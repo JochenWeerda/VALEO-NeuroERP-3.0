@@ -13,4 +13,4 @@ export interface OrderStatusChangedEvent extends DomainEvent {
     newStatus: string;
 }
 export type OrderDomainEvent = OrderCreatedEvent | OrderStatusChangedEvent;
-//***REMOVED*** sourceMappingURL=order-events.d.ts.map
+//# sourceMappingURL=order-events.d.ts.map

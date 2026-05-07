@@ -6,4 +6,4 @@ export declare class GetOrderQuery {
     constructor(service: OrderDomainService);
     execute(id: OrderId): Promise<OrderDTO | null>;
 }
-//***REMOVED*** sourceMappingURL=get-order.d.ts.map
+//# sourceMappingURL=get-order.d.ts.map

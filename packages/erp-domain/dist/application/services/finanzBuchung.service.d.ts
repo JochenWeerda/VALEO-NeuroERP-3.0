@@ -29,4 +29,4 @@ export declare class FinanzBuchungService {
     update(id: string, payload: UpdateFinanzBuchungDto): Promise<FinanzBuchung>;
     remove(id: string): Promise<void>;
 }
-//***REMOVED*** sourceMappingURL=finanzBuchung.service.d.ts.map
+//# sourceMappingURL=finanzBuchung.service.d.ts.map

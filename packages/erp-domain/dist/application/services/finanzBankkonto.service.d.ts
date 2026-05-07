@@ -24,4 +24,4 @@ export declare class FinanzBankkontoService {
     update(id: string, payload: UpdateFinanzBankkontoDto): Promise<FinanzBankkonto>;
     remove(id: string): Promise<void>;
 }
-//***REMOVED*** sourceMappingURL=finanzBankkonto.service.d.ts.map
+//# sourceMappingURL=finanzBankkonto.service.d.ts.map

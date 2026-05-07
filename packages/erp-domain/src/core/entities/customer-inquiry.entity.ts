@@ -176,4 +176,46 @@ export class CustomerInquiry {
   hatBudget(): boolean {
     return this.budget !== undefined && this.budget > 0
   }
+
+  /**
+   * Rekonstruiert eine CustomerInquiry aus API-Payload (z. B. CRM-Gateway),
+   * wenn kein eigenes Prisma-Model im ERP-Domain vorliegt.
+   */
+  static fromPayload(raw: Record<string, unknown>): CustomerInquiry {
+    const id = String(raw.id ?? '').trim()
+    if (!id) {
+      throw new Error('CustomerInquiry.id ist erforderlich')
+    }
+    const parseDate = (v: unknown): Date | undefined => {
+      if (v === undefined || v === null || v === '') return undefined
+      const d = new Date(String(v))
+      return Number.isNaN(d.getTime()) ? undefined : d
+    }
+    const coerceEnum = <T extends string>(val: unknown, allowed: readonly T[], fallback: T): T => {
+      const s = String(val ?? '').trim()
+      return (allowed as readonly string[]).includes(s) ? (s as T) : fallback
+    }
+
+    return new CustomerInquiry(
+      id,
+      String(raw.inquiryNumber ?? raw.inquiry_number ?? ''),
+      String(raw.customerId ?? raw.customer_id ?? ''),
+      coerceEnum(raw.type, Object.values(InquiryType), InquiryType.STANDARD),
+      String(raw.subject ?? ''),
+      String(raw.description ?? ''),
+      coerceEnum(raw.priority, Object.values(InquiryPriority), InquiryPriority.NORMAL),
+      String(raw.currency ?? 'EUR'),
+      coerceEnum(raw.status, Object.values(CustomerInquiryStatus), CustomerInquiryStatus.EINGEGANGEN),
+      String(raw.tenantId ?? raw.tenant_id ?? ''),
+      raw.contactPerson !== undefined ? String(raw.contactPerson) : raw.contact_person !== undefined ? String(raw.contact_person) : undefined,
+      parseDate(raw.requestedDeliveryDate ?? raw.requested_delivery_date),
+      raw.budget !== undefined ? Number(raw.budget) : undefined,
+      raw.assignedTo !== undefined ? String(raw.assignedTo) : raw.assigned_to !== undefined ? String(raw.assigned_to) : undefined,
+      raw.notes !== undefined ? String(raw.notes) : undefined,
+      raw.version !== undefined ? Number(raw.version) : 0,
+      parseDate(raw.createdAt ?? raw.created_at) ?? new Date(),
+      parseDate(raw.updatedAt ?? raw.updated_at) ?? new Date(),
+      parseDate(raw.deletedAt ?? raw.deleted_at)
+    )
+  }
 }

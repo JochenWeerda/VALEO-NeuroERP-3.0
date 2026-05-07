@@ -55,4 +55,4 @@ function buildFinanzBankkontoRouter({ service, baseRoute = '/finanzBankkonto' })
     });
     return router;
 }
-//***REMOVED*** sourceMappingURL=finanzBankkonto.controller.js.map
+//# sourceMappingURL=finanzBankkonto.controller.js.map

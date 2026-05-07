@@ -2,6 +2,9 @@ import { Request, Response } from 'express'
 import { SalesOfferService } from '../../application/services/sales-offer.service'
 import { CreateSalesOfferData } from '../../application/services/sales-offer.service'
 import { SalesOfferStatus } from '../../core/entities/sales-offer.entity'
+import { clampLimit, clampOffset } from '../types/api-pagination'
+import { resolveActorId } from '../utils/request-context'
+import { CustomerInquiry } from '../../core/entities/customer-inquiry.entity'
 
 export class SalesOfferController {
   constructor(private salesOfferService: SalesOfferService) {}
@@ -9,7 +12,7 @@ export class SalesOfferController {
   async createSalesOffer(req: Request, res: Response): Promise<void> {
     try {
       const tenantId = req.headers['x-tenant-id'] as string
-      const actorId = req.user?.id || 'system'
+      const auditActorId = resolveActorId(req)
 
       const data: CreateSalesOfferData = {
         offerNumber: req.body.offerNumber,
@@ -27,7 +30,7 @@ export class SalesOfferController {
         notes: req.body.notes
       }
 
-      const salesOffer = await this.salesOfferService.createSalesOffer(data)
+      const salesOffer = await this.salesOfferService.createSalesOffer(data, auditActorId)
 
       res.status(201).json({
         success: true,
@@ -46,13 +49,47 @@ export class SalesOfferController {
     try {
       const { inquiryId } = req.params
       const tenantId = req.headers['x-tenant-id'] as string
-      const actorId = 'system' // TODO: Aus Auth-Middleware
+      const actorId = resolveActorId(req)
 
-      // TODO: CustomerInquiry laden und SalesOffer erstellen
-      // Für jetzt einfach eine Fehlermeldung
-      res.status(501).json({
-        success: false,
-        error: 'Funktion noch nicht implementiert - CustomerInquiry Service fehlt'
+      const snap = req.body?.inquirySnapshot as Record<string, unknown> | undefined
+      let inquiry: CustomerInquiry
+      if (snap && typeof snap === 'object') {
+        inquiry = CustomerInquiry.fromPayload({
+          ...snap,
+          id: snap.id ?? inquiryId,
+          tenantId: snap.tenantId ?? snap.tenant_id ?? tenantId
+        })
+      } else {
+        inquiry = CustomerInquiry.fromPayload({
+          id: inquiryId,
+          tenantId,
+          inquiryNumber: req.body?.inquiryNumber ?? `INQ-${inquiryId}`,
+          customerId: req.body?.customerId ?? '',
+          type: req.body?.inquiryType ?? 'STANDARD',
+          subject: req.body?.subject ?? '',
+          description: req.body?.description ?? '',
+          priority: req.body?.priority ?? 'normal',
+          currency: req.body?.currency ?? 'EUR',
+          status: 'BEARBEITET'
+        })
+      }
+
+      const offer = await this.salesOfferService.createSalesOfferFromInquiry(
+        inquiry,
+        {
+          offerNumber: req.body.offerNumber,
+          totalAmount: Number(req.body.totalAmount),
+          validUntil: new Date(req.body.validUntil),
+          deliveryDate: req.body.deliveryDate ? new Date(req.body.deliveryDate) : undefined,
+          paymentTerms: req.body.paymentTerms,
+          notes: req.body.notes
+        },
+        actorId
+      )
+
+      res.status(201).json({
+        success: true,
+        data: offer
       })
     } catch (error) {
       console.error('Fehler beim Erstellen des SalesOffers aus CustomerInquiry:', error)
@@ -97,16 +134,18 @@ export class SalesOfferController {
       const options = {
         status: req.query.status as SalesOfferStatus,
         customerId: req.query.customerId as string,
-        limit: req.query.limit ? parseInt(req.query.limit as string) : undefined,
-        offset: req.query.offset ? parseInt(req.query.offset as string) : undefined
+        limit: req.query.limit ? parseInt(req.query.limit as string, 10) : undefined,
+        offset: req.query.offset ? parseInt(req.query.offset as string, 10) : undefined
       }
 
-      const salesOffers = await this.salesOfferService.getSalesOffersByTenant(tenantId, options)
+      const { items, total } = await this.salesOfferService.getSalesOffersByTenant(tenantId, options)
+      const limit = clampLimit(options.limit)
+      const offset = clampOffset(options.offset)
 
       res.json({
         success: true,
-        data: salesOffers,
-        total: salesOffers.length // TODO: Pagination-Info
+        data: items,
+        pagination: { total, limit, offset }
       })
     } catch (error) {
       console.error('Fehler beim Laden der SalesOffers:', error)
@@ -141,7 +180,7 @@ export class SalesOfferController {
     try {
       const { id } = req.params
       const tenantId = req.headers['x-tenant-id'] as string
-      const actorId = req.user?.id || 'system'
+      const actorId = resolveActorId(req)
 
       const salesOffer = await this.salesOfferService.sendSalesOffer(id as string, tenantId, actorId)
 
@@ -162,7 +201,7 @@ export class SalesOfferController {
     try {
       const { id } = req.params
       const tenantId = req.headers['x-tenant-id'] as string
-      const actorId = req.user?.id || 'system'
+      const actorId = resolveActorId(req)
 
       const salesOffer = await this.salesOfferService.acceptSalesOffer(id as string, tenantId, actorId)
 
@@ -183,7 +222,7 @@ export class SalesOfferController {
     try {
       const { id } = req.params
       const tenantId = req.headers['x-tenant-id'] as string
-      const actorId = req.user?.id || 'system'
+      const actorId = resolveActorId(req)
 
       const salesOffer = await this.salesOfferService.rejectSalesOffer(id as string, tenantId, actorId)
 
@@ -204,7 +243,7 @@ export class SalesOfferController {
     try {
       const { id } = req.params
       const tenantId = req.headers['x-tenant-id'] as string
-      const actorId = req.user?.id || 'system'
+      const actorId = resolveActorId(req)
 
       const salesOffer = await this.salesOfferService.updateSalesOffer(id as string, tenantId, req.body, actorId)
 
@@ -225,7 +264,7 @@ export class SalesOfferController {
     try {
       const { id } = req.params
       const tenantId = req.headers['x-tenant-id'] as string
-      const actorId = req.user?.id || 'system'
+      const actorId = resolveActorId(req)
 
       await this.salesOfferService.deleteSalesOffer(id as string, tenantId, actorId)
 

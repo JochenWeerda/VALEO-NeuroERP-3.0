@@ -36,4 +36,4 @@ export declare class FinanzKreditor {
     get aktualisiertAm(): Date | undefined;
     toPrimitives(): FinanzKreditorProps;
 }
-//***REMOVED*** sourceMappingURL=finanzKreditor.entity.d.ts.map
+//# sourceMappingURL=finanzKreditor.entity.d.ts.map

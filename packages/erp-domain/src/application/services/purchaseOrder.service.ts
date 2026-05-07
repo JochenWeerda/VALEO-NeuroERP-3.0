@@ -2,10 +2,8 @@ import { inject, injectable } from 'inversify'
 import { PurchaseOrderRepository } from '../../core/repositories/purchaseOrder.repository'
 import { PurchaseOrder } from '../../core/entities/purchaseOrder.entity'
 import { PurchaseOrderItem } from '../../core/entities/purchaseOrderItem.entity'
-// @ts-ignore - Module to be created
 import { NumberRangeService } from './numberRange.service'
 import { AuditService } from './audit.service'
-// @ts-ignore - Module to be created  
 import { ValidationError } from '../../core/errors/validation.error'
 
 @injectable()
@@ -115,6 +113,13 @@ export class PurchaseOrderService {
 
   async findByTenant(tenantId: string, filters?: any): Promise<PurchaseOrder[]> {
     return this.repository.findByTenant(tenantId, filters)
+  }
+
+  async countByTenant(
+    tenantId: string,
+    filters?: { status?: string; supplierId?: string }
+  ): Promise<number> {
+    return this.repository.countByTenant(tenantId, filters)
   }
 
   async submit(id: string, actorId: string): Promise<PurchaseOrder> {

@@ -2,6 +2,8 @@ import { Request, Response } from 'express'
 import { RechnungseingangService } from '../../application/services/rechnungseingang.service'
 import { CreateRechnungseingangData } from '../../application/services/rechnungseingang.service'
 import { RechnungseingangStatus } from '../../core/entities/rechnungseingang.entity'
+import { clampLimit, clampOffset } from '../types/api-pagination'
+import { resolveActorId } from '../utils/request-context'
 
 export class RechnungseingangController {
   constructor(private rechnungseingangService: RechnungseingangService) {}
@@ -9,7 +11,7 @@ export class RechnungseingangController {
   async createRechnungseingang(req: Request, res: Response): Promise<void> {
     try {
       const tenantId = req.headers['x-tenant-id'] as string
-      const actorId = req.user?.id || 'system' // TODO: Aus Auth-Middleware
+      const auditActorId = resolveActorId(req)
 
       const data: CreateRechnungseingangData = {
         rechnungsNummer: req.body.rechnungsNummer,
@@ -29,7 +31,7 @@ export class RechnungseingangController {
         bemerkungen: req.body.bemerkungen
       }
 
-      const rechnung = await this.rechnungseingangService.createRechnungseingang(data)
+      const rechnung = await this.rechnungseingangService.createRechnungseingang(data, auditActorId)
 
       res.status(201).json({
         success: true,
@@ -80,16 +82,18 @@ export class RechnungseingangController {
         lieferantId: req.query.lieferantId as string,
         bestellungId: req.query.bestellungId as string,
         wareneingangId: req.query.wareneingangId as string,
-        limit: req.query.limit ? parseInt(req.query.limit as string) : undefined,
-        offset: req.query.offset ? parseInt(req.query.offset as string) : undefined
+        limit: req.query.limit ? parseInt(req.query.limit as string, 10) : undefined,
+        offset: req.query.offset ? parseInt(req.query.offset as string, 10) : undefined
       }
 
-      const rechnungen = await this.rechnungseingangService.getRechnungseingaengeByTenant(tenantId, options)
+      const { items, total } = await this.rechnungseingangService.getRechnungseingaengeByTenant(tenantId, options)
+      const limit = clampLimit(options.limit)
+      const offset = clampOffset(options.offset)
 
       res.json({
         success: true,
-        data: rechnungen,
-        total: rechnungen.length // TODO: Pagination-Info
+        data: items,
+        pagination: { total, limit, offset }
       })
     } catch (error) {
       console.error('Fehler beim Laden der Rechnungseingänge:', error)
@@ -144,7 +148,7 @@ export class RechnungseingangController {
     try {
       const { id } = req.params
       const tenantId = req.headers['x-tenant-id'] as string
-      const actorId = req.user?.id || 'system'
+      const actorId = resolveActorId(req)
 
       const rechnung = await this.rechnungseingangService.pruefenRechnungseingang(id as string, tenantId, actorId)
 
@@ -165,7 +169,7 @@ export class RechnungseingangController {
     try {
       const { id } = req.params
       const tenantId = req.headers['x-tenant-id'] as string
-      const actorId = req.user?.id || 'system'
+      const actorId = resolveActorId(req)
 
       const rechnung = await this.rechnungseingangService.freigebenRechnungseingang(id as string, tenantId, actorId)
 
@@ -186,7 +190,7 @@ export class RechnungseingangController {
     try {
       const { id } = req.params
       const tenantId = req.headers['x-tenant-id'] as string
-      const actorId = req.user?.id || 'system'
+      const actorId = resolveActorId(req)
 
       const rechnung = await this.rechnungseingangService.verbuchenRechnungseingang(id as string, tenantId, actorId)
 
@@ -207,7 +211,7 @@ export class RechnungseingangController {
     try {
       const { id } = req.params
       const tenantId = req.headers['x-tenant-id'] as string
-      const actorId = req.user?.id || 'system'
+      const actorId = resolveActorId(req)
 
       const rechnung = await this.rechnungseingangService.bezahlenRechnungseingang(id as string, tenantId, actorId)
 
@@ -228,7 +232,7 @@ export class RechnungseingangController {
     try {
       const { id } = req.params
       const tenantId = req.headers['x-tenant-id'] as string
-      const actorId = req.user?.id || 'system'
+      const actorId = resolveActorId(req)
 
       const rechnung = await this.rechnungseingangService.updateRechnungseingang(id as string, tenantId, req.body, actorId)
 
@@ -249,7 +253,7 @@ export class RechnungseingangController {
     try {
       const { id } = req.params
       const tenantId = req.headers['x-tenant-id'] as string
-      const actorId = req.user?.id || 'system'
+      const actorId = resolveActorId(req)
 
       await this.rechnungseingangService.deleteRechnungseingang(id as string, tenantId, actorId)
 

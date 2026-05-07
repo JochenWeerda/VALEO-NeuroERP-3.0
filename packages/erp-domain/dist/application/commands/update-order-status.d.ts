@@ -6,4 +6,4 @@ export declare class UpdateOrderStatusCommand {
     constructor(service: OrderDomainService);
     execute(id: OrderId, payload: UpdateOrderStatusDTO): Promise<OrderDTO>;
 }
-//***REMOVED*** sourceMappingURL=update-order-status.d.ts.map
+//# sourceMappingURL=update-order-status.d.ts.map

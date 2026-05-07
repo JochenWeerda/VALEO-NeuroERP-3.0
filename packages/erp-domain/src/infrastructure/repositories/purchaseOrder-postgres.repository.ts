@@ -8,6 +8,27 @@ import { PurchaseOrderItem } from '../../core/entities/purchaseOrderItem.entity'
 export class PurchaseOrderPostgresRepository implements PurchaseOrderRepository {
   constructor(private pool: Pool) {}
 
+  private extendTenantFilters(
+    baseParams: unknown[],
+    filters?: { status?: string; supplierId?: string; limit?: number; offset?: number }
+  ): { clause: string; params: unknown[] } {
+    let clause = ''
+    const params = [...baseParams]
+    let idx = params.length + 1
+
+    if (filters?.status) {
+      clause += ` AND status = $${idx}`
+      params.push(filters.status)
+      idx++
+    }
+    if (filters?.supplierId) {
+      clause += ` AND supplier_id = $${idx}`
+      params.push(filters.supplierId)
+      idx++
+    }
+    return { clause, params }
+  }
+
   async save(order: PurchaseOrder): Promise<PurchaseOrder> {
     const client = await this.pool.connect()
 
@@ -139,27 +160,15 @@ export class PurchaseOrderPostgresRepository implements PurchaseOrderRepository 
   }
 
   async findByTenant(tenantId: string, filters?: any): Promise<PurchaseOrder[]> {
+    const { clause, params } = this.extendTenantFilters([tenantId], filters)
     let query = `
       SELECT * FROM purchase_orders
       WHERE tenant_id = $1 AND deleted_at IS NULL
+      ${clause}
+      ORDER BY created_at DESC
     `
-    const params = [tenantId]
-    let paramIndex = 2
 
-    if (filters?.status) {
-      query += ` AND status = $${paramIndex}`
-      params.push(filters.status)
-      paramIndex++
-    }
-
-    if (filters?.supplierId) {
-      query += ` AND supplier_id = $${paramIndex}`
-      params.push(filters.supplierId)
-      paramIndex++
-    }
-
-    query += ' ORDER BY created_at DESC'
-
+    let paramIndex = params.length + 1
     if (filters?.limit) {
       query += ` LIMIT $${paramIndex}`
       params.push(filters.limit)
@@ -204,14 +213,19 @@ export class PurchaseOrderPostgresRepository implements PurchaseOrderRepository 
     await this.pool.query(query, [id])
   }
 
-  async countByTenant(tenantId: string): Promise<number> {
+  async countByTenant(
+    tenantId: string,
+    filters?: { status?: string; supplierId?: string }
+  ): Promise<number> {
+    const { clause, params } = this.extendTenantFilters([tenantId], filters)
     const query = `
-      SELECT COUNT(*) as count
+      SELECT COUNT(*) AS count
       FROM purchase_orders
       WHERE tenant_id = $1 AND deleted_at IS NULL
+      ${clause}
     `
-    const result = await this.pool.query(query, [tenantId])
-    return parseInt(result.rows[0].count)
+    const result = await this.pool.query(query, params)
+    return parseInt(String(result.rows[0].count), 10)
   }
 
   private generateId(): string {

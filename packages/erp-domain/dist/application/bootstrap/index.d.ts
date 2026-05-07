@@ -3,4 +3,4 @@ export interface FinanceModuleOptions {
     reusePool?: boolean;
 }
 export declare function buildFinanceRouter(_options?: FinanceModuleOptions): Router;
-//***REMOVED*** sourceMappingURL=index.d.ts.map
+//# sourceMappingURL=index.d.ts.map

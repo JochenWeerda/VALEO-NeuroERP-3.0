@@ -4,6 +4,7 @@ import { AnfrageRepository } from '../../core/repositories/anfrage.repository'
 import { AnfrageStatus, Prioritaet } from '../../core/entities/anfrage.entity'
 import { AuditService } from './audit.service'
 import { WorkflowService } from './workflow.service'
+import { clampLimit, clampOffset, ListResult } from '../../presentation/types/api-pagination'
 
 import { AnfrageTyp } from '../../core/entities/anfrage.entity'
 
@@ -42,7 +43,7 @@ export class AnfrageService {
     private workflowService: WorkflowService
   ) {}
 
-  async createAnfrage(data: CreateAnfrageData): Promise<Anfrage> {
+  async createAnfrage(data: CreateAnfrageData, auditActorId: string): Promise<Anfrage> {
     // Validierung
     this.validateAnfrageData(data)
 
@@ -60,7 +61,7 @@ export class AnfrageService {
 
     // Audit-Log
     await this.auditService.log({
-      actorId: data.anforderer, // TODO: Aus Context holen
+      actorId: auditActorId,
       entity: 'Anfrage',
       entityId: savedAnfrage.id,
       action: 'CREATE',
@@ -81,8 +82,22 @@ export class AnfrageService {
     anforderer?: string
     limit?: number
     offset?: number
-  }): Promise<Anfrage[]> {
-    return this.repository.findByTenant(tenantId, options)
+  }): Promise<ListResult<Anfrage>> {
+    const limit = clampLimit(options?.limit)
+    const offset = clampOffset(options?.offset)
+    const items = await this.repository.findByTenant(tenantId, {
+      status: options?.status,
+      prioritaet: options?.prioritaet,
+      anforderer: options?.anforderer,
+      limit,
+      offset,
+    })
+    const total = await this.repository.countByTenant(tenantId, {
+      status: options?.status,
+      prioritaet: options?.prioritaet,
+      anforderer: options?.anforderer,
+    })
+    return { items, total }
   }
 
   async freigebenAnfrage(id: string, tenantId: string, actorId: string): Promise<Anfrage> {
@@ -128,22 +143,45 @@ export class AnfrageService {
       throw new Error('Anfrage nicht gefunden')
     }
 
-    // TODO: Anfrage mit neuen Daten aktualisieren
-    // const updatedAnfrage = anfrage.update(data)
-    // const saved = await this.repository.update(updatedAnfrage)
+    if (anfrage.status !== AnfrageStatus.ENTWURF) {
+      throw new Error('Nur Entwürfe können aktualisiert werden')
+    }
 
-    // Audit-Log
+    const updatedAnfrage = new Anfrage(
+      anfrage.id,
+      anfrage.anfrageNummer,
+      anfrage.typ,
+      anfrage.anforderer,
+      data.artikel ?? anfrage.artikel,
+      data.menge ?? anfrage.menge,
+      data.einheit ?? anfrage.einheit,
+      data.prioritaet ?? anfrage.prioritaet,
+      data.faelligkeit ?? anfrage.faelligkeit,
+      anfrage.status,
+      data.begruendung ?? anfrage.begruendung,
+      anfrage.tenantId,
+      data.kostenstelle !== undefined ? data.kostenstelle : anfrage.kostenstelle,
+      data.projekt !== undefined ? data.projekt : anfrage.projekt,
+      data.bemerkungen !== undefined ? data.bemerkungen : anfrage.bemerkungen,
+      anfrage.version + 1,
+      anfrage.createdAt,
+      new Date(),
+      anfrage.deletedAt
+    )
+
+    const saved = await this.repository.update(updatedAnfrage)
+
     await this.auditService.log({
       actorId,
       entity: 'Anfrage',
       entityId: id,
       action: 'UPDATE',
       before: anfrage,
-      after: anfrage, // TODO: updatedAnfrage
+      after: saved,
       tenantId
     })
 
-    return anfrage // TODO: saved
+    return saved
   }
 
   async deleteAnfrage(id: string, tenantId: string, actorId: string): Promise<void> {

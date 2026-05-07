@@ -4,6 +4,7 @@ import { AngebotRepository } from '../../core/repositories/angebot.repository'
 import { AngebotStatus } from '../../core/entities/angebot.entity'
 import { AuditService } from './audit.service'
 import { WorkflowService } from './workflow.service'
+import { clampLimit, clampOffset, ListResult } from '../../presentation/types/api-pagination'
 
 export interface CreateAngebotData {
   angebotNummer: string
@@ -44,7 +45,7 @@ export class AngebotService {
     private workflowService: WorkflowService
   ) {}
 
-  async createAngebot(data: CreateAngebotData): Promise<Angebot> {
+  async createAngebot(data: CreateAngebotData, auditActorId: string): Promise<Angebot> {
     // Validierung
     this.validateAngebotData(data)
 
@@ -62,7 +63,7 @@ export class AngebotService {
 
     // Audit-Log
     await this.auditService.log({
-      actorId: data.lieferantId, // TODO: Aus Context holen
+      actorId: auditActorId,
       entity: 'Angebot',
       entityId: savedAngebot.id,
       action: 'CREATE',
@@ -83,8 +84,22 @@ export class AngebotService {
     anfrageId?: string
     limit?: number
     offset?: number
-  }): Promise<Angebot[]> {
-    return this.repository.findByTenant(tenantId, options)
+  }): Promise<ListResult<Angebot>> {
+    const limit = clampLimit(options?.limit)
+    const offset = clampOffset(options?.offset)
+    const items = await this.repository.findByTenant(tenantId, {
+      status: options?.status,
+      lieferantId: options?.lieferantId,
+      anfrageId: options?.anfrageId,
+      limit,
+      offset,
+    })
+    const total = await this.repository.countByTenant(tenantId, {
+      status: options?.status,
+      lieferantId: options?.lieferantId,
+      anfrageId: options?.anfrageId,
+    })
+    return { items, total }
   }
 
   async getAngeboteByAnfrage(anfrageId: string, tenantId: string): Promise<Angebot[]> {
@@ -188,22 +203,47 @@ export class AngebotService {
       throw new Error('Angebot nicht gefunden')
     }
 
-    // TODO: Angebot mit neuen Daten aktualisieren
-    // const updatedAngebot = angebot.update(data)
-    // const saved = await this.repository.update(updatedAngebot)
+    if (angebot.status !== AngebotStatus.ERFASST) {
+      throw new Error('Nur erfasste Angebote können aktualisiert werden')
+    }
 
-    // Audit-Log
+    const updatedAngebot = new Angebot(
+      angebot.id,
+      angebot.angebotNummer,
+      angebot.anfrageId,
+      angebot.lieferantId,
+      data.artikel ?? angebot.artikel,
+      data.menge ?? angebot.menge,
+      data.einheit ?? angebot.einheit,
+      data.preis ?? angebot.preis,
+      data.waehrung ?? angebot.waehrung,
+      data.lieferzeit ?? angebot.lieferzeit,
+      data.gueltigBis ?? angebot.gueltigBis,
+      angebot.status,
+      angebot.tenantId,
+      data.mindestabnahme !== undefined ? data.mindestabnahme : angebot.mindestabnahme,
+      data.zahlungsbedingungen !== undefined ? data.zahlungsbedingungen : angebot.zahlungsbedingungen,
+      data.incoterms !== undefined ? data.incoterms : angebot.incoterms,
+      data.bemerkungen !== undefined ? data.bemerkungen : angebot.bemerkungen,
+      angebot.version + 1,
+      angebot.createdAt,
+      new Date(),
+      angebot.deletedAt
+    )
+
+    const saved = await this.repository.update(updatedAngebot)
+
     await this.auditService.log({
       actorId,
       entity: 'Angebot',
       entityId: id,
       action: 'UPDATE',
       before: angebot,
-      after: angebot, // TODO: updatedAngebot
+      after: saved,
       tenantId
     })
 
-    return angebot // TODO: saved
+    return saved
   }
 
   async deleteAngebot(id: string, tenantId: string, actorId: string): Promise<void> {

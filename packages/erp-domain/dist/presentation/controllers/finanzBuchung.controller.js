@@ -55,4 +55,4 @@ function buildFinanzBuchungRouter({ service, baseRoute = '/finanzBuchung' }) {
     });
     return router;
 }
-//***REMOVED*** sourceMappingURL=finanzBuchung.controller.js.map
+//# sourceMappingURL=finanzBuchung.controller.js.map

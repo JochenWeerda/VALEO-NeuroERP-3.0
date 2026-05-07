@@ -1,5 +1,6 @@
 import { Request, Response } from 'express'
 import { AuditLogService } from '../../application/services/audit-log.service'
+import { clampLimit, clampOffset } from '../types/api-pagination'
 
 export class AuditLogController {
   constructor(private auditLogService: AuditLogService) {}
@@ -18,12 +19,14 @@ export class AuditLogController {
         offset: req.query.offset ? parseInt(req.query.offset as string) : undefined
       }
 
-      const logs = await this.auditLogService.getAuditLogsByTenant(tenantId, options)
+      const { items, total } = await this.auditLogService.getAuditLogsByTenant(tenantId, options)
+      const limit = clampLimit(options.limit)
+      const offset = clampOffset(options.offset)
 
       res.json({
         success: true,
-        data: logs,
-        total: logs.length // TODO: Pagination-Info
+        data: items,
+        pagination: { total, limit, offset }
       })
     } catch (error) {
       console.error('Fehler beim Laden der Audit-Logs:', error)

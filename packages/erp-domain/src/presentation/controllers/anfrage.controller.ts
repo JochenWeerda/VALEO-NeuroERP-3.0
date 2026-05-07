@@ -2,6 +2,8 @@ import { Request, Response } from 'express'
 import { AnfrageService } from '../../application/services/anfrage.service'
 import { CreateAnfrageData } from '../../application/services/anfrage.service'
 import { AnfrageTyp, Prioritaet } from '../../core/entities/anfrage.entity'
+import { clampLimit, clampOffset } from '../types/api-pagination'
+import { resolveActorId } from '../utils/request-context'
 
 export class AnfrageController {
   constructor(private anfrageService: AnfrageService) {}
@@ -9,7 +11,7 @@ export class AnfrageController {
   async createAnfrage(req: Request, res: Response): Promise<void> {
     try {
       const tenantId = req.headers['x-tenant-id'] as string
-      const actorId = req.user?.id || 'system' // TODO: Aus Auth-Middleware
+      const auditActorId = resolveActorId(req)
 
       const data: CreateAnfrageData = {
         anfrageNummer: req.body.anfrageNummer,
@@ -27,7 +29,7 @@ export class AnfrageController {
         bemerkungen: req.body.bemerkungen
       }
 
-      const anfrage = await this.anfrageService.createAnfrage(data)
+      const anfrage = await this.anfrageService.createAnfrage(data, auditActorId)
 
       res.status(201).json({
         success: true,
@@ -35,7 +37,11 @@ export class AnfrageController {
       })
     } catch (error) {
       console.error('Fehler beim Erstellen der Anfrage:', error)
-      res.status(400).json({
+      const status =
+        error && typeof error === 'object' && 'statusCode' in error
+          ? Number((error as { statusCode?: number }).statusCode) || 400
+          : 400
+      res.status(status).json({
         success: false,
         error: error instanceof Error ? error.message : 'Unbekannter Fehler'
       })
@@ -77,16 +83,18 @@ export class AnfrageController {
         status: req.query.status as any,
         prioritaet: req.query.prioritaet as any,
         anforderer: req.query.anforderer as string,
-        limit: req.query.limit ? parseInt(req.query.limit as string) : undefined,
-        offset: req.query.offset ? parseInt(req.query.offset as string) : undefined
+        limit: req.query.limit ? parseInt(req.query.limit as string, 10) : undefined,
+        offset: req.query.offset ? parseInt(req.query.offset as string, 10) : undefined
       }
 
-      const anfragen = await this.anfrageService.getAnfragenByTenant(tenantId, options)
+      const { items, total } = await this.anfrageService.getAnfragenByTenant(tenantId, options)
+      const limit = clampLimit(options.limit)
+      const offset = clampOffset(options.offset)
 
       res.json({
         success: true,
-        data: anfragen,
-        total: anfragen.length // TODO: Pagination-Info
+        data: items,
+        pagination: { total, limit, offset }
       })
     } catch (error) {
       console.error('Fehler beim Laden der Anfragen:', error)
@@ -101,7 +109,7 @@ export class AnfrageController {
     try {
       const { id } = req.params
       const tenantId = req.headers['x-tenant-id'] as string
-      const actorId = req.user?.id || 'system'
+      const actorId = resolveActorId(req)
 
       const anfrage = await this.anfrageService.freigebenAnfrage(id as string, tenantId, actorId)
 
@@ -122,7 +130,7 @@ export class AnfrageController {
     try {
       const { id } = req.params
       const tenantId = req.headers['x-tenant-id'] as string
-      const actorId = req.user?.id || 'system'
+      const actorId = resolveActorId(req)
 
       const anfrage = await this.anfrageService.updateAnfrage(id as string, tenantId, req.body, actorId)
 
@@ -143,7 +151,7 @@ export class AnfrageController {
     try {
       const { id } = req.params
       const tenantId = req.headers['x-tenant-id'] as string
-      const actorId = req.user?.id || 'system'
+      const actorId = resolveActorId(req)
 
       await this.anfrageService.deleteAnfrage(id as string, tenantId, actorId)
 

@@ -16,5 +16,9 @@ export interface AnfrageRepository {
   findDringende(tenantId: string): Promise<Anfrage[]>
   update(anfrage: Anfrage): Promise<Anfrage>
   delete(id: string, tenantId: string): Promise<void>
-  countByTenant(tenantId: string, status?: AnfrageStatus): Promise<number>
+  countByTenant(tenantId: string, filters?: {
+    status?: AnfrageStatus
+    prioritaet?: Prioritaet
+    anforderer?: string
+  }): Promise<number>
 }

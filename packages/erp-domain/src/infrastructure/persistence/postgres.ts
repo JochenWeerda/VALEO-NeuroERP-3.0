@@ -7,9 +7,14 @@ export function getErpPool(config?: PoolConfig): Pool {
     return singleton;
   }
 
-  const connectionString = config?.connectionString ?? process.env.ERP_DATABASE_URL;
+  const connectionString =
+    config?.connectionString ??
+    process.env.ERP_DATABASE_URL ??
+    process.env.DATABASE_URL;
   if (connectionString === undefined || connectionString === null) {
-    throw new Error('ERP_DATABASE_URL is not defined. Set it before initialising the ERP domain.');
+    throw new Error(
+      'DATABASE_URL oder ERP_DATABASE_URL ist nicht gesetzt. Bitte Umgebungsvariable konfigurieren.'
+    );
   }
 
   singleton = new Pool({ ...config, connectionString });

@@ -11,4 +11,4 @@ export declare class FinanzDebitorPostgresRepository {
     update(entity: FinanzDebitor): Promise<FinanzDebitor>;
     delete(id: string): Promise<void>;
 }
-//***REMOVED*** sourceMappingURL=finanzDebitor-postgres.repository.d.ts.map
+//# sourceMappingURL=finanzDebitor-postgres.repository.d.ts.map

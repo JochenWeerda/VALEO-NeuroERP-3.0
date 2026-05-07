@@ -1,7 +1,8 @@
-import { inject, injectable } from 'inversify'
 import { WorkflowRule } from '../../core/entities/workflow-rule.entity'
 import { WorkflowRuleRepository } from '../../core/repositories/workflow-rule.repository'
 import { AuditService } from './audit.service'
+import { WorkflowExecutionService } from './workflow-execution.service'
+import { clampLimit, clampOffset, ListResult } from '../../presentation/types/api-pagination'
 
 export interface CreateWorkflowRuleData {
   triggerEntity: string
@@ -25,10 +26,11 @@ export interface UpdateWorkflowRuleData {
 export class WorkflowRuleService {
   constructor(
     private repository: WorkflowRuleRepository,
-    private auditService: AuditService
+    private auditService: AuditService,
+    private workflowExecutionService: WorkflowExecutionService | null = null
   ) {}
 
-  async createWorkflowRule(data: CreateWorkflowRuleData): Promise<WorkflowRule> {
+  async createWorkflowRule(data: CreateWorkflowRuleData, auditActorId: string): Promise<WorkflowRule> {
     // Validierung
     this.validateWorkflowRuleData(data)
 
@@ -40,7 +42,7 @@ export class WorkflowRuleService {
 
     // Audit-Log
     await this.auditService.log({
-      actorId: 'system', // TODO: Aus Context holen
+      actorId: auditActorId,
       entity: 'WorkflowRule',
       entityId: savedRule.id,
       action: 'CREATE',
@@ -63,8 +65,26 @@ export class WorkflowRuleService {
     active?: boolean
     limit?: number
     offset?: number
-  }): Promise<WorkflowRule[]> {
-    return this.repository.findByTenant(tenantId, options)
+  }): Promise<ListResult<WorkflowRule>> {
+    const limit = clampLimit(options?.limit)
+    const offset = clampOffset(options?.offset)
+    const items = await this.repository.findByTenant(tenantId, {
+      triggerEntity: options?.triggerEntity,
+      triggerAction: options?.triggerAction,
+      targetEntity: options?.targetEntity,
+      targetAction: options?.targetAction,
+      active: options?.active,
+      limit,
+      offset,
+    })
+    const total = await this.repository.countByTenant(tenantId, {
+      triggerEntity: options?.triggerEntity,
+      triggerAction: options?.triggerAction,
+      targetEntity: options?.targetEntity,
+      targetAction: options?.targetAction,
+      active: options?.active,
+    })
+    return { items, total }
   }
 
   async getMatchingRules(triggerEntity: string, triggerAction: string, tenantId: string): Promise<WorkflowRule[]> {
@@ -131,9 +151,8 @@ export class WorkflowRuleService {
       throw new Error('Workflow-Regel nicht gefunden')
     }
 
-    // TODO: Workflow-Regel mit neuen Daten aktualisieren
-    // const updatedRule = rule.update(data)
-    // const saved = await this.repository.update(updatedRule)
+    const updatedRule = rule.withPatches(data)
+    const saved = await this.repository.update(updatedRule)
 
     // Audit-Log
     await this.auditService.log({
@@ -142,11 +161,11 @@ export class WorkflowRuleService {
       entityId: id,
       action: 'UPDATE',
       before: rule,
-      after: rule, // TODO: updatedRule
+      after: saved,
       tenantId
     })
 
-    return rule // TODO: saved
+    return saved
   }
 
   async deleteWorkflowRule(id: string, tenantId: string, actorId: string): Promise<void> {
@@ -177,6 +196,11 @@ export class WorkflowRuleService {
     const executedRules: WorkflowRule[] = []
     const failedRules: { rule: WorkflowRule; error: string }[] = []
 
+    const actorId =
+      data && typeof data.actorId === 'string' && data.actorId.trim() !== ''
+        ? data.actorId
+        : 'system'
+
     for (const rule of matchingRules) {
       try {
         // Bedingung prüfen
@@ -184,8 +208,23 @@ export class WorkflowRuleService {
           continue
         }
 
-        // TODO: Workflow-Aktion ausführen
-        // await this.executeWorkflowAction(rule, data)
+        if (this.workflowExecutionService) {
+          const created = await this.workflowExecutionService.createWorkflowExecution({
+            ruleId: rule.id,
+            triggerEntity,
+            triggerAction,
+            targetEntity: rule.targetEntity,
+            targetAction: rule.targetAction,
+            actorId,
+            tenantId
+          })
+          const started = await this.workflowExecutionService.startWorkflowExecution(
+            created.id,
+            tenantId,
+            actorId
+          )
+          await this.workflowExecutionService.succeedWorkflowExecution(started.id, tenantId, actorId)
+        }
 
         executedRules.push(rule)
       } catch (error) {

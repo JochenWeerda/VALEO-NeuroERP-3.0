@@ -14,4 +14,4 @@ function initFinanzKreditorModule({ pool }) {
     const router = (0, finanzKreditor_controller_1.buildFinanzKreditorRouter)({ service, baseRoute: '/erp/finance/creditors' });
     return { repository, service, router };
 }
-//***REMOVED*** sourceMappingURL=finanzKreditor.bootstrap.js.map
+//# sourceMappingURL=finanzKreditor.bootstrap.js.map

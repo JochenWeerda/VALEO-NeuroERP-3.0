@@ -28,28 +28,39 @@ import { WorkflowExecutionPostgresRepository } from '../../infrastructure/reposi
 import { AuditLogPostgresRepository } from '../../infrastructure/repositories/audit-log-postgres.repository'
 import { AuditService } from '../../application/services/audit.service'
 import { WorkflowService } from '../../application/services/workflow.service'
+import { PrismaClient } from '@prisma/client'
+import { getErpPool } from '../../infrastructure/persistence/postgres'
+import { PurchaseOrderPostgresRepository } from '../../infrastructure/repositories/purchaseOrder-postgres.repository'
+import { PurchaseOrderService } from '../../application/services/purchaseOrder.service'
+import { NumberRangeService } from '../../application/services/numberRange.service'
 
 export function createErpApiRouter(): Router {
   const router = Router()
 
-  // TODO: Dependency Injection Container verwenden
-  // Mock-Implementierungen für jetzt
-  const mockPrisma = {} as any
+  const prisma = new PrismaClient()
+  const pool = getErpPool()
 
-  // Repositories
-  const anfrageRepository = new AnfragePostgresRepository(mockPrisma)
-  const angebotRepository = new AngebotPostgresRepository(mockPrisma)
-  const salesOfferRepository = new SalesOfferPostgresRepository(mockPrisma)
-  const auftragsbestaetigungRepository = new AuftragsbestaetigungPostgresRepository(mockPrisma)
-  const anlieferavisRepository = new AnlieferavisPostgresRepository(mockPrisma)
-  const rechnungseingangRepository = new RechnungseingangPostgresRepository(mockPrisma)
-  const workflowRuleRepository = new WorkflowRulePostgresRepository(mockPrisma)
-  const workflowExecutionRepository = new WorkflowExecutionPostgresRepository(mockPrisma)
-  const auditLogRepository = new AuditLogPostgresRepository(mockPrisma)
+  const anfrageRepository = new AnfragePostgresRepository(prisma)
+  const angebotRepository = new AngebotPostgresRepository(prisma)
+  const salesOfferRepository = new SalesOfferPostgresRepository(prisma)
+  const auftragsbestaetigungRepository = new AuftragsbestaetigungPostgresRepository(prisma)
+  const anlieferavisRepository = new AnlieferavisPostgresRepository(prisma)
+  const rechnungseingangRepository = new RechnungseingangPostgresRepository(prisma)
+  const workflowRuleRepository = new WorkflowRulePostgresRepository(prisma)
+  const workflowExecutionRepository = new WorkflowExecutionPostgresRepository(prisma)
+  const auditLogRepository = new AuditLogPostgresRepository(prisma)
 
-  // Services
-  const auditService = new AuditService()
-  const workflowService = new WorkflowService({} as any, {} as any) // TODO: Provide proper arguments
+  const auditService = new AuditService(auditLogRepository)
+
+  const purchaseOrderRepository = new PurchaseOrderPostgresRepository(pool)
+  const numberRangeService = new NumberRangeService()
+  const purchaseOrderService = new PurchaseOrderService(
+    purchaseOrderRepository,
+    numberRangeService,
+    auditService
+  )
+
+  const workflowService = new WorkflowService(purchaseOrderService, auditService)
 
   const anfrageService = new AnfrageService(
     anfrageRepository,
@@ -81,13 +92,14 @@ export function createErpApiRouter(): Router {
     auditService,
     workflowService
   )
-  const workflowRuleService = new WorkflowRuleService(
-    workflowRuleRepository,
-    auditService
-  )
   const workflowExecutionService = new WorkflowExecutionService(
     workflowExecutionRepository,
     auditService
+  )
+  const workflowRuleService = new WorkflowRuleService(
+    workflowRuleRepository,
+    auditService,
+    workflowExecutionService
   )
   const auditLogService = new AuditLogService(auditLogRepository)
 

@@ -15,5 +15,8 @@ export interface AnlieferavisRepository {
   findUeberfaellige(tenantId: string): Promise<Anlieferavis[]>
   update(avis: Anlieferavis): Promise<Anlieferavis>
   delete(id: string, tenantId: string): Promise<void>
-  countByTenant(tenantId: string, status?: AnlieferavisStatus): Promise<number>
+  countByTenant(tenantId: string, filters?: {
+    status?: AnlieferavisStatus
+    bestellungId?: string
+  }): Promise<number>
 }

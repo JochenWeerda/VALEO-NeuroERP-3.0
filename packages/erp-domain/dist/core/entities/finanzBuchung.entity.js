@@ -77,4 +77,4 @@ class FinanzBuchung {
     }
 }
 exports.FinanzBuchung = FinanzBuchung;
-//***REMOVED*** sourceMappingURL=finanzBuchung.entity.js.map
+//# sourceMappingURL=finanzBuchung.entity.js.map

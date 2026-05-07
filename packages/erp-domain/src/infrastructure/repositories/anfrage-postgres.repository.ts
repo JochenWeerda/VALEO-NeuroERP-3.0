@@ -153,13 +153,19 @@ export class AnfragePostgresRepository implements AnfrageRepository {
     })
   }
 
-  async countByTenant(tenantId: string, status?: AnfrageStatus): Promise<number> {
+  async countByTenant(tenantId: string, filters?: {
+    status?: AnfrageStatus
+    prioritaet?: Prioritaet
+    anforderer?: string
+  }): Promise<number> {
     const where: any = {
       tenantId,
       deletedAt: null
     }
 
-    if (status) where.status = status
+    if (filters?.status) where.status = filters.status
+    if (filters?.prioritaet) where.prioritaet = filters.prioritaet
+    if (filters?.anforderer) where.anforderer = filters.anforderer
 
     return this.prisma.anfrage.count({ where })
   }

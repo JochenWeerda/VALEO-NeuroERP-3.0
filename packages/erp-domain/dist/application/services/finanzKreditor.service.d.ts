@@ -22,4 +22,4 @@ export declare class FinanzKreditorService {
     update(id: string, payload: UpdateFinanzKreditorDto): Promise<FinanzKreditor>;
     remove(id: string): Promise<void>;
 }
-//***REMOVED*** sourceMappingURL=finanzKreditor.service.d.ts.map
+//# sourceMappingURL=finanzKreditor.service.d.ts.map

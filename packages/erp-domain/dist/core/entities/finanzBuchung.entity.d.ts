@@ -50,4 +50,4 @@ export declare class FinanzBuchung {
     get aktualisiertAm(): Date | undefined;
     toPrimitives(): FinanzBuchungProps;
 }
-//***REMOVED*** sourceMappingURL=finanzBuchung.entity.d.ts.map
+//# sourceMappingURL=finanzBuchung.entity.d.ts.map

@@ -108,10 +108,20 @@ export class WorkflowRulePostgresRepository implements WorkflowRuleRepository {
     })
   }
 
-  async countByTenant(tenantId: string, active?: boolean): Promise<number> {
+  async countByTenant(tenantId: string, filters?: {
+    triggerEntity?: string
+    triggerAction?: string
+    targetEntity?: string
+    targetAction?: string
+    active?: boolean
+  }): Promise<number> {
     const where: any = { tenantId }
 
-    if (active !== undefined) where.active = active
+    if (filters?.triggerEntity) where.triggerEntity = filters.triggerEntity
+    if (filters?.triggerAction) where.triggerAction = filters.triggerAction
+    if (filters?.targetEntity) where.targetEntity = filters.targetEntity
+    if (filters?.targetAction) where.targetAction = filters.targetAction
+    if (filters?.active !== undefined) where.active = filters.active
 
     return this.prisma.workflowRule.count({ where })
   }

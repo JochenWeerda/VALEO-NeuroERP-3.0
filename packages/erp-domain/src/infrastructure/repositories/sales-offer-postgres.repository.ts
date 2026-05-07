@@ -164,13 +164,17 @@ export class SalesOfferPostgresRepository implements SalesOfferRepository {
     })
   }
 
-  async countByTenant(tenantId: string, status?: SalesOfferStatus): Promise<number> {
+  async countByTenant(tenantId: string, filters?: {
+    status?: SalesOfferStatus
+    customerId?: string
+  }): Promise<number> {
     const where: any = {
       tenantId,
       deletedAt: null
     }
 
-    if (status) where.status = status
+    if (filters?.status) where.status = filters.status
+    if (filters?.customerId) where.customerId = filters.customerId
 
     return (this.prisma as any).salesOffer.count({ where })
   }

@@ -7,5 +7,8 @@ export interface PurchaseOrderRepository {
   findBySupplier(tenantId: string, supplierId: string): Promise<PurchaseOrder[]>
   findByStatus(tenantId: string, status: string): Promise<PurchaseOrder[]>
   delete(id: string): Promise<void>
-  countByTenant(tenantId: string): Promise<number>
+  countByTenant(
+    tenantId: string,
+    filters?: { status?: string; supplierId?: string }
+  ): Promise<number>
 }

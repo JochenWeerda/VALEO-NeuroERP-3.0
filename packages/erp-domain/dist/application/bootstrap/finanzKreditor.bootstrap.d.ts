@@ -15,4 +15,4 @@ export interface FinanzKreditorModule {
     router: Router;
 }
 export declare function initFinanzKreditorModule({ pool }: FinanzKreditorBootstrapDependencies): FinanzKreditorModule;
-//***REMOVED*** sourceMappingURL=finanzKreditor.bootstrap.d.ts.map
+//# sourceMappingURL=finanzKreditor.bootstrap.d.ts.map

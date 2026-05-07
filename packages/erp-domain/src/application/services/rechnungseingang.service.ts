@@ -4,6 +4,7 @@ import { RechnungseingangRepository } from '../../core/repositories/rechnungsein
 import { RechnungseingangStatus } from '../../core/entities/rechnungseingang.entity'
 import { AuditService } from './audit.service'
 import { WorkflowService } from './workflow.service'
+import { clampLimit, clampOffset, ListResult } from '../../presentation/types/api-pagination'
 
 export interface CreateRechnungseingangData {
   rechnungsNummer: string
@@ -70,7 +71,7 @@ export class RechnungseingangService {
     private workflowService: WorkflowService
   ) {}
 
-  async createRechnungseingang(data: CreateRechnungseingangData): Promise<Rechnungseingang> {
+  async createRechnungseingang(data: CreateRechnungseingangData, auditActorId: string): Promise<Rechnungseingang> {
     // Validierung
     this.validateRechnungseingangData(data)
 
@@ -88,7 +89,7 @@ export class RechnungseingangService {
 
     // Audit-Log
     await this.auditService.log({
-      actorId: 'system', // TODO: Aus Context holen
+      actorId: auditActorId,
       entity: 'Rechnungseingang',
       entityId: savedRechnung.id,
       action: 'CREATE',
@@ -110,8 +111,24 @@ export class RechnungseingangService {
     wareneingangId?: string
     limit?: number
     offset?: number
-  }): Promise<Rechnungseingang[]> {
-    return this.repository.findByTenant(tenantId, options)
+  }): Promise<ListResult<Rechnungseingang>> {
+    const limit = clampLimit(options?.limit)
+    const offset = clampOffset(options?.offset)
+    const items = await this.repository.findByTenant(tenantId, {
+      status: options?.status,
+      lieferantId: options?.lieferantId,
+      bestellungId: options?.bestellungId,
+      wareneingangId: options?.wareneingangId,
+      limit,
+      offset,
+    })
+    const total = await this.repository.countByTenant(tenantId, {
+      status: options?.status,
+      lieferantId: options?.lieferantId,
+      bestellungId: options?.bestellungId,
+      wareneingangId: options?.wareneingangId,
+    })
+    return { items, total }
   }
 
   async getRechnungseingaengeByBestellung(bestellungId: string, tenantId: string): Promise<Rechnungseingang[]> {
@@ -246,22 +263,47 @@ export class RechnungseingangService {
       throw new Error('Rechnungseingang nicht gefunden')
     }
 
-    // TODO: Rechnungseingang mit neuen Daten aktualisieren
-    // const updatedRechnung = rechnung.update(data)
-    // const saved = await this.repository.update(updatedRechnung)
+    if (rechnung.status !== RechnungseingangStatus.ERFASST) {
+      throw new Error('Nur erfasste Rechnungen können aktualisiert werden')
+    }
 
-    // Audit-Log
+    const updatedRechnung = new Rechnungseingang(
+      rechnung.id,
+      rechnung.rechnungsNummer,
+      rechnung.lieferantId,
+      rechnung.bestellungId,
+      rechnung.wareneingangId,
+      rechnung.rechnungsDatum,
+      rechnung.status,
+      data.bruttoBetrag ?? rechnung.bruttoBetrag,
+      data.nettoBetrag ?? rechnung.nettoBetrag,
+      data.steuerBetrag ?? rechnung.steuerBetrag,
+      data.steuerSatz ?? rechnung.steuerSatz,
+      data.skonto ?? rechnung.skonto,
+      data.zahlungsziel ?? rechnung.zahlungsziel,
+      data.positionen ?? rechnung.positionen,
+      data.abweichungen ?? rechnung.abweichungen,
+      rechnung.tenantId,
+      data.bemerkungen !== undefined ? data.bemerkungen : rechnung.bemerkungen,
+      rechnung.version + 1,
+      rechnung.createdAt,
+      new Date(),
+      rechnung.deletedAt
+    )
+
+    const saved = await this.repository.update(updatedRechnung)
+
     await this.auditService.log({
       actorId,
       entity: 'Rechnungseingang',
       entityId: id,
       action: 'UPDATE',
       before: rechnung,
-      after: rechnung, // TODO: updatedRechnung
+      after: saved,
       tenantId
     })
 
-    return rechnung // TODO: saved
+    return saved
   }
 
   async deleteRechnungseingang(id: string, tenantId: string, actorId: string): Promise<void> {

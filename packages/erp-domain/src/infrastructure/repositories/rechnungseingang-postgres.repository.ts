@@ -186,13 +186,21 @@ export class RechnungseingangPostgresRepository implements RechnungseingangRepos
     })
   }
 
-  async countByTenant(tenantId: string, status?: RechnungseingangStatus): Promise<number> {
+  async countByTenant(tenantId: string, filters?: {
+    status?: RechnungseingangStatus
+    lieferantId?: string
+    bestellungId?: string
+    wareneingangId?: string
+  }): Promise<number> {
     const where: any = {
       tenantId,
       deletedAt: null
     }
 
-    if (status) where.status = status
+    if (filters?.status) where.status = filters.status
+    if (filters?.lieferantId) where.lieferantId = filters.lieferantId
+    if (filters?.bestellungId) where.bestellungId = filters.bestellungId
+    if (filters?.wareneingangId) where.wareneingangId = filters.wareneingangId
 
     return this.prisma.rechnungseingang.count({ where })
   }
