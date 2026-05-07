@@ -6,10 +6,11 @@ SEC-008: Tenant-Isolation + Mass-Assignment-Whitelist + Information-Disclosure-F
 """
 
 import logging
+import os
 from app.core.uuid7 import uuid7
 from datetime import datetime
 
-from fastapi import APIRouter, Depends, HTTPException, Header, Request
+from fastapi import APIRouter, Depends, HTTPException, Header, Request, File, UploadFile
 from sqlalchemy.orm import Session
 from sqlalchemy import text
 from typing import List, Optional
@@ -17,6 +18,7 @@ from typing import List, Optional
 from app.core.database import get_db
 from app.auth.deps import get_tenant_id
 from app.einkauf import schemas
+from app.einkauf.ocr_invoice import extract_invoice_pdf
 
 logger = logging.getLogger(__name__)
 
@@ -639,7 +641,10 @@ async def send_anfrage(
 
 # ============================================================================
 # PDF/OCR RECHNUNGSIMPORT (PROC-IV-01)
+# Engine: env EINKAUF_OCR_ENGINE=stub|pdfplumber|… — Upload-Pfad via EINKAUF_OCR_UPLOAD_DIR
 # ============================================================================
+
+EINKAUF_OCR_ENGINE = os.getenv("EINKAUF_OCR_ENGINE", "stub")
 
 @router.post("/rechnungseingaenge/import/pdf", status_code=201)
 async def import_rechnung_pdf(
@@ -654,40 +659,7 @@ async def import_rechnung_pdf(
     - Optional: Match mit Bestellung für 3-Wege-Abgleich
     """
     try:
-        # OCR-Stub: Liefert Platzhalter-Struktur zurück.
-        # TODO(phase-4): Echte Extraktion via pdfplumber / tesseract / Cloud-OCR einbauen
-        ocr_result = {
-            "extracted_data": {
-                "rechnungs_nummer": f"OCR-{file_id[-8:]}",
-                "rechnungs_datum": datetime.utcnow().date().isoformat(),
-                "lieferant_name": "Muster-Lieferant GmbH",
-                "lieferant_adresse": "Musterstraße 1, 12345 Musterstadt",
-                "netto_betrag": 1500.00,
-                "mwst_betrag": 285.00,
-                "brutto_betrag": 1785.00,
-                "waehrung": "EUR",
-                "positionen": [
-                    {
-                        "artikel_name": "Musterartikel A",
-                        "menge": 10,
-                        "einzelpreis": 100.00,
-                        "gesamtpreis": 1000.00,
-                        "mwst_satz": 19.0
-                    },
-                    {
-                        "artikel_name": "Musterartikel B",
-                        "menge": 5,
-                        "einzelpreis": 100.00,
-                        "gesamtpreis": 500.00,
-                        "mwst_satz": 19.0
-                    }
-                ]
-            },
-            "confidence_score": 0.92,
-            "extraction_warnings": [],
-            "ocr_model": "tesseract-v4",
-            "processed_at": datetime.utcnow().isoformat()
-        }
+        ocr_result = extract_invoice_pdf(file_id=file_id, engine=EINKAUF_OCR_ENGINE, pdf_bytes=None)
 
         po_data = None
         if bestellung_id:
@@ -707,6 +679,41 @@ async def import_rechnung_pdf(
     except Exception as e:
         logger.exception("OCR Import fehlgeschlagen")
         raise HTTPException(status_code=500, detail="Fehler beim OCR-Import")
+
+
+@router.post("/rechnungseingaenge/import/pdf-upload", status_code=201)
+async def import_rechnung_pdf_upload(
+    file: UploadFile = File(...),
+    bestellung_id: Optional[str] = None,
+    db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
+):
+    """Multipart-Upload eines PDF; OCR wie import/pdf (EINKAUF_OCR_ENGINE)."""
+    try:
+        content = await file.read()
+        fid = (file.filename or "upload.pdf")[:160]
+        ocr_result = extract_invoice_pdf(file_id=fid, engine=EINKAUF_OCR_ENGINE, pdf_bytes=content)
+
+        po_data = None
+        if bestellung_id:
+            po_result = db.execute(
+                text(
+                    "SELECT * FROM einkauf_bestellungen WHERE (id = :id OR bestellnummer = :id) "
+                    "AND tenant_id = :tenant_id"
+                ),
+                {"id": bestellung_id, "tenant_id": tenant_id},
+            ).fetchone()
+            if po_result:
+                po_data = dict(po_result._mapping)
+
+        return {
+            "ocr_result": ocr_result,
+            "bestellung": po_data,
+            "message": "OCR-Extraktion erfolgreich (Upload). Bitte Daten prüfen und bestätigen.",
+        }
+    except Exception:
+        logger.exception("OCR Upload fehlgeschlagen")
+        raise HTTPException(status_code=500, detail="Fehler beim OCR-Upload")
 
 
 @router.post("/rechnungseingaenge/import/confirm", status_code=201)
