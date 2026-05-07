@@ -1,19 +1,27 @@
 """
 Strecke – Streckengeschaefte CRUD
 Drop-ship / pass-through trade management.
+Persistenz: public.streckengeschaefte (M-11).
 """
 
+from __future__ import annotations
+
+import re
+from decimal import Decimal
 from datetime import date, datetime
-from typing import Any, Optional
+from typing import Optional
 from uuid import uuid4
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Response
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
+from sqlalchemy import desc, text
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
 from app.core.tenant import get_tenant_id
-
+from app.core.metrics import strecke_operations_total
+from app.models.streckengeschaeft import Streckengeschaeft
 
 router = APIRouter(prefix="/strecke/streckengeschaefte", tags=["Strecke"])
 
@@ -21,6 +29,7 @@ router = APIRouter(prefix="/strecke/streckengeschaefte", tags=["Strecke"])
 # ---------------------------------------------------------------------------
 # Schemas
 # ---------------------------------------------------------------------------
+
 
 class StreckengeschaeftBase(BaseModel):
     datum: str
@@ -73,82 +82,83 @@ class StreckengeschaeftUpdate(BaseModel):
 
 
 # ---------------------------------------------------------------------------
-# In-memory store (TODO: replace with DB table)
+# Hilfen
 # ---------------------------------------------------------------------------
 
-_DEMO_DATA: list[dict[str, Any]] = [
-    {
-        "id": "stg-001",
-        "strecke_nr": "STR-2026-0001",
-        "datum": "2026-02-25",
-        "niederlassung": "Hauptlager",
-        "partie_nr": "P-4410",
-        "kostenstelle": "KS-110",
-        "lagerhalle": "H3",
-        "nls_nr": "NLS-01",
-        "erledigt": False,
-        "lieferant_name": "Agrar Müller GmbH",
-        "lieferant_nr": "LF-1001",
-        "kontrakt_nr": "KT-2026-0042",
-        "artikel": "Weizen B",
-        "netto": 12500.00,
-        "mwst": 875.00,
-        "brutto": 13375.00,
-        "rechnungsnr": "",
-        "bediener": "Meier",
-        "notiz": "",
-        "erstellt": "2026-02-25T08:00:00",
-    },
-    {
-        "id": "stg-002",
-        "strecke_nr": "STR-2026-0002",
-        "datum": "2026-03-10",
-        "niederlassung": "Außenlager West",
-        "partie_nr": "P-4422",
-        "kostenstelle": "KS-210",
-        "lagerhalle": "H1",
-        "nls_nr": "NLS-02",
-        "erledigt": True,
-        "lieferant_name": "Raiffeisen Handel eG",
-        "lieferant_nr": "LF-2030",
-        "kontrakt_nr": "KT-2026-0055",
-        "artikel": "Raps 00",
-        "netto": 28900.00,
-        "mwst": 2023.00,
-        "brutto": 30923.00,
-        "rechnungsnr": "RE-2026-1122",
-        "bediener": "Schmidt",
-        "notiz": "Expresslieferung",
-        "erstellt": "2026-03-10T10:30:00",
-    },
-    {
-        "id": "stg-003",
-        "strecke_nr": "STR-2026-0003",
-        "datum": "2026-04-01",
-        "niederlassung": "Hauptlager",
-        "partie_nr": "P-4480",
-        "kostenstelle": "KS-110",
-        "lagerhalle": "H5",
-        "nls_nr": "NLS-01",
-        "erledigt": False,
-        "lieferant_name": "BayWa AG",
-        "lieferant_nr": "LF-3100",
-        "kontrakt_nr": "KT-2026-0071",
-        "artikel": "Gerste",
-        "netto": 8750.00,
-        "mwst": 612.50,
-        "brutto": 9362.50,
-        "rechnungsnr": "",
-        "bediener": "Meier",
-        "notiz": "",
-        "erstellt": "2026-04-01T09:15:00",
-    },
-]
+
+def _parse_datum(s: str) -> date:
+    try:
+        return date.fromisoformat(s[:10])
+    except (TypeError, ValueError) as e:
+        raise HTTPException(status_code=400, detail="Ungültiges Datum (erwartet YYYY-MM-DD)") from e
+
+
+def _numeric_advisory_key(tenant_id: str, year: int) -> int:
+    """Stabiler 31-bit Key für pg_advisory_xact_lock (Parallel-Inserts pro Tenant/Jahr serialisieren)."""
+    h = hash(f"strecke:{tenant_id}:{year}") & 0x7FFF_FFFF
+    return h if h != 0 else 1
+
+
+def _next_strecke_nr(db: Session, tenant_id: str, fiscal_year: int | None = None) -> str:
+    year = fiscal_year if fiscal_year is not None else datetime.now().year
+    prefix = f"STR-{year}-"
+    rows = (
+        db.query(Streckengeschaeft.strecke_nr)
+        .filter(
+            Streckengeschaeft.tenant_id == tenant_id,
+            Streckengeschaeft.strecke_nr.like(f"{prefix}%"),
+        )
+        .all()
+    )
+    escaped = re.escape(prefix)
+    pat = re.compile(rf"^{escaped}(\d+)$")
+    max_seq = 0
+    for (nr,) in rows:
+        if not nr:
+            continue
+        m = pat.match(nr)
+        if m:
+            max_seq = max(max_seq, int(m.group(1)))
+    return f"{prefix}{max_seq + 1:04d}"
+
+
+def _to_out(row: Streckengeschaeft) -> StreckengeschaeftOut:
+    return StreckengeschaeftOut(
+        id=row.id,
+        strecke_nr=row.strecke_nr,
+        datum=row.datum.isoformat() if row.datum else "",
+        niederlassung=row.niederlassung or "",
+        partie_nr=row.partie_nr or "",
+        kostenstelle=row.kostenstelle or "",
+        lagerhalle=row.lagerhalle or "",
+        nls_nr=row.nls_nr or "",
+        erledigt=bool(row.erledigt),
+        lieferant_name=row.lieferant_name or "",
+        lieferant_nr=row.lieferant_nr or "",
+        kontrakt_nr=row.kontrakt_nr or "",
+        artikel=row.artikel or "",
+        netto=float(row.netto or 0),
+        mwst=float(row.mwst or 0),
+        brutto=float(row.brutto or 0),
+        rechnungsnr=row.rechnungsnr or "",
+        bediener=row.bediener or "",
+        notiz=row.notiz or "",
+        erstellt=row.erstellt.isoformat() if row.erstellt else "",
+    )
+
+
+def _get_row(db: Session, tenant_id: str, strecke_id: str) -> Streckengeschaeft | None:
+    return (
+        db.query(Streckengeschaeft)
+        .filter(Streckengeschaeft.id == strecke_id, Streckengeschaeft.tenant_id == tenant_id)
+        .first()
+    )
 
 
 # ---------------------------------------------------------------------------
 # Endpoints
 # ---------------------------------------------------------------------------
+
 
 @router.get("", response_model=list[StreckengeschaeftOut])
 async def list_streckengeschaefte(
@@ -158,11 +168,12 @@ async def list_streckengeschaefte(
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
-    """Liste aller Streckengeschaefte."""
-    data = _DEMO_DATA
+    """Liste aller Streckengeschaefte für den Tenant."""
+    q = db.query(Streckengeschaeft).filter(Streckengeschaeft.tenant_id == tenant_id)
     if erledigt is not None:
-        data = [d for d in data if d["erledigt"] == erledigt]
-    return [StreckengeschaeftOut(**d) for d in data[skip : skip + limit]]
+        q = q.filter(Streckengeschaeft.erledigt == erledigt)
+    rows = q.order_by(desc(Streckengeschaeft.erstellt)).offset(skip).limit(limit).all()
+    return [_to_out(r) for r in rows]
 
 
 @router.get("/{strecke_id}", response_model=StreckengeschaeftOut)
@@ -172,10 +183,10 @@ async def get_streckengeschaeft(
     db: Session = Depends(get_db),
 ):
     """Einzelnes Streckengeschaeft laden."""
-    for d in _DEMO_DATA:
-        if d["id"] == strecke_id:
-            return StreckengeschaeftOut(**d)
-    raise HTTPException(status_code=404, detail=f"Streckengeschaeft {strecke_id} nicht gefunden")
+    row = _get_row(db, tenant_id, strecke_id)
+    if not row:
+        raise HTTPException(status_code=404, detail=f"Streckengeschaeft {strecke_id} nicht gefunden")
+    return _to_out(row)
 
 
 @router.post("", response_model=StreckengeschaeftOut, status_code=201)
@@ -185,18 +196,42 @@ async def create_streckengeschaeft(
     db: Session = Depends(get_db),
 ):
     """Neues Streckengeschaeft anlegen."""
-    new_id = str(uuid4())
-    seq = len(_DEMO_DATA) + 1
-    strecke_nr = f"STR-{datetime.now().year}-{seq:04d}"
-
-    entry = {
-        **payload.model_dump(),
-        "id": new_id,
-        "strecke_nr": strecke_nr,
-        "erstellt": datetime.now().isoformat(),
-    }
-    _DEMO_DATA.append(entry)
-    return StreckengeschaeftOut(**entry)
+    data = payload.model_dump()
+    d = _parse_datum(data["datum"])
+    fy = d.year
+    db.execute(text("SELECT pg_advisory_xact_lock(:k)"), {"k": _numeric_advisory_key(tenant_id, fy)})
+    strecke_nr = _next_strecke_nr(db, tenant_id, fiscal_year=fy)
+    row = Streckengeschaeft(
+        id=str(uuid4()),
+        tenant_id=tenant_id,
+        strecke_nr=strecke_nr,
+        datum=d,
+        niederlassung=data.get("niederlassung") or "",
+        partie_nr=data.get("partie_nr") or "",
+        kostenstelle=data.get("kostenstelle") or "",
+        lagerhalle=data.get("lagerhalle") or "",
+        nls_nr=data.get("nls_nr") or "",
+        erledigt=bool(data.get("erledigt", False)),
+        lieferant_name=data.get("lieferant_name") or "",
+        lieferant_nr=data.get("lieferant_nr") or "",
+        kontrakt_nr=data.get("kontrakt_nr") or "",
+        artikel=data.get("artikel") or "",
+        netto=Decimal(str(data.get("netto", 0))),
+        mwst=Decimal(str(data.get("mwst", 0))),
+        brutto=Decimal(str(data.get("brutto", 0))),
+        rechnungsnr=data.get("rechnungsnr") or "",
+        bediener=data.get("bediener") or "",
+        notiz=data.get("notiz") or "",
+    )
+    db.add(row)
+    try:
+        db.commit()
+    except IntegrityError:
+        db.rollback()
+        raise HTTPException(status_code=409, detail="Konflikt beim Anlegen (Strecken-Nr.)")
+    db.refresh(row)
+    strecke_operations_total.labels(operation="create").inc()
+    return _to_out(row)
 
 
 @router.patch("/{strecke_id}", response_model=StreckengeschaeftOut)
@@ -207,12 +242,27 @@ async def update_streckengeschaeft(
     db: Session = Depends(get_db),
 ):
     """Streckengeschaeft aktualisieren."""
-    for d in _DEMO_DATA:
-        if d["id"] == strecke_id:
-            updates = payload.model_dump(exclude_unset=True)
-            d.update(updates)
-            return StreckengeschaeftOut(**d)
-    raise HTTPException(status_code=404, detail=f"Streckengeschaeft {strecke_id} nicht gefunden")
+    row = _get_row(db, tenant_id, strecke_id)
+    if not row:
+        raise HTTPException(status_code=404, detail=f"Streckengeschaeft {strecke_id} nicht gefunden")
+
+    updates = payload.model_dump(exclude_unset=True)
+    if "datum" in updates:
+        row.datum = _parse_datum(updates.pop("datum"))
+    for key in ("netto", "mwst", "brutto"):
+        if key in updates:
+            setattr(row, key, Decimal(str(updates.pop(key))))
+    for key, val in updates.items():
+        setattr(row, key, val)
+
+    try:
+        db.commit()
+    except IntegrityError:
+        db.rollback()
+        raise HTTPException(status_code=409, detail="Konflikt beim Aktualisieren")
+    db.refresh(row)
+    strecke_operations_total.labels(operation="update").inc()
+    return _to_out(row)
 
 
 @router.delete("/{strecke_id}", status_code=204, response_class=Response)
@@ -221,9 +271,10 @@ async def delete_streckengeschaeft(
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
-    """Streckengeschaeft loeschen."""
-    for i, d in enumerate(_DEMO_DATA):
-        if d["id"] == strecke_id:
-            _DEMO_DATA.pop(i)
-            return Response(status_code=204)
-    raise HTTPException(status_code=404, detail=f"Streckengeschaeft {strecke_id} nicht gefunden")
+    """Streckengeschaeft löschen."""
+    row = _get_row(db, tenant_id, strecke_id)
+    if not row:
+        raise HTTPException(status_code=404, detail=f"Streckengeschaeft {strecke_id} nicht gefunden")
+    db.delete(row)
+    db.commit()
+    return Response(status_code=204)

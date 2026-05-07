@@ -62,3 +62,10 @@ valeo_event_bus_dlq_entries_total = Counter(
     'Events sent to DLQ',
 )
 
+# Strecke / Streckengeschäfte (M-11 Betrieb)
+strecke_operations_total = Counter(
+    'strecke_operations_total',
+    'Streckengeschaefte Erstell-/Mutationsbewegungen',
+    ['operation'],
+)
+

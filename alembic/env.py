@@ -1,5 +1,13 @@
 import os
+from pathlib import Path
 from logging.config import fileConfig
+
+try:
+    from dotenv import load_dotenv
+
+    load_dotenv(Path(__file__).resolve().parents[1] / ".env")
+except ImportError:
+    pass
 
 from sqlalchemy import engine_from_config, text
 from sqlalchemy import pool
@@ -20,9 +28,23 @@ if config.config_file_name is not None:
 metadata = MetaData()
 
 def _get_database_url() -> str:
-    """Return database URL from environment or config."""
-    default_url = config.get_main_option("sqlalchemy.url")
-    return os.getenv("DATABASE_URL", default_url)
+    """DATABASE_URL-Umgebung, alembic.ini sqlalchemy.url oder App-Defaults (wie FastAPI)."""
+    ini_url = (config.get_main_option("sqlalchemy.url") or "").strip()
+    url = (os.getenv("DATABASE_URL") or ini_url).strip()
+    if url:
+        return url
+    try:
+        from app.core.config import settings
+
+        u = (getattr(settings, "DATABASE_URL", None) or "").strip()
+        if u:
+            return u
+    except Exception:
+        pass
+    raise RuntimeError(
+        "Keine Datenbank-URL für Alembic: setzen Sie DATABASE_URL (z. B. in .env) "
+        "oder sqlalchemy.url in alembic.ini."
+    )
 
 def run_migrations_offline() -> None:
     """Run migrations in 'offline' mode."""
