@@ -10,6 +10,8 @@ from typing import Iterable
 from uuid import uuid4
 
 from sqlalchemy.orm import Session
+from sqlalchemy import text
+from sqlalchemy.exc import SQLAlchemyError
 from structlog import get_logger
 
 from finance_shared.gobd.audit_trail import GoBDAuditTrail
@@ -207,6 +209,52 @@ class FinanceService:
             notes="" if len(gaps) == 0 else f"{len(gaps)} gap(s) detected – GoBD violation!",
         )
 
+    def _period_closed_flag(self, period: str) -> bool:
+        """True wenn die Periode in finance_accounting_periods geschlossen ist."""
+        try:
+            row = self.db.execute(
+                text("""
+                    SELECT status FROM finance_accounting_periods
+                    WHERE tenant_id = :tenant_id AND period = :period
+                """),
+                {"tenant_id": self.tenant_id, "period": period},
+            ).fetchone()
+        except SQLAlchemyError as ex:
+            logger.warning("period_closed_lookup_failed", error=str(ex))
+            return False
+        if not row:
+            return False
+        return str(row[0]).upper() != "OPEN"
+
+    def _period_balance_flag(self, period_entries: list) -> str:
+        """Prüft Kontensaldo: bevorzugt Soll/Haben pro Zeilen, sonst Fallback auf Buchungsfeld amount."""
+        if not period_entries:
+            return "balanced"
+
+        debit_total = Decimal("0")
+        credit_total = Decimal("0")
+        fallback_sum = Decimal("0")
+        saw_lines = False
+
+        for e in period_entries:
+            lines = getattr(e, "lines", None)
+            if lines:
+                saw_lines = True
+                for ln in lines:
+                    debit_total += Decimal(str(getattr(ln, "debit", 0) or 0))
+                    credit_total += Decimal(str(getattr(ln, "credit", 0) or 0))
+            fallback_sum += Decimal(str(getattr(e, "amount", 0) or 0))
+
+        if saw_lines:
+            diff = debit_total - credit_total
+            if abs(diff) < Decimal("0.01"):
+                return "balanced"
+            return "unbalanced"
+
+        if abs(fallback_sum) < Decimal("0.01"):
+            return "balanced"
+        return "unbalanced"
+
     def check_gobd_compliance(self) -> GoBDComplianceResponse:
         """Run full GoBD compliance check: document number gaps + audit hash chain.
 
@@ -282,6 +330,9 @@ class FinanceService:
             if hasattr(item, "due_date") and str(getattr(item, "due_date", ""))[:7] == period
         ]
 
+        is_closed = self._period_closed_flag(period)
+        balance_check = self._period_balance_flag(period_entries)
+
         je_doc_numbers = [e.id for e in period_entries]
         je_check = self._check_number_sequence("journal_entry", je_doc_numbers)
 
@@ -291,8 +342,8 @@ class FinanceService:
             open_items_count=len(period_items),
             has_gaps=je_check.gap_count > 0,
             gap_count=je_check.gap_count,
-            is_closed=False,  # TODO: Check period closing status
-            balance_check="balanced",  # TODO: Real balance check
+            is_closed=is_closed,
+            balance_check=balance_check,
             notes=je_check.notes,
         )
 

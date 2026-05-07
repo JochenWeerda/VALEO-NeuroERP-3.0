@@ -6,7 +6,7 @@ Data validation and serialization schemas for finance domain
 from datetime import datetime
 from decimal import Decimal
 from typing import Optional, List
-from pydantic import BaseModel, Field, field_validator, ConfigDict
+from pydantic import BaseModel, Field, field_validator, ConfigDict, model_validator
 from uuid import UUID
 
 
@@ -81,7 +81,7 @@ class JournalEntryLineBase(BaseModel):
     account_id: str = Field(..., description="Account ID")
     debit_amount: Decimal = Field(default=Decimal('0.00'), ge=0, description="Debit amount")
     credit_amount: Decimal = Field(default=Decimal('0.00'), ge=0, description="Credit amount")
-    line_number: int = Field(..., gt=0, description="Line number in entry")
+    line_number: int = Field(default=1, gt=0, description="Line number in entry")
     description: Optional[str] = Field(None, max_length=200, description="Line description")
     tax_code: Optional[str] = Field(None, max_length=20, description="Tax code")
     tax_amount: Decimal = Field(default=Decimal('0.00'), ge=0, description="Tax amount")
@@ -159,7 +159,19 @@ class JournalEntryBase(BaseModel):
 
 class JournalEntryCreate(JournalEntryBase):
     """Schema for creating journal entries"""
-    tenant_id: str = Field(..., description="Tenant ID")
+    tenant_id: Optional[str] = Field(default=None, description="Tenant ID")
+    entry_number: Optional[str] = Field(default=None, min_length=1, max_length=50, description="Entry number")
+    posting_date: Optional[datetime] = Field(default=None, description="Posting date")
+
+    @model_validator(mode="after")
+    def fill_manual_entry_defaults(self):
+        if self.posting_date is None:
+            self.posting_date = self.entry_date
+        if not self.entry_number:
+            self.entry_number = f"JE-{datetime.utcnow().strftime('%Y%m%d%H%M%S')}"
+        for idx, line in enumerate(self.lines, start=1):
+            line.line_number = idx
+        return self
 
 
 class JournalEntryUpdate(BaseModel):
