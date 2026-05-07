@@ -26,6 +26,22 @@ Stattdessen gilt:
 | cityssm Attendance Tracking | MIT | Lizenzrechtlich einfach, fachlich aber eher Abwesenheits-/Call-Out-Nische, nicht ausreichend fuer deutsche Arbeitszeit plus Fahrerlogik. |
 | Kommerzieller deutscher SaaS | Vertraglich | Lizenzrechtlich oft sauber, wenn AVV/DPA, Datenexport, SSO/API und Auftragsverarbeitung passen. Fachliche Abhaengigkeit und Kosten separat pruefen. |
 
+## GitHub Topic Scan HRMS
+
+Die GitHub-Topic-Seite `human-resources-management-system` wurde als zusaetzlicher Kandidatenpool geprueft.
+Sie listet 67 oeffentliche Repositories; die sichtbaren Top-Treffer bestaetigen die bisherige Lizenzlinie.
+
+| Kandidat | Lizenz / Signal | Bewertung |
+|----------|-----------------|-----------|
+| OrangeHRM | GPL-3.0 | Reifes HRMS, aber Copyleft. Als separater Fremddienst moeglich, nicht als VALEO-Codebasis. |
+| MintHCM | AGPL-3.0 | Funktional breites HCM, aber wegen AGPL nicht als integrierte oder modifizierte VALEO-Codebasis geeignet. |
+| Headcount | AGPL-3.0 | Modernere HRM-Anwendung mit Time-off/Employee Self Service, aber AGPL. Nicht als VALEO-Codebasis. |
+| GleamHRM | GPL-3.0 | HRM mit Leave und Attendance, aber alter Laravel-Stack und GPL-3.0. Nicht bevorzugt. |
+| Diverse kleinere HRMS-Demos | oft keine klare Lizenz, alt oder Demo-/Studienprojekt | Fuer VALEO nicht belastbar genug; fehlende Lizenz ist rechtlich schlechter als eine unpassende Lizenz. |
+
+Fazit: Die Topic-Seite liefert keinen besseren permissiven Kandidaten fuer deutsche Arbeitszeit-/Abwesenheitsverwaltung mit Fahrerbezug.
+Sie staerkt die Entscheidung, Abwesenheiten ueber Apache-2.0-Urlaubsverwaltung zu pruefen und Fahrerzeit als VALEO-eigenen Bounded Context zu modellieren.
+
 ## Zielarchitektur
 
 ```text
@@ -160,5 +176,10 @@ Geprueft am 2026-05-07:
 
 - `urlaubsverwaltung/urlaubsverwaltung`: GitHub weist Apache-2.0 aus: https://github.com/urlaubsverwaltung/urlaubsverwaltung
 - `urlaubsverwaltung/zeiterfassung`: Lizenzdatei ist AGPL-3.0: https://raw.githubusercontent.com/urlaubsverwaltung/zeiterfassung/main/LICENSE.md
+- GitHub Topic `human-resources-management-system`: https://github.com/topics/human-resources-management-system
+- OrangeHRM: GitHub weist GPL-3.0 aus: https://github.com/orangehrm/orangehrm
+- MintHCM: Lizenzdatei ist AGPL-3.0: https://raw.githubusercontent.com/minthcm/minthcm/master/LICENSE
+- Headcount: Lizenzdatei ist AGPL-3.0: https://raw.githubusercontent.com/bluewave-labs/Headcount/main/LICENSE
+- GleamHRM: Lizenzdatei ist GPL-3.0: https://raw.githubusercontent.com/glowlogix/gleamhrm/master/LICENSE
 - EU-Regelwerk zu Lenk- und Ruhezeiten: Verordnung (EG) Nr. 561/2006 und Folgeregeln: https://eur-lex.europa.eu/eli/reg/2006/561/oj
 - BAuA/BMAS bestaetigen die Pflicht zu einem objektiven, verlaesslichen und zugaenglichen Arbeitszeiterfassungssystem sowie den Arbeitsschutzbezug: https://www.baua.de/DE/Themen/Arbeitsgestaltung/Arbeitszeit/Arbeitszeiterfassung
