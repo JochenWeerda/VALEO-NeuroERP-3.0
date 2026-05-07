@@ -43,7 +43,13 @@ Zuletzt vollstaendig auditiert: **2026-05-05**.
 
 ## P2 - Architektonisch offen / mittelfristig relevant
 
-*Alle bisherigen P2-Punkte wurden am 2026-04-13 geschlossen (siehe unten).*
+### HR-TIME-001: Deutsche Abwesenheit, Zeiterfassung und Fahrerzeit
+
+- Fuer 27 Mitarbeitende mit relevantem LKW-Fahreranteil ist klassische Zeiterfassung allein fachlich nicht ausreichend.
+- Die Zielarchitektur ist dokumentiert in [hr-time-absence-driver-integration-2026-05-07.md](c:/Users/Jochen/VALEO-NeuroERP-3.0/docs/project-context/hr-time-absence-driver-integration-2026-05-07.md).
+- Lizenzlinie: `urlaubsverwaltung/urlaubsverwaltung` wird wegen Apache-2.0 als Abwesenheitskandidat geprueft; AGPL-/GPL-Zeiterfassung wird nicht als VALEO-Codebasis uebernommen.
+- Der naechste sinnvolle Umsetzungsschritt ist ein Pilot-Slice fuer Driver-Time-Datenmodell, manuelle Fahrerzeitereignisse, Tour-/Fahrzeugbezug und Abwesenheitskollisionen.
+- Offene externe Risiken: Rechtspruefung, Anbieter-AVV/DPA, Tacho-/Telematik-Schnittstellen und Payroll-/DATEV-Zielformat.
 
 ---
 
