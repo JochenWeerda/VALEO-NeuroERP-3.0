@@ -187,6 +187,51 @@ Stand: `2026-04-24`
 
 Dieses Board ist bewusst schlank gehalten, damit Session-Starts und Agent-Handoffs weniger Kontext verbrauchen.
 
+## RATIONS-LP-SPLIT-001
+
+**Von:** Cursor
+**Owner:** Cursor
+**Stand:** reserviert
+**Ziel des Slices:** `_run_lp` in `rations_optimization.py` durch Extraktion des Constraint-Matrix-Aufbaus in `app/agrar/rations/solver/lp_constraints.py` und der Stage-2-Policy-Extension in `app/agrar/rations/solver/lp_stage2.py` von ~1350 auf ~800 Zeilen reduzieren.
+**Dateibesitz:** `app/api/v1/endpoints/rations_optimization.py`, `app/agrar/rations/solver/lp_constraints.py` (neu), `app/agrar/rations/solver/lp_stage2.py` (neu), `tests/test_rations_lp_constraints.py` (neu)
+**Abnahmekriterien:** Volle Rations-Regression gruen; `_run_lp` < 900 Zeilen; `lp_constraints.py` exportiert `build_lp_constraint_matrix`; `lp_stage2.py` exportiert `build_policy_band_lp_extension`.
+
+## COV-RATCHET-004
+
+**Von:** Cursor
+**Owner:** Cursor
+**Stand:** reserviert
+**Ziel des Slices:** Coverage-Schwellen fuer bereits gruene kritische Pfade kontrolliert anheben (Puffer auf 97 % des gemessenen Wertes) und drei neue Ratchet-Pfade aufnehmen (strecke.py, sales_orders.py, ap_invoices.py).
+**Dateibesitz:** `scripts/check_critical_backend_coverage.py`, `docs/project-context/domain-parity-roadmap-2026-04-24.md`
+**Abnahmekriterien:** Alle Schwellen liegen <= gemessener Wert; `python scripts/check_critical_backend_coverage.py` gibt gruenen Exit-Code wenn coverage.xml vorhanden.
+
+## DOMAIN-PARITY-COV-001
+
+**Von:** Cursor
+**Owner:** Cursor
+**Stand:** reserviert
+**Ziel des Slices:** COV-INT-002: Integrations-Governance-Tests fuer `strecke.py`, `kontrakte.py` und `ap_invoices.py` hinzufuegen; domain-parity-roadmap um abgeschlossene Slices aktualisieren.
+**Dateibesitz:** `tests/test_strecke_api.py` (neu), `tests/test_kontrakte_api.py` (neu), `tests/test_ap_invoices_api.py` (neu), `docs/project-context/domain-parity-roadmap-2026-04-24.md`
+**Abnahmekriterien:** Neue Testdateien vorhanden, >= 5 Tests je Datei, pytest gruen; Roadmap-Dokument aktualisiert.
+
+## RATIONS-FS-WIZARD-001
+
+**Von:** Cursor
+**Owner:** Cursor
+**Stand:** reserviert
+**Ziel des Slices:** Wizard-Schritt fuer `feeding_system_config` im Rations-Wizard in `rationsoptimierung.tsx` sichtbar machen (System-Auswahl TMR/PMR_stall/PMR_pasture, Konzentratsverteilung, Limits je Verteilung).
+**Dateibesitz:** `packages/frontend-web/src/pages/futtermittel/rationsoptimierung.tsx`, `packages/frontend-web/src/lib/api/rations-optimization.ts`
+**Abnahmekriterien:** Wizard-Schritt sichtbar, `feeding_system_config` wird im Request gesendet, TypeScript-Typen passen, `pnpm run type-check` gruen.
+
+## RATIONS-FANI-KL-001
+
+**Von:** Cursor
+**Owner:** Cursor
+**Stand:** reserviert
+**Ziel des Slices:** FANi-basiertes dynamisches k_l in den Solver-Iterationsloop einbauen: `_gfe_requirements` erhaelt optionales `fani`-Argument, das `k_l_planning` (bisher fix 0,60) via `_kl_milk_from_me_density` iterativ anpasst. Gilt fuer PMR_pasture und TMR.
+**Dateibesitz:** `app/api/v1/endpoints/rations_optimization.py`, `tests/test_rations_fani_kl.py` (neu)
+**Abnahmekriterien:** `_gfe_requirements(profile, fani=3.2)` gibt anderen `me_mj` als `fani=None`; Rations-Regression gruen; FANi-Iteration in `_run_lp` reicht FANi an `_gfe_requirements` durch.
+
 Archiv des vorherigen Boards:
 - [active-workboard-2026-04-10-pre-slim.md](C:/Users/Jochen/VALEO-NeuroERP-3.0/docs/agent-ops/archive/active-workboard-2026-04-10-pre-slim.md)
 
