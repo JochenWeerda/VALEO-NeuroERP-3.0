@@ -1923,6 +1923,11 @@ from app.agrar.rations.constants.feeding_system import (
 )
 
 
+# Wizard Step 3: L1-Abstand zu Referenzration (kg TM je feed_id).
+# Hilfsvariablen t_i mit min sum(t_i) ≡ sum |x_i-b_i|; Gewicht in Stage 1/2 gekoppelt.
+_WIZARD_BASELINE_L1_WEIGHT = 0.088
+
+
 def _run_lp(
     req: _CowReq,
     feeds: List[Dict[str, Any]],
@@ -1930,10 +1935,26 @@ def _run_lp(
     runtime_options: Optional[Dict[str, Any]] = None,
 ) -> Dict[str, Any]:
     """
-    Minimiere Futterkosten (€/d) via scipy.optimize.linprog (LP, HiGHS-Solver).
+    LP-Rationsoptimierung (scipy.optimize.linprog, HiGHS).
 
-    Ablauf: Welfare-Stage-1, danach Kosten-Stage-2 inkl. optionaler Policy-
-    und Konzentrat-Tagesmax-Slacks (empfohlenes Limit weich, 1,5x weiterhin hart).
+    Endstufe bei Laktation: Minimierung der **Futterkosten je kg ECM** (fraktionales
+    LP / Charnes–Cooper), sonst klassisch **EUR pro Tag**.
+
+    Ablauf bei gesetztem Milchleistungsziel im Profil (milk_kg_day > 0):
+      (1) Stage Milch: limitierende Milch maximieren bis max. Ist-Leistung + 5 %
+          (Hilfsvariable z, gleiche ME/sidP-Linearisierung wie _milk_from_supply).
+      (2) Stage Welfare: Welfare-Ziel bei hoechstens MILK_TRADEOFF_% Einbusse ggue.
+          Stage (1), ausser disable_milk_tradeoff_between_stages.
+      (3) Stage Kosten: bei Laktation min. **EUR je kg ECM** (Charnes–Cooper/
+          fraktionales LP: min Feedkosten / limitierende Milch; ECM linear aus
+          Profil-Fett/-Protein-%). Optional `stage2_minimize_feed_eur_per_day`:
+          klassisches min. EUR/Tag (Fallback bei Infeasible des fraktionalen LP).
+    Ohne Milchleistungsziel: wie zuvor Welfare-Stage-1, dann Kosten-Stage-2.
+    Konzentrat-Tagesmax-Slack und Policy-Slacks wie bisher.
+
+    Optional Wizard ``policy_overrides.wizard_baseline_kg_dm`` (feed_id -> kg TM)
+    bei ``minimize_deviation_from_baseline``: L1-Abstand ||x-b||_1 ueber Hilfs-
+    variablen in Stage 1 und gekoppeltes Gewicht in Stage 2.
 
     Nebenbedingungen nach GfE 2023 / DLG 01|2023 / GfE-Workshop 2023:
       ME   ≥ Bedarf                           [GfE 2023]
@@ -1948,13 +1969,29 @@ def _run_lp(
     """
     conc_max_lp_slack_kg_out: Optional[float] = None
     conc_max_lp_slack_penalty_out: Optional[float] = None
+    stage2_lp_mode_out: Optional[str] = None
+    stage2_relaxation_summary_out: List[Dict[str, Any]] = []
+    stage2_fallback_used_out = False
+    stage2_ecm_failure_class_out: Optional[str] = None
     from scipy.optimize import linprog  # type: ignore[import]
 
     n = len(feeds)
     prices = [f["price"] for f in feeds]
+    _raw_os = str((runtime_options or {}).get("objective_strategy") or "balance_then_cost").strip().lower()
+    _obj_strat = _raw_os if _raw_os in _OBJECTIVE_STRATEGIES else "balance_then_cost"
     feeding_type = _normalize_feeding_type((profile or {}).get("feeding_type"))
     pasture_pmr = _is_pasture_pmr_system(feeds, profile)
     _wizard_sg = ((runtime_options or {}).get("policy_overrides") or {}).get("wizard_soft_goals") or {}
+    _wizard_baseline_raw = (
+        ((runtime_options or {}).get("policy_overrides") or {}).get("wizard_baseline_kg_dm") or {}
+    )
+    _wizard_baseline_kgdm: Dict[str, float] = {}
+    if isinstance(_wizard_baseline_raw, dict):
+        for _bk, _bv in _wizard_baseline_raw.items():
+            try:
+                _wizard_baseline_kgdm[str(_bk)] = max(0.0, float(_bv))
+            except (TypeError, ValueError):
+                continue
     andfom_gf_min = 180.0 if pasture_pmr else 200.0
     pabkh_max = 225.0 if pasture_pmr else 210.0
     xl_max = 42.0 if pasture_pmr else 40.0
@@ -2276,75 +2313,120 @@ def _run_lp(
 
     bounds = [(f["min_kg"], f["max_kg"]) for f in feeds]
 
-    def _solve(objective: List[float], A_local: List[List[float]], b_local: List[float]):
+    k_lp_extra = 0
+    _baseline_positions: List[Tuple[int, float]] = []
+    if _wizard_sg.get("minimize_deviation_from_baseline") and _wizard_baseline_kgdm:
+        for _fi in range(n):
+            _fid = str(feeds[_fi].get("id") or "")
+            if _fid and _fid in _wizard_baseline_kgdm:
+                _baseline_positions.append((_fi, float(_wizard_baseline_kgdm[_fid])))
+        k_lp_extra = len(_baseline_positions)
+    if k_lp_extra > 0:
+        A_ub = [list(_r) + [0.0] * k_lp_extra for _r in A_ub]
+        for _j, (_fi, _bkg) in enumerate(_baseline_positions):
+            _ti = n + _j
+            _r_pos = [0.0] * (n + k_lp_extra)
+            _r_pos[_fi] = 1.0
+            _r_pos[_ti] = -1.0
+            A_ub.append(_r_pos)
+            b_ub.append(_bkg)
+            _r_neg = [0.0] * (n + k_lp_extra)
+            _r_neg[_fi] = -1.0
+            _r_neg[_ti] = -1.0
+            A_ub.append(_r_neg)
+            b_ub.append(-_bkg)
+        bounds = list(bounds) + [(0.0, None)] * k_lp_extra
+
+    n_tot = n + k_lp_extra
+    A_ub_snap = [list(row) for row in A_ub]
+    b_ub_snap = list(b_ub)
+    bounds_snap = list(bounds)
+
+    _prof_lp = profile or {}
+    herd_milk_kg = float(_prof_lp.get("milk_kg_day") or 0.0)
+    _disable_milk_tradeoff = bool((runtime_options or {}).get("disable_milk_tradeoff_between_stages"))
+    _trade_frac_eff: Optional[float]
+    if _disable_milk_tradeoff:
+        _trade_frac_eff = None
+    else:
+        _tr_raw = (runtime_options or {}).get("milk_tradeoff_max_pct_per_stage")
+        if _tr_raw is None:
+            _trade_frac_eff = _MILK_TRADEOFF_MAX_PCT_PER_STAGE_DEFAULT / 100.0
+        else:
+            try:
+                tv = float(_tr_raw)
+                _trade_frac_eff = tv / 100.0 if tv > 1.0 else tv
+            except (TypeError, ValueError):
+                _trade_frac_eff = _MILK_TRADEOFF_MAX_PCT_PER_STAGE_DEFAULT / 100.0
+            _trade_frac_eff = max(0.0, min(0.5, float(_trade_frac_eff)))
+
+    _fs_sys_for_kl = str((_fs_cfg or {}).get("system") or "TMR")
+    _me_maint_milk, _me_pkm, _sidp_maint_milk, _sidp_pkm = _milk_requirement_factors(
+        _prof_lp,
+        None,
+        feeding_system=_fs_sys_for_kl,
+    )
+    _use_milk_stage = herd_milk_kg > 1e-6
+    z_cap_milk = herd_milk_kg * (1.0 + float(_MILK_TARGET_HEADROOM_FRAC))
+    z_star: Optional[float] = None
+
+    _zero_wiz = [0.0] * k_lp_extra
+
+    def _feed_row_pad(vec: List[float]) -> List[float]:
+        return list(vec) + [0.0] * k_lp_extra
+
+    def _feed_row_pad_z(vec: List[float]) -> List[float]:
+        return _feed_row_pad(vec) + [0.0]
+
+    def _lin_prog(
+        objective: List[float],
+        A_loc: List[List[float]],
+        b_loc: List[float],
+        bounds_loc: List[Tuple[Any, Any]],
+    ):
         return linprog(
             c=objective,
-            A_ub=A_local,
-            b_ub=b_local,
-            bounds=bounds,
+            A_ub=A_loc,
+            b_ub=b_loc,
+            bounds=bounds_loc,
             method="highs",
             options={"disp": False},
         )
 
-    _sg_kw = _wizard_sg if _wizard_sg else None
-    stage1_objective = [_welfare_objective_coeff(feed, wizard_soft_goals=_sg_kw) for feed in feeds]
-    result = _solve(stage1_objective, A_ub, b_ub)
+    def _solve_simple(objective: List[float], A_loc: List[List[float]], b_loc: List[float]):
+        return _lin_prog(objective, A_loc, b_loc, bounds_snap)
 
-    # Refactor Schritt 3 (2026-04-23): Constraint-Indizes werden ueber die
-    # ``_constraint_registry`` symbolisch aufgeloest. Die historische
-    # Reihenfolge (ME/sidP/aNDFom-tot/aNDFomGF/pabKH/XL/CP/RMD/ME-dichte/
-    # ME-abs/aNDFom-max/Ca/P/Na/Mg/DMI-min/DMI-max) wird bewusst nicht
-    # veraendert; ein verspaetetes Umordnen ist aber nicht mehr
-    # fehleranfaellig, weil alle relaxations-relevanten Rows per Name
-    # angesprochen werden.
     _IDX_XL = _constraint_registry.index_of(_CONSTR_XL_DENSITY)
     _IDX_ANDFOM_GF = _constraint_registry.index_of(_CONSTR_ANDFOM_GF_GEQ)
     _IDX_RMD = _constraint_registry.index_of(_CONSTR_RMD_DENSITY)
     _IDX_ME_ABS = _constraint_registry.index_of(_CONSTR_ME_ABS_LEQ)
-    # Regressions-Absicherung: die historische Reihenfolge bleibt (Tests).
     assert _IDX_XL == 5, f"XL-Index erwartet 5, ist {_IDX_XL}"
     assert _IDX_ANDFOM_GF == 3, f"aNDFomGF-Index erwartet 3, ist {_IDX_ANDFOM_GF}"
     assert _IDX_RMD == 7, f"RMD-Index erwartet 7, ist {_IDX_RMD}"
     assert _IDX_ME_ABS == 9, f"ME-abs-Index erwartet 9, ist {_IDX_ME_ABS}"
 
-    # Refactor Schritt 4 (2026-04-23): Relaxations-Kaskade gekapselt.
-    # Die vier historischen Relaxations-Stufen (XL -> RMD -> aNDFomGF-drop
-    # -> sidP-85%) werden aus ``_run_lp`` in eine benannte Closure
-    # ausgezogen. Dadurch bleibt die Haupt-Funktion lesbarer und spaetere
-    # Verfeinerungen (selektives Ueberspringen, Protokollierung,
-    # Strafkosten-Variante) koennen lokal geaendert werden, ohne den
-    # 1300-zeiligen LP-Build zu beruehren.
-    def _relax_stage1(current_result):
-        """Wendet sequentiell die 4 Relaxations-Stufen an, bis feasible.
-
-        Die verwendeten Indizes kommen ausschliesslich aus der
-        ``_constraint_registry`` und sind damit namensbasiert stabil.
-        """
-        r = current_result
-        # Stufe 1: XL-Dichte weicher (60 bzw. 48 g/kg TM bei PMR+Weide)
+    def _relax_primary_cascade(cur_result, objective, A_constraints_base, b_constraints_base, bounds_loc, row_extend_fn):
+        r = cur_result
         if r.status not in (0, 1):
             xl_density_r = [v - (60.0 if not pasture_pmr else 48.0) for v in xl_per_kg]
-            A_loc = list(A_ub)
-            A_loc[_IDX_XL] = xl_density_r
-            b_loc = b_ub.copy()
-            b_loc[_IDX_XL] = 0.0  # linearisiertes RHS bleibt 0
-            r = _solve(stage1_objective, A_loc, b_loc)
-        # Stufe 2: RMD-Dichte um eine Stufe weicher als rmd_max
+            A_loc = list(A_constraints_base)
+            A_loc[_IDX_XL] = row_extend_fn(xl_density_r)
+            b_loc = list(b_constraints_base)
+            b_loc[_IDX_XL] = 0.0
+            r = _lin_prog(objective, A_loc, b_loc, bounds_loc)
         if r.status not in (0, 1):
             rmd_relax = rmd_max + (4.0 if feeding_type == "PMR+Weide" else 1.5)
-            b_loc = b_ub.copy()
+            b_loc = list(b_constraints_base)
             b_loc[_IDX_RMD] = 0.0
-            A_loc = list(A_ub)
-            A_loc[_IDX_RMD] = [v - rmd_relax for v in rmd_per_kg]
-            r = _solve(stage1_objective, A_loc, b_loc)
-        # Stufe 3: aNDFomGF-Dichte-Constraint vollstaendig entfernen
-        A_r3 = A_ub
-        b_r3 = b_ub
+            A_loc = list(A_constraints_base)
+            A_loc[_IDX_RMD] = row_extend_fn([v - rmd_relax for v in rmd_per_kg])
+            r = _lin_prog(objective, A_loc, b_loc, bounds_loc)
+        A_r3 = list(A_constraints_base)
+        b_r3 = list(b_constraints_base)
         if r.status not in (0, 1):
-            A_r3 = [row for i, row in enumerate(A_ub) if i != _IDX_ANDFOM_GF]
-            b_r3 = [v for i, v in enumerate(b_ub) if i != _IDX_ANDFOM_GF]
-            r = _solve(stage1_objective, A_r3, b_r3)
-        # Stufe 4: sidP auf 85% des Bedarfs reduzieren (letzter Ausweg)
+            A_r3 = [row for i, row in enumerate(A_constraints_base) if i != _IDX_ANDFOM_GF]
+            b_r3 = [v for i, v in enumerate(b_constraints_base) if i != _IDX_ANDFOM_GF]
+            r = _lin_prog(objective, A_r3, b_r3, bounds_loc)
         if r.status not in (0, 1):
             A_r4 = list(A_r3)
             b_r4 = list(b_r3)
@@ -2352,16 +2434,63 @@ def _run_lp(
                 if all(abs(row[j] + (feeds[j]["sidp"] or 0)) < 0.01 for j in range(n)):
                     b_r4[idx] = -req.sidp_g * 0.85
                     break
-            r = _solve(stage1_objective, A_r4, b_r4)
+            r = _lin_prog(objective, A_r4, b_r4, bounds_loc)
         return r
 
-    result = _relax_stage1(result)
+    _sg_kw = _wizard_sg if _wizard_sg else None
+    _welfare_coeffs = [_welfare_objective_coeff(feed, wizard_soft_goals=_sg_kw) for feed in feeds]
+    stage1_obj_base = list(_welfare_coeffs)
+    if _obj_strat == "cost_only":
+        stage1_obj_base = [float(prices[i]) for i in range(n)]
+    stage1_objective = stage1_obj_base + [_WIZARD_BASELINE_L1_WEIGHT] * k_lp_extra
+
+    result: Any
+
+    if _use_milk_stage:
+        A_milk = [list(row) + [0.0] for row in A_ub_snap]
+        b_milk = list(b_ub_snap)
+        coupling_me = [-float(me_per_kg[i]) for i in range(n)] + _zero_wiz + [float(_me_pkm)]
+        coupling_sidp = [-float(sidp_per_kg[i]) for i in range(n)] + _zero_wiz + [float(_sidp_pkm)]
+        A_milk.append(coupling_me)
+        b_milk.append(-float(_me_maint_milk))
+        A_milk.append(coupling_sidp)
+        b_milk.append(-float(_sidp_maint_milk))
+        bounds_milk = list(bounds_snap) + [(0.0, max(z_cap_milk, 0.0))]
+        c_milk = [0.0] * n_tot + [-1.0]
+        res_milk = _lin_prog(c_milk, A_milk, b_milk, bounds_milk)
+        res_milk = _relax_primary_cascade(res_milk, c_milk, A_milk, b_milk, bounds_milk, _feed_row_pad_z)
+        if res_milk.status not in (0, 1):
+            result = res_milk
+        elif _obj_strat == "cost_only":
+            z_star = float(res_milk.x[n_tot])
+            result = res_milk
+        else:
+            z_star = float(res_milk.x[n_tot])
+            A_welfare = [list(row) for row in A_ub_snap]
+            b_welfare = list(b_ub_snap)
+            if _trade_frac_eff is not None and z_star is not None:
+                mf_w = max(0.0, z_star * (1.0 - _trade_frac_eff))
+                me_rhs_w = float(_me_maint_milk) + float(_me_pkm) * mf_w
+                sidp_rhs_w = float(_sidp_maint_milk) + float(_sidp_pkm) * mf_w
+                A_welfare.append(_feed_row_pad([-float(me_per_kg[i]) for i in range(n)]))
+                b_welfare.append(-me_rhs_w)
+                A_welfare.append(_feed_row_pad([-float(sidp_per_kg[i]) for i in range(n)]))
+                b_welfare.append(-sidp_rhs_w)
+            res_w = _solve_simple(stage1_objective, A_welfare, b_welfare)
+            res_w = _relax_primary_cascade(res_w, stage1_objective, A_welfare, b_welfare, bounds_snap, _feed_row_pad)
+            if res_w.status not in (0, 1) and len(A_welfare) > len(A_ub_snap):
+                res_w = _solve_simple(stage1_objective, A_ub_snap, b_ub_snap)
+                res_w = _relax_primary_cascade(res_w, stage1_objective, A_ub_snap, b_ub_snap, bounds_snap, _feed_row_pad)
+            result = res_w
+    else:
+        result = _solve_simple(stage1_objective, A_ub_snap, b_ub_snap)
+        result = _relax_primary_cascade(result, stage1_objective, A_ub_snap, b_ub_snap, bounds_snap, _feed_row_pad)
 
     infeasibility_hint = None
     if result.status not in (0, 1):
         infeasibility_hint = _diagnose_infeasibility(req, feeds, profile)
     else:
-        stage1_amounts = [_f(v) for v in result.x]
+        stage1_amounts = [_f(v) for v in result.x[:n]]
         stage1_total_dmi = sum(stage1_amounts)
         if stage1_total_dmi > 0:
             stage1_forage_pct = (
@@ -2376,69 +2505,31 @@ def _run_lp(
             stage1_xl_density = sum(stage1_amounts[i] * xl_per_kg[i] for i in range(n)) / stage1_total_dmi
             stage1_cp_density = sum(stage1_amounts[i] * cp_per_kg[i] for i in range(n)) / stage1_total_dmi
 
-            A_stage2 = list(A_ub)
-            b_stage2 = list(b_ub)
+            milk_floor_cost: Optional[float] = None
+            if _use_milk_stage and _trade_frac_eff is not None:
+                if _obj_strat == "cost_only" and z_star is not None:
+                    milk_floor_cost = max(0.0, float(z_star) * (1.0 - float(_trade_frac_eff)))
+                elif _obj_strat != "cost_only":
+                    me_sup_w = sum(me_per_kg[i] * stage1_amounts[i] for i in range(n))
+                    sidp_sup_w = sum(sidp_per_kg[i] * stage1_amounts[i] for i in range(n))
+                    milk_e = (
+                        max(0.0, (me_sup_w - float(_me_maint_milk)) / float(_me_pkm))
+                        if float(_me_pkm) > 1e-9
+                        else 0.0
+                    )
+                    milk_p = (
+                        max(0.0, (sidp_sup_w - float(_sidp_maint_milk)) / float(_sidp_pkm))
+                        if float(_sidp_pkm) > 1e-9
+                        else 0.0
+                    )
+                    milk_lim_w = min(milk_e, milk_p)
+                    milk_floor_cost = max(0.0, milk_lim_w * (1.0 - float(_trade_frac_eff)))
 
-            forage_floor = max(60.0 if pasture_pmr else 55.0, stage1_forage_pct - 2.0)
-            A_stage2.append([
-                forage_floor - 100.0 if feed.get("forage") else forage_floor
-                for feed in feeds
-            ])
-            b_stage2.append(0.0)
+            _orig_pabkh_base = float(min(pabkh_max, stage1_pabkh_density + 10.0))
+            _orig_cp_base = float(min(cp_max, stage1_cp_density + 5.0))
+            _orig_forage_floor_base = float(max(60.0 if pasture_pmr else 55.0, stage1_forage_pct - 2.0))
 
-            # DLG 01|2023: peNDF wird in der Rationsplanung NICHT mehr als harte
-            # Stage-2-Nebenbedingung verwendet; DLG empfiehlt stattdessen aNDFom
-            # aus dem Grobfutter (aNDFomGF) als primaere Planungsgroesse, mit
-            # staerkeadaptiver Erhoehung bei hohen pansenabbaubaren KH. Wir
-            # hebeln deshalb das aNDFomGF-Dichteminimum fuer Stage 2 an, angepasst
-            # an die tatsaechliche Staerke-Dichte aus Stage 1, und addieren den
-            # SARA-Reopt-Floor-Boost (falls gesetzt) hier - nicht am peNDF.
-            stage2_andfom_gf_min = _andfom_gf_min_target(
-                staerke_density_kgdm=stage1_starch_density,
-                pabkh_density_kgdm=stage1_pabkh_density,
-                pasture_pmr=pasture_pmr,
-                seasonal_boost=float(_seasonal.get("andfom_gf_min_boost") or 0.0),
-                sara_boost=float(_sara.get("andfom_gf_min_boost") or 0.0)
-                + _sara_pendf_floor_boost,
-            )
-            if stage2_andfom_gf_min > andfom_gf_min:
-                stage2_andfom_gf_cop_density = [
-                    f["ndf"] - stage2_andfom_gf_min if _is_forage_or_cop(f) else -stage2_andfom_gf_min
-                    for f in feeds
-                ]
-                # Slice 1c: Struktur-Dichte Stage-2 ebenfalls auf TMR-Block beschraenken
-                A_stage2.append([-v for v in _tmr_only(stage2_andfom_gf_cop_density)])
-                b_stage2.append(0.0)
-
-            # Absolute peNDF-Untergrenze nur als physiologischer Schutz (nicht als
-            # Planungsgroesse): verhindert Kollaps bei extrem struktur-armen Rationen,
-            # liegt aber deutlich unter der Lookup-Tabelle (reine Sicherheitsfloor).
-            _PENDF_SAFETY_FLOOR = 120.0
-            pendf_floor_coeffs = [
-                _PENDF_SAFETY_FLOOR - (feed["ndf"] * _feed_pendf_factor(feed))
-                for feed in feeds
-            ]
-            A_stage2.append(_tmr_only(pendf_floor_coeffs))
-            b_stage2.append(0.0)
-
-            pabkh_ceiling = min(pabkh_max, stage1_pabkh_density + 10.0)
-            pabkh_ceil_coeffs = [value - pabkh_ceiling for value in pabkh_per_kg]
-            A_stage2.append(_tmr_only(pabkh_ceil_coeffs))
-            b_stage2.append(0.0)
-
-            xl_ceiling = min(xl_max, stage1_xl_density + 2.0)
-            xl_ceil_coeffs = [value - xl_ceiling for value in xl_per_kg]
-            A_stage2.append(_tmr_only(xl_ceil_coeffs))
-            b_stage2.append(0.0)
-
-            cp_ceiling = min(cp_max, stage1_cp_density + 5.0)
-            cp_ceil_coeffs = [value - cp_ceiling for value in cp_per_kg]
-            A_stage2.append(_tmr_only(cp_ceil_coeffs))
-            b_stage2.append(0.0)
-
-            # Stage-2: empfohlenes Konzentrat-Tagesmax weich (Slack s >= 0):
-            #   sum(conc_mask * x) <= empfohlen + s,  Ziel min Kosten + w*s.
-            # Hartes 1,5x-Sicherheitsnetz bleibt in A_stage2 erhalten.
+            # Stage-2: Konzentrat-Slack-Kosten und Zielfunktion (von Relax-Snapshots unabhaengig).
             policy_relax = str((runtime_options or {}).get("relaxation_policy", "standard"))
             _conc_slack_halfwidth = 1.5
             _conc_relax_f = _RELAXATION_FACTORS.get(policy_relax, 1.0)
@@ -2456,25 +2547,255 @@ def _run_lp(
                     float(prices[i]) + (0.095 if _feed_is_soya(feeds[i]) else 0.0)
                     for i in range(n)
                 ]
-            A_s2 = [list(row) + [0.0] * n_cs for row in A_stage2]
-            b_s2 = list(b_stage2)
-            if conc_slack_needed:
-                A_s2.append(list(conc_mask) + [-1.0])
-                b_s2.append(_conc_max_per_day)
-            c_s2 = list(_prices_stage2) + ([w_conc_slack] if conc_slack_needed else [])
-            bounds_s2 = list(bounds) + ([(0.0, None)] if conc_slack_needed else [])
-
-            try:
-                cost_result = linprog(
-                    c=c_s2,
-                    A_ub=A_s2,
-                    b_ub=b_s2,
-                    bounds=bounds_s2,
-                    method="highs",
-                    options={"disp": False},
+            _feed_c2 = [
+                float(_prices_stage2[i])
+                + (
+                    _STAGE2_WELFARE_WEIGHT_BALANCE_ONLY * float(_welfare_coeffs[i])
+                    if _obj_strat == "balance_only"
+                    else 0.0
                 )
-            except Exception:  # pragma: no cover
+                for i in range(n)
+            ]
+            c_s2 = (
+                _feed_c2
+                + [_WIZARD_BASELINE_L1_WEIGHT] * k_lp_extra
+                + ([w_conc_slack] if conc_slack_needed else [])
+            )
+            ncol_s2 = len(c_s2)
+
+            _try_frac = (
+                _use_milk_stage
+                and herd_milk_kg > 1e-6
+                and not bool((runtime_options or {}).get("stage2_minimize_feed_eur_per_day"))
+            )
+            m_hi_ecm = max(float(z_cap_milk), herd_milk_kg * 4.0, 90.0)
+            m_lo_ecm = max(
+                0.5,
+                (float(milk_floor_cost) * 0.75) if milk_floor_cost else (herd_milk_kg * 0.12),
+            )
+            m_lo_ecm = float(min(m_lo_ecm, m_hi_ecm * 0.48))
+            v_lo_ecm = 1.0 / m_hi_ecm
+            v_hi_ecm = 1.0 / max(m_lo_ecm, 0.15)
+
+            _relax_snaps: Tuple[Tuple[float, float, float, float], ...] = (
+                (
+                    (0.0, 0.0, 0.0, 1.0),
+                    (2.0, 0.0, 0.0, 1.0),
+                    (4.0, 0.0, 0.0, 1.0),
+                    (6.0, 0.0, 0.0, 1.0),
+                    (6.0, 4.0, 0.0, 1.0),
+                    (6.0, 8.0, 0.0, 1.0),
+                    (6.0, 8.0, 1.0, 1.0),
+                    (6.0, 8.0, 2.0, 1.0),
+                    (6.0, 8.0, 2.0, 1.02),
+                    (6.0, 8.0, 2.0, 1.04),
+                )
+                if _try_frac
+                else ((0.0, 0.0, 0.0, 1.0),)
+            )
+
+            cost_result: Any = None
+            _stage2_lp_mode_local = "feed_eur_per_day"
+            A_s2: List[List[float]] = []
+            b_s2: List[float] = []
+            bounds_s2: List[Tuple[Any, Any]] = []
+            last_feasible_bundle: Optional[
+                Tuple[
+                    List[List[float]],
+                    List[float],
+                    List[Tuple[Any, Any]],
+                    List[float],
+                    Tuple[float, float, float, float],
+                ]
+            ] = None
+
+            for snap_idx, (_pe, _cpe, _fs, _fm) in enumerate(_relax_snaps):
                 cost_result = None
+                A_stage2 = list(A_ub_snap)
+                b_stage2 = list(b_ub_snap)
+
+                if milk_floor_cost is not None and milk_floor_cost > 1e-6:
+                    mf_c = float(milk_floor_cost)
+                    A_stage2.append(_feed_row_pad([-float(me_per_kg[i]) for i in range(n)]))
+                    b_stage2.append(-(float(_me_maint_milk) + float(_me_pkm) * mf_c))
+                    A_stage2.append(_feed_row_pad([-float(sidp_per_kg[i]) for i in range(n)]))
+                    b_stage2.append(-(float(_sidp_maint_milk) + float(_sidp_pkm) * mf_c))
+
+                forage_floor = _orig_forage_floor_base - _fs
+                A_stage2.append(_feed_row_pad([
+                    forage_floor - 100.0 if feed.get("forage") else forage_floor
+                    for feed in feeds
+                ]))
+                b_stage2.append(0.0)
+
+                stage2_andfom_gf_min = _andfom_gf_min_target(
+                    staerke_density_kgdm=stage1_starch_density,
+                    pabkh_density_kgdm=stage1_pabkh_density,
+                    pasture_pmr=pasture_pmr,
+                    seasonal_boost=float(_seasonal.get("andfom_gf_min_boost") or 0.0),
+                    sara_boost=float(_sara.get("andfom_gf_min_boost") or 0.0)
+                    + _sara_pendf_floor_boost,
+                )
+                if stage2_andfom_gf_min > andfom_gf_min:
+                    stage2_andfom_gf_cop_density = [
+                        f["ndf"] - stage2_andfom_gf_min if _is_forage_or_cop(f) else -stage2_andfom_gf_min
+                        for f in feeds
+                    ]
+                    A_stage2.append(_feed_row_pad([-v for v in _tmr_only(stage2_andfom_gf_cop_density)]))
+                    b_stage2.append(0.0)
+
+                _PENDF_SAFETY_FLOOR = 120.0
+                pendf_floor_coeffs = [
+                    _PENDF_SAFETY_FLOOR - (feed["ndf"] * _feed_pendf_factor(feed))
+                    for feed in feeds
+                ]
+                A_stage2.append(_feed_row_pad(_tmr_only(pendf_floor_coeffs)))
+                b_stage2.append(0.0)
+
+                pabkh_ceiling = _orig_pabkh_base + _pe
+                pabkh_ceil_coeffs = [value - pabkh_ceiling for value in pabkh_per_kg]
+                A_stage2.append(_feed_row_pad(_tmr_only(pabkh_ceil_coeffs)))
+                b_stage2.append(0.0)
+
+                xl_ceiling = min(xl_max, stage1_xl_density + 2.0)
+                xl_ceil_coeffs = [value - xl_ceiling for value in xl_per_kg]
+                A_stage2.append(_feed_row_pad(_tmr_only(xl_ceil_coeffs)))
+                b_stage2.append(0.0)
+
+                cp_ceiling = _orig_cp_base + _cpe
+                cp_ceil_coeffs = [value - cp_ceiling for value in cp_per_kg]
+                A_stage2.append(_feed_row_pad(_tmr_only(cp_ceil_coeffs)))
+                b_stage2.append(0.0)
+
+                A_s2 = [list(row) + [0.0] * n_cs for row in A_stage2]
+                b_s2 = list(b_stage2)
+                if conc_slack_needed:
+                    A_s2.append(_feed_row_pad(list(conc_mask)) + [-1.0])
+                    b_s2.append(_conc_max_per_day)
+
+                bounds_s2_base: List[Tuple[Any, Any]] = []
+                for _bi in range(len(bounds_snap)):
+                    _lo, _hi = bounds_snap[_bi]
+                    if _bi < n and _hi is not None and not feeds[_bi].get("forage"):
+                        _hi = float(_hi) * _fm
+                    bounds_s2_base.append((_lo, _hi))
+                bounds_s2 = bounds_s2_base + ([(0.0, None)] if conc_slack_needed else [])
+
+                feas_r = _stage2_feasibility_probe(A_s2, b_s2, bounds_s2)
+                if feas_r.status != 0:
+                    if snap_idx == 0 and _try_frac:
+                        stage2_ecm_failure_class_out = (
+                            "infeasible"
+                            if feas_r.status == 2
+                            else "unbounded"
+                            if feas_r.status == 3
+                            else "feasibility_error"
+                        )
+                    continue
+
+                last_feasible_bundle = (A_s2, b_s2, bounds_s2, c_s2, (_pe, _cpe, _fs, _fm))
+
+                frac_ok = False
+                frac_failed_raw: Any = None
+                if _try_frac:
+                    try:
+                        A_fr, b_fr, c_fr, bnd_fr = _charnes_cooper_min_cost_per_milk_transform(
+                            A_s2, b_s2, c_s2, bounds_s2, v_lo=v_lo_ecm, v_hi=v_hi_ecm
+                        )
+                        frac_failed_raw = linprog(
+                            c=c_fr,
+                            A_ub=A_fr,
+                            b_ub=b_fr,
+                            bounds=bnd_fr,
+                            method="highs",
+                            options={"disp": False},
+                        )
+                        x_frac = _recover_x_from_charnes_cooper(frac_failed_raw, ncol_s2)
+                        if x_frac is not None:
+                            class _FracTrim:
+                                pass
+
+                            _fr = _FracTrim()
+                            _fr.status = 0
+                            _fr.x = x_frac
+                            _fr.message = "stage2_frac_min_eur_per_kg_ecm"
+                            cost_result = _fr
+                            _stage2_lp_mode_local = (
+                                "feed_cost_eur_per_kg_ecm_relaxed"
+                                if snap_idx > 0
+                                else "min_eur_per_kg_ecm"
+                            )
+                            frac_ok = True
+                        else:
+                            cost_result = None
+                    except Exception:  # pragma: no cover
+                        frac_failed_raw = None
+                        cost_result = None
+
+                    if snap_idx == 0 and not frac_ok:
+                        stage2_ecm_failure_class_out = _classify_stage2_frac_failure(
+                            frac_failed_raw, m_lo_ecm, m_hi_ecm
+                        )
+
+                    if frac_ok:
+                        if snap_idx > 0:
+                            if stage2_ecm_failure_class_out == "infeasible":
+                                stage2_ecm_failure_class_out = "recovered_via_relaxation"
+                            stage2_relaxation_summary_out = _summarize_stage2_relaxations(
+                                _orig_pabkh_base,
+                                _orig_cp_base,
+                                _orig_forage_floor_base,
+                                _pe,
+                                _cpe,
+                                _fs,
+                                _fm,
+                            )
+                        break
+
+                if not _try_frac:
+                    try:
+                        cost_result = linprog(
+                            c=c_s2,
+                            A_ub=A_s2,
+                            b_ub=b_s2,
+                            bounds=bounds_s2,
+                            method="highs",
+                            options={"disp": False},
+                        )
+                    except Exception:  # pragma: no cover
+                        cost_result = None
+                    _stage2_lp_mode_local = "feed_eur_per_day"
+                    break
+            else:
+                if _try_frac and last_feasible_bundle is not None:
+                    _A2, _b2, _bd2, _c2, (_lpe, _lcpe, _lfs, _lfm) = last_feasible_bundle
+                    A_s2, b_s2, bounds_s2, c_s2 = _A2, _b2, _bd2, _c2
+                    try:
+                        cost_result = linprog(
+                            c=c_s2,
+                            A_ub=A_s2,
+                            b_ub=b_s2,
+                            bounds=bounds_s2,
+                            method="highs",
+                            options={"disp": False},
+                        )
+                    except Exception:  # pragma: no cover
+                        cost_result = None
+                    if cost_result is not None and cost_result.status == 0:
+                        stage2_fallback_used_out = True
+                        _stage2_lp_mode_local = "feed_eur_per_day_fallback"
+                        if stage2_ecm_failure_class_out == "infeasible":
+                            stage2_ecm_failure_class_out = "recovered_via_relaxation"
+                        if (_lpe + _lcpe + _lfs > 1e-12) or (_lfm > 1.0 + 1e-9):
+                            stage2_relaxation_summary_out = _summarize_stage2_relaxations(
+                                _orig_pabkh_base,
+                                _orig_cp_base,
+                                _orig_forage_floor_base,
+                                _lpe,
+                                _lcpe,
+                                _lfs,
+                                _lfm,
+                            )
 
             if cost_result is not None and cost_result.status == 0:
                 class _Stage2Trim:
@@ -2486,10 +2807,11 @@ def _run_lp(
                 _s2r.message = getattr(cost_result, "message", "")
                 result = _s2r
                 if conc_slack_needed:
-                    c_sl = max(0.0, float(cost_result.x[n]))
+                    c_sl = max(0.0, float(cost_result.x[n + k_lp_extra]))
                     if c_sl > 1e-6:
                         conc_max_lp_slack_kg_out = round(c_sl, 4)
                         conc_max_lp_slack_penalty_out = round(w_conc_slack * c_sl, 4)
+                stage2_lp_mode_out = _stage2_lp_mode_local
 
             # DLG-01|2025-Slack-Erweiterung (nur wenn Policy-Profil Targets liefert).
             # Ziel: Policy-Baender werden nicht nur post-solve bewertet, sondern
@@ -2512,27 +2834,61 @@ def _run_lp(
                     for prow in ext["rows"]:
                         feed_part = prow[:n]
                         pol_part = prow[n:]
-                        A_ext.append(list(feed_part) + [0.0] * n_cs + list(pol_part))
+                        A_ext.append(
+                            list(feed_part)
+                            + [0.0] * k_lp_extra
+                            + [0.0] * n_cs
+                            + list(pol_part)
+                        )
                     b_ext = list(b_s2) + list(ext["rhs"])
                     c_ext = list(c_s2) + list(ext["slack_costs"])
                     bounds_ext = list(bounds_s2) + list(ext["slack_bounds"])
-                    try:
-                        ext_result = linprog(
-                            c=c_ext,
-                            A_ub=A_ext,
-                            b_ub=b_ext,
-                            bounds=bounds_ext,
-                            method="highs",
-                            options={"disp": False},
-                        )
-                    except Exception:  # pragma: no cover - Solver-Fehler fallback
-                        ext_result = None
+                    ncol_ext = len(c_ext)
+                    ext_result: Any = None
+                    if _try_frac:
+                        try:
+                            A_efr, b_efr, c_efr, bnd_efr = _charnes_cooper_min_cost_per_milk_transform(
+                                A_ext, b_ext, c_ext, bounds_ext, v_lo=v_lo_ecm, v_hi=v_hi_ecm
+                            )
+                            ext_result = linprog(
+                                c=c_efr,
+                                A_ub=A_efr,
+                                b_ub=b_efr,
+                                bounds=bnd_efr,
+                                method="highs",
+                                options={"disp": False},
+                            )
+                            x_ef = _recover_x_from_charnes_cooper(ext_result, ncol_ext)
+                            if x_ef is not None:
+                                class _PolFrac:
+                                    pass
+                                _pf = _PolFrac()
+                                _pf.status = 0
+                                _pf.x = x_ef
+                                _pf.message = "stage2_policy_frac_min_eur_per_kg_ecm"
+                                ext_result = _pf
+                            else:
+                                ext_result = None
+                        except Exception:  # pragma: no cover
+                            ext_result = None
+                    if ext_result is None:
+                        try:
+                            ext_result = linprog(
+                                c=c_ext,
+                                A_ub=A_ext,
+                                b_ub=b_ext,
+                                bounds=bounds_ext,
+                                method="highs",
+                                options={"disp": False},
+                            )
+                        except Exception:  # pragma: no cover - Solver-Fehler fallback
+                            ext_result = None
                     if ext_result is not None and ext_result.status == 0:
                         slack_values = [float(v) for v in ext_result.x[-n_pol:]]
                         policy_lp_slacks: List[Dict[str, Any]] = []
                         total_slack_penalty = 0.0
                         if n_cs > 0:
-                            c_sl = max(0.0, float(ext_result.x[n]))
+                            c_sl = max(0.0, float(ext_result.x[n + k_lp_extra]))
                             c_pen = w_conc_slack * c_sl
                             total_slack_penalty += c_pen
                             if c_sl > 1e-6:
@@ -2576,6 +2932,11 @@ def _run_lp(
                         _r.status = 0
                         _r.message = "stage2_policy_slack"
                         result = _r
+                        stage2_lp_mode_out = (
+                            "min_eur_per_kg_ecm_policy"
+                            if getattr(ext_result, "message", "") == "stage2_policy_frac_min_eur_per_kg_ecm"
+                            else "feed_eur_per_day_policy"
+                        )
                         return {
                             "scipy_result": result,
                             "feeds": feeds,
@@ -2588,6 +2949,10 @@ def _run_lp(
                             "_block_labels": list(block_labels),
                             "_concentrate_max_lp_slack_kg": conc_max_lp_slack_kg_out,
                             "_concentrate_max_lp_slack_penalty": conc_max_lp_slack_penalty_out,
+                            "_stage2_lp_mode": stage2_lp_mode_out,
+                            "_stage2_relaxation_summary": stage2_relaxation_summary_out,
+                            "_stage2_fallback_used": stage2_fallback_used_out,
+                            "_stage2_ecm_failure_class": stage2_ecm_failure_class_out,
                         }
 
     return {
@@ -2599,6 +2964,10 @@ def _run_lp(
         "_block_labels": list(block_labels),
         "_concentrate_max_lp_slack_kg": conc_max_lp_slack_kg_out,
         "_concentrate_max_lp_slack_penalty": conc_max_lp_slack_penalty_out,
+        "_stage2_lp_mode": stage2_lp_mode_out,
+        "_stage2_relaxation_summary": stage2_relaxation_summary_out,
+        "_stage2_fallback_used": stage2_fallback_used_out,
+        "_stage2_ecm_failure_class": stage2_ecm_failure_class_out,
     }
 
 
@@ -2609,6 +2978,121 @@ def _suggestions_already_cover_hay_straw(suggestions: List[Dict[str, Any]]) -> b
         if any(k in blob for k in ("stroh", "heu", "raufutter", "grasheu")):
             return True
     return False
+
+
+_MAX_OPTIMAL_FEED_SUGGESTIONS = 3
+
+
+def _build_optimal_feed_suggestions(
+    req: _CowReq,
+    feeds: List[Dict[str, Any]],
+    *,
+    warnings: List[str],
+    stage2_relaxation_summary: Optional[List[Dict[str, Any]]] = None,
+) -> List[Dict[str, Any]]:
+    """Bis zu drei konkrete Futtermittel-Richtungen zur Korb-Erweiterung bei optimaler Loesung.
+
+    Nutzt dieselbe Kapazitaetslogik wie die Infeasibility-Diagnose sowie Warnungen /
+    dokumentierte Relaxationen zu Struktur und fermentierbaren KH.
+    """
+    out: List[Dict[str, Any]] = []
+
+    def push(item: Dict[str, Any]) -> None:
+        if len(out) >= _MAX_OPTIMAL_FEED_SUGGESTIONS:
+            return
+        blob_new = f"{item.get('feed', '')} {item.get('action', '')}".lower()
+        for x in out:
+            blob_x = f"{x.get('feed', '')} {x.get('action', '')}".lower()
+            if blob_new.strip() == blob_x.strip():
+                return
+        out.append(item)
+
+    max_me = sum(f["me"] * f["max_kg"] for f in feeds)
+    max_sidp = sum(f["sidp"] * f["max_kg"] for f in feeds)
+    max_ndf = sum(f["ndf"] * f["max_kg"] for f in feeds)
+
+    if max_ndf + 1e-6 < req.ndf_min_g:
+        if not _suggestions_already_cover_hay_straw(out):
+            push({
+                "feed": "Wiesenheu / Raufutter",
+                "dlg_id": "10150030",
+                "ndf": "Heu typ. 450–650 g/kg TM (DLG-Tabellen)",
+                "action": (
+                    "Futtermittelliste um strukturreiches Grobfutter erweitern oder Max-FM bei Heu "
+                    "erhoehen; orientierungsweise 0,5–3 kg TM/d. Energie-/Proteinbilanz mitpruefen."
+                ),
+                "rationale": "portfolio_ndf_capacity_below_req",
+            })
+        if len(out) < _MAX_OPTIMAL_FEED_SUGGESTIONS:
+            if not any("stroh" in str(x.get("feed", "")).lower() for x in out):
+                push({
+                    "feed": "Weizen- oder Gerstenstroh",
+                    "dlg_id": "10610000",
+                    "ndf": "Stroh oft >750 g/kg TM aNDFom-aequivalent",
+                    "action": (
+                        "Struktur und peNDF-Puffer; langsam einarbeiten (verduennt ME/Protein – "
+                        "Gesamtration neu bewerten)."
+                    ),
+                    "rationale": "portfolio_ndf_capacity_straw_option",
+                })
+
+    warn_blob = " ".join(warnings).lower()
+    fiber_hit = any(
+        k in warn_blob
+        for k in (
+            "strukturindex",
+            "andfomgf",
+            "struktur-faser",
+            "rohfaser",
+            "pendf",
+            "langfaser",
+            "grundfutteranteil",
+        )
+    )
+    rel_fiber = False
+    for row in stage2_relaxation_summary or []:
+        ck = str(row.get("constraint") or "").lower()
+        if "forage" in ck or "pabkh" in ck:
+            rel_fiber = True
+            break
+
+    if (fiber_hit or rel_fiber) and not _suggestions_already_cover_hay_straw(out):
+        push({
+            "feed": "Heu (gute OMD) oder kompatibles Stroh",
+            "dlg_id": "10150030 / 10610000",
+            "action": (
+                "Warnungen oder dokumentierte Relaxationen deuten auf strukturelle bzw. "
+                "KH-Grenzkonflikte: langfaseriges Grobfutter erhoehen oder Staerkeanteile im Korb "
+                "mischen, erneut optimieren."
+            ),
+            "rationale": "warnings_or_relaxation_structure_signal",
+        })
+
+    if len(out) >= _MAX_OPTIMAL_FEED_SUGGESTIONS:
+        return out
+
+    if max_me + 1e-6 < req.me_mj:
+        push({
+            "feed": "Koernermais oder Gerste",
+            "dlg_id": "88 / 82",
+            "me": "13.3 / 13.4 MJ/kg TM",
+            "action": "Energiekonzentrat in die Auswahl aufnehmen oder Max-FM erhoehen (TMR-Band beachten).",
+            "rationale": "portfolio_me_capacity_below_req",
+        })
+
+    if len(out) >= _MAX_OPTIMAL_FEED_SUGGESTIONS:
+        return out
+
+    if max_sidp + 1e-6 < req.sidp_g:
+        push({
+            "feed": "Rapsextraktionsschrot oder Sojaextraktionsschrot",
+            "dlg_id": "97 / 105",
+            "sidp": "190 / 250 g/kg TM",
+            "action": "sidP-tragendes Kraftfutter ergaenzen oder Obergrenzen pruefen.",
+            "rationale": "portfolio_sidp_capacity_below_req",
+        })
+
+    return out
 
 
 def _diagnose_infeasibility(
@@ -2945,6 +3429,167 @@ def _milk_from_supply(
         "milk_from_protein_kg": round(milk_from_protein, 1),
         "limiting_milk_kg": round(min(milk_from_energy, milk_from_protein), 1),
     }
+
+
+def _ecm_kg_per_kg_milk_factor(profile: Dict[str, Any]) -> float:
+    """kg ECM je kg Milch bei festem Fett-/Proteingehalt der Milch [%].
+
+    Gaengige Linearisierung (NRC-Ansatz):
+      ECM [kg/d] = 0.327*M + 12.95*Fett_kg/d + 7.2*Protein_kg/d
+    mit Fett_kg/d = M * fat%/100, Protein analog.
+    """
+    fat = float(profile.get("milk_fat_pct") or 4.0)
+    prot = float(profile.get("milk_protein_pct") or 3.4)
+    return 0.327 + 0.1295 * fat + 0.072 * prot
+
+
+def _charnes_cooper_min_cost_per_milk_transform(
+    A_ub: List[List[float]],
+    b_ub: List[float],
+    c_obj: List[float],
+    bounds_x: List[Tuple[Any, Any]],
+    *,
+    v_lo: float,
+    v_hi: float,
+) -> Tuple[List[List[float]], List[float], List[float], List[Tuple[Any, Any]]]:
+    """Charnes–Cooper: min c^T x / m mit x = y/v, Nebenbedingungen A x <= b => A y - b v <= 0.
+
+    Bei konstantem ECM je kg Milch (Fett/Protein-% aus Profil) minimiert dasselbe
+    LP die Futterkosten je kg ECM wie je kg physische Milch.
+    """
+    ncol = len(c_obj)
+    if len(bounds_x) != ncol:
+        raise ValueError("bounds_x und c_obj Laenge stimmen nicht ueberein")
+    if not all(len(row) == ncol for row in A_ub):
+        raise ValueError("A_ub-Zeilenbreite passt nicht zu c_obj")
+    A_out: List[List[float]] = []
+    b_out: List[float] = []
+    for row, rhs in zip(A_ub, b_ub):
+        A_out.append(list(row) + [-float(rhs)])
+        b_out.append(0.0)
+    for i in range(ncol):
+        lb, ub = bounds_x[i]
+        lb_eff = 0.0 if lb is None else float(lb)
+        if lb_eff > 1e-12:
+            zrow = [0.0] * (ncol + 1)
+            zrow[i] = -1.0
+            zrow[-1] = lb_eff
+            A_out.append(zrow)
+            b_out.append(0.0)
+        else:
+            zrow = [0.0] * (ncol + 1)
+            zrow[i] = -1.0
+            A_out.append(zrow)
+            b_out.append(0.0)
+        if ub is not None:
+            ub_f = float(ub)
+            z2 = [0.0] * (ncol + 1)
+            z2[i] = 1.0
+            z2[-1] = -ub_f
+            A_out.append(z2)
+            b_out.append(0.0)
+    c_frac = list(c_obj) + [0.0]
+    bounds_frac: List[Tuple[Any, Any]] = [(None, None)] * ncol + [(float(v_lo), float(v_hi))]
+    return A_out, b_out, c_frac, bounds_frac
+
+
+def _recover_x_from_charnes_cooper(res: Any, ncol: int) -> Optional[List[float]]:
+    """Mappt Optimum (y, v) zurueck auf x = y/v."""
+    if res is None or getattr(res, "status", None) not in (0, 1) or res.x is None:
+        return None
+    v_sol = float(res.x[ncol])
+    if v_sol <= 1e-14:
+        return None
+    return [float(res.x[i]) / v_sol for i in range(ncol)]
+
+
+def _stage2_feasibility_probe(
+    A_ub: List[List[float]],
+    b_ub: List[float],
+    bounds: List[Tuple[Any, Any]],
+) -> Any:
+    """Trivial-Zielfunktion: prueft Zulaessigkeit von A_ub x <= b_ub unter bounds."""
+    from scipy.optimize import linprog  # type: ignore[import]
+
+    ncol = len(bounds)
+    c_triv = [1e-9] * ncol
+    try:
+        return linprog(
+            c=c_triv,
+            A_ub=A_ub,
+            b_ub=b_ub,
+            bounds=bounds,
+            method="highs",
+            options={"disp": False},
+        )
+    except Exception:
+        class _Bad:
+            status = 4
+            message = "feasibility_probe_exception"
+
+        return _Bad()
+
+
+def _classify_stage2_frac_failure(frac_res: Any, m_lo_ecm: float, m_hi_ecm: float) -> str:
+    """Klassifikation wenn fraktionales ECM-LP nach Zulaessigkeit dennoch scheitert."""
+    st = getattr(frac_res, "status", None)
+    if st == 3:
+        return "unbounded"
+    if m_hi_ecm <= max(m_lo_ecm * 1.001, 1e-6) or m_lo_ecm < 0.05:
+        return "zero_or_near_zero_ecm_denominator"
+    return "numerical_fractional"
+
+
+def _summarize_stage2_relaxations(
+    orig_pabkh: float,
+    orig_cp: float,
+    orig_forage_floor: float,
+    pe: float,
+    cpe: float,
+    fs: float,
+    fm: float,
+) -> List[Dict[str, Any]]:
+    """Menschenlesbare Liste dokumentierter Stage-2-Relaxationen fuer API/UI."""
+    out: List[Dict[str, Any]] = []
+    if pe > 1e-9:
+        out.append({
+            "constraint": "pabkh_density_ceiling_g_kg_tm",
+            "original": round(orig_pabkh, 2),
+            "relaxed_to": round(orig_pabkh + pe, 2),
+            "unit": "g/kg TM",
+            "reason": (
+                "begrenzte Aufweitung fermentierbarer KH (Komfortband) fuer ECM-Zielgang "
+                "oder Charnes-Cooper-Stabilitaet"
+            ),
+        })
+    if cpe > 1e-9:
+        out.append({
+            "constraint": "cp_density_ceiling_g_kg_tm",
+            "original": round(orig_cp, 2),
+            "relaxed_to": round(orig_cp + cpe, 2),
+            "unit": "g/kg TM",
+            "reason": (
+                "moderate Aufweitung der CP-Obergrenze (Komfortband); ME-/sidP-Untergrenzen "
+                "unveraendert"
+            ),
+        })
+    if fs > 1e-9:
+        out.append({
+            "constraint": "stage2_forage_share_floor",
+            "original": round(orig_forage_floor, 2),
+            "relaxed_to": round(orig_forage_floor - fs, 2),
+            "unit": "% TM (Modellgroesse Grundfutteranteil)",
+            "reason": "leichte Absenkung der GF-Untergrenze nur nach weniger kritischen Schritten",
+        })
+    if fm > 1.0 + 1e-9:
+        out.append({
+            "constraint": "feed_max_kg_dm_non_forage",
+            "original": 1.0,
+            "relaxed_to": round(fm, 4),
+            "unit": "Faktor auf max_kg TM",
+            "reason": "kleiner Spielraum bei Kraftfutter-Obergrenzen (Profil-Feed-Caps)",
+        })
+    return out
 
 
 # Abgleich UI „Milch aus Protein“ vs. „Milch aus Energie“ (kg Milch ~ l).
@@ -3604,6 +4249,7 @@ def _build_response(
     result = lp_out["scipy_result"]
     feeds = lp_out["feeds"]
     runtime_options = lp_out.get("_runtime_options") or _resolve_runtime_options(profile)
+    _stage2_rx: List[Dict[str, Any]] = list(lp_out.get("_stage2_relaxation_summary") or [])
     fan_opts = runtime_options.get("fan", {})
     fan_mode = fan_opts.get("mode", _FAN_DEFAULT_MODE)
     fan_reference = fan_opts.get("reference")
@@ -4113,6 +4759,22 @@ def _build_response(
 
     # --- Warnungen und Erklärungen ---
     warnings: List[str] = []
+    if _stage2_rx:
+        warnings.append(
+            "Die EUR/kg-ECM-Optimierung war zunaechst nicht mit dem Ausgangs-Nebenbedingungssatz "
+            "loesbar. Es wurden kleine, dokumentierte Relaxationen an fachlich weniger kritischen "
+            "Grenzen geprueft bzw. angewendet (siehe relaxation_summary). Bitte Relaxationen "
+            "fachlich kontrollieren, bevor die Ration uebernommen wird."
+        )
+    if lp_out.get("_stage2_lp_mode") == "feed_eur_per_day_fallback":
+        warnings.append(
+            "Stage 2: Das Ziel EUR/kg ECM war fuer das fraktionale LP nicht erreichbar "
+            "(keine gueltige Loesung oder Recovery fehlgeschlagen); es wurde auf "
+            "Minimierung EUR/Tag zurueckgeschaltet. Die harten Nebenbedingungen "
+            "(ME, sidP, Mindest-TM usw.) sind dieselben wie bei ECM; bei positivem "
+            "Bedarf ist 'nichts fuettern' weiterhin ausgeschlossen. Bei wiederholbarem "
+            "Fallback Futtermittelkorb oder Relaxation pruefen."
+        )
     if si is not None and si < 50:
         warnings.append(
             f"Strukturindex {si:.1f} < 50 – Pansen-pH < 6,15 wahrscheinlich. "
@@ -4491,12 +5153,24 @@ def _build_response(
         milk_p_excess_forage=_ex_pf,
         milk_p_excess_total=_ex_sup,
     )
+    feed_suggestions_opt = _build_optimal_feed_suggestions(
+        req,
+        feeds,
+        warnings=warnings,
+        stage2_relaxation_summary=_stage2_rx,
+    )
+
+    _lim_mk = float(supplemented_milk.get("limiting_milk_kg") or 0.0)
+    _ecm_day_kg = _lim_mk * _ecm_kg_per_kg_milk_factor(profile) if _lim_mk > 1e-9 else 0.0
+    feed_cost_eur_per_kg_ecm = round(total_cost / max(_ecm_day_kg, 1e-9), 5)
 
     return {
         "status": "optimal",
         "objective_value": round(_f(result.fun), 4),
         "total_cost_eur_day": round(total_cost, 4),
         "total_cost_eur_100kg_milk": round(total_cost / (float(profile.get("milk_kg_day") or 1)) * 100, 2),
+        "feed_cost_eur_per_kg_ecm": feed_cost_eur_per_kg_ecm,
+        "ecm_supply_kg_day": round(_ecm_day_kg, 4),
         "ration_items": ration_items,
         # Slice 1f: Block-Aggregate je Fuetterungssystem (leer/0 bei reinem TMR).
         "ration_blocks": ration_blocks,
@@ -4527,7 +5201,7 @@ def _build_response(
         "pasture_risk": pasture_risk_payload,
         "sara_safety_reopt": lp_out.get("_sara_reopt") or {"triggered": False},
         "warnings": warnings,
-        "feed_suggestions": [],
+        "feed_suggestions": feed_suggestions_opt,
         "ration_adjustment_suggestions": ration_adjustment_suggestions,
         "fan_calibration": fan_calibration,
         "active_policy_profile": policy_profile,
@@ -4544,6 +5218,11 @@ def _build_response(
         "policy_overrides": policy_overrides,
         "relaxation_policy": relaxation_policy,
         "objective_strategy": objective_strategy,
+        "solver_stage2_lp_mode": lp_out.get("_stage2_lp_mode"),
+        "relaxation_applied": bool(_stage2_rx),
+        "relaxation_summary": list(_stage2_rx),
+        "fallback_used": bool(lp_out.get("_stage2_fallback_used")),
+        "stage2_ecm_failure_class": lp_out.get("_stage2_ecm_failure_class"),
         "season_profile": season_profile,
         "metadata": {
             "solver": "scipy-highs-internal",
@@ -4561,6 +5240,11 @@ def _build_response(
             ),
             "wizard_soft_goals_lp": _wizard_soft_lp_meta,
             "objective_strategy": objective_strategy,
+            "solver_stage2_lp_mode": lp_out.get("_stage2_lp_mode"),
+            "relaxation_applied": bool(_stage2_rx),
+            "relaxation_summary": list(_stage2_rx),
+            "fallback_used": bool(lp_out.get("_stage2_fallback_used")),
+            "stage2_ecm_failure_class": lp_out.get("_stage2_ecm_failure_class"),
             "pasture_pmr_mode": pasture_pmr,
             "energy_system": "ME-FAN1-GfE2023",
             "protein_system": "sidP-GfE2023",
@@ -4939,6 +5623,9 @@ def _resolve_runtime_options(
     policy_overrides: Optional[Dict[str, Any]] = None,
     feeding_system_config: Optional[Any] = None,
     feed_block_overrides: Optional[List[Any]] = None,
+    disable_milk_tradeoff_between_stages: Optional[bool] = None,
+    milk_tradeoff_max_pct_per_stage: Optional[float] = None,
+    stage2_minimize_feed_eur_per_day: Optional[bool] = None,
 ) -> Dict[str, Any]:
     """Vereinheitlicht FAN-/Policy-/Relaxation-Optionen und setzt V1-Defaults.
 
@@ -4988,6 +5675,28 @@ def _resolve_runtime_options(
 
     overrides = dict(policy_overrides or {})
 
+    _s2eur = stage2_minimize_feed_eur_per_day
+    if _s2eur is None:
+        _s2eur = profile.get("stage2_minimize_feed_eur_per_day")
+    stage2_min_feed_eur_day_bool = bool(_s2eur)
+
+    _dmilk_disable = disable_milk_tradeoff_between_stages
+    if _dmilk_disable is None:
+        _dmilk_disable = profile.get("disable_milk_tradeoff_between_stages")
+    disable_milk_tradeoff_bool = bool(_dmilk_disable)
+
+    _mtp_override = milk_tradeoff_max_pct_per_stage
+    if _mtp_override is None:
+        _mtp_override = profile.get("milk_tradeoff_max_pct_per_stage")
+    _mtp_clean: Optional[float]
+    if _mtp_override is None:
+        _mtp_clean = None
+    else:
+        try:
+            _mtp_clean = float(_mtp_override)
+        except (TypeError, ValueError):
+            _mtp_clean = None
+
     # Slice 1h: FeedingSystemConfig + Block-Overrides normalisieren.
     # Eingabe kann FeedingSystemConfig-Instanz, dict oder None sein.
     # Wir normieren ueber _resolve_feeding_system_config(), damit die
@@ -5017,6 +5726,9 @@ def _resolve_runtime_options(
         # Slice 1h: Fuetterungssystem + Block-Overrides
         "feeding_system_config": fs_cfg,
         "feed_block_overrides": block_overrides_norm,
+        "disable_milk_tradeoff_between_stages": disable_milk_tradeoff_bool,
+        "milk_tradeoff_max_pct_per_stage": _mtp_clean,
+        "stage2_minimize_feed_eur_per_day": stage2_min_feed_eur_day_bool,
     }
 
 
@@ -5301,7 +6013,8 @@ def _detect_sara_risk(lp_out: Dict[str, Any], profile: Dict[str, Any]) -> Dict[s
     if result is None or result.status != 0 or not feeds_res:
         return {"triggered": False, "reason": None, "metrics": {}}
 
-    amounts = [_f(v) for v in result.x]
+    n_lp_feeds = len(feeds_res)
+    amounts = [_f(v) for v in result.x[:n_lp_feeds]]
     total_dmi = sum(amounts)
     if total_dmi <= 0:
         return {"triggered": False, "reason": None, "metrics": {}}
@@ -5544,8 +6257,10 @@ def _demo_profile() -> Dict[str, Any]:
 # Refactor 2026-04-23: ausgelagert nach app.agrar.rations.constants
 from app.agrar.rations.constants.gfe2023 import FAN_MODES as _FAN_MODES
 from app.agrar.rations.constants.solver_defaults import (
-    RELAXATION_POLICIES as _RELAXATION_POLICIES,
+    MILK_TARGET_HEADROOM_FRAC as _MILK_TARGET_HEADROOM_FRAC,
+    MILK_TRADEOFF_MAX_PCT_PER_STAGE_DEFAULT as _MILK_TRADEOFF_MAX_PCT_PER_STAGE_DEFAULT,
     OBJECTIVE_STRATEGIES as _OBJECTIVE_STRATEGIES,
+    RELAXATION_POLICIES as _RELAXATION_POLICIES,
 )
 _SEASON_PROFILES = (
     "spring_young",
@@ -6138,6 +6853,7 @@ from app.agrar.rations.constants.solver_defaults import (
     RELAXATION_FACTORS as _RELAXATION_FACTORS,
     PENALTY_BASE_COST as _PENALTY_BASE_COST,
     PENALTY_CLASS_WEIGHTS as _PENALTY_CLASS_WEIGHTS,
+    STAGE2_WELFARE_WEIGHT_BALANCE_ONLY as _STAGE2_WELFARE_WEIGHT_BALANCE_ONLY,
 )
 
 
@@ -6220,6 +6936,11 @@ class _OptimizeFromProfileBody(BaseModel):
     season_profile: Optional[str] = None               # spring_young | ...; steuert Policy-Profil (§6)
     policy_profile: Optional[str] = None               # Explicit Override; sonst aus feeding_type+season abgeleitet
     policy_overrides: Optional[Dict[str, Any]] = None  # Expertenmodus: Block-Limit-Overrides
+
+    # Lexikografische Milch-Pipeline: Zwischen-Stufen-Einbusse begrenzen oder abschalten.
+    disable_milk_tradeoff_between_stages: Optional[bool] = None
+    milk_tradeoff_max_pct_per_stage: Optional[float] = None   # Prozentpunkte je Stufenwechsel (Default Backend)
+    stage2_minimize_feed_eur_per_day: Optional[bool] = None   # True: Stage 2 klassisch EUR/d statt EUR/kg ECM
 
     # Slice 1h (2026-04-23): Fuetterungssystem-Architektur
     # - feeding_system_config: TMR / PMR_stall / PMR_pasture + Verteilungssystem
@@ -6414,6 +7135,9 @@ async def optimize_from_profile(
                 policy_overrides=body.policy_overrides,
                 feeding_system_config=body.feeding_system_config,
                 feed_block_overrides=body.feed_block_overrides,
+                disable_milk_tradeoff_between_stages=body.disable_milk_tradeoff_between_stages,
+                milk_tradeoff_max_pct_per_stage=body.milk_tradeoff_max_pct_per_stage,
+                stage2_minimize_feed_eur_per_day=body.stage2_minimize_feed_eur_per_day,
             )
             result = _optimize_internal(
                 body.cow_profile,

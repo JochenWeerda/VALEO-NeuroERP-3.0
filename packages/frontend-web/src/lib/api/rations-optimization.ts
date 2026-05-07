@@ -222,6 +222,18 @@ export interface RationItem {
   block?: 'tmr_block' | 'pasture_block' | 'concentrate_staged_block' | string
 }
 
+/** Referenzration kg TM/d je feed_id (Wizard: Abstand zur Ist-Ration minimieren). */
+export function rationItemsToBaselineKgDm(items: RationItem[]): Record<string, number> {
+  const out: Record<string, number> = {}
+  for (const it of items) {
+    const id = String(it.feed_id ?? '').trim()
+    if (!id) continue
+    const kg = Number(it.kgdm)
+    if (Number.isFinite(kg) && kg > 1e-8) out[id] = kg
+  }
+  return out
+}
+
 export interface NutrientSupply {
   dmi_kg: number
   me_mj: number
@@ -564,6 +576,15 @@ export type OptimizationStrategyPipeline =
   | 'stage1_balance_then_stage2_cost_plus_concentrate_slack'
   | null
 
+/** Dokumentierte Stage-2-LP-Relaxation bei ECM-Zielgang (Backend snake_case als JSON). */
+export interface Stage2RelaxationSummaryEntry {
+  constraint: string
+  original: number | string
+  relaxed_to: number | string
+  unit: string
+  reason: string
+}
+
 /** Aktive Wizard-weiche Ziele mit dokumentierter LP-/Objective-Wirkung (Echo aus Backend). */
 export interface WizardSoftGoalsLpMeta {
   minimize_soya?: boolean
@@ -578,11 +599,27 @@ export type RationsOptimizationMetadata = {
   wizard_soft_goals_lp?: WizardSoftGoalsLpMeta | null
 } & Record<string, unknown>
 
+/** Konkrete Korb-Erweiterung (Backend: feed_suggestions bei optimal/infeasible). */
+export interface RationFeedSuggestion {
+  feed: string
+  dlg_id?: string
+  action: string
+  rationale?: string
+  ndf?: string
+  me?: string
+  sidp?: string
+  cp?: string
+}
+
 export interface OptimizationResult {
   status: 'optimal' | 'infeasible' | 'unbounded' | 'error'
   objective_value?: number
   total_cost_eur_day?: number
   total_cost_eur_100kg_milk?: number
+  /** Feedkosten je kg ECM (Milch-Fett/-Protein-% aus Profil; ECM linearisiert NRC-artig). */
+  feed_cost_eur_per_kg_ecm?: number
+  /** Geschaetzte ECM-Leistung [kg/d] aus limitierender Milch der Modellbilanz. */
+  ecm_supply_kg_day?: number
   ration_items: RationItem[]
   nutrient_supply: NutrientSupply
   constraint_report: ConstraintReportItem[]
@@ -590,6 +627,8 @@ export interface OptimizationResult {
   penalty_summary?: PenaltySummary
   dlg_indicators?: DlgIndicators
   warnings: string[]
+  /** Bis zu wenige konkrete Futtermittel-Richtungen (z. B. Heu/Stroh bei Faserluecke). */
+  feed_suggestions?: RationFeedSuggestion[]
   /** Vorschläge zur Rationsanpassung inkl. optional anwendbarem Patch. */
   ration_adjustment_suggestions?: RationAdjustmentSuggestion[]
   metadata?: RationsOptimizationMetadata
@@ -633,6 +672,15 @@ export interface OptimizationResult {
   policy_overrides?: Record<string, unknown>
   relaxation_policy?: RelaxationPolicy
   objective_strategy?: ObjectiveStrategy
+  /** Backend: Stage-2-LP-Ziel (ECM-Effizienz vs. Fallback EUR/Tag). */
+  solver_stage2_lp_mode?: string | null
+  /** True wenn dokumentierte Relaxationen fuer den ECM-Gang angewendet wurden. */
+  relaxation_applied?: boolean
+  relaxation_summary?: Stage2RelaxationSummaryEntry[]
+  /** True wenn nach Relaxationsversuchen auf EUR/Tag-Fallback geschaltet wurde. */
+  fallback_used?: boolean
+  /** Diagnose wenn fraktionales ECM-LP zunaechst scheitert (Backend). */
+  stage2_ecm_failure_class?: string | null
   season_profile?: SeasonProfile | null
   diagnosis?: OptimizationDiagnosis | null
   // Slice 1f: Block-Aggregate je Fuetterungssystem.
@@ -736,6 +784,12 @@ export interface OptimizeFromProfileExtras {
   season_profile?: SeasonProfile
   policy_profile?: PolicyProfile
   policy_overrides?: Record<string, unknown>
+  /** Milch-Pipeline: keine min. Milch zwischen Solver-Stufen erzwingen */
+  disable_milk_tradeoff_between_stages?: boolean
+  /** Max. erlaubte Milch-Einbusse je Stufenwechsel [%]; Default Backend */
+  milk_tradeoff_max_pct_per_stage?: number
+  /** Stage 2: klassisch Feed-EUR/Tag statt EUR/kg ECM minimieren */
+  stage2_minimize_feed_eur_per_day?: boolean
   /** Slice 1h: explizites Fuetterungssystem (snake_case wie FastAPI-Body). */
   feeding_system_config?: FeedingSystemConfig
   feed_block_overrides?: FeedBlockAssignment[]

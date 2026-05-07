@@ -89,3 +89,22 @@ def test_optimize_metadata_lists_active_wizard_soft_flags():
     wlp = meta.get("wizard_soft_goals_lp") or {}
     assert wlp.get("minimize_soya") is True
     assert "prefer_homegrown" not in wlp
+
+
+def test_wizard_baseline_l1_optimal_and_metadata_flag():
+    profile = _profile_tmr()
+    opts = _resolve_runtime_options(
+        profile,
+        policy_overrides={
+            "wizard_soft_goals": {"minimize_deviation_from_baseline": True},
+            "wizard_baseline_kg_dm": {
+                "dlg_10100020": 3.5,
+                "dlg_30880030": 0.88,
+            },
+        },
+    )
+    result = _optimize_internal(profile, runtime_options=opts)
+    assert result.get("status") == "optimal"
+    meta = result.get("metadata") or {}
+    wlp = meta.get("wizard_soft_goals_lp") or {}
+    assert wlp.get("minimize_deviation_from_baseline") is True
