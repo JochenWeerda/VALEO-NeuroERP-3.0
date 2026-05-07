@@ -47,7 +47,7 @@ class DocumentationRetriever:
         similar_chunks.sort(key=lambda x: x["similarity"], reverse=True)
         return similar_chunks[:n_results]
 
-    def text_search(self, query: str, limit: int = 5) -> List[Dict[str, Any]]:
+    def text_search(self, query: str, limit: int = 200) -> List[Dict[str, Any]]:
         """Führt eine Textsuche in den Dokumenten durch."""
         try:
             # Suche in allen Feldern
@@ -169,7 +169,9 @@ class DocumentationRetriever:
             return [doc for doc, _ in similarities[:limit]]
             
         except Exception as e:
-            print(f"Fehler bei der semantischen Suche: {str(e)}")
+            # Stiller Fallback (Quota/Netz) — Aufrufer nutzen Textsuche weiter
+            if os.environ.get("DOC_QUERY_VERBOSE"):
+                print(f"Fehler bei der semantischen Suche: {str(e)}")
             return []
 
     def search_sections(self, query: str, limit: int = 5) -> List[Dict[str, Any]]:

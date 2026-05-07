@@ -119,6 +119,12 @@ data/paperless-consume/
 data/policies.db
 files/
 
+# update_todos.py (lokal generiert, groß)
+docs/todo-repo-scan.md
+docs/todo-report.json
+docs/TODO-backlog.md
+docs/TODO-next-slices.md
+
 # ── Tool-spezifisch ───────────────────────────────────────────────────────────
 .cursor/
 memory-bank/
