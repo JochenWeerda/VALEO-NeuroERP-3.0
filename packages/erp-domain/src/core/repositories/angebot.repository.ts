@@ -16,5 +16,9 @@ export interface AngebotRepository {
   findByAnfrage(anfrageId: string, tenantId: string): Promise<Angebot[]>
   update(angebot: Angebot): Promise<Angebot>
   delete(id: string, tenantId: string): Promise<void>
-  countByTenant(tenantId: string, status?: AngebotStatus): Promise<number>
+  countByTenant(tenantId: string, filters?: {
+    status?: AngebotStatus
+    lieferantId?: string
+    anfrageId?: string
+  }): Promise<number>
 }

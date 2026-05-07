@@ -5,4 +5,4 @@ export declare class CreateOrderCommand {
     constructor(service: OrderDomainService);
     execute(payload: CreateOrderDTO): Promise<OrderDTO>;
 }
-//***REMOVED*** sourceMappingURL=create-order.d.ts.map
+//# sourceMappingURL=create-order.d.ts.map

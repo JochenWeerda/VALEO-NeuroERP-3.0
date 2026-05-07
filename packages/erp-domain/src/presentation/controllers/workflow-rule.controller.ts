@@ -1,6 +1,8 @@
 import { Request, Response } from 'express'
 import { WorkflowRuleService } from '../../application/services/workflow-rule.service'
 import { CreateWorkflowRuleData } from '../../application/services/workflow-rule.service'
+import { clampLimit, clampOffset } from '../types/api-pagination'
+import { resolveActorId } from '../utils/request-context'
 
 export class WorkflowRuleController {
   constructor(private workflowRuleService: WorkflowRuleService) {}
@@ -8,7 +10,7 @@ export class WorkflowRuleController {
   async createWorkflowRule(req: Request, res: Response): Promise<void> {
     try {
       const tenantId = req.headers['x-tenant-id'] as string
-      const actorId = req.user?.id || 'system' // TODO: Aus Auth-Middleware
+      const auditActorId = resolveActorId(req)
 
       const data: CreateWorkflowRuleData = {
         triggerEntity: req.body.triggerEntity,
@@ -20,7 +22,7 @@ export class WorkflowRuleController {
         tenantId
       }
 
-      const rule = await this.workflowRuleService.createWorkflowRule(data)
+      const rule = await this.workflowRuleService.createWorkflowRule(data, auditActorId)
 
       res.status(201).json({
         success: true,
@@ -72,16 +74,18 @@ export class WorkflowRuleController {
         targetEntity: req.query.targetEntity as string,
         targetAction: req.query.targetAction as string,
         active: req.query.active ? req.query.active === 'true' : undefined,
-        limit: req.query.limit ? parseInt(req.query.limit as string) : undefined,
-        offset: req.query.offset ? parseInt(req.query.offset as string) : undefined
+        limit: req.query.limit ? parseInt(req.query.limit as string, 10) : undefined,
+        offset: req.query.offset ? parseInt(req.query.offset as string, 10) : undefined
       }
 
-      const rules = await this.workflowRuleService.getWorkflowRulesByTenant(tenantId, options)
+      const { items, total } = await this.workflowRuleService.getWorkflowRulesByTenant(tenantId, options)
+      const limit = clampLimit(options.limit)
+      const offset = clampOffset(options.offset)
 
       res.json({
         success: true,
-        data: rules,
-        total: rules.length // TODO: Pagination-Info
+        data: items,
+        pagination: { total, limit, offset }
       })
     } catch (error) {
       console.error('Fehler beim Laden der Workflow-Regeln:', error)
@@ -116,7 +120,7 @@ export class WorkflowRuleController {
     try {
       const { id } = req.params
       const tenantId = req.headers['x-tenant-id'] as string
-      const actorId = req.user?.id || 'system'
+      const actorId = resolveActorId(req)
 
       const rule = await this.workflowRuleService.activateWorkflowRule(id as string, tenantId, actorId)
 
@@ -137,7 +141,7 @@ export class WorkflowRuleController {
     try {
       const { id } = req.params
       const tenantId = req.headers['x-tenant-id'] as string
-      const actorId = req.user?.id || 'system'
+      const actorId = resolveActorId(req)
 
       const rule = await this.workflowRuleService.deactivateWorkflowRule(id as string, tenantId, actorId)
 
@@ -158,7 +162,7 @@ export class WorkflowRuleController {
     try {
       const { id } = req.params
       const tenantId = req.headers['x-tenant-id'] as string
-      const actorId = req.user?.id || 'system'
+      const actorId = resolveActorId(req)
 
       const rule = await this.workflowRuleService.updateWorkflowRule(id as string, tenantId, req.body, actorId)
 
@@ -179,7 +183,7 @@ export class WorkflowRuleController {
     try {
       const { id } = req.params
       const tenantId = req.headers['x-tenant-id'] as string
-      const actorId = req.user?.id || 'system'
+      const actorId = resolveActorId(req)
 
       await this.workflowRuleService.deleteWorkflowRule(id as string, tenantId, actorId)
 

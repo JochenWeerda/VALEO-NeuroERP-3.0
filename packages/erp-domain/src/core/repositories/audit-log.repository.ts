@@ -21,6 +21,7 @@ export interface AuditLogRepository {
   findRecent(tenantId: string, limit?: number): Promise<AuditLog[]>
   countByTenant(tenantId: string, options?: {
     entity?: string
+    entityId?: string
     actorId?: string
     action?: string
     fromDate?: Date

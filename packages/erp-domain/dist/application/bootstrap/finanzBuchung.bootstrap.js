@@ -14,4 +14,4 @@ function initFinanzBuchungModule({ pool }) {
     const router = (0, finanzBuchung_controller_1.buildFinanzBuchungRouter)({ service, baseRoute: '/erp/finance/bookings' });
     return { repository, service, router };
 }
-//***REMOVED*** sourceMappingURL=finanzBuchung.bootstrap.js.map
+//# sourceMappingURL=finanzBuchung.bootstrap.js.map

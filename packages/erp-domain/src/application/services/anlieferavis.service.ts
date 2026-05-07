@@ -4,6 +4,7 @@ import { AnlieferavisRepository } from '../../core/repositories/anlieferavis.rep
 import { AnlieferavisStatus } from '../../core/entities/anlieferavis.entity'
 import { AuditService } from './audit.service'
 import { WorkflowService } from './workflow.service'
+import { clampLimit, clampOffset, ListResult } from '../../presentation/types/api-pagination'
 
 export interface CreateAnlieferavisData {
   avisNummer: string
@@ -47,7 +48,7 @@ export class AnlieferavisService {
     private workflowService: WorkflowService
   ) {}
 
-  async createAnlieferavis(data: CreateAnlieferavisData): Promise<Anlieferavis> {
+  async createAnlieferavis(data: CreateAnlieferavisData, auditActorId: string): Promise<Anlieferavis> {
     // Validierung
     this.validateAnlieferavisData(data)
 
@@ -71,7 +72,7 @@ export class AnlieferavisService {
 
     // Audit-Log
     await this.auditService.log({
-      actorId: 'system', // TODO: Aus Context holen
+      actorId: auditActorId,
       entity: 'Anlieferavis',
       entityId: savedAvis.id,
       action: 'CREATE',
@@ -91,8 +92,20 @@ export class AnlieferavisService {
     bestellungId?: string
     limit?: number
     offset?: number
-  }): Promise<Anlieferavis[]> {
-    return this.repository.findByTenant(tenantId, options)
+  }): Promise<ListResult<Anlieferavis>> {
+    const limit = clampLimit(options?.limit)
+    const offset = clampOffset(options?.offset)
+    const items = await this.repository.findByTenant(tenantId, {
+      status: options?.status,
+      bestellungId: options?.bestellungId,
+      limit,
+      offset,
+    })
+    const total = await this.repository.countByTenant(tenantId, {
+      status: options?.status,
+      bestellungId: options?.bestellungId,
+    })
+    return { items, total }
   }
 
   async getAnlieferavisByBestellung(bestellungId: string, tenantId: string): Promise<Anlieferavis | null> {
@@ -169,22 +182,47 @@ export class AnlieferavisService {
       throw new Error('Anlieferavis nicht gefunden')
     }
 
-    // TODO: Anlieferavis mit neuen Daten aktualisieren
-    // const updatedAvis = avis.update(data)
-    // const saved = await this.repository.update(updatedAvis)
+    if (avis.status === AnlieferavisStatus.STORNIERT) {
+      throw new Error('Stornierte Avise können nicht aktualisiert werden')
+    }
 
-    // Audit-Log
+    const fahrzeug = data.fahrzeug
+      ? {
+          kennzeichen: data.fahrzeug.kennzeichen,
+          fahrer: data.fahrzeug.fahrer,
+          telefon: data.fahrzeug.telefon ?? avis.fahrzeug.telefon
+        }
+      : avis.fahrzeug
+
+    const updatedAvis = new Anlieferavis(
+      avis.id,
+      avis.avisNummer,
+      avis.bestellungId,
+      avis.status,
+      data.geplantesAnlieferDatum ?? avis.geplantesAnlieferDatum,
+      fahrzeug,
+      data.positionen ?? avis.positionen,
+      avis.tenantId,
+      data.bemerkungen !== undefined ? data.bemerkungen : avis.bemerkungen,
+      avis.version + 1,
+      avis.createdAt,
+      new Date(),
+      avis.deletedAt
+    )
+
+    const saved = await this.repository.update(updatedAvis)
+
     await this.auditService.log({
       actorId,
       entity: 'Anlieferavis',
       entityId: id,
       action: 'UPDATE',
       before: avis,
-      after: avis, // TODO: updatedAvis
+      after: saved,
       tenantId
     })
 
-    return avis // TODO: saved
+    return saved
   }
 
   async deleteAnlieferavis(id: string, tenantId: string, actorId: string): Promise<void> {

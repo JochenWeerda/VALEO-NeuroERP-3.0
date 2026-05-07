@@ -2,6 +2,8 @@ import { Request, Response } from 'express'
 import { AngebotService } from '../../application/services/angebot.service'
 import { CreateAngebotData } from '../../application/services/angebot.service'
 import { AngebotStatus } from '../../core/entities/angebot.entity'
+import { clampLimit, clampOffset } from '../types/api-pagination'
+import { resolveActorId } from '../utils/request-context'
 
 export class AngebotController {
   constructor(private angebotService: AngebotService) {}
@@ -9,7 +11,7 @@ export class AngebotController {
   async createAngebot(req: Request, res: Response): Promise<void> {
     try {
       const tenantId = req.headers['x-tenant-id'] as string
-      const actorId = req.user?.id || 'system' // TODO: Aus Auth-Middleware
+      const auditActorId = resolveActorId(req)
 
       const data: CreateAngebotData = {
         angebotNummer: req.body.angebotNummer,
@@ -29,7 +31,7 @@ export class AngebotController {
         bemerkungen: req.body.bemerkungen
       }
 
-      const angebot = await this.angebotService.createAngebot(data)
+      const angebot = await this.angebotService.createAngebot(data, auditActorId)
 
       res.status(201).json({
         success: true,
@@ -79,16 +81,18 @@ export class AngebotController {
         status: req.query.status as any,
         lieferantId: req.query.lieferantId as string,
         anfrageId: req.query.anfrageId as string,
-        limit: req.query.limit ? parseInt(req.query.limit as string) : undefined,
-        offset: req.query.offset ? parseInt(req.query.offset as string) : undefined
+        limit: req.query.limit ? parseInt(req.query.limit as string, 10) : undefined,
+        offset: req.query.offset ? parseInt(req.query.offset as string, 10) : undefined
       }
 
-      const angebote = await this.angebotService.getAngeboteByTenant(tenantId, options)
+      const { items, total } = await this.angebotService.getAngeboteByTenant(tenantId, options)
+      const limit = clampLimit(options.limit)
+      const offset = clampOffset(options.offset)
 
       res.json({
         success: true,
-        data: angebote,
-        total: angebote.length // TODO: Pagination-Info
+        data: items,
+        pagination: { total, limit, offset }
       })
     } catch (error) {
       console.error('Fehler beim Laden der Angebote:', error)
@@ -123,7 +127,7 @@ export class AngebotController {
     try {
       const { id } = req.params
       const tenantId = req.headers['x-tenant-id'] as string
-      const actorId = req.user?.id || 'system'
+      const actorId = resolveActorId(req)
 
       const angebot = await this.angebotService.pruefenAngebot(id as string, tenantId, actorId)
 
@@ -144,7 +148,7 @@ export class AngebotController {
     try {
       const { id } = req.params
       const tenantId = req.headers['x-tenant-id'] as string
-      const actorId = req.user?.id || 'system'
+      const actorId = resolveActorId(req)
 
       const angebot = await this.angebotService.genehmigenAngebot(id as string, tenantId, actorId)
 
@@ -165,7 +169,7 @@ export class AngebotController {
     try {
       const { id } = req.params
       const tenantId = req.headers['x-tenant-id'] as string
-      const actorId = req.user?.id || 'system'
+      const actorId = resolveActorId(req)
 
       const angebot = await this.angebotService.ablehnenAngebot(id as string, tenantId, actorId)
 
@@ -186,7 +190,7 @@ export class AngebotController {
     try {
       const { id } = req.params
       const tenantId = req.headers['x-tenant-id'] as string
-      const actorId = req.user?.id || 'system'
+      const actorId = resolveActorId(req)
 
       const angebot = await this.angebotService.updateAngebot(id as string, tenantId, req.body, actorId)
 
@@ -207,7 +211,7 @@ export class AngebotController {
     try {
       const { id } = req.params
       const tenantId = req.headers['x-tenant-id'] as string
-      const actorId = req.user?.id || 'system'
+      const actorId = resolveActorId(req)
 
       await this.angebotService.deleteAngebot(id as string, tenantId, actorId)
 

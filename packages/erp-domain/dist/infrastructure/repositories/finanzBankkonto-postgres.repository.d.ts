@@ -10,4 +10,4 @@ export declare class FinanzBankkontoPostgresRepository {
     update(entity: FinanzBankkonto): Promise<FinanzBankkonto>;
     delete(id: string): Promise<void>;
 }
-//***REMOVED*** sourceMappingURL=finanzBankkonto-postgres.repository.d.ts.map
+//# sourceMappingURL=finanzBankkonto-postgres.repository.d.ts.map

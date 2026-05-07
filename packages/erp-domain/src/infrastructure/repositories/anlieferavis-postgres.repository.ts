@@ -137,13 +137,17 @@ export class AnlieferavisPostgresRepository implements AnlieferavisRepository {
     })
   }
 
-  async countByTenant(tenantId: string, status?: AnlieferavisStatus): Promise<number> {
+  async countByTenant(tenantId: string, filters?: {
+    status?: AnlieferavisStatus
+    bestellungId?: string
+  }): Promise<number> {
     const where: any = {
       tenantId,
       deletedAt: null
     }
 
-    if (status) where.status = status
+    if (filters?.status) where.status = filters.status
+    if (filters?.bestellungId) where.bestellungId = filters.bestellungId
 
     return this.prisma.anlieferavis.count({ where })
   }

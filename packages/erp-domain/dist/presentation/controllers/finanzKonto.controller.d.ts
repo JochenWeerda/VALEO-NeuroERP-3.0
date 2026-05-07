@@ -9,4 +9,4 @@ export interface FinanzKontoRouterDependencies {
     baseRoute?: string;
 }
 export declare function buildFinanzKontoRouter({ service, baseRoute }: FinanzKontoRouterDependencies): Router;
-//***REMOVED*** sourceMappingURL=finanzKonto.controller.d.ts.map
+//# sourceMappingURL=finanzKonto.controller.d.ts.map

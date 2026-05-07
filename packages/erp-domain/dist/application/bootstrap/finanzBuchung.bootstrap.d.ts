@@ -15,4 +15,4 @@ export interface FinanzBuchungModule {
     router: Router;
 }
 export declare function initFinanzBuchungModule({ pool }: FinanzBuchungBootstrapDependencies): FinanzBuchungModule;
-//***REMOVED*** sourceMappingURL=finanzBuchung.bootstrap.d.ts.map
+//# sourceMappingURL=finanzBuchung.bootstrap.d.ts.map

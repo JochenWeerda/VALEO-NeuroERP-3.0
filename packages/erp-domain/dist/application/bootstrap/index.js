@@ -23,4 +23,4 @@ function buildFinanceRouter(_options = {}) {
     financeRouter.use(bankkonto.router);
     return financeRouter;
 }
-//***REMOVED*** sourceMappingURL=index.js.map
+//# sourceMappingURL=index.js.map

@@ -70,4 +70,4 @@ function createOrderItem(input, timestamp) {
 function generateOrderNumber() {
     return `ORD-${Date.now().toString(ORDER_NUMBER_RADIX).toUpperCase()}`;
 }
-//***REMOVED*** sourceMappingURL=order.js.map
+//# sourceMappingURL=order.js.map

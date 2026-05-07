@@ -70,6 +70,28 @@ export class WorkflowRule {
     )
   }
 
+  withPatches(patch: {
+    triggerEntity?: string
+    triggerAction?: string
+    targetEntity?: string
+    targetAction?: string
+    condition?: string
+    active?: boolean
+  }): WorkflowRule {
+    return new WorkflowRule(
+      this.id,
+      patch.triggerEntity ?? this.triggerEntity,
+      patch.triggerAction ?? this.triggerAction,
+      patch.targetEntity ?? this.targetEntity,
+      patch.targetAction ?? this.targetAction,
+      this.tenantId,
+      patch.condition !== undefined ? patch.condition : this.condition,
+      patch.active !== undefined ? patch.active : this.active,
+      this.createdAt,
+      new Date()
+    )
+  }
+
   matches(triggerEntity: string, triggerAction: string): boolean {
     return this.active &&
            this.triggerEntity === triggerEntity &&
@@ -77,14 +99,65 @@ export class WorkflowRule {
   }
 
   evaluateCondition(data?: any): boolean {
-    if (!this.condition) return true
-
-    // Einfache Bedingungsauswertung - in Realität komplexer
+    const c = this.condition?.trim()
+    if (!c) return true
     try {
-      // TODO: Implementiere echte Bedingungsauswertung
-      return true
+      const parsed = JSON.parse(c) as unknown
+      return WorkflowRule.evalConditionNode(parsed, data)
     } catch {
-      return false
+      // Legacy-Freitext-Bedingungen: nicht blockieren
+      return true
+    }
+  }
+
+  private static getJsonPath(obj: unknown, path: string): unknown {
+    if (!path || obj === null || obj === undefined) return undefined
+    return path.split('.').reduce<unknown>((acc, key) => {
+      if (acc === null || acc === undefined) return undefined
+      if (typeof acc === 'object' && key in (acc as object)) {
+        return (acc as Record<string, unknown>)[key]
+      }
+      return undefined
+    }, obj)
+  }
+
+  private static evalConditionNode(node: unknown, data: unknown): boolean {
+    if (node === null || node === undefined) return true
+    if (typeof node !== 'object' || Array.isArray(node)) {
+      return true
+    }
+    const n = node as Record<string, unknown>
+
+    if (Array.isArray(n.and)) {
+      return (n.and as unknown[]).every(child => WorkflowRule.evalConditionNode(child, data))
+    }
+    if (Array.isArray(n.or)) {
+      return (n.or as unknown[]).some(child => WorkflowRule.evalConditionNode(child, data))
+    }
+    const op = n.op as string | undefined
+    if (!op) return true
+
+    const fieldVal = WorkflowRule.getJsonPath(data, String(n.field ?? ''))
+
+    switch (op) {
+      case 'eq':
+        return fieldVal === n.value
+      case 'neq':
+        return fieldVal !== n.value
+      case 'truthy':
+        return Boolean(fieldVal)
+      case 'falsy':
+        return !fieldVal
+      case 'exists':
+        return fieldVal !== undefined && fieldVal !== null
+      case 'missing':
+        return fieldVal === undefined || fieldVal === null
+      case 'gte':
+        return Number(fieldVal) >= Number(n.value)
+      case 'lte':
+        return Number(fieldVal) <= Number(n.value)
+      default:
+        return true
     }
   }
 }

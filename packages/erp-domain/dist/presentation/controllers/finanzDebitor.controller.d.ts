@@ -9,4 +9,4 @@ export interface FinanzDebitorRouterDependencies {
     baseRoute?: string;
 }
 export declare function buildFinanzDebitorRouter({ service, baseRoute }: FinanzDebitorRouterDependencies): Router;
-//***REMOVED*** sourceMappingURL=finanzDebitor.controller.d.ts.map
+//# sourceMappingURL=finanzDebitor.controller.d.ts.map

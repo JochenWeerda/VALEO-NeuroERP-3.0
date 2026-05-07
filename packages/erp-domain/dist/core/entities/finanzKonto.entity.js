@@ -56,4 +56,4 @@ class FinanzKonto {
     }
 }
 exports.FinanzKonto = FinanzKonto;
-//***REMOVED*** sourceMappingURL=finanzKonto.entity.js.map
+//# sourceMappingURL=finanzKonto.entity.js.map

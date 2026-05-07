@@ -15,5 +15,11 @@ export interface WorkflowRuleRepository {
   findMatchingRules(triggerEntity: string, triggerAction: string, tenantId: string): Promise<WorkflowRule[]>
   update(rule: WorkflowRule): Promise<WorkflowRule>
   delete(id: string, tenantId: string): Promise<void>
-  countByTenant(tenantId: string, active?: boolean): Promise<number>
+  countByTenant(tenantId: string, filters?: {
+    triggerEntity?: string
+    triggerAction?: string
+    targetEntity?: string
+    targetAction?: string
+    active?: boolean
+  }): Promise<number>
 }

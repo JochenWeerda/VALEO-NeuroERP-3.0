@@ -137,13 +137,17 @@ export class AuftragsbestaetigungPostgresRepository implements Auftragsbestaetig
     })
   }
 
-  async countByTenant(tenantId: string, status?: AuftragsbestaetigungStatus): Promise<number> {
+  async countByTenant(tenantId: string, filters?: {
+    status?: AuftragsbestaetigungStatus
+    bestellungId?: string
+  }): Promise<number> {
     const where: any = {
       tenantId,
       deletedAt: null
     }
 
-    if (status) where.status = status
+    if (filters?.status) where.status = filters.status
+    if (filters?.bestellungId) where.bestellungId = filters.bestellungId
 
     return this.prisma.auftragsbestaetigung.count({ where })
   }

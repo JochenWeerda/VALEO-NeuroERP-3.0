@@ -133,10 +133,16 @@ export class WorkflowExecutionPostgresRepository implements WorkflowExecutionRep
     })
   }
 
-  async countByTenant(tenantId: string, status?: WorkflowExecutionStatus): Promise<number> {
+  async countByTenant(tenantId: string, filters?: {
+    status?: WorkflowExecutionStatus
+    ruleId?: string
+    actorId?: string
+  }): Promise<number> {
     const where: any = { tenantId }
 
-    if (status) where.status = status
+    if (filters?.status) where.status = filters.status
+    if (filters?.ruleId) where.ruleId = filters.ruleId
+    if (filters?.actorId) where.actorId = filters.actorId
 
     return this.prisma.workflowExecution.count({ where })
   }

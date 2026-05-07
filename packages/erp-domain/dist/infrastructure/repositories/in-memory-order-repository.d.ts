@@ -9,4 +9,4 @@ export declare class InMemoryOrderRepository extends InMemoryRepository<Order, '
     update(id: OrderId, order: Order): Promise<Order>;
     updateStatus(id: OrderId, status: OrderStatus): Promise<Order>;
 }
-//***REMOVED*** sourceMappingURL=in-memory-order-repository.d.ts.map
+//# sourceMappingURL=in-memory-order-repository.d.ts.map

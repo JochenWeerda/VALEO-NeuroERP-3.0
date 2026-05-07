@@ -14,4 +14,4 @@ function initFinanzDebitorModule({ pool }) {
     const router = (0, finanzDebitor_controller_1.buildFinanzDebitorRouter)({ service, baseRoute: '/erp/finance/debtors' });
     return { repository, service, router };
 }
-//***REMOVED*** sourceMappingURL=finanzDebitor.bootstrap.js.map
+//# sourceMappingURL=finanzDebitor.bootstrap.js.map

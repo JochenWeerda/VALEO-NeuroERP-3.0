@@ -1,4 +1,6 @@
-import { injectable } from 'inversify'
+import { inject, injectable } from 'inversify'
+import { AuditLog } from '../../core/entities/workflow-rule.entity'
+import { AuditLogRepository } from '../../core/repositories/audit-log.repository'
 
 export interface AuditEntry {
   id?: string
@@ -6,8 +8,8 @@ export interface AuditEntry {
   entity: string
   entityId: string
   action: string
-  before?: any
-  after?: any
+  before?: unknown
+  after?: unknown
   timestamp?: Date
   tenantId: string
   ipAddress?: string
@@ -16,30 +18,29 @@ export interface AuditEntry {
 
 @injectable()
 export class AuditService {
+  constructor(@inject('AuditLogRepository') private readonly auditLogRepository: AuditLogRepository) {}
+
   async log(entry: AuditEntry): Promise<void> {
-    // In einer realen Implementierung würde hier die Audit-Tabelle beschrieben
-    console.log('Audit Log:', {
-      timestamp: new Date().toISOString(),
-      actor: entry.actorId,
+    const auditLog = AuditLog.create({
+      actorId: entry.actorId,
       entity: entry.entity,
       entityId: entry.entityId,
       action: entry.action,
-      tenantId: entry.tenantId
+      before: entry.before,
+      after: entry.after,
+      tenantId: entry.tenantId,
+      ipAddress: entry.ipAddress,
+      userAgent: entry.userAgent,
     })
 
-    // TODO: Implementiere tatsächliche Datenbank-Persistierung
-    // await this.auditRepository.save(entry)
+    await this.auditLogRepository.save(auditLog)
   }
 
-  async getEntityHistory(entity: string, entityId: string, tenantId: string): Promise<AuditEntry[]> {
-    // TODO: Implementiere Historien-Abfrage
-    console.log(`Audit History für ${entity}:${entityId} in Tenant ${tenantId}`)
-    return []
+  async getEntityHistory(entity: string, entityId: string, tenantId: string): Promise<AuditLog[]> {
+    return this.auditLogRepository.findByEntity(entity, entityId, tenantId)
   }
 
-  async getUserActivity(actorId: string, tenantId: string, limit = 100): Promise<AuditEntry[]> {
-    // TODO: Implementiere Benutzeraktivitäten-Abfrage
-    console.log(`User Activity für ${actorId} in Tenant ${tenantId}, Limit: ${limit}`)
-    return []
+  async getUserActivity(actorId: string, tenantId: string, limit = 100): Promise<AuditLog[]> {
+    return this.auditLogRepository.findByActor(actorId, tenantId, { limit, offset: 0 })
   }
 }

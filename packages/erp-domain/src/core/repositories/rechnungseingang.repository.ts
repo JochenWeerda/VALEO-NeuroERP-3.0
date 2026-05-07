@@ -19,6 +19,11 @@ export interface RechnungseingangRepository {
   findMitAbweichungen(tenantId: string): Promise<Rechnungseingang[]>
   update(rechnung: Rechnungseingang): Promise<Rechnungseingang>
   delete(id: string, tenantId: string): Promise<void>
-  countByTenant(tenantId: string, status?: RechnungseingangStatus): Promise<number>
+  countByTenant(tenantId: string, filters?: {
+    status?: RechnungseingangStatus
+    lieferantId?: string
+    bestellungId?: string
+    wareneingangId?: string
+  }): Promise<number>
   getGesamtOffen(tenantId: string): Promise<number>
 }

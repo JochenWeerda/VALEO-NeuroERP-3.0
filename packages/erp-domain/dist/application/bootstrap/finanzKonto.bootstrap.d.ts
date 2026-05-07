@@ -15,4 +15,4 @@ export interface FinanzKontoModule {
     router: Router;
 }
 export declare function initFinanzKontoModule({ pool }: FinanzKontoBootstrapDependencies): FinanzKontoModule;
-//***REMOVED*** sourceMappingURL=finanzKonto.bootstrap.d.ts.map
+//# sourceMappingURL=finanzKonto.bootstrap.d.ts.map

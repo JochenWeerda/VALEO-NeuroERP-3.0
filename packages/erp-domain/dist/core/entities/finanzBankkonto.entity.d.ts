@@ -40,4 +40,4 @@ export declare class FinanzBankkonto {
     get aktualisiertAm(): Date | undefined;
     toPrimitives(): FinanzBankkontoProps;
 }
-//***REMOVED*** sourceMappingURL=finanzBankkonto.entity.d.ts.map
+//# sourceMappingURL=finanzBankkonto.entity.d.ts.map

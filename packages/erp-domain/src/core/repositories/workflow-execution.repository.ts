@@ -15,5 +15,9 @@ export interface WorkflowExecutionRepository {
   findFailed(tenantId: string): Promise<WorkflowExecution[]>
   update(execution: WorkflowExecution): Promise<WorkflowExecution>
   delete(id: string, tenantId: string): Promise<void>
-  countByTenant(tenantId: string, status?: WorkflowExecutionStatus): Promise<number>
+  countByTenant(tenantId: string, filters?: {
+    status?: WorkflowExecutionStatus
+    ruleId?: string
+    actorId?: string
+  }): Promise<number>
 }

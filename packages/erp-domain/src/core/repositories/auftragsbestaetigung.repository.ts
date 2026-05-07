@@ -15,5 +15,8 @@ export interface AuftragsbestaetigungRepository {
   findMitAbweichungen(tenantId: string): Promise<Auftragsbestaetigung[]>
   update(ab: Auftragsbestaetigung): Promise<Auftragsbestaetigung>
   delete(id: string, tenantId: string): Promise<void>
-  countByTenant(tenantId: string, status?: AuftragsbestaetigungStatus): Promise<number>
+  countByTenant(tenantId: string, filters?: {
+    status?: AuftragsbestaetigungStatus
+    bestellungId?: string
+  }): Promise<number>
 }

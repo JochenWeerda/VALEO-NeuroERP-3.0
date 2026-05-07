@@ -2,6 +2,8 @@ import { Request, Response } from 'express'
 import { AnlieferavisService } from '../../application/services/anlieferavis.service'
 import { CreateAnlieferavisData } from '../../application/services/anlieferavis.service'
 import { AnlieferavisStatus } from '../../core/entities/anlieferavis.entity'
+import { clampLimit, clampOffset } from '../types/api-pagination'
+import { resolveActorId } from '../utils/request-context'
 
 export class AnlieferavisController {
   constructor(private anlieferavisService: AnlieferavisService) {}
@@ -9,7 +11,7 @@ export class AnlieferavisController {
   async createAnlieferavis(req: Request, res: Response): Promise<void> {
     try {
       const tenantId = req.headers['x-tenant-id'] as string
-      const actorId = req.user?.id || 'system' // TODO: Aus Auth-Middleware
+      const auditActorId = resolveActorId(req)
 
       const data: CreateAnlieferavisData = {
         avisNummer: req.body.avisNummer,
@@ -21,7 +23,7 @@ export class AnlieferavisController {
         bemerkungen: req.body.bemerkungen
       }
 
-      const avis = await this.anlieferavisService.createAnlieferavis(data)
+      const avis = await this.anlieferavisService.createAnlieferavis(data, auditActorId)
 
       res.status(201).json({
         success: true,
@@ -70,16 +72,18 @@ export class AnlieferavisController {
       const options = {
         status: req.query.status as any,
         bestellungId: req.query.bestellungId as string,
-        limit: req.query.limit ? parseInt(req.query.limit as string) : undefined,
-        offset: req.query.offset ? parseInt(req.query.offset as string) : undefined
+        limit: req.query.limit ? parseInt(req.query.limit as string, 10) : undefined,
+        offset: req.query.offset ? parseInt(req.query.offset as string, 10) : undefined
       }
 
-      const avise = await this.anlieferavisService.getAnlieferaviseByTenant(tenantId, options)
+      const { items, total } = await this.anlieferavisService.getAnlieferaviseByTenant(tenantId, options)
+      const limit = clampLimit(options.limit)
+      const offset = clampOffset(options.offset)
 
       res.json({
         success: true,
-        data: avise,
-        total: avise.length // TODO: Pagination-Info
+        data: items,
+        pagination: { total, limit, offset }
       })
     } catch (error) {
       console.error('Fehler beim Laden der Anlieferavise:', error)
@@ -122,7 +126,7 @@ export class AnlieferavisController {
     try {
       const { id } = req.params
       const tenantId = req.headers['x-tenant-id'] as string
-      const actorId = req.user?.id || 'system'
+      const actorId = resolveActorId(req)
 
       const avis = await this.anlieferavisService.bestaetigenAnlieferavis(id as string, tenantId, actorId)
 
@@ -143,7 +147,7 @@ export class AnlieferavisController {
     try {
       const { id } = req.params
       const tenantId = req.headers['x-tenant-id'] as string
-      const actorId = req.user?.id || 'system'
+      const actorId = resolveActorId(req)
 
       const avis = await this.anlieferavisService.stornierenAnlieferavis(id as string, tenantId, actorId)
 
@@ -164,7 +168,7 @@ export class AnlieferavisController {
     try {
       const { id } = req.params
       const tenantId = req.headers['x-tenant-id'] as string
-      const actorId = req.user?.id || 'system'
+      const actorId = resolveActorId(req)
 
       const avis = await this.anlieferavisService.updateAnlieferavis(id as string, tenantId, req.body, actorId)
 
@@ -185,7 +189,7 @@ export class AnlieferavisController {
     try {
       const { id } = req.params
       const tenantId = req.headers['x-tenant-id'] as string
-      const actorId = req.user?.id || 'system'
+      const actorId = resolveActorId(req)
 
       await this.anlieferavisService.deleteAnlieferavis(id as string, tenantId, actorId)
 

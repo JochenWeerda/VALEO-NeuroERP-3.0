@@ -6,4 +6,4 @@ export interface OrderRepository extends Repository<Order, OrderId> {
     updateStatus(id: OrderId, status: OrderStatus): Promise<Order>;
 }
 export declare const buildOrderQuery: (filters?: OrderFilters) => RepositoryQuery<Order>;
-//***REMOVED*** sourceMappingURL=order-repository.d.ts.map
+//# sourceMappingURL=order-repository.d.ts.map

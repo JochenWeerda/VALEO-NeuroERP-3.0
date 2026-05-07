@@ -4,6 +4,7 @@ exports.createErpApiRouter = createErpApiRouter;
 const express_1 = require("express");
 const anfrage_controller_1 = require("./anfrage.controller");
 const angebot_controller_1 = require("./angebot.controller");
+const sales_offer_controller_1 = require("./sales-offer.controller");
 const auftragsbestaetigung_controller_1 = require("./auftragsbestaetigung.controller");
 const anlieferavis_controller_1 = require("./anlieferavis.controller");
 const rechnungseingang_controller_1 = require("./rechnungseingang.controller");
@@ -12,6 +13,7 @@ const workflow_execution_controller_1 = require("./workflow-execution.controller
 const audit_log_controller_1 = require("./audit-log.controller");
 const anfrage_service_1 = require("../../application/services/anfrage.service");
 const angebot_service_1 = require("../../application/services/angebot.service");
+const sales_offer_service_1 = require("../../application/services/sales-offer.service");
 const auftragsbestaetigung_service_1 = require("../../application/services/auftragsbestaetigung.service");
 const anlieferavis_service_1 = require("../../application/services/anlieferavis.service");
 const rechnungseingang_service_1 = require("../../application/services/rechnungseingang.service");
@@ -20,6 +22,7 @@ const workflow_execution_service_1 = require("../../application/services/workflo
 const audit_log_service_1 = require("../../application/services/audit-log.service");
 const anfrage_postgres_repository_1 = require("../../infrastructure/repositories/anfrage-postgres.repository");
 const angebot_postgres_repository_1 = require("../../infrastructure/repositories/angebot-postgres.repository");
+const sales_offer_postgres_repository_1 = require("../../infrastructure/repositories/sales-offer-postgres.repository");
 const auftragsbestaetigung_postgres_repository_1 = require("../../infrastructure/repositories/auftragsbestaetigung-postgres.repository");
 const anlieferavis_postgres_repository_1 = require("../../infrastructure/repositories/anlieferavis-postgres.repository");
 const rechnungseingang_postgres_repository_1 = require("../../infrastructure/repositories/rechnungseingang-postgres.repository");
@@ -28,34 +31,42 @@ const workflow_execution_postgres_repository_1 = require("../../infrastructure/r
 const audit_log_postgres_repository_1 = require("../../infrastructure/repositories/audit-log-postgres.repository");
 const audit_service_1 = require("../../application/services/audit.service");
 const workflow_service_1 = require("../../application/services/workflow.service");
+const client_1 = require("@prisma/client");
+const postgres_1 = require("../../infrastructure/persistence/postgres");
+const purchaseOrder_postgres_repository_1 = require("../../infrastructure/repositories/purchaseOrder-postgres.repository");
+const purchaseOrder_service_1 = require("../../application/services/purchaseOrder.service");
+const numberRange_service_1 = require("../../application/services/numberRange.service");
 function createErpApiRouter() {
     const router = (0, express_1.Router)();
-    // TODO: Dependency Injection Container verwenden
-    // Mock-Implementierungen für jetzt
-    const mockPrisma = {};
-    // Repositories
-    const anfrageRepository = new anfrage_postgres_repository_1.AnfragePostgresRepository(mockPrisma);
-    const angebotRepository = new angebot_postgres_repository_1.AngebotPostgresRepository(mockPrisma);
-    const auftragsbestaetigungRepository = new auftragsbestaetigung_postgres_repository_1.AuftragsbestaetigungPostgresRepository(mockPrisma);
-    const anlieferavisRepository = new anlieferavis_postgres_repository_1.AnlieferavisPostgresRepository(mockPrisma);
-    const rechnungseingangRepository = new rechnungseingang_postgres_repository_1.RechnungseingangPostgresRepository(mockPrisma);
-    const workflowRuleRepository = new workflow_rule_postgres_repository_1.WorkflowRulePostgresRepository(mockPrisma);
-    const workflowExecutionRepository = new workflow_execution_postgres_repository_1.WorkflowExecutionPostgresRepository(mockPrisma);
-    const auditLogRepository = new audit_log_postgres_repository_1.AuditLogPostgresRepository(mockPrisma);
-    // Services
-    const auditService = new audit_service_1.AuditService();
-    const workflowService = new workflow_service_1.WorkflowService();
+    const prisma = new client_1.PrismaClient();
+    const pool = (0, postgres_1.getErpPool)();
+    const anfrageRepository = new anfrage_postgres_repository_1.AnfragePostgresRepository(prisma);
+    const angebotRepository = new angebot_postgres_repository_1.AngebotPostgresRepository(prisma);
+    const salesOfferRepository = new sales_offer_postgres_repository_1.SalesOfferPostgresRepository(prisma);
+    const auftragsbestaetigungRepository = new auftragsbestaetigung_postgres_repository_1.AuftragsbestaetigungPostgresRepository(prisma);
+    const anlieferavisRepository = new anlieferavis_postgres_repository_1.AnlieferavisPostgresRepository(prisma);
+    const rechnungseingangRepository = new rechnungseingang_postgres_repository_1.RechnungseingangPostgresRepository(prisma);
+    const workflowRuleRepository = new workflow_rule_postgres_repository_1.WorkflowRulePostgresRepository(prisma);
+    const workflowExecutionRepository = new workflow_execution_postgres_repository_1.WorkflowExecutionPostgresRepository(prisma);
+    const auditLogRepository = new audit_log_postgres_repository_1.AuditLogPostgresRepository(prisma);
+    const auditService = new audit_service_1.AuditService(auditLogRepository);
+    const purchaseOrderRepository = new purchaseOrder_postgres_repository_1.PurchaseOrderPostgresRepository(pool);
+    const numberRangeService = new numberRange_service_1.NumberRangeService();
+    const purchaseOrderService = new purchaseOrder_service_1.PurchaseOrderService(purchaseOrderRepository, numberRangeService, auditService);
+    const workflowService = new workflow_service_1.WorkflowService(purchaseOrderService, auditService);
     const anfrageService = new anfrage_service_1.AnfrageService(anfrageRepository, auditService, workflowService);
     const angebotService = new angebot_service_1.AngebotService(angebotRepository, auditService, workflowService);
+    const salesOfferService = new sales_offer_service_1.SalesOfferService(salesOfferRepository, auditService, workflowService);
     const auftragsbestaetigungService = new auftragsbestaetigung_service_1.AuftragsbestaetigungService(auftragsbestaetigungRepository, auditService, workflowService);
     const anlieferavisService = new anlieferavis_service_1.AnlieferavisService(anlieferavisRepository, auditService, workflowService);
     const rechnungseingangService = new rechnungseingang_service_1.RechnungseingangService(rechnungseingangRepository, auditService, workflowService);
-    const workflowRuleService = new workflow_rule_service_1.WorkflowRuleService(workflowRuleRepository, auditService);
     const workflowExecutionService = new workflow_execution_service_1.WorkflowExecutionService(workflowExecutionRepository, auditService);
+    const workflowRuleService = new workflow_rule_service_1.WorkflowRuleService(workflowRuleRepository, auditService, workflowExecutionService);
     const auditLogService = new audit_log_service_1.AuditLogService(auditLogRepository);
     // Controllers
     const anfrageController = new anfrage_controller_1.AnfrageController(anfrageService);
     const angebotController = new angebot_controller_1.AngebotController(angebotService);
+    const salesOfferController = new sales_offer_controller_1.SalesOfferController(salesOfferService);
     const auftragsbestaetigungController = new auftragsbestaetigung_controller_1.AuftragsbestaetigungController(auftragsbestaetigungService);
     const anlieferavisController = new anlieferavis_controller_1.AnlieferavisController(anlieferavisService);
     const rechnungseingangController = new rechnungseingang_controller_1.RechnungseingangController(rechnungseingangService);
@@ -82,6 +93,19 @@ function createErpApiRouter() {
     router.post('/angebote/:id/ablehnen', (req, res) => angebotController.ablehnenAngebot(req, res));
     router.get('/angebote/anfrage/:anfrageId', (req, res) => angebotController.getAngeboteByAnfrage(req, res));
     router.get('/angebote/abgelaufen', (req, res) => angebotController.getAbgelaufeneAngebote(req, res));
+    // SalesOffer-Routen
+    router.post('/sales-offers', (req, res) => salesOfferController.createSalesOffer(req, res));
+    router.post('/sales-offers/from-inquiry/:inquiryId', (req, res) => salesOfferController.createSalesOfferFromInquiry(req, res));
+    router.get('/sales-offers', (req, res) => salesOfferController.getSalesOffers(req, res));
+    router.get('/sales-offers/:id', (req, res) => salesOfferController.getSalesOffer(req, res));
+    router.put('/sales-offers/:id', (req, res) => salesOfferController.updateSalesOffer(req, res));
+    router.delete('/sales-offers/:id', (req, res) => salesOfferController.deleteSalesOffer(req, res));
+    router.post('/sales-offers/:id/send', (req, res) => salesOfferController.sendSalesOffer(req, res));
+    router.post('/sales-offers/:id/accept', (req, res) => salesOfferController.acceptSalesOffer(req, res));
+    router.post('/sales-offers/:id/reject', (req, res) => salesOfferController.rejectSalesOffer(req, res));
+    router.get('/sales-offers/inquiry/:inquiryId', (req, res) => salesOfferController.getSalesOffersByCustomerInquiry(req, res));
+    router.get('/sales-offers/expired', (req, res) => salesOfferController.getExpiredSalesOffers(req, res));
+    router.get('/sales-offers/valid', (req, res) => salesOfferController.getValidSalesOffers(req, res));
     // Auftragsbestätigung-Routen
     router.post('/auftragsbestaetigungen', (req, res) => auftragsbestaetigungController.createAuftragsbestaetigung(req, res));
     router.get('/auftragsbestaetigungen', (req, res) => auftragsbestaetigungController.getAuftragsbestaetigungen(req, res));
@@ -150,4 +174,4 @@ function createErpApiRouter() {
     router.get('/workflow-executions/stats', (req, res) => workflowExecutionController.getWorkflowExecutionStats(req, res));
     return router;
 }
-//***REMOVED*** sourceMappingURL=erp-api-controller.js.map
+//# sourceMappingURL=erp-api-controller.js.map

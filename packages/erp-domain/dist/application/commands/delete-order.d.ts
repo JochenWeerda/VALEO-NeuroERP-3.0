@@ -5,4 +5,4 @@ export declare class DeleteOrderCommand {
     constructor(service: OrderDomainService);
     execute(id: OrderId): Promise<void>;
 }
-//***REMOVED*** sourceMappingURL=delete-order.d.ts.map
+//# sourceMappingURL=delete-order.d.ts.map

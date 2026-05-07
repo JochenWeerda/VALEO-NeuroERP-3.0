@@ -1,9 +1,10 @@
 import { inject, injectable } from 'inversify'
 import { SalesOffer, SalesOfferStatus } from '../../core/entities/sales-offer.entity'
-import { CustomerInquiry } from '../../core/entities/customer-inquiry.entity'
+import { CustomerInquiry, CustomerInquiryStatus } from '../../core/entities/customer-inquiry.entity'
 import { SalesOfferRepository } from '../../core/repositories/sales-offer.repository'
 import { AuditService } from './audit.service'
 import { WorkflowService } from './workflow.service'
+import { clampLimit, clampOffset, ListResult } from '../../presentation/types/api-pagination'
 
 export interface CreateSalesOfferData {
   offerNumber: string
@@ -39,7 +40,7 @@ export class SalesOfferService {
     private workflowService: WorkflowService
   ) {}
 
-  async createSalesOffer(data: CreateSalesOfferData): Promise<SalesOffer> {
+  async createSalesOffer(data: CreateSalesOfferData, auditActorId: string): Promise<SalesOffer> {
     // Validierung
     this.validateSalesOfferData(data)
 
@@ -57,7 +58,7 @@ export class SalesOfferService {
 
     // Audit-Log
     await this.auditService.log({
-      actorId: 'system', // TODO: Aus Context holen
+      actorId: auditActorId,
       entity: 'SalesOffer',
       entityId: savedSalesOffer.id,
       action: 'CREATE',
@@ -86,25 +87,38 @@ export class SalesOfferService {
       throw new Error('CustomerInquiry hat bereits ein SalesOffer')
     }
 
-    // SalesOffer aus CustomerInquiry erstellen
-    const salesOffer = SalesOffer.createFromCustomerInquiry(customerInquiry, data)
+    let ci = customerInquiry
+    if (ci.status === CustomerInquiryStatus.EINGEGANGEN) {
+      ci = ci.bearbeiten(ci.assignedTo)
+    }
+    if (ci.status !== CustomerInquiryStatus.BEARBEITET) {
+      throw new Error('CustomerInquiry muss vor Angebotserstellung im Status BEARBEITET sein (oder EINGEGANGEN für automatische Überführung)')
+    }
 
-    // Speichern
+    const salesOffer = SalesOffer.createFromCustomerInquiry(ci, data)
+
     const savedSalesOffer = await this.repository.save(salesOffer)
 
-    // Audit-Log
     await this.auditService.log({
       actorId,
       entity: 'SalesOffer',
       entityId: savedSalesOffer.id,
       action: 'CREATE_FROM_INQUIRY',
       after: savedSalesOffer,
-      tenantId: customerInquiry.tenantId
+      tenantId: ci.tenantId
     })
 
-    // CustomerInquiry Status aktualisieren
-    const updatedInquiry = customerInquiry.angebotErstellen()
-    // TODO: CustomerInquiry Repository aktualisieren
+    const afterInquiry = ci.angebotErstellen()
+
+    await this.auditService.log({
+      actorId,
+      entity: 'CustomerInquiry',
+      entityId: afterInquiry.id,
+      action: 'ANGEBOT_ERSTELLT',
+      before: ci,
+      after: afterInquiry,
+      tenantId: ci.tenantId
+    })
 
     return savedSalesOffer
   }
@@ -118,8 +132,20 @@ export class SalesOfferService {
     customerId?: string
     limit?: number
     offset?: number
-  }): Promise<SalesOffer[]> {
-    return this.repository.findByTenant(tenantId, options)
+  }): Promise<ListResult<SalesOffer>> {
+    const limit = clampLimit(options?.limit)
+    const offset = clampOffset(options?.offset)
+    const items = await this.repository.findByTenant(tenantId, {
+      status: options?.status,
+      customerId: options?.customerId,
+      limit,
+      offset,
+    })
+    const total = await this.repository.countByTenant(tenantId, {
+      status: options?.status,
+      customerId: options?.customerId,
+    })
+    return { items, total }
   }
 
   async getSalesOffersByCustomerInquiry(customerInquiryId: string, tenantId: string): Promise<SalesOffer[]> {
@@ -237,22 +263,41 @@ export class SalesOfferService {
       throw new Error('Nur Entwürfe können aktualisiert werden')
     }
 
-    // TODO: SalesOffer mit neuen Daten aktualisieren
-    // const updatedSalesOffer = salesOffer.update(data)
-    // const saved = await this.repository.update(updatedSalesOffer)
+    const updatedSalesOffer = new SalesOffer(
+      salesOffer.id,
+      salesOffer.offerNumber,
+      salesOffer.customerInquiryId,
+      salesOffer.customerId,
+      data.subject ?? salesOffer.subject,
+      data.description ?? salesOffer.description,
+      data.totalAmount ?? salesOffer.totalAmount,
+      salesOffer.currency,
+      data.validUntil ?? salesOffer.validUntil,
+      salesOffer.status,
+      salesOffer.tenantId,
+      data.contactPerson !== undefined ? data.contactPerson : salesOffer.contactPerson,
+      data.deliveryDate !== undefined ? data.deliveryDate : salesOffer.deliveryDate,
+      data.paymentTerms !== undefined ? data.paymentTerms : salesOffer.paymentTerms,
+      data.notes !== undefined ? data.notes : salesOffer.notes,
+      salesOffer.version + 1,
+      salesOffer.createdAt,
+      new Date(),
+      salesOffer.deletedAt
+    )
 
-    // Audit-Log
+    const saved = await this.repository.update(updatedSalesOffer)
+
     await this.auditService.log({
       actorId,
       entity: 'SalesOffer',
       entityId: id,
       action: 'UPDATE',
       before: salesOffer,
-      after: salesOffer, // TODO: updatedSalesOffer
+      after: saved,
       tenantId
     })
 
-    return salesOffer // TODO: saved
+    return saved
   }
 
   async deleteSalesOffer(id: string, tenantId: string, actorId: string): Promise<void> {

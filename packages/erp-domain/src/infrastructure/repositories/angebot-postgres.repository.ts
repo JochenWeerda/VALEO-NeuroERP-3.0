@@ -156,13 +156,19 @@ export class AngebotPostgresRepository implements AngebotRepository {
     })
   }
 
-  async countByTenant(tenantId: string, status?: AngebotStatus): Promise<number> {
+  async countByTenant(tenantId: string, filters?: {
+    status?: AngebotStatus
+    lieferantId?: string
+    anfrageId?: string
+  }): Promise<number> {
     const where: any = {
       tenantId,
       deletedAt: null
     }
 
-    if (status) where.status = status
+    if (filters?.status) where.status = filters.status
+    if (filters?.lieferantId) where.lieferantId = filters.lieferantId
+    if (filters?.anfrageId) where.anfrageId = filters.anfrageId
 
     return this.prisma.angebot.count({ where })
   }

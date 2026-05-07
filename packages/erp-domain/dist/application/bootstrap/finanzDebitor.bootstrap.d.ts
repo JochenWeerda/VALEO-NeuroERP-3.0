@@ -15,4 +15,4 @@ export interface FinanzDebitorModule {
     router: Router;
 }
 export declare function initFinanzDebitorModule({ pool }: FinanzDebitorBootstrapDependencies): FinanzDebitorModule;
-//***REMOVED*** sourceMappingURL=finanzDebitor.bootstrap.d.ts.map
+//# sourceMappingURL=finanzDebitor.bootstrap.d.ts.map

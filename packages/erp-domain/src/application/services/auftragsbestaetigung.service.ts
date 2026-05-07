@@ -4,6 +4,7 @@ import { AuftragsbestaetigungRepository } from '../../core/repositories/auftrags
 import { AuftragsbestaetigungStatus } from '../../core/entities/auftragsbestaetigung.entity'
 import { AuditService } from './audit.service'
 import { WorkflowService } from './workflow.service'
+import { clampLimit, clampOffset, ListResult } from '../../presentation/types/api-pagination'
 
 export interface CreateAuftragsbestaetigungData {
   bestaetigungsNummer: string
@@ -45,7 +46,7 @@ export class AuftragsbestaetigungService {
     private workflowService: WorkflowService
   ) {}
 
-  async createAuftragsbestaetigung(data: CreateAuftragsbestaetigungData): Promise<Auftragsbestaetigung> {
+  async createAuftragsbestaetigung(data: CreateAuftragsbestaetigungData, auditActorId: string): Promise<Auftragsbestaetigung> {
     // Validierung
     this.validateAuftragsbestaetigungData(data)
 
@@ -69,7 +70,7 @@ export class AuftragsbestaetigungService {
 
     // Audit-Log
     await this.auditService.log({
-      actorId: 'system', // TODO: Aus Context holen
+      actorId: auditActorId,
       entity: 'Auftragsbestaetigung',
       entityId: savedAb.id,
       action: 'CREATE',
@@ -89,8 +90,20 @@ export class AuftragsbestaetigungService {
     bestellungId?: string
     limit?: number
     offset?: number
-  }): Promise<Auftragsbestaetigung[]> {
-    return this.repository.findByTenant(tenantId, options)
+  }): Promise<ListResult<Auftragsbestaetigung>> {
+    const limit = clampLimit(options?.limit)
+    const offset = clampOffset(options?.offset)
+    const items = await this.repository.findByTenant(tenantId, {
+      status: options?.status,
+      bestellungId: options?.bestellungId,
+      limit,
+      offset,
+    })
+    const total = await this.repository.countByTenant(tenantId, {
+      status: options?.status,
+      bestellungId: options?.bestellungId,
+    })
+    return { items, total }
   }
 
   async getAuftragsbestaetigungByBestellung(bestellungId: string, tenantId: string): Promise<Auftragsbestaetigung | null> {
@@ -167,22 +180,38 @@ export class AuftragsbestaetigungService {
       throw new Error('Auftragsbestätigung nicht gefunden')
     }
 
-    // TODO: Auftragsbestätigung mit neuen Daten aktualisieren
-    // const updatedAb = ab.update(data)
-    // const saved = await this.repository.update(updatedAb)
+    if (ab.status !== AuftragsbestaetigungStatus.OFFEN) {
+      throw new Error('Nur offene Auftragsbestätigungen können aktualisiert werden')
+    }
 
-    // Audit-Log
+    const updatedAb = new Auftragsbestaetigung(
+      ab.id,
+      ab.bestaetigungsNummer,
+      ab.bestellungId,
+      ab.status,
+      data.bestaetigteTermine ?? ab.bestaetigteTermine,
+      data.preisabweichungen ?? ab.preisabweichungen,
+      ab.tenantId,
+      data.bemerkungen !== undefined ? data.bemerkungen : ab.bemerkungen,
+      ab.version + 1,
+      ab.createdAt,
+      new Date(),
+      ab.deletedAt
+    )
+
+    const saved = await this.repository.update(updatedAb)
+
     await this.auditService.log({
       actorId,
       entity: 'Auftragsbestaetigung',
       entityId: id,
       action: 'UPDATE',
       before: ab,
-      after: ab, // TODO: updatedAb
+      after: saved,
       tenantId
     })
 
-    return ab // TODO: saved
+    return saved
   }
 
   async deleteAuftragsbestaetigung(id: string, tenantId: string, actorId: string): Promise<void> {

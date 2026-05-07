@@ -2,6 +2,8 @@ import { Request, Response } from 'express'
 import { AuftragsbestaetigungService } from '../../application/services/auftragsbestaetigung.service'
 import { CreateAuftragsbestaetigungData } from '../../application/services/auftragsbestaetigung.service'
 import { AuftragsbestaetigungStatus } from '../../core/entities/auftragsbestaetigung.entity'
+import { clampLimit, clampOffset } from '../types/api-pagination'
+import { resolveActorId } from '../utils/request-context'
 
 export class AuftragsbestaetigungController {
   constructor(private auftragsbestaetigungService: AuftragsbestaetigungService) {}
@@ -9,7 +11,7 @@ export class AuftragsbestaetigungController {
   async createAuftragsbestaetigung(req: Request, res: Response): Promise<void> {
     try {
       const tenantId = req.headers['x-tenant-id'] as string
-      const actorId = req.user?.id || 'system' // TODO: Aus Auth-Middleware
+      const auditActorId = resolveActorId(req)
 
       const data: CreateAuftragsbestaetigungData = {
         bestaetigungsNummer: req.body.bestaetigungsNummer,
@@ -20,7 +22,7 @@ export class AuftragsbestaetigungController {
         bemerkungen: req.body.bemerkungen
       }
 
-      const ab = await this.auftragsbestaetigungService.createAuftragsbestaetigung(data)
+      const ab = await this.auftragsbestaetigungService.createAuftragsbestaetigung(data, auditActorId)
 
       res.status(201).json({
         success: true,
@@ -69,16 +71,18 @@ export class AuftragsbestaetigungController {
       const options = {
         status: req.query.status as any,
         bestellungId: req.query.bestellungId as string,
-        limit: req.query.limit ? parseInt(req.query.limit as string) : undefined,
-        offset: req.query.offset ? parseInt(req.query.offset as string) : undefined
+        limit: req.query.limit ? parseInt(req.query.limit as string, 10) : undefined,
+        offset: req.query.offset ? parseInt(req.query.offset as string, 10) : undefined
       }
 
-      const abs = await this.auftragsbestaetigungService.getAuftragsbestaetigungenByTenant(tenantId, options)
+      const { items, total } = await this.auftragsbestaetigungService.getAuftragsbestaetigungenByTenant(tenantId, options)
+      const limit = clampLimit(options.limit)
+      const offset = clampOffset(options.offset)
 
       res.json({
         success: true,
-        data: abs,
-        total: abs.length // TODO: Pagination-Info
+        data: items,
+        pagination: { total, limit, offset }
       })
     } catch (error) {
       console.error('Fehler beim Laden der Auftragsbestätigungen:', error)
@@ -121,7 +125,7 @@ export class AuftragsbestaetigungController {
     try {
       const { id } = req.params
       const tenantId = req.headers['x-tenant-id'] as string
-      const actorId = req.user?.id || 'system'
+      const actorId = resolveActorId(req)
 
       const ab = await this.auftragsbestaetigungService.pruefenAuftragsbestaetigung(id as string, tenantId, actorId)
 
@@ -142,7 +146,7 @@ export class AuftragsbestaetigungController {
     try {
       const { id } = req.params
       const tenantId = req.headers['x-tenant-id'] as string
-      const actorId = req.user?.id || 'system'
+      const actorId = resolveActorId(req)
 
       const ab = await this.auftragsbestaetigungService.bestaetigenAuftragsbestaetigung(id as string, tenantId, actorId)
 
@@ -163,7 +167,7 @@ export class AuftragsbestaetigungController {
     try {
       const { id } = req.params
       const tenantId = req.headers['x-tenant-id'] as string
-      const actorId = req.user?.id || 'system'
+      const actorId = resolveActorId(req)
 
       const ab = await this.auftragsbestaetigungService.updateAuftragsbestaetigung(id as string, tenantId, req.body, actorId)
 
@@ -184,7 +188,7 @@ export class AuftragsbestaetigungController {
     try {
       const { id } = req.params
       const tenantId = req.headers['x-tenant-id'] as string
-      const actorId = req.user?.id || 'system'
+      const actorId = resolveActorId(req)
 
       await this.auftragsbestaetigungService.deleteAuftragsbestaetigung(id as string, tenantId, actorId)
 

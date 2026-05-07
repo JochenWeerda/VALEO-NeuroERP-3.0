@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.resolveErpController = exports.resolveErpDomainService = void 0;
+exports.resolveErpDomainService = void 0;
 exports.registerErpDomain = registerErpDomain;
 const utilities_1 = require("@valero-neuroerp/utilities");
 const in_memory_order_repository_1 = require("./infrastructure/repositories/in-memory-order-repository");
@@ -10,7 +10,6 @@ const get_order_1 = require("./application/queries/get-order");
 const create_order_1 = require("./application/commands/create-order");
 const update_order_status_1 = require("./application/commands/update-order-status");
 const delete_order_1 = require("./application/commands/delete-order");
-const erp_api_controller_1 = require("./presentation/controllers/erp-api-controller");
 const TOKENS = {
     repository: 'erp.order.repository',
     service: 'erp.order.service',
@@ -31,11 +30,21 @@ function registerErpDomain(options = {}) {
     locator.registerFactory(TOKENS.createOrder, () => new create_order_1.CreateOrderCommand(locator.resolve(TOKENS.service)));
     locator.registerFactory(TOKENS.updateOrderStatus, () => new update_order_status_1.UpdateOrderStatusCommand(locator.resolve(TOKENS.service)));
     locator.registerFactory(TOKENS.deleteOrder, () => new delete_order_1.DeleteOrderCommand(locator.resolve(TOKENS.service)));
-    locator.registerFactory(TOKENS.controller, () => new erp_api_controller_1.ERPApiController(locator.resolve(TOKENS.listOrders), locator.resolve(TOKENS.getOrder), locator.resolve(TOKENS.createOrder), locator.resolve(TOKENS.updateOrderStatus), locator.resolve(TOKENS.deleteOrder)));
+    // TODO: ERPApiController not implemented yet
+    // locator.registerFactory(TOKENS.controller, () =>
+    //   new ERPApiController(
+    //     locator.resolve<ListOrdersQuery>(TOKENS.listOrders),
+    //     locator.resolve<GetOrderQuery>(TOKENS.getOrder),
+    //     locator.resolve<CreateOrderCommand>(TOKENS.createOrder),
+    //     locator.resolve<UpdateOrderStatusCommand>(TOKENS.updateOrderStatus),
+    //     locator.resolve<DeleteOrderCommand>(TOKENS.deleteOrder),
+    //   ),
+    // );
     return locator;
 }
 const resolveErpDomainService = (locator = utilities_1.ServiceLocator.getInstance()) => locator.resolve(TOKENS.service);
 exports.resolveErpDomainService = resolveErpDomainService;
-const resolveErpController = (locator = utilities_1.ServiceLocator.getInstance()) => locator.resolve(TOKENS.controller);
-exports.resolveErpController = resolveErpController;
-//***REMOVED*** sourceMappingURL=bootstrap.js.map
+// TODO: ERPApiController not implemented yet
+// export const resolveErpController = (locator: ServiceLocator = ServiceLocator.getInstance()): ERPApiController =>
+//   locator.resolve<ERPApiController>(TOKENS.controller);
+//# sourceMappingURL=bootstrap.js.map

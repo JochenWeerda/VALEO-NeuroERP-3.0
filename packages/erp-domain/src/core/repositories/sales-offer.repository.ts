@@ -16,5 +16,8 @@ export interface SalesOfferRepository {
   findValid(tenantId: string): Promise<SalesOffer[]>
   update(salesOffer: SalesOffer): Promise<SalesOffer>
   delete(id: string, tenantId: string): Promise<void>
-  countByTenant(tenantId: string, status?: SalesOfferStatus): Promise<number>
+  countByTenant(tenantId: string, filters?: {
+    status?: SalesOfferStatus
+    customerId?: string
+  }): Promise<number>
 }

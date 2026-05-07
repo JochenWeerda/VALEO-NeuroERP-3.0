@@ -3,7 +3,7 @@ import type { Config } from 'jest';
 const config: Config = {
   preset: 'ts-jest',
   testEnvironment: 'node',
-  roots: ['<rootDir>/domains/erp/tests', '<rootDir>/domains/finance/tests', '<rootDir>/src'],
+  roots: ['<rootDir>/domains/erp/tests', '<rootDir>/domains/finance/tests', '<rootDir>/src', '<rootDir>/packages/erp-domain/src'],
   testMatch: ['**/*.spec.ts', '**/*.test.ts'],
   transform: {
     '^.+\\.(ts|tsx)$': ['ts-jest', {

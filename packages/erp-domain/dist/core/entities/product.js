@@ -146,4 +146,4 @@ function formatPrice(price, currency = 'EUR') {
         currency
     }).format(price);
 }
-//***REMOVED*** sourceMappingURL=product.js.map
+//# sourceMappingURL=product.js.map

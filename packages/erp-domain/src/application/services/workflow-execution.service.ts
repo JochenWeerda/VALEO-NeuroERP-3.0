@@ -2,6 +2,7 @@ import { inject, injectable } from 'inversify'
 import { WorkflowExecution, WorkflowExecutionStatus } from '../../core/entities/workflow-rule.entity'
 import { WorkflowExecutionRepository } from '../../core/repositories/workflow-execution.repository'
 import { AuditService } from './audit.service'
+import { clampLimit, clampOffset, ListResult } from '../../presentation/types/api-pagination'
 
 export interface CreateWorkflowExecutionData {
   ruleId: string
@@ -52,8 +53,22 @@ export class WorkflowExecutionService {
     actorId?: string
     limit?: number
     offset?: number
-  }): Promise<WorkflowExecution[]> {
-    return this.repository.findByTenant(tenantId, options)
+  }): Promise<ListResult<WorkflowExecution>> {
+    const limit = clampLimit(options?.limit)
+    const offset = clampOffset(options?.offset)
+    const items = await this.repository.findByTenant(tenantId, {
+      status: options?.status,
+      ruleId: options?.ruleId,
+      actorId: options?.actorId,
+      limit,
+      offset,
+    })
+    const total = await this.repository.countByTenant(tenantId, {
+      status: options?.status,
+      ruleId: options?.ruleId,
+      actorId: options?.actorId,
+    })
+    return { items, total }
   }
 
   async getWorkflowExecutionsByRule(ruleId: string, tenantId: string): Promise<WorkflowExecution[]> {

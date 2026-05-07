@@ -78,4 +78,4 @@ export declare class ProductEntity implements Product {
 export declare function createProduct(command: CreateProductCommand): ProductEntity;
 export declare function isValidProductId(id: string): boolean;
 export declare function formatPrice(price: number, currency?: string): string;
-//***REMOVED*** sourceMappingURL=product.d.ts.map
+//# sourceMappingURL=product.d.ts.map

@@ -1,6 +1,7 @@
 import { inject, injectable } from 'inversify'
 import { AuditLog } from '../../core/entities/workflow-rule.entity'
 import { AuditLogRepository } from '../../core/repositories/audit-log.repository'
+import { clampLimit, clampOffset, ListResult } from '../../presentation/types/api-pagination'
 
 export interface LogAuditData {
   actorId: string
@@ -44,8 +45,23 @@ export class AuditLogService {
     toDate?: Date
     limit?: number
     offset?: number
-  }): Promise<AuditLog[]> {
-    return this.repository.findByTenant(tenantId, options)
+  }): Promise<ListResult<AuditLog>> {
+    const limit = clampLimit(options?.limit)
+    const offset = clampOffset(options?.offset)
+    const items = await this.repository.findByTenant(tenantId, {
+      ...options,
+      limit,
+      offset,
+    })
+    const total = await this.repository.countByTenant(tenantId, {
+      entity: options?.entity,
+      entityId: options?.entityId,
+      actorId: options?.actorId,
+      action: options?.action,
+      fromDate: options?.fromDate,
+      toDate: options?.toDate,
+    })
+    return { items, total }
   }
 
   async getRecentAuditLogs(tenantId: string, limit: number = 100): Promise<AuditLog[]> {

@@ -74,4 +74,4 @@ export declare const DEFAULT_ORDER_LIMIT = 50;
 export declare function createOrder(input: CreateOrderInput): Order;
 export declare function withOrderStatus(order: Order, status: OrderStatus): Order;
 export declare function cloneOrder(order: Order): Order;
-//***REMOVED*** sourceMappingURL=order.d.ts.map
+//# sourceMappingURL=order.d.ts.map

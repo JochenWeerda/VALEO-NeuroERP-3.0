@@ -85,4 +85,4 @@ export declare class InventoryEntity implements Inventory {
     private static validateCreateCommand;
     private static validateUpdateCommand;
 }
-//***REMOVED*** sourceMappingURL=inventory.d.ts.map
+//# sourceMappingURL=inventory.d.ts.map

@@ -14,4 +14,4 @@ function initFinanzBankkontoModule({ pool }) {
     const router = (0, finanzBankkonto_controller_1.buildFinanzBankkontoRouter)({ service, baseRoute: '/erp/finance/bank-accounts' });
     return { repository, service, router };
 }
-//***REMOVED*** sourceMappingURL=finanzBankkonto.bootstrap.js.map
+//# sourceMappingURL=finanzBankkonto.bootstrap.js.map

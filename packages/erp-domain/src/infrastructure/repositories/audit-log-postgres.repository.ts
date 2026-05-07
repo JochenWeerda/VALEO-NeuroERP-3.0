@@ -9,24 +9,27 @@ export class AuditLogPostgresRepository implements AuditLogRepository {
 
   async save(log: AuditLog): Promise<AuditLog> {
     const data = {
-      id: log.id,
       actorId: log.actorId,
       entity: log.entity,
       entityId: log.entityId,
       action: log.action,
-      before: log.before,
-      after: log.after,
-      timestamp: log.timestamp,
+      before: log.before ?? undefined,
+      after: log.after ?? undefined,
+      timestamp: log.timestamp ?? new Date(),
       tenantId: log.tenantId,
-      ipAddress: log.ipAddress,
-      userAgent: log.userAgent
+      ipAddress: log.ipAddress ?? undefined,
+      userAgent: log.userAgent ?? undefined,
     }
 
-    const saved = await this.prisma.auditLog.upsert({
-      where: { id: log.id },
-      update: data,
-      create: data
-    })
+    let saved
+    if (log.id) {
+      saved = await this.prisma.auditLog.update({
+        where: { id: log.id },
+        data,
+      })
+    } else {
+      saved = await this.prisma.auditLog.create({ data })
+    }
 
     return this.mapToEntity(saved)
   }
@@ -119,6 +122,7 @@ export class AuditLogPostgresRepository implements AuditLogRepository {
 
   async countByTenant(tenantId: string, options?: {
     entity?: string
+    entityId?: string
     actorId?: string
     action?: string
     fromDate?: Date
@@ -127,6 +131,7 @@ export class AuditLogPostgresRepository implements AuditLogRepository {
     const where: any = { tenantId }
 
     if (options?.entity) where.entity = options.entity
+    if (options?.entityId) where.entityId = options.entityId
     if (options?.actorId) where.actorId = options.actorId
     if (options?.action) where.action = options.action
 

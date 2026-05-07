@@ -16,18 +16,19 @@ export class PurchaseOrderController {
       const filters: any = {}
       if (status) filters.status = status
       if (supplierId) filters.supplierId = supplierId
-      filters.limit = parseInt(limit as string)
-      filters.offset = parseInt(offset as string)
+      filters.limit = parseInt(limit as string, 10)
+      filters.offset = parseInt(offset as string, 10)
 
       const orders = await this.service.findByTenant(tenantId, filters)
-      const total = orders.length // TODO: Implement countByTenant
+      const { limit: flimit, offset: foffset, ...countFilters } = filters
+      const total = await this.service.countByTenant(tenantId, countFilters)
 
       res.json({
         success: true,
         data: orders,
         total,
-        limit: filters.limit,
-        offset: filters.offset
+        limit: flimit,
+        offset: foffset
       })
     } catch (error) {
       console.error('Error listing purchase orders:', error)

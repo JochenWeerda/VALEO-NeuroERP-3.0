@@ -55,4 +55,4 @@ function buildFinanzKreditorRouter({ service, baseRoute = '/finanzKreditor' }) {
     });
     return router;
 }
-//***REMOVED*** sourceMappingURL=finanzKreditor.controller.js.map
+//# sourceMappingURL=finanzKreditor.controller.js.map
