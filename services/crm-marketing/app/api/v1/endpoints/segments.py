@@ -34,6 +34,7 @@ from app.schemas.segment import (
 )
 from app.services.events import get_event_publisher
 from app.services.segment_calculator import SegmentCalculator
+from app.api.deps import resolve_actor_id
 
 router = APIRouter()
 
@@ -42,6 +43,7 @@ router = APIRouter()
 async def create_segment(
     segment_data: SegmentCreate,
     db: AsyncSession = Depends(get_db),
+    created_by: str = Depends(resolve_actor_id),
 ):
     """Create a new segment."""
     segment = Segment(
@@ -51,7 +53,7 @@ async def create_segment(
         type=SegmentType(segment_data.type),
         status=SegmentStatus(segment_data.status),
         rules=segment_data.rules,
-        created_by="system",  # TODO: Get from auth context
+        created_by=created_by,
     )
     
     db.add(segment)

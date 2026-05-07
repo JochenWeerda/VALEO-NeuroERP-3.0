@@ -78,6 +78,7 @@ async def list_opportunities(
     tenant_id: Optional[str] = Query(None),
     status: Optional[str] = Query(None),
     assigned_to: Optional[str] = Query(None),
+    contact_id: Optional[UUID] = Query(None, description="Filter by linked contact"),
     skip: int = Query(0, ge=0),
     limit: int = Query(100, ge=1, le=1000),
     db: AsyncSession = Depends(get_db),
@@ -90,6 +91,8 @@ async def list_opportunities(
         filters.append(OpportunityModel.status == status)
     if assigned_to:
         filters.append(OpportunityModel.assigned_to == assigned_to)
+    if contact_id:
+        filters.append(OpportunityModel.contact_id == contact_id)
 
     count_stmt = select(func.count()).select_from(OpportunityModel)
     if filters:
@@ -115,6 +118,26 @@ async def list_opportunities(
         has_next=(skip + limit) < total,
         has_prev=skip > 0,
     )
+
+
+@router.post("/by-contact/{contact_id}/unlink-references", status_code=status.HTTP_204_NO_CONTENT)
+async def unlink_opportunity_contact_references(
+    contact_id: UUID,
+    tenant_id: str = Query(..., description="Tenant ID"),
+    changed_by: str = Query(default="gdpr-orchestration"),
+    db: AsyncSession = Depends(get_db),
+):
+    """Entfernt Kontaktbezug an Opportunities (Retention an Pipeline-Daten moeglich)."""
+    stmt = select(OpportunityModel).where(
+        OpportunityModel.tenant_id == tenant_id,
+        OpportunityModel.contact_id == contact_id,
+    )
+    result = await db.execute(stmt)
+    rows = result.scalars().all()
+    for opp in rows:
+        opp.contact_id = None
+        opp.updated_by = changed_by
+    await db.commit()
 
 
 @router.get("/{opportunity_id}", response_model=Opportunity)

@@ -5,7 +5,7 @@ from uuid import UUID
 from typing import List
 
 from fastapi import APIRouter, Depends, HTTPException, Query
-from sqlalchemy import select, and_, func
+from sqlalchemy import select, and_, func, delete, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.models import (
@@ -18,6 +18,8 @@ from app.db.models import (
     CampaignStatus,
     RecipientStatus,
     CampaignEventType,
+    Segment,
+    SegmentMember,
 )
 from app.db.session import get_db
 from app.schemas.campaign import (
@@ -35,8 +37,60 @@ from app.schemas.campaign import (
     CampaignTestRequest,
 )
 from app.services.events import get_event_publisher
+from app.api.deps import resolve_actor_id, require_tenant_id
 
 router = APIRouter()
+
+
+@router.get("/recipients/by-contact", response_model=List[CampaignRecipientSchema])
+async def list_recipients_for_contact(
+    contact_id: UUID = Query(...),
+    tenant_id: str = Query(..., description="Tenant ID"),
+    db: AsyncSession = Depends(get_db),
+):
+    """Alle Kampagnen-Empfaenger fuer einen Kontakt (DSGVO-Export)."""
+    stmt = (
+        select(CampaignRecipient)
+        .join(Campaign, CampaignRecipient.campaign_id == Campaign.id)
+        .where(
+            CampaignRecipient.contact_id == contact_id,
+            Campaign.tenant_id == tenant_id,
+        )
+        .order_by(CampaignRecipient.sent_at.desc())
+    )
+    result = await db.execute(stmt)
+    return list(result.scalars().all())
+
+
+@router.post("/contact-data/anonymize", status_code=204)
+async def anonymize_marketing_contact_data(
+    contact_id: UUID = Query(...),
+    tenant_id: str = Depends(require_tenant_id),
+    db: AsyncSession = Depends(get_db),
+    _actor: str = Depends(resolve_actor_id),
+):
+    """Pseudonymisiert Empfaenger-PII und entfernt Segment-Mitgliedschaften fuer einen Kontakt."""
+    anon_mail = f"deleted-{contact_id}@anonymized.invalid"
+
+    await db.execute(
+        update(CampaignRecipient)
+        .where(
+            CampaignRecipient.contact_id == contact_id,
+            CampaignRecipient.campaign_id.in_(
+                select(Campaign.id).where(Campaign.tenant_id == tenant_id)
+            ),
+        )
+        .values(email=anon_mail, phone=None)
+    )
+
+    segment_ids_subq = select(Segment.id).where(Segment.tenant_id == tenant_id)
+    await db.execute(
+        delete(SegmentMember).where(
+            SegmentMember.contact_id == contact_id,
+            SegmentMember.segment_id.in_(segment_ids_subq),
+        )
+    )
+    await db.commit()
 
 
 # Campaign CRUD
@@ -44,6 +98,7 @@ router = APIRouter()
 async def create_campaign(
     campaign_data: CampaignCreate,
     db: AsyncSession = Depends(get_db),
+    created_by: str = Depends(resolve_actor_id),
 ):
     """Create a new campaign."""
     campaign = Campaign(
@@ -60,7 +115,7 @@ async def create_campaign(
         subject=campaign_data.subject,
         budget=campaign_data.budget,
         settings=campaign_data.settings,
-        created_by="system",  # TODO: Get from auth context
+        created_by=created_by,
     )
     
     db.add(campaign)

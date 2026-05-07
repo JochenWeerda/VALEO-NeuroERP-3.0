@@ -2,8 +2,11 @@
 
 from uuid import UUID
 from typing import Dict, Any
-import httpx
+import asyncio
 import logging
+import re
+import smtplib
+from email.message import EmailMessage
 from datetime import datetime
 
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -19,10 +22,12 @@ class EmailSender:
     
     def __init__(self, db: AsyncSession):
         self.db = db
-        self.smtp_host = "localhost"  # TODO: Get from config
-        self.smtp_port = 587
-        self.smtp_user = None  # TODO: Get from config
-        self.smtp_password = None  # TODO: Get from config
+        self.smtp_host = settings.SMTP_HOST
+        self.smtp_port = settings.SMTP_PORT
+        self.smtp_user = settings.SMTP_USER
+        self.smtp_password = settings.SMTP_PASSWORD
+        self.smtp_from = settings.SMTP_FROM
+        self.smtp_use_tls = settings.SMTP_USE_TLS
     
     def _render_template(self, template: str, variables: Dict[str, Any]) -> str:
         """Render template with variables."""
@@ -39,11 +44,41 @@ class EmailSender:
         from_email: str,
         from_name: str | None = None,
     ) -> bool:
-        """Send email via SMTP or email service."""
-        # TODO: Implement actual email sending
-        # For now, just log
-        logger.info(f"Sending email to {to_email}: {subject}")
-        return True
+        """Send email via SMTP (läuft in einem Worker-Thread)."""
+        if not self.smtp_host:
+            logger.warning("SMTP_HOST nicht gesetzt — E-Mail wird nicht versendet (Dry-Run)")
+            logger.info("(dry-run) would send to %s: %s", to_email, subject)
+            return False
+        if not to_email.strip():
+            return False
+
+        def _sync_send() -> None:
+            msg = EmailMessage()
+            msg["Subject"] = subject
+            msg["From"] = from_email if not from_name else f"{from_name} <{from_email}>"
+            msg["To"] = to_email.strip()
+            plain = re.sub(r"<[^>]+>", " ", body)
+            plain = re.sub(r"\s+", " ", plain).strip() or body
+            msg.set_content(plain)
+            if "<" in body and ">" in body:
+                msg.add_alternative(body, subtype="html")
+            timeout = float(settings.SMTP_TIMEOUT_SECONDS)
+            host = self.smtp_host
+            port = int(self.smtp_port or 587)
+            with smtplib.SMTP(host, port, timeout=float(timeout)) as smtp:
+                if self.smtp_use_tls:
+                    smtp.starttls()
+                if self.smtp_user and self.smtp_password:
+                    smtp.login(self.smtp_user, self.smtp_password)
+                smtp.send_message(msg)
+
+        try:
+            await asyncio.to_thread(_sync_send)
+            logger.info("E-Mail erfolgreich an %s gesendet: %s", to_email, subject)
+            return True
+        except Exception:
+            logger.exception("SMTP Versand fehlgeschlagen: %s", to_email)
+            return False
     
     async def send_campaign_email(
         self,
@@ -62,8 +97,8 @@ class EmailSender:
                 return False
         
         # Get subject and body
-        subject = campaign.subject or template.subject_template or ""
-        body = template.body_template
+        subject = campaign.subject or template.subject or ""
+        body = template.body_html or template.body_text or ""
         
         # Render template with variables
         variables = {
@@ -92,7 +127,7 @@ class EmailSender:
             to_email=recipient.email or "",
             subject=subject,
             body=body,
-            from_email=campaign.sender_email or "noreply@example.com",
+            from_email=(campaign.sender_email or settings.SMTP_FROM or self.smtp_from or "noreply@example.com"),
             from_name=campaign.sender_name,
         )
         
