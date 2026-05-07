@@ -1,0 +1,21 @@
+id: HR-TIME-001
+status: reserviert
+owner: Codex
+goal: >
+  Lizenz- und Zielarchitektur fuer deutsche Abwesenheitsverwaltung, Zeiterfassung
+  und VALEO-eigenen Driver-Time-Layer festhalten.
+file_ownership:
+  - docs/agent-ops/active-workboard.md
+  - docs/agent-ops/slices/HR-TIME-001.yaml
+  - docs/project-context/hr-time-absence-driver-integration-2026-05-07.md
+  - docs/project-context/open-gaps-and-known-issues.md
+acceptance_criteria: >
+  Urlaubsverwaltung wird als Apache-2.0-Abwesenheitskandidat bewertet; AGPL/GPL-Zeiterfassung
+  ist als Codebasis ausgeschlossen; VALEO-Driver-Time-Layer, Integrationsgrenzen,
+  Pilotumfang und Lizenzrisiken sind dokumentiert.
+checks:
+  - python scripts/agent_workboard_supervisor.py validate
+  - node scripts/docs-governance-check.cjs
+risks: >
+  Finale Rechtspruefung, Anbieter-AVV/DPA und produktive Tacho-/Telematik-Schnittstellen
+  liegen ausserhalb des Repos.
