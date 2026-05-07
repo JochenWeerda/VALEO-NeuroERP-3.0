@@ -3,9 +3,8 @@
 from datetime import datetime
 from uuid import UUID, uuid4
 from pathlib import Path
+import asyncio
 import json
-import csv
-import os
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Request, File, UploadFile
 from fastapi.responses import FileResponse
@@ -34,7 +33,14 @@ from app.schemas.gdpr import (
     GDPRCheckResponse,
 )
 from app.config.settings import settings
+from app.services.privacy_erasure.repository_factory import build_privacy_erasure_repository
+from app.services.privacy_erasure.service import PrivacyErasureService
 from app.services.events import get_event_publisher
+from app.gdpr_retention import LEGAL_HOLD_NOTE, deletion_audit_suffix
+from app.services.module_export import collect_contact_modules
+from app.services.notification_mail import send_verification_email_async
+from app.services.export_bundle import write_csv, write_json, write_pdf
+from app.services.deletion_flow import orchestrate_erasure
 
 router = APIRouter()
 
@@ -78,7 +84,24 @@ async def create_gdpr_request(
         verification_token = uuid4()
         gdpr_request.verification_token = verification_token
         await db.commit()
-        # TODO: Send verification email
+
+        email_to = request_data.requested_by if "@" in request_data.requested_by else None
+        if not email_to:
+            profile = await collect_contact_modules(
+                tenant_id=request_data.tenant_id,
+                contact_id=request_data.contact_id,
+                data_areas=["contacts"],
+            )
+            mc = profile.get("modules", {}).get("crm_core_contact")
+            if isinstance(mc, dict) and mc.get("email"):
+                email_to = str(mc["email"])
+
+        if email_to:
+            await send_verification_email_async(
+                to_email=email_to,
+                verification_token=str(verification_token),
+                request_id=str(gdpr_request.id),
+            )
     
     # Publish event
     event_publisher = get_event_publisher()
@@ -236,39 +259,41 @@ async def export_gdpr_data(
     if gdpr_request.status != GDPRRequestStatus.IN_PROGRESS:
         raise HTTPException(status_code=400, detail="Request must be verified and in progress")
     
-    # TODO: Collect data from all CRM modules
-    # This is a placeholder - actual implementation would query all services
+    module_payload = await collect_contact_modules(
+        tenant_id=gdpr_request.tenant_id,
+        contact_id=gdpr_request.contact_id,
+        data_areas=list(export_data.data_areas),
+    )
+
     export_data_dict = {
         "contact_id": str(gdpr_request.contact_id),
         "exported_at": datetime.utcnow().isoformat(),
         "data_areas": export_data.data_areas,
-        "contacts": [],  # TODO: Fetch from crm-core
-        "opportunities": [],  # TODO: Fetch from crm-sales
-        "activities": [],  # TODO: Fetch from crm-sales
-        "consents": [],  # TODO: Fetch from crm-consent
-        "campaigns": [],  # TODO: Fetch from crm-marketing
+        "modules": module_payload.get("modules", {}),
     }
-    
-    # Generate export file
+
     export_dir = Path(settings.EXPORT_STORAGE_PATH)
     export_dir.mkdir(parents=True, exist_ok=True)
-    
+
     file_name = f"gdpr_export_{gdpr_request.id}_{datetime.utcnow().strftime('%Y%m%d_%H%M%S')}"
-    
+
     if export_data.format == "json":
         file_path = export_dir / f"{file_name}.json"
-        with open(file_path, "w", encoding="utf-8") as f:
-            json.dump(export_data_dict, f, indent=2, ensure_ascii=False)
+        await asyncio.to_thread(write_json, file_path, export_data_dict)
     elif export_data.format == "csv":
         file_path = export_dir / f"{file_name}.csv"
-        # TODO: Convert to CSV format
-        with open(file_path, "w", encoding="utf-8", newline="") as f:
-            writer = csv.writer(f)
-            writer.writerow(["Contact ID", "Exported At", "Data Areas"])
-            writer.writerow([str(gdpr_request.contact_id), datetime.utcnow().isoformat(), ", ".join(export_data.data_areas)])
+        await asyncio.to_thread(write_csv, file_path, export_data_dict)
+    elif export_data.format == "pdf":
+        file_path = export_dir / f"{file_name}.pdf"
+        await asyncio.to_thread(
+            write_pdf,
+            file_path,
+            export_data_dict,
+            f"GDPR Export {gdpr_request.id}",
+        )
     else:
         raise HTTPException(status_code=400, detail=f"Unsupported format: {export_data.format}")
-    
+
     # Update request
     gdpr_request.response_data = export_data_dict
     gdpr_request.response_file_path = str(file_path)
@@ -319,14 +344,44 @@ async def delete_gdpr_data(
     
     if gdpr_request.status != GDPRRequestStatus.IN_PROGRESS:
         raise HTTPException(status_code=400, detail="Request must be verified and in progress")
-    
-    # TODO: Implement actual deletion/anonymization logic
-    # This would call anonymization services for all modules
-    # For now, we just mark as completed
-    
+
+    if settings.PRIVACY_GATE_GDPR_DELETE_BEHIND_DECISION:
+        repo = build_privacy_erasure_repository(db)
+        pec = PrivacyErasureService(repo)
+        if not await pec.has_successful_execute_for_request(
+            tenant_id=gdpr_request.tenant_id,
+            request_id=gdpr_request.id,
+            subject_id=gdpr_request.contact_id,
+            anonymize_only=delete_data.anonymize_only,
+        ):
+            raise HTTPException(
+                status_code=428,
+                detail=(
+                    "Erasure requires prior successful POST /api/v1/privacy/erasure-requests/"
+                    f"{request_id}/evaluate and .../execute "
+                    f"(PRIVACY_GATE_GDPR_DELETE_BEHIND_DECISION)."
+                ),
+            )
+        erasure_log = {
+            "via": "prior_privacy_execute",
+            "skipped_duplicate_orchestration": True,
+            "anonymize_only": delete_data.anonymize_only,
+        }
+    else:
+        erasure_log = await orchestrate_erasure(
+            tenant_id=gdpr_request.tenant_id,
+            contact_id=gdpr_request.contact_id,
+            anonymize_only=delete_data.anonymize_only,
+        )
+
     gdpr_request.status = GDPRRequestStatus.COMPLETED
     gdpr_request.completed_at = datetime.utcnow()
-    gdpr_request.notes = f"Data {'anonymized' if delete_data.anonymize_only else 'deleted'}. Reason: {delete_data.reason or 'GDPR request'}"
+    gdpr_request.notes = (
+        f"Data {'anonymized' if delete_data.anonymize_only else 'deleted'}. "
+        f"Reason: {delete_data.reason or 'GDPR request'}. "
+        f"{LEGAL_HOLD_NOTE}{deletion_audit_suffix()} "
+        f"Orchestration: {json.dumps(erasure_log, ensure_ascii=False)}"
+    )
     gdpr_request.updated_by = changed_by or "system"
     gdpr_request.updated_at = datetime.utcnow()
     

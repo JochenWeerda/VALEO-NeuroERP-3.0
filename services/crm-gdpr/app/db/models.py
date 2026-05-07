@@ -4,7 +4,7 @@ from datetime import datetime
 from enum import Enum
 from uuid import UUID, uuid4
 
-from sqlalchemy import Boolean, Column, DateTime, Enum as SQLEnum, ForeignKey, String, Text, JSON
+from sqlalchemy import Boolean, DateTime, Enum as SQLEnum, ForeignKey, String, Text
 from sqlalchemy.dialects.postgresql import UUID as PGUUID, JSONB
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
@@ -126,3 +126,72 @@ class GDPRRequestHistory(Base):
     request: Mapped["GDPRRequest"] = relationship("GDPRRequest", back_populates="history")
 
 
+class PrivacyErasureDecision(Base):
+    """Aus evaluate: versionierte Policy-Decision (Referenz zu GDPR-Antrag)."""
+
+    __tablename__ = "crm_privacy_erasure_decisions"
+
+    id: Mapped[UUID] = mapped_column(PGUUID(as_uuid=True), primary_key=True, default=uuid4)
+    gdpr_request_id: Mapped[UUID] = mapped_column(
+        PGUUID(as_uuid=True),
+        nullable=False,
+        index=True,
+    )
+    tenant_id: Mapped[str] = mapped_column(String(64), nullable=False, index=True)
+    subject_id: Mapped[UUID] = mapped_column(PGUUID(as_uuid=True), nullable=False, index=True)
+
+    decision: Mapped[str] = mapped_column(String(64), nullable=False)
+    allowed_actions: Mapped[list] = mapped_column(JSONB, nullable=False, default=list)
+    blocked_actions: Mapped[list] = mapped_column(JSONB, nullable=False, default=list)
+    reasons: Mapped[list] = mapped_column(JSONB, nullable=False, default=list)
+
+    policy_version: Mapped[str] = mapped_column(String(128), nullable=False)
+    requires_manual_review: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+    anonymize_only: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+    correlation_id_evaluate: Mapped[str] = mapped_column(String(128), nullable=False)
+
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=datetime.utcnow)
+    expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+
+
+class PrivacyErasureAudit(Base):
+    """Append-only Privacy/Erasure-Audit (keine Updates aus dem Anwendungscode)."""
+
+    __tablename__ = "crm_privacy_erasure_audit"
+
+    id: Mapped[UUID] = mapped_column(PGUUID(as_uuid=True), primary_key=True, default=uuid4)
+    gdpr_request_id: Mapped[UUID | None] = mapped_column(PGUUID(as_uuid=True), index=True)
+    decision_id: Mapped[UUID | None] = mapped_column(PGUUID(as_uuid=True), index=True)
+    tenant_id: Mapped[str] = mapped_column(String(64), nullable=False, index=True)
+    subject_ref: Mapped[str] = mapped_column(String(255), nullable=False)
+    actor_id: Mapped[str | None] = mapped_column(String(255))
+
+    policy_version: Mapped[str] = mapped_column(String(128), nullable=False)
+    decision: Mapped[str | None] = mapped_column(String(64))
+    reason_codes: Mapped[list] = mapped_column(JSONB, nullable=False, default=list)
+    allowed_actions: Mapped[list] = mapped_column(JSONB, nullable=False, default=list)
+    blocked_actions: Mapped[list] = mapped_column(JSONB, nullable=False, default=list)
+    executed_action: Mapped[str | None] = mapped_column(String(128))
+    result: Mapped[str] = mapped_column(String(64), nullable=False)
+    correlation_id: Mapped[str] = mapped_column(String(128), nullable=False)
+    extra: Mapped[dict | None] = mapped_column(JSONB)
+
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=datetime.utcnow)
+
+
+class PrivacyErasureExecution(Base):
+    """Erfolgreiche Execute-Operationen für Idempotenz und Delete-Gate."""
+
+    __tablename__ = "crm_privacy_erasure_executions"
+
+    idempotency_key: Mapped[str] = mapped_column(String(512), primary_key=True)
+    tenant_id: Mapped[str] = mapped_column(String(64), nullable=False, index=True)
+    gdpr_request_id: Mapped[UUID] = mapped_column(PGUUID(as_uuid=True), nullable=False, index=True)
+    subject_id: Mapped[UUID] = mapped_column(PGUUID(as_uuid=True), nullable=False)
+    decision_id: Mapped[UUID] = mapped_column(PGUUID(as_uuid=True), nullable=False, index=True)
+    action: Mapped[str] = mapped_column(String(128), nullable=False)
+    anonymize_only: Mapped[bool] = mapped_column(Boolean, nullable=False)
+
+    erasure_log: Mapped[dict | None] = mapped_column(JSONB)
+    correlation_id: Mapped[str] = mapped_column(String(128), nullable=False)
+    completed_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
