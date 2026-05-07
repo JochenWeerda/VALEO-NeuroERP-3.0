@@ -49,6 +49,9 @@ def test_resolve_runtime_options_defaults_match_spec_v1():
     assert opts["objective_strategy"] == "balance_then_cost"
     assert opts["policy_profile"] == "pmr_standard"
     assert opts["season_profile"] is None
+    assert opts["disable_milk_tradeoff_between_stages"] is False
+    assert opts["milk_tradeoff_max_pct_per_stage"] is None
+    assert opts["stage2_minimize_feed_eur_per_day"] is False
 
 
 def test_resolve_runtime_options_clamps_bad_values():

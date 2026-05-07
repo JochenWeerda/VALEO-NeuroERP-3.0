@@ -51,6 +51,7 @@ import {
   FAN_DEFAULTS,
   FAN_REFERENCE_PRESETS,
   defaultFeedingSystemConfig,
+  rationItemsToBaselineKgDm,
   type CowProfile,
   type FeedIngredient,
   type OptimizationResult,
@@ -241,6 +242,8 @@ type WizardData = {
   priorityWeights?: PriorityWeights
   wizardHardBounds?: WizardHardBounds
   wizardSoftGoals?: WizardSoftGoals
+  /** Letzte Ist-Ration kg TM/d je feed_id — nach erfolgreicher Optimierung gesetzt; fuer Baseline-Ziel. */
+  wizardBaselineKgDm?: Record<string, number>
 }
 
 function applyRationPatch(wd: WizardData, patch: RationAdjustmentApplyPatch): WizardData {
@@ -3697,6 +3700,11 @@ export default function Rationsoptimierung() {
             maximize_n_efficiency_rmd: sg.maximizeNEfficiencyRmd,
             prefer_homegrown: sg.preferHomegrown,
           },
+          ...(sg.minimizeDeviationFromBaseline &&
+          nextWizardData.wizardBaselineKgDm &&
+          Object.keys(nextWizardData.wizardBaselineKgDm).length > 0
+            ? { wizard_baseline_kg_dm: nextWizardData.wizardBaselineKgDm }
+            : {}),
         },
         ...(nextWizardData.policyProfile ? { policy_profile: nextWizardData.policyProfile } : {}),
         feeding_system_config: defaultFeedingSystemConfig(nextWizardData.feedingType),
@@ -3718,6 +3726,13 @@ export default function Rationsoptimierung() {
       setResult(data)
       setError(null)
       setView('workbench')
+      setWizardData((prev) => {
+        if (!prev) return prev
+        return {
+          ...prev,
+          wizardBaselineKgDm: rationItemsToBaselineKgDm(data.ration_items ?? []),
+        }
+      })
     },
     onError: (err: unknown) => {
       setError(getRationsApiErrorMessage(err, 'Optimierung fehlgeschlagen'))
