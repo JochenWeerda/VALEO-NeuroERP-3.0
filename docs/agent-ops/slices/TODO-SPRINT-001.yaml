@@ -1,0 +1,17 @@
+id: TODO-SPRINT-001
+status: abgeschlossen
+owner: Team
+goal: >
+  TODO-Umsetzungs-Roadmap (Meilensteine M-01–M-12) und Sprint-Zuordnung S1–S5 im Repo
+  und im Active Workboard als Referenz fuer Sprint- und Issue-Planung verankern.
+file_ownership:
+  - docs/agent-ops/active-workboard.md
+  - docs/agent-ops/slices/TODO-SPRINT-001.yaml
+  - docs/roadmap/TODO-UMSETZUNG-SPRINT-PLAN-S1-S5.md
+acceptance_criteria: >
+  Workboard-Slice mit ID TODO-SPRINT-001; kanonische Doku unter docs/roadmap/;
+  Kurztabelle S1–S5; Hinweis auf update_todos.py / TODO-next-slices.md.
+checks:
+  - python scripts/update_todos.py --repo-only
+risks: >
+  Die Meilensteine M-01–M-12 sind Abwicklungsarbeit; dieser Slice ist nur Planungs-/Referenz-Ebene.

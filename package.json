@@ -20,6 +20,8 @@
     "docs:lint": "node scripts/docs-markdown-check.cjs",
     "docs:governance": "node scripts/docs-governance-check.cjs",
     "docs:check": "pnpm run docs:lint && pnpm run docs:governance",
+    "todo:scan": "python scripts/update_todos.py --repo-only",
+    "todo:scan:full": "python scripts/update_todos.py",
     "test": "pnpm -r run test",
     "check:dupes": "node scripts/check-dupes.cjs",
     "guard:paths:staged": "node scripts/guard-forbidden-paths.cjs --staged",

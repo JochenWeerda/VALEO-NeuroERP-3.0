@@ -2,6 +2,33 @@
 
 Stand: `2026-04-24`
 
+## TODO-SPRINT-001
+
+**Von:** Cursor<br>
+**Owner:** (Team)<br>
+**Stand:** dokumentiert 2026-04-24<br>
+**Ziel des Slices:** Die abgestimmte **TODO-Umsetzungs-Roadmap** (Meilensteine **M-01–M-12**) und die **Sprint-Zuordnung S1–S5** im Repo und hier im Workboard als **einzige Sprint-/Issue-Referenz** festhalten; Abgleich mit automatisch erzeugten TODO-Reports möglich.
+
+**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/agent-ops/slices/TODO-SPRINT-001.yaml`, [docs/roadmap/TODO-UMSETZUNG-SPRINT-PLAN-S1-S5.md](../roadmap/TODO-UMSETZUNG-SPRINT-PLAN-S1-S5.md), Ergänzungen in `scripts/update_todos.py` (Slice-Ausgaben `docs/TODO-next-slices.md`, `docs/todo-report.json` → `next_slices`).
+
+**Kurzreferenz Meilensteine**
+
+| Sprint | Meilensteine |
+|--------|----------------|
+| S1 | M-01 (Auth-/Tenant-**Vertrag**), M-02 (Pagination Contract erp-domain) |
+| S2 | M-03 (Pagination Rollout), M-04 (ERP Actor), M-05 (**E2E-Auth früh**) |
+| S3 | M-06 (CRM Auth), M-07 (CRM E-Mail/Queue) |
+| S4 | M-08 (GDPR Export), M-09 (GDPR Löschung inkl. Retention), M-10 (FiBu Perioden/Saldo) |
+| S5 | M-11 (Strecke DB + Migration/Rollback), M-12 (Einkauf OCR, Teilprojekt) |
+
+**Abnahmekriterien (Doku-Slice):** Workboard enthält Slice-ID und Tabelle; kanonisches Dokument existiert und ist vom Board aus erreichbar; Tracking-Hinweis für `python scripts/update_todos.py --repo-only` / `docs/TODO-next-slices.md` genannt.
+
+**Erledigt:** Kanonische Sprint-Matrix und Meilenstein-Details in `docs/roadmap/TODO-UMSETZUNG-SPRINT-PLAN-S1-S5.md`; dieser Eintrag.
+
+**Checks (optional):** `python scripts/update_todos.py --repo-only`; Doku-Link im Browser öffnen.
+
+**Offene Risiken:** Die Meilensteine **M-01–M-12** sind Umsetzungsarbeit — dieser Slice ist **Planungs-/Referenz-Ebene**. Konkrete Implementierungs-Slices sollten eigene IDs im Workboard erhalten und auf **M-xx** im Titel oder Body verweisen.
+
 ## AGENT-ORCH-001
 
 **Von:** Codex
