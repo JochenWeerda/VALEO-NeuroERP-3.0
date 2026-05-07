@@ -1,4 +1,4 @@
-"""
+﻿"""
 Rationsoptimierung API  (GfE 2023 / DLG-Futterwerttabellen Stand Juli 2025)
 
 Primär: Proxy zum externen Rationsoptimierungs-Microservice (RATIONS_OPTIMIZATION_URL).
@@ -80,6 +80,9 @@ from app.agrar.rations.solver import (  # noqa: E402
     CONSTR_XL_DENSITY as _CONSTR_XL_DENSITY,
     ConstraintRegistry as _NewConstraintRegistry,
     Feed as _SolverFeed,
+)
+from app.agrar.rations.solver.lp_constraints import (  # noqa: E402
+    build_lp_constraint_matrix as _build_lp_constraint_matrix,
 )
 
 
@@ -925,7 +928,7 @@ class _CowReq(BaseModel):
     dmi_target_kg: float  # Ziel-TM-Aufnahme (Mittelpunkt) für peNDF-Lookup
 
 
-def _gfe_requirements(profile: Dict[str, Any]) -> _CowReq:
+def _gfe_requirements(profile: Dict[str, Any], fani: Optional[float] = None) -> _CowReq:
     """
     GfE 2023 ME + sidP Bedarfsberechnung für Milchkühe.
 
@@ -971,11 +974,14 @@ def _gfe_requirements(profile: Dict[str, Any]) -> _CowReq:
     # --- ME (GfE 2023 dreistufig) ---
     me_maint = nel_maint / 0.73         # k_m = 0.73 für laktierende Kühe
     # k_l dichte-abhaengig (GfE 2001, §5): k_l = 0.463 + 0.24·q mit q = ME/GE.
-    # Die effektive Ration-ME-Dichte ist beim Bedarfsaufruf noch unbekannt;
-    # wir setzen konservativ k_l_fix = 0.60 als Planungsbasis. Der
-    # rationsspezifische k_l wird nur fuer die Anzeige "Milch aus Grundfutter"
-    # im _milk_from_supply dynamisch ermittelt.
+    # Basis: k_l = 0.60 (konservativ, da ME-Dichte beim Planungsaufruf unbekannt).
+    # Optional: FANi-Korrektur fuer den FAN-Iterationsloop:
+    #   k_l += 0.01 * (FANi - 3.0), begrenzt auf [0.58, 0.64].
+    # Bei hoeherem FANi (= mehr Futteraufnahme) steigt die ME-Dichte und damit k_l,
+    # was den ME-Bedarf senkt – konsistent mit GfE 2023 Passageraten-Beziehung.
     k_l_planning = 0.60
+    if fani is not None and fani > 0:
+        k_l_planning = max(0.58, min(0.64, 0.60 + 0.01 * (float(fani) - 3.0)))
     me_milk = nel_milk / k_l_planning if milk > 0 else 0.0
     me_total = me_maint + me_milk
 
@@ -2090,252 +2096,38 @@ def _run_lp(
         except (TypeError, ValueError):
             pass
 
-    A_ub: List[List[float]] = []
-    b_ub: List[float] = []
-    # Refactor Schritt 3 (2026-04-23): Constraint-Registry. Statt hartkodiertem
-    # ``_IDX_XL = 5`` wird bei jedem Hinzufuegen einer Row ein symbolischer Name
-    # registriert; die Relaxationen unten greifen dann via
-    # ``_constraint_registry.index_of(CONSTR_XL_DENSITY)`` darauf zu. Eine
-    # verspaete Umsortierung/Einschub verschiebt damit keine Indizes mehr.
-    _constraint_registry = _NewConstraintRegistry()
-
-    def _geq(col_vals: List[float], rhs: float, *, name: Optional[str] = None) -> None:
-        if name is not None:
-            _constraint_registry.add(name)
-        A_ub.append([-v for v in col_vals])
-        b_ub.append(-rhs)
-
-    def _leq(col_vals: List[float], rhs: float, *, name: Optional[str] = None) -> None:
-        if name is not None:
-            _constraint_registry.add(name)
-        A_ub.append(col_vals)
-        b_ub.append(rhs)
-
-    ones         = [1.0] * n
-    me_per_kg    = [f["me"]   for f in feeds]
-    sidp_per_kg  = [f["sidp"] for f in feeds]
-    ndf_per_kg   = [f["ndf"]  for f in feeds]
-    ca_per_kg    = [f["ca"]   for f in feeds]
-    p_per_kg     = [f["p"]    for f in feeds]
-    na_per_kg    = [f["na"]   for f in feeds]
-    mg_per_kg    = [f["mg"]   for f in feeds]
-    xl_per_kg    = [f["xl"]   for f in feeds]
-
-    # Pansenabbaubare KH: pabKH = ST + ZU - bST (g/kg TM)
-    pabkh_per_kg = [f["st"] + f["zu"] - f["bst"] for f in feeds]
-
-    # Energie und Protein
-    _geq(me_per_kg,   req.me_mj,   name=_CONSTR_ME_GEQ)           # ME ≥ Bedarf
-    _geq(sidp_per_kg, req.sidp_g,  name=_CONSTR_SIDP_GEQ)          # sidP ≥ Bedarf
-
-    # Faserversorgung
-    _geq(ndf_per_kg,  req.ndf_min_g, name=_CONSTR_ANDFOM_TOT_GEQ) # aNDFom ≥ Minimum gesamt
-
-    # aNDFomGF+CoP-Dichte >= Mindestwert (DLG 01|2025, linearisiert):
-    #   sum_i(amounts_i × (aNDFom_i × is_forage_or_cop_i - min)) >= 0
-    #
-    # "CoP" = faserreiche Co-Produkte (Biertreber, Pressschnitzel, Schlempe).
-    # Diese werden ab DLG 01|2025 zusammen mit Grobfutter als strukturelle
-    # Faserbasis gewertet (Kap. 8.2).
-    def _is_forage_or_cop(feed: Dict[str, Any]) -> bool:
-        return bool(feed.get("forage") or feed.get("structural_coproduct"))
-
-    # Slice 1c: Mischmasse-Dichten (Struktur, pabKH, XL, CP) werden auf den
-    # TMR-Block beschraenkt - das ist die homogene Mischung im Mischwagen
-    # (bzw. komplette Ration bei TMR). Weide und Lockfutter werden getrennt
-    # gefressen und gehen nicht in die Mischmassenbilanz ein. Die
-    # tagesbezogene Strukturversorgung (Kaudauer, Speichelbildung, lange
-    # Partikel) bleibt ueber die eigene Weide-/Aufnahmelogik erhalten
-    # (pasture_block, K/Mg, Saisonprofile).
-    andfom_gf_cop_density = [
-        f["ndf"] - andfom_gf_min if _is_forage_or_cop(f) else -andfom_gf_min
-        for f in feeds
-    ]
-    _geq(_tmr_only(andfom_gf_cop_density), 0.0, name=_CONSTR_ANDFOM_GF_GEQ)
-
-    # pabKH-Dichte ≤ 210 g/kg TM (linearisiert):
-    #   sum_i(amounts_i × (pabKH_i - 210)) ≤ 0
-    pabkh_density = [v - pabkh_max for v in pabkh_per_kg]
-    _leq(_tmr_only(pabkh_density), 0.0, name=_CONSTR_PABKH_LEQ)
-
-    # XL-Dichte ≤ 40 g/kg TM (Fettlimit Milchkuh ohne pansengeschütztes Fett)
-    xl_density = [v - xl_max for v in xl_per_kg]
-    _leq(_tmr_only(xl_density), 0.0, name=_CONSTR_XL_DENSITY)
-
-    # CP-Dichte ≤ 165 g/kg TM (DLG 01|25 Tab. 14 Optimalbereich 135-165 g/kg TM – verhindert überhöhten RNB/RMD)
-    cp_per_kg = [f["cp"] for f in feeds]
-    cp_density = [v - cp_max for v in cp_per_kg]
-    _leq(_tmr_only(cp_density), 0.0, name=_CONSTR_CP_DENSITY)
-
-    # RMD-Dichte (DLG 01|25: Ziel -1,5 bis 0 g N/kg TM, Toleranzbereich bis +1,5).
-    # In Weidesystemen ist ein strukturell hoeherer N-Ueberschuss real (DLG-Merkblatt 417):
-    # Junges Gras/Weide hat laut DLG-Futterwerttabelle RMD-Werte von 7-9 g N/kg TM,
-    # Grassilage 1.-3. Schnitt 5-8 g N/kg TM. Das ist biologisch erklaerbar und
-    # kein Fuetterungsfehler. Bei hohem Weideanteil ist die LP-Obergrenze daher strukturell
-    # nicht erreichbar, wenn man sich an der Stallnorm orientiert. Deshalb wird die
-    # Obergrenze je Fuetterungsmodus gestaffelt:
-    #   TMR          -> 1.5 g N/kg TM  (unveraendert, Stallfuetterung)
-    #   PMR          -> 3.0 g N/kg TM  (moderat weicher, Kraftfutter leistungsabhaengig)
-    #   PMR+Weide    -> 8.0 g N/kg TM  (DLG 417: Weidesysteme, Jungweide RMD typ. 7-9)
-    # Feeds ohne rmd-Wert werden mit 0 angesetzt (konservativ; zieht LP zu low-rmd-Futtermitteln).
-    if feeding_type == "PMR+Weide":
-        rmd_max = 8.0
-    elif feeding_type == "PMR":
-        rmd_max = 3.0
-    else:
-        rmd_max = 1.5
-    # Herbst: leicht erhoehtes RMD-Limit zulassen (stickstoffreicher Grasaufwuchs),
-    # aber nur dosiert (max. +1 g N/kg TM) um Harnstoff-Belastung zu begrenzen.
-    if "rmd_max_boost" in _seasonal:
-        rmd_max = rmd_max + float(_seasonal["rmd_max_boost"])
-    rmd_per_kg = [float(f.get("rmd") or 0.0) for f in feeds]
-    rmd_density = [v - rmd_max for v in rmd_per_kg]
-    _leq(rmd_density, 0.0, name=_CONSTR_RMD_DENSITY)
-
-    # ME-Dichte ≤ 12.5 MJ/kg TM (DLG 01|25 Tab. 14 – Energiedichte-Obergrenze Hochleistung)
-    me_density_max = [v - 12.5 for v in me_per_kg]
-    _leq(me_density_max, 0.0, name=_CONSTR_ME_DENSITY)
-
-    # ME absolut ≤ Bedarf × 1.12 (max. 12% Überversorgung – DLG Toleranz 10%, LP-Spielraum +2%)
-    _leq(me_per_kg, req.me_mj * 1.12, name=_CONSTR_ME_ABS_LEQ)
-
-    # aNDFom-Dichte ≤ 420 g/kg TM (DLG 01|25 Tab. 14 – verhindert Überversorgung mit Rohfaser)
-    andfom_density_max = [v - 420.0 for v in ndf_per_kg]
-    _leq(andfom_density_max, 0.0, name=_CONSTR_ANDFOM_TOT_LEQ)
-
-    # Mengenelemente
-    _geq(ca_per_kg, req.ca_min_g, name=_CONSTR_CA_LEQ)
-    _geq(p_per_kg,  req.p_min_g,  name=_CONSTR_P_LEQ)
-    _geq(na_per_kg, req.na_min_g, name=_CONSTR_NA_LEQ)
-    _geq(mg_per_kg, req.mg_min_g, name=_CONSTR_MG_LEQ)
-
-    # K/Mg-Antagonismus: max. Kalium ≤ 28 g/kg TM × DMI (GfE-Workshop 2023)
-    k_per_kg = [f.get("k", 0.0) for f in feeds]
-    _leq(k_per_kg, k_max)
-
-    # Saftfutter / nasse CoP: harte Summen-Obergrenze kg TM/d (DLG 01|2025
-    # Kap. 1.1, 8.4, Tab. 14 – siehe Konstanten-Kommentar oben).
-    juice_wet_cap_mask = [
-        1.0 if _feed_counts_toward_saftfutter_wet_cap(f) else 0.0
-        for f in feeds
-    ]
-    _leq(juice_wet_cap_mask, _JUICE_WET_CAP_HARD_KG_DM)
-
-    # Frischgras/Weide nur in TMR strikt begrenzen; PMR/Weidesysteme duerfen das gezielt nutzen.
-    # Klassifikation TM-basiert: echte Weide = TM < 30 %. Grassilage (konserviert,
-    # TM >= 30 %) zaehlt hier bewusst NICHT als Weide und wird nicht gedeckelt.
-    if feeding_type == "TMR":
-        weide_mask = [
-            1.0 if _grass_feed_kind(f) == "pasture" else 0.0
-            for f in feeds
-        ]
-        _leq(weide_mask, 4.0)
-
-    # PMR+Weide: Weidemineral/Mg-Supplement als fester Sicherheitsbaustein
-    # DLG-Merkblatt 417 / 443 / DLG-Information 01|2023 begruenden eine gezielte
-    # Mg-/Na-Absicherung bei Frischgras/Weide (K/Mg-Antagonismus, Grastetanie-Risiko).
-    if pasture_pmr:
-        mg_supplement_mask = [
-            1.0 if feed.get("_special") == "pasture_mg" else 0.0
-            for feed in feeds
-        ]
-        if any(mg_supplement_mask):
-            # mindestens 0,05 kg TM/d (~ 50 g Frischmasse Mineralfutter) muss in die Ration
-            _geq(mg_supplement_mask, 0.05)
-
-    # Mindest-Grobfutter-Anteil: ≥ 40% der DMI als echtes Grobfutter (peNDF-Basis)
-    # Verhindert Kraftfutter-Dominanz / NPN-Überschüsse
-    grobfutter_neg = [-1.0 if f.get("forage") and "grobfutter" in f.get("group", "").lower() else 0.4 for f in feeds]
-    _leq(grobfutter_neg, 0.0)
-
-    # DMI
-    _geq(ones, req.dmi_min_kg, name=_CONSTR_DMI_GEQ)
-    _leq(ones, req.dmi_max_kg, name=_CONSTR_DMI_LEQ)
-
-    # Wizard Step 3 — lineare Dichte-Nebenbedingungen (ohne Registry-Namen),
-    # absichtlich NACH den relaxierbaren Standardrows eingefuegt, damit die
-    # festen Relaxations-Indizes (aNDFomGF=3, XL=5, RMD=7, ME-abs=9) stabil bleiben.
-    #
-    #   ME_min:    sum x_i (ME_i - ME_min) >= 0  ⇔ Durchschnittsdichte >= ME_min  [MJ/kg TM]
-    #   Staerke:   sum x_i (ST_i - ST_max) <= 0  ⇔ mittlere Staerke <= ST_max    [g/kg TM]
-    #   aNDFom:    sum x_i (NDF_i - NDF_min) >= 0  ⇔ mittlere NDF >= NDF_min   [g/kg TM]
-    #
-    # UI-% TM entspricht hier g/kg TM / 10 (vgl. Frontend-KPI-Stärke-% TM).
-    _wizard_hb_lp = (
-        ((runtime_options or {}).get("policy_overrides") or {}).get("wizard_hard_bounds") or {}
+    _cm = _build_lp_constraint_matrix(
+        feeds=feeds,
+        req=req,
+        feeding_type=feeding_type,
+        pasture_pmr=pasture_pmr,
+        block_labels=block_labels,
+        block_scoping_struct=_block_scoping_struct,
+        andfom_gf_min=andfom_gf_min,
+        pabkh_max=pabkh_max,
+        xl_max=xl_max,
+        cp_max=cp_max,
+        k_max=k_max,
+        seasonal=_seasonal,
+        runtime_options=runtime_options,
+        juice_wet_cap_fn=_feed_counts_toward_saftfutter_wet_cap,
+        grass_feed_kind_fn=_grass_feed_kind,
     )
-    _me_min_u = _wizard_hb_lp.get("me_min_mj_per_kg_dm")
-    if _me_min_u is not None:
-        try:
-            _me_min_v = float(_me_min_u)
-            if _me_min_v > 0:
-                _geq([f["me"] - _me_min_v for f in feeds], 0.0)
-        except (TypeError, ValueError):
-            pass
-    _st_pct_u = _wizard_hb_lp.get("starch_max_pct_tm")
-    if _st_pct_u is not None:
-        try:
-            _st_cap = float(_st_pct_u) * 10.0
-            if _st_cap >= 0:
-                _leq([f["st"] - _st_cap for f in feeds], 0.0)
-        except (TypeError, ValueError):
-            pass
-    _ndf_pct_u = _wizard_hb_lp.get("andfom_min_pct_tm")
-    if _ndf_pct_u is not None:
-        try:
-            _ndf_floor_d = float(_ndf_pct_u) * 10.0
-            if _ndf_floor_d > 0:
-                _geq([f["ndf"] - _ndf_floor_d for f in feeds], 0.0)
-        except (TypeError, ValueError):
-            pass
-
-    # Slice 1e (nachgeschaerft 2026-04-23, §4 - hart/weich-Trennung):
-    #   Die Einzelgabe-Grenzen je Abruf/Melkung sind PHYSIOLOGISCH hart
-    #   (Pansensicherheit, SARA-Schutz). Das empfohlene Tagesmaximum ist
-    #   eher wirtschaftlich/Management-motiviert und wird weich bewertet.
-    #
-    #   Umsetzung:
-    #     - LP-harte Obergrenze: 1,5 x empfohlenes Tagesmaximum als
-    #       Sicherheitsnetz (kein Infeasible bei leicht ueber Limit, aber
-    #       keine absurden Mengen wie 25 kg Kraftfutter/Tag).
-    #     - Empfohlenes Tagesmax selbst: wird Post-Solve in
-    #       _build_constraint_status_v2 als weicher Constraint gewertet
-    #       (Klasse B, mit Strafkostenbeitrag und UI-Hinweis).
-    #     - Einzelgabe-Grenze: UI-Validierung im Futterabruf-Tab
-    #       (Slice 2), nicht LP-Ebene.
-    _conc_max_per_day = float(_fs_cfg.get("concentrate_max_per_day_kg") or 0.0)
-    conc_mask = [
-        1.0 if block_labels[i] == "concentrate_staged_block" else 0.0
-        for i in range(n)
-    ]
-    if _conc_max_per_day > 0 and _has_staged_concentrate:
-        _leq(conc_mask, _CONC_HARD_SAFETY_FACTOR * _conc_max_per_day)
-
-    bounds = [(f["min_kg"], f["max_kg"]) for f in feeds]
-
-    k_lp_extra = 0
-    _baseline_positions: List[Tuple[int, float]] = []
-    if _wizard_sg.get("minimize_deviation_from_baseline") and _wizard_baseline_kgdm:
-        for _fi in range(n):
-            _fid = str(feeds[_fi].get("id") or "")
-            if _fid and _fid in _wizard_baseline_kgdm:
-                _baseline_positions.append((_fi, float(_wizard_baseline_kgdm[_fid])))
-        k_lp_extra = len(_baseline_positions)
-    if k_lp_extra > 0:
-        A_ub = [list(_r) + [0.0] * k_lp_extra for _r in A_ub]
-        for _j, (_fi, _bkg) in enumerate(_baseline_positions):
-            _ti = n + _j
-            _r_pos = [0.0] * (n + k_lp_extra)
-            _r_pos[_fi] = 1.0
-            _r_pos[_ti] = -1.0
-            A_ub.append(_r_pos)
-            b_ub.append(_bkg)
-            _r_neg = [0.0] * (n + k_lp_extra)
-            _r_neg[_fi] = -1.0
-            _r_neg[_ti] = -1.0
-            A_ub.append(_r_neg)
-            b_ub.append(-_bkg)
-        bounds = list(bounds) + [(0.0, None)] * k_lp_extra
+    A_ub                 = _cm.A_ub
+    b_ub                 = _cm.b_ub
+    bounds               = _cm.bounds
+    _constraint_registry = _cm.registry
+    me_per_kg            = _cm.me_per_kg
+    sidp_per_kg          = _cm.sidp_per_kg
+    ndf_per_kg           = _cm.ndf_per_kg
+    xl_per_kg            = _cm.xl_per_kg
+    rmd_per_kg           = _cm.rmd_per_kg
+    pabkh_per_kg         = _cm.pabkh_per_kg
+    k_per_kg             = _cm.k_per_kg
+    cp_per_kg            = _cm.cp_per_kg
+    rmd_max              = _cm.rmd_max
+    k_lp_extra           = _cm.k_lp_extra
+    _baseline_positions  = _cm.baseline_positions
 
     n_tot = n + k_lp_extra
     A_ub_snap = [list(row) for row in A_ub]
@@ -5881,7 +5673,8 @@ def _optimize_internal(
         # Einmalige Rechnung bei festgeklemmtem FANi = fan_reference.
         target_fani = float(fan_reference or 3.0)
         adjusted = _apply_fan_effect(feeds, target_fani)
-        lp_out = _run_lp(req, adjusted, profile, runtime_options=runtime_options)
+        req_ref = _gfe_requirements(profile, fani=target_fani)
+        lp_out = _run_lp(req_ref, adjusted, profile, runtime_options=runtime_options)
         fani_out = (
             _fani_from_result(
                 [_f(v) for v in lp_out["scipy_result"].x[: len(feeds)]], profile
@@ -5908,7 +5701,8 @@ def _optimize_internal(
         lp_out = None
         for i in range(fan_max_iter):
             adjusted = _apply_fan_effect(feeds, fani_in)
-            lp_out = _run_lp(req, adjusted, profile, runtime_options=runtime_options)
+            req_iter = _gfe_requirements(profile, fani=fani_in)
+            lp_out = _run_lp(req_iter, adjusted, profile, runtime_options=runtime_options)
             if lp_out["scipy_result"].status != 0:
                 iterations.append({
                     "i": i, "fan_in": round(fani_in, 4), "fan_out": None,
@@ -6424,315 +6218,16 @@ def _policy_profile_targets(profile_key: Optional[str]) -> Optional[Dict[str, An
 
 
 # ---------------------------------------------------------------------------
-# DLG-01|2025-Policy-Profil-Auswertung als weiche Band-Constraints
+# DLG-01|2025-Policy-Profil-Auswertung — Re-Export aus lp_stage2.py
+# (RATIONS-LP-SPLIT-001: extrahiert nach app/agrar/rations/solver/lp_stage2.py)
 # ---------------------------------------------------------------------------
-# Jedes Leistungsstufen-Profil aus _POLICY_PROFILE_TARGETS liefert Referenz-
-# korridore fuer die zentralen Rationsparameter (ME, CP, sidP, pabKH, XL,
-# Grundfutteranteil, aNDFomGF+CoP, aNDFom). Diese werden hier nach dem LP-Lauf
-# als **weiche** Band-Checks (min/max-Korridor) gegen die tatsaechlich erreichte
-# Ration ausgewertet und als zusaetzliche Eintraege in die Penalty-Statistik
-# gefuehrt.
-#
-# Bewusste Design-Entscheidung (2026-04-21):
-# - Kein harter LP-Constraint -> keine zusaetzliche Infeasibility-Gefahr bei
-#   schwierigen Praxis-Rationen (Fruehjahrsweide, Hitzestress, Trockensteher
-#   auf betriebseigenem GF).
-# - Klasse B (Balance, Basisgewicht 3.0) nach Spec §5.2: unter Tierwohl-Klasse
-#   A, ueber Komfort-Klasse C. relaxation_policy skaliert wie gewohnt.
-# - Band-Modell: Penalty nur, wenn actual ausserhalb [min, max]; innerhalb
-#   des Bandes deviation_norm = 0.
-# ---------------------------------------------------------------------------
-_POLICY_BAND_SPECS: Tuple[Tuple[str, str, str, str, str, float], ...] = (
-    # (anzeige_name, value_key,           min_key,                max_key,            unit,       min_halfwidth)
-    ("DLG-Policy: ME-Dichte",          "me_kgdm",              "me_kgdm_min",          "me_kgdm_max",        "MJ/kg TM",  0.20),
-    ("DLG-Policy: CP-Dichte",          "cp_kgdm",              "cp_kgdm_min",          "cp_kgdm_max",        "g/kg TM",  10.00),
-    ("DLG-Policy: sidP-Dichte",        "sidp_kgdm",            "sidp_kgdm_min",        "sidp_kgdm_max",      "g/kg TM",   8.00),
-    ("DLG-Policy: pabKH (max)",        "pabkh_kgdm",           None,                   "pabkh_max",          "g/kg TM",  15.00),
-    ("DLG-Policy: Rohfett XL (max)",   "xl_kgdm",              "xl_kgdm_min",          "xl_kgdm_max",        "g/kg TM",   5.00),
-    ("DLG-Policy: Grundfutteranteil",  "forage_share_pct",     "forage_share_min_pct", "forage_share_max_pct","%TM",      5.00),
-    ("DLG-Policy: aNDFomGF+CoP (min)", "andfom_gf_cop_kgdm",   "andfom_gf_cop_min",    None,                 "g/kg TM",  20.00),
-    ("DLG-Policy: aNDFom (min)",       "andfom_kgdm",          "ndf_kgdm_min",         None,                 "g/kg TM",  20.00),
+from app.agrar.rations.solver.lp_stage2 import (  # noqa: E402
+    POLICY_BAND_SPECS as _POLICY_BAND_SPECS,
+    policy_band_coeffs as _policy_band_coeffs,
+    policy_profile_band_evaluate as _policy_profile_band_evaluate,
+    build_policy_band_lp_extension as _build_policy_band_lp_extension,
+    build_policy_profile_evaluation as _build_policy_profile_evaluation,
 )
-
-
-def _policy_profile_band_evaluate(
-    targets: Optional[Dict[str, Any]],
-    values: Dict[str, Any],
-    relaxation_policy: str,
-) -> List[Dict[str, Any]]:
-    """Bewertet die Ist-Werte einer Ration gegen DLG-01|2025-Referenzkorridore.
-
-    Rueckgabe: Liste von constraint_status-kompatiblen Eintraegen mit Klasse B.
-    Jedes Band ist ein weicher Constraint (direction=min/max/target je nach
-    Lage). Innerhalb des Bandes gilt deviation_norm = 0, also penalty = 0.
-    """
-    if not targets:
-        return []
-
-    out: List[Dict[str, Any]] = []
-    factor = _RELAXATION_FACTORS.get(relaxation_policy, 1.0)
-    klass_weight = _PENALTY_CLASS_WEIGHTS.get("B", 3.0)
-
-    for display_name, value_key, min_key, max_key, unit, min_halfwidth in _POLICY_BAND_SPECS:
-        raw_value = values.get(value_key)
-        if raw_value is None:
-            continue
-        try:
-            actual = float(raw_value)
-        except (TypeError, ValueError):
-            continue
-
-        lo_raw = targets.get(min_key) if min_key else None
-        hi_raw = targets.get(max_key) if max_key else None
-        lo = float(lo_raw) if lo_raw is not None else None
-        hi = float(hi_raw) if hi_raw is not None else None
-        if lo is None and hi is None:
-            continue
-
-        # Halbbreite: halbe Bandbreite, mindestens min_halfwidth
-        if lo is not None and hi is not None:
-            halfwidth = max(min_halfwidth, 0.5 * (hi - lo))
-        else:
-            anchor = lo if lo is not None else hi
-            halfwidth = max(min_halfwidth, 0.10 * abs(anchor or 1.0))
-
-        if lo is not None and actual < lo:
-            violation = lo - actual
-            target_display = lo
-            direction = "min"
-            status = "violated"
-        elif hi is not None and actual > hi:
-            violation = actual - hi
-            target_display = hi
-            direction = "max"
-            status = "violated"
-        else:
-            violation = 0.0
-            # Bei Bandkonformitaet: Target als Bandmitte darstellen
-            if lo is not None and hi is not None:
-                target_display = 0.5 * (lo + hi)
-            else:
-                target_display = lo if lo is not None else hi
-            direction = "target"
-            status = "ok"
-
-        deviation_norm = violation / halfwidth if halfwidth > 0 else 0.0
-        penalty = _PENALTY_BASE_COST * klass_weight * factor * deviation_norm
-
-        out.append({
-            "name": display_name,
-            "kind": "weich",
-            "class": "B",
-            "unit": unit,
-            "target": round(float(target_display or 0.0), 3),
-            "target_min": round(lo, 3) if lo is not None else None,
-            "target_max": round(hi, 3) if hi is not None else None,
-            "direction": direction,
-            "actual": round(actual, 3),
-            "difference": round(actual - float(target_display or 0.0), 3),
-            "fulfilled": deviation_norm < 1e-6,
-            "deviation_norm": round(deviation_norm, 3),
-            "penalty_cost": round(penalty, 4),
-            "status": status,
-            "source": "policy_profile",
-        })
-
-    return out
-
-
-# ---------------------------------------------------------------------------
-# DLG-01|2025-Policy-Profil: native LP-Slack-Integration (Stage-2-Cost)
-# ---------------------------------------------------------------------------
-# Zusaetzlich zur Post-Solve-Band-Auswertung koennen die DLG-Referenz-
-# korridore direkt im LP als **weiche Nebenbedingungen** gebunden werden.
-# Jedes Band bekommt eine Slack-Variable s_min/s_max >= 0 mit einer
-# normierten Penalty im Objective, so dass der Solver gemeinsam Futter-
-# kosten UND Korridor-Abweichung minimiert.
-#
-# Mathematisch entspricht das exakt der bisherigen Klasse-B-Penalty:
-#   penalty_eur = base × class_weight × relax × deviation_norm
-#               = base × class_weight × relax × (violation / halfwidth)
-# In LP-Einheiten (s_min ist in g/d bei Dichte-Bands bzw. kg TM/d × 100
-# bei Grundfutteranteil) wird der Gewichtungsfaktor deshalb noch durch
-# eine typische DMI skaliert, damit sich LP-Slack und Post-Solve-Penalty
-# vergleichbar verhalten.
-# ---------------------------------------------------------------------------
-
-
-def _policy_band_coeffs(band_key: str, feeds: List[Dict[str, Any]]) -> Optional[List[float]]:
-    """Liefert die Futtermittel-Koeffizienten fuer das angegebene Band.
-
-    Rueckgabe `None` bedeutet: Band hat kein lineares LP-Modell und wird
-    ausschliesslich post-solve ausgewertet.
-    """
-    if band_key == "me_kgdm":
-        return [float(f.get("me") or 0.0) for f in feeds]
-    if band_key == "cp_kgdm":
-        return [float(f.get("cp") or 0.0) for f in feeds]
-    if band_key == "sidp_kgdm":
-        return [float(f.get("sidp") or 0.0) for f in feeds]
-    if band_key == "pabkh_kgdm":
-        return [
-            float(f.get("st") or 0.0)
-            + float(f.get("zu") or 0.0)
-            - float(f.get("bst") or 0.0)
-            for f in feeds
-        ]
-    if band_key == "xl_kgdm":
-        return [float(f.get("xl") or 0.0) for f in feeds]
-    if band_key == "andfom_gf_cop_kgdm":
-        return [
-            float(f.get("ndf") or 0.0) if (f.get("forage") or f.get("structural_coproduct")) else 0.0
-            for f in feeds
-        ]
-    if band_key == "andfom_kgdm":
-        return [float(f.get("ndf") or 0.0) for f in feeds]
-    if band_key == "forage_share_pct":
-        # Koeffizient a_i = 100  falls Grobfutter, sonst 0; Dichte = Σ(a_i·x_i)/Σx_i = %TM Grobfutter
-        return [100.0 if f.get("forage") else 0.0 for f in feeds]
-    return None
-
-
-def _build_policy_band_lp_extension(
-    targets: Optional[Dict[str, Any]],
-    feeds: List[Dict[str, Any]],
-    relaxation_policy: str,
-    dmi_typ_kg: float,
-) -> Dict[str, Any]:
-    """Baut die Slack-Erweiterung des LP fuer die DLG-01|2025-Band-Constraints.
-
-    Rueckgabe-Dict mit:
-      - `n_slacks`        Anzahl eingefuehrter Slack-Variablen
-      - `rows`            zusaetzliche A_ub-Zeilen (mit Slack-Einintraegen)
-      - `rhs`             zusaetzliche b_ub-Werte (immer 0.0 bei Dichte-Bands)
-      - `slack_costs`     Objective-Anteile je Slack (EUR pro g-Verletzung)
-      - `slack_bounds`    Bounds je Slack (immer (0, None))
-      - `slack_meta`      Liste mit {`name`, `unit`, `direction`, `class`,
-                          `halfwidth`, `weight`}
-    """
-    out: Dict[str, Any] = {
-        "n_slacks": 0,
-        "rows": [],
-        "rhs": [],
-        "slack_costs": [],
-        "slack_bounds": [],
-        "slack_meta": [],
-    }
-    if not targets or not feeds:
-        return out
-
-    n_feeds = len(feeds)
-    factor = _RELAXATION_FACTORS.get(relaxation_policy, 1.0)
-    klass_weight = _PENALTY_CLASS_WEIGHTS.get("B", 3.0)
-    # Schutz gegen 0: mindestens 1 kg TM/d als Skalierungsbasis
-    dmi_scale = max(1.0, float(dmi_typ_kg))
-
-    slacks: List[Dict[str, Any]] = []
-    slack_rows: List[List[float]] = []   # jede Zeile hat Laenge n_feeds + (akt. n_slacks); wird am Ende aufgefuellt
-
-    for display_name, value_key, min_key, max_key, unit, min_halfwidth in _POLICY_BAND_SPECS:
-        coeffs = _policy_band_coeffs(value_key, feeds)
-        if coeffs is None:
-            continue
-        lo_raw = targets.get(min_key) if min_key else None
-        hi_raw = targets.get(max_key) if max_key else None
-        lo = float(lo_raw) if lo_raw is not None else None
-        hi = float(hi_raw) if hi_raw is not None else None
-        if lo is None and hi is None:
-            continue
-
-        if lo is not None and hi is not None:
-            halfwidth = max(min_halfwidth, 0.5 * (hi - lo))
-        else:
-            anchor = lo if lo is not None else hi
-            halfwidth = max(min_halfwidth, 0.10 * abs(anchor or 1.0))
-
-        # Gewichtung: LP-Slack ist "absolut" (g/d fuer Dichten, %TM × kg TM/d
-        # fuer Grundfutteranteil). Um den Post-Solve-Penalty von
-        #   w_post = base × class × relax × (violation_density / halfwidth)
-        # nachzubilden, teilen wir zusaetzlich durch halfwidth und durch eine
-        # typische DMI. Dadurch entspricht 1 g Abweichung/d bei 20 kg DMI
-        # approximativ 0,05 g/kg TM Dichte-Abweichung.
-        weight = _PENALTY_BASE_COST * klass_weight * factor / (halfwidth * dmi_scale)
-
-        if lo is not None:
-            # Constraint (density >= lo), linearisiert: Σ (coeff_i − lo) · x_i + s_min ≥ 0
-            # scipy linprog arbeitet mit A_ub (≤), daher negiert:
-            #   -Σ (coeff_i − lo) · x_i − s_min ≤ 0
-            feed_row = [-(c - lo) for c in coeffs]
-            slack_rows.append(feed_row)    # Slack-Spalte wird spaeter als -1 eingesetzt
-            slacks.append({
-                "name": f"{display_name} (min)",
-                "unit": unit,
-                "direction": "min",
-                "band_min": lo,
-                "band_max": hi,
-                "halfwidth": halfwidth,
-                "weight": weight,
-                "slack_sign": -1.0,
-            })
-
-        if hi is not None:
-            # Constraint (density <= hi), linearisiert: Σ (coeff_i − hi) · x_i − s_max ≤ 0
-            feed_row = [(c - hi) for c in coeffs]
-            slack_rows.append(feed_row)
-            slacks.append({
-                "name": f"{display_name} (max)",
-                "unit": unit,
-                "direction": "max",
-                "band_min": lo,
-                "band_max": hi,
-                "halfwidth": halfwidth,
-                "weight": weight,
-                "slack_sign": -1.0,
-            })
-
-    if not slacks:
-        return out
-
-    n_slacks = len(slacks)
-    full_rows: List[List[float]] = []
-    for row_idx, feed_row in enumerate(slack_rows):
-        slack_cols = [0.0] * n_slacks
-        slack_cols[row_idx] = float(slacks[row_idx].get("slack_sign") or -1.0)
-        full_rows.append(feed_row + slack_cols)
-
-    out.update({
-        "n_slacks": n_slacks,
-        "rows": full_rows,               # Shape: (n_slacks, n_feeds + n_slacks)
-        "rhs": [0.0] * n_slacks,
-        "slack_costs": [float(s["weight"]) for s in slacks],
-        "slack_bounds": [(0.0, None)] * n_slacks,
-        "slack_meta": slacks,
-    })
-    return out
-
-
-def _build_policy_profile_evaluation(
-    profile_key: Optional[str],
-    targets: Optional[Dict[str, Any]],
-    bands: List[Dict[str, Any]],
-) -> Optional[Dict[str, Any]]:
-    """Liefert das kompakte Policy-Profil-Evaluation-Objekt fuer das Response.
-
-    - `bands`: alle ausgewerteten Band-Checks (auch `ok`-Zeilen, damit die UI
-       einen kompletten Plancheck rendern kann).
-    - `violations`: nur verletzte Baender.
-    - `penalty_total`: Summe Penalty-Kosten aus dem Policy-Profil.
-    """
-    if not profile_key or not targets:
-        return None
-    violations = [b for b in bands if b.get("status") == "violated"]
-    penalty_total = sum(float(b.get("penalty_cost") or 0.0) for b in bands)
-    return {
-        "profile": profile_key,
-        "label": targets.get("label"),
-        "bands": bands,
-        "violation_count": len(violations),
-        "violations": violations,
-        "penalty_total": round(penalty_total, 4),
-        "source": "DLG 01|2025 Tab. 13-15 (Leistungs-/Physiologiestufen)",
-    }
 
 
 # ---------------------------------------------------------------------------
