@@ -1,0 +1,27 @@
+id: HR-TIME-PILOT-001
+status: reserviert
+owner: Codex
+goal: >
+  Ersten VALEO-eigenen Driver-Time-Toolkern fuer LKW-Fahrerzeit, Tour-/Fahrzeugbezug
+  und Plausibilitaetschecks umsetzen.
+file_ownership:
+  - docs/agent-ops/active-workboard.md
+  - docs/agent-ops/slices/HR-TIME-PILOT-001.yaml
+  - packages/hr-domain/src/domain/entities/driver-time-event.ts
+  - packages/hr-domain/src/domain/services/driver-time-service.ts
+  - packages/hr-domain/src/index.ts
+  - packages/hr-domain/tests/domain/driver-time-service.test.ts
+  - packages/frontend-web/src/pages/personal/zeiterfassung.tsx
+  - docs/project-context/hr-time-absence-driver-integration-2026-05-07.md
+acceptance_criteria: >
+  Fahrerzeitereignisse besitzen typisierte Ereignisarten, Tour-/Fahrzeugbezug, Quellen-
+  und Auditfelder; Plausibilitaetschecks erkennen Ueberlappungen, fehlende Tour-/Fahrzeugdaten,
+  fehlende Korrekturbegruendung und Abwesenheitskollisionen; die Zeiterfassungsseite zeigt
+  den Driver-Time-Pilot ohne AGPL-/GPL-Codeuebernahme.
+checks:
+  - pnpm --filter @valero-neuroerp/hr-domain test
+  - pnpm --filter @valero-neuroerp/frontend-web type-check
+  - python scripts/agent_workboard_supervisor.py validate
+  - node scripts/docs-governance-check.cjs
+risks: >
+  Produktive Persistenz, Tacho-/Telematik-Import und Payroll-/DATEV-Export bleiben Folgeslices.
