@@ -244,6 +244,8 @@ type WizardData = {
   wizardSoftGoals?: WizardSoftGoals
   /** Letzte Ist-Ration kg TM/d je feed_id — nach erfolgreicher Optimierung gesetzt; fuer Baseline-Ziel. */
   wizardBaselineKgDm?: Record<string, number>
+  /** Explizite Fuetterungssystem-Konfiguration (RATIONS-FS-WIZARD-001). Ohne Wert: Backend-Default. */
+  feedingSystemConfig?: FeedingSystemConfig
 }
 
 function applyRationPatch(wd: WizardData, patch: RationAdjustmentApplyPatch): WizardData {
@@ -1573,6 +1575,10 @@ function Wizard({
     ...DEFAULT_WIZARD_SOFT_GOALS,
     ...resumeFrom?.wizardSoftGoals,
   }))
+  const [feedingSystemConfig, setFeedingSystemConfig] = useState<FeedingSystemConfig>(
+    () => resumeFrom?.feedingSystemConfig ?? defaultFeedingSystemConfig(resumeFrom?.feedingType ?? 'TMR'),
+  )
+  const [showFsAdvanced, setShowFsAdvanced] = useState(false)
   const [showFanAdvanced, setShowFanAdvanced] = useState(false)
   const [selectedFeedIds, setSelectedFeedIds] = useState<Set<string>>(() =>
     resumeFrom ? new Set(resumeFrom.selectedFeedIds) : new Set(),
@@ -1652,6 +1658,7 @@ function Wizard({
       priorityWeights,
       wizardHardBounds,
       wizardSoftGoals,
+      feedingSystemConfig,
     })
   }
 
@@ -1795,6 +1802,7 @@ function Wizard({
                       type="button"
                       onClick={() => {
                         setFeedingType(opt.key)
+                        setFeedingSystemConfig(defaultFeedingSystemConfig(opt.key))
                         if (opt.key === 'PMR+Weide') {
                           setShowFanAdvanced(true)
                           if (!seasonProfile) setSeasonProfile('spring_mid')
@@ -1845,6 +1853,100 @@ function Wizard({
                       <div style={{ color: C.muted }}>
                         Hinweis: Bitte Saison unter &quot;mehr Optionen&quot; setzen, damit das richtige
                         Weideprofil aktiv wird.
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+
+              {/* RATIONS-FS-WIZARD-001: Fuetterungssystem-Konfiguration ----------- */}
+              <div className="space-y-2 pt-3 border-t" style={{ borderColor: C.border }}>
+                <div className="flex items-center justify-between">
+                  <label className={labelCls}>Fuetterungssystem</label>
+                  <button
+                    type="button"
+                    onClick={() => setShowFsAdvanced((v) => !v)}
+                    className="text-[11px] font-semibold underline-offset-2 hover:underline"
+                    style={{ color: C.muted }}
+                  >
+                    {showFsAdvanced ? 'weniger' : 'Details'}
+                  </button>
+                </div>
+                {/* Kurzinfo immer sichtbar */}
+                <div className="text-[11px] px-2 py-1 rounded border" style={{ background: '#F8F8F8', borderColor: C.border, color: C.muted }}>
+                  System: <strong>{feedingSystemConfig.system}</strong> &middot; KF-Verteilung:{' '}
+                  <strong>
+                    {{ included_in_tmr: 'In TMR', transponder: 'Transponder', ams: 'AMS', milkparlor: 'Melkstand' }[feedingSystemConfig.concentrate_distribution]}
+                  </strong>
+                  {feedingSystemConfig.concentrate_max_per_day_kg != null && (
+                    <span> &middot; Max {feedingSystemConfig.concentrate_max_per_day_kg} kg/d</span>
+                  )}
+                </div>
+                {showFsAdvanced && (
+                  <div className="space-y-2 text-xs pl-2">
+                    {/* Konzentratverteilung */}
+                    <div>
+                      <label className="block font-semibold mb-1" style={{ color: C.dark }}>Konzentrat-Verteilung</label>
+                      <div className="flex gap-2 flex-wrap">
+                        {([
+                          { key: 'included_in_tmr', label: 'In TMR' },
+                          { key: 'transponder', label: 'Transponder' },
+                          { key: 'ams', label: 'AMS' },
+                          { key: 'milkparlor', label: 'Melkstand' },
+                        ] as const).map((opt) => (
+                          <button
+                            key={opt.key}
+                            type="button"
+                            onClick={() => setFeedingSystemConfig((prev) => ({ ...prev, concentrate_distribution: opt.key }))}
+                            className="px-2 py-1 rounded border text-[11px] font-semibold transition-all"
+                            style={{
+                              background: feedingSystemConfig.concentrate_distribution === opt.key ? C.dark : '#fff',
+                              borderColor: feedingSystemConfig.concentrate_distribution === opt.key ? C.dark : C.border,
+                              color: feedingSystemConfig.concentrate_distribution === opt.key ? '#fff' : C.muted,
+                            }}
+                          >
+                            {opt.label}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                    {/* Max KF pro Tag */}
+                    {feedingSystemConfig.concentrate_distribution !== 'included_in_tmr' && (
+                      <div className="flex gap-4">
+                        <div>
+                          <label className="block font-semibold mb-0.5" style={{ color: C.dark }}>Max KF/Tag (kg)</label>
+                          <input
+                            type="number"
+                            min={0}
+                            max={20}
+                            step={0.5}
+                            value={feedingSystemConfig.concentrate_max_per_day_kg ?? ''}
+                            onChange={(e) => setFeedingSystemConfig((prev) => ({
+                              ...prev,
+                              concentrate_max_per_day_kg: e.target.value ? parseFloat(e.target.value) : null,
+                            }))}
+                            placeholder="Auto"
+                            className="w-20 border rounded px-1.5 py-0.5 text-xs"
+                            style={{ borderColor: C.border }}
+                          />
+                        </div>
+                        <div>
+                          <label className="block font-semibold mb-0.5" style={{ color: C.dark }}>Max/Gabe (kg)</label>
+                          <input
+                            type="number"
+                            min={0}
+                            max={6}
+                            step={0.25}
+                            value={feedingSystemConfig.concentrate_max_per_serving_kg ?? ''}
+                            onChange={(e) => setFeedingSystemConfig((prev) => ({
+                              ...prev,
+                              concentrate_max_per_serving_kg: e.target.value ? parseFloat(e.target.value) : null,
+                            }))}
+                            placeholder="Auto"
+                            className="w-20 border rounded px-1.5 py-0.5 text-xs"
+                            style={{ borderColor: C.border }}
+                          />
+                        </div>
                       </div>
                     )}
                   </div>
@@ -3707,7 +3809,7 @@ export default function Rationsoptimierung() {
             : {}),
         },
         ...(nextWizardData.policyProfile ? { policy_profile: nextWizardData.policyProfile } : {}),
-        feeding_system_config: defaultFeedingSystemConfig(nextWizardData.feedingType),
+        feeding_system_config: nextWizardData.feedingSystemConfig ?? defaultFeedingSystemConfig(nextWizardData.feedingType),
       }
       if (nextWizardData.seasonProfile) {
         profile.season_profile = nextWizardData.seasonProfile
