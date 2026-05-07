@@ -12,7 +12,11 @@ from app.config.settings import settings
 
 app = FastAPI(
     title="CRM GDPR Service",
-    description="GDPR compliance: data access, deletion, portability, and objection requests",
+    description=(
+        "GDPR compliance: data access, deletion, portability, and objection requests. "
+        "Includes Privacy Erasure Decision API under /api/v1/privacy/erasure-requests "
+        "(evaluate/execute; see docs/architecture/adr-2026-05-06-erasure-decision-api-and-audit.md)."
+    ),
     version="1.0.0",
 )
 
