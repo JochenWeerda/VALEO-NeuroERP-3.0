@@ -94,33 +94,35 @@ async def create_journal_entry(
             )
 
         # FIBU-GL-05: Check if period is open for bookings
-        if entry_data.period:
+        period = getattr(entry_data, "period", None)
+        if period:
             from sqlalchemy import text
             period_check = db.execute(
                 text("""
                     SELECT status FROM finance_accounting_periods
                     WHERE tenant_id = :tenant_id AND period = :period
                 """),
-                {"tenant_id": tenant_id, "period": entry_data.period}
+                {"tenant_id": tenant_id, "period": period}
             ).fetchone()
 
             if period_check and period_check[0] != "OPEN":
                 raise HTTPException(
                     status_code=403,
-                    detail=f"Period {entry_data.period} is {period_check[0]}. Bookings are blocked for closed periods."
+                    detail=f"Period {period} is {period_check[0]}. Bookings are blocked for closed periods."
                 )
 
         entry_repo = container.resolve(JournalEntryRepository)
 
         # Create the entry data
         entry_dict = entry_data.model_dump()
+        entry_dict["tenant_id"] = tenant_id
         entry_dict['total_debit'] = total_debit
         entry_dict['total_credit'] = total_credit
 
         entry = await entry_repo.create(entry_dict, tenant_id)
         log_fibu_audit(
             db, tenant_id, "create", "journal_entry", entry.id,
-            {"document_number": getattr(entry, "document_number", None), "period": entry_data.period},
+            {"document_number": getattr(entry, "document_number", None), "period": period},
             request=request,
         )
         return JournalEntry.model_validate(entry)

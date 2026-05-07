@@ -182,7 +182,7 @@ async def export_portable_data(
     logger.info(f"GDPR portable-export requested for user: {user_id}")
     
     # Same as data-export but in standardized format
-    data = await export_user_data(user_id, request, db)
+    data = await export_user_data(user_id, request, db, tenant_id)
     
     # Add portability-specific metadata
     data["portability_metadata"] = {
