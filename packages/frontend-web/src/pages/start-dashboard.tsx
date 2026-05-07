@@ -27,7 +27,7 @@ import { usePinnedTiles } from '@/hooks/usePinnedTiles'
 import { useTranslation } from 'react-i18next'
 import { queryKeys } from '@/lib/query'
 import { apiClient } from '@/lib/api-client'
-import { fetchFlowSpineCatalog, type FlowSpineCatalog } from '@/lib/api/flow-spines'
+import { fetchFlowSpineCatalog, getFlowSpineFetchErrorMessage, type FlowSpineCatalog } from '@/lib/api/flow-spines'
 
 type StarterTile = {
   id: string
@@ -196,10 +196,16 @@ export default function StartDashboardPage(): JSX.Element {
     refetchInterval: 60_000,
   })
 
-  const { data: flowCatalog } = useQuery<FlowSpineCatalog>({
+  const {
+    data: flowCatalog,
+    isPending: flowCatalogPending,
+    isError: flowCatalogError,
+    error: flowCatalogErr,
+  } = useQuery<FlowSpineCatalog>({
     queryKey: ['flow-spine', 'catalog', activeLang],
     queryFn: fetchFlowSpineCatalog,
     staleTime: 120_000,
+    retry: false,
   })
 
   return (
@@ -246,8 +252,24 @@ export default function StartDashboardPage(): JSX.Element {
           </div>
         </div>
         <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
-          {flowCatalog
-            ? flowCatalog.processes.map((proc) => {
+          {flowCatalogPending && !flowCatalog
+            ? Array.from({ length: 6 }).map((_, i) => <Skeleton key={i} className="h-20 w-full rounded-2xl" />)
+            : null}
+          {flowCatalogError ? (
+            <div className="sm:col-span-2 xl:col-span-3 rounded-2xl border border-destructive/25 bg-destructive/10 px-4 py-3 text-sm text-destructive">
+              Flow-Spine-Katalog konnte nicht geladen werden: {getFlowSpineFetchErrorMessage(flowCatalogErr)}. Lokal FastAPI starten und Vite{' '}
+              <code className="rounded bg-muted px-1 text-xs">/api/v1</code> auf Port 8000 proxien.
+            </div>
+          ) : null}
+          {!flowCatalogPending &&
+          !flowCatalogError &&
+          flowCatalog &&
+          (!flowCatalog.processes?.length ? (
+            <div className="sm:col-span-2 xl:col-span-3 text-sm text-muted-foreground">
+              Keine Flow-Spine-Prozesse im Katalog-Antwort (leeres <code className="rounded bg-muted px-1 text-xs">processes</code>-Array).
+            </div>
+          ) : (
+            flowCatalog.processes.map((proc) => {
                 const gradient = DOMAIN_COLOR[proc.key] ?? 'from-slate-500/20 to-slate-600/5 border-slate-500/30'
                 const domain = getDomainPresentation(proc.domain, activeLang)
                 const DomainIcon = domain.icon
@@ -273,9 +295,7 @@ export default function StartDashboardPage(): JSX.Element {
                   </button>
                 )
               })
-            : Array.from({ length: 6 }).map((_, i) => (
-                <Skeleton key={i} className="h-20 w-full rounded-2xl" />
-              ))}
+          ))}
         </div>
       </section>
 

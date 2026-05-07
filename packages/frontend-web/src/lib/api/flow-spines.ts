@@ -260,6 +260,25 @@ function getActiveLanguage(): string {
   return i18n.resolvedLanguage ?? i18n.language ?? 'de'
 }
 
+/**
+ * Einige Gateways/BFFs liefern das Manifest als { data: { manifest_kind, ... } };
+ * FastAPI liefert das flache JSON. Diese Hilfsfunktion vereinheitlicht den Zugriff.
+ */
+function normalizeFlowSpineBody<T>(body: unknown): T {
+  if (body == null || typeof body !== 'object') {
+    throw new Error('Flow-Spine API: Leere oder ungueltige Antwort.')
+  }
+  const obj = body as Record<string, unknown>
+  const nested = obj.data
+  if (nested && typeof nested === 'object' && !Array.isArray(nested)) {
+    const mk = (nested as Record<string, unknown>).manifest_kind
+    if (typeof mk === 'string' && mk.startsWith('FLOW_SPINE_')) {
+      return nested as T
+    }
+  }
+  return obj as T
+}
+
 export function getFlowSpineWorkspaceQueryKey(
   processKey: string,
   instanceId?: string,
@@ -301,8 +320,8 @@ export async function fetchFlowSpineWorkspace(processKey: string, instanceId?: s
   }
   const url = `/api/v1/process/flow-spines/${processKey}?${query.toString()}`
   const response = await apiClient.get<FlowSpineWorkspace>(url)
-  const body = response.data
-  if (body == null || typeof body !== 'object' || !Array.isArray(body.nodes)) {
+  const body = normalizeFlowSpineBody<FlowSpineWorkspace>(response.data)
+  if (!Array.isArray(body.nodes)) {
     throw new Error('Flow-Spine API: Antwort ohne gueltiges nodes-Array (Backend-Vertrag pruefen).')
   }
   return body
@@ -311,7 +330,11 @@ export async function fetchFlowSpineWorkspace(processKey: string, instanceId?: s
 export async function fetchFlowSpineCatalog(): Promise<FlowSpineCatalog> {
   const lang = encodeURIComponent(getActiveLanguage())
   const response = await apiClient.get<FlowSpineCatalog>(`/api/v1/process/flow-spines/catalog?lang=${lang}`)
-  return response.data
+  const body = normalizeFlowSpineBody<FlowSpineCatalog>(response.data)
+  if (!Array.isArray(body.processes)) {
+    throw new Error('Flow-Spine Katalog: Feld processes fehlt oder ist kein Array (Backend-Vertrag pruefen).')
+  }
+  return body
 }
 
 export async function saveFlowSpineResumeCheckpoint(
@@ -338,19 +361,20 @@ export function useFlowSpineWorkspace(processKey: string, instanceId?: string) {
   })
 }
 
-export function useFlowSpineCatalogHook() {
+export function useFlowSpineCatalogHook(options?: { enabled?: boolean }) {
   const lang = getActiveLanguage()
   return useQuery<FlowSpineCatalog>({
     queryKey: ['workflow', 'flow-spine', 'catalog', lang],
     queryFn: fetchFlowSpineCatalog,
     staleTime: 60_000,
     retry: false,
+    enabled: options?.enabled !== false,
   })
 }
 
 /** Named alias matching the spec — delegates to useFlowSpineCatalogHook */
-export function useFlowSpineCatalog() {
-  return useFlowSpineCatalogHook()
+export function useFlowSpineCatalog(options?: { enabled?: boolean }) {
+  return useFlowSpineCatalogHook(options)
 }
 
 type FlowSpineInstancesResponse = {
