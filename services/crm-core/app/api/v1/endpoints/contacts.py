@@ -15,6 +15,11 @@ from app.schemas import ContactCreate, ContactListResponse, ContactRead, Contact
 router = APIRouter()
 
 
+def _effective_tenant(tenant_id: str | None) -> str:
+    t = (tenant_id or "").strip()
+    return t or settings.DEFAULT_TENANT_ID
+
+
 def _ensure_contact_customer_name(records: List[Contact]) -> None:
     for contact in records:
         customer_name = contact.customer.display_name if contact.customer else None
@@ -25,11 +30,13 @@ def _ensure_contact_customer_name(records: List[Contact]) -> None:
 async def list_contacts(
     customer_id: UUID | None = Query(default=None),
     search: str | None = Query(default=None),
+    tenant_id: str | None = Query(default=None, description="Tenant-ID; Default aus Service-Config"),
     skip: int = Query(0, ge=0),
     limit: int = Query(50, ge=1, le=200),
     session: AsyncSession = Depends(get_session),
 ) -> ContactListResponse:
-    filters = [Customer.tenant_id == settings.DEFAULT_TENANT_ID]
+    tid = _effective_tenant(tenant_id)
+    filters = [Customer.tenant_id == tid]
     if customer_id:
         filters.append(Contact.customer_id == customer_id)
     if search:
@@ -61,9 +68,14 @@ async def list_contacts(
 
 
 @router.post("/", response_model=ContactRead, status_code=status.HTTP_201_CREATED)
-async def create_contact(payload: ContactCreate, session: AsyncSession = Depends(get_session)) -> ContactRead:
+async def create_contact(
+    payload: ContactCreate,
+    tenant_id: str | None = Query(default=None),
+    session: AsyncSession = Depends(get_session),
+) -> ContactRead:
+    tid = _effective_tenant(tenant_id)
     customer = await session.get(Customer, payload.customer_id)
-    if not customer or customer.tenant_id != settings.DEFAULT_TENANT_ID:
+    if not customer or customer.tenant_id != tid:
         raise HTTPException(status_code=404, detail="Customer not found")
 
     contact = Contact(**payload.model_dump())
@@ -75,9 +87,15 @@ async def create_contact(payload: ContactCreate, session: AsyncSession = Depends
 
 
 @router.patch("/{contact_id}", response_model=ContactRead)
-async def update_contact(contact_id: UUID, payload: ContactUpdate, session: AsyncSession = Depends(get_session)) -> ContactRead:
+async def update_contact(
+    contact_id: UUID,
+    payload: ContactUpdate,
+    tenant_id: str | None = Query(default=None),
+    session: AsyncSession = Depends(get_session),
+) -> ContactRead:
+    tid = _effective_tenant(tenant_id)
     contact = await session.get(Contact, contact_id, options=[selectinload(Contact.customer)])
-    if not contact or (contact.customer and contact.customer.tenant_id != settings.DEFAULT_TENANT_ID):
+    if not contact or (contact.customer and contact.customer.tenant_id != tid):
         raise HTTPException(status_code=404, detail="Contact not found")
 
     for field, value in payload.model_dump(exclude_unset=True).items():
@@ -90,9 +108,14 @@ async def update_contact(contact_id: UUID, payload: ContactUpdate, session: Asyn
 
 
 @router.delete("/{contact_id}", status_code=status.HTTP_204_NO_CONTENT)
-async def delete_contact(contact_id: UUID, session: AsyncSession = Depends(get_session)) -> None:
+async def delete_contact(
+    contact_id: UUID,
+    tenant_id: str | None = Query(default=None),
+    session: AsyncSession = Depends(get_session),
+) -> None:
+    tid = _effective_tenant(tenant_id)
     contact = await session.get(Contact, contact_id, options=[selectinload(Contact.customer)])
-    if not contact or (contact.customer and contact.customer.tenant_id != settings.DEFAULT_TENANT_ID):
+    if not contact or (contact.customer and contact.customer.tenant_id != tid):
         raise HTTPException(status_code=404, detail="Contact not found")
 
     await session.delete(contact)
@@ -100,9 +123,14 @@ async def delete_contact(contact_id: UUID, session: AsyncSession = Depends(get_s
 
 
 @router.get("/{contact_id}", response_model=ContactRead)
-async def get_contact(contact_id: UUID, session: AsyncSession = Depends(get_session)) -> ContactRead:
+async def get_contact(
+    contact_id: UUID,
+    tenant_id: str | None = Query(default=None),
+    session: AsyncSession = Depends(get_session),
+) -> ContactRead:
+    tid = _effective_tenant(tenant_id)
     contact = await session.get(Contact, contact_id, options=[selectinload(Contact.customer)])
-    if not contact or (contact.customer and contact.customer.tenant_id != settings.DEFAULT_TENANT_ID):
+    if not contact or (contact.customer and contact.customer.tenant_id != tid):
         raise HTTPException(status_code=404, detail="Contact not found")
     setattr(contact, "customer_name", contact.customer.display_name if contact.customer else None)
     return ContactRead.model_validate(contact)

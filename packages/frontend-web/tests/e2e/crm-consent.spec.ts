@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test'
+import { prepareE2EAuth } from './helpers/auth-from-env'
 
 /**
  * E2E Tests für CRM Consent-Management
@@ -13,7 +14,7 @@ import { test, expect } from '@playwright/test'
 
 test.describe('CRM Consent-Management', () => {
   test.beforeEach(async ({ page }) => {
-    // TODO: Setup authentication
+    await prepareE2EAuth(page)
     await page.goto('/crm/consents')
     await page.waitForLoadState('networkidle')
   })

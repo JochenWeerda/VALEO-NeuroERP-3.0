@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test'
+import { prepareE2EAuth } from './helpers/auth-from-env'
 
 /**
  * E2E Tests für CRM Opportunities
@@ -12,14 +13,7 @@ import { test, expect } from '@playwright/test'
 
 test.describe('CRM Opportunities', () => {
   test.beforeEach(async ({ page }) => {
-    // TODO: Setup authentication
-    // await page.goto('/login')
-    // await page.fill('[name="username"]', 'testuser')
-    // await page.fill('[name="password"]', 'testpass')
-    // await page.click('button[type="submit"]')
-    // await page.waitForURL('/')
-    
-    // Für jetzt: Direkt zur Seite navigieren (wenn Auth nicht benötigt)
+    await prepareE2EAuth(page)
     await page.goto('/crm/opportunities')
     await page.waitForLoadState('networkidle')
   })

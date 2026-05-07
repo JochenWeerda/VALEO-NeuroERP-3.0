@@ -2,9 +2,8 @@ from datetime import datetime
 from typing import Optional
 from uuid import UUID
 
-import sqlalchemy as sa
 from fastapi import APIRouter, Depends, HTTPException, Query, status
-from sqlalchemy import func, select
+from sqlalchemy import delete, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
@@ -16,6 +15,11 @@ from app.schemas import ActivityCreate, ActivityListResponse, ActivityRead, Acti
 router = APIRouter()
 
 
+def _effective_tenant(tenant_id: str | None) -> str:
+    t = (tenant_id or "").strip()
+    return t or settings.DEFAULT_TENANT_ID
+
+
 def _attach_names(records: list[Activity]) -> None:
     for activity in records:
         setattr(activity, "customer_name", activity.customer.display_name if activity.customer else None)
@@ -25,15 +29,20 @@ def _attach_names(records: list[Activity]) -> None:
 async def list_activities(
     activity_type: Optional[str] = Query(default=None, alias="type"),
     status_filter: Optional[str] = Query(default=None, alias="status"),
+    tenant_id: Optional[str] = Query(default=None),
+    contact_id: Optional[UUID] = Query(default=None),
     skip: int = Query(0, ge=0),
     limit: int = Query(50, ge=1, le=200),
     session: AsyncSession = Depends(get_session),
 ) -> ActivityListResponse:
-    filters = [Activity.tenant_id == settings.DEFAULT_TENANT_ID]
+    tid = _effective_tenant(tenant_id)
+    filters = [Activity.tenant_id == tid]
     if activity_type:
         filters.append(Activity.type == activity_type)
     if status_filter:
         filters.append(Activity.status == status_filter)
+    if contact_id:
+        filters.append(Activity.contact_id == contact_id)
 
     total_stmt = select(func.count()).select_from(Activity).where(*filters)
     total = await session.scalar(total_stmt)
@@ -53,12 +62,30 @@ async def list_activities(
     return ActivityListResponse(items=items, total=total or 0)
 
 
+@router.delete("/by-contact/{contact_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_activities_for_contact(
+    contact_id: UUID,
+    tenant_id: Optional[str] = Query(default=None),
+    session: AsyncSession = Depends(get_session),
+) -> None:
+    tid = _effective_tenant(tenant_id)
+    await session.execute(
+        delete(Activity).where(Activity.tenant_id == tid, Activity.contact_id == contact_id)
+    )
+    await session.commit()
+
+
 @router.post("/", response_model=ActivityRead, status_code=status.HTTP_201_CREATED)
-async def create_activity(payload: ActivityCreate, session: AsyncSession = Depends(get_session)) -> ActivityRead:
+async def create_activity(
+    payload: ActivityCreate,
+    tenant_id: Optional[str] = Query(default=None),
+    session: AsyncSession = Depends(get_session),
+) -> ActivityRead:
+    tid = _effective_tenant(tenant_id)
     customer = None
     if payload.customer_id:
         customer = await session.get(Customer, payload.customer_id)
-        if not customer or customer.tenant_id != settings.DEFAULT_TENANT_ID:
+        if not customer or customer.tenant_id != tid:
             raise HTTPException(status_code=404, detail="Customer not found")
     if payload.contact_id:
         contact = await session.get(Contact, payload.contact_id)
@@ -66,7 +93,7 @@ async def create_activity(payload: ActivityCreate, session: AsyncSession = Depen
             raise HTTPException(status_code=404, detail="Contact not found")
 
     activity = Activity(
-        tenant_id=settings.DEFAULT_TENANT_ID,
+        tenant_id=tid,
         type=payload.type,
         title=payload.title,
         status=payload.status,
@@ -86,24 +113,35 @@ async def create_activity(payload: ActivityCreate, session: AsyncSession = Depen
 
 
 @router.get("/{activity_id}", response_model=ActivityRead)
-async def get_activity(activity_id: UUID, session: AsyncSession = Depends(get_session)) -> ActivityRead:
+async def get_activity(
+    activity_id: UUID,
+    tenant_id: Optional[str] = Query(default=None),
+    session: AsyncSession = Depends(get_session),
+) -> ActivityRead:
+    tid = _effective_tenant(tenant_id)
     activity = await session.get(Activity, activity_id, options=[selectinload(Activity.customer)])
-    if not activity or activity.tenant_id != settings.DEFAULT_TENANT_ID:
+    if not activity or activity.tenant_id != tid:
         raise HTTPException(status_code=404, detail="Activity not found")
     setattr(activity, "customer_name", activity.customer.display_name if activity.customer else None)
     return ActivityRead.model_validate(activity)
 
 
 @router.patch("/{activity_id}", response_model=ActivityRead)
-async def update_activity(activity_id: UUID, payload: ActivityUpdate, session: AsyncSession = Depends(get_session)) -> ActivityRead:
+async def update_activity(
+    activity_id: UUID,
+    payload: ActivityUpdate,
+    tenant_id: Optional[str] = Query(default=None),
+    session: AsyncSession = Depends(get_session),
+) -> ActivityRead:
+    tid = _effective_tenant(tenant_id)
     activity = await session.get(Activity, activity_id, options=[selectinload(Activity.customer)])
-    if not activity or activity.tenant_id != settings.DEFAULT_TENANT_ID:
+    if not activity or activity.tenant_id != tid:
         raise HTTPException(status_code=404, detail="Activity not found")
 
     updates = payload.model_dump(exclude_unset=True)
     if "customer_id" in updates and updates["customer_id"] is not None:
         customer = await session.get(Customer, updates["customer_id"])
-        if not customer or customer.tenant_id != settings.DEFAULT_TENANT_ID:
+        if not customer or customer.tenant_id != tid:
             raise HTTPException(status_code=404, detail="Customer not found")
     if "contact_id" in updates and updates["contact_id"] is not None:
         contact = await session.get(Contact, updates["contact_id"])
@@ -120,9 +158,14 @@ async def update_activity(activity_id: UUID, payload: ActivityUpdate, session: A
 
 
 @router.delete("/{activity_id}", status_code=status.HTTP_204_NO_CONTENT)
-async def delete_activity(activity_id: UUID, session: AsyncSession = Depends(get_session)) -> None:
+async def delete_activity(
+    activity_id: UUID,
+    tenant_id: Optional[str] = Query(default=None),
+    session: AsyncSession = Depends(get_session),
+) -> None:
+    tid = _effective_tenant(tenant_id)
     activity = await session.get(Activity, activity_id)
-    if not activity or activity.tenant_id != settings.DEFAULT_TENANT_ID:
+    if not activity or activity.tenant_id != tid:
         raise HTTPException(status_code=404, detail="Activity not found")
     await session.delete(activity)
     await session.commit()

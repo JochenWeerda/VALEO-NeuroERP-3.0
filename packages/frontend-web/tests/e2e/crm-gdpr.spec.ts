@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test'
+import { prepareE2EAuth } from './helpers/auth-from-env'
 
 /**
  * E2E Tests für CRM GDPR-Funktionen
@@ -15,7 +16,7 @@ import { test, expect } from '@playwright/test'
 
 test.describe('CRM GDPR-Funktionen', () => {
   test.beforeEach(async ({ page }) => {
-    // TODO: Setup authentication
+    await prepareE2EAuth(page)
     await page.goto('/crm/gdpr-requests')
     await page.waitForLoadState('networkidle')
   })
