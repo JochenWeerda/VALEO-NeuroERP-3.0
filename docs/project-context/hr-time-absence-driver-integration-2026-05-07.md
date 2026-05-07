@@ -42,6 +42,20 @@ Sie listet 67 oeffentliche Repositories; die sichtbaren Top-Treffer bestaetigen 
 Fazit: Die Topic-Seite liefert keinen besseren permissiven Kandidaten fuer deutsche Arbeitszeit-/Abwesenheitsverwaltung mit Fahrerbezug.
 Sie staerkt die Entscheidung, Abwesenheiten ueber Apache-2.0-Urlaubsverwaltung zu pruefen und Fahrerzeit als VALEO-eigenen Bounded Context zu modellieren.
 
+### MintHCM Zusatzpruefung
+
+Der von GitHub ueber Camo referenzierte MintHCM-GIF verweist auf die MintHCM-Produktpraesentation.
+Fachlich ist MintHCM deutlich breiter als eine reine Zeiterfassung: README und Projektprofil nennen unter anderem Recruitment, Time Management, Onboarding/Offboarding, Kalender, Leave Management, Ressourcenbuchung, Travel & Expenses, Workplace Management, Analytics, Rollen/Rechte, Mitarbeiterprofile, Kompetenzen, Bewertungen sowie mobile Apps.
+
+Die technische Basis ist fuer VALEO jedoch kein einfacher Fit:
+
+- MintHCM basiert auf SugarCRM CE und SuiteCRM.
+- Stack laut README: Apache2, PHP 8.0, MySQL 8.0 oder MariaDB, ElasticSearch 7.9.
+- API ist SuiteCRM-aehnlich, aber mit projektspezifischen Abweichungen.
+- Das Repo weist AGPL-3.0 aus.
+
+Bewertung: MintHCM ist als fachlicher Vergleichskandidat interessant, aber wegen AGPL-3.0, CRM-Herkunft und separatem PHP/MySQL/Elastic-Stack keine bevorzugte VALEO-Codebasis. Wenn ueberhaupt, dann nur als strikt getrennter Evaluierungsdienst ohne Fork und ohne Codeuebernahme.
+
 ## Zielarchitektur
 
 ```text
@@ -179,6 +193,7 @@ Geprueft am 2026-05-07:
 - GitHub Topic `human-resources-management-system`: https://github.com/topics/human-resources-management-system
 - OrangeHRM: GitHub weist GPL-3.0 aus: https://github.com/orangehrm/orangehrm
 - MintHCM: Lizenzdatei ist AGPL-3.0: https://raw.githubusercontent.com/minthcm/minthcm/master/LICENSE
+- MintHCM README mit Featureliste, Stack und API-Hinweisen: https://github.com/minthcm/minthcm
 - Headcount: Lizenzdatei ist AGPL-3.0: https://raw.githubusercontent.com/bluewave-labs/Headcount/main/LICENSE
 - GleamHRM: Lizenzdatei ist GPL-3.0: https://raw.githubusercontent.com/glowlogix/gleamhrm/master/LICENSE
 - EU-Regelwerk zu Lenk- und Ruhezeiten: Verordnung (EG) Nr. 561/2006 und Folgeregeln: https://eur-lex.europa.eu/eli/reg/2006/561/oj
