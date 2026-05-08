@@ -89,6 +89,17 @@ Stand: `2026-05-08`
 **Checks:** `python scripts/agent_workboard_supervisor.py validate`; `node scripts/docs-governance-check.cjs`; `git diff --check`
 **Offene Risiken:** Detailauslegung Arbeitszeit-/Lenkzeitrecht, Tarif-/Betriebsvereinbarungen, Anbieter-AVV/DPA und echte Kalender-/Tacho-/Telematik-Zugangsdaten bleiben fachlich oder extern zu klaeren.
 
+## HR-TIME-DATA-001
+
+**Von:** Codex
+**Owner:** Codex
+**Stand:** reserviert 2026-05-08
+**Ziel des Slices:** Persistenten HR-Time-Datenkern fuer Mitarbeiter-Zeitprofile, produktive Zeitereignisse und Audit-/Statusfelder einfuehren.
+**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/agent-ops/slices/HR-TIME-DATA-001.yaml`, `app/api/v1/endpoints/personal.py`, `tests/test_personal_time_data_api.py`, `migrations/sql/hr/001_hr_time_core.sql`, `docs/project-context/hr-time-sap-oracle-gap-lastenheft-roadmap-2026-05-08.md`
+**Abnahmekriterien:** API liefert kanonische HR-Time-Profile aus Datenbank oder Pilot-Fallback; produktive Zeitereignisse besitzen Quelle, Status, Kostenstelle, Arbeitsbereich, Audit und Korrekturgrund im Migrationsvertrag; Tests sichern Profil- und Event-Transformation.
+**Checks:** `pytest tests/test_personal_time_data_api.py tests/test_personal_time_cockpit_api.py tests/test_personal_driver_time_api.py -q --no-cov`; `python scripts/agent_workboard_supervisor.py validate`; `node scripts/docs-governance-check.cjs`; `git diff --check`
+**Offene Risiken:** Produktive Anwendung der Migration, echte HR-Stammdatenquelle und Lohnartenmapping bleiben Folgeslices.
+
 ## AGENT-ORCH-001
 
 **Von:** Codex
