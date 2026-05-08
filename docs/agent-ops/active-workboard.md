@@ -77,6 +77,17 @@ Stand: `2026-05-08`
 **Checks:** `pytest tests/test_personal_time_cockpit_api.py tests/test_personal_driver_time_api.py -q --no-cov`; `pnpm --filter @valero-neuroerp/frontend-web type-check`; `python scripts/agent_workboard_supervisor.py validate`; `node scripts/docs-governance-check.cjs`
 **Offene Risiken:** Rechtsfeingranulare ArbZG-/Lenkzeitregeln, echte Dienstplanung, Buchungsworkflow und Lohnexport bleiben Folgeslices.
 
+## HR-TIME-GAP-001
+
+**Von:** Codex
+**Owner:** Codex
+**Stand:** reserviert 2026-05-08
+**Ziel des Slices:** GAP-Liste, Lastenheft, Roadmap, Integrationsanforderungen und Landhandel-spezifische HRM-Planung gegen SAP/Oracle/Shiftfy-Benchmark dokumentieren.
+**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/agent-ops/slices/HR-TIME-GAP-001.yaml`, `docs/project-context/hr-time-sap-oracle-gap-lastenheft-roadmap-2026-05-08.md`, `docs/project-context/hr-time-absence-driver-integration-2026-05-07.md`
+**Abnahmekriterien:** SAP-/Oracle-/Shiftfy-Benchmark ist quellenbasiert; VALEO-GAPs, Lastenheft, Roadmap-Milestones, Integrationsanforderungen, Kreuzverbindungen, Mitarbeitertypen im Landhandel, Kalenderintegration, Saison-/Arbeitsspitzenplanung, Kampagneninterferenzen und Aussendienstplanung sind als umsetzbare Planung dokumentiert.
+**Checks:** `python scripts/agent_workboard_supervisor.py validate`; `node scripts/docs-governance-check.cjs`; `git diff --check`
+**Offene Risiken:** Detailauslegung Arbeitszeit-/Lenkzeitrecht, Tarif-/Betriebsvereinbarungen, Anbieter-AVV/DPA und echte Kalender-/Tacho-/Telematik-Zugangsdaten bleiben fachlich oder extern zu klaeren.
+
 ## AGENT-ORCH-001
 
 **Von:** Codex
