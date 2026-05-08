@@ -93,10 +93,11 @@ Stand: `2026-05-08`
 
 **Von:** Codex
 **Owner:** Codex
-**Stand:** reserviert 2026-05-08
+**Stand:** abgeschlossen 2026-05-08
 **Ziel des Slices:** Persistenten HR-Time-Datenkern fuer Mitarbeiter-Zeitprofile, produktive Zeitereignisse und Audit-/Statusfelder einfuehren.
-**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/agent-ops/slices/HR-TIME-DATA-001.yaml`, `app/api/v1/endpoints/personal.py`, `tests/test_personal_time_data_api.py`, `migrations/sql/hr/001_hr_time_core.sql`, `docs/project-context/hr-time-sap-oracle-gap-lastenheft-roadmap-2026-05-08.md`
-**Abnahmekriterien:** API liefert kanonische HR-Time-Profile aus Datenbank oder Pilot-Fallback; produktive Zeitereignisse besitzen Quelle, Status, Kostenstelle, Arbeitsbereich, Audit und Korrekturgrund im Migrationsvertrag; Tests sichern Profil- und Event-Transformation.
+**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/agent-ops/slices/HR-TIME-DATA-001.yaml`, `app/api/v1/endpoints/personal.py`, `tests/test_personal_time_data_api.py`, `migrations/sql/hr/001_hr_time_core.sql`, `docs/project-context/hr-time-canonical-core-data-model-2026-05-08.md`, `docs/project-context/hr-time-sap-oracle-gap-lastenheft-roadmap-2026-05-08.md`
+**Abnahmekriterien:** Kanonisches HR-Time-Kerndatenmodell und Konsistenzregeln sind dokumentiert; API liefert kanonische HR-Time-Profile aus Datenbank oder Pilot-Fallback; produktive Zeitereignisse besitzen Quelle, Status, Kostenstelle, Arbeitsbereich, Audit und Korrekturgrund im Migrationsvertrag; Tests sichern Profil- und Event-Transformation.
+**Erledigt:** Kanonisches Kerndatenmodell inklusive API-Resource-URLs und Konsistenzanalyse dokumentiert; SQL-Vertrag fuer `employee_time_profiles`, erweiterte `time_entries` und `driver_time_events` erstellt; `GET /api/v1/personal/time-profiles` mit Datenbank-, User- und Pilot-Fallback umgesetzt; fokussierte API-/Mapping-Regression ergaenzt.
 **Checks:** `pytest tests/test_personal_time_data_api.py tests/test_personal_time_cockpit_api.py tests/test_personal_driver_time_api.py -q --no-cov`; `python scripts/agent_workboard_supervisor.py validate`; `node scripts/docs-governance-check.cjs`; `git diff --check`
 **Offene Risiken:** Produktive Anwendung der Migration, echte HR-Stammdatenquelle und Lohnartenmapping bleiben Folgeslices.
 

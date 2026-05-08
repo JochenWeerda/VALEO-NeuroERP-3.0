@@ -1,5 +1,5 @@
 id: HR-TIME-DATA-001
-status: reserviert
+status: abgeschlossen
 owner: Codex
 goal: >
   Persistenten HR-Time-Datenkern fuer Mitarbeiter-Zeitprofile, produktive
@@ -10,8 +10,10 @@ file_ownership:
   - app/api/v1/endpoints/personal.py
   - tests/test_personal_time_data_api.py
   - migrations/sql/hr/001_hr_time_core.sql
+  - docs/project-context/hr-time-canonical-core-data-model-2026-05-08.md
   - docs/project-context/hr-time-sap-oracle-gap-lastenheft-roadmap-2026-05-08.md
 acceptance_criteria: >
+  Kanonisches HR-Time-Kerndatenmodell und Konsistenzregeln sind dokumentiert;
   API liefert kanonische HR-Time-Profile aus Datenbank oder Pilot-Fallback;
   produktive Zeitereignisse besitzen Quelle, Status, Kostenstelle, Arbeitsbereich,
   Audit und Korrekturgrund im Migrationsvertrag; Tests sichern Profil- und
