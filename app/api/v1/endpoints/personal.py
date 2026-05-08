@@ -97,6 +97,35 @@ class TimeEntryActionOut(BaseModel):
     entry: TimeEntryBookingOut
 
 
+class AbsenceImportIn(BaseModel):
+    employeeRef: str = Field(..., min_length=1, max_length=120)
+    absenceType: str = Field(default="Urlaub", pattern="^(Urlaub|Krank|Unbezahlt|Sonstiges)$")
+    fromDate: str
+    toDate: str
+    status: str = Field(default="Approved", pattern="^(Draft|Submitted|Approved|Rejected|Genehmigt)$")
+    sourceSystem: str = Field(default="urlaubsverwaltung", max_length=80)
+    externalRef: str | None = Field(default=None, max_length=120)
+    note: str | None = Field(default=None, max_length=500)
+
+
+class AbsenceOut(BaseModel):
+    id: str
+    employeeRef: str
+    datum: str
+    absenceType: str
+    status: str
+    source: str
+    externalRef: str | None = None
+    planningBlockers: list[str] = Field(default_factory=list)
+    note: str | None = None
+
+
+class AbsenceImportOut(BaseModel):
+    ok: bool
+    imported: int
+    absences: list[AbsenceOut]
+
+
 class TourIn(BaseModel):
     id: str
     start: str
@@ -372,6 +401,13 @@ def _parse_entry_date(value: str) -> date:
         raise HTTPException(status_code=400, detail="Invalid datum format") from exc
 
 
+def _date_range(start: date, end: date) -> list[date]:
+    if end < start:
+        raise HTTPException(status_code=400, detail="toDate must be on or after fromDate")
+    days = (end - start).days
+    return [date.fromordinal(start.toordinal() + offset) for offset in range(days + 1)]
+
+
 def _time_booking_from_row(row: Any) -> TimeEntryBookingOut:
     row_map = dict(row)
     return TimeEntryBookingOut(
@@ -390,6 +426,30 @@ def _time_booking_from_row(row: Any) -> TimeEntryBookingOut:
         approvedBy=str(row_map.get("approved_by") or "") or None,
         approvedAt=_to_iso(row_map.get("approved_at")) if row_map.get("approved_at") else None,
         auditRef=str(row_map.get("audit_ref") or "") or None,
+    )
+
+
+def _absence_blockers(status: str) -> list[str]:
+    if status in {"Approved", "Genehmigt"}:
+        return ["tour", "shift", "calendar", "payroll"]
+    if status == "Submitted":
+        return ["planning-review"]
+    return []
+
+
+def _absence_from_row(row: Any) -> AbsenceOut:
+    row_map = dict(row)
+    status = str(row_map.get("status") or "Draft")
+    return AbsenceOut(
+        id=str(row_map.get("id") or ""),
+        employeeRef=str(row_map.get("employee_ref") or ""),
+        datum=_to_iso(row_map.get("entry_date")),
+        absenceType=str(row_map.get("entry_type") or "Urlaub"),
+        status=status,
+        source=str(row_map.get("source") or "absence"),
+        externalRef=str(row_map.get("audit_ref") or "") or None,
+        planningBlockers=_absence_blockers(status),
+        note=str(row_map.get("notes") or "") or None,
     )
 
 
@@ -1416,6 +1476,78 @@ async def correct_time_entry(
     ).mappings().first()
     db.commit()
     return TimeEntryActionOut(ok=True, entry=_time_booking_from_row(row))
+
+
+@router.get("/absences", response_model=list[AbsenceOut])
+async def list_absences(
+    datum_von: str | None = Query(default=None),
+    datum_bis: str | None = Query(default=None),
+    status: str | None = Query(default=None),
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+):
+    params: dict[str, Any] = {"tenant_id": tenant_id}
+    where = ["tenant_id = :tenant_id", "entry_type IN ('Urlaub', 'Krank', 'Unbezahlt', 'Sonstiges')"]
+    if datum_von:
+        params["datum_von"] = _parse_entry_date(datum_von)
+        where.append("entry_date >= :datum_von")
+    if datum_bis:
+        params["datum_bis"] = _parse_entry_date(datum_bis)
+        where.append("entry_date <= :datum_bis")
+    if status:
+        params["status"] = status
+        where.append("status = :status")
+
+    rows = db.execute(
+        text(
+            f"""
+            SELECT id, employee_ref, entry_date, entry_type, source, status, notes, audit_ref
+            FROM domain_hr.time_entries
+            WHERE {' AND '.join(where)}
+            ORDER BY entry_date ASC, employee_ref ASC
+            """
+        ),
+        params,
+    ).mappings().all()
+    return [_absence_from_row(row) for row in rows]
+
+
+@router.post("/absences/import", response_model=AbsenceImportOut, status_code=201)
+async def import_absence(
+    payload: AbsenceImportIn,
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+):
+    from_date = _parse_entry_date(payload.fromDate)
+    to_date = _parse_entry_date(payload.toDate)
+    imported: list[AbsenceOut] = []
+    for entry_date in _date_range(from_date, to_date):
+        row = db.execute(
+            text(
+                """
+                INSERT INTO domain_hr.time_entries
+                  (id, tenant_id, employee_ref, entry_date, start_time, end_time, hours,
+                   entry_type, source, status, notes, audit_ref, created_at, updated_at)
+                VALUES
+                  (:id, :tenant_id, :employee_ref, :entry_date, NULL, NULL, 0,
+                   :entry_type, 'absence', :status, :notes, :audit_ref, NOW(), NOW())
+                RETURNING id, employee_ref, entry_date, entry_type, source, status, notes, audit_ref
+                """
+            ),
+            {
+                "id": str(uuid4()),
+                "tenant_id": tenant_id,
+                "employee_ref": payload.employeeRef,
+                "entry_date": entry_date,
+                "entry_type": payload.absenceType,
+                "status": payload.status,
+                "notes": payload.note or payload.sourceSystem,
+                "audit_ref": payload.externalRef or f"{payload.sourceSystem}:{payload.employeeRef}:{entry_date.isoformat()}",
+            },
+        ).mappings().first()
+        imported.append(_absence_from_row(row))
+    db.commit()
+    return AbsenceImportOut(ok=True, imported=len(imported), absences=imported)
 
 
 @router.get("/driver-time/summary", response_model=DriverTimeSummaryOut)
