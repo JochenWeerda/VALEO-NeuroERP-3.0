@@ -173,7 +173,8 @@ Umsetzungsstand 2026-05-07:
 
 - `packages/hr-domain/src/domain/entities/driver-time-event.ts` definiert den ersten VALEO-eigenen Driver-Time-Contract mit Ereignisart, Quelle, Tour, Fahrzeug, Standort, Korrekturstatus und Audit-Referenz.
 - `packages/hr-domain/src/domain/services/driver-time-service.ts` liefert Tages-/Fahrerzusammenfassungen und Plausibilitaetsbefunde fuer Ueberlappungen, fehlenden Tour-/Fahrzeugbezug, Abwesenheitskollisionen und Tacho-/Manuell-Abweichungen.
-- `packages/frontend-web/src/pages/personal/zeiterfassung.tsx` zeigt den Driver-Time-Pilot neben klassischer Arbeitszeit, damit Dispo/HR die Fahrerzeitlogik sichtbar pruefen koennen.
+- `app/api/v1/endpoints/personal.py` stellt mit `GET /api/v1/personal/driver-time/summary` den ersten Backend-Toolvertrag fuer Fahrerzeit-KPIs, Ereignisse und Plausibilitaetsbefunde bereit.
+- `packages/frontend-web/src/lib/api/personal.ts` exponiert `useDriverTimeSummary`; `packages/frontend-web/src/pages/personal/zeiterfassung.tsx` nutzt diesen Vertrag statt harter lokaler Driver-Time-Daten.
 
 Nicht im ersten Pilot:
 

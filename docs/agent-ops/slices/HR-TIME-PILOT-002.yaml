@@ -1,5 +1,5 @@
 id: HR-TIME-PILOT-002
-status: reserviert
+status: abgeschlossen
 owner: Codex
 goal: >
   Driver-Time-Pilot als Backend-/Frontend-Toolvertrag an die bestehende Personal-API anbinden.

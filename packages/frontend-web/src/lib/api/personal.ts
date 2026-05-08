@@ -36,6 +36,49 @@ export type ZeitEintrag = {
   typ: 'Arbeit' | 'Ueberstunden' | 'Urlaub'
 }
 
+export type DriverTimeFindingSeverity = 'blocker' | 'warning' | 'info'
+
+export type DriverTimeFinding = {
+  code: string
+  severity: DriverTimeFindingSeverity
+  message: string
+  eventIds: string[]
+}
+
+export type DriverTimeEvent = {
+  id: string
+  fahrer: string
+  employeeRef: string
+  datum: string
+  tour?: string | null
+  fahrzeug?: string | null
+  start: string
+  ende: string
+  taetigkeit: string
+  eventType: string
+  quelle: 'Manuell' | 'Tacho' | 'Telematik' | 'Dispo' | string
+  dauer: number
+  findings: DriverTimeFinding[]
+}
+
+export type DriverTimeSummary = {
+  datum: string
+  source: string
+  kpis: {
+    eventCount: number
+    fahrerCount: number
+    tourCount: number
+    vehicleCount: number
+    fahrzeitStunden: number
+    produktivStunden: number
+    ruhezeitStunden: number
+    blocker: number
+    warnings: number
+  }
+  findings: DriverTimeFinding[]
+  events: DriverTimeEvent[]
+}
+
 export type SchulungTyp = 'PSM' | 'Gefahrstoffe' | 'Gabelstapler' | 'Erste Hilfe' | 'Brandschutz' | 'Arbeitssicherheit'
 export type SchulungStatus = 'gueltig' | 'ablaufend' | 'abgelaufen'
 
@@ -112,6 +155,7 @@ export const personalKeys = {
   all: ['personal'] as const,
   mitarbeiter: (filters?: Record<string, unknown>) => [...personalKeys.all, 'mitarbeiter', filters] as const,
   zeiterfassung: (datum?: string) => [...personalKeys.all, 'zeit', datum] as const,
+  driverTimeSummary: (datum?: string) => [...personalKeys.all, 'driver-time-summary', datum] as const,
   schulungen: (filters?: Record<string, unknown>) => [...personalKeys.all, 'schulungen', filters] as const,
   qualifikationen: (filters?: Record<string, unknown>) => [...personalKeys.all, 'qualifikationen', filters] as const,
   onboardingRuns: (filters?: Record<string, unknown>) => [...personalKeys.all, 'onboarding-runs', filters] as const,
@@ -122,6 +166,23 @@ export const personalKeys = {
 
 const EMPTY_MITARBEITER_LIST: Mitarbeiter[] = []
 const EMPTY_ZEITERFASSUNG_LIST: ZeitEintrag[] = []
+const EMPTY_DRIVER_TIME_SUMMARY: DriverTimeSummary = {
+  datum: '',
+  source: 'empty',
+  kpis: {
+    eventCount: 0,
+    fahrerCount: 0,
+    tourCount: 0,
+    vehicleCount: 0,
+    fahrzeitStunden: 0,
+    produktivStunden: 0,
+    ruhezeitStunden: 0,
+    blocker: 0,
+    warnings: 0,
+  },
+  findings: [],
+  events: [],
+}
 const EMPTY_SCHULUNGEN_LIST: Schulung[] = []
 const EMPTY_STUNDENZETTEL_LIST: StundenzettelEintrag[] = []
 const EMPTY_QUALIFIKATIONEN_LIST: Qualifikation[] = []
@@ -150,6 +211,18 @@ export function useZeiterfassung(datum?: string) {
       return (await apiClient.get<ZeitEintrag[]>(`/api/v1/personal/zeiterfassung${params}`)).data
     },
     initialData: EMPTY_ZEITERFASSUNG_LIST,
+    staleTime: 30 * 1000,
+  })
+}
+
+export function useDriverTimeSummary(datum?: string) {
+  return useQuery({
+    queryKey: personalKeys.driverTimeSummary(datum),
+    queryFn: async () => {
+      const params = datum ? `?datum=${datum}` : ''
+      return (await apiClient.get<DriverTimeSummary>(`/api/v1/personal/driver-time/summary${params}`)).data
+    },
+    initialData: EMPTY_DRIVER_TIME_SUMMARY,
     staleTime: 30 * 1000,
   })
 }

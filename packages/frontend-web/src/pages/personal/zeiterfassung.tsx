@@ -4,91 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { DataTable } from '@/components/ui/data-table'
 import { Skeleton } from '@/components/ui/skeleton'
 import { AlertTriangle, CalendarCheck, Clock, Route, ShieldCheck, Truck } from 'lucide-react'
-import { useZeiterfassung, type ZeitEintrag } from '@/lib/api/personal'
-
-type DriverTimeFindingSeverity = 'blocker' | 'warning' | 'info'
-
-type DriverTimeFinding = {
-  code: string
-  severity: DriverTimeFindingSeverity
-  message: string
-}
-
-type DriverTimePilotRow = {
-  id: string
-  fahrer: string
-  tour: string
-  fahrzeug: string
-  start: string
-  ende: string
-  taetigkeit: string
-  quelle: 'Manuell' | 'Tacho' | 'Telematik' | 'Dispo'
-  dauer: number
-  findings: DriverTimeFinding[]
-}
-
-const driverTimePilotRows: DriverTimePilotRow[] = [
-  {
-    id: 'dt-001',
-    fahrer: 'M. Krueger',
-    tour: 'TOUR-2407',
-    fahrzeug: 'WL-VA 1840',
-    start: '05:45',
-    ende: '07:55',
-    taetigkeit: 'Fahren',
-    quelle: 'Tacho',
-    dauer: 2.17,
-    findings: [],
-  },
-  {
-    id: 'dt-002',
-    fahrer: 'M. Krueger',
-    tour: 'TOUR-2407',
-    fahrzeug: 'WL-VA 1840',
-    start: '07:55',
-    ende: '09:10',
-    taetigkeit: 'Entladen',
-    quelle: 'Manuell',
-    dauer: 1.25,
-    findings: [
-      {
-        code: 'TACHO_MANUAL_DEVIATION',
-        severity: 'warning',
-        message: 'Tacho-Abgleich offen',
-      },
-    ],
-  },
-  {
-    id: 'dt-003',
-    fahrer: 'S. Weber',
-    tour: 'TOUR-2411',
-    fahrzeug: 'fehlt',
-    start: '06:20',
-    ende: '08:00',
-    taetigkeit: 'Fahren',
-    quelle: 'Dispo',
-    dauer: 1.67,
-    findings: [
-      {
-        code: 'MISSING_VEHICLE',
-        severity: 'blocker',
-        message: 'Fahrzeug fehlt',
-      },
-    ],
-  },
-  {
-    id: 'dt-004',
-    fahrer: 'A. Brandt',
-    tour: 'TOUR-2409',
-    fahrzeug: 'WL-VA 1217',
-    start: '08:00',
-    ende: '08:45',
-    taetigkeit: 'Pause',
-    quelle: 'Manuell',
-    dauer: 0.75,
-    findings: [],
-  },
-]
+import { useDriverTimeSummary, useZeiterfassung, type DriverTimeEvent, type DriverTimeFindingSeverity, type ZeitEintrag } from '@/lib/api/personal'
 
 const getFindingBadgeVariant = (severity: DriverTimeFindingSeverity): 'destructive' | 'secondary' | 'outline' => {
   if (severity === 'blocker') return 'destructive'
@@ -99,8 +15,9 @@ const getFindingBadgeVariant = (severity: DriverTimeFindingSeverity): 'destructi
 export default function ZeiterfassungPage(): JSX.Element {
   const today = new Date().toISOString().split('T')[0]
   const { data: zeiten, isLoading } = useZeiterfassung(today)
+  const { data: driverTime, isLoading: isDriverTimeLoading } = useDriverTimeSummary(today)
   const list = useMemo(() => zeiten ?? [], [zeiten])
-  const driverRows = useMemo(() => driverTimePilotRows, [])
+  const driverRows = useMemo(() => driverTime.events, [driverTime.events])
 
   const columns = [
     { key: 'mitarbeiter' as const, label: 'Mitarbeiter' },
@@ -136,53 +53,45 @@ export default function ZeiterfassungPage(): JSX.Element {
   ]
 
   const gesamtStunden = list.reduce((sum, z) => sum + z.stunden, 0)
-  const driverBlocker = driverRows.reduce(
-    (sum, row) => sum + row.findings.filter((finding) => finding.severity === 'blocker').length,
-    0,
-  )
-  const driverWarnings = driverRows.reduce(
-    (sum, row) => sum + row.findings.filter((finding) => finding.severity === 'warning').length,
-    0,
-  )
-  const fahrzeitStunden = driverRows
-    .filter((row) => row.taetigkeit === 'Fahren')
-    .reduce((sum, row) => sum + row.dauer, 0)
+  const driverBlocker = driverTime.kpis.blocker
+  const driverWarnings = driverTime.kpis.warnings
+  const fahrzeitStunden = driverTime.kpis.fahrzeitStunden
   const driverColumns = [
     { key: 'fahrer' as const, label: 'Fahrer' },
     {
       key: 'tour' as const,
       label: 'Tour',
-      render: (row: DriverTimePilotRow) => <span className="font-mono text-xs">{row.tour}</span>,
+      render: (row: DriverTimeEvent) => <span className="font-mono text-xs">{row.tour ?? '-'}</span>,
     },
     {
       key: 'fahrzeug' as const,
       label: 'Fahrzeug',
-      render: (row: DriverTimePilotRow) => (
-        <span className={row.fahrzeug === 'fehlt' ? 'font-semibold text-destructive' : 'font-mono text-xs'}>
-          {row.fahrzeug}
+      render: (row: DriverTimeEvent) => (
+        <span className={!row.fahrzeug ? 'font-semibold text-destructive' : 'font-mono text-xs'}>
+          {row.fahrzeug ?? 'fehlt'}
         </span>
       ),
     },
     {
       key: 'start' as const,
       label: 'Zeit',
-      render: (row: DriverTimePilotRow) => <span className="font-mono">{row.start} - {row.ende}</span>,
+      render: (row: DriverTimeEvent) => <span className="font-mono">{row.start} - {row.ende}</span>,
     },
     { key: 'taetigkeit' as const, label: 'Taetigkeit' },
     {
       key: 'quelle' as const,
       label: 'Quelle',
-      render: (row: DriverTimePilotRow) => <Badge variant="outline">{row.quelle}</Badge>,
+      render: (row: DriverTimeEvent) => <Badge variant="outline">{row.quelle}</Badge>,
     },
     {
       key: 'dauer' as const,
       label: 'Dauer',
-      render: (row: DriverTimePilotRow) => <span className="font-semibold">{row.dauer.toFixed(2)} h</span>,
+      render: (row: DriverTimeEvent) => <span className="font-semibold">{row.dauer.toFixed(2)} h</span>,
     },
     {
       key: 'findings' as const,
       label: 'Check',
-      render: (row: DriverTimePilotRow) => (
+      render: (row: DriverTimeEvent) => (
         <div className="flex flex-wrap gap-1">
           {row.findings.length === 0 ? (
             <Badge variant="outline">ok</Badge>
@@ -278,8 +187,8 @@ export default function ZeiterfassungPage(): JSX.Element {
           </CardHeader>
           <CardContent>
             <div className="flex items-center gap-2">
-              <Route className="h-5 w-5 text-cyan-700" />
-              <span className="text-2xl font-bold">{new Set(driverRows.map((row) => row.tour)).size}</span>
+            <Route className="h-5 w-5 text-cyan-700" />
+              <span className="text-2xl font-bold">{driverTime.kpis.tourCount}</span>
             </div>
           </CardContent>
         </Card>
@@ -291,7 +200,9 @@ export default function ZeiterfassungPage(): JSX.Element {
           <CardContent>
             <div className="flex items-center gap-2">
               <CalendarCheck className="h-5 w-5 text-amber-700" />
-              <span className="text-2xl font-bold">0</span>
+              <span className="text-2xl font-bold">
+                {driverTime.findings.filter((finding) => finding.code === 'ABSENCE_COLLISION').length}
+              </span>
             </div>
           </CardContent>
         </Card>
@@ -314,7 +225,7 @@ export default function ZeiterfassungPage(): JSX.Element {
           <CardTitle>Driver-Time-Pilot</CardTitle>
         </CardHeader>
         <CardContent>
-          <DataTable data={driverRows} columns={driverColumns} />
+          <DataTable data={driverRows} columns={driverColumns} loading={isDriverTimeLoading} />
         </CardContent>
       </Card>
 

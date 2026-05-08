@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import json
-from datetime import date, datetime
+from datetime import date, datetime, time
 from typing import Any
 from uuid import UUID, uuid4
 
@@ -75,6 +75,63 @@ class StundenzettelOut(BaseModel):
     erstelltAm: str
 
 
+class DriverTimeFindingOut(BaseModel):
+    code: str
+    severity: str
+    message: str
+    eventIds: list[str] = Field(default_factory=list)
+
+
+class DriverTimeEventOut(BaseModel):
+    id: str
+    fahrer: str
+    employeeRef: str
+    datum: str
+    tour: str | None = None
+    fahrzeug: str | None = None
+    start: str
+    ende: str
+    taetigkeit: str
+    eventType: str
+    quelle: str
+    dauer: float
+    findings: list[DriverTimeFindingOut] = Field(default_factory=list)
+
+
+class DriverTimeKpisOut(BaseModel):
+    eventCount: int
+    fahrerCount: int
+    tourCount: int
+    vehicleCount: int
+    fahrzeitStunden: float
+    produktivStunden: float
+    ruhezeitStunden: float
+    blocker: int
+    warnings: int
+
+
+class DriverTimeSummaryOut(BaseModel):
+    datum: str
+    source: str
+    kpis: DriverTimeKpisOut
+    findings: list[DriverTimeFindingOut]
+    events: list[DriverTimeEventOut]
+
+
+_PRODUCTIVE_DRIVER_EVENT_TYPES = {"DRIVING", "LOADING", "UNLOADING", "OTHER_WORK", "AVAILABILITY"}
+_REST_DRIVER_EVENT_TYPES = {"BREAK", "DAILY_REST", "WEEKLY_REST"}
+_DRIVER_ACTIVITY_LABELS = {
+    "DRIVING": "Fahren",
+    "LOADING": "Beladen",
+    "UNLOADING": "Entladen",
+    "OTHER_WORK": "Sonstige Arbeit",
+    "AVAILABILITY": "Bereitschaft",
+    "BREAK": "Pause",
+}
+_TACHO_DEVIATION_THRESHOLD_MINUTES = 15
+_MINUTES_PER_HOUR = 60
+
+
 def _to_iso(d: date | datetime | None) -> str:
     if d is None:
         return datetime.utcnow().date().isoformat()
@@ -114,6 +171,19 @@ def _parse_preferences(raw: Any) -> dict[str, Any]:
     return {}
 
 
+def _parse_json_list(raw: Any) -> list[dict[str, Any]]:
+    if isinstance(raw, list):
+        return [dict(item) if isinstance(item, dict) else {"value": item} for item in raw]
+    if isinstance(raw, str):
+        try:
+            parsed = json.loads(raw)
+        except Exception:
+            return []
+        if isinstance(parsed, list):
+            return [dict(item) if isinstance(item, dict) else {"value": item} for item in parsed]
+    return []
+
+
 def _split_name(full_name: str) -> tuple[str, str]:
     parts = [part for part in full_name.strip().split(" ") if part]
     if not parts:
@@ -121,6 +191,255 @@ def _split_name(full_name: str) -> tuple[str, str]:
     if len(parts) == 1:
         return parts[0], ""
     return " ".join(parts[:-1]), parts[-1]
+
+
+def _parse_clock_minutes(value: Any) -> int | None:
+    if value is None:
+        return None
+    if isinstance(value, time):
+        return value.hour * _MINUTES_PER_HOUR + value.minute
+    text_value = str(value).strip()
+    if not text_value:
+        return None
+    try:
+        parsed_time = time.fromisoformat(text_value[:8])
+    except ValueError:
+        return None
+    return parsed_time.hour * _MINUTES_PER_HOUR + parsed_time.minute
+
+
+def _duration_hours(start: Any, end: Any) -> float:
+    start_minutes = _parse_clock_minutes(start)
+    end_minutes = _parse_clock_minutes(end)
+    if start_minutes is None or end_minutes is None or end_minutes <= start_minutes:
+        return 0.0
+    return round((end_minutes - start_minutes) / _MINUTES_PER_HOUR, 2)
+
+
+def _driver_time_pilot_events(target_date: str) -> list[DriverTimeEventOut]:
+    return [
+        DriverTimeEventOut(
+            id=f"pilot-{target_date}-001",
+            fahrer="M. Krueger",
+            employeeRef="M. Krueger",
+            datum=target_date,
+            tour="TOUR-2407",
+            fahrzeug="WL-VA 1840",
+            start="05:45",
+            ende="07:55",
+            taetigkeit="Fahren",
+            eventType="DRIVING",
+            quelle="Tacho",
+            dauer=2.17,
+        ),
+        DriverTimeEventOut(
+            id=f"pilot-{target_date}-002",
+            fahrer="M. Krueger",
+            employeeRef="M. Krueger",
+            datum=target_date,
+            tour="TOUR-2407",
+            fahrzeug="WL-VA 1840",
+            start="07:55",
+            ende="09:10",
+            taetigkeit="Entladen",
+            eventType="UNLOADING",
+            quelle="Manuell",
+            dauer=1.25,
+        ),
+        DriverTimeEventOut(
+            id=f"pilot-{target_date}-003",
+            fahrer="S. Weber",
+            employeeRef="S. Weber",
+            datum=target_date,
+            tour="TOUR-2411",
+            fahrzeug=None,
+            start="06:20",
+            ende="08:00",
+            taetigkeit="Fahren",
+            eventType="DRIVING",
+            quelle="Dispo",
+            dauer=1.67,
+        ),
+        DriverTimeEventOut(
+            id=f"pilot-{target_date}-004",
+            fahrer="A. Brandt",
+            employeeRef="A. Brandt",
+            datum=target_date,
+            tour="TOUR-2409",
+            fahrzeug="WL-VA 1217",
+            start="08:00",
+            ende="08:45",
+            taetigkeit="Pause",
+            eventType="BREAK",
+            quelle="Manuell",
+            dauer=0.75,
+        ),
+    ]
+
+
+def _events_from_timesheets(rows: list[Any]) -> list[DriverTimeEventOut]:
+    events: list[DriverTimeEventOut] = []
+    for row in rows:
+        row_map = dict(row)
+        target_date = _to_iso(row_map.get("entry_date"))
+        fahrer = str(row_map.get("driver_name") or "")
+        vehicle = str(row_map.get("vehicle_plate") or "").strip() or None
+        for index, tour in enumerate(_parse_json_list(row_map.get("tours")), start=1):
+            tour_id = str(tour.get("id") or row_map.get("id") or f"tour-{index}")
+            start = _to_time_text(tour.get("start"))
+            end = _to_time_text(tour.get("ende") or tour.get("end"))
+            duration = _duration_hours(start, end)
+            events.append(
+                DriverTimeEventOut(
+                    id=f"{row_map.get('id')}-{index}",
+                    fahrer=fahrer,
+                    employeeRef=fahrer,
+                    datum=target_date,
+                    tour=tour_id,
+                    fahrzeug=vehicle,
+                    start=start,
+                    ende=end,
+                    taetigkeit="Fahren",
+                    eventType="DRIVING",
+                    quelle="Manuell",
+                    dauer=duration,
+                )
+            )
+            pause = float(tour.get("pause") or 0)
+            if pause > 0 and end != "-":
+                events.append(
+                    DriverTimeEventOut(
+                        id=f"{row_map.get('id')}-{index}-break",
+                        fahrer=fahrer,
+                        employeeRef=fahrer,
+                        datum=target_date,
+                        tour=tour_id,
+                        fahrzeug=vehicle,
+                        start=end,
+                        ende=end,
+                        taetigkeit="Pause",
+                        eventType="BREAK",
+                        quelle="Manuell",
+                        dauer=round(pause / _MINUTES_PER_HOUR, 2),
+                    )
+                )
+    return events
+
+
+def _approved_absence_ranges(rows: list[Any]) -> list[tuple[str, str, str]]:
+    ranges: list[tuple[str, str, str]] = []
+    for row in rows:
+        row_map = dict(row)
+        entry_type = str(row_map.get("entry_type") or "")
+        if entry_type.lower() not in {"urlaub", "krank"}:
+            continue
+        employee_ref = str(row_map.get("employee_ref") or "")
+        entry_date = _to_iso(row_map.get("entry_date"))
+        ranges.append((employee_ref, entry_date, entry_date))
+    return ranges
+
+
+def _apply_driver_time_findings(
+    events: list[DriverTimeEventOut],
+    absence_ranges: list[tuple[str, str, str]],
+) -> list[DriverTimeFindingOut]:
+    findings: list[DriverTimeFindingOut] = []
+    events_by_driver: dict[str, list[DriverTimeEventOut]] = {}
+    for event in events:
+        event.findings = []
+        events_by_driver.setdefault(event.employeeRef, []).append(event)
+
+        if event.eventType in {"DRIVING", "VEHICLE_CHANGE"} and not event.fahrzeug:
+            finding = DriverTimeFindingOut(
+                code="MISSING_VEHICLE",
+                severity="blocker",
+                message="Fahr- oder Fahrzeugwechselereignis hat kein Fahrzeug.",
+                eventIds=[event.id],
+            )
+            findings.append(finding)
+            event.findings.append(finding)
+        if event.eventType not in {"DAILY_REST", "WEEKLY_REST"} and not event.tour:
+            finding = DriverTimeFindingOut(
+                code="MISSING_TOUR",
+                severity="warning",
+                message="Fahrerzeitereignis hat keinen Tourbezug.",
+                eventIds=[event.id],
+            )
+            findings.append(finding)
+            event.findings.append(finding)
+        if any(employee == event.employeeRef and start <= event.datum <= end for employee, start, end in absence_ranges):
+            finding = DriverTimeFindingOut(
+                code="ABSENCE_COLLISION",
+                severity="blocker",
+                message="Fahrerzeitereignis kollidiert mit genehmigter Abwesenheit.",
+                eventIds=[event.id],
+            )
+            findings.append(finding)
+            event.findings.append(finding)
+
+    for driver_events in events_by_driver.values():
+        sorted_events = sorted(driver_events, key=lambda item: (item.datum, item.start, item.ende))
+        for previous, current in zip(sorted_events, sorted_events[1:]):
+            previous_end = _parse_clock_minutes(previous.ende)
+            current_start = _parse_clock_minutes(current.start)
+            if previous_end is not None and current_start is not None and previous_end > current_start:
+                finding = DriverTimeFindingOut(
+                    code="EVENT_OVERLAP",
+                    severity="blocker",
+                    message="Fahrerzeitereignisse ueberlappen sich.",
+                    eventIds=[previous.id, current.id],
+                )
+                findings.append(finding)
+                previous.findings.append(finding)
+                current.findings.append(finding)
+
+    manual_by_key = {
+        (event.employeeRef, event.eventType): event
+        for event in events
+        if event.quelle.lower() == "manuell"
+    }
+    for event in events:
+        if event.quelle.lower() != "tacho":
+            continue
+        manual_event = manual_by_key.get((event.employeeRef, event.eventType))
+        if manual_event and abs((event.dauer - manual_event.dauer) * _MINUTES_PER_HOUR) > _TACHO_DEVIATION_THRESHOLD_MINUTES:
+            finding = DriverTimeFindingOut(
+                code="TACHO_MANUAL_DEVIATION",
+                severity="warning",
+                message="Manuelle Buchung weicht vom Tacho-Import ab.",
+                eventIds=[manual_event.id, event.id],
+            )
+            findings.append(finding)
+            manual_event.findings.append(finding)
+            event.findings.append(finding)
+
+    return findings
+
+
+def _build_driver_time_summary(
+    target_date: str,
+    events: list[DriverTimeEventOut],
+    absence_ranges: list[tuple[str, str, str]] | None = None,
+    source: str = "database",
+) -> DriverTimeSummaryOut:
+    findings = _apply_driver_time_findings(events, absence_ranges or [])
+    return DriverTimeSummaryOut(
+        datum=target_date,
+        source=source,
+        findings=findings,
+        events=events,
+        kpis=DriverTimeKpisOut(
+            eventCount=len(events),
+            fahrerCount=len({event.employeeRef for event in events}),
+            tourCount=len({event.tour for event in events if event.tour}),
+            vehicleCount=len({event.fahrzeug for event in events if event.fahrzeug}),
+            fahrzeitStunden=round(sum(event.dauer for event in events if event.eventType == "DRIVING"), 2),
+            produktivStunden=round(sum(event.dauer for event in events if event.eventType in _PRODUCTIVE_DRIVER_EVENT_TYPES), 2),
+            ruhezeitStunden=round(sum(event.dauer for event in events if event.eventType in _REST_DRIVER_EVENT_TYPES), 2),
+            blocker=sum(1 for finding in findings if finding.severity == "blocker"),
+            warnings=sum(1 for finding in findings if finding.severity == "warning"),
+        ),
+    )
 
 
 @router.get("/mitarbeiter", response_model=list[MitarbeiterOut])
@@ -350,6 +669,56 @@ async def list_zeiterfassung(
         )
         for row in rows
     ]
+
+
+@router.get("/driver-time/summary", response_model=DriverTimeSummaryOut)
+async def get_driver_time_summary(
+    datum: str | None = Query(default=None),
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+):
+    target_date = datum or datetime.utcnow().date().isoformat()
+    params: dict[str, Any] = {"tenant_id": tenant_id, "entry_date": target_date}
+
+    try:
+        timesheet_rows = db.execute(
+            text(
+                """
+                SELECT id, entry_date, driver_name, vehicle_plate, tours, total_hours, overtime_hours, created_at
+                FROM domain_hr.driver_timesheets
+                WHERE tenant_id = :tenant_id AND entry_date = :entry_date
+                ORDER BY driver_name ASC, created_at ASC
+                """
+            ),
+            params,
+        ).mappings().all()
+        absence_rows = db.execute(
+            text(
+                """
+                SELECT employee_ref, entry_date, entry_type
+                FROM domain_hr.time_entries
+                WHERE tenant_id = :tenant_id
+                  AND entry_date = :entry_date
+                  AND entry_type IN ('Urlaub', 'Krank')
+                """
+            ),
+            params,
+        ).mappings().all()
+    except Exception:
+        pilot_events = _driver_time_pilot_events(target_date)
+        return _build_driver_time_summary(target_date, pilot_events, source="pilot-fallback")
+
+    events = _events_from_timesheets(list(timesheet_rows))
+    if not events:
+        pilot_events = _driver_time_pilot_events(target_date)
+        return _build_driver_time_summary(target_date, pilot_events, source="pilot-empty")
+
+    return _build_driver_time_summary(
+        target_date,
+        events,
+        absence_ranges=_approved_absence_ranges(list(absence_rows)),
+        source="database",
+    )
 
 
 @router.post("/stundenzettel")
