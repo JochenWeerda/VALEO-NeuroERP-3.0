@@ -146,14 +146,16 @@ Die API-URLs sind fachliche Ressourcen, nicht UI-Layouts.
 | Mitarbeiter | `GET /api/v1/personal/mitarbeiter` | bestehende Mitarbeiterliste aus User-/HR-Read-Model. |
 | HR-Time-Profile | `GET /api/v1/personal/time-profiles` | kanonische Planungsprofile fuer Schicht, Fahrer, Kalender, Payroll. |
 | Zeiteintraege | `GET /api/v1/personal/zeiterfassung` | kanonische Zeit-/Abwesenheitsbuchungen. |
+| Zeitbuchung erstellen | `POST /api/v1/personal/time-entries` | neue kanonische Zeitbuchung im Status `Draft`. |
+| Zeitbuchung einreichen | `POST /api/v1/personal/time-entries/{id}/submit` | Statusuebergang `Draft`, `Rejected`, `Corrected` nach `Submitted`. |
+| Zeitbuchung freigeben | `POST /api/v1/personal/time-entries/{id}/approve` | Statusuebergang `Submitted` nach `Approved` mit Freigeber. |
+| Zeitbuchung korrigieren | `POST /api/v1/personal/time-entries/{id}/correct` | Korrektur mit Pflichtgrund; `Exported` wird nicht still veraendert. |
 | Driver-Time Summary | `GET /api/v1/personal/driver-time/summary` | Fahrerzeit-KPIs, Ereignisse, Plausibilitaetsbefunde. |
 | Time Cockpit | `GET /api/v1/personal/time-cockpit` | operative Freigabe-, Compliance- und Payroll-Sicht. |
 | Stundenzettel | `POST/GET /api/v1/personal/stundenzettel` | Legacy-/Pilotvertrag fuer Fahrer-Stundenzettel. |
 
 Folge-URLs muessen diese Begriffe wiederverwenden:
 
-- `/api/v1/personal/time-entries/{id}/submit`
-- `/api/v1/personal/time-entries/{id}/approve`
 - `/api/v1/personal/absences`
 - `/api/v1/personal/shifts`
 - `/api/v1/personal/calendar-events`

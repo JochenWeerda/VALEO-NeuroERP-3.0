@@ -46,6 +46,57 @@ class ZeitEintragOut(BaseModel):
     typ: str
 
 
+class TimeEntryBookingCreateIn(BaseModel):
+    employeeRef: str = Field(..., min_length=1, max_length=120)
+    datum: str
+    startTime: str | None = None
+    endTime: str | None = None
+    hours: float = Field(..., ge=0)
+    entryType: str = Field(default="Arbeit", max_length=40)
+    source: str = Field(default="manual", max_length=40)
+    costCenter: str | None = Field(default=None, max_length=80)
+    workArea: str | None = Field(default=None, max_length=120)
+    notes: str | None = Field(default=None, max_length=500)
+
+
+class TimeEntryBookingCorrectionIn(BaseModel):
+    hours: float = Field(..., ge=0)
+    correctionReason: str = Field(..., min_length=3, max_length=500)
+    startTime: str | None = None
+    endTime: str | None = None
+    entryType: str = Field(default="Arbeit", max_length=40)
+    costCenter: str | None = Field(default=None, max_length=80)
+    workArea: str | None = Field(default=None, max_length=120)
+    notes: str | None = Field(default=None, max_length=500)
+
+
+class TimeEntryApproveIn(BaseModel):
+    approvedBy: str = Field(..., min_length=1, max_length=120)
+
+
+class TimeEntryBookingOut(BaseModel):
+    id: str
+    employeeRef: str
+    datum: str
+    startTime: str | None = None
+    endTime: str | None = None
+    hours: float
+    entryType: str
+    source: str
+    status: str
+    costCenter: str | None = None
+    workArea: str | None = None
+    correctionReason: str | None = None
+    approvedBy: str | None = None
+    approvedAt: str | None = None
+    auditRef: str | None = None
+
+
+class TimeEntryActionOut(BaseModel):
+    ok: bool
+    entry: TimeEntryBookingOut
+
+
 class TourIn(BaseModel):
     id: str
     start: str
@@ -239,6 +290,11 @@ def _to_time_text(value: Any) -> str:
     return text_value
 
 
+def _to_optional_time_text(value: Any) -> str | None:
+    text_value = _to_time_text(value)
+    return None if text_value == "-" else text_value
+
+
 def _normalize_status(value: Any, fallback: str = "aktiv") -> str:
     normalized = str(value or "").strip().lower()
     if normalized in {"aktiv", "urlaub", "krank"}:
@@ -307,6 +363,34 @@ def _parse_clock_minutes(value: Any) -> int | None:
     except ValueError:
         return None
     return parsed_time.hour * _MINUTES_PER_HOUR + parsed_time.minute
+
+
+def _parse_entry_date(value: str) -> date:
+    try:
+        return datetime.fromisoformat(value).date()
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail="Invalid datum format") from exc
+
+
+def _time_booking_from_row(row: Any) -> TimeEntryBookingOut:
+    row_map = dict(row)
+    return TimeEntryBookingOut(
+        id=str(row_map.get("id") or ""),
+        employeeRef=str(row_map.get("employee_ref") or ""),
+        datum=_to_iso(row_map.get("entry_date")),
+        startTime=_to_optional_time_text(row_map.get("start_time")),
+        endTime=_to_optional_time_text(row_map.get("end_time")),
+        hours=float(row_map.get("hours") or 0),
+        entryType=str(row_map.get("entry_type") or "Arbeit"),
+        source=str(row_map.get("source") or "manual"),
+        status=str(row_map.get("status") or "Draft"),
+        costCenter=str(row_map.get("cost_center") or "") or None,
+        workArea=str(row_map.get("work_area") or "") or None,
+        correctionReason=str(row_map.get("correction_reason") or "") or None,
+        approvedBy=str(row_map.get("approved_by") or "") or None,
+        approvedAt=_to_iso(row_map.get("approved_at")) if row_map.get("approved_at") else None,
+        auditRef=str(row_map.get("audit_ref") or "") or None,
+    )
 
 
 def _normalize_time_profile_status(value: Any) -> str:
@@ -1172,6 +1256,166 @@ async def list_zeiterfassung(
         )
         for row in rows
     ]
+
+
+@router.post("/time-entries", response_model=TimeEntryBookingOut, status_code=201)
+async def create_time_entry(
+    payload: TimeEntryBookingCreateIn,
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+):
+    entry_id = str(uuid4())
+    entry_date = _parse_entry_date(payload.datum)
+    row = db.execute(
+        text(
+            """
+            INSERT INTO domain_hr.time_entries
+              (id, tenant_id, employee_ref, entry_date, start_time, end_time, hours,
+               entry_type, source, status, cost_center, work_area, notes, created_at, updated_at)
+            VALUES
+              (:id, :tenant_id, :employee_ref, :entry_date, :start_time, :end_time, :hours,
+               :entry_type, :source, 'Draft', :cost_center, :work_area, :notes, NOW(), NOW())
+            RETURNING id, employee_ref, entry_date, start_time, end_time, hours, entry_type,
+                      source, status, cost_center, work_area, correction_reason, approved_by,
+                      approved_at, audit_ref
+            """
+        ),
+        {
+            "id": entry_id,
+            "tenant_id": tenant_id,
+            "employee_ref": payload.employeeRef,
+            "entry_date": entry_date,
+            "start_time": payload.startTime,
+            "end_time": payload.endTime,
+            "hours": payload.hours,
+            "entry_type": payload.entryType,
+            "source": payload.source,
+            "cost_center": payload.costCenter,
+            "work_area": payload.workArea,
+            "notes": payload.notes,
+        },
+    ).mappings().first()
+    db.commit()
+    return _time_booking_from_row(row)
+
+
+@router.post("/time-entries/{entry_id}/submit", response_model=TimeEntryActionOut)
+async def submit_time_entry(
+    entry_id: str,
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+):
+    row = db.execute(
+        text(
+            """
+            UPDATE domain_hr.time_entries
+            SET status = 'Submitted', updated_at = NOW(), version = version + 1
+            WHERE id = :entry_id
+              AND tenant_id = :tenant_id
+              AND status IN ('Draft', 'Rejected', 'Corrected')
+            RETURNING id, employee_ref, entry_date, start_time, end_time, hours, entry_type,
+                      source, status, cost_center, work_area, correction_reason, approved_by,
+                      approved_at, audit_ref
+            """
+        ),
+        {"entry_id": entry_id, "tenant_id": tenant_id},
+    ).mappings().first()
+    if not row:
+        raise HTTPException(status_code=409, detail="Zeitbuchung kann in diesem Status nicht eingereicht werden")
+    db.commit()
+    return TimeEntryActionOut(ok=True, entry=_time_booking_from_row(row))
+
+
+@router.post("/time-entries/{entry_id}/approve", response_model=TimeEntryActionOut)
+async def approve_time_entry(
+    entry_id: str,
+    payload: TimeEntryApproveIn,
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+):
+    row = db.execute(
+        text(
+            """
+            UPDATE domain_hr.time_entries
+            SET status = 'Approved',
+                approved_by = :approved_by,
+                approved_at = NOW(),
+                updated_at = NOW(),
+                version = version + 1
+            WHERE id = :entry_id
+              AND tenant_id = :tenant_id
+              AND status = 'Submitted'
+            RETURNING id, employee_ref, entry_date, start_time, end_time, hours, entry_type,
+                      source, status, cost_center, work_area, correction_reason, approved_by,
+                      approved_at, audit_ref
+            """
+        ),
+        {"entry_id": entry_id, "tenant_id": tenant_id, "approved_by": payload.approvedBy},
+    ).mappings().first()
+    if not row:
+        raise HTTPException(status_code=409, detail="Zeitbuchung muss vor Freigabe eingereicht sein")
+    db.commit()
+    return TimeEntryActionOut(ok=True, entry=_time_booking_from_row(row))
+
+
+@router.post("/time-entries/{entry_id}/correct", response_model=TimeEntryActionOut)
+async def correct_time_entry(
+    entry_id: str,
+    payload: TimeEntryBookingCorrectionIn,
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+):
+    current = db.execute(
+        text(
+            """
+            SELECT status
+            FROM domain_hr.time_entries
+            WHERE id = :entry_id AND tenant_id = :tenant_id
+            """
+        ),
+        {"entry_id": entry_id, "tenant_id": tenant_id},
+    ).mappings().first()
+    if not current:
+        raise HTTPException(status_code=404, detail="Zeitbuchung nicht gefunden")
+    if str(current.get("status")) == "Exported":
+        raise HTTPException(status_code=409, detail="Exportierte Zeitbuchungen duerfen nicht still veraendert werden")
+
+    row = db.execute(
+        text(
+            """
+            UPDATE domain_hr.time_entries
+            SET start_time = :start_time,
+                end_time = :end_time,
+                hours = :hours,
+                entry_type = :entry_type,
+                status = 'Corrected',
+                cost_center = :cost_center,
+                work_area = :work_area,
+                correction_reason = :correction_reason,
+                notes = :notes,
+                updated_at = NOW(),
+                version = version + 1
+            WHERE id = :entry_id AND tenant_id = :tenant_id
+            RETURNING id, employee_ref, entry_date, start_time, end_time, hours, entry_type,
+                      source, status, cost_center, work_area, correction_reason, approved_by,
+                      approved_at, audit_ref
+            """
+        ),
+        {
+            "entry_id": entry_id,
+            "tenant_id": tenant_id,
+            "start_time": payload.startTime,
+            "end_time": payload.endTime,
+            "hours": payload.hours,
+            "entry_type": payload.entryType,
+            "cost_center": payload.costCenter,
+            "work_area": payload.workArea,
+            "correction_reason": payload.correctionReason,
+            "notes": payload.notes,
+        },
+    ).mappings().first()
+    db.commit()
+    return TimeEntryActionOut(ok=True, entry=_time_booking_from_row(row))
 
 
 @router.get("/driver-time/summary", response_model=DriverTimeSummaryOut)
