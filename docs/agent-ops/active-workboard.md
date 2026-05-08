@@ -1,6 +1,6 @@
 # Active Workboard
 
-Stand: `2026-04-24`
+Stand: `2026-05-08`
 
 ## TODO-SPRINT-001
 
@@ -270,6 +270,26 @@ Dieses Board ist bewusst schlank gehalten, damit Session-Starts und Agent-Handof
 
 Archiv des vorherigen Boards:
 - [active-workboard-2026-04-10-pre-slim.md](C:/Users/Jochen/VALEO-NeuroERP-3.0/docs/agent-ops/archive/active-workboard-2026-04-10-pre-slim.md)
+
+## AGRAR-COV-001
+
+**Von:** Claude Code
+**Owner:** Claude Code
+**Stand:** abgeschlossen 2026-05-08
+**Ziel des Slices:** Unit- und HTTP-Tests fuer `agrar_contracts.py` und `agrar_settlements.py` — Abnahme-Status-Logik, Abrechnungs-Rundung, DQ-Datensatz-Aufbau und CRUD-Smoke-Pfade.
+**Dateibesitz:** `tests/test_agrar_contracts_api.py` (neu), `tests/test_agrar_settlements_api.py` (neu)
+**Abnahmekriterien:** >= 15 Tests je Datei; `_compute_status`, `_round_money`, `_round_qty`, `_build_*_dq_datensatz` und HTTP-Pfade gruendeckend; pytest gruen.
+**Erledigt:** 20 agrar_contracts-Tests (Status-Logik, DQ, CRUD); 17 agrar_settlements-Tests (Rundung, Modell-Validierung, Smoke-HTTP). 54 pass gesamt.
+
+## FIN-COV-002
+
+**Von:** Claude Code
+**Owner:** Claude Code
+**Stand:** abgeschlossen 2026-05-08
+**Ziel des Slices:** Unit- und HTTP-Tests fuer `closing_checklists.py` und `bank_reconciliation.py` — Mapping-Funktion, Freigabe-Logik, Pydantic-Modelle und Smoke-Pfade.
+**Dateibesitz:** `tests/test_closing_checklists_api.py` (neu), `tests/test_bank_reconciliation_api.py` (neu)
+**Abnahmekriterien:** `build_closing_checklist_response` vollstaendig getestet inkl. approval_can_close und explainability; Pydantic-Modelle fuer BankReconciliation; HTTP-Smoke-Pfade gruen.
+**Erledigt:** 17 closing_checklists-Tests (Mapping, Freigabe, Explainability, Validierung, HTTP); 11 bank_reconciliation-Tests (Pydantic-Modelle, HTTP-Smoke). 54 pass gesamt.
 
 ## Arbeitsregel
 
