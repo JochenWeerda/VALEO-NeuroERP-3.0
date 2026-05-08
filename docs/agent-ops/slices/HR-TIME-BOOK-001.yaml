@@ -1,0 +1,24 @@
+id: HR-TIME-BOOK-001
+status: reserviert
+owner: Codex
+goal: >
+  Buchungs-, Korrektur-, Einreichungs- und Freigabe-Workflow fuer kanonische
+  HR-Time-Zeitereignisse bereitstellen.
+file_ownership:
+  - docs/agent-ops/active-workboard.md
+  - docs/agent-ops/slices/HR-TIME-BOOK-001.yaml
+  - app/api/v1/endpoints/personal.py
+  - tests/test_personal_time_booking_api.py
+  - docs/project-context/hr-time-canonical-core-data-model-2026-05-08.md
+acceptance_criteria: >
+  Zeitbuchungen koennen erstellt, eingereicht und freigegeben werden; Korrekturen
+  verlangen einen Grund; exportierte Eintraege werden nicht still mutiert; API-Tests
+  sichern Statusuebergaenge und Fehlerfaelle.
+checks:
+  - pytest tests/test_personal_time_booking_api.py tests/test_personal_time_data_api.py tests/test_personal_time_cockpit_api.py tests/test_personal_driver_time_api.py -q --no-cov
+  - python scripts/agent_workboard_supervisor.py validate
+  - node scripts/docs-governance-check.cjs
+  - git diff --check
+risks: >
+  Rollenbasierte echte Managerfreigabe, Payroll-Export und UI-Aktionen bleiben
+  Folgeslices.
