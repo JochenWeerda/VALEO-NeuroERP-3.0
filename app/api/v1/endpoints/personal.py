@@ -169,6 +169,41 @@ class TimeCockpitOut(BaseModel):
     driverTime: DriverTimeSummaryOut
 
 
+class EmployeeTimeProfileOut(BaseModel):
+    employeeRef: str
+    displayName: str
+    roleCode: str
+    roleLabel: str
+    locationCode: str
+    department: str
+    managerRef: str | None = None
+    employmentType: str
+    weeklyHours: float
+    timeModel: str
+    costCenter: str | None = None
+    payrollGroup: str | None = None
+    qualifications: list[str] = Field(default_factory=list)
+    canDrive: bool
+    driverCardId: str | None = None
+    vehicleRefs: list[str] = Field(default_factory=list)
+    calendarProvider: str
+    status: str
+
+
+class EmployeeTimeProfileKpisOut(BaseModel):
+    employeeCount: int
+    driverCount: int
+    activeCount: int
+    locationCount: int
+    qualificationCount: int
+
+
+class EmployeeTimeProfileCatalogOut(BaseModel):
+    source: str
+    profiles: list[EmployeeTimeProfileOut]
+    kpis: EmployeeTimeProfileKpisOut
+
+
 _PRODUCTIVE_DRIVER_EVENT_TYPES = {"DRIVING", "LOADING", "UNLOADING", "OTHER_WORK", "AVAILABILITY"}
 _REST_DRIVER_EVENT_TYPES = {"BREAK", "DAILY_REST", "WEEKLY_REST"}
 _DRIVER_ACTIVITY_LABELS = {
@@ -237,6 +272,19 @@ def _parse_json_list(raw: Any) -> list[dict[str, Any]]:
     return []
 
 
+def _parse_json_string_list(raw: Any) -> list[str]:
+    if isinstance(raw, list):
+        return [str(item) for item in raw if str(item).strip()]
+    if isinstance(raw, str):
+        try:
+            parsed = json.loads(raw)
+        except Exception:
+            return [raw] if raw.strip() else []
+        if isinstance(parsed, list):
+            return [str(item) for item in parsed if str(item).strip()]
+    return []
+
+
 def _split_name(full_name: str) -> tuple[str, str]:
     parts = [part for part in full_name.strip().split(" ") if part]
     if not parts:
@@ -259,6 +307,155 @@ def _parse_clock_minutes(value: Any) -> int | None:
     except ValueError:
         return None
     return parsed_time.hour * _MINUTES_PER_HOUR + parsed_time.minute
+
+
+def _normalize_time_profile_status(value: Any) -> str:
+    normalized = str(value or "").strip().lower()
+    if normalized in {"active", "inactive", "on_leave"}:
+        return normalized
+    if normalized == "aktiv":
+        return "active"
+    if normalized in {"urlaub", "krank"}:
+        return "on_leave"
+    return "inactive" if normalized in {"inaktiv", "disabled"} else "active"
+
+
+def _profile_kpis(profiles: list[EmployeeTimeProfileOut]) -> EmployeeTimeProfileKpisOut:
+    qualifications = {qualification for profile in profiles for qualification in profile.qualifications}
+    return EmployeeTimeProfileKpisOut(
+        employeeCount=len(profiles),
+        driverCount=sum(1 for profile in profiles if profile.canDrive or profile.timeModel == "driver"),
+        activeCount=sum(1 for profile in profiles if profile.status == "active"),
+        locationCount=len({profile.locationCode for profile in profiles if profile.locationCode}),
+        qualificationCount=len(qualifications),
+    )
+
+
+def _time_profiles_from_rows(rows: list[Any]) -> list[EmployeeTimeProfileOut]:
+    profiles: list[EmployeeTimeProfileOut] = []
+    for row in rows:
+        row_map = dict(row)
+        profiles.append(
+            EmployeeTimeProfileOut(
+                employeeRef=str(row_map.get("employee_ref") or row_map.get("id") or ""),
+                displayName=str(row_map.get("display_name") or row_map.get("employee_ref") or ""),
+                roleCode=str(row_map.get("role_code") or "employee"),
+                roleLabel=str(row_map.get("role_label") or "Mitarbeiter"),
+                locationCode=str(row_map.get("location_code") or "main"),
+                department=str(row_map.get("department") or "Allgemein"),
+                managerRef=str(row_map.get("manager_ref") or "") or None,
+                employmentType=str(row_map.get("employment_type") or "full_time"),
+                weeklyHours=float(row_map.get("weekly_hours") or 40.0),
+                timeModel=str(row_map.get("time_model") or "standard"),
+                costCenter=str(row_map.get("cost_center") or "") or None,
+                payrollGroup=str(row_map.get("payroll_group") or "") or None,
+                qualifications=_parse_json_string_list(row_map.get("qualifications")),
+                canDrive=bool(row_map.get("can_drive")),
+                driverCardId=str(row_map.get("driver_card_id") or "") or None,
+                vehicleRefs=_parse_json_string_list(row_map.get("vehicle_refs")),
+                calendarProvider=str(row_map.get("calendar_provider") or "none"),
+                status=_normalize_time_profile_status(row_map.get("status")),
+            )
+        )
+    return profiles
+
+
+def _time_profiles_from_user_rows(rows: list[Any]) -> list[EmployeeTimeProfileOut]:
+    profiles: list[EmployeeTimeProfileOut] = []
+    for row in rows:
+        row_map = dict(row)
+        prefs = _parse_preferences(row_map.get("preferences"))
+        roles = row_map.get("roles") or []
+        role_code = str(roles[0]) if isinstance(roles, list) and roles else str(prefs.get("role_code") or "employee")
+        role_lower = role_code.lower()
+        first = str(row_map.get("first_name") or "").strip()
+        last = str(row_map.get("last_name") or "").strip()
+        display_name = f"{first} {last}".strip() or str(row_map.get("username") or row_map.get("email") or row_map.get("id"))
+        can_drive = bool(prefs.get("can_drive")) or any(token in role_lower for token in ("fahrer", "driver", "lkw"))
+        qualifications = _parse_json_string_list(prefs.get("qualifications"))
+        if can_drive and "driver_time" not in qualifications:
+            qualifications.append("driver_time")
+        profiles.append(
+            EmployeeTimeProfileOut(
+                employeeRef=str(row_map.get("id") or row_map.get("email") or display_name),
+                displayName=display_name,
+                roleCode=role_code,
+                roleLabel=str(prefs.get("role_label") or role_code.replace("_", " ").title()),
+                locationCode=str(prefs.get("location_code") or prefs.get("standort") or "main"),
+                department=str(prefs.get("abteilung") or "Allgemein"),
+                managerRef=str(prefs.get("manager_ref") or "") or None,
+                employmentType=str(prefs.get("employment_type") or "full_time"),
+                weeklyHours=float(prefs.get("weekly_hours") or 40.0),
+                timeModel=str(prefs.get("time_model") or ("driver" if can_drive else "standard")),
+                costCenter=str(prefs.get("cost_center") or "") or None,
+                payrollGroup=str(prefs.get("payroll_group") or "") or None,
+                qualifications=qualifications,
+                canDrive=can_drive,
+                driverCardId=str(prefs.get("driver_card_id") or "") or None,
+                vehicleRefs=_parse_json_string_list(prefs.get("vehicle_refs")),
+                calendarProvider=str(prefs.get("calendar_provider") or "none"),
+                status=_normalize_time_profile_status(prefs.get("hr_status") or ("active" if bool(row_map.get("is_active")) else "inactive")),
+            )
+        )
+    return profiles
+
+
+def _pilot_time_profiles() -> list[EmployeeTimeProfileOut]:
+    return [
+        EmployeeTimeProfileOut(
+            employeeRef="driver-m-krueger",
+            displayName="M. Krueger",
+            roleCode="lkw_fahrer",
+            roleLabel="LKW-Fahrer",
+            locationCode="main",
+            department="Logistik",
+            employmentType="full_time",
+            weeklyHours=40.0,
+            timeModel="driver",
+            costCenter="LOG",
+            payrollGroup="stundenlohn",
+            qualifications=["ce_license", "driver_time", "tacho_card"],
+            canDrive=True,
+            driverCardId="D-1001",
+            vehicleRefs=["WL-VA 1840"],
+            calendarProvider="microsoft365",
+            status="active",
+        ),
+        EmployeeTimeProfileOut(
+            employeeRef="warehouse-l-meier",
+            displayName="L. Meier",
+            roleCode="lager",
+            roleLabel="Lager / Verladung",
+            locationCode="main",
+            department="Lager",
+            employmentType="full_time",
+            weeklyHours=40.0,
+            timeModel="shift",
+            costCenter="LAG",
+            payrollGroup="stundenlohn",
+            qualifications=["forklift"],
+            canDrive=False,
+            calendarProvider="microsoft365",
+            status="active",
+        ),
+        EmployeeTimeProfileOut(
+            employeeRef="field-a-brandt",
+            displayName="A. Brandt",
+            roleCode="aussendienst",
+            roleLabel="Agrarberater Aussendienst",
+            locationCode="field-north",
+            department="Vertrieb",
+            employmentType="full_time",
+            weeklyHours=40.0,
+            timeModel="field_service",
+            costCenter="VER",
+            payrollGroup="gehalt",
+            qualifications=["plant_protection_advice"],
+            canDrive=False,
+            calendarProvider="google",
+            status="active",
+        ),
+    ]
 
 
 def _duration_hours(start: Any, end: Any) -> float:
@@ -675,6 +872,77 @@ def _pilot_time_entries(target_date: str) -> list[dict[str, Any]]:
             "status": "Approved",
         },
     ]
+
+
+@router.get("/time-profiles", response_model=EmployeeTimeProfileCatalogOut)
+async def list_time_profiles(
+    status: str | None = Query(default=None),
+    role: str | None = Query(default=None),
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+):
+    params: dict[str, Any] = {"tenant_id": tenant_id}
+    where = ["tenant_id = :tenant_id"]
+    if status:
+        params["status"] = _normalize_time_profile_status(status)
+        where.append("status = :status")
+    if role:
+        params["role"] = role
+        where.append("role_code = :role")
+
+    try:
+        rows = db.execute(
+            text(
+                f"""
+                SELECT employee_ref, display_name, role_code, role_label, location_code,
+                       department, manager_ref, employment_type, weekly_hours, time_model,
+                       cost_center, payroll_group, qualifications, can_drive, driver_card_id,
+                       vehicle_refs, calendar_provider, status
+                FROM domain_hr.employee_time_profiles
+                WHERE {' AND '.join(where)}
+                ORDER BY location_code ASC, department ASC, display_name ASC
+                """
+            ),
+            params,
+        ).mappings().all()
+        profiles = _time_profiles_from_rows(list(rows))
+        if profiles:
+            return EmployeeTimeProfileCatalogOut(source="database", profiles=profiles, kpis=_profile_kpis(profiles))
+    except Exception:
+        profiles = []
+    else:
+        profiles = []
+
+    try:
+        user_rows = db.execute(
+            text(
+                """
+                SELECT id, username, email, first_name, last_name, roles, is_active, preferences
+                FROM domain_shared.users
+                WHERE tenant_id = :tenant_id
+                ORDER BY last_name ASC, first_name ASC, username ASC
+                """
+            ),
+            {"tenant_id": tenant_id},
+        ).mappings().all()
+        profiles = _time_profiles_from_user_rows(list(user_rows))
+        if status:
+            normalized_status = _normalize_time_profile_status(status)
+            profiles = [profile for profile in profiles if profile.status == normalized_status]
+        if role:
+            profiles = [profile for profile in profiles if profile.roleCode == role]
+        if profiles:
+            return EmployeeTimeProfileCatalogOut(source="users-fallback", profiles=profiles, kpis=_profile_kpis(profiles))
+    except Exception:
+        profiles = []
+
+    profiles = _pilot_time_profiles()
+    if status:
+        normalized_status = _normalize_time_profile_status(status)
+        profiles = [profile for profile in profiles if profile.status == normalized_status]
+    if role:
+        profiles = [profile for profile in profiles if profile.roleCode == role]
+    return EmployeeTimeProfileCatalogOut(source="pilot-fallback", profiles=profiles, kpis=_profile_kpis(profiles))
 
 
 @router.get("/mitarbeiter", response_model=list[MitarbeiterOut])

@@ -13,6 +13,8 @@ Die Zielrichtung bleibt:
 - VALEO-eigener Time-&-Labor-Kern fuer Landhandel, Fahrerzeit, Tour/Fahrzeug, Waage, Kampagnen und Aussendienst
 - spaetere Anbieteranbindung nur ueber klare API-, Datenschutz-, Export- und Lizenzgrenzen
 
+Verbindliche Datenmodellbasis fuer die Umsetzung ist `docs/project-context/hr-time-canonical-core-data-model-2026-05-08.md`.
+
 ## Benchmark-Referenz
 
 | Referenz | Relevante Muster fuer VALEO | Konsequenz |
