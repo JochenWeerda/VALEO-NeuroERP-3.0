@@ -101,6 +101,17 @@ Stand: `2026-05-08`
 **Checks:** `pytest tests/test_personal_time_data_api.py tests/test_personal_time_cockpit_api.py tests/test_personal_driver_time_api.py -q --no-cov`; `python scripts/agent_workboard_supervisor.py validate`; `node scripts/docs-governance-check.cjs`; `git diff --check`
 **Offene Risiken:** Produktive Anwendung der Migration, echte HR-Stammdatenquelle und Lohnartenmapping bleiben Folgeslices.
 
+## HR-TIME-BOOK-001
+
+**Von:** Codex
+**Owner:** Codex
+**Stand:** reserviert 2026-05-08
+**Ziel des Slices:** Buchungs-, Korrektur-, Einreichungs- und Freigabe-Workflow fuer kanonische HR-Time-Zeitereignisse bereitstellen.
+**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/agent-ops/slices/HR-TIME-BOOK-001.yaml`, `app/api/v1/endpoints/personal.py`, `tests/test_personal_time_booking_api.py`, `docs/project-context/hr-time-canonical-core-data-model-2026-05-08.md`
+**Abnahmekriterien:** Zeitbuchungen koennen erstellt, eingereicht und freigegeben werden; Korrekturen verlangen einen Grund; exportierte Eintraege werden nicht still mutiert; API-Tests sichern Statusuebergaenge und Fehlerfaelle.
+**Checks:** `pytest tests/test_personal_time_booking_api.py tests/test_personal_time_data_api.py tests/test_personal_time_cockpit_api.py tests/test_personal_driver_time_api.py -q --no-cov`; `python scripts/agent_workboard_supervisor.py validate`; `node scripts/docs-governance-check.cjs`; `git diff --check`
+**Offene Risiken:** Rollenbasierte echte Managerfreigabe, Payroll-Export und UI-Aktionen bleiben Folgeslices.
+
 ## AGENT-ORCH-001
 
 **Von:** Codex
