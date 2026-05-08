@@ -1,0 +1,26 @@
+id: HR-TIME-ABS-001
+status: reserviert
+owner: Codex
+goal: >
+  Abwesenheits-Contract als kanonischen Planungsblocker fuer Urlaubsverwaltung/SaaS-Adapter,
+  Tour, Schicht, Kalender und Payroll bereitstellen.
+file_ownership:
+  - docs/agent-ops/active-workboard.md
+  - docs/agent-ops/slices/HR-TIME-ABS-001.yaml
+  - app/api/v1/endpoints/personal.py
+  - tests/test_personal_absence_api.py
+  - docs/project-context/hr-time-canonical-core-data-model-2026-05-08.md
+  - docs/project-context/hr-time-absence-driver-integration-2026-05-07.md
+acceptance_criteria: >
+  Abwesenheiten koennen als Contract importiert und gelesen werden; genehmigte
+  Abwesenheiten werden als time_entries mit Quelle absence gespiegelt; API weist
+  Planungsblocker fuer Tour, Schicht, Kalender und Payroll aus; Tests sichern
+  Import, Listing und Driver-Time-Kollision.
+checks:
+  - pytest tests/test_personal_absence_api.py tests/test_personal_time_booking_api.py tests/test_personal_time_data_api.py tests/test_personal_time_cockpit_api.py tests/test_personal_driver_time_api.py -q --no-cov
+  - python scripts/agent_workboard_supervisor.py validate
+  - node scripts/docs-governance-check.cjs
+  - git diff --check
+risks: >
+  Echter Urlaubsverwaltung-HTTP-Connector, AVV/DPA und bidirektionale
+  Konfliktaufloesung bleiben Folgeslices.
