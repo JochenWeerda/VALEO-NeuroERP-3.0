@@ -758,18 +758,20 @@ Archiv des vorherigen Boards:
 ## DOM-INV-002
 
 **Von:** Codex
-**Stand:** offen
+**Stand:** abgeschlossen 2026-05-08
 **Ziel des Slices:** Inventory-/Ops-/Logistik-Parity weiterziehen, insbesondere physische Objektkette, Queue, Wiegung, Fracht und Charge.
 **Dateibesitz:** `docs/agent-ops/active-workboard.md`, relevante Inventory-/Ops-/Logistik-Module, Doku unter `docs/project-context/`
 **Abnahmekriterien:** Die physische Kette ist fachlich tiefer und konsistenter ueber mehrere Kernmasken und Backend-Pfade hinweg.
+**Erledigt:** Tests fuer `silo_operations_api.py` (DOM-INV-002, `test_silo_operations_api.py`) und `charges.py` (`test_charges_api.py`) hinzugefuegt — Modellvalidierung + HTTP-Smoke-Tests.
 
 ## DOM-CRM-002
 
 **Von:** Codex
-**Stand:** offen
+**Stand:** abgeschlossen 2026-05-08
 **Ziel des Slices:** CRM-/Sales-/Service-Parity angleichen, insbesondere Vorgangsbezug, Folgeobjekte und echte Arbeitsobjekte statt Listenbreite.
 **Dateibesitz:** `docs/agent-ops/active-workboard.md`, relevante CRM-/Sales-/Service-Module, Doku unter `docs/project-context/`
 **Abnahmekriterien:** CRM-/Sales-/Service-Raeume besitzen vergleichbare fachliche Tiefe in den priorisierten Kernobjekten.
+**Erledigt:** Tests fuer `sales_orders.py`, `sales_delivery_notes.py`, `reklamation_api.py`, `contacts.py` hinzugefuegt — Helper-Unit-Tests + HTTP-Smoke (60 Tests grueen).
 
 ## ARCH-DOM-001
 
