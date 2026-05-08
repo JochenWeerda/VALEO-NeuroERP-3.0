@@ -118,6 +118,57 @@ class DriverTimeSummaryOut(BaseModel):
     events: list[DriverTimeEventOut]
 
 
+class TimeCockpitKpisOut(BaseModel):
+    presentEmployees: int
+    absentEmployees: int
+    pendingApprovals: int
+    blockerCount: int
+    warningCount: int
+    payrollReadyEntries: int
+    payrollBlockedEntries: int
+    totalHours: float
+    overtimeHours: float
+
+
+class TimeApprovalItemOut(BaseModel):
+    id: str
+    employeeRef: str
+    datum: str
+    hours: float
+    entryType: str
+    status: str
+    source: str
+    risk: str
+    nextAction: str
+
+
+class TimeComplianceIssueOut(BaseModel):
+    code: str
+    severity: str
+    employeeRef: str
+    datum: str
+    message: str
+    sourceId: str | None = None
+
+
+class TimePayrollReadinessOut(BaseModel):
+    status: str
+    readyEntries: int
+    blockedEntries: int
+    blockers: list[str] = Field(default_factory=list)
+    exportHint: str
+
+
+class TimeCockpitOut(BaseModel):
+    datum: str
+    source: str
+    kpis: TimeCockpitKpisOut
+    approvalQueue: list[TimeApprovalItemOut]
+    complianceIssues: list[TimeComplianceIssueOut]
+    payrollReadiness: TimePayrollReadinessOut
+    driverTime: DriverTimeSummaryOut
+
+
 _PRODUCTIVE_DRIVER_EVENT_TYPES = {"DRIVING", "LOADING", "UNLOADING", "OTHER_WORK", "AVAILABILITY"}
 _REST_DRIVER_EVENT_TYPES = {"BREAK", "DAILY_REST", "WEEKLY_REST"}
 _DRIVER_ACTIVITY_LABELS = {
@@ -130,6 +181,8 @@ _DRIVER_ACTIVITY_LABELS = {
 }
 _TACHO_DEVIATION_THRESHOLD_MINUTES = 15
 _MINUTES_PER_HOUR = 60
+_STANDARD_DAILY_HOURS = 8.0
+_LONG_DAY_WARNING_HOURS = 10.0
 
 
 def _to_iso(d: date | datetime | None) -> str:
@@ -442,6 +495,188 @@ def _build_driver_time_summary(
     )
 
 
+def _time_rows_to_entries(rows: list[Any]) -> list[dict[str, Any]]:
+    entries: list[dict[str, Any]] = []
+    for row in rows:
+        row_map = dict(row)
+        entries.append(
+            {
+                "id": str(row_map.get("id") or ""),
+                "employee_ref": str(row_map.get("employee_ref") or ""),
+                "entry_date": _to_iso(row_map.get("entry_date")),
+                "start_time": _to_time_text(row_map.get("start_time")),
+                "end_time": _to_time_text(row_map.get("end_time")),
+                "hours": float(row_map.get("hours") or 0),
+                "entry_type": str(row_map.get("entry_type") or "Arbeit"),
+                "source": str(row_map.get("source") or "manual"),
+                "status": str(row_map.get("status") or "Draft"),
+            }
+        )
+    return entries
+
+
+def _build_time_compliance_issues(
+    entries: list[dict[str, Any]],
+    driver_time: DriverTimeSummaryOut,
+) -> list[TimeComplianceIssueOut]:
+    issues: list[TimeComplianceIssueOut] = []
+    for entry in entries:
+        hours = float(entry["hours"])
+        if entry["entry_type"] == "Arbeit" and hours <= 0:
+            issues.append(
+                TimeComplianceIssueOut(
+                    code="MISSING_HOURS",
+                    severity="blocker",
+                    employeeRef=str(entry["employee_ref"]),
+                    datum=str(entry["entry_date"]),
+                    message="Arbeitszeiteintrag hat keine Stunden.",
+                    sourceId=str(entry["id"]),
+                )
+            )
+        if hours > _LONG_DAY_WARNING_HOURS:
+            issues.append(
+                TimeComplianceIssueOut(
+                    code="LONG_WORKDAY",
+                    severity="warning",
+                    employeeRef=str(entry["employee_ref"]),
+                    datum=str(entry["entry_date"]),
+                    message="Arbeitszeit liegt ueber 10 Stunden und braucht Pruefung.",
+                    sourceId=str(entry["id"]),
+                )
+            )
+        if entry["entry_type"] in {"Urlaub", "Krank"} and entry["status"] not in {"Approved", "Genehmigt"}:
+            issues.append(
+                TimeComplianceIssueOut(
+                    code="ABSENCE_NOT_APPROVED",
+                    severity="blocker",
+                    employeeRef=str(entry["employee_ref"]),
+                    datum=str(entry["entry_date"]),
+                    message="Abwesenheit ist nicht genehmigt.",
+                    sourceId=str(entry["id"]),
+                )
+            )
+
+    for finding in driver_time.findings:
+        severity = "blocker" if finding.severity == "blocker" else "warning"
+        event = next((item for item in driver_time.events if item.id in finding.eventIds), None)
+        issues.append(
+            TimeComplianceIssueOut(
+                code=finding.code,
+                severity=severity,
+                employeeRef=event.employeeRef if event else "",
+                datum=event.datum if event else driver_time.datum,
+                message=finding.message,
+                sourceId=finding.eventIds[0] if finding.eventIds else None,
+            )
+        )
+    return issues
+
+
+def _build_approval_queue(entries: list[dict[str, Any]], issues: list[TimeComplianceIssueOut]) -> list[TimeApprovalItemOut]:
+    blocker_ids = {issue.sourceId for issue in issues if issue.severity == "blocker" and issue.sourceId}
+    queue: list[TimeApprovalItemOut] = []
+    for entry in entries:
+        status = str(entry["status"])
+        if status in {"Approved", "Genehmigt"}:
+            continue
+        entry_id = str(entry["id"])
+        has_blocker = entry_id in blocker_ids
+        queue.append(
+            TimeApprovalItemOut(
+                id=entry_id,
+                employeeRef=str(entry["employee_ref"]),
+                datum=str(entry["entry_date"]),
+                hours=float(entry["hours"]),
+                entryType=str(entry["entry_type"]),
+                status=status,
+                source=str(entry["source"]),
+                risk="blockiert" if has_blocker else "pruefen",
+                nextAction="Befund klaeren" if has_blocker else "Freigeben oder korrigieren",
+            )
+        )
+    return queue
+
+
+def _build_time_cockpit(
+    target_date: str,
+    entries: list[dict[str, Any]],
+    driver_time: DriverTimeSummaryOut,
+    source: str,
+) -> TimeCockpitOut:
+    issues = _build_time_compliance_issues(entries, driver_time)
+    approval_queue = _build_approval_queue(entries, issues)
+    blockers = [issue.message for issue in issues if issue.severity == "blocker"]
+    approved_entries = [entry for entry in entries if entry["status"] in {"Approved", "Genehmigt"}]
+    work_entries = [entry for entry in entries if entry["entry_type"] == "Arbeit"]
+    absent_entries = [entry for entry in entries if entry["entry_type"] in {"Urlaub", "Krank"}]
+    overtime_hours = sum(max(0.0, float(entry["hours"]) - _STANDARD_DAILY_HOURS) for entry in work_entries)
+    payroll_blocked = len(blockers) + len(approval_queue)
+    payroll_ready = len(approved_entries)
+    return TimeCockpitOut(
+        datum=target_date,
+        source=source,
+        driverTime=driver_time,
+        complianceIssues=issues,
+        approvalQueue=approval_queue,
+        payrollReadiness=TimePayrollReadinessOut(
+            status="blocked" if payroll_blocked else "ready",
+            readyEntries=payroll_ready,
+            blockedEntries=payroll_blocked,
+            blockers=blockers,
+            exportHint="Payroll-Export blockiert bis Freigaben und Befunde erledigt sind." if payroll_blocked else "Payroll-Export fachlich freigabefaehig.",
+        ),
+        kpis=TimeCockpitKpisOut(
+            presentEmployees=len({entry["employee_ref"] for entry in work_entries}),
+            absentEmployees=len({entry["employee_ref"] for entry in absent_entries}),
+            pendingApprovals=len(approval_queue),
+            blockerCount=sum(1 for issue in issues if issue.severity == "blocker"),
+            warningCount=sum(1 for issue in issues if issue.severity == "warning"),
+            payrollReadyEntries=payroll_ready,
+            payrollBlockedEntries=payroll_blocked,
+            totalHours=round(sum(float(entry["hours"]) for entry in entries) + driver_time.kpis.produktivStunden, 2),
+            overtimeHours=round(overtime_hours, 2),
+        ),
+    )
+
+
+def _pilot_time_entries(target_date: str) -> list[dict[str, Any]]:
+    return [
+        {
+            "id": f"pilot-time-{target_date}-001",
+            "employee_ref": "L. Meier",
+            "entry_date": target_date,
+            "start_time": "07:00",
+            "end_time": "16:00",
+            "hours": 8.0,
+            "entry_type": "Arbeit",
+            "source": "terminal",
+            "status": "Approved",
+        },
+        {
+            "id": f"pilot-time-{target_date}-002",
+            "employee_ref": "S. Weber",
+            "entry_date": target_date,
+            "start_time": "06:20",
+            "end_time": "18:05",
+            "hours": 11.75,
+            "entry_type": "Arbeit",
+            "source": "driver-time",
+            "status": "Draft",
+        },
+        {
+            "id": f"pilot-time-{target_date}-003",
+            "employee_ref": "A. Brandt",
+            "entry_date": target_date,
+            "start_time": "-",
+            "end_time": "-",
+            "hours": 0.0,
+            "entry_type": "Urlaub",
+            "source": "absence",
+            "status": "Approved",
+        },
+    ]
+
+
 @router.get("/mitarbeiter", response_model=list[MitarbeiterOut])
 async def list_mitarbeiter(
     search: str | None = Query(default=None),
@@ -719,6 +954,40 @@ async def get_driver_time_summary(
         absence_ranges=_approved_absence_ranges(list(absence_rows)),
         source="database",
     )
+
+
+@router.get("/time-cockpit", response_model=TimeCockpitOut)
+async def get_time_cockpit(
+    datum: str | None = Query(default=None),
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+):
+    target_date = datum or datetime.utcnow().date().isoformat()
+    params: dict[str, Any] = {"tenant_id": tenant_id, "entry_date": target_date}
+
+    driver_time = await get_driver_time_summary(datum=target_date, tenant_id=tenant_id, db=db)
+    try:
+        rows = db.execute(
+            text(
+                """
+                SELECT id, employee_ref, entry_date, start_time, end_time, hours, entry_type, source, status
+                FROM domain_hr.time_entries
+                WHERE tenant_id = :tenant_id AND entry_date = :entry_date
+                ORDER BY employee_ref ASC, start_time ASC
+                """
+            ),
+            params,
+        ).mappings().all()
+    except Exception:
+        entries = _pilot_time_entries(target_date)
+        return _build_time_cockpit(target_date, entries, driver_time, source="pilot-fallback")
+
+    entries = _time_rows_to_entries(list(rows))
+    if not entries:
+        entries = _pilot_time_entries(target_date)
+        return _build_time_cockpit(target_date, entries, driver_time, source="pilot-empty")
+
+    return _build_time_cockpit(target_date, entries, driver_time, source="database")
 
 
 @router.post("/stundenzettel")

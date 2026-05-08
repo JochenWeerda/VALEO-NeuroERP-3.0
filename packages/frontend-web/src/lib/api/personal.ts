@@ -79,6 +79,49 @@ export type DriverTimeSummary = {
   events: DriverTimeEvent[]
 }
 
+export type TimeCockpit = {
+  datum: string
+  source: string
+  kpis: {
+    presentEmployees: number
+    absentEmployees: number
+    pendingApprovals: number
+    blockerCount: number
+    warningCount: number
+    payrollReadyEntries: number
+    payrollBlockedEntries: number
+    totalHours: number
+    overtimeHours: number
+  }
+  approvalQueue: Array<{
+    id: string
+    employeeRef: string
+    datum: string
+    hours: number
+    entryType: string
+    status: string
+    source: string
+    risk: string
+    nextAction: string
+  }>
+  complianceIssues: Array<{
+    code: string
+    severity: DriverTimeFindingSeverity
+    employeeRef: string
+    datum: string
+    message: string
+    sourceId?: string | null
+  }>
+  payrollReadiness: {
+    status: 'ready' | 'blocked' | string
+    readyEntries: number
+    blockedEntries: number
+    blockers: string[]
+    exportHint: string
+  }
+  driverTime: DriverTimeSummary
+}
+
 export type SchulungTyp = 'PSM' | 'Gefahrstoffe' | 'Gabelstapler' | 'Erste Hilfe' | 'Brandschutz' | 'Arbeitssicherheit'
 export type SchulungStatus = 'gueltig' | 'ablaufend' | 'abgelaufen'
 
@@ -156,6 +199,7 @@ export const personalKeys = {
   mitarbeiter: (filters?: Record<string, unknown>) => [...personalKeys.all, 'mitarbeiter', filters] as const,
   zeiterfassung: (datum?: string) => [...personalKeys.all, 'zeit', datum] as const,
   driverTimeSummary: (datum?: string) => [...personalKeys.all, 'driver-time-summary', datum] as const,
+  timeCockpit: (datum?: string) => [...personalKeys.all, 'time-cockpit', datum] as const,
   schulungen: (filters?: Record<string, unknown>) => [...personalKeys.all, 'schulungen', filters] as const,
   qualifikationen: (filters?: Record<string, unknown>) => [...personalKeys.all, 'qualifikationen', filters] as const,
   onboardingRuns: (filters?: Record<string, unknown>) => [...personalKeys.all, 'onboarding-runs', filters] as const,
@@ -182,6 +226,31 @@ const EMPTY_DRIVER_TIME_SUMMARY: DriverTimeSummary = {
   },
   findings: [],
   events: [],
+}
+const EMPTY_TIME_COCKPIT: TimeCockpit = {
+  datum: '',
+  source: 'empty',
+  kpis: {
+    presentEmployees: 0,
+    absentEmployees: 0,
+    pendingApprovals: 0,
+    blockerCount: 0,
+    warningCount: 0,
+    payrollReadyEntries: 0,
+    payrollBlockedEntries: 0,
+    totalHours: 0,
+    overtimeHours: 0,
+  },
+  approvalQueue: [],
+  complianceIssues: [],
+  payrollReadiness: {
+    status: 'blocked',
+    readyEntries: 0,
+    blockedEntries: 0,
+    blockers: [],
+    exportHint: '',
+  },
+  driverTime: EMPTY_DRIVER_TIME_SUMMARY,
 }
 const EMPTY_SCHULUNGEN_LIST: Schulung[] = []
 const EMPTY_STUNDENZETTEL_LIST: StundenzettelEintrag[] = []
@@ -223,6 +292,18 @@ export function useDriverTimeSummary(datum?: string) {
       return (await apiClient.get<DriverTimeSummary>(`/api/v1/personal/driver-time/summary${params}`)).data
     },
     initialData: EMPTY_DRIVER_TIME_SUMMARY,
+    staleTime: 30 * 1000,
+  })
+}
+
+export function useTimeCockpit(datum?: string) {
+  return useQuery({
+    queryKey: personalKeys.timeCockpit(datum),
+    queryFn: async () => {
+      const params = datum ? `?datum=${datum}` : ''
+      return (await apiClient.get<TimeCockpit>(`/api/v1/personal/time-cockpit${params}`)).data
+    },
+    initialData: EMPTY_TIME_COCKPIT,
     staleTime: 30 * 1000,
   })
 }
