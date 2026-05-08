@@ -185,6 +185,8 @@ Orientierung fuer den weiteren Profi-Ausbau:
 
 VALEO muss diese Muster domänenspezifisch erweitern: Driver-Time, Tour/Fahrzeug, Lenk-/Ruhezeit-Plausibilitaet, Waage/Frachtbrief und spaetere Tacho-/Telematik-Adapter.
 
+Die detaillierte GAP-Liste, das Lastenheft, die Roadmap und die Landhandel-spezifischen Integrationsanforderungen liegen in `docs/project-context/hr-time-sap-oracle-gap-lastenheft-roadmap-2026-05-08.md`.
+
 Nicht im ersten Pilot:
 
 - automatischer Tacho-Download

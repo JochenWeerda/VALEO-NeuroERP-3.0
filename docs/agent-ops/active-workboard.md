@@ -81,10 +81,11 @@ Stand: `2026-05-08`
 
 **Von:** Codex
 **Owner:** Codex
-**Stand:** reserviert 2026-05-08
+**Stand:** abgeschlossen 2026-05-08
 **Ziel des Slices:** GAP-Liste, Lastenheft, Roadmap, Integrationsanforderungen und Landhandel-spezifische HRM-Planung gegen SAP/Oracle/Shiftfy-Benchmark dokumentieren.
 **Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/agent-ops/slices/HR-TIME-GAP-001.yaml`, `docs/project-context/hr-time-sap-oracle-gap-lastenheft-roadmap-2026-05-08.md`, `docs/project-context/hr-time-absence-driver-integration-2026-05-07.md`
 **Abnahmekriterien:** SAP-/Oracle-/Shiftfy-Benchmark ist quellenbasiert; VALEO-GAPs, Lastenheft, Roadmap-Milestones, Integrationsanforderungen, Kreuzverbindungen, Mitarbeitertypen im Landhandel, Kalenderintegration, Saison-/Arbeitsspitzenplanung, Kampagneninterferenzen und Aussendienstplanung sind als umsetzbare Planung dokumentiert.
+**Erledigt:** GAP-/Lastenheft-/Roadmap-Dokument in `docs/project-context/hr-time-sap-oracle-gap-lastenheft-roadmap-2026-05-08.md` erstellt und in die HR-Time-Zielarchitektur verlinkt.
 **Checks:** `python scripts/agent_workboard_supervisor.py validate`; `node scripts/docs-governance-check.cjs`; `git diff --check`
 **Offene Risiken:** Detailauslegung Arbeitszeit-/Lenkzeitrecht, Tarif-/Betriebsvereinbarungen, Anbieter-AVV/DPA und echte Kalender-/Tacho-/Telematik-Zugangsdaten bleiben fachlich oder extern zu klaeren.
 
