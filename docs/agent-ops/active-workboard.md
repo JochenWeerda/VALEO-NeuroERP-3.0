@@ -53,6 +53,17 @@ Stand: `2026-04-24`
 **Checks:** `pnpm --filter @valero-neuroerp/hr-domain exec vitest run tests/domain/driver-time-service.test.ts`; `pnpm --filter @valero-neuroerp/hr-domain build`; `pnpm --filter @valero-neuroerp/frontend-web type-check`; `python scripts/agent_workboard_supervisor.py validate`; `node scripts/docs-governance-check.cjs`
 **Offene Risiken:** Produktive Persistenz, Tacho-/Telematik-Import und Payroll-/DATEV-Export bleiben Folgeslices. Der volle `@valero-neuroerp/hr-domain test`-Lauf ist aktuell durch den bestehenden `testcontainers`-Import im Repository-Integrationstest blockiert.
 
+## HR-TIME-PILOT-002
+
+**Von:** Codex
+**Owner:** Codex
+**Stand:** reserviert 2026-05-08
+**Ziel des Slices:** Driver-Time-Pilot als Backend-/Frontend-Toolvertrag an die bestehende Personal-API anbinden.
+**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/agent-ops/slices/HR-TIME-PILOT-002.yaml`, `app/api/v1/endpoints/personal.py`, `tests/test_personal_driver_time_api.py`, `packages/frontend-web/src/lib/api/personal.ts`, `packages/frontend-web/src/pages/personal/zeiterfassung.tsx`, `docs/project-context/hr-time-absence-driver-integration-2026-05-07.md`
+**Abnahmekriterien:** `/api/v1/personal/driver-time/summary` liefert Fahrerzeit-KPIs, Ereignisse und Plausibilitaetsbefunde aus einem stabilen API-Vertrag; Frontend nutzt diesen Hook statt harter lokaler Driver-Time-Daten; Tests decken Happy Path und Befundlogik ab.
+**Checks:** `pytest tests/test_personal_driver_time_api.py -q --no-cov`; `pnpm --filter @valero-neuroerp/frontend-web type-check`; `python scripts/agent_workboard_supervisor.py validate`; `node scripts/docs-governance-check.cjs`
+**Offene Risiken:** Persistente Fahrerzeitereignisse, Tacho-/Telematik-Import und Payroll-/DATEV-Export bleiben Folgeslices.
+
 ## AGENT-ORCH-001
 
 **Von:** Codex
