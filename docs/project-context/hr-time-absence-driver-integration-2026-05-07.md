@@ -140,6 +140,8 @@ VALEO nutzt diese Daten:
 - in HR-Reports
 - als Kontext fuer Agenten-Hinweise
 
+Umsetzungsstand 2026-05-08: `POST /api/v1/personal/absences/import` nimmt diesen Contract entgegen und spiegelt genehmigte Abwesenheiten als kanonische `domain_hr.time_entries` mit Quelle `absence`; `GET /api/v1/personal/absences` liefert daraus Planungsblocker fuer Tour, Schicht, Kalender und Payroll.
+
 ### Klassische Zeiterfassung
 
 Fuer Buero, Lager, Waage und Werkstatt reichen generische Zeitereignisse:
