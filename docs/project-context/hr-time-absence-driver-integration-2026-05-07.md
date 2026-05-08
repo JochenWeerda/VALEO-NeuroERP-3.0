@@ -174,7 +174,16 @@ Umsetzungsstand 2026-05-07:
 - `packages/hr-domain/src/domain/entities/driver-time-event.ts` definiert den ersten VALEO-eigenen Driver-Time-Contract mit Ereignisart, Quelle, Tour, Fahrzeug, Standort, Korrekturstatus und Audit-Referenz.
 - `packages/hr-domain/src/domain/services/driver-time-service.ts` liefert Tages-/Fahrerzusammenfassungen und Plausibilitaetsbefunde fuer Ueberlappungen, fehlenden Tour-/Fahrzeugbezug, Abwesenheitskollisionen und Tacho-/Manuell-Abweichungen.
 - `app/api/v1/endpoints/personal.py` stellt mit `GET /api/v1/personal/driver-time/summary` den ersten Backend-Toolvertrag fuer Fahrerzeit-KPIs, Ereignisse und Plausibilitaetsbefunde bereit.
-- `packages/frontend-web/src/lib/api/personal.ts` exponiert `useDriverTimeSummary`; `packages/frontend-web/src/pages/personal/zeiterfassung.tsx` nutzt diesen Vertrag statt harter lokaler Driver-Time-Daten.
+- `app/api/v1/endpoints/personal.py` stellt mit `GET /api/v1/personal/time-cockpit` zusaetzlich ein professionelles Time-&-Labor-Cockpit bereit: Perioden-KPIs, Freigabequeue, Compliance-Befunde, Payroll-Readiness und Driver-Time-Zusammenfassung.
+- `packages/frontend-web/src/lib/api/personal.ts` exponiert `useDriverTimeSummary` und `useTimeCockpit`; `packages/frontend-web/src/pages/personal/zeiterfassung.tsx` nutzt diese Vertraege statt harter lokaler Driver-Time-Daten.
+
+Orientierung fuer den weiteren Profi-Ausbau:
+
+- SAP SuccessFactors Time Tracking/Time Management: integrierte Time-Off-/Time-Sheet-Prozesse, Clock-In/Clock-Out, Perioden- und Payroll-Ausrichtung.
+- Oracle Time and Labor: Integration mit Global HR, Absence Management, Payroll und Project Costing.
+- Shiftfy: Zeiterfassung, Schichtplanung, Abwesenheiten, Berichte, Manager-Freigabe, Audit-Trail und Kommentarfunktion.
+
+VALEO muss diese Muster domänenspezifisch erweitern: Driver-Time, Tour/Fahrzeug, Lenk-/Ruhezeit-Plausibilitaet, Waage/Frachtbrief und spaetere Tacho-/Telematik-Adapter.
 
 Nicht im ersten Pilot:
 

@@ -69,10 +69,11 @@ Stand: `2026-05-08`
 
 **Von:** Codex
 **Owner:** Codex
-**Stand:** reserviert 2026-05-08
+**Stand:** abgeschlossen 2026-05-08
 **Ziel des Slices:** Zeiterfassung vom Fahrerzeit-Pilot zu einem professionellen Time-&-Labor-Cockpit mit Freigabe-, Compliance- und Payroll-Sicht ausbauen.
 **Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/agent-ops/slices/HR-TIME-PRO-001.yaml`, `app/api/v1/endpoints/personal.py`, `tests/test_personal_time_cockpit_api.py`, `packages/frontend-web/src/lib/api/personal.ts`, `packages/frontend-web/src/pages/personal/zeiterfassung.tsx`, `docs/project-context/hr-time-absence-driver-integration-2026-05-07.md`
 **Abnahmekriterien:** Backend liefert ein Time-Cockpit mit Perioden-KPIs, Freigabequeue, Compliance-Befunden, Payroll-Readiness und Driver-Time-Zusammenfassung; Frontend zeigt diese Steuerung statt reiner Mock-/Tabellenseite; Tests sichern Kernvertrag und Regelbefunde.
+**Erledigt:** `GET /api/v1/personal/time-cockpit` liefert professionelle Steuerungsdaten inklusive Payroll-Readiness und Compliance-Befunden; Zeiterfassungsseite nutzt Tabs fuer Steuerung, Driver-Time, Arbeitszeit und Payroll; Tests decken API-Vertrag und Regelbefunde ab.
 **Checks:** `pytest tests/test_personal_time_cockpit_api.py tests/test_personal_driver_time_api.py -q --no-cov`; `pnpm --filter @valero-neuroerp/frontend-web type-check`; `python scripts/agent_workboard_supervisor.py validate`; `node scripts/docs-governance-check.cjs`
 **Offene Risiken:** Rechtsfeingranulare ArbZG-/Lenkzeitregeln, echte Dienstplanung, Buchungsworkflow und Lohnexport bleiben Folgeslices.
 
