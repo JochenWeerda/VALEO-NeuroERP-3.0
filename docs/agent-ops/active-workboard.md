@@ -221,6 +221,17 @@ Stand: `2026-05-12`
 **Checks:** `pnpm --filter @valero-neuroerp/frontend-web exec playwright test tests/e2e/hr-time-clickthrough.generated.spec.ts --project=chromium`; `pnpm --filter @valero-neuroerp/frontend-web type-check`; `python scripts/agent_workboard_supervisor.py validate`; `node scripts/docs-governance-check.cjs`
 **Offene Risiken:** Der temporäre E2E-Smoke nutzt API-Mocks; produktive Browser-E2E gegen echte FastAPI/Postgres bleibt Folgeslice.
 
+## HR-TIME-OPS-003
+
+**Von:** Codex
+**Owner:** Codex
+**Stand:** reserviert 2026-05-12
+**Ziel des Slices:** Nachbearbeitung ergonomisch aus der Arbeitszeitliste starten statt manuelle Zeitbuchungs-ID-Eingabe zu erzwingen.
+**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/agent-ops/slices/HR-TIME-OPS-003.yaml`, `packages/frontend-web/src/pages/personal/zeiterfassung.tsx`, `packages/frontend-web/tests/e2e/hr-time-clickthrough.generated.spec.ts`
+**Abnahmekriterien:** Arbeitszeitzeilen haben eine Bearbeiten-Aktion; Klick fuellt die Nachbearbeitung mit ID, Zeiten, Stunden und Typ; die UI springt zur Erfassungs-/Nachbearbeitungsgruppe; E2E-Durchklicktest nutzt diesen Pfad.
+**Checks:** `pnpm --filter @valero-neuroerp/frontend-web exec playwright test tests/e2e/hr-time-clickthrough.generated.spec.ts --project=chromium`; `pnpm --filter @valero-neuroerp/frontend-web type-check`; `python scripts/agent_workboard_supervisor.py validate`; `node scripts/docs-governance-check.cjs`
+**Offene Risiken:** Voller Edit/Delete-Workflow fuer alle HR-Time-Objekte bleibt Folgeslice.
+
 ## AGENT-ORCH-001
 
 **Von:** Codex
