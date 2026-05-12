@@ -83,7 +83,7 @@ async def sse_stream(request: Request, channel: str):
                     yield f"data: {json.dumps(data)}\n\n"
                 except asyncio.TimeoutError:
                     # Send keepalive
-                    yield f": keepalive\n\n"
+                    yield ": keepalive\n\n"
         
         finally:
             await sse_hub.unsubscribe(channel, queue)

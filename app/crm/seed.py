@@ -395,7 +395,7 @@ def seed_crm_data(db: Session, tenant_id: str = "default"):
     
     db.commit()
     
-    print(f"✅ CRM Seed-Daten erstellt:")
+    print("✅ CRM Seed-Daten erstellt:")
     print(f"   - {len(contacts_data)} Kontakte")
     print(f"   - {len(leads_data)} Leads")
     print(f"   - {len(activities_data)} Aktivitäten")

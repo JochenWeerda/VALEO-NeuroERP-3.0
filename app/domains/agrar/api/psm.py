@@ -711,7 +711,7 @@ async def sync_proplanta_psm(
 
             return {
                 "status": "completed",
-                "message": f"PSM synchronization completed successfully",
+                "message": "PSM synchronization completed successfully",
                 "processed_items": processed_count,
                 "tenant_id": effective_tenant,
                 "timestamp": datetime.utcnow().isoformat()

@@ -317,7 +317,7 @@ def validate_iban(value: str, field_name: str = "iban") -> DomainValidationResul
                 title=f"IBAN-Länge für {land} muss {erwartet} Zeichen sein",
                 detail=f"Eingabe hat {len(normalized)} Zeichen.",
                 severity=ValidationSeverity.ERROR,
-                suggestion=f"Eine deutsche IBAN hat 22 Zeichen (ohne Leerzeichen).",
+                suggestion="Eine deutsche IBAN hat 22 Zeichen (ohne Leerzeichen).",
                 field_name=field_name,
             )],
         )
@@ -389,7 +389,7 @@ def validate_preis(
             value=value,
             is_valid=False,
             messages=[ValidationMessage(
-                title=f"Negativer Preis nicht zulässig",
+                title="Negativer Preis nicht zulässig",
                 detail="Ein Preis kann nicht negativ sein.",
                 severity=ValidationSeverity.ERROR,
                 suggestion="Für Gutschriften verwenden Sie bitte den Gutschrift-Workflow.",

@@ -610,7 +610,7 @@ class ISO27001CommunicationsSecurity:
         # In production, this would trigger automated responses
         if traffic.anomaly_score > 0.8:
             # High anomaly - potential security incident
-            logger.error(f"High anomaly score detected - potential security incident")
+            logger.error("High anomaly score detected - potential security incident")
 
     def configure_security_gateway(self, gateway_data: Dict[str, Any]) -> str:
         """
