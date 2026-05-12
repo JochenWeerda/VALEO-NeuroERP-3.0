@@ -374,7 +374,7 @@ async def update_sales_offer(
     db: Session = Depends(get_db),
 ):
     effective_tenant = tenant_id
-    row = _get_sales_offer_row(db, offer_id, effective_tenant)
+    _row = _get_sales_offer_row(db, offer_id, effective_tenant)  # noqa: F841
 
     if payload.customer_id is not None and (payload.customer_id or "").strip():
         assert_customer_allowed_for_sales_order(db, effective_tenant, str(payload.customer_id).strip())

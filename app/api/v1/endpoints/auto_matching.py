@@ -504,11 +504,11 @@ async def auto_match(
             line_id = str(line_row[0])
             line_booking_date = line_row[1]
             line_amount = Decimal(str(line_row[2]))
-            line_currency = str(line_row[3])
+            _line_currency = str(line_row[3])  # noqa: F841
             line_reference = str(line_row[4]) if line_row[4] else ""
             line_remittance = str(line_row[5]) if line_row[5] else ""
-            line_creditor_iban = str(line_row[6]) if line_row[6] else ""
-            line_debtor_iban = str(line_row[7]) if line_row[7] else ""
+            _line_creditor_iban = str(line_row[6]) if line_row[6] else ""  # noqa: F841
+            _line_debtor_iban = str(line_row[7]) if line_row[7] else ""  # noqa: F841
             
             # Combine reference and remittance info
             full_reference = f"{line_reference} {line_remittance}".strip()

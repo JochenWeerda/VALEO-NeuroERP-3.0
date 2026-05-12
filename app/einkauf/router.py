@@ -78,7 +78,7 @@ async def get_lieferanten(
             "total": len(lieferanten),
             "items": lieferanten
         }
-    except Exception as e:
+    except Exception:
         logger.exception("Lieferantenliste laden fehlgeschlagen")
         raise HTTPException(status_code=500, detail="Datenbankfehler beim Laden der Lieferanten")
 
@@ -101,7 +101,7 @@ async def get_lieferant(
         return dict(lieferant)
     except HTTPException:
         raise
-    except Exception as e:
+    except Exception:
         logger.exception("Lieferant laden fehlgeschlagen")
         raise HTTPException(status_code=500, detail="Datenbankfehler beim Laden des Lieferanten")
 
@@ -145,7 +145,7 @@ async def create_lieferant(
 
     except HTTPException:
         raise
-    except Exception as e:
+    except Exception:
         db.rollback()
         logger.exception("Lieferant erstellen fehlgeschlagen")
         raise HTTPException(status_code=500, detail="Fehler beim Erstellen des Lieferanten")
@@ -183,7 +183,7 @@ async def update_lieferant(
 
     except HTTPException:
         raise
-    except Exception as e:
+    except Exception:
         db.rollback()
         logger.exception("Lieferant aktualisieren fehlgeschlagen")
         raise HTTPException(status_code=500, detail="Fehler beim Aktualisieren des Lieferanten")
@@ -211,7 +211,7 @@ async def delete_lieferant(
 
     except HTTPException:
         raise
-    except Exception as e:
+    except Exception:
         db.rollback()
         logger.exception("Lieferant löschen fehlgeschlagen")
         raise HTTPException(status_code=500, detail="Fehler beim Löschen des Lieferanten")
@@ -252,7 +252,7 @@ async def get_bestellungen(
             "total": len(bestellungen),
             "items": bestellungen
         }
-    except Exception as e:
+    except Exception:
         logger.exception("Bestellungsliste laden fehlgeschlagen")
         raise HTTPException(status_code=500, detail="Datenbankfehler beim Laden der Bestellungen")
 
@@ -275,7 +275,7 @@ async def get_bestellung(
         return dict(bestellung)
     except HTTPException:
         raise
-    except Exception as e:
+    except Exception:
         logger.exception("Bestellung laden fehlgeschlagen")
         raise HTTPException(status_code=500, detail="Datenbankfehler beim Laden der Bestellung")
 
@@ -317,7 +317,7 @@ async def create_bestellung(
 
     except HTTPException:
         raise
-    except Exception as e:
+    except Exception:
         db.rollback()
         logger.exception("Bestellung erstellen fehlgeschlagen")
         raise HTTPException(status_code=500, detail="Fehler beim Erstellen der Bestellung")
@@ -355,7 +355,7 @@ async def update_bestellung(
 
     except HTTPException:
         raise
-    except Exception as e:
+    except Exception:
         db.rollback()
         logger.exception("Bestellung aktualisieren fehlgeschlagen")
         raise HTTPException(status_code=500, detail="Fehler beim Aktualisieren der Bestellung")
@@ -383,7 +383,7 @@ async def delete_bestellung(
 
     except HTTPException:
         raise
-    except Exception as e:
+    except Exception:
         db.rollback()
         logger.exception("Bestellung löschen fehlgeschlagen")
         raise HTTPException(status_code=500, detail="Fehler beim Löschen der Bestellung")
@@ -420,7 +420,7 @@ async def get_anfragen(
         anfragen = [dict(row._mapping) for row in result]
 
         return {"total": len(anfragen), "items": anfragen}
-    except Exception as e:
+    except Exception:
         logger.exception("Anfragenliste laden fehlgeschlagen")
         raise HTTPException(status_code=500, detail="Datenbankfehler beim Laden der Anfragen")
 
@@ -451,7 +451,7 @@ async def get_anfrage(
         return anfrage
     except HTTPException:
         raise
-    except Exception as e:
+    except Exception:
         logger.exception("Anfrage laden fehlgeschlagen")
         raise HTTPException(status_code=500, detail="Datenbankfehler beim Laden der Anfrage")
 
@@ -528,7 +528,7 @@ async def create_anfrage(
 
     except HTTPException:
         raise
-    except Exception as e:
+    except Exception:
         db.rollback()
         logger.exception("Anfrage erstellen fehlgeschlagen")
         raise HTTPException(status_code=500, detail="Fehler beim Erstellen der Anfrage")
@@ -567,7 +567,7 @@ async def update_anfrage(
 
     except HTTPException:
         raise
-    except Exception as e:
+    except Exception:
         db.rollback()
         logger.exception("Anfrage aktualisieren fehlgeschlagen")
         raise HTTPException(status_code=500, detail="Fehler beim Aktualisieren der Anfrage")
@@ -596,7 +596,7 @@ async def delete_anfrage(
 
     except HTTPException:
         raise
-    except Exception as e:
+    except Exception:
         db.rollback()
         logger.exception("Anfrage löschen fehlgeschlagen")
         raise HTTPException(status_code=500, detail="Fehler beim Loeschen der Anfrage")
@@ -627,7 +627,7 @@ async def send_anfrage(
 
     except HTTPException:
         raise
-    except Exception as e:
+    except Exception:
         db.rollback()
         logger.exception("Anfrage freigeben fehlgeschlagen")
         raise HTTPException(status_code=500, detail="Fehler beim Freigeben der Anfrage")
@@ -676,7 +676,7 @@ async def import_rechnung_pdf(
             "message": "OCR-Extraktion erfolgreich. Bitte Daten prüfen und bestätigen."
         }
 
-    except Exception as e:
+    except Exception:
         logger.exception("OCR Import fehlgeschlagen")
         raise HTTPException(status_code=500, detail="Fehler beim OCR-Import")
 
@@ -788,7 +788,7 @@ async def confirm_ocr_import(
             "message": "Rechnung erfolgreich importiert"
         }
 
-    except Exception as e:
+    except Exception:
         db.rollback()
         logger.exception("OCR Bestätigung fehlgeschlagen")
         raise HTTPException(status_code=500, detail="Fehler bei der OCR-Bestätigung")
@@ -829,7 +829,7 @@ async def get_zahlungslaeufe(
         laeufe = [dict(row._mapping) for row in result]
 
         return {"total": len(laeufe), "items": laeufe}
-    except Exception as e:
+    except Exception:
         logger.exception("Zahlungsläufe laden fehlgeschlagen")
         raise HTTPException(status_code=500, detail="Datenbankfehler beim Laden der Zahlungsläufe")
 
@@ -860,7 +860,7 @@ async def get_zahlungslauf(
         return lauf
     except HTTPException:
         raise
-    except Exception as e:
+    except Exception:
         logger.exception("Zahlungslauf laden fehlgeschlagen")
         raise HTTPException(status_code=500, detail="Datenbankfehler beim Laden des Zahlungslaufs")
 
@@ -1029,7 +1029,7 @@ async def create_zahlungslauf(
             "message": "Zahlungslauf erfolgreich erstellt"
         }
 
-    except Exception as e:
+    except Exception:
         db.rollback()
         logger.exception("Zahlungslauf erstellen fehlgeschlagen")
         raise HTTPException(status_code=500, detail="Fehler beim Erstellen des Zahlungslaufs")
@@ -1086,7 +1086,7 @@ async def execute_zahlungslauf(
 
     except HTTPException:
         raise
-    except Exception as e:
+    except Exception:
         db.rollback()
         logger.exception("Zahlungslauf ausführen fehlgeschlagen")
         raise HTTPException(status_code=500, detail="Fehler beim Ausführen des Zahlungslaufs")
@@ -1116,7 +1116,7 @@ async def get_sepa_xml(
 
     except HTTPException:
         raise
-    except Exception as e:
+    except Exception:
         logger.exception("SEPA-XML laden fehlgeschlagen")
         raise HTTPException(status_code=500, detail="Fehler beim Laden des SEPA-XML")
 
@@ -1147,7 +1147,7 @@ async def get_rechnungseingang(
         return rechnung
     except HTTPException:
         raise
-    except Exception as e:
+    except Exception:
         logger.exception("Rechnungseingang laden fehlgeschlagen")
         raise HTTPException(status_code=500, detail="Datenbankfehler beim Laden des Rechnungseingangs")
 
@@ -1332,7 +1332,7 @@ async def create_rechnungseingang(
 
     except HTTPException:
         raise
-    except Exception as e:
+    except Exception:
         db.rollback()
         logger.exception("Rechnungseingang erstellen fehlgeschlagen")
         raise HTTPException(status_code=500, detail="Fehler beim Erstellen des Rechnungseingangs")
@@ -1402,7 +1402,7 @@ async def update_rechnungseingang(
 
     except HTTPException:
         raise
-    except Exception as e:
+    except Exception:
         db.rollback()
         logger.exception("Rechnungseingang aktualisieren fehlgeschlagen")
         raise HTTPException(status_code=500, detail="Fehler beim Aktualisieren des Rechnungseingangs")
@@ -1431,7 +1431,7 @@ async def delete_rechnungseingang(
 
     except HTTPException:
         raise
-    except Exception as e:
+    except Exception:
         db.rollback()
         logger.exception("Rechnungseingang löschen fehlgeschlagen")
         raise HTTPException(status_code=500, detail="Fehler beim Loeschen des Rechnungseingangs")

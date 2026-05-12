@@ -46,7 +46,7 @@ class PayrollParser(ConnectorParser):
             return []
 
         # Header aus erster Zeile
-        headers = [h.strip().strip("\ufeff") for h in rows[0].keys()] if rows else []
+        _headers = [h.strip().strip("\ufeff") for h in rows[0].keys()] if rows else []  # noqa: F841
         items: List[NormalizedItem] = []
         current_doc: Dict[str, Any] = {}
         current_lines: List[NormalizedLine] = []

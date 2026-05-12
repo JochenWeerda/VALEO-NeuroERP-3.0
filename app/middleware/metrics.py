@@ -64,7 +64,7 @@ class PrometheusMiddleware(BaseHTTPMiddleware):
             
             return response
             
-        except Exception as e:
+        except Exception:
             # Track errors
             http_requests_total.labels(
                 method=method,

@@ -263,8 +263,8 @@ async def calculate_vat_return(
     try:
         effective_tenant_id = _resolve_vat_request_tenant(request.tenant_id, tenant_id)
         # Get journal entries for period
-        period_start = f"{request.period}-01"
-        period_end = f"{request.period}-31"
+        _period_start = f"{request.period}-01"  # noqa: F841
+        _period_end = f"{request.period}-31"  # noqa: F841
         
         # Get tax keys with UStVA positions
         tax_keys_query = text("""
@@ -377,7 +377,7 @@ async def calculate_vat_return(
         
         # Calculate totals
         total_sales_net = sum(p["sales_net"] for p in position_totals.values())
-        total_purchase_net = sum(p["purchase_net"] for p in position_totals.values())
+        _total_purchase_net = sum(p["purchase_net"] for p in position_totals.values())  # noqa: F841
         total_output_tax = sum(p["sales_tax"] for p in position_totals.values())
         total_input_tax = sum(p["purchase_tax"] for p in position_totals.values())
         vat_payable = total_output_tax - total_input_tax

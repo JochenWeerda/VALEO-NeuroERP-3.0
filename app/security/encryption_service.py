@@ -195,7 +195,7 @@ class ISO27001EncryptionService:
 
     def _verify_access_permissions(self, encrypted_package: Dict[str, Any], context: Dict[str, Any]) -> bool:
         """Verify user has permission to access encrypted data"""
-        user_id = context.get('user_id')
+        _user_id = context.get('user_id')  # noqa: F841
         user_role = context.get('user_role', 'user')
         data_classification = encrypted_package.get('classification')
         tenant_id = encrypted_package.get('tenant_id')

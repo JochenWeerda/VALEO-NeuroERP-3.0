@@ -560,7 +560,7 @@ class ISO27001IncidentManagement:
 
         incident = self.incidents[incident_id]
         old_status = incident.status
-        old_phase = incident.phase
+        _old_phase = incident.phase  # noqa: F841
 
         incident.status = new_status
         incident.current_phase = new_phase

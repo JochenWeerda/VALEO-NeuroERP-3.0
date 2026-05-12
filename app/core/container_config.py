@@ -225,7 +225,7 @@ def configure_container():
             return False
 
     # Create placeholder classes for each service
-    PlaceholderCustomerService = type('PlaceholderCustomerService', (PlaceholderService, CustomerService), {})
+    _PlaceholderCustomerService = type('PlaceholderCustomerService', (PlaceholderService, CustomerService), {})  # noqa: F841
     PlaceholderLeadService = type('PlaceholderLeadService', (PlaceholderService, LeadService), {})
     PlaceholderContactService = type('PlaceholderContactService', (PlaceholderService, ContactService), {})
     PlaceholderArticleService = type('PlaceholderArticleService', (PlaceholderService, ArticleService), {})

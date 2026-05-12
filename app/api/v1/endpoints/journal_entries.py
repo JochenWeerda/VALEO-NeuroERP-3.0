@@ -204,7 +204,7 @@ async def list_journal_entries(
                 has_prev=skip > 0,
             )
 
-        entry_repo = container.resolve(JournalEntryRepository)
+        _entry_repo = container.resolve(JournalEntryRepository)  # noqa: F841
 
         q_base = db.query(JournalEntryModel).filter(
             JournalEntryModel.tenant_id == tenant_id

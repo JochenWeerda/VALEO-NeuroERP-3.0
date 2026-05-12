@@ -136,7 +136,7 @@ class DocumentRepository:
                 row.data if isinstance(row.data, dict) else json.loads(row.data) 
                 for row in results
             ]
-        except Exception as e:
+        except Exception:
             raise
     
     def delete_document(self, doc_type: str, doc_number: str) -> bool:
@@ -151,7 +151,7 @@ class DocumentRepository:
             )
             self.db.commit()
             return result.rowcount > 0
-        except Exception as e:
+        except Exception:
             self.db.rollback()
             raise
     
@@ -174,6 +174,6 @@ class DocumentRepository:
             
             result = self.db.execute(text(query), params).scalar()
             return result or 0
-        except Exception as e:
+        except Exception:
             raise
 

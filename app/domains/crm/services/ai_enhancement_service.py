@@ -113,7 +113,7 @@ class AIEnhancementService:
         customer_id = activity_data.get('customer_id')
 
         # Get customer information for context
-        customer = self.db.query(self.db.query().filter_by(id=customer_id).first()) if customer_id else None
+        _customer = self.db.query(self.db.query().filter_by(id=customer_id).first()) if customer_id else None  # noqa: F841
 
         # Analyze activity content for suggestions
         if 'angebot' in description or 'offer' in description:
@@ -182,7 +182,7 @@ class AIEnhancementService:
         }
 
         summary = report_data.get('summary', {})
-        activities = report_data.get('activities', [])
+        _activities = report_data.get('activities', [])  # noqa: F841
         visits = report_data.get('visits', [])
 
         # Analyze activity patterns

@@ -94,7 +94,7 @@ async def crm_dashboard() -> dict:
     try:
         customers, customers_total = await crm_list_customers(skip=0, limit=500, search=None)
     except Exception:
-        customers, customers_total = [], 0
+        customers, customers_total = [], 0  # noqa: F841
     try:
         leads, leads_total = await crm_list_leads(status=None, search=None, skip=0, limit=500)
     except Exception:
@@ -156,7 +156,7 @@ async def crm_suppliers(
         try:
             rows = db.execute(text(fallback_query), params).fetchall()
             total = int(db.execute(text(count_query), params).scalar() or 0)
-        except Exception as exc:
+        except Exception:
             # Tabelle fehlt in manchen Umgebungen; UI soll ohne Fehler laden.
             return {"items": [], "total": 0}
 
@@ -1907,7 +1907,7 @@ def _parse_csv_bytes(content: bytes) -> list[dict]:
     import csv
     import io
     text_content = content.decode("utf-8-sig", errors="replace")
-    dialect = "excel" if "," in text_content.split("\n")[0] else "excel-tab"
+    _dialect = "excel" if "," in text_content.split("\n")[0] else "excel-tab"  # noqa: F841
     sep = ";" if ";" in text_content.split("\n")[0] else ","
     reader = csv.DictReader(io.StringIO(text_content), delimiter=sep)
     return [dict(row) for row in reader]

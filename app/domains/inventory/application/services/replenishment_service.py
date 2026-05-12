@@ -91,7 +91,7 @@ class ReplenishmentService:
         # This would typically analyze stock movement history
         # For now, return articles with no recent movements (simplified)
 
-        cutoff_date = datetime.utcnow() - timedelta(days=days_threshold)
+        _cutoff_date = datetime.utcnow() - timedelta(days=days_threshold)  # noqa: F841
 
         # Get articles with low turnover (simplified logic)
         articles = (

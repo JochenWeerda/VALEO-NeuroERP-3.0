@@ -182,7 +182,7 @@ def build_policy_band_lp_extension(
     if not targets or not feeds:
         return out
 
-    n_feeds = len(feeds)
+    _n_feeds = len(feeds)  # noqa: F841
     factor = _RELAXATION_FACTORS.get(relaxation_policy, 1.0)
     klass_weight = _PENALTY_CLASS_WEIGHTS.get("B", 3.0)
     dmi_scale = max(1.0, float(dmi_typ_kg))

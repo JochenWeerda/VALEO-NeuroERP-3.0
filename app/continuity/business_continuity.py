@@ -323,7 +323,7 @@ class ISO22301BusinessContinuity:
 
     def _notify_incident_stakeholders(self, incident: IncidentRecord):
         """Notify relevant stakeholders about the incident"""
-        notification_data = {
+        _notification_data = {  # noqa: F841
             'type': 'incident_notification',
             'incident_id': incident.id,
             'title': incident.title,

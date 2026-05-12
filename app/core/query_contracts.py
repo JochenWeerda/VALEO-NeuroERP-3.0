@@ -189,7 +189,7 @@ def validate_query_result(
     """
     violations: list[QueryViolation] = []
 
-    contract_felder = {f.name: f for f in contract.felder}
+    _contract_felder = {f.name: f for f in contract.felder}  # noqa: F841
     result_keys = set(result.keys())
 
     for feld in contract.felder:

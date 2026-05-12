@@ -1707,7 +1707,7 @@ async def analyze_csv_structure():
                                 
                                 break  # Erfolgreicher Delimiter gefunden
                                 
-                        except Exception as e:
+                        except Exception:
                             continue  # Nächsten Delimiter probieren
                             
             except Exception as e:

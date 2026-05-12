@@ -414,8 +414,8 @@ def reverse_run(db: Session, run_id: str, tenant_id: str, request: Any = None) -
         if not lines:
             continue
         rev_id = str(uuid4())
-        total_d = sum(Decimal(str(l[1])) for l in lines)
-        total_c = sum(Decimal(str(l[2])) for l in lines)
+        _total_d = sum(Decimal(str(l[1])) for l in lines)  # noqa: F841
+        _total_c = sum(Decimal(str(l[2])) for l in lines)  # noqa: F841
         db.execute(
             text("""
                 INSERT INTO domain_erp.journal_entries

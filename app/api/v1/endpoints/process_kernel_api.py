@@ -5362,7 +5362,7 @@ def pruefe_ausfuehrbarkeit(payload: dict):
     """Payload: {"modus": str, "max_gleichzeitig": int, "aktive_ausfuehrungen": int}"""
     from datetime import datetime
     from app.core.process_concurrency_contracts import KonkurrenzRegel
-    jetzt = datetime(2026, 3, 16, 10, 0, 0)
+    _jetzt = datetime(2026, 3, 16, 10, 0, 0)  # noqa: F841
     regel = KonkurrenzRegel("TEMP", "generic", KonkurrenzModus(payload.get("modus", "MUTEX")),
                              int(payload.get("max_gleichzeitig", 1)))
     aktive = int(payload.get("aktive_ausfuehrungen", 0))

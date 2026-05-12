@@ -377,7 +377,7 @@ async def process_dunning(
         for op_row in op_rows:
             op_id = str(op_row[0])
             debtor_id = str(op_row[1])
-            booking_date = op_row[2]
+            _booking_date = op_row[2]  # noqa: F841
             due_date = op_row[3]
             open_amount = Decimal(str(op_row[4]))
             current_dunning_level = int(op_row[5]) if op_row[5] else 0

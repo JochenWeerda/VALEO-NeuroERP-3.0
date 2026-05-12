@@ -153,7 +153,7 @@ class KontraktPositionService:
         article_map: dict[str, ArticlePosition] = {}
 
         line_ids = [r.line_id for r in rows]
-        contract_ids = list({r.contract_id for r in rows})
+        _contract_ids = list({r.contract_id for r in rows})  # noqa: F841
 
         moved_by_line = self._moved_by_line(tenant_id, line_ids) if line_ids else {}
 

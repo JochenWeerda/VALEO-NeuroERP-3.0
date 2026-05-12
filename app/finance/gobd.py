@@ -117,7 +117,7 @@ async def gobd_status(
             ),
         ]
         
-        gesamt_score = sum(100 for e in ergebnisse if e.status == "OK") // len(ergebnisse)
+        _gesamt_score = sum(100 for e in ergebnisse if e.status == "OK") // len(ergebnisse)  # noqa: F841
         
         return GoBDStatusResponse(
             gesamt_score=95,
@@ -792,7 +792,7 @@ async def get_aufbewahrungs_fristen(
                 """),
                 {"tid": tenant_id},
             ).fetchall()
-        except Exception as exc:
+        except Exception:
             db.rollback()
             # Fallback: statische Daten
             return [

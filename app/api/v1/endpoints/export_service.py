@@ -81,7 +81,7 @@ def _export_debtors(db: Session, tenant_id: str, filt: Optional[ExportListFilter
         ORDER BY debitor_number
     """)
     rows = db.execute(q, {"tenant_id": effective_tenant}).fetchall()
-    cols = ["id", "tenant_id", "debtor_number", "company_name", "address", "payment_terms", "credit_limit", "is_active", "created_at", "updated_at"]
+    _cols = ["id", "tenant_id", "debtor_number", "company_name", "address", "payment_terms", "credit_limit", "is_active", "created_at", "updated_at"]  # noqa: F841
     out = []
     for row in rows:
         addr = row[4]

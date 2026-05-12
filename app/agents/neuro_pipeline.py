@@ -87,7 +87,7 @@ def run_pipeline(
             capability = resolve_neuroassist_capability(plan.capability)
             if capability and capability.readiness in ("productive", "assisted"):
                 from app.agents.neuroassist_service import NeuroAssistService
-                service = NeuroAssistService()
+                _service = NeuroAssistService()  # noqa: F841
                 capability_result = {
                     "capability_key": plan.capability,
                     "readiness": capability.readiness,

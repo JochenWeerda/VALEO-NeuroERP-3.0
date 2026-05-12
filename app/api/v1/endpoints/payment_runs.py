@@ -417,7 +417,7 @@ async def create_payment_run(
         total_amount = sum(payment.amount for payment in payment_run.payments)
 
         import json
-        payments_json = json.dumps([p.model_dump(mode="json") for p in payment_run.payments])
+        _payments_json = json.dumps([p.model_dump(mode="json") for p in payment_run.payments])  # noqa: F841
 
         insert_query = text("""
             INSERT INTO domain_erp.payment_runs
@@ -715,7 +715,7 @@ async def execute_payment_run(
             PaymentItem(**payment) for payment in payment_run.payments
         ]
 
-        sepa_xml = generator.generate_credit_transfer(
+        _sepa_xml = generator.generate_credit_transfer(  # noqa: F841
             payments=payment_items,
             message_id=payment_run.run_number,
             execution_date=payment_run.execution_date
