@@ -201,6 +201,40 @@ class CalendarEventOut(BaseModel):
     metadata: dict[str, Any] = Field(default_factory=dict)
 
 
+class PayrollExportCreateIn(BaseModel):
+    periodFrom: str
+    periodTo: str
+    targetSystem: str = Field(default="datev", max_length=40)
+    createdBy: str | None = Field(default=None, max_length=120)
+
+
+class PayrollExportItemOut(BaseModel):
+    employeeRef: str
+    datum: str
+    hours: float
+    entryType: str
+    wageType: str
+    costCenter: str | None = None
+    sourceEntryId: str
+
+
+class PayrollExportBlockerOut(BaseModel):
+    code: str
+    message: str
+    employeeRef: str | None = None
+    sourceEntryId: str | None = None
+
+
+class PayrollExportOut(BaseModel):
+    id: str
+    periodFrom: str
+    periodTo: str
+    targetSystem: str
+    status: str
+    items: list[PayrollExportItemOut] = Field(default_factory=list)
+    blockers: list[PayrollExportBlockerOut] = Field(default_factory=list)
+
+
 class TourIn(BaseModel):
     id: str
     start: str
@@ -605,6 +639,55 @@ def _calendar_event_from_row(row: Any) -> CalendarEventOut:
         conflictLevel=str(row_map.get("conflict_level") or "none"),
         sourceRef=str(row_map.get("source_ref") or "") or None,
         metadata=metadata,
+    )
+
+
+def _wage_type_for_entry(entry_type: str, hours: float) -> str:
+    if entry_type in {"Urlaub", "Krank"}:
+        return "ABSENCE"
+    if entry_type == "Bereitschaft":
+        return "STANDBY"
+    if hours > _STANDARD_DAILY_HOURS:
+        return "OVERTIME"
+    return "REGULAR"
+
+
+def _payroll_item_from_time_row(row: Any) -> PayrollExportItemOut:
+    row_map = dict(row)
+    entry_type = str(row_map.get("entry_type") or "Arbeit")
+    hours = float(row_map.get("hours") or 0)
+    return PayrollExportItemOut(
+        employeeRef=str(row_map.get("employee_ref") or ""),
+        datum=_to_iso(row_map.get("entry_date")),
+        hours=hours,
+        entryType=entry_type,
+        wageType=_wage_type_for_entry(entry_type, hours),
+        costCenter=str(row_map.get("cost_center") or "") or None,
+        sourceEntryId=str(row_map.get("id") or ""),
+    )
+
+
+def _payroll_blocker_from_time_row(row: Any) -> PayrollExportBlockerOut:
+    row_map = dict(row)
+    status = str(row_map.get("status") or "")
+    return PayrollExportBlockerOut(
+        code="TIME_ENTRY_NOT_APPROVED",
+        message=f"Zeitbuchung ist nicht freigegeben: {status}",
+        employeeRef=str(row_map.get("employee_ref") or "") or None,
+        sourceEntryId=str(row_map.get("id") or "") or None,
+    )
+
+
+def _payroll_export_from_row(row: Any) -> PayrollExportOut:
+    row_map = dict(row)
+    return PayrollExportOut(
+        id=str(row_map.get("id") or ""),
+        periodFrom=_to_iso(row_map.get("period_from")),
+        periodTo=_to_iso(row_map.get("period_to")),
+        targetSystem=str(row_map.get("target_system") or "datev"),
+        status=str(row_map.get("status") or "blocked"),
+        items=[PayrollExportItemOut(**item) for item in _parse_json_list(row_map.get("items"))],
+        blockers=[PayrollExportBlockerOut(**item) for item in _parse_json_list(row_map.get("blockers"))],
     )
 
 
@@ -1972,6 +2055,78 @@ async def create_calendar_event(
     return _calendar_event_from_row(row)
 
 
+@router.get("/payroll-exports", response_model=list[PayrollExportOut])
+async def list_payroll_exports(
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+):
+    rows = db.execute(
+        text(
+            """
+            SELECT id, period_from, period_to, target_system, status, items, blockers
+            FROM domain_hr.payroll_exports
+            WHERE tenant_id = :tenant_id
+            ORDER BY period_from DESC, created_at DESC
+            """
+        ),
+        {"tenant_id": tenant_id},
+    ).mappings().all()
+    return [_payroll_export_from_row(row) for row in rows]
+
+
+@router.post("/payroll-exports", response_model=PayrollExportOut, status_code=201)
+async def create_payroll_export(
+    payload: PayrollExportCreateIn,
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+):
+    period_from = _parse_entry_date(payload.periodFrom)
+    period_to = _parse_entry_date(payload.periodTo)
+    if period_to < period_from:
+        raise HTTPException(status_code=400, detail="periodTo must be on or after periodFrom")
+    rows = db.execute(
+        text(
+            """
+            SELECT id, employee_ref, entry_date, hours, entry_type, status, cost_center
+            FROM domain_hr.time_entries
+            WHERE tenant_id = :tenant_id
+              AND entry_date BETWEEN :period_from AND :period_to
+              AND entry_type IN ('Arbeit', 'Bereitschaft', 'Urlaub', 'Krank', 'Korrektur')
+            ORDER BY employee_ref ASC, entry_date ASC
+            """
+        ),
+        {"tenant_id": tenant_id, "period_from": period_from, "period_to": period_to},
+    ).mappings().all()
+    items = [_payroll_item_from_time_row(row) for row in rows if str(dict(row).get("status")) in {"Approved", "Genehmigt"}]
+    blockers = [_payroll_blocker_from_time_row(row) for row in rows if str(dict(row).get("status")) not in {"Approved", "Genehmigt"}]
+    status = "blocked" if blockers else "ready"
+    row = db.execute(
+        text(
+            """
+            INSERT INTO domain_hr.payroll_exports
+              (id, tenant_id, period_from, period_to, target_system, status, items, blockers, created_at, created_by)
+            VALUES
+              (:id, :tenant_id, :period_from, :period_to, :target_system, :status,
+               CAST(:items AS jsonb), CAST(:blockers AS jsonb), NOW(), :created_by)
+            RETURNING id, period_from, period_to, target_system, status, items, blockers
+            """
+        ),
+        {
+            "id": str(uuid4()),
+            "tenant_id": tenant_id,
+            "period_from": period_from,
+            "period_to": period_to,
+            "target_system": payload.targetSystem,
+            "status": status,
+            "items": json.dumps([item.model_dump() for item in items]),
+            "blockers": json.dumps([blocker.model_dump() for blocker in blockers]),
+            "created_by": payload.createdBy,
+        },
+    ).mappings().first()
+    db.commit()
+    return _payroll_export_from_row(row)
+
+
 @router.get("/driver-time/summary", response_model=DriverTimeSummaryOut)
 async def get_driver_time_summary(
     datum: str | None = Query(default=None),
@@ -2180,3 +2335,75 @@ async def list_stundenzettel(
             )
         )
     return out
+
+
+@router.delete("/mitarbeiter/{user_id}", status_code=204)
+async def delete_mitarbeiter(
+    user_id: str,
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+):
+    """Deaktiviert einen Mitarbeiter (soft-delete via is_active=FALSE)."""
+    updated = db.execute(
+        text("""
+            UPDATE domain_shared.users
+            SET is_active = FALSE, updated_at = NOW()
+            WHERE id = :user_id AND tenant_id = :tenant_id
+        """),
+        {"user_id": user_id, "tenant_id": tenant_id},
+    ).rowcount
+    if not updated:
+        raise HTTPException(status_code=404, detail="Mitarbeiter nicht gefunden")
+    db.commit()
+
+
+@router.delete("/absences/{absence_id}", status_code=204)
+async def delete_absence(
+    absence_id: str,
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+):
+    """Löscht einen Abwesenheitseintrag (nur im Status 'Pending'/'Beantragt')."""
+    row = db.execute(
+        text("""
+            SELECT id, status FROM domain_hr.time_entries
+            WHERE id = :absence_id AND tenant_id = :tenant_id
+              AND entry_type IN ('Urlaub', 'Krank', 'Unbezahlt', 'Sonstiges')
+        """),
+        {"absence_id": absence_id, "tenant_id": tenant_id},
+    ).fetchone()
+    if not row:
+        raise HTTPException(status_code=404, detail="Abwesenheit nicht gefunden")
+    if str(row[1]) in ("Approved", "Genehmigt"):
+        raise HTTPException(status_code=400, detail="Genehmigte Abwesenheiten können nicht gelöscht werden")
+    db.execute(
+        text("DELETE FROM domain_hr.time_entries WHERE id = :id AND tenant_id = :tenant_id"),
+        {"id": absence_id, "tenant_id": tenant_id},
+    )
+    db.commit()
+
+
+@router.delete("/shifts/{shift_id}", status_code=204)
+async def delete_shift(
+    shift_id: str,
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+):
+    """Löscht eine Schicht (nur wenn noch keine Mitarbeiter zugewiesen wurden)."""
+    row = db.execute(
+        text("SELECT id, assigned_employee_refs FROM domain_hr.shifts WHERE id = :id AND tenant_id = :tenant_id"),
+        {"id": shift_id, "tenant_id": tenant_id},
+    ).fetchone()
+    if not row:
+        raise HTTPException(status_code=404, detail="Schicht nicht gefunden")
+    assigned = row[1] if row[1] else []
+    if isinstance(assigned, str):
+        import json as _json
+        assigned = _json.loads(assigned)
+    if assigned:
+        raise HTTPException(status_code=400, detail="Schichten mit zugewiesenen Mitarbeitern können nicht gelöscht werden")
+    db.execute(
+        text("DELETE FROM domain_hr.shifts WHERE id = :id AND tenant_id = :tenant_id"),
+        {"id": shift_id, "tenant_id": tenant_id},
+    )
+    db.commit()
