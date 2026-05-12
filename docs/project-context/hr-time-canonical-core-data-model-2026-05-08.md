@@ -152,13 +152,14 @@ Die API-URLs sind fachliche Ressourcen, nicht UI-Layouts.
 | Zeitbuchung korrigieren | `POST /api/v1/personal/time-entries/{id}/correct` | Korrektur mit Pflichtgrund; `Exported` wird nicht still veraendert. |
 | Abwesenheiten lesen | `GET /api/v1/personal/absences` | kanonische Abwesenheitsblocker aus Zeit-/Absence-Read-Model. |
 | Abwesenheiten importieren | `POST /api/v1/personal/absences/import` | Importvertrag fuer Urlaubsverwaltung/SaaS; schreibt `TimeEntry(source=absence)`. |
+| Schichten lesen | `GET /api/v1/personal/shifts` | geplante Schichten/Einsaetze mit Besetzung und Konflikten. |
+| Schicht erstellen | `POST /api/v1/personal/shifts` | erstellt eine Schicht und prueft Mindestbesetzung, Profile, Qualifikationen und Abwesenheiten. |
 | Driver-Time Summary | `GET /api/v1/personal/driver-time/summary` | Fahrerzeit-KPIs, Ereignisse, Plausibilitaetsbefunde. |
 | Time Cockpit | `GET /api/v1/personal/time-cockpit` | operative Freigabe-, Compliance- und Payroll-Sicht. |
 | Stundenzettel | `POST/GET /api/v1/personal/stundenzettel` | Legacy-/Pilotvertrag fuer Fahrer-Stundenzettel. |
 
 Folge-URLs muessen diese Begriffe wiederverwenden:
 
-- `/api/v1/personal/shifts`
 - `/api/v1/personal/calendar-events`
 - `/api/v1/personal/payroll-exports`
 - `/api/v1/personal/campaign-capacity`
