@@ -225,7 +225,7 @@ class _FakeDb:
 def _coa_client(db: _FakeDb):
     from app.api.v1.endpoints import chart_of_accounts as coa_router
     _app = FastAPI()
-    _app.include_router(coa_router)  # router prefix is already /chart-of-accounts
+    _app.include_router(coa_router.router)  # router prefix is already /chart-of-accounts
     _app.dependency_overrides[get_db] = lambda: db
     return TestClient(_app, raise_server_exceptions=False)
 
