@@ -278,3 +278,44 @@ async def delete_streckengeschaeft(
     db.delete(row)
     db.commit()
     return Response(status_code=204)
+
+
+@router.post("/{strecke_id}/close", response_model=StreckengeschaeftOut)
+async def close_streckengeschaeft(
+    strecke_id: str,
+    rechnungsnr: str = Query(..., description="Rechnungsnummer des Lieferanten"),
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+):
+    """Schließt ein Streckengeschäft ab (setzt erledigt=True + Rechnungsnummer)."""
+    row = _get_row(db, tenant_id, strecke_id)
+    if not row:
+        raise HTTPException(status_code=404, detail=f"Streckengeschaeft {strecke_id} nicht gefunden")
+    if row.erledigt:
+        raise HTTPException(status_code=400, detail="Streckengeschaeft ist bereits abgeschlossen")
+    row.erledigt = True
+    row.rechnungsnr = rechnungsnr
+    db.commit()
+    db.refresh(row)
+    return StreckengeschaeftOut(
+        id=str(row.id),
+        strecke_nr=str(row.strecke_nr),
+        erstellt=str(row.erstellt),
+        datum=str(row.datum),
+        niederlassung=row.niederlassung or "",
+        partie_nr=row.partie_nr or "",
+        kostenstelle=row.kostenstelle or "",
+        lagerhalle=row.lagerhalle or "",
+        nls_nr=row.nls_nr or "",
+        erledigt=row.erledigt,
+        lieferant_name=row.lieferant_name or "",
+        lieferant_nr=row.lieferant_nr or "",
+        kontrakt_nr=row.kontrakt_nr or "",
+        artikel=row.artikel or "",
+        netto=float(row.netto or 0),
+        mwst=float(row.mwst or 0),
+        brutto=float(row.brutto or 0),
+        rechnungsnr=row.rechnungsnr or "",
+        bediener=row.bediener or "",
+        notiz=row.notiz or "",
+    )

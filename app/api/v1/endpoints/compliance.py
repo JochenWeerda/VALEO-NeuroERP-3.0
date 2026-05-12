@@ -891,22 +891,54 @@ async def list_pcn_meldungen(
 @router.get("/eudr", response_model=dict)
 async def get_eudr_status(
     tenant_id: Optional[str] = Query(None, description="Tenant context"),
+    db: Session = Depends(get_db),
 ) -> dict:
     """
-    Return EU Deforestation Regulation (EUDR) compliance status and batch overview.
-    Covers due-diligence statements, batch compliance flags, deforestation risk assessment,
-    and origin country coverage.
+    EU Deforestation Regulation (EUDR) compliance status — aggregated from charge/lot data.
+    Falls back to a zero-state response when no EUDR data exists yet.
     """
+    from sqlalchemy import text as _text
+    tid = tenant_id or "default"
+    try:
+        row = db.execute(
+            _text("""
+                SELECT
+                    COUNT(*) AS total,
+                    COUNT(*) FILTER (WHERE eudr_compliant = TRUE) AS compliant,
+                    COUNT(*) FILTER (WHERE eudr_compliant = FALSE) AS flagged,
+                    ARRAY_AGG(DISTINCT origin_country) FILTER (WHERE origin_country IS NOT NULL) AS countries
+                FROM domain_inventory.lots
+                WHERE tenant_id = :tid
+            """),
+            {"tid": tid},
+        ).fetchone()
+        total = int(row[0]) if row and row[0] else 0
+        compliant = int(row[1]) if row and row[1] else 0
+        flagged = int(row[2]) if row and row[2] else 0
+        countries = list(row[3]) if row and row[3] else []
+    except Exception:
+        total = compliant = flagged = 0
+        countries = []
+
+    try:
+        stmt_count = db.execute(
+            _text("SELECT COUNT(*) FROM domain_compliance.eudr_due_diligence WHERE tenant_id = :tid"),
+            {"tid": tid},
+        ).scalar() or 0
+    except Exception:
+        stmt_count = 0
+
+    status_label = "KONFORM" if flagged == 0 else ("KRITISCH" if flagged > 5 else "WARNUNG")
     return {
-        "status": "KONFORM",
+        "status": status_label,
         "last_check": datetime.utcnow().isoformat(),
-        "batches_total": 45,
-        "batches_compliant": 43,
-        "batches_flagged": 2,
-        "due_diligence_statements": 12,
-        "origin_countries": ["DE", "FR", "PL", "UA"],
-        "deforestation_risk": "NIEDRIG",
-        "next_report_due": "2026-04-01",
+        "batches_total": total,
+        "batches_compliant": compliant,
+        "batches_flagged": flagged,
+        "due_diligence_statements": int(stmt_count),
+        "origin_countries": countries,
+        "deforestation_risk": "NIEDRIG" if flagged == 0 else "MITTEL",
+        "next_report_due": None,
     }
 
 
@@ -916,24 +948,62 @@ async def get_eudr_status(
 async def get_ustva_status(
     tenant_id: Optional[str] = Query(None, description="Tenant context"),
     periode: Optional[str] = Query(None, description="Meldezeitraum z.B. 2026-03"),
+    db: Session = Depends(get_db),
 ) -> dict:
     """
-    Return current VAT return (Umsatzsteuer-Voranmeldung) preparation status.
-    Aggregates readiness, open positions and submission deadlines.
+    UStVA-Bereitschaftsstatus — aggregiert aus gebuchten Journal-Einträgen der Periode.
     """
     from datetime import timezone
+    from sqlalchemy import text as _text
     current_period = periode or datetime.now(timezone.utc).strftime("%Y-%m")
+    tid = tenant_id or "default"
+    try:
+        row = db.execute(
+            _text("""
+                SELECT
+                    COALESCE(SUM(CASE WHEN jel.credit > 0 AND coa.account_type = 'revenue' THEN jel.credit ELSE 0 END), 0) AS umsatz,
+                    COALESCE(SUM(CASE WHEN jel.credit > 0 AND coa.account_number LIKE '17%' THEN jel.credit ELSE 0 END), 0) AS ust_soll,
+                    COALESCE(SUM(CASE WHEN jel.debit > 0 AND coa.account_number LIKE '15%' THEN jel.debit ELSE 0 END), 0) AS vorsteuer
+                FROM domain_erp.journal_entries je
+                JOIN domain_erp.journal_entry_lines jel ON jel.journal_entry_id = je.id
+                JOIN domain_erp.chart_of_accounts coa ON coa.id = jel.account_id
+                WHERE je.tenant_id = :tid
+                  AND je.status = 'posted'
+                  AND TO_CHAR(je.entry_date::date, 'YYYY-MM') = :period
+            """),
+            {"tid": tid, "period": current_period},
+        ).fetchone()
+        umsatz = float(row[0]) if row else 0.0
+        ust_soll = float(row[1]) if row else 0.0
+        vorsteuer = float(row[2]) if row else 0.0
+        zahllast = round(ust_soll - vorsteuer, 2)
+        offene = db.execute(
+            _text("""
+                SELECT COUNT(*) FROM domain_erp.journal_entries
+                WHERE tenant_id = :tid AND status = 'draft'
+                  AND TO_CHAR(entry_date::date, 'YYYY-MM') = :period
+            """),
+            {"tid": tid, "period": current_period},
+        ).scalar() or 0
+        readiness = min(100, int(100 * (1 - int(offene) / max(int(offene) + 1, 1))))
+        elster_status = "EINGEREICHT" if readiness == 100 else "AUSSTEHEND"
+    except Exception:
+        umsatz = ust_soll = vorsteuer = zahllast = 0.0
+        offene = 0
+        readiness = 0
+        elster_status = "AUSSTEHEND"
+
     return {
         "periode": current_period,
-        "status": "IN_VORBEREITUNG",
-        "readiness_pct": 82,
-        "steuerliche_bemessungsgrundlage": 0.0,
-        "ust_soll": 0.0,
-        "vorsteuer": 0.0,
-        "zahllast": 0.0,
-        "offene_positionen": 3,
-        "elster_übermittlung": "AUSSTEHEND",
-        "deadline": "2026-04-10",
+        "status": "BEREIT" if readiness >= 95 else "IN_VORBEREITUNG",
+        "readiness_pct": readiness,
+        "steuerliche_bemessungsgrundlage": umsatz,
+        "ust_soll": ust_soll,
+        "vorsteuer": vorsteuer,
+        "zahllast": zahllast,
+        "offene_positionen": int(offene),
+        "elster_uebermittlung": elster_status,
+        "deadline": None,
         "last_updated": datetime.utcnow().isoformat(),
     }
 

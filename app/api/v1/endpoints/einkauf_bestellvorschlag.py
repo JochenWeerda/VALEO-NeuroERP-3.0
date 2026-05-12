@@ -48,6 +48,7 @@ from typing import Any, Optional
 from fastapi import APIRouter, Depends, File, HTTPException, Query, UploadFile
 from fastapi.responses import Response
 from pydantic import BaseModel
+from sqlalchemy.exc import DataError
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
@@ -1357,3 +1358,51 @@ async def update_fremdwaren_einlagerung(
             setattr(fw, field, data[field])
     db.commit()
     return {"id": str(fw.id), "status": fw.status}
+
+
+@router.post("/einkauf/bestellungen/{bestellung_id}/freigeben")
+async def bestellung_freigeben(
+    bestellung_id: str,
+    db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
+) -> dict[str, Any]:
+    """Gibt eine Bestellung frei (Freigabe-Workflow: entwurf → freigegeben)."""
+    try:
+        b = (
+            db.query(EinkaufBestellung)
+            .filter(EinkaufBestellung.id == bestellung_id, EinkaufBestellung.tenant_id == tenant_id)
+            .first()
+        )
+    except DataError:
+        raise HTTPException(404, "Bestellung nicht gefunden")
+    if not b:
+        raise HTTPException(404, "Bestellung nicht gefunden")
+    if b.status not in ("entwurf", "draft"):
+        raise HTTPException(400, f"Bestellung hat Status '{b.status}' — nur Entwürfe können freigegeben werden")
+    b.status = "freigegeben"
+    db.commit()
+    return {"bestellung_id": str(b.id), "bestellnummer": b.bestellnummer, "status": b.status}
+
+
+@router.post("/einkauf/bestellungen/{bestellung_id}/stornieren")
+async def bestellung_stornieren(
+    bestellung_id: str,
+    db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
+) -> dict[str, Any]:
+    """Storniert eine Bestellung (freigegeben/versandt → storniert)."""
+    try:
+        b = (
+            db.query(EinkaufBestellung)
+            .filter(EinkaufBestellung.id == bestellung_id, EinkaufBestellung.tenant_id == tenant_id)
+            .first()
+        )
+    except DataError:
+        raise HTTPException(404, "Bestellung nicht gefunden")
+    if not b:
+        raise HTTPException(404, "Bestellung nicht gefunden")
+    if b.status in ("storniert", "abgeschlossen"):
+        raise HTTPException(400, f"Bestellung hat Status '{b.status}' und kann nicht storniert werden")
+    b.status = "storniert"
+    db.commit()
+    return {"bestellung_id": str(b.id), "bestellnummer": b.bestellnummer, "status": b.status}
