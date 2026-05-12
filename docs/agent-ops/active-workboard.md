@@ -149,6 +149,17 @@ Stand: `2026-05-12`
 **Checks:** `pytest tests/test_personal_calendar_api.py tests/test_personal_shift_planning_api.py tests/test_personal_absence_api.py tests/test_personal_time_booking_api.py tests/test_personal_time_data_api.py tests/test_personal_time_cockpit_api.py tests/test_personal_driver_time_api.py -q --no-cov`; `python scripts/agent_workboard_supervisor.py validate`; `node scripts/docs-governance-check.cjs`; `git diff --check`
 **Offene Risiken:** Microsoft/Google OAuth, Delta-Sync und echte externe Kalenderzugriffe bleiben Folgeslices.
 
+## HR-TIME-PAY-001
+
+**Von:** Codex
+**Owner:** Codex
+**Stand:** reserviert 2026-05-12
+**Ziel des Slices:** Payroll-/DATEV-Exportvertrag fuer freigegebene HR-Time-Zeitwerte mit Lohnarten, Kostenstellen und Blockerpruefung bereitstellen.
+**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/agent-ops/slices/HR-TIME-PAY-001.yaml`, `app/api/v1/endpoints/personal.py`, `tests/test_personal_payroll_export_api.py`, `migrations/sql/hr/004_hr_time_payroll_exports.sql`, `docs/project-context/hr-time-canonical-core-data-model-2026-05-08.md`
+**Abnahmekriterien:** Payroll-Export kann fuer Zeitraum erzeugt und gelesen werden; nur freigegebene Zeitwerte werden exportfaehig; offene/nicht freigegebene Buchungen werden als Blocker ausgewiesen; Tests sichern Lohnartenmapping und Blocker.
+**Checks:** `pytest tests/test_personal_payroll_export_api.py tests/test_personal_calendar_api.py tests/test_personal_shift_planning_api.py tests/test_personal_absence_api.py tests/test_personal_time_booking_api.py tests/test_personal_time_data_api.py tests/test_personal_time_cockpit_api.py tests/test_personal_driver_time_api.py -q --no-cov`; `python scripts/agent_workboard_supervisor.py validate`; `node scripts/docs-governance-check.cjs`; `git diff --check`
+**Offene Risiken:** Echte DATEV-/Lohnsoftware-Dateiformate, Steuerberaterfreigabe und Rueckschreibstatus bleiben Folgeslices.
+
 ## AGENT-ORCH-001
 
 **Von:** Codex
