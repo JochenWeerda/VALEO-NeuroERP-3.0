@@ -4,7 +4,7 @@ Druckerverwaltung und Druckaufträge
 """
 from typing import Optional, List
 from datetime import datetime
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 import logging

@@ -159,7 +159,6 @@ def _export_dunning_runs(db: Session, tenant_id: str, filt: Optional[ExportListF
 
 def _export_audit_log(db: Session, tenant_id: str, filt: Optional[ExportListFilter]) -> list[dict]:
     from app.infrastructure.models import AuditLog
-    from sqlalchemy import and_
 
     effective_tenant = (filt.tenant_id if filt else None) or tenant_id
     query = db.query(AuditLog).filter(AuditLog.tenant_id == effective_tenant)

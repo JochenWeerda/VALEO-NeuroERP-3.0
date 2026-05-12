@@ -1,5 +1,4 @@
 from __future__ import annotations
-from typing import Optional
 from fastapi import APIRouter, HTTPException
 from app.core.e2e_chain import E2EProcessChain, ChainCompletenessReport
 

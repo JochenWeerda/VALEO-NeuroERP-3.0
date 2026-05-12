@@ -23,7 +23,6 @@ Wildcards fuer Consumer:
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from datetime import datetime
 
 from app.domains.shared.events import DomainEvent
 

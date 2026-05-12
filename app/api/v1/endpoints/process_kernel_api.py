@@ -51,11 +51,9 @@ from ....core.settlement_completion_contracts import (
 )
 from ....core.settlement_human_gate import get_default_gate_rules
 from ....core.process_sla import build_default_sla_policies
-from ....core.settlement_audit_chain import build_genesis_chain, CHAIN_GENESIS_HASH
+from ....core.settlement_audit_chain import build_genesis_chain
 from ....core.gobd_settlement_check import build_stub_gobd_check
 from ....core.price_formula_engine import (
-    FixedPriceSpec,
-    FormulaPriceSpec,
     TerminmarktPriceSpec,
     evaluate_price,
     build_deviation_alert,
@@ -74,9 +72,7 @@ from ....core.kampagnen_vorlage import (
     instantiate_from_vorlage,
 )
 from ....core.tenant_prozess_variante import (
-    SchrittOverride,
     SchrittStatus,
-    TenantProzessVariante,
     build_default_tenant_variante,
     get_default_agrar_settlement_schritte,
     resolve_process_steps,
@@ -85,26 +81,20 @@ from ....core.tenant_prozess_variante import (
 from ....core.sla_eskalation_engine import (
     evaluate_sla_breach,
     get_default_sla_eskalations_policies,
-    validate_sla_policy,
 )
 from ....core.otel_span_contracts import get_process_kernel_spans
 from ....core.policy_code_engine import (
     evaluate_policy_set,
     get_default_agrar_policy_sets,
-    validate_policy_set,
 )
 from ....core.query_contracts import get_process_kernel_queries
 from ....core.human_approval_gate import (
     evaluate_approval_requirement,
     get_default_approval_rules,
-    record_approval_decision,
-    ApprovalDecision,
-    ApprovalRisikostufe,
 )
 from ....core.slo_definitions import (
     check_slo_compliance,
     get_process_kernel_slos,
-    validate_slo_definition,
 )
 from ....core.mcp_tool_contracts import get_process_kernel_mcp_tools
 from ....core.data_quality_rules import (
@@ -124,7 +114,6 @@ from ....core.bulk_operations import (
 )
 from ....core.background_jobs import (
     JobEnqueueRequest,
-    JobStatus,
     JobTyp,
     create_job_from_request,
     evaluate_job_routing,
@@ -137,31 +126,22 @@ from ....core.scheduler_recovery import (
 from ....services.scheduler_service import get_scheduler_status
 from ....core.workflow_versioning_contracts import (
     MigrationsTyp,
-    SandboxModus,
     WorkflowDefinitionsStatus,
     WorkflowInstanzStatus,
-    ermittle_aktive_definition,
-    get_default_migrationsregeln,
     get_default_sandbox_regeln,
     get_default_workflow_definitionen,
     pruefe_migration,
 )
 from ....core.canonical_process_audit_trail import (
-    AuditKategorie,
-    GoBDRelevanz,
-    AuditEreignisTyp,
     baue_beispiel_audit_kette,
     erstelle_audit_eintrag,
 )
 from ....core.process_capacity_contracts import (
-    AuslastungsStatus,
-    EngpassStufe,
     KapazitaetsTyp,
     get_default_kapazitaets_einheiten,
     pruefe_workflow_kapazitaet,
 )
 from ....core.domain_event_schema_registry import (
-    EventSchemaStatus,
     KompatibilitaetsTyp,
     finde_aktives_schema,
     get_default_event_schemas,
@@ -175,30 +155,19 @@ from ....core.process_compensation_contracts import (
     get_default_saga_definitionen,
 )
 from ....core.workflow_checkpoint_contracts import (
-    CheckpointIntervall,
     CheckpointStatus,
-    WiederherstellungsErgebnis,
     erstelle_checkpoint,
     get_default_checkpoint_regeln,
-    stelle_checkpoint_wieder_her,
 )
 from ....core.process_routing_contracts import (
-    RoutingBedingungsTyp,
-    RoutingErgebnis,
-    RoutingZielTyp,
     get_default_routing_regeln,
     route_nachricht,
 )
 from ....core.data_lineage_contracts import (
     LineageKnotenTyp,
-    LineageStatus,
-    TransformationsTyp,
     get_default_lineage_graph,
 )
 from ....core.feature_flag_contracts import (
-    FeatureFlagStatus,
-    FlagVariante,
-    RolloutStrategie,
     evaluiere_flags,
     get_aktive_flag_ids,
     get_default_feature_flags,
@@ -209,61 +178,40 @@ from ....core.process_cost_contracts import (
     KostenTyp,
     erstelle_kosten_erfassung,
     get_default_budget_ueberwachungen,
-    pruefe_budget,
 )
 from ....core.process_quarantine_contracts import (
-    QuarantaeneGrund,
-    QuarantaeneStatus,
     RetryStrategie,
     berechne_quarantaene_statistik,
     get_default_quarantaene_eintraege,
 )
 from ....core.workflow_acl_contracts import (
     AclAktion,
-    AclEffekt,
-    AclVererbung,
     get_default_acl_regeln,
     pruefe_acl,
 )
 from ....core.process_state_machine_contracts import (
-    AutomatStatus,
-    UebergangsBedingung,
-    ZustandTyp,
     fuehre_uebergang_aus,
     get_default_zustandsautomat,
 )
 from ....core.workflow_delegation_contracts import (
-    DelegationsStatus,
-    DelegationsTyp,
     EskalationsStufe,
     get_default_delegations_regeln,
     loeseauf_delegation,
 )
 from ....core.process_timeout_contracts import (
-    TimeoutAktion,
-    TimeoutStatus,
-    TimeoutTyp,
     get_default_timeout_regeln,
     pruefe_timeout,
 )
 from ....core.workflow_batch_contracts import (
     BatchStatus,
-    BatchTyp,
-    ChunkStatus,
-    berechne_batch_status,
     erstelle_chunks,
     get_default_batch_jobs,
 )
 from ....core.process_notification_contracts_wave49 import (
-    NotifikationsKanal as NotifikationsKanalW49,
-    NotifikationsPrioritaet,
-    ZustellStatus,
-    berechne_zustellstatistik,
     erstelle_zustellung,
     get_default_notifikations_vorlagen,
 )
 from ....core.workflow_lock_contracts import (
-    KonfliktTyp,
     LockStatus,
     LockTyp,
     akquiriere_lock,
@@ -271,9 +219,6 @@ from ....core.workflow_lock_contracts import (
 )
 from ....core.database import get_db
 from ....core.process_archive_contracts import (
-    ArchivStatus,
-    ArchivierungsGrund,
-    AufbewahrungsKlasse,
     berechne_archiv_statistik,
     get_default_archiv_eintraege,
 )
@@ -285,9 +230,7 @@ from ....core.workflow_metrics_contracts import (
     get_default_kpi_summaries,
 )
 from ....core.cross_domain_projection_contracts import (
-    KonsistenzLevel,
     ProjectionLagStufe,
-    ProjectionStatus,
     berechne_lag_stufe,
     erstelle_projektions_gesundheit,
     get_default_projektionen,
@@ -296,12 +239,10 @@ from ....core.event_replay_contracts import (
     ReplayModus,
     ReplayStatus,
     SnapshotTyp,
-    erstelle_replay_auftrag,
     get_default_replay_auftraege,
     pruefe_replay_konsistenz,
 )
 from ....core.command_surfacing_contracts import (
-    CommandPrioritaet,
     DichteStufe,
     SurfacingAnfrage,
     SurfacingKontext,
@@ -310,35 +251,26 @@ from ....core.command_surfacing_contracts import (
 )
 from ....core.process_notification_contracts import (
     NotifikationsAusloeser,
-    NotifikationsKanal,
-    berechne_prioritaet,
     erstelle_benachrichtigung,
     get_default_abonnements,
     get_default_eskalationsregeln,
     route_benachrichtigung,
 )
 from ....core.sustainability_reporting import (
-    BerichtsTyp,
     EmissionsKategorie,
-    EmissionsScope,
     berechne_energie_co2e,
     berechne_transport_co2e,
-    erstelle_beispiel_co2_bilanz,
     erstelle_beispiel_esg_bericht,
 )
 from ....core.benchmark_cockpit import (
     BenchmarkKategorie,
-    ReportFrequenz,
     berechne_branchenperzentile,
-    berechne_trend,
     get_example_benchmark_report,
 )
 from ....core.dms_ocr_contracts import (
-    BelegErkennungsRegel,
     DokumentTyp,
     OCREngine,
     build_ocr_kernfluss,
-    bewerte_ocr_ergebnis,
     get_default_erkennungsregeln,
     klassifiziere_dokument,
 )
@@ -352,7 +284,6 @@ from ....core.agent_integration_contracts import (
 from ....core.edi_hub_contracts import (
     EDIPartnerTyp,
     EDIStandard,
-    EDIUebertragungsKanal,
     get_default_edi_partners,
     get_edi_nachrichtentyp_katalog,
 )
@@ -368,16 +299,11 @@ from ....core.supply_chain_tracking import (
     get_example_tracking_events,
 )
 from ....core.inline_validation_contracts import (
-    FeldTyp,
-    InlineValidierungsFeld,
-    InlineValidierungsRegel,
-    ValidierungsRegelTyp,
     get_default_field_validations,
     get_field_by_id,
     validate_inline_field,
 )
 from ....core.error_guidance_contracts import (
-    ErrorGuidanceResult,
     FehlerKategorie,
     FehlerKontext,
     evaluate_error_guidance,
@@ -4159,7 +4085,6 @@ def aggregiere_workflow_messpunkte(body: dict | None = None):
     if body is None:
         body = {}
 
-    from datetime import datetime as _dt
     workflow_typ: str = body.get("workflow_typ", "kontrakt_freigabe")
     metrik_str: str = body.get("metrik_typ", "SLA_EINHALTUNG")
     agg_str: str = body.get("aggregation", "DURCHSCHNITT")
@@ -4238,7 +4163,6 @@ def pruefe_kapazitaets_auslastung(payload: dict):
     """
     Payload: {"max_kapazitaet": float, "warnschwelle_pct": float, "kritisch_schwelle_pct": float, "aktuelle_auslastung": float}
     """
-    from datetime import datetime
     regel = KapazitaetsRegel(
         regel_id="TEMP",
         kapazitaets_typ=KapazitaetsTyp.CPU,
@@ -4294,7 +4218,7 @@ def erstelle_kompensations_plan_endpoint(payload: dict):
 from app.core.process_circuit_breaker_contracts import (
     get_default_circuit_breaker_konfigurationen,
     CircuitBreakerKonfiguration, CircuitBreakerZustandsRecord,
-    CircuitBreakerZustand, AufrufErgebnis,
+    CircuitBreakerZustand,
 )
 from app.core.workflow_event_sourcing_contracts import (  # noqa: F811
     get_default_ereignis_streams, rekonstruiere_zustand,
@@ -4376,12 +4300,12 @@ def rekonstruiere_workflow_zustand(payload: dict):
 # === Wave 53: Rate Limiting + Idempotency ===
 from app.core.process_rate_limit_contracts import (
     get_default_rate_limit_regeln,
-    RateLimitRegel, RateLimitZaehler, RateLimitErgebnis,
-    RateLimitFenster, RateLimitGranularitaet,
+    RateLimitRegel, RateLimitZaehler, RateLimitFenster,
+    RateLimitGranularitaet,
 )
 from app.core.workflow_idempotency_contracts import (
     get_default_idempotenz_eintraege, pruefe_idempotenz,
-    IdempotenzEintrag, IdempotenzStatus, DeduplizierungsStrategie,
+    DeduplizierungsStrategie,
 )
 
 @router.get("/rate-limit/regeln", tags=["process-kernel"])
@@ -4519,11 +4443,10 @@ def get_wiederherstellungspunkt(payload: dict):
 # === Wave 55: Priority Queue + Rollback ===
 from app.core.process_priority_contracts import (
     get_default_warteschlangen, PrioritaetsWarteschlange,
-    PrioritaetsAufgabe, AufgabenPrioritaet, WarteschlangenStatus,
+    PrioritaetsAufgabe, AufgabenPrioritaet,
 )
 from app.core.workflow_rollback_contracts import (
-    get_default_rollback_plaene, RollbackPlan, RollbackSchritt,
-    RollbackTyp, RollbackStatus, UmkehrbarkeitsGrad,
+    get_default_rollback_plaene,
 )
 
 @router.get("/prioritaet/warteschlangen", tags=["process-kernel"])
@@ -4599,7 +4522,6 @@ from app.core.process_dependency_contracts import (  # noqa: F811
 )
 from app.core.workflow_signal_contracts import (
     get_default_signale, get_default_signal_regeln, verarbeite_signal,
-    WorkflowSignal, SignalRegel, SignalTyp, SignalStatus, TriggerAktion,
 )
 
 @router.get("/abhaengigkeit/graphen", tags=["process-kernel"])
@@ -4669,8 +4591,6 @@ def verarbeite_signal_endpoint(payload: dict):
 # === Wave 57: Observability + Workflow Versioning ===
 from app.core.process_observability_contracts import (
     get_default_traces, get_default_health_report,
-    Trace, ObservabilitySpan, SystemHealthReport, HealthCheck,
-    SpanStatus, HealthStatus,
 )
 from app.core.workflow_versioning_contracts_wave57 import (  # noqa: F811
     get_default_migrations_guards, MigrationsGuard,
@@ -4812,12 +4732,10 @@ def pruefe_audit_integritaet(payload: dict):  # noqa: F811
 # === Wave 59: Consent Management + Workflow Triggers ===
 from app.core.process_consent_contracts import (
     get_default_einwilligungs_register,
-    EinwilligungsRegister, Einwilligung,
-    EinwilligungsTyp, EinwilligungsStatus, RechtsgrundlageTyp,
+    EinwilligungsTyp,
 )
 from app.core.workflow_trigger_contracts import (
-    get_default_workflow_trigger, WorkflowTrigger, TriggerBedingung,
-    TriggerTyp, TriggerStatus, BedingungsOperator,
+    get_default_workflow_trigger,
 )
 
 
@@ -4891,13 +4809,11 @@ def pruefe_trigger_bedingungen(payload: dict):
 
 # === Wave 60: Process Forecasting + Workflow Handover ===
 from app.core.process_forecast_contracts import (
-    get_default_prognosen, erstelle_prognose,
-    PrognoseErgebnis, Datenpunkt, PrognoseTyp, PrognoseMethode,
-    KonfidenzNiveau, berechne_gleitenden_durchschnitt, berechne_gewichteten_durchschnitt,
+    get_default_prognosen, Datenpunkt,
+    berechne_gleitenden_durchschnitt, berechne_gewichteten_durchschnitt,
 )
 from app.core.workflow_handover_contracts import (
-    get_default_uebergabe_protokolle, UebergabeProtokoll, UebergabeAnfrage,
-    UebergabeTyp, UebergabeStatus, DringlichkeitsStufe,
+    get_default_uebergabe_protokolle,
 )
 
 
@@ -4968,12 +4884,11 @@ def pruefe_offene_handover(payload: dict):
 
 # === Wave 61: Quota Management + Workflow Pause ===
 from app.core.process_quota_contracts import (
-    get_default_quota_uebersicht, QuotaUebersicht,
-    QuotaRegel, TenantQuotaVerbrauch, QuotaTyp, QuotaStatus, QuotaAktionsBei,
+    get_default_quota_uebersicht, QuotaRegel,
+    QuotaTyp,
 )
 from app.core.workflow_pause_contracts import (
-    get_default_pause_verlaeufe, PauseVerlauf, WorkflowPause,
-    PauseGrund, PauseStatus, ResumeAusloeser,
+    get_default_pause_verlaeufe,
 )
 
 
@@ -5045,8 +4960,6 @@ def pruefe_pause_ueberfaellig(payload: dict):
 # === Wave 62: Process Templates + Workflow Deadlines ===
 from app.core.process_template_contracts import (
     get_default_templates, instanziere_template,
-    ProzessTemplate, ProzessSchritt_Template,
-    TemplateTyp, TemplateStatus, InstanzierungsStatus,
 )
 from app.core.workflow_deadline_contracts import (  # noqa: F811
     get_default_deadline_monitor, DeadlineMonitor, WorkflowDeadline,
@@ -5139,12 +5052,9 @@ def pruefe_deadline_eskalation(payload: dict):
 # === Wave 63: Process Validation + Workflow Collaboration ===
 from app.core.process_validation_contracts import (
     get_default_validierungs_regeln, validiere_daten,
-    ValidierungsRegel, ValidierungsErgebnis,
-    ValidierungsSchwere, RegelTyp, ValidierungsStatus,
 )
 from app.core.workflow_collaboration_contracts import (
-    get_default_entscheidungen, KollaborationsEntscheidung, Stimme,
-    AbstimmungsTyp, StimmeTyp, KollaborationsStatus,
+    get_default_entscheidungen,
 )
 
 
@@ -5211,8 +5121,7 @@ from app.core.process_lineage_contracts import (  # noqa: F811
     LineageKante, LineageKnotenTyp, LineageOperationTyp,
 )
 from app.core.workflow_simulation_contracts_wave64 import (
-    get_default_simulations_laeufe, SimulationsLauf, SimulationsErgebnis,
-    SimulationsParameter, SimulationsTyp, SimulationsStatus,
+    get_default_simulations_laeufe,
 )
 
 
@@ -5279,12 +5188,9 @@ def get_simulations_ergebnis_w64(payload: dict):
 # === Wave 65: Exception Patterns + Remediation ===
 from app.core.process_exception_pattern_contracts import (
     get_default_ausnahme_signaturen, klassifiziere_ausnahme,
-    AusnahmeSignatur, KlassifizierungsErgebnis,
-    AusnahmeMuster, AusnahmeSchwere, MusterErkennungsKonfidenz,
 )
 from app.core.workflow_remediation_contracts import (
-    get_default_playbooks, RemediationsPlaybook, RemediationsSchritt,
-    RemediationsTyp, RemediationsStatus, RemediationsAktion,
+    get_default_playbooks,
 )
 
 @router.get("/exception/signaturen", tags=["process-kernel"])
@@ -5332,12 +5238,10 @@ def pruefe_remediation_playbook(payload: dict):
 
 # === Wave 66: Concurrency + Resource Locks ===
 from app.core.process_concurrency_contracts import (
-    get_default_konkurrenz_waechter, KonkurrenzWaechter, AusfuehrungsSlot,
-    KonkurrenzModus, AusfuehrungsSlotStatus,
+    get_default_konkurrenz_waechter, KonkurrenzModus,
 )
 from app.core.workflow_resource_lock_contracts import (
-    get_default_resource_locks, pruefe_lock_kompatibilitaet, erkenne_deadlock,
-    RessourceLock, RessourceLockTyp, DeadlockStatus,
+    get_default_resource_locks, erkenne_deadlock,
 )
 
 @router.get("/konkurrenz/waechter", tags=["process-kernel"])
@@ -5405,7 +5309,7 @@ def liste_cache_konfigurationen():
 
 @router.post("/cache/pruefe-status")
 def pruefe_cache_status(payload: dict):
-    from app.core.process_cache_contracts import CacheEintrag, CacheStatus
+    from app.core.process_cache_contracts import CacheEintrag
     from datetime import datetime
     erstellt = datetime.fromisoformat(payload.get("erstellt_am", datetime.now().isoformat()))
     ttl = payload.get("ttl_sekunden")
@@ -5463,8 +5367,8 @@ def liste_health_schwellwerte():
 @router.post("/health-dashboard/pruefe-status")
 def pruefe_dashboard_status(payload: dict):
     from app.core.process_health_dashboard_contracts import (
-        HealthDashboard, DashboardKomponente, KomponentenMetrik, MetrikSchwellwert,
-        MetrikTyp, STANDARD_SCHWELLWERTE
+        HealthDashboard, DashboardKomponente, KomponentenMetrik, MetrikTyp,
+        STANDARD_SCHWELLWERTE
     )
     from datetime import datetime
     komponenten = []

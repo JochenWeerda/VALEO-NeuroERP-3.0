@@ -6,7 +6,7 @@ Dieses Modul implementiert das Security Incident Response Team gemäß ISO 27001
 für VALEO-NeuroERP mit Team-Struktur, Escalation Procedures und Incident Response Workflows.
 """
 
-from datetime import datetime, timedelta
+from datetime import datetime
 from typing import Dict, Any, List, Optional
 from dataclasses import dataclass, field
 from enum import Enum

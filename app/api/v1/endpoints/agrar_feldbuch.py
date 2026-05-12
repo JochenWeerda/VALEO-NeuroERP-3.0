@@ -512,7 +512,7 @@ async def get_duengebilanz(
     AGR-COM-01: Berechnet die Nährstoffbilanz (N) für ein Jahr.
     Basiert auf dokumentierten Düngemaßnahmen im Feldbuch.
     """
-    from sqlalchemy import func, extract
+    from sqlalchemy import extract
 
     q = (
         db.query(FeldbuchMassnahme)
@@ -614,7 +614,7 @@ async def get_cross_compliance_report(
     AGR-COM-03: Zusammenfassender Cross-Compliance-Bericht.
     Prüft: Spritztagebuch-Vollständigkeit, Düngebilanz, Schlag-Dokumentation.
     """
-    from sqlalchemy import extract, func
+    from sqlalchemy import extract
 
     # 1. Spritztagebuch: alle PSM-Maßnahmen im Jahr
     psm_q = db.query(FeldbuchMassnahme).filter(

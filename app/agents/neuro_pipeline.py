@@ -7,7 +7,7 @@ Integriert Intent Engine, Planner, Verification Engine und Decision Protocol.
 from __future__ import annotations
 
 import logging
-from typing import Any, Optional
+from typing import Optional
 
 from sqlalchemy.orm import Session
 

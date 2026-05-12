@@ -10,10 +10,10 @@ import os
 from app.core.uuid7 import uuid7
 from datetime import datetime
 
-from fastapi import APIRouter, Depends, HTTPException, Header, Request, File, UploadFile
+from fastapi import APIRouter, Depends, HTTPException, Request, File, UploadFile
 from sqlalchemy.orm import Session
 from sqlalchemy import text
-from typing import List, Optional
+from typing import Optional
 
 from app.core.database import get_db
 from app.auth.deps import get_tenant_id

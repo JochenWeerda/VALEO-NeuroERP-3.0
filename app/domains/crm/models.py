@@ -3,8 +3,8 @@ CRM Domain Models
 Models for Customer Relationship Management
 """
 
-from sqlalchemy import Column, String, Integer, Float, Boolean, DateTime, Text, ForeignKey, DECIMAL
-from sqlalchemy.dialects.postgresql import UUID as PGUUID, JSONB
+from sqlalchemy import Column, String, Integer, Boolean, DateTime, Text, ForeignKey, DECIMAL
+from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from app.core.uuid7 import uuid7

@@ -1,6 +1,6 @@
 """POS Retoure (Return) Endpoint"""
 from typing import Optional, List
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 from ....core.database import get_db
@@ -86,7 +86,6 @@ async def create_retoure(
     except Exception:
         db.rollback()
         # Retoure trotzdem erfassen, auch wenn Lagerbuchung fehlschlägt
-        pass
 
     return RetourResponse(
         retoure_id=retoure_id,

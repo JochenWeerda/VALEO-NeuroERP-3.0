@@ -15,7 +15,6 @@ import hashlib
 import os
 import shutil
 import json
-from pathlib import Path
 from app.core.uuid7 import uuid7
 
 logger = logging.getLogger(__name__)
@@ -474,7 +473,6 @@ class ISO27001AutomatedBackup:
         """Encrypt backup directory"""
         # In production, implement proper encryption
         # For now, just mark as encrypted
-        pass
 
     def _calculate_file_checksum(self, file_path: str) -> str:
         """Calculate SHA-256 checksum of file"""
@@ -498,7 +496,6 @@ class ISO27001AutomatedBackup:
     def _cleanup_old_backups(self, job: BackupJob):
         """Clean up old backups based on retention policy"""
         # In production, implement proper cleanup logic
-        pass
 
     def restore_from_backup(self, restore_data: Dict[str, Any]) -> str:
         """

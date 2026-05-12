@@ -9,7 +9,6 @@ Gap 026: Inline-Validierung — KPI: 35% weniger Eingabefehler
 """
 from __future__ import annotations
 
-import re
 from dataclasses import dataclass, field
 from enum import Enum
 from typing import Any

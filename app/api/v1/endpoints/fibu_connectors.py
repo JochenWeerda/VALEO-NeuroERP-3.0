@@ -6,7 +6,7 @@ Profile CRUD, Import-Runs: Upload → Parse → Validate → Post → Cancel/Rev
 from __future__ import annotations
 
 import json
-from typing import Any, List, Optional
+from typing import List, Optional
 from uuid import uuid4
 
 from fastapi import APIRouter, Depends, File, HTTPException, Query, Request, UploadFile

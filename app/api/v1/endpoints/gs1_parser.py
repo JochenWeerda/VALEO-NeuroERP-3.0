@@ -3,8 +3,6 @@ GS1 barcode parser endpoint (l3c-gs1)
 Parses GS1-128 / GS1 DataMatrix barcodes into structured AI data.
 """
 
-import re
-from typing import Optional
 
 from fastapi import APIRouter
 from pydantic import BaseModel

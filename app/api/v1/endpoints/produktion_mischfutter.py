@@ -8,9 +8,9 @@ in futtermittel_produktionsauftraege mit echtem Bestandsabzug.
 
 from datetime import datetime
 from decimal import Decimal
-from typing import Any, Optional
+from typing import Optional
 
-from fastapi import APIRouter, Depends, HTTPException, Query, Response
+from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel, Field
 from sqlalchemy import and_
 from sqlalchemy.orm import Session, joinedload
@@ -22,7 +22,6 @@ from app.infrastructure.models.futtermittel_models import (
     Einzelfuttermittel,
     FuttermittelRezept,
     ProduktionsAuftrag,
-    RezeptKomponente,
 )
 
 

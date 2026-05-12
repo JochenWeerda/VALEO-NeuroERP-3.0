@@ -5,8 +5,8 @@ Automatische Abholung und Aktualisierung von Wechselkursen
 
 import httpx
 import xml.etree.ElementTree as ET
-from datetime import datetime, date, timedelta
-from typing import List, Optional, Dict
+from datetime import datetime, date
+from typing import List, Dict
 import structlog
 
 from app.core.database import get_db

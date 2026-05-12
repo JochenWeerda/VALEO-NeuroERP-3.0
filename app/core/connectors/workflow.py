@@ -6,7 +6,6 @@ from __future__ import annotations
 
 import json
 import logging
-from datetime import datetime
 from decimal import Decimal
 from typing import Any, Dict, List, Optional
 from uuid import uuid4
@@ -14,7 +13,7 @@ from uuid import uuid4
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
-from app.core.connectors.base import NormalizedItem, NormalizedLine, validate_item_balance
+from app.core.connectors.base import NormalizedItem, validate_item_balance
 from app.core.connectors.payroll_parser import PayrollParser
 from app.core.connectors.asset_ledger_parser import AssetLedgerParser
 from app.core.data_quality_enforcement import DQValidationException

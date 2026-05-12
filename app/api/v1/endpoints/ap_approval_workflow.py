@@ -7,8 +7,7 @@ from typing import List, Optional, Dict, Any
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 from sqlalchemy import text
-from decimal import Decimal
-from datetime import date, datetime
+from datetime import datetime
 from pydantic import BaseModel, Field
 import logging
 from app.core.uuid7 import uuid7

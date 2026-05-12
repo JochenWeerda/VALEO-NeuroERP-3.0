@@ -7,7 +7,6 @@ Multi-Tenant & Jahreswechsel-Support
 from __future__ import annotations
 import os
 import logging
-from datetime import datetime
 from typing import Annotated
 from fastapi import Depends
 from sqlalchemy import text

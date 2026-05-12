@@ -6,7 +6,7 @@ Oeffentliches Manifest aller Commands, die von Agenten aufgerufen werden koennen
 
 from __future__ import annotations
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 
 from app.core.business_commands import CommandDefinition, build_core_command_catalog
 

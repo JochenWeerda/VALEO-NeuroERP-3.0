@@ -6,7 +6,7 @@ Pydantic schemas for Saatgut, Dünger, PSM, and other agricultural products
 from datetime import datetime
 from typing import Optional, List, Dict, Any
 from decimal import Decimal
-from pydantic import Field, validator
+from pydantic import Field
 
 from .base import BaseSchema, TimestampMixin, SoftDeleteMixin
 

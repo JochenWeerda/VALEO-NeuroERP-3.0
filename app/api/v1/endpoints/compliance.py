@@ -12,7 +12,6 @@ from sqlalchemy.orm import Session
 
 from app.core.database import get_db
 from app.core.tenant import get_tenant_id
-from app.core.tenant_context import get_current_tenant_id
 from app.documents.router_helpers import get_repository, list_from_store
 from app.domains.operations.models import (
     ComplianceEintrag,
@@ -711,7 +710,6 @@ async def export_chargen_trace_report(
 # ---------------------------------------------------------------------------
 
 from ....core.intrastat_model import (
-    IntrastatMeldung,
     IntrastatRichtung,
     build_stub_intrastat_meldung,
     validate_intrastat_meldung,

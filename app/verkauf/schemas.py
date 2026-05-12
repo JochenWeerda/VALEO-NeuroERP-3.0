@@ -28,7 +28,6 @@ class KundeBase(BaseModel):
 class KundeCreate(KundeBase):
     """Schema für Kunde-Erstellung"""
 
-    pass
 
 
 class KundeUpdate(BaseModel):

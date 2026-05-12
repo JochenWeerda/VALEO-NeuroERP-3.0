@@ -1,7 +1,7 @@
 """Inventory Articles management endpoints."""
 
 from datetime import datetime, timezone
-from typing import Optional, List
+from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Response, status
 from pydantic import BaseModel as PydanticBaseModel

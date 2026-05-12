@@ -4,7 +4,7 @@ Schadenmeldung und Versicherungsverwaltung
 """
 from typing import Optional, List
 from datetime import datetime
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, Query
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 import logging

@@ -5,7 +5,6 @@ Commodity Position Snapshot Service (optional cache for matrix performance).
 from __future__ import annotations
 
 from datetime import date
-from decimal import Decimal
 from typing import Optional
 
 from sqlalchemy.orm import Session

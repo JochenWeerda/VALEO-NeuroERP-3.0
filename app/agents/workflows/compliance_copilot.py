@@ -5,9 +5,9 @@ AI-Agent to ensure regulatory compliance (PSM, ENNI, TRACES, etc.)
 
 from typing import Annotated, List, TypedDict, Dict, Any
 import operator
-from datetime import datetime, timedelta
+from datetime import datetime
 
-from langchain_core.messages import BaseMessage, HumanMessage, AIMessage
+from langchain_core.messages import BaseMessage, HumanMessage
 from langgraph.graph import StateGraph, END
 
 import logging

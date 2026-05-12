@@ -5,13 +5,11 @@ Uses real database queries via SQLAlchemy
 """
 
 from __future__ import annotations
-from typing import Dict, List, Optional, Any, Generator
+from typing import Optional
 import logging
 from datetime import datetime, timedelta
 from collections import defaultdict
-from decimal import Decimal
 
-from sqlalchemy import func, and_, or_
 from sqlalchemy.orm import Session, joinedload
 from sqlalchemy.exc import SQLAlchemyError
 
@@ -24,7 +22,7 @@ from .models import (
     DashboardSummary,
     DateRangeFilter
 )
-from app.models.documents import DocumentHeader, DocumentLine
+from app.models.documents import DocumentHeader
 
 logger = logging.getLogger(__name__)
 

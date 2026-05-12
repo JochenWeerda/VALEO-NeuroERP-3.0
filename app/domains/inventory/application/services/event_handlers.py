@@ -4,13 +4,10 @@ Event-driven workflows for automated inventory management
 """
 
 import logging
-from typing import List
 from sqlalchemy.orm import Session
 
-from ....core.database import get_db
 from ....core.event_publisher import get_event_publisher
 from ....infrastructure.models import Article as ArticleModel
-from ..domain.entities import Article
 from ...shared.events.inventory_events import (
     StockLevelChangedEvent,
     LowStockAlertEvent,
@@ -159,7 +156,6 @@ async def register_inventory_event_handlers():
     """Register all inventory event handlers."""
     # This would be called during application startup
     # For now, handlers are called directly from services
-    pass
 
 
 # Notification handlers for external integrations

@@ -14,7 +14,7 @@ from __future__ import annotations
 import json
 import logging
 from functools import wraps
-from typing import Any, Callable
+from typing import Callable
 
 logger = logging.getLogger(__name__)
 

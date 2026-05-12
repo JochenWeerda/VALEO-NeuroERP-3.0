@@ -8,8 +8,6 @@ Modelle für:
 - Bestellpositionen
 """
 
-from datetime import datetime
-from decimal import Decimal
 from app.core.uuid7 import uuid7
 
 from sqlalchemy import (

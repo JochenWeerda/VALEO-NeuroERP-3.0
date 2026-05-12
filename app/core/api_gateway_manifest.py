@@ -2,8 +2,6 @@ from __future__ import annotations
 from pydantic import BaseModel
 from enum import Enum
 from typing import Optional
-from datetime import datetime
-import uuid
 
 class ApiPartnerTyp(str, Enum):
     SUPPLIER = "supplier"

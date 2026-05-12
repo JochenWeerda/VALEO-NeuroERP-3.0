@@ -6,7 +6,7 @@ Delegation Reviews, Export Reviews und Governance Audit-Trail.
 from __future__ import annotations
 
 from enum import Enum
-from typing import Optional, Any
+from typing import Optional
 from datetime import datetime, timezone
 from pydantic import BaseModel, Field
 

@@ -11,7 +11,6 @@ from typing import Dict, Any, List, Optional
 from dataclasses import dataclass, field
 from enum import Enum
 import logging
-import json
 from app.core.uuid7 import uuid7
 
 logger = logging.getLogger(__name__)

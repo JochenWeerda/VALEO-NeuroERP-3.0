@@ -8,11 +8,10 @@ parallel via the ASGI app, and returns a combined JSON response.
 from __future__ import annotations
 
 import asyncio
-import io
 import logging
 from typing import Any
 
-from fastapi import APIRouter, Depends, HTTPException, Request
+from fastapi import APIRouter, Request
 from pydantic import BaseModel, Field, field_validator
 
 logger = logging.getLogger(__name__)

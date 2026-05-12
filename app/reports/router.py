@@ -6,7 +6,6 @@ Uses real database queries via SQLAlchemy
 
 from __future__ import annotations
 from fastapi import APIRouter, HTTPException, Query, Depends
-from fastapi.responses import JSONResponse
 from typing import Optional
 import logging
 

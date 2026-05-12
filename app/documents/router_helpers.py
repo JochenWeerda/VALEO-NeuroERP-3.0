@@ -5,7 +5,6 @@ Zentrale Funktionen für DB/In-Memory Fallback
 
 from typing import Dict, Optional
 from sqlalchemy.orm import Session
-from app.core.database import get_db
 from app.documents.repository import DocumentRepository
 import logging
 

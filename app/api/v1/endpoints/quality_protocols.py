@@ -17,7 +17,6 @@ from sqlalchemy.orm import Session
 from app.core.data_quality_enforcement import build_dq_error_detail, evaluate_quality_protocol_datensatz
 from app.core.database import get_db
 from app.core.tenant import get_tenant_id
-from app.domains.inventory.api.inventory_auth import require_inventory_admin
 from modules.agrar.services.quality_protocol_service import (
     create_quality_protocol,
     update_quality_protocol,

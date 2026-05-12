@@ -16,7 +16,6 @@ from sqlalchemy.orm import Session
 from app.core.data_quality_enforcement import build_dq_error_detail, evaluate_self_billing_datensatz
 from app.core.database import get_db
 from app.core.tenant import get_tenant_id
-from app.domains.inventory.api.inventory_auth import require_inventory_admin
 
 from modules.agrar.services.self_billing_service import (
     create_credit_note,

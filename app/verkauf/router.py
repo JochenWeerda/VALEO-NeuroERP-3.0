@@ -4,7 +4,7 @@ FastAPI Router für Verkauf
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session, selectinload
-from typing import List, Optional
+from typing import List
 from app.core.database import get_db
 from app.verkauf import models, schemas
 

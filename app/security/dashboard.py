@@ -11,8 +11,6 @@ from app.auth.deps_oidc import require_roles
 from app.core.database import get_db
 from typing import Dict, Any
 import os
-from pathlib import Path
-import json
 
 router = APIRouter(prefix="/security", tags=["security"])
 

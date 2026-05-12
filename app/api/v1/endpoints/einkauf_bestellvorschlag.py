@@ -57,7 +57,6 @@ from app.core.uuid7 import uuid7
 from app.infrastructure.models.einkauf_models import (
     ArtikelLagerParameter,
     EinkaufBestellvorschlag,
-    EinkaufBestellvorschlagPosition,
     EinkaufBestellung,
     EinkaufBestellungPosition,
     EinkaufKontrakt,

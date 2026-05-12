@@ -3,7 +3,7 @@ Inventory Operations — Bestandskorrektur, Schwund, MHD-Abschreibung
 Wave 1+2: Core inventory correction endpoints with automatic GL posting.
 """
 
-from datetime import date, datetime
+from datetime import date
 from decimal import Decimal
 from typing import Optional
 from uuid import uuid4

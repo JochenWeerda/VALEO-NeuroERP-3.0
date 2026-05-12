@@ -5,12 +5,11 @@ Scheduled worker for monitoring market prices and alerting on significant change
 
 import logging
 import asyncio
-from datetime import datetime, date, timedelta
+from datetime import date, timedelta
 from typing import Dict, Any, List
 
 from ..core.config import settings
 from app.core.database import get_db
-from sqlalchemy import text
 from app.infrastructure.models import DailyPrice, ArticlePriceThreshold
 
 logger = logging.getLogger(__name__)

@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from datetime import date, datetime, timezone
 from decimal import Decimal, ROUND_HALF_UP
-from typing import Any, Optional
+from typing import Optional
 from uuid import uuid4
 import calendar
 import json

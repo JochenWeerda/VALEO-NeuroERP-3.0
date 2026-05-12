@@ -1,8 +1,7 @@
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from enum import Enum
 from typing import Optional
 from datetime import datetime, timedelta
-import math
 
 
 class RetryStrategie(str, Enum):

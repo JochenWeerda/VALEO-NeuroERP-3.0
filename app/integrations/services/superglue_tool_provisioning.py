@@ -9,7 +9,6 @@ from app.integrations.adapters.superglue.client import SuperglueClient
 from app.integrations.adapters.superglue.tool_sync import refresh_superglue_sync_snapshot
 from app.integrations.services.superglue_connector_registry import (
     SuperglueConnectorBinding,
-    build_superglue_connector_binding,
     list_superglue_connector_bindings,
 )
 

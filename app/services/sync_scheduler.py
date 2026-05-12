@@ -3,10 +3,9 @@ Advanced Sync Scheduler Service
 Handles scheduled synchronization with timers, article group separation, and monitoring
 """
 
-import asyncio
 import logging
 from datetime import datetime, timedelta, time
-from typing import Dict, List, Optional, Callable
+from typing import Dict, List, Optional
 from dataclasses import dataclass
 import json
 from pathlib import Path

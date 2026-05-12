@@ -5,7 +5,7 @@ VAT Information Exchange System validation for EU VAT numbers
 
 import logging
 import httpx
-from typing import Dict, Any, Optional
+from typing import Optional
 from dataclasses import dataclass
 
 logger = logging.getLogger(__name__)

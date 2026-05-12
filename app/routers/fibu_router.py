@@ -2,11 +2,11 @@
 Finanzbuchhaltung Router
 Endpoints für Debitoren, Kreditoren, Buchungsjournal, Bilanz, GuV, BWA, etc.
 """
-from datetime import date, datetime
+from datetime import date
 from decimal import Decimal
 from typing import List, Optional
 from fastapi import APIRouter, HTTPException, Query
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 from app.core.dependency_container import container
 from app.finance.repositories import OffenerPostenRepository, BuchungRepository, KontoRepository, AnlageRepository
 

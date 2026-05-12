@@ -8,7 +8,6 @@ from typing import Optional
 import httpx
 from fastapi import APIRouter, HTTPException, Query, status
 
-from ....core.config import settings
 from ....integrations.crm_core_client import (
     create_opportunity as crm_create_opportunity,
     delete_opportunity as crm_delete_opportunity,

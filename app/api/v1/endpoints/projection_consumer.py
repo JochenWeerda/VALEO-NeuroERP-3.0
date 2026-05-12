@@ -6,7 +6,6 @@ Endpoints fuer die Verwaltung von Read-Model-Consumers und Rebuild-Anforderungen
 
 from __future__ import annotations
 
-from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
@@ -14,7 +13,6 @@ from starlette.responses import JSONResponse
 
 from app.core.tenant import get_tenant_id
 from app.core.projection_consumer import (
-    ProjectionConsumer,
     ProjectionRegistry,
     RebuildRequest,
     build_default_projection_registry,

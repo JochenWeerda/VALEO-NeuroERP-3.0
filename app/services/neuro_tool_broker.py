@@ -22,7 +22,7 @@ from sqlalchemy.orm import Session
 
 from app.agents.neuro_planner import ExecutionPlan, PlanStep, StepType
 from app.core.action_execution import ActionExecutionRequest, ActionExecutionService
-from app.core.mcp_tool_contracts import MCPToolContract, MCPToolKategorie, get_process_kernel_mcp_tools
+from app.core.mcp_tool_contracts import MCPToolKategorie, get_process_kernel_mcp_tools
 from app.core.neuro_state_graph import StateGraphService, StateNode, StateNodeType, StatePhase
 from app.integrations.services.superglue_capability_service import SuperglueCapabilityService
 from app.services.neuro_tool_execution import NeuroToolExecutionService

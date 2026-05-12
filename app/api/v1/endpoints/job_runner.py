@@ -15,8 +15,6 @@ from sqlalchemy.orm import Session
 from app.core.database import get_db
 from app.core.background_jobs import (
     JobQueue,
-    JobStatus,
-    JobTyp,
     evaluate_job_routing,
     get_default_job_types,
 )

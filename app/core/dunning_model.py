@@ -6,7 +6,7 @@ Baut auf finance_followup.py-Contracts (Wave 4 AP5) auf.
 """
 from __future__ import annotations
 
-from datetime import date, timedelta
+from datetime import date
 from enum import Enum
 from typing import Optional
 

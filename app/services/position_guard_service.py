@@ -14,7 +14,7 @@ from sqlalchemy.orm import Session
 
 from app.core.uuid7 import uuid7
 from app.domains.operations.models import PosPositionOverride, PosPositionRule
-from app.services.position_service import PositionCalculationService, SEVERITY_RED
+from app.services.position_service import PositionCalculationService
 
 
 @dataclass

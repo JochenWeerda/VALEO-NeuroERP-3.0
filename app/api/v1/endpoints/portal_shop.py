@@ -8,8 +8,8 @@ für das Kundenportal bereit.
 import logging
 from datetime import datetime, timedelta
 from decimal import Decimal
-from typing import List, Optional
-from app.core.uuid7 import uuid7, uuid7_short_suffix
+from typing import Optional
+from app.core.uuid7 import uuid7_short_suffix
 
 logger = logging.getLogger(__name__)
 
@@ -33,8 +33,7 @@ from app.api.v1.schemas.portal import (
     PortalProduct, PortalProductList, LastOrderInfo,
     ContractStatus, OrderStatus, PriceSource,
     OrderCreate, OrderResponse, OrderItemResponse,
-    OrderList, OrderListItem, CartSummary, CartItem,
-    InquiryCreate, InquiryResponse
+    OrderList, OrderListItem
 )
 
 router = APIRouter()
@@ -771,7 +770,6 @@ async def reconcile_orders(
     - CONFIRMED seit > stale_hours ohne Bearbeitung
     - Orders ohne Positionen
     """
-    from sqlalchemy import func
 
     cutoff = datetime.utcnow() - timedelta(hours=stale_hours)
 

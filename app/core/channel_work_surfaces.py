@@ -10,7 +10,7 @@ from sqlalchemy.orm import Session
 
 from app.core.knowledge_core_contracts import KnowledgeChannel
 from app.core.knowledge_runtime import build_runtime_context_pack, retrieve_runtime_knowledge
-from app.core.knowledge_core_contracts import KnowledgeObjectTyp, KnowledgeRetrievalRequest, KnowledgeStatus
+from app.core.knowledge_core_contracts import KnowledgeRetrievalRequest, KnowledgeStatus
 
 
 @dataclass

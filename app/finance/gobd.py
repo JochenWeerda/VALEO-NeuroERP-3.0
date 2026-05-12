@@ -5,7 +5,7 @@ Revisionssichere Buchhaltung, Audit-Logging, Hash-Chain, Systemintegrität
 
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import Response as FastAPIResponse
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 from typing import List, Optional, Dict, Any
 from datetime import datetime, date, timedelta
 from enum import Enum

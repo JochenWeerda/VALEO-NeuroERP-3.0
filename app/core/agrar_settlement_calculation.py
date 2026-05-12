@@ -5,10 +5,7 @@ from decimal import Decimal
 from fastapi import HTTPException
 
 from modules.agrar.services.settlement_calculator import (
-    calc_deduction_amount,
     compute_settlement_amounts as _compute_settlement_amounts,
-    round_money,
-    round_qty,
 )
 
 

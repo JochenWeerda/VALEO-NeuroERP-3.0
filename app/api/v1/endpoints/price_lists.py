@@ -5,7 +5,6 @@ SALES-PRC-01: Preislisten und Preisfindung
 
 from __future__ import annotations
 
-import json
 import logging
 from datetime import date, datetime
 from decimal import Decimal

@@ -5,11 +5,9 @@ Dokumente API - Dokumentenverwaltung (SQLAlchemy Version)
 from typing import Optional
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
-from sqlalchemy import func
 
 from app.core.database import get_db
 from app.domains.operations.repository import DokumentRepository, DokumentVersionRepository
-from app.domains.operations.models import Dokument, DokumentStatus
 
 router = APIRouter(prefix="/dokumente", tags=["Dokumente"])
 

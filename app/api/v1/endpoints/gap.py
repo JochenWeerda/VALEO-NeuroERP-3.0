@@ -3,8 +3,6 @@ GAP Pipeline API Endpoints
 Endpoints für die Ausführung der GAP-ETL-Pipeline über das Frontend
 """
 
-import asyncio
-import subprocess
 from pathlib import Path
 from typing import Optional, Dict, Any, List
 import shutil
@@ -520,7 +518,6 @@ async def check_csv_file():
     📁 Checkt ob CSV-Datei existiert und lesbar ist
     """
     try:
-        import os
         from pathlib import Path
         
         # Suche nach CSV-Dateien
@@ -930,7 +927,6 @@ async def check_farmers_available():
         }
         
     except Exception as e:
-        import traceback
         return {
             "success": False,
             "farmers_available": False,
@@ -1583,7 +1579,6 @@ async def analyze_csv_structure():
     try:
         import os
         import csv
-        from pathlib import Path
         
         # Mögliche CSV-Pfade
         csv_paths = [
@@ -1934,7 +1929,6 @@ async def debug_plz_data(db: Session = Depends(get_db)):
         try:
             import os
             import csv
-            from pathlib import Path
             
             csv_paths = [
                 "data/gap/impdata2024.csv",
