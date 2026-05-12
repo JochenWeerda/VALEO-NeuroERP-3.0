@@ -5,6 +5,7 @@ Database entities following domain-driven design
 
 from sqlalchemy import Column, String, Integer, Float, Boolean, DateTime, Date, Time, Text, ForeignKey, DECIMAL, UniqueConstraint
 from sqlalchemy.dialects.postgresql import UUID as PGUUID
+from sqlalchemy.orm import relationship
 from sqlalchemy.dialects import postgresql
 from sqlalchemy.sql import func
 
@@ -1216,9 +1217,87 @@ class AuditLog(Base):
 
 
 # Import Agrar models
+from .agrar_models import (
+    Saatgut,
+    SaatgutLizenz,
+    Duenger,
+    DuengerMischung,
+    PSM,
+    Sachkunde,
+    Biostimulanz
+)
 
 # Import L3-Connect gap closure models
+from .l3c_models import (
+    InventoryCountLine,
+    WeighingTicket,
+    WeighingTicketLine,
+    WeighingMeasurement,
+    LkwAnnahmeQueue,
+    ContractAmendment,
+    AmendmentTemplate,
+    AgrarContract,
+    AgrarContractAllocation,
+    AgrarSettlement,
+    AgrarSettlementDeduction,
+    DryingRuleSet,
+    DryingRuleLookupRow,
+    DryingRuleFactorRange,
+    HarvestAcceptance,
+    HarvestAcceptancePosition,
+    HarvestAcceptanceLine,
+    SupplierTaxProfile,
+    PriceAdjustmentRule,
+    QualityProtocol,
+    DailyPrice,
+    ArticlePriceThreshold,
+    SelfBillingInvoice,
+    DisputeRecord,
+    NawaroPrintNotification,
+    NawaroContractSheet,
+    NawaroContractSheetRow,
+    NawaroAreaSheet,
+    NawaroAreaSheetRow,
+    NawaroRapsProfile,
+    NawaroRapsCertificate,
+    NawaroRapsBalance,
+    Silo,
+    SiloLot,
+    SiloLotMovement,
+    SiloQualitySnapshot,
+    WarehouseTransfer,
+    WarehouseTransferLine,
+    StockCorrection,
+    StockCorrectionLine,
+    BinLocation,
+    PreparationList,
+    PreparationListLine,
+    PickList,
+    PickListLine,
+    ShippingUnit,
+    WebhookRegistration,
+    ArticleBatch,
+    InternalMessage,
+    MasterDataEntry,
+    SystemProperty,
+    Dispatcher,
+    ArticleSelection,
+)
 
 # Futtermittel (Feed) domain
+from .futtermittel_models import (
+    Einzelfuttermittel,
+    Mischfuttermittel,
+    FuttermittelRezept,
+    RezeptKomponente,
+    ProduktionsAuftrag,
+    AgrarSorte,
+)
 
 # Neuro State Graph + Confidence Ledger
+from .neuro_state_models import (
+    StateNodeRecord,
+    StateEdgeRecord,
+    StateTransitionRecord,
+    ConfidenceLedgerRecord,
+)
