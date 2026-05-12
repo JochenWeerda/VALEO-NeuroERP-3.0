@@ -15,6 +15,9 @@ class FinanzBankkonto {
     get id() {
         return this.props.id;
     }
+    get tenantId() {
+        return this.props.tenant_id;
+    }
     get kontoname() {
         return this.props.kontoname;
     }

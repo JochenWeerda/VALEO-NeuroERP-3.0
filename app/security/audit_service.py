@@ -6,7 +6,7 @@ Dieses Modul implementiert das Audit Logging System gemäß ISO 27001 Annex A.12
 für VALEO-NeuroERP mit tamper-proof Hash-Chains.
 """
 
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import Dict, Any, List, Optional
 from dataclasses import dataclass
 import hashlib

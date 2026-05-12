@@ -4,7 +4,7 @@
  */
 import { FinanzKonto, FinanzKontoProps } from '../../core/entities/finanzKonto.entity';
 import { FinanzKontoPostgresRepository } from '../../infrastructure/repositories/finanzKonto-postgres.repository';
-import { clampLimit, clampOffset, ListResult } from '../../presentation/types/api-pagination';
+import { ListResult, clampLimit, clampOffset } from '../../presentation/types/api-pagination';
 
 const TAX_RATE_MIN = 0;
 const TAX_RATE_MAX = 100;

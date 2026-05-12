@@ -4,6 +4,7 @@
  */
 export interface FinanzKreditorProps {
     id?: string;
+    tenant_id: string;
     lieferanten_id?: string;
     kreditor_nr: string;
     zahlungsziel?: number;
@@ -22,6 +23,7 @@ export declare class FinanzKreditor {
     private constructor();
     static create(props: FinanzKreditorProps): FinanzKreditor;
     get id(): string | undefined;
+    get tenantId(): string;
     get lieferantenId(): string | undefined;
     get kreditorNr(): string;
     get zahlungsziel(): number | undefined;

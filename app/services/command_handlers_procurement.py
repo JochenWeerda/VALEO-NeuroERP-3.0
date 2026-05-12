@@ -40,6 +40,7 @@ def _create_purchase_order_mutation(
         logger.warning("CreatePurchaseOrder: ungueltige lieferant_id: %s", lid)
         return
 
+    tenant_id = request.tenant_id
     if payload.get("bestellnummer") or payload.get("order_number"):
         bn = str(
             payload.get("bestellnummer") or payload.get("order_number")
@@ -55,8 +56,6 @@ def _create_purchase_order_mutation(
         )[:80]
     if not bn:
         bn = f"AE-{request.idempotency_key}"[:40]
-
-    tenant_id = request.tenant_id
     check = db.execute(
         text(
             "SELECT id FROM einkauf_bestellungen "

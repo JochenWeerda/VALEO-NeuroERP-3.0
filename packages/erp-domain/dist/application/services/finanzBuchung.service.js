@@ -7,6 +7,7 @@ exports.FinanzBuchungService = void 0;
  */
 const crypto_1 = require("crypto");
 const finanzBuchung_entity_1 = require("../../core/entities/finanzBuchung.entity");
+const api_pagination_1 = require("../../presentation/types/api-pagination");
 const RANDOM_SUFFIX_LENGTH = 6;
 function toDate(value) {
     if (value instanceof Date) {
@@ -18,8 +19,17 @@ function toDate(value) {
     }
     return parsed;
 }
-function normalizeBuchung(dto, existing) {
-    if (!dto.buchungstext?.trim()) {
+function tenantFrom(existing, tenantForCreate) {
+    const t = existing?.tenant_id ?? tenantForCreate?.trim();
+    if (!t) {
+        throw new Error('tenant_id is required');
+    }
+    return t;
+}
+function normalizeBuchung(dto, existing, tenantForCreate) {
+    const rawText = dto.buchungstext ?? existing?.buchungstext;
+    const textTrim = rawText?.trim();
+    if (textTrim === undefined || textTrim.length === 0) {
         throw new Error('buchungstext is required');
     }
     if (dto.betrag === undefined || dto.betrag === null) {
@@ -33,11 +43,12 @@ function normalizeBuchung(dto, existing) {
     }
     const payload = {
         ...existing,
+        tenant_id: tenantFrom(existing, tenantForCreate),
         buchungsnummer: dto.buchungsnummer?.trim() ?? existing?.buchungsnummer ?? '',
         buchungsdatum: toDate(dto.buchungsdatum ?? existing?.buchungsdatum ?? new Date()),
         belegdatum: toDate(dto.belegdatum ?? existing?.belegdatum ?? new Date()),
         belegnummer: dto.belegnummer?.trim() ?? existing?.belegnummer,
-        buchungstext: dto.buchungstext.trim(),
+        buchungstext: textTrim,
         sollkonto: dto.sollkonto ?? existing?.sollkonto,
         habenkonto: dto.habenkonto ?? existing?.habenkonto,
         betrag: Number(dto.betrag),
@@ -54,7 +65,7 @@ function normalizeBuchung(dto, existing) {
         erstellt_am: existing?.erstellt_am,
         aktualisiert_am: existing?.aktualisiert_am,
     };
-    if (payload.buchungsnummer === undefined || payload.buchungsnummer === null) {
+    if (payload.buchungsnummer === undefined || payload.buchungsnummer === null || payload.buchungsnummer.length === 0) {
         payload.buchungsnummer = `BCH-${Date.now()}-${(0, crypto_1.randomUUID)().slice(0, RANDOM_SUFFIX_LENGTH)}`;
     }
     return payload;
@@ -63,24 +74,36 @@ class FinanzBuchungService {
     constructor(repository) {
         this.repository = repository;
     }
-    async list() {
-        return this.repository.list();
+    async list(tenantId) {
+        return this.repository.list(tenantId);
     }
-    async findById(id) {
-        return this.repository.findById(id);
+    async listPaged(tenantId, options) {
+        const limit = (0, api_pagination_1.clampLimit)(options?.limit);
+        const offset = (0, api_pagination_1.clampOffset)(options?.offset);
+        const items = await this.repository.listPaged(tenantId, limit, offset);
+        const total = await this.repository.count(tenantId);
+        return { items, total };
     }
-    async create(payload) {
-        const normalized = normalizeBuchung(payload);
-        const entity = finanzBuchung_entity_1.FinanzBuchung.create(normalized);
+    async findById(id, tenantId) {
+        return this.repository.findById(id, tenantId);
+    }
+    async create(tenantId, payload) {
+        const normalized = normalizeBuchung(payload, undefined, tenantId);
+        const dup = await this.repository.findByBuchungsnummer(tenantId, normalized.buchungsnummer);
+        if (dup !== undefined && dup !== null) {
+            throw new Error(`Buchung mit Nummer ${normalized.buchungsnummer} existiert bereits`);
+        }
+        const id = normalized.id ?? (0, crypto_1.randomUUID)();
+        const entity = finanzBuchung_entity_1.FinanzBuchung.create({ ...normalized, id });
         await this.repository.save(entity);
         return entity;
     }
-    async update(id, payload) {
-        const existing = await this.repository.findById(id);
-        if (existing === undefined || existing === null) {
+    async update(id, tenantId, payload) {
+        const existingRow = await this.repository.findById(id, tenantId);
+        if (existingRow === undefined || existingRow === null) {
             throw new Error('FinanzBuchung not found');
         }
-        const existingProps = existing.toPrimitives();
+        const existingProps = existingRow.toPrimitives();
         const normalized = normalizeBuchung({
             buchungsnummer: payload.buchungsnummer ?? existingProps.buchungsnummer,
             buchungsdatum: payload.buchungsdatum ?? existingProps.buchungsdatum,
@@ -100,12 +123,16 @@ class FinanzBuchungService {
             storno_buchung_id: payload.storno_buchung_id ?? existingProps.storno_buchung_id,
             erstellt_von: existingProps.erstellt_von,
         }, existingProps);
+        const dup = await this.repository.findByBuchungsnummer(tenantId, normalized.buchungsnummer);
+        if ((dup !== undefined && dup !== null) && dup.toPrimitives().id !== id) {
+            throw new Error(`Another Buchung already uses buchungsnummer ${normalized.buchungsnummer}`);
+        }
         const entity = finanzBuchung_entity_1.FinanzBuchung.create({ ...normalized, id });
         await this.repository.update(entity);
         return entity;
     }
-    async remove(id) {
-        await this.repository.delete(id);
+    async remove(id, tenantId) {
+        await this.repository.delete(id, tenantId);
     }
 }
 exports.FinanzBuchungService = FinanzBuchungService;

@@ -235,22 +235,6 @@ class _DbDryingRuleRepo(_DryingRuleRepository):
         return self._row_to_rule_set(row)
 
     def _row_to_rule_set(self, row) -> _DryingRuleSet:
-
-        row = None
-        if site_id is not None:
-            row = (
-                _base_q()
-                .filter(DryingRuleSet.site_id == site_id)
-                .order_by(DryingRuleSet.valid_from.desc().nullslast(), DryingRuleSet.version.desc())
-                .first()
-            )
-        if row is None:
-            row = (
-                _base_q()
-                .filter(DryingRuleSet.site_id.is_(None))
-                .order_by(DryingRuleSet.valid_from.desc().nullslast(), DryingRuleSet.version.desc())
-                .first()
-            )
         return _DryingRuleSet(
             id=row.id,
             version=int(row.version),

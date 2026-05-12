@@ -1,5 +1,6 @@
 import { FinanzBankkonto } from '../../core/entities/finanzBankkonto.entity';
 import { FinanzBankkontoPostgresRepository } from '../../infrastructure/repositories/finanzBankkonto-postgres.repository';
+import { ListResult } from '../../presentation/types/api-pagination';
 export interface CreateFinanzBankkontoDto {
     kontoname: string;
     bankname: string;
@@ -18,10 +19,14 @@ export type UpdateFinanzBankkontoDto = Partial<CreateFinanzBankkontoDto>;
 export declare class FinanzBankkontoService {
     private readonly repository;
     constructor(repository: FinanzBankkontoPostgresRepository);
-    list(): Promise<FinanzBankkonto[]>;
-    findById(id: string): Promise<FinanzBankkonto | null>;
-    create(payload: CreateFinanzBankkontoDto): Promise<FinanzBankkonto>;
-    update(id: string, payload: UpdateFinanzBankkontoDto): Promise<FinanzBankkonto>;
-    remove(id: string): Promise<void>;
+    list(tenantId: string): Promise<FinanzBankkonto[]>;
+    listPaged(tenantId: string, options?: {
+        limit?: number;
+        offset?: number;
+    }): Promise<ListResult<FinanzBankkonto>>;
+    findById(id: string, tenantId: string): Promise<FinanzBankkonto | null>;
+    create(tenantId: string, payload: CreateFinanzBankkontoDto): Promise<FinanzBankkonto>;
+    update(id: string, tenantId: string, payload: UpdateFinanzBankkontoDto): Promise<FinanzBankkonto>;
+    remove(id: string, tenantId: string): Promise<void>;
 }
 //# sourceMappingURL=finanzBankkonto.service.d.ts.map

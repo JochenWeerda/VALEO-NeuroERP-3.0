@@ -1,11 +1,12 @@
 "use strict";
 /**
  * Express router for FinanzKonto generated via CRM toolkit.
- * Provides baseline CRUD endpoints; extend with domain-specific routes.
  */
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.buildFinanzKontoRouter = buildFinanzKontoRouter;
 const express_1 = require("express");
+const finanz_http_1 = require("../utils/finanz-http");
+const request_context_1 = require("../utils/request-context");
 const HTTP_STATUS = {
     BAD_REQUEST: 400,
     NOT_FOUND: 404,
@@ -14,44 +15,75 @@ const HTTP_STATUS = {
 };
 function buildFinanzKontoRouter({ service, baseRoute = '/finanzKonto' }) {
     const router = (0, express_1.Router)();
-    router.get(baseRoute, async (_req, res) => {
-        const result = await service.list();
-        res.json(result);
+    router.get(baseRoute, async (req, res) => {
+        try {
+            const tenantId = (0, request_context_1.resolveTenantId)(req);
+            const { limit, offset } = (0, finanz_http_1.parseFinanzListQuery)(req);
+            const { items, total } = await service.listPaged(tenantId, { limit, offset });
+            (0, finanz_http_1.jsonFinanzList)(res, items, total, limit, offset);
+        }
+        catch (error) {
+            (0, request_context_1.respondControllerError)(res, error, 500);
+        }
     });
     router.get(`${baseRoute}/:finanzKontoId`, async (req, res) => {
-        const id = req.params.finanzKontoId;
-        if (id === null || id === undefined || id.trim().length === 0) {
-            res.status(HTTP_STATUS.BAD_REQUEST).json({ message: 'finanzKontoId parameter is required' });
-            return;
+        try {
+            const tenantId = (0, request_context_1.resolveTenantId)(req);
+            const id = req.params.finanzKontoId;
+            if (id === null || id === undefined || id.trim().length === 0) {
+                (0, finanz_http_1.jsonFinanzError)(res, HTTP_STATUS.BAD_REQUEST, 'finanzKontoId parameter is required');
+                return;
+            }
+            const entity = await service.findById(id, tenantId);
+            if (entity === undefined || entity === null) {
+                (0, finanz_http_1.jsonFinanzError)(res, HTTP_STATUS.NOT_FOUND, 'FinanzKonto not found');
+                return;
+            }
+            (0, finanz_http_1.jsonFinanzData)(res, entity);
         }
-        const entity = await service.findById(id);
-        if (entity === undefined || entity === null) {
-            res.status(HTTP_STATUS.NOT_FOUND).json({ message: 'FinanzKonto not found' });
-            return;
+        catch (error) {
+            (0, request_context_1.respondControllerError)(res, error, 500);
         }
-        res.json(entity);
     });
     router.post(baseRoute, async (req, res) => {
-        const created = await service.create(req.body);
-        res.status(HTTP_STATUS.CREATED).json(created);
+        try {
+            const tenantId = (0, request_context_1.resolveTenantId)(req);
+            const created = await service.create(tenantId, req.body);
+            (0, finanz_http_1.jsonFinanzData)(res, created, HTTP_STATUS.CREATED);
+        }
+        catch (error) {
+            (0, request_context_1.respondControllerError)(res, error, 400);
+        }
     });
     router.put(`${baseRoute}/:finanzKontoId`, async (req, res) => {
         const id = req.params.finanzKontoId;
         if (id === null || id === undefined || id.trim().length === 0) {
-            res.status(HTTP_STATUS.BAD_REQUEST).json({ message: 'finanzKontoId parameter is required' });
+            (0, finanz_http_1.jsonFinanzError)(res, HTTP_STATUS.BAD_REQUEST, 'finanzKontoId parameter is required');
             return;
         }
-        const updated = await service.update(id, req.body);
-        res.json(updated);
+        try {
+            const tenantId = (0, request_context_1.resolveTenantId)(req);
+            const updated = await service.update(id, tenantId, req.body);
+            (0, finanz_http_1.jsonFinanzData)(res, updated);
+        }
+        catch (error) {
+            (0, request_context_1.respondControllerError)(res, error, 400);
+        }
     });
     router.delete(`${baseRoute}/:finanzKontoId`, async (req, res) => {
         const id = req.params.finanzKontoId;
         if (id === null || id === undefined || id.trim().length === 0) {
-            res.status(HTTP_STATUS.BAD_REQUEST).json({ message: 'finanzKontoId parameter is required' });
+            (0, finanz_http_1.jsonFinanzError)(res, HTTP_STATUS.BAD_REQUEST, 'finanzKontoId parameter is required');
             return;
         }
-        await service.remove(id);
-        res.status(HTTP_STATUS.NO_CONTENT).send();
+        try {
+            const tenantId = (0, request_context_1.resolveTenantId)(req);
+            await service.remove(id, tenantId);
+            res.status(HTTP_STATUS.NO_CONTENT).send();
+        }
+        catch (error) {
+            (0, request_context_1.respondControllerError)(res, error, 400);
+        }
     });
     return router;
 }

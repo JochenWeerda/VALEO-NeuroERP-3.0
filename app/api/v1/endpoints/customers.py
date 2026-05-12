@@ -430,7 +430,7 @@ async def list_customers(
                                 postal_code = address_data.get('postal_code')
                                 country = address_data.get('country')
                                 address_str = address_data.get('street') or row.address
-                            except:
+                            except Exception:
                                 address_str = row.address
                     
                     # Parse payment_terms (can be string or int)
@@ -438,7 +438,7 @@ async def list_customers(
                     if row.payment_terms:
                         try:
                             payment_terms_val = int(row.payment_terms) if str(row.payment_terms).isdigit() else 30
-                        except:
+                        except Exception:
                             payment_terms_val = 30
                     
                     customer_dict = {

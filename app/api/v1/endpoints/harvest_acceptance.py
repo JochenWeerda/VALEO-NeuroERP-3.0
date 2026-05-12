@@ -904,7 +904,7 @@ async def get_harvest_acceptance(
             if protocol:
                 acceptance.quality_protocol_id = protocol.id
                 db.commit()
-        except:
+        except Exception:
             pass  # Kein Protokoll vorhanden, kein Fehler
     
     result = _harvest_acceptance_to_dict_with_positions(acceptance, db)

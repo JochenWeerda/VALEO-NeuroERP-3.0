@@ -5,6 +5,7 @@ const finanzKreditor_entity_1 = require("../../core/entities/finanzKreditor.enti
 const TABLE = 'finanz.kreditoren';
 const COLUMNS = [
     'id',
+    'tenant_id',
     'lieferanten_id',
     'kreditor_nr',
     'kreditlimit',
@@ -47,6 +48,7 @@ class FinanzKreditorPostgresRepository {
     mapRow(row) {
         const props = {
             id: row.id,
+            tenant_id: String(row.tenant_id),
             lieferanten_id: (row.lieferanten_id !== undefined && row.lieferanten_id !== null) ? String(row.lieferanten_id) : undefined,
             kreditor_nr: String(row.kreditor_nr),
             zahlungsziel: toNumber(row.zahlungsziel),
@@ -61,28 +63,38 @@ class FinanzKreditorPostgresRepository {
         };
         return finanzKreditor_entity_1.FinanzKreditor.create(props);
     }
-    async findById(id) {
-        const result = await this.pool.query(`SELECT ${COLUMNS.join(', ')} FROM ${TABLE} WHERE id = $1 LIMIT 1`, [id]);
+    async findById(id, tenantId) {
+        const result = await this.pool.query(`SELECT ${COLUMNS.join(', ')} FROM ${TABLE} WHERE id = $1 AND tenant_id = $2 LIMIT 1`, [id, tenantId]);
         if (result.rowCount === 0) {
             return null;
         }
         return this.mapRow(result.rows[0]);
     }
-    async findByKreditorNr(kreditorNr) {
-        const result = await this.pool.query(`SELECT ${COLUMNS.join(', ')} FROM ${TABLE} WHERE kreditor_nr = $1 LIMIT 1`, [kreditorNr]);
+    async findByKreditorNr(tenantId, kreditorNr) {
+        const result = await this.pool.query(`SELECT ${COLUMNS.join(', ')} FROM ${TABLE} WHERE tenant_id = $1 AND kreditor_nr = $2 LIMIT 1`, [tenantId, kreditorNr]);
         if (result.rowCount === 0) {
             return null;
         }
         return this.mapRow(result.rows[0]);
     }
-    async list() {
-        const result = await this.pool.query(`SELECT ${COLUMNS.join(', ')} FROM ${TABLE} ORDER BY kreditor_nr ASC`);
+    async count(tenantId) {
+        const result = await this.pool.query(`SELECT COUNT(*)::int AS c FROM ${TABLE} WHERE tenant_id = $1`, [tenantId]);
+        const c = result.rows[0]?.c;
+        return typeof c === 'number' ? c : parseInt(String(c), 10);
+    }
+    async listPaged(tenantId, limit, offset) {
+        const result = await this.pool.query(`SELECT ${COLUMNS.join(', ')} FROM ${TABLE} WHERE tenant_id = $1 ORDER BY kreditor_nr ASC LIMIT $2 OFFSET $3`, [tenantId, limit, offset]);
+        return result.rows.map((row) => this.mapRow(row));
+    }
+    async list(tenantId) {
+        const result = await this.pool.query(`SELECT ${COLUMNS.join(', ')} FROM ${TABLE} WHERE tenant_id = $1 ORDER BY kreditor_nr ASC`, [tenantId]);
         return result.rows.map((row) => this.mapRow(row));
     }
     async save(entity) {
         const primitives = entity.toPrimitives();
         const result = await this.pool.query(`INSERT INTO ${TABLE} (
         id,
+        tenant_id,
         lieferanten_id,
         kreditor_nr,
         kreditlimit,
@@ -102,13 +114,16 @@ class FinanzKreditorPostgresRepository {
         $6,
         $7,
         $8,
-        COALESCE($9, true),
-        $10,
-        $11
+        $9,
+        COALESCE($10, true),
+        $11,
+        $12
       ) RETURNING ${COLUMNS.join(', ')}`, [
             primitives.id ?? null,
+            primitives.tenant_id,
             primitives.lieferanten_id ?? null,
             primitives.kreditor_nr,
+            null,
             primitives.zahlungsziel ?? null,
             primitives.zahlungsart ?? null,
             primitives.bankverbindung ?? null,
@@ -135,26 +150,28 @@ class FinanzKreditorPostgresRepository {
               ist_aktiv = COALESCE($9, ist_aktiv),
               notizen = $10,
               aktualisiert_am = CURRENT_TIMESTAMP
-        WHERE id = $1
+        WHERE id = $1 AND tenant_id = $11
         RETURNING ${COLUMNS.join(', ')}
       `, [
             primitives.id,
             primitives.lieferanten_id ?? null,
             primitives.kreditor_nr,
+            null,
             primitives.zahlungsziel ?? null,
             primitives.zahlungsart ?? null,
             primitives.bankverbindung ?? null,
             primitives.steuernummer ?? null,
             primitives.ist_aktiv ?? null,
             primitives.notizen ?? null,
+            primitives.tenant_id,
         ]);
         if (result.rowCount === 0) {
             throw new Error(`FinanzKreditor with id ${primitives.id} not found`);
         }
         return this.mapRow(result.rows[0]);
     }
-    async delete(id) {
-        await this.pool.query(`DELETE FROM ${TABLE} WHERE id = $1`, [id]);
+    async delete(id, tenantId) {
+        await this.pool.query(`DELETE FROM ${TABLE} WHERE id = $1 AND tenant_id = $2`, [id, tenantId]);
     }
 }
 exports.FinanzKreditorPostgresRepository = FinanzKreditorPostgresRepository;

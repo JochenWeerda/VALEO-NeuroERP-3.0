@@ -1,6 +1,6 @@
 import { FinanzDebitor, FinanzDebitorProps } from '../../core/entities/finanzDebitor.entity';
 import { FinanzDebitorPostgresRepository } from '../../infrastructure/repositories/finanzDebitor-postgres.repository';
-import { clampLimit, clampOffset, ListResult } from '../../presentation/types/api-pagination';
+import { ListResult, clampLimit, clampOffset } from '../../presentation/types/api-pagination';
 
 const DEFAULT_PAYMENT_TARGET_DAYS = 30;
 

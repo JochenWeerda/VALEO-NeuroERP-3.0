@@ -4,6 +4,7 @@
  */
 export interface FinanzKontoProps {
     id?: string;
+    tenant_id: string;
     kontonummer: string;
     kontobezeichnung: string;
     kontotyp: string;
@@ -22,6 +23,7 @@ export declare class FinanzKonto {
     private constructor();
     static create(props: FinanzKontoProps): FinanzKonto;
     get id(): string | undefined;
+    get tenantId(): string;
     get kontonummer(): string;
     get kontobezeichnung(): string;
     get kontotyp(): string;

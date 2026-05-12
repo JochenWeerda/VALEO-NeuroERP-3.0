@@ -1,6 +1,6 @@
 import { FinanzKreditor, FinanzKreditorProps } from '../../core/entities/finanzKreditor.entity';
 import { FinanzKreditorPostgresRepository } from '../../infrastructure/repositories/finanzKreditor-postgres.repository';
-import { clampLimit, clampOffset, ListResult } from '../../presentation/types/api-pagination';
+import { ListResult, clampLimit, clampOffset } from '../../presentation/types/api-pagination';
 
 const DEFAULT_PAYMENT_TARGET_DAYS = 30;
 

@@ -5,7 +5,7 @@
 import { randomUUID } from 'crypto';
 import { FinanzBuchung, FinanzBuchungProps } from '../../core/entities/finanzBuchung.entity';
 import { FinanzBuchungPostgresRepository } from '../../infrastructure/repositories/finanzBuchung-postgres.repository';
-import { clampLimit, clampOffset, ListResult } from '../../presentation/types/api-pagination';
+import { ListResult, clampLimit, clampOffset } from '../../presentation/types/api-pagination';
 
 const RANDOM_SUFFIX_LENGTH = 6;
 

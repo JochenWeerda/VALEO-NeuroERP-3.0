@@ -4,6 +4,7 @@
  */
 export interface FinanzBankkontoProps {
     id?: string;
+    tenant_id: string;
     kontoname: string;
     bankname: string;
     iban?: string;
@@ -24,6 +25,7 @@ export declare class FinanzBankkonto {
     private constructor();
     static create(props: FinanzBankkontoProps): FinanzBankkonto;
     get id(): string | undefined;
+    get tenantId(): string;
     get kontoname(): string;
     get bankname(): string;
     get iban(): string | undefined;

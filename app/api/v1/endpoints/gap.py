@@ -1276,7 +1276,7 @@ def _execute_gap_pipeline_optimized(year: int, csv_path: Optional[str] = None, b
                 progress = PipelineProgress(batch_id, year)
                 error_msg = f"Optimierte Pipeline-Fehler: {str(e)}"
                 progress.error(error_msg)
-        except:
+        except Exception:
             pass
             
         print(f"[GAP OPTIMIZED PIPELINE] === OPTIMIZED PIPELINE FAILED ===")
@@ -1343,7 +1343,7 @@ def _execute_gap_pipeline_with_plz_filter(year: int, csv_path: Optional[str] = N
                 progress = PipelineProgress(batch_id, year)
                 error_msg = f"Pipeline-Fehler: {str(e)}"
                 progress.error(error_msg)
-        except:
+        except Exception:
             pass
             
         print(f"[GAP PIPELINE] === PIPELINE FAILED ===")
@@ -1413,7 +1413,7 @@ def _execute_gap_pipeline(year: int, csv_path: Optional[str] = None, batch_id: O
                 progress = PipelineProgress(batch_id, year)
                 error_msg = f"Pipeline-Fehler: {str(e)}"
                 progress.error(error_msg)
-        except:
+        except Exception:
             pass  # Fallback wenn Progress-Update fehlschlägt
             
         print(f"[GAP Pipeline] === PIPELINE FAILED ===")
