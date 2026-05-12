@@ -1,0 +1,24 @@
+id: HR-TIME-CAL-001
+status: reserviert
+owner: Codex
+goal: >
+  Provider-neutralen Kalendervertrag fuer HR-Time-Blocker, Schichten,
+  Abwesenheiten, Touren und Aussendienst bereitstellen.
+file_ownership:
+  - docs/agent-ops/active-workboard.md
+  - docs/agent-ops/slices/HR-TIME-CAL-001.yaml
+  - app/api/v1/endpoints/personal.py
+  - tests/test_personal_calendar_api.py
+  - migrations/sql/hr/003_hr_time_calendar.sql
+  - docs/project-context/hr-time-canonical-core-data-model-2026-05-08.md
+acceptance_criteria: >
+  Kalenderereignisse koennen erstellt und gelesen werden; private externe Termine
+  werden nur als Busy-Blocker ohne Betreffdetails gefuehrt; Konfliktlevel und
+  Sync-State sind im Contract sichtbar; Tests sichern Datenschutzmaskierung und Vertrag.
+checks:
+  - pytest tests/test_personal_calendar_api.py tests/test_personal_shift_planning_api.py tests/test_personal_absence_api.py tests/test_personal_time_booking_api.py tests/test_personal_time_data_api.py tests/test_personal_time_cockpit_api.py tests/test_personal_driver_time_api.py -q --no-cov
+  - python scripts/agent_workboard_supervisor.py validate
+  - node scripts/docs-governance-check.cjs
+  - git diff --check
+risks: >
+  Microsoft/Google OAuth, Delta-Sync und echte externe Kalenderzugriffe bleiben Folgeslices.
