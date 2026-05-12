@@ -1,5 +1,5 @@
 id: HR-TIME-OPS-003
-status: reserviert
+status: abgeschlossen
 owner: Codex
 goal: >
   Nachbearbeitung ergonomisch aus der Arbeitszeitliste starten statt manuelle
@@ -20,3 +20,7 @@ checks:
   - node scripts/docs-governance-check.cjs
 risks: >
   Voller Edit/Delete-Workflow fuer alle HR-Time-Objekte bleibt Folgeslice.
+done:
+  - Arbeitszeitliste erhaelt Bearbeiten-Aktion mit ID-/Zeit-/Typ-Uebernahme.
+  - Tabs sind kontrolliert und springen in die Erfassung.
+  - Playwright-Durchklicktest nutzt den realen Bearbeiten-Pfad vor Submit/Korrektur.

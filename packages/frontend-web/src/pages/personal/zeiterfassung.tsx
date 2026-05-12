@@ -90,6 +90,7 @@ export default function ZeiterfassungPage(): JSX.Element {
   const createPayrollExport = useCreatePayrollExport()
   const createCampaignCapacity = useCreateCampaignCapacity()
   const createFieldServicePlan = useCreateFieldServicePlan()
+  const [activeTab, setActiveTab] = useState('steuerung')
   const list = useMemo(() => zeiten ?? [], [zeiten])
   const driverTime = cockpit.driverTime
   const driverRows = useMemo(() => driverTime.events, [driverTime.events])
@@ -100,6 +101,19 @@ export default function ZeiterfassungPage(): JSX.Element {
   const [campaignForm, setCampaignForm] = useState({ campaignCode: 'ERNTE-2026', name: 'Ernteannahme 2026', periodFrom: selectedDate, periodTo: selectedDate, locationCode: 'main', roleCode: 'lkw_fahrer', demand: '2', expectedVolume: '12000' })
   const [fieldForm, setFieldForm] = useState({ employeeRef: 'berater-1', customerRef: 'kunde-42', territoryCode: 'north', campaignCode: 'SAAT-2026', startsAt: `${selectedDate}T09:00:00+02:00`, endsAt: `${selectedDate}T11:00:00+02:00` })
   const [correctionForm, setCorrectionForm] = useState({ entryId: '', startTime: '07:00', endTime: '16:00', hours: '8', entryType: 'Arbeit', reason: 'Nachbearbeitung nach Pruefung', costCenter: 'LOG', workArea: 'Tour' })
+
+  const startCorrection = (entry: ZeitEintrag) => {
+    setCorrectionForm((prev) => ({
+      ...prev,
+      entryId: entry.id,
+      startTime: entry.kommen === '-' ? prev.startTime : entry.kommen,
+      endTime: entry.gehen === '-' ? prev.endTime : entry.gehen,
+      hours: String(entry.stunden),
+      entryType: entry.typ,
+      reason: prev.reason || 'Nachbearbeitung nach Pruefung',
+    }))
+    setActiveTab('crud')
+  }
 
   const agentHints = useMemo(() => {
     const hints: Array<{ severity: DriverTimeFindingSeverity; title: string; detail: string }> = []
@@ -144,6 +158,16 @@ export default function ZeiterfassungPage(): JSX.Element {
         <Badge variant={z.typ === 'Ueberstunden' ? 'destructive' : z.typ === 'Urlaub' ? 'secondary' : 'outline'}>
           {z.typ}
         </Badge>
+      ),
+    },
+    {
+      key: 'id' as const,
+      label: 'Aktion',
+      render: (z: ZeitEintrag) => (
+        <Button type="button" size="sm" variant="outline" className="gap-2" onClick={() => startCorrection(z)}>
+          <Pencil className="h-4 w-4" />
+          Bearbeiten
+        </Button>
       ),
     },
   ]
@@ -545,7 +569,7 @@ export default function ZeiterfassungPage(): JSX.Element {
         </Card>
       </div>
 
-      <Tabs defaultValue="steuerung" className="space-y-4">
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
         <TabsList>
           <TabsTrigger value="agent">Agent</TabsTrigger>
           <TabsTrigger value="steuerung">Steuerung</TabsTrigger>
