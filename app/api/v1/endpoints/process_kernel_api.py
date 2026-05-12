@@ -323,7 +323,7 @@ from ....core.security_hardening_contracts import (
     get_default_secret_classifications,
     get_default_security_controls,
 )
-from ....core.dashboard_snapshots import (  # noqa: F811
+from ....core.dashboard_snapshots import (  # noqa: F401,F811
     SnapshotTyp,
     SnapshotRebuildRequest,
     SnapshotRebuildResult,
@@ -3610,7 +3610,7 @@ def erstelle_prozess_kostenerfassung(body: dict | None = None):
     if body is None:
         body = {}
 
-    from ....core.process_cost_contracts import KostenPosition  # noqa: F811
+    from ....core.process_cost_contracts import KostenPosition  # noqa: F401,F811
 
     rohe_positionen = body.get("positionen", [
         {"position_id": "P-001", "kosten_typ": "CPU",
@@ -4132,11 +4132,11 @@ def aggregiere_workflow_messpunkte(body: dict | None = None):
 
 
 # === Wave 51: Process Capacity + Workflow Compensation ===
-from app.core.process_capacity_contracts_wave51 import (  # noqa: F811
+from app.core.process_capacity_contracts_wave51 import (  # noqa: F401,F811
     get_default_kapazitaets_regeln, KapazitaetsRegel, KapazitaetsMessung,
     KapazitaetsPlan, KapazitaetsStatus, KapazitaetsTyp, SkalierungsStrategie,
 )
-from app.core.workflow_compensation_contracts import (  # noqa: F811
+from app.core.workflow_compensation_contracts import (  # noqa: F401,F811
     get_default_saga_instanzen, erstelle_kompensations_plan,
     SagaInstanz, KompensationsStatus, SagaStatus, KompensationsTyp,
 )
@@ -4220,7 +4220,7 @@ from app.core.process_circuit_breaker_contracts import (
     CircuitBreakerKonfiguration, CircuitBreakerZustandsRecord,
     CircuitBreakerZustand,
 )
-from app.core.workflow_event_sourcing_contracts import (  # noqa: F811
+from app.core.workflow_event_sourcing_contracts import (  # noqa: F401,F811
     get_default_ereignis_streams, rekonstruiere_zustand,
     EreignisStream, WorkflowEreignis, EreignisTyp, ReplayModus,
 )
@@ -4385,11 +4385,11 @@ def pruefe_idempotenz_endpoint(payload: dict):
     }
 
 # === Wave 54: Retry Policies + Workflow Checkpoints ===
-from app.core.process_retry_contracts import (  # noqa: F811
+from app.core.process_retry_contracts import (  # noqa: F401,F811
     get_default_retry_regeln, RetryRegel, RetryZustand,
     RetryStrategie, RetryStatus,
 )
-from app.core.workflow_checkpoint_contracts_wave54 import (  # noqa: F811
+from app.core.workflow_checkpoint_contracts_wave54 import (  # noqa: F401,F811
     get_default_checkpoint_sequenzen, WorkflowCheckpoint,
     CheckpointSequenz, CheckpointTyp, CheckpointStatus,
 )
@@ -4516,7 +4516,7 @@ def pruefe_rollback_ausfuehrbarkeit(payload: dict):
     }
 
 # === Wave 56: Process Dependencies + Workflow Signals ===
-from app.core.process_dependency_contracts import (  # noqa: F811
+from app.core.process_dependency_contracts import (  # noqa: F401,F811
     get_default_prozess_graphen, ProzessGraph, ProzessSchritt,
     AbhaengigkeitsKante, AbhaengigkeitsTyp, SchrittStatus,
 )
@@ -4592,7 +4592,7 @@ def verarbeite_signal_endpoint(payload: dict):
 from app.core.process_observability_contracts import (
     get_default_traces, get_default_health_report,
 )
-from app.core.workflow_versioning_contracts_wave57 import (  # noqa: F811
+from app.core.workflow_versioning_contracts_wave57 import (  # noqa: F401,F811
     get_default_migrations_guards, MigrationsGuard,
     WorkflowSchemaVersion, MigrationsSchritt,
     VersionsStatus, KompatibilitaetsTyp, MigrationsTyp,
@@ -4660,12 +4660,12 @@ def pruefe_brechende_aenderung(payload: dict):
 
 
 # === Wave 58: Cost Allocation + Audit Trail ===
-from app.core.process_cost_allocation_contracts import (  # noqa: F811
+from app.core.process_cost_allocation_contracts import (  # noqa: F401,F811
     get_default_kosten_allokationen, verteile_kosten,
     KostenAllokation, KostenPosition, KostenTyp,
     AllokationsMethode, KostenStatus,
 )
-from app.core.workflow_audit_trail_contracts import (  # noqa: F811
+from app.core.workflow_audit_trail_contracts import (  # noqa: F401,F811
     get_default_audit_trail, erstelle_audit_eintrag,
     AuditTrail, AuditEintrag, AuditAktionsTyp,
     AuditIntegritaetsStatus,
@@ -4714,7 +4714,7 @@ def get_audit_trail():
 
 
 @router.post("/audit-trail/pruefe-integritaet", tags=["process-kernel"])
-def pruefe_audit_integritaet(payload: dict):  # noqa: F811
+def pruefe_audit_integritaet(payload: dict):  # noqa: F401,F811
     """
     Payload: {"trail_id": str, "manipuliert": bool}
     If manipuliert=True, tampers with first entry hash to simulate corruption.
@@ -4961,7 +4961,7 @@ def pruefe_pause_ueberfaellig(payload: dict):
 from app.core.process_template_contracts import (
     get_default_templates, instanziere_template,
 )
-from app.core.workflow_deadline_contracts import (  # noqa: F811
+from app.core.workflow_deadline_contracts import (  # noqa: F401,F811
     get_default_deadline_monitor, DeadlineMonitor, WorkflowDeadline,
     DeadlineTyp, DeadlineStatus, EskalationsStufe,
 )
@@ -5116,7 +5116,7 @@ def pruefe_kollaborations_ergebnis(payload: dict):
 
 
 # === Wave 64: Data Lineage + Process Simulation ===
-from app.core.process_lineage_contracts import (  # noqa: F811
+from app.core.process_lineage_contracts import (  # noqa: F401,F811
     get_default_lineage_graph, LineageGraph, LineageKnoten,
     LineageKante, LineageKnotenTyp, LineageOperationTyp,
 )
@@ -5332,7 +5332,7 @@ def liste_schema_versionen():
             for v in SCHEMA_VERSIONEN]
 
 @router.post("/schema/pruefe-kompatibilitaet")
-def pruefe_schema_kompatibilitaet(payload: dict):  # noqa: F811
+def pruefe_schema_kompatibilitaet(payload: dict):  # noqa: F401,F811
     from app.core.workflow_schema_migration_contracts import (
         SchemaVersion, FeldAenderung, FeldAenderungsTyp, SchemaKompatibilitaet
     )
