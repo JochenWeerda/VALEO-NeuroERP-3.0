@@ -125,6 +125,17 @@ Stand: `2026-05-08`
 **Checks:** `pytest tests/test_personal_absence_api.py tests/test_personal_time_booking_api.py tests/test_personal_time_data_api.py tests/test_personal_time_cockpit_api.py tests/test_personal_driver_time_api.py -q --no-cov`; `python scripts/agent_workboard_supervisor.py validate`; `node scripts/docs-governance-check.cjs`; `git diff --check`
 **Offene Risiken:** Echter Urlaubsverwaltung-HTTP-Connector, AVV/DPA und bidirektionale Konfliktaufloesung bleiben Folgeslices.
 
+## HR-TIME-SCHED-001
+
+**Von:** Codex
+**Owner:** Codex
+**Stand:** reserviert 2026-05-12
+**Ziel des Slices:** Schicht- und Einsatzplanung mit Standort, Rolle, Qualifikationen, Besetzung und Abwesenheitskonflikten auf dem kanonischen HR-Time-Modell bereitstellen.
+**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/agent-ops/slices/HR-TIME-SCHED-001.yaml`, `app/api/v1/endpoints/personal.py`, `tests/test_personal_shift_planning_api.py`, `migrations/sql/hr/002_hr_time_scheduling.sql`, `docs/project-context/hr-time-canonical-core-data-model-2026-05-08.md`
+**Abnahmekriterien:** Schichten koennen erstellt und gelesen werden; Planung prueft Mindestbesetzung, aktive Profile, Qualifikationen und genehmigte Abwesenheiten; Konflikte werden als Warnung/Blocker im API-Vertrag ausgewiesen; Tests sichern Happy Path und Konfliktfaelle.
+**Checks:** `pytest tests/test_personal_shift_planning_api.py tests/test_personal_absence_api.py tests/test_personal_time_booking_api.py tests/test_personal_time_data_api.py tests/test_personal_time_cockpit_api.py tests/test_personal_driver_time_api.py -q --no-cov`; `python scripts/agent_workboard_supervisor.py validate`; `node scripts/docs-governance-check.cjs`; `git diff --check`
+**Offene Risiken:** UI-Kalender, echte Optimierung/Auto-Staffing und rollenbasierte Managerfreigabe bleiben Folgeslices.
+
 ## AGENT-ORCH-001
 
 **Von:** Codex
