@@ -9,11 +9,12 @@ import { NativeSelect } from '@/components/ui/native-select'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Textarea } from '@/components/ui/textarea'
-import { AlertTriangle, Bot, CalendarCheck, CalendarDays, CheckCircle2, Clock, FileDown, Plus, Route, ShieldCheck, Truck, Users } from 'lucide-react'
+import { AlertTriangle, Bot, CalendarCheck, CalendarDays, CheckCircle2, ChevronLeft, ChevronRight, Clock, FileDown, Pencil, Plus, Printer, Route, Save, ShieldCheck, Truck, Users } from 'lucide-react'
 import {
   useAbsences,
   useCalendarEvents,
   useCampaignCapacity,
+  useCorrectTimeEntry,
   useCreateCalendarEvent,
   useCreateCampaignCapacity,
   useCreateFieldServicePlan,
@@ -24,7 +25,9 @@ import {
   useImportAbsence,
   usePayrollExports,
   useShifts,
+  useSubmitTimeEntry,
   useTimeCockpit,
+  useWorkPlan,
   useZeiterfassung,
   type Absence,
   type CalendarEvent,
@@ -35,6 +38,8 @@ import {
   type PayrollExport,
   type Shift,
   type TimeCockpit,
+  type WorkPlanAssignment,
+  type WorkPlanFinding,
   type ZeitEintrag,
 } from '@/lib/api/personal'
 
@@ -52,17 +57,33 @@ const getStatusBadgeVariant = (status: string): 'destructive' | 'secondary' | 'o
 
 const splitCsv = (value: string): string[] => value.split(',').map((item) => item.trim()).filter(Boolean)
 
+const addDays = (dateText: string, days: number): string => {
+  const value = new Date(`${dateText}T00:00:00`)
+  value.setDate(value.getDate() + days)
+  return value.toISOString().split('T')[0]
+}
+
 export default function ZeiterfassungPage(): JSX.Element {
-  const today = new Date().toISOString().split('T')[0]
-  const { data: zeiten, isLoading } = useZeiterfassung(today)
-  const { data: cockpit, isLoading: isCockpitLoading } = useTimeCockpit(today)
-  const { data: absences } = useAbsences({ datumVon: today, datumBis: today })
-  const { data: shifts } = useShifts({ datumVon: today, datumBis: today })
-  const { data: calendarEvents } = useCalendarEvents({ start: `${today}T00:00:00+02:00`, end: `${today}T23:59:59+02:00` })
+  const initialDate = new Date().toISOString().split('T')[0]
+  const [selectedDate, setSelectedDate] = useState(initialDate)
+  const { data: zeiten, isLoading } = useZeiterfassung(selectedDate)
+  const { data: cockpit, isLoading: isCockpitLoading } = useTimeCockpit(selectedDate)
+  const { data: absences } = useAbsences({ datumVon: selectedDate, datumBis: selectedDate })
+  const { data: shifts } = useShifts({ datumVon: selectedDate, datumBis: selectedDate })
+  const { data: calendarEvents } = useCalendarEvents({ start: `${selectedDate}T00:00:00+02:00`, end: `${selectedDate}T23:59:59+02:00` })
   const { data: payrollExports } = usePayrollExports()
   const { data: campaignCapacity } = useCampaignCapacity()
   const { data: fieldServicePlan } = useFieldServicePlan()
+  const { data: workPlan } = useWorkPlan({
+    periodFrom: selectedDate,
+    periodTo: addDays(selectedDate, 7),
+    holidayDates: [addDays(selectedDate, 1)],
+    bridgeDays: [addDays(selectedDate, 2)],
+    schoolHolidayDates: [selectedDate],
+  })
   const createTimeEntry = useCreateTimeEntry()
+  const submitTimeEntry = useSubmitTimeEntry()
+  const correctTimeEntry = useCorrectTimeEntry()
   const importAbsence = useImportAbsence()
   const createShift = useCreateShift()
   const createCalendarEvent = useCreateCalendarEvent()
@@ -73,11 +94,12 @@ export default function ZeiterfassungPage(): JSX.Element {
   const driverTime = cockpit.driverTime
   const driverRows = useMemo(() => driverTime.events, [driverTime.events])
   const [timeForm, setTimeForm] = useState({ employeeRef: 'warehouse-1', startTime: '07:00', endTime: '16:00', hours: '8', entryType: 'Arbeit', costCenter: 'LAG', workArea: 'Lager' })
-  const [absenceForm, setAbsenceForm] = useState({ employeeRef: 'driver-1', absenceType: 'Urlaub' as const, fromDate: today, toDate: today, externalRef: '' })
+  const [absenceForm, setAbsenceForm] = useState({ employeeRef: 'driver-1', absenceType: 'Urlaub' as const, fromDate: selectedDate, toDate: selectedDate, externalRef: '' })
   const [shiftForm, setShiftForm] = useState({ name: 'Ernteannahme Waage', startTime: '06:00', endTime: '14:00', locationCode: 'main', requiredRole: 'waage', requiredQualifications: 'forklift', requiredHeadcount: '2', assignedEmployeeRefs: 'warehouse-1' })
-  const [calendarForm, setCalendarForm] = useState({ eventType: 'shift', title: 'Teamkalender Blocker', employeeRef: 'warehouse-1', startsAt: `${today}T06:00:00+02:00`, endsAt: `${today}T14:00:00+02:00`, visibility: 'team' })
-  const [campaignForm, setCampaignForm] = useState({ campaignCode: 'ERNTE-2026', name: 'Ernteannahme 2026', periodFrom: today, periodTo: today, locationCode: 'main', roleCode: 'lkw_fahrer', demand: '2', expectedVolume: '12000' })
-  const [fieldForm, setFieldForm] = useState({ employeeRef: 'berater-1', customerRef: 'kunde-42', territoryCode: 'north', campaignCode: 'SAAT-2026', startsAt: `${today}T09:00:00+02:00`, endsAt: `${today}T11:00:00+02:00` })
+  const [calendarForm, setCalendarForm] = useState({ eventType: 'shift', title: 'Teamkalender Blocker', employeeRef: 'warehouse-1', startsAt: `${selectedDate}T06:00:00+02:00`, endsAt: `${selectedDate}T14:00:00+02:00`, visibility: 'team' })
+  const [campaignForm, setCampaignForm] = useState({ campaignCode: 'ERNTE-2026', name: 'Ernteannahme 2026', periodFrom: selectedDate, periodTo: selectedDate, locationCode: 'main', roleCode: 'lkw_fahrer', demand: '2', expectedVolume: '12000' })
+  const [fieldForm, setFieldForm] = useState({ employeeRef: 'berater-1', customerRef: 'kunde-42', territoryCode: 'north', campaignCode: 'SAAT-2026', startsAt: `${selectedDate}T09:00:00+02:00`, endsAt: `${selectedDate}T11:00:00+02:00` })
+  const [correctionForm, setCorrectionForm] = useState({ entryId: '', startTime: '07:00', endTime: '16:00', hours: '8', entryType: 'Arbeit', reason: 'Nachbearbeitung nach Pruefung', costCenter: 'LOG', workArea: 'Tour' })
 
   const agentHints = useMemo(() => {
     const hints: Array<{ severity: DriverTimeFindingSeverity; title: string; detail: string }> = []
@@ -247,11 +269,27 @@ export default function ZeiterfassungPage(): JSX.Element {
     { key: 'status' as const, label: 'Status', render: (row: FieldServicePlan) => <Badge variant={getStatusBadgeVariant(row.status)}>{row.status}</Badge> },
     { key: 'conflicts' as const, label: 'Checks', render: (row: FieldServicePlan) => row.conflicts.map((item) => item.code).join(', ') || 'ok' },
   ]
+  const workPlanColumns = [
+    { key: 'datum' as const, label: 'Datum' },
+    { key: 'employeeRef' as const, label: 'Mitarbeiter' },
+    { key: 'label' as const, label: 'Arbeitsplan' },
+    { key: 'sourceType' as const, label: 'Quelle', render: (row: WorkPlanAssignment) => <Badge variant="outline">{row.sourceType}</Badge> },
+    { key: 'startTime' as const, label: 'Zeit', render: (row: WorkPlanAssignment) => <span className="font-mono text-xs">{row.startTime ?? '-'} - {row.endTime ?? '-'}</span> },
+    { key: 'status' as const, label: 'Status', render: (row: WorkPlanAssignment) => <Badge variant={getStatusBadgeVariant(row.status)}>{row.status}</Badge> },
+    { key: 'findings' as const, label: 'Planungschecks', render: (row: WorkPlanAssignment) => (
+      <div className="flex flex-wrap gap-1">
+        {row.findings.length === 0 ? <Badge variant="outline">ok</Badge> : row.findings.map((finding: WorkPlanFinding) => (
+          <Badge key={`${row.id}-${finding.code}`} variant={getFindingBadgeVariant(finding.severity as DriverTimeFindingSeverity)}>{finding.code}</Badge>
+        ))}
+      </div>
+    ) },
+    { key: 'printReady' as const, label: 'Druck', render: (row: WorkPlanAssignment) => <Badge variant={row.printReady ? 'outline' : 'destructive'}>{row.printReady ? 'bereit' : 'blockiert'}</Badge> },
+  ]
 
   const handleCreateTime = () => {
     createTimeEntry.mutate({
       employeeRef: timeForm.employeeRef,
-      datum: today,
+      datum: selectedDate,
       startTime: timeForm.startTime,
       endTime: timeForm.endTime,
       hours: Number(timeForm.hours || 0),
@@ -269,7 +307,7 @@ export default function ZeiterfassungPage(): JSX.Element {
   const handleCreateShift = () => {
     createShift.mutate({
       ...shiftForm,
-      datum: today,
+      datum: selectedDate,
       requiredQualifications: splitCsv(shiftForm.requiredQualifications),
       requiredHeadcount: Number(shiftForm.requiredHeadcount || 1),
       assignedEmployeeRefs: splitCsv(shiftForm.assignedEmployeeRefs),
@@ -281,7 +319,7 @@ export default function ZeiterfassungPage(): JSX.Element {
   }
 
   const handleCreatePayroll = () => {
-    createPayrollExport.mutate({ periodFrom: today, periodTo: today, targetSystem: 'datev', createdBy: 'ui' })
+    createPayrollExport.mutate({ periodFrom: selectedDate, periodTo: selectedDate, targetSystem: 'datev', createdBy: 'ui' })
   }
 
   const handleCreateCampaign = () => {
@@ -298,6 +336,27 @@ export default function ZeiterfassungPage(): JSX.Element {
 
   const handleCreateField = () => {
     createFieldServicePlan.mutate({ ...fieldForm, visitType: 'field_visit', notes: null })
+  }
+
+  const handleCorrectTimeEntry = () => {
+    if (!correctionForm.entryId) return
+    correctTimeEntry.mutate({
+      entryId: correctionForm.entryId,
+      data: {
+        startTime: correctionForm.startTime,
+        endTime: correctionForm.endTime,
+        hours: Number(correctionForm.hours || 0),
+        entryType: correctionForm.entryType,
+        costCenter: correctionForm.costCenter,
+        workArea: correctionForm.workArea,
+        correctionReason: correctionForm.reason,
+        notes: 'UI-Nachbearbeitung',
+      },
+    })
+  }
+
+  const handlePrintWorkPlan = () => {
+    window.print()
   }
 
   if (isLoading || isCockpitLoading) {
@@ -321,11 +380,24 @@ export default function ZeiterfassungPage(): JSX.Element {
             <p className="text-muted-foreground">Time & Labor, Abwesenheiten, Fahrerzeit und Payroll-Freigabe</p>
           </div>
           <div className="flex flex-wrap gap-2">
-            <Button variant="outline" size="sm">
+            <Button variant="outline" size="sm" onClick={() => setSelectedDate(addDays(selectedDate, -1))}>
+              <ChevronLeft className="mr-2 h-4 w-4" />
+              Zurueck
+            </Button>
+            <Input className="h-9 w-[150px]" value={selectedDate} onChange={(event) => setSelectedDate(event.target.value)} />
+            <Button variant="outline" size="sm" onClick={() => setSelectedDate(initialDate)}>
               <Clock className="mr-2 h-4 w-4" />
               Heute
             </Button>
-            <Button variant="outline" size="sm">
+            <Button variant="outline" size="sm" onClick={() => setSelectedDate(addDays(selectedDate, 1))}>
+              Weiter
+              <ChevronRight className="ml-2 h-4 w-4" />
+            </Button>
+            <Button variant="outline" size="sm" onClick={handlePrintWorkPlan}>
+              <Printer className="mr-2 h-4 w-4" />
+              Arbeitsplan drucken
+            </Button>
+            <Button variant="outline" size="sm" onClick={handleCreatePayroll} disabled={createPayrollExport.isPending}>
               <FileDown className="mr-2 h-4 w-4" />
               Payroll vorbereiten
             </Button>
@@ -478,6 +550,7 @@ export default function ZeiterfassungPage(): JSX.Element {
           <TabsTrigger value="agent">Agent</TabsTrigger>
           <TabsTrigger value="steuerung">Steuerung</TabsTrigger>
           <TabsTrigger value="crud">Erfassen</TabsTrigger>
+          <TabsTrigger value="arbeitsplan">Arbeitsplan</TabsTrigger>
           <TabsTrigger value="planung">Planung</TabsTrigger>
           <TabsTrigger value="driver">Fahrerzeit</TabsTrigger>
           <TabsTrigger value="zeiten">Arbeitszeit</TabsTrigger>
@@ -550,7 +623,7 @@ export default function ZeiterfassungPage(): JSX.Element {
         </TabsContent>
 
         <TabsContent value="crud" className="space-y-4">
-          <div className="grid gap-4 xl:grid-cols-3">
+          <div className="grid gap-4 xl:grid-cols-4">
             <Card>
               <CardHeader>
                 <CardTitle>Zeitbuchung</CardTitle>
@@ -658,6 +731,89 @@ export default function ZeiterfassungPage(): JSX.Element {
                   <Plus className="h-4 w-4" />
                   Schicht anlegen
                 </Button>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Nachbearbeitung</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <Input value={correctionForm.entryId} onChange={(event) => setCorrectionForm((prev) => ({ ...prev, entryId: event.target.value }))} placeholder="Zeitbuchungs-ID" />
+                <div className="grid grid-cols-2 gap-3">
+                  <Input value={correctionForm.startTime} onChange={(event) => setCorrectionForm((prev) => ({ ...prev, startTime: event.target.value }))} placeholder="Start" />
+                  <Input value={correctionForm.endTime} onChange={(event) => setCorrectionForm((prev) => ({ ...prev, endTime: event.target.value }))} placeholder="Ende" />
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <Input value={correctionForm.hours} onChange={(event) => setCorrectionForm((prev) => ({ ...prev, hours: event.target.value }))} placeholder="Stunden" />
+                  <NativeSelect
+                    value={correctionForm.entryType}
+                    onValueChange={(value) => setCorrectionForm((prev) => ({ ...prev, entryType: value }))}
+                    options={[
+                      { value: 'Arbeit', label: 'Arbeit' },
+                      { value: 'Bereitschaft', label: 'Bereitschaft' },
+                      { value: 'Korrektur', label: 'Korrektur' },
+                    ]}
+                  />
+                </div>
+                <Textarea value={correctionForm.reason} onChange={(event) => setCorrectionForm((prev) => ({ ...prev, reason: event.target.value }))} rows={2} />
+                <div className="grid grid-cols-2 gap-2">
+                  <Button className="gap-2" variant="outline" onClick={() => correctionForm.entryId && submitTimeEntry.mutate(correctionForm.entryId)} disabled={!correctionForm.entryId || submitTimeEntry.isPending}>
+                    <Save className="h-4 w-4" />
+                    Einreichen
+                  </Button>
+                  <Button className="gap-2" onClick={handleCorrectTimeEntry} disabled={!correctionForm.entryId || correctTimeEntry.isPending}>
+                    <Pencil className="h-4 w-4" />
+                    Korrigieren
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </TabsContent>
+
+        <TabsContent value="arbeitsplan" className="space-y-4">
+          <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_360px]">
+            <Card>
+              <CardHeader>
+                <div className="flex items-center justify-between gap-3">
+                  <CardTitle>{workPlan.printTitle || 'Arbeitsplan'}</CardTitle>
+                  <Button variant="outline" size="sm" onClick={handlePrintWorkPlan}>
+                    <Printer className="mr-2 h-4 w-4" />
+                    Drucken
+                  </Button>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <DataTable data={workPlan.assignments} columns={workPlanColumns} />
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader>
+                <CardTitle>Praeferenz-Checks</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <p className="text-sm text-muted-foreground">Planungsbefunde</p>
+                    <p className="text-2xl font-semibold">{workPlan.findings.length}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">Druckbereit</p>
+                    <p className="text-2xl font-semibold">{workPlan.assignments.filter((item) => item.printReady).length}</p>
+                  </div>
+                </div>
+                {workPlan.preferences.map((preference) => (
+                  <div key={preference.employeeRef} className="rounded-md border p-3">
+                    <div className="font-medium">{preference.employeeRef}</div>
+                    <div className="mt-2 flex flex-wrap gap-1">
+                      {preference.prefersNightTours ? <Badge variant="outline">Nachttour bevorzugt</Badge> : null}
+                      {preference.avoidNightTours ? <Badge variant="secondary">Nachttour vermeiden</Badge> : null}
+                      {preference.childcareSensitive ? <Badge variant="secondary">Schulferien beachten</Badge> : null}
+                      <Badge variant="outline">{preference.bridgeDayPolicy}</Badge>
+                    </div>
+                  </div>
+                ))}
               </CardContent>
             </Card>
           </div>
