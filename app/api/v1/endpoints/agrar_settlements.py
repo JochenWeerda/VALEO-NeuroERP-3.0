@@ -11,7 +11,6 @@ from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from pydantic import BaseModel, Field, model_validator
 from sqlalchemy.orm import Session
 from sqlalchemy.orm.exc import StaleDataError
-from datetime import date
 
 from app.core.database import get_db
 from app.core.data_quality_enforcement import (

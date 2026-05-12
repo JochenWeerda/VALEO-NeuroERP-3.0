@@ -109,8 +109,6 @@ async def create_schadenmeldung(
     db: Session = Depends(get_db),
 ):
     """Neue Schadenmeldung anlegen."""
-    from datetime import datetime
-
     meldung_id = str(uuid7())
     now = datetime.utcnow().isoformat()
     nr = f"SM-{datetime.utcnow().strftime('%Y%m%d')}-{meldung_id[:6].upper()}"

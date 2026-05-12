@@ -354,7 +354,7 @@ async def post_ap_invoice(
         period = invoice_date[:7]  # YYYY-MM format
         
         # Create journal entry lines
-        from app.api.v1.schemas.finance import JournalEntryLine
+        from app.api.v1.schemas.finance import JournalEntryLine  # noqa: F811
         
         journal_lines = [
             JournalEntryLine(

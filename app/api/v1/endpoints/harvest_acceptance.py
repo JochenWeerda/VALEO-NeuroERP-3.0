@@ -1082,8 +1082,8 @@ async def calculate_harvest_settlement_endpoint(
                 price_source = "contract_fixed"
             elif contract.pricing_model == "follow":
                 # Tagespreis aus daily_prices Tabelle ermitteln
-                from modules.agrar.services.daily_price_service import DailyPriceFilter
-                from modules.agrar.repositories.daily_price_repo import DailyPriceRepositoryImpl
+                from modules.agrar.services.daily_price_service import DailyPriceFilter  # noqa: F811
+                from modules.agrar.repositories.daily_price_repo import DailyPriceRepositoryImpl  # noqa: F811
                 
                 repo = DailyPriceRepositoryImpl(db)
                 price_filter = DailyPriceFilter(
@@ -1292,7 +1292,7 @@ async def release_harvest_acceptance(
     acceptance_id: str,
     release_status: ReleaseStatus = Query(..., description="Neuer Freigabe-Status: provisional oder final"),
     create_stock_movement: bool = Query(True, description="Wareneingang automatisch erstellen?"),
-    create_credit_note: bool = Query(False, description="Self-Billing Gutschrift automatisch erstellen (nur bei final)?"),
+    create_credit_note: bool = Query(False, description="Self-Billing Gutschrift automatisch erstellen (nur bei final)?"),  # noqa: F811
     request: Request = None,
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),

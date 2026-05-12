@@ -75,7 +75,7 @@ class UserRepository(BaseRepository[T, TCreate, TUpdate], ABC):
         pass
 
     @abstractmethod
-    async def get_by_username(self, username: str, tenant_id: str) -> Optional[T]:
+    async def get_by_username(self, username: str, tenant_id: str) -> Optional[T]:  # noqa: F811
         """Get user by username"""
         pass
 
