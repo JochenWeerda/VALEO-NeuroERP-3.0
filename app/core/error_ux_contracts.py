@@ -164,7 +164,7 @@ def classify_http_error(
                    "Bitte prüfen Sie Ihre Eingaben.",
             recovery_actions=[_action_back()],
             tip="Prüfen Sie die rot markierten Felder und korrigieren Sie die Eingaben.",
-            support_code=f"ERR-VALIDATION-400",
+            support_code="ERR-VALIDATION-400",
         )
 
     if status_code in (401, 403):
@@ -185,7 +185,7 @@ def classify_http_error(
         return UserFacingError(
             category=ErrorCategory.NOT_FOUND,
             severity=ErrorSeverity.RECOVERABLE,
-            title=f"Datensatz nicht gefunden",
+            title="Datensatz nicht gefunden",
             detail="Der gesuchte Datensatz existiert nicht oder wurde bereits gelöscht.",
             recovery_actions=[_action_back(), _action_reload()],
             tip="Möglicherweise wurde der Datensatz von einem anderen Benutzer gelöscht.",

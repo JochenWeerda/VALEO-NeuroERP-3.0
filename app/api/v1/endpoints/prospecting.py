@@ -82,7 +82,7 @@ async def get_lead_candidates(
             """
         else:
             # 🔍 KRUMMHÖRN-TEST: Spezielle Analyse für Spaltenverschiebungs-Diagnose
-            print(f"[DEBUG KRUMMHÖRN] Suche nach PLZ 26736 und Krummhörn...")
+            print("[DEBUG KRUMMHÖRN] Suche nach PLZ 26736 und Krummhörn...")
             
             # Test-Query für Krummhörn
             krummhoern_check = db.execute(text("""

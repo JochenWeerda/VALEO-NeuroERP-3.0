@@ -265,7 +265,7 @@ def validate_intrastat_meldung(meldung: IntrastatMeldung) -> IntrastatValidation
         if not pos.cn8_code:
             violations.append(IntrastatViolation(
                 code=IntrastatViolationCode.POSITION_MISSING_CN8,
-                message=f"CN8-Warencode fehlt",
+                message="CN8-Warencode fehlt",
                 position_id=pid,
             ))
         elif not _is_valid_cn8(pos.cn8_code):

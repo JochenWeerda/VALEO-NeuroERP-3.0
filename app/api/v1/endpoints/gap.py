@@ -1242,14 +1242,14 @@ async def get_gap_statistics(year: int = Query(2024, description="Jahr für Stat
 def _execute_gap_pipeline_optimized(year: int, csv_path: Optional[str] = None, batch_id: Optional[str] = None, plz_filter: Optional[List[str]] = None):
     """Führt die OPTIMIERTE GAP-Pipeline mit PLZ-Filter aus"""
     try:
-        print(f"[GAP OPTIMIZED PIPELINE] === STARTING OPTIMIZED PIPELINE EXECUTION ===")
+        print("[GAP OPTIMIZED PIPELINE] === STARTING OPTIMIZED PIPELINE EXECUTION ===")
         print(f"[GAP OPTIMIZED PIPELINE] Year: {year}, CSV: {csv_path}, Batch-ID: {batch_id}, PLZ-Filter: {plz_filter}")
         
         from app.services.gap_progress import PipelineProgress
         from app.services.gap_pipeline import run_year_pipeline_optimized
         
         if not batch_id:
-            print(f"[GAP OPTIMIZED PIPELINE] ERROR: No batch_id provided!")
+            print("[GAP OPTIMIZED PIPELINE] ERROR: No batch_id provided!")
             return
         
         progress = PipelineProgress(batch_id, year)
@@ -1266,7 +1266,7 @@ def _execute_gap_pipeline_optimized(year: int, csv_path: Optional[str] = None, b
         result = run_year_pipeline_optimized(year=year, csv_path=csv_path, batch_id=batch_id, plz_filter=plz_filter, progress_callback=progress_callback)
         
         progress.complete("OPTIMIERTE Pipeline erfolgreich abgeschlossen - nur heiße Bereiche verarbeitet!")
-        print(f"[GAP OPTIMIZED PIPELINE] === OPTIMIZED PIPELINE COMPLETED SUCCESSFULLY ===")
+        print("[GAP OPTIMIZED PIPELINE] === OPTIMIZED PIPELINE COMPLETED SUCCESSFULLY ===")
         print(f"[GAP OPTIMIZED PIPELINE] Result: {result}")
         
     except Exception as e:
@@ -1279,7 +1279,7 @@ def _execute_gap_pipeline_optimized(year: int, csv_path: Optional[str] = None, b
         except Exception:
             pass
             
-        print(f"[GAP OPTIMIZED PIPELINE] === OPTIMIZED PIPELINE FAILED ===")
+        print("[GAP OPTIMIZED PIPELINE] === OPTIMIZED PIPELINE FAILED ===")
         print(f"[GAP OPTIMIZED PIPELINE] Error: {str(e)}")
         import traceback
         print(f"[GAP OPTIMIZED PIPELINE] Full traceback: {traceback.format_exc()}")
@@ -1288,13 +1288,13 @@ def _execute_gap_pipeline_optimized(year: int, csv_path: Optional[str] = None, b
 def _execute_gap_pipeline_with_plz_filter(year: int, csv_path: Optional[str] = None, batch_id: Optional[str] = None, plz_filter: Optional[List[str]] = None):
     """Führt die GAP-Pipeline mit PLZ-Filter aus"""
     try:
-        print(f"[GAP PIPELINE] === STARTING PIPELINE WITH PLZ FILTER ===")
+        print("[GAP PIPELINE] === STARTING PIPELINE WITH PLZ FILTER ===")
         print(f"[GAP PIPELINE] Year: {year}, CSV: {csv_path}, Batch-ID: {batch_id}, PLZ-Filter: {plz_filter}")
         
         from app.services.gap_progress import PipelineProgress
         
         if not batch_id:
-            print(f"[GAP PIPELINE] ERROR: No batch_id provided!")
+            print("[GAP PIPELINE] ERROR: No batch_id provided!")
             return
         
         progress = PipelineProgress(batch_id, year)
@@ -1305,7 +1305,7 @@ def _execute_gap_pipeline_with_plz_filter(year: int, csv_path: Optional[str] = N
         
         try:
             from app.services.gap_pipeline import run_year_pipeline
-            print(f"[GAP PIPELINE] Successfully imported run_year_pipeline")
+            print("[GAP PIPELINE] Successfully imported run_year_pipeline")
         except Exception as import_error:
             error_msg = f"Import-Fehler: {str(import_error)}"
             progress.error(error_msg)
@@ -1327,13 +1327,13 @@ def _execute_gap_pipeline_with_plz_filter(year: int, csv_path: Optional[str] = N
                 print(f"[GAP PIPELINE] Callback traceback: {traceback.format_exc()}")
         
         progress.update_status("initializing", 2, 6, "Initialisiere Pipeline-Parameter...", "running")
-        print(f"[GAP PIPELINE] About to call run_year_pipeline with PLZ filter...")
+        print("[GAP PIPELINE] About to call run_year_pipeline with PLZ filter...")
         
         # WICHTIG: PLZ-Filter wird jetzt korrekt übergeben!
         result = run_year_pipeline(year=year, csv_path=csv_path, batch_id=batch_id, progress_callback=progress_callback, plz_filter=plz_filter)
         
         progress.complete(f"Pipeline erfolgreich abgeschlossen{filter_info}")
-        print(f"[GAP PIPELINE] === PIPELINE COMPLETED SUCCESSFULLY ===")
+        print("[GAP PIPELINE] === PIPELINE COMPLETED SUCCESSFULLY ===")
         print(f"[GAP PIPELINE] Result: {result}")
         
     except Exception as e:
@@ -1346,7 +1346,7 @@ def _execute_gap_pipeline_with_plz_filter(year: int, csv_path: Optional[str] = N
         except Exception:
             pass
             
-        print(f"[GAP PIPELINE] === PIPELINE FAILED ===")
+        print("[GAP PIPELINE] === PIPELINE FAILED ===")
         print(f"[GAP PIPELINE] Error: {str(e)}")
         import traceback
         print(f"[GAP PIPELINE] Full traceback: {traceback.format_exc()}")
@@ -1355,14 +1355,14 @@ def _execute_gap_pipeline_with_plz_filter(year: int, csv_path: Optional[str] = N
 def _execute_gap_pipeline(year: int, csv_path: Optional[str] = None, batch_id: Optional[str] = None):
     """Führt die komplette GAP-Pipeline aus (Python-Implementierung)"""
     try:
-        print(f"[GAP Pipeline] === STARTING PIPELINE EXECUTION ===")
+        print("[GAP Pipeline] === STARTING PIPELINE EXECUTION ===")
         print(f"[GAP Pipeline] Year: {year}, CSV: {csv_path}, Batch-ID: {batch_id}")
         
         from app.services.gap_progress import PipelineProgress
         
         # Verwende existierende Batch-ID (wurde bereits von create_pipeline_job erstellt)
         if not batch_id:
-            print(f"[GAP Pipeline] ERROR: No batch_id provided!")
+            print("[GAP Pipeline] ERROR: No batch_id provided!")
             return
         
         progress = PipelineProgress(batch_id, year)
@@ -1374,7 +1374,7 @@ def _execute_gap_pipeline(year: int, csv_path: Optional[str] = None, batch_id: O
         # Import der Pipeline-Funktionen hier (späte Bindung)
         try:
             from app.services.gap_pipeline import run_year_pipeline
-            print(f"[GAP Pipeline] Successfully imported run_year_pipeline")
+            print("[GAP Pipeline] Successfully imported run_year_pipeline")
         except Exception as import_error:
             error_msg = f"Import-Fehler: {str(import_error)}"
             progress.error(error_msg)
@@ -1397,13 +1397,13 @@ def _execute_gap_pipeline(year: int, csv_path: Optional[str] = None, batch_id: O
         
         # Weitere Progress-Updates während der Ausführung
         progress.update_status("initializing", 2, 6, "Initialisiere Pipeline-Parameter...", "running")
-        print(f"[GAP Pipeline] About to call run_year_pipeline...")
+        print("[GAP Pipeline] About to call run_year_pipeline...")
         
         # Pipeline ausführen
         result = run_year_pipeline(year=year, csv_path=csv_path, batch_id=batch_id, progress_callback=progress_callback)
         
         progress.complete("Pipeline erfolgreich abgeschlossen")
-        print(f"[GAP Pipeline] === PIPELINE COMPLETED SUCCESSFULLY ===")
+        print("[GAP Pipeline] === PIPELINE COMPLETED SUCCESSFULLY ===")
         print(f"[GAP Pipeline] Result: {result}")
         
     except Exception as e:
@@ -1416,7 +1416,7 @@ def _execute_gap_pipeline(year: int, csv_path: Optional[str] = None, batch_id: O
         except Exception:
             pass  # Fallback wenn Progress-Update fehlschlägt
             
-        print(f"[GAP Pipeline] === PIPELINE FAILED ===")
+        print("[GAP Pipeline] === PIPELINE FAILED ===")
         print(f"[GAP Pipeline] Error: {str(e)}")
         import traceback
         print(f"[GAP Pipeline] Full traceback: {traceback.format_exc()}")
@@ -2014,18 +2014,18 @@ async def debug_plz_data(db: Session = Depends(get_db)):
 def _execute_gap_pipeline_filtered(year: int, batch_id: Optional[str] = None):
     """🚀 Führt die ULTRA-OPTIMIERTE GAP-Pipeline für vorgefilterte PLZ 26XXX CSV aus"""
     try:
-        print(f"🚀 [GAP FILTERED PIPELINE] === STARTING ULTRA-OPTIMIZED PIPELINE EXECUTION ===")
+        print("🚀 [GAP FILTERED PIPELINE] === STARTING ULTRA-OPTIMIZED PIPELINE EXECUTION ===")
         print(f"🚀 [GAP FILTERED PIPELINE] Year: {year}, Batch-ID: {batch_id} (PLZ 26XXX Vorgefiltert)")
         
         from app.services.gap_progress import PipelineProgress
         from app.services.gap_pipeline import run_year_pipeline_filtered
         
         if not batch_id:
-            print(f"🚀 [GAP FILTERED PIPELINE] ERROR: No batch_id provided!")
+            print("🚀 [GAP FILTERED PIPELINE] ERROR: No batch_id provided!")
             return
         
         progress = PipelineProgress(batch_id, year)
-        progress.update_status("starting", 1, 6, f"🎯 ULTRA-OPTIMIERTE Pipeline für PLZ 26XXX gestartet...", "running")
+        progress.update_status("starting", 1, 6, "🎯 ULTRA-OPTIMIERTE Pipeline für PLZ 26XXX gestartet...", "running")
         
         def progress_callback(step: str, step_num: int, message: str):
             try:
@@ -2041,7 +2041,7 @@ def _execute_gap_pipeline_filtered(year: int, batch_id: Optional[str] = None):
             summary = result.get("summary", {})
             completion_msg = f"🎉 ULTRA-OPTIMIERTE Pipeline erfolgreich abgeschlossen! {summary.get('total_payments', 0):,} Zahlungen in {summary.get('duration_seconds', 0):.1f}s verarbeitet"
             progress.complete(completion_msg)
-            print(f"🚀 [GAP FILTERED PIPELINE] === ULTRA-OPTIMIZED PIPELINE COMPLETED SUCCESSFULLY ===")
+            print("🚀 [GAP FILTERED PIPELINE] === ULTRA-OPTIMIZED PIPELINE COMPLETED SUCCESSFULLY ===")
         else:
             error_msg = result.get("error", "Unbekannter Fehler")
             progress.error(f"Pipeline-Fehler: {error_msg}")

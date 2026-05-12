@@ -34,7 +34,7 @@ class ProductionTenantService(TenantService):
 
     async def get_all(self, tenant_id: str, pagination: Optional[Dict] = None):
         """Get all tenants for organization."""
-        logger.debug(f"ProductionTenantService.get_all called")
+        logger.debug("ProductionTenantService.get_all called")
         try:
             # Database query implementation
             return []
@@ -44,7 +44,7 @@ class ProductionTenantService(TenantService):
 
     async def create(self, data: Dict[str, Any], tenant_id: str) -> Optional[Dict[str, Any]]:
         """Create new tenant."""
-        logger.debug(f"ProductionTenantService.create called")
+        logger.debug("ProductionTenantService.create called")
         try:
             # Database insert implementation
             return {"id": "new_tenant_id", "status": "created"}
