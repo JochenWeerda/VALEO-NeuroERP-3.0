@@ -86,6 +86,53 @@ def configure_number_range(
         raise HTTPException(status_code=422, detail=str(exc)) from exc
 
 
+@router.get("/{range_type}")
+def get_number_range(range_type: str, db: Session = Depends(get_db)) -> dict[str, Any]:
+    tenant_id = get_current_tenant_id()
+    svc = NumberRangeService(db)
+    ranges = svc.list_ranges(tenant_id)
+    nr = next((r for r in ranges if r.range_type == range_type), None)
+    if not nr:
+        raise HTTPException(status_code=404, detail=f"Kein Nummernkreis für '{range_type}' konfiguriert")
+    return _to_out(nr, svc, tenant_id)
+
+
+@router.put("/{range_type}")
+def update_number_range(
+    range_type: str,
+    body: NumberRangeConfigRequest,
+    db: Session = Depends(get_db),
+) -> dict[str, Any]:
+    tenant_id = get_current_tenant_id()
+    svc = NumberRangeService(db)
+    try:
+        nr = svc.configure(
+            tenant_id=tenant_id,
+            range_type=range_type,
+            prefix=body.prefix,
+            start_number=body.start_number,
+            digit_count=body.digit_count,
+            reserved_prefix_digits=body.reserved_prefix_digits,
+        )
+        db.commit()
+        db.refresh(nr)
+        return _to_out(nr, svc, tenant_id)
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+
+
+@router.delete("/{range_type}", status_code=204)
+def delete_number_range(range_type: str, db: Session = Depends(get_db)) -> None:
+    tenant_id = get_current_tenant_id()
+    svc = NumberRangeService(db)
+    ranges = svc.list_ranges(tenant_id)
+    nr = next((r for r in ranges if r.range_type == range_type), None)
+    if not nr:
+        raise HTTPException(status_code=404, detail=f"Kein Nummernkreis für '{range_type}' konfiguriert")
+    nr.is_active = False
+    db.commit()
+
+
 @router.get("/{range_type}/peek")
 def peek_next_number(
     range_type: str,

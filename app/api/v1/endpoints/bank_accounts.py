@@ -295,3 +295,33 @@ async def update_bank_account(
         db.rollback()
         logger.error(f"Error updating bank account: {e}")
         raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.delete("/{account_id}", status_code=204)
+async def delete_bank_account(
+    account_id: str,
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+):
+    """Bankkonto deaktivieren (Soft-Delete über is_active=FALSE)."""
+    try:
+        row = db.execute(
+            text("SELECT id FROM domain_erp.bank_accounts WHERE id = :id AND tenant_id = :tid"),
+            {"id": account_id, "tid": tenant_id},
+        ).fetchone()
+        if not row:
+            raise HTTPException(status_code=404, detail="Bankkonto nicht gefunden")
+        db.execute(
+            text(
+                "UPDATE domain_erp.bank_accounts SET is_active = FALSE, updated_at = NOW() "
+                "WHERE id = :id AND tenant_id = :tid"
+            ),
+            {"id": account_id, "tid": tenant_id},
+        )
+        db.commit()
+    except HTTPException:
+        raise
+    except Exception as e:
+        db.rollback()
+        logger.error(f"Error deleting bank account: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
