@@ -2153,6 +2153,7 @@ def _run_lp(
             _trade_frac_eff = max(0.0, min(0.5, float(_trade_frac_eff)))
 
     _fs_sys_for_kl = str((_fs_cfg or {}).get("system") or "TMR")
+    _conc_max_per_day = float((_fs_cfg or {}).get("concentrate_max_per_day_kg") or 0.0)
     _me_maint_milk, _me_pkm, _sidp_maint_milk, _sidp_pkm = _milk_requirement_factors(
         _prof_lp,
         None,
@@ -2332,6 +2333,10 @@ def _run_lp(
                 / _conc_slack_halfwidth
             )
             conc_slack_needed = _conc_max_per_day > 0 and _has_staged_concentrate
+            conc_mask = [1.0 if block_labels[i] == "concentrate_staged_block" else 0.0 for i in range(n)]
+
+            def _is_forage_or_cop(f: Dict[str, Any]) -> bool:
+                return bool(f.get("forage")) or bool(f.get("structural_coproduct"))
             n_cs = 1 if conc_slack_needed else 0
             _prices_stage2 = list(prices)
             if _wizard_sg.get("minimize_soya"):

@@ -4,9 +4,8 @@ Centralized configuration management using Pydantic settings
 """
 
 import json
-import secrets
 from typing import Any, List, Optional, Union
-from pydantic import Field, field_validator, ValidationInfo
+from pydantic import Field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -27,7 +26,7 @@ class Settings(BaseSettings):
     HOST: str = "0.0.0.0"
     PORT: int = 8000
     APP_ENV: str = "development"
-    DEBUG: bool = True
+    DEBUG: bool = False
 
     @field_validator("DEBUG", mode="before")
     @classmethod
@@ -234,7 +233,8 @@ class Settings(BaseSettings):
 
     # Rationsoptimierung Microservice
     RATIONS_OPTIMIZATION_URL: Optional[str] = None  # z.B. http://rations-optimization:8000
-    RATIONS_OPTIMIZATION_API_KEY: str = "dev-api-key-change-in-production"
+    # SC-SECRETS-002: In Produktion MUSS dieser Key aus einer Env-Var kommen.
+    RATIONS_OPTIMIZATION_API_KEY: Optional[str] = None
     RATIONS_DLG_DATA_PATH: Optional[str] = None  # Pfad zur DLG-FWT-2025-JSON (z.B. /data/DLG_FWT_WK_2025.json)
 
     # File Storage

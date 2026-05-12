@@ -397,18 +397,16 @@ def test_api_zertifikat_post():
 
     client = TestClient(app, raise_server_exceptions=True)
     payload = {
-        "tenant_id": "tenant-test",
-        "typ": "qs_gap",
-        "zertifizierungsstelle": "DQS GmbH",
-        "gueltig_von": "2025-01-01",
+        "art": "qs_gap",
+        "standard": "QS",
+        "nummer": "QS-2025-9999",
         "gueltig_bis": "2026-12-31",
-        "zertifikatsnummer": "QS-2025-9999",
     }
     resp = client.post("/api/v1/zertifikate", json=payload)
     assert resp.status_code == 201
     data = resp.json()
-    assert "zertifikat_id" in data
-    assert data["tenant_id"] == "tenant-test"
+    assert "id" in data
+    assert data["nummer"] == "QS-2025-9999"
 
 
 def test_api_edi_nachricht_mit_unb():

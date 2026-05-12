@@ -7,8 +7,7 @@ from typing import List, Optional, Dict, Any
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 from sqlalchemy import text
-from decimal import Decimal
-from datetime import date, datetime
+from datetime import datetime
 from pydantic import BaseModel, Field
 import logging
 from app.core.uuid7 import uuid7
@@ -185,25 +184,25 @@ async def list_checklist_templates(
             FROM domain_erp.closing_checklist_templates
             WHERE tenant_id = :tenant_id
         """)
-        
+
         params = {"tenant_id": tenant_id}
-        
+
         if closing_type:
             query = text(str(query) + " AND closing_type = :closing_type")
             params["closing_type"] = closing_type
-        
+
         if active_only:
             query = text(str(query) + " AND active = true")
-        
+
         query = text(str(query) + " ORDER BY closing_type, template_name")
-        
+
         rows = db.execute(query, params).fetchall()
-        
+
         result = []
         for row in rows:
             import json
             items_data = json.loads(row[4]) if row[4] else []
-            
+
             result.append({
                 "id": str(row[0]),
                 "template_name": str(row[1]),
@@ -214,9 +213,9 @@ async def list_checklist_templates(
                 "created_at": row[6].isoformat() if row[6] else None,
                 "updated_at": row[7].isoformat() if row[7] else None
             })
-        
+
         return result
-        
+
     except Exception as e:
         logger.error(f"Error listing checklist templates: {e}")
         # Return default templates if table doesn't exist
@@ -280,7 +279,10 @@ async def list_checklist_templates(
                         "description": "USt-Voranmeldung erstellt",
                         "category": "TAX",
                         "validation_type": "automatic",
-                        "validation_query": "SELECT COUNT(*) FROM vat_returns WHERE period = :period AND status IN ('calculated', 'validated', 'submitted')",
+                        "validation_query": (
+                            "SELECT COUNT(*) FROM vat_returns "
+                            "WHERE period = :period AND status IN ('calculated', 'validated', 'submitted')"
+                        ),
                         "required": True,
                         "responsible_role": "controller",
                         "due_date_offset": 0
@@ -405,10 +407,10 @@ async def create_checklist_template(
     """
     try:
         template_id = uuid7()
-        
+
         import json
         items_json = json.dumps([item.dict() for item in template.items])
-        
+
         insert_query = text("""
             INSERT INTO domain_erp.closing_checklist_templates
             (id, tenant_id, template_name, description, closing_type, items, active, created_at, updated_at)
@@ -416,7 +418,7 @@ async def create_checklist_template(
             (:id, :tenant_id, :template_name, :description, :closing_type, :items, :active, NOW(), NOW())
             RETURNING id, template_name, description, closing_type, items, active, created_at, updated_at
         """)
-        
+
         row = db.execute(insert_query, {
             "id": template_id,
             "tenant_id": tenant_id,
@@ -426,12 +428,12 @@ async def create_checklist_template(
             "items": items_json,
             "active": template.active
         }).fetchone()
-        
+
         db.commit()
-        
+
         import json
         items_data = json.loads(row[4]) if row[4] else []
-        
+
         return {
             "id": str(row[0]),
             "template_name": str(row[1]),
@@ -442,7 +444,7 @@ async def create_checklist_template(
             "created_at": row[6].isoformat() if row[6] else None,
             "updated_at": row[7].isoformat() if row[7] else None
         }
-        
+
     except Exception as e:
         db.rollback()
         logger.error(f"Error creating checklist template: {e}")
@@ -459,27 +461,27 @@ async def create_closing_checklist(
     """
     try:
         checklist_id = uuid7()
-        
+
         # Get template if provided
         items = []
         template_id = None
-        
+
         if checklist.template_id:
             template_query = text("""
                 SELECT id, items FROM domain_erp.closing_checklist_templates
                 WHERE id = :template_id AND tenant_id = :tenant_id AND active = true
             """)
-            
+
             template_row = db.execute(template_query, {
                 "template_id": checklist.template_id,
                 "tenant_id": checklist.tenant_id
             }).fetchone()
-            
+
             if template_row:
                 template_id = str(template_row[0])
                 import json
                 items = json.loads(template_row[1]) if template_row[1] else []
-        
+
         # If no template, use default items based on closing type
         if not items:
             if checklist.closing_type == "yearly":
@@ -598,18 +600,18 @@ async def create_closing_checklist(
                         "status": "pending"
                     }
                 ]
-        
+
         # Initialize all items with pending status
         for item in items:
             if "status" not in item:
                 item["status"] = "pending"
-        
+
         import json
         items_json = json.dumps(items)
-        
+
         total_items = len(items)
         required_items = sum(1 for item in items if item.get("required", True))
-        
+
         insert_query = text("""
             INSERT INTO domain_erp.closing_checklists
             (id, tenant_id, period, closing_type, template_id, status, progress_percentage,
@@ -623,7 +625,7 @@ async def create_closing_checklist(
                       total_items, completed_items, required_items, completed_required_items,
                       items, created_at, updated_at, completed_at, completed_by
         """)
-        
+
         row = db.execute(insert_query, {
             "id": checklist_id,
             "tenant_id": checklist.tenant_id,
@@ -638,14 +640,14 @@ async def create_closing_checklist(
             "completed_required_items": 0,
             "items": items_json
         }).fetchone()
-        
+
         db.commit()
-        
+
         import json
         items_data = json.loads(row[10]) if row[10] else []
-        
+
         return build_closing_checklist_response(row, items_data=items_data)
-        
+
     except Exception as e:
         db.rollback()
         logger.error(f"Error creating closing checklist: {e}")
@@ -669,20 +671,20 @@ async def get_closing_checklist(
             FROM domain_erp.closing_checklists
             WHERE id = :checklist_id AND tenant_id = :tenant_id
         """)
-        
+
         row = db.execute(query, {
             "checklist_id": checklist_id,
             "tenant_id": tenant_id
         }).fetchone()
-        
+
         if not row:
             raise HTTPException(status_code=404, detail="Closing checklist not found")
-        
+
         import json
         items_data = json.loads(row[10]) if row[10] else []
-        
+
         return build_closing_checklist_response(row, items_data=items_data)
-        
+
     except HTTPException:
         raise
     except Exception as e:
@@ -704,11 +706,11 @@ async def complete_checklist_item(
     try:
         # Get checklist
         checklist = await get_closing_checklist(checklist_id, tenant_id, db)
-        
+
         # Find item
         item_found = False
         updated_items = []
-        
+
         for item in checklist.items:
             if item.get("item_code") == item_code:
                 item_found = True
@@ -718,25 +720,25 @@ async def complete_checklist_item(
                 if request.notes:
                     item["notes"] = request.notes
             updated_items.append(item)
-        
+
         if not item_found:
             raise HTTPException(status_code=404, detail="Checklist item not found")
-        
+
         # Recalculate progress
         completed_items = sum(1 for item in updated_items if item.get("status") == "completed")
         completed_required = sum(1 for item in updated_items if item.get("status") == "completed" and item.get("required", True))
         progress = (completed_items / checklist.total_items * 100) if checklist.total_items > 0 else 0.0
-        
+
         # Update status
         new_status = "in_progress"
         if completed_required >= checklist.required_items:
             new_status = "completed"
         elif any(item.get("status") == "failed" for item in updated_items if item.get("required", True)):
             new_status = "blocked"
-        
+
         import json
         items_json = json.dumps(updated_items)
-        
+
         update_query = text("""
             UPDATE domain_erp.closing_checklists
             SET items = :items, completed_items = :completed_items,
@@ -747,7 +749,7 @@ async def complete_checklist_item(
                 updated_at = NOW()
             WHERE id = :checklist_id AND tenant_id = :tenant_id
         """)
-        
+
         db.execute(update_query, {
             "checklist_id": checklist_id,
             "tenant_id": tenant_id,
@@ -758,11 +760,11 @@ async def complete_checklist_item(
             "status": new_status,
             "completed_by": request.completed_by
         })
-        
+
         db.commit()
-        
+
         return await get_closing_checklist(checklist_id, tenant_id, db)
-        
+
     except HTTPException:
         raise
     except Exception as e:
@@ -782,20 +784,21 @@ async def validate_checklist_items(
     """
     try:
         checklist = await get_closing_checklist(checklist_id, tenant_id, db)
-        
+
         updated_items = []
         validation_results = []
-        
+
         for item in checklist.items:
             if item.get("validation_type") == "automatic" and item.get("validation_query"):
                 # Execute validation query
                 try:
                     validation_query = item["validation_query"]
-                    # Replace :period placeholder
-                    validation_query = validation_query.replace(":period", f"'{checklist.period}'")
-                    
-                    result = db.execute(text(validation_query)).fetchone()
-                    
+                    # :period als gebundener Parameter — niemals per String-Ersatz interpolieren.
+                    result = db.execute(
+                        text(validation_query),
+                        {"period": checklist.period},
+                    ).fetchone()
+
                     # Determine if validation passed (assumes query returns count or boolean)
                     validation_passed = False
                     if result:
@@ -805,25 +808,25 @@ async def validate_checklist_items(
                             validation_passed = (value == 0)
                         elif isinstance(value, bool):
                             validation_passed = value
-                    
+
                     item["validation_result"] = {
                         "passed": validation_passed,
                         "value": str(result[0]) if result else None,
                         "validated_at": datetime.now().isoformat()
                     }
-                    
+
                     # Auto-update status if validation passed
                     if validation_passed and item.get("status") == "pending":
                         item["status"] = "completed"
                         item["completed_at"] = datetime.now().isoformat()
                         item["completed_by"] = "SYSTEM"
-                    
+
                     validation_results.append({
                         "item_code": item.get("item_code"),
                         "passed": validation_passed,
                         "message": "Validation passed" if validation_passed else "Validation failed"
                     })
-                    
+
                 except Exception as e:
                     item["validation_result"] = {
                         "passed": False,
@@ -835,22 +838,22 @@ async def validate_checklist_items(
                         "passed": False,
                         "message": f"Validation error: {str(e)}"
                     })
-            
+
             updated_items.append(item)
-        
+
         # Recalculate progress
         completed_items = sum(1 for item in updated_items if item.get("status") == "completed")
         completed_required = sum(1 for item in updated_items if item.get("status") == "completed" and item.get("required", True))
         progress = (completed_items / checklist.total_items * 100) if checklist.total_items > 0 else 0.0
-        
+
         # Update status
         new_status = "in_progress"
         if completed_required >= checklist.required_items:
             new_status = "completed"
-        
+
         import json
         items_json = json.dumps(updated_items)
-        
+
         update_query = text("""
             UPDATE domain_erp.closing_checklists
             SET items = :items, completed_items = :completed_items,
@@ -859,7 +862,7 @@ async def validate_checklist_items(
                 updated_at = NOW()
             WHERE id = :checklist_id AND tenant_id = :tenant_id
         """)
-        
+
         db.execute(update_query, {
             "checklist_id": checklist_id,
             "tenant_id": tenant_id,
@@ -869,15 +872,15 @@ async def validate_checklist_items(
             "progress_percentage": progress,
             "status": new_status
         })
-        
+
         db.commit()
-        
+
         return {
             "checklist_id": checklist_id,
             "validation_results": validation_results,
             "updated_checklist": await get_closing_checklist(checklist_id, tenant_id, db)
         }
-        
+
     except HTTPException:
         raise
     except Exception as e:
@@ -905,38 +908,38 @@ async def list_closing_checklists(
             FROM domain_erp.closing_checklists
             WHERE tenant_id = :tenant_id
         """)
-        
+
         params = {"tenant_id": tenant_id}
         conditions = []
-        
+
         if period:
             conditions.append("period = :period")
             params["period"] = period
-        
+
         if closing_type:
             conditions.append("closing_type = :closing_type")
             params["closing_type"] = closing_type
-        
+
         if status:
             conditions.append("status = :status")
             params["status"] = status
-        
+
         if conditions:
             query = text(str(query) + " AND " + " AND ".join(conditions))
-        
+
         query = text(str(query) + " ORDER BY period DESC, created_at DESC")
-        
+
         rows = db.execute(query, params).fetchall()
-        
+
         result = []
         for row in rows:
             import json
             items_data = json.loads(row[10]) if row[10] else []
-            
+
             result.append(build_closing_checklist_response(row, items_data=items_data))
-        
+
         return result
-        
+
     except Exception as e:
         logger.error(f"Error listing closing checklists: {e}")
         return []
@@ -1091,4 +1094,3 @@ async def delete_closing_checklist(
         {"checklist_id": checklist_id, "tenant_id": tenant_id},
     )
     db.commit()
-

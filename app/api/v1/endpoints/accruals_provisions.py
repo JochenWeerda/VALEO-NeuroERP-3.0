@@ -7,7 +7,7 @@ from typing import List, Optional
 from datetime import date, datetime
 from decimal import Decimal
 
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel, Field
 from sqlalchemy import text
 from sqlalchemy.orm import Session
@@ -173,7 +173,8 @@ async def update_accrual_provision(
     existing = _fetch_accrual_or_404(db, item_id, tenant_id)
     if existing.status == "posted":
         raise HTTPException(status_code=400, detail="Posted items cannot be edited")
-    updates = payload.model_dump(exclude_unset=True)
+    _ALLOWED_COLUMNS = frozenset(AccrualItemUpdate.model_fields.keys())
+    updates = {k: v for k, v in payload.model_dump(exclude_unset=True).items() if k in _ALLOWED_COLUMNS}
     if not updates:
         return existing
     set_clauses = ", ".join(f"{k} = :{k}" for k in updates)
