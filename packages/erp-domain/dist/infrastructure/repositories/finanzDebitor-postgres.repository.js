@@ -5,6 +5,7 @@ const finanzDebitor_entity_1 = require("../../core/entities/finanzDebitor.entity
 const TABLE = 'finanz.debitoren';
 const COLUMNS = [
     'id',
+    'tenant_id',
     'kunden_id',
     'debitor_nr',
     'kreditlimit',
@@ -48,6 +49,7 @@ class FinanzDebitorPostgresRepository {
     mapRow(row) {
         const props = {
             id: row.id,
+            tenant_id: String(row.tenant_id),
             kunden_id: (row.kunden_id !== undefined && row.kunden_id !== null) ? String(row.kunden_id) : undefined,
             debitor_nr: String(row.debitor_nr),
             kreditlimit: toNumber(row.kreditlimit),
@@ -64,28 +66,38 @@ class FinanzDebitorPostgresRepository {
         };
         return finanzDebitor_entity_1.FinanzDebitor.create(props);
     }
-    async findById(id) {
-        const result = await this.pool.query(`SELECT ${COLUMNS.join(', ')} FROM ${TABLE} WHERE id = $1 LIMIT 1`, [id]);
+    async findById(id, tenantId) {
+        const result = await this.pool.query(`SELECT ${COLUMNS.join(', ')} FROM ${TABLE} WHERE id = $1 AND tenant_id = $2 LIMIT 1`, [id, tenantId]);
         if (result.rowCount === 0) {
             return null;
         }
         return this.mapRow(result.rows[0]);
     }
-    async findByDebitorNr(debitorNr) {
-        const result = await this.pool.query(`SELECT ${COLUMNS.join(', ')} FROM ${TABLE} WHERE debitor_nr = $1 LIMIT 1`, [debitorNr]);
+    async findByDebitorNr(tenantId, debitorNr) {
+        const result = await this.pool.query(`SELECT ${COLUMNS.join(', ')} FROM ${TABLE} WHERE tenant_id = $1 AND debitor_nr = $2 LIMIT 1`, [tenantId, debitorNr]);
         if (result.rowCount === 0) {
             return null;
         }
         return this.mapRow(result.rows[0]);
     }
-    async list() {
-        const result = await this.pool.query(`SELECT ${COLUMNS.join(', ')} FROM ${TABLE} ORDER BY debitor_nr ASC`);
+    async count(tenantId) {
+        const result = await this.pool.query(`SELECT COUNT(*)::int AS c FROM ${TABLE} WHERE tenant_id = $1`, [tenantId]);
+        const c = result.rows[0]?.c;
+        return typeof c === 'number' ? c : parseInt(String(c), 10);
+    }
+    async listPaged(tenantId, limit, offset) {
+        const result = await this.pool.query(`SELECT ${COLUMNS.join(', ')} FROM ${TABLE} WHERE tenant_id = $1 ORDER BY debitor_nr ASC LIMIT $2 OFFSET $3`, [tenantId, limit, offset]);
+        return result.rows.map((row) => this.mapRow(row));
+    }
+    async list(tenantId) {
+        const result = await this.pool.query(`SELECT ${COLUMNS.join(', ')} FROM ${TABLE} WHERE tenant_id = $1 ORDER BY debitor_nr ASC`, [tenantId]);
         return result.rows.map((row) => this.mapRow(row));
     }
     async save(entity) {
         const primitives = entity.toPrimitives();
         const result = await this.pool.query(`INSERT INTO ${TABLE} (
         id,
+        tenant_id,
         kunden_id,
         debitor_nr,
         kreditlimit,
@@ -107,11 +119,13 @@ class FinanzDebitorPostgresRepository {
         $7,
         $8,
         $9,
-        COALESCE($10, true),
-        $11,
-        $12
+        $10,
+        COALESCE($11, true),
+        $12,
+        $13
       ) RETURNING ${COLUMNS.join(', ')}`, [
             primitives.id ?? null,
+            primitives.tenant_id,
             primitives.kunden_id ?? null,
             primitives.debitor_nr,
             primitives.kreditlimit ?? null,
@@ -143,7 +157,7 @@ class FinanzDebitorPostgresRepository {
               ist_aktiv = COALESCE($10, ist_aktiv),
               notizen = $11,
               aktualisiert_am = CURRENT_TIMESTAMP
-        WHERE id = $1
+        WHERE id = $1 AND tenant_id = $12
         RETURNING ${COLUMNS.join(', ')}
       `, [
             primitives.id,
@@ -157,14 +171,15 @@ class FinanzDebitorPostgresRepository {
             primitives.ust_id ?? null,
             primitives.ist_aktiv ?? null,
             primitives.notizen ?? null,
+            primitives.tenant_id,
         ]);
         if (result.rowCount === 0) {
             throw new Error(`FinanzDebitor with id ${primitives.id} not found`);
         }
         return this.mapRow(result.rows[0]);
     }
-    async delete(id) {
-        await this.pool.query(`DELETE FROM ${TABLE} WHERE id = $1`, [id]);
+    async delete(id, tenantId) {
+        await this.pool.query(`DELETE FROM ${TABLE} WHERE id = $1 AND tenant_id = $2`, [id, tenantId]);
     }
 }
 exports.FinanzDebitorPostgresRepository = FinanzDebitorPostgresRepository;

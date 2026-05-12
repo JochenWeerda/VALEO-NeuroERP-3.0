@@ -15,6 +15,9 @@ class FinanzBuchung {
     get id() {
         return this.props.id;
     }
+    get tenantId() {
+        return this.props.tenant_id;
+    }
     get buchungsnummer() {
         return this.props.buchungsnummer;
     }

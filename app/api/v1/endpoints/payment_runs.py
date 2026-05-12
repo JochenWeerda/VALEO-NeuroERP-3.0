@@ -203,26 +203,26 @@ class PaymentRunPlanResponse(BaseModel):
 
 class SEPAXMLGenerator:
     """Generates SEPA pain.001.001.03 XML files"""
-    
+
     NAMESPACE = "urn:iso:std:iso:20022:tech:xsd:pain.001.001.03"
-    
+
     def __init__(self, initiator_name: str, initiator_iban: str, initiator_bic: str):
         self.initiator_name = initiator_name
         self.initiator_iban = self._format_iban(initiator_iban)
         self.initiator_bic = initiator_bic
-    
+
     def _format_iban(self, iban: str) -> str:
         """Remove spaces and convert to uppercase"""
         return iban.replace(" ", "").upper()
-    
+
     def _format_bic(self, bic: str) -> str:
         """Format BIC"""
         return bic.replace(" ", "").upper() if bic else ""
-    
+
     def _format_decimal(self, value: Decimal) -> str:
         """Format decimal for SEPA (2 decimal places)"""
         return f"{value:.2f}"
-    
+
     def generate_credit_transfer(
         self,
         payments: List[PaymentItem],
@@ -234,33 +234,33 @@ class SEPAXMLGenerator:
         """
         if message_id is None:
             message_id = f"MSG-{datetime.now().strftime('%Y%m%d-%H%M%S')}"
-        
+
         if execution_date is None:
             execution_date = date.today()
-        
+
         # Register namespace
         ET.register_namespace('', self.NAMESPACE)
-        
+
         # Root element
         root = ET.Element("Document", xmlns=self.NAMESPACE)
-        
+
         # CstmrCdtTrfInitn (Customer Credit Transfer Initiation)
         cct_initn = ET.SubElement(root, "CstmrCdtTrfInitn")
-        
+
         # Group Header
         grp_hdr = ET.SubElement(cct_initn, "GrpHdr")
         ET.SubElement(grp_hdr, "MsgId").text = message_id
         ET.SubElement(grp_hdr, "CreDtTm").text = datetime.now().isoformat()
         ET.SubElement(grp_hdr, "NbOfTxs").text = str(len(payments))
-        
+
         # Calculate total amount
         total_amount = sum(payment.amount for payment in payments)
         ET.SubElement(grp_hdr, "CtrlSum").text = self._format_decimal(total_amount)
-        
+
         # Initiating Party
         initg_pty = ET.SubElement(grp_hdr, "InitgPty")
         ET.SubElement(initg_pty, "Nm").text = self.initiator_name
-        
+
         # Payment Information
         pmt_inf = ET.SubElement(cct_initn, "PmtInf")
         pmt_inf_id = f"PMT-{datetime.now().strftime('%Y%m%d-%H%M%S')}"
@@ -269,63 +269,63 @@ class SEPAXMLGenerator:
         ET.SubElement(pmt_inf, "BtchBookg").text = "false"
         ET.SubElement(pmt_inf, "NbOfTxs").text = str(len(payments))
         ET.SubElement(pmt_inf, "CtrlSum").text = self._format_decimal(total_amount)
-        
+
         # Payment Type Information
         pmt_tp_inf = ET.SubElement(pmt_inf, "PmtTpInf")
         svc_lvl = ET.SubElement(pmt_tp_inf, "SvcLvl")
         ET.SubElement(svc_lvl, "Cd").text = "SEPA"
-        
+
         # Requested Execution Date
         reqd_exctn_dt = ET.SubElement(pmt_inf, "ReqdExctnDt")
         reqd_exctn_dt.text = execution_date.strftime("%Y-%m-%d")
-        
+
         # Debtor (Initiator)
         dbtr = ET.SubElement(pmt_inf, "Dbtr")
         ET.SubElement(dbtr, "Nm").text = self.initiator_name
-        
+
         # Debtor Account
         dbtr_acct = ET.SubElement(pmt_inf, "DbtrAcct")
         dbtr_acct_id = ET.SubElement(dbtr_acct, "Id")
         ET.SubElement(dbtr_acct_id, "IBAN").text = self.initiator_iban
-        
+
         # Debtor Agent (Bank)
         dbtr_agt = ET.SubElement(pmt_inf, "DbtrAgt")
         fin_instn_id = ET.SubElement(dbtr_agt, "FinInstnId")
         ET.SubElement(fin_instn_id, "BIC").text = self.initiator_bic
-        
+
         # Credit Transfer Transaction Information
         for idx, payment in enumerate(payments, start=1):
             cdt_trf_tx_inf = ET.SubElement(pmt_inf, "CdtTrfTxInf")
-            
+
             # Payment Identification
             pmt_id = ET.SubElement(cdt_trf_tx_inf, "PmtId")
             end_to_end_id = payment.end_to_end_id or f"E2E-{payment.invoice_number or payment.op_id or idx}"
             ET.SubElement(pmt_id, "EndToEndId").text = end_to_end_id
-            
+
             # Amount
             amt = ET.SubElement(cdt_trf_tx_inf, "Amt")
             instd_amt = ET.SubElement(amt, "InstdAmt", Ccy="EUR")
             instd_amt.text = self._format_decimal(payment.amount)
-            
+
             # Creditor Agent (Bank) - optional for SEPA
             if payment.bic:
                 cdtr_agt = ET.SubElement(cdt_trf_tx_inf, "CdtrAgt")
                 fin_instn_id = ET.SubElement(cdtr_agt, "FinInstnId")
                 ET.SubElement(fin_instn_id, "BIC").text = self._format_bic(payment.bic)
-            
+
             # Creditor
             cdtr = ET.SubElement(cdt_trf_tx_inf, "Cdtr")
             ET.SubElement(cdtr, "Nm").text = payment.creditor_name
-            
+
             # Creditor Account
             cdtr_acct = ET.SubElement(cdt_trf_tx_inf, "CdtrAcct")
             cdtr_acct_id = ET.SubElement(cdtr_acct, "Id")
             ET.SubElement(cdtr_acct_id, "IBAN").text = self._format_iban(payment.iban)
-            
+
             # Remittance Information
             rmt_inf = ET.SubElement(cdt_trf_tx_inf, "RmtInf")
             ET.SubElement(rmt_inf, "Ustrd").text = payment.purpose
-        
+
         # Convert to string and prettify
         rough_string = ET.tostring(root, encoding='utf-8')
         reparsed = minidom.parseString(rough_string)
@@ -413,12 +413,12 @@ async def create_payment_run(
     """
     try:
         run_id = uuid7()
-        
+
         total_amount = sum(payment.amount for payment in payment_run.payments)
-        
+
         import json
         payments_json = json.dumps([p.model_dump(mode="json") for p in payment_run.payments])
-        
+
         insert_query = text("""
             INSERT INTO domain_erp.payment_runs
             (id, tenant_id, run_number, execution_date, initiator_name, initiator_iban, initiator_bic,
@@ -430,7 +430,7 @@ async def create_payment_run(
                       total_amount, payment_count, status, approved_at, approved_by, executed_at,
                       sepa_file_id, notes, created_at, updated_at
         """)
-        
+
         row = db.execute(insert_query, {
             "id": run_id,
             "tenant_id": tenant_id,
@@ -444,7 +444,7 @@ async def create_payment_run(
             "status": "draft",
             "notes": payment_run.notes
         }).fetchone()
-        
+
         # Insert payment items
         for idx, payment in enumerate(payment_run.payments, start=1):
             payment_id = f"{run_id}-P{idx}"
@@ -458,7 +458,7 @@ async def create_payment_run(
                  :purpose, :op_id, :invoice_number, :discount_used, :discount_amount, :end_to_end_id,
                  :status, NOW(), NOW())
             """)
-            
+
             db.execute(payment_insert, {
                 "id": payment_id,
                 "tenant_id": tenant_id,
@@ -476,9 +476,9 @@ async def create_payment_run(
                 "end_to_end_id": payment.end_to_end_id or f"E2E-{payment.invoice_number or payment.op_id or idx}",
                 "status": "pending"
             })
-        
+
         db.commit()
-        
+
         # Get payments for response
         payments_query = text("""
             SELECT creditor_id, creditor_name, iban, bic, amount, purpose, op_id, invoice_number,
@@ -487,9 +487,9 @@ async def create_payment_run(
             WHERE payment_run_id = :payment_run_id
             ORDER BY created_at
         """)
-        
+
         payments_rows = db.execute(payments_query, {"payment_run_id": run_id}).fetchall()
-        
+
         payments = [
             {
                 "creditor_id": str(row[0]),
@@ -507,9 +507,9 @@ async def create_payment_run(
             }
             for row in payments_rows
         ]
-        
+
         return _build_payment_run_response(row, payments=payments)
-        
+
     except Exception as e:
         db.rollback()
         logger.error(f"Error creating payment run: {e}")
@@ -533,17 +533,17 @@ async def list_payment_runs(
             FROM domain_erp.payment_runs
             WHERE tenant_id = :tenant_id
         """)
-        
+
         params = {"tenant_id": tenant_id}
-        
+
         if status:
             query = text(str(query) + " AND status = :status")
             params["status"] = status
-        
+
         query = text(str(query) + " ORDER BY created_at DESC")
-        
+
         rows = db.execute(query, params).fetchall()
-        
+
         result = []
         for row in rows:
             # Get payments for each run
@@ -554,9 +554,9 @@ async def list_payment_runs(
                 WHERE payment_run_id = :payment_run_id
                 ORDER BY created_at
             """)
-            
+
             payments_rows = db.execute(payments_query, {"payment_run_id": str(row[0])}).fetchall()
-            
+
             payments = [
                 {
                     "creditor_id": str(p_row[0]),
@@ -574,11 +574,11 @@ async def list_payment_runs(
                 }
                 for p_row in payments_rows
             ]
-            
+
             result.append(_build_payment_run_response(row, payments=payments))
-        
+
         return result
-        
+
     except Exception as e:
         logger.error(f"Error listing payment runs: {e}")
         return []
@@ -601,15 +601,15 @@ async def get_payment_run(
             FROM domain_erp.payment_runs
             WHERE id = :run_id AND tenant_id = :tenant_id
         """)
-        
+
         row = db.execute(query, {
             "run_id": run_id,
             "tenant_id": tenant_id
         }).fetchone()
-        
+
         if not row:
             raise HTTPException(status_code=404, detail="Payment run not found")
-        
+
         # Get payments
         payments_query = text("""
             SELECT creditor_id, creditor_name, iban, bic, amount, purpose, op_id, invoice_number,
@@ -618,9 +618,9 @@ async def get_payment_run(
             WHERE payment_run_id = :payment_run_id
             ORDER BY created_at
         """)
-        
+
         payments_rows = db.execute(payments_query, {"payment_run_id": run_id}).fetchall()
-        
+
         payments = [
             {
                 "creditor_id": str(p_row[0]),
@@ -638,9 +638,9 @@ async def get_payment_run(
             }
             for p_row in payments_rows
         ]
-        
+
         return _build_payment_run_response(row, payments=payments)
-        
+
     except HTTPException:
         raise
     except Exception as e:
@@ -665,20 +665,20 @@ async def approve_payment_run(
             WHERE id = :run_id AND tenant_id = :tenant_id AND status = 'draft'
             RETURNING id
         """)
-        
+
         row = db.execute(update_query, {
             "run_id": run_id,
             "tenant_id": tenant_id,
             "approved_by": request.approved_by
         }).fetchone()
-        
+
         if not row:
             raise HTTPException(status_code=404, detail="Payment run not found or cannot be approved")
-        
+
         db.commit()
 
         return await get_payment_run(run_id, tenant_id, db)
-        
+
     except HTTPException:
         raise
     except Exception as e:
@@ -700,55 +700,55 @@ async def execute_payment_run(
     try:
         # Get payment run
         payment_run = await get_payment_run(run_id, tenant_id, db)
-        
+
         if payment_run.status != "approved":
             raise HTTPException(status_code=400, detail="Payment run must be approved before execution")
-        
+
         # Generate SEPA XML
         generator = SEPAXMLGenerator(
             initiator_name=payment_run.initiator_name,
             initiator_iban=payment_run.initiator_iban,
             initiator_bic=payment_run.initiator_bic
         )
-        
+
         payment_items = [
             PaymentItem(**payment) for payment in payment_run.payments
         ]
-        
+
         sepa_xml = generator.generate_credit_transfer(
             payments=payment_items,
             message_id=payment_run.run_number,
             execution_date=payment_run.execution_date
         )
-        
+
         # Save SEPA file
         sepa_file_id = f"SEPA-{run_id}"
-        
+
         # Update payment run status
         update_query = text("""
             UPDATE domain_erp.payment_runs
             SET status = 'executed', executed_at = NOW(), sepa_file_id = :sepa_file_id, updated_at = NOW()
             WHERE id = :run_id AND tenant_id = :tenant_id
         """)
-        
+
         db.execute(update_query, {
             "run_id": run_id,
             "tenant_id": tenant_id,
             "sepa_file_id": sepa_file_id
         })
-        
+
         # Update payment items status
         update_items_query = text("""
             UPDATE domain_erp.payment_run_items
             SET status = 'executed', updated_at = NOW()
             WHERE payment_run_id = :payment_run_id AND tenant_id = :tenant_id
         """)
-        
+
         db.execute(update_items_query, {
             "payment_run_id": run_id,
             "tenant_id": tenant_id
         })
-        
+
         # Settle open items
         for payment in payment_run.payments:
             if payment.get("op_id"):
@@ -759,32 +759,32 @@ async def execute_payment_run(
                         SET offen = offen - :amount, updated_at = NOW()
                         WHERE id = :op_id AND tenant_id = :tenant_id
                     """)
-                    
+
                     db.execute(settle_query, {
                         "op_id": payment["op_id"],
                         "tenant_id": tenant_id,
                         "amount": payment["amount"]
                     })
-                    
+
                     # If fully settled, mark as closed
                     check_query = text("""
                         UPDATE domain_erp.offene_posten
                         SET offen = 0, updated_at = NOW()
                         WHERE id = :op_id AND tenant_id = :tenant_id AND offen <= 0
                     """)
-                    
+
                     db.execute(check_query, {
                         "op_id": payment["op_id"],
                         "tenant_id": tenant_id
                     })
-                    
+
                 except Exception as e:
                     logger.warning(f"Could not settle open item {payment.get('op_id')}: {e}")
-        
+
         db.commit()
-        
+
         return await get_payment_run(run_id, tenant_id, db)
-        
+
     except HTTPException:
         raise
     except Exception as e:
@@ -804,27 +804,27 @@ async def get_sepa_xml(
     """
     try:
         payment_run = await get_payment_run(run_id, tenant_id, db)
-        
+
         if payment_run.status != "executed":
             raise HTTPException(status_code=400, detail="Payment run must be executed to generate SEPA XML")
-        
+
         # Generate SEPA XML
         generator = SEPAXMLGenerator(
             initiator_name=payment_run.initiator_name,
             initiator_iban=payment_run.initiator_iban,
             initiator_bic=payment_run.initiator_bic
         )
-        
+
         payment_items = [
             PaymentItem(**payment) for payment in payment_run.payments
         ]
-        
+
         sepa_xml = generator.generate_credit_transfer(
             payments=payment_items,
             message_id=payment_run.run_number,
             execution_date=payment_run.execution_date
         )
-        
+
         return Response(
             content=sepa_xml,
             media_type="application/xml",
@@ -832,7 +832,7 @@ async def get_sepa_xml(
                 "Content-Disposition": f'attachment; filename="SEPA_{payment_run.run_number}.xml"'
             }
         )
-        
+
     except HTTPException:
         raise
     except Exception as e:
@@ -857,32 +857,32 @@ async def return_payment(
             FROM domain_erp.payment_run_items
             WHERE id = :payment_id AND tenant_id = :tenant_id
         """)
-        
+
         payment_row = db.execute(payment_query, {
             "payment_id": request.payment_id,
             "tenant_id": tenant_id
         }).fetchone()
-        
+
         if not payment_row:
             raise HTTPException(status_code=404, detail="Payment item not found")
-        
+
         payment_item_id = str(payment_row[0])
         payment_run_id = str(payment_row[1])
         op_id = str(payment_row[2]) if payment_row[2] else None
         amount = _payment_return_amount(payment_row)
-        
+
         # Update payment item status
         update_payment_query = text("""
             UPDATE domain_erp.payment_run_items
             SET status = 'returned', updated_at = NOW()
             WHERE id = :payment_id AND tenant_id = :tenant_id
         """)
-        
+
         db.execute(update_payment_query, {
             "payment_id": request.payment_id,
             "tenant_id": tenant_id
         })
-        
+
         # Reopen open item if it was settled
         if op_id:
             reopen_query = text("""
@@ -890,13 +890,13 @@ async def return_payment(
                 SET offen = offen + :amount, updated_at = NOW()
                 WHERE id = :op_id AND tenant_id = :tenant_id
             """)
-            
+
             db.execute(reopen_query, {
                 "op_id": op_id,
                 "tenant_id": tenant_id,
                 "amount": amount
             })
-        
+
         # Create return record
         return_id = uuid7()
         return_insert = text("""
@@ -905,7 +905,7 @@ async def return_payment(
             VALUES
             (:id, :tenant_id, :payment_run_id, :payment_item_id, :return_reason, :return_date, :notes, NOW())
         """)
-        
+
         db.execute(return_insert, {
             "id": return_id,
             "tenant_id": tenant_id,
@@ -915,7 +915,7 @@ async def return_payment(
             "return_date": request.return_date,
             "notes": request.notes
         })
-        
+
         db.commit()
         await _store_payment_run_event_in_outbox(
             db,
@@ -929,13 +929,13 @@ async def return_payment(
                 "return_date": request.return_date.isoformat(),
             },
         )
-        
+
         return {
             "status": "ok",
             "message": "Payment return processed",
             "return_id": return_id
         }
-        
+
     except HTTPException:
         raise
     except Exception as e:

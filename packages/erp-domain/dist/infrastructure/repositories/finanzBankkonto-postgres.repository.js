@@ -5,6 +5,7 @@ const finanzBankkonto_entity_1 = require("../../core/entities/finanzBankkonto.en
 const TABLE = 'finanz.bankkonten';
 const COLUMNS = [
     'id',
+    'tenant_id',
     'kontoname',
     'bankname',
     'iban',
@@ -49,6 +50,7 @@ class FinanzBankkontoPostgresRepository {
     mapRow(row) {
         const props = {
             id: row.id,
+            tenant_id: String(row.tenant_id),
             kontoname: String(row.kontoname),
             bankname: String(row.bankname),
             iban: (row.iban !== undefined && row.iban !== null) ? String(row.iban) : undefined,
@@ -66,21 +68,31 @@ class FinanzBankkontoPostgresRepository {
         };
         return finanzBankkonto_entity_1.FinanzBankkonto.create(props);
     }
-    async findById(id) {
-        const result = await this.pool.query(`SELECT ${COLUMNS.join(', ')} FROM ${TABLE} WHERE id = $1 LIMIT 1`, [id]);
+    async findById(id, tenantId) {
+        const result = await this.pool.query(`SELECT ${COLUMNS.join(', ')} FROM ${TABLE} WHERE id = $1 AND tenant_id = $2 LIMIT 1`, [id, tenantId]);
         if (result.rowCount === 0) {
             return null;
         }
         return this.mapRow(result.rows[0]);
     }
-    async list() {
-        const result = await this.pool.query(`SELECT ${COLUMNS.join(', ')} FROM ${TABLE} ORDER BY kontoname ASC`);
+    async count(tenantId) {
+        const result = await this.pool.query(`SELECT COUNT(*)::int AS c FROM ${TABLE} WHERE tenant_id = $1`, [tenantId]);
+        const c = result.rows[0]?.c;
+        return typeof c === 'number' ? c : parseInt(String(c), 10);
+    }
+    async listPaged(tenantId, limit, offset) {
+        const result = await this.pool.query(`SELECT ${COLUMNS.join(', ')} FROM ${TABLE} WHERE tenant_id = $1 ORDER BY kontoname ASC LIMIT $2 OFFSET $3`, [tenantId, limit, offset]);
+        return result.rows.map((row) => this.mapRow(row));
+    }
+    async list(tenantId) {
+        const result = await this.pool.query(`SELECT ${COLUMNS.join(', ')} FROM ${TABLE} WHERE tenant_id = $1 ORDER BY kontoname ASC`, [tenantId]);
         return result.rows.map((row) => this.mapRow(row));
     }
     async save(entity) {
         const primitives = entity.toPrimitives();
         const result = await this.pool.query(`INSERT INTO ${TABLE} (
         id,
+        tenant_id,
         kontoname,
         bankname,
         iban,
@@ -104,11 +116,13 @@ class FinanzBankkontoPostgresRepository {
         $8,
         $9,
         $10,
-        COALESCE($11, true),
-        $12,
-        $13
+        $11,
+        COALESCE($12, true),
+        $13,
+        $14
       ) RETURNING ${COLUMNS.join(', ')}`, [
             primitives.id ?? null,
+            primitives.tenant_id,
             primitives.kontoname,
             primitives.bankname,
             primitives.iban ?? null,
@@ -142,7 +156,7 @@ class FinanzBankkontoPostgresRepository {
               ist_aktiv = COALESCE($11, ist_aktiv),
               notizen = $12,
               aktualisiert_am = CURRENT_TIMESTAMP
-        WHERE id = $1
+        WHERE id = $1 AND tenant_id = $13
         RETURNING ${COLUMNS.join(', ')}
       `, [
             primitives.id,
@@ -157,14 +171,15 @@ class FinanzBankkontoPostgresRepository {
             primitives.letzter_abgleich ?? null,
             primitives.ist_aktiv ?? null,
             primitives.notizen ?? null,
+            primitives.tenant_id,
         ]);
         if (result.rowCount === 0) {
             throw new Error(`FinanzBankkonto with id ${primitives.id} not found`);
         }
         return this.mapRow(result.rows[0]);
     }
-    async delete(id) {
-        await this.pool.query(`DELETE FROM ${TABLE} WHERE id = $1`, [id]);
+    async delete(id, tenantId) {
+        await this.pool.query(`DELETE FROM ${TABLE} WHERE id = $1 AND tenant_id = $2`, [id, tenantId]);
     }
 }
 exports.FinanzBankkontoPostgresRepository = FinanzBankkontoPostgresRepository;

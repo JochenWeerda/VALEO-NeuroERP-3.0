@@ -447,7 +447,8 @@ async def get_kostenstellen_report(
     von: date,
     bis: date,
     tenant_id: str = Depends(get_tenant_id),
-    current_user=Depends(get_current_user)
+    current_user=Depends(get_current_user),
+    db=Depends(get_db),
 ):
     """Kostenstellen-Auswertung (Budget aus Stammdaten)"""
     from app.finance.models import Kostenstelle as KostenstelleModel

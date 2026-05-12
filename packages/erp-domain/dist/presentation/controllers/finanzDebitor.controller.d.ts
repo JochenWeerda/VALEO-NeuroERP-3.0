@@ -1,6 +1,6 @@
 /**
  * Express router for FinanzDebitor generated via CRM toolkit.
- * Provides baseline CRUD endpoints; extend with domain-specific routes.
+ * Listen und Schreibantworten: gleicher Contract wie übriges erp-domain ({@link ../types/api-pagination.ts}).
  */
 import { Router } from 'express';
 import { FinanzDebitorService } from '../../application/services/finanzDebitor.service';

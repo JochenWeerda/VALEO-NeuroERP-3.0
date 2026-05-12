@@ -117,7 +117,7 @@ class EZBClient:
             if time_attr is not None:
                 date_str = time_attr.get('time')
                 
-                for rate_cube in time_cube.findall('.//ecb:Cube[@currency]', ns):
+                for rate_cube in day_cube.findall('.//ecb:Cube[@currency]', ns):
                     currency = rate_cube.get('currency')
                     rate = rate_cube.get('rate')
                     

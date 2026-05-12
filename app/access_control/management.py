@@ -430,7 +430,7 @@ class ISO27001AccessControlManagement:
             salt, hashed = password_hash.split(':')
             expected_hash = hashlib.sha256(f"{password}{salt}".encode()).hexdigest()
             return expected_hash == hashed
-        except:
+        except Exception:
             return False
 
     def _create_user_session(self, user_id: str, ip_address: str, user_agent: str) -> str:

@@ -15,6 +15,9 @@ class FinanzKreditor {
     get id() {
         return this.props.id;
     }
+    get tenantId() {
+        return this.props.tenant_id;
+    }
     get lieferantenId() {
         return this.props.lieferanten_id;
     }

@@ -15,6 +15,9 @@ class FinanzDebitor {
     get id() {
         return this.props.id;
     }
+    get tenantId() {
+        return this.props.tenant_id;
+    }
     get kundenId() {
         return this.props.kunden_id;
     }

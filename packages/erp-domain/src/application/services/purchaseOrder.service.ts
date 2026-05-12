@@ -5,7 +5,7 @@ import { PurchaseOrderItem } from '../../core/entities/purchaseOrderItem.entity'
 import { NumberRangeService } from './numberRange.service'
 import { AuditService } from './audit.service'
 import { ValidationError } from '../../core/errors/validation.error'
-import { clampLimit, clampOffset, ListResult } from '../../presentation/types/api-pagination'
+import { ListResult, clampLimit, clampOffset } from '../../presentation/types/api-pagination'
 
 @injectable()
 export class PurchaseOrderService {

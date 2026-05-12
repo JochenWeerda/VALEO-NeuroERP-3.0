@@ -4442,7 +4442,6 @@ def _build_response(
         "sidlys_sidmet_ratio": round(sidlys_sup / sidmet_sup, 2) if sidmet_sup and sidmet_sup > 0 else None,
         "forage_share_pct": round(forage_share_pct, 1),
         "rmd_gn_kgdm": round(rmd_ration, 2) if rmd_ration is not None else None,
-        "k_g": round(k_sup, 1),
         "pendf_kgdm": round(pendf_density, 1),
         "pendf_min_kgdm": round(pendf_min_val, 1),
         "staerke_kgdm": round(st_density, 1),

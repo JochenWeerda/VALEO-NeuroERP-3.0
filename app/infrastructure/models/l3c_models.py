@@ -237,7 +237,7 @@ class AgrarSettlement(Base):
 class DryingRuleSet(Base):
     """
     Configurable drying rules for invoice weight/loss/fee by crop/site and validity.
-    
+
     Fester Vertragsteil jedes Ankaufskontrakts:
     - Allgemeingültige Tabellen: contract_id=NULL, customer_id=NULL, is_customer_specific=False
     - Kundenspezifische Sonderregelungen: customer_id gesetzt, is_customer_specific=True, justification erforderlich
@@ -336,7 +336,7 @@ class AgrarSettlementDeduction(Base):
 class HarvestAcceptance(Base):
     """
     Ernte-Annahme (Harvest Acceptance) - Hauptbeleg für Anlieferung, Verwiegung, Qualitätsprüfung, Abrechnung.
-    
+
     NUTS-2-Code:
     - Bedeutung: "Herkunft/Region der Erzeugung" (nicht Standort des Lagers)
     - Hauptzweck: Nachhaltigkeitsnachweise / Biomasse-Zertifizierung (RED-II, ISCC, REDcert, SURE)
@@ -388,11 +388,11 @@ class HarvestAcceptance(Base):
     provisional_invoice_number = Column(String(50), nullable=True, comment="vorl. Rechn.-Nr.")
     invoice_id = Column(String(64), nullable=True, comment="FK zu invoice (Gutschrift)")
     invoice_number = Column(String(50), nullable=True, comment="Rechnungs-Nr. (nach Gutschrift)")
-    
+
     # Preisermittlung (nach praxisnahen Default-Entscheidungen)
     pricing_mode = Column(String(20), nullable=False, default="spot_daily", comment="Preismodell: fixed_contract / spot_daily / exchange_fix_later")
     price_source_id = Column(String(64), nullable=True, comment="Referenz zu Preisquelle (daily_price_id, exchange_index_id, etc.)")
-    
+
     # Belegkette-Referenzen
     stock_movement_id = Column(String, ForeignKey("domain_inventory.inventory_stock_movements.id"), nullable=True, comment="Referenz zu Wareneingang (wird bei Freigabe erstellt)")
     quality_protocol_id = Column(String(64), nullable=True, comment="Referenz zu Qualitätsprotokoll")
@@ -407,12 +407,12 @@ class HarvestAcceptance(Base):
     total_vat_amount_eur = Column(DECIMAL(15, 2), nullable=True, comment="MWSt-Betrag")
     total_gross_amount_eur = Column(DECIMAL(15, 2), nullable=True, comment="Brutto-Betrag")
     vat_rate_percent = Column(DECIMAL(5, 2), nullable=True, comment="MWSt %")
-    
+
     # VAT/Steuer-Modi (für Vorsteuerabzug und Geschäftsmodell)
     acceptance_mode = Column(String(30), nullable=True, default="PURCHASE_AT_DELIVERY_PTBF", comment="Geschäftsmodell: STORAGE_ONLY (Fremdware, keine Vorsteuer) / PURCHASE_AT_DELIVERY_PTBF (Ankauf jetzt, Preis später, Vorsteuer möglich) / ADVANCE_ON_STORAGE (Einlagerung + Abschlag/Anzahlung)")
     ownership_type = Column(String(20), nullable=True, default="OWN_STOCK", comment="Eigentumsverhältnis: THIRD_PARTY_STOCK (Fremdware) / OWN_STOCK (Eigene Ware)")
     vat_event = Column(String(40), nullable=True, default="NO_INVOICE", comment="VAT-Ereignis: NO_INVOICE (Storage) / PROVISIONAL_CREDIT_NOTE_CREATED / FINAL_CREDIT_NOTE_CREATED / CORRECTION_ISSUED")
-    
+
     # Anzahlung (für ADVANCE_ON_STORAGE)
     advance_payment_amount_eur = Column(DECIMAL(14, 2), nullable=True, comment="Anzahlungsbetrag (EUR) - für ADVANCE_ON_STORAGE Modus")
     advance_payment_date = Column(Date, nullable=True, comment="Anzahlungsdatum - für ADVANCE_ON_STORAGE Modus")
@@ -428,7 +428,7 @@ class HarvestAcceptance(Base):
 class HarvestAcceptancePosition(Base):
     """
     Ernte-Annahme Position (für Mischladungen: mehrere Herkunftsorte/Artikel).
-    
+
     NUTS-2 pro Position:
     - Bei Mischladungen: Jede Position kann eigene Herkunft (origin_nuts2_code) haben
     - Summe der Positionen = Gesamtmenge der Anlieferung
@@ -469,7 +469,7 @@ class HarvestAcceptancePosition(Base):
 class HarvestAcceptanceLine(Base):
     """
     Ernte-Annahme Zeilen für Verteilungen (Silo/Partie-Splits).
-    
+
     Default: 1 Wiegeschein = 1 Ernte-Annahme, aber mit Zeilen für Verteilungen.
     Constraint: Sum(line.qty) = Wiegeschein.netto (± Rundungstoleranz).
     """
@@ -490,7 +490,7 @@ class HarvestAcceptanceLine(Base):
 class SupplierTaxProfile(Base):
     """
     Steuerprofil am Lieferanten (mit Gültigkeit).
-    
+
     Default: eigene Tabelle für taxation_type mit Gültigkeit.
     Priorität: Lieferant-Profil > Artikel/Warengruppe > Standard
     """
@@ -514,7 +514,7 @@ class SupplierTaxProfile(Base):
 class PriceAdjustmentRule(Base):
     """
     Rule-Tabellen für Zu-/Abschläge (produkt- & gültigkeitsbezogen).
-    
+
     Default: Rules konfigurierbar, nicht hart codieren.
     Beispiele: HL-Gewicht, Besatz-Staffel, Mykotoxin, etc.
     """
@@ -553,7 +553,7 @@ class NawaroPrintNotification(Base):
 class QualityProtocol(Base):
     """
     Qualitätsprotokoll für Laborwerte mit Versionierung.
-    
+
     Verwaltet Laborwerte für Ernte-Annahmen mit Import-Funktionalität und Audit-Trail.
     """
     __tablename__ = "quality_protocols"
@@ -564,7 +564,7 @@ class QualityProtocol(Base):
     harvest_acceptance_id = Column(String, ForeignKey("domain_inventory.harvest_acceptances.id", ondelete="SET NULL"), nullable=True)
     protocol_number = Column(String(50), nullable=False)
     version = Column(Integer, nullable=False, server_default="1")
-    
+
     # Laborwerte
     moisture_pct = Column(DECIMAL(5, 2), nullable=True, comment="Feuchte (%)")
     impurities_pct = Column(DECIMAL(5, 2), nullable=True, comment="Besatz (%)")
@@ -572,18 +572,18 @@ class QualityProtocol(Base):
     protein_pct = Column(DECIMAL(5, 2), nullable=True, comment="Protein (%)")
     mycotoxin_ppb = Column(DECIMAL(10, 2), nullable=True, comment="Mykotoxin (ppb)")
     other_values = Column(JSONB(astext_type=Text()), nullable=True, comment="Weitere Laborwerte (JSONB)")
-    
+
     # Quelle
     source_type = Column(String(20), nullable=True, comment="Quelle: manual / import / lims / device")
     source_device_id = Column(String(64), nullable=True)
     source_file_name = Column(String(255), nullable=True)
     source_file_content = Column(Text(), nullable=True, comment="Original-Dateiinhalt (für Audit)")
-    
+
     # Status
     is_final = Column(Boolean, nullable=False, server_default="false")
     approved_by = Column(String(64), nullable=True)
     approved_at = Column(DateTime(timezone=True), nullable=True)
-    
+
     # Audit
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     created_by = Column(String(64), nullable=True)
@@ -596,7 +596,7 @@ class QualityProtocol(Base):
 class DailyPrice(Base):
     """
     Tagespreise für dynamische Preisermittlung.
-    
+
     Verwaltet Tagespreise für Artikel, Warengruppen oder Crop Codes mit Gültigkeitszeitraum.
     """
     __tablename__ = "daily_prices"
@@ -607,21 +607,21 @@ class DailyPrice(Base):
     article_id = Column(String, ForeignKey("domain_inventory.articles.id", ondelete="SET NULL"), nullable=True)
     warengruppe = Column(String(80), nullable=True, comment="Warengruppe (falls artikel_id NULL)")
     crop_code = Column(String(20), nullable=True, comment="Crop Code (MAIZE, WHEAT, BARLEY, etc.)")
-    
+
     # Preis
     price_eur_per_ton = Column(DECIMAL(10, 2), nullable=False)
     currency = Column(String(3), nullable=False, server_default="EUR")
-    
+
     # Gültigkeit
     price_date = Column(Date, nullable=False)
     valid_from = Column(DateTime(timezone=True), nullable=False)
     valid_to = Column(DateTime(timezone=True), nullable=True)
-    
+
     # Quelle
     source_type = Column(String(20), nullable=True, comment="Quelle: manual / exchange / api")
     source_id = Column(String(64), nullable=True)
     source_name = Column(String(255), nullable=True)
-    
+
     # Audit
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     created_by = Column(String(64), nullable=True)
@@ -657,7 +657,7 @@ class ArticlePriceThreshold(Base):
 class SelfBillingInvoice(Base):
     """
     Self-Billing Gutschrift für Ernte-Annahmen.
-    
+
     Verwaltet Self-Billing Gutschriften mit E-Rechnung-Erstellung und Dispute-Handling.
     """
     __tablename__ = "self_billing_invoices"
@@ -666,33 +666,33 @@ class SelfBillingInvoice(Base):
     id = Column(String, primary_key=True, default=uuid7)
     tenant_id = Column(String, ForeignKey("domain_shared.tenants.id"), nullable=False)
     harvest_acceptance_id = Column(String, ForeignKey("domain_inventory.harvest_acceptances.id", ondelete="SET NULL"), nullable=True)
-    
+
     # Rechnungsnummern
     invoice_number = Column(String(50), nullable=False)
     provisional_invoice_number = Column(String(50), nullable=True)
-    
+
     # Status
     status = Column(String(20), nullable=False, server_default="draft", comment="draft / issued / paid / disputed / cancelled")
     dispute_status = Column(String(20), nullable=True, comment="none / raised / resolved / rejected")
     dispute_reason = Column(Text(), nullable=True)
     dispute_date = Column(DateTime(timezone=True), nullable=True)
     dispute_user_id = Column(String(64), nullable=True)
-    
+
     # Beträge
     total_net_amount_eur = Column(DECIMAL(15, 2), nullable=False)
     total_vat_amount_eur = Column(DECIMAL(15, 2), nullable=False)
     total_gross_amount_eur = Column(DECIMAL(15, 2), nullable=False)
     vat_rate_percent = Column(DECIMAL(5, 2), nullable=False)
-    
+
     # E-Rechnung
     einvoice_xml = Column(Text(), nullable=True, comment="XRechnung/ZUGFeRD XML")
     einvoice_pdf = Column(postgresql.BYTEA(), nullable=True, comment="PDF (optional)")
     einvoice_sent_at = Column(DateTime(timezone=True), nullable=True)
     einvoice_received_at = Column(DateTime(timezone=True), nullable=True)
-    
+
     # Pflichttexte
     mandatory_texts = Column(JSONB(astext_type=Text()), nullable=True, comment="Array von Pflichttexten (JSONB)")
-    
+
     # Audit
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     created_by = Column(String(64), nullable=True)
@@ -705,7 +705,7 @@ class SelfBillingInvoice(Base):
 class DisputeRecord(Base):
     """
     Dispute-Records für Self-Billing Gutschriften.
-    
+
     Verwaltet Widersprüche gegen Gutschriften mit Status-Tracking und Auflösung.
     """
     __tablename__ = "dispute_records"
@@ -714,18 +714,18 @@ class DisputeRecord(Base):
     id = Column(String, primary_key=True, default=uuid7)
     tenant_id = Column(String, ForeignKey("domain_shared.tenants.id"), nullable=False)
     invoice_id = Column(String, ForeignKey("domain_finance.self_billing_invoices.id", ondelete="CASCADE"), nullable=False)
-    
+
     # Dispute-Details
     dispute_type = Column(String(30), nullable=True, comment="amount / quality / quantity / other")
     dispute_reason = Column(Text(), nullable=False)
     disputed_amount_eur = Column(DECIMAL(15, 2), nullable=True)
-    
+
     # Status
     status = Column(String(20), nullable=False, server_default="raised", comment="raised / resolved / rejected")
     resolution_notes = Column(Text(), nullable=True)
     resolved_by = Column(String(64), nullable=True)
     resolved_at = Column(DateTime(timezone=True), nullable=True)
-    
+
     # Audit
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     created_by = Column(String(64), nullable=True)

@@ -2,8 +2,16 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.FinanzDebitorService = void 0;
 const finanzDebitor_entity_1 = require("../../core/entities/finanzDebitor.entity");
+const api_pagination_1 = require("../../presentation/types/api-pagination");
 const DEFAULT_PAYMENT_TARGET_DAYS = 30;
-function normalize(dto, existing) {
+function tenantFrom(existing, tenantForCreate) {
+    const t = existing?.tenant_id ?? tenantForCreate?.trim();
+    if (!t) {
+        throw new Error('tenant_id is required');
+    }
+    return t;
+}
+function normalize(dto, existing, tenantForCreate) {
     const debitorNr = dto.debitor_nr?.trim();
     if (debitorNr === undefined || debitorNr === null) {
         throw new Error('debitor_nr is required');
@@ -16,6 +24,7 @@ function normalize(dto, existing) {
     }
     return {
         ...existing,
+        tenant_id: tenantFrom(existing, tenantForCreate),
         kunden_id: dto.kunden_id ?? existing?.kunden_id,
         debitor_nr: debitorNr,
         kreditlimit: dto.kreditlimit ?? existing?.kreditlimit ?? 0,
@@ -36,27 +45,34 @@ class FinanzDebitorService {
     constructor(repository) {
         this.repository = repository;
     }
-    async list() {
-        return this.repository.list();
+    async list(tenantId) {
+        return this.repository.list(tenantId);
     }
-    async findById(id) {
-        return this.repository.findById(id);
+    async listPaged(tenantId, options) {
+        const limit = (0, api_pagination_1.clampLimit)(options?.limit);
+        const offset = (0, api_pagination_1.clampOffset)(options?.offset);
+        const items = await this.repository.listPaged(tenantId, limit, offset);
+        const total = await this.repository.count(tenantId);
+        return { items, total };
     }
-    async create(payload) {
-        const normalized = normalize(payload);
-        const existing = await this.repository.findByDebitorNr(normalized.debitor_nr);
-        if (existing !== undefined && existing !== null) {
+    async findById(id, tenantId) {
+        return this.repository.findById(id, tenantId);
+    }
+    async create(tenantId, payload) {
+        const normalized = normalize(payload, undefined, tenantId);
+        const existingNr = await this.repository.findByDebitorNr(tenantId, normalized.debitor_nr);
+        if (existingNr !== undefined && existingNr !== null) {
             throw new Error(`Debitor ${normalized.debitor_nr} already exists`);
         }
         const entity = finanzDebitor_entity_1.FinanzDebitor.create(normalized);
         return this.repository.save(entity);
     }
-    async update(id, payload) {
-        const existing = await this.repository.findById(id);
-        if (existing === undefined || existing === null) {
+    async update(id, tenantId, payload) {
+        const existingRow = await this.repository.findById(id, tenantId);
+        if (existingRow === undefined || existingRow === null) {
             throw new Error('FinanzDebitor not found');
         }
-        const current = existing.toPrimitives();
+        const current = existingRow.toPrimitives();
         const normalized = normalize({
             kunden_id: payload.kunden_id ?? current.kunden_id,
             debitor_nr: payload.debitor_nr ?? current.debitor_nr,
@@ -70,15 +86,15 @@ class FinanzDebitorService {
             notizen: payload.notizen ?? current.notizen,
             erstellt_von: current.erstellt_von,
         }, current);
-        const duplicate = await this.repository.findByDebitorNr(normalized.debitor_nr);
+        const duplicate = await this.repository.findByDebitorNr(tenantId, normalized.debitor_nr);
         if ((duplicate !== undefined && duplicate !== null) && duplicate.toPrimitives().id !== id) {
             throw new Error(`Another Debitor already uses debitor_nr ${normalized.debitor_nr}`);
         }
         const entity = finanzDebitor_entity_1.FinanzDebitor.create({ ...normalized, id });
         return this.repository.update(entity);
     }
-    async remove(id) {
-        await this.repository.delete(id);
+    async remove(id, tenantId) {
+        await this.repository.delete(id, tenantId);
     }
 }
 exports.FinanzDebitorService = FinanzDebitorService;

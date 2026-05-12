@@ -1,6 +1,6 @@
 import { FinanzBankkonto, FinanzBankkontoProps } from '../../core/entities/finanzBankkonto.entity';
 import { FinanzBankkontoPostgresRepository } from '../../infrastructure/repositories/finanzBankkonto-postgres.repository';
-import { clampLimit, clampOffset, ListResult } from '../../presentation/types/api-pagination';
+import { ListResult, clampLimit, clampOffset } from '../../presentation/types/api-pagination';
 
 export interface CreateFinanzBankkontoDto {
   kontoname: string;

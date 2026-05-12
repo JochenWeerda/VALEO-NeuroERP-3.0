@@ -4,6 +4,7 @@
  */
 export interface FinanzBuchungProps {
     id?: string;
+    tenant_id: string;
     buchungsnummer: string;
     buchungsdatum: Date;
     belegdatum: Date;
@@ -29,6 +30,7 @@ export declare class FinanzBuchung {
     private constructor();
     static create(props: FinanzBuchungProps): FinanzBuchung;
     get id(): string | undefined;
+    get tenantId(): string;
     get buchungsnummer(): string;
     get buchungsdatum(): Date;
     get belegdatum(): Date;
