@@ -934,7 +934,7 @@ async def execute_agent_action(
     # RAG enrichment — graceful degradation if ChromaDB is unavailable
     rag_hits: list[dict[str, Any]] = []
     try:
-        import chromadb  # type: ignore
+        import chromadb  # type: ignore  # noqa: F401
         from app.infrastructure.rag.client import get_rag_collection
 
         collection = get_rag_collection()

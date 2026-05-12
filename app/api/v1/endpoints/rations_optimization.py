@@ -35,7 +35,7 @@ router = APIRouter(tags=["agrar", "rations-optimization"])
 # Refactor 2026-04-23: HTTP-Proxy ausgelagert nach app.agrar.rations.http.proxy.
 # Re-Exports halten die oeffentliche Schnittstelle stabil (Tests patchen z. T.
 # ``rations_optimization.get_rations_base_url``).
-from app.agrar.rations.http.proxy import (  # noqa: E402
+from app.agrar.rations.http.proxy import (  # noqa: E402,F401
     RATIONS_TIMEOUT as RATIONS_TIMEOUT,
     get_rations_base_url as get_rations_base_url,
     _rations_api_key as _rations_api_key,
@@ -49,13 +49,13 @@ _rations_base_url = get_rations_base_url  # noqa: E305
 from app.agrar.rations.repository.dlg_loader import _dlg_json_path as _dlg_json_path  # noqa: E402
 
 # Refactor 2026-04-23 (Schritt 2): Zentrale Rations-Aggregation
-from app.agrar.rations.response import (  # noqa: E402
+from app.agrar.rations.response import (  # noqa: E402,F401
     RationAggregates,
     aggregate_ration,
 )
 
 # Refactor 2026-04-23 (Schritt 3): Constraint-Registry statt Magic-Index
-from app.agrar.rations.solver import (  # noqa: E402
+from app.agrar.rations.solver import (  # noqa: E402,F401
     CONSTR_ANDFOM_GF_GEQ as _CONSTR_ANDFOM_GF_GEQ,
     CONSTR_ANDFOM_TOT_GEQ as _CONSTR_ANDFOM_TOT_GEQ,
     CONSTR_ANDFOM_TOT_LEQ as _CONSTR_ANDFOM_TOT_LEQ,
@@ -81,7 +81,7 @@ from app.agrar.rations.solver.lp_constraints import (  # noqa: E402
 )
 
 
-from app.agrar.rations.http.proxy import (  # noqa: E402
+from app.agrar.rations.http.proxy import (  # noqa: E402,F401
     _tenant_from_request as _tenant_from_request,
     _proxy_request as _proxy_request,
 )
@@ -5159,7 +5159,7 @@ def _gfa_to_feed(gfa: Dict[str, Any]) -> Dict[str, Any]:
 # Refactor 2026-04-23 (Schritt 1e): Compound-Feed-Parser ausgelagert nach
 # app.agrar.rations.compound_feed.parser. Re-Exports unter den alten Namen
 # erhalten die oeffentliche Schnittstelle (Tests + Endpoint).
-from app.agrar.rations.compound_feed.parser import (  # noqa: E402
+from app.agrar.rations.compound_feed.parser import (  # noqa: E402,F401
     COMPOUND_FEED_MATCHERS as _COMPOUND_FEED_MATCHERS,
     ascii_slug as _ascii_slug,
     normalize_feed_label as _normalize_feed_label,
@@ -6220,7 +6220,7 @@ def _policy_profile_targets(profile_key: Optional[str]) -> Optional[Dict[str, An
 # DLG-01|2025-Policy-Profil-Auswertung — Re-Export aus lp_stage2.py
 # (RATIONS-LP-SPLIT-001: extrahiert nach app/agrar/rations/solver/lp_stage2.py)
 # ---------------------------------------------------------------------------
-from app.agrar.rations.solver.lp_stage2 import (  # noqa: E402
+from app.agrar.rations.solver.lp_stage2 import (  # noqa: E402,F401
     POLICY_BAND_SPECS as _POLICY_BAND_SPECS,
     policy_band_coeffs as _policy_band_coeffs,
     policy_profile_band_evaluate as _policy_profile_band_evaluate,
