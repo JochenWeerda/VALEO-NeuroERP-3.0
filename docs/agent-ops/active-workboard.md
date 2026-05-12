@@ -209,6 +209,17 @@ Stand: `2026-05-12`
 **Checks:** `pytest tests/test_personal_work_plan_api.py tests/test_personal_shift_planning_api.py tests/test_personal_time_booking_api.py -q --no-cov`; `pnpm --filter @valero-neuroerp/frontend-web type-check`; `python scripts/agent_workboard_supervisor.py validate`; `node scripts/docs-governance-check.cjs`; `git diff --check`
 **Offene Risiken:** Produktive Ferienkalender-Provider, Betriebsvereinbarungen und echte Optimierungsengine bleiben Folgeslices.
 
+## HR-TIME-OPS-002
+
+**Von:** Codex
+**Owner:** Codex
+**Stand:** reserviert 2026-05-12
+**Ziel des Slices:** Durchklicktest-Befund beheben: HR-Time-GET-Hooks duerfen leere Platzhalterdaten nicht als frische Daten cachen und muessen beim Oeffnen der Maske wirklich laden.
+**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/agent-ops/slices/HR-TIME-OPS-002.yaml`, `packages/frontend-web/src/lib/api/personal.ts`, `packages/frontend-web/tests/e2e/hr-time-clickthrough.generated.spec.ts`
+**Abnahmekriterien:** HR-Time-Durchklicktest sieht geladene Arbeitsplan-/Cockpitdaten; GET-Hooks verwenden Platzhalter statt frischer Initialdaten; Formular-POSTs und Druckaktion bleiben funktionsfaehig.
+**Checks:** `pnpm --filter @valero-neuroerp/frontend-web exec playwright test tests/e2e/hr-time-clickthrough.generated.spec.ts --project=chromium`; `pnpm --filter @valero-neuroerp/frontend-web type-check`; `python scripts/agent_workboard_supervisor.py validate`; `node scripts/docs-governance-check.cjs`
+**Offene Risiken:** Der temporäre E2E-Smoke nutzt API-Mocks; produktive Browser-E2E gegen echte FastAPI/Postgres bleibt Folgeslice.
+
 ## AGENT-ORCH-001
 
 **Von:** Codex
