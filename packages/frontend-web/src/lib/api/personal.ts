@@ -498,7 +498,7 @@ export function useZeiterfassung(datum?: string) {
       const params = datum ? `?datum=${datum}` : ''
       return (await apiClient.get<ZeitEintrag[]>(`/api/v1/personal/zeiterfassung${params}`)).data
     },
-    initialData: EMPTY_ZEITERFASSUNG_LIST,
+    placeholderData: EMPTY_ZEITERFASSUNG_LIST,
     staleTime: 30 * 1000,
   })
 }
@@ -510,7 +510,7 @@ export function useDriverTimeSummary(datum?: string) {
       const params = datum ? `?datum=${datum}` : ''
       return (await apiClient.get<DriverTimeSummary>(`/api/v1/personal/driver-time/summary${params}`)).data
     },
-    initialData: EMPTY_DRIVER_TIME_SUMMARY,
+    placeholderData: EMPTY_DRIVER_TIME_SUMMARY,
     staleTime: 30 * 1000,
   })
 }
@@ -522,7 +522,7 @@ export function useTimeCockpit(datum?: string) {
       const params = datum ? `?datum=${datum}` : ''
       return (await apiClient.get<TimeCockpit>(`/api/v1/personal/time-cockpit${params}`)).data
     },
-    initialData: EMPTY_TIME_COCKPIT,
+    placeholderData: EMPTY_TIME_COCKPIT,
     staleTime: 30 * 1000,
   })
 }
@@ -570,7 +570,7 @@ export function useAbsences(filters?: { datumVon?: string; datumBis?: string }) 
       if (filters?.datumBis) params.append('datum_bis', filters.datumBis)
       return (await apiClient.get<Absence[]>(`/api/v1/personal/absences?${String(params)}`)).data
     },
-    initialData: EMPTY_ABSENCES,
+    placeholderData: EMPTY_ABSENCES,
     staleTime: 30_000,
   })
 }
@@ -597,7 +597,7 @@ export function useShifts(filters?: { datumVon?: string; datumBis?: string; loca
       if (filters?.location) params.append('location', filters.location)
       return (await apiClient.get<Shift[]>(`/api/v1/personal/shifts?${String(params)}`)).data
     },
-    initialData: EMPTY_SHIFTS,
+    placeholderData: EMPTY_SHIFTS,
     staleTime: 30_000,
   })
 }
@@ -622,7 +622,7 @@ export function useCalendarEvents(filters?: { start?: string; end?: string }) {
       if (filters?.end) params.append('end', filters.end)
       return (await apiClient.get<CalendarEvent[]>(`/api/v1/personal/calendar-events?${String(params)}`)).data
     },
-    initialData: EMPTY_CALENDAR_EVENTS,
+    placeholderData: EMPTY_CALENDAR_EVENTS,
     staleTime: 30_000,
   })
 }
@@ -641,7 +641,7 @@ export function usePayrollExports() {
   return useQuery({
     queryKey: personalKeys.payrollExports(),
     queryFn: async () => (await apiClient.get<PayrollExport[]>('/api/v1/personal/payroll-exports')).data,
-    initialData: EMPTY_PAYROLL_EXPORTS,
+    placeholderData: EMPTY_PAYROLL_EXPORTS,
     staleTime: 30_000,
   })
 }
@@ -662,7 +662,7 @@ export function useCampaignCapacity() {
   return useQuery({
     queryKey: personalKeys.campaignCapacity(),
     queryFn: async () => (await apiClient.get<CampaignCapacity[]>('/api/v1/personal/campaign-capacity')).data,
-    initialData: EMPTY_CAMPAIGN_CAPACITY,
+    placeholderData: EMPTY_CAMPAIGN_CAPACITY,
     staleTime: 30_000,
   })
 }
@@ -682,7 +682,7 @@ export function useFieldServicePlan() {
   return useQuery({
     queryKey: personalKeys.fieldServicePlan(),
     queryFn: async () => (await apiClient.get<FieldServicePlan[]>('/api/v1/personal/field-service-plan')).data,
-    initialData: EMPTY_FIELD_SERVICE_PLAN,
+    placeholderData: EMPTY_FIELD_SERVICE_PLAN,
     staleTime: 30_000,
   })
 }
@@ -711,7 +711,7 @@ export function useWorkPlan(filters: { periodFrom: string; periodTo: string; hol
       if (filters.schoolHolidayDates?.length) params.append('school_holiday_dates', filters.schoolHolidayDates.join(','))
       return (await apiClient.get<WorkPlan>(`/api/v1/personal/work-plan?${String(params)}`)).data
     },
-    initialData: EMPTY_WORK_PLAN,
+    placeholderData: EMPTY_WORK_PLAN,
     staleTime: 30_000,
   })
 }
