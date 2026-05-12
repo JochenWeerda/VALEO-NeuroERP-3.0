@@ -186,6 +186,27 @@ async def list_credit_notes(
     ]
 
 
+@router.delete("/credit-notes/{cn_id}", status_code=204)
+async def delete_credit_note(
+    cn_id: str,
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+):
+    row = db.execute(
+        text("SELECT id, status FROM domain_sales.sales_credit_notes WHERE id = :id AND tenant_id = :tid"),
+        {"id": cn_id, "tid": tenant_id},
+    ).fetchone()
+    if not row:
+        raise HTTPException(status_code=404, detail="Gutschrift nicht gefunden")
+    if row[1] not in ("draft", "ENTWURF", None):
+        raise HTTPException(status_code=400, detail="Nur Entwürfe können gelöscht werden")
+    db.execute(
+        text("DELETE FROM domain_sales.sales_credit_notes WHERE id = :id AND tenant_id = :tid"),
+        {"id": cn_id, "tid": tenant_id},
+    )
+    db.commit()
+
+
 @router.post("/credit-notes/{cn_id}/post", response_model=dict)
 async def post_credit_note(
     cn_id: str,
@@ -330,6 +351,27 @@ async def list_returns(
         )
         for r in rows
     ]
+
+
+@router.delete("/returns/{return_id}", status_code=204)
+async def delete_return(
+    return_id: str,
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+):
+    row = db.execute(
+        text("SELECT id, status FROM domain_sales.sales_returns WHERE id = :id AND tenant_id = :tid"),
+        {"id": return_id, "tid": tenant_id},
+    ).fetchone()
+    if not row:
+        raise HTTPException(status_code=404, detail="Retoure nicht gefunden")
+    if row[1] == "completed":
+        raise HTTPException(status_code=400, detail="Abgeschlossene Retouren können nicht gelöscht werden")
+    db.execute(
+        text("DELETE FROM domain_sales.sales_returns WHERE id = :id AND tenant_id = :tid"),
+        {"id": return_id, "tid": tenant_id},
+    )
+    db.commit()
 
 
 @router.patch("/returns/{return_id}/status", response_model=dict)

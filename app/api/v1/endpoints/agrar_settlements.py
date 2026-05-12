@@ -2260,3 +2260,22 @@ async def settlement_freigabe(
         **result.audit_entry,
         "allowed_transitions": [s.value for s in get_allowed_transitions(result.new_status if result.allowed else current_status)],
     }
+
+
+@router.post("/{settlement_id}/reject", response_model=dict, tags=["agrar", "settlement", "freigabe"])
+async def reject_settlement(
+    settlement_id: str,
+    actor_id: str = Query(..., description="Benutzer-ID des Ablehnenden"),
+    actor_type: str = Query(default="SACHBEARBEITER"),
+    reason: str = Query(..., description="Pflichtbegründung für Ablehnung"),
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+):
+    """Lehnt eine Abrechnung ab — Convenience-Wrapper über POST /{id}/freigabe mit target_status=ABGELEHNT."""
+    reject_payload = SettlementFreigabeRequest(
+        actor_id=actor_id,
+        actor_type=actor_type,
+        target_status="ABGELEHNT",
+        reason=reason,
+    )
+    return await settlement_freigabe(settlement_id, reject_payload, tenant_id, db)

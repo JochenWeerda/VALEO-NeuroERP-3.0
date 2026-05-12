@@ -212,6 +212,12 @@ async def update_charge(charge_id: str, data: ChargeUpdate, db: Session = Depend
     return _to_dict(charge)
 
 
+@router.put("/{charge_id}", response_model=dict)
+async def replace_charge(charge_id: str, data: ChargeUpdate, db: Session = Depends(get_db)) -> dict:
+    """Full replacement — delegates to PATCH logic."""
+    return await update_charge(charge_id, data, db)
+
+
 @router.post("/{charge_id}/freigabe", response_model=dict)
 async def freigabe_charge(charge_id: str, db: Session = Depends(get_db)) -> dict:
     repo = ChargeRepository(db)

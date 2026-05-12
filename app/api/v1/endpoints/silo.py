@@ -316,6 +316,50 @@ async def create_silo(
     }
 
 
+@router.put("/silos/{silo_id}", response_model=dict)
+async def update_silo(
+    silo_id: str,
+    payload: SiloCreate,
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+) -> dict:
+    silo = db.query(Silo).filter(Silo.id == silo_id, Silo.tenant_id == tenant_id).first()
+    if not silo:
+        raise HTTPException(status_code=404, detail="Silo not found")
+    for field in ("silo_number", "name", "article_id", "capacity_tons"):
+        val = getattr(payload, field, None)
+        if val is not None:
+            setattr(silo, field, val)
+    db.commit()
+    db.refresh(silo)
+    return {
+        "id": str(silo.id),
+        "silo_number": silo.silo_number,
+        "name": silo.name,
+        "article_id": silo.article_id,
+        "capacity_tons": _to_float(silo.capacity_tons),
+        "is_active": bool(silo.is_active),
+    }
+
+
+@router.delete("/silos/{silo_id}", status_code=204)
+async def delete_silo(
+    silo_id: str,
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+):
+    silo = db.query(Silo).filter(Silo.id == silo_id, Silo.tenant_id == tenant_id).first()
+    if not silo:
+        raise HTTPException(status_code=404, detail="Silo not found")
+    active_lots = db.query(SiloLot).filter(
+        SiloLot.silo_id == silo_id, SiloLot.tenant_id == tenant_id, SiloLot.status == "active"
+    ).count()
+    if active_lots > 0:
+        raise HTTPException(status_code=400, detail="Silo hat aktive Lots — zuerst auslagern")
+    silo.is_active = False
+    db.commit()
+
+
 @router.post("/silos/{silo_id}/lots", response_model=dict, status_code=201)
 async def create_silo_lot(
     silo_id: str,
@@ -383,6 +427,52 @@ async def create_silo_lot(
             "lot_count": int(snapshot.lot_count),
         },
     }
+
+
+@router.put("/silos/{silo_id}/lots/{lot_id}", response_model=dict)
+async def update_silo_lot(
+    silo_id: str,
+    lot_id: str,
+    payload: SiloLotCreate,
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+) -> dict:
+    lot = db.query(SiloLot).filter(
+        SiloLot.id == lot_id, SiloLot.silo_id == silo_id, SiloLot.tenant_id == tenant_id
+    ).first()
+    if not lot:
+        raise HTTPException(status_code=404, detail="Silo lot not found")
+    if lot.status != "active":
+        raise HTTPException(status_code=400, detail="Nur aktive Lots können bearbeitet werden")
+    for field in ("moisture_pct", "protein_pct", "impurities_pct", "hl_weight"):
+        val = getattr(payload, field, None)
+        if val is not None:
+            setattr(lot, field, val)
+    snapshot = _create_snapshot(db, silo_id, tenant_id)
+    db.commit()
+    db.refresh(lot)
+    db.refresh(snapshot)
+    return {"id": str(lot.id), "silo_id": lot.silo_id, "status": lot.status,
+            "quantity_tons": _to_float(lot.quantity_tons)}
+
+
+@router.delete("/silos/{silo_id}/lots/{lot_id}", status_code=204)
+async def delete_silo_lot(
+    silo_id: str,
+    lot_id: str,
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+):
+    lot = db.query(SiloLot).filter(
+        SiloLot.id == lot_id, SiloLot.silo_id == silo_id, SiloLot.tenant_id == tenant_id
+    ).first()
+    if not lot:
+        raise HTTPException(status_code=404, detail="Silo lot not found")
+    if lot.status == "active" and _to_float(lot.quantity_tons) > 0:
+        raise HTTPException(status_code=400, detail="Lot hat Restmenge — zuerst ausbuchen")
+    lot.status = "closed"
+    _create_snapshot(db, silo_id, tenant_id)
+    db.commit()
 
 
 @router.post("/silos/{silo_id}/lots/{lot_id}/movements", response_model=dict, status_code=201)
