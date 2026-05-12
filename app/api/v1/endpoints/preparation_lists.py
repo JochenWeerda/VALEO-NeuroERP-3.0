@@ -64,6 +64,45 @@ async def list_preparation_lists(
     )
 
 
+@router.get("/{list_id}", response_model=PrepListOut)
+async def get_preparation_list(list_id: str, db: Session = Depends(get_db)):
+    """GET einzelne Rüstliste"""
+    obj = db.query(PreparationList).filter(PreparationList.id == list_id).first()
+    if not obj:
+        raise HTTPException(404, "Preparation list not found")
+    return PrepListOut.model_validate(obj)
+
+
+@router.put("/{list_id}", response_model=PrepListOut)
+async def update_preparation_list(
+    list_id: str,
+    payload: PrepListRemark,
+    db: Session = Depends(get_db),
+):
+    """PUT Rüstliste aktualisieren (Notiz/Status)"""
+    obj = db.query(PreparationList).filter(PreparationList.id == list_id).first()
+    if not obj:
+        raise HTTPException(404, "Preparation list not found")
+    if obj.status == "processed":
+        raise HTTPException(400, "Verarbeitete Rüstlisten können nicht geändert werden")
+    obj.notes = payload.notes
+    db.commit()
+    db.refresh(obj)
+    return PrepListOut.model_validate(obj)
+
+
+@router.delete("/{list_id}", status_code=204)
+async def delete_preparation_list(list_id: str, db: Session = Depends(get_db)):
+    """DELETE Rüstliste (nur offene)"""
+    obj = db.query(PreparationList).filter(PreparationList.id == list_id).first()
+    if not obj:
+        raise HTTPException(404, "Preparation list not found")
+    if obj.status != "open":
+        raise HTTPException(400, f"Nur offene Rüstlisten können gelöscht werden (Status: {obj.status})")
+    db.delete(obj)
+    db.commit()
+
+
 @router.get("/{list_id}/lines", response_model=list[PrepListLineOut])
 async def get_prep_list_lines(list_id: str, db: Session = Depends(get_db)):
     """GET Rüstliste Positionen ermitteln"""

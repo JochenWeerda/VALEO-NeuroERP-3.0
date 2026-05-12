@@ -1457,6 +1457,30 @@ async def release_harvest_acceptance(
     return _harvest_acceptance_to_dict_with_positions(acceptance, db)
 
 
+@router.post("/{acceptance_id}/cancel", response_model=HarvestAcceptanceOut)
+async def cancel_harvest_acceptance(
+    acceptance_id: str,
+    reason: str = Query(..., min_length=1, description="Pflichtbegründung für Stornierung"),
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+):
+    """Ernte-Annahme stornieren. Blockiert wenn bereits endgültig freigegeben."""
+    acceptance = db.query(HarvestAcceptance).filter(
+        HarvestAcceptance.id == acceptance_id, HarvestAcceptance.tenant_id == tenant_id
+    ).first()
+    if not acceptance:
+        raise HTTPException(status_code=404, detail="Harvest acceptance not found")
+    if acceptance.release_status == "final":
+        raise HTTPException(status_code=400, detail="Endgültig freigegebene Annahmen können nicht storniert werden")
+    if acceptance.release_status == "cancelled":
+        raise HTTPException(status_code=400, detail="Annahme ist bereits storniert")
+    acceptance.release_status = "cancelled"
+    acceptance.notes = f"[STORNIERT: {reason}] " + (acceptance.notes or "")
+    db.commit()
+    db.refresh(acceptance)
+    return _harvest_acceptance_to_dict_with_positions(acceptance, db)
+
+
 # ============================================================================
 # QUALITÄTSPROTOKOLL-INTEGRATION
 # ============================================================================

@@ -476,3 +476,38 @@ async def list_korrekturen(
         ],
         "total": total,
     }
+
+
+@router.get("/korrekturen/{korrektur_id}", tags=["lager"])
+async def get_korrektur(
+    korrektur_id: str,
+    tenant_id: Optional[str] = Query(None),
+    db: Session = Depends(get_db),
+):
+    """Einzelne Bestandskorrektur abrufen."""
+    tid = tenant_id or DEFAULT_TENANT
+    try:
+        row = db.execute(
+            text("""
+                SELECT id, article_id, warehouse_id, quantity, charge, reference_number,
+                       movement_date, notes, created_at
+                FROM domain_inventory.inventory_stock_movements
+                WHERE id = :id AND tenant_id = :tid AND movement_type = 'adjustment'
+            """),
+            {"id": korrektur_id, "tid": tid},
+        ).mappings().fetchone()
+    except Exception:
+        row = None
+    if not row:
+        raise HTTPException(status_code=404, detail="Korrektur nicht gefunden")
+    return {
+        "id": str(row["id"]),
+        "article_id": str(row["article_id"]),
+        "warehouse_id": str(row["warehouse_id"]),
+        "menge": float(row["quantity"]),
+        "charge": row["charge"],
+        "reference_number": row["reference_number"],
+        "buchungsdatum": str(row["movement_date"]) if row["movement_date"] else None,
+        "bemerkung": row["notes"],
+        "created_at": str(row["created_at"]),
+    }
