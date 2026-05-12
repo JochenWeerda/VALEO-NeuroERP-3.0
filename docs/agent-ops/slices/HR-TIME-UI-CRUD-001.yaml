@@ -1,0 +1,23 @@
+id: HR-TIME-UI-CRUD-001
+status: reserviert
+owner: Codex
+goal: >
+  HR-Time-Tools als Human/AI-Agent-Interface mit CRUD-Aktionen fuer Zeitbuchung,
+  Abwesenheit, Schicht, Kalender, Payroll, Kampagne und Aussendienst operationalisieren.
+file_ownership:
+  - docs/agent-ops/active-workboard.md
+  - docs/agent-ops/slices/HR-TIME-UI-CRUD-001.yaml
+  - packages/frontend-web/src/lib/api/personal.ts
+  - packages/frontend-web/src/pages/personal/zeiterfassung.tsx
+acceptance_criteria: >
+  Frontend nutzt die neuen HR-Time-Contracts fuer Listen und Create-Mutations;
+  Nutzer koennen zentrale HR-Time-Objekte aus dem Cockpit anlegen; Agent-Hinweise
+  fassen Blocker, Freigaben und naechste Aktionen zusammen; Typecheck ist gruen.
+checks:
+  - pnpm --filter @valero-neuroerp/frontend-web type-check
+  - python scripts/agent_workboard_supervisor.py validate
+  - node scripts/docs-governance-check.cjs
+  - git diff --check
+risks: >
+  Detail-CRUD mit Edit/Delete, echte Optimierungsvorschlaege und mobile Offline-UX
+  bleiben Folgeslices.

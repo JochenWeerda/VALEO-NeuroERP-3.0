@@ -185,6 +185,17 @@ Stand: `2026-05-12`
 **Checks:** `pytest tests/test_personal_field_service_api.py tests/test_personal_campaign_capacity_api.py tests/test_personal_payroll_export_api.py tests/test_personal_calendar_api.py tests/test_personal_shift_planning_api.py tests/test_personal_absence_api.py tests/test_personal_time_booking_api.py tests/test_personal_time_data_api.py tests/test_personal_time_cockpit_api.py tests/test_personal_driver_time_api.py -q --no-cov`; `python scripts/agent_workboard_supervisor.py validate`; `node scripts/docs-governance-check.cjs`; `git diff --check`
 **Offene Risiken:** CRM-Live-Connector, Routenoptimierung und mobile Aussendienst-UI bleiben Folgeslices.
 
+## HR-TIME-UI-CRUD-001
+
+**Von:** Codex
+**Owner:** Codex
+**Stand:** reserviert 2026-05-12
+**Ziel des Slices:** HR-Time-Tools als Human/AI-Agent-Interface mit CRUD-Aktionen fuer Zeitbuchung, Abwesenheit, Schicht, Kalender, Payroll, Kampagne und Aussendienst operationalisieren.
+**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/agent-ops/slices/HR-TIME-UI-CRUD-001.yaml`, `packages/frontend-web/src/lib/api/personal.ts`, `packages/frontend-web/src/pages/personal/zeiterfassung.tsx`
+**Abnahmekriterien:** Frontend nutzt die neuen HR-Time-Contracts fuer Listen und Create-Mutations; Nutzer koennen zentrale HR-Time-Objekte aus dem Cockpit anlegen; Agent-Hinweise fassen Blocker, Freigaben und naechste Aktionen zusammen; Typecheck ist gruen.
+**Checks:** `pnpm --filter @valero-neuroerp/frontend-web type-check`; `python scripts/agent_workboard_supervisor.py validate`; `node scripts/docs-governance-check.cjs`; `git diff --check`
+**Offene Risiken:** Detail-CRUD mit Edit/Delete, echte Optimierungsvorschlaege und mobile Offline-UX bleiben Folgeslices.
+
 ## AGENT-ORCH-001
 
 **Von:** Codex
