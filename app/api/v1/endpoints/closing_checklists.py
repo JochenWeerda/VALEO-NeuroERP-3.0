@@ -1046,3 +1046,49 @@ async def get_closing_cockpit_summary(
 
     return result
 
+
+@router.post("/{checklist_id}/approve", response_model=ClosingChecklistResponse)
+async def approve_closing_checklist(
+    checklist_id: str,
+    approved_by: str = Query("system", description="Approver user ID"),
+    tenant_id: str = Query("system", description="Tenant ID"),
+    db: Session = Depends(get_db),
+):
+    """Approve a completed checklist (completed → approved)."""
+    checklist = await get_closing_checklist(checklist_id, tenant_id, db)
+    if checklist.status not in {"completed", "approved"}:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Only completed checklists can be approved (current: {checklist.status})",
+        )
+    db.execute(
+        text("""
+            UPDATE domain_erp.closing_checklists
+            SET status = 'approved', completed_at = NOW(), completed_by = :approved_by, updated_at = NOW()
+            WHERE id = :checklist_id AND tenant_id = :tenant_id
+        """),
+        {"checklist_id": checklist_id, "tenant_id": tenant_id, "approved_by": approved_by},
+    )
+    db.commit()
+    return await get_closing_checklist(checklist_id, tenant_id, db)
+
+
+@router.delete("/{checklist_id}", status_code=204)
+async def delete_closing_checklist(
+    checklist_id: str,
+    tenant_id: str = Query("system", description="Tenant ID"),
+    db: Session = Depends(get_db),
+):
+    """Delete a draft or in_progress checklist."""
+    checklist = await get_closing_checklist(checklist_id, tenant_id, db)
+    if checklist.status in {"approved", "completed"}:
+        raise HTTPException(
+            status_code=400,
+            detail="Approved or completed checklists cannot be deleted",
+        )
+    db.execute(
+        text("DELETE FROM domain_erp.closing_checklists WHERE id = :checklist_id AND tenant_id = :tenant_id"),
+        {"checklist_id": checklist_id, "tenant_id": tenant_id},
+    )
+    db.commit()
+

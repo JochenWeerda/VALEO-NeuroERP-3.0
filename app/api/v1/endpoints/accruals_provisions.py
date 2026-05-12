@@ -124,6 +124,86 @@ async def create_accrual_provision(
     )
 
 
+def _fetch_accrual_or_404(db: Session, item_id: str, tenant_id: str) -> AccrualItem:
+    row = db.execute(
+        text("""
+            SELECT id, tenant_id, description, amount, account_number, counterpart_account,
+                   period, accrual_type, status, created_at
+            FROM domain_erp.accruals_provisions
+            WHERE id = :id AND tenant_id = :tid
+        """),
+        {"id": item_id, "tid": tenant_id},
+    ).fetchone()
+    if not row:
+        raise HTTPException(status_code=404, detail="Accrual/Provision not found")
+    return AccrualItem(
+        id=str(row[0]), tenant_id=row[1], description=row[2],
+        amount=Decimal(str(row[3])), account_number=row[4], counterpart_account=row[5],
+        period=row[6], accrual_type=row[7], status=row[8], created_at=row[9],
+    )
+
+
+@router.get("/{item_id}", response_model=AccrualItem)
+async def get_accrual_provision(
+    item_id: str,
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+):
+    """Get a single accrual/provision by ID."""
+    return _fetch_accrual_or_404(db, item_id, tenant_id)
+
+
+class AccrualItemUpdate(BaseModel):
+    description: Optional[str] = Field(default=None, min_length=1, max_length=500)
+    amount: Optional[Decimal] = Field(default=None, ge=0)
+    account_number: Optional[str] = Field(default=None, min_length=1, max_length=20)
+    counterpart_account: Optional[str] = Field(default=None, min_length=1, max_length=20)
+    period: Optional[str] = None
+    accrual_type: Optional[str] = None
+
+
+@router.put("/{item_id}", response_model=AccrualItem)
+async def update_accrual_provision(
+    item_id: str,
+    payload: AccrualItemUpdate,
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+):
+    """Update a draft accrual/provision."""
+    existing = _fetch_accrual_or_404(db, item_id, tenant_id)
+    if existing.status == "posted":
+        raise HTTPException(status_code=400, detail="Posted items cannot be edited")
+    updates = payload.model_dump(exclude_unset=True)
+    if not updates:
+        return existing
+    set_clauses = ", ".join(f"{k} = :{k}" for k in updates)
+    updates["id"] = item_id
+    updates["tid"] = tenant_id
+    db.execute(
+        text(f"UPDATE domain_erp.accruals_provisions SET {set_clauses} WHERE id = :id AND tenant_id = :tid"),
+        updates,
+    )
+    db.commit()
+    return _fetch_accrual_or_404(db, item_id, tenant_id)
+
+
+@router.delete("/{item_id}", status_code=204)
+async def delete_accrual_provision(
+    item_id: str,
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+):
+    """Delete a draft accrual/provision."""
+    existing = _fetch_accrual_or_404(db, item_id, tenant_id)
+    if existing.status == "posted":
+        raise HTTPException(status_code=400, detail="Posted items cannot be deleted")
+    db.execute(
+        text("DELETE FROM domain_erp.accruals_provisions WHERE id = :id AND tenant_id = :tid"),
+        {"id": item_id, "tid": tenant_id},
+    )
+    db.commit()
+
+
 @router.post("/{item_id}/post", response_model=dict)
 async def post_accrual_provision(
     item_id: str,

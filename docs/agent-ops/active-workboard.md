@@ -774,10 +774,11 @@ Archiv des vorherigen Boards:
 ## DOM-FIN-002
 
 **Von:** Codex
-**Stand:** offen
+**Stand:** abgeschlossen 2026-05-12
 **Ziel des Slices:** FIBU-/L3-Parity fachlich weiter vertiefen, insbesondere Abschluss-, Revisions- und Operator-Pfade.
 **Dateibesitz:** `docs/agent-ops/active-workboard.md`, relevante FIBU-/Finance-Module, Doku unter `docs/project-context/`
 **Abnahmekriterien:** Finance/FIBU ist nicht nur breit, sondern in den priorisierten Operatorpfaden semantisch konsistenter und tiefer.
+**Erledigt:** (1) `accruals_provisions.py`: GET/PUT/DELETE-Endpoints fuer Einzelobjekte hinzugefuegt (waren fehlend — nur List+Create+Post vorhanden); (2) `closing_checklists.py`: POST `/{id}/approve` + DELETE `/{id}` hinzugefuegt (approve-Schritt fehlte im Workflow); (3) Tests: `test_accruals_provisions_api.py` (12), `test_subsidiary_ledger_reconciliation_api.py` (12) — 24 Tests gruen. Stand: 2026-05-12.
 
 ## DOM-INV-002
 
