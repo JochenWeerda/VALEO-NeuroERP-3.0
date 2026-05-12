@@ -233,6 +233,17 @@ Stand: `2026-05-12`
 **Checks:** `pnpm --filter @valero-neuroerp/frontend-web exec playwright test tests/e2e/hr-time-clickthrough.generated.spec.ts --project=chromium`; `pnpm --filter @valero-neuroerp/frontend-web type-check`; `python scripts/agent_workboard_supervisor.py validate`; `node scripts/docs-governance-check.cjs`
 **Offene Risiken:** Voller Edit/Delete-Workflow fuer alle HR-Time-Objekte bleibt Folgeslice.
 
+## HR-TIME-UX-ROADMAP-001
+
+**Von:** Codex
+**Owner:** Codex
+**Stand:** reserviert 2026-05-12
+**Ziel des Slices:** HR-Time-Workflows als klickarme End-to-End UX-Roadmap mit Milestones, Quervernetzungen, User-Fragen, Masken, Such-/Filter-/Sortierfunktionen planen und den ersten Filter-/Such-Slice im Cockpit umsetzen.
+**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/agent-ops/slices/HR-TIME-UX-ROADMAP-001.yaml`, `docs/project-context/hr-time-ux-workflow-roadmap-2026-05-12.md`, `packages/frontend-web/src/pages/personal/zeiterfassung.tsx`, `packages/frontend-web/tests/e2e/hr-time-clickthrough.generated.spec.ts`
+**Abnahmekriterien:** Roadmap beschreibt Milestones mit Quervernetzungen und Abhaengigkeiten; User-Fragen sind Masken, Datenquellen und Aktionen zugeordnet; UI bietet zentrale Suche, Schnellfilter und Sortierung fuer Arbeitszeit/Arbeitsplan; Durchklicktest nutzt Suche/Filter/Sortierung.
+**Checks:** `pnpm --filter @valero-neuroerp/frontend-web exec playwright test tests/e2e/hr-time-clickthrough.generated.spec.ts --project=chromium`; `pnpm --filter @valero-neuroerp/frontend-web type-check`; `python scripts/agent_workboard_supervisor.py validate`; `node scripts/docs-governance-check.cjs`
+**Offene Risiken:** Weitere Milestones wie Action Panel, Wizard, Driver-Dispo und Payroll Closeout bleiben Folge-Slices.
+
 ## AGENT-ORCH-001
 
 **Von:** Codex
