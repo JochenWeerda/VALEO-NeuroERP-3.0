@@ -1,8 +1,32 @@
 # Wave 101 — Gap 024 + Gap 037 Abschluss
 
-**Datum:** 2026-03-22
-**Status:** ABGESCHLOSSEN
-**Tests:** 0 neue (Lasttest-Infrastruktur + UI-Ergonomie, kein Python-Testfile)
+## Scope
+
+Gap 024 (Touch-Optimierung Qualitäts-Check) und Gap 037 (k6 Lasttest-Infrastruktur Erntepeak).
+
+## Zielbild
+
+Touch-First-Bedienung für Qualitätsprüfung im Annahme-Prozess; reproduzierbare Lasttests für Erntepeak-Szenarien.
+
+## Lieferumfang
+
+- `packages/frontend-web/src/pages/annahme/qualitaets-check.tsx` — Touch-Komponenten
+- `tests/load/harvest-peak.js`, `tests/load/health-check.js`, `tests/load/README.md`
+- `.github/workflows/load-test.yml`
+
+## Abnahmekriterien
+
+- Alle Touch-Targets ≥ 44px
+- `tsc --noEmit` Exit 0
+- k6 health-check Gate grün im CI
+
+## Tests
+
+0 neue Python-Tests (Lasttest-Infrastruktur + UI-Ergonomie)
+
+## Status
+
+`abgeschlossen` - 2026-03-22
 
 ## Gelieferte Gaps
 
@@ -62,7 +86,7 @@ POST /api/v1/lager/einlagerung         (Einlagerung buchen)
 ## Bonus-Fix
 
 **`packages/frontend-web/src/pages/annahme/abrechnung.tsx:728`**
-- Pre-existing TS-Fehler: bare `->` in JSX (TS1382) → korrigiert zu `{'->'}` 
+- Pre-existing TS-Fehler: bare `->` in JSX (TS1382) → korrigiert zu `{'->'}`
 - Blockierte vorher `tsc --noEmit` Exit 0
 
 ## TypeScript-Status

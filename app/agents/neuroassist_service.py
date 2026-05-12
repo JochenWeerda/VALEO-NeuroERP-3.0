@@ -585,7 +585,7 @@ class NeuroAssistService:
         except (ValidationError, KeyError) as exc:
             raise NeuroAssistInputContractError(str(exc)) from exc
 
-        capability = resolve_neuroassist_capability(capability_key)
+        _capability = resolve_neuroassist_capability(capability_key)  # noqa: F841
         try:
             get_agent_ops_service().enforce_budget(tenant_id, capability_key)
         except AgentBudgetGuardrailExceededError as exc:

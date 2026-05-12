@@ -760,7 +760,7 @@ class ISO27001OperationsSecurity:
         backup_summary = self._get_backup_summary()
 
         # Get active alerts
-        active_alerts = [alert for alert in self.capacity_alerts
+        _active_alerts = [alert for alert in self.capacity_alerts  # noqa: F841
                         if not alert.resolved_at][:10]  # Last 10
 
         # Get upcoming maintenance

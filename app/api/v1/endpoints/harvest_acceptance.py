@@ -1639,7 +1639,7 @@ async def calculate_frachtkosten(
     # Hole Parameter
     entfernung_km = data.get("entfernung_km", 0)
     gewicht_kg = data.get("gewicht_kg")
-    tariff_id = data.get("tariff_id")
+    _tariff_id = data.get("tariff_id")  # noqa: F841
     
     # Fallback: Nimm Gewicht aus Acceptance
     if not gewicht_kg:

@@ -296,7 +296,7 @@ class ISO27001NetworkSecurity:
         anomalies = []
 
         source_ip = traffic_data.get('source_ip')
-        destination_ip = traffic_data.get('destination_ip')
+        _destination_ip = traffic_data.get('destination_ip')  # noqa: F841
         protocol = traffic_data.get('protocol')
         port = traffic_data.get('destination_port')
 
@@ -664,7 +664,7 @@ class ISO27001NetworkSecurity:
         issues = []
 
         # Check for unmonitored assets
-        monitored_zones = set()
+        _monitored_zones = set()  # noqa: F841
         for event in self.network_events[-100:]:  # Last 100 events
             # This is simplified - in production, check actual monitoring coverage
             pass

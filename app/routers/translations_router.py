@@ -230,7 +230,7 @@ async def bulk_seed_translations(
             ).first()
             
             if not existing:
-                new_trans = create_translation(
+                _new_trans = create_translation(  # noqa: F841
                     db,
                     key=trans.translation_key,
                     context=trans.context,

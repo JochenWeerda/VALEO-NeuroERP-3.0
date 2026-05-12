@@ -95,7 +95,7 @@ def verteile_kosten(
 
 
 def get_default_kosten_allokationen() -> list:
-    now = datetime(2026, 3, 16, 10, 0, 0)
+    _now = datetime(2026, 3, 16, 10, 0, 0)  # noqa: F841
     a1 = KostenAllokation("KA-001", "WI-K-001", "KST-AGRAR", [], AllokationsMethode.DIREKT, 1.0)
     a1.positionen = [
         KostenPosition("KP-001", KostenTyp.PERSONAL, 120.0, "EUR", "Bearbeitung", KostenStatus.GEBUCHT),

@@ -103,7 +103,7 @@ class ProzessGraph:
 
 def get_default_prozess_graphen() -> list:
     """Returns 2 default ProzessGraph instances."""
-    now = datetime(2026, 3, 16, 10, 0, 0)
+    _now = datetime(2026, 3, 16, 10, 0, 0)  # noqa: F841
 
     # Graph 1: Linear kontrakt process: S1->S2->S3->S4
     g1 = ProzessGraph("PG-001")

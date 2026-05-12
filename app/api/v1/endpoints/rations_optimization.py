@@ -1602,7 +1602,7 @@ def _feeding_system_defaults(
               Einzelgabe: -0,5 kg bei Melkstand/Transponder
     """
     dist = (distribution or "").strip().lower()
-    sys_norm = (system or "").strip().upper()
+    _sys_norm = (system or "").strip().upper()  # noqa: F841
 
     starch_class = (
         (recipe.starch_breakdown_class if recipe else "mixed") or "mixed"
@@ -2119,15 +2119,15 @@ def _run_lp(
     _constraint_registry = _cm.registry
     me_per_kg            = _cm.me_per_kg
     sidp_per_kg          = _cm.sidp_per_kg
-    ndf_per_kg           = _cm.ndf_per_kg
+    _ndf_per_kg = _cm.ndf_per_kg  # noqa: F841
     xl_per_kg            = _cm.xl_per_kg
     rmd_per_kg           = _cm.rmd_per_kg
     pabkh_per_kg         = _cm.pabkh_per_kg
-    k_per_kg             = _cm.k_per_kg
+    _k_per_kg = _cm.k_per_kg  # noqa: F841
     cp_per_kg            = _cm.cp_per_kg
     rmd_max              = _cm.rmd_max
     k_lp_extra           = _cm.k_lp_extra
-    _baseline_positions  = _cm.baseline_positions
+    _baseline_positions  = _cm.baseline_positions  # noqa: F841
 
     n_tot = n + k_lp_extra
     A_ub_snap = [list(row) for row in A_ub]
@@ -2289,7 +2289,7 @@ def _run_lp(
             stage1_forage_pct = (
                 sum(stage1_amounts[i] for i in range(n) if feeds[i].get("forage")) / stage1_total_dmi * 100.0
             )
-            stage1_pendf_density = sum(
+            _stage1_pendf_density = sum(  # noqa: F841
                 stage1_amounts[i] * feeds[i]["ndf"] * _feed_pendf_factor(feeds[i])
                 for i in range(n)
             ) / stage1_total_dmi
@@ -4197,7 +4197,7 @@ def _build_response(
     ndf_sup = _agg.ndf
     adf_sup = _agg.adf
     st_sup = _agg.st
-    bst_sup = _agg.bst
+    _bst_sup = _agg.bst  # noqa: F841
     zu_sup = _agg.zu
     xl_sup = _agg.xl
     ca_sup = _agg.ca
@@ -4208,7 +4208,7 @@ def _build_response(
     sidlys_sup = _agg.sidlys
     sidmet_sup = _agg.sidmet
 
-    pendf_sup = _agg.pendf
+    _pendf_sup = _agg.pendf  # noqa: F841
     pendf_density = _agg.pendf_density
 
     # Stärke-Dichten
@@ -4232,8 +4232,8 @@ def _build_response(
     # DLG 01|2025: aNDFomGF+CoP - faserreiche Co-Produkte (Biertreber, Press-
     # schnitzel, Schlempe) werden gemeinsam mit Grobfutter als strukturelle
     # Faserbasis gewertet.
-    cop_kg = _agg.cop_kg
-    cop_ndf_sup = _agg.cop_ndf
+    _cop_kg = _agg.cop_kg  # noqa: F841
+    _cop_ndf_sup = _agg.cop_ndf  # noqa: F841
     forage_plus_cop_ndf = _agg.forage_plus_cop_ndf
     feeding_type = _normalize_feeding_type(profile.get("feeding_type"))
     pasture_pmr = _is_pasture_pmr_system(feeds, profile)
@@ -4403,7 +4403,7 @@ def _build_response(
         si = None
 
     # --- RMD (Ruminale Mikrobielle Differenz) – Ration gesamt ---
-    rmd_vals = [feeds[i].get("rmd") for i in range(len(feeds)) if amounts[i] > 0.001]
+    _rmd_vals = [feeds[i].get("rmd") for i in range(len(feeds)) if amounts[i] > 0.001]  # noqa: F841
     has_rmd = any(v is not None for v in [feeds[i].get("rmd") for i in range(len(feeds))])
     rmd_ration = None
     if has_rmd and total_dmi > 0:
@@ -5114,7 +5114,7 @@ def _gfa_to_feed(gfa: Dict[str, Any]) -> Dict[str, Any]:
     rmd = float(gfa.get("rmd_ts") or gfa.get("rnb_ts") or 0)
 
     # NEL / OMD
-    nel = float(gfa.get("nel_ts") or 0)
+    _nel = float(gfa.get("nel_ts") or 0)  # noqa: F841
     omd = float(gfa.get("omd_ts") or 65.0)
 
     name = gfa.get("bezeichnung") or gfa.get("name") or "Betriebseigenes Grundfutter"

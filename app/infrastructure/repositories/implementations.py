@@ -272,7 +272,7 @@ class AccountRepositoryImpl(AccountRepository):
                     Account.is_active == True
                 )
             ).first()
-        except Exception as e:
+        except Exception:
             return None
 
     async def get_all(self, tenant_id: str, skip: int = 0, limit: int = 100, **kwargs) -> list[Account]:
@@ -286,7 +286,7 @@ class AccountRepositoryImpl(AccountRepository):
                 query = query.filter(Account.tenant_id == tenant_id)
 
             return query.offset(skip).limit(limit).all()
-        except Exception as e:
+        except Exception:
             return []
 
     async def create(self, data: dict, tenant_id: str) -> Account:
@@ -305,7 +305,7 @@ class AccountRepositoryImpl(AccountRepository):
             self.session.commit()
             self.session.refresh(instance)
             return instance
-        except Exception as e:
+        except Exception:
             self.session.rollback()
             raise
 
@@ -332,7 +332,7 @@ class AccountRepositoryImpl(AccountRepository):
                 return await self.get_by_id(id, tenant_id)
             else:
                 return None
-        except Exception as e:
+        except Exception:
             self.session.rollback()
             raise
 
@@ -353,7 +353,7 @@ class AccountRepositoryImpl(AccountRepository):
             })
             self.session.commit()
             return result > 0
-        except Exception as e:
+        except Exception:
             self.session.rollback()
             raise
 
@@ -369,7 +369,7 @@ class AccountRepositoryImpl(AccountRepository):
                 query = query.filter(Account.tenant_id == tenant_id)
 
             return self.session.query(query.exists()).scalar()
-        except Exception as e:
+        except Exception:
             return False
 
     async def count(self, tenant_id: str, **kwargs) -> int:
@@ -391,7 +391,7 @@ class AccountRepositoryImpl(AccountRepository):
                 query = query.filter(Account.category == category)
 
             return query.count()
-        except Exception as e:
+        except Exception:
             return 0
 
     async def get_by_number(self, account_number: str, tenant_id: str) -> Account | None:

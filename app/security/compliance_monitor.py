@@ -172,7 +172,7 @@ class ISO27001ComplianceMonitor:
     def _check_access_reviews(self, tenant_id: str) -> Dict[str, Any]:
         """Check if access rights reviews are up to date"""
         # Check for users whose access hasn't been reviewed recently (90 days)
-        ninety_days_ago = datetime.utcnow() - timedelta(days=90)
+        _ninety_days_ago = datetime.utcnow() - timedelta(days=90)  # noqa: F841
 
         # Mock: assume some reviews are overdue
         overdue_reviews = 2

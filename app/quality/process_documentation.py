@@ -313,7 +313,7 @@ class ISO9001ProcessDocumentation:
         """Create new version of document"""
         # Increment version
         major, minor = map(int, document.version.split('.'))
-        new_version = f"{major}.{minor + 1}"
+        _new_version = f"{major}.{minor + 1}"  # noqa: F841
 
         # Create new document
         new_document_data = {

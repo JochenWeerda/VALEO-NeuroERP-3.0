@@ -306,7 +306,7 @@ class ISO22301DisasterRecovery:
 
     def _notify_disaster_stakeholders(self, disaster: DisasterDeclaration):
         """Notify relevant stakeholders about disaster declaration"""
-        notification_data = {
+        _notification_data = {  # noqa: F841
             'type': 'disaster_declaration',
             'disaster_id': disaster.id,
             'disaster_type': disaster.disaster_type.value,

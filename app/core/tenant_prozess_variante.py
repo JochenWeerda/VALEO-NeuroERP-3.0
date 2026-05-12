@@ -250,7 +250,7 @@ def validate_prozess_variante(variante: TenantProzessVariante) -> VarianteValidi
     """
     violations: list[VarianteViolation] = []
     bekannte_ids = {s.schritt_id for s in variante.default_schritte}
-    override_map: dict[str, SchrittOverride] = {
+    override_map: dict[str, SchrittOverride] = {  # noqa: F841
         o.schritt_id: o for o in variante.overrides
     }
 

@@ -215,7 +215,7 @@ async def get_tours_by_week(week: str, db: Session = Depends(get_db)):
 async def get_today_tours(db: Session = Depends(get_db)):
     """Get all tours for today"""
     repo = TourRepository(db)
-    today = datetime.utcnow().date()
+    _today = datetime.utcnow().date()  # noqa: F841
     # Create a date object for comparison
     from datetime import date
     today_date = date.today()

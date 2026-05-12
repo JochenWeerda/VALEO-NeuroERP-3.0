@@ -222,7 +222,7 @@ def parse_mt940(content: bytes) -> dict:
                 # Format: :60F:CYYMMDDEUR1234,56
                 balance_str = line[5:].strip()
                 if len(balance_str) >= 10:
-                    currency = balance_str[7:10]
+                    _currency = balance_str[7:10]  # noqa: F841
                     amount_str = balance_str[10:].replace(',', '.')
                     opening_balance = Decimal(amount_str)
             

@@ -65,7 +65,7 @@ class SchemaVersion:
         if not self.aenderungen:
             return SchemaKompatibilitaet.VOLLSTAENDIG
         hat_brechend = any(a.ist_brechend() for a in self.aenderungen)
-        hat_harmlos = any(not a.ist_brechend() for a in self.aenderungen)
+        _hat_harmlos = any(not a.ist_brechend() for a in self.aenderungen)  # noqa: F841
         if hat_brechend:
             return SchemaKompatibilitaet.KEINE
         # Only non-breaking (added optional fields → backward compat)

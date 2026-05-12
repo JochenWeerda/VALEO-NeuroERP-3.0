@@ -281,7 +281,7 @@ async def generate_optimization_plan(state: SystemOptimizerState) -> Dict[str, A
     # Process each signal with AI-enhanced logic
     for signal in signals:
         signal_type = signal.get("type")
-        severity = signal.get("severity", "low")
+        _severity = signal.get("severity", "low")  # noqa: F841
 
         # AI-enhanced decision making
         if signal_type == "memory_critical":

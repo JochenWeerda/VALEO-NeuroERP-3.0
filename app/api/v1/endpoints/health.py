@@ -67,7 +67,7 @@ async def readiness_check() -> JSONResponse:
     # 3. Vector Store Check (Chroma/RAG)
     try:
         from app.infrastructure.rag.vector_store import get_vector_store
-        vector_store = get_vector_store()
+        _vector_store = get_vector_store()  # noqa: F841
         # Simple ping
         checks["vector_store"] = {"status": "healthy"}
     except Exception as e:

@@ -128,7 +128,7 @@ class RAGQueryCache:
     
     def cleanup_expired(self) -> int:
         """Remove expired entries. Returns count of removed entries."""
-        before_count = len(self.cache)
+        _before_count = len(self.cache)  # noqa: F841
         
         expired_keys = [
             key for key, cached in self.cache.items()

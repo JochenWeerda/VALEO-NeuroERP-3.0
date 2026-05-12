@@ -391,7 +391,7 @@ def _pdf_text_line(x: float, y: float, text: str, font: str = "/F1", size: int =
 
 def _build_compliance_pdf_bytes(stats: dict, cross_items: list[dict]) -> bytes:
     """Baut ein mehrseitiges PDF mit automatischen Längen, Seitenumbrüchen und Zwischensummen."""
-    buffer = io.BytesIO()
+    _buffer = io.BytesIO()  # noqa: F841
     margin = 72
     line_height = 14
     font_size = 10

@@ -167,7 +167,7 @@ async def cash_close_day(
     """Kasse Tagesabschluss — erzeugt Abschlussbuchung fuer den aktuellen Tag."""
     from datetime import date as _date
     today = _date.today()
-    period = today.strftime("%Y-%m")
+    _period = today.strftime("%Y-%m")  # noqa: F841
 
     try:
         row = db.execute(

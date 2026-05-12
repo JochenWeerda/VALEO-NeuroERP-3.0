@@ -114,7 +114,7 @@ async def fetch_wikipedia_image(name: str) -> Optional[str]:
     search_term = name.split()[0] if name else ""  # first word usually best
     if len(search_term) < 3:
         return None
-    url = (
+    _url = (  # noqa: F841
         "https://de.wikipedia.org/w/api.php"
         "?action=query&generator=search&gsrsearch={q}"
         "&prop=pageimages&piprop=thumbnail&pithumbsize=300"

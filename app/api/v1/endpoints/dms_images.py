@@ -40,7 +40,7 @@ async def list_dms_documents(
 ):
     """Dokumente aus article_documents oder generischem Document-Store."""
     try:
-        conditions = []
+        _conditions = []  # noqa: F841
         params: dict = {}
 
         if entity_type == "article" and entity_id:

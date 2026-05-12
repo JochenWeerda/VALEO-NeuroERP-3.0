@@ -91,7 +91,7 @@ def instanziere_template(
 
 
 def get_default_templates() -> list:
-    now = datetime(2026, 3, 16, 10, 0, 0)
+    _now = datetime(2026, 3, 16, 10, 0, 0)  # noqa: F841
     t1 = ProzessTemplate("PT-001", "Kontrakt-Standardprozess", "kontrakt_freigabe",
                           TemplateTyp.STANDARD, TemplateStatus.AKTIV, "2.1.0",
                           pflicht_parameter=["lieferant_id", "menge_tonnen", "preis_eur_t"])

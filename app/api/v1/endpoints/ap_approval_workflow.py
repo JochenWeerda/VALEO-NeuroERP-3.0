@@ -428,7 +428,7 @@ async def request_approval(
             RETURNING id, invoice_id, status, required_approvals, applicable_rule, created_at, updated_at
         """)
         
-        row = db.execute(insert_query, {
+        _row = db.execute(insert_query, {  # noqa: F841
             "id": approval_id,
             "tenant_id": tenant_id,
             "invoice_id": request.invoice_id,

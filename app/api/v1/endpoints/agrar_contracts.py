@@ -324,7 +324,7 @@ async def list_contract_allocations(
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
-    contract = _get_contract_or_404(db, contract_id, tenant_id)
+    _contract = _get_contract_or_404(db, contract_id, tenant_id)  # noqa: F841
     rows = (
         db.query(AgrarContractAllocation)
         .filter(

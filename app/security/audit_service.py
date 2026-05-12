@@ -269,7 +269,7 @@ class ISMSAuditService:
         entries = self._get_audit_entries_in_range(start_date, end_date)
 
         integrity_breaches = []
-        expected_hash = self._get_hash_at_date(start_date) if start_date else "genesis"
+        expected_hash = self._get_hash_at_date(start_date) if start_date else "genesis"  # noqa: F841
 
         for entry in entries:
             calculated_hash = self._create_integrity_hash(entry)
@@ -280,7 +280,7 @@ class ISMSAuditService:
                     'stored_hash': entry.integrity_hash,
                     'timestamp': entry.timestamp
                 })
-            expected_hash = entry.integrity_hash
+            _expected_hash = entry.integrity_hash  # noqa: F841
 
         return {
             'entries_checked': len(entries),

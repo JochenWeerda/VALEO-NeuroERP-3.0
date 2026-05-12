@@ -818,7 +818,7 @@ async def get_settlements(
             }
             for row in rows
         ]
-    except Exception as e:
+    except Exception:
         # If table doesn't exist, return empty list
         return []
 
