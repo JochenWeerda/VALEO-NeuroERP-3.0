@@ -5,11 +5,17 @@ on:
     branches: [ main, develop ]
     paths:
       - 'domains/finance/**'
+      - 'packages/erp-domain/**'
+      - 'migrations/sql/erp/**'
+      - 'tools/migration/**'
       - '.github/workflows/finance-domain-ci.yml'
   pull_request:
     branches: [ main, develop ]
     paths:
       - 'domains/finance/**'
+      - 'packages/erp-domain/**'
+      - 'migrations/sql/erp/**'
+      - 'tools/migration/**'
 
 env:
   NODE_VERSION: '18'

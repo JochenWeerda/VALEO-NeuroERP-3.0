@@ -37,11 +37,11 @@
       "@valero-neuroerp/data-models/*": ["../../packages/data-models/src/*"],
       "@valero-neuroerp/finance-domain": ["./index.ts"],
       "@valero-neuroerp/finance-domain/*": ["./*"],
-      "@valero-neuroerp/erp-domain": ["../../domains/erp/src/index.ts"],
-      "@valero-neuroerp/erp-domain/*": ["../../domains/erp/src/*"],
+      "@valero-neuroerp/erp-domain": ["../../packages/erp-domain/src/index.ts"],
+      "@valero-neuroerp/erp-domain/*": ["../../packages/erp-domain/src/*"],
       "@domains/*": ["../../domains/*/src"],
       "@finance/*": ["./*"],
-      "@erp/*": ["../../domains/erp/src/*"]
+      "@erp/*": ["../../packages/erp-domain/src/*"]
     },
     "types": [
       "node",
