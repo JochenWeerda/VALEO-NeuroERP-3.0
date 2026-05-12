@@ -1,12 +1,42 @@
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { DataTable } from '@/components/ui/data-table'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { NativeSelect } from '@/components/ui/native-select'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { AlertTriangle, CalendarCheck, CheckCircle2, Clock, FileDown, Route, ShieldCheck, Truck, Users } from 'lucide-react'
-import { useTimeCockpit, useZeiterfassung, type DriverTimeEvent, type DriverTimeFindingSeverity, type TimeCockpit, type ZeitEintrag } from '@/lib/api/personal'
+import { Textarea } from '@/components/ui/textarea'
+import { AlertTriangle, Bot, CalendarCheck, CalendarDays, CheckCircle2, Clock, FileDown, Plus, Route, ShieldCheck, Truck, Users } from 'lucide-react'
+import {
+  useAbsences,
+  useCalendarEvents,
+  useCampaignCapacity,
+  useCreateCalendarEvent,
+  useCreateCampaignCapacity,
+  useCreateFieldServicePlan,
+  useCreatePayrollExport,
+  useCreateShift,
+  useCreateTimeEntry,
+  useFieldServicePlan,
+  useImportAbsence,
+  usePayrollExports,
+  useShifts,
+  useTimeCockpit,
+  useZeiterfassung,
+  type Absence,
+  type CalendarEvent,
+  type CampaignCapacity,
+  type DriverTimeEvent,
+  type DriverTimeFindingSeverity,
+  type FieldServicePlan,
+  type PayrollExport,
+  type Shift,
+  type TimeCockpit,
+  type ZeitEintrag,
+} from '@/lib/api/personal'
 
 const getFindingBadgeVariant = (severity: DriverTimeFindingSeverity): 'destructive' | 'secondary' | 'outline' => {
   if (severity === 'blocker') return 'destructive'
@@ -14,13 +44,54 @@ const getFindingBadgeVariant = (severity: DriverTimeFindingSeverity): 'destructi
   return 'outline'
 }
 
+const getStatusBadgeVariant = (status: string): 'destructive' | 'secondary' | 'outline' => {
+  if (['blocked', 'blockiert', 'warning'].includes(status)) return status === 'warning' ? 'secondary' : 'destructive'
+  if (['Approved', 'Genehmigt', 'ready', 'planned', 'synced'].includes(status)) return 'outline'
+  return 'secondary'
+}
+
+const splitCsv = (value: string): string[] => value.split(',').map((item) => item.trim()).filter(Boolean)
+
 export default function ZeiterfassungPage(): JSX.Element {
   const today = new Date().toISOString().split('T')[0]
   const { data: zeiten, isLoading } = useZeiterfassung(today)
   const { data: cockpit, isLoading: isCockpitLoading } = useTimeCockpit(today)
+  const { data: absences } = useAbsences({ datumVon: today, datumBis: today })
+  const { data: shifts } = useShifts({ datumVon: today, datumBis: today })
+  const { data: calendarEvents } = useCalendarEvents({ start: `${today}T00:00:00+02:00`, end: `${today}T23:59:59+02:00` })
+  const { data: payrollExports } = usePayrollExports()
+  const { data: campaignCapacity } = useCampaignCapacity()
+  const { data: fieldServicePlan } = useFieldServicePlan()
+  const createTimeEntry = useCreateTimeEntry()
+  const importAbsence = useImportAbsence()
+  const createShift = useCreateShift()
+  const createCalendarEvent = useCreateCalendarEvent()
+  const createPayrollExport = useCreatePayrollExport()
+  const createCampaignCapacity = useCreateCampaignCapacity()
+  const createFieldServicePlan = useCreateFieldServicePlan()
   const list = useMemo(() => zeiten ?? [], [zeiten])
   const driverTime = cockpit.driverTime
   const driverRows = useMemo(() => driverTime.events, [driverTime.events])
+  const [timeForm, setTimeForm] = useState({ employeeRef: 'warehouse-1', startTime: '07:00', endTime: '16:00', hours: '8', entryType: 'Arbeit', costCenter: 'LAG', workArea: 'Lager' })
+  const [absenceForm, setAbsenceForm] = useState({ employeeRef: 'driver-1', absenceType: 'Urlaub' as const, fromDate: today, toDate: today, externalRef: '' })
+  const [shiftForm, setShiftForm] = useState({ name: 'Ernteannahme Waage', startTime: '06:00', endTime: '14:00', locationCode: 'main', requiredRole: 'waage', requiredQualifications: 'forklift', requiredHeadcount: '2', assignedEmployeeRefs: 'warehouse-1' })
+  const [calendarForm, setCalendarForm] = useState({ eventType: 'shift', title: 'Teamkalender Blocker', employeeRef: 'warehouse-1', startsAt: `${today}T06:00:00+02:00`, endsAt: `${today}T14:00:00+02:00`, visibility: 'team' })
+  const [campaignForm, setCampaignForm] = useState({ campaignCode: 'ERNTE-2026', name: 'Ernteannahme 2026', periodFrom: today, periodTo: today, locationCode: 'main', roleCode: 'lkw_fahrer', demand: '2', expectedVolume: '12000' })
+  const [fieldForm, setFieldForm] = useState({ employeeRef: 'berater-1', customerRef: 'kunde-42', territoryCode: 'north', campaignCode: 'SAAT-2026', startsAt: `${today}T09:00:00+02:00`, endsAt: `${today}T11:00:00+02:00` })
+
+  const agentHints = useMemo(() => {
+    const hints: Array<{ severity: DriverTimeFindingSeverity; title: string; detail: string }> = []
+    if (cockpit.kpis.pendingApprovals > 0) hints.push({ severity: 'warning', title: 'Freigaben', detail: `${cockpit.kpis.pendingApprovals} Zeitbuchungen warten auf Entscheidung.` })
+    if (cockpit.kpis.blockerCount > 0) hints.push({ severity: 'blocker', title: 'Compliance', detail: `${cockpit.kpis.blockerCount} Blocker muessen vor Payroll/Planung geklaert werden.` })
+    const blockedShiftCount = shifts.filter((item) => item.status === 'blocked').length
+    if (blockedShiftCount > 0) hints.push({ severity: 'blocker', title: 'Schichten', detail: `${blockedShiftCount} Schichten sind wegen Besetzung, Qualifikation oder Abwesenheit blockiert.` })
+    const blockedCampaignCount = campaignCapacity.filter((item) => item.status === 'blocked').length
+    if (blockedCampaignCount > 0) hints.push({ severity: 'blocker', title: 'Kampagnen', detail: `${blockedCampaignCount} Kampagnenplaene haben Rollenengpaesse.` })
+    const warningFieldCount = fieldServicePlan.filter((item) => item.status !== 'planned').length
+    if (warningFieldCount > 0) hints.push({ severity: 'warning', title: 'Aussendienst', detail: `${warningFieldCount} Besuche haben Kalender- oder Abwesenheitskonflikte.` })
+    if (hints.length === 0) hints.push({ severity: 'info', title: 'Arbeitsvorrat', detail: 'Keine akuten HR-Time Blocker im aktuellen Cockpit.' })
+    return hints
+  }, [campaignCapacity, cockpit.kpis.blockerCount, cockpit.kpis.pendingApprovals, fieldServicePlan, shifts])
 
   const columns = [
     { key: 'mitarbeiter' as const, label: 'Mitarbeiter' },
@@ -130,6 +201,104 @@ export default function ZeiterfassungPage(): JSX.Element {
       ),
     },
   ]
+  const absenceColumns = [
+    { key: 'employeeRef' as const, label: 'Mitarbeiter' },
+    { key: 'datum' as const, label: 'Datum' },
+    { key: 'absenceType' as const, label: 'Typ' },
+    { key: 'status' as const, label: 'Status', render: (row: Absence) => <Badge variant={getStatusBadgeVariant(row.status)}>{row.status}</Badge> },
+    { key: 'planningBlockers' as const, label: 'Blocker', render: (row: Absence) => <span>{row.planningBlockers.join(', ') || '-'}</span> },
+  ]
+  const shiftColumns = [
+    { key: 'name' as const, label: 'Schicht' },
+    { key: 'locationCode' as const, label: 'Standort' },
+    { key: 'requiredRole' as const, label: 'Rolle' },
+    { key: 'startTime' as const, label: 'Zeit', render: (row: Shift) => <span className="font-mono">{row.startTime} - {row.endTime}</span> },
+    { key: 'status' as const, label: 'Status', render: (row: Shift) => <Badge variant={getStatusBadgeVariant(row.status)}>{row.status}</Badge> },
+    { key: 'conflicts' as const, label: 'Checks', render: (row: Shift) => <span>{row.conflicts.map((item) => item.code).join(', ') || 'ok'}</span> },
+  ]
+  const calendarColumns = [
+    { key: 'eventType' as const, label: 'Typ' },
+    { key: 'title' as const, label: 'Titel' },
+    { key: 'employeeRef' as const, label: 'Mitarbeiter', render: (row: CalendarEvent) => row.employeeRef ?? '-' },
+    { key: 'startsAt' as const, label: 'Start', render: (row: CalendarEvent) => <span className="font-mono text-xs">{row.startsAt}</span> },
+    { key: 'syncState' as const, label: 'Sync', render: (row: CalendarEvent) => <Badge variant={getStatusBadgeVariant(row.syncState)}>{row.syncState}</Badge> },
+    { key: 'conflictLevel' as const, label: 'Konflikt', render: (row: CalendarEvent) => <Badge variant={getStatusBadgeVariant(row.conflictLevel)}>{row.conflictLevel}</Badge> },
+  ]
+  const payrollColumns = [
+    { key: 'periodFrom' as const, label: 'Von' },
+    { key: 'periodTo' as const, label: 'Bis' },
+    { key: 'targetSystem' as const, label: 'Ziel' },
+    { key: 'status' as const, label: 'Status', render: (row: PayrollExport) => <Badge variant={getStatusBadgeVariant(row.status)}>{row.status}</Badge> },
+    { key: 'items' as const, label: 'Items', render: (row: PayrollExport) => row.items.length },
+    { key: 'blockers' as const, label: 'Blocker', render: (row: PayrollExport) => row.blockers.length },
+  ]
+  const campaignColumns = [
+    { key: 'campaignCode' as const, label: 'Kampagne' },
+    { key: 'name' as const, label: 'Name' },
+    { key: 'periodFrom' as const, label: 'Zeitraum', render: (row: CampaignCapacity) => `${row.periodFrom} - ${row.periodTo}` },
+    { key: 'status' as const, label: 'Status', render: (row: CampaignCapacity) => <Badge variant={getStatusBadgeVariant(row.status)}>{row.status}</Badge> },
+    { key: 'findings' as const, label: 'Befunde', render: (row: CampaignCapacity) => row.findings.map((item) => item.code).join(', ') || 'ok' },
+  ]
+  const fieldColumns = [
+    { key: 'employeeRef' as const, label: 'Mitarbeiter' },
+    { key: 'customerRef' as const, label: 'Kunde' },
+    { key: 'territoryCode' as const, label: 'Gebiet' },
+    { key: 'startsAt' as const, label: 'Zeit', render: (row: FieldServicePlan) => <span className="font-mono text-xs">{row.startsAt}</span> },
+    { key: 'status' as const, label: 'Status', render: (row: FieldServicePlan) => <Badge variant={getStatusBadgeVariant(row.status)}>{row.status}</Badge> },
+    { key: 'conflicts' as const, label: 'Checks', render: (row: FieldServicePlan) => row.conflicts.map((item) => item.code).join(', ') || 'ok' },
+  ]
+
+  const handleCreateTime = () => {
+    createTimeEntry.mutate({
+      employeeRef: timeForm.employeeRef,
+      datum: today,
+      startTime: timeForm.startTime,
+      endTime: timeForm.endTime,
+      hours: Number(timeForm.hours || 0),
+      entryType: timeForm.entryType,
+      source: 'manual',
+      costCenter: timeForm.costCenter,
+      workArea: timeForm.workArea,
+    })
+  }
+
+  const handleImportAbsence = () => {
+    importAbsence.mutate({ ...absenceForm, status: 'Approved', sourceSystem: 'ui', externalRef: absenceForm.externalRef || null })
+  }
+
+  const handleCreateShift = () => {
+    createShift.mutate({
+      ...shiftForm,
+      datum: today,
+      requiredQualifications: splitCsv(shiftForm.requiredQualifications),
+      requiredHeadcount: Number(shiftForm.requiredHeadcount || 1),
+      assignedEmployeeRefs: splitCsv(shiftForm.assignedEmployeeRefs),
+    })
+  }
+
+  const handleCreateCalendarEvent = () => {
+    createCalendarEvent.mutate({ ...calendarForm, sourceSystem: 'valeo', provider: 'internal', status: 'confirmed', syncState: 'pending', conflictLevel: 'none', metadata: {} })
+  }
+
+  const handleCreatePayroll = () => {
+    createPayrollExport.mutate({ periodFrom: today, periodTo: today, targetSystem: 'datev', createdBy: 'ui' })
+  }
+
+  const handleCreateCampaign = () => {
+    createCampaignCapacity.mutate({
+      campaignCode: campaignForm.campaignCode,
+      name: campaignForm.name,
+      periodFrom: campaignForm.periodFrom,
+      periodTo: campaignForm.periodTo,
+      locationCode: campaignForm.locationCode,
+      roleDemand: { [campaignForm.roleCode]: Number(campaignForm.demand || 1) },
+      expectedVolume: Number(campaignForm.expectedVolume || 0),
+    })
+  }
+
+  const handleCreateField = () => {
+    createFieldServicePlan.mutate({ ...fieldForm, visitType: 'field_visit', notes: null })
+  }
 
   if (isLoading || isCockpitLoading) {
     return (
@@ -306,11 +475,57 @@ export default function ZeiterfassungPage(): JSX.Element {
 
       <Tabs defaultValue="steuerung" className="space-y-4">
         <TabsList>
+          <TabsTrigger value="agent">Agent</TabsTrigger>
           <TabsTrigger value="steuerung">Steuerung</TabsTrigger>
+          <TabsTrigger value="crud">Erfassen</TabsTrigger>
+          <TabsTrigger value="planung">Planung</TabsTrigger>
           <TabsTrigger value="driver">Fahrerzeit</TabsTrigger>
           <TabsTrigger value="zeiten">Arbeitszeit</TabsTrigger>
           <TabsTrigger value="payroll">Payroll</TabsTrigger>
         </TabsList>
+
+        <TabsContent value="agent" className="space-y-4">
+          <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_380px]">
+            <Card>
+              <CardHeader>
+                <CardTitle>Agent Worklist</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                {agentHints.map((hint) => (
+                  <div key={`${hint.title}-${hint.detail}`} className="flex items-start gap-3 rounded-md border p-3">
+                    <Bot className="mt-0.5 h-4 w-4 text-muted-foreground" />
+                    <div className="min-w-0 flex-1">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span className="font-medium">{hint.title}</span>
+                        <Badge variant={getFindingBadgeVariant(hint.severity)}>{hint.severity}</Badge>
+                      </div>
+                      <p className="mt-1 text-sm text-muted-foreground">{hint.detail}</p>
+                    </div>
+                  </div>
+                ))}
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader>
+                <CardTitle>Nächste Aktionen</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-2">
+                <Button className="w-full justify-start gap-2" variant="outline" onClick={handleCreatePayroll} disabled={createPayrollExport.isPending}>
+                  <FileDown className="h-4 w-4" />
+                  Payroll-Paket erzeugen
+                </Button>
+                <Button className="w-full justify-start gap-2" variant="outline" onClick={handleCreateShift} disabled={createShift.isPending}>
+                  <CalendarDays className="h-4 w-4" />
+                  Schicht prüfen
+                </Button>
+                <Button className="w-full justify-start gap-2" variant="outline" onClick={handleCreateField} disabled={createFieldServicePlan.isPending}>
+                  <Route className="h-4 w-4" />
+                  Außendienst prüfen
+                </Button>
+              </CardContent>
+            </Card>
+          </div>
+        </TabsContent>
 
         <TabsContent value="steuerung" className="space-y-4">
           <div className="grid gap-4 lg:grid-cols-2">
@@ -331,6 +546,194 @@ export default function ZeiterfassungPage(): JSX.Element {
                 <DataTable data={cockpit.complianceIssues} columns={complianceColumns} />
               </CardContent>
             </Card>
+          </div>
+        </TabsContent>
+
+        <TabsContent value="crud" className="space-y-4">
+          <div className="grid gap-4 xl:grid-cols-3">
+            <Card>
+              <CardHeader>
+                <CardTitle>Zeitbuchung</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <div className="grid gap-2">
+                  <Label htmlFor="time-employee">Mitarbeiter</Label>
+                  <Input id="time-employee" value={timeForm.employeeRef} onChange={(event) => setTimeForm((prev) => ({ ...prev, employeeRef: event.target.value }))} />
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="grid gap-2">
+                    <Label htmlFor="time-start">Start</Label>
+                    <Input id="time-start" value={timeForm.startTime} onChange={(event) => setTimeForm((prev) => ({ ...prev, startTime: event.target.value }))} />
+                  </div>
+                  <div className="grid gap-2">
+                    <Label htmlFor="time-end">Ende</Label>
+                    <Input id="time-end" value={timeForm.endTime} onChange={(event) => setTimeForm((prev) => ({ ...prev, endTime: event.target.value }))} />
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="grid gap-2">
+                    <Label htmlFor="time-hours">Stunden</Label>
+                    <Input id="time-hours" value={timeForm.hours} onChange={(event) => setTimeForm((prev) => ({ ...prev, hours: event.target.value }))} />
+                  </div>
+                  <div className="grid gap-2">
+                    <Label htmlFor="time-type">Typ</Label>
+                    <NativeSelect
+                      id="time-type"
+                      value={timeForm.entryType}
+                      onValueChange={(value) => setTimeForm((prev) => ({ ...prev, entryType: value }))}
+                      options={[
+                        { value: 'Arbeit', label: 'Arbeit' },
+                        { value: 'Bereitschaft', label: 'Bereitschaft' },
+                        { value: 'Schulung', label: 'Schulung' },
+                      ]}
+                    />
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <Input value={timeForm.costCenter} onChange={(event) => setTimeForm((prev) => ({ ...prev, costCenter: event.target.value }))} placeholder="Kostenstelle" />
+                  <Input value={timeForm.workArea} onChange={(event) => setTimeForm((prev) => ({ ...prev, workArea: event.target.value }))} placeholder="Arbeitsbereich" />
+                </div>
+                <Button className="w-full gap-2" onClick={handleCreateTime} disabled={createTimeEntry.isPending}>
+                  <Plus className="h-4 w-4" />
+                  Zeitbuchung anlegen
+                </Button>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Abwesenheit</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <div className="grid gap-2">
+                  <Label htmlFor="absence-employee">Mitarbeiter</Label>
+                  <Input id="absence-employee" value={absenceForm.employeeRef} onChange={(event) => setAbsenceForm((prev) => ({ ...prev, employeeRef: event.target.value }))} />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="absence-type">Typ</Label>
+                  <NativeSelect
+                    id="absence-type"
+                    value={absenceForm.absenceType}
+                    onValueChange={(value) => setAbsenceForm((prev) => ({ ...prev, absenceType: value as typeof absenceForm.absenceType }))}
+                    options={[
+                      { value: 'Urlaub', label: 'Urlaub' },
+                      { value: 'Krank', label: 'Krank' },
+                      { value: 'Unbezahlt', label: 'Unbezahlt' },
+                      { value: 'Sonstiges', label: 'Sonstiges' },
+                    ]}
+                  />
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <Input value={absenceForm.fromDate} onChange={(event) => setAbsenceForm((prev) => ({ ...prev, fromDate: event.target.value }))} />
+                  <Input value={absenceForm.toDate} onChange={(event) => setAbsenceForm((prev) => ({ ...prev, toDate: event.target.value }))} />
+                </div>
+                <Input value={absenceForm.externalRef} onChange={(event) => setAbsenceForm((prev) => ({ ...prev, externalRef: event.target.value }))} placeholder="Externe Referenz" />
+                <Button className="w-full gap-2" onClick={handleImportAbsence} disabled={importAbsence.isPending}>
+                  <Plus className="h-4 w-4" />
+                  Abwesenheit importieren
+                </Button>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Schicht</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <Input value={shiftForm.name} onChange={(event) => setShiftForm((prev) => ({ ...prev, name: event.target.value }))} placeholder="Schichtname" />
+                <div className="grid grid-cols-2 gap-3">
+                  <Input value={shiftForm.startTime} onChange={(event) => setShiftForm((prev) => ({ ...prev, startTime: event.target.value }))} />
+                  <Input value={shiftForm.endTime} onChange={(event) => setShiftForm((prev) => ({ ...prev, endTime: event.target.value }))} />
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <Input value={shiftForm.locationCode} onChange={(event) => setShiftForm((prev) => ({ ...prev, locationCode: event.target.value }))} placeholder="Standort" />
+                  <Input value={shiftForm.requiredRole} onChange={(event) => setShiftForm((prev) => ({ ...prev, requiredRole: event.target.value }))} placeholder="Rolle" />
+                </div>
+                <Input value={shiftForm.requiredQualifications} onChange={(event) => setShiftForm((prev) => ({ ...prev, requiredQualifications: event.target.value }))} placeholder="Qualifikationen, kommagetrennt" />
+                <div className="grid grid-cols-[90px_1fr] gap-3">
+                  <Input value={shiftForm.requiredHeadcount} onChange={(event) => setShiftForm((prev) => ({ ...prev, requiredHeadcount: event.target.value }))} />
+                  <Input value={shiftForm.assignedEmployeeRefs} onChange={(event) => setShiftForm((prev) => ({ ...prev, assignedEmployeeRefs: event.target.value }))} placeholder="Mitarbeiter, kommagetrennt" />
+                </div>
+                <Button className="w-full gap-2" onClick={handleCreateShift} disabled={createShift.isPending}>
+                  <Plus className="h-4 w-4" />
+                  Schicht anlegen
+                </Button>
+              </CardContent>
+            </Card>
+          </div>
+        </TabsContent>
+
+        <TabsContent value="planung" className="space-y-4">
+          <div className="grid gap-4 xl:grid-cols-3">
+            <Card>
+              <CardHeader>
+                <CardTitle>Kalender</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <Input value={calendarForm.title} onChange={(event) => setCalendarForm((prev) => ({ ...prev, title: event.target.value }))} placeholder="Titel" />
+                <Input value={calendarForm.employeeRef} onChange={(event) => setCalendarForm((prev) => ({ ...prev, employeeRef: event.target.value }))} placeholder="Mitarbeiter" />
+                <div className="grid grid-cols-2 gap-3">
+                  <Input value={calendarForm.startsAt} onChange={(event) => setCalendarForm((prev) => ({ ...prev, startsAt: event.target.value }))} />
+                  <Input value={calendarForm.endsAt} onChange={(event) => setCalendarForm((prev) => ({ ...prev, endsAt: event.target.value }))} />
+                </div>
+                <Button className="w-full gap-2" onClick={handleCreateCalendarEvent} disabled={createCalendarEvent.isPending}>
+                  <Plus className="h-4 w-4" />
+                  Kalenderblocker anlegen
+                </Button>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Kampagne</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <Input value={campaignForm.campaignCode} onChange={(event) => setCampaignForm((prev) => ({ ...prev, campaignCode: event.target.value }))} placeholder="Code" />
+                <Input value={campaignForm.name} onChange={(event) => setCampaignForm((prev) => ({ ...prev, name: event.target.value }))} placeholder="Name" />
+                <div className="grid grid-cols-2 gap-3">
+                  <Input value={campaignForm.periodFrom} onChange={(event) => setCampaignForm((prev) => ({ ...prev, periodFrom: event.target.value }))} />
+                  <Input value={campaignForm.periodTo} onChange={(event) => setCampaignForm((prev) => ({ ...prev, periodTo: event.target.value }))} />
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <Input value={campaignForm.roleCode} onChange={(event) => setCampaignForm((prev) => ({ ...prev, roleCode: event.target.value }))} placeholder="Rolle" />
+                  <Input value={campaignForm.demand} onChange={(event) => setCampaignForm((prev) => ({ ...prev, demand: event.target.value }))} placeholder="Bedarf" />
+                </div>
+                <Input value={campaignForm.expectedVolume} onChange={(event) => setCampaignForm((prev) => ({ ...prev, expectedVolume: event.target.value }))} placeholder="Menge" />
+                <Button className="w-full gap-2" onClick={handleCreateCampaign} disabled={createCampaignCapacity.isPending}>
+                  <Plus className="h-4 w-4" />
+                  Kampagne prüfen
+                </Button>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Außendienst</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <Input value={fieldForm.employeeRef} onChange={(event) => setFieldForm((prev) => ({ ...prev, employeeRef: event.target.value }))} placeholder="Mitarbeiter" />
+                <Input value={fieldForm.customerRef} onChange={(event) => setFieldForm((prev) => ({ ...prev, customerRef: event.target.value }))} placeholder="Kunde" />
+                <div className="grid grid-cols-2 gap-3">
+                  <Input value={fieldForm.territoryCode} onChange={(event) => setFieldForm((prev) => ({ ...prev, territoryCode: event.target.value }))} placeholder="Gebiet" />
+                  <Input value={fieldForm.campaignCode} onChange={(event) => setFieldForm((prev) => ({ ...prev, campaignCode: event.target.value }))} placeholder="Kampagne" />
+                </div>
+                <Textarea value={`${fieldForm.startsAt}\n${fieldForm.endsAt}`} onChange={(event) => {
+                  const [startsAt = fieldForm.startsAt, endsAt = fieldForm.endsAt] = event.target.value.split('\n')
+                  setFieldForm((prev) => ({ ...prev, startsAt, endsAt }))
+                }} rows={2} />
+                <Button className="w-full gap-2" onClick={handleCreateField} disabled={createFieldServicePlan.isPending}>
+                  <Plus className="h-4 w-4" />
+                  Besuch planen
+                </Button>
+              </CardContent>
+            </Card>
+          </div>
+
+          <div className="grid gap-4 xl:grid-cols-2">
+            <Card><CardHeader><CardTitle>Schichten</CardTitle></CardHeader><CardContent><DataTable data={shifts} columns={shiftColumns} /></CardContent></Card>
+            <Card><CardHeader><CardTitle>Kalender</CardTitle></CardHeader><CardContent><DataTable data={calendarEvents} columns={calendarColumns} /></CardContent></Card>
+            <Card><CardHeader><CardTitle>Kampagnen</CardTitle></CardHeader><CardContent><DataTable data={campaignCapacity} columns={campaignColumns} /></CardContent></Card>
+            <Card><CardHeader><CardTitle>Außendienst</CardTitle></CardHeader><CardContent><DataTable data={fieldServicePlan} columns={fieldColumns} /></CardContent></Card>
           </div>
         </TabsContent>
 
@@ -361,33 +764,39 @@ export default function ZeiterfassungPage(): JSX.Element {
         </TabsContent>
 
         <TabsContent value="payroll">
-          <Card>
-            <CardHeader>
-              <CardTitle>Payroll-Readiness</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid gap-4 md:grid-cols-3">
-                <div>
-                  <p className="text-sm text-muted-foreground">Status</p>
-                  <p className="text-xl font-semibold">{cockpit.payrollReadiness.status}</p>
+          <div className="space-y-4">
+            <Card>
+              <CardHeader>
+                <CardTitle>Payroll-Readiness</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid gap-4 md:grid-cols-3">
+                  <div>
+                    <p className="text-sm text-muted-foreground">Status</p>
+                    <p className="text-xl font-semibold">{cockpit.payrollReadiness.status}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">Bereite Eintraege</p>
+                    <p className="text-xl font-semibold">{cockpit.payrollReadiness.readyEntries}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">Blockierte Eintraege</p>
+                    <p className="text-xl font-semibold">{cockpit.payrollReadiness.blockedEntries}</p>
+                  </div>
                 </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">Bereite Eintraege</p>
-                  <p className="text-xl font-semibold">{cockpit.payrollReadiness.readyEntries}</p>
+                <p className="text-sm text-muted-foreground">{cockpit.payrollReadiness.exportHint}</p>
+                <div className="space-y-2">
+                  {cockpit.payrollReadiness.blockers.map((blocker, index) => (
+                    <Badge key={`${blocker}-${index}`} variant="destructive">{blocker}</Badge>
+                  ))}
                 </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">Blockierte Eintraege</p>
-                  <p className="text-xl font-semibold">{cockpit.payrollReadiness.blockedEntries}</p>
-                </div>
-              </div>
-              <p className="text-sm text-muted-foreground">{cockpit.payrollReadiness.exportHint}</p>
-              <div className="space-y-2">
-                {cockpit.payrollReadiness.blockers.map((blocker, index) => (
-                  <Badge key={`${blocker}-${index}`} variant="destructive">{blocker}</Badge>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+            <div className="grid gap-4 xl:grid-cols-2">
+              <Card><CardHeader><CardTitle>Payroll-Exporte</CardTitle></CardHeader><CardContent><DataTable data={payrollExports} columns={payrollColumns} /></CardContent></Card>
+              <Card><CardHeader><CardTitle>Abwesenheiten</CardTitle></CardHeader><CardContent><DataTable data={absences} columns={absenceColumns} /></CardContent></Card>
+            </div>
+          </div>
         </TabsContent>
       </Tabs>
     </div>

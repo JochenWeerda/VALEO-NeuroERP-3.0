@@ -189,10 +189,11 @@ Stand: `2026-05-12`
 
 **Von:** Codex
 **Owner:** Codex
-**Stand:** reserviert 2026-05-12
+**Stand:** abgeschlossen 2026-05-12
 **Ziel des Slices:** HR-Time-Tools als Human/AI-Agent-Interface mit CRUD-Aktionen fuer Zeitbuchung, Abwesenheit, Schicht, Kalender, Payroll, Kampagne und Aussendienst operationalisieren.
 **Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/agent-ops/slices/HR-TIME-UI-CRUD-001.yaml`, `packages/frontend-web/src/lib/api/personal.ts`, `packages/frontend-web/src/pages/personal/zeiterfassung.tsx`
 **Abnahmekriterien:** Frontend nutzt die neuen HR-Time-Contracts fuer Listen und Create-Mutations; Nutzer koennen zentrale HR-Time-Objekte aus dem Cockpit anlegen; Agent-Hinweise fassen Blocker, Freigaben und naechste Aktionen zusammen; Typecheck ist gruen.
+**Erledigt:** Frontend-API-Hooks fuer Zeitbuchung, Abwesenheit, Schicht, Kalender, Payroll, Kampagne und Aussendienst ergaenzt; Zeiterfassungsseite zu einem kompakten ERP-Object-Page-Cockpit mit Agent Worklist, CRUD-Formulargruppen und Planungs-/Payroll-Tabellen ausgebaut.
 **Checks:** `pnpm --filter @valero-neuroerp/frontend-web type-check`; `python scripts/agent_workboard_supervisor.py validate`; `node scripts/docs-governance-check.cjs`; `git diff --check`
 **Offene Risiken:** Detail-CRUD mit Edit/Delete, echte Optimierungsvorschlaege und mobile Offline-UX bleiben Folgeslices.
 
