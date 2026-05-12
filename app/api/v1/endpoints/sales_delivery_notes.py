@@ -540,6 +540,46 @@ async def print_delivery_note(
     return {"ok": True, "message": "Delivery note printed"}
 
 
+@router.post("/{ls_id}/ship", response_model=DeliveryNote)
+async def ship_delivery_note(
+    ls_id: str,
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+):
+    """Lieferschein versenden — posted/printed → shipped."""
+    row = _get_delivery_note_or_404(db, ls_id, tenant_id)
+    if row["status"] not in ("posted", "printed"):
+        raise HTTPException(status_code=400, detail=f"Nur gebuchte/gedruckte Lieferscheine können versandt werden (Status: {row['status']})")
+    db.execute(
+        text("UPDATE domain_sales.delivery_notes SET status = 'shipped', updated_at = NOW() WHERE id = :id AND tenant_id = :tenant_id"),
+        {"id": ls_id, "tenant_id": tenant_id},
+    )
+    db.commit()
+    row = _get_delivery_note_or_404(db, ls_id, tenant_id)
+    positions = _list_positions(db, ls_id)
+    return DeliveryNote(**dict(row), positionen=[DeliveryNotePosition(**dict(p)) for p in positions])
+
+
+@router.post("/{ls_id}/deliver", response_model=DeliveryNote)
+async def deliver_delivery_note(
+    ls_id: str,
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+):
+    """Lieferung bestätigen — shipped → delivered."""
+    row = _get_delivery_note_or_404(db, ls_id, tenant_id)
+    if row["status"] != "shipped":
+        raise HTTPException(status_code=400, detail=f"Nur versandte Lieferscheine können als geliefert markiert werden (Status: {row['status']})")
+    db.execute(
+        text("UPDATE domain_sales.delivery_notes SET status = 'delivered', updated_at = NOW() WHERE id = :id AND tenant_id = :tenant_id"),
+        {"id": ls_id, "tenant_id": tenant_id},
+    )
+    db.commit()
+    row = _get_delivery_note_or_404(db, ls_id, tenant_id)
+    positions = _list_positions(db, ls_id)
+    return DeliveryNote(**dict(row), positionen=[DeliveryNotePosition(**dict(p)) for p in positions])
+
+
 @router.get("", response_model=list[DeliveryNote])
 async def list_delivery_notes(
     customer_id: Optional[str] = Query(None),

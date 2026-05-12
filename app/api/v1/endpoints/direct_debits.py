@@ -140,6 +140,70 @@ async def create_direct_debit_run(
     }
 
 
+@router.get("/{run_id}", response_model=dict)
+async def get_direct_debit_run(
+    run_id: str,
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+) -> dict:
+    """Einzelnen Lastschriftlauf mit Positionen abrufen."""
+    try:
+        rows = db.execute(text("""
+            SELECT run_id, debitor_name, iban, bic, mandate_id, amount,
+                   verwendungszweck, status, created_at
+            FROM domain_shared.direct_debit_items
+            WHERE run_id = :run_id
+            ORDER BY created_at
+        """), {"run_id": run_id}).fetchall()
+    except Exception:
+        rows = []
+    if not rows:
+        raise HTTPException(status_code=404, detail="Lastschriftlauf nicht gefunden")
+    items = [
+        {
+            "debitor_name": r.debitor_name,
+            "iban": r.iban,
+            "bic": r.bic,
+            "mandate_id": r.mandate_id,
+            "amount": float(r.amount),
+            "verwendungszweck": r.verwendungszweck,
+            "status": r.status,
+        }
+        for r in rows
+    ]
+    return {
+        "id": run_id,
+        "laufnummer": run_id,
+        "anzahlLastschriften": len(items),
+        "gesamtbetrag": sum(i["amount"] for i in items),
+        "status": rows[0].status,
+        "erstellt_am": str(rows[0].created_at) if rows[0].created_at else None,
+        "lastschriften": items,
+    }
+
+
+@router.post("/{run_id}/export", response_model=dict)
+async def export_direct_debit_run(
+    run_id: str,
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+) -> dict:
+    """Lastschriftlauf exportieren — setzt alle pending Positionen auf 'exported'."""
+    try:
+        result = db.execute(text("""
+            UPDATE domain_shared.direct_debit_items
+            SET status = 'exported'
+            WHERE run_id = :run_id AND status = 'pending'
+        """), {"run_id": run_id})
+        db.commit()
+    except Exception as exc:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=str(exc))
+    if result.rowcount == 0:
+        raise HTTPException(status_code=404, detail="Lauf nicht gefunden oder bereits exportiert")
+    return {"ok": True, "run_id": run_id, "exported_items": result.rowcount}
+
+
 @router.delete("/{run_id}", response_class=Response, status_code=204)
 async def cancel_direct_debit_run(
     run_id: str,

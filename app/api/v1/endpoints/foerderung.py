@@ -134,6 +134,35 @@ async def create_antrag(
     }
 
 
+@router.get("/antraege/{antrag_id}", response_model=dict)
+async def get_antrag(antrag_id: int, db: Session = Depends(get_db)) -> dict:
+    """Einzelnen Förderantrag abrufen."""
+    antrag = db.query(FoerderAntrag).filter(FoerderAntrag.id == antrag_id).first()
+    if not antrag:
+        raise HTTPException(status_code=404, detail="Antrag nicht gefunden")
+    return {
+        "id": antrag.id,
+        "nummer": antrag.nummer,
+        "programm": antrag.programm,
+        "antragsdatum": _dt(antrag.antragsdatum),
+        "flaeche": float(antrag.flaeche or 0),
+        "betrag": float(antrag.betrag or 0),
+        "status": antrag.status,
+    }
+
+
+@router.delete("/antraege/{antrag_id}", status_code=204)
+async def delete_antrag(antrag_id: int, db: Session = Depends(get_db)) -> None:
+    """Förderantrag löschen (nur im Entwurfsstatus)."""
+    antrag = db.query(FoerderAntrag).filter(FoerderAntrag.id == antrag_id).first()
+    if not antrag:
+        raise HTTPException(status_code=404, detail="Antrag nicht gefunden")
+    if antrag.status not in ("entwurf",):
+        raise HTTPException(status_code=400, detail="Nur Entwürfe können gelöscht werden")
+    db.delete(antrag)
+    db.commit()
+
+
 @router.put("/antraege/{antrag_id}", response_model=dict)
 async def update_antrag(
     antrag_id: int,

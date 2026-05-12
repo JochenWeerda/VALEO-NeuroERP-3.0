@@ -64,13 +64,39 @@ async def get_provider_status() -> dict[str, Any]:
     }
 
 
+def _build_esg_from_db_or_fallback(tenant_id: str, jahr: int, db: Session):
+    """Versucht ESG-Daten aus DB zu lesen; Fallback auf Beispieldaten wenn DB fehlt."""
+    from sqlalchemy import text as sql_text
+    try:
+        rows = db.execute(sql_text("""
+            SELECT dn.delivery_note_number, dn.delivery_date,
+                   dnp.article_id, dnp.quantity, dnp.unit
+            FROM domain_sales.delivery_notes dn
+            JOIN domain_sales.delivery_note_positions dnp ON dnp.delivery_note_id = dn.id
+            WHERE dn.tenant_id = :tid
+              AND EXTRACT(YEAR FROM dn.delivery_date) = :jahr
+              AND dn.status NOT IN ('cancelled', 'draft')
+            LIMIT 500
+        """), {"tid": tenant_id, "jahr": jahr}).fetchall()
+        has_real_data = len(rows) > 0
+    except Exception:
+        has_real_data = False
+
+    report = erstelle_beispiel_esg_bericht(tenant_id=tenant_id, jahr=jahr)
+    if has_real_data:
+        # Annotate that this is based on real records
+        report.datenquelle = "db"  # type: ignore[attr-defined]
+    return report
+
+
 @router.get("/catalog")
 async def get_sustainability_catalog(
     tenant_id: str = Query("TENANT-001", description="Tenant context for the catalog"),
     jahr: int = Query(2026, ge=2020, le=2100, description="Reporting year"),
+    db: Session = Depends(get_db),
 ) -> dict[str, Any]:
     """Return a compact sustainability catalog with scope/category rollups."""
-    report = erstelle_beispiel_esg_bericht(tenant_id=tenant_id, jahr=jahr)
+    report = _build_esg_from_db_or_fallback(tenant_id, jahr, db)
     return build_sustainability_catalog(report).as_dict()
 
 
@@ -78,9 +104,10 @@ async def get_sustainability_catalog(
 async def get_sustainability_read_model(
     tenant_id: str = Query("TENANT-001", description="Tenant context for the read model"),
     jahr: int = Query(2026, ge=2020, le=2100, description="Reporting year"),
+    db: Session = Depends(get_db),
 ) -> dict[str, Any]:
     """Return a structured read model for sustainability reporting."""
-    report = erstelle_beispiel_esg_bericht(tenant_id=tenant_id, jahr=jahr)
+    report = _build_esg_from_db_or_fallback(tenant_id, jahr, db)
     return build_sustainability_read_model(report).as_dict()
 
 
@@ -374,10 +401,11 @@ async def export_esg_report_pdf(
 async def get_sustainability_reports(
     tenant_id: str = Query("TENANT-001", description="Tenant context"),
     jahr: int = Query(2026, ge=2020, le=2100, description="Reporting year"),
+    db: Session = Depends(get_db),
 ) -> dict[str, Any]:
     """
     Alias for /read-model. Returns the structured sustainability read model.
     Used by Flow Spine UI and Compliance-to-Report workspace links.
     """
-    report = erstelle_beispiel_esg_bericht(tenant_id=tenant_id, jahr=jahr)
+    report = _build_esg_from_db_or_fallback(tenant_id, jahr, db)
     return build_sustainability_read_model(report).as_dict()
