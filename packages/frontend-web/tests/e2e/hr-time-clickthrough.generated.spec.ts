@@ -101,13 +101,15 @@ test('HR time cockpit clickthrough covers navigation, forms, corrections and pri
   await page.getByRole('button', { name: /Weiter/ }).click()
   await page.getByRole('button', { name: /Arbeitsplan drucken/ }).click()
 
-  await page.getByRole('tab', { name: 'Erfassen' }).click()
+  await page.getByRole('tab', { name: 'Arbeitszeit' }).click()
+  await page.getByRole('button', { name: /Bearbeiten/ }).click()
+  await expect(page.getByRole('tab', { name: 'Erfassen' })).toHaveAttribute('data-state', 'active')
+  await expect(page.getByPlaceholder('Zeitbuchungs-ID')).toHaveValue('time-1')
   await page.locator('#time-employee').fill('driver-1')
   await page.locator('#time-start').fill('08:00')
   await page.locator('#time-end').fill('17:00')
   await page.locator('#time-hours').fill('8.5')
   await page.getByRole('button', { name: /Zeitbuchung anlegen/ }).click()
-  await page.getByPlaceholder('Zeitbuchungs-ID').fill('time-1')
   await page.getByRole('button', { name: /Einreichen/ }).click()
   await page.getByRole('button', { name: /Korrigieren/ }).click()
 
