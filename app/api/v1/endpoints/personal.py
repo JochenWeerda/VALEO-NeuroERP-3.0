@@ -162,6 +162,45 @@ class ShiftOut(BaseModel):
     notes: str | None = None
 
 
+class CalendarEventIn(BaseModel):
+    sourceSystem: str = Field(default="valeo", max_length=80)
+    provider: str = Field(default="internal", max_length=40)
+    externalEventRef: str | None = Field(default=None, max_length=160)
+    eventType: str = Field(..., min_length=1, max_length=60)
+    title: str = Field(..., min_length=1, max_length=200)
+    employeeRef: str | None = Field(default=None, max_length=120)
+    resourceRef: str | None = Field(default=None, max_length=120)
+    startsAt: str
+    endsAt: str
+    timezone: str = Field(default="Europe/Berlin", max_length=80)
+    visibility: str = Field(default="team", pattern="^(public|team|private|busy_only)$")
+    status: str = Field(default="confirmed", max_length=40)
+    syncState: str = Field(default="local", pattern="^(local|pending|synced|failed)$")
+    conflictLevel: str = Field(default="none", pattern="^(none|warning|blocker)$")
+    sourceRef: str | None = Field(default=None, max_length=160)
+    metadata: dict[str, Any] = Field(default_factory=dict)
+
+
+class CalendarEventOut(BaseModel):
+    id: str
+    sourceSystem: str
+    provider: str
+    externalEventRef: str | None = None
+    eventType: str
+    title: str
+    employeeRef: str | None = None
+    resourceRef: str | None = None
+    startsAt: str
+    endsAt: str
+    timezone: str
+    visibility: str
+    status: str
+    syncState: str
+    conflictLevel: str
+    sourceRef: str | None = None
+    metadata: dict[str, Any] = Field(default_factory=dict)
+
+
 class TourIn(BaseModel):
     id: str
     start: str
@@ -528,6 +567,45 @@ def _shift_status(conflicts: list[ShiftConflictOut]) -> str:
     if conflicts:
         return "warning"
     return "planned"
+
+
+def _parse_event_datetime(value: str) -> datetime:
+    try:
+        return datetime.fromisoformat(value.replace("Z", "+00:00"))
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail="Invalid datetime format") from exc
+
+
+def _mask_calendar_title(title: str, visibility: str) -> str:
+    return "Besetzt" if visibility in {"private", "busy_only"} else title
+
+
+def _calendar_event_from_row(row: Any) -> CalendarEventOut:
+    row_map = dict(row)
+    visibility = str(row_map.get("visibility") or "team")
+    metadata_raw = row_map.get("metadata")
+    metadata = _parse_preferences(metadata_raw)
+    if visibility in {"private", "busy_only"}:
+        metadata = {key: value for key, value in metadata.items() if key in {"busy", "source"}}
+    return CalendarEventOut(
+        id=str(row_map.get("id") or ""),
+        sourceSystem=str(row_map.get("source_system") or "valeo"),
+        provider=str(row_map.get("provider") or "internal"),
+        externalEventRef=str(row_map.get("external_event_ref") or "") or None,
+        eventType=str(row_map.get("event_type") or ""),
+        title=_mask_calendar_title(str(row_map.get("title") or ""), visibility),
+        employeeRef=str(row_map.get("employee_ref") or "") or None,
+        resourceRef=str(row_map.get("resource_ref") or "") or None,
+        startsAt=str(row_map.get("starts_at") or ""),
+        endsAt=str(row_map.get("ends_at") or ""),
+        timezone=str(row_map.get("timezone") or "Europe/Berlin"),
+        visibility=visibility,
+        status=str(row_map.get("status") or "confirmed"),
+        syncState=str(row_map.get("sync_state") or "local"),
+        conflictLevel=str(row_map.get("conflict_level") or "none"),
+        sourceRef=str(row_map.get("source_ref") or "") or None,
+        metadata=metadata,
+    )
 
 
 def _build_shift_conflicts(
@@ -1801,6 +1879,97 @@ async def create_shift(
     ).mappings().first()
     db.commit()
     return _shift_from_row(row)
+
+
+@router.get("/calendar-events", response_model=list[CalendarEventOut])
+async def list_calendar_events(
+    start: str | None = Query(default=None),
+    end: str | None = Query(default=None),
+    employee_ref: str | None = Query(default=None),
+    event_type: str | None = Query(default=None),
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+):
+    params: dict[str, Any] = {"tenant_id": tenant_id}
+    where = ["tenant_id = :tenant_id"]
+    if start:
+        params["start"] = _parse_event_datetime(start)
+        where.append("ends_at >= :start")
+    if end:
+        params["end"] = _parse_event_datetime(end)
+        where.append("starts_at <= :end")
+    if employee_ref:
+        params["employee_ref"] = employee_ref
+        where.append("employee_ref = :employee_ref")
+    if event_type:
+        params["event_type"] = event_type
+        where.append("event_type = :event_type")
+
+    rows = db.execute(
+        text(
+            f"""
+            SELECT id, source_system, provider, external_event_ref, event_type, title,
+                   employee_ref, resource_ref, starts_at, ends_at, timezone, visibility,
+                   status, sync_state, conflict_level, source_ref, metadata
+            FROM domain_hr.calendar_events
+            WHERE {' AND '.join(where)}
+            ORDER BY starts_at ASC, employee_ref ASC
+            """
+        ),
+        params,
+    ).mappings().all()
+    return [_calendar_event_from_row(row) for row in rows]
+
+
+@router.post("/calendar-events", response_model=CalendarEventOut, status_code=201)
+async def create_calendar_event(
+    payload: CalendarEventIn,
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+):
+    starts_at = _parse_event_datetime(payload.startsAt)
+    ends_at = _parse_event_datetime(payload.endsAt)
+    if ends_at <= starts_at:
+        raise HTTPException(status_code=400, detail="endsAt must be after startsAt")
+    row = db.execute(
+        text(
+            """
+            INSERT INTO domain_hr.calendar_events
+              (id, tenant_id, source_system, provider, external_event_ref, event_type, title,
+               employee_ref, resource_ref, starts_at, ends_at, timezone, visibility, status,
+               sync_state, conflict_level, source_ref, metadata, created_at, updated_at)
+            VALUES
+              (:id, :tenant_id, :source_system, :provider, :external_event_ref, :event_type, :title,
+               :employee_ref, :resource_ref, :starts_at, :ends_at, :timezone, :visibility, :status,
+               :sync_state, :conflict_level, :source_ref, CAST(:metadata AS jsonb), NOW(), NOW())
+            RETURNING id, source_system, provider, external_event_ref, event_type, title,
+                      employee_ref, resource_ref, starts_at, ends_at, timezone, visibility,
+                      status, sync_state, conflict_level, source_ref, metadata
+            """
+        ),
+        {
+            "id": str(uuid4()),
+            "tenant_id": tenant_id,
+            "source_system": payload.sourceSystem,
+            "provider": payload.provider,
+            "external_event_ref": payload.externalEventRef,
+            "event_type": payload.eventType,
+            "title": payload.title,
+            "employee_ref": payload.employeeRef,
+            "resource_ref": payload.resourceRef,
+            "starts_at": starts_at,
+            "ends_at": ends_at,
+            "timezone": payload.timezone,
+            "visibility": payload.visibility,
+            "status": payload.status,
+            "sync_state": payload.syncState,
+            "conflict_level": payload.conflictLevel,
+            "source_ref": payload.sourceRef,
+            "metadata": json.dumps(payload.metadata),
+        },
+    ).mappings().first()
+    db.commit()
+    return _calendar_event_from_row(row)
 
 
 @router.get("/driver-time/summary", response_model=DriverTimeSummaryOut)
