@@ -4,7 +4,6 @@ Policy-basierte Guards für Workflow-Transitions
 """
 
 from __future__ import annotations
-from typing import Tuple
 
 
 def guard_total_positive(payload: dict) -> tuple[bool, str]:

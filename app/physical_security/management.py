@@ -7,7 +7,7 @@ gemäß ISO 27001 Annex A.11 für VALEO-NeuroERP mit Secure Areas, Equipment Sec
 """
 
 from datetime import datetime, timedelta
-from typing import Dict, Any, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 from dataclasses import dataclass, field
 from enum import Enum
 import logging

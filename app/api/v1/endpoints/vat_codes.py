@@ -30,7 +30,8 @@ def _get_user_id_from_request(request: Request | None) -> str | None:
     auth = request.headers.get("Authorization", "")
     if auth.startswith("Bearer "):
         try:
-            import base64 as _b64, json as _json
+            import base64 as _b64
+            import json as _json
             payload = auth[7:].split(".")[1]
             payload += "=" * (4 - len(payload) % 4)
             return _json.loads(_b64.urlsafe_b64decode(payload)).get("sub")
