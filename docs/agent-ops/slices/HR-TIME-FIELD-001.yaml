@@ -1,0 +1,24 @@
+id: HR-TIME-FIELD-001
+status: reserviert
+owner: Codex
+goal: >
+  Aussendienstplanung mit Kunde, Gebiet, Kampagne, Kalender- und
+  Abwesenheitskonflikten auf HR-Time-Basis bereitstellen.
+file_ownership:
+  - docs/agent-ops/active-workboard.md
+  - docs/agent-ops/slices/HR-TIME-FIELD-001.yaml
+  - app/api/v1/endpoints/personal.py
+  - tests/test_personal_field_service_api.py
+  - migrations/sql/hr/006_hr_time_field_service.sql
+  - docs/project-context/hr-time-canonical-core-data-model-2026-05-08.md
+acceptance_criteria: >
+  Aussendiensttermine koennen erstellt und gelesen werden; Planung prueft
+  HR-Time-Profil, Abwesenheit und Kalenderueberschneidung; Konflikte werden
+  im Contract ausgewiesen; Tests sichern Blocker und Happy Path.
+checks:
+  - pytest tests/test_personal_field_service_api.py tests/test_personal_campaign_capacity_api.py tests/test_personal_payroll_export_api.py tests/test_personal_calendar_api.py tests/test_personal_shift_planning_api.py tests/test_personal_absence_api.py tests/test_personal_time_booking_api.py tests/test_personal_time_data_api.py tests/test_personal_time_cockpit_api.py tests/test_personal_driver_time_api.py -q --no-cov
+  - python scripts/agent_workboard_supervisor.py validate
+  - node scripts/docs-governance-check.cjs
+  - git diff --check
+risks: >
+  CRM-Live-Connector, Routenoptimierung und mobile Aussendienst-UI bleiben Folgeslices.
