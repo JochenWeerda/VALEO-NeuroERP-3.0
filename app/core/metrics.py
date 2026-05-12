@@ -69,3 +69,10 @@ strecke_operations_total = Counter(
     ['operation'],
 )
 
+# Tenant-Authentifizierung/-Autorisierung (Phase 4 — Observability)
+tenant_auth_errors_total = Counter(
+    'tenant_auth_errors_total',
+    'Tenant authentication and authorization errors by route and error type',
+    ['route', 'error_type'],  # error_type: missing_tenant | forbidden_tenant | unauthorized
+)
+

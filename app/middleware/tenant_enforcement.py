@@ -21,6 +21,7 @@ from starlette.responses import JSONResponse, Response
 
 from app.core.config import settings
 from app.core.tenant_context import set_current_tenant_id, reset_current_tenant_id
+from app.core.metrics import tenant_auth_errors_total
 
 logger = logging.getLogger("tenant_enforcement")
 
@@ -73,6 +74,7 @@ class TenantEnforcementMiddleware(BaseHTTPMiddleware):
         if not raw_tenant:
             logger.warning("tenant_missing path=%s method=%s ip=%s",
                            path, request.method, request.client.host if request.client else "unknown")
+            tenant_auth_errors_total.labels(route=path, error_type="missing_tenant").inc()
             return JSONResponse(
                 status_code=400,
                 content={"detail": "X-Tenant-ID header is required"},
@@ -80,6 +82,7 @@ class TenantEnforcementMiddleware(BaseHTTPMiddleware):
 
         if not _TENANT_ID_PATTERN.match(raw_tenant):
             logger.warning("tenant_invalid path=%s tenant=%s", path, raw_tenant[:50])
+            tenant_auth_errors_total.labels(route=path, error_type="invalid_tenant").inc()
             return JSONResponse(
                 status_code=400,
                 content={"detail": "X-Tenant-ID contains invalid characters"},
