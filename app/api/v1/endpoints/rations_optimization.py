@@ -6333,7 +6333,7 @@ def _seasonal_adjustments(season_profile: Optional[str]) -> Dict[str, float]:
 
 # FAN-V1 Defaults (Spec §11.1 freigegeben 2026-04-21)
 # Refactor 2026-04-23: ausgelagert nach app.agrar.rations.constants
-from app.agrar.rations.constants.gfe2023 import (
+from app.agrar.rations.constants.gfe2023 import (  # noqa: F401
     FAN_DEFAULT_MODE as _FAN_DEFAULT_MODE,
     FAN_DEFAULT_TOLERANCE as _FAN_DEFAULT_TOLERANCE,
     FAN_DEFAULT_TOLERANCE_WARN as _FAN_DEFAULT_TOLERANCE_WARN,

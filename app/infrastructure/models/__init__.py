@@ -5,7 +5,7 @@ Database entities following domain-driven design
 
 from sqlalchemy import Column, String, Integer, Float, Boolean, DateTime, Date, Time, Text, ForeignKey, DECIMAL, UniqueConstraint
 from sqlalchemy.dialects.postgresql import UUID as PGUUID
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import relationship  # noqa: F401
 from sqlalchemy.dialects import postgresql
 from sqlalchemy.sql import func
 
@@ -1217,7 +1217,7 @@ class AuditLog(Base):
 
 
 # Import Agrar models
-from .agrar_models import (
+from .agrar_models import (  # noqa: F401
     Saatgut,
     SaatgutLizenz,
     Duenger,
@@ -1228,7 +1228,7 @@ from .agrar_models import (
 )
 
 # Import L3-Connect gap closure models
-from .l3c_models import (
+from .l3c_models import (  # noqa: F401
     InventoryCountLine,
     WeighingTicket,
     WeighingTicketLine,
@@ -1285,7 +1285,7 @@ from .l3c_models import (
 )
 
 # Futtermittel (Feed) domain
-from .futtermittel_models import (
+from .futtermittel_models import (  # noqa: F401
     Einzelfuttermittel,
     Mischfuttermittel,
     FuttermittelRezept,
@@ -1295,7 +1295,7 @@ from .futtermittel_models import (
 )
 
 # Neuro State Graph + Confidence Ledger
-from .neuro_state_models import (
+from .neuro_state_models import (  # noqa: F401
     StateNodeRecord,
     StateEdgeRecord,
     StateTransitionRecord,
