@@ -235,6 +235,36 @@ class PayrollExportOut(BaseModel):
     blockers: list[PayrollExportBlockerOut] = Field(default_factory=list)
 
 
+class CampaignCapacityFindingOut(BaseModel):
+    code: str
+    severity: str
+    message: str
+    roleCode: str | None = None
+
+
+class CampaignCapacityCreateIn(BaseModel):
+    campaignCode: str = Field(..., min_length=1, max_length=80)
+    name: str = Field(..., min_length=1, max_length=200)
+    periodFrom: str
+    periodTo: str
+    locationCode: str = Field(default="main", max_length=80)
+    roleDemand: dict[str, int] = Field(default_factory=dict)
+    expectedVolume: float | None = None
+
+
+class CampaignCapacityOut(BaseModel):
+    id: str
+    campaignCode: str
+    name: str
+    periodFrom: str
+    periodTo: str
+    locationCode: str
+    roleDemand: dict[str, int]
+    expectedVolume: float | None = None
+    status: str
+    findings: list[CampaignCapacityFindingOut] = Field(default_factory=list)
+
+
 class TourIn(BaseModel):
     id: str
     start: str
@@ -688,6 +718,85 @@ def _payroll_export_from_row(row: Any) -> PayrollExportOut:
         status=str(row_map.get("status") or "blocked"),
         items=[PayrollExportItemOut(**item) for item in _parse_json_list(row_map.get("items"))],
         blockers=[PayrollExportBlockerOut(**item) for item in _parse_json_list(row_map.get("blockers"))],
+    )
+
+
+def _campaign_finding_from_item(item: Any) -> CampaignCapacityFindingOut:
+    item_map = dict(item) if isinstance(item, dict) else {}
+    return CampaignCapacityFindingOut(
+        code=str(item_map.get("code") or "UNKNOWN"),
+        severity=str(item_map.get("severity") or "warning"),
+        message=str(item_map.get("message") or ""),
+        roleCode=str(item_map.get("roleCode") or item_map.get("role_code") or "") or None,
+    )
+
+
+def _campaign_status(findings: list[CampaignCapacityFindingOut]) -> str:
+    if any(finding.severity == "blocker" for finding in findings):
+        return "blocked"
+    if findings:
+        return "warning"
+    return "planned"
+
+
+def _build_campaign_findings(
+    role_demand: dict[str, int],
+    profile_rows: list[Any],
+    absence_rows: list[Any],
+    shift_rows: list[Any],
+) -> list[CampaignCapacityFindingOut]:
+    findings: list[CampaignCapacityFindingOut] = []
+    active_by_role: dict[str, set[str]] = {}
+    for row in profile_rows:
+        row_map = dict(row)
+        if _normalize_time_profile_status(row_map.get("status")) != "active":
+            continue
+        active_by_role.setdefault(str(row_map.get("role_code") or "employee"), set()).add(str(row_map.get("employee_ref") or ""))
+    absent_refs = {str(dict(row).get("employee_ref") or "") for row in absence_rows}
+    assigned_refs = {
+        employee_ref
+        for row in shift_rows
+        for employee_ref in _parse_json_string_list(dict(row).get("assigned_employee_refs"))
+    }
+    for role_code, demand in role_demand.items():
+        available = active_by_role.get(role_code, set()) - absent_refs
+        planned = available & assigned_refs
+        if len(available) < demand:
+            findings.append(
+                CampaignCapacityFindingOut(
+                    code="ROLE_CAPACITY_SHORTAGE",
+                    severity="blocker",
+                    message=f"Rollenbedarf {role_code} nicht gedeckt: {len(available)} verfuegbar, {demand} benoetigt.",
+                    roleCode=role_code,
+                )
+            )
+        elif len(planned) < demand:
+            findings.append(
+                CampaignCapacityFindingOut(
+                    code="ROLE_NOT_FULLY_SCHEDULED",
+                    severity="warning",
+                    message=f"Rollenbedarf {role_code} ist verfuegbar, aber noch nicht voll eingeplant.",
+                    roleCode=role_code,
+                )
+            )
+    return findings
+
+
+def _campaign_capacity_from_row(row: Any) -> CampaignCapacityOut:
+    row_map = dict(row)
+    role_demand_raw = row_map.get("role_demand")
+    role_demand = _parse_preferences(role_demand_raw)
+    return CampaignCapacityOut(
+        id=str(row_map.get("id") or ""),
+        campaignCode=str(row_map.get("campaign_code") or ""),
+        name=str(row_map.get("name") or ""),
+        periodFrom=_to_iso(row_map.get("period_from")),
+        periodTo=_to_iso(row_map.get("period_to")),
+        locationCode=str(row_map.get("location_code") or "main"),
+        roleDemand={str(key): int(value) for key, value in role_demand.items()},
+        expectedVolume=float(row_map.get("expected_volume")) if row_map.get("expected_volume") is not None else None,
+        status=str(row_map.get("status") or "planned"),
+        findings=[_campaign_finding_from_item(item) for item in _parse_json_list(row_map.get("findings"))],
     )
 
 
@@ -2125,6 +2234,104 @@ async def create_payroll_export(
     ).mappings().first()
     db.commit()
     return _payroll_export_from_row(row)
+
+
+@router.get("/campaign-capacity", response_model=list[CampaignCapacityOut])
+async def list_campaign_capacity(
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+):
+    rows = db.execute(
+        text(
+            """
+            SELECT id, campaign_code, name, period_from, period_to, location_code,
+                   role_demand, expected_volume, status, findings
+            FROM domain_hr.campaign_capacity_plans
+            WHERE tenant_id = :tenant_id
+            ORDER BY period_from ASC, campaign_code ASC
+            """
+        ),
+        {"tenant_id": tenant_id},
+    ).mappings().all()
+    return [_campaign_capacity_from_row(row) for row in rows]
+
+
+@router.post("/campaign-capacity", response_model=CampaignCapacityOut, status_code=201)
+async def create_campaign_capacity(
+    payload: CampaignCapacityCreateIn,
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+):
+    period_from = _parse_entry_date(payload.periodFrom)
+    period_to = _parse_entry_date(payload.periodTo)
+    if period_to < period_from:
+        raise HTTPException(status_code=400, detail="periodTo must be on or after periodFrom")
+    profile_rows = db.execute(
+        text(
+            """
+            SELECT employee_ref, role_code, status
+            FROM domain_hr.employee_time_profiles
+            WHERE tenant_id = :tenant_id AND location_code = :location_code
+            """
+        ),
+        {"tenant_id": tenant_id, "location_code": payload.locationCode},
+    ).mappings().all()
+    absence_rows = db.execute(
+        text(
+            """
+            SELECT employee_ref
+            FROM domain_hr.time_entries
+            WHERE tenant_id = :tenant_id
+              AND entry_date BETWEEN :period_from AND :period_to
+              AND entry_type IN ('Urlaub', 'Krank', 'Unbezahlt', 'Sonstiges')
+              AND status IN ('Approved', 'Genehmigt')
+            """
+        ),
+        {"tenant_id": tenant_id, "period_from": period_from, "period_to": period_to},
+    ).mappings().all()
+    shift_rows = db.execute(
+        text(
+            """
+            SELECT assigned_employee_refs
+            FROM domain_hr.shifts
+            WHERE tenant_id = :tenant_id
+              AND shift_date BETWEEN :period_from AND :period_to
+              AND location_code = :location_code
+            """
+        ),
+        {"tenant_id": tenant_id, "period_from": period_from, "period_to": period_to, "location_code": payload.locationCode},
+    ).mappings().all()
+    findings = _build_campaign_findings(payload.roleDemand, list(profile_rows), list(absence_rows), list(shift_rows))
+    status = _campaign_status(findings)
+    row = db.execute(
+        text(
+            """
+            INSERT INTO domain_hr.campaign_capacity_plans
+              (id, tenant_id, campaign_code, name, period_from, period_to, location_code,
+               role_demand, expected_volume, status, findings, created_at, updated_at)
+            VALUES
+              (:id, :tenant_id, :campaign_code, :name, :period_from, :period_to, :location_code,
+               CAST(:role_demand AS jsonb), :expected_volume, :status, CAST(:findings AS jsonb), NOW(), NOW())
+            RETURNING id, campaign_code, name, period_from, period_to, location_code,
+                      role_demand, expected_volume, status, findings
+            """
+        ),
+        {
+            "id": str(uuid4()),
+            "tenant_id": tenant_id,
+            "campaign_code": payload.campaignCode,
+            "name": payload.name,
+            "period_from": period_from,
+            "period_to": period_to,
+            "location_code": payload.locationCode,
+            "role_demand": json.dumps(payload.roleDemand),
+            "expected_volume": payload.expectedVolume,
+            "status": status,
+            "findings": json.dumps([finding.model_dump() for finding in findings]),
+        },
+    ).mappings().first()
+    db.commit()
+    return _campaign_capacity_from_row(row)
 
 
 @router.get("/driver-time/summary", response_model=DriverTimeSummaryOut)
