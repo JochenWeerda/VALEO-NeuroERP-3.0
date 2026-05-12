@@ -583,3 +583,57 @@ async def delete_sales_order(
         raise HTTPException(status_code=404, detail="Sales order not found")
     db.commit()
     return Response(status_code=status.HTTP_204_NO_CONTENT)
+
+
+@router.post("/{order_id}/confirm", response_model=SalesOrder)
+async def confirm_sales_order(
+    order_id: str,
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+):
+    """Bestätigt einen offenen Auftrag (open → confirmed)."""
+    order = _get_sales_order_row(db, order_id, tenant_id)
+    if order["status"] != "open":
+        raise HTTPException(status_code=400, detail=f"Auftrag hat Status '{order['status']}' — nur 'open' kann bestätigt werden")
+    db.execute(
+        text("UPDATE domain_crm.sales_orders SET status = 'confirmed', updated_at = NOW() WHERE id = :id AND tenant_id = :tid"),
+        {"id": order_id, "tid": tenant_id},
+    )
+    db.commit()
+    return _row_to_order(_get_sales_order_row(db, order_id, tenant_id))
+
+
+@router.post("/{order_id}/complete", response_model=SalesOrder)
+async def complete_sales_order(
+    order_id: str,
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+):
+    """Schließt einen Auftrag ab (confirmed/in_delivery → completed)."""
+    order = _get_sales_order_row(db, order_id, tenant_id)
+    if order["status"] not in ("confirmed", "in_delivery"):
+        raise HTTPException(status_code=400, detail=f"Auftrag hat Status '{order['status']}' — nur 'confirmed'/'in_delivery' kann abgeschlossen werden")
+    db.execute(
+        text("UPDATE domain_crm.sales_orders SET status = 'completed', updated_at = NOW() WHERE id = :id AND tenant_id = :tid"),
+        {"id": order_id, "tid": tenant_id},
+    )
+    db.commit()
+    return _row_to_order(_get_sales_order_row(db, order_id, tenant_id))
+
+
+@router.post("/{order_id}/cancel", response_model=SalesOrder)
+async def cancel_sales_order(
+    order_id: str,
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+):
+    """Storniert einen Auftrag (open/confirmed → cancelled)."""
+    order = _get_sales_order_row(db, order_id, tenant_id)
+    if order["status"] in ("cancelled", "completed"):
+        raise HTTPException(status_code=400, detail=f"Auftrag hat Status '{order['status']}' und kann nicht storniert werden")
+    db.execute(
+        text("UPDATE domain_crm.sales_orders SET status = 'cancelled', updated_at = NOW() WHERE id = :id AND tenant_id = :tid"),
+        {"id": order_id, "tid": tenant_id},
+    )
+    db.commit()
+    return _row_to_order(_get_sales_order_row(db, order_id, tenant_id))

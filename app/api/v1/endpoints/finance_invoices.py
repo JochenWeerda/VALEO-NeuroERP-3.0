@@ -20,6 +20,7 @@ from app.core.tenant import get_tenant_id
 from app.core.uuid7 import uuid7
 from app.documents.models import SalesInvoice
 from app.documents.router_helpers import (
+    delete_from_store,
     get_from_store,
     get_repository,
     list_from_store,
@@ -538,3 +539,26 @@ async def list_invoices(
         logger.error("Error listing invoices: %s", str(e), exc_info=True)
         raise HTTPException(status_code=500, detail=f"Failed to list invoices: {str(e)}")
 
+
+
+@router.delete("/{invoice_number}", status_code=204)
+async def delete_invoice(
+    invoice_number: str,
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+) -> None:
+    """Löscht eine Rechnung im Entwurfsstatus."""
+    try:
+        repo = get_repository(db)
+        existing = get_from_store("sales_invoice", invoice_number, repo)
+        if not existing:
+            raise HTTPException(status_code=404, detail=f"Invoice {invoice_number} not found")
+        if existing.get("status", "ENTWURF") not in ("ENTWURF", "DRAFT", "draft"):
+            raise HTTPException(status_code=400, detail="Only draft invoices can be deleted")
+        delete_from_store("sales_invoice", invoice_number, repo)
+        logger.info("Invoice deleted: %s", invoice_number)
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error("Error deleting invoice: %s", str(e), exc_info=True)
+        raise HTTPException(status_code=500, detail=f"Failed to delete invoice: {str(e)}")

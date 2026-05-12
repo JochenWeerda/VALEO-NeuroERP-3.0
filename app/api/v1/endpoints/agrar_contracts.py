@@ -346,3 +346,58 @@ async def list_contract_allocations(
         for row in rows
     ]
 
+
+
+@router.delete("/{contract_id}", status_code=204)
+async def delete_contract(
+    contract_id: str,
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+):
+    """Löscht einen Kontrakt (nur im Status 'open' ohne Allokationen)."""
+    contract = _get_contract_or_404(db, contract_id, tenant_id)
+    if contract.status not in ("open", "draft"):
+        raise HTTPException(status_code=400, detail="Only open/draft contracts can be deleted")
+    alloc_count = (
+        db.query(AgrarContractAllocation)
+        .filter(AgrarContractAllocation.contract_id == contract_id)
+        .count()
+    )
+    if alloc_count > 0:
+        raise HTTPException(status_code=400, detail="Contract has allocations; cancel instead of delete")
+    db.delete(contract)
+    db.commit()
+
+
+@router.post("/{contract_id}/cancel", response_model=AgrarContractOut)
+async def cancel_contract(
+    contract_id: str,
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+):
+    """Storniert einen aktiven Kontrakt."""
+    contract = _get_contract_or_404(db, contract_id, tenant_id)
+    if contract.status == "cancelled":
+        raise HTTPException(status_code=400, detail="Contract is already cancelled")
+    if contract.status == "fulfilled":
+        raise HTTPException(status_code=400, detail="Fulfilled contracts cannot be cancelled")
+    contract.status = "cancelled"
+    db.commit()
+    db.refresh(contract)
+    return _to_contract_out(contract)
+
+
+@router.post("/{contract_id}/close", response_model=AgrarContractOut)
+async def close_contract(
+    contract_id: str,
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+):
+    """Schließt einen erfüllten Kontrakt ab."""
+    contract = _get_contract_or_404(db, contract_id, tenant_id)
+    if contract.status not in ("fulfilled", "partially_allocated"):
+        raise HTTPException(status_code=400, detail=f"Cannot close contract in status '{contract.status}'")
+    contract.status = "closed"
+    db.commit()
+    db.refresh(contract)
+    return _to_contract_out(contract)

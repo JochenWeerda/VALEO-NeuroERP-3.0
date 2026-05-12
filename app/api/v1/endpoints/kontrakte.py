@@ -652,6 +652,18 @@ async def update_kontrakt(
     return await get_kontrakt(contract_id, db, tenant_id, user)
 
 
+@router.put("/{contract_id}")
+async def replace_kontrakt(
+    contract_id: str,
+    payload: KonContractIn,
+    db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
+    user: User = Depends(get_current_user),
+):
+    """Full replacement — delegates to PATCH logic (PATCH already accepts all fields)."""
+    return await update_kontrakt(contract_id, payload, db, tenant_id, user)
+
+
 @router.delete("/{contract_id}")
 async def delete_kontrakt(
     contract_id: str,

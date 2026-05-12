@@ -234,6 +234,111 @@ async def create_matching_rule(
         raise HTTPException(status_code=500, detail=f"Failed to create matching rule: {str(e)}")
 
 
+@router.get("/rules/{rule_id}", response_model=MatchingRule)
+async def get_matching_rule(
+    rule_id: str,
+    tenant_id: str = Query("system", description="Tenant ID"),
+    db: Session = Depends(get_db),
+):
+    """Get a single matching rule by ID."""
+    try:
+        import json
+        row = db.execute(
+            text("""
+                SELECT id, rule_name, priority, match_type, conditions, confidence_threshold,
+                       auto_apply, active, created_at, updated_at
+                FROM domain_erp.matching_rules
+                WHERE id = :rule_id AND tenant_id = :tenant_id
+            """),
+            {"rule_id": rule_id, "tenant_id": tenant_id},
+        ).fetchone()
+        if not row:
+            raise HTTPException(status_code=404, detail="Matching rule not found")
+        return MatchingRule(
+            rule_name=str(row[1]), priority=int(row[2]), match_type=str(row[3]),
+            conditions=json.loads(row[4]) if row[4] else {},
+            confidence_threshold=float(row[5]), auto_apply=bool(row[6]), active=bool(row[7]),
+        )
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error getting matching rule {rule_id}: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to get rule: {str(e)}")
+
+
+@router.put("/rules/{rule_id}", response_model=MatchingRule)
+async def update_matching_rule(
+    rule_id: str,
+    rule: MatchingRuleCreate,
+    tenant_id: str = Query("system", description="Tenant ID"),
+    db: Session = Depends(get_db),
+):
+    """Update a matching rule."""
+    try:
+        import json
+        row = db.execute(
+            text("SELECT id FROM domain_erp.matching_rules WHERE id = :rule_id AND tenant_id = :tenant_id"),
+            {"rule_id": rule_id, "tenant_id": tenant_id},
+        ).fetchone()
+        if not row:
+            raise HTTPException(status_code=404, detail="Matching rule not found")
+        db.execute(
+            text("""
+                UPDATE domain_erp.matching_rules
+                SET rule_name = :rule_name, priority = :priority, match_type = :match_type,
+                    conditions = :conditions, confidence_threshold = :confidence_threshold,
+                    auto_apply = :auto_apply, active = :active, updated_at = NOW()
+                WHERE id = :rule_id AND tenant_id = :tenant_id
+            """),
+            {
+                "rule_id": rule_id, "tenant_id": tenant_id,
+                "rule_name": rule.rule_name, "priority": rule.priority,
+                "match_type": rule.match_type, "conditions": json.dumps(rule.conditions),
+                "confidence_threshold": rule.confidence_threshold,
+                "auto_apply": rule.auto_apply, "active": rule.active,
+            },
+        )
+        db.commit()
+        return MatchingRule(
+            rule_name=rule.rule_name, priority=rule.priority, match_type=rule.match_type,
+            conditions=rule.conditions, confidence_threshold=rule.confidence_threshold,
+            auto_apply=rule.auto_apply, active=rule.active,
+        )
+    except HTTPException:
+        raise
+    except Exception as e:
+        db.rollback()
+        logger.error(f"Error updating matching rule {rule_id}: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to update rule: {str(e)}")
+
+
+@router.delete("/rules/{rule_id}", status_code=204)
+async def delete_matching_rule(
+    rule_id: str,
+    tenant_id: str = Query("system", description="Tenant ID"),
+    db: Session = Depends(get_db),
+):
+    """Delete a matching rule."""
+    try:
+        row = db.execute(
+            text("SELECT id FROM domain_erp.matching_rules WHERE id = :rule_id AND tenant_id = :tenant_id"),
+            {"rule_id": rule_id, "tenant_id": tenant_id},
+        ).fetchone()
+        if not row:
+            raise HTTPException(status_code=404, detail="Matching rule not found")
+        db.execute(
+            text("DELETE FROM domain_erp.matching_rules WHERE id = :rule_id AND tenant_id = :tenant_id"),
+            {"rule_id": rule_id, "tenant_id": tenant_id},
+        )
+        db.commit()
+    except HTTPException:
+        raise
+    except Exception as e:
+        db.rollback()
+        logger.error(f"Error deleting matching rule {rule_id}: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to delete rule: {str(e)}")
+
+
 def _extract_reference_numbers(text: str) -> List[str]:
     """Extract potential reference numbers from text"""
     if not text:
