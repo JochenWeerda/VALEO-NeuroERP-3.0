@@ -55,6 +55,24 @@ def get_kampagnen(tenant_id: str, wirtschaftsjahr: int | None = None) -> list[Er
     return [kampagne for kampagne in _store.kampagnen.values() if kampagne.tenant_id == tenant_id]
 
 
+@router.get("/{kampagne_id}")
+def get_kampagne(kampagne_id: str) -> ErnteKampagne:
+    kampagne = _store.get(kampagne_id)
+    if kampagne is None:
+        raise HTTPException(status_code=404, detail="Kampagne nicht gefunden")
+    return kampagne
+
+
+@router.delete("/{kampagne_id}", status_code=204)
+def delete_kampagne(kampagne_id: str) -> None:
+    kampagne = _store.get(kampagne_id)
+    if kampagne is None:
+        raise HTTPException(status_code=404, detail="Kampagne nicht gefunden")
+    if kampagne.status.value not in ("geplant",):
+        raise HTTPException(status_code=400, detail="Nur geplante Kampagnen können gelöscht werden")
+    del _store.kampagnen[kampagne_id]
+
+
 @router.post("/{kampagne_id}/start")
 def start_kampagne(kampagne_id: str) -> ErnteKampagne:
     kampagne = _store.get(kampagne_id)
