@@ -122,6 +122,147 @@ export type TimeCockpit = {
   driverTime: DriverTimeSummary
 }
 
+export type TimeEntryBookingInput = {
+  employeeRef: string
+  datum: string
+  startTime?: string | null
+  endTime?: string | null
+  hours: number
+  entryType: string
+  source?: string
+  costCenter?: string | null
+  workArea?: string | null
+  notes?: string | null
+}
+
+export type AbsenceImportInput = {
+  employeeRef: string
+  absenceType: 'Urlaub' | 'Krank' | 'Unbezahlt' | 'Sonstiges'
+  fromDate: string
+  toDate: string
+  status?: string
+  sourceSystem?: string
+  externalRef?: string | null
+  note?: string | null
+}
+
+export type Absence = {
+  id: string
+  employeeRef: string
+  datum: string
+  absenceType: string
+  status: string
+  source: string
+  externalRef?: string | null
+  planningBlockers: string[]
+  note?: string | null
+}
+
+export type Shift = {
+  id: string
+  datum: string
+  name: string
+  locationCode: string
+  requiredRole: string
+  requiredQualifications: string[]
+  requiredHeadcount: number
+  startTime: string
+  endTime: string
+  assignedEmployeeRefs: string[]
+  status: string
+  conflicts: Array<{ code: string; severity: string; message: string; employeeRef?: string | null }>
+  notes?: string | null
+}
+
+export type ShiftInput = {
+  name: string
+  datum: string
+  startTime: string
+  endTime: string
+  locationCode?: string
+  requiredRole?: string
+  requiredQualifications?: string[]
+  requiredHeadcount?: number
+  assignedEmployeeRefs?: string[]
+  notes?: string | null
+}
+
+export type CalendarEvent = {
+  id: string
+  sourceSystem: string
+  provider: string
+  externalEventRef?: string | null
+  eventType: string
+  title: string
+  employeeRef?: string | null
+  resourceRef?: string | null
+  startsAt: string
+  endsAt: string
+  timezone: string
+  visibility: string
+  status: string
+  syncState: string
+  conflictLevel: string
+  sourceRef?: string | null
+  metadata: Record<string, unknown>
+}
+
+export type CalendarEventInput = {
+  sourceSystem?: string
+  provider?: string
+  externalEventRef?: string | null
+  eventType: string
+  title: string
+  employeeRef?: string | null
+  resourceRef?: string | null
+  startsAt: string
+  endsAt: string
+  timezone?: string
+  visibility?: string
+  status?: string
+  syncState?: string
+  conflictLevel?: string
+  sourceRef?: string | null
+  metadata?: Record<string, unknown>
+}
+
+export type PayrollExport = {
+  id: string
+  periodFrom: string
+  periodTo: string
+  targetSystem: string
+  status: string
+  items: Array<{ employeeRef: string; datum: string; hours: number; entryType: string; wageType: string; costCenter?: string | null; sourceEntryId: string }>
+  blockers: Array<{ code: string; message: string; employeeRef?: string | null; sourceEntryId?: string | null }>
+}
+
+export type CampaignCapacity = {
+  id: string
+  campaignCode: string
+  name: string
+  periodFrom: string
+  periodTo: string
+  locationCode: string
+  roleDemand: Record<string, number>
+  expectedVolume?: number | null
+  status: string
+  findings: Array<{ code: string; severity: string; message: string; roleCode?: string | null }>
+}
+
+export type FieldServicePlan = {
+  id: string
+  employeeRef: string
+  customerRef: string
+  territoryCode: string
+  campaignCode?: string | null
+  visitType: string
+  startsAt: string
+  endsAt: string
+  status: string
+  conflicts: Array<{ code: string; severity: string; message: string }>
+  notes?: string | null
+}
+
 export type SchulungTyp = 'PSM' | 'Gefahrstoffe' | 'Gabelstapler' | 'Erste Hilfe' | 'Brandschutz' | 'Arbeitssicherheit'
 export type SchulungStatus = 'gueltig' | 'ablaufend' | 'abgelaufen'
 
@@ -200,6 +341,12 @@ export const personalKeys = {
   zeiterfassung: (datum?: string) => [...personalKeys.all, 'zeit', datum] as const,
   driverTimeSummary: (datum?: string) => [...personalKeys.all, 'driver-time-summary', datum] as const,
   timeCockpit: (datum?: string) => [...personalKeys.all, 'time-cockpit', datum] as const,
+  absences: (filters?: Record<string, unknown>) => [...personalKeys.all, 'absences', filters] as const,
+  shifts: (filters?: Record<string, unknown>) => [...personalKeys.all, 'shifts', filters] as const,
+  calendarEvents: (filters?: Record<string, unknown>) => [...personalKeys.all, 'calendar-events', filters] as const,
+  payrollExports: () => [...personalKeys.all, 'payroll-exports'] as const,
+  campaignCapacity: () => [...personalKeys.all, 'campaign-capacity'] as const,
+  fieldServicePlan: () => [...personalKeys.all, 'field-service-plan'] as const,
   schulungen: (filters?: Record<string, unknown>) => [...personalKeys.all, 'schulungen', filters] as const,
   qualifikationen: (filters?: Record<string, unknown>) => [...personalKeys.all, 'qualifikationen', filters] as const,
   onboardingRuns: (filters?: Record<string, unknown>) => [...personalKeys.all, 'onboarding-runs', filters] as const,
@@ -252,6 +399,12 @@ const EMPTY_TIME_COCKPIT: TimeCockpit = {
   },
   driverTime: EMPTY_DRIVER_TIME_SUMMARY,
 }
+const EMPTY_ABSENCES: Absence[] = []
+const EMPTY_SHIFTS: Shift[] = []
+const EMPTY_CALENDAR_EVENTS: CalendarEvent[] = []
+const EMPTY_PAYROLL_EXPORTS: PayrollExport[] = []
+const EMPTY_CAMPAIGN_CAPACITY: CampaignCapacity[] = []
+const EMPTY_FIELD_SERVICE_PLAN: FieldServicePlan[] = []
 const EMPTY_SCHULUNGEN_LIST: Schulung[] = []
 const EMPTY_STUNDENZETTEL_LIST: StundenzettelEintrag[] = []
 const EMPTY_QUALIFIKATIONEN_LIST: Qualifikation[] = []
@@ -305,6 +458,155 @@ export function useTimeCockpit(datum?: string) {
     },
     initialData: EMPTY_TIME_COCKPIT,
     staleTime: 30 * 1000,
+  })
+}
+
+export function useCreateTimeEntry() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async (data: TimeEntryBookingInput) => (await apiClient.post('/api/v1/personal/time-entries', data)).data,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: personalKeys.zeiterfassung() })
+      queryClient.invalidateQueries({ queryKey: personalKeys.timeCockpit() })
+    },
+  })
+}
+
+export function useAbsences(filters?: { datumVon?: string; datumBis?: string }) {
+  return useQuery({
+    queryKey: personalKeys.absences(filters),
+    queryFn: async () => {
+      const params = new URLSearchParams()
+      if (filters?.datumVon) params.append('datum_von', filters.datumVon)
+      if (filters?.datumBis) params.append('datum_bis', filters.datumBis)
+      return (await apiClient.get<Absence[]>(`/api/v1/personal/absences?${String(params)}`)).data
+    },
+    initialData: EMPTY_ABSENCES,
+    staleTime: 30_000,
+  })
+}
+
+export function useImportAbsence() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async (data: AbsenceImportInput) => (await apiClient.post('/api/v1/personal/absences/import', data)).data,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: personalKeys.absences() })
+      queryClient.invalidateQueries({ queryKey: personalKeys.timeCockpit() })
+      queryClient.invalidateQueries({ queryKey: personalKeys.driverTimeSummary() })
+    },
+  })
+}
+
+export function useShifts(filters?: { datumVon?: string; datumBis?: string; location?: string }) {
+  return useQuery({
+    queryKey: personalKeys.shifts(filters),
+    queryFn: async () => {
+      const params = new URLSearchParams()
+      if (filters?.datumVon) params.append('datum_von', filters.datumVon)
+      if (filters?.datumBis) params.append('datum_bis', filters.datumBis)
+      if (filters?.location) params.append('location', filters.location)
+      return (await apiClient.get<Shift[]>(`/api/v1/personal/shifts?${String(params)}`)).data
+    },
+    initialData: EMPTY_SHIFTS,
+    staleTime: 30_000,
+  })
+}
+
+export function useCreateShift() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async (data: ShiftInput) => (await apiClient.post<Shift>('/api/v1/personal/shifts', data)).data,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: personalKeys.shifts() })
+      queryClient.invalidateQueries({ queryKey: personalKeys.calendarEvents() })
+    },
+  })
+}
+
+export function useCalendarEvents(filters?: { start?: string; end?: string }) {
+  return useQuery({
+    queryKey: personalKeys.calendarEvents(filters),
+    queryFn: async () => {
+      const params = new URLSearchParams()
+      if (filters?.start) params.append('start', filters.start)
+      if (filters?.end) params.append('end', filters.end)
+      return (await apiClient.get<CalendarEvent[]>(`/api/v1/personal/calendar-events?${String(params)}`)).data
+    },
+    initialData: EMPTY_CALENDAR_EVENTS,
+    staleTime: 30_000,
+  })
+}
+
+export function useCreateCalendarEvent() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async (data: CalendarEventInput) => (await apiClient.post<CalendarEvent>('/api/v1/personal/calendar-events', data)).data,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: personalKeys.calendarEvents() })
+    },
+  })
+}
+
+export function usePayrollExports() {
+  return useQuery({
+    queryKey: personalKeys.payrollExports(),
+    queryFn: async () => (await apiClient.get<PayrollExport[]>('/api/v1/personal/payroll-exports')).data,
+    initialData: EMPTY_PAYROLL_EXPORTS,
+    staleTime: 30_000,
+  })
+}
+
+export function useCreatePayrollExport() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async (data: { periodFrom: string; periodTo: string; targetSystem?: string; createdBy?: string }) =>
+      (await apiClient.post<PayrollExport>('/api/v1/personal/payroll-exports', data)).data,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: personalKeys.payrollExports() })
+      queryClient.invalidateQueries({ queryKey: personalKeys.timeCockpit() })
+    },
+  })
+}
+
+export function useCampaignCapacity() {
+  return useQuery({
+    queryKey: personalKeys.campaignCapacity(),
+    queryFn: async () => (await apiClient.get<CampaignCapacity[]>('/api/v1/personal/campaign-capacity')).data,
+    initialData: EMPTY_CAMPAIGN_CAPACITY,
+    staleTime: 30_000,
+  })
+}
+
+export function useCreateCampaignCapacity() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async (data: Omit<CampaignCapacity, 'id' | 'status' | 'findings'>) =>
+      (await apiClient.post<CampaignCapacity>('/api/v1/personal/campaign-capacity', data)).data,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: personalKeys.campaignCapacity() })
+    },
+  })
+}
+
+export function useFieldServicePlan() {
+  return useQuery({
+    queryKey: personalKeys.fieldServicePlan(),
+    queryFn: async () => (await apiClient.get<FieldServicePlan[]>('/api/v1/personal/field-service-plan')).data,
+    initialData: EMPTY_FIELD_SERVICE_PLAN,
+    staleTime: 30_000,
+  })
+}
+
+export function useCreateFieldServicePlan() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async (data: Omit<FieldServicePlan, 'id' | 'status' | 'conflicts'>) =>
+      (await apiClient.post<FieldServicePlan>('/api/v1/personal/field-service-plan', data)).data,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: personalKeys.fieldServicePlan() })
+      queryClient.invalidateQueries({ queryKey: personalKeys.calendarEvents() })
+    },
   })
 }
 
