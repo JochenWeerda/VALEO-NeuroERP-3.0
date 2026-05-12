@@ -126,6 +126,42 @@ class AbsenceImportOut(BaseModel):
     absences: list[AbsenceOut]
 
 
+class ShiftConflictOut(BaseModel):
+    code: str
+    severity: str
+    message: str
+    employeeRef: str | None = None
+
+
+class ShiftCreateIn(BaseModel):
+    name: str = Field(..., min_length=1, max_length=160)
+    datum: str
+    startTime: str
+    endTime: str
+    locationCode: str = Field(default="main", max_length=80)
+    requiredRole: str = Field(default="employee", max_length=80)
+    requiredQualifications: list[str] = Field(default_factory=list)
+    requiredHeadcount: int = Field(default=1, ge=1)
+    assignedEmployeeRefs: list[str] = Field(default_factory=list)
+    notes: str | None = Field(default=None, max_length=500)
+
+
+class ShiftOut(BaseModel):
+    id: str
+    datum: str
+    name: str
+    locationCode: str
+    requiredRole: str
+    requiredQualifications: list[str] = Field(default_factory=list)
+    requiredHeadcount: int
+    startTime: str
+    endTime: str
+    assignedEmployeeRefs: list[str] = Field(default_factory=list)
+    status: str
+    conflicts: list[ShiftConflictOut] = Field(default_factory=list)
+    notes: str | None = None
+
+
 class TourIn(BaseModel):
     id: str
     start: str
@@ -451,6 +487,111 @@ def _absence_from_row(row: Any) -> AbsenceOut:
         planningBlockers=_absence_blockers(status),
         note=str(row_map.get("notes") or "") or None,
     )
+
+
+def _shift_conflict_from_item(item: Any) -> ShiftConflictOut:
+    if isinstance(item, ShiftConflictOut):
+        return item
+    item_map = dict(item) if isinstance(item, dict) else {}
+    return ShiftConflictOut(
+        code=str(item_map.get("code") or "UNKNOWN"),
+        severity=str(item_map.get("severity") or "warning"),
+        message=str(item_map.get("message") or ""),
+        employeeRef=str(item_map.get("employeeRef") or item_map.get("employee_ref") or "") or None,
+    )
+
+
+def _shift_from_row(row: Any) -> ShiftOut:
+    row_map = dict(row)
+    conflicts_raw = row_map.get("conflicts")
+    conflicts = [_shift_conflict_from_item(item) for item in _parse_json_list(conflicts_raw)]
+    return ShiftOut(
+        id=str(row_map.get("id") or ""),
+        datum=_to_iso(row_map.get("shift_date")),
+        name=str(row_map.get("name") or ""),
+        locationCode=str(row_map.get("location_code") or "main"),
+        requiredRole=str(row_map.get("required_role") or "employee"),
+        requiredQualifications=_parse_json_string_list(row_map.get("required_qualifications")),
+        requiredHeadcount=int(row_map.get("required_headcount") or 1),
+        startTime=_to_time_text(row_map.get("starts_at")),
+        endTime=_to_time_text(row_map.get("ends_at")),
+        assignedEmployeeRefs=_parse_json_string_list(row_map.get("assigned_employee_refs")),
+        status=str(row_map.get("status") or "planned"),
+        conflicts=conflicts,
+        notes=str(row_map.get("notes") or "") or None,
+    )
+
+
+def _shift_status(conflicts: list[ShiftConflictOut]) -> str:
+    if any(conflict.severity == "blocker" for conflict in conflicts):
+        return "blocked"
+    if conflicts:
+        return "warning"
+    return "planned"
+
+
+def _build_shift_conflicts(
+    assigned_employee_refs: list[str],
+    required_headcount: int,
+    required_qualifications: list[str],
+    profile_rows: list[Any],
+    absence_rows: list[Any],
+) -> list[ShiftConflictOut]:
+    conflicts: list[ShiftConflictOut] = []
+    profile_by_ref = {str(row.get("employee_ref") or ""): dict(row) for row in [dict(item) for item in profile_rows]}
+    absent_refs = {str(dict(row).get("employee_ref") or "") for row in absence_rows}
+
+    if len(assigned_employee_refs) < required_headcount:
+        conflicts.append(
+            ShiftConflictOut(
+                code="UNDERSTAFFED",
+                severity="blocker",
+                message="Mindestbesetzung ist nicht erreicht.",
+            )
+        )
+
+    for employee_ref in assigned_employee_refs:
+        profile = profile_by_ref.get(employee_ref)
+        if not profile:
+            conflicts.append(
+                ShiftConflictOut(
+                    code="PROFILE_MISSING",
+                    severity="blocker",
+                    message="Mitarbeiter hat kein HR-Time-Profil.",
+                    employeeRef=employee_ref,
+                )
+            )
+            continue
+        if _normalize_time_profile_status(profile.get("status")) != "active":
+            conflicts.append(
+                ShiftConflictOut(
+                    code="PROFILE_INACTIVE",
+                    severity="blocker",
+                    message="Mitarbeiter ist nicht aktiv planbar.",
+                    employeeRef=employee_ref,
+                )
+            )
+        if employee_ref in absent_refs:
+            conflicts.append(
+                ShiftConflictOut(
+                    code="ABSENCE_COLLISION",
+                    severity="blocker",
+                    message="Mitarbeiter hat eine genehmigte Abwesenheit.",
+                    employeeRef=employee_ref,
+                )
+            )
+        qualifications = set(_parse_json_string_list(profile.get("qualifications")))
+        missing = [qualification for qualification in required_qualifications if qualification not in qualifications]
+        if missing:
+            conflicts.append(
+                ShiftConflictOut(
+                    code="QUALIFICATION_MISSING",
+                    severity="warning",
+                    message=f"Erforderliche Qualifikation fehlt: {', '.join(missing)}.",
+                    employeeRef=employee_ref,
+                )
+            )
+    return conflicts
 
 
 def _normalize_time_profile_status(value: Any) -> str:
@@ -1548,6 +1689,118 @@ async def import_absence(
         imported.append(_absence_from_row(row))
     db.commit()
     return AbsenceImportOut(ok=True, imported=len(imported), absences=imported)
+
+
+@router.get("/shifts", response_model=list[ShiftOut])
+async def list_shifts(
+    datum_von: str | None = Query(default=None),
+    datum_bis: str | None = Query(default=None),
+    location: str | None = Query(default=None),
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+):
+    params: dict[str, Any] = {"tenant_id": tenant_id}
+    where = ["tenant_id = :tenant_id"]
+    if datum_von:
+        params["datum_von"] = _parse_entry_date(datum_von)
+        where.append("shift_date >= :datum_von")
+    if datum_bis:
+        params["datum_bis"] = _parse_entry_date(datum_bis)
+        where.append("shift_date <= :datum_bis")
+    if location:
+        params["location"] = location
+        where.append("location_code = :location")
+
+    rows = db.execute(
+        text(
+            f"""
+            SELECT id, shift_date, name, location_code, required_role, required_qualifications,
+                   required_headcount, starts_at, ends_at, assigned_employee_refs, status,
+                   conflicts, notes
+            FROM domain_hr.shifts
+            WHERE {' AND '.join(where)}
+            ORDER BY shift_date ASC, starts_at ASC, location_code ASC
+            """
+        ),
+        params,
+    ).mappings().all()
+    return [_shift_from_row(row) for row in rows]
+
+
+@router.post("/shifts", response_model=ShiftOut, status_code=201)
+async def create_shift(
+    payload: ShiftCreateIn,
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+):
+    shift_date = _parse_entry_date(payload.datum)
+    profile_rows = db.execute(
+        text(
+            """
+            SELECT employee_ref, status, qualifications
+            FROM domain_hr.employee_time_profiles
+            WHERE tenant_id = :tenant_id
+            """
+        ),
+        {"tenant_id": tenant_id},
+    ).mappings().all()
+    absence_rows = db.execute(
+        text(
+            """
+            SELECT employee_ref
+            FROM domain_hr.time_entries
+            WHERE tenant_id = :tenant_id
+              AND entry_date = :shift_date
+              AND entry_type IN ('Urlaub', 'Krank', 'Unbezahlt', 'Sonstiges')
+              AND status IN ('Approved', 'Genehmigt')
+            """
+        ),
+        {"tenant_id": tenant_id, "shift_date": shift_date},
+    ).mappings().all()
+    conflicts = _build_shift_conflicts(
+        assigned_employee_refs=payload.assignedEmployeeRefs,
+        required_headcount=payload.requiredHeadcount,
+        required_qualifications=payload.requiredQualifications,
+        profile_rows=list(profile_rows),
+        absence_rows=list(absence_rows),
+    )
+    status = _shift_status(conflicts)
+    row = db.execute(
+        text(
+            """
+            INSERT INTO domain_hr.shifts
+              (id, tenant_id, shift_date, name, location_code, required_role,
+               required_qualifications, required_headcount, starts_at, ends_at,
+               assigned_employee_refs, status, conflicts, notes, created_at, updated_at)
+            VALUES
+              (:id, :tenant_id, :shift_date, :name, :location_code, :required_role,
+               CAST(:required_qualifications AS jsonb), :required_headcount, :starts_at, :ends_at,
+               CAST(:assigned_employee_refs AS jsonb), :status, CAST(:conflicts AS jsonb),
+               :notes, NOW(), NOW())
+            RETURNING id, shift_date, name, location_code, required_role, required_qualifications,
+                      required_headcount, starts_at, ends_at, assigned_employee_refs, status,
+                      conflicts, notes
+            """
+        ),
+        {
+            "id": str(uuid4()),
+            "tenant_id": tenant_id,
+            "shift_date": shift_date,
+            "name": payload.name,
+            "location_code": payload.locationCode,
+            "required_role": payload.requiredRole,
+            "required_qualifications": json.dumps(payload.requiredQualifications),
+            "required_headcount": payload.requiredHeadcount,
+            "starts_at": payload.startTime,
+            "ends_at": payload.endTime,
+            "assigned_employee_refs": json.dumps(payload.assignedEmployeeRefs),
+            "status": status,
+            "conflicts": json.dumps([conflict.model_dump() for conflict in conflicts]),
+            "notes": payload.notes,
+        },
+    ).mappings().first()
+    db.commit()
+    return _shift_from_row(row)
 
 
 @router.get("/driver-time/summary", response_model=DriverTimeSummaryOut)
