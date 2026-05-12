@@ -213,7 +213,7 @@ api_router.include_router(
 )
 
 api_router.include_router(
-    health,
+    health.router,
     prefix="/health",
     tags=["health"]
 )
@@ -279,19 +279,19 @@ api_router.include_router(
 )
 
 api_router.include_router(
-    tenants,
+    tenants.router,
     prefix="/tenants",
     tags=["tenants"]
 )
 
 api_router.include_router(
-    users,
+    users.router,
     prefix="/users",
     tags=["users"]
 )
 
 api_router.include_router(
-    customers,
+    customers.router,
     prefix="/crm/customers",
     tags=["crm", "customers"]
 )
@@ -352,13 +352,13 @@ api_router.include_router(
 )
 
 api_router.include_router(
-    leads,
+    leads.router,
     prefix="/crm/leads",
     tags=["crm", "leads"]
 )
 
 api_router.include_router(
-    contacts,
+    contacts.router,
     prefix="/crm/contacts",
     tags=["crm", "contacts"]
 )
@@ -388,13 +388,13 @@ api_router.include_router(
 )
 
 api_router.include_router(
-    accounts,
+    accounts.router,
     prefix="/accounts",
     tags=["finance", "accounts"]
 )
 
 api_router.include_router(
-    journal_entries,
+    journal_entries.router,
     prefix="/journal-entries",
     tags=["finance", "journal-entries"]
 )
@@ -565,7 +565,7 @@ api_router.include_router(
 )
 
 api_router.include_router(
-    chart_of_accounts,
+    chart_of_accounts.router,
     prefix="/finance",
     tags=["finance", "kontenplan", "chart-of-accounts"]
 )
@@ -602,13 +602,13 @@ api_router.include_router(
 )
 
 api_router.include_router(
-    articles,
+    articles.router,
     prefix="/articles",
     tags=["inventory", "articles"]
 )
 
 api_router.include_router(
-    warehouses,
+    warehouses.router,
     prefix="/warehouses",
     tags=["inventory", "warehouses"]
 )
