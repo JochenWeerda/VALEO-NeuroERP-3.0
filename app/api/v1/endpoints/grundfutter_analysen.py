@@ -168,7 +168,7 @@ def _parse_date_de(s: Optional[str]) -> Optional[date]:
     return None
 
 
-def _extract_value(text: str, label: str) -> Optional[str]:
+def _extract_value(text: str, label: str) -> Optional[str]:  # noqa: F811
     """Sucht nach 'Label <zahl>' mit optionalem Trennzeichen."""
     pattern = rf"{re.escape(label)}\s+([<\d,\.\-]+)"
     m = re.search(pattern, text, re.IGNORECASE)

@@ -377,7 +377,6 @@ async def update_psm(
 
     # Validate approval expiry
     if "zulassung_ablauf" in update_data and update_data["zulassung_ablauf"]:
-        from datetime import datetime
         if update_data["zulassung_ablauf"] < datetime.utcnow().date():
             raise HTTPException(
                 status_code=400,
@@ -602,7 +601,6 @@ async def get_psm_stats(
         safety_stats[safety_type or "Standard"] = count
 
     # Approval expiry warnings (next 90 days)
-    from datetime import datetime, timedelta
     expiry_cutoff = datetime.utcnow().date() + timedelta(days=90)
 
     expiring_count = db.query(PSMModel).filter(

@@ -116,8 +116,7 @@ async def get_business_metrics(
         
         # 2. Event Bus Metrics (from Outbox table)
         from app.infrastructure.eventbus.outbox import OutboxEvent
-        from datetime import timedelta
-        
+
         now = datetime.utcnow()
         today_start = now.replace(hour=0, minute=0, second=0, microsecond=0)
         

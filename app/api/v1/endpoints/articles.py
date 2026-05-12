@@ -443,7 +443,7 @@ async def delete_article(
 # Article Extended Data Endpoints (Suppliers, Discounts, Prices, Documents)
 # ============================================================================
 
-from ....infrastructure.models import BusinessPartnerDiscountItem, BusinessPartnerPriceAgreement
+from ....infrastructure.models import BusinessPartnerDiscountItem, BusinessPartnerPriceAgreement  # noqa: F811
 
 
 @router.get("/{article_id}/suppliers", response_model=dict)

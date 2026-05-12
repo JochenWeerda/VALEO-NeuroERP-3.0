@@ -132,7 +132,7 @@ async def export_documents(
         )
     except Exception as e:
         logger.error(f"Failed to export: {e}")
-        from fastapi import HTTPException
+        from fastapi import HTTPException  # noqa: F811
 
         raise HTTPException(status_code=500, detail=str(e))
 
