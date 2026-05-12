@@ -10,8 +10,9 @@ from sqlalchemy.orm import Session
 from ....core.config import settings
 from ....core.database import get_db
 from ....infrastructure.models import Warehouse as WarehouseModel
+from app.core.uuid7 import uuid7
 from ..schemas.base import PaginatedResponse
-from ..schemas.inventory import Warehouse
+from ..schemas.inventory import Warehouse, WarehouseCreate, WarehouseUpdate
 
 router = APIRouter()
 
@@ -78,4 +79,61 @@ async def get_warehouse(warehouse_id: str, db: Session = Depends(get_db)):
     if not warehouse:
         raise HTTPException(status_code=404, detail="Warehouse not found")
     return Warehouse.model_validate(warehouse)
+
+
+@router.post("/", response_model=Warehouse, status_code=201)
+async def create_warehouse(payload: WarehouseCreate, db: Session = Depends(get_db)):
+    """Neues Lager anlegen."""
+    existing = db.query(WarehouseModel).filter(
+        WarehouseModel.warehouse_code == payload.warehouse_code,
+        WarehouseModel.tenant_id == payload.tenant_id,
+    ).first()
+    if existing:
+        raise HTTPException(status_code=409, detail="Warehouse code already exists for this tenant")
+    wh = WarehouseModel(
+        id=str(uuid7()),
+        warehouse_code=payload.warehouse_code,
+        name=payload.name,
+        address=payload.address,
+        city=payload.city,
+        postal_code=payload.postal_code,
+        country=payload.country,
+        contact_person=payload.contact_person,
+        phone=payload.phone,
+        email=payload.email,
+        warehouse_type=payload.warehouse_type,
+        tenant_id=payload.tenant_id,
+        is_active=True,
+    )
+    db.add(wh)
+    db.commit()
+    db.refresh(wh)
+    return Warehouse.model_validate(wh)
+
+
+@router.put("/{warehouse_id}", response_model=Warehouse)
+async def update_warehouse(
+    warehouse_id: str,
+    payload: WarehouseUpdate,
+    db: Session = Depends(get_db),
+):
+    """Lager aktualisieren."""
+    wh = db.query(WarehouseModel).filter(WarehouseModel.id == warehouse_id).first()
+    if not wh:
+        raise HTTPException(status_code=404, detail="Warehouse not found")
+    for field, value in payload.model_dump(exclude_unset=True).items():
+        setattr(wh, field, value)
+    db.commit()
+    db.refresh(wh)
+    return Warehouse.model_validate(wh)
+
+
+@router.delete("/{warehouse_id}", status_code=204)
+async def delete_warehouse(warehouse_id: str, db: Session = Depends(get_db)):
+    """Lager deaktivieren (Soft-Delete)."""
+    wh = db.query(WarehouseModel).filter(WarehouseModel.id == warehouse_id).first()
+    if not wh:
+        raise HTTPException(status_code=404, detail="Warehouse not found")
+    wh.is_active = False
+    db.commit()
 
