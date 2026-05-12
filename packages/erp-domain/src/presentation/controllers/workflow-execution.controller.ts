@@ -3,14 +3,14 @@ import { WorkflowExecutionService } from '../../application/services/workflow-ex
 import { CreateWorkflowExecutionData } from '../../application/services/workflow-execution.service'
 import { WorkflowExecutionStatus } from '../../core/entities/workflow-rule.entity'
 import { clampLimit, clampOffset } from '../types/api-pagination'
-import { resolveActorId } from '../utils/request-context'
+import { resolveActorId, resolveTenantId, respondControllerError, respondDomainMutationError } from '../utils/request-context'
 
 export class WorkflowExecutionController {
   constructor(private workflowExecutionService: WorkflowExecutionService) {}
 
   async createWorkflowExecution(req: Request, res: Response): Promise<void> {
     try {
-      const tenantId = req.headers['x-tenant-id'] as string
+      const tenantId = resolveTenantId(req)
       const actorId = resolveActorId(req)
 
       const data: CreateWorkflowExecutionData = {
@@ -31,17 +31,14 @@ export class WorkflowExecutionController {
       })
     } catch (error) {
       console.error('Fehler beim Erstellen der Workflow-Execution:', error)
-      res.status(400).json({
-        success: false,
-        error: error instanceof Error ? error.message : 'Unbekannter Fehler'
-      })
+      respondControllerError(res, error, 400)
     }
   }
 
   async getWorkflowExecution(req: Request, res: Response): Promise<void> {
     try {
       const { id } = req.params
-      const tenantId = req.headers['x-tenant-id'] as string
+      const tenantId = resolveTenantId(req)
 
       const execution = await this.workflowExecutionService.getWorkflowExecutionById(id as string, tenantId)
 
@@ -59,16 +56,13 @@ export class WorkflowExecutionController {
       })
     } catch (error) {
       console.error('Fehler beim Laden der Workflow-Execution:', error)
-      res.status(500).json({
-        success: false,
-        error: 'Interner Serverfehler'
-      })
+      respondControllerError(res, error, 500)
     }
   }
 
   async getWorkflowExecutions(req: Request, res: Response): Promise<void> {
     try {
-      const tenantId = req.headers['x-tenant-id'] as string
+      const tenantId = resolveTenantId(req)
       const options = {
         status: req.query.status as any,
         ruleId: req.query.ruleId as string,
@@ -88,17 +82,14 @@ export class WorkflowExecutionController {
       })
     } catch (error) {
       console.error('Fehler beim Laden der Workflow-Executions:', error)
-      res.status(500).json({
-        success: false,
-        error: 'Interner Serverfehler'
-      })
+      respondControllerError(res, error, 500)
     }
   }
 
   async getWorkflowExecutionsByRule(req: Request, res: Response): Promise<void> {
     try {
       const { ruleId } = req.params
-      const tenantId = req.headers['x-tenant-id'] as string
+      const tenantId = resolveTenantId(req)
 
       const executions = await this.workflowExecutionService.getWorkflowExecutionsByRule(ruleId as string, tenantId)
 
@@ -108,17 +99,14 @@ export class WorkflowExecutionController {
       })
     } catch (error) {
       console.error('Fehler beim Laden der Workflow-Executions zur Regel:', error)
-      res.status(500).json({
-        success: false,
-        error: 'Interner Serverfehler'
-      })
+      respondControllerError(res, error, 500)
     }
   }
 
   async startWorkflowExecution(req: Request, res: Response): Promise<void> {
     try {
       const { id } = req.params
-      const tenantId = req.headers['x-tenant-id'] as string
+      const tenantId = resolveTenantId(req)
       const actorId = resolveActorId(req)
 
       const execution = await this.workflowExecutionService.startWorkflowExecution(id as string, tenantId, actorId)
@@ -129,17 +117,14 @@ export class WorkflowExecutionController {
       })
     } catch (error) {
       console.error('Fehler beim Starten der Workflow-Execution:', error)
-      res.status(error instanceof Error && error.message.includes('nicht gefunden') ? 404 : 400).json({
-        success: false,
-        error: error instanceof Error ? error.message : 'Unbekannter Fehler'
-      })
+      respondDomainMutationError(res, error)
     }
   }
 
   async succeedWorkflowExecution(req: Request, res: Response): Promise<void> {
     try {
       const { id } = req.params
-      const tenantId = req.headers['x-tenant-id'] as string
+      const tenantId = resolveTenantId(req)
       const actorId = resolveActorId(req)
 
       const execution = await this.workflowExecutionService.succeedWorkflowExecution(id as string, tenantId, actorId)
@@ -150,17 +135,14 @@ export class WorkflowExecutionController {
       })
     } catch (error) {
       console.error('Fehler beim erfolgreichen Abschließen der Workflow-Execution:', error)
-      res.status(error instanceof Error && error.message.includes('nicht gefunden') ? 404 : 400).json({
-        success: false,
-        error: error instanceof Error ? error.message : 'Unbekannter Fehler'
-      })
+      respondDomainMutationError(res, error)
     }
   }
 
   async failWorkflowExecution(req: Request, res: Response): Promise<void> {
     try {
       const { id } = req.params
-      const tenantId = req.headers['x-tenant-id'] as string
+      const tenantId = resolveTenantId(req)
       const actorId = resolveActorId(req)
       const errorMessage = req.body.errorMessage || 'Unbekannter Fehler'
 
@@ -172,17 +154,14 @@ export class WorkflowExecutionController {
       })
     } catch (error) {
       console.error('Fehler beim Fehlschlagen der Workflow-Execution:', error)
-      res.status(error instanceof Error && error.message.includes('nicht gefunden') ? 404 : 400).json({
-        success: false,
-        error: error instanceof Error ? error.message : 'Unbekannter Fehler'
-      })
+      respondDomainMutationError(res, error)
     }
   }
 
   async retryWorkflowExecution(req: Request, res: Response): Promise<void> {
     try {
       const { id } = req.params
-      const tenantId = req.headers['x-tenant-id'] as string
+      const tenantId = resolveTenantId(req)
       const actorId = resolveActorId(req)
 
       const execution = await this.workflowExecutionService.retryWorkflowExecution(id as string, tenantId, actorId)
@@ -193,16 +172,13 @@ export class WorkflowExecutionController {
       })
     } catch (error) {
       console.error('Fehler beim Wiederholen der Workflow-Execution:', error)
-      res.status(error instanceof Error && error.message.includes('nicht gefunden') ? 404 : 400).json({
-        success: false,
-        error: error instanceof Error ? error.message : 'Unbekannter Fehler'
-      })
+      respondDomainMutationError(res, error)
     }
   }
 
   async getRunningWorkflowExecutions(req: Request, res: Response): Promise<void> {
     try {
-      const tenantId = req.headers['x-tenant-id'] as string
+      const tenantId = resolveTenantId(req)
 
       const executions = await this.workflowExecutionService.getRunningWorkflowExecutions(tenantId)
 
@@ -212,16 +188,13 @@ export class WorkflowExecutionController {
       })
     } catch (error) {
       console.error('Fehler beim Laden der laufenden Workflow-Executions:', error)
-      res.status(500).json({
-        success: false,
-        error: 'Interner Serverfehler'
-      })
+      respondControllerError(res, error, 500)
     }
   }
 
   async getFailedWorkflowExecutions(req: Request, res: Response): Promise<void> {
     try {
-      const tenantId = req.headers['x-tenant-id'] as string
+      const tenantId = resolveTenantId(req)
 
       const executions = await this.workflowExecutionService.getFailedWorkflowExecutions(tenantId)
 
@@ -231,16 +204,13 @@ export class WorkflowExecutionController {
       })
     } catch (error) {
       console.error('Fehler beim Laden der fehlgeschlagenen Workflow-Executions:', error)
-      res.status(500).json({
-        success: false,
-        error: 'Interner Serverfehler'
-      })
+      respondControllerError(res, error, 500)
     }
   }
 
   async getWorkflowExecutionStats(req: Request, res: Response): Promise<void> {
     try {
-      const tenantId = req.headers['x-tenant-id'] as string
+      const tenantId = resolveTenantId(req)
 
       const stats = await this.workflowExecutionService.getWorkflowExecutionStats(tenantId)
 
@@ -250,10 +220,7 @@ export class WorkflowExecutionController {
       })
     } catch (error) {
       console.error('Fehler beim Laden der Workflow-Execution-Statistiken:', error)
-      res.status(500).json({
-        success: false,
-        error: 'Interner Serverfehler'
-      })
+      respondControllerError(res, error, 500)
     }
   }
 }

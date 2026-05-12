@@ -112,13 +112,13 @@ export class PurchaseOrderPostgresRepository implements PurchaseOrderRepository 
     }
   }
 
-  async findById(id: string): Promise<PurchaseOrder | null> {
+  async findById(id: string, tenantId: string): Promise<PurchaseOrder | null> {
     const orderQuery = `
       SELECT * FROM purchase_orders
-      WHERE id = $1 AND deleted_at IS NULL
+      WHERE id = $1 AND tenant_id = $2 AND deleted_at IS NULL
     `
 
-    const orderResult = await this.pool.query(orderQuery, [id])
+    const orderResult = await this.pool.query(orderQuery, [id, tenantId])
     if (orderResult.rows.length === 0) {
       return null
     }
@@ -204,13 +204,16 @@ export class PurchaseOrderPostgresRepository implements PurchaseOrderRepository 
     return this.findByTenant(tenantId, { status })
   }
 
-  async delete(id: string): Promise<void> {
+  async delete(id: string, tenantId: string): Promise<void> {
     const query = `
       UPDATE purchase_orders
       SET deleted_at = NOW()
-      WHERE id = $1
+      WHERE id = $1 AND tenant_id = $2 AND deleted_at IS NULL
     `
-    await this.pool.query(query, [id])
+    const result = await this.pool.query(query, [id, tenantId])
+    if (result.rowCount === 0) {
+      throw Object.assign(new Error('Purchase order not found'), { statusCode: 404 })
+    }
   }
 
   async countByTenant(

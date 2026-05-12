@@ -96,8 +96,30 @@ SERVICE_PORT=3002
 SERVICE_REGISTRY_URL=http://service-registry:3000
 SERVICE_BUS_URL=amqp://rabbitmq:5672
 DATABASE_URL=postgresql://user:password@host:port/database
+# Optional: preferred by tools/migration/run_sql_migration.ts for ERP SQL
+ERP_DATABASE_URL=postgresql://user:password@host:port/database
 REDIS_URL=redis://host:port
+# Dev/test tenant fallback only (see ADR M-01)
+# ERP_ALLOW_MISSING_TENANT=1
+# ERP_DEV_TENANT_ID=my-tenant
 ```
+
+### Multi-tenancy (finance master data & purchase orders)
+
+PostgreSQL schema **`finanz`** (accounts, creditors, debtors, bank accounts, postings) is isolated by **`tenant_id`**. Apply SQL migrations **`migrations/sql/erp/001_finance_core.sql`** then **`003_finanz_tenant_id.sql`** before running the finance APIs (see **`docs/erp-finanz-multitenancy.md`** and **`migrations/sql/erp/README.md`**). Express handlers use **`resolveTenantId`** (`src/presentation/utils/request-context.ts`) and the finance routers (`buildFinanz*Router`). Purchase-order **GET by ID** and mutations are scoped by **`tenant_id`** as documented in the same guide.
+
+Run migrations from the **repository root** (connection string precedence: `ERP_DATABASE_URL`, then `DATABASE_URL`, then `CRM_DATABASE_URL`):
+
+```bash
+pnpm migrate:erp-finanz
+
+# Equivalent:
+npx ts-node tools/migration/run_sql_migration.ts \
+  --file migrations/sql/erp/001_finance_core.sql \
+  --file migrations/sql/erp/003_finanz_tenant_id.sql
+```
+
+The migration runner resolves `.env` from the repo root **and** optionally `./.env` in the working directory (see [`tools/migration/run_sql_migration.ts`](../../tools/migration/run_sql_migration.ts)).
 
 ## Development
 
@@ -116,9 +138,18 @@ npm run dev
 
 ### Testing
 ```bash
-npm test
-npm run test:coverage
+cd packages/erp-domain
+pnpm test             # npm test equivalent; Jest via jest.config.cjs
+pnpm run test:coverage
 ```
+
+From the **repository root**:
+
+```bash
+pnpm test:erp-domain    # alias: pnpm --filter @valero-neuroerp/erp-domain test
+```
+
+Tests are **`*.spec.ts`** under [`tests/`](tests/); handlers and DI wiring are covered (e.g. [`tests/integration/erp-bootstrap-orders.spec.ts`](tests/integration/erp-bootstrap-orders.spec.ts), `ERP_DOMAIN_SERVICE_TOKENS` in [`src/bootstrap.ts`](src/bootstrap.ts)).
 
 ### Docker
 ```bash

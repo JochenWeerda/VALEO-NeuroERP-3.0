@@ -3,14 +3,19 @@ import { AnfrageService } from '../../application/services/anfrage.service'
 import { CreateAnfrageData } from '../../application/services/anfrage.service'
 import { AnfrageTyp, Prioritaet } from '../../core/entities/anfrage.entity'
 import { clampLimit, clampOffset } from '../types/api-pagination'
-import { resolveActorId } from '../utils/request-context'
+import {
+  resolveActorId,
+  resolveTenantId,
+  respondControllerError,
+  respondDomainMutationError,
+} from '../utils/request-context'
 
 export class AnfrageController {
   constructor(private anfrageService: AnfrageService) {}
 
   async createAnfrage(req: Request, res: Response): Promise<void> {
     try {
-      const tenantId = req.headers['x-tenant-id'] as string
+      const tenantId = resolveTenantId(req)
       const auditActorId = resolveActorId(req)
 
       const data: CreateAnfrageData = {
@@ -37,21 +42,14 @@ export class AnfrageController {
       })
     } catch (error) {
       console.error('Fehler beim Erstellen der Anfrage:', error)
-      const status =
-        error && typeof error === 'object' && 'statusCode' in error
-          ? Number((error as { statusCode?: number }).statusCode) || 400
-          : 400
-      res.status(status).json({
-        success: false,
-        error: error instanceof Error ? error.message : 'Unbekannter Fehler'
-      })
+      respondControllerError(res, error, 400)
     }
   }
 
   async getAnfrage(req: Request, res: Response): Promise<void> {
     try {
       const { id } = req.params
-      const tenantId = req.headers['x-tenant-id'] as string
+      const tenantId = resolveTenantId(req)
 
       const anfrage = await this.anfrageService.getAnfrageById(id as string, tenantId)
 
@@ -69,16 +67,13 @@ export class AnfrageController {
       })
     } catch (error) {
       console.error('Fehler beim Laden der Anfrage:', error)
-      res.status(500).json({
-        success: false,
-        error: 'Interner Serverfehler'
-      })
+      respondControllerError(res, error, 500)
     }
   }
 
   async getAnfragen(req: Request, res: Response): Promise<void> {
     try {
-      const tenantId = req.headers['x-tenant-id'] as string
+      const tenantId = resolveTenantId(req)
       const options = {
         status: req.query.status as any,
         prioritaet: req.query.prioritaet as any,
@@ -98,17 +93,14 @@ export class AnfrageController {
       })
     } catch (error) {
       console.error('Fehler beim Laden der Anfragen:', error)
-      res.status(500).json({
-        success: false,
-        error: 'Interner Serverfehler'
-      })
+      respondControllerError(res, error, 500)
     }
   }
 
   async freigebenAnfrage(req: Request, res: Response): Promise<void> {
     try {
       const { id } = req.params
-      const tenantId = req.headers['x-tenant-id'] as string
+      const tenantId = resolveTenantId(req)
       const actorId = resolveActorId(req)
 
       const anfrage = await this.anfrageService.freigebenAnfrage(id as string, tenantId, actorId)
@@ -119,17 +111,14 @@ export class AnfrageController {
       })
     } catch (error) {
       console.error('Fehler beim Freigeben der Anfrage:', error)
-      res.status(error instanceof Error && error.message.includes('nicht gefunden') ? 404 : 400).json({
-        success: false,
-        error: error instanceof Error ? error.message : 'Unbekannter Fehler'
-      })
+      respondDomainMutationError(res, error)
     }
   }
 
   async updateAnfrage(req: Request, res: Response): Promise<void> {
     try {
       const { id } = req.params
-      const tenantId = req.headers['x-tenant-id'] as string
+      const tenantId = resolveTenantId(req)
       const actorId = resolveActorId(req)
 
       const anfrage = await this.anfrageService.updateAnfrage(id as string, tenantId, req.body, actorId)
@@ -140,17 +129,14 @@ export class AnfrageController {
       })
     } catch (error) {
       console.error('Fehler beim Aktualisieren der Anfrage:', error)
-      res.status(error instanceof Error && error.message.includes('nicht gefunden') ? 404 : 400).json({
-        success: false,
-        error: error instanceof Error ? error.message : 'Unbekannter Fehler'
-      })
+      respondDomainMutationError(res, error)
     }
   }
 
   async deleteAnfrage(req: Request, res: Response): Promise<void> {
     try {
       const { id } = req.params
-      const tenantId = req.headers['x-tenant-id'] as string
+      const tenantId = resolveTenantId(req)
       const actorId = resolveActorId(req)
 
       await this.anfrageService.deleteAnfrage(id as string, tenantId, actorId)
@@ -161,16 +147,13 @@ export class AnfrageController {
       })
     } catch (error) {
       console.error('Fehler beim Löschen der Anfrage:', error)
-      res.status(error instanceof Error && error.message.includes('nicht gefunden') ? 404 : 400).json({
-        success: false,
-        error: error instanceof Error ? error.message : 'Unbekannter Fehler'
-      })
+      respondDomainMutationError(res, error)
     }
   }
 
   async getUeberfaelligeAnfragen(req: Request, res: Response): Promise<void> {
     try {
-      const tenantId = req.headers['x-tenant-id'] as string
+      const tenantId = resolveTenantId(req)
 
       const anfragen = await this.anfrageService.getUeberfaelligeAnfragen(tenantId)
 
@@ -180,16 +163,13 @@ export class AnfrageController {
       })
     } catch (error) {
       console.error('Fehler beim Laden überfälliger Anfragen:', error)
-      res.status(500).json({
-        success: false,
-        error: 'Interner Serverfehler'
-      })
+      respondControllerError(res, error, 500)
     }
   }
 
   async getDringendeAnfragen(req: Request, res: Response): Promise<void> {
     try {
-      const tenantId = req.headers['x-tenant-id'] as string
+      const tenantId = resolveTenantId(req)
 
       const anfragen = await this.anfrageService.getDringendeAnfragen(tenantId)
 
@@ -199,10 +179,7 @@ export class AnfrageController {
       })
     } catch (error) {
       console.error('Fehler beim Laden dringender Anfragen:', error)
-      res.status(500).json({
-        success: false,
-        error: 'Interner Serverfehler'
-      })
+      respondControllerError(res, error, 500)
     }
   }
 }

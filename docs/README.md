@@ -31,6 +31,7 @@ Sie richtet sich an:
 
 ## Relevante Doku-Bereiche
 
+- **Auth & Mandant (API/erp-domain):** [AUTH-AND-TENANT-CONCEPT.md](AUTH-AND-TENANT-CONCEPT.md), ADR unter `docs/architecture/`, sowie [ERP: Finanz & Mandant – Multitenancy](erp-finanz-multitenancy.md) (`finanz`-Schema, Migrationen, SQL-Runner). Schnellwege von der Repo-Wurzel: **`pnpm migrate:erp-finanz`**, **`pnpm test:erp-domain`**.
 - `docs/project-context/`: fachlicher und technischer Rahmen
 - `docs/workflows/`: Arbeitsweise fuer Workflow-Zerlegung, Prompting und Struktur (Kernel-Actions/DB: [kernel-action-execution-mutations.md](c:/Users/Jochen/VALEO-NeuroERP-3.0/docs/workflows/kernel-action-execution-mutations.md))
 - `docs/cards/`: Card-Templates und Ablagelogik

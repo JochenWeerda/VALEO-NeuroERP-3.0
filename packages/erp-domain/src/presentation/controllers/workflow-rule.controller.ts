@@ -2,14 +2,14 @@ import { Request, Response } from 'express'
 import { WorkflowRuleService } from '../../application/services/workflow-rule.service'
 import { CreateWorkflowRuleData } from '../../application/services/workflow-rule.service'
 import { clampLimit, clampOffset } from '../types/api-pagination'
-import { resolveActorId } from '../utils/request-context'
+import { resolveActorId, resolveTenantId, respondControllerError, respondDomainMutationError } from '../utils/request-context'
 
 export class WorkflowRuleController {
   constructor(private workflowRuleService: WorkflowRuleService) {}
 
   async createWorkflowRule(req: Request, res: Response): Promise<void> {
     try {
-      const tenantId = req.headers['x-tenant-id'] as string
+      const tenantId = resolveTenantId(req)
       const auditActorId = resolveActorId(req)
 
       const data: CreateWorkflowRuleData = {
@@ -30,17 +30,14 @@ export class WorkflowRuleController {
       })
     } catch (error) {
       console.error('Fehler beim Erstellen der Workflow-Regel:', error)
-      res.status(400).json({
-        success: false,
-        error: error instanceof Error ? error.message : 'Unbekannter Fehler'
-      })
+      respondControllerError(res, error, 400)
     }
   }
 
   async getWorkflowRule(req: Request, res: Response): Promise<void> {
     try {
       const { id } = req.params
-      const tenantId = req.headers['x-tenant-id'] as string
+      const tenantId = resolveTenantId(req)
 
       const rule = await this.workflowRuleService.getWorkflowRuleById(id as string, tenantId)
 
@@ -58,16 +55,13 @@ export class WorkflowRuleController {
       })
     } catch (error) {
       console.error('Fehler beim Laden der Workflow-Regel:', error)
-      res.status(500).json({
-        success: false,
-        error: 'Interner Serverfehler'
-      })
+      respondControllerError(res, error, 500)
     }
   }
 
   async getWorkflowRules(req: Request, res: Response): Promise<void> {
     try {
-      const tenantId = req.headers['x-tenant-id'] as string
+      const tenantId = resolveTenantId(req)
       const options = {
         triggerEntity: req.query.triggerEntity as string,
         triggerAction: req.query.triggerAction as string,
@@ -89,17 +83,14 @@ export class WorkflowRuleController {
       })
     } catch (error) {
       console.error('Fehler beim Laden der Workflow-Regeln:', error)
-      res.status(500).json({
-        success: false,
-        error: 'Interner Serverfehler'
-      })
+      respondControllerError(res, error, 500)
     }
   }
 
   async getMatchingRules(req: Request, res: Response): Promise<void> {
     try {
       const { triggerEntity, triggerAction } = req.params
-      const tenantId = req.headers['x-tenant-id'] as string
+      const tenantId = resolveTenantId(req)
 
       const rules = await this.workflowRuleService.getMatchingRules(triggerEntity as string, triggerAction as string, tenantId)
 
@@ -109,17 +100,14 @@ export class WorkflowRuleController {
       })
     } catch (error) {
       console.error('Fehler beim Laden der passenden Workflow-Regeln:', error)
-      res.status(500).json({
-        success: false,
-        error: 'Interner Serverfehler'
-      })
+      respondControllerError(res, error, 500)
     }
   }
 
   async activateWorkflowRule(req: Request, res: Response): Promise<void> {
     try {
       const { id } = req.params
-      const tenantId = req.headers['x-tenant-id'] as string
+      const tenantId = resolveTenantId(req)
       const actorId = resolveActorId(req)
 
       const rule = await this.workflowRuleService.activateWorkflowRule(id as string, tenantId, actorId)
@@ -130,17 +118,14 @@ export class WorkflowRuleController {
       })
     } catch (error) {
       console.error('Fehler beim Aktivieren der Workflow-Regel:', error)
-      res.status(error instanceof Error && error.message.includes('nicht gefunden') ? 404 : 400).json({
-        success: false,
-        error: error instanceof Error ? error.message : 'Unbekannter Fehler'
-      })
+      respondDomainMutationError(res, error)
     }
   }
 
   async deactivateWorkflowRule(req: Request, res: Response): Promise<void> {
     try {
       const { id } = req.params
-      const tenantId = req.headers['x-tenant-id'] as string
+      const tenantId = resolveTenantId(req)
       const actorId = resolveActorId(req)
 
       const rule = await this.workflowRuleService.deactivateWorkflowRule(id as string, tenantId, actorId)
@@ -151,17 +136,14 @@ export class WorkflowRuleController {
       })
     } catch (error) {
       console.error('Fehler beim Deaktivieren der Workflow-Regel:', error)
-      res.status(error instanceof Error && error.message.includes('nicht gefunden') ? 404 : 400).json({
-        success: false,
-        error: error instanceof Error ? error.message : 'Unbekannter Fehler'
-      })
+      respondDomainMutationError(res, error)
     }
   }
 
   async updateWorkflowRule(req: Request, res: Response): Promise<void> {
     try {
       const { id } = req.params
-      const tenantId = req.headers['x-tenant-id'] as string
+      const tenantId = resolveTenantId(req)
       const actorId = resolveActorId(req)
 
       const rule = await this.workflowRuleService.updateWorkflowRule(id as string, tenantId, req.body, actorId)
@@ -172,17 +154,14 @@ export class WorkflowRuleController {
       })
     } catch (error) {
       console.error('Fehler beim Aktualisieren der Workflow-Regel:', error)
-      res.status(error instanceof Error && error.message.includes('nicht gefunden') ? 404 : 400).json({
-        success: false,
-        error: error instanceof Error ? error.message : 'Unbekannter Fehler'
-      })
+      respondDomainMutationError(res, error)
     }
   }
 
   async deleteWorkflowRule(req: Request, res: Response): Promise<void> {
     try {
       const { id } = req.params
-      const tenantId = req.headers['x-tenant-id'] as string
+      const tenantId = resolveTenantId(req)
       const actorId = resolveActorId(req)
 
       await this.workflowRuleService.deleteWorkflowRule(id as string, tenantId, actorId)
@@ -193,17 +172,14 @@ export class WorkflowRuleController {
       })
     } catch (error) {
       console.error('Fehler beim Löschen der Workflow-Regel:', error)
-      res.status(error instanceof Error && error.message.includes('nicht gefunden') ? 404 : 400).json({
-        success: false,
-        error: error instanceof Error ? error.message : 'Unbekannter Fehler'
-      })
+      respondDomainMutationError(res, error)
     }
   }
 
   async executeWorkflowRules(req: Request, res: Response): Promise<void> {
     try {
       const { triggerEntity, triggerAction } = req.params
-      const tenantId = req.headers['x-tenant-id'] as string
+      const tenantId = resolveTenantId(req)
 
       const result = await this.workflowRuleService.executeWorkflowRules(triggerEntity as string, triggerAction as string, tenantId, req.body)
 
@@ -213,10 +189,7 @@ export class WorkflowRuleController {
       })
     } catch (error) {
       console.error('Fehler beim Ausführen der Workflow-Regeln:', error)
-      res.status(500).json({
-        success: false,
-        error: 'Interner Serverfehler'
-      })
+      respondControllerError(res, error, 500)
     }
   }
 }

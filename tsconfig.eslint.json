@@ -25,6 +25,8 @@
     "specs/**/*.tsx",
     "src/**/*.ts",
     "src/**/*.tsx",
+    "tools/**/*.ts",
+    "tools/**/*.tsx",
     "*.ts",
     "*.tsx"
   ],

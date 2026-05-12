@@ -2,6 +2,8 @@
 
 **Zweck:** Einheitliche Nutzung von Mandant (Tenant) und Benutzer (User) im Frontend und Backend. Alle Masken und APIs sollen Tenant/User aus diesem Konzept beziehen, keine fest codierten IDs.
 
+**Verbindlicher API-Vertrag (Tenant, Subjekt, Fehlercodes):** [ADR: Auth- und Tenant-Kontext](architecture/adr-2026-04-24-auth-tenant-context.md) (**M-01**). Diese Seite ergänzt die ADR um Frontend- und Dependency-Konventionen.
+
 ---
 
 ## 1. Backend
@@ -10,7 +12,7 @@
 
 - **Quelle:** HTTP-Header `X-Tenant-ID` (vom Frontend bei jedem Request gesendet).
 - **Dependency:** `get_tenant_id(x_tenant_id: str | None = Header(default=None, alias="X-Tenant-ID"))` in `app/core/tenant.py`.
-- **Fallback:** `get_current_tenant_id()` (z. B. aus Middleware) oder `settings.DEFAULT_TENANT_ID`.
+- **Fallback:** `get_current_tenant_id()` (z. B. aus Middleware) oder `settings.DEFAULT_TENANT_ID` — nur wo ausdrücklich für **Dev/Staging** konfiguriert. In **Produktion** kein stiller Standard-Mandant auf **schreibenden** Pfaden; bei fehlendem Tenant gilt die ADR (**400** / Gateway, keine stillen `system`-Audits außerhalb definierter Ausnahmen).
 - **Verwendung:** In Endpoints `tenant_id: str = Depends(get_tenant_id)`; alle tenant-sensiblen Abfragen filtern nach dieser ID.
 
 ### 1.2 User (optional im Backend)
@@ -26,7 +28,7 @@
 
 - **Hook:** `useTenant()` aus `@/hooks/useTenant`.
 - **Rückgabe:** `{ tenantId: string, setTenantId: (id: string) => void }`.
-- **Quelle:** `localStorage.getItem('tenant_id')` bzw. `sessionStorage.getItem('tenant_id')`, sonst `VITE_TENANT_ID` oder Fallback-UUID.
+- **Quelle:** `localStorage.getItem('tenant_id')` bzw. `sessionStorage.getItem('tenant_id')`, sonst `VITE_TENANT_ID` oder Fallback-UUID (typisch **lokal/Dev**; produktive Builds müssen einen gültigen Mandanten setzen — siehe ADR M-01).
 - **API-Client:** `apiClient` (axios) setzt in jedem Request automatisch `X-Tenant-ID` aus derselben Quelle (localStorage/sessionStorage/Default). Seiten, die nur API aufrufen, brauchen `useTenant()` nur, wenn sie `tenant_id` in Request-Body oder Query-Parametern mitschicken müssen.
 
 ### 2.2 User (Auth)
@@ -70,7 +72,23 @@
 
 ---
 
-## 5. Zusammenfassung
+## 5. erp-domain (Node / Express)
+
+Für **`packages/erp-domain`** gilt derselbe Vertrag wie in der ADR (M-01), technisch gebündelt in:
+
+| Bestandteil | Pfad |
+|-------------|------|
+| Tenant / Actor / Fehlerbehandlung | `packages/erp-domain/src/presentation/utils/request-context.ts` (`resolveTenantId`, `resolveActorId`, `respondControllerError`, …) |
+| Finanz-Stammdaten-Router | `packages/erp-domain/src/presentation/controllers/finanz*.controller.ts` (nutzen `resolveTenantId` und mandantenbezogene Services) |
+| Listen-/Paging-Hilfen Finanz | `packages/erp-domain/src/presentation/utils/finanz-http.ts` |
+| Datenbank: Mandantenspalte Finanz | Migrationen `migrations/sql/erp/001_finance_core.sql`, `003_finanz_tenant_id.sql` |
+| Lokale Qualität & DB (Repo-Wurzel) | `pnpm test:erp-domain` (Jest `packages/erp-domain`), `pnpm migrate:erp-finanz` (beide Finanz-SQLs); Details [erp-finanz-multitenancy.md](erp-finanz-multitenancy.md) |
+
+**Ausführliche Beschreibung** (Schema `finanz`, `_legacy`, SQL-Runner, Purchase-Order-Tenant): [**ERP: Finanz & Mandant (Multitenancy)**](erp-finanz-multitenancy.md).
+
+---
+
+## 6. Zusammenfassung
 
 | Thema           | Backend                    | Frontend                          |
 |-----------------|----------------------------|------------------------------------|

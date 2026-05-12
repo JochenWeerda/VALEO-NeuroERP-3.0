@@ -1,6 +1,8 @@
 import { Request, Response } from 'express'
 import { inject, injectable } from 'inversify'
 import { PurchaseOrderService } from '../../application/services/purchaseOrder.service'
+import { clampLimit, clampOffset } from '../types/api-pagination'
+import { resolveActorId, resolveTenantId, respondControllerError } from '../utils/request-context'
 
 @injectable()
 export class PurchaseOrderController {
@@ -10,39 +12,36 @@ export class PurchaseOrderController {
 
   list = async (req: Request, res: Response): Promise<void> => {
     try {
-      const { tenantId } = req.user as any // From auth middleware
-      const { status, supplierId, limit = 50, offset = 0 } = req.query
+      const tenantId = resolveTenantId(req)
+      const { status, supplierId } = req.query
+      const limitRaw = req.query.limit !== undefined ? parseInt(String(req.query.limit), 10) : undefined
+      const offsetRaw = req.query.offset !== undefined ? parseInt(String(req.query.offset), 10) : undefined
 
-      const filters: any = {}
-      if (status) filters.status = status
-      if (supplierId) filters.supplierId = supplierId
-      filters.limit = parseInt(limit as string, 10)
-      filters.offset = parseInt(offset as string, 10)
-
-      const orders = await this.service.findByTenant(tenantId, filters)
-      const { limit: flimit, offset: foffset, ...countFilters } = filters
-      const total = await this.service.countByTenant(tenantId, countFilters)
+      const { items, total } = await this.service.getPurchaseOrdersByTenant(tenantId, {
+        status: status as string | undefined,
+        supplierId: supplierId as string | undefined,
+        limit: limitRaw,
+        offset: offsetRaw,
+      })
+      const limit = clampLimit(limitRaw)
+      const offset = clampOffset(offsetRaw)
 
       res.json({
         success: true,
-        data: orders,
-        total,
-        limit: flimit,
-        offset: foffset
+        data: items,
+        pagination: { total, limit, offset },
       })
     } catch (error) {
       console.error('Error listing purchase orders:', error)
-      res.status(500).json({
-        success: false,
-        error: 'Failed to list purchase orders'
-      })
+      respondControllerError(res, error, 500)
     }
   }
 
   getById = async (req: Request, res: Response): Promise<void> => {
     try {
       const { id } = req.params
-      const order = await this.service.findById(id as string)
+      const tenantId = resolveTenantId(req)
+      const order = await this.service.findById(id as string, tenantId)
 
       if (!order) {
         res.status(404).json({
@@ -58,16 +57,14 @@ export class PurchaseOrderController {
       })
     } catch (error) {
       console.error('Error getting purchase order:', error)
-      res.status(500).json({
-        success: false,
-        error: 'Failed to get purchase order'
-      })
+      respondControllerError(res, error, 500)
     }
   }
 
   create = async (req: Request, res: Response): Promise<void> => {
     try {
-      const { tenantId, id: actorId } = req.user as any
+      const tenantId = resolveTenantId(req)
+      const actorId = resolveActorId(req)
       const orderData = req.body
 
       const order = await this.service.create(tenantId, orderData, actorId)
@@ -78,20 +75,18 @@ export class PurchaseOrderController {
       })
     } catch (error) {
       console.error('Error creating purchase order:', error)
-      res.status(400).json({
-        success: false,
-        error: error instanceof Error ? error.message : 'Failed to create purchase order'
-      })
+      respondControllerError(res, error, 400)
     }
   }
 
   update = async (req: Request, res: Response): Promise<void> => {
     try {
+      const tenantId = resolveTenantId(req)
       const { id } = req.params
       const { version, ...orderData } = req.body
-      const { id: actorId } = req.user as any
+      const actorId = resolveActorId(req)
 
-      const order = await this.service.update(id as string, orderData, version, actorId)
+      const order = await this.service.update(tenantId, id as string, orderData, version, actorId)
 
       res.json({
         success: true,
@@ -99,19 +94,17 @@ export class PurchaseOrderController {
       })
     } catch (error) {
       console.error('Error updating purchase order:', error)
-      res.status(400).json({
-        success: false,
-        error: error instanceof Error ? error.message : 'Failed to update purchase order'
-      })
+      respondControllerError(res, error, 400)
     }
   }
 
   submit = async (req: Request, res: Response): Promise<void> => {
     try {
       const { id } = req.params
-      const { id: actorId } = req.user as any
+      const tenantId = resolveTenantId(req)
+      const actorId = resolveActorId(req)
 
-      const order = await this.service.submit(id as string, actorId)
+      const order = await this.service.submit(id as string, tenantId, actorId)
 
       res.json({
         success: true,
@@ -119,19 +112,17 @@ export class PurchaseOrderController {
       })
     } catch (error) {
       console.error('Error submitting purchase order:', error)
-      res.status(400).json({
-        success: false,
-        error: error instanceof Error ? error.message : 'Failed to submit purchase order'
-      })
+      respondControllerError(res, error, 400)
     }
   }
 
   cancel = async (req: Request, res: Response): Promise<void> => {
     try {
       const { id } = req.params
-      const { id: actorId } = req.user as any
+      const tenantId = resolveTenantId(req)
+      const actorId = resolveActorId(req)
 
-      const order = await this.service.cancel(id as string, actorId)
+      const order = await this.service.cancel(id as string, tenantId, actorId)
 
       res.json({
         success: true,
@@ -139,27 +130,22 @@ export class PurchaseOrderController {
       })
     } catch (error) {
       console.error('Error cancelling purchase order:', error)
-      res.status(400).json({
-        success: false,
-        error: error instanceof Error ? error.message : 'Failed to cancel purchase order'
-      })
+      respondControllerError(res, error, 400)
     }
   }
 
   delete = async (req: Request, res: Response): Promise<void> => {
     try {
+      const tenantId = resolveTenantId(req)
       const { id } = req.params
-      await (this.service as any).delete(id as string)
+      await this.service.delete(tenantId, id as string)
 
       res.json({
         success: true
       })
     } catch (error) {
       console.error('Error deleting purchase order:', error)
-      res.status(500).json({
-        success: false,
-        error: 'Failed to delete purchase order'
-      })
+      respondControllerError(res, error, 404)
     }
   }
 }

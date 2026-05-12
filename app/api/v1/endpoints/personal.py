@@ -5,7 +5,7 @@ from __future__ import annotations
 import json
 from datetime import date, datetime, time
 from typing import Any
-from uuid import UUID, uuid4
+from uuid import uuid4
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel, Field
@@ -294,6 +294,50 @@ class FieldServicePlanOut(BaseModel):
     status: str
     conflicts: list[FieldServiceConflictOut] = Field(default_factory=list)
     notes: str | None = None
+
+
+class PlanningPreferenceOut(BaseModel):
+    employeeRef: str
+    prefersNightTours: bool = False
+    avoidNightTours: bool = False
+    childcareSensitive: bool = False
+    preferredWeekdays: list[str] = Field(default_factory=list)
+    schoolHolidayRegions: list[str] = Field(default_factory=list)
+    bridgeDayPolicy: str = "normal"
+    maxExtraHoursBeforeHoliday: float = 2.0
+
+
+class WorkPlanFindingOut(BaseModel):
+    code: str
+    severity: str
+    message: str
+    employeeRef: str | None = None
+    datum: str | None = None
+    sourceRef: str | None = None
+
+
+class WorkPlanAssignmentOut(BaseModel):
+    id: str
+    datum: str
+    employeeRef: str
+    label: str
+    sourceType: str
+    startTime: str | None = None
+    endTime: str | None = None
+    status: str
+    printReady: bool
+    findings: list[WorkPlanFindingOut] = Field(default_factory=list)
+
+
+class WorkPlanOut(BaseModel):
+    periodFrom: str
+    periodTo: str
+    source: str
+    preferences: list[PlanningPreferenceOut] = Field(default_factory=list)
+    assignments: list[WorkPlanAssignmentOut] = Field(default_factory=list)
+    findings: list[WorkPlanFindingOut] = Field(default_factory=list)
+    printTitle: str
+    generatedAt: str
 
 
 class TourIn(BaseModel):
@@ -880,6 +924,137 @@ def _field_service_from_row(row: Any) -> FieldServicePlanOut:
         conflicts=[_field_conflict_from_item(item) for item in _parse_json_list(row_map.get("conflicts"))],
         notes=str(row_map.get("notes") or "") or None,
     )
+
+
+def _parse_date_set(raw: str | None) -> set[date]:
+    if not raw:
+        return set()
+    dates: set[date] = set()
+    for item in raw.split(","):
+        value = item.strip()
+        if value:
+            dates.add(_parse_entry_date(value))
+    return dates
+
+
+def _is_night_window(start_value: Any, end_value: Any) -> bool:
+    start_minutes = _parse_clock_minutes(start_value)
+    end_minutes = _parse_clock_minutes(end_value)
+    if start_minutes is None or end_minutes is None:
+        return False
+    return start_minutes < 6 * _MINUTES_PER_HOUR or end_minutes > 22 * _MINUTES_PER_HOUR or end_minutes <= start_minutes
+
+
+def _planning_preference_from_profile(row: Any, user_preferences: dict[str, Any] | None = None) -> PlanningPreferenceOut:
+    row_map = dict(row)
+    prefs = _parse_preferences(user_preferences or row_map.get("preferences"))
+    planning = _parse_preferences(prefs.get("planning") or prefs.get("hr_time_planning"))
+    employee_ref = str(row_map.get("employee_ref") or row_map.get("id") or "")
+    time_model = str(row_map.get("time_model") or "")
+    role_code = str(row_map.get("role_code") or "")
+    default_night = time_model == "driver" or "fahrer" in role_code.lower() or "driver" in role_code.lower()
+    return PlanningPreferenceOut(
+        employeeRef=employee_ref,
+        prefersNightTours=bool(planning.get("prefers_night_tours", planning.get("prefersNightTours", False))),
+        avoidNightTours=bool(planning.get("avoid_night_tours", planning.get("avoidNightTours", False))),
+        childcareSensitive=bool(planning.get("childcare_sensitive", planning.get("childcareSensitive", False))),
+        preferredWeekdays=_parse_json_string_list(planning.get("preferred_weekdays", planning.get("preferredWeekdays"))),
+        schoolHolidayRegions=_parse_json_string_list(planning.get("school_holiday_regions", planning.get("schoolHolidayRegions"))),
+        bridgeDayPolicy=str(planning.get("bridge_day_policy") or planning.get("bridgeDayPolicy") or ("preload" if default_night else "normal")),
+        maxExtraHoursBeforeHoliday=float(planning.get("max_extra_hours_before_holiday") or planning.get("maxExtraHoursBeforeHoliday") or 2.0),
+    )
+
+
+def _work_plan_findings_for_assignment(
+    assignment: WorkPlanAssignmentOut,
+    preference: PlanningPreferenceOut | None,
+    absence_dates_by_employee: dict[str, set[date]],
+    school_holiday_dates: set[date],
+    bridge_days: set[date],
+    holiday_dates: set[date],
+) -> list[WorkPlanFindingOut]:
+    findings: list[WorkPlanFindingOut] = []
+    assignment_date = _parse_entry_date(assignment.datum)
+    employee_ref = assignment.employeeRef
+    if employee_ref and assignment_date in absence_dates_by_employee.get(employee_ref, set()) and assignment.sourceType != "absence":
+        findings.append(
+            WorkPlanFindingOut(
+                code="ABSENCE_COLLISION",
+                severity="blocker",
+                message="Einsatz kollidiert mit genehmigter Abwesenheit.",
+                employeeRef=employee_ref,
+                datum=assignment.datum,
+                sourceRef=assignment.id,
+            )
+        )
+    if preference:
+        is_night = _is_night_window(assignment.startTime, assignment.endTime)
+        weekday = assignment_date.strftime("%a").lower()
+        if is_night and preference.avoidNightTours:
+            findings.append(
+                WorkPlanFindingOut(
+                    code="NIGHT_TOUR_AVOIDED",
+                    severity="warning",
+                    message="Persoenliche Praeferenz vermeidet Nachttouren.",
+                    employeeRef=employee_ref,
+                    datum=assignment.datum,
+                    sourceRef=assignment.id,
+                )
+            )
+        if preference.prefersNightTours and not is_night and assignment.sourceType in {"shift", "field_service"}:
+            findings.append(
+                WorkPlanFindingOut(
+                    code="NIGHT_TOUR_PREFERENCE_MISSED",
+                    severity="info",
+                    message="Mitarbeiter bevorzugt Nachttouren; aktueller Einsatz ist tagsueber.",
+                    employeeRef=employee_ref,
+                    datum=assignment.datum,
+                    sourceRef=assignment.id,
+                )
+            )
+        if preference.preferredWeekdays and weekday not in {item[:3].lower() for item in preference.preferredWeekdays}:
+            findings.append(
+                WorkPlanFindingOut(
+                    code="WEEKDAY_PREFERENCE_MISMATCH",
+                    severity="warning",
+                    message="Einsatz liegt ausserhalb der bevorzugten Wochentage.",
+                    employeeRef=employee_ref,
+                    datum=assignment.datum,
+                    sourceRef=assignment.id,
+                )
+            )
+        if preference.childcareSensitive and assignment_date in school_holiday_dates:
+            findings.append(
+                WorkPlanFindingOut(
+                    code="SCHOOL_HOLIDAY_SENSITIVITY",
+                    severity="warning",
+                    message="Schulferien treffen Mitarbeiter mit Betreuungsrelevanz.",
+                    employeeRef=employee_ref,
+                    datum=assignment.datum,
+                    sourceRef=assignment.id,
+                )
+            )
+        next_day = date.fromordinal(assignment_date.toordinal() + 1)
+        if preference.bridgeDayPolicy == "preload" and (next_day in bridge_days or next_day in holiday_dates):
+            findings.append(
+                WorkPlanFindingOut(
+                    code="PRE_HOLIDAY_LOAD",
+                    severity="info",
+                    message="Mehrarbeit vor Bruecken-/Feiertag ist als Praeferenz/Planungsdruck markiert.",
+                    employeeRef=employee_ref,
+                    datum=assignment.datum,
+                    sourceRef=assignment.id,
+                )
+            )
+    return findings
+
+
+def _assignment_status(findings: list[WorkPlanFindingOut], fallback: str) -> str:
+    if any(finding.severity == "blocker" for finding in findings):
+        return "blocked"
+    if any(finding.severity == "warning" for finding in findings):
+        return "warning"
+    return fallback
 
 
 def _build_shift_conflicts(
@@ -2522,6 +2697,212 @@ async def create_field_service_plan(
     ).mappings().first()
     db.commit()
     return _field_service_from_row(row)
+
+
+@router.get("/work-plan", response_model=WorkPlanOut)
+async def get_work_plan(
+    period_from: str = Query(...),
+    period_to: str = Query(...),
+    holiday_dates: str | None = Query(default=None),
+    bridge_days: str | None = Query(default=None),
+    school_holiday_dates: str | None = Query(default=None),
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+):
+    start_date = _parse_entry_date(period_from)
+    end_date = _parse_entry_date(period_to)
+    if end_date < start_date:
+        raise HTTPException(status_code=400, detail="period_to must be on or after period_from")
+
+    params = {"tenant_id": tenant_id, "period_from": start_date, "period_to": end_date}
+    profile_rows = db.execute(
+        text(
+            """
+            SELECT employee_ref, display_name, role_code, time_model, status, qualifications
+            FROM domain_hr.employee_time_profiles
+            WHERE tenant_id = :tenant_id AND status = 'active'
+            """
+        ),
+        {"tenant_id": tenant_id},
+    ).mappings().all()
+    try:
+        user_rows = db.execute(
+            text(
+                """
+                SELECT id, preferences
+                FROM domain_shared.users
+                WHERE tenant_id = :tenant_id
+                """
+            ),
+            {"tenant_id": tenant_id},
+        ).mappings().all()
+    except Exception:
+        user_rows = []
+    preferences_by_ref = {str(dict(row).get("id") or ""): _parse_preferences(dict(row).get("preferences")) for row in user_rows}
+    preferences = [
+        _planning_preference_from_profile(row, preferences_by_ref.get(str(dict(row).get("employee_ref") or "")))
+        for row in profile_rows
+    ]
+    preference_by_ref = {preference.employeeRef: preference for preference in preferences}
+
+    absence_rows = db.execute(
+        text(
+            """
+            SELECT id, employee_ref, entry_date, entry_type, status
+            FROM domain_hr.time_entries
+            WHERE tenant_id = :tenant_id
+              AND entry_date BETWEEN :period_from AND :period_to
+              AND entry_type IN ('Urlaub', 'Krank', 'Unbezahlt', 'Sonstiges')
+              AND status IN ('Approved', 'Genehmigt')
+            ORDER BY entry_date ASC, employee_ref ASC
+            """
+        ),
+        params,
+    ).mappings().all()
+    shift_rows = db.execute(
+        text(
+            """
+            SELECT id, shift_date, name, starts_at, ends_at, assigned_employee_refs, status
+            FROM domain_hr.shifts
+            WHERE tenant_id = :tenant_id AND shift_date BETWEEN :period_from AND :period_to
+            ORDER BY shift_date ASC, starts_at ASC
+            """
+        ),
+        params,
+    ).mappings().all()
+    calendar_rows = db.execute(
+        text(
+            """
+            SELECT id, employee_ref, event_type, title, starts_at, ends_at, status, conflict_level
+            FROM domain_hr.calendar_events
+            WHERE tenant_id = :tenant_id
+              AND starts_at::date <= :period_to
+              AND ends_at::date >= :period_from
+            ORDER BY starts_at ASC, employee_ref ASC
+            """
+        ),
+        params,
+    ).mappings().all()
+    field_rows = db.execute(
+        text(
+            """
+            SELECT id, employee_ref, customer_ref, visit_type, starts_at, ends_at, status
+            FROM domain_hr.field_service_plans
+            WHERE tenant_id = :tenant_id
+              AND starts_at::date <= :period_to
+              AND ends_at::date >= :period_from
+            ORDER BY starts_at ASC, employee_ref ASC
+            """
+        ),
+        params,
+    ).mappings().all()
+
+    absence_dates_by_employee: dict[str, set[date]] = {}
+    assignments: list[WorkPlanAssignmentOut] = []
+    for row in absence_rows:
+        row_map = dict(row)
+        employee_ref = str(row_map.get("employee_ref") or "")
+        entry_date = row_map.get("entry_date")
+        target_date = entry_date if isinstance(entry_date, date) else _parse_entry_date(str(entry_date))
+        absence_dates_by_employee.setdefault(employee_ref, set()).add(target_date)
+        assignments.append(
+            WorkPlanAssignmentOut(
+                id=str(row_map.get("id") or ""),
+                datum=_to_iso(target_date),
+                employeeRef=employee_ref,
+                label=str(row_map.get("entry_type") or "Abwesenheit"),
+                sourceType="absence",
+                status=str(row_map.get("status") or "Approved"),
+                printReady=True,
+            )
+        )
+
+    for row in shift_rows:
+        row_map = dict(row)
+        for employee_ref in _parse_json_string_list(row_map.get("assigned_employee_refs")):
+            assignments.append(
+                WorkPlanAssignmentOut(
+                    id=str(row_map.get("id") or ""),
+                    datum=_to_iso(row_map.get("shift_date")),
+                    employeeRef=employee_ref,
+                    label=str(row_map.get("name") or "Schicht"),
+                    sourceType="shift",
+                    startTime=_to_time_text(row_map.get("starts_at")),
+                    endTime=_to_time_text(row_map.get("ends_at")),
+                    status=str(row_map.get("status") or "planned"),
+                    printReady=str(row_map.get("status") or "planned") != "blocked",
+                )
+            )
+
+    for row in calendar_rows:
+        row_map = dict(row)
+        employee_ref = str(row_map.get("employee_ref") or "")
+        if not employee_ref:
+            continue
+        assignments.append(
+            WorkPlanAssignmentOut(
+                id=str(row_map.get("id") or ""),
+                datum=_to_iso(row_map.get("starts_at")),
+                employeeRef=employee_ref,
+                label=str(row_map.get("title") or row_map.get("event_type") or "Kalender"),
+                sourceType="calendar",
+                startTime=_to_time_text(row_map.get("starts_at")),
+                endTime=_to_time_text(row_map.get("ends_at")),
+                status=str(row_map.get("conflict_level") or row_map.get("status") or "confirmed"),
+                printReady=str(row_map.get("conflict_level") or "none") != "blocker",
+            )
+        )
+
+    for row in field_rows:
+        row_map = dict(row)
+        assignments.append(
+            WorkPlanAssignmentOut(
+                id=str(row_map.get("id") or ""),
+                datum=_to_iso(row_map.get("starts_at")),
+                employeeRef=str(row_map.get("employee_ref") or ""),
+                label=f"{row_map.get('visit_type') or 'Aussendienst'}: {row_map.get('customer_ref') or ''}".strip(),
+                sourceType="field_service",
+                startTime=_to_time_text(row_map.get("starts_at")),
+                endTime=_to_time_text(row_map.get("ends_at")),
+                status=str(row_map.get("status") or "planned"),
+                printReady=str(row_map.get("status") or "planned") != "blocked",
+            )
+        )
+
+    holidays = _parse_date_set(holiday_dates)
+    bridges = _parse_date_set(bridge_days)
+    school_holidays = _parse_date_set(school_holiday_dates)
+    decorated: list[WorkPlanAssignmentOut] = []
+    for assignment in assignments:
+        findings = _work_plan_findings_for_assignment(
+            assignment,
+            preference_by_ref.get(assignment.employeeRef),
+            absence_dates_by_employee,
+            school_holidays,
+            bridges,
+            holidays,
+        )
+        decorated.append(
+            assignment.model_copy(
+                update={
+                    "findings": findings,
+                    "status": _assignment_status(findings, assignment.status),
+                    "printReady": assignment.printReady and not any(finding.severity == "blocker" for finding in findings),
+                }
+            )
+        )
+
+    all_findings = [finding for assignment in decorated for finding in assignment.findings]
+    return WorkPlanOut(
+        periodFrom=start_date.isoformat(),
+        periodTo=end_date.isoformat(),
+        source="database",
+        preferences=preferences,
+        assignments=sorted(decorated, key=lambda item: (item.datum, item.employeeRef, item.startTime or "")),
+        findings=all_findings,
+        printTitle=f"Arbeitsplan {start_date.isoformat()} bis {end_date.isoformat()}",
+        generatedAt=datetime.utcnow().isoformat(),
+    )
 
 
 @router.get("/driver-time/summary", response_model=DriverTimeSummaryOut)

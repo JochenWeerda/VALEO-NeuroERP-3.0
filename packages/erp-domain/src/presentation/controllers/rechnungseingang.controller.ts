@@ -3,14 +3,14 @@ import { RechnungseingangService } from '../../application/services/rechnungsein
 import { CreateRechnungseingangData } from '../../application/services/rechnungseingang.service'
 import { RechnungseingangStatus } from '../../core/entities/rechnungseingang.entity'
 import { clampLimit, clampOffset } from '../types/api-pagination'
-import { resolveActorId } from '../utils/request-context'
+import { resolveActorId, resolveTenantId, respondControllerError, respondDomainMutationError } from '../utils/request-context'
 
 export class RechnungseingangController {
   constructor(private rechnungseingangService: RechnungseingangService) {}
 
   async createRechnungseingang(req: Request, res: Response): Promise<void> {
     try {
-      const tenantId = req.headers['x-tenant-id'] as string
+      const tenantId = resolveTenantId(req)
       const auditActorId = resolveActorId(req)
 
       const data: CreateRechnungseingangData = {
@@ -39,17 +39,14 @@ export class RechnungseingangController {
       })
     } catch (error) {
       console.error('Fehler beim Erstellen des Rechnungseingangs:', error)
-      res.status(400).json({
-        success: false,
-        error: error instanceof Error ? error.message : 'Unbekannter Fehler'
-      })
+      respondControllerError(res, error, 400)
     }
   }
 
   async getRechnungseingang(req: Request, res: Response): Promise<void> {
     try {
       const { id } = req.params
-      const tenantId = req.headers['x-tenant-id'] as string
+      const tenantId = resolveTenantId(req)
 
       const rechnung = await this.rechnungseingangService.getRechnungseingangById(id as string, tenantId)
 
@@ -67,16 +64,13 @@ export class RechnungseingangController {
       })
     } catch (error) {
       console.error('Fehler beim Laden des Rechnungseingangs:', error)
-      res.status(500).json({
-        success: false,
-        error: 'Interner Serverfehler'
-      })
+      respondControllerError(res, error, 500)
     }
   }
 
   async getRechnungseingaenge(req: Request, res: Response): Promise<void> {
     try {
-      const tenantId = req.headers['x-tenant-id'] as string
+      const tenantId = resolveTenantId(req)
       const options = {
         status: req.query.status as any,
         lieferantId: req.query.lieferantId as string,
@@ -97,17 +91,14 @@ export class RechnungseingangController {
       })
     } catch (error) {
       console.error('Fehler beim Laden der Rechnungseingänge:', error)
-      res.status(500).json({
-        success: false,
-        error: 'Interner Serverfehler'
-      })
+      respondControllerError(res, error, 500)
     }
   }
 
   async getRechnungseingaengeByBestellung(req: Request, res: Response): Promise<void> {
     try {
       const { bestellungId } = req.params
-      const tenantId = req.headers['x-tenant-id'] as string
+      const tenantId = resolveTenantId(req)
 
       const rechnungen = await this.rechnungseingangService.getRechnungseingaengeByBestellung(bestellungId as string, tenantId)
 
@@ -117,17 +108,14 @@ export class RechnungseingangController {
       })
     } catch (error) {
       console.error('Fehler beim Laden der Rechnungseingänge zur Bestellung:', error)
-      res.status(500).json({
-        success: false,
-        error: 'Interner Serverfehler'
-      })
+      respondControllerError(res, error, 500)
     }
   }
 
   async getRechnungseingaengeByWareneingang(req: Request, res: Response): Promise<void> {
     try {
       const { wareneingangId } = req.params
-      const tenantId = req.headers['x-tenant-id'] as string
+      const tenantId = resolveTenantId(req)
 
       const rechnungen = await this.rechnungseingangService.getRechnungseingaengeByWareneingang(wareneingangId as string, tenantId)
 
@@ -137,17 +125,14 @@ export class RechnungseingangController {
       })
     } catch (error) {
       console.error('Fehler beim Laden der Rechnungseingänge zum Wareneingang:', error)
-      res.status(500).json({
-        success: false,
-        error: 'Interner Serverfehler'
-      })
+      respondControllerError(res, error, 500)
     }
   }
 
   async pruefenRechnungseingang(req: Request, res: Response): Promise<void> {
     try {
       const { id } = req.params
-      const tenantId = req.headers['x-tenant-id'] as string
+      const tenantId = resolveTenantId(req)
       const actorId = resolveActorId(req)
 
       const rechnung = await this.rechnungseingangService.pruefenRechnungseingang(id as string, tenantId, actorId)
@@ -158,17 +143,14 @@ export class RechnungseingangController {
       })
     } catch (error) {
       console.error('Fehler beim Prüfen des Rechnungseingangs:', error)
-      res.status(error instanceof Error && error.message.includes('nicht gefunden') ? 404 : 400).json({
-        success: false,
-        error: error instanceof Error ? error.message : 'Unbekannter Fehler'
-      })
+      respondDomainMutationError(res, error)
     }
   }
 
   async freigebenRechnungseingang(req: Request, res: Response): Promise<void> {
     try {
       const { id } = req.params
-      const tenantId = req.headers['x-tenant-id'] as string
+      const tenantId = resolveTenantId(req)
       const actorId = resolveActorId(req)
 
       const rechnung = await this.rechnungseingangService.freigebenRechnungseingang(id as string, tenantId, actorId)
@@ -179,17 +161,14 @@ export class RechnungseingangController {
       })
     } catch (error) {
       console.error('Fehler beim Freigeben des Rechnungseingangs:', error)
-      res.status(error instanceof Error && error.message.includes('nicht gefunden') ? 404 : 400).json({
-        success: false,
-        error: error instanceof Error ? error.message : 'Unbekannter Fehler'
-      })
+      respondDomainMutationError(res, error)
     }
   }
 
   async verbuchenRechnungseingang(req: Request, res: Response): Promise<void> {
     try {
       const { id } = req.params
-      const tenantId = req.headers['x-tenant-id'] as string
+      const tenantId = resolveTenantId(req)
       const actorId = resolveActorId(req)
 
       const rechnung = await this.rechnungseingangService.verbuchenRechnungseingang(id as string, tenantId, actorId)
@@ -200,17 +179,14 @@ export class RechnungseingangController {
       })
     } catch (error) {
       console.error('Fehler beim Verbuchen des Rechnungseingangs:', error)
-      res.status(error instanceof Error && error.message.includes('nicht gefunden') ? 404 : 400).json({
-        success: false,
-        error: error instanceof Error ? error.message : 'Unbekannter Fehler'
-      })
+      respondDomainMutationError(res, error)
     }
   }
 
   async bezahlenRechnungseingang(req: Request, res: Response): Promise<void> {
     try {
       const { id } = req.params
-      const tenantId = req.headers['x-tenant-id'] as string
+      const tenantId = resolveTenantId(req)
       const actorId = resolveActorId(req)
 
       const rechnung = await this.rechnungseingangService.bezahlenRechnungseingang(id as string, tenantId, actorId)
@@ -221,17 +197,14 @@ export class RechnungseingangController {
       })
     } catch (error) {
       console.error('Fehler beim Bezahlen des Rechnungseingangs:', error)
-      res.status(error instanceof Error && error.message.includes('nicht gefunden') ? 404 : 400).json({
-        success: false,
-        error: error instanceof Error ? error.message : 'Unbekannter Fehler'
-      })
+      respondDomainMutationError(res, error)
     }
   }
 
   async updateRechnungseingang(req: Request, res: Response): Promise<void> {
     try {
       const { id } = req.params
-      const tenantId = req.headers['x-tenant-id'] as string
+      const tenantId = resolveTenantId(req)
       const actorId = resolveActorId(req)
 
       const rechnung = await this.rechnungseingangService.updateRechnungseingang(id as string, tenantId, req.body, actorId)
@@ -242,17 +215,14 @@ export class RechnungseingangController {
       })
     } catch (error) {
       console.error('Fehler beim Aktualisieren des Rechnungseingangs:', error)
-      res.status(error instanceof Error && error.message.includes('nicht gefunden') ? 404 : 400).json({
-        success: false,
-        error: error instanceof Error ? error.message : 'Unbekannter Fehler'
-      })
+      respondDomainMutationError(res, error)
     }
   }
 
   async deleteRechnungseingang(req: Request, res: Response): Promise<void> {
     try {
       const { id } = req.params
-      const tenantId = req.headers['x-tenant-id'] as string
+      const tenantId = resolveTenantId(req)
       const actorId = resolveActorId(req)
 
       await this.rechnungseingangService.deleteRechnungseingang(id as string, tenantId, actorId)
@@ -263,16 +233,13 @@ export class RechnungseingangController {
       })
     } catch (error) {
       console.error('Fehler beim Löschen des Rechnungseingangs:', error)
-      res.status(error instanceof Error && error.message.includes('nicht gefunden') ? 404 : 400).json({
-        success: false,
-        error: error instanceof Error ? error.message : 'Unbekannter Fehler'
-      })
+      respondDomainMutationError(res, error)
     }
   }
 
   async getUeberfaelligeRechnungseingaenge(req: Request, res: Response): Promise<void> {
     try {
-      const tenantId = req.headers['x-tenant-id'] as string
+      const tenantId = resolveTenantId(req)
 
       const rechnungen = await this.rechnungseingangService.getUeberfaelligeRechnungseingaenge(tenantId)
 
@@ -282,16 +249,13 @@ export class RechnungseingangController {
       })
     } catch (error) {
       console.error('Fehler beim Laden überfälliger Rechnungseingänge:', error)
-      res.status(500).json({
-        success: false,
-        error: 'Interner Serverfehler'
-      })
+      respondControllerError(res, error, 500)
     }
   }
 
   async getRechnungseingaengeMitAbweichungen(req: Request, res: Response): Promise<void> {
     try {
-      const tenantId = req.headers['x-tenant-id'] as string
+      const tenantId = resolveTenantId(req)
 
       const rechnungen = await this.rechnungseingangService.getRechnungseingaengeMitAbweichungen(tenantId)
 
@@ -301,16 +265,13 @@ export class RechnungseingangController {
       })
     } catch (error) {
       console.error('Fehler beim Laden der Rechnungseingänge mit Abweichungen:', error)
-      res.status(500).json({
-        success: false,
-        error: 'Interner Serverfehler'
-      })
+      respondControllerError(res, error, 500)
     }
   }
 
   async getGesamtOffenerBetrag(req: Request, res: Response): Promise<void> {
     try {
-      const tenantId = req.headers['x-tenant-id'] as string
+      const tenantId = resolveTenantId(req)
 
       const betrag = await this.rechnungseingangService.getGesamtOffenerBetrag(tenantId)
 
@@ -320,10 +281,7 @@ export class RechnungseingangController {
       })
     } catch (error) {
       console.error('Fehler beim Laden des Gesamtbetrags offener Rechnungen:', error)
-      res.status(500).json({
-        success: false,
-        error: 'Interner Serverfehler'
-      })
+      respondControllerError(res, error, 500)
     }
   }
 }

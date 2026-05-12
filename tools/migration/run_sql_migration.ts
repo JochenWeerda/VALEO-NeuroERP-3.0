@@ -1,14 +1,40 @@
 #!/usr/bin/env ts-node
 /**
- * Minimal SQL migration runner used during CRM migration.
- * Accepts either a single --file or a --dir containing *.sql files.
+ * Minimal SQL migration runner (CRM, ERP, seeds).
+ * Accepts either a single --file or a `--dir` containing *.sql files.
+ *
+ * Env: lädt Repo-Wurzel-`.env` und optional `./.env` im CWD (siehe `loadMigrationEnv`).
+ * Connection string (first match): `--url`, `--env NAME`, dann
+ * `ERP_DATABASE_URL`, `DATABASE_URL`, `CRM_DATABASE_URL`.
+ *
+ * Siehe auch: docs/erp-finanz-multitenancy.md, migrations/sql/erp/README.md, tools/migration/CRM_TOOLKIT.md.
  */
-import { promises as fs } from 'fs';
+import { existsSync, promises as fs } from 'fs';
 import * as path from 'path';
 import { Pool } from 'pg';
 import { config as loadEnv } from 'dotenv';
 
-loadEnv();
+/**
+ * Repo-Wurzel-`.env` zuerst (auch wenn das Tool aus Unterverzeichnissen gestartet wird),
+ * dann optionales `./.env` im aktuellen Arbeitsverzeichnis (`override`).
+ */
+function loadMigrationEnv(): void {
+  const cwdEnv = path.join(process.cwd(), '.env');
+  const repoRootEnv = path.resolve(__dirname, '..', '..', '.env');
+  const cwdResolved = path.resolve(cwdEnv);
+
+  if (existsSync(repoRootEnv)) {
+    loadEnv({ path: repoRootEnv });
+  }
+  if (existsSync(cwdEnv) && cwdResolved !== path.resolve(repoRootEnv)) {
+    loadEnv({ path: cwdEnv, override: true });
+  }
+  if (!existsSync(repoRootEnv) && !existsSync(cwdEnv)) {
+    loadEnv();
+  }
+}
+
+loadMigrationEnv();
 
 interface CliOptions {
   connectionString: string;
@@ -81,21 +107,34 @@ async function collectSqlFiles(raw: RawArgs): Promise<string[]> {
   return files;
 }
 
+function firstNonEmptyEnv(...keys: string[]): string | undefined {
+  for (const key of keys) {
+    const value = process.env[key];
+    if (typeof value === 'string' && value.trim().length > 0) {
+      return value.trim();
+    }
+  }
+  return undefined;
+}
+
 function resolveConnectionString(raw: RawArgs): string {
   if (raw.url) {
     return raw.url;
   }
   if (raw.env) {
     const value = process.env[raw.env];
-    if (!value) {
+    if (!value || String(value).trim().length === 0) {
       throw new Error(`Environment variable ${raw.env} is not defined.`);
     }
-    return value;
+    return String(value).trim();
   }
-  if (process.env.CRM_DATABASE_URL) {
-    return process.env.CRM_DATABASE_URL;
+  const fromEnv = firstNonEmptyEnv('ERP_DATABASE_URL', 'DATABASE_URL', 'CRM_DATABASE_URL');
+  if (fromEnv) {
+    return fromEnv;
   }
-  throw new Error('Missing connection string. Provide --url or --env.');
+  throw new Error(
+    'Missing connection string. Provide --url, --env VAR, or set ERP_DATABASE_URL, DATABASE_URL, or CRM_DATABASE_URL.',
+  );
 }
 
 function parseArgs(): Promise<CliOptions> {

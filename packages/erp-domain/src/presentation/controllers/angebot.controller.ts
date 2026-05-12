@@ -3,14 +3,14 @@ import { AngebotService } from '../../application/services/angebot.service'
 import { CreateAngebotData } from '../../application/services/angebot.service'
 import { AngebotStatus } from '../../core/entities/angebot.entity'
 import { clampLimit, clampOffset } from '../types/api-pagination'
-import { resolveActorId } from '../utils/request-context'
+import { resolveActorId, resolveTenantId, respondControllerError, respondDomainMutationError } from '../utils/request-context'
 
 export class AngebotController {
   constructor(private angebotService: AngebotService) {}
 
   async createAngebot(req: Request, res: Response): Promise<void> {
     try {
-      const tenantId = req.headers['x-tenant-id'] as string
+      const tenantId = resolveTenantId(req)
       const auditActorId = resolveActorId(req)
 
       const data: CreateAngebotData = {
@@ -39,17 +39,14 @@ export class AngebotController {
       })
     } catch (error) {
       console.error('Fehler beim Erstellen des Angebots:', error)
-      res.status(400).json({
-        success: false,
-        error: error instanceof Error ? error.message : 'Unbekannter Fehler'
-      })
+      respondControllerError(res, error, 400)
     }
   }
 
   async getAngebot(req: Request, res: Response): Promise<void> {
     try {
       const { id } = req.params
-      const tenantId = req.headers['x-tenant-id'] as string
+      const tenantId = resolveTenantId(req)
 
       const angebot = await this.angebotService.getAngebotById(id as string, tenantId)
 
@@ -67,16 +64,13 @@ export class AngebotController {
       })
     } catch (error) {
       console.error('Fehler beim Laden des Angebots:', error)
-      res.status(500).json({
-        success: false,
-        error: 'Interner Serverfehler'
-      })
+      respondControllerError(res, error, 500)
     }
   }
 
   async getAngebote(req: Request, res: Response): Promise<void> {
     try {
-      const tenantId = req.headers['x-tenant-id'] as string
+      const tenantId = resolveTenantId(req)
       const options = {
         status: req.query.status as any,
         lieferantId: req.query.lieferantId as string,
@@ -96,17 +90,14 @@ export class AngebotController {
       })
     } catch (error) {
       console.error('Fehler beim Laden der Angebote:', error)
-      res.status(500).json({
-        success: false,
-        error: 'Interner Serverfehler'
-      })
+      respondControllerError(res, error, 500)
     }
   }
 
   async getAngeboteByAnfrage(req: Request, res: Response): Promise<void> {
     try {
       const { anfrageId } = req.params
-      const tenantId = req.headers['x-tenant-id'] as string
+      const tenantId = resolveTenantId(req)
 
       const angebote = await this.angebotService.getAngeboteByAnfrage(anfrageId as string, tenantId)
 
@@ -116,17 +107,14 @@ export class AngebotController {
       })
     } catch (error) {
       console.error('Fehler beim Laden der Angebote zur Anfrage:', error)
-      res.status(500).json({
-        success: false,
-        error: 'Interner Serverfehler'
-      })
+      respondControllerError(res, error, 500)
     }
   }
 
   async pruefenAngebot(req: Request, res: Response): Promise<void> {
     try {
       const { id } = req.params
-      const tenantId = req.headers['x-tenant-id'] as string
+      const tenantId = resolveTenantId(req)
       const actorId = resolveActorId(req)
 
       const angebot = await this.angebotService.pruefenAngebot(id as string, tenantId, actorId)
@@ -137,17 +125,14 @@ export class AngebotController {
       })
     } catch (error) {
       console.error('Fehler beim Prüfen des Angebots:', error)
-      res.status(error instanceof Error && error.message.includes('nicht gefunden') ? 404 : 400).json({
-        success: false,
-        error: error instanceof Error ? error.message : 'Unbekannter Fehler'
-      })
+      respondDomainMutationError(res, error)
     }
   }
 
   async genehmigenAngebot(req: Request, res: Response): Promise<void> {
     try {
       const { id } = req.params
-      const tenantId = req.headers['x-tenant-id'] as string
+      const tenantId = resolveTenantId(req)
       const actorId = resolveActorId(req)
 
       const angebot = await this.angebotService.genehmigenAngebot(id as string, tenantId, actorId)
@@ -158,17 +143,14 @@ export class AngebotController {
       })
     } catch (error) {
       console.error('Fehler beim Genehmigen des Angebots:', error)
-      res.status(error instanceof Error && error.message.includes('nicht gefunden') ? 404 : 400).json({
-        success: false,
-        error: error instanceof Error ? error.message : 'Unbekannter Fehler'
-      })
+      respondDomainMutationError(res, error)
     }
   }
 
   async ablehnenAngebot(req: Request, res: Response): Promise<void> {
     try {
       const { id } = req.params
-      const tenantId = req.headers['x-tenant-id'] as string
+      const tenantId = resolveTenantId(req)
       const actorId = resolveActorId(req)
 
       const angebot = await this.angebotService.ablehnenAngebot(id as string, tenantId, actorId)
@@ -179,17 +161,14 @@ export class AngebotController {
       })
     } catch (error) {
       console.error('Fehler beim Ablehnen des Angebots:', error)
-      res.status(error instanceof Error && error.message.includes('nicht gefunden') ? 404 : 400).json({
-        success: false,
-        error: error instanceof Error ? error.message : 'Unbekannter Fehler'
-      })
+      respondDomainMutationError(res, error)
     }
   }
 
   async updateAngebot(req: Request, res: Response): Promise<void> {
     try {
       const { id } = req.params
-      const tenantId = req.headers['x-tenant-id'] as string
+      const tenantId = resolveTenantId(req)
       const actorId = resolveActorId(req)
 
       const angebot = await this.angebotService.updateAngebot(id as string, tenantId, req.body, actorId)
@@ -200,17 +179,14 @@ export class AngebotController {
       })
     } catch (error) {
       console.error('Fehler beim Aktualisieren des Angebots:', error)
-      res.status(error instanceof Error && error.message.includes('nicht gefunden') ? 404 : 400).json({
-        success: false,
-        error: error instanceof Error ? error.message : 'Unbekannter Fehler'
-      })
+      respondDomainMutationError(res, error)
     }
   }
 
   async deleteAngebot(req: Request, res: Response): Promise<void> {
     try {
       const { id } = req.params
-      const tenantId = req.headers['x-tenant-id'] as string
+      const tenantId = resolveTenantId(req)
       const actorId = resolveActorId(req)
 
       await this.angebotService.deleteAngebot(id as string, tenantId, actorId)
@@ -221,16 +197,13 @@ export class AngebotController {
       })
     } catch (error) {
       console.error('Fehler beim Löschen des Angebots:', error)
-      res.status(error instanceof Error && error.message.includes('nicht gefunden') ? 404 : 400).json({
-        success: false,
-        error: error instanceof Error ? error.message : 'Unbekannter Fehler'
-      })
+      respondDomainMutationError(res, error)
     }
   }
 
   async getAbgelaufeneAngebote(req: Request, res: Response): Promise<void> {
     try {
-      const tenantId = req.headers['x-tenant-id'] as string
+      const tenantId = resolveTenantId(req)
 
       const angebote = await this.angebotService.getAbgelaufeneAngebote(tenantId)
 
@@ -240,10 +213,7 @@ export class AngebotController {
       })
     } catch (error) {
       console.error('Fehler beim Laden abgelaufener Angebote:', error)
-      res.status(500).json({
-        success: false,
-        error: 'Interner Serverfehler'
-      })
+      respondControllerError(res, error, 500)
     }
   }
 }

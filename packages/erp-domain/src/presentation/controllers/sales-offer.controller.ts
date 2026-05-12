@@ -3,7 +3,7 @@ import { SalesOfferService } from '../../application/services/sales-offer.servic
 import { CreateSalesOfferData } from '../../application/services/sales-offer.service'
 import { SalesOfferStatus } from '../../core/entities/sales-offer.entity'
 import { clampLimit, clampOffset } from '../types/api-pagination'
-import { resolveActorId } from '../utils/request-context'
+import { resolveActorId, resolveTenantId, respondControllerError, respondDomainMutationError } from '../utils/request-context'
 import { CustomerInquiry } from '../../core/entities/customer-inquiry.entity'
 
 export class SalesOfferController {
@@ -11,7 +11,7 @@ export class SalesOfferController {
 
   async createSalesOffer(req: Request, res: Response): Promise<void> {
     try {
-      const tenantId = req.headers['x-tenant-id'] as string
+      const tenantId = resolveTenantId(req)
       const auditActorId = resolveActorId(req)
 
       const data: CreateSalesOfferData = {
@@ -38,17 +38,14 @@ export class SalesOfferController {
       })
     } catch (error) {
       console.error('Fehler beim Erstellen des SalesOffers:', error)
-      res.status(400).json({
-        success: false,
-        error: error instanceof Error ? error.message : 'Unbekannter Fehler'
-      })
+      respondControllerError(res, error, 400)
     }
   }
 
   async createSalesOfferFromInquiry(req: Request, res: Response): Promise<void> {
     try {
       const { inquiryId } = req.params
-      const tenantId = req.headers['x-tenant-id'] as string
+      const tenantId = resolveTenantId(req)
       const actorId = resolveActorId(req)
 
       const snap = req.body?.inquirySnapshot as Record<string, unknown> | undefined
@@ -93,17 +90,14 @@ export class SalesOfferController {
       })
     } catch (error) {
       console.error('Fehler beim Erstellen des SalesOffers aus CustomerInquiry:', error)
-      res.status(400).json({
-        success: false,
-        error: error instanceof Error ? error.message : 'Unbekannter Fehler'
-      })
+      respondControllerError(res, error, 400)
     }
   }
 
   async getSalesOffer(req: Request, res: Response): Promise<void> {
     try {
       const { id } = req.params
-      const tenantId = req.headers['x-tenant-id'] as string
+      const tenantId = resolveTenantId(req)
 
       const salesOffer = await this.salesOfferService.getSalesOfferById(id as string, tenantId)
 
@@ -121,16 +115,13 @@ export class SalesOfferController {
       })
     } catch (error) {
       console.error('Fehler beim Laden des SalesOffers:', error)
-      res.status(500).json({
-        success: false,
-        error: 'Interner Serverfehler'
-      })
+      respondControllerError(res, error, 500)
     }
   }
 
   async getSalesOffers(req: Request, res: Response): Promise<void> {
     try {
-      const tenantId = req.headers['x-tenant-id'] as string
+      const tenantId = resolveTenantId(req)
       const options = {
         status: req.query.status as SalesOfferStatus,
         customerId: req.query.customerId as string,
@@ -149,17 +140,14 @@ export class SalesOfferController {
       })
     } catch (error) {
       console.error('Fehler beim Laden der SalesOffers:', error)
-      res.status(500).json({
-        success: false,
-        error: 'Interner Serverfehler'
-      })
+      respondControllerError(res, error, 500)
     }
   }
 
   async getSalesOffersByCustomerInquiry(req: Request, res: Response): Promise<void> {
     try {
       const { inquiryId } = req.params
-      const tenantId = req.headers['x-tenant-id'] as string
+      const tenantId = resolveTenantId(req)
 
       const salesOffers = await this.salesOfferService.getSalesOffersByCustomerInquiry(inquiryId as string, tenantId)
 
@@ -169,17 +157,14 @@ export class SalesOfferController {
       })
     } catch (error) {
       console.error('Fehler beim Laden der SalesOffers für CustomerInquiry:', error)
-      res.status(500).json({
-        success: false,
-        error: 'Interner Serverfehler'
-      })
+      respondControllerError(res, error, 500)
     }
   }
 
   async sendSalesOffer(req: Request, res: Response): Promise<void> {
     try {
       const { id } = req.params
-      const tenantId = req.headers['x-tenant-id'] as string
+      const tenantId = resolveTenantId(req)
       const actorId = resolveActorId(req)
 
       const salesOffer = await this.salesOfferService.sendSalesOffer(id as string, tenantId, actorId)
@@ -190,17 +175,14 @@ export class SalesOfferController {
       })
     } catch (error) {
       console.error('Fehler beim Versenden des SalesOffers:', error)
-      res.status(error instanceof Error && error.message.includes('nicht gefunden') ? 404 : 400).json({
-        success: false,
-        error: error instanceof Error ? error.message : 'Unbekannter Fehler'
-      })
+      respondDomainMutationError(res, error)
     }
   }
 
   async acceptSalesOffer(req: Request, res: Response): Promise<void> {
     try {
       const { id } = req.params
-      const tenantId = req.headers['x-tenant-id'] as string
+      const tenantId = resolveTenantId(req)
       const actorId = resolveActorId(req)
 
       const salesOffer = await this.salesOfferService.acceptSalesOffer(id as string, tenantId, actorId)
@@ -211,17 +193,14 @@ export class SalesOfferController {
       })
     } catch (error) {
       console.error('Fehler beim Annehmen des SalesOffers:', error)
-      res.status(error instanceof Error && error.message.includes('nicht gefunden') ? 404 : 400).json({
-        success: false,
-        error: error instanceof Error ? error.message : 'Unbekannter Fehler'
-      })
+      respondDomainMutationError(res, error)
     }
   }
 
   async rejectSalesOffer(req: Request, res: Response): Promise<void> {
     try {
       const { id } = req.params
-      const tenantId = req.headers['x-tenant-id'] as string
+      const tenantId = resolveTenantId(req)
       const actorId = resolveActorId(req)
 
       const salesOffer = await this.salesOfferService.rejectSalesOffer(id as string, tenantId, actorId)
@@ -232,17 +211,14 @@ export class SalesOfferController {
       })
     } catch (error) {
       console.error('Fehler beim Ablehnen des SalesOffers:', error)
-      res.status(error instanceof Error && error.message.includes('nicht gefunden') ? 404 : 400).json({
-        success: false,
-        error: error instanceof Error ? error.message : 'Unbekannter Fehler'
-      })
+      respondDomainMutationError(res, error)
     }
   }
 
   async updateSalesOffer(req: Request, res: Response): Promise<void> {
     try {
       const { id } = req.params
-      const tenantId = req.headers['x-tenant-id'] as string
+      const tenantId = resolveTenantId(req)
       const actorId = resolveActorId(req)
 
       const salesOffer = await this.salesOfferService.updateSalesOffer(id as string, tenantId, req.body, actorId)
@@ -253,17 +229,14 @@ export class SalesOfferController {
       })
     } catch (error) {
       console.error('Fehler beim Aktualisieren des SalesOffers:', error)
-      res.status(error instanceof Error && error.message.includes('nicht gefunden') ? 404 : 400).json({
-        success: false,
-        error: error instanceof Error ? error.message : 'Unbekannter Fehler'
-      })
+      respondDomainMutationError(res, error)
     }
   }
 
   async deleteSalesOffer(req: Request, res: Response): Promise<void> {
     try {
       const { id } = req.params
-      const tenantId = req.headers['x-tenant-id'] as string
+      const tenantId = resolveTenantId(req)
       const actorId = resolveActorId(req)
 
       await this.salesOfferService.deleteSalesOffer(id as string, tenantId, actorId)
@@ -274,16 +247,13 @@ export class SalesOfferController {
       })
     } catch (error) {
       console.error('Fehler beim Löschen des SalesOffers:', error)
-      res.status(error instanceof Error && error.message.includes('nicht gefunden') ? 404 : 400).json({
-        success: false,
-        error: error instanceof Error ? error.message : 'Unbekannter Fehler'
-      })
+      respondDomainMutationError(res, error)
     }
   }
 
   async getExpiredSalesOffers(req: Request, res: Response): Promise<void> {
     try {
-      const tenantId = req.headers['x-tenant-id'] as string
+      const tenantId = resolveTenantId(req)
 
       const salesOffers = await this.salesOfferService.getExpiredSalesOffers(tenantId)
 
@@ -293,16 +263,13 @@ export class SalesOfferController {
       })
     } catch (error) {
       console.error('Fehler beim Laden abgelaufener SalesOffers:', error)
-      res.status(500).json({
-        success: false,
-        error: 'Interner Serverfehler'
-      })
+      respondControllerError(res, error, 500)
     }
   }
 
   async getValidSalesOffers(req: Request, res: Response): Promise<void> {
     try {
-      const tenantId = req.headers['x-tenant-id'] as string
+      const tenantId = resolveTenantId(req)
 
       const salesOffers = await this.salesOfferService.getValidSalesOffers(tenantId)
 
@@ -312,10 +279,7 @@ export class SalesOfferController {
       })
     } catch (error) {
       console.error('Fehler beim Laden gültiger SalesOffers:', error)
-      res.status(500).json({
-        success: false,
-        error: 'Interner Serverfehler'
-      })
+      respondControllerError(res, error, 500)
     }
   }
 }
