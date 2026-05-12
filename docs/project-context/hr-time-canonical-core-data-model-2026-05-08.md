@@ -156,13 +156,14 @@ Die API-URLs sind fachliche Ressourcen, nicht UI-Layouts.
 | Schicht erstellen | `POST /api/v1/personal/shifts` | erstellt eine Schicht und prueft Mindestbesetzung, Profile, Qualifikationen und Abwesenheiten. |
 | Kalenderereignisse lesen | `GET /api/v1/personal/calendar-events` | provider-neutrale Kalenderblocker, Schichten, Touren, Abwesenheiten und Aussendiensttermine. |
 | Kalenderereignis erstellen | `POST /api/v1/personal/calendar-events` | schreibt ein internes oder importiertes Event mit Sync-State, Sichtbarkeit und Konfliktlevel. |
+| Payroll-Exporte lesen | `GET /api/v1/personal/payroll-exports` | erzeugte Lohnexportpakete mit Items und Blockern. |
+| Payroll-Export erzeugen | `POST /api/v1/personal/payroll-exports` | baut Exportpaket aus freigegebenen Zeitwerten und meldet nicht freigegebene Buchungen als Blocker. |
 | Driver-Time Summary | `GET /api/v1/personal/driver-time/summary` | Fahrerzeit-KPIs, Ereignisse, Plausibilitaetsbefunde. |
 | Time Cockpit | `GET /api/v1/personal/time-cockpit` | operative Freigabe-, Compliance- und Payroll-Sicht. |
 | Stundenzettel | `POST/GET /api/v1/personal/stundenzettel` | Legacy-/Pilotvertrag fuer Fahrer-Stundenzettel. |
 
 Folge-URLs muessen diese Begriffe wiederverwenden:
 
-- `/api/v1/personal/payroll-exports`
 - `/api/v1/personal/campaign-capacity`
 - `/api/v1/personal/field-service-plan`
 
