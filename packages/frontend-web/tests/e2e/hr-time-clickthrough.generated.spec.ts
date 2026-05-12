@@ -13,7 +13,7 @@ test('HR time cockpit clickthrough covers navigation, forms, corrections and pri
       posts.push(path)
     }
     if (path.includes('/api/v1/personal/zeiterfassung')) {
-      await route.fulfill(json([{ id: 'time-1', mitarbeiter: 'driver-1', datum: '2026-05-12', kommen: '07:00', gehen: '16:00', stunden: 8, typ: 'Arbeit' }]))
+      await route.fulfill(json([{ id: 'time-1', mitarbeiter: 'driver-1', datum: '2026-05-12', kommen: '07:00', gehen: '16:00', stunden: 8, typ: 'Ueberstunden' }]))
       return
     }
     if (path.includes('/api/v1/personal/driver-time/summary')) {
@@ -100,6 +100,9 @@ test('HR time cockpit clickthrough covers navigation, forms, corrections and pri
   await page.getByRole('button', { name: /Zurueck/ }).click()
   await page.getByRole('button', { name: /Weiter/ }).click()
   await page.getByRole('button', { name: /Arbeitsplan drucken/ }).click()
+  await page.getByLabel('HR-Time Suche').fill('driver-1')
+  await page.getByLabel('HR-Time Schnellfilter').selectOption('warnings')
+  await page.getByLabel('HR-Time Sortierung').selectOption('employee')
 
   await page.getByRole('tab', { name: 'Arbeitszeit' }).click()
   await page.getByRole('button', { name: /Bearbeiten/ }).click()
@@ -116,6 +119,8 @@ test('HR time cockpit clickthrough covers navigation, forms, corrections and pri
   await page.getByRole('tab', { name: 'Arbeitsplan' }).click()
   await expect(page.getByText('Arbeitsplan 2026-05-12 bis 2026-05-19')).toBeVisible()
   await expect(page.getByText('NIGHT_TOUR_AVOIDED')).toBeVisible()
+  await page.getByLabel('HR-Time Schnellfilter').selectOption('printReady')
+  await expect(page.getByRole('cell', { name: 'Nachttour' })).toBeVisible()
   await page.getByRole('button', { name: /^Drucken$/ }).click()
 
   await page.getByRole('tab', { name: 'Planung' }).click()

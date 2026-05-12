@@ -1,5 +1,5 @@
 id: HR-TIME-UX-ROADMAP-001
-status: reserviert
+status: abgeschlossen
 owner: Codex
 goal: >
   HR-Time-Workflows als klickarme End-to-End UX-Roadmap mit Milestones,
@@ -24,3 +24,7 @@ checks:
 risks: >
   Weitere Milestones wie Action Panel, Wizard, Driver-Dispo und Payroll Closeout
   bleiben Folge-Slices.
+done:
+  - UX-Workflow-Roadmap mit Milestones UX-M1 bis UX-M7, User-Fragen, Masken, Datenquellen, Aktionen, Quervernetzungen und Folge-Slices dokumentiert.
+  - Zeiterfassungs-Cockpit um zentrale Suche, Schnellfilter und Sortierung fuer Arbeitszeit und Arbeitsplan erweitert.
+  - E2E-Durchklicktest nutzt Suche, Filter und Sortierung.
