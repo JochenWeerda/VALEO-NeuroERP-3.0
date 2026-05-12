@@ -18,7 +18,7 @@ def guard_total_positive(payload: dict) -> tuple[bool, str]:
     """
     total = payload.get("total")
     if total is None:
-        total = sum((l.get("qty", 0) * l.get("price", 0)) for l in payload.get("lines", []))
+        total = sum((line_item.get("qty", 0) * line_item.get("price", 0)) for line_item in payload.get("lines", []))
     return (total > 0, "Total must be > 0")
 
 
@@ -32,10 +32,10 @@ def guard_price_not_below_cost(payload: dict) -> tuple[bool, str]:
     Returns:
         (ok, reason)
     """
-    for l in payload.get("lines", []):
-        if isinstance(l.get("price"), (int, float)) and isinstance(l.get("cost"), (int, float)):
-            if l["price"] < l["cost"]:
-                return (False, f"Price below cost for article {l.get('article')}")
+    for line_item in payload.get("lines", []):
+        if isinstance(line_item.get("price"), (int, float)) and isinstance(line_item.get("cost"), (int, float)):
+            if line_item["price"] < line_item["cost"]:
+                return (False, f"Price below cost for article {line_item.get('article')}")
     return (True, "ok")
 
 

@@ -109,7 +109,7 @@ async def get_prep_list_lines(list_id: str, db: Session = Depends(get_db)):
     lines = db.query(PreparationListLine).filter(
         PreparationListLine.list_id == list_id
     ).all()
-    return [PrepListLineOut.model_validate(l) for l in lines]
+    return [PrepListLineOut.model_validate(line_item) for line_item in lines]
 
 
 @router.post("/{list_id}/process", response_model=PrepListOut)

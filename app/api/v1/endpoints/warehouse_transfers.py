@@ -193,7 +193,7 @@ async def get_transfer_lines(
         WarehouseTransferLine.transfer_id == transfer_id,
         WarehouseTransferLine.tenant_id == tenant_id,
     ).all()
-    return [TransferLineOut.model_validate(l) for l in lines]
+    return [TransferLineOut.model_validate(line_item) for line_item in lines]
 
 
 @router.post("/", response_model=TransferOut, status_code=201)
@@ -414,7 +414,7 @@ async def get_correction_lines(
         StockCorrectionLine.correction_id == corr_id,
         StockCorrectionLine.tenant_id == tenant_id,
     ).all()
-    return [CorrectionLineOut.model_validate(l) for l in lines]
+    return [CorrectionLineOut.model_validate(line_item) for line_item in lines]
 
 
 @router.post("/corrections", response_model=CorrectionOut, status_code=201)

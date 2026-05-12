@@ -78,11 +78,11 @@ class JournalEntryDraft:
 
     @property
     def soll_total(self) -> Decimal:
-        return sum(l.amount for l in self.lines if l.side == JournalSide.SOLL)
+        return sum(line_item.amount for line_item in self.lines if line_item.side == JournalSide.SOLL)
 
     @property
     def haben_total(self) -> Decimal:
-        return sum(l.amount for l in self.lines if l.side == JournalSide.HABEN)
+        return sum(line_item.amount for line_item in self.lines if line_item.side == JournalSide.HABEN)
 
     @property
     def balanced(self) -> bool:
@@ -100,7 +100,7 @@ class JournalEntryDraft:
             "soll_total": str(self.soll_total),
             "haben_total": str(self.haben_total),
             "balanced": self.balanced,
-            "lines": [l.as_dict() for l in self.lines],
+            "lines": [line_item.as_dict() for line_item in self.lines],
             "process_definition_key": self.process_definition_key,
             "workflow_version": self.workflow_version,
             "audit_chain_ref": self.audit_chain_ref,

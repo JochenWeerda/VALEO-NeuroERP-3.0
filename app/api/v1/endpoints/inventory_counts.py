@@ -136,7 +136,7 @@ async def get_count_lines(count_id: str, db: Session = Depends(get_db)):
     lines = db.query(InventoryCountLine).filter(
         InventoryCountLine.inventory_count_id == count_id
     ).all()
-    return [InventoryCountLineOut.model_validate(l) for l in lines]
+    return [InventoryCountLineOut.model_validate(line_item) for line_item in lines]
 
 
 @router.post("/lines", response_model=InventoryCountLineOut, status_code=201)

@@ -934,17 +934,17 @@ async def list_kontrakt_audit(
     return {
         "items": [
             {
-                "audit_id": l.audit_id,
-                "entity_type": l.entity_type,
-                "entity_id": l.entity_id,
-                "field_name": l.field_name,
-                "old_value": l.old_value,
-                "new_value": l.new_value,
-                "action": l.action,
-                "changed_at": l.changed_at,
-                "changed_by": l.changed_by,
+                "audit_id": line_item.audit_id,
+                "entity_type": line_item.entity_type,
+                "entity_id": line_item.entity_id,
+                "field_name": line_item.field_name,
+                "old_value": line_item.old_value,
+                "new_value": line_item.new_value,
+                "action": line_item.action,
+                "changed_at": line_item.changed_at,
+                "changed_by": line_item.changed_by,
             }
-            for l in logs
+            for line_item in logs
         ]
     }
 

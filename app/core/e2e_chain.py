@@ -58,13 +58,13 @@ class E2EProcessChain(BaseModel):
     def completeness_pct(self) -> int:
         """Anteil vorhandener Kettenglieder in Prozent."""
         lnks = self.links()
-        return int(len([l for l in lnks if l.present]) * 100 / len(lnks))
+        return int(len([line_item for line_item in lnks if line_item.present]) * 100 / len(lnks))
 
     def missing_links(self) -> list[str]:
-        return [l.aggregate_type for l in self.links() if not l.present]
+        return [line_item.aggregate_type for line_item in self.links() if not line_item.present]
 
     def is_complete(self) -> bool:
-        return all(l.present for l in self.links())
+        return all(line_item.present for line_item in self.links())
 
 
 class ChainCompletenessReport(BaseModel):

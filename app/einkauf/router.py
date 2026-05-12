@@ -885,9 +885,9 @@ async def create_zahlungslauf(
         if not lieferanten_ids:
             rechnungen_result = db.execute(
                 text("""
-                    SELECT r.*, l.iban, l.bic, l.kontoinhaber, l.firmenname as lieferant_name
+                    SELECT r.*, line_item.iban, line_item.bic, line_item.kontoinhaber, line_item.firmenname as lieferant_name
                     FROM einkauf_rechnungseingaenge r
-                    LEFT JOIN einkauf_lieferanten l ON r.lieferant_id = l.id
+                    LEFT JOIN einkauf_lieferanten line_item ON r.lieferant_id = line_item.id
                     WHERE r.status = 'OFFEN' AND r.tenant_id = :tenant_id
                     ORDER BY r.faelligkeits_datum ASC
                 """),
@@ -896,9 +896,9 @@ async def create_zahlungslauf(
         else:
             rechnungen_result = db.execute(
                 text("""
-                    SELECT r.*, l.iban, l.bic, l.kontoinhaber, l.firmenname as lieferant_name
+                    SELECT r.*, line_item.iban, line_item.bic, line_item.kontoinhaber, line_item.firmenname as lieferant_name
                     FROM einkauf_rechnungseingaenge r
-                    LEFT JOIN einkauf_lieferanten l ON r.lieferant_id = l.id
+                    LEFT JOIN einkauf_lieferanten line_item ON r.lieferant_id = line_item.id
                     WHERE r.status = 'OFFEN' AND r.tenant_id = :tenant_id
                     AND (r.lieferant_id IS NULL OR r.lieferant_id IN :lieferanten)
                     ORDER BY r.faelligkeits_datum ASC
@@ -944,7 +944,7 @@ async def create_zahlungslauf(
       <MsgId>PAY-{xml_escape(str(lauf_id)[:8])}-{datetime.utcnow().strftime('%Y%m%d%H%M%S')}</MsgId>
       <CreDtTm>{datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S')}</CreDtTm>
       <NbOfCstrms>{len(lieferanten_gruppen)}</NbOfCstrms>
-      <CtrlSum>{sum(l['gesamtbetrag'] for l in lieferanten_gruppen.values()):.2f}</CtrlSum>
+      <CtrlSum>{sum(line_item['gesamtbetrag'] for line_item in lieferanten_gruppen.values()):.2f}</CtrlSum>
     </GrpHdr>"""
 
         for lid, gruppe in lieferanten_gruppen.items():
@@ -988,7 +988,7 @@ async def create_zahlungslauf(
                 "id": lauf_id,
                 "bez": data.get("bezeichnung", f"Zahlungslauf {datetime.utcnow().strftime('%Y-%m-%d')}"),
                 "datum": ausfuehrungsdatum,
-                "betrag": sum(l["gesamtbetrag"] for l in lieferanten_gruppen.values()),
+                "betrag": sum(line_item["gesamtbetrag"] for line_item in lieferanten_gruppen.values()),
                 "lcount": len(lieferanten_gruppen),
                 "rcount": len(rechnungen),
                 "xml": sepa_xml[:1000] + "..." if len(sepa_xml) > 1000 else sepa_xml,
@@ -1022,7 +1022,7 @@ async def create_zahlungslauf(
             "id": lauf_id,
             "bezeichnung": data.get("bezeichnung"),
             "ausfuehrungs_datum": ausfuehrungsdatum,
-            "gesamt_betrag": sum(l["gesamtbetrag"] for l in lieferanten_gruppen.values()),
+            "gesamt_betrag": sum(line_item["gesamtbetrag"] for line_item in lieferanten_gruppen.values()),
             "lieferanten_count": len(lieferanten_gruppen),
             "rechnungen_count": len(rechnungen),
             "status": "BEREIT",

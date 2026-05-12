@@ -102,7 +102,8 @@ class PriceMonitoringWorker:
                 .limit(500)
                 .all()
             )
-            by_key = lambda r: (r.article_id or "", r.warengruppe or "", r.crop_code or "")
+            def by_key(r):
+                return (r.article_id or "", r.warengruppe or "", r.crop_code or "")
             prev_map = {by_key(r): float(r.price_eur_per_ton) for r in rows_yesterday}
             for r in rows_today:
                 key = by_key(r)
@@ -178,7 +179,8 @@ class PriceMonitoringWorker:
                 .limit(500)
                 .all()
             )
-            by_key = lambda r: (r.article_id or "", r.warengruppe or "", r.crop_code or "")
+            def by_key(r):
+                return (r.article_id or "", r.warengruppe or "", r.crop_code or "")
             thresh_by_key = {}
             for t in thresholds:
                 key = (t.article_id or "", t.warengruppe or "", t.crop_code or "")

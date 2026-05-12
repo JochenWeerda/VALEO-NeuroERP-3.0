@@ -138,7 +138,7 @@ def _find_matching_line(
     if not lines:
         return None
     if article_id:
-        match = next((l for l in lines if l.article_id == article_id), None)
+        match = next((line_item for line_item in lines if line_item.article_id == article_id), None)
         if match:
             return match
     return lines[0]

@@ -84,7 +84,7 @@ async def export_documents(
         rows = []
         for doc in docs:
             lines = doc.get("lines", [])
-            total = sum(l.get("qty", 0) * l.get("price", 0) for l in lines)
+            total = sum(line_item.get("qty", 0) * line_item.get("price", 0) for line_item in lines)
 
             row = {
                 "Belegnummer": doc.get("number", ""),
