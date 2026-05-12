@@ -7,7 +7,7 @@ gemäß ISO 27001 Annex A.16 für VALEO-NeuroERP mit Incident Detection, Respons
 """
 
 from datetime import datetime, timedelta
-from typing import Dict, Any, List, Optional, Tuple
+from typing import Dict, Any, List, Optional
 from dataclasses import dataclass, field
 from enum import Enum
 import logging

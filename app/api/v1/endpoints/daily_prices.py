@@ -114,7 +114,8 @@ def _get_user_id_from_request(request) -> Optional[str]:
     if auth.startswith("Bearer "):
         token = auth[7:]
         try:
-            import base64, json as _json
+            import base64
+            import json as _json
             payload_b64 = token.split(".")[1]
             payload_b64 += "=" * (4 - len(payload_b64) % 4)
             claims = _json.loads(base64.urlsafe_b64decode(payload_b64))

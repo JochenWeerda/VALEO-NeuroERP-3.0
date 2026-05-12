@@ -7,7 +7,7 @@ für VALEO-NeuroERP mit Role-Based Access Control, Multi-Factor Authentication u
 """
 
 from datetime import datetime, timedelta
-from typing import Dict, Any, List, Optional, Tuple, Set
+from typing import Any, Dict, List, Optional, Set, Tuple
 from dataclasses import dataclass, field
 from enum import Enum
 import logging

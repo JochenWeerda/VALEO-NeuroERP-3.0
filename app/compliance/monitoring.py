@@ -7,7 +7,7 @@ für VALEO-NeuroERP mit Real-time Monitoring, Automated Alerts und Compliance Da
 """
 
 from datetime import datetime, timedelta
-from typing import Dict, Any, List, Optional, Tuple
+from typing import Dict, Any, List, Optional
 from dataclasses import dataclass, field
 from enum import Enum
 import logging
