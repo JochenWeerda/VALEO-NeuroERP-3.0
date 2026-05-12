@@ -5,6 +5,16 @@ on:
     branches: [ main, develop ]
   pull_request:
     branches: [ main, develop ]
+    paths:
+      - 'app/**'
+      - 'tests/**'
+      - 'packages/erp-domain/**'
+      - 'packages/frontend-web/**'
+      - 'migrations/sql/erp/**'
+      - 'tools/migration/**'
+      - 'requirements.txt'
+      - 'package.json'
+      - '.github/workflows/quality-gate.yml'
 
 permissions:
   contents: read
@@ -179,6 +189,14 @@ jobs:
 
       - name: Build (smoke)
         run: pnpm --filter @valero-neuroerp/frontend-web build
+
+      - name: ERP-Domain tests (packages/erp-domain)
+        run: pnpm --filter @valero-neuroerp/erp-domain test --passWithNoTests
+        continue-on-error: false
+
+      - name: Docs lint
+        run: pnpm run docs:lint --if-present
+        continue-on-error: true
 
   dependency-scan:
     name: Dependency Scan (advisory)
