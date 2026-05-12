@@ -265,6 +265,37 @@ class CampaignCapacityOut(BaseModel):
     findings: list[CampaignCapacityFindingOut] = Field(default_factory=list)
 
 
+class FieldServiceConflictOut(BaseModel):
+    code: str
+    severity: str
+    message: str
+
+
+class FieldServicePlanCreateIn(BaseModel):
+    employeeRef: str = Field(..., min_length=1, max_length=120)
+    customerRef: str = Field(..., min_length=1, max_length=120)
+    territoryCode: str = Field(..., min_length=1, max_length=80)
+    campaignCode: str | None = Field(default=None, max_length=80)
+    visitType: str = Field(default="consulting", max_length=60)
+    startsAt: str
+    endsAt: str
+    notes: str | None = Field(default=None, max_length=500)
+
+
+class FieldServicePlanOut(BaseModel):
+    id: str
+    employeeRef: str
+    customerRef: str
+    territoryCode: str
+    campaignCode: str | None = None
+    visitType: str
+    startsAt: str
+    endsAt: str
+    status: str
+    conflicts: list[FieldServiceConflictOut] = Field(default_factory=list)
+    notes: str | None = None
+
+
 class TourIn(BaseModel):
     id: str
     start: str
@@ -797,6 +828,57 @@ def _campaign_capacity_from_row(row: Any) -> CampaignCapacityOut:
         expectedVolume=float(row_map.get("expected_volume")) if row_map.get("expected_volume") is not None else None,
         status=str(row_map.get("status") or "planned"),
         findings=[_campaign_finding_from_item(item) for item in _parse_json_list(row_map.get("findings"))],
+    )
+
+
+def _field_conflict_from_item(item: Any) -> FieldServiceConflictOut:
+    item_map = dict(item) if isinstance(item, dict) else {}
+    return FieldServiceConflictOut(
+        code=str(item_map.get("code") or "UNKNOWN"),
+        severity=str(item_map.get("severity") or "warning"),
+        message=str(item_map.get("message") or ""),
+    )
+
+
+def _build_field_conflicts(profile_rows: list[Any], absence_rows: list[Any], calendar_rows: list[Any]) -> list[FieldServiceConflictOut]:
+    conflicts: list[FieldServiceConflictOut] = []
+    if not profile_rows:
+        conflicts.append(FieldServiceConflictOut(code="PROFILE_MISSING", severity="blocker", message="Kein HR-Time-Profil fuer Aussendienstplanung."))
+    else:
+        profile = dict(profile_rows[0])
+        if _normalize_time_profile_status(profile.get("status")) != "active":
+            conflicts.append(FieldServiceConflictOut(code="PROFILE_INACTIVE", severity="blocker", message="Mitarbeiter ist nicht aktiv planbar."))
+        if str(profile.get("time_model") or "") not in {"field_service", "flex", "standard"}:
+            conflicts.append(FieldServiceConflictOut(code="TIME_MODEL_MISMATCH", severity="warning", message="Zeitmodell ist nicht fuer Aussendienst optimiert."))
+    if absence_rows:
+        conflicts.append(FieldServiceConflictOut(code="ABSENCE_COLLISION", severity="blocker", message="Mitarbeiter hat im Besuchsfenster eine genehmigte Abwesenheit."))
+    if calendar_rows:
+        conflicts.append(FieldServiceConflictOut(code="CALENDAR_COLLISION", severity="warning", message="Kalender enthaelt bereits einen Blocker im Besuchsfenster."))
+    return conflicts
+
+
+def _field_status(conflicts: list[FieldServiceConflictOut]) -> str:
+    if any(conflict.severity == "blocker" for conflict in conflicts):
+        return "blocked"
+    if conflicts:
+        return "warning"
+    return "planned"
+
+
+def _field_service_from_row(row: Any) -> FieldServicePlanOut:
+    row_map = dict(row)
+    return FieldServicePlanOut(
+        id=str(row_map.get("id") or ""),
+        employeeRef=str(row_map.get("employee_ref") or ""),
+        customerRef=str(row_map.get("customer_ref") or ""),
+        territoryCode=str(row_map.get("territory_code") or ""),
+        campaignCode=str(row_map.get("campaign_code") or "") or None,
+        visitType=str(row_map.get("visit_type") or "consulting"),
+        startsAt=str(row_map.get("starts_at") or ""),
+        endsAt=str(row_map.get("ends_at") or ""),
+        status=str(row_map.get("status") or "planned"),
+        conflicts=[_field_conflict_from_item(item) for item in _parse_json_list(row_map.get("conflicts"))],
+        notes=str(row_map.get("notes") or "") or None,
     )
 
 
@@ -2332,6 +2414,114 @@ async def create_campaign_capacity(
     ).mappings().first()
     db.commit()
     return _campaign_capacity_from_row(row)
+
+
+@router.get("/field-service-plan", response_model=list[FieldServicePlanOut])
+async def list_field_service_plan(
+    employee_ref: str | None = Query(default=None),
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+):
+    params: dict[str, Any] = {"tenant_id": tenant_id}
+    where = ["tenant_id = :tenant_id"]
+    if employee_ref:
+        params["employee_ref"] = employee_ref
+        where.append("employee_ref = :employee_ref")
+    rows = db.execute(
+        text(
+            f"""
+            SELECT id, employee_ref, customer_ref, territory_code, campaign_code, visit_type,
+                   starts_at, ends_at, status, conflicts, notes
+            FROM domain_hr.field_service_plans
+            WHERE {' AND '.join(where)}
+            ORDER BY starts_at ASC, employee_ref ASC
+            """
+        ),
+        params,
+    ).mappings().all()
+    return [_field_service_from_row(row) for row in rows]
+
+
+@router.post("/field-service-plan", response_model=FieldServicePlanOut, status_code=201)
+async def create_field_service_plan(
+    payload: FieldServicePlanCreateIn,
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+):
+    starts_at = _parse_event_datetime(payload.startsAt)
+    ends_at = _parse_event_datetime(payload.endsAt)
+    if ends_at <= starts_at:
+        raise HTTPException(status_code=400, detail="endsAt must be after startsAt")
+    profile_rows = db.execute(
+        text(
+            """
+            SELECT employee_ref, status, time_model
+            FROM domain_hr.employee_time_profiles
+            WHERE tenant_id = :tenant_id AND employee_ref = :employee_ref
+            """
+        ),
+        {"tenant_id": tenant_id, "employee_ref": payload.employeeRef},
+    ).mappings().all()
+    absence_rows = db.execute(
+        text(
+            """
+            SELECT employee_ref
+            FROM domain_hr.time_entries
+            WHERE tenant_id = :tenant_id
+              AND employee_ref = :employee_ref
+              AND entry_date BETWEEN :start_date AND :end_date
+              AND entry_type IN ('Urlaub', 'Krank', 'Unbezahlt', 'Sonstiges')
+              AND status IN ('Approved', 'Genehmigt')
+            """
+        ),
+        {"tenant_id": tenant_id, "employee_ref": payload.employeeRef, "start_date": starts_at.date(), "end_date": ends_at.date()},
+    ).mappings().all()
+    calendar_rows = db.execute(
+        text(
+            """
+            SELECT id
+            FROM domain_hr.calendar_events
+            WHERE tenant_id = :tenant_id
+              AND employee_ref = :employee_ref
+              AND ends_at > :starts_at
+              AND starts_at < :ends_at
+              AND status = 'confirmed'
+            """
+        ),
+        {"tenant_id": tenant_id, "employee_ref": payload.employeeRef, "starts_at": starts_at, "ends_at": ends_at},
+    ).mappings().all()
+    conflicts = _build_field_conflicts(list(profile_rows), list(absence_rows), list(calendar_rows))
+    status = _field_status(conflicts)
+    row = db.execute(
+        text(
+            """
+            INSERT INTO domain_hr.field_service_plans
+              (id, tenant_id, employee_ref, customer_ref, territory_code, campaign_code,
+               visit_type, starts_at, ends_at, status, conflicts, notes, created_at, updated_at)
+            VALUES
+              (:id, :tenant_id, :employee_ref, :customer_ref, :territory_code, :campaign_code,
+               :visit_type, :starts_at, :ends_at, :status, CAST(:conflicts AS jsonb), :notes, NOW(), NOW())
+            RETURNING id, employee_ref, customer_ref, territory_code, campaign_code, visit_type,
+                      starts_at, ends_at, status, conflicts, notes
+            """
+        ),
+        {
+            "id": str(uuid4()),
+            "tenant_id": tenant_id,
+            "employee_ref": payload.employeeRef,
+            "customer_ref": payload.customerRef,
+            "territory_code": payload.territoryCode,
+            "campaign_code": payload.campaignCode,
+            "visit_type": payload.visitType,
+            "starts_at": starts_at,
+            "ends_at": ends_at,
+            "status": status,
+            "conflicts": json.dumps([conflict.model_dump() for conflict in conflicts]),
+            "notes": payload.notes,
+        },
+    ).mappings().first()
+    db.commit()
+    return _field_service_from_row(row)
 
 
 @router.get("/driver-time/summary", response_model=DriverTimeSummaryOut)
