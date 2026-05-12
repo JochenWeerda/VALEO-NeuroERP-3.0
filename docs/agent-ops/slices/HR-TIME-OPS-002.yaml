@@ -1,5 +1,5 @@
 id: HR-TIME-OPS-002
-status: reserviert
+status: abgeschlossen
 owner: Codex
 goal: >
   Durchklicktest-Befund beheben: HR-Time-GET-Hooks duerfen leere Platzhalterdaten
@@ -21,3 +21,7 @@ checks:
 risks: >
   Der temporaere E2E-Smoke nutzt API-Mocks; produktive Browser-E2E gegen echte
   FastAPI/Postgres bleibt Folgeslice.
+done:
+  - React-Query-HR-Time-Hooks von initialData auf placeholderData umgestellt.
+  - Playwright-Durchklicktest fuer Navigation, Arbeitsplan, Erfassung, Nachbearbeitung, Submit/Korrektur-POSTs und Druckpfad ergaenzt.
+  - Testlauf hat GET-Requests und UI-Rendering verifiziert.

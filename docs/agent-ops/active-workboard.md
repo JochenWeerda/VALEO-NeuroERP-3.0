@@ -213,10 +213,11 @@ Stand: `2026-05-12`
 
 **Von:** Codex
 **Owner:** Codex
-**Stand:** reserviert 2026-05-12
+**Stand:** abgeschlossen 2026-05-12
 **Ziel des Slices:** Durchklicktest-Befund beheben: HR-Time-GET-Hooks duerfen leere Platzhalterdaten nicht als frische Daten cachen und muessen beim Oeffnen der Maske wirklich laden.
 **Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/agent-ops/slices/HR-TIME-OPS-002.yaml`, `packages/frontend-web/src/lib/api/personal.ts`, `packages/frontend-web/tests/e2e/hr-time-clickthrough.generated.spec.ts`
 **Abnahmekriterien:** HR-Time-Durchklicktest sieht geladene Arbeitsplan-/Cockpitdaten; GET-Hooks verwenden Platzhalter statt frischer Initialdaten; Formular-POSTs und Druckaktion bleiben funktionsfaehig.
+**Erledigt:** React-Query-HR-Time-Hooks von `initialData` auf `placeholderData` umgestellt; Playwright-Durchklicktest fuer Navigation, Arbeitsplan, Erfassung, Nachbearbeitung, Submit/Korrektur-POSTs und Druckpfad ergaenzt; Testlauf hat GET-Requests und UI-Rendering verifiziert.
 **Checks:** `pnpm --filter @valero-neuroerp/frontend-web exec playwright test tests/e2e/hr-time-clickthrough.generated.spec.ts --project=chromium`; `pnpm --filter @valero-neuroerp/frontend-web type-check`; `python scripts/agent_workboard_supervisor.py validate`; `node scripts/docs-governance-check.cjs`
 **Offene Risiken:** Der temporäre E2E-Smoke nutzt API-Mocks; produktive Browser-E2E gegen echte FastAPI/Postgres bleibt Folgeslice.
 
