@@ -135,6 +135,17 @@ export type TimeEntryBookingInput = {
   notes?: string | null
 }
 
+export type TimeEntryCorrectionInput = {
+  hours: number
+  correctionReason: string
+  startTime?: string | null
+  endTime?: string | null
+  entryType?: string
+  costCenter?: string | null
+  workArea?: string | null
+  notes?: string | null
+}
+
 export type AbsenceImportInput = {
   employeeRef: string
   absenceType: 'Urlaub' | 'Krank' | 'Unbezahlt' | 'Sonstiges'
@@ -263,6 +274,50 @@ export type FieldServicePlan = {
   notes?: string | null
 }
 
+export type PlanningPreference = {
+  employeeRef: string
+  prefersNightTours: boolean
+  avoidNightTours: boolean
+  childcareSensitive: boolean
+  preferredWeekdays: string[]
+  schoolHolidayRegions: string[]
+  bridgeDayPolicy: string
+  maxExtraHoursBeforeHoliday: number
+}
+
+export type WorkPlanFinding = {
+  code: string
+  severity: DriverTimeFindingSeverity | string
+  message: string
+  employeeRef?: string | null
+  datum?: string | null
+  sourceRef?: string | null
+}
+
+export type WorkPlanAssignment = {
+  id: string
+  datum: string
+  employeeRef: string
+  label: string
+  sourceType: string
+  startTime?: string | null
+  endTime?: string | null
+  status: string
+  printReady: boolean
+  findings: WorkPlanFinding[]
+}
+
+export type WorkPlan = {
+  periodFrom: string
+  periodTo: string
+  source: string
+  preferences: PlanningPreference[]
+  assignments: WorkPlanAssignment[]
+  findings: WorkPlanFinding[]
+  printTitle: string
+  generatedAt: string
+}
+
 export type SchulungTyp = 'PSM' | 'Gefahrstoffe' | 'Gabelstapler' | 'Erste Hilfe' | 'Brandschutz' | 'Arbeitssicherheit'
 export type SchulungStatus = 'gueltig' | 'ablaufend' | 'abgelaufen'
 
@@ -347,6 +402,7 @@ export const personalKeys = {
   payrollExports: () => [...personalKeys.all, 'payroll-exports'] as const,
   campaignCapacity: () => [...personalKeys.all, 'campaign-capacity'] as const,
   fieldServicePlan: () => [...personalKeys.all, 'field-service-plan'] as const,
+  workPlan: (filters?: Record<string, unknown>) => [...personalKeys.all, 'work-plan', filters] as const,
   schulungen: (filters?: Record<string, unknown>) => [...personalKeys.all, 'schulungen', filters] as const,
   qualifikationen: (filters?: Record<string, unknown>) => [...personalKeys.all, 'qualifikationen', filters] as const,
   onboardingRuns: (filters?: Record<string, unknown>) => [...personalKeys.all, 'onboarding-runs', filters] as const,
@@ -405,6 +461,16 @@ const EMPTY_CALENDAR_EVENTS: CalendarEvent[] = []
 const EMPTY_PAYROLL_EXPORTS: PayrollExport[] = []
 const EMPTY_CAMPAIGN_CAPACITY: CampaignCapacity[] = []
 const EMPTY_FIELD_SERVICE_PLAN: FieldServicePlan[] = []
+const EMPTY_WORK_PLAN: WorkPlan = {
+  periodFrom: '',
+  periodTo: '',
+  source: 'empty',
+  preferences: [],
+  assignments: [],
+  findings: [],
+  printTitle: '',
+  generatedAt: '',
+}
 const EMPTY_SCHULUNGEN_LIST: Schulung[] = []
 const EMPTY_STUNDENZETTEL_LIST: StundenzettelEintrag[] = []
 const EMPTY_QUALIFIKATIONEN_LIST: Qualifikation[] = []
@@ -465,6 +531,29 @@ export function useCreateTimeEntry() {
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: async (data: TimeEntryBookingInput) => (await apiClient.post('/api/v1/personal/time-entries', data)).data,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: personalKeys.zeiterfassung() })
+      queryClient.invalidateQueries({ queryKey: personalKeys.timeCockpit() })
+    },
+  })
+}
+
+export function useSubmitTimeEntry() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async (entryId: string) => (await apiClient.post(`/api/v1/personal/time-entries/${entryId}/submit`)).data,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: personalKeys.zeiterfassung() })
+      queryClient.invalidateQueries({ queryKey: personalKeys.timeCockpit() })
+    },
+  })
+}
+
+export function useCorrectTimeEntry() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async ({ entryId, data }: { entryId: string; data: TimeEntryCorrectionInput }) =>
+      (await apiClient.post(`/api/v1/personal/time-entries/${entryId}/correct`, data)).data,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: personalKeys.zeiterfassung() })
       queryClient.invalidateQueries({ queryKey: personalKeys.timeCockpit() })
@@ -607,6 +696,23 @@ export function useCreateFieldServicePlan() {
       queryClient.invalidateQueries({ queryKey: personalKeys.fieldServicePlan() })
       queryClient.invalidateQueries({ queryKey: personalKeys.calendarEvents() })
     },
+  })
+}
+
+export function useWorkPlan(filters: { periodFrom: string; periodTo: string; holidayDates?: string[]; bridgeDays?: string[]; schoolHolidayDates?: string[] }) {
+  return useQuery({
+    queryKey: personalKeys.workPlan(filters),
+    queryFn: async () => {
+      const params = new URLSearchParams()
+      params.append('period_from', filters.periodFrom)
+      params.append('period_to', filters.periodTo)
+      if (filters.holidayDates?.length) params.append('holiday_dates', filters.holidayDates.join(','))
+      if (filters.bridgeDays?.length) params.append('bridge_days', filters.bridgeDays.join(','))
+      if (filters.schoolHolidayDates?.length) params.append('school_holiday_dates', filters.schoolHolidayDates.join(','))
+      return (await apiClient.get<WorkPlan>(`/api/v1/personal/work-plan?${String(params)}`)).data
+    },
+    initialData: EMPTY_WORK_PLAN,
+    staleTime: 30_000,
   })
 }
 
