@@ -201,10 +201,11 @@ Stand: `2026-05-12`
 
 **Von:** Codex
 **Owner:** Codex
-**Stand:** reserviert 2026-05-12
+**Stand:** abgeschlossen 2026-05-12
 **Ziel des Slices:** HR-Time-Verdrahtung fuer Navigation vor/zurueck, Bearbeiten/Nachbearbeiten, Drucken, Arbeitsplanabruf und praferenzbasierte Planung mit Nachttouren, Urlaub, Schulferien, Brueckentagen und Feiertagsdruck operationalisieren.
 **Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/agent-ops/slices/HR-TIME-OPS-001.yaml`, `app/api/v1/endpoints/personal.py`, `tests/test_personal_work_plan_api.py`, `packages/frontend-web/src/lib/api/personal.ts`, `packages/frontend-web/src/pages/personal/zeiterfassung.tsx`
 **Abnahmekriterien:** Backend liefert einen Arbeitsplanvertrag mit Planungsbefunden und Mitarbeiterpraeferenzen; Zeitbuchungen koennen aus der UI nachbearbeitet und neu eingereicht werden; Frontend bietet vor/zurueck-Navigation, Druckpfade und Arbeitsplanabruf; Tests sichern Arbeitsplan- und Praeferenzlogik.
+**Erledigt:** `/api/v1/personal/work-plan` mit Praeferenz-, Ferien-, Brueckentags-, Feiertags- und Abwesenheitsbefunden umgesetzt; Frontend-Hooks fuer Arbeitsplan, Einreichen und Korrektur ergaenzt; Zeiterfassungsseite bietet Tagesnavigation, Arbeitsplan-Druck, Arbeitsplan-Tab und Nachbearbeitungsmaske.
 **Checks:** `pytest tests/test_personal_work_plan_api.py tests/test_personal_shift_planning_api.py tests/test_personal_time_booking_api.py -q --no-cov`; `pnpm --filter @valero-neuroerp/frontend-web type-check`; `python scripts/agent_workboard_supervisor.py validate`; `node scripts/docs-governance-check.cjs`; `git diff --check`
 **Offene Risiken:** Produktive Ferienkalender-Provider, Betriebsvereinbarungen und echte Optimierungsengine bleiben Folgeslices.
 
@@ -1469,3 +1470,30 @@ Archiv des vorherigen Boards:
 **Ziel des Slices:** Wiegungen als operative Sammelmaske zwischen Waage, Annahme und Abrechnung verdichten.
 **Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/project-context/open-gaps-and-known-issues.md`, `docs/project-context/operational-rollout-scope-2026-04-09.md`, `packages/frontend-web/src/pages/waage/wiegungen.tsx`
 **Abnahmekriterien:** `wiegungen.tsx` surfact Rueckstand, Blocker und Folgepfad im leichten Fallmodell aus bereits geladenen Daten.
+
+## ERP-FINANZ-ROADMAP-P3P4
+
+**Von:** Claude Code
+**Owner:** (Team)
+**Stand:** abgeschlossen 2026-05-12
+**Ziel des Slices:** ERP-Finanz Roadmap Phase 3 (Orders-REST Architektur-Entscheid + Tenant-Isolation-Tests) und Phase 4 (Observability Counter + DB-Indexes) abschliessen.
+
+**Dateibesitz:**
+- `packages/erp-domain/src/bootstrap.ts` — Architektur-Kommentar Orders-REST = Python
+- `packages/erp-domain/tests/integration/tenant-isolation.spec.ts` — Negative Tenant-Tests
+- `app/core/metrics.py` — tenant_auth_errors_total Counter
+- `app/middleware/tenant_enforcement.py` — Counter-Inkrementierung
+- `migrations/sql/erp/006_missing_tenant_indexes.sql` — Composite-Indexes domain_sales/inventory/erp/finanz
+- `alembic/versions/faf00a6bfc11_006_missing_tenant_indexes.py` — No-Op Alembic-Revision
+- `tests/test_gap_fixes_phase4.py` — Phase-4-Smoke-Tests
+
+**Abnahmekriterien:**
+- bootstrap.ts dokumentiert: Orders-REST = Python; controller-Token nicht registriert (Invariante)
+- Tenant-Isolation: fremder Tenant sieht keine Debitoren/Kreditoren des anderen Tenants
+- `tenant_auth_errors_total{route, error_type}` Counter in Prometheus scrappbar
+- 006_missing_tenant_indexes.sql: idempotente Composite-Indexes auf alle relevanten Schemas
+- `alembic upgrade head` laeuft ohne drop_table-Operationen
+
+**Erledigt:** Alle 4 Phase-3+4-Ziele umgesetzt, committed `f4d0462ae` + `6cf97afcc`; Linter sauber; 4/4 Phase-4-Tests gruen; `alembic upgrade head` = no-op; main + develop auf GitHub gepusht.
+
+**Checks:** `pytest tests/test_gap_fixes_phase4.py -v`; `alembic upgrade head`; `flake8 app/core/metrics.py app/middleware/tenant_enforcement.py`
