@@ -197,6 +197,17 @@ Stand: `2026-05-12`
 **Checks:** `pnpm --filter @valero-neuroerp/frontend-web type-check`; `python scripts/agent_workboard_supervisor.py validate`; `node scripts/docs-governance-check.cjs`; `git diff --check`
 **Offene Risiken:** Detail-CRUD mit Edit/Delete, echte Optimierungsvorschlaege und mobile Offline-UX bleiben Folgeslices.
 
+## HR-TIME-OPS-001
+
+**Von:** Codex
+**Owner:** Codex
+**Stand:** reserviert 2026-05-12
+**Ziel des Slices:** HR-Time-Verdrahtung fuer Navigation vor/zurueck, Bearbeiten/Nachbearbeiten, Drucken, Arbeitsplanabruf und praferenzbasierte Planung mit Nachttouren, Urlaub, Schulferien, Brueckentagen und Feiertagsdruck operationalisieren.
+**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/agent-ops/slices/HR-TIME-OPS-001.yaml`, `app/api/v1/endpoints/personal.py`, `tests/test_personal_work_plan_api.py`, `packages/frontend-web/src/lib/api/personal.ts`, `packages/frontend-web/src/pages/personal/zeiterfassung.tsx`
+**Abnahmekriterien:** Backend liefert einen Arbeitsplanvertrag mit Planungsbefunden und Mitarbeiterpraeferenzen; Zeitbuchungen koennen aus der UI nachbearbeitet und neu eingereicht werden; Frontend bietet vor/zurueck-Navigation, Druckpfade und Arbeitsplanabruf; Tests sichern Arbeitsplan- und Praeferenzlogik.
+**Checks:** `pytest tests/test_personal_work_plan_api.py tests/test_personal_shift_planning_api.py tests/test_personal_time_booking_api.py -q --no-cov`; `pnpm --filter @valero-neuroerp/frontend-web type-check`; `python scripts/agent_workboard_supervisor.py validate`; `node scripts/docs-governance-check.cjs`; `git diff --check`
+**Offene Risiken:** Produktive Ferienkalender-Provider, Betriebsvereinbarungen und echte Optimierungsengine bleiben Folgeslices.
+
 ## AGENT-ORCH-001
 
 **Von:** Codex
