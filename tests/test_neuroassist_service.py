@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import asyncio
 from decimal import Decimal
+from unittest.mock import patch
 
 import pytest
 
@@ -10,9 +11,11 @@ from app.agents.neuroassist_service import NeuroAssistService
 
 
 @pytest.fixture(autouse=True)
-def _reset_agent_ops_state() -> None:
-    get_agent_ops_service().reset()
-    NeuroAssistService._run_registry.clear()
+def _reset_agent_ops_state():
+    with patch("app.agents.agent_ops.load_agent_ops_tenant_snapshot", return_value=None):
+        get_agent_ops_service().reset()
+        NeuroAssistService._run_registry.clear()
+        yield
 
 
 def test_neuroassist_service_lists_productive_capabilities():
