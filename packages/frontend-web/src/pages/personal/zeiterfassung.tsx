@@ -9,7 +9,7 @@ import { NativeSelect } from '@/components/ui/native-select'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Textarea } from '@/components/ui/textarea'
-import { AlertTriangle, Bot, CalendarCheck, CalendarDays, CheckCircle2, ChevronLeft, ChevronRight, Clock, FileDown, Pencil, Plus, Printer, Route, Save, ShieldCheck, Truck, Users } from 'lucide-react'
+import { AlertTriangle, Bot, CalendarCheck, CalendarDays, CheckCircle2, ChevronLeft, ChevronRight, Clock, FileDown, Pencil, Plus, Printer, Route, Save, Search, ShieldCheck, Truck, Users } from 'lucide-react'
 import {
   useAbsences,
   useCalendarEvents,
@@ -63,6 +63,11 @@ const addDays = (dateText: string, days: number): string => {
   return value.toISOString().split('T')[0]
 }
 
+const normalizeText = (value: unknown): string => String(value ?? '').toLowerCase()
+
+type HrTimeQuickFilter = 'all' | 'blockers' | 'warnings' | 'printReady' | 'drivers' | 'payroll'
+type HrTimeSortMode = 'priority' | 'date' | 'employee' | 'status'
+
 export default function ZeiterfassungPage(): JSX.Element {
   const initialDate = new Date().toISOString().split('T')[0]
   const [selectedDate, setSelectedDate] = useState(initialDate)
@@ -91,6 +96,9 @@ export default function ZeiterfassungPage(): JSX.Element {
   const createCampaignCapacity = useCreateCampaignCapacity()
   const createFieldServicePlan = useCreateFieldServicePlan()
   const [activeTab, setActiveTab] = useState('steuerung')
+  const [searchTerm, setSearchTerm] = useState('')
+  const [quickFilter, setQuickFilter] = useState<HrTimeQuickFilter>('all')
+  const [sortMode, setSortMode] = useState<HrTimeSortMode>('priority')
   const list = useMemo(() => zeiten ?? [], [zeiten])
   const driverTime = cockpit.driverTime
   const driverRows = useMemo(() => driverTime.events, [driverTime.events])
@@ -128,6 +136,62 @@ export default function ZeiterfassungPage(): JSX.Element {
     if (hints.length === 0) hints.push({ severity: 'info', title: 'Arbeitsvorrat', detail: 'Keine akuten HR-Time Blocker im aktuellen Cockpit.' })
     return hints
   }, [campaignCapacity, cockpit.kpis.blockerCount, cockpit.kpis.pendingApprovals, fieldServicePlan, shifts])
+
+  const filteredWorkPlanAssignments = useMemo(() => {
+    const search = normalizeText(searchTerm)
+    const matchesSearch = (item: WorkPlanAssignment) => {
+      if (!search) return true
+      return [
+        item.employeeRef,
+        item.label,
+        item.sourceType,
+        item.status,
+        item.findings.map((finding) => finding.code).join(' '),
+      ].some((value) => normalizeText(value).includes(search))
+    }
+    const matchesFilter = (item: WorkPlanAssignment) => {
+      if (quickFilter === 'all') return true
+      if (quickFilter === 'blockers') return item.status === 'blocked' || item.findings.some((finding) => finding.severity === 'blocker')
+      if (quickFilter === 'warnings') return item.status === 'warning' || item.findings.some((finding) => finding.severity === 'warning')
+      if (quickFilter === 'printReady') return item.printReady
+      if (quickFilter === 'drivers') return normalizeText(item.employeeRef).includes('driver') || normalizeText(item.label).includes('tour')
+      if (quickFilter === 'payroll') return normalizeText(item.sourceType).includes('payroll')
+      return true
+    }
+    const severityRank = (item: WorkPlanAssignment) => {
+      if (item.status === 'blocked' || item.findings.some((finding) => finding.severity === 'blocker')) return 0
+      if (item.status === 'warning' || item.findings.some((finding) => finding.severity === 'warning')) return 1
+      return 2
+    }
+    return workPlan.assignments
+      .filter((item) => matchesSearch(item) && matchesFilter(item))
+      .sort((a, b) => {
+        if (sortMode === 'priority') return severityRank(a) - severityRank(b) || a.datum.localeCompare(b.datum)
+        if (sortMode === 'employee') return a.employeeRef.localeCompare(b.employeeRef) || a.datum.localeCompare(b.datum)
+        if (sortMode === 'status') return a.status.localeCompare(b.status) || a.datum.localeCompare(b.datum)
+        return `${a.datum} ${a.startTime ?? ''}`.localeCompare(`${b.datum} ${b.startTime ?? ''}`)
+      })
+  }, [quickFilter, searchTerm, sortMode, workPlan.assignments])
+
+  const filteredTimeEntries = useMemo(() => {
+    const search = normalizeText(searchTerm)
+    return list
+      .filter((item) => {
+        const matchesSearch = !search || [item.id, item.mitarbeiter, item.datum, item.kommen, item.gehen, item.typ].some((value) => normalizeText(value).includes(search))
+        if (!matchesSearch) return false
+        if (quickFilter === 'all') return true
+        if (quickFilter === 'warnings') return item.typ === 'Ueberstunden'
+        if (quickFilter === 'drivers') return normalizeText(item.mitarbeiter).includes('driver') || normalizeText(item.mitarbeiter).includes('fahrer')
+        if (quickFilter === 'payroll') return item.typ !== 'Urlaub'
+        return quickFilter !== 'blockers'
+      })
+      .sort((a, b) => {
+        if (sortMode === 'employee') return a.mitarbeiter.localeCompare(b.mitarbeiter) || a.kommen.localeCompare(b.kommen)
+        if (sortMode === 'status') return a.typ.localeCompare(b.typ) || a.mitarbeiter.localeCompare(b.mitarbeiter)
+        if (sortMode === 'priority') return Number(b.typ === 'Ueberstunden') - Number(a.typ === 'Ueberstunden') || a.kommen.localeCompare(b.kommen)
+        return a.kommen.localeCompare(b.kommen)
+      })
+  }, [list, quickFilter, searchTerm, sortMode])
 
   const columns = [
     { key: 'mitarbeiter' as const, label: 'Mitarbeiter' },
@@ -427,6 +491,52 @@ export default function ZeiterfassungPage(): JSX.Element {
             </Button>
           </div>
         </div>
+      </div>
+
+      <div className="grid gap-3 rounded-md border bg-card p-3 lg:grid-cols-[minmax(220px,1fr)_190px_190px_auto]">
+        <div className="relative">
+          <Search className="pointer-events-none absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+          <Input
+            aria-label="HR-Time Suche"
+            className="pl-9"
+            placeholder="Mitarbeiter, Tour, Schicht, Kampagne, Befund suchen"
+            value={searchTerm}
+            onChange={(event) => setSearchTerm(event.target.value)}
+          />
+        </div>
+        <div>
+          <Label htmlFor="hr-time-quick-filter" className="sr-only">HR-Time Schnellfilter</Label>
+          <NativeSelect
+            id="hr-time-quick-filter"
+            value={quickFilter}
+            onValueChange={(value) => setQuickFilter(value as HrTimeQuickFilter)}
+            options={[
+              { value: 'all', label: 'Alle' },
+              { value: 'blockers', label: 'Nur Blocker' },
+              { value: 'warnings', label: 'Nur Warnungen' },
+              { value: 'printReady', label: 'Druckbereit' },
+              { value: 'drivers', label: 'Fahrer' },
+              { value: 'payroll', label: 'Payroll' },
+            ]}
+          />
+        </div>
+        <div>
+          <Label htmlFor="hr-time-sort" className="sr-only">HR-Time Sortierung</Label>
+          <NativeSelect
+            id="hr-time-sort"
+            value={sortMode}
+            onValueChange={(value) => setSortMode(value as HrTimeSortMode)}
+            options={[
+              { value: 'priority', label: 'Prioritaet' },
+              { value: 'date', label: 'Datum/Zeit' },
+              { value: 'employee', label: 'Mitarbeiter' },
+              { value: 'status', label: 'Status' },
+            ]}
+          />
+        </div>
+        <Button type="button" variant="outline" onClick={() => { setSearchTerm(''); setQuickFilter('all'); setSortMode('priority') }}>
+          Filter resetten
+        </Button>
       </div>
 
       <div className="grid gap-4 md:grid-cols-4">
@@ -809,7 +919,7 @@ export default function ZeiterfassungPage(): JSX.Element {
                 </div>
               </CardHeader>
               <CardContent>
-                <DataTable data={workPlan.assignments} columns={workPlanColumns} />
+                <DataTable data={filteredWorkPlanAssignments} columns={workPlanColumns} />
               </CardContent>
             </Card>
             <Card>
@@ -824,7 +934,7 @@ export default function ZeiterfassungPage(): JSX.Element {
                   </div>
                   <div>
                     <p className="text-sm text-muted-foreground">Druckbereit</p>
-                    <p className="text-2xl font-semibold">{workPlan.assignments.filter((item) => item.printReady).length}</p>
+                    <p className="text-2xl font-semibold">{filteredWorkPlanAssignments.filter((item) => item.printReady).length}</p>
                   </div>
                 </div>
                 {workPlan.preferences.map((preference) => (
@@ -934,7 +1044,7 @@ export default function ZeiterfassungPage(): JSX.Element {
               <CardTitle>Klassische Arbeitszeit</CardTitle>
             </CardHeader>
             <CardContent className="pt-6">
-              <DataTable data={list} columns={columns} />
+              <DataTable data={filteredTimeEntries} columns={columns} />
               <div className="mt-6 flex justify-between border-t pt-4 font-bold">
                 <span>Gesamt-Stunden Heute:</span>
                 <span>{gesamtStunden.toFixed(1)} h</span>
