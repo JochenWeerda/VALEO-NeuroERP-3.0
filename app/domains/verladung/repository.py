@@ -2,7 +2,7 @@
 Repository Pattern for Verladung Domain (Tours)
 """
 
-from typing import List, Optional, Dict, Any
+from typing import List, Optional
 from sqlalchemy.orm import Session
 from sqlalchemy import desc, func
 from datetime import datetime
@@ -10,9 +10,9 @@ from app.core.uuid7 import prefixed_id
 
 from app.domains.verladung.models import (
     Tour, TourStatus,
-    TourStop, StopStatus,
-    TourDeliveryNote, DeliveryNoteStatus,
-    TourEvent, EventType
+    TourStop, TourDeliveryNote,
+    DeliveryNoteStatus, TourEvent,
+    EventType
 )
 
 

@@ -4,7 +4,7 @@ RESTful API for Tours with Stops, Delivery Notes, and Events
 """
 
 from typing import Optional, List
-from fastapi import APIRouter, Depends, HTTPException, Query, Body
+from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 from pydantic import BaseModel, ConfigDict
 from datetime import datetime
@@ -15,9 +15,6 @@ from app.domains.verladung.repository import (
     TourStopRepository,
     TourDeliveryNoteRepository,
     TourEventRepository
-)
-from app.domains.verladung.models import (
-    TourStatus, StopStatus, DeliveryNoteStatus, EventType
 )
 
 router = APIRouter(prefix="/tours", tags=["Verladung", "Tours"])

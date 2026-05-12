@@ -5,7 +5,7 @@ Double-entry bookkeeping transaction
 
 from dataclasses import dataclass
 from datetime import datetime, date
-from typing import List, Optional
+from typing import List
 
 
 @dataclass

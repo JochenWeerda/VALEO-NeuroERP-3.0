@@ -3,9 +3,9 @@ Workflow Schema Migration Contracts — Wave 67
 Pure Python, no app/api imports.
 """
 from enum import Enum
-from dataclasses import dataclass, field, replace
+from dataclasses import dataclass, field
 from datetime import datetime
-from typing import Optional, List, Dict, Any
+from typing import Optional, List
 
 
 class SchemaKompatibilitaet(Enum):

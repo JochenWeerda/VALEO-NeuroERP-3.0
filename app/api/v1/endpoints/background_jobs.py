@@ -12,7 +12,6 @@ from app.core.background_jobs import (
     JobPrioritaet,
     JobStatus,
     JobTyp,
-    create_job_from_request,
     get_background_job_registry,
     get_default_job_types,
 )

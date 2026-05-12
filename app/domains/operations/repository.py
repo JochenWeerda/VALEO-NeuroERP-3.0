@@ -5,23 +5,20 @@ Repository Pattern for Operations Domain
 from typing import List, Optional
 from sqlalchemy.orm import Session
 from sqlalchemy import desc, func
-from datetime import datetime, timezone
+from datetime import datetime
 from app.core.uuid7 import prefixed_id
 
 from app.domains.operations.models import (
-    Waage, WaageStatus,
-    Wiegung,
-    Fahrzeug, FahrzeugStatus,
-    Fahrer, FahrerStatus,
-    FahrzeugTour,
-    FuhrparkTerminart,
-    FuhrparkRechnung,
+    Waage, Wiegung,
+    Fahrzeug,
+    Fahrer, FahrzeugTour,
+    FuhrparkTerminart, FuhrparkRechnung,
     FuhrparkAusgehendesDokument,
     SpeditionFrachttarif,
-    Dokument, DokumentStatus,
+    Dokument,
+    DokumentStatus,
     DokumentVersion,
-    Charge,
-    ChargeStatus,
+    Charge, ChargeStatus,
     BankKonto,
     Rahmenvertrag,
     KonContract,

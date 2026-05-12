@@ -2,7 +2,7 @@
 Policy Manager API Endpoints
 """
 
-from fastapi import APIRouter, HTTPException, Body, Request, Query, Depends
+from fastapi import APIRouter, HTTPException, Request, Query, Depends
 from fastapi.responses import StreamingResponse
 from typing import List, Dict, Any
 from pydantic import BaseModel, Field

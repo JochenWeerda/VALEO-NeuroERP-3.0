@@ -7,7 +7,6 @@ import logging
 import asyncio
 from datetime import datetime, timedelta
 from typing import Dict, Any
-from calendar import monthrange
 
 from app.core.database import get_db
 

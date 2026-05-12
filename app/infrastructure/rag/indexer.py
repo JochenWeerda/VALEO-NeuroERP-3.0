@@ -12,7 +12,7 @@ Indexed collections:
 """
 
 import logging
-from typing import List, Optional
+from typing import Optional
 from sqlalchemy.orm import Session
 
 from app.infrastructure.models import Article, Customer

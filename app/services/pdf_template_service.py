@@ -11,7 +11,6 @@ from reportlab.lib.pagesizes import A4, LETTER
 from reportlab.lib.units import mm
 from reportlab.pdfgen import canvas
 from reportlab.lib.utils import ImageReader
-from PIL import Image
 
 logger = logging.getLogger(__name__)
 

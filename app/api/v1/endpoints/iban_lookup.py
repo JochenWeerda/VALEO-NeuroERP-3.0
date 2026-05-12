@@ -10,7 +10,6 @@ import httpx
 from pydantic import BaseModel
 from datetime import datetime, timedelta
 import hashlib
-import json
 
 router = APIRouter(prefix="/iban-lookup", tags=["finance", "iban"])
 

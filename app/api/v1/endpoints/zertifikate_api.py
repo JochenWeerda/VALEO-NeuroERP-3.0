@@ -1,10 +1,10 @@
 from __future__ import annotations
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, Query
 from pydantic import BaseModel
 from typing import Optional
 from datetime import date
 import uuid
-from app.core.zertifikate import Zertifikat, ZertifikatStore, ZertifikatTyp, ZertifikatStatus
+from app.core.zertifikate import Zertifikat, ZertifikatStore, ZertifikatTyp
 
 router = APIRouter(prefix="/zertifikate", tags=["zertifikate"])
 _store = ZertifikatStore()

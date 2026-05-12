@@ -10,7 +10,6 @@ from pydantic import BaseModel, Field
 from app.core.reklamation import (
     Reklamation,
     ReklamationStore,
-    ReklamationZustandsmaschine,
     ReklamationsCRMReferenz,
     ReklamationsDMSReferenz,
     ReklamationsPosition,

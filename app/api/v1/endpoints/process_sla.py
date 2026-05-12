@@ -15,7 +15,6 @@ from pydantic import BaseModel
 from app.core.tenant import get_tenant_id
 from app.core.process_sla import (
     EscalationEvent,
-    EscalationTarget,
     ProcessSLAPolicy,
     SLASeverity,
     SLAViolation,

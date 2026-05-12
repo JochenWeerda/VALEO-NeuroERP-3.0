@@ -21,7 +21,7 @@ testbar.
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Any, Iterable, Mapping, Optional, Sequence
+from typing import Any, Mapping, Optional, Sequence
 
 
 FeedLike = Mapping[str, Any]

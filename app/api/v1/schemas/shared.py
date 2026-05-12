@@ -3,12 +3,11 @@ API schemas for shared domain (tenants, users)
 Pydantic models for request/response validation
 """
 
-from typing import Optional, List
-from pydantic import BaseModel, Field, EmailStr, ConfigDict
+from typing import Optional
+from pydantic import Field, EmailStr, ConfigDict
 from datetime import datetime
-from uuid import UUID
 
-from .base import BaseSchema, PaginatedResponse
+from .base import BaseSchema
 
 
 # Tenant Schemas

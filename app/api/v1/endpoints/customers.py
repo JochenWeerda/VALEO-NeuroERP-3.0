@@ -357,8 +357,7 @@ async def list_customers(
         )
     except (httpx.HTTPStatusError, httpx.ConnectError, Exception) as exc:
         # Fallback: Read directly from database
-        from ....infrastructure.models import Customer as CustomerModel
-        from sqlalchemy import or_
+        pass
         
         # Log the fallback for debugging
         import logging

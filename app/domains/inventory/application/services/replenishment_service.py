@@ -8,9 +8,7 @@ from decimal import Decimal
 from datetime import datetime, timedelta
 from sqlalchemy.orm import Session
 
-from app.core.database import get_db
 from app.infrastructure.models import Article as ArticleModel
-from app.domains.inventory.domain.entities import Article
 
 
 class ReplenishmentService:

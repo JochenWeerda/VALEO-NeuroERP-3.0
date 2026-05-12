@@ -4,13 +4,13 @@ Mayan-DMS-Integration für Admin-Benutzer
 """
 
 from __future__ import annotations
-from fastapi import APIRouter, Body, HTTPException, Depends
+from fastapi import APIRouter, HTTPException, Depends
 from pydantic import BaseModel, AnyHttpUrl, Field
 import httpx
 import json
 import logging
 from pathlib import Path
-from typing import Dict, List, Any
+from typing import Dict
 
 from app.auth.guards import require_all_scopes
 

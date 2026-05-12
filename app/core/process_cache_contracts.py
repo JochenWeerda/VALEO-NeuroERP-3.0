@@ -5,7 +5,7 @@ Pure Python, no app/api imports.
 from enum import Enum
 from dataclasses import dataclass, field, replace
 from datetime import datetime
-from typing import Optional, Any, List, Dict
+from typing import Optional, Any, List
 
 
 class CacheStrategie(Enum):

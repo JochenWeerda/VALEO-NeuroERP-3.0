@@ -5,7 +5,7 @@ Wires up all services, repositories, and dependencies for VALEO-NeuroERP
 
 import logging
 from .dependency_container import container
-from .database import get_db, SessionLocal
+from .database import SessionLocal
 from ..infrastructure.repositories import (
     TenantRepository, UserRepository, CustomerRepository,
     LeadRepository, ContactRepository, ArticleRepository,
@@ -52,7 +52,6 @@ def configure_container():
     def get_db_session_factory():
         """Factory for database sessions with improved error handling."""
         try:
-            from sqlalchemy.orm import sessionmaker
             from .database import SessionLocal
             logger.debug("Creating database session factory")
             return SessionLocal()

@@ -3,7 +3,6 @@ Competitor Price & Image Monitoring Service
 Hybrid approach: Search API discovery + structured scraping with JSON-LD/schema.org
 """
 
-import asyncio
 import logging
 import json
 import hashlib

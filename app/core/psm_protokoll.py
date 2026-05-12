@@ -1,8 +1,6 @@
 from __future__ import annotations
 from pydantic import BaseModel
 from datetime import date
-from typing import Optional
-import uuid
 
 class PsmAnwendungProtokoll(BaseModel):
     """GoBD-konformes PSM-Anwendungsprotokoll nach § 11 PflSchG."""

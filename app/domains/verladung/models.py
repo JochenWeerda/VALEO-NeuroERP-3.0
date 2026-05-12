@@ -2,7 +2,7 @@
 Verladung Domain Models - Tours, Stops, Delivery Notes, Events
 """
 
-from sqlalchemy import Column, String, Integer, Float, DateTime, Text, ForeignKey, JSON, Boolean
+from sqlalchemy import Column, String, Integer, Float, DateTime, Text, ForeignKey, JSON
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 import enum

@@ -4,15 +4,13 @@ API-Endpoints für CSV/XLSX-Export
 """
 
 from __future__ import annotations
-from fastapi import APIRouter, Query, Depends, HTTPException
+from fastapi import APIRouter, Query, Depends
 from fastapi.responses import FileResponse
 from pathlib import Path
-from typing import Dict, List
 import pandas as pd
 import logging
 import time
 
-from app.auth.deps import require_roles, get_current_user, User
 from app.auth.guards import require_scopes
 from app.core.sse import sse_hub
 from app.repositories.document_repository import DocumentRepository

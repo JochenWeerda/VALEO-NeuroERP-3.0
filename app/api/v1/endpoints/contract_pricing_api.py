@@ -1,8 +1,6 @@
 from __future__ import annotations
-from fastapi import APIRouter, Query
+from fastapi import APIRouter
 from pydantic import BaseModel
-from typing import Optional
-from datetime import date
 import uuid
 
 router = APIRouter(prefix="/contract-pricing", tags=["contract-pricing"])

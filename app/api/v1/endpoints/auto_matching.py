@@ -8,7 +8,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 from sqlalchemy import text
 from decimal import Decimal
-from datetime import date, datetime, timedelta
+from datetime import date, datetime
 from pydantic import BaseModel, Field
 import logging
 import re
@@ -597,7 +597,6 @@ async def auto_match(
                         
                         # Check if IBAN matches (would need to query debtor master data)
                         # For now, skip IBAN matching
-                        pass
                 
                 elif rule.match_type == "combined":
                     # Combine multiple factors

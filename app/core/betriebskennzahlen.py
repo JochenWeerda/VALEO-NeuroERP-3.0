@@ -1,10 +1,8 @@
 from __future__ import annotations
 from pydantic import BaseModel
 from enum import Enum
-from typing import Optional
 from datetime import date
 import uuid
-import hashlib
 import statistics
 
 class KennzahlEinheit(str, Enum):

@@ -11,10 +11,9 @@ Tables:
 """
 
 from sqlalchemy import (
-    Column, String, Integer, Float, Boolean, DateTime, Date,
-    Text, ForeignKey, DECIMAL, Index, UniqueConstraint,
+    Column, String, Integer, Boolean, DateTime, Date, Text,
+    ForeignKey, DECIMAL, Index, UniqueConstraint,
 )
-from sqlalchemy.dialects import postgresql
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 

@@ -6,8 +6,7 @@ KPIs and dashboard metrics endpoint
 from fastapi import APIRouter, Depends, Query
 from typing import Optional
 import logging
-from datetime import datetime, timedelta
-from collections import defaultdict
+from datetime import datetime
 
 from sqlalchemy.orm import Session
 from app.core.database import get_db

@@ -16,7 +16,6 @@ from ....core.operational_governance import (
     DelegationReviewEntry,
     ExportReviewEntry,
     OperationalGovernanceStore,
-    GovernanceReviewStatus,
 )
 
 router = APIRouter(prefix="/governance", tags=["governance", "audit"])

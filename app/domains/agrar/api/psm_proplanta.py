@@ -11,11 +11,7 @@ import logging
 from ....core.database import get_db
 from ....integrations.proplanta_psm_client import (
     ProplantaPSMClient,
-    PSMData,
     ProplantaPSMContractError,
-    sync_psm_data,
-    search_psm,
-    get_psm_details,
     is_configured
 )
 

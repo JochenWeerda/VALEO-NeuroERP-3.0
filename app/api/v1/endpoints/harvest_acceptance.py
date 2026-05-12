@@ -23,8 +23,6 @@ from app.infrastructure.models import (
     HarvestAcceptance,
     HarvestAcceptancePosition,
     HarvestAcceptanceLine,
-    SupplierTaxProfile,
-    PriceAdjustmentRule,
     WeighingTicket,
     Customer,
     Article,
@@ -35,11 +33,7 @@ from app.infrastructure.models import (
 from app.domains.inventory.api.inventory_auth import require_inventory_admin
 from modules.agrar.services.harvest_calculator import (
     HarvestCalculationInput,
-    HarvestCalculationResult,
     calculate_harvest_settlement,
-)
-from modules.agrar.services.drying_rule_engine import (
-    DryingRuleRepository as _DryingRuleRepository,
 )
 from app.api.v1.endpoints.agrar_settlements import _DbDryingRuleRepo
 from modules.agrar.services.quality_protocol_service import (
@@ -48,13 +42,7 @@ from modules.agrar.services.quality_protocol_service import (
     QualityProtocolCreate,
 )
 from modules.agrar.repositories.quality_protocol_repo import QualityProtocolRepositoryImpl
-from modules.agrar.services.daily_price_service import (
-    get_price_for_date,
-    DailyPriceFilter,
-)
-from modules.agrar.repositories.daily_price_repo import DailyPriceRepositoryImpl
 from modules.agrar.services.self_billing_service import (
-    create_credit_note,
     CreditNoteCreate,
 )
 from modules.agrar.repositories.self_billing_repo import SelfBillingRepositoryImpl
@@ -1496,7 +1484,6 @@ async def create_qualitaetsprotokoll(
     Erstelle Qualitätsprotokoll für Ernte-Annahme.
     Speichert Laborwerte in domain_inventory.quality_protocols und setzt quality_protocol_id.
     """
-    from datetime import datetime
     
     acceptance = db.query(HarvestAcceptance).filter(
         HarvestAcceptance.id == acceptance_id,

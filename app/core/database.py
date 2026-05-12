@@ -4,7 +4,7 @@ PostgreSQL database connection with SQLAlchemy
 """
 
 import logging
-from sqlalchemy import create_engine, event, text
+from sqlalchemy import create_engine, text
 from sqlalchemy.orm import sessionmaker, Session, declarative_base
 from sqlalchemy.pool import QueuePool
 
@@ -50,7 +50,6 @@ def create_tables():
         
         # Import all models to register them with Base
         try:
-            from app.crm import models as crm_models
             logger.info("CRM models imported")
         except Exception as e:
             logger.warning(f"CRM models import failed: {e}")

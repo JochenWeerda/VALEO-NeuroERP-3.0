@@ -8,7 +8,6 @@ import asyncio
 from datetime import datetime, timedelta
 from typing import Dict, Any
 
-from ..core.config import settings
 from app.core.database import get_db
 
 logger = logging.getLogger(__name__)

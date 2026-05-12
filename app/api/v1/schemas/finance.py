@@ -7,7 +7,6 @@ from datetime import datetime
 from decimal import Decimal
 from typing import Optional, List
 from pydantic import BaseModel, Field, field_validator, ConfigDict, model_validator
-from uuid import UUID
 
 
 # Account Schemas
@@ -114,7 +113,6 @@ class JournalEntryLineBase(BaseModel):
 
 class JournalEntryLineCreate(JournalEntryLineBase):
     """Schema for creating journal entry lines"""
-    pass
 
 
 class JournalEntryLine(JournalEntryLineBase):

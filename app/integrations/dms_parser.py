@@ -5,7 +5,7 @@ Extrahiert Beleg-Felder aus OCR-Text (Mayan → VALEO)
 
 import re
 import logging
-from typing import Dict, Optional, Any
+from typing import Dict, Any
 from datetime import datetime
 
 logger = logging.getLogger(__name__)

@@ -202,7 +202,6 @@ class ActivityBase(BaseSchema):
 
 class ActivityCreate(ActivityBase):
     """Schema for creating an activity"""
-    pass
 
 
 class ActivityUpdate(BaseSchema):
@@ -256,7 +255,6 @@ class FarmProfileBase(BaseSchema):
 
 class FarmProfileCreate(FarmProfileBase):
     """Schema for creating a farm profile"""
-    pass
 
 
 class FarmProfileUpdate(BaseSchema):

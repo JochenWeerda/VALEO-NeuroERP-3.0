@@ -3,7 +3,6 @@ Inventory-specific authentication and authorization middleware
 """
 
 import json
-from typing import Optional
 from fastapi import Depends, HTTPException, Request
 from sqlalchemy.orm import Session
 

@@ -6,12 +6,12 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 from sqlalchemy import text
-from typing import Any, Optional
+from typing import Optional
 
 from app.core.database import get_db
 from app.core.tenant import get_tenant_id
 from app.services.audit_hardening import (
-    append_audit_entry, validate_hash_chain, query_audit_trail,
+    validate_hash_chain, query_audit_trail,
 )
 from app.services.neuro_decision_protocol import (
     record_decision, get_decision, list_decisions,

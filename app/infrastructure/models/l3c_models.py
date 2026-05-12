@@ -4,7 +4,7 @@ Database models for inventory extensions, logistics, messaging, webhooks,
 and master-data tables required for L3-Connect API parity.
 """
 
-from sqlalchemy import Column, String, Integer, Float, Boolean, DateTime, Date, Text, ForeignKey, DECIMAL, UniqueConstraint
+from sqlalchemy import Column, String, Integer, Boolean, DateTime, Date, Text, ForeignKey, DECIMAL, UniqueConstraint
 from sqlalchemy.dialects import postgresql
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.sql import func

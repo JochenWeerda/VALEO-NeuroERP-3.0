@@ -2,7 +2,7 @@
 CRM SQLAlchemy Models
 """
 
-from sqlalchemy import Column, String, Text, DateTime, ForeignKey, Numeric, Integer, Boolean, Enum
+from sqlalchemy import Column, String, Text, DateTime, ForeignKey, Numeric, Integer, Enum
 from sqlalchemy.sql import func
 from app.core.database import Base
 import enum

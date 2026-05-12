@@ -9,10 +9,9 @@ from __future__ import annotations
 import json
 import logging
 import uuid
-from datetime import datetime
 from typing import Any
 
-from fastapi import APIRouter, Depends, HTTPException, Response
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from sqlalchemy import text
 
@@ -23,7 +22,6 @@ from ....core.audit_evidence import (
     EvidenceReference,
     EvidenceSourceSystem,
     EvidenceType,
-    DocumentEvidencePolicy,
     build_default_evidence_policy,
 )
 

@@ -20,18 +20,13 @@ from __future__ import annotations
 
 import json
 import logging
-import math
 import os
-import re
-from pathlib import Path
 from typing import Any, Dict, List, Literal, Optional, Set, Tuple
 
-import httpx
 from fastapi import APIRouter, File, Header, HTTPException, Query, Request, UploadFile
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 
-from app.core.config import settings
 
 logger = logging.getLogger(__name__)
 
@@ -6343,7 +6338,6 @@ from app.agrar.rations.constants.gfe2023 import (
     FAN_DEFAULT_TOLERANCE as _FAN_DEFAULT_TOLERANCE,
     FAN_DEFAULT_TOLERANCE_WARN as _FAN_DEFAULT_TOLERANCE_WARN,
     FAN_DEFAULT_MAX_ITERATIONS as _FAN_DEFAULT_MAX_ITERATIONS,
-    FAN_REFERENCE_PRESETS as _FAN_REFERENCE_PRESETS,
     FAN_REFERENCE_MIN as _FAN_REFERENCE_MIN,
     FAN_REFERENCE_MAX as _FAN_REFERENCE_MAX,
 )

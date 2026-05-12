@@ -9,8 +9,6 @@ from pydantic import BaseModel, Field
 
 from app.core.tenant_rate_limits import (
     RateLimitRequest,
-    RateLimitResult,
-    RateLimitResultTyp,
     get_tenant_isolation_registry,
 )
 

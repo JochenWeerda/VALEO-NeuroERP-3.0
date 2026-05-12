@@ -20,7 +20,7 @@ from dataclasses import dataclass, field
 from decimal import Decimal
 from typing import Optional
 
-from sqlalchemy import func, case
+from sqlalchemy import func
 from sqlalchemy.orm import Session
 
 from app.domains.operations.models import KonContract, KonContractLine, KonContractMovement

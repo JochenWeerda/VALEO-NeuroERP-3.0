@@ -5,7 +5,6 @@ Standardisierte Import-Pipelines fuer CSV, EDI, OCR und andere Formate.
 
 from __future__ import annotations
 
-import uuid
 from datetime import datetime, timezone
 from typing import Any
 

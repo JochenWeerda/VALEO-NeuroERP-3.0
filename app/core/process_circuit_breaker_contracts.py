@@ -1,7 +1,7 @@
 from dataclasses import dataclass, field
 from enum import Enum
 from typing import Optional
-from datetime import datetime, timedelta
+from datetime import datetime
 
 
 class CircuitBreakerZustand(str, Enum):

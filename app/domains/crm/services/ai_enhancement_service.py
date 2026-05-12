@@ -4,11 +4,9 @@ AI-powered features for CRM: sentiment analysis, follow-up suggestions, report i
 """
 
 import logging
-import re
 from datetime import datetime, timedelta
-from typing import Dict, List, Any, Optional
+from typing import Dict, List, Any
 from sqlalchemy.orm import Session
-from sqlalchemy import and_, func, desc
 
 logger = logging.getLogger(__name__)
 

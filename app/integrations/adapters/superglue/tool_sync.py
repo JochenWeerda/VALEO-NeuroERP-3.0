@@ -13,7 +13,6 @@ from app.core.config import settings
 from app.integrations.adapters.superglue.client import SuperglueClient
 from app.integrations.contracts import SuperglueToolRecord
 from app.integrations.services.superglue_connector_registry import (
-    build_superglue_connector_binding,
     list_superglue_connector_bindings,
 )
 

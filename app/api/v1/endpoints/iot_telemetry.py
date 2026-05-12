@@ -5,17 +5,15 @@ Waage, Silo, Lager sensor management and telemetry ingestion.
 
 from __future__ import annotations
 
-import uuid
 from datetime import datetime, timezone
 from typing import Any
 
-from fastapi import APIRouter, Depends, HTTPException, Response
+from fastapi import APIRouter, Depends, HTTPException
 
 from ....core.endpoint_gateways import register_telemetry_stores
 from ....core.tenant import get_tenant_id
 from ....core.iot_telemetry import (
     DeviceManifest,
-    DeviceStatus,
     TelemetryReading,
     TelemetryAggregation,
 )

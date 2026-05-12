@@ -3,11 +3,10 @@ Credit Memos and Debit Memos API
 PROC-PAY-02: Lieferantengutschriften / Belastungen
 """
 
-from fastapi import APIRouter, HTTPException, Depends, Query, Request
+from fastapi import APIRouter, HTTPException, Depends, Request
 from sqlalchemy.orm import Session
 from typing import List, Optional
 from datetime import datetime
-from decimal import Decimal
 from pydantic import BaseModel, Field
 import logging
 from app.core.uuid7 import uuid7

@@ -7,7 +7,7 @@ import logging
 from datetime import datetime, timedelta
 from typing import Dict, List, Any, Optional
 from sqlalchemy.orm import Session
-from sqlalchemy import and_, func, desc, extract
+from sqlalchemy import and_
 
 logger = logging.getLogger(__name__)
 

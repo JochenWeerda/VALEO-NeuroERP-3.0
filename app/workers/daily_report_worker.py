@@ -5,10 +5,8 @@ Scheduled worker for generating and sending daily CRM reports
 
 import logging
 import asyncio
-from datetime import datetime, time
 from typing import Dict, Any
 
-from ..core.config import settings
 from app.core.database import get_db
 from ..domains.crm.services.daily_report_service import DailyReportService
 

@@ -21,7 +21,6 @@ from app.core.data_quality_enforcement import (
 from app.core.tenant import get_tenant_id
 from app.domains.inventory.api.inventory_auth import require_inventory_admin
 from modules.agrar.services.daily_price_service import (
-    get_price_for_date,
     create_daily_price,
     bulk_import_prices,
     get_price_history,

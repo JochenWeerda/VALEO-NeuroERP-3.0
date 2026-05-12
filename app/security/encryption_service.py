@@ -7,7 +7,7 @@ für VALEO-NeuroERP mit Key-Management und automatischem Key-Rotation.
 """
 
 from datetime import datetime, timedelta
-from typing import Dict, Any, Optional
+from typing import Dict, Any
 import os
 import base64
 import logging
@@ -15,7 +15,6 @@ from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 from cryptography.hazmat.backends import default_backend
-import secrets
 
 logger = logging.getLogger(__name__)
 
@@ -352,7 +351,6 @@ class ISO27001EncryptionService:
 
 class SecurityException(Exception):
     """Security-related exception"""
-    pass
 
 
 # Convenience functions

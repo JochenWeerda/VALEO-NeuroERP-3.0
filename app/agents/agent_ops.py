@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 from collections import defaultdict
-from copy import deepcopy
 from datetime import UTC, datetime, timedelta
 from decimal import Decimal, ROUND_HALF_UP
 from typing import Any

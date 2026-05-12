@@ -3,10 +3,9 @@ Finance Schemas
 Pydantic schemas for finance operations, E-Invoicing (ZUGFeRD/XRechnung), and advanced features
 """
 
-from pydantic import BaseModel, Field, field_validator, ConfigDict
+from pydantic import BaseModel, Field, ConfigDict
 from typing import List, Optional, Dict, Any
 from datetime import datetime, date
-from decimal import Decimal
 
 
 # ============================================================================

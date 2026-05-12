@@ -7,11 +7,10 @@ Integriert Guardrails (NC-C) und Neuro-Core Pipeline (NC-A).
 from __future__ import annotations
 
 import logging
-import re
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from enum import Enum
-from typing import Any, Optional
+from typing import Optional
 from uuid import uuid4
 
 logger = logging.getLogger(__name__)

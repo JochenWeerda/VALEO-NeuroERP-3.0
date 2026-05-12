@@ -5,8 +5,8 @@ Models für Waagen, Wiegungen, Fahrzeuge und Fahrer
 
 from uuid import uuid4
 
-from sqlalchemy import Column, String, Integer, Float, DateTime, Date, Text, ForeignKey, DECIMAL, Enum, Boolean
-from sqlalchemy.dialects.postgresql import UUID as PGUUID, JSONB
+from sqlalchemy import Column, String, Integer, Float, DateTime, Date, Text, ForeignKey, DECIMAL, Boolean
+from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 import enum

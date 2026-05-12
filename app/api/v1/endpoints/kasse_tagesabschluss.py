@@ -3,7 +3,7 @@ Kasse – Tagesabschluss: Aktueller Tag + Buchung
 Light endpoint for the simple kasse/tagesabschluss page (not the enhanced POS version).
 """
 
-from datetime import date, datetime
+from datetime import date
 from typing import Optional
 from uuid import uuid4
 

@@ -3,7 +3,6 @@ from pydantic import BaseModel
 from enum import Enum
 from typing import Optional
 from datetime import date
-import uuid
 
 class TerminmarktProdukt(str, Enum):
     WEIZEN_MATIF = "weizen_matif"

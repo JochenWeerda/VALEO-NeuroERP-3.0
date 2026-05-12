@@ -11,7 +11,6 @@ from sqlalchemy.inspection import inspect as sa_inspect
 
 from app.core.database import get_db
 from app.domains.operations.repository import WaageRepository, WiegungRepository
-from app.domains.operations.models import Waage, Wiegung
 
 router = APIRouter(prefix="/waage", tags=["Waage"])
 

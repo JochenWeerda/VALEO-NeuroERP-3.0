@@ -4,17 +4,15 @@ from __future__ import annotations
 
 from fastapi import APIRouter, Depends
 from pydantic import BaseModel, Field
-from typing import Any, Optional
+from typing import Optional
 
 from app.core.tenant import get_tenant_id
 from app.core.human_approval_gate import ApprovalDecision
 from app.services.case_management import (
-    ApprovalCase,
     CasePriority,
     CaseStatus,
     assign_case,
     close_case,
-    create_case,
     decide_case,
     escalate_case,
     get_case,

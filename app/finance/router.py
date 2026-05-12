@@ -11,12 +11,11 @@ from app.core.uuid7 import uuid7
 from app.auth.deps import get_current_user, get_tenant_id
 from app.core.database import get_db
 from app.finance.schemas import (
-    Wechselkurs, WechselkursCreate, WechselkursResponse,
-    Buchungsschema, BuchungsschemaCreate, BuchungsschemaResponse, Buchungsvorschlag,
-    Kostenstelle, KostenstelleCreate, KostenstelleResponse, KostenstellenReport,
-    AbschlussCheckliste, AbschlussChecklisteCreate, AbschlussChecklisteUpdate, AbschlussChecklisteResponse,
-    NebenbuchAbstimmung, NebenbuchAbstimmungCreate, NebenbuchAbstimmungResponse,
-    IntercompanyBuchung, IntercompanyBuchungCreate, IntercompanyBuchungResponse,
+    WechselkursCreate, WechselkursResponse, BuchungsschemaCreate,
+    BuchungsschemaResponse, Buchungsvorschlag, Kostenstelle, KostenstelleCreate,
+    KostenstelleResponse, KostenstellenReport, AbschlussChecklisteCreate, AbschlussChecklisteUpdate,
+    AbschlussChecklisteResponse, NebenbuchAbstimmung, NebenbuchAbstimmungCreate, NebenbuchAbstimmungResponse,
+    IntercompanyBuchungCreate, IntercompanyBuchungResponse,
 )
 
 router = APIRouter(prefix="/finance", tags=["Finance Advanced"])

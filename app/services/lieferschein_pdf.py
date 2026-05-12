@@ -17,16 +17,12 @@ from reportlab.platypus import (
     TableStyle,
     Spacer,
     Image,
-    PageBreak,
-    KeepTogether,
 )
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
-from reportlab.lib.enums import TA_RIGHT, TA_CENTER, TA_LEFT
+from reportlab.lib.enums import TA_CENTER
 from reportlab.graphics.barcode.qr import QrCodeWidget
 from reportlab.graphics.shapes import Drawing
-from reportlab.graphics import renderPDF
 import logging
-from datetime import datetime
 
 logger = logging.getLogger(__name__)
 

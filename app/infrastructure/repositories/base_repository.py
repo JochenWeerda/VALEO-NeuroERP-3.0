@@ -7,7 +7,7 @@ import logging
 from datetime import datetime
 from typing import List, Optional, Type, TypeVar, Generic
 from sqlalchemy.orm import Session
-from sqlalchemy import and_, or_, desc, asc
+from sqlalchemy import and_
 from sqlalchemy.exc import SQLAlchemyError
 
 from app.core.database import Base

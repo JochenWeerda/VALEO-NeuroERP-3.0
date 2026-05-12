@@ -6,7 +6,7 @@ Database operations for finance entities
 from typing import List, Optional
 from datetime import date
 from sqlalchemy.orm import Session
-from sqlalchemy import select, and_, or_
+from sqlalchemy import select, and_
 from decimal import Decimal
 from datetime import datetime
 from app.core.uuid7 import uuid7

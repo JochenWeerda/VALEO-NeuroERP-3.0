@@ -7,7 +7,7 @@ import asyncio
 import logging
 from typing import Optional
 from sqlalchemy.orm import Session
-from datetime import datetime, timedelta
+from datetime import datetime
 
 from app.core.database import SessionLocal
 from app.infrastructure.rag.indexer import get_indexer

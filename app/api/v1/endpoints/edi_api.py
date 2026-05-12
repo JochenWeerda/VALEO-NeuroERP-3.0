@@ -1,7 +1,6 @@
 from __future__ import annotations
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter
 from pydantic import BaseModel
-from typing import Optional
 from datetime import datetime
 import uuid
 from app.core.edi_integration import (

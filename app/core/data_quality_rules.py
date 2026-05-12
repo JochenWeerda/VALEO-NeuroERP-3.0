@@ -5,7 +5,6 @@ Zentrale Regeldefinitionen für Stammdaten-Validierung.
 """
 
 from dataclasses import dataclass, field
-from typing import Literal
 
 
 @dataclass(frozen=True)

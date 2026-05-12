@@ -3,10 +3,9 @@
 from __future__ import annotations
 
 from fastapi import APIRouter
-from pydantic import BaseModel, Field
-from typing import Optional
+from pydantic import BaseModel
 
-from app.services.guardrails import check_input, sanitize_output, check_and_sanitize
+from app.services.guardrails import check_input, sanitize_output
 from app.services.pii_detector import detect_pii, mask_irreversible, mask_reversible, scan_dict
 
 router = APIRouter(prefix="/neuro/guardrails", tags=["neuro-core", "guardrails", "pii"])

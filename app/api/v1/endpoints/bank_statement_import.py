@@ -530,7 +530,7 @@ async def import_bank_statement(
         if auto_match and imported_lines:
             try:
                 from app.finance.models import OffenerPosten
-                from sqlalchemy import select, func as sqlfunc
+                from sqlalchemy import select
 
                 offene_posten = db.execute(
                     select(OffenerPosten).where(OffenerPosten.zahlbar == True)

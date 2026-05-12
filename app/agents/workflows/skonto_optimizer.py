@@ -3,7 +3,7 @@ Skonto-Optimizer Workflow
 AI-Agent to maximize cash discount opportunities
 """
 
-from typing import Annotated, List, TypedDict, Optional, Dict, Any
+from typing import Annotated, List, TypedDict, Optional
 from datetime import datetime, timedelta
 from decimal import Decimal
 import operator

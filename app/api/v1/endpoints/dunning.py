@@ -3,7 +3,7 @@ Dunning System API
 FIBU-AR-04: Mahnwesen vervollständigen
 """
 
-from typing import List, Optional, Dict, Any
+from typing import List, Optional
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 from sqlalchemy import text

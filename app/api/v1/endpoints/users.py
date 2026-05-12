@@ -13,7 +13,7 @@ from ....core.dependency_container import container
 from ....auth.deps_oidc import get_current_user, User as OIDCUser
 from ..schemas.shared import (
     UserCreate, UserUpdate, User,
-    UserLogin, TokenResponse, ChangePasswordRequest
+    UserLogin, ChangePasswordRequest
 )
 from ..schemas.base import PaginatedResponse
 

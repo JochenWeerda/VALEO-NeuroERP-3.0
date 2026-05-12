@@ -3,9 +3,9 @@ Wave 68 — Process Health Dashboard Contracts.
 Pure domain layer: NO imports from app/api/.
 """
 from enum import Enum
-from dataclasses import dataclass, field, replace
+from dataclasses import dataclass, field
 from datetime import datetime
-from typing import Optional, List, Dict
+from typing import Optional, List
 
 
 class KomponentenStatus(Enum):

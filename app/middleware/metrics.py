@@ -7,7 +7,6 @@ import time
 import logging
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.requests import Request
-from starlette.responses import Response
 from prometheus_client import Counter, Histogram, Gauge
 
 logger = logging.getLogger(__name__)

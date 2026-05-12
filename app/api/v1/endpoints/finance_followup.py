@@ -22,7 +22,6 @@ from ....core.database import get_db
 from ....core.tenant import get_tenant_id
 from ....core.finance_followup import (
     MahnwesenPreview,
-    MahnwesenExportRequest,
     MahnwesenExportResult,
     MahnwesenExportFormat,
     LastschriftPreview,

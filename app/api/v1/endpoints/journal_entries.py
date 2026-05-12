@@ -6,7 +6,7 @@ Supports OData query parameters ($filter, $orderby, $top, $skip) on the
 list endpoint for server-side filtering and sorting.
 """
 
-from typing import Optional, List, Any
+from typing import Optional, Any
 from datetime import datetime
 from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from fastapi.responses import JSONResponse
@@ -20,7 +20,7 @@ from ....infrastructure.models import JournalEntry as JournalEntryModel
 from ....core.dependency_container import container
 from ....middleware.odata_adapter import apply_odata
 from ..schemas.finance import (
-    JournalEntryCreate, JournalEntryUpdate, JournalEntry, JournalEntryLine
+    JournalEntryCreate, JournalEntryUpdate, JournalEntry
 )
 from ..schemas.base import PaginatedResponse
 

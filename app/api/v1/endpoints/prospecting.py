@@ -3,7 +3,7 @@ Prospecting API Endpoints
 Lead-Candidates basierend auf GAP-Daten und Customer-Potential-Snapshots
 """
 
-from typing import Optional, List
+from typing import Optional
 from fastapi import APIRouter, Query, HTTPException
 from sqlalchemy import text
 from app.core.database import get_db

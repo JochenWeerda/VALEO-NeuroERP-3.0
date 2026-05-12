@@ -8,7 +8,6 @@ from typing import Optional
 import httpx
 from fastapi import APIRouter, HTTPException, Query, status
 
-from ....core.config import settings
 from ....integrations.crm_core_client import (
     create_case as crm_create_case,
     delete_case as crm_delete_case,

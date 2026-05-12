@@ -3,7 +3,6 @@ Tenant API endpoints
 RESTful API for tenant management
 """
 
-from typing import Optional
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 
@@ -14,7 +13,6 @@ from ..schemas.shared import (
     TenantCreate, TenantUpdate, Tenant
 )
 from ..schemas.base import PaginatedResponse
-from ..schemas.base import PaginationParams
 
 router = APIRouter(tags=["tenants"])
 

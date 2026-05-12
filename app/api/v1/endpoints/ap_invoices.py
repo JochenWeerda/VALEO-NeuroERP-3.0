@@ -9,7 +9,6 @@ from sqlalchemy import text
 from typing import List, Optional, Any
 from datetime import datetime, timedelta
 from decimal import Decimal
-import asyncio
 import logging
 
 from app.core.database import get_db

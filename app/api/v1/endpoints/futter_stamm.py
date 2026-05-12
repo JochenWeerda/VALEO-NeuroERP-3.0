@@ -8,7 +8,7 @@ Persistenz ueber SQLAlchemy-Modelle in domain_shared.
 from typing import Optional
 from datetime import date
 
-from fastapi import APIRouter, Depends, Header, HTTPException, Query, Response
+from fastapi import APIRouter, Depends, HTTPException, Query, Response
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session, joinedload
 from sqlalchemy import and_

@@ -3,7 +3,7 @@ Journal entry ORM models in a dedicated module to avoid registry name clashes
 with Pydantic/schema classes named JournalEntry/JournalEntryLine.
 """
 
-from sqlalchemy import Column, String, Integer, DateTime, Text, ForeignKey, DECIMAL
+from sqlalchemy import Column, String, Integer, DateTime, ForeignKey, DECIMAL
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 

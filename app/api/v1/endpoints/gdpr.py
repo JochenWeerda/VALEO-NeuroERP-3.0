@@ -10,7 +10,6 @@ import logging
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
-from app.core.rbac import require_role, Role
 from app.core.tenant import get_tenant_id
 from fastapi import Request
 
@@ -35,7 +34,7 @@ async def export_user_data(
     
     try:
         from app.infrastructure.models import (
-            User, Customer, AuditLog, JournalEntry
+            User, AuditLog
         )
         
         # Get user

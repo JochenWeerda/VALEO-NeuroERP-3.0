@@ -3,7 +3,6 @@ AI Agents API
 Endpoints for triggering and managing agent workflows
 """
 
-from datetime import datetime
 import logging
 
 from fastapi import APIRouter, HTTPException

@@ -4,7 +4,7 @@ Scope-basierte Zugriffskontrolle
 """
 
 from fastapi import HTTPException, Depends
-from typing import List, Optional
+from typing import Optional
 from app.auth.deps_oidc import get_current_user
 
 

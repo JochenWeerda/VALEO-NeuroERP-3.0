@@ -6,8 +6,7 @@ CRM-REP-01: Standard-CRM-Reports, Pipeline Funnel, Win/Loss-Analyse
 from __future__ import annotations
 
 import logging
-from datetime import date, datetime
-from decimal import Decimal
+from datetime import date
 from typing import List, Optional
 
 from fastapi import APIRouter, Depends, Query

@@ -4,9 +4,8 @@ Manages scheduled tasks for VALEO NeuroERP
 """
 
 import logging
-import asyncio
-from datetime import datetime, time, timezone
-from typing import Dict, List, Any, Callable, Optional
+from datetime import datetime, time
+from typing import Dict, Any, Callable, Optional
 import schedule
 import threading
 import time as time_module

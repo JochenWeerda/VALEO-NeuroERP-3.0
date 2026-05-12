@@ -14,7 +14,6 @@ from typing import Any
 
 from .data_quality_rules import (
     DQRegelTyp,
-    DQSeverity,
     DQValidationResult,
     get_dq_ruleset_for_entity,
     validate_datensatz,

@@ -7,7 +7,7 @@ process_sla.py-Contracts (Wave 4 AP3).
 from __future__ import annotations
 
 import uuid
-from datetime import datetime, timezone
+from datetime import datetime
 from typing import Any
 
 from app.core.process_sla import (

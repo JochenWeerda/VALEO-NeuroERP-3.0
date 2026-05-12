@@ -5,12 +5,8 @@ Replaces placeholder services with actual working implementations
 
 import logging
 from typing import Optional, Dict, Any
-from sqlalchemy.orm import Session
-from .database import get_db
 from .services import (
-    TenantService, UserService, CustomerService, LeadService, ContactService,
-    ArticleService, WarehouseService, StockMovementService, InventoryCountService,
-    AccountService, JournalEntryService, EmailService, NotificationService, AuditService
+    TenantService, UserService, CustomerService
 )
 
 logger = logging.getLogger(__name__)

@@ -7,7 +7,7 @@ import logging
 from app.core.uuid7 import uuid7
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.requests import Request
-from app.core.logging import set_correlation_id, get_correlation_id
+from app.core.logging import set_correlation_id
 
 logger = logging.getLogger(__name__)
 
