@@ -457,7 +457,7 @@ async def get_belegnummern_kontrolle(
                 pass
     
     gesamt_belege = len(result)
-    fortlaufend = gesamt_belege - sum(len(l.luecken) for l in luecken) if luecken else gesamt_belege
+    fortlaufend = gesamt_belege - sum(len(line_item.luecken) for line_item in luecken) if luecken else gesamt_belege
     status = "ORDNUNGSGEMAESS" if not luecken else "LUCKEN_VORHANDEN"
     
     return BelegnummernKontrolleResponse(

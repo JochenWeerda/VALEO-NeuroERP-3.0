@@ -194,10 +194,10 @@ def _pruefe_regel(
         verletzt = not wert_str
 
     elif regel.typ == ValidierungsRegelTyp.LAENGE:
-        l = len(wert_str)
-        if regel.min_laenge is not None and l < regel.min_laenge:
+        line_item = len(wert_str)
+        if regel.min_laenge is not None and line_item < regel.min_laenge:
             verletzt = True
-        if regel.max_laenge is not None and l > regel.max_laenge:
+        if regel.max_laenge is not None and line_item > regel.max_laenge:
             verletzt = True
 
     elif regel.typ == ValidierungsRegelTyp.FORMAT:

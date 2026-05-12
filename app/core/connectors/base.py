@@ -37,8 +37,8 @@ class NormalizedItem:
 
 def validate_item_balance(item: NormalizedItem) -> Optional[str]:
     """Prüft Soll=Haben. Gibt Fehlermeldung zurück oder None."""
-    total_d = sum(l.amount for l in item.lines if l.dc == "D")
-    total_c = sum(l.amount for l in item.lines if l.dc == "C")
+    total_d = sum(line_item.amount for line_item in item.lines if line_item.dc == "D")
+    total_c = sum(line_item.amount for line_item in item.lines if line_item.dc == "C")
     if abs(total_d - total_c) > Decimal("0.01"):
         return f"Soll={total_d} != Haben={total_c}"
     return None

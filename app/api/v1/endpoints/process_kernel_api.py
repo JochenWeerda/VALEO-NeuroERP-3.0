@@ -4048,9 +4048,9 @@ def get_aktive_locks():
     locks = get_default_locks()
     return {
         "anzahl": len(locks),
-        "locks": [l.as_dict() for l in locks],
+        "locks": [line_item.as_dict() for line_item in locks],
         "status_verteilung": {
-            s.value: sum(1 for l in locks if l.status == s)
+            s.value: sum(1 for line_item in locks if line_item.status == s)
             for s in LockStatus
         },
     }
@@ -5242,14 +5242,14 @@ def get_upstream_w64(payload: dict):
 def get_simulations_laeufe_w64():
     return [
         {
-            "lauf_id": l.lauf_id,
-            "workflow_typ": l.workflow_typ,
-            "simulations_typ": l.simulations_typ,
-            "status": l.status,
-            "laufzeit_sekunden": l.laufzeit_sekunden(),
-            "hat_ergebnis": l.ergebnis is not None,
+            "lauf_id": line_item.lauf_id,
+            "workflow_typ": line_item.workflow_typ,
+            "simulations_typ": line_item.simulations_typ,
+            "status": line_item.status,
+            "laufzeit_sekunden": line_item.laufzeit_sekunden(),
+            "hat_ergebnis": line_item.ergebnis is not None,
         }
-        for l in get_default_simulations_laeufe()
+        for line_item in get_default_simulations_laeufe()
     ]
 
 
@@ -5257,13 +5257,13 @@ def get_simulations_laeufe_w64():
 def get_simulations_ergebnis_w64(payload: dict):
     """Payload: {"lauf_id": str}"""
     lauf_id = payload.get("lauf_id", "")
-    laeufe = {l.lauf_id: l for l in get_default_simulations_laeufe()}
+    laeufe = {line_item.lauf_id: line_item for line_item in get_default_simulations_laeufe()}
     if lauf_id not in laeufe:
         return {"fehler": f"Lauf {lauf_id!r} nicht gefunden"}
-    l = laeufe[lauf_id]
-    if l.ergebnis is None:
+    line_item = laeufe[lauf_id]
+    if line_item.ergebnis is None:
         return {"lauf_id": lauf_id, "ergebnis": None}
-    e = l.ergebnis
+    e = line_item.ergebnis
     groesste = e.groesste_abweichung
     return {
         "lauf_id": lauf_id,
@@ -5376,13 +5376,13 @@ def get_resource_locks():
     jetzt = datetime(2026, 3, 16, 10, 0, 0)
     return [
         {
-            "lock_id": l.lock_id,
-            "ressource_id": l.ressource_id,
-            "inhaber_id": l.inhaber_id,
-            "lock_typ": l.lock_typ,
-            "ist_aktiv": l.ist_aktiv(jetzt),
+            "lock_id": line_item.lock_id,
+            "ressource_id": line_item.ressource_id,
+            "inhaber_id": line_item.inhaber_id,
+            "lock_typ": line_item.lock_typ,
+            "ist_aktiv": line_item.ist_aktiv(jetzt),
         }
-        for l in get_default_resource_locks()
+        for line_item in get_default_resource_locks()
     ]
 
 @router.post("/resource-lock/erkenne-deadlock", tags=["process-kernel"])

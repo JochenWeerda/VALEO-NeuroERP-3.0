@@ -100,8 +100,8 @@ async def crm_dashboard() -> dict:
     except Exception:
         leads, leads_total = [], 0
 
-    won = sum(1 for l in leads if getattr(l, "status", "") == "won")
-    qualified = sum(1 for l in leads if getattr(l, "status", "") in {"qualified", "proposal", "negotiation", "won"})
+    won = sum(1 for line_item in leads if getattr(line_item, "status", "") == "won")
+    qualified = sum(1 for line_item in leads if getattr(line_item, "status", "") in {"qualified", "proposal", "negotiation", "won"})
 
     return {
         "kpis": [
@@ -1553,14 +1553,14 @@ async def futter_chargen(db: Session = Depends(get_db)) -> list[dict[str, Any]]:
     lots = db.query(Charge).order_by(Charge.eingang.desc()).limit(500).all()
     return [
         {
-            "id": l.id,
-            "chargen_id": l.chargen_id,
-            "artikel": l.artikel,
-            "menge": float(l.menge or 0),
-            "status": l.status,
-            "eingang": l.eingang.isoformat() if l.eingang else None,
+            "id": line_item.id,
+            "chargen_id": line_item.chargen_id,
+            "artikel": line_item.artikel,
+            "menge": float(line_item.menge or 0),
+            "status": line_item.status,
+            "eingang": line_item.eingang.isoformat() if line_item.eingang else None,
         }
-        for l in lots
+        for line_item in lots
     ]
 
 
@@ -1569,27 +1569,27 @@ async def futter_qc(db: Session = Depends(get_db)) -> list[dict[str, Any]]:
     lots = db.query(Charge).order_by(Charge.updated_at.desc()).limit(500).all()
     return [
         {
-            "id": l.id,
-            "charge": l.chargen_id,
-            "artikel": l.artikel,
-            "qualitaetsstatus": l.qualitaetsstatus,
-            "freigabe_datum": l.freigabe_datum.isoformat() if l.freigabe_datum else None,
-            "status": l.status,
+            "id": line_item.id,
+            "charge": line_item.chargen_id,
+            "artikel": line_item.artikel,
+            "qualitaetsstatus": line_item.qualitaetsstatus,
+            "freigabe_datum": line_item.freigabe_datum.isoformat() if line_item.freigabe_datum else None,
+            "status": line_item.status,
         }
-        for l in lots
+        for line_item in lots
     ]
 
 
 @router.get("/futter/statistik", response_model=dict)
 async def futter_stats(db: Session = Depends(get_db)) -> dict:
     lots = db.query(Charge).all()
-    total_menge = sum(float(l.menge or 0) for l in lots)
+    total_menge = sum(float(line_item.menge or 0) for line_item in lots)
     return {
         "gesamtChargen": len(lots),
         "gesamtMenge": round(total_menge, 3),
-        "freigegeben": sum(1 for l in lots if l.status == "freigegeben"),
-        "inPruefung": sum(1 for l in lots if l.status == "in-pruefung"),
-        "gesperrt": sum(1 for l in lots if l.status == "gesperrt"),
+        "freigegeben": sum(1 for line_item in lots if line_item.status == "freigegeben"),
+        "inPruefung": sum(1 for line_item in lots if line_item.status == "in-pruefung"),
+        "gesperrt": sum(1 for line_item in lots if line_item.status == "gesperrt"),
     }
 
 

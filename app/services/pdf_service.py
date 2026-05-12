@@ -218,7 +218,7 @@ class PDFGenerator:
                 )
 
             # Gesamtsumme
-            grand_total = sum(l.get("qty", 0) * l.get("price", 0) for l in lines)
+            grand_total = sum(line_item.get("qty", 0) * line_item.get("price", 0) for line_item in lines)
             table_data.append(["", "", "<b>Gesamt:</b>", f"<b>{grand_total:.2f} €</b>"])
 
             table = Table(table_data, colWidths=[80 * mm, 30 * mm, 30 * mm, 30 * mm])

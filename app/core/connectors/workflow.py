@@ -42,8 +42,8 @@ def _item_to_payload(item: NormalizedItem) -> dict:
         "document_no": item.document_no,
         "text": item.text,
         "lines": [
-            {"account": l.account, "dc": l.dc, "amount": str(l.amount), "tax_code": l.tax_code, "cost_center": l.cost_center}
-            for l in item.lines
+            {"account": line_item.account, "dc": line_item.dc, "amount": str(line_item.amount), "tax_code": line_item.tax_code, "cost_center": line_item.cost_center}
+            for line_item in item.lines
         ],
         "asset_no": item.asset_no,
         "asset_name": item.asset_name,
@@ -188,8 +188,8 @@ def parse_run(db: Session, run_id: str, tenant_id: str, file_content: bytes) -> 
             },
         )
 
-    total_d = sum(sum(l.amount for l in it.lines if l.dc == "D") for it in items)
-    total_c = sum(sum(l.amount for l in it.lines if l.dc == "C") for it in items)
+    total_d = sum(sum(line_item.amount for line_item in it.lines if line_item.dc == "D") for it in items)
+    total_c = sum(sum(line_item.amount for line_item in it.lines if line_item.dc == "C") for it in items)
     err_count = sum(1 for it in items if validate_item_balance(it))
     db.execute(
         text("""
@@ -289,8 +289,8 @@ def post_run(db: Session, run_id: str, tenant_id: str, request: Any = None) -> N
         if not all_lines:
             continue
 
-        total_debit = sum(Decimal(l.get("amount", 0)) for l in all_lines if l.get("dc") == "D")
-        total_credit = sum(Decimal(l.get("amount", 0)) for l in all_lines if l.get("dc") == "C")
+        total_debit = sum(Decimal(line_item.get("amount", 0)) for line_item in all_lines if line_item.get("dc") == "D")
+        total_credit = sum(Decimal(line_item.get("amount", 0)) for line_item in all_lines if line_item.get("dc") == "C")
         if abs(total_debit - total_credit) > Decimal("0.01"):
             continue
 
@@ -414,8 +414,8 @@ def reverse_run(db: Session, run_id: str, tenant_id: str, request: Any = None) -
         if not lines:
             continue
         rev_id = str(uuid4())
-        _total_d = sum(Decimal(str(l[1])) for l in lines)  # noqa: F841
-        _total_c = sum(Decimal(str(l[2])) for l in lines)  # noqa: F841
+        _total_d = sum(Decimal(str(line_item[1])) for line_item in lines)  # noqa: F841
+        _total_c = sum(Decimal(str(line_item[2])) for line_item in lines)  # noqa: F841
         db.execute(
             text("""
                 INSERT INTO domain_erp.journal_entries

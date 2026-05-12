@@ -162,16 +162,16 @@ def akquiriere_lock(
     )
 
     aktive = [
-        l for l in bestehende_locks
-        if l.ressource_id == ressource_id
-        and l.ist_aktiv
-        and not l.ist_abgelaufen(ts)
-        and l.inhaber_id != inhaber_id
+        line_item for line_item in bestehende_locks
+        if line_item.ressource_id == ressource_id
+        and line_item.ist_aktiv
+        and not line_item.ist_abgelaufen(ts)
+        and line_item.inhaber_id != inhaber_id
     ]
 
     # LESEN-Locks blockieren sich nicht gegenseitig
     if lock_typ == LockTyp.LESEN:
-        aktive = [l for l in aktive if l.lock_typ != LockTyp.LESEN]
+        aktive = [line_item for line_item in aktive if line_item.lock_typ != LockTyp.LESEN]
 
     for bestehend in aktive:
         konflikt = neuer_lock.pruefe_konflikt(bestehend)

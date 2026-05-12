@@ -81,7 +81,7 @@ class KonContractLotStore(BaseModel):
         return self.lots.get(lot_id)
 
     def by_kontrakt(self, kontrakt_id: str) -> list[KonContractLot]:
-        return [l for l in self.lots.values() if l.kontrakt_id == kontrakt_id]
+        return [line_item for line_item in self.lots.values() if line_item.kontrakt_id == kontrakt_id]
 
     def offene_lots(self, tenant_id: str) -> list[KonContractLot]:
-        return [l for l in self.lots.values() if l.tenant_id == tenant_id and not l.ist_abgeschlossen]
+        return [line_item for line_item in self.lots.values() if line_item.tenant_id == tenant_id and not line_item.ist_abgeschlossen]
