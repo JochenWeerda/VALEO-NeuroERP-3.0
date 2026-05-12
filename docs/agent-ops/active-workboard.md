@@ -177,10 +177,11 @@ Stand: `2026-05-12`
 
 **Von:** Codex
 **Owner:** Codex
-**Stand:** reserviert 2026-05-12
+**Stand:** abgeschlossen 2026-05-12
 **Ziel des Slices:** Aussendienstplanung mit Kunde, Gebiet, Kampagne, Kalender- und Abwesenheitskonflikten auf HR-Time-Basis bereitstellen.
 **Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/agent-ops/slices/HR-TIME-FIELD-001.yaml`, `app/api/v1/endpoints/personal.py`, `tests/test_personal_field_service_api.py`, `migrations/sql/hr/006_hr_time_field_service.sql`, `docs/project-context/hr-time-canonical-core-data-model-2026-05-08.md`
 **Abnahmekriterien:** Aussendiensttermine koennen erstellt und gelesen werden; Planung prueft HR-Time-Profil, Abwesenheit und Kalenderueberschneidung; Konflikte werden im Contract ausgewiesen; Tests sichern Blocker und Happy Path.
+**Erledigt:** `domain_hr.field_service_plans`, `GET/POST /api/v1/personal/field-service-plan` und Konfliktpruefung gegen HR-Time-Profil, Abwesenheiten und Kalenderblocker umgesetzt und getestet.
 **Checks:** `pytest tests/test_personal_field_service_api.py tests/test_personal_campaign_capacity_api.py tests/test_personal_payroll_export_api.py tests/test_personal_calendar_api.py tests/test_personal_shift_planning_api.py tests/test_personal_absence_api.py tests/test_personal_time_booking_api.py tests/test_personal_time_data_api.py tests/test_personal_time_cockpit_api.py tests/test_personal_driver_time_api.py -q --no-cov`; `python scripts/agent_workboard_supervisor.py validate`; `node scripts/docs-governance-check.cjs`; `git diff --check`
 **Offene Risiken:** CRM-Live-Connector, Routenoptimierung und mobile Aussendienst-UI bleiben Folgeslices.
 

@@ -160,13 +160,14 @@ Die API-URLs sind fachliche Ressourcen, nicht UI-Layouts.
 | Payroll-Export erzeugen | `POST /api/v1/personal/payroll-exports` | baut Exportpaket aus freigegebenen Zeitwerten und meldet nicht freigegebene Buchungen als Blocker. |
 | Kampagnenkapazitaet lesen | `GET /api/v1/personal/campaign-capacity` | Saison-/Kampagnenplaene mit Rollenbedarf und Engpaessen. |
 | Kampagnenkapazitaet erstellen | `POST /api/v1/personal/campaign-capacity` | bewertet Rollenbedarf gegen Profile, Abwesenheiten und Schichten. |
+| Aussendienstplan lesen | `GET /api/v1/personal/field-service-plan` | geplante Kunden-/Feldbesuche mit Kampagnen- und Konfliktbezug. |
+| Aussendiensttermin erstellen | `POST /api/v1/personal/field-service-plan` | plant Besuch und prueft Profil, Abwesenheit und Kalenderblocker. |
 | Driver-Time Summary | `GET /api/v1/personal/driver-time/summary` | Fahrerzeit-KPIs, Ereignisse, Plausibilitaetsbefunde. |
 | Time Cockpit | `GET /api/v1/personal/time-cockpit` | operative Freigabe-, Compliance- und Payroll-Sicht. |
 | Stundenzettel | `POST/GET /api/v1/personal/stundenzettel` | Legacy-/Pilotvertrag fuer Fahrer-Stundenzettel. |
 
 Folge-URLs muessen diese Begriffe wiederverwenden:
 
-- `/api/v1/personal/field-service-plan`
 
 ## Konsistenzanalyse
 
