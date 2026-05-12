@@ -1,6 +1,6 @@
 # Active Workboard
 
-Stand: `2026-05-08`
+Stand: `2026-05-12`
 
 ## TODO-SPRINT-001
 
@@ -753,10 +753,11 @@ Archiv des vorherigen Boards:
 ## COV-INT-002
 
 **Von:** Codex
-**Stand:** reserviert
+**Stand:** abgeschlossen 2026-05-12
 **Ziel des Slices:** Integrations-Governance tiefer testen: Superglue, Secrets, Outbound-Gates, Bootstrap und Tenant-Schutz.
 **Dateibesitz:** `docs/agent-ops/active-workboard.md`, `tests/**`, `app/services/**`, `app/integrations/**`
 **Abnahmekriterien:** Integrationsnahe Kernpfade werden nicht nur konfiguriert, sondern auch testseitig breiter abgesichert.
+**Erledigt:** `IntegrationCircuitBreaker` (12 Tests), `superglue_execution_journal` (9 Tests), `superglue_admin_state` (11 Tests), `superglue_monitoring` (5 Tests) — 37 Tests gruen. Stand: 2026-05-12.
 
 ## DOM-FIN-002
 
