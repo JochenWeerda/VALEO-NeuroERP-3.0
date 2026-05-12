@@ -19,11 +19,13 @@ Backend-Services und das `erp-domain`-Paket müssen denselben technischen Vertra
 | **Schreibende APIs** | `created_by` / `updated_by` / Audit `actorId` aus Request-Kontext, nicht aus fachlichen Body-Feldern (außer bewusst und dokumentiert). |
 | **Fehlerbilder** | **401** nicht authentifiziert; **403** authentifiziert aber nicht berechtigt; **400** fehlender Tenant. |
 | **Abweichung Entwicklung** | Wenn `NODE_ENV=development` **oder** `ERP_ALLOW_SYSTEM_ACTOR=1`, darf `resolveActorId` auf `'system'` fallen — **nicht** in standardisierten Produktions-Builds. |
+| **Abweichung Tenant (nur Dev/Test)** | `NODE_ENV=development` \| `test` oder `ERP_ALLOW_MISSING_TENANT=1`: fehlender Header/JWT-Tenant → Fallback `ERP_DEV_TENANT_ID` oder `dev-tenant` (Implementierung: `resolveTenantId` in `request-context.ts`). |
 | **Testbarkeit** | E2E (Playwright) und interne Tests setzen dieselben Header/Token wie das Produkt (siehe `tests/e2e` Hilfen). |
 
 ## Konsequenzen
 
-- **erp-domain:** zentrale Hilfsfunktionen unter `packages/erp-domain/src/presentation/utils/request-context.ts`.
+- **erp-domain:** zentrale Hilfsfunktionen unter `packages/erp-domain/src/presentation/utils/request-context.ts` (`resolveTenantId`, `resolveActorId`, `respondControllerError`, `respondDomainMutationError`).
+- **Finanz-Stammdaten & Purchase Orders** im erp-domain: Mandantenfilter persistiert (`finanz.*.tenant_id`, `purchase_orders.tenant_id`); Operationalisierung und Migrationsreihenfolge: [ERP: Finanz & Mandant](../erp-finanz-multitenancy.md).
 - **FastAPI CRM:** analoge `Depends`-Funktionen (Header/JWT) pro Service; gleiche Semantik.
 - Änderungen am Vertrag erfordern **Revision dieser ADR** und Anpassung der Tests.
 

@@ -5,6 +5,7 @@
 
 export interface FinanzDebitorProps {
   id?: string;
+  tenant_id: string;
   kunden_id?: string;
   debitor_nr: string;
   kreditlimit?: number;
@@ -29,6 +30,10 @@ export class FinanzDebitor {
 
   public get id(): string | undefined {
     return this.props.id;
+  }
+
+  public get tenantId(): string {
+    return this.props.tenant_id;
   }
 
   public get kundenId(): string | undefined {

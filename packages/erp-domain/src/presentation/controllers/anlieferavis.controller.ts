@@ -3,14 +3,14 @@ import { AnlieferavisService } from '../../application/services/anlieferavis.ser
 import { CreateAnlieferavisData } from '../../application/services/anlieferavis.service'
 import { AnlieferavisStatus } from '../../core/entities/anlieferavis.entity'
 import { clampLimit, clampOffset } from '../types/api-pagination'
-import { resolveActorId } from '../utils/request-context'
+import { resolveActorId, resolveTenantId, respondControllerError, respondDomainMutationError } from '../utils/request-context'
 
 export class AnlieferavisController {
   constructor(private anlieferavisService: AnlieferavisService) {}
 
   async createAnlieferavis(req: Request, res: Response): Promise<void> {
     try {
-      const tenantId = req.headers['x-tenant-id'] as string
+      const tenantId = resolveTenantId(req)
       const auditActorId = resolveActorId(req)
 
       const data: CreateAnlieferavisData = {
@@ -31,17 +31,14 @@ export class AnlieferavisController {
       })
     } catch (error) {
       console.error('Fehler beim Erstellen des Anlieferavis:', error)
-      res.status(400).json({
-        success: false,
-        error: error instanceof Error ? error.message : 'Unbekannter Fehler'
-      })
+      respondControllerError(res, error, 400)
     }
   }
 
   async getAnlieferavis(req: Request, res: Response): Promise<void> {
     try {
       const { id } = req.params
-      const tenantId = req.headers['x-tenant-id'] as string
+      const tenantId = resolveTenantId(req)
 
       const avis = await this.anlieferavisService.getAnlieferavisById(id as string, tenantId)
 
@@ -59,16 +56,13 @@ export class AnlieferavisController {
       })
     } catch (error) {
       console.error('Fehler beim Laden des Anlieferavis:', error)
-      res.status(500).json({
-        success: false,
-        error: 'Interner Serverfehler'
-      })
+      respondControllerError(res, error, 500)
     }
   }
 
   async getAnlieferavise(req: Request, res: Response): Promise<void> {
     try {
-      const tenantId = req.headers['x-tenant-id'] as string
+      const tenantId = resolveTenantId(req)
       const options = {
         status: req.query.status as any,
         bestellungId: req.query.bestellungId as string,
@@ -87,17 +81,14 @@ export class AnlieferavisController {
       })
     } catch (error) {
       console.error('Fehler beim Laden der Anlieferavise:', error)
-      res.status(500).json({
-        success: false,
-        error: 'Interner Serverfehler'
-      })
+      respondControllerError(res, error, 500)
     }
   }
 
   async getAnlieferavisByBestellung(req: Request, res: Response): Promise<void> {
     try {
       const { bestellungId } = req.params
-      const tenantId = req.headers['x-tenant-id'] as string
+      const tenantId = resolveTenantId(req)
 
       const avis = await this.anlieferavisService.getAnlieferavisByBestellung(bestellungId as string, tenantId)
 
@@ -115,17 +106,14 @@ export class AnlieferavisController {
       })
     } catch (error) {
       console.error('Fehler beim Laden des Anlieferavis zur Bestellung:', error)
-      res.status(500).json({
-        success: false,
-        error: 'Interner Serverfehler'
-      })
+      respondControllerError(res, error, 500)
     }
   }
 
   async bestaetigenAnlieferavis(req: Request, res: Response): Promise<void> {
     try {
       const { id } = req.params
-      const tenantId = req.headers['x-tenant-id'] as string
+      const tenantId = resolveTenantId(req)
       const actorId = resolveActorId(req)
 
       const avis = await this.anlieferavisService.bestaetigenAnlieferavis(id as string, tenantId, actorId)
@@ -136,17 +124,14 @@ export class AnlieferavisController {
       })
     } catch (error) {
       console.error('Fehler beim Bestätigen des Anlieferavis:', error)
-      res.status(error instanceof Error && error.message.includes('nicht gefunden') ? 404 : 400).json({
-        success: false,
-        error: error instanceof Error ? error.message : 'Unbekannter Fehler'
-      })
+      respondDomainMutationError(res, error)
     }
   }
 
   async stornierenAnlieferavis(req: Request, res: Response): Promise<void> {
     try {
       const { id } = req.params
-      const tenantId = req.headers['x-tenant-id'] as string
+      const tenantId = resolveTenantId(req)
       const actorId = resolveActorId(req)
 
       const avis = await this.anlieferavisService.stornierenAnlieferavis(id as string, tenantId, actorId)
@@ -157,17 +142,14 @@ export class AnlieferavisController {
       })
     } catch (error) {
       console.error('Fehler beim Stornieren des Anlieferavis:', error)
-      res.status(error instanceof Error && error.message.includes('nicht gefunden') ? 404 : 400).json({
-        success: false,
-        error: error instanceof Error ? error.message : 'Unbekannter Fehler'
-      })
+      respondDomainMutationError(res, error)
     }
   }
 
   async updateAnlieferavis(req: Request, res: Response): Promise<void> {
     try {
       const { id } = req.params
-      const tenantId = req.headers['x-tenant-id'] as string
+      const tenantId = resolveTenantId(req)
       const actorId = resolveActorId(req)
 
       const avis = await this.anlieferavisService.updateAnlieferavis(id as string, tenantId, req.body, actorId)
@@ -178,17 +160,14 @@ export class AnlieferavisController {
       })
     } catch (error) {
       console.error('Fehler beim Aktualisieren des Anlieferavis:', error)
-      res.status(error instanceof Error && error.message.includes('nicht gefunden') ? 404 : 400).json({
-        success: false,
-        error: error instanceof Error ? error.message : 'Unbekannter Fehler'
-      })
+      respondDomainMutationError(res, error)
     }
   }
 
   async deleteAnlieferavis(req: Request, res: Response): Promise<void> {
     try {
       const { id } = req.params
-      const tenantId = req.headers['x-tenant-id'] as string
+      const tenantId = resolveTenantId(req)
       const actorId = resolveActorId(req)
 
       await this.anlieferavisService.deleteAnlieferavis(id as string, tenantId, actorId)
@@ -199,16 +178,13 @@ export class AnlieferavisController {
       })
     } catch (error) {
       console.error('Fehler beim Löschen des Anlieferavis:', error)
-      res.status(error instanceof Error && error.message.includes('nicht gefunden') ? 404 : 400).json({
-        success: false,
-        error: error instanceof Error ? error.message : 'Unbekannter Fehler'
-      })
+      respondDomainMutationError(res, error)
     }
   }
 
   async getUeberfaelligeAnlieferavise(req: Request, res: Response): Promise<void> {
     try {
-      const tenantId = req.headers['x-tenant-id'] as string
+      const tenantId = resolveTenantId(req)
 
       const avise = await this.anlieferavisService.getUeberfaelligeAnlieferavise(tenantId)
 
@@ -218,10 +194,7 @@ export class AnlieferavisController {
       })
     } catch (error) {
       console.error('Fehler beim Laden überfälliger Anlieferavise:', error)
-      res.status(500).json({
-        success: false,
-        error: 'Interner Serverfehler'
-      })
+      respondControllerError(res, error, 500)
     }
   }
 }

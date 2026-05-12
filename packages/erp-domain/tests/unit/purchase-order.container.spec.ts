@@ -4,8 +4,8 @@
 import 'reflect-metadata'
 import type { Pool } from 'pg'
 import type { PrismaClient } from '@prisma/client'
-import { PurchaseOrderRouter } from '../../presentation/controllers/purchaseOrder.router'
-import { createPurchaseOrderApiContainer } from './purchase-order.container'
+import { PurchaseOrderRouter } from '../../src/presentation/controllers/purchaseOrder.router'
+import { createPurchaseOrderApiContainer } from '../../src/infrastructure/di/purchase-order.container'
 
 describe('createPurchaseOrderApiContainer', () => {
   it('liefert PurchaseOrderRouter inklusive createRouter()', () => {

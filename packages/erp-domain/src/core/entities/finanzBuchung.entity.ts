@@ -5,6 +5,7 @@
 
 export interface FinanzBuchungProps {
   id?: string;
+  tenant_id: string;
   buchungsnummer: string;
   buchungsdatum: Date;
   belegdatum: Date;
@@ -35,6 +36,10 @@ export class FinanzBuchung {
 
   public get id(): string | undefined {
     return this.props.id;
+  }
+
+  public get tenantId(): string {
+    return this.props.tenant_id;
   }
 
   public get buchungsnummer(): string {

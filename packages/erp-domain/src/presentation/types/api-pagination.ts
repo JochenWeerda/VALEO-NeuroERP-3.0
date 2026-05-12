@@ -1,4 +1,13 @@
-/** JSON-Listen-Contract (erp-domain), siehe Sprint-Plan M-02/M-03 */
+/**
+ * Standard-Listen-Contract (erp-domain, Meilensteine M-02/M-03).
+ *
+ * Erfolgs-Body der paginierten GET-Listen:
+ * `{ success: true, data: T[], pagination: { total, limit, offset } }`
+ *
+ * - `total`: COUNT(*) mit **denselben** Filtern wie die Liste (ohne LIMIT/OFFSET).
+ * - `limit` / `offset`: nach {@link clampLimit} / {@link clampOffset}
+ *   (Defaults gemäß {@link DEFAULT_LIST_LIMIT}, Cap {@link MAX_LIST_LIMIT}).
+ */
 export const DEFAULT_LIST_LIMIT = 50
 export const MAX_LIST_LIMIT = 500
 

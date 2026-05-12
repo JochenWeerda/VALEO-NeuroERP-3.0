@@ -5,6 +5,7 @@
 
 export interface FinanzKreditorProps {
   id?: string;
+  tenant_id: string;
   lieferanten_id?: string;
   kreditor_nr: string;
   zahlungsziel?: number;
@@ -28,6 +29,10 @@ export class FinanzKreditor {
 
   public get id(): string | undefined {
     return this.props.id;
+  }
+
+  public get tenantId(): string {
+    return this.props.tenant_id;
   }
 
   public get lieferantenId(): string | undefined {

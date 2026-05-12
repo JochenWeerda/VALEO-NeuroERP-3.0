@@ -5,6 +5,7 @@ import { PurchaseOrderItem } from '../../core/entities/purchaseOrderItem.entity'
 import { NumberRangeService } from './numberRange.service'
 import { AuditService } from './audit.service'
 import { ValidationError } from '../../core/errors/validation.error'
+import { clampLimit, clampOffset, ListResult } from '../../presentation/types/api-pagination'
 
 @injectable()
 export class PurchaseOrderService {
@@ -59,8 +60,8 @@ export class PurchaseOrderService {
     return savedOrder
   }
 
-  async update(id: string, data: any, version: number, actorId: string): Promise<PurchaseOrder> {
-    const existingOrder = await this.repository.findById(id)
+  async update(tenantId: string, id: string, data: any, version: number, actorId: string): Promise<PurchaseOrder> {
+    const existingOrder = await this.repository.findById(id, tenantId)
     if (!existingOrder) {
       throw new Error('Purchase order not found')
     }
@@ -107,12 +108,28 @@ export class PurchaseOrderService {
     return savedOrder
   }
 
-  async findById(id: string): Promise<PurchaseOrder | null> {
-    return this.repository.findById(id)
+  async findById(id: string, tenantId: string): Promise<PurchaseOrder | null> {
+    return this.repository.findById(id, tenantId)
   }
 
   async findByTenant(tenantId: string, filters?: any): Promise<PurchaseOrder[]> {
     return this.repository.findByTenant(tenantId, filters)
+  }
+
+  async getPurchaseOrdersByTenant(
+    tenantId: string,
+    options?: { status?: string; supplierId?: string; limit?: number; offset?: number }
+  ): Promise<ListResult<PurchaseOrder>> {
+    const limit = clampLimit(options?.limit)
+    const offset = clampOffset(options?.offset)
+    const filters = { status: options?.status, supplierId: options?.supplierId }
+    const items = await this.repository.findByTenant(tenantId, {
+      ...filters,
+      limit,
+      offset,
+    })
+    const total = await this.repository.countByTenant(tenantId, filters)
+    return { items, total }
   }
 
   async countByTenant(
@@ -122,8 +139,8 @@ export class PurchaseOrderService {
     return this.repository.countByTenant(tenantId, filters)
   }
 
-  async submit(id: string, actorId: string): Promise<PurchaseOrder> {
-    const order = await this.repository.findById(id)
+  async submit(id: string, tenantId: string, actorId: string): Promise<PurchaseOrder> {
+    const order = await this.repository.findById(id, tenantId)
     if (!order) {
       throw new Error('Purchase order not found')
     }
@@ -158,8 +175,8 @@ export class PurchaseOrderService {
     return savedOrder
   }
 
-  async cancel(id: string, actorId: string): Promise<PurchaseOrder> {
-    const order = await this.repository.findById(id)
+  async cancel(id: string, tenantId: string, actorId: string): Promise<PurchaseOrder> {
+    const order = await this.repository.findById(id, tenantId)
     if (!order) {
       throw new Error('Purchase order not found')
     }
@@ -189,6 +206,10 @@ export class PurchaseOrderService {
     })
 
     return savedOrder
+  }
+
+  async delete(tenantId: string, id: string): Promise<void> {
+    await this.repository.delete(id, tenantId)
   }
 
   private validatePurchaseOrderData(data: any): void {

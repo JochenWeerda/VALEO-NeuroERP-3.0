@@ -5,6 +5,7 @@
 
 export interface FinanzBankkontoProps {
   id?: string;
+  tenant_id: string;
   kontoname: string;
   bankname: string;
   iban?: string;
@@ -30,6 +31,10 @@ export class FinanzBankkonto {
 
   public get id(): string | undefined {
     return this.props.id;
+  }
+
+  public get tenantId(): string {
+    return this.props.tenant_id;
   }
 
   public get kontoname(): string {

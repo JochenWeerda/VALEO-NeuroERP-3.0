@@ -3,14 +3,14 @@ import { AuftragsbestaetigungService } from '../../application/services/auftrags
 import { CreateAuftragsbestaetigungData } from '../../application/services/auftragsbestaetigung.service'
 import { AuftragsbestaetigungStatus } from '../../core/entities/auftragsbestaetigung.entity'
 import { clampLimit, clampOffset } from '../types/api-pagination'
-import { resolveActorId } from '../utils/request-context'
+import { resolveActorId, resolveTenantId, respondControllerError, respondDomainMutationError } from '../utils/request-context'
 
 export class AuftragsbestaetigungController {
   constructor(private auftragsbestaetigungService: AuftragsbestaetigungService) {}
 
   async createAuftragsbestaetigung(req: Request, res: Response): Promise<void> {
     try {
-      const tenantId = req.headers['x-tenant-id'] as string
+      const tenantId = resolveTenantId(req)
       const auditActorId = resolveActorId(req)
 
       const data: CreateAuftragsbestaetigungData = {
@@ -30,17 +30,14 @@ export class AuftragsbestaetigungController {
       })
     } catch (error) {
       console.error('Fehler beim Erstellen der Auftragsbestätigung:', error)
-      res.status(400).json({
-        success: false,
-        error: error instanceof Error ? error.message : 'Unbekannter Fehler'
-      })
+      respondControllerError(res, error, 400)
     }
   }
 
   async getAuftragsbestaetigung(req: Request, res: Response): Promise<void> {
     try {
       const { id } = req.params
-      const tenantId = req.headers['x-tenant-id'] as string
+      const tenantId = resolveTenantId(req)
 
       const ab = await this.auftragsbestaetigungService.getAuftragsbestaetigungById(id as string, tenantId)
 
@@ -58,16 +55,13 @@ export class AuftragsbestaetigungController {
       })
     } catch (error) {
       console.error('Fehler beim Laden der Auftragsbestätigung:', error)
-      res.status(500).json({
-        success: false,
-        error: 'Interner Serverfehler'
-      })
+      respondControllerError(res, error, 500)
     }
   }
 
   async getAuftragsbestaetigungen(req: Request, res: Response): Promise<void> {
     try {
-      const tenantId = req.headers['x-tenant-id'] as string
+      const tenantId = resolveTenantId(req)
       const options = {
         status: req.query.status as any,
         bestellungId: req.query.bestellungId as string,
@@ -86,17 +80,14 @@ export class AuftragsbestaetigungController {
       })
     } catch (error) {
       console.error('Fehler beim Laden der Auftragsbestätigungen:', error)
-      res.status(500).json({
-        success: false,
-        error: 'Interner Serverfehler'
-      })
+      respondControllerError(res, error, 500)
     }
   }
 
   async getAuftragsbestaetigungByBestellung(req: Request, res: Response): Promise<void> {
     try {
       const { bestellungId } = req.params
-      const tenantId = req.headers['x-tenant-id'] as string
+      const tenantId = resolveTenantId(req)
 
       const ab = await this.auftragsbestaetigungService.getAuftragsbestaetigungByBestellung(bestellungId as string, tenantId)
 
@@ -114,17 +105,14 @@ export class AuftragsbestaetigungController {
       })
     } catch (error) {
       console.error('Fehler beim Laden der Auftragsbestätigung zur Bestellung:', error)
-      res.status(500).json({
-        success: false,
-        error: 'Interner Serverfehler'
-      })
+      respondControllerError(res, error, 500)
     }
   }
 
   async pruefenAuftragsbestaetigung(req: Request, res: Response): Promise<void> {
     try {
       const { id } = req.params
-      const tenantId = req.headers['x-tenant-id'] as string
+      const tenantId = resolveTenantId(req)
       const actorId = resolveActorId(req)
 
       const ab = await this.auftragsbestaetigungService.pruefenAuftragsbestaetigung(id as string, tenantId, actorId)
@@ -135,17 +123,14 @@ export class AuftragsbestaetigungController {
       })
     } catch (error) {
       console.error('Fehler beim Prüfen der Auftragsbestätigung:', error)
-      res.status(error instanceof Error && error.message.includes('nicht gefunden') ? 404 : 400).json({
-        success: false,
-        error: error instanceof Error ? error.message : 'Unbekannter Fehler'
-      })
+      respondDomainMutationError(res, error)
     }
   }
 
   async bestaetigenAuftragsbestaetigung(req: Request, res: Response): Promise<void> {
     try {
       const { id } = req.params
-      const tenantId = req.headers['x-tenant-id'] as string
+      const tenantId = resolveTenantId(req)
       const actorId = resolveActorId(req)
 
       const ab = await this.auftragsbestaetigungService.bestaetigenAuftragsbestaetigung(id as string, tenantId, actorId)
@@ -156,17 +141,14 @@ export class AuftragsbestaetigungController {
       })
     } catch (error) {
       console.error('Fehler beim Bestätigen der Auftragsbestätigung:', error)
-      res.status(error instanceof Error && error.message.includes('nicht gefunden') ? 404 : 400).json({
-        success: false,
-        error: error instanceof Error ? error.message : 'Unbekannter Fehler'
-      })
+      respondDomainMutationError(res, error)
     }
   }
 
   async updateAuftragsbestaetigung(req: Request, res: Response): Promise<void> {
     try {
       const { id } = req.params
-      const tenantId = req.headers['x-tenant-id'] as string
+      const tenantId = resolveTenantId(req)
       const actorId = resolveActorId(req)
 
       const ab = await this.auftragsbestaetigungService.updateAuftragsbestaetigung(id as string, tenantId, req.body, actorId)
@@ -177,17 +159,14 @@ export class AuftragsbestaetigungController {
       })
     } catch (error) {
       console.error('Fehler beim Aktualisieren der Auftragsbestätigung:', error)
-      res.status(error instanceof Error && error.message.includes('nicht gefunden') ? 404 : 400).json({
-        success: false,
-        error: error instanceof Error ? error.message : 'Unbekannter Fehler'
-      })
+      respondDomainMutationError(res, error)
     }
   }
 
   async deleteAuftragsbestaetigung(req: Request, res: Response): Promise<void> {
     try {
       const { id } = req.params
-      const tenantId = req.headers['x-tenant-id'] as string
+      const tenantId = resolveTenantId(req)
       const actorId = resolveActorId(req)
 
       await this.auftragsbestaetigungService.deleteAuftragsbestaetigung(id as string, tenantId, actorId)
@@ -198,16 +177,13 @@ export class AuftragsbestaetigungController {
       })
     } catch (error) {
       console.error('Fehler beim Löschen der Auftragsbestätigung:', error)
-      res.status(error instanceof Error && error.message.includes('nicht gefunden') ? 404 : 400).json({
-        success: false,
-        error: error instanceof Error ? error.message : 'Unbekannter Fehler'
-      })
+      respondDomainMutationError(res, error)
     }
   }
 
   async getAuftragsbestaetigungenMitAbweichungen(req: Request, res: Response): Promise<void> {
     try {
-      const tenantId = req.headers['x-tenant-id'] as string
+      const tenantId = resolveTenantId(req)
 
       const abs = await this.auftragsbestaetigungService.getAuftragsbestaetigungenMitAbweichungen(tenantId)
 
@@ -217,10 +193,7 @@ export class AuftragsbestaetigungController {
       })
     } catch (error) {
       console.error('Fehler beim Laden der Auftragsbestätigungen mit Abweichungen:', error)
-      res.status(500).json({
-        success: false,
-        error: 'Interner Serverfehler'
-      })
+      respondControllerError(res, error, 500)
     }
   }
 }

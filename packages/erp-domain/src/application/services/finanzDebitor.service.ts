@@ -1,5 +1,6 @@
 import { FinanzDebitor, FinanzDebitorProps } from '../../core/entities/finanzDebitor.entity';
 import { FinanzDebitorPostgresRepository } from '../../infrastructure/repositories/finanzDebitor-postgres.repository';
+import { clampLimit, clampOffset, ListResult } from '../../presentation/types/api-pagination';
 
 const DEFAULT_PAYMENT_TARGET_DAYS = 30;
 
@@ -19,7 +20,15 @@ export interface CreateFinanzDebitorDto {
 
 export type UpdateFinanzDebitorDto = Partial<CreateFinanzDebitorDto>;
 
-function normalize(dto: CreateFinanzDebitorDto, existing?: FinanzDebitorProps): FinanzDebitorProps {
+function tenantFrom(existing?: FinanzDebitorProps, tenantForCreate?: string): string {
+  const t = existing?.tenant_id ?? tenantForCreate?.trim();
+  if (!t) {
+    throw new Error('tenant_id is required');
+  }
+  return t;
+}
+
+function normalize(dto: CreateFinanzDebitorDto, existing?: FinanzDebitorProps, tenantForCreate?: string): FinanzDebitorProps {
   const debitorNr = dto.debitor_nr?.trim();
   if (debitorNr === undefined || debitorNr === null) {
     throw new Error('debitor_nr is required');
@@ -34,6 +43,7 @@ function normalize(dto: CreateFinanzDebitorDto, existing?: FinanzDebitorProps): 
 
   return {
     ...existing,
+    tenant_id: tenantFrom(existing, tenantForCreate),
     kunden_id: dto.kunden_id ?? existing?.kunden_id,
     debitor_nr: debitorNr,
     kreditlimit: dto.kreditlimit ?? existing?.kreditlimit ?? 0,
@@ -54,46 +64,60 @@ function normalize(dto: CreateFinanzDebitorDto, existing?: FinanzDebitorProps): 
 export class FinanzDebitorService {
   public constructor(private readonly repository: FinanzDebitorPostgresRepository) {}
 
-  public async list(): Promise<FinanzDebitor[]> {
-    return this.repository.list();
+  public async list(tenantId: string): Promise<FinanzDebitor[]> {
+    return this.repository.list(tenantId);
   }
 
-  public async findById(id: string): Promise<FinanzDebitor | null> {
-    return this.repository.findById(id);
+  public async listPaged(
+    tenantId: string,
+    options?: { limit?: number; offset?: number },
+  ): Promise<ListResult<FinanzDebitor>> {
+    const limit = clampLimit(options?.limit);
+    const offset = clampOffset(options?.offset);
+    const items = await this.repository.listPaged(tenantId, limit, offset);
+    const total = await this.repository.count(tenantId);
+    return { items, total };
   }
 
-  public async create(payload: CreateFinanzDebitorDto): Promise<FinanzDebitor> {
-    const normalized = normalize(payload);
-    const existing = await this.repository.findByDebitorNr(normalized.debitor_nr);
-    if (existing !== undefined && existing !== null) {
+  public async findById(id: string, tenantId: string): Promise<FinanzDebitor | null> {
+    return this.repository.findById(id, tenantId);
+  }
+
+  public async create(tenantId: string, payload: CreateFinanzDebitorDto): Promise<FinanzDebitor> {
+    const normalized = normalize(payload, undefined, tenantId);
+    const existingNr = await this.repository.findByDebitorNr(tenantId, normalized.debitor_nr);
+    if (existingNr !== undefined && existingNr !== null) {
       throw new Error(`Debitor ${normalized.debitor_nr} already exists`);
     }
     const entity = FinanzDebitor.create(normalized);
     return this.repository.save(entity);
   }
 
-  public async update(id: string, payload: UpdateFinanzDebitorDto): Promise<FinanzDebitor> {
-    const existing = await this.repository.findById(id);
-    if (existing === undefined || existing === null) {
+  public async update(id: string, tenantId: string, payload: UpdateFinanzDebitorDto): Promise<FinanzDebitor> {
+    const existingRow = await this.repository.findById(id, tenantId);
+    if (existingRow === undefined || existingRow === null) {
       throw new Error('FinanzDebitor not found');
     }
 
-    const current = existing.toPrimitives();
-    const normalized = normalize({
-      kunden_id: payload.kunden_id ?? current.kunden_id,
-      debitor_nr: payload.debitor_nr ?? current.debitor_nr,
-      kreditlimit: payload.kreditlimit ?? current.kreditlimit,
-      zahlungsziel: payload.zahlungsziel ?? current.zahlungsziel,
-      zahlungsart: payload.zahlungsart ?? current.zahlungsart,
-      bankverbindung: payload.bankverbindung ?? current.bankverbindung,
-      steuernummer: payload.steuernummer ?? current.steuernummer,
-      ust_id: payload.ust_id ?? current.ust_id,
-      ist_aktiv: payload.ist_aktiv ?? current.ist_aktiv,
-      notizen: payload.notizen ?? current.notizen,
-      erstellt_von: current.erstellt_von,
-    }, current);
+    const current = existingRow.toPrimitives();
+    const normalized = normalize(
+      {
+        kunden_id: payload.kunden_id ?? current.kunden_id,
+        debitor_nr: payload.debitor_nr ?? current.debitor_nr,
+        kreditlimit: payload.kreditlimit ?? current.kreditlimit,
+        zahlungsziel: payload.zahlungsziel ?? current.zahlungsziel,
+        zahlungsart: payload.zahlungsart ?? current.zahlungsart,
+        bankverbindung: payload.bankverbindung ?? current.bankverbindung,
+        steuernummer: payload.steuernummer ?? current.steuernummer,
+        ust_id: payload.ust_id ?? current.ust_id,
+        ist_aktiv: payload.ist_aktiv ?? current.ist_aktiv,
+        notizen: payload.notizen ?? current.notizen,
+        erstellt_von: current.erstellt_von,
+      },
+      current,
+    );
 
-    const duplicate = await this.repository.findByDebitorNr(normalized.debitor_nr);
+    const duplicate = await this.repository.findByDebitorNr(tenantId, normalized.debitor_nr);
     if ((duplicate !== undefined && duplicate !== null) && duplicate.toPrimitives().id !== id) {
       throw new Error(`Another Debitor already uses debitor_nr ${normalized.debitor_nr}`);
     }
@@ -102,7 +126,7 @@ export class FinanzDebitorService {
     return this.repository.update(entity);
   }
 
-  public async remove(id: string): Promise<void> {
-    await this.repository.delete(id);
+  public async remove(id: string, tenantId: string): Promise<void> {
+    await this.repository.delete(id, tenantId);
   }
 }

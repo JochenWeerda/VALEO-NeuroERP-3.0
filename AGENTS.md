@@ -58,6 +58,11 @@ Wenn eine Session neu startet:
 - dann `docs/agent-ops/active-workboard.md`
 - dann den letzten passenden Handoff / Resume-Block lesen
 
+## Nuetzliche Repo-Befehle (ERP-Domain / Finanz)
+
+- **`pnpm test:erp-domain`** — Jest nur fuer `packages/erp-domain` (`*.spec.ts`).
+- **`pnpm migrate:erp-finanz`** — SQL `001_finance_core` + `003_finanz_tenant_id` (Verbindung: `ERP_DATABASE_URL` → `DATABASE_URL` → `CRM_DATABASE_URL`; `.env`-Laden siehe `tools/migration/run_sql_migration.ts`). Fachlich: [docs/erp-finanz-multitenancy.md](docs/erp-finanz-multitenancy.md).
+
 ## Verweise
 
 - [Agent Ops README](c:/Users/Jochen/VALEO-NeuroERP-3.0/docs/agent-ops/README.md)

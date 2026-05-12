@@ -51,6 +51,17 @@ npm run storybook    # Storybook (port 6006)
 npx playwright test  # E2E tests
 ```
 
+### Monorepo — ERP domain (`packages/erp-domain`)
+
+From the **repository root**:
+
+```bash
+pnpm test:erp-domain      # Jest for packages/erp-domain (*.spec.ts)
+pnpm migrate:erp-finanz   # SQL: 001_finance_core + 003_finanz_tenant_id
+```
+
+Connection string precedence for the migration runner: `ERP_DATABASE_URL` → `DATABASE_URL` → `CRM_DATABASE_URL`. See `docs/erp-finanz-multitenancy.md` and `tools/migration/run_sql_migration.ts`.
+
 ### Docker
 ```bash
 docker compose up -d                          # Full stack (postgres, redis, nats, keycloak, all services)

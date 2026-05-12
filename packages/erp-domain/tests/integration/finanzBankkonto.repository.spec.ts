@@ -24,7 +24,7 @@ describe('FinanzBankkontoPostgresRepository', () => {
   });
 
   it('list returns an array', async () => {
-    const items = await repository.list();
+    const items = await repository.list('_legacy');
     expect(Array.isArray(items)).toBe(true);
   });
 });

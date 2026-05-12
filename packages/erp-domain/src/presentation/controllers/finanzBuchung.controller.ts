@@ -1,10 +1,16 @@
 /**
  * Express router for FinanzBuchung generated via CRM toolkit.
- * Provides baseline CRUD endpoints; extend with domain-specific routes.
  */
 
 import { Request, Response, Router } from 'express';
 import { FinanzBuchungService } from '../../application/services/finanzBuchung.service';
+import {
+  parseFinanzListQuery,
+  jsonFinanzList,
+  jsonFinanzData,
+  jsonFinanzError,
+} from '../utils/finanz-http';
+import { resolveTenantId, respondControllerError } from '../utils/request-context';
 
 const HTTP_STATUS = {
   BAD_REQUEST: 400,
@@ -23,52 +29,75 @@ export function buildFinanzBuchungRouter(
 ): Router {
   const router = Router();
 
-  router.get(baseRoute, async (_req: Request, res: Response) => {
-    const result = await service.list();
-    res.json(result);
+  router.get(baseRoute, async (req: Request, res: Response) => {
+    try {
+      const tenantId = resolveTenantId(req);
+      const { limit, offset } = parseFinanzListQuery(req);
+      const { items, total } = await service.listPaged(tenantId, { limit, offset });
+      jsonFinanzList(res, items, total, limit, offset);
+    } catch (error) {
+      respondControllerError(res, error, 500);
+    }
   });
 
   router.get(`${baseRoute}/:finanzBuchungId`, async (req: Request, res: Response) => {
-    const id = req.params.finanzBuchungId;
-    if (id === null || id === undefined || id.trim().length === 0) {
-      res.status(HTTP_STATUS.BAD_REQUEST).json({ message: 'finanzBuchungId parameter is required' });
-      return;
+    try {
+      const tenantId = resolveTenantId(req);
+      const id = req.params.finanzBuchungId;
+      if (id === null || id === undefined || id.trim().length === 0) {
+        jsonFinanzError(res, HTTP_STATUS.BAD_REQUEST, 'finanzBuchungId parameter is required');
+        return;
+      }
+      const entity = await service.findById(id, tenantId);
+      if (entity === undefined || entity === null) {
+        jsonFinanzError(res, HTTP_STATUS.NOT_FOUND, 'FinanzBuchung not found');
+        return;
+      }
+      jsonFinanzData(res, entity);
+    } catch (error) {
+      respondControllerError(res, error, 500);
     }
-    const entity = await service.findById(id);
-    if (entity === undefined || entity === null) {
-      res.status(HTTP_STATUS.NOT_FOUND).json({ message: 'FinanzBuchung not found' });
-      return;
-    }
-    res.json(entity);
   });
 
   router.post(baseRoute, async (req: Request, res: Response) => {
-    const created = await service.create(req.body);
-    res.status(HTTP_STATUS.CREATED).json(created);
+    try {
+      const tenantId = resolveTenantId(req);
+      const created = await service.create(tenantId, req.body);
+      jsonFinanzData(res, created, HTTP_STATUS.CREATED);
+    } catch (error) {
+      respondControllerError(res, error, 400);
+    }
   });
 
   router.put(`${baseRoute}/:finanzBuchungId`, async (req: Request, res: Response) => {
     const id = req.params.finanzBuchungId;
     if (id === null || id === undefined || id.trim().length === 0) {
-      res.status(HTTP_STATUS.BAD_REQUEST).json({ message: 'finanzBuchungId parameter is required' });
+      jsonFinanzError(res, HTTP_STATUS.BAD_REQUEST, 'finanzBuchungId parameter is required');
       return;
     }
-    const updated = await service.update(id, req.body);
-    res.json(updated);
+    try {
+      const tenantId = resolveTenantId(req);
+      const updated = await service.update(id, tenantId, req.body);
+      jsonFinanzData(res, updated);
+    } catch (error) {
+      respondControllerError(res, error, 400);
+    }
   });
 
   router.delete(`${baseRoute}/:finanzBuchungId`, async (req: Request, res: Response) => {
     const id = req.params.finanzBuchungId;
     if (id === null || id === undefined || id.trim().length === 0) {
-      res.status(HTTP_STATUS.BAD_REQUEST).json({ message: 'finanzBuchungId parameter is required' });
+      jsonFinanzError(res, HTTP_STATUS.BAD_REQUEST, 'finanzBuchungId parameter is required');
       return;
     }
-    await service.remove(id);
-    res.status(HTTP_STATUS.NO_CONTENT).send();
+    try {
+      const tenantId = resolveTenantId(req);
+      await service.remove(id, tenantId);
+      res.status(HTTP_STATUS.NO_CONTENT).send();
+    } catch (error) {
+      respondControllerError(res, error, 400);
+    }
   });
 
   return router;
 }
-
-
-
