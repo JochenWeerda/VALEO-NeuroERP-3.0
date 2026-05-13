@@ -98,6 +98,17 @@ Stand: `2026-05-12`
 **Checks:** `pytest tests/test_personal_hrm_operations_gate_workflow_api.py tests/test_personal_hrm_operations_gates_api.py -q --no-cov`; `pnpm --filter @valero-neuroerp/frontend-web type-check`; `python -m py_compile app/api/v1/endpoints/personal.py tests/test_personal_hrm_operations_gate_workflow_api.py`; `python scripts/agent_workboard_supervisor.py validate`; `node scripts/docs-governance-check.cjs`; `git diff --check`
 **Offene Risiken:** Produktive Rollen-/Rechtesteuerung haengt an der zentralen Auth-/Navigation-Enforcement; dieser Slice macht fachliche Sichtbarkeit und API-Metadaten explizit.
 
+## HRM-OPERATIONS-GATES-005
+
+**Von:** Codex
+**Owner:** Codex
+**Stand:** reserviert 2026-05-13
+**Ziel des Slices:** Google-Studio-Designentwurf fuer `HRM-Betriebsfreigaben` in die bestehende VALEO-React-Seite uebertragen: Readiness-Header, KPI-Leiste, Policy-Box, Stopper-Markierung, kompakte Pruefpunkt-Zeilen und aufklappbare Arbeitsbereiche.
+**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/agent-ops/slices/HRM-OPERATIONS-GATES-005.yaml`, `packages/frontend-web/src/pages/personal/hrm-operations-gates.tsx`
+**Abnahmekriterien:** Seite folgt dem Studio-Entwurf ohne neue Dependencies; bestehende React-Query-Hooks bleiben verdrahtet; sichtbare Sprache bleibt buerotauglich; Typecheck ist gruen.
+**Checks:** offen
+**Offene Risiken:** Studio-Prototyp enthaelt Mockdaten und `motion`; Uebernahme erfolgt auf echte VALEO-Daten und ohne zusaetzliche Animationsdependency.
+
 ## TODO-SPRINT-001
 
 **Von:** Cursor<br>
