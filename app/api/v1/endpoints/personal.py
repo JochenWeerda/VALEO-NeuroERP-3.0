@@ -541,6 +541,71 @@ class HrmReadinessOut(BaseModel):
     residualRisks: list[str]
 
 
+class EmployeeFileDocumentClassOut(BaseModel):
+    documentType: str
+    title: str
+    legalBasis: list[str]
+    defaultVisibility: str
+    retentionYears: int
+    requiresDmsRef: bool
+    deletionRule: str
+
+
+class EmployeeFileDocumentCreateIn(BaseModel):
+    documentType: str = Field(..., min_length=1, max_length=80)
+    title: str = Field(..., min_length=1, max_length=180)
+    issuedAt: str | None = None
+    validUntil: str | None = None
+    dmsDocumentId: str | None = Field(default=None, max_length=160)
+    visibility: str | None = Field(default=None, pattern="^(employee|manager|hr|payroll)$")
+    notes: str | None = Field(default=None, max_length=500)
+    createdBy: str = Field(default="system", max_length=120)
+
+
+class EmployeeFileDocumentOut(BaseModel):
+    id: str
+    employeeRef: str
+    documentType: str
+    title: str
+    status: str
+    visibility: str
+    legalBasis: list[str]
+    issuedAt: str | None = None
+    validUntil: str | None = None
+    retentionUntil: str
+    dmsDocumentId: str | None = None
+    canEmployeeView: bool
+    canManagerView: bool
+    deletionBlockedReason: str
+    auditRef: str
+
+
+class EmployeeFileExportOut(BaseModel):
+    available: bool
+    format: str
+    includesAuditTrail: bool
+    includesRetentionPlan: bool
+    dataSubjectAccessHint: str
+
+
+class EmployeeFileRetentionOut(BaseModel):
+    deletionConcept: str
+    reviewCadence: str
+    blockedDocumentCount: int
+    nextReviewHint: str
+
+
+class EmployeeFileOut(BaseModel):
+    employeeRef: str
+    source: str
+    actorRole: str
+    documentClasses: list[EmployeeFileDocumentClassOut]
+    documents: list[EmployeeFileDocumentOut]
+    hiddenDocumentCount: int
+    exportPackage: EmployeeFileExportOut
+    retention: EmployeeFileRetentionOut
+
+
 _HRM_MINIMUM_CHECKLIST = [
     "Digitale Personalakte",
     "DSGVO-konformes Rechte- und Loeschkonzept",
@@ -558,6 +623,224 @@ _HRM_MINIMUM_CHECKLIST = [
     "Microsoft-365-, LibreOffice- und Google-Workspace-Integration",
     "Sichere KI-Funktionen mit menschlicher Kontrolle",
 ]
+
+
+_EMPLOYEE_FILE_DOCUMENT_CLASSES = {
+    "employment_contract": {
+        "title": "Arbeitsvertrag",
+        "legal_basis": ["BDSG §26", "Nachweisgesetz", "DSGVO Art. 6(1)(b)"],
+        "default_visibility": "hr",
+        "retention_years": 10,
+        "requires_dms_ref": True,
+        "deletion_rule": "Nach Austritt und Ablauf arbeits-/steuerrechtlicher Fristen pruefen.",
+    },
+    "payroll_document": {
+        "title": "Gehalts- und Payroll-Dokument",
+        "legal_basis": ["BDSG §26", "GoBD", "Steuerrecht"],
+        "default_visibility": "payroll",
+        "retention_years": 10,
+        "requires_dms_ref": True,
+        "deletion_rule": "Nicht loeschen, solange Payroll-/Steuerfristen laufen.",
+    },
+    "certificate": {
+        "title": "Bescheinigung oder Zertifikat",
+        "legal_basis": ["BDSG §26", "Arbeitsschutz", "Qualifikationsnachweis"],
+        "default_visibility": "employee",
+        "retention_years": 6,
+        "requires_dms_ref": False,
+        "deletion_rule": "Nach Ablauf und Ersatznachweis pruefen.",
+    },
+    "absence_evidence": {
+        "title": "Abwesenheitsnachweis",
+        "legal_basis": ["BDSG §26", "Entgeltfortzahlungsgesetz"],
+        "default_visibility": "hr",
+        "retention_years": 5,
+        "requires_dms_ref": True,
+        "deletion_rule": "Nur erforderliche Statusdaten; keine Diagnosedaten speichern.",
+    },
+    "privacy_acknowledgement": {
+        "title": "Datenschutz- und Verpflichtungsnachweis",
+        "legal_basis": ["DSGVO", "BDSG §26", "Vertraulichkeitsverpflichtung"],
+        "default_visibility": "employee",
+        "retention_years": 6,
+        "requires_dms_ref": True,
+        "deletion_rule": "Nach Zweckfortfall und Ablauf interner Nachweisfrist pruefen.",
+    },
+    "warning_notice": {
+        "title": "Abmahnung oder Personalnotiz",
+        "legal_basis": ["BDSG §26", "berechtigter HR-Zweck"],
+        "default_visibility": "hr",
+        "retention_years": 3,
+        "requires_dms_ref": True,
+        "deletion_rule": "Regelmaessige Erforderlichkeitspruefung; Loeschung bei Zweckfortfall.",
+    },
+}
+
+
+def _employee_file_document_classes() -> list[EmployeeFileDocumentClassOut]:
+    return [
+        EmployeeFileDocumentClassOut(
+            documentType=key,
+            title=str(value["title"]),
+            legalBasis=[str(item) for item in value["legal_basis"]],
+            defaultVisibility=str(value["default_visibility"]),
+            retentionYears=int(value["retention_years"]),
+            requiresDmsRef=bool(value["requires_dms_ref"]),
+            deletionRule=str(value["deletion_rule"]),
+        )
+        for key, value in _EMPLOYEE_FILE_DOCUMENT_CLASSES.items()
+    ]
+
+
+def _document_class(document_type: str) -> dict[str, Any]:
+    if document_type not in _EMPLOYEE_FILE_DOCUMENT_CLASSES:
+        raise HTTPException(status_code=422, detail=f"Unknown employee file document type: {document_type}")
+    return _EMPLOYEE_FILE_DOCUMENT_CLASSES[document_type]
+
+
+def _normalize_actor_role(actor_role: str | None) -> str:
+    role = (actor_role or "hr").strip().lower()
+    if role in {"admin", "hr", "payroll", "manager", "employee"}:
+        return role
+    return "employee"
+
+
+def _role_can_view(role: str, visibility: str) -> bool:
+    if role in {"admin", "hr"}:
+        return True
+    if role == "payroll":
+        return visibility in {"payroll", "employee"}
+    if role == "manager":
+        return visibility in {"manager", "employee"}
+    return visibility == "employee"
+
+
+def _add_years(date_text: str | None, years: int) -> str:
+    try:
+        base = date.fromisoformat(str(date_text)) if date_text else datetime.utcnow().date()
+    except ValueError:
+        base = datetime.utcnow().date()
+    try:
+        return base.replace(year=base.year + years).isoformat()
+    except ValueError:
+        return base.replace(month=2, day=28, year=base.year + years).isoformat()
+
+
+def _employee_file_document_from_row(row: dict[str, Any], actor_role: str) -> EmployeeFileDocumentOut:
+    document_type = str(row.get("document_type") or row.get("documentType") or "certificate")
+    document_class = _document_class(document_type)
+    visibility = str(row.get("visibility") or document_class["default_visibility"])
+    issued_at = row.get("issued_at") or row.get("issuedAt")
+    if hasattr(issued_at, "isoformat"):
+        issued_at = issued_at.isoformat()
+    valid_until = row.get("valid_until") or row.get("validUntil")
+    if hasattr(valid_until, "isoformat"):
+        valid_until = valid_until.isoformat()
+    retention_until = row.get("retention_until") or row.get("retentionUntil") or _add_years(str(issued_at) if issued_at else None, int(document_class["retention_years"]))
+    if hasattr(retention_until, "isoformat"):
+        retention_until = retention_until.isoformat()
+    return EmployeeFileDocumentOut(
+        id=str(row.get("id") or f"employee-file-{uuid4()}"),
+        employeeRef=str(row.get("employee_ref") or row.get("employeeRef") or ""),
+        documentType=document_type,
+        title=str(row.get("title") or document_class["title"]),
+        status=str(row.get("status") or "active"),
+        visibility=visibility,
+        legalBasis=[str(item) for item in document_class["legal_basis"]],
+        issuedAt=str(issued_at) if issued_at else None,
+        validUntil=str(valid_until) if valid_until else None,
+        retentionUntil=str(retention_until),
+        dmsDocumentId=row.get("dms_document_id") or row.get("dmsDocumentId"),
+        canEmployeeView=_role_can_view("employee", visibility),
+        canManagerView=_role_can_view("manager", visibility),
+        deletionBlockedReason=str(document_class["deletion_rule"]),
+        auditRef=str(row.get("audit_ref") or row.get("auditRef") or f"hrm-akte:{row.get('id') or 'contract'}"),
+    )
+
+
+def _filter_employee_file_documents(documents: list[EmployeeFileDocumentOut], actor_role: str) -> tuple[list[EmployeeFileDocumentOut], int]:
+    visible = [document for document in documents if _role_can_view(actor_role, document.visibility)]
+    return visible, len(documents) - len(visible)
+
+
+def _pilot_employee_file_documents(employee_ref: str, actor_role: str) -> tuple[list[EmployeeFileDocumentOut], int]:
+    rows = [
+        {
+            "id": f"akte-{employee_ref}-contract",
+            "employee_ref": employee_ref,
+            "document_type": "employment_contract",
+            "title": "Arbeitsvertrag",
+            "visibility": "hr",
+            "issued_at": "2024-01-01",
+            "dms_document_id": "dms-hr-contract-demo",
+        },
+        {
+            "id": f"akte-{employee_ref}-certificate",
+            "employee_ref": employee_ref,
+            "document_type": "certificate",
+            "title": "Staplerschein / Qualifikationsnachweis",
+            "visibility": "employee",
+            "issued_at": "2025-04-01",
+            "valid_until": "2028-04-01",
+            "dms_document_id": "dms-hr-cert-demo",
+        },
+        {
+            "id": f"akte-{employee_ref}-payroll",
+            "employee_ref": employee_ref,
+            "document_type": "payroll_document",
+            "title": "Payroll-Stammdatenblatt",
+            "visibility": "payroll",
+            "issued_at": "2025-01-01",
+            "dms_document_id": "dms-hr-payroll-demo",
+        },
+    ]
+    documents = [_employee_file_document_from_row(row, actor_role) for row in rows]
+    return _filter_employee_file_documents(documents, actor_role)
+
+
+def _employee_file_response(employee_ref: str, actor_role: str, source: str, documents: list[EmployeeFileDocumentOut], hidden_count: int) -> EmployeeFileOut:
+    return EmployeeFileOut(
+        employeeRef=employee_ref,
+        source=source,
+        actorRole=actor_role,
+        documentClasses=_employee_file_document_classes(),
+        documents=documents,
+        hiddenDocumentCount=hidden_count,
+        exportPackage=EmployeeFileExportOut(
+            available=True,
+            format="json+zip",
+            includesAuditTrail=True,
+            includesRetentionPlan=True,
+            dataSubjectAccessHint="DSGVO-Auskunftspaket enthaelt sichtbare Aktenmetadaten, Audit-Referenzen und Retention-Plan.",
+        ),
+        retention=EmployeeFileRetentionOut(
+            deletionConcept="Dokumentklasse bestimmt Mindestaufbewahrung; Zweckfortfall und Rechtsfristen blockieren automatische Loeschung.",
+            reviewCadence="jaehrlich und bei Austritt",
+            blockedDocumentCount=sum(1 for document in documents if document.retentionUntil >= datetime.utcnow().date().isoformat()),
+            nextReviewHint="HR prueft Retention, DMS-Referenz und Zweckbindung vor Loeschlauf.",
+        ),
+    )
+
+
+def _load_employee_file_documents(db: Session, tenant_id: str, employee_ref: str, actor_role: str) -> tuple[list[EmployeeFileDocumentOut], int, str]:
+    rows = db.execute(
+        text(
+            """
+            SELECT id, employee_ref, document_type, title, status, visibility,
+                   issued_at, valid_until, retention_until, dms_document_id, audit_ref
+            FROM domain_hr.employee_file_documents
+            WHERE tenant_id = :tenant_id AND employee_ref = :employee_ref
+            ORDER BY issued_at DESC NULLS LAST, created_at DESC NULLS LAST
+            """
+        ),
+        {"tenant_id": tenant_id, "employee_ref": employee_ref},
+    ).mappings().all()
+    if not rows:
+        visible, hidden = _pilot_employee_file_documents(employee_ref, actor_role)
+        return visible, hidden, "pilot"
+    documents = [_employee_file_document_from_row(dict(row), actor_role) for row in rows]
+    visible, hidden = _filter_employee_file_documents(documents, actor_role)
+    return visible, hidden, "database"
 
 
 def build_hrm_readiness() -> HrmReadinessOut:
@@ -2133,35 +2416,18 @@ async def list_zeiterfassung(
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
-    params: dict[str, Any] = {"tenant_id": tenant_id}
-    where = ["tenant_id = :tenant_id"]
-    if datum:
-        where.append("entry_date = :entry_date")
-        params["entry_date"] = datum
-
-    rows = db.execute(
-        text(
-            f"""
-            SELECT id, employee_ref, entry_date, start_time, end_time, hours, entry_type
-            FROM domain_hr.time_entries
-            WHERE {' AND '.join(where)}
-            ORDER BY entry_date DESC, employee_ref ASC
-            """
-        ),
-        params,
-    ).mappings().all()
-
+    rows = PersonalService(db, tenant_id).list_zeiteintraege(datum=datum)
     return [
         ZeitEintragOut(
-            id=str(row["id"]),
-            mitarbeiter=str(row.get("employee_ref") or ""),
-            datum=_to_iso(row.get("entry_date")),
-            kommen=_to_time_text(row.get("start_time")),
-            gehen=_to_time_text(row.get("end_time")),
-            stunden=float(row.get("hours") or 0),
-            typ=str(row.get("entry_type") or "Arbeit"),
+            id=r["id"],
+            mitarbeiter=r["employeeRef"],
+            datum=r["datum"],
+            kommen=r["startTime"] or "",
+            gehen=r["endTime"] or "",
+            stunden=r["hours"],
+            typ=r["entryType"],
         )
-        for row in rows
+        for r in rows
     ]
 
 
@@ -2171,39 +2437,9 @@ async def create_time_entry(
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
-    entry_id = str(uuid4())
-    entry_date = _parse_entry_date(payload.datum)
-    row = db.execute(
-        text(
-            """
-            INSERT INTO domain_hr.time_entries
-              (id, tenant_id, employee_ref, entry_date, start_time, end_time, hours,
-               entry_type, source, status, cost_center, work_area, notes, created_at, updated_at)
-            VALUES
-              (:id, :tenant_id, :employee_ref, :entry_date, :start_time, :end_time, :hours,
-               :entry_type, :source, 'Draft', :cost_center, :work_area, :notes, NOW(), NOW())
-            RETURNING id, employee_ref, entry_date, start_time, end_time, hours, entry_type,
-                      source, status, cost_center, work_area, correction_reason, approved_by,
-                      approved_at, audit_ref
-            """
-        ),
-        {
-            "id": entry_id,
-            "tenant_id": tenant_id,
-            "employee_ref": payload.employeeRef,
-            "entry_date": entry_date,
-            "start_time": payload.startTime,
-            "end_time": payload.endTime,
-            "hours": payload.hours,
-            "entry_type": payload.entryType,
-            "source": payload.source,
-            "cost_center": payload.costCenter,
-            "work_area": payload.workArea,
-            "notes": payload.notes,
-        },
-    ).mappings().first()
-    db.commit()
-    return _time_booking_from_row(row)
+    svc = PersonalService(db, tenant_id)
+    data = svc.create_zeiteintrag(payload.model_dump(by_alias=True))
+    return TimeEntryBookingOut(**data)
 
 
 @router.post("/time-entries/{entry_id}/submit", response_model=TimeEntryActionOut)
@@ -2212,25 +2448,12 @@ async def submit_time_entry(
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
-    row = db.execute(
-        text(
-            """
-            UPDATE domain_hr.time_entries
-            SET status = 'Submitted', updated_at = NOW(), version = version + 1
-            WHERE id = :entry_id
-              AND tenant_id = :tenant_id
-              AND status IN ('Draft', 'Rejected', 'Corrected')
-            RETURNING id, employee_ref, entry_date, start_time, end_time, hours, entry_type,
-                      source, status, cost_center, work_area, correction_reason, approved_by,
-                      approved_at, audit_ref
-            """
-        ),
-        {"entry_id": entry_id, "tenant_id": tenant_id},
-    ).mappings().first()
-    if not row:
-        raise HTTPException(status_code=409, detail="Zeitbuchung kann in diesem Status nicht eingereicht werden")
-    db.commit()
-    return TimeEntryActionOut(ok=True, entry=_time_booking_from_row(row))
+    from app.core.exceptions import ConflictError
+    try:
+        data = PersonalService(db, tenant_id).submit_zeiteintrag(entry_id)
+        return TimeEntryActionOut(ok=True, entry=TimeEntryBookingOut(**data))
+    except ConflictError as exc:
+        raise HTTPException(status_code=409, detail=exc.detail)
 
 
 @router.post("/time-entries/{entry_id}/approve", response_model=TimeEntryActionOut)
@@ -2240,29 +2463,12 @@ async def approve_time_entry(
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
-    row = db.execute(
-        text(
-            """
-            UPDATE domain_hr.time_entries
-            SET status = 'Approved',
-                approved_by = :approved_by,
-                approved_at = NOW(),
-                updated_at = NOW(),
-                version = version + 1
-            WHERE id = :entry_id
-              AND tenant_id = :tenant_id
-              AND status = 'Submitted'
-            RETURNING id, employee_ref, entry_date, start_time, end_time, hours, entry_type,
-                      source, status, cost_center, work_area, correction_reason, approved_by,
-                      approved_at, audit_ref
-            """
-        ),
-        {"entry_id": entry_id, "tenant_id": tenant_id, "approved_by": payload.approvedBy},
-    ).mappings().first()
-    if not row:
-        raise HTTPException(status_code=409, detail="Zeitbuchung muss vor Freigabe eingereicht sein")
-    db.commit()
-    return TimeEntryActionOut(ok=True, entry=_time_booking_from_row(row))
+    from app.core.exceptions import ConflictError
+    try:
+        data = PersonalService(db, tenant_id).approve_zeiteintrag(entry_id, payload.approvedBy)
+        return TimeEntryActionOut(ok=True, entry=TimeEntryBookingOut(**data))
+    except ConflictError as exc:
+        raise HTTPException(status_code=409, detail=exc.detail)
 
 
 @router.post("/time-entries/{entry_id}/correct", response_model=TimeEntryActionOut)
@@ -2272,57 +2478,14 @@ async def correct_time_entry(
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
-    current = db.execute(
-        text(
-            """
-            SELECT status
-            FROM domain_hr.time_entries
-            WHERE id = :entry_id AND tenant_id = :tenant_id
-            """
-        ),
-        {"entry_id": entry_id, "tenant_id": tenant_id},
-    ).mappings().first()
-    if not current:
+    from app.core.exceptions import ConflictError, EntityNotFoundError, ValidationFailedError
+    try:
+        data = PersonalService(db, tenant_id).correct_zeiteintrag(entry_id, payload.model_dump(by_alias=True))
+        return TimeEntryActionOut(ok=True, entry=TimeEntryBookingOut(**data))
+    except EntityNotFoundError:
         raise HTTPException(status_code=404, detail="Zeitbuchung nicht gefunden")
-    if str(current.get("status")) == "Exported":
-        raise HTTPException(status_code=409, detail="Exportierte Zeitbuchungen duerfen nicht still veraendert werden")
-
-    row = db.execute(
-        text(
-            """
-            UPDATE domain_hr.time_entries
-            SET start_time = :start_time,
-                end_time = :end_time,
-                hours = :hours,
-                entry_type = :entry_type,
-                status = 'Corrected',
-                cost_center = :cost_center,
-                work_area = :work_area,
-                correction_reason = :correction_reason,
-                notes = :notes,
-                updated_at = NOW(),
-                version = version + 1
-            WHERE id = :entry_id AND tenant_id = :tenant_id
-            RETURNING id, employee_ref, entry_date, start_time, end_time, hours, entry_type,
-                      source, status, cost_center, work_area, correction_reason, approved_by,
-                      approved_at, audit_ref
-            """
-        ),
-        {
-            "entry_id": entry_id,
-            "tenant_id": tenant_id,
-            "start_time": payload.startTime,
-            "end_time": payload.endTime,
-            "hours": payload.hours,
-            "entry_type": payload.entryType,
-            "cost_center": payload.costCenter,
-            "work_area": payload.workArea,
-            "correction_reason": payload.correctionReason,
-            "notes": payload.notes,
-        },
-    ).mappings().first()
-    db.commit()
-    return TimeEntryActionOut(ok=True, entry=_time_booking_from_row(row))
+    except (ConflictError, ValidationFailedError) as exc:
+        raise HTTPException(status_code=409, detail=exc.detail)
 
 
 @router.get("/absences", response_model=list[AbsenceOut])
@@ -2333,30 +2496,10 @@ async def list_absences(
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
-    params: dict[str, Any] = {"tenant_id": tenant_id}
-    where = ["tenant_id = :tenant_id", "entry_type IN ('Urlaub', 'Krank', 'Unbezahlt', 'Sonstiges')"]
-    if datum_von:
-        params["datum_von"] = _parse_entry_date(datum_von)
-        where.append("entry_date >= :datum_von")
-    if datum_bis:
-        params["datum_bis"] = _parse_entry_date(datum_bis)
-        where.append("entry_date <= :datum_bis")
-    if status:
-        params["status"] = status
-        where.append("status = :status")
-
-    rows = db.execute(
-        text(
-            f"""
-            SELECT id, employee_ref, entry_date, entry_type, source, status, notes, audit_ref
-            FROM domain_hr.time_entries
-            WHERE {' AND '.join(where)}
-            ORDER BY entry_date ASC, employee_ref ASC
-            """
-        ),
-        params,
-    ).mappings().all()
-    return [_absence_from_row(row) for row in rows]
+    rows = PersonalService(db, tenant_id).list_abwesenheiten(
+        datum_von=datum_von, datum_bis=datum_bis, status=status
+    )
+    return [AbsenceOut(**r) for r in rows]
 
 
 @router.post("/absences/import", response_model=AbsenceImportOut, status_code=201)
@@ -2365,36 +2508,12 @@ async def import_absence(
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
-    from_date = _parse_entry_date(payload.fromDate)
-    to_date = _parse_entry_date(payload.toDate)
-    imported: list[AbsenceOut] = []
-    for entry_date in _date_range(from_date, to_date):
-        row = db.execute(
-            text(
-                """
-                INSERT INTO domain_hr.time_entries
-                  (id, tenant_id, employee_ref, entry_date, start_time, end_time, hours,
-                   entry_type, source, status, notes, audit_ref, created_at, updated_at)
-                VALUES
-                  (:id, :tenant_id, :employee_ref, :entry_date, NULL, NULL, 0,
-                   :entry_type, 'absence', :status, :notes, :audit_ref, NOW(), NOW())
-                RETURNING id, employee_ref, entry_date, entry_type, source, status, notes, audit_ref
-                """
-            ),
-            {
-                "id": str(uuid4()),
-                "tenant_id": tenant_id,
-                "employee_ref": payload.employeeRef,
-                "entry_date": entry_date,
-                "entry_type": payload.absenceType,
-                "status": payload.status,
-                "notes": payload.note or payload.sourceSystem,
-                "audit_ref": payload.externalRef or f"{payload.sourceSystem}:{payload.employeeRef}:{entry_date.isoformat()}",
-            },
-        ).mappings().first()
-        imported.append(_absence_from_row(row))
-    db.commit()
-    return AbsenceImportOut(ok=True, imported=len(imported), absences=imported)
+    from app.core.exceptions import ValidationFailedError
+    try:
+        absences, count = PersonalService(db, tenant_id).import_abwesenheit(payload.model_dump(by_alias=True))
+        return AbsenceImportOut(ok=True, imported=count, absences=[AbsenceOut(**r) for r in absences])
+    except ValidationFailedError as exc:
+        raise HTTPException(status_code=400, detail=exc.detail)
 
 
 @router.get("/shifts", response_model=list[ShiftOut])
@@ -3321,23 +3440,13 @@ async def delete_absence(
     db: Session = Depends(get_db),
 ):
     """Löscht einen Abwesenheitseintrag (nur im Status 'Pending'/'Beantragt')."""
-    row = db.execute(
-        text("""
-            SELECT id, status FROM domain_hr.time_entries
-            WHERE id = :absence_id AND tenant_id = :tenant_id
-              AND entry_type IN ('Urlaub', 'Krank', 'Unbezahlt', 'Sonstiges')
-        """),
-        {"absence_id": absence_id, "tenant_id": tenant_id},
-    ).fetchone()
-    if not row:
+    from app.core.exceptions import ValidationFailedError
+    try:
+        PersonalService(db, tenant_id).delete_abwesenheit(absence_id)
+    except EntityNotFoundError:
         raise HTTPException(status_code=404, detail="Abwesenheit nicht gefunden")
-    if str(row[1]) in ("Approved", "Genehmigt"):
-        raise HTTPException(status_code=400, detail="Genehmigte Abwesenheiten können nicht gelöscht werden")
-    db.execute(
-        text("DELETE FROM domain_hr.time_entries WHERE id = :id AND tenant_id = :tenant_id"),
-        {"id": absence_id, "tenant_id": tenant_id},
-    )
-    db.commit()
+    except ValidationFailedError as exc:
+        raise HTTPException(status_code=400, detail=exc.detail)
 
 
 @router.delete("/shifts/{shift_id}", status_code=204)
