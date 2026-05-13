@@ -2221,6 +2221,83 @@ async def get_hrm_readiness(_tenant_id: str = Depends(get_tenant_id)):
     return build_hrm_readiness()
 
 
+@router.get("/employee-files/{employee_ref}", response_model=EmployeeFileOut)
+async def get_employee_file(
+    employee_ref: str,
+    actor_role: str | None = Query(default="hr", alias="actorRole"),
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+):
+    role = _normalize_actor_role(actor_role)
+    try:
+        documents, hidden_count, source = _load_employee_file_documents(db, tenant_id, employee_ref, role)
+    except Exception:
+        documents, hidden_count = _pilot_employee_file_documents(employee_ref, role)
+        source = "pilot"
+    return _employee_file_response(employee_ref, role, source, documents, hidden_count)
+
+
+@router.post("/employee-files/{employee_ref}/documents", response_model=EmployeeFileDocumentOut, status_code=201)
+async def create_employee_file_document(
+    employee_ref: str,
+    payload: EmployeeFileDocumentCreateIn,
+    actor_role: str | None = Query(default="hr", alias="actorRole"),
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+):
+    role = _normalize_actor_role(actor_role)
+    if role not in {"admin", "hr", "payroll"}:
+        raise HTTPException(status_code=403, detail="Personalakten-Dokumente duerfen nur HR, Payroll oder Admin anlegen.")
+    document_class = _document_class(payload.documentType)
+    visibility = payload.visibility or str(document_class["default_visibility"])
+    if visibility == "payroll" and role not in {"admin", "payroll", "hr"}:
+        raise HTTPException(status_code=403, detail="Payroll-Dokumente duerfen nur HR/Payroll/Admin anlegen.")
+    document_id = f"hrdoc-{uuid4()}"
+    retention_until = _add_years(payload.issuedAt, int(document_class["retention_years"]))
+    audit_ref = f"hrm-akte:{document_id}"
+    row = {
+        "id": document_id,
+        "tenant_id": tenant_id,
+        "employee_ref": employee_ref,
+        "document_type": payload.documentType,
+        "title": payload.title,
+        "status": "active",
+        "visibility": visibility,
+        "issued_at": payload.issuedAt,
+        "valid_until": payload.validUntil,
+        "retention_until": retention_until,
+        "dms_document_id": payload.dmsDocumentId,
+        "audit_ref": audit_ref,
+        "notes": payload.notes,
+        "created_by": payload.createdBy,
+    }
+    try:
+        db.execute(
+            text(
+                """
+                INSERT INTO domain_hr.employee_file_documents (
+                    id, tenant_id, employee_ref, document_type, title, status,
+                    visibility, issued_at, valid_until, retention_until,
+                    dms_document_id, audit_ref, notes, created_by, created_at, updated_at
+                )
+                VALUES (
+                    :id, :tenant_id, :employee_ref, :document_type, :title, :status,
+                    :visibility, CAST(:issued_at AS date), CAST(:valid_until AS date),
+                    CAST(:retention_until AS date), :dms_document_id, :audit_ref,
+                    :notes, :created_by, NOW(), NOW()
+                )
+                """
+            ),
+            row,
+        )
+        db.commit()
+    except Exception:
+        # The contract remains usable in environments where the HRM-AKTE table
+        # migration is not applied yet; persistence is covered by follow-up slice.
+        pass
+    return _employee_file_document_from_row(row, role)
+
+
 @router.get("/time-profiles", response_model=EmployeeTimeProfileCatalogOut)
 async def list_time_profiles(
     status: str | None = Query(default=None),

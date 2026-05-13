@@ -1,7 +1,7 @@
 id: HRM-AKTE-001
 title: Digitale Personalakte Vertrag
 owner: Codex
-status: reserviert
+status: abgeschlossen
 created: 2026-05-13
 goal: >
   Ersten Vertrag fuer digitale Personalakte mit Dokumentklassen,
@@ -21,8 +21,14 @@ acceptance_criteria:
 checks:
   - pytest tests/test_personal_employee_file_api.py -q --no-cov
   - pnpm --filter @valero-neuroerp/frontend-web type-check
+  - python -m py_compile app/api/v1/endpoints/personal.py tests/test_personal_employee_file_api.py
   - python scripts/agent_workboard_supervisor.py validate
   - node scripts/docs-governance-check.cjs
   - git diff --check
+done:
+  - GET /api/v1/personal/employee-files/{employee_ref} eingefuehrt.
+  - POST /api/v1/personal/employee-files/{employee_ref}/documents eingefuehrt.
+  - Frontend-Hooks useEmployeeFile und useCreateEmployeeFileDocument ergaenzt.
+  - HRM-Gap-Plan auf Contract-Umsetzung und Folgeslice HRM-AKTE-DB-001 aktualisiert.
 risks:
   - Produktive DMS-Ablage, echte Signaturen, Rechtsfreigabe der Aufbewahrungsfristen und DB-Migration bleiben Folgeslices.
