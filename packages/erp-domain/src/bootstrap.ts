@@ -56,7 +56,7 @@ export function registerErpDomain(options: ErpBootstrapOptions = {}): ServiceLoc
   locator.registerFactory(ERP_DOMAIN_SERVICE_TOKENS.updateOrderStatus, () => new UpdateOrderStatusCommand(locator.resolve<OrderDomainService>(ERP_DOMAIN_SERVICE_TOKENS.service)));
   locator.registerFactory(ERP_DOMAIN_SERVICE_TOKENS.deleteOrder, () => new DeleteOrderCommand(locator.resolve<OrderDomainService>(ERP_DOMAIN_SERVICE_TOKENS.service)));
 
-  // TODO: ERPApiController not implemented yet
+  // No order controller is registered by design: Orders-REST is owned by Python.
   // locator.registerFactory(ERP_DOMAIN_SERVICE_TOKENS.controller, () =>
   //   new ERPApiController(
   //     locator.resolve<ListOrdersQuery>(ERP_DOMAIN_SERVICE_TOKENS.listOrders),
