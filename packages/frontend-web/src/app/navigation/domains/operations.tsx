@@ -787,6 +787,13 @@ export const RAW_NAV_SECTIONS: RawNavItem[] = [
         mcp: { businessDomain: 'hr', scope: 'hr:read' },
       },
       {
+        id: 'hrm-operations-gates',
+        label: 'HRM-Freigaben',
+        icon: ShieldCheck,
+        module: '@/pages/personal/hrm-operations-gates',
+        mcp: { businessDomain: 'hr', scope: 'hr:write' },
+      },
+      {
         id: 'schichtplan',
         label: 'Schichtplan',
         icon: Calendar,

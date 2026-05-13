@@ -48,32 +48,12 @@ from typing import Any, Optional
 from fastapi import APIRouter, Depends, File, HTTPException, Query, UploadFile
 from fastapi.responses import Response
 from pydantic import BaseModel
-from sqlalchemy.exc import DataError
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
 from app.core.tenant import get_tenant_id
-from app.core.uuid7 import uuid7
-from app.infrastructure.models.einkauf_models import (
-    ArtikelLagerParameter,
-    EinkaufBestellvorschlag,
-    EinkaufBestellung,
-    EinkaufBestellungPosition,
-    EinkaufKontrakt,
-    EinkaufKontraktPosition,
-    EinkaufLieferant,
-    LagerKontenzuordnung,
-    PalettenKontoBuchung,
-    PfandKontoBuchung,
-    FremdwarenEinlagerung,
-)
-from modules.einkauf.services.bestellvorschlag_service import (
-    engine_lager,
-    engine_rohware,
-    engine_verkauf,
-    save_vorschlag,
-    vorschlag_zu_bestellungen,
-)
+from app.core.exceptions import ConflictError, EntityNotFoundError, ValidationFailedError
+from app.services.procurement_service import ProcurementService
 
 router = APIRouter(tags=["einkauf", "bestellvorschlag"])
 
@@ -250,6 +230,14 @@ class FremdwarenCreate(BaseModel):
     notiz: Optional[str] = None
 
 
+def _svc(db: Session, tenant_id: str) -> ProcurementService:
+    return ProcurementService(db, tenant_id)
+
+
+def _not_found(exc: EntityNotFoundError, label: str) -> HTTPException:
+    return HTTPException(404, f"{label} nicht gefunden")
+
+
 # ─────────────────────────────────────────────────────────────────────────────
 # Bestell-Vorschlag Engines
 # ─────────────────────────────────────────────────────────────────────────────
@@ -264,16 +252,7 @@ async def vorschlag_lager(
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
 ) -> list[dict[str, Any]]:
-    """Engine 1: Bestell-Vorschläge aus Lagerbestand (Meldebestand-Unterschreitung)."""
-    return engine_lager(
-        db,
-        tenant_id=tenant_id,
-        niederlassung_id=niederlassung_id,
-        artikelgruppe=artikelgruppe,
-        artikel_nr=artikel_nr,
-        warehouse_id=warehouse_id,
-        nur_unter_meldebestand=nur_unter_meldebestand,
-    )
+    return _svc(db, tenant_id).compute_vorschlag_lager(niederlassung_id, artikelgruppe, artikel_nr, warehouse_id, nur_unter_meldebestand)
 
 
 @router.get("/einkauf/bestellvorschlaege/verkauf")
@@ -285,15 +264,7 @@ async def vorschlag_verkauf(
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
 ) -> list[dict[str, Any]]:
-    """Engine 2: Bestell-Vorschläge aus offenen VK-Auftrags-Positionen."""
-    return engine_verkauf(
-        db,
-        tenant_id=tenant_id,
-        niederlassung_id=niederlassung_id,
-        artikelgruppe=artikelgruppe,
-        von_datum=von_datum,
-        bis_datum=bis_datum,
-    )
+    return _svc(db, tenant_id).compute_vorschlag_verkauf(niederlassung_id, artikelgruppe, von_datum, bis_datum)
 
 
 @router.get("/einkauf/bestellvorschlaege/rohware")
@@ -303,13 +274,7 @@ async def vorschlag_rohware(
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
 ) -> list[dict[str, Any]]:
-    """Engine 3: Bestell-Vorschläge aus Rohstoff-Bedarf."""
-    return engine_rohware(
-        db,
-        tenant_id=tenant_id,
-        stichtag=stichtag,
-        niederlassung_id=niederlassung_id,
-    )
+    return _svc(db, tenant_id).compute_vorschlag_rohware(stichtag, niederlassung_id)
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -325,33 +290,7 @@ async def list_bestellvorschlaege(
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
 ) -> list[dict[str, Any]]:
-    q = (
-        db.query(EinkaufBestellvorschlag)
-        .filter(EinkaufBestellvorschlag.tenant_id == tenant_id)
-    )
-    if vorschlag_typ:
-        q = q.filter(EinkaufBestellvorschlag.vorschlag_typ == vorschlag_typ)
-    if status:
-        q = q.filter(EinkaufBestellvorschlag.status == status)
-    if von:
-        q = q.filter(EinkaufBestellvorschlag.datum >= von)
-    if bis:
-        q = q.filter(EinkaufBestellvorschlag.datum <= bis)
-
-    return [
-        {
-            "id":              str(v.id),
-            "vorschlag_typ":   v.vorschlag_typ,
-            "bezeichnung":     v.bezeichnung,
-            "datum":           v.datum.isoformat() if v.datum else None,
-            "status":          v.status,
-            "niederlassung_id": v.niederlassung_id,
-            "erstellt_von":    v.erstellt_von,
-            "positionen_anz":  len(v.positionen),
-            "created_at":      v.created_at.isoformat() if v.created_at else None,
-        }
-        for v in q.order_by(EinkaufBestellvorschlag.datum.desc()).all()
-    ]
+    return _svc(db, tenant_id).list_vorschlaege(vorschlag_typ, status, von, bis)
 
 
 @router.post("/einkauf/bestellvorschlaege", status_code=201)
@@ -360,21 +299,7 @@ async def create_bestellvorschlag(
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
 ) -> dict[str, Any]:
-    """Speichert einen berechneten Vorschlag persistent."""
-    vorschlag = save_vorschlag(
-        db,
-        tenant_id=tenant_id,
-        vorschlag_typ=data.vorschlag_typ,
-        positionen=data.positionen,
-        parameter=data.parameter,
-        niederlassung_id=data.niederlassung_id,
-    )
-    if data.bezeichnung:
-        vorschlag.bezeichnung = data.bezeichnung
-    db.commit()
-    db.refresh(vorschlag)
-    return {"id": str(vorschlag.id), "status": vorschlag.status,
-            "positionen_anz": len(vorschlag.positionen)}
+    return _svc(db, tenant_id).create_vorschlag(data.vorschlag_typ, data.positionen, data.parameter, data.niederlassung_id, data.bezeichnung)
 
 
 @router.get("/einkauf/bestellvorschlaege/{vorschlag_id}")
@@ -383,48 +308,10 @@ async def get_bestellvorschlag(
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
 ) -> dict[str, Any]:
-    v = (
-        db.query(EinkaufBestellvorschlag)
-        .filter(EinkaufBestellvorschlag.id == vorschlag_id,
-                EinkaufBestellvorschlag.tenant_id == tenant_id)
-        .first()
-    )
-    if not v:
+    try:
+        return _svc(db, tenant_id).get_vorschlag(vorschlag_id)
+    except EntityNotFoundError:
         raise HTTPException(404, "Vorschlag nicht gefunden")
-    return {
-        "id":              str(v.id),
-        "vorschlag_typ":   v.vorschlag_typ,
-        "bezeichnung":     v.bezeichnung,
-        "datum":           v.datum.isoformat() if v.datum else None,
-        "status":          v.status,
-        "parameter":       v.parameter,
-        "niederlassung_id": v.niederlassung_id,
-        "erstellt_von":    v.erstellt_von,
-        "freigegeben_von": v.freigegeben_von,
-        "freigegeben_am":  v.freigegeben_am.isoformat() if v.freigegeben_am else None,
-        "positionen": [
-            {
-                "id":                  str(p.id),
-                "pos_nr":              p.pos_nr,
-                "article_id":          p.article_id,
-                "artikel_nr":          p.artikel_nr,
-                "artikel_bezeichnung": p.artikel_bezeichnung,
-                "artikel_gruppe":      p.artikel_gruppe,
-                "einheit":             p.einheit,
-                "ist_bestand":         float(p.ist_bestand or 0),
-                "offene_auftraege":    float(p.offene_auftraege or 0),
-                "bedarf":              float(p.bedarf or 0),
-                "vorschlag_menge":     float(p.vorschlag_menge),
-                "bestell_menge":       float(p.bestell_menge or p.vorschlag_menge),
-                "lieferant_id":        str(p.lieferant_id) if p.lieferant_id else None,
-                "lieferant_name":      p.lieferant_name,
-                "letzter_preis":       float(p.letzter_preis) if p.letzter_preis else None,
-                "preis_einheit":       p.preis_einheit,
-                "status":              p.status,
-            }
-            for p in v.positionen
-        ],
-    }
 
 
 @router.put("/einkauf/bestellvorschlaege/{vorschlag_id}")
@@ -434,53 +321,22 @@ async def update_bestellvorschlag(
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
 ) -> dict[str, Any]:
-    """Aktualisiert Vorschlag-Positionen (bestell_menge, status, lieferant_id)."""
-    v = (
-        db.query(EinkaufBestellvorschlag)
-        .filter(EinkaufBestellvorschlag.id == vorschlag_id,
-                EinkaufBestellvorschlag.tenant_id == tenant_id)
-        .first()
-    )
-    if not v:
+    try:
+        return _svc(db, tenant_id).update_vorschlag(vorschlag_id, data)
+    except EntityNotFoundError:
         raise HTTPException(404, "Vorschlag nicht gefunden")
 
-    # Kopf-Felder aktualisieren
-    for field in ("bezeichnung", "status", "notiz"):
-        if field in data:
-            setattr(v, field, data[field])
 
-    # Positionen aktualisieren
-    if "positionen" in data:
-        pos_map = {str(p.id): p for p in v.positionen}
-        for pos_data in data["positionen"]:
-            pos = pos_map.get(str(pos_data.get("id", "")))
-            if pos:
-                for f in ("bestell_menge", "lieferant_id", "lieferant_name",
-                          "letzter_preis", "status"):
-                    if f in pos_data:
-                        setattr(pos, f, pos_data[f])
-
-    db.commit()
-    return {"id": str(v.id), "status": v.status}
-
-
-@router.delete("/einkauf/bestellvorschlaege/{vorschlag_id}",
-               status_code=204, response_class=Response)
+@router.delete("/einkauf/bestellvorschlaege/{vorschlag_id}", status_code=204, response_class=Response)
 async def delete_bestellvorschlag(
     vorschlag_id: str,
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
 ) -> Response:
-    v = (
-        db.query(EinkaufBestellvorschlag)
-        .filter(EinkaufBestellvorschlag.id == vorschlag_id,
-                EinkaufBestellvorschlag.tenant_id == tenant_id)
-        .first()
-    )
-    if not v:
+    try:
+        _svc(db, tenant_id).delete_vorschlag(vorschlag_id)
+    except EntityNotFoundError:
         raise HTTPException(404, "Vorschlag nicht gefunden")
-    db.delete(v)
-    db.commit()
     return Response(status_code=204)
 
 
@@ -490,18 +346,10 @@ async def vorschlag_freigeben(
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
 ) -> dict[str, Any]:
-    """Gibt Vorschlag frei und erzeugt daraus Einkaufs-Bestellungen je Lieferant."""
     try:
-        orders = vorschlag_zu_bestellungen(
-            db,
-            vorschlag_id=vorschlag_id,
-            tenant_id=tenant_id,
-            freigegeben_von="system",
-        )
-        db.commit()
-        return {"bestellungen": orders, "anzahl": len(orders)}
-    except ValueError as e:
-        raise HTTPException(404, str(e))
+        return _svc(db, tenant_id).freigebe_vorschlag(vorschlag_id)
+    except EntityNotFoundError:
+        raise HTTPException(404, "Vorschlag nicht gefunden")
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -516,38 +364,7 @@ async def list_artikel_lager_parameter(
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
 ) -> list[dict[str, Any]]:
-    q = (
-        db.query(ArtikelLagerParameter)
-        .filter(ArtikelLagerParameter.tenant_id == tenant_id)
-    )
-    if article_id:
-        q = q.filter(ArtikelLagerParameter.article_id == article_id)
-    if warehouse_id:
-        q = q.filter(ArtikelLagerParameter.warehouse_id == warehouse_id)
-    if niederlassung_id:
-        q = q.filter(ArtikelLagerParameter.niederlassung_id == niederlassung_id)
-
-    return [
-        {
-            "id":              str(p.id),
-            "article_id":      p.article_id,
-            "warehouse_id":    p.warehouse_id,
-            "niederlassung_id": p.niederlassung_id,
-            "mindestbestand":  float(p.mindestbestand or 0),
-            "maximalbestand":  float(p.maximalbestand or 0),
-            "meldebestand":    float(p.meldebestand or 0),
-            "soll_bestand":    float(p.soll_bestand or 0),
-            "std_lieferant_id": str(p.std_lieferant_id) if p.std_lieferant_id else None,
-            "std_bestellmenge": float(p.std_bestellmenge) if p.std_bestellmenge else None,
-            "std_einheit":     p.std_einheit,
-            "wiederbeschaffungs_tage": p.wiederbeschaffungs_tage,
-            "durchschnitt_verbrauch_tag": float(p.durchschnitt_verbrauch_tag) if p.durchschnitt_verbrauch_tag else None,
-            "reichweite_tage": float(p.reichweite_tage) if p.reichweite_tage else None,
-            "aktiv":           p.aktiv,
-            "notiz":           p.notiz,
-        }
-        for p in q.all()
-    ]
+    return _svc(db, tenant_id).list_artikel_lager_parameter(article_id, warehouse_id, niederlassung_id)
 
 
 @router.post("/einkauf/artikel-lager-parameter", status_code=201)
@@ -556,28 +373,10 @@ async def create_artikel_lager_parameter(
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
 ) -> dict[str, Any]:
-    # Prüfen ob schon vorhanden
-    existing = (
-        db.query(ArtikelLagerParameter)
-        .filter(
-            ArtikelLagerParameter.tenant_id == tenant_id,
-            ArtikelLagerParameter.article_id == data.article_id,
-            ArtikelLagerParameter.warehouse_id == data.warehouse_id,
-        )
-        .first()
-    )
-    if existing:
-        raise HTTPException(409, "Parameter für diesen Artikel/Lager bereits vorhanden")
-
-    param = ArtikelLagerParameter(
-        id=uuid7(),
-        tenant_id=tenant_id,
-        **data.model_dump(),
-    )
-    db.add(param)
-    db.commit()
-    db.refresh(param)
-    return {"id": str(param.id), "article_id": param.article_id}
+    try:
+        return _svc(db, tenant_id).create_artikel_lager_parameter(data.model_dump())
+    except ConflictError as exc:
+        raise HTTPException(409, exc.detail)
 
 
 @router.put("/einkauf/artikel-lager-parameter/{param_id}")
@@ -587,37 +386,22 @@ async def update_artikel_lager_parameter(
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
 ) -> dict[str, Any]:
-    p = (
-        db.query(ArtikelLagerParameter)
-        .filter(ArtikelLagerParameter.id == param_id,
-                ArtikelLagerParameter.tenant_id == tenant_id)
-        .first()
-    )
-    if not p:
+    try:
+        return _svc(db, tenant_id).update_artikel_lager_parameter(param_id, data.model_dump(exclude_none=True))
+    except EntityNotFoundError:
         raise HTTPException(404, "Parameter nicht gefunden")
-    for field, value in data.model_dump(exclude_none=True).items():
-        setattr(p, field, value)
-    db.commit()
-    return {"id": str(p.id)}
 
 
-@router.delete("/einkauf/artikel-lager-parameter/{param_id}",
-               status_code=204, response_class=Response)
+@router.delete("/einkauf/artikel-lager-parameter/{param_id}", status_code=204, response_class=Response)
 async def delete_artikel_lager_parameter(
     param_id: str,
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
 ) -> Response:
-    p = (
-        db.query(ArtikelLagerParameter)
-        .filter(ArtikelLagerParameter.id == param_id,
-                ArtikelLagerParameter.tenant_id == tenant_id)
-        .first()
-    )
-    if not p:
+    try:
+        _svc(db, tenant_id).delete_artikel_lager_parameter(param_id)
+    except EntityNotFoundError:
         raise HTTPException(404, "Parameter nicht gefunden")
-    db.delete(p)
-    db.commit()
     return Response(status_code=204)
 
 
@@ -632,28 +416,7 @@ async def list_lieferanten(
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
 ) -> list[dict[str, Any]]:
-    q = db.query(EinkaufLieferant).filter(EinkaufLieferant.tenant_id == tenant_id)
-    if aktiv is not None:
-        q = q.filter(EinkaufLieferant.aktiv == aktiv)
-    if suche:
-        q = q.filter(EinkaufLieferant.firmenname.ilike(f"%{suche}%"))
-    return [
-        {
-            "id":                 str(lf.id),
-            "lieferantennummer":  lf.lieferantennummer,
-            "firmenname":         lf.firmenname,
-            "ort":                lf.ort,
-            "plz":                lf.plz,
-            "email":              lf.email,
-            "telefon":            lf.telefon,
-            "partner_id":         lf.partner_id,
-            "zahlungsbedingungen": lf.zahlungsbedingungen,
-            "lieferzeit_tage":    lf.lieferzeit_tage,
-            "bewertung":          lf.bewertung,
-            "aktiv":              lf.aktiv,
-        }
-        for lf in q.order_by(EinkaufLieferant.firmenname).all()
-    ]
+    return _svc(db, tenant_id).list_lieferanten(suche, aktiv)
 
 
 @router.post("/einkauf/lieferanten", status_code=201)
@@ -662,12 +425,7 @@ async def create_lieferant(
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
 ) -> dict[str, Any]:
-    lf = EinkaufLieferant(id=uuid7(), tenant_id=tenant_id, **data.model_dump())
-    db.add(lf)
-    db.commit()
-    db.refresh(lf)
-    return {"id": str(lf.id), "lieferantennummer": lf.lieferantennummer,
-            "firmenname": lf.firmenname}
+    return _svc(db, tenant_id).create_lieferant(data.model_dump())
 
 
 @router.get("/einkauf/lieferanten/{lieferant_id}")
@@ -676,16 +434,10 @@ async def get_lieferant(
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
 ) -> dict[str, Any]:
-    lf = (
-        db.query(EinkaufLieferant)
-        .filter(EinkaufLieferant.id == lieferant_id,
-                EinkaufLieferant.tenant_id == tenant_id)
-        .first()
-    )
-    if not lf:
+    try:
+        return _svc(db, tenant_id).get_lieferant(lieferant_id)
+    except EntityNotFoundError:
         raise HTTPException(404, "Lieferant nicht gefunden")
-    return {c.name: getattr(lf, c.name) for c in lf.__table__.columns
-            if c.name not in ("created_at", "updated_at")}
 
 
 @router.put("/einkauf/lieferanten/{lieferant_id}")
@@ -695,18 +447,10 @@ async def update_lieferant(
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
 ) -> dict[str, Any]:
-    lf = (
-        db.query(EinkaufLieferant)
-        .filter(EinkaufLieferant.id == lieferant_id,
-                EinkaufLieferant.tenant_id == tenant_id)
-        .first()
-    )
-    if not lf:
+    try:
+        return _svc(db, tenant_id).update_lieferant(lieferant_id, data.model_dump(exclude_none=True))
+    except EntityNotFoundError:
         raise HTTPException(404, "Lieferant nicht gefunden")
-    for field, value in data.model_dump(exclude_none=True).items():
-        setattr(lf, field, value)
-    db.commit()
-    return {"id": str(lf.id)}
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -720,26 +464,7 @@ async def list_kontrakte(
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
 ) -> list[dict[str, Any]]:
-    q = db.query(EinkaufKontrakt).filter(EinkaufKontrakt.tenant_id == tenant_id)
-    if lieferant_id:
-        q = q.filter(EinkaufKontrakt.lieferant_id == lieferant_id)
-    if status:
-        q = q.filter(EinkaufKontrakt.status == status)
-    return [
-        {
-            "id":            str(k.id),
-            "kontraktnummer": k.kontraktnummer,
-            "lieferant_id":  str(k.lieferant_id),
-            "bezeichnung":   k.bezeichnung,
-            "gueltig_von":   k.gueltig_von.isoformat() if k.gueltig_von else None,
-            "gueltig_bis":   k.gueltig_bis.isoformat() if k.gueltig_bis else None,
-            "status":        k.status,
-            "kontrakt_typ":  k.kontrakt_typ,
-            "gesamtmenge":   float(k.gesamtmenge) if k.gesamtmenge else None,
-            "offene_menge":  float(k.offene_menge) if k.offene_menge else None,
-        }
-        for k in q.order_by(EinkaufKontrakt.gueltig_bis.desc()).all()
-    ]
+    return _svc(db, tenant_id).list_kontrakte(lieferant_id, status)
 
 
 @router.post("/einkauf/kontrakte", status_code=201)
@@ -748,11 +473,7 @@ async def create_kontrakt(
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
 ) -> dict[str, Any]:
-    k = EinkaufKontrakt(id=uuid7(), tenant_id=tenant_id, **data.model_dump())
-    db.add(k)
-    db.commit()
-    db.refresh(k)
-    return {"id": str(k.id), "kontraktnummer": k.kontraktnummer}
+    return _svc(db, tenant_id).create_kontrakt(data.model_dump())
 
 
 @router.get("/einkauf/kontrakte/{kontrakt_id}")
@@ -761,43 +482,10 @@ async def get_kontrakt(
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
 ) -> dict[str, Any]:
-    k = (
-        db.query(EinkaufKontrakt)
-        .filter(EinkaufKontrakt.id == kontrakt_id,
-                EinkaufKontrakt.tenant_id == tenant_id)
-        .first()
-    )
-    if not k:
+    try:
+        return _svc(db, tenant_id).get_kontrakt(kontrakt_id)
+    except EntityNotFoundError:
         raise HTTPException(404, "Kontrakt nicht gefunden")
-    return {
-        "id":            str(k.id),
-        "kontraktnummer": k.kontraktnummer,
-        "lieferant_id":  str(k.lieferant_id),
-        "bezeichnung":   k.bezeichnung,
-        "gueltig_von":   k.gueltig_von.isoformat() if k.gueltig_von else None,
-        "gueltig_bis":   k.gueltig_bis.isoformat() if k.gueltig_bis else None,
-        "status":        k.status,
-        "kontrakt_typ":  k.kontrakt_typ,
-        "gesamtmenge":   float(k.gesamtmenge) if k.gesamtmenge else None,
-        "offene_menge":  float(k.offene_menge) if k.offene_menge else None,
-        "positionen": [
-            {
-                "id":       str(p.id),
-                "pos_nr":   p.pos_nr,
-                "article_id": p.article_id,
-                "artikel_bezeichnung": p.artikel_bezeichnung,
-                "menge":    float(p.menge),
-                "offene_menge": float(p.offene_menge) if p.offene_menge else None,
-                "einheit":  p.einheit,
-                "preis":    float(p.preis) if p.preis else None,
-                "preis_einheit": p.preis_einheit,
-                "preisbindung": p.preisbindung,
-                "gueltig_von": p.gueltig_von.isoformat() if p.gueltig_von else None,
-                "gueltig_bis": p.gueltig_bis.isoformat() if p.gueltig_bis else None,
-            }
-            for p in k.positionen
-        ],
-    }
 
 
 @router.put("/einkauf/kontrakte/{kontrakt_id}")
@@ -807,18 +495,10 @@ async def update_kontrakt(
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
 ) -> dict[str, Any]:
-    k = (
-        db.query(EinkaufKontrakt)
-        .filter(EinkaufKontrakt.id == kontrakt_id,
-                EinkaufKontrakt.tenant_id == tenant_id)
-        .first()
-    )
-    if not k:
+    try:
+        return _svc(db, tenant_id).update_kontrakt(kontrakt_id, data.model_dump(exclude_none=True))
+    except EntityNotFoundError:
         raise HTTPException(404, "Kontrakt nicht gefunden")
-    for field, value in data.model_dump(exclude_none=True).items():
-        setattr(k, field, value)
-    db.commit()
-    return {"id": str(k.id)}
 
 
 @router.post("/einkauf/kontrakte/{kontrakt_id}/positionen", status_code=201)
@@ -828,18 +508,10 @@ async def add_kontrakt_position(
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
 ) -> dict[str, Any]:
-    k = (
-        db.query(EinkaufKontrakt)
-        .filter(EinkaufKontrakt.id == kontrakt_id,
-                EinkaufKontrakt.tenant_id == tenant_id)
-        .first()
-    )
-    if not k:
+    try:
+        return _svc(db, tenant_id).add_kontrakt_position(kontrakt_id, data.model_dump())
+    except EntityNotFoundError:
         raise HTTPException(404, "Kontrakt nicht gefunden")
-    pos = EinkaufKontraktPosition(id=uuid7(), kontrakt_id=kontrakt_id, **data.model_dump())
-    db.add(pos)
-    db.commit()
-    return {"id": str(pos.id)}
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -855,32 +527,7 @@ async def list_bestellungen(
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
 ) -> list[dict[str, Any]]:
-    q = db.query(EinkaufBestellung).filter(EinkaufBestellung.tenant_id == tenant_id)
-    if lieferant_id:
-        q = q.filter(EinkaufBestellung.lieferant_id == lieferant_id)
-    if status:
-        q = q.filter(EinkaufBestellung.status == status)
-    if von:
-        q = q.filter(EinkaufBestellung.bestelldatum >= von)
-    if bis:
-        q = q.filter(EinkaufBestellung.bestelldatum <= bis)
-    return [
-        {
-            "id":             str(b.id),
-            "bestellnummer":  b.bestellnummer,
-            "lieferant_id":   str(b.lieferant_id),
-            "lieferant_name": b.lieferant.firmenname if b.lieferant else None,
-            "bestelldatum":   b.bestelldatum.isoformat() if b.bestelldatum else None,
-            "lieferdatum_wunsch": b.lieferdatum_wunsch.isoformat() if b.lieferdatum_wunsch else None,
-            "status":         b.status,
-            "versand_art":    b.versand_art,
-            "versandt_am":    b.versandt_am.isoformat() if b.versandt_am else None,
-            "netto_summe":    float(b.netto_summe) if b.netto_summe else None,
-            "brutto_summe":   float(b.brutto_summe) if b.brutto_summe else None,
-            "positionen_anz": len(b.positionen),
-        }
-        for b in q.order_by(EinkaufBestellung.bestelldatum.desc()).all()
-    ]
+    return _svc(db, tenant_id).list_bestellungen(lieferant_id, status, von, bis)
 
 
 @router.post("/einkauf/bestellungen/import")
@@ -889,16 +536,11 @@ async def import_bestellungen(
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
 ) -> dict[str, Any]:
-    """Stub: Bestellungen aus CSV/Excel importieren. Datei wird entgegengenommen und Zeilen gezählt; Verarbeitung kann asynchron erfolgen."""
     content = await file.read()
     lines = content.decode("utf-8", errors="ignore").strip().splitlines()
-    # Header mitzählen, mind. 1
     received = max(1, len(lines))
-    return {
-        "received": received,
-        "message": "Import in Verarbeitung. Bestellungen werden angelegt.",
-        "filename": file.filename or "upload",
-    }
+    return {"received": received, "message": "Import in Verarbeitung. Bestellungen werden angelegt.",
+            "filename": file.filename or "upload"}
 
 
 @router.post("/einkauf/bestellungen", status_code=201)
@@ -907,39 +549,7 @@ async def create_bestellung(
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
 ) -> dict[str, Any]:
-    from datetime import datetime
-    ts = datetime.now().strftime("%y%m%d%H%M%S")
-    bestell_nr = f"EK-{ts}"
-
-    bestellung = EinkaufBestellung(
-        id=uuid7(),
-        tenant_id=tenant_id,
-        bestellnummer=bestell_nr,
-        **{k: v for k, v in data.model_dump().items() if k != "positionen"},
-    )
-    db.add(bestellung)
-    db.flush()
-
-    for i, pos_data in enumerate(data.positionen, start=1):
-        pos = EinkaufBestellungPosition(
-            id=uuid7(),
-            bestellung_id=bestellung.id,
-            pos_nr=i,
-            artikel_nr=pos_data.get("artikel_nr", ""),
-            artikel_bezeichnung=pos_data.get("artikel_bezeichnung", ""),
-            article_id=pos_data.get("article_id"),
-            menge=pos_data.get("menge", 0),
-            menge_geliefert=0,
-            menge_offen=pos_data.get("menge", 0),
-            einheit=pos_data.get("einheit", "t"),
-            einzelpreis=pos_data.get("einzelpreis"),
-            preis_einheit=pos_data.get("preis_einheit", "100kg"),
-        )
-        db.add(pos)
-
-    db.commit()
-    db.refresh(bestellung)
-    return {"id": str(bestellung.id), "bestellnummer": bestellung.bestellnummer}
+    return _svc(db, tenant_id).create_bestellung(data.model_dump())
 
 
 @router.get("/einkauf/bestellungen/{bestellung_id}")
@@ -948,52 +558,10 @@ async def get_bestellung(
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
 ) -> dict[str, Any]:
-    b = (
-        db.query(EinkaufBestellung)
-        .filter(EinkaufBestellung.id == bestellung_id,
-                EinkaufBestellung.tenant_id == tenant_id)
-        .first()
-    )
-    if not b:
+    try:
+        return _svc(db, tenant_id).get_bestellung(bestellung_id)
+    except EntityNotFoundError:
         raise HTTPException(404, "Bestellung nicht gefunden")
-    return {
-        "id":             str(b.id),
-        "bestellnummer":  b.bestellnummer,
-        "lieferant_id":   str(b.lieferant_id),
-        "lieferant_name": b.lieferant.firmenname if b.lieferant else None,
-        "bestelldatum":   b.bestelldatum.isoformat() if b.bestelldatum else None,
-        "lieferdatum_wunsch": b.lieferdatum_wunsch.isoformat() if b.lieferdatum_wunsch else None,
-        "lieferdatum_zugesagt": b.lieferdatum_zugesagt.isoformat() if b.lieferdatum_zugesagt else None,
-        "status":         b.status,
-        "versand_art":    b.versand_art,
-        "netto_summe":    float(b.netto_summe) if b.netto_summe else None,
-        "mwst_betrag":    float(b.mwst_betrag) if b.mwst_betrag else None,
-        "brutto_summe":   float(b.brutto_summe) if b.brutto_summe else None,
-        "unsere_referenz": b.unsere_referenz,
-        "ihre_referenz":  b.ihre_referenz,
-        "freitext_kopf":  b.freitext_kopf,
-        "freitext_fuss":  b.freitext_fuss,
-        "notiz":          b.notiz,
-        "positionen": [
-            {
-                "id":                  str(p.id),
-                "pos_nr":              p.pos_nr,
-                "article_id":          p.article_id,
-                "artikel_nr":          p.artikel_nr,
-                "artikel_bezeichnung": p.artikel_bezeichnung,
-                "lieferanten_artnr":   p.lieferanten_artnr,
-                "menge":               float(p.menge),
-                "menge_geliefert":     float(p.menge_geliefert or 0),
-                "menge_offen":         float(p.menge_offen or p.menge),
-                "einheit":             p.einheit,
-                "einzelpreis":         float(p.einzelpreis) if p.einzelpreis else None,
-                "preis_einheit":       p.preis_einheit,
-                "netto_betrag":        float(p.netto_betrag) if p.netto_betrag else None,
-                "status":              p.status,
-            }
-            for p in b.positionen
-        ],
-    }
 
 
 @router.put("/einkauf/bestellungen/{bestellung_id}")
@@ -1003,58 +571,24 @@ async def update_bestellung(
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
 ) -> dict[str, Any]:
-    b = (
-        db.query(EinkaufBestellung)
-        .filter(EinkaufBestellung.id == bestellung_id,
-                EinkaufBestellung.tenant_id == tenant_id)
-        .first()
-    )
-    if not b:
+    try:
+        return _svc(db, tenant_id).update_bestellung(bestellung_id, data)
+    except EntityNotFoundError:
         raise HTTPException(404, "Bestellung nicht gefunden")
-    for field in ("status", "lieferdatum_zugesagt", "lieferdatum_wunsch",
-                  "notiz", "freitext_kopf", "freitext_fuss",
-                  "unsere_referenz", "ihre_referenz"):
-        if field in data:
-            setattr(b, field, data[field])
-    db.commit()
-    return {"id": str(b.id), "status": b.status}
 
 
 @router.post("/einkauf/bestellungen/{bestellung_id}/versenden")
 async def bestellung_versenden(
     bestellung_id: str,
     versand_art: str = Query("email"),
-    empfaenger: Optional[str] = Query(None, description="Override-Empfänger (E-Mail oder Faxnummer)"),
+    empfaenger: Optional[str] = Query(None),
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
 ) -> dict[str, Any]:
-    """
-    Bestellung versenden: E-Mail (SMTP), Fax (Twilio) oder EDI (EDIFACT/SFTP).
-    Setzt Status auf 'versandt' und speichert Versanddatum.
-    """
-    from modules.einkauf.services.versand_service import versende_bestellung
-
-    b = (
-        db.query(EinkaufBestellung)
-        .filter(EinkaufBestellung.id == bestellung_id,
-                EinkaufBestellung.tenant_id == tenant_id)
-        .first()
-    )
-    if not b:
+    try:
+        return _svc(db, tenant_id).versende_bestellung_svc(bestellung_id, versand_art, empfaenger)
+    except EntityNotFoundError:
         raise HTTPException(404, "Bestellung nicht gefunden")
-
-    result = versende_bestellung(
-        db, b,
-        versand_art=versand_art,
-        empfaenger_override=empfaenger,
-    )
-    db.commit()
-
-    return {
-        "bestellung_id": str(b.id),
-        "bestellnummer": b.bestellnummer,
-        "versand":       result,
-    }
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -1067,14 +601,7 @@ async def list_lager_konten(
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
 ) -> list[dict[str, Any]]:
-    q = db.query(LagerKontenzuordnung).filter(LagerKontenzuordnung.tenant_id == tenant_id)
-    if artikelgruppe:
-        q = q.filter(LagerKontenzuordnung.artikelgruppe == artikelgruppe)
-    return [
-        {c.name: getattr(lk, c.name) for c in lk.__table__.columns
-         if c.name not in ("created_at", "updated_at")}
-        for lk in q.order_by(LagerKontenzuordnung.artikelgruppe).all()
-    ]
+    return _svc(db, tenant_id).list_lager_konten(artikelgruppe)
 
 
 @router.post("/einkauf/lager-konten", status_code=201)
@@ -1083,12 +610,7 @@ async def create_lager_konto(
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
 ) -> dict[str, Any]:
-    lk = LagerKontenzuordnung(id=uuid7(), tenant_id=tenant_id, **data.model_dump())
-    db.add(lk)
-    db.commit()
-    db.refresh(lk)
-    return {"id": str(lk.id), "artikelgruppe": lk.artikelgruppe,
-            "bestandskonto": lk.bestandskonto}
+    return _svc(db, tenant_id).create_lager_konto(data.model_dump())
 
 
 @router.put("/einkauf/lager-konten/{konto_id}")
@@ -1098,18 +620,10 @@ async def update_lager_konto(
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
 ) -> dict[str, Any]:
-    lk = (
-        db.query(LagerKontenzuordnung)
-        .filter(LagerKontenzuordnung.id == konto_id,
-                LagerKontenzuordnung.tenant_id == tenant_id)
-        .first()
-    )
-    if not lk:
+    try:
+        return _svc(db, tenant_id).update_lager_konto(konto_id, data.model_dump(exclude_none=True))
+    except EntityNotFoundError:
         raise HTTPException(404, "Konten-Zuordnung nicht gefunden")
-    for field, value in data.model_dump(exclude_none=True).items():
-        setattr(lk, field, value)
-    db.commit()
-    return {"id": str(lk.id)}
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -1123,28 +637,7 @@ async def get_paletten_saldo(
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
 ) -> dict[str, Any]:
-    """Gibt den aktuellen Paletten-Saldo für einen Partner zurück."""
-    q = (
-        db.query(PalettenKontoBuchung)
-        .filter(
-            PalettenKontoBuchung.tenant_id == tenant_id,
-            PalettenKontoBuchung.partner_id == partner_id,
-        )
-        .order_by(PalettenKontoBuchung.buchungsdatum.desc())
-    )
-    if paletten_typ:
-        q = q.filter(PalettenKontoBuchung.paletten_typ == paletten_typ)
-
-    buchungen = q.all()
-    letzter_saldo = buchungen[0].saldo_nachher if buchungen else 0
-
-    return {
-        "partner_id":    partner_id,
-        "paletten_typ":  paletten_typ or "alle",
-        "saldo":         letzter_saldo,
-        "buchungen_anz": len(buchungen),
-        "letzte_buchung": buchungen[0].buchungsdatum.isoformat() if buchungen else None,
-    }
+    return _svc(db, tenant_id).get_paletten_saldo(partner_id, paletten_typ)
 
 
 @router.post("/einkauf/paletten-konto", status_code=201)
@@ -1153,41 +646,7 @@ async def create_paletten_buchung(
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
 ) -> dict[str, Any]:
-    # Letzten Saldo ermitteln
-    last = (
-        db.query(PalettenKontoBuchung)
-        .filter(
-            PalettenKontoBuchung.tenant_id == tenant_id,
-            PalettenKontoBuchung.partner_id == data.partner_id,
-            PalettenKontoBuchung.paletten_typ == data.paletten_typ,
-        )
-        .order_by(PalettenKontoBuchung.buchungsdatum.desc())
-        .first()
-    )
-    saldo_vorher = last.saldo_nachher if last else 0
-
-    # Saldo berechnen
-    if data.buchungsart in ("ausgabe",):
-        saldo_neu = saldo_vorher - data.menge
-    elif data.buchungsart in ("ruecknahme",):
-        saldo_neu = saldo_vorher + data.menge
-    elif data.buchungsart == "kauf":
-        saldo_neu = saldo_vorher + data.menge
-    elif data.buchungsart == "verkauf":
-        saldo_neu = saldo_vorher - data.menge
-    else:
-        saldo_neu = saldo_vorher  # differenz bleibt neutral
-
-    buchung = PalettenKontoBuchung(
-        id=uuid7(),
-        tenant_id=tenant_id,
-        saldo_vorher=saldo_vorher,
-        saldo_nachher=saldo_neu,
-        **data.model_dump(),
-    )
-    db.add(buchung)
-    db.commit()
-    return {"id": str(buchung.id), "saldo_nachher": saldo_neu}
+    return _svc(db, tenant_id).create_paletten_buchung(data.model_dump())
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -1201,33 +660,7 @@ async def get_pfand_saldo(
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
 ) -> list[dict[str, Any]]:
-    """Gibt Pfand-Salden je Gebinde-Typ für einen Partner zurück."""
-    from sqlalchemy import func as sqlfunc
-    q = (
-        db.query(
-            PfandKontoBuchung.gebinde_typ,
-            sqlfunc.max(PfandKontoBuchung.saldo_menge).label("saldo_menge"),
-            sqlfunc.max(PfandKontoBuchung.saldo_wert).label("saldo_wert"),
-            sqlfunc.max(PfandKontoBuchung.buchungsdatum).label("letzte_buchung"),
-        )
-        .filter(
-            PfandKontoBuchung.tenant_id == tenant_id,
-            PfandKontoBuchung.partner_id == partner_id,
-        )
-        .group_by(PfandKontoBuchung.gebinde_typ)
-    )
-    if gebinde_typ:
-        q = q.filter(PfandKontoBuchung.gebinde_typ == gebinde_typ)
-
-    return [
-        {
-            "gebinde_typ":   r[0],
-            "saldo_menge":   float(r[1] or 0),
-            "saldo_wert":    float(r[2] or 0),
-            "letzte_buchung": r[3].isoformat() if r[3] else None,
-        }
-        for r in q.all()
-    ]
+    return _svc(db, tenant_id).get_pfand_saldo(partner_id, gebinde_typ)
 
 
 @router.post("/einkauf/pfand-konto", status_code=201)
@@ -1236,46 +669,7 @@ async def create_pfand_buchung(
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
 ) -> dict[str, Any]:
-    # Letzten Saldo ermitteln
-    last = (
-        db.query(PfandKontoBuchung)
-        .filter(
-            PfandKontoBuchung.tenant_id == tenant_id,
-            PfandKontoBuchung.partner_id == data.partner_id,
-            PfandKontoBuchung.gebinde_typ == data.gebinde_typ,
-        )
-        .order_by(PfandKontoBuchung.buchungsdatum.desc())
-        .first()
-    )
-    saldo_menge_vorher = float(last.saldo_menge or 0) if last else 0.0
-    saldo_wert_vorher  = float(last.saldo_wert  or 0) if last else 0.0
-
-    delta = float(data.menge)
-    pfandwert = float(data.pfandwert_je_einheit or 0) * delta
-
-    if data.buchungsart in ("ausgabe",):
-        saldo_menge_neu = saldo_menge_vorher - delta
-        saldo_wert_neu  = saldo_wert_vorher  - pfandwert
-    elif data.buchungsart in ("ruecknahme",):
-        saldo_menge_neu = saldo_menge_vorher + delta
-        saldo_wert_neu  = saldo_wert_vorher  + pfandwert
-    else:
-        saldo_menge_neu = saldo_menge_vorher
-        saldo_wert_neu  = saldo_wert_vorher
-
-    buchung = PfandKontoBuchung(
-        id=uuid7(),
-        tenant_id=tenant_id,
-        gesamtpfandwert=pfandwert,
-        saldo_menge=saldo_menge_neu,
-        saldo_wert=saldo_wert_neu,
-        **data.model_dump(),
-    )
-    db.add(buchung)
-    db.commit()
-    return {"id": str(buchung.id),
-            "saldo_menge": saldo_menge_neu,
-            "saldo_wert": saldo_wert_neu}
+    return _svc(db, tenant_id).create_pfand_buchung(data.model_dump())
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -1290,32 +684,7 @@ async def list_fremdwaren(
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
 ) -> list[dict[str, Any]]:
-    q = db.query(FremdwarenEinlagerung).filter(FremdwarenEinlagerung.tenant_id == tenant_id)
-    if eigentuemer_id:
-        q = q.filter(FremdwarenEinlagerung.eigentuemer_id == eigentuemer_id)
-    if status:
-        q = q.filter(FremdwarenEinlagerung.status == status)
-    if warehouse_id:
-        q = q.filter(FremdwarenEinlagerung.warehouse_id == warehouse_id)
-    return [
-        {
-            "id":               str(fw.id),
-            "einlagerungs_nr":  fw.einlagerungs_nr,
-            "eigentuemer_id":   fw.eigentuemer_id,
-            "eigentuemer_name": fw.eigentuemer_name,
-            "artikel_bezeichnung": fw.artikel_bezeichnung,
-            "charge":           fw.charge,
-            "einlagerungstyp":  fw.einlagerungstyp,
-            "menge_eingelagert": float(fw.menge_eingelagert),
-            "menge_aktuell":    float(fw.menge_aktuell),
-            "einheit":          fw.einheit,
-            "einlagerungsdatum": fw.einlagerungsdatum.isoformat() if fw.einlagerungsdatum else None,
-            "geplante_auslagerung": fw.geplante_auslagerung.isoformat() if fw.geplante_auslagerung else None,
-            "gebuehr_pro_tag":  float(fw.gebuehr_pro_tag) if fw.gebuehr_pro_tag else None,
-            "status":           fw.status,
-        }
-        for fw in q.order_by(FremdwarenEinlagerung.einlagerungsdatum.desc()).all()
-    ]
+    return _svc(db, tenant_id).list_fremdwaren(eigentuemer_id, status, warehouse_id)
 
 
 @router.post("/einkauf/fremdwaren-einlagerung", status_code=201)
@@ -1324,16 +693,7 @@ async def create_fremdwaren_einlagerung(
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
 ) -> dict[str, Any]:
-    fw = FremdwarenEinlagerung(
-        id=uuid7(),
-        tenant_id=tenant_id,
-        menge_aktuell=data.menge_eingelagert,  # initial = eingelegert
-        **data.model_dump(),
-    )
-    db.add(fw)
-    db.commit()
-    db.refresh(fw)
-    return {"id": str(fw.id), "einlagerungs_nr": fw.einlagerungs_nr}
+    return _svc(db, tenant_id).create_fremdwaren(data.model_dump())
 
 
 @router.put("/einkauf/fremdwaren-einlagerung/{einlagerung_id}")
@@ -1343,21 +703,15 @@ async def update_fremdwaren_einlagerung(
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
 ) -> dict[str, Any]:
-    fw = (
-        db.query(FremdwarenEinlagerung)
-        .filter(FremdwarenEinlagerung.id == einlagerung_id,
-                FremdwarenEinlagerung.tenant_id == tenant_id)
-        .first()
-    )
-    if not fw:
+    try:
+        return _svc(db, tenant_id).update_fremdwaren(einlagerung_id, data)
+    except EntityNotFoundError:
         raise HTTPException(404, "Einlagerung nicht gefunden")
-    for field in ("menge_aktuell", "status", "auslagerungsdatum",
-                  "geplante_auslagerung", "notiz", "lagerort"):
-        if field in data:
-            setattr(fw, field, data[field])
-    db.commit()
-    return {"id": str(fw.id), "status": fw.status}
 
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Bestellungen Workflow
+# ─────────────────────────────────────────────────────────────────────────────
 
 @router.post("/einkauf/bestellungen/{bestellung_id}/freigeben")
 async def bestellung_freigeben(
@@ -1365,22 +719,12 @@ async def bestellung_freigeben(
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
 ) -> dict[str, Any]:
-    """Gibt eine Bestellung frei (Freigabe-Workflow: entwurf → freigegeben)."""
     try:
-        b = (
-            db.query(EinkaufBestellung)
-            .filter(EinkaufBestellung.id == bestellung_id, EinkaufBestellung.tenant_id == tenant_id)
-            .first()
-        )
-    except DataError:
+        return _svc(db, tenant_id).freigebe_bestellung(bestellung_id)
+    except EntityNotFoundError:
         raise HTTPException(404, "Bestellung nicht gefunden")
-    if not b:
-        raise HTTPException(404, "Bestellung nicht gefunden")
-    if b.status not in ("entwurf", "draft"):
-        raise HTTPException(400, f"Bestellung hat Status '{b.status}' — nur Entwürfe können freigegeben werden")
-    b.status = "freigegeben"
-    db.commit()
-    return {"bestellung_id": str(b.id), "bestellnummer": b.bestellnummer, "status": b.status}
+    except ValidationFailedError as exc:
+        raise HTTPException(400, exc.detail)
 
 
 @router.post("/einkauf/bestellungen/{bestellung_id}/stornieren")
@@ -1389,19 +733,9 @@ async def bestellung_stornieren(
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
 ) -> dict[str, Any]:
-    """Storniert eine Bestellung (freigegeben/versandt → storniert)."""
     try:
-        b = (
-            db.query(EinkaufBestellung)
-            .filter(EinkaufBestellung.id == bestellung_id, EinkaufBestellung.tenant_id == tenant_id)
-            .first()
-        )
-    except DataError:
+        return _svc(db, tenant_id).storniere_bestellung(bestellung_id)
+    except EntityNotFoundError:
         raise HTTPException(404, "Bestellung nicht gefunden")
-    if not b:
-        raise HTTPException(404, "Bestellung nicht gefunden")
-    if b.status in ("storniert", "abgeschlossen"):
-        raise HTTPException(400, f"Bestellung hat Status '{b.status}' und kann nicht storniert werden")
-    b.status = "storniert"
-    db.commit()
-    return {"bestellung_id": str(b.id), "bestellnummer": b.bestellnummer, "status": b.status}
+    except ValidationFailedError as exc:
+        raise HTTPException(400, exc.detail)
