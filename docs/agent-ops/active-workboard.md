@@ -50,6 +50,17 @@ Stand: `2026-05-12`
 **Checks:** `pytest tests/test_personal_hrm_gap_closure_api.py tests/test_personal_hrm_readiness_api.py tests/test_personal_employee_file_api.py -q --no-cov`; `pnpm --filter @valero-neuroerp/frontend-web type-check`; `python -m py_compile app/api/v1/endpoints/personal.py tests/test_personal_hrm_gap_closure_api.py tests/test_personal_hrm_readiness_api.py tests/test_personal_employee_file_api.py`; `python scripts/agent_workboard_supervisor.py validate`; `node scripts/docs-governance-check.cjs`; `git diff --check`
 **Offene Risiken:** Echte eAU-/DATEV-/Microsoft-/Google-/LibreOffice-/E-Signatur-Zugangsdaten, AVV/DPA, Betriebsvereinbarungen, DSFA und Rechtsfreigaben bleiben externe Betriebsfreigaben.
 
+## HRM-OPERATIONS-GATES-001
+
+**Von:** Codex
+**Owner:** Codex
+**Stand:** reserviert 2026-05-13
+**Ziel des Slices:** Externe HRM-Betriebsfreigaben fachlich sauber zum Abschluss fuehren: Evidenzanforderungen, Owner, Go-live-Blocker, Abnahme und Auditstatus fuer eAU, DATEV, Office/SSO, LibreOffice/E-Signatur, AVV/DPA, Betriebsrat, DSFA und Rechtsfreigaben.
+**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/agent-ops/slices/HRM-OPERATIONS-GATES-001.yaml`, `docs/project-context/hrm-germany-operating-system-gap-plan-2026-05-13.md`, `docs/project-context/open-gaps-and-known-issues.md`, `app/api/v1/endpoints/personal.py`, `tests/test_personal_hrm_operations_gates_api.py`, `packages/frontend-web/src/lib/api/personal.ts`
+**Abnahmekriterien:** `GET /api/v1/personal/hrm-operations-gates` liefert Gate-Status mit Evidenzpflichten und Go-live-Blockern; Doku unterscheidet fachlich abgeschlossen, repo-seitig umgesetzt und extern freizugeben; Tests sichern alle externen Gates und Professional-Practice-Kriterien.
+**Checks:** `pytest tests/test_personal_hrm_operations_gates_api.py tests/test_personal_hrm_gap_closure_api.py -q --no-cov`; `pnpm --filter @valero-neuroerp/frontend-web type-check`; `python -m py_compile app/api/v1/endpoints/personal.py tests/test_personal_hrm_operations_gates_api.py`; `python scripts/agent_workboard_supervisor.py validate`; `node scripts/docs-governance-check.cjs`; `git diff --check`
+**Offene Risiken:** Abschluss der Gates erfordert reale externe Nachweise; ohne diese Nachweise bleibt Go-live bewusst blockiert.
+
 ## TODO-SPRINT-001
 
 **Von:** Cursor<br>
