@@ -16,10 +16,17 @@ from app.infrastructure.models import (
     BusinessPartnerAddress,
     BusinessPartnerBillingConfig,
     BusinessPartnerContact,
+    BusinessPartnerCooperativeMembership,
     BusinessPartnerCpdAccount,
+    BusinessPartnerDispatchMedium,
     BusinessPartnerDiscountItem,
+    BusinessPartnerEmailDistribution,
     BusinessPartnerInstruction,
+    BusinessPartnerInterfaceProfile,
+    BusinessPartnerInterestSetting,
     BusinessPartnerPriceAgreement,
+    BusinessPartnerPricingRule,
+    BusinessPartnerProfile,
 )
 from app.repositories.business_partner_repository import BusinessPartnerRepository
 
@@ -78,16 +85,20 @@ class BusinessPartnerService:
 
     # ── discount items ────────────────────────────────────────────────────────
 
-    def list_discount_items(self, partner_id: str) -> List[BusinessPartnerDiscountItem]:
+    def list_discount_items(
+        self, partner_id: str, article_number: Optional[str] = None
+    ) -> List[BusinessPartnerDiscountItem]:
         self.repo.get_by_id(partner_id)  # ownership check
-        return (
-            self.db.query(BusinessPartnerDiscountItem)
-            .filter(
-                BusinessPartnerDiscountItem.partner_id == partner_id,
-                BusinessPartnerDiscountItem.tenant_id == self.tenant_id,
-            )
-            .all()
+        q = self.db.query(BusinessPartnerDiscountItem).filter(
+            BusinessPartnerDiscountItem.partner_id == partner_id,
+            BusinessPartnerDiscountItem.tenant_id == self.tenant_id,
         )
+        if article_number:
+            q = q.filter(BusinessPartnerDiscountItem.article_number.ilike(f"%{article_number}%"))
+        return q.order_by(
+            BusinessPartnerDiscountItem.article_number.asc(),
+            BusinessPartnerDiscountItem.created_at.desc(),
+        ).all()
 
     def get_discount_item(self, item_id: str) -> BusinessPartnerDiscountItem:
         obj = self.db.query(BusinessPartnerDiscountItem).filter(
@@ -121,16 +132,20 @@ class BusinessPartnerService:
 
     # ── price agreements ──────────────────────────────────────────────────────
 
-    def list_price_agreements(self, partner_id: str) -> List[BusinessPartnerPriceAgreement]:
+    def list_price_agreements(
+        self, partner_id: str, article_number: Optional[str] = None
+    ) -> List[BusinessPartnerPriceAgreement]:
         self.repo.get_by_id(partner_id)
-        return (
-            self.db.query(BusinessPartnerPriceAgreement)
-            .filter(
-                BusinessPartnerPriceAgreement.partner_id == partner_id,
-                BusinessPartnerPriceAgreement.tenant_id == self.tenant_id,
-            )
-            .all()
+        q = self.db.query(BusinessPartnerPriceAgreement).filter(
+            BusinessPartnerPriceAgreement.partner_id == partner_id,
+            BusinessPartnerPriceAgreement.tenant_id == self.tenant_id,
         )
+        if article_number:
+            q = q.filter(BusinessPartnerPriceAgreement.article_number.ilike(f"%{article_number}%"))
+        return q.order_by(
+            BusinessPartnerPriceAgreement.article_number.asc(),
+            BusinessPartnerPriceAgreement.created_at.desc(),
+        ).all()
 
     def get_price_agreement(self, agreement_id: str) -> BusinessPartnerPriceAgreement:
         obj = self.db.query(BusinessPartnerPriceAgreement).filter(
@@ -243,9 +258,20 @@ class BusinessPartnerService:
 
     # ── addresses ─────────────────────────────────────────────────────────────
 
-    def list_addresses(self, partner_id: str) -> List[BusinessPartnerAddress]:
+    def list_addresses(
+        self, partner_id: str, address_type: Optional[str] = None, skip: int = 0, limit: int = 50
+    ) -> List[BusinessPartnerAddress]:
         self.repo.get_by_id(partner_id)
-        return self.repo.list_addresses(partner_id)
+        q = self.db.query(BusinessPartnerAddress).filter(
+            BusinessPartnerAddress.partner_id == partner_id,
+            BusinessPartnerAddress.tenant_id == self.tenant_id,
+        )
+        if address_type:
+            q = q.filter(BusinessPartnerAddress.address_type == address_type)
+        return q.order_by(
+            BusinessPartnerAddress.is_default.desc(),
+            BusinessPartnerAddress.created_at.asc(),
+        ).offset(skip).limit(limit).all()
 
     def get_address(self, address_id: str) -> BusinessPartnerAddress:
         obj = self.db.query(BusinessPartnerAddress).filter(
@@ -276,3 +302,373 @@ class BusinessPartnerService:
         obj = self.get_address(address_id)
         self.db.delete(obj)
         self.db.commit()
+
+    # ── billing config (singleton upsert) ─────────────────────────────────────
+
+    def get_billing_config(self, partner_id: str) -> BusinessPartnerBillingConfig:
+        self.repo.get_by_id(partner_id)
+        obj = self.db.query(BusinessPartnerBillingConfig).filter(
+            BusinessPartnerBillingConfig.partner_id == partner_id,
+            BusinessPartnerBillingConfig.tenant_id == self.tenant_id,
+        ).first()
+        if obj is None:
+            raise EntityNotFoundError("BusinessPartnerBillingConfig", partner_id)
+        return obj
+
+    def upsert_billing_config(self, partner_id: str, data: dict) -> BusinessPartnerBillingConfig:
+        self.repo.get_by_id(partner_id)
+        obj = self.db.query(BusinessPartnerBillingConfig).filter(
+            BusinessPartnerBillingConfig.partner_id == partner_id,
+            BusinessPartnerBillingConfig.tenant_id == self.tenant_id,
+        ).first()
+        is_new = obj is None
+        if is_new:
+            obj = BusinessPartnerBillingConfig(id=uuid7(), partner_id=partner_id, tenant_id=self.tenant_id)
+            self.db.add(obj)
+        for k, v in data.items():
+            if k == "created_by" and not is_new:
+                continue
+            setattr(obj, k, v)
+        self.db.commit()
+        self.db.refresh(obj)
+        return obj
+
+    # ── cpd accounts ──────────────────────────────────────────────────────────
+
+    def list_cpd_accounts(self, partner_id: str, skip: int = 0, limit: int = 50) -> List[BusinessPartnerCpdAccount]:
+        self.repo.get_by_id(partner_id)
+        return (
+            self.db.query(BusinessPartnerCpdAccount)
+            .filter(
+                BusinessPartnerCpdAccount.partner_id == partner_id,
+                BusinessPartnerCpdAccount.tenant_id == self.tenant_id,
+            )
+            .order_by(BusinessPartnerCpdAccount.cpd_customer_number.asc())
+            .offset(skip).limit(limit).all()
+        )
+
+    def get_cpd_account(self, account_id: str) -> BusinessPartnerCpdAccount:
+        obj = self.db.query(BusinessPartnerCpdAccount).filter(
+            BusinessPartnerCpdAccount.id == account_id,
+            BusinessPartnerCpdAccount.tenant_id == self.tenant_id,
+        ).first()
+        if obj is None:
+            raise EntityNotFoundError("BusinessPartnerCpdAccount", account_id)
+        return obj
+
+    def create_cpd_account(self, partner_id: str, data: dict) -> BusinessPartnerCpdAccount:
+        self.repo.get_by_id(partner_id)
+        obj = BusinessPartnerCpdAccount(id=uuid7(), partner_id=partner_id, tenant_id=self.tenant_id, **data)
+        self.db.add(obj)
+        self.db.commit()
+        self.db.refresh(obj)
+        return obj
+
+    def update_cpd_account(self, account_id: str, data: dict) -> BusinessPartnerCpdAccount:
+        obj = self.get_cpd_account(account_id)
+        for k, v in data.items():
+            setattr(obj, k, v)
+        self.db.commit()
+        self.db.refresh(obj)
+        return obj
+
+    def delete_cpd_account(self, account_id: str) -> None:
+        obj = self.get_cpd_account(account_id)
+        self.db.delete(obj)
+        self.db.commit()
+
+    # ── pricing rules ─────────────────────────────────────────────────────────
+
+    def list_pricing_rules(self, partner_id: str, skip: int = 0, limit: int = 50) -> List[BusinessPartnerPricingRule]:
+        self.repo.get_by_id(partner_id)
+        return (
+            self.db.query(BusinessPartnerPricingRule)
+            .filter(
+                BusinessPartnerPricingRule.partner_id == partner_id,
+                BusinessPartnerPricingRule.tenant_id == self.tenant_id,
+            )
+            .order_by(BusinessPartnerPricingRule.created_at.desc())
+            .offset(skip).limit(limit).all()
+        )
+
+    def get_pricing_rule(self, rule_id: str) -> BusinessPartnerPricingRule:
+        obj = self.db.query(BusinessPartnerPricingRule).filter(
+            BusinessPartnerPricingRule.id == rule_id,
+            BusinessPartnerPricingRule.tenant_id == self.tenant_id,
+        ).first()
+        if obj is None:
+            raise EntityNotFoundError("BusinessPartnerPricingRule", rule_id)
+        return obj
+
+    def create_pricing_rule(self, partner_id: str, data: dict) -> BusinessPartnerPricingRule:
+        self.repo.get_by_id(partner_id)
+        obj = BusinessPartnerPricingRule(id=uuid7(), partner_id=partner_id, tenant_id=self.tenant_id, **data)
+        self.db.add(obj)
+        self.db.commit()
+        self.db.refresh(obj)
+        return obj
+
+    def update_pricing_rule(self, rule_id: str, data: dict) -> BusinessPartnerPricingRule:
+        obj = self.get_pricing_rule(rule_id)
+        for k, v in data.items():
+            setattr(obj, k, v)
+        self.db.commit()
+        self.db.refresh(obj)
+        return obj
+
+    def delete_pricing_rule(self, rule_id: str) -> None:
+        obj = self.get_pricing_rule(rule_id)
+        self.db.delete(obj)
+        self.db.commit()
+
+    # ── interest settings ─────────────────────────────────────────────────────
+
+    def list_interest_settings(self, partner_id: str, skip: int = 0, limit: int = 50) -> List[BusinessPartnerInterestSetting]:
+        self.repo.get_by_id(partner_id)
+        return (
+            self.db.query(BusinessPartnerInterestSetting)
+            .filter(
+                BusinessPartnerInterestSetting.partner_id == partner_id,
+                BusinessPartnerInterestSetting.tenant_id == self.tenant_id,
+            )
+            .order_by(BusinessPartnerInterestSetting.created_at.desc())
+            .offset(skip).limit(limit).all()
+        )
+
+    def get_interest_setting(self, setting_id: str) -> BusinessPartnerInterestSetting:
+        obj = self.db.query(BusinessPartnerInterestSetting).filter(
+            BusinessPartnerInterestSetting.id == setting_id,
+            BusinessPartnerInterestSetting.tenant_id == self.tenant_id,
+        ).first()
+        if obj is None:
+            raise EntityNotFoundError("BusinessPartnerInterestSetting", setting_id)
+        return obj
+
+    def create_interest_setting(self, partner_id: str, data: dict) -> BusinessPartnerInterestSetting:
+        self.repo.get_by_id(partner_id)
+        obj = BusinessPartnerInterestSetting(id=uuid7(), partner_id=partner_id, tenant_id=self.tenant_id, **data)
+        self.db.add(obj)
+        self.db.commit()
+        self.db.refresh(obj)
+        return obj
+
+    def update_interest_setting(self, setting_id: str, data: dict) -> BusinessPartnerInterestSetting:
+        obj = self.get_interest_setting(setting_id)
+        for k, v in data.items():
+            setattr(obj, k, v)
+        self.db.commit()
+        self.db.refresh(obj)
+        return obj
+
+    def delete_interest_setting(self, setting_id: str) -> None:
+        obj = self.get_interest_setting(setting_id)
+        self.db.delete(obj)
+        self.db.commit()
+
+    # ── dispatch media ────────────────────────────────────────────────────────
+
+    def list_dispatch_media(self, partner_id: str, skip: int = 0, limit: int = 50) -> List[BusinessPartnerDispatchMedium]:
+        self.repo.get_by_id(partner_id)
+        return (
+            self.db.query(BusinessPartnerDispatchMedium)
+            .filter(
+                BusinessPartnerDispatchMedium.partner_id == partner_id,
+                BusinessPartnerDispatchMedium.tenant_id == self.tenant_id,
+            )
+            .order_by(
+                BusinessPartnerDispatchMedium.document_type.asc(),
+                BusinessPartnerDispatchMedium.dispatch_channel.asc(),
+            )
+            .offset(skip).limit(limit).all()
+        )
+
+    def get_dispatch_medium(self, medium_id: str) -> BusinessPartnerDispatchMedium:
+        obj = self.db.query(BusinessPartnerDispatchMedium).filter(
+            BusinessPartnerDispatchMedium.id == medium_id,
+            BusinessPartnerDispatchMedium.tenant_id == self.tenant_id,
+        ).first()
+        if obj is None:
+            raise EntityNotFoundError("BusinessPartnerDispatchMedium", medium_id)
+        return obj
+
+    def create_dispatch_medium(self, partner_id: str, data: dict) -> BusinessPartnerDispatchMedium:
+        self.repo.get_by_id(partner_id)
+        obj = BusinessPartnerDispatchMedium(id=uuid7(), partner_id=partner_id, tenant_id=self.tenant_id, **data)
+        self.db.add(obj)
+        self.db.commit()
+        self.db.refresh(obj)
+        return obj
+
+    def update_dispatch_medium(self, medium_id: str, data: dict) -> BusinessPartnerDispatchMedium:
+        obj = self.get_dispatch_medium(medium_id)
+        for k, v in data.items():
+            setattr(obj, k, v)
+        self.db.commit()
+        self.db.refresh(obj)
+        return obj
+
+    def delete_dispatch_medium(self, medium_id: str) -> None:
+        obj = self.get_dispatch_medium(medium_id)
+        self.db.delete(obj)
+        self.db.commit()
+
+    # ── cooperative memberships ───────────────────────────────────────────────
+
+    def list_cooperative_memberships(self, partner_id: str, skip: int = 0, limit: int = 50) -> List[BusinessPartnerCooperativeMembership]:
+        self.repo.get_by_id(partner_id)
+        return (
+            self.db.query(BusinessPartnerCooperativeMembership)
+            .filter(
+                BusinessPartnerCooperativeMembership.partner_id == partner_id,
+                BusinessPartnerCooperativeMembership.tenant_id == self.tenant_id,
+            )
+            .order_by(BusinessPartnerCooperativeMembership.created_at.desc())
+            .offset(skip).limit(limit).all()
+        )
+
+    def get_cooperative_membership(self, membership_id: str) -> BusinessPartnerCooperativeMembership:
+        obj = self.db.query(BusinessPartnerCooperativeMembership).filter(
+            BusinessPartnerCooperativeMembership.id == membership_id,
+            BusinessPartnerCooperativeMembership.tenant_id == self.tenant_id,
+        ).first()
+        if obj is None:
+            raise EntityNotFoundError("BusinessPartnerCooperativeMembership", membership_id)
+        return obj
+
+    def create_cooperative_membership(self, partner_id: str, data: dict) -> BusinessPartnerCooperativeMembership:
+        self.repo.get_by_id(partner_id)
+        obj = BusinessPartnerCooperativeMembership(id=uuid7(), partner_id=partner_id, tenant_id=self.tenant_id, **data)
+        self.db.add(obj)
+        self.db.commit()
+        self.db.refresh(obj)
+        return obj
+
+    def patch_cooperative_membership(self, membership_id: str, data: dict) -> BusinessPartnerCooperativeMembership:
+        obj = self.get_cooperative_membership(membership_id)
+        for k, v in data.items():
+            setattr(obj, k, v)
+        self.db.commit()
+        self.db.refresh(obj)
+        return obj
+
+    def delete_cooperative_membership(self, membership_id: str) -> None:
+        obj = self.get_cooperative_membership(membership_id)
+        self.db.delete(obj)
+        self.db.commit()
+
+    # ── email distributions ───────────────────────────────────────────────────
+
+    def list_email_distributions(self, partner_id: str, skip: int = 0, limit: int = 50) -> List[BusinessPartnerEmailDistribution]:
+        self.repo.get_by_id(partner_id)
+        return (
+            self.db.query(BusinessPartnerEmailDistribution)
+            .filter(
+                BusinessPartnerEmailDistribution.partner_id == partner_id,
+                BusinessPartnerEmailDistribution.tenant_id == self.tenant_id,
+            )
+            .order_by(
+                BusinessPartnerEmailDistribution.distribution_name.asc(),
+                BusinessPartnerEmailDistribution.email.asc(),
+            )
+            .offset(skip).limit(limit).all()
+        )
+
+    def get_email_distribution(self, distribution_id: str) -> BusinessPartnerEmailDistribution:
+        obj = self.db.query(BusinessPartnerEmailDistribution).filter(
+            BusinessPartnerEmailDistribution.id == distribution_id,
+            BusinessPartnerEmailDistribution.tenant_id == self.tenant_id,
+        ).first()
+        if obj is None:
+            raise EntityNotFoundError("BusinessPartnerEmailDistribution", distribution_id)
+        return obj
+
+    def create_email_distribution(self, partner_id: str, data: dict) -> BusinessPartnerEmailDistribution:
+        self.repo.get_by_id(partner_id)
+        obj = BusinessPartnerEmailDistribution(id=uuid7(), partner_id=partner_id, tenant_id=self.tenant_id, **data)
+        self.db.add(obj)
+        self.db.commit()
+        self.db.refresh(obj)
+        return obj
+
+    def patch_email_distribution(self, distribution_id: str, data: dict) -> BusinessPartnerEmailDistribution:
+        obj = self.get_email_distribution(distribution_id)
+        for k, v in data.items():
+            setattr(obj, k, v)
+        self.db.commit()
+        self.db.refresh(obj)
+        return obj
+
+    def delete_email_distribution(self, distribution_id: str) -> None:
+        obj = self.get_email_distribution(distribution_id)
+        self.db.delete(obj)
+        self.db.commit()
+
+    # ── profile (singleton upsert) ────────────────────────────────────────────
+
+    def get_profile(self, partner_id: str) -> BusinessPartnerProfile:
+        self.repo.get_by_id(partner_id)
+        obj = self.db.query(BusinessPartnerProfile).filter(
+            BusinessPartnerProfile.partner_id == partner_id,
+            BusinessPartnerProfile.tenant_id == self.tenant_id,
+        ).first()
+        if obj is None:
+            raise EntityNotFoundError("BusinessPartnerProfile", partner_id)
+        return obj
+
+    def upsert_profile(self, partner_id: str, data: dict) -> BusinessPartnerProfile:
+        self.repo.get_by_id(partner_id)
+        obj = self.db.query(BusinessPartnerProfile).filter(
+            BusinessPartnerProfile.partner_id == partner_id,
+            BusinessPartnerProfile.tenant_id == self.tenant_id,
+        ).first()
+        if obj is None:
+            obj = BusinessPartnerProfile(id=uuid7(), partner_id=partner_id, tenant_id=self.tenant_id)
+            self.db.add(obj)
+        for k, v in data.items():
+            setattr(obj, k, v)
+        self.db.commit()
+        self.db.refresh(obj)
+        return obj
+
+    def patch_profile(self, partner_id: str, data: dict) -> BusinessPartnerProfile:
+        obj = self.get_profile(partner_id)
+        for k, v in data.items():
+            setattr(obj, k, v)
+        self.db.commit()
+        self.db.refresh(obj)
+        return obj
+
+    # ── interface profile (singleton upsert) ──────────────────────────────────
+
+    def get_interface_profile(self, partner_id: str) -> BusinessPartnerInterfaceProfile:
+        self.repo.get_by_id(partner_id)
+        obj = self.db.query(BusinessPartnerInterfaceProfile).filter(
+            BusinessPartnerInterfaceProfile.partner_id == partner_id,
+            BusinessPartnerInterfaceProfile.tenant_id == self.tenant_id,
+        ).first()
+        if obj is None:
+            raise EntityNotFoundError("BusinessPartnerInterfaceProfile", partner_id)
+        return obj
+
+    def upsert_interface_profile(self, partner_id: str, data: dict) -> BusinessPartnerInterfaceProfile:
+        self.repo.get_by_id(partner_id)
+        obj = self.db.query(BusinessPartnerInterfaceProfile).filter(
+            BusinessPartnerInterfaceProfile.partner_id == partner_id,
+            BusinessPartnerInterfaceProfile.tenant_id == self.tenant_id,
+        ).first()
+        if obj is None:
+            obj = BusinessPartnerInterfaceProfile(id=uuid7(), partner_id=partner_id, tenant_id=self.tenant_id)
+            self.db.add(obj)
+        for k, v in data.items():
+            setattr(obj, k, v)
+        self.db.commit()
+        self.db.refresh(obj)
+        return obj
+
+    def patch_interface_profile(self, partner_id: str, data: dict) -> BusinessPartnerInterfaceProfile:
+        obj = self.get_interface_profile(partner_id)
+        for k, v in data.items():
+            setattr(obj, k, v)
+        self.db.commit()
+        self.db.refresh(obj)
+        return obj
