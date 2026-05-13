@@ -62,6 +62,17 @@ Stand: `2026-05-12`
 **Checks:** `pytest tests/test_personal_hrm_operations_gates_api.py tests/test_personal_hrm_gap_closure_api.py -q --no-cov`; `pnpm --filter @valero-neuroerp/frontend-web type-check`; `python -m py_compile app/api/v1/endpoints/personal.py tests/test_personal_hrm_operations_gates_api.py`; `python scripts/agent_workboard_supervisor.py validate`; `node scripts/docs-governance-check.cjs`; `git diff --check`
 **Offene Risiken:** Abschluss der Gates erfordert reale externe Nachweise; ohne diese Nachweise bleibt Go-live bewusst blockiert.
 
+## HRM-OPERATIONS-GATES-002
+
+**Von:** Codex
+**Owner:** Codex
+**Stand:** reserviert 2026-05-13
+**Ziel des Slices:** HRM-Betriebsfreigabe-Gates technisch vollstaendig machen: persistente Gate-/Evidence-Daten, Approval-/Reject-Workflow, Connector-Probe-Status, Auditspur und Go-live-Policy.
+**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/agent-ops/slices/HRM-OPERATIONS-GATES-002.yaml`, `docs/project-context/hrm-germany-operating-system-gap-plan-2026-05-13.md`, `docs/project-context/open-gaps-and-known-issues.md`, `alembic/versions/hrm_operations_gates_20260513.py`, `app/api/v1/endpoints/personal.py`, `tests/test_personal_hrm_operations_gate_workflow_api.py`, `packages/frontend-web/src/lib/api/personal.ts`
+**Abnahmekriterien:** Gates werden aus DB-Zustand plus Default-Katalog gelesen; Evidence kann angelegt werden; Gate-Entscheidungen koennen approved/rejected werden; Connector-Probes aktualisieren Status; `goLiveAllowed` wird aus persistenten Status abgeleitet; API-/Frontend-Contracts und Tests sind vorhanden.
+**Checks:** offen
+**Offene Risiken:** Echte externe Providerzugriffe benoetigen weiterhin produktive Credentials; dieser Slice implementiert die technische Workflow- und Persistenzschicht inklusive Probe-Status, nicht die Beschaffung externer Freigaben.
+
 ## TODO-SPRINT-001
 
 **Von:** Cursor<br>
