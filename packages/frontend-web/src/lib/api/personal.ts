@@ -444,6 +444,12 @@ export type HrmOperationsGate = {
   status: string
   ownerRole: string
   goLiveBlocking: boolean
+  priority: string
+  riskLevel: string
+  dueDate?: string | null
+  lastChangedAt?: string | null
+  allowedRoles: string[]
+  readOnlyRoles: string[]
   evidenceCount: number
   latestEvidenceRef?: string | null
   lastProbeStatus?: string | null

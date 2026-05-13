@@ -143,6 +143,12 @@ def test_hrm_operations_gates_runtime_starts_blocked_from_persistent_seed():
     assert data["status"] == "external_gates_runtime"
     assert data["goLiveAllowed"] is False
     assert len(session.gates) == 7
+    eau = next(gate for gate in data["gates"] if gate["id"] == "eau-communication")
+    assert eau["priority"] == "P0"
+    assert eau["riskLevel"] == "hoch"
+    assert eau["dueDate"] == "2026-05-20"
+    assert "HR Admin" in eau["allowedRoles"]
+    assert "Geschaeftsleitung" in eau["readOnlyRoles"]
     assert all(gate["status"] == "external_evidence_required" for gate in session.gates.values())
 
 

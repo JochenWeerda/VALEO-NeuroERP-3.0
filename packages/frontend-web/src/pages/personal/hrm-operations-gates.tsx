@@ -66,6 +66,18 @@ function formatDate(value?: string | null): string {
   return Number.isNaN(parsed.getTime()) ? value : parsed.toLocaleString('de-DE')
 }
 
+function formatDateOnly(value?: string | null): string {
+  if (!value) return '-'
+  const parsed = new Date(value)
+  return Number.isNaN(parsed.getTime()) ? value : parsed.toLocaleDateString('de-DE')
+}
+
+function riskVariant(riskLevel: string): 'default' | 'secondary' | 'destructive' | 'outline' {
+  if (riskLevel === 'hoch') return 'destructive'
+  if (riskLevel === 'mittel') return 'secondary'
+  return 'outline'
+}
+
 function nextAction(gate: HrmOperationsGate): string {
   if (gate.status === 'approved') return 'Kein Sofortbedarf. Beim naechsten Regeltermin erneut pruefen.'
   if (gate.status === 'rejected') return 'Klaeren, warum der Punkt zurueckgewiesen wurde, und einen neuen Nachweis einreichen.'
@@ -289,11 +301,15 @@ function GatePanel({ gate }: { gate: HrmOperationsGate }): JSX.Element {
               <Badge variant={statusVariant(gate.status)}>{statusLabel[gate.status] ?? gate.status}</Badge>
               {gate.goLiveBlocking ? <Badge variant="destructive">Stoppt Produktivstart</Badge> : <Badge variant="outline">Hinweis</Badge>}
               <Badge variant="outline">Zustaendig: {gate.ownerRole}</Badge>
+              <Badge variant={riskVariant(gate.riskLevel)}>Risiko: {gate.riskLevel}</Badge>
+              <Badge variant="outline">{gate.priority}</Badge>
             </div>
           </div>
           <div className="grid min-w-56 gap-1 text-sm text-muted-foreground">
             <span>Nachweise: {gate.evidenceCount}</span>
             <span>Letzter Test: {gate.lastProbeStatus ?? '-'}</span>
+            <span>Faellig bis: {formatDateOnly(gate.dueDate)}</span>
+            <span>Letzte Aenderung: {formatDate(gate.lastChangedAt)}</span>
             <span>Freigabe: {gate.approvedBy ? `${gate.approvedBy}, ${formatDate(gate.approvedAt)}` : '-'}</span>
           </div>
         </div>
@@ -331,6 +347,17 @@ function GatePanel({ gate }: { gate: HrmOperationsGate }): JSX.Element {
           <h3 className="text-sm font-medium">Naechste Aktion</h3>
           <p className="mt-1 text-sm text-muted-foreground">{nextAction(gate)}</p>
         </div>
+        <div className="rounded-md border p-3">
+          <h3 className="text-sm font-medium">Wer darf diese Seite nutzen?</h3>
+          <div className="mt-2 flex flex-wrap gap-2">
+            {gate.allowedRoles.map((role) => (
+              <Badge key={role} variant="outline">{role}</Badge>
+            ))}
+            {gate.readOnlyRoles.map((role) => (
+              <Badge key={role} variant="secondary">{role} nur lesen</Badge>
+            ))}
+          </div>
+        </div>
         <GateActions gate={gate} />
       </CardContent>
     </Card>
@@ -361,8 +388,8 @@ export default function HrmOperationsGatesPage(): JSX.Element {
     <div className="space-y-4 p-3 md:p-6">
       <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
         <div>
-          <h1 className="text-3xl font-bold">HR-Freigaben vor Start</h1>
-          <p className="text-muted-foreground">Was vor dem Produktivstart der Personalprozesse noch fehlt</p>
+          <h1 className="text-3xl font-bold">HRM-Betriebsfreigaben</h1>
+          <p className="text-muted-foreground">Admin-Cockpit fuer technische, rechtliche und organisatorische Betriebsbereitschaft</p>
         </div>
         <Badge variant={policyQuery.data?.goLiveAllowed ? 'default' : 'destructive'} className="w-fit gap-2 px-3 py-2">
           {policyQuery.data?.goLiveAllowed ? <CheckCircle2 className="h-4 w-4" /> : <AlertTriangle className="h-4 w-4" />}
@@ -403,6 +430,9 @@ export default function HrmOperationsGatesPage(): JSX.Element {
         </CardHeader>
         <CardContent className="space-y-2">
           <p className="text-sm text-muted-foreground">{policyQuery.data?.summary ?? gatesQuery.data?.summary ?? '-'}</p>
+          <p className="text-sm text-muted-foreground">
+            Sichtbar fuer HR Admin, Payroll, IT, Datenschutz, Legal, Betriebsrat und Geschaeftsleitung. Normale Mitarbeitende nutzen diese Admin-Seite nicht.
+          </p>
           <div className="flex flex-wrap gap-2">
             {(policyQuery.data?.blockers ?? []).map((gate) => (
               <Badge key={gate.id} variant="outline">{gate.title}</Badge>
