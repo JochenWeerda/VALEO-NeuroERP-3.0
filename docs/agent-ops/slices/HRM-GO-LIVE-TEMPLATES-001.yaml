@@ -1,7 +1,7 @@
 id: HRM-GO-LIVE-TEMPLATES-001
 title: HRM-Go-live-Evidenzpaket und Mustervorlagen
 owner: Codex
-status: reserviert
+status: abgeschlossen
 created: 2026-05-13
 goal: >
   HRM-Go-live-Evidenzpaket als operative Repo-Vorlagen unter
@@ -19,6 +19,14 @@ acceptance_criteria:
   - Rechtlicher Arbeitsvorlagen-Charakter ist klar markiert.
   - HRM-Plan und Open-Gaps-Doku verweisen auf das Vorlagenpaket.
 checks:
-  - offen
+  - rg -n "HRM-GATE-001|Mindest-Evidence|BDSG Paragraf 26|DSFA-Vorpruefung|Geschaeftsfuehrungsfreigabe" docs/hrm-go-live-templates/00_hrm_go_live_gesamtwerk.md
+  - python scripts/agent_workboard_supervisor.py validate
+  - node scripts/docs-governance-check.cjs
+  - git diff --check
+done:
+  - docs/hrm-go-live-templates/README.md ergaenzt.
+  - docs/hrm-go-live-templates/00_hrm_go_live_gesamtwerk.md als Copy-and-paste-faehiges Gesamtwerk ergaenzt.
+  - Gesamtwerk deckt Gate-Matrix, Go-live-Protokoll, Betriebsratsstatus, Mitarbeiterinformation, VVT, AVV/DPA, DSFA, Rollen, TOM, Retention, eAU, DATEV/Payroll, Office/SSO, DMS/E-Signatur, KI/Analytics, Evidence/Audit, Geschaeftsfuehrungsfreigabe und optionale Betriebsvereinbarung ab.
+  - HRM-Plan und Open-Gaps-Doku verweisen auf das Vorlagenpaket.
 risks:
   - Produktivnutzung erfordert reale Datenschutz-, Payroll-/Steuerberater-, IT-Sicherheits- und Rechtspruefung.
