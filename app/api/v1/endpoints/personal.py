@@ -624,6 +624,27 @@ class HrmOperatingSystemOut(BaseModel):
     externalOperatingGates: list[str]
 
 
+class HrmOperationsGateOut(BaseModel):
+    id: str
+    title: str
+    status: str
+    ownerRole: str
+    goLiveBlocking: bool
+    evidenceRequired: list[str]
+    acceptanceCriteria: list[str]
+    auditTrail: list[str]
+    professionalPractice: list[str]
+
+
+class HrmOperationsGatesOut(BaseModel):
+    status: str
+    asOf: str
+    goLiveAllowed: bool
+    summary: str
+    gates: list[HrmOperationsGateOut]
+    closureDefinition: list[str]
+
+
 _HRM_MINIMUM_CHECKLIST = [
     "Digitale Personalakte",
     "DSGVO-konformes Rechte- und Loeschkonzept",
@@ -641,6 +662,157 @@ _HRM_MINIMUM_CHECKLIST = [
     "Microsoft-365-, LibreOffice- und Google-Workspace-Integration",
     "Sichere KI-Funktionen mit menschlicher Kontrolle",
 ]
+
+
+def build_hrm_operations_gates() -> HrmOperationsGatesOut:
+    gates = [
+        HrmOperationsGateOut(
+            id="eau-communication",
+            title="eAU-Kommunikationszugang und Krankenkassen-Testverfahren",
+            status="external_evidence_required",
+            ownerRole="HR/Ops",
+            goLiveBlocking=True,
+            evidenceRequired=[
+                "Nachweis produktiver oder freigegebener Testzugang zum eAU-Arbeitgeberverfahren",
+                "Protokoll fuer Abfrage, Rueckmeldung, Fehlercode und Fristenfall",
+                "Bestaetigung, dass keine Diagnosedaten gespeichert werden",
+            ],
+            acceptanceCriteria=[
+                "Krankmeldung erzeugt minimalen HR-Status ohne Diagnose",
+                "eAU-Abfrage und Rueckmeldung sind nachvollziehbar protokolliert",
+                "Fehlerrueckmeldungen blockieren Payroll/Planung fachlich sichtbar",
+            ],
+            auditTrail=["request_id", "employee_ref", "absence_ref", "status_code", "checked_at"],
+            professionalPractice=["Datenminimierung", "Fristenmonitor", "Vier-Augen-Ausnahme bei manueller Korrektur"],
+        ),
+        HrmOperationsGateOut(
+            id="datev-payroll",
+            title="DATEV-/Payroll-Zielformat und Steuerberaterfreigabe",
+            status="external_evidence_required",
+            ownerRole="Payroll/Finance",
+            goLiveBlocking=True,
+            evidenceRequired=[
+                "Festgelegtes Zielformat fuer DATEV LODAS, Lohn und Gehalt oder Steuerbuero-Import",
+                "Testexport mit Lohnarten, Kostenstellen, Fehlzeiten und Korrekturen",
+                "Freigabe durch Steuerbuero oder Payroll-Verantwortliche",
+            ],
+            acceptanceCriteria=[
+                "Exportpaket ist wiederholbar und auditierbar",
+                "Nur freigegebene time_entries werden exportiert",
+                "Blocker verhindern Monatsabschluss ohne Klaerung",
+            ],
+            auditTrail=["export_id", "period_from", "period_to", "created_by", "blocker_count"],
+            professionalPractice=["Vier-Augen-Freigabe", "Exportprotokoll", "Keine stille Mutation exportierter Zeiten"],
+        ),
+        HrmOperationsGateOut(
+            id="office-sso-connectors",
+            title="Microsoft 365, Google Workspace und SSO",
+            status="external_evidence_required",
+            ownerRole="IT/Ops",
+            goLiveBlocking=True,
+            evidenceRequired=[
+                "Tenant-IDs, OAuth-Scopes und Redirect-URIs dokumentiert",
+                "SSO-/Rollenmapping fuer Employee, Manager, HR, Payroll und Admin getestet",
+                "Kalenderimport speichert private Termine nur als Busy-Blocker",
+            ],
+            acceptanceCriteria=[
+                "SSO-Login erzwingt MFA gemaess Tenant-Policy",
+                "Kalender-Sync verletzt keine private Sichtbarkeit",
+                "Connector-Probe kann ohne PII-Leakage wiederholt werden",
+            ],
+            auditTrail=["connector_id", "tenant_id", "scope_set", "last_probe_at", "probe_result"],
+            professionalPractice=["Least-Privilege-Scopes", "Busy-only Datenschutz", "Secret-Rotation"],
+        ),
+        HrmOperationsGateOut(
+            id="documents-esign",
+            title="LibreOffice-Rendering, DMS und E-Signatur",
+            status="external_evidence_required",
+            ownerRole="HR/Ops/Legal",
+            goLiveBlocking=True,
+            evidenceRequired=[
+                "Vorlagenbibliothek mit Versionsstand und Verantwortlichem",
+                "DMS-Ablage mit Dokumentklasse, Retention und Audit-Referenz",
+                "E-Signatur-Anbieterfreigabe inklusive AVV/DPA",
+            ],
+            acceptanceCriteria=[
+                "Dokumentgenerierung ist reproduzierbar",
+                "Signaturstatus und Archiv-Ref landen in der Personalakte",
+                "Schriftform- und Textform-Ausnahmen sind dokumentiert",
+            ],
+            auditTrail=["template_version", "document_id", "signature_status", "archive_ref"],
+            professionalPractice=["Vorlagenreview", "Signaturstatus", "Retention je Dokumentklasse"],
+        ),
+        HrmOperationsGateOut(
+            id="privacy-contracts",
+            title="AVV/DPA, Hosting, Subprozessoren und Datenexport",
+            status="external_evidence_required",
+            ownerRole="Datenschutz/Ops",
+            goLiveBlocking=True,
+            evidenceRequired=[
+                "AVV/DPA je Anbieter",
+                "Hostingort und Subprozessorenliste",
+                "Datenexport- und Loeschprozess fuer Anbieterwechsel",
+            ],
+            acceptanceCriteria=[
+                "Kein Anbieter ohne AVV/DPA im Produktivbetrieb",
+                "Datenportabilitaet ist getestet",
+                "Loesch- und Auskunftsprozess ist nachvollziehbar",
+            ],
+            auditTrail=["vendor_id", "dpa_version", "hosting_region", "subprocessor_reviewed_at"],
+            professionalPractice=["Vendor-Register", "Datenminimierung", "jaehrliche Subprozessorenpruefung"],
+        ),
+        HrmOperationsGateOut(
+            id="works-council-dsfa",
+            title="Betriebsrat, DSFA und Analytics-/KI-Freigaben",
+            status="external_evidence_required",
+            ownerRole="HR/Datenschutz/Betriebsrat",
+            goLiveBlocking=True,
+            evidenceRequired=[
+                "Betriebsvereinbarung oder dokumentierte Mitbestimmungsbewertung",
+                "DSFA fuer risikoreiche Analytics oder KI-Funktionen",
+                "Freigabe konkreter KI-Werkzeuge inklusive Human-Gate",
+            ],
+            acceptanceCriteria=[
+                "Keine verdeckte Leistungsueberwachung",
+                "Analytics nutzt Aggregationsschwellen",
+                "KI trifft keine automatische Personalentscheidung",
+            ],
+            auditTrail=["policy_id", "dsfa_ref", "approval_ref", "effective_from"],
+            professionalPractice=["Transparenz fuer Betroffene", "Human Oversight", "AI-Act-Hochrisikopruefung"],
+        ),
+        HrmOperationsGateOut(
+            id="retention-legal",
+            title="Rechtsfreigabe fuer Retention und Dokumentklassen",
+            status="external_evidence_required",
+            ownerRole="Legal/HR",
+            goLiveBlocking=True,
+            evidenceRequired=[
+                "Freigegebene Aufbewahrungsfristen je Dokumentklasse",
+                "Loeschregeln fuer Austritt, Zweckfortfall und Widerspruch",
+                "Ausnahmen fuer laufende Verfahren oder gesetzliche Pflichten",
+            ],
+            acceptanceCriteria=[
+                "Personalakte zeigt Retention und Loeschblocker je Dokument",
+                "Loeschlauf ist vor Produktivbetrieb fachlich freigegeben",
+                "Auskunftsexport enthaelt Retention-Plan und Audit-Hinweise",
+            ],
+            auditTrail=["document_type", "retention_rule_version", "approved_by", "approved_at"],
+            professionalPractice=["Jaehrlicher Review", "Zweckbindung", "Keine automatische Loeschung ohne Pruefprotokoll"],
+        ),
+    ]
+    return HrmOperationsGatesOut(
+        status="external_gates_defined",
+        asOf="2026-05-13",
+        goLiveAllowed=not any(gate.goLiveBlocking and gate.status != "approved" for gate in gates),
+        summary="Repo fachlich abgeschlossen; Produktiv-Go-live bleibt bis zur Evidenzfreigabe aller externen Gates blockiert.",
+        gates=gates,
+        closureDefinition=[
+            "Jedes Gate besitzt Owner, Evidenz, Abnahmekriterien und Auditspur.",
+            "Go-live ist nur erlaubt, wenn alle blocking Gates approved sind.",
+            "Fehlende Zugangsdaten oder Rechtsfreigaben werden nicht als Repo-Gap gefuehrt, sondern als Betriebsfreigabe.",
+            "Fachliche Contracts bleiben stabil und koennen mit echten Nachweisen befuellt werden.",
+        ],
+    )
 
 
 _HRM_CLOSED_REPO_GAPS = [
@@ -2370,6 +2542,11 @@ async def get_hrm_readiness(_tenant_id: str = Depends(get_tenant_id)):
 @router.get("/hrm-operating-system", response_model=HrmOperatingSystemOut)
 async def get_hrm_operating_system(_tenant_id: str = Depends(get_tenant_id)):
     return build_hrm_operating_system_contract()
+
+
+@router.get("/hrm-operations-gates", response_model=HrmOperationsGatesOut)
+async def get_hrm_operations_gates(_tenant_id: str = Depends(get_tenant_id)):
+    return build_hrm_operations_gates()
 
 
 @router.get("/employee-files/{employee_ref}", response_model=EmployeeFileOut)
