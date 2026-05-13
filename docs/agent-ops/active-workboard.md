@@ -102,11 +102,12 @@ Stand: `2026-05-12`
 
 **Von:** Codex
 **Owner:** Codex
-**Stand:** reserviert 2026-05-13
+**Stand:** abgeschlossen 2026-05-13
 **Ziel des Slices:** Google-Studio-Designentwurf fuer `HRM-Betriebsfreigaben` in die bestehende VALEO-React-Seite uebertragen: Readiness-Header, KPI-Leiste, Policy-Box, Stopper-Markierung, kompakte Pruefpunkt-Zeilen und aufklappbare Arbeitsbereiche.
 **Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/agent-ops/slices/HRM-OPERATIONS-GATES-005.yaml`, `packages/frontend-web/src/pages/personal/hrm-operations-gates.tsx`
 **Abnahmekriterien:** Seite folgt dem Studio-Entwurf ohne neue Dependencies; bestehende React-Query-Hooks bleiben verdrahtet; sichtbare Sprache bleibt buerotauglich; Typecheck ist gruen.
-**Checks:** offen
+**Erledigt:** Google-Studio-Entwurf in die echte VALEO-Seite uebertragen: sticky Readiness-Header, KPI-Leiste, Policy-Box, Stopper-Markierung, kompakte Pruefpunkt-Zeilen, aufklappbare Details und Arbeitsaktionen. Keine neue `motion`-Dependency; alle bestehenden Runtime-Hooks bleiben verdrahtet.
+**Checks:** `pnpm --filter @valero-neuroerp/frontend-web type-check`; `python scripts/agent_workboard_supervisor.py validate`; `node scripts/docs-governance-check.cjs`; `git diff --check`
 **Offene Risiken:** Studio-Prototyp enthaelt Mockdaten und `motion`; Uebernahme erfolgt auf echte VALEO-Daten und ohne zusaetzliche Animationsdependency.
 
 ## TODO-SPRINT-001
