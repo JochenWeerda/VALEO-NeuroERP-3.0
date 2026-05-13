@@ -631,6 +631,12 @@ class HrmOperationsGateOut(BaseModel):
     status: str
     ownerRole: str
     goLiveBlocking: bool
+    priority: str = "P1"
+    riskLevel: str = "mittel"
+    dueDate: str | None = None
+    lastChangedAt: str | None = None
+    allowedRoles: list[str] = Field(default_factory=list)
+    readOnlyRoles: list[str] = Field(default_factory=list)
     evidenceCount: int = 0
     latestEvidenceRef: str | None = None
     lastProbeStatus: str | None = None
@@ -884,6 +890,27 @@ def _hrm_operations_gate_catalog() -> dict[str, HrmOperationsGateOut]:
     return {gate.id: gate for gate in build_hrm_operations_gates().gates}
 
 
+def _hrm_gate_readiness_metadata(gate_id: str) -> dict[str, Any]:
+    defaults: dict[str, dict[str, Any]] = {
+        "eau-communication": {"priority": "P0", "riskLevel": "hoch", "dueDate": "2026-05-20"},
+        "datev-payroll": {"priority": "P0", "riskLevel": "hoch", "dueDate": "2026-05-21"},
+        "office-sso-connectors": {"priority": "P0", "riskLevel": "hoch", "dueDate": "2026-05-22"},
+        "documents-esign": {"priority": "P1", "riskLevel": "mittel", "dueDate": "2026-05-24"},
+        "privacy-contracts": {"priority": "P0", "riskLevel": "hoch", "dueDate": "2026-05-20"},
+        "works-council-dsfa": {"priority": "P0", "riskLevel": "hoch", "dueDate": "2026-05-23"},
+        "retention-legal": {"priority": "P1", "riskLevel": "mittel", "dueDate": "2026-05-27"},
+    }
+    return {
+        **defaults.get(gate_id, {"priority": "P1", "riskLevel": "mittel", "dueDate": None}),
+        "allowedRoles": ["HR Admin", "Payroll Lead", "IT Admin", "Datenschutz", "Legal"],
+        "readOnlyRoles": ["Geschaeftsleitung", "Betriebsrat"],
+    }
+
+
+def _apply_hrm_gate_readiness_metadata(gate: HrmOperationsGateOut) -> HrmOperationsGateOut:
+    return gate.model_copy(update=_hrm_gate_readiness_metadata(gate.id))
+
+
 def _hrm_gate_datetime(value: Any) -> str | None:
     if value is None:
         return None
@@ -904,13 +931,15 @@ def _row_mapping(row: Any) -> dict[str, Any]:
 
 
 def _merge_hrm_gate_state(template: HrmOperationsGateOut, row: dict[str, Any] | None) -> HrmOperationsGateOut:
+    enriched_template = _apply_hrm_gate_readiness_metadata(template)
     if not row:
-        return template
-    return template.model_copy(
+        return enriched_template
+    return enriched_template.model_copy(
         update={
-            "status": row.get("status") or template.status,
-            "ownerRole": row.get("owner_role") or template.ownerRole,
-            "goLiveBlocking": bool(row.get("go_live_blocking", template.goLiveBlocking)),
+            "status": row.get("status") or enriched_template.status,
+            "ownerRole": row.get("owner_role") or enriched_template.ownerRole,
+            "goLiveBlocking": bool(row.get("go_live_blocking", enriched_template.goLiveBlocking)),
+            "lastChangedAt": _hrm_gate_datetime(row.get("updated_at") or row.get("approved_at") or row.get("last_probe_at")),
             "evidenceCount": int(row.get("evidence_count") or 0),
             "latestEvidenceRef": row.get("latest_evidence_ref"),
             "lastProbeStatus": row.get("last_probe_status"),
@@ -956,7 +985,7 @@ def _load_hrm_operations_gates_from_db(db: Session, tenant_id: str) -> HrmOperat
             SELECT
               g.gate_id, g.status, g.owner_role, g.go_live_blocking,
               g.last_probe_status, g.last_probe_at, g.approved_by, g.approved_at,
-              g.rejection_reason,
+              g.rejection_reason, g.updated_at,
               COALESCE(ev.evidence_count, 0) AS evidence_count,
               ev.latest_evidence_ref
             FROM domain_hr.hrm_operations_gates g

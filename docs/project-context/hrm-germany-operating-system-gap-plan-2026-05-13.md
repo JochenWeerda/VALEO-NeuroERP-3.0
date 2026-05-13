@@ -199,6 +199,10 @@ Stand 2026-05-13:
   - Nachweis-Erfassung je Pruefpunkt
   - Test-Erfassung je Pruefpunkt
   - Freigeben-/Zurueckweisen-Aktionen je Pruefpunkt
+- `HRM-OPERATIONS-GATES-004` schaerft das Cockpit als Admin-/Compliance-/Go-live-Readiness-Arbeitsflaeche:
+  - Name in der Personal-Navigation: `HRM-Betriebsfreigaben`
+  - API-Metadaten je Gate: Prioritaet, Risiko-Level, Faelligkeit, letzte Aenderung, berechtigte Rollen und Read-only-Rollen
+  - UI zeigt Risiko, Prioritaet, Faelligkeit, letzte Aenderung, Rollenhinweis und normalen Bedienkontext
 - Der statische Gate-Katalog ist nur noch Seed/Fallback. Produktivstatus, Evidence, Probe-Ergebnisse, Approval/Reject und Go-live-Policy werden tenant-spezifisch persistent gefuehrt.
 
 | Gate | Owner | Abschlussdefinition |
@@ -217,4 +221,5 @@ Technischer Abschluss 2026-05-13:
 
 - Repo-seitig sind die Gates nicht mehr nur dokumentiert, sondern als steuerbarer Workflow implementiert.
 - Das Frontend stellt den Workflow als HR-Freigabe-Cockpit in der Personal-Navigation bereit und vermeidet fachliche Blackbox-Begriffe in der Bedienoberflaeche.
+- Die Seite ist ausdruecklich Admin-/Compliance-/Readiness-Flaeche, nicht Mitarbeiter-Self-Service.
 - Produktive externe Zugangsdaten und reale Rechts-/Betriebsratsfreigaben bleiben notwendige Betriebsnachweise; ohne sie koennen Gates nicht fachlich `approved` werden.

@@ -1,7 +1,7 @@
 id: HRM-OPERATIONS-GATES-004
 title: HRM-Betriebsfreigaben Readiness-Schaerfung
 owner: Codex
-status: reserviert
+status: abgeschlossen
 created: 2026-05-13
 goal: >
   HRM-Freigabe-Cockpit fachlich als Admin-/Compliance-/Go-live-Readiness-
@@ -23,6 +23,15 @@ acceptance_criteria:
   - UI zeigt Risiko, Prioritaet, Faelligkeit, letzte Aenderung, Rollen-/Sichtbarkeitshinweis und Abnahmekriterien.
   - Typecheck und fokussierte API-Tests sind gruen.
 checks:
-  - offen
+  - pytest tests/test_personal_hrm_operations_gate_workflow_api.py tests/test_personal_hrm_operations_gates_api.py -q --no-cov
+  - pnpm --filter @valero-neuroerp/frontend-web type-check
+  - python -m py_compile app/api/v1/endpoints/personal.py tests/test_personal_hrm_operations_gate_workflow_api.py
+  - python scripts/agent_workboard_supervisor.py validate
+  - node scripts/docs-governance-check.cjs
+  - git diff --check
+done:
+  - HrmOperationsGateOut liefert Prioritaet, Risiko-Level, Faelligkeit, letzte Aenderung, berechtigte Rollen und Read-only-Rollen.
+  - Frontend heisst HRM-Betriebsfreigaben und zeigt Admin-/Compliance-/Readiness-Kontext.
+  - UI zeigt Risiko, Prioritaet, Faelligkeit, letzte Aenderung, Rollenhinweis und einfache Arbeitsbegriffe.
 risks:
   - Produktive Rollen-/Rechtesteuerung haengt an der zentralen Auth-/Navigation-Enforcement; dieser Slice macht fachliche Sichtbarkeit und API-Metadaten explizit.
