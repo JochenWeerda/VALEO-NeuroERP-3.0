@@ -1301,13 +1301,19 @@ async def update_business_partner(
     return _to_out(row)
 
 
+def _svc(db: Session, tenant_id: str) -> BusinessPartnerService:
+    return BusinessPartnerService(db, tenant_id)
+
+
 def _ensure_partner_exists(partner_id: str, db: Session) -> None:
+    """Used by tenant-agnostic catalog routes (communities) only."""
     exists = db.query(BusinessPartner.partner_id).filter(BusinessPartner.partner_id == partner_id).first()
     if not exists:
         raise HTTPException(status_code=404, detail="Business partner not found")
 
 
 def _commit_with_validation(db: Session, conflict_detail: str) -> None:
+    """Used by tenant-agnostic catalog routes (communities) only."""
     try:
         db.commit()
     except IntegrityError:
@@ -1361,13 +1367,13 @@ def _to_price_agreement(row: BusinessPartnerPriceAgreement) -> PriceAgreement:
 async def list_discount_items(
     partner_id: str,
     article_number: Optional[str] = Query(None),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
-    _ensure_partner_exists(partner_id, db)
-    q = db.query(BusinessPartnerDiscountItem).filter(BusinessPartnerDiscountItem.partner_id == partner_id)
-    if article_number:
-        q = q.filter(BusinessPartnerDiscountItem.article_number.ilike(f"%{article_number}%"))
-    rows = q.order_by(BusinessPartnerDiscountItem.article_number.asc(), BusinessPartnerDiscountItem.created_at.desc()).all()
+    try:
+        rows = _svc(db, tenant_id).list_discount_items(partner_id, article_number=article_number)
+    except EntityNotFoundError as exc:
+        raise HTTPException(404, exc.detail)
     return [_to_discount_item(r) for r in rows]
 
 
@@ -1375,121 +1381,77 @@ async def list_discount_items(
 async def create_discount_item(
     partner_id: str,
     payload: DiscountItemCreate,
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
-    _ensure_partner_exists(partner_id, db)
-    row = BusinessPartnerDiscountItem(
-        id=uuid7(),
-        partner_id=partner_id,
-        article_number=payload.article_number,
-        description=payload.description,
-        discount_percent=_quantize_2(payload.discount_percent),
-        valid_from=payload.valid_from,
-        valid_to=payload.valid_to,
-        discount_list_number=payload.discount_list_number,
-        source_type=payload.source_type,
-        created_by=payload.created_by,
-        updated_by=payload.updated_by,
-    )
-    db.add(row)
-    _commit_with_validation(db, "Discount item violates constraints or duplicate period key")
-    db.refresh(row)
+    data = payload.model_dump()
+    data["discount_percent"] = _quantize_2(data.get("discount_percent"))
+    try:
+        row = _svc(db, tenant_id).create_discount_item(partner_id, data)
+    except EntityNotFoundError as exc:
+        raise HTTPException(404, exc.detail)
+    except IntegrityError:
+        db.rollback()
+        raise HTTPException(409, "Discount item violates constraints or duplicate period key")
     return _to_discount_item(row)
 
 
 @router.get("/{partner_id}/discount-items/{item_id}", response_model=DiscountItem)
-async def get_discount_item(partner_id: str, item_id: str, db: Session = Depends(get_db)):
-    _ensure_partner_exists(partner_id, db)
-    row = (
-        db.query(BusinessPartnerDiscountItem)
-        .filter(
-            BusinessPartnerDiscountItem.id == item_id,
-            BusinessPartnerDiscountItem.partner_id == partner_id,
-        )
-        .first()
-    )
-    if not row:
-        raise HTTPException(status_code=404, detail="Discount item not found")
+async def get_discount_item(
+    partner_id: str, item_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
+):
+    try:
+        _svc(db, tenant_id).repo.get_by_id(partner_id)
+        row = _svc(db, tenant_id).get_discount_item(item_id)
+    except EntityNotFoundError as exc:
+        raise HTTPException(404, exc.detail)
     return _to_discount_item(row)
 
 
 @router.put("/{partner_id}/discount-items/{item_id}", response_model=DiscountItem)
 async def update_discount_item(
-    partner_id: str,
-    item_id: str,
-    payload: DiscountItemCreate,
-    db: Session = Depends(get_db),
+    partner_id: str, item_id: str, payload: DiscountItemCreate,
+    tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db),
 ):
-    _ensure_partner_exists(partner_id, db)
-    row = (
-        db.query(BusinessPartnerDiscountItem)
-        .filter(
-            BusinessPartnerDiscountItem.id == item_id,
-            BusinessPartnerDiscountItem.partner_id == partner_id,
-        )
-        .first()
-    )
-    if not row:
-        raise HTTPException(status_code=404, detail="Discount item not found")
-
-    # PUT semantics: full replacement of mutable fields.
-    row.article_number = payload.article_number
-    row.description = payload.description
-    row.discount_percent = _quantize_2(payload.discount_percent)
-    row.valid_from = payload.valid_from
-    row.valid_to = payload.valid_to
-    row.discount_list_number = payload.discount_list_number
-    row.source_type = payload.source_type
-    row.updated_by = payload.updated_by
-    _commit_with_validation(db, "Discount item violates constraints or duplicate period key")
-    db.refresh(row)
+    data = payload.model_dump()
+    data["discount_percent"] = _quantize_2(data.get("discount_percent"))
+    data.pop("created_by", None)
+    try:
+        row = _svc(db, tenant_id).update_discount_item(item_id, data)
+    except EntityNotFoundError as exc:
+        raise HTTPException(404, exc.detail)
+    except IntegrityError:
+        db.rollback()
+        raise HTTPException(409, "Discount item violates constraints or duplicate period key")
     return _to_discount_item(row)
 
 
 @router.patch("/{partner_id}/discount-items/{item_id}", response_model=DiscountItem)
 async def patch_discount_item(
-    partner_id: str,
-    item_id: str,
-    payload: DiscountItemUpdate,
-    db: Session = Depends(get_db),
+    partner_id: str, item_id: str, payload: DiscountItemUpdate,
+    tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db),
 ):
-    _ensure_partner_exists(partner_id, db)
-    row = (
-        db.query(BusinessPartnerDiscountItem)
-        .filter(
-            BusinessPartnerDiscountItem.id == item_id,
-            BusinessPartnerDiscountItem.partner_id == partner_id,
-        )
-        .first()
-    )
-    if not row:
-        raise HTTPException(status_code=404, detail="Discount item not found")
-
-    values = payload.model_dump(exclude_unset=True)
-    for key, value in values.items():
-        if key == "discount_percent" and value is not None:
-            value = _quantize_2(value)
-        setattr(row, key, value)
-    _commit_with_validation(db, "Discount item violates constraints or duplicate period key")
-    db.refresh(row)
+    data = payload.model_dump(exclude_unset=True)
+    if "discount_percent" in data and data["discount_percent"] is not None:
+        data["discount_percent"] = _quantize_2(data["discount_percent"])
+    try:
+        row = _svc(db, tenant_id).update_discount_item(item_id, data)
+    except EntityNotFoundError as exc:
+        raise HTTPException(404, exc.detail)
+    except IntegrityError:
+        db.rollback()
+        raise HTTPException(409, "Discount item violates constraints or duplicate period key")
     return _to_discount_item(row)
 
 
 @router.delete("/{partner_id}/discount-items/{item_id}", status_code=204)
-async def delete_discount_item(partner_id: str, item_id: str, db: Session = Depends(get_db)):
-    _ensure_partner_exists(partner_id, db)
-    row = (
-        db.query(BusinessPartnerDiscountItem)
-        .filter(
-            BusinessPartnerDiscountItem.id == item_id,
-            BusinessPartnerDiscountItem.partner_id == partner_id,
-        )
-        .first()
-    )
-    if not row:
-        raise HTTPException(status_code=404, detail="Discount item not found")
-    db.delete(row)
-    db.commit()
+async def delete_discount_item(
+    partner_id: str, item_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
+):
+    try:
+        _svc(db, tenant_id).delete_discount_item(item_id)
+    except EntityNotFoundError as exc:
+        raise HTTPException(404, exc.detail)
     return None
 
 
@@ -1497,147 +1459,92 @@ async def delete_discount_item(partner_id: str, item_id: str, db: Session = Depe
 async def list_price_agreements(
     partner_id: str,
     article_number: Optional[str] = Query(None),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
-    _ensure_partner_exists(partner_id, db)
-    q = db.query(BusinessPartnerPriceAgreement).filter(BusinessPartnerPriceAgreement.partner_id == partner_id)
-    if article_number:
-        q = q.filter(BusinessPartnerPriceAgreement.article_number.ilike(f"%{article_number}%"))
-    rows = q.order_by(BusinessPartnerPriceAgreement.article_number.asc(), BusinessPartnerPriceAgreement.created_at.desc()).all()
+    try:
+        rows = _svc(db, tenant_id).list_price_agreements(partner_id, article_number=article_number)
+    except EntityNotFoundError as exc:
+        raise HTTPException(404, exc.detail)
     return [_to_price_agreement(r) for r in rows]
 
 
 @router.post("/{partner_id}/price-agreements", response_model=PriceAgreement, status_code=201)
 async def create_price_agreement(
-    partner_id: str,
-    payload: PriceAgreementCreate,
-    db: Session = Depends(get_db),
+    partner_id: str, payload: PriceAgreementCreate,
+    tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db),
 ):
-    _ensure_partner_exists(partner_id, db)
-    row = BusinessPartnerPriceAgreement(
-        id=uuid7(),
-        partner_id=partner_id,
-        article_number=payload.article_number,
-        description=payload.description,
-        valid_from=payload.valid_from,
-        valid_to=payload.valid_to,
-        price_net=_quantize_4(payload.price_net),
-        price_incl_freight=_quantize_4(payload.price_incl_freight),
-        price_unit=payload.price_unit,
-        discount_allowed=payload.discount_allowed,
-        special_freight=_quantize_4(payload.special_freight),
-        payment_condition=payload.payment_condition,
-        source_type=payload.source_type,
-        operator_name=payload.operator_name,
-        operator_date=payload.operator_date,
-        created_by=payload.created_by,
-        updated_by=payload.updated_by,
-    )
-    db.add(row)
-    _commit_with_validation(db, "Price agreement violates constraints or duplicate period key")
-    db.refresh(row)
+    data = payload.model_dump()
+    for f in ("price_net", "price_incl_freight", "special_freight"):
+        data[f] = _quantize_4(data.get(f))
+    try:
+        row = _svc(db, tenant_id).create_price_agreement(partner_id, data)
+    except EntityNotFoundError as exc:
+        raise HTTPException(404, exc.detail)
+    except IntegrityError:
+        db.rollback()
+        raise HTTPException(409, "Price agreement violates constraints or duplicate period key")
     return _to_price_agreement(row)
 
 
 @router.get("/{partner_id}/price-agreements/{agreement_id}", response_model=PriceAgreement)
-async def get_price_agreement(partner_id: str, agreement_id: str, db: Session = Depends(get_db)):
-    _ensure_partner_exists(partner_id, db)
-    row = (
-        db.query(BusinessPartnerPriceAgreement)
-        .filter(
-            BusinessPartnerPriceAgreement.id == agreement_id,
-            BusinessPartnerPriceAgreement.partner_id == partner_id,
-        )
-        .first()
-    )
-    if not row:
-        raise HTTPException(status_code=404, detail="Price agreement not found")
+async def get_price_agreement(
+    partner_id: str, agreement_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
+):
+    try:
+        _svc(db, tenant_id).repo.get_by_id(partner_id)
+        row = _svc(db, tenant_id).get_price_agreement(agreement_id)
+    except EntityNotFoundError as exc:
+        raise HTTPException(404, exc.detail)
     return _to_price_agreement(row)
 
 
 @router.put("/{partner_id}/price-agreements/{agreement_id}", response_model=PriceAgreement)
 async def update_price_agreement(
-    partner_id: str,
-    agreement_id: str,
-    payload: PriceAgreementCreate,
-    db: Session = Depends(get_db),
+    partner_id: str, agreement_id: str, payload: PriceAgreementCreate,
+    tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db),
 ):
-    _ensure_partner_exists(partner_id, db)
-    row = (
-        db.query(BusinessPartnerPriceAgreement)
-        .filter(
-            BusinessPartnerPriceAgreement.id == agreement_id,
-            BusinessPartnerPriceAgreement.partner_id == partner_id,
-        )
-        .first()
-    )
-    if not row:
-        raise HTTPException(status_code=404, detail="Price agreement not found")
-
-    # PUT semantics: full replacement of mutable fields.
-    row.article_number = payload.article_number
-    row.description = payload.description
-    row.valid_from = payload.valid_from
-    row.valid_to = payload.valid_to
-    row.price_net = _quantize_4(payload.price_net)
-    row.price_incl_freight = _quantize_4(payload.price_incl_freight)
-    row.price_unit = payload.price_unit
-    row.discount_allowed = payload.discount_allowed
-    row.special_freight = _quantize_4(payload.special_freight)
-    row.payment_condition = payload.payment_condition
-    row.source_type = payload.source_type
-    row.operator_name = payload.operator_name
-    row.operator_date = payload.operator_date
-    row.updated_by = payload.updated_by
-    _commit_with_validation(db, "Price agreement violates constraints or duplicate period key")
-    db.refresh(row)
+    data = payload.model_dump()
+    for f in ("price_net", "price_incl_freight", "special_freight"):
+        data[f] = _quantize_4(data.get(f))
+    data.pop("created_by", None)
+    try:
+        row = _svc(db, tenant_id).update_price_agreement(agreement_id, data)
+    except EntityNotFoundError as exc:
+        raise HTTPException(404, exc.detail)
+    except IntegrityError:
+        db.rollback()
+        raise HTTPException(409, "Price agreement violates constraints or duplicate period key")
     return _to_price_agreement(row)
 
 
 @router.patch("/{partner_id}/price-agreements/{agreement_id}", response_model=PriceAgreement)
 async def patch_price_agreement(
-    partner_id: str,
-    agreement_id: str,
-    payload: PriceAgreementUpdate,
-    db: Session = Depends(get_db),
+    partner_id: str, agreement_id: str, payload: PriceAgreementUpdate,
+    tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db),
 ):
-    _ensure_partner_exists(partner_id, db)
-    row = (
-        db.query(BusinessPartnerPriceAgreement)
-        .filter(
-            BusinessPartnerPriceAgreement.id == agreement_id,
-            BusinessPartnerPriceAgreement.partner_id == partner_id,
-        )
-        .first()
-    )
-    if not row:
-        raise HTTPException(status_code=404, detail="Price agreement not found")
-
-    values = payload.model_dump(exclude_unset=True)
-    for key, value in values.items():
-        if key in {"price_net", "price_incl_freight", "special_freight"} and value is not None:
-            value = _quantize_4(value)
-        setattr(row, key, value)
-    _commit_with_validation(db, "Price agreement violates constraints or duplicate period key")
-    db.refresh(row)
+    data = payload.model_dump(exclude_unset=True)
+    for f in ("price_net", "price_incl_freight", "special_freight"):
+        if f in data and data[f] is not None:
+            data[f] = _quantize_4(data[f])
+    try:
+        row = _svc(db, tenant_id).update_price_agreement(agreement_id, data)
+    except EntityNotFoundError as exc:
+        raise HTTPException(404, exc.detail)
+    except IntegrityError:
+        db.rollback()
+        raise HTTPException(409, "Price agreement violates constraints or duplicate period key")
     return _to_price_agreement(row)
 
 
 @router.delete("/{partner_id}/price-agreements/{agreement_id}", status_code=204)
-async def delete_price_agreement(partner_id: str, agreement_id: str, db: Session = Depends(get_db)):
-    _ensure_partner_exists(partner_id, db)
-    row = (
-        db.query(BusinessPartnerPriceAgreement)
-        .filter(
-            BusinessPartnerPriceAgreement.id == agreement_id,
-            BusinessPartnerPriceAgreement.partner_id == partner_id,
-        )
-        .first()
-    )
-    if not row:
-        raise HTTPException(status_code=404, detail="Price agreement not found")
-    db.delete(row)
-    db.commit()
+async def delete_price_agreement(
+    partner_id: str, agreement_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
+):
+    try:
+        _svc(db, tenant_id).delete_price_agreement(agreement_id)
+    except EntityNotFoundError as exc:
+        raise HTTPException(404, exc.detail)
     return None
 
 
@@ -1799,248 +1706,141 @@ def _to_cpd_account(row: BusinessPartnerCpdAccount) -> CpdAccount:
 @router.get("/{partner_id}/instructions", response_model=list[Instruction])
 async def list_instructions(
     partner_id: str,
-    skip: int = Query(0, ge=0, description="Skip N records"),
-    limit: int = Query(50, ge=1, le=500, description="Max records to return"),
-    db: Session = Depends(get_db),
+    skip: int = Query(0, ge=0), limit: int = Query(50, ge=1, le=500),
+    tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db),
 ):
-    _ensure_partner_exists(partner_id, db)
-    rows = (
-        db.query(BusinessPartnerInstruction)
-        .filter(BusinessPartnerInstruction.partner_id == partner_id)
-        .order_by(BusinessPartnerInstruction.created_at.desc())
-        .offset(skip).limit(limit)
-        .all()
-    )
+    try:
+        rows = _svc(db, tenant_id).list_instructions(partner_id)
+    except EntityNotFoundError as exc:
+        raise HTTPException(404, exc.detail)
     return [_to_instruction(r) for r in rows]
 
 
 @router.post("/{partner_id}/instructions", response_model=Instruction, status_code=201)
-async def create_instruction(partner_id: str, payload: InstructionCreate, db: Session = Depends(get_db)):
-    _ensure_partner_exists(partner_id, db)
-    row = BusinessPartnerInstruction(
-        id=uuid7(),
-        partner_id=partner_id,
-        instruction_text=payload.instruction_text,
-        instruction_priority=payload.instruction_priority,
-        valid_from=payload.valid_from,
-        valid_to=payload.valid_to,
-        created_by=payload.created_by,
-        updated_by=payload.updated_by,
-    )
-    db.add(row)
-    _commit_with_validation(db, "Instruction violates constraints")
-    db.refresh(row)
+async def create_instruction(
+    partner_id: str, payload: InstructionCreate,
+    tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db),
+):
+    try:
+        row = _svc(db, tenant_id).create_instruction(partner_id, payload.model_dump())
+    except EntityNotFoundError as exc:
+        raise HTTPException(404, exc.detail)
+    except IntegrityError:
+        db.rollback()
+        raise HTTPException(409, "Instruction violates constraints")
     return _to_instruction(row)
 
 
 @router.get("/{partner_id}/instructions/{instruction_id}", response_model=Instruction)
-async def get_instruction(partner_id: str, instruction_id: str, db: Session = Depends(get_db)):
-    _ensure_partner_exists(partner_id, db)
-    row = (
-        db.query(BusinessPartnerInstruction)
-        .filter(
-            BusinessPartnerInstruction.id == instruction_id,
-            BusinessPartnerInstruction.partner_id == partner_id,
-        )
-        .first()
-    )
-    if not row:
-        raise HTTPException(status_code=404, detail="Instruction not found")
+async def get_instruction(
+    partner_id: str, instruction_id: str,
+    tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db),
+):
+    try:
+        row = _svc(db, tenant_id).get_instruction(instruction_id)
+    except EntityNotFoundError as exc:
+        raise HTTPException(404, exc.detail)
     return _to_instruction(row)
 
 
 @router.put("/{partner_id}/instructions/{instruction_id}", response_model=Instruction)
 async def update_instruction(
-    partner_id: str,
-    instruction_id: str,
-    payload: InstructionCreate,
-    db: Session = Depends(get_db),
+    partner_id: str, instruction_id: str, payload: InstructionCreate,
+    tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db),
 ):
-    _ensure_partner_exists(partner_id, db)
-    row = (
-        db.query(BusinessPartnerInstruction)
-        .filter(
-            BusinessPartnerInstruction.id == instruction_id,
-            BusinessPartnerInstruction.partner_id == partner_id,
-        )
-        .first()
-    )
-    if not row:
-        raise HTTPException(status_code=404, detail="Instruction not found")
-    row.instruction_text = payload.instruction_text
-    row.instruction_priority = payload.instruction_priority
-    row.valid_from = payload.valid_from
-    row.valid_to = payload.valid_to
-    row.updated_by = payload.updated_by
-    _commit_with_validation(db, "Instruction violates constraints")
-    db.refresh(row)
+    data = payload.model_dump()
+    data.pop("created_by", None)
+    try:
+        row = _svc(db, tenant_id).update_instruction(instruction_id, data)
+    except EntityNotFoundError as exc:
+        raise HTTPException(404, exc.detail)
+    except IntegrityError:
+        db.rollback()
+        raise HTTPException(409, "Instruction violates constraints")
     return _to_instruction(row)
 
 
 @router.patch("/{partner_id}/instructions/{instruction_id}", response_model=Instruction)
 async def patch_instruction(
-    partner_id: str,
-    instruction_id: str,
-    payload: InstructionUpdate,
-    db: Session = Depends(get_db),
+    partner_id: str, instruction_id: str, payload: InstructionUpdate,
+    tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db),
 ):
-    _ensure_partner_exists(partner_id, db)
-    row = (
-        db.query(BusinessPartnerInstruction)
-        .filter(
-            BusinessPartnerInstruction.id == instruction_id,
-            BusinessPartnerInstruction.partner_id == partner_id,
-        )
-        .first()
-    )
-    if not row:
-        raise HTTPException(status_code=404, detail="Instruction not found")
-    values = payload.model_dump(exclude_unset=True)
-    for key, value in values.items():
-        setattr(row, key, value)
-    _commit_with_validation(db, "Instruction violates constraints")
-    db.refresh(row)
+    try:
+        row = _svc(db, tenant_id).update_instruction(instruction_id, payload.model_dump(exclude_unset=True))
+    except EntityNotFoundError as exc:
+        raise HTTPException(404, exc.detail)
+    except IntegrityError:
+        db.rollback()
+        raise HTTPException(409, "Instruction violates constraints")
     return _to_instruction(row)
 
 
 @router.delete("/{partner_id}/instructions/{instruction_id}", status_code=204)
-async def delete_instruction(partner_id: str, instruction_id: str, db: Session = Depends(get_db)):
-    _ensure_partner_exists(partner_id, db)
-    row = (
-        db.query(BusinessPartnerInstruction)
-        .filter(
-            BusinessPartnerInstruction.id == instruction_id,
-            BusinessPartnerInstruction.partner_id == partner_id,
-        )
-        .first()
-    )
-    if not row:
-        raise HTTPException(status_code=404, detail="Instruction not found")
-    db.delete(row)
-    db.commit()
+async def delete_instruction(
+    partner_id: str, instruction_id: str,
+    tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db),
+):
+    try:
+        _svc(db, tenant_id).delete_instruction(instruction_id)
+    except EntityNotFoundError as exc:
+        raise HTTPException(404, exc.detail)
     return None
 
 
 @router.get("/{partner_id}/contacts", response_model=list[Contact])
 async def list_contacts(
     partner_id: str,
-    skip: int = Query(0, ge=0, description="Skip N records"),
-    limit: int = Query(50, ge=1, le=500, description="Max records to return"),
-    db: Session = Depends(get_db),
+    skip: int = Query(0, ge=0), limit: int = Query(50, ge=1, le=500),
+    tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db),
 ):
-    _ensure_partner_exists(partner_id, db)
-    rows = (
-        db.query(BusinessPartnerContact)
-        .filter(BusinessPartnerContact.partner_id == partner_id)
-        .order_by(BusinessPartnerContact.priority.asc(), BusinessPartnerContact.last_name.asc())
-        .offset(skip).limit(limit)
-        .all()
-    )
+    try:
+        rows = _svc(db, tenant_id).list_contacts(partner_id)
+    except EntityNotFoundError as exc:
+        raise HTTPException(404, exc.detail)
     return [_to_contact(r) for r in rows]
 
 
 @router.post("/{partner_id}/contacts", response_model=Contact, status_code=201)
-async def create_contact(partner_id: str, payload: ContactCreate, db: Session = Depends(get_db)):
-    _ensure_partner_exists(partner_id, db)
-    row = BusinessPartnerContact(
-        id=uuid7(),
-        partner_id=partner_id,
-        priority=payload.priority,
-        salutation=payload.salutation,
-        brief_salutation=payload.brief_salutation,
-        title=payload.title,
-        first_name=payload.first_name,
-        last_name=payload.last_name,
-        position=payload.position,
-        department=payload.department,
-        phone_1=payload.phone_1,
-        phone_2=payload.phone_2,
-        mobile=payload.mobile,
-        email=payload.email,
-        street=payload.street,
-        postal_code=payload.postal_code,
-        city=payload.city,
-        birth_date=payload.birth_date,
-        hobbies=payload.hobbies,
-        info_1=payload.info_1,
-        info_2=payload.info_2,
-        invoice_email_recipient=payload.invoice_email_recipient,
-        reminder_email_recipient=payload.reminder_email_recipient,
-        contact_type=payload.contact_type,
-        cad_system=payload.cad_system,
-        software_systems=payload.software_systems,
-        is_data_protection_officer=payload.is_data_protection_officer,
-        created_by=payload.created_by,
-        updated_by=payload.updated_by,
-    )
-    db.add(row)
-    _commit_with_validation(db, "Contact violates constraints")
-    db.refresh(row)
+async def create_contact(
+    partner_id: str, payload: ContactCreate,
+    tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db),
+):
+    try:
+        row = _svc(db, tenant_id).create_contact(partner_id, payload.model_dump())
+    except EntityNotFoundError as exc:
+        raise HTTPException(404, exc.detail)
+    except IntegrityError:
+        db.rollback()
+        raise HTTPException(409, "Contact violates constraints")
     return _to_contact(row)
 
 
 @router.get("/{partner_id}/contacts/{contact_id}", response_model=Contact)
-async def get_contact(partner_id: str, contact_id: str, db: Session = Depends(get_db)):
-    _ensure_partner_exists(partner_id, db)
-    row = (
-        db.query(BusinessPartnerContact)
-        .filter(
-            BusinessPartnerContact.id == contact_id,
-            BusinessPartnerContact.partner_id == partner_id,
-        )
-        .first()
-    )
-    if not row:
-        raise HTTPException(status_code=404, detail="Contact not found")
+async def get_contact(
+    partner_id: str, contact_id: str,
+    tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db),
+):
+    try:
+        row = _svc(db, tenant_id).get_contact(contact_id)
+    except EntityNotFoundError as exc:
+        raise HTTPException(404, exc.detail)
     return _to_contact(row)
 
 
 @router.put("/{partner_id}/contacts/{contact_id}", response_model=Contact)
 async def update_contact(
-    partner_id: str,
-    contact_id: str,
-    payload: ContactCreate,
-    db: Session = Depends(get_db),
+    partner_id: str, contact_id: str, payload: ContactCreate,
+    tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db),
 ):
-    _ensure_partner_exists(partner_id, db)
-    row = (
-        db.query(BusinessPartnerContact)
-        .filter(
-            BusinessPartnerContact.id == contact_id,
-            BusinessPartnerContact.partner_id == partner_id,
-        )
-        .first()
-    )
-    if not row:
-        raise HTTPException(status_code=404, detail="Contact not found")
-    row.priority = payload.priority
-    row.salutation = payload.salutation
-    row.brief_salutation = payload.brief_salutation
-    row.title = payload.title
-    row.first_name = payload.first_name
-    row.last_name = payload.last_name
-    row.position = payload.position
-    row.department = payload.department
-    row.phone_1 = payload.phone_1
-    row.phone_2 = payload.phone_2
-    row.mobile = payload.mobile
-    row.email = payload.email
-    row.street = payload.street
-    row.postal_code = payload.postal_code
-    row.city = payload.city
-    row.birth_date = payload.birth_date
-    row.hobbies = payload.hobbies
-    row.info_1 = payload.info_1
-    row.info_2 = payload.info_2
-    row.invoice_email_recipient = payload.invoice_email_recipient
-    row.reminder_email_recipient = payload.reminder_email_recipient
-    row.contact_type = payload.contact_type
-    row.cad_system = payload.cad_system
-    row.software_systems = payload.software_systems
-    row.is_data_protection_officer = payload.is_data_protection_officer
-    row.updated_by = payload.updated_by
-    _commit_with_validation(db, "Contact violates constraints")
-    db.refresh(row)
+    data = payload.model_dump()
+    data.pop("created_by", None)
+    try:
+        row = _svc(db, tenant_id).update_contact(contact_id, data)
+    except EntityNotFoundError as exc:
+        raise HTTPException(404, exc.detail)
+    except IntegrityError:
+        db.rollback()
+        raise HTTPException(409, "Contact violates constraints")
     return _to_contact(row)
 
 
@@ -2049,42 +1849,28 @@ async def patch_contact(
     partner_id: str,
     contact_id: str,
     payload: ContactUpdate,
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
-    _ensure_partner_exists(partner_id, db)
-    row = (
-        db.query(BusinessPartnerContact)
-        .filter(
-            BusinessPartnerContact.id == contact_id,
-            BusinessPartnerContact.partner_id == partner_id,
-        )
-        .first()
-    )
-    if not row:
-        raise HTTPException(status_code=404, detail="Contact not found")
-    values = payload.model_dump(exclude_unset=True)
-    for key, value in values.items():
-        setattr(row, key, value)
-    _commit_with_validation(db, "Contact violates constraints")
-    db.refresh(row)
+    try:
+        row = _svc(db, tenant_id).update_contact(contact_id, payload.model_dump(exclude_unset=True))
+    except EntityNotFoundError as exc:
+        raise HTTPException(404, exc.detail)
+    except IntegrityError:
+        db.rollback()
+        raise HTTPException(409, "Contact violates constraints")
     return _to_contact(row)
 
 
 @router.delete("/{partner_id}/contacts/{contact_id}", status_code=204)
-async def delete_contact(partner_id: str, contact_id: str, db: Session = Depends(get_db)):
-    _ensure_partner_exists(partner_id, db)
-    row = (
-        db.query(BusinessPartnerContact)
-        .filter(
-            BusinessPartnerContact.id == contact_id,
-            BusinessPartnerContact.partner_id == partner_id,
-        )
-        .first()
-    )
-    if not row:
-        raise HTTPException(status_code=404, detail="Contact not found")
-    db.delete(row)
-    db.commit()
+async def delete_contact(
+    partner_id: str, contact_id: str,
+    tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db),
+):
+    try:
+        _svc(db, tenant_id).delete_contact(contact_id)
+    except EntityNotFoundError as exc:
+        raise HTTPException(404, exc.detail)
     return None
 
 
@@ -2092,427 +1878,220 @@ async def delete_contact(partner_id: str, contact_id: str, db: Session = Depends
 async def list_addresses(
     partner_id: str,
     address_type: Optional[str] = Query(None),
-    skip: int = Query(0, ge=0, description="Skip N records"),
-    limit: int = Query(50, ge=1, le=500, description="Max records to return"),
-    db: Session = Depends(get_db),
+    skip: int = Query(0, ge=0), limit: int = Query(50, ge=1, le=500),
+    tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db),
 ):
-    _ensure_partner_exists(partner_id, db)
-    q = db.query(BusinessPartnerAddress).filter(BusinessPartnerAddress.partner_id == partner_id)
-    if address_type:
-        q = q.filter(BusinessPartnerAddress.address_type == address_type)
-    rows = q.order_by(BusinessPartnerAddress.is_default.desc(), BusinessPartnerAddress.created_at.asc()).offset(skip).limit(limit).all()
+    try:
+        rows = _svc(db, tenant_id).list_addresses(partner_id, address_type=address_type, skip=skip, limit=limit)
+    except EntityNotFoundError as exc:
+        raise HTTPException(404, exc.detail)
     return [_to_address(r) for r in rows]
 
 
 @router.post("/{partner_id}/addresses", response_model=Address, status_code=201)
 async def create_address(
-    partner_id: str,
-    payload: AddressCreate,
-    db: Session = Depends(get_db),
+    partner_id: str, payload: AddressCreate,
+    tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db),
 ):
-    _ensure_partner_exists(partner_id, db)
-    row = BusinessPartnerAddress(
-        id=uuid7(),
-        partner_id=partner_id,
-        address_type=payload.address_type,
-        name_1=payload.name_1,
-        name_2=payload.name_2,
-        name_3=payload.name_3,
-        street=payload.street,
-        house_number=payload.house_number,
-        country=payload.country,
-        postal_code=payload.postal_code,
-        city=payload.city,
-        po_box=payload.po_box,
-        po_box_postal_code=payload.po_box_postal_code,
-        po_box_city=payload.po_box_city,
-        phone=payload.phone,
-        fax=payload.fax,
-        email=payload.email,
-        website=payload.website,
-        salutation=payload.salutation,
-        brief_salutation=payload.brief_salutation,
-        free_field_1=payload.free_field_1,
-        free_field_2=payload.free_field_2,
-        free_field_3=payload.free_field_3,
-        area_code=payload.area_code,
-        is_default=payload.is_default,
-        created_by=payload.created_by,
-        updated_by=payload.updated_by,
-    )
-    db.add(row)
-    _commit_with_validation(db, "Address violates constraints")
-    db.refresh(row)
+    try:
+        row = _svc(db, tenant_id).create_address(partner_id, payload.model_dump())
+    except EntityNotFoundError as exc:
+        raise HTTPException(404, exc.detail)
+    except IntegrityError:
+        db.rollback()
+        raise HTTPException(409, "Address violates constraints")
     return _to_address(row)
 
 
 @router.get("/{partner_id}/addresses/{address_id}", response_model=Address)
-async def get_address(partner_id: str, address_id: str, db: Session = Depends(get_db)):
-    _ensure_partner_exists(partner_id, db)
-    row = (
-        db.query(BusinessPartnerAddress)
-        .filter(
-            BusinessPartnerAddress.id == address_id,
-            BusinessPartnerAddress.partner_id == partner_id,
-        )
-        .first()
-    )
-    if not row:
-        raise HTTPException(status_code=404, detail="Address not found")
+async def get_address(
+    partner_id: str, address_id: str,
+    tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db),
+):
+    try:
+        row = _svc(db, tenant_id).get_address(address_id)
+    except EntityNotFoundError as exc:
+        raise HTTPException(404, exc.detail)
     return _to_address(row)
 
 
 @router.put("/{partner_id}/addresses/{address_id}", response_model=Address)
 async def update_address(
-    partner_id: str,
-    address_id: str,
-    payload: AddressCreate,
-    db: Session = Depends(get_db),
+    partner_id: str, address_id: str, payload: AddressCreate,
+    tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db),
 ):
-    _ensure_partner_exists(partner_id, db)
-    row = (
-        db.query(BusinessPartnerAddress)
-        .filter(
-            BusinessPartnerAddress.id == address_id,
-            BusinessPartnerAddress.partner_id == partner_id,
-        )
-        .first()
-    )
-    if not row:
-        raise HTTPException(status_code=404, detail="Address not found")
-    row.address_type = payload.address_type
-    row.name_1 = payload.name_1
-    row.name_2 = payload.name_2
-    row.name_3 = payload.name_3
-    row.street = payload.street
-    row.house_number = payload.house_number
-    row.country = payload.country
-    row.postal_code = payload.postal_code
-    row.city = payload.city
-    row.po_box = payload.po_box
-    row.po_box_postal_code = payload.po_box_postal_code
-    row.po_box_city = payload.po_box_city
-    row.phone = payload.phone
-    row.fax = payload.fax
-    row.email = payload.email
-    row.website = payload.website
-    row.salutation = payload.salutation
-    row.brief_salutation = payload.brief_salutation
-    row.free_field_1 = payload.free_field_1
-    row.free_field_2 = payload.free_field_2
-    row.free_field_3 = payload.free_field_3
-    row.area_code = payload.area_code
-    row.is_default = payload.is_default
-    row.updated_by = payload.updated_by
-    _commit_with_validation(db, "Address violates constraints")
-    db.refresh(row)
+    data = payload.model_dump()
+    data.pop("created_by", None)
+    try:
+        row = _svc(db, tenant_id).update_address(address_id, data)
+    except EntityNotFoundError as exc:
+        raise HTTPException(404, exc.detail)
+    except IntegrityError:
+        db.rollback()
+        raise HTTPException(409, "Address violates constraints")
     return _to_address(row)
 
 
 @router.patch("/{partner_id}/addresses/{address_id}", response_model=Address)
 async def patch_address(
-    partner_id: str,
-    address_id: str,
-    payload: AddressUpdate,
-    db: Session = Depends(get_db),
+    partner_id: str, address_id: str, payload: AddressUpdate,
+    tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db),
 ):
-    _ensure_partner_exists(partner_id, db)
-    row = (
-        db.query(BusinessPartnerAddress)
-        .filter(
-            BusinessPartnerAddress.id == address_id,
-            BusinessPartnerAddress.partner_id == partner_id,
-        )
-        .first()
-    )
-    if not row:
-        raise HTTPException(status_code=404, detail="Address not found")
-    values = payload.model_dump(exclude_unset=True)
-    for key, value in values.items():
-        setattr(row, key, value)
-    _commit_with_validation(db, "Address violates constraints")
-    db.refresh(row)
+    try:
+        row = _svc(db, tenant_id).update_address(address_id, payload.model_dump(exclude_unset=True))
+    except EntityNotFoundError as exc:
+        raise HTTPException(404, exc.detail)
+    except IntegrityError:
+        db.rollback()
+        raise HTTPException(409, "Address violates constraints")
     return _to_address(row)
 
 
 @router.delete("/{partner_id}/addresses/{address_id}", status_code=204)
-async def delete_address(partner_id: str, address_id: str, db: Session = Depends(get_db)):
-    _ensure_partner_exists(partner_id, db)
-    row = (
-        db.query(BusinessPartnerAddress)
-        .filter(
-            BusinessPartnerAddress.id == address_id,
-            BusinessPartnerAddress.partner_id == partner_id,
-        )
-        .first()
-    )
-    if not row:
-        raise HTTPException(status_code=404, detail="Address not found")
-    db.delete(row)
-    db.commit()
+async def delete_address(
+    partner_id: str, address_id: str,
+    tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db),
+):
+    try:
+        _svc(db, tenant_id).delete_address(address_id)
+    except EntityNotFoundError as exc:
+        raise HTTPException(404, exc.detail)
     return None
 
 
 @router.get("/{partner_id}/billing-config", response_model=BillingConfig)
-async def get_billing_config(partner_id: str, db: Session = Depends(get_db)):
-    _ensure_partner_exists(partner_id, db)
-    row = (
-        db.query(BusinessPartnerBillingConfig)
-        .filter(BusinessPartnerBillingConfig.partner_id == partner_id)
-        .first()
-    )
-    if not row:
-        raise HTTPException(status_code=404, detail="Billing config not found")
+async def get_billing_config(
+    partner_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
+):
+    try:
+        row = _svc(db, tenant_id).get_billing_config(partner_id)
+    except EntityNotFoundError as exc:
+        raise HTTPException(404, exc.detail)
     return _to_billing_config(row)
 
 
 @router.put("/{partner_id}/billing-config", response_model=BillingConfig)
 async def put_billing_config(
-    partner_id: str,
-    payload: BillingConfigCreate,
-    db: Session = Depends(get_db),
+    partner_id: str, payload: BillingConfigCreate,
+    tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db),
 ):
-    _ensure_partner_exists(partner_id, db)
-    row = (
-        db.query(BusinessPartnerBillingConfig)
-        .filter(BusinessPartnerBillingConfig.partner_id == partner_id)
-        .first()
-    )
-    if row is None:
-        row = BusinessPartnerBillingConfig(id=uuid7(), partner_id=partner_id)
-        db.add(row)
-
-    row.customer_group = payload.customer_group
-    row.customer_type = payload.customer_type
-    row.account_statement_print = payload.account_statement_print
-    row.account_statement_separate = payload.account_statement_separate
-    row.account_statement_reprint = payload.account_statement_reprint
-    row.last_account_statement_number = payload.last_account_statement_number
-    row.last_account_statement_date = payload.last_account_statement_date
-    row.account_balance = _quantize_2(payload.account_balance)
-    row.print_ad_text = payload.print_ad_text
-    row.shipping_expenses_enabled = payload.shipping_expenses_enabled
-    row.settlement_mode = payload.settlement_mode
-    row.admin_overhead_surcharge_percent = _quantize_2(payload.admin_overhead_surcharge_percent)
-    row.invoice_number_range = payload.invoice_number_range
-    row.bonus_eligible = payload.bonus_eligible
-    row.self_billing_sales = payload.self_billing_sales
-    row.self_billing_purchase = payload.self_billing_purchase
-    row.remarkable_claim = payload.remarkable_claim
-    row.vat_optimizer = payload.vat_optimizer
-    row.created_by = payload.created_by if row.created_by is None else row.created_by
-    row.updated_by = payload.updated_by
-
-    _commit_with_validation(db, "Billing config violates constraints")
-    db.refresh(row)
+    data = payload.model_dump()
+    data["account_balance"] = _quantize_2(data.get("account_balance"))
+    data["admin_overhead_surcharge_percent"] = _quantize_2(data.get("admin_overhead_surcharge_percent"))
+    try:
+        row = _svc(db, tenant_id).upsert_billing_config(partner_id, data)
+    except EntityNotFoundError as exc:
+        raise HTTPException(404, exc.detail)
+    except IntegrityError:
+        db.rollback()
+        raise HTTPException(409, "Billing config violates constraints")
     return _to_billing_config(row)
 
 
 @router.patch("/{partner_id}/billing-config", response_model=BillingConfig)
 async def patch_billing_config(
-    partner_id: str,
-    payload: BillingConfigUpdate,
-    db: Session = Depends(get_db),
+    partner_id: str, payload: BillingConfigUpdate,
+    tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db),
 ):
-    _ensure_partner_exists(partner_id, db)
-    row = (
-        db.query(BusinessPartnerBillingConfig)
-        .filter(BusinessPartnerBillingConfig.partner_id == partner_id)
-        .first()
-    )
-    if row is None:
-        row = BusinessPartnerBillingConfig(id=uuid7(), partner_id=partner_id)
-        db.add(row)
-    values = payload.model_dump(exclude_unset=True)
-    for key, value in values.items():
-        if key in {"account_balance", "admin_overhead_surcharge_percent"} and value is not None:
-            value = _quantize_2(value)
-        setattr(row, key, value)
-    _commit_with_validation(db, "Billing config violates constraints")
-    db.refresh(row)
+    data = payload.model_dump(exclude_unset=True)
+    for f in ("account_balance", "admin_overhead_surcharge_percent"):
+        if f in data and data[f] is not None:
+            data[f] = _quantize_2(data[f])
+    try:
+        row = _svc(db, tenant_id).upsert_billing_config(partner_id, data)
+    except EntityNotFoundError as exc:
+        raise HTTPException(404, exc.detail)
+    except IntegrityError:
+        db.rollback()
+        raise HTTPException(409, "Billing config violates constraints")
     return _to_billing_config(row)
 
 
 @router.get("/{partner_id}/cpd-accounts", response_model=list[CpdAccount])
 async def list_cpd_accounts(
     partner_id: str,
-    skip: int = Query(0, ge=0, description="Skip N records"),
-    limit: int = Query(50, ge=1, le=500, description="Max records to return"),
-    db: Session = Depends(get_db),
+    skip: int = Query(0, ge=0), limit: int = Query(50, ge=1, le=500),
+    tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db),
 ):
-    _ensure_partner_exists(partner_id, db)
-    rows = (
-        db.query(BusinessPartnerCpdAccount)
-        .filter(BusinessPartnerCpdAccount.partner_id == partner_id)
-        .order_by(BusinessPartnerCpdAccount.cpd_customer_number.asc())
-        .offset(skip).limit(limit)
-        .all()
-    )
+    try:
+        rows = _svc(db, tenant_id).list_cpd_accounts(partner_id, skip=skip, limit=limit)
+    except EntityNotFoundError as exc:
+        raise HTTPException(404, exc.detail)
     return [_to_cpd_account(r) for r in rows]
 
 
 @router.post("/{partner_id}/cpd-accounts", response_model=CpdAccount, status_code=201)
 async def create_cpd_account(
-    partner_id: str,
-    payload: CpdAccountCreate,
-    db: Session = Depends(get_db),
+    partner_id: str, payload: CpdAccountCreate,
+    tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db),
 ):
-    _ensure_partner_exists(partner_id, db)
-    row = BusinessPartnerCpdAccount(
-        id=uuid7(),
-        partner_id=partner_id,
-        cpd_customer_number=payload.cpd_customer_number,
-        debtor_account=payload.debtor_account,
-        search_term=payload.search_term,
-        name_1=payload.name_1,
-        name_2=payload.name_2,
-        name_3=payload.name_3,
-        street=payload.street,
-        house_number=payload.house_number,
-        country=payload.country,
-        postal_code=payload.postal_code,
-        city=payload.city,
-        po_box=payload.po_box,
-        po_box_city=payload.po_box_city,
-        phone_1=payload.phone_1,
-        phone_2=payload.phone_2,
-        fax=payload.fax,
-        salutation=payload.salutation,
-        brief_salutation=payload.brief_salutation,
-        email=payload.email,
-        website=payload.website,
-        branch_office=payload.branch_office,
-        cost_center=payload.cost_center,
-        invoice_type=payload.invoice_type,
-        collective_invoice=payload.collective_invoice,
-        invoice_form_template=payload.invoice_form_template,
-        sales_representative=payload.sales_representative,
-        area_code=payload.area_code,
-        cash_discount_percent=_quantize_2(payload.cash_discount_percent),
-        cash_discount_days=payload.cash_discount_days,
-        payment_target_days=payload.payment_target_days,
-        created_by=payload.created_by,
-        updated_by=payload.updated_by,
-    )
-    db.add(row)
-    _commit_with_validation(db, "CPD account violates constraints")
-    db.refresh(row)
+    data = payload.model_dump()
+    data["cash_discount_percent"] = _quantize_2(data.get("cash_discount_percent"))
+    try:
+        row = _svc(db, tenant_id).create_cpd_account(partner_id, data)
+    except EntityNotFoundError as exc:
+        raise HTTPException(404, exc.detail)
+    except IntegrityError:
+        db.rollback()
+        raise HTTPException(409, "CPD account violates constraints")
     return _to_cpd_account(row)
 
 
 @router.get("/{partner_id}/cpd-accounts/{account_id}", response_model=CpdAccount)
-async def get_cpd_account(partner_id: str, account_id: str, db: Session = Depends(get_db)):
-    _ensure_partner_exists(partner_id, db)
-    row = (
-        db.query(BusinessPartnerCpdAccount)
-        .filter(
-            BusinessPartnerCpdAccount.id == account_id,
-            BusinessPartnerCpdAccount.partner_id == partner_id,
-        )
-        .first()
-    )
-    if not row:
-        raise HTTPException(status_code=404, detail="CPD account not found")
+async def get_cpd_account(
+    partner_id: str, account_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
+):
+    try:
+        row = _svc(db, tenant_id).get_cpd_account(account_id)
+    except EntityNotFoundError as exc:
+        raise HTTPException(404, exc.detail)
     return _to_cpd_account(row)
 
 
 @router.put("/{partner_id}/cpd-accounts/{account_id}", response_model=CpdAccount)
 async def update_cpd_account(
-    partner_id: str,
-    account_id: str,
-    payload: CpdAccountCreate,
-    db: Session = Depends(get_db),
+    partner_id: str, account_id: str, payload: CpdAccountCreate,
+    tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db),
 ):
-    _ensure_partner_exists(partner_id, db)
-    row = (
-        db.query(BusinessPartnerCpdAccount)
-        .filter(
-            BusinessPartnerCpdAccount.id == account_id,
-            BusinessPartnerCpdAccount.partner_id == partner_id,
-        )
-        .first()
-    )
-    if not row:
-        raise HTTPException(status_code=404, detail="CPD account not found")
-    row.cpd_customer_number = payload.cpd_customer_number
-    row.debtor_account = payload.debtor_account
-    row.search_term = payload.search_term
-    row.name_1 = payload.name_1
-    row.name_2 = payload.name_2
-    row.name_3 = payload.name_3
-    row.street = payload.street
-    row.house_number = payload.house_number
-    row.country = payload.country
-    row.postal_code = payload.postal_code
-    row.city = payload.city
-    row.po_box = payload.po_box
-    row.po_box_city = payload.po_box_city
-    row.phone_1 = payload.phone_1
-    row.phone_2 = payload.phone_2
-    row.fax = payload.fax
-    row.salutation = payload.salutation
-    row.brief_salutation = payload.brief_salutation
-    row.email = payload.email
-    row.website = payload.website
-    row.branch_office = payload.branch_office
-    row.cost_center = payload.cost_center
-    row.invoice_type = payload.invoice_type
-    row.collective_invoice = payload.collective_invoice
-    row.invoice_form_template = payload.invoice_form_template
-    row.sales_representative = payload.sales_representative
-    row.area_code = payload.area_code
-    row.cash_discount_percent = _quantize_2(payload.cash_discount_percent)
-    row.cash_discount_days = payload.cash_discount_days
-    row.payment_target_days = payload.payment_target_days
-    row.updated_by = payload.updated_by
-    _commit_with_validation(db, "CPD account violates constraints")
-    db.refresh(row)
+    data = payload.model_dump()
+    data["cash_discount_percent"] = _quantize_2(data.get("cash_discount_percent"))
+    data.pop("created_by", None)
+    try:
+        row = _svc(db, tenant_id).update_cpd_account(account_id, data)
+    except EntityNotFoundError as exc:
+        raise HTTPException(404, exc.detail)
+    except IntegrityError:
+        db.rollback()
+        raise HTTPException(409, "CPD account violates constraints")
     return _to_cpd_account(row)
 
 
 @router.patch("/{partner_id}/cpd-accounts/{account_id}", response_model=CpdAccount)
 async def patch_cpd_account(
-    partner_id: str,
-    account_id: str,
-    payload: CpdAccountUpdate,
-    db: Session = Depends(get_db),
+    partner_id: str, account_id: str, payload: CpdAccountUpdate,
+    tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db),
 ):
-    _ensure_partner_exists(partner_id, db)
-    row = (
-        db.query(BusinessPartnerCpdAccount)
-        .filter(
-            BusinessPartnerCpdAccount.id == account_id,
-            BusinessPartnerCpdAccount.partner_id == partner_id,
-        )
-        .first()
-    )
-    if not row:
-        raise HTTPException(status_code=404, detail="CPD account not found")
-    values = payload.model_dump(exclude_unset=True)
-    for key, value in values.items():
-        if key == "cash_discount_percent" and value is not None:
-            value = _quantize_2(value)
-        setattr(row, key, value)
-    _commit_with_validation(db, "CPD account violates constraints")
-    db.refresh(row)
+    data = payload.model_dump(exclude_unset=True)
+    if "cash_discount_percent" in data and data["cash_discount_percent"] is not None:
+        data["cash_discount_percent"] = _quantize_2(data["cash_discount_percent"])
+    try:
+        row = _svc(db, tenant_id).update_cpd_account(account_id, data)
+    except EntityNotFoundError as exc:
+        raise HTTPException(404, exc.detail)
+    except IntegrityError:
+        db.rollback()
+        raise HTTPException(409, "CPD account violates constraints")
     return _to_cpd_account(row)
 
 
 @router.delete("/{partner_id}/cpd-accounts/{account_id}", status_code=204)
-async def delete_cpd_account(partner_id: str, account_id: str, db: Session = Depends(get_db)):
-    _ensure_partner_exists(partner_id, db)
-    row = (
-        db.query(BusinessPartnerCpdAccount)
-        .filter(
-            BusinessPartnerCpdAccount.id == account_id,
-            BusinessPartnerCpdAccount.partner_id == partner_id,
-        )
-        .first()
-    )
-    if not row:
-        raise HTTPException(status_code=404, detail="CPD account not found")
-    db.delete(row)
-    db.commit()
+async def delete_cpd_account(
+    partner_id: str, account_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
+):
+    try:
+        _svc(db, tenant_id).delete_cpd_account(account_id)
+    except EntityNotFoundError as exc:
+        raise HTTPException(404, exc.detail)
     return None
 
 
@@ -2537,112 +2116,87 @@ def _to_pricing_rule(row: BusinessPartnerPricingRule) -> PricingRule:
 @router.get("/{partner_id}/pricing-rules", response_model=list[PricingRule])
 async def list_pricing_rules(
     partner_id: str,
-    skip: int = Query(0, ge=0, description="Skip N records"),
-    limit: int = Query(50, ge=1, le=500, description="Max records to return"),
-    db: Session = Depends(get_db),
+    skip: int = Query(0, ge=0), limit: int = Query(50, ge=1, le=500),
+    tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db),
 ):
-    _ensure_partner_exists(partner_id, db)
-    rows = (
-        db.query(BusinessPartnerPricingRule)
-        .filter(BusinessPartnerPricingRule.partner_id == partner_id)
-        .order_by(BusinessPartnerPricingRule.created_at.desc())
-        .offset(skip).limit(limit)
-        .all()
-    )
+    try:
+        rows = _svc(db, tenant_id).list_pricing_rules(partner_id, skip=skip, limit=limit)
+    except EntityNotFoundError as exc:
+        raise HTTPException(404, exc.detail)
     return [_to_pricing_rule(r) for r in rows]
 
 
 @router.post("/{partner_id}/pricing-rules", response_model=PricingRule, status_code=201)
-async def create_pricing_rule(partner_id: str, payload: PricingRuleCreate, db: Session = Depends(get_db)):
-    _ensure_partner_exists(partner_id, db)
-    row = BusinessPartnerPricingRule(
-        id=uuid7(),
-        partner_id=partner_id,
-        direct_account=payload.direct_account,
-        discount_settlement=payload.discount_settlement,
-        self_pickup_discount_percent=_quantize_2(payload.self_pickup_discount_percent),
-        price_determination_mode=payload.price_determination_mode,
-        direct_deduction=payload.direct_deduction,
-        weekly_price_ec_basis=payload.weekly_price_ec_basis,
-        valid_from=payload.valid_from,
-        valid_to=payload.valid_to,
-        notes=payload.notes,
-    )
-    db.add(row)
-    _commit_with_validation(db, "Pricing rule violates constraints")
-    db.refresh(row)
+async def create_pricing_rule(
+    partner_id: str, payload: PricingRuleCreate,
+    tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db),
+):
+    data = payload.model_dump()
+    data["self_pickup_discount_percent"] = _quantize_2(data.get("self_pickup_discount_percent"))
+    try:
+        row = _svc(db, tenant_id).create_pricing_rule(partner_id, data)
+    except EntityNotFoundError as exc:
+        raise HTTPException(404, exc.detail)
+    except IntegrityError:
+        db.rollback()
+        raise HTTPException(409, "Pricing rule violates constraints")
     return _to_pricing_rule(row)
 
 
 @router.get("/{partner_id}/pricing-rules/{rule_id}", response_model=PricingRule)
-async def get_pricing_rule(partner_id: str, rule_id: str, db: Session = Depends(get_db)):
-    _ensure_partner_exists(partner_id, db)
-    row = (
-        db.query(BusinessPartnerPricingRule)
-        .filter(BusinessPartnerPricingRule.id == rule_id, BusinessPartnerPricingRule.partner_id == partner_id)
-        .first()
-    )
-    if not row:
-        raise HTTPException(status_code=404, detail="Pricing rule not found")
+async def get_pricing_rule(
+    partner_id: str, rule_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
+):
+    try:
+        row = _svc(db, tenant_id).get_pricing_rule(rule_id)
+    except EntityNotFoundError as exc:
+        raise HTTPException(404, exc.detail)
     return _to_pricing_rule(row)
 
 
 @router.put("/{partner_id}/pricing-rules/{rule_id}", response_model=PricingRule)
-async def update_pricing_rule(partner_id: str, rule_id: str, payload: PricingRuleCreate, db: Session = Depends(get_db)):
-    _ensure_partner_exists(partner_id, db)
-    row = (
-        db.query(BusinessPartnerPricingRule)
-        .filter(BusinessPartnerPricingRule.id == rule_id, BusinessPartnerPricingRule.partner_id == partner_id)
-        .first()
-    )
-    if not row:
-        raise HTTPException(status_code=404, detail="Pricing rule not found")
-    row.direct_account = payload.direct_account
-    row.discount_settlement = payload.discount_settlement
-    row.self_pickup_discount_percent = _quantize_2(payload.self_pickup_discount_percent)
-    row.price_determination_mode = payload.price_determination_mode
-    row.direct_deduction = payload.direct_deduction
-    row.weekly_price_ec_basis = payload.weekly_price_ec_basis
-    row.valid_from = payload.valid_from
-    row.valid_to = payload.valid_to
-    row.notes = payload.notes
-    _commit_with_validation(db, "Pricing rule violates constraints")
-    db.refresh(row)
+async def update_pricing_rule(
+    partner_id: str, rule_id: str, payload: PricingRuleCreate,
+    tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db),
+):
+    data = payload.model_dump()
+    data["self_pickup_discount_percent"] = _quantize_2(data.get("self_pickup_discount_percent"))
+    try:
+        row = _svc(db, tenant_id).update_pricing_rule(rule_id, data)
+    except EntityNotFoundError as exc:
+        raise HTTPException(404, exc.detail)
+    except IntegrityError:
+        db.rollback()
+        raise HTTPException(409, "Pricing rule violates constraints")
     return _to_pricing_rule(row)
 
 
 @router.patch("/{partner_id}/pricing-rules/{rule_id}", response_model=PricingRule)
-async def patch_pricing_rule(partner_id: str, rule_id: str, payload: PricingRuleUpdate, db: Session = Depends(get_db)):
-    _ensure_partner_exists(partner_id, db)
-    row = (
-        db.query(BusinessPartnerPricingRule)
-        .filter(BusinessPartnerPricingRule.id == rule_id, BusinessPartnerPricingRule.partner_id == partner_id)
-        .first()
-    )
-    if not row:
-        raise HTTPException(status_code=404, detail="Pricing rule not found")
-    values = payload.model_dump(exclude_unset=True)
-    for key, value in values.items():
-        if key == "self_pickup_discount_percent" and value is not None:
-            value = _quantize_2(value)
-        setattr(row, key, value)
-    _commit_with_validation(db, "Pricing rule violates constraints")
-    db.refresh(row)
+async def patch_pricing_rule(
+    partner_id: str, rule_id: str, payload: PricingRuleUpdate,
+    tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db),
+):
+    data = payload.model_dump(exclude_unset=True)
+    if "self_pickup_discount_percent" in data and data["self_pickup_discount_percent"] is not None:
+        data["self_pickup_discount_percent"] = _quantize_2(data["self_pickup_discount_percent"])
+    try:
+        row = _svc(db, tenant_id).update_pricing_rule(rule_id, data)
+    except EntityNotFoundError as exc:
+        raise HTTPException(404, exc.detail)
+    except IntegrityError:
+        db.rollback()
+        raise HTTPException(409, "Pricing rule violates constraints")
     return _to_pricing_rule(row)
 
 
 @router.delete("/{partner_id}/pricing-rules/{rule_id}", status_code=204)
-async def delete_pricing_rule(partner_id: str, rule_id: str, db: Session = Depends(get_db)):
-    _ensure_partner_exists(partner_id, db)
-    row = (
-        db.query(BusinessPartnerPricingRule)
-        .filter(BusinessPartnerPricingRule.id == rule_id, BusinessPartnerPricingRule.partner_id == partner_id)
-        .first()
-    )
-    if not row:
-        raise HTTPException(status_code=404, detail="Pricing rule not found")
-    db.delete(row)
-    db.commit()
+async def delete_pricing_rule(
+    partner_id: str, rule_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
+):
+    try:
+        _svc(db, tenant_id).delete_pricing_rule(rule_id)
+    except EntityNotFoundError as exc:
+        raise HTTPException(404, exc.detail)
     return None
 
 
@@ -2666,81 +2220,69 @@ def _to_interest_setting(row: BusinessPartnerInterestSetting) -> InterestSetting
 @router.get("/{partner_id}/interest-settings", response_model=list[InterestSetting])
 async def list_interest_settings(
     partner_id: str,
-    skip: int = Query(0, ge=0, description="Skip N records"),
-    limit: int = Query(50, ge=1, le=500, description="Max records to return"),
-    db: Session = Depends(get_db),
+    skip: int = Query(0, ge=0), limit: int = Query(50, ge=1, le=500),
+    tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db),
 ):
-    _ensure_partner_exists(partner_id, db)
-    rows = (
-        db.query(BusinessPartnerInterestSetting)
-        .filter(BusinessPartnerInterestSetting.partner_id == partner_id)
-        .order_by(BusinessPartnerInterestSetting.created_at.desc())
-        .offset(skip).limit(limit)
-        .all()
-    )
+    try:
+        rows = _svc(db, tenant_id).list_interest_settings(partner_id, skip=skip, limit=limit)
+    except EntityNotFoundError as exc:
+        raise HTTPException(404, exc.detail)
     return [_to_interest_setting(r) for r in rows]
 
 
 @router.post("/{partner_id}/interest-settings", response_model=InterestSetting, status_code=201)
-async def create_interest_setting(partner_id: str, payload: InterestSettingCreate, db: Session = Depends(get_db)):
-    _ensure_partner_exists(partner_id, db)
-    row = BusinessPartnerInterestSetting(id=uuid7(), partner_id=partner_id, **payload.model_dump())
-    db.add(row)
-    _commit_with_validation(db, "Interest setting violates constraints")
-    db.refresh(row)
+async def create_interest_setting(
+    partner_id: str, payload: InterestSettingCreate,
+    tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db),
+):
+    try:
+        row = _svc(db, tenant_id).create_interest_setting(partner_id, payload.model_dump())
+    except EntityNotFoundError as exc:
+        raise HTTPException(404, exc.detail)
+    except IntegrityError:
+        db.rollback()
+        raise HTTPException(409, "Interest setting violates constraints")
     return _to_interest_setting(row)
 
 
 @router.put("/{partner_id}/interest-settings/{setting_id}", response_model=InterestSetting)
 async def update_interest_setting(
-    partner_id: str, setting_id: str, payload: InterestSettingCreate, db: Session = Depends(get_db)
+    partner_id: str, setting_id: str, payload: InterestSettingCreate,
+    tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db),
 ):
-    _ensure_partner_exists(partner_id, db)
-    row = (
-        db.query(BusinessPartnerInterestSetting)
-        .filter(BusinessPartnerInterestSetting.id == setting_id, BusinessPartnerInterestSetting.partner_id == partner_id)
-        .first()
-    )
-    if not row:
-        raise HTTPException(status_code=404, detail="Interest setting not found")
-    for key, value in payload.model_dump().items():
-        setattr(row, key, value)
-    _commit_with_validation(db, "Interest setting violates constraints")
-    db.refresh(row)
+    try:
+        row = _svc(db, tenant_id).update_interest_setting(setting_id, payload.model_dump())
+    except EntityNotFoundError as exc:
+        raise HTTPException(404, exc.detail)
+    except IntegrityError:
+        db.rollback()
+        raise HTTPException(409, "Interest setting violates constraints")
     return _to_interest_setting(row)
 
 
 @router.patch("/{partner_id}/interest-settings/{setting_id}", response_model=InterestSetting)
 async def patch_interest_setting(
-    partner_id: str, setting_id: str, payload: InterestSettingUpdate, db: Session = Depends(get_db)
+    partner_id: str, setting_id: str, payload: InterestSettingUpdate,
+    tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db),
 ):
-    _ensure_partner_exists(partner_id, db)
-    row = (
-        db.query(BusinessPartnerInterestSetting)
-        .filter(BusinessPartnerInterestSetting.id == setting_id, BusinessPartnerInterestSetting.partner_id == partner_id)
-        .first()
-    )
-    if not row:
-        raise HTTPException(status_code=404, detail="Interest setting not found")
-    for key, value in payload.model_dump(exclude_unset=True).items():
-        setattr(row, key, value)
-    _commit_with_validation(db, "Interest setting violates constraints")
-    db.refresh(row)
+    try:
+        row = _svc(db, tenant_id).update_interest_setting(setting_id, payload.model_dump(exclude_unset=True))
+    except EntityNotFoundError as exc:
+        raise HTTPException(404, exc.detail)
+    except IntegrityError:
+        db.rollback()
+        raise HTTPException(409, "Interest setting violates constraints")
     return _to_interest_setting(row)
 
 
 @router.delete("/{partner_id}/interest-settings/{setting_id}", status_code=204)
-async def delete_interest_setting(partner_id: str, setting_id: str, db: Session = Depends(get_db)):
-    _ensure_partner_exists(partner_id, db)
-    row = (
-        db.query(BusinessPartnerInterestSetting)
-        .filter(BusinessPartnerInterestSetting.id == setting_id, BusinessPartnerInterestSetting.partner_id == partner_id)
-        .first()
-    )
-    if not row:
-        raise HTTPException(status_code=404, detail="Interest setting not found")
-    db.delete(row)
-    db.commit()
+async def delete_interest_setting(
+    partner_id: str, setting_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
+):
+    try:
+        _svc(db, tenant_id).delete_interest_setting(setting_id)
+    except EntityNotFoundError as exc:
+        raise HTTPException(404, exc.detail)
     return None
 
 
@@ -2763,81 +2305,69 @@ def _to_dispatch_medium(row: BusinessPartnerDispatchMedium) -> DispatchMedium:
 @router.get("/{partner_id}/dispatch-media", response_model=list[DispatchMedium])
 async def list_dispatch_media(
     partner_id: str,
-    skip: int = Query(0, ge=0, description="Skip N records"),
-    limit: int = Query(50, ge=1, le=500, description="Max records to return"),
-    db: Session = Depends(get_db),
+    skip: int = Query(0, ge=0), limit: int = Query(50, ge=1, le=500),
+    tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db),
 ):
-    _ensure_partner_exists(partner_id, db)
-    rows = (
-        db.query(BusinessPartnerDispatchMedium)
-        .filter(BusinessPartnerDispatchMedium.partner_id == partner_id)
-        .order_by(BusinessPartnerDispatchMedium.document_type.asc(), BusinessPartnerDispatchMedium.dispatch_channel.asc())
-        .offset(skip).limit(limit)
-        .all()
-    )
+    try:
+        rows = _svc(db, tenant_id).list_dispatch_media(partner_id, skip=skip, limit=limit)
+    except EntityNotFoundError as exc:
+        raise HTTPException(404, exc.detail)
     return [_to_dispatch_medium(r) for r in rows]
 
 
 @router.post("/{partner_id}/dispatch-media", response_model=DispatchMedium, status_code=201)
-async def create_dispatch_medium(partner_id: str, payload: DispatchMediumCreate, db: Session = Depends(get_db)):
-    _ensure_partner_exists(partner_id, db)
-    row = BusinessPartnerDispatchMedium(id=uuid7(), partner_id=partner_id, **payload.model_dump())
-    db.add(row)
-    _commit_with_validation(db, "Dispatch medium violates constraints or duplicate key")
-    db.refresh(row)
+async def create_dispatch_medium(
+    partner_id: str, payload: DispatchMediumCreate,
+    tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db),
+):
+    try:
+        row = _svc(db, tenant_id).create_dispatch_medium(partner_id, payload.model_dump())
+    except EntityNotFoundError as exc:
+        raise HTTPException(404, exc.detail)
+    except IntegrityError:
+        db.rollback()
+        raise HTTPException(409, "Dispatch medium violates constraints or duplicate key")
     return _to_dispatch_medium(row)
 
 
 @router.put("/{partner_id}/dispatch-media/{medium_id}", response_model=DispatchMedium)
 async def update_dispatch_medium(
-    partner_id: str, medium_id: str, payload: DispatchMediumCreate, db: Session = Depends(get_db)
+    partner_id: str, medium_id: str, payload: DispatchMediumCreate,
+    tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db),
 ):
-    _ensure_partner_exists(partner_id, db)
-    row = (
-        db.query(BusinessPartnerDispatchMedium)
-        .filter(BusinessPartnerDispatchMedium.id == medium_id, BusinessPartnerDispatchMedium.partner_id == partner_id)
-        .first()
-    )
-    if not row:
-        raise HTTPException(status_code=404, detail="Dispatch medium not found")
-    for key, value in payload.model_dump().items():
-        setattr(row, key, value)
-    _commit_with_validation(db, "Dispatch medium violates constraints or duplicate key")
-    db.refresh(row)
+    try:
+        row = _svc(db, tenant_id).update_dispatch_medium(medium_id, payload.model_dump())
+    except EntityNotFoundError as exc:
+        raise HTTPException(404, exc.detail)
+    except IntegrityError:
+        db.rollback()
+        raise HTTPException(409, "Dispatch medium violates constraints or duplicate key")
     return _to_dispatch_medium(row)
 
 
 @router.patch("/{partner_id}/dispatch-media/{medium_id}", response_model=DispatchMedium)
 async def patch_dispatch_medium(
-    partner_id: str, medium_id: str, payload: DispatchMediumUpdate, db: Session = Depends(get_db)
+    partner_id: str, medium_id: str, payload: DispatchMediumUpdate,
+    tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db),
 ):
-    _ensure_partner_exists(partner_id, db)
-    row = (
-        db.query(BusinessPartnerDispatchMedium)
-        .filter(BusinessPartnerDispatchMedium.id == medium_id, BusinessPartnerDispatchMedium.partner_id == partner_id)
-        .first()
-    )
-    if not row:
-        raise HTTPException(status_code=404, detail="Dispatch medium not found")
-    for key, value in payload.model_dump(exclude_unset=True).items():
-        setattr(row, key, value)
-    _commit_with_validation(db, "Dispatch medium violates constraints or duplicate key")
-    db.refresh(row)
+    try:
+        row = _svc(db, tenant_id).update_dispatch_medium(medium_id, payload.model_dump(exclude_unset=True))
+    except EntityNotFoundError as exc:
+        raise HTTPException(404, exc.detail)
+    except IntegrityError:
+        db.rollback()
+        raise HTTPException(409, "Dispatch medium violates constraints or duplicate key")
     return _to_dispatch_medium(row)
 
 
 @router.delete("/{partner_id}/dispatch-media/{medium_id}", status_code=204)
-async def delete_dispatch_medium(partner_id: str, medium_id: str, db: Session = Depends(get_db)):
-    _ensure_partner_exists(partner_id, db)
-    row = (
-        db.query(BusinessPartnerDispatchMedium)
-        .filter(BusinessPartnerDispatchMedium.id == medium_id, BusinessPartnerDispatchMedium.partner_id == partner_id)
-        .first()
-    )
-    if not row:
-        raise HTTPException(status_code=404, detail="Dispatch medium not found")
-    db.delete(row)
-    db.commit()
+async def delete_dispatch_medium(
+    partner_id: str, medium_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
+):
+    try:
+        _svc(db, tenant_id).delete_dispatch_medium(medium_id)
+    except EntityNotFoundError as exc:
+        raise HTTPException(404, exc.detail)
     return None
 
 
@@ -2862,70 +2392,54 @@ def _to_coop(row: BusinessPartnerCooperativeMembership) -> CooperativeMembership
 @router.get("/{partner_id}/cooperative-memberships", response_model=list[CooperativeMembership])
 async def list_cooperative_memberships(
     partner_id: str,
-    skip: int = Query(0, ge=0, description="Skip N records"),
-    limit: int = Query(50, ge=1, le=500, description="Max records to return"),
-    db: Session = Depends(get_db),
+    skip: int = Query(0, ge=0), limit: int = Query(50, ge=1, le=500),
+    tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db),
 ):
-    _ensure_partner_exists(partner_id, db)
-    rows = (
-        db.query(BusinessPartnerCooperativeMembership)
-        .filter(BusinessPartnerCooperativeMembership.partner_id == partner_id)
-        .order_by(BusinessPartnerCooperativeMembership.created_at.desc())
-        .offset(skip).limit(limit)
-        .all()
-    )
+    try:
+        rows = _svc(db, tenant_id).list_cooperative_memberships(partner_id, skip=skip, limit=limit)
+    except EntityNotFoundError as exc:
+        raise HTTPException(404, exc.detail)
     return [_to_coop(r) for r in rows]
 
 
 @router.post("/{partner_id}/cooperative-memberships", response_model=CooperativeMembership, status_code=201)
 async def create_cooperative_membership(
-    partner_id: str, payload: CooperativeMembershipCreate, db: Session = Depends(get_db)
+    partner_id: str, payload: CooperativeMembershipCreate,
+    tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db),
 ):
-    _ensure_partner_exists(partner_id, db)
-    row = BusinessPartnerCooperativeMembership(id=uuid7(), partner_id=partner_id, **payload.model_dump())
-    db.add(row)
-    _commit_with_validation(db, "Cooperative membership violates constraints")
-    db.refresh(row)
+    try:
+        row = _svc(db, tenant_id).create_cooperative_membership(partner_id, payload.model_dump())
+    except EntityNotFoundError as exc:
+        raise HTTPException(404, exc.detail)
+    except IntegrityError:
+        db.rollback()
+        raise HTTPException(409, "Cooperative membership violates constraints")
     return _to_coop(row)
 
 
 @router.patch("/{partner_id}/cooperative-memberships/{membership_id}", response_model=CooperativeMembership)
 async def patch_cooperative_membership(
-    partner_id: str, membership_id: str, payload: CooperativeMembershipUpdate, db: Session = Depends(get_db)
+    partner_id: str, membership_id: str, payload: CooperativeMembershipUpdate,
+    tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db),
 ):
-    _ensure_partner_exists(partner_id, db)
-    row = (
-        db.query(BusinessPartnerCooperativeMembership)
-        .filter(
-            BusinessPartnerCooperativeMembership.id == membership_id,
-            BusinessPartnerCooperativeMembership.partner_id == partner_id,
-        )
-        .first()
-    )
-    if not row:
-        raise HTTPException(status_code=404, detail="Cooperative membership not found")
-    for key, value in payload.model_dump(exclude_unset=True).items():
-        setattr(row, key, value)
-    _commit_with_validation(db, "Cooperative membership violates constraints")
-    db.refresh(row)
+    try:
+        row = _svc(db, tenant_id).patch_cooperative_membership(membership_id, payload.model_dump(exclude_unset=True))
+    except EntityNotFoundError as exc:
+        raise HTTPException(404, exc.detail)
+    except IntegrityError:
+        db.rollback()
+        raise HTTPException(409, "Cooperative membership violates constraints")
     return _to_coop(row)
 
 
 @router.delete("/{partner_id}/cooperative-memberships/{membership_id}", status_code=204)
-async def delete_cooperative_membership(partner_id: str, membership_id: str, db: Session = Depends(get_db)):
-    _ensure_partner_exists(partner_id, db)
-    row = (
-        db.query(BusinessPartnerCooperativeMembership)
-        .filter(
-            BusinessPartnerCooperativeMembership.id == membership_id,
-            BusinessPartnerCooperativeMembership.partner_id == partner_id,
-        )
-        .first()
-    )
-    if not row:
-        raise HTTPException(status_code=404, detail="Cooperative membership not found")
-    db.delete(row)
-    db.commit()
+async def delete_cooperative_membership(
+    partner_id: str, membership_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
+):
+    try:
+        _svc(db, tenant_id).delete_cooperative_membership(membership_id)
+    except EntityNotFoundError as exc:
+        raise HTTPException(404, exc.detail)
     return None
 
 
@@ -2945,68 +2459,54 @@ def _to_email_distribution(row: BusinessPartnerEmailDistribution) -> EmailDistri
 @router.get("/{partner_id}/email-distributions", response_model=list[EmailDistribution])
 async def list_email_distributions(
     partner_id: str,
-    skip: int = Query(0, ge=0, description="Skip N records"),
-    limit: int = Query(50, ge=1, le=500, description="Max records to return"),
-    db: Session = Depends(get_db),
+    skip: int = Query(0, ge=0), limit: int = Query(50, ge=1, le=500),
+    tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db),
 ):
-    _ensure_partner_exists(partner_id, db)
-    rows = (
-        db.query(BusinessPartnerEmailDistribution)
-        .filter(BusinessPartnerEmailDistribution.partner_id == partner_id)
-        .order_by(BusinessPartnerEmailDistribution.distribution_name.asc(), BusinessPartnerEmailDistribution.email.asc())
-        .offset(skip).limit(limit)
-        .all()
-    )
+    try:
+        rows = _svc(db, tenant_id).list_email_distributions(partner_id, skip=skip, limit=limit)
+    except EntityNotFoundError as exc:
+        raise HTTPException(404, exc.detail)
     return [_to_email_distribution(r) for r in rows]
 
 
 @router.post("/{partner_id}/email-distributions", response_model=EmailDistribution, status_code=201)
-async def create_email_distribution(partner_id: str, payload: EmailDistributionCreate, db: Session = Depends(get_db)):
-    _ensure_partner_exists(partner_id, db)
-    row = BusinessPartnerEmailDistribution(id=uuid7(), partner_id=partner_id, **payload.model_dump())
-    db.add(row)
-    _commit_with_validation(db, "Email distribution violates constraints or duplicate key")
-    db.refresh(row)
+async def create_email_distribution(
+    partner_id: str, payload: EmailDistributionCreate,
+    tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db),
+):
+    try:
+        row = _svc(db, tenant_id).create_email_distribution(partner_id, payload.model_dump())
+    except EntityNotFoundError as exc:
+        raise HTTPException(404, exc.detail)
+    except IntegrityError:
+        db.rollback()
+        raise HTTPException(409, "Email distribution violates constraints or duplicate key")
     return _to_email_distribution(row)
 
 
 @router.patch("/{partner_id}/email-distributions/{distribution_id}", response_model=EmailDistribution)
 async def patch_email_distribution(
-    partner_id: str, distribution_id: str, payload: EmailDistributionUpdate, db: Session = Depends(get_db)
+    partner_id: str, distribution_id: str, payload: EmailDistributionUpdate,
+    tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db),
 ):
-    _ensure_partner_exists(partner_id, db)
-    row = (
-        db.query(BusinessPartnerEmailDistribution)
-        .filter(
-            BusinessPartnerEmailDistribution.id == distribution_id,
-            BusinessPartnerEmailDistribution.partner_id == partner_id,
-        )
-        .first()
-    )
-    if not row:
-        raise HTTPException(status_code=404, detail="Email distribution not found")
-    for key, value in payload.model_dump(exclude_unset=True).items():
-        setattr(row, key, value)
-    _commit_with_validation(db, "Email distribution violates constraints or duplicate key")
-    db.refresh(row)
+    try:
+        row = _svc(db, tenant_id).patch_email_distribution(distribution_id, payload.model_dump(exclude_unset=True))
+    except EntityNotFoundError as exc:
+        raise HTTPException(404, exc.detail)
+    except IntegrityError:
+        db.rollback()
+        raise HTTPException(409, "Email distribution violates constraints or duplicate key")
     return _to_email_distribution(row)
 
 
 @router.delete("/{partner_id}/email-distributions/{distribution_id}", status_code=204)
-async def delete_email_distribution(partner_id: str, distribution_id: str, db: Session = Depends(get_db)):
-    _ensure_partner_exists(partner_id, db)
-    row = (
-        db.query(BusinessPartnerEmailDistribution)
-        .filter(
-            BusinessPartnerEmailDistribution.id == distribution_id,
-            BusinessPartnerEmailDistribution.partner_id == partner_id,
-        )
-        .first()
-    )
-    if not row:
-        raise HTTPException(status_code=404, detail="Email distribution not found")
-    db.delete(row)
-    db.commit()
+async def delete_email_distribution(
+    partner_id: str, distribution_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
+):
+    try:
+        _svc(db, tenant_id).delete_email_distribution(distribution_id)
+    except EntityNotFoundError as exc:
+        raise HTTPException(404, exc.detail)
     return None
 
 
@@ -3147,38 +2647,43 @@ def _to_profile(row: BusinessPartnerProfile) -> Profile:
 
 
 @router.get("/{partner_id}/profile", response_model=Profile)
-async def get_profile(partner_id: str, db: Session = Depends(get_db)):
-    _ensure_partner_exists(partner_id, db)
-    row = db.query(BusinessPartnerProfile).filter(BusinessPartnerProfile.partner_id == partner_id).first()
-    if not row:
-        raise HTTPException(status_code=404, detail="Profile not found")
+async def get_profile(
+    partner_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
+):
+    try:
+        row = _svc(db, tenant_id).get_profile(partner_id)
+    except EntityNotFoundError as exc:
+        raise HTTPException(404, exc.detail)
     return _to_profile(row)
 
 
 @router.put("/{partner_id}/profile", response_model=Profile)
-async def put_profile(partner_id: str, payload: ProfileCreate, db: Session = Depends(get_db)):
-    _ensure_partner_exists(partner_id, db)
-    row = db.query(BusinessPartnerProfile).filter(BusinessPartnerProfile.partner_id == partner_id).first()
-    if not row:
-        row = BusinessPartnerProfile(id=uuid7(), partner_id=partner_id)
-        db.add(row)
-    for key, value in payload.model_dump().items():
-        setattr(row, key, value)
-    _commit_with_validation(db, "Profile violates constraints")
-    db.refresh(row)
+async def put_profile(
+    partner_id: str, payload: ProfileCreate,
+    tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db),
+):
+    try:
+        row = _svc(db, tenant_id).upsert_profile(partner_id, payload.model_dump())
+    except EntityNotFoundError as exc:
+        raise HTTPException(404, exc.detail)
+    except IntegrityError:
+        db.rollback()
+        raise HTTPException(409, "Profile violates constraints")
     return _to_profile(row)
 
 
 @router.patch("/{partner_id}/profile", response_model=Profile)
-async def patch_profile(partner_id: str, payload: ProfileUpdate, db: Session = Depends(get_db)):
-    _ensure_partner_exists(partner_id, db)
-    row = db.query(BusinessPartnerProfile).filter(BusinessPartnerProfile.partner_id == partner_id).first()
-    if not row:
-        raise HTTPException(status_code=404, detail="Profile not found")
-    for key, value in payload.model_dump(exclude_unset=True).items():
-        setattr(row, key, value)
-    _commit_with_validation(db, "Profile violates constraints")
-    db.refresh(row)
+async def patch_profile(
+    partner_id: str, payload: ProfileUpdate,
+    tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db),
+):
+    try:
+        row = _svc(db, tenant_id).patch_profile(partner_id, payload.model_dump(exclude_unset=True))
+    except EntityNotFoundError as exc:
+        raise HTTPException(404, exc.detail)
+    except IntegrityError:
+        db.rollback()
+        raise HTTPException(409, "Profile violates constraints")
     return _to_profile(row)
 
 
@@ -3199,38 +2704,41 @@ def _to_interface_profile(row: BusinessPartnerInterfaceProfile) -> InterfaceProf
 
 
 @router.get("/{partner_id}/interface-profile", response_model=InterfaceProfile)
-async def get_interface_profile(partner_id: str, db: Session = Depends(get_db)):
-    _ensure_partner_exists(partner_id, db)
-    row = db.query(BusinessPartnerInterfaceProfile).filter(BusinessPartnerInterfaceProfile.partner_id == partner_id).first()
-    if not row:
-        raise HTTPException(status_code=404, detail="Interface profile not found")
+async def get_interface_profile(
+    partner_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
+):
+    try:
+        row = _svc(db, tenant_id).get_interface_profile(partner_id)
+    except EntityNotFoundError as exc:
+        raise HTTPException(404, exc.detail)
     return _to_interface_profile(row)
 
 
 @router.put("/{partner_id}/interface-profile", response_model=InterfaceProfile)
-async def put_interface_profile(partner_id: str, payload: InterfaceProfileCreate, db: Session = Depends(get_db)):
-    _ensure_partner_exists(partner_id, db)
-    row = db.query(BusinessPartnerInterfaceProfile).filter(BusinessPartnerInterfaceProfile.partner_id == partner_id).first()
-    if not row:
-        row = BusinessPartnerInterfaceProfile(id=uuid7(), partner_id=partner_id)
-        db.add(row)
-    for key, value in payload.model_dump().items():
-        setattr(row, key, value)
-    _commit_with_validation(db, "Interface profile violates constraints")
-    db.refresh(row)
+async def put_interface_profile(
+    partner_id: str, payload: InterfaceProfileCreate,
+    tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db),
+):
+    try:
+        row = _svc(db, tenant_id).upsert_interface_profile(partner_id, payload.model_dump())
+    except EntityNotFoundError as exc:
+        raise HTTPException(404, exc.detail)
+    except IntegrityError:
+        db.rollback()
+        raise HTTPException(409, "Interface profile violates constraints")
     return _to_interface_profile(row)
 
 
 @router.patch("/{partner_id}/interface-profile", response_model=InterfaceProfile)
 async def patch_interface_profile(
-    partner_id: str, payload: InterfaceProfileUpdate, db: Session = Depends(get_db)
+    partner_id: str, payload: InterfaceProfileUpdate,
+    tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db),
 ):
-    _ensure_partner_exists(partner_id, db)
-    row = db.query(BusinessPartnerInterfaceProfile).filter(BusinessPartnerInterfaceProfile.partner_id == partner_id).first()
-    if not row:
-        raise HTTPException(status_code=404, detail="Interface profile not found")
-    for key, value in payload.model_dump(exclude_unset=True).items():
-        setattr(row, key, value)
-    _commit_with_validation(db, "Interface profile violates constraints")
-    db.refresh(row)
+    try:
+        row = _svc(db, tenant_id).patch_interface_profile(partner_id, payload.model_dump(exclude_unset=True))
+    except EntityNotFoundError as exc:
+        raise HTTPException(404, exc.detail)
+    except IntegrityError:
+        db.rollback()
+        raise HTTPException(409, "Interface profile violates constraints")
     return _to_interface_profile(row)
