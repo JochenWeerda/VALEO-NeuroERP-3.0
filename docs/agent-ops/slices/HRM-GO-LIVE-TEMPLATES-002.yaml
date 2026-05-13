@@ -1,11 +1,11 @@
 id: HRM-GO-LIVE-TEMPLATES-002
 title: HRM-Go-live-Formulare auf realen Funktionsumfang begrenzen
 owner: Codex
-status: reserviert
+status: abgeschlossen
 created: 2026-05-13
 goal: >
   HRM-Go-live-Formulare auf den tatsaechlichen VALEO-Funktionsumfang begrenzen
-  und hypothetische, nicht vorgesehene KI-/Ueberwachungsbegriffe aus
+  und hypothetische, nicht vorgesehene KI-/Auswertungsbegriffe aus
   Mitarbeiter- und Freigabetexten entfernen.
 file_ownership:
   - docs/agent-ops/active-workboard.md
@@ -17,11 +17,21 @@ file_ownership:
   - app/api/v1/endpoints/personal.py
   - tests/test_personal_hrm_gap_closure_api.py
 acceptance_criteria:
-  - Formulare nennen keine nicht vorgesehenen Funktionen wie Emotionserkennung, allgemeines Scoring oder automatisches Ranking.
+  - Formulare nennen keine nicht vorgesehenen Funktionen.
   - Mitarbeiterinformation beschreibt nur real vorgesehene HRM-Funktionen.
   - KI-Freigabe ist als optionale Assistenzfunktions-Pruefung formuliert.
   - API-/Doku-Vertraege sind konsistent.
 checks:
-  - offen
+  - pytest tests/test_personal_hrm_gap_closure_api.py tests/test_personal_hrm_readiness_api.py tests/test_personal_hrm_operations_gates_api.py -q --no-cov
+  - python -m py_compile app/api/v1/endpoints/personal.py tests/test_personal_hrm_gap_closure_api.py tests/test_personal_hrm_readiness_api.py tests/test_personal_hrm_operations_gates_api.py
+  - rg -n "Emotion|Scoring|Ranking|Score|Profiling|verdeckte|heimliche|Leistungsueberwachung|Verhaltens|KI-/Analytics|Analytics-/KI|Reports und Scores" docs/hrm-go-live-templates docs/project-context/hrm-germany-operating-system-gap-plan-2026-05-13.md docs/project-context/open-gaps-and-known-issues.md app/api/v1/endpoints/personal.py tests/test_personal_hrm_gap_closure_api.py tests/test_personal_hrm_operations_gates_api.py tests/test_personal_hrm_readiness_api.py
+  - python scripts/agent_workboard_supervisor.py validate
+  - node scripts/docs-governance-check.cjs
+  - git diff --check
+done:
+  - Formulare, HRM-Plan, Open-Gaps-Doku und Personal-API auf realen HRM-Funktionsumfang gezogen.
+  - Mitarbeitertexte nennen nur Personalverwaltung, Arbeitszeit, Abwesenheiten, Dokumente, Payroll-Vorbereitung, freigegebenes HR-Reporting, Compliance und optional konkret freigegebene KI-Assistenz.
+  - KI-Freigabe als konkrete Assistenzfunktions-Pruefung formuliert.
+  - Hypothetische, nicht vorgesehene Sonderfunktionen aus Formularen und API-Vertraegen entfernt.
 risks:
   - Konkrete spaetere KI- oder Analytics-Erweiterungen brauchen erneut gesonderte Datenschutz-, Legal- und Betriebsratspruefung.

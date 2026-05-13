@@ -62,7 +62,7 @@ def test_hrm_operations_gates_endpoint_covers_betriebsrat_dsfa_ai_and_retention(
     works_council = _gate(data, "works-council-dsfa")
     assert "Betriebsvereinbarung" in " ".join(works_council["evidenceRequired"])
     assert "DSFA" in " ".join(works_council["evidenceRequired"])
-    assert "KI trifft keine automatische Personalentscheidung" in works_council["acceptanceCriteria"]
+    assert "KI-Assistenz erstellt nur Vorschlaege oder Zusammenfassungen mit menschlicher Freigabe" in works_council["acceptanceCriteria"]
 
     documents = _gate(data, "documents-esign")
     assert "LibreOffice-Rendering" in documents["title"]
@@ -72,4 +72,3 @@ def test_hrm_operations_gates_endpoint_covers_betriebsrat_dsfa_ai_and_retention(
     retention = _gate(data, "retention-legal")
     assert "Aufbewahrungsfristen" in " ".join(retention["evidenceRequired"])
     assert "Zweckbindung" in retention["professionalPractice"]
-

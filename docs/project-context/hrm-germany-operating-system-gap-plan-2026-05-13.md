@@ -37,8 +37,8 @@ Mindestanker, gegen die Umsetzungsslices pruefbar bleiben muessen.
 | eAU | SGB IV Paragraph 109 | Krankmeldung, eAU-Abfrage, Krankenkassen-Rueckmeldung, Fristen und Fehlerstatus brauchen einen eigenen Prozess. |
 | Payroll | GoBD, Entgeltabrechnungs- und SV-Meldeprozesse | VALEO bereitet Payroll vor; das SV-Meldeportal ersetzt kein Entgeltabrechnungsprogramm. |
 | Nachweise | Nachweisgesetz 2025 Textform-Ausbau | Digitale Nachweise sind weiter an Ausnahmen, Schriftformwuensche, Empfang und Archivierung gebunden. |
-| KI im HR | EU AI Act, insbesondere Beschaeftigung/Personalmanagement als Hochrisikobereich | KI darf assistieren, aber nicht unkontrolliert entscheiden; Recruiting-/Bewertungs-KI braucht Governance. |
-| Betriebsratsfaehigkeit | BetrVG-Mitbestimmung und Transparenz | Keine verdeckte Leistungsueberwachung; Auswertungen muessen transparent und begrenzt sein. |
+| KI im HR | EU AI Act, insbesondere Beschaeftigung/Personalmanagement als Hochrisikobereich | Nur konkret vorgesehene Assistenzfunktionen duerfen nach Pruefung genutzt werden; Personalentscheidungen bleiben menschlich verantwortet. |
+| Betriebsratsfaehigkeit | BetrVG-Mitbestimmung und Transparenz | Reporting und Auswertungen muessen zweckgebunden, transparent und begrenzt sein; es ist keine Funktion fuer Mitarbeitendenueberwachung oder automatische Leistungsbewertung vorgesehen. |
 
 ## Mindest-Checkliste
 
@@ -70,8 +70,8 @@ Mindestanker, gegen die Umsetzungsslices pruefbar bleiben muessen.
 | Dokumente und Verträge | Personalakte und HRM-Betriebssystemvertrag fuehren Vorlagen, Archiv-Ref und Signaturstatus. | Kein fachlicher Repo-Gap; LibreOffice-Rendering und E-Signatur-Anbieter bleiben external gate. | Vertrags- und Nachweisprozess mit Vorlagenversion, Empfang, Signaturstatus und Archivierung. |
 | ESS/MSS | Self-Service-Funktionen sind ueber Akte, Zeit, Work-Plan und Time-Cockpit vertraglich geschlossen. | Kein fachlicher Repo-Gap; SSO-Rollen und Betriebsvereinbarung bleiben external gate. | Mitarbeiter koennen Daten, Dokumente, Zeiten, Krankmeldungen und Bescheinigungen steuern; Manager sehen Teamkalender, Freigaben und Headcount. |
 | Recruiting/Performance | Training, Onboarding, Qualifikationen und HRM-Operating-System-Contract decken Retention, Talentpool und Human-in-the-loop ab. | Kein fachlicher Repo-Gap; Karriereseite und Interviewkommunikation bleiben external gate. | Getrennter Bewerberkontext mit Loeschfristen, Interviewplanung, Entwicklung und Skill-Matrix. |
-| People Analytics | Readiness und Operating-System-Contract erzwingen Aggregationsschwellen, DSFA und Betriebsratsfaehigkeit. | Kein fachlicher Repo-Gap; DSFA- und Betriebsratsfreigaben bleiben external gate. | Dashboards fuer Headcount, Fluktuation, Krankenstand, Resturlaub, Ueberstunden, Kosten und Weiterbildung ohne heimliche Leistungsueberwachung. |
-| KI | HR-spezifische AI-Governance ist als Contract mit Human-Gate, Hochrisiko-Klassifizierung und Verbot Emotionserkennung geschlossen. | Kein fachlicher Repo-Gap; konkrete AI-Act-Konformitaetspruefung je Tool bleibt external gate. | Assistive KI nur mit Human-Gate, Protokollierung, Transparenz und Hochrisiko-Pruefung. |
+| People Analytics | Readiness und Operating-System-Contract erzwingen Aggregationsschwellen, DSFA und Betriebsratsfaehigkeit. | Kein fachlicher Repo-Gap; DSFA- und Betriebsratsfreigaben bleiben external gate. | Dashboards fuer Headcount, Fluktuation, Krankenstand, Resturlaub, Ueberstunden, Kosten und Weiterbildung im dokumentierten Zweck. |
+| KI | HR-spezifische AI-Governance ist als Contract fuer konkret freigegebene Assistenzfunktionen mit Human-Gate geschlossen. | Kein fachlicher Repo-Gap; konkrete Konformitaetspruefung je Tool bleibt external gate. | Assistive KI nur fuer vorgesehene Zwecke, mit Human-Gate, Protokollierung und Transparenz. |
 | Office-Connectoren | Kalendercontract und Operating-System-Contract decken Microsoft 365, Google Workspace, LibreOffice, DMS und E-Signatur ab. | Kein fachlicher Repo-Gap; produktive Tenant-Secrets und AVV/DPA bleiben external gate. | Connectoren mit SSO, OAuth-Scopes, Busy-only Datenschutz, Dokumentvorlagen und Audit. |
 
 ## Zielarchitektur
@@ -111,12 +111,11 @@ Erlaubt als assistive Funktionen:
 - HR-Chatbot mit Quellenangabe
 - Lernempfehlungen und Skill-Matching als Vorschlag
 
-Nicht erlaubt:
+Nicht vorgesehen und daher ohne neue Pruefung nicht nutzbar:
 
 - automatische Ablehnung von Bewerbungen ohne menschliche Aufsicht
 - Blackbox-Bewertung von Mitarbeitenden
-- Emotionserkennung am Arbeitsplatz
-- verdeckte Leistungsueberwachung
+- nicht freigegebene HR-Auswertungen ausserhalb des dokumentierten Zwecks
 
 Pflichtkontrollen fuer Hochrisiko-Kontexte:
 
@@ -219,7 +218,7 @@ Stand 2026-05-13:
 | Office/SSO | IT/Ops | Tenant, OAuth-Scopes, MFA/SSO-Rollen, Busy-only Kalenderdatenschutz und Connector-Probe. |
 | LibreOffice/DMS/E-Signatur | HR/Ops/Legal | Vorlagenversion, DMS-Ablage, Signaturstatus, Archiv-Ref und AVV/DPA. |
 | Privacy/Vendor | Datenschutz/Ops | AVV/DPA, Hostingort, Subprozessoren, Export und Loeschprozess. |
-| Betriebsrat/DSFA/KI | HR/Datenschutz/Betriebsrat | Mitbestimmung, DSFA, keine verdeckte Leistungsueberwachung, Human-Gate fuer KI. |
+| Betriebsrat/DSFA/KI | HR/Datenschutz/Betriebsrat | Mitbestimmung, DSFA, zweckgebundenes Reporting, Human-Gate fuer konkret freigegebene KI-Assistenz. |
 | Retention Legal | Legal/HR | Freigegebene Dokumentklassen, Aufbewahrungsfristen, Zweckfortfall und Loeschblocker. |
 
 Damit ist auch das Verbleibende fachlich abgeschlossen: Es gibt keine unspezifizierten Restpunkte mehr, sondern nur noch blockierende, evidenzbasierte Betriebsfreigaben.
@@ -243,5 +242,9 @@ Stand 2026-05-13:
   - AVV-/DPA-Pruefprotokoll, DSFA-Vorpruefung, TOM-/IT-Sicherheitsfreigabe
   - Rollen-/Berechtigungskonzept und Retention-/Loeschkonzept
   - eAU-, DATEV-/Payroll-, Office-/SSO- und LibreOffice-/DMS-/E-Signatur-Abnahme
-  - KI-/Analytics-Freigabe, Evidence-/Auditprotokoll und Geschaeftsfuehrungsfreigabe
+  - HR-Reporting-/KI-Assistenzfreigabe, Evidence-/Auditprotokoll und Geschaeftsfuehrungsfreigabe
+- `HRM-GO-LIVE-TEMPLATES-002` begrenzt die Vorlagen auf den real vorgesehenen HRM-Funktionsumfang:
+  - keine Erwaehnung hypothetischer, nicht vorgesehener Funktionen
+  - Mitarbeiterinformation beschreibt nur Personalverwaltung, Arbeitszeit, Abwesenheiten, Dokumente, Payroll-Vorbereitung, freigegebenes Reporting, Compliance und optional konkret freigegebene Assistenzfunktionen
+  - KI-Pruefung ist als konkrete Assistenzfunktionsfreigabe formuliert, nicht als Warnliste fuer nicht geplante Funktionen
 - Die Vorlagen sind klar als Arbeitsmuster markiert. Produktivnutzung bleibt von realer Datenschutz-, Steuerberater-/Payroll-, IT-Sicherheits-, Legal- und gegebenenfalls Betriebsratspruefung abhaengig.
