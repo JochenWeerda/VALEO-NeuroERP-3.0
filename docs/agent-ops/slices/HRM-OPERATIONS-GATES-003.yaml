@@ -1,7 +1,7 @@
 id: HRM-OPERATIONS-GATES-003
 title: HRM-Betriebsfreigabe-Cockpit
 owner: Codex
-status: reserviert
+status: abgeschlossen
 created: 2026-05-13
 goal: >
   HRM-Betriebsfreigabe-Gates als bedienbares Frontend-Cockpit verfuegbar
@@ -23,6 +23,14 @@ acceptance_criteria:
   - Pro Gate koennen Evidence, Probe und Entscheidung ausgeloest werden.
   - Typecheck ist gruen.
 checks:
-  - offen
+  - pnpm --filter @valero-neuroerp/frontend-web type-check
+  - python scripts/agent_workboard_supervisor.py validate
+  - node scripts/docs-governance-check.cjs
+  - git diff --check
+done:
+  - HR-Freigabe-Cockpit unter packages/frontend-web/src/pages/personal/hrm-operations-gates.tsx ergaenzt.
+  - Personal-Navigation und Route-Aliase fuer /personal/hrm-freigaben angeschlossen.
+  - UI zeigt Produktivstart-Status, Stopper, Pruefpunkt-Details, Nachweis-Erfassung, Test-Erfassung und Freigabe/Zurueckweisung in einfacher Buero-Sprache.
+  - HRM-Plan und Open-Gaps-Doku auf bedienbaren Frontend-Pfad aktualisiert.
 risks:
   - Echte externe Freigaben bleiben betriebliche Nachweise; UI stellt den technischen Bedienpfad bereit.

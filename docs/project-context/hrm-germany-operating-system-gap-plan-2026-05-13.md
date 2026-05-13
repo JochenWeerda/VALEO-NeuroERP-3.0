@@ -193,6 +193,12 @@ Stand 2026-05-13:
   - `POST /api/v1/personal/hrm-operations-gates/{gate_id}/probe`
   - `POST /api/v1/personal/hrm-operations-gates/{gate_id}/decision`
   - `GET /api/v1/personal/hrm-operations-gates/go-live-policy`
+- `HRM-OPERATIONS-GATES-003` ergaenzt das Bediencockpit unter `/personal/hrm-freigaben` in einfacher Buero-Sprache:
+  - Produktivstart-Status und Stopper-Uebersicht
+  - Pruefpunkt-Details mit benoetigten Nachweisen, Erledigt-Kriterien und Protokollfeldern
+  - Nachweis-Erfassung je Pruefpunkt
+  - Test-Erfassung je Pruefpunkt
+  - Freigeben-/Zurueckweisen-Aktionen je Pruefpunkt
 - Der statische Gate-Katalog ist nur noch Seed/Fallback. Produktivstatus, Evidence, Probe-Ergebnisse, Approval/Reject und Go-live-Policy werden tenant-spezifisch persistent gefuehrt.
 
 | Gate | Owner | Abschlussdefinition |
@@ -210,4 +216,5 @@ Damit ist auch das Verbleibende fachlich abgeschlossen: Es gibt keine unspezifiz
 Technischer Abschluss 2026-05-13:
 
 - Repo-seitig sind die Gates nicht mehr nur dokumentiert, sondern als steuerbarer Workflow implementiert.
+- Das Frontend stellt den Workflow als HR-Freigabe-Cockpit in der Personal-Navigation bereit und vermeidet fachliche Blackbox-Begriffe in der Bedienoberflaeche.
 - Produktive externe Zugangsdaten und reale Rechts-/Betriebsratsfreigaben bleiben notwendige Betriebsnachweise; ohne sie koennen Gates nicht fachlich `approved` werden.
