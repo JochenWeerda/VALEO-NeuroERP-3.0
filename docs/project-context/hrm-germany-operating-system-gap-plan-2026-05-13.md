@@ -18,6 +18,12 @@ Der maschinenlesbare Zielvertrag liegt in:
 - `GET /api/v1/personal/hrm-readiness`
 - `GET /api/v1/personal/hrm-operating-system`
 - `GET /api/v1/personal/hrm-operations-gates`
+- `GET /api/v1/personal/hrm-operations-gates/go-live-policy`
+
+Das operative Go-live-Evidenzpaket liegt in:
+
+- `docs/hrm-go-live-templates/README.md`
+- `docs/hrm-go-live-templates/00_hrm_go_live_gesamtwerk.md`
 
 ## Rechts- und Compliance-Anker
 
@@ -130,6 +136,7 @@ Pflichtkontrollen fuer Hochrisiko-Kontexte:
 | `HRM-AKTE-DB-001` | Persistente Personalakten-Migration und DMS-Anbindung. | `domain_hr.employee_file_documents` ist migriert, DMS-Referenzen werden produktiv validiert. |
 | `HRM-GAP-CLOSURE-001` | Alle fachlichen Repo-Gaps im HRM-Plan schliessen. | Umgesetzt: `GET /api/v1/personal/hrm-operating-system` weist alle Module als `contract_complete` aus. |
 | `HRM-OPERATIONS-GATES-001` | Externe Betriebsfreigaben professionell abschliessen. | Umgesetzt: `GET /api/v1/personal/hrm-operations-gates` fuehrt Evidenz, Owner, Go-live-Blocker, Abnahme und Auditspur je Gate. |
+| `HRM-GO-LIVE-TEMPLATES-001` | Operative Muster fuer reale Gate-Nachweise bereitstellen. | Umgesetzt: `docs/hrm-go-live-templates/00_hrm_go_live_gesamtwerk.md` deckt Gate-Matrix, Freigaben, VVT, AVV/DPA, DSFA, TOM, Retention, eAU, DATEV, Office/SSO, DMS/E-Signatur, KI/Analytics und Audit ab. |
 
 ## Quellenstand
 
@@ -223,3 +230,18 @@ Technischer Abschluss 2026-05-13:
 - Das Frontend stellt den Workflow als HR-Freigabe-Cockpit in der Personal-Navigation bereit und vermeidet fachliche Blackbox-Begriffe in der Bedienoberflaeche.
 - Die Seite ist ausdruecklich Admin-/Compliance-/Readiness-Flaeche, nicht Mitarbeiter-Self-Service.
 - Produktive externe Zugangsdaten und reale Rechts-/Betriebsratsfreigaben bleiben notwendige Betriebsnachweise; ohne sie koennen Gates nicht fachlich `approved` werden.
+
+## Umsetzungsstand HRM-GO-LIVE-TEMPLATES-001
+
+Stand 2026-05-13:
+
+- `docs/hrm-go-live-templates/README.md` erklaert Nutzung und Gate-Zuordnung des Vorlagenpakets.
+- `docs/hrm-go-live-templates/00_hrm_go_live_gesamtwerk.md` fuehrt alle benoetigten Arbeitsmuster in einem Copy-and-paste-faehigen Gesamtwerk:
+  - Gate-Matrix und Go-live-Freigabeprotokoll
+  - Betriebsratsstatus-Erklaerung und optionale Betriebsvereinbarung
+  - Mitarbeiterinformation und Verzeichnis der Verarbeitungstaetigkeit
+  - AVV-/DPA-Pruefprotokoll, DSFA-Vorpruefung, TOM-/IT-Sicherheitsfreigabe
+  - Rollen-/Berechtigungskonzept und Retention-/Loeschkonzept
+  - eAU-, DATEV-/Payroll-, Office-/SSO- und LibreOffice-/DMS-/E-Signatur-Abnahme
+  - KI-/Analytics-Freigabe, Evidence-/Auditprotokoll und Geschaeftsfuehrungsfreigabe
+- Die Vorlagen sind klar als Arbeitsmuster markiert. Produktivnutzung bleibt von realer Datenschutz-, Steuerberater-/Payroll-, IT-Sicherheits-, Legal- und gegebenenfalls Betriebsratspruefung abhaengig.
