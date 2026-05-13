@@ -86,6 +86,17 @@ Stand: `2026-05-12`
 **Checks:** `pnpm --filter @valero-neuroerp/frontend-web type-check`; `python scripts/agent_workboard_supervisor.py validate`; `node scripts/docs-governance-check.cjs`; `git diff --check`
 **Offene Risiken:** Echte externe Freigaben bleiben betriebliche Nachweise; UI stellt den technischen Bedienpfad bereit.
 
+## HRM-OPERATIONS-GATES-004
+
+**Von:** Codex
+**Owner:** Codex
+**Stand:** reserviert 2026-05-13
+**Ziel des Slices:** HRM-Freigabe-Cockpit fachlich als Admin-/Compliance-/Go-live-Readiness-Arbeitsflaeche schaerfen: Name, Risiko, Prioritaet, Faelligkeit, Rollenhinweis und letzte Aenderung.
+**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/agent-ops/slices/HRM-OPERATIONS-GATES-004.yaml`, `docs/project-context/hrm-germany-operating-system-gap-plan-2026-05-13.md`, `docs/project-context/open-gaps-and-known-issues.md`, `app/api/v1/endpoints/personal.py`, `tests/test_personal_hrm_operations_gate_workflow_api.py`, `packages/frontend-web/src/lib/api/personal.ts`, `packages/frontend-web/src/pages/personal/hrm-operations-gates.tsx`, `packages/frontend-web/src/app/navigation/domains/operations.tsx`
+**Abnahmekriterien:** API liefert Readiness-Metadaten je Gate; UI heisst HRM-Betriebsfreigaben; UI zeigt Risiko, Prioritaet, Faelligkeit, letzte Aenderung, Rollen-/Sichtbarkeitshinweis und Abnahmekriterien; Typecheck und fokussierte API-Tests sind gruen.
+**Checks:** offen
+**Offene Risiken:** Produktive Rollen-/Rechtesteuerung haengt an der zentralen Auth-/Navigation-Enforcement; dieser Slice macht fachliche Sichtbarkeit und API-Metadaten explizit.
+
 ## TODO-SPRINT-001
 
 **Von:** Cursor<br>
