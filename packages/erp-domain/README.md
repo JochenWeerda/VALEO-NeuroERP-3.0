@@ -39,7 +39,27 @@ This service follows Domain-Driven Design (DDD) principles with clear separation
 - Revenue tracking
 - Financial reporting data
 
-## API Endpoints
+## API Boundary
+
+`packages/erp-domain` exposes order logic as in-process domain commands and
+queries for tests and potential BFF integration. It does **not** provide public
+Order REST endpoints.
+
+The public UI/API route for sales orders is owned by the Python FastAPI backend:
+
+- `GET /api/v1/sales/orders` - List sales orders
+- `POST /api/v1/sales/orders` - Create sales order
+- `GET /api/v1/sales/orders/{id}` - Get sales order details
+- `PUT /api/v1/sales/orders/{id}` - Update sales order
+- `DELETE /api/v1/sales/orders/{id}` - Delete sales order
+- `POST /api/v1/sales/orders/{id}/print` - Record print action
+- `POST /api/v1/sales/orders/{id}/post` - Post sales order
+
+The bootstrap invariant is covered by
+[`tests/integration/erp-bootstrap-orders.spec.ts`](tests/integration/erp-bootstrap-orders.spec.ts):
+`ERP_DOMAIN_SERVICE_TOKENS.controller` remains unregistered.
+
+## Package-Local API Examples
 
 ### Products
 - `GET /api/products` - List products
@@ -53,12 +73,6 @@ This service follows Domain-Driven Design (DDD) principles with clear separation
 - `PUT /api/inventory/:productId` - Update inventory
 - `POST /api/inventory/:productId/reserve` - Reserve inventory
 - `POST /api/inventory/:productId/release` - Release inventory
-
-### Orders
-- `GET /api/orders` - List orders
-- `POST /api/orders` - Create order
-- `GET /api/orders/:id` - Get order details
-- `PUT /api/orders/:id/status` - Update order status
 
 ## Domain Events
 
