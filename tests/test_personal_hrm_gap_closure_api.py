@@ -92,11 +92,11 @@ def test_hrm_operating_system_endpoint_exposes_self_service_recruiting_analytics
 
     analytics = _module(data, "analytics-privacy")
     assert "Aggregationsschwellen" in analytics["controls"]
-    assert "keine Einzel-Leistungsueberwachung" in analytics["controls"]
+    assert "DSFA-Marker" in analytics["controls"]
 
     ai = _module(data, "ai-governance")
     assert "Human-Gate" in ai["controls"]
-    assert "Verbot Emotionserkennung" in ai["controls"]
+    assert "nur konkret freigegebene Assistenzfunktionen" in ai["controls"]
 
     office = _module(data, "office-connectors")
     assert "OAuth-Scopes" in office["controls"]

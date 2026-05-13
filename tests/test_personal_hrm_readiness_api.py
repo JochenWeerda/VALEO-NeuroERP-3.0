@@ -65,3 +65,6 @@ def test_hrm_readiness_exposes_office_payroll_and_ai_controls():
     assert "high-risk" in ai_high_risk["classification"]
     assert "Blackbox-CV-Sorting" in ai_high_risk["prohibitedUse"]
     assert "menschliche Aufsicht" in " ".join(ai_high_risk["requiredControls"])
+
+    ai_assist = next(item for item in data["aiControls"] if item["id"] == "hrm-ai-assist")
+    assert "nicht freigegebene KI-Funktionen" in ai_assist["prohibitedUse"]

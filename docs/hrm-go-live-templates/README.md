@@ -19,7 +19,7 @@ Die Vorlagen dienen als Arbeitsmuster fuer HR, Payroll, IT, Datenschutz, Legal, 
 3. Microsoft 365, Google Workspace und SSO
 4. LibreOffice-Rendering, DMS und E-Signatur
 5. AVV/DPA, Hosting, Subprozessoren und Datenexport
-6. Betriebsrat, DSFA und Analytics-/KI-Freigaben
+6. Betriebsrat, DSFA, HR-Reporting und optional freigegebene KI-Assistenz
 7. Rechtsfreigabe fuer Retention und Dokumentklassen
 
 ## Nutzung
@@ -29,4 +29,3 @@ Die Vorlagen dienen als Arbeitsmuster fuer HR, Payroll, IT, Datenschutz, Legal, 
 3. Freigaben durch die jeweils verantwortlichen Rollen einholen.
 4. Blocker im HRM-Betriebsfreigaben-Cockpit nachhalten.
 5. Produktivstart erst freigeben, wenn alle blockierenden Gates nachweisbar abgenommen sind.
-

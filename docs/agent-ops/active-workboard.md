@@ -126,11 +126,12 @@ Stand: `2026-05-12`
 
 **Von:** Codex
 **Owner:** Codex
-**Stand:** reserviert 2026-05-13
-**Ziel des Slices:** HRM-Go-live-Formulare auf den tatsaechlichen VALEO-Funktionsumfang begrenzen und hypothetische, nicht vorgesehene KI-/Ueberwachungsbegriffe aus Mitarbeiter- und Freigabetexten entfernen.
+**Stand:** abgeschlossen 2026-05-13
+**Ziel des Slices:** HRM-Go-live-Formulare auf den tatsaechlichen VALEO-Funktionsumfang begrenzen und hypothetische, nicht vorgesehene KI-/Auswertungsbegriffe aus Mitarbeiter- und Freigabetexten entfernen.
 **Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/agent-ops/slices/HRM-GO-LIVE-TEMPLATES-002.yaml`, `docs/hrm-go-live-templates/README.md`, `docs/hrm-go-live-templates/00_hrm_go_live_gesamtwerk.md`, `docs/project-context/hrm-germany-operating-system-gap-plan-2026-05-13.md`, `docs/project-context/open-gaps-and-known-issues.md`, `app/api/v1/endpoints/personal.py`, `tests/test_personal_hrm_gap_closure_api.py`
-**Abnahmekriterien:** Formulare nennen keine nicht vorgesehenen Funktionen wie Emotionserkennung, allgemeines Scoring oder automatisches Ranking; Mitarbeiterinformation beschreibt nur real vorgesehene HRM-Funktionen; KI-Freigabe ist als optionale Assistenzfunktions-Pruefung formuliert; API-/Doku-Vertraege sind konsistent.
-**Checks:** offen
+**Abnahmekriterien:** Formulare nennen keine nicht vorgesehenen Funktionen; Mitarbeiterinformation beschreibt nur real vorgesehene HRM-Funktionen; KI-Freigabe ist als optionale Assistenzfunktions-Pruefung formuliert; API-/Doku-Vertraege sind konsistent.
+**Erledigt:** Formulare, HRM-Plan, Open-Gaps-Doku und Personal-API sind auf den realen Funktionsumfang gezogen. Mitarbeitertexte nennen Personalverwaltung, Arbeitszeit, Abwesenheiten, Dokumente, Payroll-Vorbereitung, freigegebenes HR-Reporting, Compliance und optional konkret freigegebene KI-Assistenz; hypothetische Sonderfunktionen wurden entfernt.
+**Checks:** `pytest tests/test_personal_hrm_gap_closure_api.py tests/test_personal_hrm_readiness_api.py tests/test_personal_hrm_operations_gates_api.py -q --no-cov`; `python -m py_compile app/api/v1/endpoints/personal.py tests/test_personal_hrm_gap_closure_api.py tests/test_personal_hrm_readiness_api.py tests/test_personal_hrm_operations_gates_api.py`; `rg -n "Emotion|Scoring|Ranking|Score|Profiling|verdeckte|heimliche|Leistungsueberwachung|Verhaltens|KI-/Analytics|Analytics-/KI|Reports und Scores" docs/hrm-go-live-templates docs/project-context/hrm-germany-operating-system-gap-plan-2026-05-13.md docs/project-context/open-gaps-and-known-issues.md app/api/v1/endpoints/personal.py tests/test_personal_hrm_gap_closure_api.py tests/test_personal_hrm_operations_gates_api.py tests/test_personal_hrm_readiness_api.py` (keine Treffer); `python scripts/agent_workboard_supervisor.py validate`; `node scripts/docs-governance-check.cjs`; `git diff --check`
 **Offene Risiken:** Konkrete spaetere KI- oder Analytics-Erweiterungen brauchen erneut gesonderte Datenschutz-, Legal- und Betriebsratspruefung.
 
 ## TODO-SPRINT-001

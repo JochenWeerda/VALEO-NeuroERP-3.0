@@ -25,7 +25,7 @@ Es dient als Evidence-Paket fuer folgende HRM-Gates:
 3. Microsoft 365, Google Workspace und SSO
 4. LibreOffice-Rendering, DMS und E-Signatur
 5. AVV/DPA, Hosting, Subprozessoren und Datenexport
-6. Betriebsrat, DSFA und Analytics-/KI-Freigaben
+6. Betriebsrat, DSFA, HR-Reporting und optional freigegebene KI-Assistenz
 7. Rechtsfreigabe fuer Retention und Dokumentklassen
 
 ## Rechtlicher Arbeitshinweis
@@ -58,7 +58,7 @@ Orientierungspunkte sind insbesondere BDSG Paragraf 26 fuer Beschaeftigtendaten,
 | HRM-GATE-003 | Office/SSO | Offen / Blockiert / Freigegeben | [Name] | [Link] | Ja / Nein | SSO, Rollen und Zugriffstest erfolgreich | [Name] | [Datum] |
 | HRM-GATE-004 | DMS/E-Signatur/Rendering | Offen / Blockiert / Freigegeben | [Name] | [Link] | Ja / Nein | Dokumentenerzeugung, Ablage und Signaturprozess geprueft | [Name] | [Datum] |
 | HRM-GATE-005 | AVV/DPA/Hosting/Subprozessoren | Offen / Blockiert / Freigegeben | [Name] | [Link] | Ja / Nein | AVV, TOMs, Subprozessoren und Datenexport geprueft | [Name] | [Datum] |
-| HRM-GATE-006 | Betriebsrat/DSFA/KI | Offen / Blockiert / Freigegeben | [Name] | [Link] | Ja / Nein | Betriebsratsstatus, DSFA-Vorpruefung und KI-Freigabe dokumentiert | [Name] | [Datum] |
+| HRM-GATE-006 | Betriebsrat/DSFA/HR-Reporting/optionale KI-Assistenz | Offen / Blockiert / Freigegeben | [Name] | [Link] | Ja / Nein | Betriebsratsstatus, DSFA-Vorpruefung, Reporting-Freigabe und falls genutzt KI-Assistenzfreigabe dokumentiert | [Name] | [Datum] |
 | HRM-GATE-007 | Retention/Dokumentklassen | Offen / Blockiert / Freigegeben | [Name] | [Link] | Ja / Nein | Loesch- und Aufbewahrungskonzept rechtlich freigegeben | [Name] | [Datum] |
 
 ---
@@ -140,11 +140,13 @@ Eine Betriebsvereinbarung zur Einfuehrung und Nutzung des HRM-Systems kann daher
 - [ ] Geschaeftsfuehrungsfreigabe
 - [ ] Payroll-/DATEV-Abnahme
 - [ ] Retention- und Loeschkonzept
-- [ ] KI-/Analytics-Freigabe, falls relevant
+- [ ] Freigabe fuer HR-Reporting und optional freigegebene KI-Assistenz, falls genutzt
 
-## 2.2 Erklaerung zur Ueberwachungsfreiheit
+## 2.2 Erklaerung zum vorgesehenen Nutzungsumfang
 
-Das HRM-System wird nicht zur verdeckten Leistungs- oder Verhaltenskontrolle von Beschaeftigten eingesetzt. Auswertungen erfolgen nur zweckgebunden, rollenbasiert, protokolliert, nach Need-to-know und im Rahmen dokumentierter HR-, Payroll-, Compliance- und Sicherheitszwecke.
+Das HRM-System wird fuer Personalverwaltung, Arbeitszeit, Abwesenheiten, Dokumente, Payroll-Vorbereitung, Reporting im freigegebenen Umfang und Compliance-Nachweise eingesetzt. Es ist keine Funktion fuer Mitarbeitendenueberwachung oder automatische Leistungsbewertung vorgesehen.
+
+Auswertungen erfolgen nur zweckgebunden, rollenbasiert, protokolliert, nach Need-to-know und im Rahmen dokumentierter HR-, Payroll-, Compliance- und Sicherheitszwecke.
 
 ## 2.3 Aenderung bei spaeterer Betriebsratswahl
 
@@ -202,11 +204,11 @@ Gesundheitsbezogene Informationen werden nur verarbeitet, soweit dies fuer geset
 | Empfaenger/Schnittstellen | HR, Payroll, Steuerberater, Krankenkassen/eAU, DATEV/Payroll-System, IT, DMS, E-Signatur, Hosting, Datenschutz, Legal, Behoerden soweit gesetzlich erforderlich |
 | Rollen | Beschaeftigte sehen grundsaetzlich eigene Daten; Fuehrungskraefte sehen erforderliche Teamdaten; HR, Payroll, IT und Datenschutz erhalten nur erforderliche Rechte |
 
-## 3.6 Keine verdeckte Ueberwachung, KI und Rechte
+## 3.6 Reporting, optionale Assistenzfunktionen und Rechte
 
-Das HRM-System wird nicht zur verdeckten Leistungs- oder Verhaltenskontrolle eingesetzt. Systemprotokolle dienen IT-Sicherheit, Nachvollziehbarkeit, Fehleranalyse und gesetzlichen Nachweispflichten.
+Das HRM-System stellt keine Funktion fuer Mitarbeitendenueberwachung oder automatische Leistungsbewertung bereit. Systemprotokolle dienen IT-Sicherheit, Nachvollziehbarkeit, Fehleranalyse und gesetzlichen Nachweispflichten.
 
-Automatisierte Entscheidungen mit rechtlicher Wirkung oder vergleichbarer erheblicher Wirkung werden nicht ohne gesonderte Pruefung und Freigabe eingesetzt. KI- oder Analytics-Funktionen duerfen nur genutzt werden, wenn sie geprueft, dokumentiert und freigegeben sind.
+HR-Reporting wird nur im freigegebenen Umfang genutzt. Optionale KI-Assistenzfunktionen, zum Beispiel Textvorschlaege oder Zusammenfassungen, duerfen nur genutzt werden, wenn sie konkret geprueft, dokumentiert und freigegeben sind. Personalentscheidungen bleiben menschliche Entscheidungen.
 
 Beschaeftigte haben insbesondere Rechte auf Auskunft, Berichtigung, Loeschung, Einschraenkung der Verarbeitung, Widerspruch soweit anwendbar, Datenuebertragbarkeit soweit anwendbar und Beschwerde bei einer Datenschutzaufsichtsbehoerde.
 
@@ -349,11 +351,10 @@ Empfaenger koennen HR, Payroll, Geschaeftsfuehrung soweit erforderlich, Fuehrung
 |---|---|---|---|
 | Werden Gesundheitsdaten verarbeitet? | [ ] | [ ] | [Text] |
 | Werden umfangreiche Beschaeftigtendaten verarbeitet? | [ ] | [ ] | [Text] |
-| Gibt es systematische Ueberwachung? | [ ] | [ ] | [Text] |
-| Gibt es Leistungs- oder Verhaltensauswertungen? | [ ] | [ ] | [Text] |
-| Gibt es Profiling oder Scoring? | [ ] | [ ] | [Text] |
-| Gibt es automatisierte Entscheidungen mit Wirkung auf Beschaeftigte? | [ ] | [ ] | [Text] |
-| Gibt es KI-gestuetzte Empfehlungen? | [ ] | [ ] | [Text] |
+| Werden personenbezogene HR-Reports genutzt? | [ ] | [ ] | [Text] |
+| Werden Reports nur rollenbasiert und zweckgebunden bereitgestellt? | [ ] | [ ] | [Text] |
+| Gibt es optionale KI-Assistenzfunktionen, zum Beispiel Textvorschlaege oder Zusammenfassungen? | [ ] | [ ] | [Text] |
+| Bleiben Personalentscheidungen vollstaendig menschlich verantwortet? | [ ] | [ ] | [Text] |
 | Gibt es neue Technologien mit hohem Risiko? | [ ] | [ ] | [Text] |
 | Gibt es Drittlanduebermittlungen? | [ ] | [ ] | [Text] |
 | Sind besonders viele Beschaeftigte betroffen? | [ ] | [ ] | [Text] |
@@ -415,7 +416,7 @@ Legende: R = Lesen, W = Schreiben, R/W = Lesen und Schreiben, `-` = kein Zugriff
 
 ## 7.3 Kritische Rechte und Rezertifizierung
 
-Kritisch sind Export von Personaldaten, Loeschung von HR-Daten, Aenderung von Payroll-Daten, Zugriff auf eAU-/Krankmeldungsdaten, Rollenvergabe, Auditlog-Zugriff, KI-/Analytics-Auswertungen und Massenaenderungen.
+Kritisch sind Export von Personaldaten, Loeschung von HR-Daten, Aenderung von Payroll-Daten, Zugriff auf eAU-/Krankmeldungsdaten, Rollenvergabe, Auditlog-Zugriff, personenbezogene HR-Reports, optional freigegebene KI-Assistenzfunktionen und Massenaenderungen.
 
 | Pruefung | Intervall | Verantwortlich |
 |---|---|---|
@@ -484,7 +485,7 @@ Dieses Dokument definiert Aufbewahrungs-, Sperr- und Loeschregeln fuer HRM-Daten
 | Bewerberdaten | Bewerbungen | [Frist] | [Regel] | Recruiting |
 | Auditlogs | System- und Aenderungsprotokolle | [Frist] | [Regel] | IT / Datenschutz |
 | Dokumentenvorlagen | Vertrags- und HR-Vorlagen | [Frist] | [Regel] | HR / Legal |
-| KI-/Analytics-Auswertungen | Reports und Scores | [Frist] | [Regel] | HR / Datenschutz |
+| HR-Reporting und KI-Assistenzprotokolle | Freigegebene Reports, Textvorschlaege, Zusammenfassungen und Pruefprotokolle | [Frist] | [Regel] | HR / Datenschutz |
 
 ## 9.1 Loeschprozess
 
@@ -668,17 +669,17 @@ Dieses Dokument definiert Aufbewahrungs-, Sperr- und Loeschregeln fuer HRM-Daten
 
 ---
 
-# 14. KI-/Analytics-Freigabe
+# 14. HR-Reporting- und optionale KI-Assistenzfreigabe
 
-Diese Vorlage prueft, ob HRM-Analytics oder KI-Funktionen eingesetzt werden duerfen.
+Diese Vorlage prueft, ob ein konkreter HR-Report oder eine konkret vorgesehene KI-Assistenzfunktion eingesetzt werden darf. Nicht vorgesehene Funktionen werden hier nicht vorsorglich beschrieben.
 
 | Feld | Eintrag |
 |---|---|
-| Funktion | [Name der KI-/Analytics-Funktion] |
+| Funktion | [Name des HR-Reports oder der KI-Assistenzfunktion] |
 | Zweck | [Beschreibung] |
 | Betroffene Nutzer | [Personengruppe] |
 | Datenquellen | [Datenquellen] |
-| Output | Empfehlung / Report / Score / Textvorschlag |
+| Output | Report / Textvorschlag / Zusammenfassung / Suchergebnis |
 | Owner | [Name] |
 
 | Frage | Ja | Nein | Bemerkung |
@@ -686,32 +687,28 @@ Diese Vorlage prueft, ob HRM-Analytics oder KI-Funktionen eingesetzt werden duer
 | Betrifft die Funktion Beschaeftigte? | [ ] | [ ] | [Text] |
 | Werden personenbezogene Daten genutzt? | [ ] | [ ] | [Text] |
 | Werden besondere Datenkategorien genutzt? | [ ] | [ ] | [Text] |
-| Entsteht ein Score oder Ranking? | [ ] | [ ] | [Text] |
-| Wird Recruiting beeinflusst? | [ ] | [ ] | [Text] |
-| Wird Performance bewertet? | [ ] | [ ] | [Text] |
-| Gibt es automatisierte Entscheidungen? | [ ] | [ ] | [Text] |
-| Gibt es menschliche Kontrolle? | [ ] | [ ] | [Text] |
-| Koennen Betroffene eine Entscheidung nachvollziehen? | [ ] | [ ] | [Text] |
+| Ist die Funktion im aktuellen HRM-Funktionsumfang vorgesehen? | [ ] | [ ] | [Text] |
+| Ist der Zweck fuer HR, Payroll, Compliance oder IT-Sicherheit dokumentiert? | [ ] | [ ] | [Text] |
+| Gibt es eine menschliche Pruefung vor Nutzung des Ergebnisses? | [ ] | [ ] | [Text] |
+| Koennen Betroffene Zweck und Datenquellen nachvollziehen? | [ ] | [ ] | [Text] |
 | Ist eine DSFA erforderlich? | [ ] | [ ] | [Text] |
 
-## 14.1 Erlaubte und blockierte Nutzung
+## 14.1 Voraussichtlich freigabefaehige Nutzung
 
-Erlaubt nach Freigabe:
+Freigabefaehig nach Pruefung:
 
 - [ ] Nur Textvorschlaege
 - [ ] Nur Zusammenfassungen
 - [ ] Nur aggregierte Reports
-- [ ] Nur Entscheidungsvorbereitung mit menschlicher Pruefung
-- [ ] Keine automatisierte Entscheidung
-- [ ] Keine verdeckte Leistungs-/Verhaltenskontrolle
+- [ ] Nur Dokumentensuche mit Quellenbezug
+- [ ] Nur gesetzlich oder betrieblich erforderliche HR-/Payroll-Auswertung
+- [ ] Menschliche Pruefung vor Nutzung in einem Personalprozess
 
-Blockiert:
+Nicht freigegeben:
 
-- [ ] Automatische Kuendigungsentscheidung
-- [ ] Automatische Befoerderungsentscheidung
-- [ ] Automatisches Ranking ohne menschliche Pruefung
-- [ ] Emotionserkennung am Arbeitsplatz
-- [ ] Verdeckte Leistungsueberwachung
+- [ ] Funktion ist im VALEO-HRM nicht vorgesehen
+- [ ] Zweck, Datenquellen oder Rollen sind nicht dokumentiert
+- [ ] Ergebnis wuerde ohne menschliche Pruefung in Personalprozesse eingehen
 - [ ] Zweckaenderung ohne neue Pruefung
 
 | Rolle | Name | Datum | Entscheidung |
@@ -775,7 +772,7 @@ Blockiert:
 | IT-Sicherheit | Gruen / Gelb / Rot | [Text] |
 | Legal / Retention | Gruen / Gelb / Rot | [Text] |
 | Betriebsrat / Kein Betriebsrat | Gruen / Gelb / Rot | [Text] |
-| KI / Analytics | Gruen / Gelb / Rot | [Text] |
+| HR-Reporting / KI-Assistenz, falls genutzt | Gruen / Gelb / Rot | [Text] |
 
 - [ ] Produktivsetzung freigegeben
 - [ ] Produktivsetzung mit Auflagen freigegeben
@@ -799,11 +796,11 @@ zwischen **[Unternehmen]** und **dem Betriebsrat der [Betrieb / Standort]**.
 
 Regelungsgegenstand ist Einfuehrung, Betrieb und Nutzung des HRM-Systems. Das System dient Personalverwaltung, Arbeitszeit- und Abwesenheitsverwaltung, Payroll-Vorbereitung, Dokumentenmanagement, Compliance-Nachweisen, Employee Self Service, Manager Self Service und HR-Reporting im freigegebenen Umfang.
 
-Eine verdeckte Leistungs- oder Verhaltenskontrolle findet nicht statt. Personenbezogene Auswertungen sind nur zulaessig, wenn sie fuer den jeweiligen HR-, Payroll- oder Compliance-Zweck erforderlich und freigegeben sind.
+Das HRM-System wird fuer Personalverwaltung, Arbeitszeit, Abwesenheiten, Dokumente, Payroll-Vorbereitung, freigegebenes HR-Reporting und Compliance-Nachweise eingesetzt. Es ist keine Funktion fuer Mitarbeitendenueberwachung oder automatische Leistungsbewertung vorgesehen. Personenbezogene Auswertungen sind nur zulaessig, wenn sie fuer den jeweiligen HR-, Payroll- oder Compliance-Zweck erforderlich und freigegeben sind.
 
-Zulaessig sind aggregierte HR-Reports, gesetzlich erforderliche Nachweise, payroll-relevante Auswertungen und freigegebene Management-Reports. Nicht zulaessig sind verdeckte Leistungsueberwachung, heimliche Verhaltensprofile, nicht freigegebene Scoring-Modelle und automatisierte Personalentscheidungen ohne menschliche Pruefung.
+Zulaessig sind aggregierte HR-Reports, gesetzlich erforderliche Nachweise, payroll-relevante Auswertungen und freigegebene Management-Reports. Nicht zulaessig ist die Nutzung nicht freigegebener Funktionen oder Auswertungen ausserhalb des dokumentierten Zwecks.
 
-Rollen und Zugriffsrechte ergeben sich aus dem Rollen- und Berechtigungskonzept. Systemzugriffe und Aenderungen werden protokolliert, soweit dies fuer IT-Sicherheit, Nachvollziehbarkeit und Compliance erforderlich ist. Loeschung und Aufbewahrung richten sich nach dem Retention- und Loeschkonzept. KI- und Analytics-Funktionen duerfen nur nach gesonderter Pruefung und Freigabe eingesetzt werden.
+Rollen und Zugriffsrechte ergeben sich aus dem Rollen- und Berechtigungskonzept. Systemzugriffe und Aenderungen werden protokolliert, soweit dies fuer IT-Sicherheit, Nachvollziehbarkeit und Compliance erforderlich ist. Loeschung und Aufbewahrung richten sich nach dem Retention- und Loeschkonzept. HR-Reporting und optionale KI-Assistenzfunktionen duerfen nur nach konkreter Pruefung und Freigabe eingesetzt werden.
 
 | Partei | Name | Datum | Unterschrift |
 |---|---|---|---|
@@ -850,7 +847,7 @@ docs/hrm-go-live-templates/
 | Office/SSO | SSO-Test, MFA-Nachweis, Rollenmapping |
 | DMS/E-Signatur | PDF-Test, DMS-Ablage, Signaturtest, Dokumentklassen |
 | AVV/DPA | AVV, TOMs, Subprozessorenliste, Datenexportnachweis |
-| Betriebsrat/DSFA/KI | Betriebsratsstatus, Mitarbeiterinformation, DSFA-Vorpruefung, KI-Freigabe |
+| Betriebsrat/DSFA/Reporting/KI-Assistenz | Betriebsratsstatus, Mitarbeiterinformation, DSFA-Vorpruefung, Reporting-Freigabe und falls genutzt Freigabe konkreter KI-Assistenz |
 | Retention Legal | Loeschkonzept, Dokumentklassen, Legal-Freigabe |
 
 ---

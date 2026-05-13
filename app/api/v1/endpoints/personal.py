@@ -834,19 +834,19 @@ def build_hrm_operations_gates() -> HrmOperationsGatesOut:
         ),
         HrmOperationsGateOut(
             id="works-council-dsfa",
-            title="Betriebsrat, DSFA und Analytics-/KI-Freigaben",
+            title="Betriebsrat, DSFA, HR-Reporting und KI-Assistenzfreigaben",
             status="external_evidence_required",
             ownerRole="HR/Datenschutz/Betriebsrat",
             goLiveBlocking=True,
             evidenceRequired=[
                 "Betriebsvereinbarung oder dokumentierte Mitbestimmungsbewertung",
-                "DSFA fuer risikoreiche Analytics oder KI-Funktionen",
-                "Freigabe konkreter KI-Werkzeuge inklusive Human-Gate",
+                "DSFA-Pruefung fuer konkret vorgesehene HR-Reports oder KI-Assistenzfunktionen",
+                "Freigabe konkreter KI-Assistenzwerkzeuge inklusive Human-Gate",
             ],
             acceptanceCriteria=[
-                "Keine verdeckte Leistungsueberwachung",
+                "Keine Funktion fuer Mitarbeitendenueberwachung oder automatische Leistungsbewertung vorgesehen",
                 "Analytics nutzt Aggregationsschwellen",
-                "KI trifft keine automatische Personalentscheidung",
+                "KI-Assistenz erstellt nur Vorschlaege oder Zusammenfassungen mit menschlicher Freigabe",
             ],
             auditTrail=["policy_id", "dsfa_ref", "approval_ref", "effective_from"],
             professionalPractice=["Transparenz fuer Betroffene", "Human Oversight", "AI-Act-Hochrisikopruefung"],
@@ -1220,7 +1220,7 @@ def build_hrm_operating_system_contract() -> HrmOperatingSystemOut:
                 title="People Analytics, Datenschutz und Betriebsratsfaehigkeit",
                 status="contract_complete",
                 apiContracts=["GET /api/v1/personal/hrm-readiness", "GET /api/v1/personal/hrm-operating-system"],
-                controls=["Aggregationsschwellen", "keine Einzel-Leistungsueberwachung", "DSFA-Marker", "AVV/DPA-Register"],
+                controls=["Aggregationsschwellen", "freigegebener Reporting-Zweck", "DSFA-Marker", "AVV/DPA-Register"],
                 externalGates=["DSFA-Freigabe", "Betriebsratsabstimmung"],
             ),
             HrmOperatingSystemModuleOut(
@@ -1228,8 +1228,8 @@ def build_hrm_operating_system_contract() -> HrmOperatingSystemOut:
                 title="Kontrollierte HR-KI",
                 status="contract_complete",
                 apiContracts=["GET /api/v1/personal/hrm-readiness", "GET /api/v1/personal/hrm-operating-system"],
-                controls=["Human-Gate", "Hochrisiko-Klassifizierung", "Protokollierung", "Transparenz", "Verbot Emotionserkennung"],
-                externalGates=["AI-Act-Konformitaetspruefung fuer konkrete KI-Tools"],
+                controls=["Human-Gate", "Protokollierung", "Transparenz", "nur konkret freigegebene Assistenzfunktionen"],
+                externalGates=["Konformitaetspruefung fuer konkret vorgesehene KI-Assistenztools"],
             ),
             HrmOperatingSystemModuleOut(
                 id="office-connectors",
@@ -1543,7 +1543,7 @@ def build_hrm_readiness() -> HrmReadinessOut:
             implementedEvidence=["Zeitbuchung, Abwesenheitsimport, Schicht-/Kalender-/Onboarding-Sichten"],
             missingCapabilities=["Betriebsvereinbarung und SSO-Rollenzuordnung bleiben external_gate"],
             nextSlices=["HRM-ESS-001", "HRM-MSS-001"],
-            controls=["Vier-Augen-Freigaben", "Rollenfilter", "keine verdeckte Leistungsueberwachung"],
+            controls=["Vier-Augen-Freigaben", "Rollenfilter", "freigegebene Rollen- und Zweckbindung"],
         ),
         HrmReadinessCapabilityOut(
             id="hrm-recruiting-development",
@@ -1565,7 +1565,7 @@ def build_hrm_readiness() -> HrmReadinessOut:
             implementedEvidence=["Time-Cockpit KPIs", "tenant_id auf HR-Time-Tabellen", "Audit-/Statusfelder in HR-Time-Slices"],
             missingCapabilities=["DSFA- und Betriebsratsfreigaben bleiben external_gate"],
             nextSlices=["HRM-ANALYTICS-001", "HRM-PRIVACY-001", "HRM-AI-GOV-001"],
-            controls=["Aggregationsschwellen", "PII-Minimierung", "Exportierbarkeit", "keine heimliche Leistungsueberwachung"],
+            controls=["Aggregationsschwellen", "PII-Minimierung", "Exportierbarkeit", "freigegebener Reporting-Zweck"],
         ),
     ]
 
@@ -1618,7 +1618,7 @@ def build_hrm_readiness() -> HrmReadinessOut:
             title="Kontrollierte HR-KI",
             classification="assistive",
             allowedUse=["Stellenanzeigen-Entwurf", "Dokumentensuche", "Zusammenfassungen", "Lernempfehlungen", "HR-Chatbot mit Quellen"],
-            prohibitedUse=["Emotionserkennung am Arbeitsplatz", "automatische Personalentscheidung", "verdeckte Leistungsueberwachung"],
+            prohibitedUse=["nicht freigegebene KI-Funktionen", "Personalentscheidungen ohne dokumentierte menschliche Pruefung"],
             requiredControls=["Human approval", "Protokollierung", "Quellenanzeige", "Opt-out/Policy", "Keine sensiblen Merkmale als Entscheidungstreiber"],
         ),
         HrmReadinessAiControlOut(
