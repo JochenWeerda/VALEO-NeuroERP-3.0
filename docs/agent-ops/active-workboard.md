@@ -14,6 +14,17 @@ Stand: `2026-05-12`
 **Checks:** `pnpm test:erp-domain -- erp-bootstrap-orders.spec.ts`; `python scripts/agent_workboard_supervisor.py validate`; `git diff --check`
 **Offene Risiken:** Historische Archive und generierte API-Dumps koennen weiterhin alte Order-Begriffe enthalten; dieser Slice betrifft nur aktive Roadmap-/Paketdoku.
 
+## HRM-GERMANY-GAP-001
+
+**Von:** Codex
+**Owner:** Codex
+**Stand:** reserviert 2026-05-13
+**Ziel des Slices:** Deutsche HRM-Gaps ueber Personalakte, eAU, Payroll/DATEV, ESS/MSS, Recruiting/Onboarding, Reporting, Datenschutz, kontrollierte KI und Office-Connectoren als pruefbaren Zielvertrag schliessen.
+**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/agent-ops/slices/HRM-GERMANY-GAP-001.yaml`, `docs/project-context/hrm-germany-operating-system-gap-plan-2026-05-13.md`, `docs/project-context/open-gaps-and-known-issues.md`, `app/api/v1/endpoints/personal.py`, `tests/test_personal_hrm_readiness_api.py`
+**Abnahmekriterien:** Zielbild und Gap-Matrix decken die 15 Mindestpunkte ab; API liefert HRM-Readiness mit Status, Rechts-/Compliance-Referenzen, Integrationen, KI-Kontrollen und naechsten Slices; Tests sichern eAU, §26 BDSG, BAG-Arbeitszeitpflicht, EU-AI-Act-Hochrisiko und Office-/DATEV-Connectoren.
+**Checks:** `pytest tests/test_personal_hrm_readiness_api.py -q --no-cov`; `python scripts/agent_workboard_supervisor.py validate`; `node scripts/docs-governance-check.cjs`; `git diff --check`
+**Offene Risiken:** Rechtsfeinpruefung, Betriebsvereinbarungen, echte eAU-/DATEV-/Microsoft-/Google-Zugangsdaten und produktive AVV/DPA bleiben Folgeslices.
+
 ## TODO-SPRINT-001
 
 **Von:** Cursor<br>
