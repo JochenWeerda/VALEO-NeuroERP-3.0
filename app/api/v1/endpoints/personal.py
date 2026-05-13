@@ -10,6 +10,7 @@ from uuid import uuid4
 from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel, Field
 from sqlalchemy import text
+from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
@@ -630,6 +631,13 @@ class HrmOperationsGateOut(BaseModel):
     status: str
     ownerRole: str
     goLiveBlocking: bool
+    evidenceCount: int = 0
+    latestEvidenceRef: str | None = None
+    lastProbeStatus: str | None = None
+    lastProbeAt: str | None = None
+    approvedBy: str | None = None
+    approvedAt: str | None = None
+    rejectionReason: str | None = None
     evidenceRequired: list[str]
     acceptanceCriteria: list[str]
     auditTrail: list[str]
@@ -643,6 +651,63 @@ class HrmOperationsGatesOut(BaseModel):
     summary: str
     gates: list[HrmOperationsGateOut]
     closureDefinition: list[str]
+
+
+class HrmOperationsGateEvidenceIn(BaseModel):
+    evidenceType: str = Field(..., min_length=2, max_length=80)
+    title: str = Field(..., min_length=2, max_length=220)
+    artifactRef: str = Field(..., min_length=2, max_length=500)
+    submittedBy: str = Field(..., min_length=2, max_length=160)
+    metadata: dict[str, Any] = Field(default_factory=dict)
+
+
+class HrmOperationsGateEvidenceOut(BaseModel):
+    id: str
+    gateId: str
+    evidenceType: str
+    title: str
+    artifactRef: str
+    submittedBy: str
+    submittedAt: str
+    metadata: dict[str, Any]
+
+
+class HrmOperationsGateDecisionIn(BaseModel):
+    decision: str = Field(..., pattern="^(approve|reject)$")
+    decidedBy: str = Field(..., min_length=2, max_length=160)
+    reason: str | None = Field(default=None, max_length=1000)
+
+
+class HrmOperationsGateProbeIn(BaseModel):
+    provider: str = Field(..., min_length=2, max_length=120)
+    probeType: str = Field(..., min_length=2, max_length=80)
+    result: str = Field(..., pattern="^(passed|failed|manual|not_configured)$")
+    performedBy: str = Field(..., min_length=2, max_length=160)
+    details: dict[str, Any] = Field(default_factory=dict)
+
+
+class HrmOperationsGateProbeOut(BaseModel):
+    id: str
+    gateId: str
+    provider: str
+    probeType: str
+    result: str
+    performedBy: str
+    performedAt: str
+    details: dict[str, Any]
+
+
+class HrmOperationsGateActionOut(BaseModel):
+    ok: bool
+    gate: HrmOperationsGateOut
+
+
+class HrmOperationsGoLivePolicyOut(BaseModel):
+    goLiveAllowed: bool
+    blockerCount: int
+    blockers: list[HrmOperationsGateOut]
+    status: str
+    summary: str
 
 
 _HRM_MINIMUM_CHECKLIST = [
@@ -812,6 +877,213 @@ def build_hrm_operations_gates() -> HrmOperationsGatesOut:
             "Fehlende Zugangsdaten oder Rechtsfreigaben werden nicht als Repo-Gap gefuehrt, sondern als Betriebsfreigabe.",
             "Fachliche Contracts bleiben stabil und koennen mit echten Nachweisen befuellt werden.",
         ],
+    )
+
+
+def _hrm_operations_gate_catalog() -> dict[str, HrmOperationsGateOut]:
+    return {gate.id: gate for gate in build_hrm_operations_gates().gates}
+
+
+def _hrm_gate_datetime(value: Any) -> str | None:
+    if value is None:
+        return None
+    if hasattr(value, "isoformat"):
+        return value.isoformat()
+    return str(value)
+
+
+def _row_mapping(row: Any) -> dict[str, Any]:
+    if row is None:
+        return {}
+    if isinstance(row, dict):
+        return row
+    try:
+        return dict(row)
+    except Exception:
+        return {key: getattr(row, key) for key in dir(row) if not key.startswith("_")}
+
+
+def _merge_hrm_gate_state(template: HrmOperationsGateOut, row: dict[str, Any] | None) -> HrmOperationsGateOut:
+    if not row:
+        return template
+    return template.model_copy(
+        update={
+            "status": row.get("status") or template.status,
+            "ownerRole": row.get("owner_role") or template.ownerRole,
+            "goLiveBlocking": bool(row.get("go_live_blocking", template.goLiveBlocking)),
+            "evidenceCount": int(row.get("evidence_count") or 0),
+            "latestEvidenceRef": row.get("latest_evidence_ref"),
+            "lastProbeStatus": row.get("last_probe_status"),
+            "lastProbeAt": _hrm_gate_datetime(row.get("last_probe_at")),
+            "approvedBy": row.get("approved_by"),
+            "approvedAt": _hrm_gate_datetime(row.get("approved_at")),
+            "rejectionReason": row.get("rejection_reason"),
+        }
+    )
+
+
+def _seed_hrm_operations_gates(db: Session, tenant_id: str) -> None:
+    for gate in build_hrm_operations_gates().gates:
+        db.execute(
+            text(
+                """
+                INSERT INTO domain_hr.hrm_operations_gates
+                  (tenant_id, gate_id, status, owner_role, go_live_blocking, metadata)
+                VALUES
+                  (:tenant_id, :gate_id, :status, :owner_role, :go_live_blocking, CAST(:metadata AS jsonb))
+                ON CONFLICT (tenant_id, gate_id) DO UPDATE SET
+                  owner_role = EXCLUDED.owner_role,
+                  go_live_blocking = EXCLUDED.go_live_blocking,
+                  updated_at = NOW()
+                """
+            ),
+            {
+                "tenant_id": tenant_id,
+                "gate_id": gate.id,
+                "status": gate.status,
+                "owner_role": gate.ownerRole,
+                "go_live_blocking": gate.goLiveBlocking,
+                "metadata": json.dumps({"title": gate.title}),
+            },
+        )
+
+
+def _load_hrm_operations_gates_from_db(db: Session, tenant_id: str) -> HrmOperationsGatesOut:
+    _seed_hrm_operations_gates(db, tenant_id)
+    rows = db.execute(
+        text(
+            """
+            SELECT
+              g.gate_id, g.status, g.owner_role, g.go_live_blocking,
+              g.last_probe_status, g.last_probe_at, g.approved_by, g.approved_at,
+              g.rejection_reason,
+              COALESCE(ev.evidence_count, 0) AS evidence_count,
+              ev.latest_evidence_ref
+            FROM domain_hr.hrm_operations_gates g
+            LEFT JOIN (
+              SELECT tenant_id, gate_id, COUNT(*) AS evidence_count,
+                     (ARRAY_AGG(artifact_ref ORDER BY submitted_at DESC))[1] AS latest_evidence_ref
+              FROM domain_hr.hrm_operations_gate_evidence
+              WHERE tenant_id = :tenant_id
+              GROUP BY tenant_id, gate_id
+            ) ev ON ev.tenant_id = g.tenant_id AND ev.gate_id = g.gate_id
+            WHERE g.tenant_id = :tenant_id
+            ORDER BY g.gate_id
+            """
+        ),
+        {"tenant_id": tenant_id},
+    ).mappings().all()
+    catalog = _hrm_operations_gate_catalog()
+    merged = [_merge_hrm_gate_state(catalog[row["gate_id"]], _row_mapping(row)) for row in rows if row["gate_id"] in catalog]
+    known_ids = {gate.id for gate in merged}
+    merged.extend(gate for gate_id, gate in catalog.items() if gate_id not in known_ids)
+    go_live_allowed = not any(gate.goLiveBlocking and gate.status != "approved" for gate in merged)
+    return HrmOperationsGatesOut(
+        status="approved" if go_live_allowed else "external_gates_runtime",
+        asOf="2026-05-13",
+        goLiveAllowed=go_live_allowed,
+        summary=(
+            "Alle blockierenden HRM-Betriebsfreigaben sind technisch approved."
+            if go_live_allowed
+            else "HRM-Go-live bleibt durch persistente Betriebsfreigabe-Gates blockiert."
+        ),
+        gates=merged,
+        closureDefinition=[
+            "Gate-Status wird tenant-spezifisch aus domain_hr.hrm_operations_gates gelesen.",
+            "Evidence, Connector-Probes und Entscheidungen werden persistent und auditierbar gespeichert.",
+            "Go-live ist nur erlaubt, wenn alle blocking Gates approved sind.",
+            "Statischer Katalog dient nur als Seed/Fallback; Produktivfreigaben entstehen durch Workflow-Aktionen.",
+        ],
+    )
+
+
+def _get_hrm_operations_gates_runtime(db: Session, tenant_id: str) -> HrmOperationsGatesOut:
+    try:
+        return _load_hrm_operations_gates_from_db(db, tenant_id)
+    except SQLAlchemyError:
+        return build_hrm_operations_gates()
+
+
+def _require_hrm_gate(gate_id: str) -> HrmOperationsGateOut:
+    gate = _hrm_operations_gate_catalog().get(gate_id)
+    if gate is None:
+        raise HTTPException(status_code=404, detail=f"Unknown HRM operations gate '{gate_id}'")
+    return gate
+
+
+def _load_single_hrm_gate(db: Session, tenant_id: str, gate_id: str) -> HrmOperationsGateOut:
+    gates = _load_hrm_operations_gates_from_db(db, tenant_id)
+    for gate in gates.gates:
+        if gate.id == gate_id:
+            return gate
+    raise HTTPException(status_code=404, detail=f"Unknown HRM operations gate '{gate_id}'")
+
+
+def _insert_hrm_gate_audit(
+    db: Session,
+    tenant_id: str,
+    gate_id: str,
+    action: str,
+    actor: str,
+    from_status: str | None,
+    to_status: str,
+    reason: str | None = None,
+    details: dict[str, Any] | None = None,
+) -> None:
+    db.execute(
+        text(
+            """
+            INSERT INTO domain_hr.hrm_operations_gate_audit
+              (id, tenant_id, gate_id, action, actor, from_status, to_status, reason, details)
+            VALUES
+              (:id, :tenant_id, :gate_id, :action, :actor, :from_status, :to_status, :reason, CAST(:details AS jsonb))
+            """
+        ),
+        {
+            "id": str(uuid4()),
+            "tenant_id": tenant_id,
+            "gate_id": gate_id,
+            "action": action,
+            "actor": actor,
+            "from_status": from_status,
+            "to_status": to_status,
+            "reason": reason,
+            "details": json.dumps(details or {}),
+        },
+    )
+
+
+def _evidence_out(row: Any) -> HrmOperationsGateEvidenceOut:
+    data = _row_mapping(row)
+    metadata = data.get("metadata") or {}
+    if isinstance(metadata, str):
+        metadata = json.loads(metadata)
+    return HrmOperationsGateEvidenceOut(
+        id=str(data["id"]),
+        gateId=str(data["gate_id"]),
+        evidenceType=str(data["evidence_type"]),
+        title=str(data["title"]),
+        artifactRef=str(data["artifact_ref"]),
+        submittedBy=str(data["submitted_by"]),
+        submittedAt=_hrm_gate_datetime(data.get("submitted_at")) or datetime.utcnow().isoformat(),
+        metadata=metadata,
+    )
+
+
+def _probe_out(row: Any) -> HrmOperationsGateProbeOut:
+    data = _row_mapping(row)
+    details = data.get("details") or {}
+    if isinstance(details, str):
+        details = json.loads(details)
+    return HrmOperationsGateProbeOut(
+        id=str(data["id"]),
+        gateId=str(data["gate_id"]),
+        provider=str(data["provider"]),
+        probeType=str(data["probe_type"]),
+        result=str(data["result"]),
+        performedBy=str(data["performed_by"]),
+        performedAt=_hrm_gate_datetime(data.get("performed_at")) or datetime.utcnow().isoformat(),
+        details=details,
     )
 
 
@@ -2545,8 +2817,211 @@ async def get_hrm_operating_system(_tenant_id: str = Depends(get_tenant_id)):
 
 
 @router.get("/hrm-operations-gates", response_model=HrmOperationsGatesOut)
-async def get_hrm_operations_gates(_tenant_id: str = Depends(get_tenant_id)):
-    return build_hrm_operations_gates()
+async def get_hrm_operations_gates(
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+):
+    return _get_hrm_operations_gates_runtime(db, tenant_id)
+
+
+@router.get("/hrm-operations-gates/go-live-policy", response_model=HrmOperationsGoLivePolicyOut)
+async def get_hrm_operations_go_live_policy(
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+):
+    gates = _get_hrm_operations_gates_runtime(db, tenant_id)
+    blockers = [gate for gate in gates.gates if gate.goLiveBlocking and gate.status != "approved"]
+    return HrmOperationsGoLivePolicyOut(
+        goLiveAllowed=not blockers,
+        blockerCount=len(blockers),
+        blockers=blockers,
+        status="approved" if not blockers else "blocked",
+        summary="HRM-Go-live freigegeben." if not blockers else "HRM-Go-live durch Betriebsfreigabe-Gates blockiert.",
+    )
+
+
+@router.post("/hrm-operations-gates/{gate_id}/evidence", response_model=HrmOperationsGateEvidenceOut, status_code=201)
+async def create_hrm_operations_gate_evidence(
+    gate_id: str,
+    payload: HrmOperationsGateEvidenceIn,
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+):
+    _require_hrm_gate(gate_id)
+    try:
+        current = _load_single_hrm_gate(db, tenant_id, gate_id)
+        row = db.execute(
+            text(
+                """
+                INSERT INTO domain_hr.hrm_operations_gate_evidence
+                  (id, tenant_id, gate_id, evidence_type, title, artifact_ref, submitted_by, metadata)
+                VALUES
+                  (:id, :tenant_id, :gate_id, :evidence_type, :title, :artifact_ref, :submitted_by, CAST(:metadata AS jsonb))
+                RETURNING id, gate_id, evidence_type, title, artifact_ref, submitted_by, submitted_at, metadata
+                """
+            ),
+            {
+                "id": str(uuid4()),
+                "tenant_id": tenant_id,
+                "gate_id": gate_id,
+                "evidence_type": payload.evidenceType,
+                "title": payload.title,
+                "artifact_ref": payload.artifactRef,
+                "submitted_by": payload.submittedBy,
+                "metadata": json.dumps(payload.metadata),
+            },
+        ).mappings().first()
+        if current.status != "approved":
+            db.execute(
+                text(
+                    """
+                    UPDATE domain_hr.hrm_operations_gates
+                    SET status = 'evidence_submitted', updated_at = NOW(), rejection_reason = NULL
+                    WHERE tenant_id = :tenant_id AND gate_id = :gate_id
+                    """
+                ),
+                {"tenant_id": tenant_id, "gate_id": gate_id},
+            )
+        _insert_hrm_gate_audit(
+            db,
+            tenant_id,
+            gate_id,
+            "evidence_created",
+            payload.submittedBy,
+            current.status,
+            "approved" if current.status == "approved" else "evidence_submitted",
+            details={"artifact_ref": payload.artifactRef, "evidence_type": payload.evidenceType},
+        )
+        db.commit()
+    except SQLAlchemyError as exc:
+        db.rollback()
+        raise HTTPException(status_code=503, detail="HRM operations gate persistence is not available") from exc
+    return _evidence_out(row)
+
+
+@router.post("/hrm-operations-gates/{gate_id}/decision", response_model=HrmOperationsGateActionOut)
+async def decide_hrm_operations_gate(
+    gate_id: str,
+    payload: HrmOperationsGateDecisionIn,
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+):
+    _require_hrm_gate(gate_id)
+    try:
+        current = _load_single_hrm_gate(db, tenant_id, gate_id)
+        evidence_count = current.evidenceCount
+        if payload.decision == "approve" and evidence_count < 1:
+            raise HTTPException(status_code=409, detail="Gate approval requires at least one evidence artifact")
+        to_status = "approved" if payload.decision == "approve" else "rejected"
+        db.execute(
+            text(
+                """
+                UPDATE domain_hr.hrm_operations_gates
+                SET status = :status,
+                    approved_by = CASE WHEN :status = 'approved' THEN :actor ELSE NULL END,
+                    approved_at = CASE WHEN :status = 'approved' THEN NOW() ELSE NULL END,
+                    rejection_reason = CASE WHEN :status = 'rejected' THEN :reason ELSE NULL END,
+                    updated_at = NOW()
+                WHERE tenant_id = :tenant_id AND gate_id = :gate_id
+                RETURNING gate_id, status
+                """
+            ),
+            {
+                "tenant_id": tenant_id,
+                "gate_id": gate_id,
+                "status": to_status,
+                "actor": payload.decidedBy,
+                "reason": payload.reason,
+            },
+        ).mappings().first()
+        _insert_hrm_gate_audit(
+            db,
+            tenant_id,
+            gate_id,
+            f"gate_{payload.decision}d",
+            payload.decidedBy,
+            current.status,
+            to_status,
+            reason=payload.reason,
+            details={"evidence_count": evidence_count},
+        )
+        db.commit()
+        gate = _load_single_hrm_gate(db, tenant_id, gate_id)
+    except HTTPException:
+        raise
+    except SQLAlchemyError as exc:
+        db.rollback()
+        raise HTTPException(status_code=503, detail="HRM operations gate persistence is not available") from exc
+    return HrmOperationsGateActionOut(ok=True, gate=gate)
+
+
+@router.post("/hrm-operations-gates/{gate_id}/probe", response_model=HrmOperationsGateProbeOut, status_code=201)
+async def record_hrm_operations_gate_probe(
+    gate_id: str,
+    payload: HrmOperationsGateProbeIn,
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+):
+    _require_hrm_gate(gate_id)
+    try:
+        current = _load_single_hrm_gate(db, tenant_id, gate_id)
+        row = db.execute(
+            text(
+                """
+                INSERT INTO domain_hr.hrm_operations_gate_probes
+                  (id, tenant_id, gate_id, provider, probe_type, result, performed_by, details)
+                VALUES
+                  (:id, :tenant_id, :gate_id, :provider, :probe_type, :result, :performed_by, CAST(:details AS jsonb))
+                RETURNING id, gate_id, provider, probe_type, result, performed_by, performed_at, details
+                """
+            ),
+            {
+                "id": str(uuid4()),
+                "tenant_id": tenant_id,
+                "gate_id": gate_id,
+                "provider": payload.provider,
+                "probe_type": payload.probeType,
+                "result": payload.result,
+                "performed_by": payload.performedBy,
+                "details": json.dumps(payload.details),
+            },
+        ).mappings().first()
+        to_status = "probe_passed" if payload.result == "passed" and current.status != "approved" else current.status
+        if payload.result in {"failed", "not_configured"} and current.status != "approved":
+            to_status = "external_evidence_required"
+        db.execute(
+            text(
+                """
+                UPDATE domain_hr.hrm_operations_gates
+                SET status = :status,
+                    last_probe_status = :probe_status,
+                    last_probe_at = NOW(),
+                    updated_at = NOW()
+                WHERE tenant_id = :tenant_id AND gate_id = :gate_id
+                """
+            ),
+            {
+                "tenant_id": tenant_id,
+                "gate_id": gate_id,
+                "status": to_status,
+                "probe_status": payload.result,
+            },
+        )
+        _insert_hrm_gate_audit(
+            db,
+            tenant_id,
+            gate_id,
+            "connector_probe",
+            payload.performedBy,
+            current.status,
+            to_status,
+            details={"provider": payload.provider, "probe_type": payload.probeType, "result": payload.result},
+        )
+        db.commit()
+    except SQLAlchemyError as exc:
+        db.rollback()
+        raise HTTPException(status_code=503, detail="HRM operations gate persistence is not available") from exc
+    return _probe_out(row)
 
 
 @router.get("/employee-files/{employee_ref}", response_model=EmployeeFileOut)

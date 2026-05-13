@@ -55,9 +55,10 @@ Zuletzt vollstaendig auditiert: **2026-05-05**.
 
 - HR-Time deckt Arbeitszeit, Abwesenheit, Schicht, Kalender, Fahrerzeit und Payroll-Readiness bereits als operativen Kern ab; ein vollstaendiges deutsches HRM-System braucht zusaetzlich Personalakte, eAU, Vertrags-/Dokumentenmanagement, ESS/MSS, Recruiting, Performance, People Analytics, Datenschutz-Governance, kontrollierte KI und Office-Connectoren.
 - Der Zielvertrag und die Gap-Matrix liegen in [hrm-germany-operating-system-gap-plan-2026-05-13.md](c:/Users/Jochen/VALEO-NeuroERP-3.0/docs/project-context/hrm-germany-operating-system-gap-plan-2026-05-13.md).
-- Repo-seitig sind die maschinenlesbaren Vertraege unter `GET /api/v1/personal/hrm-readiness`, `GET /api/v1/personal/hrm-operating-system`, `GET /api/v1/personal/hrm-operations-gates` und `GET/POST /api/v1/personal/employee-files/...` verfuegbar.
-- Stand 2026-05-13: Die fachlichen Repo-Gaps aus dem HRM-Plan sind ueber `HRM-GERMANY-GAP-001`, `HRM-AKTE-001`, `HRM-GAP-CLOSURE-001` und `HRM-OPERATIONS-GATES-001` geschlossen.
-- Externe Restpunkte sind keine losen Gaps mehr, sondern blockierende Betriebsfreigabe-Gates mit Owner, Evidenz, Abnahmekriterien und Auditspur: eAU, DATEV/Payroll, Office/SSO, LibreOffice/DMS/E-Signatur, AVV/DPA, Betriebsrat/DSFA/KI und Retention Legal.
+- Repo-seitig sind die maschinenlesbaren Vertraege unter `GET /api/v1/personal/hrm-readiness`, `GET /api/v1/personal/hrm-operating-system`, `GET /api/v1/personal/hrm-operations-gates`, `GET /api/v1/personal/hrm-operations-gates/go-live-policy`, `GET /api/v1/personal/employee-files/...` und `POST /api/v1/personal/employee-files/...` verfuegbar.
+- Stand 2026-05-13: Die fachlichen Repo-Gaps aus dem HRM-Plan sind ueber `HRM-GERMANY-GAP-001`, `HRM-AKTE-001`, `HRM-GAP-CLOSURE-001`, `HRM-OPERATIONS-GATES-001` und `HRM-OPERATIONS-GATES-002` repo-seitig geschlossen.
+- Externe Restpunkte sind keine losen Gaps mehr, sondern persistent gefuehrte Betriebsfreigabe-Gates mit Owner, Evidenz, Abnahmekriterien, Probe-Status, Approval/Reject, Auditspur und Go-live-Policy: eAU, DATEV/Payroll, Office/SSO, LibreOffice/DMS/E-Signatur, AVV/DPA, Betriebsrat/DSFA/KI und Retention Legal.
+- Produktive externe Zugangsdaten sowie echte Rechts-, Datenschutz-, Betriebsrats- und Providerfreigaben bleiben Betriebsnachweise und werden ueber Evidence/Decision im Gate-Workflow freigegeben; sie sind kein offener Repo-Code-Gap.
 
 ---
 

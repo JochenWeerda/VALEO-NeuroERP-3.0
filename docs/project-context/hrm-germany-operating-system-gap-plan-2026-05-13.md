@@ -187,6 +187,13 @@ Stand 2026-05-13:
 - `GET /api/v1/personal/hrm-operations-gates` fuehrt alle externen Betriebsfreigaben als strukturierte Gates.
 - Go-live bleibt blockiert, solange ein blockierendes Gate nicht `approved` ist.
 - Jedes Gate besitzt Owner-Rolle, Evidenzanforderungen, Abnahmekriterien, Auditspur und Professional-Practice-Regeln.
+- `HRM-OPERATIONS-GATES-002` ergaenzt die technische Workflow-Schicht:
+  - Alembic-Migration `hrm_operations_gates_20260513` fuer `domain_hr.hrm_operations_gates`, `hrm_operations_gate_evidence`, `hrm_operations_gate_probes` und `hrm_operations_gate_audit`
+  - `POST /api/v1/personal/hrm-operations-gates/{gate_id}/evidence`
+  - `POST /api/v1/personal/hrm-operations-gates/{gate_id}/probe`
+  - `POST /api/v1/personal/hrm-operations-gates/{gate_id}/decision`
+  - `GET /api/v1/personal/hrm-operations-gates/go-live-policy`
+- Der statische Gate-Katalog ist nur noch Seed/Fallback. Produktivstatus, Evidence, Probe-Ergebnisse, Approval/Reject und Go-live-Policy werden tenant-spezifisch persistent gefuehrt.
 
 | Gate | Owner | Abschlussdefinition |
 |------|-------|---------------------|
@@ -199,3 +206,8 @@ Stand 2026-05-13:
 | Retention Legal | Legal/HR | Freigegebene Dokumentklassen, Aufbewahrungsfristen, Zweckfortfall und Loeschblocker. |
 
 Damit ist auch das Verbleibende fachlich abgeschlossen: Es gibt keine unspezifizierten Restpunkte mehr, sondern nur noch blockierende, evidenzbasierte Betriebsfreigaben.
+
+Technischer Abschluss 2026-05-13:
+
+- Repo-seitig sind die Gates nicht mehr nur dokumentiert, sondern als steuerbarer Workflow implementiert.
+- Produktive externe Zugangsdaten und reale Rechts-/Betriebsratsfreigaben bleiben notwendige Betriebsnachweise; ohne sie koennen Gates nicht fachlich `approved` werden.

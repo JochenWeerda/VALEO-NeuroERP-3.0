@@ -1,7 +1,7 @@
 id: HRM-OPERATIONS-GATES-002
 title: HRM-Betriebsfreigabe-Gates technisch vollstaendig
 owner: Codex
-status: reserviert
+status: abgeschlossen
 created: 2026-05-13
 goal: >
   HRM-Betriebsfreigabe-Gates technisch vollstaendig machen: persistente Gate-/
@@ -24,6 +24,17 @@ acceptance_criteria:
   - goLiveAllowed wird aus persistenten Status abgeleitet.
   - API-/Frontend-Contracts und Tests sind vorhanden.
 checks:
-  - offen
+  - pytest tests/test_personal_hrm_operations_gate_workflow_api.py tests/test_personal_hrm_operations_gates_api.py tests/test_personal_hrm_gap_closure_api.py tests/test_personal_employee_file_api.py -q --no-cov
+  - pnpm --filter @valero-neuroerp/frontend-web type-check
+  - python -m py_compile app/api/v1/endpoints/personal.py tests/test_personal_hrm_operations_gate_workflow_api.py alembic/versions/hrm_operations_gates_20260513.py
+  - python scripts/agent_workboard_supervisor.py validate
+  - node scripts/docs-governance-check.cjs
+  - git diff --check
+done:
+  - Persistente Gate-, Evidence-, Probe- und Audit-Tabellen per Alembic ergaenzt.
+  - GET /api/v1/personal/hrm-operations-gates liest Runtime-Status aus DB mit Katalog-Fallback.
+  - Evidence-, Probe- und Decision-Endpunkte sowie Go-live-Policy umgesetzt.
+  - Frontend-Hooks fuer Lesen, Evidence, Probe, Entscheidung und Go-live-Policy ergaenzt.
+  - Tests sichern Seed, Evidence, Probe, Approval, Evidence-Pflicht und Blocker-Policy.
 risks:
   - Echte externe Providerzugriffe benoetigen weiterhin produktive Credentials; dieser Slice implementiert die technische Workflow- und Persistenzschicht inklusive Probe-Status.

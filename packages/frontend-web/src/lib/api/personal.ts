@@ -444,6 +444,13 @@ export type HrmOperationsGate = {
   status: string
   ownerRole: string
   goLiveBlocking: boolean
+  evidenceCount: number
+  latestEvidenceRef?: string | null
+  lastProbeStatus?: string | null
+  lastProbeAt?: string | null
+  approvedBy?: string | null
+  approvedAt?: string | null
+  rejectionReason?: string | null
   evidenceRequired: string[]
   acceptanceCriteria: string[]
   auditTrail: string[]
@@ -457,6 +464,55 @@ export type HrmOperationsGates = {
   summary: string
   gates: HrmOperationsGate[]
   closureDefinition: string[]
+}
+
+export type HrmOperationsGateEvidenceInput = {
+  evidenceType: string
+  title: string
+  artifactRef: string
+  submittedBy: string
+  metadata?: Record<string, unknown>
+}
+
+export type HrmOperationsGateEvidence = HrmOperationsGateEvidenceInput & {
+  id: string
+  gateId: string
+  submittedAt: string
+  metadata: Record<string, unknown>
+}
+
+export type HrmOperationsGateDecisionInput = {
+  decision: 'approve' | 'reject'
+  decidedBy: string
+  reason?: string | null
+}
+
+export type HrmOperationsGateProbeInput = {
+  provider: string
+  probeType: string
+  result: 'passed' | 'failed' | 'manual' | 'not_configured'
+  performedBy: string
+  details?: Record<string, unknown>
+}
+
+export type HrmOperationsGateProbe = HrmOperationsGateProbeInput & {
+  id: string
+  gateId: string
+  performedAt: string
+  details: Record<string, unknown>
+}
+
+export type HrmOperationsGateAction = {
+  ok: boolean
+  gate: HrmOperationsGate
+}
+
+export type HrmOperationsGoLivePolicy = {
+  goLiveAllowed: boolean
+  blockerCount: number
+  blockers: HrmOperationsGate[]
+  status: string
+  summary: string
 }
 
 export type SchulungTyp = 'PSM' | 'Gefahrstoffe' | 'Gabelstapler' | 'Erste Hilfe' | 'Brandschutz' | 'Arbeitssicherheit'
@@ -547,6 +603,7 @@ export const personalKeys = {
   hrmReadiness: () => [...personalKeys.all, 'hrm-readiness'] as const,
   hrmOperatingSystem: () => [...personalKeys.all, 'hrm-operating-system'] as const,
   hrmOperationsGates: () => [...personalKeys.all, 'hrm-operations-gates'] as const,
+  hrmOperationsGoLivePolicy: () => [...personalKeys.all, 'hrm-operations-gates', 'go-live-policy'] as const,
   employeeFile: (employeeRef?: string, actorRole?: string) => [...personalKeys.all, 'employee-file', employeeRef, actorRole] as const,
   schulungen: (filters?: Record<string, unknown>) => [...personalKeys.all, 'schulungen', filters] as const,
   qualifikationen: (filters?: Record<string, unknown>) => [...personalKeys.all, 'qualifikationen', filters] as const,
@@ -662,6 +719,13 @@ const EMPTY_HRM_OPERATIONS_GATES: HrmOperationsGates = {
   summary: '',
   gates: [],
   closureDefinition: [],
+}
+const EMPTY_HRM_OPERATIONS_GO_LIVE_POLICY: HrmOperationsGoLivePolicy = {
+  goLiveAllowed: false,
+  blockerCount: 0,
+  blockers: [],
+  status: 'unknown',
+  summary: '',
 }
 const EMPTY_SCHULUNGEN_LIST: Schulung[] = []
 const EMPTY_STUNDENZETTEL_LIST: StundenzettelEintrag[] = []
@@ -946,6 +1010,54 @@ export function useHrmOperationsGates() {
     queryFn: async () => (await apiClient.get<HrmOperationsGates>('/api/v1/personal/hrm-operations-gates')).data,
     placeholderData: EMPTY_HRM_OPERATIONS_GATES,
     staleTime: 5 * 60 * 1000,
+  })
+}
+
+export function useHrmOperationsGoLivePolicy() {
+  return useQuery({
+    queryKey: personalKeys.hrmOperationsGoLivePolicy(),
+    queryFn: async () => (await apiClient.get<HrmOperationsGoLivePolicy>('/api/v1/personal/hrm-operations-gates/go-live-policy')).data,
+    placeholderData: EMPTY_HRM_OPERATIONS_GO_LIVE_POLICY,
+    staleTime: 60_000,
+  })
+}
+
+export function useCreateHrmOperationsGateEvidence(gateId: string) {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async (data: HrmOperationsGateEvidenceInput) => {
+      return (await apiClient.post<HrmOperationsGateEvidence>(`/api/v1/personal/hrm-operations-gates/${gateId}/evidence`, data)).data
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: personalKeys.hrmOperationsGates() })
+      queryClient.invalidateQueries({ queryKey: personalKeys.hrmOperationsGoLivePolicy() })
+    },
+  })
+}
+
+export function useDecideHrmOperationsGate(gateId: string) {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async (data: HrmOperationsGateDecisionInput) => {
+      return (await apiClient.post<HrmOperationsGateAction>(`/api/v1/personal/hrm-operations-gates/${gateId}/decision`, data)).data
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: personalKeys.hrmOperationsGates() })
+      queryClient.invalidateQueries({ queryKey: personalKeys.hrmOperationsGoLivePolicy() })
+    },
+  })
+}
+
+export function useRecordHrmOperationsGateProbe(gateId: string) {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async (data: HrmOperationsGateProbeInput) => {
+      return (await apiClient.post<HrmOperationsGateProbe>(`/api/v1/personal/hrm-operations-gates/${gateId}/probe`, data)).data
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: personalKeys.hrmOperationsGates() })
+      queryClient.invalidateQueries({ queryKey: personalKeys.hrmOperationsGoLivePolicy() })
+    },
   })
 }
 
