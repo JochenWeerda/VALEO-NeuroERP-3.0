@@ -498,6 +498,251 @@ class EmployeeTimeProfileCatalogOut(BaseModel):
     kpis: EmployeeTimeProfileKpisOut
 
 
+class HrmReadinessCapabilityOut(BaseModel):
+    id: str
+    title: str
+    status: str
+    priority: str
+    legalBasis: list[str] = Field(default_factory=list)
+    implementedEvidence: list[str] = Field(default_factory=list)
+    missingCapabilities: list[str] = Field(default_factory=list)
+    nextSlices: list[str] = Field(default_factory=list)
+    controls: list[str] = Field(default_factory=list)
+
+
+class HrmReadinessIntegrationOut(BaseModel):
+    id: str
+    title: str
+    status: str
+    direction: str
+    minimumContract: list[str] = Field(default_factory=list)
+    nextSlice: str
+
+
+class HrmReadinessAiControlOut(BaseModel):
+    id: str
+    title: str
+    classification: str
+    allowedUse: list[str] = Field(default_factory=list)
+    prohibitedUse: list[str] = Field(default_factory=list)
+    requiredControls: list[str] = Field(default_factory=list)
+
+
+class HrmReadinessOut(BaseModel):
+    status: str
+    country: str
+    asOf: str
+    minimumChecklist: list[str]
+    capabilities: list[HrmReadinessCapabilityOut]
+    integrations: list[HrmReadinessIntegrationOut]
+    aiControls: list[HrmReadinessAiControlOut]
+    residualRisks: list[str]
+
+
+_HRM_MINIMUM_CHECKLIST = [
+    "Digitale Personalakte",
+    "DSGVO-konformes Rechte- und Loeschkonzept",
+    "Arbeitszeiterfassung",
+    "Urlaubs- und Abwesenheitsmanagement",
+    "eAU-Prozess",
+    "Payroll-/DATEV-Schnittstelle",
+    "Vertrags- und Dokumentenvorlagen",
+    "Employee Self Service",
+    "Manager Self Service",
+    "Recruiting und Bewerbermanagement",
+    "Onboarding und Offboarding",
+    "Workflows mit Freigaben",
+    "Reporting und HR-Dashboards",
+    "Microsoft-365-, LibreOffice- und Google-Workspace-Integration",
+    "Sichere KI-Funktionen mit menschlicher Kontrolle",
+]
+
+
+def build_hrm_readiness() -> HrmReadinessOut:
+    """Return the German HRM target contract used by UI, docs and tests."""
+
+    capabilities = [
+        HrmReadinessCapabilityOut(
+            id="hrm-personnel-file",
+            title="Digitale Personalakte und Stammdaten",
+            status="gap",
+            priority="P0",
+            legalBasis=["DSGVO", "BDSG §26", "Nachweisgesetz"],
+            implementedEvidence=["GET/POST/PUT /api/v1/personal/mitarbeiter", "GET /api/v1/personal/time-profiles"],
+            missingCapabilities=[
+                "Dokumentenakte mit Verträgen, Nachweisen, Bescheinigungen und Gehaltsdokumenten",
+                "Fristen, Historie, Änderungsprotokoll und Aufbewahrungs-/Loeschkonzept je Dokumentklasse",
+                "Rollenrechte bis Dokumenttyp und Zweckbindung",
+            ],
+            nextSlices=["HRM-AKTE-001", "HRM-DMS-001", "HRM-RETENTION-001"],
+            controls=["Datenminimierung", "Need-to-know-Rollen", "Audit-Log", "Export und Loeschlauf"],
+        ),
+        HrmReadinessCapabilityOut(
+            id="hrm-time-absence",
+            title="Arbeitszeit, Urlaub und Abwesenheiten",
+            status="implemented",
+            priority="P0",
+            legalBasis=["BAG 1 ABR 22/21", "ArbSchG §3 Abs. 2 Nr. 1", "ArbZG"],
+            implementedEvidence=[
+                "GET /api/v1/personal/time-cockpit",
+                "POST /api/v1/personal/time-entries",
+                "POST /api/v1/personal/absences/import",
+                "GET /api/v1/personal/work-plan",
+            ],
+            missingCapabilities=["Tarif-/Betriebsvereinbarungs-Regelkalibrierung", "produktive Terminal-/Mobile-Adapter"],
+            nextSlices=["HR-TIME-RULES-001", "HR-TIME-MOBILE-001"],
+            controls=["Korrekturgrund", "Managerfreigabe", "Payroll-Blocker", "Keine stille Änderung exportierter Zeiten"],
+        ),
+        HrmReadinessCapabilityOut(
+            id="hrm-eau",
+            title="eAU und Krankmeldung",
+            status="gap",
+            priority="P0",
+            legalBasis=["SGB IV §109", "Entgeltfortzahlungsgesetz"],
+            implementedEvidence=["POST /api/v1/personal/absences/import kann Krankheit als Abwesenheit spiegeln"],
+            missingCapabilities=[
+                "Krankmeldung durch Mitarbeitende mit Fristen und Nachweispflicht",
+                "eAU-Abfrage, Krankenkassen-Rueckmeldung, Statusueberwachung und Fehlercodes",
+                "Trennung medizinischer Detaildaten von HR-Planungsdaten",
+            ],
+            nextSlices=["HRM-EAU-001"],
+            controls=["Nur erforderliche Statusdaten speichern", "Fristenmonitor", "Audit ohne Diagnosedaten"],
+        ),
+        HrmReadinessCapabilityOut(
+            id="hrm-payroll",
+            title="Payroll-/DATEV-Vorbereitung",
+            status="partial",
+            priority="P0",
+            legalBasis=["GoBD", "SV-Meldeportal ist kein Entgeltabrechnungsersatz"],
+            implementedEvidence=["GET/POST /api/v1/personal/payroll-exports", "Payroll-Readiness im Time-Cockpit"],
+            missingCapabilities=["DATEV LODAS/Lohn-und-Gehalt Zielformat", "Sachbezüge, variable Vergütung, Zuschläge, Monatsabschluss"],
+            nextSlices=["HR-TIME-PAYROLL-CLOSE-001", "HRM-DATEV-001"],
+            controls=["Nur freigegebene Werte exportieren", "Kostenstellen", "Blockerliste", "Exportprotokoll"],
+        ),
+        HrmReadinessCapabilityOut(
+            id="hrm-contract-documents",
+            title="Vertrags- und Dokumentenmanagement",
+            status="gap",
+            priority="P0",
+            legalBasis=["Nachweisgesetz 2025 Textform-Ausbau", "DSGVO"],
+            implementedEvidence=["Onboarding-Checklisten über /api/v1/training/onboarding/*"],
+            missingCapabilities=["Vorlagenbibliothek", "Textform-/Schriftform-Ausnahmen", "E-Signatur", "revisionssichere Ablage"],
+            nextSlices=["HRM-CONTRACTS-001", "HRM-ESIGN-001"],
+            controls=["Vorlagenversion", "Empfangsbestaetigung", "Archivfristen", "Schriftformwunsch dokumentieren"],
+        ),
+        HrmReadinessCapabilityOut(
+            id="hrm-self-service",
+            title="Employee und Manager Self Service",
+            status="partial",
+            priority="P1",
+            legalBasis=["DSGVO Rollen- und Zweckbindung", "Betriebsratsfaehigkeit"],
+            implementedEvidence=["Zeitbuchung, Abwesenheitsimport, Schicht-/Kalender-/Onboarding-Sichten"],
+            missingCapabilities=["Mitarbeiterdaten-Aenderungsantrag", "Bescheinigungsdownload", "Teamkalender", "Headcount-/Budget-Sichten"],
+            nextSlices=["HRM-ESS-001", "HRM-MSS-001"],
+            controls=["Vier-Augen-Freigaben", "Rollenfilter", "keine verdeckte Leistungsueberwachung"],
+        ),
+        HrmReadinessCapabilityOut(
+            id="hrm-recruiting-development",
+            title="Recruiting, Onboarding, Performance und Entwicklung",
+            status="partial",
+            priority="P1",
+            legalBasis=["DSGVO Bewerberloeschfristen", "EU AI Act Annex III bei KI-Screening"],
+            implementedEvidence=["/api/v1/training/onboarding/*", "/api/v1/training/qualifications"],
+            missingCapabilities=["Bewerbermanagement", "Talentpool-Loeschfristen", "Interviewplanung", "Zielvereinbarungen", "360-Feedback", "Nachfolgeplanung"],
+            nextSlices=["HRM-RECRUITING-001", "HRM-PERFORMANCE-001"],
+            controls=["Bewerber-Retention", "Human-in-the-loop", "Betriebsratsfaehige Auswertungen"],
+        ),
+        HrmReadinessCapabilityOut(
+            id="hrm-analytics-compliance",
+            title="Reporting, People Analytics, Datenschutz und Mandantenfaehigkeit",
+            status="partial",
+            priority="P0",
+            legalBasis=["DSGVO", "BDSG §26", "BetrVG Mitbestimmung", "EU AI Act"],
+            implementedEvidence=["Time-Cockpit KPIs", "tenant_id auf HR-Time-Tabellen", "Audit-/Statusfelder in HR-Time-Slices"],
+            missingCapabilities=["Headcount, Fluktuation, Krankenstand, Diversity, Personalkosten", "DSFA-Workflow", "AVV-/DPA-Register", "MFA/SSO-Readiness je Connector"],
+            nextSlices=["HRM-ANALYTICS-001", "HRM-PRIVACY-001", "HRM-AI-GOV-001"],
+            controls=["Aggregationsschwellen", "PII-Minimierung", "Exportierbarkeit", "keine heimliche Leistungsueberwachung"],
+        ),
+    ]
+
+    integrations = [
+        HrmReadinessIntegrationOut(
+            id="microsoft-365",
+            title="Microsoft 365, Teams, Outlook, Entra ID",
+            status="planned",
+            direction="bidirectional",
+            minimumContract=["SSO", "Kalender-Busy-Blocker", "Abwesenheitskalender", "Benutzeranlage", "Teams-Benachrichtigung"],
+            nextSlice="HRM-M365-001",
+        ),
+        HrmReadinessIntegrationOut(
+            id="google-workspace",
+            title="Google Workspace",
+            status="planned",
+            direction="bidirectional",
+            minimumContract=["OAuth Scopes", "Calendar Events", "Directory Mapping", "Busy-only Datenschutz"],
+            nextSlice="HRM-GOOGLE-001",
+        ),
+        HrmReadinessIntegrationOut(
+            id="libreoffice",
+            title="LibreOffice Dokumentvorlagen",
+            status="planned",
+            direction="export",
+            minimumContract=["ODT/DOCX Vorlagen", "Serienbriefdaten", "PDF-Erzeugung", "Vorlagenversion"],
+            nextSlice="HRM-LIBREOFFICE-001",
+        ),
+        HrmReadinessIntegrationOut(
+            id="datev-payroll",
+            title="DATEV, Steuerberater und Payroll",
+            status="partial",
+            direction="export",
+            minimumContract=["Stammdaten", "Bewegungsdaten", "Fehlzeiten", "Kostenstellen", "Lohnarten", "Monatsabschluss"],
+            nextSlice="HRM-DATEV-001",
+        ),
+        HrmReadinessIntegrationOut(
+            id="dms-esign",
+            title="DMS und E-Signatur",
+            status="planned",
+            direction="bidirectional",
+            minimumContract=["Dokumentenklasse", "Retention", "Signaturstatus", "Audit-Ref", "Exportpaket"],
+            nextSlice="HRM-DMS-001",
+        ),
+    ]
+
+    ai_controls = [
+        HrmReadinessAiControlOut(
+            id="hrm-ai-assist",
+            title="Kontrollierte HR-KI",
+            classification="assistive",
+            allowedUse=["Stellenanzeigen-Entwurf", "Dokumentensuche", "Zusammenfassungen", "Lernempfehlungen", "HR-Chatbot mit Quellen"],
+            prohibitedUse=["Emotionserkennung am Arbeitsplatz", "automatische Personalentscheidung", "verdeckte Leistungsueberwachung"],
+            requiredControls=["Human approval", "Protokollierung", "Quellenanzeige", "Opt-out/Policy", "Keine sensiblen Merkmale als Entscheidungstreiber"],
+        ),
+        HrmReadinessAiControlOut(
+            id="hrm-ai-high-risk",
+            title="Recruiting und Personalmanagement KI",
+            classification="EU AI Act high-risk when used for employment decisions",
+            allowedUse=["Vorsortierung nur mit dokumentierter menschlicher Pruefung", "Skill-Matching als Empfehlung"],
+            prohibitedUse=["Blackbox-CV-Sorting", "automatische Ablehnung ohne menschliche Aufsicht"],
+            requiredControls=["Risikomanagement", "Datenqualitaet", "Technische Dokumentation", "Transparenz", "menschliche Aufsicht", "Robustheit", "Cybersecurity"],
+        ),
+    ]
+
+    return HrmReadinessOut(
+        status="partial",
+        country="DE",
+        asOf="2026-05-13",
+        minimumChecklist=_HRM_MINIMUM_CHECKLIST,
+        capabilities=capabilities,
+        integrations=integrations,
+        aiControls=ai_controls,
+        residualRisks=[
+            "Rechtsfeinpruefung und Betriebsvereinbarungen muessen vor Produktivbetrieb abgeschlossen sein.",
+            "Produktive eAU-, DATEV-, Microsoft-365- und Google-Workspace-Zugangsdaten fehlen.",
+            "AVV/DPA, Hostingort, Subprozessoren und DSFA sind je Fremdanbieter zu pruefen.",
+        ],
+    )
+
+
 _PRODUCTIVE_DRIVER_EVENT_TYPES = {"DRIVING", "LOADING", "UNLOADING", "OTHER_WORK", "AVAILABILITY"}
 _REST_DRIVER_EVENT_TYPES = {"BREAK", "DAILY_REST", "WEEKLY_REST"}
 _DRIVER_ACTIVITY_LABELS = {
@@ -1684,6 +1929,11 @@ def _pilot_time_entries(target_date: str) -> list[dict[str, Any]]:
             "status": "Approved",
         },
     ]
+
+
+@router.get("/hrm-readiness", response_model=HrmReadinessOut)
+async def get_hrm_readiness(_tenant_id: str = Depends(get_tenant_id)):
+    return build_hrm_readiness()
 
 
 @router.get("/time-profiles", response_model=EmployeeTimeProfileCatalogOut)
