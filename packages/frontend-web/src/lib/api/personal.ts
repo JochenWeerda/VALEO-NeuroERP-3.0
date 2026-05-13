@@ -318,6 +318,47 @@ export type WorkPlan = {
   generatedAt: string
 }
 
+export type HrmReadinessCapability = {
+  id: string
+  title: string
+  status: string
+  priority: string
+  legalBasis: string[]
+  implementedEvidence: string[]
+  missingCapabilities: string[]
+  nextSlices: string[]
+  controls: string[]
+}
+
+export type HrmReadinessIntegration = {
+  id: string
+  title: string
+  status: string
+  direction: string
+  minimumContract: string[]
+  nextSlice: string
+}
+
+export type HrmReadinessAiControl = {
+  id: string
+  title: string
+  classification: string
+  allowedUse: string[]
+  prohibitedUse: string[]
+  requiredControls: string[]
+}
+
+export type HrmReadiness = {
+  status: string
+  country: string
+  asOf: string
+  minimumChecklist: string[]
+  capabilities: HrmReadinessCapability[]
+  integrations: HrmReadinessIntegration[]
+  aiControls: HrmReadinessAiControl[]
+  residualRisks: string[]
+}
+
 export type SchulungTyp = 'PSM' | 'Gefahrstoffe' | 'Gabelstapler' | 'Erste Hilfe' | 'Brandschutz' | 'Arbeitssicherheit'
 export type SchulungStatus = 'gueltig' | 'ablaufend' | 'abgelaufen'
 
@@ -403,6 +444,7 @@ export const personalKeys = {
   campaignCapacity: () => [...personalKeys.all, 'campaign-capacity'] as const,
   fieldServicePlan: () => [...personalKeys.all, 'field-service-plan'] as const,
   workPlan: (filters?: Record<string, unknown>) => [...personalKeys.all, 'work-plan', filters] as const,
+  hrmReadiness: () => [...personalKeys.all, 'hrm-readiness'] as const,
   schulungen: (filters?: Record<string, unknown>) => [...personalKeys.all, 'schulungen', filters] as const,
   qualifikationen: (filters?: Record<string, unknown>) => [...personalKeys.all, 'qualifikationen', filters] as const,
   onboardingRuns: (filters?: Record<string, unknown>) => [...personalKeys.all, 'onboarding-runs', filters] as const,
@@ -470,6 +512,16 @@ const EMPTY_WORK_PLAN: WorkPlan = {
   findings: [],
   printTitle: '',
   generatedAt: '',
+}
+const EMPTY_HRM_READINESS: HrmReadiness = {
+  status: 'unknown',
+  country: 'DE',
+  asOf: '',
+  minimumChecklist: [],
+  capabilities: [],
+  integrations: [],
+  aiControls: [],
+  residualRisks: [],
 }
 const EMPTY_SCHULUNGEN_LIST: Schulung[] = []
 const EMPTY_STUNDENZETTEL_LIST: StundenzettelEintrag[] = []
@@ -713,6 +765,15 @@ export function useWorkPlan(filters: { periodFrom: string; periodTo: string; hol
     },
     placeholderData: EMPTY_WORK_PLAN,
     staleTime: 30_000,
+  })
+}
+
+export function useHrmReadiness() {
+  return useQuery({
+    queryKey: personalKeys.hrmReadiness(),
+    queryFn: async () => (await apiClient.get<HrmReadiness>('/api/v1/personal/hrm-readiness')).data,
+    placeholderData: EMPTY_HRM_READINESS,
+    staleTime: 5 * 60 * 1000,
   })
 }
 

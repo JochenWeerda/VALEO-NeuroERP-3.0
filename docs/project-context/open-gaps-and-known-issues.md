@@ -51,6 +51,14 @@ Zuletzt vollstaendig auditiert: **2026-05-05**.
 - Der naechste sinnvolle Umsetzungsschritt ist ein Pilot-Slice fuer Driver-Time-Datenmodell, manuelle Fahrerzeitereignisse, Tour-/Fahrzeugbezug und Abwesenheitskollisionen.
 - Offene externe Risiken: Rechtspruefung, Anbieter-AVV/DPA, Tacho-/Telematik-Schnittstellen und Payroll-/DATEV-Zielformat.
 
+### HRM-GERMANY-GAP-001: Deutsches HRM-Betriebssystem ueber HR-Time hinaus
+
+- HR-Time deckt Arbeitszeit, Abwesenheit, Schicht, Kalender, Fahrerzeit und Payroll-Readiness bereits als operativen Kern ab; ein vollstaendiges deutsches HRM-System braucht zusaetzlich Personalakte, eAU, Vertrags-/Dokumentenmanagement, ESS/MSS, Recruiting, Performance, People Analytics, Datenschutz-Governance, kontrollierte KI und Office-Connectoren.
+- Der Zielvertrag und die Gap-Matrix liegen in [hrm-germany-operating-system-gap-plan-2026-05-13.md](c:/Users/Jochen/VALEO-NeuroERP-3.0/docs/project-context/hrm-germany-operating-system-gap-plan-2026-05-13.md).
+- Repo-seitig ist der maschinenlesbare Readiness-Vertrag unter `GET /api/v1/personal/hrm-readiness` verfuegbar.
+- Die naechsten fachlichen Slices sind `HRM-AKTE-001`, `HRM-EAU-001`, `HRM-DATEV-001`, `HRM-CONTRACTS-001`, `HRM-ESS-001`, `HRM-MSS-001`, `HRM-RECRUITING-001`, `HRM-ANALYTICS-001`, `HRM-AI-GOV-001`, `HRM-M365-001`, `HRM-GOOGLE-001` und `HRM-LIBREOFFICE-001`.
+- Offene externe Risiken: Rechtsfeinpruefung, Betriebsvereinbarungen, AVV/DPA, echte eAU-/DATEV-/Office-Zugangsdaten, Hosting-/Subprozessorenpruefung und DSFA fuer risikoreiche Analytics oder KI.
+
 ---
 
 ## P4 - Externe Abhaengigkeiten (nicht repo-seitig loesbar)
