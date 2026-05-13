@@ -138,11 +138,12 @@ Stand: `2026-05-12`
 
 **Von:** Codex
 **Owner:** Codex
-**Stand:** reserviert 2026-05-13
+**Stand:** abgeschlossen 2026-05-13
 **Ziel des Slices:** HRM-Go-live-Gesamtwerk in einzelne, direkt auffindbare Formular-Dateien unter `docs/hrm-go-live-templates/` zerlegen, ohne den fachlichen Master zu duplizieren.
 **Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/agent-ops/slices/HRM-GO-LIVE-TEMPLATES-003.yaml`, `docs/hrm-go-live-templates/README.md`, `docs/hrm-go-live-templates/01_hrm_go_live_freigabeprotokoll.md`, `docs/hrm-go-live-templates/02_betriebsratsstatus_kein_betriebsrat.md`, `docs/hrm-go-live-templates/03_mitarbeiterinformation_hrm.md`, `docs/hrm-go-live-templates/04_vvt_hrm_system.md`, `docs/hrm-go-live-templates/05_avv_dpa_pruefprotokoll.md`, `docs/hrm-go-live-templates/06_dsfa_vorpruefung.md`, `docs/hrm-go-live-templates/07_rollen_berechtigungskonzept.md`, `docs/hrm-go-live-templates/08_tom_it_sicherheitsfreigabe.md`, `docs/hrm-go-live-templates/09_retention_loeschkonzept.md`, `docs/hrm-go-live-templates/10_eau_freigabeprotokoll.md`, `docs/hrm-go-live-templates/11_datev_payroll_abnahme.md`, `docs/hrm-go-live-templates/12_office_sso_abnahme.md`, `docs/hrm-go-live-templates/13_dms_esignatur_rendering_abnahme.md`, `docs/hrm-go-live-templates/14_ki_assistenz_reporting_freigabe.md`, `docs/hrm-go-live-templates/15_evidence_auditprotokoll.md`, `docs/hrm-go-live-templates/16_geschaeftsfuehrungsfreigabe.md`, `docs/hrm-go-live-templates/17_betriebsvereinbarung_optional.md`
 **Abnahmekriterien:** Alle im README genannten Einzelvorlagen existieren; jede Einzelvorlage ist als Auszug mit Zweck, Verwendung und Link zum Master auffindbar; keine Einzelvorlage nennt hypothetische, nicht vorgesehene HRM-Funktionen; Doku-Checks sind gruen.
-**Checks:** offen
+**Erledigt:** Einzelvorlagen `01_...` bis `17_...` unter `docs/hrm-go-live-templates/` ergaenzt und im README verlinkt. Jede Vorlage ist als Arbeitsauszug aus dem Master gekennzeichnet und auf den realen HRM-Funktionsumfang begrenzt. HRM-Plan und Open-Gaps-Doku nennen die operativen Einzelvorlagen.
+**Checks:** `Get-ChildItem -Path docs/hrm-go-live-templates -Filter *.md`; `rg -n "Emotion|Scoring|Ranking|Score|Profiling|verdeckte|heimliche|Leistungsueberwachung|Verhaltens|KI-/Analytics|Analytics-/KI|Reports und Scores" docs/hrm-go-live-templates` (keine Treffer); `$files = (Get-ChildItem -Path docs/hrm-go-live-templates -Filter *.md | ForEach-Object { $_.FullName }); node scripts/docs-markdown-check.cjs @files`; `python scripts/agent_workboard_supervisor.py validate`; `node scripts/docs-governance-check.cjs`; `git diff --check`
 **Offene Risiken:** Die Einzeldateien sind Arbeitskopien aus dem Master; bei inhaltlichen Aenderungen muss der Master als Source of Truth zuerst angepasst werden.
 
 ## TODO-SPRINT-001
