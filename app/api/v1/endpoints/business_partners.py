@@ -14,8 +14,10 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
+from app.core.exceptions import ConflictError, EntityNotFoundError, ValidationFailedError
 from app.core.uuid7 import uuid7
 from app.core.tenant import get_tenant_id
+from app.services.business_partner_service import BusinessPartnerService
 from app.infrastructure.models import (
     BusinessPartnerAddress,
     BusinessPartnerBillingConfig,
@@ -1221,12 +1223,8 @@ async def create_business_partner(
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db)
 ):
-    existing = (
-        db.query(BusinessPartner)
-        .filter(BusinessPartner.tenant_id == tenant_id)
-        .filter(BusinessPartner.partner_number == payload.business_partner.core_identity.partner_number)
-        .first()
-    )
+    svc = BusinessPartnerService(db, tenant_id)
+    existing = svc.repo.get_by_partner_number(payload.business_partner.core_identity.partner_number)
     if existing:
         raise HTTPException(status_code=409, detail="partner_number already exists")
 
@@ -1262,13 +1260,8 @@ async def list_business_partners(
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
-    q = db.query(BusinessPartner).filter(BusinessPartner.tenant_id == tenant_id)
-    if status:
-        q = q.filter(BusinessPartner.status == status)
-    if search:
-        s = f"%{search}%"
-        q = q.filter((BusinessPartner.partner_number.ilike(s)) | (BusinessPartner.name_1.ilike(s)))
-    rows = q.order_by(BusinessPartner.name_1.asc()).offset(skip).limit(limit).all()
+    svc = BusinessPartnerService(db, tenant_id)
+    rows, _ = svc.list_partners(query=search, status=status, skip=skip, limit=limit)
     return [_to_out(r) for r in rows]
 
 
@@ -1278,13 +1271,10 @@ async def get_business_partner(
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db)
 ):
-    row = db.query(BusinessPartner).filter(
-        BusinessPartner.partner_id == partner_id,
-        BusinessPartner.tenant_id == tenant_id
-    ).first()
-    if not row:
+    try:
+        return _to_out(BusinessPartnerService(db, tenant_id).get_partner(partner_id))
+    except EntityNotFoundError:
         raise HTTPException(status_code=404, detail="Business partner not found")
-    return _to_out(row)
 
 
 @router.put("/{partner_id}", response_model=BusinessPartnerEnvelope)
@@ -1294,20 +1284,14 @@ async def update_business_partner(
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db)
 ):
-    row = db.query(BusinessPartner).filter(
-        BusinessPartner.partner_id == partner_id,
-        BusinessPartner.tenant_id == tenant_id
-    ).first()
-    if not row:
+    svc = BusinessPartnerService(db, tenant_id)
+    try:
+        row = svc.get_partner(partner_id)
+    except EntityNotFoundError:
         raise HTTPException(status_code=404, detail="Business partner not found")
 
     if payload.business_partner.core_identity.partner_number != row.partner_number:
-        duplicate = (
-            db.query(BusinessPartner)
-            .filter(BusinessPartner.tenant_id == tenant_id)
-            .filter(BusinessPartner.partner_number == payload.business_partner.core_identity.partner_number)
-            .first()
-        )
+        duplicate = svc.repo.get_by_partner_number(payload.business_partner.core_identity.partner_number)
         if duplicate:
             raise HTTPException(status_code=409, detail="partner_number already exists")
 

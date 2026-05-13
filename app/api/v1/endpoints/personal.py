@@ -13,7 +13,9 @@ from sqlalchemy import text
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
+from app.core.exceptions import EntityNotFoundError
 from app.core.tenant import get_tenant_id
+from app.services.personal_service import PersonalService
 
 router = APIRouter(prefix="/personal", tags=["personal", "hr"])
 
@@ -2014,54 +2016,8 @@ async def list_mitarbeiter(
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
-    params: dict[str, Any] = {"tenant_id": tenant_id}
-    where = ["tenant_id = :tenant_id"]
-    if search and search.strip():
-        params["needle"] = f"%{search.strip()}%"
-        where.append("(username ILIKE :needle OR email ILIKE :needle OR first_name ILIKE :needle OR last_name ILIKE :needle)")
-    if status in {"aktiv", "inaktiv"}:
-        params["is_active"] = status == "aktiv"
-        where.append("is_active = :is_active")
-
-    rows = db.execute(
-        text(
-            f"""
-            SELECT id, username, email, first_name, last_name, roles, is_active, preferences, created_at
-            FROM domain_shared.users
-            WHERE {' AND '.join(where)}
-            ORDER BY last_name ASC, first_name ASC, username ASC
-            """
-        ),
-        params,
-    ).mappings().all()
-
-    out: list[MitarbeiterOut] = []
-    for row in rows:
-        roles = row.get("roles") or []
-        role_name = "Mitarbeiter"
-        if isinstance(roles, list) and roles:
-            role_name = str(roles[0])
-        prefs = _parse_preferences(row.get("preferences"))
-        hr_status = _normalize_status(prefs.get("hr_status"), "aktiv" if bool(row.get("is_active")) else "krank")
-        abteilung = str(prefs.get("abteilung") or "Allgemein")
-        first = (row.get("first_name") or "").strip()
-        last = (row.get("last_name") or "").strip()
-        display = f"{first} {last}".strip() or (row.get("username") or row.get("email") or str(row["id"]))
-        out.append(
-            MitarbeiterOut(
-                id=str(row["id"]),
-                name=display,
-                email=str(row.get("email") or ""),
-                abteilung=abteilung,
-                position=role_name,
-                eintrittsdatum=_to_iso(row.get("created_at")),
-                status=hr_status,
-            )
-        )
-
-    if status in {"aktiv", "urlaub", "krank"}:
-        out = [item for item in out if item.status == status]
-    return out
+    rows = PersonalService(db, tenant_id).list_mitarbeiter(search=search, status=status)
+    return [MitarbeiterOut(**r) for r in rows]
 
 
 @router.get("/mitarbeiter/{user_id}", response_model=MitarbeiterOut)
@@ -2070,37 +2026,10 @@ async def get_mitarbeiter(
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
-    row = db.execute(
-        text(
-            """
-            SELECT id, username, email, first_name, last_name, roles, is_active, preferences, created_at
-            FROM domain_shared.users
-            WHERE id = :user_id AND tenant_id = :tenant_id
-            """
-        ),
-        {"user_id": user_id, "tenant_id": tenant_id},
-    ).mappings().first()
-    if not row:
+    try:
+        return MitarbeiterOut(**PersonalService(db, tenant_id).get_mitarbeiter(user_id))
+    except EntityNotFoundError:
         raise HTTPException(status_code=404, detail="Mitarbeiter nicht gefunden")
-    roles = row.get("roles") or []
-    role_name = "Mitarbeiter"
-    if isinstance(roles, list) and roles:
-        role_name = str(roles[0])
-    prefs = _parse_preferences(row.get("preferences"))
-    hr_status = _normalize_status(prefs.get("hr_status"), "aktiv" if bool(row.get("is_active")) else "krank")
-    abteilung = str(prefs.get("abteilung") or "Allgemein")
-    first = (row.get("first_name") or "").strip()
-    last = (row.get("last_name") or "").strip()
-    display = f"{first} {last}".strip() or (row.get("username") or row.get("email") or str(row["id"]))
-    return MitarbeiterOut(
-        id=str(row["id"]),
-        name=display,
-        email=str(row.get("email") or ""),
-        abteilung=abteilung,
-        position=role_name,
-        eintrittsdatum=_to_iso(row.get("created_at")),
-        status=hr_status,
-    )
 
 
 @router.post("/mitarbeiter", response_model=MitarbeiterOut, status_code=201)

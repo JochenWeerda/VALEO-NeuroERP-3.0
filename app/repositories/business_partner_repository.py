@@ -77,8 +77,18 @@ class BusinessPartnerRepository(BaseRepository[BusinessPartner]):
             .all()
         )
 
-    def get_partner_or_404(self, partner_id: str) -> BusinessPartner:
-        obj = self._base_query().filter(BusinessPartner.id == partner_id).first()
+    # BusinessPartner uses partner_id as PK (not id) — override base methods
+
+    def get_by_id(self, partner_id: str) -> BusinessPartner:
+        obj = self._base_query().filter(BusinessPartner.partner_id == partner_id).first()
         if obj is None:
             raise EntityNotFoundError("BusinessPartner", partner_id)
         return obj
+
+    def get_by_id_or_none(self, partner_id: str) -> Optional[BusinessPartner]:
+        return self._base_query().filter(BusinessPartner.partner_id == partner_id).first()
+
+    def delete(self, partner_id: str) -> None:
+        obj = self.get_by_id(partner_id)
+        self.db.delete(obj)
+        self.db.commit()

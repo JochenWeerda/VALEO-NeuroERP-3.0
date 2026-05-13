@@ -61,7 +61,8 @@ class BusinessPartnerService:
         existing = self.repo.get_by_partner_number(payload.get("partner_number", ""))
         if existing:
             raise ConflictError(f"partner_number '{payload['partner_number']}' already exists")
-        partner = BusinessPartner(id=uuid7(), tenant_id=self.tenant_id, **payload)
+        partner_id = payload.pop("partner_id", None) or uuid7()
+        partner = BusinessPartner(partner_id=partner_id, tenant_id=self.tenant_id, **payload)
         try:
             return self.repo.create(partner)
         except IntegrityError as exc:
