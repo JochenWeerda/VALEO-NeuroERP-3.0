@@ -42,11 +42,12 @@ Stand: `2026-05-12`
 
 **Von:** Codex
 **Owner:** Codex
-**Stand:** reserviert 2026-05-13
+**Stand:** abgeschlossen 2026-05-13
 **Ziel des Slices:** Alle verbleibenden HRM-Plan-Gaps repo-seitig als API-/Frontend-/Doku-Vertraege schliessen: eAU, DATEV/Payroll-Closeout, Vertragsvorlagen, ESS, MSS, Recruiting, Analytics, Privacy, AI-Governance und Office-Connectoren.
 **Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/agent-ops/slices/HRM-GAP-CLOSURE-001.yaml`, `docs/project-context/hrm-germany-operating-system-gap-plan-2026-05-13.md`, `docs/project-context/open-gaps-and-known-issues.md`, `app/api/v1/endpoints/personal.py`, `tests/test_personal_hrm_gap_closure_api.py`, `packages/frontend-web/src/lib/api/personal.ts`
 **Abnahmekriterien:** HRM-Plan weist keine fachlichen Repo-Gaps mehr aus; jeder verbliebene Punkt hat einen API-Vertrag und Frontend-Hook; Tests sichern eAU ohne Diagnosedaten, DATEV-Closeout, Vertragsvorlagen, ESS/MSS, Recruiting-Retention, Analytics-Aggregationsschutz, AI-Human-Gate und Office-Connector-Readiness.
-**Checks:** `pytest tests/test_personal_hrm_gap_closure_api.py -q --no-cov`; `pnpm --filter @valero-neuroerp/frontend-web type-check`; `python -m py_compile app/api/v1/endpoints/personal.py tests/test_personal_hrm_gap_closure_api.py`; `python scripts/agent_workboard_supervisor.py validate`; `node scripts/docs-governance-check.cjs`; `git diff --check`
+**Erledigt:** `GET /api/v1/personal/hrm-operating-system` eingefuehrt; HRM-Plan weist keine fachlichen Repo-Gaps mehr aus. Frontend-Hook `useHrmOperatingSystem` ergaenzt. Tests sichern eAU ohne Diagnosedaten, DATEV-Closeout, Vertragsvorlagen, ESS/MSS, Recruiting-Retention, Analytics-Aggregationsschutz, AI-Human-Gate, Office-Connector-Readiness und die kanonischen `time_entries`-Service-Regeln.
+**Checks:** `pytest tests/test_personal_hrm_gap_closure_api.py tests/test_personal_hrm_readiness_api.py tests/test_personal_employee_file_api.py -q --no-cov`; `pnpm --filter @valero-neuroerp/frontend-web type-check`; `python -m py_compile app/api/v1/endpoints/personal.py tests/test_personal_hrm_gap_closure_api.py tests/test_personal_hrm_readiness_api.py tests/test_personal_employee_file_api.py`; `python scripts/agent_workboard_supervisor.py validate`; `node scripts/docs-governance-check.cjs`; `git diff --check`
 **Offene Risiken:** Echte eAU-/DATEV-/Microsoft-/Google-/LibreOffice-/E-Signatur-Zugangsdaten, AVV/DPA, Betriebsvereinbarungen, DSFA und Rechtsfreigaben bleiben externe Betriebsfreigaben.
 
 ## TODO-SPRINT-001

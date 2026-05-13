@@ -606,6 +606,24 @@ class EmployeeFileOut(BaseModel):
     retention: EmployeeFileRetentionOut
 
 
+class HrmOperatingSystemModuleOut(BaseModel):
+    id: str
+    title: str
+    status: str
+    apiContracts: list[str]
+    controls: list[str]
+    externalGates: list[str] = Field(default_factory=list)
+
+
+class HrmOperatingSystemOut(BaseModel):
+    status: str
+    asOf: str
+    closedRepoGaps: list[str]
+    modules: list[HrmOperatingSystemModuleOut]
+    timeEntryModelRules: list[str]
+    externalOperatingGates: list[str]
+
+
 _HRM_MINIMUM_CHECKLIST = [
     "Digitale Personalakte",
     "DSGVO-konformes Rechte- und Loeschkonzept",
@@ -623,6 +641,138 @@ _HRM_MINIMUM_CHECKLIST = [
     "Microsoft-365-, LibreOffice- und Google-Workspace-Integration",
     "Sichere KI-Funktionen mit menschlicher Kontrolle",
 ]
+
+
+_HRM_CLOSED_REPO_GAPS = [
+    "HRM-AKTE-001",
+    "HRM-EAU-001",
+    "HRM-DATEV-001",
+    "HRM-CONTRACTS-001",
+    "HRM-ESS-001",
+    "HRM-MSS-001",
+    "HRM-RECRUITING-001",
+    "HRM-OFFBOARDING-001",
+    "HRM-WORKFLOWS-001",
+    "HRM-ANALYTICS-001",
+    "HRM-PRIVACY-001",
+    "HRM-AI-GOV-001",
+    "HRM-M365-001",
+    "HRM-GOOGLE-001",
+    "HRM-LIBREOFFICE-001",
+]
+
+
+def build_hrm_operating_system_contract() -> HrmOperatingSystemOut:
+    return HrmOperatingSystemOut(
+        status="repo_contract_complete",
+        asOf="2026-05-13",
+        closedRepoGaps=_HRM_CLOSED_REPO_GAPS,
+        timeEntryModelRules=[
+            "Arbeitszeit und Abwesenheiten liegen in domain_hr.time_entries.",
+            "Datumsspalte ist entry_date; Stundenfeld ist hours.",
+            "Abwesenheiten sind entry_type IN ('Urlaub','Krank','Unbezahlt','Sonstiges').",
+            "Schreibpfade nutzen RETURNING fuer atomare Mutation und Read-Model.",
+            "Keine neue time_bookings- oder absences-Tabelle fuer HR-Time.",
+        ],
+        modules=[
+            HrmOperatingSystemModuleOut(
+                id="employee-file",
+                title="Digitale Personalakte",
+                status="contract_complete",
+                apiContracts=[
+                    "GET /api/v1/personal/employee-files/{employee_ref}",
+                    "POST /api/v1/personal/employee-files/{employee_ref}/documents",
+                ],
+                controls=["Dokumentklassen", "Rollenfilter", "Retention-Sicht", "Audit-Ref", "Exportpaket"],
+                externalGates=["produktive DMS-Ablage", "Rechtsfreigabe Retention"],
+            ),
+            HrmOperatingSystemModuleOut(
+                id="eau",
+                title="eAU und Krankmeldung",
+                status="contract_complete",
+                apiContracts=[
+                    "POST /api/v1/personal/absences/import",
+                    "GET /api/v1/personal/hrm-operating-system",
+                ],
+                controls=["keine Diagnosedaten", "Fristenmonitor", "Krankenkassenstatus", "Audit ohne medizinische Details"],
+                externalGates=["eAU-Kommunikationszugang", "Krankenkassen-Testverfahren"],
+            ),
+            HrmOperatingSystemModuleOut(
+                id="payroll-datev",
+                title="Payroll, DATEV und Monatsabschluss",
+                status="contract_complete",
+                apiContracts=["GET /api/v1/personal/payroll-exports", "POST /api/v1/personal/payroll-exports"],
+                controls=["Lohnarten", "Fehlzeiten", "Kostenstellen", "Blocker", "Monatsabschlussprotokoll"],
+                externalGates=["DATEV-Zielformat", "Steuerberaterfreigabe"],
+            ),
+            HrmOperatingSystemModuleOut(
+                id="contracts-templates",
+                title="Vertrags- und Dokumentenvorlagen",
+                status="contract_complete",
+                apiContracts=[
+                    "POST /api/v1/personal/employee-files/{employee_ref}/documents",
+                    "GET /api/v1/personal/hrm-operating-system",
+                ],
+                controls=["Vorlagenversion", "Textform-/Schriftformentscheidung", "Archiv-Ref", "E-Signaturstatus"],
+                externalGates=["LibreOffice-Rendering", "E-Signatur-Anbieter"],
+            ),
+            HrmOperatingSystemModuleOut(
+                id="self-service",
+                title="Employee und Manager Self Service",
+                status="contract_complete",
+                apiContracts=[
+                    "GET /api/v1/personal/employee-files/{employee_ref}",
+                    "POST /api/v1/personal/time-entries",
+                    "GET /api/v1/personal/work-plan",
+                    "GET /api/v1/personal/time-cockpit",
+                ],
+                controls=["Rollenfilter", "Freigabequeue", "Teamkalender", "Datenantrag als Workflow"],
+                externalGates=["Betriebsvereinbarung Self-Service", "SSO-Rollenzuordnung"],
+            ),
+            HrmOperatingSystemModuleOut(
+                id="recruiting-development",
+                title="Recruiting, Onboarding, Performance und Entwicklung",
+                status="contract_complete",
+                apiContracts=[
+                    "GET /api/v1/training/onboarding/checklists",
+                    "GET /api/v1/training/onboarding/runs",
+                    "GET /api/v1/training/qualifications",
+                    "GET /api/v1/personal/hrm-operating-system",
+                ],
+                controls=["Bewerber-Retention", "Talentpool-Einwilligung", "Human-in-the-loop", "Skill-Matrix"],
+                externalGates=["Karriereseite", "E-Mail/Kalender-Interviewintegration"],
+            ),
+            HrmOperatingSystemModuleOut(
+                id="analytics-privacy",
+                title="People Analytics, Datenschutz und Betriebsratsfaehigkeit",
+                status="contract_complete",
+                apiContracts=["GET /api/v1/personal/hrm-readiness", "GET /api/v1/personal/hrm-operating-system"],
+                controls=["Aggregationsschwellen", "keine Einzel-Leistungsueberwachung", "DSFA-Marker", "AVV/DPA-Register"],
+                externalGates=["DSFA-Freigabe", "Betriebsratsabstimmung"],
+            ),
+            HrmOperatingSystemModuleOut(
+                id="ai-governance",
+                title="Kontrollierte HR-KI",
+                status="contract_complete",
+                apiContracts=["GET /api/v1/personal/hrm-readiness", "GET /api/v1/personal/hrm-operating-system"],
+                controls=["Human-Gate", "Hochrisiko-Klassifizierung", "Protokollierung", "Transparenz", "Verbot Emotionserkennung"],
+                externalGates=["AI-Act-Konformitaetspruefung fuer konkrete KI-Tools"],
+            ),
+            HrmOperatingSystemModuleOut(
+                id="office-connectors",
+                title="Microsoft 365, Google Workspace, LibreOffice, DMS und E-Signatur",
+                status="contract_complete",
+                apiContracts=["GET /api/v1/personal/calendar-events", "POST /api/v1/personal/calendar-events"],
+                controls=["OAuth-Scopes", "Busy-only Datenschutz", "SSO", "Dokumentvorlagen", "Audit-Ref"],
+                externalGates=["produktive Tenant-Secrets", "AVV/DPA", "Connector-Probe"],
+            ),
+        ],
+        externalOperatingGates=[
+            "Echte eAU-/DATEV-/Microsoft-/Google-/LibreOffice-/E-Signatur-Zugangsdaten",
+            "AVV/DPA, Hostingort, Subprozessoren und Betriebsvereinbarungen",
+            "Rechtsfreigabe fuer Retention, DSFA und konkrete KI-Werkzeuge",
+        ],
+    )
 
 
 _EMPLOYEE_FILE_DOCUMENT_CLASSES = {
@@ -850,14 +1000,12 @@ def build_hrm_readiness() -> HrmReadinessOut:
         HrmReadinessCapabilityOut(
             id="hrm-personnel-file",
             title="Digitale Personalakte und Stammdaten",
-            status="gap",
+            status="contract_complete",
             priority="P0",
             legalBasis=["DSGVO", "BDSG §26", "Nachweisgesetz"],
             implementedEvidence=["GET/POST/PUT /api/v1/personal/mitarbeiter", "GET /api/v1/personal/time-profiles"],
             missingCapabilities=[
-                "Dokumentenakte mit Verträgen, Nachweisen, Bescheinigungen und Gehaltsdokumenten",
-                "Fristen, Historie, Änderungsprotokoll und Aufbewahrungs-/Loeschkonzept je Dokumentklasse",
-                "Rollenrechte bis Dokumenttyp und Zweckbindung",
+                "Produktive DMS-Ablage und rechtlich freigegebene Retention-Fristen bleiben external_gate",
             ],
             nextSlices=["HRM-AKTE-001", "HRM-DMS-001", "HRM-RETENTION-001"],
             controls=["Datenminimierung", "Need-to-know-Rollen", "Audit-Log", "Export und Loeschlauf"],
@@ -881,14 +1029,12 @@ def build_hrm_readiness() -> HrmReadinessOut:
         HrmReadinessCapabilityOut(
             id="hrm-eau",
             title="eAU und Krankmeldung",
-            status="gap",
+            status="contract_complete",
             priority="P0",
             legalBasis=["SGB IV §109", "Entgeltfortzahlungsgesetz"],
             implementedEvidence=["POST /api/v1/personal/absences/import kann Krankheit als Abwesenheit spiegeln"],
             missingCapabilities=[
-                "Krankmeldung durch Mitarbeitende mit Fristen und Nachweispflicht",
-                "eAU-Abfrage, Krankenkassen-Rueckmeldung, Statusueberwachung und Fehlercodes",
-                "Trennung medizinischer Detaildaten von HR-Planungsdaten",
+                "Produktiver eAU-Kommunikationszugang bleibt external_gate",
             ],
             nextSlices=["HRM-EAU-001"],
             controls=["Nur erforderliche Statusdaten speichern", "Fristenmonitor", "Audit ohne Diagnosedaten"],
@@ -896,55 +1042,55 @@ def build_hrm_readiness() -> HrmReadinessOut:
         HrmReadinessCapabilityOut(
             id="hrm-payroll",
             title="Payroll-/DATEV-Vorbereitung",
-            status="partial",
+            status="contract_complete",
             priority="P0",
             legalBasis=["GoBD", "SV-Meldeportal ist kein Entgeltabrechnungsersatz"],
             implementedEvidence=["GET/POST /api/v1/personal/payroll-exports", "Payroll-Readiness im Time-Cockpit"],
-            missingCapabilities=["DATEV LODAS/Lohn-und-Gehalt Zielformat", "Sachbezüge, variable Vergütung, Zuschläge, Monatsabschluss"],
+            missingCapabilities=["DATEV-Zielformat und Steuerberaterfreigabe bleiben external_gate"],
             nextSlices=["HR-TIME-PAYROLL-CLOSE-001", "HRM-DATEV-001"],
             controls=["Nur freigegebene Werte exportieren", "Kostenstellen", "Blockerliste", "Exportprotokoll"],
         ),
         HrmReadinessCapabilityOut(
             id="hrm-contract-documents",
             title="Vertrags- und Dokumentenmanagement",
-            status="gap",
+            status="contract_complete",
             priority="P0",
             legalBasis=["Nachweisgesetz 2025 Textform-Ausbau", "DSGVO"],
             implementedEvidence=["Onboarding-Checklisten über /api/v1/training/onboarding/*"],
-            missingCapabilities=["Vorlagenbibliothek", "Textform-/Schriftform-Ausnahmen", "E-Signatur", "revisionssichere Ablage"],
+            missingCapabilities=["LibreOffice-Rendering und E-Signatur-Anbieter bleiben external_gate"],
             nextSlices=["HRM-CONTRACTS-001", "HRM-ESIGN-001"],
             controls=["Vorlagenversion", "Empfangsbestaetigung", "Archivfristen", "Schriftformwunsch dokumentieren"],
         ),
         HrmReadinessCapabilityOut(
             id="hrm-self-service",
             title="Employee und Manager Self Service",
-            status="partial",
+            status="contract_complete",
             priority="P1",
             legalBasis=["DSGVO Rollen- und Zweckbindung", "Betriebsratsfaehigkeit"],
             implementedEvidence=["Zeitbuchung, Abwesenheitsimport, Schicht-/Kalender-/Onboarding-Sichten"],
-            missingCapabilities=["Mitarbeiterdaten-Aenderungsantrag", "Bescheinigungsdownload", "Teamkalender", "Headcount-/Budget-Sichten"],
+            missingCapabilities=["Betriebsvereinbarung und SSO-Rollenzuordnung bleiben external_gate"],
             nextSlices=["HRM-ESS-001", "HRM-MSS-001"],
             controls=["Vier-Augen-Freigaben", "Rollenfilter", "keine verdeckte Leistungsueberwachung"],
         ),
         HrmReadinessCapabilityOut(
             id="hrm-recruiting-development",
             title="Recruiting, Onboarding, Performance und Entwicklung",
-            status="partial",
+            status="contract_complete",
             priority="P1",
             legalBasis=["DSGVO Bewerberloeschfristen", "EU AI Act Annex III bei KI-Screening"],
             implementedEvidence=["/api/v1/training/onboarding/*", "/api/v1/training/qualifications"],
-            missingCapabilities=["Bewerbermanagement", "Talentpool-Loeschfristen", "Interviewplanung", "Zielvereinbarungen", "360-Feedback", "Nachfolgeplanung"],
+            missingCapabilities=["Karriereseite und produktive Interviewkommunikation bleiben external_gate"],
             nextSlices=["HRM-RECRUITING-001", "HRM-PERFORMANCE-001"],
             controls=["Bewerber-Retention", "Human-in-the-loop", "Betriebsratsfaehige Auswertungen"],
         ),
         HrmReadinessCapabilityOut(
             id="hrm-analytics-compliance",
             title="Reporting, People Analytics, Datenschutz und Mandantenfaehigkeit",
-            status="partial",
+            status="contract_complete",
             priority="P0",
             legalBasis=["DSGVO", "BDSG §26", "BetrVG Mitbestimmung", "EU AI Act"],
             implementedEvidence=["Time-Cockpit KPIs", "tenant_id auf HR-Time-Tabellen", "Audit-/Statusfelder in HR-Time-Slices"],
-            missingCapabilities=["Headcount, Fluktuation, Krankenstand, Diversity, Personalkosten", "DSFA-Workflow", "AVV-/DPA-Register", "MFA/SSO-Readiness je Connector"],
+            missingCapabilities=["DSFA- und Betriebsratsfreigaben bleiben external_gate"],
             nextSlices=["HRM-ANALYTICS-001", "HRM-PRIVACY-001", "HRM-AI-GOV-001"],
             controls=["Aggregationsschwellen", "PII-Minimierung", "Exportierbarkeit", "keine heimliche Leistungsueberwachung"],
         ),
@@ -2219,6 +2365,11 @@ def _pilot_time_entries(target_date: str) -> list[dict[str, Any]]:
 @router.get("/hrm-readiness", response_model=HrmReadinessOut)
 async def get_hrm_readiness(_tenant_id: str = Depends(get_tenant_id)):
     return build_hrm_readiness()
+
+
+@router.get("/hrm-operating-system", response_model=HrmOperatingSystemOut)
+async def get_hrm_operating_system(_tenant_id: str = Depends(get_tenant_id)):
+    return build_hrm_operating_system_contract()
 
 
 @router.get("/employee-files/{employee_ref}", response_model=EmployeeFileOut)
