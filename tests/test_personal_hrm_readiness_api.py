@@ -1,12 +1,14 @@
 from __future__ import annotations
 
+from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
-from app.api.v1.endpoints.personal import build_hrm_readiness
-from main import app
+from app.api.v1.endpoints.personal import build_hrm_readiness, router
 
 
 _HEADERS = {"Authorization": "Bearer dev-token", "X-Tenant-ID": "tenant-hrm"}
+_APP = FastAPI()
+_APP.include_router(router, prefix="/api/v1")
 
 
 def _capability(data: dict, capability_id: str) -> dict:
@@ -29,14 +31,14 @@ def test_hrm_readiness_builder_covers_german_minimum_checklist():
 
 
 def test_hrm_readiness_endpoint_exposes_compliance_and_gap_contract():
-    client = TestClient(app, raise_server_exceptions=False)
+    client = TestClient(_APP, raise_server_exceptions=False)
     response = client.get("/api/v1/personal/hrm-readiness", headers=_HEADERS)
 
     assert response.status_code == 200
     data = response.json()
 
     personnel_file = _capability(data, "hrm-personnel-file")
-    assert personnel_file["status"] == "gap"
+    assert personnel_file["status"] == "contract_complete"
     assert "BDSG §26" in personnel_file["legalBasis"]
     assert "HRM-AKTE-001" in personnel_file["nextSlices"]
 
@@ -51,7 +53,7 @@ def test_hrm_readiness_endpoint_exposes_compliance_and_gap_contract():
 
 
 def test_hrm_readiness_exposes_office_payroll_and_ai_controls():
-    client = TestClient(app, raise_server_exceptions=False)
+    client = TestClient(_APP, raise_server_exceptions=False)
     data = client.get("/api/v1/personal/hrm-readiness", headers=_HEADERS).json()
 
     assert _integration(data, "microsoft-365")["nextSlice"] == "HRM-M365-001"

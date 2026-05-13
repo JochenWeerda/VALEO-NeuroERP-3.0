@@ -420,6 +420,24 @@ export type EmployeeFileDocumentInput = {
   createdBy?: string
 }
 
+export type HrmOperatingSystemModule = {
+  id: string
+  title: string
+  status: string
+  apiContracts: string[]
+  controls: string[]
+  externalGates: string[]
+}
+
+export type HrmOperatingSystem = {
+  status: string
+  asOf: string
+  closedRepoGaps: string[]
+  modules: HrmOperatingSystemModule[]
+  timeEntryModelRules: string[]
+  externalOperatingGates: string[]
+}
+
 export type SchulungTyp = 'PSM' | 'Gefahrstoffe' | 'Gabelstapler' | 'Erste Hilfe' | 'Brandschutz' | 'Arbeitssicherheit'
 export type SchulungStatus = 'gueltig' | 'ablaufend' | 'abgelaufen'
 
@@ -506,6 +524,7 @@ export const personalKeys = {
   fieldServicePlan: () => [...personalKeys.all, 'field-service-plan'] as const,
   workPlan: (filters?: Record<string, unknown>) => [...personalKeys.all, 'work-plan', filters] as const,
   hrmReadiness: () => [...personalKeys.all, 'hrm-readiness'] as const,
+  hrmOperatingSystem: () => [...personalKeys.all, 'hrm-operating-system'] as const,
   employeeFile: (employeeRef?: string, actorRole?: string) => [...personalKeys.all, 'employee-file', employeeRef, actorRole] as const,
   schulungen: (filters?: Record<string, unknown>) => [...personalKeys.all, 'schulungen', filters] as const,
   qualifikationen: (filters?: Record<string, unknown>) => [...personalKeys.all, 'qualifikationen', filters] as const,
@@ -605,6 +624,14 @@ const EMPTY_EMPLOYEE_FILE: EmployeeFile = {
     blockedDocumentCount: 0,
     nextReviewHint: '',
   },
+}
+const EMPTY_HRM_OPERATING_SYSTEM: HrmOperatingSystem = {
+  status: 'unknown',
+  asOf: '',
+  closedRepoGaps: [],
+  modules: [],
+  timeEntryModelRules: [],
+  externalOperatingGates: [],
 }
 const EMPTY_SCHULUNGEN_LIST: Schulung[] = []
 const EMPTY_STUNDENZETTEL_LIST: StundenzettelEintrag[] = []
@@ -871,6 +898,15 @@ export function useEmployeeFile(employeeRef?: string, actorRole = 'hr') {
     },
     placeholderData: EMPTY_EMPLOYEE_FILE,
     staleTime: 60_000,
+  })
+}
+
+export function useHrmOperatingSystem() {
+  return useQuery({
+    queryKey: personalKeys.hrmOperatingSystem(),
+    queryFn: async () => (await apiClient.get<HrmOperatingSystem>('/api/v1/personal/hrm-operating-system')).data,
+    placeholderData: EMPTY_HRM_OPERATING_SYSTEM,
+    staleTime: 5 * 60 * 1000,
   })
 }
 

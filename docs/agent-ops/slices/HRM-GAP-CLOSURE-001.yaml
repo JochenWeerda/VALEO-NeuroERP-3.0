@@ -1,7 +1,7 @@
 id: HRM-GAP-CLOSURE-001
 title: HRM-Plan-Gaps repo-seitig schliessen
 owner: Codex
-status: reserviert
+status: abgeschlossen
 created: 2026-05-13
 goal: >
   Alle verbleibenden HRM-Plan-Gaps repo-seitig als API-/Frontend-/Doku-Vertraege
@@ -20,11 +20,16 @@ acceptance_criteria:
   - Jeder verbliebene Punkt hat einen API-Vertrag und Frontend-Hook.
   - Tests sichern eAU ohne Diagnosedaten, DATEV-Closeout, Vertragsvorlagen, ESS/MSS, Recruiting-Retention, Analytics-Aggregationsschutz, AI-Human-Gate und Office-Connector-Readiness.
 checks:
-  - pytest tests/test_personal_hrm_gap_closure_api.py -q --no-cov
+  - pytest tests/test_personal_hrm_gap_closure_api.py tests/test_personal_hrm_readiness_api.py tests/test_personal_employee_file_api.py -q --no-cov
   - pnpm --filter @valero-neuroerp/frontend-web type-check
-  - python -m py_compile app/api/v1/endpoints/personal.py tests/test_personal_hrm_gap_closure_api.py
+  - python -m py_compile app/api/v1/endpoints/personal.py tests/test_personal_hrm_gap_closure_api.py tests/test_personal_hrm_readiness_api.py tests/test_personal_employee_file_api.py
   - python scripts/agent_workboard_supervisor.py validate
   - node scripts/docs-governance-check.cjs
   - git diff --check
+done:
+  - GET /api/v1/personal/hrm-operating-system eingefuehrt.
+  - Frontend-Hook useHrmOperatingSystem ergaenzt.
+  - HRM-Plan weist keine fachlichen Repo-Gaps mehr aus.
+  - PersonalService-Regeln fuer domain_hr.time_entries, entry_date, hours und RETURNING regressionsgesichert.
 risks:
   - Echte eAU-/DATEV-/Microsoft-/Google-/LibreOffice-/E-Signatur-Zugangsdaten, AVV/DPA, Betriebsvereinbarungen, DSFA und Rechtsfreigaben bleiben externe Betriebsfreigaben.

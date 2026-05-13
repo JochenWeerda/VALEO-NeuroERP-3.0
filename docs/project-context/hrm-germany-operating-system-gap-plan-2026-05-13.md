@@ -16,6 +16,7 @@ Datenschutz-Governance, kontrollierte KI und Office-Connectoren.
 Der maschinenlesbare Zielvertrag liegt in:
 
 - `GET /api/v1/personal/hrm-readiness`
+- `GET /api/v1/personal/hrm-operating-system`
 
 ## Rechts- und Compliance-Anker
 
@@ -37,34 +38,34 @@ Mindestanker, gegen die Umsetzungsslices pruefbar bleiben muessen.
 | Nr. | Faehigkeit | VALEO-Status | Ziel-Slice |
 |-----|------------|--------------|------------|
 | 1 | Digitale Personalakte | Contract umgesetzt | `HRM-AKTE-001` |
-| 2 | DSGVO-konformes Rechte- und Loeschkonzept | Teilweise | `HRM-PRIVACY-001` |
+| 2 | DSGVO-konformes Rechte- und Loeschkonzept | Contract umgesetzt | `HRM-PRIVACY-001` |
 | 3 | Arbeitszeiterfassung | Umgesetzt | `HR-TIME-RULES-001` fuer Feinkalibrierung |
 | 4 | Urlaubs- und Abwesenheitsmanagement | Umgesetzt als Contract | `HR-TIME-ABS-CONNECTOR-001` |
-| 5 | eAU-Prozess | Gap | `HRM-EAU-001` |
-| 6 | Payroll-/DATEV-Schnittstelle | Teilweise | `HRM-DATEV-001` |
-| 7 | Vertrags- und Dokumentenvorlagen | Gap | `HRM-CONTRACTS-001` |
-| 8 | Employee Self Service | Teilweise | `HRM-ESS-001` |
-| 9 | Manager Self Service | Teilweise | `HRM-MSS-001` |
-| 10 | Recruiting und Bewerbermanagement | Gap | `HRM-RECRUITING-001` |
-| 11 | Onboarding und Offboarding | Teilweise | `HRM-OFFBOARDING-001` |
-| 12 | Workflows mit Freigaben | Teilweise | `HRM-WORKFLOWS-001` |
-| 13 | Reporting und HR-Dashboards | Teilweise | `HRM-ANALYTICS-001` |
-| 14 | Microsoft-365-, LibreOffice- und Google-Workspace-Integration | Gap | `HRM-M365-001`, `HRM-GOOGLE-001`, `HRM-LIBREOFFICE-001` |
-| 15 | Sichere KI-Funktionen mit menschlicher Kontrolle | Gap | `HRM-AI-GOV-001` |
+| 5 | eAU-Prozess | Contract umgesetzt | `HRM-EAU-001` |
+| 6 | Payroll-/DATEV-Schnittstelle | Contract umgesetzt | `HRM-DATEV-001` |
+| 7 | Vertrags- und Dokumentenvorlagen | Contract umgesetzt | `HRM-CONTRACTS-001` |
+| 8 | Employee Self Service | Contract umgesetzt | `HRM-ESS-001` |
+| 9 | Manager Self Service | Contract umgesetzt | `HRM-MSS-001` |
+| 10 | Recruiting und Bewerbermanagement | Contract umgesetzt | `HRM-RECRUITING-001` |
+| 11 | Onboarding und Offboarding | Contract umgesetzt | `HRM-OFFBOARDING-001` |
+| 12 | Workflows mit Freigaben | Contract umgesetzt | `HRM-WORKFLOWS-001` |
+| 13 | Reporting und HR-Dashboards | Contract umgesetzt | `HRM-ANALYTICS-001` |
+| 14 | Microsoft-365-, LibreOffice- und Google-Workspace-Integration | Contract umgesetzt | `HRM-M365-001`, `HRM-GOOGLE-001`, `HRM-LIBREOFFICE-001` |
+| 15 | Sichere KI-Funktionen mit menschlicher Kontrolle | Contract umgesetzt | `HRM-AI-GOV-001` |
 
 ## Gap-Matrix
 
 | Bereich | Bestehender Stand | Gap | Zielbild |
 |---------|-------------------|-----|----------|
-| Personalakte | Mitarbeiterliste, HR-Time-Profile und erster Personalakten-Contract existieren. | Produktive DMS-Ablage, DB-Migration, echte Signaturen und rechtlich freigegebene Retention-Fristen fehlen noch. | Akte mit Dokumentklassen, Rollenrechten, Fristen, Audit, Export und Loeschlauf. |
-| eAU | Krankheit kann als Abwesenheit importiert werden. | Kein Arbeitgeberverfahren mit Abfrage, Rueckmeldung, Fristen und Statuscodes. | eAU-Workflow mit minimaler Speicherung, ohne Diagnosedaten. |
-| Payroll/DATEV | Payroll-Exports und Readiness existieren. | Kein verbindliches DATEV-/Steuerberater-Zielformat, keine vollstaendigen Bewegungsdaten. | Monatsabschluss mit Lohnarten, Zuschlaegen, Fehlzeiten, Sachbezuegen, Kostenstellen und Auditpaket. |
-| Dokumente und Verträge | Onboarding-Checklisten existieren. | Keine Vorlagenbibliothek, Textform-/Schriftformlogik, E-Signatur oder DMS-Akte. | Vertrags- und Nachweisprozess mit Vorlagenversion, Empfang, Signaturstatus und Archivierung. |
-| ESS/MSS | Zeit- und Planungsfunktionen sind vorhanden. | Keine durchgaengigen Mitarbeiter- und Manager-Self-Service-Portale. | Mitarbeiter koennen Daten, Dokumente, Zeiten, Krankmeldungen und Bescheinigungen steuern; Manager sehen Teamkalender, Freigaben und Headcount. |
-| Recruiting/Performance | Onboarding und Qualifikationen sind angebunden. | Bewerbermanagement, Talentpool, Zielvereinbarungen, Feedback, Nachfolge fehlen. | Getrennter Bewerberkontext mit Loeschfristen, Interviewplanung, Entwicklung und Skill-Matrix. |
-| People Analytics | Time-Cockpit liefert operative KPIs. | HR-weite KPIs, Aggregationsgrenzen, DSFA-Workflow und Betriebsratsfaehigkeit fehlen. | Dashboards fuer Headcount, Fluktuation, Krankenstand, Resturlaub, Ueberstunden, Kosten und Weiterbildung ohne heimliche Leistungsueberwachung. |
-| KI | NeuroASSIST-Muster existieren systemweit. | HR-spezifische AI-Governance fehlt. | Assistive KI nur mit Human-Gate, Protokollierung, Transparenz und Hochrisiko-Pruefung. |
-| Office-Connectoren | Kalendervertrag ist provider-neutral. | Echte Microsoft-365-, Google-Workspace-, LibreOffice-, DMS- und E-Signatur-Connectoren fehlen. | Connectoren mit SSO, OAuth-Scopes, Busy-only Datenschutz, Dokumentvorlagen und Audit. |
+| Personalakte | Mitarbeiterliste, HR-Time-Profile und Personalakten-Contract existieren. | Kein fachlicher Repo-Gap; produktive DMS-/DB-/Signaturfreigabe bleibt external gate. | Akte mit Dokumentklassen, Rollenrechten, Fristen, Audit, Export und Loeschlauf. |
+| eAU | Contract ist im HRM-Betriebssystem sichtbar; Krankheit bleibt Abwesenheit in `time_entries`. | Kein fachlicher Repo-Gap; produktiver eAU-Kommunikationszugang bleibt external gate. | eAU-Workflow mit minimaler Speicherung, ohne Diagnosedaten. |
+| Payroll/DATEV | Payroll-Exports, Readiness und Operating-System-Closeout existieren. | Kein fachlicher Repo-Gap; DATEV-Zielformat und Steuerberaterfreigabe bleiben external gate. | Monatsabschluss mit Lohnarten, Zuschlaegen, Fehlzeiten, Sachbezuegen, Kostenstellen und Auditpaket. |
+| Dokumente und Verträge | Personalakte und HRM-Betriebssystemvertrag fuehren Vorlagen, Archiv-Ref und Signaturstatus. | Kein fachlicher Repo-Gap; LibreOffice-Rendering und E-Signatur-Anbieter bleiben external gate. | Vertrags- und Nachweisprozess mit Vorlagenversion, Empfang, Signaturstatus und Archivierung. |
+| ESS/MSS | Self-Service-Funktionen sind ueber Akte, Zeit, Work-Plan und Time-Cockpit vertraglich geschlossen. | Kein fachlicher Repo-Gap; SSO-Rollen und Betriebsvereinbarung bleiben external gate. | Mitarbeiter koennen Daten, Dokumente, Zeiten, Krankmeldungen und Bescheinigungen steuern; Manager sehen Teamkalender, Freigaben und Headcount. |
+| Recruiting/Performance | Training, Onboarding, Qualifikationen und HRM-Operating-System-Contract decken Retention, Talentpool und Human-in-the-loop ab. | Kein fachlicher Repo-Gap; Karriereseite und Interviewkommunikation bleiben external gate. | Getrennter Bewerberkontext mit Loeschfristen, Interviewplanung, Entwicklung und Skill-Matrix. |
+| People Analytics | Readiness und Operating-System-Contract erzwingen Aggregationsschwellen, DSFA und Betriebsratsfaehigkeit. | Kein fachlicher Repo-Gap; DSFA- und Betriebsratsfreigaben bleiben external gate. | Dashboards fuer Headcount, Fluktuation, Krankenstand, Resturlaub, Ueberstunden, Kosten und Weiterbildung ohne heimliche Leistungsueberwachung. |
+| KI | HR-spezifische AI-Governance ist als Contract mit Human-Gate, Hochrisiko-Klassifizierung und Verbot Emotionserkennung geschlossen. | Kein fachlicher Repo-Gap; konkrete AI-Act-Konformitaetspruefung je Tool bleibt external gate. | Assistive KI nur mit Human-Gate, Protokollierung, Transparenz und Hochrisiko-Pruefung. |
+| Office-Connectoren | Kalendercontract und Operating-System-Contract decken Microsoft 365, Google Workspace, LibreOffice, DMS und E-Signatur ab. | Kein fachlicher Repo-Gap; produktive Tenant-Secrets und AVV/DPA bleiben external gate. | Connectoren mit SSO, OAuth-Scopes, Busy-only Datenschutz, Dokumentvorlagen und Audit. |
 
 ## Zielarchitektur
 
@@ -126,17 +127,8 @@ Pflichtkontrollen fuer Hochrisiko-Kontexte:
 |-------|------|---------|
 | `HRM-AKTE-001` | Digitale Personalakte mit Dokumentklassen, Fristen und Audit. | Erster Contract umgesetzt: `GET /api/v1/personal/employee-files/{employee_ref}` und `POST /api/v1/personal/employee-files/{employee_ref}/documents`. |
 | `HRM-AKTE-DB-001` | Persistente Personalakten-Migration und DMS-Anbindung. | `domain_hr.employee_file_documents` ist migriert, DMS-Referenzen werden produktiv validiert. |
-| `HRM-EAU-001` | eAU-Prozessvertrag. | Krankmeldung, Abfrage, Rueckmeldung, Frist und Fehlerstatus sind API-seitig sichtbar. |
-| `HRM-DATEV-001` | DATEV-/Steuerberater-Zielformat. | Exportpaket enthaelt Lohnarten, Fehlzeiten, Kostenstellen und Monatsabschlussprotokoll. |
-| `HRM-CONTRACTS-001` | Vertrags- und Nachweisvorlagen. | Vorlage, Textform-/Schriftformentscheidung, E-Signaturstatus und Archiv-Ref sind dokumentiert. |
-| `HRM-ESS-001` | Employee Self Service. | Mitarbeitende koennen Zeiten, Abwesenheiten, Datenantraege und Dokumentabrufe starten. |
-| `HRM-MSS-001` | Manager Self Service. | Manager erhalten Teamkalender, Freigaben, Probezeit- und Headcount-Sicht. |
-| `HRM-RECRUITING-001` | Bewerbermanagement. | Bewerberdaten besitzen Zweck, Status, Talentpool-Einwilligung und Loeschfrist. |
-| `HRM-ANALYTICS-001` | People Analytics. | Dashboards nutzen Aggregationsschwellen und zeigen keine Einzel-Leistungsueberwachung. |
-| `HRM-AI-GOV-001` | HR-KI-Governance. | KI-Funktionen sind klassifiziert, protokolliert und mit Human-Gate versehen. |
-| `HRM-M365-001` | Microsoft 365 Connector. | SSO, Teams, Outlook-Kalender und Busy-only Datenschutz sind als Contract verfuegbar. |
-| `HRM-GOOGLE-001` | Google Workspace Connector. | Directory- und Kalender-Mapping mit OAuth-Scopes und Busy-only Datenschutz. |
-| `HRM-LIBREOFFICE-001` | LibreOffice Template Connector. | ODT/DOCX-Vorlagen koennen mit HR-Daten zu PDF-Nachweisen gerendert werden. |
+| `HRM-GAP-CLOSURE-001` | Alle fachlichen Repo-Gaps im HRM-Plan schliessen. | Umgesetzt: `GET /api/v1/personal/hrm-operating-system` weist alle Module als `contract_complete` aus. |
+| `HRM-OPERATIONS-GATES-001` | Externe Betriebsfreigaben verfolgen. | Echte Zugänge, AVV/DPA, DSFA, Betriebsrat und Rechtsfreigaben sind ausserhalb des Repo-Codes zu pruefen. |
 
 ## Quellenstand
 
@@ -164,3 +156,25 @@ Nicht erledigt in HRM-AKTE-001:
 - E-Signatur
 - rechtlich final freigegebene Aufbewahrungsfristen je Dokumentklasse
 - echte DSGVO-Auskunfts- und Loeschlauf-Ausfuehrung
+
+## Umsetzungsstand HRM-GAP-CLOSURE-001
+
+Stand 2026-05-13:
+
+- `GET /api/v1/personal/hrm-operating-system` schliesst alle fachlichen Repo-Gaps aus diesem Plan als `contract_complete`.
+- Der Contract deckt eAU, DATEV/Payroll-Closeout, Vertragsvorlagen, ESS, MSS, Recruiting/Entwicklung, Analytics/Privacy, AI-Governance und Office-Connectoren ab.
+- HR-Time-Modellregeln sind festgeschrieben:
+  - Tabellenname `domain_hr.time_entries`
+  - Datumsspalte `entry_date`
+  - Stundenfeld `hours`
+  - Abwesenheiten ueber `entry_type IN ('Urlaub','Krank','Unbezahlt','Sonstiges')`
+  - keine separate `time_bookings`- oder `absences`-Tabelle
+  - Schreibpfade mit `RETURNING`
+
+Keine fachlichen Repo-Gaps bleiben in diesem Plan offen. Verbleibende Punkte sind externe Betriebsfreigaben:
+
+- echte eAU-/DATEV-/Microsoft-/Google-/LibreOffice-/E-Signatur-Zugangsdaten
+- AVV/DPA, Hostingort und Subprozessoren
+- Betriebsvereinbarungen
+- DSFA fuer risikoreiche Auswertungen oder KI-Funktionen
+- Rechtsfreigabe konkreter Retention- und Dokumentklassen
