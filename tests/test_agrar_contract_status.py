@@ -1,6 +1,6 @@
 from decimal import Decimal
 
-from app.api.v1.endpoints.agrar_contracts import _compute_status
+from app.services.agrar_contract_service import _compute_status
 
 
 def test_compute_status_open_when_no_allocation():

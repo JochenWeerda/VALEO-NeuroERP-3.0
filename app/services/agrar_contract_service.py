@@ -42,6 +42,10 @@ def _build_dq_datensatz(data: dict) -> dict:
     }
 
 
+# backward-compat alias used by tests and weighing_tickets
+_build_contract_dq_datensatz = _build_dq_datensatz
+
+
 class AgrarContractService:
     """Encapsulates all business logic for Agrar contracts and allocations."""
 
