@@ -1,7 +1,7 @@
 id: HRM-GO-LIVE-TEMPLATES-003
 title: HRM-Go-live-Einzelvorlagen aus Gesamtwerk bereitstellen
 owner: Codex
-status: reserviert
+status: abgeschlossen
 created: 2026-05-13
 goal: >
   HRM-Go-live-Gesamtwerk in einzelne, direkt auffindbare Formular-Dateien unter
@@ -34,6 +34,16 @@ acceptance_criteria:
   - Keine Einzelvorlage nennt hypothetische, nicht vorgesehene HRM-Funktionen.
   - Doku-Checks sind gruen.
 checks:
-  - offen
+  - Get-ChildItem -Path docs/hrm-go-live-templates -Filter *.md
+  - rg -n "Emotion|Scoring|Ranking|Score|Profiling|verdeckte|heimliche|Leistungsueberwachung|Verhaltens|KI-/Analytics|Analytics-/KI|Reports und Scores" docs/hrm-go-live-templates
+  - $files = (Get-ChildItem -Path docs/hrm-go-live-templates -Filter *.md | ForEach-Object { $_.FullName }); node scripts/docs-markdown-check.cjs @files
+  - python scripts/agent_workboard_supervisor.py validate
+  - node scripts/docs-governance-check.cjs
+  - git diff --check
+done:
+  - Einzelvorlagen 01 bis 17 unter docs/hrm-go-live-templates/ ergaenzt.
+  - README listet Master und Einzelvorlagen.
+  - Jede Einzelvorlage ist als Arbeitsauszug aus dem Master gekennzeichnet.
+  - HRM-Plan und Open-Gaps-Doku nennen die operativen Einzelvorlagen.
 risks:
   - Die Einzeldateien sind Arbeitskopien aus dem Master; bei inhaltlichen Aenderungen muss der Master als Source of Truth zuerst angepasst werden.

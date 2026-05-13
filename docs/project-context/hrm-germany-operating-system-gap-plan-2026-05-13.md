@@ -247,4 +247,5 @@ Stand 2026-05-13:
   - keine Erwaehnung hypothetischer, nicht vorgesehener Funktionen
   - Mitarbeiterinformation beschreibt nur Personalverwaltung, Arbeitszeit, Abwesenheiten, Dokumente, Payroll-Vorbereitung, freigegebenes Reporting, Compliance und optional konkret freigegebene Assistenzfunktionen
   - KI-Pruefung ist als konkrete Assistenzfunktionsfreigabe formuliert, nicht als Warnliste fuer nicht geplante Funktionen
+- `HRM-GO-LIVE-TEMPLATES-003` stellt die operativen Einzelvorlagen `01_...` bis `17_...` neben dem Master bereit, damit HR, Payroll, IT, Datenschutz, Legal und Geschaeftsfuehrung jeweils nur das benoetigte Formular verwenden koennen.
 - Die Vorlagen sind klar als Arbeitsmuster markiert. Produktivnutzung bleibt von realer Datenschutz-, Steuerberater-/Payroll-, IT-Sicherheits-, Legal- und gegebenenfalls Betriebsratspruefung abhaengig.
