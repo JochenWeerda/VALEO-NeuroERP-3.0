@@ -110,6 +110,17 @@ Stand: `2026-05-12`
 **Checks:** `pnpm --filter @valero-neuroerp/frontend-web type-check`; `python scripts/agent_workboard_supervisor.py validate`; `node scripts/docs-governance-check.cjs`; `git diff --check`
 **Offene Risiken:** Studio-Prototyp enthaelt Mockdaten und `motion`; Uebernahme erfolgt auf echte VALEO-Daten und ohne zusaetzliche Animationsdependency.
 
+## HRM-GO-LIVE-TEMPLATES-001
+
+**Von:** Codex
+**Owner:** Codex
+**Stand:** reserviert 2026-05-13
+**Ziel des Slices:** HRM-Go-live-Evidenzpaket als operative Repo-Vorlagen unter `docs/hrm-go-live-templates/` bereitstellen.
+**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/agent-ops/slices/HRM-GO-LIVE-TEMPLATES-001.yaml`, `docs/hrm-go-live-templates/README.md`, `docs/hrm-go-live-templates/00_hrm_go_live_gesamtwerk.md`, `docs/project-context/hrm-germany-operating-system-gap-plan-2026-05-13.md`, `docs/project-context/open-gaps-and-known-issues.md`
+**Abnahmekriterien:** Gesamtwerk enthaelt Gate-Matrix, Go-live-Protokoll, Betriebsratsstatus, Mitarbeiterinformation, VVT, AVV/DPA, DSFA, Rollen, TOM, Retention, eAU, DATEV/Payroll, Office/SSO, DMS/E-Signatur, KI/Analytics, Evidence/Audit, Geschaeftsfuehrungsfreigabe und optionale Betriebsvereinbarung; Doku verweist auf das Vorlagenpaket; rechtlicher Arbeitsvorlagen-Charakter ist klar markiert.
+**Checks:** offen
+**Offene Risiken:** Produktivnutzung erfordert reale Datenschutz-, Payroll-/Steuerberater-, IT-Sicherheits- und Rechtspruefung.
+
 ## TODO-SPRINT-001
 
 **Von:** Cursor<br>
