@@ -63,15 +63,18 @@ class AgrarSettlementService:
         self,
         supplier_id: Optional[str] = None,
         status: Optional[str] = None,
-        skip: int = 0,
-        limit: int = 50,
-    ) -> Tuple[List[AgrarSettlement], int]:
-        if supplier_id:
-            return self.repo.list_by_supplier(supplier_id, status=status, skip=skip, limit=limit)
+        campaign_id: Optional[str] = None,
+        limit: int = 500,
+    ) -> List[Tuple[AgrarSettlement, List[AgrarSettlementDeduction]]]:
+        q = self.repo._base_query()
         if status:
-            return self.repo.list_by_status(status, skip=skip, limit=limit)
-        items, total = self.repo.list_paginated(skip=skip, limit=limit)
-        return items, total
+            q = q.filter(AgrarSettlement.status == status)
+        if supplier_id:
+            q = q.filter(AgrarSettlement.supplier_id == supplier_id)
+        if campaign_id:
+            q = q.filter(AgrarSettlement.campaign_id == campaign_id)
+        items = q.order_by(AgrarSettlement.created_at.desc()).limit(limit).all()
+        return [(s, self.repo.list_deductions(s.id)) for s in items]
 
     def get_settlement(self, settlement_id: str) -> Tuple[AgrarSettlement, list]:
         settlement = self.repo.get_by_id(settlement_id)
@@ -121,7 +124,13 @@ class AgrarSettlementService:
 
     # ── mutations ─────────────────────────────────────────────────────────────
 
-    def create_settlement(self, payload: Any, settlement_number: Optional[str] = None) -> Tuple[AgrarSettlement, list]:
+    def create_settlement(
+        self,
+        payload: Any,
+        settlement_number: Optional[str] = None,
+        drying_snapshot: Optional[dict] = None,
+        billing_qty_override: Optional[Decimal] = None,
+    ) -> Tuple[AgrarSettlement, list]:
         sn = settlement_number or payload.settlement_number or f"SET-{datetime.utcnow().strftime('%Y%m%d%H%M%S')}"
 
         dq_result = evaluate_settlement_datensatz({
@@ -139,7 +148,7 @@ class AgrarSettlementService:
             raise ConflictError("settlement_number already exists")
 
         gross_qty = _round_qty(payload.gross_quantity_kg)
-        billing_qty = _round_qty(
+        billing_qty = billing_qty_override if billing_qty_override is not None else _round_qty(
             payload.billing_quantity_kg if payload.billing_quantity_kg is not None else payload.gross_quantity_kg
         )
         amounts = self.compute_amounts(
@@ -165,15 +174,16 @@ class AgrarSettlementService:
             currency="EUR",
             status="draft",
             note=payload.note,
+            drying_result=drying_snapshot or {},
             tenant_id=self.tenant_id,
         )
         self.db.add(settlement)
         self.db.flush()
 
+        billing_qty_tons = amounts["billing_qty_tons"]
         deduction_rows: list[AgrarSettlementDeduction] = []
         for d in payload.deductions:
-            billing_tons = billing_qty / Decimal("1000")
-            amt = _calc_deduction_amount(d, billing_tons)
+            amt = _calc_deduction_amount(d, billing_qty_tons)
             row = AgrarSettlementDeduction(
                 id=uuid7(),
                 settlement_id=settlement.id,
@@ -181,7 +191,7 @@ class AgrarSettlementService:
                 mode=d.mode,
                 rate_per_ton_eur=d.rate_per_ton_eur,
                 fixed_amount_eur=d.fixed_amount_eur,
-                basis_quantity_tons=d.basis_quantity_tons,
+                basis_quantity_tons=d.basis_quantity_tons if d.basis_quantity_tons is not None else billing_qty_tons,
                 amount_eur=amt,
                 note=d.note,
                 tenant_id=self.tenant_id,
@@ -206,16 +216,33 @@ class AgrarSettlementService:
         self.db.refresh(settlement)
         return settlement
 
-    def post_to_fibu(self, settlement_id: str, journal_ref: str) -> AgrarSettlement:
+    def post_to_fibu(self, settlement_id: str, journal_ref: str, posting_date: Optional[Any] = None) -> AgrarSettlement:
         settlement = self.repo.get_by_id(settlement_id)
         approval_status = self.get_approval_status(settlement)
         if settlement.status != "draft":
             raise ValidationFailedError(f"Settlement status '{settlement.status}' cannot be posted")
         if approval_status != "FREIGEGEBEN":
             raise ValidationFailedError(f"Settlement approval status '{approval_status}' must be FREIGEGEBEN before posting")
+        effective_date = posting_date or datetime.utcnow()
         settlement.status = "posted"
         settlement.posted_journal_ref = journal_ref
-        settlement.posted_at = datetime.utcnow()
+        settlement.posted_at = effective_date
+        new_state = dict(settlement.drying_result or {})
+        new_state["approval_status"] = "VERBUCHT"
+        history = list(new_state.get("approval_history") or [])
+        history.append({
+            "settlement_id": settlement.id,
+            "event": "settlement.approval.verbucht",
+            "actor_id": "system",
+            "actor_type": "SYSTEM",
+            "previous_status": approval_status,
+            "new_status": "VERBUCHT",
+            "allowed": True,
+            "reason": "Settlement nach erteilter Freigabe in FiBu verbucht.",
+            "decided_at": effective_date.isoformat(),
+        })
+        new_state["approval_history"] = history
+        settlement.drying_result = new_state
         self.db.commit()
         self.db.refresh(settlement)
         return settlement
