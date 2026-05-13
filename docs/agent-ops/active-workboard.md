@@ -54,10 +54,11 @@ Stand: `2026-05-12`
 
 **Von:** Codex
 **Owner:** Codex
-**Stand:** reserviert 2026-05-13
+**Stand:** abgeschlossen 2026-05-13
 **Ziel des Slices:** Externe HRM-Betriebsfreigaben fachlich sauber zum Abschluss fuehren: Evidenzanforderungen, Owner, Go-live-Blocker, Abnahme und Auditstatus fuer eAU, DATEV, Office/SSO, LibreOffice/E-Signatur, AVV/DPA, Betriebsrat, DSFA und Rechtsfreigaben.
 **Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/agent-ops/slices/HRM-OPERATIONS-GATES-001.yaml`, `docs/project-context/hrm-germany-operating-system-gap-plan-2026-05-13.md`, `docs/project-context/open-gaps-and-known-issues.md`, `app/api/v1/endpoints/personal.py`, `tests/test_personal_hrm_operations_gates_api.py`, `packages/frontend-web/src/lib/api/personal.ts`
 **Abnahmekriterien:** `GET /api/v1/personal/hrm-operations-gates` liefert Gate-Status mit Evidenzpflichten und Go-live-Blockern; Doku unterscheidet fachlich abgeschlossen, repo-seitig umgesetzt und extern freizugeben; Tests sichern alle externen Gates und Professional-Practice-Kriterien.
+**Erledigt:** `GET /api/v1/personal/hrm-operations-gates` eingefuehrt; alle verbleibenden HRM-Betriebsfreigaben sind als blockierende Gates mit Owner, Evidenzanforderungen, Abnahmekriterien, Auditspur und Professional-Practice-Regeln modelliert. Frontend-Hook `useHrmOperationsGates` ergaenzt. HRM-Plan und Open-Gaps-Doku fuehren keine unspezifizierten Restpunkte mehr, sondern nur noch evidenzbasierte Go-live-Gates.
 **Checks:** `pytest tests/test_personal_hrm_operations_gates_api.py tests/test_personal_hrm_gap_closure_api.py -q --no-cov`; `pnpm --filter @valero-neuroerp/frontend-web type-check`; `python -m py_compile app/api/v1/endpoints/personal.py tests/test_personal_hrm_operations_gates_api.py`; `python scripts/agent_workboard_supervisor.py validate`; `node scripts/docs-governance-check.cjs`; `git diff --check`
 **Offene Risiken:** Abschluss der Gates erfordert reale externe Nachweise; ohne diese Nachweise bleibt Go-live bewusst blockiert.
 

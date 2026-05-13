@@ -438,6 +438,27 @@ export type HrmOperatingSystem = {
   externalOperatingGates: string[]
 }
 
+export type HrmOperationsGate = {
+  id: string
+  title: string
+  status: string
+  ownerRole: string
+  goLiveBlocking: boolean
+  evidenceRequired: string[]
+  acceptanceCriteria: string[]
+  auditTrail: string[]
+  professionalPractice: string[]
+}
+
+export type HrmOperationsGates = {
+  status: string
+  asOf: string
+  goLiveAllowed: boolean
+  summary: string
+  gates: HrmOperationsGate[]
+  closureDefinition: string[]
+}
+
 export type SchulungTyp = 'PSM' | 'Gefahrstoffe' | 'Gabelstapler' | 'Erste Hilfe' | 'Brandschutz' | 'Arbeitssicherheit'
 export type SchulungStatus = 'gueltig' | 'ablaufend' | 'abgelaufen'
 
@@ -525,6 +546,7 @@ export const personalKeys = {
   workPlan: (filters?: Record<string, unknown>) => [...personalKeys.all, 'work-plan', filters] as const,
   hrmReadiness: () => [...personalKeys.all, 'hrm-readiness'] as const,
   hrmOperatingSystem: () => [...personalKeys.all, 'hrm-operating-system'] as const,
+  hrmOperationsGates: () => [...personalKeys.all, 'hrm-operations-gates'] as const,
   employeeFile: (employeeRef?: string, actorRole?: string) => [...personalKeys.all, 'employee-file', employeeRef, actorRole] as const,
   schulungen: (filters?: Record<string, unknown>) => [...personalKeys.all, 'schulungen', filters] as const,
   qualifikationen: (filters?: Record<string, unknown>) => [...personalKeys.all, 'qualifikationen', filters] as const,
@@ -632,6 +654,14 @@ const EMPTY_HRM_OPERATING_SYSTEM: HrmOperatingSystem = {
   modules: [],
   timeEntryModelRules: [],
   externalOperatingGates: [],
+}
+const EMPTY_HRM_OPERATIONS_GATES: HrmOperationsGates = {
+  status: 'unknown',
+  asOf: '',
+  goLiveAllowed: false,
+  summary: '',
+  gates: [],
+  closureDefinition: [],
 }
 const EMPTY_SCHULUNGEN_LIST: Schulung[] = []
 const EMPTY_STUNDENZETTEL_LIST: StundenzettelEintrag[] = []
@@ -906,6 +936,15 @@ export function useHrmOperatingSystem() {
     queryKey: personalKeys.hrmOperatingSystem(),
     queryFn: async () => (await apiClient.get<HrmOperatingSystem>('/api/v1/personal/hrm-operating-system')).data,
     placeholderData: EMPTY_HRM_OPERATING_SYSTEM,
+    staleTime: 5 * 60 * 1000,
+  })
+}
+
+export function useHrmOperationsGates() {
+  return useQuery({
+    queryKey: personalKeys.hrmOperationsGates(),
+    queryFn: async () => (await apiClient.get<HrmOperationsGates>('/api/v1/personal/hrm-operations-gates')).data,
+    placeholderData: EMPTY_HRM_OPERATIONS_GATES,
     staleTime: 5 * 60 * 1000,
   })
 }

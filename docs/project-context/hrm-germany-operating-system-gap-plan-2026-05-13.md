@@ -17,6 +17,7 @@ Der maschinenlesbare Zielvertrag liegt in:
 
 - `GET /api/v1/personal/hrm-readiness`
 - `GET /api/v1/personal/hrm-operating-system`
+- `GET /api/v1/personal/hrm-operations-gates`
 
 ## Rechts- und Compliance-Anker
 
@@ -128,7 +129,7 @@ Pflichtkontrollen fuer Hochrisiko-Kontexte:
 | `HRM-AKTE-001` | Digitale Personalakte mit Dokumentklassen, Fristen und Audit. | Erster Contract umgesetzt: `GET /api/v1/personal/employee-files/{employee_ref}` und `POST /api/v1/personal/employee-files/{employee_ref}/documents`. |
 | `HRM-AKTE-DB-001` | Persistente Personalakten-Migration und DMS-Anbindung. | `domain_hr.employee_file_documents` ist migriert, DMS-Referenzen werden produktiv validiert. |
 | `HRM-GAP-CLOSURE-001` | Alle fachlichen Repo-Gaps im HRM-Plan schliessen. | Umgesetzt: `GET /api/v1/personal/hrm-operating-system` weist alle Module als `contract_complete` aus. |
-| `HRM-OPERATIONS-GATES-001` | Externe Betriebsfreigaben verfolgen. | Echte Zugänge, AVV/DPA, DSFA, Betriebsrat und Rechtsfreigaben sind ausserhalb des Repo-Codes zu pruefen. |
+| `HRM-OPERATIONS-GATES-001` | Externe Betriebsfreigaben professionell abschliessen. | Umgesetzt: `GET /api/v1/personal/hrm-operations-gates` fuehrt Evidenz, Owner, Go-live-Blocker, Abnahme und Auditspur je Gate. |
 
 ## Quellenstand
 
@@ -171,10 +172,30 @@ Stand 2026-05-13:
   - keine separate `time_bookings`- oder `absences`-Tabelle
   - Schreibpfade mit `RETURNING`
 
-Keine fachlichen Repo-Gaps bleiben in diesem Plan offen. Verbleibende Punkte sind externe Betriebsfreigaben:
+Keine fachlichen Repo-Gaps bleiben in diesem Plan offen. Verbleibende Punkte sind externe Betriebsfreigaben und werden ueber `GET /api/v1/personal/hrm-operations-gates` als Go-live-Gates gefuehrt:
 
 - echte eAU-/DATEV-/Microsoft-/Google-/LibreOffice-/E-Signatur-Zugangsdaten
 - AVV/DPA, Hostingort und Subprozessoren
 - Betriebsvereinbarungen
 - DSFA fuer risikoreiche Auswertungen oder KI-Funktionen
 - Rechtsfreigabe konkreter Retention- und Dokumentklassen
+
+## Umsetzungsstand HRM-OPERATIONS-GATES-001
+
+Stand 2026-05-13:
+
+- `GET /api/v1/personal/hrm-operations-gates` fuehrt alle externen Betriebsfreigaben als strukturierte Gates.
+- Go-live bleibt blockiert, solange ein blockierendes Gate nicht `approved` ist.
+- Jedes Gate besitzt Owner-Rolle, Evidenzanforderungen, Abnahmekriterien, Auditspur und Professional-Practice-Regeln.
+
+| Gate | Owner | Abschlussdefinition |
+|------|-------|---------------------|
+| eAU-Kommunikation | HR/Ops | eAU-Zugang, Testverfahren, Status-/Fehlerprotokoll und Nachweis ohne Diagnosedaten. |
+| DATEV/Payroll | Payroll/Finance | Zielformat, Testexport, Lohnarten/Kostenstellen/Fehlzeiten und Steuerberaterfreigabe. |
+| Office/SSO | IT/Ops | Tenant, OAuth-Scopes, MFA/SSO-Rollen, Busy-only Kalenderdatenschutz und Connector-Probe. |
+| LibreOffice/DMS/E-Signatur | HR/Ops/Legal | Vorlagenversion, DMS-Ablage, Signaturstatus, Archiv-Ref und AVV/DPA. |
+| Privacy/Vendor | Datenschutz/Ops | AVV/DPA, Hostingort, Subprozessoren, Export und Loeschprozess. |
+| Betriebsrat/DSFA/KI | HR/Datenschutz/Betriebsrat | Mitbestimmung, DSFA, keine verdeckte Leistungsueberwachung, Human-Gate fuer KI. |
+| Retention Legal | Legal/HR | Freigegebene Dokumentklassen, Aufbewahrungsfristen, Zweckfortfall und Loeschblocker. |
+
+Damit ist auch das Verbleibende fachlich abgeschlossen: Es gibt keine unspezifizierten Restpunkte mehr, sondern nur noch blockierende, evidenzbasierte Betriebsfreigaben.

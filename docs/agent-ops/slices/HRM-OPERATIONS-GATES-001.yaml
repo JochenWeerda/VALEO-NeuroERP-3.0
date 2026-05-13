@@ -1,7 +1,7 @@
 id: HRM-OPERATIONS-GATES-001
 title: HRM-Betriebsfreigabe-Gates
 owner: Codex
-status: reserviert
+status: abgeschlossen
 created: 2026-05-13
 goal: >
   Externe HRM-Betriebsfreigaben fachlich sauber zum Abschluss fuehren:
@@ -27,5 +27,10 @@ checks:
   - python scripts/agent_workboard_supervisor.py validate
   - node scripts/docs-governance-check.cjs
   - git diff --check
+done:
+  - GET /api/v1/personal/hrm-operations-gates eingefuehrt.
+  - Alle verbleibenden HRM-Betriebsfreigaben als blockierende Gates mit Owner, Evidenz, Abnahme, Auditspur und Professional-Practice-Regeln modelliert.
+  - Frontend-Hook useHrmOperationsGates ergaenzt.
+  - HRM-Plan und Open-Gaps-Doku weisen keine unspezifizierten Restpunkte mehr aus.
 risks:
   - Abschluss der Gates erfordert reale externe Nachweise; ohne diese Nachweise bleibt Go-live bewusst blockiert.
