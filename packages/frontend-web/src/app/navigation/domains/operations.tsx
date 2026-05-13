@@ -788,7 +788,7 @@ export const RAW_NAV_SECTIONS: RawNavItem[] = [
       },
       {
         id: 'hrm-operations-gates',
-        label: 'HRM-Freigaben',
+        label: 'HR-Freigaben',
         icon: ShieldCheck,
         module: '@/pages/personal/hrm-operations-gates',
         mcp: { businessDomain: 'hr', scope: 'hr:write' },
