@@ -1,7 +1,7 @@
 id: HRM-OPERATIONS-GATES-005
 title: HRM-Betriebsfreigaben Studio-Designuebernahme
 owner: Codex
-status: reserviert
+status: abgeschlossen
 created: 2026-05-13
 goal: >
   Google-Studio-Designentwurf fuer HRM-Betriebsfreigaben in die bestehende
@@ -17,6 +17,14 @@ acceptance_criteria:
   - Sichtbare Sprache bleibt buerotauglich.
   - Typecheck ist gruen.
 checks:
-  - offen
+  - pnpm --filter @valero-neuroerp/frontend-web type-check
+  - python scripts/agent_workboard_supervisor.py validate
+  - node scripts/docs-governance-check.cjs
+  - git diff --check
+done:
+  - Google-Studio-Entwurf in die echte VALEO-Seite uebertragen.
+  - Sticky Readiness-Header, KPI-Leiste, Policy-Box, Stopper-Markierung und kompakte Pruefpunkt-Zeilen umgesetzt.
+  - Aufklappbare Details und Arbeitsaktionen bleiben mit den bestehenden Runtime-Hooks verdrahtet.
+  - Keine neue motion- oder Animationsdependency eingefuehrt.
 risks:
   - Studio-Prototyp enthaelt Mockdaten und motion; Uebernahme erfolgt auf echte VALEO-Daten und ohne zusaetzliche Animationsdependency.
