@@ -122,6 +122,17 @@ Stand: `2026-05-12`
 **Checks:** `rg -n "HRM-GATE-001|Mindest-Evidence|BDSG Paragraf 26|DSFA-Vorpruefung|Geschaeftsfuehrungsfreigabe" docs/hrm-go-live-templates/00_hrm_go_live_gesamtwerk.md`; `python scripts/agent_workboard_supervisor.py validate`; `node scripts/docs-governance-check.cjs`; `git diff --check`
 **Offene Risiken:** Produktivnutzung erfordert reale Datenschutz-, Payroll-/Steuerberater-, IT-Sicherheits- und Rechtspruefung.
 
+## HRM-GO-LIVE-TEMPLATES-002
+
+**Von:** Codex
+**Owner:** Codex
+**Stand:** reserviert 2026-05-13
+**Ziel des Slices:** HRM-Go-live-Formulare auf den tatsaechlichen VALEO-Funktionsumfang begrenzen und hypothetische, nicht vorgesehene KI-/Ueberwachungsbegriffe aus Mitarbeiter- und Freigabetexten entfernen.
+**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/agent-ops/slices/HRM-GO-LIVE-TEMPLATES-002.yaml`, `docs/hrm-go-live-templates/README.md`, `docs/hrm-go-live-templates/00_hrm_go_live_gesamtwerk.md`, `docs/project-context/hrm-germany-operating-system-gap-plan-2026-05-13.md`, `docs/project-context/open-gaps-and-known-issues.md`, `app/api/v1/endpoints/personal.py`, `tests/test_personal_hrm_gap_closure_api.py`
+**Abnahmekriterien:** Formulare nennen keine nicht vorgesehenen Funktionen wie Emotionserkennung, allgemeines Scoring oder automatisches Ranking; Mitarbeiterinformation beschreibt nur real vorgesehene HRM-Funktionen; KI-Freigabe ist als optionale Assistenzfunktions-Pruefung formuliert; API-/Doku-Vertraege sind konsistent.
+**Checks:** offen
+**Offene Risiken:** Konkrete spaetere KI- oder Analytics-Erweiterungen brauchen erneut gesonderte Datenschutz-, Legal- und Betriebsratspruefung.
+
 ## TODO-SPRINT-001
 
 **Von:** Cursor<br>
