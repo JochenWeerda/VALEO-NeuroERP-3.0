@@ -1,0 +1,24 @@
+id: HRM-GO-LIVE-TEMPLATES-001
+title: HRM-Go-live-Evidenzpaket und Mustervorlagen
+owner: Codex
+status: reserviert
+created: 2026-05-13
+goal: >
+  HRM-Go-live-Evidenzpaket als operative Repo-Vorlagen unter
+  docs/hrm-go-live-templates/ bereitstellen.
+file_ownership:
+  - docs/agent-ops/active-workboard.md
+  - docs/agent-ops/slices/HRM-GO-LIVE-TEMPLATES-001.yaml
+  - docs/hrm-go-live-templates/README.md
+  - docs/hrm-go-live-templates/00_hrm_go_live_gesamtwerk.md
+  - docs/project-context/hrm-germany-operating-system-gap-plan-2026-05-13.md
+  - docs/project-context/open-gaps-and-known-issues.md
+acceptance_criteria:
+  - Gesamtwerk enthaelt alle sieben HRM-Betriebsfreigabe-Gates.
+  - Gesamtwerk enthaelt operative Vorlagen fuer Freigabe, Betriebsrat, Mitarbeiterinformation, VVT, AVV/DPA, DSFA, Rollen, TOM, Retention, eAU, DATEV/Payroll, Office/SSO, DMS/E-Signatur, KI/Analytics, Evidence/Audit, Geschaeftsfuehrung und optionale Betriebsvereinbarung.
+  - Rechtlicher Arbeitsvorlagen-Charakter ist klar markiert.
+  - HRM-Plan und Open-Gaps-Doku verweisen auf das Vorlagenpaket.
+checks:
+  - offen
+risks:
+  - Produktivnutzung erfordert reale Datenschutz-, Payroll-/Steuerberater-, IT-Sicherheits- und Rechtspruefung.
