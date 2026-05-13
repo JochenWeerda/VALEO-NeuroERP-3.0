@@ -2,11 +2,13 @@ import { useMemo, useState } from 'react'
 import {
   AlertTriangle,
   ArrowRight,
+  BriefcaseBusiness,
   Calendar,
   Check,
   CheckCircle2,
   ChevronDown,
   ChevronUp,
+  ClipboardCheck,
   ExternalLink,
   FileCheck2,
   FilePlus,
@@ -47,6 +49,8 @@ type GateFormState = {
   decidedBy: string
   decisionReason: string
 }
+
+type RoleFocus = 'all' | 'hr' | 'payroll' | 'it' | 'privacy' | 'legal' | 'management'
 
 const defaultForm: GateFormState = {
   evidenceType: 'Freigabedokument',
@@ -122,6 +126,78 @@ function gatePurpose(gate: HrmOperationsGate): string {
   return purposes[gate.id] ?? gate.title
 }
 
+const templateByGate: Record<string, { label: string; path: string }> = {
+  'eau-communication': { label: 'eAU-Freigabeprotokoll', path: 'docs/hrm-go-live-templates/10_eau_freigabeprotokoll.md' },
+  'datev-payroll': { label: 'DATEV-/Payroll-Abnahme', path: 'docs/hrm-go-live-templates/11_datev_payroll_abnahme.md' },
+  'office-sso-connectors': { label: 'Office-/SSO-Abnahme', path: 'docs/hrm-go-live-templates/12_office_sso_abnahme.md' },
+  'documents-esign': { label: 'DMS-/E-Signatur-Abnahme', path: 'docs/hrm-go-live-templates/13_dms_esignatur_rendering_abnahme.md' },
+  'privacy-contracts': { label: 'AVV-/DPA-Pruefprotokoll', path: 'docs/hrm-go-live-templates/05_avv_dpa_pruefprotokoll.md' },
+  'works-council-dsfa': { label: 'DSFA-/Reporting-Freigabe', path: 'docs/hrm-go-live-templates/06_dsfa_vorpruefung.md' },
+  'retention-legal': { label: 'Retention- und Loeschkonzept', path: 'docs/hrm-go-live-templates/09_retention_loeschkonzept.md' },
+}
+
+const gatePresets: Record<string, { evidenceTypes: string[]; probeTypes: string[]; provider: string }> = {
+  'eau-communication': {
+    evidenceTypes: ['eAU-Testprotokoll', 'Rollenpruefung', 'Fehlerprozess', 'Datenschutzfreigabe'],
+    probeTypes: ['Testabruf eAU', 'Zertifikatspruefung', 'Rollenpruefung', 'Auditlog-Pruefung'],
+    provider: 'eAU-Kommunikation',
+  },
+  'datev-payroll': {
+    evidenceTypes: ['Testexport', 'Steuerberaterfreigabe', 'Lohnartenmapping', 'Kostenstellenmapping'],
+    probeTypes: ['DATEV-Testexport', 'Importpruefung Steuerberater', 'Monatsabschlussprobe'],
+    provider: 'DATEV/Payroll',
+  },
+  'office-sso-connectors': {
+    evidenceTypes: ['SSO-Test', 'MFA-Nachweis', 'Rollenmapping', 'Deprovisioning-Test'],
+    probeTypes: ['SSO-Login', 'MFA-Challenge', 'Rollenmapping', 'Leaver-Test'],
+    provider: 'Identity Provider',
+  },
+  'documents-esign': {
+    evidenceTypes: ['PDF-Test', 'DMS-Ablage', 'Signaturtest', 'Dokumentklassenpruefung'],
+    probeTypes: ['LibreOffice-Rendering', 'DMS-Ablage', 'E-Signatur-Rueckmeldung'],
+    provider: 'DMS/E-Signatur',
+  },
+  'privacy-contracts': {
+    evidenceTypes: ['AVV/DPA', 'TOM-Nachweis', 'Subprozessorenliste', 'Datenexportnachweis'],
+    probeTypes: ['AVV-Pruefung', 'Subprozessorenreview', 'Datenexporttest'],
+    provider: 'Anbieterregister',
+  },
+  'works-council-dsfa': {
+    evidenceTypes: ['Betriebsratsstatus', 'DSFA-Vorpruefung', 'Reporting-Freigabe', 'KI-Assistenzfreigabe'],
+    probeTypes: ['DSFA-Pruefung', 'Reporting-Zweckpruefung', 'Freigabecheck'],
+    provider: 'HR/Datenschutz',
+  },
+  'retention-legal': {
+    evidenceTypes: ['Loeschkonzept', 'Dokumentklassenfreigabe', 'Legal-Freigabe', 'Loeschlauf-Protokoll'],
+    probeTypes: ['Retention-Regelpruefung', 'Auskunftsexport', 'Loeschlauf-Stichprobe'],
+    provider: 'Legal/HR',
+  },
+}
+
+const roleProfiles: Array<{ id: RoleFocus; label: string; description: string }> = [
+  { id: 'all', label: 'Alle', description: 'Gesamtbild fuer Koordination und Go-live' },
+  { id: 'hr', label: 'HR', description: 'Personalprozesse, Akten, Reporting und Vorlagen' },
+  { id: 'payroll', label: 'Payroll', description: 'eAU, DATEV, Lohn und Monatsabschluss' },
+  { id: 'it', label: 'IT', description: 'SSO, MFA, DMS, technische Tests und Audit' },
+  { id: 'privacy', label: 'Datenschutz', description: 'AVV, DSFA, TOMs und Zweckbindung' },
+  { id: 'legal', label: 'Legal', description: 'Retention, Dokumentklassen und Vertragsfreigaben' },
+  { id: 'management', label: 'Leitung', description: 'Startentscheidung, Blocker und Restrisiken' },
+]
+
+const gateRoles: Record<string, RoleFocus[]> = {
+  'eau-communication': ['hr', 'payroll', 'privacy'],
+  'datev-payroll': ['payroll', 'hr', 'management'],
+  'office-sso-connectors': ['it', 'privacy'],
+  'documents-esign': ['hr', 'it', 'legal'],
+  'privacy-contracts': ['privacy', 'it', 'management'],
+  'works-council-dsfa': ['hr', 'privacy', 'management'],
+  'retention-legal': ['legal', 'hr', 'privacy', 'management'],
+}
+
+function gateMatchesRole(gate: HrmOperationsGate, role: RoleFocus): boolean {
+  return role === 'all' || gateRoles[gate.id]?.includes(role) || false
+}
+
 function nextAction(gate: HrmOperationsGate): string {
   if (gate.status === 'approved') return 'Kein Sofortbedarf. Beim naechsten Regeltermin erneut pruefen.'
   if (gate.status === 'rejected') return 'Klaeren, warum der Punkt zurueckgewiesen wurde, und einen neuen Nachweis einreichen.'
@@ -129,6 +205,27 @@ function nextAction(gate: HrmOperationsGate): string {
   if (!gate.lastProbeStatus || gate.lastProbeStatus === 'failed' || gate.lastProbeStatus === 'not_configured') return 'Den fachlichen oder technischen Test nachtragen.'
   if (gate.status === 'probe_passed' || gate.status === 'evidence_submitted') return 'Die verantwortliche Person soll den Punkt freigeben oder zurueckweisen.'
   return 'Pruefen, welcher Nachweis noch fehlt.'
+}
+
+function taskItems(gate: HrmOperationsGate): Array<{ label: string; done: boolean; hint: string }> {
+  const probeDone = gate.lastProbeStatus === 'passed' || gate.lastProbeStatus === 'manual'
+  return [
+    {
+      label: 'Nachweis hinterlegen',
+      done: gate.evidenceCount > 0,
+      hint: gate.evidenceCount > 0 ? `${gate.evidenceCount} Nachweis(e) vorhanden` : 'Vorlage nutzen und DMS-Link oder Aktenzeichen eintragen',
+    },
+    {
+      label: 'Fachlichen Test dokumentieren',
+      done: probeDone,
+      hint: gate.lastProbeStatus ? `Letzter Test: ${probeLabel[gate.lastProbeStatus] ?? gate.lastProbeStatus}` : 'Testart auswaehlen und Ergebnis speichern',
+    },
+    {
+      label: 'Freigabeentscheidung treffen',
+      done: gate.status === 'approved',
+      hint: gate.status === 'approved' ? `Freigegeben durch ${gate.approvedBy ?? 'verantwortliche Person'}` : 'Nachweis und Test pruefen, dann freigeben oder zurueckweisen',
+    },
+  ]
 }
 
 function StatusPill({ status }: { status: ReturnType<typeof checkpointStatus> }): JSX.Element {
@@ -164,10 +261,17 @@ function GateActions({ gate }: { gate: HrmOperationsGate }): JSX.Element {
   const evidenceMutation = useCreateHrmOperationsGateEvidence(gate.id)
   const probeMutation = useRecordHrmOperationsGateProbe(gate.id)
   const decisionMutation = useDecideHrmOperationsGate(gate.id)
+  const preset = gatePresets[gate.id] ?? {
+    evidenceTypes: [defaultForm.evidenceType],
+    probeTypes: [defaultForm.probeType],
+    provider: simpleGateTitle(gate),
+  }
   const [form, setForm] = useState<GateFormState>({
     ...defaultForm,
+    evidenceType: preset.evidenceTypes[0] ?? defaultForm.evidenceType,
     title: `${simpleGateTitle(gate)} Nachweis`,
-    provider: simpleGateTitle(gate).split(' ')[0] || gate.id,
+    provider: preset.provider,
+    probeType: preset.probeTypes[0] ?? defaultForm.probeType,
   })
 
   const update = <K extends keyof GateFormState>(key: K, value: GateFormState[K]): void => {
@@ -240,15 +344,38 @@ function GateActions({ gate }: { gate: HrmOperationsGate }): JSX.Element {
   }
 
   const busy = evidenceMutation.isPending || probeMutation.isPending || decisionMutation.isPending
+  const template = templateByGate[gate.id]
 
   return (
     <div className="flex flex-col gap-4">
+      {template ? (
+        <a
+          href={`/${template.path}`}
+          target="_blank"
+          rel="noreferrer"
+          className="flex items-center justify-between rounded border border-blue-200 bg-blue-50 px-3 py-2 text-xs font-bold text-blue-800 hover:bg-blue-100"
+        >
+          <span className="flex items-center gap-2">
+            <FileText className="h-4 w-4" />
+            Vorlage oeffnen: {template.label}
+          </span>
+          <ExternalLink className="h-3.5 w-3.5" />
+        </a>
+      ) : null}
+
       <div className="rounded border border-gray-200 bg-white p-4 shadow-sm">
         <h4 className="mb-4 border-b pb-2 text-xs font-bold uppercase text-gray-800">1. Nachweis ablegen</h4>
         <div className="space-y-4">
           <div>
             <Label className="mb-1 block text-[10px] font-bold uppercase text-gray-400" htmlFor={`${gate.id}-evidence-type`}>Art des Nachweises</Label>
-            <Input id={`${gate.id}-evidence-type`} value={form.evidenceType} onChange={(event) => update('evidenceType', event.target.value)} />
+            <select
+              id={`${gate.id}-evidence-type`}
+              className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+              value={form.evidenceType}
+              onChange={(event) => update('evidenceType', event.target.value)}
+            >
+              {preset.evidenceTypes.map((item) => <option key={item} value={item}>{item}</option>)}
+            </select>
           </div>
           <div>
             <Label className="mb-1 block text-[10px] font-bold uppercase text-gray-400" htmlFor={`${gate.id}-title`}>Titel / Bezeichnung</Label>
@@ -282,7 +409,14 @@ function GateActions({ gate }: { gate: HrmOperationsGate }): JSX.Element {
             </div>
             <div>
               <Label className="mb-1 block text-[10px] font-bold uppercase text-gray-400" htmlFor={`${gate.id}-probe-type`}>Was pruefen?</Label>
-              <Input id={`${gate.id}-probe-type`} value={form.probeType} onChange={(event) => update('probeType', event.target.value)} />
+              <select
+                id={`${gate.id}-probe-type`}
+                className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                value={form.probeType}
+                onChange={(event) => update('probeType', event.target.value)}
+              >
+                {preset.probeTypes.map((item) => <option key={item} value={item}>{item}</option>)}
+              </select>
             </div>
           </div>
           <div>
@@ -333,6 +467,67 @@ function GateActions({ gate }: { gate: HrmOperationsGate }): JSX.Element {
           </div>
         </div>
       </div>
+    </div>
+  )
+}
+
+function GateTaskPlan({ gate }: { gate: HrmOperationsGate }): JSX.Element {
+  return (
+    <div className="rounded border border-gray-200 bg-white p-4 shadow-sm">
+      <h4 className="mb-4 flex items-center gap-2 border-b pb-2 text-xs font-bold uppercase text-gray-700">
+        <ClipboardCheck className="h-3.5 w-3.5 text-[#005ca5]" />
+        Arbeitsplan
+      </h4>
+      <div className="space-y-3">
+        {taskItems(gate).map((item, index) => (
+          <div key={item.label} className="flex items-start gap-3">
+            <div className={`mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full border text-[11px] font-black ${item.done ? 'border-emerald-500 bg-emerald-50 text-emerald-700' : 'border-gray-300 bg-gray-50 text-gray-500'}`}>
+              {item.done ? <Check className="h-3.5 w-3.5" /> : index + 1}
+            </div>
+            <div className="min-w-0">
+              <p className="text-[13px] font-bold text-gray-800">{item.label}</p>
+              <p className="text-[12px] leading-relaxed text-gray-500">{item.hint}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+function AuditTimeline({ gate }: { gate: HrmOperationsGate }): JSX.Element {
+  const entries = [
+    gate.latestEvidenceRef ? { label: 'Nachweis hinterlegt', detail: gate.latestEvidenceRef, tone: 'blue' } : null,
+    gate.lastProbeStatus ? { label: 'Test dokumentiert', detail: `${probeLabel[gate.lastProbeStatus] ?? gate.lastProbeStatus}${gate.lastProbeAt ? ` am ${formatDate(gate.lastProbeAt)}` : ''}`, tone: gate.lastProbeStatus === 'passed' ? 'emerald' : 'amber' } : null,
+    gate.status === 'approved' ? { label: 'Freigegeben', detail: `${gate.approvedBy ?? 'Verantwortliche Person'}${gate.approvedAt ? ` am ${formatDate(gate.approvedAt)}` : ''}`, tone: 'emerald' } : null,
+    gate.status === 'rejected' ? { label: 'Zurueckgewiesen', detail: gate.rejectionReason ?? 'Kommentar pruefen', tone: 'red' } : null,
+  ].filter(Boolean) as Array<{ label: string; detail: string; tone: 'blue' | 'emerald' | 'amber' | 'red' }>
+
+  const dotClass: Record<string, string> = {
+    blue: 'bg-blue-600',
+    emerald: 'bg-emerald-600',
+    amber: 'bg-amber-500',
+    red: 'bg-red-600',
+  }
+
+  return (
+    <div className="rounded border border-gray-200 bg-white p-4 shadow-sm">
+      <h4 className="mb-4 border-b pb-2 text-xs font-bold uppercase text-gray-700">Audit-Zeitleiste</h4>
+      {entries.length > 0 ? (
+        <div className="space-y-3">
+          {entries.map((entry) => (
+            <div key={`${entry.label}-${entry.detail}`} className="flex gap-3">
+              <span className={`mt-1.5 h-2.5 w-2.5 shrink-0 rounded-full ${dotClass[entry.tone]}`} />
+              <div className="min-w-0">
+                <p className="text-[13px] font-bold text-gray-800">{entry.label}</p>
+                <p className="break-words text-[12px] text-gray-500">{entry.detail}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <p className="text-[13px] text-gray-500">Noch keine Nachweise, Tests oder Entscheidungen protokolliert.</p>
+      )}
     </div>
   )
 }
@@ -410,6 +605,11 @@ function GateRow({ gate, expanded, onToggle }: { gate: HrmOperationsGate; expand
           <div className="grid gap-8 lg:grid-cols-12">
             <div className="flex flex-col gap-6 lg:col-span-8">
               <div className="grid gap-4 md:grid-cols-2">
+                <GateTaskPlan gate={gate} />
+                <AuditTimeline gate={gate} />
+              </div>
+
+              <div className="grid gap-4 md:grid-cols-2">
                 <div className="rounded border border-gray-200 bg-white p-4 shadow-sm">
                   <h4 className="mb-4 border-b pb-2 text-xs font-bold uppercase text-gray-700">Was muss vorliegen?</h4>
                   <ul className="space-y-3">
@@ -483,12 +683,15 @@ export default function HrmOperationsGatesPage(): JSX.Element {
   const gatesQuery = useHrmOperationsGates()
   const policyQuery = useHrmOperationsGoLivePolicy()
   const gates = useMemo(() => gatesQuery.data?.gates ?? [], [gatesQuery.data?.gates])
+  const [roleFocus, setRoleFocus] = useState<RoleFocus>('all')
   const [expandedGateId, setExpandedGateId] = useState<string | null>(null)
+  const visibleGates = useMemo(() => gates.filter((gate) => gateMatchesRole(gate, roleFocus)), [gates, roleFocus])
   const approvedCount = gates.filter((gate) => gate.status === 'approved').length
   const evidenceCount = gates.reduce((sum, gate) => sum + gate.evidenceCount, 0)
   const blockerCount = policyQuery.data?.blockerCount ?? gates.filter((gate) => gate.goLiveBlocking && gate.status !== 'approved').length
   const isGoLiveAllowed = policyQuery.data?.goLiveAllowed ?? blockerCount === 0
   const blockers = policyQuery.data?.blockers ?? gates.filter((gate) => gate.goLiveBlocking && gate.status !== 'approved')
+  const selectedRole = roleProfiles.find((profile) => profile.id === roleFocus) ?? roleProfiles[0]
 
   if (gatesQuery.isLoading && gates.length === 0) {
     return (
@@ -539,6 +742,37 @@ export default function HrmOperationsGatesPage(): JSX.Element {
           <KpiItem label="Nachweise Gesamt" value={evidenceCount} icon={FileText} colorClass="text-blue-500" />
         </section>
 
+        <section className="rounded border border-gray-200 bg-white p-4 shadow-sm">
+          <div className="mb-3 flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+              <h2 className="flex items-center gap-2 text-base font-bold text-gray-900">
+                <BriefcaseBusiness className="h-4 w-4 text-[#005ca5]" />
+                Rollenfokus
+              </h2>
+              <p className="text-[12px] text-gray-500">{selectedRole.description}</p>
+            </div>
+            <span className="text-[11px] font-bold uppercase tracking-wide text-gray-400">
+              {visibleGates.length} von {gates.length} Pruefpunkten sichtbar
+            </span>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {roleProfiles.map((profile) => (
+              <button
+                key={profile.id}
+                type="button"
+                onClick={() => {
+                  setRoleFocus(profile.id)
+                  setExpandedGateId(null)
+                }}
+                className={`rounded border px-3 py-1.5 text-xs font-bold transition ${roleFocus === profile.id ? 'border-[#005ca5] bg-blue-50 text-[#005ca5]' : 'border-gray-200 bg-white text-gray-600 hover:bg-gray-50'}`}
+                title={profile.description}
+              >
+                {profile.label}
+              </button>
+            ))}
+          </div>
+        </section>
+
         <section className="overflow-hidden rounded border border-gray-300 border-t-4 border-t-[#005ca5] bg-white shadow-sm">
           <div className="flex items-center justify-between border-b border-gray-200 bg-gray-50/50 px-6 py-4">
             <div className="flex items-center gap-2.5">
@@ -577,6 +811,23 @@ export default function HrmOperationsGatesPage(): JSX.Element {
               </p>
             </div>
           </div>
+          <div className="grid border-t border-gray-100 bg-gray-50/60 md:grid-cols-3">
+            <div className="border-b border-gray-100 p-4 md:border-b-0 md:border-r">
+              <p className="text-[10px] font-bold uppercase tracking-wide text-gray-400">Management-Entscheidung</p>
+              <p className="mt-1 text-sm font-bold text-gray-800">{isGoLiveAllowed ? 'Freigabe kann vorbereitet werden' : 'Freigabe aktuell nicht moeglich'}</p>
+            </div>
+            <div className="border-b border-gray-100 p-4 md:border-b-0 md:border-r">
+              <p className="text-[10px] font-bold uppercase tracking-wide text-gray-400">Naechster Fokus</p>
+              <p className="mt-1 text-sm font-bold text-gray-800">{blockers[0] ? simpleGateTitle(blockers[0]) : 'Regelpruefung terminieren'}</p>
+            </div>
+            <div className="p-4">
+              <p className="text-[10px] font-bold uppercase tracking-wide text-gray-400">Vorlage Entscheidung</p>
+              <a href="/docs/hrm-go-live-templates/16_geschaeftsfuehrungsfreigabe.md" target="_blank" rel="noreferrer" className="mt-1 inline-flex items-center gap-1 text-sm font-bold text-[#005ca5] hover:underline">
+                Geschaeftsfuehrungsfreigabe oeffnen
+                <ExternalLink className="h-3.5 w-3.5" />
+              </a>
+            </div>
+          </div>
         </section>
 
         <div className="flex flex-col gap-3 pt-4 sm:flex-row sm:items-center sm:justify-between">
@@ -591,7 +842,7 @@ export default function HrmOperationsGatesPage(): JSX.Element {
         </div>
 
         <div className="space-y-4">
-          {gates.map((gate) => (
+          {visibleGates.map((gate) => (
             <GateRow
               key={gate.id}
               gate={gate}

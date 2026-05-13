@@ -1,7 +1,7 @@
 id: HRM-GO-LIVE-UX-001
 title: HRM-Betriebsfreigaben UX-Referenz und domänenweiter Standard
 owner: Codex
-status: reserviert
+status: abgeschlossen
 created: 2026-05-13
 goal: >
   HRM-Betriebsfreigaben von Compliance-Cockpit zu gefuehrter Arbeitsflaeche
@@ -20,6 +20,15 @@ acceptance_criteria:
   - Repo-weiter UX-Standard uebertraegt diese Muster auf alle Domaenen.
   - Typecheck und Doku-Checks sind gruen.
 checks:
-  - offen
+  - pnpm --filter @valero-neuroerp/frontend-web type-check
+  - node scripts/docs-markdown-check.cjs docs/project-context/ux-excellence-operating-standard-2026-05-13.md docs/project-context/open-gaps-and-known-issues.md docs/agent-ops/active-workboard.md docs/agent-ops/slices/HRM-GO-LIVE-UX-001.yaml
+  - python scripts/agent_workboard_supervisor.py validate
+  - node scripts/docs-governance-check.cjs
+  - git diff --check
+done:
+  - HRM-Betriebsfreigaben um Rollenfokus, Management-Entscheidungsbild, Vorlage-Link je Gate, Aufgabenplan und Audit-Zeitleiste erweitert.
+  - Nachweis- und Testeingaben nutzen gate-spezifische Auswahllisten statt generischer Freitextfelder.
+  - UX-Exzellenzstandard fuer alle Domaenen dokumentiert.
+  - Open-Gaps-Doku verweist auf den neuen UX-Standard.
 risks:
   - Vollstaendige Ueberarbeitung aller Domaenen bleibt ein Rollout-Programm; dieser Slice liefert Referenzumsetzung und verbindlichen Standard.
