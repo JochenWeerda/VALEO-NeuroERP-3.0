@@ -134,6 +134,17 @@ Stand: `2026-05-12`
 **Checks:** `pytest tests/test_personal_hrm_gap_closure_api.py tests/test_personal_hrm_readiness_api.py tests/test_personal_hrm_operations_gates_api.py -q --no-cov`; `python -m py_compile app/api/v1/endpoints/personal.py tests/test_personal_hrm_gap_closure_api.py tests/test_personal_hrm_readiness_api.py tests/test_personal_hrm_operations_gates_api.py`; `rg -n "Emotion|Scoring|Ranking|Score|Profiling|verdeckte|heimliche|Leistungsueberwachung|Verhaltens|KI-/Analytics|Analytics-/KI|Reports und Scores" docs/hrm-go-live-templates docs/project-context/hrm-germany-operating-system-gap-plan-2026-05-13.md docs/project-context/open-gaps-and-known-issues.md app/api/v1/endpoints/personal.py tests/test_personal_hrm_gap_closure_api.py tests/test_personal_hrm_operations_gates_api.py tests/test_personal_hrm_readiness_api.py` (keine Treffer); `python scripts/agent_workboard_supervisor.py validate`; `node scripts/docs-governance-check.cjs`; `git diff --check`
 **Offene Risiken:** Konkrete spaetere KI- oder Analytics-Erweiterungen brauchen erneut gesonderte Datenschutz-, Legal- und Betriebsratspruefung.
 
+## HRM-GO-LIVE-TEMPLATES-003
+
+**Von:** Codex
+**Owner:** Codex
+**Stand:** reserviert 2026-05-13
+**Ziel des Slices:** HRM-Go-live-Gesamtwerk in einzelne, direkt auffindbare Formular-Dateien unter `docs/hrm-go-live-templates/` zerlegen, ohne den fachlichen Master zu duplizieren.
+**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/agent-ops/slices/HRM-GO-LIVE-TEMPLATES-003.yaml`, `docs/hrm-go-live-templates/README.md`, `docs/hrm-go-live-templates/01_hrm_go_live_freigabeprotokoll.md`, `docs/hrm-go-live-templates/02_betriebsratsstatus_kein_betriebsrat.md`, `docs/hrm-go-live-templates/03_mitarbeiterinformation_hrm.md`, `docs/hrm-go-live-templates/04_vvt_hrm_system.md`, `docs/hrm-go-live-templates/05_avv_dpa_pruefprotokoll.md`, `docs/hrm-go-live-templates/06_dsfa_vorpruefung.md`, `docs/hrm-go-live-templates/07_rollen_berechtigungskonzept.md`, `docs/hrm-go-live-templates/08_tom_it_sicherheitsfreigabe.md`, `docs/hrm-go-live-templates/09_retention_loeschkonzept.md`, `docs/hrm-go-live-templates/10_eau_freigabeprotokoll.md`, `docs/hrm-go-live-templates/11_datev_payroll_abnahme.md`, `docs/hrm-go-live-templates/12_office_sso_abnahme.md`, `docs/hrm-go-live-templates/13_dms_esignatur_rendering_abnahme.md`, `docs/hrm-go-live-templates/14_ki_assistenz_reporting_freigabe.md`, `docs/hrm-go-live-templates/15_evidence_auditprotokoll.md`, `docs/hrm-go-live-templates/16_geschaeftsfuehrungsfreigabe.md`, `docs/hrm-go-live-templates/17_betriebsvereinbarung_optional.md`
+**Abnahmekriterien:** Alle im README genannten Einzelvorlagen existieren; jede Einzelvorlage ist als Auszug mit Zweck, Verwendung und Link zum Master auffindbar; keine Einzelvorlage nennt hypothetische, nicht vorgesehene HRM-Funktionen; Doku-Checks sind gruen.
+**Checks:** offen
+**Offene Risiken:** Die Einzeldateien sind Arbeitskopien aus dem Master; bei inhaltlichen Aenderungen muss der Master als Source of Truth zuerst angepasst werden.
+
 ## TODO-SPRINT-001
 
 **Von:** Cursor<br>
