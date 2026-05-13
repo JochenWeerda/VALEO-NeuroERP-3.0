@@ -38,6 +38,7 @@ Zuletzt vollstaendig auditiert: **2026-05-05**.
 - Zweite Codewelle ist ebenfalls eingezogen: `fibu/schnittstellen-center.tsx`, `charge/wareneingang.tsx`, `einkauf/rechnungseingang.tsx`, `kontrakte/KontraktPositionsmonitor.tsx`, `crm/opportunity-detail.tsx` und `fibu/atlas.tsx` bilden dieselbe Verdichtung jetzt direkt in den operativen Folgepfaden ab.
 - Dritte Codewelle ist jetzt ebenfalls aktiv: `finance/mahnwesen.tsx`, `fibu/zahlungslaeufe.tsx`, `waage/wiegeschein-detail.tsx`, `annahme/rohware.tsx`, `logistik/frachtbriefe.tsx`, `einkauf/lieferanten-dokumente.tsx`, `einkauf/anlieferavis.tsx`, `einkauf/auftragsbestaetigung.tsx`, `kontrakte/FrmKontraktDetail.tsx`, `kontrakte/KontraktAlarmDashboard.tsx`, `crm/kontakt-management.tsx` und die vertiefte `dokumente/ablage.tsx` sind auf dasselbe leichte Operator- und Nachweisbild gezogen.
 - Messbare Domaenenparitaet wird jetzt in [domain-parity-roadmap-2026-04-24.md](c:/Users/Jochen/VALEO-NeuroERP-3.0/docs/project-context/domain-parity-roadmap-2026-04-24.md) gefuehrt.
+- UX-Paritaet wird ab 2026-05-13 zusaetzlich ueber [ux-excellence-operating-standard-2026-05-13.md](c:/Users/Jochen/VALEO-NeuroERP-3.0/docs/project-context/ux-excellence-operating-standard-2026-05-13.md) gefuehrt: Rollenfokus, Aufgabenplan, naechste Aktion, Vorlage-/Nachweislink, gefuehrte Eingabe, Audit-Zeitleiste und Management-Entscheidungsbild sind kuenftig Pflichtmuster fuer komplexe Arbeitsflaechen.
 
 ---
 
