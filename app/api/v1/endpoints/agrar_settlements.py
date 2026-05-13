@@ -17,7 +17,9 @@ from app.core.data_quality_enforcement import (
     build_dq_error_detail,
     evaluate_settlement_datensatz,
 )
+from app.core.exceptions import ConflictError, EntityNotFoundError, ValidationFailedError
 from app.core.tenant import get_tenant_id
+from app.services.agrar_settlement_service import AgrarSettlementService
 from app.documents.router_helpers import get_repository, get_from_store, list_from_store, save_to_store
 from app.infrastructure.models import AgrarSettlement, AgrarSettlementDeduction
 from app.domains.inventory.api.inventory_auth import require_inventory_admin
@@ -645,30 +647,16 @@ async def create_settlement(
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
-    settlement_number = payload.settlement_number or f"SET-{datetime.utcnow().strftime('%Y%m%d%H%M%S')}"
-    dq_result = evaluate_settlement_datensatz(_build_settlement_dq_datensatz(payload, settlement_number))
-    if not dq_result.bestanden:
-        raise HTTPException(status_code=422, detail=build_dq_error_detail("Abrechnung", dq_result))
-    duplicate = (
-        db.query(AgrarSettlement)
-        .filter(AgrarSettlement.tenant_id == tenant_id, AgrarSettlement.settlement_number == settlement_number)
-        .first()
-    )
-    if duplicate:
-        raise HTTPException(status_code=409, detail="settlement_number already exists")
-
     gross_qty = _round_qty(payload.gross_quantity_kg)
-
-    # Optional: compute drying loss/invoice weight + fee and persist audit snapshot on settlement.
     drying_snapshot: dict | None = None
+    billing_qty_override: Decimal | None = None
+
     if payload.drying is not None:
-        # Prevent double application of drying fee if caller already sends a 'drying' deduction line.
         if any(d.deduction_type == "drying" for d in payload.deductions):
             raise HTTPException(
                 status_code=400,
                 detail="Do not provide deductions[].deduction_type='drying' together with payload.drying (prevents double fee application).",
             )
-
         repo = _DbDryingRuleRepo(db, tenant_id=tenant_id)
         calc_date = payload.drying.calc_date or datetime.utcnow().date().isoformat()
         try:
@@ -702,14 +690,8 @@ async def create_settlement(
             "used_row_moisture_pct": float(drying_result.used_row_moisture_pct) if drying_result.used_row_moisture_pct is not None else None,
             "warnings": list(drying_result.warnings),
         }
-
-        # If caller didn't explicitly provide billing_quantity_kg, use computed invoice weight.
         if payload.billing_quantity_kg is None:
-            billing_qty = _round_qty(drying_result.invoice_weight_kg)
-        else:
-            billing_qty = _round_qty(payload.billing_quantity_kg)
-
-        # Optional fee becomes a settlement deduction line (fixed amount).
+            billing_qty_override = _round_qty(drying_result.invoice_weight_kg)
         if drying_result.drying_fee_eur is not None and drying_result.drying_fee_eur > 0:
             payload.deductions.append(
                 DeductionInput(
@@ -719,58 +701,22 @@ async def create_settlement(
                     note=f"Drying fee via rule-set {drying_result.used_rule_set_id} v{drying_result.used_rule_version}",
                 )
             )
-    else:
-        billing_qty = _round_qty(payload.billing_quantity_kg if payload.billing_quantity_kg is not None else payload.gross_quantity_kg)
 
-    amounts = _compute_settlement_amounts(
-        billing_quantity_kg=billing_qty,
-        unit_price_eur_per_ton=Decimal(str(payload.unit_price_eur_per_ton)),
-        deductions=payload.deductions,
-    )
-
-    settlement = AgrarSettlement(
-        id=uuid7(),
-        settlement_number=settlement_number,
-        campaign_id=payload.campaign_id,
-        contract_id=payload.contract_id,
-        ticket_id=payload.ticket_id,
-        supplier_id=payload.supplier_id,
-        article_id=payload.article_id,
-        gross_quantity_kg=gross_qty,
-        billing_quantity_kg=billing_qty,
-        unit_price_eur_per_ton=payload.unit_price_eur_per_ton,
-        gross_amount_eur=amounts["gross_amount"],
-        total_deductions_eur=amounts["total_deductions"],
-        net_amount_eur=amounts["net_amount"],
-        currency="EUR",
-        status="draft",
-        note=payload.note,
-        drying_result=drying_snapshot or {},
-        tenant_id=tenant_id,
-    )
-    db.add(settlement)
-    db.flush()
-
-    billing_qty_tons = amounts["billing_qty_tons"]
-    for d in payload.deductions:
-        deduction = AgrarSettlementDeduction(
-            id=uuid7(),
-            settlement_id=settlement.id,
-            deduction_type=d.deduction_type,
-            mode=d.mode,
-            rate_per_ton_eur=d.rate_per_ton_eur,
-            fixed_amount_eur=d.fixed_amount_eur,
-            basis_quantity_tons=d.basis_quantity_tons if d.basis_quantity_tons is not None else billing_qty_tons,
-            amount_eur=_calc_deduction_amount(d, billing_qty_tons),
-            note=d.note,
-            tenant_id=tenant_id,
+    try:
+        settlement, rows = _svc(db, tenant_id).create_settlement(
+            payload,
+            drying_snapshot=drying_snapshot,
+            billing_qty_override=billing_qty_override,
         )
-        db.add(deduction)
-
-    db.commit()
-    rows = db.query(AgrarSettlementDeduction).filter(AgrarSettlementDeduction.settlement_id == settlement.id).all()
-    db.refresh(settlement)
+    except ValidationFailedError as exc:
+        raise HTTPException(status_code=422, detail=exc.detail)
+    except ConflictError as exc:
+        raise HTTPException(status_code=409, detail=exc.detail)
     return _to_out(settlement, rows)
+
+
+def _svc(db: Session, tenant_id: str) -> AgrarSettlementService:
+    return AgrarSettlementService(db, tenant_id)
 
 
 @router.get("/", response_model=list[SettlementOut])
@@ -781,19 +727,10 @@ async def list_settlements(
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
-    query = db.query(AgrarSettlement).filter(AgrarSettlement.tenant_id == tenant_id)
-    if status:
-        query = query.filter(AgrarSettlement.status == status)
-    if supplier_id:
-        query = query.filter(AgrarSettlement.supplier_id == supplier_id)
-    if campaign_id:
-        query = query.filter(AgrarSettlement.campaign_id == campaign_id)
-    items = query.order_by(AgrarSettlement.created_at.desc()).limit(500).all()
-    result: list[SettlementOut] = []
-    for item in items:
-        deductions = db.query(AgrarSettlementDeduction).filter(AgrarSettlementDeduction.settlement_id == item.id).all()
-        result.append(_to_out(item, deductions))
-    return result
+    pairs = _svc(db, tenant_id).list_settlements(
+        status=status, supplier_id=supplier_id, campaign_id=campaign_id
+    )
+    return [_to_out(s, d) for s, d in pairs]
 
 
 @router.post("/campaign-reference/backfill", response_model=SettlementCampaignBackfillResponse)
@@ -835,10 +772,10 @@ async def get_settlement(
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
-    settlement = db.query(AgrarSettlement).filter(AgrarSettlement.id == settlement_id, AgrarSettlement.tenant_id == tenant_id).first()
-    if not settlement:
-        raise HTTPException(status_code=404, detail="Settlement not found")
-    deductions = db.query(AgrarSettlementDeduction).filter(AgrarSettlement.settlement_id == settlement.id).all()
+    try:
+        settlement, deductions = _svc(db, tenant_id).get_settlement(settlement_id)
+    except EntityNotFoundError as exc:
+        raise HTTPException(status_code=404, detail=exc.detail)
     return _to_out(settlement, deductions)
 
 
@@ -849,18 +786,11 @@ async def post_settlement_to_fibu(
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
-    settlement = db.query(AgrarSettlement).filter(AgrarSettlement.id == settlement_id, AgrarSettlement.tenant_id == tenant_id).first()
-    if not settlement:
-        raise HTTPException(status_code=404, detail="Settlement not found")
+    try:
+        settlement, _ = _svc(db, tenant_id).get_settlement(settlement_id)
+    except EntityNotFoundError as exc:
+        raise HTTPException(status_code=404, detail=exc.detail)
     _require_settlement_row_version_match(settlement, payload.expected_row_version)
-    if settlement.status != "draft":
-        raise HTTPException(status_code=400, detail=f"Settlement cannot be posted in status {settlement.status}")
-    approval_status = _get_settlement_approval_status(settlement)
-    if approval_status != "FREIGEGEBEN":
-        raise HTTPException(
-            status_code=409,
-            detail=f"Settlement requires approval before posting. Current approval_status={approval_status}",
-        )
 
     posting_date = payload.posting_date or datetime.utcnow()
     journal_ref = f"JE-SET-{datetime.utcnow().strftime('%Y%m%d')}-{settlement.id[:8].upper()}"
@@ -885,15 +815,13 @@ async def post_settlement_to_fibu(
         },
     ]
     if deductions > 0:
-        lines.append(
-            {
-                "line_number": 3,
-                "account_id": payload.credit_account_deductions,
-                "debit_amount": 0.0,
-                "credit_amount": float(deductions),
-                "description": "Settlement deductions",
-            }
-        )
+        lines.append({
+            "line_number": 3,
+            "account_id": payload.credit_account_deductions,
+            "debit_amount": 0.0,
+            "credit_amount": float(deductions),
+            "description": "Settlement deductions",
+        })
 
     journal_entry = {
         "id": journal_ref,
@@ -911,28 +839,10 @@ async def post_settlement_to_fibu(
     }
     save_to_store("journal_entry", journal_ref, journal_entry, get_repository(db))
 
-    settlement.status = "posted"
-    settlement.posted_journal_ref = journal_ref
-    settlement.posted_at = posting_date
-    new_state = dict(settlement.drying_result or {})
-    new_state["approval_status"] = "VERBUCHT"
-    history = list(new_state.get("approval_history") or [])
-    history.append(
-        {
-            "settlement_id": settlement.id,
-            "event": "settlement.approval.verbucht",
-            "actor_id": "system",
-            "actor_type": "SYSTEM",
-            "previous_status": approval_status,
-            "new_status": "VERBUCHT",
-            "allowed": True,
-            "reason": "Settlement nach erteilter Freigabe in FiBu verbucht.",
-            "decided_at": posting_date.isoformat(),
-        }
-    )
-    new_state["approval_history"] = history
-    settlement.drying_result = new_state
-    _commit_settlement_mutation(db)
+    try:
+        settlement = _svc(db, tenant_id).post_to_fibu(settlement_id, journal_ref, posting_date)
+    except ValidationFailedError as exc:
+        raise HTTPException(status_code=400, detail=exc.detail)
     return {"ok": True, "settlement_id": settlement.id, "journal_ref": journal_ref}
 
 
@@ -1131,15 +1041,18 @@ async def cancel_settlement(
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
-    settlement = db.query(AgrarSettlement).filter(AgrarSettlement.id == settlement_id, AgrarSettlement.tenant_id == tenant_id).first()
-    if not settlement:
-        raise HTTPException(status_code=404, detail="Settlement not found")
+    try:
+        settlement, _ = _svc(db, tenant_id).get_settlement(settlement_id)
+    except EntityNotFoundError as exc:
+        raise HTTPException(status_code=404, detail=exc.detail)
     _require_settlement_row_version_match(settlement, expected_row_version)
-    if settlement.status == "posted":
-        raise HTTPException(status_code=400, detail="Posted settlement cannot be cancelled")
-    settlement.status = "cancelled"
-    _commit_settlement_mutation(db)
-    return {"ok": True, "settlement_id": settlement.id, "status": settlement.status}
+    try:
+        result = _svc(db, tenant_id).cancel_settlement(settlement_id)
+    except ConflictError as exc:
+        raise HTTPException(status_code=409, detail=exc.detail)
+    except ValidationFailedError as exc:
+        raise HTTPException(status_code=400, detail=exc.detail)
+    return {"ok": True, "settlement_id": result.id, "status": result.status}
 
 
 # ── Drying Rule Sets CRUD (Admin-only write, read for all) ──────────────────────
