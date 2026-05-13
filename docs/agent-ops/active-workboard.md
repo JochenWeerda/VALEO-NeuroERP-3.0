@@ -26,6 +26,17 @@ Stand: `2026-05-12`
 **Checks:** `pytest tests/test_personal_hrm_readiness_api.py -q --no-cov`; `pnpm --filter @valero-neuroerp/frontend-web type-check`; `python scripts/agent_workboard_supervisor.py validate`; `node scripts/docs-governance-check.cjs`; `git diff --check`
 **Offene Risiken:** Rechtsfeinpruefung, Betriebsvereinbarungen, echte eAU-/DATEV-/Microsoft-/Google-Zugangsdaten und produktive AVV/DPA bleiben Folgeslices.
 
+## HRM-AKTE-001
+
+**Von:** Codex
+**Owner:** Codex
+**Stand:** reserviert 2026-05-13
+**Ziel des Slices:** Ersten Vertrag fuer digitale Personalakte mit Dokumentklassen, DMS-Referenzen, Rollenfilter, Audit- und Retention-Sicht bereitstellen.
+**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/agent-ops/slices/HRM-AKTE-001.yaml`, `docs/project-context/hrm-germany-operating-system-gap-plan-2026-05-13.md`, `app/api/v1/endpoints/personal.py`, `tests/test_personal_employee_file_api.py`, `packages/frontend-web/src/lib/api/personal.ts`
+**Abnahmekriterien:** Personalakte kann Dokumentmetadaten lesen und anlegen; Dokumentklassen weisen Rechtsgrundlage, Standard-Sichtbarkeit und Retention aus; Rollenfilter fuer Employee/Manager/HR/Payroll ist regressionsgesichert; Export-/Loeschkonzept ist im Contract sichtbar.
+**Checks:** `pytest tests/test_personal_employee_file_api.py -q --no-cov`; `pnpm --filter @valero-neuroerp/frontend-web type-check`; `python scripts/agent_workboard_supervisor.py validate`; `node scripts/docs-governance-check.cjs`; `git diff --check`
+**Offene Risiken:** Produktive DMS-Ablage, echte Signaturen, Rechtsfreigabe der Aufbewahrungsfristen und DB-Migration bleiben Folgeslices.
+
 ## TODO-SPRINT-001
 
 **Von:** Cursor<br>
