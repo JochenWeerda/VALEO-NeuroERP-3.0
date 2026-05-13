@@ -74,6 +74,17 @@ Stand: `2026-05-12`
 **Checks:** `pytest tests/test_personal_hrm_operations_gate_workflow_api.py tests/test_personal_hrm_operations_gates_api.py tests/test_personal_hrm_gap_closure_api.py tests/test_personal_employee_file_api.py -q --no-cov`; `pnpm --filter @valero-neuroerp/frontend-web type-check`; `python -m py_compile app/api/v1/endpoints/personal.py tests/test_personal_hrm_operations_gate_workflow_api.py alembic/versions/hrm_operations_gates_20260513.py`; `python scripts/agent_workboard_supervisor.py validate`; `node scripts/docs-governance-check.cjs`; `git diff --check`
 **Offene Risiken:** Echte externe Providerzugriffe benoetigen weiterhin produktive Credentials; dieser Slice implementiert die technische Workflow- und Persistenzschicht inklusive Probe-Status, nicht die Beschaffung externer Freigaben.
 
+## HRM-OPERATIONS-GATES-003
+
+**Von:** Codex
+**Owner:** Codex
+**Stand:** reserviert 2026-05-13
+**Ziel des Slices:** HRM-Betriebsfreigabe-Gates als bedienbares Frontend-Cockpit verfuegbar machen: Go-live-Status, Gate-Liste, Evidence-Erfassung, Probe-Erfassung und Approval/Reject-Aktionen.
+**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/agent-ops/slices/HRM-OPERATIONS-GATES-003.yaml`, `docs/project-context/hrm-germany-operating-system-gap-plan-2026-05-13.md`, `docs/project-context/open-gaps-and-known-issues.md`, `packages/frontend-web/src/pages/personal/hrm-operations-gates.tsx`, `packages/frontend-web/src/app/navigation/domains/operations.tsx`, `packages/frontend-web/src/app/route-builders/alias-groups/generated/personal.ts`, `packages/frontend-web/src/app/route-builders/auto-groups/generated/personal.ts`
+**Abnahmekriterien:** Personal-Navigation enthaelt das HRM-Freigabe-Cockpit; Route ist aufloesbar; UI zeigt Go-live-Policy, Blocker und Gate-Details; pro Gate koennen Evidence, Probe und Entscheidung ausgelöst werden; Typecheck ist gruen.
+**Checks:** offen
+**Offene Risiken:** Echte externe Freigaben bleiben betriebliche Nachweise; UI stellt den technischen Bedienpfad bereit.
+
 ## TODO-SPRINT-001
 
 **Von:** Cursor<br>

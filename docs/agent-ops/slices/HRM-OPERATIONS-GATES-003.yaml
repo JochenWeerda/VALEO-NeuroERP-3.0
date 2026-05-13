@@ -1,0 +1,28 @@
+id: HRM-OPERATIONS-GATES-003
+title: HRM-Betriebsfreigabe-Cockpit
+owner: Codex
+status: reserviert
+created: 2026-05-13
+goal: >
+  HRM-Betriebsfreigabe-Gates als bedienbares Frontend-Cockpit verfuegbar
+  machen: Go-live-Status, Gate-Liste, Evidence-Erfassung, Probe-Erfassung und
+  Approval/Reject-Aktionen.
+file_ownership:
+  - docs/agent-ops/active-workboard.md
+  - docs/agent-ops/slices/HRM-OPERATIONS-GATES-003.yaml
+  - docs/project-context/hrm-germany-operating-system-gap-plan-2026-05-13.md
+  - docs/project-context/open-gaps-and-known-issues.md
+  - packages/frontend-web/src/pages/personal/hrm-operations-gates.tsx
+  - packages/frontend-web/src/app/navigation/domains/operations.tsx
+  - packages/frontend-web/src/app/route-builders/alias-groups/generated/personal.ts
+  - packages/frontend-web/src/app/route-builders/auto-groups/generated/personal.ts
+acceptance_criteria:
+  - Personal-Navigation enthaelt das HRM-Freigabe-Cockpit.
+  - Route ist aufloesbar.
+  - UI zeigt Go-live-Policy, Blocker und Gate-Details.
+  - Pro Gate koennen Evidence, Probe und Entscheidung ausgeloest werden.
+  - Typecheck ist gruen.
+checks:
+  - offen
+risks:
+  - Echte externe Freigaben bleiben betriebliche Nachweise; UI stellt den technischen Bedienpfad bereit.
