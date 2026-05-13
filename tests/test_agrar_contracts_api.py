@@ -12,7 +12,7 @@ from fastapi.testclient import TestClient
 
 from main import app
 from conftest import skip_if_db_unavailable
-from app.api.v1.endpoints.agrar_contracts import (
+from app.services.agrar_contract_service import (
     _compute_status,
     _build_contract_dq_datensatz,
 )

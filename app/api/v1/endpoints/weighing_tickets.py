@@ -21,7 +21,7 @@ from modules.agrar.services.weighing_domain import (
     resolve_ticket_allocation_quantity as _resolve_ticket_allocation_quantity_impl,
     validate_and_compute_weights as _validate_and_compute_weights_impl,
 )
-from .agrar_contracts import _compute_status
+from app.services.agrar_contract_service import _compute_status
 from ..schemas.base import PaginatedResponse, BaseSchema
 from app.core.uuid7 import uuid7
 
