@@ -18,6 +18,10 @@ export const entries: AliasGroupRouteEntry[] = [
     "path": "onboarding"
   },
   {
+    "module": "@/pages/personal/hrm-operations-gates",
+    "path": "hrm-freigaben"
+  },
+  {
     "module": "@/pages/personal/qualifikationen",
     "path": "qualifikationen"
   },

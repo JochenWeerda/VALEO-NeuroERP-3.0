@@ -2,6 +2,10 @@ import type { AutoGroupRouteEntry } from '@/app/route-builders/types'
 
 export const entries: AutoGroupRouteEntry[] = [
   {
+    "module": "@/pages/personal/hrm-operations-gates",
+    "path": "hrm-operations-gates"
+  },
+  {
     "module": "@/pages/personal/mitarbeiter-liste",
     "path": "mitarbeiter-liste"
   },
