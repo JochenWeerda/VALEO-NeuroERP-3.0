@@ -146,6 +146,17 @@ Stand: `2026-05-12`
 **Checks:** `Get-ChildItem -Path docs/hrm-go-live-templates -Filter *.md`; `rg -n "Emotion|Scoring|Ranking|Score|Profiling|verdeckte|heimliche|Leistungsueberwachung|Verhaltens|KI-/Analytics|Analytics-/KI|Reports und Scores" docs/hrm-go-live-templates` (keine Treffer); `$files = (Get-ChildItem -Path docs/hrm-go-live-templates -Filter *.md | ForEach-Object { $_.FullName }); node scripts/docs-markdown-check.cjs @files`; `python scripts/agent_workboard_supervisor.py validate`; `node scripts/docs-governance-check.cjs`; `git diff --check`
 **Offene Risiken:** Die Einzeldateien sind Arbeitskopien aus dem Master; bei inhaltlichen Aenderungen muss der Master als Source of Truth zuerst angepasst werden.
 
+## HRM-GO-LIVE-UX-001
+
+**Von:** Codex
+**Owner:** Codex
+**Stand:** reserviert 2026-05-13
+**Ziel des Slices:** HRM-Betriebsfreigaben von Compliance-Cockpit zu gefuehrter Arbeitsflaeche ausbauen und daraus einen repo-weiten UX-Exzellenzstandard fuer alle Domaenen ableiten.
+**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/agent-ops/slices/HRM-GO-LIVE-UX-001.yaml`, `packages/frontend-web/src/pages/personal/hrm-operations-gates.tsx`, `docs/project-context/ux-excellence-operating-standard-2026-05-13.md`, `docs/project-context/open-gaps-and-known-issues.md`
+**Abnahmekriterien:** HRM-Seite bietet Rollenfokus, Gate-Aufgabenplan, Vorlage-Link je Gate, gefuehrte Nachweis-/Test-/Freigabe-Schritte, Audit-Zeitleiste und Management-Entscheidungsbild; repo-weiter UX-Standard uebertraegt diese Muster auf alle Domaenen; Typecheck und Doku-Checks sind gruen.
+**Checks:** offen
+**Offene Risiken:** Vollstaendige Ueberarbeitung aller Domaenen bleibt ein Rollout-Programm; dieser Slice liefert Referenzumsetzung und verbindlichen Standard.
+
 ## TODO-SPRINT-001
 
 **Von:** Cursor<br>
