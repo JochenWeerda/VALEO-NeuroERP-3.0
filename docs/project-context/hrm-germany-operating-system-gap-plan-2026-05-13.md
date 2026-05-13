@@ -36,7 +36,7 @@ Mindestanker, gegen die Umsetzungsslices pruefbar bleiben muessen.
 
 | Nr. | Faehigkeit | VALEO-Status | Ziel-Slice |
 |-----|------------|--------------|------------|
-| 1 | Digitale Personalakte | Gap | `HRM-AKTE-001` |
+| 1 | Digitale Personalakte | Contract umgesetzt | `HRM-AKTE-001` |
 | 2 | DSGVO-konformes Rechte- und Loeschkonzept | Teilweise | `HRM-PRIVACY-001` |
 | 3 | Arbeitszeiterfassung | Umgesetzt | `HR-TIME-RULES-001` fuer Feinkalibrierung |
 | 4 | Urlaubs- und Abwesenheitsmanagement | Umgesetzt als Contract | `HR-TIME-ABS-CONNECTOR-001` |
@@ -56,7 +56,7 @@ Mindestanker, gegen die Umsetzungsslices pruefbar bleiben muessen.
 
 | Bereich | Bestehender Stand | Gap | Zielbild |
 |---------|-------------------|-----|----------|
-| Personalakte | Mitarbeiterliste und HR-Time-Profile existieren. | Keine vollstaendige digitale Akte mit Dokumenten, Historien, Fristen, Gehaltsdokumenten und Retention. | Akte mit Dokumentklassen, Rollenrechten, Fristen, Audit, Export und Loeschlauf. |
+| Personalakte | Mitarbeiterliste, HR-Time-Profile und erster Personalakten-Contract existieren. | Produktive DMS-Ablage, DB-Migration, echte Signaturen und rechtlich freigegebene Retention-Fristen fehlen noch. | Akte mit Dokumentklassen, Rollenrechten, Fristen, Audit, Export und Loeschlauf. |
 | eAU | Krankheit kann als Abwesenheit importiert werden. | Kein Arbeitgeberverfahren mit Abfrage, Rueckmeldung, Fristen und Statuscodes. | eAU-Workflow mit minimaler Speicherung, ohne Diagnosedaten. |
 | Payroll/DATEV | Payroll-Exports und Readiness existieren. | Kein verbindliches DATEV-/Steuerberater-Zielformat, keine vollstaendigen Bewegungsdaten. | Monatsabschluss mit Lohnarten, Zuschlaegen, Fehlzeiten, Sachbezuegen, Kostenstellen und Auditpaket. |
 | Dokumente und Verträge | Onboarding-Checklisten existieren. | Keine Vorlagenbibliothek, Textform-/Schriftformlogik, E-Signatur oder DMS-Akte. | Vertrags- und Nachweisprozess mit Vorlagenversion, Empfang, Signaturstatus und Archivierung. |
@@ -124,7 +124,8 @@ Pflichtkontrollen fuer Hochrisiko-Kontexte:
 
 | Slice | Ziel | Abnahme |
 |-------|------|---------|
-| `HRM-AKTE-001` | Digitale Personalakte mit Dokumentklassen, Fristen und Audit. | Akte kann Dokumente lesen/schreiben, rollenfiltern, exportieren und Retention ausweisen. |
+| `HRM-AKTE-001` | Digitale Personalakte mit Dokumentklassen, Fristen und Audit. | Erster Contract umgesetzt: `GET /api/v1/personal/employee-files/{employee_ref}` und `POST /api/v1/personal/employee-files/{employee_ref}/documents`. |
+| `HRM-AKTE-DB-001` | Persistente Personalakten-Migration und DMS-Anbindung. | `domain_hr.employee_file_documents` ist migriert, DMS-Referenzen werden produktiv validiert. |
 | `HRM-EAU-001` | eAU-Prozessvertrag. | Krankmeldung, Abfrage, Rueckmeldung, Frist und Fehlerstatus sind API-seitig sichtbar. |
 | `HRM-DATEV-001` | DATEV-/Steuerberater-Zielformat. | Exportpaket enthaelt Lohnarten, Fehlzeiten, Kostenstellen und Monatsabschlussprotokoll. |
 | `HRM-CONTRACTS-001` | Vertrags- und Nachweisvorlagen. | Vorlage, Textform-/Schriftformentscheidung, E-Signaturstatus und Archiv-Ref sind dokumentiert. |
@@ -145,3 +146,21 @@ Geprueft am 2026-05-13:
 - SGB IV Paragraph 109: https://www.gesetze-im-internet.de/sgb_4/__109.html
 - BAG 1 ABR 22/21: https://www.bundesarbeitsgericht.de/entscheidung/1-abr-22-21/
 - EU AI Act Annex III / Beschaeftigung: https://artificialintelligenceact.eu/annex/3/
+
+## Umsetzungsstand HRM-AKTE-001
+
+Stand 2026-05-13:
+
+- `GET /api/v1/personal/employee-files/{employee_ref}` liefert Aktenmetadaten, Dokumentklassen, Rollenfilter, Exportpaket und Retention-Sicht.
+- `POST /api/v1/personal/employee-files/{employee_ref}/documents` nimmt Dokumentmetadaten mit Dokumentklasse, DMS-Referenz, Sichtbarkeit, Ausstellungsdatum und Audit-Ref an.
+- Dokumentklassen: Arbeitsvertrag, Payroll-Dokument, Zertifikat, Abwesenheitsnachweis, Datenschutz-/Verpflichtungsnachweis und Abmahnung/Personalnotiz.
+- Rollenfilter: `employee`, `manager`, `hr`, `payroll`, `admin`; HR/Admin sehen alles, Payroll nur Payroll/Employee-Sicht, Manager nur Manager/Employee-Sicht, Employee nur Employee-Sicht.
+- Retention bleibt ein Contract-Hinweis, keine automatische Loeschung.
+
+Nicht erledigt in HRM-AKTE-001:
+
+- produktive DB-Migration fuer `domain_hr.employee_file_documents`
+- Upload/Download ins DMS
+- E-Signatur
+- rechtlich final freigegebene Aufbewahrungsfristen je Dokumentklasse
+- echte DSGVO-Auskunfts- und Loeschlauf-Ausfuehrung

@@ -359,6 +359,67 @@ export type HrmReadiness = {
   residualRisks: string[]
 }
 
+export type EmployeeFileDocumentClass = {
+  documentType: string
+  title: string
+  legalBasis: string[]
+  defaultVisibility: string
+  retentionYears: number
+  requiresDmsRef: boolean
+  deletionRule: string
+}
+
+export type EmployeeFileDocument = {
+  id: string
+  employeeRef: string
+  documentType: string
+  title: string
+  status: string
+  visibility: string
+  legalBasis: string[]
+  issuedAt?: string | null
+  validUntil?: string | null
+  retentionUntil: string
+  dmsDocumentId?: string | null
+  canEmployeeView: boolean
+  canManagerView: boolean
+  deletionBlockedReason: string
+  auditRef: string
+}
+
+export type EmployeeFile = {
+  employeeRef: string
+  source: string
+  actorRole: string
+  documentClasses: EmployeeFileDocumentClass[]
+  documents: EmployeeFileDocument[]
+  hiddenDocumentCount: number
+  exportPackage: {
+    available: boolean
+    format: string
+    includesAuditTrail: boolean
+    includesRetentionPlan: boolean
+    dataSubjectAccessHint: string
+  }
+  retention: {
+    deletionConcept: string
+    reviewCadence: string
+    blockedDocumentCount: number
+    nextReviewHint: string
+  }
+}
+
+export type EmployeeFileDocumentInput = {
+  documentType: string
+  title: string
+  issuedAt?: string | null
+  validUntil?: string | null
+  dmsDocumentId?: string | null
+  visibility?: 'employee' | 'manager' | 'hr' | 'payroll'
+  notes?: string | null
+  createdBy?: string
+}
+
 export type SchulungTyp = 'PSM' | 'Gefahrstoffe' | 'Gabelstapler' | 'Erste Hilfe' | 'Brandschutz' | 'Arbeitssicherheit'
 export type SchulungStatus = 'gueltig' | 'ablaufend' | 'abgelaufen'
 
@@ -445,6 +506,7 @@ export const personalKeys = {
   fieldServicePlan: () => [...personalKeys.all, 'field-service-plan'] as const,
   workPlan: (filters?: Record<string, unknown>) => [...personalKeys.all, 'work-plan', filters] as const,
   hrmReadiness: () => [...personalKeys.all, 'hrm-readiness'] as const,
+  employeeFile: (employeeRef?: string, actorRole?: string) => [...personalKeys.all, 'employee-file', employeeRef, actorRole] as const,
   schulungen: (filters?: Record<string, unknown>) => [...personalKeys.all, 'schulungen', filters] as const,
   qualifikationen: (filters?: Record<string, unknown>) => [...personalKeys.all, 'qualifikationen', filters] as const,
   onboardingRuns: (filters?: Record<string, unknown>) => [...personalKeys.all, 'onboarding-runs', filters] as const,
@@ -522,6 +584,27 @@ const EMPTY_HRM_READINESS: HrmReadiness = {
   integrations: [],
   aiControls: [],
   residualRisks: [],
+}
+const EMPTY_EMPLOYEE_FILE: EmployeeFile = {
+  employeeRef: '',
+  source: 'empty',
+  actorRole: 'employee',
+  documentClasses: [],
+  documents: [],
+  hiddenDocumentCount: 0,
+  exportPackage: {
+    available: false,
+    format: '',
+    includesAuditTrail: false,
+    includesRetentionPlan: false,
+    dataSubjectAccessHint: '',
+  },
+  retention: {
+    deletionConcept: '',
+    reviewCadence: '',
+    blockedDocumentCount: 0,
+    nextReviewHint: '',
+  },
 }
 const EMPTY_SCHULUNGEN_LIST: Schulung[] = []
 const EMPTY_STUNDENZETTEL_LIST: StundenzettelEintrag[] = []
@@ -774,6 +857,35 @@ export function useHrmReadiness() {
     queryFn: async () => (await apiClient.get<HrmReadiness>('/api/v1/personal/hrm-readiness')).data,
     placeholderData: EMPTY_HRM_READINESS,
     staleTime: 5 * 60 * 1000,
+  })
+}
+
+export function useEmployeeFile(employeeRef?: string, actorRole = 'hr') {
+  return useQuery({
+    queryKey: personalKeys.employeeFile(employeeRef, actorRole),
+    enabled: Boolean(employeeRef),
+    queryFn: async () => {
+      const params = new URLSearchParams()
+      params.append('actorRole', actorRole)
+      return (await apiClient.get<EmployeeFile>(`/api/v1/personal/employee-files/${employeeRef}?${String(params)}`)).data
+    },
+    placeholderData: EMPTY_EMPLOYEE_FILE,
+    staleTime: 60_000,
+  })
+}
+
+export function useCreateEmployeeFileDocument(employeeRef: string, actorRole = 'hr') {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async (data: EmployeeFileDocumentInput) => {
+      const params = new URLSearchParams()
+      params.append('actorRole', actorRole)
+      return (await apiClient.post<EmployeeFileDocument>(`/api/v1/personal/employee-files/${employeeRef}/documents?${String(params)}`, data)).data
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: personalKeys.employeeFile(employeeRef, actorRole) })
+      queryClient.invalidateQueries({ queryKey: personalKeys.hrmReadiness() })
+    },
   })
 }
 
