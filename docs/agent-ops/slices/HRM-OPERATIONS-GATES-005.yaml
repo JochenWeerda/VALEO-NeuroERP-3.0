@@ -1,0 +1,22 @@
+id: HRM-OPERATIONS-GATES-005
+title: HRM-Betriebsfreigaben Studio-Designuebernahme
+owner: Codex
+status: reserviert
+created: 2026-05-13
+goal: >
+  Google-Studio-Designentwurf fuer HRM-Betriebsfreigaben in die bestehende
+  VALEO-React-Seite uebertragen: Readiness-Header, KPI-Leiste, Policy-Box,
+  Stopper-Markierung, kompakte Pruefpunkt-Zeilen und aufklappbare Arbeitsbereiche.
+file_ownership:
+  - docs/agent-ops/active-workboard.md
+  - docs/agent-ops/slices/HRM-OPERATIONS-GATES-005.yaml
+  - packages/frontend-web/src/pages/personal/hrm-operations-gates.tsx
+acceptance_criteria:
+  - Seite folgt dem Studio-Entwurf ohne neue Dependencies.
+  - Bestehende React-Query-Hooks bleiben verdrahtet.
+  - Sichtbare Sprache bleibt buerotauglich.
+  - Typecheck ist gruen.
+checks:
+  - offen
+risks:
+  - Studio-Prototyp enthaelt Mockdaten und motion; Uebernahme erfolgt auf echte VALEO-Daten und ohne zusaetzliche Animationsdependency.
