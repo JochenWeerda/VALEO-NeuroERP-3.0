@@ -1,0 +1,22 @@
+id: ERP-FINANZ-ORDERS-DOC-001
+title: Orders-REST-Dokumentation auf Python-FastAPI-Zielroute ausrichten
+owner: Codex
+status: reserviert
+created: 2026-05-13
+goal: >
+  Veraltete packages/erp-domain-Order-REST-Dokumentation auf die entschiedene
+  Python-FastAPI-Zielroute ausrichten.
+file_ownership:
+  - docs/agent-ops/active-workboard.md
+  - docs/agent-ops/slices/ERP-FINANZ-ORDERS-DOC-001.yaml
+  - packages/erp-domain/README.md
+  - C:\Users\Jochen\.cursor\plans\erp-finanz_roadmap_9029845d.plan.md
+acceptance_criteria:
+  - README nennt keine oeffentlichen Node-Order-Endpunkte mehr.
+  - Orders-REST verweist auf /api/v1/sales/orders.
+  - Roadmap-Phase 3 ist Doku/Redirect-only statt zweigeteilt.
+checks:
+  - python scripts/agent_workboard_supervisor.py validate
+  - git diff --check
+risks:
+  - Historische Archive und generierte API-Dumps koennen weiterhin alte Order-Begriffe enthalten.

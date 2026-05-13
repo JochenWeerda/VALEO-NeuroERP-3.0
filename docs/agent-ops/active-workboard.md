@@ -2,6 +2,17 @@
 
 Stand: `2026-05-12`
 
+## ERP-FINANZ-ORDERS-DOC-001
+
+**Von:** Codex
+**Owner:** Codex
+**Stand:** reserviert 2026-05-13
+**Ziel des Slices:** Veraltete `packages/erp-domain`-Order-REST-Dokumentation auf die entschiedene Python-FastAPI-Zielroute ausrichten.
+**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/agent-ops/slices/ERP-FINANZ-ORDERS-DOC-001.yaml`, `packages/erp-domain/README.md`, `C:\Users\Jochen\.cursor\plans\erp-finanz_roadmap_9029845d.plan.md`
+**Abnahmekriterien:** README nennt keine oeffentlichen Node-Order-Endpunkte mehr; Orders-REST verweist auf `/api/v1/sales/orders`; Roadmap-Phase 3 ist nicht mehr zweigeteilt, sondern Doku/Redirect-only.
+**Checks:** `python scripts/agent_workboard_supervisor.py validate`; `git diff --check`
+**Offene Risiken:** Historische Archive und generierte API-Dumps koennen weiterhin alte Order-Begriffe enthalten; dieser Slice betrifft nur aktive Roadmap-/Paketdoku.
+
 ## TODO-SPRINT-001
 
 **Von:** Cursor<br>
