@@ -1,49 +1,30 @@
-"""
-Weekly Report Worker
-Scheduled worker for generating and sending weekly CRM reports
-"""
+"""Weekly Report Worker — generates weekly CRM reports."""
 
-import logging
 import asyncio
+import logging
 from datetime import datetime, timedelta
-from typing import Dict, Any
+from typing import Any, Dict
 
-from app.core.database import get_db
+from sqlalchemy import text
+
+from .base_worker import BaseWorker
 
 logger = logging.getLogger(__name__)
 
 
-class WeeklyReportWorker:
-    """Worker for automated weekly report generation"""
-
-    def __init__(self):
-        self.db = None
-
-    async def initialize(self):
-        """Initialize database connection"""
-        self.db = next(get_db())
-
-    async def generate_weekly_reports(self) -> Dict[str, Any]:
-        """
-        Generate weekly reports for all sales reps
-        
-        Returns:
-            Dictionary with generation results
-        """
+class WeeklyReportWorker(BaseWorker):
+    async def run(self) -> Dict[str, Any]:
+        result = self._base_result(reports_generated=0)
         try:
-            if not self.db:
-                await self.initialize()
+            await self._ensure_db()
 
-            # Calculate date range for last week
             end_date = datetime.now()
             start_date = end_date - timedelta(days=7)
-
-            logger.info(f"Generating weekly reports for {start_date.date()} to {end_date.date()}")
+            logger.info("Generating weekly reports for %s to %s", start_date.date(), end_date.date())
 
             reports_generated = 0
             try:
-                from sqlalchemy import text
-                r = self.db.execute(
+                self.db.execute(
                     text(
                         "SELECT COUNT(*) FROM domain_erp.journal_entries "
                         "WHERE entry_date >= :start AND entry_date <= :end"
@@ -51,70 +32,42 @@ class WeeklyReportWorker:
                     {"start": start_date.date(), "end": end_date.date()},
                 ).scalar()
                 reports_generated = 1
-                logger.info(f"Weekly journal entries in period: {r}")
             except Exception:
                 pass
 
-            return {
-                'success': True,
-                'reports_generated': reports_generated,
-                'period_start': start_date.isoformat(),
-                'period_end': end_date.isoformat(),
-            }
+            result.update(
+                reports_generated=reports_generated,
+                period_start=start_date.isoformat(),
+                period_end=end_date.isoformat(),
+            )
+        except Exception as exc:
+            self._error_result(result, exc)
+        return result
 
-        except Exception as e:
-            logger.error(f"Error in weekly report generation: {e}")
-            return {
-                'success': False,
-                'error': str(e)
-            }
-
-    async def cleanup(self):
-        """Clean up database connections"""
+    async def cleanup(self) -> None:
         if self.db:
             self.db.close()
 
 
-async def run_weekly_reports():
-    """Main function to run weekly report generation"""
+async def run_weekly_reports() -> Dict[str, Any]:
     worker = WeeklyReportWorker()
-
     try:
         await worker.initialize()
-        result = await worker.generate_weekly_reports()
-
-        if result['success']:
-            logger.info(f"Weekly reports completed: {result}")
-        else:
-            logger.error(f"Weekly reports failed: {result}")
-
-        return result
-
-    except Exception as e:
-        logger.error(f"Critical error in weekly report worker: {e}")
-        return {
-            'success': False,
-            'error': str(e)
-        }
-
+        return await worker.run()
+    except Exception as exc:
+        logger.error("Critical error in weekly report worker: %s", exc)
+        return {"success": False, "error": str(exc)}
     finally:
         await worker.cleanup()
 
 
-# Scheduled execution function (to be called by scheduler)
-def execute_weekly_reports():
-    """Synchronous wrapper for scheduled execution"""
+def execute_weekly_reports() -> Dict[str, Any]:
     try:
         loop = asyncio.new_event_loop()
         asyncio.set_event_loop(loop)
         result = loop.run_until_complete(run_weekly_reports())
         loop.close()
-
         return result
-
-    except Exception as e:
-        logger.error(f"Error executing weekly reports: {e}")
-        return {
-            'success': False,
-            'error': str(e)
-        }
+    except Exception as exc:
+        logger.error("Error executing weekly reports: %s", exc)
+        return {"success": False, "error": str(exc)}
