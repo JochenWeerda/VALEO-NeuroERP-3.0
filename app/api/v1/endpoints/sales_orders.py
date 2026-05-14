@@ -285,7 +285,7 @@ async def create_sales_order(
         {"customer_id": payload.customer_id, "tenant_id": effective_tenant},
     ).first()
     if not customer_exists:
-        raise HTTPException(status_code=400, detail="customer_id does not exist")
+        raise HTTPException(status_code=422, detail="customer_id does not exist")
 
     assert_customer_allowed_for_sales_order(db, effective_tenant, payload.customer_id)
 

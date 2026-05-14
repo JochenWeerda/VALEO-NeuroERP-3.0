@@ -53,9 +53,11 @@ def parse_json_string_list(raw: Any) -> list[str]:
     return [str(x) for x in items]
 
 
-def to_iso(d: date | datetime | None) -> str:
+def to_iso(d: date | datetime | str | None) -> str:
     if d is None:
         return ""
+    if isinstance(d, str):
+        return d  # already ISO string
     if isinstance(d, datetime):
         return d.date().isoformat()
     return d.isoformat()
@@ -241,11 +243,11 @@ class PersonalService:
             text(
                 "UPDATE domain_hr.time_entries "
                 "SET status = 'Submitted', updated_at = NOW(), version = version + 1 "
-                "WHERE id = :id AND tenant_id = :tenant_id "
+                "WHERE id = :entry_id AND tenant_id = :tenant_id "
                 "  AND status IN ('Draft', 'Rejected', 'Corrected') "
                 f"RETURNING {self._TIME_ENTRY_COLS}"
             ),
-            {"id": entry_id, "tenant_id": self.tenant_id},
+            {"entry_id": entry_id, "tenant_id": self.tenant_id},
         ).mappings().first()
         if not row:
             from app.core.exceptions import ConflictError
@@ -259,10 +261,10 @@ class PersonalService:
                 "UPDATE domain_hr.time_entries "
                 "SET status = 'Approved', approved_by = :approved_by, "
                 "    approved_at = NOW(), updated_at = NOW(), version = version + 1 "
-                "WHERE id = :id AND tenant_id = :tenant_id AND status = 'Submitted' "
+                "WHERE id = :entry_id AND tenant_id = :tenant_id AND status = 'Submitted' "
                 f"RETURNING {self._TIME_ENTRY_COLS}"
             ),
-            {"id": entry_id, "tenant_id": self.tenant_id, "approved_by": approved_by},
+            {"entry_id": entry_id, "tenant_id": self.tenant_id, "approved_by": approved_by},
         ).mappings().first()
         if not row:
             from app.core.exceptions import ConflictError
@@ -272,8 +274,8 @@ class PersonalService:
 
     def correct_zeiteintrag(self, entry_id: str, payload: dict) -> dict:
         current = self.db.execute(
-            text("SELECT status FROM domain_hr.time_entries WHERE id = :id AND tenant_id = :tenant_id"),
-            {"id": entry_id, "tenant_id": self.tenant_id},
+            text("SELECT status FROM domain_hr.time_entries WHERE id = :entry_id AND tenant_id = :tenant_id"),
+            {"entry_id": entry_id, "tenant_id": self.tenant_id},
         ).mappings().first()
         if not current:
             raise EntityNotFoundError("Zeiteintrag", entry_id)
@@ -288,11 +290,11 @@ class PersonalService:
                 "entry_type = :entry_type, status = 'Corrected', cost_center = :cost_center, "
                 "work_area = :work_area, correction_reason = :correction_reason, "
                 "notes = :notes, updated_at = NOW(), version = version + 1 "
-                "WHERE id = :id AND tenant_id = :tenant_id "
+                "WHERE id = :entry_id AND tenant_id = :tenant_id "
                 f"RETURNING {self._TIME_ENTRY_COLS}"
             ),
             {
-                "id": entry_id,
+                "entry_id": entry_id,
                 "tenant_id": self.tenant_id,
                 "start_time": payload.get("startTime"),
                 "end_time": payload.get("endTime"),

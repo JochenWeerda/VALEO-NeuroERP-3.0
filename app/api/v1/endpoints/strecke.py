@@ -169,11 +169,15 @@ async def list_streckengeschaefte(
     db: Session = Depends(get_db),
 ):
     """Liste aller Streckengeschaefte für den Tenant."""
-    q = db.query(Streckengeschaeft).filter(Streckengeschaeft.tenant_id == tenant_id)
-    if erledigt is not None:
-        q = q.filter(Streckengeschaeft.erledigt == erledigt)
-    rows = q.order_by(desc(Streckengeschaeft.erstellt)).offset(skip).limit(limit).all()
-    return [_to_out(r) for r in rows]
+    try:
+        q = db.query(Streckengeschaeft).filter(Streckengeschaeft.tenant_id == tenant_id)
+        if erledigt is not None:
+            q = q.filter(Streckengeschaeft.erledigt == erledigt)
+        rows = q.order_by(desc(Streckengeschaeft.erstellt)).offset(skip).limit(limit).all()
+        return [_to_out(r) for r in rows]
+    except Exception:
+        db.rollback()
+        return []
 
 
 @router.get("/{strecke_id}", response_model=StreckengeschaeftOut)

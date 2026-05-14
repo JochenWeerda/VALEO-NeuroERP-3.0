@@ -294,8 +294,10 @@ def _harvest_acceptance_to_dict_with_positions(acceptance: HarvestAcceptance, db
         result_dict["article_name"] = article_name
     return result_dict
 
-def _get_user_id_from_request(request: Request) -> Optional[str]:
+def _get_user_id_from_request(request: Optional[Request]) -> Optional[str]:
     """Hilfsfunktion zum Extrahieren der User-ID aus Request (für Audit)."""
+    if request is None:
+        return "system"
     return get_user_id_from_request(request) or "system"
 
 

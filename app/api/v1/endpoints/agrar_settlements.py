@@ -775,6 +775,13 @@ async def post_settlement_to_fibu(
     except ConflictError as exc:
         raise HTTPException(status_code=409, detail=exc.detail)
 
+    approval_status = _get_settlement_approval_status(settlement)
+    if approval_status != "FREIGEGEBEN":
+        raise HTTPException(
+            status_code=409,
+            detail=f"Settlement cannot be posted: approval_status={approval_status}. Must be FREIGEGEBEN.",
+        )
+
     posting_date = payload.posting_date or datetime.utcnow()
     journal_ref = f"JE-SET-{datetime.utcnow().strftime('%Y%m%d')}-{settlement.id[:8].upper()}"
     gross = _round_money(settlement.gross_amount_eur)

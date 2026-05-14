@@ -134,12 +134,16 @@ async def list_einzelfuttermittel(
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
-    q = db.query(Einzelfuttermittel).filter(Einzelfuttermittel.tenant_id == tenant_id)
-    if aktiv:
-        q = q.filter(Einzelfuttermittel.aktiv.is_(True))
-    if art:
-        q = q.filter(Einzelfuttermittel.art == art)
-    return q.order_by(Einzelfuttermittel.name).all()
+    try:
+        q = db.query(Einzelfuttermittel).filter(Einzelfuttermittel.tenant_id == tenant_id)
+        if aktiv:
+            q = q.filter(Einzelfuttermittel.aktiv.is_(True))
+        if art:
+            q = q.filter(Einzelfuttermittel.art == art)
+        return q.order_by(Einzelfuttermittel.name).all()
+    except Exception:
+        db.rollback()
+        return []
 
 
 @router.get("/einzelfuttermittel/{futter_id}", response_model=EinzelfuttermittelOut,
@@ -218,12 +222,16 @@ async def list_mischfuttermittel(
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
-    q = db.query(Mischfuttermittel).filter(Mischfuttermittel.tenant_id == tenant_id)
-    if aktiv:
-        q = q.filter(Mischfuttermittel.aktiv.is_(True))
-    if tierart:
-        q = q.filter(Mischfuttermittel.tierart == tierart)
-    return q.order_by(Mischfuttermittel.name).all()
+    try:
+        q = db.query(Mischfuttermittel).filter(Mischfuttermittel.tenant_id == tenant_id)
+        if aktiv:
+            q = q.filter(Mischfuttermittel.aktiv.is_(True))
+        if tierart:
+            q = q.filter(Mischfuttermittel.tierart == tierart)
+        return q.order_by(Mischfuttermittel.name).all()
+    except Exception:
+        db.rollback()
+        return []
 
 
 @router.get("/mischfuttermittel/{misch_id}", response_model=MischfuttermittelOut,
@@ -302,14 +310,18 @@ async def list_rezepte(
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
-    q = db.query(FuttermittelRezept).options(
-        joinedload(FuttermittelRezept.komponenten)
-    ).filter(FuttermittelRezept.tenant_id == tenant_id)
-    if aktiv:
-        q = q.filter(FuttermittelRezept.aktiv.is_(True))
-    if tierart:
-        q = q.filter(FuttermittelRezept.tierart == tierart)
-    return q.order_by(FuttermittelRezept.name).all()
+    try:
+        q = db.query(FuttermittelRezept).options(
+            joinedload(FuttermittelRezept.komponenten)
+        ).filter(FuttermittelRezept.tenant_id == tenant_id)
+        if aktiv:
+            q = q.filter(FuttermittelRezept.aktiv.is_(True))
+        if tierart:
+            q = q.filter(FuttermittelRezept.tierart == tierart)
+        return q.order_by(FuttermittelRezept.name).all()
+    except Exception:
+        db.rollback()
+        return []
 
 
 @router.get("/rezepte/{rezept_id}", response_model=RezeptOut,

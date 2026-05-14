@@ -1481,8 +1481,8 @@ async def futter_einzel(db: Session = Depends(get_db)) -> list[dict[str, Any]]:
             "name": i.name,
             "artikelnummer": i.article_number,
             "kategorie": i.category,
-            "protein": float(i.custom_properties.get("protein", 0)) if isinstance(i.custom_properties, dict) else 0,
-            "energie": float(i.custom_properties.get("energie", 0)) if isinstance(i.custom_properties, dict) else 0,
+            "protein": float((getattr(i, "custom_properties", None) or {}).get("protein", 0)),
+            "energie": float((getattr(i, "custom_properties", None) or {}).get("energie", 0)),
             "preis": float(i.sales_price or 0),
             "einheit": i.unit,
         }
@@ -1498,7 +1498,7 @@ async def futter_misch(db: Session = Depends(get_db)) -> list[dict[str, Any]]:
             "id": i.id,
             "name": i.name,
             "artikelnummer": i.article_number,
-            "komponenten": int((i.custom_properties or {}).get("komponenten", 0)) if isinstance(i.custom_properties, dict) else 0,
+            "komponenten": int((getattr(i, "custom_properties", None) or {}).get("komponenten", 0)),
             "preis": float(i.sales_price or 0),
             "einheit": i.unit,
         }
