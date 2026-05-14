@@ -16,6 +16,14 @@ import { formatDateForExport, formatCurrencyForExport } from '@/lib/export-utils
 import { saveDocument } from '@/lib/document-api'
 import { getAxiosErrorMessage } from '@/lib/api-client'
 import { useAuftraege, type Auftrag, type AuftragStatus } from '@/lib/api/sales'
+import {
+  CrudCapabilityChecklist,
+  ManagementDecisionPanel,
+  NextActionPanel,
+  OperationalTaskPlan,
+  RoleFocusBar,
+  type UxTaskItem,
+} from '@/components/workflow'
 
 const statusVariantMap: Record<AuftragStatus, 'default' | 'outline' | 'secondary' | 'destructive'> = {
   open: 'default',
@@ -25,6 +33,41 @@ const statusVariantMap: Record<AuftragStatus, 'default' | 'outline' | 'secondary
   fakturiert: 'outline',
   storniert: 'destructive',
 }
+
+type SalesRoleFocus = 'all' | 'sales' | 'order-desk' | 'logistics' | 'finance' | 'management'
+
+const salesRoleProfiles: Array<{ id: SalesRoleFocus; label: string; description: string }> = [
+  {
+    id: 'all',
+    label: 'Alle Rollen',
+    description: 'Zeigt die Auftragslage fuer Vertrieb, Auftragsabwicklung, Logistik, Finance und Leitung.',
+  },
+  {
+    id: 'sales',
+    label: 'Vertrieb',
+    description: 'Fokus auf Kunde, Auftragswert und naechstes Follow-up.',
+  },
+  {
+    id: 'order-desk',
+    label: 'Auftragsabwicklung',
+    description: 'Fokus auf offene Auftraege, Liefertermin und Bearbeitungsstatus.',
+  },
+  {
+    id: 'logistics',
+    label: 'Logistik',
+    description: 'Fokus auf Lieferdruck, Teillieferungen und offene Auslieferung.',
+  },
+  {
+    id: 'finance',
+    label: 'Finance',
+    description: 'Fokus auf fakturierte Auftraege, offene Faktura und Export.',
+  },
+  {
+    id: 'management',
+    label: 'Leitung',
+    description: 'Fokus auf Rueckstand, Wert und operative Entscheidung.',
+  },
+]
 
 export default function AuftraegeListePage(): JSX.Element {
   const { t } = useTranslation()
@@ -37,6 +80,7 @@ export default function AuftraegeListePage(): JSX.Element {
   const [statusFilter, setStatusFilter] = useState<AuftragStatus | 'alle'>('alle')
   const [showImport, setShowImport] = useState(false)
   const [filterValues, setFilterValues] = useState<Record<string, any>>({})
+  const [roleFocus, setRoleFocus] = useState<SalesRoleFocus>('all')
 
   const { data: auftraege = [] } = useAuftraege()
 
@@ -105,6 +149,93 @@ export default function AuftraegeListePage(): JSX.Element {
     data: exportData,
     entityName: 'auftraege',
   })
+
+  const total = filteredAuftraege.length
+  const openCount = filteredAuftraege.filter((auftrag) => ['open', 'offen'].includes(String(auftrag.status))).length
+  const partialCount = filteredAuftraege.filter((auftrag) => auftrag.status === 'teilgeliefert').length
+  const deliveredCount = filteredAuftraege.filter((auftrag) => auftrag.status === 'geliefert').length
+  const invoicedCount = filteredAuftraege.filter((auftrag) => auftrag.status === 'fakturiert').length
+  const cancelledCount = filteredAuftraege.filter((auftrag) => auftrag.status === 'storniert').length
+  const totalAmount = filteredAuftraege.reduce((sum, auftrag) => sum + Number(auftrag.betrag || 0), 0)
+  const today = new Date().toISOString().split('T')[0]
+  const overdueDeliveryCount = filteredAuftraege.filter((auftrag) =>
+    auftrag.liefertermin && new Date(auftrag.liefertermin).toISOString().split('T')[0] < today && !['geliefert', 'fakturiert', 'storniert'].includes(String(auftrag.status)),
+  ).length
+  const nextOrderAction = overdueDeliveryCount > 0
+    ? 'Ueberfaellige Liefertermine klaeren und Logistikfolge setzen.'
+    : openCount > 0
+      ? 'Offene Auftraege bestaetigen und Liefertermin sichern.'
+      : partialCount > 0
+        ? 'Teillieferungen nachhalten und Restlieferung planen.'
+        : deliveredCount > 0
+          ? 'Gelieferte Auftraege fakturieren.'
+          : 'Neuen Auftrag anlegen oder Filter anpassen.'
+  const orderTaskItems: UxTaskItem[] = [
+    {
+      label: 'Auftrag erfassen',
+      done: total > 0,
+      hint: total > 0 ? `${total} Auftraege in der aktuellen Sicht.` : 'Neuen Verkaufsauftrag anlegen oder Import starten.',
+    },
+    {
+      label: 'Liefertermin klaeren',
+      done: overdueDeliveryCount === 0 && total > 0,
+      hint: overdueDeliveryCount > 0 ? `${overdueDeliveryCount} Auftraege sind ueberfaellig.` : 'Keine ueberfaelligen Liefertermine in der Sicht.',
+    },
+    {
+      label: 'Liefern',
+      done: partialCount + deliveredCount + invoicedCount > 0,
+      hint: partialCount > 0 ? `${partialCount} Teillieferungen brauchen Nachlauf.` : `${openCount} offene Auftraege brauchen Lieferfolge.`,
+    },
+    {
+      label: 'Fakturieren',
+      done: invoicedCount > 0 && deliveredCount === 0,
+      hint: deliveredCount > 0 ? `${deliveredCount} gelieferte Auftraege koennen fakturiert werden.` : 'Keine gelieferte, unfakturierte Position in der Sicht.',
+    },
+  ]
+  const orderCrudCapabilities = [
+    {
+      key: 'create',
+      label: 'Anlegen',
+      available: true,
+      hint: 'Neue Verkaufsauftraege koennen direkt aus der Liste angelegt werden.',
+    },
+    {
+      key: 'read',
+      label: 'Lesen',
+      available: true,
+      hint: 'Auftragsnummer, Kunde, Betrag, Liefertermin und Status sind sichtbar.',
+    },
+    {
+      key: 'update',
+      label: 'Bearbeiten',
+      available: total > 0,
+      hint: 'Auftraege koennen aus der Liste im Editor geoeffnet werden.',
+    },
+    {
+      key: 'delete',
+      label: 'Storno',
+      available: cancelledCount > 0 || total > 0,
+      hint: 'Storniert wird fachlich ueber den Auftragsstatus; direkte Loeschung ist kein Standardpfad.',
+    },
+    {
+      key: 'approve',
+      label: 'Liefer-/Faktura-Folge',
+      available: openCount + partialCount + deliveredCount > 0,
+      hint: 'Offene, teilgelieferte und gelieferte Auftraege zeigen den naechsten operativen Schritt.',
+    },
+    {
+      key: 'export',
+      label: 'Export/Import',
+      available: true,
+      hint: 'CSV-Export, Druck und CSV-Import sind an der Liste angebunden.',
+    },
+    {
+      key: 'audit',
+      label: 'Nachverfolgung',
+      available: true,
+      hint: 'Status, Liefertermin, Kunde und Betrag bilden die operative Nachfassspur.',
+    },
+  ]
 
   const handleImport = async (importData: any[]) => {
     try {
@@ -190,6 +321,37 @@ export default function AuftraegeListePage(): JSX.Element {
           {t('crud.actions.new')} {entityTypeLabel}
         </Button>
       </div>
+      <RoleFocusBar
+        roles={salesRoleProfiles}
+        value={roleFocus}
+        onChange={setRoleFocus}
+        visibleCount={roleFocus === 'all' ? 5 : 1}
+        totalCount={5}
+      />
+      <ManagementDecisionPanel
+        decision={{
+          allowed: total > 0,
+          allowedLabel: 'Auftragsarbeit moeglich',
+          blockedLabel: 'Keine Auftraege',
+          summary: total > 0
+            ? `Die aktuelle Sicht enthaelt ${total} Auftraege mit ${new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(totalAmount)} Auftragswert. ${nextOrderAction}`
+            : 'In der aktuellen Sicht gibt es keine Verkaufsauftraege. Legen Sie einen neuen Auftrag an, importieren Sie Daten oder passen Sie Filter an.',
+          blockerCount: total === 0 ? 1 : overdueDeliveryCount,
+          nextFocus: nextOrderAction,
+          template: {
+            label: 'Verkaufsauftrag anlegen',
+            href: '/sales/order-editor',
+          },
+        }}
+      />
+      <div className="grid gap-4 lg:grid-cols-[1.35fr_1fr]">
+        <OperationalTaskPlan title="Auftrag-Follow-up-Plan" items={orderTaskItems} />
+        <NextActionPanel
+          action={nextOrderAction}
+          tone={overdueDeliveryCount > 0 ? 'red' : openCount + partialCount + deliveredCount > 0 ? 'amber' : total > 0 ? 'blue' : 'red'}
+        />
+      </div>
+      <CrudCapabilityChecklist capabilities={orderCrudCapabilities} />
 
       <Card>
         <CardHeader>
