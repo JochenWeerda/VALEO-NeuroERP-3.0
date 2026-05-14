@@ -440,7 +440,6 @@ class HarvestAcceptanceService:
         return {
             "acceptance_id": acceptance_id,
             "frachtkosten_eur": float(obj.logistics_freight_costs_eur or 0),
-            "message": "Frachtkosten vorhanden" if obj.logistics_freight_costs_eur else "Noch keine Frachtkosten berechnet",
         }
 
     def release_acceptance(
@@ -457,7 +456,7 @@ class HarvestAcceptanceService:
         from app.infrastructure.models import StockMovement, HarvestAcceptanceLine
         from app.core.uuid7 import uuid7 as _uuid7
         from modules.agrar.services.partie_service import generate_lot_number
-        from modules.agrar.services.self_billing_service import CreditNoteCreate, create_credit_note
+        from modules.agrar.services.self_billing_service import CreditNoteCreate, create_credit_note as _create_credit_note_svc
         from modules.agrar.repositories.self_billing_repo import SelfBillingRepositoryImpl
         from modules.agrar.services.tax_profile_service import get_taxation_type_for_supplier
 
@@ -584,7 +583,7 @@ class HarvestAcceptanceService:
                     effective_date=obj.delivery_date,
                 )
 
-            invoice = create_credit_note(billing_repo, credit_note_input, taxation_type=taxation_type)
+            invoice = _create_credit_note_svc(billing_repo, credit_note_input, taxation_type=taxation_type)
             obj.invoice_id = invoice.id
             obj.release_status = "credit_note_created"
 
