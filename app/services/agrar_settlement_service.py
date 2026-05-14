@@ -246,3 +246,95 @@ class AgrarSettlementService:
         self.db.commit()
         self.db.refresh(settlement)
         return settlement
+
+    # ── optimistic locking + commit helpers ──────────────────────────────────
+
+    def check_row_version(self, settlement: AgrarSettlement, expected: Optional[int]) -> None:
+        if expected is None:
+            return
+        cur = self.get_row_version(settlement)
+        if cur != expected:
+            raise ConflictError({
+                "code": "row_version_conflict",
+                "message": "Abrechnung wurde zwischenzeitlich geändert.",
+                "current_row_version": cur,
+                "expected_row_version": expected,
+            })
+
+    def commit_mutation(self) -> None:
+        from sqlalchemy.orm.exc import StaleDataError
+        try:
+            self.db.commit()
+        except StaleDataError:
+            self.db.rollback()
+            raise ConflictError({
+                "code": "row_version_conflict",
+                "message": "Abrechnung wurde zwischenzeitlich geändert.",
+            })
+
+    # ── approval (freigabe) ───────────────────────────────────────────────────
+
+    def apply_freigabe(
+        self,
+        settlement_id: str,
+        actor_id: str,
+        actor_type_str: str,
+        target_status_str: str,
+        reason: Optional[str] = None,
+        expected_row_version: Optional[int] = None,
+    ) -> dict:
+        from app.core.settlement_approval import (
+            SettlementActorType,
+            SettlementApprovalRequest,
+            SettlementApprovalStatus,
+            evaluate_settlement_approval,
+            get_allowed_transitions,
+        )
+        settlement = self.repo.get_by_id(settlement_id)
+        self.check_row_version(settlement, expected_row_version)
+        try:
+            actor_type = SettlementActorType(actor_type_str)
+            target_status = SettlementApprovalStatus(target_status_str)
+            approval_state = (settlement.drying_result or {}).get("approval_status", "ENTWURF")
+            current_status = SettlementApprovalStatus(approval_state)
+        except ValueError as exc:
+            raise ValidationFailedError(str(exc))
+        req = SettlementApprovalRequest(
+            settlement_id=settlement_id,
+            tenant_id=self.tenant_id,
+            actor_id=actor_id,
+            actor_type=actor_type,
+            target_status=target_status,
+            reason=reason,
+        )
+        result = evaluate_settlement_approval(req, current_status)
+        if result.allowed:
+            new_state = dict(settlement.drying_result or {})
+            new_state["approval_status"] = result.new_status.value
+            if "approval_history" not in new_state:
+                new_state["approval_history"] = []
+            new_state["approval_history"].append(result.audit_entry)
+            settlement.drying_result = new_state
+            self.commit_mutation()
+        return {
+            **result.audit_entry,
+            "allowed_transitions": [s.value for s in get_allowed_transitions(
+                result.new_status if result.allowed else current_status
+            )],
+        }
+
+    # ── campaign backfill ─────────────────────────────────────────────────────
+
+    def apply_campaign_backfill(self, settlement_ids: list[str], campaign_id: str) -> None:
+        updatable = set(settlement_ids)
+        settlements = (
+            self.db.query(AgrarSettlement)
+            .filter(
+                AgrarSettlement.tenant_id == self.tenant_id,
+                AgrarSettlement.id.in_(updatable),
+            )
+            .all()
+        )
+        for s in settlements:
+            s.campaign_id = campaign_id
+        self.commit_mutation()
