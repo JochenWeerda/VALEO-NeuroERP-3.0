@@ -15,11 +15,55 @@ import { useFrachtbriefe, type Frachtbrief } from '@/lib/api/misc-modules'
 import { useSupplyChainOverview } from '@/lib/api/supply-chain'
 import { summarizeSupplyOps } from '@/lib/professional-control-centers'
 import { normalizeOperationalStatus } from '@/lib/operational-status'
+import {
+  CrudCapabilityChecklist,
+  ManagementDecisionPanel,
+  NextActionPanel,
+  OperationalTaskPlan,
+  RoleFocusBar,
+  type UxTaskItem,
+} from '@/components/workflow'
+
+type FreightRoleFocus = 'all' | 'dispatch' | 'driver' | 'warehouse-scale' | 'documentation' | 'management'
+
+const freightRoleProfiles: Array<{ id: FreightRoleFocus; label: string; description: string }> = [
+  {
+    id: 'all',
+    label: 'Alle Rollen',
+    description: 'Zeigt Frachtbriefarbeit fuer Disposition, Fahrer, Lager/Waage, Dokumentation und Leitung.',
+  },
+  {
+    id: 'dispatch',
+    label: 'Disposition',
+    description: 'Fokus auf Versandstatus, Transit und naechste Transportaktion.',
+  },
+  {
+    id: 'driver',
+    label: 'Fahrer',
+    description: 'Fokus auf Kennzeichen, Strecke, Artikel und Zustellung.',
+  },
+  {
+    id: 'warehouse-scale',
+    label: 'Lager/Waage',
+    description: 'Fokus auf Annahme, Waage, Charge und aktive Kennzeichen.',
+  },
+  {
+    id: 'documentation',
+    label: 'Dokumentation',
+    description: 'Fokus auf Frachtbriefnummer, Status, Export und Nachweis.',
+  },
+  {
+    id: 'management',
+    label: 'Leitung',
+    description: 'Fokus auf Dokumentdruck, Bottleneck und Kettenrisiko.',
+  },
+]
 
 export default function FrachtbriefePage(): JSX.Element {
   const navigate = useNavigate()
   const { data: chain } = useSupplyChainOverview()
   const [searchTerm, setSearchTerm] = useState('')
+  const [roleFocus, setRoleFocus] = useState<FreightRoleFocus>('all')
   const { data: frachtbriefe, isLoading } = useFrachtbriefe()
   const list = useMemo(() => frachtbriefe ?? [], [frachtbriefe])
   const supplyOps = useMemo(() => summarizeSupplyOps(chain), [chain])
@@ -136,6 +180,83 @@ export default function FrachtbriefePage(): JSX.Element {
       detail: transferSummary.nextAction,
     },
   ]
+  const createdCount = list.filter((f) => f.status === 'erstellt').length
+  const inTransitCount = list.filter((f) => f.status === 'unterwegs').length
+  const deliveredCount = list.filter((f) => f.status === 'zugestellt').length
+  const freightBlocked = chain.blockedCharges > 0
+  const nextFreightAction = freightBlocked
+    ? 'Gesperrte Chargen klaeren, bevor betroffene Frachtbriefe weiterlaufen.'
+    : createdCount > 0
+      ? 'Erstellte Frachtbriefe pruefen und versenden.'
+      : inTransitCount > 0
+        ? 'Transporte verfolgen und Zustellung sichern.'
+        : 'Neuen Frachtbrief anlegen oder Filter pruefen.'
+  const freightTaskItems: UxTaskItem[] = [
+    {
+      label: 'Frachtbrief erstellen',
+      done: list.length > 0,
+      hint: list.length > 0 ? `${list.length} Frachtbriefe in der aktuellen Sicht.` : 'Neuen Frachtbrief anlegen.',
+    },
+    {
+      label: 'Versenden',
+      done: createdCount === 0 && list.length > 0,
+      hint: createdCount > 0 ? `${createdCount} Frachtbriefe warten auf Versand.` : 'Keine erstellten, unversendeten Frachtbriefe in der Sicht.',
+    },
+    {
+      label: 'Transport verfolgen',
+      done: inTransitCount > 0,
+      hint: inTransitCount > 0 ? `${inTransitCount} Frachtbriefe sind unterwegs.` : 'Keine Frachtbriefe in Transit.',
+    },
+    {
+      label: 'Zustellung sichern',
+      done: deliveredCount > 0,
+      hint: deliveredCount > 0 ? `${deliveredCount} Frachtbriefe sind zugestellt.` : 'Zustellung und Nachweis nach Transportende sichern.',
+    },
+  ]
+  const freightCrudCapabilities = [
+    {
+      key: 'create',
+      label: 'Anlegen',
+      available: true,
+      hint: 'Neue Frachtbriefe koennen aus der Seite angelegt werden.',
+    },
+    {
+      key: 'read',
+      label: 'Lesen',
+      available: true,
+      hint: 'Nummer, Kennzeichen, Artikel, Menge, Strecke, Datum und Status sind sichtbar.',
+    },
+    {
+      key: 'update',
+      label: 'Bearbeiten',
+      available: list.length > 0,
+      hint: 'Frachtbriefe koennen ueber die Detailnavigation geoeffnet werden.',
+    },
+    {
+      key: 'delete',
+      label: 'Storno',
+      available: createdCount > 0,
+      hint: 'Erstellte, noch nicht zugestellte Frachtbriefe koennen fachlich korrigiert oder storniert werden.',
+    },
+    {
+      key: 'approve',
+      label: 'Transportnachweis',
+      available: !freightBlocked,
+      hint: freightBlocked ? 'Chargensperren muessen vor betroffener Transportfreigabe geklaert werden.' : 'Keine Chargensperre blockiert die aktuelle Sicht.',
+    },
+    {
+      key: 'export',
+      label: 'Export',
+      available: list.length > 0,
+      hint: 'Suche, Status und Frachtbriefdaten bilden die Export-/Nachweisgrundlage.',
+    },
+    {
+      key: 'audit',
+      label: 'Nachverfolgung',
+      available: true,
+      hint: 'Frachtstatus, Kettenblick und Bottleneck bleiben nachvollziehbar.',
+    },
+  ]
 
   return (
     <div className="space-y-4 p-3 md:p-6">
@@ -145,14 +266,47 @@ export default function FrachtbriefePage(): JSX.Element {
         status={operationalStatus}
         owner="Logistik / Disposition"
         blocker={fallkopf.blocker !== 'Kein Blocker' ? fallkopf.blocker : null}
-        nextAction={fallkopf.naechsteAktion}
+        nextAction={nextFreightAction}
         caseLabel="Frachtfall"
         tags={['Logistik', 'Fracht']}
       />
+      <RoleFocusBar
+        roles={freightRoleProfiles}
+        value={roleFocus}
+        onChange={setRoleFocus}
+        visibleCount={roleFocus === 'all' ? 5 : 1}
+        totalCount={5}
+      />
+      <ManagementDecisionPanel
+        decision={{
+          allowed: list.length > 0 && !freightBlocked,
+          allowedLabel: 'Nachweisfaehig',
+          blockedLabel: freightBlocked ? 'Transport blockiert' : 'Kein Frachtbrief',
+          summary: freightBlocked
+            ? `${chain.blockedCharges} gesperrte Chargen koennen Frachtbriefe blockieren. Bitte QS-Klaerung vor Versand oder Zustellung abschliessen.`
+            : list.length > 0
+              ? `${list.length} Frachtbriefe sind in der aktuellen Sicht. ${nextFreightAction}`
+              : 'In der aktuellen Sicht gibt es keine Frachtbriefe. Legen Sie einen neuen Frachtbrief an oder passen Sie die Suche an.',
+          blockerCount: freightBlocked ? chain.blockedCharges : list.length > 0 ? 0 : 1,
+          nextFocus: nextFreightAction,
+          template: {
+            label: 'Frachtbrief anlegen',
+            href: '/logistik/frachtbrief/neu',
+          },
+        }}
+      />
+      <div className="grid gap-4 lg:grid-cols-[1.35fr_1fr]">
+        <OperationalTaskPlan title="Dokument-Follow-up-Plan" items={freightTaskItems} />
+        <NextActionPanel
+          action={nextFreightAction}
+          tone={freightBlocked ? 'red' : createdCount > 0 || inTransitCount > 0 ? 'amber' : list.length > 0 ? 'blue' : 'red'}
+        />
+      </div>
       <div className="grid gap-4 lg:grid-cols-[1.35fr_1fr]">
         <OperationalTimeline title="Frachtverlauf" items={timelineItems} />
         <OperationalContextPanel title="Frachtkontext" sections={contextSections} />
       </div>
+      <CrudCapabilityChecklist capabilities={freightCrudCapabilities} />
 
       <div className="flex items-center justify-between">
         <div>
