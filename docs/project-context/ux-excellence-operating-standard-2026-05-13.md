@@ -107,10 +107,10 @@ Eine Seite gilt erst als UX-ready, wenn sie mindestens diese Punkte erfuellt:
 | `UX-STANDARD-COMPONENTS-001` | Plattform | abgeschlossen | Wiederverwendbarer Baukasten unter `@/components/workflow`. |
 | `UX-FINANCE-001` | Finance/FIBU | abgeschlossen | Kreditoren-Zahlungslauf nutzt Rollenfokus, Aufgabenplan, Managemententscheidung, Next Action und CRUD-Abdeckung. |
 | `UX-FINANCE-002` | Finance/FIBU | abgeschlossen | UStVA nutzt Rollenfokus, Melde-Aufgabenplan, Managemententscheidung, Next Action und CRUD-/Meldeabdeckung. |
+| `UX-FINANCE-003` | Finance/FIBU | abgeschlossen | Mahnwesen nutzt Rollenfokus, Mahn-Aufgabenplan, Eskalationsentscheidung, Next Action und CRUD-/Kommunikationsabdeckung. |
 
 Naechste Finance-Folgeslices:
 
-- `UX-FINANCE-003`: Mahnwesen mit Rollenfokus, Eskalationsaufgaben, Kundenkommunikation und Audit.
 - `UX-FINANCE-004`: Periodenabschluss mit Close-Plan, Abstimmnachweisen und Management-Freigabe.
 
 ## Nicht-Ziel
