@@ -158,6 +158,17 @@ Stand: `2026-05-12`
 **Checks:** `pnpm --filter @valero-neuroerp/frontend-web type-check`; `node scripts/docs-markdown-check.cjs docs/project-context/ux-excellence-operating-standard-2026-05-13.md docs/project-context/open-gaps-and-known-issues.md docs/agent-ops/active-workboard.md docs/agent-ops/slices/HRM-GO-LIVE-UX-001.yaml`; `python scripts/agent_workboard_supervisor.py validate`; `node scripts/docs-governance-check.cjs`; `git diff --check`
 **Offene Risiken:** Vollstaendige Ueberarbeitung aller Domaenen bleibt ein Rollout-Programm; dieser Slice liefert Referenzumsetzung und verbindlichen Standard.
 
+## UX-STANDARD-COMPONENTS-001
+
+**Von:** Codex
+**Owner:** Codex
+**Stand:** reserviert 2026-05-14
+**Ziel des Slices:** Wiederverwendbare UX-Exzellenz-Komponenten fuer Rollenfokus, Aufgabenplan, naechste Aktion, Evidence-Link, Audit-Zeitleiste, Managemententscheidung und CRUD-Abdeckung bereitstellen und in HRM als Referenz nutzen.
+**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/agent-ops/slices/UX-STANDARD-COMPONENTS-001.yaml`, `packages/frontend-web/src/components/workflow/ux-standard.tsx`, `packages/frontend-web/src/components/workflow/index.ts`, `packages/frontend-web/src/pages/personal/hrm-operations-gates.tsx`, `docs/project-context/ux-excellence-operating-standard-2026-05-13.md`
+**Abnahmekriterien:** Komponenten sind typisiert und domaenenneutral; HRM nutzt mindestens Rollenfokus, Aufgabenplan, Evidence-Link, Audit-Zeitleiste und Managemententscheidung aus dem Baukasten; UX-Standard dokumentiert den Baukasten und CRUD-Matrix; Typecheck und Doku-Checks sind gruen.
+**Checks:** offen
+**Offene Risiken:** Weitere Domaenen muessen in Folgeslices migriert werden; dieser Slice schafft den gemeinsamen Baukasten und die HRM-Referenzverdrahtung.
+
 ## TODO-SPRINT-001
 
 **Von:** Cursor<br>
