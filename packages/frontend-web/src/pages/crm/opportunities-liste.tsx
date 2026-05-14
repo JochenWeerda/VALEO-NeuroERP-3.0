@@ -9,9 +9,52 @@ import { Badge } from '@/components/ui/badge'
 import { ListConfig } from '@/components/mask-builder/types'
 import { getEntityTypeLabel, getStatusLabel } from '@/features/crud/utils/i18n-helpers'
 import { toast } from '@/hooks/use-toast'
+import {
+  CrudCapabilityChecklist,
+  ManagementDecisionPanel,
+  NextActionPanel,
+  OperationalTaskPlan,
+  RoleFocusBar,
+  type UxTaskItem,
+} from '@/components/workflow'
 
 // API Client für Opportunities
 const apiClient = createApiClient('/api/v1/crm')
+
+type CrmRoleFocus = 'all' | 'sales' | 'inside-sales' | 'management' | 'finance' | 'customer-success'
+
+const crmRoleProfiles: Array<{ id: CrmRoleFocus; label: string; description: string }> = [
+  {
+    id: 'all',
+    label: 'Alle Rollen',
+    description: 'Zeigt die Pipeline fuer Vertrieb, Inside Sales, Leitung, Finance und Customer Success.',
+  },
+  {
+    id: 'sales',
+    label: 'Vertrieb',
+    description: 'Fokus auf Deal-Lage, Abschlusswahrscheinlichkeit und naechstes Kundengespraech.',
+  },
+  {
+    id: 'inside-sales',
+    label: 'Inside Sales',
+    description: 'Fokus auf Datenqualitaet, Follow-up, Angebotserstellung und Wiedervorlage.',
+  },
+  {
+    id: 'management',
+    label: 'Leitung',
+    description: 'Fokus auf Pipeline-Wert, erwarteten Umsatz und Abschlussrisiko.',
+  },
+  {
+    id: 'finance',
+    label: 'Finance',
+    description: 'Fokus auf erwarteten Umsatz, Angebotspfad und spaetere Auftrag-/Faktura-Uebergabe.',
+  },
+  {
+    id: 'customer-success',
+    label: 'Customer Success',
+    description: 'Fokus auf gewonnene Deals, Uebergabe und naechste Kundenbetreuung.',
+  },
+]
 
 // Konfiguration für Opportunities ListReport (wird in Komponente mit i18n erstellt)
 const createOpportunitiesConfig = (
@@ -216,6 +259,7 @@ export default function OpportunitiesListePage(): JSX.Element {
   const [data, setData] = useState<any[]>([])
   const [total, setTotal] = useState(0)
   const [loading, setLoading] = useState(true)
+  const [roleFocus, setRoleFocus] = useState<CrmRoleFocus>('all')
   const entityType = 'opportunity'
   const entityTypeLabel = getEntityTypeLabel(t, entityType, 'Opportunity')
   const importInputRef = useRef<HTMLInputElement>(null)
@@ -443,9 +487,122 @@ export default function OpportunitiesListePage(): JSX.Element {
     }
   }
 
+  const visibleTotal = data.length
+  const proposalCount = data.filter((item) => item.status === 'proposal' || item.stage === 'proposal_price_quote').length
+  const negotiationCount = data.filter((item) => item.status === 'negotiation' || item.stage === 'negotiation_review').length
+  const wonCount = data.filter((item) => item.status === 'closed_won').length
+  const lostCount = data.filter((item) => item.status === 'closed_lost').length
+  const activeCount = data.filter((item) => !['closed_won', 'closed_lost'].includes(String(item.status || ''))).length
+  const expectedRevenue = data.reduce((sum, item) => sum + Number(item.expected_revenue || 0), 0)
+  const missingOwnerCount = data.filter((item) => !item.owner_id).length
+  const nextPipelineAction = proposalCount > 0
+    ? 'Opportunities in der Angebotsphase nachfassen oder in ein Angebot ueberfuehren.'
+    : negotiationCount > 0
+      ? 'Verhandlungsergebnis entscheiden: gewonnen, verloren oder naechster Termin.'
+      : activeCount > 0
+        ? 'Aktive Opportunities qualifizieren und naechsten Kundenschritt setzen.'
+        : 'Neue Opportunity anlegen oder Import starten.'
+  const pipelineTaskItems: UxTaskItem[] = [
+    {
+      label: 'Opportunity erfassen',
+      done: visibleTotal > 0,
+      hint: visibleTotal > 0 ? `${visibleTotal} Opportunities in der aktuellen Sicht.` : 'Neue Opportunity anlegen oder CSV importieren.',
+    },
+    {
+      label: 'Qualifizieren und Owner klaeren',
+      done: activeCount > 0 && missingOwnerCount === 0,
+      hint: missingOwnerCount > 0 ? `${missingOwnerCount} Opportunities brauchen einen Owner.` : 'Aktive Opportunities sind einem Owner zugeordnet.',
+    },
+    {
+      label: 'Angebot vorbereiten',
+      done: proposalCount > 0,
+      hint: proposalCount > 0 ? `${proposalCount} Opportunities stehen in der Angebotsphase.` : 'Qualifizierte Chancen in Angebot ueberfuehren.',
+    },
+    {
+      label: 'Entscheiden und nachfassen',
+      done: wonCount + lostCount > 0,
+      hint: negotiationCount > 0 ? `${negotiationCount} Opportunities sind in Verhandlung.` : 'Gewonnene, verlorene und offene Deals regelmaessig nachhalten.',
+    },
+  ]
+  const pipelineCrudCapabilities = [
+    {
+      key: 'create',
+      label: 'Anlegen',
+      available: true,
+      hint: 'Neue Opportunities koennen direkt aus der Liste angelegt werden.',
+    },
+    {
+      key: 'read',
+      label: 'Lesen',
+      available: true,
+      hint: 'Kunde, Stage, Betrag, Wahrscheinlichkeit, Owner und Status sind sichtbar.',
+    },
+    {
+      key: 'update',
+      label: 'Bearbeiten',
+      available: visibleTotal > 0,
+      hint: 'Opportunities koennen geoeffnet und im Detail bearbeitet werden.',
+    },
+    {
+      key: 'delete',
+      label: 'Loeschen',
+      available: visibleTotal > 0,
+      hint: 'Einzelne Opportunities koennen geloescht werden, solange die Rolle berechtigt ist.',
+    },
+    {
+      key: 'approve',
+      label: 'Pipeline-Aktion',
+      available: activeCount > 0,
+      hint: 'Bulk-Aktionen ueberfuehren in Angebot, markieren gewonnen oder markieren verloren.',
+    },
+    {
+      key: 'export',
+      label: 'Export/Import',
+      available: true,
+      hint: 'CSV-Export und CSV-Import sind an der Liste angebunden.',
+    },
+    {
+      key: 'audit',
+      label: 'Follow-up',
+      available: true,
+      hint: 'Stage, Status, Owner und erwarteter Abschluss bilden die Nachfassspur.',
+    },
+  ]
+
   return (
-    <>
+    <div className="space-y-6">
       <input ref={importInputRef} type="file" accept=".csv" className="hidden" onChange={handleImportFile} />
+      <RoleFocusBar
+        roles={crmRoleProfiles}
+        value={roleFocus}
+        onChange={setRoleFocus}
+        visibleCount={roleFocus === 'all' ? 5 : 1}
+        totalCount={5}
+      />
+      <ManagementDecisionPanel
+        decision={{
+          allowed: visibleTotal > 0,
+          allowedLabel: 'Pipeline handlungsfaehig',
+          blockedLabel: 'Pipeline leer',
+          summary: visibleTotal > 0
+            ? `Die Pipeline enthaelt ${visibleTotal} Opportunities mit ${formatCurrency(expectedRevenue, 'EUR')} erwartetem Umsatz. ${nextPipelineAction}`
+            : 'In der aktuellen Sicht gibt es keine Opportunities. Legen Sie eine neue Chance an oder importieren Sie eine CSV-Datei.',
+          blockerCount: visibleTotal === 0 ? 1 : missingOwnerCount,
+          nextFocus: nextPipelineAction,
+          template: {
+            label: 'Opportunity anlegen',
+            href: '/crm/opportunity/new',
+          },
+        }}
+      />
+      <div className="grid gap-4 lg:grid-cols-[1.35fr_1fr]">
+        <OperationalTaskPlan title="Pipeline-Follow-up-Plan" items={pipelineTaskItems} />
+        <NextActionPanel
+          action={nextPipelineAction}
+          tone={proposalCount > 0 || negotiationCount > 0 ? 'amber' : visibleTotal > 0 ? 'blue' : 'red'}
+        />
+      </div>
+      <CrudCapabilityChecklist capabilities={pipelineCrudCapabilities} />
       <ListReport
         config={opportunitiesConfig}
         data={data}
@@ -457,6 +614,6 @@ export default function OpportunitiesListePage(): JSX.Element {
         onImport={() => importInputRef.current?.click()}
         isLoading={loading}
       />
-    </>
+    </div>
   )
 }

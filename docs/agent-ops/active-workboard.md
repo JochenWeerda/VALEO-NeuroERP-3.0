@@ -234,10 +234,12 @@ Stand: `2026-05-12`
 
 **Von:** Codex
 **Owner:** Codex
-**Stand:** reserviert 2026-05-14
+**Stand:** abgeschlossen 2026-05-14
 **Ziel des Slices:** Opportunities als erste CRM-/Vertriebs-Arbeitsflaeche auf den UX-Exzellenzbaukasten ziehen: Rollenfokus, Follow-up-Plan, Managemententscheidung, Next Action und CRUD-/Pipeline-Abdeckung.
 **Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/agent-ops/slices/UX-CRM-001.yaml`, `packages/frontend-web/src/pages/crm/opportunities-liste.tsx`, `docs/project-context/ux-excellence-operating-standard-2026-05-13.md`
 **Abnahmekriterien:** Opportunities zeigen Rollenfokus fuer Vertrieb, Inside Sales, Leitung, Finance und Customer Success; Aufgabenplan fuehrt Qualifizieren, Angebot erstellen, Entscheiden und Nachfassen; Managemententscheidung zeigt Pipeline handlungsfaehig/leer; CRUD-/Pipeline-Abdeckung ist sichtbar; Typecheck und Doku-Checks sind gruen.
+**Erledigt:** `crm/opportunities-liste.tsx` nutzt den UX-Baukasten fuer Rollenfokus, Pipeline-Follow-up-Plan, Managemententscheidung, Next Action und CRUD-/Pipeline-Abdeckung. Bestehende Opportunity-Liste, CSV-Import/-Export und Bulk-Aktionen fuer Angebot, gewonnen und verloren bleiben erhalten. UX-Standard markiert `UX-CRM-001` als abgeschlossen.
+**Checks:** `pnpm --filter @valero-neuroerp/frontend-web type-check`; `python scripts/agent_workboard_supervisor.py validate`; `node scripts/docs-governance-check.cjs`; `node scripts/docs-markdown-check.cjs docs/project-context/ux-excellence-operating-standard-2026-05-13.md docs/agent-ops/active-workboard.md docs/agent-ops/slices/UX-CRM-001.yaml`; `git diff --check`
 **Offene Risiken:** Angebots- und Auftragseditor folgen in separaten Sales-/CRM-UX-Slices.
 
 ## TODO-SPRINT-001

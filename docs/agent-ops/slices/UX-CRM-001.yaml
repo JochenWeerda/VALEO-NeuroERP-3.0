@@ -1,7 +1,7 @@
 id: UX-CRM-001
 title: Opportunities mit UX-Exzellenzbaukasten
 owner: Codex
-status: reserviert
+status: abgeschlossen
 created: 2026-05-14
 goal: >
   Opportunities als erste CRM-/Vertriebs-Arbeitsflaeche auf den
@@ -18,6 +18,15 @@ acceptance_criteria:
   - Managemententscheidung zeigt Pipeline handlungsfaehig/leer.
   - CRUD-/Pipeline-Abdeckung ist sichtbar.
   - Typecheck und Doku-Checks sind gruen.
-checks: []
+checks:
+  - pnpm --filter @valero-neuroerp/frontend-web type-check
+  - python scripts/agent_workboard_supervisor.py validate
+  - node scripts/docs-governance-check.cjs
+  - node scripts/docs-markdown-check.cjs docs/project-context/ux-excellence-operating-standard-2026-05-13.md docs/agent-ops/active-workboard.md docs/agent-ops/slices/UX-CRM-001.yaml
+  - git diff --check
+done:
+  - crm/opportunities-liste.tsx nutzt Rollenfokus, Pipeline-Follow-up-Plan, Managemententscheidung, Next Action und CRUD-/Pipeline-Abdeckung aus dem UX-Baukasten.
+  - Bestehende Opportunity-Liste, CSV-Import/-Export und Bulk-Aktionen fuer Angebot, gewonnen und verloren bleiben erhalten.
+  - UX-Standard markiert UX-CRM-001 als abgeschlossen.
 risks:
   - Angebots- und Auftragseditor folgen in separaten Sales-/CRM-UX-Slices.
