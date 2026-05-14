@@ -1,14 +1,11 @@
 import { useMemo, useState } from 'react'
 import {
   AlertTriangle,
-  ArrowRight,
-  BriefcaseBusiness,
   Calendar,
   Check,
   CheckCircle2,
   ChevronDown,
   ChevronUp,
-  ClipboardCheck,
   ExternalLink,
   FileCheck2,
   FilePlus,
@@ -27,6 +24,15 @@ import { Label } from '@/components/ui/label'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Textarea } from '@/components/ui/textarea'
 import { useToast } from '@/components/ui/toast-provider'
+import {
+  AuditTimeline,
+  EvidenceTemplateLink,
+  ManagementDecisionPanel,
+  NextActionPanel,
+  OperationalTaskPlan,
+  RoleFocusBar,
+  type AuditTimelineEntry,
+} from '@/components/workflow'
 import { getAxiosErrorMessage } from '@/lib/api-client'
 import {
   useCreateHrmOperationsGateEvidence,
@@ -63,15 +69,6 @@ const defaultForm: GateFormState = {
   performedBy: '',
   decidedBy: '',
   decisionReason: '',
-}
-
-const statusLabel: Record<string, string> = {
-  external_evidence_required: 'Nachweis offen',
-  evidence_submitted: 'Nachweis liegt vor',
-  probe_passed: 'Test bestanden',
-  approved: 'Erledigt',
-  rejected: 'Zurueckgewiesen',
-  external_gates_defined: 'Vorbereitet',
 }
 
 const probeLabel: Record<string, string> = {
@@ -228,6 +225,15 @@ function taskItems(gate: HrmOperationsGate): Array<{ label: string; done: boolea
   ]
 }
 
+function auditEntries(gate: HrmOperationsGate): AuditTimelineEntry[] {
+  return [
+    gate.latestEvidenceRef ? { label: 'Nachweis hinterlegt', detail: gate.latestEvidenceRef, tone: 'blue' as const } : null,
+    gate.lastProbeStatus ? { label: 'Test dokumentiert', detail: `${probeLabel[gate.lastProbeStatus] ?? gate.lastProbeStatus}${gate.lastProbeAt ? ` am ${formatDate(gate.lastProbeAt)}` : ''}`, tone: gate.lastProbeStatus === 'passed' ? 'emerald' as const : 'amber' as const } : null,
+    gate.status === 'approved' ? { label: 'Freigegeben', detail: `${gate.approvedBy ?? 'Verantwortliche Person'}${gate.approvedAt ? ` am ${formatDate(gate.approvedAt)}` : ''}`, tone: 'emerald' as const } : null,
+    gate.status === 'rejected' ? { label: 'Zurueckgewiesen', detail: gate.rejectionReason ?? 'Kommentar pruefen', tone: 'red' as const } : null,
+  ].filter(Boolean) as AuditTimelineEntry[]
+}
+
 function StatusPill({ status }: { status: ReturnType<typeof checkpointStatus> }): JSX.Element {
   const config = {
     offen: { label: 'Nachweis offen', className: 'border-amber-200 bg-amber-50 text-amber-700', icon: AlertTriangle },
@@ -349,18 +355,7 @@ function GateActions({ gate }: { gate: HrmOperationsGate }): JSX.Element {
   return (
     <div className="flex flex-col gap-4">
       {template ? (
-        <a
-          href={`/${template.path}`}
-          target="_blank"
-          rel="noreferrer"
-          className="flex items-center justify-between rounded border border-blue-200 bg-blue-50 px-3 py-2 text-xs font-bold text-blue-800 hover:bg-blue-100"
-        >
-          <span className="flex items-center gap-2">
-            <FileText className="h-4 w-4" />
-            Vorlage oeffnen: {template.label}
-          </span>
-          <ExternalLink className="h-3.5 w-3.5" />
-        </a>
+        <EvidenceTemplateLink link={{ label: template.label, href: `/${template.path}` }} />
       ) : null}
 
       <div className="rounded border border-gray-200 bg-white p-4 shadow-sm">
@@ -471,67 +466,6 @@ function GateActions({ gate }: { gate: HrmOperationsGate }): JSX.Element {
   )
 }
 
-function GateTaskPlan({ gate }: { gate: HrmOperationsGate }): JSX.Element {
-  return (
-    <div className="rounded border border-gray-200 bg-white p-4 shadow-sm">
-      <h4 className="mb-4 flex items-center gap-2 border-b pb-2 text-xs font-bold uppercase text-gray-700">
-        <ClipboardCheck className="h-3.5 w-3.5 text-[#005ca5]" />
-        Arbeitsplan
-      </h4>
-      <div className="space-y-3">
-        {taskItems(gate).map((item, index) => (
-          <div key={item.label} className="flex items-start gap-3">
-            <div className={`mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full border text-[11px] font-black ${item.done ? 'border-emerald-500 bg-emerald-50 text-emerald-700' : 'border-gray-300 bg-gray-50 text-gray-500'}`}>
-              {item.done ? <Check className="h-3.5 w-3.5" /> : index + 1}
-            </div>
-            <div className="min-w-0">
-              <p className="text-[13px] font-bold text-gray-800">{item.label}</p>
-              <p className="text-[12px] leading-relaxed text-gray-500">{item.hint}</p>
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
-  )
-}
-
-function AuditTimeline({ gate }: { gate: HrmOperationsGate }): JSX.Element {
-  const entries = [
-    gate.latestEvidenceRef ? { label: 'Nachweis hinterlegt', detail: gate.latestEvidenceRef, tone: 'blue' } : null,
-    gate.lastProbeStatus ? { label: 'Test dokumentiert', detail: `${probeLabel[gate.lastProbeStatus] ?? gate.lastProbeStatus}${gate.lastProbeAt ? ` am ${formatDate(gate.lastProbeAt)}` : ''}`, tone: gate.lastProbeStatus === 'passed' ? 'emerald' : 'amber' } : null,
-    gate.status === 'approved' ? { label: 'Freigegeben', detail: `${gate.approvedBy ?? 'Verantwortliche Person'}${gate.approvedAt ? ` am ${formatDate(gate.approvedAt)}` : ''}`, tone: 'emerald' } : null,
-    gate.status === 'rejected' ? { label: 'Zurueckgewiesen', detail: gate.rejectionReason ?? 'Kommentar pruefen', tone: 'red' } : null,
-  ].filter(Boolean) as Array<{ label: string; detail: string; tone: 'blue' | 'emerald' | 'amber' | 'red' }>
-
-  const dotClass: Record<string, string> = {
-    blue: 'bg-blue-600',
-    emerald: 'bg-emerald-600',
-    amber: 'bg-amber-500',
-    red: 'bg-red-600',
-  }
-
-  return (
-    <div className="rounded border border-gray-200 bg-white p-4 shadow-sm">
-      <h4 className="mb-4 border-b pb-2 text-xs font-bold uppercase text-gray-700">Audit-Zeitleiste</h4>
-      {entries.length > 0 ? (
-        <div className="space-y-3">
-          {entries.map((entry) => (
-            <div key={`${entry.label}-${entry.detail}`} className="flex gap-3">
-              <span className={`mt-1.5 h-2.5 w-2.5 shrink-0 rounded-full ${dotClass[entry.tone]}`} />
-              <div className="min-w-0">
-                <p className="text-[13px] font-bold text-gray-800">{entry.label}</p>
-                <p className="break-words text-[12px] text-gray-500">{entry.detail}</p>
-              </div>
-            </div>
-          ))}
-        </div>
-      ) : (
-        <p className="text-[13px] text-gray-500">Noch keine Nachweise, Tests oder Entscheidungen protokolliert.</p>
-      )}
-    </div>
-  )
-}
-
 function GateRow({ gate, expanded, onToggle }: { gate: HrmOperationsGate; expanded: boolean; onToggle: () => void }): JSX.Element {
   const status = checkpointStatus(gate)
   const isStopper = gate.goLiveBlocking && gate.status !== 'approved'
@@ -605,8 +539,8 @@ function GateRow({ gate, expanded, onToggle }: { gate: HrmOperationsGate; expand
           <div className="grid gap-8 lg:grid-cols-12">
             <div className="flex flex-col gap-6 lg:col-span-8">
               <div className="grid gap-4 md:grid-cols-2">
-                <GateTaskPlan gate={gate} />
-                <AuditTimeline gate={gate} />
+                <OperationalTaskPlan items={taskItems(gate)} />
+                <AuditTimeline entries={auditEntries(gate)} />
               </div>
 
               <div className="grid gap-4 md:grid-cols-2">
@@ -660,13 +594,7 @@ function GateRow({ gate, expanded, onToggle }: { gate: HrmOperationsGate; expand
                 </div>
               </div>
 
-              <div className="flex items-start gap-3 rounded-lg border border-blue-100 bg-blue-50 p-4">
-                <ArrowRight className="mt-0.5 h-4.5 w-4.5 shrink-0 text-blue-700" />
-                <div>
-                  <h5 className="mb-0.5 text-[13px] font-bold text-blue-950">Empfohlene naechste Aktion</h5>
-                  <p className="text-[13px] text-blue-800">{nextAction(gate)}</p>
-                </div>
-              </div>
+              <NextActionPanel action={nextAction(gate)} />
             </div>
 
             <div className="lg:col-span-4">
@@ -691,7 +619,6 @@ export default function HrmOperationsGatesPage(): JSX.Element {
   const blockerCount = policyQuery.data?.blockerCount ?? gates.filter((gate) => gate.goLiveBlocking && gate.status !== 'approved').length
   const isGoLiveAllowed = policyQuery.data?.goLiveAllowed ?? blockerCount === 0
   const blockers = policyQuery.data?.blockers ?? gates.filter((gate) => gate.goLiveBlocking && gate.status !== 'approved')
-  const selectedRole = roleProfiles.find((profile) => profile.id === roleFocus) ?? roleProfiles[0]
 
   if (gatesQuery.isLoading && gates.length === 0) {
     return (
@@ -742,93 +669,28 @@ export default function HrmOperationsGatesPage(): JSX.Element {
           <KpiItem label="Nachweise Gesamt" value={evidenceCount} icon={FileText} colorClass="text-blue-500" />
         </section>
 
-        <section className="rounded border border-gray-200 bg-white p-4 shadow-sm">
-          <div className="mb-3 flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
-            <div>
-              <h2 className="flex items-center gap-2 text-base font-bold text-gray-900">
-                <BriefcaseBusiness className="h-4 w-4 text-[#005ca5]" />
-                Rollenfokus
-              </h2>
-              <p className="text-[12px] text-gray-500">{selectedRole.description}</p>
-            </div>
-            <span className="text-[11px] font-bold uppercase tracking-wide text-gray-400">
-              {visibleGates.length} von {gates.length} Pruefpunkten sichtbar
-            </span>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            {roleProfiles.map((profile) => (
-              <button
-                key={profile.id}
-                type="button"
-                onClick={() => {
-                  setRoleFocus(profile.id)
-                  setExpandedGateId(null)
-                }}
-                className={`rounded border px-3 py-1.5 text-xs font-bold transition ${roleFocus === profile.id ? 'border-[#005ca5] bg-blue-50 text-[#005ca5]' : 'border-gray-200 bg-white text-gray-600 hover:bg-gray-50'}`}
-                title={profile.description}
-              >
-                {profile.label}
-              </button>
-            ))}
-          </div>
-        </section>
+        <RoleFocusBar
+          roles={roleProfiles}
+          value={roleFocus}
+          visibleCount={visibleGates.length}
+          totalCount={gates.length}
+          onChange={(value) => {
+            setRoleFocus(value)
+            setExpandedGateId(null)
+          }}
+        />
 
-        <section className="overflow-hidden rounded border border-gray-300 border-t-4 border-t-[#005ca5] bg-white shadow-sm">
-          <div className="flex items-center justify-between border-b border-gray-200 bg-gray-50/50 px-6 py-4">
-            <div className="flex items-center gap-2.5">
-              <Shield className="h-5 w-5 text-[#005ca5]" />
-              <h2 className="text-base font-bold text-gray-900">Darf HRM produktiv starten?</h2>
-            </div>
-            <span className="text-[10px] font-bold uppercase tracking-widest text-gray-400">Sicherheitspruefung</span>
-          </div>
-          <div className="flex flex-wrap items-start gap-8 p-6 lg:flex-nowrap lg:gap-12">
-            <div className="flex-1 space-y-4">
-              <p className="max-w-3xl text-sm leading-relaxed text-gray-600">
-                {policyQuery.data?.summary ?? gatesQuery.data?.summary ?? 'Der Produktivstart wird aus offenen Stoppern und Freigaben berechnet.'}
-              </p>
-              <p className="max-w-3xl text-sm leading-relaxed text-gray-600">
-                Sobald mindestens ein kritischer Pruefpunkt offen ist, bleibt die Systemampel rot. Normale Mitarbeitende nutzen diese Admin-Seite nicht.
-              </p>
-              <div className="flex flex-wrap gap-3">
-                {blockers.map((gate) => (
-                  <span key={gate.id} className="flex items-center gap-2 rounded border border-red-200 bg-red-50 px-3 py-1.5 text-[11px] font-bold uppercase tracking-wide text-red-700">
-                    <AlertTriangle className="h-3.5 w-3.5" />
-                    {simpleGateTitle(gate)}
-                  </span>
-                ))}
-              </div>
-            </div>
-
-            <div className={`flex min-w-full flex-col items-center justify-center gap-3 rounded-lg border-2 border-dashed p-8 text-center sm:min-w-[320px] ${isGoLiveAllowed ? 'border-emerald-200 bg-emerald-50' : 'border-red-200 bg-red-50'}`}>
-              <div className={`flex h-12 w-12 items-center justify-center rounded-full ${isGoLiveAllowed ? 'bg-emerald-600' : 'bg-red-600'}`}>
-                {isGoLiveAllowed ? <Check className="h-7 w-7 text-white" strokeWidth={3} /> : <X className="h-7 w-7 text-white" strokeWidth={3} />}
-              </div>
-              <h4 className={`text-xl font-black uppercase tracking-tight ${isGoLiveAllowed ? 'text-emerald-700' : 'text-red-700'}`}>
-                {isGoLiveAllowed ? 'Freigabe erteilt' : 'Keine Freigabe'}
-              </h4>
-              <p className="text-xs font-medium text-gray-500">
-                {isGoLiveAllowed ? 'Alle kritischen Anforderungen wurden erfuellt.' : `${blockerCount} kritische Pruefpunkte verhindern aktuell die Produktivsetzung.`}
-              </p>
-            </div>
-          </div>
-          <div className="grid border-t border-gray-100 bg-gray-50/60 md:grid-cols-3">
-            <div className="border-b border-gray-100 p-4 md:border-b-0 md:border-r">
-              <p className="text-[10px] font-bold uppercase tracking-wide text-gray-400">Management-Entscheidung</p>
-              <p className="mt-1 text-sm font-bold text-gray-800">{isGoLiveAllowed ? 'Freigabe kann vorbereitet werden' : 'Freigabe aktuell nicht moeglich'}</p>
-            </div>
-            <div className="border-b border-gray-100 p-4 md:border-b-0 md:border-r">
-              <p className="text-[10px] font-bold uppercase tracking-wide text-gray-400">Naechster Fokus</p>
-              <p className="mt-1 text-sm font-bold text-gray-800">{blockers[0] ? simpleGateTitle(blockers[0]) : 'Regelpruefung terminieren'}</p>
-            </div>
-            <div className="p-4">
-              <p className="text-[10px] font-bold uppercase tracking-wide text-gray-400">Vorlage Entscheidung</p>
-              <a href="/docs/hrm-go-live-templates/16_geschaeftsfuehrungsfreigabe.md" target="_blank" rel="noreferrer" className="mt-1 inline-flex items-center gap-1 text-sm font-bold text-[#005ca5] hover:underline">
-                Geschaeftsfuehrungsfreigabe oeffnen
-                <ExternalLink className="h-3.5 w-3.5" />
-              </a>
-            </div>
-          </div>
-        </section>
+        <ManagementDecisionPanel
+          decision={{
+            allowed: isGoLiveAllowed,
+            allowedLabel: 'Freigabe erteilt',
+            blockedLabel: 'Keine Freigabe',
+            summary: `${policyQuery.data?.summary ?? gatesQuery.data?.summary ?? 'Der Produktivstart wird aus offenen Stoppern und Freigaben berechnet.'} Normale Mitarbeitende nutzen diese Admin-Seite nicht.`,
+            blockerCount,
+            nextFocus: blockers[0] ? simpleGateTitle(blockers[0]) : 'Regelpruefung terminieren',
+            template: { label: 'Geschaeftsfuehrungsfreigabe oeffnen', href: '/docs/hrm-go-live-templates/16_geschaeftsfuehrungsfreigabe.md' },
+          }}
+        />
 
         <div className="flex flex-col gap-3 pt-4 sm:flex-row sm:items-center sm:justify-between">
           <h2 className="w-fit border-b-2 border-b-[#005ca5] pb-1 text-lg font-bold text-gray-900">Pruefliste Betriebsbereitschaft</h2>
