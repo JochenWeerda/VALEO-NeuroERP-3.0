@@ -170,6 +170,17 @@ Stand: `2026-05-12`
 **Checks:** `pnpm --filter @valero-neuroerp/frontend-web type-check`; `node scripts/docs-markdown-check.cjs docs/project-context/ux-excellence-operating-standard-2026-05-13.md docs/agent-ops/active-workboard.md docs/agent-ops/slices/UX-STANDARD-COMPONENTS-001.yaml`; `python scripts/agent_workboard_supervisor.py validate`; `node scripts/docs-governance-check.cjs`; `git diff --check`
 **Offene Risiken:** Weitere Domaenen muessen in Folgeslices migriert werden; dieser Slice schafft den gemeinsamen Baukasten und die HRM-Referenzverdrahtung.
 
+## UX-FINANCE-001
+
+**Von:** Codex
+**Owner:** Codex
+**Stand:** reserviert 2026-05-14
+**Ziel des Slices:** Den UX-Exzellenzbaukasten auf Finance/FIBU anwenden, beginnend mit dem Kreditoren-Zahlungslauf als produktkritischer Zahlungsarbeitsflaeche.
+**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/agent-ops/slices/UX-FINANCE-001.yaml`, `packages/frontend-web/src/pages/finance/zahlungslauf-kreditoren.tsx`, `docs/project-context/ux-excellence-operating-standard-2026-05-13.md`
+**Abnahmekriterien:** Kreditoren-Zahlungslauf zeigt Rollenfokus, Aufgabenplan, Managemententscheidung, Audit-/Zahlungspfad und CRUD-Abdeckung; naechste Aktion bleibt sichtbar; Typecheck und Doku-Checks sind gruen.
+**Checks:** offen
+**Offene Risiken:** Weitere Finance-Seiten wie UStVA, Mahnwesen und Abschluss folgen in separaten Rollout-Slices.
+
 ## TODO-SPRINT-001
 
 **Von:** Cursor<br>
