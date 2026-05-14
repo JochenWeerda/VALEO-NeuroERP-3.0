@@ -1,0 +1,23 @@
+id: UX-FINANCE-004
+title: Periodenabschluss mit UX-Exzellenzbaukasten
+owner: Codex
+status: reserviert
+created: 2026-05-14
+goal: >
+  Periodenabschluss als vierte Finance-Arbeitsflaeche auf den
+  UX-Exzellenzbaukasten ziehen: Rollenfokus, Close-Aufgabenplan,
+  Managemententscheidung, Next Action und CRUD-/Close-Abdeckung.
+file_ownership:
+  - docs/agent-ops/active-workboard.md
+  - docs/agent-ops/slices/UX-FINANCE-004.yaml
+  - packages/frontend-web/src/pages/finance/abschluss.tsx
+  - docs/project-context/ux-excellence-operating-standard-2026-05-13.md
+acceptance_criteria:
+  - Periodenabschluss zeigt Rollenfokus fuer FIBU, Controlling, Steuerbuero, Leitung und Audit.
+  - Close-Aufgabenplan fuehrt Periode, Abstimmung, Freigabe und Sperre/Export.
+  - Managemententscheidung zeigt abschliessbar/gestoppt.
+  - CRUD-/Close-Abdeckung ist sichtbar.
+  - Typecheck und Doku-Checks sind gruen.
+checks: []
+risks:
+  - Einkauf und weitere Domaenen folgen in separaten UX-Rollout-Slices.

@@ -206,6 +206,16 @@ Stand: `2026-05-12`
 **Checks:** `pnpm --filter @valero-neuroerp/frontend-web type-check`; `python scripts/agent_workboard_supervisor.py validate`; `node scripts/docs-governance-check.cjs`; `git diff --check`
 **Offene Risiken:** Periodenabschluss folgt in separatem Finance-UX-Slice.
 
+## UX-FINANCE-004
+
+**Von:** Codex
+**Owner:** Codex
+**Stand:** reserviert 2026-05-14
+**Ziel des Slices:** Periodenabschluss als vierte Finance-Arbeitsflaeche auf den UX-Exzellenzbaukasten ziehen: Rollenfokus, Close-Aufgabenplan, Managemententscheidung, Next Action und CRUD-/Close-Abdeckung.
+**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/agent-ops/slices/UX-FINANCE-004.yaml`, `packages/frontend-web/src/pages/finance/abschluss.tsx`, `docs/project-context/ux-excellence-operating-standard-2026-05-13.md`
+**Abnahmekriterien:** Periodenabschluss zeigt Rollenfokus fuer FIBU, Controlling, Steuerbuero, Leitung und Audit; Close-Aufgabenplan fuehrt Periode, Abstimmung, Freigabe und Sperre/Export; Managemententscheidung zeigt abschliessbar/gestoppt; CRUD-/Close-Abdeckung ist sichtbar; Typecheck und Doku-Checks sind gruen.
+**Offene Risiken:** Einkauf und weitere Domaenen folgen in separaten UX-Rollout-Slices.
+
 ## TODO-SPRINT-001
 
 **Von:** Cursor<br>
