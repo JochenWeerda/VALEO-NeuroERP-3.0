@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { useQueryClient } from '@tanstack/react-query'
@@ -13,7 +13,50 @@ import { useRechnungseingaenge, type Rechnungseingang, einkaufKeys } from '@/lib
 import { OperationalCaseHeader } from '@/components/workflow/OperationalCaseHeader'
 import { OperationalContextPanel } from '@/components/workflow/OperationalContextPanel'
 import { OperationalTimeline } from '@/components/workflow/OperationalTimeline'
+import {
+  CrudCapabilityChecklist,
+  ManagementDecisionPanel,
+  NextActionPanel,
+  OperationalTaskPlan,
+  RoleFocusBar,
+  type UxTaskItem,
+} from '@/components/workflow'
 import { normalizeOperationalStatus } from '@/lib/operational-status'
+
+type ProcurementRoleFocus = 'all' | 'procurement' | 'goods-receipt' | 'finance' | 'management' | 'audit'
+
+const procurementRoleProfiles: Array<{ id: ProcurementRoleFocus; label: string; description: string }> = [
+  {
+    id: 'all',
+    label: 'Alle Rollen',
+    description: 'Zeigt die Rechnungseingangsarbeit fuer Einkauf, Wareneingang, FIBU, Leitung und Audit.',
+  },
+  {
+    id: 'procurement',
+    label: 'Einkauf',
+    description: 'Fokus auf Lieferant, Bestellung, Preisabweichungen und Freigabevorbereitung.',
+  },
+  {
+    id: 'goods-receipt',
+    label: 'Wareneingang',
+    description: 'Fokus auf Wareneingang, Mengenabweichungen und fehlende Nachweise.',
+  },
+  {
+    id: 'finance',
+    label: 'FIBU',
+    description: 'Fokus auf Steuer, Kostenstelle, Freigabe und Verbuchung.',
+  },
+  {
+    id: 'management',
+    label: 'Leitung',
+    description: 'Fokus auf Rueckstand, Betrag und naechste Entscheidung.',
+  },
+  {
+    id: 'audit',
+    label: 'Audit',
+    description: 'Fokus auf Nachvollziehbarkeit, Export und Workflow-Spur.',
+  },
+]
 
 const createRechnungseingaengeConfig = (t: any, entityTypeLabel: string): ListConfig => ({
   title: entityTypeLabel,
@@ -162,6 +205,7 @@ export default function RechnungseingaengeListePage(): JSX.Element {
   const { t } = useTranslation()
   const navigate = useNavigate()
   const queryClient = useQueryClient()
+  const [roleFocus, setRoleFocus] = useState<ProcurementRoleFocus>('all')
   const { data: apiData = [], isLoading } = useRechnungseingaenge()
   const data = useMemo(() => apiData.map((item: Rechnungseingang) => ({
     ...item,
@@ -171,6 +215,7 @@ export default function RechnungseingaengeListePage(): JSX.Element {
   const reviewedCount = data.filter((item) => String(item.status || '').toUpperCase() === 'GEPRUEFT').length
   const approvedCount = data.filter((item) => String(item.status || '').toUpperCase() === 'FREIGEGEBEN').length
   const draftCount = data.filter((item) => ENTWURF_STATUSES.includes(String(item.status || '').toUpperCase())).length
+  const postedCount = data.filter((item) => ['VERBUCHT', 'BEZAHLT'].includes(String(item.status || '').toUpperCase())).length
   const totalAmount = data.reduce((sum, item) => sum + Number(item.bruttoBetrag || 0), 0)
   const total = data.length
   const entityType = 'invoiceReceipt'
@@ -190,6 +235,80 @@ export default function RechnungseingaengeListePage(): JSX.Element {
     : reviewedCount > 0
       ? `${reviewedCount} Rechnungseingaenge warten auf Freigabe.`
       : null
+  const nextInvoiceAction = approvedCount > 0
+    ? 'Freigegebene Rechnungseingaenge verbuchen.'
+    : reviewedCount > 0
+      ? 'Gepruefte Rechnungseingaenge freigeben.'
+      : draftCount > 0
+        ? 'Erfasste Rechnungseingaenge pruefen.'
+        : 'Neue Rechnung erfassen oder Filter anpassen.'
+  const hasActionableItems = approvedCount > 0 || reviewedCount > 0 || draftCount > 0
+  const invoiceTaskItems: UxTaskItem[] = [
+    {
+      label: 'Rechnung erfassen',
+      done: total > 0,
+      hint: total > 0 ? `${total} Rechnungseingaenge in der aktuellen Sicht.` : 'Neue Eingangsrechnung erfassen oder Import starten.',
+    },
+    {
+      label: 'Bestellung und Wareneingang pruefen',
+      done: reviewedCount + approvedCount + postedCount > 0,
+      hint: draftCount > 0 ? `${draftCount} Rechnungseingaenge muessen noch geprueft werden.` : 'Keine ungeprueften Rechnungseingaenge in der Sicht.',
+    },
+    {
+      label: 'Freigabe einholen',
+      done: approvedCount + postedCount > 0,
+      hint: reviewedCount > 0 ? `${reviewedCount} gepruefte Rechnungseingaenge warten auf Freigabe.` : 'Keine geprueften Rechnungseingaenge warten auf Freigabe.',
+    },
+    {
+      label: 'Verbuchen und uebergeben',
+      done: postedCount > 0 && approvedCount === 0,
+      hint: approvedCount > 0 ? `${approvedCount} freigegebene Rechnungseingaenge warten auf Verbuchung.` : 'Keine freigegebenen Rechnungseingaenge warten auf Verbuchung.',
+    },
+  ]
+  const invoiceCrudCapabilities = [
+    {
+      key: 'create',
+      label: 'Anlegen',
+      available: true,
+      hint: 'Neue Rechnungseingaenge koennen ueber die Erfassung angelegt werden.',
+    },
+    {
+      key: 'read',
+      label: 'Lesen',
+      available: true,
+      hint: 'Lieferant, Bestellung, Wareneingang, Betrag und Status sind in der Liste sichtbar.',
+    },
+    {
+      key: 'update',
+      label: 'Bearbeiten',
+      available: total > 0,
+      hint: 'Einzelne Rechnungseingaenge koennen aus der Liste geoeffnet und bearbeitet werden.',
+    },
+    {
+      key: 'delete',
+      label: 'Loeschen/Storno',
+      available: draftCount > 0,
+      hint: draftCount > 0 ? 'Entwurfsnahe Rechnungseingaenge koennen geloescht werden.' : 'Bei freigegebenen oder verbuchten Belegen ist Storno statt Loeschen fachlich sauberer.',
+    },
+    {
+      key: 'approve',
+      label: 'Pruefen/Freigeben',
+      available: hasActionableItems,
+      hint: 'Bulk-Aktionen fuehren Pruefen, Freigeben und Verbuchen statusabhaengig aus.',
+    },
+    {
+      key: 'export',
+      label: 'Export',
+      available: total > 0,
+      hint: 'Die aktuelle Sicht kann als CSV exportiert werden.',
+    },
+    {
+      key: 'audit',
+      label: 'Audit',
+      available: true,
+      hint: 'Statuswechsel, Export und Belegbezug bleiben im Workflow nachvollziehbar.',
+    },
+  ]
   const contextSections = [
     {
       title: 'Workflowdruck',
@@ -356,14 +475,47 @@ export default function RechnungseingaengeListePage(): JSX.Element {
         status={operationalStatus}
         owner="Einkauf / FIBU"
         blocker={blocker}
-        nextAction={approvedCount > 0 ? 'Freigegebene Eingaenge verbuchen' : reviewedCount > 0 ? 'Gepruefte Eingaenge freigeben' : 'Neue Eingaenge pruefen'}
+        nextAction={nextInvoiceAction}
         caseLabel="Sammelarbeitsplatz"
         tags={['Einkauf', 'FIBU']}
       />
+      <RoleFocusBar
+        roles={procurementRoleProfiles}
+        value={roleFocus}
+        onChange={setRoleFocus}
+        visibleCount={roleFocus === 'all' ? 5 : 1}
+        totalCount={5}
+      />
+      <ManagementDecisionPanel
+        decision={{
+          allowed: hasActionableItems || total > 0,
+          allowedLabel: hasActionableItems ? 'Arbeitsschritt moeglich' : 'Sicht geprueft',
+          blockedLabel: 'Keine Rechnung',
+          summary: hasActionableItems
+            ? `Es gibt Rechnungseingaenge fuer den naechsten Arbeitsschritt. ${nextInvoiceAction}`
+            : total > 0
+              ? 'Alle sichtbaren Rechnungseingaenge sind aktuell ohne offenen Pruef-, Freigabe- oder Verbuchungsschritt.'
+              : 'In der aktuellen Sicht gibt es keine Rechnungseingaenge. Erfassen Sie eine neue Rechnung oder passen Sie Filter an.',
+          blockerCount: total === 0 ? 1 : 0,
+          nextFocus: nextInvoiceAction,
+          template: {
+            label: 'Rechnungseingang erfassen',
+            href: '/einkauf/rechnungseingang/neu',
+          },
+        }}
+      />
+      <div className="grid gap-4 lg:grid-cols-[1.35fr_1fr]">
+        <OperationalTaskPlan title="Freigabeplan Rechnungseingang" items={invoiceTaskItems} />
+        <NextActionPanel
+          action={nextInvoiceAction}
+          tone={approvedCount > 0 ? 'emerald' : reviewedCount > 0 || draftCount > 0 ? 'amber' : 'blue'}
+        />
+      </div>
       <div className="grid gap-4 lg:grid-cols-[1.35fr_1fr]">
         <OperationalTimeline title="Aktuelle Lage" items={timelineItems} />
         <OperationalContextPanel title="Listenkontext" sections={contextSections} />
       </div>
+      <CrudCapabilityChecklist capabilities={invoiceCrudCapabilities} />
       <ListReport
         config={rechnungseingaengeConfig}
         data={data}
