@@ -1,0 +1,23 @@
+id: UX-CRM-001
+title: Opportunities mit UX-Exzellenzbaukasten
+owner: Codex
+status: reserviert
+created: 2026-05-14
+goal: >
+  Opportunities als erste CRM-/Vertriebs-Arbeitsflaeche auf den
+  UX-Exzellenzbaukasten ziehen: Rollenfokus, Follow-up-Plan,
+  Managemententscheidung, Next Action und CRUD-/Pipeline-Abdeckung.
+file_ownership:
+  - docs/agent-ops/active-workboard.md
+  - docs/agent-ops/slices/UX-CRM-001.yaml
+  - packages/frontend-web/src/pages/crm/opportunities-liste.tsx
+  - docs/project-context/ux-excellence-operating-standard-2026-05-13.md
+acceptance_criteria:
+  - Opportunities zeigen Rollenfokus fuer Vertrieb, Inside Sales, Leitung, Finance und Customer Success.
+  - Aufgabenplan fuehrt Qualifizieren, Angebot erstellen, Entscheiden und Nachfassen.
+  - Managemententscheidung zeigt Pipeline handlungsfaehig/leer.
+  - CRUD-/Pipeline-Abdeckung ist sichtbar.
+  - Typecheck und Doku-Checks sind gruen.
+checks: []
+risks:
+  - Angebots- und Auftragseditor folgen in separaten Sales-/CRM-UX-Slices.
