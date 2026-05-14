@@ -210,10 +210,12 @@ Stand: `2026-05-12`
 
 **Von:** Codex
 **Owner:** Codex
-**Stand:** reserviert 2026-05-14
+**Stand:** abgeschlossen 2026-05-14
 **Ziel des Slices:** Periodenabschluss als vierte Finance-Arbeitsflaeche auf den UX-Exzellenzbaukasten ziehen: Rollenfokus, Close-Aufgabenplan, Managemententscheidung, Next Action und CRUD-/Close-Abdeckung.
 **Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/agent-ops/slices/UX-FINANCE-004.yaml`, `packages/frontend-web/src/pages/finance/abschluss.tsx`, `docs/project-context/ux-excellence-operating-standard-2026-05-13.md`
 **Abnahmekriterien:** Periodenabschluss zeigt Rollenfokus fuer FIBU, Controlling, Steuerbuero, Leitung und Audit; Close-Aufgabenplan fuehrt Periode, Abstimmung, Freigabe und Sperre/Export; Managemententscheidung zeigt abschliessbar/gestoppt; CRUD-/Close-Abdeckung ist sichtbar; Typecheck und Doku-Checks sind gruen.
+**Erledigt:** `finance/abschluss.tsx` nutzt den UX-Baukasten fuer Rollenfokus, Close-Aufgabenplan, Managemententscheidung, Next Action und CRUD-/Close-Abdeckung. Bestehende Abschlusslage, Kontext, FIBU-KPIs, Calculate-/Approve-/Close-/Lock- und Export-Aktionen bleiben erhalten. UX-Standard markiert `UX-FINANCE-004` als abgeschlossen und leitet Einkauf/CRM/Logistik als naechste Rollout-Domaenen ein.
+**Checks:** `pnpm --filter @valero-neuroerp/frontend-web type-check`; `python scripts/agent_workboard_supervisor.py validate`; `node scripts/docs-governance-check.cjs`; `node scripts/docs-markdown-check.cjs docs/project-context/ux-excellence-operating-standard-2026-05-13.md docs/agent-ops/active-workboard.md docs/agent-ops/slices/UX-FINANCE-004.yaml`; `git diff --check`
 **Offene Risiken:** Einkauf und weitere Domaenen folgen in separaten UX-Rollout-Slices.
 
 ## TODO-SPRINT-001
