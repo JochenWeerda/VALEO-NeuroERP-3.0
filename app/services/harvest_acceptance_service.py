@@ -10,6 +10,7 @@ from sqlalchemy.orm import Session
 
 from app.core.data_quality_enforcement import build_dq_error_detail, evaluate_harvest_acceptance_datensatz
 from app.core.exceptions import ConflictError, EntityNotFoundError, ValidationFailedError
+from app.core.nuts2_utils import derive_nuts2_from_postal_code
 from app.core.uuid7 import uuid7, uuid7_short_suffix
 from app.infrastructure.models import (
     AgrarContract,
@@ -65,6 +66,35 @@ def _to_dict_with_positions(acceptance: HarvestAcceptance, db: Session) -> dict:
     if article_name is not None:
         result_dict["article_name"] = article_name
     return result_dict
+
+
+def _quality_protocol_to_qualitaetsprotokoll(protocol) -> dict:
+    """Mappt QualityProtocol auf das API-Format (Laborwerte-Dict)."""
+    ov = protocol.other_values or {}
+    return {
+        "id": protocol.id,
+        "acceptance_id": protocol.harvest_acceptance_id,
+        "protocol_number": protocol.protocol_number,
+        "version": protocol.version,
+        "erstellt_am": protocol.created_at.isoformat() if protocol.created_at else None,
+        "qualitaetsdaten": {
+            "feuchte_prozent": float(protocol.moisture_pct) if protocol.moisture_pct is not None else None,
+            "protein_prozent": float(protocol.protein_pct) if protocol.protein_pct is not None else None,
+            "fallzahl": ov.get("fallzahl"),
+            "sedimentation": ov.get("sedimentation"),
+            "besatz": float(protocol.impurities_pct) if protocol.impurities_pct is not None else ov.get("besatz"),
+            "mykotoxine": float(protocol.mycotoxin_ppb) if protocol.mycotoxin_ppb is not None else ov.get("mykotoxine"),
+            "schadstoffe": ov.get("schadstoffe"),
+            "keimzahl": ov.get("keimzahl"),
+            "glasbruch": ov.get("glasbruch"),
+            "sensorik": ov.get("sensorik"),
+            "hektolitergewicht_kg_hl": float(protocol.hl_weight_kg_per_hl) if protocol.hl_weight_kg_per_hl is not None else None,
+        },
+        "bewertung": "ok" if protocol.is_final else "none",
+        "bemerkungen": None,
+        "labor_code": None,
+        "analysendatum": protocol.approved_at.date().isoformat() if protocol.approved_at else None,
+    }
 
 
 class HarvestAcceptanceService:
@@ -316,7 +346,6 @@ class HarvestAcceptanceService:
         self.db.commit()
 
     def derive_nuts2(self, acceptance_id: str) -> dict:
-        from app.api.v1.endpoints.harvest_acceptance import derive_nuts2_from_postal_code
         obj = self._get_or_raise(acceptance_id)
         if not obj.origin_postal_code:
             raise ValidationFailedError("Postal code (origin_postal_code) is required to derive NUTS-2 code")
@@ -341,7 +370,6 @@ class HarvestAcceptanceService:
 
     def get_quality_protocol(self, acceptance_id: str) -> dict:
         from modules.agrar.repositories.quality_protocol_repo import QualityProtocolRepositoryImpl
-        from app.api.v1.endpoints.harvest_acceptance import _quality_protocol_to_qualitaetsprotokoll
         obj = self._get_or_raise(acceptance_id)
         if obj.quality_protocol_id:
             quality_repo = QualityProtocolRepositoryImpl(self.db)
@@ -357,7 +385,6 @@ class HarvestAcceptanceService:
         from decimal import Decimal
         from modules.agrar.repositories.quality_protocol_repo import QualityProtocolRepositoryImpl
         from modules.agrar.services.quality_protocol_service import create_quality_protocol, QualityProtocolCreate
-        from app.api.v1.endpoints.harvest_acceptance import _quality_protocol_to_qualitaetsprotokoll
         obj = self._get_or_raise(acceptance_id)
         qd = data.get("qualitaetsdaten") or data
         create_input = QualityProtocolCreate(
