@@ -1,7 +1,7 @@
 id: UX-LOGISTIK-002
 title: Frachtbriefe mit UX-Exzellenzbaukasten
 owner: Codex
-status: reserviert
+status: abgeschlossen
 created: 2026-05-14
 goal: >
   Frachtbriefe als zweite Logistik-Arbeitsflaeche auf den UX-Exzellenzbaukasten
@@ -18,6 +18,15 @@ acceptance_criteria:
   - Managemententscheidung zeigt nachweisfaehig/blockiert.
   - CRUD-/Nachweis-Abdeckung ist sichtbar.
   - Typecheck und Doku-Checks sind gruen.
-checks: []
+checks:
+  - pnpm --filter @valero-neuroerp/frontend-web type-check
+  - python scripts/agent_workboard_supervisor.py validate
+  - node scripts/docs-governance-check.cjs
+  - node scripts/docs-markdown-check.cjs docs/project-context/ux-excellence-operating-standard-2026-05-13.md docs/agent-ops/active-workboard.md docs/agent-ops/slices/UX-LOGISTIK-002.yaml
+  - git diff --check
+done:
+  - logistik/frachtbriefe.tsx nutzt Rollenfokus, Dokument-Follow-up-Plan, Managemententscheidung, Next Action und CRUD-/Nachweis-Abdeckung aus dem UX-Baukasten.
+  - Bestehende Frachtlage, Supply-Chain-Kontext, Suche, Ketten-KPIs und Frachtbrief-Liste bleiben erhalten.
+  - UX-Standard markiert UX-LOGISTIK-002 als abgeschlossen.
 risks:
   - Waage folgt in separatem Logistik-UX-Slice.

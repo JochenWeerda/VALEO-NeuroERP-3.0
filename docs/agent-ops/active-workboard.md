@@ -294,10 +294,12 @@ Stand: `2026-05-12`
 
 **Von:** Codex
 **Owner:** Codex
-**Stand:** reserviert 2026-05-14
+**Stand:** abgeschlossen 2026-05-14
 **Ziel des Slices:** Frachtbriefe als zweite Logistik-Arbeitsflaeche auf den UX-Exzellenzbaukasten ziehen: Rollenfokus, Dokument-Follow-up-Plan, Managemententscheidung, Next Action und CRUD-/Nachweis-Abdeckung.
 **Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/agent-ops/slices/UX-LOGISTIK-002.yaml`, `packages/frontend-web/src/pages/logistik/frachtbriefe.tsx`, `docs/project-context/ux-excellence-operating-standard-2026-05-13.md`
 **Abnahmekriterien:** Frachtbriefe zeigen Rollenfokus fuer Disposition, Fahrer, Lager/Waage, Dokumentation und Leitung; Aufgabenplan fuehrt Erstellen, Versenden, Transport verfolgen und Zustellung sichern; Managemententscheidung zeigt nachweisfaehig/blockiert; CRUD-/Nachweis-Abdeckung ist sichtbar; Typecheck und Doku-Checks sind gruen.
+**Erledigt:** `logistik/frachtbriefe.tsx` nutzt den UX-Baukasten fuer Rollenfokus, Dokument-Follow-up-Plan, Managemententscheidung, Next Action und CRUD-/Nachweis-Abdeckung. Bestehende Frachtlage, Supply-Chain-Kontext, Suche, Ketten-KPIs und Frachtbrief-Liste bleiben erhalten. UX-Standard markiert `UX-LOGISTIK-002` als abgeschlossen.
+**Checks:** `pnpm --filter @valero-neuroerp/frontend-web type-check`; `python scripts/agent_workboard_supervisor.py validate`; `node scripts/docs-governance-check.cjs`; `node scripts/docs-markdown-check.cjs docs/project-context/ux-excellence-operating-standard-2026-05-13.md docs/agent-ops/active-workboard.md docs/agent-ops/slices/UX-LOGISTIK-002.yaml`; `git diff --check`
 **Offene Risiken:** Waage folgt in separatem Logistik-UX-Slice.
 
 ## TODO-SPRINT-001
