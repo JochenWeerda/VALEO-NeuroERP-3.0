@@ -15,8 +15,51 @@ import { getEntityTypeLabel, getStatusLabel } from '@/features/crud/utils/i18n-h
 import { usePurchaseOrders, useApprovePurchaseOrder, useCancelPurchaseOrder, INCOTERM_OPTIONS } from '@/lib/api/purchase-orders'
 import { apiClient } from '@/lib/api-client'
 import { escapeHtml } from '@/lib/export-utils'
+import {
+  CrudCapabilityChecklist,
+  ManagementDecisionPanel,
+  NextActionPanel,
+  OperationalTaskPlan,
+  RoleFocusBar,
+  type UxTaskItem,
+} from '@/components/workflow'
 
 // Konfiguration für Bestellungen ListReport (wird in Komponente mit i18n erstellt)
+type PurchaseRoleFocus = 'all' | 'procurement' | 'goods-receipt' | 'finance' | 'supplier' | 'management'
+
+const purchaseRoleProfiles: Array<{ id: PurchaseRoleFocus; label: string; description: string }> = [
+  {
+    id: 'all',
+    label: 'Alle Rollen',
+    description: 'Zeigt Bestellarbeit fuer Einkauf, Wareneingang, Finance, Lieferant und Leitung.',
+  },
+  {
+    id: 'procurement',
+    label: 'Einkauf',
+    description: 'Fokus auf Entwurf, Freigabe, Liefertermin und Lieferantenkommunikation.',
+  },
+  {
+    id: 'goods-receipt',
+    label: 'Wareneingang',
+    description: 'Fokus auf bestellte, teilgelieferte und gelieferte Mengen.',
+  },
+  {
+    id: 'finance',
+    label: 'Finance',
+    description: 'Fokus auf Bestellwert, Freigabe und spaeteren Rechnungsabgleich.',
+  },
+  {
+    id: 'supplier',
+    label: 'Lieferant',
+    description: 'Fokus auf externe Referenz, Incoterms, Liefertermin und Bestellstatus.',
+  },
+  {
+    id: 'management',
+    label: 'Leitung',
+    description: 'Fokus auf Rueckstand, Wert und Entscheidungsbedarf.',
+  },
+]
+
 const createBestellungenConfig = (
   t: any,
   entityTypeLabel: string,
@@ -162,6 +205,7 @@ export default function BestellungenListePage(): JSX.Element {
   const navigate = useNavigate()
   const entityType = 'purchaseOrder'
   const entityTypeLabel = getEntityTypeLabel(t, entityType, 'Bestellung')
+  const [roleFocus, setRoleFocus] = useState<PurchaseRoleFocus>('all')
   const handleBulkPrint = (items: any[]) => {
     if (!items?.length) {
       toast({ title: t('crud.actions.print'), description: 'Bitte Bestellungen auswählen.', variant: 'destructive' })
@@ -216,6 +260,93 @@ export default function BestellungenListePage(): JSX.Element {
   const cancelMutation = useCancelPurchaseOrder()
 
   const data = orders ?? []
+  const draftCount = data.filter((order: any) => order.status === 'ENTWURF').length
+  const approvedCount = data.filter((order: any) => order.status === 'FREIGEGEBEN').length
+  const orderedCount = data.filter((order: any) => order.status === 'BESTELLT').length
+  const partialCount = data.filter((order: any) => order.status === 'TEILGELIEFERT').length
+  const deliveredCount = data.filter((order: any) => order.status === 'GELIEFERT').length
+  const cancelledCount = data.filter((order: any) => order.status === 'STORNIERT').length
+  const totalAmount = data.reduce((sum: number, order: any) => sum + Number(order.totalAmount || 0), 0)
+  const today = new Date().toISOString().split('T')[0]
+  const overdueCount = data.filter((order: any) =>
+    order.deliveryDate && new Date(order.deliveryDate).toISOString().split('T')[0] < today && !['GELIEFERT', 'STORNIERT'].includes(String(order.status)),
+  ).length
+  const activeCount = data.length - cancelledCount
+  const nextPurchaseAction = overdueCount > 0
+    ? 'Ueberfaellige Liefertermine mit Lieferant und Wareneingang klaeren.'
+    : draftCount > 0
+      ? 'Entwuerfe pruefen und freigeben.'
+      : approvedCount > 0
+        ? 'Freigegebene Bestellungen an Lieferanten senden oder drucken.'
+        : orderedCount + partialCount > 0
+          ? 'Bestellte und teilgelieferte Positionen im Wareneingang nachhalten.'
+          : 'Neue Bestellung anlegen oder Import starten.'
+  const purchaseTaskItems: UxTaskItem[] = [
+    {
+      label: 'Bestellung erfassen',
+      done: data.length > 0,
+      hint: data.length > 0 ? `${data.length} Bestellungen in der aktuellen Sicht.` : 'Neue Bestellung anlegen oder Import starten.',
+    },
+    {
+      label: 'Freigeben',
+      done: draftCount === 0 && data.length > 0,
+      hint: draftCount > 0 ? `${draftCount} Entwuerfe warten auf Freigabe.` : 'Keine offenen Entwuerfe in der Sicht.',
+    },
+    {
+      label: 'Bestellen und Liefern',
+      done: orderedCount + partialCount + deliveredCount > 0,
+      hint: orderedCount + partialCount > 0 ? `${orderedCount + partialCount} Bestellungen brauchen Liefernachlauf.` : 'Keine bestellte, offene Lieferung in der Sicht.',
+    },
+    {
+      label: 'Nachweis und Export sichern',
+      done: deliveredCount > 0,
+      hint: deliveredCount > 0 ? `${deliveredCount} Bestellungen sind geliefert.` : 'Druck, Export oder Liefernachweis nach Freigabe sichern.',
+    },
+  ]
+  const purchaseCrudCapabilities = [
+    {
+      key: 'create',
+      label: 'Anlegen',
+      available: true,
+      hint: 'Neue Bestellungen koennen direkt aus der Liste angelegt werden.',
+    },
+    {
+      key: 'read',
+      label: 'Lesen',
+      available: true,
+      hint: 'Bestellnummer, Lieferant, Status, Incoterms, Liefertermin und Betrag sind sichtbar.',
+    },
+    {
+      key: 'update',
+      label: 'Bearbeiten',
+      available: data.length > 0,
+      hint: 'Bestellungen koennen aus der Liste geoeffnet und bearbeitet werden.',
+    },
+    {
+      key: 'delete',
+      label: 'Storno',
+      available: activeCount > 0,
+      hint: 'Storno ist als gefuehrte Bulk-Aktion vorhanden; direktes Loeschen ist kein Standardpfad.',
+    },
+    {
+      key: 'approve',
+      label: 'Freigeben',
+      available: draftCount > 0 || approvedCount > 0,
+      hint: 'Bulk-Freigabe und Druck der freigegebenen Bestellungen sind angebunden.',
+    },
+    {
+      key: 'export',
+      label: 'Export/Import',
+      available: true,
+      hint: 'CSV/Excel-Import, CSV-Export und Druck sind an der Liste verfuegbar.',
+    },
+    {
+      key: 'audit',
+      label: 'Nachverfolgung',
+      available: true,
+      hint: 'Status, Liefertermin, externe Referenz und Betrag bilden die Bestellspur.',
+    },
+  ]
 
   const { handleAction } = useMaskActions(async (action: string, item: any) => {
     if (action === 'edit' && item) {
@@ -314,7 +445,38 @@ export default function BestellungenListePage(): JSX.Element {
   }
 
   return (
-    <>
+    <div className="space-y-6">
+      <RoleFocusBar
+        roles={purchaseRoleProfiles}
+        value={roleFocus}
+        onChange={setRoleFocus}
+        visibleCount={roleFocus === 'all' ? 5 : 1}
+        totalCount={5}
+      />
+      <ManagementDecisionPanel
+        decision={{
+          allowed: data.length > 0 && overdueCount === 0,
+          allowedLabel: 'Bestellarbeit stabil',
+          blockedLabel: data.length === 0 ? 'Keine Bestellung' : 'Liefertermin pruefen',
+          summary: data.length > 0
+            ? `Die aktuelle Sicht enthaelt ${data.length} Bestellungen mit ${formatNumber(totalAmount, 2)} EUR Bestellwert. ${nextPurchaseAction}`
+            : 'In der aktuellen Sicht gibt es keine Bestellungen. Legen Sie eine neue Bestellung an oder starten Sie den Import.',
+          blockerCount: data.length === 0 ? 1 : overdueCount,
+          nextFocus: nextPurchaseAction,
+          template: {
+            label: 'Bestellung anlegen',
+            href: '/einkauf/bestellungen/neu',
+          },
+        }}
+      />
+      <div className="grid gap-4 lg:grid-cols-[1.35fr_1fr]">
+        <OperationalTaskPlan title="Bestell-Follow-up-Plan" items={purchaseTaskItems} />
+        <NextActionPanel
+          action={nextPurchaseAction}
+          tone={overdueCount > 0 ? 'red' : draftCount + approvedCount + orderedCount + partialCount > 0 ? 'amber' : data.length > 0 ? 'blue' : 'red'}
+        />
+      </div>
+      <CrudCapabilityChecklist capabilities={purchaseCrudCapabilities} />
       <ListReport
         config={bestellungenConfig}
         data={data}
@@ -350,7 +512,7 @@ export default function BestellungenListePage(): JSX.Element {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </>
+    </div>
   )
 }
 
