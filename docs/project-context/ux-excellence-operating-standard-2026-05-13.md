@@ -105,11 +105,11 @@ Eine Seite gilt erst als UX-ready, wenn sie mindestens diese Punkte erfuellt:
 |---|---|---|---|
 | `HRM-GO-LIVE-UX-001` | HRM | abgeschlossen | Betriebsfreigaben als Referenz mit Rollenfokus, Aufgabenplan, Vorlage-Link, Audit-Zeitleiste und Managemententscheidung. |
 | `UX-STANDARD-COMPONENTS-001` | Plattform | abgeschlossen | Wiederverwendbarer Baukasten unter `@/components/workflow`. |
-| `UX-FINANCE-001` | Finance/FIBU | erster Rollout | Kreditoren-Zahlungslauf nutzt Rollenfokus, Aufgabenplan, Managemententscheidung, Next Action und CRUD-Abdeckung. |
+| `UX-FINANCE-001` | Finance/FIBU | abgeschlossen | Kreditoren-Zahlungslauf nutzt Rollenfokus, Aufgabenplan, Managemententscheidung, Next Action und CRUD-Abdeckung. |
+| `UX-FINANCE-002` | Finance/FIBU | abgeschlossen | UStVA nutzt Rollenfokus, Melde-Aufgabenplan, Managemententscheidung, Next Action und CRUD-/Meldeabdeckung. |
 
 Naechste Finance-Folgeslices:
 
-- `UX-FINANCE-002`: UStVA mit Meldeentscheidung, ELSTER-Nachweis, Abweichungsaufgaben und Steuerberater-Sicht.
 - `UX-FINANCE-003`: Mahnwesen mit Rollenfokus, Eskalationsaufgaben, Kundenkommunikation und Audit.
 - `UX-FINANCE-004`: Periodenabschluss mit Close-Plan, Abstimmnachweisen und Management-Freigabe.
 
