@@ -33,6 +33,37 @@ Eine exzellente ERP-Oberflaeche beantwortet fuer die Nutzerin ohne Vorwissen:
 | Leere-/Fehlerzustaende | Ja | Keine leeren Tabellen ohne Erklaerung; Fehler muessen Handlung anbieten. |
 | Normalsprache | Ja | Keine internen Begriffe, wenn ein normaler Bueroanwender eine einfache Formulierung braucht. |
 
+## Wiederverwendbarer Frontend-Baukasten
+
+Die Komponenten liegen unter `packages/frontend-web/src/components/workflow/ux-standard.tsx` und werden ueber `@/components/workflow` exportiert.
+
+| Komponente | Zweck | Typischer Einsatz |
+|---|---|---|
+| `RoleFocusBar` | Rollen- oder Sichtfilter mit erklaerendem Kontext. | HR/Payroll/IT/Leitung, Buchhaltung/Controlling/Steuerberater, Einkauf/QS/Finance. |
+| `OperationalTaskPlan` | Arbeitsschritte mit erledigt/offen und Hinweistext. | Abschlusslisten, Gate-Bearbeitung, Wareneingang, Zahlungslauf, Reklamation. |
+| `NextActionPanel` | Eine konkrete naechste Handlung sichtbar machen. | Detailseiten, Pruefungen, Fehler- und Blockerlagen. |
+| `EvidenceTemplateLink` | Vorlage oder Nachweisformular direkt aus der UI oeffnen. | eAU-Protokoll, DATEV-Testexport, AVV/DPA, Frachtbrief, Pruefbericht. |
+| `AuditTimeline` | Nachweis-, Test-, Entscheidungs- und Rueckfrageverlauf anzeigen. | Freigaben, Storno, Abschluss, QS, Zahlung, Dokumentversionen. |
+| `ManagementDecisionPanel` | Verdichtete Abschluss-/Freigabeentscheidung zeigen. | Go-live, Monatsabschluss, Zahlungslauf, Versand, Sperre/Freigabe. |
+| `CrudCapabilityChecklist` | CRUD- und Workflow-Abdeckung transparent pruefen. | UX-Reviews und komplexe Stammdaten-/Belegseiten. |
+| `EmptyStateWithAction` | Leere Zustaende mit sinnvoller Handlung statt leerer Tabelle. | Neue Mandanten, leere Suchergebnisse, fehlende Nachweise. |
+
+## CRUD-Abdeckung
+
+CRUD wird nicht nur technisch verstanden. Eine exzellente ERP-Seite muss auch die fachlichen Nebenpfade sichtbar machen.
+
+| Faehigkeit | UX-Frage | Mindestanforderung |
+|---|---|---|
+| Create | Kann ein neuer Vorgang sicher angelegt werden? | Pflichtfelder, Vorbelegung, Plausibilitaet und klare Erfolgsmeldung. |
+| Read | Ist der Vorgang schnell verstehbar? | Status, Owner, Risiko, Faelligkeit und naechste Aktion sichtbar. |
+| Update | Sind Aenderungen gefuehrt? | Validierung, Aenderungsgrund wo noetig, kein unerklaerter Freitextzwang. |
+| Delete | Ist Loeschen fachlich sicher? | Storno, Sperre oder Loeschfreigabe statt riskanter Direktloeschung bei Belegen. |
+| Approve | Kann freigegeben werden? | Rolle, Datum, Kommentar und Entscheidung sichtbar. |
+| Reject | Kann sauber zurueckgewiesen werden? | Begruendung, Rueckfrage und naechste Aktion erforderlich. |
+| Export | Ist der Export nachvollziehbar? | Zweck, Format, Empfaenger und Auditbezug sichtbar. |
+| Audit | Ist die Historie sichtbar? | Chronologische Timeline mit Person, Zeitpunkt, Aktion und Ergebnis. |
+| Evidence | Sind Nachweise auffindbar? | Vorlage, DMS-Link, Aktenzeichen oder Datei-Referenz direkt verknuepft. |
+
 ## Domaenenuebertragung
 
 | Domaene | Rollenfokus | Aufgabenplan | Evidence/Vorlage | Audit/Entscheidung |
@@ -71,4 +102,3 @@ Eine Seite gilt erst als UX-ready, wenn sie mindestens diese Punkte erfuellt:
 ## Nicht-Ziel
 
 Dieser Standard verlangt keine Marketingseiten und keine dekorativen UIs. Ziel ist ein ruhiges, dichtes und handlungsorientiertes ERP fuer wiederkehrende Bueroarbeit.
-

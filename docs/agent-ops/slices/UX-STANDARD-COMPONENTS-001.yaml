@@ -1,7 +1,7 @@
 id: UX-STANDARD-COMPONENTS-001
 title: UX-Exzellenz-Komponenten und HRM-Referenzverdrahtung
 owner: Codex
-status: reserviert
+status: abgeschlossen
 created: 2026-05-14
 goal: >
   Wiederverwendbare UX-Exzellenz-Komponenten fuer Rollenfokus, Aufgabenplan,
@@ -20,6 +20,15 @@ acceptance_criteria:
   - UX-Standard dokumentiert den Baukasten und CRUD-Matrix.
   - Typecheck und Doku-Checks sind gruen.
 checks:
-  - offen
+  - pnpm --filter @valero-neuroerp/frontend-web type-check
+  - node scripts/docs-markdown-check.cjs docs/project-context/ux-excellence-operating-standard-2026-05-13.md docs/agent-ops/active-workboard.md docs/agent-ops/slices/UX-STANDARD-COMPONENTS-001.yaml
+  - python scripts/agent_workboard_supervisor.py validate
+  - node scripts/docs-governance-check.cjs
+  - git diff --check
+done:
+  - packages/frontend-web/src/components/workflow/ux-standard.tsx mit domaenenneutralem UX-Baukasten ergaenzt.
+  - packages/frontend-web/src/components/workflow/index.ts exportiert den Baukasten.
+  - HRM-Betriebsfreigaben nutzen Rollenfokus, Aufgabenplan, Evidence-Link, Audit-Zeitleiste, Next Action und Managemententscheidung aus dem Baukasten.
+  - UX-Standard dokumentiert Komponenten und CRUD-Abdeckung.
 risks:
   - Weitere Domaenen muessen in Folgeslices migriert werden; dieser Slice schafft den gemeinsamen Baukasten und die HRM-Referenzverdrahtung.
