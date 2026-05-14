@@ -109,10 +109,11 @@ Eine Seite gilt erst als UX-ready, wenn sie mindestens diese Punkte erfuellt:
 | `UX-FINANCE-002` | Finance/FIBU | abgeschlossen | UStVA nutzt Rollenfokus, Melde-Aufgabenplan, Managemententscheidung, Next Action und CRUD-/Meldeabdeckung. |
 | `UX-FINANCE-003` | Finance/FIBU | abgeschlossen | Mahnwesen nutzt Rollenfokus, Mahn-Aufgabenplan, Eskalationsentscheidung, Next Action und CRUD-/Kommunikationsabdeckung. |
 | `UX-FINANCE-004` | Finance/FIBU | abgeschlossen | Periodenabschluss nutzt Rollenfokus, Close-Aufgabenplan, Managemententscheidung, Next Action und CRUD-/Close-Abdeckung. |
+| `UX-EINKAUF-001` | Einkauf | abgeschlossen | Rechnungseingaenge nutzen Rollenfokus, Freigabeplan, Managemententscheidung, Next Action und CRUD-/Workflow-Abdeckung. |
 
 Naechste Rollout-Slices:
 
-- `UX-EINKAUF-001`: Lieferanten- und Rechnungseingangsprozesse mit Rollenfokus, Freigabeplan, Nachweislink und CRUD-Abdeckung.
+- `UX-EINKAUF-002`: Bestellung, Wareneingang und Lieferantenstamm mit Rollenfokus, Nachweislink und CRUD-Abdeckung.
 - `UX-CRM-001`: Angebots- und Auftragsarbeitsflaechen mit naechster Aktion, Entscheidungsbild und Follow-up-Plan.
 - `UX-LOGISTIK-001`: Touren-, Frachtbrief- und Abweichungsarbeitsflaechen mit klarer Stopper-/Nachweissicht.
 
