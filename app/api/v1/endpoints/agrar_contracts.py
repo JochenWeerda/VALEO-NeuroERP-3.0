@@ -11,6 +11,7 @@ from app.api.v1.schemas.base import BaseSchema, PaginatedResponse
 from app.core.database import get_db
 from app.core.exceptions import ConflictError, EntityNotFoundError, ValidationFailedError
 from app.core.tenant import get_tenant_id
+from app.infrastructure.models.l3c_models import AgrarContract, AgrarContractAllocation  # noqa: F401
 from app.services.agrar_contract_service import AgrarContractService
 
 router = APIRouter()
@@ -120,8 +121,20 @@ def _svc_errors(exc: Exception) -> HTTPException:
     if isinstance(exc, ConflictError):
         return HTTPException(status_code=409, detail=exc.detail)
     if isinstance(exc, ValidationFailedError):
-        return HTTPException(status_code=400, detail=exc.detail)
+        return HTTPException(status_code=422, detail=exc.detail)
     raise exc
+
+
+def _get_contract_or_404(db: Session, contract_id: str, tenant_id: str) -> AgrarContract:
+    """Helper used by route handlers and tests: fetch contract or raise 404."""
+    contract = (
+        db.query(AgrarContract)
+        .filter(AgrarContract.tenant_id == tenant_id, AgrarContract.id == contract_id)
+        .first()
+    )
+    if contract is None:
+        raise HTTPException(status_code=404, detail=f"Contract {contract_id!r} not found")
+    return contract
 
 
 # ── route handlers ────────────────────────────────────────────────────────────
@@ -205,11 +218,17 @@ async def list_contract_allocations(
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
-    try:
-        rows = AgrarContractService(db, tenant_id).list_allocations(contract_id)
-        return [_to_alloc_out(r) for r in rows]
-    except (EntityNotFoundError, ConflictError, ValidationFailedError) as exc:
-        raise _svc_errors(exc)
+    _get_contract_or_404(db, contract_id, tenant_id)
+    rows = (
+        db.query(AgrarContractAllocation)
+        .filter(
+            AgrarContractAllocation.contract_id == contract_id,
+            AgrarContractAllocation.tenant_id == tenant_id,
+        )
+        .order_by(AgrarContractAllocation.allocated_at.desc())
+        .all()
+    )
+    return [_to_alloc_out(r) for r in rows]
 
 
 @router.delete("/{contract_id}", status_code=204)

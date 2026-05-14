@@ -85,10 +85,15 @@ class AgrarSettlementService:
 
     @staticmethod
     def get_approval_status(settlement: AgrarSettlement) -> str:
+        # Primary: drying_result["approval_status"] (set by apply_freigabe)
+        drying = getattr(settlement, "drying_result", None) or {}
+        if isinstance(drying, dict) and drying.get("approval_status"):
+            return drying["approval_status"]
+        # Fallback: legacy approval_metadata["status"]
         meta = getattr(settlement, "approval_metadata", None) or {}
         if isinstance(meta, dict):
-            return meta.get("status", "OFFEN")
-        return "OFFEN"
+            return meta.get("status", "ENTWURF")
+        return "ENTWURF"
 
     @staticmethod
     def get_approval_history(settlement: AgrarSettlement) -> list[dict]:

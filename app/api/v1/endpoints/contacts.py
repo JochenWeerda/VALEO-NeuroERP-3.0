@@ -104,7 +104,7 @@ async def get_contact(contact_id: str):
     try:
         contact = await crm_core_client.get_contact(contact_id)
     except httpx.HTTPStatusError as exc:  # type: ignore[name-defined]
-        if exc.response.status_code == 404:
+        if exc.response.status_code in (404, 422):
             raise HTTPException(status_code=404, detail="Contact not found") from exc
         raise HTTPException(status_code=exc.response.status_code, detail=exc.response.text) from exc
     except Exception as exc:

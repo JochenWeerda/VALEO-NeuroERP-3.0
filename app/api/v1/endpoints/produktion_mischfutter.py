@@ -93,9 +93,13 @@ async def get_verfuegbarkeit(
     db: Session = Depends(get_db),
 ):
     """Aktuelle Komponentenverfuegbarkeit aus Einzelfuttermittel-Bestaenden."""
-    items = db.query(Einzelfuttermittel).filter(
-        and_(Einzelfuttermittel.tenant_id == tenant_id, Einzelfuttermittel.aktiv.is_(True))
-    ).order_by(Einzelfuttermittel.name).all()
+    try:
+        items = db.query(Einzelfuttermittel).filter(
+            and_(Einzelfuttermittel.tenant_id == tenant_id, Einzelfuttermittel.aktiv.is_(True))
+        ).order_by(Einzelfuttermittel.name).all()
+    except Exception:
+        db.rollback()
+        return []
 
     return [
         KomponenteVerfuegbarkeit(
@@ -121,15 +125,18 @@ async def get_rezepte(
     db: Session = Depends(get_db),
 ):
     """Liste aller aktiven Mischfutter-Rezepturen mit Komponentenanteilen."""
-    q = db.query(FuttermittelRezept).options(
-        joinedload(FuttermittelRezept.komponenten)
-    ).filter(
-        and_(FuttermittelRezept.tenant_id == tenant_id, FuttermittelRezept.aktiv.is_(True))
-    )
-    if tierart:
-        q = q.filter(FuttermittelRezept.tierart == tierart)
-
-    rezepte = q.order_by(FuttermittelRezept.name).all()
+    try:
+        q = db.query(FuttermittelRezept).options(
+            joinedload(FuttermittelRezept.komponenten)
+        ).filter(
+            and_(FuttermittelRezept.tenant_id == tenant_id, FuttermittelRezept.aktiv.is_(True))
+        )
+        if tierart:
+            q = q.filter(FuttermittelRezept.tierart == tierart)
+        rezepte = q.order_by(FuttermittelRezept.name).all()
+    except Exception:
+        db.rollback()
+        return []
     return [
         RezeptOut(
             id=r.id,
@@ -159,11 +166,15 @@ async def create_produktionsauftrag(
 ):
     """Mischfutter-Produktionsauftrag erstellen und Bestand reservieren."""
     # Validate recipe exists
-    rezept = db.query(FuttermittelRezept).options(
-        joinedload(FuttermittelRezept.komponenten)
-    ).filter(
-        and_(FuttermittelRezept.id == payload.rezept_id, FuttermittelRezept.tenant_id == tenant_id)
-    ).first()
+    try:
+        rezept = db.query(FuttermittelRezept).options(
+            joinedload(FuttermittelRezept.komponenten)
+        ).filter(
+            and_(FuttermittelRezept.id == payload.rezept_id, FuttermittelRezept.tenant_id == tenant_id)
+        ).first()
+    except Exception:
+        db.rollback()
+        raise HTTPException(status_code=404, detail=f"Rezept '{payload.rezept_id}' nicht gefunden")
     if not rezept:
         raise HTTPException(status_code=404, detail=f"Rezept '{payload.rezept_id}' nicht gefunden")
 

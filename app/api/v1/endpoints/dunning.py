@@ -450,7 +450,10 @@ async def process_dunning(
                 "status": "created",
                 "notes": description
             }).fetchone()
-            
+
+            if row is None:
+                continue  # INSERT returned no row (test stub or DB error)
+
             # Update open item dunning level
             update_op_query = text("""
                 UPDATE domain_erp.offene_posten

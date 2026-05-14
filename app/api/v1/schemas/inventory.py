@@ -179,14 +179,14 @@ class WarehouseBase(BaseSchema):
     """Base warehouse schema"""
     warehouse_code: str = Field(..., min_length=1, max_length=20, description="Unique warehouse code")
     name: str = Field(..., min_length=1, max_length=100, description="Warehouse name")
-    address: str = Field(..., max_length=200, description="Warehouse address")
-    city: str = Field(..., max_length=50, description="City")
-    postal_code: str = Field(..., max_length=10, description="Postal code")
-    country: str = Field(default="DE", max_length=2, description="Country code")
+    address: Optional[str] = Field(None, max_length=200, description="Warehouse address")
+    city: Optional[str] = Field(None, max_length=50, description="City")
+    postal_code: Optional[str] = Field(None, max_length=10, description="Postal code")
+    country: Optional[str] = Field(default="DE", max_length=2, description="Country code")
     contact_person: Optional[str] = Field(None, max_length=100, description="Contact person")
     phone: Optional[str] = Field(None, max_length=20, description="Contact phone")
     email: Optional[str] = Field(None, max_length=100, description="Contact email")
-    warehouse_type: str = Field(default="standard", max_length=20, description="Warehouse type")
+    warehouse_type: Optional[str] = Field(default="standard", max_length=20, description="Warehouse type")
 
 
 class WarehouseCreate(WarehouseBase):
@@ -214,7 +214,7 @@ class Warehouse(WarehouseBase, TimestampMixin, SoftDeleteMixin):
     id: str = Field(..., description="Warehouse ID")
     tenant_id: str = Field(..., description="Tenant ID")
     total_capacity: Optional[Decimal] = Field(None, ge=0, description="Total storage capacity")
-    used_capacity: Decimal = Field(default=0, ge=0, description="Used storage capacity")
+    used_capacity: Optional[Decimal] = Field(default=0, ge=0, description="Used storage capacity")
 
 
 # Stock Movement Schemas
