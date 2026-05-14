@@ -110,13 +110,14 @@ Eine Seite gilt erst als UX-ready, wenn sie mindestens diese Punkte erfuellt:
 | `UX-FINANCE-003` | Finance/FIBU | abgeschlossen | Mahnwesen nutzt Rollenfokus, Mahn-Aufgabenplan, Eskalationsentscheidung, Next Action und CRUD-/Kommunikationsabdeckung. |
 | `UX-FINANCE-004` | Finance/FIBU | abgeschlossen | Periodenabschluss nutzt Rollenfokus, Close-Aufgabenplan, Managemententscheidung, Next Action und CRUD-/Close-Abdeckung. |
 | `UX-EINKAUF-001` | Einkauf | abgeschlossen | Rechnungseingaenge nutzen Rollenfokus, Freigabeplan, Managemententscheidung, Next Action und CRUD-/Workflow-Abdeckung. |
+| `UX-EINKAUF-002` | Einkauf | abgeschlossen | Bestellungen nutzen Rollenfokus, Bestell-Follow-up-Plan, Managemententscheidung, Next Action und CRUD-/Liefer-Abdeckung. |
 | `UX-CRM-001` | CRM/Vertrieb | abgeschlossen | Opportunities nutzen Rollenfokus, Follow-up-Plan, Managemententscheidung, Next Action und CRUD-/Pipeline-Abdeckung. |
 | `UX-SALES-001` | Sales/Verkauf | abgeschlossen | Verkaufsauftraege nutzen Rollenfokus, Auftrag-Follow-up-Plan, Managemententscheidung, Next Action und CRUD-/Fulfillment-Abdeckung. |
 | `UX-LOGISTIK-001` | Logistik | abgeschlossen | Tourenplanung nutzt Rollenfokus, Dispo-Aufgabenplan, Managemententscheidung, Next Action und CRUD-/Transport-Abdeckung. |
 
 Naechste Rollout-Slices:
 
-- `UX-EINKAUF-002`: Bestellung, Wareneingang und Lieferantenstamm mit Rollenfokus, Nachweislink und CRUD-Abdeckung.
+- `UX-EINKAUF-003`: Wareneingang und Lieferantenstamm mit Rollenfokus, Nachweislink und CRUD-Abdeckung.
 - `UX-SALES-002`: Angebotsliste und Auftragseditor mit naechster Aktion, Entscheidungsbild und Follow-up-Plan.
 - `UX-LOGISTIK-002`: Frachtbrief- und Waagearbeitsflaechen mit klarer Stopper-/Nachweissicht.
 
