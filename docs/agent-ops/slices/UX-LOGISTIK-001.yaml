@@ -1,0 +1,23 @@
+id: UX-LOGISTIK-001
+title: Tourenplanung mit UX-Exzellenzbaukasten
+owner: Codex
+status: reserviert
+created: 2026-05-14
+goal: >
+  Tourenplanung als erste Logistik-Arbeitsflaeche auf den
+  UX-Exzellenzbaukasten ziehen: Rollenfokus, Dispo-Plan,
+  Managemententscheidung, Next Action und CRUD-/Transport-Abdeckung.
+file_ownership:
+  - docs/agent-ops/active-workboard.md
+  - docs/agent-ops/slices/UX-LOGISTIK-001.yaml
+  - packages/frontend-web/src/pages/logistik/tourenplanung.tsx
+  - docs/project-context/ux-excellence-operating-standard-2026-05-13.md
+acceptance_criteria:
+  - Tourenplanung zeigt Rollenfokus fuer Disposition, Fahrer, Lager/Waage, QS und Leitung.
+  - Aufgabenplan fuehrt Planen, Ressourcen klaeren, unterwegs ueberwachen und abschliessen.
+  - Managemententscheidung zeigt disponierbar/blockiert.
+  - CRUD-/Transport-Abdeckung ist sichtbar.
+  - Typecheck und Doku-Checks sind gruen.
+checks: []
+risks:
+  - Frachtbriefe und Waage folgen in separaten Logistik-UX-Slices.

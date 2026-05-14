@@ -254,6 +254,16 @@ Stand: `2026-05-12`
 **Checks:** `pnpm --filter @valero-neuroerp/frontend-web type-check`; `python scripts/agent_workboard_supervisor.py validate`; `node scripts/docs-governance-check.cjs`; `node scripts/docs-markdown-check.cjs docs/project-context/ux-excellence-operating-standard-2026-05-13.md docs/agent-ops/active-workboard.md docs/agent-ops/slices/UX-SALES-001.yaml`; `git diff --check`
 **Offene Risiken:** Angebotsliste und Auftragseditor folgen in separaten Sales-UX-Slices.
 
+## UX-LOGISTIK-001
+
+**Von:** Codex
+**Owner:** Codex
+**Stand:** reserviert 2026-05-14
+**Ziel des Slices:** Tourenplanung als erste Logistik-Arbeitsflaeche auf den UX-Exzellenzbaukasten ziehen: Rollenfokus, Dispo-Plan, Managemententscheidung, Next Action und CRUD-/Transport-Abdeckung.
+**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/agent-ops/slices/UX-LOGISTIK-001.yaml`, `packages/frontend-web/src/pages/logistik/tourenplanung.tsx`, `docs/project-context/ux-excellence-operating-standard-2026-05-13.md`
+**Abnahmekriterien:** Tourenplanung zeigt Rollenfokus fuer Disposition, Fahrer, Lager/Waage, QS und Leitung; Aufgabenplan fuehrt Planen, Ressourcen klaeren, unterwegs ueberwachen und abschliessen; Managemententscheidung zeigt disponierbar/blockiert; CRUD-/Transport-Abdeckung ist sichtbar; Typecheck und Doku-Checks sind gruen.
+**Offene Risiken:** Frachtbriefe und Waage folgen in separaten Logistik-UX-Slices.
+
 ## TODO-SPRINT-001
 
 **Von:** Cursor<br>
