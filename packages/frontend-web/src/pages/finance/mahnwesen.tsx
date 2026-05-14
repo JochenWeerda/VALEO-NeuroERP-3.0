@@ -19,7 +19,26 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { OperationalCaseHeader } from '@/components/workflow/OperationalCaseHeader'
 import { OperationalContextPanel } from '@/components/workflow/OperationalContextPanel'
 import { OperationalTimeline } from '@/components/workflow/OperationalTimeline'
+import {
+  CrudCapabilityChecklist,
+  ManagementDecisionPanel,
+  NextActionPanel,
+  OperationalTaskPlan,
+  RoleFocusBar,
+  type UxTaskItem,
+} from '@/components/workflow'
 import { normalizeOperationalStatus } from '@/lib/operational-status'
+
+type DunningRoleFocus = 'all' | 'accounting' | 'receivables' | 'sales' | 'tax-advisor' | 'management'
+
+const dunningRoleProfiles: Array<{ id: DunningRoleFocus; label: string; description: string }> = [
+  { id: 'all', label: 'Alle', description: 'Gesamtbild fuer Mahnlage, Versand, Eskalation und Zahlungsklaerung.' },
+  { id: 'accounting', label: 'FIBU', description: 'Offene Posten, Zinsen, Mahnparameter und Buchungsbezug.' },
+  { id: 'receivables', label: 'Forderungen', description: 'Mahnlauf, Fristen, Kommunikation und Eskalation.' },
+  { id: 'sales', label: 'Vertrieb', description: 'Kundenbeziehung, Rueckfragen und Zahlungsvereinbarungen.' },
+  { id: 'tax-advisor', label: 'Steuerbuero', description: 'Nachvollziehbare Forderungs- und Exportgrundlage.' },
+  { id: 'management', label: 'Leitung', description: 'Rueckstandsrisiko, Eskalation und Inkassoentscheidung.' },
+]
 
 const createMahnwesenConfig = (t: any, entityTypeLabel: string): MaskConfig => ({
   title: entityTypeLabel,
@@ -203,6 +222,7 @@ export default function MahnwesenPage(): JSX.Element {
   const navigate = useNavigate()
   const [isDirty, setIsDirty] = useState(false)
   const [actionLoadingKey, setActionLoadingKey] = useState<string | null>(null)
+  const [roleFocus, setRoleFocus] = useState<DunningRoleFocus>('all')
   const entityType = 'dunning'
   const entityTypeLabel = getEntityTypeLabel(t, entityType, 'Mahnwesen')
   const mahnwesenConfig = createMahnwesenConfig(t, entityTypeLabel)
@@ -256,6 +276,40 @@ export default function MahnwesenPage(): JSX.Element {
     { label: 'Mahnwesen geladen', detail: `${fibuCockpit.dunning.overdue_items} ueberfaellige Posten im Cockpit.` },
     ...(fibuOps ? [{ label: 'Naechste FIBU-Aktion', detail: fibuOps.nextAction }] : []),
     ...(fibuCockpit.interest.candidate_count > 0 ? [{ label: 'Zinswesen relevant', detail: `${fibuCockpit.interest.candidate_count} Kandidaten fuer Folgepruefung.` }] : []),
+  ]
+  const hasOverdue = fibuCockpit.dunning.overdue_items > 0
+  const dunningParametersReady = fibuCockpit.master_data.dunning_parameters_ready && fibuCockpit.master_data.interest_groups_ready
+  const nextDunningAction = hasOverdue ? 'Mahnlauf generieren oder senden' : 'Mahnparameter und Zinswesen nachhalten'
+  const taskItems: UxTaskItem[] = [
+    {
+      label: 'Offene Posten pruefen',
+      done: hasOverdue,
+      hint: hasOverdue ? `${fibuCockpit.dunning.overdue_items} ueberfaellige OP im Arbeitsvorrat.` : 'Keine ueberfaelligen OP im Cockpit.',
+    },
+    {
+      label: 'Mahn- und Zinsparameter pruefen',
+      done: dunningParametersReady,
+      hint: dunningParametersReady ? 'Mahnparameter und Zinsgruppen sind bereit.' : 'Mahnparameter oder Zinsgruppen muessen ergaenzt werden.',
+    },
+    {
+      label: 'Mahnung erzeugen oder senden',
+      done: !hasOverdue,
+      hint: hasOverdue ? 'Mahnlauf generieren, Vorschau pruefen und Versand ausloesen.' : 'Kein Versandbedarf aus aktueller Lage.',
+    },
+    {
+      label: 'Zahlung, Rueckfrage oder Eskalation klaeren',
+      done: fibuCockpit.dunning.overdue_items === 0 && fibuCockpit.interest.candidate_count === 0,
+      hint: fibuCockpit.interest.candidate_count > 0 ? `${fibuCockpit.interest.candidate_count} Zinskandidaten mitpruefen.` : 'Bei Rueckstand Kontakt- oder Inkassoentscheidung dokumentieren.',
+    },
+  ]
+  const crudCapabilities = [
+    { key: 'create', label: 'Anlegen', available: true, hint: 'Mahnfall kann fuer einen offenen Posten erstellt werden.' },
+    { key: 'read', label: 'Lesen', available: true, hint: 'Mahnlage, Rueckstand, Zinsen und Stammdaten sind sichtbar.' },
+    { key: 'update', label: 'Aendern', available: true, hint: 'Text, Frist, Gebuehren und Notizen koennen angepasst werden.' },
+    { key: 'delete', label: 'Loeschen/Storno', available: true, hint: 'Abbruch oder Storno statt stiller Entfernung pruefen.' },
+    { key: 'approve', label: 'Freigeben/Eskalieren', available: hasOverdue, hint: 'Mahnstufe, Versand oder Inkassoentscheidung fachlich bestaetigen.' },
+    { key: 'export', label: 'PDF/Export', available: true, hint: 'Mahnung oder Mahnlauf kann als Nachweis exportiert werden.' },
+    { key: 'audit', label: 'Audit', available: true, hint: 'Mahnlage, Versand und Export bleiben nachvollziehbar.' },
   ]
 
   const validate = (formData: any) => validateFields(getFieldsFromMaskConfig(mahnwesenConfig), formData ?? {})
@@ -399,14 +453,39 @@ export default function MahnwesenPage(): JSX.Element {
           status={operationalStatus}
           owner="FIBU / Forderungsmanagement"
           blocker={operationalBlocker}
-          nextAction={fibuCockpit.dunning.overdue_items > 0 ? 'Mahnlauf generieren oder senden' : 'Mahnparameter und Zinswesen nachhalten'}
+          nextAction={nextDunningAction}
           caseLabel="Mahnwesen"
           tags={['FIBU', 'Follow-up']}
         />
+        <RoleFocusBar
+          roles={dunningRoleProfiles}
+          value={roleFocus}
+          visibleCount={roleFocus === 'all' ? 4 : 1}
+          totalCount={4}
+          onChange={setRoleFocus}
+        />
+        <ManagementDecisionPanel
+          decision={{
+            allowed: !hasOverdue || dunningParametersReady,
+            allowedLabel: hasOverdue ? 'Mahnlauf sendbar' : 'Keine Eskalation noetig',
+            blockedLabel: 'Mahnprozess gestoppt',
+            summary: hasOverdue
+              ? 'Es gibt ueberfaellige offene Posten. Versand oder Eskalation ist erst sinnvoll, wenn Mahnparameter und Zinsgruppen geklaert sind.'
+              : 'Aktuell gibt es keinen dringenden Mahnversand. Parameter und Zinswesen bleiben im Regelbetrieb zu pruefen.',
+            blockerCount: hasOverdue && !dunningParametersReady ? 1 : 0,
+            nextFocus: nextDunningAction,
+            template: { label: 'Mahnlauf pruefen und dokumentieren', href: '/finance/mahnwesen' },
+          }}
+        />
+        <div className="grid gap-4 lg:grid-cols-[1.35fr_1fr]">
+          <OperationalTaskPlan items={taskItems} />
+          <NextActionPanel action={nextDunningAction} tone={hasOverdue ? (dunningParametersReady ? 'amber' : 'red') : 'emerald'} />
+        </div>
         <div className="grid gap-4 lg:grid-cols-[1.35fr_1fr]">
           <OperationalTimeline title="Mahnlage" items={timelineItems} />
           <OperationalContextPanel title="Mahnkontext" sections={contextSections} />
         </div>
+        <CrudCapabilityChecklist capabilities={crudCapabilities} />
       </div>
       <div className="grid gap-4 px-6 pt-4 md:grid-cols-4">
         <Card>

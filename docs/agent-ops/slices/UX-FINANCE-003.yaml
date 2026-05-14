@@ -1,7 +1,7 @@
 id: UX-FINANCE-003
 title: Mahnwesen mit UX-Exzellenzbaukasten
 owner: Codex
-status: reserviert
+status: abgeschlossen
 created: 2026-05-14
 goal: >
   Mahnwesen als dritte Finance-Arbeitsflaeche auf den UX-Exzellenzbaukasten
@@ -19,6 +19,13 @@ acceptance_criteria:
   - CRUD-/Kommunikationsabdeckung ist sichtbar.
   - Typecheck und Doku-Checks sind gruen.
 checks:
-  - offen
+  - pnpm --filter @valero-neuroerp/frontend-web type-check
+  - python scripts/agent_workboard_supervisor.py validate
+  - node scripts/docs-governance-check.cjs
+  - git diff --check
+done:
+  - finance/mahnwesen.tsx nutzt Rollenfokus, Mahn-Aufgabenplan, Eskalationsentscheidung, Next Action und CRUD-/Kommunikationsabdeckung aus dem UX-Baukasten.
+  - Bestehende Mahnlage, Kontext, FIBU-KPIs, Versand-, Paid-, Export- und Inkasso-Aktionen bleiben erhalten.
+  - UX-Standard markiert UX-FINANCE-003 als abgeschlossen.
 risks:
   - Periodenabschluss folgt in separatem Finance-UX-Slice.

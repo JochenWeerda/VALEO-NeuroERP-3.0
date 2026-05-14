@@ -198,11 +198,12 @@ Stand: `2026-05-12`
 
 **Von:** Codex
 **Owner:** Codex
-**Stand:** reserviert 2026-05-14
+**Stand:** abgeschlossen 2026-05-14
 **Ziel des Slices:** Mahnwesen als dritte Finance-Arbeitsflaeche auf den UX-Exzellenzbaukasten ziehen: Rollenfokus, Mahn-Aufgabenplan, Eskalationsentscheidung, Next Action und CRUD-/Kommunikationsabdeckung.
 **Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/agent-ops/slices/UX-FINANCE-003.yaml`, `packages/frontend-web/src/pages/finance/mahnwesen.tsx`, `docs/project-context/ux-excellence-operating-standard-2026-05-13.md`
 **Abnahmekriterien:** Mahnwesen zeigt Rollenfokus fuer FIBU, Forderungsmanagement, Vertrieb, Leitung und Steuerbuero; Aufgabenplan fuehrt OP-Auswahl, Parameter, Versand/Eskalation und Zahlungsklaerung; Managemententscheidung zeigt sendbar/gestoppt; CRUD-/Kommunikationsabdeckung ist sichtbar; Typecheck und Doku-Checks sind gruen.
-**Checks:** offen
+**Erledigt:** `finance/mahnwesen.tsx` nutzt den UX-Baukasten fuer Rollenfokus, Mahn-Aufgabenplan, Eskalationsentscheidung, Next Action und CRUD-/Kommunikationsabdeckung. Bestehende Mahnlage, Kontext, FIBU-KPIs, Versand-, Paid-, Export- und Inkasso-Aktionen bleiben erhalten. UX-Standard markiert `UX-FINANCE-003` als abgeschlossen.
+**Checks:** `pnpm --filter @valero-neuroerp/frontend-web type-check`; `python scripts/agent_workboard_supervisor.py validate`; `node scripts/docs-governance-check.cjs`; `git diff --check`
 **Offene Risiken:** Periodenabschluss folgt in separatem Finance-UX-Slice.
 
 ## TODO-SPRINT-001
