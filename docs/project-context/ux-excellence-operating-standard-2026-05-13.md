@@ -112,12 +112,13 @@ Eine Seite gilt erst als UX-ready, wenn sie mindestens diese Punkte erfuellt:
 | `UX-EINKAUF-001` | Einkauf | abgeschlossen | Rechnungseingaenge nutzen Rollenfokus, Freigabeplan, Managemententscheidung, Next Action und CRUD-/Workflow-Abdeckung. |
 | `UX-CRM-001` | CRM/Vertrieb | abgeschlossen | Opportunities nutzen Rollenfokus, Follow-up-Plan, Managemententscheidung, Next Action und CRUD-/Pipeline-Abdeckung. |
 | `UX-SALES-001` | Sales/Verkauf | abgeschlossen | Verkaufsauftraege nutzen Rollenfokus, Auftrag-Follow-up-Plan, Managemententscheidung, Next Action und CRUD-/Fulfillment-Abdeckung. |
+| `UX-LOGISTIK-001` | Logistik | abgeschlossen | Tourenplanung nutzt Rollenfokus, Dispo-Aufgabenplan, Managemententscheidung, Next Action und CRUD-/Transport-Abdeckung. |
 
 Naechste Rollout-Slices:
 
 - `UX-EINKAUF-002`: Bestellung, Wareneingang und Lieferantenstamm mit Rollenfokus, Nachweislink und CRUD-Abdeckung.
 - `UX-SALES-002`: Angebotsliste und Auftragseditor mit naechster Aktion, Entscheidungsbild und Follow-up-Plan.
-- `UX-LOGISTIK-001`: Touren-, Frachtbrief- und Abweichungsarbeitsflaechen mit klarer Stopper-/Nachweissicht.
+- `UX-LOGISTIK-002`: Frachtbrief- und Waagearbeitsflaechen mit klarer Stopper-/Nachweissicht.
 
 ## Nicht-Ziel
 
