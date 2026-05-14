@@ -13,10 +13,28 @@ import { ProcessStatusPanel } from '@/components/workflow/ProcessStatusPanel'
 import { OperationalCaseHeader } from '@/components/workflow/OperationalCaseHeader'
 import { OperationalContextPanel } from '@/components/workflow/OperationalContextPanel'
 import { OperationalTimeline } from '@/components/workflow/OperationalTimeline'
+import {
+  CrudCapabilityChecklist,
+  ManagementDecisionPanel,
+  NextActionPanel,
+  OperationalTaskPlan,
+  RoleFocusBar,
+  type UxTaskItem,
+} from '@/components/workflow'
 import { useApprovalDensityProfile } from '@/features/workflow/useApprovalDensityProfile'
 import { useFibuCockpit } from '@/lib/api/fibu'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { normalizeOperationalStatus } from '@/lib/operational-status'
+
+type VatRoleFocus = 'all' | 'accounting' | 'tax-advisor' | 'controller' | 'management'
+
+const vatRoleProfiles: Array<{ id: VatRoleFocus; label: string; description: string }> = [
+  { id: 'all', label: 'Alle', description: 'Gesamtbild fuer Berechnung, Freigabe und ELSTER-Einreichung.' },
+  { id: 'accounting', label: 'FIBU', description: 'Umsaetze, Vorsteuer, Abweichungen und Buchungsgrundlage pruefen.' },
+  { id: 'tax-advisor', label: 'Steuerbuero', description: 'Meldefaehigkeit, ELSTER-Export und Nachweise pruefen.' },
+  { id: 'controller', label: 'Controlling', description: 'Abweichungen, Liquiditaetswirkung und Periodenvergleich einordnen.' },
+  { id: 'management', label: 'Leitung', description: 'Abgabestatus, Stopper und Restrisiken entscheiden.' },
+]
 
 const createUstvaConfig = (t: any, entityTypeLabel: string): MaskConfig => ({
   title: entityTypeLabel,
@@ -404,6 +422,7 @@ export default function UStVAPage(): JSX.Element {
   const [isDirty, setIsDirty] = useState(false)
   const [actionLoadingKey, setActionLoadingKey] = useState<string | null>(null)
   const [workspaceData, setWorkspaceData] = useState<any>({})
+  const [roleFocus, setRoleFocus] = useState<VatRoleFocus>('all')
   const entityType = 'ustva'
   const entityTypeLabel = getEntityTypeLabel(t, entityType, 'Umsatzsteuervoranmeldung')
   const ustvaConfig = createUstvaConfig(t, entityTypeLabel)
@@ -642,6 +661,39 @@ export default function UStVAPage(): JSX.Element {
         : 'Die Maske laeuft ohne expliziten Flow-Spine-Kontext.',
     },
   ]
+  const deviations = Array.isArray(effectiveData?.abweichungen) ? effectiveData.abweichungen : []
+  const nextVatAction = effectiveData?.approval_can_submit ? 'ELSTER-Einreichung vorbereiten' : 'Abweichungen, Regeln oder Freigabe klaeren'
+  const taskItems: UxTaskItem[] = [
+    {
+      label: 'Periode und Stammdaten pruefen',
+      done: Boolean(effectiveData?.periode || fibuCockpit.tax.latest_period) && Boolean(effectiveData?.steuerpflichtiger),
+      hint: 'Periode, Meldezeitraum, Steuerpflichtiger und USt-ID muessen stimmen.',
+    },
+    {
+      label: 'Steuerwerte und Abweichungen klaeren',
+      done: deviations.length === 0 || deviations.every((item: any) => item.grund),
+      hint: deviations.length > 0 ? `${deviations.length} Abweichung(en) mit Begruendung pruefen.` : 'Keine Abweichungen im Arbeitsstand erfasst.',
+    },
+    {
+      label: 'Freigabe und Regelkontext pruefen',
+      done: Boolean(effectiveData?.approval_can_submit),
+      hint: effectiveData?.approval_can_submit ? 'Meldung ist abgabefaehig.' : 'Freigabe, Regel oder Validierung fehlt noch.',
+    },
+    {
+      label: 'ELSTER-Einreichung oder XML-Export',
+      done: effectiveData?.status === 'submitted',
+      hint: effectiveData?.status === 'submitted' ? 'Meldung wurde eingereicht.' : 'Nach Freigabe Einreichung oder XML-Export starten.',
+    },
+  ]
+  const crudCapabilities = [
+    { key: 'create', label: 'Anlegen', available: true, hint: 'Neue UStVA kann fuer eine Periode erstellt werden.' },
+    { key: 'read', label: 'Lesen', available: true, hint: 'Meldekontext, FIBU-Lage, Status und ELSTER-Referenz sind sichtbar.' },
+    { key: 'update', label: 'Aendern', available: effectiveData?.status !== 'submitted', hint: effectiveData?.status === 'submitted' ? 'Eingereichte Meldungen nicht direkt aendern.' : 'Entwurf und Pruefstand koennen korrigiert werden.' },
+    { key: 'delete', label: 'Loeschen/Storno', available: false, hint: 'Fachlich nur mit Korrektur- oder Stornopfad, nicht als Direktloeschung.' },
+    { key: 'approve', label: 'Freigeben', available: Boolean(effectiveData?.id), hint: 'Freigabe erfolgt ueber Workflow-/Policy-Status.' },
+    { key: 'export', label: 'XML/ELSTER', available: Boolean(effectiveData?.approval_can_submit), hint: 'Export oder Einreichung erst nach Abgabefaehigkeit.' },
+    { key: 'audit', label: 'Audit', available: true, hint: 'Meldeverlauf und Entscheidung bleiben nachvollziehbar.' },
+  ]
 
   return (
     <>
@@ -652,14 +704,39 @@ export default function UStVAPage(): JSX.Element {
           status={operationalStatus}
           owner="Steuer / FIBU"
           blocker={operationalBlocker}
-          nextAction={effectiveData?.approval_can_submit ? 'ELSTER-Einreichung vorbereiten' : 'Abweichungen, Regeln oder Freigabe klaeren'}
+          nextAction={nextVatAction}
           caseLabel="Vorgang: Steueranmeldung"
           tags={['FIBU', 'ELSTER']}
         />
+        <RoleFocusBar
+          roles={vatRoleProfiles}
+          value={roleFocus}
+          visibleCount={roleFocus === 'all' ? 4 : 1}
+          totalCount={4}
+          onChange={setRoleFocus}
+        />
+        <ManagementDecisionPanel
+          decision={{
+            allowed: Boolean(effectiveData?.approval_can_submit),
+            allowedLabel: 'Abgabefaehig',
+            blockedLabel: 'Abgabe gestoppt',
+            summary: effectiveData?.approval_can_submit
+              ? 'Die UStVA ist fachlich freigegeben und kann fuer ELSTER vorbereitet werden.'
+              : 'Die UStVA ist noch nicht abgabefaehig. Pruefe Abweichungen, Regelkontext und Freigabe.',
+            blockerCount: effectiveData?.approval_can_submit ? 0 : 1,
+            nextFocus: nextVatAction,
+            template: { label: 'UStVA pruefen und einreichen', href: '/finance/ustva' },
+          }}
+        />
+        <div className="grid gap-4 xl:grid-cols-[minmax(0,2fr)_360px]">
+          <OperationalTaskPlan items={taskItems} />
+          <NextActionPanel action={nextVatAction} tone={effectiveData?.approval_can_submit ? 'emerald' : deviations.length > 0 ? 'amber' : 'blue'} />
+        </div>
         <div className="grid gap-4 xl:grid-cols-[minmax(0,2fr)_360px]">
           <OperationalTimeline title="Meldeverlauf" items={timelineItems} />
           <OperationalContextPanel title="UStVA-Kontext" sections={contextSections} />
         </div>
+        <CrudCapabilityChecklist capabilities={crudCapabilities} />
       </div>
       <div className="grid gap-4 px-4 pb-4 md:grid-cols-4">
         <Card>

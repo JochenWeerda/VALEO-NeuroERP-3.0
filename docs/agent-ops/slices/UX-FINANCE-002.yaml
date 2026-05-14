@@ -1,7 +1,7 @@
 id: UX-FINANCE-002
 title: UStVA mit UX-Exzellenzbaukasten
 owner: Codex
-status: reserviert
+status: abgeschlossen
 created: 2026-05-14
 goal: >
   UStVA als zweite Finance-Arbeitsflaeche auf den UX-Exzellenzbaukasten ziehen:
@@ -19,6 +19,13 @@ acceptance_criteria:
   - CRUD-/Meldeabdeckung ist sichtbar.
   - Typecheck und Doku-Checks sind gruen.
 checks:
-  - offen
+  - pnpm --filter @valero-neuroerp/frontend-web type-check
+  - python scripts/agent_workboard_supervisor.py validate
+  - node scripts/docs-governance-check.cjs
+  - git diff --check
+done:
+  - finance/ustva.tsx nutzt Rollenfokus, Melde-Aufgabenplan, Managemententscheidung, Next Action und CRUD-/Meldeabdeckung aus dem UX-Baukasten.
+  - Bestehender Meldeverlauf, UStVA-Kontext, FIBU-KPIs und Submit-/Export-Aktionen bleiben erhalten.
+  - UX-Standard markiert UX-FINANCE-002 als abgeschlossen.
 risks:
   - Mahnwesen und Periodenabschluss folgen in separaten Finance-UX-Slices.
