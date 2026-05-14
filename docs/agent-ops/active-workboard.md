@@ -182,6 +182,17 @@ Stand: `2026-05-12`
 **Checks:** `pnpm --filter @valero-neuroerp/frontend-web type-check`; `python scripts/agent_workboard_supervisor.py validate`; `node scripts/docs-governance-check.cjs`; `git diff --check`
 **Offene Risiken:** Weitere Finance-Seiten wie UStVA, Mahnwesen und Abschluss folgen in separaten Rollout-Slices.
 
+## UX-FINANCE-002
+
+**Von:** Codex
+**Owner:** Codex
+**Stand:** reserviert 2026-05-14
+**Ziel des Slices:** UStVA als zweite Finance-Arbeitsflaeche auf den UX-Exzellenzbaukasten ziehen: Rollenfokus, Melde-Aufgabenplan, Managemententscheidung, Next Action und CRUD-/Meldeabdeckung.
+**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/agent-ops/slices/UX-FINANCE-002.yaml`, `packages/frontend-web/src/pages/finance/ustva.tsx`, `docs/project-context/ux-excellence-operating-standard-2026-05-13.md`
+**Abnahmekriterien:** UStVA zeigt Rollenfokus fuer FIBU, Steuerbuero, Controlling und Leitung; Melde-Aufgabenplan fuehrt Periode, Abweichungen, Freigabe und ELSTER; Managemententscheidung zeigt abgabefaehig/gestoppt; CRUD-/Meldeabdeckung ist sichtbar; Typecheck und Doku-Checks sind gruen.
+**Checks:** offen
+**Offene Risiken:** Mahnwesen und Periodenabschluss folgen in separaten Finance-UX-Slices.
+
 ## TODO-SPRINT-001
 
 **Von:** Cursor<br>
