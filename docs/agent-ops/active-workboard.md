@@ -218,6 +218,16 @@ Stand: `2026-05-12`
 **Checks:** `pnpm --filter @valero-neuroerp/frontend-web type-check`; `python scripts/agent_workboard_supervisor.py validate`; `node scripts/docs-governance-check.cjs`; `node scripts/docs-markdown-check.cjs docs/project-context/ux-excellence-operating-standard-2026-05-13.md docs/agent-ops/active-workboard.md docs/agent-ops/slices/UX-FINANCE-004.yaml`; `git diff --check`
 **Offene Risiken:** Einkauf und weitere Domaenen folgen in separaten UX-Rollout-Slices.
 
+## UX-EINKAUF-001
+
+**Von:** Codex
+**Owner:** Codex
+**Stand:** reserviert 2026-05-14
+**Ziel des Slices:** Rechnungseingaenge als erste Einkaufs-Arbeitsflaeche auf den UX-Exzellenzbaukasten ziehen: Rollenfokus, Freigabeplan, Managemententscheidung, Next Action und CRUD-/Workflow-Abdeckung.
+**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/agent-ops/slices/UX-EINKAUF-001.yaml`, `packages/frontend-web/src/pages/einkauf/rechnungseingaenge-liste.tsx`, `docs/project-context/ux-excellence-operating-standard-2026-05-13.md`
+**Abnahmekriterien:** Rechnungseingaenge zeigen Rollenfokus fuer Einkauf, Wareneingang, FIBU, Leitung und Audit; Aufgabenplan fuehrt Erfassen, Pruefen, Freigeben und Verbuchen; Managemententscheidung zeigt buchbar/gestoppt; CRUD-/Workflow-Abdeckung ist sichtbar; Typecheck und Doku-Checks sind gruen.
+**Offene Risiken:** Bestellung, Wareneingang und Lieferantenstamm folgen in separaten Einkaufs-UX-Slices.
+
 ## TODO-SPRINT-001
 
 **Von:** Cursor<br>
