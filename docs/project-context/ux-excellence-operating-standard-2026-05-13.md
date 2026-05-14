@@ -99,6 +99,20 @@ Eine Seite gilt erst als UX-ready, wenn sie mindestens diese Punkte erfuellt:
 6. Dokumente/DMS auf Klassifikation, Retention, Version und Freigabe uebertragen.
 7. Produktion/QS auf Chargen-, Pruef- und Sperrprozesse uebertragen.
 
+## Rollout-Status
+
+| Slice | Domaene | Status | Ergebnis |
+|---|---|---|---|
+| `HRM-GO-LIVE-UX-001` | HRM | abgeschlossen | Betriebsfreigaben als Referenz mit Rollenfokus, Aufgabenplan, Vorlage-Link, Audit-Zeitleiste und Managemententscheidung. |
+| `UX-STANDARD-COMPONENTS-001` | Plattform | abgeschlossen | Wiederverwendbarer Baukasten unter `@/components/workflow`. |
+| `UX-FINANCE-001` | Finance/FIBU | erster Rollout | Kreditoren-Zahlungslauf nutzt Rollenfokus, Aufgabenplan, Managemententscheidung, Next Action und CRUD-Abdeckung. |
+
+Naechste Finance-Folgeslices:
+
+- `UX-FINANCE-002`: UStVA mit Meldeentscheidung, ELSTER-Nachweis, Abweichungsaufgaben und Steuerberater-Sicht.
+- `UX-FINANCE-003`: Mahnwesen mit Rollenfokus, Eskalationsaufgaben, Kundenkommunikation und Audit.
+- `UX-FINANCE-004`: Periodenabschluss mit Close-Plan, Abstimmnachweisen und Management-Freigabe.
+
 ## Nicht-Ziel
 
 Dieser Standard verlangt keine Marketingseiten und keine dekorativen UIs. Ziel ist ein ruhiges, dichtes und handlungsorientiertes ERP fuer wiederkehrende Bueroarbeit.

@@ -1,7 +1,7 @@
 id: UX-FINANCE-001
 title: Finance-Zahlungslauf mit UX-Exzellenzbaukasten
 owner: Codex
-status: reserviert
+status: abgeschlossen
 created: 2026-05-14
 goal: >
   Den UX-Exzellenzbaukasten auf Finance/FIBU anwenden, beginnend mit dem
@@ -16,6 +16,13 @@ acceptance_criteria:
   - Naechste Aktion bleibt sichtbar.
   - Typecheck und Doku-Checks sind gruen.
 checks:
-  - offen
+  - pnpm --filter @valero-neuroerp/frontend-web type-check
+  - python scripts/agent_workboard_supervisor.py validate
+  - node scripts/docs-governance-check.cjs
+  - git diff --check
+done:
+  - finance/zahlungslauf-kreditoren.tsx nutzt Rollenfokus, Aufgabenplan, Managemententscheidung, Next Action und CRUD-Abdeckung aus dem UX-Baukasten.
+  - Bestehender Zahlungspfad und Zahlungslauf-Kontext bleiben erhalten.
+  - UX-Standard dokumentiert Finance-Rollout-Status und naechste Finance-Slices.
 risks:
   - Weitere Finance-Seiten wie UStVA, Mahnwesen und Abschluss folgen in separaten Rollout-Slices.
