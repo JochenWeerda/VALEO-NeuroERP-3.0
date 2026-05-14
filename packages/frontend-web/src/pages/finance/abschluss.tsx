@@ -15,7 +15,50 @@ import { useAccountingPeriods, useFibuCockpit } from '@/lib/api/fibu'
 import { OperationalCaseHeader } from '@/components/workflow/OperationalCaseHeader'
 import { OperationalContextPanel } from '@/components/workflow/OperationalContextPanel'
 import { OperationalTimeline } from '@/components/workflow/OperationalTimeline'
+import {
+  CrudCapabilityChecklist,
+  ManagementDecisionPanel,
+  NextActionPanel,
+  OperationalTaskPlan,
+  RoleFocusBar,
+  type UxTaskItem,
+} from '@/components/workflow'
 import { normalizeOperationalStatus } from '@/lib/operational-status'
+
+type CloseRoleFocus = 'all' | 'accounting' | 'controlling' | 'tax-advisor' | 'management' | 'audit'
+
+const closeRoleProfiles: Array<{ id: CloseRoleFocus; label: string; description: string }> = [
+  {
+    id: 'all',
+    label: 'Alle Rollen',
+    description: 'Zeigt die Abschlusslage fuer alle Beteiligten: FIBU, Controlling, Steuerbuero, Leitung und Audit.',
+  },
+  {
+    id: 'accounting',
+    label: 'FIBU',
+    description: 'Fokus auf Periode, Buchungsstatus, Abstimmungen, Sperre und Export.',
+  },
+  {
+    id: 'controlling',
+    label: 'Controlling',
+    description: 'Fokus auf GuV, Bilanz, Abweichungen und Abschlussreife.',
+  },
+  {
+    id: 'tax-advisor',
+    label: 'Steuerbuero',
+    description: 'Fokus auf Steuerpruefung, VAT-Periode, Export und Nachweise.',
+  },
+  {
+    id: 'management',
+    label: 'Leitung',
+    description: 'Fokus auf Entscheidung: abschliessen, warten oder offene Punkte klaeren.',
+  },
+  {
+    id: 'audit',
+    label: 'Audit',
+    description: 'Fokus auf Protokoll, Freigaben, Sperre und nachvollziehbare Abschlussnachweise.',
+  },
+]
 
 const abschlussConfig: MaskConfig = {
   title: 'Monats-/Jahresabschluss',
@@ -452,6 +495,7 @@ export default function AbschlussPage(): JSX.Element {
   const [isDirty, setIsDirty] = useState(false)
   const [actionLoadingKey, setActionLoadingKey] = useState<string | null>(null)
   const [workspaceData, setWorkspaceData] = useState<any>({})
+  const [roleFocus, setRoleFocus] = useState<CloseRoleFocus>('all')
   const currentActor = localStorage.getItem('userEmail') || localStorage.getItem('username') || 'api'
   const { data: fibuCockpit } = useFibuCockpit()
   const { data: periods } = useAccountingPeriods()
@@ -637,6 +681,79 @@ export default function AbschlussPage(): JSX.Element {
     : fibuCockpit.annual_close.ready_for_year_close
       ? null
       : 'Jahreswechsel ist noch nicht stabil. Reorganisator und Abstimmung muessen weiter bereinigt werden.'
+  const nextCloseAction = effectiveData?.approval_can_close
+    ? 'Abschluss berechnen, freigeben und danach Periode sperren.'
+    : operationalBlocker ?? 'Periode auswaehlen und Abschlusspruefung starten.'
+  const hasSelectedPeriod = Boolean(effectiveData?.periode)
+  const hasReconciliation = Boolean(effectiveData?.kontenabstimmungDurchgefuehrt || fibuCockpit.annual_close.ready_for_year_close)
+  const hasApproval = Boolean(effectiveData?.approval_can_close)
+  const isClosed = effectiveData?.status === 'abgeschlossen' || effectiveData?.status === 'gesperrt'
+  const closeTaskItems: UxTaskItem[] = [
+    {
+      label: 'Periode festlegen',
+      done: hasSelectedPeriod,
+      hint: hasSelectedPeriod ? `Abschluss wird fuer ${effectiveData.periode} gefuehrt.` : 'Periode eintragen oder Abschlussfall laden.',
+    },
+    {
+      label: 'Konten und Nebenbuecher abstimmen',
+      done: hasReconciliation,
+      hint: hasReconciliation ? 'Abstimmung ist als erledigt oder stabil bewertet.' : 'Offene Perioden, Journal und VAT-Periode pruefen.',
+    },
+    {
+      label: 'Freigabe einholen',
+      done: hasApproval,
+      hint: hasApproval ? 'Abschluss ist laut Checkliste abschliessbar.' : 'Freigabe- oder Abstimmungsbedarf vor Abschluss klaeren.',
+    },
+    {
+      label: 'Sperren und exportieren',
+      done: isClosed,
+      hint: isClosed ? 'Periode ist abgeschlossen oder gesperrt.' : 'Nach erfolgreichem Abschluss Export erzeugen und Periode sperren.',
+    },
+  ]
+  const closeCrudCapabilities = [
+    {
+      key: 'create',
+      label: 'Anlegen',
+      available: true,
+      hint: 'Neue Abschlussfaelle koennen ueber Periode und Abschluss-Typ vorbereitet werden.',
+    },
+    {
+      key: 'read',
+      label: 'Lesen',
+      available: true,
+      hint: 'Periode, Revisionslage, Governance und Abschlusszahlen sind sichtbar.',
+    },
+    {
+      key: 'update',
+      label: 'Bearbeiten',
+      available: !isClosed,
+      hint: isClosed ? 'Gesperrte Perioden werden nicht mehr direkt bearbeitet.' : 'Pruefungen, Abgrenzungen, Rueckstellungen und Notizen koennen gepflegt werden.',
+    },
+    {
+      key: 'delete',
+      label: 'Loeschen/Storno',
+      available: false,
+      hint: 'Abschlussfaelle werden nicht geloescht; Korrekturen laufen ueber Wiedereroeffnung oder neuen Abschlusslauf.',
+    },
+    {
+      key: 'approve',
+      label: 'Freigeben',
+      available: Boolean(effectiveData?.id),
+      hint: 'Freigabe und Abschlusslauf sind als gefuehrte Aktionen vorhanden.',
+    },
+    {
+      key: 'export',
+      label: 'Export',
+      available: Boolean(effectiveData?.id),
+      hint: 'PDF-/Listenexport ist nach angelegtem Abschlussfall verfuegbar.',
+    },
+    {
+      key: 'audit',
+      label: 'Audit',
+      available: true,
+      hint: 'Freigabe, Abschluss, Sperre und Revisionseintraege bleiben nachvollziehbar.',
+    },
+  ]
   const contextSections = [
     {
       title: 'Periode',
@@ -709,14 +826,45 @@ export default function AbschlussPage(): JSX.Element {
           status={operationalStatus}
           owner={effectiveData?.freigegebenDurch || effectiveData?.abgeschlossenDurch || 'Finance'}
           blocker={operationalBlocker}
-          nextAction={effectiveData?.approval_can_close ? 'Abschluss berechnen oder abschliessen' : 'Freigabe- und Abstimmungsluecken schliessen'}
+          nextAction={nextCloseAction}
           caseLabel={effectiveData?.periode ? `Periode ${effectiveData.periode}` : 'Abschlussfall'}
           tags={['FIBU', 'Abschluss']}
         />
+        <RoleFocusBar
+          roles={closeRoleProfiles}
+          value={roleFocus}
+          onChange={setRoleFocus}
+          visibleCount={roleFocus === 'all' ? 5 : 1}
+          totalCount={5}
+        />
+        <ManagementDecisionPanel
+          decision={{
+            allowed: hasApproval,
+            allowedLabel: 'Abschluss moeglich',
+            blockedLabel: 'Abschluss gestoppt',
+            summary: hasApproval
+              ? 'Die Abschluss-Checkliste erlaubt den Abschlusslauf. Bitte vor der Sperre Export und Nachweise erzeugen.'
+              : operationalBlocker ?? 'Der Abschluss ist noch nicht freigegeben. Pruefen Sie Periode, Abstimmungen und Freigaben.',
+            blockerCount: hasApproval ? 0 : 1,
+            nextFocus: nextCloseAction,
+            template: {
+              label: 'Abschluss pruefen und freigeben',
+              href: '/finance/abschluss',
+            },
+          }}
+        />
+        <div className="grid gap-4 lg:grid-cols-[1.35fr_1fr]">
+          <OperationalTaskPlan title="Close-Aufgabenplan" items={closeTaskItems} />
+          <NextActionPanel
+            action={nextCloseAction}
+            tone={hasApproval ? 'emerald' : adjustingPeriods > 0 ? 'amber' : 'blue'}
+          />
+        </div>
         <div className="grid gap-4 lg:grid-cols-[1.35fr_1fr]">
           <OperationalTimeline title="Abschlussverlauf" items={timelineItems} />
           <OperationalContextPanel title="Abschlusskontext" sections={contextSections} />
         </div>
+        <CrudCapabilityChecklist capabilities={closeCrudCapabilities} />
       </div>
       <div className="grid gap-4 px-4 pb-4 md:grid-cols-4">
         <Card>
