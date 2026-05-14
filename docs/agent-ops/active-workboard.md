@@ -266,6 +266,16 @@ Stand: `2026-05-12`
 **Checks:** `pnpm --filter @valero-neuroerp/frontend-web type-check`; `python scripts/agent_workboard_supervisor.py validate`; `node scripts/docs-governance-check.cjs`; `node scripts/docs-markdown-check.cjs docs/project-context/ux-excellence-operating-standard-2026-05-13.md docs/agent-ops/active-workboard.md docs/agent-ops/slices/UX-LOGISTIK-001.yaml`; `git diff --check`
 **Offene Risiken:** Frachtbriefe und Waage folgen in separaten Logistik-UX-Slices.
 
+## UX-EINKAUF-002
+
+**Von:** Codex
+**Owner:** Codex
+**Stand:** reserviert 2026-05-14
+**Ziel des Slices:** Bestellungen als zweite Einkaufs-Arbeitsflaeche auf den UX-Exzellenzbaukasten ziehen: Rollenfokus, Bestell-Follow-up-Plan, Managemententscheidung, Next Action und CRUD-/Liefer-Abdeckung.
+**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/agent-ops/slices/UX-EINKAUF-002.yaml`, `packages/frontend-web/src/pages/einkauf/bestellungen-liste.tsx`, `docs/project-context/ux-excellence-operating-standard-2026-05-13.md`
+**Abnahmekriterien:** Bestellungen zeigen Rollenfokus fuer Einkauf, Wareneingang, Finance, Lieferant und Leitung; Aufgabenplan fuehrt Erfassen, Freigeben, Bestellen/Liefern und Nachweis/Export; Managemententscheidung zeigt bestellfaehig/blockiert; CRUD-/Liefer-Abdeckung ist sichtbar; Typecheck und Doku-Checks sind gruen.
+**Offene Risiken:** Wareneingang und Lieferantenstamm folgen in separaten Einkaufs-UX-Slices.
+
 ## TODO-SPRINT-001
 
 **Von:** Cursor<br>
