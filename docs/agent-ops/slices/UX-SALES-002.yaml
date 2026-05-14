@@ -1,7 +1,7 @@
 id: UX-SALES-002
 title: Angebote mit UX-Exzellenzbaukasten
 owner: Codex
-status: reserviert
+status: abgeschlossen
 created: 2026-05-14
 goal: >
   Angebotsliste als zweite Sales-Arbeitsflaeche auf den UX-Exzellenzbaukasten
@@ -18,6 +18,15 @@ acceptance_criteria:
   - Managemententscheidung zeigt Angebotsarbeit handlungsfaehig/leer.
   - CRUD-/Conversion-Abdeckung ist sichtbar.
   - Typecheck und Doku-Checks sind gruen.
-checks: []
+checks:
+  - pnpm --filter @valero-neuroerp/frontend-web type-check
+  - python scripts/agent_workboard_supervisor.py validate
+  - node scripts/docs-governance-check.cjs
+  - node scripts/docs-markdown-check.cjs docs/project-context/ux-excellence-operating-standard-2026-05-13.md docs/agent-ops/active-workboard.md docs/agent-ops/slices/UX-SALES-002.yaml
+  - git diff --check
+done:
+  - sales/angebote-liste.tsx nutzt Rollenfokus, Angebots-Follow-up-Plan, Managemententscheidung, Next Action und CRUD-/Conversion-Abdeckung aus dem UX-Baukasten.
+  - Bestehende Suche, Filter, CSV-Import, Export, Druck und Detailnavigation bleiben erhalten.
+  - UX-Standard markiert UX-SALES-002 als abgeschlossen.
 risks:
   - Auftragseditor folgt in separatem Sales-UX-Slice.

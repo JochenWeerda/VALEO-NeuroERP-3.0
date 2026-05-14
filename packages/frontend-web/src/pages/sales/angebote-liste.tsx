@@ -16,6 +16,14 @@ import { useToast } from '@/hooks/use-toast'
 import { saveDocument } from '@/lib/document-api'
 import { getAxiosErrorMessage } from '@/lib/api-client'
 import { useAngebote, type Angebot, type AngebotStatus } from '@/lib/api/sales'
+import {
+  CrudCapabilityChecklist,
+  ManagementDecisionPanel,
+  NextActionPanel,
+  OperationalTaskPlan,
+  RoleFocusBar,
+  type UxTaskItem,
+} from '@/components/workflow'
 
 const statusVariantMap: Record<AngebotStatus, 'default' | 'outline' | 'secondary' | 'destructive'> = {
   offen: 'default',
@@ -23,6 +31,41 @@ const statusVariantMap: Record<AngebotStatus, 'default' | 'outline' | 'secondary
   abgelehnt: 'destructive',
   abgelaufen: 'secondary',
 }
+
+type OfferRoleFocus = 'all' | 'sales' | 'inside-sales' | 'order-desk' | 'finance' | 'management'
+
+const offerRoleProfiles: Array<{ id: OfferRoleFocus; label: string; description: string }> = [
+  {
+    id: 'all',
+    label: 'Alle Rollen',
+    description: 'Zeigt die Angebotsarbeit fuer Vertrieb, Inside Sales, Auftragsabwicklung, Finance und Leitung.',
+  },
+  {
+    id: 'sales',
+    label: 'Vertrieb',
+    description: 'Fokus auf Kunde, Angebotswert, Nachfassen und Abschlusschance.',
+  },
+  {
+    id: 'inside-sales',
+    label: 'Inside Sales',
+    description: 'Fokus auf offene Angebote, Gueltigkeit, Datenpflege und Wiedervorlage.',
+  },
+  {
+    id: 'order-desk',
+    label: 'Auftragsabwicklung',
+    description: 'Fokus auf angenommene Angebote und Uebernahme in den Auftrag.',
+  },
+  {
+    id: 'finance',
+    label: 'Finance',
+    description: 'Fokus auf Angebotswert, spaetere Faktura und Export.',
+  },
+  {
+    id: 'management',
+    label: 'Leitung',
+    description: 'Fokus auf Angebotsvolumen, Ablaufdruck und Entscheidungsbedarf.',
+  },
+]
 
 export default function AngeboteListePage(): JSX.Element {
   const { t } = useTranslation()
@@ -32,6 +75,7 @@ export default function AngeboteListePage(): JSX.Element {
   const [statusFilter, setStatusFilter] = useState<AngebotStatus | 'alle'>('alle')
   const [showImport, setShowImport] = useState(false)
   const [filterValues, setFilterValues] = useState<Record<string, any>>({})
+  const [roleFocus, setRoleFocus] = useState<OfferRoleFocus>('all')
 
   const entityType = 'offer'
   const entityTypeLabel = getEntityTypeLabel(t, entityType, 'Angebot')
@@ -126,6 +170,92 @@ export default function AngeboteListePage(): JSX.Element {
     entityName: 'angebote',
   })
 
+  const total = filteredAngebote.length
+  const openCount = filteredAngebote.filter((angebot) => angebot.status === 'offen').length
+  const acceptedCount = filteredAngebote.filter((angebot) => angebot.status === 'angenommen').length
+  const rejectedCount = filteredAngebote.filter((angebot) => angebot.status === 'abgelehnt').length
+  const expiredCount = filteredAngebote.filter((angebot) => angebot.status === 'abgelaufen').length
+  const totalAmount = filteredAngebote.reduce((sum, angebot) => sum + Number(angebot.betrag || 0), 0)
+  const today = new Date().toISOString().split('T')[0]
+  const expiringCount = filteredAngebote.filter((angebot) => {
+    if (!angebot.gueltigBis || angebot.status !== 'offen') return false
+    const validUntil = new Date(angebot.gueltigBis).toISOString().split('T')[0]
+    return validUntil <= today
+  }).length
+  const nextOfferAction = expiringCount > 0
+    ? 'Abgelaufene oder heute faellige Angebote nachfassen.'
+    : acceptedCount > 0
+      ? 'Angenommene Angebote in Auftraege ueberfuehren.'
+      : openCount > 0
+        ? 'Offene Angebote nachfassen und Entscheidung sichern.'
+        : 'Neues Angebot anlegen oder Import starten.'
+  const offerTaskItems: UxTaskItem[] = [
+    {
+      label: 'Angebot erfassen',
+      done: total > 0,
+      hint: total > 0 ? `${total} Angebote in der aktuellen Sicht.` : 'Neues Angebot anlegen oder Import starten.',
+    },
+    {
+      label: 'Nachfassen',
+      done: openCount > 0 && expiringCount === 0,
+      hint: expiringCount > 0 ? `${expiringCount} offene Angebote sind faellig oder abgelaufen.` : `${openCount} offene Angebote nachhalten.`,
+    },
+    {
+      label: 'Entscheidung sichern',
+      done: acceptedCount + rejectedCount + expiredCount > 0,
+      hint: acceptedCount > 0 ? `${acceptedCount} angenommene Angebote brauchen Folgeauftrag.` : 'Annahme, Ablehnung oder Ablauf im Status festhalten.',
+    },
+    {
+      label: 'In Auftrag ueberfuehren',
+      done: acceptedCount > 0,
+      hint: acceptedCount > 0 ? `${acceptedCount} Angebote koennen in Auftraege ueberfuehrt werden.` : 'Noch kein angenommenes Angebot in der Sicht.',
+    },
+  ]
+  const offerCrudCapabilities = [
+    {
+      key: 'create',
+      label: 'Anlegen',
+      available: true,
+      hint: 'Neue Angebote koennen direkt aus der Liste angelegt werden.',
+    },
+    {
+      key: 'read',
+      label: 'Lesen',
+      available: true,
+      hint: 'Angebotsnummer, Kunde, Betrag, Gueltigkeit und Status sind sichtbar.',
+    },
+    {
+      key: 'update',
+      label: 'Bearbeiten',
+      available: total > 0,
+      hint: 'Angebote koennen aus der Liste geoeffnet und bearbeitet werden.',
+    },
+    {
+      key: 'delete',
+      label: 'Loeschen/Storno',
+      available: total > 0,
+      hint: 'Angebote koennen fachlich abgelehnt, abgelaufen oder geloescht werden.',
+    },
+    {
+      key: 'approve',
+      label: 'Conversion',
+      available: acceptedCount > 0 || openCount > 0,
+      hint: 'Offene Angebote werden nachgefasst; angenommene Angebote fuehren in den Auftrag.',
+    },
+    {
+      key: 'export',
+      label: 'Export/Import',
+      available: true,
+      hint: 'CSV-Export, Druck und CSV-Import sind angebunden.',
+    },
+    {
+      key: 'audit',
+      label: 'Follow-up',
+      available: true,
+      hint: 'Status, Gueltigkeit, Kunde und Betrag bilden die Nachfassspur.',
+    },
+  ]
+
   const columns = [
     {
       key: 'nummer' as const,
@@ -180,6 +310,37 @@ export default function AngeboteListePage(): JSX.Element {
           {t('crud.actions.new')} {entityTypeLabel}
         </Button>
       </div>
+      <RoleFocusBar
+        roles={offerRoleProfiles}
+        value={roleFocus}
+        onChange={setRoleFocus}
+        visibleCount={roleFocus === 'all' ? 5 : 1}
+        totalCount={5}
+      />
+      <ManagementDecisionPanel
+        decision={{
+          allowed: total > 0 && expiringCount === 0,
+          allowedLabel: 'Angebotsarbeit stabil',
+          blockedLabel: total === 0 ? 'Keine Angebote' : 'Nachfassen faellig',
+          summary: total > 0
+            ? `Die aktuelle Sicht enthaelt ${total} Angebote mit ${new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(totalAmount)} Angebotswert. ${nextOfferAction}`
+            : 'In der aktuellen Sicht gibt es keine Angebote. Legen Sie ein neues Angebot an oder starten Sie den Import.',
+          blockerCount: total === 0 ? 1 : expiringCount,
+          nextFocus: nextOfferAction,
+          template: {
+            label: 'Angebot anlegen',
+            href: '/sales/angebot/neu',
+          },
+        }}
+      />
+      <div className="grid gap-4 lg:grid-cols-[1.35fr_1fr]">
+        <OperationalTaskPlan title="Angebots-Follow-up-Plan" items={offerTaskItems} />
+        <NextActionPanel
+          action={nextOfferAction}
+          tone={expiringCount > 0 ? 'red' : openCount + acceptedCount > 0 ? 'amber' : total > 0 ? 'blue' : 'red'}
+        />
+      </div>
+      <CrudCapabilityChecklist capabilities={offerCrudCapabilities} />
 
       <Card>
         <CardHeader>
