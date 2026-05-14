@@ -5,6 +5,14 @@ import { ObjectPage } from '@/components/mask-builder'
 import { OperationalCaseHeader } from '@/components/workflow/OperationalCaseHeader'
 import { OperationalContextPanel } from '@/components/workflow/OperationalContextPanel'
 import { OperationalTimeline } from '@/components/workflow/OperationalTimeline'
+import {
+  CrudCapabilityChecklist,
+  ManagementDecisionPanel,
+  NextActionPanel,
+  OperationalTaskPlan,
+  RoleFocusBar,
+  type UxTaskItem,
+} from '@/components/workflow'
 import { useMaskData, useMaskActions } from '@/components/mask-builder/hooks'
 import { MaskConfig } from '@/components/mask-builder/types'
 import { getFieldsFromMaskConfig, validateFields } from '@/components/mask-builder/validation'
@@ -18,6 +26,17 @@ import { buildDecisionView } from '@/policy/decision-view'
 import { ProcessStatusPanel } from '@/components/workflow/ProcessStatusPanel'
 import { useApprovalDensityProfile } from '@/features/workflow/useApprovalDensityProfile'
 import { normalizeOperationalStatus } from '@/lib/operational-status'
+
+type FinanceRoleFocus = 'all' | 'accounting' | 'treasury' | 'controller' | 'tax-advisor' | 'management'
+
+const financeRoleProfiles: Array<{ id: FinanceRoleFocus; label: string; description: string }> = [
+  { id: 'all', label: 'Alle', description: 'Gesamtbild fuer Zahlungslauf, Freigabe und Ausfuehrung.' },
+  { id: 'accounting', label: 'Buchhaltung', description: 'Stammdaten, offene Posten, Buchungs- und Belegqualitaet.' },
+  { id: 'treasury', label: 'Zahlungsverkehr', description: 'SEPA-Datei, Ausfuehrungsdatum, IBAN/BIC und Bankfreigabe.' },
+  { id: 'controller', label: 'Controlling', description: 'Betrag, Skonto, Liquiditaetswirkung und Abweichungen.' },
+  { id: 'tax-advisor', label: 'Steuerbuero', description: 'Nachvollziehbare Export- und Buchungsgrundlage.' },
+  { id: 'management', label: 'Leitung', description: 'Freigabestatus, Stopper, Risiko und Entscheidung.' },
+]
 
 const createZahlungslaufConfig = (t: any, entityTypeLabel: string): MaskConfig => ({
   title: entityTypeLabel,
@@ -548,6 +567,7 @@ export default function ZahlungslaufKreditorenPage(): JSX.Element {
   const navigate = useNavigate()
   const [isDirty, setIsDirty] = useState(false)
   const [formData, setFormData] = useState<any>({})
+  const [roleFocus, setRoleFocus] = useState<FinanceRoleFocus>('all')
   const currentActor = localStorage.getItem('userEmail') || localStorage.getItem('username') || 'api'
   const entityType = 'paymentRun'
   const entityTypeLabel = getEntityTypeLabel(t, entityType, 'Zahlungslauf Kreditoren')
@@ -790,6 +810,42 @@ export default function ZahlungslaufKreditorenPage(): JSX.Element {
         : 'Approval- und Policy-Pruefung halten den Lauf noch vor der Ausfuehrung.',
     },
   ]
+  const nextPaymentAction = effectiveData?.approval_can_execute
+    ? 'SEPA-Datei erstellen oder Lauf ausfuehren'
+    : paymentCount > 0
+      ? 'Freigabe und Policy-Pruefung abschliessen'
+      : 'Zahlungen in den Lauf aufnehmen'
+  const taskItems: UxTaskItem[] = [
+    {
+      label: 'Zahlungen erfassen',
+      done: paymentCount > 0,
+      hint: paymentCount > 0 ? `${paymentCount} Zahlung(en) im Lauf` : 'Mindestens eine Kreditorenzahlung aufnehmen.',
+    },
+    {
+      label: 'Bank- und Stammdaten pruefen',
+      done: Boolean(effectiveData?.auftraggeberIban || effectiveData?.initiator_iban) && Boolean(effectiveData?.auftraggeberBic || effectiveData?.initiator_bic),
+      hint: 'Auftraggeber-IBAN, BIC und Ausfuehrungsdatum muessen plausibel sein.',
+    },
+    {
+      label: 'Freigabe und Policy pruefen',
+      done: Boolean(effectiveData?.approval_can_execute),
+      hint: effectiveData?.approval_can_execute ? 'Zahlungslauf ist ausfuehrbar.' : 'Freigabe oder Regelpruefung blockiert die Ausfuehrung noch.',
+    },
+    {
+      label: 'SEPA exportieren oder ausfuehren',
+      done: effectiveData?.status === 'executed',
+      hint: effectiveData?.status === 'executed' ? 'Lauf wurde ausgefuehrt.' : 'Nach Freigabe SEPA-Datei erstellen oder Lauf ausfuehren.',
+    },
+  ]
+  const crudCapabilities = [
+    { key: 'create', label: 'Anlegen', available: true, hint: 'Neue Zahlungslaufe koennen erfasst und gespeichert werden.' },
+    { key: 'read', label: 'Lesen', available: true, hint: 'Status, Betrag, Zahlungen, Freigabe und Kontext sind sichtbar.' },
+    { key: 'update', label: 'Aendern', available: effectiveData?.status !== 'executed', hint: effectiveData?.status === 'executed' ? 'Ausgefuehrte Laeufe nicht direkt aendern.' : 'Entwurf und Pruefstand koennen angepasst werden.' },
+    { key: 'delete', label: 'Loeschen/Storno', available: true, hint: 'Fachlich als Storno oder Abbruch behandeln, nicht still entfernen.' },
+    { key: 'approve', label: 'Freigeben', available: Boolean(effectiveData?.id), hint: 'Freigabe erfolgt mit verantwortlicher Person und Policy-Status.' },
+    { key: 'export', label: 'SEPA Export', available: Boolean(effectiveData?.approval_can_execute), hint: 'Export erst nach Freigabe und Regelpruefung.' },
+    { key: 'audit', label: 'Audit', available: true, hint: 'Zahlungspfad und Entscheidung bleiben nachvollziehbar.' },
+  ]
 
   return (
     <>
@@ -802,14 +858,41 @@ export default function ZahlungslaufKreditorenPage(): JSX.Element {
           status={operationalStatus}
           owner="Zahlungsverkehr"
           blocker={!effectiveData?.approval_can_execute && paymentCount > 0 ? 'Der Lauf ist noch nicht freigegeben oder policy-konform ausfuehrbar.' : null}
-          nextAction={effectiveData?.approval_can_execute ? 'SEPA-Datei erstellen oder Lauf ausfuehren' : paymentCount > 0 ? 'Freigabe und Policy-Pruefung abschliessen' : 'Zahlungen in den Lauf aufnehmen'}
+          nextAction={nextPaymentAction}
           caseLabel="Vorgang: Kreditorenlauf"
           tags={['FIBU', 'SEPA', 'L3']}
         />
+        <RoleFocusBar
+          roles={financeRoleProfiles}
+          value={roleFocus}
+          visibleCount={roleFocus === 'all' ? 4 : 1}
+          totalCount={4}
+          onChange={setRoleFocus}
+        />
+        <ManagementDecisionPanel
+          decision={{
+            allowed: Boolean(effectiveData?.approval_can_execute),
+            allowedLabel: 'Zahlung ausfuehrbar',
+            blockedLabel: 'Zahlung gestoppt',
+            summary: effectiveData?.approval_can_execute
+              ? 'Der Zahlungslauf ist freigegeben und kann exportiert oder ausgefuehrt werden.'
+              : paymentCount > 0
+                ? 'Der Zahlungslauf enthaelt Zahlungen, ist aber noch nicht freigegeben oder policy-konform ausfuehrbar.'
+                : 'Der Zahlungslauf ist noch leer. Erfasse zuerst die Zahlungen und pruefe danach Freigabe und Bankdaten.',
+            blockerCount: effectiveData?.approval_can_execute ? 0 : 1,
+            nextFocus: nextPaymentAction,
+            template: { label: 'Zahlungslauf pruefen und freigeben', href: '/finance/zahlungslauf-kreditoren' },
+          }}
+        />
+        <div className="grid gap-4 xl:grid-cols-[minmax(0,2fr)_360px]">
+          <OperationalTaskPlan items={taskItems} />
+          <NextActionPanel action={nextPaymentAction} tone={effectiveData?.approval_can_execute ? 'emerald' : paymentCount > 0 ? 'amber' : 'blue'} />
+        </div>
         <div className="grid gap-4 xl:grid-cols-[minmax(0,2fr)_360px]">
           <OperationalTimeline title="Zahlungspfad" items={timelineItems} />
           <OperationalContextPanel title="Zahlungslauf-Kontext" sections={contextSections} />
         </div>
+        <CrudCapabilityChecklist capabilities={crudCapabilities} />
       </div>
       {effectiveData?.id && approvalDecisionView !== null ? (
         <ProcessStatusPanel view={approvalDecisionView} className="mb-4 px-4 py-3" densityProfileOverride={approvalDensityProfile}>
