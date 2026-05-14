@@ -282,10 +282,12 @@ Stand: `2026-05-12`
 
 **Von:** Codex
 **Owner:** Codex
-**Stand:** reserviert 2026-05-14
+**Stand:** abgeschlossen 2026-05-14
 **Ziel des Slices:** Angebotsliste als zweite Sales-Arbeitsflaeche auf den UX-Exzellenzbaukasten ziehen: Rollenfokus, Angebots-Follow-up-Plan, Managemententscheidung, Next Action und CRUD-/Conversion-Abdeckung.
 **Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/agent-ops/slices/UX-SALES-002.yaml`, `packages/frontend-web/src/pages/sales/angebote-liste.tsx`, `docs/project-context/ux-excellence-operating-standard-2026-05-13.md`
 **Abnahmekriterien:** Angebote zeigen Rollenfokus fuer Vertrieb, Inside Sales, Auftragsabwicklung, Finance und Leitung; Aufgabenplan fuehrt Erfassen, Nachfassen, Entscheiden und in Auftrag ueberfuehren; Managemententscheidung zeigt Angebotsarbeit handlungsfaehig/leer; CRUD-/Conversion-Abdeckung ist sichtbar; Typecheck und Doku-Checks sind gruen.
+**Erledigt:** `sales/angebote-liste.tsx` nutzt den UX-Baukasten fuer Rollenfokus, Angebots-Follow-up-Plan, Managemententscheidung, Next Action und CRUD-/Conversion-Abdeckung. Bestehende Suche, Filter, CSV-Import, Export, Druck und Detailnavigation bleiben erhalten. UX-Standard markiert `UX-SALES-002` als abgeschlossen.
+**Checks:** `pnpm --filter @valero-neuroerp/frontend-web type-check`; `python scripts/agent_workboard_supervisor.py validate`; `node scripts/docs-governance-check.cjs`; `node scripts/docs-markdown-check.cjs docs/project-context/ux-excellence-operating-standard-2026-05-13.md docs/agent-ops/active-workboard.md docs/agent-ops/slices/UX-SALES-002.yaml`; `git diff --check`
 **Offene Risiken:** Auftragseditor folgt in separatem Sales-UX-Slice.
 
 ## TODO-SPRINT-001
