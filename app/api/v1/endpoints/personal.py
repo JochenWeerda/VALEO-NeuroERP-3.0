@@ -14,7 +14,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
-from app.core.exceptions import EntityNotFoundError
+from app.core.exceptions import ConflictError, EntityNotFoundError
 from app.core.tenant import get_tenant_id
 from app.services.personal_service import PersonalService
 
@@ -2879,49 +2879,16 @@ async def create_hrm_operations_gate_evidence(
     _require_hrm_gate(gate_id)
     try:
         current = _load_single_hrm_gate(db, tenant_id, gate_id)
-        row = db.execute(
-            text(
-                """
-                INSERT INTO domain_hr.hrm_operations_gate_evidence
-                  (id, tenant_id, gate_id, evidence_type, title, artifact_ref, submitted_by, metadata)
-                VALUES
-                  (:id, :tenant_id, :gate_id, :evidence_type, :title, :artifact_ref, :submitted_by, CAST(:metadata AS jsonb))
-                RETURNING id, gate_id, evidence_type, title, artifact_ref, submitted_by, submitted_at, metadata
-                """
-            ),
-            {
-                "id": str(uuid4()),
-                "tenant_id": tenant_id,
-                "gate_id": gate_id,
-                "evidence_type": payload.evidenceType,
-                "title": payload.title,
-                "artifact_ref": payload.artifactRef,
-                "submitted_by": payload.submittedBy,
-                "metadata": json.dumps(payload.metadata),
-            },
-        ).mappings().first()
-        if current.status != "approved":
-            db.execute(
-                text(
-                    """
-                    UPDATE domain_hr.hrm_operations_gates
-                    SET status = 'evidence_submitted', updated_at = NOW(), rejection_reason = NULL
-                    WHERE tenant_id = :tenant_id AND gate_id = :gate_id
-                    """
-                ),
-                {"tenant_id": tenant_id, "gate_id": gate_id},
-            )
-        _insert_hrm_gate_audit(
-            db,
-            tenant_id,
-            gate_id,
-            "evidence_created",
-            payload.submittedBy,
-            current.status,
-            "approved" if current.status == "approved" else "evidence_submitted",
-            details={"artifact_ref": payload.artifactRef, "evidence_type": payload.evidenceType},
+        row = PersonalService(db, tenant_id).add_gate_evidence(
+            gate_id=gate_id,
+            evidence_id=str(uuid4()),
+            evidence_type=payload.evidenceType,
+            title=payload.title,
+            artifact_ref=payload.artifactRef,
+            submitted_by=payload.submittedBy,
+            metadata=payload.metadata,
+            current_status=current.status,
         )
-        db.commit()
     except SQLAlchemyError as exc:
         db.rollback()
         raise HTTPException(status_code=503, detail="HRM operations gate persistence is not available") from exc
@@ -2938,44 +2905,17 @@ async def decide_hrm_operations_gate(
     _require_hrm_gate(gate_id)
     try:
         current = _load_single_hrm_gate(db, tenant_id, gate_id)
-        evidence_count = current.evidenceCount
-        if payload.decision == "approve" and evidence_count < 1:
-            raise HTTPException(status_code=409, detail="Gate approval requires at least one evidence artifact")
-        to_status = "approved" if payload.decision == "approve" else "rejected"
-        db.execute(
-            text(
-                """
-                UPDATE domain_hr.hrm_operations_gates
-                SET status = :status,
-                    approved_by = CASE WHEN :status = 'approved' THEN :actor ELSE NULL END,
-                    approved_at = CASE WHEN :status = 'approved' THEN NOW() ELSE NULL END,
-                    rejection_reason = CASE WHEN :status = 'rejected' THEN :reason ELSE NULL END,
-                    updated_at = NOW()
-                WHERE tenant_id = :tenant_id AND gate_id = :gate_id
-                RETURNING gate_id, status
-                """
-            ),
-            {
-                "tenant_id": tenant_id,
-                "gate_id": gate_id,
-                "status": to_status,
-                "actor": payload.decidedBy,
-                "reason": payload.reason,
-            },
-        ).mappings().first()
-        _insert_hrm_gate_audit(
-            db,
-            tenant_id,
-            gate_id,
-            f"gate_{payload.decision}d",
-            payload.decidedBy,
-            current.status,
-            to_status,
+        PersonalService(db, tenant_id).decide_gate(
+            gate_id=gate_id,
+            decision=payload.decision,
+            decided_by=payload.decidedBy,
             reason=payload.reason,
-            details={"evidence_count": evidence_count},
+            current_status=current.status,
+            evidence_count=current.evidenceCount,
         )
-        db.commit()
         gate = _load_single_hrm_gate(db, tenant_id, gate_id)
+    except ConflictError as exc:
+        raise HTTPException(status_code=409, detail=str(exc)) from exc
     except HTTPException:
         raise
     except SQLAlchemyError as exc:
@@ -2994,59 +2934,16 @@ async def record_hrm_operations_gate_probe(
     _require_hrm_gate(gate_id)
     try:
         current = _load_single_hrm_gate(db, tenant_id, gate_id)
-        row = db.execute(
-            text(
-                """
-                INSERT INTO domain_hr.hrm_operations_gate_probes
-                  (id, tenant_id, gate_id, provider, probe_type, result, performed_by, details)
-                VALUES
-                  (:id, :tenant_id, :gate_id, :provider, :probe_type, :result, :performed_by, CAST(:details AS jsonb))
-                RETURNING id, gate_id, provider, probe_type, result, performed_by, performed_at, details
-                """
-            ),
-            {
-                "id": str(uuid4()),
-                "tenant_id": tenant_id,
-                "gate_id": gate_id,
-                "provider": payload.provider,
-                "probe_type": payload.probeType,
-                "result": payload.result,
-                "performed_by": payload.performedBy,
-                "details": json.dumps(payload.details),
-            },
-        ).mappings().first()
-        to_status = "probe_passed" if payload.result == "passed" and current.status != "approved" else current.status
-        if payload.result in {"failed", "not_configured"} and current.status != "approved":
-            to_status = "external_evidence_required"
-        db.execute(
-            text(
-                """
-                UPDATE domain_hr.hrm_operations_gates
-                SET status = :status,
-                    last_probe_status = :probe_status,
-                    last_probe_at = NOW(),
-                    updated_at = NOW()
-                WHERE tenant_id = :tenant_id AND gate_id = :gate_id
-                """
-            ),
-            {
-                "tenant_id": tenant_id,
-                "gate_id": gate_id,
-                "status": to_status,
-                "probe_status": payload.result,
-            },
+        row = PersonalService(db, tenant_id).record_gate_probe(
+            gate_id=gate_id,
+            probe_id=str(uuid4()),
+            provider=payload.provider,
+            probe_type=payload.probeType,
+            result=payload.result,
+            performed_by=payload.performedBy,
+            details=payload.details,
+            current_status=current.status,
         )
-        _insert_hrm_gate_audit(
-            db,
-            tenant_id,
-            gate_id,
-            "connector_probe",
-            payload.performedBy,
-            current.status,
-            to_status,
-            details={"provider": payload.provider, "probe_type": payload.probeType, "result": payload.result},
-        )
-        db.commit()
     except SQLAlchemyError as exc:
         db.rollback()
         raise HTTPException(status_code=503, detail="HRM operations gate persistence is not available") from exc
@@ -3230,48 +3127,11 @@ async def create_mitarbeiter(
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
-    existing = db.execute(
-        text(
-            """
-            SELECT 1
-            FROM domain_shared.users
-            WHERE tenant_id = :tenant_id AND (email = :email OR username = :username)
-            LIMIT 1
-            """
-        ),
-        {"tenant_id": tenant_id, "email": payload.email, "username": payload.email},
-    ).first()
-    if existing:
-        raise HTTPException(status_code=409, detail="Mitarbeiter mit E-Mail existiert bereits")
-
-    first_name, last_name = _split_name(payload.name)
-    user_id = str(uuid4())
-    role_slug = payload.position.strip().lower().replace(" ", "_")
-    if not role_slug:
-        role_slug = "mitarbeiter"
-    db.execute(
-        text(
-            """
-            INSERT INTO domain_shared.users
-              (id, keycloak_id, username, email, first_name, last_name, is_active, roles, tenant_id, preferences, created_at, updated_at)
-            VALUES
-              (:id, :keycloak_id, :username, :email, :first_name, :last_name, :is_active, :roles, :tenant_id, CAST(:preferences AS jsonb), NOW(), NOW())
-            """
-        ),
-        {
-            "id": user_id,
-            "keycloak_id": f"local-{user_id}",
-            "username": payload.email,
-            "email": payload.email,
-            "first_name": first_name,
-            "last_name": last_name,
-            "is_active": payload.status != "krank",
-            "roles": [role_slug],
-            "tenant_id": tenant_id,
-            "preferences": json.dumps({"hr_status": payload.status, "abteilung": payload.abteilung}),
-        },
-    )
-    db.commit()
+    from app.core.exceptions import ConflictError
+    try:
+        user_id = PersonalService(db, tenant_id).create_mitarbeiter(payload)
+    except ConflictError as exc:
+        raise HTTPException(status_code=409, detail=str(exc))
     return await get_mitarbeiter(user_id=user_id, tenant_id=tenant_id, db=db)
 
 
@@ -3282,40 +3142,10 @@ async def update_mitarbeiter(
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
-    first_name, last_name = _split_name(payload.name)
-    role_slug = payload.position.strip().lower().replace(" ", "_")
-    if not role_slug:
-        role_slug = "mitarbeiter"
-    updated = db.execute(
-        text(
-            """
-            UPDATE domain_shared.users
-            SET email = :email,
-                username = :username,
-                first_name = :first_name,
-                last_name = :last_name,
-                is_active = :is_active,
-                roles = :roles,
-                preferences = COALESCE(preferences, '{}'::jsonb) || CAST(:preferences AS jsonb),
-                updated_at = NOW()
-            WHERE id = :user_id AND tenant_id = :tenant_id
-            """
-        ),
-        {
-            "tenant_id": tenant_id,
-            "user_id": user_id,
-            "email": payload.email,
-            "username": payload.email,
-            "first_name": first_name,
-            "last_name": last_name,
-            "is_active": payload.status != "krank",
-            "roles": [role_slug],
-            "preferences": json.dumps({"hr_status": payload.status, "abteilung": payload.abteilung}),
-        },
-    ).rowcount
-    if not updated:
+    try:
+        PersonalService(db, tenant_id).update_mitarbeiter(user_id, payload)
+    except EntityNotFoundError:
         raise HTTPException(status_code=404, detail="Mitarbeiter nicht gefunden")
-    db.commit()
     return await get_mitarbeiter(user_id=user_id, tenant_id=tenant_id, db=db)
 
 
@@ -3433,31 +3263,9 @@ async def list_shifts(
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
-    params: dict[str, Any] = {"tenant_id": tenant_id}
-    where = ["tenant_id = :tenant_id"]
-    if datum_von:
-        params["datum_von"] = _parse_entry_date(datum_von)
-        where.append("shift_date >= :datum_von")
-    if datum_bis:
-        params["datum_bis"] = _parse_entry_date(datum_bis)
-        where.append("shift_date <= :datum_bis")
-    if location:
-        params["location"] = location
-        where.append("location_code = :location")
-
-    rows = db.execute(
-        text(
-            f"""
-            SELECT id, shift_date, name, location_code, required_role, required_qualifications,
-                   required_headcount, starts_at, ends_at, assigned_employee_refs, status,
-                   conflicts, notes
-            FROM domain_hr.shifts
-            WHERE {' AND '.join(where)}
-            ORDER BY shift_date ASC, starts_at ASC, location_code ASC
-            """
-        ),
-        params,
-    ).mappings().all()
+    rows = PersonalService(db, tenant_id).list_shifts(
+        datum_von=datum_von, datum_bis=datum_bis, location=location
+    )
     return [_shift_from_row(row) for row in rows]
 
 
@@ -3467,73 +3275,31 @@ async def create_shift(
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
+    svc = PersonalService(db, tenant_id)
     shift_date = _parse_entry_date(payload.datum)
-    profile_rows = db.execute(
-        text(
-            """
-            SELECT employee_ref, status, qualifications
-            FROM domain_hr.employee_time_profiles
-            WHERE tenant_id = :tenant_id
-            """
-        ),
-        {"tenant_id": tenant_id},
-    ).mappings().all()
-    absence_rows = db.execute(
-        text(
-            """
-            SELECT employee_ref
-            FROM domain_hr.time_entries
-            WHERE tenant_id = :tenant_id
-              AND entry_date = :shift_date
-              AND entry_type IN ('Urlaub', 'Krank', 'Unbezahlt', 'Sonstiges')
-              AND status IN ('Approved', 'Genehmigt')
-            """
-        ),
-        {"tenant_id": tenant_id, "shift_date": shift_date},
-    ).mappings().all()
+    profile_rows, absence_rows = svc.get_shift_context(shift_date)
     conflicts = _build_shift_conflicts(
         assigned_employee_refs=payload.assignedEmployeeRefs,
         required_headcount=payload.requiredHeadcount,
         required_qualifications=payload.requiredQualifications,
-        profile_rows=list(profile_rows),
-        absence_rows=list(absence_rows),
+        profile_rows=profile_rows,
+        absence_rows=absence_rows,
     )
-    status = _shift_status(conflicts)
-    row = db.execute(
-        text(
-            """
-            INSERT INTO domain_hr.shifts
-              (id, tenant_id, shift_date, name, location_code, required_role,
-               required_qualifications, required_headcount, starts_at, ends_at,
-               assigned_employee_refs, status, conflicts, notes, created_at, updated_at)
-            VALUES
-              (:id, :tenant_id, :shift_date, :name, :location_code, :required_role,
-               CAST(:required_qualifications AS jsonb), :required_headcount, :starts_at, :ends_at,
-               CAST(:assigned_employee_refs AS jsonb), :status, CAST(:conflicts AS jsonb),
-               :notes, NOW(), NOW())
-            RETURNING id, shift_date, name, location_code, required_role, required_qualifications,
-                      required_headcount, starts_at, ends_at, assigned_employee_refs, status,
-                      conflicts, notes
-            """
-        ),
-        {
-            "id": str(uuid4()),
-            "tenant_id": tenant_id,
-            "shift_date": shift_date,
-            "name": payload.name,
-            "location_code": payload.locationCode,
-            "required_role": payload.requiredRole,
-            "required_qualifications": json.dumps(payload.requiredQualifications),
-            "required_headcount": payload.requiredHeadcount,
-            "starts_at": payload.startTime,
-            "ends_at": payload.endTime,
-            "assigned_employee_refs": json.dumps(payload.assignedEmployeeRefs),
-            "status": status,
-            "conflicts": json.dumps([conflict.model_dump() for conflict in conflicts]),
-            "notes": payload.notes,
-        },
-    ).mappings().first()
-    db.commit()
+    row = svc.create_shift({
+        "id": str(uuid4()),
+        "shift_date": shift_date,
+        "name": payload.name,
+        "location_code": payload.locationCode,
+        "required_role": payload.requiredRole,
+        "required_qualifications": json.dumps(payload.requiredQualifications),
+        "required_headcount": payload.requiredHeadcount,
+        "starts_at": payload.startTime,
+        "ends_at": payload.endTime,
+        "assigned_employee_refs": json.dumps(payload.assignedEmployeeRefs),
+        "status": _shift_status(conflicts),
+        "conflicts": json.dumps([c.model_dump() for c in conflicts]),
+        "notes": payload.notes,
+    })
     return _shift_from_row(row)
 
 
@@ -3546,34 +3312,9 @@ async def list_calendar_events(
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
-    params: dict[str, Any] = {"tenant_id": tenant_id}
-    where = ["tenant_id = :tenant_id"]
-    if start:
-        params["start"] = _parse_event_datetime(start)
-        where.append("ends_at >= :start")
-    if end:
-        params["end"] = _parse_event_datetime(end)
-        where.append("starts_at <= :end")
-    if employee_ref:
-        params["employee_ref"] = employee_ref
-        where.append("employee_ref = :employee_ref")
-    if event_type:
-        params["event_type"] = event_type
-        where.append("event_type = :event_type")
-
-    rows = db.execute(
-        text(
-            f"""
-            SELECT id, source_system, provider, external_event_ref, event_type, title,
-                   employee_ref, resource_ref, starts_at, ends_at, timezone, visibility,
-                   status, sync_state, conflict_level, source_ref, metadata
-            FROM domain_hr.calendar_events
-            WHERE {' AND '.join(where)}
-            ORDER BY starts_at ASC, employee_ref ASC
-            """
-        ),
-        params,
-    ).mappings().all()
+    rows = PersonalService(db, tenant_id).list_calendar_events(
+        start=start, end=end, employee_ref=employee_ref, event_type=event_type
+    )
     return [_calendar_event_from_row(row) for row in rows]
 
 
@@ -3587,44 +3328,25 @@ async def create_calendar_event(
     ends_at = _parse_event_datetime(payload.endsAt)
     if ends_at <= starts_at:
         raise HTTPException(status_code=400, detail="endsAt must be after startsAt")
-    row = db.execute(
-        text(
-            """
-            INSERT INTO domain_hr.calendar_events
-              (id, tenant_id, source_system, provider, external_event_ref, event_type, title,
-               employee_ref, resource_ref, starts_at, ends_at, timezone, visibility, status,
-               sync_state, conflict_level, source_ref, metadata, created_at, updated_at)
-            VALUES
-              (:id, :tenant_id, :source_system, :provider, :external_event_ref, :event_type, :title,
-               :employee_ref, :resource_ref, :starts_at, :ends_at, :timezone, :visibility, :status,
-               :sync_state, :conflict_level, :source_ref, CAST(:metadata AS jsonb), NOW(), NOW())
-            RETURNING id, source_system, provider, external_event_ref, event_type, title,
-                      employee_ref, resource_ref, starts_at, ends_at, timezone, visibility,
-                      status, sync_state, conflict_level, source_ref, metadata
-            """
-        ),
-        {
-            "id": str(uuid4()),
-            "tenant_id": tenant_id,
-            "source_system": payload.sourceSystem,
-            "provider": payload.provider,
-            "external_event_ref": payload.externalEventRef,
-            "event_type": payload.eventType,
-            "title": payload.title,
-            "employee_ref": payload.employeeRef,
-            "resource_ref": payload.resourceRef,
-            "starts_at": starts_at,
-            "ends_at": ends_at,
-            "timezone": payload.timezone,
-            "visibility": payload.visibility,
-            "status": payload.status,
-            "sync_state": payload.syncState,
-            "conflict_level": payload.conflictLevel,
-            "source_ref": payload.sourceRef,
-            "metadata": json.dumps(payload.metadata),
-        },
-    ).mappings().first()
-    db.commit()
+    row = PersonalService(db, tenant_id).create_calendar_event({
+        "id": str(uuid4()),
+        "source_system": payload.sourceSystem,
+        "provider": payload.provider,
+        "external_event_ref": payload.externalEventRef,
+        "event_type": payload.eventType,
+        "title": payload.title,
+        "employee_ref": payload.employeeRef,
+        "resource_ref": payload.resourceRef,
+        "starts_at": starts_at,
+        "ends_at": ends_at,
+        "timezone": payload.timezone,
+        "visibility": payload.visibility,
+        "status": payload.status,
+        "sync_state": payload.syncState,
+        "conflict_level": payload.conflictLevel,
+        "source_ref": payload.sourceRef,
+        "metadata": json.dumps(payload.metadata),
+    })
     return _calendar_event_from_row(row)
 
 
@@ -3633,17 +3355,7 @@ async def list_payroll_exports(
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
-    rows = db.execute(
-        text(
-            """
-            SELECT id, period_from, period_to, target_system, status, items, blockers
-            FROM domain_hr.payroll_exports
-            WHERE tenant_id = :tenant_id
-            ORDER BY period_from DESC, created_at DESC
-            """
-        ),
-        {"tenant_id": tenant_id},
-    ).mappings().all()
+    rows = PersonalService(db, tenant_id).list_payroll_exports()
     return [_payroll_export_from_row(row) for row in rows]
 
 
@@ -3657,46 +3369,20 @@ async def create_payroll_export(
     period_to = _parse_entry_date(payload.periodTo)
     if period_to < period_from:
         raise HTTPException(status_code=400, detail="periodTo must be on or after periodFrom")
-    rows = db.execute(
-        text(
-            """
-            SELECT id, employee_ref, entry_date, hours, entry_type, status, cost_center
-            FROM domain_hr.time_entries
-            WHERE tenant_id = :tenant_id
-              AND entry_date BETWEEN :period_from AND :period_to
-              AND entry_type IN ('Arbeit', 'Bereitschaft', 'Urlaub', 'Krank', 'Korrektur')
-            ORDER BY employee_ref ASC, entry_date ASC
-            """
-        ),
-        {"tenant_id": tenant_id, "period_from": period_from, "period_to": period_to},
-    ).mappings().all()
-    items = [_payroll_item_from_time_row(row) for row in rows if str(dict(row).get("status")) in {"Approved", "Genehmigt"}]
-    blockers = [_payroll_blocker_from_time_row(row) for row in rows if str(dict(row).get("status")) not in {"Approved", "Genehmigt"}]
-    status = "blocked" if blockers else "ready"
-    row = db.execute(
-        text(
-            """
-            INSERT INTO domain_hr.payroll_exports
-              (id, tenant_id, period_from, period_to, target_system, status, items, blockers, created_at, created_by)
-            VALUES
-              (:id, :tenant_id, :period_from, :period_to, :target_system, :status,
-               CAST(:items AS jsonb), CAST(:blockers AS jsonb), NOW(), :created_by)
-            RETURNING id, period_from, period_to, target_system, status, items, blockers
-            """
-        ),
-        {
-            "id": str(uuid4()),
-            "tenant_id": tenant_id,
-            "period_from": period_from,
-            "period_to": period_to,
-            "target_system": payload.targetSystem,
-            "status": status,
-            "items": json.dumps([item.model_dump() for item in items]),
-            "blockers": json.dumps([blocker.model_dump() for blocker in blockers]),
-            "created_by": payload.createdBy,
-        },
-    ).mappings().first()
-    db.commit()
+    svc = PersonalService(db, tenant_id)
+    time_rows = svc.get_payroll_time_rows(period_from, period_to)
+    items = [_payroll_item_from_time_row(r) for r in time_rows if str(r.get("status")) in {"Approved", "Genehmigt"}]
+    blockers = [_payroll_blocker_from_time_row(r) for r in time_rows if str(r.get("status")) not in {"Approved", "Genehmigt"}]
+    row = svc.create_payroll_export({
+        "id": str(uuid4()),
+        "period_from": period_from,
+        "period_to": period_to,
+        "target_system": payload.targetSystem,
+        "status": "blocked" if blockers else "ready",
+        "items": json.dumps([item.model_dump() for item in items]),
+        "blockers": json.dumps([b.model_dump() for b in blockers]),
+        "created_by": payload.createdBy,
+    })
     return _payroll_export_from_row(row)
 
 
@@ -3705,18 +3391,7 @@ async def list_campaign_capacity(
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
-    rows = db.execute(
-        text(
-            """
-            SELECT id, campaign_code, name, period_from, period_to, location_code,
-                   role_demand, expected_volume, status, findings
-            FROM domain_hr.campaign_capacity_plans
-            WHERE tenant_id = :tenant_id
-            ORDER BY period_from ASC, campaign_code ASC
-            """
-        ),
-        {"tenant_id": tenant_id},
-    ).mappings().all()
+    rows = PersonalService(db, tenant_id).list_campaign_capacity()
     return [_campaign_capacity_from_row(row) for row in rows]
 
 
@@ -3730,71 +3405,23 @@ async def create_campaign_capacity(
     period_to = _parse_entry_date(payload.periodTo)
     if period_to < period_from:
         raise HTTPException(status_code=400, detail="periodTo must be on or after periodFrom")
-    profile_rows = db.execute(
-        text(
-            """
-            SELECT employee_ref, role_code, status
-            FROM domain_hr.employee_time_profiles
-            WHERE tenant_id = :tenant_id AND location_code = :location_code
-            """
-        ),
-        {"tenant_id": tenant_id, "location_code": payload.locationCode},
-    ).mappings().all()
-    absence_rows = db.execute(
-        text(
-            """
-            SELECT employee_ref
-            FROM domain_hr.time_entries
-            WHERE tenant_id = :tenant_id
-              AND entry_date BETWEEN :period_from AND :period_to
-              AND entry_type IN ('Urlaub', 'Krank', 'Unbezahlt', 'Sonstiges')
-              AND status IN ('Approved', 'Genehmigt')
-            """
-        ),
-        {"tenant_id": tenant_id, "period_from": period_from, "period_to": period_to},
-    ).mappings().all()
-    shift_rows = db.execute(
-        text(
-            """
-            SELECT assigned_employee_refs
-            FROM domain_hr.shifts
-            WHERE tenant_id = :tenant_id
-              AND shift_date BETWEEN :period_from AND :period_to
-              AND location_code = :location_code
-            """
-        ),
-        {"tenant_id": tenant_id, "period_from": period_from, "period_to": period_to, "location_code": payload.locationCode},
-    ).mappings().all()
-    findings = _build_campaign_findings(payload.roleDemand, list(profile_rows), list(absence_rows), list(shift_rows))
-    status = _campaign_status(findings)
-    row = db.execute(
-        text(
-            """
-            INSERT INTO domain_hr.campaign_capacity_plans
-              (id, tenant_id, campaign_code, name, period_from, period_to, location_code,
-               role_demand, expected_volume, status, findings, created_at, updated_at)
-            VALUES
-              (:id, :tenant_id, :campaign_code, :name, :period_from, :period_to, :location_code,
-               CAST(:role_demand AS jsonb), :expected_volume, :status, CAST(:findings AS jsonb), NOW(), NOW())
-            RETURNING id, campaign_code, name, period_from, period_to, location_code,
-                      role_demand, expected_volume, status, findings
-            """
-        ),
-        {
-            "id": str(uuid4()),
-            "tenant_id": tenant_id,
-            "campaign_code": payload.campaignCode,
-            "name": payload.name,
-            "period_from": period_from,
-            "period_to": period_to,
-            "location_code": payload.locationCode,
-            "role_demand": json.dumps(payload.roleDemand),
-            "expected_volume": payload.expectedVolume,
-            "status": status,
-            "findings": json.dumps([finding.model_dump() for finding in findings]),
-        },
-    ).mappings().first()
-    db.commit()
+    svc = PersonalService(db, tenant_id)
+    profile_rows, absence_rows, shift_rows = svc.get_campaign_context(
+        payload.locationCode, period_from, period_to
+    )
+    findings = _build_campaign_findings(payload.roleDemand, profile_rows, absence_rows, shift_rows)
+    row = svc.create_campaign_capacity({
+        "id": str(uuid4()),
+        "campaign_code": payload.campaignCode,
+        "name": payload.name,
+        "period_from": period_from,
+        "period_to": period_to,
+        "location_code": payload.locationCode,
+        "role_demand": json.dumps(payload.roleDemand),
+        "expected_volume": payload.expectedVolume,
+        "status": _campaign_status(findings),
+        "findings": json.dumps([f.model_dump() for f in findings]),
+    })
     return _campaign_capacity_from_row(row)
 
 
@@ -3804,23 +3431,7 @@ async def list_field_service_plan(
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
-    params: dict[str, Any] = {"tenant_id": tenant_id}
-    where = ["tenant_id = :tenant_id"]
-    if employee_ref:
-        params["employee_ref"] = employee_ref
-        where.append("employee_ref = :employee_ref")
-    rows = db.execute(
-        text(
-            f"""
-            SELECT id, employee_ref, customer_ref, territory_code, campaign_code, visit_type,
-                   starts_at, ends_at, status, conflicts, notes
-            FROM domain_hr.field_service_plans
-            WHERE {' AND '.join(where)}
-            ORDER BY starts_at ASC, employee_ref ASC
-            """
-        ),
-        params,
-    ).mappings().all()
+    rows = PersonalService(db, tenant_id).list_field_service_plans(employee_ref=employee_ref)
     return [_field_service_from_row(row) for row in rows]
 
 
@@ -3834,75 +3445,24 @@ async def create_field_service_plan(
     ends_at = _parse_event_datetime(payload.endsAt)
     if ends_at <= starts_at:
         raise HTTPException(status_code=400, detail="endsAt must be after startsAt")
-    profile_rows = db.execute(
-        text(
-            """
-            SELECT employee_ref, status, time_model
-            FROM domain_hr.employee_time_profiles
-            WHERE tenant_id = :tenant_id AND employee_ref = :employee_ref
-            """
-        ),
-        {"tenant_id": tenant_id, "employee_ref": payload.employeeRef},
-    ).mappings().all()
-    absence_rows = db.execute(
-        text(
-            """
-            SELECT employee_ref
-            FROM domain_hr.time_entries
-            WHERE tenant_id = :tenant_id
-              AND employee_ref = :employee_ref
-              AND entry_date BETWEEN :start_date AND :end_date
-              AND entry_type IN ('Urlaub', 'Krank', 'Unbezahlt', 'Sonstiges')
-              AND status IN ('Approved', 'Genehmigt')
-            """
-        ),
-        {"tenant_id": tenant_id, "employee_ref": payload.employeeRef, "start_date": starts_at.date(), "end_date": ends_at.date()},
-    ).mappings().all()
-    calendar_rows = db.execute(
-        text(
-            """
-            SELECT id
-            FROM domain_hr.calendar_events
-            WHERE tenant_id = :tenant_id
-              AND employee_ref = :employee_ref
-              AND ends_at > :starts_at
-              AND starts_at < :ends_at
-              AND status = 'confirmed'
-            """
-        ),
-        {"tenant_id": tenant_id, "employee_ref": payload.employeeRef, "starts_at": starts_at, "ends_at": ends_at},
-    ).mappings().all()
-    conflicts = _build_field_conflicts(list(profile_rows), list(absence_rows), list(calendar_rows))
-    status = _field_status(conflicts)
-    row = db.execute(
-        text(
-            """
-            INSERT INTO domain_hr.field_service_plans
-              (id, tenant_id, employee_ref, customer_ref, territory_code, campaign_code,
-               visit_type, starts_at, ends_at, status, conflicts, notes, created_at, updated_at)
-            VALUES
-              (:id, :tenant_id, :employee_ref, :customer_ref, :territory_code, :campaign_code,
-               :visit_type, :starts_at, :ends_at, :status, CAST(:conflicts AS jsonb), :notes, NOW(), NOW())
-            RETURNING id, employee_ref, customer_ref, territory_code, campaign_code, visit_type,
-                      starts_at, ends_at, status, conflicts, notes
-            """
-        ),
-        {
-            "id": str(uuid4()),
-            "tenant_id": tenant_id,
-            "employee_ref": payload.employeeRef,
-            "customer_ref": payload.customerRef,
-            "territory_code": payload.territoryCode,
-            "campaign_code": payload.campaignCode,
-            "visit_type": payload.visitType,
-            "starts_at": starts_at,
-            "ends_at": ends_at,
-            "status": status,
-            "conflicts": json.dumps([conflict.model_dump() for conflict in conflicts]),
-            "notes": payload.notes,
-        },
-    ).mappings().first()
-    db.commit()
+    svc = PersonalService(db, tenant_id)
+    profile_rows, absence_rows, calendar_rows = svc.get_field_service_context(
+        payload.employeeRef, starts_at, ends_at
+    )
+    conflicts = _build_field_conflicts(profile_rows, absence_rows, calendar_rows)
+    row = svc.create_field_service_plan({
+        "id": str(uuid4()),
+        "employee_ref": payload.employeeRef,
+        "customer_ref": payload.customerRef,
+        "territory_code": payload.territoryCode,
+        "campaign_code": payload.campaignCode,
+        "visit_type": payload.visitType,
+        "starts_at": starts_at,
+        "ends_at": ends_at,
+        "status": _field_status(conflicts),
+        "conflicts": json.dumps([c.model_dump() for c in conflicts]),
+        "notes": payload.notes,
+    })
     return _field_service_from_row(row)
 
 
@@ -3921,88 +3481,13 @@ async def get_work_plan(
     if end_date < start_date:
         raise HTTPException(status_code=400, detail="period_to must be on or after period_from")
 
-    params = {"tenant_id": tenant_id, "period_from": start_date, "period_to": end_date}
-    profile_rows = db.execute(
-        text(
-            """
-            SELECT employee_ref, display_name, role_code, time_model, status, qualifications
-            FROM domain_hr.employee_time_profiles
-            WHERE tenant_id = :tenant_id AND status = 'active'
-            """
-        ),
-        {"tenant_id": tenant_id},
-    ).mappings().all()
-    try:
-        user_rows = db.execute(
-            text(
-                """
-                SELECT id, preferences
-                FROM domain_shared.users
-                WHERE tenant_id = :tenant_id
-                """
-            ),
-            {"tenant_id": tenant_id},
-        ).mappings().all()
-    except Exception:
-        user_rows = []
-    preferences_by_ref = {str(dict(row).get("id") or ""): _parse_preferences(dict(row).get("preferences")) for row in user_rows}
-    preferences = [
-        _planning_preference_from_profile(row, preferences_by_ref.get(str(dict(row).get("employee_ref") or "")))
-        for row in profile_rows
-    ]
-    preference_by_ref = {preference.employeeRef: preference for preference in preferences}
-
-    absence_rows = db.execute(
-        text(
-            """
-            SELECT id, employee_ref, entry_date, entry_type, status
-            FROM domain_hr.time_entries
-            WHERE tenant_id = :tenant_id
-              AND entry_date BETWEEN :period_from AND :period_to
-              AND entry_type IN ('Urlaub', 'Krank', 'Unbezahlt', 'Sonstiges')
-              AND status IN ('Approved', 'Genehmigt')
-            ORDER BY entry_date ASC, employee_ref ASC
-            """
-        ),
-        params,
-    ).mappings().all()
-    shift_rows = db.execute(
-        text(
-            """
-            SELECT id, shift_date, name, starts_at, ends_at, assigned_employee_refs, status
-            FROM domain_hr.shifts
-            WHERE tenant_id = :tenant_id AND shift_date BETWEEN :period_from AND :period_to
-            ORDER BY shift_date ASC, starts_at ASC
-            """
-        ),
-        params,
-    ).mappings().all()
-    calendar_rows = db.execute(
-        text(
-            """
-            SELECT id, employee_ref, event_type, title, starts_at, ends_at, status, conflict_level
-            FROM domain_hr.calendar_events
-            WHERE tenant_id = :tenant_id
-              AND starts_at::date <= :period_to
-              AND ends_at::date >= :period_from
-            ORDER BY starts_at ASC, employee_ref ASC
-            """
-        ),
-        params,
-    ).mappings().all()
-    field_rows = db.execute(
-        text(
-            """
-            SELECT id, employee_ref, customer_ref, visit_type, starts_at, ends_at, status
-            FROM domain_hr.field_service_plans
-            WHERE tenant_id = :tenant_id
-              AND starts_at::date <= :period_to
-              AND ends_at::date >= :period_from
-            ORDER BY starts_at ASC, employee_ref ASC
-            """
-        ),
-        params,
-    ).mappings().all()
+    data = PersonalService(db, tenant_id).get_work_plan_data(start_date, end_date)
+    profile_rows = data["profile_rows"]
+    user_rows = data["user_rows"]
+    absence_rows = data["absence_rows"]
+    shift_rows = data["shift_rows"]
+    calendar_rows = data["calendar_rows"]
+    field_rows = data["field_rows"]
 
     absence_dates_by_employee: dict[str, set[date]] = {}
     assignments: list[WorkPlanAssignmentOut] = []
@@ -4119,37 +3604,15 @@ async def get_driver_time_summary(
     db: Session = Depends(get_db),
 ):
     target_date = datum or datetime.utcnow().date().isoformat()
-    params: dict[str, Any] = {"tenant_id": tenant_id, "entry_date": target_date}
-
     try:
-        timesheet_rows = db.execute(
-            text(
-                """
-                SELECT id, entry_date, driver_name, vehicle_plate, tours, total_hours, overtime_hours, created_at
-                FROM domain_hr.driver_timesheets
-                WHERE tenant_id = :tenant_id AND entry_date = :entry_date
-                ORDER BY driver_name ASC, created_at ASC
-                """
-            ),
-            params,
-        ).mappings().all()
-        absence_rows = db.execute(
-            text(
-                """
-                SELECT employee_ref, entry_date, entry_type
-                FROM domain_hr.time_entries
-                WHERE tenant_id = :tenant_id
-                  AND entry_date = :entry_date
-                  AND entry_type IN ('Urlaub', 'Krank')
-                """
-            ),
-            params,
-        ).mappings().all()
+        data = PersonalService(db, tenant_id).get_driver_time_data(target_date)
+        timesheet_rows = data["timesheet_rows"]
+        absence_rows = data["absence_rows"]
     except Exception:
         pilot_events = _driver_time_pilot_events(target_date)
         return _build_driver_time_summary(target_date, pilot_events, source="pilot-fallback")
 
-    events = _events_from_timesheets(list(timesheet_rows))
+    events = _events_from_timesheets(timesheet_rows)
     if not events:
         pilot_events = _driver_time_pilot_events(target_date)
         return _build_driver_time_summary(target_date, pilot_events, source="pilot-empty")
@@ -4157,7 +3620,7 @@ async def get_driver_time_summary(
     return _build_driver_time_summary(
         target_date,
         events,
-        absence_ranges=_approved_absence_ranges(list(absence_rows)),
+        absence_ranges=_approved_absence_ranges(absence_rows),
         source="database",
     )
 
@@ -4169,26 +3632,14 @@ async def get_time_cockpit(
     db: Session = Depends(get_db),
 ):
     target_date = datum or datetime.utcnow().date().isoformat()
-    params: dict[str, Any] = {"tenant_id": tenant_id, "entry_date": target_date}
-
     driver_time = await get_driver_time_summary(datum=target_date, tenant_id=tenant_id, db=db)
     try:
-        rows = db.execute(
-            text(
-                """
-                SELECT id, employee_ref, entry_date, start_time, end_time, hours, entry_type, source, status
-                FROM domain_hr.time_entries
-                WHERE tenant_id = :tenant_id AND entry_date = :entry_date
-                ORDER BY employee_ref ASC, start_time ASC
-                """
-            ),
-            params,
-        ).mappings().all()
+        rows = PersonalService(db, tenant_id).get_time_cockpit_entries(target_date)
     except Exception:
         entries = _pilot_time_entries(target_date)
         return _build_time_cockpit(target_date, entries, driver_time, source="pilot-fallback")
 
-    entries = _time_rows_to_entries(list(rows))
+    entries = _time_rows_to_entries(rows)
     if not entries:
         entries = _pilot_time_entries(target_date)
         return _build_time_cockpit(target_date, entries, driver_time, source="pilot-empty")
@@ -4207,57 +3658,29 @@ async def create_stundenzettel(
     except ValueError as exc:
         raise HTTPException(status_code=400, detail="Invalid datum format") from exc
 
-    timesheet_id = str(uuid4())
-    db.execute(
-        text(
-            """
-            INSERT INTO domain_hr.driver_timesheets
-              (id, tenant_id, entry_date, driver_name, vehicle_plate, tours, total_hours, overtime_hours, signature_data, created_at, updated_at)
-            VALUES
-              (:id, :tenant_id, :entry_date, :driver_name, :vehicle_plate, CAST(:tours AS jsonb), :total_hours, :overtime_hours, :signature_data, NOW(), NOW())
-            """
-        ),
-        {
-            "id": timesheet_id,
-            "tenant_id": tenant_id,
-            "entry_date": entry_date,
-            "driver_name": payload.fahrer,
-            "vehicle_plate": payload.kennzeichen,
-            "tours": json.dumps([tour.model_dump() for tour in payload.touren]),
-            "total_hours": payload.gesamtArbeitszeit,
-            "overtime_hours": payload.ueberstunden,
-            "signature_data": payload.unterschrift,
-        },
-    )
-
     start_values = [tour.start for tour in payload.touren if tour.start]
     end_values = [tour.ende for tour in payload.touren if tour.ende]
-    start_time = min(start_values) if start_values else None
-    end_time = max(end_values) if end_values else None
-    entry_type = "Ueberstunden" if payload.ueberstunden > 0 else "Arbeit"
-
-    db.execute(
-        text(
-            """
-            INSERT INTO domain_hr.time_entries
-              (id, tenant_id, employee_ref, entry_date, start_time, end_time, hours, entry_type, source, notes, created_at, updated_at)
-            VALUES
-              (:id, :tenant_id, :employee_ref, :entry_date, :start_time, :end_time, :hours, :entry_type, 'timesheet', :notes, NOW(), NOW())
-            """
-        ),
-        {
+    timesheet_id = str(uuid4())
+    timesheet_id = PersonalService(db, tenant_id).create_stundenzettel({
+        "timesheet_id": timesheet_id,
+        "entry_date": entry_date,
+        "driver_name": payload.fahrer,
+        "vehicle_plate": payload.kennzeichen,
+        "tours": json.dumps([tour.model_dump() for tour in payload.touren]),
+        "total_hours": payload.gesamtArbeitszeit,
+        "overtime_hours": payload.ueberstunden,
+        "signature_data": payload.unterschrift,
+        "time_entry_params": {
             "id": str(uuid4()),
-            "tenant_id": tenant_id,
             "employee_ref": payload.fahrer,
             "entry_date": entry_date,
-            "start_time": start_time,
-            "end_time": end_time,
+            "start_time": min(start_values) if start_values else None,
+            "end_time": max(end_values) if end_values else None,
             "hours": payload.gesamtArbeitszeit,
-            "entry_type": entry_type,
+            "entry_type": "Ueberstunden" if payload.ueberstunden > 0 else "Arbeit",
             "notes": f"LKW {payload.kennzeichen}",
         },
-    )
-    db.commit()
+    })
     return {"ok": True, "timesheet_id": timesheet_id}
 
 
@@ -4268,26 +3691,7 @@ async def list_stundenzettel(
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
-    params: dict[str, Any] = {"tenant_id": tenant_id}
-    where = ["tenant_id = :tenant_id"]
-    if datum_von:
-        where.append("entry_date >= :datum_von")
-        params["datum_von"] = datum_von
-    if datum_bis:
-        where.append("entry_date <= :datum_bis")
-        params["datum_bis"] = datum_bis
-
-    rows = db.execute(
-        text(
-            f"""
-            SELECT id, entry_date, driver_name, vehicle_plate, tours, total_hours, overtime_hours, created_at
-            FROM domain_hr.driver_timesheets
-            WHERE {' AND '.join(where)}
-            ORDER BY entry_date DESC, created_at DESC
-            """
-        ),
-        params,
-    ).mappings().all()
+    rows = PersonalService(db, tenant_id).list_stundenzettel(datum_von, datum_bis)
 
     out: list[StundenzettelOut] = []
     for row in rows:
@@ -4329,17 +3733,10 @@ async def delete_mitarbeiter(
     db: Session = Depends(get_db),
 ):
     """Deaktiviert einen Mitarbeiter (soft-delete via is_active=FALSE)."""
-    updated = db.execute(
-        text("""
-            UPDATE domain_shared.users
-            SET is_active = FALSE, updated_at = NOW()
-            WHERE id = :user_id AND tenant_id = :tenant_id
-        """),
-        {"user_id": user_id, "tenant_id": tenant_id},
-    ).rowcount
-    if not updated:
+    try:
+        PersonalService(db, tenant_id).delete_mitarbeiter(user_id)
+    except EntityNotFoundError:
         raise HTTPException(status_code=404, detail="Mitarbeiter nicht gefunden")
-    db.commit()
 
 
 @router.delete("/absences/{absence_id}", status_code=204)
@@ -4365,20 +3762,7 @@ async def delete_shift(
     db: Session = Depends(get_db),
 ):
     """Löscht eine Schicht (nur wenn noch keine Mitarbeiter zugewiesen wurden)."""
-    row = db.execute(
-        text("SELECT id, assigned_employee_refs FROM domain_hr.shifts WHERE id = :id AND tenant_id = :tenant_id"),
-        {"id": shift_id, "tenant_id": tenant_id},
-    ).fetchone()
-    if not row:
+    try:
+        PersonalService(db, tenant_id).delete_shift(shift_id)
+    except EntityNotFoundError:
         raise HTTPException(status_code=404, detail="Schicht nicht gefunden")
-    assigned = row[1] if row[1] else []
-    if isinstance(assigned, str):
-        import json as _json
-        assigned = _json.loads(assigned)
-    if assigned:
-        raise HTTPException(status_code=400, detail="Schichten mit zugewiesenen Mitarbeitern können nicht gelöscht werden")
-    db.execute(
-        text("DELETE FROM domain_hr.shifts WHERE id = :id AND tenant_id = :tenant_id"),
-        {"id": shift_id, "tenant_id": tenant_id},
-    )
-    db.commit()
