@@ -506,6 +506,18 @@ Stand: `2026-05-12`
 **Checks:** `pnpm --filter @valero-neuroerp/frontend-web type-check`; `python scripts/agent_workboard_supervisor.py validate`; `node scripts/docs-governance-check.cjs`; `node scripts/docs-markdown-check.cjs docs/project-context/ux-excellence-operating-standard-2026-05-13.md docs/agent-ops/active-workboard.md docs/agent-ops/slices/UX-DMS-001.yaml`; `git diff --check`
 **Offene Risiken:** `dokumente/ablage.tsx` hat bereits einen operativen Nachweisrahmen; dieser Slice fokussiert zentrale QM-Dokumente und technische DMS-Anbindung.
 
+## UX-QS-001
+
+**Von:** Codex
+**Owner:** Codex
+**Stand:** reserviert 2026-05-15
+**Ziel des Slices:** Qualitaet/Produktion fuer Pruef-, Sperr- und Freigabeprozesse mit Rollenfokus, naechster Aktion, Nachweisstatus und normaler Buero-Sprache fuehren.
+**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/agent-ops/slices/UX-QS-001.yaml`, `packages/frontend-web/src/pages/annahme/klaerung-gesperrt.tsx`, `packages/frontend-web/src/pages/qualitaet/ausnahmen.tsx`, `docs/project-context/ux-excellence-operating-standard-2026-05-13.md`
+**Abnahmekriterien:** Gesperrte-Ware-Klaerung und QS-Ausnahmen zeigen Rollenfokus, Pruef-/Eskalationsplan, Managemententscheidung, Next Action, Nachweislink und CRUD-/Workflow-Abdeckung; bestehende Entscheidung, Begruendung, Liste und Agent-Vorschlaege bleiben erhalten.
+**Erledigt:** Reserviert; Umsetzung folgt.
+**Checks:** offen
+**Offene Risiken:** `annahme/qualitaets-check.tsx` hat bereits einen operativen Fallkopf; dieser Slice fokussiert die Klär- und Eskalationsraeume.
+
 ## TODO-SPRINT-001
 
 **Von:** Cursor<br>
