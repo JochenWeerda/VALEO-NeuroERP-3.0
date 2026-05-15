@@ -117,13 +117,14 @@ Eine Seite gilt erst als UX-ready, wenn sie mindestens diese Punkte erfuellt:
 | `UX-SALES-001` | Sales/Verkauf | abgeschlossen | Verkaufsauftraege nutzen Rollenfokus, Auftrag-Follow-up-Plan, Managemententscheidung, Next Action und CRUD-/Fulfillment-Abdeckung. |
 | `UX-SALES-002` | Sales/Verkauf | abgeschlossen | Angebote nutzen Rollenfokus, Angebots-Follow-up-Plan, Managemententscheidung, Next Action und CRUD-/Conversion-Abdeckung. |
 | `UX-SALES-003` | Sales/Verkauf | abgeschlossen | Auftragseditor nutzt Rollenfokus, Auftrags-Erfassungsplan, Managemententscheidung, Next Action und CRUD-/Folgebeleg-Abdeckung. |
+| `UX-SALES-004` | Sales/Verkauf | abgeschlossen | Rechnungs- und Lieferschein-Editor nutzen Rollenfokus, Folgebelegplan, Managemententscheidung, Next Action und CRUD-/Nachweis-Abdeckung. |
 | `UX-LOGISTIK-001` | Logistik | abgeschlossen | Tourenplanung nutzt Rollenfokus, Dispo-Aufgabenplan, Managemententscheidung, Next Action und CRUD-/Transport-Abdeckung. |
 | `UX-LOGISTIK-002` | Logistik | abgeschlossen | Frachtbriefe nutzen Rollenfokus, Dokument-Follow-up-Plan, Managemententscheidung, Next Action und CRUD-/Nachweis-Abdeckung. |
 
 Naechste Rollout-Slices:
 
 - `UX-EINKAUF-005`: Lieferantenbewertung mit Bewertungsplan, Eskalationssicht und Nachweisabdeckung.
-- `UX-SALES-004`: Rechnungs- und Lieferschein-Editor mit Entscheidungsbild, Folgebelegplan und Nachweisabdeckung.
+- `UX-SALES-005`: Gutschriften- und Retourenfolge mit Entscheidungsbild, Freigabeplan und Nachweisabdeckung.
 - `UX-LOGISTIK-003`: Waagearbeitsflaechen mit klarer Stopper-/Nachweissicht.
 
 ## Nicht-Ziel

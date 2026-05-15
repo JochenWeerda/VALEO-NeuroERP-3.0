@@ -30,6 +30,50 @@ import { LieferscheinDruckDialog, type PrintOptions } from '@/components/sales/L
 import { apiClient } from '@/lib/api-client'
 import { ModuleToolbar } from '@/components/navigation/ModuleToolbar'
 import { MoreHorizontal, Check, Printer, Save } from 'lucide-react'
+import {
+  CrudCapabilityChecklist,
+  EvidenceTemplateLink,
+  ManagementDecisionPanel,
+  NextActionPanel,
+  OperationalTaskPlan,
+  RoleFocusBar,
+  type UxTaskItem,
+} from '@/components/workflow'
+
+type DeliveryRoleFocus = 'all' | 'shipping' | 'sales' | 'warehouse' | 'billing' | 'management'
+
+const deliveryRoleProfiles: Array<{ id: DeliveryRoleFocus; label: string; description: string }> = [
+  {
+    id: 'all',
+    label: 'Alle Rollen',
+    description: 'Zeigt den Lieferschein fuer Versand, Vertrieb, Lager, Faktura und Leitung.',
+  },
+  {
+    id: 'shipping',
+    label: 'Versand',
+    description: 'Fokus auf Kunde, Lieferdatum, Druck und Buchung.',
+  },
+  {
+    id: 'sales',
+    label: 'Vertrieb',
+    description: 'Fokus auf Kundenbezug, Positionen und Rechnungsfolge.',
+  },
+  {
+    id: 'warehouse',
+    label: 'Lager',
+    description: 'Fokus auf Artikel, Menge, Lkw und Auslieferstatus.',
+  },
+  {
+    id: 'billing',
+    label: 'Faktura',
+    description: 'Fokus auf Rechnungsbezug, Gutschriftkennzeichen und Fakturastatus.',
+  },
+  {
+    id: 'management',
+    label: 'Leitung',
+    description: 'Fokus auf Lieferfaehigkeit, Stopper und naechste Aktion.',
+  },
+]
 
 type DeliveryNotePosition = {
   positionNumber: number
@@ -114,6 +158,7 @@ export default function DeliveryEditorNewPage(): JSX.Element {
   const [showCustomerDialog, setShowCustomerDialog] = useState(false)
   const [showArticleDialog, setShowArticleDialog] = useState(false)
   const [showPrintDialog, setShowPrintDialog] = useState(false)
+  const [roleFocus, setRoleFocus] = useState<DeliveryRoleFocus>('all')
 
   const handleCustomerSelect = (customer: Customer): void => {
     setDeliveryNote((prev) => ({
@@ -215,11 +260,128 @@ export default function DeliveryEditorNewPage(): JSX.Element {
     }
   }
 
+  const hasCustomer = Boolean(deliveryNote.customerId)
+  const hasPositions = deliveryNote.positions.length > 0
+  const hasDeliveryDate = Boolean(deliveryNote.deliveryDate)
+  const hasTruckOrBranch = Boolean(deliveryNote.truckNumber || deliveryNote.branch)
+  const hasInvoiceFollowUp = Boolean(deliveryNote.invoiceNumber)
+  const canBookDelivery = hasCustomer && hasPositions && hasDeliveryDate
+  const nextDeliveryAction = !hasCustomer
+    ? 'Kunden fuer den Lieferschein auswaehlen.'
+    : !hasPositions
+      ? 'Mindestens eine Artikelposition erfassen und mit Zeile OK uebernehmen.'
+      : !hasDeliveryDate
+        ? 'Lieferdatum setzen.'
+        : !deliveryNote.isPrinted
+          ? 'Lieferschein speichern oder drucken und buchen.'
+          : !deliveryNote.isDelivered
+            ? 'Auslieferstatus pruefen.'
+            : hasInvoiceFollowUp
+              ? 'Rechnungsfolge pruefen.'
+              : 'Fakturierung aus dem Lieferschein vorbereiten.'
+  const deliveryTaskItems: UxTaskItem[] = [
+    {
+      label: 'Kunde festlegen',
+      done: hasCustomer,
+      hint: hasCustomer ? `${deliveryNote.customerName || deliveryNote.customerId} ist zugeordnet.` : 'Kunde auswaehlen, bevor Positionen final gebucht werden.',
+    },
+    {
+      label: 'Positionen uebernehmen',
+      done: hasPositions,
+      hint: hasPositions ? `${deliveryNote.positions.length} Positionen im Lieferschein.` : 'Artikel auswaehlen, Menge setzen und Zeile OK klicken.',
+    },
+    {
+      label: 'Lieferkopf pruefen',
+      done: hasDeliveryDate && hasTruckOrBranch,
+      hint: hasDeliveryDate ? `Lieferdatum ${deliveryNote.deliveryDate}, Lkw/Niederlassung ${deliveryNote.truckNumber || deliveryNote.branch || 'offen'}.` : 'Lieferdatum, Lkw oder Niederlassung klaeren.',
+    },
+    {
+      label: 'Druck, Buchung und Faktura sichern',
+      done: deliveryNote.isPrinted || hasInvoiceFollowUp,
+      hint: hasInvoiceFollowUp ? `Rechnung ${deliveryNote.invoiceNumber} ist verknuepft.` : 'Druck bucht den Lieferschein; danach Fakturierung pruefen.',
+    },
+  ]
+  const deliveryCrudCapabilities = [
+    {
+      key: 'create',
+      label: 'Anlegen/Speichern',
+      available: canBookDelivery,
+      hint: canBookDelivery ? 'Lieferschein kann gespeichert werden.' : 'Kunde, Positionen und Lieferdatum sind Pflicht.',
+    },
+    {
+      key: 'read',
+      label: 'Lesen',
+      available: true,
+      hint: 'Kopf, Kunde, Positionen, Summen, Druck- und Fakturastatus sind sichtbar.',
+    },
+    {
+      key: 'update',
+      label: 'Bearbeiten',
+      available: true,
+      hint: 'Kopf, Kunde, Positionen, Mengen und Bezug zur Rechnung koennen gepflegt werden.',
+    },
+    {
+      key: 'approve',
+      label: 'Drucken/Buchen',
+      available: canBookDelivery,
+      hint: canBookDelivery ? 'Druckdialog bucht den Lieferschein im bestehenden Prozess.' : 'Druck/Buchung brauchen Kunde und Positionen.',
+    },
+    {
+      key: 'follow-up',
+      label: 'Rechnungsfolge',
+      available: deliveryNote.isPrinted || hasInvoiceFollowUp,
+      hint: hasInvoiceFollowUp ? 'Rechnungsnummer ist hinterlegt.' : 'Nach Druck/Buchung kann die Fakturierung folgen.',
+    },
+    {
+      key: 'audit',
+      label: 'Nachverfolgung',
+      available: Boolean(deliveryNote.deliveryNumber),
+      hint: 'Lieferscheinnummer, Druckstatus, Auslieferstatus und Rechnung bilden die Belegspur.',
+    },
+  ]
+
   return (
     <div className="space-y-4 p-4">
       <ModuleToolbar backTarget="/sales" closeTarget="/sales" title="Lieferschein-Erfassung" />
       <div className="border-b-2 border-green-600 pb-2">
         <h1 className="text-xl font-bold text-green-700">LIEFERSCHEIN-ERFASSUNG</h1>
+      </div>
+
+      <div className="space-y-4">
+        <RoleFocusBar
+          roles={deliveryRoleProfiles}
+          value={roleFocus}
+          onChange={setRoleFocus}
+          visibleCount={roleFocus === 'all' ? 5 : 1}
+          totalCount={5}
+        />
+        <ManagementDecisionPanel
+          decision={{
+            allowed: canBookDelivery,
+            allowedLabel: 'Lieferfaehig',
+            blockedLabel: 'Noch nicht lieferfaehig',
+            summary: canBookDelivery
+              ? `Der Lieferschein ist fachlich bereit. ${deliveryNote.positions.length} Positionen fuer ${deliveryNote.customerName || deliveryNote.customerId}.`
+              : `Vor Druck oder Buchung ist noch etwas offen: ${nextDeliveryAction}`,
+            blockerCount: [!hasCustomer, !hasPositions, !hasDeliveryDate].filter(Boolean).length,
+            nextFocus: nextDeliveryAction,
+            template: {
+              label: 'Lieferscheinliste oeffnen',
+              href: '/sales/lieferungen',
+            },
+          }}
+        />
+        <div className="grid gap-4 lg:grid-cols-[1.35fr_1fr]">
+          <OperationalTaskPlan title="Lieferschein-Folgebelegplan" items={deliveryTaskItems} />
+          <div className="space-y-3">
+            <NextActionPanel
+              action={nextDeliveryAction}
+              tone={canBookDelivery ? 'emerald' : hasCustomer ? 'amber' : 'blue'}
+            />
+            <EvidenceTemplateLink link={{ label: 'Rechnungsliste pruefen', href: '/sales/rechnungen' }} />
+          </div>
+        </div>
+        <CrudCapabilityChecklist capabilities={deliveryCrudCapabilities} />
       </div>
 
       {/* Lieferschein-Erfassung Header */}
