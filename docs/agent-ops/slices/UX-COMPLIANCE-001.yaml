@@ -1,0 +1,29 @@
+id: UX-COMPLIANCE-001
+title: Compliance-Center und QS-Checkliste mit UX-Exzellenzbaukasten
+owner: Codex
+status: reserviert
+created: 2026-05-15
+goal: >
+  Compliance-Center und QS-Checkliste mit klarer Pruefaufgabe, Risiko,
+  naechster Aktion, Nachweisfuehrung und CRUD-/Workflow-Klarheit nach UX-Standard fuehren.
+file_ownership:
+  - docs/agent-ops/active-workboard.md
+  - docs/agent-ops/slices/UX-COMPLIANCE-001.yaml
+  - packages/frontend-web/src/pages/admin/compliance-dashboard.tsx
+  - packages/frontend-web/src/pages/compliance/qs-checkliste.tsx
+  - docs/project-context/ux-excellence-operating-standard-2026-05-13.md
+acceptance_criteria:
+  - Compliance-Center zeigt Rollenfokus, Pruefplan, Managemententscheidung, Next Action und Nachweislink.
+  - QS-Checkliste zeigt Rollenfokus, Pruefplan, Managemententscheidung, Next Action und CRUD-/Workflow-Abdeckung.
+  - Bestehende Reports, Detailnavigation, Agent-Panel, Tastaturleiste und Tabellen bleiben erhalten.
+  - Typecheck und Doku-Checks sind gruen.
+checks:
+  - pnpm --filter @valero-neuroerp/frontend-web type-check
+  - python scripts/agent_workboard_supervisor.py validate
+  - node scripts/docs-governance-check.cjs
+  - node scripts/docs-markdown-check.cjs docs/project-context/ux-excellence-operating-standard-2026-05-13.md docs/agent-ops/active-workboard.md docs/agent-ops/slices/UX-COMPLIANCE-001.yaml
+  - git diff --check
+done:
+  - Slice reserviert; Umsetzung folgt.
+risks:
+  - Meldewesen-Konsole bleibt Spezial-Folgeslice; dieser Slice fokussiert Dashboard und QS-Pruefaufgabe.
