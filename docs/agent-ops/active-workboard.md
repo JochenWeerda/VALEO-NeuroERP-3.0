@@ -566,6 +566,18 @@ Stand: `2026-05-12`
 **Checks:** `pnpm --filter @valero-neuroerp/frontend-web type-check`; `python scripts/agent_workboard_supervisor.py validate`; `node scripts/docs-governance-check.cjs`; `node scripts/docs-markdown-check.cjs docs/project-context/ux-excellence-operating-standard-2026-05-13.md docs/agent-ops/active-workboard.md docs/agent-ops/slices/UX-ADMIN-001.yaml`; `git diff --check`
 **Offene Risiken:** DMS-Setup ist bereits ueber `UX-DMS-001` abgedeckt; weitere Admin-Spezialseiten bleiben Folgeslices.
 
+## UX-FUHRPARK-001
+
+**Von:** Codex
+**Owner:** Codex
+**Stand:** reserviert 2026-05-15
+**Ziel des Slices:** Fuhrparkseiten fuer Fahrzeugstatus, Dokumente, Fristen, naechste Aktion und Nachweisfuehrung nach UX-Standard fuehren.
+**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/agent-ops/slices/UX-FUHRPARK-001.yaml`, `packages/frontend-web/src/pages/fuhrpark/fahrzeuge.tsx`, `packages/frontend-web/src/pages/fuhrpark/ausgehende-belege-dokumente.tsx`, `docs/project-context/ux-excellence-operating-standard-2026-05-13.md`
+**Abnahmekriterien:** Fahrzeugliste und ausgehende Fuhrpark-Dokumente zeigen Rollenfokus, Fristen-/Dokumentplan, Managemententscheidung, Next Action, Nachweislink und CRUD-/Workflow-Abdeckung; bestehende Liste, Suche, Export, Quicklinks und Dokument-CRUD bleiben erhalten.
+**Erledigt:** Reserviert; Umsetzung folgt.
+**Checks:** offen
+**Offene Risiken:** Fuhrpark-Menues und Detailstammdaten bleiben Folgeslices; dieser Slice fokussiert Status-/Fristen- und Dokumentsteuerung.
+
 ## TODO-SPRINT-001
 
 **Von:** Cursor<br>
