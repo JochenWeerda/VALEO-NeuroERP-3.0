@@ -123,12 +123,13 @@ Eine Seite gilt erst als UX-ready, wenn sie mindestens diese Punkte erfuellt:
 | `UX-LOGISTIK-001` | Logistik | abgeschlossen | Tourenplanung nutzt Rollenfokus, Dispo-Aufgabenplan, Managemententscheidung, Next Action und CRUD-/Transport-Abdeckung. |
 | `UX-LOGISTIK-002` | Logistik | abgeschlossen | Frachtbriefe nutzen Rollenfokus, Dokument-Follow-up-Plan, Managemententscheidung, Next Action und CRUD-/Nachweis-Abdeckung. |
 | `UX-LOGISTIK-003` | Logistik/Waage | abgeschlossen | Waagearbeitsflaechen nutzen Rollenfokus, Waage-Aufgabenplan, Stopperentscheidung, Next Action und CRUD-/Nachweis-Abdeckung. |
+| `UX-LOGISTIK-004` | Logistik/Waage | abgeschlossen | Hofliste und Waagenliste nutzen Rollenfokus, Prioritaetsplan, Stopperentscheidung, Next Action und CRUD-/Nachweis-Abdeckung. |
 
 Naechste Rollout-Slices:
 
 - `UX-EINKAUF-006`: Retouren und Gutschriften/Belastungen mit Freigabeplan, Stoppern und Nachweisabdeckung.
 - `UX-SALES-006`: Verkaufslisten und Dashboards mit Prioritaet, naechster Aktion und Nachweisstatus.
-- `UX-LOGISTIK-004`: Hofliste und Wiegescheinliste mit Stopper-, Prioritaets- und Nachweissicht.
+- `UX-LOGISTIK-005`: Logistik-/Waage-Dashboards mit Rollenfokus, Prioritaeten und Kettennachweis.
 
 ## Nicht-Ziel
 

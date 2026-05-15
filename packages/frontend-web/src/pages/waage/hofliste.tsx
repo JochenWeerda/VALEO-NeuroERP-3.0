@@ -26,6 +26,26 @@ import {
   type WeighingTicket,
 } from '@/lib/api/weighing-tickets'
 import { Plus, RefreshCw, Scale } from 'lucide-react'
+import {
+  CrudCapabilityChecklist,
+  EvidenceTemplateLink,
+  ManagementDecisionPanel,
+  NextActionPanel,
+  OperationalTaskPlan,
+  RoleFocusBar,
+  type UxTaskItem,
+} from '@/components/workflow'
+
+type YardRoleFocus = 'all' | 'scale' | 'yard' | 'dispatch' | 'quality' | 'management'
+
+const yardRoleProfiles: Array<{ id: YardRoleFocus; label: string; description: string }> = [
+  { id: 'all', label: 'Alle Rollen', description: 'Zeigt die Hofliste fuer Waage, Hof, Disposition, QS und Leitung.' },
+  { id: 'scale', label: 'Waage', description: 'Fokus auf offene Wiegescheine, Zweit-Wiegung und Aktualisierung.' },
+  { id: 'yard', label: 'Hof', description: 'Fokus auf Fahrzeuge, Wartepositionen und naechste Bewegung.' },
+  { id: 'dispatch', label: 'Disposition', description: 'Fokus auf Artikelgruppe, Kontraktfolge und Prioritaet.' },
+  { id: 'quality', label: 'QS', description: 'Fokus auf Artikelgruppe, Notizen und Klaerbedarf.' },
+  { id: 'management', label: 'Leitung', description: 'Fokus auf Rueckstand, Stopper und naechste Aktion.' },
+]
 
 export default function HoflistePage(): JSX.Element {
   const { toast } = useToast()
@@ -33,6 +53,7 @@ export default function HoflistePage(): JSX.Element {
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedTicketId, setSelectedTicketId] = useState<string | null>(null)
   const [showNewDialog, setShowNewDialog] = useState(false)
+  const [roleFocus, setRoleFocus] = useState<YardRoleFocus>('all')
 
   // New weighing form state
   const [formArticleGroup, setFormArticleGroup] = useState<string>('')
@@ -58,10 +79,52 @@ export default function HoflistePage(): JSX.Element {
     return openTickets.filter(
       (t) =>
         t.ticket_number.toLowerCase().includes(sl) ||
-        (t.vehicle_plate && t.vehicle_plate.toLowerCase().includes(sl)) ||
-        (t.article_group && t.article_group.toLowerCase().includes(sl))
+        (t.vehicle_plate?.toLowerCase().includes(sl)) ||
+        (t.article_group?.toLowerCase().includes(sl))
     )
   }, [openTickets, searchTerm])
+  const selectedTicket = openTickets.find((ticket) => ticket.id === selectedTicketId)
+  const hasOpenTickets = openTickets.length > 0
+  const hasSelection = Boolean(selectedTicketId)
+  const hasNewTicketDraft = Boolean(formVehiclePlate || formArticleGroup || formArticleId || formNotes)
+  const yardIsWorkable = hasOpenTickets || hasNewTicketDraft
+  const yardNextAction = hasSelection
+    ? `Zweit-Wiegung fuer ${selectedTicket?.ticket_number ?? 'markierten Wiegeschein'} durchfuehren.`
+    : hasOpenTickets
+      ? 'Naechsten offenen Wiegeschein markieren.'
+      : hasNewTicketDraft
+        ? 'Neue Wiegung im Dialog vollstaendig anlegen.'
+        : 'Neue Wiegung anlegen oder Liste aktualisieren.'
+  const yardTaskItems: UxTaskItem[] = [
+    {
+      label: 'Hoflage pruefen',
+      done: hasOpenTickets,
+      hint: hasOpenTickets ? `${openTickets.length} offene Wiegescheine im Hof.` : 'Aktuell keine offenen Wiegescheine.',
+    },
+    {
+      label: 'Fahrzeug priorisieren',
+      done: hasSelection,
+      hint: hasSelection ? `${selectedTicket?.ticket_number ?? 'Wiegeschein'} ist markiert.` : 'Ein Fahrzeug oder Ticket in der Liste markieren.',
+    },
+    {
+      label: 'Zweit-Wiegung vorbereiten',
+      done: hasSelection && !updateMutation.isPending,
+      hint: hasSelection ? 'Zweit-Wiegung kann ueber F2 gestartet werden.' : 'F2 ist aktiv, sobald ein Ticket markiert ist.',
+    },
+    {
+      label: 'Nachweis sichern',
+      done: hasOpenTickets,
+      hint: hasOpenTickets ? 'Ticketnummer, Fahrzeug, Artikelgruppe und Status sind sichtbar.' : 'Nachweis entsteht mit der ersten Wiegung.',
+    },
+  ]
+  const yardCrudCapabilities = [
+    { key: 'create', label: 'Neue Wiegung', available: true, hint: 'Neue Wiegung kann per F1 oder Button angelegt werden.' },
+    { key: 'read', label: 'Lesen', available: true, hint: 'Offene Tickets, Fahrzeug, Artikelgruppe und Status sind sichtbar.' },
+    { key: 'update', label: 'Zweit-Wiegung', available: hasSelection, hint: hasSelection ? 'Markiertes Ticket kann geschlossen werden.' : 'Zweit-Wiegung braucht eine markierte Zeile.' },
+    { key: 'filter', label: 'Suchen', available: true, hint: 'Suche filtert nach Nummer, Kennzeichen und Artikelgruppe.' },
+    { key: 'evidence', label: 'Nachweis', available: hasOpenTickets, hint: hasOpenTickets ? 'Hofliste bildet den operativen Nachweis offener Fahrzeuge.' : 'Kein offener Nachweis in der aktuellen Liste.' },
+    { key: 'audit', label: 'Pruefspur', available: true, hint: 'Aktualisierung, Anlage und Zweit-Wiegung laufen ueber bestehende API-Aktionen.' },
+  ]
 
   const resetForm = useCallback(() => {
     setFormArticleGroup('')
@@ -172,6 +235,29 @@ export default function HoflistePage(): JSX.Element {
         <Badge variant="secondary" className="text-sm">
           {openTickets.length} offen
         </Badge>
+      </div>
+
+      <div className="space-y-4">
+        <RoleFocusBar roles={yardRoleProfiles} value={roleFocus} onChange={setRoleFocus} visibleCount={roleFocus === 'all' ? 5 : 1} totalCount={5} />
+        <ManagementDecisionPanel
+          decision={{
+            allowed: yardIsWorkable,
+            allowedLabel: 'Arbeitsfaehig',
+            blockedLabel: 'Keine aktive Hofarbeit',
+            summary: yardIsWorkable ? `${openTickets.length} offene Wiegescheine, ${filteredTickets.length} nach Suche sichtbar.` : `Aktuell ist kein Fahrzeug offen. ${yardNextAction}`,
+            blockerCount: yardIsWorkable ? 0 : 1,
+            nextFocus: yardNextAction,
+            template: { label: 'Wiegungen oeffnen', href: '/waage/wiegungen' },
+          }}
+        />
+        <div className="grid gap-4 lg:grid-cols-[1.35fr_1fr]">
+          <OperationalTaskPlan title="Hof-Prioritaetsplan" items={yardTaskItems} />
+          <div className="space-y-3">
+            <NextActionPanel action={yardNextAction} tone={yardIsWorkable ? 'emerald' : 'blue'} />
+            <EvidenceTemplateLink link={{ label: 'Wiegescheinliste pruefen', href: '/waage/liste' }} />
+          </div>
+        </div>
+        <CrudCapabilityChecklist capabilities={yardCrudCapabilities} />
       </div>
 
       {/* Toolbar */}

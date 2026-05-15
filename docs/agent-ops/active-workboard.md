@@ -390,10 +390,12 @@ Stand: `2026-05-12`
 
 **Von:** Codex
 **Owner:** Codex
-**Stand:** reserviert 2026-05-15
+**Stand:** abgeschlossen 2026-05-15
 **Ziel des Slices:** Hofliste und Waagenliste auf den UX-Exzellenzbaukasten ziehen: Rollenfokus, Prioritaetsplan, Stopperentscheidung, Next Action und CRUD-/Nachweis-Abdeckung.
 **Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/agent-ops/slices/UX-LOGISTIK-004.yaml`, `packages/frontend-web/src/pages/waage/hofliste.tsx`, `packages/frontend-web/src/pages/waage/liste.tsx`, `docs/project-context/ux-excellence-operating-standard-2026-05-13.md`
 **Abnahmekriterien:** Hofliste und Waagenliste zeigen Rollenfokus fuer Waage, Hof, Disposition, QS und Leitung; Prioritaetsplan fuehrt offene Vorgange, Eichung, Suche und naechste Aktion; Stopperentscheidung zeigt arbeitsfaehig/blockiert; CRUD-/Nachweis-Abdeckung ist sichtbar; Typecheck und Doku-Checks sind gruen.
+**Erledigt:** `waage/hofliste.tsx` und `waage/liste.tsx` nutzen den UX-Baukasten fuer Rollenfokus, Prioritaetsplan, Stopperentscheidung, Next Action und CRUD-/Nachweis-Abdeckung. Bestehende Hotkeys, Tabellen, Anlage, Zweit-Wiegung, Suche, Export, OperationalCaseHeader und Kettenkontext bleiben erhalten. UX-Standard markiert `UX-LOGISTIK-004` als abgeschlossen.
+**Checks:** `pnpm --filter @valero-neuroerp/frontend-web type-check`; `python scripts/agent_workboard_supervisor.py validate`; `node scripts/docs-governance-check.cjs`; `node scripts/docs-markdown-check.cjs docs/project-context/ux-excellence-operating-standard-2026-05-13.md docs/agent-ops/active-workboard.md docs/agent-ops/slices/UX-LOGISTIK-004.yaml`; `git diff --check`
 **Offene Risiken:** Waage-Hardware- und Echtzeit-Sensorik bleiben ausserhalb dieses Slice.
 
 ## TODO-SPRINT-001
