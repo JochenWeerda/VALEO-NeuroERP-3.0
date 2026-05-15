@@ -1,0 +1,27 @@
+id: UX-SALES-008
+title: Sales-Assistenz fuer Angebots- und Auftragsuebergaben
+owner: Codex
+status: reserviert
+created: 2026-05-15
+goal: >
+  Angebots-Erfassung als gefuehrte Sales-Assistenz fuer Angebots- und
+  Auftragsuebergaben mit naechster Aktion, Nachweisstatus und
+  Abschlussentscheidung fuehren.
+file_ownership:
+  - docs/agent-ops/active-workboard.md
+  - docs/agent-ops/slices/UX-SALES-008.yaml
+  - packages/frontend-web/src/pages/sales/angebot-erstellen.tsx
+  - docs/project-context/ux-excellence-operating-standard-2026-05-13.md
+acceptance_criteria:
+  - Angebots-Erfassung zeigt Rollenfokus fuer Vertrieb, Innendienst, Auftragsabwicklung, Finance und Leitung.
+  - Uebergabeplan macht Kunde, Positionen, Speichern, Druck/Nachweis und Auftragserzeugung sichtbar.
+  - Managemententscheidung und Next Action zeigen, ob das Angebot in einen Auftrag uebergeben werden kann.
+  - CRUD-/Workflow-Abdeckung ist fuer Anlage, Aenderung, Druck, DMS, Loeschen und Auftraguebergabe sichtbar.
+checks:
+  - pnpm --filter @valero-neuroerp/frontend-web type-check
+  - python scripts/agent_workboard_supervisor.py validate
+  - node scripts/docs-governance-check.cjs
+  - node scripts/docs-markdown-check.cjs docs/project-context/ux-excellence-operating-standard-2026-05-13.md docs/agent-ops/active-workboard.md docs/agent-ops/slices/UX-SALES-008.yaml
+  - git diff --check
+risks:
+  - Die Angebotsliste ist bereits ueber UX-SALES-002 abgedeckt; dieser Slice fokussiert die Erfassung und Uebergabe.

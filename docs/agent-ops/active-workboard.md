@@ -470,6 +470,18 @@ Stand: `2026-05-12`
 **Checks:** `pnpm --filter @valero-neuroerp/frontend-web type-check`; `python scripts/agent_workboard_supervisor.py validate`; `node scripts/docs-governance-check.cjs`; `node scripts/docs-markdown-check.cjs docs/project-context/ux-excellence-operating-standard-2026-05-13.md docs/agent-ops/active-workboard.md docs/agent-ops/slices/UX-EINKAUF-008.yaml`; `git diff --check`
 **Offene Risiken:** OCR hat aktuell keine eigene sichtbare Einkaufsseite; der Slice behandelt die vorhandenen Ausnahmeflaechen EDI/Lieferantenportal und Service Entry Sheets.
 
+## UX-SALES-008
+
+**Von:** Codex
+**Owner:** Codex
+**Stand:** reserviert 2026-05-15
+**Ziel des Slices:** Angebots-Erfassung als gefuehrte Sales-Assistenz fuer Angebots-/Auftragsuebergaben mit naechster Aktion, Nachweisstatus und Abschlussentscheidung fuehren.
+**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/agent-ops/slices/UX-SALES-008.yaml`, `packages/frontend-web/src/pages/sales/angebot-erstellen.tsx`, `docs/project-context/ux-excellence-operating-standard-2026-05-13.md`
+**Abnahmekriterien:** Angebots-Erfassung zeigt Rollenfokus, Uebergabeplan, Management-/Abschlussentscheidung, Next Action, Nachweislink und CRUD-/Workflow-Abdeckung; bestehende Erfassungs-, Druck-, DMS- und Auftraguebergabe-Funktionen bleiben erhalten.
+**Erledigt:** Reserviert; Umsetzung folgt.
+**Checks:** offen
+**Offene Risiken:** Die Angebotsliste ist bereits ueber `UX-SALES-002` abgedeckt; dieser Slice fokussiert die eigentliche Erfassungs- und Uebergabemaske.
+
 ## TODO-SPRINT-001
 
 **Von:** Cursor<br>
