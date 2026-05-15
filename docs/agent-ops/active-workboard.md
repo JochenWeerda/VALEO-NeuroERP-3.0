@@ -474,12 +474,12 @@ Stand: `2026-05-12`
 
 **Von:** Codex
 **Owner:** Codex
-**Stand:** reserviert 2026-05-15
+**Stand:** abgeschlossen 2026-05-15
 **Ziel des Slices:** Angebots-Erfassung als gefuehrte Sales-Assistenz fuer Angebots-/Auftragsuebergaben mit naechster Aktion, Nachweisstatus und Abschlussentscheidung fuehren.
 **Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/agent-ops/slices/UX-SALES-008.yaml`, `packages/frontend-web/src/pages/sales/angebot-erstellen.tsx`, `docs/project-context/ux-excellence-operating-standard-2026-05-13.md`
 **Abnahmekriterien:** Angebots-Erfassung zeigt Rollenfokus, Uebergabeplan, Management-/Abschlussentscheidung, Next Action, Nachweislink und CRUD-/Workflow-Abdeckung; bestehende Erfassungs-, Druck-, DMS- und Auftraguebergabe-Funktionen bleiben erhalten.
-**Erledigt:** Reserviert; Umsetzung folgt.
-**Checks:** offen
+**Erledigt:** `sales/angebot-erstellen.tsx` nutzt den UX-Baukasten fuer Rollenfokus, Uebergabeplan, Managemententscheidung, Next Action, Nachweislink und CRUD-/Workflow-Abdeckung. Die bestehende Angebots-Erfassung, Suche, Positionserfassung, Druck, DMS-Anhang, Loeschen und Auftraguebergabe bleiben erhalten.
+**Checks:** `pnpm --filter @valero-neuroerp/frontend-web type-check`; `python scripts/agent_workboard_supervisor.py validate`; `node scripts/docs-governance-check.cjs`; `node scripts/docs-markdown-check.cjs docs/project-context/ux-excellence-operating-standard-2026-05-13.md docs/agent-ops/active-workboard.md docs/agent-ops/slices/UX-SALES-008.yaml`; `git diff --check`
 **Offene Risiken:** Die Angebotsliste ist bereits ueber `UX-SALES-002` abgedeckt; dieser Slice fokussiert die eigentliche Erfassungs- und Uebergabemaske.
 
 ## TODO-SPRINT-001

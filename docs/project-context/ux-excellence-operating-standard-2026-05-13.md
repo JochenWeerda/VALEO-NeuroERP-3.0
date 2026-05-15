@@ -125,6 +125,7 @@ Eine Seite gilt erst als UX-ready, wenn sie mindestens diese Punkte erfuellt:
 | `UX-SALES-005` | Sales/Verkauf | abgeschlossen | Gutschriften-Editor nutzt Rollenfokus, Freigabeplan, Managemententscheidung, Next Action und CRUD-/Nachweis-Abdeckung. |
 | `UX-SALES-006` | Sales/Verkauf | abgeschlossen | Verkaufsdashboard, Rechnungs- und Lieferlisten nutzen Rollenfokus, Prioritaetsplan, Managemententscheidung, Next Action und CRUD-/Nachweis-Abdeckung. |
 | `UX-SALES-007` | Sales/Verkauf | abgeschlossen | Moderne Sales-Auftragssicht nutzt Rollenfokus, Eskalationsplan, Managemententscheidung, Next Action und CRUD-/Nachweis-Abdeckung. |
+| `UX-SALES-008` | Sales/Verkauf | abgeschlossen | Angebots-Erfassung nutzt Rollenfokus, Uebergabeplan, Managemententscheidung, Next Action, Nachweislink und CRUD-/Workflow-Abdeckung. |
 | `UX-LOGISTIK-001` | Logistik | abgeschlossen | Tourenplanung nutzt Rollenfokus, Dispo-Aufgabenplan, Managemententscheidung, Next Action und CRUD-/Transport-Abdeckung. |
 | `UX-LOGISTIK-002` | Logistik | abgeschlossen | Frachtbriefe nutzen Rollenfokus, Dokument-Follow-up-Plan, Managemententscheidung, Next Action und CRUD-/Nachweis-Abdeckung. |
 | `UX-LOGISTIK-003` | Logistik/Waage | abgeschlossen | Waagearbeitsflaechen nutzen Rollenfokus, Waage-Aufgabenplan, Stopperentscheidung, Next Action und CRUD-/Nachweis-Abdeckung. |
@@ -133,9 +134,9 @@ Eine Seite gilt erst als UX-ready, wenn sie mindestens diese Punkte erfuellt:
 
 Naechste Rollout-Slices:
 
-- `UX-SALES-008`: Sales-Assistenz fuer Angebots-/Auftragsuebergaben mit naechster Aktion und Nachweisstatus.
 - `UX-LOGISTIK-006`: Fracht-/Speditions-Ausnahmen mit Eskalationssicht, naechster Aktion und Kettennachweis.
 - `UX-DMS-001`: Dokumente/DMS auf Klassifikation, Retention, Version, Vorlage und Freigabe mit normaler Buero-Sprache ziehen.
+- `UX-QS-001`: Qualitaet/Produktion auf Pruef-, Sperr- und Freigabeprozesse mit naechster Aktion und Nachweisstatus ziehen.
 
 ## Nicht-Ziel
 
