@@ -112,6 +112,7 @@ Eine Seite gilt erst als UX-ready, wenn sie mindestens diese Punkte erfuellt:
 | `UX-EINKAUF-001` | Einkauf | abgeschlossen | Rechnungseingaenge nutzen Rollenfokus, Freigabeplan, Managemententscheidung, Next Action und CRUD-/Workflow-Abdeckung. |
 | `UX-EINKAUF-002` | Einkauf | abgeschlossen | Bestellungen nutzen Rollenfokus, Bestell-Follow-up-Plan, Managemententscheidung, Next Action und CRUD-/Liefer-Abdeckung. |
 | `UX-EINKAUF-003` | Einkauf | abgeschlossen | Wareneingang nutzt Rollenfokus, Eingangspruefplan, Managemententscheidung, Next Action und CRUD-/Nachweis-Abdeckung. |
+| `UX-EINKAUF-004` | Einkauf | abgeschlossen | Lieferantenstamm nutzt Rollenfokus, Lieferanten-Onboardingplan, Managemententscheidung, Next Action, Nachweislink und CRUD-/Compliance-Abdeckung. |
 | `UX-CRM-001` | CRM/Vertrieb | abgeschlossen | Opportunities nutzen Rollenfokus, Follow-up-Plan, Managemententscheidung, Next Action und CRUD-/Pipeline-Abdeckung. |
 | `UX-SALES-001` | Sales/Verkauf | abgeschlossen | Verkaufsauftraege nutzen Rollenfokus, Auftrag-Follow-up-Plan, Managemententscheidung, Next Action und CRUD-/Fulfillment-Abdeckung. |
 | `UX-SALES-002` | Sales/Verkauf | abgeschlossen | Angebote nutzen Rollenfokus, Angebots-Follow-up-Plan, Managemententscheidung, Next Action und CRUD-/Conversion-Abdeckung. |
@@ -121,7 +122,7 @@ Eine Seite gilt erst als UX-ready, wenn sie mindestens diese Punkte erfuellt:
 
 Naechste Rollout-Slices:
 
-- `UX-EINKAUF-004`: Lieferantenstamm mit Rollenfokus, Nachweislink und CRUD-Abdeckung.
+- `UX-EINKAUF-005`: Lieferantenbewertung mit Bewertungsplan, Eskalationssicht und Nachweisabdeckung.
 - `UX-SALES-004`: Rechnungs- und Lieferschein-Editor mit Entscheidungsbild, Folgebelegplan und Nachweisabdeckung.
 - `UX-LOGISTIK-003`: Waagearbeitsflaechen mit klarer Stopper-/Nachweissicht.
 
