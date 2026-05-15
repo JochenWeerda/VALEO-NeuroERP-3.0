@@ -458,6 +458,18 @@ Stand: `2026-05-12`
 **Checks:** `pnpm --filter @valero-neuroerp/frontend-web type-check`; `python scripts/agent_workboard_supervisor.py validate`; `node scripts/docs-governance-check.cjs`; `node scripts/docs-markdown-check.cjs docs/project-context/ux-excellence-operating-standard-2026-05-13.md docs/agent-ops/active-workboard.md docs/agent-ops/slices/UX-LOGISTIK-005.yaml`; `git diff --check`
 **Offene Risiken:** Es gibt aktuell keine separate Logistik-Dashboard-Route; dieser Slice nutzt die bestehende Inventory-Dashboard-Flaeche als operative Logistik-/Bestandsuebersicht.
 
+## UX-EINKAUF-008
+
+**Von:** Codex
+**Owner:** Codex
+**Stand:** reserviert 2026-05-15
+**Ziel des Slices:** Einkaufs-Ausnahmen fuer EDI/Lieferantenportal und Service Entry Sheets als verstaendliche Arbeitsflaechen mit Stopper-, Prioritaets- und Nachweissicht fuehren.
+**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/agent-ops/slices/UX-EINKAUF-008.yaml`, `packages/frontend-web/src/pages/einkauf/edi-portal.tsx`, `packages/frontend-web/src/pages/einkauf/service-entry-sheets.tsx`, `docs/project-context/ux-excellence-operating-standard-2026-05-13.md`
+**Abnahmekriterien:** EDI-Portal und Service-Entry-Sheets zeigen Rollenfokus, konkreten Pruefplan, Stopper-/Managemententscheidung, naechste Aktion, Nachweis-/Vorlagenbezug und CRUD-/Workflow-Abdeckung in normaler Buero-Sprache.
+**Erledigt:** Reserviert; Umsetzung folgt.
+**Checks:** offen
+**Offene Risiken:** OCR hat aktuell keine eigene sichtbare Einkaufsseite; der Slice behandelt die vorhandenen Ausnahmeflaechen EDI/Lieferantenportal und Service Entry Sheets.
+
 ## TODO-SPRINT-001
 
 **Von:** Cursor<br>
