@@ -1,0 +1,22 @@
+id: UX-EINKAUF-005
+title: Lieferantenbewertung mit UX-Exzellenzbaukasten
+owner: Codex
+status: reserviert
+created: 2026-05-15
+goal: >
+  Lieferantenbewertung auf den UX-Exzellenzbaukasten ziehen: Rollenfokus,
+  Bewertungsplan, Eskalationsentscheidung, Next Action und CRUD-/Nachweis-Abdeckung.
+file_ownership:
+  - docs/agent-ops/active-workboard.md
+  - docs/agent-ops/slices/UX-EINKAUF-005.yaml
+  - packages/frontend-web/src/pages/einkauf/lieferantenbewertung.tsx
+  - docs/project-context/ux-excellence-operating-standard-2026-05-13.md
+acceptance_criteria:
+  - Lieferantenbewertung zeigt Rollenfokus fuer Einkauf, QS, Finance und Leitung.
+  - Bewertungsplan fuehrt Datenbasis, Scores, Eskalation und Review.
+  - Managemententscheidung zeigt akzeptabel/klaerungsbeduerftig.
+  - CRUD-/Nachweis-Abdeckung ist sichtbar.
+  - Typecheck und Doku-Checks sind gruen.
+checks: []
+risks:
+  - Score-Historie und Massnahmenworkflow bleiben ausserhalb dieses Slice; dieser Slice setzt die Bedien- und Entscheidungssicht auf die bestehende Bewertungsmatrix.
