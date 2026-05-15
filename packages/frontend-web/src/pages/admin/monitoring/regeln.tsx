@@ -5,6 +5,14 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import {
+  CrudCapabilityChecklist,
+  EvidenceTemplateLink,
+  ManagementDecisionPanel,
+  NextActionPanel,
+  OperationalTaskPlan,
+  RoleFocusBar,
+} from '@/components/workflow'
+import {
   useCreateMonitoringChannel,
   useCreateMonitoringRule,
   useCreateSchedulerJob,
@@ -24,10 +32,36 @@ function splitCsv(value: string): string[] {
     .filter(Boolean)
 }
 
+type MonitoringRulesRole = 'admin' | 'betrieb' | 'security' | 'leitung'
+
+const monitoringRulesRoles = [
+  {
+    id: 'admin',
+    label: 'Admin',
+    description: 'Regeln, Alarmkanaele und Scheduler-Jobs technisch pflegen.',
+  },
+  {
+    id: 'betrieb',
+    label: 'Betrieb',
+    description: 'Regeln so steuern, dass Stoerungen rechtzeitig und passend gemeldet werden.',
+  },
+  {
+    id: 'security',
+    label: 'Security',
+    description: 'Kritische Regeln und Eskalationskanaele auf Nachweis und Risiko pruefen.',
+  },
+  {
+    id: 'leitung',
+    label: 'Leitung',
+    description: 'Betriebsbereitschaft der Ueberwachung und offene Luecken bewerten.',
+  },
+] satisfies Array<{ id: MonitoringRulesRole; label: string; description: string }>
+
 export default function MonitoringRegelnPage(): JSX.Element {
   const { data: rules = [] } = useMonitoringRules()
   const { data: channels = [] } = useMonitoringChannels()
   const { data: jobs = [] } = useSchedulerJobs()
+  const [roleFocus, setRoleFocus] = useState<MonitoringRulesRole>('admin')
 
   const createRule = useCreateMonitoringRule()
   const deleteRule = useDeleteMonitoringRule()
@@ -56,6 +90,17 @@ export default function MonitoringRegelnPage(): JSX.Element {
   const [jobChannels, setJobChannels] = useState('')
 
   const channelCodeList = useMemo(() => channels.map((item) => item.code), [channels])
+  const hasRule = rules.length > 0
+  const hasChannel = channels.length > 0
+  const hasJob = jobs.length > 0
+  const monitoringReady = hasRule && hasChannel && hasJob
+  const rulesAction = !hasRule
+    ? 'Mindestens eine Monitoring-Regel anlegen, damit relevante Betriebsereignisse erkannt werden.'
+    : !hasChannel
+      ? 'Alarmkanal anlegen und in Regeln oder Jobs verwenden.'
+      : !hasJob
+        ? 'Scheduler-Job anlegen, wenn wiederkehrende Pruefungen oder Berichte automatisch laufen sollen.'
+        : 'Regeln, Kanaele und Jobs sind vorhanden. Naechste Aenderung mit Grund und Nachweis dokumentieren.'
 
   const onCreateRule = async () => {
     if (!ruleCode || !ruleName || !ruleMetric) {
@@ -138,7 +183,78 @@ export default function MonitoringRegelnPage(): JSX.Element {
     <div className="space-y-6 p-6">
       <div>
         <h1 className="text-3xl font-bold">Monitoring-Regeln</h1>
-        <p className="text-muted-foreground">Alert-Regeln, Alarmkanäle und Scheduler-Jobs administrieren.</p>
+        <p className="text-muted-foreground">Alert-Regeln, Alarmkanaele und Scheduler-Jobs nachvollziehbar administrieren.</p>
+      </div>
+
+      <RoleFocusBar
+        roles={monitoringRulesRoles}
+        value={roleFocus}
+        onChange={setRoleFocus}
+        visibleCount={rules.length + channels.length + jobs.length}
+        totalCount={rules.length + channels.length + jobs.length}
+        title="Arbeitsrolle fuer Monitoring-Regeln"
+      />
+
+      <ManagementDecisionPanel
+        decision={{
+          allowed: monitoringReady,
+          allowedLabel: 'Ueberwachung bereit',
+          blockedLabel: 'Ueberwachung unvollstaendig',
+          summary: monitoringReady
+            ? 'Monitoring-Regeln, Alarmkanaele und Scheduler-Jobs sind vorhanden. Die Ueberwachung kann technisch betrieben und fachlich nachgewiesen werden.'
+            : 'Fuer eine betriebsfaehige Ueberwachung muessen mindestens Regeln, Alarmkanaele und wiederkehrende Jobs vorhanden sein. Fehlende Bausteine verhindern verlaessliche Eskalation.',
+          blockerCount: [hasRule, hasChannel, hasJob].filter((value) => !value).length,
+          nextFocus: rulesAction,
+          template: {
+            label: 'Monitoring-Regel-Freigabe',
+            href: '/docs/monitoring/monitoring-regel-freigabe.md',
+          },
+        }}
+      />
+
+      <div className="grid gap-4 xl:grid-cols-[1.15fr_1fr_1fr]">
+        <OperationalTaskPlan
+          title="Regelbetriebsplan"
+          items={[
+            {
+              label: 'Regel definieren',
+              done: hasRule,
+              hint: hasRule ? `${rules.length} Regel(n) vorhanden.` : 'Eine Metrik, ein Grenzwert und ein Level werden benoetigt.',
+            },
+            {
+              label: 'Alarmkanal verbinden',
+              done: hasChannel,
+              hint: hasChannel ? `${channels.length} Kanal/Kanaele vorhanden.` : 'Ohne Kanal erreicht ein Alert keinen Verantwortlichen.',
+            },
+            {
+              label: 'Wiederkehrende Pruefung planen',
+              done: hasJob,
+              hint: hasJob ? `${jobs.length} Scheduler-Job(s) vorhanden.` : 'Jobs machen Pruefungen und Berichte wiederholbar.',
+            },
+            {
+              label: 'Aenderung nachweisen',
+              done: monitoringReady,
+              hint: 'Regelaenderungen sollten mit Anlass, Owner und Wirkung dokumentiert werden.',
+            },
+          ]}
+        />
+        <NextActionPanel action={rulesAction} tone={monitoringReady ? 'emerald' : 'amber'} />
+        <div className="space-y-3">
+          <EvidenceTemplateLink
+            link={{
+              label: 'Monitoring-Aenderungsnachweis',
+              href: '/docs/monitoring/monitoring-aenderungsnachweis.md',
+            }}
+          />
+          <CrudCapabilityChecklist
+            capabilities={[
+              { key: 'create', label: 'Anlegen', available: true, hint: 'Regeln, Kanaele und Jobs koennen angelegt werden.' },
+              { key: 'read', label: 'Lesen', available: true, hint: 'Vorhandene Regeln, Kanaele und Jobs sind sichtbar.' },
+              { key: 'delete', label: 'Loeschen', available: true, hint: 'Nicht mehr benoetigte Eintraege koennen entfernt werden.' },
+              { key: 'evidence', label: 'Nachweis', available: monitoringReady, hint: 'Bei vollstaendiger Ueberwachung ist ein Freigabenachweis sinnvoll.' },
+            ]}
+          />
+        </div>
       </div>
 
       <div className="grid gap-6 lg:grid-cols-3">
@@ -154,8 +270,29 @@ export default function MonitoringRegelnPage(): JSX.Element {
             <Label htmlFor="rule-metric">Metric</Label>
             <Input id="rule-metric" value={ruleMetric} onChange={(e) => setRuleMetric(e.target.value)} placeholder="inventory.low_stock_count" />
             <div className="grid grid-cols-2 gap-2">
-              <Input value={ruleLevel} onChange={(e) => setRuleLevel(e.target.value as 'critical' | 'warning' | 'info')} placeholder="warning" />
-              <Input value={ruleOperator} onChange={(e) => setRuleOperator(e.target.value as 'gt' | 'gte' | 'lt' | 'lte' | 'eq' | 'neq')} placeholder="gte" />
+              <select
+                aria-label="Alert-Level"
+                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                value={ruleLevel}
+                onChange={(e) => setRuleLevel(e.target.value as 'critical' | 'warning' | 'info')}
+              >
+                <option value="critical">Kritisch</option>
+                <option value="warning">Warnung</option>
+                <option value="info">Info</option>
+              </select>
+              <select
+                aria-label="Vergleich"
+                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                value={ruleOperator}
+                onChange={(e) => setRuleOperator(e.target.value as 'gt' | 'gte' | 'lt' | 'lte' | 'eq' | 'neq')}
+              >
+                <option value="gt">groesser als</option>
+                <option value="gte">groesser/gleich</option>
+                <option value="lt">kleiner als</option>
+                <option value="lte">kleiner/gleich</option>
+                <option value="eq">gleich</option>
+                <option value="neq">ungleich</option>
+              </select>
             </div>
             <Input value={ruleThreshold} onChange={(e) => setRuleThreshold(e.target.value)} placeholder="Threshold (z.B. 1)" />
             <Input value={ruleChannels} onChange={(e) => setRuleChannels(e.target.value)} placeholder="Channel-IDs CSV" />
@@ -183,7 +320,17 @@ export default function MonitoringRegelnPage(): JSX.Element {
           <CardContent className="space-y-3">
             <Input value={channelCode} onChange={(e) => setChannelCode(e.target.value)} placeholder="ops-email" />
             <Input value={channelName} onChange={(e) => setChannelName(e.target.value)} placeholder="Ops E-Mail" />
-            <Input value={channelType} onChange={(e) => setChannelType(e.target.value as 'email' | 'sms' | 'webhook' | 'chatops')} placeholder="email|sms|webhook|chatops" />
+            <select
+              aria-label="Kanaltyp"
+              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+              value={channelType}
+              onChange={(e) => setChannelType(e.target.value as 'email' | 'sms' | 'webhook' | 'chatops')}
+            >
+              <option value="email">E-Mail</option>
+              <option value="sms">SMS</option>
+              <option value="webhook">Webhook</option>
+              <option value="chatops">ChatOps</option>
+            </select>
             <Input value={channelTarget} onChange={(e) => setChannelTarget(e.target.value)} placeholder="ops@example.org / webhook-url" />
             <Button className="w-full" onClick={onCreateChannel} disabled={createChannel.isPending}>
               Kanal anlegen
