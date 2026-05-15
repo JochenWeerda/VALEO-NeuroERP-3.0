@@ -1,0 +1,28 @@
+id: UX-QS-001
+title: QS-Sperr- und Ausnahmeprozesse mit UX-Exzellenzbaukasten
+owner: Codex
+status: reserviert
+created: 2026-05-15
+goal: >
+  Qualitaet/Produktion fuer Pruef-, Sperr- und Freigabeprozesse mit
+  Rollenfokus, naechster Aktion, Nachweisstatus und normaler Buero-Sprache
+  fuehren.
+file_ownership:
+  - docs/agent-ops/active-workboard.md
+  - docs/agent-ops/slices/UX-QS-001.yaml
+  - packages/frontend-web/src/pages/annahme/klaerung-gesperrt.tsx
+  - packages/frontend-web/src/pages/qualitaet/ausnahmen.tsx
+  - docs/project-context/ux-excellence-operating-standard-2026-05-13.md
+acceptance_criteria:
+  - Gesperrte-Ware-Klaerung zeigt Rollenfokus, Sperrplan, Freigabeentscheidung, Next Action und Nachweislink.
+  - QS-Ausnahmen zeigen Rollenfokus, Eskalationsplan, Managemententscheidung, Next Action und CRUD-/Nachweis-Abdeckung.
+  - Bestehende Entscheidung, Begruendung, Liste und Agent-Vorschlaege bleiben erhalten.
+  - Typecheck und Doku-Checks sind gruen.
+checks:
+  - pnpm --filter @valero-neuroerp/frontend-web type-check
+  - python scripts/agent_workboard_supervisor.py validate
+  - node scripts/docs-governance-check.cjs
+  - node scripts/docs-markdown-check.cjs docs/project-context/ux-excellence-operating-standard-2026-05-13.md docs/agent-ops/active-workboard.md docs/agent-ops/slices/UX-QS-001.yaml
+  - git diff --check
+risks:
+  - Qualitaetspruefung hat bereits einen operativen Fallkopf; dieser Slice fokussiert Klaer- und Eskalationsraeume.
