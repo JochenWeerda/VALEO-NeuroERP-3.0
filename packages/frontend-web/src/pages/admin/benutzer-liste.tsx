@@ -10,12 +10,30 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { FileDown, Plus, Search } from 'lucide-react'
 import { api } from '@/lib/axios'
 import { useToast } from '@/hooks/use-toast'
+import {
+  CrudCapabilityChecklist,
+  EvidenceTemplateLink,
+  ManagementDecisionPanel,
+  NextActionPanel,
+  OperationalTaskPlan,
+  RoleFocusBar,
+} from '@/components/workflow'
+
+type UserAdminRole = 'it' | 'fachbereich' | 'datenschutz' | 'leitung'
+
+const userAdminRoles = [
+  { id: 'it', label: 'IT', description: 'Legt Benutzer an, prueft Status und sichert Exporte ab.' },
+  { id: 'fachbereich', label: 'Fachbereich', description: 'Prueft, ob Nutzer und Rollen zur fachlichen Arbeit passen.' },
+  { id: 'datenschutz', label: 'Datenschutz', description: 'Achtet auf Zweck, Zugriff und Export von Benutzerdaten.' },
+  { id: 'leitung', label: 'Leitung', description: 'Sieht aktive/inaktive Konten und offene Pflegeaufgaben.' },
+] satisfies Array<{ id: UserAdminRole; label: string; description: string }>
 
 export default function BenutzerListePage(): JSX.Element {
   const navigate = useNavigate()
   const { toast } = useToast()
   const { data: items, isLoading } = useBenutzer()
   const [searchTerm, setSearchTerm] = useState('')
+  const [roleFocus, setRoleFocus] = useState<UserAdminRole>('it')
 
   const handleExport = async () => {
     try {
@@ -41,6 +59,18 @@ export default function BenutzerListePage(): JSX.Element {
   )
 
   const list = items ?? []
+  const filteredList = list.filter((user) =>
+    user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    user.rolle.toLowerCase().includes(searchTerm.toLowerCase()),
+  )
+  const inactiveCount = filteredList.filter((user) => user.status !== 'aktiv').length
+  const activeCount = filteredList.length - inactiveCount
+  const nextUserAction = inactiveCount > 0
+    ? `${inactiveCount} inaktive Benutzer pruefen und Rollen-/Zugriffslage klaeren.`
+    : filteredList.length === 0
+      ? 'Suchfilter pruefen oder neuen Benutzer anlegen.'
+      : 'Benutzerliste exportieren oder naechsten Benutzer fachlich pruefen.'
 
   const columns = [
     {
@@ -79,6 +109,50 @@ export default function BenutzerListePage(): JSX.Element {
         </Button>
       </div>
 
+      <RoleFocusBar roles={userAdminRoles} value={roleFocus} onChange={setRoleFocus} visibleCount={filteredList.length} totalCount={list.length} title="Wer verwaltet die Benutzer?" />
+
+      <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_360px]">
+        <ManagementDecisionPanel
+          decision={{
+            allowed: inactiveCount === 0 && filteredList.length > 0,
+            allowedLabel: 'Benutzerbestand sauber',
+            blockedLabel: 'Benutzer pruefen',
+            summary: inactiveCount > 0
+              ? `${inactiveCount} Benutzer sind inaktiv. Bitte klaeren, ob Sperre, Austritt oder Rollenpflege notwendig ist.`
+              : `${activeCount} aktive Benutzer sind in der aktuellen Sicht vorhanden.`,
+            blockerCount: inactiveCount + (filteredList.length === 0 ? 1 : 0),
+            nextFocus: nextUserAction,
+            template: { label: 'Benutzer- und Rollenpruefung', href: '/docs/admin/benutzer-rollen-pruefung.md' },
+          }}
+        />
+        <div className="space-y-4">
+          <NextActionPanel action={nextUserAction} tone={inactiveCount > 0 ? 'amber' : 'emerald'} />
+          <EvidenceTemplateLink link={{ label: 'Admin-Aenderungsnachweis', href: '/docs/admin/admin-aenderungsnachweis.md' }} />
+        </div>
+      </div>
+
+      <div className="grid gap-4 lg:grid-cols-2">
+        <OperationalTaskPlan
+          title="Benutzer-Sicherheitsplan"
+          items={[
+            { label: 'Benutzer laden', done: list.length > 0, hint: `${list.length} Benutzer im System.` },
+            { label: 'Aktive Konten pruefen', done: activeCount > 0, hint: `${activeCount} aktive Benutzer in der Sicht.` },
+            { label: 'Inaktive Konten klaeren', done: inactiveCount === 0, hint: inactiveCount > 0 ? `${inactiveCount} inaktive Konten pruefen.` : 'Keine inaktiven Konten in der Sicht.' },
+            { label: 'Export absichern', done: true, hint: 'CSV-Export ist vorhanden und sollte zweckgebunden genutzt werden.' },
+          ]}
+        />
+        <CrudCapabilityChecklist
+          capabilities={[
+            { key: 'create', label: 'Benutzer anlegen', available: true, hint: 'Neuer Benutzer kann ueber die Aktion angelegt werden.' },
+            { key: 'read', label: 'Benutzer lesen', available: true, hint: 'Name, E-Mail, Rolle, Status und letzte Anmeldung sind sichtbar.' },
+            { key: 'update', label: 'Benutzer bearbeiten', available: true, hint: 'Klick auf den Namen fuehrt in die Detailbearbeitung.' },
+            { key: 'export', label: 'Export', available: true, hint: 'CSV-Export fuer Benutzerliste ist vorhanden.' },
+            { key: 'evidence', label: 'Nachweis', available: true, hint: 'Aenderungsnachweis ist verlinkt.' },
+            { key: 'audit', label: 'Letzte Anmeldung', available: true, hint: 'Letzte Anmeldung hilft bei Zugriffskontrolle.' },
+          ]}
+        />
+      </div>
+
       <Card>
         <CardHeader>
           <CardTitle>Suche</CardTitle>
@@ -99,7 +173,7 @@ export default function BenutzerListePage(): JSX.Element {
 
       <Card>
         <CardContent className="pt-6">
-          <DataTable data={list} columns={columns} />
+          <DataTable data={filteredList} columns={columns} />
         </CardContent>
       </Card>
     </div>
