@@ -2121,3 +2121,15 @@ Archiv des vorherigen Boards:
 **Erledigt:** Service-Anfragen um Rollenfokus, Service-Arbeitsplan, Managemententscheidung, Next Action, Nachweislink, CRUD-Abdeckung und klare Leerzustandsaktion erweitert; Rueckmeldung um Rollenfokus, Rueckmeldeplan, Pflichtklarheit, Folgehinweis, Nachweislink und gefuehrte Sendebereitschaft erweitert.
 **Checks:** `pnpm --filter @valero-neuroerp/frontend-web type-check`; `python scripts/agent_workboard_supervisor.py validate`; `node scripts/docs-governance-check.cjs`; `node scripts/docs-markdown-check.cjs docs/project-context/ux-excellence-operating-standard-2026-05-13.md docs/agent-ops/active-workboard.md docs/agent-ops/slices/UX-SERVICE-001.yaml`; `git diff --check`
 **Offene Risiken:** Service-Abschluss und Feldservice-Detail bleiben Folgeslices; dieser Slice fokussiert Anfrageuebersicht und Rueckmeldung.
+
+## UX-MONITORING-001
+
+**Von:** Codex
+**Owner:** Codex
+**Stand:** reserviert 2026-05-15
+**Ziel des Slices:** Monitoring-Alerts und Monitoring-Regeln mit Betriebsstatus, Owner, naechster Aktion, Eskalationsnachweis und CRUD-Klarheit nach UX-Standard fuehren.
+**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/agent-ops/slices/UX-MONITORING-001.yaml`, `packages/frontend-web/src/pages/admin/monitoring/alerts.tsx`, `packages/frontend-web/src/pages/admin/monitoring/regeln.tsx`, `docs/project-context/ux-excellence-operating-standard-2026-05-13.md`
+**Abnahmekriterien:** Alert-Uebersicht und Regelverwaltung zeigen Rollenfokus, Betriebs-/Regelplan, Managemententscheidung, Next Action, Nachweislink und CRUD-/Workflow-Abdeckung; bestehende Alert-Liste, Regelanlage, Kanalverwaltung, Scheduler-Jobs und Loeschen bleiben erhalten.
+**Erledigt:** Reserviert; Umsetzung folgt.
+**Checks:** offen
+**Offene Risiken:** `system/live-monitor` bleibt technischer Folgeslice; dieser Slice fokussiert Admin-Alerts und Monitoring-Regeln.
