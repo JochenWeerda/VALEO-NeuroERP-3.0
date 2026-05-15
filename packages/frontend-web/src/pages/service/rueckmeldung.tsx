@@ -14,6 +14,14 @@ import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { useToast } from '@/hooks/use-toast'
 import {
+  CrudCapabilityChecklist,
+  EvidenceTemplateLink,
+  ManagementDecisionPanel,
+  NextActionPanel,
+  OperationalTaskPlan,
+  RoleFocusBar,
+} from '@/components/workflow'
+import {
   WorkflowEntryBanner,
   readWorkflowEntryContext,
 } from '@/components/workflow/WorkflowEntryBanner'
@@ -27,11 +35,37 @@ type RueckmeldungForm = {
   bemerkung: string
 }
 
+type RueckmeldungRole = 'service' | 'techniker' | 'disposition' | 'abrechnung'
+
+const rueckmeldungRoles = [
+  {
+    id: 'service',
+    label: 'Service',
+    description: 'Rueckmeldung pruefen und den Kundenfall sauber weiterfuehren.',
+  },
+  {
+    id: 'techniker',
+    label: 'Technik',
+    description: 'Arbeitszeit, Material und Ergebnis direkt nach dem Einsatz dokumentieren.',
+  },
+  {
+    id: 'disposition',
+    label: 'Disposition',
+    description: 'Offene oder teilweise erledigte Einsaetze fuer Folgeplanung erkennen.',
+  },
+  {
+    id: 'abrechnung',
+    label: 'Abrechnung',
+    description: 'Arbeitszeit und Material als Grundlage fuer Folgebelege nachvollziehen.',
+  },
+] satisfies Array<{ id: RueckmeldungRole; label: string; description: string }>
+
 export default function RueckmeldungPage(): JSX.Element {
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
   const { toast } = useToast()
   const workflowContext = readWorkflowEntryContext(searchParams)
+  const [roleFocus, setRoleFocus] = useState<RueckmeldungRole>('service')
 
   const anfrageId = searchParams.get('anfrage_id') ?? ''
 
@@ -73,6 +107,20 @@ export default function RueckmeldungPage(): JSX.Element {
     },
   })
 
+  const arbeitszeit = Number.parseFloat(form.arbeitszeit_stunden)
+  const hasArbeitszeit = Number.isFinite(arbeitszeit) && arbeitszeit > 0
+  const hasAnfrage = form.anfrage_id.trim().length > 0
+  const needsFolgehinweis = form.ergebnis !== 'erledigt'
+  const hasFolgehinweis = !needsFolgehinweis || form.bemerkung.trim().length > 0
+  const canSendRueckmeldung = hasAnfrage && hasArbeitszeit && hasFolgehinweis
+  const rueckmeldungAction = !hasAnfrage
+    ? 'Zuerst die zugehoerige Service-Anfrage auswaehlen oder aus der Anfrage heraus starten.'
+    : !hasArbeitszeit
+      ? 'Arbeitszeit in Stunden erfassen, damit Einsatz und Abrechnung nachvollziehbar sind.'
+      : !hasFolgehinweis
+        ? 'Bei offenem oder teilweise erledigtem Ergebnis eine konkrete Folgeaktion in der Bemerkung notieren.'
+        : 'Rueckmeldung speichern und den Servicefall danach im Ticket weiterpruefen.'
+
   return (
     <div className="space-y-6 p-6">
       {/* Workflow Banner */}
@@ -95,6 +143,75 @@ export default function RueckmeldungPage(): JSX.Element {
             Einsatzdaten und Ergebnis erfassen
             {anfrageId && <span> (Anfrage: {anfrageId.slice(0, 8)})</span>}
           </p>
+        </div>
+      </div>
+
+      <RoleFocusBar
+        roles={rueckmeldungRoles}
+        value={roleFocus}
+        onChange={setRoleFocus}
+        title="Arbeitsrolle fuer diese Rueckmeldung"
+      />
+
+      <ManagementDecisionPanel
+        decision={{
+          allowed: canSendRueckmeldung,
+          allowedLabel: 'Rueckmeldung bereit',
+          blockedLabel: 'Angaben fehlen',
+          summary: canSendRueckmeldung
+            ? 'Die Rueckmeldung enthaelt Anfrage, Arbeitszeit und Ergebnis. Sie kann als Nachweis fuer Serviceabschluss, Folgeplanung oder Abrechnung gespeichert werden.'
+            : 'Fuer eine belastbare Rueckmeldung fehlen noch Pflichtangaben. Ohne Anfrage, Arbeitszeit oder Folgehinweis bleibt unklar, was erledigt wurde und was als naechstes passieren muss.',
+          blockerCount: [hasAnfrage, hasArbeitszeit, hasFolgehinweis].filter((value) => !value).length,
+          nextFocus: rueckmeldungAction,
+          template: {
+            label: 'Service-Rueckmeldeprotokoll',
+            href: '/docs/service/service-rueckmeldung.md',
+          },
+        }}
+      />
+
+      <div className="grid gap-4 xl:grid-cols-[1.15fr_1fr_1fr]">
+        <OperationalTaskPlan
+          title="Rueckmeldeplan"
+          items={[
+            {
+              label: 'Anfrage zuordnen',
+              done: hasAnfrage,
+              hint: hasAnfrage ? `Anfrage ${form.anfrage_id.slice(0, 8)} ist gesetzt.` : 'Rueckmeldung braucht eine eindeutige Service-Anfrage.',
+            },
+            {
+              label: 'Arbeitszeit erfassen',
+              done: hasArbeitszeit,
+              hint: hasArbeitszeit ? `${form.arbeitszeit_stunden} Stunde(n) erfasst.` : 'Arbeitszeit als Zahl groesser 0 eintragen.',
+            },
+            {
+              label: 'Ergebnis festlegen',
+              done: Boolean(form.ergebnis),
+              hint: 'Ergebnis steuert, ob Abschluss oder Folgeeinsatz noetig ist.',
+            },
+            {
+              label: 'Folgeaktion dokumentieren',
+              done: hasFolgehinweis,
+              hint: needsFolgehinweis ? 'Bei offenem Ergebnis muss die naechste Aktion im Hinweis stehen.' : 'Bei erledigtem Ergebnis ist ein Hinweis optional.',
+            },
+          ]}
+        />
+        <NextActionPanel action={rueckmeldungAction} tone={canSendRueckmeldung ? 'emerald' : 'amber'} />
+        <div className="space-y-3">
+          <EvidenceTemplateLink
+            link={{
+              label: 'Einsatznachweis Service',
+              href: '/docs/service/einsatznachweis.md',
+            }}
+          />
+          <CrudCapabilityChecklist
+            capabilities={[
+              { key: 'create', label: 'Rueckmeldung anlegen', available: true, hint: 'POST speichert die Rueckmeldung als neuen Nachweis.' },
+              { key: 'read', label: 'Anfragebezug lesen', available: hasAnfrage, hint: 'Anfrage-ID kommt aus dem Ticket oder kann hier geprueft werden.' },
+              { key: 'update', label: 'Einsatzdaten aendern', available: true, hint: 'Arbeitszeit, Material, Ergebnis und Hinweis werden gefuehrt erfasst.' },
+              { key: 'evidence', label: 'Nachweis', available: canSendRueckmeldung, hint: 'Vollstaendige Rueckmeldung dient als Einsatz- und Abrechnungsnachweis.' },
+            ]}
+          />
         </div>
       </div>
 
@@ -159,7 +276,7 @@ export default function RueckmeldungPage(): JSX.Element {
             </Button>
             <Button
               onClick={() => submitMutation.mutate()}
-              disabled={submitMutation.isPending}
+              disabled={submitMutation.isPending || !canSendRueckmeldung}
               className="gap-2"
             >
               {submitMutation.isPending ? (

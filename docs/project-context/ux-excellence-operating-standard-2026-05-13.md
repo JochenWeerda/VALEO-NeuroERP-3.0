@@ -139,12 +139,13 @@ Eine Seite gilt erst als UX-ready, wenn sie mindestens diese Punkte erfuellt:
 | `UX-PRODUKTION-001` | Produktion | abgeschlossen | Mischfutter-Produktion und Produktionsdokument-Druck nutzen Rollenfokus, Produktions-/Dokumentplan, Managemententscheidung, Next Action, Nachweislink und CRUD-/Workflow-Abdeckung. |
 | `UX-ADMIN-001` | Admin/Setup | abgeschlossen | Benutzer- und Rollenverwaltung nutzen Rollenfokus, Sicherheits-/Berechtigungsplan, Managemententscheidung, Next Action, Nachweislink und CRUD-/Workflow-Abdeckung. |
 | `UX-FUHRPARK-001` | Fuhrpark | abgeschlossen | Fahrzeugliste und ausgehende Fuhrpark-Dokumente nutzen Rollenfokus, Fristen-/Dokumentplan, Managemententscheidung, Next Action, Nachweislink und CRUD-/Workflow-Abdeckung. |
+| `UX-SERVICE-001` | Service | abgeschlossen | Service-Anfragen und Rueckmeldung nutzen Rollenfokus, Service-/Rueckmeldeplan, Managemententscheidung, Next Action, Nachweislink und CRUD-/Workflow-Abdeckung. |
 
 Naechste Rollout-Slices:
 
-- `UX-SERVICE-001`: Service- und Rueckmeldeseiten auf klare Aufgabe, Status, naechste Aktion und Nachweisfuehrung pruefen.
 - `UX-MONITORING-001`: Monitoring-/Alert-Seiten auf Betriebsstatus, Owner, naechste Aktion und Eskalationsnachweis pruefen.
 - `UX-COMPLIANCE-001`: Compliance-Dashboards und Checklisten auf klare Pruefaufgabe, Risiko, naechste Aktion und Nachweisfuehrung pruefen.
+- `UX-AGRIBUSINESS-001`: Feldservice- und Agribusiness-Aufgaben auf Einsatzstatus, Owner, naechste Aktion und Nachweisfuehrung pruefen.
 
 ## Nicht-Ziel
 
