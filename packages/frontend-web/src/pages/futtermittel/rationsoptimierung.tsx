@@ -2772,6 +2772,7 @@ function Workbench({
   onDemo,
   onReset,
   onGoReview,
+  onGoDiagnose,
   onGoWizard,
   onApplySuggestionPatch,
   chatSeed,
@@ -2787,6 +2788,7 @@ function Workbench({
   onDemo: () => void
   onReset: () => void
   onGoReview: () => void
+  onGoDiagnose: () => void
   onGoWizard: () => void
   onApplySuggestionPatch: (patch: RationAdjustmentApplyPatch) => void
   chatSeed?: { role: 'ai' | 'user'; text: string }[]
@@ -2842,6 +2844,16 @@ function Workbench({
         { label: 'Stärke', value: fmt(((result.nutrient_supply.staerke_g ?? result.nutrient_supply.starch_g ?? 0) / (result.nutrient_supply.dmi_kg || 1) / 10), 1), unit: '%TM', status: 'success' as const },
         { label: 'GF-Anteil', value: fmt(result.nutrient_supply.forage_share_pct, 1), unit: '%', status: result.nutrient_supply.forage_share_pct >= 55 ? 'success' as const : 'warn' as const },
         { label: 'Struktur-SI', value: result.dlg_indicators?.strukturindex != null ? fmt(result.dlg_indicators.strukturindex, 0) : '–', unit: '', status: (result.dlg_indicators?.strukturindex_erfuellt ? 'success' : 'error') as 'success' | 'error' },
+        (() => {
+          const tw = computeTierwohlScore(result.dlg_indicators)
+          return {
+            label: 'Tierwohl',
+            value: `${tw.score}/${tw.max}`,
+            unit: tw.status === 'green' ? '✓' : tw.status === 'yellow' ? '~' : '!',
+            status: tw.status === 'green' ? 'success' : tw.status === 'yellow' ? 'warn' : 'error' as 'success' | 'warn' | 'error',
+            title: tw.criteria.map((c) => `${c.ok ? '✓' : '✗'} ${c.label}`).join(' · '),
+          }
+        })(),
       ]
     : []
 
@@ -2925,6 +2937,14 @@ function Workbench({
         <button
           className="w-full py-2 text-sm font-semibold rounded-lg border transition-colors hover:bg-slate-50"
           style={{ borderColor: C.border, color: C.dark }}
+          onClick={onGoDiagnose}
+          disabled={!result}
+        >
+          → Diagnose
+        </button>
+        <button
+          className="w-full py-2 text-sm font-semibold rounded-lg border transition-colors hover:bg-slate-50"
+          style={{ borderColor: C.border, color: C.dark }}
           onClick={onGoReview}
           disabled={!result}
         >
@@ -2952,6 +2972,14 @@ function Workbench({
             <RotateCcw size={14} />
           </button>
           <div className="flex-grow" />
+          <button
+            onClick={onGoDiagnose}
+            disabled={!result}
+            className="px-4 py-2 rounded text-sm font-semibold border flex items-center gap-2 transition-colors hover:bg-slate-50 disabled:opacity-40"
+            style={{ borderColor: C.border, color: C.dark }}
+          >
+            Diagnose
+          </button>
           <button
             onClick={onGoReview}
             disabled={!result}
@@ -3700,10 +3728,220 @@ function Review({
 }
 
 // ---------------------------------------------------------------------------
+// TIERWOHL-SCORE HELPER
+// ---------------------------------------------------------------------------
+
+function computeTierwohlScore(dlg: DlgIndicators | null | undefined): {
+  score: number
+  max: number
+  status: 'green' | 'yellow' | 'red'
+  criteria: { label: string; ok: boolean }[]
+} {
+  const criteria = [
+    { label: 'Strukturindex ≥ 50', ok: dlg?.strukturindex_erfuellt ?? false },
+    { label: 'aNDFom-GF erfüllt', ok: dlg != null ? dlg.andfom_gf_kgdm >= 0.19 : false },
+    { label: 'pabKH ≤ 210 g/kg TM', ok: dlg != null ? dlg.pabkh_kgdm <= 0.21 : false },
+    { label: 'RMD im Zielbereich', ok: dlg?.rmd_gn_kgdm != null ? dlg.rmd_gn_kgdm >= -1.5 && dlg.rmd_gn_kgdm <= 1 : false },
+    { label: 'XL ≤ 40 g/kg TM', ok: dlg != null ? (dlg as any).xl_kgdm == null || (dlg as any).xl_kgdm <= 0.04 : true },
+  ]
+  const score = criteria.filter((c) => c.ok).length
+  const status: 'green' | 'yellow' | 'red' = score >= 5 ? 'green' : score >= 3 ? 'yellow' : 'red'
+  return { score, max: criteria.length, status, criteria }
+}
+
+// ---------------------------------------------------------------------------
+// VIEW: Diagnose
+// ---------------------------------------------------------------------------
+
+function Diagnose({
+  result,
+  wizardData,
+  onBack,
+  onGoReview,
+}: {
+  result: OptimizationResult | null
+  wizardData: WizardData | null
+  onBack: () => void
+  onGoReview: () => void
+}) {
+  const dlg = result?.dlg_indicators
+  const tierwohl = computeTierwohlScore(dlg)
+  const constraints = result?.constraint_status ?? []
+  const violated = constraints.filter((c) => !c.fulfilled)
+  const warnings = result?.warnings ?? []
+
+  const econRows = result
+    ? [
+        { label: 'Kosten/Kuh/Tag', value: `${fmt(result.total_cost_eur_day ?? 0)} €` },
+        { label: 'Teuerste Komponente', value: (() => {
+            const items = [...(result.ration_items ?? [])].sort((a, b) => b.total_cost - a.total_cost)
+            return items[0] ? `${items[0].name} (${fmt(items[0].total_cost, 2)} €)` : '–'
+          })() },
+        { label: 'GF-Anteil', value: `${fmt(result.nutrient_supply.forage_share_pct, 1)} %` },
+        { label: 'ME/Kuh/Tag', value: `${fmt(result.nutrient_supply.me_mj, 1)} MJ` },
+        { label: 'sidP/Kuh/Tag', value: `${fmt(result.nutrient_supply.sidp_g, 0)} g` },
+      ]
+    : []
+
+  const bioRisks: { label: string; risk: 'ok' | 'warn' | 'crit' }[] = dlg
+    ? [
+        { label: 'Pansenazidose-Risiko', risk: dlg.strukturindex_erfuellt && dlg.pabkh_kgdm <= 0.21 ? 'ok' : dlg.pabkh_kgdm > 0.25 ? 'crit' : 'warn' },
+        { label: 'Strukturmangel', risk: dlg.strukturindex_erfuellt ? 'ok' : (dlg.strukturindex ?? 0) < 40 ? 'crit' : 'warn' },
+        { label: 'Protein-Energie-Sync (RMD)', risk: dlg.rmd_gn_kgdm != null ? (Math.abs(dlg.rmd_gn_kgdm) <= 0.5 ? 'ok' : Math.abs(dlg.rmd_gn_kgdm) > 1.5 ? 'crit' : 'warn') : 'warn' },
+        { label: 'aNDFom-GF-Versorgung', risk: dlg.andfom_gf_kgdm >= 0.2 ? 'ok' : dlg.andfom_gf_kgdm < 0.17 ? 'crit' : 'warn' },
+        { label: 'pabKH-Niveau', risk: dlg.pabkh_kgdm <= 0.21 ? 'ok' : dlg.pabkh_kgdm > 0.25 ? 'crit' : 'warn' },
+      ]
+    : []
+
+  const riskColor = (r: 'ok' | 'warn' | 'crit') =>
+    r === 'ok' ? '#22c55e' : r === 'warn' ? '#f59e0b' : '#ef4444'
+  const riskLabel = (r: 'ok' | 'warn' | 'crit') =>
+    r === 'ok' ? 'OK' : r === 'warn' ? 'Warnung' : 'Kritisch'
+
+  const tw = tierwohl
+  const tierwohlColor = tw.status === 'green' ? '#22c55e' : tw.status === 'yellow' ? '#f59e0b' : '#ef4444'
+
+  return (
+    <div className="flex-1 overflow-auto p-4 max-w-5xl mx-auto w-full">
+      <div className="flex items-center gap-3 mb-4">
+        <button
+          className="text-sm px-3 py-1.5 rounded flex items-center gap-1"
+          style={{ background: C.card, color: C.dark, border: `1px solid ${C.border}` }}
+          onClick={onBack}
+        >
+          <ArrowLeft size={14} /> Workbench
+        </button>
+        <h2 className="text-lg font-bold" style={{ color: C.dark }}>Diagnose</h2>
+        <button
+          className="ml-auto text-sm px-3 py-1.5 rounded flex items-center gap-1 text-white"
+          style={{ background: C.dark }}
+          onClick={onGoReview}
+        >
+          Review & Freigabe <ArrowRight size={14} />
+        </button>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+        {/* Tierwohl-Score */}
+        <div className={card()} style={{ borderTop: `4px solid ${tierwohlColor}` }}>
+          <h3 className="font-semibold text-sm mb-3" style={{ color: C.dark }}>
+            Tierwohl-Score ({tw.score}/{tw.max})
+          </h3>
+          <div className="flex items-center gap-3 mb-3">
+            <div
+              className="text-3xl font-bold"
+              style={{ color: tierwohlColor }}
+            >
+              {tw.score}/{tw.max}
+            </div>
+            <div className="text-sm font-medium" style={{ color: tierwohlColor }}>
+              {tw.status === 'green' ? 'Alle Kriterien erfüllt' : tw.status === 'yellow' ? 'Teilweise erfüllt' : 'Kritisch'}
+            </div>
+          </div>
+          <div className="space-y-1.5">
+            {tw.criteria.map((c) => (
+              <div key={c.label} className="flex items-center gap-2 text-sm">
+                <span style={{ color: c.ok ? '#22c55e' : '#ef4444' }}>{c.ok ? '✓' : '✗'}</span>
+                <span style={{ color: c.ok ? C.dark : '#ef4444' }}>{c.label}</span>
+              </div>
+            ))}
+          </div>
+          <p className="text-[11px] mt-3" style={{ color: C.muted }}>
+            „Die Ration soll wiederkäuergerecht sein — der Erfolg zeigt sich in der Reaktion des Tieres." (DLG 01|25)
+          </p>
+        </div>
+
+        {/* Verletzte Nebenbedingungen */}
+        <div className={card()} style={{ borderTop: `4px solid ${violated.length === 0 ? '#22c55e' : '#ef4444'}` }}>
+          <h3 className="font-semibold text-sm mb-3" style={{ color: C.dark }}>
+            Nebenbedingungen ({violated.length} verletzt)
+          </h3>
+          {violated.length === 0 ? (
+            <p className="text-sm" style={{ color: '#22c55e' }}>Alle Nebenbedingungen erfüllt ✓</p>
+          ) : (
+            <div className="space-y-2">
+              {violated.map((c, i) => (
+                <div key={i} className="text-sm p-2 rounded" style={{ background: c.status === 'hard_violated' ? '#fef2f2' : '#fffbeb', border: `1px solid ${c.status === 'hard_violated' ? '#fca5a5' : '#fcd34d'}` }}>
+                  <div className="font-medium">{c.name}</div>
+                  <div style={{ color: C.muted }}>
+                    Ist: {fmt(c.actual, 2)} {c.unit} · Ziel: {fmt(c.target, 2)} {c.unit} · Δ {fmt(Math.abs(c.difference ?? c.actual - c.target), 2)}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+          {warnings.length > 0 && (
+            <div className="mt-3 space-y-1">
+              {warnings.slice(0, 5).map((w, i) => (
+                <div key={i} className="text-[12px] flex items-start gap-1" style={{ color: '#92400e' }}>
+                  <AlertTriangle size={12} className="mt-0.5 shrink-0" />{w}
+                </div>
+              ))}
+              {warnings.length > 5 && (
+                <div className="text-[11px]" style={{ color: C.muted }}>+{warnings.length - 5} weitere Warnungen</div>
+              )}
+            </div>
+          )}
+        </div>
+
+        {/* Biologische Risiken */}
+        <div className={card()} style={{ borderTop: '4px solid #f59e0b' }}>
+          <h3 className="font-semibold text-sm mb-3" style={{ color: C.dark }}>Biologische Risiken</h3>
+          {bioRisks.length === 0 ? (
+            <p className="text-sm" style={{ color: C.muted }}>Kein Ergebnis vorhanden.</p>
+          ) : (
+            <div className="space-y-2">
+              {bioRisks.map((r) => (
+                <div key={r.label} className="flex items-center justify-between text-sm">
+                  <span>{r.label}</span>
+                  <span className="text-xs font-bold px-2 py-0.5 rounded" style={{ background: riskColor(r.risk) + '22', color: riskColor(r.risk) }}>
+                    {riskLabel(r.risk)}
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
+          {dlg && (
+            <div className="mt-3 pt-3 border-t text-[11px] space-y-0.5" style={{ color: C.muted, borderColor: C.border }}>
+              <div>pabKH: {fmt(dlg.pabkh_kgdm * 1000, 0)} g/kg TM (Limit ≤ 210)</div>
+              <div>aNDFom-GF: {fmt(dlg.andfom_gf_kgdm * 1000, 0)} g/kg TM (Ziel ≥ 200)</div>
+              {dlg.rmd_gn_kgdm != null && <div>RMD: {fmt(dlg.rmd_gn_kgdm * 1000, 1)} g N/kg TM (Ziel −1 bis +1)</div>}
+            </div>
+          )}
+        </div>
+
+        {/* Wirtschaftlichkeit */}
+        <div className={card()} style={{ borderTop: `4px solid ${C.accent}` }}>
+          <h3 className="font-semibold text-sm mb-3" style={{ color: C.dark }}>Wirtschaftlichkeit</h3>
+          {econRows.length === 0 ? (
+            <p className="text-sm" style={{ color: C.muted }}>Kein Ergebnis vorhanden.</p>
+          ) : (
+            <div className="space-y-2">
+              {econRows.map((row) => (
+                <div key={row.label} className="flex items-center justify-between text-sm">
+                  <span style={{ color: C.muted }}>{row.label}</span>
+                  <span className="font-medium">{row.value}</span>
+                </div>
+              ))}
+            </div>
+          )}
+          {result && (
+            <div className="mt-3 pt-3 border-t text-[11px]" style={{ color: C.muted, borderColor: C.border }}>
+              {result.ration_items?.length ?? 0} Futtermittel · Solver-Status: {result.status}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ---------------------------------------------------------------------------
 // ROOT PAGE
 // ---------------------------------------------------------------------------
 
-type AppView = 'dashboard' | 'wizard' | 'workbench' | 'review'
+type AppView = 'dashboard' | 'wizard' | 'workbench' | 'diagnose' | 'review'
 
 export default function Rationsoptimierung() {
   const [view, setView] = useState<AppView>('dashboard')
@@ -3921,6 +4159,7 @@ export default function Rationsoptimierung() {
     { id: 'dashboard', label: 'Startseite' },
     { id: 'wizard', label: 'Neue Ration' },
     { id: 'workbench', label: 'Rations-Workbench' },
+    { id: 'diagnose', label: 'Diagnose' },
     { id: 'review', label: 'Review & Freigabe' },
   ]
 
@@ -3973,6 +4212,7 @@ export default function Rationsoptimierung() {
             key={tab.id}
             onClick={() => {
               if (tab.id === 'workbench' && !result) return
+              if (tab.id === 'diagnose' && !result) return
               if (tab.id === 'review' && !result) return
               if (tab.id === 'wizard') {
                 setWizardBoot((b) => ({ key: b.key + 1, resumeFrom: null, initialStep: 1 }))
@@ -3981,7 +4221,7 @@ export default function Rationsoptimierung() {
             }}
             className="font-semibold text-[13px] h-full flex items-center relative transition-colors cursor-pointer disabled:opacity-40"
             style={{ color: view === tab.id ? C.dark : C.muted }}
-            disabled={(tab.id === 'workbench' || tab.id === 'review') && !result}
+            disabled={(tab.id === 'workbench' || tab.id === 'diagnose' || tab.id === 'review') && !result}
           >
             {tab.label}
             {view === tab.id && (
@@ -4032,11 +4272,20 @@ export default function Rationsoptimierung() {
             onDemo={() => demoMutation.mutate()}
             onReset={handleReset}
             onGoReview={() => setView('review')}
+            onGoDiagnose={() => setView('diagnose')}
             onGoWizard={() => (wizardData ? openWizardReoptimize(wizardData) : openWizardFresh())}
             onApplySuggestionPatch={handleApplySuggestionPatch}
             chatSeed={demoChatSeed}
             tourStep={tourStep}
             onTourNext={() => tourStep !== null && tourStep < TOUR_STEPS.length - 1 ? setTourStep(tourStep + 1) : setTourStep(null)}
+          />
+        )}
+        {view === 'diagnose' && (
+          <Diagnose
+            result={result}
+            wizardData={wizardData}
+            onBack={() => setView('workbench')}
+            onGoReview={() => setView('review')}
           />
         )}
         {view === 'review' && (
