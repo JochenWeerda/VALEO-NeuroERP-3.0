@@ -354,10 +354,12 @@ Stand: `2026-05-12`
 
 **Von:** Codex
 **Owner:** Codex
-**Stand:** reserviert 2026-05-15
+**Stand:** abgeschlossen 2026-05-15
 **Ziel des Slices:** Waagearbeitsflaechen auf den UX-Exzellenzbaukasten ziehen: Rollenfokus, Waage-Aufgabenplan, Stopper-/Managemententscheidung, Next Action und CRUD-/Nachweis-Abdeckung.
 **Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/agent-ops/slices/UX-LOGISTIK-003.yaml`, `packages/frontend-web/src/pages/waage/wiegungen.tsx`, `packages/frontend-web/src/pages/waage/wiegeschein-detail.tsx`, `docs/project-context/ux-excellence-operating-standard-2026-05-13.md`
 **Abnahmekriterien:** Wiegungen und Wiegeschein-Detail zeigen Rollenfokus fuer Waage, Annahme, Disposition, QS und Abrechnung; Aufgabenplan fuehrt Ticket, Gewichte, Qualitaet, Kontrakt und Abschluss; Stopper-/Managemententscheidung zeigt buchbar/blockiert; CRUD-/Nachweis-Abdeckung ist sichtbar; Typecheck und Doku-Checks sind gruen.
+**Erledigt:** `waage/wiegungen.tsx` und `waage/wiegeschein-detail.tsx` nutzen den UX-Baukasten fuer Rollenfokus, Waage-/Wiegeschein-Aufgabenplan, Stopperentscheidung, Next Action und CRUD-/Nachweis-Abdeckung. Bestehende Ticketanlage, Gewichtserfassung, Kontraktzuordnung, Supply-Chain-Kennzahlen, Timeline und Detail-Tabs bleiben erhalten. UX-Standard markiert `UX-LOGISTIK-003` als abgeschlossen.
+**Checks:** `pnpm --filter @valero-neuroerp/frontend-web type-check`; `python scripts/agent_workboard_supervisor.py validate`; `node scripts/docs-governance-check.cjs`; `node scripts/docs-markdown-check.cjs docs/project-context/ux-excellence-operating-standard-2026-05-13.md docs/agent-ops/active-workboard.md docs/agent-ops/slices/UX-LOGISTIK-003.yaml`; `git diff --check`
 **Offene Risiken:** Waage-Hardware-Integration bleibt ausserhalb dieses Slice; dieser Slice fokussiert die Bedien- und Nachweissicht.
 
 ## TODO-SPRINT-001
