@@ -426,10 +426,12 @@ Stand: `2026-05-12`
 
 **Von:** Codex
 **Owner:** Codex
-**Stand:** reserviert 2026-05-15
+**Stand:** abgeschlossen 2026-05-15
 **Ziel des Slices:** Einkaufs-Dashboard auf den UX-Exzellenzbaukasten ziehen: Rollenfokus, Einkaufs-Prioritaetsplan, Managemententscheidung, Next Action und CRUD-/Nachweis-Abdeckung. Bestell- und Rechnungseingangslisten sind bereits in frueheren Einkauf-Slices abgedeckt.
 **Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/agent-ops/slices/UX-EINKAUF-007.yaml`, `packages/frontend-web/src/pages/dashboard/einkauf-dashboard.tsx`, `docs/project-context/ux-excellence-operating-standard-2026-05-13.md`
 **Abnahmekriterien:** Einkaufs-Dashboard zeigt Rollenfokus fuer Einkauf, Wareneingang, Finance, Lieferantenmanagement und Leitung; Prioritaetsplan fuehrt offene Bestellungen, Ueberfaelligkeit, Einkaufsvolumen, offene Posten und Nachweis; Managemententscheidung zeigt arbeitsfaehig/blockiert; CRUD-/Nachweis-Abdeckung ist sichtbar; Typecheck und Doku-Checks sind gruen.
+**Erledigt:** `dashboard/einkauf-dashboard.tsx` nutzt den UX-Baukasten fuer Rollenfokus, Einkaufs-Prioritaetsplan, Managemententscheidung, Next Action und CRUD-/Nachweis-Abdeckung. Bestehende KPI-Karten, Ueberfaelligkeitswarnung und aktuelle Bestellungen bleiben erhalten. UX-Standard markiert `UX-EINKAUF-007` als abgeschlossen.
+**Checks:** `pnpm --filter @valero-neuroerp/frontend-web type-check`; `python scripts/agent_workboard_supervisor.py validate`; `node scripts/docs-governance-check.cjs`; `node scripts/docs-markdown-check.cjs docs/project-context/ux-excellence-operating-standard-2026-05-13.md docs/agent-ops/active-workboard.md docs/agent-ops/slices/UX-EINKAUF-007.yaml`; `git diff --check`
 **Offene Risiken:** Detail-Listen bleiben in den vorhandenen Einkaufs-Slices; dieser Slice fokussiert die Management- und Prioritaetssicht des Dashboards.
 
 ## TODO-SPRINT-001

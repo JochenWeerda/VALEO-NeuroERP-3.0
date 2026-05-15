@@ -1,7 +1,7 @@
 id: UX-EINKAUF-007
 title: Einkaufs-Dashboard mit UX-Exzellenzbaukasten
 owner: Codex
-status: reserviert
+status: abgeschlossen
 created: 2026-05-15
 goal: >
   Einkaufs-Dashboard auf den UX-Exzellenzbaukasten ziehen: Rollenfokus,
@@ -19,6 +19,15 @@ acceptance_criteria:
   - Managemententscheidung zeigt arbeitsfaehig/blockiert.
   - CRUD-/Nachweis-Abdeckung ist sichtbar.
   - Typecheck und Doku-Checks sind gruen.
-checks: []
+checks:
+  - pnpm --filter @valero-neuroerp/frontend-web type-check
+  - python scripts/agent_workboard_supervisor.py validate
+  - node scripts/docs-governance-check.cjs
+  - node scripts/docs-markdown-check.cjs docs/project-context/ux-excellence-operating-standard-2026-05-13.md docs/agent-ops/active-workboard.md docs/agent-ops/slices/UX-EINKAUF-007.yaml
+  - git diff --check
+done:
+  - Einkaufs-Dashboard um Rollenfokus fuer Einkauf, Wareneingang, Finance, Lieferantenmanagement und Leitung ergaenzt.
+  - Einkaufs-Prioritaetsplan fuer offene Bestellungen, Ueberfaelligkeit, Einkaufsvolumen, offene Posten und Lieferantenbasis ergaenzt.
+  - Managemententscheidung arbeitsfaehig/blockiert, Next Action und CRUD-/Nachweis-Abdeckung sichtbar gemacht.
 risks:
   - Detail-Listen bleiben in den vorhandenen Einkaufs-Slices; dieser Slice fokussiert die Management- und Prioritaetssicht des Dashboards.
