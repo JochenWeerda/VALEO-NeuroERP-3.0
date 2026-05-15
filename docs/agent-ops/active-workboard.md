@@ -378,10 +378,12 @@ Stand: `2026-05-12`
 
 **Von:** Codex
 **Owner:** Codex
-**Stand:** reserviert 2026-05-15
+**Stand:** abgeschlossen 2026-05-15
 **Ziel des Slices:** Gutschriften-Editor als Verkaufsfolge auf den UX-Exzellenzbaukasten ziehen: Rollenfokus, Freigabeplan, Managemententscheidung, Next Action und CRUD-/Nachweis-Abdeckung.
 **Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/agent-ops/slices/UX-SALES-005.yaml`, `packages/frontend-web/src/pages/sales/credit-note-editor.tsx`, `docs/project-context/ux-excellence-operating-standard-2026-05-13.md`
 **Abnahmekriterien:** Gutschriften-Editor zeigt Rollenfokus fuer Vertrieb, Faktura, Finance und Leitung; Freigabeplan fuehrt Kunde, Ausgangsrechnung, Grund, Positionen und Zahlung; Managemententscheidung zeigt freigabefaehig/blockiert; CRUD-/Nachweis-Abdeckung ist sichtbar; Typecheck und Doku-Checks sind gruen.
+**Erledigt:** `sales/credit-note-editor.tsx` nutzt den UX-Baukasten fuer Rollenfokus, Gutschriften-Freigabeplan, Managemententscheidung, Next Action und CRUD-/Nachweis-Abdeckung. Bestehende ObjectPage-Konfiguration, Validierung, Freigabe, Versand, Druck und Storno bleiben erhalten. UX-Standard markiert `UX-SALES-005` als abgeschlossen.
+**Checks:** `pnpm --filter @valero-neuroerp/frontend-web type-check`; `python scripts/agent_workboard_supervisor.py validate`; `node scripts/docs-governance-check.cjs`; `node scripts/docs-markdown-check.cjs docs/project-context/ux-excellence-operating-standard-2026-05-13.md docs/agent-ops/active-workboard.md docs/agent-ops/slices/UX-SALES-005.yaml`; `git diff --check`
 **Offene Risiken:** Retourenlogik ausserhalb des Gutschriften-Editors bleibt fuer einen separaten Sales-/Einkauf-Slice offen.
 
 ## TODO-SPRINT-001

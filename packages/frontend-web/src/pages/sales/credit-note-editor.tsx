@@ -7,6 +7,45 @@ import { MaskConfig } from '@/components/mask-builder/types'
 import { getFieldsFromMaskConfig, validateFields } from '@/components/mask-builder/validation'
 import { toast } from '@/hooks/use-toast'
 import { getEntityTypeLabel } from '@/features/crud/utils/i18n-helpers'
+import {
+  CrudCapabilityChecklist,
+  EvidenceTemplateLink,
+  ManagementDecisionPanel,
+  NextActionPanel,
+  OperationalTaskPlan,
+  RoleFocusBar,
+  type UxTaskItem,
+} from '@/components/workflow'
+
+type CreditNoteRoleFocus = 'all' | 'sales' | 'billing' | 'finance' | 'management'
+
+const creditNoteRoleProfiles: Array<{ id: CreditNoteRoleFocus; label: string; description: string }> = [
+  {
+    id: 'all',
+    label: 'Alle Rollen',
+    description: 'Zeigt die Gutschrift fuer Vertrieb, Faktura, Finance und Leitung.',
+  },
+  {
+    id: 'sales',
+    label: 'Vertrieb',
+    description: 'Fokus auf Kunde, Grund, Ausgangsrechnung und Kundenklaerung.',
+  },
+  {
+    id: 'billing',
+    label: 'Faktura',
+    description: 'Fokus auf Positionen, Betrag, Freigabe, Versand und Druck.',
+  },
+  {
+    id: 'finance',
+    label: 'Finance',
+    description: 'Fokus auf Betrag, Steuer, Zahlungsziel und OP-Auswirkung.',
+  },
+  {
+    id: 'management',
+    label: 'Leitung',
+    description: 'Fokus auf Freigabefaehigkeit, Blocker und naechste Aktion.',
+  },
+]
 
 const createCreditNoteConfig = (t: any, entityTypeLabel: string): MaskConfig => ({
   title: `${t('crud.actions.create')}/${t('crud.actions.edit')} ${entityTypeLabel}`,
@@ -241,6 +280,7 @@ export default function CreditNoteEditorPage(): JSX.Element {
   const navigate = useNavigate()
   const { id } = useParams()
   const [isDirty, setIsDirty] = useState(false)
+  const [roleFocus, setRoleFocus] = useState<CreditNoteRoleFocus>('all')
   const entityType = 'creditNote'
   const entityTypeLabel = getEntityTypeLabel(t, entityType, 'Gutschrift')
   const creditNoteConfig = createCreditNoteConfig(t, entityTypeLabel)
@@ -315,14 +355,137 @@ export default function CreditNoteEditorPage(): JSX.Element {
     navigate('/sales/credit-notes')
   }
 
+  const creditNote = (data ?? {}) as Record<string, any>
+  const lines = Array.isArray(creditNote.lines) ? creditNote.lines : []
+  const hasCustomer = Boolean(creditNote.customerId)
+  const hasSourceInvoice = Boolean(creditNote.sourceInvoice)
+  const hasReason = Boolean(creditNote.reason)
+  const hasReasonText = Boolean(String(creditNote.reasonText ?? '').trim())
+  const hasLines = lines.length > 0
+  const hasAmount = Number(creditNote.totalGross ?? 0) > 0 || lines.some((line: any) => Number(line?.price ?? 0) > 0)
+  const hasPaymentPath = Boolean(creditNote.paymentTerms && creditNote.dueDate)
+  const isCancelled = creditNote.status === 'cancelled'
+  const isCreditNoteReady = hasCustomer && hasReason && hasLines && hasAmount && hasPaymentPath && !isCancelled
+  const nextCreditNoteAction = !hasCustomer
+    ? 'Kunden fuer die Gutschrift auswaehlen.'
+    : !hasSourceInvoice
+      ? 'Ausgangsrechnung verknuepfen oder begruenden, warum keine vorhanden ist.'
+      : !hasReason
+        ? 'Gutschriftsgrund auswaehlen.'
+        : !hasLines
+          ? 'Mindestens eine Gutschriftsposition erfassen.'
+          : !hasAmount
+            ? 'Betrag und Steuer pruefen.'
+            : !hasPaymentPath
+              ? 'Zahlungsbedingung und Faelligkeit setzen.'
+              : isCancelled
+                ? 'Stornierte Gutschrift pruefen; keine Freigabe moeglich.'
+                : 'Gutschrift freigeben, senden oder drucken.'
+  const creditNoteTaskItems: UxTaskItem[] = [
+    {
+      label: 'Kunde und Ausgangsrechnung klaeren',
+      done: hasCustomer && (hasSourceInvoice || hasReasonText),
+      hint: hasCustomer ? (hasSourceInvoice ? 'Kunde und Ausgangsrechnung sind verbunden.' : 'Kunde ist gesetzt; Ausgangsrechnung oder Begruendung klaeren.') : 'Kunde fehlt noch.',
+    },
+    {
+      label: 'Grund und Positionen erfassen',
+      done: hasReason && hasLines,
+      hint: hasReason && hasLines ? `${lines.length} Positionen mit Grund ${creditNote.reason}.` : 'Grund und mindestens eine Position sind Pflicht.',
+    },
+    {
+      label: 'Betrag und Zahlungsfolge pruefen',
+      done: hasAmount && hasPaymentPath,
+      hint: hasAmount && hasPaymentPath ? `Brutto ${Number(creditNote.totalGross ?? 0).toFixed(2)} und Faelligkeit ${creditNote.dueDate}.` : 'Betrag, Steuer, Zahlungsbedingung und Faelligkeit pruefen.',
+    },
+    {
+      label: 'Freigabe und Nachweis sichern',
+      done: ['approved', 'sent', 'paid'].includes(String(creditNote.status)),
+      hint: creditNote.status ? `Status: ${creditNote.status}.` : 'Freigabe, Versand oder Druck als Nachweis festhalten.',
+    },
+  ]
+  const creditNoteCrudCapabilities = [
+    {
+      key: 'create',
+      label: 'Anlegen/Speichern',
+      available: isCreditNoteReady,
+      hint: isCreditNoteReady ? 'Gutschrift kann gespeichert oder freigegeben werden.' : 'Kunde, Grund, Positionen, Betrag und Zahlungsfolge muessen stimmen.',
+    },
+    {
+      key: 'read',
+      label: 'Lesen',
+      available: true,
+      hint: 'Grunddaten, Positionen, Betrag, Zahlung und Notizen sind in der Maske sichtbar.',
+    },
+    {
+      key: 'update',
+      label: 'Bearbeiten',
+      available: !isCancelled,
+      hint: isCancelled ? 'Stornierte Gutschriften sollten nicht weiter bearbeitet werden.' : 'Felder und Positionen koennen ueber die ObjectPage bearbeitet werden.',
+    },
+    {
+      key: 'approve',
+      label: 'Freigeben/Senden',
+      available: isCreditNoteReady,
+      hint: isCreditNoteReady ? 'Freigabe, Versand und Druck sind als Aktionen vorhanden.' : 'Freigabe braucht vollstaendige Gutschrift.',
+    },
+    {
+      key: 'evidence',
+      label: 'Nachweis',
+      available: hasReason && (hasSourceInvoice || hasReasonText),
+      hint: hasSourceInvoice ? 'Ausgangsrechnung und Grund bilden den Nachweis.' : 'Ohne Ausgangsrechnung braucht die Gutschrift eine klare Begruendung.',
+    },
+    {
+      key: 'audit',
+      label: 'Pruefspur',
+      available: Boolean(id || creditNote.number),
+      hint: id || creditNote.number ? 'Gutschriftsnummer, Status, Grund und Aktionen bilden die Pruefspur.' : 'Pruefspur entsteht beim Speichern.',
+    },
+  ]
+
   return (
-    <ObjectPage
-      config={creditNoteConfig}
-      data={data}
-      onSave={handleSave}
-      onCancel={handleCancel}
-      onAction={handleAction}
-      isLoading={loading}
-    />
+    <div className="space-y-4">
+      <RoleFocusBar
+        roles={creditNoteRoleProfiles}
+        value={roleFocus}
+        onChange={setRoleFocus}
+        visibleCount={roleFocus === 'all' ? 4 : 1}
+        totalCount={4}
+      />
+      <ManagementDecisionPanel
+        decision={{
+          allowed: isCreditNoteReady,
+          allowedLabel: 'Freigabefaehig',
+          blockedLabel: 'Noch nicht freigabefaehig',
+          summary: isCreditNoteReady
+            ? `Die Gutschrift ist fachlich bereit. ${lines.length} Positionen, ${Number(creditNote.totalGross ?? 0).toFixed(2)} EUR brutto.`
+            : `Vor Freigabe ist noch etwas offen: ${nextCreditNoteAction}`,
+          blockerCount: [!hasCustomer, !hasReason, !hasLines, !hasAmount, !hasPaymentPath, isCancelled].filter(Boolean).length,
+          nextFocus: nextCreditNoteAction,
+          template: {
+            label: 'Gutschriftenliste oeffnen',
+            href: '/sales/credit-notes',
+          },
+        }}
+      />
+      <div className="grid gap-4 lg:grid-cols-[1.35fr_1fr]">
+        <OperationalTaskPlan title="Gutschriften-Freigabeplan" items={creditNoteTaskItems} />
+        <div className="space-y-3">
+          <NextActionPanel
+            action={nextCreditNoteAction}
+            tone={isCreditNoteReady ? 'emerald' : isCancelled ? 'red' : hasCustomer ? 'amber' : 'blue'}
+          />
+          <EvidenceTemplateLink link={{ label: 'Rechnungsliste pruefen', href: '/sales/rechnungen' }} />
+        </div>
+      </div>
+      <CrudCapabilityChecklist capabilities={creditNoteCrudCapabilities} />
+      <ObjectPage
+        config={creditNoteConfig}
+        data={data}
+        onSave={handleSave}
+        onCancel={handleCancel}
+        onAction={handleAction}
+        isLoading={loading}
+      />
+    </div>
   )
 }
