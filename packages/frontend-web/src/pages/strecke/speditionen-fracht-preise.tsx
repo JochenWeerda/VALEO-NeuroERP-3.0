@@ -7,8 +7,24 @@ import {
   updateFrachttarif,
   deleteFrachttarif,
 } from '@/lib/api/strecke'
+import {
+  CrudCapabilityChecklist,
+  EvidenceTemplateLink,
+  ManagementDecisionPanel,
+  NextActionPanel,
+  OperationalTaskPlan,
+  RoleFocusBar,
+} from '@/components/workflow'
 
 type EditRow = SpeditionFrachttarifPayload & { id?: string }
+type FreightTariffRole = 'disposition' | 'einkauf' | 'finance' | 'leitung'
+
+const freightTariffRoles = [
+  { id: 'disposition', label: 'Disposition', description: 'Prueft, ob fuer die aktuelle PLZ-Strecke ein aktiver Spediteur verfuegbar ist.' },
+  { id: 'einkauf', label: 'Einkauf', description: 'Pflegt Tarife, Spediteur und Notiz fuer neue oder geaenderte Frachtpreise.' },
+  { id: 'finance', label: 'Finance', description: 'Achtet auf Preislogik, Rechnungserwartung und Kostenabweichung.' },
+  { id: 'leitung', label: 'Leitung', description: 'Sieht, ob Tarifpflege oder inaktive Spediteure die Lieferkette blockieren.' },
+] satisfies Array<{ id: FreightTariffRole; label: string; description: string }>
 
 const EMPTY_ROW: EditRow = {
   plz_von: '',
@@ -26,6 +42,7 @@ export default function SpeditionenFrachtPreisePage(): JSX.Element {
   const [editRow, setEditRow] = useState<EditRow | null>(null)
   const [saving, setSaving] = useState(false)
   const [deleteId, setDeleteId] = useState<string | null>(null)
+  const [roleFocus, setRoleFocus] = useState<FreightTariffRole>('disposition')
   const firstInputRef = useRef<HTMLInputElement>(null)
 
   const load = async () => {
@@ -99,8 +116,66 @@ export default function SpeditionenFrachtPreisePage(): JSX.Element {
       setEditRow((prev) => prev ? { ...prev, [key]: key === 'preis_eur_t' ? e.target.value : e.target.value } : prev),
   })
 
+  const activeRows = rows.filter((row) => row.aktiv)
+  const inactiveRows = rows.filter((row) => !row.aktiv)
+  const missingNotes = rows.filter((row) => !row.notiz)
+  const hasTariffStopper = rows.length === 0 || inactiveRows.length > 0 || Boolean(error)
+  const nextTariffAction = error
+    ? 'Fehler beim Laden klaeren und Tarife erneut aktualisieren.'
+    : rows.length === 0
+      ? 'Ersten Frachttarif fuer PLZ-Bereich, Spediteur und EUR/t anlegen.'
+      : inactiveRows.length > 0
+        ? `${inactiveRows.length} inaktive Frachttarife pruefen und Ersatzspediteur festlegen.`
+        : missingNotes.length > 0
+          ? `${missingNotes.length} Tarife ohne Notiz pruefen und Nachweis zur Preisbasis ergaenzen.`
+          : 'Tarife sind arbeitsfaehig; naechste Frachtentscheidung kann gegen die Liste geprueft werden.'
+
   return (
     <div className="min-h-full bg-[#ececec] p-4 text-[11px] text-black">
+      <div className="mb-4 space-y-4 text-[13px]">
+        <RoleFocusBar roles={freightTariffRoles} value={roleFocus} onChange={setRoleFocus} visibleCount={rows.length} totalCount={rows.length} title="Wer klaert den Frachttarif?" />
+        <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_360px]">
+          <ManagementDecisionPanel
+            decision={{
+              allowed: !hasTariffStopper,
+              allowedLabel: 'Tarife arbeitsfaehig',
+              blockedLabel: 'Tarifklaerung offen',
+              summary: hasTariffStopper
+                ? 'Mindestens ein Frachttarif ist offen, inaktiv oder nicht ladbar. Disposition und Einkauf muessen die Route klaeren, bevor die Frachtkosten ungeprueft verwendet werden.'
+                : `${activeRows.length} aktive Frachttarife sind verfuegbar und koennen fuer Disposition und Kostenpruefung genutzt werden.`,
+              blockerCount: (rows.length === 0 ? 1 : 0) + inactiveRows.length + (error ? 1 : 0),
+              nextFocus: inactiveRows[0]?.spediteur ?? (rows.length === 0 ? 'Ersten Tarif anlegen' : 'Tarifnotizen pruefen'),
+              template: { label: 'Frachttarif-Pruefprotokoll', href: '/docs/logistik/frachttarif-pruefprotokoll.md' },
+            }}
+          />
+          <div className="space-y-4">
+            <NextActionPanel action={nextTariffAction} tone={hasTariffStopper ? 'amber' : 'emerald'} />
+            <EvidenceTemplateLink link={{ label: 'Speditionspreis-Nachweis', href: '/docs/logistik/speditionspreis-nachweis.md' }} />
+          </div>
+        </div>
+        <div className="grid gap-4 lg:grid-cols-2">
+          <OperationalTaskPlan
+            title="Pruefplan fuer Frachtpreise"
+            items={[
+              { label: 'Tarife laden', done: !loading && !error, hint: error ?? `${rows.length} Tarif(e) in der aktuellen Sicht.` },
+              { label: 'Aktive Spediteure pruefen', done: activeRows.length > 0, hint: `${activeRows.length} aktive und ${inactiveRows.length} inaktive Tarife.` },
+              { label: 'Preis und PLZ-Bereich pflegen', done: rows.every((row) => row.plz_von && row.plz_bis && Number(row.preis_eur_t) > 0), hint: 'PLZ von/bis, Spediteur und EUR/t muessen gefuellt sein.' },
+              { label: 'Preisnachweis halten', done: missingNotes.length === 0 && rows.length > 0, hint: missingNotes.length > 0 ? `${missingNotes.length} Tarife ohne Notiz oder Preisbasis.` : 'Notizen sind als Mindestnachweis gepflegt.' },
+            ]}
+          />
+          <CrudCapabilityChecklist
+            capabilities={[
+              { key: 'create', label: 'Tarif anlegen', available: true, hint: 'Neue PLZ-/Spediteur-Tarife koennen angelegt werden.' },
+              { key: 'read', label: 'Tarife lesen', available: true, hint: 'PLZ-Bereich, Spediteur, Preis und Aktivstatus sind sichtbar.' },
+              { key: 'update', label: 'Tarif bearbeiten', available: true, hint: 'Bestehende Tarife koennen geaendert werden.' },
+              { key: 'delete', label: 'Tarif loeschen', available: true, hint: 'Loeschen laeuft ueber eine Rueckfrage.' },
+              { key: 'evidence', label: 'Preisnachweis', available: true, hint: 'Vorlage fuer Preisbasis und Freigabe ist verlinkt.' },
+              { key: 'audit', label: 'Aenderung nachvollziehen', available: false, hint: 'Eigene Audit-Zeitleiste ist noch nicht angebunden.' },
+            ]}
+          />
+        </div>
+      </div>
+
       <div className="mb-2 text-[12px] font-semibold uppercase">Speditionen / Fracht-Preise (nach PLZ)</div>
 
       {error && (
