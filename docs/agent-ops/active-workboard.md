@@ -2109,3 +2109,15 @@ Archiv des vorherigen Boards:
 **Erledigt:** Alle 4 Phase-3+4-Ziele umgesetzt, committed `f4d0462ae` + `6cf97afcc`; Linter sauber; 4/4 Phase-4-Tests gruen; `alembic upgrade head` = no-op; main + develop auf GitHub gepusht.
 
 **Checks:** `pytest tests/test_gap_fixes_phase4.py -v`; `alembic upgrade head`; `flake8 app/core/metrics.py app/middleware/tenant_enforcement.py`
+
+## UX-SERVICE-001
+
+**Von:** Codex
+**Owner:** Codex
+**Stand:** reserviert 2026-05-15
+**Ziel des Slices:** Service-Anfragen und Rueckmeldung mit Rollenfokus, klarer Aufgabe, Status, naechster Aktion und Nachweisfuehrung nach UX-Standard fuehren.
+**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/agent-ops/slices/UX-SERVICE-001.yaml`, `packages/frontend-web/src/pages/service/anfragen.tsx`, `packages/frontend-web/src/pages/service/rueckmeldung.tsx`, `docs/project-context/ux-excellence-operating-standard-2026-05-13.md`
+**Abnahmekriterien:** Service-Anfragen und Rueckmeldung zeigen Rollenfokus, Service-/Rueckmeldeplan, Managemententscheidung, Next Action, Nachweislink und CRUD-/Workflow-Abdeckung; bestehende Liste, Suche, Export, Workflow-Handover, Rueckmeldeformular und Navigation bleiben erhalten.
+**Erledigt:** Reserviert; Umsetzung folgt.
+**Checks:** offen
+**Offene Risiken:** Service-Abschluss und Feldservice-Detail bleiben Folgeslices; dieser Slice fokussiert Anfrageuebersicht und Rueckmeldung.
