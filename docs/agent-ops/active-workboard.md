@@ -338,6 +338,16 @@ Stand: `2026-05-12`
 **Checks:** `pnpm --filter @valero-neuroerp/frontend-web type-check`; `python scripts/agent_workboard_supervisor.py validate`; `node scripts/docs-governance-check.cjs`; `node scripts/docs-markdown-check.cjs docs/project-context/ux-excellence-operating-standard-2026-05-13.md docs/agent-ops/active-workboard.md docs/agent-ops/slices/UX-EINKAUF-004.yaml`; `git diff --check`
 **Offene Risiken:** Detaildialoge fuer Ansprechpartner, Bankkonten, Klassifikationen und Dokumente bleiben bestehend; dieser Slice setzt den Leitbereich oberhalb der Stammdatenmaske.
 
+## UX-SALES-004
+
+**Von:** Codex
+**Owner:** Codex
+**Stand:** reserviert 2026-05-15
+**Ziel des Slices:** Rechnungs- und Lieferschein-Editor als Folgebeleg-Arbeitsflaechen auf den UX-Exzellenzbaukasten ziehen: Rollenfokus, Folgebelegplan, Managemententscheidung, Next Action und CRUD-/Nachweis-Abdeckung.
+**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/agent-ops/slices/UX-SALES-004.yaml`, `packages/frontend-web/src/pages/sales/invoice-editor.tsx`, `packages/frontend-web/src/pages/sales/delivery-editor.tsx`, `docs/project-context/ux-excellence-operating-standard-2026-05-13.md`
+**Abnahmekriterien:** Rechnungseditor zeigt Rollenfokus fuer Faktura, Vertrieb, Finance und Leitung; Lieferschein-Editor zeigt Rollenfokus fuer Versand, Vertrieb, Lager und Faktura; beide zeigen Folgebelegplan, Managemententscheidung, Next Action und CRUD-/Nachweis-Abdeckung; Typecheck und Doku-Checks sind gruen.
+**Offene Risiken:** Tiefe Belegdruck- und Exportprozesse bleiben in bestehenden Funktionen; dieser Slice setzt den Leitbereich oberhalb der bestehenden Editor-Masken.
+
 ## TODO-SPRINT-001
 
 **Von:** Cursor<br>
