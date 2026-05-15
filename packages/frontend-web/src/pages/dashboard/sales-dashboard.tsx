@@ -1,9 +1,29 @@
+import { useState } from 'react'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
 import { BarChart3, Euro, FileText, TrendingUp, Users, AlertCircle } from 'lucide-react'
 import { useSalesDashboard } from '@/lib/api/dashboard'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
+import {
+  CrudCapabilityChecklist,
+  EvidenceTemplateLink,
+  ManagementDecisionPanel,
+  NextActionPanel,
+  OperationalTaskPlan,
+  RoleFocusBar,
+  type UxTaskItem,
+} from '@/components/workflow'
+
+type SalesDashboardRoleFocus = 'all' | 'sales' | 'billing' | 'finance' | 'management'
+
+const salesDashboardRoleProfiles: Array<{ id: SalesDashboardRoleFocus; label: string; description: string }> = [
+  { id: 'all', label: 'Alle Rollen', description: 'Zeigt Verkaufskennzahlen fuer Vertrieb, Faktura, Finance und Leitung.' },
+  { id: 'sales', label: 'Vertrieb', description: 'Fokus auf Umsatz, aktive Kunden und Top-Kunden.' },
+  { id: 'billing', label: 'Faktura', description: 'Fokus auf Auftragsvolumen und Rechnungsfolge.' },
+  { id: 'finance', label: 'Finance', description: 'Fokus auf Umsatz, Durchschnittswert und OP-Folge.' },
+  { id: 'management', label: 'Leitung', description: 'Fokus auf Entscheidungslage, Prioritaet und naechste Aktion.' },
+]
 
 // Skeleton-Komponente für KPI-Karten
 function KpiCardSkeleton({ title, icon: Icon }: { title: string; icon?: React.ElementType }) {
@@ -83,6 +103,7 @@ function DashboardSkeleton({ showMessage = false }: { showMessage?: boolean }) {
 
 export default function SalesDashboardPage(): JSX.Element {
   const { data: dashboard, isLoading } = useSalesDashboard()
+  const [roleFocus, setRoleFocus] = useState<SalesDashboardRoleFocus>('all')
   
   // Während des Ladens zeigen wir eine Skeleton-Vorschau
   if (isLoading) {
@@ -93,12 +114,58 @@ export default function SalesDashboardPage(): JSX.Element {
   if (!dashboard) {
     return <DashboardSkeleton showMessage />
   }
+  const hasRevenue = dashboard.totalRevenue > 0
+  const hasOrders = dashboard.totalOrders > 0
+  const hasCustomers = dashboard.topCustomers.length > 0
+  const dashboardReady = hasRevenue && hasOrders && hasCustomers
+  const dashboardNextAction = !hasOrders
+    ? 'Ersten Auftrag oder erste Rechnung erfassen.'
+    : !hasRevenue
+      ? 'Umsatzdaten pruefen oder Faktura nachziehen.'
+      : !hasCustomers
+        ? 'Kundenumsatz pruefen.'
+        : 'Top-Kunden pruefen und offene Verkaufsfolge nachhalten.'
+  const dashboardTaskItems: UxTaskItem[] = [
+    { label: 'Umsatzlage pruefen', done: hasRevenue, hint: hasRevenue ? `Monatsumsatz ${new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(dashboard.totalRevenue)}.` : 'Noch kein Umsatz im Dashboard.' },
+    { label: 'Auftragsbasis pruefen', done: hasOrders, hint: hasOrders ? `${dashboard.totalOrders} Auftraege im Dashboard.` : 'Noch keine Auftraege sichtbar.' },
+    { label: 'Kunden priorisieren', done: hasCustomers, hint: hasCustomers ? `${dashboard.topCustomers.length} aktive Top-Kunden.` : 'Keine Top-Kunden fuer Follow-up vorhanden.' },
+    { label: 'Nachweis sichern', done: dashboardReady, hint: dashboardReady ? 'Dashboard kann als Managementsicht genutzt werden.' : 'Erst Auftrags-, Umsatz- und Kundendaten vervollstaendigen.' },
+  ]
+  const dashboardCrudCapabilities = [
+    { key: 'read', label: 'Lesen', available: true, hint: 'Umsatz, Auftragswert, Auftragsanzahl und Top-Kunden sind sichtbar.' },
+    { key: 'follow-up', label: 'Folgeaktionen', available: dashboardReady, hint: dashboardReady ? 'Verkaufsfolge kann aus Top-Kunden und Auftragslage abgeleitet werden.' : 'Folgeaktionen brauchen Verkaufsdaten.' },
+    { key: 'evidence', label: 'Managementnachweis', available: dashboardReady, hint: dashboardReady ? 'Kennzahlen bilden den Managementnachweis.' : 'Nachweis entsteht mit belastbaren Verkaufsdaten.' },
+    { key: 'audit', label: 'Pruefspur', available: true, hint: 'Dashboarddaten kommen aus dem bestehenden Sales-API-Vertrag.' },
+  ]
 
   return (
     <div className="space-y-6 p-6">
       <div>
         <h1 className="text-3xl font-bold">Verkaufs-Dashboard</h1>
         <p className="text-muted-foreground">Aktuelle Kennzahlen</p>
+      </div>
+
+      <div className="space-y-4">
+        <RoleFocusBar roles={salesDashboardRoleProfiles} value={roleFocus} onChange={setRoleFocus} visibleCount={roleFocus === 'all' ? 4 : 1} totalCount={4} />
+        <ManagementDecisionPanel
+          decision={{
+            allowed: dashboardReady,
+            allowedLabel: 'Entscheidungsfaehig',
+            blockedLabel: 'Datenbasis fehlt',
+            summary: dashboardReady ? `Verkaufsbild ist belastbar: ${dashboard.totalOrders} Auftraege, ${dashboard.topCustomers.length} aktive Kunden.` : `Vor der Managemententscheidung ist noch etwas offen: ${dashboardNextAction}`,
+            blockerCount: [!hasRevenue, !hasOrders, !hasCustomers].filter(Boolean).length,
+            nextFocus: dashboardNextAction,
+            template: { label: 'Auftragsliste oeffnen', href: '/sales/auftraege' },
+          }}
+        />
+        <div className="grid gap-4 lg:grid-cols-[1.35fr_1fr]">
+          <OperationalTaskPlan title="Verkaufs-Prioritaetsplan" items={dashboardTaskItems} />
+          <div className="space-y-3">
+            <NextActionPanel action={dashboardNextAction} tone={dashboardReady ? 'emerald' : hasOrders ? 'amber' : 'blue'} />
+            <EvidenceTemplateLink link={{ label: 'Rechnungen pruefen', href: '/sales/rechnungen' }} />
+          </div>
+        </div>
+        <CrudCapabilityChecklist capabilities={dashboardCrudCapabilities} />
       </div>
 
       <div className="grid gap-4 md:grid-cols-5">

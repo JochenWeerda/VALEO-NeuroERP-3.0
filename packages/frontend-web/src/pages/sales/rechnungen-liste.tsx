@@ -13,6 +13,15 @@ import { CSVImport } from '@/components/list/CSVImport'
 import { OperationalCaseHeader } from '@/components/workflow/OperationalCaseHeader'
 import { OperationalContextPanel } from '@/components/workflow/OperationalContextPanel'
 import { OperationalTimeline } from '@/components/workflow/OperationalTimeline'
+import {
+  CrudCapabilityChecklist,
+  EvidenceTemplateLink,
+  ManagementDecisionPanel,
+  NextActionPanel,
+  OperationalTaskPlan,
+  RoleFocusBar,
+  type UxTaskItem,
+} from '@/components/workflow'
 import { useToast } from '@/hooks/use-toast'
 import { useListActions } from '@/hooks/useListActions'
 import { formatDateForExport, formatCurrencyForExport } from '@/lib/export-utils'
@@ -29,6 +38,16 @@ const statusVariantMap: Record<RechnungStatus, 'default' | 'outline' | 'secondar
   storniert: 'destructive',
 }
 
+type InvoiceListRoleFocus = 'all' | 'billing' | 'sales' | 'finance' | 'management'
+
+const invoiceListRoleProfiles: Array<{ id: InvoiceListRoleFocus; label: string; description: string }> = [
+  { id: 'all', label: 'Alle Rollen', description: 'Zeigt Rechnungen fuer Faktura, Vertrieb, Finance und Leitung.' },
+  { id: 'billing', label: 'Faktura', description: 'Fokus auf offene Rechnungen, Versand, Druck und Import.' },
+  { id: 'sales', label: 'Vertrieb', description: 'Fokus auf Kunde, Auftrag und Rechnungsklaerung.' },
+  { id: 'finance', label: 'Finance', description: 'Fokus auf Faelligkeit, offene Forderungen und OP-Folge.' },
+  { id: 'management', label: 'Leitung', description: 'Fokus auf ueberfaellige Rechnungen, Volumen und naechste Aktion.' },
+]
+
 export default function RechnungenListePage(): JSX.Element {
   const { t } = useTranslation()
   const navigate = useNavigate()
@@ -40,6 +59,7 @@ export default function RechnungenListePage(): JSX.Element {
   const [statusFilter, setStatusFilter] = useState<RechnungStatus | 'alle'>('alle')
   const [showImport, setShowImport] = useState(false)
   const [filterValues, setFilterValues] = useState<Record<string, any>>({})
+  const [roleFocus, setRoleFocus] = useState<InvoiceListRoleFocus>('all')
 
   const { data: rechnungen = [] } = useRechnungen()
 
@@ -146,6 +166,28 @@ export default function RechnungenListePage(): JSX.Element {
     overdueCount > 0 ? { label: 'Ueberfaellige Forderungen erkannt', detail: `${overdueCount} Rechnung(en)` } : null,
     showImport ? { label: 'Importmodus aktiv', detail: 'CSV-Import fuer Faktura geoeffnet' } : null,
   ].filter((item): item is { label: string; detail: string } => item !== null)
+  const invoiceListReady = overdueCount === 0 && filteredRechnungen.length > 0
+  const invoiceListNextAction = overdueCount > 0
+    ? 'Ueberfaellige Rechnungen klaeren oder Mahnfolge starten.'
+    : openCount > 0
+      ? 'Offene Rechnungen drucken, versenden oder Zahlungseingang pruefen.'
+      : filteredRechnungen.length > 0
+        ? 'Rechnungsliste exportieren oder neue Rechnung anlegen.'
+        : 'Filter anpassen oder neue Rechnung anlegen.'
+  const invoiceListTaskItems: UxTaskItem[] = [
+    { label: 'Rechnungsbestand pruefen', done: filteredRechnungen.length > 0, hint: `${filteredRechnungen.length} Rechnungen in der aktuellen Sicht.` },
+    { label: 'Faelligkeit klaeren', done: overdueCount === 0, hint: overdueCount > 0 ? `${overdueCount} Rechnungen sind ueberfaellig.` : 'Keine ueberfaellige Rechnung in der Sicht.' },
+    { label: 'Offene Posten nachhalten', done: openCount === 0, hint: openCount > 0 ? `${openCount} Rechnungen sind offen oder teilbezahlt.` : 'Keine offenen Rechnungen in der Sicht.' },
+    { label: 'Nachweis sichern', done: filteredRechnungen.length > 0, hint: `Volumen ${new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(totalVolume)}.` },
+  ]
+  const invoiceListCrudCapabilities = [
+    { key: 'create', label: 'Anlegen', available: true, hint: 'Neue Rechnungen koennen aus der Liste angelegt werden.' },
+    { key: 'read', label: 'Lesen', available: true, hint: 'Rechnung, Kunde, Auftrag, Betrag, Faelligkeit und Status sind sichtbar.' },
+    { key: 'update', label: 'Bearbeiten', available: filteredRechnungen.length > 0, hint: 'Rechnungen koennen aus der Liste im Editor geoeffnet werden.' },
+    { key: 'filter', label: 'Filtern/Suchen', available: true, hint: 'Suche, Statusfilter, Advanced Filters und CSV-Import sind vorhanden.' },
+    { key: 'export', label: 'Export/Druck', available: filteredRechnungen.length > 0, hint: 'Export und Druck nutzen die gefilterte Sicht.' },
+    { key: 'evidence', label: 'Nachweis', available: filteredRechnungen.length > 0, hint: 'Rechnungsnummer, Auftrag, Status und Faelligkeit bilden den Nachweis.' },
+  ]
 
   const handleImport = async (importData: any[]) => {
     try {
@@ -249,6 +291,28 @@ export default function RechnungenListePage(): JSX.Element {
       <div className="grid gap-4 xl:grid-cols-[1.3fr_0.7fr]">
         <OperationalTimeline title="Rechnungsverlauf" items={timelineItems} />
         <OperationalContextPanel sections={contextSections} />
+      </div>
+      <div className="space-y-4">
+        <RoleFocusBar roles={invoiceListRoleProfiles} value={roleFocus} onChange={setRoleFocus} visibleCount={roleFocus === 'all' ? 4 : 1} totalCount={4} />
+        <ManagementDecisionPanel
+          decision={{
+            allowed: invoiceListReady,
+            allowedLabel: 'Faktura arbeitsfaehig',
+            blockedLabel: 'Klaerungsbedarf',
+            summary: invoiceListReady ? `Rechnungsliste ist ohne ueberfaellige Stopper. ${filteredRechnungen.length} Rechnungen, ${new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(totalVolume)}.` : `Vor der Fakturaentscheidung ist noch etwas offen: ${invoiceListNextAction}`,
+            blockerCount: [filteredRechnungen.length === 0, overdueCount > 0].filter(Boolean).length,
+            nextFocus: invoiceListNextAction,
+            template: { label: 'OP Debitoren oeffnen', href: '/finance/op-debitoren' },
+          }}
+        />
+        <div className="grid gap-4 lg:grid-cols-[1.35fr_1fr]">
+          <OperationalTaskPlan title="Rechnungs-Prioritaetsplan" items={invoiceListTaskItems} />
+          <div className="space-y-3">
+            <NextActionPanel action={invoiceListNextAction} tone={invoiceListReady ? 'emerald' : overdueCount > 0 ? 'red' : openCount > 0 ? 'amber' : 'blue'} />
+            <EvidenceTemplateLink link={{ label: 'Auftragsliste pruefen', href: '/sales/auftraege' }} />
+          </div>
+        </div>
+        <CrudCapabilityChecklist capabilities={invoiceListCrudCapabilities} />
       </div>
       <div className="flex items-center justify-between">
         <div>
