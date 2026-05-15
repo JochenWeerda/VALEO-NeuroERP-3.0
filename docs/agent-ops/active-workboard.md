@@ -482,6 +482,18 @@ Stand: `2026-05-12`
 **Checks:** `pnpm --filter @valero-neuroerp/frontend-web type-check`; `python scripts/agent_workboard_supervisor.py validate`; `node scripts/docs-governance-check.cjs`; `node scripts/docs-markdown-check.cjs docs/project-context/ux-excellence-operating-standard-2026-05-13.md docs/agent-ops/active-workboard.md docs/agent-ops/slices/UX-SALES-008.yaml`; `git diff --check`
 **Offene Risiken:** Die Angebotsliste ist bereits ueber `UX-SALES-002` abgedeckt; dieser Slice fokussiert die eigentliche Erfassungs- und Uebergabemaske.
 
+## UX-LOGISTIK-006
+
+**Von:** Codex
+**Owner:** Codex
+**Stand:** reserviert 2026-05-15
+**Ziel des Slices:** Fracht-/Speditions-Ausnahmen fuer Frachtdokumentdruck und Frachttarife mit Eskalationssicht, naechster Aktion und Kettennachweis fuehren.
+**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/agent-ops/slices/UX-LOGISTIK-006.yaml`, `packages/frontend-web/src/pages/versand/frachtdokumente.tsx`, `packages/frontend-web/src/pages/strecke/speditionen-fracht-preise.tsx`, `docs/project-context/ux-excellence-operating-standard-2026-05-13.md`
+**Abnahmekriterien:** Frachtdokumente und Speditions-Frachttarife zeigen Rollenfokus, Ausnahme-/Pruefplan, Eskalationsentscheidung, naechste Aktion, Nachweislink und CRUD-/Workflow-Abdeckung in normaler Buero-Sprache.
+**Erledigt:** Reserviert; Umsetzung folgt.
+**Checks:** offen
+**Offene Risiken:** `logistik/frachtbriefe.tsx` ist bereits ueber `UX-LOGISTIK-002` abgedeckt; dieser Slice fokussiert Druck-/Tarifausnahmen.
+
 ## TODO-SPRINT-001
 
 **Von:** Cursor<br>
