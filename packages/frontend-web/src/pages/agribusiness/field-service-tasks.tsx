@@ -19,6 +19,14 @@ import type { ChangeLog } from '@/features/crud/components/CrudAuditTrailPanel';
 import { useCrudDelete, useCrudCancel, useCrudAuditTrail } from '@/features/crud/hooks';
 import { Badge } from '@/components/ui/badge';
 import { getEntityTypeLabel, getListTitle, getDetailTitle, getStatusLabel } from '@/features/crud/utils/i18n-helpers';
+import {
+  CrudCapabilityChecklist,
+  EvidenceTemplateLink,
+  ManagementDecisionPanel,
+  NextActionPanel,
+  OperationalTaskPlan,
+  RoleFocusBar,
+} from '@/components/workflow';
 
 interface FieldServiceTask {
   id: string;
@@ -32,6 +40,31 @@ interface FieldServiceTask {
   scheduledStartDate: string;
   completionPercentage: number;
 }
+
+type FieldServiceRole = 'disposition' | 'aussendienst' | 'beratung' | 'leitung';
+
+const fieldServiceRoles = [
+  {
+    id: 'disposition',
+    label: 'Disposition',
+    description: 'Einsaetze priorisieren, Termine halten und offene Aufgaben verteilen.',
+  },
+  {
+    id: 'aussendienst',
+    label: 'Aussendienst',
+    description: 'Eigene Einsaetze vorbereiten, Status pflegen und Rueckmeldung sichern.',
+  },
+  {
+    id: 'beratung',
+    label: 'Beratung',
+    description: 'Landwirt, Aufgabe und fachlichen Nachweis im Blick behalten.',
+  },
+  {
+    id: 'leitung',
+    label: 'Leitung',
+    description: 'Rueckstand, Prioritaet und Abschlussfaehigkeit der Einsatzlage bewerten.',
+  },
+] satisfies Array<{ id: FieldServiceRole; label: string; description: string }>;
 
 export default function FieldServiceTasksPage(): JSX.Element {
   const { t } = useTranslation();
@@ -51,6 +84,7 @@ export default function FieldServiceTasksPage(): JSX.Element {
 
   const [selectedTask, setSelectedTask] = useState<FieldServiceTask | null>(null);
   const [query, setQuery] = useState('');
+  const [roleFocus, setRoleFocus] = useState<FieldServiceRole>('disposition');
 
   const entityType = 'fieldServiceTask';
   const entityTypeLabel = getEntityTypeLabel(t, entityType, 'Field Service Task');
@@ -160,6 +194,27 @@ export default function FieldServiceTasksPage(): JSX.Element {
     );
   }, [tasks, query]);
 
+  const activeTasks = tasks.filter((task) => !['COMPLETED', 'CANCELLED'].includes(task.status)).length;
+  const urgentTasks = tasks.filter((task) => task.priority === 'URGENT' && !['COMPLETED', 'CANCELLED'].includes(task.status)).length;
+  const inProgressTasks = tasks.filter((task) => task.status === 'IN_PROGRESS').length;
+  const completedTasks = tasks.filter((task) => task.status === 'COMPLETED').length;
+  const averageCompletion = tasks.length > 0
+    ? Math.round(tasks.reduce((sum, task) => sum + (task.completionPercentage || 0), 0) / tasks.length)
+    : 0;
+  const focusTask = filtered.find((task) => task.priority === 'URGENT' && !['COMPLETED', 'CANCELLED'].includes(task.status)) ?? filtered[0];
+  const fieldServiceReady = urgentTasks === 0 && activeTasks === 0;
+  const nextFieldServiceAction = focusTask
+    ? focusTask.status === 'SCHEDULED'
+      ? `${focusTask.taskNumber} terminlich bestaetigen und Einsatz vorbereiten.`
+      : focusTask.status === 'IN_PROGRESS'
+        ? `${focusTask.taskNumber} Rueckmeldung und Restaufwand nachhalten.`
+        : focusTask.status === 'COMPLETED'
+          ? `${focusTask.taskNumber} Nachweis pruefen und Abschluss dokumentieren.`
+          : `${focusTask.taskNumber} Status klaeren und Verantwortlichen bestaetigen.`
+    : query
+      ? 'Suche anpassen oder neuen Feldservice-Einsatz anlegen.'
+      : 'Neuen Feldservice-Einsatz anlegen, sobald eine Beratung oder Vor-Ort-Aufgabe ansteht.';
+
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'COMPLETED':
@@ -226,6 +281,98 @@ export default function FieldServiceTasksPage(): JSX.Element {
           {workflowInstanceId ? ` · Instanz ${workflowInstanceId}` : ''}
         </div>
       )}
+
+      <RoleFocusBar
+        roles={fieldServiceRoles}
+        value={roleFocus}
+        onChange={setRoleFocus}
+        visibleCount={filtered.length}
+        totalCount={tasks.length}
+        title="Arbeitsrolle fuer Feldservice"
+      />
+
+      <ManagementDecisionPanel
+        decision={{
+          allowed: fieldServiceReady,
+          allowedLabel: 'Einsatzlage erledigt',
+          blockedLabel: 'Einsaetze offen',
+          summary: fieldServiceReady
+            ? 'Es sind keine aktiven oder dringenden Feldservice-Aufgaben offen. Die Liste dient aktuell als Nachweis und Historie.'
+            : 'Aktive oder dringende Feldservice-Aufgaben brauchen klare Zustaendigkeit, Terminsteuerung und Rueckmeldung, bevor die Einsatzlage abgeschlossen ist.',
+          blockerCount: fieldServiceReady ? 0 : activeTasks + urgentTasks,
+          nextFocus: nextFieldServiceAction,
+          template: {
+            label: 'Feldservice-Einsatznachweis',
+            href: '/docs/agribusiness/feldservice-einsatznachweis.md',
+          },
+        }}
+      />
+
+      <div className="grid gap-4 xl:grid-cols-[1.15fr_1fr_1fr]">
+        <OperationalTaskPlan
+          title="Einsatzplan"
+          items={[
+            {
+              label: 'Einsatz erfassen',
+              done: tasks.length > 0,
+              hint: `${tasks.length} Aufgabe(n) in der Feldservice-Liste.`,
+            },
+            {
+              label: 'Dringende Aufgaben klaeren',
+              done: urgentTasks === 0,
+              hint: urgentTasks > 0 ? `${urgentTasks} dringende Aufgabe(n) zuerst disponieren.` : 'Keine dringenden offenen Aufgaben.',
+            },
+            {
+              label: 'Rueckmeldung nachhalten',
+              done: inProgressTasks === 0,
+              hint: inProgressTasks > 0 ? `${inProgressTasks} laufende Aufgabe(n) brauchen Status oder Rueckmeldung.` : 'Keine laufenden Einsaetze ohne Abschluss.',
+            },
+            {
+              label: 'Nachweis sichern',
+              done: completedTasks > 0 || tasks.length === 0,
+              hint: completedTasks > 0 ? `${completedTasks} abgeschlossene Aufgabe(n) fuer Audit und Druck verfuegbar.` : 'Abschlussnachweise entstehen nach erledigtem Einsatz.',
+            },
+          ]}
+        />
+        <NextActionPanel action={nextFieldServiceAction} tone={fieldServiceReady ? 'emerald' : urgentTasks > 0 ? 'red' : 'amber'} />
+        <div className="space-y-3">
+          <EvidenceTemplateLink
+            link={{
+              label: 'Feldservice-Rueckmeldeprotokoll',
+              href: '/docs/agribusiness/feldservice-rueckmeldung.md',
+            }}
+          />
+          <CrudCapabilityChecklist
+            capabilities={[
+              { key: 'create', label: 'Anlegen', available: true, hint: 'Neue Feldservice-Aufgabe kann direkt erstellt werden.' },
+              { key: 'read', label: 'Lesen', available: true, hint: 'Status, Prioritaet, Owner und Fortschritt sind sichtbar.' },
+              { key: 'update', label: 'Bearbeiten', available: true, hint: 'Bearbeiten-Route fuehrt die Einsatzdaten weiter.' },
+              { key: 'reject', label: 'Abbrechen', available: true, hint: 'Abbruchdialog verlangt eine begruendete Entscheidung.' },
+              { key: 'delete', label: 'Loeschen', available: true, hint: 'Loeschen laeuft ueber den bestehenden Grund-Dialog.' },
+              { key: 'audit', label: 'Audit', available: true, hint: 'Detail-Drawer zeigt die Aenderungshistorie.' },
+            ]}
+          />
+        </div>
+      </div>
+
+      <div className="grid gap-4 md:grid-cols-4">
+        <Card className="p-4">
+          <div className="text-xs font-semibold uppercase text-muted-foreground">Offene Einsaetze</div>
+          <div className="mt-2 text-2xl font-bold">{activeTasks}</div>
+        </Card>
+        <Card className="p-4">
+          <div className="text-xs font-semibold uppercase text-muted-foreground">Dringend</div>
+          <div className="mt-2 text-2xl font-bold text-red-600">{urgentTasks}</div>
+        </Card>
+        <Card className="p-4">
+          <div className="text-xs font-semibold uppercase text-muted-foreground">In Bearbeitung</div>
+          <div className="mt-2 text-2xl font-bold text-blue-700">{inProgressTasks}</div>
+        </Card>
+        <Card className="p-4">
+          <div className="text-xs font-semibold uppercase text-muted-foreground">Fortschritt im Schnitt</div>
+          <div className="mt-2 text-2xl font-bold">{averageCompletion}%</div>
+        </Card>
+      </div>
 
       <Toolbar
         onSearch={setQuery}
