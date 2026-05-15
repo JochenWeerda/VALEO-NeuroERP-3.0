@@ -1,7 +1,7 @@
 id: UX-QS-001
 title: QS-Sperr- und Ausnahmeprozesse mit UX-Exzellenzbaukasten
 owner: Codex
-status: reserviert
+status: abgeschlossen
 created: 2026-05-15
 goal: >
   Qualitaet/Produktion fuer Pruef-, Sperr- und Freigabeprozesse mit
@@ -24,5 +24,9 @@ checks:
   - node scripts/docs-governance-check.cjs
   - node scripts/docs-markdown-check.cjs docs/project-context/ux-excellence-operating-standard-2026-05-13.md docs/agent-ops/active-workboard.md docs/agent-ops/slices/UX-QS-001.yaml
   - git diff --check
+done:
+  - Gesperrte-Ware-Klaerung um Rollenfokus, Sperrplan, Managemententscheidung, Next Action und Nachweislink erweitert.
+  - QS-Ausnahmenliste um Rollenfokus, Eskalationsplan, Managemententscheidung, Next Action und Nachweislink erweitert.
+  - CRUD-/Workflow-Abdeckung fuer Lesen, Speichern, Sonderfreigabe, Sperre, Eskalation und Nachweis sichtbar gemacht.
 risks:
   - Qualitaetspruefung hat bereits einen operativen Fallkopf; dieser Slice fokussiert Klaer- und Eskalationsraeume.
