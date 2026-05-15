@@ -19,6 +19,26 @@ import { getEntityTypeLabel } from '@/features/crud/utils/i18n-helpers'
 import { formatDate, formatNumber } from '@/components/mask-builder/utils/formatting'
 import { ErrorState } from '@/components/ErrorState'
 import { useEinkaufRetouren, useUpdateEinkaufRetoure } from '@/lib/api/einkauf'
+import {
+  CrudCapabilityChecklist,
+  EvidenceTemplateLink,
+  ManagementDecisionPanel,
+  NextActionPanel,
+  OperationalTaskPlan,
+  RoleFocusBar,
+  type UxTaskItem,
+} from '@/components/workflow'
+
+type ReturnRoleFocus = 'all' | 'procurement' | 'goods-receipt' | 'finance' | 'quality' | 'management'
+
+const returnRoleProfiles: Array<{ id: ReturnRoleFocus; label: string; description: string }> = [
+  { id: 'all', label: 'Alle Rollen', description: 'Zeigt Retouren fuer Einkauf, Wareneingang, Finance, QS und Leitung.' },
+  { id: 'procurement', label: 'Einkauf', description: 'Fokus auf Lieferant, Wareneingang, Grund und Lieferantenklaerung.' },
+  { id: 'goods-receipt', label: 'Wareneingang', description: 'Fokus auf Positionen, Mengen und Ruecksendung.' },
+  { id: 'finance', label: 'Finance', description: 'Fokus auf Gutschriftanforderung und Wert der Retoure.' },
+  { id: 'quality', label: 'QS', description: 'Fokus auf Defekt, Schaden, Qualitaetsproblem und Notizen.' },
+  { id: 'management', label: 'Leitung', description: 'Fokus auf Stopper, Status und naechste Aktion.' },
+]
 
 type GoodsReceiptItem = {
   id: string
@@ -76,6 +96,7 @@ export default function RetourenPage(): JSX.Element {
   const [goodsReceipt, setGoodsReceipt] = useState<GoodsReceipt | null>(null)
   const [selectedGrId, setSelectedGrId] = useState<string>(grId || '')
   const [returnDialogOpen, setReturnDialogOpen] = useState(false)
+  const [roleFocus, setRoleFocus] = useState<ReturnRoleFocus>('all')
   const [returnData, setReturnData] = useState<ReturnData>({
     goodsReceiptId: '',
     returnDate: new Date().toISOString().split('T')[0],
@@ -138,6 +159,55 @@ export default function RetourenPage(): JSX.Element {
     }
     setReturnDialogOpen(true)
   }
+
+  const hasGoodsReceipt = Boolean(goodsReceipt)
+  const returnableItems = goodsReceipt?.items.filter(item => item.quantityReturned < item.quantityReceived) ?? []
+  const selectedReturnItems = returnData.items.filter(item => item.quantityReturned > 0)
+  const openReturns = retouren.filter((retoure) => retoure.status !== 'abgeschlossen' && retoure.status !== 'storniert').length
+  const hasReturnReason = Boolean(returnData.returnReason)
+  const hasReturnItems = selectedReturnItems.length > 0
+  const canCreateReturn = hasGoodsReceipt && hasReturnReason && hasReturnItems
+  const nextReturnAction = !hasGoodsReceipt
+    ? 'Wareneingang auswaehlen.'
+    : returnableItems.length === 0
+      ? 'Wareneingang ist vollstaendig retourniert; anderen Wareneingang waehlen.'
+      : !hasReturnReason
+        ? 'Retourengrund im Dialog auswaehlen.'
+        : !hasReturnItems
+          ? 'Ruecksendemenge fuer mindestens eine Position erfassen.'
+          : returnData.creditMemoRequested
+            ? 'Retoure speichern und Gutschrift beim Lieferanten nachhalten.'
+            : 'Retoure speichern und Status nachhalten.'
+  const returnTaskItems: UxTaskItem[] = [
+    {
+      label: 'Wareneingang klaeren',
+      done: hasGoodsReceipt,
+      hint: hasGoodsReceipt ? `${goodsReceipt?.number} von ${goodsReceipt?.supplierName}.` : 'Wareneingang ist Pflicht fuer eine belastbare Retoure.',
+    },
+    {
+      label: 'Ruecksendemengen pruefen',
+      done: hasReturnItems,
+      hint: hasReturnItems ? `${selectedReturnItems.length} Positionen fuer Ruecksendung markiert.` : `${returnableItems.length} Positionen waeren aktuell retournierbar.`,
+    },
+    {
+      label: 'Grund und QS-Nachweis sichern',
+      done: hasReturnReason,
+      hint: hasReturnReason ? `Grund: ${returnData.returnReason}.` : 'Grund auswaehlen und bei Bedarf Positionsgrund ergaenzen.',
+    },
+    {
+      label: 'Gutschrift und Status nachhalten',
+      done: openReturns === 0 && retouren.length > 0,
+      hint: openReturns > 0 ? `${openReturns} Retouren sind noch offen oder in Pruefung.` : 'Keine offene Retoure im aktuellen Bestand.',
+    },
+  ]
+  const returnCrudCapabilities = [
+    { key: 'create', label: 'Retoure anlegen', available: canCreateReturn, hint: canCreateReturn ? 'Retoure kann gespeichert werden.' : 'Wareneingang, Grund und Ruecksendemenge fehlen noch.' },
+    { key: 'read', label: 'Lesen', available: true, hint: 'Wareneingaenge, Positionen, Retourenliste und Status sind sichtbar.' },
+    { key: 'update', label: 'Status pflegen', available: retouren.length > 0, hint: retouren.length > 0 ? 'Retourenstatus kann in der Liste aktualisiert werden.' : 'Keine Retoure fuer Statuspflege vorhanden.' },
+    { key: 'approve', label: 'Gutschrift anfordern', available: returnData.creditMemoRequested || retouren.length > 0, hint: returnData.creditMemoRequested ? 'Gutschrift ist fuer diese Retoure angefordert.' : 'Gutschrift kann im Retourendialog markiert werden.' },
+    { key: 'evidence', label: 'Nachweis', available: hasGoodsReceipt || retouren.length > 0, hint: 'Wareneingang, Position, Grund, Status und Gutschriftanforderung bilden den Nachweis.' },
+    { key: 'audit', label: 'Pruefspur', available: true, hint: 'Anlage, Statuswechsel und Wareneingangsbezug laufen ueber bestehende API-Aktionen.' },
+  ]
 
   const handleSaveReturn = async () => {
     if (!returnData.returnReason) {
@@ -218,6 +288,29 @@ export default function RetourenPage(): JSX.Element {
           <ArrowLeft className="h-4 w-4 mr-2" />
           {t('common.back')}
         </Button>
+      </div>
+
+      <div className="space-y-4">
+        <RoleFocusBar roles={returnRoleProfiles} value={roleFocus} onChange={setRoleFocus} visibleCount={roleFocus === 'all' ? 5 : 1} totalCount={5} />
+        <ManagementDecisionPanel
+          decision={{
+            allowed: canCreateReturn || openReturns === 0,
+            allowedLabel: 'Freigabefaehig',
+            blockedLabel: 'Klaerungsbedarf',
+            summary: canCreateReturn ? `Retoure ist vorbereitet: ${selectedReturnItems.length} Positionen, Gutschrift ${returnData.creditMemoRequested ? 'ja' : 'nein'}.` : `Vor der Retoure ist noch etwas offen: ${nextReturnAction}`,
+            blockerCount: [!hasGoodsReceipt, returnableItems.length === 0, !hasReturnReason, !hasReturnItems].filter(Boolean).length,
+            nextFocus: nextReturnAction,
+            template: { label: 'Wareneingang oeffnen', href: '/einkauf/wareneingang' },
+          }}
+        />
+        <div className="grid gap-4 lg:grid-cols-[1.35fr_1fr]">
+          <OperationalTaskPlan title="Retouren-Freigabeplan" items={returnTaskItems} />
+          <div className="space-y-3">
+            <NextActionPanel action={nextReturnAction} tone={canCreateReturn ? 'emerald' : hasGoodsReceipt ? 'amber' : 'blue'} />
+            <EvidenceTemplateLink link={{ label: 'Gutschriften/Belastungen pruefen', href: '/einkauf/gutschriften-belastungen' }} />
+          </div>
+        </div>
+        <CrudCapabilityChecklist capabilities={returnCrudCapabilities} />
       </div>
 
       <Card>
