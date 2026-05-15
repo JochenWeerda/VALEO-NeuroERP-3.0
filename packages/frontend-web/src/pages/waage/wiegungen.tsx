@@ -19,6 +19,50 @@ import {
 } from '@/lib/api/weighing-tickets'
 import { useSupplyChainOverview } from '@/lib/api/supply-chain'
 import { Scale, Search, Plus, Link2 } from 'lucide-react'
+import {
+  CrudCapabilityChecklist,
+  EvidenceTemplateLink,
+  ManagementDecisionPanel,
+  NextActionPanel,
+  OperationalTaskPlan,
+  RoleFocusBar,
+  type UxTaskItem,
+} from '@/components/workflow'
+
+type WeighingRoleFocus = 'all' | 'scale' | 'inbound' | 'dispatch' | 'quality' | 'billing'
+
+const weighingRoleProfiles: Array<{ id: WeighingRoleFocus; label: string; description: string }> = [
+  {
+    id: 'all',
+    label: 'Alle Rollen',
+    description: 'Zeigt die Waagearbeit fuer Waage, Annahme, Disposition, QS und Abrechnung.',
+  },
+  {
+    id: 'scale',
+    label: 'Waage',
+    description: 'Fokus auf Ticketnummer, Waage, Kennzeichen, Brutto, Tara und Abschluss.',
+  },
+  {
+    id: 'inbound',
+    label: 'Annahme',
+    description: 'Fokus auf wartende Anlieferungen, Fahrzeug und Rueckstand.',
+  },
+  {
+    id: 'dispatch',
+    label: 'Disposition',
+    description: 'Fokus auf Kontraktzuordnung, offene Tickets und Folgepfad.',
+  },
+  {
+    id: 'quality',
+    label: 'QS',
+    description: 'Fokus auf Feuchte, Besatz und gesperrte Chargen.',
+  },
+  {
+    id: 'billing',
+    label: 'Abrechnung',
+    description: 'Fokus auf Abrechnungsgewicht, Kontrakt und Settlement-Folge.',
+  },
+]
 
 type NewTicketForm = {
   ticketNumber: string
@@ -46,6 +90,7 @@ export default function WiegungenPage(): JSX.Element {
   const [selectedTicketId, setSelectedTicketId] = useState<string>('')
   const [selectedContractId, setSelectedContractId] = useState<string>('')
   const [form, setForm] = useState<NewTicketForm>(initialForm)
+  const [roleFocus, setRoleFocus] = useState<WeighingRoleFocus>('all')
   const searchRef = useRef<HTMLInputElement | null>(null)
   const ticketNumberRef = useRef<HTMLInputElement | null>(null)
   const { data: chain } = useSupplyChainOverview()
@@ -73,6 +118,81 @@ export default function WiegungenPage(): JSX.Element {
 
   const totalNetKg = tickets.reduce((sum, t) => sum + Number(t.net_weight ?? 0), 0)
   const totalBillingKg = tickets.reduce((sum, t) => sum + Number(t.billing_weight ?? t.net_weight ?? 0), 0)
+  const openTickets = tickets.filter((t) => t.status !== 'closed').length
+  const ticketsWithoutContract = tickets.filter((t) => !t.contract_id).length
+  const hasCreateInput = Boolean(form.ticketNumber.trim() && form.scaleId.trim())
+  const hasWeightInput = form.grossWeight > 0 && form.tareWeight >= 0
+  const hasAllocationInput = Boolean(selectedTicketId && selectedContractId)
+  const canProceedWeighing = (hasCreateInput && hasWeightInput) || ticketsWithoutContract === 0
+  const weighingNextAction = !hasCreateInput
+    ? 'Ticketnummer, Waage und Kennzeichen fuer die naechste Wiegung erfassen.'
+    : !hasWeightInput
+      ? 'Brutto- und Taragewicht pruefen.'
+      : ticketsWithoutContract > 0 && !hasAllocationInput
+        ? 'Offenes Ticket und passenden Kontrakt auswaehlen.'
+        : openTickets > 0
+          ? 'Offene Tickets schliessen oder zweites Gewicht buchen.'
+          : 'Wiegung anlegen oder Kontraktzuordnung fortsetzen.'
+  const weighingTaskItems: UxTaskItem[] = [
+    {
+      label: 'Ticket vorbereiten',
+      done: hasCreateInput,
+      hint: hasCreateInput ? `Ticket ${form.ticketNumber || 'neu'} auf Waage ${form.scaleId}.` : 'Ticketnummer und Waage sind Pflicht fuer eine neue Wiegung.',
+    },
+    {
+      label: 'Gewichte und Qualitaet pruefen',
+      done: hasWeightInput,
+      hint: hasWeightInput ? `Brutto ${form.grossWeight} kg, Tara ${form.tareWeight} kg, Feuchte ${form.moisturePct} %, Besatz ${form.impuritiesPct} %. ` : 'Gewichte sowie Feuchte/Besatz vor der Anlage pruefen.',
+    },
+    {
+      label: 'Kontrakt zuordnen',
+      done: ticketsWithoutContract === 0 || hasAllocationInput,
+      hint: ticketsWithoutContract === 0 ? 'Alle Tickets sind zugeordnet.' : `${ticketsWithoutContract} Tickets brauchen eine Kontraktzuordnung.`,
+    },
+    {
+      label: 'Abschluss sichern',
+      done: openTickets === 0 && tickets.length > 0,
+      hint: openTickets === 0 && tickets.length > 0 ? 'Alle Wiegungen sind abgeschlossen.' : `${openTickets} Wiegungen sind noch offen.`,
+    },
+  ]
+  const weighingCrudCapabilities = [
+    {
+      key: 'create',
+      label: 'Anlegen',
+      available: hasCreateInput && hasWeightInput,
+      hint: hasCreateInput && hasWeightInput ? 'Neuer Wiegeschein kann angelegt werden.' : 'Ticketnummer, Waage und Gewichte fehlen noch.',
+    },
+    {
+      key: 'read',
+      label: 'Lesen',
+      available: true,
+      hint: 'Tickets, Gewichte, Kontrakte, Status und Supply-Chain-Kennzahlen sind sichtbar.',
+    },
+    {
+      key: 'update',
+      label: 'Schliessen',
+      available: openTickets > 0,
+      hint: openTickets > 0 ? 'Offene Tickets koennen geschlossen werden.' : 'Keine offenen Tickets zum Schliessen.',
+    },
+    {
+      key: 'allocate',
+      label: 'Kontraktzuordnung',
+      available: ticketsWithoutContract > 0,
+      hint: ticketsWithoutContract > 0 ? 'Tickets ohne Kontrakt koennen allokiert werden.' : 'Alle Tickets sind bereits zugeordnet.',
+    },
+    {
+      key: 'evidence',
+      label: 'Nachweis',
+      available: tickets.length > 0,
+      hint: tickets.length > 0 ? 'Wiegescheinnummer, Gewichtsdaten und Kontrakt bilden den Nachweis.' : 'Nachweis entsteht mit dem ersten Ticket.',
+    },
+    {
+      key: 'audit',
+      label: 'Pruefspur',
+      available: true,
+      hint: 'Status, Kontrakt, Schliessen-Aktion und Gewichtsdaten sind nachvollziehbar.',
+    },
+  ]
 
   const fallkopf = useMemo(() => {
     const offeneTickets = tickets.filter((t) => t.status !== 'closed').length
@@ -160,6 +280,43 @@ export default function WiegungenPage(): JSX.Element {
       <div>
         <h1 className="text-3xl font-bold">Wiegungen</h1>
         <p className="text-muted-foreground">Wiegeschein-Erfassung und Kontraktzuordnung</p>
+      </div>
+
+      <div className="space-y-4">
+        <RoleFocusBar
+          roles={weighingRoleProfiles}
+          value={roleFocus}
+          onChange={setRoleFocus}
+          visibleCount={roleFocus === 'all' ? 5 : 1}
+          totalCount={5}
+        />
+        <ManagementDecisionPanel
+          decision={{
+            allowed: canProceedWeighing,
+            allowedLabel: 'Bearbeitbar',
+            blockedLabel: 'Stopper offen',
+            summary: canProceedWeighing
+              ? `Die Waagearbeit kann fortgesetzt werden. ${tickets.length} Tickets, ${openTickets} offen, ${ticketsWithoutContract} ohne Kontrakt.`
+              : `Vor der naechsten Buchung ist noch etwas offen: ${weighingNextAction}`,
+            blockerCount: [!hasCreateInput, !hasWeightInput, ticketsWithoutContract > 0 && !hasAllocationInput].filter(Boolean).length,
+            nextFocus: weighingNextAction,
+            template: {
+              label: 'Hofliste oeffnen',
+              href: '/waage/hofliste',
+            },
+          }}
+        />
+        <div className="grid gap-4 lg:grid-cols-[1.35fr_1fr]">
+          <OperationalTaskPlan title="Waage-Aufgabenplan" items={weighingTaskItems} />
+          <div className="space-y-3">
+            <NextActionPanel
+              action={weighingNextAction}
+              tone={canProceedWeighing ? 'emerald' : ticketsWithoutContract > 0 ? 'amber' : 'blue'}
+            />
+            <EvidenceTemplateLink link={{ label: 'Wiegescheinliste pruefen', href: '/waage/liste' }} />
+          </div>
+        </div>
+        <CrudCapabilityChecklist capabilities={weighingCrudCapabilities} />
       </div>
 
       {/* Operativer Fallkopf */}

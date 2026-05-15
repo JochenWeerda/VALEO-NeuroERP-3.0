@@ -21,6 +21,15 @@ import { OperationalCaseHeader } from '@/components/workflow/OperationalCaseHead
 import { OperationalContextPanel } from '@/components/workflow/OperationalContextPanel'
 import { OperationalTimeline } from '@/components/workflow/OperationalTimeline'
 import { normalizeOperationalStatus } from '@/lib/operational-status'
+import {
+  CrudCapabilityChecklist,
+  EvidenceTemplateLink,
+  ManagementDecisionPanel,
+  NextActionPanel,
+  OperationalTaskPlan,
+  RoleFocusBar,
+  type UxTaskItem,
+} from '@/components/workflow'
 
 // ── Tabs ─────────────────────────────────────────────────────────────────────
 type TabId = 'gewichte' | 'qualitaet' | 'kontrakt' | 'verlauf'
@@ -30,6 +39,41 @@ const TABS: { id: TabId; label: string }[] = [
   { id: 'qualitaet', label: 'Qualität' },
   { id: 'kontrakt', label: 'Kontrakt-Zuordnung' },
   { id: 'verlauf', label: 'Verlauf' },
+]
+
+type WeighingDetailRoleFocus = 'all' | 'scale' | 'inbound' | 'dispatch' | 'quality' | 'billing'
+
+const weighingDetailRoleProfiles: Array<{ id: WeighingDetailRoleFocus; label: string; description: string }> = [
+  {
+    id: 'all',
+    label: 'Alle Rollen',
+    description: 'Zeigt den Wiegeschein fuer Waage, Annahme, Disposition, QS und Abrechnung.',
+  },
+  {
+    id: 'scale',
+    label: 'Waage',
+    description: 'Fokus auf Gewichte, Status und Wiegescheinabschluss.',
+  },
+  {
+    id: 'inbound',
+    label: 'Annahme',
+    description: 'Fokus auf Fahrzeug, Richtung, Artikel und Uebergabe.',
+  },
+  {
+    id: 'dispatch',
+    label: 'Disposition',
+    description: 'Fokus auf Kontraktzuordnung und Objektkette.',
+  },
+  {
+    id: 'quality',
+    label: 'QS',
+    description: 'Fokus auf Feuchte, Protein, Besatz und HL-Gewicht.',
+  },
+  {
+    id: 'billing',
+    label: 'Abrechnung',
+    description: 'Fokus auf Abrechnungsgewicht, Kontrakt und Settlement.',
+  },
 ]
 
 // ── Mock fallback (dev mode) ──────────────────────────────────────────────────
@@ -164,6 +208,7 @@ export default function WiegescheinDetailPage(): JSX.Element {
   const [activeTab, setActiveTab] = useState<TabId>('gewichte')
   const [allocateOpen, setAllocateOpen] = useState(false)
   const [contractInput, setContractInput] = useState('')
+  const [roleFocus, setRoleFocus] = useState<WeighingDetailRoleFocus>('all')
   const { data: chain } = useSupplyChainOverview()
   const workflowContext = readWorkflowEntryContext(searchParams)
   const transferSummary = summarizeSupplyTransfer(chain)
@@ -252,6 +297,74 @@ export default function WiegescheinDetailPage(): JSX.Element {
   }
 
   const netWeight = ticket.net_weight ?? (ticket.gross_weight != null && ticket.tare_weight != null ? ticket.gross_weight - ticket.tare_weight : null)
+  const hasWeights = ticket.gross_weight != null && ticket.tare_weight != null && netWeight != null
+  const hasQualityValues = ticket.moisture_pct != null || ticket.protein_pct != null || ticket.impurities_pct != null || ticket.hl_weight != null
+  const hasContract = Boolean(ticket.contract_id || ticket.allocation_status === 'allocated' || ticket.allocation_status === 'partially_allocated')
+  const isPosted = ticket.status === 'posted' || ticket.status === 'closed'
+  const isWeighingDetailReady = hasWeights && hasQualityValues && hasContract
+  const weighingDetailNextAction = !hasWeights
+    ? 'Brutto, Tara und Nettogewicht pruefen.'
+    : !hasQualityValues
+      ? 'Qualitaetswerte pruefen oder nachtragen.'
+      : !hasContract
+        ? 'Kontrakt zuordnen.'
+        : !isPosted
+          ? 'Wiegeschein abschliessen oder Settlement vorbereiten.'
+          : 'Abrechnung fortsetzen.'
+  const weighingDetailTaskItems: UxTaskItem[] = [
+    {
+      label: 'Gewichte pruefen',
+      done: hasWeights,
+      hint: hasWeights ? `Netto ${netWeight?.toLocaleString('de-DE')} kg.` : 'Brutto, Tara und Netto sind noch nicht vollstaendig.',
+    },
+    {
+      label: 'Qualitaet sichern',
+      done: hasQualityValues,
+      hint: hasQualityValues ? 'Qualitaetswerte sind vorhanden.' : 'Feuchte, Protein, Besatz oder HL-Gewicht pruefen.',
+    },
+    {
+      label: 'Kontrakt zuordnen',
+      done: hasContract,
+      hint: hasContract ? `Zuordnung: ${allocationStatusLabel(ticket.allocation_status)}.` : 'Kontrakt ist fuer Abrechnung und Nachweis noch offen.',
+    },
+    {
+      label: 'Abschluss und Settlement',
+      done: isPosted,
+      hint: isPosted ? 'Wiegeschein ist abgeschlossen oder verbucht.' : 'Nach Kontraktzuordnung Settlement vorbereiten.',
+    },
+  ]
+  const weighingDetailCrudCapabilities = [
+    {
+      key: 'read',
+      label: 'Lesen',
+      available: true,
+      hint: 'Gewichte, Qualitaet, Kontrakt, Verlauf und Objektkette sind sichtbar.',
+    },
+    {
+      key: 'update',
+      label: 'Kontrakt zuordnen',
+      available: !isPosted,
+      hint: !isPosted ? 'Kontraktzuordnung ist im Detaildialog verfuegbar.' : 'Verbuchte Wiegescheine sind fuer Zuordnung gesperrt.',
+    },
+    {
+      key: 'approve',
+      label: 'Abrechnung vorbereiten',
+      available: hasContract,
+      hint: hasContract ? 'Settlement-Folge kann fortgesetzt werden.' : 'Abrechnung braucht eine Kontraktzuordnung.',
+    },
+    {
+      key: 'evidence',
+      label: 'Nachweis',
+      available: Boolean(ticket.ticket_number),
+      hint: 'Ticketnummer, Gewichte, Qualitaetswerte, Fahrzeug und Kontrakt bilden den Nachweis.',
+    },
+    {
+      key: 'audit',
+      label: 'Pruefspur',
+      available: true,
+      hint: 'Timeline, Status, Zuordnung und Objektkette machen den Vorgang nachvollziehbar.',
+    },
+  ]
 
   const shortcutsForBar = [
     { key: 'Escape', label: 'Zurück', action: () => navigate('/waage/wiegungen') },
@@ -380,6 +493,42 @@ export default function WiegescheinDetailPage(): JSX.Element {
         caseLabel={workflowContext?.caseNumber || 'Wiegevorgang'}
         tags={[ticket.direction, ticket.article_group || 'Artikelgruppe offen']}
       />
+      <div className="space-y-4">
+        <RoleFocusBar
+          roles={weighingDetailRoleProfiles}
+          value={roleFocus}
+          onChange={setRoleFocus}
+          visibleCount={roleFocus === 'all' ? 5 : 1}
+          totalCount={5}
+        />
+        <ManagementDecisionPanel
+          decision={{
+            allowed: isWeighingDetailReady,
+            allowedLabel: 'Abrechnungsbereit',
+            blockedLabel: 'Stopper offen',
+            summary: isWeighingDetailReady
+              ? `Der Wiegeschein ist fachlich bereit. Netto ${netWeight?.toLocaleString('de-DE')} kg, Zuordnung ${allocationStatusLabel(ticket.allocation_status)}.`
+              : `Vor der Abrechnung ist noch etwas offen: ${weighingDetailNextAction}`,
+            blockerCount: [!hasWeights, !hasQualityValues, !hasContract].filter(Boolean).length,
+            nextFocus: weighingDetailNextAction,
+            template: {
+              label: 'Wiegescheinliste oeffnen',
+              href: '/waage/liste',
+            },
+          }}
+        />
+        <div className="grid gap-4 lg:grid-cols-[1.35fr_1fr]">
+          <OperationalTaskPlan title="Wiegeschein-Aufgabenplan" items={weighingDetailTaskItems} />
+          <div className="space-y-3">
+            <NextActionPanel
+              action={weighingDetailNextAction}
+              tone={isWeighingDetailReady ? 'emerald' : !hasContract ? 'amber' : 'blue'}
+            />
+            <EvidenceTemplateLink link={{ label: 'Wiegungen oeffnen', href: '/waage/wiegungen' }} />
+          </div>
+        </div>
+        <CrudCapabilityChecklist capabilities={weighingDetailCrudCapabilities} />
+      </div>
       <ModuleToolbar
         backTarget="/waage/wiegungen"
         closeTarget="/waage/wiegungen"

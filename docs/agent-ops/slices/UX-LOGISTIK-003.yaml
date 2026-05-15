@@ -1,7 +1,7 @@
 id: UX-LOGISTIK-003
 title: Waagearbeitsflaechen mit UX-Exzellenzbaukasten
 owner: Codex
-status: reserviert
+status: abgeschlossen
 created: 2026-05-15
 goal: >
   Waagearbeitsflaechen auf den UX-Exzellenzbaukasten ziehen: Rollenfokus,
@@ -19,6 +19,15 @@ acceptance_criteria:
   - Stopper-/Managemententscheidung zeigt buchbar/blockiert.
   - CRUD-/Nachweis-Abdeckung ist sichtbar.
   - Typecheck und Doku-Checks sind gruen.
-checks: []
+checks:
+  - pnpm --filter @valero-neuroerp/frontend-web type-check
+  - python scripts/agent_workboard_supervisor.py validate
+  - node scripts/docs-governance-check.cjs
+  - node scripts/docs-markdown-check.cjs docs/project-context/ux-excellence-operating-standard-2026-05-13.md docs/agent-ops/active-workboard.md docs/agent-ops/slices/UX-LOGISTIK-003.yaml
+  - git diff --check
+done:
+  - Wiegungen um Rollenfokus, Waage-Aufgabenplan, Stopperentscheidung, Next Action und CRUD-/Nachweis-Abdeckung ergaenzt.
+  - Wiegeschein-Detail um Rollenfokus, Wiegeschein-Aufgabenplan, Abrechnungsentscheidung, Next Action und CRUD-/Nachweis-Abdeckung ergaenzt.
+  - Bestehende Ticketanlage, Gewichtserfassung, Kontraktzuordnung, Supply-Chain-Kennzahlen, Timeline und Detail-Tabs bleiben erhalten.
 risks:
   - Waage-Hardware-Integration bleibt ausserhalb dieses Slice; dieser Slice fokussiert die Bedien- und Nachweissicht.
