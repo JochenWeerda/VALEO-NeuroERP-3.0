@@ -2162,10 +2162,10 @@ Archiv des vorherigen Boards:
 
 **Von:** Codex
 **Owner:** Codex
-**Stand:** reserviert 2026-05-15
+**Stand:** abgeschlossen 2026-05-15
 **Ziel des Slices:** Technischen Live-Monitor von roher JSON-Sicht zu einer verstaendlichen Betriebsstatusseite mit Rollenfokus, Statusdeutung, naechster Aktion und Nachweisbezug nach UX-Standard umbauen.
 **Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/agent-ops/slices/UX-SYSTEM-LIVE-001.yaml`, `packages/frontend-web/src/pages/system/live-monitor.tsx`, `docs/project-context/ux-excellence-operating-standard-2026-05-13.md`
 **Abnahmekriterien:** Live-Monitor zeigt Rollenfokus, Betriebsplan, Managemententscheidung, Next Action, Nachweislink und kompakte Ereignisuebersichten; technische JSON-Rohdaten bleiben als Diagnosebereich verfuegbar; bestehender NavLiveStatus und Live-Store werden weiter genutzt.
-**Erledigt:** Reserviert; Umsetzung folgt.
-**Checks:** offen
+**Erledigt:** Live-Monitor als Live-Betriebsmonitor mit Rollenfokus, Betriebsplan, Managemententscheidung, Next Action, Nachweislink, Live-KPIs, Ereigniszeitleiste und kompakten Sales-/Bestands-/Policy-Listen umgesetzt; technische JSON-Rohdaten bleiben als Diagnosebereich verfuegbar.
+**Checks:** `pnpm --filter @valero-neuroerp/frontend-web type-check`; `python scripts/agent_workboard_supervisor.py validate`; `node scripts/docs-governance-check.cjs`; `node scripts/docs-markdown-check.cjs docs/project-context/ux-excellence-operating-standard-2026-05-13.md docs/agent-ops/active-workboard.md docs/agent-ops/slices/UX-SYSTEM-LIVE-001.yaml`; `git diff --check`
 **Offene Risiken:** Externe SSE-Verfuegbarkeit bleibt umgebungsabhaengig; dieser Slice verbessert die UI-Deutung vorhandener Live-Daten.
