@@ -402,10 +402,12 @@ Stand: `2026-05-12`
 
 **Von:** Codex
 **Owner:** Codex
-**Stand:** reserviert 2026-05-15
+**Stand:** abgeschlossen 2026-05-15
 **Ziel des Slices:** Retouren und Gutschriften/Belastungen auf den UX-Exzellenzbaukasten ziehen: Rollenfokus, Freigabeplan, Stopperentscheidung, Next Action und CRUD-/Nachweis-Abdeckung.
 **Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/agent-ops/slices/UX-EINKAUF-006.yaml`, `packages/frontend-web/src/pages/einkauf/retouren.tsx`, `packages/frontend-web/src/pages/einkauf/gutschriften-belastungen.tsx`, `docs/project-context/ux-excellence-operating-standard-2026-05-13.md`
 **Abnahmekriterien:** Retouren und Gutschriften/Belastungen zeigen Rollenfokus fuer Einkauf, Wareneingang, Finance, QS und Leitung; Freigabeplan fuehrt Wareneingang/Rechnung, Grund, Positionen, Gutschrift/Belastung und Ausgleich; Stopperentscheidung zeigt freigabefaehig/blockiert; CRUD-/Nachweis-Abdeckung ist sichtbar; Typecheck und Doku-Checks sind gruen.
+**Erledigt:** `einkauf/retouren.tsx` und `einkauf/gutschriften-belastungen.tsx` nutzen den UX-Baukasten fuer Rollenfokus, Freigabeplan, Stopperentscheidung, Next Action und CRUD-/Nachweis-Abdeckung. Bestehende Wareneingangs-Auswahl, Retourendialog, Statuspflege, Memo-Erstellung, Settlement-Entwurf und Ausgleichsdialoge bleiben erhalten. UX-Standard markiert `UX-EINKAUF-006` als abgeschlossen.
+**Checks:** `pnpm --filter @valero-neuroerp/frontend-web type-check`; `python scripts/agent_workboard_supervisor.py validate`; `node scripts/docs-governance-check.cjs`; `node scripts/docs-markdown-check.cjs docs/project-context/ux-excellence-operating-standard-2026-05-13.md docs/agent-ops/active-workboard.md docs/agent-ops/slices/UX-EINKAUF-006.yaml`; `git diff --check`
 **Offene Risiken:** Tiefe Buchhaltungs- und Lieferantenkommunikationsworkflows bleiben in den bestehenden Aktionen; dieser Slice setzt die Bedien- und Entscheidungssicht.
 
 ## TODO-SPRINT-001

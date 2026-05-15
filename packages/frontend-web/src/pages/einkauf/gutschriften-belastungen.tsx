@@ -15,6 +15,25 @@ import { toast } from '@/hooks/use-toast'
 import { apiClient } from '@/lib/api-client'
 import { Plus, ArrowLeft, XCircle } from 'lucide-react'
 import { formatDate, formatNumber } from '@/components/mask-builder/utils/formatting'
+import {
+  CrudCapabilityChecklist,
+  EvidenceTemplateLink,
+  ManagementDecisionPanel,
+  NextActionPanel,
+  OperationalTaskPlan,
+  RoleFocusBar,
+  type UxTaskItem,
+} from '@/components/workflow'
+
+type MemoRoleFocus = 'all' | 'procurement' | 'finance' | 'quality' | 'management'
+
+const memoRoleProfiles: Array<{ id: MemoRoleFocus; label: string; description: string }> = [
+  { id: 'all', label: 'Alle Rollen', description: 'Zeigt Gutschriften und Belastungen fuer Einkauf, Finance, QS und Leitung.' },
+  { id: 'procurement', label: 'Einkauf', description: 'Fokus auf Lieferant, Rechnung, Grund und Lieferantenklaerung.' },
+  { id: 'finance', label: 'Finance', description: 'Fokus auf Betrag, offene Rechnungen, Ausgleich und Buchungsfolge.' },
+  { id: 'quality', label: 'QS', description: 'Fokus auf Reklamationsgrund, Positionen und Nachweis.' },
+  { id: 'management', label: 'Leitung', description: 'Fokus auf offene Werte, Stopper und naechste Aktion.' },
+]
 
 type APInvoice = {
   id: string
@@ -112,6 +131,7 @@ export default function GutschriftenBelastungenPage(): JSX.Element {
   const settlementId = searchParams.get('settlementId')
   
   const [activeTab, setActiveTab] = useState<'credit' | 'debit'>(type === 'debit' ? 'debit' : 'credit')
+  const [roleFocus, setRoleFocus] = useState<MemoRoleFocus>('all')
   const [loading, setLoading] = useState(false)
   const [creditMemos, setCreditMemos] = useState<CreditMemo[]>([])
   const [debitMemos, setDebitMemos] = useState<DebitMemo[]>([])
@@ -447,6 +467,41 @@ export default function GutschriftenBelastungenPage(): JSX.Element {
     }))
   }
 
+  const activeMemos = activeTab === 'credit' ? creditMemos : debitMemos
+  const openMemos = activeMemos.filter((memo) => !memo.settled)
+  const totalOpenMemoAmount = openMemos.reduce((sum, memo) => sum + Number(memo.grossAmount || 0), 0)
+  const hasSupplier = Boolean(memoData.supplierId)
+  const hasInvoiceOrSettlement = Boolean(memoData.invoiceId || memoData.settlementId)
+  const hasMemoReason = memoData.reason.length >= 10
+  const hasMemoItems = memoData.items.length > 0
+  const hasSettlementSelection = memoData.settlementInvoiceIds.length > 0
+  const canCreateMemo = hasSupplier && hasMemoReason && hasMemoItems
+  const memoNextAction = !hasSupplier
+    ? 'Lieferant aus offener Rechnung oder Settlement auswaehlen.'
+    : !hasInvoiceOrSettlement
+      ? 'Rechnung oder Settlement-Bezug klaeren.'
+      : !hasMemoReason
+        ? 'Grund mit mindestens 10 Zeichen erfassen.'
+        : !hasMemoItems
+          ? 'Mindestens eine Position erfassen.'
+          : openMemos.length > 0 && !hasSettlementSelection
+            ? `${openMemos.length} offene ${activeTab === 'credit' ? 'Gutschriften' : 'Belastungen'} verrechnen.`
+            : `${activeTab === 'credit' ? 'Gutschrift' : 'Belastung'} speichern oder ausgleichen.`
+  const memoTaskItems: UxTaskItem[] = [
+    { label: 'Lieferant und Bezug klaeren', done: hasSupplier && hasInvoiceOrSettlement, hint: hasSupplier ? (hasInvoiceOrSettlement ? 'Lieferant und Rechnung/Settlement sind verbunden.' : 'Lieferant ist gesetzt; Rechnung oder Settlement fehlt noch.') : 'Lieferant fehlt noch.' },
+    { label: 'Grund und Positionen erfassen', done: hasMemoReason && hasMemoItems, hint: hasMemoReason && hasMemoItems ? `${memoData.items.length} Positionen mit begruendetem Vorgang.` : 'Grund und mindestens eine Position sind Pflicht.' },
+    { label: 'Ausgleich vorbereiten', done: openMemos.length === 0 || hasSettlementSelection, hint: openMemos.length > 0 ? `${openMemos.length} offene Vorgange mit ${formatNumber(totalOpenMemoAmount, 2)} EUR.` : 'Keine offenen Vorgange im aktiven Tab.' },
+    { label: 'Nachweis sichern', done: activeMemos.length > 0 || Boolean(settlementDraft), hint: settlementDraft ? `Settlement ${settlementDraft.settlement_number} ist verknuepft.` : `${activeMemos.length} Vorgange im aktiven Tab.` },
+  ]
+  const memoCrudCapabilities = [
+    { key: 'create', label: 'Anlegen', available: canCreateMemo, hint: canCreateMemo ? 'Vorgang kann gespeichert werden.' : 'Lieferant, Grund und Positionen fehlen noch.' },
+    { key: 'read', label: 'Lesen', available: true, hint: 'Gutschriften, Belastungen, Lieferant, Rechnung, Betrag, Grund und Status sind sichtbar.' },
+    { key: 'update', label: 'Verrechnen', available: openMemos.length > 0, hint: openMemos.length > 0 ? 'Offene Vorgange koennen gegen Rechnungen verrechnet werden.' : 'Keine offenen Vorgange zum Verrechnen.' },
+    { key: 'filter', label: 'Tab-Wechsel', available: true, hint: 'Gutschriften und Belastungen sind getrennt auswaehlbar.' },
+    { key: 'evidence', label: 'Nachweis', available: activeMemos.length > 0 || Boolean(settlementDraft), hint: 'Rechnung/Settlement, Grund, Positionen und Ausgleich bilden den Nachweis.' },
+    { key: 'audit', label: 'Pruefspur', available: true, hint: 'Anlage und Ausgleich laufen ueber bestehende API-Aktionen.' },
+  ]
+
   return (
     <div className="space-y-6 p-6">
       <div className="flex items-center justify-between">
@@ -465,6 +520,29 @@ export default function GutschriftenBelastungenPage(): JSX.Element {
           <ArrowLeft className="h-4 w-4 mr-2" />
           {t('common.back')}
         </Button>
+      </div>
+
+      <div className="space-y-4">
+        <RoleFocusBar roles={memoRoleProfiles} value={roleFocus} onChange={setRoleFocus} visibleCount={roleFocus === 'all' ? 4 : 1} totalCount={4} />
+        <ManagementDecisionPanel
+          decision={{
+            allowed: canCreateMemo || openMemos.length === 0,
+            allowedLabel: 'Freigabefaehig',
+            blockedLabel: 'Klaerungsbedarf',
+            summary: canCreateMemo ? `${activeTab === 'credit' ? 'Gutschrift' : 'Belastung'} ist vorbereitet: ${memoData.items.length} Positionen.` : `Vor Freigabe oder Ausgleich ist noch etwas offen: ${memoNextAction}`,
+            blockerCount: [!hasSupplier, !hasInvoiceOrSettlement, !hasMemoReason, !hasMemoItems].filter(Boolean).length,
+            nextFocus: memoNextAction,
+            template: { label: 'Rechnungseingaenge oeffnen', href: '/einkauf/rechnungseingaenge-liste' },
+          }}
+        />
+        <div className="grid gap-4 lg:grid-cols-[1.35fr_1fr]">
+          <OperationalTaskPlan title="Gutschrift-/Belastung-Freigabeplan" items={memoTaskItems} />
+          <div className="space-y-3">
+            <NextActionPanel action={memoNextAction} tone={canCreateMemo ? 'emerald' : hasSupplier ? 'amber' : 'blue'} />
+            <EvidenceTemplateLink link={{ label: 'Retouren pruefen', href: '/einkauf/retouren' }} />
+          </div>
+        </div>
+        <CrudCapabilityChecklist capabilities={memoCrudCapabilities} />
       </div>
 
       {settlementDraft ? (
