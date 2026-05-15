@@ -2169,3 +2169,15 @@ Archiv des vorherigen Boards:
 **Erledigt:** Live-Monitor als Live-Betriebsmonitor mit Rollenfokus, Betriebsplan, Managemententscheidung, Next Action, Nachweislink, Live-KPIs, Ereigniszeitleiste und kompakten Sales-/Bestands-/Policy-Listen umgesetzt; technische JSON-Rohdaten bleiben als Diagnosebereich verfuegbar.
 **Checks:** `pnpm --filter @valero-neuroerp/frontend-web type-check`; `python scripts/agent_workboard_supervisor.py validate`; `node scripts/docs-governance-check.cjs`; `node scripts/docs-markdown-check.cjs docs/project-context/ux-excellence-operating-standard-2026-05-13.md docs/agent-ops/active-workboard.md docs/agent-ops/slices/UX-SYSTEM-LIVE-001.yaml`; `git diff --check`
 **Offene Risiken:** Externe SSE-Verfuegbarkeit bleibt umgebungsabhaengig; dieser Slice verbessert die UI-Deutung vorhandener Live-Daten.
+
+## UX-MELDEWESEN-001
+
+**Von:** Codex
+**Owner:** Codex
+**Stand:** reserviert 2026-05-15
+**Ziel des Slices:** Meldewesen-Konsole mit Meldefrist, Artefaktstatus, Owner, naechster Einreichungsaktion, Nachweisfuehrung und CRUD-/Workflow-Klarheit nach UX-Standard fuehren.
+**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/agent-ops/slices/UX-MELDEWESEN-001.yaml`, `packages/frontend-web/src/pages/compliance/meldewesen-konsole.tsx`, `docs/project-context/ux-excellence-operating-standard-2026-05-13.md`
+**Abnahmekriterien:** Meldewesen-Konsole zeigt Rollenfokus, Meldeplan, Managemententscheidung, Next Action, Nachweislink und CRUD-/Workflow-Abdeckung; bestehende Connector-, Unit-, Schedule-, Job-, Import-/Export- und Artefaktfunktionen bleiben erhalten.
+**Erledigt:** Reserviert; Umsetzung folgt.
+**Checks:** offen
+**Offene Risiken:** Echte externe Meldestellen-Quittungen bleiben umgebungsabhaengig; dieser Slice verbessert die UI-Steuerung der vorhandenen Jobs und Artefakte.
