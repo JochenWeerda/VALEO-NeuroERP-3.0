@@ -9,6 +9,7 @@ from sqlalchemy.orm import Session
 from app.core.exceptions import ConflictError, EntityNotFoundError, ValidationFailedError
 from app.core.uuid7 import uuid7
 from app.infrastructure.models import AuditLog
+from app.services.finance_transaction_service import FinanceTransactionService
 from app.services.compat_helpers import (
     cache_key,
     enqueue_event,
@@ -239,6 +240,7 @@ class EinkaufCompatService:
                                      "status": quality_status, "receivedDate": received_date,
                                      "itemCount": len(items)},
                             tenant_id=self.tenant_id)
+        self._book_wareneingang(receipt_id, received_date, items)
         self._invalidate()
         return {
             "id": receipt_id,
@@ -246,6 +248,39 @@ class EinkaufCompatService:
             "status": quality_status,
             "message": "Wareneingang erfasst",
         }
+
+    def _book_wareneingang(self, receipt_id: str, received_date: str, items: list) -> None:
+        """Book inventory increase on goods receipt: Debit 2000 Warenbestand / Credit 1600 Verbindlichkeiten."""
+        from decimal import Decimal
+        total_cost = Decimal("0.00")
+        for line in items:
+            qty = Decimal(str(line.get("acceptedQuantity") or line.get("accepted_quantity") or
+                              line.get("receivedQuantity") or line.get("received_quantity") or 0))
+            cost = Decimal(str(line.get("unitCost") or line.get("unit_cost") or
+                               line.get("unitPrice") or line.get("unit_price") or 0))
+            total_cost += (qty * cost).quantize(Decimal("0.01"))
+        if total_cost == Decimal("0.00"):
+            return
+        try:
+            entry_date = received_date[:10] if received_date else None
+            fin = FinanceTransactionService(self.db, self.tenant_id)
+            fin.create(
+                entry_number=f"WE-{receipt_id[:8]}",
+                description=f"Wareneingang {receipt_id[:8]}",
+                entry_date=entry_date,
+                lines=[
+                    {"account_id": "2000", "debit_amount": float(total_cost), "credit_amount": 0,
+                     "description": "Warenbestand Zugang"},
+                    {"account_id": "1600", "debit_amount": 0, "credit_amount": float(total_cost),
+                     "description": "Verbindlichkeiten Lieferant"},
+                ],
+                reference=receipt_id[:8],
+                source="goods_receipt",
+                document_type="wareneingang",
+                period=received_date[:7] if received_date else None,
+            )
+        except Exception:
+            pass  # booking failure must not block receipt creation
 
     # ── Anfragen ──────────────────────────────────────────────────────────────
 

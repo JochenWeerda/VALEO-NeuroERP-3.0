@@ -15,6 +15,7 @@ from sqlalchemy.orm import Session
 from app.core.database import get_db
 from app.services.customer_sales_eligibility import assert_customer_allowed_for_invoice
 from app.services.sales_posting_service import SalesPostingService
+from app.services.finance_transaction_service import FinanceTransactionService
 from app.core.fibu_audit import log_fibu_audit
 from app.core.gobd_artifact import register_artifact, sha256_hex
 from app.core.tenant import get_tenant_id
@@ -169,118 +170,45 @@ async def _create_gl_booking_and_op(db: Session, invoice: SalesInvoice, tenant_i
     ).fetchone()
 
     if not existing_je:
-        debtor_account_id = _ensure_account(
-            db, tenant_id, "1200", "Forderungen aus Lieferungen und Leistungen", "asset", "receivables"
-        )
-        revenue_account_id = _ensure_account(
-            db, tenant_id, "8400", "Umsatzerlöse", "revenue", "sales"
-        )
-
-        je_id = uuid7()
-        db.execute(
-            text(
-                """
-                INSERT INTO domain_erp.journal_entries
-                (id, tenant_id, entry_number, entry_date, posting_date, document_type, document_number,
-                 reference, description, total_debit, total_credit, status, source, created_at, updated_at)
-                VALUES (:id, :tenant_id, :entry_number, :entry_date, :posting_date, :document_type, :document_number,
-                        :reference, :description, :total_debit, :total_credit, :status, :source, NOW(), NOW())
-                """
-            ),
-            {
-                "id": je_id,
-                "tenant_id": tenant_id,
-                "entry_number": f"AR-{invoice.number}",
-                "entry_date": invoice.date,
-                "posting_date": invoice.date,
-                "document_type": "AR_INVOICE",
-                "document_number": invoice.number,
-                "reference": invoice.number,
-                "description": f"Ausgangsrechnung {invoice.number}",
-                "total_debit": total_gross,
-                "total_credit": total_gross,
-                "status": "posted",
-                "source": "sales_invoice",
-            },
-        )
-
-        line_no = 1
-        db.execute(
-            text(
-                """
-                INSERT INTO domain_erp.journal_entry_lines
-                (id, tenant_id, journal_entry_id, account_id, description, debit, credit, line_number, created_at)
-                VALUES (:id, :tenant_id, :journal_entry_id, :account_id, :description, :debit, :credit, :line_number, NOW())
-                """
-            ),
-            {
-                "id": uuid7(),
-                "tenant_id": tenant_id,
-                "journal_entry_id": je_id,
-                "account_id": debtor_account_id,
-                "description": f"Forderung {invoice.customerId}",
-                "debit": total_gross,
-                "credit": Decimal("0.00"),
-                "line_number": line_no,
-            },
-        )
-        line_no += 1
-
-        db.execute(
-            text(
-                """
-                INSERT INTO domain_erp.journal_entry_lines
-                (id, tenant_id, journal_entry_id, account_id, description, debit, credit, line_number, created_at)
-                VALUES (:id, :tenant_id, :journal_entry_id, :account_id, :description, :debit, :credit, :line_number, NOW())
-                """
-            ),
-            {
-                "id": uuid7(),
-                "tenant_id": tenant_id,
-                "journal_entry_id": je_id,
-                "account_id": revenue_account_id,
-                "description": "Umsatzerlöse",
-                "debit": Decimal("0.00"),
-                "credit": total_net,
-                "line_number": line_no,
-            },
-        )
-        line_no += 1
-
-        if total_tax > Decimal("0.00"):
-            max_rate = Decimal("0.00")
-            if invoice.lines:
-                max_rate = max(
-                    Decimal(str(line.vatRate or 0)).quantize(Decimal("0.01"))
-                    for line in invoice.lines
-                )
+        # Resolve dynamic tax account (country-specific, reverse-charge aware)
+        tax_account_no = "1776"
+        reverse_charge = False
+        if total_tax > Decimal("0.00") and invoice.lines:
+            max_rate = max(
+                Decimal(str(line.vatRate or 0)).quantize(Decimal("0.01"))
+                for line in invoice.lines
+            )
             invoice_country = getattr(invoice, "country", None) or resolve_partner_country(db, invoice.customerId, "DE")
             tax_key_cfg = resolve_tax_key_accounts(db, tenant_id, max_rate, invoice_country)
             tax_account_no = tax_key_cfg.get("credit_account") or "1776"
             reverse_charge = bool(tax_key_cfg.get("reverse_charge"))
-            vat_account_id = _ensure_account(
-                db, tenant_id, tax_account_no, "Umsatzsteuer", "liability", "tax"
-            )
-            db.execute(
-                text(
-                    """
-                    INSERT INTO domain_erp.journal_entry_lines
-                    (id, tenant_id, journal_entry_id, account_id, description, debit, credit, line_number, created_at)
-                    VALUES (:id, :tenant_id, :journal_entry_id, :account_id, :description, :debit, :credit, :line_number, NOW())
-                    """
-                ),
-                {
-                    "id": uuid7(),
-                    "tenant_id": tenant_id,
-                    "journal_entry_id": je_id,
-                    "account_id": vat_account_id,
-                    "description": "Umsatzsteuer (Reverse-Charge)" if reverse_charge else "Umsatzsteuer",
-                    "debit": Decimal("0.00"),
-                    "credit": total_tax,
-                    "line_number": line_no,
-                },
-            )
+            _ensure_account(db, tenant_id, tax_account_no, "Umsatzsteuer", "liability", "tax")
 
+        _ensure_account(db, tenant_id, "1200", "Forderungen aus Lieferungen und Leistungen", "asset", "receivables")
+        _ensure_account(db, tenant_id, "8400", "Umsatzerlöse", "revenue", "sales")
+
+        lines: list[dict] = [
+            {"account_id": "1200", "debit_amount": float(total_gross), "credit_amount": 0,
+             "description": f"Forderung {invoice.customerId}"},
+            {"account_id": "8400", "debit_amount": 0, "credit_amount": float(total_net),
+             "description": "Umsatzerlöse"},
+        ]
+        if total_tax > Decimal("0.00"):
+            lines.append({"account_id": tax_account_no, "debit_amount": 0, "credit_amount": float(total_tax),
+                          "description": "Umsatzsteuer (Reverse-Charge)" if reverse_charge else "Umsatzsteuer"})
+
+        fin = FinanceTransactionService(db, tenant_id)
+        je = fin.create(
+            entry_number=f"AR-{invoice.number}",
+            description=f"Ausgangsrechnung {invoice.number}",
+            entry_date=invoice.date,
+            lines=lines,
+            reference=invoice.number,
+            source="sales_invoice",
+            document_type="AR_INVOICE",
+            period=period,
+        )
+        je_id = str(je.id)
         log_fibu_audit(
             db,
             tenant_id,
@@ -563,3 +491,69 @@ async def delete_invoice(
     except Exception as e:
         logger.error("Error deleting invoice: %s", str(e), exc_info=True)
         raise HTTPException(status_code=500, detail=f"Failed to delete invoice: {str(e)}")
+
+
+@router.post("/{invoice_number}/storno", response_model=dict)
+async def storno_invoice(
+    invoice_number: str,
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+) -> dict:
+    """Storniert eine gebuchte Rechnung: erzeugt Gegenbuchung (Reversal) via GoBD-Hashkette.
+
+    - Setzt die ursprüngliche JournalEntry auf status='reversed'
+    - Erstellt neue JournalEntry mit umgekehrten Soll/Haben-Positionen
+    - Markiert den offenen Posten als 'storniert'
+    """
+    try:
+        row = db.execute(
+            text(
+                """
+                SELECT id, status FROM domain_erp.journal_entries
+                WHERE tenant_id = :tid
+                  AND source = 'sales_invoice'
+                  AND (document_number = :nr OR reference = :nr)
+                LIMIT 1
+                """
+            ),
+            {"tid": tenant_id, "nr": invoice_number},
+        ).fetchone()
+
+        if not row:
+            raise HTTPException(status_code=404, detail=f"Keine Buchung für Rechnung {invoice_number} gefunden")
+
+        je_id = str(row[0])
+        fin = FinanceTransactionService(db, tenant_id)
+        from app.core.exceptions import ValidationFailedError as _VFE
+        try:
+            original, reversal = fin.reverse(je_id, reason=f"Storno Rechnung {invoice_number}")
+        except _VFE as exc:
+            raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+        op_table = _resolve_open_items_table(db)
+        try:
+            db.execute(
+                text(
+                    f"""
+                    UPDATE {op_table}
+                    SET op_status = 'storniert', offen = 0, updated_at = NOW()
+                    WHERE tenant_id = :tid AND rechnungsnr = :nr AND konto_typ = 'debitoren'
+                    """
+                ),
+                {"tid": tenant_id, "nr": invoice_number},
+            )
+            db.commit()
+        except Exception:
+            db.rollback()
+
+        log_fibu_audit(
+            db, tenant_id, "storno", "journal_entry", je_id,
+            {"invoice_number": invoice_number, "reversal_id": str(reversal.id)},
+        )
+        logger.info("Invoice storno: %s → reversal %s", invoice_number, reversal.id)
+        return {"ok": True, "original_entry_id": je_id, "reversal_entry_id": str(reversal.id)}
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error("Error in storno_invoice: %s", str(e), exc_info=True)
+        raise HTTPException(status_code=500, detail=f"Storno fehlgeschlagen: {str(e)}")
