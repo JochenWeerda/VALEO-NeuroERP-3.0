@@ -1,0 +1,24 @@
+id: UX-EINKAUF-006
+title: Retouren und Gutschriften/Belastungen mit UX-Exzellenzbaukasten
+owner: Codex
+status: reserviert
+created: 2026-05-15
+goal: >
+  Retouren und Gutschriften/Belastungen auf den UX-Exzellenzbaukasten ziehen:
+  Rollenfokus, Freigabeplan, Stopperentscheidung, Next Action und
+  CRUD-/Nachweis-Abdeckung.
+file_ownership:
+  - docs/agent-ops/active-workboard.md
+  - docs/agent-ops/slices/UX-EINKAUF-006.yaml
+  - packages/frontend-web/src/pages/einkauf/retouren.tsx
+  - packages/frontend-web/src/pages/einkauf/gutschriften-belastungen.tsx
+  - docs/project-context/ux-excellence-operating-standard-2026-05-13.md
+acceptance_criteria:
+  - Retouren und Gutschriften/Belastungen zeigen Rollenfokus fuer Einkauf, Wareneingang, Finance, QS und Leitung.
+  - Freigabeplan fuehrt Wareneingang/Rechnung, Grund, Positionen, Gutschrift/Belastung und Ausgleich.
+  - Stopperentscheidung zeigt freigabefaehig/blockiert.
+  - CRUD-/Nachweis-Abdeckung ist sichtbar.
+  - Typecheck und Doku-Checks sind gruen.
+checks: []
+risks:
+  - Tiefe Buchhaltungs- und Lieferantenkommunikationsworkflows bleiben in den bestehenden Aktionen; dieser Slice setzt die Bedien- und Entscheidungssicht.
