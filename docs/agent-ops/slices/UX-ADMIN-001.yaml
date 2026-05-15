@@ -1,7 +1,7 @@
 id: UX-ADMIN-001
 title: Admin-Benutzer- und Rollenverwaltung mit UX-Exzellenzbaukasten
 owner: Codex
-status: reserviert
+status: abgeschlossen
 created: 2026-05-15
 goal: >
   Admin-Benutzer- und Rollenverwaltung mit klarer Betriebsaufgabe, Status,
@@ -23,5 +23,9 @@ checks:
   - node scripts/docs-governance-check.cjs
   - node scripts/docs-markdown-check.cjs docs/project-context/ux-excellence-operating-standard-2026-05-13.md docs/agent-ops/active-workboard.md docs/agent-ops/slices/UX-ADMIN-001.yaml
   - git diff --check
+done:
+  - Benutzerverwaltung um Rollenfokus, Sicherheitsplan, Managemententscheidung, Next Action und Nachweislink erweitert.
+  - Rollenverwaltung um Rollenfokus, Berechtigungsplan, Managemententscheidung, Next Action und Nachweislink erweitert.
+  - CRUD-/Workflow-Abdeckung fuer Neuanlage, Lesen, Bearbeiten, Export, Nachweis, Rezertifizierung und Audit sichtbar gemacht.
 risks:
   - DMS-Setup ist bereits ueber UX-DMS-001 abgedeckt; weitere Admin-Spezialseiten bleiben Folgeslices.
