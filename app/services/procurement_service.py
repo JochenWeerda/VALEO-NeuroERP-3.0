@@ -31,6 +31,7 @@ from modules.einkauf.services.bestellvorschlag_service import (
     vorschlag_zu_bestellungen,
 )
 from modules.einkauf.services.versand_service import versende_bestellung
+from app.services.finance_transaction_service import FinanceTransactionService
 
 
 def _model_cols(obj) -> dict[str, Any]:
@@ -444,8 +445,33 @@ class ProcurementService:
         if b.status not in ("entwurf", "draft"):
             raise ValidationFailedError(f"Bestellung hat Status '{b.status}' — nur Entwürfe können freigegeben werden")
         b.status = "freigegeben"
+        self._book_bestellung_obligo(b)
         self.db.commit()
         return {"bestellung_id": str(b.id), "bestellnummer": b.bestellnummer, "status": b.status}
+
+    def _book_bestellung_obligo(self, b: EinkaufBestellung) -> None:
+        """Create a commitment (Obligo) JournalEntry when a Bestellung is approved."""
+        from decimal import Decimal
+        netto = Decimal(str(b.netto_summe or 0))
+        if netto == 0:
+            return
+        entry_date = b.bestelldatum or datetime.utcnow().date()
+        fin = FinanceTransactionService(self.db, self.tenant_id)
+        fin.create(
+            entry_number=f"OBLIGO-{b.bestellnummer}",
+            description=f"Bestellobligo {b.bestellnummer}",
+            entry_date=entry_date,
+            lines=[
+                {"account_id": "6000", "debit_amount": float(netto), "credit_amount": 0,
+                 "description": "Warenaufwand Bestellung"},
+                {"account_id": "1600", "debit_amount": 0, "credit_amount": float(netto),
+                 "description": "Verbindlichkeiten Lieferant"},
+            ],
+            reference=b.bestellnummer,
+            source="procurement",
+            document_type="bestellung",
+            period=str(entry_date)[:7],
+        )
 
     def storniere_bestellung(self, bestellung_id: str) -> dict:
         try:
