@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useNavigate } from 'react-router-dom'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -11,6 +12,14 @@ import {
 import { apiClient } from '@/lib/api-client'
 import { api } from '@/lib/axios'
 import { useToast } from '@/hooks/use-toast'
+import {
+  CrudCapabilityChecklist,
+  EvidenceTemplateLink,
+  ManagementDecisionPanel,
+  NextActionPanel,
+  OperationalTaskPlan,
+  RoleFocusBar,
+} from '@/components/workflow'
 
 // ─── API-Typen ───────────────────────────────────────────────────────────────
 
@@ -94,9 +103,19 @@ const scoreColor = (score: number) =>
 
 // ─── Komponente ──────────────────────────────────────────────────────────────
 
+type ComplianceRole = 'compliance' | 'qs' | 'meldewesen' | 'leitung'
+
+const complianceRoles = [
+  { id: 'compliance', label: 'Compliance', description: 'Offene Anforderungen pruefen und Nachweise nachhalten.' },
+  { id: 'qs', label: 'QS', description: 'Qualitaetspruefungen und Zulassungen fachlich bewerten.' },
+  { id: 'meldewesen', label: 'Meldewesen', description: 'Meldungen, Fristen und Report-Export im Blick behalten.' },
+  { id: 'leitung', label: 'Leitung', description: 'Gesamtrisiko und Abschlussfaehigkeit verdichtet bewerten.' },
+] satisfies Array<{ id: ComplianceRole; label: string; description: string }>
+
 export default function ComplianceDashboardPage(): JSX.Element {
   const navigate = useNavigate()
   const { toast } = useToast()
+  const [roleFocus, setRoleFocus] = useState<ComplianceRole>('compliance')
   const { data: stats, isLoading: loadStats } = useQuery({
     queryKey: ['compliance', 'stats'],
     queryFn: async () => (await apiClient.get<ComplianceStats>('/api/v1/compliance/stats')).data,
@@ -235,6 +254,13 @@ export default function ComplianceDashboardPage(): JSX.Element {
       status: (enniScore >= 90 ? 'compliant' : enniScore >= 70 ? 'warning' : 'pending') as 'compliant' | 'warning' | 'pending',
     },
   ]
+  const openRequirements = (crossList?.offen ?? 0) + (qs?.offen ?? 0) + zulAbgelaufen
+  const complianceReady = overallScore >= 90 && openRequirements === 0
+  const nextComplianceAction = openRequirements > 0
+    ? `${openRequirements} offene Compliance-Punkte pruefen und Verantwortliche zuordnen.`
+    : overallScore < 90
+      ? 'Bereiche mit niedriger Quote oeffnen und Nachweise aktualisieren.'
+      : 'Compliance-Report exportieren und als aktuellen Nachweis ablegen.'
 
   return (
     <div className="space-y-6 p-6">
@@ -250,6 +276,58 @@ export default function ComplianceDashboardPage(): JSX.Element {
           <Download className="h-4 w-4" />
           Compliance-Report (PDF)
         </Button>
+      </div>
+
+      <RoleFocusBar
+        roles={complianceRoles}
+        value={roleFocus}
+        onChange={setRoleFocus}
+        visibleCount={checks.length}
+        totalCount={checks.length}
+        title="Arbeitsrolle fuer Compliance"
+      />
+
+      <ManagementDecisionPanel
+        decision={{
+          allowed: complianceReady,
+          allowedLabel: 'Nachweisfaehig',
+          blockedLabel: 'Pruefung offen',
+          summary: complianceReady
+            ? 'Alle wesentlichen Compliance-Bereiche liegen im gruenen Bereich. Der Report kann als aktueller Nachweis exportiert werden.'
+            : 'Offene Anforderungen, QS-Punkte oder abgelaufene Zulassungen muessen zuerst geklaert werden, damit der Compliance-Stand belastbar ist.',
+          blockerCount: complianceReady ? 0 : openRequirements || checks.filter((check) => check.status !== 'compliant').length,
+          nextFocus: nextComplianceAction,
+          template: {
+            label: 'Compliance-Pruefprotokoll',
+            href: '/docs/compliance/compliance-pruefprotokoll.md',
+          },
+        }}
+      />
+
+      <div className="grid gap-4 xl:grid-cols-[1.15fr_1fr_1fr]">
+        <OperationalTaskPlan
+          title="Compliance-Pruefplan"
+          items={[
+            { label: 'Scores pruefen', done: overallScore >= 90, hint: `Gesamtstand liegt bei ${overallScore}%.` },
+            { label: 'QS-Offenpunkte klaeren', done: (qs?.offen ?? 0) === 0, hint: `${qs?.offen ?? 0} QS-Punkt(e) offen.` },
+            { label: 'Zulassungen pruefen', done: zulAbgelaufen === 0, hint: zulAbgelaufen > 0 ? `${zulAbgelaufen} Zulassung(en) abgelaufen oder gesperrt.` : 'Keine abgelaufenen oder gesperrten Zulassungen.' },
+            { label: 'Report nachweisen', done: complianceReady, hint: 'Report erst exportieren, wenn offene Punkte bewertet sind.' },
+          ]}
+        />
+        <NextActionPanel action={nextComplianceAction} tone={complianceReady ? 'emerald' : openRequirements > 0 ? 'red' : 'amber'} />
+        <div className="space-y-3">
+          <EvidenceTemplateLink
+            link={{ label: 'Compliance-Report-Ablage', href: '/docs/compliance/compliance-report-ablage.md' }}
+          />
+          <CrudCapabilityChecklist
+            capabilities={[
+              { key: 'read', label: 'Status lesen', available: true, hint: 'Scores, offene Anforderungen und Details sind sichtbar.' },
+              { key: 'update', label: 'Details klaeren', available: true, hint: 'Offene Punkte fuehren in die passende Fachmaske.' },
+              { key: 'export', label: 'Report exportieren', available: true, hint: 'PDF-Report kann direkt erzeugt werden.' },
+              { key: 'evidence', label: 'Nachweis', available: complianceReady, hint: 'Nachweis ist belastbar, wenn offene Punkte geklaert sind.' },
+            ]}
+          />
+        </div>
       </div>
 
       {/* Overall Score */}
