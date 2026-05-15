@@ -26,8 +26,24 @@ import {
 } from "lucide-react"
 import { dmsService, type Document as DmsDocument } from "@/lib/services/dms-service"
 import { useTenant } from "@/hooks/useTenant"
+import {
+  CrudCapabilityChecklist,
+  EvidenceTemplateLink,
+  ManagementDecisionPanel,
+  NextActionPanel,
+  OperationalTaskPlan,
+  RoleFocusBar,
+} from "@/components/workflow"
 
 const KB_PRECISION = 0
+type DocumentRoleFocus = 'fachbereich' | 'qm' | 'datenschutz' | 'leitung'
+
+const documentRoleProfiles = [
+  { id: 'fachbereich', label: 'Fachbereich', description: 'Legt Dokumente ab, findet Nachweise wieder und klaert fehlende Zuordnungen.' },
+  { id: 'qm', label: 'QM', description: 'Prueft Dokumenttyp, Freigabe, Gueltigkeit und Wiedervorlage.' },
+  { id: 'datenschutz', label: 'Datenschutz', description: 'Achtet auf Zweck, Aufbewahrung, Loeschfrist und Zugriff auf vertrauliche Unterlagen.' },
+  { id: 'leitung', label: 'Leitung', description: 'Sieht, ob Nachweise vollstaendig, freigegeben und auditfaehig sind.' },
+] satisfies Array<{ id: DocumentRoleFocus; label: string; description: string }>
 
 // Icon basierend auf Dateityp
 function getFileIcon(type: string) {
@@ -174,6 +190,7 @@ export default function DocumentPanel(): JSX.Element {
   }, [dmsConnected, dmsDocuments, apiRows])
   
   const [q, setQ] = React.useState<string>("")
+  const [roleFocus, setRoleFocus] = React.useState<DocumentRoleFocus>('fachbereich')
   const { push } = useToast()
   const qc = useQueryClient()
   const key = ['mcp', 'document', 'list'] as const
@@ -232,6 +249,23 @@ export default function DocumentPanel(): JSX.Element {
     const types = new Set(rows.map(d => d.type))
     return types.size
   }, [rows])
+  const documentsWithType = React.useMemo(() => rows.filter((d) => d.type && d.type !== 'unknown'), [rows])
+  const retentionReady = dmsConnected && rows.length > 0
+  const classificationReady = rows.length > 0 && documentsWithType.length === rows.length
+  const releaseReady = rows.length > 0 && dmsConnected && classificationReady
+  const dmsBlockers = [
+    !dmsConnected ? 'DMS-Verbindung pruefen' : null,
+    rows.length === 0 ? 'Dokumente hochladen' : null,
+    !classificationReady && rows.length > 0 ? 'Dokumenttypen pruefen' : null,
+    !retentionReady && rows.length > 0 ? 'Aufbewahrung im DMS absichern' : null,
+  ].filter((item): item is string => Boolean(item))
+  const nextDocumentAction = !dmsConnected
+    ? 'DMS-Verbindung pruefen oder Dokumente zunaechst lokal hochladen.'
+    : rows.length === 0
+      ? 'Erstes QM-Dokument hochladen und Dokumenttyp setzen.'
+      : !classificationReady
+        ? 'Dokumente ohne klaren Typ pruefen und richtig einordnen.'
+        : 'Naechstes Dokument scannen, freigeben oder bei Bedarf loeschen.'
 
   const onFiles = async (files: File[]): Promise<void> => {
     if (files.length === 0) return
@@ -330,6 +364,57 @@ export default function DocumentPanel(): JSX.Element {
         </p>
       </div>
 
+      <RoleFocusBar
+        roles={documentRoleProfiles}
+        value={roleFocus}
+        onChange={setRoleFocus}
+        visibleCount={filtered.length}
+        totalCount={rows.length}
+        title="Wer arbeitet gerade mit den Dokumenten?"
+      />
+
+      <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_360px]">
+        <ManagementDecisionPanel
+          decision={{
+            allowed: releaseReady,
+            allowedLabel: 'Nachweise arbeitsfaehig',
+            blockedLabel: 'Nachweis offen',
+            summary: releaseReady
+              ? `${rows.length} Dokument(e) sind im DMS verfuegbar und nach Dokumenttyp auffindbar. QM kann mit Scan, Freigabe und Nachweispruefung weiterarbeiten.`
+              : `Vor einer belastbaren Dokumentenfreigabe fehlen noch: ${dmsBlockers.join(', ')}.`,
+            blockerCount: dmsBlockers.length,
+            nextFocus: dmsBlockers[0] ?? 'Naechstes Dokument freigeben',
+            template: { label: 'Dokumentenklasse und Aufbewahrung', href: '/docs/dms/dokumentenklasse-retention.md' },
+          }}
+        />
+        <div className="space-y-4">
+          <NextActionPanel action={nextDocumentAction} tone={releaseReady ? 'emerald' : 'amber'} />
+          <EvidenceTemplateLink link={{ label: 'Dokumentenfreigabe dokumentieren', href: '/docs/dms/dokumentenfreigabe.md' }} />
+        </div>
+      </div>
+
+      <div className="grid gap-4 lg:grid-cols-2">
+        <OperationalTaskPlan
+          title="Arbeitsplan fuer Dokumente"
+          items={[
+            { label: 'Dokument hochladen', done: rows.length > 0, hint: rows.length > 0 ? `${rows.length} Dokument(e) im aktuellen Raum.` : 'Noch kein Dokument vorhanden.' },
+            { label: 'Dokumenttyp klaeren', done: classificationReady, hint: `${documentsWithType.length} von ${rows.length} Dokument(en) haben einen Typ.` },
+            { label: 'Aufbewahrung absichern', done: retentionReady, hint: dmsConnected ? 'DMS-Anbindung ist Grundlage fuer Aufbewahrung und Wiederfinden.' : 'DMS-Verbindung ist noch nicht aktiv.' },
+            { label: 'Scan/Freigabe nachhalten', done: releaseReady, hint: releaseReady ? 'Scan und Folgepruefung sind auf DMS-Basis moeglich.' : 'Erst Verbindung, Dokumente und Typen klaeren.' },
+          ]}
+        />
+        <CrudCapabilityChecklist
+          capabilities={[
+            { key: 'create', label: 'Hochladen', available: true, hint: 'Dokumente koennen per Upload abgelegt werden.' },
+            { key: 'read', label: 'Suchen und lesen', available: true, hint: 'Titel und Dokumenttyp sind durchsuchbar.' },
+            { key: 'update', label: 'Scan starten', available: true, hint: 'Scan/OCR kann je Dokument angestossen werden.' },
+            { key: 'delete', label: 'Loeschen', available: true, hint: 'Loeschen ist vorhanden; fachlich braucht es Aufbewahrungspruefung.' },
+            { key: 'evidence', label: 'Nachweisvorlage', available: true, hint: 'Vorlage fuer Dokumentenklasse und Freigabe ist verlinkt.' },
+            { key: 'audit', label: 'Version/Freigabe', available: false, hint: 'Eigene Versionstimeline ist in dieser Seite noch nicht angebunden.' },
+          ]}
+        />
+      </div>
+
       {/* DMS Status Alert */}
       {dmsConnected && (
         <Alert className="bg-green-50 border-green-200">
@@ -339,7 +424,7 @@ export default function DocumentPanel(): JSX.Element {
             Paperless-ngx Dokumentenmanagement ist aktiv. Dokumente werden automatisch per OCR verarbeitet.
           </AlertDescription>
         </Alert>
-      )}`r`n
+      )}
       {/* KPI Cards */}
       <QMKpiCards documentCount={rows.length} categories={categories} />
 

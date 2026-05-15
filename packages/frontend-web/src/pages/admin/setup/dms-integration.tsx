@@ -8,6 +8,14 @@ import { useToast } from '@/hooks/use-toast'
 import { getAxiosErrorMessage } from '@/lib/api-client'
 import { Badge } from '@/components/ui/badge'
 import { CheckCircle2, ExternalLink, Loader2 } from 'lucide-react'
+import {
+  CrudCapabilityChecklist,
+  EvidenceTemplateLink,
+  ManagementDecisionPanel,
+  NextActionPanel,
+  OperationalTaskPlan,
+  RoleFocusBar,
+} from '@/components/workflow'
 
 type BootstrapResult = {
   ok: boolean
@@ -34,6 +42,14 @@ type TestConnectionResult = {
 }
 
 type TestState = 'idle' | 'ok' | 'fail'
+type DmsSetupRole = 'it' | 'fachbereich' | 'datenschutz' | 'leitung'
+
+const dmsSetupRoles = [
+  { id: 'it', label: 'IT', description: 'Richtet Verbindung, Token und technischen Verbindungstest ein.' },
+  { id: 'fachbereich', label: 'Fachbereich', description: 'Prueft, ob Dokumenttypen und Metadaten fuer die Arbeit passen.' },
+  { id: 'datenschutz', label: 'Datenschutz', description: 'Achtet auf Zugriff, Aufbewahrung und saubere Verarbeitung im DMS.' },
+  { id: 'leitung', label: 'Leitung', description: 'Sieht, ob die DMS-Anbindung fuer produktive Dokumentarbeit bereit ist.' },
+] satisfies Array<{ id: DmsSetupRole; label: string; description: string }>
 
 const DEFAULT_BASE_URL = 'http://localhost:8010'
 const UNKNOWN_ERROR_MESSAGE = 'Unbekannter Fehler'
@@ -69,10 +85,24 @@ export default function DmsIntegrationCard(): JSX.Element {
   const [loading, setLoading] = useState<boolean>(false)
   const [testState, setTestState] = useState<TestState>('idle')
   const [status, setStatus] = useState<DmsStatus | null>(null)
+  const [roleFocus, setRoleFocus] = useState<DmsSetupRole>('it')
 
   const hasCredentials = useMemo(() => isNonEmptyString(baseUrl) && isNonEmptyString(token), [baseUrl, token])
   const isConfigured = status?.configured === true
   const configuredBaseUrl = isConfigured && isNonEmptyString(status?.base) ? status.base : undefined
+  const dmsSetupBlockers = [
+    !isConfigured ? 'DMS noch nicht eingerichtet' : null,
+    isConfigured && !configuredBaseUrl ? 'Base-URL fehlt' : null,
+    testState === 'fail' ? 'Verbindungstest fehlgeschlagen' : null,
+  ].filter((item): item is string => Boolean(item))
+  const dmsSetupReady = isConfigured && dmsSetupBlockers.length === 0
+  const nextSetupAction = dmsSetupReady
+    ? 'DMS oeffnen und Dokumenttypen im produktiven Ablauf pruefen.'
+    : testState === 'ok'
+      ? 'Einrichtung starten, damit Dokumenttypen und Metadaten angelegt werden.'
+      : hasCredentials
+        ? 'Verbindung testen und danach die Einrichtung starten.'
+        : 'Base-URL und API-Token eintragen.'
 
   const loadStatus = useCallback(async (): Promise<void> => {
     try {
@@ -200,6 +230,50 @@ export default function DmsIntegrationCard(): JSX.Element {
       </CardHeader>
 
       <CardContent className="p-0 space-y-4">
+        <div className="space-y-4 p-6 pb-0">
+          <RoleFocusBar roles={dmsSetupRoles} value={roleFocus} onChange={setRoleFocus} title="Wer richtet das DMS ein?" />
+          <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_320px]">
+            <ManagementDecisionPanel
+              decision={{
+                allowed: dmsSetupReady,
+                allowedLabel: 'DMS bereit',
+                blockedLabel: 'Einrichtung offen',
+                summary: dmsSetupReady
+                  ? 'Die DMS-Anbindung ist eingerichtet. Dokumenttypen, Metadaten und Zugriff koennen im Fachprozess genutzt werden.'
+                  : `Vor produktiver Dokumentarbeit fehlen noch: ${dmsSetupBlockers.join(', ') || 'Verbindungstest und Einrichtung'}.`,
+                blockerCount: dmsSetupBlockers.length || (dmsSetupReady ? 0 : 1),
+                nextFocus: dmsSetupReady ? 'Dokumenttypen pruefen' : nextSetupAction,
+                template: { label: 'DMS-Einrichtungsprotokoll', href: '/docs/dms/dms-einrichtungsprotokoll.md' },
+              }}
+            />
+            <div className="space-y-4">
+              <NextActionPanel action={nextSetupAction} tone={dmsSetupReady ? 'emerald' : 'amber'} />
+              <EvidenceTemplateLink link={{ label: 'DMS-Betriebsnachweis', href: '/docs/dms/dms-betriebsnachweis.md' }} />
+            </div>
+          </div>
+          <div className="grid gap-4 lg:grid-cols-2">
+            <OperationalTaskPlan
+              title="Einrichtungsplan"
+              items={[
+                { label: 'Zugangsdaten eintragen', done: hasCredentials || isConfigured, hint: isConfigured ? 'DMS ist bereits konfiguriert.' : 'Base-URL und API-Token sind erforderlich.' },
+                { label: 'Verbindung testen', done: testState === 'ok' || isConfigured, hint: testState === 'fail' ? 'Letzter Test ist fehlgeschlagen.' : 'Test bestaetigt, dass das DMS erreichbar ist.' },
+                { label: 'Dokumenttypen anlegen', done: Boolean(status?.document_types), hint: `${status?.document_types ?? 0} Dokumenttypen bekannt.` },
+                { label: 'Metadaten anlegen', done: Boolean(status?.metadata_types), hint: `${status?.metadata_types ?? 0} Metadatenfelder bekannt.` },
+              ]}
+            />
+            <CrudCapabilityChecklist
+              capabilities={[
+                { key: 'create', label: 'Einrichtung starten', available: true, hint: 'Bootstrap legt Dokumenttypen und Metadaten an.' },
+                { key: 'read', label: 'Status lesen', available: true, hint: 'Konfiguration, Base-URL und Anzahl Typen sind sichtbar.' },
+                { key: 'update', label: 'Neu konfigurieren', available: true, hint: 'Bestehende Verbindung kann angepasst werden.' },
+                { key: 'approve', label: 'Verbindung testen', available: true, hint: 'Erfolgreicher Test ist Voraussetzung fuer Einrichtung.' },
+                { key: 'evidence', label: 'Betriebsnachweis', available: true, hint: 'Einrichtungs- und Betriebsnachweis sind verlinkt.' },
+                { key: 'audit', label: 'Aenderungshistorie', available: false, hint: 'Eigene Audit-Zeitleiste ist hier noch nicht angebunden.' },
+              ]}
+            />
+          </div>
+        </div>
+
         {isConfigured ? (
           <div className="space-y-3 p-6">
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
