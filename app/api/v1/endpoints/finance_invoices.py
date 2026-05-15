@@ -14,6 +14,7 @@ from sqlalchemy.orm import Session
 
 from app.core.database import get_db
 from app.services.customer_sales_eligibility import assert_customer_allowed_for_invoice
+from app.services.sales_posting_service import SalesPostingService
 from app.core.fibu_audit import log_fibu_audit
 from app.core.gobd_artifact import register_artifact, sha256_hex
 from app.core.tenant import get_tenant_id

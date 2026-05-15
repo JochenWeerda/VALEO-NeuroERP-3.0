@@ -18,6 +18,7 @@ from app.core.config import settings
 from app.core.tenant import get_tenant_id
 from app.services.customer_sales_eligibility import assert_customer_allowed_for_delivery
 from app.services.kontrakt_movement_sync import sync_movements_for_delivery_note
+from app.services.sales_posting_service import SalesPostingService
 
 router = APIRouter(prefix="/sales/delivery-notes", tags=["sales", "delivery-notes"])
 
@@ -472,17 +473,31 @@ async def post_delivery_note(
     
     db.execute(
         text("""
-            UPDATE domain_sales.delivery_notes 
+            UPDATE domain_sales.delivery_notes
             SET status = 'posted', updated_at = NOW()
             WHERE id = :id AND tenant_id = :tenant_id
         """),
         {"id": ls_id, "tenant_id": tenant_id}
     )
+    db.flush()
+
+    positions = _list_positions(db, ls_id)
+    ls_number = row.get("ls_number") or row.get("delivery_note_number") or ls_id
+    try:
+        SalesPostingService(db, tenant_id).book_warenabgang(
+            delivery_note_id=ls_id,
+            delivery_note_number=ls_number,
+            positions=positions,
+            delivery_date=row.get("delivery_date") or row.get("created_at"),
+        )
+    except Exception:
+        pass  # booking failure must not block the status transition
+
     db.commit()
-    
+
     row = _get_delivery_note_or_404(db, ls_id, tenant_id)
     positions = _list_positions(db, ls_id)
-    
+
     return DeliveryNote(
         **dict(row),
         positionen=[DeliveryNotePosition(**dict(p)) for p in positions]
