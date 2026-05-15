@@ -1,7 +1,7 @@
 id: UX-SERVICE-001
 title: Service-Anfragen und Rueckmeldungen mit UX-Exzellenzbaukasten
 owner: Codex
-status: reserviert
+status: abgeschlossen
 created: 2026-05-15
 goal: >
   Service-Anfragen und Rueckmeldung mit Rollenfokus, klarer Aufgabe, Status,
@@ -24,6 +24,9 @@ checks:
   - node scripts/docs-markdown-check.cjs docs/project-context/ux-excellence-operating-standard-2026-05-13.md docs/agent-ops/active-workboard.md docs/agent-ops/slices/UX-SERVICE-001.yaml
   - git diff --check
 done:
-  - Slice reserviert; Umsetzung folgt.
+  - Service-Anfragen um Rollenfokus, Service-Arbeitsplan, Managemententscheidung, Next Action und Service-Ticket-Nachweis erweitert.
+  - Service-Tabelle um klaren Leerzustand mit direkter Anlageaktion ergaenzt.
+  - Rueckmeldung um Rollenfokus, Rueckmeldeplan, Managemententscheidung, Next Action, Einsatznachweis und CRUD-/Workflow-Abdeckung erweitert.
+  - Senden der Rueckmeldung an vollstaendige Pflichtangaben und Folgehinweis bei offenem Ergebnis gekoppelt.
 risks:
   - Service-Abschluss und Feldservice-Detail bleiben Folgeslices; dieser Slice fokussiert Anfrageuebersicht und Rueckmeldung.

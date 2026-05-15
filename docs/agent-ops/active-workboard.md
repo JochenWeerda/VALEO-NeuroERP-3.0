@@ -2114,10 +2114,10 @@ Archiv des vorherigen Boards:
 
 **Von:** Codex
 **Owner:** Codex
-**Stand:** reserviert 2026-05-15
+**Stand:** abgeschlossen 2026-05-15
 **Ziel des Slices:** Service-Anfragen und Rueckmeldung mit Rollenfokus, klarer Aufgabe, Status, naechster Aktion und Nachweisfuehrung nach UX-Standard fuehren.
 **Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/agent-ops/slices/UX-SERVICE-001.yaml`, `packages/frontend-web/src/pages/service/anfragen.tsx`, `packages/frontend-web/src/pages/service/rueckmeldung.tsx`, `docs/project-context/ux-excellence-operating-standard-2026-05-13.md`
 **Abnahmekriterien:** Service-Anfragen und Rueckmeldung zeigen Rollenfokus, Service-/Rueckmeldeplan, Managemententscheidung, Next Action, Nachweislink und CRUD-/Workflow-Abdeckung; bestehende Liste, Suche, Export, Workflow-Handover, Rueckmeldeformular und Navigation bleiben erhalten.
-**Erledigt:** Reserviert; Umsetzung folgt.
-**Checks:** offen
+**Erledigt:** Service-Anfragen um Rollenfokus, Service-Arbeitsplan, Managemententscheidung, Next Action, Nachweislink, CRUD-Abdeckung und klare Leerzustandsaktion erweitert; Rueckmeldung um Rollenfokus, Rueckmeldeplan, Pflichtklarheit, Folgehinweis, Nachweislink und gefuehrte Sendebereitschaft erweitert.
+**Checks:** `pnpm --filter @valero-neuroerp/frontend-web type-check`; `python scripts/agent_workboard_supervisor.py validate`; `node scripts/docs-governance-check.cjs`; `node scripts/docs-markdown-check.cjs docs/project-context/ux-excellence-operating-standard-2026-05-13.md docs/agent-ops/active-workboard.md docs/agent-ops/slices/UX-SERVICE-001.yaml`; `git diff --check`
 **Offene Risiken:** Service-Abschluss und Feldservice-Detail bleiben Folgeslices; dieser Slice fokussiert Anfrageuebersicht und Rueckmeldung.
