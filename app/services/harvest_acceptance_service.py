@@ -614,9 +614,51 @@ class HarvestAcceptanceService:
             obj.invoice_id = invoice.id
             obj.release_status = "credit_note_created"
 
+            # FIBU-Buchung: Self-Billing Gutschrift buchen (Eingangsseite)
+            self._book_self_billing_credit_note(invoice, obj.delivery_date)
+
         self.db.commit()
         self.db.refresh(obj)
         return _to_dict_with_positions(obj, self.db)
+
+    def _book_self_billing_credit_note(self, invoice: Any, delivery_date: Any) -> None:
+        """Book self-billing credit note into GL: Debit 3100 / Credit 4000 + 1576 (non-blocking)."""
+        try:
+            from app.services.finance_transaction_service import FinanceTransactionService
+            net = Decimal(str(invoice.total_net_amount_eur or 0))
+            vat = Decimal(str(invoice.total_vat_amount_eur or 0))
+            gross = Decimal(str(invoice.total_gross_amount_eur or 0))
+            if gross == Decimal("0"):
+                return
+            entry_date = delivery_date
+            if entry_date is None:
+                from datetime import datetime as _dt
+                entry_date = _dt.utcnow().date()
+            period = str(entry_date)[:7]
+            lines = [
+                {"account_id": "3100", "debit_amount": float(gross), "credit_amount": 0,
+                 "description": f"Verbindlichkeit Self-Billing {invoice.invoice_number}"},
+                {"account_id": "4000", "debit_amount": 0, "credit_amount": float(net),
+                 "description": "Wareneinkauf Ernte"},
+            ]
+            if vat > Decimal("0"):
+                lines.append({
+                    "account_id": "1576", "debit_amount": 0, "credit_amount": float(vat),
+                    "description": "Vorsteuer Self-Billing",
+                })
+            fin = FinanceTransactionService(self.db, self.tenant_id)
+            fin.create(
+                entry_number=f"SB-{invoice.invoice_number}",
+                description=f"Self-Billing Gutschrift {invoice.invoice_number}",
+                entry_date=entry_date,
+                lines=lines,
+                reference=invoice.invoice_number,
+                source="self_billing",
+                document_type="credit_note",
+                period=period,
+            )
+        except Exception:
+            pass  # booking failure must not block release
 
     def calculate_settlement(self, acceptance_id: str) -> dict:
         from decimal import Decimal

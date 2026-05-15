@@ -5,6 +5,7 @@ Covers:
 - SalesPostingService.book_ausgangsrechnung
 - ProcurementService._book_bestellung_obligo (via freigebe_bestellung)
 - EinkaufCompatService._book_wareneingang (via create_goods_receipt)
+- HarvestAcceptanceService._book_self_billing_credit_note
 - storno_invoice endpoint logic (FinanceTransactionService.reverse round-trip)
 """
 from __future__ import annotations
@@ -315,6 +316,90 @@ def test_warenabgang_is_nonblocking_on_finance_error():
     # The service itself propagates — the endpoint wraps it
     with pytest.raises(RuntimeError, match="DB down"):
         svc.book_warenabgang("dn-1", "LS-005", [{"qty": 1, "unit_price": 100}])
+
+
+# ── HarvestAcceptanceService._book_self_billing_credit_note ──────────────────
+
+def _make_harvest_svc():
+    from app.services.harvest_acceptance_service import HarvestAcceptanceService
+    db = MagicMock()
+    db.execute.return_value.fetchone.return_value = (1,)
+    svc = HarvestAcceptanceService(db, TENANT)
+    return svc
+
+
+def _make_invoice(net=100, vat=19, gross=119, number="SB-2026-001"):
+    inv = MagicMock()
+    inv.invoice_number = number
+    inv.total_net_amount_eur = Decimal(str(net))
+    inv.total_vat_amount_eur = Decimal(str(vat))
+    inv.total_gross_amount_eur = Decimal(str(gross))
+    return inv
+
+
+def test_self_billing_skips_zero_gross():
+    svc = _make_harvest_svc()
+    inv = _make_invoice(net=0, vat=0, gross=0)
+    with patch.object(FinanceTransactionService, "create") as mock_create:
+        svc._book_self_billing_credit_note(inv, date(2026, 3, 1))
+        mock_create.assert_not_called()
+
+
+def test_self_billing_creates_three_lines_with_vat():
+    svc = _make_harvest_svc()
+    inv = _make_invoice(net=100, vat=19, gross=119)
+    with patch.object(FinanceTransactionService, "create", return_value=MagicMock(id="j-sb")) as mock_create:
+        svc._book_self_billing_credit_note(inv, date(2026, 3, 15))
+        mock_create.assert_called_once()
+        kwargs = mock_create.call_args.kwargs
+        assert kwargs["source"] == "self_billing"
+        assert kwargs["document_type"] == "credit_note"
+        assert kwargs["entry_number"] == "SB-SB-2026-001"
+        assert kwargs["period"] == "2026-03"
+        lines = kwargs["lines"]
+        assert len(lines) == 3
+        accounts = {l["account_id"] for l in lines}
+        assert "3100" in accounts   # Verbindlichkeit Lieferant
+        assert "4000" in accounts   # Wareneinkauf
+        assert "1576" in accounts   # Vorsteuer
+
+
+def test_self_billing_debit_equals_gross():
+    svc = _make_harvest_svc()
+    inv = _make_invoice(net=500, vat=95, gross=595)
+    with patch.object(FinanceTransactionService, "create", return_value=MagicMock(id="j-sb2")) as mock_create:
+        svc._book_self_billing_credit_note(inv, date(2026, 4, 1))
+        lines = mock_create.call_args.kwargs["lines"]
+        debit = next(l for l in lines if l["debit_amount"] > 0)
+        assert debit["account_id"] == "3100"
+        assert debit["debit_amount"] == pytest.approx(595.0)
+
+
+def test_self_billing_two_lines_without_vat():
+    svc = _make_harvest_svc()
+    inv = _make_invoice(net=200, vat=0, gross=200)
+    with patch.object(FinanceTransactionService, "create", return_value=MagicMock(id="j-sb3")) as mock_create:
+        svc._book_self_billing_credit_note(inv, date(2026, 5, 1))
+        lines = mock_create.call_args.kwargs["lines"]
+        assert len(lines) == 2
+        assert not any(l["account_id"] == "1576" for l in lines)
+
+
+def test_self_billing_uses_today_when_no_delivery_date():
+    svc = _make_harvest_svc()
+    inv = _make_invoice(net=100, vat=0, gross=100)
+    with patch.object(FinanceTransactionService, "create", return_value=MagicMock(id="j-sb4")) as mock_create:
+        svc._book_self_billing_credit_note(inv, None)
+        kwargs = mock_create.call_args.kwargs
+        assert kwargs["entry_date"] == date.today()
+
+
+def test_self_billing_is_nonblocking_on_error():
+    svc = _make_harvest_svc()
+    inv = _make_invoice()
+    with patch.object(FinanceTransactionService, "create", side_effect=RuntimeError("DB down")):
+        # Must not raise — non-blocking
+        svc._book_self_billing_credit_note(inv, date(2026, 3, 1))
 
 
 # ── FinanceTransactionService.reverse — storno round-trip ────────────────────
