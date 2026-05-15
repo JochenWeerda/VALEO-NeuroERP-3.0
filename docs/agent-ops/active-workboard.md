@@ -366,10 +366,12 @@ Stand: `2026-05-12`
 
 **Von:** Codex
 **Owner:** Codex
-**Stand:** reserviert 2026-05-15
+**Stand:** abgeschlossen 2026-05-15
 **Ziel des Slices:** Lieferantenbewertung auf den UX-Exzellenzbaukasten ziehen: Rollenfokus, Bewertungsplan, Eskalationsentscheidung, Next Action und CRUD-/Nachweis-Abdeckung.
 **Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/agent-ops/slices/UX-EINKAUF-005.yaml`, `packages/frontend-web/src/pages/einkauf/lieferantenbewertung.tsx`, `docs/project-context/ux-excellence-operating-standard-2026-05-13.md`
 **Abnahmekriterien:** Lieferantenbewertung zeigt Rollenfokus fuer Einkauf, QS, Finance und Leitung; Bewertungsplan fuehrt Datenbasis, Scores, Eskalation und Review; Managemententscheidung zeigt akzeptabel/klaerungsbeduerftig; CRUD-/Nachweis-Abdeckung ist sichtbar; Typecheck und Doku-Checks sind gruen.
+**Erledigt:** `einkauf/lieferantenbewertung.tsx` nutzt den UX-Baukasten fuer Rollenfokus, Bewertungsplan, Eskalationsentscheidung, Next Action und CRUD-/Nachweis-Abdeckung. Bestehende Suche, Bewertungsmatrix und Score-Anpassung bleiben erhalten. UX-Standard markiert `UX-EINKAUF-005` als abgeschlossen.
+**Checks:** `pnpm --filter @valero-neuroerp/frontend-web type-check`; `python scripts/agent_workboard_supervisor.py validate`; `node scripts/docs-governance-check.cjs`; `node scripts/docs-markdown-check.cjs docs/project-context/ux-excellence-operating-standard-2026-05-13.md docs/agent-ops/active-workboard.md docs/agent-ops/slices/UX-EINKAUF-005.yaml`; `git diff --check`
 **Offene Risiken:** Score-Historie und Massnahmenworkflow bleiben ausserhalb dieses Slice; dieser Slice setzt die Bedien- und Entscheidungssicht auf die bestehende Bewertungsmatrix.
 
 ## TODO-SPRINT-001
