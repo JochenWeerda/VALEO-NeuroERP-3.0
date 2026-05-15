@@ -1,0 +1,28 @@
+id: UX-PRODUKTION-001
+title: Produktionsauftrag und Dokumentdruck mit UX-Exzellenzbaukasten
+owner: Codex
+status: reserviert
+created: 2026-05-15
+goal: >
+  Produktionsarbeitsflaechen fuer Mischfutter-Auftrag und Produktionsdokument-
+  Druck mit Rollenfokus, Materialentscheidung, Dokumentnachweis und naechster
+  Aktion fuehren.
+file_ownership:
+  - docs/agent-ops/active-workboard.md
+  - docs/agent-ops/slices/UX-PRODUKTION-001.yaml
+  - packages/frontend-web/src/pages/produktion/mischfutter-produktion.tsx
+  - packages/frontend-web/src/pages/produktion/produktions-dokumente-drucken.tsx
+  - docs/project-context/ux-excellence-operating-standard-2026-05-13.md
+acceptance_criteria:
+  - Mischfutter-Produktion zeigt Rollenfokus, Materialplan, Managemententscheidung, Next Action und Nachweislink.
+  - Produktionsdokument-Druck zeigt Rollenfokus, Dokumentplan, Druckentscheidung, Next Action und CRUD-/Nachweis-Abdeckung.
+  - Bestehender Wizard und Druckmaske bleiben erhalten.
+  - Typecheck und Doku-Checks sind gruen.
+checks:
+  - pnpm --filter @valero-neuroerp/frontend-web type-check
+  - python scripts/agent_workboard_supervisor.py validate
+  - node scripts/docs-governance-check.cjs
+  - node scripts/docs-markdown-check.cjs docs/project-context/ux-excellence-operating-standard-2026-05-13.md docs/agent-ops/active-workboard.md docs/agent-ops/slices/UX-PRODUKTION-001.yaml
+  - git diff --check
+risks:
+  - Produktion hat bisher nur schmale sichtbare Frontend-Flaechen; weitere Produktionsdetails bleiben Folgeslices.
