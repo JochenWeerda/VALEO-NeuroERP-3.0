@@ -1,6 +1,68 @@
-﻿export default function ProduktionsDokumenteDruckenPage(): JSX.Element {
+import { useState } from 'react'
+import {
+  CrudCapabilityChecklist,
+  EvidenceTemplateLink,
+  ManagementDecisionPanel,
+  NextActionPanel,
+  OperationalTaskPlan,
+  RoleFocusBar,
+} from '@/components/workflow'
+
+type ProductionPrintRole = 'produktion' | 'versand' | 'qs' | 'it'
+
+const productionPrintRoles = [
+  { id: 'produktion', label: 'Produktion', description: 'Prueft Auftrag, Formular und benoetigte Druckbestandteile.' },
+  { id: 'versand', label: 'Versand', description: 'Achtet darauf, ob Lade-Informationen und Wegbeschreibung benoetigt werden.' },
+  { id: 'qs', label: 'QS', description: 'Prueft, ob der Produktionsauftrag als Nachweis zur Charge passt.' },
+  { id: 'it', label: 'IT', description: 'Klaert Drucker, Vorschau und Formularproblem.' },
+] satisfies Array<{ id: ProductionPrintRole; label: string; description: string }>
+
+export default function ProduktionsDokumenteDruckenPage(): JSX.Element {
+  const [roleFocus, setRoleFocus] = useState<ProductionPrintRole>('produktion')
+
   return (
     <div className="min-h-full bg-[#ececec] p-6 text-[11px] text-black">
+      <div className="mx-auto mb-6 max-w-6xl space-y-4 text-[13px]">
+        <RoleFocusBar roles={productionPrintRoles} value={roleFocus} onChange={setRoleFocus} title="Wer prueft den Produktionsdruck?" />
+        <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_360px]">
+          <ManagementDecisionPanel
+            decision={{
+              allowed: true,
+              allowedLabel: 'Druck bereit',
+              blockedLabel: 'Druck pruefen',
+              summary: 'Auftrag, Dokumentart, Formular, Druckdatum und Drucker sind sichtbar. Der Produktionsauftrag kann als Nachweis gedruckt oder in der Vorschau geprueft werden.',
+              blockerCount: 0,
+              nextFocus: 'Vorschau pruefen, dann Produktionsauftrag drucken',
+              template: { label: 'Produktionsdokument-Druckprotokoll', href: '/docs/produktion/produktionsdokument-druckprotokoll.md' },
+            }}
+          />
+          <div className="space-y-4">
+            <NextActionPanel action="Vorschau pruefen, relevante Zusatzdrucke waehlen und Druck als Produktionsnachweis dokumentieren." tone="emerald" />
+            <EvidenceTemplateLink link={{ label: 'Drucknachweis Produktion', href: '/docs/produktion/drucknachweis-produktion.md' }} />
+          </div>
+        </div>
+        <div className="grid gap-4 lg:grid-cols-2">
+          <OperationalTaskPlan
+            title="Dokumentplan"
+            items={[
+              { label: 'Auftrag identifizieren', done: true, hint: 'Auftrag 2610147 ist der aktuelle Produktionsbezug.' },
+              { label: 'Dokumentart pruefen', done: true, hint: 'Produktions-Auftrag ist ausgewaehlt.' },
+              { label: 'Formular und Drucker pruefen', done: true, hint: 'Formular W25501 und Drucker sind gesetzt.' },
+              { label: 'Zusatzdrucke entscheiden', done: false, hint: 'Allgemeine Angaben, Wegbeschreibung und Lade-Information bei Bedarf bewusst waehlen.' },
+            ]}
+          />
+          <CrudCapabilityChecklist
+            capabilities={[
+              { key: 'read', label: 'Auftrag lesen', available: true, hint: 'Auftrag, Kunde, Dokument, Formular und Drucker sind sichtbar.' },
+              { key: 'update', label: 'Druckoptionen setzen', available: true, hint: 'Zusatzdrucke koennen gewaehlt werden.' },
+              { key: 'export', label: 'Drucken/Vorschau', available: true, hint: 'Druck und Vorschau sind als Aktionen vorhanden.' },
+              { key: 'evidence', label: 'Drucknachweis', available: true, hint: 'Druckprotokoll ist verlinkt.' },
+              { key: 'audit', label: 'Druckdatum', available: true, hint: 'Druckdatum und Formular bilden den Mindestnachweis.' },
+            ]}
+          />
+        </div>
+      </div>
+
       <div className="mx-auto w-[600px] border border-[#8f8f8f] bg-[#efefef] shadow-[0_8px_24px_rgba(0,0,0,0.2)]">
         <div className="flex items-center justify-between border-b border-[#b8b8b8] bg-[#f4f4f4] px-3 py-1 text-[#5a5a5a]">
           <span>Produktion</span>

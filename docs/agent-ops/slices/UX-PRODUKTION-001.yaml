@@ -1,7 +1,7 @@
 id: UX-PRODUKTION-001
 title: Produktionsauftrag und Dokumentdruck mit UX-Exzellenzbaukasten
 owner: Codex
-status: reserviert
+status: abgeschlossen
 created: 2026-05-15
 goal: >
   Produktionsarbeitsflaechen fuer Mischfutter-Auftrag und Produktionsdokument-
@@ -24,5 +24,9 @@ checks:
   - node scripts/docs-governance-check.cjs
   - node scripts/docs-markdown-check.cjs docs/project-context/ux-excellence-operating-standard-2026-05-13.md docs/agent-ops/active-workboard.md docs/agent-ops/slices/UX-PRODUKTION-001.yaml
   - git diff --check
+done:
+  - Mischfutter-Produktion um Rollenfokus, Materialplan, Managemententscheidung, Next Action und Produktionsnachweis erweitert.
+  - Produktionsdokument-Druck um Rollenfokus, Dokumentplan, Druckentscheidung, Next Action und Drucknachweis erweitert.
+  - CRUD-/Workflow-Abdeckung fuer Auftrag, Rezeptur, Menge, Material, Druck, Vorschau und Nachweis sichtbar gemacht.
 risks:
   - Produktion hat bisher nur schmale sichtbare Frontend-Flaechen; weitere Produktionsdetails bleiben Folgeslices.
