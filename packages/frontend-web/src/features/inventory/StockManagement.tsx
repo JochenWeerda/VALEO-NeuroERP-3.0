@@ -8,6 +8,14 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { NativeSelect } from '@/components/ui/native-select';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Plus, Search, Edit, ArrowUpDown } from 'lucide-react';
+import {
+  CrudCapabilityChecklist,
+  EvidenceTemplateLink,
+  ManagementDecisionPanel,
+  NextActionPanel,
+  OperationalTaskPlan,
+  RoleFocusBar,
+} from '@/components/workflow';
 
 interface Article {
   id: string;
@@ -34,12 +42,21 @@ interface StockMovementForm {
   reference_number?: string;
   notes?: string;
 }
+type StockRole = 'lager' | 'disposition' | 'einkauf' | 'finance';
+
+const stockRoles = [
+  { id: 'lager', label: 'Lager', description: 'Prueft Bestand, Verfuegbarkeit und Bewegungen im Tagesgeschaeft.' },
+  { id: 'disposition', label: 'Disposition', description: 'Klaert Reservierungen, Engpaesse und Auslagerungsfaehigkeit.' },
+  { id: 'einkauf', label: 'Einkauf', description: 'Sieht Mindestbestand und Nachschubbedarf.' },
+  { id: 'finance', label: 'Finance', description: 'Achtet auf Bewertungs- und Bewegungsnachweise.' },
+] satisfies Array<{ id: StockRole; label: string; description: string }>;
 
 export function StockManagement() {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [movementDialogOpen, setMovementDialogOpen] = useState(false);
   const [selectedArticle, setSelectedArticle] = useState<Article | null>(null);
+  const [roleFocus, setRoleFocus] = useState<StockRole>('lager');
   const queryClient = useQueryClient();
 
   // Fetch articles
@@ -92,6 +109,15 @@ export function StockManagement() {
     { value: 'all', label: 'All Categories' },
     ...categories.map((category) => ({ value: category, label: category })),
   ];
+  const outOfStockCount = filteredArticles.filter((article) => article.current_stock <= 0).length;
+  const lowStockCount = filteredArticles.filter((article) => article.min_stock && article.current_stock < article.min_stock).length;
+  const reservedCount = filteredArticles.filter((article) => article.reserved_stock > 0).length;
+  const hasStockStopper = outOfStockCount > 0 || lowStockCount > 0;
+  const nextStockAction = hasStockStopper
+    ? 'Artikel mit Fehlbestand oder Mindestbestand zuerst pruefen und Bewegung oder Nachschub anstossen.'
+    : reservedCount > 0
+      ? 'Reservierte Artikel gegen verfuegbaren Bestand pruefen.'
+      : 'Bestand ist arbeitsfaehig; naechste Bewegung bei Bedarf erfassen.';
 
   const getStockStatus = (article: Article) => {
     if (article.current_stock <= 0) return { status: 'out_of_stock', color: 'destructive' };
@@ -107,6 +133,50 @@ export function StockManagement() {
           <Plus className="mr-2 h-4 w-4" />
           New Article
         </Button>
+      </div>
+
+      <RoleFocusBar roles={stockRoles} value={roleFocus} onChange={setRoleFocus} visibleCount={filteredArticles.length} totalCount={articles?.length ?? 0} title="Wer arbeitet am Bestand?" />
+
+      <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_360px]">
+        <ManagementDecisionPanel
+          decision={{
+            allowed: !hasStockStopper && filteredArticles.length > 0,
+            allowedLabel: 'Bestand arbeitsfaehig',
+            blockedLabel: 'Bestand pruefen',
+            summary: hasStockStopper
+              ? `${outOfStockCount} Artikel ohne Bestand und ${lowStockCount} Artikel unter Mindestbestand brauchen Klaerung.`
+              : `${filteredArticles.length} Artikel sind in der aktuellen Sicht arbeitsfaehig.`,
+            blockerCount: outOfStockCount + lowStockCount,
+            nextFocus: nextStockAction,
+            template: { label: 'Bestandsbewegungs- und Korrekturprotokoll', href: '/docs/lager/bestandsbewegung.md' },
+          }}
+        />
+        <div className="space-y-4">
+          <NextActionPanel action={nextStockAction} tone={hasStockStopper ? 'amber' : 'emerald'} />
+          <EvidenceTemplateLink link={{ label: 'Bestandsnachweis ablegen', href: '/docs/lager/bestandsnachweis.md' }} />
+        </div>
+      </div>
+
+      <div className="grid gap-4 lg:grid-cols-2">
+        <OperationalTaskPlan
+          title="Bestandsplan"
+          items={[
+            { label: 'Artikel laden', done: Boolean(articles?.length), hint: `${articles?.length ?? 0} Artikel geladen.` },
+            { label: 'Fehlbestand klaeren', done: outOfStockCount === 0, hint: outOfStockCount > 0 ? `${outOfStockCount} Artikel ohne Bestand.` : 'Kein Fehlbestand in der Sicht.' },
+            { label: 'Mindestbestand pruefen', done: lowStockCount === 0, hint: lowStockCount > 0 ? `${lowStockCount} Artikel unter Mindestbestand.` : 'Mindestbestaende sind unauffaellig.' },
+            { label: 'Reservierungen pruefen', done: reservedCount === 0, hint: reservedCount > 0 ? `${reservedCount} Artikel mit Reservierung.` : 'Keine Reservierung in der Sicht.' },
+          ]}
+        />
+        <CrudCapabilityChecklist
+          capabilities={[
+            { key: 'create', label: 'Artikel anlegen', available: true, hint: 'Schaltflaeche fuer neue Artikel ist vorhanden.' },
+            { key: 'read', label: 'Bestand lesen', available: true, hint: 'Bestand, verfuegbar, reserviert und Mindestbestand sind sichtbar.' },
+            { key: 'update', label: 'Bewegung buchen', available: true, hint: 'Bestandsbewegung kann je Artikel gestartet werden.' },
+            { key: 'delete', label: 'Artikel loeschen', available: false, hint: 'Kein Direktloeschen in dieser Arbeitsflaeche.' },
+            { key: 'evidence', label: 'Nachweis', available: true, hint: 'Bestandsnachweis ist verlinkt.' },
+            { key: 'audit', label: 'Bewegungsverlauf', available: false, hint: 'Eigene Bewegungstimeline ist hier noch nicht sichtbar.' },
+          ]}
+        />
       </div>
 
       {/* Filters */}
