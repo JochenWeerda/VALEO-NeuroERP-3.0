@@ -43,6 +43,9 @@ from app.routers.contracts_router import get_contract as get_contract_via_router
 from app.core.exceptions import ConflictError, EntityNotFoundError, ValidationFailedError
 from app.services.einkauf_compat_service import EinkaufCompatService
 from app.services.pos_compat_service import PosCompatService
+from app.services.inventory_compat_service import InventoryCompatService, FutterCompatService
+from app.services.annahme_service import AnnahmeService
+from app.services.portal_compat_service import PortalCompatService
 
 router = APIRouter(tags=["compat"])
 
@@ -750,124 +753,74 @@ class FutterBulkDeleteOut(BaseModel):
 
 
 @router.get("/futter/einzelfuttermittel", response_model=list)
-async def futter_einzel(db: Session = Depends(get_db)) -> list[dict[str, Any]]:
-    items = db.query(ArticleModel).filter(ArticleModel.is_active == True).limit(500).all()  # noqa: E712
-    return [
-        {
-            "id": i.id,
-            "name": i.name,
-            "artikelnummer": i.article_number,
-            "kategorie": i.category,
-            "protein": float((getattr(i, "custom_properties", None) or {}).get("protein", 0)),
-            "energie": float((getattr(i, "custom_properties", None) or {}).get("energie", 0)),
-            "preis": float(i.sales_price or 0),
-            "einheit": i.unit,
-        }
-        for i in items
-    ]
+async def futter_einzel(
+    tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
+) -> list[dict[str, Any]]:
+    return FutterCompatService(db, tenant_id).list_einzelfuttermittel()
 
 
 @router.get("/futter/mischfuttermittel", response_model=list)
-async def futter_misch(db: Session = Depends(get_db)) -> list[dict[str, Any]]:
-    items = db.query(ArticleModel).filter(ArticleModel.is_active == True).limit(200).all()  # noqa: E712
-    return [
-        {
-            "id": i.id,
-            "name": i.name,
-            "artikelnummer": i.article_number,
-            "komponenten": int((getattr(i, "custom_properties", None) or {}).get("komponenten", 0)),
-            "preis": float(i.sales_price or 0),
-            "einheit": i.unit,
-        }
-        for i in items
-    ]
+async def futter_misch(
+    tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
+) -> list[dict[str, Any]]:
+    return FutterCompatService(db, tenant_id).list_mischfuttermittel()
 
 
 @router.delete("/futter/einzelfuttermittel/{item_id}", status_code=204, response_class=Response)
 async def delete_futter_einzel_item(
-    item_id: str,
-    db: Session = Depends(get_db),
-    tenant_id: str = Depends(get_tenant_id),
+    item_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
 ) -> Response:
-    result = _soft_delete_futter_articles(db, ids=[item_id], tenant_id=tenant_id)
-    if result.deleted == 0:
+    result = FutterCompatService(db, tenant_id).soft_delete_artikel([item_id], tenant_id)
+    if result["deleted"] == 0:
         raise HTTPException(status_code=404, detail="Einzelfuttermittel nicht gefunden")
     return Response(status_code=204)
 
 
 @router.post("/futter/einzelfuttermittel/bulk-delete", response_model=FutterBulkDeleteOut)
 async def bulk_delete_futter_einzel(
-    payload: FutterBulkDeleteIn,
-    db: Session = Depends(get_db),
-    tenant_id: str = Depends(get_tenant_id),
+    payload: FutterBulkDeleteIn, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
 ) -> FutterBulkDeleteOut:
-    return _soft_delete_futter_articles(db, ids=payload.ids, tenant_id=tenant_id)
+    result = FutterCompatService(db, tenant_id).soft_delete_artikel(payload.ids, tenant_id)
+    return FutterBulkDeleteOut(**result)
 
 
 @router.delete("/futter/mischfuttermittel/{item_id}", status_code=204, response_class=Response)
 async def delete_futter_misch_item(
-    item_id: str,
-    db: Session = Depends(get_db),
-    tenant_id: str = Depends(get_tenant_id),
+    item_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
 ) -> Response:
-    result = _soft_delete_futter_articles(db, ids=[item_id], tenant_id=tenant_id)
-    if result.deleted == 0:
+    result = FutterCompatService(db, tenant_id).soft_delete_artikel([item_id], tenant_id)
+    if result["deleted"] == 0:
         raise HTTPException(status_code=404, detail="Mischfuttermittel nicht gefunden")
     return Response(status_code=204)
 
 
 @router.post("/futter/mischfuttermittel/bulk-delete", response_model=FutterBulkDeleteOut)
 async def bulk_delete_futter_misch(
-    payload: FutterBulkDeleteIn,
-    db: Session = Depends(get_db),
-    tenant_id: str = Depends(get_tenant_id),
+    payload: FutterBulkDeleteIn, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
 ) -> FutterBulkDeleteOut:
-    return _soft_delete_futter_articles(db, ids=payload.ids, tenant_id=tenant_id)
+    result = FutterCompatService(db, tenant_id).soft_delete_artikel(payload.ids, tenant_id)
+    return FutterBulkDeleteOut(**result)
 
 
 @router.get("/futter/chargen", response_model=list)
-async def futter_chargen(db: Session = Depends(get_db)) -> list[dict[str, Any]]:
-    lots = db.query(Charge).order_by(Charge.eingang.desc()).limit(500).all()
-    return [
-        {
-            "id": line_item.id,
-            "chargen_id": line_item.chargen_id,
-            "artikel": line_item.artikel,
-            "menge": float(line_item.menge or 0),
-            "status": line_item.status,
-            "eingang": line_item.eingang.isoformat() if line_item.eingang else None,
-        }
-        for line_item in lots
-    ]
+async def futter_chargen(
+    tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
+) -> list[dict[str, Any]]:
+    return FutterCompatService(db, tenant_id).list_chargen()
 
 
 @router.get("/futter/qualitaetskontrolle", response_model=list)
-async def futter_qc(db: Session = Depends(get_db)) -> list[dict[str, Any]]:
-    lots = db.query(Charge).order_by(Charge.updated_at.desc()).limit(500).all()
-    return [
-        {
-            "id": line_item.id,
-            "charge": line_item.chargen_id,
-            "artikel": line_item.artikel,
-            "qualitaetsstatus": line_item.qualitaetsstatus,
-            "freigabe_datum": line_item.freigabe_datum.isoformat() if line_item.freigabe_datum else None,
-            "status": line_item.status,
-        }
-        for line_item in lots
-    ]
+async def futter_qc(
+    tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
+) -> list[dict[str, Any]]:
+    return FutterCompatService(db, tenant_id).list_qualitaetskontrolle()
 
 
 @router.get("/futter/statistik", response_model=dict)
-async def futter_stats(db: Session = Depends(get_db)) -> dict:
-    lots = db.query(Charge).all()
-    total_menge = sum(float(line_item.menge or 0) for line_item in lots)
-    return {
-        "gesamtChargen": len(lots),
-        "gesamtMenge": round(total_menge, 3),
-        "freigegeben": sum(1 for line_item in lots if line_item.status == "freigegeben"),
-        "inPruefung": sum(1 for line_item in lots if line_item.status == "in-pruefung"),
-        "gesperrt": sum(1 for line_item in lots if line_item.status == "gesperrt"),
-    }
+async def futter_stats(
+    tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
+) -> dict:
+    return FutterCompatService(db, tenant_id).get_statistik()
 
 
 class NaehrwertKomponente(BaseModel):
@@ -1552,241 +1505,119 @@ async def import_debitoren_csv(
 
 
 @router.post("/futter/import/einzelfuttermittel", response_model=dict)
-async def import_einzelfuttermittel_csv(file: UploadFile = File(...), db: Session = Depends(get_db)) -> dict:
-    """CSV-Import für Einzelfuttermittel."""
+async def import_einzelfuttermittel_csv(
+    file: UploadFile = File(...), tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
+) -> dict:
     content = await file.read()
     rows = _parse_csv_bytes(content)
-    created = 0
-    errors: list[str] = []
+    # DQ validation before delegating
+    validated, errors = [], []
     for i, row in enumerate(rows):
         norm = {k.lower().strip(): v.strip() for k, v in row.items() if v}
         dq_error = _validate_csv_article_row(norm)
         if dq_error:
             errors.append(f"{_csv_error_prefix(i+2)} {dq_error}")
-            continue
-        name = norm.get("name", norm.get("artikel", norm.get("bezeichnung", "")))
-        try:
-            import uuid as _uuid
-            db.execute(
-                text("""INSERT INTO domain_inventory.articles (id, name, article_number, unit, is_active, created_at)
-                        VALUES (:id, :name, :artnr, 'kg', true, NOW())
-                        ON CONFLICT DO NOTHING"""),
-                {"id": str(_uuid.uuid4()), "name": name, "artnr": norm.get("artikelnummer", norm.get("artnr", ""))}
-            )
-            created += 1
-        except Exception as e:
-            errors.append(f"Zeile {i+2}: {str(e)[:80]}")
-    try:
-        db.commit()
-    except Exception as e:
-        db.rollback()
-        return {"created": 0, "updated": 0, "errors": [str(e)]}
-    return {"created": created, "updated": 0, "errors": errors}
+        else:
+            validated.append(norm)
+    result = FutterCompatService(db, tenant_id).import_einzelfuttermittel_sql(validated)
+    result["errors"] = errors + result.get("errors", [])
+    return result
 
 
 @router.post("/futter/import/mischfuttermittel", response_model=dict)
-async def import_mischfuttermittel_csv(file: UploadFile = File(...), db: Session = Depends(get_db)) -> dict:
-    """CSV-Import für Mischfuttermittel (gleiche Tabelle wie Einzelfuttermittel)."""
+async def import_mischfuttermittel_csv(
+    file: UploadFile = File(...), tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
+) -> dict:
     content = await file.read()
     rows = _parse_csv_bytes(content)
-    created = 0
-    errors: list[str] = []
+    validated, errors = [], []
     for i, row in enumerate(rows):
         norm = {k.lower().strip(): v.strip() for k, v in row.items() if v}
         dq_error = _validate_csv_article_row(norm)
         if dq_error:
             errors.append(f"{_csv_error_prefix(i+2)} {dq_error}")
-            continue
-        name = norm.get("name", norm.get("bezeichnung", ""))
-        try:
-            import uuid as _uuid
-            props = {k: v for k, v in norm.items() if k in ("tierart", "lebensphase", "typ", "futtergruppe")}
-            db.execute(
-                text("""INSERT INTO domain_inventory.articles
-                        (id, name, article_number, unit, is_active, custom_properties, created_at)
-                        VALUES (:id, :name, :artnr, 'kg', true, :props::jsonb, NOW())
-                        ON CONFLICT DO NOTHING"""),
-                {"id": str(_uuid.uuid4()), "name": name,
-                 "artnr": norm.get("artikelnummer", ""),
-                 "props": json.dumps(props)}
-            )
-            created += 1
-        except Exception as e:
-            errors.append(f"Zeile {i+2}: {str(e)[:80]}")
-    try:
-        db.commit()
-    except Exception as e:
-        db.rollback()
-        return {"created": 0, "updated": 0, "errors": [str(e)]}
-    return {"created": created, "updated": 0, "errors": errors}
+        else:
+            validated.append(norm)
+    result = FutterCompatService(db, tenant_id).import_mischfuttermittel_sql(validated)
+    result["errors"] = errors + result.get("errors", [])
+    return result
 
 
 @router.post("/futter/import/chargen", response_model=dict)
-async def import_chargen_csv(file: UploadFile = File(...), db: Session = Depends(get_db)) -> dict:
-    """CSV-Import für Futtermittel-Chargen."""
+async def import_chargen_csv(
+    file: UploadFile = File(...), tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
+) -> dict:
     content = await file.read()
     rows = _parse_csv_bytes(content)
-    created = 0
-    errors: list[str] = []
-    for i, row in enumerate(rows):
-        norm = {k.lower().strip(): v.strip() for k, v in row.items() if v}
-        artikel = norm.get("artikel", norm.get("name", ""))
-        if not artikel:
-            errors.append(f"Zeile {i+2}: Artikel fehlt")
-            continue
-        try:
-            import uuid as _uuid
-            db.execute(
-                text("""INSERT INTO domain_ops.ops_chargen
-                        (id, chargen_id, artikel, menge, status, qualitaetsstatus, eingang, created_at)
-                        VALUES (:id, :cid, :artikel, :menge, 'eingang', 'offen', NOW(), NOW())
-                        ON CONFLICT DO NOTHING"""),
-                {"id": str(_uuid.uuid4()),
-                 "cid": norm.get("chargen_id", norm.get("charge", str(_uuid.uuid4())[:8].upper())),
-                 "artikel": artikel,
-                 "menge": float(norm.get("menge", 0) or 0)}
-            )
-            created += 1
-        except Exception as e:
-            errors.append(f"Zeile {i+2}: {str(e)[:80]}")
-    try:
-        db.commit()
-    except Exception as e:
-        db.rollback()
-        return {"created": 0, "updated": 0, "errors": [str(e)]}
-    return {"created": created, "updated": 0, "errors": errors}
+    return FutterCompatService(db, tenant_id).import_chargen_sql(rows)
 
 
 # Inventory extra endpoints -------------------------------------------------
 
 
 @router.get("/inventory/inventur", response_model=dict)
-async def inventory_inventur(db: Session = Depends(get_db)) -> dict:
-    items = db.query(InventoryCount).order_by(InventoryCount.created_at.desc()).limit(500).all()
-    return {
-        "items": [
-            {
-                "id": i.id,
-                "lager": i.warehouse_id,
-                "status": i.status,
-                "expected": int(i.total_items or 0),
-                "counted": int(i.total_items or 0),
-                "differenz": int(i.discrepancies_found or 0),
-            }
-            for i in items
-        ],
-        "total": len(items),
-    }
+async def inventory_inventur(
+    tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
+) -> dict:
+    return InventoryCompatService(db, tenant_id).list_inventur_counts()
 
 
 @router.post("/inventory/inventur/complete", response_model=dict)
-async def inventory_inventur_complete(payload: dict[str, list[str]], db: Session = Depends(get_db)) -> dict:
-    ids = payload.get("ids", [])
-    if not ids:
-        return {"ok": True, "updated": 0}
-    updated = (
-        db.query(InventoryCount)
-        .filter(InventoryCount.id.in_(ids))
-        .update({InventoryCount.status: "completed"}, synchronize_session=False)
-    )
-    db.commit()
-    return {"ok": True, "updated": int(updated)}
+async def inventory_inventur_complete(
+    payload: dict[str, list[str]], tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
+) -> dict:
+    return InventoryCompatService(db, tenant_id).complete_inventur_counts(payload.get("ids", []))
 
 
 @router.delete("/inventory/inventur/{item_id}", status_code=204)
-async def inventory_inventur_stornieren(item_id: str, db: Session = Depends(get_db)):
-    """Einzelnen Inventur-Eintrag stornieren/entfernen."""
-    row = db.query(InventoryCount).filter(InventoryCount.id == item_id).first()
-    if not row:
-        raise HTTPException(404, "Inventur-Eintrag nicht gefunden")
-    db.delete(row)
-    db.commit()
+async def inventory_inventur_stornieren(
+    item_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
+):
+    try:
+        InventoryCompatService(db, tenant_id).delete_inventur_count(item_id)
+    except EntityNotFoundError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
     return None
 
 
 @router.get("/inventory/mhd-warnings", response_model=dict)
-async def inventory_mhd(db: Session = Depends(get_db)) -> dict:
-    items = db.query(Charge).order_by(Charge.eingang.asc()).limit(200).all()
-    return {
-        "items": [
-            {
-                "id": c.id,
-                "article": c.artikel,
-                "batch": c.chargen_id,
-                "bestBefore": c.freigabe_datum.isoformat()[:10] if c.freigabe_datum else None,
-                "stock": float(c.menge or 0),
-            }
-            for c in items
-        ]
-    }
+async def inventory_mhd(
+    tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
+) -> dict:
+    return InventoryCompatService(db, tenant_id).get_mhd_warnings()
 
 
 @router.get("/inventory/top-sellers", response_model=dict)
-async def inventory_top_sellers(db: Session = Depends(get_db)) -> dict:
-    items = db.query(ArticleModel).filter(ArticleModel.is_active == True).order_by(ArticleModel.sales_price.desc()).limit(50).all()  # noqa: E712
-    return {
-        "items": [
-            {"articleId": a.id, "article": a.name, "value": float(a.sales_price or 0), "unit": a.unit}
-            for a in items
-        ]
-    }
+async def inventory_top_sellers(
+    tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
+) -> dict:
+    return InventoryCompatService(db, tenant_id).get_top_sellers()
 
 
 @router.get("/inventory/slow-movers", response_model=dict)
-async def inventory_slow_movers(db: Session = Depends(get_db)) -> dict:
-    items = db.query(ArticleModel).filter(ArticleModel.is_active == True).order_by(ArticleModel.sales_price.asc()).limit(50).all()  # noqa: E712
-    return {
-        "items": [
-            {"articleId": a.id, "article": a.name, "value": float(a.sales_price or 0), "unit": a.unit}
-            for a in items
-        ]
-    }
+async def inventory_slow_movers(
+    tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
+) -> dict:
+    return InventoryCompatService(db, tenant_id).get_slow_movers()
 
 
 @router.get("/inventory/lots", response_model=dict)
-async def inventory_lots(search: Optional[str] = Query(None), db: Session = Depends(get_db)) -> dict:
-    query = db.query(Charge)
-    if search:
-        like = f"%{search}%"
-        query = query.filter((Charge.chargen_id.ilike(like)) | (Charge.artikel.ilike(like)))
-    items = query.order_by(Charge.eingang.desc()).limit(200).all()
-    return {
-        "items": [
-            {
-                "id": c.id,
-                "lotId": c.chargen_id,
-                "article": c.artikel,
-                "articleId": c.artikel_id,
-                "quantity": float(c.menge or 0),
-                "location": c.lagerort,
-                "status": c.status,
-            }
-            for c in items
-        ],
-        "total": len(items),
-    }
+async def inventory_lots(
+    search: Optional[str] = Query(None),
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+) -> dict:
+    return InventoryCompatService(db, tenant_id).list_lots(search=search)
 
 
 @router.get("/inventory/lots/{lot_id}", response_model=dict)
-async def inventory_lot_trace(lot_id: str, db: Session = Depends(get_db)) -> dict:
-    lot = db.query(Charge).filter((Charge.id == lot_id) | (Charge.chargen_id == lot_id)).first()
-    if not lot:
-        raise HTTPException(status_code=404, detail="Lot not found")
-    return {
-        "id": lot.id,
-        "lotId": lot.chargen_id,
-        "article": lot.artikel,
-        "articleId": lot.artikel_id,
-        "quantity": float(lot.menge or 0),
-        "location": lot.lagerort,
-        "status": lot.status,
-        "qualityStatus": lot.qualitaetsstatus,
-        "origin": lot.herkunft,
-        "events": [
-            {"type": "eingang", "date": lot.eingang.isoformat() if lot.eingang else None, "note": "Wareneingang erfasst"},
-            {"type": "update", "date": lot.updated_at.isoformat() if lot.updated_at else None, "note": "Letzte Aktualisierung"},
-        ],
-    }
+async def inventory_lot_trace(
+    lot_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
+) -> dict:
+    try:
+        return InventoryCompatService(db, tenant_id).get_lot(lot_id)
+    except EntityNotFoundError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
 
 
 def _lkw_db_to_item(row: LkwAnnahmeQueue, position: int) -> dict:
@@ -1889,39 +1720,19 @@ def _repair_lkw_article_reference(
 
 @router.get("/annahme/warteschlange", response_model=dict)
 async def annahme_warteschlange(
-    tenant_id: str = Depends(get_tenant_id),
-    db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
 ) -> dict:
-    """Liste aller LKW in der Annahme-Warteschlange (aus DB, Gap 002)."""
-    try:
-        rows = (
-            db.query(LkwAnnahmeQueue)
-            .filter(LkwAnnahmeQueue.tenant_id == tenant_id)
-            .order_by(LkwAnnahmeQueue.ankunftszeit.asc())
-            .all()
-        )
-    except Exception:
-        return {"items": [], "total": 0}
-    items = [_lkw_db_to_item(r, position=i + 1) for i, r in enumerate(rows)]
-    return {"items": items, "total": len(items)}
+    return AnnahmeService(db, tenant_id).list_lkw_db()
 
 
 @router.get("/annahme/warteschlange/{reg_id}", response_model=dict)
 async def annahme_warteschlange_get(
-    reg_id: str,
-    tenant_id: str = Depends(get_tenant_id),
-    db: Session = Depends(get_db),
+    reg_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
 ) -> dict:
-    """Einzelnen LKW-Eintrag für Qualitäts-Check o.ä. abrufen."""
-    row = (
-        db.query(LkwAnnahmeQueue)
-        .filter(LkwAnnahmeQueue.id == reg_id, LkwAnnahmeQueue.tenant_id == tenant_id)
-        .first()
-    )
-    if not row:
-        raise HTTPException(status_code=404, detail="LKW-Eintrag nicht gefunden")
-    item = _lkw_db_to_item(row, position=0)
-    return item
+    try:
+        return AnnahmeService(db, tenant_id).get_lkw_db(reg_id)
+    except EntityNotFoundError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
 
 
 class AnnahmeStatusUpdate(BaseModel):
@@ -1936,60 +1747,22 @@ async def annahme_warteschlange_patch(
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ) -> dict:
-    """Status eines LKW-Eintrags aktualisieren (z.B. In Bearbeitung, Abgeschlossen)."""
-    if body.status is None and body.klaerung is None:
-        raise HTTPException(status_code=400, detail="status oder klaerung muss angegeben werden")
-    if body.status is not None and body.status not in ("in-bearbeitung", "abgeschlossen", "gesperrt"):
-        raise HTTPException(status_code=400, detail="status muss 'in-bearbeitung', 'abgeschlossen' oder 'gesperrt' sein")
-    row = (
-        db.query(LkwAnnahmeQueue)
-        .filter(LkwAnnahmeQueue.id == reg_id, LkwAnnahmeQueue.tenant_id == tenant_id)
-        .first()
-    )
-    if not row:
-        raise HTTPException(status_code=404, detail="LKW-Eintrag nicht gefunden")
-    if body.status is not None:
-        row.status = body.status
-    if body.klaerung is not None:
-        existing = row.klaerung or {}
-        if not isinstance(existing, dict):
-            existing = {}
-        existing.update(body.klaerung)
-        existing.setdefault("updated_at", datetime.utcnow().isoformat())
-        row.klaerung = existing
-    db.commit()
-    db.refresh(row)
-    return _lkw_db_to_item(row, position=0)
+    try:
+        return AnnahmeService(db, tenant_id).patch_lkw_db(reg_id, body.status, body.klaerung)
+    except EntityNotFoundError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+    except ValidationFailedError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
 
 
 @router.post("/annahme/warteschlange/{reg_id}/repair-article", response_model=dict)
 async def annahme_warteschlange_repair_article(
-    reg_id: str,
-    tenant_id: str = Depends(get_tenant_id),
-    db: Session = Depends(get_db),
+    reg_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
 ) -> dict:
-    """Konservativer Repair fuer Queue-Eintraege ohne article_id."""
-    row = (
-        db.query(LkwAnnahmeQueue)
-        .filter(LkwAnnahmeQueue.id == reg_id, LkwAnnahmeQueue.tenant_id == tenant_id)
-        .first()
-    )
-    if not row:
-        raise HTTPException(status_code=404, detail="LKW-Eintrag nicht gefunden")
-    if row.article_id:
-        return {"status": "already_set", "article_id": row.article_id, "artikel": row.artikel}
-
-    article_id, artikel_label, reason = _repair_lkw_article_reference(
-        db, tenant_id=tenant_id, artikel=row.artikel
-    )
-    if not article_id or not artikel_label:
-        return {"status": "not_resolved", "reason": reason}
-
-    row.article_id = article_id
-    row.artikel = artikel_label
-    db.commit()
-    db.refresh(row)
-    return {"status": "updated", "article_id": article_id, "artikel": artikel_label}
+    try:
+        return AnnahmeService(db, tenant_id).repair_article_db(reg_id)
+    except EntityNotFoundError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
 
 
 class LKWRegistrierungIn(BaseModel):
@@ -2050,46 +1823,8 @@ async def create_lkw_registrierung(
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ) -> LKWRegistrierungOut:
-    """LKW in Annahme-Warteschlange eintragen; erscheint in GET /annahme/warteschlange (DB, Gap 002)."""
-    reg_id = uuid7()
-    ankunft_dt = None
-    if payload.ankunftszeit:
-        try:
-            normalized = payload.ankunftszeit.replace("Z", "+00:00")[:19]
-            ankunft_dt = datetime.fromisoformat(normalized)
-            if ankunft_dt.tzinfo is None:
-                ankunft_dt = ankunft_dt.replace(tzinfo=timezone.utc)
-        except Exception:
-            pass
-    resolved_article_id, resolved_artikel = _resolve_lkw_article_reference(
-        db,
-        tenant_id=tenant_id,
-        article_id=payload.article_id,
-        artikel=payload.artikel,
-    )
-    row = LkwAnnahmeQueue(
-        id=reg_id,
-        tenant_id=tenant_id,
-        kennzeichen=payload.kennzeichen,
-        lieferant=payload.lieferant,
-        lieferschein_nr=payload.lieferschein_nr or "",
-        article_id=resolved_article_id,
-        artikel=resolved_artikel,
-        ankunftszeit=ankunft_dt,
-        prioritaet=payload.prioritaet,
-        status="wartend",
-        attachment_ids=payload.attachment_ids or [],
-    )
-    db.add(row)
-    db.commit()
-    db.refresh(row)
-    return LKWRegistrierungOut(
-        id=reg_id,
-        kennzeichen=payload.kennzeichen,
-        article_id=resolved_article_id,
-        artikel=resolved_artikel,
-        status="wartend",
-    )
+    result = AnnahmeService(db, tenant_id).register_lkw_db(payload)
+    return LKWRegistrierungOut(**result)
 
 
 @router.post("/annahme/warteschlange", response_model=LKWRegistrierungOut, status_code=201, tags=["annahme"])
@@ -2098,196 +1833,69 @@ async def create_lkw_warteschlange_alias(
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ) -> LKWRegistrierungOut:
-    """Rueckwaertskompatibler Alias fuer QR-/Mobile-Pfade, die direkt auf die Warteschlange posten."""
-    return await create_lkw_registrierung(payload=payload, tenant_id=tenant_id, db=db)
+    result = AnnahmeService(db, tenant_id).register_lkw_db(payload)
+    return LKWRegistrierungOut(**result)
 
 
 # Portal compatibility ------------------------------------------------------
 
 
 @router.get("/portal/dashboard", response_model=dict)
-async def portal_dashboard(db: Session = Depends(get_db)) -> dict:
-    orders = _list_docs(db, "sales_order", limit=20)
-    invoices = _list_docs(db, "sales_invoice", limit=20)
-    try:
-        docs = db.query(Dokument).order_by(Dokument.hochgeladen_am.desc()).limit(5).all()
-    except Exception:
-        docs = []
-
-    offene_rechnungen = sum(1 for i in invoices if str(i.get("status", "")).lower() in {"offen", "ueberfaellig"})
-
-    return {
-        "kpis": [
-            {"label": "Bestellungen", "value": str(len(orders))},
-            {"label": "Rechnungen offen", "value": str(offene_rechnungen)},
-            {"label": "Dokumente", "value": str(len(docs))},
-        ],
-        "letzteBestellungen": [
-            {
-                "id": o.get("id") or o.get("number"),
-                "nummer": o.get("number") or o.get("id"),
-                "datum": o.get("date"),
-                "betrag": float(o.get("totalGross") or 0),
-                "status": str(o.get("status") or "offen").lower(),
-            }
-            for o in orders[:5]
-        ],
-        "neueDokumente": [
-            {
-                "id": d.id,
-                "name": d.name,
-                "datum": d.hochgeladen_am.isoformat()[:10] if d.hochgeladen_am else None,
-                "typ": d.typ,
-            }
-            for d in docs
-        ],
-    }
+async def portal_dashboard(
+    tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
+) -> dict:
+    return PortalCompatService(db, tenant_id).get_portal_dashboard_full()
 
 
 @router.get("/portal/anfragen", response_model=list)
-async def portal_anfragen(db: Session = Depends(get_db)) -> list[dict[str, Any]]:
-    docs = _list_docs(db, "customer_inquiry", limit=500)
-    return [
-        {
-            "id": d.get("id") or d.get("number"),
-            "nummer": d.get("number"),
-            "betreff": d.get("subject") or d.get("topic") or "Anfrage",
-            "datum": d.get("date"),
-            "status": str(d.get("status") or "offen").lower(),
-        }
-        for d in docs
-    ]
+async def portal_anfragen(
+    tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
+) -> list[dict[str, Any]]:
+    return PortalCompatService(db, tenant_id).list_portal_anfragen()
 
 
 @router.get("/portal/bestellungen", response_model=list)
-async def portal_bestellungen(db: Session = Depends(get_db)) -> list[dict[str, Any]]:
-    docs = _list_docs(db, "sales_order", limit=500)
-    return [
-        {
-            "id": d.get("id") or d.get("number"),
-            "nummer": d.get("number"),
-            "datum": d.get("date"),
-            "artikel": (d.get("lines") or [{}])[0].get("article") if d.get("lines") else "",
-            "menge": sum(float(line.get("qty") or 0) for line in (d.get("lines") or [])),
-            "betrag": float(d.get("totalGross") or 0),
-            "status": str(d.get("status") or "bestellt").lower(),
-        }
-        for d in docs
-    ]
+async def portal_bestellungen(
+    tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
+) -> list[dict[str, Any]]:
+    return PortalCompatService(db, tenant_id).list_portal_bestellungen()
 
 
 @router.get("/portal/dokumente", response_model=list)
-async def portal_dokumente(db: Session = Depends(get_db)) -> list[dict[str, Any]]:
-    try:
-        docs = db.query(Dokument).order_by(Dokument.hochgeladen_am.desc()).limit(500).all()
-    except Exception:
-        docs = []
-    return [
-        {
-            "id": d.id,
-            "name": d.name,
-            "kategorie": d.kategorie,
-            "datum": d.hochgeladen_am.isoformat()[:10] if d.hochgeladen_am else None,
-            "groesse": int(d.groesse or 0),
-            "typ": d.typ,
-        }
-        for d in docs
-    ]
+async def portal_dokumente(
+    tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
+) -> list[dict[str, Any]]:
+    return PortalCompatService(db, tenant_id).list_portal_dokumente()
 
 
 @router.get("/portal/feldbuch", response_model=list)
 async def portal_feldbuch(
     customer_id: Optional[str] = Query(None),
-    db: Session = Depends(get_db),
     tenant_id: Optional[str] = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
 ) -> list[dict[str, Any]]:
-    """
-    Backward-compat endpoint: gibt Feldbuch-Schläge aus der echten DB zurück.
-    Neue Clients nutzen /portal/feldbuch/schlaege und /portal/feldbuch/massnahmen.
-    """
-    from app.infrastructure.models.agrar_models import FeldbuchSchlag
-
-    q = db.query(FeldbuchSchlag)
-    if tenant_id:
-        q = q.filter(FeldbuchSchlag.tenant_id == tenant_id)
-    if customer_id:
-        q = q.filter(FeldbuchSchlag.customer_id == customer_id)
-    schlaege = q.order_by(FeldbuchSchlag.name).all()
-
-    if schlaege:
-        return [
-            {
-                "id": s.id,
-                "schlag": s.name,
-                "kultur": s.kultur or "",
-                "flaeche": s.flaeche,
-                "letzteMassnahme": None,
-                "naechsteMassnahme": None,
-            }
-            for s in schlaege
-        ]
-
-    # Fallback auf alten Stub wenn noch keine echten Daten vorhanden
-    deliveries = _list_docs(db, "sales_delivery", limit=1000)
-    return [
-        {
-            "id": d.get("number") or d.get("id"),
-            "schlag": d.get("fieldName") or "Schlag unbekannt",
-            "kultur": d.get("crop") or "",
-            "flaeche": float(d.get("areaHa") or 0),
-            "letzteMassnahme": d.get("date"),
-            "naechsteMassnahme": None,
-        }
-        for d in deliveries
-    ]
+    return PortalCompatService(db, tenant_id or "").list_portal_feldbuch(customer_id=customer_id)
 
 
 @router.get("/portal/naehrstoffbilanzen", response_model=list)
-async def portal_naehrstoffbilanzen(db: Session = Depends(get_db)) -> list[dict[str, Any]]:
-    deliveries = _list_docs(db, "sales_delivery", limit=2000)
-    return [
-        {
-            "id": d.get("number") or d.get("id"),
-            "schlag": d.get("fieldName") or "Gesamt",
-            "kultur": d.get("crop") or "",
-            "n_saldo": float(d.get("totalNutrientNKg") or 0),
-            "p_saldo": float(d.get("totalNutrientP2o5Kg") or 0),
-            "k_saldo": float(d.get("totalNutrientKKg") or 0),
-            "bewertung": "ok" if float(d.get("totalNutrientNKg") or 0) <= 170 else "warnung",
-        }
-        for d in deliveries
-    ]
+async def portal_naehrstoffbilanzen(
+    tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
+) -> list[dict[str, Any]]:
+    return PortalCompatService(db, tenant_id).list_portal_naehrstoffbilanzen()
 
 
 @router.get("/portal/rechnungen", response_model=list)
-async def portal_rechnungen(db: Session = Depends(get_db)) -> list[dict[str, Any]]:
-    invoices = _list_docs(db, "sales_invoice", limit=500)
-    return [
-        {
-            "id": i.get("id") or i.get("number"),
-            "nummer": i.get("number"),
-            "datum": i.get("date"),
-            "betrag": float(i.get("totalGross") or 0),
-            "status": str(i.get("status") or "offen").lower(),
-        }
-        for i in invoices
-    ]
+async def portal_rechnungen(
+    tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
+) -> list[dict[str, Any]]:
+    return PortalCompatService(db, tenant_id).list_portal_rechnungen()
 
 
 @router.get("/portal/shop", response_model=list)
-async def portal_shop(db: Session = Depends(get_db)) -> list[dict[str, Any]]:
-    articles = db.query(ArticleModel).filter(ArticleModel.is_active == True).order_by(ArticleModel.name.asc()).limit(500).all()  # noqa: E712
-    return [
-        {
-            "id": a.id,
-            "name": a.name,
-            "kategorie": a.category or "sonstiges",
-            "preis": float(a.sales_price or 0),
-            "einheit": a.unit,
-            "verfuegbar": float(a.available_stock or 0) > 0,
-        }
-        for a in articles
-    ]
+async def portal_shop(
+    tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
+) -> list[dict[str, Any]]:
+    return PortalCompatService(db, tenant_id).list_portal_shop()
 
 
 @router.get("/portal/products", response_model=dict)
@@ -2299,50 +1907,9 @@ async def portal_products(
     tenant_id: Optional[str] = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ) -> dict[str, Any]:
-    """
-    Produktliste für den Portal-Shop.
-    Gibt {items: [...], total: N} mit Kontrakt-Fallback zurück.
-    """
-    q = db.query(ArticleModel).filter(ArticleModel.is_active == True)  # noqa: E712
-    if kategorie and kategorie != "alle":
-        q = q.filter(ArticleModel.category == kategorie)
-    if search:
-        q = q.filter(ArticleModel.name.ilike(f"%{search}%"))
-    total = q.count()
-    articles = q.order_by(ArticleModel.name.asc()).offset(skip).limit(limit).all()
-    items = [
-        {
-            "id": str(a.id),
-            "artikelnummer": str(getattr(a, "article_number", a.id)),
-            "name": a.name,
-            "kategorie": a.category or "sonstiges",
-            "beschreibung": getattr(a, "description", None) or "",
-            "einheit": a.unit or "Stk",
-            "preis": float(a.sales_price or 0),
-            "rabattPreis": None,
-            "verfuegbar": float(a.available_stock or 0) > 0,
-            "bestand": float(a.available_stock or 0),
-            "zertifikate": [],
-            "letzteBestellung": None,
-            "contractStatus": "NONE",
-            "contractPrice": None,
-            "contractRemainingQty": None,
-            "contractTotalQty": None,
-            "isPrePurchase": False,
-            "prePurchasePrice": None,
-            "prePurchaseTotalQty": None,
-            "prePurchaseRemainingQty": None,
-        }
-        for a in articles
-    ]
-    return {
-        "items": items,
-        "total": total,
-        "page": skip // limit if limit else 0,
-        "size": limit,
-        "has_contracts": 0,
-        "has_pre_purchases": 0,
-    }
+    return PortalCompatService(db, tenant_id or "").list_portal_products(
+        kategorie=kategorie, search=search, skip=skip, limit=limit
+    )
 
 
 @router.get("/portal/orders", response_model=dict)
@@ -2353,41 +1920,19 @@ async def portal_orders(
     tenant_id: Optional[str] = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ) -> dict[str, Any]:
-    """Portal-Bestellhistorie. Gibt OrderListItem[] zurück (portal-service.ts)."""
-    orders = _list_docs(db, "sales_order", limit=limit, tenant_id=tenant_id)
-    if status_filter:
-        orders = [o for o in orders if o.get("status") == status_filter]
-    items = [
-        {
-            "id": o.get("id", ""),
-            "order_number": o.get("number") or o.get("order_number", ""),
-            "order_date": (o.get("created_at", "")[:10] if o.get("created_at") else
-                           o.get("datum", "")[:10] if o.get("datum") else ""),
-            "status": o.get("status", "SUBMITTED"),
-            "item_count": len(o.get("positions") or o.get("items") or []),
-            "total_net": float(o.get("total_net") or o.get("total_amount") or o.get("totalAmount") or 0),
-            "main_article": (
-                (o.get("positions") or o.get("items") or [{}])[0].get("bezeichnung") or
-                (o.get("positions") or o.get("items") or [{}])[0].get("name") or ""
-            ) if (o.get("positions") or o.get("items")) else "",
-        }
-        for o in orders
-    ]
-    return {"items": items, "total": len(items)}
+    return PortalCompatService(db, tenant_id or "").list_sales_orders(
+        skip=skip, limit=limit, status_filter=status_filter
+    )
 
 
 @router.get("/portal/orders/{order_id}", response_model=dict)
 async def portal_order_detail(
-    order_id: str,
-    tenant_id: Optional[str] = Depends(get_tenant_id),
-    db: Session = Depends(get_db),
+    order_id: str, tenant_id: Optional[str] = Depends(get_tenant_id), db: Session = Depends(get_db)
 ) -> dict[str, Any]:
-    """Detail einer Portal-Bestellung."""
-    orders = _list_docs(db, "sales_order", limit=1000, tenant_id=tenant_id)
-    for o in orders:
-        if str(o.get("id")) == order_id:
-            return o
-    raise HTTPException(status_code=404, detail="Bestellung nicht gefunden")
+    try:
+        return PortalCompatService(db, tenant_id or "").get_sales_order(order_id)
+    except EntityNotFoundError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
 
 
 @router.post("/portal/orders", response_model=dict)
@@ -2396,113 +1941,37 @@ async def portal_create_order(
     tenant_id: Optional[str] = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ) -> dict[str, Any]:
-    """Neue Bestellung aus dem Portal anlegen."""
-    import uuid as _uuid
-    order_id = str(_uuid.uuid4())
-    order = {
-        "id": order_id,
-        "number": f"PA-{order_id[:8].upper()}",
-        "status": "SUBMITTED",
-        "created_at": _now_iso(),
-        "tenant_id": tenant_id,
-        **body,
-    }
-    save_to_store("sales_order", order_id, order, _doc_repo(db))
+    result = PortalCompatService(db, tenant_id or "").create_sales_order(body)
     db.commit()
-    return order
+    return result
 
 
 @router.get("/portal/contracts", response_model=list)
 async def portal_contracts(
-    tenant_id: Optional[str] = Depends(get_tenant_id),
-    db: Session = Depends(get_db),
+    tenant_id: Optional[str] = Depends(get_tenant_id), db: Session = Depends(get_db)
 ) -> list[dict[str, Any]]:
-    """Aktive Verträge/Kontingente des Kunden (Contract[] für portal-service.ts)."""
-    try:
-        contracts = _list_docs(db, "kontrakt", limit=200, tenant_id=tenant_id)
-    except Exception:
-        contracts = []
-    return [
-        {
-            "id": c.get("id", ""),
-            "contract_number": c.get("nummer") or c.get("contract_number", ""),
-            "article_name": c.get("artikel_name") or c.get("article_name", ""),
-            "article_number": c.get("artikel_nummer") or c.get("article_number", ""),
-            "contract_price": float(c.get("preis") or c.get("contract_price") or 0),
-            "list_price": float(c.get("listenpreis") or c.get("list_price") or 0),
-            "unit": c.get("einheit") or c.get("unit", "kg"),
-            "total_quantity": float(c.get("gesamtmenge") or c.get("total_quantity") or 0),
-            "remaining_quantity": float(c.get("verbleibende_menge") or c.get("remaining_quantity") or 0),
-            "status": c.get("status", "ACTIVE"),
-            "valid_until": c.get("laufzeit_bis") or c.get("valid_until", ""),
-        }
-        for c in contracts
-    ]
+    return PortalCompatService(db, tenant_id or "").list_portal_contracts()
 
 
 @router.get("/portal/pre-purchases", response_model=list)
 async def portal_pre_purchases(
-    tenant_id: Optional[str] = Depends(get_tenant_id),
-    db: Session = Depends(get_db),
+    tenant_id: Optional[str] = Depends(get_tenant_id), db: Session = Depends(get_db)
 ) -> list[dict[str, Any]]:
-    """Vorkäufe des Kunden (PrePurchase[] für portal-service.ts)."""
-    try:
-        pps = _list_docs(db, "vorkauf", limit=200, tenant_id=tenant_id)
-    except Exception:
-        pps = []
-    return [
-        {
-            "id": p.get("id", ""),
-            "pre_purchase_number": p.get("nummer") or p.get("pre_purchase_number", ""),
-            "article_name": p.get("artikel_name") or p.get("article_name", ""),
-            "article_number": p.get("artikel_nummer") or p.get("article_number", ""),
-            "pre_purchase_price": float(p.get("preis") or p.get("pre_purchase_price") or 0),
-            "current_list_price": float(p.get("listenpreis") or p.get("current_list_price") or 0),
-            "unit": p.get("einheit") or p.get("unit", "kg"),
-            "total_quantity": float(p.get("gesamtmenge") or p.get("total_quantity") or 0),
-            "remaining_quantity": float(p.get("verbleibende_menge") or p.get("remaining_quantity") or 0),
-            "payment_date": p.get("zahldatum") or p.get("payment_date", ""),
-            "valid_until": p.get("laufzeit_bis") or p.get("valid_until"),
-        }
-        for p in pps
-    ]
+    return PortalCompatService(db, tenant_id or "").list_portal_pre_purchases()
 
 
 @router.get("/portal/vertraege", response_model=list)
-async def portal_vertraege(db: Session = Depends(get_db)) -> list[dict[str, Any]]:
-    try:
-        items = db.query(Rahmenvertrag).order_by(Rahmenvertrag.laufzeit_bis.desc()).limit(500).all()
-    except Exception:
-        items = []
-    return [
-        {
-            "id": i.id,
-            "nummer": i.nummer,
-            "typ": i.typ,
-            "partner": i.partner,
-            "laufzeitBis": i.laufzeit_bis.date().isoformat() if i.laufzeit_bis else None,
-            "status": i.status,
-        }
-        for i in items
-    ]
+async def portal_vertraege(
+    tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
+) -> list[dict[str, Any]]:
+    return PortalCompatService(db, tenant_id).list_portal_vertraege()
 
 
 @router.get("/portal/zertifikate", response_model=list)
-async def portal_zertifikate(db: Session = Depends(get_db)) -> list[dict[str, Any]]:
-    try:
-        items = db.query(ZertifikatEintrag).order_by(ZertifikatEintrag.gueltig_bis.desc()).limit(500).all()
-    except Exception:
-        items = []
-    return [
-        {
-            "id": i.id,
-            "art": i.art,
-            "nummer": i.nummer,
-            "gueltigBis": i.gueltig_bis.date().isoformat() if i.gueltig_bis else None,
-            "status": i.status,
-        }
-        for i in items
-    ]
+async def portal_zertifikate(
+    tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
+) -> list[dict[str, Any]]:
+    return PortalCompatService(db, tenant_id).list_portal_zertifikate()
 
 
 # Procurement Nice-to-Have --------------------------------------------------
