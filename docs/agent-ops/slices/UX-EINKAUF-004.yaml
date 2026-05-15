@@ -1,0 +1,24 @@
+id: UX-EINKAUF-004
+title: Lieferantenstamm mit UX-Exzellenzbaukasten
+owner: Codex
+status: reserviert
+created: 2026-05-15
+goal: >
+  Lieferantenstamm als vierte Einkaufs-Arbeitsflaeche auf den
+  UX-Exzellenzbaukasten ziehen: Rollenfokus, Lieferanten-Onboardingplan,
+  Managemententscheidung, Next Action, Nachweislink und
+  CRUD-/Compliance-Abdeckung.
+file_ownership:
+  - docs/agent-ops/active-workboard.md
+  - docs/agent-ops/slices/UX-EINKAUF-004.yaml
+  - packages/frontend-web/src/pages/einkauf/lieferanten-stamm.tsx
+  - docs/project-context/ux-excellence-operating-standard-2026-05-13.md
+acceptance_criteria:
+  - Lieferantenstamm zeigt Rollenfokus fuer Einkauf, QS, Finance, Compliance und Leitung.
+  - Aufgabenplan fuehrt Stammdaten, Bank/Zahlung, QS-/Dokumentnachweise und Sperr-/Archivstatus.
+  - Managemententscheidung zeigt einkaufsbereit/blockiert.
+  - CRUD-/Nachweis-Abdeckung ist sichtbar.
+  - Typecheck und Doku-Checks sind gruen.
+checks: []
+risks:
+  - Detaildialoge fuer Ansprechpartner, Bankkonten, Klassifikationen und Dokumente bleiben bestehend; dieser Slice setzt den Leitbereich oberhalb der Stammdatenmaske.
