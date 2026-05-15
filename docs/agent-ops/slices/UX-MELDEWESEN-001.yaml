@@ -1,0 +1,28 @@
+id: UX-MELDEWESEN-001
+title: Meldewesen-Konsole mit UX-Exzellenzbaukasten
+owner: Codex
+status: reserviert
+created: 2026-05-15
+goal: >
+  Meldewesen-Konsole mit Meldefrist, Artefaktstatus, Owner, naechster
+  Einreichungsaktion, Nachweisfuehrung und CRUD-/Workflow-Klarheit nach UX-Standard fuehren.
+file_ownership:
+  - docs/agent-ops/active-workboard.md
+  - docs/agent-ops/slices/UX-MELDEWESEN-001.yaml
+  - packages/frontend-web/src/pages/compliance/meldewesen-konsole.tsx
+  - docs/project-context/ux-excellence-operating-standard-2026-05-13.md
+acceptance_criteria:
+  - Meldewesen-Konsole zeigt Rollenfokus, Meldeplan, Managemententscheidung, Next Action und Nachweislink.
+  - CRUD-/Workflow-Abdeckung fuer Connectoren, Reporting Units, Zeitplaene, Jobs, Import/Export und Artefakte ist sichtbar.
+  - Bestehende Connector-, Unit-, Schedule-, Job-, Import-/Export- und Artefaktfunktionen bleiben erhalten.
+  - Typecheck und Doku-Checks sind gruen.
+checks:
+  - pnpm --filter @valero-neuroerp/frontend-web type-check
+  - python scripts/agent_workboard_supervisor.py validate
+  - node scripts/docs-governance-check.cjs
+  - node scripts/docs-markdown-check.cjs docs/project-context/ux-excellence-operating-standard-2026-05-13.md docs/agent-ops/active-workboard.md docs/agent-ops/slices/UX-MELDEWESEN-001.yaml
+  - git diff --check
+done:
+  - Slice reserviert; Umsetzung folgt.
+risks:
+  - Echte externe Meldestellen-Quittungen bleiben umgebungsabhaengig; dieser Slice verbessert die UI-Steuerung der vorhandenen Jobs und Artefakte.
