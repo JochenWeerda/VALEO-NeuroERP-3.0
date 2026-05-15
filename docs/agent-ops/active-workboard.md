@@ -534,12 +534,12 @@ Stand: `2026-05-12`
 
 **Von:** Codex
 **Owner:** Codex
-**Stand:** reserviert 2026-05-15
+**Stand:** abgeschlossen 2026-05-15
 **Ziel des Slices:** Portal-/Self-Service-Dokumente mit Rollenfokus, klarer Nutzeraufgabe, Nachweisstatus, naechster Aktion und CRUD-/Workflow-Abdeckung fuehren.
 **Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/agent-ops/slices/UX-PORTAL-001.yaml`, `packages/frontend-web/src/pages/portal/dokumente.tsx`, `docs/project-context/ux-excellence-operating-standard-2026-05-13.md`
 **Abnahmekriterien:** Portal-Dokumente zeigen Rollenfokus, Nachweisplan, Managemententscheidung, Next Action, Vorlage-/Nachweislink und CRUD-/Workflow-Abdeckung; bestehende KPI-Karten, Compliance-Spur, Suche, Filter, Tabs und Download bleiben erhalten.
-**Erledigt:** Reserviert; Umsetzung folgt.
-**Checks:** offen
+**Erledigt:** `portal/dokumente.tsx` nutzt den UX-Baukasten fuer Rollenfokus, Nachweisplan, Managemententscheidung, Next Action, Vorlage-/Nachweislink und CRUD-/Workflow-Abdeckung. Bestehende KPI-Karten, Compliance-Spur, Suche, Filter, Tabs und Download bleiben erhalten.
+**Checks:** `pnpm --filter @valero-neuroerp/frontend-web type-check`; `python scripts/agent_workboard_supervisor.py validate`; `node scripts/docs-governance-check.cjs`; `node scripts/docs-markdown-check.cjs docs/project-context/ux-excellence-operating-standard-2026-05-13.md docs/agent-ops/active-workboard.md docs/agent-ops/slices/UX-PORTAL-001.yaml`; `git diff --check`
 **Offene Risiken:** Dieser Slice fokussiert die Portal-Dokumentenseite; weitere Portal-Self-Service-Seiten bleiben Folgeslices.
 
 ## TODO-SPRINT-001
