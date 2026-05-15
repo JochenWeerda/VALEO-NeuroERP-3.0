@@ -21,6 +21,7 @@ from app.core.exceptions import ConflictError, EntityNotFoundError, ValidationFa
 from app.core.tenant import get_tenant_id
 from app.services.agrar_settlement_service import AgrarSettlementService
 from app.services.agrar_drying_rule_service import DryingRuleService
+from app.services.finance_transaction_service import FinanceTransactionService
 from app.documents.router_helpers import get_repository, get_from_store, list_from_store, save_to_store
 from app.infrastructure.models import AgrarSettlement, AgrarSettlementDeduction
 from app.domains.inventory.api.inventory_auth import require_inventory_admin
@@ -789,45 +790,30 @@ async def post_settlement_to_fibu(
     net = _round_money(settlement.net_amount_eur)
 
     lines = [
-        {
-            "line_number": 1,
-            "account_id": payload.debit_account,
-            "debit_amount": float(gross),
-            "credit_amount": 0.0,
-            "description": f"Agrar settlement {settlement.settlement_number} gross",
-        },
-        {
-            "line_number": 2,
-            "account_id": payload.credit_account_supplier,
-            "debit_amount": 0.0,
-            "credit_amount": float(net),
-            "description": f"Supplier payable {settlement.supplier_id}",
-        },
+        {"account_id": payload.debit_account, "debit_amount": float(gross), "credit_amount": 0.0,
+         "description": f"Agrar settlement {settlement.settlement_number} gross"},
+        {"account_id": payload.credit_account_supplier, "debit_amount": 0.0, "credit_amount": float(net),
+         "description": f"Supplier payable {settlement.supplier_id}"},
     ]
     if deductions > 0:
-        lines.append({
-            "line_number": 3,
-            "account_id": payload.credit_account_deductions,
-            "debit_amount": 0.0,
-            "credit_amount": float(deductions),
-            "description": "Settlement deductions",
-        })
+        lines.append({"account_id": payload.credit_account_deductions, "debit_amount": 0.0,
+                      "credit_amount": float(deductions), "description": "Settlement deductions"})
 
-    journal_entry = {
-        "id": journal_ref,
-        "tenant_id": tenant_id,
-        "entry_number": journal_ref,
-        "entry_date": posting_date.isoformat(),
-        "posting_date": posting_date.isoformat(),
-        "description": f"Agrar settlement {settlement.settlement_number}",
-        "source": "agrar_settlement",
-        "source_id": settlement.id,
-        "status": "posted",
-        "total_debit": float(gross),
-        "total_credit": float(net + deductions),
-        "lines": lines,
-    }
-    save_to_store("journal_entry", journal_ref, journal_entry, get_repository(db))
+    fin = FinanceTransactionService(db, tenant_id)
+    try:
+        je = fin.create(
+            entry_number=journal_ref,
+            description=f"Agrar settlement {settlement.settlement_number}",
+            entry_date=posting_date.date() if isinstance(posting_date, datetime) else posting_date,
+            lines=lines,
+            reference=settlement.settlement_number,
+            source="agrar_settlement",
+            document_type="agrar_settlement",
+            period=posting_date.strftime("%Y-%m") if isinstance(posting_date, datetime) else str(posting_date)[:7],
+        )
+        journal_ref = str(je.entry_number)
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=f"FIBU-Buchung fehlgeschlagen: {exc}") from exc
 
     try:
         settlement = _svc(db, tenant_id).post_to_fibu(settlement_id, journal_ref, posting_date)
