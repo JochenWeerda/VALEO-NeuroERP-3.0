@@ -9,6 +9,15 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { FileDown, Search, Truck } from 'lucide-react'
 import { getEntityTypeLabel, getListTitle, getStatusLabel } from '@/features/crud/utils/i18n-helpers'
 import { useLieferungen, type Lieferung, type LieferungStatus } from '@/lib/api/sales'
+import {
+  CrudCapabilityChecklist,
+  EvidenceTemplateLink,
+  ManagementDecisionPanel,
+  NextActionPanel,
+  OperationalTaskPlan,
+  RoleFocusBar,
+  type UxTaskItem,
+} from '@/components/workflow'
 
 const statusVariantMap: Record<LieferungStatus, 'default' | 'outline' | 'secondary' | 'destructive'> = {
   geplant: 'default',
@@ -16,6 +25,17 @@ const statusVariantMap: Record<LieferungStatus, 'default' | 'outline' | 'seconda
   zugestellt: 'outline',
   storniert: 'destructive',
 }
+
+type DeliveryListRoleFocus = 'all' | 'shipping' | 'sales' | 'logistics' | 'billing' | 'management'
+
+const deliveryListRoleProfiles: Array<{ id: DeliveryListRoleFocus; label: string; description: string }> = [
+  { id: 'all', label: 'Alle Rollen', description: 'Zeigt Lieferungen fuer Versand, Vertrieb, Logistik, Faktura und Leitung.' },
+  { id: 'shipping', label: 'Versand', description: 'Fokus auf geplante und unterwegs befindliche Lieferungen.' },
+  { id: 'sales', label: 'Vertrieb', description: 'Fokus auf Kunde, Auftragsbezug und Lieferstatus.' },
+  { id: 'logistics', label: 'Logistik', description: 'Fokus auf Tour-/Auslieferdruck und Zustellung.' },
+  { id: 'billing', label: 'Faktura', description: 'Fokus auf zugestellte Lieferungen und Rechnungsfolge.' },
+  { id: 'management', label: 'Leitung', description: 'Fokus auf Stopper, offene Lieferungen und naechste Aktion.' },
+]
 
 export default function LieferungenListePage(): JSX.Element {
   const { t } = useTranslation()
@@ -25,6 +45,7 @@ export default function LieferungenListePage(): JSX.Element {
   const pageTitle = getListTitle(t, entityTypeLabel)
   const [searchTerm, setSearchTerm] = useState('')
   const [statusFilter, setStatusFilter] = useState<LieferungStatus | 'alle'>('alle')
+  const [roleFocus, setRoleFocus] = useState<DeliveryListRoleFocus>('all')
 
   const { data: lieferungen = [] } = useLieferungen()
 
@@ -36,6 +57,34 @@ export default function LieferungenListePage(): JSX.Element {
     const matchesStatus = statusFilter === 'alle' || lieferung.status === statusFilter
     return matchesSearch && matchesStatus
   })
+  const plannedCount = filteredLieferungen.filter((lieferung) => lieferung.status === 'geplant').length
+  const transitCount = filteredLieferungen.filter((lieferung) => lieferung.status === 'unterwegs').length
+  const deliveredCount = filteredLieferungen.filter((lieferung) => lieferung.status === 'zugestellt').length
+  const cancelledCount = filteredLieferungen.filter((lieferung) => lieferung.status === 'storniert').length
+  const deliveryListReady = filteredLieferungen.length > 0 && cancelledCount === 0
+  const deliveryListNextAction = transitCount > 0
+    ? 'Lieferungen unterwegs nachhalten und Zustellung bestaetigen.'
+    : plannedCount > 0
+      ? 'Geplante Lieferungen disponieren oder starten.'
+      : deliveredCount > 0
+        ? 'Zugestellte Lieferungen fuer Faktura pruefen.'
+        : filteredLieferungen.length === 0
+          ? 'Filter anpassen oder neuen Lieferschein anlegen.'
+          : 'Stornierte Lieferungen pruefen.'
+  const deliveryListTaskItems: UxTaskItem[] = [
+    { label: 'Lieferbestand pruefen', done: filteredLieferungen.length > 0, hint: `${filteredLieferungen.length} Lieferungen in der aktuellen Sicht.` },
+    { label: 'Versand priorisieren', done: plannedCount === 0, hint: plannedCount > 0 ? `${plannedCount} Lieferungen sind geplant.` : 'Keine geplante Lieferung in der Sicht.' },
+    { label: 'Zustellung nachhalten', done: transitCount === 0, hint: transitCount > 0 ? `${transitCount} Lieferungen sind unterwegs.` : 'Keine Lieferung unterwegs.' },
+    { label: 'Faktura vorbereiten', done: deliveredCount > 0, hint: deliveredCount > 0 ? `${deliveredCount} Lieferungen sind zugestellt.` : 'Noch keine zugestellte Lieferung fuer Faktura.' },
+  ]
+  const deliveryListCrudCapabilities = [
+    { key: 'create', label: 'Anlegen', available: true, hint: 'Neue Lieferung kann aus der Liste angelegt werden.' },
+    { key: 'read', label: 'Lesen', available: true, hint: 'Liefernummer, Datum, Kunde, Auftrag, Menge und Status sind sichtbar.' },
+    { key: 'update', label: 'Bearbeiten', available: filteredLieferungen.length > 0, hint: 'Lieferungen koennen im Editor geoeffnet werden.' },
+    { key: 'filter', label: 'Suchen/Filtern', available: true, hint: 'Suche und Statusfilter grenzen die Liste ein.' },
+    { key: 'export', label: 'Export/Nachweis', available: filteredLieferungen.length > 0, hint: 'Exportaktion ist vorbereitet; Nachweis basiert auf Liefernummer und Auftragsbezug.' },
+    { key: 'audit', label: 'Pruefspur', available: true, hint: 'Status, Auftrag, Kunde und Lieferung bilden die operative Pruefspur.' },
+  ]
 
   const columns = [
     {
@@ -95,6 +144,29 @@ export default function LieferungenListePage(): JSX.Element {
           <Truck className="h-4 w-4" />
           {t('crud.actions.new')} {entityTypeLabel}
         </Button>
+      </div>
+
+      <div className="space-y-4">
+        <RoleFocusBar roles={deliveryListRoleProfiles} value={roleFocus} onChange={setRoleFocus} visibleCount={roleFocus === 'all' ? 5 : 1} totalCount={5} />
+        <ManagementDecisionPanel
+          decision={{
+            allowed: deliveryListReady,
+            allowedLabel: 'Liefersteuerung arbeitsfaehig',
+            blockedLabel: 'Klaerungsbedarf',
+            summary: deliveryListReady ? `${filteredLieferungen.length} Lieferungen sichtbar, ${transitCount} unterwegs, ${deliveredCount} zugestellt.` : `Vor der Lieferentscheidung ist noch etwas offen: ${deliveryListNextAction}`,
+            blockerCount: [filteredLieferungen.length === 0, cancelledCount > 0].filter(Boolean).length,
+            nextFocus: deliveryListNextAction,
+            template: { label: 'Rechnungsliste oeffnen', href: '/sales/rechnungen' },
+          }}
+        />
+        <div className="grid gap-4 lg:grid-cols-[1.35fr_1fr]">
+          <OperationalTaskPlan title="Liefer-Prioritaetsplan" items={deliveryListTaskItems} />
+          <div className="space-y-3">
+            <NextActionPanel action={deliveryListNextAction} tone={deliveryListReady ? 'emerald' : transitCount > 0 || plannedCount > 0 ? 'amber' : 'blue'} />
+            <EvidenceTemplateLink link={{ label: 'Auftragsliste pruefen', href: '/sales/auftraege' }} />
+          </div>
+        </div>
+        <CrudCapabilityChecklist capabilities={deliveryListCrudCapabilities} />
       </div>
 
       <Card>

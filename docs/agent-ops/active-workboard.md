@@ -414,10 +414,12 @@ Stand: `2026-05-12`
 
 **Von:** Codex
 **Owner:** Codex
-**Stand:** reserviert 2026-05-15
+**Stand:** abgeschlossen 2026-05-15
 **Ziel des Slices:** Verkaufsdashboard, Rechnungs- und Lieferlisten auf den UX-Exzellenzbaukasten ziehen: Rollenfokus, Prioritaetsplan, Managemententscheidung, Next Action und CRUD-/Nachweis-Abdeckung.
 **Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/agent-ops/slices/UX-SALES-006.yaml`, `packages/frontend-web/src/pages/dashboard/sales-dashboard.tsx`, `packages/frontend-web/src/pages/sales/rechnungen-liste.tsx`, `packages/frontend-web/src/pages/sales/lieferungen-liste.tsx`, `docs/project-context/ux-excellence-operating-standard-2026-05-13.md`
 **Abnahmekriterien:** Dashboard, Rechnungs- und Lieferlisten zeigen Rollenfokus fuer Vertrieb, Faktura, Logistik, Finance und Leitung; Prioritaetsplan fuehrt Umsatz, offene Rechnungen, Lieferstatus und Nachweis; Managemententscheidung zeigt arbeitsfaehig/blockiert; CRUD-/Nachweis-Abdeckung ist sichtbar; Typecheck und Doku-Checks sind gruen.
+**Erledigt:** `dashboard/sales-dashboard.tsx`, `sales/rechnungen-liste.tsx` und `sales/lieferungen-liste.tsx` nutzen den UX-Baukasten fuer Rollenfokus, Prioritaetsplan, Managemententscheidung, Next Action und CRUD-/Nachweis-Abdeckung. Bestehende KPI-Karten, Top-Kunden, OperationalCaseHeader, Filter, Import, Export, Druck, Tabellen und Editor-Navigation bleiben erhalten. UX-Standard markiert `UX-SALES-006` als abgeschlossen.
+**Checks:** `pnpm --filter @valero-neuroerp/frontend-web type-check`; `python scripts/agent_workboard_supervisor.py validate`; `node scripts/docs-governance-check.cjs`; `node scripts/docs-markdown-check.cjs docs/project-context/ux-excellence-operating-standard-2026-05-13.md docs/agent-ops/active-workboard.md docs/agent-ops/slices/UX-SALES-006.yaml`; `git diff --check`
 **Offene Risiken:** Auftrags- und Angebotslisten sind bereits in frueheren Sales-Slices abgedeckt; dieser Slice fokussiert Dashboard, Rechnungen und Lieferungen.
 
 ## TODO-SPRINT-001
