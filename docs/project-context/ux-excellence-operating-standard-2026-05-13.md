@@ -113,6 +113,7 @@ Eine Seite gilt erst als UX-ready, wenn sie mindestens diese Punkte erfuellt:
 | `UX-EINKAUF-002` | Einkauf | abgeschlossen | Bestellungen nutzen Rollenfokus, Bestell-Follow-up-Plan, Managemententscheidung, Next Action und CRUD-/Liefer-Abdeckung. |
 | `UX-EINKAUF-003` | Einkauf | abgeschlossen | Wareneingang nutzt Rollenfokus, Eingangspruefplan, Managemententscheidung, Next Action und CRUD-/Nachweis-Abdeckung. |
 | `UX-EINKAUF-004` | Einkauf | abgeschlossen | Lieferantenstamm nutzt Rollenfokus, Lieferanten-Onboardingplan, Managemententscheidung, Next Action, Nachweislink und CRUD-/Compliance-Abdeckung. |
+| `UX-EINKAUF-005` | Einkauf | abgeschlossen | Lieferantenbewertung nutzt Rollenfokus, Bewertungsplan, Eskalationsentscheidung, Next Action und CRUD-/Nachweis-Abdeckung. |
 | `UX-CRM-001` | CRM/Vertrieb | abgeschlossen | Opportunities nutzen Rollenfokus, Follow-up-Plan, Managemententscheidung, Next Action und CRUD-/Pipeline-Abdeckung. |
 | `UX-SALES-001` | Sales/Verkauf | abgeschlossen | Verkaufsauftraege nutzen Rollenfokus, Auftrag-Follow-up-Plan, Managemententscheidung, Next Action und CRUD-/Fulfillment-Abdeckung. |
 | `UX-SALES-002` | Sales/Verkauf | abgeschlossen | Angebote nutzen Rollenfokus, Angebots-Follow-up-Plan, Managemententscheidung, Next Action und CRUD-/Conversion-Abdeckung. |
@@ -124,7 +125,7 @@ Eine Seite gilt erst als UX-ready, wenn sie mindestens diese Punkte erfuellt:
 
 Naechste Rollout-Slices:
 
-- `UX-EINKAUF-005`: Lieferantenbewertung mit Bewertungsplan, Eskalationssicht und Nachweisabdeckung.
+- `UX-EINKAUF-006`: Retouren und Gutschriften/Belastungen mit Freigabeplan, Stoppern und Nachweisabdeckung.
 - `UX-SALES-005`: Gutschriften- und Retourenfolge mit Entscheidungsbild, Freigabeplan und Nachweisabdeckung.
 - `UX-LOGISTIK-004`: Hofliste und Wiegescheinliste mit Stopper-, Prioritaets- und Nachweissicht.
 

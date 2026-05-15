@@ -1,7 +1,7 @@
 id: UX-EINKAUF-005
 title: Lieferantenbewertung mit UX-Exzellenzbaukasten
 owner: Codex
-status: reserviert
+status: abgeschlossen
 created: 2026-05-15
 goal: >
   Lieferantenbewertung auf den UX-Exzellenzbaukasten ziehen: Rollenfokus,
@@ -17,6 +17,16 @@ acceptance_criteria:
   - Managemententscheidung zeigt akzeptabel/klaerungsbeduerftig.
   - CRUD-/Nachweis-Abdeckung ist sichtbar.
   - Typecheck und Doku-Checks sind gruen.
-checks: []
+checks:
+  - pnpm --filter @valero-neuroerp/frontend-web type-check
+  - python scripts/agent_workboard_supervisor.py validate
+  - node scripts/docs-governance-check.cjs
+  - node scripts/docs-markdown-check.cjs docs/project-context/ux-excellence-operating-standard-2026-05-13.md docs/agent-ops/active-workboard.md docs/agent-ops/slices/UX-EINKAUF-005.yaml
+  - git diff --check
+done:
+  - Rollenfokus fuer Einkauf, QS, Finance und Leitung ergaenzt.
+  - Bewertungsplan fuer Datenbasis, Scores, Eskalation und Review ergaenzt.
+  - Managemententscheidung akzeptabel/klaerungsbeduerftig und Next Action sichtbar gemacht.
+  - CRUD-/Nachweis-Abdeckung fuer Lesen, Suche, Score-Anpassung, Review, Nachweis und Pruefspur ergaenzt.
 risks:
   - Score-Historie und Massnahmenworkflow bleiben ausserhalb dieses Slice; dieser Slice setzt die Bedien- und Entscheidungssicht auf die bestehende Bewertungsmatrix.
