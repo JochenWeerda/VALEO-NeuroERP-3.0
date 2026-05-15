@@ -8,8 +8,24 @@ import { Label } from '@/components/ui/label'
 import { CheckCircle, Loader2 } from 'lucide-react'
 import { useMischfutterVerfuegbarkeit, useMischfutterRezepte, useCreateProduktionsauftrag } from '@/lib/api/produktion'
 import { useToast } from '@/hooks/use-toast'
+import {
+  CrudCapabilityChecklist,
+  EvidenceTemplateLink,
+  ManagementDecisionPanel,
+  NextActionPanel,
+  OperationalTaskPlan,
+  RoleFocusBar,
+} from '@/components/workflow'
 
 type KomponentenBedarf = { name: string; bedarf: number; verfuegbar: number }
+type ProductionRole = 'produktion' | 'lager' | 'qs' | 'leitung'
+
+const productionRoles = [
+  { id: 'produktion', label: 'Produktion', description: 'Plant Rezeptur, Menge, Charge und Start des Produktionsauftrags.' },
+  { id: 'lager', label: 'Lager', description: 'Prueft Komponentenverfuegbarkeit und Abbuchung.' },
+  { id: 'qs', label: 'QS', description: 'Achtet auf Charge, Rezeptur und spaeteren Produktionsnachweis.' },
+  { id: 'leitung', label: 'Leitung', description: 'Sieht, ob Auftrag und Material fuer den Start bereit sind.' },
+] satisfies Array<{ id: ProductionRole; label: string; description: string }>
 
 export default function MischfutterProduktionPage(): JSX.Element {
   const navigate = useNavigate()
@@ -22,6 +38,7 @@ export default function MischfutterProduktionPage(): JSX.Element {
   const [rezeptur, setRezeptur] = useState('')
   const [menge, setMenge] = useState(0)
   const [chargenId, setChargenId] = useState('')
+  const [roleFocus, setRoleFocus] = useState<ProductionRole>('produktion')
 
   // Build a map of component name -> available tons from the API
   const verfuegbarkeitMap = useMemo(() => {
@@ -47,6 +64,15 @@ export default function MischfutterProduktionPage(): JSX.Element {
       verfuegbar: verfuegbarkeitMap[k.name] ?? 0,
     }))
   }, [selectedRezept, menge, verfuegbarkeitMap])
+  const missingComponents = komponenten.filter((k) => k.verfuegbar < k.bedarf)
+  const productionReady = Boolean(selectedRezept && menge > 0 && chargenId && komponenten.length > 0 && missingComponents.length === 0)
+  const nextProductionAction = !selectedRezept
+    ? 'Rezeptur auswaehlen.'
+    : menge <= 0
+      ? 'Produktionsmenge eintragen.'
+      : missingComponents.length > 0
+        ? `${missingComponents.length} Komponente(n) fehlen: Bestand klaeren oder Menge anpassen.`
+        : 'Produktionsauftrag erstellen und Chargennachweis sichern.'
 
   function handleRezepturChange(code: string) {
     setRezeptur(code)
@@ -204,7 +230,48 @@ export default function MischfutterProduktionPage(): JSX.Element {
   ]
 
   return (
-    <div className="p-3 md:p-6">
+    <div className="space-y-6 p-3 md:p-6">
+      <RoleFocusBar roles={productionRoles} value={roleFocus} onChange={setRoleFocus} visibleCount={komponenten.length} totalCount={komponenten.length} title="Wer bereitet die Produktion vor?" />
+      <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_360px]">
+        <ManagementDecisionPanel
+          decision={{
+            allowed: productionReady,
+            allowedLabel: 'Produktion startbereit',
+            blockedLabel: 'Vorbereitung offen',
+            summary: productionReady
+              ? `Rezeptur, Menge, Charge und ${komponenten.length} Komponente(n) sind verfuegbar. Der Produktionsauftrag kann erstellt werden.`
+              : 'Vor dem Produktionsstart muessen Rezeptur, Menge, Charge und Komponentenverfuegbarkeit vollstaendig sein.',
+            blockerCount: (selectedRezept ? 0 : 1) + (menge > 0 ? 0 : 1) + missingComponents.length,
+            nextFocus: nextProductionAction,
+            template: { label: 'Produktionsauftrag und Chargennachweis', href: '/docs/produktion/produktionsauftrag-chargennachweis.md' },
+          }}
+        />
+        <div className="space-y-4">
+          <NextActionPanel action={nextProductionAction} tone={productionReady ? 'emerald' : missingComponents.length > 0 ? 'red' : 'amber'} />
+          <EvidenceTemplateLink link={{ label: 'Mischfutter-Produktionsnachweis', href: '/docs/produktion/mischfutter-produktionsnachweis.md' }} />
+        </div>
+      </div>
+      <div className="grid gap-4 lg:grid-cols-2">
+        <OperationalTaskPlan
+          title="Produktionsplan"
+          items={[
+            { label: 'Rezeptur waehlen', done: Boolean(selectedRezept), hint: selectedRezept?.name ?? 'Noch keine Rezeptur gewaehlt.' },
+            { label: 'Menge festlegen', done: menge > 0, hint: menge > 0 ? `${menge} t geplant.` : 'Produktionsmenge fehlt.' },
+            { label: 'Komponenten pruefen', done: komponenten.length > 0 && missingComponents.length === 0, hint: missingComponents.length > 0 ? `${missingComponents.length} Komponente(n) fehlen.` : `${komponenten.length} Komponente(n) geprueft.` },
+            { label: 'Charge sichern', done: Boolean(chargenId), hint: chargenId || 'Chargen-ID entsteht nach Rezeptur und Menge.' },
+          ]}
+        />
+        <CrudCapabilityChecklist
+          capabilities={[
+            { key: 'create', label: 'Produktionsauftrag erstellen', available: true, hint: 'Wizard erstellt den Auftrag am Ende.' },
+            { key: 'read', label: 'Rezeptur und Bestand lesen', available: true, hint: 'Rezepturen und Komponentenverfuegbarkeit sind sichtbar.' },
+            { key: 'update', label: 'Menge anpassen', available: true, hint: 'Menge und Rezeptur koennen vor Abschluss geaendert werden.' },
+            { key: 'approve', label: 'Start freigeben', available: productionReady, hint: 'Freigabe ist fachlich sinnvoll, wenn keine Komponente fehlt.' },
+            { key: 'evidence', label: 'Chargennachweis', available: true, hint: 'Produktionsnachweis ist verlinkt.' },
+            { key: 'audit', label: 'Materialentscheidung', available: true, hint: 'Bedarf gegen Verfuegbarkeit ist je Komponente sichtbar.' },
+          ]}
+        />
+      </div>
       <Wizard
         title="Mischfutter-Produktion"
         steps={steps}
