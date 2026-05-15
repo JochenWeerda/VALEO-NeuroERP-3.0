@@ -1,0 +1,23 @@
+id: UX-SALES-003
+title: Auftragseditor mit UX-Exzellenzbaukasten
+owner: Codex
+status: reserviert
+created: 2026-05-15
+goal: >
+  Auftragseditor als dritte Sales-Arbeitsflaeche auf den UX-Exzellenzbaukasten
+  ziehen: Rollenfokus, Auftrags-Erfassungsplan, Managemententscheidung, Next
+  Action und CRUD-/Folgebeleg-Abdeckung.
+file_ownership:
+  - docs/agent-ops/active-workboard.md
+  - docs/agent-ops/slices/UX-SALES-003.yaml
+  - packages/frontend-web/src/pages/sales/order-editor.tsx
+  - docs/project-context/ux-excellence-operating-standard-2026-05-13.md
+acceptance_criteria:
+  - Auftragseditor zeigt Rollenfokus fuer Vertrieb, Auftragsabwicklung, Logistik, Finance und Leitung.
+  - Aufgabenplan fuehrt Kunde, Positionen, Liefertermin und Folgebeleg.
+  - Managemententscheidung zeigt belegfaehig/blockiert.
+  - CRUD-/Folgebeleg-Abdeckung ist sichtbar.
+  - Typecheck und Doku-Checks sind gruen.
+checks: []
+risks:
+  - Detailtiefe einzelner Dialoge bleibt im bestehenden Editor; dieser Slice setzt den Leitbereich oberhalb der Maske.
