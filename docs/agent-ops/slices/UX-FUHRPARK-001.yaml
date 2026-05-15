@@ -1,0 +1,27 @@
+id: UX-FUHRPARK-001
+title: Fuhrparkstatus und Dokumentnachweise mit UX-Exzellenzbaukasten
+owner: Codex
+status: reserviert
+created: 2026-05-15
+goal: >
+  Fuhrparkseiten fuer Fahrzeugstatus, Dokumente, Fristen, naechste Aktion und
+  Nachweisfuehrung nach UX-Standard fuehren.
+file_ownership:
+  - docs/agent-ops/active-workboard.md
+  - docs/agent-ops/slices/UX-FUHRPARK-001.yaml
+  - packages/frontend-web/src/pages/fuhrpark/fahrzeuge.tsx
+  - packages/frontend-web/src/pages/fuhrpark/ausgehende-belege-dokumente.tsx
+  - docs/project-context/ux-excellence-operating-standard-2026-05-13.md
+acceptance_criteria:
+  - Fahrzeugliste zeigt Rollenfokus, Fristenplan, Managemententscheidung, Next Action und Nachweislink.
+  - Ausgehende Fuhrpark-Dokumente zeigen Rollenfokus, Dokumentplan, Managemententscheidung, Next Action und CRUD-/Nachweis-Abdeckung.
+  - Bestehende Liste, Suche, Export, Quicklinks und Dokument-CRUD bleiben erhalten.
+  - Typecheck und Doku-Checks sind gruen.
+checks:
+  - pnpm --filter @valero-neuroerp/frontend-web type-check
+  - python scripts/agent_workboard_supervisor.py validate
+  - node scripts/docs-governance-check.cjs
+  - node scripts/docs-markdown-check.cjs docs/project-context/ux-excellence-operating-standard-2026-05-13.md docs/agent-ops/active-workboard.md docs/agent-ops/slices/UX-FUHRPARK-001.yaml
+  - git diff --check
+risks:
+  - Fuhrpark-Menues und Detailstammdaten bleiben Folgeslices; dieser Slice fokussiert Status-/Fristen- und Dokumentsteuerung.
