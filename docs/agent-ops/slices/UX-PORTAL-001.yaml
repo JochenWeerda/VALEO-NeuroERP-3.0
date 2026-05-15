@@ -1,7 +1,7 @@
 id: UX-PORTAL-001
 title: Portal-Dokumente mit UX-Exzellenzbaukasten
 owner: Codex
-status: reserviert
+status: abgeschlossen
 created: 2026-05-15
 goal: >
   Portal-/Self-Service-Dokumente mit Rollenfokus, klarer Nutzeraufgabe,
@@ -21,5 +21,9 @@ checks:
   - node scripts/docs-governance-check.cjs
   - node scripts/docs-markdown-check.cjs docs/project-context/ux-excellence-operating-standard-2026-05-13.md docs/agent-ops/active-workboard.md docs/agent-ops/slices/UX-PORTAL-001.yaml
   - git diff --check
+done:
+  - Portal-Dokumente um Rollenfokus, Nachweisplan, Managemententscheidung, Next Action und Nachweislink erweitert.
+  - CRUD-/Workflow-Abdeckung fuer Lesen, Download, Filter, Nachweis, Rueckfrage und Compliance-Spur sichtbar gemacht.
+  - Bestehende KPI-Karten, Compliance-Spur, Suche, Tabs und Download bleiben erhalten.
 risks:
   - Weitere Portal-Self-Service-Seiten bleiben Folgeslices.
