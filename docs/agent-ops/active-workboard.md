@@ -2150,10 +2150,10 @@ Archiv des vorherigen Boards:
 
 **Von:** Codex
 **Owner:** Codex
-**Stand:** reserviert 2026-05-15
+**Stand:** abgeschlossen 2026-05-15
 **Ziel des Slices:** Feldservice-Aufgaben als Agribusiness-Einsatzliste mit Einsatzstatus, Owner, naechster Aktion, Nachweisfuehrung und CRUD-/Workflow-Klarheit nach UX-Standard fuehren.
 **Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/agent-ops/slices/UX-AGRIBUSINESS-001.yaml`, `packages/frontend-web/src/pages/agribusiness/field-service-tasks.tsx`, `docs/project-context/ux-excellence-operating-standard-2026-05-13.md`
 **Abnahmekriterien:** Field-Service-Aufgaben zeigen Rollenfokus, Einsatzplan, Managemententscheidung, Next Action, Nachweislink und CRUD-/Workflow-Abdeckung; bestehende Suche, Copilot, Druck, Neu/Bearbeiten/Abbrechen/Loeschen, Workflow-Hinweis und Audit-Drawer bleiben erhalten.
-**Erledigt:** Reserviert; Umsetzung folgt.
-**Checks:** offen
+**Erledigt:** Field-Service-Aufgabenliste um Rollenfokus, Einsatzplan, Managemententscheidung, Next Action, Nachweislink, Einsatz-KPIs und CRUD-/Workflow-Abdeckung erweitert; bestehende Suche, Copilot, Druck, Neu/Bearbeiten/Abbrechen/Loeschen, Workflow-Hinweis und Audit-Drawer bleiben erhalten.
+**Checks:** `pnpm --filter @valero-neuroerp/frontend-web type-check`; `python scripts/agent_workboard_supervisor.py validate`; `node scripts/docs-governance-check.cjs`; `node scripts/docs-markdown-check.cjs docs/project-context/ux-excellence-operating-standard-2026-05-13.md docs/agent-ops/active-workboard.md docs/agent-ops/slices/UX-AGRIBUSINESS-001.yaml`; `git diff --check`
 **Offene Risiken:** Neue-/Edit-Masken und Farmer-Stamm bleiben Folgeslices; dieser Slice fokussiert die Einsatzliste.
