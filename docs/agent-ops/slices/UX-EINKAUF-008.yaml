@@ -1,0 +1,28 @@
+id: UX-EINKAUF-008
+title: Einkaufs-Ausnahmen fuer EDI und Service Entry Sheets
+owner: Codex
+status: reserviert
+created: 2026-05-15
+goal: >
+  Einkaufs-Ausnahmen fuer EDI/Lieferantenportal und Service Entry Sheets als
+  verstaendliche Arbeitsflaechen mit Stopper-, Prioritaets- und Nachweissicht
+  fuehren.
+file_ownership:
+  - docs/agent-ops/active-workboard.md
+  - docs/agent-ops/slices/UX-EINKAUF-008.yaml
+  - packages/frontend-web/src/pages/einkauf/edi-portal.tsx
+  - packages/frontend-web/src/pages/einkauf/service-entry-sheets.tsx
+  - docs/project-context/ux-excellence-operating-standard-2026-05-13.md
+acceptance_criteria:
+  - EDI-Portal zeigt Rollenfokus, Pruefplan, Stopperentscheidung, naechste Aktion und Nachweisbezug.
+  - Service Entry Sheets zeigen Rollenfokus, Pruefplan, Freigabeentscheidung, naechste Aktion und Nachweisbezug.
+  - Beide Seiten nutzen normale Buero-Sprache und vermeiden interne Abkuerzungen ohne Kontext.
+  - CRUD-/Workflow-Abdeckung ist fuer Anlage, Pruefung, Freigabe, Rueckfrage, Export und Nachweis sichtbar.
+risks:
+  - OCR hat aktuell keine eigene sichtbare Einkaufsseite; der Slice dokumentiert und behandelt die vorhandenen Ausnahmeflaechen.
+checks:
+  - pnpm --filter @valero-neuroerp/frontend-web type-check
+  - python scripts/agent_workboard_supervisor.py validate
+  - node scripts/docs-governance-check.cjs
+  - node scripts/docs-markdown-check.cjs docs/project-context/ux-excellence-operating-standard-2026-05-13.md docs/agent-ops/active-workboard.md docs/agent-ops/slices/UX-EINKAUF-008.yaml
+  - git diff --check
