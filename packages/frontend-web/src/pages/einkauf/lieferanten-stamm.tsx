@@ -16,6 +16,50 @@ import { toast } from '@/hooks/use-toast'
 import { apiClient } from '@/lib/api-client'
 import { getEntityTypeLabel } from '@/features/crud/utils/i18n-helpers'
 import { formatDate } from '@/components/mask-builder/utils/formatting'
+import {
+  CrudCapabilityChecklist,
+  EvidenceTemplateLink,
+  ManagementDecisionPanel,
+  NextActionPanel,
+  OperationalTaskPlan,
+  RoleFocusBar,
+  type UxTaskItem,
+} from '@/components/workflow'
+
+type SupplierRoleFocus = 'all' | 'procurement' | 'quality' | 'finance' | 'compliance' | 'management'
+
+const supplierRoleProfiles: Array<{ id: SupplierRoleFocus; label: string; description: string }> = [
+  {
+    id: 'all',
+    label: 'Alle Rollen',
+    description: 'Zeigt die Lieferantenakte fuer Einkauf, QS, Finance, Compliance und Leitung.',
+  },
+  {
+    id: 'procurement',
+    label: 'Einkauf',
+    description: 'Fokus auf Stammdaten, Ansprechpartner, Kategorie und Einkaufsbereitschaft.',
+  },
+  {
+    id: 'quality',
+    label: 'QS',
+    description: 'Fokus auf QS-Nummer, Bewertung, Klassifikation und gueltige Nachweise.',
+  },
+  {
+    id: 'finance',
+    label: 'Finance',
+    description: 'Fokus auf Bankdaten, Zahlungsbedingungen, Kreditlimit und Steuerdaten.',
+  },
+  {
+    id: 'compliance',
+    label: 'Compliance',
+    description: 'Fokus auf Dokumente, Gueltigkeiten, Sperrstatus und Nachweisablage.',
+  },
+  {
+    id: 'management',
+    label: 'Leitung',
+    description: 'Fokus auf Freigabestatus, Blocker und naechste Aktion.',
+  },
+]
 
 type LieferantData = {
   id: string
@@ -147,6 +191,7 @@ export default function LieferantenStammPage(): JSX.Element {
   const [newClassificationDialogOpen, setNewClassificationDialogOpen] = useState(false)
   const [newDocumentDialogOpen, setNewDocumentDialogOpen] = useState(false)
   const [newDocument, setNewDocument] = useState<{ typ: DokumentTyp; titel: string; dateiname: string; gueltigBis: string }>({ typ: 'rahmenvertrag', titel: '', dateiname: '', gueltigBis: '' })
+  const [roleFocus, setRoleFocus] = useState<SupplierRoleFocus>('all')
 
   const [lieferant, setLieferant] = useState<LieferantData>({
     id: id || 'L-001',
@@ -378,6 +423,92 @@ export default function LieferantenStammPage(): JSX.Element {
     }
   }
 
+  const hasMasterData = Boolean(lieferant.name && lieferant.typ && lieferant.land)
+  const hasContactPath = Boolean(lieferant.email || lieferant.telefon || (lieferant.ansprechpartner?.length ?? 0) > 0)
+  const hasFinanceData = Boolean((lieferant.bankkonten?.length ?? 0) > 0 || lieferant.zahlungsbedingungen || lieferant.vatId || lieferant.steuernummer)
+  const hasQualityEvidence = Boolean(lieferant.qsNummer || (lieferant.klassifikationen?.length ?? 0) > 0 || (lieferant.dokumente?.length ?? 0) > 0)
+  const expiredDocuments = (lieferant.dokumente ?? []).filter((doc) => doc.status === 'abgelaufen').length
+  const expiringDocuments = (lieferant.dokumente ?? []).filter((doc) => doc.status === 'wird_abgelaufen').length
+  const hasBlockingStatus = lieferant.status !== 'aktiv'
+  const isSupplierReady = hasMasterData && hasContactPath && hasFinanceData && hasQualityEvidence && expiredDocuments === 0 && !hasBlockingStatus
+  const nextSupplierAction = !hasMasterData
+    ? 'Name, Typ und Land im Bereich Stammdaten ergaenzen.'
+    : !hasContactPath
+      ? 'Mindestens E-Mail, Telefon oder Ansprechpartner hinterlegen.'
+      : !hasFinanceData
+        ? 'Bank-, Steuer- oder Zahlungsdaten fuer Finance ergaenzen.'
+        : !hasQualityEvidence
+          ? 'QS-Nummer, Klassifikation oder Lieferantendokument hinterlegen.'
+          : expiredDocuments > 0
+            ? 'Abgelaufene Lieferantendokumente pruefen und ersetzen.'
+            : hasBlockingStatus
+              ? 'Sperr- oder Archivstatus fachlich klaeren.'
+              : 'Lieferant speichern und fuer Einkaufsprozesse nutzen.'
+  const supplierTaskItems: UxTaskItem[] = [
+    {
+      label: 'Stammdaten erfassen',
+      done: hasMasterData,
+      hint: hasMasterData ? `${lieferant.name || 'Lieferant'} ist als ${lieferant.typ || 'Typ'} in ${lieferant.land} angelegt.` : 'Name, Typ und Land sind Pflicht fuer eine belastbare Lieferantenakte.',
+    },
+    {
+      label: 'Kontaktweg sichern',
+      done: hasContactPath,
+      hint: hasContactPath ? 'Kontakt per E-Mail, Telefon oder Ansprechpartner ist vorhanden.' : 'Kontaktweg ergaenzen, damit Einkauf und QS Rueckfragen klaeren koennen.',
+    },
+    {
+      label: 'Finance-Daten pruefen',
+      done: hasFinanceData,
+      hint: hasFinanceData ? 'Bank-, Steuer- oder Zahlungsdaten sind vorhanden.' : 'Zahlungsbedingungen, Steuerdaten oder Bankkonto fuer Finance ergaenzen.',
+    },
+    {
+      label: 'Nachweise und QS klaeren',
+      done: hasQualityEvidence && expiredDocuments === 0,
+      hint: hasQualityEvidence
+        ? expiredDocuments > 0
+          ? `${expiredDocuments} Dokumente sind abgelaufen.`
+          : `${lieferant.dokumente?.length ?? 0} Dokumente, ${lieferant.klassifikationen?.length ?? 0} Klassifikationen, QS ${lieferant.qsNummer || 'offen'}.`
+        : 'QS-Nummer, Klassifikation oder relevantes Dokument hinterlegen.',
+    },
+  ]
+  const supplierCrudCapabilities = [
+    {
+      key: 'create',
+      label: 'Anlegen/Speichern',
+      available: hasMasterData,
+      hint: hasMasterData ? 'Lieferant kann gespeichert werden.' : 'Vor dem Speichern fehlen noch Name, Typ oder Land.',
+    },
+    {
+      key: 'read',
+      label: 'Lesen',
+      available: true,
+      hint: 'Stammdaten, Kontakte, Bank, Steuer, Compliance, Dokumente und QS sind in Tabs erreichbar.',
+    },
+    {
+      key: 'update',
+      label: 'Bearbeiten',
+      available: true,
+      hint: 'Stammdaten, Status, Kontakte, Bankkonten, Klassifikationen und Dokumente koennen gepflegt werden.',
+    },
+    {
+      key: 'delete',
+      label: 'Sperren/Archivieren',
+      available: lieferant.status === 'aktiv',
+      hint: lieferant.status === 'aktiv' ? 'Sperren und Archivieren sind als gefuehrte Aktionen vorhanden.' : 'Der Lieferant ist bereits gesperrt oder archiviert.',
+    },
+    {
+      key: 'evidence',
+      label: 'Nachweisablage',
+      available: (lieferant.dokumente?.length ?? 0) > 0,
+      hint: (lieferant.dokumente?.length ?? 0) > 0 ? `${lieferant.dokumente?.length ?? 0} Lieferantendokumente sind hinterlegt.` : 'Dokumente koennen im Compliance-Tab erfasst werden.',
+    },
+    {
+      key: 'audit',
+      label: 'Pruefspur',
+      available: Boolean(lieferant.id),
+      hint: 'Lieferantennummer, Status, Dokumentgueltigkeit und Sperr-/Archivaktionen bilden die operative Pruefspur.',
+    },
+  ]
+
   return (
     <div className="space-y-6 p-6">
       <div className="flex items-center justify-between">
@@ -417,6 +548,48 @@ export default function LieferantenStammPage(): JSX.Element {
             {loading ? t('common.loading') : t('common.save')}
           </Button>
         </div>
+      </div>
+
+      <div className="space-y-4">
+        <RoleFocusBar
+          roles={supplierRoleProfiles}
+          value={roleFocus}
+          onChange={setRoleFocus}
+          visibleCount={roleFocus === 'all' ? 5 : 1}
+          totalCount={5}
+        />
+        <ManagementDecisionPanel
+          decision={{
+            allowed: isSupplierReady,
+            allowedLabel: 'Einkaufsbereit',
+            blockedLabel: 'Noch nicht einkaufsbereit',
+            summary: isSupplierReady
+              ? `Der Lieferant ist fachlich nutzbar. Bewertung ${lieferant.bewertung || 0}, ${lieferant.dokumente?.length ?? 0} Dokumente und Status aktiv.`
+              : `Vor Nutzung im Einkauf ist noch etwas offen: ${nextSupplierAction}`,
+            blockerCount: [!hasMasterData, !hasContactPath, !hasFinanceData, !hasQualityEvidence, expiredDocuments > 0, hasBlockingStatus].filter(Boolean).length,
+            nextFocus: nextSupplierAction,
+            template: {
+              label: 'Lieferantenliste oeffnen',
+              href: '/einkauf/lieferanten',
+            },
+          }}
+        />
+        <div className="grid gap-4 lg:grid-cols-[1.35fr_1fr]">
+          <OperationalTaskPlan title="Lieferanten-Onboardingplan" items={supplierTaskItems} />
+          <div className="space-y-3">
+            <NextActionPanel
+              action={nextSupplierAction}
+              tone={isSupplierReady ? 'emerald' : expiredDocuments > 0 || hasBlockingStatus ? 'red' : hasMasterData ? 'amber' : 'blue'}
+            />
+            <EvidenceTemplateLink link={{ label: 'Lieferantendokumente pruefen', href: '/einkauf/lieferanten-dokumente' }} />
+            {expiringDocuments > 0 ? (
+              <div className="rounded border border-amber-200 bg-amber-50 px-3 py-2 text-xs font-bold text-amber-800">
+                {expiringDocuments} Dokumente laufen bald ab.
+              </div>
+            ) : null}
+          </div>
+        </div>
+        <CrudCapabilityChecklist capabilities={supplierCrudCapabilities} />
       </div>
 
       <Tabs defaultValue="stammdaten">
