@@ -522,12 +522,12 @@ Stand: `2026-05-12`
 
 **Von:** Codex
 **Owner:** Codex
-**Stand:** reserviert 2026-05-15
+**Stand:** abgeschlossen 2026-05-15
 **Ziel des Slices:** Lagerarbeitsflaechen fuer Lagerplaetze und Bestandsbewegungen mit Rollenfokus, Engpassentscheidung, naechster Aktion und Nachweisstatus fuehren.
 **Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/agent-ops/slices/UX-LAGER-001.yaml`, `packages/frontend-web/src/pages/lager/lagerplaetze.tsx`, `packages/frontend-web/src/features/inventory/StockManagement.tsx`, `docs/project-context/ux-excellence-operating-standard-2026-05-13.md`
 **Abnahmekriterien:** Lagerplaetze und StockManagement zeigen Rollenfokus, Lager-/Bewegungsplan, Managemententscheidung, Next Action, Nachweislink und CRUD-/Workflow-Abdeckung; bestehende Kapazitaetsanzeige, Artikel-/Bestandsliste und Bewegungsdialog bleiben erhalten.
-**Erledigt:** Reserviert; Umsetzung folgt.
-**Checks:** offen
+**Erledigt:** `lager/lagerplaetze.tsx` und `features/inventory/StockManagement.tsx` nutzen den UX-Baukasten fuer Rollenfokus, Kapazitaets-/Bestandsplan, Managemententscheidung, Next Action, Nachweislink und CRUD-/Workflow-Abdeckung. Bestehende Kapazitaetsanzeige, Artikel-/Bestandsliste und Bewegungsdialog bleiben erhalten.
+**Checks:** `pnpm --filter @valero-neuroerp/frontend-web type-check`; `python scripts/agent_workboard_supervisor.py validate`; `node scripts/docs-governance-check.cjs`; `node scripts/docs-markdown-check.cjs docs/project-context/ux-excellence-operating-standard-2026-05-13.md docs/agent-ops/active-workboard.md docs/agent-ops/slices/UX-LAGER-001.yaml`; `git diff --check`
 **Offene Risiken:** Einzelne Lagerseiten wurden in OP-ROLL-Slices bereits fallartig aufgewertet; dieser Slice fokussiert Lagerplaetze und das zentrale StockManagement.
 
 ## TODO-SPRINT-001

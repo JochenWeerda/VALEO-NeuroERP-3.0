@@ -1,12 +1,31 @@
 import { useSearchParams } from 'react-router-dom'
+import { useState } from 'react'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { AlertTriangle, MapPin, Package, Warehouse } from 'lucide-react'
 import { useWarehouses } from '@/lib/api/inventory'
 import { Skeleton } from '@/components/ui/skeleton'
+import {
+  CrudCapabilityChecklist,
+  EvidenceTemplateLink,
+  ManagementDecisionPanel,
+  NextActionPanel,
+  OperationalTaskPlan,
+  RoleFocusBar,
+} from '@/components/workflow'
+
+type WarehouseRole = 'lager' | 'disposition' | 'einkauf' | 'leitung'
+
+const warehouseRoles = [
+  { id: 'lager', label: 'Lager', description: 'Prueft freie Plaetze, belegte Bereiche und kurzfristige Einlagerung.' },
+  { id: 'disposition', label: 'Disposition', description: 'Klaert, ob Auslastung Lieferungen, Touren oder Umlagerungen blockiert.' },
+  { id: 'einkauf', label: 'Einkauf', description: 'Sieht, ob bestellte Ware noch Lagerkapazitaet hat.' },
+  { id: 'leitung', label: 'Leitung', description: 'Sieht Engpaesse, Kapazitaetsdruck und naechste Entscheidung.' },
+] satisfies Array<{ id: WarehouseRole; label: string; description: string }>
 
 export default function LagerplaetzePage(): JSX.Element {
   const [searchParams] = useSearchParams()
+  const [roleFocus, setRoleFocus] = useState<WarehouseRole>('lager')
   const workflowInstanceId = searchParams.get('workflowInstanceId')
   const workflowProcess = searchParams.get('workflowProcess')
   const workflowCase = searchParams.get('workflowCase')
@@ -38,6 +57,12 @@ export default function LagerplaetzePage(): JSX.Element {
   const kritisch = lager.bereiche.length > 0
     ? lager.bereiche.filter((b) => b.plaetze > 0 && b.belegt / b.plaetze > 0.95).length
     : 0
+  const hasCapacityStopper = kritisch > 0 || lager.frei <= 0
+  const nextWarehouseAction = hasCapacityStopper
+    ? 'Kritische Lagerbereiche pruefen und Umlagerung oder Annahmestopp entscheiden.'
+    : lager.bereiche.length === 0
+      ? 'Ersten Lagerbereich in den Stammdaten anlegen.'
+      : 'Freie Kapazitaet beobachten und naechste Einlagerung planen.'
 
   return (
     <div className="space-y-6 p-6">
@@ -50,6 +75,51 @@ export default function LagerplaetzePage(): JSX.Element {
         <h1 className="text-3xl font-bold">Lagerplätze</h1>
         <p className="text-muted-foreground">Lagerverwaltung & Auslastung</p>
       </div>
+
+      {!isLoading && (
+        <>
+          <RoleFocusBar roles={warehouseRoles} value={roleFocus} onChange={setRoleFocus} visibleCount={lager.bereiche.length} totalCount={lager.bereiche.length} title="Wer klaert die Lagerkapazitaet?" />
+          <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_360px]">
+            <ManagementDecisionPanel
+              decision={{
+                allowed: !hasCapacityStopper && lager.bereiche.length > 0,
+                allowedLabel: 'Kapazitaet verfuegbar',
+                blockedLabel: 'Lagerengpass pruefen',
+                summary: hasCapacityStopper
+                  ? `${kritisch} Lagerbereich(e) sind kritisch ausgelastet oder es gibt keine freien Plaetze. Einlagerung braucht eine bewusste Entscheidung.`
+                  : `${lager.frei} Lagerplatz/-plaetze sind frei. Einlagerung kann geplant werden.`,
+                blockerCount: hasCapacityStopper ? Math.max(1, kritisch) : 0,
+                nextFocus: nextWarehouseAction,
+                template: { label: 'Lagerkapazitaets- und Umlagerungsprotokoll', href: '/docs/lager/lagerkapazitaet.md' },
+              }}
+            />
+            <div className="space-y-4">
+              <NextActionPanel action={nextWarehouseAction} tone={hasCapacityStopper ? 'amber' : 'emerald'} />
+              <EvidenceTemplateLink link={{ label: 'Kapazitaetsnachweis ablegen', href: '/docs/lager/kapazitaetsnachweis.md' }} />
+            </div>
+          </div>
+          <div className="grid gap-4 lg:grid-cols-2">
+            <OperationalTaskPlan
+              title="Kapazitaetsplan"
+              items={[
+                { label: 'Lagerbereiche laden', done: lager.bereiche.length > 0, hint: `${lager.bereiche.length} Bereich(e) in der aktuellen Sicht.` },
+                { label: 'Freie Plaetze pruefen', done: lager.frei > 0, hint: `${lager.frei} frei, ${lager.belegt} belegt.` },
+                { label: 'Kritische Bereiche klaeren', done: kritisch === 0, hint: kritisch > 0 ? `${kritisch} Bereich(e) ueber 95 Prozent.` : 'Keine kritische Auslastung.' },
+                { label: 'Naechste Einlagerung planen', done: !hasCapacityStopper && lager.bereiche.length > 0, hint: nextWarehouseAction },
+              ]}
+            />
+            <CrudCapabilityChecklist
+              capabilities={[
+                { key: 'read', label: 'Kapazitaet lesen', available: true, hint: 'Bereiche, Plaetze, Bestand und Auslastung sind sichtbar.' },
+                { key: 'create', label: 'Lagerplatz anlegen', available: false, hint: 'Anlage erfolgt laut Hinweis in den Lager-Stammdaten.' },
+                { key: 'update', label: 'Umlagerung planen', available: false, hint: 'Diese Seite zeigt Engpaesse; Umlagerung erfolgt in Bewegungsprozessen.' },
+                { key: 'evidence', label: 'Nachweis', available: true, hint: 'Kapazitaetsnachweis ist verlinkt.' },
+                { key: 'audit', label: 'Auslastung nachvollziehen', available: true, hint: 'Bestand und Auslastung je Bereich bilden den Mindestnachweis.' },
+              ]}
+            />
+          </div>
+        </>
+      )}
 
       {isLoading && (
         <div className="grid gap-4 md:grid-cols-4">

@@ -134,12 +134,13 @@ Eine Seite gilt erst als UX-ready, wenn sie mindestens diese Punkte erfuellt:
 | `UX-LOGISTIK-006` | Logistik/Versand | abgeschlossen | Frachtdokumente und Speditions-Frachttarife nutzen Rollenfokus, Pruefplan, Eskalationsentscheidung, Next Action, Nachweislink und CRUD-/Workflow-Abdeckung. |
 | `UX-DMS-001` | Dokumente/DMS | abgeschlossen | QM-Dokumente und DMS-Integration nutzen Rollenfokus, Klassifikations-/Einrichtungsplan, Managemententscheidung, Next Action, Nachweislink und CRUD-/Workflow-Abdeckung. |
 | `UX-QS-001` | Qualitaet/Produktion | abgeschlossen | Gesperrte-Ware-Klaerung und QS-Ausnahmen nutzen Rollenfokus, Sperr-/Eskalationsplan, Managemententscheidung, Next Action, Nachweislink und CRUD-/Workflow-Abdeckung. |
+| `UX-LAGER-001` | Lager | abgeschlossen | Lagerplaetze und StockManagement nutzen Rollenfokus, Kapazitaets-/Bestandsplan, Managemententscheidung, Next Action, Nachweislink und CRUD-/Workflow-Abdeckung. |
 
 Naechste Rollout-Slices:
 
-- `UX-LAGER-001`: Lagerarbeitsflaechen auf Bestand, Reservierung, Bewegung, Inventur und naechste Aktion im UX-Standard pruefen.
 - `UX-PORTAL-001`: Portal-/Self-Service-Dokumente auf klare Nutzeraufgabe, Nachweisstatus und naechste Aktion pruefen.
 - `UX-PRODUKTION-001`: Produktionsarbeitsflaechen auf Auftrag, Rueckmeldung, Dokumentdruck, Sperre und Freigabe nach UX-Standard pruefen.
+- `UX-ADMIN-001`: Admin-/Setup-Seiten auf klare Betriebsaufgabe, Status, naechste Aktion und sichere Aenderungen pruefen.
 
 ## Nicht-Ziel
 
