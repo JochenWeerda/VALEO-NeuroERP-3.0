@@ -16,6 +16,14 @@ import { CustomerSelectionDialog, type Customer } from '@/components/sales/Custo
 import { ArtikelSuchDialog } from '@/components/sales/ArtikelSuchDialog'
 import { LieferscheinDruckDialog, type PrintOptions } from '@/components/sales/LieferscheinDruckDialog'
 import { DmsAnhangDialog } from '@/components/dms/DmsAnhangDialog'
+import {
+  CrudCapabilityChecklist,
+  EvidenceTemplateLink,
+  ManagementDecisionPanel,
+  NextActionPanel,
+  OperationalTaskPlan,
+  RoleFocusBar,
+} from '@/components/workflow'
 import { useAngebote, type Angebot } from '@/lib/api/sales'
 import { apiClient } from '@/lib/api-client'
 import { useToast } from '@/components/ui/toast-provider'
@@ -77,6 +85,36 @@ import { fetchDocumentNumber } from '@/hooks/useDocumentNumber'
 import { CustomerSalesEligibilityBanner } from '@/components/sales/CustomerSalesEligibilityBanner'
 import { useCustomerSalesEligibility } from '@/hooks/useCustomerSalesEligibility'
 
+type OfferAssistantRole = 'vertrieb' | 'innendienst' | 'auftragsabwicklung' | 'finance' | 'leitung'
+
+const offerAssistantRoles = [
+  {
+    id: 'vertrieb',
+    label: 'Vertrieb',
+    description: 'Prueft Kunde, Angebot, Preis und naechstes Nachfassen bis zur Entscheidung.',
+  },
+  {
+    id: 'innendienst',
+    label: 'Innendienst',
+    description: 'Haelt Stammdaten, Positionen, Druck und Anlagen sauber, damit nichts im Folgeauftrag fehlt.',
+  },
+  {
+    id: 'auftragsabwicklung',
+    label: 'Auftragsabwicklung',
+    description: 'Achtet darauf, ob das Angebot vollstaendig und gespeichert ist, bevor daraus ein Auftrag wird.',
+  },
+  {
+    id: 'finance',
+    label: 'Finance',
+    description: 'Prueft Wert, Rabatt, Steuer und spaetere Faktura-Folgen.',
+  },
+  {
+    id: 'leitung',
+    label: 'Leitung',
+    description: 'Sieht Abschlussreife, offene Stopper und den naechsten Verantwortungswechsel.',
+  },
+] satisfies Array<{ id: OfferAssistantRole; label: string; description: string }>
+
 let _angebotNrCache: string | null = null
 function generateAngebotNr(): string {
   if (!_angebotNrCache) {
@@ -126,6 +164,7 @@ export default function AngebotErstellenPage(): JSX.Element {
   const navigate = useNavigate()
   const [isDirty, setIsDirty] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
+  const [roleFocus, setRoleFocus] = useState<OfferAssistantRole>('vertrieb')
 
   // â”€â”€ Angebot-Kopf â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   const [angebotNr, setAngebotNr] = useState(() => generateAngebotNr())
@@ -176,6 +215,24 @@ export default function AngebotErstellenPage(): JSX.Element {
     const gewicht = positionen.reduce((s, p) => s + (p.gesamtGewicht || 0), 0)
     return { netto, mwst, brutto, gewicht }
   }, [positionen])
+  const customerAllowed = !customer || !salesEligibility || salesEligibility.allowed_order
+  const canConvertToOrder = Boolean(angebotId && customer && positionen.length > 0 && customerAllowed && !isDirty)
+  const offerBlockers = [
+    !customer ? 'Kunde auswaehlen' : null,
+    positionen.length === 0 ? 'mindestens eine Position erfassen' : null,
+    !angebotId ? 'Angebot speichern' : null,
+    isDirty ? 'Aenderungen speichern' : null,
+    !customerAllowed ? 'Kundenfreigabe klaeren' : null,
+  ].filter((item): item is string => Boolean(item))
+  const offerNextAction = !customer
+    ? 'Kunde auswaehlen, damit Preis, Kontakt und Auftragsfreigabe geprueft werden koennen.'
+    : positionen.length === 0
+      ? 'Position erfassen und Menge/Preis pruefen.'
+      : !angebotId || isDirty
+        ? 'Angebot speichern, bevor Druck, DMS-Anhang oder Auftragserzeugung genutzt werden.'
+        : !customerAllowed
+          ? 'Kundenfreigabe im Stammdatensatz klaeren, bevor daraus ein Auftrag wird.'
+          : 'Angebot ist uebergabereif: Druck/Nachweis erstellen oder in Auftrag uebernehmen.'
 
   // â”€â”€ Handler â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
@@ -505,6 +562,60 @@ export default function AngebotErstellenPage(): JSX.Element {
         ) : null}
 
         {/* â”€â”€ Kopf-Bereich â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+        <div className="mb-4 space-y-4">
+          <RoleFocusBar
+            roles={offerAssistantRoles}
+            value={roleFocus}
+            onChange={setRoleFocus}
+            visibleCount={positionen.length}
+            totalCount={positionen.length}
+            title="Wer fuehrt das Angebot weiter?"
+          />
+
+          <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_360px]">
+            <ManagementDecisionPanel
+              decision={{
+                allowed: canConvertToOrder,
+                allowedLabel: 'Uebergabe bereit',
+                blockedLabel: 'Noch nicht uebergabereif',
+                summary: canConvertToOrder
+                  ? `Das Angebot ${angebotNr} ist gespeichert, hat einen freigegebenen Kunden und ${positionen.length} Position(en). Es kann in den Auftrag uebernommen werden.`
+                  : `Vor der Auftragsuebergabe fehlen noch: ${offerBlockers.join(', ')}.`,
+                blockerCount: offerBlockers.length,
+                nextFocus: canConvertToOrder ? 'Auftrag erzeugen oder Nachweis drucken' : offerBlockers[0] ?? 'Angebot vervollstaendigen',
+                template: { label: 'Angebots- und Auftragsuebergabe', href: '/docs/sales/angebot-auftrag-uebergabe.md' },
+              }}
+            />
+            <div className="space-y-4">
+              <NextActionPanel action={offerNextAction} tone={canConvertToOrder ? 'emerald' : 'amber'} />
+              <EvidenceTemplateLink link={{ label: 'Angebotsnachweis im DMS ablegen', href: '/docs/sales/angebotsnachweis.md' }} />
+            </div>
+          </div>
+
+          <div className="grid gap-4 lg:grid-cols-2">
+            <OperationalTaskPlan
+              title="Uebergabeplan Angebot zu Auftrag"
+              items={[
+                { label: 'Kunde auswaehlen', done: Boolean(customer), hint: customer ? `${customer.name} ist ausgewaehlt.` : 'Ohne Kunde ist keine saubere Auftragsuebergabe moeglich.' },
+                { label: 'Positionen erfassen', done: positionen.length > 0, hint: positionen.length > 0 ? `${positionen.length} Position(en), ${summen.brutto.toFixed(2)} EUR brutto.` : 'Artikel, Menge, Preis und Rabatt erfassen.' },
+                { label: 'Angebot speichern', done: Boolean(angebotId) && !isDirty, hint: angebotId && !isDirty ? 'Gespeicherter Stand ist Grundlage fuer Druck und Auftrag.' : 'Vor Druck, DMS und Auftragserzeugung speichern.' },
+                { label: 'Kundenfreigabe pruefen', done: customerAllowed, hint: customerAllowed ? 'Keine Sperre aus den Stammdaten sichtbar.' : salesEligibility?.reasons.join(' ') ?? 'Kundenfreigabe offen.' },
+                { label: 'Nachweis oder Auftrag erzeugen', done: canConvertToOrder, hint: canConvertToOrder ? 'Druck, DMS-Anhang oder Auftragserzeugung sind jetzt fachlich sinnvoll.' : 'Erst die offenen Punkte abschliessen.' },
+              ]}
+            />
+            <CrudCapabilityChecklist
+              capabilities={[
+                { key: 'create', label: 'Angebot anlegen', available: true, hint: 'Neues Angebot wird ueber die Erfassungsmaske erstellt.' },
+                { key: 'read', label: 'Bestehendes Angebot laden', available: true, hint: 'Suchdialog oeffnet vorhandene Angebote.' },
+                { key: 'update', label: 'Aenderungen speichern', available: true, hint: 'Kopf, Kunde und Positionen koennen gespeichert werden.' },
+                { key: 'delete', label: 'Angebot loeschen', available: Boolean(angebotId), hint: 'Loeschen ist erst nach Speicherung technisch moeglich.' },
+                { key: 'evidence', label: 'DMS-Anhang', available: Boolean(angebotId), hint: 'Anlagen gehoeren an ein gespeichertes Angebot.' },
+                { key: 'approve', label: 'In Auftrag uebernehmen', available: canConvertToOrder, hint: 'Uebergabe erst nach Kunde, Position, Speicherung und Kundenfreigabe.' },
+              ]}
+            />
+          </div>
+        </div>
+
         <Card className="mb-4 p-4">
           <div className="grid grid-cols-3 gap-6">
 
