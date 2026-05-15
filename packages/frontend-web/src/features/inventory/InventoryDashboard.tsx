@@ -1,9 +1,18 @@
-// React import removed - not needed with new JSX transform
+import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { AlertTriangle, TrendingUp, Package, Warehouse } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
+import {
+  CrudCapabilityChecklist,
+  EvidenceTemplateLink,
+  ManagementDecisionPanel,
+  NextActionPanel,
+  OperationalTaskPlan,
+  RoleFocusBar,
+  type UxTaskItem,
+} from '@/components/workflow';
 
 interface InventoryStats {
   total_articles: number;
@@ -23,7 +32,19 @@ interface AlertItem {
   deficit: number;
 }
 
+type InventoryRoleFocus = 'all' | 'warehouse' | 'logistics' | 'scale' | 'procurement' | 'management';
+
+const inventoryRoleProfiles: Array<{ id: InventoryRoleFocus; label: string; description: string }> = [
+  { id: 'all', label: 'Alle Rollen', description: 'Zeigt Bestand und Logistikfolge fuer Lager, Logistik, Waage, Einkauf und Leitung.' },
+  { id: 'warehouse', label: 'Lager', description: 'Fokus auf Artikelbestand, verfuegbare Menge und Inventur.' },
+  { id: 'logistics', label: 'Logistik', description: 'Fokus auf Engpaesse, Nachschub und Bewegungen.' },
+  { id: 'scale', label: 'Waage', description: 'Fokus auf Nachweis von Bestand, Bewegungen und Folgeprozessen.' },
+  { id: 'procurement', label: 'Einkauf', description: 'Fokus auf Nachschubvorschlaege, Alerts und Bestellfolge.' },
+  { id: 'management', label: 'Leitung', description: 'Fokus auf Stopper, Bestandwert und naechste Aktion.' },
+];
+
 export function InventoryDashboard() {
+  const [roleFocus, setRoleFocus] = useState<InventoryRoleFocus>('all');
   // Fetch inventory statistics
   const { data: stats } = useQuery<InventoryStats>({
     queryKey: ['inventory', 'stats'],
@@ -50,15 +71,73 @@ export function InventoryDashboard() {
       return response.json();
     }
   });
+  const alertItems = alerts?.alerts ?? [];
+  const replenishmentSuggestions = Array.isArray(replenishment?.suggestions) ? replenishment.suggestions : [];
+  const totalArticles = stats?.total_articles ?? 0;
+  const totalStock = stats?.total_current_stock ?? 0;
+  const availableStock = stats?.total_available_stock ?? 0;
+  const totalValue = stats?.total_value ?? 0;
+  const lowStockCount = stats?.low_stock_count ?? alertItems.length;
+  const outOfStockCount = stats?.out_of_stock_count ?? 0;
+  const hasStockBase = totalArticles > 0 && totalStock > 0;
+  const hasCriticalAlerts = outOfStockCount > 0 || alertItems.length > 0;
+  const inventoryReady = hasStockBase && !hasCriticalAlerts;
+  const inventoryNextAction = outOfStockCount > 0
+    ? `${outOfStockCount} Artikel ohne Bestand pruefen.`
+    : alertItems.length > 0
+      ? `${alertItems.length} Bestandswarnungen priorisieren.`
+      : replenishmentSuggestions.length > 0
+        ? `${replenishmentSuggestions.length} Nachschubvorschlaege pruefen.`
+        : hasStockBase
+          ? 'Bestand stabil; Inventur- und Bewegungsnachweis pruefen.'
+          : 'Artikel- und Bestandsdaten laden oder ersten Bestand erfassen.';
+  const inventoryTaskItems: UxTaskItem[] = [
+    { label: 'Bestandsbasis pruefen', done: hasStockBase, hint: hasStockBase ? `${totalArticles} Artikel, ${totalStock.toLocaleString('de-DE')} Bestand.` : 'Artikel- oder Bestandsbasis fehlt.' },
+    { label: 'Engpaesse klaeren', done: !hasCriticalAlerts, hint: hasCriticalAlerts ? `${alertItems.length} Warnungen, ${outOfStockCount} ohne Bestand.` : 'Keine kritischen Bestandswarnungen.' },
+    { label: 'Nachschub steuern', done: replenishmentSuggestions.length === 0, hint: replenishmentSuggestions.length > 0 ? `${replenishmentSuggestions.length} Nachschubvorschlaege vorhanden.` : 'Kein akuter Nachschubvorschlag.' },
+    { label: 'Wert und Nachweis sichern', done: totalValue > 0 || availableStock > 0, hint: `Wert ${new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(totalValue)}, verfuegbar ${availableStock.toLocaleString('de-DE')}.` },
+  ];
+  const inventoryCrudCapabilities = [
+    { key: 'read', label: 'Lesen', available: true, hint: 'Artikel, Bestand, verfuegbarer Bestand, Alerts, Wert und Nachschub sind sichtbar.' },
+    { key: 'create', label: 'Artikel/Bewegung anlegen', available: true, hint: 'Neue Artikel und Bewegungen sind als Quick Actions vorgesehen.' },
+    { key: 'update', label: 'Inventur/Bestand pflegen', available: hasStockBase, hint: hasStockBase ? 'Inventur und Bestandsbewegungen koennen aus dem Dashboard angestossen werden.' : 'Pflege braucht vorhandene Artikel.' },
+    { key: 'approve', label: 'Nachschub freigeben', available: replenishmentSuggestions.length > 0, hint: replenishmentSuggestions.length > 0 ? 'Nachschubvorschlaege koennen priorisiert werden.' : 'Kein Nachschubvorschlag offen.' },
+    { key: 'evidence', label: 'Kettennachweis', available: hasStockBase, hint: 'Bestand, Alerts, Nachschub und Wert bilden den Logistiknachweis.' },
+    { key: 'audit', label: 'Pruefspur', available: true, hint: 'Dashboarddaten kommen aus den bestehenden Inventory-Report-Endpunkten.' },
+  ];
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold">Inventory Dashboard</h1>
+        <h1 className="text-3xl font-bold">Bestands- und Logistik-Dashboard</h1>
         <Button>
           <Package className="mr-2 h-4 w-4" />
           New Article
         </Button>
+      </div>
+
+      <div className="space-y-4">
+        <RoleFocusBar roles={inventoryRoleProfiles} value={roleFocus} onChange={setRoleFocus} visibleCount={roleFocus === 'all' ? 5 : 1} totalCount={5} />
+        <ManagementDecisionPanel
+          decision={{
+            allowed: inventoryReady,
+            allowedLabel: 'Arbeitsfaehig',
+            blockedLabel: 'Stopper offen',
+            summary: inventoryReady ? `Bestandslage ist stabil: ${totalArticles} Artikel, ${totalStock.toLocaleString('de-DE')} Bestand.` : `Vor der Logistikentscheidung ist noch etwas offen: ${inventoryNextAction}`,
+            blockerCount: [!hasStockBase, outOfStockCount > 0, alertItems.length > 0].filter(Boolean).length,
+            nextFocus: inventoryNextAction,
+            template: { label: 'Waage oeffnen', href: '/waage/wiegungen' },
+          }}
+        />
+        <div className="grid gap-4 lg:grid-cols-[1.35fr_1fr]">
+          <OperationalTaskPlan title="Bestands-Kettenplan" items={inventoryTaskItems} />
+          <div className="space-y-3">
+            <NextActionPanel action={inventoryNextAction} tone={inventoryReady ? 'emerald' : hasCriticalAlerts ? 'red' : replenishmentSuggestions.length > 0 ? 'amber' : 'blue'} />
+            <EvidenceTemplateLink link={{ label: 'Hofliste pruefen', href: '/waage/hofliste' }} />
+            <EvidenceTemplateLink link={{ label: 'Bestellvorschlaege pruefen', href: '/einkauf/bestellvorschlaege' }} />
+          </div>
+        </div>
+        <CrudCapabilityChecklist capabilities={inventoryCrudCapabilities} />
       </div>
 
       {/* Key Metrics Cards */}
