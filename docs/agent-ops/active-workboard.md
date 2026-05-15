@@ -554,6 +554,18 @@ Stand: `2026-05-12`
 **Checks:** `pnpm --filter @valero-neuroerp/frontend-web type-check`; `python scripts/agent_workboard_supervisor.py validate`; `node scripts/docs-governance-check.cjs`; `node scripts/docs-markdown-check.cjs docs/project-context/ux-excellence-operating-standard-2026-05-13.md docs/agent-ops/active-workboard.md docs/agent-ops/slices/UX-PRODUKTION-001.yaml`; `git diff --check`
 **Offene Risiken:** Produktion hat bisher nur schmale sichtbare Frontend-Flaechen; weitere Produktionsdetails bleiben Folgeslices.
 
+## UX-ADMIN-001
+
+**Von:** Codex
+**Owner:** Codex
+**Stand:** reserviert 2026-05-15
+**Ziel des Slices:** Admin-Benutzer- und Rollenverwaltung mit klarer Betriebsaufgabe, Status, naechster Aktion und sicherer Aenderungsfuehrung nach UX-Standard fuehren.
+**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/agent-ops/slices/UX-ADMIN-001.yaml`, `packages/frontend-web/src/pages/admin/benutzer-liste.tsx`, `packages/frontend-web/src/pages/admin/rollen-verwaltung.tsx`, `docs/project-context/ux-excellence-operating-standard-2026-05-13.md`
+**Abnahmekriterien:** Benutzer- und Rollenverwaltung zeigen Rollenfokus, Admin-Aufgabenplan, Managemententscheidung, Next Action, Vorlage-/Nachweislink und CRUD-/Workflow-Abdeckung; bestehende Liste, Suche, Export und Neuanlage bleiben erhalten.
+**Erledigt:** Reserviert; Umsetzung folgt.
+**Checks:** offen
+**Offene Risiken:** DMS-Setup ist bereits ueber `UX-DMS-001` abgedeckt; weitere Admin-Spezialseiten bleiben Folgeslices.
+
 ## TODO-SPRINT-001
 
 **Von:** Cursor<br>
