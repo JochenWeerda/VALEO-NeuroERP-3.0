@@ -11,8 +11,24 @@ import { ModuleToolbar } from '@/components/navigation/ModuleToolbar'
 import { PageSection, PageSurface } from '@/components/patterns/PageSurface'
 import { useToast } from '@/hooks/use-toast'
 import { usePatchWarteschlangeStatus, useWarteschlangeEintrag } from '@/lib/api/inventory'
+import {
+  CrudCapabilityChecklist,
+  EvidenceTemplateLink,
+  ManagementDecisionPanel,
+  NextActionPanel,
+  OperationalTaskPlan,
+  RoleFocusBar,
+} from '@/components/workflow'
 
 type KlaerungDecision = '' | 'sonderfreigabe' | 'gesperrt'
+type QualityHoldRole = 'annahme' | 'qs' | 'produktion' | 'leitung'
+
+const qualityHoldRoles = [
+  { id: 'annahme', label: 'Annahme', description: 'Haelt die gesperrte Ware zurueck und sorgt dafuer, dass kein Folgeprozess ungeklaert startet.' },
+  { id: 'qs', label: 'QS', description: 'Bewertet Pruefergebnis, Begruendung und Sonderfreigabe oder Sperre.' },
+  { id: 'produktion', label: 'Produktion', description: 'Sieht, ob die Ware weiterverarbeitet werden darf oder blockiert bleibt.' },
+  { id: 'leitung', label: 'Leitung', description: 'Trifft oder prueft die fachliche Freigabe bei Risiko und Abweichung.' },
+] satisfies Array<{ id: QualityHoldRole; label: string; description: string }>
 
 function buildHarvestAcceptanceHandoverQuery(input: {
   partnerName: string
@@ -49,6 +65,7 @@ export default function KlaerungGesperrtPage(): JSX.Element {
 
   const { data: entry, isLoading } = useWarteschlangeEintrag(queueEntryId || undefined)
   const patchStatus = usePatchWarteschlangeStatus()
+  const [roleFocus, setRoleFocus] = useState<QualityHoldRole>('annahme')
   const [decision, setDecision] = useState<KlaerungDecision>(
     (entry?.klaerung?.decision as KlaerungDecision | undefined) ?? '',
   )
@@ -65,6 +82,17 @@ export default function KlaerungGesperrtPage(): JSX.Element {
       setReason(entry.klaerung.reason)
     }
   }, [entry?.id, entry?.klaerung?.decision, entry?.klaerung?.reason])
+
+  const hasReason = reason.trim().length > 0
+  const canCloseClarification = Boolean(decision && hasReason)
+  const blockerCount = (decision ? 0 : 1) + (hasReason ? 0 : 1)
+  const nextClarificationAction = !decision
+    ? 'Entscheidung waehlen: Sonderfreigabe oder endgueltige Sperre.'
+    : !hasReason
+      ? 'Kurze Begruendung erfassen, damit die Entscheidung nachvollziehbar ist.'
+      : decision === 'sonderfreigabe'
+        ? 'Klaerung speichern und Ware in die Annahme-Erfassung uebergeben.'
+        : 'Klaerung speichern; Ware bleibt gesperrt und wird nicht weiterverarbeitet.'
 
   const handleSave = (): void => {
     if (!queueEntryId) {
@@ -142,6 +170,50 @@ export default function KlaerungGesperrtPage(): JSX.Element {
           </Button>
         }
       />
+
+      <RoleFocusBar roles={qualityHoldRoles} value={roleFocus} onChange={setRoleFocus} title="Wer klaert die gesperrte Ware?" />
+
+      <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_360px]">
+        <ManagementDecisionPanel
+          decision={{
+            allowed: canCloseClarification,
+            allowedLabel: decision === 'sonderfreigabe' ? 'Sonderfreigabe dokumentiert' : 'Sperre dokumentiert',
+            blockedLabel: 'Klaerung offen',
+            summary: canCloseClarification
+              ? 'Entscheidung und Begruendung sind vorhanden. Die gesperrte Ware kann kontrolliert freigegeben oder als gesperrt dokumentiert werden.'
+              : 'Gesperrte Ware darf erst weiterlaufen, wenn Entscheidung und Begruendung dokumentiert sind.',
+            blockerCount,
+            nextFocus: nextClarificationAction,
+            template: { label: 'QS-Sperr- und Sonderfreigabeprotokoll', href: '/docs/qualitaet/qs-sperrfreigabe.md' },
+          }}
+        />
+        <div className="space-y-4">
+          <NextActionPanel action={nextClarificationAction} tone={canCloseClarification ? 'emerald' : 'red'} />
+          <EvidenceTemplateLink link={{ label: 'Abweichung und Freigabe dokumentieren', href: '/docs/qualitaet/abweichungsnachweis.md' }} />
+        </div>
+      </div>
+
+      <div className="grid gap-4 lg:grid-cols-2">
+        <OperationalTaskPlan
+          title="Pruefplan fuer gesperrte Ware"
+          items={[
+            { label: 'Ware identifizieren', done: Boolean(entry), hint: entry ? `${entry.kennzeichen ?? 'ohne Kennzeichen'} / ${entry.artikel ?? 'Artikel offen'}` : 'Queue-Eintrag laden.' },
+            { label: 'Pruefprotokoll zuordnen', done: Boolean(qualityProtocolId), hint: qualityProtocolId ? `Protokoll ${qualityProtocolId}` : 'Qualitaetsprotokoll fehlt oder wurde nicht uebergeben.' },
+            { label: 'Entscheidung treffen', done: Boolean(decision), hint: decision ? 'Entscheidung gewaehlt.' : 'Sonderfreigabe oder Sperre waehlen.' },
+            { label: 'Begruendung erfassen', done: hasReason, hint: hasReason ? 'Begruendung ist vorhanden.' : 'Ohne Begruendung keine nachvollziehbare Freigabe.' },
+          ]}
+        />
+        <CrudCapabilityChecklist
+          capabilities={[
+            { key: 'read', label: 'Sperrfall lesen', available: true, hint: 'Queue, Lieferant, Artikel und Lieferschein sind sichtbar.' },
+            { key: 'update', label: 'Klaerung speichern', available: true, hint: 'Entscheidung und Begruendung werden am Eintrag gespeichert.' },
+            { key: 'approve', label: 'Sonderfreigabe', available: decision === 'sonderfreigabe', hint: 'Freigabe fuehrt kontrolliert in die Annahme-Erfassung.' },
+            { key: 'reject', label: 'Sperre bestaetigen', available: decision === 'gesperrt', hint: 'Ware bleibt gesperrt und wird nicht weiterverarbeitet.' },
+            { key: 'evidence', label: 'Nachweis', available: true, hint: 'Vorlage fuer Abweichung und Freigabe ist verlinkt.' },
+            { key: 'audit', label: 'Zeitpunkt', available: true, hint: 'Beim Speichern wird der Entscheidungszeitpunkt gesetzt.' },
+          ]}
+        />
+      </div>
 
       <PageSection
         title="Queue-Kontext"

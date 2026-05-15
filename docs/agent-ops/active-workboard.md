@@ -510,12 +510,12 @@ Stand: `2026-05-12`
 
 **Von:** Codex
 **Owner:** Codex
-**Stand:** reserviert 2026-05-15
+**Stand:** abgeschlossen 2026-05-15
 **Ziel des Slices:** Qualitaet/Produktion fuer Pruef-, Sperr- und Freigabeprozesse mit Rollenfokus, naechster Aktion, Nachweisstatus und normaler Buero-Sprache fuehren.
 **Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/agent-ops/slices/UX-QS-001.yaml`, `packages/frontend-web/src/pages/annahme/klaerung-gesperrt.tsx`, `packages/frontend-web/src/pages/qualitaet/ausnahmen.tsx`, `docs/project-context/ux-excellence-operating-standard-2026-05-13.md`
 **Abnahmekriterien:** Gesperrte-Ware-Klaerung und QS-Ausnahmen zeigen Rollenfokus, Pruef-/Eskalationsplan, Managemententscheidung, Next Action, Nachweislink und CRUD-/Workflow-Abdeckung; bestehende Entscheidung, Begruendung, Liste und Agent-Vorschlaege bleiben erhalten.
-**Erledigt:** Reserviert; Umsetzung folgt.
-**Checks:** offen
+**Erledigt:** `annahme/klaerung-gesperrt.tsx` und `qualitaet/ausnahmen.tsx` nutzen den UX-Baukasten fuer Rollenfokus, Sperr-/Eskalationsplan, Managemententscheidung, Next Action, Nachweislink und CRUD-/Workflow-Abdeckung. Bestehende Entscheidung, Begruendung, Liste, Kennzahlen und Agent-Vorschlaege bleiben erhalten.
+**Checks:** `pnpm --filter @valero-neuroerp/frontend-web type-check`; `python scripts/agent_workboard_supervisor.py validate`; `node scripts/docs-governance-check.cjs`; `node scripts/docs-markdown-check.cjs docs/project-context/ux-excellence-operating-standard-2026-05-13.md docs/agent-ops/active-workboard.md docs/agent-ops/slices/UX-QS-001.yaml`; `git diff --check`
 **Offene Risiken:** `annahme/qualitaets-check.tsx` hat bereits einen operativen Fallkopf; dieser Slice fokussiert die Klär- und Eskalationsraeume.
 
 ## TODO-SPRINT-001
