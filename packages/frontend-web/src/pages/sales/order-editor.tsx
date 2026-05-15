@@ -29,9 +29,52 @@ import { CustomerChefHintsBanner } from '@/components/sales/CustomerChefHintsBan
 import { CustomerSalesEligibilityBanner } from '@/components/sales/CustomerSalesEligibilityBanner'
 import { useCustomerSalesEligibility } from '@/hooks/useCustomerSalesEligibility'
 import {
+  CrudCapabilityChecklist,
+  ManagementDecisionPanel,
+  NextActionPanel,
+  OperationalTaskPlan,
+  RoleFocusBar,
+  type UxTaskItem,
+} from '@/components/workflow'
+import {
   ChevronLeft, ChevronRight, ChevronUp, ChevronDown, MoreHorizontal, Check, Printer, Save,
   FileText, Folder, FileCheck, Link as LinkIcon, Receipt, Trash2, Search,
 } from 'lucide-react'
+
+type SalesOrderRoleFocus = 'all' | 'sales' | 'order-desk' | 'logistics' | 'finance' | 'management'
+
+const salesOrderRoleProfiles: Array<{ id: SalesOrderRoleFocus; label: string; description: string }> = [
+  {
+    id: 'all',
+    label: 'Alle Rollen',
+    description: 'Zeigt den Auftrag fuer Vertrieb, Auftragsabwicklung, Logistik, Finance und Leitung.',
+  },
+  {
+    id: 'sales',
+    label: 'Vertrieb',
+    description: 'Fokus auf Kunde, Angebot, Positionen und Abschluss.',
+  },
+  {
+    id: 'order-desk',
+    label: 'Auftragsabwicklung',
+    description: 'Fokus auf Belegkopf, Positionen, Speichern und Druck.',
+  },
+  {
+    id: 'logistics',
+    label: 'Logistik',
+    description: 'Fokus auf Liefertermin, Versandart, Gewicht und Lieferscheinfolge.',
+  },
+  {
+    id: 'finance',
+    label: 'Finance',
+    description: 'Fokus auf Betrag, Steuer, Zahlungsziel und Sofort-Rechnung.',
+  },
+  {
+    id: 'management',
+    label: 'Leitung',
+    description: 'Fokus auf Belegfaehigkeit, Risiko und naechste Aktion.',
+  },
+]
 
 const CustomerSelectionDialog = lazy(() =>
   import('@/components/sales/CustomerSelectionDialog').then((m) => ({ default: m.CustomerSelectionDialog }))
@@ -337,6 +380,7 @@ export default function SalesOrderEditorPage(): JSX.Element {
   const [showKontraktLookup, setShowKontraktLookup] = useState(false)
   const { resolveKontrakt, isResolving: isResolvingKontrakt } = useKontraktLookup()
   const [vertreterInput, setVertreterInput] = useState('')
+  const [roleFocus, setRoleFocus] = useState<SalesOrderRoleFocus>('all')
   const [branchesList, setBranchesList] = useState<Array<{ id: string; branch_number: number; name: string }>>([])
 
   // Auftrags-Auswahl-Liste
@@ -479,6 +523,90 @@ export default function SalesOrderEditorPage(): JSX.Element {
     const gefahrgutPunkte = state.positionen.reduce((s, p) => s + p.gesamtGefahrgutPunkte, 0)
     return { netto, mwst, brutto, gesamt: brutto, gewicht, gefahrgutPunkte }
   }, [state.positionen])
+
+  const hasCustomer = Boolean(state.customer)
+  const hasPositions = state.positionen.length > 0
+  const hasDeliveryDate = Boolean(state.liefertermin)
+  const hasFollowUpDocument = Boolean(state.lieferscheinNr || state.statusGedruckt || state.statusBestaetigt)
+  const hasDangerousGoodsBlocker = summen.gefahrgutPunkte > 1000
+  const canFinalizeOrder = hasCustomer && hasPositions && hasDeliveryDate && !hasDangerousGoodsBlocker
+  const nextOrderEditorAction = !hasCustomer
+    ? 'Kunden auswaehlen.'
+    : !hasPositions
+      ? 'Positionen erfassen oder aus Angebot uebernehmen.'
+      : !hasDeliveryDate
+        ? 'Liefertermin setzen.'
+        : hasDangerousGoodsBlocker
+          ? 'Gefahrgutpunkte klaeren, bevor der Auftrag gedruckt oder fakturiert wird.'
+          : state.lieferscheinNr
+            ? 'Folgebeleg pruefen und Rechnung vorbereiten.'
+            : 'Auftrag speichern, drucken oder Folgebeleg erzeugen.'
+  const orderEditorTaskItems: UxTaskItem[] = [
+    {
+      label: 'Kunde festlegen',
+      done: hasCustomer,
+      hint: hasCustomer ? `${state.customer?.name || 'Kunde'} ist zugeordnet.` : 'Kunde suchen oder neu auswaehlen.',
+    },
+    {
+      label: 'Positionen erfassen',
+      done: hasPositions,
+      hint: hasPositions ? `${state.positionen.length} Positionen mit ${summen.netto.toFixed(2)} EUR netto.` : 'Artikel erfassen oder Positionen aus Angebot uebernehmen.',
+    },
+    {
+      label: 'Liefer- und Zahlungsfolge klaeren',
+      done: hasDeliveryDate,
+      hint: hasDeliveryDate ? `Liefertermin ${state.liefertermin} gesetzt.` : 'Liefertermin und Zahlungsziel vor Folgebeleg klaeren.',
+    },
+    {
+      label: 'Folgebeleg sichern',
+      done: hasFollowUpDocument,
+      hint: state.lieferscheinNr ? `Lieferschein ${state.lieferscheinNr} vorhanden.` : 'Speichern, drucken, Lieferschein oder Sofort-Rechnung erzeugen.',
+    },
+  ]
+  const orderEditorCrudCapabilities = [
+    {
+      key: 'create',
+      label: 'Anlegen/Speichern',
+      available: canFinalizeOrder,
+      hint: canFinalizeOrder ? 'Auftrag kann gespeichert und weitergefuehrt werden.' : 'Kunde, Positionen und Liefertermin sind Pflicht fuer einen belastbaren Auftrag.',
+    },
+    {
+      key: 'read',
+      label: 'Lesen',
+      available: true,
+      hint: 'Kunde, Kopf, Positionen, Summen, Gewicht und Gefahrgutpunkte sind sichtbar.',
+    },
+    {
+      key: 'update',
+      label: 'Bearbeiten',
+      available: true,
+      hint: 'Kopf, Kunde, Positionen und Folgeinformationen koennen in der Maske bearbeitet werden.',
+    },
+    {
+      key: 'delete',
+      label: 'Loeschen/Storno',
+      available: Boolean(state.id),
+      hint: state.id ? 'Gespeicherte Auftraege koennen ueber den bestehenden Loeschdialog behandelt werden.' : 'Neue, ungespeicherte Auftraege koennen verworfen werden.',
+    },
+    {
+      key: 'approve',
+      label: 'Drucken/Folgebeleg',
+      available: canFinalizeOrder,
+      hint: 'Druck, Lieferschein, Attestation und Sofort-Rechnung sind im Editor angebunden.',
+    },
+    {
+      key: 'export',
+      label: 'DMS/Nachweis',
+      available: Boolean(state.id),
+      hint: state.id ? 'DMS-Anhaenge und Folgebelege koennen dem Auftrag zugeordnet werden.' : 'Nachweisablage startet nach dem ersten Speichern.',
+    },
+    {
+      key: 'audit',
+      label: 'Nachverfolgung',
+      available: true,
+      hint: 'Auftragsnummer, Angebotsbezug, Kunde, Status und Folgebeleg bilden die Belegspur.',
+    },
+  ]
 
   // Keyboard event handler for global shortcuts
   useEffect(() => {
@@ -1022,6 +1150,40 @@ export default function SalesOrderEditorPage(): JSX.Element {
 
 
         {/* â”€â”€ Kopf-Bereich (3 Spalten) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+        <div className="mb-4 space-y-4">
+          <RoleFocusBar
+            roles={salesOrderRoleProfiles}
+            value={roleFocus}
+            onChange={setRoleFocus}
+            visibleCount={roleFocus === 'all' ? 5 : 1}
+            totalCount={5}
+          />
+          <ManagementDecisionPanel
+            decision={{
+              allowed: canFinalizeOrder,
+              allowedLabel: 'Belegfaehig',
+              blockedLabel: 'Noch nicht belegfaehig',
+              summary: canFinalizeOrder
+                ? `Der Auftrag ist fachlich bereit. ${state.positionen.length} Positionen, ${summen.brutto.toFixed(2)} EUR brutto und Liefertermin ${state.liefertermin}.`
+                : `Der Auftrag braucht noch Eingaben. ${nextOrderEditorAction}`,
+              blockerCount: canFinalizeOrder ? 0 : 1,
+              nextFocus: nextOrderEditorAction,
+              template: {
+                label: 'Auftragsliste oeffnen',
+                href: '/sales/auftraege',
+              },
+            }}
+          />
+          <div className="grid gap-4 lg:grid-cols-[1.35fr_1fr]">
+            <OperationalTaskPlan title="Auftrags-Erfassungsplan" items={orderEditorTaskItems} />
+            <NextActionPanel
+              action={nextOrderEditorAction}
+              tone={canFinalizeOrder ? 'emerald' : hasDangerousGoodsBlocker ? 'red' : hasCustomer ? 'amber' : 'blue'}
+            />
+          </div>
+          <CrudCapabilityChecklist capabilities={orderEditorCrudCapabilities} />
+        </div>
+
         <Card className="mb-4 p-4">
           <div className="grid grid-cols-3 gap-4">
 
