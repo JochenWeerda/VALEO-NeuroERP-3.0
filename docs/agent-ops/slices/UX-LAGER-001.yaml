@@ -1,0 +1,27 @@
+id: UX-LAGER-001
+title: Lagerplaetze und Bestandsbewegungen mit UX-Exzellenzbaukasten
+owner: Codex
+status: reserviert
+created: 2026-05-15
+goal: >
+  Lagerarbeitsflaechen fuer Lagerplaetze und Bestandsbewegungen mit
+  Rollenfokus, Engpassentscheidung, naechster Aktion und Nachweisstatus fuehren.
+file_ownership:
+  - docs/agent-ops/active-workboard.md
+  - docs/agent-ops/slices/UX-LAGER-001.yaml
+  - packages/frontend-web/src/pages/lager/lagerplaetze.tsx
+  - packages/frontend-web/src/features/inventory/StockManagement.tsx
+  - docs/project-context/ux-excellence-operating-standard-2026-05-13.md
+acceptance_criteria:
+  - Lagerplaetze zeigen Rollenfokus, Kapazitaetsplan, Managemententscheidung, Next Action und Nachweislink.
+  - StockManagement zeigt Rollenfokus, Bestands-/Reservierungsplan, Managemententscheidung, Next Action und CRUD-/Workflow-Abdeckung.
+  - Bestehende Kapazitaetsanzeige, Artikel-/Bestandsliste und Bewegungsdialog bleiben erhalten.
+  - Typecheck und Doku-Checks sind gruen.
+checks:
+  - pnpm --filter @valero-neuroerp/frontend-web type-check
+  - python scripts/agent_workboard_supervisor.py validate
+  - node scripts/docs-governance-check.cjs
+  - node scripts/docs-markdown-check.cjs docs/project-context/ux-excellence-operating-standard-2026-05-13.md docs/agent-ops/active-workboard.md docs/agent-ops/slices/UX-LAGER-001.yaml
+  - git diff --check
+risks:
+  - Einzelne Lagerseiten wurden in OP-ROLL-Slices bereits fallartig aufgewertet; dieser Slice fokussiert Lagerplaetze und zentrales StockManagement.
