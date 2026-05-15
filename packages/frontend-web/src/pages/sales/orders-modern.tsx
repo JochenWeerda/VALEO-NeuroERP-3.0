@@ -11,6 +11,15 @@ import { Input } from '@/components/ui/input'
 import { DataTable } from '@/components/ui/data-table'
 import { getEntityTypeLabel, getListTitle, getStatusLabel } from '@/features/crud/utils/i18n-helpers'
 import { useAuftraege, type Auftrag, type AuftragStatus } from '@/lib/api/sales'
+import {
+  CrudCapabilityChecklist,
+  EvidenceTemplateLink,
+  ManagementDecisionPanel,
+  NextActionPanel,
+  OperationalTaskPlan,
+  RoleFocusBar,
+  type UxTaskItem,
+} from '@/components/workflow'
 
 const STATUS_OPTIONS: Array<{ value: AuftragStatus | 'alle'; label: string }> = [
   { value: 'alle', label: 'Alle Status' },
@@ -29,6 +38,17 @@ const statusVariantMap: Record<AuftragStatus, 'default' | 'outline' | 'secondary
   fakturiert: 'outline',
   storniert: 'destructive',
 }
+
+type SalesExceptionRoleFocus = 'all' | 'sales' | 'order-desk' | 'logistics' | 'billing' | 'management'
+
+const salesExceptionRoleProfiles: Array<{ id: SalesExceptionRoleFocus; label: string; description: string }> = [
+  { id: 'all', label: 'Alle Rollen', description: 'Zeigt Sales-Ausnahmen fuer Vertrieb, Auftragsabwicklung, Logistik, Faktura und Leitung.' },
+  { id: 'sales', label: 'Vertrieb', description: 'Fokus auf offene Auftraege, Kunde und naechstes Follow-up.' },
+  { id: 'order-desk', label: 'Auftragsabwicklung', description: 'Fokus auf Bearbeitung, Filter und Importarbeitsplatz.' },
+  { id: 'logistics', label: 'Logistik', description: 'Fokus auf Teillieferungen und Lieferfolge.' },
+  { id: 'billing', label: 'Faktura', description: 'Fokus auf rechnungsfaehige und fakturierte Auftraege.' },
+  { id: 'management', label: 'Leitung', description: 'Fokus auf Eskalation, Archivkandidaten und naechste Aktion.' },
+]
 
 function downloadCsv(rows: Auftrag[]): void {
   const header = ['Auftragsnummer', 'Datum', 'Kunde', 'Betrag', 'Liefertermin', 'Status']
@@ -63,6 +83,7 @@ export default function SalesOrdersModernPage(): JSX.Element {
   const [searchTerm, setSearchTerm] = useState('')
   const [statusFilter, setStatusFilter] = useState<AuftragStatus | 'alle'>('alle')
   const [showFilters, setShowFilters] = useState(false)
+  const [roleFocus, setRoleFocus] = useState<SalesExceptionRoleFocus>('all')
 
   const { data: orders = [] } = useAuftraege()
 
@@ -88,6 +109,32 @@ export default function SalesOrdersModernPage(): JSX.Element {
   }, [filteredOrders])
 
   const focusOrder = filteredOrders[0]
+  const cancelledCount = filteredOrders.filter((order) => order.status === 'storniert').length
+  const exceptionCount = quickStats.partial + quickStats.invoiceReady + cancelledCount
+  const exceptionReady = filteredOrders.length > 0 && cancelledCount === 0
+  const exceptionNextAction = cancelledCount > 0
+    ? `${cancelledCount} stornierte Auftraege pruefen und Nachweis sichern.`
+    : quickStats.partial > 0
+      ? `${quickStats.partial} Teillieferungen nachhalten.`
+      : quickStats.invoiceReady > 0
+        ? `${quickStats.invoiceReady} rechnungsfaehige Auftraege fakturieren.`
+        : quickStats.open > 0
+          ? `${quickStats.open} offene Auftraege bestaetigen oder bearbeiten.`
+          : 'Filter anpassen, neuen Auftrag anlegen oder Archiv vorbereiten.'
+  const exceptionTaskItems: UxTaskItem[] = [
+    { label: 'Offene Auftraege priorisieren', done: quickStats.open === 0, hint: quickStats.open > 0 ? `${quickStats.open} offene Auftraege brauchen Bearbeitung.` : 'Keine offenen Auftraege in der Sicht.' },
+    { label: 'Teillieferungen klaeren', done: quickStats.partial === 0, hint: quickStats.partial > 0 ? `${quickStats.partial} Teillieferungen brauchen Restlieferung oder Faktura.` : 'Keine Teillieferungen in der Sicht.' },
+    { label: 'Faktura vorbereiten', done: quickStats.invoiceReady === 0, hint: quickStats.invoiceReady > 0 ? `${quickStats.invoiceReady} Auftraege sind rechnungsfaehig.` : 'Keine rechnungsfaehige Ausnahme in der Sicht.' },
+    { label: 'Archiv/Storno nachweisen', done: cancelledCount === 0, hint: cancelledCount > 0 ? `${cancelledCount} Storno-Faelle brauchen Nachweis.` : `${quickStats.archiveReady} Archivkandidaten vorhanden.` },
+  ]
+  const exceptionCrudCapabilities = [
+    { key: 'create', label: 'Anlegen', available: true, hint: 'Neue Auftraege koennen ueber die Toolbar angelegt werden.' },
+    { key: 'read', label: 'Lesen', available: true, hint: 'Auftragsnummer, Kunde, Betrag, Liefertermin und Status sind sichtbar.' },
+    { key: 'update', label: 'Bearbeiten', available: filteredOrders.length > 0, hint: 'Auftraege koennen im Editor geoeffnet werden.' },
+    { key: 'filter', label: 'Filtern/Suchen', available: true, hint: 'Suche und Statusfilter grenzen Ausnahmen ein.' },
+    { key: 'export', label: 'Export/Nachweis', available: filteredOrders.length > 0, hint: 'CSV-Export dokumentiert die aktuelle Ausnahmensicht.' },
+    { key: 'audit', label: 'Pruefspur', available: true, hint: 'Status, Archivkandidaten, Export und Fokusauftrag bilden die Pruefsicht.' },
+  ]
 
   const primaryActions: ToolbarAction[] = [
     {
@@ -205,6 +252,29 @@ export default function SalesOrdersModernPage(): JSX.Element {
           title={pageTitle}
           description="Die Seite ist jetzt an die reale Auftragslage angebunden und fuehrt in die produktiven Arbeitsplaetze fuer Export, Import, Bearbeitung und Archivvorbereitung."
         >
+          <div className="mb-4 space-y-4">
+            <RoleFocusBar roles={salesExceptionRoleProfiles} value={roleFocus} onChange={setRoleFocus} visibleCount={roleFocus === 'all' ? 5 : 1} totalCount={5} />
+            <ManagementDecisionPanel
+              decision={{
+                allowed: exceptionReady,
+                allowedLabel: 'Arbeitsfaehig',
+                blockedLabel: 'Eskalation offen',
+                summary: exceptionReady ? `${filteredOrders.length} Auftraege sichtbar, ${exceptionCount} operative Ausnahmen ohne Storno-Blocker.` : `Vor der Entscheidung ist noch etwas offen: ${exceptionNextAction}`,
+                blockerCount: [filteredOrders.length === 0, cancelledCount > 0].filter(Boolean).length,
+                nextFocus: exceptionNextAction,
+                template: { label: 'Klassische Auftragsliste oeffnen', href: '/sales/auftraege-liste' },
+              }}
+            />
+            <div className="grid gap-4 lg:grid-cols-[1.35fr_1fr]">
+              <OperationalTaskPlan title="Sales-Eskalationsplan" items={exceptionTaskItems} />
+              <div className="space-y-3">
+                <NextActionPanel action={exceptionNextAction} tone={exceptionReady ? 'emerald' : cancelledCount > 0 ? 'red' : quickStats.partial > 0 || quickStats.invoiceReady > 0 ? 'amber' : 'blue'} />
+                <EvidenceTemplateLink link={{ label: 'Rechnungen pruefen', href: '/sales/rechnungen' }} />
+              </div>
+            </div>
+            <CrudCapabilityChecklist capabilities={exceptionCrudCapabilities} />
+          </div>
+
           <div className="grid gap-4 md:grid-cols-4">
             <Card>
               <CardHeader className="pb-2">
