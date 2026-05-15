@@ -14,6 +14,23 @@ from app.core.uuid7 import uuid7
 
 logger = logging.getLogger(__name__)
 
+
+def _parse_date(value: str) -> date:
+    try:
+        return date.fromisoformat(value)
+    except ValueError as exc:
+        from app.core.exceptions import ValidationFailedError
+        raise ValidationFailedError(f"Invalid date format: {value}") from exc
+
+
+def _parse_event_dt(value: str) -> datetime:
+    try:
+        return datetime.fromisoformat(value.replace("Z", "+00:00"))
+    except ValueError as exc:
+        from app.core.exceptions import ValidationFailedError
+        raise ValidationFailedError(f"Invalid datetime format: {value}") from exc
+
+
 # ── pure value helpers (no DB, no side-effects) ───────────────────────────────
 
 def normalize_status(value: Any, fallback: str = "aktiv") -> str:
@@ -497,3 +514,658 @@ class PersonalService:
             "planningBlockers": blockers,
             "note": str(r.get("notes") or "") or None,
         }
+
+    # ── mitarbeiter mutations ─────────────────────────────────────────────────
+
+    def create_mitarbeiter(self, payload: Any) -> str:
+        """Insert new user into domain_shared.users. Returns new user_id."""
+        from uuid import uuid4
+        import json as _json
+        existing = self.db.execute(
+            text("SELECT 1 FROM domain_shared.users "
+                 "WHERE tenant_id = :tid AND (email = :email OR username = :email) LIMIT 1"),
+            {"tid": self.tenant_id, "email": payload.email},
+        ).first()
+        if existing:
+            from app.core.exceptions import ConflictError
+            raise ConflictError("Mitarbeiter mit E-Mail existiert bereits")
+        first, last = split_name(payload.name)
+        role_slug = (payload.position or "mitarbeiter").strip().lower().replace(" ", "_") or "mitarbeiter"
+        user_id = str(uuid4())
+        self.db.execute(
+            text("""INSERT INTO domain_shared.users
+                    (id, keycloak_id, username, email, first_name, last_name,
+                     is_active, roles, tenant_id, preferences, created_at, updated_at)
+                    VALUES (:id, :kc_id, :uname, :email, :first, :last,
+                            :active, :roles, :tid, CAST(:prefs AS jsonb), NOW(), NOW())"""),
+            {"id": user_id, "kc_id": f"local-{user_id}", "uname": payload.email,
+             "email": payload.email, "first": first, "last": last,
+             "active": payload.status != "krank", "roles": [role_slug],
+             "tid": self.tenant_id,
+             "prefs": _json.dumps({"hr_status": payload.status, "abteilung": payload.abteilung})},
+        )
+        self.db.commit()
+        return user_id
+
+    def update_mitarbeiter(self, user_id: str, payload: Any) -> None:
+        import json as _json
+        first, last = split_name(payload.name)
+        role_slug = (payload.position or "mitarbeiter").strip().lower().replace(" ", "_") or "mitarbeiter"
+        count = self.db.execute(
+            text("""UPDATE domain_shared.users
+                    SET email=:email, username=:email, first_name=:first, last_name=:last,
+                        is_active=:active, roles=:roles,
+                        preferences=COALESCE(preferences,'{}' ::jsonb)||CAST(:prefs AS jsonb),
+                        updated_at=NOW()
+                    WHERE id=:uid AND tenant_id=:tid"""),
+            {"email": payload.email, "first": first, "last": last,
+             "active": payload.status != "krank", "roles": [role_slug],
+             "prefs": _json.dumps({"hr_status": payload.status, "abteilung": payload.abteilung}),
+             "uid": user_id, "tid": self.tenant_id},
+        ).rowcount
+        if not count:
+            from app.core.exceptions import EntityNotFoundError
+            raise EntityNotFoundError("Mitarbeiter", user_id)
+        self.db.commit()
+
+    def delete_mitarbeiter(self, user_id: str) -> None:
+        count = self.db.execute(
+            text("DELETE FROM domain_shared.users WHERE id=:uid AND tenant_id=:tid"),
+            {"uid": user_id, "tid": self.tenant_id},
+        ).rowcount
+        if not count:
+            from app.core.exceptions import EntityNotFoundError
+            raise EntityNotFoundError("Mitarbeiter", user_id)
+        self.db.commit()
+
+    # ── shifts ────────────────────────────────────────────────────────────────
+
+    def list_shifts(
+        self,
+        datum_von: Optional[str] = None,
+        datum_bis: Optional[str] = None,
+        location: Optional[str] = None,
+    ) -> list:
+        params: dict[str, Any] = {"tid": self.tenant_id}
+        where = ["tenant_id = :tid"]
+        if datum_von:
+            params["dv"] = _parse_date(datum_von)
+            where.append("shift_date >= :dv")
+        if datum_bis:
+            params["db"] = _parse_date(datum_bis)
+            where.append("shift_date <= :db")
+        if location:
+            params["loc"] = location
+            where.append("location_code = :loc")
+        rows = self.db.execute(
+            text(f"SELECT id, shift_date, name, location_code, required_role, "
+                 f"required_qualifications, required_headcount, starts_at, ends_at, "
+                 f"assigned_employee_refs, status, conflicts, notes "
+                 f"FROM domain_hr.shifts WHERE {' AND '.join(where)} "
+                 f"ORDER BY shift_date ASC, starts_at ASC"),
+            params,
+        ).mappings().all()
+        return [dict(r) for r in rows]
+
+    def create_shift(self, params: dict) -> dict:
+        row = self.db.execute(
+            text("""INSERT INTO domain_hr.shifts
+                    (id, tenant_id, shift_date, name, location_code, required_role,
+                     required_qualifications, required_headcount, starts_at, ends_at,
+                     assigned_employee_refs, status, conflicts, notes, created_at, updated_at)
+                    VALUES (:id, :tid, :shift_date, :name, :location_code, :required_role,
+                     CAST(:required_qualifications AS jsonb), :required_headcount, :starts_at, :ends_at,
+                     CAST(:assigned_employee_refs AS jsonb), :status, CAST(:conflicts AS jsonb),
+                     :notes, NOW(), NOW())
+                    RETURNING id, shift_date, name, location_code, required_role,
+                              required_qualifications, required_headcount, starts_at, ends_at,
+                              assigned_employee_refs, status, conflicts, notes"""),
+            {"tid": self.tenant_id, **params},
+        ).mappings().first()
+        self.db.commit()
+        return dict(row)
+
+    def delete_shift(self, shift_id: str) -> None:
+        count = self.db.execute(
+            text("DELETE FROM domain_hr.shifts WHERE id=:sid AND tenant_id=:tid"),
+            {"sid": shift_id, "tid": self.tenant_id},
+        ).rowcount
+        if not count:
+            from app.core.exceptions import EntityNotFoundError
+            raise EntityNotFoundError("Shift", shift_id)
+        self.db.commit()
+
+    def get_shift_context(self, shift_date: Any) -> tuple[list, list]:
+        """Return (profile_rows, absence_rows) needed for conflict detection."""
+        profile_rows = self.db.execute(
+            text("SELECT employee_ref, status, qualifications "
+                 "FROM domain_hr.employee_time_profiles WHERE tenant_id=:tid"),
+            {"tid": self.tenant_id},
+        ).mappings().all()
+        absence_rows = self.db.execute(
+            text("SELECT employee_ref FROM domain_hr.time_entries "
+                 "WHERE tenant_id=:tid AND entry_date=:dt "
+                 "AND entry_type IN ('Urlaub','Krank','Unbezahlt','Sonstiges') "
+                 "AND status IN ('Approved','Genehmigt')"),
+            {"tid": self.tenant_id, "dt": shift_date},
+        ).mappings().all()
+        return list(profile_rows), list(absence_rows)
+
+    # ── calendar events ───────────────────────────────────────────────────────
+
+    def list_calendar_events(
+        self,
+        start: Optional[str] = None,
+        end: Optional[str] = None,
+        employee_ref: Optional[str] = None,
+        event_type: Optional[str] = None,
+    ) -> list:
+        params: dict[str, Any] = {"tid": self.tenant_id}
+        where = ["tenant_id = :tid"]
+        if start:
+            params["start"] = _parse_event_dt(start)
+            where.append("ends_at >= :start")
+        if end:
+            params["end"] = _parse_event_dt(end)
+            where.append("starts_at <= :end")
+        if employee_ref:
+            params["eref"] = employee_ref
+            where.append("employee_ref = :eref")
+        if event_type:
+            params["etype"] = event_type
+            where.append("event_type = :etype")
+        rows = self.db.execute(
+            text(f"SELECT id, source_system, provider, external_event_ref, event_type, title, "
+                 f"employee_ref, resource_ref, starts_at, ends_at, timezone, visibility, "
+                 f"status, sync_state, conflict_level, source_ref, metadata "
+                 f"FROM domain_hr.calendar_events WHERE {' AND '.join(where)} "
+                 f"ORDER BY starts_at ASC, employee_ref ASC"),
+            params,
+        ).mappings().all()
+        return [dict(r) for r in rows]
+
+    def create_calendar_event(self, params: dict) -> dict:
+        row = self.db.execute(
+            text("""INSERT INTO domain_hr.calendar_events
+                    (id, tenant_id, source_system, provider, external_event_ref, event_type, title,
+                     employee_ref, resource_ref, starts_at, ends_at, timezone, visibility, status,
+                     sync_state, conflict_level, source_ref, metadata, created_at, updated_at)
+                    VALUES (:id, :tid, :source_system, :provider, :external_event_ref, :event_type,
+                     :title, :employee_ref, :resource_ref, :starts_at, :ends_at, :timezone, :visibility,
+                     :status, :sync_state, :conflict_level, :source_ref, CAST(:metadata AS jsonb), NOW(), NOW())
+                    RETURNING id, source_system, provider, external_event_ref, event_type, title,
+                              employee_ref, resource_ref, starts_at, ends_at, timezone, visibility,
+                              status, sync_state, conflict_level, source_ref, metadata"""),
+            {"tid": self.tenant_id, **params},
+        ).mappings().first()
+        self.db.commit()
+        return dict(row)
+
+    # ── payroll exports ───────────────────────────────────────────────────────
+
+    def list_payroll_exports(self) -> list:
+        rows = self.db.execute(
+            text("SELECT id, period_from, period_to, target_system, status, items, blockers "
+                 "FROM domain_hr.payroll_exports WHERE tenant_id=:tid "
+                 "ORDER BY period_from DESC, created_at DESC"),
+            {"tid": self.tenant_id},
+        ).mappings().all()
+        return [dict(r) for r in rows]
+
+    def get_payroll_time_rows(self, period_from: Any, period_to: Any) -> list:
+        rows = self.db.execute(
+            text("SELECT id, employee_ref, entry_date, hours, entry_type, status, cost_center "
+                 "FROM domain_hr.time_entries WHERE tenant_id=:tid "
+                 "AND entry_date BETWEEN :pf AND :pt "
+                 "AND entry_type IN ('Arbeit','Bereitschaft','Urlaub','Krank','Korrektur') "
+                 "ORDER BY employee_ref ASC, entry_date ASC"),
+            {"tid": self.tenant_id, "pf": period_from, "pt": period_to},
+        ).mappings().all()
+        return [dict(r) for r in rows]
+
+    def create_payroll_export(self, params: dict) -> dict:
+        row = self.db.execute(
+            text("""INSERT INTO domain_hr.payroll_exports
+                    (id, tenant_id, period_from, period_to, target_system, status,
+                     items, blockers, created_at, created_by)
+                    VALUES (:id, :tid, :period_from, :period_to, :target_system, :status,
+                     CAST(:items AS jsonb), CAST(:blockers AS jsonb), NOW(), :created_by)
+                    RETURNING id, period_from, period_to, target_system, status, items, blockers"""),
+            {"tid": self.tenant_id, **params},
+        ).mappings().first()
+        self.db.commit()
+        return dict(row)
+
+    # ── campaign capacity ─────────────────────────────────────────────────────
+
+    def list_campaign_capacity(self) -> list:
+        rows = self.db.execute(
+            text("SELECT id, campaign_code, name, period_from, period_to, location_code, "
+                 "role_demand, expected_volume, status, findings "
+                 "FROM domain_hr.campaign_capacity_plans WHERE tenant_id=:tid "
+                 "ORDER BY period_from ASC, campaign_code ASC"),
+            {"tid": self.tenant_id},
+        ).mappings().all()
+        return [dict(r) for r in rows]
+
+    def get_campaign_context(self, location_code: str, period_from: Any, period_to: Any) -> tuple[list, list, list]:
+        profile_rows = self.db.execute(
+            text("SELECT employee_ref, role_code, status "
+                 "FROM domain_hr.employee_time_profiles "
+                 "WHERE tenant_id=:tid AND location_code=:loc"),
+            {"tid": self.tenant_id, "loc": location_code},
+        ).mappings().all()
+        absence_rows = self.db.execute(
+            text("SELECT employee_ref FROM domain_hr.time_entries "
+                 "WHERE tenant_id=:tid AND entry_date BETWEEN :pf AND :pt "
+                 "AND entry_type IN ('Urlaub','Krank','Unbezahlt','Sonstiges') "
+                 "AND status IN ('Approved','Genehmigt')"),
+            {"tid": self.tenant_id, "pf": period_from, "pt": period_to},
+        ).mappings().all()
+        shift_rows = self.db.execute(
+            text("SELECT assigned_employee_refs FROM domain_hr.shifts "
+                 "WHERE tenant_id=:tid AND shift_date BETWEEN :pf AND :pt "
+                 "AND location_code=:loc"),
+            {"tid": self.tenant_id, "pf": period_from, "pt": period_to, "loc": location_code},
+        ).mappings().all()
+        return list(profile_rows), list(absence_rows), list(shift_rows)
+
+    def create_campaign_capacity(self, params: dict) -> dict:
+        row = self.db.execute(
+            text("""INSERT INTO domain_hr.campaign_capacity_plans
+                    (id, tenant_id, campaign_code, name, period_from, period_to, location_code,
+                     role_demand, expected_volume, status, findings, created_at, updated_at)
+                    VALUES (:id, :tid, :campaign_code, :name, :period_from, :period_to,
+                     :location_code, CAST(:role_demand AS jsonb), :expected_volume, :status,
+                     CAST(:findings AS jsonb), NOW(), NOW())
+                    RETURNING id, campaign_code, name, period_from, period_to, location_code,
+                              role_demand, expected_volume, status, findings"""),
+            {"tid": self.tenant_id, **params},
+        ).mappings().first()
+        self.db.commit()
+        return dict(row)
+
+    # ── field service plan ────────────────────────────────────────────────────
+
+    def list_field_service_plans(self, employee_ref: Optional[str] = None) -> list:
+        params: dict[str, Any] = {"tid": self.tenant_id}
+        where = ["tenant_id = :tid"]
+        if employee_ref:
+            params["eref"] = employee_ref
+            where.append("employee_ref = :eref")
+        rows = self.db.execute(
+            text(f"SELECT id, employee_ref, customer_ref, territory_code, campaign_code, "
+                 f"visit_type, starts_at, ends_at, status, conflicts, notes "
+                 f"FROM domain_hr.field_service_plans WHERE {' AND '.join(where)} "
+                 f"ORDER BY starts_at ASC, employee_ref ASC"),
+            params,
+        ).mappings().all()
+        return [dict(r) for r in rows]
+
+    def get_field_service_context(self, employee_ref: str, starts_at: Any, ends_at: Any) -> tuple[list, list, list]:
+        profile_rows = self.db.execute(
+            text("SELECT employee_ref, status, time_model "
+                 "FROM domain_hr.employee_time_profiles "
+                 "WHERE tenant_id=:tid AND employee_ref=:eref"),
+            {"tid": self.tenant_id, "eref": employee_ref},
+        ).mappings().all()
+        absence_rows = self.db.execute(
+            text("SELECT employee_ref FROM domain_hr.time_entries "
+                 "WHERE tenant_id=:tid AND employee_ref=:eref "
+                 "AND entry_date BETWEEN :sd AND :ed "
+                 "AND entry_type IN ('Urlaub','Krank','Unbezahlt','Sonstiges') "
+                 "AND status IN ('Approved','Genehmigt')"),
+            {"tid": self.tenant_id, "eref": employee_ref,
+             "sd": starts_at.date(), "ed": ends_at.date()},
+        ).mappings().all()
+        cal_rows = self.db.execute(
+            text("SELECT id FROM domain_hr.calendar_events "
+                 "WHERE tenant_id=:tid AND employee_ref=:eref "
+                 "AND ends_at > :sa AND starts_at < :ea AND status='confirmed'"),
+            {"tid": self.tenant_id, "eref": employee_ref, "sa": starts_at, "ea": ends_at},
+        ).mappings().all()
+        return list(profile_rows), list(absence_rows), list(cal_rows)
+
+    def create_field_service_plan(self, params: dict) -> dict:
+        row = self.db.execute(
+            text("""INSERT INTO domain_hr.field_service_plans
+                    (id, tenant_id, employee_ref, customer_ref, territory_code, campaign_code,
+                     visit_type, starts_at, ends_at, status, conflicts, notes, created_at, updated_at)
+                    VALUES (:id, :tid, :employee_ref, :customer_ref, :territory_code, :campaign_code,
+                     :visit_type, :starts_at, :ends_at, :status, CAST(:conflicts AS jsonb),
+                     :notes, NOW(), NOW())
+                    RETURNING id, employee_ref, customer_ref, territory_code, campaign_code,
+                              visit_type, starts_at, ends_at, status, conflicts, notes"""),
+            {"tid": self.tenant_id, **params},
+        ).mappings().first()
+        self.db.commit()
+        return dict(row)
+
+    # ── stundenzettel (driver timesheets) ─────────────────────────────────────
+
+    def create_stundenzettel(self, params: dict) -> str:
+        """Insert a driver timesheet + linked time_entry. Returns timesheet_id."""
+        timesheet_id = params.pop("timesheet_id")
+        time_entry_params = params.pop("time_entry_params")
+        self.db.execute(
+            text("""INSERT INTO domain_hr.driver_timesheets
+                    (id, tenant_id, entry_date, driver_name, vehicle_plate, tours,
+                     total_hours, overtime_hours, signature_data, created_at, updated_at)
+                    VALUES (:id, :tid, :entry_date, :driver_name, :vehicle_plate,
+                     CAST(:tours AS jsonb), :total_hours, :overtime_hours,
+                     :signature_data, NOW(), NOW())"""),
+            {"id": timesheet_id, "tid": self.tenant_id, **params},
+        )
+        self.db.execute(
+            text("""INSERT INTO domain_hr.time_entries
+                    (id, tenant_id, employee_ref, entry_date, start_time, end_time,
+                     hours, entry_type, source, notes, created_at, updated_at)
+                    VALUES (:id, :tid, :employee_ref, :entry_date, :start_time, :end_time,
+                     :hours, :entry_type, 'timesheet', :notes, NOW(), NOW())"""),
+            {"tid": self.tenant_id, **time_entry_params},
+        )
+        self.db.commit()
+        return timesheet_id
+
+    def list_stundenzettel(self, datum_von: Optional[str] = None, datum_bis: Optional[str] = None) -> list:
+        params: dict[str, Any] = {"tid": self.tenant_id}
+        where = ["tenant_id = :tid"]
+        if datum_von:
+            where.append("entry_date >= :dv")
+            params["dv"] = datum_von
+        if datum_bis:
+            where.append("entry_date <= :db")
+            params["db"] = datum_bis
+        rows = self.db.execute(
+            text(f"SELECT id, entry_date, driver_name, vehicle_plate, tours, total_hours, "
+                 f"overtime_hours, created_at FROM domain_hr.driver_timesheets "
+                 f"WHERE {' AND '.join(where)} ORDER BY entry_date DESC, created_at DESC"),
+            params,
+        ).mappings().all()
+        return [dict(r) for r in rows]
+
+    # ── Work-Plan ─────────────────────────────────────────────────────────────
+
+    def get_work_plan_data(self, start_date: date, end_date: date) -> dict:
+        """Fetch all raw rows needed to assemble a work plan."""
+        tid = self.tenant_id
+        period = {"tenant_id": tid, "period_from": start_date, "period_to": end_date}
+
+        profile_rows = self.db.execute(
+            text("""SELECT employee_ref, display_name, role_code, time_model, status, qualifications
+                    FROM domain_hr.employee_time_profiles
+                    WHERE tenant_id = :tenant_id AND status = 'active'"""),
+            {"tenant_id": tid},
+        ).mappings().all()
+
+        try:
+            user_rows = self.db.execute(
+                text("SELECT id, preferences FROM domain_shared.users WHERE tenant_id = :tenant_id"),
+                {"tenant_id": tid},
+            ).mappings().all()
+        except Exception:
+            user_rows = []
+
+        absence_rows = self.db.execute(
+            text("""SELECT id, employee_ref, entry_date, entry_type, status
+                    FROM domain_hr.time_entries
+                    WHERE tenant_id = :tenant_id
+                      AND entry_date BETWEEN :period_from AND :period_to
+                      AND entry_type IN ('Urlaub', 'Krank', 'Unbezahlt', 'Sonstiges')
+                      AND status IN ('Approved', 'Genehmigt')
+                    ORDER BY entry_date ASC, employee_ref ASC"""),
+            period,
+        ).mappings().all()
+
+        shift_rows = self.db.execute(
+            text("""SELECT id, shift_date, name, starts_at, ends_at, assigned_employee_refs, status
+                    FROM domain_hr.shifts
+                    WHERE tenant_id = :tenant_id AND shift_date BETWEEN :period_from AND :period_to
+                    ORDER BY shift_date ASC, starts_at ASC"""),
+            period,
+        ).mappings().all()
+
+        calendar_rows = self.db.execute(
+            text("""SELECT id, employee_ref, event_type, title, starts_at, ends_at, status, conflict_level
+                    FROM domain_hr.calendar_events
+                    WHERE tenant_id = :tenant_id
+                      AND starts_at::date <= :period_to
+                      AND ends_at::date >= :period_from
+                    ORDER BY starts_at ASC, employee_ref ASC"""),
+            period,
+        ).mappings().all()
+
+        field_rows = self.db.execute(
+            text("""SELECT id, employee_ref, customer_ref, visit_type, starts_at, ends_at, status
+                    FROM domain_hr.field_service_plans
+                    WHERE tenant_id = :tenant_id
+                      AND starts_at::date <= :period_to
+                      AND ends_at::date >= :period_from
+                    ORDER BY starts_at ASC, employee_ref ASC"""),
+            period,
+        ).mappings().all()
+
+        return {
+            "profile_rows": [dict(r) for r in profile_rows],
+            "user_rows": [dict(r) for r in user_rows],
+            "absence_rows": [dict(r) for r in absence_rows],
+            "shift_rows": [dict(r) for r in shift_rows],
+            "calendar_rows": [dict(r) for r in calendar_rows],
+            "field_rows": [dict(r) for r in field_rows],
+        }
+
+    # ── Driver-Time Summary ───────────────────────────────────────────────────
+
+    def get_driver_time_data(self, target_date: str) -> dict:
+        """Fetch timesheet + absence rows for driver-time summary. Raises on DB error."""
+        params = {"tenant_id": self.tenant_id, "entry_date": target_date}
+        timesheet_rows = self.db.execute(
+            text("""SELECT id, entry_date, driver_name, vehicle_plate, tours,
+                           total_hours, overtime_hours, created_at
+                    FROM domain_hr.driver_timesheets
+                    WHERE tenant_id = :tenant_id AND entry_date = :entry_date
+                    ORDER BY driver_name ASC, created_at ASC"""),
+            params,
+        ).mappings().all()
+        absence_rows = self.db.execute(
+            text("""SELECT employee_ref, entry_date, entry_type
+                    FROM domain_hr.time_entries
+                    WHERE tenant_id = :tenant_id
+                      AND entry_date = :entry_date
+                      AND entry_type IN ('Urlaub', 'Krank')"""),
+            params,
+        ).mappings().all()
+        return {
+            "timesheet_rows": [dict(r) for r in timesheet_rows],
+            "absence_rows": [dict(r) for r in absence_rows],
+        }
+
+    # ── Time Cockpit ──────────────────────────────────────────────────────────
+
+    def get_time_cockpit_entries(self, target_date: str) -> list:
+        """Fetch time entries for the cockpit view. Raises on DB error."""
+        rows = self.db.execute(
+            text("""SELECT id, employee_ref, entry_date, start_time, end_time,
+                           hours, entry_type, source, status
+                    FROM domain_hr.time_entries
+                    WHERE tenant_id = :tenant_id AND entry_date = :entry_date
+                    ORDER BY employee_ref ASC, start_time ASC"""),
+            {"tenant_id": self.tenant_id, "entry_date": target_date},
+        ).mappings().all()
+        return [dict(r) for r in rows]
+
+    # ── HRM Operations Gates ──────────────────────────────────────────────────
+
+    def add_gate_evidence(
+        self,
+        gate_id: str,
+        evidence_id: str,
+        evidence_type: str,
+        title: str,
+        artifact_ref: Optional[str],
+        submitted_by: str,
+        metadata: dict,
+        current_status: str,
+    ) -> dict:
+        """Insert gate evidence, update gate status, write audit. Returns evidence row dict."""
+        row = self.db.execute(
+            text("""INSERT INTO domain_hr.hrm_operations_gate_evidence
+                      (id, tenant_id, gate_id, evidence_type, title, artifact_ref,
+                       submitted_by, metadata)
+                    VALUES
+                      (:id, :tenant_id, :gate_id, :evidence_type, :title, :artifact_ref,
+                       :submitted_by, CAST(:metadata AS jsonb))
+                    RETURNING id, gate_id, evidence_type, title, artifact_ref,
+                              submitted_by, submitted_at, metadata"""),
+            {
+                "id": evidence_id,
+                "tenant_id": self.tenant_id,
+                "gate_id": gate_id,
+                "evidence_type": evidence_type,
+                "title": title,
+                "artifact_ref": artifact_ref,
+                "submitted_by": submitted_by,
+                "metadata": __import__("json").dumps(metadata),
+            },
+        ).mappings().first()
+        if current_status != "approved":
+            self.db.execute(
+                text("""UPDATE domain_hr.hrm_operations_gates
+                        SET status = 'evidence_submitted', updated_at = NOW(), rejection_reason = NULL
+                        WHERE tenant_id = :tenant_id AND gate_id = :gate_id"""),
+                {"tenant_id": self.tenant_id, "gate_id": gate_id},
+            )
+        self._insert_gate_audit(
+            gate_id, "evidence_created", submitted_by,
+            current_status,
+            "approved" if current_status == "approved" else "evidence_submitted",
+            details={"artifact_ref": artifact_ref, "evidence_type": evidence_type},
+        )
+        self.db.commit()
+        return dict(row)
+
+    def decide_gate(
+        self,
+        gate_id: str,
+        decision: str,
+        decided_by: str,
+        reason: Optional[str],
+        current_status: str,
+        evidence_count: int,
+    ) -> str:
+        """Apply approve/reject decision. Returns new status."""
+        if decision == "approve" and evidence_count < 1:
+            from app.core.exceptions import ConflictError
+            raise ConflictError("Gate approval requires at least one evidence artifact")
+        to_status = "approved" if decision == "approve" else "rejected"
+        self.db.execute(
+            text("""UPDATE domain_hr.hrm_operations_gates
+                    SET status = :status,
+                        approved_by = CASE WHEN :status = 'approved' THEN :actor ELSE NULL END,
+                        approved_at = CASE WHEN :status = 'approved' THEN NOW() ELSE NULL END,
+                        rejection_reason = CASE WHEN :status = 'rejected' THEN :reason ELSE NULL END,
+                        updated_at = NOW()
+                    WHERE tenant_id = :tenant_id AND gate_id = :gate_id"""),
+            {
+                "tenant_id": self.tenant_id,
+                "gate_id": gate_id,
+                "status": to_status,
+                "actor": decided_by,
+                "reason": reason,
+            },
+        )
+        self._insert_gate_audit(
+            gate_id, f"gate_{decision}d", decided_by,
+            current_status, to_status,
+            reason=reason,
+            details={"evidence_count": evidence_count},
+        )
+        self.db.commit()
+        return to_status
+
+    def record_gate_probe(
+        self,
+        gate_id: str,
+        probe_id: str,
+        provider: str,
+        probe_type: str,
+        result: str,
+        performed_by: str,
+        details: dict,
+        current_status: str,
+    ) -> dict:
+        """Insert probe record, update gate status, write audit. Returns probe row dict."""
+        row = self.db.execute(
+            text("""INSERT INTO domain_hr.hrm_operations_gate_probes
+                      (id, tenant_id, gate_id, provider, probe_type, result, performed_by, details)
+                    VALUES
+                      (:id, :tenant_id, :gate_id, :provider, :probe_type, :result, :performed_by,
+                       CAST(:details AS jsonb))
+                    RETURNING id, gate_id, provider, probe_type, result,
+                              performed_by, performed_at, details"""),
+            {
+                "id": probe_id,
+                "tenant_id": self.tenant_id,
+                "gate_id": gate_id,
+                "provider": provider,
+                "probe_type": probe_type,
+                "result": result,
+                "performed_by": performed_by,
+                "details": __import__("json").dumps(details),
+            },
+        ).mappings().first()
+        to_status = "probe_passed" if result == "passed" and current_status != "approved" else current_status
+        if result in {"failed", "not_configured"} and current_status != "approved":
+            to_status = "external_evidence_required"
+        self.db.execute(
+            text("""UPDATE domain_hr.hrm_operations_gates
+                    SET status = :status,
+                        last_probe_status = :probe_status,
+                        last_probe_at = NOW(),
+                        updated_at = NOW()
+                    WHERE tenant_id = :tenant_id AND gate_id = :gate_id"""),
+            {
+                "tenant_id": self.tenant_id,
+                "gate_id": gate_id,
+                "status": to_status,
+                "probe_status": result,
+            },
+        )
+        self._insert_gate_audit(
+            gate_id, "connector_probe", performed_by,
+            current_status, to_status,
+            details={"provider": provider, "probe_type": probe_type, "result": result},
+        )
+        self.db.commit()
+        return dict(row)
+
+    def _insert_gate_audit(
+        self,
+        gate_id: str,
+        event_type: str,
+        actor: str,
+        from_status: str,
+        to_status: str,
+        reason: Optional[str] = None,
+        details: Optional[dict] = None,
+    ) -> None:
+        import json as _json
+        self.db.execute(
+            text("""INSERT INTO domain_hr.hrm_operations_gate_audit
+                      (id, tenant_id, gate_id, event_type, actor, from_status, to_status,
+                       reason, details, created_at)
+                    VALUES
+                      (:id, :tenant_id, :gate_id, :event_type, :actor, :from_status, :to_status,
+                       :reason, CAST(:details AS jsonb), NOW())"""),
+            {
+                "id": str(uuid7()),
+                "tenant_id": self.tenant_id,
+                "gate_id": gate_id,
+                "event_type": event_type,
+                "actor": actor,
+                "from_status": from_status,
+                "to_status": to_status,
+                "reason": reason,
+                "details": _json.dumps(details or {}),
+            },
+        )

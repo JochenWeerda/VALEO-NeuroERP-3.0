@@ -40,6 +40,9 @@ from app.integrations.crm_core_client import (
     update_case as crm_update_case,
 )
 from app.routers.contracts_router import get_contract as get_contract_via_router
+from app.core.exceptions import ConflictError, EntityNotFoundError, ValidationFailedError
+from app.services.einkauf_compat_service import EinkaufCompatService
+from app.services.pos_compat_service import PosCompatService
 
 router = APIRouter(tags=["compat"])
 
@@ -427,57 +430,10 @@ async def sales_bridge(doc_type: str, db: Session = Depends(get_db)) -> dict:
 
 
 @router.get("/einkauf/goods-receipts", response_model=list)
-async def einkauf_goods_receipts(db: Session = Depends(get_db)) -> list[dict[str, Any]]:
-    try:
-        rows = db.execute(
-            text(
-                """
-                SELECT
-                    we.id,
-                    we.delivery_note_number AS nummer,
-                    we.received_date AS datum,
-                    we.quality_inspection_status AS status,
-                    COALESCE(po.subject, '') AS lieferant,
-                    COALESCE(SUM(pos.accepted_quantity * 0), 0) AS betrag
-                FROM einkauf_wareneingaenge we
-                LEFT JOIN einkauf_wareneingang_positionen pos ON pos.wareneingang_id = we.id
-                LEFT JOIN LATERAL (
-                    SELECT data::jsonb->>'subject' AS subject
-                    FROM docs_store
-                    WHERE doc_type = 'purchase_order'
-                      AND (
-                        data::jsonb->>'id' = we.purchase_order_id
-                        OR data::jsonb->>'purchaseOrderNumber' = we.purchase_order_id
-                      )
-                    ORDER BY updated_at DESC
-                    LIMIT 1
-                ) po ON TRUE
-                GROUP BY we.id, we.delivery_note_number, we.received_date, we.quality_inspection_status, po.subject
-                ORDER BY we.created_at DESC
-                LIMIT 500
-                """
-            )
-        ).fetchall()
-    except Exception:
-        try:
-            rows = db.execute(
-                text(
-                    "SELECT id, wareneingangs_nummer AS nummer, bestelldatum AS datum, status, lieferant_name AS lieferant, brutto_gesamt AS betrag FROM einkauf_wareneingaenge ORDER BY created_at DESC LIMIT 500"
-                )
-            ).fetchall()
-        except Exception:
-            return []
-    return [
-        {
-            "id": str(r._mapping.get("id")),
-            "nummer": r._mapping.get("nummer") or str(r._mapping.get("id")),
-            "datum": r._mapping.get("datum").isoformat()[:10] if r._mapping.get("datum") else None,
-            "status": r._mapping.get("status") or "offen",
-            "lieferant": r._mapping.get("lieferant") or "",
-            "betrag": float(r._mapping.get("betrag") or 0),
-        }
-        for r in rows
-    ]
+async def einkauf_goods_receipts(
+    tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
+) -> list[dict[str, Any]]:
+    return EinkaufCompatService(db, tenant_id).list_goods_receipts()
 
 
 @router.post("/einkauf/goods-receipts", response_model=dict, status_code=201)
@@ -486,147 +442,12 @@ async def einkauf_goods_receipts_create(
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ) -> dict:
-    receipt_id = str(uuid4())
-    purchase_order_id = str(payload.get("purchaseOrderId") or payload.get("purchase_order_id") or "")
-    if not purchase_order_id:
-        raise HTTPException(status_code=400, detail="purchaseOrderId is required")
-
-    items = payload.get("items") or []
-    if not isinstance(items, list) or not items:
-        raise HTTPException(status_code=400, detail="items must contain at least one row")
-
-    received_by = str(payload.get("receivedBy") or payload.get("received_by") or "").strip()
-    received_location = str(payload.get("receivedLocation") or payload.get("received_location") or "").strip()
-    if not received_by or not received_location:
-        raise HTTPException(status_code=400, detail="receivedBy and receivedLocation are required")
-
-    received_date = str(payload.get("receivedDate") or payload.get("received_date") or _now_iso()[:10])
-    delivery_note_number = payload.get("deliveryNoteNumber") or payload.get("delivery_note_number")
-    quality_status = str(payload.get("qualityInspectionStatus") or payload.get("quality_inspection_status") or "PENDING")
-    inspection_notes = payload.get("inspectionNotes") or payload.get("inspection_notes")
-    damage_report = payload.get("damageReport") or payload.get("damage_report")
-
     try:
-        db.execute(
-            text(
-                """
-                INSERT INTO einkauf_wareneingaenge (
-                    id, purchase_order_id, delivery_note_number, received_date,
-                    received_by, received_location, quality_inspection_status,
-                    inspection_notes, damage_report, created_at, updated_at
-                ) VALUES (
-                    :id, :purchase_order_id, :delivery_note_number, :received_date,
-                    :received_by, :received_location, :quality_inspection_status,
-                    :inspection_notes, :damage_report, now(), now()
-                )
-                """
-            ),
-            {
-                "id": receipt_id,
-                "purchase_order_id": purchase_order_id,
-                "delivery_note_number": delivery_note_number,
-                "received_date": received_date,
-                "received_by": received_by,
-                "received_location": received_location,
-                "quality_inspection_status": quality_status,
-                "inspection_notes": inspection_notes,
-                "damage_report": damage_report,
-            },
-        )
-    except Exception as exc:
-        db.rollback()
-        raise HTTPException(status_code=500, detail=f"Could not create goods receipt: {exc}") from exc
-
-    for line in items:
-        pos_id = str(uuid4())
-        received_qty = float(line.get("receivedQuantity") or line.get("received_quantity") or 0)
-        accepted_qty = float(line.get("acceptedQuantity") or line.get("accepted_quantity") or received_qty)
-        rejected_qty = float(line.get("rejectedQuantity") or line.get("rejected_quantity") or 0)
-        ordered_qty = float(line.get("orderedQuantity") or line.get("ordered_quantity") or received_qty)
-        try:
-            db.execute(
-                text(
-                    """
-                    INSERT INTO einkauf_wareneingang_positionen (
-                        id, wareneingang_id, purchase_order_item_id, article_id, article_name,
-                        ordered_quantity, received_quantity, accepted_quantity, rejected_quantity,
-                        condition, created_at, updated_at
-                    ) VALUES (
-                        :id, :wareneingang_id, :purchase_order_item_id, :article_id, :article_name,
-                        :ordered_quantity, :received_quantity, :accepted_quantity, :rejected_quantity,
-                        :condition, now(), now()
-                    )
-                    """
-                ),
-                {
-                    "id": pos_id,
-                    "wareneingang_id": receipt_id,
-                    "purchase_order_item_id": line.get("purchaseOrderItemId") or line.get("purchase_order_item_id"),
-                    "article_id": line.get("articleId") or line.get("article_id") or "",
-                    "article_name": line.get("articleName") or line.get("article_name"),
-                    "ordered_quantity": ordered_qty,
-                    "received_quantity": received_qty,
-                    "accepted_quantity": accepted_qty,
-                    "rejected_quantity": rejected_qty,
-                    "condition": line.get("condition") or "PERFECT",
-                },
-            )
-        except Exception as exc:
-            db.rollback()
-            raise HTTPException(status_code=500, detail=f"Could not create goods receipt item: {exc}") from exc
-
-    # Update purchase order quantities and status for document-store based purchase orders.
-    repo = _doc_repo(db)
-    po = get_from_store("purchase_order", purchase_order_id, repo)
-    if not po:
-        docs = _list_docs(db, "purchase_order", limit=5000, tenant_id=tenant_id)
-        if not docs:
-            docs = _list_docs(db, "purchase_order", limit=5000)
-        po = next((d for d in docs if str(d.get("id")) == purchase_order_id or str(d.get("purchaseOrderNumber")) == purchase_order_id), None)
-    if po:
-        po_items = po.get("items", []) or []
-        for line in items:
-            target_item_id = str(line.get("purchaseOrderItemId") or line.get("purchase_order_item_id") or "")
-            if not target_item_id:
-                continue
-            received_qty = float(line.get("receivedQuantity") or line.get("received_quantity") or 0)
-            for po_item in po_items:
-                po_item_id = str(po_item.get("id") or "")
-                if po_item_id == target_item_id:
-                    current_received = float(po_item.get("quantityReceived") or 0)
-                    po_item["quantityReceived"] = round(current_received + received_qty, 3)
-                    break
-        po["items"] = po_items
-        total_open = 0.0
-        for po_item in po_items:
-            qty = float(po_item.get("quantity") or 0)
-            rec = float(po_item.get("quantityReceived") or 0)
-            total_open += max(0.0, qty - rec)
-        po["status"] = "KOMPLETT" if total_open <= 0.0001 else "TEILGELIEFERT"
-        po["updatedAt"] = _now_iso()
-        save_to_store("purchase_order", po.get("purchaseOrderNumber") or purchase_order_id, po, repo)
-
-    await _enqueue_event(
-        db,
-        event_type="goods_receipt.created",
-        aggregate_id=receipt_id,
-        payload={
-            "receiptId": receipt_id,
-            "purchaseOrderId": purchase_order_id,
-            "status": quality_status,
-            "receivedDate": received_date,
-            "itemCount": len(items),
-        },
-        tenant_id=tenant_id,
-    )
-    cache_delete_prefix(f"compat:procurement:{tenant_id}:")
-    db.commit()
-    return {
-        "id": receipt_id,
-        "purchaseOrderId": purchase_order_id,
-        "status": quality_status,
-        "message": "Wareneingang erfasst",
-    }
+        result = await EinkaufCompatService(db, tenant_id).create_goods_receipt(payload)
+        db.commit()
+        return result
+    except ValidationFailedError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
 
 
 @router.get("/einkauf/bestellvorschlaege", response_model=list)
@@ -662,139 +483,32 @@ async def einkauf_warengruppen(db: Session = Depends(get_db)) -> list[dict[str, 
 
 
 @router.get("/einkauf/anfragen", response_model=list)
-async def einkauf_anfragen_list(db: Session = Depends(get_db)) -> list[dict[str, Any]]:
-    try:
-        rows = db.execute(
-            text(
-                "SELECT id, anfrage_nummer, typ, anforderer, artikel, menge, prioritaet, status, datum, created_at FROM einkauf_anfragen ORDER BY created_at DESC LIMIT 500"
-            )
-        ).fetchall()
-    except Exception:
-        return []
-    return [
-        {
-            "id": str(r._mapping.get("id")),
-            "anfrageNummer": r._mapping.get("anfrage_nummer") or str(r._mapping.get("id")),
-            "typ": r._mapping.get("typ") or "",
-            "anforderer": r._mapping.get("anforderer") or "",
-            "artikel": r._mapping.get("artikel") or "",
-            "menge": float(r._mapping.get("menge") or 0),
-            "prioritaet": r._mapping.get("prioritaet") or "normal",
-            "status": r._mapping.get("status") or "offen",
-            "faelligkeit": r._mapping.get("datum").isoformat()[:10] if r._mapping.get("datum") else None,
-            "createdAt": r._mapping.get("created_at").isoformat() if r._mapping.get("created_at") else None,
-        }
-        for r in rows
-    ]
-
-
-def _load_einkauf_anfrage(db: Session, anfrage_id: str) -> dict[str, Any] | None:
-    try:
-        row = db.execute(
-            text(
-                """
-                SELECT id, anfrage_nummer, typ, anforderer, artikel, menge, prioritaet, status, datum, created_at
-                FROM einkauf_anfragen
-                WHERE id = :anfrage_id OR anfrage_nummer = :anfrage_id
-                ORDER BY created_at DESC
-                LIMIT 1
-                """
-            ),
-            {"anfrage_id": anfrage_id},
-        ).fetchone()
-    except Exception:
-        return None
-
-    if row is None:
-        return None
-
-    return {
-        "id": str(row._mapping.get("id")),
-        "anfrageNummer": row._mapping.get("anfrage_nummer") or str(row._mapping.get("id")),
-        "typ": row._mapping.get("typ") or "",
-        "anforderer": row._mapping.get("anforderer") or "",
-        "artikel": row._mapping.get("artikel") or "",
-        "menge": float(row._mapping.get("menge") or 0),
-        "prioritaet": row._mapping.get("prioritaet") or "normal",
-        "status": row._mapping.get("status") or "offen",
-        "faelligkeit": row._mapping.get("datum").isoformat()[:10] if row._mapping.get("datum") else None,
-        "createdAt": row._mapping.get("created_at").isoformat() if row._mapping.get("created_at") else None,
-    }
-
-
-def _load_einkauf_anfrage_row(db: Session, anfrage_id: str, tenant_id: str) -> Any | None:
-    try:
-        return db.execute(
-            text(
-                """
-                SELECT id, anfrage_nummer, typ, anforderer, artikel, menge, prioritaet, status, datum, created_at
-                FROM einkauf_anfragen
-                WHERE (id = :anfrage_id OR anfrage_nummer = :anfrage_id) AND tenant_id = :tenant_id
-                ORDER BY created_at DESC
-                LIMIT 1
-                """
-            ),
-            {"anfrage_id": anfrage_id, "tenant_id": tenant_id},
-        ).fetchone()
-    except Exception:
-        return None
+async def einkauf_anfragen_list(
+    tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
+) -> list[dict[str, Any]]:
+    return EinkaufCompatService(db, tenant_id).list_anfragen()
 
 
 @router.get("/einkauf/anfragen/{anfrage_id}", response_model=dict)
-async def einkauf_anfrage_get(anfrage_id: str, db: Session = Depends(get_db)) -> dict[str, Any]:
-    item = _load_einkauf_anfrage(db, anfrage_id)
-    if item is None:
-        raise HTTPException(status_code=404, detail="Anfrage not found")
-    return item
+async def einkauf_anfrage_get(
+    anfrage_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
+) -> dict[str, Any]:
+    try:
+        return EinkaufCompatService(db, tenant_id).get_anfrage(anfrage_id)
+    except EntityNotFoundError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
 
 
 @router.post("/einkauf/anfragen/{anfrage_id}/convert-to-order", response_model=dict)
 async def einkauf_anfrage_convert_to_order(
     anfrage_id: str,
-    db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
 ) -> dict[str, Any]:
-    row = _load_einkauf_anfrage_row(db, anfrage_id, tenant_id)
-    if row is None:
-        raise HTTPException(status_code=404, detail="Anfrage not found")
-
-    mapping = row._mapping
-    po = await _create_compat_purchase_order(
-        db,
-        tenant_id=tenant_id,
-        payload={
-            "subject": mapping.get("artikel") or f"Anfrage {mapping.get('anfrage_nummer')}",
-            "description": f"Erzeugt aus Anfrage {mapping.get('anfrage_nummer') or mapping.get('id')}",
-            "deliveryDate": mapping.get("datum").isoformat()[:10] if mapping.get("datum") else None,
-            "externalReference": mapping.get("anfrage_nummer") or str(mapping.get("id")),
-            "items": [
-                {
-                    "description": mapping.get("artikel") or "Bedarfsposition",
-                    "quantity": float(mapping.get("menge") or 0),
-                    "unitPrice": 0,
-                    "unit": "Stk",
-                }
-            ],
-        },
-    )
-
-    db.execute(
-        text(
-            """
-            UPDATE einkauf_anfragen
-            SET status = 'BESTELLT', updated_at = CURRENT_TIMESTAMP
-            WHERE id = :id AND tenant_id = :tenant_id
-            """
-        ),
-        {"id": mapping.get("id"), "tenant_id": tenant_id},
-    )
-    db.commit()
-    return {
-        "message": "Anfrage in Bestellung ueberfuehrt",
-        "purchaseOrderId": po.get("id"),
-        "purchaseOrderNumber": po.get("purchaseOrderNumber"),
-        "status": "BESTELLT",
-    }
+    try:
+        return await EinkaufCompatService(db, tenant_id).convert_anfrage_to_order(anfrage_id)
+    except EntityNotFoundError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
 
 
 @router.get("/contracts/{contract_id}", response_model=dict)
@@ -807,506 +521,133 @@ async def compat_contract_get(
 
 
 @router.get("/einkauf/angebote", response_model=list)
-async def einkauf_angebote_list(db: Session = Depends(get_db)) -> list[dict[str, Any]]:
-    try:
-        rows = db.execute(
-            text(
-                "SELECT id, angebots_nummer, anfrage_id, lieferant_name, artikel_name, netto_summe, gueltig_bis, status, lieferzeit_tage, created_at FROM einkauf_angebote ORDER BY created_at DESC LIMIT 500"
-            )
-        ).fetchall()
-    except Exception:
-        return []
-    return [
-        {
-            "id": str(r._mapping.get("id")),
-            "angebotNummer": r._mapping.get("angebots_nummer") or str(r._mapping.get("id")),
-            "anfrage": str(r._mapping.get("anfrage_id") or ""),
-            "lieferant": r._mapping.get("lieferant_name") or "",
-            "artikel": r._mapping.get("artikel_name") or "",
-            "preis": float(r._mapping.get("netto_summe") or 0),
-            "gueltigBis": r._mapping.get("gueltig_bis").isoformat()[:10] if r._mapping.get("gueltig_bis") else None,
-            "status": r._mapping.get("status") or "offen",
-            "lieferzeit": str(r._mapping.get("lieferzeit_tage") or ""),
-            "createdAt": r._mapping.get("created_at").isoformat() if r._mapping.get("created_at") else None,
-        }
-        for r in rows
-    ]
-
-
-def _load_einkauf_angebot_row(db: Session, angebot_id: str, tenant_id: str) -> Any | None:
-    try:
-        return db.execute(
-            text(
-                """
-                SELECT id, angebots_nummer, anfrage_id, lieferant_name, artikel_name, netto_summe, gueltig_bis, status, lieferzeit_tage, created_at
-                FROM einkauf_angebote
-                WHERE (id = :angebot_id OR angebots_nummer = :angebot_id) AND tenant_id = :tenant_id
-                ORDER BY created_at DESC
-                LIMIT 1
-                """
-            ),
-            {"angebot_id": angebot_id, "tenant_id": tenant_id},
-        ).fetchone()
-    except Exception:
-        return None
-
-
-async def _update_angebot_status(
-    db: Session,
-    *,
-    angebot_id: str,
-    new_status: str,
-    tenant_id: str,
-    change_type: str,
-) -> dict[str, Any]:
-    row = _load_einkauf_angebot_row(db, angebot_id, tenant_id)
-    if row is None:
-        raise HTTPException(status_code=404, detail="Angebot not found")
-
-    db.execute(
-        text(
-            """
-            UPDATE einkauf_angebote
-            SET status = :status, updated_at = CURRENT_TIMESTAMP
-            WHERE id = :id AND tenant_id = :tenant_id
-            """
-        ),
-        {"status": new_status, "id": row._mapping.get("id"), "tenant_id": tenant_id},
-    )
-    db.commit()
-    cache_delete_prefix(f"compat:procurement:{tenant_id}:")
-    return {
-        "message": f"Angebot {change_type.lower()}",
-        "status": new_status,
-        "id": str(row._mapping.get("id")),
-        "angebotNummer": row._mapping.get("angebots_nummer") or str(row._mapping.get("id")),
-    }
+async def einkauf_angebote_list(
+    tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
+) -> list[dict[str, Any]]:
+    return EinkaufCompatService(db, tenant_id).list_angebote()
 
 
 @router.post("/einkauf/angebote/{angebot_id}/review", response_model=dict)
 async def einkauf_angebot_review(
-    angebot_id: str,
-    db: Session = Depends(get_db),
-    tenant_id: str = Depends(get_tenant_id),
+    angebot_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
 ) -> dict[str, Any]:
-    return await _update_angebot_status(
-        db,
-        angebot_id=angebot_id,
-        new_status="GEPRUEFT",
-        tenant_id=tenant_id,
-        change_type="GEPRUEFT",
-    )
+    try:
+        return EinkaufCompatService(db, tenant_id).update_angebot_status(angebot_id, "GEPRUEFT", "geprueft")
+    except EntityNotFoundError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
 
 
 @router.post("/einkauf/angebote/{angebot_id}/approve", response_model=dict)
 async def einkauf_angebot_approve(
-    angebot_id: str,
-    db: Session = Depends(get_db),
-    tenant_id: str = Depends(get_tenant_id),
+    angebot_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
 ) -> dict[str, Any]:
-    return await _update_angebot_status(
-        db,
-        angebot_id=angebot_id,
-        new_status="GENEHMIGT",
-        tenant_id=tenant_id,
-        change_type="GENEHMIGT",
-    )
+    try:
+        return EinkaufCompatService(db, tenant_id).update_angebot_status(angebot_id, "GENEHMIGT", "genehmigt")
+    except EntityNotFoundError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
 
 
 @router.post("/einkauf/angebote/{angebot_id}/reject", response_model=dict)
 async def einkauf_angebot_reject(
-    angebot_id: str,
-    db: Session = Depends(get_db),
-    tenant_id: str = Depends(get_tenant_id),
+    angebot_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
 ) -> dict[str, Any]:
-    return await _update_angebot_status(
-        db,
-        angebot_id=angebot_id,
-        new_status="ABGELEHNT",
-        tenant_id=tenant_id,
-        change_type="ABGELEHNT",
-    )
+    try:
+        return EinkaufCompatService(db, tenant_id).update_angebot_status(angebot_id, "ABGELEHNT", "abgelehnt")
+    except EntityNotFoundError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
 
 
 @router.post("/einkauf/angebote/{angebot_id}/convert-to-order", response_model=dict)
 async def einkauf_angebot_convert_to_order(
-    angebot_id: str,
-    db: Session = Depends(get_db),
-    tenant_id: str = Depends(get_tenant_id),
+    angebot_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
 ) -> dict[str, Any]:
-    row = _load_einkauf_angebot_row(db, angebot_id, tenant_id)
-    if row is None:
-        raise HTTPException(status_code=404, detail="Angebot not found")
-
-    mapping = row._mapping
-    po = await _create_compat_purchase_order(
-        db,
-        tenant_id=tenant_id,
-        payload={
-            "subject": mapping.get("artikel_name") or f"Angebot {mapping.get('angebots_nummer')}",
-            "description": f"Erzeugt aus Angebot {mapping.get('angebots_nummer') or mapping.get('id')} von {mapping.get('lieferant_name') or 'Lieferant'}",
-            "deliveryDate": mapping.get("gueltig_bis").isoformat()[:10] if mapping.get("gueltig_bis") else None,
-            "externalReference": mapping.get("angebots_nummer") or str(mapping.get("id")),
-            "items": [
-                {
-                    "description": mapping.get("artikel_name") or "Angebotsposition",
-                    "quantity": 1,
-                    "unitPrice": float(mapping.get("netto_summe") or 0),
-                    "unit": "Stk",
-                }
-            ],
-            "notes": f"Lieferant: {mapping.get('lieferant_name') or 'unbekannt'}",
-        },
-    )
-
-    db.execute(
-        text(
-            """
-            UPDATE einkauf_angebote
-            SET status = 'IN_BESTELLUNG', updated_at = CURRENT_TIMESTAMP
-            WHERE id = :id AND tenant_id = :tenant_id
-            """
-        ),
-        {"id": mapping.get("id"), "tenant_id": tenant_id},
-    )
-    db.commit()
-    cache_delete_prefix(f"compat:procurement:{tenant_id}:")
-    return {
-        "message": "Angebot in Bestellung ueberfuehrt",
-        "purchaseOrderId": po.get("id"),
-        "purchaseOrderNumber": po.get("purchaseOrderNumber"),
-        "status": "IN_BESTELLUNG",
-    }
+    try:
+        return await EinkaufCompatService(db, tenant_id).convert_angebot_to_order(angebot_id)
+    except EntityNotFoundError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
 
 
 @router.get("/einkauf/anlieferavis", response_model=list)
-async def einkauf_anlieferavis_list(db: Session = Depends(get_db)) -> list[dict[str, Any]]:
-    try:
-        rows = db.execute(
-            text(
-                "SELECT id, avis_nummer, bestellung_id, lieferant_name, status, geplantes_anliefer_datum, kennzeichen, created_at FROM einkauf_anlieferavis ORDER BY created_at DESC LIMIT 500"
-            )
-        ).fetchall()
-    except Exception:
-        return []
-    return [
-        {
-            "id": str(r._mapping.get("id")),
-            "avisNummer": r._mapping.get("avis_nummer") or str(r._mapping.get("id")),
-            "bestellung": str(r._mapping.get("bestellung_id") or ""),
-            "lieferant": r._mapping.get("lieferant_name") or "",
-            "status": r._mapping.get("status") or "offen",
-            "geplantesAnlieferDatum": r._mapping.get("geplantes_anliefer_datum").isoformat()[:10] if r._mapping.get("geplantes_anliefer_datum") else None,
-            "kennzeichen": r._mapping.get("kennzeichen") or "",
-            "createdAt": r._mapping.get("created_at").isoformat() if r._mapping.get("created_at") else None,
-        }
-        for r in rows
-    ]
-
-
-def _load_anlieferavis_row(db: Session, avis_id: str, tenant_id: str) -> Any | None:
-    try:
-        return db.execute(
-            text(
-                """
-                SELECT id, avis_nummer, bestellung_id, lieferant_name, status, geplantes_anliefer_datum, kennzeichen, created_at
-                FROM einkauf_anlieferavis
-                WHERE (id = :avis_id OR avis_nummer = :avis_id) AND tenant_id = :tenant_id
-                ORDER BY created_at DESC
-                LIMIT 1
-                """
-            ),
-            {"avis_id": avis_id, "tenant_id": tenant_id},
-        ).fetchone()
-    except Exception:
-        return None
+async def einkauf_anlieferavis_list(
+    tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
+) -> list[dict[str, Any]]:
+    return EinkaufCompatService(db, tenant_id).list_anlieferavis()
 
 
 @router.post("/einkauf/anlieferavis/{avis_id}/{action}", response_model=dict)
 async def einkauf_anlieferavis_transition(
-    avis_id: str,
-    action: str,
-    db: Session = Depends(get_db),
-    tenant_id: str = Depends(get_tenant_id),
+    avis_id: str, action: str,
+    tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
 ) -> dict[str, Any]:
-    status_map = {
-        "send": "GESENDET",
-        "confirm": "BESTAETIGT",
-        "cancel": "STORNIERT",
-    }
-    if action not in status_map:
-        raise HTTPException(status_code=404, detail="Unknown action")
-
-    row = _load_anlieferavis_row(db, avis_id, tenant_id)
-    if row is None:
-        raise HTTPException(status_code=404, detail="Anlieferavis not found")
-
-    db.execute(
-        text(
-            """
-            UPDATE einkauf_anlieferavis
-            SET status = :status, updated_at = CURRENT_TIMESTAMP
-            WHERE id = :id AND tenant_id = :tenant_id
-            """
-        ),
-        {"status": status_map[action], "id": row._mapping.get("id"), "tenant_id": tenant_id},
-    )
-    db.commit()
-    cache_delete_prefix(f"compat:procurement:{tenant_id}:")
-    return {
-        "message": f"Anlieferavis {action}",
-        "status": status_map[action],
-        "id": str(row._mapping.get("id")),
-        "avisNummer": row._mapping.get("avis_nummer") or str(row._mapping.get("id")),
-    }
+    try:
+        return EinkaufCompatService(db, tenant_id).transition_anlieferavis(avis_id, action)
+    except EntityNotFoundError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+    except ValidationFailedError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
 
 
 @router.get("/einkauf/auftragsbestaetigungen", response_model=list)
-async def einkauf_auftragsbestaetigungen_list(db: Session = Depends(get_db)) -> list[dict[str, Any]]:
-    try:
-        rows = db.execute(
-            text(
-                "SELECT id, bestaetigungs_nummer, bestellung_id, lieferant_name, status, created_at FROM einkauf_auftragsbestaetigungen ORDER BY created_at DESC LIMIT 500"
-            )
-        ).fetchall()
-    except Exception:
-        return []
-    return [
-        {
-            "id": str(r._mapping.get("id")),
-            "bestaetigungsNummer": r._mapping.get("bestaetigungs_nummer") or str(r._mapping.get("id")),
-            "bestellung": str(r._mapping.get("bestellung_id") or ""),
-            "lieferant": r._mapping.get("lieferant_name") or "",
-            "status": r._mapping.get("status") or "offen",
-            "createdAt": r._mapping.get("created_at").isoformat() if r._mapping.get("created_at") else None,
-        }
-        for r in rows
-    ]
-
-
-def _load_auftragsbestaetigung_row(db: Session, bestaetigung_id: str, tenant_id: str) -> Any | None:
-    try:
-        return db.execute(
-            text(
-                """
-                SELECT id, bestaetigungs_nummer, bestellung_id, lieferant_name, status, created_at
-                FROM einkauf_auftragsbestaetigungen
-                WHERE (id = :bestaetigung_id OR bestaetigungs_nummer = :bestaetigung_id) AND tenant_id = :tenant_id
-                ORDER BY created_at DESC
-                LIMIT 1
-                """
-            ),
-            {"bestaetigung_id": bestaetigung_id, "tenant_id": tenant_id},
-        ).fetchone()
-    except Exception:
-        return None
+async def einkauf_auftragsbestaetigungen_list(
+    tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
+) -> list[dict[str, Any]]:
+    return EinkaufCompatService(db, tenant_id).list_auftragsbestaetigungen()
 
 
 @router.post("/einkauf/auftragsbestaetigungen/{bestaetigung_id}/{action}", response_model=dict)
 async def einkauf_auftragsbestaetigung_transition(
-    bestaetigung_id: str,
-    action: str,
-    db: Session = Depends(get_db),
-    tenant_id: str = Depends(get_tenant_id),
+    bestaetigung_id: str, action: str,
+    tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
 ) -> dict[str, Any]:
-    status_map = {
-        "review": "GEPRUEFT",
-        "confirm": "BESTAETIGT",
-    }
-    if action not in status_map:
-        raise HTTPException(status_code=404, detail="Unknown action")
-
-    row = _load_auftragsbestaetigung_row(db, bestaetigung_id, tenant_id)
-    if row is None:
-        raise HTTPException(status_code=404, detail="Auftragsbestaetigung not found")
-
-    db.execute(
-        text(
-            """
-            UPDATE einkauf_auftragsbestaetigungen
-            SET status = :status, updated_at = CURRENT_TIMESTAMP
-            WHERE id = :id AND tenant_id = :tenant_id
-            """
-        ),
-        {"status": status_map[action], "id": row._mapping.get("id"), "tenant_id": tenant_id},
-    )
-    db.commit()
-    cache_delete_prefix(f"compat:procurement:{tenant_id}:")
-    return {
-        "message": f"Auftragsbestaetigung {action}",
-        "status": status_map[action],
-        "id": str(row._mapping.get("id")),
-        "bestaetigungsNummer": row._mapping.get("bestaetigungs_nummer") or str(row._mapping.get("id")),
-    }
+    try:
+        return EinkaufCompatService(db, tenant_id).transition_auftragsbestaetigung(bestaetigung_id, action)
+    except EntityNotFoundError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+    except ValidationFailedError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
 
 
 @router.get("/einkauf/rechnungseingaenge", response_model=list)
-async def einkauf_rechnungseingaenge_list(db: Session = Depends(get_db)) -> list[dict[str, Any]]:
-    try:
-        rows = db.execute(
-            text(
-                "SELECT id, rechnungs_nummer, lieferant_name, bestellung_id, wareneingang_id, status, brutto_betrag, rechnungs_datum, created_at FROM einkauf_rechnungseingaenge ORDER BY created_at DESC LIMIT 500"
-            )
-        ).fetchall()
-    except Exception:
-        return []
-    return [
-        {
-            "id": str(r._mapping.get("id")),
-            "rechnungsNummer": r._mapping.get("rechnungs_nummer") or str(r._mapping.get("id")),
-            "lieferant": r._mapping.get("lieferant_name") or "",
-            "bestellung": str(r._mapping.get("bestellung_id") or ""),
-            "wareneingang": str(r._mapping.get("wareneingang_id") or ""),
-            "status": r._mapping.get("status") or "OFFEN",
-            "bruttoBetrag": float(r._mapping.get("brutto_betrag") or 0),
-            "rechnungsDatum": r._mapping.get("rechnungs_datum").isoformat()[:10] if r._mapping.get("rechnungs_datum") else None,
-            "createdAt": r._mapping.get("created_at").isoformat() if r._mapping.get("created_at") else None,
-        }
-        for r in rows
-    ]
-
-
-def _einkauf_rechnungseingang_get_id_and_status(db: Session, rechnung_id: str) -> Optional[tuple[str, str]]:
-    """Return (id, status) or None if not found."""
-    row = db.execute(
-        text(
-            "SELECT id, status FROM einkauf_rechnungseingaenge WHERE id = :id OR rechnungs_nummer = :id"
-        ),
-        {"id": rechnung_id},
-    ).mappings().first()
-    if not row:
-        return None
-    return (str(row["id"]), (row.get("status") or "").upper())
-
-
-def _einkauf_audit_user_for_tenant(db: Session, tenant_id: str) -> Optional[tuple[str, str]]:
-    """Return (user_id, user_email) for first user in tenant, or None if none (skip audit)."""
-    try:
-        row = db.execute(
-            text(
-                "SELECT id, email FROM domain_shared.users WHERE tenant_id = :tid AND (is_active IS NULL OR is_active = true) LIMIT 1"
-            ),
-            {"tid": tenant_id},
-        ).mappings().first()
-        if row and row.get("id"):
-            return (str(row["id"]), str((row.get("email") or "unknown")[:100]))
-    except Exception:
-        pass
-    return None
-
-
-def _einkauf_rechnungseingang_write_audit(
-    db: Session,
-    tenant_id: str,
-    rechnung_id: str,
-    action: str,
-    old_status: str,
-    new_status: str,
-) -> None:
-    """Write one audit log entry for rechnungseingang status change (GoBD)."""
-    user_pair = _einkauf_audit_user_for_tenant(db, tenant_id)
-    if not user_pair:
-        return
-    user_id, user_email = user_pair
-    log_entry = AuditLog(
-        id=str(uuid4()),
-        timestamp=datetime.utcnow(),
-        user_id=user_id,
-        user_email=user_email,
-        tenant_id=tenant_id,
-        action=action,
-        entity_type="rechnungseingang",
-        entity_id=rechnung_id,
-        changes={"old": {"status": old_status}, "new": {"status": new_status}},
-        ip_address=None,
-        user_agent=None,
-        correlation_id=get_correlation_id(),
-    )
-    db.add(log_entry)
+async def einkauf_rechnungseingaenge_list(
+    tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
+) -> list[dict[str, Any]]:
+    return EinkaufCompatService(db, tenant_id).list_rechnungseingaenge()
 
 
 @router.post("/einkauf/rechnungseingaenge/{rechnung_id}/pruefen")
 async def einkauf_rechnungseingang_pruefen(
-    rechnung_id: str,
-    db: Session = Depends(get_db),
-    tenant_id: str = Depends(get_tenant_id),
+    rechnung_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
 ) -> dict[str, Any]:
-    """Setzt Status auf GEPRUEFT (nur aus ENTWURF/ERFASST/OFFEN). GoBD: Audit-Eintrag."""
-    pair = _einkauf_rechnungseingang_get_id_and_status(db, rechnung_id)
-    if not pair:
-        raise HTTPException(status_code=404, detail="Rechnungseingang nicht gefunden")
-    rid, status = pair
-    if status not in ("ENTWURF", "ERFASST", "OFFEN"):
-        raise HTTPException(
-            status_code=400,
-            detail=f"Prüfen nur möglich bei Status Entwurf/Erfasst/Offen. Aktuell: {status}",
-        )
-    new_status = "GEPRUEFT"
-    db.execute(
-        text(
-            "UPDATE einkauf_rechnungseingaenge SET status = :new_status, updated_at = now() WHERE id = :id"
-        ),
-        {"id": rid, "new_status": new_status},
-    )
-    _einkauf_rechnungseingang_write_audit(db, tenant_id, rid, "pruefen", status, new_status)
-    db.commit()
-    return {"message": "Rechnungseingang geprüft", "status": new_status}
+    try:
+        return EinkaufCompatService(db, tenant_id).pruefen_rechnung(rechnung_id)
+    except EntityNotFoundError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+    except ValidationFailedError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
 
 
 @router.post("/einkauf/rechnungseingaenge/{rechnung_id}/freigeben")
 async def einkauf_rechnungseingang_freigeben(
-    rechnung_id: str,
-    db: Session = Depends(get_db),
-    tenant_id: str = Depends(get_tenant_id),
+    rechnung_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
 ) -> dict[str, Any]:
-    """Setzt Status auf FREIGEGEBEN (nur aus GEPRUEFT). GoBD: Audit-Eintrag."""
-    pair = _einkauf_rechnungseingang_get_id_and_status(db, rechnung_id)
-    if not pair:
-        raise HTTPException(status_code=404, detail="Rechnungseingang nicht gefunden")
-    rid, status = pair
-    if status != "GEPRUEFT":
-        raise HTTPException(
-            status_code=400,
-            detail=f"Freigeben nur möglich bei Status GEPRUEFT. Aktuell: {status}",
-        )
-    new_status = "FREIGEGEBEN"
-    db.execute(
-        text(
-            "UPDATE einkauf_rechnungseingaenge SET status = :new_status, updated_at = now() WHERE id = :id"
-        ),
-        {"id": rid, "new_status": new_status},
-    )
-    _einkauf_rechnungseingang_write_audit(db, tenant_id, rid, "freigeben", status, new_status)
-    db.commit()
-    return {"message": "Rechnungseingang freigegeben", "status": new_status}
+    try:
+        return EinkaufCompatService(db, tenant_id).freigeben_rechnung(rechnung_id)
+    except EntityNotFoundError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+    except ValidationFailedError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
 
 
 @router.post("/einkauf/rechnungseingaenge/{rechnung_id}/verbuchen")
 async def einkauf_rechnungseingang_verbuchen(
-    rechnung_id: str,
-    db: Session = Depends(get_db),
-    tenant_id: str = Depends(get_tenant_id),
+    rechnung_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
 ) -> dict[str, Any]:
-    """Setzt Status auf VERBUCHT (nur aus FREIGEGEBEN). GoBD: Audit-Eintrag."""
-    pair = _einkauf_rechnungseingang_get_id_and_status(db, rechnung_id)
-    if not pair:
-        raise HTTPException(status_code=404, detail="Rechnungseingang nicht gefunden")
-    rid, status = pair
-    if status != "FREIGEGEBEN":
-        raise HTTPException(
-            status_code=400,
-            detail=f"Verbuchen nur möglich bei Status FREIGEGEBEN. Aktuell: {status}",
-        )
-    new_status = "VERBUCHT"
-    db.execute(
-        text(
-            "UPDATE einkauf_rechnungseingaenge SET status = :new_status, updated_at = now() WHERE id = :id"
-        ),
-        {"id": rid, "new_status": new_status},
-    )
-    _einkauf_rechnungseingang_write_audit(db, tenant_id, rid, "verbuchen", status, new_status)
-    db.commit()
-    return {"message": "Rechnungseingang verbucht", "status": new_status}
+    try:
+        return EinkaufCompatService(db, tenant_id).verbuchen_rechnung(rechnung_id)
+    except EntityNotFoundError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+    except ValidationFailedError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
 
 
 @router.get("/einkauf/reports", response_model=dict)
@@ -1367,90 +708,26 @@ async def einkauf_reports(tenant_id: str = Depends(get_tenant_id), db: Session =
 
 
 @router.get("/einkauf/anfragen/{anfrage_id}/bids", response_model=list)
-async def einkauf_bids(anfrage_id: str, db: Session = Depends(get_db)) -> list[dict[str, Any]]:
-    try:
-        rows = db.execute(
-            text(
-                "SELECT id, angebots_nummer, lieferant_name, netto_summe, waehrung, status, created_at FROM einkauf_angebote WHERE anfrage_id = :id ORDER BY created_at DESC"
-            ),
-            {"id": anfrage_id},
-        ).fetchall()
-    except Exception:
-        return []
-    return [
-        {
-            "id": str(r._mapping.get("id")),
-            "nummer": r._mapping.get("angebots_nummer") or str(r._mapping.get("id")),
-            "lieferant": r._mapping.get("lieferant_name") or "",
-            "preis": float(r._mapping.get("netto_summe") or 0),
-            "waehrung": r._mapping.get("waehrung") or "EUR",
-            "status": r._mapping.get("status") or "offen",
-            "createdAt": r._mapping.get("created_at").isoformat() if r._mapping.get("created_at") else None,
-        }
-        for r in rows
-    ]
+async def einkauf_bids(
+    anfrage_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
+) -> list[dict[str, Any]]:
+    return EinkaufCompatService(db, tenant_id).list_bids(anfrage_id)
 
 
 @router.get("/einkauf/retouren", response_model=list)
-async def einkauf_retouren(db: Session = Depends(get_db)) -> list[dict[str, Any]]:
-    try:
-        rows = db.execute(
-            text(
-                "SELECT id, retouren_nummer, grund, status, created_at, lieferant_name FROM einkauf_retouren ORDER BY created_at DESC LIMIT 500"
-            )
-        ).fetchall()
-    except Exception:
-        return []
-    return [
-        {
-            "id": str(r._mapping.get("id")),
-            "nummer": r._mapping.get("retouren_nummer") or str(r._mapping.get("id")),
-            "grund": r._mapping.get("grund") or "",
-            "status": r._mapping.get("status") or "offen",
-            "datum": r._mapping.get("created_at").isoformat()[:10] if r._mapping.get("created_at") else None,
-            "lieferant": r._mapping.get("lieferant_name") or "",
-        }
-        for r in rows
-    ]
+async def einkauf_retouren(
+    tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
+) -> list[dict[str, Any]]:
+    return EinkaufCompatService(db, tenant_id).list_retouren()
 
 
 @router.post("/einkauf/retouren", response_model=dict, status_code=201)
-async def einkauf_retouren_create(payload: dict[str, Any], db: Session = Depends(get_db)) -> dict:
-    retour_id = str(uuid4())
-    nummer = payload.get("nummer") or f"RET-{datetime.utcnow().strftime('%Y%m%d%H%M%S')}"
-    try:
-        db.execute(
-            text(
-                """
-                INSERT INTO einkauf_retouren (id, retouren_nummer, grund, status, lieferant_name, created_at)
-                VALUES (:id, :nr, :grund, :status, :lieferant, now())
-                """
-            ),
-            {
-                "id": retour_id,
-                "nr": nummer,
-                "grund": payload.get("returnReason") or payload.get("grund") or "",
-                "status": payload.get("status") or "offen",
-                "lieferant": payload.get("supplierName") or "",
-            },
-        )
-        db.commit()
-    except Exception:
-        # If table does not exist yet, still return a deterministic object for client flow.
-        db.rollback()
-    await _enqueue_event(
-        db,
-        event_type="procurement.return.created",
-        aggregate_id=retour_id,
-        payload={
-            "nummer": nummer,
-            "returnReason": payload.get("returnReason") or payload.get("grund"),
-            "goodsReceiptId": payload.get("goodsReceiptId"),
-            "createdAt": datetime.utcnow().isoformat(),
-        },
-    )
+async def einkauf_retouren_create(
+    payload: dict[str, Any], tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
+) -> dict:
+    result = await EinkaufCompatService(db, tenant_id).create_retoure(payload)
     db.commit()
-    return {"id": retour_id, "nummer": nummer, "message": "Retoure erfasst"}
+    return result
 
 
 # Futter -------------------------------------------------------------------
@@ -3283,22 +2560,7 @@ async def upsert_supplier_rating(
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ) -> dict:
-    score = {
-        "supplierId": supplier_id,
-        "supplier": payload.get("supplier") or supplier_id,
-        "onTimeDelivery": _safe_float(payload.get("onTimeDelivery")),
-        "qualityScore": _safe_float(payload.get("qualityScore")),
-        "priceScore": _safe_float(payload.get("priceScore")),
-        "serviceScore": _safe_float(payload.get("serviceScore")),
-        "overallScore": _safe_float(payload.get("overallScore")),
-        "totalOrders": int(payload.get("totalOrders") or 0),
-        "tenantId": tenant_id,
-        "updatedAt": _now_iso(),
-    }
-    repo = _doc_repo(db)
-    save_to_store("supplier_rating", supplier_id, score, repo)
-    cache_delete_prefix(f"compat:procurement:{tenant_id}:")
-    return score
+    return EinkaufCompatService(db, tenant_id).upsert_supplier_rating(supplier_id, payload)
 
 
 @router.get("/einkauf/suppliers/{supplier_id}/documents", response_model=list)
@@ -3426,25 +2688,23 @@ async def po_send_portal(
 
 
 @router.get("/einkauf/retouren/{retour_id}", response_model=dict)
-async def einkauf_retoure_get(retour_id: str, db: Session = Depends(get_db)) -> dict:
-    rows = await einkauf_retouren(db)
-    for row in rows:
-        if str(row.get("id")) == retour_id or str(row.get("nummer")) == retour_id:
-            return row
-    raise HTTPException(status_code=404, detail="Retoure not found")
+async def einkauf_retoure_get(
+    retour_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
+) -> dict:
+    try:
+        return EinkaufCompatService(db, tenant_id).get_retoure(retour_id)
+    except EntityNotFoundError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
 
 
 @router.patch("/einkauf/retouren/{retour_id}", response_model=dict)
-async def einkauf_retoure_patch(retour_id: str, payload: dict[str, Any], db: Session = Depends(get_db)) -> dict:
-    try:
-        db.execute(
-            text("UPDATE einkauf_retouren SET status = :status, grund = COALESCE(:grund, grund), updated_at = now() WHERE id = :id OR retouren_nummer = :id"),
-            {"id": retour_id, "status": payload.get("status", "offen"), "grund": payload.get("grund")},
-        )
-        db.commit()
-    except Exception:
-        db.rollback()
-    return {"id": retour_id, "status": payload.get("status", "offen"), "ok": True}
+async def einkauf_retoure_patch(
+    retour_id: str, payload: dict[str, Any],
+    tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
+) -> dict:
+    result = EinkaufCompatService(db, tenant_id).patch_retoure(retour_id, payload)
+    db.commit()
+    return result
 
 
 @router.get("/einkauf/service-entry-sheets", response_model=dict)
@@ -3453,10 +2713,7 @@ async def list_service_entry_sheets(
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ) -> dict:
-    items = _list_docs(db, "service_entry_sheet", limit=2000, tenant_id=tenant_id)
-    if status:
-        items = [i for i in items if str(i.get("status")) == status]
-    return {"items": items, "total": len(items)}
+    return EinkaufCompatService(db, tenant_id).list_service_entry_sheets(status=status)
 
 
 @router.post("/einkauf/service-entry-sheets", response_model=dict, status_code=201)
@@ -3465,26 +2722,10 @@ async def create_service_entry_sheet(
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ) -> dict:
-    number = payload.get("number") or f"SES-{datetime.utcnow().strftime('%Y%m%d%H%M%S')}"
-    ses = {
-        "id": str(uuid4()),
-        "number": number,
-        "supplierId": payload.get("supplierId"),
-        "purchaseOrderId": payload.get("purchaseOrderId"),
-        "serviceDate": payload.get("serviceDate") or _now_iso()[:10],
-        "description": payload.get("description") or "",
-        "quantity": _safe_float(payload.get("quantity")),
-        "unitPrice": _safe_float(payload.get("unitPrice")),
-        "amount": round(_safe_float(payload.get("quantity")) * _safe_float(payload.get("unitPrice")), 2),
-        "status": payload.get("status") or "ERFASST",
-        "tenantId": tenant_id,
-        "createdAt": _now_iso(),
-    }
-    save_to_store("service_entry_sheet", number, ses, _doc_repo(db))
-    await _enqueue_event(db, event_type="service_entry_sheet.created", aggregate_id=ses["id"], payload=ses, tenant_id=tenant_id)
-    cache_delete_prefix(f"compat:procurement:{tenant_id}:")
+    svc = EinkaufCompatService(db, tenant_id)
+    result = await svc.create_service_entry_sheet(payload)
     db.commit()
-    return ses
+    return result
 
 
 @router.patch("/einkauf/service-entry-sheets/{ses_id}", response_model=dict)
@@ -3494,67 +2735,20 @@ async def update_service_entry_sheet(
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ) -> dict:
-    items = _list_docs(db, "service_entry_sheet", limit=5000, tenant_id=tenant_id)
-    target = None
-    for i in items:
-        if str(i.get("id")) == ses_id or str(i.get("number")) == ses_id:
-            target = i
-            break
-    if not target:
-        raise HTTPException(status_code=404, detail="Service entry sheet not found")
-    target.update({k: v for k, v in payload.items() if v is not None})
-    target["updatedAt"] = _now_iso()
-    save_to_store("service_entry_sheet", target["number"], target, _doc_repo(db))
-    cache_delete_prefix(f"compat:procurement:{tenant_id}:")
-    db.commit()
-    return target
-
-
-def _memo_doc_type(kind: str) -> str:
-    return "credit_memo" if kind == "credit" else "debit_memo"
+    try:
+        return EinkaufCompatService(db, tenant_id).update_service_entry_sheet(ses_id, payload)
+    except EntityNotFoundError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
 
 
 @router.get("/einkauf/credit-memos", response_model=list)
 async def list_credit_memos(tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)) -> list[dict[str, Any]]:
-    return _list_docs(db, "credit_memo", limit=2000, tenant_id=tenant_id)
+    return EinkaufCompatService(db, tenant_id).list_credit_memos()
 
 
 @router.get("/einkauf/debit-memos", response_model=list)
 async def list_debit_memos(tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)) -> list[dict[str, Any]]:
-    return _list_docs(db, "debit_memo", limit=2000, tenant_id=tenant_id)
-
-
-async def _create_memo(kind: str, payload: dict[str, Any], tenant_id: str, db: Session) -> dict[str, Any]:
-    number_prefix = "CM" if kind == "credit" else "DM"
-    number = payload.get("number") or f"{number_prefix}-{datetime.utcnow().strftime('%Y%m%d%H%M%S')}"
-    items = payload.get("items") or []
-    net = sum(_safe_float(i.get("netAmount")) for i in items)
-    tax = sum(_safe_float(i.get("taxAmount")) for i in items)
-    gross = net + tax
-    memo = {
-        "id": str(uuid4()),
-        "number": number,
-        "supplierId": payload.get("supplierId"),
-        "supplierName": payload.get("supplierName") or "",
-        "invoiceId": payload.get("invoiceId"),
-        "memoDate": payload.get("memoDate") or _now_iso()[:10],
-        "reason": payload.get("reason") or "",
-        "notes": payload.get("notes"),
-        "items": items,
-        "netAmount": round(net, 2),
-        "taxAmount": round(tax, 2),
-        "grossAmount": round(gross, 2),
-        "status": "ERFASST",
-        "settled": False,
-        "settledInvoiceIds": [],
-        "tenantId": tenant_id,
-        "createdAt": _now_iso(),
-    }
-    save_to_store(_memo_doc_type(kind), number, memo, _doc_repo(db))
-    await _enqueue_event(db, event_type=f"{_memo_doc_type(kind)}.created", aggregate_id=memo["id"], payload=memo, tenant_id=tenant_id)
-    cache_delete_prefix(f"compat:procurement:{tenant_id}:")
-    db.commit()
-    return memo
+    return EinkaufCompatService(db, tenant_id).list_debit_memos()
 
 
 @router.post("/einkauf/credit-memos", response_model=dict, status_code=201)
@@ -3563,7 +2757,9 @@ async def create_credit_memo(
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ) -> dict:
-    return await _create_memo("credit", payload, tenant_id, db)
+    result = await EinkaufCompatService(db, tenant_id).create_credit_memo(payload)
+    db.commit()
+    return result
 
 
 @router.post("/einkauf/debit-memos", response_model=dict, status_code=201)
@@ -3572,27 +2768,9 @@ async def create_debit_memo(
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ) -> dict:
-    return await _create_memo("debit", payload, tenant_id, db)
-
-
-async def _settle_memo(kind: str, memo_id: str, payload: dict[str, Any], tenant_id: str, db: Session) -> dict[str, Any]:
-    memos = _list_docs(db, _memo_doc_type(kind), limit=5000, tenant_id=tenant_id)
-    target = None
-    for m in memos:
-        if str(m.get("id")) == memo_id or str(m.get("number")) == memo_id:
-            target = m
-            break
-    if not target:
-        raise HTTPException(status_code=404, detail="Memo not found")
-    target["settled"] = True
-    target["status"] = "VERRECHNET"
-    target["settledInvoiceIds"] = payload.get("invoiceIds", [])
-    target["settledAt"] = _now_iso()
-    save_to_store(_memo_doc_type(kind), target["number"], target, _doc_repo(db))
-    await _enqueue_event(db, event_type=f"{_memo_doc_type(kind)}.settled", aggregate_id=target["id"], payload=target, tenant_id=tenant_id)
-    cache_delete_prefix(f"compat:procurement:{tenant_id}:")
+    result = await EinkaufCompatService(db, tenant_id).create_debit_memo(payload)
     db.commit()
-    return target
+    return result
 
 
 @router.post("/einkauf/credit-memos/{memo_id}/settle", response_model=dict)
@@ -3602,7 +2780,14 @@ async def settle_credit_memo(
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ) -> dict:
-    return await _settle_memo("credit", memo_id, payload, tenant_id, db)
+    try:
+        result = await EinkaufCompatService(db, tenant_id).settle_credit_memo(memo_id, payload)
+        db.commit()
+        return result
+    except EntityNotFoundError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+    except ConflictError as exc:
+        raise HTTPException(status_code=409, detail=str(exc)) from exc
 
 
 @router.post("/einkauf/debit-memos/{memo_id}/settle", response_model=dict)
@@ -3612,7 +2797,14 @@ async def settle_debit_memo(
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ) -> dict:
-    return await _settle_memo("debit", memo_id, payload, tenant_id, db)
+    try:
+        result = await EinkaufCompatService(db, tenant_id).settle_debit_memo(memo_id, payload)
+        db.commit()
+        return result
+    except EntityNotFoundError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+    except ConflictError as exc:
+        raise HTTPException(status_code=409, detail=str(exc)) from exc
 
 
 @router.get("/einkauf/reports/standard", response_model=dict)
@@ -3659,8 +2851,7 @@ async def einkauf_audit_trail(
 
 @router.get("/einkauf/edi/messages", response_model=dict)
 async def edi_messages(tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)) -> dict:
-    items = _list_docs(db, "edi_message", limit=2000, tenant_id=tenant_id)
-    return {"items": items, "total": len(items)}
+    return EinkaufCompatService(db, tenant_id).list_edi_messages()
 
 
 @router.post("/einkauf/edi/messages", response_model=dict, status_code=201)
@@ -3669,43 +2860,19 @@ async def create_edi_message(
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ) -> dict:
-    msg_id = str(uuid4())
-    number = payload.get("number") or f"EDI-{datetime.utcnow().strftime('%Y%m%d%H%M%S')}"
-    msg = {
-        "id": msg_id,
-        "number": number,
-        "direction": payload.get("direction") or "outbound",
-        "partner": payload.get("partner") or "",
-        "messageType": payload.get("messageType") or "ORDERS",
-        "status": payload.get("status") or "QUEUED",
-        "payload": payload.get("payload") or {},
-        "tenantId": tenant_id,
-        "createdAt": _now_iso(),
-    }
-    save_to_store("edi_message", number, msg, _doc_repo(db))
-    await _enqueue_event(db, event_type="procurement.edi.message.created", aggregate_id=msg_id, payload=msg, tenant_id=tenant_id)
-    cache_delete_prefix(f"compat:procurement:{tenant_id}:")
+    result = await EinkaufCompatService(db, tenant_id).create_edi_message(payload)
     db.commit()
-    return msg
+    return result
 
 
 @router.post("/einkauf/edi/messages/{msg_id}/ack", response_model=dict)
 async def ack_edi_message(msg_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)) -> dict:
-    items = _list_docs(db, "edi_message", limit=5000, tenant_id=tenant_id)
-    target = None
-    for i in items:
-        if str(i.get("id")) == msg_id or str(i.get("number")) == msg_id:
-            target = i
-            break
-    if not target:
-        raise HTTPException(status_code=404, detail="EDI message not found")
-    target["status"] = "ACKNOWLEDGED"
-    target["ackAt"] = _now_iso()
-    save_to_store("edi_message", target["number"], target, _doc_repo(db))
-    await _enqueue_event(db, event_type="procurement.edi.message.ack", aggregate_id=target["id"], payload=target, tenant_id=tenant_id)
-    cache_delete_prefix(f"compat:procurement:{tenant_id}:")
-    db.commit()
-    return target
+    try:
+        result = await EinkaufCompatService(db, tenant_id).ack_edi_message(msg_id)
+        db.commit()
+        return result
+    except EntityNotFoundError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
 
 
 # ---------------------------------------------------------------------------
@@ -3975,7 +3142,7 @@ async def list_suspended_sales(
 ) -> list:
     """Liste pausierter Verkauefe aus dem Document-Store (Typ pos_suspended_sale)."""
     try:
-        docs = _list_docs(db, "pos_suspended_sale", limit=100, tenant_id=tenant_id)
+        docs = PosCompatService(db, tenant_id).list_suspended_sales()
         return [
             {
                 "id": d.get("id"),
@@ -3999,9 +3166,7 @@ async def delete_suspended_sale(
 ):
     """Pausierten Verkauf loeschen — entfernt aus Document-Store."""
     try:
-        repo = _doc_repo(db)
-        from app.documents.store import delete_from_store
-        delete_from_store("pos_suspended_sale", sale_id, repo=repo)
+        PosCompatService(db, tenant_id).delete_suspended_sale(sale_id)
     except Exception:
         pass
     return Response(status_code=204)
