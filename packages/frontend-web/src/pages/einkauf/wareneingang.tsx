@@ -12,6 +12,49 @@ import { toast } from '@/hooks/use-toast'
 import { apiClient } from '@/lib/api-client'
 import { Package } from 'lucide-react'
 import { getEntityTypeLabel } from '@/features/crud/utils/i18n-helpers'
+import {
+  CrudCapabilityChecklist,
+  ManagementDecisionPanel,
+  NextActionPanel,
+  OperationalTaskPlan,
+  RoleFocusBar,
+  type UxTaskItem,
+} from '@/components/workflow'
+
+type GoodsReceiptRoleFocus = 'all' | 'receiving' | 'procurement' | 'quality' | 'warehouse' | 'finance'
+
+const goodsReceiptRoleProfiles: Array<{ id: GoodsReceiptRoleFocus; label: string; description: string }> = [
+  {
+    id: 'all',
+    label: 'Alle Rollen',
+    description: 'Zeigt den Wareneingang fuer Annahme, Einkauf, QS, Lager und Finance.',
+  },
+  {
+    id: 'receiving',
+    label: 'Wareneingang',
+    description: 'Fokus auf Bestellung, Lieferschein, Empfaenger und Buchung.',
+  },
+  {
+    id: 'procurement',
+    label: 'Einkauf',
+    description: 'Fokus auf Bestellbezug, Lieferant und offene Restmengen.',
+  },
+  {
+    id: 'quality',
+    label: 'QS',
+    description: 'Fokus auf Pruefstatus, abgelehnte Mengen und Schadensbericht.',
+  },
+  {
+    id: 'warehouse',
+    label: 'Lager',
+    description: 'Fokus auf Lagerort, angenommene Mengen und Einlagerungsfolge.',
+  },
+  {
+    id: 'finance',
+    label: 'Finance',
+    description: 'Fokus auf Buchungsnachweis und spaeteren Rechnungsabgleich.',
+  },
+]
 
 type PurchaseOrderItem = {
   id: string
@@ -75,6 +118,7 @@ export default function WareneingangPage(): JSX.Element {
   const [purchaseOrder, setPurchaseOrder] = useState<PurchaseOrder | null>(null)
   const [purchaseOrders, setPurchaseOrders] = useState<PurchaseOrder[]>([])
   const [selectedPoId, setSelectedPoId] = useState<string>(poId || '')
+  const [roleFocus, setRoleFocus] = useState<GoodsReceiptRoleFocus>('all')
   const purchaseOrderOptions = purchaseOrders.map((po) => ({ value: po.id, label: `${po.number} - ${po.supplierName}` }))
   const [receiptData, setReceiptData] = useState<GoodsReceiptData>({
     purchaseOrderId: '',
@@ -249,6 +293,93 @@ export default function WareneingangPage(): JSX.Element {
     return item.quantityOrdered - item.quantityReceived
   }
 
+  const totalReceived = receiptData.items.reduce((sum, item) => sum + Number(item.receivedQuantity || 0), 0)
+  const totalAccepted = receiptData.items.reduce((sum, item) => sum + Number(item.acceptedQuantity || 0), 0)
+  const totalRejected = receiptData.items.reduce((sum, item) => sum + Number(item.rejectedQuantity || 0), 0)
+  const hasPurchaseOrder = Boolean(receiptData.purchaseOrderId && purchaseOrder)
+  const hasDeliveryNote = Boolean(receiptData.deliveryNoteNumber.trim())
+  const hasRequiredHeader = Boolean(receiptData.receivedBy.trim() && receiptData.receivedLocation.trim())
+  const hasReceivedItems = totalReceived > 0
+  const hasQualityBlocker = receiptData.qualityInspectionStatus === 'FAILED' || totalRejected > 0
+  const canPostReceipt = hasPurchaseOrder && hasRequiredHeader && hasReceivedItems && !hasQualityBlocker
+  const nextReceiptAction = !hasPurchaseOrder
+    ? 'Bestellung auswaehlen.'
+    : !hasDeliveryNote
+      ? 'Lieferscheinnummer erfassen.'
+      : !hasRequiredHeader
+        ? 'Empfaenger und Lagerort eintragen.'
+        : !hasReceivedItems
+          ? 'Gelieferte Mengen erfassen.'
+          : hasQualityBlocker
+            ? 'QS-Abweichung klaeren, bevor gebucht wird.'
+            : 'Wareneingang buchen und Nachweis sichern.'
+  const receiptTaskItems: UxTaskItem[] = [
+    {
+      label: 'Bestellung auswaehlen',
+      done: hasPurchaseOrder,
+      hint: hasPurchaseOrder ? `Bestellung ${purchaseOrder?.number} von ${purchaseOrder?.supplierName || 'Lieferant'} geladen.` : 'Freigegebene Bestellung auswaehlen.',
+    },
+    {
+      label: 'Lieferschein erfassen',
+      done: hasDeliveryNote,
+      hint: hasDeliveryNote ? `Lieferschein ${receiptData.deliveryNoteNumber} erfasst.` : 'Lieferscheinnummer als Nachweis eintragen.',
+    },
+    {
+      label: 'Mengen und QS pruefen',
+      done: hasReceivedItems && !hasQualityBlocker,
+      hint: hasQualityBlocker ? `${totalRejected} abgelehnte Menge oder QS-Fehler klaeren.` : `${totalAccepted} akzeptiert, ${totalRejected} abgelehnt.`,
+    },
+    {
+      label: 'Wareneingang buchen',
+      done: canPostReceipt,
+      hint: canPostReceipt ? 'Alle Pflichtangaben liegen vor; Buchung ist moeglich.' : 'Vor Buchung offene Pflicht- oder QS-Punkte schliessen.',
+    },
+  ]
+  const receiptCrudCapabilities = [
+    {
+      key: 'create',
+      label: 'Anlegen/Buchen',
+      available: canPostReceipt,
+      hint: canPostReceipt ? 'Wareneingang kann gebucht werden.' : 'Buchung erst nach Bestellung, Kopfpflichtfeldern und Mengenpruefung.',
+    },
+    {
+      key: 'read',
+      label: 'Lesen',
+      available: true,
+      hint: 'Bestellung, Lieferant, Positionen, Restmengen, QS-Status und Lagerort sind sichtbar.',
+    },
+    {
+      key: 'update',
+      label: 'Bearbeiten',
+      available: true,
+      hint: 'Lieferschein, Empfaenger, Lagerort, Mengen, Ablehnungen und Zustand koennen vor Buchung gepflegt werden.',
+    },
+    {
+      key: 'delete',
+      label: 'Abbrechen',
+      available: true,
+      hint: 'Nicht gebuchte Eingaben koennen verworfen werden; gebuchte Korrekturen laufen fachlich ueber Folgebeleg.',
+    },
+    {
+      key: 'approve',
+      label: 'QS-Freigabe',
+      available: !hasQualityBlocker,
+      hint: hasQualityBlocker ? 'QS-Abweichung oder abgelehnte Menge blockiert die Freigabe.' : 'Keine QS-Blockade in der aktuellen Eingabe.',
+    },
+    {
+      key: 'export',
+      label: 'Nachweis',
+      available: hasDeliveryNote || canPostReceipt,
+      hint: 'Lieferschein, Buchung und Positionswerte bilden den Wareneingangsnachweis.',
+    },
+    {
+      key: 'audit',
+      label: 'Audit',
+      available: true,
+      hint: 'Bestellbezug, Empfaenger, Lagerort, QS-Status und Mengen bleiben nachvollziehbar.',
+    },
+  ]
+
   return (
     <div className="space-y-6 p-6">
       <div className="flex items-center justify-between">
@@ -260,6 +391,37 @@ export default function WareneingangPage(): JSX.Element {
           {t('common.cancel')}
         </Button>
       </div>
+      <RoleFocusBar
+        roles={goodsReceiptRoleProfiles}
+        value={roleFocus}
+        onChange={setRoleFocus}
+        visibleCount={roleFocus === 'all' ? 5 : 1}
+        totalCount={5}
+      />
+      <ManagementDecisionPanel
+        decision={{
+          allowed: canPostReceipt,
+          allowedLabel: 'Buchbar',
+          blockedLabel: 'Noch nicht buchbar',
+          summary: canPostReceipt
+            ? `Wareneingang ist bereit zur Buchung. ${totalAccepted} akzeptierte Menge wird mit Bestellung ${purchaseOrder?.number} verknuepft.`
+            : `Wareneingang ist noch nicht vollstaendig. ${nextReceiptAction}`,
+          blockerCount: canPostReceipt ? 0 : 1,
+          nextFocus: nextReceiptAction,
+          template: {
+            label: 'Bestellung oeffnen',
+            href: '/einkauf/bestellungen',
+          },
+        }}
+      />
+      <div className="grid gap-4 lg:grid-cols-[1.35fr_1fr]">
+        <OperationalTaskPlan title="Eingangspruefplan" items={receiptTaskItems} />
+        <NextActionPanel
+          action={nextReceiptAction}
+          tone={canPostReceipt ? 'emerald' : hasQualityBlocker ? 'red' : hasPurchaseOrder ? 'amber' : 'blue'}
+        />
+      </div>
+      <CrudCapabilityChecklist capabilities={receiptCrudCapabilities} />
 
       <Card>
         <CardHeader>
