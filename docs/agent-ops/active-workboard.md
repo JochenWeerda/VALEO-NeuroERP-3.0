@@ -494,6 +494,18 @@ Stand: `2026-05-12`
 **Checks:** `pnpm --filter @valero-neuroerp/frontend-web type-check`; `python scripts/agent_workboard_supervisor.py validate`; `node scripts/docs-governance-check.cjs`; `node scripts/docs-markdown-check.cjs docs/project-context/ux-excellence-operating-standard-2026-05-13.md docs/agent-ops/active-workboard.md docs/agent-ops/slices/UX-LOGISTIK-006.yaml`; `git diff --check`
 **Offene Risiken:** `logistik/frachtbriefe.tsx` ist bereits ueber `UX-LOGISTIK-002` abgedeckt; dieser Slice fokussiert Druck-/Tarifausnahmen.
 
+## UX-DMS-001
+
+**Von:** Codex
+**Owner:** Codex
+**Stand:** reserviert 2026-05-15
+**Ziel des Slices:** Dokumente/DMS als gefuehrte Arbeitsflaechen fuer Klassifikation, Retention, Version, Vorlage, Freigabe und naechste Aktion in normaler Buero-Sprache fuehren.
+**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/agent-ops/slices/UX-DMS-001.yaml`, `packages/frontend-web/src/pages/document.tsx`, `packages/frontend-web/src/pages/admin/setup/dms-integration.tsx`, `docs/project-context/ux-excellence-operating-standard-2026-05-13.md`
+**Abnahmekriterien:** Dokumentenpanel und DMS-Integration zeigen Rollenfokus, Arbeitsplan, Managemententscheidung, Next Action, Vorlage-/Nachweislink und CRUD-/Workflow-Abdeckung; Upload, Suche, Scan, Loeschen und DMS-Verbindung bleiben erhalten.
+**Erledigt:** Reserviert; Umsetzung folgt.
+**Checks:** offen
+**Offene Risiken:** `dokumente/ablage.tsx` hat bereits einen operativen Nachweisrahmen; dieser Slice fokussiert zentrale QM-Dokumente und technische DMS-Anbindung.
+
 ## TODO-SPRINT-001
 
 **Von:** Cursor<br>
