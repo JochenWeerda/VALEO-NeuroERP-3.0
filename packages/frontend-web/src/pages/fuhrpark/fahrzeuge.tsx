@@ -9,6 +9,23 @@ import { DataTable } from '@/components/ui/data-table'
 import { Input } from '@/components/ui/input'
 import { Skeleton } from '@/components/ui/skeleton'
 import { listFuhrparkFahrzeuge, type FuhrparkFahrzeug } from '@/lib/api/fuhrpark'
+import {
+  CrudCapabilityChecklist,
+  EvidenceTemplateLink,
+  ManagementDecisionPanel,
+  NextActionPanel,
+  OperationalTaskPlan,
+  RoleFocusBar,
+} from '@/components/workflow'
+
+type FleetRole = 'fuhrpark' | 'disposition' | 'werkstatt' | 'leitung'
+
+const fleetRoles = [
+  { id: 'fuhrpark', label: 'Fuhrpark', description: 'Prueft Fahrzeugstatus, Fristen und Pflege der Fahrzeugdaten.' },
+  { id: 'disposition', label: 'Disposition', description: 'Sieht, welche Fahrzeuge verfuegbar, unterwegs oder blockiert sind.' },
+  { id: 'werkstatt', label: 'Werkstatt', description: 'Fokussiert faellige Inspektionen und Fahrzeuge in Werkstattstatus.' },
+  { id: 'leitung', label: 'Leitung', description: 'Sieht Fristendruck, Verfuegbarkeit und naechste Entscheidung.' },
+] satisfies Array<{ id: FleetRole; label: string; description: string }>
 
 function LoadingSkeleton(): JSX.Element {
   return (
@@ -37,6 +54,7 @@ function ErrorState({ error, onRetry }: { error: Error | null; onRetry: () => vo
 export default function FahrzeugePage(): JSX.Element {
   const navigate = useNavigate()
   const [searchTerm, setSearchTerm] = useState('')
+  const [roleFocus, setRoleFocus] = useState<FleetRole>('fuhrpark')
 
   const { data: fahrzeuge = [], isLoading, isError, error, refetch } = useQuery({
     queryKey: ['fuhrpark', 'fahrzeuge'],
@@ -57,6 +75,16 @@ export default function FahrzeugePage(): JSX.Element {
     if (!f.naechste_inspektion) return false
     return new Date(f.naechste_inspektion) < new Date(Date.now() + 14 * 24 * 60 * 60 * 1000)
   }).length
+  const werkstattCount = filteredFahrzeuge.filter((f) => f.status === 'werkstatt').length
+  const verfuegbarCount = filteredFahrzeuge.filter((f) => f.status === 'verfuegbar').length
+  const fleetBlockers = inspektionFaellig + werkstattCount
+  const nextFleetAction = inspektionFaellig > 0
+    ? `${inspektionFaellig} faellige Inspektion(en) terminieren und Nachweis aktualisieren.`
+    : werkstattCount > 0
+      ? `${werkstattCount} Fahrzeug(e) im Werkstattstatus pruefen.`
+      : filteredFahrzeuge.length === 0
+        ? 'Suchfilter pruefen oder neues Fahrzeug anlegen.'
+        : 'Fahrzeugbestand ist arbeitsfaehig; naechste Fristenpruefung planen.'
 
   if (isError && !isLoading) return <ErrorState error={error as Error} onRetry={() => { void refetch() }} />
   if (isLoading) return <LoadingSkeleton />
@@ -101,6 +129,50 @@ export default function FahrzeugePage(): JSX.Element {
           <p className="text-muted-foreground">Fahrzeug-Verwaltung</p>
         </div>
         <Button onClick={() => navigate('/fuhrpark/fahrzeug/neu')} className="gap-2"><Plus className="h-4 w-4" />Neues Fahrzeug</Button>
+      </div>
+
+      <RoleFocusBar roles={fleetRoles} value={roleFocus} onChange={setRoleFocus} visibleCount={filteredFahrzeuge.length} totalCount={fahrzeuge.length} title="Wer steuert den Fuhrpark?" />
+
+      <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_360px]">
+        <ManagementDecisionPanel
+          decision={{
+            allowed: fleetBlockers === 0 && filteredFahrzeuge.length > 0,
+            allowedLabel: 'Fuhrpark arbeitsfaehig',
+            blockedLabel: 'Fristen pruefen',
+            summary: fleetBlockers > 0
+              ? `${inspektionFaellig} Inspektion(en) und ${werkstattCount} Werkstattfall/-faelle brauchen Klaerung.`
+              : `${verfuegbarCount} Fahrzeug(e) sind verfuegbar; keine kritische Frist in der aktuellen Sicht.`,
+            blockerCount: fleetBlockers + (filteredFahrzeuge.length === 0 ? 1 : 0),
+            nextFocus: nextFleetAction,
+            template: { label: 'Fuhrpark-Fristen- und Fahrzeugnachweis', href: '/docs/fuhrpark/fristen-fahrzeugnachweis.md' },
+          }}
+        />
+        <div className="space-y-4">
+          <NextActionPanel action={nextFleetAction} tone={fleetBlockers > 0 ? 'amber' : 'emerald'} />
+          <EvidenceTemplateLink link={{ label: 'Inspektions- und Statusnachweis', href: '/docs/fuhrpark/inspektionsnachweis.md' }} />
+        </div>
+      </div>
+
+      <div className="grid gap-4 lg:grid-cols-2">
+        <OperationalTaskPlan
+          title="Fuhrpark-Fristenplan"
+          items={[
+            { label: 'Fahrzeuge laden', done: fahrzeuge.length > 0, hint: `${fahrzeuge.length} Fahrzeug(e) im Bestand.` },
+            { label: 'Verfuegbarkeit pruefen', done: verfuegbarCount > 0, hint: `${verfuegbarCount} verfuegbar, ${werkstattCount} in Werkstatt.` },
+            { label: 'Inspektionen klaeren', done: inspektionFaellig === 0, hint: inspektionFaellig > 0 ? `${inspektionFaellig} Inspektion(en) in 14 Tagen faellig.` : 'Keine kurzfristig faellige Inspektion.' },
+            { label: 'Nachweis sichern', done: filteredFahrzeuge.length > 0, hint: 'Fahrzeugstatus und Fristen bilden den operativen Mindestnachweis.' },
+          ]}
+        />
+        <CrudCapabilityChecklist
+          capabilities={[
+            { key: 'create', label: 'Fahrzeug anlegen', available: true, hint: 'Neues Fahrzeug kann ueber die Aktion angelegt werden.' },
+            { key: 'read', label: 'Status lesen', available: true, hint: 'Kennzeichen, Typ, Kilometer, Frist und Status sind sichtbar.' },
+            { key: 'update', label: 'Fahrzeug bearbeiten', available: true, hint: 'Klick auf Kennzeichen fuehrt in die Bearbeitung.' },
+            { key: 'export', label: 'Export', available: true, hint: 'Export-Aktion ist vorhanden.' },
+            { key: 'evidence', label: 'Fristennachweis', available: true, hint: 'Inspektionsnachweis ist verlinkt.' },
+            { key: 'audit', label: 'Letzte Frist', available: true, hint: 'Naechste Inspektion ist je Fahrzeug sichtbar.' },
+          ]}
+        />
       </div>
 
       {inspektionFaellig > 0 && (

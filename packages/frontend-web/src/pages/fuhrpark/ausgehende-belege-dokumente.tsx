@@ -8,6 +8,14 @@ import {
   updateFuhrparkAusgehendesDokument,
   type FuhrparkAusgehendesDokument,
 } from '@/lib/api/fuhrpark'
+import {
+  CrudCapabilityChecklist,
+  EvidenceTemplateLink,
+  ManagementDecisionPanel,
+  NextActionPanel,
+  OperationalTaskPlan,
+  RoleFocusBar,
+} from '@/components/workflow'
 
 type DokumentForm = {
   beleg_typ: string
@@ -16,6 +24,14 @@ type DokumentForm = {
   beschreibung: string
   aktiv: boolean
 }
+type FleetDocumentRole = 'fuhrpark' | 'versand' | 'produktion' | 'it'
+
+const fleetDocumentRoles = [
+  { id: 'fuhrpark', label: 'Fuhrpark', description: 'Pflegt Belegtypen, Formulare und Zielmodule fuer Fahrzeugprozesse.' },
+  { id: 'versand', label: 'Versand', description: 'Prueft, ob passende Versand- und Frachtdokumente erreichbar sind.' },
+  { id: 'produktion', label: 'Produktion', description: 'Prueft, ob produktionsnahe Dokumente sauber verlinkt sind.' },
+  { id: 'it', label: 'IT', description: 'Klaert Formular, Zielmodul und technische Druckpfade.' },
+] satisfies Array<{ id: FleetDocumentRole; label: string; description: string }>
 
 const EMPTY_FORM: DokumentForm = {
   beleg_typ: '',
@@ -39,6 +55,7 @@ export default function AusgehendeBelegeDokumentePage(): JSX.Element {
   const queryClient = useQueryClient()
   const [selected, setSelected] = useState<FuhrparkAusgehendesDokument | null>(null)
   const [form, setForm] = useState<DokumentForm>(EMPTY_FORM)
+  const [roleFocus, setRoleFocus] = useState<FleetDocumentRole>('fuhrpark')
 
   const { data: rows = [] } = useQuery({
     queryKey: ['fuhrpark', 'ausgehende-dokumente'],
@@ -76,10 +93,62 @@ export default function AusgehendeBelegeDokumentePage(): JSX.Element {
   })
 
   const sortedRows = useMemo(() => [...rows].sort((a, b) => a.beleg_typ.localeCompare(b.beleg_typ, 'de')), [rows])
+  const activeRows = sortedRows.filter((row) => row.aktiv)
+  const missingFormula = sortedRows.filter((row) => !row.formular)
+  const documentBlockers = (sortedRows.length === 0 ? 1 : 0) + missingFormula.length
+  const nextDocumentAction = sortedRows.length === 0
+    ? 'Ersten Belegtyp mit Formular und Zielmodul anlegen.'
+    : missingFormula.length > 0
+      ? `${missingFormula.length} Belegtyp(en) ohne Formular pruefen.`
+      : 'Dokumentensteuerung ist arbeitsfaehig; Quicklink oder Belegtyp pruefen.'
 
   return (
     <div className="min-h-full bg-[#ececec] p-4 text-[11px] text-black">
       <div className="mb-2 text-[12px] font-semibold uppercase">Ausgehende Belege und Dokumente</div>
+
+      <div className="mb-4 space-y-4 text-[13px]">
+        <RoleFocusBar roles={fleetDocumentRoles} value={roleFocus} onChange={setRoleFocus} visibleCount={sortedRows.length} totalCount={sortedRows.length} title="Wer pflegt die Fuhrpark-Dokumente?" />
+        <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_360px]">
+          <ManagementDecisionPanel
+            decision={{
+              allowed: documentBlockers === 0,
+              allowedLabel: 'Dokumentsteuerung bereit',
+              blockedLabel: 'Dokumente pruefen',
+              summary: documentBlockers > 0
+                ? `${missingFormula.length} Belegtyp(en) haben kein Formular oder es fehlen Belegtypen.`
+                : `${activeRows.length} aktive Dokumentsteuerungen sind fuer Fuhrpark- und Folgeprozesse verfuegbar.`,
+              blockerCount: documentBlockers,
+              nextFocus: nextDocumentAction,
+              template: { label: 'Fuhrpark-Dokumentsteuerung', href: '/docs/fuhrpark/dokumentsteuerung.md' },
+            }}
+          />
+          <div className="space-y-4">
+            <NextActionPanel action={nextDocumentAction} tone={documentBlockers > 0 ? 'amber' : 'emerald'} />
+            <EvidenceTemplateLink link={{ label: 'Dokument- und Formularnachweis', href: '/docs/fuhrpark/dokumentnachweis.md' }} />
+          </div>
+        </div>
+        <div className="grid gap-4 lg:grid-cols-2">
+          <OperationalTaskPlan
+            title="Dokumentplan"
+            items={[
+              { label: 'Belegtypen pflegen', done: sortedRows.length > 0, hint: `${sortedRows.length} Belegtyp(en) vorhanden.` },
+              { label: 'Formulare pruefen', done: missingFormula.length === 0, hint: missingFormula.length > 0 ? `${missingFormula.length} Eintraege ohne Formular.` : 'Alle Eintraege haben ein Formular.' },
+              { label: 'Aktive Dokumente klaeren', done: activeRows.length > 0, hint: `${activeRows.length} aktive Dokumentsteuerungen.` },
+              { label: 'Quicklinks pruefen', done: quickLinks.length > 0, hint: `${quickLinks.length} Folgearbeitsflaechen erreichbar.` },
+            ]}
+          />
+          <CrudCapabilityChecklist
+            capabilities={[
+              { key: 'create', label: 'Belegtyp anlegen', available: true, hint: 'Neu und Speichern legen neue Steuerungen an.' },
+              { key: 'read', label: 'Dokumente lesen', available: true, hint: 'Belegtyp, Formular, Zielmodul und Aktivstatus sind sichtbar.' },
+              { key: 'update', label: 'Steuerung bearbeiten', available: true, hint: 'Auswahl in der Liste fuellt das Formular.' },
+              { key: 'delete', label: 'Loeschen', available: true, hint: 'Ausgewaehlte Steuerung kann geloescht werden.' },
+              { key: 'evidence', label: 'Nachweis', available: true, hint: 'Dokumentnachweis ist verlinkt.' },
+              { key: 'audit', label: 'Aktivstatus', available: true, hint: 'Aktiv/inaktiv ist je Belegtyp sichtbar.' },
+            ]}
+          />
+        </div>
+      </div>
 
       <div className="mb-3 grid grid-cols-1 gap-2 md:grid-cols-3">
         {quickLinks.map((entry) => (
