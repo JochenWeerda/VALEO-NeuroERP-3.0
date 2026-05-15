@@ -115,6 +115,7 @@ Eine Seite gilt erst als UX-ready, wenn sie mindestens diese Punkte erfuellt:
 | `UX-EINKAUF-004` | Einkauf | abgeschlossen | Lieferantenstamm nutzt Rollenfokus, Lieferanten-Onboardingplan, Managemententscheidung, Next Action, Nachweislink und CRUD-/Compliance-Abdeckung. |
 | `UX-EINKAUF-005` | Einkauf | abgeschlossen | Lieferantenbewertung nutzt Rollenfokus, Bewertungsplan, Eskalationsentscheidung, Next Action und CRUD-/Nachweis-Abdeckung. |
 | `UX-EINKAUF-006` | Einkauf | abgeschlossen | Retouren und Gutschriften/Belastungen nutzen Rollenfokus, Freigabeplan, Stopperentscheidung, Next Action und CRUD-/Nachweis-Abdeckung. |
+| `UX-EINKAUF-007` | Einkauf | abgeschlossen | Einkaufs-Dashboard nutzt Rollenfokus, Einkaufs-Prioritaetsplan, Managemententscheidung, Next Action und CRUD-/Nachweis-Abdeckung. |
 | `UX-CRM-001` | CRM/Vertrieb | abgeschlossen | Opportunities nutzen Rollenfokus, Follow-up-Plan, Managemententscheidung, Next Action und CRUD-/Pipeline-Abdeckung. |
 | `UX-SALES-001` | Sales/Verkauf | abgeschlossen | Verkaufsauftraege nutzen Rollenfokus, Auftrag-Follow-up-Plan, Managemententscheidung, Next Action und CRUD-/Fulfillment-Abdeckung. |
 | `UX-SALES-002` | Sales/Verkauf | abgeschlossen | Angebote nutzen Rollenfokus, Angebots-Follow-up-Plan, Managemententscheidung, Next Action und CRUD-/Conversion-Abdeckung. |
@@ -129,7 +130,7 @@ Eine Seite gilt erst als UX-ready, wenn sie mindestens diese Punkte erfuellt:
 
 Naechste Rollout-Slices:
 
-- `UX-EINKAUF-007`: Einkaufslisten und Einkauf-Dashboard mit Prioritaet, naechster Aktion und Nachweisstatus.
+- `UX-EINKAUF-008`: Einkaufs-Ausnahmen wie OCR/EDI/Service Entry mit Stopper-, Prioritaets- und Nachweissicht.
 - `UX-SALES-007`: Sales-Ausnahmen wie stornierte/ueberfaellige Belege mit Eskalationssicht und Nachweisstatus.
 - `UX-LOGISTIK-005`: Logistik-/Waage-Dashboards mit Rollenfokus, Prioritaeten und Kettennachweis.
 
