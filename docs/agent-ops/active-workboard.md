@@ -2157,3 +2157,15 @@ Archiv des vorherigen Boards:
 **Erledigt:** Field-Service-Aufgabenliste um Rollenfokus, Einsatzplan, Managemententscheidung, Next Action, Nachweislink, Einsatz-KPIs und CRUD-/Workflow-Abdeckung erweitert; bestehende Suche, Copilot, Druck, Neu/Bearbeiten/Abbrechen/Loeschen, Workflow-Hinweis und Audit-Drawer bleiben erhalten.
 **Checks:** `pnpm --filter @valero-neuroerp/frontend-web type-check`; `python scripts/agent_workboard_supervisor.py validate`; `node scripts/docs-governance-check.cjs`; `node scripts/docs-markdown-check.cjs docs/project-context/ux-excellence-operating-standard-2026-05-13.md docs/agent-ops/active-workboard.md docs/agent-ops/slices/UX-AGRIBUSINESS-001.yaml`; `git diff --check`
 **Offene Risiken:** Neue-/Edit-Masken und Farmer-Stamm bleiben Folgeslices; dieser Slice fokussiert die Einsatzliste.
+
+## UX-SYSTEM-LIVE-001
+
+**Von:** Codex
+**Owner:** Codex
+**Stand:** reserviert 2026-05-15
+**Ziel des Slices:** Technischen Live-Monitor von roher JSON-Sicht zu einer verstaendlichen Betriebsstatusseite mit Rollenfokus, Statusdeutung, naechster Aktion und Nachweisbezug nach UX-Standard umbauen.
+**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/agent-ops/slices/UX-SYSTEM-LIVE-001.yaml`, `packages/frontend-web/src/pages/system/live-monitor.tsx`, `docs/project-context/ux-excellence-operating-standard-2026-05-13.md`
+**Abnahmekriterien:** Live-Monitor zeigt Rollenfokus, Betriebsplan, Managemententscheidung, Next Action, Nachweislink und kompakte Ereignisuebersichten; technische JSON-Rohdaten bleiben als Diagnosebereich verfuegbar; bestehender NavLiveStatus und Live-Store werden weiter genutzt.
+**Erledigt:** Reserviert; Umsetzung folgt.
+**Checks:** offen
+**Offene Risiken:** Externe SSE-Verfuegbarkeit bleibt umgebungsabhaengig; dieser Slice verbessert die UI-Deutung vorhandener Live-Daten.
