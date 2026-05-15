@@ -446,6 +446,16 @@ Stand: `2026-05-12`
 **Checks:** `pnpm --filter @valero-neuroerp/frontend-web type-check`; `python scripts/agent_workboard_supervisor.py validate`; `node scripts/docs-governance-check.cjs`; `node scripts/docs-markdown-check.cjs docs/project-context/ux-excellence-operating-standard-2026-05-13.md docs/agent-ops/active-workboard.md docs/agent-ops/slices/UX-SALES-007.yaml`; `git diff --check`
 **Offene Risiken:** Rechnungsliste und Lieferliste sind in `UX-SALES-006` abgedeckt; dieser Slice fokussiert die moderne Sales-Ausnahmensicht.
 
+## UX-LOGISTIK-005
+
+**Von:** Codex
+**Owner:** Codex
+**Stand:** reserviert 2026-05-15
+**Ziel des Slices:** Bestands-/Logistik-Dashboard als vorhandene Dashboardflaeche fuer Logistik- und Waagefolge auf den UX-Exzellenzbaukasten ziehen: Rollenfokus, Ketten-Prioritaetsplan, Managemententscheidung, Next Action und CRUD-/Nachweis-Abdeckung.
+**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/agent-ops/slices/UX-LOGISTIK-005.yaml`, `packages/frontend-web/src/features/inventory/InventoryDashboard.tsx`, `docs/project-context/ux-excellence-operating-standard-2026-05-13.md`
+**Abnahmekriterien:** Dashboard zeigt Rollenfokus fuer Lager, Logistik, Waage, Einkauf und Leitung; Prioritaetsplan fuehrt Bestand, Alerts, Nachschub, Wert und Nachweis; Managemententscheidung zeigt arbeitsfaehig/blockiert; CRUD-/Nachweis-Abdeckung ist sichtbar; Typecheck und Doku-Checks sind gruen.
+**Offene Risiken:** Es gibt aktuell keine separate Logistik-Dashboard-Route; dieser Slice nutzt die bestehende Inventory-Dashboard-Flaeche als operative Logistik-/Bestandsuebersicht.
+
 ## TODO-SPRINT-001
 
 **Von:** Cursor<br>
