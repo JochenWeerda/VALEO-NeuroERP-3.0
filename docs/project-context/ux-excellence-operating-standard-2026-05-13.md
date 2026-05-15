@@ -144,12 +144,13 @@ Eine Seite gilt erst als UX-ready, wenn sie mindestens diese Punkte erfuellt:
 | `UX-COMPLIANCE-001` | Compliance/QS | abgeschlossen | Compliance-Center und QS-Checkliste nutzen Rollenfokus, Compliance-/QS-Pruefplan, Managemententscheidung, Next Action, Nachweislink und CRUD-/Workflow-Abdeckung. |
 | `UX-AGRIBUSINESS-001` | Agribusiness/Feldservice | abgeschlossen | Field-Service-Aufgaben nutzen Rollenfokus, Einsatzplan, Managemententscheidung, Next Action, Nachweislink, Einsatz-KPIs und CRUD-/Workflow-Abdeckung. |
 | `UX-SYSTEM-LIVE-001` | System/Live-Monitoring | abgeschlossen | Live-Monitor nutzt Rollenfokus, Betriebsplan, Managemententscheidung, Next Action, Nachweislink, Live-KPIs, Ereigniszeitleiste und kompakten Diagnosebereich. |
+| `UX-MELDEWESEN-001` | Compliance/Meldewesen | abgeschlossen | Meldewesen-Konsole nutzt Rollenfokus, Meldeplan, Managemententscheidung, Next Action, Nachweislink und CRUD-/Workflow-Abdeckung fuer Connectoren, Zeitplaene, Jobs und Artefakte. |
 
 Naechste Rollout-Slices:
 
-- `UX-MELDEWESEN-001`: Meldewesen-Konsole auf Meldefrist, Artefaktstatus, Owner und naechste Einreichungsaktion pruefen.
 - `UX-AGRAR-001`: Agrar-Fachseiten auf Feld-/Massnahmenstatus, Nachweis, naechste Aktion und gefuehrte Eingaben pruefen.
 - `UX-FUTTERMITTEL-001`: Futtermittel- und Rationsseiten auf fachliche Pruefschritte, Risiko, naechste Aktion und Nachweisfuehrung pruefen.
+- `UX-PORTAL-002`: Portal-Feldbuch und Naehrstoffbilanzen auf klare Nutzeraufgabe, Nachweisstatus und naechste Aktion pruefen.
 
 ## Nicht-Ziel
 

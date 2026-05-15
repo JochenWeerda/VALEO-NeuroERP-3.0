@@ -19,6 +19,14 @@ import { KeyboardShortcutBar } from "@/components/keyboard/KeyboardShortcutBar"
 import { buildCoreMaskShortcuts, useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts"
 import { AgentProcessPanel } from "@/components/agent"
 import { summarizeMeldewesenFeedback } from "@/lib/domain-depth"
+import {
+  CrudCapabilityChecklist,
+  EvidenceTemplateLink,
+  ManagementDecisionPanel,
+  NextActionPanel,
+  OperationalTaskPlan,
+  RoleFocusBar,
+} from "@/components/workflow"
 import { OperationalCaseHeader } from "@/components/workflow/OperationalCaseHeader"
 import { normalizeOperationalStatus } from "@/lib/operational-status"
 import {
@@ -95,6 +103,31 @@ type JobRun = {
   message?: string
   artifacts?: Array<{ name: string; mime: string; sha256: string }>
 }
+
+type MeldewesenRole = "compliance" | "fibu" | "it" | "leitung"
+
+const meldewesenRoles = [
+  {
+    id: "compliance",
+    label: "Compliance",
+    description: "Prueft Meldepflichten, Fristen, Artefakte und Einreichungsnachweise.",
+  },
+  {
+    id: "fibu",
+    label: "FIBU",
+    description: "Achtet auf Reporting Unit, Zeitraum, Exportformat und Abstimmung.",
+  },
+  {
+    id: "it",
+    label: "IT",
+    description: "Betreibt Connectoren, Jobs, Secrets und technische Laufprotokolle.",
+  },
+  {
+    id: "leitung",
+    label: "Leitung",
+    description: "Bewertet Meldebereitschaft, Stopper und naechste Einreichungsaktion.",
+  },
+] satisfies Array<{ id: MeldewesenRole; label: string; description: string }>
 
 function uid(prefix: string) {
   return `${prefix}_${Math.random().toString(16).slice(2)}_${Date.now().toString(16)}`
@@ -280,6 +313,7 @@ export default function MeldewesenKonsole() {
   const qc = useQueryClient()
   const [activeConnectorId, setActiveConnectorId] = useState<string>("")
   const [activeScheduleId, setActiveScheduleId] = useState<string>("")
+  const [roleFocus, setRoleFocus] = useState<MeldewesenRole>("compliance")
 
   const { data: connectorsApi = [], isLoading: loadingC, isError: errC, error: errConn, refetch: refetchC } = useQuery({
     queryKey: ["meldewesen", "connectors"],
@@ -417,6 +451,21 @@ export default function MeldewesenKonsole() {
       }),
     [artifactsQuery.data, dokumente.length, frachtbriefe.length, jobs, warteschlange?.items?.length, wiegungen.length],
   )
+  const failedJobs = jobs.filter((job) => job.status === "failed").length
+  const runningJobs = jobs.filter((job) => job.status === "running" || job.status === "queued").length
+  const artifactCount = (artifactsQuery.data ?? []).length
+  const activeConnectorCount = connectors.filter((connector) => connector.enabled).length
+  const enabledScheduleCount = schedules.filter((schedule) => schedule.enabled).length
+  const meldewesenReady = failedJobs === 0 && activeConnectorCount > 0 && enabledScheduleCount > 0 && artifactCount > 0
+  const nextMeldewesenAction = failedJobs > 0
+    ? `${failedJobs} fehlgeschlagene(n) Lauf pruefen und Fehlerprotokoll sichern.`
+    : activeConnectorCount === 0
+      ? "Uebertragungsweg aktivieren, damit Meldungen ueberhaupt eingereicht werden koennen."
+      : enabledScheduleCount === 0
+        ? "Meldezeitplan aktivieren und Fristvorlauf pruefen."
+        : artifactCount === 0
+          ? "Ersten Lauf starten und erzeugte Artefakte pruefen."
+          : "Artefakte letzter Lauf pruefen und Einreichungsnachweis ablegen."
 
   const upsertConnector = useCallback(
     (next: Connector) => {
@@ -588,6 +637,79 @@ export default function MeldewesenKonsole() {
             <div className="text-sm font-semibold">{feedbackSummary.nextAction}</div>
           </CardContent>
         </Card>
+      </div>
+
+      <RoleFocusBar
+        roles={meldewesenRoles}
+        value={roleFocus}
+        onChange={setRoleFocus}
+        visibleCount={connectors.length + schedules.length + jobs.length}
+        totalCount={connectors.length + schedules.length + jobs.length}
+        title="Arbeitsrolle fuer Meldewesen"
+      />
+
+      <ManagementDecisionPanel
+        decision={{
+          allowed: meldewesenReady,
+          allowedLabel: "Meldebereit",
+          blockedLabel: "Meldung nicht bereit",
+          summary: meldewesenReady
+            ? "Uebertragungsweg, Zeitplan und Artefakte sind vorhanden. Die aktuelle Meldung kann fachlich geprueft und als Nachweis abgelegt werden."
+            : "Fuer eine belastbare Meldung fehlen noch Uebertragungsweg, aktiver Zeitplan, erfolgreicher Lauf oder Artefaktnachweis.",
+          blockerCount: [activeConnectorCount > 0, enabledScheduleCount > 0, artifactCount > 0, failedJobs === 0].filter((value) => !value).length,
+          nextFocus: nextMeldewesenAction,
+          template: {
+            label: "Meldewesen-Einreichungsnachweis",
+            href: "/docs/compliance/meldewesen-einreichungsnachweis.md",
+          },
+        }}
+      />
+
+      <div className="grid gap-4 xl:grid-cols-[1.15fr_1fr_1fr]">
+        <OperationalTaskPlan
+          title="Meldeplan"
+          items={[
+            {
+              label: "Uebertragungsweg aktiv",
+              done: activeConnectorCount > 0,
+              hint: activeConnectorCount > 0 ? `${activeConnectorCount} aktiver Connector.` : "Mindestens ein aktiver Connector wird benoetigt.",
+            },
+            {
+              label: "Meldezeitplan aktiv",
+              done: enabledScheduleCount > 0,
+              hint: enabledScheduleCount > 0 ? `${enabledScheduleCount} aktiver Zeitplan.` : "Zeitplan mit Fristvorlauf aktivieren.",
+            },
+            {
+              label: "Lauf pruefen",
+              done: failedJobs === 0,
+              hint: failedJobs > 0 ? `${failedJobs} Lauf/Laeufe fehlgeschlagen.` : runningJobs > 0 ? `${runningJobs} Lauf/Laeufe noch aktiv.` : "Keine fehlgeschlagenen Laeufe.",
+            },
+            {
+              label: "Artefakt nachweisen",
+              done: artifactCount > 0,
+              hint: artifactCount > 0 ? `${artifactCount} Artefakt(e) im letzten Lauf.` : "Nach Lauf muss mindestens ein Artefakt pruefbar sein.",
+            },
+          ]}
+        />
+        <NextActionPanel action={nextMeldewesenAction} tone={meldewesenReady ? "emerald" : failedJobs > 0 ? "red" : "amber"} />
+        <div className="space-y-3">
+          <EvidenceTemplateLink
+            link={{
+              label: "Meldewesen-Pruefprotokoll",
+              href: "/docs/compliance/meldewesen-pruefprotokoll.md",
+            }}
+          />
+          <CrudCapabilityChecklist
+            capabilities={[
+              { key: "create", label: "Anlegen", available: true, hint: "Connectoren, Firmen und Zeitplaene koennen angelegt werden." },
+              { key: "read", label: "Lesen", available: true, hint: "Laufstatus, Artefakte und Konfiguration sind sichtbar." },
+              { key: "update", label: "Bearbeiten", available: true, hint: "Connectoren und Zeitplaene koennen aktualisiert werden." },
+              { key: "delete", label: "Loeschen", available: true, hint: "Connectoren und Zeitplaene koennen entfernt werden." },
+              { key: "export", label: "Export", available: true, hint: "Konfiguration und erzeugte Artefakte sind exportierbar." },
+              { key: "evidence", label: "Nachweis", available: artifactCount > 0, hint: "Artefakte letzter Lauf bilden den Einreichungsnachweis." },
+            ]}
+          />
+        </div>
       </div>
 
       <AgentProcessPanel domain="compliance" />
