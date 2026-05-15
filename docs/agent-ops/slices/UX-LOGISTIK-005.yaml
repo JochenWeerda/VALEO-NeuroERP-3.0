@@ -1,0 +1,24 @@
+id: UX-LOGISTIK-005
+title: Bestands-/Logistik-Dashboard mit UX-Exzellenzbaukasten
+owner: Codex
+status: reserviert
+created: 2026-05-15
+goal: >
+  Bestands-/Logistik-Dashboard als vorhandene Dashboardflaeche fuer Logistik-
+  und Waagefolge auf den UX-Exzellenzbaukasten ziehen: Rollenfokus,
+  Ketten-Prioritaetsplan, Managemententscheidung, Next Action und
+  CRUD-/Nachweis-Abdeckung.
+file_ownership:
+  - docs/agent-ops/active-workboard.md
+  - docs/agent-ops/slices/UX-LOGISTIK-005.yaml
+  - packages/frontend-web/src/features/inventory/InventoryDashboard.tsx
+  - docs/project-context/ux-excellence-operating-standard-2026-05-13.md
+acceptance_criteria:
+  - Dashboard zeigt Rollenfokus fuer Lager, Logistik, Waage, Einkauf und Leitung.
+  - Prioritaetsplan fuehrt Bestand, Alerts, Nachschub, Wert und Nachweis.
+  - Managemententscheidung zeigt arbeitsfaehig/blockiert.
+  - CRUD-/Nachweis-Abdeckung ist sichtbar.
+  - Typecheck und Doku-Checks sind gruen.
+checks: []
+risks:
+  - Es gibt aktuell keine separate Logistik-Dashboard-Route; dieser Slice nutzt die bestehende Inventory-Dashboard-Flaeche als operative Logistik-/Bestandsuebersicht.
