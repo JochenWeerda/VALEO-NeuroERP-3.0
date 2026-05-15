@@ -246,6 +246,8 @@ type WizardData = {
   wizardBaselineKgDm?: Record<string, number>
   /** Explizite Fuetterungssystem-Konfiguration (RATIONS-FS-WIZARD-001). Ohne Wert: Backend-Default. */
   feedingSystemConfig?: FeedingSystemConfig
+  /** Milchpreis €/kg für IOFC-Berechnung. Default: 0.44 €/kg (bundesweiter Richtpreis 2025). */
+  milkPriceEur?: number
 }
 
 function applyRationPatch(wd: WizardData, patch: RationAdjustmentApplyPatch): WizardData {
@@ -1563,6 +1565,7 @@ function Wizard({
   // DLG 01|2025 Tab. 13-15: optionale Leistungs-/Physiologiestufen-Auswahl.
   // Leer = Auto-Mapping aus Fuetterungstyp/Saison (pmr_pasture_spring etc.).
   const [policyProfile, setPolicyProfile] = useState<PolicyProfile | null>(() => resumeFrom?.policyProfile ?? null)
+  const [milkPriceEur, setMilkPriceEur] = useState<number>(() => resumeFrom?.milkPriceEur ?? 0.44)
   const [priorityWeights, setPriorityWeights] = useState<PriorityWeights>(() => ({
     ...DEFAULT_PRIORITY_WEIGHTS,
     ...resumeFrom?.priorityWeights,
@@ -1659,6 +1662,7 @@ function Wizard({
       wizardHardBounds,
       wizardSoftGoals,
       feedingSystemConfig,
+      milkPriceEur,
     })
   }
 
@@ -1771,10 +1775,11 @@ function Wizard({
               </div>
               <div className="grid grid-cols-2 gap-4">
                 {[
-                  { label: 'Ziel-Milch (kg)', val: milkYield, setter: setMilkYield, step: 1 },
+                  { label: 'Ziel-Milch (kg/Tag)', val: milkYield, setter: setMilkYield, step: 1 },
                   { label: 'TM-Aufnahme (kg)', val: dmiTarget, setter: setDmiTarget, step: 0.5 },
                   { label: 'Fett (%)', val: fatPercent, setter: setFatPercent, step: 0.1 },
                   { label: 'Eiweiß (%)', val: proteinPercent, setter: setProteinPercent, step: 0.1 },
+                  { label: 'Milchpreis (€/kg)', val: milkPriceEur, setter: setMilkPriceEur, step: 0.01 },
                 ].map((field) => (
                   <div key={field.label} className="space-y-1.5">
                     <label className={labelCls}>{field.label}</label>
@@ -3770,16 +3775,34 @@ function Diagnose({
   const violated = constraints.filter((c) => !c.fulfilled)
   const warnings = result?.warnings ?? []
 
+  const milkPrice = wizardData?.milkPriceEur ?? 0.44
+  const milkKg = wizardData?.milkYield ?? 0
+  const feedCostDay = result?.total_cost_eur_day ?? 0
+  const kostenJeLiter = milkKg > 0 ? feedCostDay / milkKg : null
+  const milkRevenueDay = milkKg * milkPrice
+  const iofcDay = milkRevenueDay - feedCostDay
+  const iofcJeLiter = milkKg > 0 ? iofcDay / milkKg : null
+
   const econRows = result
     ? [
-        { label: 'Kosten/Kuh/Tag', value: `${fmt(result.total_cost_eur_day ?? 0)} €` },
+        {
+          label: 'Kosten je Liter Milch',
+          value: kostenJeLiter != null ? `${fmt(kostenJeLiter * 100, 2)} ct/L` : '–',
+          primary: true,
+        },
+        {
+          label: 'IOFC je Liter Milch',
+          value: iofcJeLiter != null ? `${fmt(iofcJeLiter * 100, 2)} ct/L` : '–',
+          primary: true,
+          positive: iofcJeLiter != null && iofcJeLiter > 0,
+        },
+        { label: 'Futterkosten/Kuh/Tag', value: `${fmt(feedCostDay, 2)} €`, primary: false },
+        { label: 'IOFC/Kuh/Tag', value: `${fmt(iofcDay, 2)} €`, primary: false, positive: iofcDay > 0 },
+        { label: 'Milchpreis (Basis)', value: `${fmt(milkPrice * 100, 1)} ct/kg`, primary: false },
         { label: 'Teuerste Komponente', value: (() => {
             const items = [...(result.ration_items ?? [])].sort((a, b) => b.total_cost - a.total_cost)
-            return items[0] ? `${items[0].name} (${fmt(items[0].total_cost, 2)} €)` : '–'
-          })() },
-        { label: 'GF-Anteil', value: `${fmt(result.nutrient_supply.forage_share_pct, 1)} %` },
-        { label: 'ME/Kuh/Tag', value: `${fmt(result.nutrient_supply.me_mj, 1)} MJ` },
-        { label: 'sidP/Kuh/Tag', value: `${fmt(result.nutrient_supply.sidp_g, 0)} g` },
+            return items[0] ? `${items[0].name} (${fmt(items[0].total_cost, 2)} €/Tag)` : '–'
+          })(), primary: false },
       ]
     : []
 
@@ -3895,7 +3918,7 @@ function Diagnose({
               {bioRisks.map((r) => (
                 <div key={r.label} className="flex items-center justify-between text-sm">
                   <span>{r.label}</span>
-                  <span className="text-xs font-bold px-2 py-0.5 rounded" style={{ background: riskColor(r.risk) + '22', color: riskColor(r.risk) }}>
+                  <span className="text-xs font-bold px-2 py-0.5 rounded" style={{ background: `${riskColor(r.risk)  }22`, color: riskColor(r.risk) }}>
                     {riskLabel(r.risk)}
                   </span>
                 </div>
@@ -3919,9 +3942,18 @@ function Diagnose({
           ) : (
             <div className="space-y-2">
               {econRows.map((row) => (
-                <div key={row.label} className="flex items-center justify-between text-sm">
-                  <span style={{ color: C.muted }}>{row.label}</span>
-                  <span className="font-medium">{row.value}</span>
+                <div
+                  key={row.label}
+                  className={`flex items-center justify-between ${row.primary ? 'text-base font-semibold' : 'text-sm'}`}
+                  style={row.primary ? { borderBottom: `1px solid ${C.border}`, paddingBottom: '6px', marginBottom: '2px' } : {}}
+                >
+                  <span style={{ color: row.primary ? C.dark : C.muted }}>{row.label}</span>
+                  <span
+                    className={row.primary ? 'font-bold text-lg' : 'font-medium'}
+                    style={{ color: 'positive' in row && row.positive === false ? C.error : 'positive' in row && row.positive ? C.success : C.dark }}
+                  >
+                    {row.value}
+                  </span>
                 </div>
               ))}
             </div>
