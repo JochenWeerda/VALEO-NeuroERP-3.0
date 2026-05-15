@@ -434,6 +434,16 @@ Stand: `2026-05-12`
 **Checks:** `pnpm --filter @valero-neuroerp/frontend-web type-check`; `python scripts/agent_workboard_supervisor.py validate`; `node scripts/docs-governance-check.cjs`; `node scripts/docs-markdown-check.cjs docs/project-context/ux-excellence-operating-standard-2026-05-13.md docs/agent-ops/active-workboard.md docs/agent-ops/slices/UX-EINKAUF-007.yaml`; `git diff --check`
 **Offene Risiken:** Detail-Listen bleiben in den vorhandenen Einkaufs-Slices; dieser Slice fokussiert die Management- und Prioritaetssicht des Dashboards.
 
+## UX-SALES-007
+
+**Von:** Codex
+**Owner:** Codex
+**Stand:** reserviert 2026-05-15
+**Ziel des Slices:** Moderne Sales-Auftragssicht als Ausnahmen- und Eskalationsarbeitsflaeche auf den UX-Exzellenzbaukasten ziehen: Rollenfokus, Eskalationsplan, Managemententscheidung, Next Action und CRUD-/Nachweis-Abdeckung.
+**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/agent-ops/slices/UX-SALES-007.yaml`, `packages/frontend-web/src/pages/sales/orders-modern.tsx`, `docs/project-context/ux-excellence-operating-standard-2026-05-13.md`
+**Abnahmekriterien:** Moderne Sales-Auftragssicht zeigt Rollenfokus fuer Vertrieb, Auftragsabwicklung, Logistik, Faktura und Leitung; Eskalationsplan fuehrt offene, teilgelieferte, rechnungsfaehige und Archiv-/Storno-Kandidaten; Managemententscheidung zeigt arbeitsfaehig/blockiert; CRUD-/Nachweis-Abdeckung ist sichtbar; Typecheck und Doku-Checks sind gruen.
+**Offene Risiken:** Rechnungsliste und Lieferliste sind in `UX-SALES-006` abgedeckt; dieser Slice fokussiert die moderne Sales-Ausnahmensicht.
+
 ## TODO-SPRINT-001
 
 **Von:** Cursor<br>
