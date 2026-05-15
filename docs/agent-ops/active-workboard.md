@@ -350,6 +350,16 @@ Stand: `2026-05-12`
 **Checks:** `pnpm --filter @valero-neuroerp/frontend-web type-check`; `python scripts/agent_workboard_supervisor.py validate`; `node scripts/docs-governance-check.cjs`; `node scripts/docs-markdown-check.cjs docs/project-context/ux-excellence-operating-standard-2026-05-13.md docs/agent-ops/active-workboard.md docs/agent-ops/slices/UX-SALES-004.yaml`; `git diff --check`
 **Offene Risiken:** Tiefe Belegdruck- und Exportprozesse bleiben in bestehenden Funktionen; dieser Slice setzt den Leitbereich oberhalb der bestehenden Editor-Masken.
 
+## UX-LOGISTIK-003
+
+**Von:** Codex
+**Owner:** Codex
+**Stand:** reserviert 2026-05-15
+**Ziel des Slices:** Waagearbeitsflaechen auf den UX-Exzellenzbaukasten ziehen: Rollenfokus, Waage-Aufgabenplan, Stopper-/Managemententscheidung, Next Action und CRUD-/Nachweis-Abdeckung.
+**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/agent-ops/slices/UX-LOGISTIK-003.yaml`, `packages/frontend-web/src/pages/waage/wiegungen.tsx`, `packages/frontend-web/src/pages/waage/wiegeschein-detail.tsx`, `docs/project-context/ux-excellence-operating-standard-2026-05-13.md`
+**Abnahmekriterien:** Wiegungen und Wiegeschein-Detail zeigen Rollenfokus fuer Waage, Annahme, Disposition, QS und Abrechnung; Aufgabenplan fuehrt Ticket, Gewichte, Qualitaet, Kontrakt und Abschluss; Stopper-/Managemententscheidung zeigt buchbar/blockiert; CRUD-/Nachweis-Abdeckung ist sichtbar; Typecheck und Doku-Checks sind gruen.
+**Offene Risiken:** Waage-Hardware-Integration bleibt ausserhalb dieses Slice; dieser Slice fokussiert die Bedien- und Nachweissicht.
+
 ## TODO-SPRINT-001
 
 **Von:** Cursor<br>
