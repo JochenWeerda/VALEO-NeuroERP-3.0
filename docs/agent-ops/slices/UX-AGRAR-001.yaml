@@ -1,7 +1,7 @@
 id: UX-AGRAR-001
 title: Agrar-Schlagkartei und Massnahmen mit UX-Exzellenzbaukasten
 owner: Codex
-status: reserviert
+status: abgeschlossen
 created: 2026-05-16
 goal: >
   Agrar-Schlagkartei und Massnahmen-Dokumentation mit Feld-/Massnahmenstatus,
@@ -24,6 +24,8 @@ checks:
   - node scripts/docs-markdown-check.cjs docs/project-context/ux-excellence-operating-standard-2026-05-13.md docs/agent-ops/active-workboard.md docs/agent-ops/slices/UX-AGRAR-001.yaml
   - git diff --check
 done:
-  - Slice reserviert; Umsetzung folgt.
+  - Schlagkartei um Rollenfokus, Feldplan, Managemententscheidung, Next Action, Nachweislink und CRUD-/Workflow-Abdeckung erweitert.
+  - Massnahmen-Dokumentation um Rollenfokus, Massnahmenplan, Managemententscheidung, Next Action, Nachweislink und CRUD-/Nachweis-Abdeckung erweitert.
+  - Bestehende Filter, Export, Feldblockfinder, Tabs, Tabellen, Anlage-, Bearbeitungs- und Loeschpfade bleiben erhalten.
 risks:
   - Duengungsplanung, PSM-Spezialmasken und Portal-Feldbuch bleiben Folgeslices; dieser Slice fokussiert Schlag- und Massnahmenuebersicht.

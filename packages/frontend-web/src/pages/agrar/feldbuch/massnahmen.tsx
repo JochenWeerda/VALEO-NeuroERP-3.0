@@ -20,6 +20,14 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import {
+  CrudCapabilityChecklist,
+  EvidenceTemplateLink,
+  ManagementDecisionPanel,
+  NextActionPanel,
+  OperationalTaskPlan,
+  RoleFocusBar,
+} from '@/components/workflow'
+import {
   CalendarDays,
   FileDown,
   Plus,
@@ -70,6 +78,15 @@ type Massnahme = {
 }
 
 // Icon für Maßnahmentyp
+type MassnahmenRole = 'dokumentation' | 'anwender' | 'beratung' | 'audit'
+
+const massnahmenRoles = [
+  { id: 'dokumentation', label: 'Dokumentation', description: 'Massnahmen vollstaendig erfassen, filtern und exportieren.' },
+  { id: 'anwender', label: 'Anwender', description: 'Eigene Einsaetze, Mittel, Menge und Hinweise nachvollziehen.' },
+  { id: 'beratung', label: 'Beratung', description: 'Compliance, PSM-Status und naechste fachliche Klaerung pruefen.' },
+  { id: 'audit', label: 'Audit', description: 'Exportstatus, Pflichtangaben und Nachweisfaehigkeit bewerten.' },
+] satisfies Array<{ id: MassnahmenRole; label: string; description: string }>
+
 function getMassnahmeIcon(typ: string) {
   switch (typ) {
     case 'Düngung': return <Droplets className="h-4 w-4 text-blue-600" />
@@ -127,6 +144,7 @@ export default function MassnahmenPage(): JSX.Element {
   const [activeTab, setActiveTab] = useState<string>('liste')
   const [selectedIds, setSelectedIds] = useState<string[]>([])
   const [bulkDeleteResult, setBulkDeleteResult] = useState<BulkDeleteResult | null>(null)
+  const [roleFocus, setRoleFocus] = useState<MassnahmenRole>('dokumentation')
 
   // Daten laden via TanStack Query hooks
   const { data: massnahmenData, isLoading: isLoadingMassnahmen } = useMassnahmen()
@@ -180,7 +198,8 @@ export default function MassnahmenPage(): JSX.Element {
       duengungen: filtered.filter(m => m.typ === 'Düngung').length,
       psmAnwendungen: filtered.filter(m => m.typ === 'PSM' || m.typ === 'PSM-Behandlung').length,
       compliant: filtered.filter(m => m.compliant).length,
-      nichtExportiert: filtered.filter(m => !m.exportiert).length
+      nichtExportiert: filtered.filter(m => !m.exportiert).length,
+      offen: filtered.filter(m => !m.compliant || !m.exportiert).length
     }
   }, [filteredMassnahmen])
 
@@ -203,6 +222,12 @@ export default function MassnahmenPage(): JSX.Element {
   const psmMassnahmen = useMemo(() => {
     return filteredMassnahmen.filter(m => m.typ === 'PSM' || m.typ === 'PSM-Behandlung')
   }, [filteredMassnahmen])
+  const massnahmenReady = stats.gesamt > 0 && stats.offen === 0
+  const nextMassnahmenAction = stats.gesamt === 0
+    ? 'Erste Massnahme erfassen, damit Feldbuch und Nachweise beginnen.'
+    : stats.offen > 0
+      ? `${stats.offen} Massnahme(n) auf Vollstaendigkeit oder Export pruefen.`
+      : 'Massnahmen exportieren und Nachweis im DMS oder Kundenordner ablegen.'
 
   const allVisibleSelected = filteredMassnahmen.length > 0 && filteredMassnahmen.every((m) => selectedIds.includes(m.id))
   const selectedCount = selectedIds.length
@@ -448,6 +473,58 @@ export default function MassnahmenPage(): JSX.Element {
           <Plus className="h-4 w-4" />
           Neue Maßnahme
         </Button>
+      </div>
+
+      <RoleFocusBar
+        roles={massnahmenRoles}
+        value={roleFocus}
+        onChange={setRoleFocus}
+        visibleCount={filteredMassnahmen.length}
+        totalCount={massnahmen.length}
+        title="Arbeitsrolle fuer Massnahmen"
+      />
+
+      <ManagementDecisionPanel
+        decision={{
+          allowed: massnahmenReady,
+          allowedLabel: 'Nachweis vollstaendig',
+          blockedLabel: 'Nachweis offen',
+          summary: massnahmenReady
+            ? 'Alle sichtbaren Massnahmen sind vollstaendig und exportiert. Die Dokumentation kann als Feldbuchnachweis verwendet werden.'
+            : 'Offene, nicht vollstaendige oder nicht exportierte Massnahmen muessen geklaert werden, bevor der Nachweis belastbar ist.',
+          blockerCount: massnahmenReady ? 0 : stats.offen || 1,
+          nextFocus: nextMassnahmenAction,
+          template: {
+            label: 'Massnahmen- und Spritztagebuchnachweis',
+            href: '/docs/agrar/massnahmen-spritztagebuch-nachweis.md',
+          },
+        }}
+      />
+
+      <div className="grid gap-4 xl:grid-cols-[1.15fr_1fr_1fr]">
+        <OperationalTaskPlan
+          title="Massnahmenplan"
+          items={[
+            { label: 'Massnahme erfassen', done: stats.gesamt > 0, hint: `${stats.gesamt} Massnahme(n) im aktuellen Filter.` },
+            { label: 'PSM-Pflichten pruefen', done: psmMassnahmen.filter(m => !m.compliant).length === 0, hint: psmMassnahmen.filter(m => !m.compliant).length > 0 ? `${psmMassnahmen.filter(m => !m.compliant).length} PSM-Punkt(e) unvollstaendig.` : 'Keine unvollstaendigen PSM-Punkte.' },
+            { label: 'Export sichern', done: stats.nichtExportiert === 0, hint: stats.nichtExportiert > 0 ? `${stats.nichtExportiert} Massnahme(n) noch nicht exportiert.` : 'Alle sichtbaren Massnahmen exportiert.' },
+            { label: 'Auswahl bereinigen', done: selectedCount === 0, hint: selectedCount > 0 ? `${selectedCount} Massnahme(n) ausgewaehlt.` : 'Keine offene Massenauswahl.' },
+          ]}
+        />
+        <NextActionPanel action={nextMassnahmenAction} tone={massnahmenReady ? 'emerald' : stats.offen > 0 ? 'amber' : 'blue'} />
+        <div className="space-y-3">
+          <EvidenceTemplateLink link={{ label: 'Feldbuch-Exportnachweis', href: '/docs/agrar/feldbuch-exportnachweis.md' }} />
+          <CrudCapabilityChecklist
+            capabilities={[
+              { key: 'create', label: 'Anlegen', available: true, hint: 'Neue Massnahme direkt aus der Seite erfassen.' },
+              { key: 'read', label: 'Lesen', available: true, hint: 'Schlag, Kunde, Typ, Mittel, Menge und Status sind sichtbar.' },
+              { key: 'update', label: 'Bearbeiten', available: true, hint: 'Bearbeiten fuehrt in die Massnahmen-Detailroute.' },
+              { key: 'delete', label: 'Loeschen', available: true, hint: 'Einzel- und Massenloeschung sind kontrolliert vorhanden.' },
+              { key: 'export', label: 'Export', available: true, hint: 'CSV-Export erzeugt den einfachen Feldbuchnachweis.' },
+              { key: 'evidence', label: 'Nachweis', available: massnahmenReady, hint: 'Vollstaendige und exportierte Massnahmen sind nachweisfaehig.' },
+            ]}
+          />
+        </div>
       </div>
 
       {/* KPI Cards */}
