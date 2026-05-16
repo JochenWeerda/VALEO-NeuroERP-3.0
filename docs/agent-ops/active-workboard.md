@@ -2193,3 +2193,13 @@ Archiv des vorherigen Boards:
 **Erledigt:** Schlagkartei um Rollenfokus, Feldplan, Managemententscheidung, Next Action, Nachweislink und CRUD-/Workflow-Abdeckung erweitert; Massnahmen-Dokumentation um Rollenfokus, Massnahmenplan, Managemententscheidung, Next Action, Nachweislink und CRUD-/Nachweis-Abdeckung erweitert.
 **Checks:** `pnpm --filter @valero-neuroerp/frontend-web type-check`; `python scripts/agent_workboard_supervisor.py validate`; `node scripts/docs-governance-check.cjs`; `node scripts/docs-markdown-check.cjs docs/project-context/ux-excellence-operating-standard-2026-05-13.md docs/agent-ops/active-workboard.md docs/agent-ops/slices/UX-AGRAR-001.yaml`; `git diff --check`
 **Offene Risiken:** Duengungsplanung, PSM-Spezialmasken und Portal-Feldbuch bleiben Folgeslices; dieser Slice fokussiert Schlag- und Massnahmenuebersicht.
+
+## UX-UX-AUDIT-001
+
+**Von:** Codex
+**Owner:** Codex
+**Stand:** reserviert 2026-05-16
+**Ziel des Slices:** Pruefen und verbindlich festlegen, wo der UX-Exzellenzbaukasten weiterhin fachlich sinnvoll ist, wo eine kompakte oder minimale Variante reicht und wo der systemweite Rollout als abgeschlossen gilt.
+**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/agent-ops/slices/UX-UX-AUDIT-001.yaml`, `docs/project-context/ux-excellence-operating-standard-2026-05-13.md`
+**Abnahmekriterien:** Der UX-Standard unterscheidet volle, kompakte und minimale Baukasten-Nutzung; Stop-Regeln verhindern Ueberladung; verbleibende sinnvolle Rollout-Slices sind nach Nutzerwert priorisiert; Doku-Checks und Workboard-Validierung sind gruen.
+**Offene Risiken:** Zu pauschaler Einsatz von Rollenfokus, Managemententscheidung oder CRUD-Checklisten kann einfache Arbeitsflaechen ueberladen.
