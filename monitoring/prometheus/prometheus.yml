@@ -17,6 +17,8 @@ alerting:
 # Load Alert Rules
 rule_files:
   - 'alerts.yml'
+  - 'alerts-slo.yml'
+  - 'alerts-event-bus.yml'
 
 # Scrape Configurations
 scrape_configs:

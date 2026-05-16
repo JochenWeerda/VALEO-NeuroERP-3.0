@@ -4,10 +4,10 @@ from __future__ import annotations
 
 import json
 from datetime import date, datetime, time
-from typing import Any
+from typing import Any, Literal
 from uuid import uuid4
 
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, Response
 from pydantic import BaseModel, Field
 from sqlalchemy import text
 from sqlalchemy.exc import SQLAlchemyError
@@ -413,6 +413,36 @@ class DriverTimeSummaryOut(BaseModel):
     kpis: DriverTimeKpisOut
     findings: list[DriverTimeFindingOut]
     events: list[DriverTimeEventOut]
+
+
+class DriverTimeEventIn(BaseModel):
+    employee_ref: str
+    vehicle_id: str | None = None
+    tour_ref: str | None = None
+    event_type: Literal["START", "END", "BREAK", "PAUSE", "TACHO"]
+    event_ts: str  # ISO datetime
+    duration_minutes: int | None = None
+    absence_ref: str | None = None
+    source: Literal["MANUAL", "TACHO", "IMPORT", "SYSTEM"] = "MANUAL"
+    notes: str | None = None
+
+
+class DriverTimeEventPatch(BaseModel):
+    vehicle_id: str | None = None
+    tour_ref: str | None = None
+    event_type: Literal["START", "END", "BREAK", "PAUSE", "TACHO"] | None = None
+    event_ts: str | None = None
+    duration_minutes: int | None = None
+    absence_ref: str | None = None
+    notes: str | None = None
+
+
+class DriverTimeCollisionOut(BaseModel):
+    event_id: str
+    employee_ref: str
+    event_ts: str
+    absence_ref: str
+    collision_type: str
 
 
 class TimeCockpitKpisOut(BaseModel):
@@ -3783,3 +3813,163 @@ async def delete_shift(
         PersonalService(db, tenant_id).delete_shift(shift_id)
     except EntityNotFoundError:
         raise HTTPException(status_code=404, detail="Schicht nicht gefunden")
+
+
+# ---------------------------------------------------------------------------
+# HR-TIME-001: Driver Time Events (Pilot Slice)
+# ---------------------------------------------------------------------------
+
+
+@router.post("/driver-time/events", status_code=201)
+async def create_driver_time_event(
+    payload: DriverTimeEventIn,
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+):
+    event_id = str(uuid4())
+    db.execute(
+        text("""
+            INSERT INTO domain_hr.driver_time_events
+              (id, tenant_id, employee_ref, vehicle_id, tour_ref, event_type,
+               event_ts, duration_minutes, absence_ref, source, notes, row_version)
+            VALUES
+              (:id, :tenant_id, :employee_ref, :vehicle_id, :tour_ref, :event_type,
+               :event_ts, :duration_minutes, :absence_ref, :source, :notes, 1)
+        """),
+        {
+            "id": event_id,
+            "tenant_id": tenant_id,
+            "employee_ref": payload.employee_ref,
+            "vehicle_id": payload.vehicle_id,
+            "tour_ref": payload.tour_ref,
+            "event_type": payload.event_type,
+            "event_ts": payload.event_ts,
+            "duration_minutes": payload.duration_minutes,
+            "absence_ref": payload.absence_ref,
+            "source": payload.source,
+            "notes": payload.notes,
+        },
+    )
+    db.commit()
+    return {"id": event_id, "status": "created"}
+
+
+@router.get("/driver-time/events")
+async def list_driver_time_events(
+    employee_ref: str | None = Query(default=None),
+    vehicle_id: str | None = Query(default=None),
+    date_from: str | None = Query(default=None),
+    date_to: str | None = Query(default=None),
+    limit: int = Query(default=50, le=200),
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+):
+    filters = ["tenant_id = :tenant_id"]
+    params: dict = {"tenant_id": tenant_id, "limit": limit}
+    if employee_ref:
+        filters.append("employee_ref = :employee_ref")
+        params["employee_ref"] = employee_ref
+    if vehicle_id:
+        filters.append("vehicle_id = :vehicle_id")
+        params["vehicle_id"] = vehicle_id
+    if date_from:
+        filters.append("event_ts >= :date_from")
+        params["date_from"] = date_from
+    if date_to:
+        filters.append("event_ts <= :date_to")
+        params["date_to"] = date_to
+    where = " AND ".join(filters)
+    rows = db.execute(
+        text(f"SELECT * FROM domain_hr.driver_time_events WHERE {where} ORDER BY event_ts DESC LIMIT :limit"),
+        params,
+    ).fetchall()
+    return {"data": [dict(r._mapping) for r in rows], "total": len(rows)}
+
+
+@router.get("/driver-time/events/absences/collisions", response_model=list[DriverTimeCollisionOut])
+async def get_driver_time_absence_collisions(
+    employee_ref: str | None = Query(default=None),
+    date_from: str | None = Query(default=None),
+    date_to: str | None = Query(default=None),
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+):
+    filters = ["e.tenant_id = :tenant_id", "e.absence_ref IS NOT NULL"]
+    params: dict = {"tenant_id": tenant_id}
+    if employee_ref:
+        filters.append("e.employee_ref = :employee_ref")
+        params["employee_ref"] = employee_ref
+    if date_from:
+        filters.append("e.event_ts >= :date_from")
+        params["date_from"] = date_from
+    if date_to:
+        filters.append("e.event_ts <= :date_to")
+        params["date_to"] = date_to
+    where = " AND ".join(filters)
+    rows = db.execute(
+        text(f"""
+            SELECT e.id as event_id, e.employee_ref, e.event_ts::text, e.absence_ref,
+                   CASE WHEN a.id IS NULL THEN 'absence_not_found'
+                        WHEN e.event_ts::date BETWEEN a.start_date AND a.end_date THEN 'driving_during_absence'
+                        ELSE 'absence_ref_mismatch' END as collision_type
+            FROM domain_hr.driver_time_events e
+            LEFT JOIN domain_hr.time_entries a ON a.id::text = e.absence_ref AND a.tenant_id = e.tenant_id
+            WHERE {where}
+            ORDER BY e.event_ts DESC
+        """),
+        params,
+    ).fetchall()
+    return [DriverTimeCollisionOut(**dict(r._mapping)) for r in rows]
+
+
+@router.get("/driver-time/events/{event_id}")
+async def get_driver_time_event(
+    event_id: str,
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+):
+    row = db.execute(
+        text("SELECT * FROM domain_hr.driver_time_events WHERE id = :id AND tenant_id = :tenant_id"),
+        {"id": event_id, "tenant_id": tenant_id},
+    ).fetchone()
+    if not row:
+        raise HTTPException(status_code=404, detail=f"DriverTimeEvent {event_id} not found")
+    return dict(row._mapping)
+
+
+@router.patch("/driver-time/events/{event_id}")
+async def update_driver_time_event(
+    event_id: str,
+    payload: DriverTimeEventPatch,
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+):
+    updates = {k: v for k, v in payload.model_dump().items() if v is not None}
+    if not updates:
+        raise HTTPException(status_code=400, detail="No fields to update")
+    set_clause = ", ".join(f"{k} = :{k}" for k in updates)
+    updates.update({"id": event_id, "tenant_id": tenant_id})
+    result = db.execute(
+        text(f"UPDATE domain_hr.driver_time_events SET {set_clause}, row_version = row_version + 1 WHERE id = :id AND tenant_id = :tenant_id"),
+        updates,
+    )
+    if result.rowcount == 0:
+        raise HTTPException(status_code=404, detail=f"DriverTimeEvent {event_id} not found")
+    db.commit()
+    return {"id": event_id, "status": "updated"}
+
+
+@router.delete("/driver-time/events/{event_id}", status_code=204, response_class=Response)
+async def delete_driver_time_event(
+    event_id: str,
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+):
+    result = db.execute(
+        text("DELETE FROM domain_hr.driver_time_events WHERE id = :id AND tenant_id = :tenant_id"),
+        {"id": event_id, "tenant_id": tenant_id},
+    )
+    if result.rowcount == 0:
+        raise HTTPException(status_code=404, detail=f"DriverTimeEvent {event_id} not found")
+    db.commit()
+    return Response(status_code=204)

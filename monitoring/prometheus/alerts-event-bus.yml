@@ -1,0 +1,92 @@
+groups:
+  - name: valeo_event_bus
+    interval: 30s
+    rules:
+      # -----------------------------------------------------------------------
+      # Warning: sustained failure rate above 5 %
+      # -----------------------------------------------------------------------
+      - alert: EventBusHighFailureRate
+        expr: |
+          (
+            rate(valeo_event_bus_events_failed_total[5m])
+            /
+            rate(valeo_event_bus_events_received_total[5m])
+          ) > 0.05
+        for: 5m
+        labels:
+          severity: warning
+          team: platform
+          domain: event-bus
+        annotations:
+          summary: "Event Bus high failure rate ({{ $labels.subject }})"
+          description: >
+            The failure rate for subject "{{ $labels.subject }}" has been above 5 %
+            for the past 5 minutes (current value: {{ $value | humanizePercentage }}).
+            Check the application logs and DLQ for details.
+          runbook_url: "https://wiki.valeo-erp.internal/runbooks/event-bus-failure-rate"
+
+      # -----------------------------------------------------------------------
+      # Warning: DLQ growing by more than 10 entries in 15 minutes
+      # -----------------------------------------------------------------------
+      - alert: EventBusDLQGrowing
+        expr: |
+          increase(valeo_event_bus_dlq_entries_total[15m]) > 10
+        for: 5m
+        labels:
+          severity: warning
+          team: platform
+          domain: event-bus
+        annotations:
+          summary: "Event Bus DLQ growing fast ({{ $labels.subject }})"
+          description: >
+            The dead-letter queue for subject "{{ $labels.subject }}" has grown by
+            more than 10 entries in the last 15 minutes
+            (increase = {{ $value | humanize }}).
+            Investigate unprocessable messages before the queue becomes unmanageable.
+          runbook_url: "https://wiki.valeo-erp.internal/runbooks/event-bus-dlq"
+
+      # -----------------------------------------------------------------------
+      # Info: event bus appears stalled while the app is up
+      # -----------------------------------------------------------------------
+      - alert: EventBusStalled
+        expr: |
+          rate(valeo_event_bus_events_received_total[5m]) == 0
+          AND
+          up{job="valeo-app"} == 1
+        for: 10m
+        labels:
+          severity: info
+          team: platform
+          domain: event-bus
+        annotations:
+          summary: "Event Bus stalled — no events received for 10 min"
+          description: >
+            No events have been received on the event bus for the last 10 minutes
+            even though the valeo-app target is marked as up.
+            This may indicate a NATS JetStream connectivity problem or a
+            misconfigured consumer.
+          runbook_url: "https://wiki.valeo-erp.internal/runbooks/event-bus-stalled"
+
+      # -----------------------------------------------------------------------
+      # Critical: sustained failure rate above 20 %
+      # -----------------------------------------------------------------------
+      - alert: EventBusCriticalFailureRate
+        expr: |
+          (
+            rate(valeo_event_bus_events_failed_total[5m])
+            /
+            rate(valeo_event_bus_events_received_total[5m])
+          ) > 0.20
+        for: 2m
+        labels:
+          severity: critical
+          team: platform
+          domain: event-bus
+        annotations:
+          summary: "Event Bus CRITICAL failure rate ({{ $labels.subject }})"
+          description: >
+            The failure rate for subject "{{ $labels.subject }}" has exceeded 20 %
+            for the last 2 minutes (current value: {{ $value | humanizePercentage }}).
+            Immediate investigation is required — downstream consumers may be
+            severely impacted.
+          runbook_url: "https://wiki.valeo-erp.internal/runbooks/event-bus-failure-rate"
