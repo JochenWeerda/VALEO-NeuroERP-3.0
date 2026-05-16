@@ -19,19 +19,43 @@ Eine exzellente ERP-Oberflaeche beantwortet fuer die Nutzerin ohne Vorwissen:
 7. Was wurde bereits gemacht?
 8. Was verhindert den Abschluss?
 
-## Pflichtmuster fuer Arbeitsflaechen
+## Einsatzlogik statt Vollausstattung
 
-| Muster | Pflicht ab jetzt | Umsetzungshinweis |
+Der Baukasten ist kein Pflichtdekor. Er wird nur eingesetzt, wenn er eine konkrete Arbeitsfrage beantwortet oder eine fachliche Entscheidung sicherer macht.
+
+| Seitentyp | Empfohlene Nutzung | Ziel |
 |---|---|---|
-| Rollenfokus | Ja | HR, Payroll, IT, Datenschutz, Management oder domaenenspezifische Rollen duerfen unterschiedliche Einstiege bekommen. |
-| Aufgabenplan | Ja | Komplexe Statusseiten brauchen konkrete Arbeitsschritte mit erledigt/offen. |
-| Naechste Aktion | Ja | Jede kritische Zeile muss eine klare naechste Handlung zeigen. |
-| Vorlage-/Nachweislink | Ja | Wenn ein Prozess Evidence braucht, muss die passende Vorlage direkt erreichbar sein. |
-| Gefuehrte Eingabe | Ja | Auswahllisten vor Freitext; Freitext nur fuer Kommentar, Link oder Begruendung. |
-| Audit-Zeitleiste | Ja | Nachweis, Test, Entscheidung und Rueckfrage sollen chronologisch sichtbar sein. |
-| Management-Bild | Ja | Go-live, Abschluss, Zahlung, Versand oder Freigabe brauchen eine verdichtete Entscheidungsansicht. |
-| Leere-/Fehlerzustaende | Ja | Keine leeren Tabellen ohne Erklaerung; Fehler muessen Handlung anbieten. |
-| Normalsprache | Ja | Keine internen Begriffe, wenn ein normaler Bueroanwender eine einfache Formulierung braucht. |
+| Steuerungs-, Freigabe- und Compliance-Cockpit | Voller Baukasten | Status, Blocker, Owner, Nachweise, Entscheidung und Audit muessen sofort sichtbar sein. |
+| Operative Listen mit Rueckstand, Risiko oder Folgeprozess | Mittlerer Baukasten | Prioritaet, naechste Aktion, Owner und Leer-/Fehlerzustand sichtbar machen. |
+| Dichte Erfassungs-, Editor- und Detailmasken | Kompakter Baukasten | Nutzerin bei Eingabe, Validierung und Abschluss fuehren, ohne die Fachmaske zu verdraengen. |
+| Self-Service-Seiten fuer Mitarbeitende, Kunden oder Landwirte | Leichter Baukasten | Einfache Aufgabe, klarer Status, klare Primaeraktion; keine internen Governance-Begriffe. |
+| Einfache Stammdaten-, Lookup-, Druck- oder technische Diagnose-Seiten | Minimalstandard | Verstaendlicher Titel, klare Primaeraktion, Validierung, Leerzustand und Fehlerhilfe reichen. |
+
+## Muster nach Nutzen
+
+| Muster | Einsatz | Nicht einsetzen, wenn |
+|---|---|---|
+| Rollenfokus | Mehrere echte Rollen dieselbe Seite mit unterschiedlicher Verantwortung nutzen. | Die Seite genau eine offensichtliche Nutzerrolle hat. |
+| Aufgabenplan | Ein Prozess mehrere fachliche Schritte oder Pruefpunkte hat. | Die Aufgabe ein einfacher Speichern-, Drucken- oder Suchen-Vorgang ist. |
+| Naechste Aktion | Ein Status, Fehler, Rueckstand oder Blocker eine Handlung ausloest. | Es nur um neutrale Stammdatenanzeige ohne akuten Folgeweg geht. |
+| Vorlage-/Nachweislink | Nachweise, Exportdateien, DMS-Belege oder Pruefprotokolle wirklich erforderlich sind. | Der Prozess keinen Nachweis erzeugt oder die Vorlage spekulativ waere. |
+| Gefuehrte Eingabe | Fehler durch Auswahllisten, Plausibilitaet oder Vorschlaege vermeidbar sind. | Freitext fachlich notwendig ist, etwa bei Kommentar oder Begruendung. |
+| Audit-Zeitleiste | Historie fuer Freigabe, Recht, Abrechnung, QS, Datenschutz oder Storno relevant ist. | Die Historie keinen Einfluss auf Entscheidung oder Nachvollziehbarkeit hat. |
+| Management-Bild | Eine echte Entscheidung ansteht: Go-live, Abschluss, Zahlung, Versand, Sperre, Freigabe. | Es nur eine einfache Bearbeitungsmaske oder ein Self-Service-Antrag ist. |
+| CRUD-/Workflow-Checkliste | Admin-, Review- oder komplexe Belegseiten ihre Abdeckung transparent machen muessen. | Normale Endnutzer dadurch Implementierungsdetails statt Arbeitsklarheit sehen wuerden. |
+| Leere-/Fehlerzustaende | Immer, sobald keine Daten oder ein Fehler angezeigt wird. | Nie; das ist Basishygiene. |
+| Normalsprache | Immer. | Nie; Fachbegriffe nur, wenn sie im Arbeitsalltag der Zielgruppe ueblich sind. |
+
+## Stop-Regeln gegen Ueberladung
+
+- Keine Seite bekommt den vollen Baukasten, nur weil Komponenten vorhanden sind.
+- Kein Management-Bild ohne echte Management- oder Freigabeentscheidung.
+- Keine sichtbare CRUD-Checkliste fuer normale Self-Service- oder einfache Erfassungsmasken.
+- Keine Rollenleiste, wenn die Nutzerrolle eindeutig ist.
+- Keine Nachweislinks fuer hypothetische Funktionen oder nicht vorhandene Prozesse.
+- Keine Audit-Zeitleiste, wenn sie nur dekorative Historie ohne fachlichen Nutzen waere.
+- Einfache Seiten bleiben einfach: Titel, Status, Primaeraktion, Validierung, Leerzustand und Fehlerhilfe sind oft das Optimum.
+- Wenn eine Baukasten-Komponente die eigentliche Facharbeit nach unten schiebt, muss sie kompakter werden oder entfallen.
 
 ## Wiederverwendbarer Frontend-Baukasten
 
@@ -47,6 +71,32 @@ Die Komponenten liegen unter `packages/frontend-web/src/components/workflow/ux-s
 | `ManagementDecisionPanel` | Verdichtete Abschluss-/Freigabeentscheidung zeigen. | Go-live, Monatsabschluss, Zahlungslauf, Versand, Sperre/Freigabe. |
 | `CrudCapabilityChecklist` | CRUD- und Workflow-Abdeckung transparent pruefen. | UX-Reviews und komplexe Stammdaten-/Belegseiten. |
 | `EmptyStateWithAction` | Leere Zustaende mit sinnvoller Handlung statt leerer Tabelle. | Neue Mandanten, leere Suchergebnisse, fehlende Nachweise. |
+
+## Abschlussbild fuer den systemweiten Rollout
+
+Der breite UX-Rollout ist fuer die Kernbereiche abgeschlossen: HRM, Finance, Einkauf, CRM/Sales, Logistik/Waage, DMS, Produktion/QS, Lager, Admin, Service, Monitoring, Compliance, Agribusiness und Agrar/Feldbuch haben ein gemeinsames Arbeitsmodell.
+
+Ab jetzt gilt kein Flaechenrollout mehr, sondern eine nutzerwertbasierte Abschlusslogik:
+
+1. Neue oder ueberarbeitete Seiten werden zuerst klassifiziert: voll, mittel, kompakt oder minimal.
+2. Bestehende Seiten werden nur geaendert, wenn echte Ueberladung, fehlende Handlungsfuehrung oder fachliche Unklarheit sichtbar ist.
+3. Offene Domaenen bekommen nur dort Baukasten-Elemente, wo sie pruefbare Entscheidungen, Nachweise, Risiken oder naechste Aktionen verbessern.
+4. Self-Service- und Portalbereiche werden bewusst leichter formuliert als Admin-, Compliance- oder Betriebsseiten.
+5. Der sichtbare UI-Text beschreibt nur Funktionen, die das System wirklich anbietet.
+
+## Ueberladungspruefung
+
+Bei Reviews ist pro Seite zu pruefen:
+
+| Frage | Konsequenz |
+|---|---|
+| Verdraengt die Einordnung die eigentliche Facharbeit? | Baukasten kompakter machen oder oberes Panel entfernen. |
+| Sieht die Nutzerin Implementierungs- oder Projektbegriffe? | In Arbeitssprache uebersetzen oder ausblenden. |
+| Gibt es eine echte Entscheidung? | Wenn nein, kein Management-Bild. |
+| Gibt es mehrere Rollen mit unterschiedlichen Aufgaben? | Wenn nein, keine Rollenleiste. |
+| Braucht der Prozess einen Nachweis? | Wenn nein, keinen Vorlage-/Evidence-Link anzeigen. |
+| Ist die Seite ein Formular? | Fokus auf Validierung, Pflichtfelder, Speichern, Abbrechen und Abschlussmeldung. |
+| Ist die Seite Self-Service? | Fokus auf eigene Aufgabe, Status und naechsten Schritt; keine Governance-Sprache. |
 
 ## CRUD-Abdeckung
 
@@ -98,6 +148,7 @@ Eine Seite gilt erst als UX-ready, wenn sie mindestens diese Punkte erfuellt:
 5. Logistik/Waage auf Tour-, Frachtbrief-, Verwiegungs- und Abweichungs-UX uebertragen.
 6. Dokumente/DMS auf Klassifikation, Retention, Version und Freigabe uebertragen.
 7. Produktion/QS auf Chargen-, Pruef- und Sperrprozesse uebertragen.
+8. Nach Abschluss der Kernbereiche keine pauschale Ausweitung mehr, sondern Seitentyp-Klassifikation und Ueberladungspruefung.
 
 ## Rollout-Status
 
@@ -146,12 +197,14 @@ Eine Seite gilt erst als UX-ready, wenn sie mindestens diese Punkte erfuellt:
 | `UX-SYSTEM-LIVE-001` | System/Live-Monitoring | abgeschlossen | Live-Monitor nutzt Rollenfokus, Betriebsplan, Managemententscheidung, Next Action, Nachweislink, Live-KPIs, Ereigniszeitleiste und kompakten Diagnosebereich. |
 | `UX-MELDEWESEN-001` | Compliance/Meldewesen | abgeschlossen | Meldewesen-Konsole nutzt Rollenfokus, Meldeplan, Managemententscheidung, Next Action, Nachweislink und CRUD-/Workflow-Abdeckung fuer Connectoren, Zeitplaene, Jobs und Artefakte. |
 | `UX-AGRAR-001` | Agrar/Feldbuch | abgeschlossen | Schlagkartei und Massnahmen-Dokumentation nutzen Rollenfokus, Feld-/Massnahmenplan, Managemententscheidung, Next Action, Nachweislink und CRUD-/Workflow-Abdeckung. |
+| `UX-UX-AUDIT-001` | UX-Systemstandard | abgeschlossen | Baukasten-Nutzung ist auf volle, mittlere, kompakte und minimale Seitentypen begrenzt; Stop-Regeln verhindern Ueberladung; weiterer Rollout erfolgt nur noch nutzerwertbasiert. |
 
-Naechste Rollout-Slices:
+Verbleibende sinnvolle Abschluss-Slices:
 
-- `UX-FUTTERMITTEL-001`: Futtermittel- und Rationsseiten auf fachliche Pruefschritte, Risiko, naechste Aktion und Nachweisfuehrung pruefen.
-- `UX-PORTAL-002`: Portal-Feldbuch und Naehrstoffbilanzen auf klare Nutzeraufgabe, Nachweisstatus und naechste Aktion pruefen.
-- `UX-DUENGUNG-001`: Duengungsplanung und Bedarfsrechner auf Bedarf, Risiko, naechste Planungshandlung und Nachweisfuehrung pruefen.
+- `UX-FUTTERMITTEL-001`: Nur fuer echte Experten-Arbeitsflaechen wie Rationsoptimierung oder Futtermittel-QS sinnvoll. Listen und einfache Pflege bleiben kompakt.
+- `UX-DUENGUNG-001`: Sinnvoll als kompakte Planungsfuehrung fuer Bedarf, Sperrfristen, Risiko und Nachweis. Kein volles Management-Bild ohne Freigabeentscheidung.
+- `UX-PORTAL-002`: Nur leichter Self-Service-Standard fuer Portal-Feldbuch und Naehrstoffbilanzen: klare Aufgabe, eigener Status, naechste Aktion, keine internen Governance-Begriffe.
+- Trim-Review: Bereits umgestellte Seiten werden nur dann reduziert, wenn Rollenleiste, Management-Bild oder CRUD-Checkliste die eigentliche Facharbeit sichtbar ueberladen.
 
 ## Nicht-Ziel
 
