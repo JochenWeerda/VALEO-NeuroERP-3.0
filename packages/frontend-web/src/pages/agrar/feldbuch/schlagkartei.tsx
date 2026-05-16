@@ -20,6 +20,14 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
+import {
+  CrudCapabilityChecklist,
+  EvidenceTemplateLink,
+  ManagementDecisionPanel,
+  NextActionPanel,
+  OperationalTaskPlan,
+  RoleFocusBar,
+} from '@/components/workflow'
 import { 
   FileDown, 
   MapPin, 
@@ -57,6 +65,15 @@ type Schlag = {
     typ: string
   }
 }
+
+type AgrarRole = 'dienstleister' | 'landwirt' | 'beratung' | 'leitung'
+
+const agrarRoles = [
+  { id: 'dienstleister', label: 'Dienstleister', description: 'Schlaege je Kunde sauber verwalten und Massnahmen vorbereiten.' },
+  { id: 'landwirt', label: 'Landwirt', description: 'Eigene Flaechen, Kulturen und letzte Massnahmen schnell verstehen.' },
+  { id: 'beratung', label: 'Beratung', description: 'Kultur, Flaeche, Status und naechste fachliche Aktion pruefen.' },
+  { id: 'leitung', label: 'Leitung', description: 'Flaechenumfang, Kundenlage und Pflegebedarf verdichtet bewerten.' },
+] satisfies Array<{ id: AgrarRole; label: string; description: string }>
 
 // API hooks from centralized agrar module
 import { useAgrarKunden, useSchlaege, useDeleteSchlag } from '@/lib/api/agrar'
@@ -112,6 +129,7 @@ export default function SchlagkarteiPage(): JSX.Element {
   const [activeTab, setActiveTab] = useState<string>('liste')
   const [feldblockDialogOpen, setFeldblockDialogOpen] = useState(false)
   const [filterStatus, setFilterStatus] = useState<string>('alle')
+  const [roleFocus, setRoleFocus] = useState<AgrarRole>('dienstleister')
 
   // Daten laden mit API-Hooks
   const { data: kunden, isLoading: kundenLoading } = useAgrarKunden()
@@ -156,7 +174,9 @@ export default function SchlagkarteiPage(): JSX.Element {
       schlagCount: filtered.length,
       gesamtflaeche: filtered.reduce((sum, s) => sum + s.flaeche, 0),
       kulturen: new Set(filtered.map(s => s.kultur)).size,
-      kundenCount: new Set(filtered.map(s => s.kundeId)).size
+      kundenCount: new Set(filtered.map(s => s.kundeId)).size,
+      aktiv: filtered.filter(s => s.status === 'aktiv').length,
+      ohneMassnahme: filtered.filter(s => !s.letzteMassnahme).length,
     }
   }, [filteredSchlaege])
 
@@ -164,6 +184,12 @@ export default function SchlagkarteiPage(): JSX.Element {
   const selectedKunde = useMemo(() => {
     return kunden?.find(k => k.id === selectedKundeId)
   }, [kunden, selectedKundeId])
+  const schlagReady = stats.schlagCount > 0 && stats.ohneMassnahme === 0
+  const nextSchlagAction = stats.schlagCount === 0
+    ? 'Ersten Schlag anlegen oder per Feldblockfinder uebernehmen.'
+    : stats.ohneMassnahme > 0
+      ? `${stats.ohneMassnahme} Schlag/Schlaege ohne letzte Massnahme pruefen und dokumentieren.`
+      : 'Schlagliste exportieren oder naechste Massnahme planen.'
 
   const handleExport = () => {
     const header = 'Schlag;FLIK;Flaeche_ha;Kultur;Vorkultur;Kunde;Gemeinde;Status\n'
@@ -355,6 +381,58 @@ export default function SchlagkarteiPage(): JSX.Element {
           </AlertDescription>
         </Alert>
       )}
+
+      <RoleFocusBar
+        roles={agrarRoles}
+        value={roleFocus}
+        onChange={setRoleFocus}
+        visibleCount={filteredSchlaege.length}
+        totalCount={schlaege?.length ?? 0}
+        title="Arbeitsrolle fuer Schlagkartei"
+      />
+
+      <ManagementDecisionPanel
+        decision={{
+          allowed: schlagReady,
+          allowedLabel: 'Feldlage gepflegt',
+          blockedLabel: 'Feldlage pruefen',
+          summary: schlagReady
+            ? 'Alle sichtbaren Schlaege haben eine letzte Massnahme. Die Schlagkartei ist fuer Planung, Export und Nachweis nutzbar.'
+            : 'Schlaege ohne Massnahmenbezug oder fehlende Flaechen verhindern eine belastbare Feldbuchlage. Bitte zuerst Anlage oder letzte Massnahme klaeren.',
+          blockerCount: schlagReady ? 0 : Math.max(stats.ohneMassnahme, stats.schlagCount === 0 ? 1 : 0),
+          nextFocus: nextSchlagAction,
+          template: {
+            label: 'Schlagkartei-Nachweis',
+            href: '/docs/agrar/schlagkartei-nachweis.md',
+          },
+        }}
+      />
+
+      <div className="grid gap-4 xl:grid-cols-[1.15fr_1fr_1fr]">
+        <OperationalTaskPlan
+          title="Feldplan"
+          items={[
+            { label: 'Schlaege erfassen', done: stats.schlagCount > 0, hint: `${stats.schlagCount} Schlag/Schlaege im aktuellen Filter.` },
+            { label: 'Aktive Flaechen pruefen', done: stats.aktiv > 0, hint: `${stats.aktiv} aktive Flaeche(n).` },
+            { label: 'Massnahmenbezug halten', done: stats.ohneMassnahme === 0, hint: stats.ohneMassnahme > 0 ? `${stats.ohneMassnahme} Schlag/Schlaege ohne letzte Massnahme.` : 'Alle sichtbaren Schlaege haben eine letzte Massnahme.' },
+            { label: 'Export/Nachweis sichern', done: filteredSchlaege.length > 0, hint: 'CSV-Export dokumentiert die aktuelle Schlagliste.' },
+          ]}
+        />
+        <NextActionPanel action={nextSchlagAction} tone={schlagReady ? 'emerald' : stats.schlagCount === 0 ? 'blue' : 'amber'} />
+        <div className="space-y-3">
+          <EvidenceTemplateLink link={{ label: 'Feldblock- und Schlagnachweis', href: '/docs/agrar/feldblock-schlagnachweis.md' }} />
+          <CrudCapabilityChecklist
+            capabilities={[
+              { key: 'create', label: 'Anlegen', available: true, hint: 'Neuer Schlag oder Feldblockfinder-Uebernahme.' },
+              { key: 'read', label: 'Lesen', available: true, hint: 'Flaeche, Kultur, Kunde, Status und letzte Massnahme sind sichtbar.' },
+              { key: 'update', label: 'Bearbeiten', available: true, hint: 'Bearbeiten fuehrt in die Schlag-Detailroute.' },
+              { key: 'delete', label: 'Stilllegen', available: true, hint: 'Aktive Schlaege werden kontrolliert stillgelegt.' },
+              { key: 'export', label: 'Export', available: true, hint: 'CSV-Export dient als einfacher Flaechennachweis.' },
+              { key: 'evidence', label: 'Nachweis', available: filteredSchlaege.length > 0, hint: 'FLIK, Flaeche und Kunde bilden die Nachweisbasis.' },
+            ]}
+          />
+        </div>
+      </div>
 
       {/* KPI Cards */}
       <div className="grid gap-4 md:grid-cols-4">
