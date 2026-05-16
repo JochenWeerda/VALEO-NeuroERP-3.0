@@ -1328,6 +1328,19 @@ function Dashboard({ onStart, onDemo }: { onStart: () => void; onDemo: () => voi
           </button>
         </div>
 
+        <div className="grid gap-3 md:grid-cols-3">
+          {[
+            { label: '1. Ziel klaeren', text: 'Tiergruppe, Leistung und Futterbasis festlegen.' },
+            { label: '2. Ration rechnen', text: 'Solver-Ergebnis, Grenzen und Warnungen pruefen.' },
+            { label: '3. Fachlich freigeben', text: 'Review oeffnen, Nachweis exportieren und Umsetzung dokumentieren.' },
+          ].map((step) => (
+            <div key={step.label} className="rounded-lg border bg-slate-50 p-3" style={{ borderColor: C.border }}>
+              <p className="text-[11px] font-bold uppercase tracking-wide" style={{ color: C.dark }}>{step.label}</p>
+              <p className="mt-1 text-[12px] leading-relaxed" style={{ color: C.muted }}>{step.text}</p>
+            </div>
+          ))}
+        </div>
+
         {/* AI Quick Start */}
         <div className="p-6 rounded-lg border space-y-4" style={{ background: C.aiBg, borderColor: C.aiBorder }}>
           <div className="flex items-center gap-2 font-bold text-xs uppercase tracking-widest" style={{ color: C.aiText }}>

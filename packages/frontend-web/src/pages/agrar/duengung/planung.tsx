@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Sprout, TrendingUp } from 'lucide-react'
 import { useDuengerKomponenten, useSchlaege } from '@/lib/api/agrar'
+import { EvidenceTemplateLink, NextActionPanel, OperationalTaskPlan } from '@/components/workflow'
 
 type BedarfsrechnerState = {
   flaeche: number
@@ -21,6 +22,12 @@ export default function DuengungsplanungPage(): JSX.Element {
   const gesamtFlaeche = schlaegeListe.reduce((sum, s) => sum + s.flaeche, 0)
   const verfuegbareKomponenten = komponenten ?? []
   const isLoading = loadingKomponenten || loadingSchlaege
+  const hasBedarf = Boolean(fromBedarfsrechner?.empfehlung)
+  const nextPlanningAction = schlaegeListe.length === 0
+    ? 'Zuerst Schlaege anlegen, damit Bedarf und Flaeche geplant werden koennen.'
+    : hasBedarf
+      ? 'Uebernommene Empfehlung schlagbezogen pruefen und passende Komponente fuer die Ausbringung waehlen.'
+      : 'Bedarf im Rechner ermitteln oder je Schlag Kultur, Flaeche und Naehrstoffbedarf nachpflegen.'
 
   if (isLoading) {
     return (
@@ -43,6 +50,24 @@ export default function DuengungsplanungPage(): JSX.Element {
         <h1 className="text-3xl font-bold">Düngungsplanung</h1>
         <p className="text-muted-foreground">Nährstoffbedarf & Planung ({verfuegbareKomponenten.length} Komponenten verfügbar)</p>
       </div>
+
+      <div className="grid gap-4 lg:grid-cols-[1fr_320px]">
+        <NextActionPanel
+          title="Naechster Planungsschritt"
+          action={nextPlanningAction}
+          tone={schlaegeListe.length === 0 ? 'amber' : hasBedarf ? 'blue' : 'neutral'}
+        />
+        <EvidenceTemplateLink link={{ label: 'Duengebedarf und Ausbringnachweis', href: '/docs/agrar/duengung/duengebedarf-ausbringnachweis.md' }} />
+      </div>
+
+      <OperationalTaskPlan
+        title="Planung ohne Ueberladung"
+        items={[
+          { label: 'Schlaege und Flaechen pruefen', done: schlaegeListe.length > 0, hint: `${schlaegeListe.length} Schlaege mit ${gesamtFlaeche.toFixed(1)} ha in der Planung.` },
+          { label: 'Bedarf je Kultur klaeren', done: hasBedarf, hint: hasBedarf ? 'Empfehlung aus dem Bedarfsrechner liegt vor.' : 'Bei Bedarf den Rechner starten und Ergebnis uebernehmen.' },
+          { label: 'Nachweis vorbereiten', done: verfuegbareKomponenten.length > 0, hint: `${verfuegbareKomponenten.length} Duengerkomponenten sind verfuegbar.` },
+        ]}
+      />
 
       {fromBedarfsrechner?.empfehlung && (
         <Card className="border-green-200 bg-green-50/50">

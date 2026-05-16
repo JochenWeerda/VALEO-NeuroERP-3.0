@@ -49,6 +49,7 @@ import {
 } from '@/components/ui/table'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { ErrorState } from '@/components/ErrorState'
+import { NextActionPanel } from '@/components/workflow'
 import {
   Bug,
   Calendar,
@@ -556,6 +557,12 @@ export default function PortalFeldbuch() {
 
   const gesamtFlaeche = stats?.gesamtFlaeche ?? schlaege.reduce((sum, s) => sum + s.flaeche, 0)
   const valeoDienste = stats?.valeoDienste ?? massnahmen.filter(m => m.quelle !== 'portal').length
+  const offenePruefungen = massnahmen.filter(m => m.typ === 'psm' && !m.compliant).length
+  const nextPortalAction = schlaege.length === 0
+    ? 'Legen Sie zuerst Ihre Schlaege an. Danach koennen Sie Massnahmen dokumentieren oder CSV-Daten importieren.'
+    : offenePruefungen > 0
+      ? 'Pruefen Sie Pflanzenschutz-Massnahmen mit Hinweis und ergaenzen Sie fehlende Angaben.'
+      : 'Dokumentieren Sie neue Massnahmen zeitnah oder exportieren Sie die Ackerschlagkartei fuer Ihre Unterlagen.'
 
   return (
     <div className="space-y-6">
@@ -576,6 +583,12 @@ export default function PortalFeldbuch() {
           </Button>
         </div>
       </div>
+
+      <NextActionPanel
+        title="Was ist als Naechstes sinnvoll?"
+        action={nextPortalAction}
+        tone={offenePruefungen > 0 ? 'amber' : schlaege.length === 0 ? 'blue' : 'emerald'}
+      />
 
       {/* KPIs */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">

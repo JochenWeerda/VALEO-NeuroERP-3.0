@@ -9,6 +9,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { CheckCircle, FileDown, ClipboardList } from 'lucide-react'
+import { NextActionPanel, OperationalTaskPlan } from '@/components/workflow'
 import {
   type GruenlandNutzung,
   type StandortTyp,
@@ -455,7 +456,22 @@ export default function BedarfsrechnerPage(): JSX.Element {
   ]
 
   return (
-    <div className="p-6">
+    <div className="space-y-4 p-6">
+      <div className="grid gap-4 lg:grid-cols-[1fr_360px]">
+        <NextActionPanel
+          title="Naechster Schritt"
+          action="Flaeche, Kultur und Bodenwerte erfassen. Danach Empfehlung speichern oder direkt in die Duengungsplanung uebernehmen."
+          tone={bedarf.kultur && bedarf.flaeche > 0 ? 'blue' : 'amber'}
+        />
+        <OperationalTaskPlan
+          title="Bedarf sauber ermitteln"
+          items={[
+            { label: 'Grunddaten erfassen', done: bedarf.flaeche > 0 && Boolean(bedarf.kultur), hint: 'Flaeche und Kultur sind Grundlage fuer die Empfehlung.' },
+            { label: 'Bodenwerte pruefen', done: bedarf.bodenanalyse.n > 0 || bedarf.bodenanalyse.p > 0 || bedarf.bodenanalyse.k > 0, hint: 'N, P und K koennen aus aktueller Analyse uebernommen werden.' },
+            { label: 'Ergebnis weitergeben', done: bedarf.empfehlung.n > 0 || Boolean(gruenlandZeile) || Boolean(wintergetreideN), hint: 'Empfehlung speichern oder als Duengeplan uebernehmen.' },
+          ]}
+        />
+      </div>
       <Wizard
         title="Düngebedarf berechnen"
         steps={steps}

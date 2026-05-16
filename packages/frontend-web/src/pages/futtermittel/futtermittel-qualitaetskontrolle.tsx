@@ -4,6 +4,7 @@ import { useMaskActions } from '@/components/mask-builder/hooks'
 import { WorklistConfig, WorklistItem } from '@/components/mask-builder/types'
 import { useFutterQualitaet } from '@/lib/api/futter'
 import { toast } from '@/hooks/use-toast'
+import { EvidenceTemplateLink, NextActionPanel, OperationalTaskPlan } from '@/components/workflow'
 
 // Konfiguration fuer Qualitaetskontrolle Worklist
 const qualityControlConfig: WorklistConfig = {
@@ -80,6 +81,13 @@ export default function FuttermittelQualitaetskontrollePage(): JSX.Element {
   const { data: qualitaetData, isLoading } = useFutterQualitaet()
   const apiItems = mapQualitaetToWorklistItems(qualitaetData)
   const [items, setItems] = useState<WorklistItem[]>([])
+  const offenePruefungen = items.filter((item) => item.status === 'pending' || item.status === 'in-progress').length
+  const gesperrteChargen = items.filter((item) => item.status === 'overdue' || item.priority === 'urgent').length
+  const nextQualityAction = gesperrteChargen > 0
+    ? 'Gesperrte oder auffaellige Charge zuerst pruefen, Entscheidung dokumentieren und erst danach freigeben.'
+    : offenePruefungen > 0
+      ? 'Offene Laborpruefungen nach Faelligkeit bearbeiten und Ergebnis an der Charge festhalten.'
+      : 'Keine offene Qualitaetspruefung. Neue Wareneingaenge und Laborrueckmeldungen beobachten.'
 
   useEffect(() => {
     if (apiItems.length > 0 && items.length === 0) {
@@ -126,11 +134,29 @@ export default function FuttermittelQualitaetskontrollePage(): JSX.Element {
   }
 
   return (
-    <Worklist
-      config={qualityControlConfig}
-      items={items}
-      onAction={handleActionClick}
-      isLoading={isLoading}
-    />
+    <div className="space-y-4">
+      <div className="grid gap-4 lg:grid-cols-[1.2fr_0.8fr]">
+        <NextActionPanel
+          title="Naechste Pruefaktion"
+          action={nextQualityAction}
+          tone={gesperrteChargen > 0 ? 'red' : offenePruefungen > 0 ? 'amber' : 'emerald'}
+        />
+        <EvidenceTemplateLink link={{ label: 'QS-Pruefprotokoll Futtermittel', href: '/docs/futtermittel/qs-pruefprotokoll.md' }} />
+      </div>
+      <OperationalTaskPlan
+        title="Kompakter QS-Ablauf"
+        items={[
+          { label: 'Charge identifizieren', done: items.length > 0, hint: 'Produkt, Charge und Pruefparameter muessen eindeutig sein.' },
+          { label: 'Laborergebnis bewerten', done: gesperrteChargen === 0 && offenePruefungen === 0 && items.length > 0, hint: 'Auffaellige Werte bleiben gesperrt oder werden eskaliert.' },
+          { label: 'Freigabe oder Ablehnung dokumentieren', done: items.some((item) => item.status === 'completed'), hint: 'Entscheidung direkt an der Worklist-Aktion ausloesen.' },
+        ]}
+      />
+      <Worklist
+        config={qualityControlConfig}
+        items={items}
+        onAction={handleActionClick}
+        isLoading={isLoading}
+      />
+    </div>
   )
 }
