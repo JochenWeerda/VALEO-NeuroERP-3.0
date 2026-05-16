@@ -198,13 +198,14 @@ Eine Seite gilt erst als UX-ready, wenn sie mindestens diese Punkte erfuellt:
 | `UX-MELDEWESEN-001` | Compliance/Meldewesen | abgeschlossen | Meldewesen-Konsole nutzt Rollenfokus, Meldeplan, Managemententscheidung, Next Action, Nachweislink und CRUD-/Workflow-Abdeckung fuer Connectoren, Zeitplaene, Jobs und Artefakte. |
 | `UX-AGRAR-001` | Agrar/Feldbuch | abgeschlossen | Schlagkartei und Massnahmen-Dokumentation nutzen Rollenfokus, Feld-/Massnahmenplan, Managemententscheidung, Next Action, Nachweislink und CRUD-/Workflow-Abdeckung. |
 | `UX-UX-AUDIT-001` | UX-Systemstandard | abgeschlossen | Baukasten-Nutzung ist auf volle, mittlere, kompakte und minimale Seitentypen begrenzt; Stop-Regeln verhindern Ueberladung; weiterer Rollout erfolgt nur noch nutzerwertbasiert. |
+| `UX-REMAINDER-001` | Futtermittel/Duengung/Portal | abgeschlossen | Restarbeiten nach angepasster Logik erledigt: Futtermittel-Expertenseiten mit Pruef-/Nachweisfuehrung, Duengung kompakt mit Planungsschritten, Portal leicht mit eigener naechster Aktion und Leerzustaenden. |
 
-Verbleibende sinnvolle Abschluss-Slices:
+Abschlussbewertung:
 
-- `UX-FUTTERMITTEL-001`: Nur fuer echte Experten-Arbeitsflaechen wie Rationsoptimierung oder Futtermittel-QS sinnvoll. Listen und einfache Pflege bleiben kompakt.
-- `UX-DUENGUNG-001`: Sinnvoll als kompakte Planungsfuehrung fuer Bedarf, Sperrfristen, Risiko und Nachweis. Kein volles Management-Bild ohne Freigabeentscheidung.
-- `UX-PORTAL-002`: Nur leichter Self-Service-Standard fuer Portal-Feldbuch und Naehrstoffbilanzen: klare Aufgabe, eigener Status, naechste Aktion, keine internen Governance-Begriffe.
-- Trim-Review: Bereits umgestellte Seiten werden nur dann reduziert, wenn Rollenleiste, Management-Bild oder CRUD-Checkliste die eigentliche Facharbeit sichtbar ueberladen.
+- Der systemweite UX-Baukasten-Rollout ist abgeschlossen.
+- Weitere Arbeiten sind keine Rollout-Slices mehr, sondern gezielte Trim- oder Detailreviews bei konkreter Ueberladung, fehlender Handlungsfuehrung oder neuen Fachfunktionen.
+- Futtermittel-Pflege, einfache Listen, Stammdaten, Druckseiten und Portal-Self-Service bleiben bewusst kompakt.
+- Keine Seite soll nachtraeglich Rollenfokus, Management-Bild oder CRUD-Checkliste erhalten, wenn kein echter fachlicher Entscheidungspunkt besteht.
 
 ## Nicht-Ziel
 

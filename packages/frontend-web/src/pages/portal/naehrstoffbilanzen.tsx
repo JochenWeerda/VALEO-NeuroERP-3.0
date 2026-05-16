@@ -16,6 +16,7 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
 import { ErrorState } from '@/components/ErrorState'
+import { EmptyStateWithAction, NextActionPanel } from '@/components/workflow'
 import { NativeSelect } from '@/components/ui/native-select'
 import {
   Table,
@@ -122,6 +123,12 @@ export default function PortalNaehrstoffbilanzen() {
   }
 
   const selectedYearNumber = Number(selectedJahr) || currentYear
+  const hasGrenzwertHinweis = dreiJahresDurchschnittN > N_GRENZWERT || dreiJahresDurchschnittP > P_GRENZWERT
+  const nextBilanzAction = portalBilanzen.length === 0
+    ? 'Noch keine Bilanzdaten vorhanden. Pruefen Sie Feldbuch und Lieferdaten oder laden Sie spaeter erneut.'
+    : hasGrenzwertHinweis
+      ? 'Grenzwert-Hinweis pruefen und die betroffenen Schlaege in der Uebersicht kontrollieren.'
+      : 'Bilanz fuer Ihre Unterlagen als PDF herunterladen oder die schlagbezogene Uebersicht pruefen.'
 
   const onDownload = async (format: 'csv' | 'pdf', year?: number) => {
     setExportError(null)
@@ -164,6 +171,12 @@ export default function PortalNaehrstoffbilanzen() {
           options={bilanzen.map((b) => ({ value: b.jahr.toString(), label: String(b.jahr) }))}
         />
       </div>
+
+      <NextActionPanel
+        title="Naechster sinnvoller Schritt"
+        action={nextBilanzAction}
+        tone={hasGrenzwertHinweis ? 'amber' : portalBilanzen.length === 0 ? 'blue' : 'emerald'}
+      />
 
       <Card>
         <CardHeader>
@@ -420,7 +433,16 @@ export default function PortalNaehrstoffbilanzen() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {schlagBilanzen.map((sb) => (
+              {schlagBilanzen.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={5} className="py-8">
+                    <EmptyStateWithAction
+                      title="Noch keine schlagbezogenen Bilanzdaten"
+                      description="Sobald Feldbuch- oder Lieferdaten vorhanden sind, sehen Sie hier die Salden je Schlag."
+                    />
+                  </TableCell>
+                </TableRow>
+              ) : schlagBilanzen.map((sb) => (
                 <TableRow key={sb.schlag}>
                   <TableCell className="font-medium">{sb.schlag}</TableCell>
                   <TableCell>
@@ -493,6 +515,12 @@ export default function PortalNaehrstoffbilanzen() {
                 </CardContent>
               </Card>
             ))}
+            {bilanzen.length === 0 && (
+              <EmptyStateWithAction
+                title="Noch keine Jahresbilanz"
+                description="Fuer das gewaehlte Jahr liegen noch keine zusammengefassten Naehrstoffdaten vor."
+              />
+            )}
           </div>
         </CardContent>
       </Card>
