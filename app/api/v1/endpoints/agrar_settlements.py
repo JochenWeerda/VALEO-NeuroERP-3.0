@@ -21,8 +21,8 @@ from app.core.exceptions import ConflictError, EntityNotFoundError, ValidationFa
 from app.core.tenant import get_tenant_id
 from app.services.agrar_settlement_service import AgrarSettlementService
 from app.services.agrar_drying_rule_service import DryingRuleService
-from app.services.finance_transaction_service import FinanceTransactionService
-from app.documents.router_helpers import get_repository, get_from_store, list_from_store, save_to_store
+from app.services.settlement_pdf_service import SettlementPdfService
+from app.documents.router_helpers import get_repository, save_to_store
 from app.infrastructure.models import AgrarSettlement, AgrarSettlementDeduction
 from app.domains.inventory.api.inventory_auth import require_inventory_admin
 from app.core.uuid7 import uuid7
@@ -36,12 +36,6 @@ from modules.agrar.services.drying_rule_engine import (
 )
 from app.infrastructure.models import DryingRuleFactorRange, DryingRuleLookupRow, DryingRuleSet
 from app.api.v1.endpoints.admin_core import _load_tenant_settings
-from app.core.settlement_completion_contracts import (
-    SettlementCompletionEvidence,
-    SettlementCompletionVariant,
-    SettlementFinancialDocumentKind,
-    evaluate_settlement_completion,
-)
 from modules.agrar.services.settlement_calculator import (
     calc_deduction_amount as _calc_deduction_amount_impl,
     compute_settlement_amounts as _compute_settlement_amounts_impl,
@@ -620,66 +614,11 @@ async def create_settlement(
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
-    gross_qty = _round_qty(payload.gross_quantity_kg)
-    drying_snapshot: dict | None = None
-    billing_qty_override: Decimal | None = None
-
-    if payload.drying is not None:
-        if any(d.deduction_type == "drying" for d in payload.deductions):
-            raise HTTPException(
-                status_code=400,
-                detail="Do not provide deductions[].deduction_type='drying' together with payload.drying (prevents double fee application).",
-            )
-        repo = _DbDryingRuleRepo(db, tenant_id=tenant_id)
-        calc_date = payload.drying.calc_date or datetime.utcnow().date().isoformat()
-        try:
-            drying_result = _compute_drying_settlement(
-                repo,
-                {
-                    "cropCode": payload.drying.crop_code,
-                    "siteId": payload.drying.site_id,
-                    "netWeightKg": float(gross_qty),
-                    "moisturePct": payload.drying.moisture_pct,
-                    "calcDate": calc_date,
-                    "roundingMode": payload.drying.rounding_mode,
-                },
-            )
-        except ValueError as e:
-            raise HTTPException(status_code=400, detail=str(e)) from e
-
-        drying_snapshot = {
-            "crop_code": payload.drying.crop_code,
-            "site_id": payload.drying.site_id,
-            "net_weight_kg": float(gross_qty),
-            "moisture_pct": float(payload.drying.moisture_pct),
-            "calc_date": calc_date,
-            "entzug_pct_points": float(drying_result.entzug_pct_points),
-            "loss_pct": float(drying_result.loss_pct),
-            "loss_kg": float(drying_result.loss_kg),
-            "invoice_weight_kg": float(drying_result.invoice_weight_kg),
-            "drying_fee_eur": float(drying_result.drying_fee_eur) if drying_result.drying_fee_eur is not None else None,
-            "used_rule_set_id": drying_result.used_rule_set_id,
-            "used_rule_version": int(drying_result.used_rule_version),
-            "used_row_moisture_pct": float(drying_result.used_row_moisture_pct) if drying_result.used_row_moisture_pct is not None else None,
-            "warnings": list(drying_result.warnings),
-        }
-        if payload.billing_quantity_kg is None:
-            billing_qty_override = _round_qty(drying_result.invoice_weight_kg)
-        if drying_result.drying_fee_eur is not None and drying_result.drying_fee_eur > 0:
-            payload.deductions.append(
-                DeductionInput(
-                    deduction_type="drying",
-                    mode="fixed",
-                    fixed_amount_eur=float(drying_result.drying_fee_eur),
-                    note=f"Drying fee via rule-set {drying_result.used_rule_set_id} v{drying_result.used_rule_version}",
-                )
-            )
-
     try:
-        settlement, rows = _svc(db, tenant_id).create_settlement(
+        settlement, rows = _svc(db, tenant_id).create_settlement_with_drying(
             payload,
-            drying_snapshot=drying_snapshot,
-            billing_qty_override=billing_qty_override,
+            drying_compute_fn=_compute_drying_settlement,
+            drying_repo=_DbDryingRuleRepo(db, tenant_id=tenant_id),
         )
     except ValidationFailedError as exc:
         raise HTTPException(status_code=422, detail=exc.detail)
@@ -768,58 +707,15 @@ async def post_settlement_to_fibu(
     db: Session = Depends(get_db),
 ):
     try:
-        settlement, _ = _svc(db, tenant_id).get_settlement(settlement_id)
+        return _svc(db, tenant_id).post_to_fibu_full(settlement_id, payload)
     except EntityNotFoundError as exc:
         raise HTTPException(status_code=404, detail=exc.detail)
-    try:
-        _svc(db, tenant_id).check_row_version(settlement, payload.expected_row_version)
     except ConflictError as exc:
         raise HTTPException(status_code=409, detail=exc.detail)
-
-    approval_status = _get_settlement_approval_status(settlement)
-    if approval_status != "FREIGEGEBEN":
-        raise HTTPException(
-            status_code=409,
-            detail=f"Settlement cannot be posted: approval_status={approval_status}. Must be FREIGEGEBEN.",
-        )
-
-    posting_date = payload.posting_date or datetime.utcnow()
-    journal_ref = f"JE-SET-{datetime.utcnow().strftime('%Y%m%d')}-{settlement.id[:8].upper()}"
-    gross = _round_money(settlement.gross_amount_eur)
-    deductions = _round_money(settlement.total_deductions_eur)
-    net = _round_money(settlement.net_amount_eur)
-
-    lines = [
-        {"account_id": payload.debit_account, "debit_amount": float(gross), "credit_amount": 0.0,
-         "description": f"Agrar settlement {settlement.settlement_number} gross"},
-        {"account_id": payload.credit_account_supplier, "debit_amount": 0.0, "credit_amount": float(net),
-         "description": f"Supplier payable {settlement.supplier_id}"},
-    ]
-    if deductions > 0:
-        lines.append({"account_id": payload.credit_account_deductions, "debit_amount": 0.0,
-                      "credit_amount": float(deductions), "description": "Settlement deductions"})
-
-    fin = FinanceTransactionService(db, tenant_id)
-    try:
-        je = fin.create(
-            entry_number=journal_ref,
-            description=f"Agrar settlement {settlement.settlement_number}",
-            entry_date=posting_date.date() if isinstance(posting_date, datetime) else posting_date,
-            lines=lines,
-            reference=settlement.settlement_number,
-            source="agrar_settlement",
-            document_type="agrar_settlement",
-            period=posting_date.strftime("%Y-%m") if isinstance(posting_date, datetime) else str(posting_date)[:7],
-        )
-        journal_ref = str(je.entry_number)
-    except Exception as exc:
-        raise HTTPException(status_code=500, detail=f"FIBU-Buchung fehlgeschlagen: {exc}") from exc
-
-    try:
-        settlement = _svc(db, tenant_id).post_to_fibu(settlement_id, journal_ref, posting_date)
     except ValidationFailedError as exc:
         raise HTTPException(status_code=400, detail=exc.detail)
-    return {"ok": True, "settlement_id": settlement.id, "journal_ref": journal_ref}
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=f"FIBU-Buchung fehlgeschlagen: {exc}") from exc
 
 
 class SettlementCorrectionDraftOut(BaseModel):
@@ -853,57 +749,12 @@ async def get_settlement_correction_draft(
     db: Session = Depends(get_db),
 ):
     try:
-        settlement, _ = _svc(db, tenant_id).get_settlement(settlement_id)
+        data = _svc(db, tenant_id).get_correction_draft(settlement_id, memo_type)
     except EntityNotFoundError as exc:
         raise HTTPException(status_code=404, detail=exc.detail)
-    if settlement.status != "posted":
-        raise HTTPException(status_code=409, detail="Correction draft requires a posted settlement")
-
-    supplier_name = None
-    try:
-        partner = get_from_store("partner", settlement.supplier_id, get_repository(db))
-        if partner:
-            supplier_name = partner.get("name")
-    except Exception:
-        supplier_name = None
-
-    amount = float(settlement.net_amount_eur)
-    item_reason = "Nachtraegliche Preis-, Mengen- oder Qualitaetskorrektur"
-    suggested_reason = (
-        f"{'Gutschrift' if memo_type == 'credit' else 'Belastung'} fuer Settlement {settlement.settlement_number}"
-    )
-    suggested_notes = (
-        f"Settlement-ID: {settlement.id}\n"
-        f"Settlement-Nummer: {settlement.settlement_number}\n"
-        f"Journal-Ref: {settlement.posted_journal_ref or '-'}\n"
-        f"Lieferant: {settlement.supplier_id}\n"
-        f"Bitte Korrekturgrund fachlich dokumentieren und gegen Audit-Trail freigeben."
-    )
-    route_type = "credit" if memo_type == "credit" else "debit"
-    return SettlementCorrectionDraftOut(
-        settlement_id=settlement.id,
-        settlement_number=settlement.settlement_number,
-        memo_type=memo_type,
-        supplier_id=settlement.supplier_id,
-        supplier_name=supplier_name,
-        posted_journal_ref=settlement.posted_journal_ref,
-        suggested_reason=suggested_reason,
-        suggested_notes=suggested_notes,
-        suggested_route=f"/einkauf/gutschriften-belastungen/{route_type}?settlementId={settlement.id}",
-        items=[
-            {
-                "productName": settlement.article_id or "Settlement-Korrektur",
-                "quantity": 1,
-                "unit": "Vorgang",
-                "unitPrice": amount,
-                "netAmount": amount,
-                "taxRate": 0,
-                "taxAmount": 0,
-                "grossAmount": amount,
-                "reason": item_reason,
-            }
-        ],
-    )
+    except ConflictError as exc:
+        raise HTTPException(status_code=409, detail=exc.detail)
+    return SettlementCorrectionDraftOut(**data)
 
 
 @router.get("/{settlement_id}/completion-status", response_model=SettlementCompletionStatusOut)
@@ -914,92 +765,12 @@ async def get_settlement_completion_status(
     db: Session = Depends(get_db),
 ):
     try:
-        settlement, _ = _svc(db, tenant_id).get_settlement(settlement_id)
+        data = _svc(db, tenant_id).get_completion_status(settlement_id, variant)
     except EntityNotFoundError as exc:
         raise HTTPException(status_code=404, detail=exc.detail)
-
-    repo = get_repository(db)
-    linked_documents: list[dict] = []
-    credit_memos = (list_from_store("credit_memo", repo=repo).get("data") or [])
-    debit_memos = (list_from_store("debit_memo", repo=repo).get("data") or [])
-    for memo in credit_memos:
-        if memo.get("settlementId") == settlement_id:
-            linked_documents.append(
-                {
-                    "memo_id": memo.get("id"),
-                    "memo_type": "credit",
-                    "status": memo.get("status"),
-                    "journal_ref": memo.get("journalRef"),
-                    "correction_mode": memo.get("correctionMode"),
-                }
-            )
-    for memo in debit_memos:
-        if memo.get("settlementId") == settlement_id:
-            linked_documents.append(
-                {
-                    "memo_id": memo.get("id"),
-                    "memo_type": "debit",
-                    "status": memo.get("status"),
-                    "journal_ref": memo.get("journalRef"),
-                    "correction_mode": memo.get("correctionMode"),
-                }
-            )
-
-    approval_status = _get_settlement_approval_status(settlement)
-    approval_history = _get_settlement_approval_history(settlement)
-    has_journal_entry = bool(settlement.posted_journal_ref)
-
-    completion_variant = SettlementCompletionVariant(variant)
-    document_kind = None
-    document_status = None
-    correction_mode = None
-    correction_links_complete = False
-
-    if completion_variant == SettlementCompletionVariant.GUTSCHRIFT:
-        credit = next((doc for doc in linked_documents if doc["memo_type"] == "credit"), None)
-        document_kind = SettlementFinancialDocumentKind.GUTSCHRIFT if credit else None
-        document_status = credit["status"] if credit else None
-    elif completion_variant == SettlementCompletionVariant.BELASTUNG:
-        debit = next((doc for doc in linked_documents if doc["memo_type"] == "debit"), None)
-        document_kind = SettlementFinancialDocumentKind.BELASTUNG if debit else None
-        document_status = debit["status"] if debit else None
-    else:
-        credit = next((doc for doc in linked_documents if doc["memo_type"] == "credit"), None)
-        debit = next((doc for doc in linked_documents if doc["memo_type"] == "debit"), None)
-        if credit and debit:
-            document_kind = SettlementFinancialDocumentKind.KORREKTUR_NEU
-            document_status = "BOOKED" if credit.get("journal_ref") and debit.get("journal_ref") else credit.get("status") or debit.get("status")
-            correction_mode = "STORNO_UND_NEU"
-            correction_links_complete = True
-        elif credit or debit:
-            document_kind = SettlementFinancialDocumentKind.STORNO
-            document_status = (credit or debit).get("status")
-            correction_mode = (credit or debit).get("correction_mode") or "STORNO"
-
-    result = evaluate_settlement_completion(
-        SettlementCompletionEvidence(
-            settlement_id=settlement_id,
-            variant=completion_variant,
-            approval_status=approval_status,
-            has_approval_history=bool(approval_history),
-            has_audit_chain=bool(approval_history),
-            has_gobd_check=has_journal_entry,
-            has_journal_entry=has_journal_entry,
-            financial_document_kind=document_kind,
-            financial_document_status=document_status,
-            correction_mode=correction_mode,
-            correction_links_complete=correction_links_complete,
-        )
-    )
-    return SettlementCompletionStatusOut(
-        settlement_id=result.settlement_id,
-        variant=result.variant.value,
-        completed=result.completed,
-        completion_pct=result.completion_pct,
-        missing_controls=result.missing_controls,
-        next_step=result.next_step,
-        linked_documents=linked_documents,
-    )
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc))
+    return SettlementCompletionStatusOut(**data)
 
 
 @router.post("/{settlement_id}/cancel", response_model=dict)
@@ -1477,11 +1248,18 @@ async def delete_drying_factor_range(
 @router.get("/{settlement_id}/export-pdf")
 async def export_settlement_pdf(
     settlement_id: str,
+    archive: bool = False,
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
-    """Exportiere Abrechnung als PDF (GoBD-konform)."""
-    from app.infrastructure.models import BusinessPartner, Article
+    """Exportiere Abrechnung als PDF (GoBD-konform).
+
+    Query-Parameter:
+    - archive=true  → PDF zusätzlich in GoBD-Artifact-Store registrieren
+    """
+    from fastapi.responses import Response as FastAPIResponse
+    from app.infrastructure.models import Article
+    from app.infrastructure.models.business_partner import BusinessPartner
 
     try:
         settlement, deductions = _svc(db, tenant_id).get_settlement(settlement_id)
@@ -1492,96 +1270,24 @@ async def export_settlement_pdf(
         BusinessPartner.id == settlement.supplier_id,
         BusinessPartner.tenant_id == tenant_id,
     ).first()
-
     article = None
     if settlement.article_id:
         article = db.query(Article).filter(Article.id == settlement.article_id).first()
-    
-    # Berechne Summen (Modell: gross_amount_eur, total_deductions_eur, net_amount_eur — kein billing_amount_eur)
-    total_deductions = sum(float(d.amount_eur or 0) for d in deductions)
-    gross_amount = float(settlement.gross_amount_eur or 0)
-    net_payable = float(settlement.net_amount_eur or 0)
 
-    def _fmt_de_datum(dt) -> str:
-        if dt is None:
-            return "N/A"
-        try:
-            return dt.strftime("%d.%m.%Y")
-        except Exception:
-            return str(dt)
+    pdf_svc = SettlementPdfService(db, tenant_id)
 
-    # Abrechnungsdatum: Verbuchung, sonst Anlage (kein settlement_date-Feld am Modell)
-    abrechnungs_datum = _fmt_de_datum(settlement.posted_at or settlement.created_at)
+    if archive:
+        meta = pdf_svc.generate_and_archive(settlement, deductions, supplier, article)
+        pdf_bytes = meta.pop("pdf_bytes")
+    else:
+        pdf_bytes = pdf_svc.generate_bytes(settlement, deductions, supplier, article)
 
-    # Erstelle PDF-Inhalt (textbasiert für Demo - in Produktion PDF-Library verwenden)
-    pdf_content = f"""
-{'=' * 70}
-SELBSTABRECHNUNG / LIEFERANTEN-ABRECHNUNG
-{'=' * 70}
-
-Abrechnungsnummer: {settlement.settlement_number or settlement.id}
-Datum: {abrechnungs_datum}
-Status: {settlement.status.upper()}
-
-{'=' * 70}
-LIEFERANT
-{'=' * 70}
-Name: {supplier.name if supplier else 'N/A'}
-Nummer: {supplier.partner_number if supplier else 'N/A'}
-Adresse: {f'{supplier.street}, {supplier.zip} {supplier.city}' if supplier else 'N/A'}
-
-{'=' * 70}
-WARENANGABEN
-{'=' * 70}
-Artikel: {article.name if article else 'N/A'}
-Artikelnummer: {article.item_number if article else 'N/A'}
-
-Bruttogewicht: {settlement.gross_quantity_kg:,.2f} kg
-Abrechnungsgewicht: {settlement.billing_quantity_kg:,.2f} kg
-Preis: {settlement.unit_price_eur_per_ton:,.2f} EUR/to
-
-{'=' * 70}
-abzüge
-{'=' * 70}
-"""
-    
-    for ded in deductions:
-        pdf_content += f"\n{ded.deduction_type.upper()}: -{ded.amount_eur:,.2f} EUR"
-        if ded.note:
-            pdf_content += f" ({ded.note})"
-    
-    pdf_content += f"""
-Summe Abzüge: -{total_deductions:,.2f} EUR
-
-{'=' * 70}
-RECHNUNGSBETRAG
-{'=' * 70}
-Abrechnungsbetrag (brutto): {gross_amount:,.2f} EUR
--abzüge: -{total_deductions:,.2f} EUR
------------------------------------
-ZAHLBAR: {net_payable:,.2f} EUR
-
-{'=' * 70}
-SONSTIGES
-{'=' * 70}
-"""
-    
-    if settlement.note:
-        pdf_content += f"\nNotiz: {settlement.note}"
-    
-    pdf_content += f"""
-Erstellt am: {datetime.utcnow().strftime('%d.%m.%Y %H:%M:%S')}
-GoBD-konforme Dokumentation gemäß §147 AO
-
-Dieses Dokument ist maschinell erstellt und revisionssicher gespeichert.
-{'=' * 70}
-    """
-    
-    return {
-        "content": pdf_content,
-        "filename": f"abrechnung_{settlement.settlement_number or settlement.id}.txt",
-        "content_type": "text/plain"
-    }
+    filename = f"abrechnung_{settlement.settlement_number or settlement.id}.pdf"
+    return FastAPIResponse(
+        content=pdf_bytes,
+        media_type="application/pdf",
+        headers={"Content-Disposition": f'attachment; filename="{filename}"'},
+    )
 
 
 # ============================================================================
