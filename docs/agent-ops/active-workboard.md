@@ -2205,3 +2205,13 @@ Archiv des vorherigen Boards:
 **Erledigt:** UX-Standard von pauschaler Pflicht auf Seitentyp-Klassifikation umgestellt; Stop-Regeln gegen Ueberladung fuer Rollenfokus, Management-Bild, Nachweislinks, Audit-Zeitleiste und CRUD-Checkliste ergaenzt; systemweiter Rollout fuer Kernbereiche als abgeschlossen dokumentiert; weitere Arbeiten erfolgen nur noch nutzerwertbasiert.
 **Checks:** `python scripts/agent_workboard_supervisor.py validate`; `node scripts/docs-governance-check.cjs`; `node scripts/docs-markdown-check.cjs docs/project-context/ux-excellence-operating-standard-2026-05-13.md docs/agent-ops/active-workboard.md docs/agent-ops/slices/UX-UX-AUDIT-001.yaml`; `git diff --check`
 **Offene Risiken:** Bereits umgestellte Seiten koennen im Einzelfall zu schwer sein; kuenftige Trim-Reviews reduzieren nur konkret sichtbare Ueberladung, statt den Baukasten pauschal zurueckzunehmen.
+
+## UX-REMAINDER-001
+
+**Von:** Codex
+**Owner:** Codex
+**Stand:** reserviert 2026-05-16
+**Ziel des Slices:** Verbleibende sinnvolle UX-Abschlussarbeiten fuer Futtermittel, Duengung und Portal nach der neuen Baukasten-Einsatzlogik umsetzen: voll nur fuer echte Experten-/Pruefflaechen, kompakt fuer Planung und leicht fuer Self-Service.
+**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/agent-ops/slices/UX-REMAINDER-001.yaml`, `docs/project-context/ux-excellence-operating-standard-2026-05-13.md`, `packages/frontend-web/src/pages/futtermittel/rationsoptimierung.tsx`, `packages/frontend-web/src/pages/futtermittel/futtermittel-qualitaetskontrolle.tsx`, `packages/frontend-web/src/pages/agrar/duengung/planung.tsx`, `packages/frontend-web/src/pages/agrar/duenger/bedarfsrechner.tsx`, `packages/frontend-web/src/pages/portal/feldbuch.tsx`, `packages/frontend-web/src/pages/portal/naehrstoffbilanzen.tsx`
+**Abnahmekriterien:** Futtermittel-Expertenseiten zeigen Pruefstatus, Risiko, naechste Aktion und Nachweis ohne einfache Pflegebereiche zu ueberladen; Duengungsplanung und Bedarfsrechner fuehren Bedarf, Sperrfrist/Risiko, Nachweis und naechste Planungshandlung kompakt; Portal-Feldbuch und Naehrstoffbilanzen nutzen leichte Self-Service-Sprache; keine unpassenden Management-Bilder oder sichtbaren CRUD-Checklisten auf Self-Service-Seiten; Typecheck, Workboard-Validierung und Doku-Checks sind gruen.
+**Offene Risiken:** Einige Futtermittel- oder Agrar-Dateien koennen parallel bearbeitet sein; bestehende fremde Aenderungen duerfen nicht ueberschrieben werden.
