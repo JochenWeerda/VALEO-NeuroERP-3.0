@@ -3,7 +3,7 @@
 ## Zweck
 
 Ehrliche, aktuelle Bestandsaufnahme aller offenen Restthemen, fachlichen Duennstellen und bekannten Risiken.
-Zuletzt vollstaendig auditiert: **2026-05-05**.
+Zuletzt vollstaendig auditiert: **2026-05-16**.
 
 ---
 
@@ -38,7 +38,14 @@ Zuletzt vollstaendig auditiert: **2026-05-05**.
 - Zweite Codewelle ist ebenfalls eingezogen: `fibu/schnittstellen-center.tsx`, `charge/wareneingang.tsx`, `einkauf/rechnungseingang.tsx`, `kontrakte/KontraktPositionsmonitor.tsx`, `crm/opportunity-detail.tsx` und `fibu/atlas.tsx` bilden dieselbe Verdichtung jetzt direkt in den operativen Folgepfaden ab.
 - Dritte Codewelle ist jetzt ebenfalls aktiv: `finance/mahnwesen.tsx`, `fibu/zahlungslaeufe.tsx`, `waage/wiegeschein-detail.tsx`, `annahme/rohware.tsx`, `logistik/frachtbriefe.tsx`, `einkauf/lieferanten-dokumente.tsx`, `einkauf/anlieferavis.tsx`, `einkauf/auftragsbestaetigung.tsx`, `kontrakte/FrmKontraktDetail.tsx`, `kontrakte/KontraktAlarmDashboard.tsx`, `crm/kontakt-management.tsx` und die vertiefte `dokumente/ablage.tsx` sind auf dasselbe leichte Operator- und Nachweisbild gezogen.
 - Messbare Domaenenparitaet wird jetzt in [domain-parity-roadmap-2026-04-24.md](c:/Users/Jochen/VALEO-NeuroERP-3.0/docs/project-context/domain-parity-roadmap-2026-04-24.md) gefuehrt.
-- UX-Paritaet wird ab 2026-05-13 zusaetzlich ueber [ux-excellence-operating-standard-2026-05-13.md](c:/Users/Jochen/VALEO-NeuroERP-3.0/docs/project-context/ux-excellence-operating-standard-2026-05-13.md) gefuehrt: Rollenfokus, Aufgabenplan, naechste Aktion, Vorlage-/Nachweislink, gefuehrte Eingabe, Audit-Zeitleiste und Management-Entscheidungsbild sind kuenftig Pflichtmuster fuer komplexe Arbeitsflaechen.
+- UX-Paritaet wird seit 2026-05-13 ueber [ux-excellence-operating-standard-2026-05-13.md](c:/Users/Jochen/VALEO-NeuroERP-3.0/docs/project-context/ux-excellence-operating-standard-2026-05-13.md) gefuehrt. Stand 2026-05-16 ist der systemweite UX-Baukasten-Rollout abgeschlossen. Der Standard verlangt keine pauschale Vollausstattung mehr, sondern eine Seitentyp-Logik: voller Baukasten nur fuer echte Steuerungs-, Freigabe- und Compliance-Cockpits; mittlere oder kompakte Fuehrung fuer operative Listen, Planungs- und Editormasken; leichter Self-Service fuer Portalbereiche. Weitere UX-Arbeit ist nur noch Trim- oder Detailreview bei konkreter Ueberladung, fehlender Handlungsfuehrung oder neuen Fachfunktionen.
+
+### UX-GAP-CLOSURE-001: UX-Baukasten abgeschlossen, keine offenen Rollout-Gaps
+
+- Die Abschlussgaps aus dem Ist/Soll-Vergleich sind repo-seitig geschlossen: `UX-UX-AUDIT-001`, `UX-REMAINDER-001` und `UX-GAP-CLOSURE-001`.
+- Portal-Dokumente wurden auf Self-Service-Niveau reduziert: keine Rollenleiste, kein Management-Entscheidungsbild und keine sichtbare CRUD-Checkliste fuer normale Portalnutzer.
+- Coverage und Domain-Parity bleiben P1-Qualitaetsprogramme, aber sie sind keine UX-Baukasten-Gaps.
+- HRM- und Live-Integrationsfreigaben bleiben Betriebsnachweise in Gate-Workflows, keine offenen Repo-Code-Gaps.
 
 ---
 
