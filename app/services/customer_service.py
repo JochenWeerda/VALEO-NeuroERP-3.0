@@ -502,3 +502,61 @@ class CustomerService:
 
     async def delete_customer(self, customer_id: str) -> None:
         await _crm_delete(customer_id)
+
+    def quick_search(self, term: str, limit: int = 8) -> list[dict[str, Any]]:
+        if not term.strip():
+            return []
+        like = f"{term.strip()}%"
+        contains = f"%{term.strip()}%"
+        sql = text(
+            """
+            SELECT id, customer_number, company_name, address, is_active,
+                CASE
+                    WHEN customer_number ILIKE :like THEN 0
+                    WHEN company_name ILIKE :like THEN 1
+                    ELSE 2
+                END AS rank
+            FROM domain_crm.customers
+            WHERE tenant_id = :tid
+              AND (company_name ILIKE :contains OR customer_number ILIKE :contains)
+            ORDER BY rank ASC, company_name ASC
+            LIMIT :lim
+            """
+        )
+        rows = self.db.execute(sql, {"tid": self.tenant_id, "like": like, "contains": contains, "lim": limit}).fetchall()
+        out: list[dict[str, Any]] = []
+        for row in rows:
+            city, postal_code = _extract_location(address=row.address)
+            out.append({
+                "id": str(row.id),
+                "customer_number": row.customer_number or "",
+                "company_name": row.company_name or "",
+                "city": city,
+                "postal_code": postal_code,
+                "is_active": bool(row.is_active) if row.is_active is not None else True,
+            })
+        return out
+
+    def recent(self, limit: int = 10) -> list[dict[str, Any]]:
+        sql = text(
+            """
+            SELECT id, customer_number, company_name, address, is_active, updated_at
+            FROM domain_crm.customers
+            WHERE tenant_id = :tid AND COALESCE(is_active, TRUE) = TRUE
+            ORDER BY updated_at DESC NULLS LAST
+            LIMIT :lim
+            """
+        )
+        rows = self.db.execute(sql, {"tid": self.tenant_id, "lim": limit}).fetchall()
+        out: list[dict[str, Any]] = []
+        for row in rows:
+            city, postal_code = _extract_location(address=row.address)
+            out.append({
+                "id": str(row.id),
+                "customer_number": row.customer_number or "",
+                "company_name": row.company_name or "",
+                "city": city,
+                "postal_code": postal_code,
+                "is_active": bool(row.is_active) if row.is_active is not None else True,
+            })
+        return out
