@@ -48,11 +48,17 @@
 
 ### Qualität & Tests
 - [x] Unit-Test-Coverage-Ziel konsolidieren und nachweisen.
-  Stand 2026-05-16: ~43% gesamt; kritische Pfade über Ratchet in `scripts/check_critical_backend_coverage.py` gesichert.
+  Stand 2026-05-16: **64,85% Gesamtabdeckung**, 18/18 Ratchet-Pfade gruen, 8564 Tests bestanden, 0 Fehler.
 - [x] Performance-/Load-Tests durchführen und dokumentieren.
   `AGRAR-PERF-01` per containerisiertem k6 ausgeführt, Thresholds erfüllt.
 - [x] Service-Layer vollständig refaktoriert (thin-router + Domain-Services).
-  Stand 2026-05-16: Alle Endpoints abgeschlossen. Siehe `memory/project_service_layer.md`.
+  Stand 2026-05-16: Alle Endpoints abgeschlossen — `business_partners.py`, `customers.py`, `personal.py`, `controlling.py`, `agrar_contracts.py`, `einkauf_bestellvorschlag.py`. Siehe `memory/project_service_layer.md`.
+- [x] Offene Gaps geschlossen (2026-05-16):
+  - **EXT-003**: Grafana Event-Bus-Dashboard + Prometheus-Alerting-Regeln (`monitoring/grafana/dashboards/event-bus-dashboard.json`, `monitoring/prometheus/alerts-event-bus.yml`).
+  - **HR-TIME-001 Pilot-Slice**: `domain_hr.driver_time_events`-Tabelle (Migration `driver_time_events_20260516`), CRUD-Endpoints `POST/GET/PATCH/DELETE /api/v1/personal/driver-time/events`, Abwesenheitskollisions-Check.
+  - **UX-GAP-CLOSURE-001**: UX-Baukasten-Rollout systemweit abgeschlossen.
+  - **HRM-GERMANY-GAP-001**: Alle fachlichen Repo-Gaps geschlossen; externe Gates laufen im Frontend als Betriebsfreigabe-Workflow.
+- [x] Test-Fixes (2026-05-16): 6 vormals fehlschlagende Tests repariert — `agrar_settlement_service.get_approval_history` liest korrekt aus `drying_result["approval_history"]`; `CustomerService._crm_create/_crm_update` korrekt per Monkeypatch in Tests erreichbar.
 
 ### Deployment & Rollout (operativ)
 Hinweis: Diese Punkte sind umgebungs-/zugriffsabhängig — kein Repo-Code-Gap.

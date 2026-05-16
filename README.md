@@ -38,7 +38,7 @@ Der belastbare Ist-Zustand liegt in:
 
 - **12+ Fachdomänen**: Agrar (Ernteannahme, Kontrakte, Trocknungsregeln), Verkauf, Einkauf, Lager, Finanzen/FIBU, CRM, Logistik, Compliance, HRM, POS, Futtermittel/Rationsoptimierung
 - **Multi-Tenancy** via `X-Tenant-ID` Header, OIDC-Authentifizierung (Keycloak/Azure AD/Auth0)
-- **Prozesskernel** — 17 Waves abgeschlossen, 903 Tests grün
+- **Prozesskernel** — Waves 1–104 abgeschlossen, 8564 Tests grün
 - **Service-Layer** — alle Endpoints auf dünnen Router + domänenspezifische Service-Klassen umgestellt
 - **React-Frontend** mit Mask-Builder-Framework (ObjectPage, ListReport, Wizard, Worklist)
 - **Event-Bus** via NATS JetStream mit Outbox-Pattern
@@ -131,7 +131,7 @@ powershell -ExecutionPolicy Bypass -File scripts/smoke_first_install_docker.ps1 
 **Belastbar vorhanden:**
 - Breiter Domänenschnitt über 12+ ERP-Bereiche
 - Vollständig refaktorierter Service-Layer (thin-router + Domain-Services)
-- Prozesskernel mit 17 abgeschlossenen Waves, 903 Tests
+- Prozesskernel mit Waves 1–104 abgeschlossen, 8564 Tests
 - HRM-Betriebsfreigabe-Gates mit ausfüllbaren Vorlagen
 - Abgesicherter Alembic-/Docker-Erstinstallationspfad
 - UX-Baukasten vollständig ausgerollt (Seitentyp-Logik)
@@ -182,7 +182,7 @@ Authoritative status documents:
 
 - **12+ business domains**: Agrar (harvest acceptance, contracts, drying rules), Sales, Procurement, Inventory, Finance/Accounting, CRM, Logistics, Compliance, HRM, POS, Feed/Ration Optimization
 - **Multi-tenancy** via `X-Tenant-ID` header, OIDC authentication (Keycloak/Azure AD/Auth0)
-- **Process kernel** — 17 waves completed, 903 tests green
+- **Process kernel** — Waves 1–104 completed, 8564 tests green
 - **Service layer** — all endpoints refactored to thin routers + domain service classes
 - **React frontend** with Mask Builder Framework (ObjectPage, ListReport, Wizard, Worklist)
 - **Event bus** via NATS JetStream with outbox pattern
@@ -275,7 +275,7 @@ powershell -ExecutionPolicy Bypass -File scripts/smoke_first_install_docker.ps1 
 **Solid and working:**
 - Broad domain coverage across 12+ ERP areas
 - Fully refactored service layer (thin-router + domain services)
-- Process kernel with 17 completed waves, 903 tests
+- Process kernel with Waves 1–104 completed, 8564 tests
 - HRM operating-release gates with fillable template packages
 - Secured Alembic/Docker first-install path
 - UX component kit fully rolled out (page-type logic)

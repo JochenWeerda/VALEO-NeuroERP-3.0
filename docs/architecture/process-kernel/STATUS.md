@@ -35,13 +35,18 @@ Diese Statusdatei verdichtet den aktuellen Gesamtstand, ohne die Detailnachweise
 
 ## Gesamtstatus
 
-- Stand: `2026-03-30` (Doku-Sync: Neuro-Gap-Matrix, REK/SVC-Cards, `open-gaps`; Kern-Waves unveraendert)
-- Status: `Waves 1 bis 100 sowie Waves 102–104 abgeschlossen`
-- Gesamtsuite: `5931 Tests gruen, 0 Fehler, 5 skipped, 1 xfailed` (Wave 104 +15)
+- Stand: `2026-05-16` (Service-Layer-Refaktorierung abgeschlossen, Gap-Closure-Welle, Test-Fixes)
+- Status: `Waves 1 bis 100 sowie Waves 102–104 abgeschlossen; Service-Layer + Gap-Closure 2026-05-16`
+- Gesamtsuite: `8564 Tests gruen, 0 Fehler, 68 skipped, 1 xfailed` (Stand 2026-05-16; +2633 gegenueber Wave 104)
+- Gesamtabdeckung: `64,85%` (ueber 60%-Ratchet; 18/18 kritische Ratchet-Pfade gruen)
 - Bereinigter Gap-Abgleich gegen spaetere Wave-Nachweise: `docs/roadmap/status/2026-03-20-gap-matrix-bereinigt.md`
 - Korrigierte Flow-Spine-Systemanalyse: `docs/roadmap/status/2026-03-26-systemanalyse-flow-spine.md`
 - Wave-104-Nachlieferung (GAP-G/H/I + Repo-Hygiene): `docs/roadmap/status/2026-03-27-wave-104-abschluss.md`
-- Letzte abgeschlossene Waves:
+- Letzte Lieferungen (2026-05-16):
+  - `Service-Layer-Refaktorierung`: `business_partners.py`, `customers.py`, `personal.py`, `controlling.py`, `agrar_contracts.py`, `einkauf_bestellvorschlag.py` auf thin-router + Service-Klassen umgestellt
+  - `Gap-Closure`: EXT-003 (Event-Bus-Monitoring Grafana/Prometheus), HR-TIME-001 Pilot-Slice (driver_time_events, CRUD, Kollisions-Check), UX-GAP-CLOSURE-001, HRM-GERMANY-GAP-001
+  - `Test-Fixes`: 6 vormals fehlschlagende Tests behoben (agrar_settlement_service, customer_service Monkeypatching)
+- Letzte abgeschlossene Waves (2026-03):
   - `Wave 104`: Flow Spine DB-Persistenz, PCN DB, Tenant-Isolation, Outbox-Events, Agent-Action+RAG, Voice-Kanal
   - `Wave 103`: Touch-optimierte Feldworkflows (WCAG), Keyboard-first Kernmasken (~85%)
   - `Wave 102`: Security-Hardening Runtime-Wiring (AuditMiddleware, SecurityHeaders, Startup-Guards)
