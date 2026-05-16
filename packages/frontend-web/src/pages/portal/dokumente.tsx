@@ -24,12 +24,7 @@ import {
   ShieldCheck,
 } from 'lucide-react'
 import {
-  CrudCapabilityChecklist,
-  EvidenceTemplateLink,
-  ManagementDecisionPanel,
   NextActionPanel,
-  OperationalTaskPlan,
-  RoleFocusBar,
 } from '@/components/workflow'
 
 interface Dokument {
@@ -43,14 +38,6 @@ interface Dokument {
   jahr?: number
   produkt?: string
 }
-type PortalDocumentRole = 'kunde' | 'vertrieb' | 'compliance' | 'service'
-
-const portalDocumentRoles = [
-  { id: 'kunde', label: 'Kunde/Portalnutzer', description: 'Findet eigene Dokumente, laedt Nachweise herunter und sieht offene Compliance-Punkte.' },
-  { id: 'vertrieb', label: 'Vertrieb', description: 'Prueft, ob Vertrag, Lieferschein, Analyse oder Rechnung fuer Rueckfragen auffindbar sind.' },
-  { id: 'compliance', label: 'Compliance', description: 'Achtet auf Nachweisrelevanz, PSM-Offenpunkte und Vorgangsbezug.' },
-  { id: 'service', label: 'Service', description: 'Unterstuetzt Portalnutzer bei Suche, Download und fehlenden Dokumenten.' },
-] satisfies Array<{ id: PortalDocumentRole; label: string; description: string }>
 
 function inferDokumentTyp(name: string, kategorie: string): Dokument['typ'] {
   const text = `${name} ${kategorie}`.toLowerCase()
@@ -83,7 +70,6 @@ export default function PortalDokumente(): JSX.Element {
   const [searchTerm, setSearchTerm] = useState('')
   const [activeTab, setActiveTab] = useState('alle')
   const [selectedJahr, setSelectedJahr] = useState<string>('alle')
-  const [roleFocus, setRoleFocus] = useState<PortalDocumentRole>('kunde')
 
   const { data: portalDokumente = [], isLoading, isError, error, refetch } = usePortalDokumente()
   const { data: psmLieferscheine = [], isError: isPsmDocsError, error: psmDocsError } = usePortalLieferscheinCompliance()
@@ -138,6 +124,11 @@ export default function PortalDokumente(): JSX.Element {
     : workspace.total === 0
       ? 'Dokumentfilter zuruecksetzen oder fehlendes Dokument beim Service anfragen.'
       : workspace.nextAction
+  const documentStatusText = psmOpenIssues.length > 0
+    ? `${psmOpenIssues.length} Hinweis(e) brauchen Ihre Pruefung.`
+    : workspace.total === 0
+      ? 'Keine passenden Dokumente in der aktuellen Auswahl.'
+      : `${workspace.total} Dokument(e) sind fuer Sie verfuegbar.`
 
   if (isLoading) {
     return <DokumenteSkeleton />
@@ -151,51 +142,24 @@ export default function PortalDokumente(): JSX.Element {
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-bold">Dokumente</h1>
-        <p className="text-muted-foreground">Download-Center mit Vorgangsbezug, Nachweisbild und Compliance-Hinweisen</p>
+        <p className="text-muted-foreground">Ihre Dokumente, Downloads und Hinweise zu Lieferscheinen oder Nachweisen</p>
       </div>
 
-      <RoleFocusBar roles={portalDocumentRoles} value={roleFocus} onChange={setRoleFocus} visibleCount={filteredDokumente.length} totalCount={dokumente.length} title="Wer nutzt die Portal-Dokumente?" />
-
-      <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_360px]">
-        <ManagementDecisionPanel
-          decision={{
-            allowed: !hasDocumentStopper,
-            allowedLabel: 'Dokumente nutzbar',
-            blockedLabel: 'Nachweis pruefen',
-            summary: hasDocumentStopper
-              ? `${psmOpenIssues.length} PSM-Offenpunkt(e) oder fehlende Dokumente brauchen Klaerung, bevor der Nachweis als vollstaendig gilt.`
-              : `${workspace.total} Dokument(e) sind im Portal auffindbar und koennen fuer Rueckfragen genutzt werden.`,
-            blockerCount: psmOpenIssues.length + (workspace.total === 0 ? 1 : 0),
-            nextFocus: nextPortalAction,
-            template: { label: 'Portal-Dokumentenrueckfrage', href: '/docs/portal/dokumentenrueckfrage.md' },
-          }}
+      <div className="grid gap-4 lg:grid-cols-[1fr_320px]">
+        <NextActionPanel
+          title="Naechster sinnvoller Schritt"
+          action={nextPortalAction}
+          tone={hasDocumentStopper ? 'amber' : 'emerald'}
         />
-        <div className="space-y-4">
-          <NextActionPanel action={nextPortalAction} tone={hasDocumentStopper ? 'amber' : 'emerald'} />
-          <EvidenceTemplateLink link={{ label: 'Nachweisstatus dokumentieren', href: '/docs/portal/nachweisstatus.md' }} />
-        </div>
-      </div>
-
-      <div className="grid gap-4 lg:grid-cols-2">
-        <OperationalTaskPlan
-          title="Arbeitsplan fuer Portal-Dokumente"
-          items={[
-            { label: 'Dokumente finden', done: filteredDokumente.length > 0, hint: `${filteredDokumente.length} von ${dokumente.length} Dokument(en) sichtbar.` },
-            { label: 'Vorgangsbezug pruefen', done: workspace.workflowCount > 0, hint: `${workspace.workflowCount} Dokument(e) direkt an Vorgang angedockt.` },
-            { label: 'Compliance-Hinweise klaeren', done: psmOpenIssues.length === 0, hint: psmOpenIssues.length > 0 ? `${psmOpenIssues.length} PSM-Offenpunkt(e).` : 'Keine offenen PSM-Hinweise.' },
-            { label: 'Download/Nachweis bereitstellen', done: workspace.total > 0, hint: nextPortalAction },
-          ]}
-        />
-        <CrudCapabilityChecklist
-          capabilities={[
-            { key: 'read', label: 'Dokumente lesen', available: true, hint: 'Name, Typ, Kategorie, Jahr und Nachweisstatus sind sichtbar.' },
-            { key: 'export', label: 'Download', available: true, hint: 'Dokumente koennen heruntergeladen werden.' },
-            { key: 'update', label: 'Filter setzen', available: true, hint: 'Suche, Jahr und Typ fuehren die Auswahl.' },
-            { key: 'evidence', label: 'Nachweisstatus', available: true, hint: 'Nachweis- und Rueckfragevorlagen sind verlinkt.' },
-            { key: 'reject', label: 'Rueckfrage stellen', available: false, hint: 'Noch keine eigene Rueckfrageaktion; Servicepfad ist ueber Vorlage vorbereitet.' },
-            { key: 'audit', label: 'Compliance-Spur', available: true, hint: 'PSM-Status und Vorgangsbezug sind sichtbar.' },
-          ]}
-        />
+        <Card>
+          <CardContent className="space-y-2 p-4">
+            <p className="text-sm font-semibold">Dokumentenstatus</p>
+            <p className="text-sm text-muted-foreground">{documentStatusText}</p>
+            <p className="text-xs text-muted-foreground">
+              Nutzen Sie Suche, Jahr und Dokumenttyp, um schnell zum passenden Download zu kommen.
+            </p>
+          </CardContent>
+        </Card>
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
