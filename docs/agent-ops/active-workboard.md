@@ -2217,3 +2217,13 @@ Archiv des vorherigen Boards:
 **Erledigt:** Futtermittel-Rationsoptimierung um leichte fachliche Schrittfolge erweitert; Futtermittel-QS um Pruefablauf, naechste Pruefaktion und QS-Nachweislink erweitert; Duengungsplanung und Bedarfsrechner um kompakte Planung/Eingabefuehrung erweitert; Portal-Feldbuch und Naehrstoffbilanzen um leichte Self-Service-Next-Actions und Leerzustaende erweitert; UX-Standard auf abgeschlossenes Abschlussbild aktualisiert.
 **Checks:** `pnpm --filter @valero-neuroerp/frontend-web type-check`; `python scripts/agent_workboard_supervisor.py validate`; `node scripts/docs-governance-check.cjs`; `node scripts/docs-markdown-check.cjs docs/project-context/ux-excellence-operating-standard-2026-05-13.md docs/agent-ops/active-workboard.md docs/agent-ops/slices/UX-REMAINDER-001.yaml`; `git diff --check`
 **Offene Risiken:** Kuenftige neue Fachfunktionen brauchen wieder Seitentyp-Klassifikation; aktuell sind keine weiteren UX-Flaechenrollouts vorgesehen.
+
+## UX-GAP-CLOSURE-001
+
+**Von:** Codex
+**Owner:** Codex
+**Stand:** reserviert 2026-05-16
+**Ziel des Slices:** Die fuenf Abschlussgaps aus dem Ist/Soll-Vergleich schliessen: Open-Gaps-Doku auf die neue UX-Einsatzlogik ziehen, Portal-Dokumente entladen, RAT-OPT-001 im Workboard abschliessen, P1-Restprogramme klar von UX trennen und HRM-/Live-Gates als Betriebsnachweise statt Repo-Code-Gaps fuehren.
+**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/agent-ops/slices/UX-GAP-CLOSURE-001.yaml`, `docs/project-context/open-gaps-and-known-issues.md`, `packages/frontend-web/src/pages/portal/dokumente.tsx`
+**Abnahmekriterien:** Open-Gaps-Doku beschreibt UX nicht mehr als pauschale Pflichtmuster, sondern als abgeschlossenen Rollout mit Seitentyp-Logik; Portal-Dokumente zeigen keine Rollenleiste, kein Management-Bild und keine sichtbare CRUD-Checkliste mehr; RAT-OPT-001 ist im Workboard nicht mehr irrefuehrend als in Arbeit gefuehrt; Coverage/Domain-Parity und externe Gates sind klar als eigene technische bzw. betriebliche Programme abgegrenzt; Typecheck, Workboard-Validierung und Doku-Checks sind gruen.
+**Offene Risiken:** Portal-Dokumente muessen weiterhin Nachweis- und PSM-Hinweise zeigen, aber in normaler Self-Service-Sprache.
