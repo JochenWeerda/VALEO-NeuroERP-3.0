@@ -171,13 +171,21 @@ Pilot `HR-TIME-PILOT-001`:
 - VALEO: Driver-Time-Datenmodell, manuelle Ereigniserfassung, Tour-/Fahrzeugbezug, Abwesenheitskollisionen
 - Export: CSV/JSON-Vertrag fuer Lohn/Payroll, noch keine produktive DATEV-Anbindung
 
-Umsetzungsstand 2026-05-07:
+Umsetzungsstand 2026-05-16:
 
 - `packages/hr-domain/src/domain/entities/driver-time-event.ts` definiert den ersten VALEO-eigenen Driver-Time-Contract mit Ereignisart, Quelle, Tour, Fahrzeug, Standort, Korrekturstatus und Audit-Referenz.
 - `packages/hr-domain/src/domain/services/driver-time-service.ts` liefert Tages-/Fahrerzusammenfassungen und Plausibilitaetsbefunde fuer Ueberlappungen, fehlenden Tour-/Fahrzeugbezug, Abwesenheitskollisionen und Tacho-/Manuell-Abweichungen.
 - `app/api/v1/endpoints/personal.py` stellt mit `GET /api/v1/personal/driver-time/summary` den ersten Backend-Toolvertrag fuer Fahrerzeit-KPIs, Ereignisse und Plausibilitaetsbefunde bereit.
 - `app/api/v1/endpoints/personal.py` stellt mit `GET /api/v1/personal/time-cockpit` zusaetzlich ein professionelles Time-&-Labor-Cockpit bereit: Perioden-KPIs, Freigabequeue, Compliance-Befunde, Payroll-Readiness und Driver-Time-Zusammenfassung.
 - `packages/frontend-web/src/lib/api/personal.ts` exponiert `useDriverTimeSummary` und `useTimeCockpit`; `packages/frontend-web/src/pages/personal/zeiterfassung.tsx` nutzt diese Vertraege statt harter lokaler Driver-Time-Daten.
+- **Pilot-Slice repo-seitig abgeschlossen (2026-05-16)**:
+  - Alembic-Migration `driver_time_events_20260516` legt `domain_hr.driver_time_events` an (Felder: `id`, `tenant_id`, `employee_ref`, `vehicle_id`, `tour_ref`, `event_type`, `event_ts`, `duration_minutes`, `absence_ref`, `source`, `notes`, `row_version`; Checks fuer `event_type` und `source`; Indizes auf `tenant_id/employee_ref/event_ts` und `tenant_id/vehicle_id`).
+  - `POST /api/v1/personal/driver-time/events` — manuelle Fahrerzeitereignisse erfassen.
+  - `GET /api/v1/personal/driver-time/events` — mit Filtern `employee_ref`, `vehicle_id`, `date_from`, `date_to`, `limit`.
+  - `GET /api/v1/personal/driver-time/events/{event_id}` — Einzelabruf.
+  - `PATCH /api/v1/personal/driver-time/events/{event_id}` — Teilaktualisierung mit `row_version`-Increment.
+  - `DELETE /api/v1/personal/driver-time/events/{event_id}` — Loeschung (204).
+  - `GET /api/v1/personal/driver-time/events/absences/collisions` — Abwesenheitskollisions-Check per LEFT JOIN auf `domain_hr.time_entries`.
 
 Orientierung fuer den weiteren Profi-Ausbau:
 

@@ -1,6 +1,6 @@
 # Process Kernel — Delivery Map
 
-Stand: 2026-03-27 | Waves 1–67 + 102–104 abgeschlossen | 5931 Tests gruen
+Stand: 2026-05-16 | Waves 1–67 + 94–104 abgeschlossen + Service-Layer-Refaktorierung + Gap-Closure | 8564 Tests gruen
 
 ## Wave → Gap Mapping
 
