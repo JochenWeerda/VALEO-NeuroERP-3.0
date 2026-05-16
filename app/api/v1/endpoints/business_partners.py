@@ -1223,31 +1223,19 @@ async def create_business_partner(
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db)
 ):
-    svc = BusinessPartnerService(db, tenant_id)
-    existing = svc.repo.get_by_partner_number(payload.business_partner.core_identity.partner_number)
-    if existing:
-        raise HTTPException(status_code=409, detail="partner_number already exists")
-
+    svc = _svc(db, tenant_id)
+    try:
+        svc.check_partner_number_unique(payload.business_partner.core_identity.partner_number)
+    except ConflictError as exc:
+        raise HTTPException(status_code=409, detail=exc.detail)
     partner_id = payload.business_partner.core_identity.partner_id or uuid7()
     row = BusinessPartner(partner_id=partner_id, tenant_id=tenant_id)
     _apply_payload(row, payload.business_partner)
-
-    from app.services.number_range_service import NumberRangeService
-    nrs = NumberRangeService(db)
-    if row.is_customer and not row.debtor_account:
-        try:
-            row.debtor_account = nrs.next_number('debtor_account', tenant_id)
-        except ValueError:
-            pass
-    if row.is_supplier and not row.creditor_account:
-        try:
-            row.creditor_account = nrs.next_number('creditor_account', tenant_id)
-        except ValueError:
-            pass
-
-    db.add(row)
-    db.commit()
-    db.refresh(row)
+    svc.assign_account_numbers(row)
+    try:
+        row = svc.persist_new_partner(row)
+    except ConflictError as exc:
+        raise HTTPException(status_code=409, detail=exc.detail)
     return _to_out(row)
 
 
@@ -1284,20 +1272,21 @@ async def update_business_partner(
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db)
 ):
-    svc = BusinessPartnerService(db, tenant_id)
+    svc = _svc(db, tenant_id)
     try:
         row = svc.get_partner(partner_id)
     except EntityNotFoundError:
         raise HTTPException(status_code=404, detail="Business partner not found")
-
     if payload.business_partner.core_identity.partner_number != row.partner_number:
-        duplicate = svc.repo.get_by_partner_number(payload.business_partner.core_identity.partner_number)
-        if duplicate:
-            raise HTTPException(status_code=409, detail="partner_number already exists")
-
+        try:
+            svc.check_partner_number_unique(
+                payload.business_partner.core_identity.partner_number,
+                exclude_id=partner_id,
+            )
+        except ConflictError as exc:
+            raise HTTPException(status_code=409, detail=exc.detail)
     _apply_payload(row, payload.business_partner)
-    db.commit()
-    db.refresh(row)
+    row = svc.persist_updated_partner(row)
     return _to_out(row)
 
 
@@ -2533,59 +2522,52 @@ def _to_community_member(row: BusinessPartnerCommunityMember) -> CommunityMember
 
 @router.get("/catalog/communities", response_model=list[Community])
 async def list_communities(db: Session = Depends(get_db)):
-    rows = db.query(BusinessPartnerCommunity).order_by(BusinessPartnerCommunity.description.asc()).all()
+    rows = BusinessPartnerService(db, "").list_communities()
     return [_to_community(r) for r in rows]
 
 
 @router.post("/catalog/communities", response_model=Community, status_code=201)
 async def create_community(payload: CommunityCreate, db: Session = Depends(get_db)):
-    row = BusinessPartnerCommunity(id=uuid7(), **payload.model_dump())
-    db.add(row)
-    _commit_with_validation(db, "Community violates constraints")
-    db.refresh(row)
+    try:
+        row = BusinessPartnerService(db, "").create_community(payload.model_dump())
+    except ConflictError as exc:
+        raise HTTPException(status_code=409, detail=str(exc))
     return _to_community(row)
 
 
 @router.patch("/catalog/communities/{community_id}", response_model=Community)
 async def patch_community(community_id: str, payload: CommunityUpdate, db: Session = Depends(get_db)):
-    row = db.query(BusinessPartnerCommunity).filter(BusinessPartnerCommunity.id == community_id).first()
-    if not row:
+    try:
+        row = BusinessPartnerService(db, "").patch_community(community_id, payload.model_dump(exclude_unset=True))
+    except EntityNotFoundError:
         raise HTTPException(status_code=404, detail="Community not found")
-    for key, value in payload.model_dump(exclude_unset=True).items():
-        setattr(row, key, value)
-    _commit_with_validation(db, "Community violates constraints")
-    db.refresh(row)
+    except ConflictError as exc:
+        raise HTTPException(status_code=409, detail=str(exc))
     return _to_community(row)
 
 
 @router.delete("/catalog/communities/{community_id}", status_code=204)
 async def delete_community(community_id: str, db: Session = Depends(get_db)):
-    row = db.query(BusinessPartnerCommunity).filter(BusinessPartnerCommunity.id == community_id).first()
-    if not row:
+    try:
+        BusinessPartnerService(db, "").delete_community(community_id)
+    except EntityNotFoundError:
         raise HTTPException(status_code=404, detail="Community not found")
-    db.delete(row)
-    db.commit()
     return None
 
 
 @router.get("/catalog/communities/{community_id}/members", response_model=list[CommunityMember])
 async def list_community_members(community_id: str, db: Session = Depends(get_db)):
-    rows = (
-        db.query(BusinessPartnerCommunityMember)
-        .filter(BusinessPartnerCommunityMember.community_id == community_id)
-        .order_by(BusinessPartnerCommunityMember.created_at.asc())
-        .all()
-    )
+    rows = BusinessPartnerService(db, "").list_community_members(community_id)
     return [_to_community_member(r) for r in rows]
 
 
 @router.post("/catalog/communities/{community_id}/members", response_model=CommunityMember, status_code=201)
 async def create_community_member(community_id: str, payload: CommunityMemberCreate, db: Session = Depends(get_db)):
     _ensure_partner_exists(payload.partner_id, db)
-    row = BusinessPartnerCommunityMember(id=uuid7(), community_id=community_id, **payload.model_dump())
-    db.add(row)
-    _commit_with_validation(db, "Community member violates constraints or duplicate key")
-    db.refresh(row)
+    try:
+        row = BusinessPartnerService(db, "").create_community_member(community_id, payload.model_dump())
+    except ConflictError as exc:
+        raise HTTPException(status_code=409, detail=str(exc))
     return _to_community_member(row)
 
 
@@ -2593,34 +2575,24 @@ async def create_community_member(community_id: str, payload: CommunityMemberCre
 async def patch_community_member(
     community_id: str, member_id: str, payload: CommunityMemberUpdate, db: Session = Depends(get_db)
 ):
-    row = (
-        db.query(BusinessPartnerCommunityMember)
-        .filter(BusinessPartnerCommunityMember.id == member_id, BusinessPartnerCommunityMember.community_id == community_id)
-        .first()
-    )
-    if not row:
-        raise HTTPException(status_code=404, detail="Community member not found")
     values = payload.model_dump(exclude_unset=True)
     if "partner_id" in values and values["partner_id"] is not None:
         _ensure_partner_exists(values["partner_id"], db)
-    for key, value in values.items():
-        setattr(row, key, value)
-    _commit_with_validation(db, "Community member violates constraints or duplicate key")
-    db.refresh(row)
+    try:
+        row = BusinessPartnerService(db, "").patch_community_member(member_id, values)
+    except EntityNotFoundError:
+        raise HTTPException(status_code=404, detail="Community member not found")
+    except ConflictError as exc:
+        raise HTTPException(status_code=409, detail=str(exc))
     return _to_community_member(row)
 
 
 @router.delete("/catalog/communities/{community_id}/members/{member_id}", status_code=204)
 async def delete_community_member(community_id: str, member_id: str, db: Session = Depends(get_db)):
-    row = (
-        db.query(BusinessPartnerCommunityMember)
-        .filter(BusinessPartnerCommunityMember.id == member_id, BusinessPartnerCommunityMember.community_id == community_id)
-        .first()
-    )
-    if not row:
+    try:
+        BusinessPartnerService(db, "").delete_community_member(member_id)
+    except EntityNotFoundError:
         raise HTTPException(status_code=404, detail="Community member not found")
-    db.delete(row)
-    db.commit()
     return None
 
 
