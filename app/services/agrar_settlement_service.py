@@ -343,3 +343,278 @@ class AgrarSettlementService:
         for s in settlements:
             s.campaign_id = campaign_id
         self.commit_mutation()
+
+    # ── drying pre-computation (create with inline drying) ───────────────────
+
+    def create_settlement_with_drying(
+        self,
+        payload: Any,
+        drying_compute_fn: Any,
+        drying_repo: Any,
+    ) -> Tuple["AgrarSettlement", list]:
+        """Run drying computation, mutate payload.deductions, then create settlement."""
+        from app.api.v1.endpoints.agrar_settlements import DeductionInput  # local import avoids circular
+
+        drying_snapshot: dict | None = None
+        billing_qty_override = None
+
+        if payload.drying is not None:
+            if any(d.deduction_type == "drying" for d in payload.deductions):
+                raise ValidationFailedError(
+                    "Do not provide deductions[].deduction_type='drying' together with payload.drying"
+                    " (prevents double fee application)."
+                )
+            gross_qty = _round_qty(payload.gross_quantity_kg)
+            calc_date = payload.drying.calc_date or datetime.utcnow().date().isoformat()
+            try:
+                drying_result = drying_compute_fn(
+                    drying_repo,
+                    {
+                        "cropCode": payload.drying.crop_code,
+                        "siteId": payload.drying.site_id,
+                        "netWeightKg": float(gross_qty),
+                        "moisturePct": payload.drying.moisture_pct,
+                        "calcDate": calc_date,
+                        "roundingMode": payload.drying.rounding_mode,
+                    },
+                )
+            except ValueError as exc:
+                raise ValidationFailedError(str(exc)) from exc
+
+            drying_snapshot = {
+                "crop_code": payload.drying.crop_code,
+                "site_id": payload.drying.site_id,
+                "net_weight_kg": float(gross_qty),
+                "moisture_pct": float(payload.drying.moisture_pct),
+                "calc_date": calc_date,
+                "entzug_pct_points": float(drying_result.entzug_pct_points),
+                "loss_pct": float(drying_result.loss_pct),
+                "loss_kg": float(drying_result.loss_kg),
+                "invoice_weight_kg": float(drying_result.invoice_weight_kg),
+                "drying_fee_eur": float(drying_result.drying_fee_eur) if drying_result.drying_fee_eur is not None else None,
+                "used_rule_set_id": drying_result.used_rule_set_id,
+                "used_rule_version": int(drying_result.used_rule_version),
+                "used_row_moisture_pct": float(drying_result.used_row_moisture_pct) if drying_result.used_row_moisture_pct is not None else None,
+                "warnings": list(drying_result.warnings),
+            }
+            if payload.billing_quantity_kg is None:
+                billing_qty_override = _round_qty(drying_result.invoice_weight_kg)
+            if drying_result.drying_fee_eur is not None and drying_result.drying_fee_eur > 0:
+                payload.deductions.append(
+                    DeductionInput(
+                        deduction_type="drying",
+                        mode="fixed",
+                        fixed_amount_eur=float(drying_result.drying_fee_eur),
+                        note=f"Drying fee via rule-set {drying_result.used_rule_set_id} v{drying_result.used_rule_version}",
+                    )
+                )
+
+        return self.create_settlement(
+            payload,
+            drying_snapshot=drying_snapshot,
+            billing_qty_override=billing_qty_override,
+        )
+
+    # ── post-fibu full (FIBU booking + PDF archive) ───────────────────────────
+
+    def post_to_fibu_full(self, settlement_id: str, payload: Any) -> dict:
+        """GL-Buchung + PDF-Archivierung + Status-Übergang in einem Schritt."""
+        from app.services.finance_transaction_service import FinanceTransactionService
+        from app.services.settlement_pdf_service import SettlementPdfService
+
+        settlement, _ = self.get_settlement(settlement_id)
+        self.check_row_version(settlement, payload.expected_row_version)
+
+        approval_status = self.get_approval_status(settlement)
+        if approval_status != "FREIGEGEBEN":
+            raise ConflictError(
+                f"Settlement cannot be posted: approval_status={approval_status}. Must be FREIGEGEBEN."
+            )
+
+        posting_date = payload.posting_date or datetime.utcnow()
+        journal_ref = f"JE-SET-{datetime.utcnow().strftime('%Y%m%d')}-{settlement.id[:8].upper()}"
+        gross = _round_money(settlement.gross_amount_eur)
+        deductions_amt = _round_money(settlement.total_deductions_eur)
+        net = _round_money(settlement.net_amount_eur)
+
+        lines = [
+            {"account_id": payload.debit_account, "debit_amount": float(gross), "credit_amount": 0.0,
+             "description": f"Agrar settlement {settlement.settlement_number} gross"},
+            {"account_id": payload.credit_account_supplier, "debit_amount": 0.0, "credit_amount": float(net),
+             "description": f"Supplier payable {settlement.supplier_id}"},
+        ]
+        if deductions_amt > 0:
+            lines.append({"account_id": payload.credit_account_deductions, "debit_amount": 0.0,
+                          "credit_amount": float(deductions_amt), "description": "Settlement deductions"})
+
+        fin = FinanceTransactionService(self.db, self.tenant_id)
+        je = fin.create(
+            entry_number=journal_ref,
+            description=f"Agrar settlement {settlement.settlement_number}",
+            entry_date=posting_date.date() if isinstance(posting_date, datetime) else posting_date,
+            lines=lines,
+            reference=settlement.settlement_number,
+            source="agrar_settlement",
+            document_type="agrar_settlement",
+            period=posting_date.strftime("%Y-%m") if isinstance(posting_date, datetime) else str(posting_date)[:7],
+        )
+        journal_ref = str(je.entry_number)
+
+        settlement = self.post_to_fibu(settlement_id, journal_ref, posting_date)
+
+        pdf_meta: dict = {}
+        try:
+            from app.infrastructure.models import Article
+            from app.infrastructure.models.business_partner import BusinessPartner
+            supplier = self.db.query(BusinessPartner).filter(
+                BusinessPartner.id == settlement.supplier_id,
+                BusinessPartner.tenant_id == self.tenant_id,
+            ).first()
+            article = None
+            if settlement.article_id:
+                article = self.db.query(Article).filter(Article.id == settlement.article_id).first()
+            deductions_rows = self.get_settlement(settlement_id)[1]
+            pdf_meta = SettlementPdfService(self.db, self.tenant_id).generate_and_archive(
+                settlement, deductions_rows, supplier, article
+            )
+            pdf_meta.pop("pdf_bytes", None)
+        except Exception as exc:
+            logger.warning("Settlement PDF archiving failed (non-blocking): %s", exc)
+
+        return {
+            "ok": True,
+            "settlement_id": settlement.id,
+            "journal_ref": journal_ref,
+            **({"pdf": pdf_meta} if pdf_meta else {}),
+        }
+
+    # ── correction draft ──────────────────────────────────────────────────────
+
+    def get_correction_draft(self, settlement_id: str, memo_type: str) -> dict:
+        """Build correction draft data for a posted settlement."""
+        settlement, _ = self.get_settlement(settlement_id)
+        if settlement.status != "posted":
+            raise ConflictError("Correction draft requires a posted settlement")
+
+        supplier_name = None
+        try:
+            from app.core.store import get_from_store, get_repository
+            partner = get_from_store("partner", settlement.supplier_id, get_repository(self.db))
+            if partner:
+                supplier_name = partner.get("name")
+        except Exception:
+            pass
+
+        amount = float(settlement.net_amount_eur)
+        route_type = "credit" if memo_type == "credit" else "debit"
+        return {
+            "settlement_id": settlement.id,
+            "settlement_number": settlement.settlement_number,
+            "memo_type": memo_type,
+            "supplier_id": settlement.supplier_id,
+            "supplier_name": supplier_name,
+            "posted_journal_ref": settlement.posted_journal_ref,
+            "suggested_reason": f"{'Gutschrift' if memo_type == 'credit' else 'Belastung'} fuer Settlement {settlement.settlement_number}",
+            "suggested_notes": (
+                f"Settlement-ID: {settlement.id}\n"
+                f"Settlement-Nummer: {settlement.settlement_number}\n"
+                f"Journal-Ref: {settlement.posted_journal_ref or '-'}\n"
+                f"Lieferant: {settlement.supplier_id}\n"
+                f"Bitte Korrekturgrund fachlich dokumentieren und gegen Audit-Trail freigeben."
+            ),
+            "suggested_route": f"/einkauf/gutschriften-belastungen/{route_type}?settlementId={settlement.id}",
+            "items": [{
+                "productName": settlement.article_id or "Settlement-Korrektur",
+                "quantity": 1,
+                "unit": "Vorgang",
+                "unitPrice": amount,
+                "netAmount": amount,
+                "taxRate": 0,
+                "taxAmount": 0,
+                "grossAmount": amount,
+                "reason": "Nachtraegliche Preis-, Mengen- oder Qualitaetskorrektur",
+            }],
+        }
+
+    # ── completion status ─────────────────────────────────────────────────────
+
+    def get_completion_status(self, settlement_id: str, variant: str) -> dict:
+        """Evaluate completion status for a settlement (GUTSCHRIFT/BELASTUNG/KORREKTUR)."""
+        from app.core.settlement_approval import (
+            SettlementApprovalStatus,
+            SettlementCompletionEvidence,
+            SettlementCompletionVariant,
+            SettlementFinancialDocumentKind,
+            evaluate_settlement_completion,
+        )
+        from app.core.store import get_repository, list_from_store
+
+        settlement, _ = self.get_settlement(settlement_id)
+        repo = get_repository(self.db)
+        linked_documents: list[dict] = []
+        for memo in (list_from_store("credit_memo", repo=repo).get("data") or []):
+            if memo.get("settlementId") == settlement_id:
+                linked_documents.append({"memo_id": memo.get("id"), "memo_type": "credit",
+                                          "status": memo.get("status"), "journal_ref": memo.get("journalRef"),
+                                          "correction_mode": memo.get("correctionMode")})
+        for memo in (list_from_store("debit_memo", repo=repo).get("data") or []):
+            if memo.get("settlementId") == settlement_id:
+                linked_documents.append({"memo_id": memo.get("id"), "memo_type": "debit",
+                                          "status": memo.get("status"), "journal_ref": memo.get("journalRef"),
+                                          "correction_mode": memo.get("correctionMode")})
+
+        approval_status = self.get_approval_status(settlement)
+        approval_history = self.get_approval_history(settlement)
+        has_journal_entry = bool(settlement.posted_journal_ref)
+
+        completion_variant = SettlementCompletionVariant(variant)
+        document_kind = None
+        document_status = None
+        correction_mode = None
+        correction_links_complete = False
+
+        if completion_variant == SettlementCompletionVariant.GUTSCHRIFT:
+            credit = next((d for d in linked_documents if d["memo_type"] == "credit"), None)
+            document_kind = SettlementFinancialDocumentKind.GUTSCHRIFT if credit else None
+            document_status = credit["status"] if credit else None
+        elif completion_variant == SettlementCompletionVariant.BELASTUNG:
+            debit = next((d for d in linked_documents if d["memo_type"] == "debit"), None)
+            document_kind = SettlementFinancialDocumentKind.BELASTUNG if debit else None
+            document_status = debit["status"] if debit else None
+        else:
+            credit = next((d for d in linked_documents if d["memo_type"] == "credit"), None)
+            debit = next((d for d in linked_documents if d["memo_type"] == "debit"), None)
+            if credit and debit:
+                document_kind = SettlementFinancialDocumentKind.KORREKTUR_NEU
+                document_status = "BOOKED" if credit.get("journal_ref") and debit.get("journal_ref") else credit.get("status") or debit.get("status")
+                correction_mode = "STORNO_UND_NEU"
+                correction_links_complete = True
+            elif credit or debit:
+                document_kind = SettlementFinancialDocumentKind.STORNO
+                document_status = (credit or debit).get("status")
+                correction_mode = (credit or debit).get("correction_mode") or "STORNO"
+
+        result = evaluate_settlement_completion(
+            SettlementCompletionEvidence(
+                settlement_id=settlement_id,
+                variant=completion_variant,
+                approval_status=approval_status,
+                has_approval_history=bool(approval_history),
+                has_audit_chain=bool(approval_history),
+                has_gobd_check=has_journal_entry,
+                has_journal_entry=has_journal_entry,
+                financial_document_kind=document_kind,
+                financial_document_status=document_status,
+                correction_mode=correction_mode,
+                correction_links_complete=correction_links_complete,
+            )
+        )
+        return {
+            "settlement_id": result.settlement_id,
+            "variant": result.variant.value,
+            "completed": result.completed,
+            "completion_pct": result.completion_pct,
+            "missing_controls": result.missing_controls,
+            "next_step": result.next_step,
+            "linked_documents": linked_documents,
+        }

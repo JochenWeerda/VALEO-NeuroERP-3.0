@@ -492,14 +492,23 @@ async def einkauf_anfragen_list(
     return EinkaufCompatService(db, tenant_id).list_anfragen()
 
 
+def _load_einkauf_anfrage(db: Session, anfrage_id: str):
+    """Module-level loader so tests can monkeypatch it."""
+    from app.services.einkauf_compat_service import EinkaufCompatService as _Svc  # local to avoid circular
+    try:
+        return _Svc(db, "default").get_anfrage(anfrage_id)
+    except EntityNotFoundError:
+        return None
+
+
 @router.get("/einkauf/anfragen/{anfrage_id}", response_model=dict)
 async def einkauf_anfrage_get(
     anfrage_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
 ) -> dict[str, Any]:
-    try:
-        return EinkaufCompatService(db, tenant_id).get_anfrage(anfrage_id)
-    except EntityNotFoundError as exc:
-        raise HTTPException(status_code=404, detail=str(exc)) from exc
+    result = _load_einkauf_anfrage(db, anfrage_id)
+    if result is None:
+        raise HTTPException(status_code=404, detail="Anfrage not found")
+    return result
 
 
 @router.post("/einkauf/anfragen/{anfrage_id}/convert-to-order", response_model=dict)
