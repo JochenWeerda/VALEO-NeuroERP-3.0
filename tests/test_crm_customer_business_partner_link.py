@@ -10,6 +10,7 @@ from app.services.customer_sales_eligibility import describe_sales_eligibility
 from app.api.v1.schemas.crm import CustomerCreate, CustomerUpdate
 
 customers_endpoint = importlib.import_module("app.api.v1.endpoints.customers")
+customer_service_module = importlib.import_module("app.services.customer_service")
 
 
 class _FakeResult:
@@ -71,7 +72,7 @@ async def test_create_customer_persists_business_partner_link_for_request_tenant
         business_partner_id="bp-1",
         email="info@example.com",
     )
-    monkeypatch.setattr(customers_endpoint, "crm_create_customer", lambda body: _async_value(_core_customer()))
+    monkeypatch.setattr(customer_service_module, "_crm_create", lambda body: _async_value(_core_customer()))
 
     created = await customers_endpoint.create_customer(payload, db=db)
 
@@ -100,8 +101,8 @@ async def test_update_customer_persists_business_partner_link_for_request_tenant
     )
     payload = CustomerUpdate(business_partner_id="bp-77", company_name="Muster Agrar GmbH")
     monkeypatch.setattr(
-        customers_endpoint,
-        "crm_update_customer",
+        customer_service_module,
+        "_crm_update",
         lambda customer_id, body: _async_value(_core_customer(customer_id)),
     )
 
