@@ -3489,6 +3489,23 @@ async def get_work_plan(
     calendar_rows = data["calendar_rows"]
     field_rows = data["field_rows"]
 
+    user_prefs_by_ref: dict[str, dict] = {}
+    for row in user_rows:
+        row_map = dict(row)
+        ref = str(row_map.get("username") or row_map.get("id") or "")
+        raw = row_map.get("preferences")
+        if ref and raw:
+            user_prefs_by_ref[ref] = _parse_preferences(raw)
+
+    preferences: list[PlanningPreferenceOut] = []
+    preference_by_ref: dict[str, PlanningPreferenceOut] = {}
+    for row in profile_rows:
+        row_map = dict(row)
+        ref = str(row_map.get("employee_ref") or row_map.get("id") or "")
+        pref = _planning_preference_from_profile(row, user_prefs_by_ref.get(ref))
+        preferences.append(pref)
+        preference_by_ref[ref] = pref
+
     absence_dates_by_employee: dict[str, set[date]] = {}
     assignments: list[WorkPlanAssignmentOut] = []
     for row in absence_rows:
