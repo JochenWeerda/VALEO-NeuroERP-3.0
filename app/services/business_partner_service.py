@@ -15,6 +15,8 @@ from app.infrastructure.models import (
     BusinessPartner,
     BusinessPartnerAddress,
     BusinessPartnerBillingConfig,
+    BusinessPartnerCommunity,
+    BusinessPartnerCommunityMember,
     BusinessPartnerContact,
     BusinessPartnerCooperativeMembership,
     BusinessPartnerCpdAccount,
@@ -672,3 +674,118 @@ class BusinessPartnerService:
         self.db.commit()
         self.db.refresh(obj)
         return obj
+
+    # ── envelope create / update (with number-range assignment) ─────────────
+
+    def assign_account_numbers(self, row: BusinessPartner) -> None:
+        """Assign debtor/creditor account from number range if not set."""
+        from app.services.number_range_service import NumberRangeService
+        nrs = NumberRangeService(self.db)
+        if row.is_customer and not row.debtor_account:
+            try:
+                row.debtor_account = nrs.next_number("debtor_account", self.tenant_id)
+            except ValueError:
+                pass
+        if row.is_supplier and not row.creditor_account:
+            try:
+                row.creditor_account = nrs.next_number("creditor_account", self.tenant_id)
+            except ValueError:
+                pass
+
+    def persist_new_partner(self, row: BusinessPartner) -> BusinessPartner:
+        """Add, commit, and refresh a newly constructed BusinessPartner row."""
+        self.db.add(row)
+        try:
+            self.db.commit()
+        except IntegrityError as exc:
+            self.db.rollback()
+            raise ConflictError("Business partner with this number already exists") from exc
+        self.db.refresh(row)
+        return row
+
+    def persist_updated_partner(self, row: BusinessPartner) -> BusinessPartner:
+        """Commit and refresh an existing BusinessPartner row after field mutations."""
+        self.db.commit()
+        self.db.refresh(row)
+        return row
+
+    def check_partner_number_unique(self, partner_number: str, exclude_id: Optional[str] = None) -> None:
+        existing = self.repo.get_by_partner_number(partner_number)
+        if existing and existing.partner_id != exclude_id:
+            raise ConflictError(f"partner_number '{partner_number}' already exists")
+
+    # ── community catalog (tenant-agnostic) ───────────────────────────────────
+
+    def list_communities(self) -> list:
+        return self.db.query(BusinessPartnerCommunity).order_by(
+            BusinessPartnerCommunity.description.asc()
+        ).all()
+
+    def create_community(self, data: dict) -> BusinessPartnerCommunity:
+        row = BusinessPartnerCommunity(id=uuid7(), **data)
+        self.db.add(row)
+        try:
+            self.db.commit()
+        except IntegrityError as exc:
+            self.db.rollback()
+            raise ConflictError("Community code already exists") from exc
+        self.db.refresh(row)
+        return row
+
+    def patch_community(self, community_id: str, data: dict) -> BusinessPartnerCommunity:
+        row = self.db.query(BusinessPartnerCommunity).filter(
+            BusinessPartnerCommunity.id == community_id
+        ).first()
+        if row is None:
+            raise EntityNotFoundError("BusinessPartnerCommunity", community_id)
+        for k, v in data.items():
+            setattr(row, k, v)
+        self.db.commit()
+        self.db.refresh(row)
+        return row
+
+    def delete_community(self, community_id: str) -> None:
+        row = self.db.query(BusinessPartnerCommunity).filter(
+            BusinessPartnerCommunity.id == community_id
+        ).first()
+        if row is None:
+            raise EntityNotFoundError("BusinessPartnerCommunity", community_id)
+        self.db.delete(row)
+        self.db.commit()
+
+    def list_community_members(self, community_id: str) -> list:
+        return self.db.query(BusinessPartnerCommunityMember).filter(
+            BusinessPartnerCommunityMember.community_id == community_id
+        ).order_by(BusinessPartnerCommunityMember.partner_id).all()
+
+    def create_community_member(self, community_id: str, data: dict) -> BusinessPartnerCommunityMember:
+        row = BusinessPartnerCommunityMember(id=uuid7(), community_id=community_id, **data)
+        self.db.add(row)
+        try:
+            self.db.commit()
+        except IntegrityError as exc:
+            self.db.rollback()
+            raise ConflictError("Member already in community") from exc
+        self.db.refresh(row)
+        return row
+
+    def patch_community_member(self, member_id: str, data: dict) -> BusinessPartnerCommunityMember:
+        row = self.db.query(BusinessPartnerCommunityMember).filter(
+            BusinessPartnerCommunityMember.id == member_id
+        ).first()
+        if row is None:
+            raise EntityNotFoundError("BusinessPartnerCommunityMember", member_id)
+        for k, v in data.items():
+            setattr(row, k, v)
+        self.db.commit()
+        self.db.refresh(row)
+        return row
+
+    def delete_community_member(self, member_id: str) -> None:
+        row = self.db.query(BusinessPartnerCommunityMember).filter(
+            BusinessPartnerCommunityMember.id == member_id
+        ).first()
+        if row is None:
+            raise EntityNotFoundError("BusinessPartnerCommunityMember", member_id)
+        self.db.delete(row)
+        self.db.commit()
