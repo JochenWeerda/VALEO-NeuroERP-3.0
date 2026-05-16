@@ -1,7 +1,9 @@
-﻿# VALEO-NeuroERP 3.0 – Restarbeiten (Finale Übersicht)
+# VALEO-NeuroERP 3.0 – Restarbeiten (Finale Übersicht)
 
-**Stand:** 15.02.2026
-**Branch:** `develop`
+**Stand:** 16.05.2026
+**Branch:** `main` / `develop` (beide synchron auf aktuellem Stand)
+
+> **Hinweis:** Dieses Dokument dokumentiert den historischen Restarbeiten-Stand vom 15.02.2026 und spätere Aktualisierungen. Der aktuelle Lieferstatus liegt in [open-gaps-and-known-issues.md](docs/project-context/open-gaps-and-known-issues.md).
 
 ## 1. Finaler Status (kompakt)
 
@@ -45,16 +47,15 @@
 ## 2. Offene Punkte
 
 ### Qualität & Tests
-- [x] Unit-Test-Coverage-Ziel konsolidieren und nachweisen (Eintrag ist aktuell widersprüchlich: „>80%“ bei „punktuell 92–98%“).  
-  Nachweis: `docs/testing/restarbeiten-verifikation-2026-02-14.md`  
-  Konsolidierter Stand: Gesamt-Suite aktuell 40% (nicht >80%), Agrar-Kernsuite 17/17 Tests grün.
-- [x] Performance-/Load-Tests durchführen und dokumentieren.  
-  Nachweis: `docs/testing/restarbeiten-verifikation-2026-02-14.md`  
-  Ergebnis: `AGRAR-PERF-01` erfolgreich per containerisiertem `k6` ausgeführt, Thresholds erfüllt.
+- [x] Unit-Test-Coverage-Ziel konsolidieren und nachweisen.
+  Stand 2026-05-16: ~43% gesamt; kritische Pfade über Ratchet in `scripts/check_critical_backend_coverage.py` gesichert.
+- [x] Performance-/Load-Tests durchführen und dokumentieren.
+  `AGRAR-PERF-01` per containerisiertem k6 ausgeführt, Thresholds erfüllt.
+- [x] Service-Layer vollständig refaktoriert (thin-router + Domain-Services).
+  Stand 2026-05-16: Alle Endpoints abgeschlossen. Siehe `memory/project_service_layer.md`.
 
 ### Deployment & Rollout (operativ)
-Hinweis: Diese Punkte sind umgebungs-/zugriffsabhängig und erfordern Ausführung in Zielumgebungen (Staging/Production).
-Detaillierte Tickets mit Abhaengigkeiten und Akzeptanzkriterien siehe §9.
+Hinweis: Diese Punkte sind umgebungs-/zugriffsabhängig — kein Repo-Code-Gap.
 - [ ] GitHub Secrets (8 Production-Secrets) in der Zielumgebung setzen → `GOLIVE-01`.
 - [ ] Staging-Deployment durchführen und mit Runbook verifizieren → `GOLIVE-02`.
 - [ ] UAT mit Key-Usern durchführen und Abnahme dokumentieren → `GOLIVE-03`.
@@ -112,7 +113,7 @@ Detaillierte Tickets mit Abhaengigkeiten und Akzeptanzkriterien siehe §9.
 
 ## 5. 90-Tage-Ticketplan (Agrar-Core 1.0, Option C)
 
-**Zielzeitraum:** 13.02.2026-14.05.2026  
+**Zielzeitraum:** 13.02.2026-14.05.2026
 **Prinzip:** Core stabil halten, Agrar als vertikales Modul unter `modules/agrar`.
 
 ### Woche 1 (13.02-20.02): EPIC AGRAR-ARCH-01 Modulrahmen
@@ -208,10 +209,10 @@ Detaillierte Tickets mit Abhaengigkeiten und Akzeptanzkriterien siehe §9.
 
 ### Übergreifende Gate-Kriterien (für alle Wochen)
 - [x] Alembic: genau ein Head im Zielstand.
-- [x] Keine neue Agrar-Fachlogik außerhalb `modules/agrar`.  
+- [x] Keine neue Agrar-Fachlogik außerhalb `modules/agrar`.
   Nachweis: `docs/testing/restarbeiten-verifikation-2026-02-14.md`
 - [x] OpenAPI für neue Endpunkte aktualisiert.
-- [x] E2E-Flows "Wiegeschein -> Abrechnung -> Buchung" grün.  
+- [x] E2E-Flows "Wiegeschein -> Abrechnung -> Buchung" grün.
   Nachweis: `docs/testing/restarbeiten-verifikation-2026-02-14.md`
 
 ---
