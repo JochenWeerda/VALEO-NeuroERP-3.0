@@ -97,6 +97,11 @@ class AgrarSettlementService:
 
     @staticmethod
     def get_approval_history(settlement: AgrarSettlement) -> list[dict]:
+        # Primary: drying_result["approval_history"] (written by apply_freigabe/post_to_fibu)
+        drying = getattr(settlement, "drying_result", None) or {}
+        if isinstance(drying, dict) and drying.get("approval_history"):
+            return drying["approval_history"]
+        # Fallback: legacy approval_metadata["history"]
         meta = getattr(settlement, "approval_metadata", None) or {}
         if isinstance(meta, dict):
             return meta.get("history", [])
@@ -498,7 +503,7 @@ class AgrarSettlementService:
 
         supplier_name = None
         try:
-            from app.core.store import get_from_store, get_repository
+            from app.documents.router_helpers import get_from_store, get_repository
             partner = get_from_store("partner", settlement.supplier_id, get_repository(self.db))
             if partner:
                 supplier_name = partner.get("name")
@@ -540,14 +545,14 @@ class AgrarSettlementService:
 
     def get_completion_status(self, settlement_id: str, variant: str) -> dict:
         """Evaluate completion status for a settlement (GUTSCHRIFT/BELASTUNG/KORREKTUR)."""
-        from app.core.settlement_approval import (
-            SettlementApprovalStatus,
+        from app.core.settlement_approval import SettlementApprovalStatus
+        from app.core.settlement_completion_contracts import (
             SettlementCompletionEvidence,
             SettlementCompletionVariant,
             SettlementFinancialDocumentKind,
             evaluate_settlement_completion,
         )
-        from app.core.store import get_repository, list_from_store
+        from app.documents.router_helpers import get_repository, list_from_store
 
         settlement, _ = self.get_settlement(settlement_id)
         repo = get_repository(self.db)
