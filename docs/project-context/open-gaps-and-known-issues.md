@@ -122,18 +122,18 @@ Stand Wave 2026-05-17 (P0/P1 Gaps implementiert):
 | AMIC-PARITY-001 | O2C/P2P/Partie-Kette — UAT-Pfad fehlt | P0 | offen (UAT extern) |
 | WAAGE-LIVE-001 | Waage: Live-Hardware, Eich-Nachweis | P0 | implementiert (Repo), UAT offen |
 | SILO-LEER-001 | Silo-Leermeldung, Schwundbuchung | P0 | implementiert |
-| L3-WAAGE-001 | Doppelwiegung (Wiegung1/2), Gosse, WaageId | P0 | in Arbeit |
-| L3-DISP-001 | Kontrakt Disposition sub-resource + Freigabe | P1 | in Arbeit |
-| L3-KONTRAKT-001 | Kontraktklassen/Varianten (Fixpreis/Basis/Praemie) | P1 | in Arbeit |
-| L3-KONTRAKT-002 | Kontrakt-Hedging (MATIF mark-to-market) | P1 | in Arbeit |
-| L3-ROHWARE-001 | Rohware-Sammelabrechnung | P1 | offen |
-| L3-ERECHNUNG-001 | e-Rechnung Import ZUGFeRD/XRechnung | P1 | in Arbeit |
-| L3-PREIS-001 | Preis berechnen Endpoint (Kalkulationsengine) | P1 | in Arbeit |
-| L3-CRM-002 | Interessent → Kunde Konvertierung | P1 | offen |
-| AMIC-COMP-001 | Sanktionsliste / Verbotsliste | P1 | in Arbeit |
-| AMIC-GEN-001 | Aktionaers-/Gesellschafterverwaltung (Genossenschaft) | P1 | in Arbeit |
-| AMIC-FIBU-001 | Gelangensbestaetigung (§17a UStDV) | P1 | in Arbeit |
-| AMIC-FIBU-002 | Intrastat EU-Handelsstatistik | P1 | in Arbeit |
+| L3-WAAGE-001 | Doppelwiegung (Wiegung1/2), Gosse, WaageId | P0 | implementiert |
+| L3-DISP-001 | Kontrakt Disposition sub-resource + Freigabe | P1 | implementiert |
+| L3-KONTRAKT-001 | Kontraktklassen/Varianten (Fixpreis/Basis/Praemie) | P1 | implementiert |
+| L3-KONTRAKT-002 | Kontrakt-Hedging (MATIF mark-to-market) | P1 | implementiert |
+| L3-ROHWARE-001 | Rohware-Sammelabrechnung | P1 | implementiert |
+| L3-ERECHNUNG-001 | e-Rechnung Import ZUGFeRD/XRechnung | P1 | implementiert |
+| L3-PREIS-001 | Preis berechnen Endpoint (Kalkulationsengine) | P1 | implementiert |
+| L3-CRM-002 | Interessent → Kunde Konvertierung | P1 | implementiert |
+| AMIC-COMP-001 | Sanktionsliste / Verbotsliste | P1 | implementiert |
+| AMIC-GEN-001 | Aktionaers-/Gesellschafterverwaltung (Genossenschaft) | P1 | implementiert |
+| AMIC-FIBU-001 | Gelangensbestaetigung (§17a UStDV) | P1 | implementiert |
+| AMIC-FIBU-002 | Intrastat EU-Handelsstatistik | P1 | implementiert |
 | PARTIE-PFLICHT-001 | Partiepflicht-Validierung je Artikel/Wiegetyp | P1 | implementiert |
 | ROHWARE-SCHEMA-001 | Abrechnungsschema-Editor + Testrechnung | P1 | implementiert |
 | CTS-H2S-UAT-001 | Rohware-UAT Schemata, Varianten, Nachtraege | P0 | offen (UAT extern) |
@@ -141,11 +141,14 @@ Stand Wave 2026-05-17 (P0/P1 Gaps implementiert):
 | DMS-DOC-002 | DMS-Live-Probe, Redirect-Failure, Audit-Paket | P1 | offen |
 | POS-DSFINVK-001 | TSE-/DSFinV-K-Abnahme | P1 | offen |
 | REPORT-PRINT-001 | Partie-Genealogie, Wiegschein-PDF, Etikett | P1 | offen |
-| AMIC-FIBU-006 | eBilanz/ELSTER-Direktschnittstelle | P1 | offen |
+| AMIC-FIBU-006 | eBilanz/ELSTER-Direktschnittstelle | P1 | implementiert (Stub) |
 | AMIC-FIBU-003 | ATLAS Zollausfuhr | P2 | offen |
-| L3-CRM-001 | Umkreissuche Kunden (Geo-Radius) | P2 | offen |
-| L3-WEBHOOK-001 | Outbound Webhook-Registrierung | P2 | offen |
+| L3-CRM-001 | Umkreissuche Kunden (Geo-Radius) | P2 | implementiert |
+| L3-WEBHOOK-001 | Outbound Webhook-Registrierung | P2 | implementiert |
 | L3-WEBSHOP-001 | Webshop B2B-Bestellintegration | P2 | offen |
+| L3-GS1-001 | GS1 Barcode Parse Service | P2 | implementiert |
+| L3-LAGER-001 | Ruestliste (Kommissioniervorbereitung) | P2 | implementiert |
+| AMIC-WAAGE-VORL | Waagenvorlagen/Wiederholfall-Anlieferungen | P2 | implementiert |
 | AMIC-SAATZ-001 | Saatzucht-Modul | P2 | offen |
 
 ## Enterprise-Domain-Gap-Closure (SAP/Oracle/Odoo/AMIC) 2026-05-17
