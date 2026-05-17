@@ -6,7 +6,7 @@ from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
-from app.core.tenant_context import get_tenant_id
+from app.core.tenant import get_tenant_id
 from app.services.warehouse_service import WarehouseService
 
 router = APIRouter()

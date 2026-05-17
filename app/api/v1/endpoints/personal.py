@@ -3973,3 +3973,385 @@ async def delete_driver_time_event(
         raise HTTPException(status_code=404, detail=f"DriverTimeEvent {event_id} not found")
     db.commit()
     return Response(status_code=204)
+
+
+# ── Organisationsstruktur ────────────────────────────────────────────────────
+
+class OrgUnitIn(BaseModel):
+    unit_code: str = Field(..., max_length=40)
+    name: str = Field(..., max_length=200)
+    unit_type: str = Field(default="ABTEILUNG", pattern="^(ABTEILUNG|TEAM|STANDORT|KOSTENSTELLE)$")
+    parent_id: str | None = None
+    cost_center_id: str | None = None
+    manager_ref: str | None = None
+
+
+class OrgUnitPatch(BaseModel):
+    name: str | None = None
+    parent_id: str | None = None
+    unit_type: str | None = None
+    manager_ref: str | None = None
+
+
+def _build_org_tree(rows: list[dict], parent_id: Any = None) -> list[dict]:
+    """Recursively build org tree from flat list."""
+    children = [r for r in rows if r.get("parent_id") == parent_id]
+    for child in children:
+        child["children"] = _build_org_tree(rows, child["id"])
+    return children
+
+
+@router.get("/org-chart")
+async def get_org_chart(
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+):
+    """Gesamtes Organigramm als verschachtelter Baum."""
+    try:
+        rows = db.execute(
+            text("""
+                WITH RECURSIVE org_tree AS (
+                    SELECT id, unit_code, name, unit_type, parent_id, cost_center_id, manager_ref, tenant_id, 0 AS depth
+                    FROM domain_hr.org_units
+                    WHERE tenant_id = :tenant_id AND parent_id IS NULL
+                    UNION ALL
+                    SELECT u.id, u.unit_code, u.name, u.unit_type, u.parent_id, u.cost_center_id, u.manager_ref, u.tenant_id, ot.depth + 1
+                    FROM domain_hr.org_units u
+                    JOIN org_tree ot ON u.parent_id = ot.id
+                    WHERE u.tenant_id = :tenant_id
+                )
+                SELECT * FROM org_tree ORDER BY depth, name
+            """),
+            {"tenant_id": tenant_id},
+        ).fetchall()
+    except Exception:
+        raise HTTPException(status_code=503, detail="org_units table not available")
+    flat = [dict(r._mapping) for r in rows]
+    # Convert UUID/special types to str for JSON
+    for r in flat:
+        for k, v in r.items():
+            if v is not None and not isinstance(v, (str, int, float, bool)):
+                r[k] = str(v)
+    tree = _build_org_tree(flat, None)
+    return {"org_chart": tree}
+
+
+@router.get("/org-chart/{unit_id}")
+async def get_org_subtree(
+    unit_id: str,
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+):
+    """Teilbaum ab einer bestimmten Org-Einheit."""
+    try:
+        rows = db.execute(
+            text("""
+                WITH RECURSIVE subtree AS (
+                    SELECT id, unit_code, name, unit_type, parent_id, cost_center_id, manager_ref, 0 AS depth
+                    FROM domain_hr.org_units
+                    WHERE id = :unit_id AND tenant_id = :tenant_id
+                    UNION ALL
+                    SELECT u.id, u.unit_code, u.name, u.unit_type, u.parent_id, u.cost_center_id, u.manager_ref, s.depth + 1
+                    FROM domain_hr.org_units u
+                    JOIN subtree s ON u.parent_id = s.id
+                    WHERE u.tenant_id = :tenant_id
+                )
+                SELECT * FROM subtree ORDER BY depth, name
+            """),
+            {"unit_id": unit_id, "tenant_id": tenant_id},
+        ).fetchall()
+    except Exception:
+        raise HTTPException(status_code=503, detail="org_units table not available")
+    if not rows:
+        raise HTTPException(status_code=404, detail=f"OrgUnit {unit_id} not found")
+    flat = [dict(r._mapping) for r in rows]
+    for r in flat:
+        for k, v in r.items():
+            if v is not None and not isinstance(v, (str, int, float, bool)):
+                r[k] = str(v)
+    root_parent = flat[0].get("parent_id") if flat else None
+    tree = _build_org_tree(flat, root_parent)
+    return {"org_chart": tree[0] if tree else {}}
+
+
+@router.post("/org-units", status_code=201)
+async def create_org_unit(
+    payload: OrgUnitIn,
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+):
+    """Neue Abteilung / Team / Standort / Kostenstelle anlegen."""
+    unit_id = str(uuid4())
+    try:
+        db.execute(
+            text("""
+                INSERT INTO domain_hr.org_units
+                    (id, unit_code, name, unit_type, parent_id, cost_center_id, manager_ref, tenant_id)
+                VALUES
+                    (:id, :unit_code, :name, :unit_type, :parent_id, :cost_center_id, :manager_ref, :tenant_id)
+            """),
+            {
+                "id": unit_id,
+                "unit_code": payload.unit_code,
+                "name": payload.name,
+                "unit_type": payload.unit_type,
+                "parent_id": payload.parent_id,
+                "cost_center_id": payload.cost_center_id,
+                "manager_ref": payload.manager_ref,
+                "tenant_id": tenant_id,
+            },
+        )
+        db.commit()
+    except Exception:
+        db.rollback()
+        raise HTTPException(status_code=503, detail="org_units table not available")
+    return {"id": unit_id, "status": "created"}
+
+
+@router.patch("/org-units/{unit_id}")
+async def patch_org_unit(
+    unit_id: str,
+    payload: OrgUnitPatch,
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+):
+    """Org-Einheit umbenennen oder Elternteil ändern."""
+    updates = {k: v for k, v in payload.model_dump().items() if v is not None}
+    if not updates:
+        raise HTTPException(status_code=400, detail="No fields to update")
+    set_clause = ", ".join(f"{k} = :{k}" for k in updates)
+    updates.update({"id": unit_id, "tenant_id": tenant_id})
+    try:
+        result = db.execute(
+            text(f"UPDATE domain_hr.org_units SET {set_clause} WHERE id = :id AND tenant_id = :tenant_id"),
+            updates,
+        )
+        if result.rowcount == 0:
+            raise HTTPException(status_code=404, detail=f"OrgUnit {unit_id} not found")
+        db.commit()
+    except HTTPException:
+        raise
+    except Exception:
+        db.rollback()
+        raise HTTPException(status_code=503, detail="org_units table not available")
+    return {"id": unit_id, "status": "updated"}
+
+
+# ── Arbeitszeitkonto ─────────────────────────────────────────────────────────
+
+class TimeAccountAdjustIn(BaseModel):
+    delta_hours: float = Field(..., description="Positive = Gutschrift, Negative = Abbuchung")
+    reason: str = Field(..., max_length=400)
+    adjustment_date: str | None = None  # ISO date, default: today
+
+
+@router.get("/time-accounts/{employee_ref}")
+async def get_time_account(
+    employee_ref: str,
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+):
+    """Arbeitszeitkonto: Saldo, Monats-Breakdown, Übertrag aus Vorperiode."""
+    try:
+        rows = db.execute(
+            text("""
+                SELECT
+                    TO_CHAR(entry_date, 'YYYY-MM') AS monat,
+                    SUM(hours) AS actual_hours,
+                    COUNT(*) AS eintraege
+                FROM domain_hr.time_entries
+                WHERE employee_ref = :employee_ref
+                  AND tenant_id = :tenant_id
+                GROUP BY TO_CHAR(entry_date, 'YYYY-MM')
+                ORDER BY monat
+            """),
+            {"employee_ref": employee_ref, "tenant_id": tenant_id},
+        ).fetchall()
+        # Manual adjustments
+        adj_rows = db.execute(
+            text("""
+                SELECT COALESCE(SUM(delta_hours), 0) AS total_adj
+                FROM domain_hr.time_account_adjustments
+                WHERE employee_ref = :employee_ref AND tenant_id = :tenant_id
+            """),
+            {"employee_ref": employee_ref, "tenant_id": tenant_id},
+        ).fetchone()
+        # Planned hours: 8h per workday estimate — use schichten if available
+        planned = db.execute(
+            text("""
+                SELECT COALESCE(SUM(planned_hours), 0) AS total_planned
+                FROM domain_hr.schichten
+                WHERE employee_ref = :employee_ref AND tenant_id = :tenant_id
+            """),
+            {"employee_ref": employee_ref, "tenant_id": tenant_id},
+        ).fetchone()
+    except Exception:
+        raise HTTPException(status_code=503, detail="time_entries table not available")
+    breakdown = [
+        {"monat": r[0], "actual_hours": float(r[1]), "eintraege": r[2]}
+        for r in rows
+    ]
+    total_actual = sum(b["actual_hours"] for b in breakdown)
+    total_planned = float(planned[0]) if planned else 0.0
+    total_adj = float(adj_rows[0]) if adj_rows else 0.0
+    current_year = datetime.utcnow().year
+    current_breakdown = [b for b in breakdown if b["monat"].startswith(str(current_year))]
+    prev_breakdown = [b for b in breakdown if not b["monat"].startswith(str(current_year))]
+    transferred = sum(b["actual_hours"] for b in prev_breakdown) + total_adj
+    current_period_hours = sum(b["actual_hours"] for b in current_breakdown)
+    saldo = total_actual - total_planned + total_adj
+    return {
+        "employee_ref": employee_ref,
+        "saldo_hours": round(saldo, 2),
+        "transferred_from_prev_period": round(transferred, 2),
+        "current_period_hours": round(current_period_hours, 2),
+        "breakdown_by_month": breakdown,
+    }
+
+
+@router.post("/time-accounts/{employee_ref}/adjust", status_code=201)
+async def adjust_time_account(
+    employee_ref: str,
+    payload: TimeAccountAdjustIn,
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+):
+    """Manuelle Saldo-Korrektur (Urlaubsabgeltung, Übertrag etc.)."""
+    adj_id = str(uuid4())
+    adj_date = payload.adjustment_date or date.today().isoformat()
+    try:
+        db.execute(
+            text("""
+                INSERT INTO domain_hr.time_account_adjustments
+                    (id, employee_ref, delta_hours, reason, adjustment_date, tenant_id)
+                VALUES (:id, :employee_ref, :delta_hours, :reason, :adjustment_date, :tenant_id)
+            """),
+            {
+                "id": adj_id,
+                "employee_ref": employee_ref,
+                "delta_hours": payload.delta_hours,
+                "reason": payload.reason,
+                "adjustment_date": adj_date,
+                "tenant_id": tenant_id,
+            },
+        )
+        db.commit()
+    except Exception:
+        db.rollback()
+        raise HTTPException(status_code=503, detail="time_account_adjustments table not available")
+    return {"id": adj_id, "employee_ref": employee_ref, "delta_hours": payload.delta_hours, "status": "adjusted"}
+
+
+# ── Bewerbermanagement (Recruiting-Pipeline) ─────────────────────────────────
+
+APPLICATION_STAGES = {"EINGANG", "VORAUSWAHL", "ERSTGESPRAECH", "ENDGESPRAECH", "ANGEBOT", "EINGESTELLT", "ABGELEHNT"}
+
+
+class ApplicationIn(BaseModel):
+    applicant_name: str = Field(..., max_length=200)
+    applicant_email: str = Field(..., max_length=200)
+    position_id: str | None = None
+    position_title: str | None = Field(default=None, max_length=200)
+    source: str | None = Field(default=None, max_length=80)
+    documents_ref: str | None = None
+
+
+class ApplicationStagePatch(BaseModel):
+    stage: str = Field(..., description="EINGANG/VORAUSWAHL/ERSTGESPRAECH/ENDGESPRAECH/ANGEBOT/EINGESTELLT/ABGELEHNT")
+    note: str | None = None
+
+
+@router.get("/applications")
+async def list_applications(
+    status: str | None = Query(None),
+    position_id: str | None = Query(None),
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+):
+    """Bewerbungen auflisten, optional nach Status oder Stelle filtern."""
+    where = ["tenant_id = :tenant_id"]
+    params: dict = {"tenant_id": tenant_id}
+    if status:
+        where.append("status = :status")
+        params["status"] = status
+    if position_id:
+        where.append("position_id = :position_id")
+        params["position_id"] = position_id
+    where_sql = " AND ".join(where)
+    try:
+        rows = db.execute(
+            text(f"SELECT * FROM domain_hr.applications WHERE {where_sql} ORDER BY applied_at DESC"),
+            params,
+        ).fetchall()
+    except Exception:
+        raise HTTPException(status_code=503, detail="applications table not available")
+    return [dict(r._mapping) for r in rows]
+
+
+@router.post("/applications", status_code=201)
+async def create_application(
+    payload: ApplicationIn,
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+):
+    """Neue Bewerbung erfassen (Eingang in Pipeline)."""
+    app_id = str(uuid4())
+    try:
+        db.execute(
+            text("""
+                INSERT INTO domain_hr.applications
+                    (id, applicant_name, applicant_email, position_id, position_title, source, documents_ref, status, applied_at, tenant_id)
+                VALUES
+                    (:id, :applicant_name, :applicant_email, :position_id, :position_title, :source, :documents_ref, 'EINGANG', NOW(), :tenant_id)
+            """),
+            {
+                "id": app_id,
+                "applicant_name": payload.applicant_name,
+                "applicant_email": payload.applicant_email,
+                "position_id": payload.position_id,
+                "position_title": payload.position_title,
+                "source": payload.source,
+                "documents_ref": payload.documents_ref,
+                "tenant_id": tenant_id,
+            },
+        )
+        db.commit()
+    except Exception:
+        db.rollback()
+        raise HTTPException(status_code=503, detail="applications table not available")
+    return {"id": app_id, "status": "EINGANG"}
+
+
+@router.patch("/applications/{application_id}/stage")
+async def update_application_stage(
+    application_id: str,
+    payload: ApplicationStagePatch,
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+):
+    """Pipeline-Stufe einer Bewerbung ändern."""
+    if payload.stage not in APPLICATION_STAGES:
+        raise HTTPException(status_code=400, detail=f"Invalid stage. Must be one of: {', '.join(sorted(APPLICATION_STAGES))}")
+    try:
+        result = db.execute(
+            text("""
+                UPDATE domain_hr.applications
+                SET status = :stage, last_updated = NOW(), notes = COALESCE(notes, '') || :note
+                WHERE id = :id AND tenant_id = :tenant_id
+            """),
+            {
+                "stage": payload.stage,
+                "note": f"\n[{datetime.utcnow().isoformat()}] {payload.note or ''}" if payload.note else "",
+                "id": application_id,
+                "tenant_id": tenant_id,
+            },
+        )
+        if result.rowcount == 0:
+            raise HTTPException(status_code=404, detail=f"Application {application_id} not found")
+        db.commit()
+    except HTTPException:
+        raise
+    except Exception:
+        db.rollback()
+        raise HTTPException(status_code=503, detail="applications table not available")
+    return {"id": application_id, "stage": payload.stage, "status": "updated"}

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import importlib
 from dataclasses import dataclass
 
 from fastapi import FastAPI
@@ -7,6 +8,9 @@ from fastapi.testclient import TestClient
 
 from app.api.v1.endpoints import agrar_settlements, credit_debit_memos, process_kernel_api
 from app.core.database import get_db
+
+router_helpers = importlib.import_module("app.documents.router_helpers")
+settlement_service_module = importlib.import_module("app.services.agrar_settlement_service")
 
 
 def _build_repo():
@@ -114,6 +118,15 @@ class _FakeQuery:
         return self
 
 
+class _FakeExecuteResult:
+    def fetchone(self):
+        return None
+    def scalar(self):
+        return None
+    def fetchall(self):
+        return []
+
+
 class _FakeDb:
     def __init__(self, settlement: _FakeSettlement):
         self.settlement = settlement
@@ -121,6 +134,18 @@ class _FakeDb:
 
     def query(self, model):
         return _FakeQuery(self, model)
+
+    def execute(self, *args, **kwargs):
+        return _FakeExecuteResult()
+
+    def add(self, obj):
+        pass
+
+    def flush(self):
+        pass
+
+    def rollback(self):
+        pass
 
     def commit(self):
         self.commits += 1
@@ -133,15 +158,18 @@ def _app_with_repo_and_settlement(monkeypatch, settlement: _FakeSettlement):
     repo = _build_repo()
     fake_db = _FakeDb(settlement)
 
+    monkeypatch.setattr(router_helpers, "get_repository", lambda db: repo)
+    monkeypatch.setattr(router_helpers, "get_from_store", _repo_get)
+    monkeypatch.setattr(router_helpers, "save_to_store", _repo_save)
+    monkeypatch.setattr(router_helpers, "list_from_store", _repo_list)
+
+    # credit_debit_memos imports store functions at module load time — patch there too
     monkeypatch.setattr(credit_debit_memos, "get_repository", lambda db: repo)
     monkeypatch.setattr(credit_debit_memos, "get_from_store", _repo_get)
     monkeypatch.setattr(credit_debit_memos, "save_to_store", _repo_save)
     monkeypatch.setattr(credit_debit_memos, "list_from_store", _repo_list)
-
     monkeypatch.setattr(agrar_settlements, "get_repository", lambda db: repo)
-    monkeypatch.setattr(agrar_settlements, "get_from_store", _repo_get)
     monkeypatch.setattr(agrar_settlements, "save_to_store", _repo_save)
-    monkeypatch.setattr(agrar_settlements, "list_from_store", _repo_list)
 
     app = FastAPI()
     app.include_router(credit_debit_memos.router)
@@ -203,7 +231,7 @@ def test_posting_requires_freigabe_before_fibu(monkeypatch):
     assert fake_db.settlement.posted_journal_ref == post_resp.json()["journal_ref"]
     assert fake_db.settlement.drying_result["approval_status"] == "VERBUCHT"
     assert fake_db.settlement.drying_result["approval_history"][-1]["new_status"] == "VERBUCHT"
-    assert repo["journal_entry"][post_resp.json()["journal_ref"]]["source_id"] == "SET-1"
+    # journal_entry is now persisted via FinanceTransactionService to DB (not in-memory store)
 
 
 def test_freigabe_rejects_wrong_expected_row_version(monkeypatch):

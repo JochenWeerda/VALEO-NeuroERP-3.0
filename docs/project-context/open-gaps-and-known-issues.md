@@ -102,6 +102,8 @@ Zuletzt vollstaendig auditiert: **2026-05-16**.
 
 Vollstaendige Analyse in [amic-parity-matrix-2026-05-17.md](c:/Users/Jochen/VALEO-NeuroERP-3.0/docs/project-context/amic-parity-matrix-2026-05-17.md).
 
+Stand nach Repo-Closure 2026-05-17: `WAAGE-LIVE-001`, `SILO-LEER-001`, `PARTIE-PFLICHT-001` und `ROHWARE-SCHEMA-001` sind technisch implementiert. `AMIC-PARITY-001` ist repo-seitig vorbereitet, benoetigt aber weiterhin echte UAT-Abnahme ueber die gesamte Folgeobjektkette.
+
 | Gap-ID | Kurzbeschreibung | Prioritaet | Status |
 |--------|-----------------|------------|--------|
 | AMIC-PARITY-001 | O2C/P2P/Partie-Kette — Browser-/CRUD-UAT-Pfad vollstaendig fehlt | P0 | offen |
@@ -114,6 +116,22 @@ Vollstaendige Analyse in [amic-parity-matrix-2026-05-17.md](c:/Users/Jochen/VALE
 | DMS-DOC-002 | DMS-Live-Probe, Redirect-Failure, Audit-Paket | P1 | offen |
 | POS-DSFINVK-001 | Produktive TSE-/DSFinV-K-Abnahme mit realem Exportpaket | P1 | offen |
 | REPORT-PRINT-001 | Partie-Genealogie-Report, Wiegschein-Druck, Etikett-Ausgabe | P1 | offen |
+
+## Enterprise-Domain-Gap-Closure (SAP/Oracle/Odoo/AMIC) 2026-05-17
+
+Repo-seitig ergaenzt und registriert:
+
+- CRM: Opportunity-Pipeline, Forecast, 360-Grad-Kundensicht, Account-Hierarchie und Service-Case-SLA.
+- Finance: Anlagenbuchhaltung, Budgetierung und Liquiditaetsplanung.
+- Logistik: Tourenplanung, Frachtkosten, Track & Trace, ePOD und Transportstatistik.
+- Einkauf: 3-Wege-Match, ERS, RFQ und Einkaufs-KPIs.
+- Verkauf/Kontrakte: Rahmenauftraege, Kreditlimit, Sammelbelege und zentrale Contract-/Obligation-Engine.
+- Futtermittel: Rohwaren-API, Rezepturverwaltung, Naehrstoffanalyse, Deklaration und Etikett-Vertrag.
+- HRM/Compliance/POS: Organigramm, Arbeitszeitkonto, Bewerberpipeline, DSGVO-Loeschantraege, Whistleblower, LkSG, POS-Split-Payment und Promotions-Preview.
+
+Checks: `pytest tests/test_crm_pipeline_360.py tests/test_einkauf_3way_match_ers_rfq.py tests/test_finance_asset_budget_liquidity.py tests/test_logistics_tour_freight.py tests/test_major_domain_router_registration.py tests/test_personal_major_gap_extensions.py tests/test_compliance_pos_gap_extensions.py tests/test_process_kernel_wave100_settlement_completion.py tests/test_process_kernel_wave31_dq_extended_write_paths.py -q --no-cov --tb=short` -> 70 gruen.
+
+Nicht repo-seitig schliessbar bleiben echte externe Abnahmen und Zugangsdaten: Steuerberater-/DATEV-Mapping, DMS-Live-Probe, reale TSE-/DSFinV-K-Pruefwerkzeugvalidierung und UAT-Unterschriften mit echten Rohwaren-/Waage-/Druckdaten.
 
 ---
 

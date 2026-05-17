@@ -8,6 +8,25 @@
 > zur fachlichen Vertiefung der Domains. Es ersetzt keine Wave-STATUS.md,
 > sondern fuehrt den Auftrag und den Fortschritt auf Domain-Ebene.
 
+## Aktualisierung 2026-05-17: Repo-seitige Closure-Welle
+
+Die grossen fachlichen Luecken aus dem Vergleich gegen SAP, Oracle, Odoo und AMIC sind repo-seitig in einer ersten Closure-Welle adressiert. Der Stand ersetzt nicht externe UAT-, Steuerberater-, TSE-, DMS- oder Rechtsfreigaben.
+
+| Domain | Geschlossene Repo-Lieferung | Nachweis |
+|--------|-----------------------------|----------|
+| Verkauf | Rahmenauftraege/Abrufe, Kreditlimit, Sammelbelege | `sales_blanket_orders.py`, `credit_management.py`, `collective_documents.py` |
+| Einkauf | 3-Wege-Match, ERS, RFQ, Einkaufs-KPIs | `purchase_invoice_verification.py`, `ers_settlement.py`, `rfq.py`, `einkauf_kpis.py` |
+| Finance | Anlagenbuchhaltung, Budgetierung, Liquiditaetsplanung | `asset_accounting.py`, `budget_planning.py`, `liquidity_planning.py` |
+| CRM | Pipeline, Forecast, 360-Grad-Sicht, Account-Hierarchie, SLA | `opportunities.py`, `crm_360.py`, `crm_account_hierarchy.py`, `cases.py` |
+| Logistik | Tourenplanung, Frachtkosten, Track & Trace, ePOD, Statistik | `logistics_tours.py`, `logistics_freight.py` |
+| HRM | Organigramm, Arbeitszeitkonto, Bewerberpipeline | `personal.py` |
+| Compliance | DSGVO-Loeschantrag, Whistleblower, LkSG-Risikobewertung | `compliance_dsgvo.py`, `compliance_whistleblower_lksg.py` |
+| Futtermittel | Rohwaren, Rezepturen, Naehrstoffanalyse, Deklaration, Etikett | `futtermittel_rohwaren.py`, `futtermittel_rezepte.py` |
+| POS | Split-Payment- und Promotions-Preview | `pos_payments_promotions.py` |
+| Kontrakte | Zentrale Contract Engine mit Versionen, Obligations und Renewals | `central_contracts.py` |
+
+Fokussierter Teststand: 70 Tests gruen fuer CRM, Einkauf, Finance, Logistik, Router-Registrierung, HRM, Compliance/POS und bestehende Settlement-/DQ-Regressionspfade.
+
 ---
 
 ## 0. Gesamtbild

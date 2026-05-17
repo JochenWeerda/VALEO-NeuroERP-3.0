@@ -18,6 +18,7 @@ from ....services.customer_sales_eligibility import assert_customer_allowed_for_
 from ....services.customer_sales_eligibility import assert_customer_allowed_for_sales_order
 from ....services.numbering_service import get_numbering
 from ..schemas.base import PaginatedResponse
+from .credit_management import get_credit_status_data
 
 router = APIRouter()
 
