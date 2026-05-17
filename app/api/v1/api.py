@@ -29,6 +29,7 @@ from app.api.v1.endpoints import (
     sales_offers,
     docflow,
     warehouses,
+    warehouse_wms,
     policies,
     gap,
     prospecting,
@@ -813,6 +814,12 @@ api_router.include_router(
     warehouse_transfers.router,
     prefix="/warehouses/transfers",
     tags=["inventory", "warehouses", "transfers"]
+)
+
+api_router.include_router(
+    warehouse_wms.router,
+    prefix="/lager/wms",
+    tags=["lager", "wms", "inventory"]
 )
 
 api_router.include_router(

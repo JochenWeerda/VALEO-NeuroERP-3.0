@@ -1301,3 +1301,12 @@ from .neuro_state_models import (  # noqa: F401
     StateTransitionRecord,
     ConfidenceLedgerRecord,
 )
+
+# WMS — Warehouse Management System
+from app.infrastructure.models.wms_models import (  # noqa: E402,F401
+    WarehouseZone,
+    WarehouseBin,
+    BinStock,
+    WmsPickList,
+    WmsPickListLine,
+)
