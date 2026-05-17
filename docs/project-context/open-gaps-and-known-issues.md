@@ -3,7 +3,7 @@
 ## Zweck
 
 Ehrliche, aktuelle Bestandsaufnahme aller offenen Restthemen, fachlichen Duennstellen und bekannten Risiken.
-Zuletzt vollstaendig auditiert: **2026-05-16**.
+Zuletzt vollstaendig auditiert: **2026-05-17** (AMIC A.eins + service-erp.de L3-Connect Browser-Analyse).
 
 ---
 
@@ -98,24 +98,55 @@ Zuletzt vollstaendig auditiert: **2026-05-16**.
 - ~~Service-Layer-Refaktorierung~~ -> Alle 6 Haupt-Endpunkt-Dateien auf thin-router + Service-Klassen umgestellt: `business_partners.py`, `customers.py`, `personal.py` (Zeiteintraege + Abwesenheiten), `controlling.py`, `agrar_contracts.py`, `einkauf_bestellvorschlag.py`.
 - ~~HR-TIME-001 (Pilot-Slice)~~ -> `domain_hr.driver_time_events`-Tabelle, CRUD-Endpoints und Abwesenheitskollisions-Check repo-seitig implementiert.
 
-## AMIC-Paritaets-Gaps (2026-05-17)
+## AMIC/L3-Connect Paritaets-Gaps (2026-05-17, aktualisiert)
 
-Vollstaendige Analyse in [amic-parity-matrix-2026-05-17.md](c:/Users/Jochen/VALEO-NeuroERP-3.0/docs/project-context/amic-parity-matrix-2026-05-17.md).
+Analysen:
+- [amic-parity-matrix-2026-05-17.md](c:/Users/Jochen/VALEO-NeuroERP-3.0/docs/project-context/amic-parity-matrix-2026-05-17.md)
+- [service-erp-l3connect-gap-matrix-2026-05-17.md](c:/Users/Jochen/VALEO-NeuroERP-3.0/docs/project-context/service-erp-l3connect-gap-matrix-2026-05-17.md) — NEU 2026-05-17
 
-Stand nach Repo-Closure 2026-05-17: `WAAGE-LIVE-001`, `SILO-LEER-001`, `PARTIE-PFLICHT-001` und `ROHWARE-SCHEMA-001` sind technisch implementiert. `AMIC-PARITY-001` ist repo-seitig vorbereitet, benoetigt aber weiterhin echte UAT-Abnahme ueber die gesamte Folgeobjektkette.
+Quellen: Browser-Analyse `https://www.amic.de/hilfe/` (vollstaendiger A.eins-Modulbaum) und `https://doku.service-erp.de/` (165 Endpoints, 24 Module).
+
+Stand Wave 2026-05-17 (P0/P1 Gaps implementiert):
+- `WAAGE-LIVE-001`, `SILO-LEER-001`, `PARTIE-PFLICHT-001`, `ROHWARE-SCHEMA-001`: implementiert (Wellen 05-17)
+- `L3-WAAGE-001` (Doppelwiegung/Gosse): in Arbeit (Wave 2026-05-17b)
+- `L3-DISP-001` (Kontrakt Disposition sub-resource): in Arbeit
+- `L3-KONTRAKT-001/002` (Klassen/Hedging): in Arbeit
+- `L3-ERECHNUNG-001` (XRechnung/ZUGFeRD Import): in Arbeit
+- `L3-PREIS-001` (Preis berechnen Endpoint): in Arbeit
+- `AMIC-COMP-001` (Sanktionsliste): in Arbeit
+- `AMIC-GEN-001` (Genossenschaftsverwaltung): in Arbeit
+- `AMIC-FIBU-001/002` (Gelangensbestaetigung, Intrastat): in Arbeit
 
 | Gap-ID | Kurzbeschreibung | Prioritaet | Status |
 |--------|-----------------|------------|--------|
-| AMIC-PARITY-001 | O2C/P2P/Partie-Kette — Browser-/CRUD-UAT-Pfad vollstaendig fehlt | P0 | offen |
-| WAAGE-LIVE-001 | Waage: Live-Hardware-Import, Eich-Nachweis, Offline-Queue | P0 | offen |
-| SILO-LEER-001 | Silo-Leermeldung, Schwundbuchung, Fehlermatrix, Waagenbeleg-Kopplung | P0 | offen |
-| PARTIE-PFLICHT-001 | Partiepflicht-Validierung je Artikel/Wiegetyp fehlt zentral | P1 | offen |
-| ROHWARE-SCHEMA-001 | Abrechnungsschema-Editor/Katalog mit Versionierung und Testrechnung | P1 | offen |
-| CTS-H2S-UAT-001 | Rohware-UAT gegen echte Schemata, regionale Varianten, Nachtraege | P0 | offen |
-| FIBU-CUTOVER-002 | Extern freigegebenes SKR03/SKR04-Mapping + Steuerberaterabnahme | P0 | offen (vgl. EXT-002) |
+| AMIC-PARITY-001 | O2C/P2P/Partie-Kette — UAT-Pfad fehlt | P0 | offen (UAT extern) |
+| WAAGE-LIVE-001 | Waage: Live-Hardware, Eich-Nachweis | P0 | implementiert (Repo), UAT offen |
+| SILO-LEER-001 | Silo-Leermeldung, Schwundbuchung | P0 | implementiert |
+| L3-WAAGE-001 | Doppelwiegung (Wiegung1/2), Gosse, WaageId | P0 | in Arbeit |
+| L3-DISP-001 | Kontrakt Disposition sub-resource + Freigabe | P1 | in Arbeit |
+| L3-KONTRAKT-001 | Kontraktklassen/Varianten (Fixpreis/Basis/Praemie) | P1 | in Arbeit |
+| L3-KONTRAKT-002 | Kontrakt-Hedging (MATIF mark-to-market) | P1 | in Arbeit |
+| L3-ROHWARE-001 | Rohware-Sammelabrechnung | P1 | offen |
+| L3-ERECHNUNG-001 | e-Rechnung Import ZUGFeRD/XRechnung | P1 | in Arbeit |
+| L3-PREIS-001 | Preis berechnen Endpoint (Kalkulationsengine) | P1 | in Arbeit |
+| L3-CRM-002 | Interessent → Kunde Konvertierung | P1 | offen |
+| AMIC-COMP-001 | Sanktionsliste / Verbotsliste | P1 | in Arbeit |
+| AMIC-GEN-001 | Aktionaers-/Gesellschafterverwaltung (Genossenschaft) | P1 | in Arbeit |
+| AMIC-FIBU-001 | Gelangensbestaetigung (§17a UStDV) | P1 | in Arbeit |
+| AMIC-FIBU-002 | Intrastat EU-Handelsstatistik | P1 | in Arbeit |
+| PARTIE-PFLICHT-001 | Partiepflicht-Validierung je Artikel/Wiegetyp | P1 | implementiert |
+| ROHWARE-SCHEMA-001 | Abrechnungsschema-Editor + Testrechnung | P1 | implementiert |
+| CTS-H2S-UAT-001 | Rohware-UAT Schemata, Varianten, Nachtraege | P0 | offen (UAT extern) |
+| FIBU-CUTOVER-002 | SKR03/SKR04-Mapping + Steuerberaterabnahme | P0 | offen (extern) |
 | DMS-DOC-002 | DMS-Live-Probe, Redirect-Failure, Audit-Paket | P1 | offen |
-| POS-DSFINVK-001 | Produktive TSE-/DSFinV-K-Abnahme mit realem Exportpaket | P1 | offen |
-| REPORT-PRINT-001 | Partie-Genealogie-Report, Wiegschein-Druck, Etikett-Ausgabe | P1 | offen |
+| POS-DSFINVK-001 | TSE-/DSFinV-K-Abnahme | P1 | offen |
+| REPORT-PRINT-001 | Partie-Genealogie, Wiegschein-PDF, Etikett | P1 | offen |
+| AMIC-FIBU-006 | eBilanz/ELSTER-Direktschnittstelle | P1 | offen |
+| AMIC-FIBU-003 | ATLAS Zollausfuhr | P2 | offen |
+| L3-CRM-001 | Umkreissuche Kunden (Geo-Radius) | P2 | offen |
+| L3-WEBHOOK-001 | Outbound Webhook-Registrierung | P2 | offen |
+| L3-WEBSHOP-001 | Webshop B2B-Bestellintegration | P2 | offen |
+| AMIC-SAATZ-001 | Saatzucht-Modul | P2 | offen |
 
 ## Enterprise-Domain-Gap-Closure (SAP/Oracle/Odoo/AMIC) 2026-05-17
 
@@ -127,6 +158,8 @@ Repo-seitig ergaenzt und registriert:
 - Einkauf: 3-Wege-Match, ERS, RFQ und Einkaufs-KPIs.
 - Verkauf/Kontrakte: Rahmenauftraege, Kreditlimit, Sammelbelege und zentrale Contract-/Obligation-Engine.
 - Futtermittel: Rohwaren-API, Rezepturverwaltung, Naehrstoffanalyse, Deklaration und Etikett-Vertrag.
+- HRM: Org-Chart, Bewerberpipeline, Arbeitszeitkonto, Whistleblower (anonym), DSGVO-Loeschkonzept.
+- POS: Split-Payment (Multi-Tender), Promotions CRUD + Check (PROZENT/BETRAG/BOGO), X/Z-Berichte.
 - HRM/Compliance/POS: Organigramm, Arbeitszeitkonto, Bewerberpipeline, DSGVO-Loeschantraege, Whistleblower, LkSG, POS-Split-Payment und Promotions-Preview.
 
 Checks: `pytest tests/test_crm_pipeline_360.py tests/test_einkauf_3way_match_ers_rfq.py tests/test_finance_asset_budget_liquidity.py tests/test_logistics_tour_freight.py tests/test_major_domain_router_registration.py tests/test_personal_major_gap_extensions.py tests/test_compliance_pos_gap_extensions.py tests/test_process_kernel_wave100_settlement_completion.py tests/test_process_kernel_wave31_dq_extended_write_paths.py -q --no-cov --tb=short` -> 70 gruen.
