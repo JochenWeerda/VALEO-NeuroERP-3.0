@@ -164,6 +164,9 @@ from app.api.v1.endpoints import (
     central_contracts,
     futtermittel_rohwaren,
     futtermittel_rezepte,
+    gs1_barcode,
+    webhook_system,
+    ruestliste,
 )
 
 # AMIC Agrarhandel — Kontrakt-Klassen, Hedging, E-Rechnung, Preiskalkulation
@@ -200,6 +203,9 @@ from app.api.v1.endpoints import neuro_state_graph_api
 
 # Finance — Anlagenbuchhaltung, Budgetierung, Liquiditätsplanung
 from app.api.v1.endpoints import asset_accounting, budget_planning, liquidity_planning
+
+# AMIC / Wave-104 extensions
+from app.api.v1.endpoints import rohware_sammelabrechnung, ebilanz_elster, waagen_vorlagen
 
 # Import domain routers
 from app.domains.agrar.api import psm, psm_proplanta
@@ -1428,6 +1434,41 @@ api_router.include_router(gelangensbestaetigung.router)
 # Intrastat — EU-Handelsstatistik
 from app.api.v1.endpoints import intrastat  # noqa: E402
 api_router.include_router(intrastat.router)
+
+# AMIC Wave-104 — Rohware-Sammelabrechnung, eBilanz/ELSTER, Waagenvorlagen
+api_router.include_router(
+    rohware_sammelabrechnung.router,
+    tags=["agrar", "sammelabrechnung"],
+)
+api_router.include_router(
+    ebilanz_elster.router,
+    tags=["finance", "ebilanz", "elster"],
+)
+api_router.include_router(
+    waagen_vorlagen.router,
+    tags=["agrar", "waage", "vorlagen"],
+)
+
+# GS1 Barcode Parse Service (service-erp.de analog)
+api_router.include_router(
+    gs1_barcode.router,
+    prefix="/gs1/barcode",
+    tags=["gs1", "barcode", "utility"],
+)
+
+# Outbound Webhook Registration
+api_router.include_router(
+    webhook_system.router,
+    prefix="/webhooks",
+    tags=["webhooks"],
+)
+
+# Rüstliste (Kommissioniervorbereitung)
+api_router.include_router(
+    ruestliste.router,
+    prefix="/lager/ruestliste",
+    tags=["lager", "ruestliste"],
+)
 
 # Process Kernel: Domain-Mutationen fuer Business-Commands registrieren
 from app.services.command_handlers_procurement import register_command_mutations

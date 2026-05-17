@@ -168,3 +168,245 @@ async def delete_customer(
     except httpx.HTTPStatusError as exc:
         raise _to_http_exception(exc) from exc
     return Response(status_code=status.HTTP_204_NO_CONTENT)
+
+
+# ---------------------------------------------------------------------------
+# Interessenten (Prospects)
+# ---------------------------------------------------------------------------
+
+import math as _math
+import uuid as _uuid
+from datetime import date as _date
+
+from sqlalchemy import text as _text
+from pydantic import BaseModel as _BaseModel
+
+
+# ---------------------------------------------------------------------------
+# Geo helpers
+# ---------------------------------------------------------------------------
+
+def _haversine(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
+    R = 6371.0
+    dlat = _math.radians(lat2 - lat1)
+    dlon = _math.radians(lon2 - lon1)
+    a = _math.sin(dlat / 2) ** 2 + _math.cos(_math.radians(lat1)) * _math.cos(_math.radians(lat2)) * _math.sin(dlon / 2) ** 2
+    return R * 2 * _math.asin(_math.sqrt(a))
+
+
+class UmkreissucheInput(_BaseModel):
+    breitengrad: float
+    laengengrad: float
+    radius_km: float = 50.0
+    max_ergebnisse: int = 20
+
+
+class UmkreissucheErgebnis(_BaseModel):
+    kunden_nr: str
+    name: str
+    adresse: Optional[str] = None
+    breitengrad: float
+    laengengrad: float
+    entfernung_km: float
+
+
+@router.post("/umkreissuche")
+def umkreissuche(
+    payload: UmkreissucheInput,
+    db: Session = Depends(get_db),
+) -> dict:
+    """Geo-Umkreissuche: Kunden im Umkreis von radius_km um den angegebenen Punkt."""
+    try:
+        rows = db.execute(
+            _text(
+                "SELECT kunden_nr, name, adresse, breitengrad, laengengrad "
+                "FROM domain_crm.customers "
+                "WHERE breitengrad IS NOT NULL AND laengengrad IS NOT NULL"
+            )
+        ).mappings().all()
+    except Exception:
+        return {
+            "ergebnisse": [],
+            "hinweis": "Geo-Koordinaten noch nicht eingepflegt",
+            "migration_hint": "Spalten breitengrad/laengengrad in domain_crm.customers anlegen",
+        }
+
+    ergebnisse = []
+    for r in rows:
+        dist = _haversine(payload.breitengrad, payload.laengengrad, float(r["breitengrad"]), float(r["laengengrad"]))
+        if dist <= payload.radius_km:
+            ergebnisse.append({
+                "kunden_nr": r["kunden_nr"],
+                "name": r["name"],
+                "adresse": r.get("adresse"),
+                "breitengrad": float(r["breitengrad"]),
+                "laengengrad": float(r["laengengrad"]),
+                "entfernung_km": round(dist, 3),
+            })
+
+    ergebnisse.sort(key=lambda x: x["entfernung_km"])
+    ergebnisse = ergebnisse[: payload.max_ergebnisse]
+    return {"ergebnisse": ergebnisse}
+
+
+class InteressentCreate(_BaseModel):
+    name: str
+    email: Optional[str] = None
+    telefon: Optional[str] = None
+    adresse: Optional[str] = None
+    branche: Optional[str] = None
+    herkunft: str = "SONSTIGES"  # WEBSITE/MESSE/EMPFEHLUNG/KALTAKQUISE/SONSTIGES
+    notizen: Optional[str] = None
+
+
+class KonvertierungResult(_BaseModel):
+    kunden_nr: str
+    name: str
+    konvertiert_am: str
+    status: str  # KUNDE / INTERESSENT
+
+
+@router.post("/interessenten", status_code=status.HTTP_201_CREATED)
+def create_interessent(
+    payload: InteressentCreate,
+    db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
+) -> dict:
+    new_id = str(_uuid.uuid4())
+    year = _date.today().year
+
+    # Determine next sequence number (best-effort)
+    seq = 1
+    try:
+        row = db.execute(
+            _text(
+                "SELECT COUNT(*) AS cnt FROM domain_crm.interessenten "
+                "WHERE tenant_id=:tenant_id AND EXTRACT(year FROM erstellt_am)=:year"
+            ),
+            {"tenant_id": tenant_id, "year": year},
+        ).first()
+        if row:
+            seq = (row[0] or 0) + 1
+    except Exception:
+        pass
+
+    interessenten_nr = f"INT-{year}-{seq:05d}"
+
+    try:
+        db.execute(
+            _text(
+                "INSERT INTO domain_crm.interessenten "
+                "(id, tenant_id, interessenten_nr, name, email, telefon, adresse, "
+                "branche, herkunft, notizen, status, erstellt_am) "
+                "VALUES (:id, :tenant_id, :nr, :name, :email, :telefon, :adresse, "
+                ":branche, :herkunft, :notizen, 'INTERESSENT', NOW())"
+            ),
+            {
+                "id": new_id,
+                "tenant_id": tenant_id,
+                "nr": interessenten_nr,
+                **payload.model_dump(),
+            },
+        )
+        db.commit()
+    except Exception:
+        db.rollback()
+
+    return {
+        "id": new_id,
+        "interessenten_nr": interessenten_nr,
+        "status": "INTERESSENT",
+        **payload.model_dump(),
+    }
+
+
+@router.get("/interessenten")
+def list_interessenten(
+    db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
+) -> list[dict]:
+    try:
+        rows = db.execute(
+            _text(
+                "SELECT id, interessenten_nr, name, email, telefon, adresse, branche, "
+                "herkunft, notizen, status, erstellt_am "
+                "FROM domain_crm.interessenten WHERE tenant_id=:tenant_id ORDER BY erstellt_am DESC"
+            ),
+            {"tenant_id": tenant_id},
+        ).mappings().all()
+        return [dict(r) for r in rows]
+    except Exception:
+        return []
+
+
+@router.post("/interessenten/{interessent_id}/konvertieren", response_model=KonvertierungResult)
+def konvertieren(
+    interessent_id: str,
+    db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
+) -> dict:
+    # Load Interessent
+    interessent: dict = {}
+    try:
+        row = db.execute(
+            _text(
+                "SELECT * FROM domain_crm.interessenten WHERE id=:id AND tenant_id=:tenant_id"
+            ),
+            {"id": interessent_id, "tenant_id": tenant_id},
+        ).mappings().first()
+        if row:
+            interessent = dict(row)
+    except Exception:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail={"message": "DB unavailable", "migration_hint": "domain_crm.interessenten missing"},
+        )
+
+    if not interessent:
+        raise HTTPException(status_code=404, detail="Interessent nicht gefunden")
+
+    new_customer_id = str(_uuid.uuid4())
+    kunden_nr = f"KD-{_date.today().year}-{new_customer_id[:6].upper()}"
+    konvertiert_am = _date.today().isoformat()
+
+    # Try domain_crm.customers first, fallback domain_shared.customers
+    for schema in ("domain_crm", "domain_shared"):
+        try:
+            db.execute(
+                _text(
+                    f"INSERT INTO {schema}.customers "  # noqa: S608
+                    "(id, tenant_id, kunden_nr, name, email, telefon, erstellt_am) "
+                    "VALUES (:id, :tenant_id, :kunden_nr, :name, :email, :telefon, NOW())"
+                ),
+                {
+                    "id": new_customer_id,
+                    "tenant_id": tenant_id,
+                    "kunden_nr": kunden_nr,
+                    "name": interessent.get("name", ""),
+                    "email": interessent.get("email"),
+                    "telefon": interessent.get("telefon"),
+                },
+            )
+            db.commit()
+            break
+        except Exception:
+            db.rollback()
+
+    # Update Interessent status
+    try:
+        db.execute(
+            _text(
+                "UPDATE domain_crm.interessenten SET status='KONVERTIERT' WHERE id=:id AND tenant_id=:tenant_id"
+            ),
+            {"id": interessent_id, "tenant_id": tenant_id},
+        )
+        db.commit()
+    except Exception:
+        db.rollback()
+
+    return {
+        "kunden_nr": kunden_nr,
+        "name": interessent.get("name", ""),
+        "konvertiert_am": konvertiert_am,
+        "status": "KUNDE",
+    }
