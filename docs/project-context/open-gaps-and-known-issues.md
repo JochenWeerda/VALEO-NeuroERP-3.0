@@ -98,6 +98,25 @@ Zuletzt vollstaendig auditiert: **2026-05-16**.
 - ~~Service-Layer-Refaktorierung~~ -> Alle 6 Haupt-Endpunkt-Dateien auf thin-router + Service-Klassen umgestellt: `business_partners.py`, `customers.py`, `personal.py` (Zeiteintraege + Abwesenheiten), `controlling.py`, `agrar_contracts.py`, `einkauf_bestellvorschlag.py`.
 - ~~HR-TIME-001 (Pilot-Slice)~~ -> `domain_hr.driver_time_events`-Tabelle, CRUD-Endpoints und Abwesenheitskollisions-Check repo-seitig implementiert.
 
+## AMIC-Paritaets-Gaps (2026-05-17)
+
+Vollstaendige Analyse in [amic-parity-matrix-2026-05-17.md](c:/Users/Jochen/VALEO-NeuroERP-3.0/docs/project-context/amic-parity-matrix-2026-05-17.md).
+
+| Gap-ID | Kurzbeschreibung | Prioritaet | Status |
+|--------|-----------------|------------|--------|
+| AMIC-PARITY-001 | O2C/P2P/Partie-Kette — Browser-/CRUD-UAT-Pfad vollstaendig fehlt | P0 | offen |
+| WAAGE-LIVE-001 | Waage: Live-Hardware-Import, Eich-Nachweis, Offline-Queue | P0 | offen |
+| SILO-LEER-001 | Silo-Leermeldung, Schwundbuchung, Fehlermatrix, Waagenbeleg-Kopplung | P0 | offen |
+| PARTIE-PFLICHT-001 | Partiepflicht-Validierung je Artikel/Wiegetyp fehlt zentral | P1 | offen |
+| ROHWARE-SCHEMA-001 | Abrechnungsschema-Editor/Katalog mit Versionierung und Testrechnung | P1 | offen |
+| CTS-H2S-UAT-001 | Rohware-UAT gegen echte Schemata, regionale Varianten, Nachtraege | P0 | offen |
+| FIBU-CUTOVER-002 | Extern freigegebenes SKR03/SKR04-Mapping + Steuerberaterabnahme | P0 | offen (vgl. EXT-002) |
+| DMS-DOC-002 | DMS-Live-Probe, Redirect-Failure, Audit-Paket | P1 | offen |
+| POS-DSFINVK-001 | Produktive TSE-/DSFinV-K-Abnahme mit realem Exportpaket | P1 | offen |
+| REPORT-PRINT-001 | Partie-Genealogie-Report, Wiegschein-Druck, Etikett-Ausgabe | P1 | offen |
+
+---
+
 ## Zuletzt geschlossene Punkte (2026-04-13)
 
 - ~~DB-BOOT-001~~ -> `python scripts/init_db.py` laeuft jetzt auf leerer Postgres-DB bis `head`; `scripts/check_required_domain_schemas.py` prueft die Mehr-Domaenen-Struktur; `scripts/smoke_first_install_docker.ps1/.sh` liefern den reproduzierbaren Docker-Smoke.

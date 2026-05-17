@@ -4,14 +4,15 @@ Silo capacity and virtual lot endpoints (AGRAR-SILO-01).
 
 from __future__ import annotations
 
-from datetime import datetime
+import json
+from datetime import datetime, timezone
 from decimal import Decimal
 from typing import Optional
 from app.core.uuid7 import uuid7
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel, Field
-from sqlalchemy import func
+from sqlalchemy import func, text
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
@@ -537,3 +538,190 @@ async def create_silo_lot_movement(
             "lot_count": int(snapshot.lot_count),
         },
     }
+
+
+# ============================================================
+# SILO-LEER-001 — Silo-Leermeldung
+# ============================================================
+
+class LeermeldungCreate(BaseModel):
+    wiegung_id: Optional[str] = None
+    schwund_kg: float = Field(..., ge=0, description="Schwund in kg")
+    grund: str = Field(..., min_length=1)
+    bearbeiter: str = Field(..., min_length=1)
+
+
+def _silo_columns(db: Session) -> set[str]:
+    """Return set of column names for agrar_silos table."""
+    rows = db.execute(
+        text(
+            "SELECT column_name FROM information_schema.columns "
+            "WHERE table_name = 'agrar_silos'"
+        )
+    ).fetchall()
+    return {r[0] for r in rows}
+
+
+@router.post("/silos/{silo_id}/leermeldung", response_model=dict, status_code=201)
+async def create_leermeldung(
+    silo_id: str,
+    payload: LeermeldungCreate,
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+) -> dict:
+    """SILO-LEER-001: Silo vollständig leeren mit Schwundbuchung."""
+    # 1. Prüfe Silo
+    silo = db.query(Silo).filter(Silo.id == silo_id, Silo.tenant_id == tenant_id).first()
+    if not silo:
+        raise HTTPException(status_code=404, detail="Silo nicht gefunden")
+    if getattr(silo, "status", None) not in (None, "active", "AKTIV"):
+        raise HTTPException(status_code=422, detail="Silo ist nicht aktiv")
+
+    # 2. Offene Lots prüfen
+    open_lot_count = (
+        db.query(func.count(SiloLot.id))
+        .filter(
+            SiloLot.silo_id == silo_id,
+            SiloLot.tenant_id == tenant_id,
+            SiloLot.status.notin_(["closed", "ABGESCHLOSSEN", "LEER"]),
+        )
+        .scalar()
+    )
+    if open_lot_count and open_lot_count > 0:
+        raise HTTPException(status_code=422, detail="Offene Lots vorhanden")
+
+    # 3. Physischer Restbestand (in tons, convert to kg)
+    restbestand_row = db.execute(
+        text(
+            "SELECT COALESCE(SUM(quantity_tons), 0) FROM agrar_silo_lots "
+            "WHERE silo_id = :silo_id "
+            "AND status NOT IN ('closed', 'ABGESCHLOSSEN', 'LEER')"
+        ),
+        {"silo_id": silo_id},
+    ).fetchone()
+    restbestand_kg = float(restbestand_row[0]) * 1000 if restbestand_row else 0.0
+
+    # 4. Schwund-Deckung prüfen
+    if restbestand_kg > 0 and payload.schwund_kg < restbestand_kg:
+        raise HTTPException(
+            status_code=422,
+            detail=f"Schwund deckt Restbestand nicht vollständig (Restbestand: {restbestand_kg:.1f} kg)",
+        )
+
+    # 5. Silo-Status auf LEER setzen
+    leermeldung_id = str(uuid7())
+    now_iso = datetime.now(timezone.utc).isoformat()
+    cols = _silo_columns(db)
+
+    if "leermeldung_meta" in cols:
+        meta = {
+            "leermeldung_id": leermeldung_id,
+            "wiegung_id": payload.wiegung_id,
+            "schwund_kg": payload.schwund_kg,
+            "grund": payload.grund,
+            "bearbeiter": payload.bearbeiter,
+            "timestamp": now_iso,
+        }
+        db.execute(
+            text("UPDATE agrar_silos SET leermeldung_meta = :meta WHERE id = :id"),
+            {"meta": json.dumps(meta), "id": silo_id},
+        )
+    if "status" in cols:
+        db.execute(
+            text("UPDATE agrar_silos SET status = 'LEER' WHERE id = :id"),
+            {"id": silo_id},
+        )
+    optional_updates = {
+        "last_empty_at": now_iso,
+        "last_empty_wiegung_id": payload.wiegung_id,
+        "last_empty_schwund_kg": payload.schwund_kg,
+        "last_empty_grund": payload.grund,
+        "last_empty_by": payload.bearbeiter,
+    }
+    for col, val in optional_updates.items():
+        if col in cols and val is not None:
+            db.execute(
+                text(f"UPDATE agrar_silos SET {col} = :{col} WHERE id = :id"),  # noqa: S608
+                {col: val, "id": silo_id},
+            )
+
+    # 6. Schwundbuchung als SiloLotMovement
+    any_lot = (
+        db.query(SiloLot)
+        .filter(SiloLot.silo_id == silo_id, SiloLot.tenant_id == tenant_id)
+        .first()
+    )
+    if any_lot and payload.schwund_kg > 0:
+        schwund_tons = Decimal(str(payload.schwund_kg)) / Decimal("1000")
+        movement = SiloLotMovement(
+            id=uuid7(),
+            silo_lot_id=any_lot.id,
+            movement_type="SCHWUND",
+            quantity_tons=schwund_tons,
+            note=f"Leermeldung {leermeldung_id}: {payload.grund}",
+            tenant_id=tenant_id,
+        )
+        db.add(movement)
+
+    # 7. Verbleibende aktive Lots auf LEER setzen
+    db.query(SiloLot).filter(
+        SiloLot.silo_id == silo_id,
+        SiloLot.tenant_id == tenant_id,
+        SiloLot.status.notin_(["closed", "ABGESCHLOSSEN", "LEER"]),
+    ).update({"status": "LEER"}, synchronize_session=False)
+
+    _create_snapshot(db, silo_id, tenant_id)
+    db.commit()
+
+    return {
+        "silo_id": silo_id,
+        "status": "LEER",
+        "schwund_kg": payload.schwund_kg,
+        "wiegung_id": payload.wiegung_id,
+        "leermeldung_id": leermeldung_id,
+        "message": "Silo erfolgreich geleert",
+    }
+
+
+@router.get("/silos/{silo_id}/leermeldungen", response_model=list)
+async def list_leermeldungen(
+    silo_id: str,
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+) -> list:
+    """SILO-LEER-001: Leermeldungs-Historie für ein Silo."""
+    silo = db.query(Silo).filter(Silo.id == silo_id, Silo.tenant_id == tenant_id).first()
+    if not silo:
+        raise HTTPException(status_code=404, detail="Silo nicht gefunden")
+
+    cols = _silo_columns(db)
+
+    # Aus leermeldung_meta JSONB falls vorhanden
+    if "leermeldung_meta" in cols:
+        row = db.execute(
+            text("SELECT leermeldung_meta FROM agrar_silos WHERE id = :id"),
+            {"id": silo_id},
+        ).fetchone()
+        if row and row[0]:
+            meta = row[0] if isinstance(row[0], dict) else json.loads(row[0])
+            return [meta]
+
+    # Fallback: SCHWUND-Movements
+    movements = (
+        db.query(SiloLotMovement)
+        .join(SiloLot, SiloLotMovement.silo_lot_id == SiloLot.id)
+        .filter(
+            SiloLot.silo_id == silo_id,
+            SiloLot.tenant_id == tenant_id,
+            SiloLotMovement.movement_type == "SCHWUND",
+        )
+        .all()
+    )
+    return [
+        {
+            "movement_id": str(m.id),
+            "schwund_tons": _to_float(m.quantity_tons),
+            "note": m.note,
+        }
+        for m in movements
+    ]

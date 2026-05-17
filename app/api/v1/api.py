@@ -151,6 +151,9 @@ from app.api.v1.endpoints import (
     kasse_tagesabschluss,
 )
 
+# ROHWARE-SCHEMA-001
+from app.api.v1.endpoints import rohware_schema
+
 # Wave 6-9 Process-Kernel-Endpoints (agrar-p0, supplier, wave-7, wave-9)
 from app.api.v1.endpoints import (
     agrar_p0,
@@ -1252,6 +1255,13 @@ api_router.include_router(
     gdpr.router,
     prefix="/gdpr",
     tags=["gdpr", "compliance"],
+)
+
+# ROHWARE-SCHEMA-001 — Abrechnungsschema-Katalog
+api_router.include_router(
+    rohware_schema.router,
+    prefix="/rohware/schemata",
+    tags=["agrar", "rohware", "schemata"],
 )
 
 # Process Kernel: Domain-Mutationen fuer Business-Commands registrieren
