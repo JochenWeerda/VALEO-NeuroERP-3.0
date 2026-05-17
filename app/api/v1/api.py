@@ -143,7 +143,7 @@ from app.api.v1.endpoints import (
     training,
     personal,
     compliance_dsgvo,
-    compliance_whistleblower_lksg,
+    compliance_whistleblower,
     analytics,
     flow_spines,
     commodity_positions,
@@ -160,7 +160,7 @@ from app.api.v1.endpoints import (
     strecke,
     produktion_mischfutter,
     kasse_tagesabschluss,
-    pos_payments_promotions,
+    pos_payments,
     central_contracts,
     futtermittel_rohwaren,
     futtermittel_rezepte,
@@ -1168,7 +1168,7 @@ api_router.include_router(
 )
 
 api_router.include_router(
-    compliance_whistleblower_lksg.router,
+    compliance_whistleblower.router,
     tags=["compliance", "whistleblower", "lksg"]
 )
 
@@ -1361,7 +1361,7 @@ api_router.include_router(
 )
 
 api_router.include_router(
-    pos_payments_promotions.router,
+    pos_payments.router,
     tags=["pos", "payments", "promotions"],
 )
 
