@@ -22,10 +22,15 @@ from app.api.v1.endpoints import (
     farm_profiles,
     opportunities,
     cases,
+    crm_360,
+    crm_account_hierarchy,
     accounts,
     journal_entries,
     articles,
     sales_orders,
+    sales_blanket_orders,
+    credit_management,
+    collective_documents,
     sales_offers,
     docflow,
     warehouses,
@@ -121,6 +126,10 @@ from app.api.v1.endpoints import (
     nawaro_raps,
     einkauf_lieferschein,
     einkauf_bestellvorschlag,
+    purchase_invoice_verification,
+    ers_settlement,
+    rfq,
+    einkauf_kpis,
     admin_monitoring,
     admin_core,
     data_quality,
@@ -133,6 +142,8 @@ from app.api.v1.endpoints import (
     controlling,
     training,
     personal,
+    compliance_dsgvo,
+    compliance_whistleblower_lksg,
     analytics,
     flow_spines,
     commodity_positions,
@@ -149,6 +160,10 @@ from app.api.v1.endpoints import (
     strecke,
     produktion_mischfutter,
     kasse_tagesabschluss,
+    pos_payments_promotions,
+    central_contracts,
+    futtermittel_rohwaren,
+    futtermittel_rezepte,
 )
 
 # ROHWARE-SCHEMA-001
@@ -174,6 +189,9 @@ from app.api.v1.endpoints import knowledge_api
 
 # Lane B — Neuro State Graph + Confidence Ledger
 from app.api.v1.endpoints import neuro_state_graph_api
+
+# Finance — Anlagenbuchhaltung, Budgetierung, Liquiditätsplanung
+from app.api.v1.endpoints import asset_accounting, budget_planning, liquidity_planning
 
 # Import domain routers
 from app.domains.agrar.api import psm, psm_proplanta
@@ -312,6 +330,24 @@ api_router.include_router(
 )
 
 api_router.include_router(
+    sales_blanket_orders.router,
+    prefix="/sales/blanket-orders",
+    tags=["sales", "blanket-orders"]
+)
+
+api_router.include_router(
+    credit_management.router,
+    prefix="/sales/credit-management",
+    tags=["sales", "credit-management"]
+)
+
+api_router.include_router(
+    collective_documents.router,
+    prefix="/sales/collective-documents",
+    tags=["sales", "collective-documents"]
+)
+
+api_router.include_router(
     sales_offers.router,
     prefix="/sales/offers",
     tags=["sales", "offers"]
@@ -389,6 +425,18 @@ api_router.include_router(
     cases.router,
     prefix="/crm/cases",
     tags=["crm", "cases"]
+)
+
+api_router.include_router(
+    crm_360.router,
+    prefix="/crm/customers",
+    tags=["crm", "customers", "360"]
+)
+
+api_router.include_router(
+    crm_account_hierarchy.router,
+    prefix="/crm/accounts",
+    tags=["crm", "accounts"]
 )
 
 api_router.include_router(
@@ -579,6 +627,25 @@ api_router.include_router(
     prefix="/finance",
     tags=["finance", "actions"]
 )
+
+# Finance — Anlagenbuchhaltung
+api_router.include_router(
+    asset_accounting.router,
+    tags=["finance", "asset-accounting"],
+)
+
+# Finance — Budgetierung / Forecast
+api_router.include_router(
+    budget_planning.router,
+    tags=["finance", "budget-planning"],
+)
+
+# Finance — Liquiditätsplanung
+api_router.include_router(
+    liquidity_planning.router,
+    tags=["finance", "liquidity"],
+)
+
 api_router.include_router(
     lohn_connector.router,
     prefix="/finance",
@@ -1024,6 +1091,18 @@ api_router.include_router(
     tours.router
 )
 
+# Logistik – Tourenplanung-Engine + Track&Trace + ePOD + Statistik
+from app.api.v1.endpoints import logistics_tours, logistics_freight  # noqa: E402
+
+api_router.include_router(
+    logistics_tours.router,
+    tags=["logistik", "tourenplanung"],
+)
+api_router.include_router(
+    logistics_freight.router,
+    tags=["logistik", "frachtkosten"],
+)
+
 # Sustainability runtime API (BVL/Climatiq/FAOSTAT)
 api_router.include_router(
     sustainability.router
@@ -1044,8 +1123,33 @@ api_router.include_router(
 )
 
 api_router.include_router(
+    purchase_invoice_verification.router,
+    tags=["einkauf", "3-wege-match"]
+)
+
+api_router.include_router(
+    ers_settlement.router,
+    tags=["einkauf", "ers"]
+)
+
+api_router.include_router(
+    rfq.router,
+    tags=["einkauf", "rfq"]
+)
+
+api_router.include_router(
+    einkauf_kpis.router,
+    tags=["einkauf", "kpi"]
+)
+
+api_router.include_router(
     controlling.router,
     tags=["controlling", "kpi", "dashboard"]
+)
+
+api_router.include_router(
+    central_contracts.router,
+    tags=["contracts", "obligations", "renewal"]
 )
 
 api_router.include_router(
@@ -1056,6 +1160,16 @@ api_router.include_router(
 api_router.include_router(
     personal.router,
     tags=["personal", "hr"]
+)
+
+api_router.include_router(
+    compliance_dsgvo.router,
+    tags=["compliance", "dsgvo", "erasure"]
+)
+
+api_router.include_router(
+    compliance_whistleblower_lksg.router,
+    tags=["compliance", "whistleblower", "lksg"]
 )
 
 # Wave 6 — Agrar-P0, Supplier-Portal, Silo-Operations, Contract-Pricing
@@ -1234,6 +1348,21 @@ api_router.include_router(
     futter_stamm.router,
     prefix="/futter",
     tags=["futter", "stammdaten"],
+)
+
+api_router.include_router(
+    futtermittel_rohwaren.router,
+    tags=["futtermittel", "rohwaren"],
+)
+
+api_router.include_router(
+    futtermittel_rezepte.router,
+    tags=["futtermittel", "rezepte"],
+)
+
+api_router.include_router(
+    pos_payments_promotions.router,
+    tags=["pos", "payments", "promotions"],
 )
 
 # Schaeden (Schadenmeldung + Versicherungen)

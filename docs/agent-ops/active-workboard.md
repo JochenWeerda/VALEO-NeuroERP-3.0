@@ -2,6 +2,18 @@
 
 Stand: `2026-05-12`
 
+## ENTERPRISE-DOMAIN-CLOSURE-001
+
+**Von:** Codex
+**Owner:** Codex
+**Stand:** abgeschlossen 2026-05-17
+**Ziel des Slices:** Von parallelen Agents begonnene SAP-/Oracle-/Odoo-/AMIC-Domain-Closure uebernehmen, fehlende Router-Registrierung und nicht gelieferte POS-/Compliance-Teile schliessen.
+**Dateibesitz:** `app/api/v1/api.py`, `app/api/v1/endpoints/*asset_accounting.py`, `*budget_planning.py`, `*liquidity_planning.py`, `*crm_360.py`, `*crm_account_hierarchy.py`, `*logistics_tours.py`, `*logistics_freight.py`, `*purchase_invoice_verification.py`, `*ers_settlement.py`, `*rfq.py`, `*einkauf_kpis.py`, `*sales_blanket_orders.py`, `*credit_management.py`, `*collective_documents.py`, `*central_contracts.py`, `*futtermittel_rohwaren.py`, `*futtermittel_rezepte.py`, `*compliance_dsgvo.py`, `*compliance_whistleblower_lksg.py`, `*pos_payments_promotions.py`, `app/api/v1/endpoints/personal.py`, `app/api/v1/endpoints/cases.py`, `app/api/v1/endpoints/opportunities.py`, `app/api/v1/endpoints/warehouse_wms.py`, `tests/test_*domain*`, `tests/test_*gap*`, `docs/project-context/domain-depth-plan-2026-05-17.md`, `docs/project-context/open-gaps-and-known-issues.md`
+**Abnahmekriterien:** Alle erzeugten Domain-Endpunkte sind ueber `/api/v1/...` erreichbar; HRM-Arbeitszeitkonto nutzt `domain_hr.time_entries.entry_date/hours`; POS Split-Payment und Promotions-Preview existieren; Whistleblower und LkSG-API-Vertraege existieren; fokussierte Tests und Doku-/Workboard-Checks sind gruen.
+**Erledigt:** Router-Registrierungen fuer CRM, Finance, Logistik, Einkauf, Verkauf/Kontrakte, Futtermittel, HRM, Compliance und POS ergaenzt; `warehouse_wms.py` auf kanonischen Tenant-Dependency-Import korrigiert; Logistik-Statistik gegen nicht-numerische DB-/Mockwerte gehaertet; HRM-Org-Subtree und Arbeitszeitkonto fachlich korrigiert; POS Split-Payment/Promotions und Whistleblower/LkSG nachgeliefert; Domain-Depth-Plan und Open-Gaps aktualisiert.
+**Checks:** `pytest tests/test_crm_pipeline_360.py tests/test_einkauf_3way_match_ers_rfq.py tests/test_finance_asset_budget_liquidity.py tests/test_logistics_tour_freight.py tests/test_major_domain_router_registration.py tests/test_personal_major_gap_extensions.py tests/test_compliance_pos_gap_extensions.py tests/test_process_kernel_wave100_settlement_completion.py tests/test_process_kernel_wave31_dq_extended_write_paths.py -q --no-cov --tb=short`; `python scripts/agent_workboard_supervisor.py validate`; `node scripts/docs-governance-check.cjs`; `node scripts/docs-markdown-check.cjs docs/project-context/open-gaps-and-known-issues.md docs/project-context/domain-depth-plan-2026-05-17.md`; `git diff --check`
+**Offene Risiken:** Echte externe Abnahmen bleiben ausserhalb des Repos: Steuerberater-/DATEV-Mapping, DMS-Live-Probe, TSE-/DSFinV-K-Pruefwerkzeugvalidierung, E-Signatur/Providerzugang und UAT-Unterschriften mit Produktivdaten.
+
 ## ERP-FINANZ-ORDERS-DOC-001
 
 **Von:** Codex

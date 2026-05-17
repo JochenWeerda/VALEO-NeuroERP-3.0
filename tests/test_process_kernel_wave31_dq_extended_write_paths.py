@@ -24,6 +24,7 @@ from app.api.v1.endpoints.harvest_acceptance import (
 )
 
 customers_endpoint = importlib.import_module("app.api.v1.endpoints.customers")
+customer_service_module = importlib.import_module("app.services.customer_service")
 
 
 class FailQueryDB:
@@ -98,7 +99,7 @@ def test_create_customer_rejects_invalid_country_before_crm_call(monkeypatch: py
     async def _fail(*args, **kwargs):
         raise AssertionError("crm create should not happen before DQ validation")
 
-    monkeypatch.setattr(customers_endpoint, "crm_create_customer", _fail)
+    monkeypatch.setattr(customer_service_module, "_crm_create", _fail)
 
     payload = CustomerCreate(
         tenant_id=UUID("00000000-0000-0000-0000-000000000001"),
@@ -118,7 +119,7 @@ def test_update_customer_rejects_invalid_country_before_crm_call(monkeypatch: py
     async def _fail(*args, **kwargs):
         raise AssertionError("crm update should not happen before DQ validation")
 
-    monkeypatch.setattr(customers_endpoint, "crm_update_customer", _fail)
+    monkeypatch.setattr(customer_service_module, "_crm_update", _fail)
 
     with pytest.raises(HTTPException) as exc:
         asyncio.run(update_customer("cust-1", CustomerUpdate(country="XX")))
