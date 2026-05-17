@@ -540,3 +540,169 @@ async def update_kalibrierung(
     except Exception as e:
         db.rollback()
         raise HTTPException(status_code=503, detail=f"DB-Fehler: {e}")
+
+
+# ===========================================================================
+# DUAL-WIEGUNG — Doppelwiegung (Brutto/Tara als zwei separate Wiegevorgänge)
+# ===========================================================================
+
+import json as _json
+
+
+class WiegungErweitert(BaseModel):
+    waage_id: str
+    ident_nr: Optional[str] = None
+    wiegung1: Optional[float] = None
+    wiegung2: Optional[float] = None
+    netto: Optional[float] = None
+    gosse: Optional[int] = None
+    muster_nr: Optional[str] = None
+    handwiegung: bool = False
+    export_flag: bool = False
+    zielschein_typ: Optional[str] = None  # VL=Verkaufslieferschein, EL=Eingangslieferschein
+
+
+class WiegescheinMitDoppelwiegung(BaseModel):
+    # Core Wiegevorgang fields (flexible dict-based submission)
+    waage_id: Optional[str] = None
+    lieferant_id: Optional[str] = None
+    artikel_id: Optional[str] = None
+    partie_id: Optional[str] = None
+    # Extended dual-weighing block
+    wiegung_erweitert: Optional[WiegungErweitert] = None
+    zielscheinfestgelegt: bool = False
+    disponr: Optional[str] = None
+    charge_nr: Optional[str] = None
+    kfz_kennzeichen: Optional[str] = None
+
+
+@router.post("/wiegungen/dual", response_model=dict, status_code=201)
+async def create_dual_wiegung(
+    payload: WiegescheinMitDoppelwiegung,
+    db: Session = Depends(get_db),
+):
+    """Doppelwiegung: Nimmt Brutto- und Tara-Wiegung entgegen und berechnet Netto automatisch."""
+    ext = payload.wiegung_erweitert
+    netto: Optional[float] = None
+    gosse: Optional[int] = None
+    zielschein_typ: Optional[str] = None
+
+    if ext:
+        # Compute netto from the two weighings if both provided
+        if ext.wiegung1 is not None and ext.wiegung2 is not None:
+            netto = abs(ext.wiegung1 - ext.wiegung2)
+            # Propagate back into model (for storage)
+            ext.netto = netto
+        elif ext.netto is not None:
+            netto = ext.netto
+        gosse = ext.gosse
+        zielschein_typ = ext.zielschein_typ
+
+    new_id = str(uuid.uuid4())
+    extended_data = ext.model_dump() if ext else {}
+    extended_data["zielscheinfestgelegt"] = payload.zielscheinfestgelegt
+    extended_data["disponr"] = payload.disponr
+    extended_data["charge_nr"] = payload.charge_nr
+    extended_data["kfz_kennzeichen"] = payload.kfz_kennzeichen
+
+    # Try inserting with native columns first; fall back to JSONB extended_data column
+    try:
+        db.execute(
+            text(
+                """
+                INSERT INTO domain_agrar.wiegungen (
+                    id, waage_id, lieferant_id, artikel_id, partie_id,
+                    netto_kg, gosse, zielschein_typ, kfz_kennzeichen,
+                    extended_data, created_at
+                ) VALUES (
+                    :id, :waage_id, :lieferant_id, :artikel_id, :partie_id,
+                    :netto_kg, :gosse, :zielschein_typ, :kfz_kennzeichen,
+                    :extended_data::jsonb, now()
+                )
+                """
+            ),
+            {
+                "id": new_id,
+                "waage_id": payload.waage_id or (ext.waage_id if ext else None),
+                "lieferant_id": payload.lieferant_id,
+                "artikel_id": payload.artikel_id,
+                "partie_id": payload.partie_id,
+                "netto_kg": netto,
+                "gosse": gosse,
+                "zielschein_typ": zielschein_typ,
+                "kfz_kennzeichen": payload.kfz_kennzeichen,
+                "extended_data": _json.dumps(extended_data),
+            },
+        )
+        db.commit()
+    except Exception as e:
+        db.rollback()
+        err_str = str(e).lower()
+        # Column missing → fallback: store everything as JSONB in extended_data column
+        if "column" in err_str or "does not exist" in err_str or "relation" in err_str:
+            try:
+                db.execute(
+                    text(
+                        """
+                        INSERT INTO domain_agrar.wiegungen (id, extended_data, created_at)
+                        VALUES (:id, :extended_data::jsonb, now())
+                        """
+                    ),
+                    {"id": new_id, "extended_data": _json.dumps(extended_data)},
+                )
+                db.commit()
+            except Exception as e2:
+                db.rollback()
+                raise HTTPException(
+                    status_code=503,
+                    detail=f"DB-Fehler (JSONB-Fallback): {e2}",
+                    headers={"X-Migration-Hint": "Run: alembic upgrade head (domain_agrar.wiegungen fehlt)"},
+                )
+        else:
+            raise HTTPException(
+                status_code=503,
+                detail=f"DB-Fehler: {e}",
+                headers={"X-Migration-Hint": "Run: alembic upgrade head"},
+            )
+
+    return {
+        "id": new_id,
+        "netto": netto,
+        "gosse": gosse,
+        "zielschein_typ": zielschein_typ,
+        "status": "created",
+    }
+
+
+@router.get("/wiegungen/{wiegeschein_id}/extended", response_model=dict)
+async def get_wiegung_extended(wiegeschein_id: str, db: Session = Depends(get_db)):
+    """Gibt erweiterte Daten einer Wiegung zurück inkl. Doppelwiegungsinformationen."""
+    try:
+        row = db.execute(
+            text(
+                "SELECT id, waage_id, netto_kg, gosse, zielschein_typ, "
+                "kfz_kennzeichen, extended_data, created_at "
+                "FROM domain_agrar.wiegungen WHERE id = :id"
+            ),
+            {"id": wiegeschein_id},
+        ).fetchone()
+    except Exception as e:
+        raise HTTPException(
+            status_code=503,
+            detail=f"DB-Fehler: {e}",
+            headers={"X-Migration-Hint": "Run: alembic upgrade head"},
+        )
+
+    if row is None:
+        raise HTTPException(status_code=404, detail=f"Wiegung {wiegeschein_id} nicht gefunden")
+
+    return {
+        "id": row[0],
+        "waage_id": row[1],
+        "netto_kg": float(row[2]) if row[2] is not None else None,
+        "gosse": row[3],
+        "zielschein_typ": row[4],
+        "kfz_kennzeichen": row[5],
+        "extended_data": row[6] or {},
+        "created_at": row[7].isoformat() if row[7] else None,
+    }

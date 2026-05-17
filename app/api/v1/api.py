@@ -166,6 +166,14 @@ from app.api.v1.endpoints import (
     futtermittel_rezepte,
 )
 
+# AMIC Agrarhandel — Kontrakt-Klassen, Hedging, E-Rechnung, Preiskalkulation
+from app.api.v1.endpoints import (
+    kontrakt_klassen,
+    kontrakt_hedging,
+    erechnung_import,
+    price_calculation,
+)
+
 # ROHWARE-SCHEMA-001
 from app.api.v1.endpoints import rohware_schema
 
@@ -1392,6 +1400,34 @@ api_router.include_router(
     prefix="/rohware/schemata",
     tags=["agrar", "rohware", "schemata"],
 )
+
+# AMIC Agrarhandel — Kontrakt-Klassen
+api_router.include_router(kontrakt_klassen.router)
+
+# AMIC Agrarhandel — Kontrakt-Hedging / MATIF
+api_router.include_router(kontrakt_hedging.router)
+
+# E-Rechnung Import (ZUGFeRD / XRechnung)
+api_router.include_router(erechnung_import.router)
+
+# Dynamische Preis-Kalkulations-Engine
+api_router.include_router(price_calculation.router)
+
+# Sanctions / Compliance
+from app.api.v1.endpoints import sanctions_compliance  # noqa: E402
+api_router.include_router(sanctions_compliance.router)
+
+# Genossenschaft — Mitglieder- und Anteilsverwaltung
+from app.api.v1.endpoints import genossenschaft  # noqa: E402
+api_router.include_router(genossenschaft.router)
+
+# Gelangensbestätigung §17a UStDV
+from app.api.v1.endpoints import gelangensbestaetigung  # noqa: E402
+api_router.include_router(gelangensbestaetigung.router)
+
+# Intrastat — EU-Handelsstatistik
+from app.api.v1.endpoints import intrastat  # noqa: E402
+api_router.include_router(intrastat.router)
 
 # Process Kernel: Domain-Mutationen fuer Business-Commands registrieren
 from app.services.command_handlers_procurement import register_command_mutations

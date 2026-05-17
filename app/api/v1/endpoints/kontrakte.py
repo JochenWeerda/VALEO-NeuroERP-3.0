@@ -1007,7 +1007,7 @@ async def lookup_verkauf_kontrakte(
 # ---------------------------------------------------------------------------
 
 @router.get("/positionen")
-def get_positionen(
+def get_positionen(  # noqa: E302
     article_ids: Optional[str] = Query(None, description="Komma-separierte Artikel-IDs"),
     include_done: bool = Query(False, description="Erledigte Kontrakte einbeziehen"),
     db: Session = Depends(get_db),
@@ -1025,3 +1025,289 @@ def get_positionen(
     service = KontraktPositionService(db)
     summary = service.compute_positions(tenant_id, article_ids=ids, include_done=include_done)
     return summary.to_dict()
+
+
+# ===========================================================================
+# KONTRAKT-DISPOSITION — Disposition als Sub-Ressource eines Kontrakts
+# ===========================================================================
+
+import uuid as _uuid_mod
+import json as _json_mod
+
+from sqlalchemy import text as _text
+
+
+class DispositionCreate(BaseModel):
+    kontrakt_nr: str
+    kontrakt_pos_nr: int = 1
+    geplantes_lieferdatum: Optional[str] = None
+    lieferdatum: Optional[str] = None
+    menge: float
+    freigabe: bool = False
+    wiegeschein_nr: Optional[str] = None
+    bemerkung: Optional[str] = None
+
+
+class DispositionOut(DispositionCreate):
+    id: str
+    disposition_nr: int
+    status: str  # OFFEN / FREIGEGEBEN / GELIEFERT / STORNIERT
+
+
+def _ensure_disposition_table(db: Session) -> None:
+    """Erstellt domain_agrar.kontrakt_dispositionen falls die Tabelle fehlt."""
+    try:
+        db.execute(
+            _text(
+                """
+                CREATE TABLE IF NOT EXISTS domain_agrar.kontrakt_dispositionen (
+                    id               TEXT PRIMARY KEY,
+                    kontrakt_id      TEXT NOT NULL,
+                    disposition_nr   INTEGER NOT NULL,
+                    kontrakt_nr      TEXT NOT NULL,
+                    kontrakt_pos_nr  INTEGER NOT NULL DEFAULT 1,
+                    geplantes_lieferdatum TEXT,
+                    lieferdatum      TEXT,
+                    menge            NUMERIC(18,3) NOT NULL,
+                    freigabe         BOOLEAN NOT NULL DEFAULT FALSE,
+                    wiegeschein_nr   TEXT,
+                    bemerkung        TEXT,
+                    status           TEXT NOT NULL DEFAULT 'OFFEN',
+                    created_at       TIMESTAMPTZ NOT NULL DEFAULT now(),
+                    updated_at       TIMESTAMPTZ NOT NULL DEFAULT now()
+                )
+                """
+            )
+        )
+        db.commit()
+    except Exception:
+        db.rollback()
+
+
+@router.get("/{kontrakt_id}/dispositionen", response_model=list)
+async def list_dispositionen(
+    kontrakt_id: str,
+    db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
+    user: User = Depends(get_current_user),
+):
+    """Listet alle Dispositionen zu einem Kontrakt."""
+    _require_roles(
+        user,
+        KontraktSecurityService.ROLE_LESEN,
+        KontraktSecurityService.ROLE_BEARBEITEN,
+        KontraktSecurityService.ROLE_ADMIN,
+    )
+    try:
+        rows = db.execute(
+            _text(
+                "SELECT id, kontrakt_id, disposition_nr, kontrakt_nr, kontrakt_pos_nr, "
+                "geplantes_lieferdatum, lieferdatum, menge, freigabe, wiegeschein_nr, "
+                "bemerkung, status, created_at, updated_at "
+                "FROM domain_agrar.kontrakt_dispositionen "
+                "WHERE kontrakt_id = :kid ORDER BY disposition_nr ASC"
+            ),
+            {"kid": kontrakt_id},
+        ).fetchall()
+    except Exception as e:
+        err = str(e).lower()
+        if "relation" in err or "does not exist" in err:
+            return []
+        raise HTTPException(
+            status_code=503,
+            detail=f"DB-Fehler: {e}",
+            headers={"X-Migration-Hint": "Run: alembic upgrade head (kontrakt_dispositionen fehlt)"},
+        )
+    return [
+        {
+            "id": r[0],
+            "kontrakt_id": r[1],
+            "disposition_nr": r[2],
+            "kontrakt_nr": r[3],
+            "kontrakt_pos_nr": r[4],
+            "geplantes_lieferdatum": r[5],
+            "lieferdatum": r[6],
+            "menge": float(r[7]) if r[7] is not None else None,
+            "freigabe": bool(r[8]),
+            "wiegeschein_nr": r[9],
+            "bemerkung": r[10],
+            "status": r[11],
+            "created_at": r[12].isoformat() if r[12] else None,
+            "updated_at": r[13].isoformat() if r[13] else None,
+        }
+        for r in rows
+    ]
+
+
+@router.post("/{kontrakt_id}/dispositionen", response_model=dict, status_code=201)
+async def create_disposition(
+    kontrakt_id: str,
+    payload: DispositionCreate,
+    db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
+    user: User = Depends(get_current_user),
+):
+    """Legt eine neue Disposition zu einem Kontrakt an."""
+    _require_roles(user, KontraktSecurityService.ROLE_BEARBEITEN, KontraktSecurityService.ROLE_ADMIN)
+
+    _ensure_disposition_table(db)
+
+    new_id = str(_uuid_mod.uuid4())
+    try:
+        db.execute(
+            _text(
+                """
+                INSERT INTO domain_agrar.kontrakt_dispositionen (
+                    id, kontrakt_id, disposition_nr, kontrakt_nr, kontrakt_pos_nr,
+                    geplantes_lieferdatum, lieferdatum, menge, freigabe,
+                    wiegeschein_nr, bemerkung, status, created_at, updated_at
+                ) VALUES (
+                    :id, :kontrakt_id,
+                    COALESCE((SELECT MAX(disposition_nr) FROM domain_agrar.kontrakt_dispositionen
+                               WHERE kontrakt_id = :kontrakt_id), 0) + 1,
+                    :kontrakt_nr, :kontrakt_pos_nr,
+                    :geplantes_lieferdatum, :lieferdatum, :menge, :freigabe,
+                    :wiegeschein_nr, :bemerkung,
+                    CASE WHEN :freigabe THEN 'FREIGEGEBEN' ELSE 'OFFEN' END,
+                    now(), now()
+                )
+                """
+            ),
+            {
+                "id": new_id,
+                "kontrakt_id": kontrakt_id,
+                "kontrakt_nr": payload.kontrakt_nr,
+                "kontrakt_pos_nr": payload.kontrakt_pos_nr,
+                "geplantes_lieferdatum": payload.geplantes_lieferdatum,
+                "lieferdatum": payload.lieferdatum,
+                "menge": payload.menge,
+                "freigabe": payload.freigabe,
+                "wiegeschein_nr": payload.wiegeschein_nr,
+                "bemerkung": payload.bemerkung,
+            },
+        )
+        db.commit()
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(
+            status_code=503,
+            detail=f"DB-Fehler: {e}",
+            headers={"X-Migration-Hint": "Run: alembic upgrade head"},
+        )
+
+    # Fetch the created record to return disposition_nr
+    row = db.execute(
+        _text(
+            "SELECT id, disposition_nr, status FROM domain_agrar.kontrakt_dispositionen WHERE id = :id"
+        ),
+        {"id": new_id},
+    ).fetchone()
+    return {
+        "id": row[0] if row else new_id,
+        "kontrakt_id": kontrakt_id,
+        "disposition_nr": row[1] if row else 1,
+        "kontrakt_nr": payload.kontrakt_nr,
+        "kontrakt_pos_nr": payload.kontrakt_pos_nr,
+        "menge": payload.menge,
+        "freigabe": payload.freigabe,
+        "status": row[2] if row else ("FREIGEGEBEN" if payload.freigabe else "OFFEN"),
+    }
+
+
+@router.patch("/{kontrakt_id}/dispositionen/{disp_id}/freigabe", response_model=dict)
+async def freigabe_disposition(
+    kontrakt_id: str,
+    disp_id: str,
+    db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
+    user: User = Depends(get_current_user),
+):
+    """Setzt freigabe=true und status=FREIGEGEBEN für eine Disposition."""
+    _require_roles(user, KontraktSecurityService.ROLE_BEARBEITEN, KontraktSecurityService.ROLE_ADMIN)
+    try:
+        result = db.execute(
+            _text(
+                "UPDATE domain_agrar.kontrakt_dispositionen "
+                "SET freigabe = true, status = 'FREIGEGEBEN', updated_at = now() "
+                "WHERE id = :id AND kontrakt_id = :kid "
+                "RETURNING id, status"
+            ),
+            {"id": disp_id, "kid": kontrakt_id},
+        ).fetchone()
+        db.commit()
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=503, detail=f"DB-Fehler: {e}")
+    if result is None:
+        raise HTTPException(status_code=404, detail=f"Disposition {disp_id} nicht gefunden")
+    return {"id": result[0], "status": result[1]}
+
+
+@router.patch("/{kontrakt_id}/dispositionen/{disp_id}/geliefert", response_model=dict)
+async def geliefert_disposition(
+    kontrakt_id: str,
+    disp_id: str,
+    wiegeschein_nr: Optional[str] = Body(default=None, embed=True),
+    db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
+    user: User = Depends(get_current_user),
+):
+    """Setzt status=GELIEFERT und optional wiegeschein_nr für eine Disposition."""
+    _require_roles(user, KontraktSecurityService.ROLE_BEARBEITEN, KontraktSecurityService.ROLE_ADMIN)
+    try:
+        if wiegeschein_nr:
+            result = db.execute(
+                _text(
+                    "UPDATE domain_agrar.kontrakt_dispositionen "
+                    "SET status = 'GELIEFERT', wiegeschein_nr = :ws, updated_at = now() "
+                    "WHERE id = :id AND kontrakt_id = :kid "
+                    "RETURNING id, status, wiegeschein_nr"
+                ),
+                {"id": disp_id, "kid": kontrakt_id, "ws": wiegeschein_nr},
+            ).fetchone()
+        else:
+            result = db.execute(
+                _text(
+                    "UPDATE domain_agrar.kontrakt_dispositionen "
+                    "SET status = 'GELIEFERT', updated_at = now() "
+                    "WHERE id = :id AND kontrakt_id = :kid "
+                    "RETURNING id, status, wiegeschein_nr"
+                ),
+                {"id": disp_id, "kid": kontrakt_id},
+            ).fetchone()
+        db.commit()
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=503, detail=f"DB-Fehler: {e}")
+    if result is None:
+        raise HTTPException(status_code=404, detail=f"Disposition {disp_id} nicht gefunden")
+    return {"id": result[0], "status": result[1], "wiegeschein_nr": result[2]}
+
+
+@router.delete("/{kontrakt_id}/dispositionen/{disp_id}", response_model=dict)
+async def storniere_disposition(
+    kontrakt_id: str,
+    disp_id: str,
+    db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
+    user: User = Depends(get_current_user),
+):
+    """Soft-Delete: Setzt status=STORNIERT für eine Disposition."""
+    _require_roles(user, KontraktSecurityService.ROLE_BEARBEITEN, KontraktSecurityService.ROLE_ADMIN)
+    try:
+        result = db.execute(
+            _text(
+                "UPDATE domain_agrar.kontrakt_dispositionen "
+                "SET status = 'STORNIERT', updated_at = now() "
+                "WHERE id = :id AND kontrakt_id = :kid "
+                "RETURNING id, status"
+            ),
+            {"id": disp_id, "kid": kontrakt_id},
+        ).fetchone()
+        db.commit()
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=503, detail=f"DB-Fehler: {e}")
+    if result is None:
+        raise HTTPException(status_code=404, detail=f"Disposition {disp_id} nicht gefunden")
+    return {"id": result[0], "status": result[1]}
