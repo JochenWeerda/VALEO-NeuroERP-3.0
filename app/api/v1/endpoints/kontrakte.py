@@ -9,7 +9,7 @@ from app.services.position_guard_service import PositionGuardService
 
 from fastapi import APIRouter, Body, Depends, HTTPException, Query
 from pydantic import BaseModel, Field
-from sqlalchemy import func
+from sqlalchemy import func, text as _sql_text
 from sqlalchemy.orm import Session
 
 from app.auth.deps import User, get_current_user
@@ -1034,8 +1034,6 @@ def get_positionen(  # noqa: E302
 import uuid as _uuid_mod
 import json as _json_mod
 
-from sqlalchemy import text as _text
-
 
 class DispositionCreate(BaseModel):
     kontrakt_nr: str
@@ -1058,7 +1056,7 @@ def _ensure_disposition_table(db: Session) -> None:
     """Erstellt domain_agrar.kontrakt_dispositionen falls die Tabelle fehlt."""
     try:
         db.execute(
-            _text(
+            _sql_text(
                 """
                 CREATE TABLE IF NOT EXISTS domain_agrar.kontrakt_dispositionen (
                     id               TEXT PRIMARY KEY,
@@ -1100,7 +1098,7 @@ async def list_dispositionen(
     )
     try:
         rows = db.execute(
-            _text(
+            _sql_text(
                 "SELECT id, kontrakt_id, disposition_nr, kontrakt_nr, kontrakt_pos_nr, "
                 "geplantes_lieferdatum, lieferdatum, menge, freigabe, wiegeschein_nr, "
                 "bemerkung, status, created_at, updated_at "
@@ -1155,7 +1153,7 @@ async def create_disposition(
     new_id = str(_uuid_mod.uuid4())
     try:
         db.execute(
-            _text(
+            _sql_text(
                 """
                 INSERT INTO domain_agrar.kontrakt_dispositionen (
                     id, kontrakt_id, disposition_nr, kontrakt_nr, kontrakt_pos_nr,
@@ -1197,7 +1195,7 @@ async def create_disposition(
 
     # Fetch the created record to return disposition_nr
     row = db.execute(
-        _text(
+        _sql_text(
             "SELECT id, disposition_nr, status FROM domain_agrar.kontrakt_dispositionen WHERE id = :id"
         ),
         {"id": new_id},
@@ -1226,7 +1224,7 @@ async def freigabe_disposition(
     _require_roles(user, KontraktSecurityService.ROLE_BEARBEITEN, KontraktSecurityService.ROLE_ADMIN)
     try:
         result = db.execute(
-            _text(
+            _sql_text(
                 "UPDATE domain_agrar.kontrakt_dispositionen "
                 "SET freigabe = true, status = 'FREIGEGEBEN', updated_at = now() "
                 "WHERE id = :id AND kontrakt_id = :kid "
@@ -1257,7 +1255,7 @@ async def geliefert_disposition(
     try:
         if wiegeschein_nr:
             result = db.execute(
-                _text(
+                _sql_text(
                     "UPDATE domain_agrar.kontrakt_dispositionen "
                     "SET status = 'GELIEFERT', wiegeschein_nr = :ws, updated_at = now() "
                     "WHERE id = :id AND kontrakt_id = :kid "
@@ -1267,7 +1265,7 @@ async def geliefert_disposition(
             ).fetchone()
         else:
             result = db.execute(
-                _text(
+                _sql_text(
                     "UPDATE domain_agrar.kontrakt_dispositionen "
                     "SET status = 'GELIEFERT', updated_at = now() "
                     "WHERE id = :id AND kontrakt_id = :kid "
@@ -1296,7 +1294,7 @@ async def storniere_disposition(
     _require_roles(user, KontraktSecurityService.ROLE_BEARBEITEN, KontraktSecurityService.ROLE_ADMIN)
     try:
         result = db.execute(
-            _text(
+            _sql_text(
                 "UPDATE domain_agrar.kontrakt_dispositionen "
                 "SET status = 'STORNIERT', updated_at = now() "
                 "WHERE id = :id AND kontrakt_id = :kid "
