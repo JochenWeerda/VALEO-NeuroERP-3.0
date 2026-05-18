@@ -1,0 +1,431 @@
+/**
+ * VALEO NeuroERP 3.0 — TERRA Design Tokens
+ * ==========================================
+ * Konzept: "Agrar-Identitaet trifft Moderne"
+ * Schrift: Inter (Variable Font)
+ * Primaer: Waldgruen  HSL(158, 64%, 28%)
+ * Akzent:  Goldgelb   HSL(45, 93%, 47%)
+ * Sekundaer: Terrakotta HSL(15, 75%, 55%)
+ * Hintergrund: Warm-Grau HSL(40, 15%, 96%)
+ *
+ * AKTIVIERUNG
+ * -----------
+ * Entweder globales Theme:
+ *   @import './styles/design-tokens-terra.css';
+ *   // Alle :root-Tokens werden auf Terra gesetzt
+ *
+ * Oder Modul-spezifisches Agrar-Theme:
+ *   <div class="theme-terra">...</div>
+ *   // Nur innerhalb dieses Containers aktiv
+ *
+ * Beide Varianten werden unten definiert.
+ */
+
+/* =================================================================
+   1. GOOGLE FONTS
+   ================================================================= */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+/* =================================================================
+   2. TERRA TOKENS — GLOBALE VARIANTE
+   (fuer vollstaendiges Terra-Theme)
+   ================================================================= */
+
+:root[data-theme="terra"] {
+
+  /* ----------------------------------------------------------------
+     TYPOGRAFIE
+     ---------------------------------------------------------------- */
+
+  --font-family-sans: 'Inter', ui-sans-serif, system-ui,
+    -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-family-mono: 'JetBrains Mono', ui-monospace, monospace;
+
+  /* DIN-A-Serie-Proportionen (Faktor sqrt(2) = 1.414)
+     11 -> 14 -> 16 -> 20 -> 28 -> 40px  */
+  --font-size-2xs:  0.6250rem;   /*  10px -- Keyboard-Hints              */
+  --font-size-xs:   0.6875rem;   /*  11px -- Legal, Micro-Labels         */
+  --font-size-sm:   0.875rem;    /*  14px -- Table-Body, Sekundaer-Info  */
+  --font-size-base: 1rem;        /*  16px -- Standard-Body               */
+  --font-size-lg:   1.25rem;     /*  20px -- Sub-Headlines, Card-Titel   */
+  --font-size-xl:   1.75rem;     /*  28px -- Seitentitel                 */
+  --font-size-2xl:  2.5rem;      /*  40px -- KPI-Werte, Hero-Zahlen      */
+
+  /* Gewichte */
+  --font-weight-light:  300;
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semi:   600;
+  --font-weight-bold:   700;
+
+  /* Zeilenhoehen */
+  --line-height-tight:   1.2;
+  --line-height-snug:    1.4;
+  --line-height-normal:  1.55;   /* Inter: leicht kompakter als Plus Jakarta */
+  --line-height-relaxed: 1.7;
+
+  /* Buchstabenabstaende */
+  --letter-spacing-tight:   -0.02em;
+  --letter-spacing-normal:   0em;
+  --letter-spacing-wide:     0.02em;
+  --letter-spacing-wider:    0.06em;  /* Fuer Uppercase-Labels: SORTE, STATUS */
+
+  /* Inter-spezifische Feature-Settings */
+  --font-feature-tabular: "tnum" 1, "cv11" 1;   /* Tabellarische Ziffern */
+  --font-feature-default: "kern" 1, "liga" 1, "calt" 1;
+
+  /* ----------------------------------------------------------------
+     ABSTANDS-SKALA — Strikt 8px-Basis (DIN-Stil, linear)
+     ---------------------------------------------------------------- */
+
+  --space-0:   0.25rem;   /*   4px -- Micro */
+  --space-1:   0.5rem;    /*   8px -- XS    */
+  --space-2:   1rem;      /*  16px -- SM    */
+  --space-3:   1.5rem;    /*  24px -- MD    */
+  --space-4:   2rem;      /*  32px -- LG    */
+  --space-5:   3rem;      /*  48px -- XL    */
+  --space-6:   4rem;      /*  64px -- 2XL   */
+
+  /* ----------------------------------------------------------------
+     LAYOUT-KONSTANTEN
+     ---------------------------------------------------------------- */
+
+  --sidebar-width-expanded:   256px;   /* Etwas breiter als Meridian */
+  --sidebar-width-collapsed:   56px;
+  --content-max-width:       1440px;
+  --content-padding-x:         32px;
+  --header-height:             60px;
+  --toolbar-height:            52px;
+  --table-row-height:          48px;
+  --table-row-compact:         36px;
+  --input-height:              44px;
+  --button-height:             44px;
+  --button-height-sm:          36px;
+  --button-height-lg:          52px;
+  --touch-target-min:          44px;
+
+  /* ----------------------------------------------------------------
+     BORDER-RADIUS (Terra: praezise 6px — GmbH-Aesthetik)
+     ---------------------------------------------------------------- */
+
+  --radius-none: 0px;
+  --radius-xs:   2px;    /* Indikatoren, sehr kleine Elemente */
+  --radius-sm:   4px;    /* Tags, Chips */
+  --radius:      6px;    /* Terra-Standard: praezise, professionell */
+  --radius-lg:   8px;    /* Modals, Panels */
+  --radius-xl:  12px;    /* Grosse Feature-Cards */
+  --radius-full: 9999px; /* Pills */
+
+  /* ----------------------------------------------------------------
+     FARBEN — PRIMAER: WALDGRUEN
+     Assoziiert mit Raiffeisen-Gruene, Feldfarben, Nachhaltigkeit
+     HSL-Referenz: 158 64% xx%
+     ---------------------------------------------------------------- */
+
+  --color-primary-50:   158 64% 94%;   /* Sehr helles Mintgruen */
+  --color-primary-100:  158 64% 85%;
+  --color-primary-200:  158 64% 72%;
+  --color-primary-300:  158 64% 55%;
+  --color-primary-400:  158 64% 40%;
+  --color-primary-500:  158 64% 28%;   /* #175c40 -- Standard Waldgruen */
+  --color-primary-600:  158 64% 22%;   /* Hover */
+  --color-primary-700:  158 64% 18%;   /* Active */
+  --color-primary-800:  158 64% 12%;
+  --color-primary-900:  158 64%  8%;
+
+  /* ----------------------------------------------------------------
+     FARBEN — HARVEST: GOLDGELB (GETREIDE)
+     Farbe des reifen Weizens und Rapses
+     HSL-Referenz: 45 93% xx%
+     ---------------------------------------------------------------- */
+
+  --color-harvest-50:   45 93% 94%;    /* Sehr helles Goldgelb */
+  --color-harvest-100:  45 93% 85%;
+  --color-harvest-200:  45 93% 72%;
+  --color-harvest-300:  45 93% 60%;
+  --color-harvest-400:  45 93% 47%;    /* #e6ab0b -- Standard Gold */
+  --color-harvest-500:  45 93% 38%;    /* Hover */
+  --color-harvest-600:  45 93% 30%;    /* Active */
+  --color-harvest-700:  45 93% 20%;    /* Dunkel -- Text auf Gold */
+  --color-harvest-800:  45 93% 14%;
+  --color-harvest-900:  45 93%  9%;
+
+  /* ----------------------------------------------------------------
+     FARBEN — TERRAKOTTA (ACKERBODEN)
+     Sekundaerfarbe fuer Bodenproben, Duengungsmodule
+     HSL-Referenz: 15 75% xx%
+     ---------------------------------------------------------------- */
+
+  --color-terra-50:     15 75% 94%;    /* Sehr helles Terrakotta */
+  --color-terra-100:    15 75% 86%;
+  --color-terra-200:    15 75% 74%;
+  --color-terra-300:    15 75% 62%;
+  --color-terra-400:    15 75% 55%;    /* #d4724a -- Standard */
+  --color-terra-500:    15 75% 45%;    /* Hover */
+  --color-terra-600:    15 75% 36%;    /* Active */
+  --color-terra-700:    15 75% 26%;    /* Dunkel -- Text auf Terrakotta */
+  --color-terra-800:    15 75% 18%;
+  --color-terra-900:    15 75% 12%;
+
+  /* ----------------------------------------------------------------
+     FARBEN — WARM-NEUTRALS (Leichter Erdton)
+     HSL-Referenz: 40 xx% xx%
+     ---------------------------------------------------------------- */
+
+  --color-gray-50:    40 15% 96%;    /* #f4f2ee -- Warm-Grau Hintergrund */
+  --color-gray-100:   40 12% 92%;    /* #eceae4 */
+  --color-gray-200:   40 10% 86%;    /* #dcdad4 */
+  --color-gray-300:   40  8% 76%;    /* #c4c2bc */
+  --color-gray-400:   40  6% 62%;    /* #9e9c97 */
+  --color-gray-500:   40  5% 48%;    /* #7b7975 */
+  --color-gray-600:   40  5% 36%;    /* #5c5a56 */
+  --color-gray-700:   40  6% 25%;    /* #403e3a */
+  --color-gray-800:   40  8% 16%;    /* #2a2826 */
+  --color-gray-900:   40 10% 10%;    /* #1a1816 */
+
+  /* ----------------------------------------------------------------
+     FARBEN — SEMANTISCH
+     ---------------------------------------------------------------- */
+
+  --color-success-light:  158 64% 92%;
+  --color-success:        158 64% 28%;  /* = Primary Waldgruen */
+  --color-success-dark:   158 64% 18%;
+  --color-success-fg:     0   0%  100%;
+
+  --color-warning-light:  45 93% 92%;
+  --color-warning:        45 93% 47%;   /* = Harvest Gold */
+  --color-warning-dark:   45 93% 32%;
+  --color-warning-fg:     45 93% 15%;
+
+  --color-error-light:    0 70% 93%;
+  --color-error:          0 70% 48%;
+  --color-error-dark:     0 70% 32%;
+  --color-error-fg:       0 70% 18%;
+
+  --color-info-light:     210 70% 93%;
+  --color-info:           210 70% 45%;  /* Neutrales Blau -- nicht Waldgruen */
+  --color-info-dark:      210 70% 30%;
+  --color-info-fg:        210 70% 15%;
+
+  /* ----------------------------------------------------------------
+     SEMANTIC ALIASES (shadcn/ui kompatibel)
+     ---------------------------------------------------------------- */
+
+  --background:            var(--color-gray-50);      /* 40 15% 96% */
+  --foreground:            var(--color-gray-900);     /* 40 10% 10% */
+  --card:                  40 20% 99%;                /* Fast weiss */
+  --card-foreground:       var(--color-gray-900);
+  --popover:               0 0% 100%;                 /* Reines Weiss */
+  --popover-foreground:    var(--color-gray-900);
+
+  --primary:               var(--color-primary-500);  /* 158 64% 28% */
+  --primary-foreground:    0 0% 100%;
+
+  --secondary:             var(--color-harvest-50);   /* 45 93% 94% */
+  --secondary-foreground:  var(--color-harvest-700);  /* 45 93% 20% */
+
+  --muted:                 var(--color-gray-100);     /* 40 12% 92% */
+  --muted-foreground:      var(--color-gray-600);     /* 40  5% 36% */
+
+  --accent:                var(--color-harvest-400);  /* 45 93% 47% */
+  --accent-foreground:     var(--color-harvest-700);  /* 45 93% 20% */
+
+  --destructive:           0 70% 48%;
+  --destructive-foreground: 0 0% 100%;
+
+  --border:                var(--color-gray-200);     /* 40 10% 86% */
+  --input:                 var(--color-gray-200);
+  --ring:                  var(--color-primary-500);  /* 158 64% 28% */
+
+  /* ----------------------------------------------------------------
+     SIDEBAR-TOKENS (Terra: Dunkles Waldgruen)
+     ---------------------------------------------------------------- */
+
+  --sidebar-bg:             hsl(158 45% 13%);    /* Sehr dunkles Waldgruen */
+  --sidebar-fg:             hsl(40 10% 72%);     /* Warm-Grau Text */
+  --sidebar-border:         hsl(158 45% 18%);
+  --sidebar-item-hover-bg:  hsl(158 45% 18%);
+  --sidebar-item-active-bg: hsl(158 45% 20%);
+  --sidebar-item-active-fg: hsl(45 93% 72%);     /* Helles Gold */
+  --sidebar-item-active-indicator: hsl(45 93% 47%);  /* Goldgelb-Stripe */
+
+  /* ----------------------------------------------------------------
+     SCHATTEN (Warm-Braun-Getoent)
+     ---------------------------------------------------------------- */
+
+  --shadow-xs: 0 1px 2px rgba(28, 24, 22, 0.04);
+  --shadow-sm: 0 1px 3px rgba(28, 24, 22, 0.06),
+               0 1px 2px rgba(28, 24, 22, 0.04);
+  --shadow-md: 0 4px 12px rgba(28, 24, 22, 0.08),
+               0 2px 4px rgba(28, 24, 22, 0.04);
+  --shadow-lg: 0 10px 30px rgba(28, 24, 22, 0.10),
+               0 4px 8px rgba(28, 24, 22, 0.06);
+  --shadow-xl: 0 20px 60px rgba(28, 24, 22, 0.12),
+               0 8px 16px rgba(28, 24, 22, 0.08);
+  --shadow-inner: inset 0 2px 4px rgba(28, 24, 22, 0.06);
+
+  /* Primary-Glow */
+  --shadow-primary-sm:    0 2px 8px rgba(23, 92, 64, 0.22);
+  --shadow-primary-md:    0 4px 16px rgba(23, 92, 64, 0.28);
+  --shadow-primary-focus: 0 0 0 3px rgba(23, 92, 64, 0.30);
+
+  /* ----------------------------------------------------------------
+     MOTION-TOKENS (Terra: etwas schoenere Dynamics als Meridian)
+     ---------------------------------------------------------------- */
+
+  --duration-instant:  50ms;
+  --duration-fast:    120ms;   /* Etwas schneller als Meridian */
+  --duration-normal:  220ms;
+  --duration-slow:    380ms;
+  --duration-slower:  600ms;
+
+  --ease-linear:    linear;
+  --ease-in:        cubic-bezier(0.4, 0, 1, 1);
+  --ease-out:       cubic-bezier(0, 0, 0.2, 1);
+  --ease-in-out:    cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-spring:    cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  /* ----------------------------------------------------------------
+     Z-INDEX-SKALA
+     ---------------------------------------------------------------- */
+
+  --z-base:     0;
+  --z-raised:   1;
+  --z-dropdown: 10;
+  --z-sticky:   20;
+  --z-overlay:  30;
+  --z-modal:    40;
+  --z-popover:  50;
+  --z-tooltip:  60;
+  --z-toast:    70;
+  --z-top:      9999;
+}
+
+/* =================================================================
+   3. TERRA ALS CLASS-VARIANTE
+   Aktivierung: <div class="theme-terra"> oder <html class="theme-terra">
+   Nützlich für Modul-spezifische Themes (Agrar-Modul, Lager-Terminal)
+   ================================================================= */
+
+.theme-terra {
+  /* Gleiche Tokens wie :root[data-theme="terra"] */
+  --font-family-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
+
+  --background:            40 15% 96%;
+  --foreground:            40 10% 10%;
+  --card:                  40 20% 99%;
+  --card-foreground:       40 10% 10%;
+  --popover:               0 0% 100%;
+  --popover-foreground:    40 10% 10%;
+  --primary:               158 64% 28%;
+  --primary-foreground:    0 0% 100%;
+  --secondary:             45 93% 94%;
+  --secondary-foreground:  45 93% 20%;
+  --muted:                 40 12% 92%;
+  --muted-foreground:      40  5% 36%;
+  --accent:                45 93% 47%;
+  --accent-foreground:     45 93% 20%;
+  --destructive:           0 70% 48%;
+  --destructive-foreground: 0 0% 100%;
+  --border:                40 10% 86%;
+  --input:                 40 10% 86%;
+  --ring:                  158 64% 28%;
+
+  --radius: 6px;
+
+  /* Sidebar (Dunkelgruen) */
+  --sidebar-bg:              hsl(158 45% 13%);
+  --sidebar-fg:              hsl(40 10% 72%);
+  --sidebar-item-active-fg:  hsl(45 93% 72%);
+  --sidebar-item-active-indicator: hsl(45 93% 47%);
+}
+
+/* =================================================================
+   4. DARK MODE OVERRIDES
+   ================================================================= */
+
+:root[data-theme="terra"].dark,
+.theme-terra.dark,
+.dark .theme-terra {
+
+  --background:         40 12% 10%;   /* Sehr dunkles Warm-Grau */
+  --foreground:         40 10% 92%;
+  --card:               40  9% 13%;
+  --card-foreground:    40 10% 92%;
+  --popover:            40  9% 16%;
+  --popover-foreground: 40 10% 92%;
+  --primary:            158 60% 48%;  /* Helleres Waldgruen auf dunkel */
+  --primary-foreground: 158 60%  8%;
+  --secondary:          40  8% 20%;
+  --secondary-foreground: 40 8% 80%;
+  --muted:              40  8% 18%;
+  --muted-foreground:   40  6% 58%;
+  --accent:             45 88% 60%;   /* Helleres Gold auf dunkel */
+  --accent-foreground:  45 88% 12%;
+  --border:             40  8% 22%;
+  --input:              40  8% 22%;
+  --ring:               158 60% 48%;
+}
+
+/* =================================================================
+   5. TYPOGRAFIE-REGELN
+   ================================================================= */
+
+.theme-terra body,
+:root[data-theme="terra"] body {
+  font-family:              var(--font-family-sans);
+  font-size:                var(--font-size-base);
+  line-height:              var(--line-height-normal);
+  font-weight:              var(--font-weight-normal);
+  text-rendering:           optimizeLegibility;
+  -webkit-font-smoothing:   antialiased;
+  -moz-osx-font-smoothing:  grayscale;
+  font-feature-settings:    "kern" 1, "liga" 1, "calt" 1;
+}
+
+/* Tabellarische Ziffern */
+.theme-terra table td,
+:root[data-theme="terra"] table td,
+.theme-terra .tabular-nums {
+  font-variant-numeric:  tabular-nums;
+  font-feature-settings: "tnum" 1, "cv11" 1;
+}
+
+/* Deutsche Hyphens */
+.theme-terra p,
+.theme-terra li,
+.theme-terra td {
+  hyphens:        auto;
+  overflow-wrap:  break-word;
+}
+
+/* Agrar-spezifisches Qualitaets-Balken-Muster */
+.quality-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.quality-bar__track {
+  height: 6px;
+  background: hsl(var(--border));
+  border-radius: var(--radius-full);
+  overflow: hidden;
+  flex: 1;
+}
+
+.quality-bar__fill {
+  height: 100%;
+  border-radius: var(--radius-full);
+  background: hsl(var(--primary));
+  transition: width var(--duration-slow) var(--ease-out);
+}
+
+.quality-bar__fill--warning {
+  background: hsl(var(--color-warning));
+}
+
+.quality-bar__fill--critical {
+  background: hsl(var(--color-error));
+}

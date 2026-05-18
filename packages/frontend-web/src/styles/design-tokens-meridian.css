@@ -1,0 +1,407 @@
+/**
+ * VALEO NeuroERP 3.0 — MERIDIAN Design Tokens
+ * ============================================
+ * Konzept: "Praezision trifft Waerme"
+ * Schrift: Plus Jakarta Sans (Google Fonts)
+ * Primaer: Ozeanblau  HSL(215, 85%, 42%)
+ * Akzent:  Bernstein  HSL(38, 95%, 52%)
+ * Hintergrund: Off-White HSL(210, 20%, 98%)
+ *
+ * VERWENDUNG
+ * ----------
+ * Importiere diese Datei am Ende von src/index.css:
+ *
+ *   @import './styles/design-tokens-meridian.css';
+ *
+ * Oder aktiviere das Theme dynamisch:
+ *
+ *   document.documentElement.dataset.theme = 'meridian';
+ *
+ * Die Tokens ueberschreiben die shadcn/ui-Defaults vollstaendig
+ * und sind Tailwind-CSS-Bridge-kompatibel (--background, --primary usw.).
+ */
+
+/* =================================================================
+   1. GOOGLE FONTS
+   ================================================================= */
+
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,opsz,wght@0,6..18,300;0,6..18,400;0,6..18,500;0,6..18,600;0,6..18,700;1,6..18,400&display=swap');
+
+/* =================================================================
+   2. LIGHT MODE — ALLE MERIDIAN-TOKENS
+   ================================================================= */
+
+:root,
+[data-theme="meridian"],
+[data-theme="meridian"] :root {
+
+  /* ----------------------------------------------------------------
+     TYPOGRAFIE
+     ---------------------------------------------------------------- */
+
+  /* Schriftfamilien */
+  --font-family-sans: 'Plus Jakarta Sans', ui-sans-serif, system-ui,
+    -apple-system, BlinkMacSystemFont, 'Segoe UI Variable', sans-serif;
+  --font-family-mono: 'JetBrains Mono', 'Fira Code', ui-monospace,
+    'Cascadia Code', monospace;
+
+  /* Typografische Skala — phi-basiert (Faktor ~1.272 = phi^0.5)
+     Basis: 16px. Schritte: 12 -> 14 -> 16 -> 20 -> 26 -> 33 -> 42px */
+  --font-size-2xs:  0.625rem;    /*  10px — Keyboard-Hints, Micro-Labels     */
+  --font-size-xs:   0.75rem;     /*  12px — Captions, Timestamps             */
+  --font-size-sm:   0.875rem;    /*  14px — Table-Body, Labels               */
+  --font-size-base: 1rem;        /*  16px — Standard-Body                    */
+  --font-size-lg:   1.25rem;     /*  20px — Card-Titel, Sub-Headlines        */
+  --font-size-xl:   1.625rem;    /*  26px — Seitentitel, Modul-Ueberschriften*/
+  --font-size-2xl:  2.0625rem;   /*  33px — Display-Elemente                 */
+  --font-size-3xl:  2.625rem;    /*  42px — Hero-KPI-Zahlen                  */
+
+  /* Font-Gewichte */
+  --font-weight-light:  300;
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semi:   600;
+  --font-weight-bold:   700;
+
+  /* Zeilenhoehen */
+  --line-height-none:    1;
+  --line-height-tight:   1.2;    /* Headlines */
+  --line-height-snug:    1.4;    /* Labels, kompakte Listen */
+  --line-height-normal:  1.6;    /* Body-Text Standard */
+  --line-height-relaxed: 1.75;   /* Beschreibungen, Hilfstexte */
+
+  /* Buchstabenabstaende */
+  --letter-spacing-tight:   -0.025em;  /* Display-Headlines */
+  --letter-spacing-snug:    -0.015em;  /* Grosse Ueberschriften */
+  --letter-spacing-normal:   0em;
+  --letter-spacing-wide:     0.025em;  /* Small Uppercase Labels */
+  --letter-spacing-wider:    0.05em;   /* Sehr kleine Uppercase Labels */
+  --letter-spacing-widest:   0.08em;   /* Micro-Text Uppercase */
+
+  /* ----------------------------------------------------------------
+     ABSTANDS-SKALA — phi-basiert (Basis: 8px)
+     Fibonacci-Approximation: 8 -> 13 -> 21 -> 34 -> 55 -> 89
+     ---------------------------------------------------------------- */
+
+  --space-0:   0.25rem;    /*   4px — Micro: Icon-Innen-Padding             */
+  --space-1:   0.5rem;     /*   8px — XS: Badge-Padding, Icon-Gap           */
+  --space-2:   0.8125rem;  /*  13px — SM: Button-H-Padding, Input-Padding   */
+  --space-3:   1.3125rem;  /*  21px — MD: Card-Padding, Formular-Gap        */
+  --space-4:   2.125rem;   /*  34px — LG: Section-Abstand                   */
+  --space-5:   3.4375rem;  /*  55px — XL: Grobe Trennung                    */
+  --space-6:   5.5625rem;  /*  89px — 2XL: Hero-Abstand, sehr selten        */
+
+  /* Zusaetzliche regulaere Werte fuer Tailwind-Kompatibilitaet */
+  --space-px:  1px;
+  --space-1-5: 0.375rem;   /*   6px */
+  --space-2-5: 0.625rem;   /*  10px */
+  --space-3-5: 0.875rem;   /*  14px */
+
+  /* ----------------------------------------------------------------
+     LAYOUT-KONSTANTEN
+     ---------------------------------------------------------------- */
+
+  --sidebar-width-expanded:   240px;
+  --sidebar-width-collapsed:   64px;
+  --content-max-width:       1400px;
+  --content-padding-x:         32px;  /* = --space-4 + 0.5 — rund */
+  --header-height:             64px;
+  --toolbar-height:            56px;
+  --table-row-height:          52px;
+  --table-row-compact:         40px;
+  --input-height:              44px;  /* WCAG 2.5.5 */
+  --button-height:             44px;  /* WCAG 2.5.5 */
+  --button-height-sm:          36px;
+  --button-height-lg:          52px;
+  --touch-target-min:          44px;
+
+  /* ----------------------------------------------------------------
+     BORDER-RADIUS
+     ---------------------------------------------------------------- */
+
+  --radius-none: 0px;
+  --radius-xs:   4px;
+  --radius-sm:   6px;
+  --radius:     12px;    /* Meridian-Standard: modern, weich */
+  --radius-lg:  16px;    /* Modals, grosse Panels */
+  --radius-xl:  24px;    /* Hero-Cards, Feature-Bereiche */
+  --radius-full: 9999px; /* Pills, Avatar */
+
+  /* ----------------------------------------------------------------
+     FARBEN — PRIMAER: OZEANBLAU
+     HSL-Referenz: 215 85% xx%
+     ---------------------------------------------------------------- */
+
+  --color-primary-50:  215 85% 95%;    /* #eef4fb */
+  --color-primary-100: 215 85% 88%;    /* #d3e5f5 */
+  --color-primary-200: 215 85% 78%;    /* #a8ccec */
+  --color-primary-300: 215 85% 65%;    /* #6aabde */
+  --color-primary-400: 215 85% 54%;    /* #3589ce */
+  --color-primary-500: 215 85% 46%;    /* #1a6bbb -- Haupt-CTA */
+  --color-primary-600: 215 85% 42%;    /* #0d5aa7 -- Default */
+  --color-primary-700: 215 85% 36%;    /* #0a4d8f -- Hover */
+  --color-primary-800: 215 85% 28%;    /* #083b70 -- Active */
+  --color-primary-900: 215 85% 18%;    /* #052648 -- Very Dark */
+
+  /* ----------------------------------------------------------------
+     FARBEN — HARVEST-AKZENT: BERNSTEIN
+     HSL-Referenz: 38 95% xx%
+     ---------------------------------------------------------------- */
+
+  --color-harvest-50:  38 95% 94%;     /* #fef5e4 */
+  --color-harvest-100: 38 95% 86%;     /* #fde2ad */
+  --color-harvest-200: 38 95% 74%;     /* #fcc462 */
+  --color-harvest-300: 38 95% 62%;     /* #faa920 */
+  --color-harvest-400: 38 95% 52%;     /* #f5a623 -- Standard Amber */
+  --color-harvest-500: 38 95% 44%;     /* #d08c10 -- Hover */
+  --color-harvest-600: 38 90% 36%;     /* #a96d0a -- Active */
+  --color-harvest-700: 38 85% 28%;     /* #825207 -- Dunkel */
+  --color-harvest-800: 38 80% 18%;     /* #533405 */
+  --color-harvest-900: 38 75% 12%;     /* #352103 */
+
+  /* ----------------------------------------------------------------
+     FARBEN — NEUTRALS MIT BLAUSTICH
+     HSL-Referenz: 210 xx% xx%
+     ---------------------------------------------------------------- */
+
+  --color-gray-50:  210 20% 98%;       /* #f5f8fc -- Off-White Hintergrund */
+  --color-gray-100: 210 18% 95%;       /* #eff3f8 -- Sunken Surfaces */
+  --color-gray-200: 210 16% 90%;       /* #dde5ef -- Borders */
+  --color-gray-300: 210 14% 82%;       /* #c4cfde -- Disabled Borders */
+  --color-gray-400: 210 12% 68%;       /* #9aacbe -- Placeholder */
+  --color-gray-500: 210 10% 50%;       /* #6d828f -- Muted Text */
+  --color-gray-600: 210 10% 38%;       /* #4e6273 -- Sekundaer-Text */
+  --color-gray-700: 210 12% 26%;       /* #32445c */
+  --color-gray-800: 210 14% 16%;       /* #1a2a38 */
+  --color-gray-900: 210 18% 10%;       /* #0f1e2e -- Primaer-Text */
+
+  /* ----------------------------------------------------------------
+     FARBEN — SEMANTISCH
+     ---------------------------------------------------------------- */
+
+  --color-success-light:  142 70% 92%;
+  --color-success:        142 70% 36%;  /* Waldgruen-nah */
+  --color-success-dark:   142 70% 22%;
+  --color-success-fg:     142 70% 15%;
+
+  --color-warning-light:  38 95% 94%;   /* = Harvest-50 */
+  --color-warning:        38 95% 52%;   /* = Harvest -- Dual-Use */
+  --color-warning-dark:   38 90% 38%;
+  --color-warning-fg:     38 95% 15%;
+
+  --color-error-light:    0 72% 94%;
+  --color-error:          0 72% 51%;
+  --color-error-dark:     0 72% 35%;
+  --color-error-fg:       0 72% 20%;
+
+  --color-info-light:     215 85% 94%;  /* = Primary-50 */
+  --color-info:           215 85% 42%;  /* = Primary -- Konsistenz */
+  --color-info-dark:      215 85% 28%;
+  --color-info-fg:        215 85% 15%;
+
+  /* ----------------------------------------------------------------
+     SEMANTIC ALIASES (shadcn/ui kompatibel — Tailwind-Bridge)
+     ---------------------------------------------------------------- */
+
+  /* Oberflaechenfarben */
+  --background:            var(--color-gray-50);    /* 210 20% 98% */
+  --foreground:            var(--color-gray-900);   /* 210 18% 10% */
+  --card:                  0 0% 100%;
+  --card-foreground:       var(--color-gray-900);
+  --popover:               0 0% 100%;
+  --popover-foreground:    var(--color-gray-900);
+
+  /* Primaer-System */
+  --primary:               var(--color-primary-600);   /* 215 85% 42% */
+  --primary-foreground:    0 0% 100%;
+
+  /* Sekundaer (Harvest-Subtle fuer sekundaere Aktionen) */
+  --secondary:             var(--color-harvest-50);    /* 38 95% 94% */
+  --secondary-foreground:  var(--color-harvest-700);   /* 38 85% 28% */
+
+  /* Muted (Hintergruende fuer gedaempfte Elemente) */
+  --muted:                 var(--color-gray-100);      /* 210 18% 95% */
+  --muted-foreground:      var(--color-gray-600);      /* 210 10% 38% -- 5.9:1 Kontrast */
+
+  /* Akzent (Harvest fuer Highlights) */
+  --accent:                var(--color-harvest-400);   /* 38 95% 52% */
+  --accent-foreground:     var(--color-harvest-700);   /* 38 85% 28% */
+
+  /* Destructive */
+  --destructive:           0 72% 51%;
+  --destructive-foreground: 0 0% 100%;
+
+  /* Rahmung und Fokus */
+  --border:                var(--color-gray-200);      /* 210 16% 90% */
+  --input:                 var(--color-gray-200);
+  --ring:                  var(--color-primary-600);   /* 215 85% 42% */
+
+  /* ----------------------------------------------------------------
+     SIDEBAR-TOKENS (Meridian: Navy-Blue)
+     ---------------------------------------------------------------- */
+
+  --sidebar-bg:             hsl(215 30% 14%);   /* Navy-Blue */
+  --sidebar-fg:             hsl(210 20% 80%);   /* Helles Grau */
+  --sidebar-border:         hsl(215 30% 20%);
+  --sidebar-item-hover-bg:  hsl(215 30% 20%);
+  --sidebar-item-active-bg: hsl(215 85% 42% / 0.2);
+  --sidebar-item-active-fg: hsl(0 0% 100%);
+  --sidebar-item-active-indicator: hsl(215 85% 42%);  /* Linker Stripe */
+
+  /* ----------------------------------------------------------------
+     SCHATTEN (Blau-Getoennt)
+     ---------------------------------------------------------------- */
+
+  --shadow-xs: 0 1px 2px rgba(15, 30, 46, 0.04);
+  --shadow-sm: 0 1px 3px rgba(15, 30, 46, 0.06),
+               0 1px 2px rgba(15, 30, 46, 0.04);
+  --shadow-md: 0 4px 12px rgba(15, 30, 46, 0.08),
+               0 2px 4px rgba(15, 30, 46, 0.04);
+  --shadow-lg: 0 10px 30px rgba(15, 30, 46, 0.10),
+               0 4px 8px rgba(15, 30, 46, 0.06);
+  --shadow-xl: 0 20px 60px rgba(15, 30, 46, 0.12),
+               0 8px 16px rgba(15, 30, 46, 0.08);
+  --shadow-inner: inset 0 2px 4px rgba(15, 30, 46, 0.06);
+
+  /* Primary-Glow fuer interaktive Elemente */
+  --shadow-primary-sm: 0 2px 8px rgba(13, 90, 167, 0.20);
+  --shadow-primary-md: 0 4px 16px rgba(13, 90, 167, 0.28);
+  --shadow-primary-focus: 0 0 0 3px rgba(13, 90, 167, 0.25);
+
+  /* ----------------------------------------------------------------
+     MOTION-TOKENS
+     ---------------------------------------------------------------- */
+
+  --duration-instant:  50ms;
+  --duration-fast:    150ms;
+  --duration-normal:  250ms;
+  --duration-slow:    400ms;
+  --duration-slower:  600ms;
+
+  --ease-linear:    linear;
+  --ease-in:        cubic-bezier(0.4, 0, 1, 1);
+  --ease-out:       cubic-bezier(0, 0, 0.2, 1);
+  --ease-in-out:    cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-spring:    cubic-bezier(0.34, 1.56, 0.64, 1);   /* Overshoot (Dialoge) */
+  --ease-bounce:    cubic-bezier(0.68, -0.55, 0.27, 1.55);
+
+  /* ----------------------------------------------------------------
+     Z-INDEX-SKALA
+     ---------------------------------------------------------------- */
+
+  --z-base:     0;
+  --z-raised:   1;
+  --z-dropdown: 10;
+  --z-sticky:   20;
+  --z-overlay:  30;
+  --z-modal:    40;
+  --z-popover:  50;
+  --z-tooltip:  60;
+  --z-toast:    70;
+  --z-top:      9999;
+}
+
+/* =================================================================
+   3. DARK MODE OVERRIDES
+   ================================================================= */
+
+[data-theme="meridian"].dark,
+.dark[data-theme="meridian"],
+[data-theme="meridian"] [data-mode="dark"] {
+
+  /* Oberflaechenfarben auf Dunkel */
+  --background:         215 30% 10%;   /* Tiefes Navy */
+  --foreground:         210 20% 92%;   /* Fast-Weiss */
+  --card:               215 28% 13%;
+  --card-foreground:    210 20% 92%;
+  --popover:            215 28% 16%;
+  --popover-foreground: 210 20% 92%;
+
+  /* Primaer heller auf dunkel */
+  --primary:            215 80% 62%;
+  --primary-foreground: 215 80% 10%;
+
+  /* Sekundaer auf dunkel */
+  --secondary:          215 25% 20%;
+  --secondary-foreground: 210 20% 80%;
+
+  /* Muted auf dunkel */
+  --muted:              215 25% 16%;
+  --muted-foreground:   210 15% 58%;
+
+  /* Akzent (Harvest) auf dunkel — heller */
+  --accent:             38 90% 60%;
+  --accent-foreground:  38 90% 12%;
+
+  /* Destructive auf dunkel */
+  --destructive:        0 65% 58%;
+  --destructive-foreground: 0 0% 100%;
+
+  /* Rahmen auf dunkel */
+  --border:             215 25% 22%;
+  --input:              215 25% 22%;
+  --ring:               215 80% 62%;
+
+  /* Schatten tiefer auf dunkel */
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.25),
+               0 1px 2px rgba(0, 0, 0, 0.15);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.35),
+               0 2px 4px rgba(0, 0, 0, 0.20);
+  --shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.40),
+               0 4px 8px rgba(0, 0, 0, 0.25);
+  --shadow-xl: 0 20px 60px rgba(0, 0, 0, 0.50),
+               0 8px 16px rgba(0, 0, 0, 0.30);
+}
+
+/* =================================================================
+   4. GLOBALE TYPOGRAFIE-REGELN (wenn Meridian aktiv)
+   ================================================================= */
+
+[data-theme="meridian"] body,
+:root body {
+  font-family:              var(--font-family-sans);
+  font-size:                var(--font-size-base);
+  line-height:              var(--line-height-normal);
+  font-weight:              var(--font-weight-normal);
+  text-rendering:           optimizeLegibility;
+  -webkit-font-smoothing:   antialiased;
+  -moz-osx-font-smoothing:  grayscale;
+  font-feature-settings:    "kern" 1, "liga" 1, "calt" 1;
+}
+
+/* Tabellarische Ziffern in allen Datentabellen */
+[data-theme="meridian"] table td,
+[data-theme="meridian"] .tabular-nums {
+  font-variant-numeric:  tabular-nums;
+  font-feature-settings: "tnum" 1;
+}
+
+/* Hyphens fuer deutsche Komposita */
+[data-theme="meridian"] p,
+[data-theme="meridian"] li,
+[data-theme="meridian"] td {
+  hyphens:        auto;
+  overflow-wrap:  break-word;
+}
+
+/* =================================================================
+   5. SKIP-TO-CONTENT (WCAG 2.4.1)
+   ================================================================= */
+
+.skip-to-content {
+  position: absolute;
+  top: -100%;
+  left: 0;
+  padding: 12px 24px;
+  background: hsl(var(--primary));
+  color: hsl(var(--primary-foreground));
+  font-weight: var(--font-weight-semi);
+  font-size: var(--font-size-sm);
+  z-index: var(--z-top);
+  border-radius: 0 0 var(--radius) 0;
+  transition: top var(--duration-fast) var(--ease-out);
+}
+
+.skip-to-content:focus {
+  top: 0;
+}
