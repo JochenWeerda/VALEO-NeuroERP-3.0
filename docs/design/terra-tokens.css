@@ -1,0 +1,110 @@
+/**
+ * TERRA Design Tokens — VALEO NeuroERP 3.0
+ * Konzept 2: Verwurzelt in der Natur
+ *
+ * Organisches Agrar-Theme mit Waldgrün und warmem Erd-Beige.
+ * Empfohlen als: Agrar-Modul-Spezifisches Theme oder Haupt-Variante für
+ * Genossenschaften mit starkem Agrar-Identitätsbezug.
+ */
+
+:root.theme-terra {
+  /* ── Primär: Waldgrün ──────────────────────────────────────────────────── */
+  --color-primary-50-hsl:  142 84% 93%;
+  --color-primary-100-hsl: 142 77% 85%;
+  --color-primary-200-hsl: 142 74% 73%;
+  --color-primary-300-hsl: 142 72% 58%;
+  --color-primary-400-hsl: 142 76% 45%;  /* #16a34a */
+  --color-primary-500-hsl: 142 76% 36%;  /* #166534 — Haupt */
+  --color-primary-600-hsl: 142 72% 29%;  /* #14532d — Hover */
+  --color-primary-700-hsl: 142 68% 22%;
+  --color-primary-800-hsl: 142 62% 15%;
+  --color-primary-900-hsl: 142 55%  9%;
+
+  /* ── Akzent: Bernstein/Ernte ───────────────────────────────────────────── */
+  --color-harvest-50-hsl:  38 96% 94%;
+  --color-harvest-100-hsl: 38 96% 85%;
+  --color-harvest-400-hsl: 43 96% 56%;   /* #f59e0b */
+  --color-harvest-600-hsl: 32 81% 29%;   /* #92400e */
+  --color-harvest-700-hsl: 28 73% 20%;
+
+  /* ── Neutrals (warmer Braun-Stich) ────────────────────────────────────── */
+  --color-neutral-50-hsl:   60  9% 98%;  /* #fafaf9 — Sand-Weiß */
+  --color-neutral-100-hsl:  60  5% 96%;  /* #f5f5f4 */
+  --color-neutral-200-hsl:  20  6% 90%;  /* #e7e5e4 */
+  --color-neutral-300-hsl:  20  6% 83%;  /* #d6d3d1 */
+  --color-neutral-400-hsl:  20  6% 64%;  /* #a8a29e */
+  --color-neutral-500-hsl:  20  6% 46%;  /* #78716c */
+  --color-neutral-600-hsl:  20  6% 32%;  /* #57534e */
+  --color-neutral-700-hsl:  20  7% 24%;  /* #44403c */
+  --color-neutral-800-hsl:  20  8% 16%;  /* #292524 */
+  --color-neutral-900-hsl:  20  9% 10%;  /* #1c1917 — Tief-Braun */
+
+  /* ── Semantic Mapping ──────────────────────────────────────────────────── */
+  --background:           var(--color-neutral-50-hsl);
+  --foreground:           var(--color-neutral-900-hsl);
+  --card:                 0 0% 100%;
+  --card-foreground:      var(--color-neutral-900-hsl);
+  --popover:              0 0% 100%;
+  --popover-foreground:   var(--color-neutral-900-hsl);
+  --primary:              var(--color-primary-500-hsl);
+  --primary-foreground:   0 0% 100%;
+  --secondary:            var(--color-harvest-50-hsl);
+  --secondary-foreground: var(--color-harvest-600-hsl);
+  --muted:                var(--color-neutral-100-hsl);
+  --muted-foreground:     var(--color-neutral-600-hsl);
+  --accent:               var(--color-harvest-400-hsl);
+  --accent-foreground:    var(--color-harvest-700-hsl);
+  --destructive:          0 72% 51%;
+  --destructive-foreground: 0 0% 100%;
+  --border:               var(--color-neutral-200-hsl);
+  --input:                var(--color-neutral-200-hsl);
+  --ring:                 var(--color-primary-500-hsl);
+
+  /* ── Sidebar (hell — Terra-Kontrapunkt) ────────────────────────────────── */
+  --sidebar-width:           256px;
+  --sidebar-width-collapsed:  72px;
+  --sidebar-bg:              hsl(0 0% 100%);
+  --sidebar-fg:              hsl(var(--color-neutral-600-hsl));
+  --sidebar-active-bg:       hsl(var(--color-primary-100-hsl));
+  --sidebar-active-fg:       hsl(var(--color-primary-600-hsl));
+  --sidebar-hover-bg:        hsl(var(--color-primary-50-hsl));
+  --sidebar-border:          1px solid hsl(var(--color-neutral-200-hsl));
+
+  /* ── Radius (Terra: minimal kantiger für Erdigkeit) ───────────────────── */
+  --radius-sm:  0.25rem;   /* 4px */
+  --radius-md:  0.375rem;  /* 6px */
+  --radius-lg:  0.625rem;  /* 10px — Terra: etwas kantiger */
+  --radius-xl:  0.875rem;  /* 14px */
+  --radius-2xl: 1.25rem;   /* 20px */
+  --radius:     var(--radius-lg);
+
+  /* ── Shadows (warmer getönt) ───────────────────────────────────────────── */
+  --shadow-sm: 0 1px 2px rgba(28, 25, 23, 0.05);
+  --shadow-md: 0 4px 8px rgba(28, 25, 23, 0.07), 0 1px 3px rgba(28, 25, 23, 0.04);
+  --shadow-lg: 0 12px 24px rgba(28, 25, 23, 0.09), 0 4px 8px rgba(28, 25, 23, 0.05);
+  --shadow-xl: 0 24px 48px rgba(28, 25, 23, 0.13);
+
+  /* ── Touch / Tabelle ───────────────────────────────────────────────────── */
+  --table-row-height: 44px;   /* Terra: großzügiger */
+  --touch-target:     44px;
+  --content-padding-x: 28px;  /* Terra: etwas mehr Luft */
+}
+
+/* ── Terra Dark Mode ──────────────────────────────────────────────────────── */
+:root.theme-terra.dark {
+  --background:       var(--color-neutral-900-hsl);
+  --foreground:       var(--color-neutral-50-hsl);
+  --card:             20 8% 14%;
+  --card-foreground:  var(--color-neutral-50-hsl);
+  --primary:          var(--color-primary-400-hsl);
+  --primary-foreground: var(--color-neutral-900-hsl);
+  --muted:            var(--color-neutral-700-hsl);
+  --muted-foreground: var(--color-neutral-300-hsl);
+  --border:           var(--color-neutral-700-hsl);
+  --input:            var(--color-neutral-700-hsl);
+
+  --sidebar-bg: hsl(20 9% 8%);
+  --sidebar-fg: hsl(var(--color-neutral-400-hsl));
+  --sidebar-active-bg: hsl(var(--color-primary-900-hsl));
+  --sidebar-active-fg: hsl(var(--color-primary-300-hsl));
+}
