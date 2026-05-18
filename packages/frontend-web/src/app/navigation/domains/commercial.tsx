@@ -30,6 +30,8 @@ import {
   Users,
   Zap,
   Search,
+  BookOpen,
+  Users2,
 } from 'lucide-react'
 import type { RawNavItem } from '@/app/navigation/types'
 import { ENABLE_PROSPECTING_UI } from '@/features/prospecting/feature-flags'
@@ -136,6 +138,57 @@ if (ENABLE_PROSPECTING_UI) {
 }
 
 export const RAW_NAV_SECTIONS: RawNavItem[] = [
+  {
+    id: 'kontrakte',
+    label: 'Kontrakte',
+    icon: BookOpen,
+    mcp: { businessDomain: 'agrar', scope: 'agrar:read' },
+    children: [
+      {
+        id: 'kontraktklassen',
+        label: 'Kontraktklassen',
+        icon: FileText,
+        module: '@/pages/kontrakte/kontraktklassen',
+        preferredPath: 'kontrakte/kontraktklassen',
+        keywords: ['kontraktklassen', 'fixpreis', 'basis', 'prämie', 'poolpreis'],
+        mcp: { businessDomain: 'agrar', scope: 'agrar:read' },
+      },
+    ],
+  },
+  {
+    id: 'preise',
+    label: 'Preise & Kalkulation',
+    icon: Calculator,
+    mcp: { businessDomain: 'agrar', scope: 'agrar:read' },
+    children: [
+      {
+        id: 'preis-kalkulation',
+        label: 'Preis-Kalkulation',
+        icon: Calculator,
+        module: '@/pages/preise/kalkulation',
+        preferredPath: 'preise/kalkulation',
+        keywords: ['preis', 'kalkulation', 'berechnung', 'marge'],
+        mcp: { businessDomain: 'agrar', scope: 'agrar:read' },
+      },
+    ],
+  },
+  {
+    id: 'genossenschaft',
+    label: 'Genossenschaft',
+    icon: Users2,
+    mcp: { businessDomain: 'agrar', scope: 'agrar:read' },
+    children: [
+      {
+        id: 'genossenschaft-mitglieder',
+        label: 'Mitglieder',
+        icon: Users,
+        module: '@/pages/genossenschaft/mitglieder',
+        preferredPath: 'genossenschaft/mitglieder',
+        keywords: ['mitglieder', 'genossenschaft', 'geschäftsanteile'],
+        mcp: { businessDomain: 'agrar', scope: 'agrar:read' },
+      },
+    ],
+  },
   {
     id: 'verkauf',
     label: 'Verkauf',
