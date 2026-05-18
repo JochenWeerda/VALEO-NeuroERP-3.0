@@ -169,6 +169,7 @@ from app.api.v1.endpoints import (
     gs1_barcode,
     webhook_system,
     ruestliste,
+    report_print,
 )
 
 # AMIC Agrarhandel — Kontrakt-Klassen, Hedging, E-Rechnung, Preiskalkulation
@@ -1476,6 +1477,9 @@ api_router.include_router(
     prefix="/gs1/barcode",
     tags=["gs1", "barcode", "utility"],
 )
+
+# Report/Print: Partie-Genealogie, Wiegeschein-PDF-Preview, GS1-Labels
+api_router.include_router(report_print.router)
 
 # Outbound Webhook Registration
 api_router.include_router(
