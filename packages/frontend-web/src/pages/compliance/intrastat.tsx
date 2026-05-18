@@ -30,7 +30,7 @@ export default function IntrastatPage(): JSX.Element {
 
   const { data: meldungen = [], isError, error, refetch } = useQuery<IntrastatMeldung[]>({
     queryKey: ['intrastat'],
-    queryFn: async () => (await apiClient.get('/api/v1/intrastat')).data,
+    queryFn: async () => (await apiClient.get<IntrastatMeldung[]>('/api/v1/intrastat')).data,
   })
 
   if (isError) return <ErrorState error={error as Error} onRetry={() => { void refetch() }} />

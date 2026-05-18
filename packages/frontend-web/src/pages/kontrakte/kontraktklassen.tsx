@@ -33,7 +33,7 @@ export default function KontraktklassenPage(): JSX.Element {
 
   const { data: klassen = [], isError, error, refetch } = useQuery<KontraktKlasse[]>({
     queryKey: ['kontrakt-klassen'],
-    queryFn: async () => (await apiClient.get('/api/v1/kontrakt-klassen')).data,
+    queryFn: async () => (await apiClient.get<KontraktKlasse[]>('/api/v1/kontrakt-klassen')).data,
   })
 
   const createMutation = useMutation({

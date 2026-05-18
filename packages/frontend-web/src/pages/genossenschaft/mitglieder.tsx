@@ -24,7 +24,7 @@ export default function GenossenschaftMitgliederPage(): JSX.Element {
 
   const { data: mitglieder = [], isError, error, refetch } = useQuery<Mitglied[]>({
     queryKey: ['genossenschaft-mitglieder'],
-    queryFn: async () => (await apiClient.get('/api/v1/genossenschaft/mitglieder')).data,
+    queryFn: async () => (await apiClient.get<Mitglied[]>('/api/v1/genossenschaft/mitglieder')).data,
   })
 
   if (isError) return <ErrorState error={error as Error} onRetry={() => { void refetch() }} />

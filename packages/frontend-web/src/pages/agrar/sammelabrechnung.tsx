@@ -21,7 +21,7 @@ export default function SammelabrechnungPage(): JSX.Element {
 
   const { data: ernten = [], isError, error, refetch } = useQuery<Ernte[]>({
     queryKey: ['rohware-sammelabrechnung-list'],
-    queryFn: async () => (await apiClient.get('/api/v1/rohware/sammelabrechnung')).data,
+    queryFn: async () => (await apiClient.get<Ernte[]>('/api/v1/rohware/sammelabrechnung')).data,
   })
 
   const submitMutation = useMutation({

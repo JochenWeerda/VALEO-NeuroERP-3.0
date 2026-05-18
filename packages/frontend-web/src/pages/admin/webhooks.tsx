@@ -23,7 +23,7 @@ export default function WebhooksPage(): JSX.Element {
 
   const { data: webhooks = [], isError, error, refetch } = useQuery<WebhookItem[]>({
     queryKey: ['webhooks'],
-    queryFn: async () => (await apiClient.get('/api/v1/webhooks')).data,
+    queryFn: async () => (await apiClient.get<WebhookItem[]>('/api/v1/webhooks')).data,
   })
 
   if (isError) return <ErrorState error={error as Error} onRetry={() => { void refetch() }} />

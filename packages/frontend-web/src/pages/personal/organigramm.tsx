@@ -48,7 +48,7 @@ function OrgNode({ unit, depth = 0 }: { unit: OrgUnit; depth?: number }): JSX.El
 export default function OrganigrammPage(): JSX.Element {
   const { data, isError, error, refetch } = useQuery<{ units: OrgUnit[] }>({
     queryKey: ['org-chart'],
-    queryFn: async () => (await apiClient.get('/api/v1/personal/org-chart')).data,
+    queryFn: async () => (await apiClient.get<{ units: OrgUnit[] }>('/api/v1/personal/org-chart')).data,
   })
 
   if (isError) return <ErrorState error={error as Error} onRetry={() => { void refetch() }} />

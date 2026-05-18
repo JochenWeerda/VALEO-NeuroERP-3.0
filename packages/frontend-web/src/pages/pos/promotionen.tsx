@@ -30,7 +30,7 @@ export default function PosPromotionenPage(): JSX.Element {
 
   const { data: promotionen = [], isError, error, refetch } = useQuery<Promotion[]>({
     queryKey: ['pos-promotions'],
-    queryFn: async () => (await apiClient.get('/api/v1/pos/promotions')).data,
+    queryFn: async () => (await apiClient.get<Promotion[]>('/api/v1/pos/promotions')).data,
   })
 
   if (isError) return <ErrorState error={error as Error} onRetry={() => { void refetch() }} />
