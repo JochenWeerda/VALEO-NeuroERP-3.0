@@ -17,6 +17,8 @@ from app.core.exceptions import ConflictError, EntityNotFoundError, ValidationFa
 from app.core.tenant import get_tenant_id
 from app.services.agrar_settlement_service import AgrarSettlementService
 from app.services.settlement_pdf_service import SettlementPdfService
+from app.services.settlement_drying_service import SettlementDryingService
+from app.services.settlement_approval_service import SettlementApprovalService
 from app.infrastructure.models import AgrarSettlement, AgrarSettlementDeduction
 from app.infrastructure.drying_rule_repo import DbDryingRuleRepo
 from modules.agrar.services.moisture_engine import MoistureEngineInput, calculate_billing_weight
@@ -25,9 +27,7 @@ from modules.agrar.services.drying_rule_engine import (
 )
 from app.api.v1.endpoints.admin_core import _load_tenant_settings
 from modules.agrar.services.settlement_calculator import (
-    calc_deduction_amount as _calc_deduction_amount_impl,
     compute_settlement_amounts as _compute_settlement_amounts_impl,
-    round_money as _round_money_impl,
     round_qty as _round_qty_impl,
 )
 
@@ -39,23 +39,8 @@ SettlementStatus = Literal["draft", "posted", "cancelled"]
 
 
 
-def _round_money(value: Decimal | float | int) -> Decimal:
-    return _round_money_impl(value)
-
-
 def _round_qty(value: Decimal | float | int) -> Decimal:
     return _round_qty_impl(value)
-
-
-def _build_settlement_dq_datensatz(payload: "SettlementCreate", settlement_number: str) -> dict:
-    return {
-        "abrechnungsnummer": settlement_number,
-        "lieferant_id": payload.supplier_id,
-        "brutto_gewicht_kg": payload.gross_quantity_kg,
-        "abrechnungsgewicht_kg": payload.billing_quantity_kg if payload.billing_quantity_kg is not None else payload.gross_quantity_kg,
-        "preis_eur_pro_t": payload.unit_price_eur_per_ton,
-        "waehrung": "EUR",
-    }
 
 
 class DeductionInput(BaseModel):
@@ -215,53 +200,19 @@ def _current_settlement_row_version(settlement: AgrarSettlement) -> int:
 
 
 def _get_settlement_approval_status(settlement: AgrarSettlement) -> str:
-    drying_result = settlement.drying_result or {}
-    return str(drying_result.get("approval_status") or "ENTWURF")
+    return AgrarSettlementService.get_approval_status(settlement)
 
 
 def _get_settlement_approval_history(settlement: AgrarSettlement) -> list[dict]:
-    drying_result = settlement.drying_result or {}
-    history = drying_result.get("approval_history") or []
-    return list(history) if isinstance(history, list) else []
+    return AgrarSettlementService.get_approval_history(settlement)
 
 
 def _get_settlement_allowed_transitions(approval_status: str) -> list[str]:
-    transition_map = {
-        "ENTWURF": ["ZUR_FREIGABE", "ABGELEHNT"],
-        "ZUR_FREIGABE": ["TEILWEISE_FREIGEGEBEN", "FREIGEGEBEN", "ABGELEHNT", "ENTWURF"],
-        "TEILWEISE_FREIGEGEBEN": ["FREIGEGEBEN", "ABGELEHNT", "ZUR_FREIGABE"],
-        "FREIGEGEBEN": ["VERBUCHT", "ABGELEHNT"],
-        "ABGELEHNT": ["ENTWURF"],
-        "VERBUCHT": [],
-    }
-    return transition_map.get(approval_status, [])
+    return AgrarSettlementService.get_allowed_transitions(approval_status)
 
 
 def _build_settlement_correction_options(settlement: AgrarSettlement, approval_status: str) -> list[dict]:
-    if settlement.status != "posted":
-        return []
-    base_note = f"Settlement {settlement.settlement_number} / Journal {settlement.posted_journal_ref or '-'}"
-    return [
-        {
-            "memo_type": "credit",
-            "label": "Gutschrift erstellen",
-            "reason": f"Gutschrift zur Settlement-Korrektur ({base_note})",
-        },
-        {
-            "memo_type": "debit",
-            "label": "Belastung erstellen",
-            "reason": f"Belastung zur Settlement-Korrektur ({base_note})",
-        },
-        {
-            "memo_type": "rework",
-            "label": "Korrektur ueber Belegpfad dokumentieren",
-            "reason": f"Settlement ist bereits verbucht; Korrektur nur ueber Gutschrift/Belastung ({base_note})",
-        },
-    ]
-
-
-def _calc_deduction_amount(deduction: DeductionInput, billing_qty_tons: Decimal) -> Decimal:
-    return _calc_deduction_amount_impl(deduction, billing_qty_tons)
+    return AgrarSettlementService.build_correction_options(settlement, approval_status)
 
 
 def _compute_settlement_amounts(
@@ -351,36 +302,19 @@ async def compute_drying_settlement(
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
-    calc_date = payload.calc_date or datetime.utcnow().date().isoformat()
-    repo = _DbDryingRuleRepo(db, tenant_id=tenant_id)
+    drying_svc = SettlementDryingService(db, tenant_id)
     try:
-        result = _compute_drying_settlement(
-            repo,
-            {
-                "cropCode": payload.crop_code,
-                "siteId": payload.site_id,
-                "netWeightKg": payload.net_weight_kg,
-                "moisturePct": payload.moisture_pct,
-                "calcDate": calc_date,
-                "roundingMode": payload.rounding_mode,
-                "contractId": payload.contract_id,
-                "customerId": payload.customer_id,
-            },
+        data = drying_svc.compute_from_rule_engine(
+            crop_code=payload.crop_code,
+            net_weight_kg=payload.net_weight_kg,
+            moisture_pct=payload.moisture_pct,
+            calc_date=payload.calc_date,
+            site_id=payload.site_id,
+            rounding_mode=payload.rounding_mode,
         )
-    except ValueError as e:
-        raise HTTPException(status_code=400, detail=str(e)) from e
-
-    return DryingComputeResponse(
-        entzug_pct_points=float(result.entzug_pct_points),
-        loss_pct=float(result.loss_pct),
-        loss_kg=float(result.loss_kg),
-        invoice_weight_kg=float(result.invoice_weight_kg),
-        drying_fee_eur=float(result.drying_fee_eur) if result.drying_fee_eur is not None else None,
-        used_rule_set_id=result.used_rule_set_id,
-        used_rule_version=int(result.used_rule_version),
-        used_row_moisture_pct=float(result.used_row_moisture_pct) if result.used_row_moisture_pct is not None else None,
-        warnings=list(result.warnings),
-    )
+    except ValidationFailedError as exc:
+        raise HTTPException(status_code=400, detail=exc.detail) from exc
+    return DryingComputeResponse(**data)
 
 
 @router.post("/preview", response_model=dict)
@@ -596,13 +530,6 @@ async def cancel_settlement(
     except ValidationFailedError as exc:
         raise HTTPException(status_code=400, detail=exc.detail)
     return {"ok": True, "settlement_id": result.id, "status": result.status}
-
-
-def _get_user_id_from_request(request: Request) -> Optional[str]:
-    """Extract user ID from request state (token claims)."""
-    claims = getattr(request.state, "token_claims", {})
-    return claims.get("sub") or claims.get("user_id")
-
 
 
 # ============================================================================

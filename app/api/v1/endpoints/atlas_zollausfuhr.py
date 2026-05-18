@@ -1,10 +1,10 @@
-"""ATLAS Zollausfuhr — German customs export declaration stub."""
+"""ATLAS Zollausfuhr — German customs export declaration (ECS Phase 2)."""
 
 from datetime import date, datetime
 from typing import Optional
 from uuid import uuid4
 
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, HTTPException, Query
 from fastapi.responses import Response
 from pydantic import BaseModel
 from sqlalchemy import text
@@ -12,6 +12,7 @@ from sqlalchemy.orm import Session
 
 from app.core.database import get_db
 from app.core.tenant import get_tenant_id
+from app.services.atlas_customs_service import ATLASCustomsService
 
 router = APIRouter(prefix="/zoll", tags=["zoll", "atlas", "customs"])
 
@@ -254,28 +255,46 @@ def uebermitteln(
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
 ):
-    """Transmit to ATLAS (stub) — generates MRN."""
-    mrn = f"DE{date.today().strftime('%y%j')}{uuid4().hex[:10].upper()}"
+    """Überträgt Ausfuhranmeldung an ATLAS — ECS Phase 2, vollständige Simulation."""
+    # Fallback: In-Memory-Store der Service-Instanz mit Endpunkt-Store synchronisieren
+    svc = ATLASCustomsService(db=db, tenant_id=tenant_id)
+    svc._fallback_store = _store  # type: ignore[attr-defined]
     try:
-        db.execute(
-            text(
-                "UPDATE domain_compliance.zollausfuhr_anmeldungen "
-                "SET status='UEBERMITTELT', atlas_mrn=:mrn "
-                "WHERE id=:id AND tenant_id=:tid"
-            ),
-            {"mrn": mrn, "id": id, "tid": tenant_id},
-        )
-        db.commit()
-    except Exception:
-        db.rollback()
-        if id in _store:
-            _store[id]["status"] = "UEBERMITTELT"
-            _store[id]["atlas_mrn"] = mrn
-    return {
-        "uebermittelt": True,
-        "atlas_mrn": mrn,
-        "hinweis": "ATLAS-Anbindung vorbereitet — Live-Übermittlung erfordert ATLAS-Zertifikat",
-    }
+        return svc.submit_to_atlas(anmeldung_id=id, db=db)
+    except Exception as exc:
+        from app.core.exceptions import EntityNotFoundError, ValidationFailedError
+        if isinstance(exc, EntityNotFoundError):
+            raise HTTPException(status_code=404, detail=str(exc))
+        if isinstance(exc, ValidationFailedError):
+            raise HTTPException(status_code=422, detail=str(exc))
+        raise
+
+
+@router.post("/ausfuhranmeldungen/{id}/vorab-validieren")
+def vorab_validieren(
+    id: str,
+    db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
+):
+    """Vorab-Validierung einer Anmeldung ohne ATLAS-Übermittlung (TARIC + Pflichtfelder)."""
+    svc = ATLASCustomsService(db=db, tenant_id=tenant_id)
+    svc._fallback_store = _store  # type: ignore[attr-defined]
+    anmeldung = svc._load_anmeldung(id, db)
+    if not anmeldung:
+        raise HTTPException(status_code=404, detail="Anmeldung nicht gefunden")
+    return svc.validate_anmeldung(anmeldung)
+
+
+@router.get("/ausfuhrnachrichten/{mrn}")
+def ausfuhrnachricht(
+    mrn: str,
+    db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
+):
+    """Ruft Ausfuhrnachricht (IE529/IE518) für eine MRN ab."""
+    svc = ATLASCustomsService(db=db, tenant_id=tenant_id)
+    svc._fallback_store = _store  # type: ignore[attr-defined]
+    return svc.get_ausfuhrnachricht(mrn=mrn, db=db)
 
 
 @router.post("/atlas-callback")

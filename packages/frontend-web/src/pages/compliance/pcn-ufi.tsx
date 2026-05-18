@@ -22,15 +22,24 @@ type PCNData = {
   pcnStatus: 'entwurf' | 'eingereicht' | 'accepted' | 'rejected'
 }
 
+type PCNMeldungResponse = {
+  meldung_id: string
+  pcnStatus: 'entwurf' | 'eingereicht' | 'accepted' | 'rejected'
+  ufi: string
+}
+
 export default function PCNUFIPage(): JSX.Element {
   const navigate = useNavigate()
   const { toast } = useToast()
 
   const createMutation = useMutation({
-    mutationFn: async (data: PCNData) =>
-      (await apiClient.post('/api/v1/compliance/pcn-meldungen', data)).data,
-    onSuccess: () => {
-      toast({ title: 'PCN-Meldung gespeichert', description: 'Die Meldung wurde erfolgreich angelegt.' })
+    mutationFn: async (data: PCNData): Promise<PCNMeldungResponse> =>
+      (await apiClient.post<PCNMeldungResponse>('/api/v1/compliance/pcn-meldungen', data)).data,
+    onSuccess: (response: PCNMeldungResponse) => {
+      toast({
+        title: 'PCN-Meldung gespeichert',
+        description: `Meldungs-ID: ${response.meldung_id} — UFI: ${response.ufi}`,
+      })
       navigate('/compliance/pcn-liste')
     },
     onError: (err: unknown) => {
