@@ -6,10 +6,12 @@ Stand: `2026-05-12`
 
 **Von:** Codex
 **Owner:** Codex
-**Stand:** reserviert 2026-05-18
+**Stand:** abgeschlossen 2026-05-18
 **Ziel des Slices:** Verbleibende UAT-Auflagen aus der Abnahme 2026-05-17 repo-seitig auf hohem Standard schliessen.
 **Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/agent-ops/slices/UAT-AUFLAGEN-2026-05-17.yaml`, `docs/uat/**`, `packages/frontend-web/tests/e2e/uat/**`, `tests/uat/**`, `app/api/v1/endpoints/compliance.py`, `app/api/v1/endpoints/kontrakt_klassen.py`, `tests/test_compliance_pos_gap_extensions.py`
 **Abnahmekriterien:** PCN/UFI API-Contract ist implementiert und getestet; ungueltige Kontraktklassen-Varianten werden per Pydantic validiert; UAT-Auflagenstatus ist in Protokoll und Traceability aktualisiert; fokussierte API-/UAT-Contract-Tests und Doku-Checks sind gruen.
+**Erledigt:** PCN/UFI-Endpoint mit UFI-/Statusvalidierung und DB-Fallback-Vertrag gehaertet; `KontraktKlasseCreate.variante` per Pydantic `Literal` validiert; UAT-API-Contracts auf aktuelle v1-Routen und idempotente Testdaten nachgezogen; UAT-Protokoll, Master-Plan und Traceability auf repo-seitig erledigte Auflagen aktualisiert.
+**Checks:** `python -m py_compile app/api/v1/endpoints/compliance.py app/api/v1/endpoints/kontrakt_klassen.py tests/uat/test_uat_api_contracts.py`; `pytest tests/uat/test_uat_api_contracts.py tests/test_compliance_pos_gap_extensions.py -q --no-cov`; `python scripts/agent_workboard_supervisor.py validate`; `node scripts/docs-governance-check.cjs`
 **Offene Risiken:** Externe PCN-Portal-/ECHA-Anbindung, Steuerberaterfreigabe und produktive Browser-Abnahme bleiben Betriebsfreigaben.
 
 ## AMIC-PARITY-001

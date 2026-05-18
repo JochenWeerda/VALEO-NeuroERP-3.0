@@ -1,8 +1,8 @@
 # UAT-Masterplan — VALEO NeuroERP 3.0
-**Version:** 1.0  
-**Stand:** 2026-05-18  
-**Klassifizierung:** Intern – Qualitätssicherung  
-**Verantwortlich:** Testmanager (Claude / QA-Beauftragter)  
+**Version:** 1.0
+**Stand:** 2026-05-18
+**Klassifizierung:** Intern – Qualitätssicherung
+**Verantwortlich:** Testmanager (Claude / QA-Beauftragter)
 **Geltungsbereich:** Release 3.0 — Waves 2026-03 bis 2026-05-17
 
 ---
@@ -202,15 +202,15 @@ Phase 7: SIGN-OFF       [Tag 12]    ← Abnahmeprotokoll, Freigabeentscheidung
 ### 7.2 Detailplan
 
 #### Phase 1 — Smoke Test (Tag 1)
-**Ziel:** Alle kritischen Endpunkte erreichbar, Stack gesund  
-**Testfälle:** ~50 Health-Checks, Auth-Flow, DB-Konnektivität  
-**Tools:** `pytest -m smoke`, curl-Skript  
+**Ziel:** Alle kritischen Endpunkte erreichbar, Stack gesund
+**Testfälle:** ~50 Health-Checks, Auth-Flow, DB-Konnektivität
+**Tools:** `pytest -m smoke`, curl-Skript
 **Exit:** 100 % der Smoke-Tests grün
 
 #### Phase 2 — Funktionaler Test (Tag 2–5)
-**Ziel:** Alle Gherkin-Szenarien für F01–F15 ausgeführt  
-**Testfälle:** ~280 Szenarien aus `.feature`-Dateien  
-**Tools:** `pytest-bdd`, Playwright, manuelle Exploration  
+**Ziel:** Alle Gherkin-Szenarien für F01–F15 ausgeführt
+**Testfälle:** ~280 Szenarien aus `.feature`-Dateien
+**Tools:** `pytest-bdd`, Playwright, manuelle Exploration
 **Priorität:** P0 zuerst, dann P1, dann P2
 
 | Tag | Feature-Bereiche | Szenarien |
@@ -235,13 +235,13 @@ Phase 7: SIGN-OFF       [Tag 12]    ← Abnahmeprotokoll, Freigabeentscheidung
 | E2E-07 | Webshop-Bestellung → L3-Connect-Sync → ERP-Auftrag → Lieferschein | P1 |
 
 #### Phase 4 — Regressionstest (Tag 9)
-**Ziel:** Keine Regressions gegenüber letztem stabilem Release  
-**Testfälle:** Komplette Regressionssuites (automatisiert)  
-**Tools:** `pytest --tb=short -m regression`  
+**Ziel:** Keine Regressions gegenüber letztem stabilem Release
+**Testfälle:** Komplette Regressionssuites (automatisiert)
+**Tools:** `pytest --tb=short -m regression`
 **Exit:** 0 neue Failures; alle bekannten Skips dokumentiert
 
 #### Phase 5 — Performancetest (Tag 10)
-**Ziel:** Response-Time-Targets unter Last  
+**Ziel:** Response-Time-Targets unter Last
 **Szenarien:**
 
 | Szenario | Last | Ziel |
@@ -470,5 +470,5 @@ uat:
 
 ---
 
-*Erstellt gemäß IEEE 829-2008 / ISTQB / ISO/IEC 25010 / ISO 31000*  
+*Erstellt gemäß IEEE 829-2008 / ISTQB / ISO/IEC 25010 / ISO 31000*
 *Dieses Dokument ist versioniert und GoBD-konform zu archivieren.*

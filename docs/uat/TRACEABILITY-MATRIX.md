@@ -1,8 +1,8 @@
 # Traceability-Matrix — VALEO NeuroERP 3.0
-**Version:** 1.0  
-**Stand:** 2026-05-18  
-**Standard:** IEEE 829-2008 (Requirements Traceability)  
-**Klassifizierung:** Intern — Qualitätssicherung  
+**Version:** 1.0
+**Stand:** 2026-05-18
+**Standard:** IEEE 829-2008 (Requirements Traceability)
+**Klassifizierung:** Intern — Qualitätssicherung
 
 ---
 
@@ -304,5 +304,5 @@ abgesichert. Ungueltige UFI werden mit HTTP 422 abgelehnt.
 
 ---
 
-*Erstellt gemäß IEEE 829-2008 / ISTQB Requirements Traceability*  
+*Erstellt gemäß IEEE 829-2008 / ISTQB Requirements Traceability*
 *Stand: 2026-05-18 — wird mit jedem Release aktualisiert*
