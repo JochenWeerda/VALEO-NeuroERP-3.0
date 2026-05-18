@@ -1,8 +1,9 @@
 id: REPORT-PRINT-001
 title: Report Print Closure
 owner: Codex
-status: reserviert
+status: abgeschlossen
 claimed_at: 2026-05-18
+completed_at: 2026-05-18
 goal: Partie-Genealogie, Wiegschein-PDF-Nachweis und Etikett-/Label-Vertrag als repo-seitig pruefbaren Report-/Print-Pfad schliessen.
 scope:
   - Partie- und Chargen-Genealogie als API-Vertrag bereitstellen
@@ -31,4 +32,8 @@ checks:
 risks:
   - Echte Drucker-/PDF-Rendering- und UAT-Abnahme mit Produktivdaten bleiben externe Betriebsfreigaben.
   - Parallel geaenderte Dateien ausserhalb des Dateibesitzes duerfen nicht beruehrt werden.
-next_step: Thin-Router, Service und fokussierte API-Tests fuer Report-/Print-Vertrag ergaenzen.
+next_step: Externe Drucker-/PDF-Layout-/UAT-Abnahme mit Produktivdaten terminieren.
+result: >
+  Thin-Router /report-print und ReportPrintService ergaenzt. API liefert
+  Readiness, Partie-Genealogie, Wiegeschein-PDF-Preview/Artefaktmetadaten
+  und print-ready GS1-Labeldaten fuer Partie/Charge/Artikel/SSCC/GTIN.

@@ -140,7 +140,7 @@ Stand Wave 2026-05-17 (P0/P1 Gaps implementiert):
 | FIBU-CUTOVER-002 | SKR03/SKR04-Mapping + Steuerberaterabnahme | P0 | offen (extern) |
 | DMS-DOC-002 | DMS-Live-Probe, Redirect-Failure, Audit-Paket | P1 | repo-seitig vorbereitet; Live-Probe extern |
 | POS-DSFINVK-001 | TSE-/DSFinV-K-Abnahme | P1 | repo-seitig implementiert; Pruefwerkzeug-Abnahme extern |
-| REPORT-PRINT-001 | Partie-Genealogie, Wiegschein-PDF, Etikett | P1 | offen |
+| REPORT-PRINT-001 | Partie-Genealogie, Wiegschein-PDF, Etikett | P1 | repo-seitig implementiert; Drucker-/UAT-Abnahme extern |
 | AMIC-FIBU-006 | eBilanz/ELSTER-Direktschnittstelle | P1 | repo-seitig implementiert; ERiC-/Steuerberater-Gate extern |
 | AMIC-FIBU-003 | ATLAS Zollausfuhr | P2 | implementiert; ATLAS-Zertifikat extern |
 | L3-CRM-001 | Umkreissuche Kunden (Geo-Radius) | P2 | implementiert |
@@ -166,6 +166,7 @@ Repo-seitig ergaenzt und registriert:
 - HRM/Compliance/POS: Organigramm, Arbeitszeitkonto, Bewerberpipeline, DSGVO-Loeschantraege, Whistleblower, LkSG, POS-Split-Payment und Promotions-Preview.
 - Webshop: B2B-Bestellsync mit idempotentem Import, Dubletten-Erkennung, fachlichen Blockern fuer Kunden-/Positions-/Summenkontext, Lesepfad und ERP-Verarbeitungsreferenz.
 - Phase 2/3 Closure: eBilanz/ELSTER-Readiness mit ERiC-Gates, GS1/SSCC im Barcode-Parser, DSFinV-K-v2.3-ZIP-Nachweis, ATLAS-Zollausfuhr, Saatzucht und Futtermittel-API-Regressionen sind repo-seitig abgesichert.
+- Report/Print: Partie-Genealogie mit Rueckverfolgungsknoten, Wiegeschein-PDF-Preview/Artefaktmetadaten und GS1-Label-Vertrag fuer Partie/Charge/Artikel/SSCC/GTIN.
 
 Checks: `pytest tests/test_crm_pipeline_360.py tests/test_einkauf_3way_match_ers_rfq.py tests/test_finance_asset_budget_liquidity.py tests/test_logistics_tour_freight.py tests/test_major_domain_router_registration.py tests/test_personal_major_gap_extensions.py tests/test_compliance_pos_gap_extensions.py tests/test_process_kernel_wave100_settlement_completion.py tests/test_process_kernel_wave31_dq_extended_write_paths.py -q --no-cov --tb=short` -> 70 gruen.
 
