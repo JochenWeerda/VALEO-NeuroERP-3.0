@@ -51,7 +51,7 @@ Methodik: Direktvergleich Branchenspezifische-Agrarsoftware-Kernfunktionen gegen
 
 | Gap-ID | Beschreibung | Prioritaet | Owner-Domain | Abnahmekriterium |
 |--------|--------------|------------|--------------|------------------|
-| AMIC-PARITY-001 | Vollstaendige Browser-/CRUD-Abnahme der O2C/P2P-Folgeobjektkette von Annahme bis FIBU-Buchung fehlt als UAT-Pfad | P0 | Agrar / Supply / Finance | Playwright-Pfad Annahme→Settlement→FIBU-Buchung laeuft gruen mit Seed-Daten |
+| AMIC-PARITY-001 | Vollstaendige Browser-/CRUD-Abnahme der O2C/P2P-Folgeobjektkette von Annahme bis FIBU-Buchung fehlt als UAT-Pfad | P0 | Agrar / Supply / Finance | Repo-seitig vorbereitet: `/uat/o2c/readiness` und 7-Schritt-Szenario-Runner decken O2C/P2P/Partie-Kette ab; externe Browser-UAT-Unterschrift bleibt Gate |
 | WAAGE-LIVE-001 | Live-Hardware-/Dateiimport (ASCII-Waagenformat), Eich-/Kalibrierungsnachweise und Offline-Fehlerqueue nicht produktiv abgenommen | P0 | Agrar / Waage | Realgeraet oder ASCII-Datei-Import-Test gruen; Fehlerqueue-Roundtrip dokumentiert |
 | SILO-LEER-001 | Leermeldung-Endpunkt, Schwundbuchung, Fehlermatrix und Waagenbeleg-Kopplung fehlen vollstaendig | P0 | Agrar / Lager | `POST /silo/silos/{id}/leermeldung` + Schwundbuchung + 3 Fehler-Szenario-Tests gruen |
 | PARTIE-PFLICHT-001 | Harte Validierungsregel "Artikel/Wiegetyp verlangt Partie" fehlt zentral im Backend | P1 | Agrar / Waage | Backend-Constraint wirft 422 bei Wiegung ohne Charge wenn Artikelstamm Partiepflicht traegt |

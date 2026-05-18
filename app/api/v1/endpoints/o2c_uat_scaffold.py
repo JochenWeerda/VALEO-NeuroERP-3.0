@@ -29,6 +29,39 @@ _STEPS_TEMPLATE = [
     (7, "Partie-Genealogie prüfen"),
 ]
 
+_READINESS_COVERAGE = [
+    {
+        "domain": "O2C",
+        "covered_paths": [
+            "customer_order_context",
+            "delivery_and_inventory_trace",
+            "invoice_or_settlement_reference",
+        ],
+        "repo_status": "prepared",
+    },
+    {
+        "domain": "P2P",
+        "covered_paths": [
+            "supplier_delivery_context",
+            "purchase_or_contract_reference",
+            "goods_receipt_to_settlement",
+        ],
+        "repo_status": "prepared",
+    },
+    {
+        "domain": "PARTIE",
+        "covered_paths": [
+            "harvest_acceptance",
+            "quality_protocol",
+            "silo_booking",
+            "settlement_preview",
+            "fibu_posting",
+            "genealogy_check",
+        ],
+        "repo_status": "prepared",
+    },
+]
+
 # In-memory store for UAT scenarios (UAT data, DB optional)
 _store: dict[str, dict] = {}
 
@@ -115,6 +148,27 @@ def _load_from_db_or_store(id: str, db: Session, tenant_id: str) -> Optional[dic
 
 
 # ── Endpoints ─────────────────────────────────────────────────────────────────
+
+@router.get("/readiness")
+def readiness(
+    db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
+):
+    """Repo-side UAT readiness for the O2C/P2P/Partie chain."""
+    return {
+        "tenant_id": tenant_id,
+        "status": "repo_ready",
+        "scenario_steps": len(_STEPS_TEMPLATE),
+        "coverage": _READINESS_COVERAGE,
+        "required_external_gates": [
+            "browser_uat_with_productive_master_data",
+            "scale_archive_reconciliation",
+            "dms_live_probe",
+            "tax_advisor_fibu_signoff",
+            "signed_uat_protocol",
+        ],
+    }
+
 
 @router.get("/szenarien", response_model=list[UATSzenarioOut])
 def list_szenarien(

@@ -6,10 +6,12 @@ Stand: `2026-05-12`
 
 **Von:** Codex
 **Owner:** Codex
-**Stand:** reserviert 2026-05-18
+**Stand:** abgeschlossen 2026-05-18
 **Ziel des Slices:** O2C/P2P/Partie-Kette als repo-seitig pruefbaren UAT-Pfad ausweisen und externe UAT-Gates sauber abgrenzen.
 **Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/agent-ops/slices/AMIC-PARITY-001.yaml`, `docs/project-context/open-gaps-and-known-issues.md`, `docs/project-context/agrar-parity-matrix-2026-05-17.md`, `app/api/v1/endpoints/o2c_uat_scaffold.py`, `tests/test_webshop_atlas_saatzucht_uat.py`
 **Abnahmekriterien:** API liefert UAT-Readiness mit O2C/P2P/Partie-Abdeckung; bestehende 7-Schritt-Szenarien bleiben kompatibel; Gap-Status trennt repo-seitigen Pfad von externer UAT-Unterschrift; fokussierte Tests und Doku-Checks sind gruen.
+**Erledigt:** `/uat/o2c/readiness` liefert repo-seitige Abdeckung fuer O2C, P2P und Partie-Kette sowie externe Gates; bestehender 7-Schritt-Szenario-Runner und Tests bleiben kompatibel; Gap- und Parity-Doku trennen repo-seitigen Pfad von externer UAT-Unterschrift.
+**Checks:** `pytest tests/test_webshop_atlas_saatzucht_uat.py -q --no-cov`
 **Offene Risiken:** Produktive Browser-UATs mit realen Mandanten-, Waage-, DMS-, Druck- und Steuerberaterdaten bleiben externe Abnahmen.
 
 ## REPORT-PRINT-001
