@@ -145,7 +145,7 @@ Stand Wave 2026-05-17 (P0/P1 Gaps implementiert):
 | AMIC-FIBU-003 | ATLAS Zollausfuhr | P2 | offen |
 | L3-CRM-001 | Umkreissuche Kunden (Geo-Radius) | P2 | implementiert |
 | L3-WEBHOOK-001 | Outbound Webhook-Registrierung | P2 | implementiert |
-| L3-WEBSHOP-001 | Webshop B2B-Bestellintegration | P2 | offen |
+| L3-WEBSHOP-001 | Webshop B2B-Bestellintegration | P2 | implementiert |
 | L3-GS1-001 | GS1 Barcode Parse Service | P2 | implementiert |
 | L3-LAGER-001 | Ruestliste (Kommissioniervorbereitung) | P2 | implementiert |
 | AMIC-WAAGE-VORL | Waagenvorlagen/Wiederholfall-Anlieferungen | P2 | implementiert |
@@ -164,6 +164,7 @@ Repo-seitig ergaenzt und registriert:
 - HRM: Org-Chart, Bewerberpipeline, Arbeitszeitkonto, Whistleblower (anonym), DSGVO-Loeschkonzept.
 - POS: Split-Payment (Multi-Tender), Promotions CRUD + Check (PROZENT/BETRAG/BOGO), X/Z-Berichte.
 - HRM/Compliance/POS: Organigramm, Arbeitszeitkonto, Bewerberpipeline, DSGVO-Loeschantraege, Whistleblower, LkSG, POS-Split-Payment und Promotions-Preview.
+- Webshop: B2B-Bestellsync mit idempotentem Import, Dubletten-Erkennung, fachlichen Blockern fuer Kunden-/Positions-/Summenkontext, Lesepfad und ERP-Verarbeitungsreferenz.
 
 Checks: `pytest tests/test_crm_pipeline_360.py tests/test_einkauf_3way_match_ers_rfq.py tests/test_finance_asset_budget_liquidity.py tests/test_logistics_tour_freight.py tests/test_major_domain_router_registration.py tests/test_personal_major_gap_extensions.py tests/test_compliance_pos_gap_extensions.py tests/test_process_kernel_wave100_settlement_completion.py tests/test_process_kernel_wave31_dq_extended_write_paths.py -q --no-cov --tb=short` -> 70 gruen.
 
