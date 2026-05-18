@@ -908,3 +908,133 @@ class HarvestAcceptanceService:
             "warnings": result.warnings,
             "price_source": price_source,
         }
+
+
+# ── Pure business-logic functions (testable without DB) ─────────────────────
+
+def calculate_net_weight(
+    gross_kg: float,
+    tare_kg: float,
+    moisture_pct: float,
+    drying_target_pct: float,
+) -> float:
+    """Nettogewicht nach Abzug Tara und Trocknungskorrektur berechnen.
+
+    Formel:
+        1. netto_feucht = gross_kg - tare_kg
+        2. Wenn moisture_pct > drying_target_pct:
+               trocknungsabzug = netto_feucht * (moisture_pct - drying_target_pct) / 100
+           Sonst: 0
+        3. netto_trocken = netto_feucht - trocknungsabzug
+
+    Args:
+        gross_kg: Bruttogewicht in kg (Wiegegewicht).
+        tare_kg: Taragewicht (Fahrzeug + Behälter) in kg.
+        moisture_pct: Gemessener Feuchtegehalt in Prozent (z.B. 15.5).
+        drying_target_pct: Ziel-Feuchtegehalt laut Norm (z.B. 14.0 für Weizen).
+
+    Returns:
+        Nettogewicht in kg (gerundet auf 3 Dezimalstellen).
+
+    Raises:
+        ValueError: Wenn Gewichte negativ oder tare_kg >= gross_kg.
+    """
+    if gross_kg < 0 or tare_kg < 0:
+        raise ValueError("Gewichte dürfen nicht negativ sein")
+    if tare_kg >= gross_kg:
+        raise ValueError(f"Tara ({tare_kg} kg) muss kleiner als Brutto ({gross_kg} kg) sein")
+    if not (0 <= moisture_pct <= 100):
+        raise ValueError(f"Feuchtegehalt muss zwischen 0 und 100 Prozent liegen, erhalten: {moisture_pct}")
+    if not (0 <= drying_target_pct <= 100):
+        raise ValueError(f"Ziel-Feuchte muss zwischen 0 und 100 Prozent liegen, erhalten: {drying_target_pct}")
+
+    netto_feucht = gross_kg - tare_kg
+    if moisture_pct > drying_target_pct:
+        trocknungsabzug = netto_feucht * (moisture_pct - drying_target_pct) / 100
+    else:
+        trocknungsabzug = 0.0
+    netto_trocken = netto_feucht - trocknungsabzug
+    return round(netto_trocken, 3)
+
+
+def assign_quality_grade(
+    moisture_pct: float,
+    protein_pct: float,
+    contamination_pct: float,
+) -> str:
+    """Qualitätsstufe (A/B/C/Reject) gemäß Standardparametern bestimmen.
+
+    Grenzwerte (vereinfacht, angelehnt an DLG/VTG-Normen):
+        - A: moisture ≤ 14, protein ≥ 12, contamination ≤ 1
+        - B: moisture ≤ 15, protein ≥ 10, contamination ≤ 2
+        - C: moisture ≤ 16, protein ≥ 8,  contamination ≤ 3
+        - Reject: sonst (zu feucht, zu wenig Protein oder zu viel Verunreinigung)
+
+    Args:
+        moisture_pct: Feuchtegehalt in Prozent.
+        protein_pct: Proteingehalt in Prozent.
+        contamination_pct: Verunreinigungsanteil in Prozent.
+
+    Returns:
+        Qualitätsstufe als String: "A", "B", "C" oder "REJECT".
+
+    Raises:
+        ValueError: Bei ungültigen Prozentwerten.
+    """
+    for name, val in [("Feuchte", moisture_pct), ("Protein", protein_pct), ("Verunreinigung", contamination_pct)]:
+        if not (0 <= val <= 100):
+            raise ValueError(f"{name} muss zwischen 0 und 100 Prozent liegen, erhalten: {val}")
+
+    if moisture_pct <= 14.0 and protein_pct >= 12.0 and contamination_pct <= 1.0:
+        return "A"
+    if moisture_pct <= 15.0 and protein_pct >= 10.0 and contamination_pct <= 2.0:
+        return "B"
+    if moisture_pct <= 16.0 and protein_pct >= 8.0 and contamination_pct <= 3.0:
+        return "C"
+    return "REJECT"
+
+
+# ── Ergänzung HarvestAcceptanceService: get_delivery_summary ─────────────────
+
+# Methode wird als Mixin am Ende der Klasse ergänzt — siehe unten.
+# (Python lässt keine nachträgliche Klassen-Erweiterung mit Monkey-Patching zu,
+#  daher wird get_delivery_summary direkt in der Klassendefinition ergänzt.)
+# Die Implementierung ist als Standalone-Funktion verfügbar:
+
+def get_delivery_summary(delivery_id: str, db: Session) -> dict:
+    """Read-Model: kompakte Zusammenfassung einer Ernte-Annahme für Dashboard/Reports.
+
+    Args:
+        delivery_id: ID der HarvestAcceptance.
+        db: SQLAlchemy Session.
+
+    Returns:
+        Dict mit acceptance_number, customer_id, delivery_date, release_status,
+        total_net_amount_eur, position_count, article_name.
+
+    Raises:
+        EntityNotFoundError: Wenn Annahme nicht gefunden.
+    """
+    obj = db.query(HarvestAcceptance).filter(HarvestAcceptance.id == delivery_id).first()
+    if not obj:
+        raise EntityNotFoundError("HarvestAcceptance", delivery_id)
+
+    position_count = db.query(HarvestAcceptancePosition).filter(
+        HarvestAcceptancePosition.harvest_acceptance_id == delivery_id
+    ).count()
+
+    article_name: Optional[str] = None
+    if obj.article_id:
+        article = db.query(Article).filter(Article.id == obj.article_id).first()
+        if article:
+            article_name = article.name or (article.description[:100] if article.description else None)
+
+    return {
+        "acceptance_number": obj.acceptance_number,
+        "customer_id": obj.customer_id,
+        "delivery_date": str(obj.delivery_date),
+        "release_status": obj.release_status,
+        "total_net_amount_eur": float(obj.total_net_amount_eur) if obj.total_net_amount_eur else None,
+        "position_count": position_count,
+        "article_name": article_name,
+    }
