@@ -4,37 +4,25 @@ Agrar self-billing settlements with deduction and posting workflow (AGRAR-SET-01
 
 from __future__ import annotations
 
-from datetime import date, datetime
+from datetime import datetime
 from decimal import Decimal
-from typing import Any, Literal, Optional
+from typing import Literal, Optional
 from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from pydantic import BaseModel, Field, model_validator
 from sqlalchemy.orm import Session
 from sqlalchemy.orm.exc import StaleDataError
 
 from app.core.database import get_db
-from app.core.data_quality_enforcement import (
-    build_dq_error_detail,
-    evaluate_settlement_datensatz,
-)
 from app.core.exceptions import ConflictError, EntityNotFoundError, ValidationFailedError
 from app.core.tenant import get_tenant_id
 from app.services.agrar_settlement_service import AgrarSettlementService
-from app.services.agrar_drying_rule_service import DryingRuleService
 from app.services.settlement_pdf_service import SettlementPdfService
-from app.documents.router_helpers import get_repository, save_to_store
 from app.infrastructure.models import AgrarSettlement, AgrarSettlementDeduction
-from app.domains.inventory.api.inventory_auth import require_inventory_admin
-from app.core.uuid7 import uuid7
+from app.infrastructure.drying_rule_repo import DbDryingRuleRepo
 from modules.agrar.services.moisture_engine import MoistureEngineInput, calculate_billing_weight
 from modules.agrar.services.drying_rule_engine import (
-    DryingFactorRange as _DryingFactorRange,
-    DryingLookupRow as _DryingLookupRow,
-    DryingRuleRepository as _DryingRuleRepository,
-    DryingRuleSet as _DryingRuleSet,
     compute_settlement as _compute_drying_settlement,
 )
-from app.infrastructure.models import DryingRuleFactorRange, DryingRuleLookupRow, DryingRuleSet
 from app.api.v1.endpoints.admin_core import _load_tenant_settings
 from modules.agrar.services.settlement_calculator import (
     calc_deduction_amount as _calc_deduction_amount_impl,
@@ -50,6 +38,15 @@ DeductionMode = Literal["per_ton", "fixed"]
 SettlementStatus = Literal["draft", "posted", "cancelled"]
 
 
+
+def _round_money(value: Decimal | float | int) -> Decimal:
+    return _round_money_impl(value)
+
+
+def _round_qty(value: Decimal | float | int) -> Decimal:
+    return _round_qty_impl(value)
+
+
 def _build_settlement_dq_datensatz(payload: "SettlementCreate", settlement_number: str) -> dict:
     return {
         "abrechnungsnummer": settlement_number,
@@ -59,14 +56,6 @@ def _build_settlement_dq_datensatz(payload: "SettlementCreate", settlement_numbe
         "preis_eur_pro_t": payload.unit_price_eur_per_ton,
         "waehrung": "EUR",
     }
-
-
-def _round_money(value: Decimal | float | int) -> Decimal:
-    return _round_money_impl(value)
-
-
-def _round_qty(value: Decimal | float | int) -> Decimal:
-    return _round_qty_impl(value)
 
 
 class DeductionInput(BaseModel):
@@ -159,129 +148,9 @@ class DryingComputeResponse(BaseModel):
     warnings: list[str] = Field(default_factory=list)
 
 
-class _DbDryingRuleRepo(_DryingRuleRepository):
-    def __init__(self, db: Session, *, tenant_id: str):
-        self.db = db
-        self.tenant_id = tenant_id
-
-    def find_rule_set(self, *, crop_code: str, site_id: Optional[str], calc_date, contract_id: Optional[str] = None, customer_id: Optional[str] = None) -> _DryingRuleSet:
-        """
-        Find rule set with priority:
-        1. Customer-specific rule (if customer_id provided)
-        2. Contract-specific rule (if contract_id provided)
-        3. Site-specific rule
-        4. Global rule (site_id=NULL)
-        """
-        def _base_q():
-            return (
-                self.db.query(DryingRuleSet)
-                .filter(DryingRuleSet.tenant_id == self.tenant_id)
-                .filter(DryingRuleSet.crop_code == crop_code)
-                .filter(DryingRuleSet.is_active == True)  # noqa: E712
-                .filter((DryingRuleSet.valid_from.is_(None)) | (DryingRuleSet.valid_from <= calc_date))
-                .filter((DryingRuleSet.valid_to.is_(None)) | (DryingRuleSet.valid_to >= calc_date))
-            )
-
-        # 1. Customer-specific rule (höchste Priorität)
-        if customer_id:
-            row = (
-                _base_q()
-                .filter(DryingRuleSet.customer_id == customer_id)
-                .filter(DryingRuleSet.is_customer_specific == True)  # noqa: E712
-                .order_by(DryingRuleSet.valid_from.desc().nullslast(), DryingRuleSet.version.desc())
-                .first()
-            )
-            if row:
-                return self._row_to_rule_set(row)
-
-        # 2. Contract-specific rule
-        if contract_id:
-            row = (
-                _base_q()
-                .filter(DryingRuleSet.contract_id == contract_id)
-                .filter(DryingRuleSet.is_customer_specific == False)  # noqa: E712
-                .order_by(DryingRuleSet.valid_from.desc().nullslast(), DryingRuleSet.version.desc())
-                .first()
-            )
-            if row:
-                return self._row_to_rule_set(row)
-
-        # 3. Site-specific rule (nur allgemeingültige)
-        row = None
-        if site_id is not None:
-            row = (
-                _base_q()
-                .filter(DryingRuleSet.site_id == site_id)
-                .filter(DryingRuleSet.contract_id.is_(None))
-                .filter(DryingRuleSet.is_customer_specific == False)  # noqa: E712
-                .order_by(DryingRuleSet.valid_from.desc().nullslast(), DryingRuleSet.version.desc())
-                .first()
-            )
-        # 4. Global rule (fallback)
-        if row is None:
-            row = (
-                _base_q()
-                .filter(DryingRuleSet.site_id.is_(None))
-                .filter(DryingRuleSet.contract_id.is_(None))
-                .filter(DryingRuleSet.is_customer_specific == False)  # noqa: E712
-                .order_by(DryingRuleSet.valid_from.desc().nullslast(), DryingRuleSet.version.desc())
-                .first()
-            )
-        if not row:
-            raise HTTPException(status_code=404, detail=f"No drying rule set found for crop_code={crop_code} (site_id={site_id}, contract_id={contract_id}, customer_id={customer_id})")
-        return self._row_to_rule_set(row)
-
-    def _row_to_rule_set(self, row) -> _DryingRuleSet:
-        return _DryingRuleSet(
-            id=row.id,
-            version=int(row.version),
-            crop_code=row.crop_code,
-            site_id=row.site_id,
-            valid_from=row.valid_from,
-            valid_to=row.valid_to,
-            method=row.method,  # type: ignore[arg-type]
-            base_moisture_pct=Decimal(str(row.base_moisture_pct)),
-            rounding_mode=row.rounding_mode,  # type: ignore[arg-type]
-            clamp_mode=row.clamp_mode,  # type: ignore[arg-type]
-            min_moisture_pct=Decimal(str(row.min_moisture_pct)),
-            max_moisture_pct=Decimal(str(row.max_moisture_pct)),
-            start_threshold_moisture_pct=Decimal(str(row.start_threshold_moisture_pct)) if row.start_threshold_moisture_pct is not None else None,
-            fee_basis=row.fee_basis,  # type: ignore[arg-type]
-        )
-
-    def list_lookup_rows(self, *, rule_set_id: str) -> list[_DryingLookupRow]:
-        rows = (
-            self.db.query(DryingRuleLookupRow)
-            .filter(DryingRuleLookupRow.rule_set_id == rule_set_id)
-            .order_by(DryingRuleLookupRow.moisture_pct.asc())
-            .all()
-        )
-        return [
-            _DryingLookupRow(
-                moisture_pct=Decimal(str(r.moisture_pct)),
-                entzug_pct_points=Decimal(str(r.entzug_pct_points)),
-                loss_pct=Decimal(str(r.loss_pct)),
-                fee_value=Decimal(str(r.fee_value)) if r.fee_value is not None else None,
-                fee_unit=r.fee_unit,  # type: ignore[arg-type]
-            )
-            for r in rows
-        ]
-
-    def list_factor_ranges(self, *, rule_set_id: str) -> list[_DryingFactorRange]:
-        rows = (
-            self.db.query(DryingRuleFactorRange)
-            .filter(DryingRuleFactorRange.rule_set_id == rule_set_id)
-            .order_by(DryingRuleFactorRange.from_moisture_incl.asc())
-            .all()
-        )
-        return [
-            _DryingFactorRange(
-                from_moisture_incl=Decimal(str(r.from_moisture_incl)),
-                to_moisture_incl=Decimal(str(r.to_moisture_incl)),
-                factor=Decimal(str(r.factor)),
-            )
-            for r in rows
-        ]
+# DbDryingRuleRepo is defined in app.infrastructure.drying_rule_repo
+# Alias for backward compatibility within this module
+_DbDryingRuleRepo = DbDryingRuleRepo
 
 
 class DeductionOut(BaseModel):
@@ -455,83 +324,6 @@ def _to_out(settlement: AgrarSettlement, deductions: list[AgrarSettlementDeducti
     )
 
 
-def _parse_campaign_window(campaign: dict[str, Any]) -> tuple[date, date] | None:
-    try:
-        return (
-            date.fromisoformat(str(campaign.get("start_date"))),
-            date.fromisoformat(str(campaign.get("end_date"))),
-        )
-    except Exception:
-        return None
-
-
-def _to_created_date(value: object) -> date | None:
-    if isinstance(value, datetime):
-        return value.date()
-    if isinstance(value, str):
-        try:
-            return datetime.fromisoformat(value.replace("Z", "+00:00")).date()
-        except ValueError:
-            return None
-    return None
-
-
-def _build_campaign_backfill_plan(
-    *,
-    campaign_id: str,
-    campaigns: list[dict[str, Any]],
-    settlements: list[AgrarSettlement],
-) -> SettlementCampaignBackfillResponse:
-    target_campaign = next((campaign for campaign in campaigns if str(campaign.get("id")) == campaign_id), None)
-    if target_campaign is None:
-        raise HTTPException(status_code=404, detail="Campaign not found")
-
-    target_window = _parse_campaign_window(target_campaign)
-    if target_window is None:
-        raise HTTPException(status_code=409, detail="Campaign date range is invalid")
-
-    updated_ids: list[str] = []
-    ambiguous_ids: list[str] = []
-    skipped_ids: list[str] = []
-    start_date, end_date = target_window
-
-    valid_campaigns = [(campaign, _parse_campaign_window(campaign)) for campaign in campaigns]
-    valid_campaigns = [(campaign, window) for campaign, window in valid_campaigns if window is not None]
-
-    for settlement in settlements:
-        if getattr(settlement, "campaign_id", None):
-            continue
-        created_on = _to_created_date(getattr(settlement, "created_at", None))
-        if created_on is None:
-            skipped_ids.append(str(settlement.id))
-            continue
-        if created_on < start_date or created_on > end_date:
-            continue
-
-        matching_campaign_ids = [
-            str(campaign.get("id"))
-            for campaign, window in valid_campaigns
-            if window[0] <= created_on <= window[1]
-        ]
-        if campaign_id not in matching_campaign_ids:
-            continue
-        if len(matching_campaign_ids) > 1:
-            ambiguous_ids.append(str(settlement.id))
-            continue
-        updated_ids.append(str(settlement.id))
-
-    return SettlementCampaignBackfillResponse(
-        campaign_id=campaign_id,
-        matched_count=len(updated_ids) + len(ambiguous_ids) + len(skipped_ids),
-        updated_count=len(updated_ids),
-        ambiguous_count=len(ambiguous_ids),
-        skipped_count=len(skipped_ids),
-        updated_settlement_ids=updated_ids,
-        ambiguous_settlement_ids=ambiguous_ids,
-        skipped_settlement_ids=skipped_ids,
-    )
-
-
 @router.post("/billing-weight/preview", response_model=dict)
 async def preview_billing_weight(payload: BillingWeightPreviewRequest) -> dict:
     result = calculate_billing_weight(
@@ -631,9 +423,6 @@ def _svc(db: Session, tenant_id: str) -> AgrarSettlementService:
     return AgrarSettlementService(db, tenant_id)
 
 
-def _drying_svc(db: Session, tenant_id: str) -> DryingRuleService:
-    return DryingRuleService(db, tenant_id)
-
 
 @router.get("/", response_model=list[SettlementOut])
 async def list_settlements(
@@ -657,7 +446,7 @@ async def backfill_settlement_campaign_reference(
 ):
     settings = _load_tenant_settings(db, tenant_id)
     campaigns = settings.get("erntefenster_campaigns")
-    campaign_list = [campaign for campaign in campaigns if isinstance(campaign, dict)] if isinstance(campaigns, list) else []
+    campaign_list = [c for c in campaigns if isinstance(c, dict)] if isinstance(campaigns, list) else []
 
     settlements = (
         db.query(AgrarSettlement)
@@ -665,11 +454,19 @@ async def backfill_settlement_campaign_reference(
         .filter(AgrarSettlement.campaign_id.is_(None))
         .all()
     )
-    plan = _build_campaign_backfill_plan(
-        campaign_id=payload.campaign_id,
-        campaigns=campaign_list,
-        settlements=settlements,
-    )
+    svc = _svc(db, tenant_id)
+    try:
+        plan_data = svc.build_campaign_backfill_plan(
+            campaign_id=payload.campaign_id,
+            campaigns=campaign_list,
+            settlements=settlements,
+        )
+    except EntityNotFoundError as exc:
+        raise HTTPException(status_code=404, detail=exc.detail)
+    except ValidationFailedError as exc:
+        raise HTTPException(status_code=409, detail=exc.detail)
+
+    plan = SettlementCampaignBackfillResponse(**plan_data)
 
     if payload.dry_run or plan.updated_count == 0:
         return plan
@@ -801,444 +598,11 @@ async def cancel_settlement(
     return {"ok": True, "settlement_id": result.id, "status": result.status}
 
 
-# ── Drying Rule Sets CRUD (Admin-only write, read for all) ──────────────────────
-
 def _get_user_id_from_request(request: Request) -> Optional[str]:
     """Extract user ID from request state (token claims)."""
-    claims = getattr(request.state, 'token_claims', {})
-    return claims.get('sub') or claims.get('user_id')
+    claims = getattr(request.state, "token_claims", {})
+    return claims.get("sub") or claims.get("user_id")
 
-
-class DryingRuleSetCreate(BaseModel):
-    crop_code: str = Field(..., min_length=1, max_length=40)
-    site_id: Optional[str] = Field(None, max_length=64)
-    valid_from: Optional[str] = Field(None, description="ISO date (YYYY-MM-DD)")
-    valid_to: Optional[str] = Field(None, description="ISO date (YYYY-MM-DD)")
-    method: Literal["LOOKUP_TABLE", "FACTOR_FROM_BASE", "DRY_MATTER_NORMALIZATION"] = Field(...)
-    base_moisture_pct: float = Field(..., ge=0, le=100)
-    rounding_mode: Literal["ROUND_NEAREST", "ROUND_UP", "ROUND_DOWN"] = Field(default="ROUND_NEAREST")
-    clamp_mode: Literal["CLAMP_TO_MAX", "HARD_ERROR"] = Field(default="HARD_ERROR")
-    min_moisture_pct: float = Field(default=0, ge=0, le=100)
-    max_moisture_pct: float = Field(default=60, ge=0, le=100)
-    start_threshold_moisture_pct: Optional[float] = Field(None, ge=0, le=100)
-    fee_basis: Literal["INVOICE_WEIGHT", "NET_WEIGHT"] = Field(default="INVOICE_WEIGHT")
-    contract_id: Optional[str] = Field(None, description="Verknüpfung zu Ankaufskontrakt (optional)")
-    customer_id: Optional[str] = Field(None, description="Kunde für Sonderregelung (optional)")
-    is_customer_specific: bool = Field(default=False)
-    justification: Optional[str] = Field(None, description="Begründung für kundenspezifische Sonderregelungen (erforderlich wenn is_customer_specific=True)")
-    document_id: Optional[str] = Field(None, max_length=64, description="DMS-Referenz für Tabelle/Formel-Dokument")
-
-    @model_validator(mode="after")
-    def validate_customer_specific(self):
-        if self.is_customer_specific and not self.customer_id:
-            raise ValueError("customer_id is required when is_customer_specific=True")
-        if self.is_customer_specific and not self.justification:
-            raise ValueError("justification is required when is_customer_specific=True")
-        return self
-
-
-class DryingRuleSetUpdate(BaseModel):
-    site_id: Optional[str] = Field(None, max_length=64)
-    valid_from: Optional[str] = Field(None, description="ISO date (YYYY-MM-DD)")
-    valid_to: Optional[str] = Field(None, description="ISO date (YYYY-MM-DD)")
-    method: Optional[Literal["LOOKUP_TABLE", "FACTOR_FROM_BASE", "DRY_MATTER_NORMALIZATION"]] = None
-    base_moisture_pct: Optional[float] = Field(None, ge=0, le=100)
-    rounding_mode: Optional[Literal["ROUND_NEAREST", "ROUND_UP", "ROUND_DOWN"]] = None
-    clamp_mode: Optional[Literal["CLAMP_TO_MAX", "HARD_ERROR"]] = None
-    min_moisture_pct: Optional[float] = Field(None, ge=0, le=100)
-    max_moisture_pct: Optional[float] = Field(None, ge=0, le=100)
-    start_threshold_moisture_pct: Optional[float] = Field(None, ge=0, le=100)
-    fee_basis: Optional[Literal["INVOICE_WEIGHT", "NET_WEIGHT"]] = None
-    contract_id: Optional[str] = None
-    customer_id: Optional[str] = None
-    is_customer_specific: Optional[bool] = None
-    justification: Optional[str] = None
-    document_id: Optional[str] = Field(None, max_length=64)
-    is_active: Optional[bool] = None
-
-    @model_validator(mode="after")
-    def validate_customer_specific(self):
-        if self.is_customer_specific is True and not self.customer_id:
-            raise ValueError("customer_id is required when is_customer_specific=True")
-        if self.is_customer_specific is True and not self.justification:
-            raise ValueError("justification is required when is_customer_specific=True")
-        return self
-
-
-class DryingRuleSetOut(BaseModel):
-    id: str
-    crop_code: str
-    site_id: Optional[str]
-    valid_from: Optional[str]
-    valid_to: Optional[str]
-    version: int
-    is_active: bool
-    method: str
-    base_moisture_pct: float
-    rounding_mode: str
-    clamp_mode: str
-    min_moisture_pct: float
-    max_moisture_pct: float
-    start_threshold_moisture_pct: Optional[float]
-    fee_basis: str
-    created_at: str
-    created_by: Optional[str]
-    updated_at: Optional[str]
-    updated_by: Optional[str]
-    contract_id: Optional[str]
-    customer_id: Optional[str]
-    is_customer_specific: bool
-    justification: Optional[str]
-    document_id: Optional[str]
-
-
-def _to_drying_rule_out(r: DryingRuleSet) -> DryingRuleSetOut:
-    return DryingRuleSetOut(
-        id=r.id,
-        crop_code=r.crop_code,
-        site_id=r.site_id,
-        valid_from=r.valid_from.isoformat() if r.valid_from else None,
-        valid_to=r.valid_to.isoformat() if r.valid_to else None,
-        version=int(r.version),
-        is_active=r.is_active,
-        method=r.method,
-        base_moisture_pct=float(r.base_moisture_pct),
-        rounding_mode=r.rounding_mode,
-        clamp_mode=r.clamp_mode,
-        min_moisture_pct=float(r.min_moisture_pct),
-        max_moisture_pct=float(r.max_moisture_pct),
-        start_threshold_moisture_pct=float(r.start_threshold_moisture_pct) if r.start_threshold_moisture_pct else None,
-        fee_basis=r.fee_basis,
-        created_at=r.created_at.isoformat() if r.created_at else "",
-        created_by=r.created_by,
-        updated_at=r.updated_at.isoformat() if r.updated_at else None,
-        updated_by=r.updated_by,
-        contract_id=r.contract_id,
-        customer_id=r.customer_id,
-        is_customer_specific=r.is_customer_specific,
-        justification=r.justification,
-        document_id=r.document_id,
-    )
-
-
-def _to_lookup_row_out(r: DryingRuleLookupRow) -> DryingLookupRowOut:
-    return DryingLookupRowOut(
-        id=r.id,
-        rule_set_id=r.rule_set_id,
-        moisture_pct=float(r.moisture_pct),
-        entzug_pct_points=float(r.entzug_pct_points),
-        loss_pct=float(r.loss_pct),
-        fee_value=float(r.fee_value) if r.fee_value is not None else None,
-        fee_unit=r.fee_unit,
-        created_at=r.created_at.isoformat() if r.created_at else "",
-    )
-
-
-def _to_factor_range_out(r: DryingRuleFactorRange) -> DryingFactorRangeOut:
-    return DryingFactorRangeOut(
-        id=r.id,
-        rule_set_id=r.rule_set_id,
-        from_moisture_incl=float(r.from_moisture_incl),
-        to_moisture_incl=float(r.to_moisture_incl),
-        factor=float(r.factor),
-        created_at=r.created_at.isoformat() if r.created_at else "",
-    )
-
-
-@router.get("/drying-rules", response_model=list[DryingRuleSetOut])
-async def list_drying_rules(
-    crop_code: Optional[str] = Query(None),
-    contract_id: Optional[str] = Query(None),
-    customer_id: Optional[str] = Query(None),
-    is_customer_specific: Optional[bool] = Query(None),
-    tenant_id: str = Depends(get_tenant_id),
-    db: Session = Depends(get_db),
-):
-    """Liste aller Trocknungs-/Schwundtabellen (Leserechte für alle)."""
-    rules = _drying_svc(db, tenant_id).list_rules(
-        crop_code=crop_code, contract_id=contract_id,
-        customer_id=customer_id, is_customer_specific=is_customer_specific,
-    )
-    return [_to_drying_rule_out(r) for r in rules]
-
-
-@router.get("/drying-rules/{rule_id}", response_model=DryingRuleSetOut)
-async def get_drying_rule(
-    rule_id: str,
-    tenant_id: str = Depends(get_tenant_id),
-    db: Session = Depends(get_db),
-):
-    """Einzelne Trocknungs-/Schwundtabelle abrufen (Leserechte für alle)."""
-    try:
-        rule = _drying_svc(db, tenant_id).get_rule(rule_id)
-    except EntityNotFoundError as exc:
-        raise HTTPException(status_code=404, detail=exc.detail)
-    return _to_drying_rule_out(rule)
-
-
-@router.post("/drying-rules", response_model=DryingRuleSetOut, status_code=201)
-async def create_drying_rule(
-    payload: DryingRuleSetCreate,
-    request: Request,
-    tenant_id: str = Depends(get_tenant_id),
-    db: Session = Depends(get_db),
-    _: str = Depends(require_inventory_admin),  # Nur Admin kann schreiben
-):
-    """Neue Trocknungs-/Schwundtabelle anlegen (nur Admin)."""
-    user_id = _get_user_id_from_request(request) or "system"
-    rule = _drying_svc(db, tenant_id).create_rule(payload, user_id)
-    return _to_drying_rule_out(rule)
-
-
-@router.put("/drying-rules/{rule_id}", response_model=DryingRuleSetOut)
-async def update_drying_rule(
-    rule_id: str,
-    payload: DryingRuleSetUpdate,
-    request: Request,
-    tenant_id: str = Depends(get_tenant_id),
-    db: Session = Depends(get_db),
-    _: str = Depends(require_inventory_admin),  # Nur Admin kann schreiben
-):
-    """Trocknungs-/Schwundtabelle aktualisieren (nur Admin). Erstellt neue Version bei Änderungen."""
-    user_id = _get_user_id_from_request(request) or "system"
-    try:
-        rule = _drying_svc(db, tenant_id).update_rule(rule_id, payload, user_id)
-    except EntityNotFoundError as exc:
-        raise HTTPException(status_code=404, detail=exc.detail)
-    return _to_drying_rule_out(rule)
-
-
-@router.delete("/drying-rules/{rule_id}", status_code=204)
-async def delete_drying_rule(
-    rule_id: str,
-    request: Request,
-    tenant_id: str = Depends(get_tenant_id),
-    db: Session = Depends(get_db),
-    _: str = Depends(require_inventory_admin),  # Nur Admin kann löschen
-):
-    """Trocknungs-/Schwundtabelle löschen (nur Admin). Soft-Delete: is_active=False."""
-    user_id = _get_user_id_from_request(request) or "system"
-    try:
-        _drying_svc(db, tenant_id).delete_rule(rule_id, user_id)
-    except EntityNotFoundError as exc:
-        raise HTTPException(status_code=404, detail=exc.detail)
-
-
-@router.get("/drying-rules/{rule_id}/download", response_model=dict)
-async def download_drying_rule_document(
-    rule_id: str,
-    tenant_id: str = Depends(get_tenant_id),
-    db: Session = Depends(get_db),
-):
-    """
-    Portal-Download für Trocknungs-/Schwundtabelle (für Kunden).
-    Gibt DMS-Referenz oder Regel-Daten als JSON zurück (später: PDF-Export).
-    """
-    try:
-        return _drying_svc(db, tenant_id).get_rule_download_data(rule_id)
-    except EntityNotFoundError as exc:
-        raise HTTPException(status_code=404, detail=exc.detail)
-
-
-# ── Drying Rule Lookup Rows CRUD (Admin-only) ────────────────────────────────
-
-class DryingLookupRowCreate(BaseModel):
-    rule_set_id: str
-    moisture_pct: float = Field(..., ge=0, le=100, description="Feuchte in % (0.1-Schritte)")
-    entzug_pct_points: float = Field(..., ge=0, description="Entzug in %-Punkten")
-    loss_pct: float = Field(..., ge=0, le=100, description="Schwund in %")
-    fee_value: Optional[float] = Field(None, ge=0, description="Trocknungskosten (optional)")
-    fee_unit: Optional[Literal["EUR_PER_T", "EUR_PER_DT", "EUR_FIXED"]] = Field(None, description="Einheit der Trocknungskosten")
-
-
-class DryingLookupRowUpdate(BaseModel):
-    moisture_pct: Optional[float] = Field(None, ge=0, le=100)
-    entzug_pct_points: Optional[float] = Field(None, ge=0)
-    loss_pct: Optional[float] = Field(None, ge=0, le=100)
-    fee_value: Optional[float] = Field(None, ge=0)
-    fee_unit: Optional[Literal["EUR_PER_T", "EUR_PER_DT", "EUR_FIXED"]] = None
-
-
-class DryingLookupRowOut(BaseModel):
-    id: str
-    rule_set_id: str
-    moisture_pct: float
-    entzug_pct_points: float
-    loss_pct: float
-    fee_value: Optional[float]
-    fee_unit: Optional[str]
-    created_at: str
-
-
-@router.get("/drying-rules/{rule_id}/lookup-rows", response_model=list[DryingLookupRowOut])
-async def list_drying_lookup_rows(
-    rule_id: str,
-    tenant_id: str = Depends(get_tenant_id),
-    db: Session = Depends(get_db),
-):
-    """Lookup-Rows einer Regel auflisten (Leserechte für alle)."""
-    try:
-        rows = _drying_svc(db, tenant_id).list_lookup_rows(rule_id)
-    except EntityNotFoundError as exc:
-        raise HTTPException(status_code=404, detail=exc.detail)
-    return [_to_lookup_row_out(r) for r in rows]
-
-
-@router.post("/drying-rules/lookup-rows", response_model=DryingLookupRowOut, status_code=201)
-async def create_drying_lookup_row(
-    payload: DryingLookupRowCreate,
-    request: Request,
-    tenant_id: str = Depends(get_tenant_id),
-    db: Session = Depends(get_db),
-    _: str = Depends(require_inventory_admin),  # Nur Admin kann schreiben
-):
-    """Lookup-Row anlegen (nur Admin)."""
-    try:
-        row = _drying_svc(db, tenant_id).create_lookup_row(payload)
-    except EntityNotFoundError as exc:
-        raise HTTPException(status_code=404, detail=exc.detail)
-    except ValidationFailedError as exc:
-        raise HTTPException(status_code=400, detail=exc.detail)
-    except ConflictError as exc:
-        raise HTTPException(status_code=409, detail=exc.detail)
-    return _to_lookup_row_out(row)
-
-
-@router.put("/drying-rules/lookup-rows/{row_id}", response_model=DryingLookupRowOut)
-async def update_drying_lookup_row(
-    row_id: str,
-    payload: DryingLookupRowUpdate,
-    request: Request,
-    tenant_id: str = Depends(get_tenant_id),
-    db: Session = Depends(get_db),
-    _: str = Depends(require_inventory_admin),  # Nur Admin kann schreiben
-):
-    """Lookup-Row aktualisieren (nur Admin)."""
-    try:
-        row = _drying_svc(db, tenant_id).update_lookup_row(row_id, payload)
-    except EntityNotFoundError as exc:
-        raise HTTPException(status_code=404, detail=exc.detail)
-    except ConflictError as exc:
-        raise HTTPException(status_code=409, detail=exc.detail)
-    return _to_lookup_row_out(row)
-
-
-@router.delete("/drying-rules/lookup-rows/{row_id}", status_code=204)
-async def delete_drying_lookup_row(
-    row_id: str,
-    tenant_id: str = Depends(get_tenant_id),
-    db: Session = Depends(get_db),
-    _: str = Depends(require_inventory_admin),  # Nur Admin kann löschen
-):
-    """Lookup-Row löschen (nur Admin)."""
-    try:
-        _drying_svc(db, tenant_id).delete_lookup_row(row_id)
-    except EntityNotFoundError as exc:
-        raise HTTPException(status_code=404, detail=exc.detail)
-
-
-# ── Drying Rule Factor Ranges CRUD (Admin-only) ───────────────────────────────
-
-class DryingFactorRangeCreate(BaseModel):
-    rule_set_id: str
-    from_moisture_incl: float = Field(..., ge=0, le=100, description="Von Feuchte in % (inklusive, 0.1-Schritte)")
-    to_moisture_incl: float = Field(..., ge=0, le=100, description="Bis Feuchte in % (inklusive, 0.1-Schritte)")
-    factor: float = Field(..., gt=0, description="Faktor für Schwundberechnung")
-
-    @model_validator(mode="after")
-    def validate_range(self):
-        if self.from_moisture_incl > self.to_moisture_incl:
-            raise ValueError("from_moisture_incl must be <= to_moisture_incl")
-        return self
-
-
-class DryingFactorRangeUpdate(BaseModel):
-    from_moisture_incl: Optional[float] = Field(None, ge=0, le=100)
-    to_moisture_incl: Optional[float] = Field(None, ge=0, le=100)
-    factor: Optional[float] = Field(None, gt=0)
-
-    @model_validator(mode="after")
-    def validate_range(self):
-        if self.from_moisture_incl is not None and self.to_moisture_incl is not None:
-            if self.from_moisture_incl > self.to_moisture_incl:
-                raise ValueError("from_moisture_incl must be <= to_moisture_incl")
-        return self
-
-
-class DryingFactorRangeOut(BaseModel):
-    id: str
-    rule_set_id: str
-    from_moisture_incl: float
-    to_moisture_incl: float
-    factor: float
-    created_at: str
-
-
-@router.get("/drying-rules/{rule_id}/factor-ranges", response_model=list[DryingFactorRangeOut])
-async def list_drying_factor_ranges(
-    rule_id: str,
-    tenant_id: str = Depends(get_tenant_id),
-    db: Session = Depends(get_db),
-):
-    """Factor-Ranges einer Regel auflisten (Leserechte für alle)."""
-    try:
-        ranges = _drying_svc(db, tenant_id).list_factor_ranges(rule_id)
-    except EntityNotFoundError as exc:
-        raise HTTPException(status_code=404, detail=exc.detail)
-    return [_to_factor_range_out(r) for r in ranges]
-
-
-@router.post("/drying-rules/factor-ranges", response_model=DryingFactorRangeOut, status_code=201)
-async def create_drying_factor_range(
-    payload: DryingFactorRangeCreate,
-    request: Request,
-    tenant_id: str = Depends(get_tenant_id),
-    db: Session = Depends(get_db),
-    _: str = Depends(require_inventory_admin),  # Nur Admin kann schreiben
-):
-    """Factor-Range anlegen (nur Admin)."""
-    try:
-        range_obj = _drying_svc(db, tenant_id).create_factor_range(payload)
-    except EntityNotFoundError as exc:
-        raise HTTPException(status_code=404, detail=exc.detail)
-    except ValidationFailedError as exc:
-        raise HTTPException(status_code=400, detail=exc.detail)
-    except ConflictError as exc:
-        raise HTTPException(status_code=409, detail=exc.detail)
-    return _to_factor_range_out(range_obj)
-
-
-@router.put("/drying-rules/factor-ranges/{range_id}", response_model=DryingFactorRangeOut)
-async def update_drying_factor_range(
-    range_id: str,
-    payload: DryingFactorRangeUpdate,
-    request: Request,
-    tenant_id: str = Depends(get_tenant_id),
-    db: Session = Depends(get_db),
-    _: str = Depends(require_inventory_admin),  # Nur Admin kann schreiben
-):
-    """Factor-Range aktualisieren (nur Admin)."""
-    try:
-        range_obj = _drying_svc(db, tenant_id).update_factor_range(range_id, payload)
-    except EntityNotFoundError as exc:
-        raise HTTPException(status_code=404, detail=exc.detail)
-    except ConflictError as exc:
-        raise HTTPException(status_code=409, detail=exc.detail)
-    return _to_factor_range_out(range_obj)
-
-
-@router.delete("/drying-rules/factor-ranges/{range_id}", status_code=204)
-async def delete_drying_factor_range(
-    range_id: str,
-    tenant_id: str = Depends(get_tenant_id),
-    db: Session = Depends(get_db),
-    _: str = Depends(require_inventory_admin),  # Nur Admin kann löschen
-):
-    """Factor-Range löschen (nur Admin)."""
-    try:
-        _drying_svc(db, tenant_id).delete_factor_range(range_id)
-    except EntityNotFoundError as exc:
-        raise HTTPException(status_code=404, detail=exc.detail)
 
 
 # ============================================================================

@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import logging
-from datetime import datetime
+from datetime import date, datetime
 from decimal import Decimal
 from typing import Any, List, Optional, Tuple
 
@@ -622,4 +622,94 @@ class AgrarSettlementService:
             "missing_controls": result.missing_controls,
             "next_step": result.next_step,
             "linked_documents": linked_documents,
+        }
+
+    # ── campaign backfill plan ────────────────────────────────────────────────
+
+    @staticmethod
+    def _parse_campaign_window(campaign: dict[str, Any]) -> tuple[date, date] | None:
+        try:
+            return (
+                date.fromisoformat(str(campaign.get("start_date"))),
+                date.fromisoformat(str(campaign.get("end_date"))),
+            )
+        except Exception:
+            return None
+
+    @staticmethod
+    def _to_created_date(value: object) -> date | None:
+        if isinstance(value, datetime):
+            return value.date()
+        if isinstance(value, str):
+            try:
+                return datetime.fromisoformat(value.replace("Z", "+00:00")).date()
+            except ValueError:
+                return None
+        return None
+
+    def build_campaign_backfill_plan(
+        self,
+        *,
+        campaign_id: str,
+        campaigns: list[dict[str, Any]],
+        settlements: list[AgrarSettlement],
+    ) -> dict:
+        """Compute which settlements would be updated, return plan dict.
+
+        Returns dict matching SettlementCampaignBackfillResponse fields:
+        campaign_id, matched_count, updated_count, ambiguous_count, skipped_count,
+        updated_settlement_ids, ambiguous_settlement_ids, skipped_settlement_ids.
+        """
+        target_campaign = next(
+            (c for c in campaigns if str(c.get("id")) == campaign_id), None
+        )
+        if target_campaign is None:
+            raise EntityNotFoundError("Campaign", campaign_id)
+
+        target_window = self._parse_campaign_window(target_campaign)
+        if target_window is None:
+            raise ValidationFailedError("Campaign date range is invalid")
+
+        updated_ids: list[str] = []
+        ambiguous_ids: list[str] = []
+        skipped_ids: list[str] = []
+        start_date, end_date = target_window
+
+        valid_campaigns = [
+            (c, self._parse_campaign_window(c))
+            for c in campaigns
+        ]
+        valid_campaigns = [(c, w) for c, w in valid_campaigns if w is not None]
+
+        for settlement in settlements:
+            if getattr(settlement, "campaign_id", None):
+                continue
+            created_on = self._to_created_date(getattr(settlement, "created_at", None))
+            if created_on is None:
+                skipped_ids.append(str(settlement.id))
+                continue
+            if created_on < start_date or created_on > end_date:
+                continue
+
+            matching_ids = [
+                str(c.get("id"))
+                for c, w in valid_campaigns
+                if w[0] <= created_on <= w[1]
+            ]
+            if campaign_id not in matching_ids:
+                continue
+            if len(matching_ids) > 1:
+                ambiguous_ids.append(str(settlement.id))
+                continue
+            updated_ids.append(str(settlement.id))
+
+        return {
+            "campaign_id": campaign_id,
+            "matched_count": len(updated_ids) + len(ambiguous_ids) + len(skipped_ids),
+            "updated_count": len(updated_ids),
+            "ambiguous_count": len(ambiguous_ids),
+            "skipped_count": len(skipped_ids),
+            "updated_settlement_ids": updated_ids,
+            "ambiguous_settlement_ids": ambiguous_ids,
+            "skipped_settlement_ids": skipped_ids,
         }

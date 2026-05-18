@@ -115,6 +115,7 @@ from app.api.v1.endpoints import (
     agrar_varieties,
     silo,
     agrar_settlements,
+    agrar_drying_rules,
     harvest_acceptance,
     rations_optimization,
     grundfutter_analysen,
@@ -790,6 +791,12 @@ api_router.include_router(
     agrar_settlements.router,
     prefix="/agrar/settlements",
     tags=["agrar", "settlements", "self-billing"]
+)
+
+api_router.include_router(
+    agrar_drying_rules.router,
+    prefix="/agrar/settlements",
+    tags=["agrar", "settlements", "drying-rules"]
 )
 
 api_router.include_router(
