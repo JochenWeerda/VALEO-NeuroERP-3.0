@@ -596,6 +596,7 @@ def test_flow_spine_instance_complete_sets_closed_fields(monkeypatch, db):
 # ── PCN-Meldungen (Gap 104-C/D — DB-backed) ──────────────────────────────────
 
 def test_pcn_meldung_create_valid(db):
+    db.rollback()
     _require_pcn_table(db)
     response = client.post(
         "/api/v1/compliance/pcn-meldungen",
