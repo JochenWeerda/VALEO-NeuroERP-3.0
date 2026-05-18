@@ -2,6 +2,16 @@
 
 Stand: `2026-05-12`
 
+## REPORT-PRINT-001
+
+**Von:** Codex
+**Owner:** Codex
+**Stand:** reserviert 2026-05-18
+**Ziel des Slices:** Partie-Genealogie, Wiegschein-PDF-Nachweis und Etikett-/Label-Vertrag als repo-seitig pruefbaren Report-/Print-Pfad schliessen.
+**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/agent-ops/slices/REPORT-PRINT-001.yaml`, `docs/project-context/open-gaps-and-known-issues.md`, `app/api/v1/endpoints/report_print.py`, `app/services/report_print_service.py`, `app/api/v1/api.py`, `tests/test_report_print_api.py`
+**Abnahmekriterien:** API liefert Partie-Genealogie mit Rueckverfolgungsknoten, Wiegschein-PDF-Preview/Artefaktmetadaten und Etikettendaten fuer Charge/Partie; Router ist registriert; fokussierte Tests und Doku-Checks sind gruen.
+**Offene Risiken:** Echte Drucker-/PDF-Rendering- und UAT-Abnahme mit Produktivdaten bleiben externe Betriebsfreigaben.
+
 ## DOMAIN-PHASE23-GAP-CLOSURE-001
 
 **Von:** Codex
