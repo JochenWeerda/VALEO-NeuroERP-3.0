@@ -1,0 +1,40 @@
+id: DOMAIN-PHASE23-GAP-CLOSURE-001
+title: Domain Phase 2 und Phase 3 Gap Closure
+owner: Codex
+status: reserviert
+claimed_at: 2026-05-18
+goal: Phase-2- und Phase-3-Restgaps aus dem Domain-Depth-Plan repo-seitig schliessen bzw. vorhandene Implementierungen mit Tests und Doku belastbar als geschlossen ausweisen.
+scope:
+  - Phase-2-Domains CRM, Finance, HRM und Verkauf gegen vorhandene API-Vertraege abgleichen
+  - Phase-3-Domains Agrar, Compliance, Futtermittel, Einkauf und POS gegen vorhandene API-Vertraege abgleichen
+  - Restpunkte eBilanz/ELSTER, GS1/SSCC, Webshop, ATLAS, Saatzucht, DSFinV-K, DMS-Live und UAT sauber einordnen
+file_ownership:
+  - docs/agent-ops/active-workboard.md
+  - docs/agent-ops/slices/DOMAIN-PHASE23-GAP-CLOSURE-001.yaml
+  - docs/project-context/domain-depth-plan-2026-05-17.md
+  - docs/project-context/open-gaps-and-known-issues.md
+  - app/api/v1/endpoints/ebilanz_elster.py
+  - app/api/v1/endpoints/gs1_barcode.py
+  - app/api/v1/endpoints/gs1_parser.py
+  - app/api/v1/endpoints/pos_dsfinvk.py
+  - app/api/v1/endpoints/saatzucht.py
+  - app/api/v1/endpoints/atlas_zollausfuhr.py
+  - tests/test_*phase23*
+  - tests/test_*webshop*
+  - tests/test_*gs1*
+  - tests/test_*pos*
+acceptance_criteria:
+  - Phase-2/3-Plan ist nicht mehr als offener 183-Tage-Backlog missverstaendlich.
+  - Vorhandene Phase-2/3-Implementierungen sind durch fokussierte Tests oder Router-Smokes abgesichert.
+  - Verbleibende echte Luecken sind externe Gates oder klar benannte Resttiefe.
+  - Workboard, Gap-Doku und Domain-Depth-Plan sind synchron.
+checks:
+  - pytest tests/test_major_domain_router_registration.py tests/test_webshop_atlas_saatzucht_uat.py tests/test_gs1_webhook_ruestliste.py tests/test_compliance_pos_gap_extensions.py -q --no-cov
+  - python scripts/agent_workboard_supervisor.py validate
+  - node scripts/docs-governance-check.cjs
+  - node scripts/docs-markdown-check.cjs docs/project-context/domain-depth-plan-2026-05-17.md docs/project-context/open-gaps-and-known-issues.md docs/agent-ops/active-workboard.md docs/agent-ops/slices/DOMAIN-PHASE23-GAP-CLOSURE-001.yaml
+  - git diff --check
+risks:
+  - Externe Provider-Credentials und Abnahmeprotokolle koennen repo-seitig nicht erzeugt werden.
+  - Vorhandene uncommitted Fremdaenderungen duerfen nicht ueberschrieben werden.
+next_step: Ist-Implementierungen und fokussierte Tests fuer Phase-2/3-Luecken abgleichen.
