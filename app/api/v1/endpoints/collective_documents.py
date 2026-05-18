@@ -25,13 +25,13 @@ router = APIRouter()
 
 class CollectiveInvoiceCreate(BaseModel):
     customer_id: str = Field(..., min_length=1)
-    delivery_note_ids: list[str] = Field(..., min_items=1)
+    delivery_note_ids: list[str] = Field(..., min_length=1)
     invoice_date: str  # ISO date string
 
 
 class CollectiveDeliveryCreate(BaseModel):
     customer_id: str = Field(..., min_length=1)
-    order_ids: list[str] = Field(..., min_items=1)
+    order_ids: list[str] = Field(..., min_length=1)
     delivery_date: str  # ISO date string
 
 

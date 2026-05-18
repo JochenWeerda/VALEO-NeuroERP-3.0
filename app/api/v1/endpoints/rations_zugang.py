@@ -24,7 +24,7 @@ from datetime import datetime, timezone
 from typing import List, Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Header, Query, status
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, ConfigDict, EmailStr
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
@@ -87,8 +87,7 @@ class ZugangOut(BaseModel):
     created_at: Optional[datetime]
     share_token: Optional[str] = None  # nur beim Erstellen eines share_link-Eintrags
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class ShareLinkCreate(BaseModel):

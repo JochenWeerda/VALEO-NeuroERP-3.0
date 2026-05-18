@@ -171,3 +171,118 @@ def batch_parse_gs1(payloads: list[GS1ParseInput]) -> list[GS1ParseResult]:
     if len(payloads) > 100:
         payloads = payloads[:100]
     return [_parse_gs1(p.barcode_string, p.format) for p in payloads]
+
+
+# ---------------------------------------------------------------------------
+# SSCC Schemas & helpers
+# ---------------------------------------------------------------------------
+
+class SSCCGenerateInput(BaseModel):
+    company_prefix: str
+    serial_ref: str
+
+
+class SSCCGenerateResult(BaseModel):
+    sscc: str
+    barcode_human_readable: str
+    check_digit: int
+
+
+class SSCCValidateResult(BaseModel):
+    valid: bool
+    check_digit_expected: int
+    check_digit_actual: int
+    company_prefix_hint: str
+
+
+class LabelGenerateInput(BaseModel):
+    gtin: str
+    charge: str
+    mhd: str  # YYYY-MM-DD
+    menge_kg: float
+
+
+class LabelAI(BaseModel):
+    ai: str
+    description: str
+    value: str
+
+
+class LabelGenerateResult(BaseModel):
+    barcode_string: str
+    human_readable: str
+    application_identifiers: list[LabelAI]
+
+
+def _gs1_mod10_check_digit(digits: str) -> int:
+    """Compute GS1 standard mod-10 (Luhn-variant) check digit."""
+    total = 0
+    for i, ch in enumerate(reversed(digits)):
+        n = int(ch)
+        total += n * 3 if i % 2 == 0 else n
+    return (10 - (total % 10)) % 10
+
+
+# ---------------------------------------------------------------------------
+# SSCC / Label Endpoints
+# ---------------------------------------------------------------------------
+
+@router.post("/sscc/generate", response_model=SSCCGenerateResult, tags=["gs1", "sscc"])
+def generate_sscc(payload: SSCCGenerateInput) -> SSCCGenerateResult:
+    """Generate a new SSCC-18 barcode from company prefix + serial reference."""
+    base = "0" + payload.company_prefix + payload.serial_ref
+    if not re.fullmatch(r"\d{17}", base):
+        from fastapi import HTTPException
+        raise HTTPException(
+            status_code=422,
+            detail=f"company_prefix + serial_ref must together form 17 digits (got {len(base) - 1})",
+        )
+    check = _gs1_mod10_check_digit(base)
+    sscc = base + str(check)
+    human = f"(00){sscc}"
+    return SSCCGenerateResult(sscc=sscc, barcode_human_readable=human, check_digit=check)
+
+
+@router.get("/sscc/{sscc}/validate", response_model=SSCCValidateResult, tags=["gs1", "sscc"])
+def validate_sscc(sscc: str) -> SSCCValidateResult:
+    """Validate an 18-digit SSCC and return check digit comparison."""
+    if not re.fullmatch(r"\d{18}", sscc):
+        from fastapi import HTTPException
+        raise HTTPException(status_code=422, detail="SSCC must be exactly 18 digits")
+    actual = int(sscc[-1])
+    expected = _gs1_mod10_check_digit(sscc[:17])
+    # company prefix hint: extension digit (1) + next 7 chars typical GS1 Germany prefix
+    company_prefix_hint = sscc[1:8]
+    return SSCCValidateResult(
+        valid=(actual == expected),
+        check_digit_expected=expected,
+        check_digit_actual=actual,
+        company_prefix_hint=company_prefix_hint,
+    )
+
+
+@router.post("/labels/generate", response_model=LabelGenerateResult, tags=["gs1", "label"])
+def generate_label(payload: LabelGenerateInput) -> LabelGenerateResult:
+    """Generate GS1-128 label data dict for printing."""
+    # Convert YYYY-MM-DD → YYMMDD
+    mhd_parts = payload.mhd.replace("-", "")
+    if len(mhd_parts) == 8:
+        mhd_gs1 = mhd_parts[2:]  # drop century
+    else:
+        mhd_gs1 = mhd_parts
+
+    menge_rounded = str(round(payload.menge_kg))
+    barcode_string = f"(01){payload.gtin}(10){payload.charge}(17){mhd_gs1}(30){menge_rounded}"
+    human_readable = barcode_string
+
+    ais = [
+        LabelAI(ai="01", description="GTIN", value=payload.gtin),
+        LabelAI(ai="10", description="Chargennummer", value=payload.charge),
+        LabelAI(ai="17", description="MHD (YYMMDD)", value=mhd_gs1),
+        LabelAI(ai="30", description="Menge (kg, gerundet)", value=menge_rounded),
+    ]
+    return LabelGenerateResult(
+        barcode_string=barcode_string,
+        human_readable=human_readable,
+        application_identifiers=ais,
+    )

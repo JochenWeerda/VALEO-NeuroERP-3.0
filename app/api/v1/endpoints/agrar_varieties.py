@@ -8,7 +8,7 @@ Beim ersten Aufruf ohne Daten werden Standard-Sorten als Seed angelegt.
 from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Response
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 from sqlalchemy import and_
 from sqlalchemy.orm import Session
 
@@ -35,8 +35,7 @@ class VarietyOut(VarietyIn):
     id: str
     aktiv: bool = True
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 # Standard seed data — inserted once per tenant on first list call
