@@ -3,11 +3,12 @@ import type { SupplyChainOverview } from '@/lib/api/supply-chain'
 
 export type DomainAlertLevel = 'niedrig' | 'mittel' | 'hoch'
 
-export function summarizeSupplyTransfer(chain: SupplyChainOverview): {
+export function summarizeSupplyTransfer(chain: SupplyChainOverview | null | undefined): {
   transferPressure: DomainAlertLevel
   handoverRisk: number
   nextAction: string
 } {
+  if (!chain) return { transferPressure: 'niedrig', handoverRisk: 0, nextAction: 'Daten werden geladen' }
   const handoverRisk = chain.waitingInbound + chain.openWeighingTickets + chain.blockedCharges
   const transferPressure: DomainAlertLevel =
     handoverRisk >= 18 || chain.freightInTransit >= 10

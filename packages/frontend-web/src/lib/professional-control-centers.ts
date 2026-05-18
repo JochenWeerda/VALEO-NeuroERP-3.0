@@ -57,7 +57,8 @@ export function summarizeFibuOps(fibuCockpit: FibuCockpitReadModel, adjustingPer
   return { reorgRisk, interestPressure, nextAction }
 }
 
-export function summarizeSupplyOps(chain: SupplyChainOverview): SupplyOpsSummary {
+export function summarizeSupplyOps(chain: SupplyChainOverview | null | undefined): SupplyOpsSummary {
+  if (!chain) return { bottleneck: 'stabil', pressure: 'niedrig', nextAction: 'Daten werden geladen' }
   const maxValue = Math.max(chain.waitingInbound, chain.openWeighingTickets, chain.blockedCharges, chain.freightInTransit)
   let bottleneck: SupplyOpsSummary['bottleneck'] = 'stabil'
   if (maxValue === chain.waitingInbound && maxValue > 0) bottleneck = 'annahme'
