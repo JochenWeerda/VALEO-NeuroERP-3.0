@@ -1,27 +1,26 @@
-"""B2B Webshop Integration — integration stub (external shop → ERP order import)."""
+"""B2B webshop integration endpoints."""
 
-from datetime import datetime
+from __future__ import annotations
+
 from typing import Optional
-from uuid import uuid4
 
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import Response
-from pydantic import BaseModel
-from sqlalchemy import text
+from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
 from app.core.tenant import get_tenant_id
+from app.services.webshop_integration_service import WebshopIntegrationService
 
 router = APIRouter(prefix="/webshop", tags=["webshop", "integration"])
 
-# ── Schemas ──────────────────────────────────────────────────────────────────
 
 class WebshopKonfiguration(BaseModel):
     id: Optional[str] = None
     shop_url: str
-    api_key: str  # write-only — never returned
-    shop_system: str  # SHOPWARE6/WOOCOMMERCE/SHOPIFY/MAGENTO/CUSTOM
+    api_key: str
+    shop_system: str
     sync_interval_minutes: int = 15
     is_active: bool = True
 
@@ -35,7 +34,7 @@ class WebshopKonfigurationOut(BaseModel):
 
 
 class ArtikelPosition(BaseModel):
-    artikel_nr: str
+    artikel_nr: str = Field(..., min_length=1)
     menge: float
     preis_brutto: float
 
@@ -48,7 +47,7 @@ class WebshopBestellung(BaseModel):
     artikel_positionen: list[ArtikelPosition]
     gesamtbetrag_brutto: float
     bestelldatum: str
-    status: str = "NEU"  # NEU/VERARBEITET/STORNIERT/FEHLER
+    status: str = "NEU"
 
 
 class WebshopSyncResult(BaseModel):
@@ -57,37 +56,22 @@ class WebshopSyncResult(BaseModel):
     neue_bestellungen: int
     fehler: int
     verarbeitete_ids: list[str]
+    duplikate: list[str] = []
+    blockierte_bestellungen: list[dict] = []
     sync_zeitpunkt: str
 
 
-# ── Endpoints ─────────────────────────────────────────────────────────────────
+def _svc(db: Session, tenant_id: str) -> WebshopIntegrationService:
+    return WebshopIntegrationService(db, tenant_id)
+
 
 @router.get("/konfigurationen", response_model=list[WebshopKonfigurationOut])
 def list_konfigurationen(
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
 ):
-    """List shop configurations — api_key is never returned."""
-    try:
-        rows = db.execute(
-            text(
-                "SELECT id, shop_url, shop_system, sync_interval_minutes, is_active "
-                "FROM domain_shared.webshop_configs WHERE tenant_id = :tid"
-            ),
-            {"tid": tenant_id},
-        ).fetchall()
-        return [
-            WebshopKonfigurationOut(
-                id=str(r.id),
-                shop_url=r.shop_url,
-                shop_system=r.shop_system,
-                sync_interval_minutes=r.sync_interval_minutes,
-                is_active=r.is_active,
-            )
-            for r in rows
-        ]
-    except Exception:
-        return []
+    """List shop configurations. API keys are never returned."""
+    return _svc(db, tenant_id).list_configurations()
 
 
 @router.post("/konfigurationen", response_model=WebshopKonfigurationOut, status_code=201)
@@ -96,37 +80,8 @@ def create_konfiguration(
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
 ):
-    """Register a shop connection — api_key stored masked, not returned."""
-    new_id = str(uuid4())
-    masked_key = payload.api_key[:4] + "****" if len(payload.api_key) >= 4 else "****"
-    try:
-        db.execute(
-            text(
-                "INSERT INTO domain_shared.webshop_configs "
-                "(id, tenant_id, shop_url, api_key_masked, shop_system, sync_interval_minutes, is_active) "
-                "VALUES (:id, :tid, :url, :key, :sys, :interval, :active)"
-            ),
-            {
-                "id": new_id,
-                "tid": tenant_id,
-                "url": payload.shop_url,
-                "key": masked_key,
-                "sys": payload.shop_system,
-                "interval": payload.sync_interval_minutes,
-                "active": payload.is_active,
-            },
-        )
-        db.commit()
-    except Exception:
-        db.rollback()
-        # best-effort — return stub result even without table
-    return WebshopKonfigurationOut(
-        id=new_id,
-        shop_url=payload.shop_url,
-        shop_system=payload.shop_system,
-        sync_interval_minutes=payload.sync_interval_minutes,
-        is_active=payload.is_active,
-    )
+    """Register a shop connection. API keys are write-only."""
+    return _svc(db, tenant_id).create_configuration(payload.model_dump())
 
 
 @router.delete("/konfigurationen/{id}", status_code=204, response_class=Response)
@@ -136,16 +91,7 @@ def delete_konfiguration(
     tenant_id: str = Depends(get_tenant_id),
 ):
     """Remove a shop configuration."""
-    try:
-        db.execute(
-            text(
-                "DELETE FROM domain_shared.webshop_configs WHERE id = :id AND tenant_id = :tid"
-            ),
-            {"id": id, "tid": tenant_id},
-        )
-        db.commit()
-    except Exception:
-        db.rollback()
+    _svc(db, tenant_id).delete_configuration(id)
     return Response(status_code=204)
 
 
@@ -155,31 +101,20 @@ def list_bestellungen(
     tenant_id: str = Depends(get_tenant_id),
 ):
     """List imported shop orders."""
-    try:
-        rows = db.execute(
-            text(
-                "SELECT externe_bestellnr, shop_system, kunde_email, kunde_name, "
-                "artikel_positionen, gesamtbetrag_brutto, bestelldatum, status "
-                "FROM domain_shared.webshop_bestellungen WHERE tenant_id = :tid "
-                "ORDER BY bestelldatum DESC LIMIT 200"
-            ),
-            {"tid": tenant_id},
-        ).fetchall()
-        return [
-            WebshopBestellung(
-                externe_bestellnr=r.externe_bestellnr,
-                shop_system=r.shop_system,
-                kunde_email=r.kunde_email,
-                kunde_name=r.kunde_name,
-                artikel_positionen=r.artikel_positionen or [],
-                gesamtbetrag_brutto=r.gesamtbetrag_brutto,
-                bestelldatum=str(r.bestelldatum),
-                status=r.status,
-            )
-            for r in rows
-        ]
-    except Exception:
-        return []
+    return _svc(db, tenant_id).list_orders()
+
+
+@router.get("/bestellungen/{external_order_no}", response_model=WebshopBestellung)
+def get_bestellung(
+    external_order_no: str,
+    db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
+):
+    """Read one imported shop order by external order number."""
+    order = _svc(db, tenant_id).get_order(external_order_no)
+    if not order:
+        raise HTTPException(status_code=404, detail="Webshop-Bestellung nicht gefunden")
+    return order
 
 
 @router.post("/bestellungen/import", response_model=WebshopSyncResult)
@@ -188,50 +123,8 @@ def import_bestellungen(
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
 ):
-    """Manual import trigger — inserts orders, returns sync result."""
-    inserted: list[str] = []
-    fehler = 0
-    shop_system = bestellungen[0].shop_system if bestellungen else "CUSTOM"
-
-    for b in bestellungen:
-        row_id = str(uuid4())
-        try:
-            import json
-            db.execute(
-                text(
-                    "INSERT INTO domain_shared.webshop_bestellungen "
-                    "(id, tenant_id, externe_bestellnr, shop_system, kunde_email, kunde_name, "
-                    "artikel_positionen, gesamtbetrag_brutto, bestelldatum, status) "
-                    "VALUES (:id, :tid, :enr, :sys, :email, :name, :pos::jsonb, :betrag, :datum, :status)"
-                ),
-                {
-                    "id": row_id,
-                    "tid": tenant_id,
-                    "enr": b.externe_bestellnr,
-                    "sys": b.shop_system,
-                    "email": b.kunde_email,
-                    "name": b.kunde_name,
-                    "pos": json.dumps([p.model_dump() for p in b.artikel_positionen]),
-                    "betrag": b.gesamtbetrag_brutto,
-                    "datum": b.bestelldatum,
-                    "status": b.status,
-                },
-            )
-            db.commit()
-            inserted.append(b.externe_bestellnr)
-        except Exception:
-            db.rollback()
-            fehler += 1
-            inserted.append(b.externe_bestellnr)  # count as received even on DB error
-
-    return WebshopSyncResult(
-        sync_id=str(uuid4()),
-        shop_system=shop_system,
-        neue_bestellungen=len(bestellungen),
-        fehler=fehler,
-        verarbeitete_ids=inserted,
-        sync_zeitpunkt=datetime.utcnow().isoformat(),
-    )
+    """Manual import trigger with idempotency and business blocker reporting."""
+    return _svc(db, tenant_id).import_orders([b.model_dump() for b in bestellungen])
 
 
 @router.post("/bestellungen/{id}/verarbeiten")
@@ -240,24 +133,8 @@ def verarbeiten(
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
 ):
-    """Convert a shop order to an internal ERP Auftrag (stub)."""
-    auftrag_nr = f"WS-{uuid4().hex[:8].upper()}"
-    try:
-        db.execute(
-            text(
-                "UPDATE domain_shared.webshop_bestellungen "
-                "SET status = 'VERARBEITET' WHERE id = :id AND tenant_id = :tid"
-            ),
-            {"id": id, "tid": tenant_id},
-        )
-        db.commit()
-    except Exception:
-        db.rollback()
-    return {
-        "verarbeitet": True,
-        "auftrag_nr": auftrag_nr,
-        "hinweis": "Auftrag im ERP angelegt",
-    }
+    """Convert a clean shop order to an ERP-visible order reference."""
+    return _svc(db, tenant_id).process_order(id)
 
 
 @router.get("/sync-status")
@@ -265,23 +142,59 @@ def sync_status(
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
 ):
-    """Connection health stub."""
-    aktiv = 0
-    try:
-        row = db.execute(
-            text(
-                "SELECT COUNT(*) AS n FROM domain_shared.webshop_configs "
-                "WHERE tenant_id = :tid AND is_active = TRUE"
-            ),
-            {"tid": tenant_id},
-        ).fetchone()
-        if row:
-            aktiv = row.n
-    except Exception:
-        pass
-    return {
-        "status": "BEREIT",
-        "letzter_sync": None,
-        "konfigurationen_aktiv": aktiv,
-        "hinweis": "Webshop-Connector noch nicht konfiguriert — POST /webshop/konfigurationen zum Einrichten",
-    }
+    """Connection and import health."""
+    return _svc(db, tenant_id).sync_status()
+
+
+@router.get("/orders")
+def list_orders(
+    db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
+):
+    """List imported webshop orders (alias for /bestellungen, English path)."""
+    return _svc(db, tenant_id).list_orders()
+
+
+class ConvertOrderResult(BaseModel):
+    auftrag_id: str
+    auftrag_nr: str
+    positionen_count: int
+
+
+@router.post("/orders/{order_id}/convert", response_model=ConvertOrderResult)
+def convert_order(
+    order_id: str,
+    db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
+):
+    """Convert a webshop order to an ERP Auftrag.
+
+    Returns ``auftrag_id``, ``auftrag_nr``, and ``positionen_count``.
+    Raises 404 when the order does not exist, 422 when it has business blockers.
+    """
+    svc = _svc(db, tenant_id)
+    order = svc.get_order(order_id)
+    if not order:
+        raise HTTPException(status_code=404, detail="Webshop-Bestellung nicht gefunden")
+    blockers = order.get("blockers") or []
+    if blockers:
+        raise HTTPException(
+            status_code=422,
+            detail={"message": "Bestellung hat fachliche Blocker", "blockers": blockers},
+        )
+    result = svc.process_order(order_id)
+    auftrag_nr = result.get("auftrag_nr") or ""
+    return ConvertOrderResult(
+        auftrag_id=str(order.get("id") or order_id),
+        auftrag_nr=auftrag_nr,
+        positionen_count=len(order.get("artikel_positionen") or []),
+    )
+
+
+@router.get("/sync-log")
+def sync_log(
+    db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
+):
+    """Return last 50 sync events from the webshop sync log."""
+    return _svc(db, tenant_id).get_sync_log()

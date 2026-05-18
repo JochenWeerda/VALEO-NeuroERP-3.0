@@ -1,7 +1,7 @@
 id: L3-WEBSHOP-001
 title: Webshop B2B Bestellsync
 owner: Codex
-status: reserviert
+status: abgeschlossen
 claimed_at: 2026-05-18
 goal: Webshop-B2B-Bestellintegration repo-seitig als belastbaren Import-/Sync-Vertrag bereitstellen.
 scope:
@@ -31,3 +31,5 @@ risks:
   - Echte Shopware-/WooCommerce-/Shopify-Credentials bleiben externe Betriebsfreigaben.
   - Produktive Webhook-Signaturen benoetigen Provider-spezifische Secrets.
 next_step: Bestehende Sales-/Order- und Portal-Shop-Vertraege lesen und minimalen Webshop-Order-Sync-Service umsetzen.
+result: Thin-router plus WebshopIntegrationService umgesetzt; Import ist idempotent, Dubletten und fachliche Blocker werden sichtbar, fehlerhafte Imports werden nicht verarbeitet.
+completed_at: 2026-05-18
