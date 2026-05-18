@@ -34,7 +34,7 @@ export default function BewerbungenPage(): JSX.Element {
 
   const { data: bewerbungen = [], isError, error, refetch } = useQuery<Bewerbung[]>({
     queryKey: ['bewerbungen'],
-    queryFn: async () => (await apiClient.get('/api/v1/personal/bewerbungen')).data,
+    queryFn: async () => (await apiClient.get<Bewerbung[]>('/api/v1/personal/bewerbungen')).data,
   })
 
   if (isError) return <ErrorState error={error as Error} onRetry={() => { void refetch() }} />

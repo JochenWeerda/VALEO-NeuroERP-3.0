@@ -30,7 +30,7 @@ export default function LksgPage(): JSX.Element {
 
   const { data: assessments = [], isError, error, refetch } = useQuery<LksgAssessment[]>({
     queryKey: ['lksg-assessments'],
-    queryFn: async () => (await apiClient.get('/api/v1/compliance/lksg/supplier-risk-assessments')).data,
+    queryFn: async () => (await apiClient.get<LksgAssessment[]>('/api/v1/compliance/lksg/supplier-risk-assessments')).data,
   })
 
   if (isError) return <ErrorState error={error as Error} onRetry={() => { void refetch() }} />

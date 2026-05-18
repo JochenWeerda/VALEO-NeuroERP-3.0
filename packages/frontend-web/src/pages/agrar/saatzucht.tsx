@@ -31,7 +31,7 @@ export default function SaatzuchtPage(): JSX.Element {
 
   const { data: partien = [], isError, error, refetch } = useQuery<SaatzuchtPartie[]>({
     queryKey: ['saatzucht'],
-    queryFn: async () => (await apiClient.get('/api/v1/saatzucht')).data,
+    queryFn: async () => (await apiClient.get<SaatzuchtPartie[]>('/api/v1/saatzucht')).data,
   })
 
   if (isError) return <ErrorState error={error as Error} onRetry={() => { void refetch() }} />

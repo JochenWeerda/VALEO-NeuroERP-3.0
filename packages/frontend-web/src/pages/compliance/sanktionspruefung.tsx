@@ -21,7 +21,7 @@ export default function SanktionspruefungPage(): JSX.Element {
 
   const { data: liste = [] } = useQuery<SanktionListeItem[]>({
     queryKey: ['sanctions-liste'],
-    queryFn: async () => (await apiClient.get('/api/v1/sanctions/liste')).data,
+    queryFn: async () => (await apiClient.get<SanktionListeItem[]>('/api/v1/sanctions/liste')).data,
   })
 
   const checkMutation = useMutation({

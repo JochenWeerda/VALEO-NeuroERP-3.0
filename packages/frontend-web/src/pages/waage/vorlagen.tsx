@@ -25,7 +25,7 @@ export default function WaagenVorlagenPage(): JSX.Element {
 
   const { data: vorlagen = [], isError, error, refetch } = useQuery<WaagenVorlage[]>({
     queryKey: ['waage-vorlagen'],
-    queryFn: async () => (await apiClient.get('/api/v1/waage/vorlagen')).data,
+    queryFn: async () => (await apiClient.get<WaagenVorlage[]>('/api/v1/waage/vorlagen')).data,
   })
 
   const createMutation = useMutation({

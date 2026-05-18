@@ -36,7 +36,7 @@ export default function GelangensBestaetigungPage(): JSX.Element {
 
   const { data: items = [], isError, error, refetch } = useQuery<Gelangensbestaetigung[]>({
     queryKey: ['gelangensbestaetigung'],
-    queryFn: async () => (await apiClient.get('/api/v1/gelangensbestaetigung')).data,
+    queryFn: async () => (await apiClient.get<Gelangensbestaetigung[]>('/api/v1/gelangensbestaetigung')).data,
   })
 
   if (isError) return <ErrorState error={error as Error} onRetry={() => { void refetch() }} />

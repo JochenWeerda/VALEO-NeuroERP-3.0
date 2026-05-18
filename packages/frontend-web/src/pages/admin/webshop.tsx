@@ -30,7 +30,7 @@ export default function WebshopPage(): JSX.Element {
 
   const { data: connectors = [], isError, error, refetch } = useQuery<Connector[]>({
     queryKey: ['webshop-connectors'],
-    queryFn: async () => (await apiClient.get('/api/v1/webshop/connectors')).data,
+    queryFn: async () => (await apiClient.get<Connector[]>('/api/v1/webshop/connectors')).data,
   })
 
   const importMutation = useMutation({
