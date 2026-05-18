@@ -27,6 +27,7 @@ class GS1ParseResult(BaseModel):
     raw: str
     format_erkannt: str
     ai_felder: dict[str, Any]
+    sscc: Optional[str] = None
     gtin: Optional[str] = None
     charge_nr: Optional[str] = None
     verfallsdatum: Optional[str] = None
@@ -66,7 +67,7 @@ def _parse_gs1(barcode: str, fmt: str) -> GS1ParseResult:
     raw = barcode.strip()
     ai_felder: dict[str, Any] = {}
     format_erkannt = fmt
-    gtin = charge_nr = verfallsdatum = seriennummer = lieferdatum = None
+    sscc = gtin = charge_nr = verfallsdatum = seriennummer = lieferdatum = None
     menge: Optional[float] = None
     gewicht_kg: Optional[float] = None
     fehler: Optional[str] = None
@@ -100,6 +101,8 @@ def _parse_gs1(barcode: str, fmt: str) -> GS1ParseResult:
                 ai_felder = {}
 
             # Extract known AIs
+            if "00" in ai_felder:
+                sscc = ai_felder["00"]
             if "01" in ai_felder:
                 gtin = ai_felder["01"]
             if "10" in ai_felder:
@@ -140,6 +143,7 @@ def _parse_gs1(barcode: str, fmt: str) -> GS1ParseResult:
         raw=raw,
         format_erkannt=format_erkannt,
         ai_felder=ai_felder,
+        sscc=sscc,
         gtin=gtin,
         charge_nr=charge_nr,
         verfallsdatum=verfallsdatum,

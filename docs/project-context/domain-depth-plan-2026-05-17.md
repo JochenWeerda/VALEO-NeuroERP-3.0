@@ -29,6 +29,44 @@ Fokussierter Teststand: 70 Tests gruen fuer CRM, Einkauf, Finance, Logistik, Rou
 
 ---
 
+## Aktualisierung 2026-05-18: Einordnung der urspruenglichen Gap-Zusammenfassung
+
+Die urspruengliche Management-Zusammenfassung mit den Klassen `Vollstaendig`, `Teilweise` und `Basis` sowie dem 3-Phasen-Plan ueber ca. 183 Entwicklungstage ist als **Ausgangsbefund vom 2026-05-17** zu lesen. Sie beschreibt die damals identifizierte Ziel-Luecke gegen marktfuehrende ERP-Systeme, nicht mehr den aktuellen offenen Repo-Backlog.
+
+Aktueller repo-seitiger Stand nach den Closure-Wellen:
+
+| Kategorie | Domains | Aktueller Repo-Stand | Verbleibende Grenze |
+|-----------|---------|----------------------|---------------------|
+| Repo-seitig breit geschlossen | Verkauf, Einkauf, Finance, CRM, Logistik, HRM, Compliance, POS, Kontrakte | Zentrale API-Vertraege, Router-Registrierungen und fokussierte Tests vorhanden | Externe UAT-, Provider-, Rechts-, Steuerberater- und Betriebsfreigaben |
+| Weiter auszubauen | Lager/WMS, Futtermittel, Agrar-Feinschliff | Basis- und Vertiefungspfade vorhanden; weitere Prozess- und Integrationshaerte sinnvoll | FEFO/FIFO-Tiefe, Bestandsbewertung, Produktions-/QS-Tiefe, GS1/SSCC und operative UATs |
+| Extern blockiert | DATEV/ELSTER/ERiC, TSE/DSFinV-K, DMS-Live, E-Signatur, Shop-/Webhook-Provider | Repo-Vertraege und Stub-/Readiness-Pfade vorhanden oder vorbereitet | Produktive Credentials, Provider-Signaturen, Abnahmeprotokolle und echte Schnittstellentests |
+
+Damit gilt: Die Detailabschnitte 1 bis 15 bleiben als **historischer Soll-Katalog und Resttiefe-Backlog** nuetzlich. Fuer den verbindlichen Lieferstand gelten jedoch `docs/architecture/process-kernel/STATUS.md`, diese Aktualisierungsbloecke und `docs/project-context/open-gaps-and-known-issues.md`.
+
+---
+
+## Aktualisierung 2026-05-18: Phase-2/3-Gap-Closure
+
+Phase 2 und Phase 3 sind repo-seitig als Code-/Vertragsgaps geschlossen. Der urspruengliche 118-Tage-Rest aus CRM, Finance, HRM, Verkauf, Agrar, Compliance, Futtermittel, Einkauf und POS ist damit nicht mehr als offener Implementierungsrueckstand zu fuehren.
+
+| Phase | Urspruengliche Domains | Repo-seitiger Closure-Nachweis | Externe oder fachliche Restgrenze |
+|-------|------------------------|--------------------------------|-----------------------------------|
+| Phase 2 | CRM, Finance, HRM, Verkauf | CRM-360, Account-Hierarchie, Pipeline, Asset Accounting, Budget, Liquiditaet, HRM-Operating-System, Arbeitszeitkonto, Recruiting/Org, Sales-Rahmenauftraege und Kredit-/Sammelbelegpfade sind registriert und getestet | DATEV-/Payroll-Cutover, Steuerberaterfreigabe, echte Office-/SSO-/DMS-Zugangsdaten |
+| Phase 3 | Agrar, Compliance, Futtermittel, Einkauf, POS | eBilanz/ELSTER-Readiness, ATLAS, Saatzucht, Futtermittel-Rohwaren/Rezeptur/Naehrstoffanalyse/Deklaration/Etikett, DSGVO/Whistleblower/LkSG, ERS/RFQ/3-Wege-Match, POS-Split-Payment/Promotions und DSFinV-K-v2.3-ZIP sind repo-seitig abgesichert | ERiC-Zertifikat, ATLAS-Zertifikat, TSE-/DSFinV-K-Pruefwerkzeug, Rechts-/Steuerberaterabnahmen, echte UAT-Daten |
+| Querschnitt | GS1/SSCC, Webshop, DMS | GS1-Parser liefert SSCC/GTIN/Charge/MHD/Gewicht; Webshop-B2B-Sync ist idempotent mit Blocker-Sicht; DMS-Redirect-/Upload- und Auditpfade sind in Finance/HRM/Process-Kernel-Tests abgedeckt | Produktive Provider-Signaturen, DMS-Live-Probe, Shop-Credentials und Betriebsfreigaben |
+
+Fokussierte Nachweise:
+
+- `tests/test_phase23_gap_closure_api.py`
+- `tests/test_gs1_webhook_ruestliste.py`
+- `tests/test_sammelabrechnung_interessent_waagen_vorlage.py`
+- `tests/test_webshop_atlas_saatzucht_uat.py`
+- `tests/test_compliance_pos_gap_extensions.py`
+- `tests/test_futtermittel_complete.py`
+- `tests/test_major_domain_router_registration.py`
+
+---
+
 ## 0. Gesamtbild
 
 | Domain | Ist-Stufe | Soll-Stufe | Gap | Prioritaet |

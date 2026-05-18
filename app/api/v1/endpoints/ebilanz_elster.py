@@ -1,4 +1,4 @@
-"""eBilanz / ELSTER Direktschnittstelle Stub."""
+"""eBilanz / ELSTER repo-side export and ERiC readiness contract."""
 
 from __future__ import annotations
 
@@ -110,6 +110,15 @@ class EBilanzValidierungsResult(BaseModel):
     warnungen: list[str]
 
 
+class EricReadinessOut(BaseModel):
+    status: str
+    repo_contract_ready: bool
+    xbrl_taxonomie_version: str
+    supported_paths: list[str]
+    external_gates: list[str]
+    next_action: str
+
+
 # ---------------------------------------------------------------------------
 # Endpoints
 # ---------------------------------------------------------------------------
@@ -118,6 +127,30 @@ class EBilanzValidierungsResult(BaseModel):
 def taxonomie_felder() -> list[dict]:
     """Return the list of XBRL taxonomy fields with GCD/GAAP classification."""
     return _TAXONOMY_FELDER
+
+
+@router.get("/eric-readiness", response_model=EricReadinessOut)
+def eric_readiness() -> dict:
+    """Repo-side readiness view for the external ELSTER ERiC runtime."""
+    return {
+        "status": "REPO_READY_EXTERNAL_GATE",
+        "repo_contract_ready": True,
+        "xbrl_taxonomie_version": "6.7",
+        "supported_paths": [
+            "Taxonomie-Feldkatalog",
+            "GCD-Pflichtfeldvalidierung",
+            "XBRL-Exportpaket-Erzeugung",
+            "Validierungsstatus",
+            "ELSTER-Transfer-Ticket-Projektion",
+        ],
+        "external_gates": [
+            "ERiC-Bibliothek/Zertifikat im Zielsystem installieren",
+            "Finanzamt-/Steuernummern-Mapping fachlich freigeben",
+            "Testuebermittlung mit ELSTER-Pruefumgebung protokollieren",
+            "Steuerberaterabnahme fuer Produktivuebermittlung dokumentieren",
+        ],
+        "next_action": "ERiC-Credentials und Testzertifikat im Zieltenant hinterlegen",
+    }
 
 
 @router.post("/validieren", response_model=EBilanzValidierungsResult)

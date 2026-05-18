@@ -50,7 +50,7 @@ def test_rohwaren_vergleich_returns_naehrstoffe():
 
     import asyncio
     with patch("app.api.v1.endpoints.futtermittel_rohwaren._ensure_tables"):
-        result = asyncio.get_event_loop().run_until_complete(
+        result = asyncio.run(
             vergleich_rohwaren(ids="rm-1,rm-2", db=db, tenant_id="t-1")
         )
     assert "rohwaren" in result
@@ -99,7 +99,7 @@ def test_naehrstoffanalyse_weighted_average():
 
     import asyncio
     with patch("app.api.v1.endpoints.futtermittel_rezepte._ensure_tables"):
-        result = asyncio.get_event_loop().run_until_complete(
+        result = asyncio.run(
             naehrstoffanalyse(rezept_id="r-1", db=db, tenant_id="t-1")
         )
     # Should return a dict with naehrstoffe
@@ -147,7 +147,7 @@ def test_deklaration_contains_pflichtfelder():
 
     import asyncio
     with patch("app.api.v1.endpoints.futtermittel_rezepte._ensure_tables"):
-        result = asyncio.get_event_loop().run_until_complete(
+        result = asyncio.run(
             deklaration(rezept_id="r-1", db=db, tenant_id="t-1")
         )
 
@@ -185,7 +185,7 @@ def test_etikett_contains_eu_pflichtfelder():
 
     import asyncio
     with patch("app.api.v1.endpoints.futtermittel_rezepte._ensure_tables"):
-        result = asyncio.get_event_loop().run_until_complete(
+        result = asyncio.run(
             etikett(rezept_id="r-1", db=db, tenant_id="t-1")
         )
 

@@ -1,7 +1,7 @@
 id: DOMAIN-PHASE23-GAP-CLOSURE-001
 title: Domain Phase 2 und Phase 3 Gap Closure
 owner: Codex
-status: reserviert
+status: abgeschlossen
 claimed_at: 2026-05-18
 goal: Phase-2- und Phase-3-Restgaps aus dem Domain-Depth-Plan repo-seitig schliessen bzw. vorhandene Implementierungen mit Tests und Doku belastbar als geschlossen ausweisen.
 scope:
@@ -38,3 +38,5 @@ risks:
   - Externe Provider-Credentials und Abnahmeprotokolle koennen repo-seitig nicht erzeugt werden.
   - Vorhandene uncommitted Fremdaenderungen duerfen nicht ueberschrieben werden.
 next_step: Ist-Implementierungen und fokussierte Tests fuer Phase-2/3-Luecken abgleichen.
+result: Phase 2 und Phase 3 repo-seitig geschlossen; eBilanz/ELSTER-Readiness, GS1/SSCC, DSFinV-K, Webshop, ATLAS, Saatzucht und Futtermittel-Regressionen sind abgesichert; externe Gates bleiben explizit.
+completed_at: 2026-05-18
