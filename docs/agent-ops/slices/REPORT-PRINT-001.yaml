@@ -1,0 +1,34 @@
+id: REPORT-PRINT-001
+title: Report Print Closure
+owner: Codex
+status: reserviert
+claimed_at: 2026-05-18
+goal: Partie-Genealogie, Wiegschein-PDF-Nachweis und Etikett-/Label-Vertrag als repo-seitig pruefbaren Report-/Print-Pfad schliessen.
+scope:
+  - Partie- und Chargen-Genealogie als API-Vertrag bereitstellen
+  - Wiegschein-PDF-Preview und Artefaktmetadaten ohne Live-Drucker absichern
+  - Etikettendaten fuer Partie/Charge/Artikel/SSCC/GTIN bereitstellen
+file_ownership:
+  - docs/agent-ops/active-workboard.md
+  - docs/agent-ops/slices/REPORT-PRINT-001.yaml
+  - docs/project-context/open-gaps-and-known-issues.md
+  - app/api/v1/endpoints/report_print.py
+  - app/services/report_print_service.py
+  - app/api/v1/api.py
+  - tests/test_report_print_api.py
+acceptance_criteria:
+  - API liefert Partie-Genealogie mit Rueckverfolgungsknoten.
+  - API liefert Wiegschein-PDF-Preview/Artefaktmetadaten.
+  - API liefert Etikettendaten fuer Charge/Partie.
+  - Router ist unter /api/v1/report-print registriert.
+  - Fokussierte Tests und Doku-Checks sind gruen.
+checks:
+  - pytest tests/test_report_print_api.py -q --no-cov
+  - python scripts/agent_workboard_supervisor.py validate
+  - node scripts/docs-governance-check.cjs
+  - node scripts/docs-markdown-check.cjs docs/project-context/open-gaps-and-known-issues.md docs/agent-ops/active-workboard.md docs/agent-ops/slices/REPORT-PRINT-001.yaml
+  - git diff --check
+risks:
+  - Echte Drucker-/PDF-Rendering- und UAT-Abnahme mit Produktivdaten bleiben externe Betriebsfreigaben.
+  - Parallel geaenderte Dateien ausserhalb des Dateibesitzes duerfen nicht beruehrt werden.
+next_step: Thin-Router, Service und fokussierte API-Tests fuer Report-/Print-Vertrag ergaenzen.
