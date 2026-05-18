@@ -2,6 +2,16 @@
 
 Stand: `2026-05-12`
 
+## UAT-AUFLAGEN-2026-05-17
+
+**Von:** Codex
+**Owner:** Codex
+**Stand:** reserviert 2026-05-18
+**Ziel des Slices:** Verbleibende UAT-Auflagen aus der Abnahme 2026-05-17 repo-seitig auf hohem Standard schliessen.
+**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/agent-ops/slices/UAT-AUFLAGEN-2026-05-17.yaml`, `docs/uat/**`, `packages/frontend-web/tests/e2e/uat/**`, `tests/uat/**`, `app/api/v1/endpoints/compliance.py`, `app/api/v1/endpoints/kontrakt_klassen.py`, `tests/test_compliance_pos_gap_extensions.py`
+**Abnahmekriterien:** PCN/UFI API-Contract ist implementiert und getestet; ungueltige Kontraktklassen-Varianten werden per Pydantic validiert; UAT-Auflagenstatus ist in Protokoll und Traceability aktualisiert; fokussierte API-/UAT-Contract-Tests und Doku-Checks sind gruen.
+**Offene Risiken:** Externe PCN-Portal-/ECHA-Anbindung, Steuerberaterfreigabe und produktive Browser-Abnahme bleiben Betriebsfreigaben.
+
 ## AMIC-PARITY-001
 
 **Von:** Codex
