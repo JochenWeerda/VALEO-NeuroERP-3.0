@@ -1,0 +1,33 @@
+id: L3-WEBSHOP-001
+title: Webshop B2B Bestellsync
+owner: Codex
+status: reserviert
+claimed_at: 2026-05-18
+goal: Webshop-B2B-Bestellintegration repo-seitig als belastbaren Import-/Sync-Vertrag bereitstellen.
+scope:
+  - B2B-Webshop-Bestellungen importieren und lesen
+  - Idempotenz, Dubletten und fachliche Blocker sichtbar machen
+  - Kunden-, Artikel-, Mengen-, Preis- und Lieferkontext validieren
+file_ownership:
+  - docs/agent-ops/active-workboard.md
+  - docs/agent-ops/slices/L3-WEBSHOP-001.yaml
+  - docs/project-context/open-gaps-and-known-issues.md
+  - app/api/v1/endpoints/*webshop*
+  - app/services/*webshop*
+  - app/api/v1/api.py
+  - tests/test_*webshop*
+acceptance_criteria:
+  - B2B-Webshop-Bestellungen koennen idempotent importiert und gelesen werden.
+  - Kunden-, Artikel-, Mengen-, Preis- und Lieferkontext werden validiert.
+  - Dubletten und fachliche Blocker werden sichtbar.
+  - Router ist unter /api/v1 registriert.
+  - Fokussierte Tests und Doku-Updates sind gruen.
+checks:
+  - pytest tests/test_webshop_order_sync_api.py -q --no-cov
+  - python scripts/agent_workboard_supervisor.py validate
+  - node scripts/docs-governance-check.cjs
+  - git diff --check
+risks:
+  - Echte Shopware-/WooCommerce-/Shopify-Credentials bleiben externe Betriebsfreigaben.
+  - Produktive Webhook-Signaturen benoetigen Provider-spezifische Secrets.
+next_step: Bestehende Sales-/Order- und Portal-Shop-Vertraege lesen und minimalen Webshop-Order-Sync-Service umsetzen.

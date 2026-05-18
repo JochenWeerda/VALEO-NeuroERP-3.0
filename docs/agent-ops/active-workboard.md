@@ -2,6 +2,16 @@
 
 Stand: `2026-05-12`
 
+## L3-WEBSHOP-001
+
+**Von:** Codex
+**Owner:** Codex
+**Stand:** reserviert 2026-05-18
+**Ziel des Slices:** Webshop-B2B-Bestellintegration repo-seitig als belastbaren Import-/Sync-Vertrag bereitstellen.
+**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/agent-ops/slices/L3-WEBSHOP-001.yaml`, `docs/project-context/open-gaps-and-known-issues.md`, `app/api/v1/endpoints/*webshop*`, `app/services/*webshop*`, `app/api/v1/api.py`, `tests/test_*webshop*`
+**Abnahmekriterien:** B2B-Webshop-Bestellungen koennen idempotent importiert und gelesen werden; Kunden-/Artikel-/Mengen-/Preis-/Lieferkontext wird validiert; Dubletten und fachliche Blocker werden sichtbar; Router ist unter `/api/v1/...` registriert; fokussierte Tests und Doku-Updates sind gruen.
+**Offene Risiken:** Echte Shopware-/WooCommerce-/Shopify-Credentials und produktive Webhook-Signaturen bleiben externe Betriebsfreigaben.
+
 ## ENTERPRISE-DOMAIN-CLOSURE-001
 
 **Von:** Codex
