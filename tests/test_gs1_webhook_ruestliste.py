@@ -35,6 +35,16 @@ def test_gs1_parse_ai_128_charge_und_verfall():
 
 
 @pytest.mark.unit
+def test_gs1_parse_sscc_shipping_unit():
+    from app.api.v1.endpoints.gs1_barcode import _parse_gs1
+    barcode = "(00)340123451234567895(01)12345678901234(10)LOT-SSCC"
+    result = _parse_gs1(barcode, "AUTO")
+    assert result.sscc == "340123451234567895"
+    assert result.ai_felder["00"] == "340123451234567895"
+    assert result.charge_nr == "LOT-SSCC"
+
+
+@pytest.mark.unit
 def test_gs1_verfallsdatum_konvertierung():
     from app.api.v1.endpoints.gs1_barcode import _convert_yymmdd
     assert _convert_yymmdd("260531") == "2026-05-31"

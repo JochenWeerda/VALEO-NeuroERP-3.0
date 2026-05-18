@@ -6,10 +6,12 @@ Stand: `2026-05-12`
 
 **Von:** Codex
 **Owner:** Codex
-**Stand:** reserviert 2026-05-18
+**Stand:** abgeschlossen 2026-05-18
 **Ziel des Slices:** Phase-2- und Phase-3-Restgaps aus dem Domain-Depth-Plan repo-seitig schliessen bzw. vorhandene Implementierungen mit Tests und Doku belastbar als geschlossen ausweisen.
 **Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/agent-ops/slices/DOMAIN-PHASE23-GAP-CLOSURE-001.yaml`, `docs/project-context/domain-depth-plan-2026-05-17.md`, `docs/project-context/open-gaps-and-known-issues.md`, Phase-2/3-nahe Endpoint-/Service-/Testdateien mit explizitem Fokus auf `ebilanz_elster`, `gs1_*`, `pos_dsfinvk`, `saatzucht`, `atlas_zollausfuhr`, `futtermittel`, `crm`, `finance`, `hrm`, `sales`
 **Abnahmekriterien:** Phase-2/3-Plan ist nicht mehr als offener 183-Tage-Backlog missverstaendlich; verbleibende echte Luecken sind externe Gates oder klar benannte Resttiefe; fokussierte API-/Router-/Doku-Checks sind gruen.
+**Erledigt:** eBilanz/ELSTER um ERiC-Readiness-Vertrag ergaenzt; GS1-Barcode-Parser gibt SSCC direkt aus; DSFinV-K-v2.3-ZIP, Phase-2/3-Routerpfade, GS1/SSCC, eBilanz-Readiness und Futtermittel-Regressionen getestet; Domain-Depth-Plan und Open-Gaps-Doku auf repo-seitig geschlossene Phase 2/3 mit externen Gates gezogen.
+**Checks:** `pytest tests/test_phase23_gap_closure_api.py tests/test_gs1_webhook_ruestliste.py tests/test_sammelabrechnung_interessent_waagen_vorlage.py -q --no-cov`; `pytest tests/test_webshop_atlas_saatzucht_uat.py tests/test_compliance_pos_gap_extensions.py tests/test_futtermittel_complete.py tests/test_major_domain_router_registration.py -q --no-cov`
 **Offene Risiken:** Externe Provider-Credentials, ERiC-/TSE-Pruefwerkzeuge, Steuerberater-/Rechtsfreigaben und echte UATs koennen repo-seitig nur als Readiness-/Gate-Vertraege abgebildet werden.
 
 ## L3-WEBSHOP-001

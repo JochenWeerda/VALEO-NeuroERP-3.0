@@ -279,6 +279,19 @@ def test_ebilanz_uebertragen_returns_ticket():
     assert ticket.isalnum()
 
 
+@pytest.mark.unit
+def test_ebilanz_eric_readiness_declares_external_gates():
+    app, _ = _app_ebilanz()
+    client = TestClient(app)
+    resp = client.get("/ebilanz/eric-readiness")
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["repo_contract_ready"] is True
+    assert data["status"] == "REPO_READY_EXTERNAL_GATE"
+    assert data["xbrl_taxonomie_version"] == "6.7"
+    assert any("ERiC" in gate for gate in data["external_gates"])
+
+
 # ===========================================================================
 # Waagenvorlagen Tests
 # ===========================================================================
