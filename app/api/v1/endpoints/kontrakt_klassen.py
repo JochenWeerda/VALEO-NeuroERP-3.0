@@ -8,6 +8,7 @@ DELETE /kontrakt-klassen/{id}    — soft delete (is_active=false)
 """
 from __future__ import annotations
 
+import enum
 from datetime import datetime
 from typing import List, Optional
 from uuid import uuid4
@@ -25,13 +26,25 @@ router = APIRouter(prefix="/kontrakt-klassen", tags=["kontrakt-klassen"])
 
 
 # ---------------------------------------------------------------------------
+# Enums
+# ---------------------------------------------------------------------------
+
+class KontraktVariante(str, enum.Enum):
+    """Preismodell-Variante eines Kontrakts (Auflage 3: Enum-Constraint)."""
+    FIXPREIS = "FIXPREIS"
+    BASIS = "BASIS"
+    PRAEMIE = "PRAEMIE"
+    POOLPREIS = "POOLPREIS"
+
+
+# ---------------------------------------------------------------------------
 # Schemas
 # ---------------------------------------------------------------------------
 
 class KontraktKlasseCreate(BaseModel):
     name: str
     beschreibung: Optional[str] = None
-    variante: str  # FIXPREIS / BASIS / PRAEMIE / POOLPREIS
+    variante: KontraktVariante  # FIXPREIS / BASIS / PRAEMIE / POOLPREIS
     parität: str   # EXW / FCA / CPT / CIF / DAP / DDP
     incoterm_ort: Optional[str] = None
     notiz: Optional[str] = None
@@ -92,7 +105,7 @@ def create_kontrakt_klasse(
                 "id": new_id,
                 "name": payload.name,
                 "beschreibung": payload.beschreibung,
-                "variante": payload.variante,
+                "variante": payload.variante.value,
                 "paritaet": payload.parität,
                 "incoterm_ort": payload.incoterm_ort,
                 "notiz": payload.notiz,
@@ -130,7 +143,7 @@ def update_kontrakt_klasse(
                 "id": klasse_id,
                 "name": payload.name,
                 "beschreibung": payload.beschreibung,
-                "variante": payload.variante,
+                "variante": payload.variante.value,
                 "paritaet": payload.parität,
                 "incoterm_ort": payload.incoterm_ort,
                 "notiz": payload.notiz,
