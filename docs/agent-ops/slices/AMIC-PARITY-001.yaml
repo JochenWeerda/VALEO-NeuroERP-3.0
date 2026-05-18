@@ -1,8 +1,9 @@
 id: AMIC-PARITY-001
 title: O2C P2P Partie UAT Path Closure
 owner: Codex
-status: reserviert
+status: abgeschlossen
 claimed_at: 2026-05-18
+completed_at: 2026-05-18
 goal: O2C/P2P/Partie-Kette als repo-seitig pruefbaren UAT-Pfad ausweisen und externe UAT-Gates sauber abgrenzen.
 scope:
   - UAT-Readiness fuer O2C/P2P/Partie-Kette als API-Vertrag bereitstellen
@@ -28,4 +29,8 @@ checks:
   - git diff --check
 risks:
   - Produktive Browser-UATs mit realen Mandanten-, Waage-, DMS-, Druck- und Steuerberaterdaten bleiben externe Abnahmen.
-next_step: UAT-Readiness-Kontrakt und fokussierte Tests ergaenzen.
+next_step: Produktive Browser-UAT-Unterschrift mit realen Mandanten- und Prozessdaten einholen.
+result: >
+  /uat/o2c/readiness liefert repo-seitige Abdeckung fuer O2C, P2P und
+  Partie-Kette sowie externe Gates. Der bestehende 7-Schritt-Szenario-Runner
+  bleibt kompatibel und ist fokussiert getestet.

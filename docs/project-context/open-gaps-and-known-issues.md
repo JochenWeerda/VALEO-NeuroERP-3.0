@@ -119,7 +119,7 @@ Stand Wave 2026-05-17 (P0/P1 Gaps implementiert):
 
 | Gap-ID | Kurzbeschreibung | Prioritaet | Status |
 |--------|-----------------|------------|--------|
-| AMIC-PARITY-001 | O2C/P2P/Partie-Kette — UAT-Pfad fehlt | P0 | offen (UAT extern) |
+| AMIC-PARITY-001 | O2C/P2P/Partie-Kette — UAT-Pfad fehlt | P0 | repo-seitig vorbereitet; UAT-Unterschrift extern |
 | WAAGE-LIVE-001 | Waage: Live-Hardware, Eich-Nachweis | P0 | implementiert (Repo), UAT offen |
 | SILO-LEER-001 | Silo-Leermeldung, Schwundbuchung | P0 | implementiert |
 | L3-WAAGE-001 | Doppelwiegung (Wiegung1/2), Gosse, WaageId | P0 | implementiert |
@@ -167,6 +167,7 @@ Repo-seitig ergaenzt und registriert:
 - Webshop: B2B-Bestellsync mit idempotentem Import, Dubletten-Erkennung, fachlichen Blockern fuer Kunden-/Positions-/Summenkontext, Lesepfad und ERP-Verarbeitungsreferenz.
 - Phase 2/3 Closure: eBilanz/ELSTER-Readiness mit ERiC-Gates, GS1/SSCC im Barcode-Parser, DSFinV-K-v2.3-ZIP-Nachweis, ATLAS-Zollausfuhr, Saatzucht und Futtermittel-API-Regressionen sind repo-seitig abgesichert.
 - Report/Print: Partie-Genealogie mit Rueckverfolgungsknoten, Wiegeschein-PDF-Preview/Artefaktmetadaten und GS1-Label-Vertrag fuer Partie/Charge/Artikel/SSCC/GTIN.
+- O2C/P2P/Partie-UAT: `/uat/o2c/readiness` weist repo-seitige Abdeckung fuer O2C, P2P und Partie-Kette aus; vorhandener 7-Schritt-Szenario-Runner bleibt kompatibel.
 
 Checks: `pytest tests/test_crm_pipeline_360.py tests/test_einkauf_3way_match_ers_rfq.py tests/test_finance_asset_budget_liquidity.py tests/test_logistics_tour_freight.py tests/test_major_domain_router_registration.py tests/test_personal_major_gap_extensions.py tests/test_compliance_pos_gap_extensions.py tests/test_process_kernel_wave100_settlement_completion.py tests/test_process_kernel_wave31_dq_extended_write_paths.py -q --no-cov --tb=short` -> 70 gruen.
 

@@ -371,6 +371,21 @@ def test_saatzucht_kontrollprotokoll_nicht_bestanden():
 # ── O2C UAT tests ─────────────────────────────────────────────────────────────
 
 @pytest.mark.unit
+def test_o2c_uat_readiness_covers_o2c_p2p_partie_chain():
+    client = _uat_client()
+
+    resp = client.get("/uat/o2c/readiness")
+
+    assert resp.status_code == 200
+    body = resp.json()
+    assert body["status"] == "repo_ready"
+    assert body["scenario_steps"] == 7
+    assert {item["domain"] for item in body["coverage"]} == {"O2C", "P2P", "PARTIE"}
+    assert "goods_receipt_to_settlement" in body["coverage"][1]["covered_paths"]
+    assert "signed_uat_protocol" in body["required_external_gates"]
+
+
+@pytest.mark.unit
 def test_o2c_uat_szenario_7_schritte():
     o2c_uat_scaffold._store.clear()
     client = _uat_client()
