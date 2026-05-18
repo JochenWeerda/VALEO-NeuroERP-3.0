@@ -1,8 +1,8 @@
 # Abnahmekriterien — VALEO NeuroERP 3.0
-**Version:** 1.0  
-**Stand:** 2026-05-18  
-**Klassifizierung:** Intern — Qualitätssicherung / Product Owner  
-**Geltungsbereich:** Release 3.0 — alle 15 Feature-Bereiche  
+**Version:** 1.0
+**Stand:** 2026-05-18
+**Klassifizierung:** Intern — Qualitätssicherung / Product Owner
+**Geltungsbereich:** Release 3.0 — alle 15 Feature-Bereiche
 
 ---
 

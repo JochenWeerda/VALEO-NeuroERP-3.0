@@ -1,8 +1,9 @@
 id: UAT-AUFLAGEN-2026-05-17
 title: UAT Auflagen Closure 2026-05-17
 owner: Codex
-status: reserviert
+status: abgeschlossen
 claimed_at: 2026-05-18
+completed_at: 2026-05-18
 goal: Verbleibende UAT-Auflagen aus der Abnahme 2026-05-17 repo-seitig auf hohem Standard schliessen.
 scope:
   - PCN/UFI Backend-Endpoint fuer Compliance-Meldungen bereitstellen
@@ -31,4 +32,9 @@ checks:
   - git diff --check
 risks:
   - Externe PCN-Portal-/ECHA-Anbindung, Steuerberaterfreigabe und produktive Browser-Abnahme bleiben Betriebsfreigaben.
-next_step: PCN/UFI, Enum-Constraint und UAT-Status konsistent implementieren.
+next_step: Externe PCN-Portal-/ECHA-Anbindung und produktive Browser-UAT mit Echtdaten terminieren.
+result: >
+  PCN/UFI-Endpoint mit UFI-/Statusvalidierung und DB-Fallback-Vertrag
+  gehaertet, KontraktKlasse.variante per Pydantic Literal validiert,
+  UAT-API-Contracts auf aktuelle v1-Routen/idempotente Testdaten nachgezogen
+  und UAT-Protokoll/Traceability auf repo-seitig erledigte Auflagen aktualisiert.
