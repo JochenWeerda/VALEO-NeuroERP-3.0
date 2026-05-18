@@ -73,6 +73,7 @@ import {
   type RationAdjustmentApplyPatch,
   type RationAdjustmentSuggestion,
   type ObjectiveStrategy,
+  type FeedingSystemConfig,
 } from '@/lib/api/rations-optimization'
 
 // ---------------------------------------------------------------------------

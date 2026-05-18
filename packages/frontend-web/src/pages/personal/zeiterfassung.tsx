@@ -73,12 +73,12 @@ export default function ZeiterfassungPage(): JSX.Element {
   const [selectedDate, setSelectedDate] = useState(initialDate)
   const { data: zeiten, isLoading } = useZeiterfassung(selectedDate)
   const { data: cockpit, isLoading: isCockpitLoading } = useTimeCockpit(selectedDate)
-  const { data: absences } = useAbsences({ datumVon: selectedDate, datumBis: selectedDate })
-  const { data: shifts } = useShifts({ datumVon: selectedDate, datumBis: selectedDate })
-  const { data: calendarEvents } = useCalendarEvents({ start: `${selectedDate}T00:00:00+02:00`, end: `${selectedDate}T23:59:59+02:00` })
-  const { data: payrollExports } = usePayrollExports()
-  const { data: campaignCapacity } = useCampaignCapacity()
-  const { data: fieldServicePlan } = useFieldServicePlan()
+  const { data: absences = [] } = useAbsences({ datumVon: selectedDate, datumBis: selectedDate })
+  const { data: shifts = [] } = useShifts({ datumVon: selectedDate, datumBis: selectedDate })
+  const { data: calendarEvents = [] } = useCalendarEvents({ start: `${selectedDate}T00:00:00+02:00`, end: `${selectedDate}T23:59:59+02:00` })
+  const { data: payrollExports = [] } = usePayrollExports()
+  const { data: campaignCapacity = [] } = useCampaignCapacity()
+  const { data: fieldServicePlan = [] } = useFieldServicePlan()
   const { data: workPlan } = useWorkPlan({
     periodFrom: selectedDate,
     periodTo: addDays(selectedDate, 7),
@@ -100,8 +100,8 @@ export default function ZeiterfassungPage(): JSX.Element {
   const [quickFilter, setQuickFilter] = useState<HrTimeQuickFilter>('all')
   const [sortMode, setSortMode] = useState<HrTimeSortMode>('priority')
   const list = useMemo(() => zeiten ?? [], [zeiten])
-  const driverTime = cockpit.driverTime
-  const driverRows = useMemo(() => driverTime.events, [driverTime.events])
+  const driverTime = cockpit?.driverTime
+  const driverRows = useMemo(() => driverTime?.events ?? [], [driverTime?.events])
   const [timeForm, setTimeForm] = useState({ employeeRef: 'warehouse-1', startTime: '07:00', endTime: '16:00', hours: '8', entryType: 'Arbeit', costCenter: 'LAG', workArea: 'Lager' })
   const [absenceForm, setAbsenceForm] = useState({ employeeRef: 'driver-1', absenceType: 'Urlaub' as const, fromDate: selectedDate, toDate: selectedDate, externalRef: '' })
   const [shiftForm, setShiftForm] = useState({ name: 'Ernteannahme Waage', startTime: '06:00', endTime: '14:00', locationCode: 'main', requiredRole: 'waage', requiredQualifications: 'forklift', requiredHeadcount: '2', assignedEmployeeRefs: 'warehouse-1' })
@@ -125,8 +125,8 @@ export default function ZeiterfassungPage(): JSX.Element {
 
   const agentHints = useMemo(() => {
     const hints: Array<{ severity: DriverTimeFindingSeverity; title: string; detail: string }> = []
-    if (cockpit.kpis.pendingApprovals > 0) hints.push({ severity: 'warning', title: 'Freigaben', detail: `${cockpit.kpis.pendingApprovals} Zeitbuchungen warten auf Entscheidung.` })
-    if (cockpit.kpis.blockerCount > 0) hints.push({ severity: 'blocker', title: 'Compliance', detail: `${cockpit.kpis.blockerCount} Blocker muessen vor Payroll/Planung geklaert werden.` })
+    if ((cockpit?.kpis.pendingApprovals ?? 0) > 0) hints.push({ severity: 'warning', title: 'Freigaben', detail: `${cockpit?.kpis.pendingApprovals} Zeitbuchungen warten auf Entscheidung.` })
+    if ((cockpit?.kpis.blockerCount ?? 0) > 0) hints.push({ severity: 'blocker', title: 'Compliance', detail: `${cockpit?.kpis.blockerCount} Blocker muessen vor Payroll/Planung geklaert werden.` })
     const blockedShiftCount = shifts.filter((item) => item.status === 'blocked').length
     if (blockedShiftCount > 0) hints.push({ severity: 'blocker', title: 'Schichten', detail: `${blockedShiftCount} Schichten sind wegen Besetzung, Qualifikation oder Abwesenheit blockiert.` })
     const blockedCampaignCount = campaignCapacity.filter((item) => item.status === 'blocked').length
@@ -135,7 +135,7 @@ export default function ZeiterfassungPage(): JSX.Element {
     if (warningFieldCount > 0) hints.push({ severity: 'warning', title: 'Aussendienst', detail: `${warningFieldCount} Besuche haben Kalender- oder Abwesenheitskonflikte.` })
     if (hints.length === 0) hints.push({ severity: 'info', title: 'Arbeitsvorrat', detail: 'Keine akuten HR-Time Blocker im aktuellen Cockpit.' })
     return hints
-  }, [campaignCapacity, cockpit.kpis.blockerCount, cockpit.kpis.pendingApprovals, fieldServicePlan, shifts])
+  }, [campaignCapacity, cockpit?.kpis.blockerCount, cockpit?.kpis.pendingApprovals, fieldServicePlan, shifts])
 
   const filteredWorkPlanAssignments = useMemo(() => {
     const search = normalizeText(searchTerm)
@@ -163,7 +163,7 @@ export default function ZeiterfassungPage(): JSX.Element {
       if (item.status === 'warning' || item.findings.some((finding) => finding.severity === 'warning')) return 1
       return 2
     }
-    return workPlan.assignments
+    return (workPlan?.assignments ?? [])
       .filter((item) => matchesSearch(item) && matchesFilter(item))
       .sort((a, b) => {
         if (sortMode === 'priority') return severityRank(a) - severityRank(b) || a.datum.localeCompare(b.datum)
@@ -171,7 +171,7 @@ export default function ZeiterfassungPage(): JSX.Element {
         if (sortMode === 'status') return a.status.localeCompare(b.status) || a.datum.localeCompare(b.datum)
         return `${a.datum} ${a.startTime ?? ''}`.localeCompare(`${b.datum} ${b.startTime ?? ''}`)
       })
-  }, [quickFilter, searchTerm, sortMode, workPlan.assignments])
+  }, [quickFilter, searchTerm, sortMode, workPlan?.assignments])
 
   const filteredTimeEntries = useMemo(() => {
     const search = normalizeText(searchTerm)
@@ -237,9 +237,9 @@ export default function ZeiterfassungPage(): JSX.Element {
   ]
 
   const gesamtStunden = list.reduce((sum, z) => sum + z.stunden, 0)
-  const driverBlocker = driverTime.kpis.blocker
-  const driverWarnings = driverTime.kpis.warnings
-  const fahrzeitStunden = driverTime.kpis.fahrzeitStunden
+  const driverBlocker = driverTime?.kpis.blocker ?? 0
+  const driverWarnings = driverTime?.kpis.warnings ?? 0
+  const fahrzeitStunden = driverTime?.kpis.fahrzeitStunden ?? 0
   const complianceColumns = [
     { key: 'severity' as const, label: 'Schwere', render: (row: TimeCockpit['complianceIssues'][number]) => (
       <Badge variant={getFindingBadgeVariant(row.severity)}>{row.severity}</Badge>
@@ -459,6 +459,8 @@ export default function ZeiterfassungPage(): JSX.Element {
     )
   }
 
+  if (!cockpit) return <></>
+
   return (
     <div className="space-y-4 p-3 md:p-6">
       <div>
@@ -647,7 +649,7 @@ export default function ZeiterfassungPage(): JSX.Element {
           <CardContent>
             <div className="flex items-center gap-2">
             <Route className="h-5 w-5 text-cyan-700" />
-              <span className="text-2xl font-bold">{driverTime.kpis.tourCount}</span>
+              <span className="text-2xl font-bold">{driverTime?.kpis.tourCount ?? 0}</span>
             </div>
           </CardContent>
         </Card>
@@ -660,7 +662,7 @@ export default function ZeiterfassungPage(): JSX.Element {
             <div className="flex items-center gap-2">
               <CalendarCheck className="h-5 w-5 text-amber-700" />
               <span className="text-2xl font-bold">
-                {driverTime.findings.filter((finding) => finding.code === 'ABSENCE_COLLISION').length}
+                {(driverTime?.findings ?? []).filter((finding) => finding.code === 'ABSENCE_COLLISION').length}
               </span>
             </div>
           </CardContent>
@@ -911,7 +913,7 @@ export default function ZeiterfassungPage(): JSX.Element {
             <Card>
               <CardHeader>
                 <div className="flex items-center justify-between gap-3">
-                  <CardTitle>{workPlan.printTitle || 'Arbeitsplan'}</CardTitle>
+                  <CardTitle>{workPlan?.printTitle || 'Arbeitsplan'}</CardTitle>
                   <Button variant="outline" size="sm" onClick={handlePrintWorkPlan}>
                     <Printer className="mr-2 h-4 w-4" />
                     Drucken
@@ -930,14 +932,14 @@ export default function ZeiterfassungPage(): JSX.Element {
                 <div className="grid grid-cols-2 gap-3">
                   <div>
                     <p className="text-sm text-muted-foreground">Planungsbefunde</p>
-                    <p className="text-2xl font-semibold">{workPlan.findings.length}</p>
+                    <p className="text-2xl font-semibold">{workPlan?.findings.length ?? 0}</p>
                   </div>
                   <div>
                     <p className="text-sm text-muted-foreground">Druckbereit</p>
                     <p className="text-2xl font-semibold">{filteredWorkPlanAssignments.filter((item) => item.printReady).length}</p>
                   </div>
                 </div>
-                {workPlan.preferences.map((preference) => (
+                {(workPlan?.preferences ?? []).map((preference) => (
                   <div key={preference.employeeRef} className="rounded-md border p-3">
                     <div className="font-medium">{preference.employeeRef}</div>
                     <div className="mt-2 flex flex-wrap gap-1">
