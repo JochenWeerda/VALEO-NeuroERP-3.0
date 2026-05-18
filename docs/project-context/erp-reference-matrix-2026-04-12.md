@@ -15,7 +15,7 @@ Diese Matrix verdichtet die externen Referenzmuster fuer die naechste fachliche 
 
 ### Fachliches Tiefenbild
 
-- AMIC / A.eins Hilfe
+- Agrar-Spezialsoftware Hilfe
 - weitere etablierte Landhandels- und ERP-Funktionsbilder
 
 ### Community-ERP-Referenzmuster
@@ -28,8 +28,8 @@ Diese Matrix verdichtet die externen Referenzmuster fuer die naechste fachliche 
 
 ### UIX-Referenzmuster
 
-- SAP Fiori Floorplans
-- OpenUI5 Object Page / Overview Page / Worklist / Wizard
+- Moderne ERP-Oberflächen Floorplans
+- Web-ERP-Standard Object Page / Overview Page / Worklist / Wizard
 
 ## Uebernahmeregel
 

@@ -189,8 +189,8 @@ Umsetzungsstand 2026-05-16:
 
 Orientierung fuer den weiteren Profi-Ausbau:
 
-- SAP SuccessFactors Time Tracking/Time Management: integrierte Time-Off-/Time-Sheet-Prozesse, Clock-In/Clock-Out, Perioden- und Payroll-Ausrichtung.
-- Oracle Time and Labor: Integration mit Global HR, Absence Management, Payroll und Project Costing.
+- Marktführende ERP-Systeme Time Tracking/Time Management: integrierte Time-Off-/Time-Sheet-Prozesse, Clock-In/Clock-Out, Perioden- und Payroll-Ausrichtung.
+- Etablierte ERP-Plattformen Time and Labor: Integration mit Global HR, Absence Management, Payroll und Project Costing.
 - Shiftfy: Zeiterfassung, Schichtplanung, Abwesenheiten, Berichte, Manager-Freigabe, Audit-Trail und Kommentarfunktion.
 
 VALEO muss diese Muster domänenspezifisch erweitern: Driver-Time, Tour/Fahrzeug, Lenk-/Ruhezeit-Plausibilitaet, Waage/Frachtbrief und spaetere Tacho-/Telematik-Adapter.

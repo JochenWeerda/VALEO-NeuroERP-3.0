@@ -499,7 +499,7 @@ Ergebnis:
 
 Ergebnis:
 - Lieferkettenereignisse koennen jetzt fuer externe Blockchain-/Ledger-Ziele als standardisierte Outbound-Payload vorbereitet werden.
-- Unterstuetzte Zielprofile im aktuellen Adapter: SAP BTP Ledger, Oracle Blockchain Platform und Hyperledger Fabric.
+- Unterstuetzte Zielprofile im aktuellen Adapter: Etablierte ERP-Plattformen BTP Ledger, etablierte ERP-Plattformen Blockchain Platform und Hyperledger Fabric.
 - API-Surfacing: `GET /api/v1/supply-chain/blockchain/profiles`, `POST /api/v1/supply-chain/blockchain/prepare`, `POST /api/v1/supply-chain/blockchain/dispatch`.
 
 ### NeuroASSIST Fach-Workflow- und Assistenten-Schicht

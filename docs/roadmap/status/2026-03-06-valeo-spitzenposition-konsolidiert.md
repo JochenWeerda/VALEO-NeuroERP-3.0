@@ -53,7 +53,7 @@ Nachweislich umgesetzt:
   - dieselbe Manifest-Anbindung nun auch in AP, Closing, USTVA, Zahlungslauf, Lastschriften und Settlement-Preview
 
 Nachweislich geschlossene Gaps:
- 
+
 | Gap-ID | Status | Beleg |
 |--------|--------|-------|
 | 006 | abgeschlossen | `wave-21/STATUS.md` |
@@ -159,5 +159,5 @@ Parallel gilt:
 | Soll-Ist-Analyse | [../../analysis/valeoneuroerp_soll_ist.md](../../analysis/valeoneuroerp_soll_ist.md) |
 | Aktuelle Prozesse | [../../architecture/current-processes.md](../../architecture/current-processes.md) |
 | Top-50 Gap Backlog | [2026-03-06-top-50-gap-backlog-landhandel.md](2026-03-06-top-50-gap-backlog-landhandel.md) |
-| A.eins Gap Backlog | [../a-eins-gap-backlog.md](../a-eins-gap-backlog.md) |
+| Agrar-Spezialsoftware Gap Backlog | [../agrar-gap-backlog.md](../agrar-gap-backlog.md) |
 | UX-Standard | [../../UX-STANDARD-VALEO.md](../../UX-STANDARD-VALEO.md) |

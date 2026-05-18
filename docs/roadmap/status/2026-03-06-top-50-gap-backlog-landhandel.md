@@ -7,7 +7,7 @@
 **Zielbild:** [target-state-landhandel-erp.md](../../architecture/target-state-landhandel-erp.md) – verbindliche Leitplanke für Produktkern, Architektur und Priorisierung.
 
 ## Ziel
-Dieses Backlog priorisiert die fehlenden Faehigkeiten, um VALEO NeuroERP auf Spitzenniveau gegenueber ServiceERP, a.amic, SAP und Oracle sowie weiteren etablierten ERP-Suiten zu bringen. Fokus: End-to-End Prozessabdeckung, AI-first Workflows, Agent-Interoperabilitaet, UUIX, Performance, Parallelverarbeitung.
+Dieses Backlog priorisiert die fehlenden Faehigkeiten, um VALEO NeuroERP auf Spitzenniveau gegenueber etablierten Agrar-ERP-Plattformen, Agrar-Spezialsoftware sowie weiteren etablierten ERP-Suiten zu bringen. Fokus: End-to-End Prozessabdeckung, AI-first Workflows, Agent-Interoperabilitaet, UUIX, Performance, Parallelverarbeitung.
 
 ## Statusabgleich 2026-03-20
 

@@ -31,13 +31,13 @@
 
 | Aspekt | Ribbon (mask-level) | Moderne Alternative (PageToolbar + Command Palette) |
 |--------|----------------------|-----------------------------------------------------|
-| **Zeitgemäßheit** | Office-Ribbon (ca. 2007+) ist in Web-ERP kaum noch Standard; SAP Fiori setzt auf **kontextuelle Page Toolbar** + Overflow, keine Registerbänder. | Fiori, moderne SaaS: eine schlanke Toolbar pro Seite, wenige Primäraktionen, Rest im ⋯-Menü oder per Ctrl+K. |
+| **Zeitgemäßheit** | Office-Ribbon (ca. 2007+) ist in Web-ERP kaum noch Standard; Moderne ERP-Oberflächen setzen auf **kontextuelle Page Toolbar** + Overflow, keine Registerbänder. | Moderne SaaS: eine schlanke Toolbar pro Seite, wenige Primäraktionen, Rest im ⋯-Menü oder per Ctrl+K. |
 | **Platz** | Zwei Zeilen (Register + Gruppen) pro Maske kosten vertikalen Platz; auf kleinen Viewports starker Druck. | Eine kompakte Toolbar-Zeile, mehr Platz für Inhalt und Grid. |
 | **Kontext** | Viele Register zeigen immer dieselben oder ähnlichen Aktionen (Export, BWA, Bilanz) – **redundant** über Masken. | Aktionen nur für die aktuelle Maske/kontextabhängig; weniger Wiederholung. |
 | **Mobile / Responsive** | Ribbon mit vielen Tabs ist auf schmalen Screens schwer nutzbar (Overflow, Verstecktes). | PageToolbar + Overflow + Command Palette (Ctrl+K) ist responsive bereits im Projekt vorgesehen (`orders-modern.tsx`). |
 | **Konsistenz im Produkt** | Andere Bereiche (z. B. Sales „modern“) nutzen ausdrücklich **kein Ribbon** (`PageToolbar`, „KEIN Ribbon“, spart Platz). | Ein einheitliches Pattern (PageToolbar + Sidebar + Command Palette) über alle Domänen. |
 
-**Fazit:** Das Ribbon auf **Masken-Ebene** (DATEI/ALLGEMEIN/AUSWERTUNGEN/…) ist **nicht mehr zeitgemäß** im Sinne von Fiori/modernem Web-ERP: Es kostet Platz, wirkt redundant und weicht vom bereits eingeführten Pattern (PageToolbar, Command Palette) ab. Die **Suite-Navigation** (START + Masken-Links) ist dagegen ein klares, nützliches Navigationspattern und kann beibehalten werden (evtl. als „Tab Bar“ oder „Suite-Nav“ bezeichnen, um Verwechslung mit Office-Ribbon zu vermeiden).
+**Fazit:** Das Ribbon auf **Masken-Ebene** (DATEI/ALLGEMEIN/AUSWERTUNGEN/…) ist **nicht mehr zeitgemäß** im Sinne von modernem Web-ERP: Es kostet Platz, wirkt redundant und weicht vom bereits eingeführten Pattern (PageToolbar, Command Palette) ab. Die **Suite-Navigation** (START + Masken-Links) ist dagegen ein klares, nützliches Navigationspattern und kann beibehalten werden (evtl. als „Tab Bar“ oder „Suite-Nav“ bezeichnen, um Verwechslung mit Office-Ribbon zu vermeiden).
 
 ### Empfehlung
 
@@ -48,7 +48,7 @@
   - Filter/Parameter in einer **Filterzeile** unter der Toolbar (unverändert sinnvoll).
 - **Bestehende Masken** (Buchhaltungsübersicht, Monatswerte, …): Ribbon nicht sofort entfernen (Akzeptanz, Schulung), aber bei **Rebuild oder größeren Refactorings** auf PageToolbar umstellen und in der Design-System-Dokumentation festhalten, dass neuer Standard „PageToolbar + Overflow + Command Palette“ ist.
 
-Damit bleibt die FIBU Suite konsistent mit dem Rest von VALEO (z. B. Sales modern) und mit aktuellen UX-Standards (Fiori, Enterprise Web).
+Damit bleibt die FIBU Suite konsistent mit dem Rest von VALEO (z. B. Sales modern) und mit aktuellen UX-Standards (Web-ERP-Standard, Enterprise Web).
 
 ---
 

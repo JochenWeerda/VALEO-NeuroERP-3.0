@@ -1,13 +1,13 @@
-# AMIC/A.eins Paritaetsmatrix
+# Agrar-Spezialsoftware Paritaetsmatrix
 
 Stand: `2026-05-17`
-Methodik: Direktvergleich AMIC-Kernfunktionen gegen VALEO-IST-Routes und vorhandene Tests. Luecken werden als Gap-IDs gefuehrt und in `open-gaps-and-known-issues.md` nachgezogen. Prioritaeten P0–P2: P0 = Go-live-blockierend, P1 = Produktionsqualitaet erforderlich, P2 = UX-/Komfortlevel.
+Methodik: Direktvergleich Branchenspezifische-Agrarsoftware-Kernfunktionen gegen VALEO-IST-Routes und vorhandene Tests. Luecken werden als Gap-IDs gefuehrt und in `open-gaps-and-known-issues.md` nachgezogen. Prioritaeten P0–P2: P0 = Go-live-blockierend, P1 = Produktionsqualitaet erforderlich, P2 = UX-/Komfortlevel.
 
 ---
 
-## Tabelle 1: Gap-Matrix (AMIC-Funktion → VALEO-IST → Gap)
+## Tabelle 1: Gap-Matrix (Agrar-Spezialsoftware-Funktion → VALEO-IST → Gap)
 
-| # | AMIC-Funktion | VALEO-IST (Kurzform) | Gap / Naechster Schritt | Gap-ID | Prioritaet |
+| # | Agrar-Spezialsoftware-Funktion | VALEO-IST (Kurzform) | Gap / Naechster Schritt | Gap-ID | Prioritaet |
 |---|---------------|----------------------|------------------------|--------|------------|
 | 1 | Warenwirtschaft Verbuchung — saubere Bestandsfuehrung, Dispo, Lieferung, Faktura, Rohertrag, Nebenbuecher | O2C/P2P/Inventory/Settlement Flow-Spines; `disposition.py`, `charges.py`, `agrar_settlements.py` | Browser-/CRUD-Abnahme der vollstaendigen Folgeobjektkette (Annahme→Silo→Settlement→FIBU-Buchung) fehlt als UAT-Pfad | AMIC-PARITY-001 | P0 |
 | 2 | Rohware/Vermarktung — Qualitaets-, Mengen-, Preis-, Abschlags- und finale Abrechnung | `harvest_acceptance.py` (POST/PUT/release/cancel/qualitaetsprotokoll), `agrar_settlements.py` (preview/drying/post-fibu), Trocknungs-Engine | UAT gegen echte Rohwaren-Schemata, regionale Varianten (NRW, BY), Abrechnungsnachtraege; kein End-to-End-Testpfad mit realen Felddaten | CTS-H2S-UAT-001 | P0 |
@@ -26,9 +26,9 @@ Methodik: Direktvergleich AMIC-Kernfunktionen gegen VALEO-IST-Routes und vorhand
 
 ---
 
-## Tabelle 2: VALEO-API-Routen je AMIC-Funktion
+## Tabelle 2: VALEO-API-Routen je Agrar-Spezialsoftware-Funktion
 
-| AMIC-Funktion | VALEO-Endpunkt-Datei | Repraesentative Routen |
+| Agrar-Spezialsoftware-Funktion | VALEO-Endpunkt-Datei | Repraesentative Routen |
 |---------------|----------------------|------------------------|
 | Warenwirtschaft Verbuchung | `agrar_settlements.py`, `disposition.py`, `charges.py` | `POST /agrar/settlements/`, `POST /agrar/settlements/{id}/post-fibu`, `GET /agrar/settlements/{id}/completion-status` |
 | Rohware/Vermarktung | `harvest_acceptance.py`, `agrar_settlements.py` | `POST /agrar/harvest-acceptances/`, `POST /agrar/harvest-acceptances/{id}/release`, `POST /agrar/harvest-acceptances/{id}/qualitaetsprotokoll`, `POST /agrar/settlements/drying/compute`, `POST /agrar/settlements/preview` |
@@ -67,7 +67,7 @@ Methodik: Direktvergleich AMIC-Kernfunktionen gegen VALEO-IST-Routes und vorhand
 ## Umsetzungsplan (6 Phasen)
 
 ### Phase 1 — Rohware-UAT-Fundament (Woche 1–2)
-**Ziel:** CTS-H2S-UAT-001 + AMIC-PARITY-001 (Rohware-Kette)
+**Ziel:** CTS-H2S-UAT-001 + AMIC-PARITY-001 (Rohware-Kette — Agrar-Spezialsoftware-Parität)
 
 - UAT-Testdaten fuer mind. 3 Rohwarengruppen (Getreide, Oelfruechte, Leguminosen) anlegen
 - Playwright-Pfad: Annahme → Qualitaetsprotokoll → Settlement-Preview → Settlement-Post → FIBU-Buchung

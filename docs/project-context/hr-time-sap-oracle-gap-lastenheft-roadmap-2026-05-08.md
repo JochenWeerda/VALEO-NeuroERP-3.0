@@ -1,10 +1,10 @@
-# HR-Time GAP, Lastenheft und Roadmap gegen SAP / Oracle HRM
+# HR-Time GAP, Lastenheft und Roadmap gegen marktführende ERP-Systeme HRM
 
 Stand: 2026-05-08
 
 ## Zweck
 
-Dieses Dokument uebersetzt den SAP-/Oracle-/Shiftfy-Benchmark in ein VALEO-spezifisches Lastenheft fuer Arbeitszeit, Abwesenheit, Fahrerzeit, Dienstplanung und Landhandel-Saisonplanung.
+Dieses Dokument uebersetzt den ERP-/Shiftfy-Benchmark in ein VALEO-spezifisches Lastenheft fuer Arbeitszeit, Abwesenheit, Fahrerzeit, Dienstplanung und Landhandel-Saisonplanung.
 
 Die Zielrichtung bleibt:
 
@@ -19,9 +19,9 @@ Verbindliche Datenmodellbasis fuer die Umsetzung ist `docs/project-context/hr-ti
 
 | Referenz | Relevante Muster fuer VALEO | Konsequenz |
 |----------|-----------------------------|------------|
-| SAP SuccessFactors Time Tracking | Clock-in/out auf Desktop, Mobile und Terminal; Genehmigungscenter; Compliance-Konfiguration fuer Pausen, Ueberstunden, Schichtzulagen; Alerts; Analytics; Payroll-/S/4HANA-Kostenzuordnung; Schichtplanung ueber Integration oder Partnerloesung. | VALEO braucht einen Time-&-Labor-Kern mit Freigabequeue, Regelengine, Kostenstellen-/Projektbezug, Analytics und Integrationsschnittstellen. |
-| SAP Employee Central Time Sheet | Positive und negative Zeitaufzeichnung, woechentliche Freigabe, alternative Kostenstellen, Ruecknahme und Aenderung bereits genehmigter Zeiten. | VALEO muss Buchungskorrekturen, Audit und Kostenstellenwechsel als Pflichtfaehigkeit fuehren. |
-| Oracle Cloud HCM Time and Labor | Regelbasierte, kalenderbasierte Time Cards; konfigurierbare Layouts; Echtzeit-Regeln; Integration mit Global HR, Absence Management, Global Payroll und Project Costing. | VALEO sollte Zeitdaten nicht isoliert bauen, sondern als kanonischen Vertrag fuer HR-Stamm, Abwesenheit, Lohn, Kostenrechnung und Projekte. |
+| Marktführende ERP-Systeme Time Tracking | Clock-in/out auf Desktop, Mobile und Terminal; Genehmigungscenter; Compliance-Konfiguration fuer Pausen, Ueberstunden, Schichtzulagen; Alerts; Analytics; Payroll-/S/4HANA-Kostenzuordnung; Schichtplanung ueber Integration oder Partnerloesung. | VALEO braucht einen Time-&-Labor-Kern mit Freigabequeue, Regelengine, Kostenstellen-/Projektbezug, Analytics und Integrationsschnittstellen. |
+| Marktführende ERP-Systeme Employee Central Time Sheet | Positive und negative Zeitaufzeichnung, woechentliche Freigabe, alternative Kostenstellen, Ruecknahme und Aenderung bereits genehmigter Zeiten. | VALEO muss Buchungskorrekturen, Audit und Kostenstellenwechsel als Pflichtfaehigkeit fuehren. |
+| Etablierte ERP-Plattformen HCM Time and Labor | Regelbasierte, kalenderbasierte Time Cards; konfigurierbare Layouts; Echtzeit-Regeln; Integration mit Global HR, Absence Management, Global Payroll und Project Costing. | VALEO sollte Zeitdaten nicht isoliert bauen, sondern als kanonischen Vertrag fuer HR-Stamm, Abwesenheit, Lohn, Kostenrechnung und Projekte. |
 | Shiftfy | Deutsche Zeiterfassung per App, automatische Pausenberechnung nach ArbZG, Schichtplanung, Abwesenheiten, Audit-Trail, Projektbuchung, DATEV-Export, Teamkalender, Standorte, Qualifikationen, PWA. | Fuer 27 Mitarbeitende ist der Bedienstandard klar: einfach, mobil, auditierbar, lohnfaehig. VALEO muss aber Fahrer-, Tour- und Landhandel-Spezifika darueberlegen. |
 
 ## GAP-Liste
@@ -30,30 +30,30 @@ Prioritaeten: P0 = produktionskritisch, P1 = Pilot-/Rollout-kritisch, P2 = Ausba
 
 | Bereich | Benchmark-Faehigkeit | VALEO-Stand | GAP | Zielbild | Naechster Slice |
 |---------|----------------------|-------------|-----|----------|-----------------|
-| HR-Stamm und Rollen | SAP/Oracle koppeln Zeit an Mitarbeiter, Organisation, Manager, Kalender, Payroll und Kostenstellen. | Personal-API und Time-Cockpit existieren, aber kein vollstaendiges HR-Time-Stammdatenmodell. | P0 | Canonical `EmployeeTimeProfile` mit Rolle, Standort, Vertragsmodell, Manager, Qualifikationen, Kostenstelle, Fahrzeug-/Tourfaehigkeit. | `HR-TIME-DATA-001` |
+| HR-Stamm und Rollen | Marktführende ERP-Systeme koppeln Zeit an Mitarbeiter, Organisation, Manager, Kalender, Payroll und Kostenstellen. | Personal-API und Time-Cockpit existieren, aber kein vollstaendiges HR-Time-Stammdatenmodell. | P0 | Canonical `EmployeeTimeProfile` mit Rolle, Standort, Vertragsmodell, Manager, Qualifikationen, Kostenstelle, Fahrzeug-/Tourfaehigkeit. | `HR-TIME-DATA-001` |
 | Zeiterfassung | Clock-in/out, Timesheet, Korrektur, Freigabe, mobile Nutzung. | Cockpit und Summary-API vorhanden; Persistenz und Buchungsworkflow fehlen. | P0 | Produktive Zeitereignisse mit Status, Korrekturgrund, Audit, Quelle und Freigabe. | `HR-TIME-BOOK-001` |
 | Abwesenheit | Time Off/Absence Management mit Genehmigung und Kalenderwirkung. | Strategie fuer Urlaubsverwaltung dokumentiert, aber kein Connector. | P0 | Abwesenheiten als Verfuegbarkeitsblocker in Dienstplanung, Tour, Aussendienst und Payroll. | `HR-TIME-ABS-001` |
-| Fahrerzeit | SAP/Oracle decken Standardzeit, aber keine VALEO-spezifische Tour-/Waage-/Tacho-Tiefe. | Driver-Time-Pilot und Summary vorhanden. | P0 | Persistenter Driver-Time-Layer mit Tacho-/Telematik-Import, Tour, Fahrzeug, Be-/Entladen, Bereitschaft, Spesen. | `HR-TIME-DRIVER-002` |
+| Fahrerzeit | Etablierte ERP-Plattformen decken Standardzeit, aber keine VALEO-spezifische Tour-/Waage-/Tacho-Tiefe. | Driver-Time-Pilot und Summary vorhanden. | P0 | Persistenter Driver-Time-Layer mit Tacho-/Telematik-Import, Tour, Fahrzeug, Be-/Entladen, Bereitschaft, Spesen. | `HR-TIME-DRIVER-002` |
 | Regelengine | Pausen, Ruhezeiten, Ueberstunden, Zuschlaege, lokale Regeln. | Erste Plausibilitaetsbefunde im Cockpit. | P0 | Regelkatalog mit Schweregrad, Quelle, fachlicher Freigabe und Payroll-Auswirkung. | `HR-TIME-RULES-001` |
-| Schicht- und Einsatzplanung | SAP/Partner und Shiftfy bieten Schichtplanung, Vorlagen, Teamkalender. | Noch keine echte Dienstplanung. | P0 | Planbare Schichten, Verfuegbarkeit, Qualifikationen, Standorte, Saisonkapazitaeten. | `HR-TIME-SCHED-001` |
-| Payroll/DATEV/Lohn | SAP/Oracle integrieren Payroll/Costing; Shiftfy bietet DATEV/CSV. | Payroll-Readiness-KPIs, aber kein Exportvertrag. | P0 | Exportfaehige, freigegebene Zeitwerte mit Lohnarten, Kostenstellen, Zuschlaegen, Abwesenheit. | `HR-TIME-PAY-001` |
-| Kalenderintegration | SAP/Oracle nutzen Kalenderlogik; Shiftfy Teamkalender. | Kein Outlook/Google/ICS-Connector. | P1 | Bidirektionale Kalenderblocker fuer Urlaub, Schicht, Tour, Aussendienst, Schulung, Wartung. | `HR-TIME-CAL-001` |
+| Schicht- und Einsatzplanung | Etablierte ERP-Plattformen und Shiftfy bieten Schichtplanung, Vorlagen, Teamkalender. | Noch keine echte Dienstplanung. | P0 | Planbare Schichten, Verfuegbarkeit, Qualifikationen, Standorte, Saisonkapazitaeten. | `HR-TIME-SCHED-001` |
+| Payroll/DATEV/Lohn | Etablierte ERP-Plattformen integrieren Payroll/Costing; Shiftfy bietet DATEV/CSV. | Payroll-Readiness-KPIs, aber kein Exportvertrag. | P0 | Exportfaehige, freigegebene Zeitwerte mit Lohnarten, Kostenstellen, Zuschlaegen, Abwesenheit. | `HR-TIME-PAY-001` |
+| Kalenderintegration | Etablierte ERP-Plattformen nutzen Kalenderlogik; Shiftfy Teamkalender. | Kein Outlook/Google/ICS-Connector. | P1 | Bidirektionale Kalenderblocker fuer Urlaub, Schicht, Tour, Aussendienst, Schulung, Wartung. | `HR-TIME-CAL-001` |
 | Saison- und Arbeitsspitzenplanung | Enterprise-HCM eher generisch; Landhandel braucht Ernte-/Kampagnenlogik. | Nicht umgesetzt. | P1 | Kapazitaetsplanung nach Ernte, Saat, Duengung, Pflanzenschutz, Silo, Waage, Lager und Fuhrpark. | `HR-TIME-SEASON-001` |
 | Kampagneninterferenzen | Standard-HCM erkennt Termin-/Schichtkonflikte, nicht Landhandel-Prozessketten. | Nicht umgesetzt. | P1 | Konfliktmatrix Kampagne vs. Fahrer, Waage, Silo, Labor, Lager, Aussendienst, Lieferfenster. | `HR-TIME-CAMPAIGN-001` |
 | Aussendienstplanung | HCM hat Kalender/Abwesenheit; CRM-/Routenlogik separat. | Noch nicht mit HR-Time gekoppelt. | P1 | Agrarberater-/Vertriebsbesuche mit Gebiet, Kunde, Kampagne, Qualifikation, Abwesenheit und Kalender. | `HR-TIME-FIELD-001` |
-| Analytics | SAP/Oracle/Shiftfy bieten Berichte und Alerts. | Cockpit-KPIs vorhanden. | P1 | Management-Dashboards fuer Ueberstunden, Fehlzeiten, Saisonlast, Payroll-Blocker, Fahrer-Compliance. | `HR-TIME-ANALYTICS-001` |
+| Analytics | Etablierte ERP-Plattformen/Shiftfy bieten Berichte und Alerts. | Cockpit-KPIs vorhanden. | P1 | Management-Dashboards fuer Ueberstunden, Fehlzeiten, Saisonlast, Payroll-Blocker, Fahrer-Compliance. | `HR-TIME-ANALYTICS-001` |
 | Sicherheit und Datenschutz | Enterprise-Rollen, Audit, DSGVO, SSO. | Keycloak/OIDC-Strategie vorhanden, Detailrollen offen. | P1 | Rollenmodell fuer Mitarbeitende, Manager, HR, Dispo, Payroll, Admin; Datenminimierung und Audit. | `HR-TIME-SEC-001` |
-| Offline/Mobile | Shiftfy PWA, SAP mobile; Fahrer/Lager brauchen robuste App. | Frontend-Web vorhanden, keine Offlinefaehigkeit. | P2 | PWA/Offline-Queue fuer Fahrer, Lager und Aussendienst mit spaeter Synchronisation. | `HR-TIME-MOBILE-001` |
+| Offline/Mobile | Shiftfy PWA, ERP-Mobile; Fahrer/Lager brauchen robuste App. | Frontend-Web vorhanden, keine Offlinefaehigkeit. | P2 | PWA/Offline-Queue fuer Fahrer, Lager und Aussendienst mit spaeter Synchronisation. | `HR-TIME-MOBILE-001` |
 
 ## Lastenheft
 
 ### Ziel
 
-VALEO stellt eine produktionsfaehige deutsche Arbeitszeit-, Abwesenheits- und Einsatzplanungsloesung fuer einen Landhandel mit ca. 27 Mitarbeitenden bereit. Die Loesung muss Standard-HRM-Faehigkeiten auf SAP-/Oracle-Niveau fuer Kernprozesse erreichen und gleichzeitig die Landhandel-Speziallogik abbilden.
+VALEO stellt eine produktionsfaehige deutsche Arbeitszeit-, Abwesenheits- und Einsatzplanungsloesung fuer einen Landhandel mit ca. 27 Mitarbeitenden bereit. Die Loesung muss Standard-HRM-Faehigkeiten auf dem Niveau marktführender ERP-Systeme fuer Kernprozesse erreichen und gleichzeitig die Landhandel-Speziallogik abbilden.
 
 ### Nicht-Ziele
 
-- keine vollstaendige SAP-/Oracle-HCM-Kopie
+- keine vollstaendige Kopie marktführender HCM-Systeme
 - keine Uebernahme von AGPL-/GPL-Zeiterfassungs-Code in VALEO
 - keine automatische Rechtsberatung oder Bussgeldbewertung
 - keine produktive Tacho-/Telematik-Anbindung ohne Anbieterfreigabe, Datenschutzpruefung und Testdaten
@@ -232,9 +232,9 @@ Aussendienst ist kein normales Buero-Kalenderproblem. VALEO muss Kundentermin, K
 
 Geprueft am 2026-05-08:
 
-- SAP SuccessFactors Time Tracking Features: https://www.sap.com/products/hcm/employee-time-tracking-software/features.html
-- SAP Employee Central Time Sheet Funktionen: https://help.sap.com/docs/successfactors-employee-central/using-time-management-in-sap-successfactors/features-and-functions-of-employee-central-time-sheet-for-employees
-- Oracle Cloud HCM Time and Labor Readiness: https://docs.oracle.com/en/cloud/saas/readiness/hcm/24b/tila-24b/24B-time-labor-wn-t55862.htm
+
+
+
 - Shiftfy Zeiterfassung und Dienstplanung: https://www.shiftfy.de/
 - Microsoft Graph Calendar API: https://learn.microsoft.com/en-us/graph/api/resources/calendar-overview
 - Google Calendar API Overview: https://developers.google.com/workspace/calendar/api/guides/overview

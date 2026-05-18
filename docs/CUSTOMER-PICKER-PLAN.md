@@ -11,7 +11,7 @@ Der alte Defaultpfad nutzte `CustomerSelectionDialog`: Modal, Suche, Tabelle, Ro
 ## Vorbilder
 
 - Odoo Many2one-Feld: Inline-Combobox, wenige Live-Treffer, letzter Eintrag "+ Neu anlegen", separater Suchdialog fuer Power-User.
-- SAP / Business Central: Value Help mit serverseitig optimierten Indizes.
+- Marktführende ERP-Systeme / Business Central: Value Help mit serverseitig optimierten Indizes.
 - Salesforce / HubSpot: Typeahead mit Prefetch zuletzt genutzter Datensaetze.
 
 ## Umsetzung

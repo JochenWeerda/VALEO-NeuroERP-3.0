@@ -52,7 +52,7 @@ Einige Einträge aus dem Button-UX-Audit wurden im Code geprüft. Ergebnis:
 
 - **docs/roadmap/** – Sprint- und Lieferpläne (z. B. finance-suite-sprint-plan-s1-s6.md, a-eins-gap-backlog.md)
 - **docs/roadmap/status/** – Statusberichte (gap-delivery-plan, gap-remediation-roadmap, must-have-gap-audit)
-- **docs/archive/** – Ältere Gap-Analysen (VALEO-ERP-SAP-FIORI-*, GAP-ANALYSIS-COMPLETE.md, VALEO-NEUROERP-TODO-STATUS-2025.md) → nur noch Referenz, nicht als aktueller Stand
+- **docs/archive/** – Ältere Gap-Analysen (VALEO-ERP-*, GAP-ANALYSIS-COMPLETE.md, VALEO-NEUROERP-TODO-STATUS-2025.md) → nur noch Referenz, nicht als aktueller Stand
 - **swarm/** – Missions- und Sprint-Pläne (gap-closure-orchestration.md, P0-GAPS-COMPLETE.md, status/finance-gaps-completion-report.md)
 
 Für **tagesaktuellen Gap-Stand** die kanonischen Dokumente in Abschnitt 1 nutzen.

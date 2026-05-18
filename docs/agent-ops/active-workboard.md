@@ -7,7 +7,7 @@ Stand: `2026-05-12`
 **Von:** Codex
 **Owner:** Codex
 **Stand:** abgeschlossen 2026-05-17
-**Ziel des Slices:** Von parallelen Agents begonnene SAP-/Oracle-/Odoo-/AMIC-Domain-Closure uebernehmen, fehlende Router-Registrierung und nicht gelieferte POS-/Compliance-Teile schliessen.
+**Ziel des Slices:** Von parallelen Agents begonnene ERP-/Odoo-/Agrar-Spezialsoftware-Domain-Closure uebernehmen, fehlende Router-Registrierung und nicht gelieferte POS-/Compliance-Teile schliessen.
 **Dateibesitz:** `app/api/v1/api.py`, `app/api/v1/endpoints/*asset_accounting.py`, `*budget_planning.py`, `*liquidity_planning.py`, `*crm_360.py`, `*crm_account_hierarchy.py`, `*logistics_tours.py`, `*logistics_freight.py`, `*purchase_invoice_verification.py`, `*ers_settlement.py`, `*rfq.py`, `*einkauf_kpis.py`, `*sales_blanket_orders.py`, `*credit_management.py`, `*collective_documents.py`, `*central_contracts.py`, `*futtermittel_rohwaren.py`, `*futtermittel_rezepte.py`, `*compliance_dsgvo.py`, `*compliance_whistleblower_lksg.py`, `*pos_payments_promotions.py`, `app/api/v1/endpoints/personal.py`, `app/api/v1/endpoints/cases.py`, `app/api/v1/endpoints/opportunities.py`, `app/api/v1/endpoints/warehouse_wms.py`, `tests/test_*domain*`, `tests/test_*gap*`, `docs/project-context/domain-depth-plan-2026-05-17.md`, `docs/project-context/open-gaps-and-known-issues.md`
 **Abnahmekriterien:** Alle erzeugten Domain-Endpunkte sind ueber `/api/v1/...` erreichbar; HRM-Arbeitszeitkonto nutzt `domain_hr.time_entries.entry_date/hours`; POS Split-Payment und Promotions-Preview existieren; Whistleblower und LkSG-API-Vertraege existieren; fokussierte Tests und Doku-/Workboard-Checks sind gruen.
 **Erledigt:** Router-Registrierungen fuer CRM, Finance, Logistik, Einkauf, Verkauf/Kontrakte, Futtermittel, HRM, Compliance und POS ergaenzt; `warehouse_wms.py` auf kanonischen Tenant-Dependency-Import korrigiert; Logistik-Statistik gegen nicht-numerische DB-/Mockwerte gehaertet; HRM-Org-Subtree und Arbeitszeitkonto fachlich korrigiert; POS Split-Payment/Promotions und Whistleblower/LkSG nachgeliefert; Domain-Depth-Plan und Open-Gaps aktualisiert.
@@ -670,9 +670,9 @@ Stand: `2026-05-12`
 **Von:** Codex
 **Owner:** Codex
 **Stand:** abgeschlossen 2026-05-08
-**Ziel des Slices:** GAP-Liste, Lastenheft, Roadmap, Integrationsanforderungen und Landhandel-spezifische HRM-Planung gegen SAP/Oracle/Shiftfy-Benchmark dokumentieren.
+**Ziel des Slices:** GAP-Liste, Lastenheft, Roadmap, Integrationsanforderungen und Landhandel-spezifische HRM-Planung gegen ERP/Shiftfy-Benchmark dokumentieren.
 **Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/agent-ops/slices/HR-TIME-GAP-001.yaml`, `docs/project-context/hr-time-sap-oracle-gap-lastenheft-roadmap-2026-05-08.md`, `docs/project-context/hr-time-absence-driver-integration-2026-05-07.md`
-**Abnahmekriterien:** SAP-/Oracle-/Shiftfy-Benchmark ist quellenbasiert; VALEO-GAPs, Lastenheft, Roadmap-Milestones, Integrationsanforderungen, Kreuzverbindungen, Mitarbeitertypen im Landhandel, Kalenderintegration, Saison-/Arbeitsspitzenplanung, Kampagneninterferenzen und Aussendienstplanung sind als umsetzbare Planung dokumentiert.
+**Abnahmekriterien:** ERP-/Shiftfy-Benchmark ist quellenbasiert; VALEO-GAPs, Lastenheft, Roadmap-Milestones, Integrationsanforderungen, Kreuzverbindungen, Mitarbeitertypen im Landhandel, Kalenderintegration, Saison-/Arbeitsspitzenplanung, Kampagneninterferenzen und Aussendienstplanung sind als umsetzbare Planung dokumentiert.
 **Erledigt:** GAP-/Lastenheft-/Roadmap-Dokument in `docs/project-context/hr-time-sap-oracle-gap-lastenheft-roadmap-2026-05-08.md` erstellt und in die HR-Time-Zielarchitektur verlinkt.
 **Checks:** `python scripts/agent_workboard_supervisor.py validate`; `node scripts/docs-governance-check.cjs`; `git diff --check`
 **Offene Risiken:** Detailauslegung Arbeitszeit-/Lenkzeitrecht, Tarif-/Betriebsvereinbarungen, Anbieter-AVV/DPA und echte Kalender-/Tacho-/Telematik-Zugangsdaten bleiben fachlich oder extern zu klaeren.
@@ -1368,7 +1368,7 @@ Archiv des vorherigen Boards:
 **Ziel des Slices:** Eine neutrale ERP-Referenzmatrix im Repo festhalten und daraus die naechsten sechs fachlichen Vertiefungs-Slices fuer VALEO ableiten.
 **Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/project-context/*.md`
 **Abnahmekriterien:** Es gibt eine eigenstaendige Matrix mit Referenzmustern, Lizenz-/Uebernahmeregeln und VALEO-Istbild; daraus sind sechs konkrete Slices mit Zielbild und Prioritaet im Workboard abgeleitet.
-**Erledigt:** `docs/project-context/erp-reference-matrix-2026-04-12.md` verdichtet jetzt fachliches Tiefenbild, Community-ERP-Referenzmuster, Fiori-/OpenUI5-UIX-Muster, Lizenzregeln und konkrete Slice-Ableitung; die naechsten sechs fachlichen Vertiefungs-Slices sind daraus direkt abgeleitet.
+**Erledigt:** `docs/project-context/erp-reference-matrix-2026-04-12.md` verdichtet jetzt fachliches Tiefenbild, Community-ERP-Referenzmuster, Web-ERP-Standard-/OpenUI5-UIX-Muster, Lizenzregeln und konkrete Slice-Ableitung; die naechsten sechs fachlichen Vertiefungs-Slices sind daraus direkt abgeleitet.
 **Checks:** `node scripts/docs-governance-check.cjs`
 
 ## DOM-FIN-003
@@ -1708,7 +1708,7 @@ Archiv des vorherigen Boards:
 
 **Von:** Codex
 **Stand:** abgeschlossen
-**Ziel des Slices:** L3/FIBU-Monatswerte als Fiori-artigen Operatorraum mit klaren Folgeaktionen und Kontrolldichte veredeln.
+**Ziel des Slices:** L3/FIBU-Monatswerte als modernen ERP-Operatorraum mit klaren Folgeaktionen und Kontrolldichte veredeln.
 **Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/project-context/open-gaps-and-known-issues.md`, `packages/frontend-web/src/pages/fibu/monatswerte.tsx`
 **Abnahmekriterien:** Monatswerte liefern klaren Fallkopf, Risiken und naechste Aktion ohne Zusatz-Requests, konsistent zum Operational-Modell.
 **Erledigt:** `fibu/monatswerte.tsx` hat jetzt denselben leichten Fallrahmen fuer L3/FIBU-Auswertung (Status, Risiken, naechste Aktion) ohne neue Datenabfragen.
@@ -1748,7 +1748,7 @@ Archiv des vorherigen Boards:
 
 **Von:** Codex
 **Stand:** abgeschlossen
-**Ziel des Slices:** Kreditoren-Zahlungslauf als Fiori-artigen Zahlungsoperatorraum mit Governance- und Freigabedruck heben.
+**Ziel des Slices:** Kreditoren-Zahlungslauf als modernen ERP-Zahlungsoperatorraum mit Governance- und Freigabedruck heben.
 **Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/project-context/open-gaps-and-known-issues.md`, `docs/project-context/operational-rollout-scope-2026-04-09.md`, `packages/frontend-web/src/pages/finance/zahlungslauf-kreditoren.tsx`
 **Abnahmekriterien:** `zahlungslauf-kreditoren.tsx` zeigt kompakten Zahlungsfallkopf, Kontext und Timeline ohne Zusatz-Requests.
 **Erledigt:** `zahlungslauf-kreditoren.tsx` fuehrt den Kreditorenlauf jetzt mit Freigabe-, Skonto- und Ausfuehrungsdruck ueber dem bestehenden SEPA-Arbeitsplatz.
@@ -1858,7 +1858,7 @@ Archiv des vorherigen Boards:
 
 **Von:** Codex
 **Stand:** abgeschlossen
-**Ziel des Slices:** BWA als Fiori-artigen Analysearbeitsplatz mit Perioden-, Abweichungs- und Folgekontext aufwerten.
+**Ziel des Slices:** BWA als modernen ERP-Analysearbeitsplatz mit Perioden-, Abweichungs- und Folgekontext aufwerten.
 **Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/project-context/open-gaps-and-known-issues.md`, `docs/project-context/operational-rollout-scope-2026-04-09.md`, `packages/frontend-web/src/pages/fibu/bwa.tsx`
 **Abnahmekriterien:** `bwa.tsx` fuehrt Fallkopf, Kontext und Timeline aus bereits geladenen Auswertungsdaten.
 **Erledigt:** `fibu/bwa.tsx` verdichtet Periodenlage, Ergebnisabweichung und Folgeaktion als leichten Analysearbeitsplatz ueber der Auswertung.

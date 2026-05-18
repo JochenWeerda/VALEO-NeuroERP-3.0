@@ -1,6 +1,6 @@
 # VALEO Finance Suite 2.0 – Roadmap mit Aufwandsschätzung
 
-**Stand:** 2026-03-04  
+**Stand:** 2026-03-04
 **Basis:** `gap/finance-fiori-gap-analysis.md`, `gap/finance-fiori-matrix.csv`, `gap/gaps.md`
 
 ## 1) Planungsannahmen
@@ -26,7 +26,7 @@
 | R10 | CO-Ausbau: Profit Center, Margin, Product Costing | P1 | 34 | 20–27 | R9 |
 | R11 | Cashflow-Reporting | P1 | 14 | 8–11 | Reporting harmonisiert |
 | R12 | Embedded Analytics Drilldown (3-Klick bis Beleg) | P1 | 16 | 10–13 | R5 |
-| R13 | UX-Harmonisierung Fiori-Muster (PageToolbar/Worklist) | P2 | 14 | 8–11 | sukzessive |
+| R13 | UX-Harmonisierung Web-ERP-Muster (PageToolbar/Worklist) | P2 | 14 | 8–11 | sukzessive |
 | R14 | E-Rechnung Harmonisierung (XRechnung/ZUGFeRD Suite-weit) | P1 | 18 | 11–14 | Rechnungsflüsse |
 | R15 | GoBD-Retention/WORM-Nachweis + Verfahrensdoku | P0 | 18 | 11–14 | Compliance |
 
@@ -70,11 +70,11 @@ Zielbild Ende Phase 3:
 
 ## 4) Kritischer Pfad
 
-1. R1 Periodensteuerung E2E  
-2. R2 AuditTrailWorkbench  
-3. R4 Eingangsrechnungen E2E  
-4. R3 Matching/Bank-Flow  
-5. R15 GoBD-Retention/WORM-Nachweis  
+1. R1 Periodensteuerung E2E
+2. R2 AuditTrailWorkbench
+3. R4 Eingangsrechnungen E2E
+4. R3 Matching/Bank-Flow
+5. R15 GoBD-Retention/WORM-Nachweis
 
 Ohne diese fünf Pakete bleibt das Compliance- und Abschlussrisiko hoch.
 
@@ -111,5 +111,5 @@ Empfohlener Gesamtpuffer: `15–20%` auf PT.
 
 ## 9) Operative Sprintplanung (S1–S6)
 
-Detaillierte Umsetzung je Sprint (Epics/Stories/SP):  
+Detaillierte Umsetzung je Sprint (Epics/Stories/SP):
 `docs/roadmap/finance-suite-sprint-plan-s1-s6.md`

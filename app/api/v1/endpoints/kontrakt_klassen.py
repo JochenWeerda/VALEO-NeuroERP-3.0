@@ -1,5 +1,5 @@
 """
-Kontrakt-Klassen und Kontraktvarianten (AMIC Agrarhandel Feature).
+Kontrakt-Klassen und Kontraktvarianten (Agrar-Spezialsoftware Feature).
 
 GET    /kontrakt-klassen         — list all
 POST   /kontrakt-klassen         — create
