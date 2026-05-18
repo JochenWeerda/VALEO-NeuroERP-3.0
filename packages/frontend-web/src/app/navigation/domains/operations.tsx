@@ -92,6 +92,14 @@ export const RAW_NAV_SECTIONS: RawNavItem[] = [
         keywords: ['lagerbewegungen', 'buchungen', 'stock movements'],
         mcp: { businessDomain: 'inventory', scope: 'inventory:read' },
       },
+      {
+        id: 'gs1-scanner',
+        label: 'GS1 Barcode Workbench',
+        icon: QrCode,
+        module: '@/pages/lager/gs1-scanner',
+        keywords: ['gs1', 'barcode', 'sscc', 'ean', 'scanner', 'label', 'etikett'],
+        mcp: { businessDomain: 'inventory', scope: 'inventory:read' },
+      },
     ],
   },
   {

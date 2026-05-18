@@ -11,7 +11,7 @@ from decimal import Decimal
 from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 from sqlalchemy import and_
 from sqlalchemy.orm import Session, joinedload
 
@@ -74,8 +74,7 @@ class ProduktionsauftragOut(BaseModel):
     bestands_abzug_erfolgt: bool
     created_at: Optional[str] = None
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class ProduktionsauftragStatusIn(BaseModel):

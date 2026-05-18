@@ -9,7 +9,7 @@ from typing import Optional
 from datetime import date
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Response
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 from sqlalchemy.orm import Session, joinedload
 from sqlalchemy import and_
 
@@ -54,8 +54,7 @@ class EinzelfuttermittelOut(EinzelfuttermittelIn):
     id: str
     aktiv: bool = True
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class MischfuttermittelIn(BaseModel):
@@ -72,8 +71,7 @@ class MischfuttermittelOut(MischfuttermittelIn):
     id: str
     aktiv: bool = True
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class RezeptKomponenteIn(BaseModel):
@@ -88,8 +86,7 @@ class RezeptKomponenteIn(BaseModel):
 class RezeptKomponenteOut(RezeptKomponenteIn):
     id: str
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class RezeptIn(BaseModel):
@@ -120,8 +117,7 @@ class RezeptOut(BaseModel):
     gueltig_bis: Optional[date] = None
     komponenten: list[RezeptKomponenteOut] = []
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 # ── Einzelfuttermittel CRUD ────────────────────────────────────
