@@ -1,6 +1,6 @@
 """
 GS1 Barcode Parse Service
-Analog service-erp.de POST /service/gs1/api/v1/gs1/action/parse
+Analog externe Agrar-ERP-Plattform POST /service/gs1/api/v1/gs1/action/parse
 """
 
 from __future__ import annotations

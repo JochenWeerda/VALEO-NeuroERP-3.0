@@ -1,6 +1,6 @@
 """
 Outbound Webhook Registration
-Analog service-erp.de Webhook-Modul
+Analog externe Agrar-ERP-Plattform Webhook-Modul
 """
 
 from __future__ import annotations

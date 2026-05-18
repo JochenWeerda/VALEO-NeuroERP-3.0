@@ -180,6 +180,14 @@ from app.api.v1.endpoints import (
 # ROHWARE-SCHEMA-001
 from app.api.v1.endpoints import rohware_schema
 
+# Integration stubs — Wave 105
+from app.api.v1.endpoints import (
+    webshop_integration,
+    atlas_zollausfuhr,
+    saatzucht,
+    o2c_uat_scaffold,
+)
+
 # Wave 6-9 Process-Kernel-Endpoints (agrar-p0, supplier, wave-7, wave-9)
 from app.api.v1.endpoints import (
     agrar_p0,
@@ -1476,3 +1484,9 @@ from app.services.command_handlers_finance import register_finance_command_mutat
 
 register_command_mutations()
 register_finance_command_mutations()
+
+# Wave 105 — Integration stubs
+api_router.include_router(webshop_integration.router, tags=["webshop", "integration"])
+api_router.include_router(atlas_zollausfuhr.router, tags=["zoll", "atlas", "customs"])
+api_router.include_router(saatzucht.router, tags=["saatzucht", "agrar", "saatgut"])
+api_router.include_router(o2c_uat_scaffold.router, tags=["uat", "o2c", "testing"])

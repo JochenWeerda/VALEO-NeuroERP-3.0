@@ -3,7 +3,7 @@
 ## Zweck
 
 Ehrliche, aktuelle Bestandsaufnahme aller offenen Restthemen, fachlichen Duennstellen und bekannten Risiken.
-Zuletzt vollstaendig auditiert: **2026-05-17** (AMIC A.eins + service-erp.de L3-Connect Browser-Analyse).
+Zuletzt vollstaendig auditiert: **2026-05-17** (Agrar-Spezialsoftware + externe Agrar-ERP-Plattform Browser-Analyse).
 
 ---
 
@@ -68,7 +68,7 @@ Zuletzt vollstaendig auditiert: **2026-05-17** (AMIC A.eins + service-erp.de L3-
 
 ### EXT-002: FIBU-Mappings fuer Cutover
 
-- Fachlich freigegebene Konten-/Steuer-/Kostenstellen-Mappings fuer die L3-Migration stehen noch aus.
+- Fachlich freigegebene Konten-/Steuer-/Kostenstellen-Mappings fuer die ERP-Migration stehen noch aus.
 - Repo-seitig vollstaendig vorbereitet: `config/fibu_cutover_mapping.template.yaml` plus `python scripts/check_fibu_cutover_mapping.py --mapping <datei> --strict`.
 
 ---
@@ -98,13 +98,13 @@ Zuletzt vollstaendig auditiert: **2026-05-17** (AMIC A.eins + service-erp.de L3-
 - ~~Service-Layer-Refaktorierung~~ -> Alle 6 Haupt-Endpunkt-Dateien auf thin-router + Service-Klassen umgestellt: `business_partners.py`, `customers.py`, `personal.py` (Zeiteintraege + Abwesenheiten), `controlling.py`, `agrar_contracts.py`, `einkauf_bestellvorschlag.py`.
 - ~~HR-TIME-001 (Pilot-Slice)~~ -> `domain_hr.driver_time_events`-Tabelle, CRUD-Endpoints und Abwesenheitskollisions-Check repo-seitig implementiert.
 
-## AMIC/L3-Connect Paritaets-Gaps (2026-05-17, aktualisiert)
+## Agrar-Spezialsoftware/Externe-Plattform Paritaets-Gaps (2026-05-17, aktualisiert)
 
 Analysen:
-- [amic-parity-matrix-2026-05-17.md](c:/Users/Jochen/VALEO-NeuroERP-3.0/docs/project-context/amic-parity-matrix-2026-05-17.md)
-- [service-erp-l3connect-gap-matrix-2026-05-17.md](c:/Users/Jochen/VALEO-NeuroERP-3.0/docs/project-context/service-erp-l3connect-gap-matrix-2026-05-17.md) — NEU 2026-05-17
+- [agrar-parity-matrix-2026-05-17.md](c:/Users/Jochen/VALEO-NeuroERP-3.0/docs/project-context/agrar-parity-matrix-2026-05-17.md)
+- [agrar-erp-gap-matrix-2026-05-17.md](c:/Users/Jochen/VALEO-NeuroERP-3.0/docs/project-context/agrar-erp-gap-matrix-2026-05-17.md) — NEU 2026-05-17
 
-Quellen: Browser-Analyse `https://www.amic.de/hilfe/` (vollstaendiger A.eins-Modulbaum) und `https://doku.service-erp.de/` (165 Endpoints, 24 Module).
+Quellen: Browser-Analyse externer Agrar-Spezialsoftware (vollstaendiger Modulbaum) und externer Agrar-ERP-Plattform (165 Endpoints, 24 Module).
 
 Stand Wave 2026-05-17 (P0/P1 Gaps implementiert):
 - `WAAGE-LIVE-001`, `SILO-LEER-001`, `PARTIE-PFLICHT-001`, `ROHWARE-SCHEMA-001`: implementiert (Wellen 05-17)
@@ -151,7 +151,7 @@ Stand Wave 2026-05-17 (P0/P1 Gaps implementiert):
 | AMIC-WAAGE-VORL | Waagenvorlagen/Wiederholfall-Anlieferungen | P2 | implementiert |
 | AMIC-SAATZ-001 | Saatzucht-Modul | P2 | offen |
 
-## Enterprise-Domain-Gap-Closure (SAP/Oracle/Odoo/AMIC) 2026-05-17
+## Enterprise-Domain-Gap-Closure (Marktführende ERP-Systeme/Odoo/Agrar-Spezialsoftware) 2026-05-17
 
 Repo-seitig ergaenzt und registriert:
 

@@ -293,7 +293,7 @@ async def import_ascii(
     fehler_toleranz: bool = Form(True),
     db: Session = Depends(get_db),
 ):
-    """Importiert eine AMIC ASCII-Waagendatei (Satzarten W und Q)."""
+    """Importiert eine ASCII-Waagendatei im Agrar-Standardformat (Satzarten W und Q)."""
     content = (await file.read()).decode("utf-8", errors="replace")
     lines = content.splitlines()
 

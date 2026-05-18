@@ -1,4 +1,4 @@
-"""Rohware-Sammelabrechnung — gebündelte Abrechnung mehrerer Belege (AMIC Feature)."""
+"""Rohware-Sammelabrechnung — gebündelte Abrechnung mehrerer Belege (Agrar-Spezialsoftware Feature)."""
 
 from __future__ import annotations
 

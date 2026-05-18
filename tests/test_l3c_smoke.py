@@ -1,5 +1,5 @@
 """
-Smoke-Tests for L3-Connect gap-closure endpoints.
+Smoke-Tests for Agrar-ERP-Plattform gap-closure endpoints.
 Validates that endpoints are reachable and not blocked by auth.
 """
 

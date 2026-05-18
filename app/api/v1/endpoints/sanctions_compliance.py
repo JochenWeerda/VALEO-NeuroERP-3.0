@@ -1,6 +1,6 @@
 """
 Sanctions Compliance API — Verbotsliste / Sanktionsprüfung
-AMIC A.eins Feature: EU/UN/US/HM_TREASURY sanctions list management.
+Agrar-Spezialsoftware Feature: EU/UN/US/HM_TREASURY sanctions list management.
 """
 
 from __future__ import annotations

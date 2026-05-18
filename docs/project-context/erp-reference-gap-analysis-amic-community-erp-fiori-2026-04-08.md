@@ -1,4 +1,4 @@
-# ERP Reference Gap Analysis: AMIC, Community ERP, SAP Fiori
+# ERP Reference Gap Analysis: Agrar-Spezialsoftware, Community ERP, Web-ERP-Standard
 
 Stand: `2026-04-12`
 
@@ -15,15 +15,10 @@ Die Datei dient als:
 
 ## Verwendete Referenzen
 
-### AMIC / A.eins Hilfe
-
-- AMIC Hilfe Index: <https://www.amic.de/hilfe/index.html#>
-- Kontrakt: <https://www.amic.de/hilfe/index.html#!_kontrakt.htm>
-- Finanzbuchhaltung: <https://www.amic.de/hilfe/index.html#!finanzbuchhaltung20.htm>
-- Frachtwesen: <https://www.amic.de/hilfe/index.html#!frachtwesen.htm>
+### Agrar-Spezialsoftware
 
 Beobachtung:
-AMIC bildet ERP-Funktionalitaet sehr fein in fachlichen Untermodulen ab. Besonders auffaellig sind die Tiefe bei Kontrakt, Finanzbuchhaltung, Frachtwesen, Waagen-/Rohwarenlogik und den dazugehoerigen Parametern, Sonderfaellen und Auswertungen.
+Agrar-Spezialsoftware bildet ERP-Funktionalitaet sehr fein in fachlichen Untermodulen ab. Besonders auffaellig sind die Tiefe bei Kontrakt, Finanzbuchhaltung, Frachtwesen, Waagen-/Rohwarenlogik und den dazugehoerigen Parametern, Sonderfaellen und Auswertungen.
 
 ### Community-ERP-Addons und Community-Funktionsrepositorien
 
@@ -36,21 +31,16 @@ AMIC bildet ERP-Funktionalitaet sehr fein in fachlichen Untermodulen ab. Besonde
 Beobachtung:
 Diese Repositorien liefern reife Referenzmuster fuer Geschaeftsobjekte, States, Parameterisierung, Dokumenten-/Workflowlogik und Integrationsmuster. Sie sind als Funktions- und Datenmodell-Referenz wertvoll, aber lizenzseitig differenziert zu behandeln.
 
-### SAP Fiori / OpenUI5
-
-- SAP Fiori Object Page: <https://experience.sap.com/fiori-design-web/object-page/>
-- SAP Fiori Overview Page: <https://experience.sap.com/fiori-design-web/v1-48/overview-page/>
-- SAP Learning, Fiori Floorplans: <https://learning.sap.com/courses/ui-development-with-sap-fiori/working-with-sap-fiori-design-guidelines_ab11c169-54de-4f51-87b9-f61c8a5198be>
-- SAP UI5 FAQ / OpenUI5 Lizenz: <https://pages.community.sap.com/topics/ui5/faq>
+### Moderne ERP-Oberflächen / Web-ERP-Standard
 
 Beobachtung:
-SAP Fiori ist fuer VALEO vor allem als UI- und Navigationsreferenz wertvoll: Object Page, Overview Page, Worklist, Wizard, klare Aufgabenorientierung, flexible Header, statusstarke Aktionsfuehrung und dichte, aber lesbare Betriebsbilder.
+Moderne ERP-Oberflächen sind fuer VALEO vor allem als UI- und Navigationsreferenz wertvoll: Object Page, Overview Page, Worklist, Wizard, klare Aufgabenorientierung, flexible Header, statusstarke Aktionsfuehrung und dichte, aber lesbare Betriebsbilder.
 
-## Vergleich: AMIC-Funktionsbild vs. VALEO-Iststand
+## Vergleich: Agrar-Spezialsoftware-Funktionsbild vs. VALEO-Iststand
 
 ### 1. Kontrakt
 
-AMIC zeigt in diesem Bereich eine deutlich tiefere fachliche Untergliederung:
+Agrar-Spezialsoftware zeigt in diesem Bereich eine deutlich tiefere fachliche Untergliederung:
 
 - Kontraktklassen
 - Kontraktgruppen
@@ -91,9 +81,9 @@ hoch
 
 ### 2. Finanzbuchhaltung
 
-AMIC beschreibt FIBU als voll integrierten Kern mit gemeinsam genutzter Datengrundlage und zusaetzlichen FIBU-exklusiven Stammdaten und Parametern.
+Agrar-Spezialsoftware beschreibt FIBU als voll integrierten Kern mit gemeinsam genutzter Datengrundlage und zusaetzlichen FIBU-exklusiven Stammdaten und Parametern.
 
-AMIC nennt u. a.:
+Agrar-Spezialsoftware nennt u. a.:
 
 - Stammdaten der Fibu
 - Belegerfassung
@@ -135,7 +125,7 @@ hoch
 
 ### 3. Frachtwesen, Rohware, Waage, Partie
 
-AMIC fuehrt Frachtwesen, Rohware-Modul, Waagenanbindung und Partieverwaltung als eigene starke Funktionsraeume.
+Agrar-Spezialsoftware fuehrt Frachtwesen, Rohware-Modul, Waagenanbindung und Partieverwaltung als eigene starke Funktionsraeume.
 
 VALEO hat bereits viele Teilraeume:
 
@@ -157,7 +147,7 @@ hoch
 
 ### 4. Dokumentenverwaltung
 
-AMIC fuehrt die Dokumentenverwaltung als eigenstaendigen Fachraum.
+Agrar-Spezialsoftware fuehrt die Dokumentenverwaltung als eigenstaendigen Fachraum.
 
 VALEO hat:
 
@@ -176,7 +166,7 @@ mittel
 
 ### 5. Preise / Konditionen / Kunden-Lieferanten-/Artikelkern
 
-AMIC fuehrt diese Bereiche als tief ausgepraegte Stammdaten- und Bewegungslogik.
+Agrar-Spezialsoftware fuehrt diese Bereiche als tief ausgepraegte Stammdaten- und Bewegungslogik.
 
 VALEO hat bereits breite Stammdatenraeume, aber noch nicht ueberall dieselbe operative Verdichtung:
 
@@ -220,7 +210,7 @@ Besonders plausible Referenzfamilien:
 - `purchase-workflow`
 - `helpdesk`
 
-### SAP Fiori / OpenUI5 als UIX-Referenz
+### Moderne ERP-Oberflächen / Web-ERP-Standard als UIX-Referenz
 
 Sinnvoll als Referenz fuer:
 
@@ -232,7 +222,7 @@ Sinnvoll als Referenz fuer:
 
 Empfehlung:
 
-- Fiori nicht als Funktion kopieren, sondern als UI-Architekturprinzip nutzen
+- Moderne ERP-Oberflächen nicht als Funktion kopieren, sondern als UI-Architekturprinzip nutzen
 - OpenUI5 nur dann als Codequelle heranziehen, wenn wirklich Komponenten oder Strukturen daraus noetig sind
 - primaer Designmuster und Interaktionslogik uebernehmen
 
@@ -241,7 +231,7 @@ Empfehlung:
 ### Gruen
 
 - OpenUI5: Apache 2.0
-- SAP Fiori Design Guidelines als Referenz fuer Informationsarchitektur und Interaktionsmuster
+- Web-ERP-Standard Design Guidelines als Referenz fuer Informationsarchitektur und Interaktionsmuster
 
 ### Gelb
 
@@ -280,6 +270,6 @@ Wenn fuer einen Ausbau echte Referenzimplementierung noetig ist:
 
 Kein Ziel ist:
 
-- AMIC oder SAP Fiori als Ganzes nachzubauen
+- Agrar-Spezialsoftware oder moderne ERP-Oberflächen als Ganzes nachzubauen
 - einen zweiten Orchestrator oder ein zweites Produktmodell einzubetten
 - Lizenzrisiken durch unkritische Codeuebernahme einzugehen

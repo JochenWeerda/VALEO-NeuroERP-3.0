@@ -1,8 +1,8 @@
 # 🧩 VALEO NeuroERP 3.0 - Soll-Ist-Analyse & Handlungsplan
 
-**Datum:** 2025-10-12  
-**Version:** 3.0.0  
-**Branch:** `develop`  
+**Datum:** 2025-10-12
+**Version:** 3.0.0
+**Branch:** `develop`
 **Analysezeitraum:** Oktober 2024 - Oktober 2025
 
 ---
@@ -93,7 +93,7 @@
 #### **Frontend:**
 - **Framework:** React 18 + TypeScript
 - **Build:** Vite + pnpm Workspaces
-- **UI:** Shadcn UI (SAP Fiori Patterns)
+- **UI:** Shadcn UI (Web-ERP-Standard Patterns)
 - **State:** TanStack Query (Server-State) + Zustand (Client-State)
 - **Realtime:** SSE + WebSockets
 - **Multimodal:** Touch-optimiert, Voice-ready, Keyboard-First
@@ -107,9 +107,9 @@
 ### **1.4 UX/UI-Vision**
 
 #### **Multimodale Bedienung:**
-1. **Maus/Keyboard:** SAP Fiori Patterns (ListReport, ObjectPage, Wizard)
+1. **Maus/Keyboard:** Web-ERP-Standard Patterns (ListReport, ObjectPage, Wizard)
 2. **Touch:** Touch-optimierter POS, Tablet-Workflows
-3. **Sprache:** "Ask VALEO" Copilot (SAP Joule-Adaption)
+3. **Sprache:** "Ask VALEO" Copilot (KI-Assistent-Adaption)
 4. **Workflow:** AI-gesteuerte Prozessführung
 
 #### **Cognitive Load Reduction:**
@@ -161,7 +161,7 @@ app/domains/
 └── shared/       ✅ Events, Domain-Events
 ```
 
-**Status:** 
+**Status:**
 - ✅ 3 Domains vollständig strukturiert (CRM, Finance, Inventory)
 - ⚠️ 16 Domains fehlen noch als eigenständige Services
 - ✅ Clean Architecture (Domain/Application/Infrastructure) implementiert
@@ -199,7 +199,7 @@ packages/
 **Status:**
 - ✅ 4 produktive Workflows mit 92-98% Test-Coverage
 - ✅ LangGraph-Integration funktional
-- ⚠️ Noch keine Skill-Registry (SAP Joule-Pattern)
+- ⚠️ Noch keine Skill-Registry (KI-Assistent-Pattern)
 
 #### **RAG-System:**
 - ✅ Vector-Store (Chroma) eingerichtet
@@ -209,7 +209,7 @@ packages/
 - ⏳ Semantic-Search-UI fehlt noch im Frontend
 
 #### **MCP-Integration:**
-- ✅ Konzept dokumentiert (SAP-JOULE-ADAPTATION-VALEO.md)
+- ✅ Konzept dokumentiert (KI-ASSISTENT-ADAPTATION-VALEO.md)
 - ✅ JouleActionBar.tsx (Floating Button)
 - ✅ AskValeo.tsx (Dialog)
 - ✅ SkillRegistry.tsx (5 Skills definiert)
@@ -220,7 +220,7 @@ packages/
 
 #### **Frontend-Masken:**
 - **Anzahl:** 181 TSX-Pages implementiert
-- **Patterns:** SAP Fiori (ListReport, ObjectPage, Wizard, Editor)
+- **Patterns:** Web-ERP-Standard (ListReport, ObjectPage, Wizard, Editor)
 - **Komponenten:** Shadcn UI (DataTable, Badge, Button, Card, Dialog, etc.)
 - **Responsive:** Ja (Tailwind CSS)
 - **Touch-optimiert:** Nur POS-Terminal (pages/pos/)
@@ -319,7 +319,7 @@ Backend:
 | Aspekt | Soll | Ist | Abweichung |
 |--------|------|-----|------------|
 | **Masken-Anzahl** | ~200 | 181 Pages | ✅ 90% |
-| **SAP Fiori Patterns** | Konsequent überall | Ja, in allen Masken | ✅ 100% |
+| **Web-ERP-Standard Patterns** | Konsequent überall | Ja, in allen Masken | ✅ 100% |
 | **Responsive** | Desktop + Tablet + Mobile | Desktop + Tablet (POS) | ⚠️ 80% |
 | **Touch-Optimierung** | Alle Workflows | Nur POS-Terminal | ❌ 10% |
 | **Voice-Steuerung** | "Ask VALEO" voll funktional | Dialog da, kein Speech-API | ⚠️ 30% |
@@ -336,7 +336,7 @@ Backend:
 | **LangGraph-Workflows** | 10+ Business-Workflows | 4 produktiv (Bestellung, Skonto, Compliance, System) | ⚠️ 40% |
 | **RAG-Pipeline** | Semantic Search überall | Indexer ✅, Frontend-UI ❌ | ⚠️ 60% |
 | **MCP-Integration** | Model Context Protocol live | Konzept ✅, Code ⏳, keine MCP-Server | ⚠️ 20% |
-| **Skill-Registry** | SAP Joule-Pattern | 5 Skills definiert, aber nicht executable | ⚠️ 40% |
+| **Skill-Registry** | KI-Assistent-Pattern | 5 Skills definiert, aber nicht executable | ⚠️ 40% |
 | **AI-Copilot** | "Ask VALEO" voll funktional | Dialog ✅, keine LLM-Anbindung | ⚠️ 35% |
 | **Explainability** | Transparente AI-Decisions | Konzept da, nicht implementiert | ⚠️ 25% |
 | **Grounding** | Nur User-verfügbare Daten | Nicht implementiert | ❌ 0% |

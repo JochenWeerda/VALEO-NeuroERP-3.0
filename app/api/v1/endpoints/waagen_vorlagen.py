@@ -1,4 +1,4 @@
-"""Waagenvorlagen / Wiederholfall-Anlieferungen (AMIC Feature)."""
+"""Waagenvorlagen / Wiederholfall-Anlieferungen (Agrar-Spezialsoftware Feature)."""
 
 from __future__ import annotations
 

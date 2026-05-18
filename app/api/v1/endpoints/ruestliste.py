@@ -1,6 +1,6 @@
 """
 Rüstliste (Kommissioniervorbereitung)
-Analog service-erp.de l3c-lager Rüstliste
+Analog externe Agrar-ERP-Plattform l3c-lager Rüstliste
 """
 
 from __future__ import annotations

@@ -1,11 +1,11 @@
-# Service-ERP L3-Connect & AMIC A.eins — Erweiterter Gap-Vergleich
+# Externe Agrar-ERP-Plattformen — Erweiterter Gap-Vergleich
 
 Stand: `2026-05-17`
-Quellen: Direkte Browser-Analyse `https://doku.service-erp.de/` (165 Endpoints, 24 Module) und `https://www.amic.de/hilfe/` (vollständiger Modulbaum A.eins).
+Quellen: Direkte Browser-Analyse externer Agrar-ERP-Plattformen (165 Endpoints, 24 Module) und Agrar-Spezialsoftware (vollständiger Modulbaum).
 
 ---
 
-## Teil 1: Service-ERP L3-Connect — 165 Endpoints in 24 Modulen
+## Teil 1: Externe Agrar-ERP-Plattform — 165 Endpoints in 24 Modulen
 
 | Modul | Endpoints | Kernfunktion |
 |-------|-----------|--------------|
@@ -47,11 +47,11 @@ Schlüsselfelder, die in VALEO noch fehlen:
 
 ---
 
-## Teil 2: AMIC A.eins — Vollständiger Modulbaum
+## Teil 2: Agrar-Spezialsoftware — Vollständiger Modulbaum
 
 ### Neu identifizierte Gaps gegenüber VALEO (gegenüber vorherigem Stand)
 
-| Funktion | AMIC-Modul | Gap-ID | Priorität |
+| Funktion | Modul | Gap-ID | Priorität |
 |----------|-----------|--------|-----------|
 | Kontraktklassen / Kontraktvarianten (Fixpreis, Basis, Prämie) | Kontrakt | L3-KONTRAKT-001 | P1 |
 | Kontrakt-Hedging (MATIF, Terminmarkt-Kopplung) | Kontrakt | L3-KONTRAKT-002 | P1 |
@@ -76,15 +76,15 @@ Schlüsselfelder, die in VALEO noch fehlen:
 | Rüstliste (Kommissioniervorbereitung) | Lager | L3-LAGER-001 | P2 |
 | Streckengeschäft Import-Endpoint | Strecke | L3-LAGER-002 | P2 |
 | BestandskorrekturGrund Stamm | Lager | L3-LAGER-003 | P2 |
-| Verbotsliste / Sanktionsprüfung (Compliance) | AMIC-Zusatz | AMIC-COMP-001 | P1 |
-| Aktionärs-/Gesellschafterverwaltung (Genossenschaft) | AMIC-Zusatz | AMIC-GEN-001 | P1 |
-| Saatzucht-Modul | AMIC-Zusatz | AMIC-SAATZ-001 | P2 |
-| Gelangensbestätigung (§ 17a UStDV) | AMIC-FIBU | AMIC-FIBU-001 | P1 |
-| Intrastat (EU-Handelsstatistik) | AMIC-FIBU | AMIC-FIBU-002 | P1 |
-| ATLAS Zollausfuhr | AMIC-FIBU | AMIC-FIBU-003 | P2 |
-| Wechselbuchhaltung | AMIC-FIBU | AMIC-FIBU-004 | P2 |
-| e-Clearing | AMIC-FIBU | AMIC-FIBU-005 | P2 |
-| eBilanz / ELSTER direkt | AMIC-FIBU | AMIC-FIBU-006 | P1 |
+| Verbotsliste / Sanktionsprüfung (Compliance) | Agrar-Zusatzmodul | AMIC-COMP-001 | P1 |
+| Aktionärs-/Gesellschafterverwaltung (Genossenschaft) | Agrar-Zusatzmodul | AMIC-GEN-001 | P1 |
+| Saatzucht-Modul | Agrar-Zusatzmodul | AMIC-SAATZ-001 | P2 |
+| Gelangensbestätigung (§ 17a UStDV) | Agrar-FIBU | AMIC-FIBU-001 | P1 |
+| Intrastat (EU-Handelsstatistik) | Agrar-FIBU | AMIC-FIBU-002 | P1 |
+| ATLAS Zollausfuhr | Agrar-FIBU | AMIC-FIBU-003 | P2 |
+| Wechselbuchhaltung | Agrar-FIBU | AMIC-FIBU-004 | P2 |
+| e-Clearing | Agrar-FIBU | AMIC-FIBU-005 | P2 |
+| eBilanz / ELSTER direkt | Agrar-FIBU | AMIC-FIBU-006 | P1 |
 | AlternativArtikel per Kontraktposition | Kontrakt | L3-KONTRAKT-006 | P2 |
 | Kontraktparitäten-Stamm (INCOTERMS) | Kontrakt | L3-KONTRAKT-007 | P2 |
 | NVE/SSCC Lifecycle vollständig | Lager | L3-NVE-001 | P2 |

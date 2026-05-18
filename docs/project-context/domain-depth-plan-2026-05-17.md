@@ -1,7 +1,7 @@
 # Domain-Tiefe: Ist-Soll-Vergleich und Umsetzungsplan
 
 **Erstellt:** 2026-05-17
-**Massstab:** SAP S/4HANA, Oracle ERP Cloud, Odoo 17 Enterprise
+**Massstab:** Marktführende ERP-Systeme, etablierte ERP-Plattformen, Odoo 17 Enterprise
 **Zielmarkt:** Agrarhandel / Landhandel / Genossenschaften
 
 > Dieses Dokument ist die **operative Source-of-Truth** fuer alle Ausbauvorhaben
@@ -10,7 +10,7 @@
 
 ## Aktualisierung 2026-05-17: Repo-seitige Closure-Welle
 
-Die grossen fachlichen Luecken aus dem Vergleich gegen SAP, Oracle, Odoo und AMIC sind repo-seitig in einer ersten Closure-Welle adressiert. Der Stand ersetzt nicht externe UAT-, Steuerberater-, TSE-, DMS- oder Rechtsfreigaben.
+Die grossen fachlichen Luecken aus dem Vergleich gegen marktführende ERP-Systeme, Odoo und Branchenspezifische Agrarsoftware sind repo-seitig in einer ersten Closure-Welle adressiert. Der Stand ersetzt nicht externe UAT-, Steuerberater-, TSE-, DMS- oder Rechtsfreigaben.
 
 | Domain | Geschlossene Repo-Lieferung | Nachweis |
 |--------|-----------------------------|----------|
@@ -46,7 +46,7 @@ Fokussierter Teststand: 70 Tests gruen fuer CRM, Einkauf, Finance, Logistik, Rou
 | POS | Stufe 2 | Stufe 4 | Mittel | P2 |
 | Kontrakte | Stufe 2 | Stufe 5 | **Gross** | **P1** |
 
-**Stufendefinition:** 1 = Datenmodell/Grundstruktur, 2 = Basis-CRUD, 3 = Workflow/Prozesse, 4 = Fachtiefe/Auswertungen, 5 = Enterprise-Reife (SAP/Oracle-vergleichbar)
+**Stufendefinition:** 1 = Datenmodell/Grundstruktur, 2 = Basis-CRUD, 3 = Workflow/Prozesse, 4 = Fachtiefe/Auswertungen, 5 = Enterprise-Reife (ERP-vergleichbar)
 
 ---
 
@@ -57,7 +57,7 @@ Fokussierter Teststand: 70 Tests gruen fuer CRM, Einkauf, Finance, Logistik, Rou
 - Reporting: Top-Kunden, Top-Artikel, Monatsumsatz, Pipeline
 - Customer-Service-Layer vorhanden
 
-### Soll (SAP SD / Oracle Order Management)
+### Soll (Marktführende ERP-Systeme: Order Management)
 | Funktion | Ist | Gap |
 |----------|-----|-----|
 | Angebote mit Gueltigkeitsfrist | ✅ | — |
@@ -96,7 +96,7 @@ Fokussierter Teststand: 70 Tests gruen fuer CRM, Einkauf, Finance, Logistik, Rou
 - EDI-Versand (EDIFACT ORDERS D97A), E-Mail, Fax
 - 50+ Endpoints, sehr detailliertes Frontend
 
-### Soll (SAP MM / Oracle Purchasing)
+### Soll (Marktführende ERP-Systeme: Purchasing)
 | Funktion | Ist | Gap |
 |----------|-----|-----|
 | Bestellungen mit Freigabestrategien (Mehrstufig) | Teilweise | Genehmigungsworkflow ausbauen |
@@ -132,7 +132,7 @@ Fokussierter Teststand: 70 Tests gruen fuer CRM, Einkauf, Finance, Logistik, Rou
 - Bestandskorrektionen (Schwund, MHD-Abschreibung)
 - Basis-Lagerbewegungen
 
-### Soll (SAP EWM / Oracle WMS)
+### Soll (Marktführende ERP-Systeme: Warehouse Management)
 | Funktion | Ist | Gap |
 |----------|-----|-----|
 | Lagerstruktur (Lager/Zone/Gang/Fach) | ❌ | **Kritisch** |
@@ -176,7 +176,7 @@ Fokussierter Teststand: 70 Tests gruen fuer CRM, Einkauf, Finance, Logistik, Rou
 - Feldbuch, Cross-Compliance, DueV, FLIK, Maschinen, Wetter
 - 60+ Endpoints — staerkste Domain im Repo
 
-### Soll (SAP Agri / Odoo Agriculture / eigene Landhandel-Anforderungen)
+### Soll (Agrar-Spezialsoftware / Odoo Agriculture / eigene Landhandel-Anforderungen)
 | Funktion | Ist | Gap |
 |----------|-----|-----|
 | Mehrstufige Trocknungsabrechnung | ✅ | — |
@@ -208,7 +208,7 @@ Fokussierter Teststand: 70 Tests gruen fuer CRM, Einkauf, Finance, Logistik, Rou
 - Bank-Reconciliation, Direct-Debit, Mahnwesen, Cash-Closing, Journal
 - Kostenstellenrechnung, Controlling-KPIs
 
-### Soll (SAP FI/CO / Oracle Financials)
+### Soll (Marktführende ERP-Systeme: Financials)
 | Funktion | Ist | Gap |
 |----------|-----|-----|
 | Anlagenbuchhaltung (AfA, Anlagespiegel) | ❌ | **Wichtig** |
@@ -245,7 +245,7 @@ Fokussierter Teststand: 70 Tests gruen fuer CRM, Einkauf, Finance, Logistik, Rou
 - Kundenstamm, Leads, Aktivitaeten, Basis-Reports
 - 7 API-Endpoints, 33 Frontend-Seiten (Frontend bereits sehr detailliert)
 
-### Soll (Salesforce CRM / SAP CRM / Odoo CRM)
+### Soll (Etablierte CRM-Systeme / Odoo CRM)
 | Funktion | Ist | Gap |
 |----------|-----|-----|
 | Opportunity-Management (Stufen/Pipeline) | Teilweise | Vollstaendig |
@@ -283,7 +283,7 @@ Fokussierter Teststand: 70 Tests gruen fuer CRM, Einkauf, Finance, Logistik, Rou
 - Frachtauftraege unter Einkauf; Verladungs-Seiten; Tourenplanung rudimentaer
 - Nur 2 dedizierte Logistik-Seiten
 
-### Soll (SAP TM / Oracle Transportation Management)
+### Soll (Marktführende ERP-Systeme: Transportation Management)
 | Funktion | Ist | Gap |
 |----------|-----|-----|
 | Tourenplanung (Route Optimization) | ❌ | **Kritisch** |
@@ -347,7 +347,7 @@ Fokussierter Teststand: 70 Tests gruen fuer CRM, Einkauf, Finance, Logistik, Rou
 - Driver-Time-Pilot-Slice implementiert (2026-05-16)
 - HRM-Operating-System mit Gate-Workflow
 
-### Soll (SAP HCM / Oracle HCM Cloud / SuccessFactors)
+### Soll (Marktführende ERP-Systeme: HCM Cloud)
 | Funktion | Ist | Gap |
 |----------|-----|-----|
 | Organisationsstruktur (Organigramm) | ❌ | **Kritisch** |
@@ -422,7 +422,7 @@ Fokussierter Teststand: 70 Tests gruen fuer CRM, Einkauf, Finance, Logistik, Rou
 - DSFINVK-Compliance (GoBD/KassenSichV), Position-Management
 - Terminal-Frontend, Rückgaben, Tagesabschluss
 
-### Soll (SAP POS / Odoo POS / Lightspeed)
+### Soll (Etablierte POS-Systeme / Odoo POS / Lightspeed)
 | Funktion | Ist | Gap |
 |----------|-----|-----|
 | Multi-Zahlungsarten (Bar/Karte/SEPA/Gutschein) | Teilweise | Vollstaendig |
@@ -456,7 +456,7 @@ Fokussierter Teststand: 70 Tests gruen fuer CRM, Einkauf, Finance, Logistik, Rou
 - Kontrakt-CRUD, Positionen, Preismatrix
 - Frontend: 8 Seiten
 
-### Soll (SAP CLM / Oracle Contract Management / Odoo Contracts)
+### Soll (Etablierte ERP-Plattformen: Contract Management / Odoo Contracts)
 | Funktion | Ist | Gap |
 |----------|-----|-----|
 | Zentrale Vertrags-Engine (alle Typen) | ❌ | **Kritisch** |
