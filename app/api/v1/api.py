@@ -144,6 +144,7 @@ from app.api.v1.endpoints import (
     personal,
     compliance_dsgvo,
     compliance_whistleblower,
+    compliance_whistleblower_lksg,
     analytics,
     flow_spines,
     commodity_positions,
@@ -1191,7 +1192,11 @@ api_router.include_router(
 
 api_router.include_router(
     compliance_whistleblower.router,
-    tags=["compliance", "whistleblower", "lksg"]
+    tags=["compliance", "whistleblower"]
+)
+api_router.include_router(
+    compliance_whistleblower_lksg.router,
+    tags=["compliance", "lksg"]
 )
 
 # Wave 6 — Agrar-P0, Supplier-Portal, Silo-Operations, Contract-Pricing
@@ -1384,6 +1389,7 @@ api_router.include_router(
 
 api_router.include_router(
     pos_payments.router,
+    prefix="/pos",
     tags=["pos", "payments", "promotions"],
 )
 

@@ -261,3 +261,23 @@ async def z_report(
         }
     except Exception:
         return {"report_type": "Z", "date": report_date, "total_eur": 0.0, "closed": True}
+
+
+@router.post("/checkout/preview")
+async def checkout_preview(
+    payload: SplitPaymentIn,
+    db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
+):
+    """Vorschau-Kalkulation ohne Verbuchung — prüft Zahlungssumme und gibt Wechselgeld zurück."""
+    total_paid = round(sum(p.amount for p in payload.payments), 2)
+    cart_total = round(payload.cart_total, 2)
+    difference = round(total_paid - cart_total, 2)
+    return {
+        "cart_total": cart_total,
+        "total_paid": total_paid,
+        "difference": difference,
+        "change_amount": max(0.0, difference),
+        "valid": abs(difference) <= 0.01,
+        "payments": [{"method_code": p.method_code, "amount": p.amount} for p in payload.payments],
+    }
