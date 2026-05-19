@@ -1,13 +1,31 @@
 from __future__ import annotations
-from fastapi import APIRouter, Query
-from pydantic import BaseModel
+
+from datetime import date, datetime, timezone
 from typing import Optional
-from datetime import date
-import uuid
-from app.core.zertifikate import Zertifikat, ZertifikatStore, ZertifikatTyp
+
+from fastapi import APIRouter, Depends, Query
+from pydantic import BaseModel
+from sqlalchemy.orm import Session
+
+from app.core.database import get_db
+from app.core.zertifikate import ZertifikatTyp
+from app.domains.operations.models import ZertifikatAPIEntry
 
 router = APIRouter(prefix="/zertifikate", tags=["zertifikate"])
-_store = ZertifikatStore()
+
+
+def _row_to_dict(row: ZertifikatAPIEntry) -> dict:
+    return {
+        "zertifikat_id": row.zertifikat_id,
+        "tenant_id": row.tenant_id,
+        "typ": row.typ,
+        "zertifizierungsstelle": row.zertifizierungsstelle,
+        "gueltig_von": row.gueltig_von.date().isoformat() if row.gueltig_von else None,
+        "gueltig_bis": row.gueltig_bis.date().isoformat() if row.gueltig_bis else None,
+        "zertifikatsnummer": row.zertifikatsnummer,
+        "status": row.status,
+    }
+
 
 class ZertifikatCreateRequest(BaseModel):
     tenant_id: str
@@ -17,24 +35,49 @@ class ZertifikatCreateRequest(BaseModel):
     gueltig_bis: str
     zertifikatsnummer: Optional[str] = None
 
+
 @router.post("", status_code=201)
-def create_zertifikat(req: ZertifikatCreateRequest):
-    z = Zertifikat(
+def create_zertifikat(req: ZertifikatCreateRequest, db: Session = Depends(get_db)):
+    import uuid
+    from datetime import datetime
+    gueltig_von = datetime.fromisoformat(req.gueltig_von)
+    gueltig_bis = datetime.fromisoformat(req.gueltig_bis)
+    now = datetime.now(tz=timezone.utc)
+    if gueltig_bis.date() < date.today():
+        status = "abgelaufen"
+    elif (gueltig_bis.date() - date.today()).days <= 30:
+        status = "ablaufend"
+    else:
+        status = "gueltig"
+    row = ZertifikatAPIEntry(
         zertifikat_id=str(uuid.uuid4()),
         tenant_id=req.tenant_id,
-        typ=ZertifikatTyp(req.typ),
+        typ=req.typ,
         zertifizierungsstelle=req.zertifizierungsstelle,
-        gueltig_von=date.fromisoformat(req.gueltig_von),
-        gueltig_bis=date.fromisoformat(req.gueltig_bis),
+        gueltig_von=gueltig_von,
+        gueltig_bis=gueltig_bis,
         zertifikatsnummer=req.zertifikatsnummer,
+        status=status,
     )
-    _store.add(z)
-    return z
+    db.add(row)
+    db.commit()
+    db.refresh(row)
+    return _row_to_dict(row)
+
 
 @router.get("/tenant/{tenant_id}")
-def get_by_tenant(tenant_id: str):
-    return _store.by_tenant(tenant_id)
+def get_by_tenant(tenant_id: str, db: Session = Depends(get_db)):
+    rows = db.query(ZertifikatAPIEntry).filter(ZertifikatAPIEntry.tenant_id == tenant_id).all()
+    return [_row_to_dict(r) for r in rows]
+
 
 @router.get("/ablaufend")
-def get_ablaufend(tage_vorwarnung: int = Query(30)):
-    return _store.ablaufende_zertifikate(tage_vorwarnung)
+def get_ablaufend(tage_vorwarnung: int = Query(30), db: Session = Depends(get_db)):
+    from datetime import timedelta
+    deadline = datetime.now(tz=timezone.utc) + timedelta(days=tage_vorwarnung)
+    today = datetime.now(tz=timezone.utc)
+    rows = db.query(ZertifikatAPIEntry).filter(
+        ZertifikatAPIEntry.gueltig_bis >= today,
+        ZertifikatAPIEntry.gueltig_bis <= deadline,
+    ).all()
+    return [_row_to_dict(r) for r in rows]

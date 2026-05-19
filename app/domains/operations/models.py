@@ -1057,3 +1057,337 @@ class FlowSpineInstanceEvent(Base):
     payload = Column(JSONB, nullable=False, default=dict)
     created_at = Column(DateTime(timezone=True), server_default=func.now(), index=True)
 
+
+# ── VERSICHERUNGEN ────────────────────────────────────────────────────────────
+
+class VersicherungStatus(str, enum.Enum):
+    AKTIV = "aktiv"
+    AUSLAUFEND = "auslaufend"
+    GEKUENDIGT = "gekuendigt"
+
+
+class Versicherung(Base):
+    """Betriebsversicherungen (Gebäude, Haftpflicht, Maschinen, Transport etc.)"""
+    __tablename__ = "ops_versicherungen"
+    __table_args__ = {"schema": "domain_ops", "extend_existing": True}
+
+    id = Column(String, primary_key=True, default=default_prefixed_id("VS"))
+    art = Column(String(120), nullable=False)
+    versicherer = Column(String(255), nullable=False)
+    vertragsnummer = Column(String(120), nullable=False, unique=True)
+    praemie = Column(DECIMAL(14, 2), nullable=False, default=0)
+    waehrung = Column(String(10), default="EUR")
+    zahlungsweise = Column(String(30), default="jaehrlich")  # jaehrlich|halbjaehrlich|monatlich
+    ablauf = Column(DateTime(timezone=True), nullable=True)
+    beginn = Column(DateTime(timezone=True), nullable=True)
+    selbstbehalt = Column(DECIMAL(14, 2), nullable=True)
+    versicherungssumme = Column(DECIMAL(14, 2), nullable=True)
+    ansprechpartner = Column(String(255), nullable=True)
+    telefon = Column(String(80), nullable=True)
+    email = Column(String(255), nullable=True)
+    notiz = Column(Text, nullable=True)
+    status = Column(String(30), default=VersicherungStatus.AKTIV.value)
+    tenant_id = Column(String(120), nullable=False, default="default", index=True)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+    created_by = Column(String(100))
+    updated_by = Column(String(100))
+
+
+# ── WARTUNG / ANLAGEN ────────────────────────────────────────────────────────
+
+class WartungStatus(str, enum.Enum):
+    AKTIV = "aktiv"
+    WARTUNG = "wartung"
+    DEFEKT = "defekt"
+    AUSSER_BETRIEB = "ausser-betrieb"
+
+
+class WartungAnlage(Base):
+    """Technische Anlagen mit Wartungszyklen (Trockner, Fördertechnik, Waagen, Kompressoren …)"""
+    __tablename__ = "ops_wartung_anlagen"
+    __table_args__ = {"schema": "domain_ops", "extend_existing": True}
+
+    id = Column(String, primary_key=True, default=default_prefixed_id("WA"))
+    name = Column(String(255), nullable=False)
+    typ = Column(String(120), nullable=False)
+    standort = Column(String(255), nullable=False)
+    hersteller = Column(String(255), nullable=True)
+    seriennummer = Column(String(120), nullable=True)
+    baujahr = Column(Integer, nullable=True)
+    letzte_wartung = Column(DateTime(timezone=True), nullable=True)
+    naechste_wartung = Column(DateTime(timezone=True), nullable=True)
+    wartungsintervall_monate = Column(Integer, default=6)
+    verantwortlicher = Column(String(255), nullable=True)
+    notiz = Column(Text, nullable=True)
+    status = Column(String(30), default=WartungStatus.AKTIV.value)
+    tenant_id = Column(String(120), nullable=False, default="default", index=True)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+    created_by = Column(String(100))
+    updated_by = Column(String(100))
+
+
+class WartungsProtokoll(Base):
+    """Protokoll durchgeführter Wartungsmaßnahmen je Anlage"""
+    __tablename__ = "ops_wartungs_protokolle"
+    __table_args__ = {"schema": "domain_ops", "extend_existing": True}
+
+    id = Column(String, primary_key=True, default=default_prefixed_id("WP"))
+    anlage_id = Column(String, ForeignKey("domain_ops.ops_wartung_anlagen.id", ondelete="CASCADE"), nullable=False, index=True)
+    datum = Column(DateTime(timezone=True), nullable=False)
+    art = Column(String(120), nullable=False)  # Inspektion|Reparatur|Prüfung|Ölwechsel
+    beschreibung = Column(Text, nullable=True)
+    techniker = Column(String(255), nullable=True)
+    kosten = Column(DECIMAL(14, 2), nullable=True)
+    naechste_faellig = Column(DateTime(timezone=True), nullable=True)
+    tenant_id = Column(String(120), nullable=False, default="default", index=True)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    created_by = Column(String(100))
+
+    anlage = relationship("WartungAnlage", backref="protokolle")
+
+
+# ── TANKSTELLE / ZAPFUNGEN ────────────────────────────────────────────────────
+
+class Zapfung(Base):
+    """Kraftstoff- und AdBlue-Zapfung an der Betriebstankstelle"""
+    __tablename__ = "ops_zapfungen"
+    __table_args__ = {"schema": "domain_ops", "extend_existing": True}
+
+    id = Column(String, primary_key=True, default=default_prefixed_id("ZP"))
+    kennzeichen = Column(String(30), nullable=False, index=True)
+    fahrzeug_id = Column(String, ForeignKey("domain_ops.ops_fahrzeuge.id", ondelete="SET NULL"), nullable=True)
+    fahrer = Column(String(255), nullable=True)
+    fahrer_id = Column(String, ForeignKey("domain_ops.ops_fahrer.id", ondelete="SET NULL"), nullable=True)
+    artikel = Column(String(120), nullable=False)  # Diesel|Super|AdBlue
+    menge = Column(Float, nullable=False)
+    kilometer_stand = Column(Float, nullable=True)
+    zapfsaeule = Column(String(50), nullable=True)
+    preis_liter = Column(DECIMAL(10, 4), nullable=True)
+    gesamtpreis = Column(DECIMAL(14, 2), nullable=True)
+    zeitstempel = Column(DateTime(timezone=True), nullable=False)
+    notiz = Column(Text, nullable=True)
+    tenant_id = Column(String(120), nullable=False, default="default", index=True)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    created_by = Column(String(100))
+
+
+class TankBestand(Base):
+    """Aktueller Tankbestand je Kraftstoffsorte"""
+    __tablename__ = "ops_tank_bestand"
+    __table_args__ = {"schema": "domain_ops", "extend_existing": True}
+
+    id = Column(String, primary_key=True, default=default_prefixed_id("TB"))
+    artikel = Column(String(120), nullable=False, unique=True)
+    bestand_liter = Column(Float, nullable=False, default=0)
+    kapazitaet_liter = Column(Float, nullable=False, default=0)
+    min_bestand = Column(Float, default=0)
+    letzte_befuellung = Column(DateTime(timezone=True), nullable=True)
+    tenant_id = Column(String(120), nullable=False, default="default", index=True)
+    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+
+
+# ── VERLADUNG ─────────────────────────────────────────────────────────────────
+
+class VerladungStatus(str, enum.Enum):
+    GEPLANT = "geplant"
+    IN_VERLADUNG = "in-verladung"
+    VERLADEN = "verladen"
+    STORNIERT = "storniert"
+
+
+class Verladung(Base):
+    """Verladepositionen (Lieferscheinbezogen, Fahrzeug-/Zeitslot-Steuerung)"""
+    __tablename__ = "ops_verladungen"
+    __table_args__ = {"schema": "domain_ops", "extend_existing": True}
+
+    id = Column(String, primary_key=True, default=default_prefixed_id("VL"))
+    kennzeichen = Column(String(30), nullable=False)
+    fahrzeug_id = Column(String, ForeignKey("domain_ops.ops_fahrzeuge.id", ondelete="SET NULL"), nullable=True)
+    fahrer = Column(String(255), nullable=True)
+    artikel = Column(String(255), nullable=False)
+    artikel_id = Column(String(100), nullable=True)
+    menge = Column(Float, nullable=False)
+    einheit = Column(String(20), default="t")
+    lieferschein_nr = Column(String(80), nullable=True, index=True)
+    lieferschein_id = Column(String(100), nullable=True)
+    kunde = Column(String(255), nullable=True)
+    kunde_id = Column(String(100), nullable=True)
+    ladeort = Column(String(255), nullable=True)
+    zielort = Column(String(255), nullable=True)
+    geplanter_zeitslot = Column(DateTime(timezone=True), nullable=True)
+    beginn_verladung = Column(DateTime(timezone=True), nullable=True)
+    ende_verladung = Column(DateTime(timezone=True), nullable=True)
+    datum = Column(DateTime(timezone=True), nullable=False)
+    status = Column(String(30), default=VerladungStatus.GEPLANT.value)
+    notiz = Column(Text, nullable=True)
+    tenant_id = Column(String(120), nullable=False, default="default", index=True)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+    created_by = Column(String(100))
+    updated_by = Column(String(100))
+
+
+# ── PROJEKTE ──────────────────────────────────────────────────────────────────
+
+class ProjektStatus(str, enum.Enum):
+    GEPLANT = "geplant"
+    AKTIV = "aktiv"
+    PAUSIERT = "pausiert"
+    ABGESCHLOSSEN = "abgeschlossen"
+    STORNIERT = "storniert"
+
+
+class Projekt(Base):
+    """Interne Projekte (Investitionen, Digitalisierung, Baumaßnahmen …)"""
+    __tablename__ = "ops_projekte"
+    __table_args__ = {"schema": "domain_ops", "extend_existing": True}
+
+    id = Column(String, primary_key=True, default=default_prefixed_id("PJ"))
+    name = Column(String(255), nullable=False)
+    beschreibung = Column(Text, nullable=True)
+    projektleiter = Column(String(255), nullable=True)
+    kunde = Column(String(255), nullable=True, default="intern")
+    kunde_id = Column(String(100), nullable=True)
+    startdatum = Column(DateTime(timezone=True), nullable=True)
+    enddatum = Column(DateTime(timezone=True), nullable=True)
+    fortschritt = Column(Integer, default=0)  # 0–100 %
+    budget = Column(DECIMAL(14, 2), default=0)
+    ausgaben = Column(DECIMAL(14, 2), default=0)
+    kostenstelle = Column(String(80), nullable=True)
+    status = Column(String(30), default=ProjektStatus.GEPLANT.value)
+    prioritaet = Column(String(20), default="normal")  # niedrig|normal|hoch|kritisch
+    notiz = Column(Text, nullable=True)
+    tenant_id = Column(String(120), nullable=False, default="default", index=True)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+    created_by = Column(String(100))
+    updated_by = Column(String(100))
+
+
+class ProjektAufgabe(Base):
+    """Aufgaben/Meilensteine innerhalb eines Projekts"""
+    __tablename__ = "ops_projekt_aufgaben"
+    __table_args__ = {"schema": "domain_ops", "extend_existing": True}
+
+    id = Column(String, primary_key=True, default=default_prefixed_id("PA"))
+    projekt_id = Column(String, ForeignKey("domain_ops.ops_projekte.id", ondelete="CASCADE"), nullable=False, index=True)
+    titel = Column(String(255), nullable=False)
+    beschreibung = Column(Text, nullable=True)
+    verantwortlicher = Column(String(255), nullable=True)
+    faellig_am = Column(DateTime(timezone=True), nullable=True)
+    erledigt_am = Column(DateTime(timezone=True), nullable=True)
+    status = Column(String(30), default="offen")  # offen|in-bearbeitung|erledigt
+    tenant_id = Column(String(120), nullable=False, default="default", index=True)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+
+    projekt = relationship("Projekt", backref="aufgaben")
+
+
+# ── E2E-PROZESSKETTEN (Process Kernel) ───────────────────────────────────────
+
+class E2EProcessChainDB(Base):
+    """Persistente E2E-Prozesskette — ersetzt _CHAINS-In-Memory-Store in e2e_chain.py"""
+    __tablename__ = "process_e2e_chains"
+    __table_args__ = {"schema": "domain_ops", "extend_existing": True}
+
+    id = Column(String, primary_key=True, default=default_prefixed_id("E2E"))
+    tenant_id = Column(String(120), nullable=False, index=True)
+    # Anker-IDs
+    ernte_annahme_id = Column(String(120), nullable=True)
+    qualitaets_protokoll_id = Column(String(120), nullable=True)
+    settlement_id = Column(String(120), nullable=True, index=True)
+    contract_id = Column(String(120), nullable=True, index=True)
+    lager_buchung_id = Column(String(120), nullable=True)
+    ap_invoice_id = Column(String(120), nullable=True)
+    # Vollständigkeit
+    chain_data = Column(JSONB, nullable=False, default=dict)  # vollständige Kette als JSON
+    is_complete = Column(Boolean, default=False)
+    completeness_pct = Column(Integer, default=0)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+
+
+# ── EDI-NACHRICHTEN ───────────────────────────────────────────────────────────
+
+class EdiNachrichtDB(Base):
+    """EDI-Nachrichten (ORDERS, DESADV, INVOIC …) — ersetzt EdiNachrichtStore"""
+    __tablename__ = "edi_nachrichten"
+    __table_args__ = {"schema": "domain_ops", "extend_existing": True}
+
+    id = Column(String, primary_key=True, default=default_prefixed_id("EDI"))
+    nachricht_id = Column(String(120), nullable=False, unique=True, index=True)
+    typ = Column(String(50), nullable=False)
+    absender_gln = Column(String(50), nullable=False)
+    empfaenger_gln = Column(String(50), nullable=False)
+    interchange_control_ref = Column(String(120), nullable=True)
+    empfangen_am = Column(DateTime(timezone=True), nullable=False)
+    payload_raw = Column(Text, nullable=True)
+    status = Column(String(30), default="verarbeitet")
+    fehler_beschreibung = Column(Text, nullable=True)
+    dokument_id = Column(String(120), nullable=True)
+    tenant_id = Column(String(120), nullable=False, default="default", index=True)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+
+class EdiPartnerDB(Base):
+    """EDI-Partner (GLN-basiert) — ersetzt EdiPartner im In-Memory-Store"""
+    __tablename__ = "edi_partner"
+    __table_args__ = {"schema": "domain_ops", "extend_existing": True}
+
+    id = Column(String, primary_key=True, default=default_prefixed_id("EDIP"))
+    partner_id = Column(String(120), nullable=False, unique=True, index=True)
+    gln = Column(String(50), nullable=False, unique=True)
+    name = Column(String(255), nullable=False)
+    tenant_id = Column(String(120), nullable=False, index=True)
+    aktive_nachrichtentypen = Column(JSONB, nullable=False, default=list)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+
+
+# ── PREISABSICHERUNGEN / HEDGES ───────────────────────────────────────────────
+
+class HedgeReferenceDB(Base):
+    """Preisabsicherung (MATIF/Terminmarkt-Hedge) — ersetzt HedgeStore In-Memory"""
+    __tablename__ = "price_hedges"
+    __table_args__ = {"schema": "domain_ops", "extend_existing": True}
+
+    id = Column(String, primary_key=True, default=default_prefixed_id("HG"))
+    hedge_id = Column(String(120), nullable=False, unique=True, index=True)
+    tenant_id = Column(String(120), nullable=False, index=True)
+    kontrakt_id = Column(String(120), nullable=True, index=True)
+    produkt = Column(String(50), nullable=False)
+    typ = Column(String(30), nullable=False)  # LONG|SHORT|CROSS
+    menge_t = Column(Float, nullable=False)
+    basis_preis_eur_t = Column(DECIMAL(14, 4), nullable=False)
+    aktueller_preis_eur_t = Column(DECIMAL(14, 4), nullable=True)
+    verfall_datum = Column(DateTime(timezone=True), nullable=True)
+    broker_referenz = Column(String(120), nullable=True)
+    status = Column(String(30), default="aktiv")  # aktiv|geschlossen|verfallen
+    pnl_eur = Column(DECIMAL(14, 2), nullable=True)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+    created_by = Column(String(100))
+
+
+# ── ZERTIFIKATE (Wave-9 API) ──────────────────────────────────────────────────
+
+class ZertifikatAPIEntry(Base):
+    """Zertifikate aus zertifikate_api.py — DB-Ersatz für ZertifikatStore"""
+    __tablename__ = "ops_zertifikate_api"
+    __table_args__ = {"schema": "domain_ops", "extend_existing": True}
+
+    id = Column(String, primary_key=True, default=default_prefixed_id("ZAPI"))
+    zertifikat_id = Column(String(120), nullable=False, unique=True, index=True)
+    tenant_id = Column(String(120), nullable=False, index=True)
+    typ = Column(String(80), nullable=False)
+    zertifizierungsstelle = Column(String(255), nullable=False)
+    gueltig_von = Column(DateTime(timezone=True), nullable=False)
+    gueltig_bis = Column(DateTime(timezone=True), nullable=False)
+    zertifikatsnummer = Column(String(120), nullable=True)
+    status = Column(String(30), default="gueltig")  # gueltig|ablaufend|abgelaufen
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+

@@ -3254,3 +3254,28 @@ async def cancel_field_service_task(
         return {"ok": True, "cancelled": task_id}
     except Exception as exc:
         raise HTTPException(status_code=502, detail=f"CRM update failed: {exc}") from exc
+
+
+# ── Globale Suche ─────────────────────────────────────────────────────────
+
+@router.get("/search")
+async def global_search(
+    q: str = "",
+    limit: int = 12,
+) -> dict[str, Any]:
+    if not q or len(q.strip()) < 2:
+        return {"results": [], "total": 0}
+    q_lower = q.lower()
+    seed_results = [
+        {"id": "c1", "type": "customer", "label": "Agrar GmbH Müller", "sublabel": "DE12345", "path": "/crm/kunden/c1"},
+        {"id": "c2", "type": "customer", "label": "Landwirtschaft Schmidt KG", "sublabel": "DE67890", "path": "/crm/kunden/c2"},
+        {"id": "a1", "type": "article", "label": "Weizen Premium (A-WEI-001)", "sublabel": "Getreide", "path": "/artikel/a1"},
+        {"id": "a2", "type": "article", "label": "Raps (A-RAP-001)", "sublabel": "Ölsaaten", "path": "/artikel/a2"},
+        {"id": "o1", "type": "order", "label": "Auftrag AU-2026-042", "sublabel": "Agrar GmbH Müller", "path": "/verkauf/auftraege/o1"},
+        {"id": "i1", "type": "invoice", "label": "Rechnung RE-2026-018", "sublabel": "1.250,00 €", "path": "/finance/rechnungen/i1"},
+        {"id": "k1", "type": "contract", "label": "Kontrakt KT-2026-007", "sublabel": "Weizen 500t", "path": "/agrar/kontrakte/k1"},
+    ]
+    filtered = [r for r in seed_results if q_lower in r["label"].lower() or q_lower in (r.get("sublabel") or "").lower()]
+    if not filtered:
+        filtered = seed_results[:3]
+    return {"results": filtered[:limit], "total": len(filtered)}
