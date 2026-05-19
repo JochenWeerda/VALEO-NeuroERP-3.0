@@ -97,6 +97,7 @@ const GROUP_BY_PREFIX: Record<string, PageModuleGroupName> = {
   waage: 'operations',
   wartung: 'operations',
   weighing: 'core',
+  wissen: 'operations',
   workflow: 'core',
   workflows: 'core',
   zertifikate: 'operations',
