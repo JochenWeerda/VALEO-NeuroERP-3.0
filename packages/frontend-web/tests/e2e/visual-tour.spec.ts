@@ -60,6 +60,13 @@ async function checkForIssues(page: Page, route: string, viewportName: string): 
       if (['fixed', 'absolute', 'sticky'].includes(style.position)) return
       // Skip elements that are overflow:hidden parents
       if (style.overflow === 'hidden' || style.overflowX === 'hidden') return
+      // Skip elements inside a scrollable ancestor (overflow-x:auto/scroll) — not a visual bug
+      let ancestor = el.parentElement
+      while (ancestor && ancestor !== document.body) {
+        const as = window.getComputedStyle(ancestor)
+        if (as.overflowX === 'auto' || as.overflowX === 'scroll') return
+        ancestor = ancestor.parentElement
+      }
       const rect = el.getBoundingClientRect()
       // Skip elements that are entirely off-screen (hidden panels/drawers translated off-viewport)
       if (rect.left >= vw - 5 || rect.right <= 5) return
