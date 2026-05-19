@@ -5,7 +5,9 @@
 
 import { useMemo, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { Command as CommandIcon, HelpCircle } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
+import { Command as CommandIcon, HelpCircle, Search, Zap } from 'lucide-react'
+import { globalSearch, QUICK_ACTIONS } from '@/lib/api/global-search'
 import {
   CommandDialog,
   CommandEmpty,
@@ -51,7 +53,15 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps): JSX
   const agrarEnabled = useFeature('agrar')
   const navigationShortcuts = useNavigationShortcuts()
   const { dispatch } = useActionDispatch()
+  const navigate = useNavigate()
   const [search, setSearch] = useState<string>('')
+
+  const dataSearchQuery = useQuery({
+    queryKey: ['global-search', search],
+    queryFn: () => globalSearch(search),
+    enabled: open && search.trim().length >= 2,
+    staleTime: 30_000,
+  })
 
   const maskRegistryQuery = useQuery({
     queryKey: ['ui', 'mask-registry', 'command-palette'],
@@ -155,6 +165,64 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps): JSX
             </CommandGroup>
           </div>
         ))}
+
+        {/* Quick Actions — filtered by search */}
+        {(() => {
+          const searchLower = search.trim().toLowerCase()
+          const matchingActions = QUICK_ACTIONS.filter(
+            (a) =>
+              searchLower.length === 0 ||
+              a.label.toLowerCase().includes(searchLower) ||
+              a.keywords.some((k) => k.includes(searchLower)),
+          )
+          if (matchingActions.length === 0) return null
+          return (
+            <>
+              <CommandSeparator />
+              <CommandGroup heading="Schnellaktionen">
+                {matchingActions.map((action) => (
+                  <CommandItem
+                    key={action.id}
+                    value={action.label}
+                    keywords={action.keywords}
+                    onSelect={() => {
+                      navigate(action.path)
+                      onOpenChange(false)
+                    }}
+                  >
+                    <Zap className="mr-2 h-4 w-4 text-amber-500" aria-hidden="true" />
+                    {action.label}
+                  </CommandItem>
+                ))}
+              </CommandGroup>
+            </>
+          )
+        })()}
+
+        {/* Data search results */}
+        {dataSearchQuery.data && dataSearchQuery.data.results.length > 0 && (
+          <>
+            <CommandSeparator />
+            <CommandGroup heading="Datensätze">
+              {dataSearchQuery.data.results.map((result) => (
+                <CommandItem
+                  key={`${result.type}-${result.id}`}
+                  value={result.label}
+                  onSelect={() => {
+                    navigate(result.path)
+                    onOpenChange(false)
+                  }}
+                >
+                  <Search className="mr-2 h-4 w-4 text-muted-foreground" aria-hidden="true" />
+                  <span>{result.label}</span>
+                  {result.sublabel && (
+                    <span className="ml-2 text-xs text-muted-foreground">{result.sublabel}</span>
+                  )}
+                </CommandItem>
+              ))}
+            </CommandGroup>
+          </>
+        )}
 
         {(search.toLowerCase().includes('ai') || search.toLowerCase().includes('help') || search.toLowerCase().includes('hilfe')) && (
           <>

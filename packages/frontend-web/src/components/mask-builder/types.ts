@@ -145,6 +145,13 @@ export interface ListColumn {
   render?: (_value: any, _row: any) => React.ReactNode
 }
 
+export interface EmptyStateConfig {
+  icon?: string
+  title: string
+  description?: string
+  actionLabel?: string
+}
+
 export interface ListConfig extends Omit<MaskConfig, 'tabs' | 'type'> {
   type: 'list-report'
   columns: ListColumn[]
@@ -153,6 +160,8 @@ export interface ListConfig extends Omit<MaskConfig, 'tabs' | 'type'> {
   defaultSort?: { field: string; direction: 'asc' | 'desc' }
   pageSize?: number
   serverPagination?: boolean
+  /** Custom empty state shown when list has no data */
+  emptyState?: EmptyStateConfig
 }
 
 export interface WorklistItem {
