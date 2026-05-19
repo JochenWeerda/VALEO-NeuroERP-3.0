@@ -28,7 +28,8 @@ export default defineConfig({
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 1 : 0,
   /** Lokal: ein Worker entlastet den Vite-Dev-Server (weniger flaky dynamic imports) */
-  workers: process.env.CI ? 2 : 1,
+  workers: process.env.CI ? 2 : (process.env.VISUAL_TOUR_WORKERS ? Number(process.env.VISUAL_TOUR_WORKERS) : 1),
+  globalTeardown: './tests/e2e/visual-tour-teardown.ts',
   reporter: [['list'], ['html', { open: 'never' }]],
   ...(process.env.PLAYWRIGHT_SKIP_WEBSERVER === '1'
     ? {}
