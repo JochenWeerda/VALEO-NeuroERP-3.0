@@ -1,15 +1,22 @@
 from __future__ import annotations
-from fastapi import APIRouter
-from pydantic import BaseModel
-from datetime import datetime
+
 import uuid
+from datetime import datetime
+
+from fastapi import APIRouter, Depends
+from pydantic import BaseModel
+from sqlalchemy.orm import Session
+
+from app.core.database import get_db
 from app.core.edi_integration import (
-    EdiNachricht, EdiNachrichtenTyp, EdiPartner, EdiNachrichtStore,
-    parse_edi_nachricht, EdiVerarbeitungsStatus
+    EdiNachrichtenTyp,
+    EdiVerarbeitungsStatus,
+    parse_edi_nachricht,
 )
+from app.domains.operations.models import EdiNachrichtDB, EdiPartnerDB
 
 router = APIRouter(prefix="/edi", tags=["edi"])
-_store = EdiNachrichtStore()
+
 
 class EdiNachrichtEmpfangRequest(BaseModel):
     typ: str
@@ -17,6 +24,8 @@ class EdiNachrichtEmpfangRequest(BaseModel):
     empfaenger_gln: str
     interchange_control_ref: str
     payload_raw: str
+    tenant_id: str = "default"
+
 
 class EdiPartnerCreateRequest(BaseModel):
     gln: str
@@ -24,37 +33,64 @@ class EdiPartnerCreateRequest(BaseModel):
     tenant_id: str
     aktive_nachrichtentypen: list[str]
 
+
 @router.post("/nachrichten", status_code=201)
-def empfange_nachricht(req: EdiNachrichtEmpfangRequest):
+def empfange_nachricht(req: EdiNachrichtEmpfangRequest, db: Session = Depends(get_db)):
     typ = EdiNachrichtenTyp(req.typ)
     ergebnis = parse_edi_nachricht(req.payload_raw, typ)
-    nachricht = EdiNachricht(
+    row = EdiNachrichtDB(
         nachricht_id=ergebnis.nachricht_id,
-        typ=typ,
+        typ=req.typ,
         absender_gln=req.absender_gln,
         empfaenger_gln=req.empfaenger_gln,
         interchange_control_ref=req.interchange_control_ref,
         empfangen_am=datetime.utcnow(),
         payload_raw=req.payload_raw,
-        status=EdiVerarbeitungsStatus.VERARBEITET if ergebnis.success else EdiVerarbeitungsStatus.FEHLER,
+        status=EdiVerarbeitungsStatus.VERARBEITET.value if ergebnis.success else EdiVerarbeitungsStatus.FEHLER.value,
         fehler_beschreibung=ergebnis.fehler_beschreibung,
         dokument_id=ergebnis.dokument_id,
+        tenant_id=req.tenant_id,
     )
-    _store.add_nachricht(nachricht)
-    return {"nachricht_id": nachricht.nachricht_id, "success": ergebnis.success, "schema_version": 1}
+    db.add(row)
+    db.commit()
+    return {"nachricht_id": ergebnis.nachricht_id, "success": ergebnis.success, "schema_version": 1}
+
 
 @router.get("/nachrichten/offene")
-def get_offene_nachrichten(empfaenger_gln: str):
-    return _store.offene_nachrichten(empfaenger_gln)
+def get_offene_nachrichten(empfaenger_gln: str, db: Session = Depends(get_db)):
+    rows = db.query(EdiNachrichtDB).filter(
+        EdiNachrichtDB.empfaenger_gln == empfaenger_gln,
+        EdiNachrichtDB.status == EdiVerarbeitungsStatus.ERHALTEN.value,
+    ).all()
+    return [
+        {
+            "nachricht_id": r.nachricht_id,
+            "typ": r.typ,
+            "absender_gln": r.absender_gln,
+            "empfangen_am": r.empfangen_am.isoformat() if r.empfangen_am else None,
+            "status": r.status,
+        }
+        for r in rows
+    ]
+
 
 @router.post("/partner", status_code=201)
-def create_partner(req: EdiPartnerCreateRequest):
-    partner = EdiPartner(
-        partner_id=str(uuid.uuid4()),
+def create_partner(req: EdiPartnerCreateRequest, db: Session = Depends(get_db)):
+    pid = str(uuid.uuid4())
+    row = EdiPartnerDB(
+        partner_id=pid,
         gln=req.gln,
         name=req.name,
         tenant_id=req.tenant_id,
-        aktive_nachrichtentypen=[EdiNachrichtenTyp(t) for t in req.aktive_nachrichtentypen],
+        aktive_nachrichtentypen=req.aktive_nachrichtentypen,
     )
-    _store.add_partner(partner)
-    return partner
+    db.add(row)
+    db.commit()
+    db.refresh(row)
+    return {"partner_id": row.partner_id, "gln": row.gln, "name": row.name}
+
+
+@router.get("/partner")
+def list_partner(tenant_id: str, db: Session = Depends(get_db)):
+    rows = db.query(EdiPartnerDB).filter(EdiPartnerDB.tenant_id == tenant_id).all()
+    return [{"partner_id": r.partner_id, "gln": r.gln, "name": r.name, "aktive_nachrichtentypen": r.aktive_nachrichtentypen} for r in rows]

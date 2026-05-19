@@ -1507,3 +1507,20 @@ api_router.include_router(webshop_integration.router, tags=["webshop", "integrat
 api_router.include_router(atlas_zollausfuhr.router, tags=["zoll", "atlas", "customs"])
 api_router.include_router(saatzucht.router, tags=["saatzucht", "agrar", "saatgut"])
 api_router.include_router(o2c_uat_scaffold.router, tags=["uat", "o2c", "testing"])
+
+# ── Wave 106 — Operations CRUD (DB-backed, replaces compat stubs) ──────────
+from app.api.v1.endpoints import (  # noqa: E402
+    versicherungen,
+    wartung,
+    tankstelle,
+    verladung,
+    projekte,
+    transporte,
+)
+
+api_router.include_router(versicherungen.router, tags=["versicherungen", "betrieb"])
+api_router.include_router(wartung.router, tags=["wartung", "anlagen"])
+api_router.include_router(tankstelle.router, tags=["tankstelle", "zapfungen"])
+api_router.include_router(verladung.router, tags=["verladung", "logistik"])
+api_router.include_router(projekte.router, tags=["projekte"])
+api_router.include_router(transporte.router, tags=["transporte", "fahrer"])
