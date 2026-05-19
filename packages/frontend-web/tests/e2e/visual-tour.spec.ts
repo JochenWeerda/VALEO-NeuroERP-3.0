@@ -61,6 +61,8 @@ async function checkForIssues(page: Page, route: string, viewportName: string): 
       // Skip elements that are overflow:hidden parents
       if (style.overflow === 'hidden' || style.overflowX === 'hidden') return
       const rect = el.getBoundingClientRect()
+      // Skip elements that are entirely off-screen (hidden panels/drawers translated off-viewport)
+      if (rect.left >= vw - 5 || rect.right <= 5) return
       if (rect.right > vw + 5 || rect.left < -5) {
         const tag = el.tagName.toLowerCase()
         const id = el.id ? `#${el.id}` : ''

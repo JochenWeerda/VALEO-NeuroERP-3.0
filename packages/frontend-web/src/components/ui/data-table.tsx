@@ -231,6 +231,7 @@ export function DataTable<T>({
         </div>
       )}
 
+      <div className="overflow-x-auto">
       <Table>
         <TableHeader>
           <TableRow>
@@ -283,6 +284,7 @@ export function DataTable<T>({
           )}
         </TableBody>
       </Table>
+      </div>
     </div>
   )
 }
