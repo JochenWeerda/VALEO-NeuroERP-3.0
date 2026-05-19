@@ -32,7 +32,8 @@
    (fuer vollstaendiges Terra-Theme)
    ================================================================= */
 
-:root[data-theme="terra"] {
+:root[data-theme="terra"],
+.theme-terra {
 
   /* ----------------------------------------------------------------
      TYPOGRAFIE

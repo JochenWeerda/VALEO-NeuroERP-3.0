@@ -25,6 +25,8 @@ interface ObjectPageProps {
   onAction?: (_actionKey: string, _formData: any) => void | Promise<void>
   /** Key of the action currently loading (disables that button and shows spinner) */
   loadingActionKey?: string | null
+  /** Enable golden-ratio split layout (61.8% / 38.2%) for the active tab content */
+  splitLayout?: boolean
 }
 
 const ObjectPage: React.FC<ObjectPageProps> = ({
@@ -35,7 +37,8 @@ const ObjectPage: React.FC<ObjectPageProps> = ({
   onCancel,
   isLoading = false,
   onAction,
-  loadingActionKey = null
+  loadingActionKey = null,
+  splitLayout = false,
 }) => {
   const { toast } = useToast()
   const [activeTab, setActiveTab] = useState(config.tabs[0]?.key || '')
@@ -367,14 +370,28 @@ const ObjectPage: React.FC<ObjectPageProps> = ({
           {config.tabs.map(tab => (
             <TabsContent key={tab.key} value={tab.key} className="space-y-6">
               {activatedTabs.has(tab.key) ? (
-                <Card>
-                  <CardHeader>
-                    <CardTitle>{tab.label}</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    {renderTabContent(tab)}
-                  </CardContent>
-                </Card>
+                splitLayout ? (
+                  <div className="grid gap-6" style={{ gridTemplateColumns: '61.8fr 38.2fr' }}>
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>{tab.label}</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        {renderTabContent(tab)}
+                      </CardContent>
+                    </Card>
+                    <div className="space-y-4" />
+                  </div>
+                ) : (
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>{tab.label}</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      {renderTabContent(tab)}
+                    </CardContent>
+                  </Card>
+                )
               ) : (
                 <Card>
                   <CardContent className="flex items-center justify-center py-12">

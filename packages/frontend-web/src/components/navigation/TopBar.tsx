@@ -180,7 +180,7 @@ export function TopBar({
 
   return (
     <header
-      className="flex h-14 md:h-16 items-center gap-2 md:gap-4 border-b bg-background px-3 md:px-6"
+      className="flex h-14 items-center gap-2 md:gap-4 border-b bg-background px-3 md:px-6 md:h-[56px] shadow-sm"
       role="banner"
       data-mcp-component="top-bar"
     >
