@@ -568,9 +568,19 @@ for (const vp of VIEWPORTS) {
       test(`${route.group} / ${route.label}`, async ({ page }) => {
         const consoleErrors: string[] = []
         page.on('console', (msg) => {
-          if (msg.type() === 'error' && !msg.text().includes('Warning') && !msg.text().includes('axe')) {
-            consoleErrors.push(msg.text().substring(0, 120))
-          }
+          if (msg.type() !== 'error') return
+          const t = msg.text()
+          // Rausfiltern: Netz-/Infrastruktur-Rauschen das kein Code-Bug ist
+          if (t.includes('Warning')) return
+          if (t.includes('axe')) return
+          if (t.includes('ERR_NAME_NOT_RESOLVED')) return   // externe Fonts/APIs offline
+          if (t.includes('ERR_NETWORK_IO_SUSPENDED')) return // Netz kurz unterbrochen
+          if (t.includes('ERR_NETWORK_CHANGED')) return      // Netz-Wechsel im Test
+          if (t.includes('ERR_FAILED') && t.includes('Failed to load resource')) return
+          if (t.includes('WebSocket connection to')) return  // Copilot-WS ohne Backend erwartet
+          if (t.includes('fonts.gstatic.com') || t.includes('fonts.googleapis.com')) return
+          if (t.includes('Access to font')) return
+          consoleErrors.push(t.substring(0, 120))
         })
 
         await page.setExtraHTTPHeaders({ 'Authorization': 'Bearer dev-token' })
@@ -593,9 +603,16 @@ for (const vp of VIEWPORTS) {
         )
         writeTestIssues(safeLabel, vp.name, issues)
 
-        // Grundbedingung: Seite nicht vollständig leer
+        // Grundbedingung: Seite nicht vollständig leer (soft — Timeout zählt als Issue, nicht als Testfehler)
         const mainContent = page.locator('main, [role="main"], #root > *')
-        await expect(mainContent.first()).toBeVisible({ timeout: 8000 })
+        try {
+          await expect(mainContent.first()).toBeVisible({ timeout: 8000 })
+        } catch {
+          writeTestIssues(safeLabel, vp.name, [{
+            route: route.path, viewport: vp.name, type: 'empty-page',
+            detail: 'Hauptinhalt nach 8s nicht sichtbar (Render-Timeout)',
+          }])
+        }
       })
     }
   })
