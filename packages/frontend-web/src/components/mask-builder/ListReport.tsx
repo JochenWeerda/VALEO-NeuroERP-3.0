@@ -254,14 +254,14 @@ const ListReport: React.FC<ListReportProps> = ({
   return (
     <div className="space-y-6 p-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <h1 className="text-3xl font-bold">{displayTitle}</h1>
           {displaySubtitle && (
             <p className="text-muted-foreground">{displaySubtitle}</p>
           )}
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           {onImport && (
             <Button variant="outline" onClick={onImport} className="gap-2">
               <Upload className="h-4 w-4" />
