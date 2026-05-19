@@ -1148,7 +1148,7 @@ function DemoLoadingOverlay({ scenario, onDone }: { scenario: typeof DEMO_SCENAR
     }
     advance(0)
     return () => clearTimeout(t)
-  }, [])  // eslint-disable-line react-hooks/exhaustive-deps
+  }, [])
 
   return (
     <div className="fixed inset-0 z-[200] flex flex-col items-center justify-center" style={{ background: 'rgba(27,48,34,0.97)' }}>
@@ -4191,7 +4191,7 @@ export default function Rationsoptimierung() {
     setTourStep(0)
     setView('workbench')
     demoMutation.mutate()
-  }, [])  // eslint-disable-line react-hooks/exhaustive-deps
+  }, [])
 
   // Szenario wechseln innerhalb Demo
   const handleDemoScenario = useCallback((idx: number) => {
