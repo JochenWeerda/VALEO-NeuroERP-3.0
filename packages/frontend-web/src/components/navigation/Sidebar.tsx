@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button'
 import { ChevronDown, ChevronLeft, ChevronRight, ChevronUp } from 'lucide-react'
 import { useFeature } from '@/hooks/useFeature'
 import { usePinnedTiles } from '@/hooks/usePinnedTiles'
+import { useUserRole } from '@/hooks/useUserRole'
 import { useNavSections } from '@/app/navigation/nav-runtime'
 import type { NavItem } from '@/app/navigation/types'
 import { resolveRoutePathFromModule } from '@/app/navigation/route-paths'
@@ -29,12 +30,19 @@ export function Sidebar({ collapsed, onToggle, onNavigate }: SidebarProps): JSX.
   const agrarEnabled = useFeature('agrar')
   const { pinnedTileIds } = usePinnedTiles()
   const navSections = useNavSections()
+  const userRoles = useUserRole()
   const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set())
 
-  const filteredNavItems = useMemo(
-    () => navSections.filter((item) => (item.featureKey === 'agrar' ? agrarEnabled : true)),
-    [agrarEnabled, navSections],
-  )
+  const filteredNavItems = useMemo(() => {
+    function isVisible(item: NavItem): boolean {
+      if (item.featureKey === 'agrar' && !agrarEnabled) return false
+      if (item.visibleToRoles && item.visibleToRoles.length > 0 && userRoles.length > 0) {
+        if (!item.visibleToRoles.some((r) => userRoles.includes(r))) return false
+      }
+      return true
+    }
+    return navSections.filter(isVisible)
+  }, [agrarEnabled, navSections, userRoles])
 
   const visiblePrefetchItems = useMemo(() => {
     const visibleItems: NavItem[] = []

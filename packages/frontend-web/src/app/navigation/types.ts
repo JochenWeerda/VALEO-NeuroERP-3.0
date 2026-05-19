@@ -5,6 +5,17 @@ export type MCPInfo = {
   scope: string
 }
 
+/** Persona-based roles for role-dependent nav filtering */
+export type UserRole =
+  | 'lagerist'
+  | 'sachbearbeiter'
+  | 'aussendienst'
+  | 'disponent'
+  | 'buchhalter'
+  | 'geschaeftsfuehrung'
+  | 'landwirt'
+  | 'admin'
+
 export type RawNavItem = {
   id: string
   label: string
@@ -15,11 +26,14 @@ export type RawNavItem = {
   keywords?: string[]
   mcp: MCPInfo
   featureKey?: 'agrar'
+  /** When set, item is only shown to users with one of these roles */
+  visibleToRoles?: UserRole[]
   children?: RawNavItem[]
 }
 
 export type NavItem = Omit<RawNavItem, 'children'> & {
   path?: string
+  visibleToRoles?: UserRole[]
   children?: NavItem[]
 }
 

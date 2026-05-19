@@ -1,4 +1,4 @@
-import { Suspense, lazy, type ReactNode, useCallback, useEffect, useMemo, useState } from 'react'
+import { Suspense, lazy, type ReactNode, useCallback, useEffect, useMemo, useState, useSyncExternalStore } from 'react'
 import { ACTION_SHORTCUTS } from '@/app/navigation/action-shortcuts'
 import { useActionDispatch } from '@/features/ki-usability/context/ActionDispatchHooks'
 import { useFeature } from '@/hooks/useFeature'
@@ -20,7 +20,17 @@ const TopBar = lazy(() =>
   import('./TopBar').then((module) => ({ default: module.TopBar })),
 )
 
+function subscribeOnline(cb: () => void): () => void {
+  window.addEventListener('online', cb)
+  window.addEventListener('offline', cb)
+  return () => {
+    window.removeEventListener('online', cb)
+    window.removeEventListener('offline', cb)
+  }
+}
+
 export function AppShell({ children, enableCommandPalette = true }: AppShellProps): JSX.Element {
+  const isOnline = useSyncExternalStore(subscribeOnline, () => navigator.onLine, () => true)
   const actionDispatch = useActionDispatch()
   const commandPaletteFeatureEnabled = useFeature('commandPalette')
   const commandPaletteAvailable = enableCommandPalette && commandPaletteFeatureEnabled
@@ -152,18 +162,23 @@ export function AppShell({ children, enableCommandPalette = true }: AppShellProp
         </Suspense>
       </div>
 
-      {/* Mobile Sidebar Overlay */}
+      {/* Mobile Sidebar Overlay — bottom-sheet on small screens */}
       {mobileMenuOpen && (
-        <div className="fixed inset-0 z-50 md:hidden">
+        <div className="fixed inset-0 z-50 md:hidden" role="dialog" aria-modal="true" aria-label="Navigationsmenü">
           {/* Backdrop */}
           <div
             className="fixed inset-0 bg-black/50"
             onClick={handleMobileMenuClose}
             aria-hidden="true"
           />
-          {/* Sidebar Panel */}
-          <div className="fixed inset-y-0 left-0 z-50 w-72 animate-in slide-in-from-left duration-300">
+          {/* Bottom sheet on mobile (< sm), side panel on tablet (sm-md) */}
+          <div className="fixed inset-y-0 left-0 z-50 w-72 animate-in slide-in-from-left duration-300 sm:block hidden">
             <Suspense fallback={<div className="h-full w-full border-r bg-background" />}>
+              <Sidebar collapsed={false} onToggle={handleMobileMenuClose} onNavigate={handleMobileMenuClose} />
+            </Suspense>
+          </div>
+          <div className="fixed inset-x-0 bottom-0 z-50 max-h-[80vh] animate-in slide-in-from-bottom duration-300 sm:hidden overflow-y-auto rounded-t-2xl">
+            <Suspense fallback={<div className="h-96 w-full rounded-t-2xl bg-background" />}>
               <Sidebar collapsed={false} onToggle={handleMobileMenuClose} onNavigate={handleMobileMenuClose} />
             </Suspense>
           </div>
@@ -180,6 +195,17 @@ export function AppShell({ children, enableCommandPalette = true }: AppShellProp
             onShortcutsToggle={handleToggleShortcuts}
           />
         </Suspense>
+
+        {!isOnline && (
+          <div
+            role="status"
+            aria-live="polite"
+            className="flex items-center justify-center gap-2 bg-orange-500 px-4 py-2 text-sm font-medium text-white"
+          >
+            <span aria-hidden="true">⚠</span>
+            Keine Internetverbindung — Änderungen werden gespeichert, sobald die Verbindung wiederhergestellt ist.
+          </div>
+        )}
 
         <main
           className="flex-1 overflow-y-auto overflow-x-hidden"

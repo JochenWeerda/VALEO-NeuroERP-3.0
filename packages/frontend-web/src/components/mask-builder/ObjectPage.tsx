@@ -46,7 +46,9 @@ const ObjectPage: React.FC<ObjectPageProps> = ({
     () => new Set(config.tabs[0]?.key ? [config.tabs[0].key] : []),
   )
   const [isDirty, setIsDirty] = useState(false)
+  const [hasDraft, setHasDraft] = useState(false)
   const isInternalUpdateRef = useRef(false)
+  const draftKey = `objectpage-draft-${config.title.replace(/\s+/g, '-').toLowerCase()}`
 
   const handleTabChange = (tabKey: string) => {
     setActiveTab(tabKey)
@@ -66,20 +68,43 @@ const ObjectPage: React.FC<ObjectPageProps> = ({
     reset
   } = useForm({
     resolver: createMaskResolver(getFieldsFromMaskConfig(config)),
-    defaultValues: data || {}
+    defaultValues: data || {},
+    mode: 'onBlur',
   })
 
-  // Watch for changes to mark form as dirty
+  // Check for existing draft on mount
   useEffect(() => {
+    try {
+      const saved = localStorage.getItem(draftKey)
+      if (saved) setHasDraft(true)
+    } catch {
+      // localStorage not available
+    }
+  }, [draftKey])
+
+  // Watch for changes to mark form as dirty and auto-save draft
+  useEffect(() => {
+    let autoSaveTimer: ReturnType<typeof setTimeout>
     const subscription = watch((value) => {
       setIsDirty(true)
       if (onChange) {
         isInternalUpdateRef.current = true
         onChange(value)
       }
+      clearTimeout(autoSaveTimer)
+      autoSaveTimer = setTimeout(() => {
+        try {
+          localStorage.setItem(draftKey, JSON.stringify(value))
+        } catch {
+          // localStorage not available or full
+        }
+      }, 30_000)
     })
-    return () => subscription.unsubscribe()
-  }, [watch, onChange])
+    return () => {
+      subscription.unsubscribe()
+      clearTimeout(autoSaveTimer)
+    }
+  }, [watch, onChange, draftKey])
 
   // Reset dirty state when data changes
   useEffect(() => {
@@ -113,10 +138,35 @@ const ObjectPage: React.FC<ObjectPageProps> = ({
     },
   ])
 
+  function restoreDraft(): void {
+    try {
+      const saved = localStorage.getItem(draftKey)
+      if (saved) {
+        reset(JSON.parse(saved))
+        setHasDraft(false)
+        setIsDirty(true)
+        toast({ title: 'Entwurf wiederhergestellt', description: 'Der gespeicherte Entwurf wurde geladen.' })
+      }
+    } catch {
+      // ignore
+    }
+  }
+
+  function discardDraft(): void {
+    try {
+      localStorage.removeItem(draftKey)
+      setHasDraft(false)
+    } catch {
+      // ignore
+    }
+  }
+
   const onSubmit = async (formData: any) => {
     try {
       await onSave(formData)
       setIsDirty(false)
+      try { localStorage.removeItem(draftKey) } catch { /* ignore */ }
+      setHasDraft(false)
       toast({
         title: "Erfolgreich gespeichert",
         description: "Die Daten wurden erfolgreich gespeichert.",
@@ -133,12 +183,13 @@ const ObjectPage: React.FC<ObjectPageProps> = ({
   const renderField = (field: Field) => {
     const fieldName = getFieldName(field)
     const error = errors[fieldName]?.message as string
+    const errorId = error ? `${fieldName}-error` : undefined
 
     return (
       <div key={fieldName} className="space-y-2">
         <Label htmlFor={fieldName}>
           {field.label}
-          {field.required && <span className="text-red-500 ml-1">*</span>}
+          {field.required && <span className="text-red-500 ml-1" aria-hidden="true">*</span>}
         </Label>
 
         <Controller
@@ -155,6 +206,9 @@ const ObjectPage: React.FC<ObjectPageProps> = ({
                     type={field.type}
                     placeholder={field.placeholder}
                     readOnly={field.readonly ?? field.readOnly}
+                    aria-invalid={error ? 'true' : undefined}
+                    aria-describedby={errorId}
+                    aria-required={field.required ? 'true' : undefined}
                     className={error ? 'border-red-500' : ''}
                   />
                 )
@@ -239,8 +293,8 @@ const ObjectPage: React.FC<ObjectPageProps> = ({
         />
 
         {error && (
-          <p className="text-sm text-red-600 flex items-center gap-1">
-            <AlertTriangle className="h-3 w-3" />
+          <p id={errorId} role="alert" aria-live="polite" className="text-sm text-red-600 flex items-center gap-1">
+            <AlertTriangle className="h-3 w-3" aria-hidden="true" />
             {error}
           </p>
         )}
@@ -339,6 +393,24 @@ const ObjectPage: React.FC<ObjectPageProps> = ({
         </div>
       </div>
 
+      {/* Draft restore banner */}
+      {hasDraft && !isDirty && (
+        <Card className="border-blue-400 bg-blue-50">
+          <CardContent className="pt-4">
+            <div className="flex items-center justify-between gap-2">
+              <div className="flex items-center gap-2 text-blue-900">
+                <Save className="h-5 w-5" aria-hidden="true" />
+                <span className="font-semibold">Entwurf vorhanden</span>
+              </div>
+              <div className="flex gap-2">
+                <Button size="sm" variant="outline" onClick={restoreDraft}>Wiederherstellen</Button>
+                <Button size="sm" variant="ghost" onClick={discardDraft}><X className="h-4 w-4" /></Button>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Dirty Warning */}
       {isDirty && (
         <Card className="border-orange-500 bg-orange-50">
@@ -352,6 +424,27 @@ const ObjectPage: React.FC<ObjectPageProps> = ({
             <p className="mt-1 text-orange-800">
               Sie haben ungespeicherte Änderungen. Vergessen Sie nicht zu speichern.
             </p>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Validation error summary */}
+      {Object.keys(errors).length > 0 && (
+        <Card className="border-red-500 bg-red-50" role="alert" aria-label="Validierungsfehler">
+          <CardContent className="pt-4">
+            <div className="flex items-center gap-2 text-red-900 mb-2">
+              <AlertTriangle className="h-5 w-5" aria-hidden="true" />
+              <span className="font-semibold">Bitte korrigieren Sie folgende Felder:</span>
+            </div>
+            <ul className="list-disc list-inside space-y-1">
+              {Object.entries(errors).map(([key, err]) => (
+                <li key={key} className="text-sm text-red-800">
+                  <a href={`#${key}`} className="underline hover:no-underline">
+                    {(err as any)?.message ?? key}
+                  </a>
+                </li>
+              ))}
+            </ul>
           </CardContent>
         </Card>
       )}

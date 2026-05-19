@@ -440,8 +440,24 @@ const ListReport: React.FC<ListReportProps> = ({
                   </TableRow>
                 ) : paginatedData.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={config.columns.length + 2} className="text-center py-8">
-                      {t('crud.list.noResults', { entityType: displayTitle })}
+                    <TableCell colSpan={config.columns.length + 2} className="py-12">
+                      <div className="flex flex-col items-center gap-3 text-center text-muted-foreground">
+                        {config.emptyState?.icon && (
+                          <span className="text-4xl" aria-hidden="true">{config.emptyState.icon}</span>
+                        )}
+                        <p className="font-medium text-foreground">
+                          {config.emptyState?.title ?? t('crud.list.noResults', { entityType: displayTitle })}
+                        </p>
+                        {config.emptyState?.description && (
+                          <p className="text-sm">{config.emptyState.description}</p>
+                        )}
+                        {config.emptyState?.actionLabel && onCreate && (
+                          <Button size="sm" onClick={onCreate} className="mt-2">
+                            <Plus className="h-4 w-4 mr-1" aria-hidden="true" />
+                            {config.emptyState.actionLabel}
+                          </Button>
+                        )}
+                      </div>
                     </TableCell>
                   </TableRow>
                 ) : (
