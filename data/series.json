@@ -3,7 +3,7 @@
     "prefix": "SO-",
     "width": 5,
     "start": 1,
-    "value": 97
+    "value": 99
   },
   "delivery": {
     "prefix": "DL-",
@@ -39,6 +39,6 @@
     "prefix": "WF-",
     "width": 5,
     "start": 1,
-    "value": 6
+    "value": 7
   }
 }
