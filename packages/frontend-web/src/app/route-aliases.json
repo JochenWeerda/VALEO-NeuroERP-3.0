@@ -77,6 +77,14 @@
       "path": "agrar/ernte"
     },
     {
+      "module": "@/pages/agrar/ernte/neu",
+      "path": "agrar/ernte/neu"
+    },
+    {
+      "module": "@/pages/agrar/ernte-annahme-erfassung",
+      "path": "agrar/ernte/:id"
+    },
+    {
       "module": "@/pages/agrar/ernte-annahme-erfassung",
       "path": "agrar/ernte-annahme-erfassung"
     },

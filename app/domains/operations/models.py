@@ -1513,3 +1513,20 @@ class PricingSourceDB(Base):
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
 
+
+class ErnteDB(Base):
+    """Ernte-Planung/Übersicht — einfache Ernte-Erfassung (Schlag, Kultur, Menge)"""
+    __tablename__ = "ernte_planung"
+    __table_args__ = {"schema": "domain_agrar", "extend_existing": True}
+
+    id = Column(String, primary_key=True, default=default_prefixed_id("ERN"))
+    tenant_id = Column(String(120), nullable=False, index=True)
+    schlag = Column(String(255), nullable=False)
+    kultur = Column(String(120), nullable=False)
+    datum = Column(Date, nullable=False)
+    menge = Column(Float, nullable=False, default=0)
+    ertrag = Column(Float, nullable=False, default=0)
+    status = Column(String(30), default="geplant")  # geplant|laufend|abgeschlossen
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+

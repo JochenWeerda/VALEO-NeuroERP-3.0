@@ -487,6 +487,24 @@ export function useErnten() {
   })
 }
 
+export type ErnteCreateInput = {
+  schlag: string
+  kultur: string
+  datum: string
+  menge: number
+  ertrag: number
+  status: 'geplant' | 'laufend' | 'abgeschlossen'
+}
+
+export function useCreateErnte() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: (data: ErnteCreateInput) =>
+      apiClient.post<Ernte>('/api/v1/agrar/ernte', data).then((r) => r.data),
+    onSuccess: () => { void qc.invalidateQueries({ queryKey: [...agrarKeys.all, 'ernten'] }) },
+  })
+}
+
 export function useSorten() {
   return useQuery({
     queryKey: [...agrarKeys.all, 'sorten'],
