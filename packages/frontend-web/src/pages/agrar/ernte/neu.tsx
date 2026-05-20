@@ -53,7 +53,7 @@ export default function ErnteNeuPage(): JSX.Element {
         onSuccess: (ernte) => {
           navigate(
             `/agrar/ernte-annahme-erfassung?workflowProcess=harvest-to-settlement` +
-              `&subject=${encodeURIComponent(form.kultur + ' ' + new Date(form.datum).getFullYear())}` +
+              `&subject=${encodeURIComponent(`${form.kultur  } ${  new Date(form.datum).getFullYear()}`)}` +
               `&entryMode=Ernteannahme`
           )
         },
