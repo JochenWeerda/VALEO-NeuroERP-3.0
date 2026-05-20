@@ -1,23 +1,24 @@
 from __future__ import annotations
-from fastapi import APIRouter
-from pydantic import BaseModel
-from typing import Optional
+
 import uuid
+from typing import Optional
+
+from fastapi import APIRouter, Depends, HTTPException
+from fastapi.responses import Response
+from pydantic import BaseModel
+from sqlalchemy.orm import Session
+
+from app.core.database import get_db
+from app.domains.operations.models import SiloBewegungDB, SiloZelleDB
 
 router = APIRouter(prefix="/silo", tags=["silo-operations"])
 
-_store_registry: dict[str, object] = {}
-
-def _get_store(tenant_id: str):
-    from app.core.silo_operations import SiloCellStore
-    if tenant_id not in _store_registry:
-        _store_registry[tenant_id] = SiloCellStore()
-    return _store_registry[tenant_id]
 
 class SiloZelleCreateRequest(BaseModel):
     tenant_id: str
     bezeichnung: str
     kapazitaet_t: float
+
 
 class EinlagerungRequest(BaseModel):
     tenant_id: str
@@ -26,46 +27,101 @@ class EinlagerungRequest(BaseModel):
     sorte: str
     beleg_nr: Optional[str] = None
 
+
 class AuslagerungRequest(BaseModel):
     tenant_id: str
     silo_id: str
     menge_t: float
     beleg_nr: Optional[str] = None
 
+
+def _zelle_to_dict(row: SiloZelleDB) -> dict:
+    return {
+        "silo_id": row.silo_id,
+        "tenant_id": row.tenant_id,
+        "bezeichnung": row.bezeichnung,
+        "kapazitaet_t": float(row.kapazitaet_t),
+        "bestand_t": float(row.bestand_t),
+        "sorte": row.sorte,
+        "gesperrt": row.gesperrt,
+    }
+
+
 @router.post("/zellen", status_code=201)
-def create_silo_zelle(req: SiloZelleCreateRequest):
-    from app.core.silo_operations import SiloCell
-    zelle = SiloCell(
+def create_silo_zelle(req: SiloZelleCreateRequest, db: Session = Depends(get_db)):
+    row = SiloZelleDB(
         silo_id=str(uuid.uuid4()),
         tenant_id=req.tenant_id,
         bezeichnung=req.bezeichnung,
         kapazitaet_t=req.kapazitaet_t,
+        bestand_t=0,
     )
-    store = _get_store(req.tenant_id)
-    store.add_zelle(zelle)
-    return zelle
+    db.add(row)
+    db.commit()
+    db.refresh(row)
+    return _zelle_to_dict(row)
+
+
+@router.get("/zellen/{tenant_id}")
+def list_zellen(tenant_id: str, db: Session = Depends(get_db)):
+    rows = db.query(SiloZelleDB).filter(SiloZelleDB.tenant_id == tenant_id).all()
+    return [_zelle_to_dict(r) for r in rows]
+
 
 @router.post("/einlagern", status_code=201)
-def einlagern(req: EinlagerungRequest):
-    store = _get_store(req.tenant_id)
-    try:
-        transfer = store.einlagern(req.silo_id, req.menge_t, req.sorte, req.beleg_nr)
-        return transfer
-    except ValueError as e:
-        from fastapi import HTTPException
-        raise HTTPException(status_code=422, detail=str(e))
+def einlagern(req: EinlagerungRequest, db: Session = Depends(get_db)):
+    zelle = db.query(SiloZelleDB).filter(
+        SiloZelleDB.silo_id == req.silo_id,
+        SiloZelleDB.tenant_id == req.tenant_id,
+    ).first()
+    if not zelle:
+        raise HTTPException(404, "Silo-Zelle nicht gefunden")
+    if zelle.gesperrt:
+        raise HTTPException(422, "Silo-Zelle ist gesperrt")
+    if float(zelle.bestand_t) + req.menge_t > float(zelle.kapazitaet_t):
+        raise HTTPException(422, "Kapazität überschritten")
+    bewegung = SiloBewegungDB(
+        bewegung_id=str(uuid.uuid4()),
+        silo_id=req.silo_id,
+        typ="einlagerung",
+        menge_t=req.menge_t,
+        sorte=req.sorte,
+        beleg_nr=req.beleg_nr,
+    )
+    zelle.bestand_t = float(zelle.bestand_t) + req.menge_t
+    zelle.sorte = req.sorte
+    db.add(bewegung)
+    db.commit()
+    db.refresh(bewegung)
+    return {"bewegung_id": bewegung.bewegung_id, "typ": "einlagerung", "menge_t": req.menge_t, "silo_id": req.silo_id}
+
 
 @router.post("/auslagern", status_code=201)
-def auslagern(req: AuslagerungRequest):
-    store = _get_store(req.tenant_id)
-    try:
-        transfer = store.auslagern(req.silo_id, req.menge_t, req.beleg_nr)
-        return transfer
-    except ValueError as e:
-        from fastapi import HTTPException
-        raise HTTPException(status_code=422, detail=str(e))
+def auslagern(req: AuslagerungRequest, db: Session = Depends(get_db)):
+    zelle = db.query(SiloZelleDB).filter(
+        SiloZelleDB.silo_id == req.silo_id,
+        SiloZelleDB.tenant_id == req.tenant_id,
+    ).first()
+    if not zelle:
+        raise HTTPException(404, "Silo-Zelle nicht gefunden")
+    if float(zelle.bestand_t) < req.menge_t:
+        raise HTTPException(422, "Nicht genügend Bestand für Auslagerung")
+    bewegung = SiloBewegungDB(
+        bewegung_id=str(uuid.uuid4()),
+        silo_id=req.silo_id,
+        typ="auslagerung",
+        menge_t=req.menge_t,
+        beleg_nr=req.beleg_nr,
+    )
+    zelle.bestand_t = float(zelle.bestand_t) - req.menge_t
+    db.add(bewegung)
+    db.commit()
+    db.refresh(bewegung)
+    return {"bewegung_id": bewegung.bewegung_id, "typ": "auslagerung", "menge_t": req.menge_t, "silo_id": req.silo_id}
+
 
 @router.get("/bestand/{tenant_id}")
-def get_bestand(tenant_id: str):
-    store = _get_store(tenant_id)
-    return {"tenant_id": tenant_id, "gesamtbestand_t": store.gesamtbestand_t(tenant_id), "schema_version": 1}
+def get_bestand(tenant_id: str, db: Session = Depends(get_db)):
+    rows = db.query(SiloZelleDB).filter(SiloZelleDB.tenant_id == tenant_id).all()
+    gesamtbestand = sum(float(r.bestand_t) for r in rows)
+    return {"tenant_id": tenant_id, "gesamtbestand_t": gesamtbestand, "zellen": len(rows), "schema_version": 1}
