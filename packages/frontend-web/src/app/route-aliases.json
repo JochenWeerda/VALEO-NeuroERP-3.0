@@ -1787,6 +1787,122 @@
     {
       "module": "@/pages/waage/liste",
       "path": "waage/neu"
+    },
+    {
+      "module": "@/pages/admin/benutzer-liste",
+      "path": "admin/benutzer/neu"
+    },
+    {
+      "module": "@/pages/admin/rollen-verwaltung",
+      "path": "admin/rolle/neu"
+    },
+    {
+      "module": "@/pages/agrar/bodenproben/liste",
+      "path": "agrar/bodenprobe/neu"
+    },
+    {
+      "module": "@/pages/agrar/duenger/liste",
+      "path": "agrar/duenger/liste"
+    },
+    {
+      "module": "@/pages/agrar/psm/liste",
+      "path": "agrar/psm/liste"
+    },
+    {
+      "module": "@/pages/agrar/saatgut-liste",
+      "path": "agrar/saatgut-liste"
+    },
+    {
+      "module": "@/pages/annahme/klaerung-gesperrt",
+      "path": "annahme/klaerung-gesperrt"
+    },
+    {
+      "module": "@/pages/crm/aktivitaeten",
+      "path": "crm/activities/neu"
+    },
+    {
+      "module": "@/pages/crm/kunden-liste",
+      "path": "crm/customers"
+    },
+    {
+      "module": "@/pages/einkauf/auftragsbestaetigung",
+      "path": "einkauf/auftragsbestaetigung/neu"
+    },
+    {
+      "module": "@/pages/einkauf/rechnungseingaenge-liste",
+      "path": "einkauf/rechnungseingaenge-liste"
+    },
+    {
+      "module": "@/pages/kontrakte/KontraktAlarmDashboard",
+      "path": "kontrakte/alarme"
+    },
+    {
+      "module": "@/pages/kontrakte/KontraktPositionsmonitor",
+      "path": "kontrakte/positionen"
+    },
+    {
+      "module": "@/pages/sales/angebot-erstellen",
+      "path": "sales/angebot-erstellen"
+    },
+    {
+      "module": "@/pages/sales/angebote-liste",
+      "path": "sales/angebote-liste"
+    },
+    {
+      "module": "@/pages/sales/invoice-editor",
+      "path": "sales/invoice-editor"
+    },
+    {
+      "module": "@/pages/sales/order-editor",
+      "path": "sales/order-editor"
+    },
+    {
+      "module": "@/pages/preise/kalkulation",
+      "path": "sales/kalkulationen/neu"
+    },
+    {
+      "module": "@/pages/sales/lieferungen-liste",
+      "path": "sales/lieferungen/neu"
+    },
+    {
+      "module": "@/pages/transporte/fahrer-liste",
+      "path": "transporte/fahrer/neu"
+    },
+    {
+      "module": "@/pages/workflow/workflow-sandbox",
+      "path": "workflow/workflow-sandbox"
+    },
+    {
+      "module": "@/pages/finance/reports",
+      "path": "finance/umsatz"
+    },
+    {
+      "module": "@/pages/agrar/sammelabrechnung",
+      "path": "agrar"
+    },
+    {
+      "module": "@/pages/einkauf/bestellungen-liste",
+      "path": "einkauf"
+    },
+    {
+      "module": "@/pages/fibu/abschluss-cockpit",
+      "path": "fibu"
+    },
+    {
+      "module": "@/pages/sales/auftraege-liste",
+      "path": "sales"
+    },
+    {
+      "module": "@/pages/verkauf/lieferschein-erfassung",
+      "path": "verkauf"
+    },
+    {
+      "module": "@/pages/kasse/tagesabschluss",
+      "path": "kasse/historie"
+    },
+    {
+      "module": "@/pages/workflow/workflow-monitoring",
+      "path": "alerts"
     }
   ]
 }
