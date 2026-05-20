@@ -202,6 +202,7 @@ from app.api.v1.endpoints import (
     edi_api,
     zertifikate_api,
     ernte_kampagne_api,
+    ernte_planung,
 )
 # Wave 2-19 Process-Kernel Read-Models + Commands
 from app.api.v1.endpoints import agent_context_api, finance_read_models, process_kernel_api
@@ -1223,6 +1224,7 @@ api_router.include_router(read_model_snapshots.router)
 api_router.include_router(edi_api.router)
 api_router.include_router(zertifikate_api.router)
 api_router.include_router(ernte_kampagne_api.router)
+api_router.include_router(ernte_planung.router)
 
 # Wave 2-19 — Process-Kernel Finance Read-Models + Commands/Surfacing
 api_router.include_router(finance_read_models.router)
