@@ -1001,6 +1001,54 @@
       "path": "fibu/quadriga-connector"
     },
     {
+      "module": "@/pages/fibu/buchungsjournal",
+      "path": "fibu/buchungsjournal"
+    },
+    {
+      "module": "@/pages/fibu/buchhaltungsuebersicht",
+      "path": "fibu/buchhaltungsuebersicht"
+    },
+    {
+      "module": "@/pages/fibu/monatswerte",
+      "path": "fibu/monatswerte"
+    },
+    {
+      "module": "@/pages/fibu/schnittstelle-fibu",
+      "path": "fibu/schnittstelle-fibu"
+    },
+    {
+      "module": "@/pages/fibu/schnittstellen-center",
+      "path": "fibu/schnittstellen-center"
+    },
+    {
+      "module": "@/pages/fibu/buchungsuebernahme-connectors",
+      "path": "fibu/buchungsuebernahme-connectors"
+    },
+    {
+      "module": "@/pages/fibu/anlagen",
+      "path": "fibu/anlage/neu"
+    },
+    {
+      "module": "@/pages/fibu/kreditlinien",
+      "path": "fibu/kreditlinie-neu"
+    },
+    {
+      "module": "@/pages/fibu/sicherheiten",
+      "path": "fibu/sicherheit-neu"
+    },
+    {
+      "module": "@/pages/crm/betriebsprofil-detail",
+      "path": "crm/betrieb/:id"
+    },
+    {
+      "module": "@/pages/einkauf/lieferanten-stamm",
+      "path": "einkauf/lieferant/neu"
+    },
+    {
+      "module": "@/pages/einkauf/lieferanten-stamm",
+      "path": "einkauf/lieferant/:id"
+    },
+    {
       "module": "@/pages/finance/abschluss",
       "path": "finance/abschluss"
     },
@@ -1639,6 +1687,106 @@
     {
       "module": "@/pages/wissen/wissensbasis",
       "path": "wissen/wissensbasis"
+    },
+    {
+      "module": "@/pages/finance/mahnwesen",
+      "path": "finance/dunning"
+    },
+    {
+      "module": "@/pages/finance/buchungserfassung",
+      "path": "finance/buchungen"
+    },
+    {
+      "module": "@/pages/fibu/offene-posten",
+      "path": "finance/offene-posten"
+    },
+    {
+      "module": "@/pages/finance/bankkonten-stamm",
+      "path": "finance/bank"
+    },
+    {
+      "module": "@/pages/finance/debitoren-stamm",
+      "path": "finance/debitoren/new"
+    },
+    {
+      "module": "@/pages/sales/auftraege-liste",
+      "path": "sales/auftraege-liste"
+    },
+    {
+      "module": "@/pages/sales/credit-note-editor",
+      "path": "sales/credit-notes"
+    },
+    {
+      "module": "@/pages/verkauf/lieferschein-erfassung",
+      "path": "sales/delivery-editor"
+    },
+    {
+      "module": "@/pages/crm/kontakte-liste",
+      "path": "crm/kontakte-liste"
+    },
+    {
+      "module": "@/pages/crm/lieferanten-liste",
+      "path": "crm/lieferanten/liste"
+    },
+    {
+      "module": "@/pages/futtermittel/einzelfuttermittel-liste",
+      "path": "futtermittel"
+    },
+    {
+      "module": "@/pages/futtermittel/futtermittel-bestellung",
+      "path": "futtermittel/bestellungen"
+    },
+    {
+      "module": "@/pages/futtermittel/futtermittel-wareneingang",
+      "path": "futtermittel/wareneingang"
+    },
+    {
+      "module": "@/pages/futtermittel/einzelfuttermittel-liste",
+      "path": "futtermittel/einzelfuttermittel/liste"
+    },
+    {
+      "module": "@/pages/futtermittel/einzelfuttermittel-stamm",
+      "path": "futtermittel/einzelfuttermittel/stamm/new"
+    },
+    {
+      "module": "@/pages/futtermittel/mischfuttermittel-liste",
+      "path": "futtermittel/mischfuttermittel/liste"
+    },
+    {
+      "module": "@/pages/futtermittel/mischfuttermittel-stamm",
+      "path": "futtermittel/mischfuttermittel/stamm/new"
+    },
+    {
+      "module": "@/pages/verladung/liste",
+      "path": "logistik/verladungen"
+    },
+    {
+      "module": "@/pages/personal/mitarbeiter-liste",
+      "path": "personal/mitarbeiter-liste"
+    },
+    {
+      "module": "@/pages/personal/stundenzettel-liste",
+      "path": "personal/stundenzettel-liste"
+    },
+    {
+      "module": "@/pages/wartung/anlagen-liste",
+      "path": "wartung/anlage/neu"
+    },
+    {
+      "module": "@/pages/zertifikate/liste",
+      "path": "zertifikate/neu"
+    },
+    {
+      "module": "@/pages/workflow/workflow-monitoring",
+      "path": "workflows/history"
+    },
+    {
+      "module": "@/pages/schaeden/meldung",
+      "path": "schaeden/liste"
+    },
+    {
+      "module": "@/pages/waage/liste",
+      "path": "waage/neu"
     }
   ]
 }
