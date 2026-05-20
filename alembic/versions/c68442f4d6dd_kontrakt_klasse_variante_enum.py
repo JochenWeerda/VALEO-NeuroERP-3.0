@@ -19,6 +19,26 @@ depends_on: Union[str, Sequence[str], None] = None
 
 
 def upgrade() -> None:
+    # Schema sicherstellen
+    op.execute("CREATE SCHEMA IF NOT EXISTS domain_agrar")
+
+    # Tabelle anlegen falls nicht vorhanden
+    op.execute("""
+        CREATE TABLE IF NOT EXISTS domain_agrar.kontrakt_klassen (
+            id VARCHAR NOT NULL PRIMARY KEY,
+            name VARCHAR(255) NOT NULL,
+            beschreibung TEXT,
+            variante VARCHAR(30) NOT NULL,
+            paritaet VARCHAR(10) NOT NULL,
+            incoterm_ort VARCHAR(255),
+            notiz TEXT,
+            is_active BOOLEAN NOT NULL DEFAULT TRUE,
+            tenant_id VARCHAR(120) NOT NULL DEFAULT 'default',
+            created_at TIMESTAMP WITH TIME ZONE DEFAULT now(),
+            updated_at TIMESTAMP WITH TIME ZONE DEFAULT now()
+        )
+    """)
+
     # Erstelle PostgreSQL-Enum-Typ für KontraktVariante
     op.execute(
         "DO $$ BEGIN "
@@ -27,13 +47,20 @@ def upgrade() -> None:
         "EXCEPTION WHEN duplicate_object THEN NULL; "
         "END $$;"
     )
-    # Füge CHECK-Constraint auf der bestehenden varchar-Spalte hinzu
-    # (als Alternative zu einer vollständigen Typumwandlung, um Datenmigrationsrisiken zu minimieren)
-    op.execute(
-        "ALTER TABLE domain_agrar.kontrakt_klassen "
-        "  ADD CONSTRAINT kontrakt_klassen_variante_check "
-        "  CHECK (variante IN ('FIXPREIS', 'BASIS', 'PRAEMIE', 'POOLPREIS'));"
-    )
+    # CHECK-Constraint nur hinzufügen wenn er noch nicht existiert
+    op.execute("""
+        DO $$ BEGIN
+            IF NOT EXISTS (
+                SELECT 1 FROM pg_constraint
+                WHERE conname = 'kontrakt_klassen_variante_check'
+                  AND conrelid = 'domain_agrar.kontrakt_klassen'::regclass
+            ) THEN
+                ALTER TABLE domain_agrar.kontrakt_klassen
+                    ADD CONSTRAINT kontrakt_klassen_variante_check
+                    CHECK (variante IN ('FIXPREIS', 'BASIS', 'PRAEMIE', 'POOLPREIS'));
+            END IF;
+        END $$;
+    """)
 
 
 def downgrade() -> None:
