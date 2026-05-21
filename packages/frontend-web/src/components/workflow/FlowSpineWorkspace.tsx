@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { lazy, Suspense, useEffect, useMemo, useState } from 'react'
 import {
   Building2,
   ArrowLeftRight,
@@ -31,10 +31,13 @@ import {
   XCircle,
 } from 'lucide-react'
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom'
-import { CustomerCombobox, type CustomerLite } from '@/components/crm/CustomerCombobox'
-import { CustomerSelectionDialog, type Customer } from '@/components/sales/CustomerSelectionDialog'
 import { PageSection, PageSurface } from '@/components/patterns/PageSurface'
-import { AgentProcessPanel } from '@/components/agent'
+
+import type { CustomerLite } from '@/components/crm/CustomerCombobox'
+import type { Customer } from '@/components/sales/CustomerSelectionDialog'
+const CustomerCombobox = lazy(() => import('@/components/crm/CustomerCombobox').then(m => ({ default: m.CustomerCombobox })))
+const CustomerSelectionDialog = lazy(() => import('@/components/sales/CustomerSelectionDialog').then(m => ({ default: m.CustomerSelectionDialog })))
+const AgentProcessPanel = lazy(() => import('@/components/agent').then(m => ({ default: m.AgentProcessPanel })))
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -509,7 +512,7 @@ export function FlowSpineWorkspace({ processKey, instanceId: instanceIdProp }: F
 
   const [instanceSearch, setInstanceSearch] = useState('')
   const debouncedInstanceSearch = useDebounce(instanceSearch, 300)
-  const instancesQuery = useFlowSpineInstances(processKey, debouncedInstanceSearch || undefined)
+  const instancesQuery = useFlowSpineInstances(processKey, debouncedInstanceSearch || undefined, workspaceQuery.isSuccess)
   const timelineQuery = useFlowSpineTimeline(processKey, instanceId)
   const saveInstance = useSaveFlowSpineInstance(processKey, instanceId)
   const resumeInstance = useResumeFlowSpineInstance(processKey, instanceId)
@@ -1253,7 +1256,7 @@ export function FlowSpineWorkspace({ processKey, instanceId: instanceIdProp }: F
                 </div>
 
                 <div className="space-y-4">
-                  <AgentProcessPanel domain={workspace.right_panel.domain} className="max-w-none border-white/10 bg-slate-950/50" />
+                  <Suspense fallback={null}><AgentProcessPanel domain={workspace.right_panel.domain} className="max-w-none border-white/10 bg-slate-950/50" /></Suspense>
                   <Card className="border-white/10 bg-slate-950/50 text-slate-100">
                     <CardHeader><CardTitle className="text-lg">Linked Modules</CardTitle></CardHeader>
                     <CardContent className="space-y-3">
@@ -1453,7 +1456,7 @@ export function FlowSpineWorkspace({ processKey, instanceId: instanceIdProp }: F
             <div className="space-y-2">
               <Label htmlFor="instance-partner" className="text-slate-300">{startConfig.partnerLabel}</Label>
               {processKey === 'order-to-cash' ? (
-                <CustomerCombobox
+                <Suspense fallback={<div className="h-10 animate-pulse rounded bg-slate-800" />}><CustomerCombobox
                   id="instance-partner"
                   value={newInstanceCustomer}
                   onChange={(c) => {
@@ -1471,7 +1474,7 @@ export function FlowSpineWorkspace({ processKey, instanceId: instanceIdProp }: F
                   }}
                   onOpenAdvanced={() => setShowAdvancedCustomerSearch(true)}
                   placeholder="Kunde suchen (Name oder Nummer) …"
-                />
+                /></Suspense>
               ) : (
                 <div className="relative">
                   <Building2 className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" />
@@ -1665,7 +1668,7 @@ export function FlowSpineWorkspace({ processKey, instanceId: instanceIdProp }: F
       </Dialog>
 
       {processKey === 'order-to-cash' ? (
-        <CustomerSelectionDialog
+        <Suspense fallback={null}><CustomerSelectionDialog
           open={showAdvancedCustomerSearch}
           onClose={() => setShowAdvancedCustomerSearch(false)}
           onSelect={(customer: Customer) => {
@@ -1682,7 +1685,7 @@ export function FlowSpineWorkspace({ processKey, instanceId: instanceIdProp }: F
             setShowAdvancedCustomerSearch(false)
           }}
           title="Erweiterte Kundensuche"
-        />
+        /></Suspense>
       ) : null}
     </PageSurface>
   )
