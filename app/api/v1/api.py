@@ -241,6 +241,14 @@ from app.api.v1.endpoints import (
     op_skonto_auszifferung,
 )
 
+# Fachliche Vertiefung Wave 4 — Rabattgruppen/klassen, Hausbankenstamm, Bestandteile, Frachttabellen
+from app.api.v1.endpoints import (
+    preis_rabattgruppen,
+    hausbankenstamm,
+    artikel_bestandteile,
+    logistik_frachttabellen,
+)
+
 # Import domain routers
 from app.domains.agrar.api import psm, psm_proplanta
 from app.domains.inventory.api import router as inventory_domain_router
@@ -1517,6 +1525,12 @@ api_router.include_router(kundenbanken.router)
 api_router.include_router(inventur_piv.router)
 api_router.include_router(artikel_stoffstrom.router)
 api_router.include_router(op_skonto_auszifferung.router)
+
+# Fachliche Vertiefung Wave 4
+api_router.include_router(preis_rabattgruppen.router)
+api_router.include_router(hausbankenstamm.router)
+api_router.include_router(artikel_bestandteile.router)
+api_router.include_router(logistik_frachttabellen.router)
 
 # Report/Print: Partie-Genealogie, Wiegeschein-PDF-Preview, GS1-Labels
 api_router.include_router(report_print.router)
