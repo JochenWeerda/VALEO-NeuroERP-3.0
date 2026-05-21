@@ -48,5 +48,9 @@ export const entries: AutoGroupRouteEntry[] = [
   {
     "module": "@/pages/compliance/zulassungen-register",
     "path": "zulassungen-register"
-  }
+  },
+  { "module": "@/pages/compliance/gelangensbestaetigung", "path": "gelangensbestaetigung" },
+  { "module": "@/pages/compliance/intrastat", "path": "intrastat" },
+  { "module": "@/pages/compliance/lksg", "path": "lksg" },
+  { "module": "@/pages/compliance/sanktionspruefung", "path": "sanktionspruefung" },
 ]

@@ -8,5 +8,6 @@ export const entries: AutoGroupRouteEntry[] = [
   {
     "module": "@/pages/preise/konditionen",
     "path": "konditionen"
-  }
+  },
+  { "module": "@/pages/preise/kalkulation", "path": "kalkulation" },
 ]

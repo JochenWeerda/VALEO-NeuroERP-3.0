@@ -8,5 +8,6 @@ export const entries: AutoGroupRouteEntry[] = [
   {
     "module": "@/pages/workflows/trigger",
     "path": "trigger"
-  }
+  },
+  { "module": "@/pages/workflows/supervisor", "path": "supervisor" },
 ]

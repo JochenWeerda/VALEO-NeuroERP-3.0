@@ -16,5 +16,7 @@ export const entries: AutoGroupRouteEntry[] = [
   {
     "module": "@/pages/agribusiness/field-service-task-edit",
     "path": "field-service-tasks/:taskId/bearbeiten"
-  }
+  },
+  { "module": "@/pages/agribusiness/field-service-task-edit", "path": "field-service-task-edit" },
+  { "module": "@/pages/agribusiness/field-service-task-neu", "path": "field-service-task-neu" },
 ]

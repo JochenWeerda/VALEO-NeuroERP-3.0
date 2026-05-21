@@ -32,5 +32,6 @@ export const entries: AutoGroupRouteEntry[] = [
   {
     "module": "@/pages/verkauf/unerledigte-auftrags-positionen",
     "path": "unerledigte-auftrags-positionen"
-  }
+  },
+  { "module": "@/pages/verkauf/kunde-neu/kundeneumaskbuilderpage", "path": "kunde-neu/kundeneumaskbuilderpage" },
 ]

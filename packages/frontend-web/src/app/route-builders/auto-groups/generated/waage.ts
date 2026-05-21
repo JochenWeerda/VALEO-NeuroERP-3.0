@@ -16,5 +16,7 @@ export const entries: AutoGroupRouteEntry[] = [
   {
     "module": "@/pages/waage/wiegungen",
     "path": "wiegungen"
-  }
+  },
+  { "module": "@/pages/waage/vorlagen", "path": "vorlagen" },
+  { "module": "@/pages/waage/wiegeschein-detail", "path": "wiegeschein-detail" },
 ]

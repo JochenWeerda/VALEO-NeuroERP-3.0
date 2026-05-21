@@ -40,5 +40,7 @@ export const entries: AutoGroupRouteEntry[] = [
   {
     "module": "@/pages/personal/zeiterfassung",
     "path": "zeiterfassung"
-  }
+  },
+  { "module": "@/pages/personal/bewerbungen", "path": "bewerbungen" },
+  { "module": "@/pages/personal/organigramm", "path": "organigramm" },
 ]
