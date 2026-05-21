@@ -227,6 +227,12 @@ from app.api.v1.endpoints import (
     artikel_stamm_ext,
 )
 
+# Fachliche Vertiefung Wave 2 — Kontraktmengenzeitraum, Zu-/Abschläge, Rezepturgruppen
+from app.api.v1.endpoints import (
+    kontrakt_mengenzeitraum,
+    produktion_rezepturgruppen,
+)
+
 # Import domain routers
 from app.domains.agrar.api import psm, psm_proplanta
 from app.domains.inventory.api import router as inventory_domain_router
@@ -1493,6 +1499,10 @@ api_router.include_router(massebilanz.router)
 api_router.include_router(zinsabrechnung.router)
 api_router.include_router(hofliste.router)
 api_router.include_router(artikel_stamm_ext.router)
+
+# Fachliche Vertiefung Wave 2
+api_router.include_router(kontrakt_mengenzeitraum.router)
+api_router.include_router(produktion_rezepturgruppen.router)
 
 # Report/Print: Partie-Genealogie, Wiegeschein-PDF-Preview, GS1-Labels
 api_router.include_router(report_print.router)
