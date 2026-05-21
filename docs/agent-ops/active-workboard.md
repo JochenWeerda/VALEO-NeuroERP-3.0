@@ -2,6 +2,18 @@
 
 Stand: `2026-05-12`
 
+## CONTAINER-HEALTH-CRM-INVENTORY-001
+
+**Von:** Claude Code / Codex Integration
+**Owner:** Team
+**Stand:** abgeschlossen 2026-05-21
+**Ziel des Slices:** Container-Health-Probleme in Backend, Inventory und CRM-Services nach Neustart-/Healthcheck-Diagnose repo-seitig stabilisieren.
+**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/agent-ops/slices/CONTAINER-HEALTH-CRM-INVENTORY-001.yaml`, `app/api/v1/endpoints/*.py` 204-Response-Korrekturen, `services/inventory/app/workflows/registration.py`, `services/crm-*/**`, `services/crm-analytics/Dockerfile`, `services/crm-communication/Dockerfile`, `services/crm-multichannel/Dockerfile`, `services/crm-security/main.py`, `services/crm-workflow/Dockerfile`
+**Abnahmekriterien:** FastAPI-Routen mit 204 liefern keine Response-Body-Definition mehr; Inventory-Workflow-Registrierung ist Pydantic-v2-kompatibel; CRM-Services nutzen absolute Imports und `pydantic-settings`; Docker-Builds koennen Dependency-Layer gezielt invalidieren; verbleibende Containerstarts sind separat ueber Compose-Health zu beobachten.
+**Erledigt:** 115 FastAPI-204-Routen gehaertet; CRM-Konfigurationen auf `pydantic-settings` und absolute Imports gezogen; reservierte SQLAlchemy-`metadata`-Attribute umbenannt; Inventory-URL-Cast fuer Pydantic v2 korrigiert; CRM-Dockerfiles mit `CACHEBUST`-Arg fuer reproduzierbare Dependency-Rebuilds ergaenzt.
+**Checks:** Commit `67f8b9c51`; gezielte Docker-/Containerdiagnose; finales Git-Diff der Nachlieferung beschraenkt auf CRM-Dockerfiles und `services/crm-security/main.py`.
+**Offene Risiken:** Einzelne Container koennen weiterhin an laufzeitabhaengigen externen Dependencies, Migrationen oder Credentials scheitern; untracked Analyseartefakte bleiben ausserhalb dieses Slices.
+
 ## DESIGN-MERIDIAN-SCREENS-001
 
 **Von:** Codex
