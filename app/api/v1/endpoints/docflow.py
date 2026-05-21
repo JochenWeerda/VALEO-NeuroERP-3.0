@@ -12,7 +12,6 @@ from sqlalchemy.orm import Session
 from ....core.config import settings
 from ....core.database import get_db
 from app.core.exceptions import ConflictError, EntityNotFoundError, ValidationFailedError
-from app.services.customer_sales_eligibility import assert_customer_allowed_for_invoice
 from app.services.docflow_service import DocflowService, POS_TYPES
 
 router = APIRouter()
@@ -300,8 +299,6 @@ async def create_document(
     _validate_pos_compliance_requirements(payload.doc_type, payload.pos_compliance)
     svc = _svc(db, effective_tenant)
     try:
-        if payload.doc_type == "sales_invoice" and payload.customer_id:
-            assert_customer_allowed_for_invoice(db, effective_tenant, str(payload.customer_id))
         doc_id = svc.create_document(payload)
     except (EntityNotFoundError, ValidationFailedError) as exc:
         db.rollback()
@@ -330,10 +327,6 @@ async def update_document(
     effective_doc_type = str(header.get("doc_type") or "")
     _validate_pos_compliance_requirements(effective_doc_type, payload.pos_compliance)
     try:
-        if effective_doc_type == "sales_invoice":
-            eff_cid = payload.customer_id if payload.customer_id is not None else header.get("customer_id")
-            if eff_cid:
-                assert_customer_allowed_for_invoice(db, effective_tenant, str(eff_cid))
         svc.update_document(doc_id, payload)
     except EntityNotFoundError as exc:
         db.rollback()
@@ -425,11 +418,6 @@ async def convert_document(
 ):
     effective_tenant = tenant_id or DEFAULT_TENANT
     try:
-        if payload.target_doc_type == "sales_invoice":
-            svc_pre = _svc(db, effective_tenant)
-            source = svc_pre.fetch_header(doc_id)
-            if source and source.get("customer_id"):
-                assert_customer_allowed_for_invoice(db, effective_tenant, str(source["customer_id"]))
         result = _svc(db, effective_tenant).convert(doc_id, payload)
     except EntityNotFoundError as exc:
         db.rollback()

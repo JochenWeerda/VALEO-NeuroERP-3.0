@@ -1,6 +1,6 @@
-"""AGRAR-COV-001: Tests fuer agrar_settlements.py.
+"""AGRAR-COV-001: Tests fuer Agrar-Settlement API und Service.
 
-Abdeckung: _round_money, _round_qty, _build_settlement_dq_datensatz,
+Abdeckung: Service-Rundung, DQ-Datensatz,
 DeductionInput-Validierung, HTTP-Smoke-Tests.
 """
 from __future__ import annotations
@@ -12,48 +12,45 @@ from fastapi.testclient import TestClient
 from main import app
 from conftest import skip_if_db_unavailable
 from app.api.v1.endpoints.agrar_settlements import (
-    _round_money,
-    _round_qty,
-    _build_settlement_dq_datensatz,
     DeductionInput,
-    SettlementCreate,
 )
+from app.services.agrar_settlement_service import AgrarSettlementService
 
 _HEADERS = {"Authorization": "Bearer dev-token", "X-Tenant-ID": "test-tenant"}
 _client = TestClient(app, raise_server_exceptions=False)
 
 
 # ---------------------------------------------------------------------------
-# _round_money / _round_qty unit tests
+# Service rounding unit tests
 # ---------------------------------------------------------------------------
 
 def test_round_money_two_decimals():
-    result = _round_money(Decimal("123.456"))
+    result = AgrarSettlementService.round_money(Decimal("123.456"))
     assert result == Decimal("123.46")
 
 
 def test_round_money_from_float():
-    result = _round_money(99.999)
+    result = AgrarSettlementService.round_money(99.999)
     assert result == Decimal("100.00")
 
 
 def test_round_money_exact():
-    result = _round_money(50)
+    result = AgrarSettlementService.round_money(50)
     assert result == Decimal("50.00")
 
 
 def test_round_qty_three_decimals():
-    result = _round_qty(Decimal("1234.5678"))
+    result = AgrarSettlementService.round_qty(Decimal("1234.5678"))
     assert result == Decimal("1234.568")
 
 
 def test_round_qty_from_float():
-    result = _round_qty(1.0005)
+    result = AgrarSettlementService.round_qty(1.0005)
     assert abs(float(result) - 1.001) < 0.001
 
 
 # ---------------------------------------------------------------------------
-# _build_settlement_dq_datensatz unit tests
+# DQ datensatz unit tests
 # ---------------------------------------------------------------------------
 
 def _make_settlement_payload(**kwargs):
@@ -78,7 +75,7 @@ def _make_settlement_payload(**kwargs):
 
 def test_build_settlement_dq_datensatz_keys():
     payload = _make_settlement_payload()
-    result = _build_settlement_dq_datensatz(payload, "ABR-2026-001")
+    result = AgrarSettlementService.build_dq_datensatz(payload, "ABR-2026-001")
     assert "abrechnungsnummer" in result
     assert result["abrechnungsnummer"] == "ABR-2026-001"
     assert "lieferant_id" in result

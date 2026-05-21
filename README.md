@@ -25,7 +25,7 @@ VALEO NeuroERP 3.0 ist ein mehrdomäniges ERP-System für Agrargenossenschaften 
 | Frontend TypeScript | 0 Fehler |
 | Backend-Testabdeckung | 64,85 % gesamt; 18/18 kritische Ratchet-Pfade grün |
 | Alembic | 1 Head |
-| Service-Layer | Hauptwellen refaktoriert; einzelne große Legacy-Endpoint-Dateien bleiben Tech-Debt |
+| Service-Layer | Bekannte große Legacy-Endpunkte repo-seitig auf dedizierte Services nachgezogen |
 | Docker/Container | Erstinstallation, Keycloak-DB-Bootstrap und mehrere Healthcheck-/CRM-/Inventory-Fixes nachgezogen |
 | UAT | Abgenommen mit dokumentierten externen Gates; repo-seitige UAT-Auflagen nachgeliefert |
 
@@ -42,7 +42,7 @@ Der belastbare Ist-Zustand liegt in:
 - **12+ Fachdomänen**: Agrar (Ernteannahme, Kontrakte, Trocknungsregeln), Verkauf, Einkauf, Lager, Finanzen/FIBU, CRM, Logistik, Compliance, HRM, POS, Futtermittel/Rationsoptimierung
 - **Multi-Tenancy** via `X-Tenant-ID` Header, OIDC-Authentifizierung (Keycloak/Azure AD/Auth0)
 - **Prozesskernel** — Waves 1–104 abgeschlossen, 8564 Tests grün
-- **Service-Layer** — zentrale Refaktorierungswellen abgeschlossen; bekannte große Legacy-Endpunkte werden weiter in Slices abgebaut
+- **Service-Layer** — zentrale Refaktorierungswellen abgeschlossen; `harvest_acceptance.py`, `agrar_settlements.py` und `docflow.py` sind auf dedizierte Services nachgezogen
 - **React-Frontend** mit Mask-Builder-Framework (ObjectPage, ListReport, Wizard, Worklist)
 - **Meridian UI** — Root-Theme aktiv, Navy-Sidebar, 56px Topbar, 44px Button/Input-Ziele und tokenisierte Dashboard-/ListReport-/Kernscreen-Muster
 - **Event-Bus** via NATS JetStream mit Outbox-Pattern
@@ -136,7 +136,7 @@ powershell -ExecutionPolicy Bypass -File scripts/smoke_first_install_docker.ps1 
 - Breiter Domänenschnitt über 12+ ERP-Bereiche
 - Prozesskernel mit Waves 1–104 abgeschlossen, 8564 Tests im letzten formalen Kernel-Status
 - Backend-Abdeckung 64,85 % im letzten formalen Kernel-Status; kritische Ratchet-Pfade grün
-- Service-Layer-Hauptwellen, Base-Worker/-Repository, Domain-Error-Konzept und viele thin-router Domain-Services
+- Service-Layer-Hauptwellen, Base-Worker/-Repository, Domain-Error-Konzept und dedizierte Services fuer die bekannten grossen Legacy-Endpunkte
 - Meridian-Shell und sichtbare Core-UI auf `localhost:3000`
 - HRM-Betriebsfreigabe-Gates mit ausfüllbaren Vorlagen
 - UAT-Dokumentation mit Masterplan, Traceability, API-Contracts und Playwright-UAT-Evidence
@@ -144,7 +144,6 @@ powershell -ExecutionPolicy Bypass -File scripts/smoke_first_install_docker.ps1 
 - UX-Baukasten vollständig ausgerollt (Seitentyp-Logik)
 
 **Bewusst noch offen:**
-- Einige große Legacy-Endpoint-Dateien sind weiterhin Service-Layer-Tech-Debt
 - Tiefe Modulunterseiten enthalten noch harte Tailwind-Farben und brauchen weitere Meridian-Slices
 - Externe Gates bleiben außerhalb des Repos: echte UAT-Unterschriften, Steuerberater-/DATEV-Mapping, DMS-Live-Probe, TSE-/DSFinV-K-Prüfwerkzeug, ERiC/ELSTER und Provider-Credentials
 - Fachliche Tiefe der Domänen ist nicht überall gleich und wird über Gap-/Parity-Dokumente weitergeführt
@@ -176,7 +175,7 @@ VALEO NeuroERP 3.0 is a multi-domain ERP system for agricultural cooperatives an
 | Frontend TypeScript | 0 errors |
 | Backend test coverage | 64.85 % overall; 18/18 critical ratchet paths green |
 | Alembic | 1 head |
-| Service layer | main refactoring waves delivered; a few large legacy endpoint files remain tech debt |
+| Service layer | known large legacy endpoints have repo-side dedicated services |
 | Docker/containers | first install, Keycloak DB bootstrap and several healthcheck/CRM/Inventory fixes delivered |
 | UAT | accepted with documented external gates; repo-side UAT conditions delivered |
 
@@ -193,7 +192,7 @@ Authoritative status documents:
 - **12+ business domains**: Agrar (harvest acceptance, contracts, drying rules), Sales, Procurement, Inventory, Finance/Accounting, CRM, Logistics, Compliance, HRM, POS, Feed/Ration Optimization
 - **Multi-tenancy** via `X-Tenant-ID` header, OIDC authentication (Keycloak/Azure AD/Auth0)
 - **Process kernel** — Waves 1–104 completed, 8564 tests green
-- **Service layer** — central refactoring waves completed; known large legacy endpoints are being reduced in follow-up slices
+- **Service layer** — central refactoring waves completed; `harvest_acceptance.py`, `agrar_settlements.py` and `docflow.py` are backed by dedicated services
 - **React frontend** with Mask Builder Framework (ObjectPage, ListReport, Wizard, Worklist)
 - **Meridian UI** — root theme active, navy sidebar, 56px top bar, 44px button/input targets and tokenized dashboard/list-report/core-screen patterns
 - **Event bus** via NATS JetStream with outbox pattern
@@ -287,7 +286,7 @@ powershell -ExecutionPolicy Bypass -File scripts/smoke_first_install_docker.ps1 
 - Broad domain coverage across 12+ ERP areas
 - Process kernel with Waves 1–104 completed, 8564 tests in the latest formal kernel status
 - Backend coverage 64.85 % in the latest formal kernel status; critical ratchet paths green
-- Main service-layer waves, BaseWorker/BaseRepository, domain error model and many thin-router domain services
+- Main service-layer waves, BaseWorker/BaseRepository, domain error model and dedicated services for the known large legacy endpoints
 - Meridian shell and visible core UI on `localhost:3000`
 - HRM operating-release gates with fillable template packages
 - UAT documentation with master plan, traceability, API contracts and Playwright UAT evidence
@@ -295,7 +294,6 @@ powershell -ExecutionPolicy Bypass -File scripts/smoke_first_install_docker.ps1 
 - UX component kit fully rolled out (page-type logic)
 
 **Intentionally still open:**
-- A few large legacy endpoint files remain service-layer tech debt
 - Deep module pages still contain hard-coded Tailwind colors and need further Meridian slices
 - External gates remain outside the repository: real UAT signatures, tax-advisor/DATEV mapping, DMS live probe, TSE/DSFinV-K validation tooling, ERiC/ELSTER and provider credentials
 - Domain depth is not uniform across all areas and remains tracked through gap/parity documents

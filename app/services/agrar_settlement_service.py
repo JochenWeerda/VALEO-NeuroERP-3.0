@@ -5,15 +5,27 @@ from __future__ import annotations
 import logging
 from datetime import date, datetime
 from decimal import Decimal
+from types import SimpleNamespace
 from typing import Any, List, Optional, Tuple
 
 from sqlalchemy.orm import Session
 
 from app.core.data_quality_enforcement import build_dq_error_detail, evaluate_settlement_datensatz
 from app.core.exceptions import ConflictError, EntityNotFoundError, ValidationFailedError
+from app.core.trocknungs_abrechnung import (
+    TrocknungsInput,
+    TrocknungsMethode,
+    TrocknungsRegelParametrierung,
+    compute_trocknungs_abrechnung,
+    get_default_trocknungsregeln,
+    validate_trocknungs_ergebnis,
+)
 from app.core.uuid7 import uuid7
+from app.infrastructure.drying_rule_repo import DbDryingRuleRepo
 from app.infrastructure.models import AgrarSettlement, AgrarSettlementDeduction
 from app.repositories.agrar_settlement_repository import AgrarSettlementRepository
+from modules.agrar.services.drying_rule_engine import compute_settlement as _compute_drying_settlement
+from modules.agrar.services.moisture_engine import MoistureEngineInput, calculate_billing_weight
 from modules.agrar.services.settlement_calculator import (
     calc_deduction_amount as _calc_deduction_amount,
     compute_settlement_amounts as _compute_settlement_amounts,
@@ -56,6 +68,168 @@ class AgrarSettlementService:
     @staticmethod
     def round_qty(value) -> Decimal:
         return _round_qty(value)
+
+    @staticmethod
+    def build_dq_datensatz(payload: Any, settlement_number: str) -> dict[str, Any]:
+        return {
+            "abrechnungsnummer": settlement_number,
+            "lieferant_id": payload.supplier_id,
+            "brutto_gewicht_kg": payload.gross_quantity_kg,
+            "abrechnungsgewicht_kg": (
+                payload.billing_quantity_kg
+                if getattr(payload, "billing_quantity_kg", None) is not None
+                else payload.gross_quantity_kg
+            ),
+            "preis_eur_pro_t": payload.unit_price_eur_per_ton,
+            "waehrung": "EUR",
+        }
+
+    @staticmethod
+    def preview_billing_weight(payload: Any) -> dict[str, float]:
+        result = calculate_billing_weight(
+            MoistureEngineInput(
+                net_weight_kg=Decimal(str(payload.net_weight_kg)),
+                moisture_pct=Decimal(str(payload.moisture_pct)),
+                impurities_pct=Decimal(str(payload.impurities_pct)),
+                target_moisture_pct=Decimal(str(payload.target_moisture_pct)),
+                base_impurities_pct=Decimal(str(payload.base_impurities_pct)),
+                allow_bonus=payload.allow_bonus,
+            )
+        )
+        return {
+            "net_weight_kg": float(result.net_weight_kg),
+            "billing_weight_kg": float(result.billing_weight_kg),
+            "deduction_kg": float(result.deduction_kg),
+            "moisture_factor": float(result.moisture_factor),
+            "impurities_factor": float(result.impurities_factor),
+        }
+
+    @classmethod
+    def preview_settlement(cls, payload: Any) -> dict[str, float]:
+        billing_qty = cls.round_qty(
+            payload.billing_quantity_kg
+            if payload.billing_quantity_kg is not None
+            else payload.gross_quantity_kg
+        )
+        amounts = cls.compute_amounts(
+            billing_quantity_kg=billing_qty,
+            unit_price_eur_per_ton=Decimal(str(payload.unit_price_eur_per_ton)),
+            deductions=payload.deductions,
+        )
+        return {
+            "gross_quantity_kg": float(payload.gross_quantity_kg),
+            "billing_quantity_kg": float(billing_qty),
+            "gross_amount_eur": float(amounts["gross_amount"]),
+            "total_deductions_eur": float(amounts["total_deductions"]),
+            "net_amount_eur": float(amounts["net_amount"]),
+        }
+
+    def compute_drying_from_rules(self, payload: Any) -> dict[str, Any]:
+        try:
+            data = _compute_drying_settlement(
+                DbDryingRuleRepo(self.db, tenant_id=self.tenant_id),
+                {
+                    "cropCode": payload.crop_code,
+                    "siteId": payload.site_id,
+                    "netWeightKg": payload.net_weight_kg,
+                    "moisturePct": payload.moisture_pct,
+                    "calcDate": payload.calc_date,
+                    "roundingMode": payload.rounding_mode,
+                },
+            )
+        except ValueError as exc:
+            raise ValidationFailedError(str(exc)) from exc
+        return {
+            "entzug_pct_points": float(data.entzug_pct_points),
+            "loss_pct": float(data.loss_pct),
+            "loss_kg": float(data.loss_kg),
+            "invoice_weight_kg": float(data.invoice_weight_kg),
+            "drying_fee_eur": float(data.drying_fee_eur) if data.drying_fee_eur is not None else None,
+            "used_rule_set_id": data.used_rule_set_id,
+            "used_rule_version": int(data.used_rule_version),
+            "used_row_moisture_pct": float(data.used_row_moisture_pct) if data.used_row_moisture_pct is not None else None,
+            "warnings": list(data.warnings),
+        }
+
+    @staticmethod
+    def preview_trocknungs_abrechnung(payload: Any) -> dict[str, Any]:
+        try:
+            methode = TrocknungsMethode(payload.methode)
+        except ValueError as exc:
+            allowed = [m.value for m in TrocknungsMethode]
+            raise ValidationFailedError(f"Unbekannte Methode: {payload.methode}. Erlaubt: {allowed}") from exc
+
+        inp = TrocknungsInput(
+            settlement_id=payload.settlement_id,
+            tenant_id=payload.tenant_id,
+            crop_code=payload.crop_code,
+            rule_set_id=payload.rule_set_id,
+            rule_set_version=payload.rule_set_version,
+            brutto_gewicht_kg=Decimal(str(payload.brutto_gewicht_kg)),
+            eingangs_feuchte_pct=Decimal(str(payload.eingangs_feuchte_pct)),
+            ziel_feuchte_pct=Decimal(str(payload.ziel_feuchte_pct)),
+            methode=methode,
+        )
+        defaults = get_default_trocknungsregeln()
+        default_params = defaults.get(payload.crop_code.upper(), TrocknungsRegelParametrierung())
+        params = TrocknungsRegelParametrierung(
+            start_threshold_pct=Decimal(str(payload.start_threshold_pct)) if payload.start_threshold_pct is not None else default_params.start_threshold_pct,
+            trocknungskosten_eur_per_pct_per_t=Decimal(str(payload.trocknungskosten_eur_per_pct_per_t)) if payload.trocknungskosten_eur_per_pct_per_t is not None else default_params.trocknungskosten_eur_per_pct_per_t,
+            schwund_faktor=Decimal(str(payload.schwund_faktor)) if payload.schwund_faktor is not None else default_params.schwund_faktor,
+            max_abzug_pct=Decimal(str(payload.max_abzug_pct)) if payload.max_abzug_pct is not None else default_params.max_abzug_pct,
+        )
+        ergebnis = compute_trocknungs_abrechnung(inp, params)
+        validierung = validate_trocknungs_ergebnis(ergebnis)
+        return {**ergebnis.as_dict(), "validierung": validierung.as_dict()}
+
+    @staticmethod
+    def get_default_trocknungsregelsets() -> dict[str, Any]:
+        defaults = get_default_trocknungsregeln()
+        return {
+            "schema_version": 1,
+            "quelle": "DLG-Empfehlungen / UFOP-Richtwerte / Handelsusancen 2024",
+            "regelsets": {
+                crop_code: {
+                    "crop_code": crop_code,
+                    "start_threshold_pct": float(params.start_threshold_pct),
+                    "trocknungskosten_eur_per_pct_per_t": float(params.trocknungskosten_eur_per_pct_per_t),
+                    "schwund_faktor": float(params.schwund_faktor),
+                    "max_abzug_pct": float(params.max_abzug_pct) if params.max_abzug_pct is not None else None,
+                }
+                for crop_code, params in defaults.items()
+            },
+        }
+
+    @staticmethod
+    def evaluate_freigabe_stateless(payload: Any) -> dict[str, Any]:
+        from app.core.settlement_approval import (
+            SettlementActorType,
+            SettlementApprovalRequest,
+            SettlementApprovalStatus,
+            evaluate_settlement_approval,
+            get_allowed_transitions,
+            is_terminal,
+        )
+        try:
+            actor_type = SettlementActorType(payload.actor_type)
+            target_status = SettlementApprovalStatus(payload.target_status)
+            current_status = SettlementApprovalStatus(payload.current_status or "ENTWURF")
+        except ValueError as exc:
+            raise ValidationFailedError(str(exc)) from exc
+        request = SettlementApprovalRequest(
+            settlement_id="preview",
+            tenant_id="system",
+            actor_id=payload.actor_id,
+            actor_type=actor_type,
+            target_status=target_status,
+            reason=payload.reason,
+        )
+        result = evaluate_settlement_approval(request, current_status)
+        return {
+            **result.audit_entry,
+            "allowed_transitions": [s.value for s in get_allowed_transitions(current_status)],
+            "is_terminal": is_terminal(current_status),
+        }
 
     # ── queries ───────────────────────────────────────────────────────────────
 
@@ -346,7 +520,8 @@ class AgrarSettlementService:
             .all()
         )
         for s in settlements:
-            s.campaign_id = campaign_id
+            if str(s.id) in updatable:
+                s.campaign_id = campaign_id
         self.commit_mutation()
 
     # ── drying pre-computation (create with inline drying) ───────────────────
@@ -354,12 +529,8 @@ class AgrarSettlementService:
     def create_settlement_with_drying(
         self,
         payload: Any,
-        drying_compute_fn: Any,
-        drying_repo: Any,
     ) -> Tuple["AgrarSettlement", list]:
         """Run drying computation, mutate payload.deductions, then create settlement."""
-        from app.api.v1.endpoints.agrar_settlements import DeductionInput  # local import avoids circular
-
         drying_snapshot: dict | None = None
         billing_qty_override = None
 
@@ -372,8 +543,8 @@ class AgrarSettlementService:
             gross_qty = _round_qty(payload.gross_quantity_kg)
             calc_date = payload.drying.calc_date or datetime.utcnow().date().isoformat()
             try:
-                drying_result = drying_compute_fn(
-                    drying_repo,
+                drying_result = _compute_drying_settlement(
+                    DbDryingRuleRepo(self.db, tenant_id=self.tenant_id),
                     {
                         "cropCode": payload.drying.crop_code,
                         "siteId": payload.drying.site_id,
@@ -406,10 +577,12 @@ class AgrarSettlementService:
                 billing_qty_override = _round_qty(drying_result.invoice_weight_kg)
             if drying_result.drying_fee_eur is not None and drying_result.drying_fee_eur > 0:
                 payload.deductions.append(
-                    DeductionInput(
+                    SimpleNamespace(
                         deduction_type="drying",
                         mode="fixed",
                         fixed_amount_eur=float(drying_result.drying_fee_eur),
+                        rate_per_ton_eur=None,
+                        basis_quantity_tons=None,
                         note=f"Drying fee via rule-set {drying_result.used_rule_set_id} v{drying_result.used_rule_version}",
                     )
                 )
@@ -419,6 +592,46 @@ class AgrarSettlementService:
             drying_snapshot=drying_snapshot,
             billing_qty_override=billing_qty_override,
         )
+
+    def backfill_campaign_reference(self, payload: Any, campaigns: list[dict[str, Any]]) -> dict[str, Any]:
+        settlements = (
+            self.db.query(AgrarSettlement)
+            .filter(AgrarSettlement.tenant_id == self.tenant_id)
+            .filter(AgrarSettlement.campaign_id.is_(None))
+            .all()
+        )
+        plan = self.build_campaign_backfill_plan(
+            campaign_id=payload.campaign_id,
+            campaigns=campaigns,
+            settlements=settlements,
+        )
+        if payload.dry_run or plan["updated_count"] == 0:
+            return plan
+        self.apply_campaign_backfill(plan["updated_settlement_ids"], payload.campaign_id)
+        return plan
+
+    def export_pdf(self, settlement_id: str, archive: bool = False) -> tuple[bytes, str]:
+        from app.infrastructure.models import Article
+        from app.infrastructure.models.business_partner import BusinessPartner
+        from app.services.settlement_pdf_service import SettlementPdfService
+
+        settlement, deductions = self.get_settlement(settlement_id)
+        supplier = self.db.query(BusinessPartner).filter(
+            BusinessPartner.id == settlement.supplier_id,
+            BusinessPartner.tenant_id == self.tenant_id,
+        ).first()
+        article = None
+        if settlement.article_id:
+            article = self.db.query(Article).filter(Article.id == settlement.article_id).first()
+
+        pdf_svc = SettlementPdfService(self.db, self.tenant_id)
+        if archive:
+            meta = pdf_svc.generate_and_archive(settlement, deductions, supplier, article)
+            pdf_bytes = meta.pop("pdf_bytes")
+        else:
+            pdf_bytes = pdf_svc.generate_bytes(settlement, deductions, supplier, article)
+        filename = f"abrechnung_{settlement.settlement_number or settlement.id}.pdf"
+        return pdf_bytes, filename
 
     # ── post-fibu full (FIBU booking + PDF archive) ───────────────────────────
 
