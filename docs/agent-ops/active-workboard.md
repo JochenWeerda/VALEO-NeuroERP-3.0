@@ -2,6 +2,16 @@
 
 Stand: `2026-05-12`
 
+## DESIGN-MERIDIAN-SCREENS-001
+
+**Von:** Codex
+**Owner:** Codex
+**Stand:** reserviert 2026-05-21
+**Ziel des Slices:** Die wichtigsten sichtbaren Fach-/Maskenflaechen nach der Shell-Umstellung weiter auf Meridian tokenisieren.
+**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/agent-ops/slices/DESIGN-MERIDIAN-SCREENS-001.yaml`, `packages/frontend-web/src/components/mask-builder/ListReport.tsx`, `packages/frontend-web/src/components/mask-builder/ObjectPage.tsx`, `packages/frontend-web/src/components/mask-builder/OverviewPage.tsx`, `packages/frontend-web/src/features/dashboard/DashboardCharts.tsx`, `packages/frontend-web/src/features/contracts/Contracts.tsx`, `packages/frontend-web/src/features/inventory/Inventory.tsx`, `packages/frontend-web/src/features/weighing/Weighing.tsx`, `packages/frontend-web/src/features/sales/Sales.tsx`
+**Abnahmekriterien:** Masken-Builder-Basisflaechen nutzen Meridian-Oberflaechen, Tabellen-/Filter-/Header-Muster und 44px Controls; Dashboard-Charts und Kernfeatures vermeiden generische Slate/Blue/Green-Mischung in den sichtbarsten Cards; Frontend-Typecheck und Workboard-Validierung sind gruen.
+**Offene Risiken:** Tiefe Modulunterseiten enthalten weiterhin harte Utility-Farben und brauchen bei Bedarf weitere fachbereichsweise Slices.
+
 ## DESIGN-MERIDIAN-SHELL-001
 
 **Von:** Codex
