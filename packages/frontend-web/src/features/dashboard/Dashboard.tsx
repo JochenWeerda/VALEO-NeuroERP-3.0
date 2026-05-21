@@ -135,6 +135,13 @@ const KPI_DESCRIPTIONS: Record<(typeof KPI_KEYS)[number], string> = {
   inventory_lots_blocked: 'Qualitaetsbedingte Sperren',
 }
 
+const KPI_ACCENTS: Record<(typeof KPI_KEYS)[number], string> = {
+  contract_long_tons: 'border-l-[hsl(var(--accent))] bg-[hsl(var(--accent)/0.08)]',
+  contract_short_tons: 'border-l-primary bg-primary/5',
+  weighing_today_tons: 'border-l-[hsl(var(--accent))] bg-[hsl(var(--accent)/0.08)]',
+  inventory_lots_blocked: 'border-l-destructive bg-destructive/5',
+}
+
 const renderKpiValue = (key: (typeof KPI_KEYS)[number], value: number): string => {
   if (key === 'inventory_lots_blocked') {
     return integerFormatter.format(value)
@@ -167,7 +174,7 @@ export default function Dashboard(): ReactElement {
     return (
       <div className="space-y-6">
         <div className="flex items-center justify-between">
-          <h1 className="text-2xl font-bold text-slate-900">Dashboard</h1>
+          <h1 className="text-xl font-bold text-foreground">Dashboard</h1>
           <Button variant="outline" onClick={() => void refetchKpis()}>
             Erneut laden
           </Button>
@@ -183,18 +190,18 @@ export default function Dashboard(): ReactElement {
   const lastUpdatedLabel = kpis?.updated_at !== undefined ? dateFormatter.format(new Date(kpis.updated_at)) : 'unbekannt'
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">Dashboard</h1>
-          <p className="text-sm text-slate-500">Valero NeuroERP - Echtzeit Kennzahlen</p>
+          <h1 className="text-xl font-bold text-foreground">Dashboard</h1>
+          <p className="text-sm text-muted-foreground">VALEO NeuroERP - Echtzeit Kennzahlen</p>
         </div>
-        <p className="text-xs text-slate-400">Aktualisiert am {lastUpdatedLabel}</p>
+        <p className="text-xs text-muted-foreground">Aktualisiert am {lastUpdatedLabel}</p>
       </div>
 
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
         {KPI_KEYS.map((key) => (
-          <Card key={key} className="rounded-2xl shadow-sm">
+          <Card key={key} className={`border-l-4 shadow-sm ${KPI_ACCENTS[key]}`}>
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-medium">{KPI_TITLES[key]}</CardTitle>
               <CardDescription>{KPI_DESCRIPTIONS[key]}</CardDescription>
@@ -203,7 +210,7 @@ export default function Dashboard(): ReactElement {
               {isKpiLoading || kpis === undefined ? (
                 <Skeleton className="h-8 w-24" />
               ) : (
-                <p className="text-2xl font-semibold text-slate-900">
+                <p className="text-2xl font-semibold tabular-nums text-foreground">
                   {renderKpiValue(key, kpis[key])}
                 </p>
               )}

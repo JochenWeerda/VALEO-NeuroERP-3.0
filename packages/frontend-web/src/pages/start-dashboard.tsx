@@ -64,7 +64,7 @@ const KPI_TILES: KpiTile[] = [
     path: '/dashboard/sales',
     format: (v) => `\u20AC ${NUM_DE.format(v)}`,
     icon: <DollarSign className="h-4 w-4" />,
-    accentClass: 'text-emerald-500',
+    accentClass: 'text-[hsl(var(--accent))]',
   },
   {
     key: 'orders',
@@ -72,7 +72,7 @@ const KPI_TILES: KpiTile[] = [
     path: '/sales/order',
     format: (v) => NUM_DE.format(v),
     icon: <ShoppingCart className="h-4 w-4" />,
-    accentClass: 'text-indigo-400',
+    accentClass: 'text-primary',
   },
   {
     key: 'customers',
@@ -80,7 +80,7 @@ const KPI_TILES: KpiTile[] = [
     path: '/verkauf/kunden-liste',
     format: (v) => NUM_DE.format(v),
     icon: <Users className="h-4 w-4" />,
-    accentClass: 'text-sky-400',
+    accentClass: 'text-primary',
   },
   {
     key: 'inventory',
@@ -88,7 +88,7 @@ const KPI_TILES: KpiTile[] = [
     path: '/lager/bestandsuebersicht',
     format: (v) => `${v}%`,
     icon: <Package className="h-4 w-4" />,
-    accentClass: 'text-amber-400',
+    accentClass: 'text-[hsl(var(--accent))]',
   },
 ]
 
@@ -218,7 +218,7 @@ export default function StartDashboardPage(): JSX.Element {
             <Link
               key={tile.key}
               to={tile.path}
-              className="group rounded-2xl border border-border bg-card shadow-sm transition-all hover:shadow-md dark:border-white/10 dark:bg-slate-950/60 dark:hover:border-white/20 dark:hover:bg-slate-900/70"
+              className="group rounded-[var(--radius)] border border-l-4 border-border border-l-[hsl(var(--accent))] bg-card shadow-sm transition-all hover:border-primary/40 hover:shadow-md"
             >
               <div className="p-5">
                 <div className="flex items-center justify-between">
@@ -229,7 +229,7 @@ export default function StartDashboardPage(): JSX.Element {
                   {kpiLoading ? (
                     <Skeleton className="h-8 w-24" />
                   ) : (
-                    <div className="text-2xl font-bold tracking-tight">
+                    <div className="text-2xl font-bold tracking-normal tabular-nums text-foreground">
                       {value !== undefined ? tile.format(value) : '-'}
                     </div>
                   )}
@@ -243,11 +243,11 @@ export default function StartDashboardPage(): JSX.Element {
       {/* Flow Spine E2E-Prozesse */}
       <section className="space-y-4">
         <div className="flex items-center gap-3">
-          <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-indigo-500/15 dark:bg-indigo-500/20">
-            <Zap className="h-4 w-4 text-indigo-500 dark:text-indigo-400" />
+          <div className="flex h-8 w-8 items-center justify-center rounded-[8px] bg-primary/10">
+            <Zap className="h-4 w-4 text-primary" />
           </div>
           <div>
-            <h2 className="text-lg font-semibold leading-none">Flow Spine Prozesse</h2>
+            <h2 className="text-lg font-semibold leading-none text-foreground">Flow Spine Prozesse</h2>
             <p className="mt-0.5 text-xs text-muted-foreground">End-to-End Prozesskontrolle mit KI-Copilot</p>
           </div>
         </div>
@@ -300,10 +300,10 @@ export default function StartDashboardPage(): JSX.Element {
       </section>
 
       {/* Header + Suche */}
-      <section className="rounded-2xl border border-border bg-card p-5 shadow-sm dark:border-white/10 dark:bg-slate-950/60">
+      <section className="rounded-[var(--radius)] border border-border bg-card p-6 shadow-sm">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
           <div>
-            <h1 className="text-2xl font-semibold tracking-tight">App Starter</h1>
+            <h1 className="text-xl font-semibold tracking-normal text-foreground">App Starter</h1>
             <p className="text-sm text-muted-foreground">
               Einstieg in alle VALEO ERP Bereiche mit aktueller Modul-Verdrahtung.
             </p>
@@ -313,7 +313,7 @@ export default function StartDashboardPage(): JSX.Element {
             <Input
               value={query}
               onChange={(event) => setQuery(event.target.value)}
-              className="pl-9 dark:border-white/10 dark:bg-slate-900/60"
+              className="pl-9"
               placeholder="Module durchsuchen..."
               aria-label="Module durchsuchen"
             />
@@ -328,8 +328,8 @@ export default function StartDashboardPage(): JSX.Element {
       </section>
 
       {/* Schnellaktionen */}
-      <section className="rounded-2xl border border-border bg-card p-4 shadow-sm dark:border-white/10 dark:bg-slate-950/60">
-        <h2 className="text-lg font-semibold">Schnellaktionen</h2>
+      <section className="rounded-[var(--radius)] border border-border bg-card p-5 shadow-sm">
+        <h2 className="text-lg font-semibold text-foreground">Schnellaktionen</h2>
         <p className="mb-3 text-sm text-muted-foreground">
           Haeufige Startaktionen fuer Tagesgeschaeft und neue Belege.
         </p>
