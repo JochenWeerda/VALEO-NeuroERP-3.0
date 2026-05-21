@@ -266,7 +266,7 @@ async def update_schlag(
     return _schlag_to_dict(schlag)
 
 
-@router.delete("/schlaege/{schlag_id}", status_code=204, response_class=Response)
+@router.delete("/schlaege/{schlag_id}", status_code=204, response_class=Response, response_model=None)
 async def deactivate_schlag(
     schlag_id: str,
     db: Session = Depends(get_db),
@@ -395,7 +395,7 @@ async def update_massnahme(
     return result
 
 
-@router.delete("/feldbuch/massnahmen/{massnahme_id}", status_code=204, response_class=Response)
+@router.delete("/feldbuch/massnahmen/{massnahme_id}", status_code=204, response_class=Response, response_model=None)
 async def delete_massnahme(
     massnahme_id: str,
     db: Session = Depends(get_db),

@@ -84,7 +84,7 @@ def create_konfiguration(
     return _svc(db, tenant_id).create_configuration(payload.model_dump())
 
 
-@router.delete("/konfigurationen/{id}", status_code=204, response_class=Response)
+@router.delete("/konfigurationen/{id}", status_code=204, response_class=Response, response_model=None)
 def delete_konfiguration(
     id: str,
     db: Session = Depends(get_db),

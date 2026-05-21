@@ -1433,7 +1433,7 @@ async def patch_discount_item(
     return _to_discount_item(row)
 
 
-@router.delete("/{partner_id}/discount-items/{item_id}", status_code=204, response_class=Response)
+@router.delete("/{partner_id}/discount-items/{item_id}", status_code=204, response_class=Response, response_model=None)
 async def delete_discount_item(
     partner_id: str, item_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
 ):
@@ -1526,7 +1526,7 @@ async def patch_price_agreement(
     return _to_price_agreement(row)
 
 
-@router.delete("/{partner_id}/price-agreements/{agreement_id}", status_code=204, response_class=Response)
+@router.delete("/{partner_id}/price-agreements/{agreement_id}", status_code=204, response_class=Response, response_model=None)
 async def delete_price_agreement(
     partner_id: str, agreement_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
 ):
@@ -1764,7 +1764,7 @@ async def patch_instruction(
     return _to_instruction(row)
 
 
-@router.delete("/{partner_id}/instructions/{instruction_id}", status_code=204, response_class=Response)
+@router.delete("/{partner_id}/instructions/{instruction_id}", status_code=204, response_class=Response, response_model=None)
 async def delete_instruction(
     partner_id: str, instruction_id: str,
     tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db),
@@ -1851,7 +1851,7 @@ async def patch_contact(
     return _to_contact(row)
 
 
-@router.delete("/{partner_id}/contacts/{contact_id}", status_code=204, response_class=Response)
+@router.delete("/{partner_id}/contacts/{contact_id}", status_code=204, response_class=Response, response_model=None)
 async def delete_contact(
     partner_id: str, contact_id: str,
     tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db),
@@ -1936,7 +1936,7 @@ async def patch_address(
     return _to_address(row)
 
 
-@router.delete("/{partner_id}/addresses/{address_id}", status_code=204, response_class=Response)
+@router.delete("/{partner_id}/addresses/{address_id}", status_code=204, response_class=Response, response_model=None)
 async def delete_address(
     partner_id: str, address_id: str,
     tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db),
@@ -2073,7 +2073,7 @@ async def patch_cpd_account(
     return _to_cpd_account(row)
 
 
-@router.delete("/{partner_id}/cpd-accounts/{account_id}", status_code=204, response_class=Response)
+@router.delete("/{partner_id}/cpd-accounts/{account_id}", status_code=204, response_class=Response, response_model=None)
 async def delete_cpd_account(
     partner_id: str, account_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
 ):
@@ -2178,7 +2178,7 @@ async def patch_pricing_rule(
     return _to_pricing_rule(row)
 
 
-@router.delete("/{partner_id}/pricing-rules/{rule_id}", status_code=204, response_class=Response)
+@router.delete("/{partner_id}/pricing-rules/{rule_id}", status_code=204, response_class=Response, response_model=None)
 async def delete_pricing_rule(
     partner_id: str, rule_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
 ):
@@ -2264,7 +2264,7 @@ async def patch_interest_setting(
     return _to_interest_setting(row)
 
 
-@router.delete("/{partner_id}/interest-settings/{setting_id}", status_code=204, response_class=Response)
+@router.delete("/{partner_id}/interest-settings/{setting_id}", status_code=204, response_class=Response, response_model=None)
 async def delete_interest_setting(
     partner_id: str, setting_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
 ):
@@ -2349,7 +2349,7 @@ async def patch_dispatch_medium(
     return _to_dispatch_medium(row)
 
 
-@router.delete("/{partner_id}/dispatch-media/{medium_id}", status_code=204, response_class=Response)
+@router.delete("/{partner_id}/dispatch-media/{medium_id}", status_code=204, response_class=Response, response_model=None)
 async def delete_dispatch_medium(
     partner_id: str, medium_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
 ):
@@ -2421,7 +2421,7 @@ async def patch_cooperative_membership(
     return _to_coop(row)
 
 
-@router.delete("/{partner_id}/cooperative-memberships/{membership_id}", status_code=204, response_class=Response)
+@router.delete("/{partner_id}/cooperative-memberships/{membership_id}", status_code=204, response_class=Response, response_model=None)
 async def delete_cooperative_membership(
     partner_id: str, membership_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
 ):
@@ -2488,7 +2488,7 @@ async def patch_email_distribution(
     return _to_email_distribution(row)
 
 
-@router.delete("/{partner_id}/email-distributions/{distribution_id}", status_code=204, response_class=Response)
+@router.delete("/{partner_id}/email-distributions/{distribution_id}", status_code=204, response_class=Response, response_model=None)
 async def delete_email_distribution(
     partner_id: str, distribution_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
 ):
@@ -2546,7 +2546,7 @@ async def patch_community(community_id: str, payload: CommunityUpdate, db: Sessi
     return _to_community(row)
 
 
-@router.delete("/catalog/communities/{community_id}", status_code=204, response_class=Response)
+@router.delete("/catalog/communities/{community_id}", status_code=204, response_class=Response, response_model=None)
 async def delete_community(community_id: str, db: Session = Depends(get_db)):
     try:
         BusinessPartnerService(db, "").delete_community(community_id)
@@ -2587,7 +2587,7 @@ async def patch_community_member(
     return _to_community_member(row)
 
 
-@router.delete("/catalog/communities/{community_id}/members/{member_id}", status_code=204, response_class=Response)
+@router.delete("/catalog/communities/{community_id}/members/{member_id}", status_code=204, response_class=Response, response_model=None)
 async def delete_community_member(community_id: str, member_id: str, db: Session = Depends(get_db)):
     try:
         BusinessPartnerService(db, "").delete_community_member(member_id)

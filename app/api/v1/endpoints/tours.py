@@ -279,7 +279,7 @@ async def update_tour(
     return tour
 
 
-@router.delete("/{tour_id}", status_code=204, response_class=Response)
+@router.delete("/{tour_id}", status_code=204, response_class=Response, response_model=None)
 async def delete_tour(tour_id: str, db: Session = Depends(get_db)):
     """Delete a tour"""
     repo = TourRepository(db)

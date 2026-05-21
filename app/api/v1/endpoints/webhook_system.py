@@ -147,7 +147,7 @@ def register_webhook(bereich: str, payload: WebhookCreate, db: Session = Depends
         raise HTTPException(status_code=503, detail=str(exc), headers={"X-Migration-Hint": "CREATE TABLE domain_shared.webhooks (...)"}) from exc
 
 
-@router.delete("/{nr}", status_code=204, response_class=Response, tags=["webhooks"])
+@router.delete("/{nr}", status_code=204, response_class=Response, tags=["webhooks"], response_model=None)
 def unregister_webhook(nr: int, db: Session = Depends(get_db)) -> Response:
     """Unregister (delete) a webhook by its sequential number."""
     try:

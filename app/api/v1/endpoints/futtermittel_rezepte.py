@@ -281,7 +281,7 @@ async def update_ingredient(
     return _row_to_dict(row)
 
 
-@router.delete("/{rezept_id}/ingredients/{ingredient_id}", status_code=204, response_class=Response)
+@router.delete("/{rezept_id}/ingredients/{ingredient_id}", status_code=204, response_class=Response, response_model=None)
 async def delete_ingredient(
     rezept_id: str,
     ingredient_id: str,

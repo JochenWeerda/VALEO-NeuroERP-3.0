@@ -269,7 +269,7 @@ async def update_streckengeschaeft(
     return _to_out(row)
 
 
-@router.delete("/{strecke_id}", status_code=204, response_class=Response)
+@router.delete("/{strecke_id}", status_code=204, response_class=Response, response_model=None)
 async def delete_streckengeschaeft(
     strecke_id: str,
     tenant_id: str = Depends(get_tenant_id),

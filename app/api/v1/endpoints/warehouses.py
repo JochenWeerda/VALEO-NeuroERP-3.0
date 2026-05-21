@@ -128,7 +128,7 @@ async def update_warehouse(
     return Warehouse.model_validate(wh)
 
 
-@router.delete("/{warehouse_id}", status_code=204, response_class=Response)
+@router.delete("/{warehouse_id}", status_code=204, response_class=Response, response_model=None)
 async def delete_warehouse(warehouse_id: str, db: Session = Depends(get_db)):
     """Lager deaktivieren (Soft-Delete)."""
     wh = db.query(WarehouseModel).filter(WarehouseModel.id == warehouse_id).first()

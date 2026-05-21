@@ -119,7 +119,7 @@ async def get_inventory_count(count_id: str, db: Session = Depends(get_db)):
     return InventoryCountOut.model_validate(obj)
 
 
-@router.delete("/{count_id}", status_code=204, response_class=Response)
+@router.delete("/{count_id}", status_code=204, response_class=Response, response_model=None)
 async def delete_inventory_count(count_id: str, db: Session = Depends(get_db)):
     """Inventur-Kopf loeschen."""
     obj = db.query(InventoryCount).filter(InventoryCount.id == count_id).first()
@@ -187,7 +187,7 @@ async def update_count_line(
     return InventoryCountLineOut.model_validate(line)
 
 
-@router.delete("/lines/{line_id}", status_code=204, response_class=Response)
+@router.delete("/lines/{line_id}", status_code=204, response_class=Response, response_model=None)
 async def delete_count_line(line_id: str, db: Session = Depends(get_db)):
     """POST Inventur Daten löschen"""
     line = db.query(InventoryCountLine).filter(InventoryCountLine.id == line_id).first()

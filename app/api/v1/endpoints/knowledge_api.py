@@ -331,7 +331,7 @@ def update_knowledge(
     return _record_to_response(record)
 
 
-@router.delete("/{knowledge_id}", status_code=204, response_class=Response)
+@router.delete("/{knowledge_id}", status_code=204, response_class=Response, response_model=None)
 def archive_knowledge(
     knowledge_id: str,
     db: Session = Depends(get_db),

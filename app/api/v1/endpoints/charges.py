@@ -237,7 +237,7 @@ async def freigabe_charge(charge_id: str, db: Session = Depends(get_db)) -> dict
     return _to_dict(updated)
 
 
-@router.delete("/{charge_id}", status_code=204, response_class=Response)
+@router.delete("/{charge_id}", status_code=204, response_class=Response, response_model=None)
 async def delete_charge(charge_id: str, db: Session = Depends(get_db)):
     repo = ChargeRepository(db)
     if not repo.delete(charge_id):

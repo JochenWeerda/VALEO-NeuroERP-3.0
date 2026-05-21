@@ -171,7 +171,7 @@ async def update_zertifikat(
     }
 
 
-@router.delete("/{zertifikat_id}", response_class=Response, status_code=204)
+@router.delete("/{zertifikat_id}", response_class=Response, status_code=204, response_model=None)
 async def delete_zertifikat(
     zertifikat_id: int,
     db: Session = Depends(get_db),

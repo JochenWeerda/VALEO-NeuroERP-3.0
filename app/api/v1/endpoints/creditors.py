@@ -412,7 +412,7 @@ async def get_creditor_balance(
         raise HTTPException(status_code=500, detail=f"OP-Saldo konnte nicht ermittelt werden: {str(e)}")
 
 
-@router.delete("/{creditor_id}", status_code=204, response_class=Response)
+@router.delete("/{creditor_id}", status_code=204, response_class=Response, response_model=None)
 async def delete_creditor(
     creditor_id: str,
     tenant_id: str = Depends(get_tenant_id),

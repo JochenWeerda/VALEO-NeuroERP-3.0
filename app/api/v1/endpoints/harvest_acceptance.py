@@ -384,7 +384,7 @@ async def update_harvest_acceptance(
         raise HTTPException(status_code=422, detail=exc.detail)
 
 
-@router.delete("/{acceptance_id}", status_code=204, response_class=Response)
+@router.delete("/{acceptance_id}", status_code=204, response_class=Response, response_model=None)
 async def delete_harvest_acceptance(
     acceptance_id: str,
     tenant_id: str = Depends(get_tenant_id),

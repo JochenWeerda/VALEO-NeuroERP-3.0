@@ -104,7 +104,7 @@ def update_verladung(verladung_id: str, payload: VerladungPatch, db: Session = D
     return _to_dict(obj)
 
 
-@router.delete("/{verladung_id}", status_code=204, response_class=Response)
+@router.delete("/{verladung_id}", status_code=204, response_class=Response, response_model=None)
 def delete_verladung(verladung_id: str, db: Session = Depends(get_db)):
     obj = db.query(Verladung).filter(Verladung.id == verladung_id).first()
     if not obj:

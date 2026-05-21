@@ -204,7 +204,7 @@ async def export_direct_debit_run(
     return {"ok": True, "run_id": run_id, "exported_items": result.rowcount}
 
 
-@router.delete("/{run_id}", response_class=Response, status_code=204)
+@router.delete("/{run_id}", response_class=Response, status_code=204, response_model=None)
 async def cancel_direct_debit_run(
     run_id: str,
     tenant_id: str = Depends(get_tenant_id),

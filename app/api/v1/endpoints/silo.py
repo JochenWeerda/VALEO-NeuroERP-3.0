@@ -343,7 +343,7 @@ async def update_silo(
     }
 
 
-@router.delete("/silos/{silo_id}", status_code=204, response_class=Response)
+@router.delete("/silos/{silo_id}", status_code=204, response_class=Response, response_model=None)
 async def delete_silo(
     silo_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -457,7 +457,7 @@ async def update_silo_lot(
             "quantity_tons": _to_float(lot.quantity_tons)}
 
 
-@router.delete("/silos/{silo_id}/lots/{lot_id}", status_code=204, response_class=Response)
+@router.delete("/silos/{silo_id}/lots/{lot_id}", status_code=204, response_class=Response, response_model=None)
 async def delete_silo_lot(
     silo_id: str,
     lot_id: str,

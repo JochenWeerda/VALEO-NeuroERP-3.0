@@ -235,7 +235,7 @@ def update_meldung(
         )
 
 
-@router.delete("/meldungen/{meldung_id}", status_code=204, summary="Intrastat-Entwurf löschen", response_class=Response)
+@router.delete("/meldungen/{meldung_id}", status_code=204, summary="Intrastat-Entwurf löschen", response_class=Response, response_model=None)
 def delete_meldung(
     meldung_id: str,
     db: Session = Depends(get_db),

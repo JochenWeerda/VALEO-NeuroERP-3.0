@@ -192,7 +192,7 @@ async def update_kampagne(
     }
 
 
-@router.delete("/kampagnen/{kampagne_id}", response_class=Response, status_code=204)
+@router.delete("/kampagnen/{kampagne_id}", response_class=Response, status_code=204, response_model=None)
 async def delete_kampagne(
     kampagne_id: int,
     db: Session = Depends(get_db),

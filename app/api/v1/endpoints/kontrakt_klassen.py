@@ -156,7 +156,7 @@ def update_kontrakt_klasse(
     return KontraktKlasseOut(id=klasse_id, **payload.model_dump())
 
 
-@router.delete("/{klasse_id}", status_code=204, response_class=Response)
+@router.delete("/{klasse_id}", status_code=204, response_class=Response, response_model=None)
 def delete_kontrakt_klasse(
     klasse_id: str,
     db: Session = Depends(get_db),

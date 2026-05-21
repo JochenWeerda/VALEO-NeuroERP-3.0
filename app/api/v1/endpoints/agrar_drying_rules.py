@@ -305,7 +305,7 @@ async def update_drying_rule(
     return _to_drying_rule_out(rule)
 
 
-@router.delete("/drying-rules/{rule_id}", status_code=204, response_class=Response)
+@router.delete("/drying-rules/{rule_id}", status_code=204, response_class=Response, response_model=None)
 async def delete_drying_rule(
     rule_id: str,
     request: Request,
@@ -389,7 +389,7 @@ async def update_drying_lookup_row(
     return _to_lookup_row_out(row)
 
 
-@router.delete("/drying-rules/lookup-rows/{row_id}", status_code=204, response_class=Response)
+@router.delete("/drying-rules/lookup-rows/{row_id}", status_code=204, response_class=Response, response_model=None)
 async def delete_drying_lookup_row(
     row_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -458,7 +458,7 @@ async def update_drying_factor_range(
     return _to_factor_range_out(range_obj)
 
 
-@router.delete("/drying-rules/factor-ranges/{range_id}", status_code=204, response_class=Response)
+@router.delete("/drying-rules/factor-ranges/{range_id}", status_code=204, response_class=Response, response_model=None)
 async def delete_drying_factor_range(
     range_id: str,
     tenant_id: str = Depends(get_tenant_id),

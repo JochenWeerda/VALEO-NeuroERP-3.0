@@ -3773,7 +3773,7 @@ async def list_stundenzettel(
     return out
 
 
-@router.delete("/mitarbeiter/{user_id}", status_code=204, response_class=Response)
+@router.delete("/mitarbeiter/{user_id}", status_code=204, response_class=Response, response_model=None)
 async def delete_mitarbeiter(
     user_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -3786,7 +3786,7 @@ async def delete_mitarbeiter(
         raise HTTPException(status_code=404, detail="Mitarbeiter nicht gefunden")
 
 
-@router.delete("/absences/{absence_id}", status_code=204, response_class=Response)
+@router.delete("/absences/{absence_id}", status_code=204, response_class=Response, response_model=None)
 async def delete_absence(
     absence_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -3802,7 +3802,7 @@ async def delete_absence(
         raise HTTPException(status_code=400, detail=exc.detail)
 
 
-@router.delete("/shifts/{shift_id}", status_code=204, response_class=Response)
+@router.delete("/shifts/{shift_id}", status_code=204, response_class=Response, response_model=None)
 async def delete_shift(
     shift_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -3959,7 +3959,7 @@ async def update_driver_time_event(
     return {"id": event_id, "status": "updated"}
 
 
-@router.delete("/driver-time/events/{event_id}", status_code=204, response_class=Response)
+@router.delete("/driver-time/events/{event_id}", status_code=204, response_class=Response, response_model=None)
 async def delete_driver_time_event(
     event_id: str,
     tenant_id: str = Depends(get_tenant_id),

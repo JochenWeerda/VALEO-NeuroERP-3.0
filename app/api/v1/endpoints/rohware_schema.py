@@ -336,7 +336,7 @@ async def add_line(
         raise HTTPException(status_code=503, detail=f"DB-Fehler: {e}")
 
 
-@router.delete("/{schema_id}/lines/{line_id}", status_code=204, response_class=Response)
+@router.delete("/{schema_id}/lines/{line_id}", status_code=204, response_class=Response, response_model=None)
 async def delete_line(
     schema_id: str,
     line_id: str,

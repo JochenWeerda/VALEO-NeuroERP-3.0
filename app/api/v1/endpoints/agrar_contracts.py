@@ -231,7 +231,7 @@ async def list_contract_allocations(
     return [_to_alloc_out(r) for r in rows]
 
 
-@router.delete("/{contract_id}", status_code=204, response_class=Response)
+@router.delete("/{contract_id}", status_code=204, response_class=Response, response_model=None)
 async def delete_contract(
     contract_id: str,
     tenant_id: str = Depends(get_tenant_id),

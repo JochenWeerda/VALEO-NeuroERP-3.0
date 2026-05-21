@@ -79,7 +79,7 @@ def create_context(req: AgentContextCreateRequest, db: Session = Depends(get_db)
     return _row_to_context(row)
 
 
-@router.delete("/{context_id}", status_code=204, response_class=Response)
+@router.delete("/{context_id}", status_code=204, response_class=Response, response_model=None)
 def widerrufen(context_id: str, db: Session = Depends(get_db)):
     row = db.query(AgentContextDB).filter(AgentContextDB.context_id == context_id).first()
     if not row:

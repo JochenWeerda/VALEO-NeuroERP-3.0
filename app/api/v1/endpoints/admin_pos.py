@@ -207,7 +207,7 @@ async def update_pos_terminal(
     return _map_row_to_model(row, PosTerminalOut)
 
 
-@router.delete("/pos/terminals/{terminal_id}", status_code=204, response_class=Response)
+@router.delete("/pos/terminals/{terminal_id}", status_code=204, response_class=Response, response_model=None)
 async def delete_pos_terminal(
     terminal_id: str,
     tenant_id: str = Depends(get_tenant_id),

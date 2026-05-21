@@ -327,7 +327,7 @@ async def update_bestellvorschlag(
         raise HTTPException(404, "Vorschlag nicht gefunden")
 
 
-@router.delete("/einkauf/bestellvorschlaege/{vorschlag_id}", status_code=204, response_class=Response)
+@router.delete("/einkauf/bestellvorschlaege/{vorschlag_id}", status_code=204, response_class=Response, response_model=None)
 async def delete_bestellvorschlag(
     vorschlag_id: str,
     db: Session = Depends(get_db),
@@ -392,7 +392,7 @@ async def update_artikel_lager_parameter(
         raise HTTPException(404, "Parameter nicht gefunden")
 
 
-@router.delete("/einkauf/artikel-lager-parameter/{param_id}", status_code=204, response_class=Response)
+@router.delete("/einkauf/artikel-lager-parameter/{param_id}", status_code=204, response_class=Response, response_model=None)
 async def delete_artikel_lager_parameter(
     param_id: str,
     db: Session = Depends(get_db),

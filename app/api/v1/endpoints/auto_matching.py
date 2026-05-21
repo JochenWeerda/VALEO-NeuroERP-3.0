@@ -312,7 +312,7 @@ async def update_matching_rule(
         raise HTTPException(status_code=500, detail=f"Failed to update rule: {str(e)}")
 
 
-@router.delete("/rules/{rule_id}", status_code=204, response_class=Response)
+@router.delete("/rules/{rule_id}", status_code=204, response_class=Response, response_model=None)
 async def delete_matching_rule(
     rule_id: str,
     tenant_id: str = Query("system", description="Tenant ID"),

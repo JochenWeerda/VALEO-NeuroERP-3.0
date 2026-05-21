@@ -385,7 +385,7 @@ async def reverse_journal_entry(
         raise HTTPException(status_code=500, detail=f"Failed to reverse journal entry: {str(e)}")
 
 
-@router.delete("/{entry_id}", status_code=204, response_class=Response)
+@router.delete("/{entry_id}", status_code=204, response_class=Response, response_model=None)
 async def delete_journal_entry(
     entry_id: str,
     request: Request,

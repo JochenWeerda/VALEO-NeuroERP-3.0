@@ -102,7 +102,7 @@ async def update_bankkonto(konto_id: str, data: BankKontoUpdate, db: Session = D
     return _to_dict(konto)
 
 
-@router.delete("/konten/{konto_id}", status_code=204, response_class=Response)
+@router.delete("/konten/{konto_id}", status_code=204, response_class=Response, response_model=None)
 async def delete_bankkonto(konto_id: str, db: Session = Depends(get_db)):
     repo = BankKontoRepository(db)
     if not repo.deactivate(konto_id):

@@ -565,7 +565,7 @@ async def update_booking_template(
         raise HTTPException(status_code=500, detail=f"Failed to update booking template: {str(e)}")
 
 
-@router.delete("/{template_id}", status_code=204, response_class=Response)
+@router.delete("/{template_id}", status_code=204, response_class=Response, response_model=None)
 async def delete_booking_template(
     template_id: str,
     tenant_id: str = Query("system", description="Tenant ID"),

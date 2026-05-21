@@ -161,7 +161,7 @@ async def update_course(item_id: str, payload: Payload, tenant_id: str = Depends
     return _clean(dict(row))
 
 
-@router.delete("/courses/{item_id}", status_code=204, response_class=Response)
+@router.delete("/courses/{item_id}", status_code=204, response_class=Response, response_model=None)
 async def delete_course(item_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
     deleted = db.execute(
         text("DELETE FROM domain_hr.training_courses WHERE tenant_id=:tenant_id AND id=:id"),
@@ -282,7 +282,7 @@ async def update_assignment(item_id: str, payload: Payload, tenant_id: str = Dep
     return _clean(dict(row))
 
 
-@router.delete("/assignments/{item_id}", status_code=204, response_class=Response)
+@router.delete("/assignments/{item_id}", status_code=204, response_class=Response, response_model=None)
 async def delete_assignment(item_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
     deleted = db.execute(
         text("DELETE FROM domain_hr.training_assignments WHERE tenant_id=:tenant_id AND id=:id"),
@@ -396,7 +396,7 @@ async def update_certificate(item_id: str, payload: Payload, tenant_id: str = De
     return _clean(dict(row))
 
 
-@router.delete("/certificates/{item_id}", status_code=204, response_class=Response)
+@router.delete("/certificates/{item_id}", status_code=204, response_class=Response, response_model=None)
 async def delete_certificate(item_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
     deleted = db.execute(
         text("DELETE FROM domain_hr.employee_certificates WHERE tenant_id=:tenant_id AND id=:id"),
@@ -500,7 +500,7 @@ async def update_qualification(item_id: str, payload: Payload, tenant_id: str = 
     return _clean(dict(row))
 
 
-@router.delete("/qualifications/{item_id}", status_code=204, response_class=Response)
+@router.delete("/qualifications/{item_id}", status_code=204, response_class=Response, response_model=None)
 async def delete_qualification(item_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
     deleted = db.execute(
         text("DELETE FROM domain_hr.qualification_profiles WHERE tenant_id=:tenant_id AND id=:id"),
@@ -602,7 +602,7 @@ async def update_checklist(item_id: str, payload: Payload, tenant_id: str = Depe
     return _clean(dict(row))
 
 
-@router.delete("/onboarding/checklists/{item_id}", status_code=204, response_class=Response)
+@router.delete("/onboarding/checklists/{item_id}", status_code=204, response_class=Response, response_model=None)
 async def delete_checklist(item_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
     deleted = db.execute(
         text("DELETE FROM domain_hr.onboarding_checklists WHERE tenant_id=:tenant_id AND id=:id"),
@@ -722,7 +722,7 @@ async def update_run(item_id: str, payload: Payload, tenant_id: str = Depends(ge
     return _clean(dict(row))
 
 
-@router.delete("/onboarding/runs/{item_id}", status_code=204, response_class=Response)
+@router.delete("/onboarding/runs/{item_id}", status_code=204, response_class=Response, response_model=None)
 async def delete_run(item_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
     deleted = db.execute(
         text("DELETE FROM domain_hr.onboarding_runs WHERE tenant_id=:tenant_id AND id=:id"),

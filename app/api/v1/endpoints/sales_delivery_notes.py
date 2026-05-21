@@ -432,7 +432,7 @@ async def update_delivery_note(
     )
 
 
-@router.delete("/{ls_id}", status_code=204, response_class=Response)
+@router.delete("/{ls_id}", status_code=204, response_class=Response, response_model=None)
 async def delete_delivery_note(
     ls_id: str,
     tenant_id: str = Depends(get_tenant_id),

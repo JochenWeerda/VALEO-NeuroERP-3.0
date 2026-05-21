@@ -191,7 +191,7 @@ async def update_disposition_position(
     }
 
 
-@router.delete("/{position_id}", response_class=Response, status_code=204)
+@router.delete("/{position_id}", response_class=Response, status_code=204, response_model=None)
 async def delete_disposition_position(
     position_id: str,
     db: Session = Depends(get_db),

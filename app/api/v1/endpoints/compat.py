@@ -775,7 +775,7 @@ async def futter_misch(
     return FutterCompatService(db, tenant_id).list_mischfuttermittel()
 
 
-@router.delete("/futter/einzelfuttermittel/{item_id}", status_code=204, response_class=Response)
+@router.delete("/futter/einzelfuttermittel/{item_id}", status_code=204, response_class=Response, response_model=None)
 async def delete_futter_einzel_item(
     item_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
 ) -> Response:
@@ -793,7 +793,7 @@ async def bulk_delete_futter_einzel(
     return FutterBulkDeleteOut(**result)
 
 
-@router.delete("/futter/mischfuttermittel/{item_id}", status_code=204, response_class=Response)
+@router.delete("/futter/mischfuttermittel/{item_id}", status_code=204, response_class=Response, response_model=None)
 async def delete_futter_misch_item(
     item_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
 ) -> Response:
@@ -1578,7 +1578,7 @@ async def inventory_inventur_complete(
     return InventoryCompatService(db, tenant_id).complete_inventur_counts(payload.get("ids", []))
 
 
-@router.delete("/inventory/inventur/{item_id}", status_code=204, response_class=Response)
+@router.delete("/inventory/inventur/{item_id}", status_code=204, response_class=Response, response_model=None)
 async def inventory_inventur_stornieren(
     item_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
 ):
@@ -2636,7 +2636,7 @@ async def list_suspended_sales(
         return []
 
 
-@router.delete("/pos/suspended-sales/{sale_id}", status_code=204, tags=["pos"], response_class=Response)
+@router.delete("/pos/suspended-sales/{sale_id}", status_code=204, tags=["pos"], response_class=Response, response_model=None)
 async def delete_suspended_sale(
     sale_id: str,
     tenant_id: str = Depends(get_tenant_id),

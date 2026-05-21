@@ -275,7 +275,7 @@ async def update_price_list(
     return await get_price_list(pl_id, db)
 
 
-@router.delete("/{pl_id}", status_code=204, response_class=Response)
+@router.delete("/{pl_id}", status_code=204, response_class=Response, response_model=None)
 async def delete_price_list(pl_id: str, db: Session = Depends(get_db)):
     """Delete price list and its items."""
     existing = db.execute(

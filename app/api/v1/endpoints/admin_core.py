@@ -554,7 +554,7 @@ async def update_admin_user(
     return await get_admin_user(user_id=user_id, tenant_id=tenant_id, db=db)
 
 
-@router.delete("/benutzer/{user_id}", status_code=204, response_class=Response)
+@router.delete("/benutzer/{user_id}", status_code=204, response_class=Response, response_model=None)
 async def delete_admin_user(
     user_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -690,7 +690,7 @@ async def update_admin_role(
     raise HTTPException(status_code=500, detail="Role updated but not retrievable")
 
 
-@router.delete("/rollen/{role_id}", status_code=204, response_class=Response)
+@router.delete("/rollen/{role_id}", status_code=204, response_class=Response, response_model=None)
 async def delete_admin_role(
     role_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -1085,7 +1085,7 @@ async def rotate_admin_api_key(
     )
 
 
-@router.post("/api-keys/{key_id}/revoke", status_code=204, response_class=Response)
+@router.post("/api-keys/{key_id}/revoke", status_code=204, response_class=Response, response_model=None)
 async def revoke_admin_api_key(
     key_id: str,
     tenant_id: str = Depends(get_tenant_id),
