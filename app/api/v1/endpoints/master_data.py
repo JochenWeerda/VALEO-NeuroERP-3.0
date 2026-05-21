@@ -5,7 +5,7 @@ Generic lookup tables: branches, countries, shipping methods, dispatchers, etc.
 
 from typing import Optional
 
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import Response, APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
@@ -201,7 +201,7 @@ async def create_contact_type(
     return MasterDataOut.model_validate(obj)
 
 
-@router.delete("/contact-types/{ct_id}", status_code=204)
+@router.delete("/contact-types/{ct_id}", status_code=204, response_class=Response)
 async def delete_contact_type(ct_id: str, db: Session = Depends(get_db)):
     """DEL Kontaktart Löschen"""
     obj = db.query(MasterDataEntry).filter(MasterDataEntry.id == ct_id).first()
@@ -262,7 +262,7 @@ async def update_dispatcher(
     return DispatcherOut.model_validate(obj)
 
 
-@router.delete("/dispatchers/{disp_id}", status_code=204)
+@router.delete("/dispatchers/{disp_id}", status_code=204, response_class=Response)
 async def delete_dispatcher(disp_id: str, db: Session = Depends(get_db)):
     """DEL Disponent löschen"""
     obj = db.query(Dispatcher).filter(Dispatcher.id == disp_id).first()

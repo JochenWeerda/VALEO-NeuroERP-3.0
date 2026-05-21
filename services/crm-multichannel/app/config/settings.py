@@ -5,7 +5,7 @@ Settings for CRM Multi-Channel Integration Service.
 import os
 from typing import Optional
 
-from pydantic import BaseSettings
+from pydantic_settings import BaseSettings
 
 
 class Settings(BaseSettings):

@@ -4,7 +4,7 @@ Verträge API - Rahmenverträge (SQLAlchemy)
 
 from datetime import datetime
 from typing import Optional
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import Response, APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
@@ -112,7 +112,7 @@ async def update_rahmenvertrag(vertrag_id: str, data: VertragUpdate, db: Session
     return _to_dict(vertrag)
 
 
-@router.delete("/rahmenvertraege/{vertrag_id}", status_code=204)
+@router.delete("/rahmenvertraege/{vertrag_id}", status_code=204, response_class=Response)
 async def delete_rahmenvertrag(vertrag_id: str, db: Session = Depends(get_db)):
     repo = RahmenvertragRepository(db)
     if not repo.delete(vertrag_id):

@@ -4,7 +4,7 @@ FIBU-GL-07: Automatische Buchungsschemata
 """
 
 from typing import List, Optional, Dict, Any
-from fastapi import APIRouter, Depends, HTTPException, Query, Request
+from fastapi import Response, APIRouter, Depends, HTTPException, Query, Request
 from sqlalchemy.orm import Session
 from sqlalchemy import text
 from decimal import Decimal
@@ -565,7 +565,7 @@ async def update_booking_template(
         raise HTTPException(status_code=500, detail=f"Failed to update booking template: {str(e)}")
 
 
-@router.delete("/{template_id}", status_code=204)
+@router.delete("/{template_id}", status_code=204, response_class=Response)
 async def delete_booking_template(
     template_id: str,
     tenant_id: str = Query("system", description="Tenant ID"),

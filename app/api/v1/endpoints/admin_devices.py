@@ -7,7 +7,7 @@ from datetime import datetime
 from typing import Any, Optional
 from uuid import UUID, uuid4
 
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import Response, APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel, Field
 from sqlalchemy import text
 from sqlalchemy.orm import Session
@@ -238,7 +238,7 @@ async def update_device(
     return _row_to_model(row, AdminDeviceOut)
 
 
-@router.delete("/devices/{device_id}", status_code=204)
+@router.delete("/devices/{device_id}", status_code=204, response_class=Response)
 async def delete_device(
     device_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -420,7 +420,7 @@ async def update_device_mapping(
     return _row_to_model(row, AdminDeviceMappingOut)
 
 
-@router.delete("/device-mappings/{mapping_id}", status_code=204)
+@router.delete("/device-mappings/{mapping_id}", status_code=204, response_class=Response)
 async def delete_device_mapping(
     mapping_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -605,7 +605,7 @@ async def list_output_template_versions(
     return [_row_to_model(row, AdminOutputTemplateVersionOut) for row in rows]
 
 
-@router.delete("/output-templates/{template_id}", status_code=204)
+@router.delete("/output-templates/{template_id}", status_code=204, response_class=Response)
 async def delete_output_template(
     template_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -749,7 +749,7 @@ async def update_output_profile(
     return _row_to_model(row, AdminOutputProfileOut)
 
 
-@router.delete("/output-profiles/{profile_id}", status_code=204)
+@router.delete("/output-profiles/{profile_id}", status_code=204, response_class=Response)
 async def delete_output_profile(
     profile_id: str,
     tenant_id: str = Depends(get_tenant_id),

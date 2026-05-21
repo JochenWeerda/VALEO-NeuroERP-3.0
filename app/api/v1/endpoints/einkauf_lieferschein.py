@@ -7,7 +7,7 @@ from decimal import Decimal
 from typing import Optional
 from app.core.uuid7 import uuid7
 
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import Response, APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel, Field
 from sqlalchemy import text
 from sqlalchemy.orm import Session
@@ -274,7 +274,7 @@ async def patch_lieferschein(ls_id: str, payload: LieferscheinUpdate, tenant_id:
     return Lieferschein(**dict(row), positionen=_list_positions(db, ls_id))
 
 
-@router.delete("/lieferscheine/{ls_id}", status_code=204)
+@router.delete("/lieferscheine/{ls_id}", status_code=204, response_class=Response)
 async def delete_lieferschein(ls_id: str, tenant_id: str = Query("system"), db: Session = Depends(get_db)):
     _get_lieferschein_or_404(db, ls_id, tenant_id)
     db.execute(text("DELETE FROM einkauf_lieferscheine WHERE id = :id AND tenant_id = :tenant_id"), {"id": ls_id, "tenant_id": tenant_id})
@@ -327,7 +327,7 @@ async def patch_lieferschein_position(
     return LieferscheinPosition(**dict(updated))
 
 
-@router.delete("/lieferscheine/{ls_id}/positionen/{pos_id}", status_code=204)
+@router.delete("/lieferscheine/{ls_id}/positionen/{pos_id}", status_code=204, response_class=Response)
 async def delete_lieferschein_position(ls_id: str, pos_id: str, tenant_id: str = Query("system"), db: Session = Depends(get_db)):
     _get_lieferschein_or_404(db, ls_id, tenant_id)
     row = db.execute(text("SELECT id FROM einkauf_lieferschein_positionen WHERE id = :id AND lieferschein_id = :ls_id"), {"id": pos_id, "ls_id": ls_id}).first()
@@ -395,7 +395,7 @@ async def patch_frachtauftrag(
     return Frachtauftrag(**dict(updated))
 
 
-@router.delete("/frachtauftraege/{fa_id}", status_code=204)
+@router.delete("/frachtauftraege/{fa_id}", status_code=204, response_class=Response)
 async def delete_frachtauftrag(fa_id: str, tenant_id: str = Query("system"), db: Session = Depends(get_db)):
     row = db.execute(text("SELECT id FROM einkauf_frachtauftraege WHERE id = :id AND tenant_id = :tenant_id"), {"id": fa_id, "tenant_id": tenant_id}).first()
     if not row:

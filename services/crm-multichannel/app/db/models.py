@@ -4,7 +4,7 @@ from datetime import datetime
 from enum import Enum
 from uuid import UUID, uuid4
 
-from sqlalchemy import Column, DateTime, Enum as SQLEnum, String, Text, Integer, Boolean, JSON, ForeignKey
+from sqlalchemy import Column, DateTime, Enum as SQLEnum, Float, String, Text, Integer, Boolean, JSON, ForeignKey
 from sqlalchemy.dialects.postgresql import UUID as PGUUID
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
@@ -214,7 +214,7 @@ class Message(Base):
 
     # Message content
     content: Mapped[str | None] = mapped_column(Text)
-    metadata: Mapped[dict] = mapped_column(JSON, default=dict)  # URLs, attachments, etc.
+    extra_metadata: Mapped[dict] = mapped_column(JSON, default=dict, name="metadata")  # URLs, attachments, etc.
 
     # Sender information
     sender_id: Mapped[str | None] = mapped_column(String(255))  # External sender ID
@@ -283,7 +283,7 @@ class FormSubmission(Base):
 
     # Submission data
     data: Mapped[dict] = mapped_column(JSON, nullable=False)  # Form field values
-    metadata: Mapped[dict] = mapped_column(JSON, default=dict)  # IP, user agent, etc.
+    extra_metadata: Mapped[dict] = mapped_column(JSON, default=dict, name="metadata")  # IP, user agent, etc.
 
     # Lead creation
     lead_created: Mapped[bool] = mapped_column(default=False)

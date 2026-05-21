@@ -4,7 +4,7 @@ from datetime import datetime
 from decimal import Decimal
 from typing import Any, Optional
 
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import Response, APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
@@ -102,7 +102,7 @@ def update_anlage(anlage_id: str, payload: AnlagePatch, db: Session = Depends(ge
     return _to_dict(obj)
 
 
-@router.delete("/anlagen/{anlage_id}", status_code=204)
+@router.delete("/anlagen/{anlage_id}", status_code=204, response_class=Response)
 def delete_anlage(anlage_id: str, db: Session = Depends(get_db)):
     obj = db.query(WartungAnlage).filter(WartungAnlage.id == anlage_id).first()
     if not obj:

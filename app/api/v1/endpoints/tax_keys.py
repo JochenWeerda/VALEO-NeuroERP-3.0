@@ -4,7 +4,7 @@ FIBU-TAX-01: Steuerschlüssel-System vervollständigen
 """
 
 from typing import List, Optional
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import Response, APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 from sqlalchemy import text
 from decimal import Decimal
@@ -476,7 +476,7 @@ async def update_tax_key(
         raise HTTPException(status_code=500, detail=f"Failed to update tax key: {str(e)}")
 
 
-@router.delete("/{tax_key_id}", status_code=204)
+@router.delete("/{tax_key_id}", status_code=204, response_class=Response)
 async def delete_tax_key(
     tax_key_id: str,
     tenant_id: str = Depends(get_tenant_id),

@@ -123,7 +123,7 @@ async def update_variety(
     return item
 
 
-@router.delete("/{sorte_id}", status_code=204)
+@router.delete("/{sorte_id}", status_code=204, response_class=Response)
 async def delete_variety(
     sorte_id: str,
     tenant_id: str = Depends(get_tenant_id),

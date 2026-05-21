@@ -3,7 +3,7 @@ Dokumente API - Dokumentenverwaltung (SQLAlchemy Version)
 """
 
 from typing import Optional
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import Response, APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
@@ -94,7 +94,7 @@ async def update_dokument(
     return dokument
 
 
-@router.delete("/{dokument_id}", status_code=204)
+@router.delete("/{dokument_id}", status_code=204, response_class=Response)
 async def delete_dokument(
     dokument_id: str,
     hard_delete: bool = Query(False, description="Hard delete vs soft delete"),
