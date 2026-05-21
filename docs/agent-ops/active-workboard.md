@@ -2,6 +2,16 @@
 
 Stand: `2026-05-12`
 
+## DESIGN-MERIDIAN-SHELL-001
+
+**Von:** Codex
+**Owner:** Codex
+**Stand:** reserviert 2026-05-21
+**Ziel des Slices:** Meridian sichtbar in Frontend-Shell und Core-UI aktivieren, damit `localhost:3000` die beschlossene Designrichtung zeigt.
+**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/agent-ops/slices/DESIGN-MERIDIAN-SHELL-001.yaml`, `packages/frontend-web/index.html`, `packages/frontend-web/src/index.css`, `packages/frontend-web/src/styles/design-tokens-meridian.css`, `packages/frontend-web/tailwind.config.js`, `packages/frontend-web/src/components/layout/AppShell.tsx`, `packages/frontend-web/src/components/navigation/AppShell.tsx`, `packages/frontend-web/src/components/navigation/Sidebar.tsx`, `packages/frontend-web/src/components/navigation/TopBar.tsx`, `packages/frontend-web/src/components/ui/button.tsx`, `packages/frontend-web/src/components/ui/input.tsx`, `packages/frontend-web/src/components/ui/card.tsx`, `packages/frontend-web/src/components/ui/table.tsx`, `packages/frontend-web/src/components/ui/data-table.tsx`, `packages/frontend-web/src/features/dashboard/Dashboard.tsx`
+**Abnahmekriterien:** Meridian-Theme ist am Root aktiv; sichtbare Shell nutzt Navy-Sidebar, tokenbasierte Breiten und kompaktere Topbar; Button/Input-Defaults erfuellen 44px-Touch-Target; Dashboard/ListReport-Basismuster zeigen Ocean-Blue/Harvest-Akzente statt generischer Slate/Blue-Mischung; Frontend-Typecheck und Workboard-Validierung sind gruen.
+**Offene Risiken:** Viele Fachseiten enthalten weiterhin harte Tailwind-Farben und brauchen Folgeslices; dieser Slice fokussiert die sichtbarste Shell/Core-UI-Schicht.
+
 ## KEYCLOAK-PSQL-DB-001
 
 **Von:** Codex
