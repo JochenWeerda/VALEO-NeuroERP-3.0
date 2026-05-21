@@ -2,7 +2,7 @@
 UAT API Contract Tests — Wave 2026-05-17
 =========================================
 Verifiziert Response-Schemas, Auth-Enforcement und Tenant-Isolation
-für alle neuen Endpoints der Wave AMIC + L3-Connect + Compliance-Vertiefung.
+für alle neuen Endpoints der Wave VALEO + L3-Connect + Compliance-Vertiefung.
 
 Testablauf:
     pytest tests/uat/test_uat_api_contracts.py -v
@@ -59,11 +59,11 @@ _CLIENT = TestClient(app, raise_server_exceptions=False)
 
 #: Alle GET-Endpoints die bei Auth einen 200er liefern sollen.
 _GET_ENDPOINTS_200 = [
-    # AMIC — Kontrakt-Klassen
+    # VALEO — Kontrakt-Klassen
     "/api/v1/kontrakt-klassen",
-    # AMIC — eBilanz/ELSTER Meldungen
+    # VALEO — eBilanz/ELSTER Meldungen
     "/api/v1/ebilanz/meldungen",
-    # AMIC — Waagenvorlagen
+    # VALEO — Waagenvorlagen
     "/api/v1/waagen-vorlagen",
     # Gelangensbestätigung (§17a UStDV)
     "/api/v1/gelangensbestaetigung",
@@ -515,11 +515,11 @@ class TestFinanceCloseReadiness:
 
 
 # ===========================================================================
-# TC-API-008 — AMIC Agrarhandel spezifische Endpoints
+# TC-API-008 — VALEO Agrarhandel spezifische Endpoints
 # ===========================================================================
 
 class TestAMICEndpoints:
-    """TC-API-008: AMIC-spezifische Agrarhandel-Endpoints."""
+    """TC-API-008: VALEO-spezifische Agrarhandel-Endpoints."""
 
     def test_kontrakt_klassen_crud_create(self):
         """TC-API-008a: POST /kontrakt-klassen → 201 und KontraktKlasseOut mit 'id'."""

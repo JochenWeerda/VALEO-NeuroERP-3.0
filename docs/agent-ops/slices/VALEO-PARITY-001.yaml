@@ -1,4 +1,4 @@
-id: AMIC-PARITY-001
+id: VALEO-PARITY-001
 title: O2C P2P Partie UAT Path Closure
 owner: Codex
 status: abgeschlossen
@@ -11,7 +11,7 @@ scope:
   - Gap- und Parity-Doku auf repo-seitig vorbereitet ziehen
 file_ownership:
   - docs/agent-ops/active-workboard.md
-  - docs/agent-ops/slices/AMIC-PARITY-001.yaml
+  - docs/agent-ops/slices/VALEO-PARITY-001.yaml
   - docs/project-context/open-gaps-and-known-issues.md
   - docs/project-context/agrar-parity-matrix-2026-05-17.md
   - app/api/v1/endpoints/o2c_uat_scaffold.py
@@ -25,7 +25,7 @@ checks:
   - pytest tests/test_webshop_atlas_saatzucht_uat.py -q --no-cov
   - python scripts/agent_workboard_supervisor.py validate
   - node scripts/docs-governance-check.cjs
-  - node scripts/docs-markdown-check.cjs docs/project-context/open-gaps-and-known-issues.md docs/project-context/agrar-parity-matrix-2026-05-17.md docs/agent-ops/active-workboard.md docs/agent-ops/slices/AMIC-PARITY-001.yaml
+  - node scripts/docs-markdown-check.cjs docs/project-context/open-gaps-and-known-issues.md docs/project-context/agrar-parity-matrix-2026-05-17.md docs/agent-ops/active-workboard.md docs/agent-ops/slices/VALEO-PARITY-001.yaml
   - git diff --check
 risks:
   - Produktive Browser-UATs mit realen Mandanten-, Waage-, DMS-, Druck- und Steuerberaterdaten bleiben externe Abnahmen.

@@ -172,7 +172,7 @@ from app.api.v1.endpoints import (
     report_print,
 )
 
-# AMIC Agrarhandel — Kontrakt-Klassen, Hedging, E-Rechnung, Preiskalkulation
+# VALEO Agrarhandel — Kontrakt-Klassen, Hedging, E-Rechnung, Preiskalkulation
 from app.api.v1.endpoints import (
     kontrakt_klassen,
     kontrakt_hedging,
@@ -216,7 +216,7 @@ from app.api.v1.endpoints import neuro_state_graph_api
 # Finance — Anlagenbuchhaltung, Budgetierung, Liquiditätsplanung
 from app.api.v1.endpoints import asset_accounting, budget_planning, liquidity_planning
 
-# AMIC / Wave-104 extensions
+# VALEO / Wave-104 extensions
 from app.api.v1.endpoints import rohware_sammelabrechnung, ebilanz_elster, waagen_vorlagen
 
 # Import domain routers
@@ -1431,10 +1431,10 @@ api_router.include_router(
     tags=["agrar", "rohware", "schemata"],
 )
 
-# AMIC Agrarhandel — Kontrakt-Klassen
+# VALEO Agrarhandel — Kontrakt-Klassen
 api_router.include_router(kontrakt_klassen.router)
 
-# AMIC Agrarhandel — Kontrakt-Hedging / MATIF
+# VALEO Agrarhandel — Kontrakt-Hedging / MATIF
 api_router.include_router(kontrakt_hedging.router)
 
 # E-Rechnung Import (ZUGFeRD / XRechnung)
@@ -1459,7 +1459,7 @@ api_router.include_router(gelangensbestaetigung.router)
 from app.api.v1.endpoints import intrastat  # noqa: E402
 api_router.include_router(intrastat.router)
 
-# AMIC Wave-104 — Rohware-Sammelabrechnung, eBilanz/ELSTER, Waagenvorlagen
+# VALEO Wave-104 — Rohware-Sammelabrechnung, eBilanz/ELSTER, Waagenvorlagen
 api_router.include_router(
     rohware_sammelabrechnung.router,
     tags=["agrar", "sammelabrechnung"],
