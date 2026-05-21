@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import Any, Optional
 
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import Response, APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
@@ -63,7 +63,7 @@ async def update_kpi(item_id: str, payload: Payload, tenant_id: str = Depends(ge
         raise HTTPException(status_code=404, detail="KPI not found")
 
 
-@router.delete("/kpis/{item_id}", status_code=204)
+@router.delete("/kpis/{item_id}", status_code=204, response_class=Response)
 async def delete_kpi(item_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
     try:
         _svc(db, tenant_id).delete_kpi(item_id)
@@ -107,7 +107,7 @@ async def update_dashboard(item_id: str, payload: Payload, tenant_id: str = Depe
         raise HTTPException(status_code=404, detail="Dashboard not found")
 
 
-@router.delete("/dashboards/{item_id}", status_code=204)
+@router.delete("/dashboards/{item_id}", status_code=204, response_class=Response)
 async def delete_dashboard(item_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
     try:
         _svc(db, tenant_id).delete_dashboard(item_id)
@@ -148,7 +148,7 @@ async def update_widget(item_id: str, payload: Payload, tenant_id: str = Depends
         raise HTTPException(status_code=404, detail="Widget not found")
 
 
-@router.delete("/widgets/{item_id}", status_code=204)
+@router.delete("/widgets/{item_id}", status_code=204, response_class=Response)
 async def delete_widget(item_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
     try:
         _svc(db, tenant_id).delete_widget(item_id)
@@ -178,7 +178,7 @@ async def create_timeseries(payload: Payload, tenant_id: str = Depends(get_tenan
         raise _schema_error()
 
 
-@router.delete("/timeseries/{item_id}", status_code=204)
+@router.delete("/timeseries/{item_id}", status_code=204, response_class=Response)
 async def delete_timeseries(item_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
     try:
         _svc(db, tenant_id).delete_timeseries(item_id)
@@ -220,7 +220,7 @@ async def update_action(item_id: str, payload: Payload, tenant_id: str = Depends
         raise HTTPException(status_code=404, detail="Action not found")
 
 
-@router.delete("/actions/{item_id}", status_code=204)
+@router.delete("/actions/{item_id}", status_code=204, response_class=Response)
 async def delete_action(item_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
     try:
         _svc(db, tenant_id).delete_action(item_id)

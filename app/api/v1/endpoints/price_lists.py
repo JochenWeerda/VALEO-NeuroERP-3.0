@@ -10,7 +10,7 @@ from datetime import date, datetime
 from decimal import Decimal
 from typing import List, Optional
 
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import Response, APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel, Field
 from sqlalchemy import text
 from sqlalchemy.orm import Session
@@ -275,7 +275,7 @@ async def update_price_list(
     return await get_price_list(pl_id, db)
 
 
-@router.delete("/{pl_id}", status_code=204)
+@router.delete("/{pl_id}", status_code=204, response_class=Response)
 async def delete_price_list(pl_id: str, db: Session = Depends(get_db)):
     """Delete price list and its items."""
     existing = db.execute(

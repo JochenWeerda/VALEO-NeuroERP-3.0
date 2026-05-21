@@ -894,7 +894,7 @@ async def transition_instance(
     return _instance_to_dict(inst)
 
 
-@router.delete("/{process_key}/instances/{instance_id}", status_code=204)
+@router.delete("/{process_key}/instances/{instance_id}", status_code=204, response_class=Response)
 def delete_instance(
     process_key: str,
     instance_id: str,

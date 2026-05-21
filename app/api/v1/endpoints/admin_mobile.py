@@ -7,7 +7,7 @@ from datetime import datetime
 from typing import Any
 from uuid import UUID, uuid4
 
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import Response, APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel, Field
 from sqlalchemy import text
 from sqlalchemy.orm import Session
@@ -116,7 +116,7 @@ async def update_station(item_id: str, payload: JsonPayload, tenant_id: str = De
     return _jsonable(dict(row))
 
 
-@router.delete("/stations/{item_id}", status_code=204)
+@router.delete("/stations/{item_id}", status_code=204, response_class=Response)
 async def delete_station(item_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
     deleted = db.execute(
         text("DELETE FROM domain_shared.admin_stations WHERE tenant_id=:tenant_id AND id=:id"),
@@ -218,7 +218,7 @@ async def update_station_device(item_id: str, payload: JsonPayload, tenant_id: s
     return _jsonable(dict(row))
 
 
-@router.delete("/station-devices/{item_id}", status_code=204)
+@router.delete("/station-devices/{item_id}", status_code=204, response_class=Response)
 async def delete_station_device(item_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
     deleted = db.execute(
         text("DELETE FROM domain_shared.admin_station_devices WHERE tenant_id=:tenant_id AND id=:id"),
@@ -299,7 +299,7 @@ async def update_routing_rule(item_id: str, payload: JsonPayload, tenant_id: str
     return _jsonable(dict(row))
 
 
-@router.delete("/routing-rules/{item_id}", status_code=204)
+@router.delete("/routing-rules/{item_id}", status_code=204, response_class=Response)
 async def delete_routing_rule(item_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
     deleted = db.execute(
         text("DELETE FROM domain_shared.admin_routing_rules WHERE tenant_id=:tenant_id AND id=:id"),
@@ -376,7 +376,7 @@ async def update_scan_profile(item_id: str, payload: JsonPayload, tenant_id: str
     return _jsonable(dict(row))
 
 
-@router.delete("/scan-profiles/{item_id}", status_code=204)
+@router.delete("/scan-profiles/{item_id}", status_code=204, response_class=Response)
 async def delete_scan_profile(item_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
     deleted = db.execute(
         text("DELETE FROM domain_shared.admin_scan_profiles WHERE tenant_id=:tenant_id AND id=:id"),
@@ -478,7 +478,7 @@ async def update_mobile_device(item_id: str, payload: JsonPayload, tenant_id: st
     return _jsonable(dict(row))
 
 
-@router.delete("/mobile-devices/{item_id}", status_code=204)
+@router.delete("/mobile-devices/{item_id}", status_code=204, response_class=Response)
 async def delete_mobile_device(item_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
     deleted = db.execute(
         text("DELETE FROM domain_shared.admin_mobile_devices WHERE tenant_id=:tenant_id AND id=:id"),
@@ -561,7 +561,7 @@ async def update_connector(item_id: str, payload: JsonPayload, tenant_id: str = 
     return _jsonable(dict(row))
 
 
-@router.delete("/connectors/{item_id}", status_code=204)
+@router.delete("/connectors/{item_id}", status_code=204, response_class=Response)
 async def delete_connector(item_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
     deleted = db.execute(
         text("DELETE FROM domain_shared.admin_connector_configs WHERE tenant_id=:tenant_id AND id=:id"),
@@ -695,7 +695,7 @@ async def update_connector_event(item_id: str, payload: JsonPayload, tenant_id: 
     return _jsonable(dict(row))
 
 
-@router.delete("/connector-events/{item_id}", status_code=204)
+@router.delete("/connector-events/{item_id}", status_code=204, response_class=Response)
 async def delete_connector_event(item_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
     deleted = db.execute(
         text("DELETE FROM domain_shared.admin_connector_events WHERE tenant_id=:tenant_id AND id=:id"),

@@ -23,7 +23,7 @@ from __future__ import annotations
 import logging
 from typing import Any, Dict, List, Optional
 
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import Response, APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel, Field
 from sqlalchemy import text
 from sqlalchemy.orm import Session
@@ -281,7 +281,7 @@ async def update_ingredient(
     return _row_to_dict(row)
 
 
-@router.delete("/{rezept_id}/ingredients/{ingredient_id}", status_code=204)
+@router.delete("/{rezept_id}/ingredients/{ingredient_id}", status_code=204, response_class=Response)
 async def delete_ingredient(
     rezept_id: str,
     ingredient_id: str,

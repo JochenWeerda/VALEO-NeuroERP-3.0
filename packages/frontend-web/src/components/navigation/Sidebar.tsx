@@ -131,12 +131,12 @@ export function Sidebar({ collapsed, onToggle, onNavigate }: SidebarProps): JSX.
           onClick={onNavigate}
           className={({ isActive }) =>
             clsx(
-              'flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors',
+              'flex min-h-11 items-center gap-3 rounded-[8px] px-3 py-2 text-sm font-medium transition-colors',
               depth > 0 && 'ml-2 text-xs',
-              'hover:bg-[hsl(215,30%,20%)] hover:text-white',
+              'hover:bg-[var(--sidebar-item-hover-bg)] hover:text-white',
               'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/20',
               isActive
-                ? 'border-l-[3px] border-l-primary bg-primary/15 text-white'
+                ? 'border-l-[3px] border-l-[var(--sidebar-item-active-indicator)] bg-[var(--sidebar-item-active-bg)] text-white'
                 : 'text-[hsl(210,20%,70%)]',
             )
           }
@@ -155,9 +155,9 @@ export function Sidebar({ collapsed, onToggle, onNavigate }: SidebarProps): JSX.
         <button
           onClick={() => toggleGroup(item.id)}
           className={clsx(
-            'flex w-full items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors',
+            'flex min-h-11 w-full items-center gap-3 rounded-[8px] px-3 py-2 text-sm font-medium transition-colors',
             depth > 0 && 'ml-2 text-xs',
-            'hover:bg-[hsl(215,30%,20%)] hover:text-white',
+            'hover:bg-[var(--sidebar-item-hover-bg)] hover:text-white',
             'text-[hsl(210,20%,70%)]',
           )}
           title={collapsed ? item.label : undefined}
@@ -180,7 +180,7 @@ export function Sidebar({ collapsed, onToggle, onNavigate }: SidebarProps): JSX.
                 onClick={onNavigate}
                 className={({ isActive }) =>
                   clsx(
-                    'flex items-center gap-2 rounded-md px-2 py-1.5 text-xs font-medium transition-colors',
+                    'flex min-h-11 items-center gap-2 rounded-md px-2 py-1.5 text-xs font-medium transition-colors',
                     'hover:bg-accent hover:text-accent-foreground',
                     isActive ? 'bg-accent text-accent-foreground' : 'text-muted-foreground',
                   )
@@ -200,9 +200,9 @@ export function Sidebar({ collapsed, onToggle, onNavigate }: SidebarProps): JSX.
     <aside
       className={clsx(
         'relative flex flex-col border-r transition-all',
-        'bg-[hsl(215,30%,14%)] text-[hsl(210,20%,80%)]',
-        'border-[hsl(215,30%,20%)]',
-        collapsed ? 'w-16' : 'w-64',
+        'bg-[var(--sidebar-bg)] text-[var(--sidebar-fg)]',
+        'border-[var(--sidebar-border)]',
+        collapsed ? 'w-[var(--sidebar-width-collapsed,64px)]' : 'w-[var(--sidebar-width-expanded,240px)]',
       )}
       style={{ transitionProperty: 'width', transitionDuration: '250ms', transitionTimingFunction: 'cubic-bezier(0.175,0.885,0.32,1.275)' }}
       role="navigation"
@@ -210,10 +210,10 @@ export function Sidebar({ collapsed, onToggle, onNavigate }: SidebarProps): JSX.
       data-mcp-component="sidebar"
       data-mcp-collapsed={collapsed}
     >
-      <div className="flex h-16 items-center justify-between border-b border-[hsl(215,30%,20%)] px-4">
+      <div className="flex h-16 items-center justify-between border-b border-[var(--sidebar-border)] px-4">
         <Link
           to="/"
-          className="flex items-center rounded focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+          className="flex min-h-11 min-w-11 items-center rounded focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
           aria-label="Zur Startseite"
         >
           {collapsed ? (
@@ -234,7 +234,7 @@ export function Sidebar({ collapsed, onToggle, onNavigate }: SidebarProps): JSX.
           variant="ghost"
           size="icon"
           onClick={onToggle}
-          className="h-8 w-8 text-[hsl(210,20%,70%)] hover:bg-[hsl(215,30%,20%)] hover:text-white"
+          className="h-11 w-11 text-[hsl(210,20%,70%)] hover:bg-[var(--sidebar-item-hover-bg)] hover:text-white"
           aria-label={collapsed ? 'Sidebar erweitern' : 'Sidebar einklappen'}
           title={collapsed ? 'Erweitern (Strg+B)' : 'Einklappen (Strg+B)'}
         >
@@ -246,7 +246,7 @@ export function Sidebar({ collapsed, onToggle, onNavigate }: SidebarProps): JSX.
         {filteredNavItems.map((item) => renderNavItem(item, 0))}
       </nav>
 
-      <div className="border-t border-[hsl(215,30%,20%)] p-2">
+      <div className="border-t border-[var(--sidebar-border)] p-2">
         {!collapsed ? (
           <Suspense fallback={null}>
             <SidebarFavorites favorites={favoriteLinks} onNavigate={onNavigate} />

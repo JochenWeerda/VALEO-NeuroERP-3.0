@@ -1,0 +1,44 @@
+id: CONTAINER-HEALTH-CRM-INVENTORY-001
+title: Container Health CRM Inventory Stabilisierung
+owner: Team
+status: abgeschlossen
+claimed_at: 2026-05-21
+completed_at: 2026-05-21
+goal: >
+  Container-Health-Probleme in Backend, Inventory und CRM-Services nach
+  Neustart-/Healthcheck-Diagnose repo-seitig stabilisieren.
+scope:
+  - FastAPI-204-Routen ohne Response-Body-Definition haerten.
+  - Inventory-Workflow-Registrierung fuer Pydantic-v2-URL-Werte korrigieren.
+  - CRM-Services auf absolute Imports und pydantic-settings migrieren.
+  - CRM-Dockerfiles fuer gezielte Dependency-Layer-Rebuilds vorbereiten.
+file_ownership:
+  - docs/agent-ops/active-workboard.md
+  - docs/agent-ops/slices/CONTAINER-HEALTH-CRM-INVENTORY-001.yaml
+  - app/api/v1/endpoints/*.py
+  - services/inventory/app/workflows/registration.py
+  - services/crm-*/**
+  - services/crm-analytics/Dockerfile
+  - services/crm-communication/Dockerfile
+  - services/crm-multichannel/Dockerfile
+  - services/crm-security/main.py
+  - services/crm-workflow/Dockerfile
+acceptance_criteria:
+  - FastAPI-Routen mit 204 liefern keine Response-Body-Definition mehr.
+  - Inventory-Workflow-Registrierung ist Pydantic-v2-kompatibel.
+  - CRM-Services nutzen absolute Imports und pydantic-settings.
+  - Docker-Builds koennen Dependency-Layer gezielt invalidieren.
+checks:
+  - Commit 67f8b9c51
+  - Gezielte Docker-/Containerdiagnose
+  - git diff --check fuer Nachlieferungsdateien
+done:
+  - 115 FastAPI-204-Routen gehaertet.
+  - CRM-Konfigurationen auf pydantic-settings und absolute Imports gezogen.
+  - Reservierte SQLAlchemy-metadata-Attribute umbenannt.
+  - Inventory-URL-Cast fuer Pydantic v2 korrigiert.
+  - CRM-Dockerfiles mit CACHEBUST-Arg fuer reproduzierbare Dependency-Rebuilds ergaenzt.
+risks:
+  - Einzelne Container koennen weiterhin an laufzeitabhaengigen externen Dependencies, Migrationen oder Credentials scheitern.
+  - Untracked Analyseartefakte bleiben ausserhalb dieses Slices.
+next_step: Compose-Health nach Push weiter beobachten und verbleibende Runtime-Gates separat schneiden.

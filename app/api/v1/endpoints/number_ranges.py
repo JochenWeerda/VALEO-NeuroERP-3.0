@@ -5,6 +5,7 @@ import logging
 from typing import Any, Optional
 
 from fastapi import APIRouter, Depends, HTTPException
+from fastapi.responses import Response
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
@@ -121,8 +122,8 @@ def update_number_range(
         raise HTTPException(status_code=422, detail=str(exc)) from exc
 
 
-@router.delete("/{range_type}", status_code=204)
-def delete_number_range(range_type: str, db: Session = Depends(get_db)) -> None:
+@router.delete("/{range_type}", status_code=204, response_class=Response)
+def delete_number_range(range_type: str, db: Session = Depends(get_db)) -> Response:
     tenant_id = get_current_tenant_id()
     svc = NumberRangeService(db)
     ranges = svc.list_ranges(tenant_id)
@@ -131,6 +132,7 @@ def delete_number_range(range_type: str, db: Session = Depends(get_db)) -> None:
         raise HTTPException(status_code=404, detail=f"Kein Nummernkreis für '{range_type}' konfiguriert")
     nr.is_active = False
     db.commit()
+    return Response(status_code=204)
 
 
 @router.get("/{range_type}/peek")

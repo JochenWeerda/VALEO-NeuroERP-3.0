@@ -8,7 +8,7 @@ from decimal import Decimal
 import logging
 from typing import Optional
 
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import Response, APIRouter, Depends, HTTPException, Query
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
@@ -470,7 +470,7 @@ async def list_invoices(
 
 
 
-@router.delete("/{invoice_number}", status_code=204)
+@router.delete("/{invoice_number}", status_code=204, response_class=Response)
 async def delete_invoice(
     invoice_number: str,
     tenant_id: str = Depends(get_tenant_id),

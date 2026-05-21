@@ -126,10 +126,10 @@ const computeTotals = (contracts: Contract[]): { total: number; long: number; sh
 
 const renderStatusBadge = (contract: Contract): ReactElement => {
   const statusClasses: Record<(typeof CONTRACT_STATUSES)[number], string> = {
-    active: 'bg-green-100 text-green-800',
-    pending: 'bg-yellow-100 text-yellow-800',
-    completed: 'bg-blue-100 text-blue-800',
-    cancelled: 'bg-red-100 text-red-800',
+    active: 'bg-primary/10 text-primary',
+    pending: 'bg-[hsl(var(--accent)/0.14)] text-[hsl(var(--accent-foreground))]',
+    completed: 'bg-muted text-foreground',
+    cancelled: 'bg-destructive/10 text-destructive',
   }
 
   return (
@@ -141,8 +141,8 @@ const renderStatusBadge = (contract: Contract): ReactElement => {
 
 const renderTypeBadge = (contract: Contract): ReactElement => {
   const typeClasses: Record<(typeof POSITION_TYPES)[number], string> = {
-    long: 'bg-blue-100 text-blue-800',
-    short: 'bg-orange-100 text-orange-800',
+    long: 'bg-primary/10 text-primary',
+    short: 'bg-[hsl(var(--accent)/0.14)] text-[hsl(var(--accent-foreground))]',
   }
 
   return (
@@ -169,7 +169,7 @@ export default function Contracts(): ReactElement {
     return (
       <div className="space-y-6">
         <div className="flex items-center justify-between">
-          <h1 className="text-2xl font-bold text-slate-900">Vertraege</h1>
+          <h1 className="text-xl font-bold text-foreground">Vertraege</h1>
           <Button onClick={() => void refetch()} variant="outline">
             Erneut laden
           </Button>
@@ -185,11 +185,11 @@ export default function Contracts(): ReactElement {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">Vertraege</h1>
-          <p className="text-sm text-slate-500">Uebersicht der aktiven Liefer- und Abnahmevertraege</p>
+          <h1 className="text-xl font-bold text-foreground">Vertraege</h1>
+          <p className="text-sm text-muted-foreground">Uebersicht der aktiven Liefer- und Abnahmevertraege</p>
         </div>
         <Button variant="outline" onClick={() => void refetch()}>
           Aktualisieren
@@ -197,7 +197,7 @@ export default function Contracts(): ReactElement {
       </div>
 
       <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-        <Card className="rounded-2xl shadow-sm">
+        <Card className="border-l-4 border-l-primary shadow-sm">
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium">Gesamt</CardTitle>
             <CardDescription>Alle erfassten Vertraege</CardDescription>
@@ -206,7 +206,7 @@ export default function Contracts(): ReactElement {
             {isPending ? <Skeleton className="h-8 w-24" /> : <p className="text-2xl font-semibold">{totals.total}</p>}
           </CardContent>
         </Card>
-        <Card className="rounded-2xl shadow-sm">
+        <Card className="border-l-4 border-l-[hsl(var(--accent))] shadow-sm">
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium">Long Positionen</CardTitle>
             <CardDescription>Kaufvertraege</CardDescription>
@@ -215,7 +215,7 @@ export default function Contracts(): ReactElement {
             {isPending ? <Skeleton className="h-8 w-24" /> : <p className="text-2xl font-semibold">{totals.long}</p>}
           </CardContent>
         </Card>
-        <Card className="rounded-2xl shadow-sm">
+        <Card className="border-l-4 border-l-primary shadow-sm">
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium">Short Positionen</CardTitle>
             <CardDescription>Verkaufsvertraege</CardDescription>
@@ -226,7 +226,7 @@ export default function Contracts(): ReactElement {
         </Card>
       </div>
 
-      <Card className="rounded-2xl shadow-sm">
+      <Card className="shadow-sm">
         <CardHeader>
           <CardTitle>Vertragsliste</CardTitle>
           <CardDescription>Neueste Kontrakte inklusive Menge und Termin</CardDescription>
@@ -235,7 +235,7 @@ export default function Contracts(): ReactElement {
           <div className="space-y-4">
             {isPending
               ? Array.from({ length: SKELETON_ROWS }).map((_, index) => (
-                  <div key={index} className="rounded-xl border border-slate-200 p-4">
+                  <div key={index} className="rounded-[var(--radius)] border border-border p-4">
                     <div className="flex items-center justify-between">
                       <div className="flex-1 space-y-2">
                         <Skeleton className="h-6 w-32" />
@@ -251,15 +251,15 @@ export default function Contracts(): ReactElement {
                   </div>
                 ))
               : contracts.map((contract) => (
-                  <div key={contract.id} className="rounded-xl border border-slate-200 p-4 hover:bg-slate-50">
+                  <div key={contract.id} className="rounded-[var(--radius)] border border-border p-4 transition-colors hover:bg-primary/5">
                     <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                       <div className="space-y-2">
                         <div className="flex flex-wrap items-center gap-2">
-                          <h3 className="text-lg font-semibold text-slate-900">{contract.contractNumber}</h3>
+                          <h3 className="text-lg font-semibold text-foreground">{contract.contractNumber}</h3>
                           {renderStatusBadge(contract)}
                           {renderTypeBadge(contract)}
                         </div>
-                        <div className="grid grid-cols-1 gap-2 text-sm text-slate-600 sm:grid-cols-2 md:grid-cols-4">
+                        <div className="grid grid-cols-1 gap-2 text-sm text-muted-foreground sm:grid-cols-2 md:grid-cols-4">
                           <div>
                             <span className="font-medium">Kunde:</span> {contract.customer}
                           </div>
@@ -275,13 +275,13 @@ export default function Contracts(): ReactElement {
                             {monetaryFormatter.format(contract.price)} {contract.currency}
                           </div>
                         </div>
-                        <div className="text-sm text-slate-600">
+                        <div className="text-sm text-muted-foreground">
                           <span className="font-medium">Lieferdatum:</span>{' '}
                           {dateFormatter.format(new Date(contract.deliveryDate))}
                         </div>
                       </div>
                       <div className="text-right">
-                        <p className="text-lg font-semibold text-slate-900">
+                        <p className="text-lg font-semibold tabular-nums text-foreground">
                           {monetaryFormatter.format(contract.quantity * contract.price)}
                         </p>
                         <Button className="mt-2" size="sm" variant="outline">
@@ -292,9 +292,9 @@ export default function Contracts(): ReactElement {
                   </div>
                 ))}
             {!isPending && contracts.length === 0 ? (
-              <div className="rounded-xl border border-dashed border-slate-200 bg-slate-50 p-6 text-center">
-                <p className="text-sm font-medium text-slate-700">Keine Vertraege vorhanden</p>
-                <p className="text-xs text-slate-500">Sobald Kontrakte angelegt sind, erscheinen diese hier.</p>
+              <div className="rounded-[var(--radius)] border border-dashed border-border bg-muted p-6 text-center">
+                <p className="text-sm font-medium text-foreground">Keine Vertraege vorhanden</p>
+                <p className="text-xs text-muted-foreground">Sobald Kontrakte angelegt sind, erscheinen diese hier.</p>
               </div>
             ) : null}
           </div>

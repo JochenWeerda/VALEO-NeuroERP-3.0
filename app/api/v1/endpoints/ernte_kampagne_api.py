@@ -1,14 +1,18 @@
 from __future__ import annotations
 
 import uuid
+from typing import Optional
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, Depends, HTTPException
+from fastapi.responses import Response
 from pydantic import BaseModel, Field
+from sqlalchemy.orm import Session
 
-from app.core.ernte_kampagne import ErnteArt, ErnteKampagne, ErnteKampagneStore, SchlagErnteziel
+from app.core.database import get_db
+from app.core.ernte_kampagne import ErnteArt
+from app.domains.operations.models import ErnteKampagneDB
 
 router = APIRouter(prefix="/ernte-kampagnen", tags=["ernte-kampagnen"])
-_store = ErnteKampagneStore()
 
 
 class SchlagErntezielRequest(BaseModel):
@@ -26,63 +30,86 @@ class ErnteKampagneCreateRequest(BaseModel):
     schlag_ziele: list[SchlagErntezielRequest] = Field(default_factory=list)
 
 
+def _to_dict(row: ErnteKampagneDB) -> dict:
+    return {
+        "kampagne_id": row.kampagne_id,
+        "tenant_id": row.tenant_id,
+        "wirtschaftsjahr": row.wirtschaftsjahr,
+        "ernte_art": row.ernte_art,
+        "bezeichnung": row.bezeichnung,
+        "status": row.status,
+        "schlag_ziele": row.schlag_ziele or [],
+        "erstellt_am": row.erstellt_am.isoformat() if row.erstellt_am else None,
+    }
+
+
 @router.post("", status_code=201)
-def create_kampagne(req: ErnteKampagneCreateRequest) -> ErnteKampagne:
-    kampagne = ErnteKampagne(
+def create_kampagne(req: ErnteKampagneCreateRequest, db: Session = Depends(get_db)):
+    ErnteArt(req.ernte_art)  # validate enum value
+    row = ErnteKampagneDB(
         kampagne_id=str(uuid.uuid4()),
         tenant_id=req.tenant_id,
         wirtschaftsjahr=req.wirtschaftsjahr,
-        ernte_art=ErnteArt(req.ernte_art),
+        ernte_art=req.ernte_art,
         bezeichnung=req.bezeichnung,
-        schlag_ziele=[
-            SchlagErnteziel(
-                schlag_id=item.schlag_id,
-                sorte=item.sorte,
-                flaeche_ha=item.flaeche_ha,
-                ziel_ertrag_t_ha=item.ziel_ertrag_t_ha,
-            )
-            for item in req.schlag_ziele
-        ],
+        status="geplant",
+        schlag_ziele=[z.model_dump() for z in req.schlag_ziele],
     )
-    return _store.add(kampagne)
+    db.add(row)
+    db.commit()
+    db.refresh(row)
+    return _to_dict(row)
 
 
 @router.get("/tenant/{tenant_id}")
-def get_kampagnen(tenant_id: str, wirtschaftsjahr: int | None = None) -> list[ErnteKampagne]:
+def get_kampagnen(tenant_id: str, wirtschaftsjahr: Optional[int] = None, db: Session = Depends(get_db)):
+    q = db.query(ErnteKampagneDB).filter(ErnteKampagneDB.tenant_id == tenant_id)
     if wirtschaftsjahr is not None:
-        return _store.by_wirtschaftsjahr(tenant_id, wirtschaftsjahr)
-    return [kampagne for kampagne in _store.kampagnen.values() if kampagne.tenant_id == tenant_id]
+        q = q.filter(ErnteKampagneDB.wirtschaftsjahr == wirtschaftsjahr)
+    return [_to_dict(r) for r in q.all()]
 
 
 @router.get("/{kampagne_id}")
-def get_kampagne(kampagne_id: str) -> ErnteKampagne:
-    kampagne = _store.get(kampagne_id)
-    if kampagne is None:
-        raise HTTPException(status_code=404, detail="Kampagne nicht gefunden")
-    return kampagne
+def get_kampagne(kampagne_id: str, db: Session = Depends(get_db)):
+    row = db.query(ErnteKampagneDB).filter(ErnteKampagneDB.kampagne_id == kampagne_id).first()
+    if not row:
+        raise HTTPException(404, "Kampagne nicht gefunden")
+    return _to_dict(row)
 
 
-@router.delete("/{kampagne_id}", status_code=204)
-def delete_kampagne(kampagne_id: str) -> None:
-    kampagne = _store.get(kampagne_id)
-    if kampagne is None:
-        raise HTTPException(status_code=404, detail="Kampagne nicht gefunden")
-    if kampagne.status.value not in ("geplant",):
-        raise HTTPException(status_code=400, detail="Nur geplante Kampagnen können gelöscht werden")
-    del _store.kampagnen[kampagne_id]
+@router.delete("/{kampagne_id}", status_code=204, response_class=Response)
+def delete_kampagne(kampagne_id: str, db: Session = Depends(get_db)):
+    row = db.query(ErnteKampagneDB).filter(ErnteKampagneDB.kampagne_id == kampagne_id).first()
+    if not row:
+        raise HTTPException(404, "Kampagne nicht gefunden")
+    if row.status != "geplant":
+        raise HTTPException(400, "Nur geplante Kampagnen können gelöscht werden")
+    db.delete(row)
+    db.commit()
+    return Response(status_code=204)
 
 
 @router.post("/{kampagne_id}/start")
-def start_kampagne(kampagne_id: str) -> ErnteKampagne:
-    kampagne = _store.get(kampagne_id)
-    if kampagne is None:
-        raise HTTPException(status_code=404, detail="Kampagne nicht gefunden")
-    return kampagne.kampagne_starten()
+def start_kampagne(kampagne_id: str, db: Session = Depends(get_db)):
+    row = db.query(ErnteKampagneDB).filter(ErnteKampagneDB.kampagne_id == kampagne_id).first()
+    if not row:
+        raise HTTPException(404, "Kampagne nicht gefunden")
+    if row.status != "geplant":
+        raise HTTPException(400, "Kampagne ist nicht im Status 'geplant'")
+    row.status = "aktiv"
+    db.commit()
+    db.refresh(row)
+    return _to_dict(row)
 
 
 @router.post("/{kampagne_id}/abschliessen")
-def abschliessen_kampagne(kampagne_id: str) -> ErnteKampagne:
-    kampagne = _store.get(kampagne_id)
-    if kampagne is None:
-        raise HTTPException(status_code=404, detail="Kampagne nicht gefunden")
-    return kampagne.kampagne_abschliessen()
+def abschliessen_kampagne(kampagne_id: str, db: Session = Depends(get_db)):
+    row = db.query(ErnteKampagneDB).filter(ErnteKampagneDB.kampagne_id == kampagne_id).first()
+    if not row:
+        raise HTTPException(404, "Kampagne nicht gefunden")
+    if row.status != "aktiv":
+        raise HTTPException(400, "Kampagne ist nicht im Status 'aktiv'")
+    row.status = "abgeschlossen"
+    db.commit()
+    db.refresh(row)
+    return _to_dict(row)

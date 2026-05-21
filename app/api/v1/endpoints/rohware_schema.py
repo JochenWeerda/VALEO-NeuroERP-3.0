@@ -23,7 +23,7 @@ import json
 from datetime import datetime
 from typing import Any, Dict, List, Optional
 
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import Response, APIRouter, Depends, HTTPException, Query
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
@@ -336,7 +336,7 @@ async def add_line(
         raise HTTPException(status_code=503, detail=f"DB-Fehler: {e}")
 
 
-@router.delete("/{schema_id}/lines/{line_id}", status_code=204)
+@router.delete("/{schema_id}/lines/{line_id}", status_code=204, response_class=Response)
 async def delete_line(
     schema_id: str,
     line_id: str,

@@ -4,7 +4,7 @@ FIBU-BNK-03: Automatisches Matching
 """
 
 from typing import List, Optional, Dict, Any
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import Response, APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 from sqlalchemy import text
 from decimal import Decimal
@@ -312,7 +312,7 @@ async def update_matching_rule(
         raise HTTPException(status_code=500, detail=f"Failed to update rule: {str(e)}")
 
 
-@router.delete("/rules/{rule_id}", status_code=204)
+@router.delete("/rules/{rule_id}", status_code=204, response_class=Response)
 async def delete_matching_rule(
     rule_id: str,
     tenant_id: str = Query("system", description="Tenant ID"),

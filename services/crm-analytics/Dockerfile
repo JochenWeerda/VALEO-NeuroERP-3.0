@@ -10,6 +10,7 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy requirements and install Python dependencies
+ARG CACHEBUST=1
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 

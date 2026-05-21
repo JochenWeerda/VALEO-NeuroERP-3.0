@@ -71,8 +71,8 @@
   --line-height-relaxed: 1.75;   /* Beschreibungen, Hilfstexte */
 
   /* Buchstabenabstaende */
-  --letter-spacing-tight:   -0.025em;  /* Display-Headlines */
-  --letter-spacing-snug:    -0.015em;  /* Grosse Ueberschriften */
+  --letter-spacing-tight:    0em;
+  --letter-spacing-snug:     0em;
   --letter-spacing-normal:   0em;
   --letter-spacing-wide:     0.025em;  /* Small Uppercase Labels */
   --letter-spacing-wider:    0.05em;   /* Sehr kleine Uppercase Labels */

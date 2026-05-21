@@ -3,7 +3,7 @@ Tenant API endpoints
 RESTful API for tenant management
 """
 
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import Response, APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 
 from ....core.database import get_db
@@ -113,7 +113,7 @@ async def update_tenant(
         raise HTTPException(status_code=500, detail=f"Failed to update tenant: {str(e)}")
 
 
-@router.delete("/{tenant_id}", status_code=204)
+@router.delete("/{tenant_id}", status_code=204, response_class=Response)
 async def delete_tenant(
     tenant_id: str,
     db: Session = Depends(get_db)

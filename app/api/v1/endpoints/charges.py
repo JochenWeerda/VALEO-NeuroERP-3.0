@@ -7,7 +7,7 @@ list endpoint for server-side filtering and sorting.
 
 from datetime import datetime
 from typing import Optional
-from fastapi import APIRouter, Depends, HTTPException, Query, Request
+from fastapi import Response, APIRouter, Depends, HTTPException, Query, Request
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
@@ -237,7 +237,7 @@ async def freigabe_charge(charge_id: str, db: Session = Depends(get_db)) -> dict
     return _to_dict(updated)
 
 
-@router.delete("/{charge_id}", status_code=204)
+@router.delete("/{charge_id}", status_code=204, response_class=Response)
 async def delete_charge(charge_id: str, db: Session = Depends(get_db)):
     repo = ChargeRepository(db)
     if not repo.delete(charge_id):

@@ -1578,7 +1578,7 @@ async def inventory_inventur_complete(
     return InventoryCompatService(db, tenant_id).complete_inventur_counts(payload.get("ids", []))
 
 
-@router.delete("/inventory/inventur/{item_id}", status_code=204)
+@router.delete("/inventory/inventur/{item_id}", status_code=204, response_class=Response)
 async def inventory_inventur_stornieren(
     item_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
 ):

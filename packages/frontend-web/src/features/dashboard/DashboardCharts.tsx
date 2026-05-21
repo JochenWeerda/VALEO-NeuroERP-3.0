@@ -32,17 +32,17 @@ function EmptyChartState({
   description: string
 }): ReactElement {
   return (
-    <div className="flex h-[300px] flex-col items-center justify-center gap-3 rounded-xl border border-dashed border-slate-200 bg-slate-50 text-center">
-      <p className="text-sm font-semibold text-slate-700">{title}</p>
-      <p className="text-xs text-slate-500">{description}</p>
+    <div className="flex h-[300px] flex-col items-center justify-center gap-3 rounded-[var(--radius)] border border-dashed border-border bg-muted text-center">
+      <p className="text-sm font-semibold text-foreground">{title}</p>
+      <p className="text-xs text-muted-foreground">{description}</p>
     </div>
   )
 }
 
 function ErrorChartState({ message, onRetry }: { message: string; onRetry: () => void }): ReactElement {
   return (
-    <div className="flex h-[300px] flex-col items-center justify-center gap-3 rounded-xl border border-dashed border-slate-200 bg-slate-50">
-      <p className="text-sm font-medium text-slate-700">{message}</p>
+    <div className="flex h-[300px] flex-col items-center justify-center gap-3 rounded-[var(--radius)] border border-dashed border-border bg-muted">
+      <p className="text-sm font-medium text-foreground">{message}</p>
       <Button variant="outline" size="sm" onClick={onRetry}>
         Erneut laden
       </Button>
@@ -51,7 +51,7 @@ function ErrorChartState({ message, onRetry }: { message: string; onRetry: () =>
 }
 
 function ChartSkeleton(): ReactElement {
-  return <div className="h-[300px] w-full animate-pulse rounded-xl bg-slate-100" />
+  return <div className="h-[300px] w-full animate-pulse rounded-[var(--radius)] bg-muted" />
 }
 
 export default function DashboardCharts({
@@ -62,7 +62,7 @@ export default function DashboardCharts({
 }: DashboardChartsProps): ReactElement {
   return (
     <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
-      <Card className="rounded-2xl shadow-sm">
+      <Card className="border-l-4 border-l-primary shadow-sm">
         <CardHeader>
           <CardTitle>Contract Positionen Trend</CardTitle>
           <CardDescription>Entwicklung der Long- und Short-Mengen</CardDescription>
@@ -80,7 +80,7 @@ export default function DashboardCharts({
         </CardContent>
       </Card>
 
-      <Card className="rounded-2xl shadow-sm">
+      <Card className="border-l-4 border-l-[hsl(var(--accent))] shadow-sm">
         <CardHeader>
           <CardTitle>Wiege-Performance der letzten Tage</CardTitle>
           <CardDescription>Vergleich der gemessenen Netto-Tonnen</CardDescription>

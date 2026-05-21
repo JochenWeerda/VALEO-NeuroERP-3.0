@@ -4,7 +4,7 @@ from datetime import datetime
 from decimal import Decimal
 from typing import Any, Optional
 
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import Response, APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
@@ -106,7 +106,7 @@ def update_projekt(projekt_id: str, payload: ProjektPatch, db: Session = Depends
     return _to_dict(obj)
 
 
-@router.delete("/{projekt_id}", status_code=204)
+@router.delete("/{projekt_id}", status_code=204, response_class=Response)
 def delete_projekt(projekt_id: str, db: Session = Depends(get_db)):
     obj = db.query(Projekt).filter(Projekt.id == projekt_id).first()
     if not obj:
@@ -173,7 +173,7 @@ def update_aufgabe(projekt_id: str, aufgabe_id: str, payload: AufgabePatch, db: 
     return _to_dict(obj)
 
 
-@router.delete("/{projekt_id}/aufgaben/{aufgabe_id}", status_code=204)
+@router.delete("/{projekt_id}/aufgaben/{aufgabe_id}", status_code=204, response_class=Response)
 def delete_aufgabe(projekt_id: str, aufgabe_id: str, db: Session = Depends(get_db)):
     obj = db.query(ProjektAufgabe).filter(
         ProjektAufgabe.id == aufgabe_id,

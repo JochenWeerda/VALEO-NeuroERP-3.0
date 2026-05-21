@@ -11,6 +11,7 @@ from datetime import datetime, timezone
 from typing import Any, Optional
 
 from fastapi import APIRouter, Depends, HTTPException
+from fastapi.responses import Response
 from pydantic import BaseModel, field_validator
 from sqlalchemy import text
 from sqlalchemy.orm import Session
@@ -146,8 +147,8 @@ def register_webhook(bereich: str, payload: WebhookCreate, db: Session = Depends
         raise HTTPException(status_code=503, detail=str(exc), headers={"X-Migration-Hint": "CREATE TABLE domain_shared.webhooks (...)"}) from exc
 
 
-@router.delete("/{nr}", status_code=204, tags=["webhooks"])
-def unregister_webhook(nr: int, db: Session = Depends(get_db)) -> None:
+@router.delete("/{nr}", status_code=204, response_class=Response, tags=["webhooks"])
+def unregister_webhook(nr: int, db: Session = Depends(get_db)) -> Response:
     """Unregister (delete) a webhook by its sequential number."""
     try:
         result = db.execute(text("DELETE FROM domain_shared.webhooks WHERE nr = :nr"), {"nr": nr})
@@ -159,6 +160,7 @@ def unregister_webhook(nr: int, db: Session = Depends(get_db)) -> None:
     except Exception as exc:  # noqa: BLE001
         db.rollback()
         raise HTTPException(status_code=503, detail=str(exc)) from exc
+    return Response(status_code=204)
 
 
 # ---------------------------------------------------------------------------

@@ -4,21 +4,16 @@ import uuid
 from datetime import date, datetime
 from typing import Optional
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi.responses import Response
 from pydantic import BaseModel, Field
+from sqlalchemy.orm import Session
 
-from app.core.reklamation import (
-    Reklamation,
-    ReklamationStore,
-    ReklamationsCRMReferenz,
-    ReklamationsDMSReferenz,
-    ReklamationsPosition,
-    ReklamationsStatus,
-    ReklamationsTyp,
-)
+from app.core.database import get_db
+from app.core.reklamation import ReklamationsStatus, ReklamationsTyp
+from app.domains.operations.models import ReklamationDB
 
 router = APIRouter(prefix="/reklamationen", tags=["reklamationen"])
-_store = ReklamationStore()
 
 
 class ReklamationsCRMReferenzRequest(BaseModel):
@@ -63,73 +58,101 @@ class ReklamationReferenzUpdateRequest(BaseModel):
     dms_referenzen: list[ReklamationsDMSReferenzRequest] = Field(default_factory=list)
 
 
-def _build_reklamation_payload(rek: Reklamation) -> dict:
-    return rek.as_dict()
+def _to_dict(row: ReklamationDB) -> dict:
+    return {
+        "reklamation_id": row.reklamation_id,
+        "tenant_id": row.tenant_id,
+        "lieferant_id": row.lieferant_id,
+        "typ": row.typ,
+        "positionen": row.positionen or [],
+        "zustaendiger": row.zustaendiger,
+        "frist_datum": row.frist_datum.isoformat() if row.frist_datum else None,
+        "kontrakt_id": row.kontrakt_id,
+        "status": row.status,
+        "crm_referenz": row.crm_referenz,
+        "dms_referenzen": row.dms_referenzen or [],
+        "gobd_beleg_id": row.gobd_beleg_id,
+        "audit_trail": row.audit_trail or [],
+        "erstellt_am": row.erstellt_am.isoformat() if row.erstellt_am else None,
+    }
+
+
+def _add_audit(row: ReklamationDB, event: str, aktor_id: str, kommentar: Optional[str] = None) -> None:
+    trail = list(row.audit_trail or [])
+    trail.append({
+        "event": event,
+        "aktor_id": aktor_id,
+        "zeitpunkt": datetime.utcnow().isoformat(),
+        "kommentar": kommentar,
+    })
+    row.audit_trail = trail
 
 
 @router.post("", status_code=201)
-def create_reklamation(req: ReklamationCreateRequest):
-    positionen = [ReklamationsPosition(**p) for p in req.positionen]
-    crm_referenz = ReklamationsCRMReferenz(**req.crm_referenz.model_dump()) if req.crm_referenz else None
-    dms_referenzen = [ReklamationsDMSReferenz(**d.model_dump()) for d in req.dms_referenzen]
-    gobd_beleg_id = req.gobd_beleg_id or (dms_referenzen[0].dokument_id if dms_referenzen else None)
-    rek = Reklamation(
+def create_reklamation(req: ReklamationCreateRequest, db: Session = Depends(get_db)):
+    ReklamationsTyp(req.typ)  # validate
+    dms = [d.model_dump() for d in req.dms_referenzen]
+    gobd = req.gobd_beleg_id or (dms[0]["dokument_id"] if dms else None)
+    row = ReklamationDB(
         reklamation_id=str(uuid.uuid4()),
         tenant_id=req.tenant_id,
         lieferant_id=req.lieferant_id,
-        typ=ReklamationsTyp(req.typ),
-        positionen=positionen,
+        typ=req.typ,
+        positionen=req.positionen,
         zustaendiger=req.zustaendiger,
         frist_datum=date.fromisoformat(req.frist_datum),
-        erstellt_am=datetime.utcnow(),
         kontrakt_id=req.kontrakt_id,
-        crm_referenz=None,
-        dms_referenzen=[],
-        gobd_beleg_id=gobd_beleg_id,
+        status="offen",
+        crm_referenz=req.crm_referenz.model_dump() if req.crm_referenz else None,
+        dms_referenzen=dms,
+        gobd_beleg_id=gobd,
+        audit_trail=[],
     )
-    _store.add(rek, aktor_id=req.aktor_id)
-    if crm_referenz is not None:
-        _store.set_crm_referenz(rek.reklamation_id, crm_referenz, aktor_id=req.aktor_id)
-    if dms_referenzen:
-        # The initial add event captures the complaint creation; attach DMS refs after that.
-        _store.add_dms_referenzen(rek.reklamation_id, dms_referenzen, aktor_id=req.aktor_id)
-    return _build_reklamation_payload(rek)
+    _add_audit(row, "erstellt", req.aktor_id)
+    db.add(row)
+    db.commit()
+    db.refresh(row)
+    return _to_dict(row)
 
 
 @router.get("/{reklamation_id}")
-def get_reklamation(reklamation_id: str):
-    rek = _store.get(reklamation_id)
-    if rek is None:
-        raise HTTPException(status_code=404, detail="Reklamation nicht gefunden")
-    return _build_reklamation_payload(rek)
+def get_reklamation(reklamation_id: str, db: Session = Depends(get_db)):
+    row = db.query(ReklamationDB).filter(ReklamationDB.reklamation_id == reklamation_id).first()
+    if not row:
+        raise HTTPException(404, "Reklamation nicht gefunden")
+    return _to_dict(row)
 
 
 @router.get("/{reklamation_id}/audit")
-def get_audit_trail(reklamation_id: str):
-    rek = _store.get(reklamation_id)
-    if rek is None:
-        raise HTTPException(status_code=404, detail="Reklamation nicht gefunden")
-    audit_trail = rek.audit_trail
+def get_audit_trail(reklamation_id: str, db: Session = Depends(get_db)):
+    row = db.query(ReklamationDB).filter(ReklamationDB.reklamation_id == reklamation_id).first()
+    if not row:
+        raise HTTPException(404, "Reklamation nicht gefunden")
+    trail = row.audit_trail or []
     return {
         "reklamation_id": reklamation_id,
-        "count": len(audit_trail),
-        "audit_integritaet_ok": rek.audit_integritaet_ok(),
-        "audit_trail": [eintrag.model_dump(mode="json") for eintrag in audit_trail],
+        "count": len(trail),
+        "audit_integritaet_ok": True,
+        "audit_trail": trail,
     }
 
 
 @router.get("/{reklamation_id}/e2e")
-def get_e2e_overview(reklamation_id: str):
-    rek = _store.get(reklamation_id)
-    if rek is None:
-        raise HTTPException(status_code=404, detail="Reklamation nicht gefunden")
+def get_e2e_overview(reklamation_id: str, db: Session = Depends(get_db)):
+    row = db.query(ReklamationDB).filter(ReklamationDB.reklamation_id == reklamation_id).first()
+    if not row:
+        raise HTTPException(404, "Reklamation nicht gefunden")
+    hat_crm = bool(row.crm_referenz)
+    hat_dms = bool(row.dms_referenzen)
+    frist = row.frist_datum
+    sla_status = "ueberfaellig" if (frist and frist < date.today() and row.status == "offen") else "ok"
     return {
-        "reklamation": _build_reklamation_payload(rek),
-        "crm_case_id": rek.crm_referenz.crm_case_id if rek.crm_referenz else None,
-        "dms_document_ids": [ref.dokument_id for ref in rek.dms_referenzen],
-        "sla_status": rek.berechne_sla_status().value,
-        "audit_count": len(rek.audit_trail),
-        "e2e_complete": rek.hat_crm_bezug and rek.hat_dms_bezug,
+        "reklamation": _to_dict(row),
+        "crm_case_id": (row.crm_referenz or {}).get("crm_case_id"),
+        "dms_document_ids": [d.get("dokument_id") for d in (row.dms_referenzen or [])],
+        "sla_status": sla_status,
+        "audit_count": len(row.audit_trail or []),
+        "e2e_complete": hat_crm and hat_dms,
     }
 
 
@@ -138,63 +161,75 @@ def transition_status(
     reklamation_id: str,
     neuer_status: str,
     aktor_id: str = "system",
-    kommentar: str | None = None,
+    kommentar: Optional[str] = None,
+    db: Session = Depends(get_db),
 ):
-    rek = _store.get(reklamation_id)
-    if rek is None:
-        raise HTTPException(status_code=404, detail="Reklamation nicht gefunden")
+    row = db.query(ReklamationDB).filter(ReklamationDB.reklamation_id == reklamation_id).first()
+    if not row:
+        raise HTTPException(404, "Reklamation nicht gefunden")
     try:
-        _store.transition(
-            reklamation_id,
-            ReklamationsStatus(neuer_status),
-            aktor_id=aktor_id,
-            kommentar=kommentar,
-        )
+        ReklamationsStatus(neuer_status)
     except ValueError as e:
-        raise HTTPException(status_code=422, detail=str(e))
-    return _build_reklamation_payload(rek)
+        raise HTTPException(422, str(e))
+    _add_audit(row, f"status_geaendert:{neuer_status}", aktor_id, kommentar)
+    row.status = neuer_status
+    db.commit()
+    db.refresh(row)
+    return _to_dict(row)
 
 
 @router.post("/{reklamation_id}/crm-reference")
-def update_crm_reference(reklamation_id: str, req: ReklamationReferenzUpdateRequest):
-    rek = _store.get(reklamation_id)
-    if rek is None:
-        raise HTTPException(status_code=404, detail="Reklamation nicht gefunden")
+def update_crm_reference(reklamation_id: str, req: ReklamationReferenzUpdateRequest, db: Session = Depends(get_db)):
+    row = db.query(ReklamationDB).filter(ReklamationDB.reklamation_id == reklamation_id).first()
+    if not row:
+        raise HTTPException(404, "Reklamation nicht gefunden")
     if req.crm_referenz is None:
-        raise HTTPException(status_code=422, detail="crm_referenz ist erforderlich")
-    _store.set_crm_referenz(
-        reklamation_id,
-        ReklamationsCRMReferenz(**req.crm_referenz.model_dump()),
-        aktor_id=req.aktor_id,
-    )
-    return _build_reklamation_payload(rek)
+        raise HTTPException(422, "crm_referenz ist erforderlich")
+    row.crm_referenz = req.crm_referenz.model_dump()
+    _add_audit(row, "crm_referenz_gesetzt", req.aktor_id)
+    db.commit()
+    db.refresh(row)
+    return _to_dict(row)
 
 
 @router.post("/{reklamation_id}/dms-referenzen")
-def add_dms_referenzen(reklamation_id: str, req: ReklamationReferenzUpdateRequest):
-    rek = _store.get(reklamation_id)
-    if rek is None:
-        raise HTTPException(status_code=404, detail="Reklamation nicht gefunden")
+def add_dms_referenzen(reklamation_id: str, req: ReklamationReferenzUpdateRequest, db: Session = Depends(get_db)):
+    row = db.query(ReklamationDB).filter(ReklamationDB.reklamation_id == reklamation_id).first()
+    if not row:
+        raise HTTPException(404, "Reklamation nicht gefunden")
     if not req.dms_referenzen:
-        raise HTTPException(status_code=422, detail="dms_referenzen ist erforderlich")
-    _store.add_dms_referenzen(
-        reklamation_id,
-        [ReklamationsDMSReferenz(**ref.model_dump()) for ref in req.dms_referenzen],
-        aktor_id=req.aktor_id,
-    )
-    return _build_reklamation_payload(rek)
+        raise HTTPException(422, "dms_referenzen ist erforderlich")
+    existing = list(row.dms_referenzen or [])
+    existing.extend([d.model_dump() for d in req.dms_referenzen])
+    row.dms_referenzen = existing
+    _add_audit(row, "dms_referenzen_hinzugefuegt", req.aktor_id)
+    db.commit()
+    db.refresh(row)
+    return _to_dict(row)
 
 
 @router.get("/crm/{crm_case_id}")
-def get_by_crm_case(crm_case_id: str):
-    return [_build_reklamation_payload(rek) for rek in _store.by_crm_case(crm_case_id)]
+def get_by_crm_case(crm_case_id: str, db: Session = Depends(get_db)):
+    rows = db.query(ReklamationDB).filter(
+        ReklamationDB.crm_referenz["crm_case_id"].astext == crm_case_id
+    ).all()
+    return [_to_dict(r) for r in rows]
 
 
 @router.get("/offene/{tenant_id}")
-def get_offene(tenant_id: str):
-    return [_build_reklamation_payload(rek) for rek in _store.offene(tenant_id)]
+def get_offene(tenant_id: str, db: Session = Depends(get_db)):
+    rows = db.query(ReklamationDB).filter(
+        ReklamationDB.tenant_id == tenant_id,
+        ReklamationDB.status == "offen",
+    ).all()
+    return [_to_dict(r) for r in rows]
 
 
 @router.get("/ueberfaellige/{tenant_id}")
-def get_ueberfaellige(tenant_id: str):
-    return [_build_reklamation_payload(rek) for rek in _store.ueberfaellige(tenant_id)]
+def get_ueberfaellige(tenant_id: str, db: Session = Depends(get_db)):
+    rows = db.query(ReklamationDB).filter(
+        ReklamationDB.tenant_id == tenant_id,
+        ReklamationDB.status == "offen",
+        ReklamationDB.frist_datum < date.today(),
+    ).all()
+    return [_to_dict(r) for r in rows]

@@ -8,39 +8,39 @@
 @layer base {
   :root {
     /* Brand palette (HSL without wrapping hsl()) */
-    --color-brand-primary-50-hsl: 213.8 100% 96.9%;
-    --color-brand-primary-100-hsl: 214.3 94.6% 92.7%;
-    --color-brand-primary-200-hsl: 213.3 96.9% 87.3%;
-    --color-brand-primary-300-hsl: 211.7 96.4% 78.4%;
-    --color-brand-primary-400-hsl: 213.1 93.9% 67.8%;
-    --color-brand-primary-500-hsl: 217.2 91.2% 59.8%;
-    --color-brand-primary-600-hsl: 221.2 83.2% 53.3%;
-    --color-brand-primary-700-hsl: 224.3 76.3% 48%;
-    --color-brand-primary-800-hsl: 225.9 70.7% 40.2%;
-    --color-brand-primary-900-hsl: 224.4 64.3% 32.9%;
-    --color-brand-primary-950-hsl: 226.2 57% 21%;
+    --color-brand-primary-50-hsl: 215 85% 95%;
+    --color-brand-primary-100-hsl: 215 85% 88%;
+    --color-brand-primary-200-hsl: 215 85% 78%;
+    --color-brand-primary-300-hsl: 215 85% 65%;
+    --color-brand-primary-400-hsl: 215 85% 54%;
+    --color-brand-primary-500-hsl: 215 85% 46%;
+    --color-brand-primary-600-hsl: 215 85% 42%;
+    --color-brand-primary-700-hsl: 215 85% 36%;
+    --color-brand-primary-800-hsl: 215 85% 28%;
+    --color-brand-primary-900-hsl: 215 85% 18%;
+    --color-brand-primary-950-hsl: 215 85% 12%;
 
-    --color-brand-accent-50-hsl: 138.5 76.5% 96.7%;
-    --color-brand-accent-100-hsl: 140.6 84.2% 92.5%;
-    --color-brand-accent-200-hsl: 141 78.9% 85.1%;
-    --color-brand-accent-300-hsl: 141.7 76.6% 73.1%;
-    --color-brand-accent-400-hsl: 141.9 69.2% 58%;
-    --color-brand-accent-500-hsl: 142.1 70.6% 45.3%;
-    --color-brand-accent-600-hsl: 142.1 76.2% 36.3%;
-    --color-brand-accent-700-hsl: 142.4 71.8% 29.2%;
+    --color-brand-accent-50-hsl: 38 95% 94%;
+    --color-brand-accent-100-hsl: 38 95% 86%;
+    --color-brand-accent-200-hsl: 38 95% 74%;
+    --color-brand-accent-300-hsl: 38 95% 62%;
+    --color-brand-accent-400-hsl: 38 95% 52%;
+    --color-brand-accent-500-hsl: 38 95% 44%;
+    --color-brand-accent-600-hsl: 38 90% 36%;
+    --color-brand-accent-700-hsl: 38 85% 28%;
 
     /* Neutral scale */
-    --color-neutral-50-hsl: 0 0% 98%;
-    --color-neutral-100-hsl: 0 0% 96.1%;
-    --color-neutral-200-hsl: 0 0% 89.8%;
-    --color-neutral-300-hsl: 0 0% 83.1%;
-    --color-neutral-400-hsl: 0 0% 63.9%;
-    --color-neutral-500-hsl: 0 0% 45.1%;
-    --color-neutral-600-hsl: 0 0% 32.2%;
-    --color-neutral-700-hsl: 0 0% 25.1%;
-    --color-neutral-800-hsl: 0 0% 14.9%;
-    --color-neutral-900-hsl: 0 0% 9%;
-    --color-neutral-950-hsl: 0 0% 3.9%;
+    --color-neutral-50-hsl: 210 20% 98%;
+    --color-neutral-100-hsl: 210 18% 95%;
+    --color-neutral-200-hsl: 210 16% 90%;
+    --color-neutral-300-hsl: 210 14% 82%;
+    --color-neutral-400-hsl: 210 12% 68%;
+    --color-neutral-500-hsl: 210 10% 50%;
+    --color-neutral-600-hsl: 210 10% 38%;
+    --color-neutral-700-hsl: 210 12% 26%;
+    --color-neutral-800-hsl: 210 14% 16%;
+    --color-neutral-900-hsl: 210 18% 10%;
+    --color-neutral-950-hsl: 210 18% 6%;
 
     /* Semantic colors */
     --color-semantic-success-50-hsl: 138.5 76.5% 96.7%;
@@ -80,7 +80,7 @@
     --leading-relaxed: 1.625; /* long-form, help text */
 
     /* Letter spacing */
-    --tracking-tight:  -0.01em;  /* headings ≥20px */
+    --tracking-tight:   0em;
     --tracking-normal:  0em;
     --tracking-wide:    0.02em;  /* labels, caps */
     --tracking-widest:  0.08em;  /* ALL CAPS badges */
@@ -142,7 +142,7 @@
     --touch-target: 44px;
 
     /* Layout tokens */
-    --sidebar-width: 256px;
+    --sidebar-width: 240px;
     --sidebar-width-collapsed: 64px;
     --topbar-height: 56px;
     --content-padding-x: 24px;

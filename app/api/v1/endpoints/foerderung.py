@@ -3,7 +3,7 @@
 from datetime import datetime
 from typing import Optional
 
-from fastapi import APIRouter, Depends, Query
+from fastapi import Response, APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
@@ -151,7 +151,7 @@ async def get_antrag(antrag_id: int, db: Session = Depends(get_db)) -> dict:
     }
 
 
-@router.delete("/antraege/{antrag_id}", status_code=204)
+@router.delete("/antraege/{antrag_id}", status_code=204, response_class=Response)
 async def delete_antrag(antrag_id: int, db: Session = Depends(get_db)) -> None:
     """Förderantrag löschen (nur im Entwurfsstatus)."""
     antrag = db.query(FoerderAntrag).filter(FoerderAntrag.id == antrag_id).first()
