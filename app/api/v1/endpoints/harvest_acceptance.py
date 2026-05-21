@@ -9,7 +9,7 @@ from datetime import datetime, date
 from decimal import Decimal
 from typing import Literal, Optional
 
-from fastapi import APIRouter, Depends, HTTPException, Query, Request
+from fastapi import Response, APIRouter, Depends, HTTPException, Query, Request
 from pydantic import BaseModel, Field, field_validator, model_validator
 from sqlalchemy.orm import Session
 
@@ -384,7 +384,7 @@ async def update_harvest_acceptance(
         raise HTTPException(status_code=422, detail=exc.detail)
 
 
-@router.delete("/{acceptance_id}", status_code=204)
+@router.delete("/{acceptance_id}", status_code=204, response_class=Response)
 async def delete_harvest_acceptance(
     acceptance_id: str,
     tenant_id: str = Depends(get_tenant_id),

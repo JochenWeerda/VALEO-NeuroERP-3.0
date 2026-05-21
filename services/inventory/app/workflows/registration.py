@@ -66,7 +66,7 @@ def _build_inventory_workflow() -> Dict[str, Any]:
 
 
 async def register_inventory_workflow() -> None:
-    url = f"{settings.WORKFLOW_SERVICE_URL.rstrip('/')}/api/v1/workflows/definitions"
+    url = f"{str(settings.WORKFLOW_SERVICE_URL).rstrip('/')}/api/v1/workflows/definitions"
     definition = _build_inventory_workflow()
 
     async with httpx.AsyncClient(timeout=settings.WORKFLOW_REGISTRATION_TIMEOUT) as client:

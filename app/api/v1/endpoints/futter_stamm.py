@@ -192,7 +192,7 @@ async def update_einzelfuttermittel(
 
 
 @router.delete("/einzelfuttermittel/{futter_id}", status_code=204,
-               summary="Einzelfuttermittel deaktivieren")
+               summary="Einzelfuttermittel deaktivieren", response_class=Response)
 async def delete_einzelfuttermittel(
     futter_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -280,7 +280,7 @@ async def update_mischfuttermittel(
 
 
 @router.delete("/mischfuttermittel/{misch_id}", status_code=204,
-               summary="Mischfuttermittel deaktivieren")
+               summary="Mischfuttermittel deaktivieren", response_class=Response)
 async def delete_mischfuttermittel(
     misch_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -420,7 +420,7 @@ async def update_rezept(
 
 
 @router.delete("/rezepte/{rezept_id}", status_code=204,
-               summary="Rezept deaktivieren")
+               summary="Rezept deaktivieren", response_class=Response)
 async def delete_rezept(
     rezept_id: str,
     tenant_id: str = Depends(get_tenant_id),

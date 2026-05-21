@@ -8,7 +8,7 @@ list endpoint for server-side filtering and sorting.
 
 from typing import Optional, Any
 from datetime import datetime
-from fastapi import APIRouter, Depends, HTTPException, Query, Request
+from fastapi import Response, APIRouter, Depends, HTTPException, Query, Request
 from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
 
@@ -385,7 +385,7 @@ async def reverse_journal_entry(
         raise HTTPException(status_code=500, detail=f"Failed to reverse journal entry: {str(e)}")
 
 
-@router.delete("/{entry_id}", status_code=204)
+@router.delete("/{entry_id}", status_code=204, response_class=Response)
 async def delete_journal_entry(
     entry_id: str,
     request: Request,

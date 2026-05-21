@@ -23,7 +23,7 @@ import re
 from datetime import date, datetime
 from typing import Any, Dict, List, Optional
 
-from fastapi import APIRouter, Depends, File, Header, HTTPException, Query, UploadFile
+from fastapi import Response, APIRouter, Depends, File, Header, HTTPException, Query, UploadFile
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
@@ -681,7 +681,7 @@ def patch_analyse(
     return _analyse_to_dict(a)
 
 
-@router.delete("/grundfutter-analysen/{analyse_id}", status_code=204)
+@router.delete("/grundfutter-analysen/{analyse_id}", status_code=204, response_class=Response)
 def delete_analyse(
     analyse_id: str,
     db: Session = Depends(get_db),

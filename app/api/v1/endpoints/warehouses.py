@@ -4,7 +4,7 @@ Warehouse management endpoints
 
 from typing import Optional
 
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import Response, APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 
 from ....core.config import settings
@@ -128,7 +128,7 @@ async def update_warehouse(
     return Warehouse.model_validate(wh)
 
 
-@router.delete("/{warehouse_id}", status_code=204)
+@router.delete("/{warehouse_id}", status_code=204, response_class=Response)
 async def delete_warehouse(warehouse_id: str, db: Session = Depends(get_db)):
     """Lager deaktivieren (Soft-Delete)."""
     wh = db.query(WarehouseModel).filter(WarehouseModel.id == warehouse_id).first()

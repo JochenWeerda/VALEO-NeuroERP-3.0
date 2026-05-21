@@ -5,7 +5,7 @@ Batches, file upload, recipe import, fertiliser management.
 
 from typing import Optional
 
-from fastapi import APIRouter, Depends, HTTPException, Query, UploadFile, File
+from fastapi import Response, APIRouter, Depends, HTTPException, Query, UploadFile, File
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
@@ -134,7 +134,7 @@ async def create_article_selection(
     return SelectionOut.model_validate(obj)
 
 
-@router.delete("/selections/{sel_id}", status_code=204)
+@router.delete("/selections/{sel_id}", status_code=204, response_class=Response)
 async def delete_article_selection(sel_id: str, db: Session = Depends(get_db)):
     """DEL Artikel Selektionen löschen"""
     obj = db.query(ArticleSelection).filter(ArticleSelection.id == sel_id).first()

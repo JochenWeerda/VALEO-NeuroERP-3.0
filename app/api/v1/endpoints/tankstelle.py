@@ -4,7 +4,7 @@ from datetime import datetime
 from decimal import Decimal
 from typing import Any, Optional
 
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import Response, APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
@@ -83,7 +83,7 @@ def create_zapfung(payload: ZapfungPayload, db: Session = Depends(get_db)):
     return _to_dict(obj)
 
 
-@router.delete("/zapfungen/{zapfung_id}", status_code=204)
+@router.delete("/zapfungen/{zapfung_id}", status_code=204, response_class=Response)
 def delete_zapfung(zapfung_id: str, db: Session = Depends(get_db)):
     obj = db.query(Zapfung).filter(Zapfung.id == zapfung_id).first()
     if not obj:

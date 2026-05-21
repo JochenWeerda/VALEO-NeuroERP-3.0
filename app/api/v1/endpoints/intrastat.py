@@ -12,7 +12,7 @@ import logging
 from typing import Any, Optional
 from uuid import uuid4
 
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import Response, APIRouter, Depends, HTTPException, Query
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, Field
 from sqlalchemy import text
@@ -235,7 +235,7 @@ def update_meldung(
         )
 
 
-@router.delete("/meldungen/{meldung_id}", status_code=204, summary="Intrastat-Entwurf löschen")
+@router.delete("/meldungen/{meldung_id}", status_code=204, summary="Intrastat-Entwurf löschen", response_class=Response)
 def delete_meldung(
     meldung_id: str,
     db: Session = Depends(get_db),

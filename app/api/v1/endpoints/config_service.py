@@ -8,7 +8,7 @@ from __future__ import annotations
 from datetime import datetime
 from typing import Optional
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import Response, APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field, ConfigDict
 from sqlalchemy.orm import Session
 
@@ -175,7 +175,7 @@ async def update_connector(
     return await get_connector(connector_id, db, tenant_id)
 
 
-@router.delete("/connectors/{connector_id}", status_code=204)
+@router.delete("/connectors/{connector_id}", status_code=204, response_class=Response)
 async def delete_connector(
     connector_id: str,
     db: Session = Depends(get_db),
@@ -355,7 +355,7 @@ async def update_reporting_unit(
     )
 
 
-@router.delete("/reporting-units/{unit_id}", status_code=204)
+@router.delete("/reporting-units/{unit_id}", status_code=204, response_class=Response)
 async def delete_reporting_unit(
     unit_id: str,
     db: Session = Depends(get_db),
@@ -574,7 +574,7 @@ async def update_schedule(
     )
 
 
-@router.delete("/schedules/{schedule_id}", status_code=204)
+@router.delete("/schedules/{schedule_id}", status_code=204, response_class=Response)
 async def delete_schedule(
     schedule_id: str,
     db: Session = Depends(get_db),
