@@ -1,8 +1,9 @@
 id: DESIGN-MERIDIAN-SCREENS-001
 title: Meridian Screen Rollout fuer Kernmasken
 owner: Codex
-status: reserviert
+status: abgeschlossen
 claimed_at: 2026-05-21
+completed_at: 2026-05-21
 goal: >
   Die wichtigsten sichtbaren Fach-/Maskenflaechen nach der Shell-Umstellung
   weiter auf Meridian tokenisieren.
@@ -30,6 +31,12 @@ checks:
   - python scripts/agent_workboard_supervisor.py validate
   - node scripts/docs-markdown-check.cjs docs/agent-ops/active-workboard.md docs/agent-ops/slices/DESIGN-MERIDIAN-SCREENS-001.yaml
   - git diff --check
+  - docker compose up -d --build frontend-web
+  - Playwright-Check auf http://localhost:3000 mit data-theme=meridian, H1 App Starter, Topbar 56px und Input 44px.
+done:
+  - Masken-Builder ListReport, ObjectPage und OverviewPage auf Meridian-Header, tokenisierte Oberflaechen und Primary/Harvest/Destructive-Zustandsfarben nachgezogen.
+  - Dashboard-Charts auf tokenisierte Empty/Error/Skeleton-Zustaende und Ocean/Harvest-Akzentkanten umgestellt.
+  - Contracts, Inventory, Weighing und Sales von generischen Slate/Blue/Green/Yellow/Red-Utility-Mustern auf Meridian-Cards, Badges, Listen-Items und Leerzustaende gezogen.
 risks:
   - Tiefe Modulunterseiten enthalten weiterhin harte Utility-Farben und brauchen bei Bedarf weitere fachbereichsweise Slices.
-next_step: Masken-Builder und sichtbare Kernfeature-Karten auf Tokenklassen umstellen.
+next_step: Bei Bedarf fachbereichsweise Detailseiten tokenisieren oder eine visuelle Regression fuer Kernrouten fest verankern.
