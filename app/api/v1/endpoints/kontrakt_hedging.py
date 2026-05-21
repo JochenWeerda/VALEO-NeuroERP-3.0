@@ -173,7 +173,7 @@ def mark_to_market(
 @router.delete(
     "/{kontrakt_id}/hedges/{hedge_id}",
     status_code=204,
-    response_class=Response,, response_model=None)
+    response_class=Response, response_model=None)
 def cancel_hedge(
     kontrakt_id: str,
     hedge_id: str,
