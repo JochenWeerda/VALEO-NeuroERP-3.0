@@ -14,7 +14,7 @@ interface OverviewPageProps {
 
 // Skeleton-Komponente für KPI-Karten
 const KpiCardSkeleton: React.FC<{ title?: string }> = ({ title }) => (
-  <Card>
+  <Card className="border-l-4 border-l-primary">
     <CardHeader className="pb-2">
       <CardTitle className="text-sm font-medium flex items-center justify-between">
         {title || <Skeleton className="h-4 w-24" />}
@@ -45,11 +45,11 @@ const ChartSkeleton: React.FC<{ title?: string }> = ({ title }) => (
 
 // Skeleton-Layout für das gesamte Dashboard
 const DashboardSkeleton: React.FC<{ config: OverviewConfig }> = ({ config }) => (
-  <div className="space-y-6 p-6">
+  <div className="space-y-8 p-4 md:p-8">
     {/* Header */}
-    <div className="flex items-center justify-between">
+    <div className="flex items-center justify-between rounded-[var(--radius)] border border-border bg-card p-6 shadow-sm">
       <div>
-        <h1 className="text-3xl font-bold">{config.title}</h1>
+        <h1 className="text-xl font-bold tracking-normal text-foreground">{config.title}</h1>
         {config.subtitle && (
           <p className="text-muted-foreground">{config.subtitle}</p>
         )}
@@ -78,7 +78,7 @@ const OverviewPage: React.FC<OverviewPageProps> = ({
   isLoading = false
 }) => {
   const renderCard = (card: OverviewCard) => (
-    <Card key={card.title}>
+    <Card key={card.title} className="border-l-4 border-l-[hsl(var(--accent))]">
       <CardHeader className="pb-2">
         <CardTitle className="text-sm font-medium flex items-center justify-between">
           {card.title}
@@ -86,10 +86,10 @@ const OverviewPage: React.FC<OverviewPageProps> = ({
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="text-2xl font-bold">{card.value}</div>
+        <div className="text-2xl font-bold tabular-nums text-foreground">{card.value}</div>
         {card.change && (
           <div className={`flex items-center text-xs mt-1 ${
-            card.change.type === 'increase' ? 'text-green-600' : 'text-red-600'
+            card.change.type === 'increase' ? 'text-primary' : 'text-destructive'
           }`}>
             {card.change.type === 'increase' ? (
               <TrendingUp className="h-3 w-3 mr-1" />
@@ -131,16 +131,16 @@ const OverviewPage: React.FC<OverviewPageProps> = ({
   }
 
   return (
-    <div className="space-y-6 p-6">
+    <div className="space-y-8 p-4 md:p-8">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-4 rounded-[var(--radius)] border border-border bg-card p-6 shadow-sm md:flex-row md:items-center md:justify-between">
         <div>
-          <h1 className="text-3xl font-bold">{config.title}</h1>
+          <h1 className="text-xl font-bold tracking-normal text-foreground">{config.title}</h1>
           {config.subtitle && (
             <p className="text-muted-foreground">{config.subtitle}</p>
           )}
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           {config.actions?.map(action => (
             <Button
               key={action.key}

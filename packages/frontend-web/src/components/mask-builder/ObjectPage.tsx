@@ -189,7 +189,7 @@ const ObjectPage: React.FC<ObjectPageProps> = ({
       <div key={fieldName} className="space-y-2">
         <Label htmlFor={fieldName}>
           {field.label}
-          {field.required && <span className="text-red-500 ml-1" aria-hidden="true">*</span>}
+          {field.required && <span className="ml-1 text-destructive" aria-hidden="true">*</span>}
         </Label>
 
         <Controller
@@ -209,7 +209,7 @@ const ObjectPage: React.FC<ObjectPageProps> = ({
                     aria-invalid={error ? 'true' : undefined}
                     aria-describedby={errorId}
                     aria-required={field.required ? 'true' : undefined}
-                    className={error ? 'border-red-500' : ''}
+                    className={error ? 'border-destructive' : ''}
                   />
                 )
 
@@ -220,7 +220,7 @@ const ObjectPage: React.FC<ObjectPageProps> = ({
                     id={fieldName}
                     placeholder={field.placeholder}
                     readOnly={field.readonly ?? field.readOnly}
-                    className={error ? 'border-red-500' : ''}
+                    className={error ? 'border-destructive' : ''}
                   />
                 )
 
@@ -251,7 +251,7 @@ const ObjectPage: React.FC<ObjectPageProps> = ({
                     options={selectField.options ?? []}
                     placeholder={field.placeholder}
                     disabled={field.readonly ?? field.readOnly}
-                    className={error ? 'border-red-500' : ''}
+                    className={error ? 'border-destructive' : ''}
                   />
                 )
               }
@@ -263,7 +263,7 @@ const ObjectPage: React.FC<ObjectPageProps> = ({
                     id={fieldName}
                     type="date"
                     readOnly={field.readonly ?? field.readOnly}
-                    className={error ? 'border-red-500' : ''}
+                    className={error ? 'border-destructive' : ''}
                   />
                 )
 
@@ -274,7 +274,7 @@ const ObjectPage: React.FC<ObjectPageProps> = ({
                     id={fieldName}
                     type="datetime-local"
                     readOnly={field.readonly ?? field.readOnly}
-                    className={error ? 'border-red-500' : ''}
+                    className={error ? 'border-destructive' : ''}
                   />
                 )
 
@@ -285,7 +285,7 @@ const ObjectPage: React.FC<ObjectPageProps> = ({
                     id={fieldName}
                     placeholder={field.placeholder}
                     readOnly={field.readonly ?? field.readOnly}
-                    className={error ? 'border-red-500' : ''}
+                    className={error ? 'border-destructive' : ''}
                   />
                 )
             }
@@ -293,7 +293,7 @@ const ObjectPage: React.FC<ObjectPageProps> = ({
         />
 
         {error && (
-          <p id={errorId} role="alert" aria-live="polite" className="text-sm text-red-600 flex items-center gap-1">
+          <p id={errorId} role="alert" aria-live="polite" className="flex items-center gap-1 text-sm text-destructive">
             <AlertTriangle className="h-3 w-3" aria-hidden="true" />
             {error}
           </p>
@@ -342,16 +342,16 @@ const ObjectPage: React.FC<ObjectPageProps> = ({
   }
 
   return (
-    <div className="space-y-6 p-6">
+    <div className="space-y-8 p-4 md:p-8">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-4 rounded-[var(--radius)] border border-border bg-card p-6 shadow-sm md:flex-row md:items-center md:justify-between">
         <div>
-          <h1 className="text-3xl font-bold">{config.title}</h1>
+          <h1 className="text-xl font-bold tracking-normal text-foreground">{config.title}</h1>
           {config.subtitle && (
-            <p className="text-muted-foreground">{config.subtitle}</p>
+            <p className="mt-1 text-sm text-muted-foreground">{config.subtitle}</p>
           )}
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           {config.actions.map(action => {
             const isThisLoading = loadingActionKey != null && action.key === loadingActionKey
             return (
@@ -395,10 +395,10 @@ const ObjectPage: React.FC<ObjectPageProps> = ({
 
       {/* Draft restore banner */}
       {hasDraft && !isDirty && (
-        <Card className="border-blue-400 bg-blue-50">
+        <Card className="border-primary/30 bg-primary/5">
           <CardContent className="pt-4">
             <div className="flex items-center justify-between gap-2">
-              <div className="flex items-center gap-2 text-blue-900">
+              <div className="flex items-center gap-2 text-primary">
                 <Save className="h-5 w-5" aria-hidden="true" />
                 <span className="font-semibold">Entwurf vorhanden</span>
               </div>
@@ -413,15 +413,15 @@ const ObjectPage: React.FC<ObjectPageProps> = ({
 
       {/* Dirty Warning */}
       {isDirty && (
-        <Card className="border-orange-500 bg-orange-50">
+        <Card className="border-[hsl(var(--accent))]/40 bg-[hsl(var(--accent)/0.10)]">
           <CardContent className="pt-4">
-            <div className="flex items-center gap-2 text-orange-900">
+            <div className="flex items-center gap-2 text-[hsl(var(--accent-foreground))]">
               <AlertTriangle className="h-5 w-5" />
               <span className="font-semibold">
                 Ungespeicherte Änderungen
               </span>
             </div>
-            <p className="mt-1 text-orange-800">
+            <p className="mt-1 text-sm text-[hsl(var(--accent-foreground))]">
               Sie haben ungespeicherte Änderungen. Vergessen Sie nicht zu speichern.
             </p>
           </CardContent>
@@ -430,15 +430,15 @@ const ObjectPage: React.FC<ObjectPageProps> = ({
 
       {/* Validation error summary */}
       {Object.keys(errors).length > 0 && (
-        <Card className="border-red-500 bg-red-50" role="alert" aria-label="Validierungsfehler">
+        <Card className="border-destructive/40 bg-destructive/10" role="alert" aria-label="Validierungsfehler">
           <CardContent className="pt-4">
-            <div className="flex items-center gap-2 text-red-900 mb-2">
+            <div className="mb-2 flex items-center gap-2 text-destructive">
               <AlertTriangle className="h-5 w-5" aria-hidden="true" />
               <span className="font-semibold">Bitte korrigieren Sie folgende Felder:</span>
             </div>
             <ul className="list-disc list-inside space-y-1">
               {Object.entries(errors).map(([key, err]) => (
-                <li key={key} className="text-sm text-red-800">
+                <li key={key} className="text-sm text-destructive">
                   <a href={`#${key}`} className="underline hover:no-underline">
                     {(err as any)?.message ?? key}
                   </a>

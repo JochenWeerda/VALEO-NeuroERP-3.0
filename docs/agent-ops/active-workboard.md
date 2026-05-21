@@ -6,10 +6,12 @@ Stand: `2026-05-12`
 
 **Von:** Codex
 **Owner:** Codex
-**Stand:** reserviert 2026-05-21
+**Stand:** abgeschlossen 2026-05-21
 **Ziel des Slices:** Die wichtigsten sichtbaren Fach-/Maskenflaechen nach der Shell-Umstellung weiter auf Meridian tokenisieren.
 **Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/agent-ops/slices/DESIGN-MERIDIAN-SCREENS-001.yaml`, `packages/frontend-web/src/components/mask-builder/ListReport.tsx`, `packages/frontend-web/src/components/mask-builder/ObjectPage.tsx`, `packages/frontend-web/src/components/mask-builder/OverviewPage.tsx`, `packages/frontend-web/src/features/dashboard/DashboardCharts.tsx`, `packages/frontend-web/src/features/contracts/Contracts.tsx`, `packages/frontend-web/src/features/inventory/Inventory.tsx`, `packages/frontend-web/src/features/weighing/Weighing.tsx`, `packages/frontend-web/src/features/sales/Sales.tsx`
 **Abnahmekriterien:** Masken-Builder-Basisflaechen nutzen Meridian-Oberflaechen, Tabellen-/Filter-/Header-Muster und 44px Controls; Dashboard-Charts und Kernfeatures vermeiden generische Slate/Blue/Green-Mischung in den sichtbarsten Cards; Frontend-Typecheck und Workboard-Validierung sind gruen.
+**Erledigt:** Masken-Builder `ListReport`, `ObjectPage` und `OverviewPage` auf Meridian-Header, tokenisierte Oberflaechen, Primary/Harvest/Destructive-Zustandsfarben und 44px-kompatible Controls nachgezogen; Dashboard-Charts auf tokenisierte Empty/Error/Skeleton-Zustaende und Ocean/Harvest-Akzentkanten umgestellt; Contracts, Inventory, Weighing und Sales von generischen Slate/Blue/Green/Yellow/Red-Utility-Mustern auf Meridian-Cards, Badges, Listen-Items und Leerzustaende gezogen.
+**Checks:** `pnpm --filter @valero-neuroerp/frontend-web type-check`; `python scripts/agent_workboard_supervisor.py validate`; `node scripts/docs-markdown-check.cjs docs/agent-ops/active-workboard.md docs/agent-ops/slices/DESIGN-MERIDIAN-SCREENS-001.yaml`; `git diff --check` fuer Slice-Dateien; `docker compose up -d --build frontend-web`; Playwright-Check auf `http://localhost:3000` mit `data-theme=meridian`, H1 `App Starter`, Topbar `56px`, Input `44px`.
 **Offene Risiken:** Tiefe Modulunterseiten enthalten weiterhin harte Utility-Farben und brauchen bei Bedarf weitere fachbereichsweise Slices.
 
 ## DESIGN-MERIDIAN-SHELL-001

@@ -93,18 +93,18 @@ const dateFormatter = new Intl.DateTimeFormat('de-DE')
 const qualityConfig: Record<(typeof QUALITY_STATES)[number], { label: string; badge: string; icon: ReactElement }> = {
   good: {
     label: 'Gut',
-    badge: 'bg-green-100 text-green-800',
-    icon: <CheckCircle className="h-4 w-4 text-green-500" />,
+    badge: 'bg-primary/10 text-primary',
+    icon: <CheckCircle className="h-4 w-4 text-primary" />,
   },
   blocked: {
     label: 'Blockiert',
-    badge: 'bg-red-100 text-red-800',
-    icon: <AlertTriangle className="h-4 w-4 text-red-500" />,
+    badge: 'bg-destructive/10 text-destructive',
+    icon: <AlertTriangle className="h-4 w-4 text-destructive" />,
   },
   pending: {
     label: 'Ausstehend',
-    badge: 'bg-yellow-100 text-yellow-800',
-    icon: <Clock className="h-4 w-4 text-yellow-500" />,
+    badge: 'bg-[hsl(var(--accent)/0.14)] text-[hsl(var(--accent-foreground))]',
+    icon: <Clock className="h-4 w-4 text-[hsl(var(--accent))]" />,
   },
 }
 
@@ -148,7 +148,7 @@ export default function Inventory(): ReactElement {
     return (
       <div className="space-y-6">
         <div className="flex items-center justify-between">
-          <h1 className="text-2xl font-bold text-slate-900">Inventar</h1>
+          <h1 className="text-xl font-bold text-foreground">Inventar</h1>
           <Button variant="outline" onClick={() => void refetch()}>
             Erneut laden
           </Button>
@@ -162,11 +162,11 @@ export default function Inventory(): ReactElement {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">Inventar</h1>
-          <p className="text-sm text-slate-500">Lagerbestaende nach Los und Qualitaetsstatus</p>
+          <h1 className="text-xl font-bold text-foreground">Inventar</h1>
+          <p className="text-sm text-muted-foreground">Lagerbestaende nach Los und Qualitaetsstatus</p>
         </div>
         <Button variant="outline" onClick={() => void refetch()}>
           Aktualisieren
@@ -174,7 +174,7 @@ export default function Inventory(): ReactElement {
       </div>
 
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
-        <Card className="rounded-2xl shadow-sm">
+        <Card className="border-l-4 border-l-primary shadow-sm">
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium">Gesamtbestand</CardTitle>
             <CardDescription>Alle verfuegbaren Mengen</CardDescription>
@@ -183,13 +183,13 @@ export default function Inventory(): ReactElement {
             {isPending ? (
               <Skeleton className="h-8 w-24" />
             ) : (
-              <p className="text-2xl font-semibold text-slate-900">
+              <p className="text-2xl font-semibold tabular-nums text-foreground">
                 {quantityFormatter.format(summary.totalQuantity)} t
               </p>
             )}
           </CardContent>
         </Card>
-        <Card className="rounded-2xl shadow-sm">
+        <Card className="border-l-4 border-l-primary shadow-sm">
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium">Freigegeben</CardTitle>
             <CardDescription>Qualitaetsgepruefte Lose</CardDescription>
@@ -198,13 +198,13 @@ export default function Inventory(): ReactElement {
             {isPending ? (
               <Skeleton className="h-8 w-24" />
             ) : (
-              <p className="text-2xl font-semibold text-green-600">
+              <p className="text-2xl font-semibold tabular-nums text-primary">
                 {quantityFormatter.format(summary.goodQuantity)} t
               </p>
             )}
           </CardContent>
         </Card>
-        <Card className="rounded-2xl shadow-sm">
+        <Card className="border-l-4 border-l-destructive shadow-sm">
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium">Blockiert</CardTitle>
             <CardDescription>Qualitaetsprobleme</CardDescription>
@@ -213,13 +213,13 @@ export default function Inventory(): ReactElement {
             {isPending ? (
               <Skeleton className="h-8 w-24" />
             ) : (
-              <p className="text-2xl font-semibold text-red-600">
+              <p className="text-2xl font-semibold tabular-nums text-destructive">
                 {quantityFormatter.format(summary.blockedQuantity)} t
               </p>
             )}
           </CardContent>
         </Card>
-        <Card className="rounded-2xl shadow-sm">
+        <Card className="border-l-4 border-l-[hsl(var(--accent))] shadow-sm">
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium">Lose insgesamt</CardTitle>
             <CardDescription>Anzahl aktiver Lagerlose</CardDescription>
@@ -230,7 +230,7 @@ export default function Inventory(): ReactElement {
         </Card>
       </div>
 
-      <Card className="rounded-2xl shadow-sm">
+      <Card className="shadow-sm">
         <CardHeader>
           <CardTitle>Lageruebersicht</CardTitle>
           <CardDescription>Alle Lose mit Menge, Standort und Qualitaet</CardDescription>
@@ -239,7 +239,7 @@ export default function Inventory(): ReactElement {
           <div className="space-y-4">
             {isPending
               ? Array.from({ length: SKELETON_ROWS }).map((_, index) => (
-                  <div key={index} className="rounded-xl border border-slate-200 p-4">
+                  <div key={index} className="rounded-[var(--radius)] border border-border p-4">
                     <div className="flex items-center justify-between">
                       <div className="flex-1 space-y-2">
                         <Skeleton className="h-6 w-32" />
@@ -255,11 +255,11 @@ export default function Inventory(): ReactElement {
                   </div>
                 ))
               : lots.map((lot) => (
-                  <div key={lot.id} className="rounded-xl border border-slate-200 p-4 hover:bg-slate-50">
+                  <div key={lot.id} className="rounded-[var(--radius)] border border-border p-4 transition-colors hover:bg-primary/5">
                     <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                       <div className="space-y-2">
                         <div className="flex flex-wrap items-center gap-2">
-                          <h3 className="text-lg font-semibold text-slate-900">{lot.lotNumber}</h3>
+                          <h3 className="text-lg font-semibold text-foreground">{lot.lotNumber}</h3>
                           <div className="flex items-center gap-2">
                             {qualityConfig[lot.qualityStatus].icon}
                             <span className={`rounded-full px-2 py-1 text-xs font-medium ${qualityConfig[lot.qualityStatus].badge}`}>
@@ -267,7 +267,7 @@ export default function Inventory(): ReactElement {
                             </span>
                           </div>
                         </div>
-                        <div className="grid grid-cols-1 gap-2 text-sm text-slate-600 sm:grid-cols-2 md:grid-cols-4">
+                        <div className="grid grid-cols-1 gap-2 text-sm text-muted-foreground sm:grid-cols-2 md:grid-cols-4">
                           <div>
                             <span className="font-medium">Ware:</span> {lot.commodity}
                           </div>
@@ -281,7 +281,7 @@ export default function Inventory(): ReactElement {
                             <span className="font-medium">Lieferant:</span> {lot.supplier}
                           </div>
                         </div>
-                        <div className="text-sm text-slate-600">
+                        <div className="text-sm text-muted-foreground">
                           <span className="font-medium">Verfallsdatum:</span>{' '}
                           {dateFormatter.format(new Date(lot.expiryDate))}
                         </div>
@@ -295,9 +295,9 @@ export default function Inventory(): ReactElement {
                   </div>
                 ))}
             {!isPending && lots.length === 0 ? (
-              <div className="rounded-xl border border-dashed border-slate-200 bg-slate-50 p-6 text-center">
-                <p className="text-sm font-medium text-slate-700">Keine Lagerlose vorhanden</p>
-                <p className="text-xs text-slate-500">Sobald Bestaende erfasst sind, erscheinen sie hier.</p>
+              <div className="rounded-[var(--radius)] border border-dashed border-border bg-muted p-6 text-center">
+                <p className="text-sm font-medium text-foreground">Keine Lagerlose vorhanden</p>
+                <p className="text-xs text-muted-foreground">Sobald Bestaende erfasst sind, erscheinen sie hier.</p>
               </div>
             ) : null}
           </div>

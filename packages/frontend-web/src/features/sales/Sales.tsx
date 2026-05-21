@@ -147,7 +147,7 @@ export default function Sales(): ReactElement {
     return (
       <div className="space-y-6">
         <div className="flex items-center justify-between">
-          <h1 className="text-2xl font-bold text-slate-900">Sales</h1>
+          <h1 className="text-xl font-bold text-foreground">Sales</h1>
           <Button variant="outline" onClick={() => {
             void refetchOrders()
             void refetchInvoices()
@@ -167,11 +167,11 @@ export default function Sales(): ReactElement {
   const totalInvoicesAmount = invoices.reduce((total, invoice) => total + invoice.amount, 0)
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">Sales</h1>
-          <p className="text-sm text-slate-500">Uebersicht der Auftraege und Rechnungen</p>
+          <h1 className="text-xl font-bold text-foreground">Sales</h1>
+          <p className="text-sm text-muted-foreground">Uebersicht der Auftraege und Rechnungen</p>
         </div>
         <Button variant="outline" onClick={() => {
           void refetchOrders()
@@ -182,7 +182,7 @@ export default function Sales(): ReactElement {
       </div>
 
       <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-        <Card className="rounded-2xl shadow-sm">
+        <Card className="border-l-4 border-l-primary shadow-sm">
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium">Auftraege gesamt</CardTitle>
             <CardDescription>Summe aller erfassten Auftraege</CardDescription>
@@ -191,7 +191,7 @@ export default function Sales(): ReactElement {
             {ordersLoading ? <Skeleton className="h-8 w-24" /> : <p className="text-2xl font-semibold">{orders.length}</p>}
           </CardContent>
         </Card>
-        <Card className="rounded-2xl shadow-sm">
+        <Card className="border-l-4 border-l-[hsl(var(--accent))] shadow-sm">
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium">Offene Auftraege</CardTitle>
             <CardDescription>Status nicht abgeschlossen</CardDescription>
@@ -200,7 +200,7 @@ export default function Sales(): ReactElement {
             {ordersLoading ? <Skeleton className="h-8 w-24" /> : <p className="text-2xl font-semibold">{totalOpenOrders}</p>}
           </CardContent>
         </Card>
-        <Card className="rounded-2xl shadow-sm">
+        <Card className="border-l-4 border-l-primary shadow-sm">
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium">Rechnungssumme</CardTitle>
             <CardDescription>Gebuchte Rechnungen</CardDescription>
@@ -209,7 +209,7 @@ export default function Sales(): ReactElement {
             {invoicesLoading ? (
               <Skeleton className="h-8 w-32" />
             ) : (
-              <p className="text-2xl font-semibold text-slate-900">
+              <p className="text-2xl font-semibold tabular-nums text-foreground">
                 {currencyFormatter.format(totalInvoicesAmount)}
               </p>
             )}
@@ -218,7 +218,7 @@ export default function Sales(): ReactElement {
       </div>
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-        <Card className="rounded-2xl shadow-sm">
+        <Card className="shadow-sm">
           <CardHeader>
             <CardTitle>Auftraege</CardTitle>
             <CardDescription>Neueste Kundenauftraege mit Status</CardDescription>
@@ -227,7 +227,7 @@ export default function Sales(): ReactElement {
             <div className="space-y-4">
               {ordersLoading
                 ? Array.from({ length: LIST_SKELETON_ROWS }).map((_, index) => (
-                    <div key={index} className="rounded-xl border border-slate-200 p-4">
+                    <div key={index} className="rounded-[var(--radius)] border border-border p-4">
                       <Skeleton className="h-5 w-40" />
                       <div className="mt-2 grid grid-cols-2 gap-3 text-sm">
                         <Skeleton className="h-4 w-24" />
@@ -236,16 +236,16 @@ export default function Sales(): ReactElement {
                     </div>
                   ))
                 : orders.map((order) => (
-                    <div key={order.id} className="rounded-xl border border-slate-200 p-4 hover:bg-slate-50">
+                    <div key={order.id} className="rounded-[var(--radius)] border border-border p-4 transition-colors hover:bg-primary/5">
                       <div className="flex flex-col gap-1">
                         <div className="flex items-center justify-between">
-                          <h3 className="text-sm font-semibold text-slate-900">{order.orderNumber}</h3>
-                          <span className="rounded-full bg-slate-100 px-2 py-1 text-xs font-medium text-slate-700">
+                          <h3 className="text-sm font-semibold text-foreground">{order.orderNumber}</h3>
+                          <span className="rounded-full bg-muted px-2 py-1 text-xs font-medium text-foreground">
                             {order.status}
                           </span>
                         </div>
-                        <p className="text-sm text-slate-600">{order.customer}</p>
-                        <div className="flex items-center justify-between text-sm text-slate-500">
+                        <p className="text-sm text-muted-foreground">{order.customer}</p>
+                        <div className="flex items-center justify-between text-sm text-muted-foreground">
                           <span>{dateFormatter.format(new Date(order.createdAt))}</span>
                           <span>{currencyFormatter.format(order.amount)} {order.currency}</span>
                         </div>
@@ -253,16 +253,16 @@ export default function Sales(): ReactElement {
                     </div>
                   ))}
               {!ordersLoading && orders.length === 0 ? (
-                <div className="rounded-xl border border-dashed border-slate-200 bg-slate-50 p-6 text-center">
-                  <p className="text-sm font-medium text-slate-700">Keine Auftraege vorhanden</p>
-                  <p className="text-xs text-slate-500">Sobald Auftraege erfasst sind, erscheinen sie hier.</p>
+                <div className="rounded-[var(--radius)] border border-dashed border-border bg-muted p-6 text-center">
+                  <p className="text-sm font-medium text-foreground">Keine Auftraege vorhanden</p>
+                  <p className="text-xs text-muted-foreground">Sobald Auftraege erfasst sind, erscheinen sie hier.</p>
                 </div>
               ) : null}
             </div>
           </CardContent>
         </Card>
 
-        <Card className="rounded-2xl shadow-sm">
+        <Card className="shadow-sm">
           <CardHeader>
             <CardTitle>Rechnungen</CardTitle>
             <CardDescription>Gebuchte Rechnungen nach Kunde</CardDescription>
@@ -271,7 +271,7 @@ export default function Sales(): ReactElement {
             <div className="space-y-4">
               {invoicesLoading
                 ? Array.from({ length: LIST_SKELETON_ROWS }).map((_, index) => (
-                    <div key={index} className="rounded-xl border border-slate-200 p-4">
+                    <div key={index} className="rounded-[var(--radius)] border border-border p-4">
                       <Skeleton className="h-5 w-40" />
                       <div className="mt-2 grid grid-cols-2 gap-3 text-sm">
                         <Skeleton className="h-4 w-24" />
@@ -280,16 +280,16 @@ export default function Sales(): ReactElement {
                     </div>
                   ))
                 : invoices.map((invoice) => (
-                    <div key={invoice.id} className="rounded-xl border border-slate-200 p-4 hover:bg-slate-50">
+                    <div key={invoice.id} className="rounded-[var(--radius)] border border-border p-4 transition-colors hover:bg-primary/5">
                       <div className="flex flex-col gap-1">
                         <div className="flex items-center justify-between">
-                          <h3 className="text-sm font-semibold text-slate-900">{invoice.invoiceNumber}</h3>
-                          <span className="rounded-full bg-slate-100 px-2 py-1 text-xs font-medium text-slate-700">
+                          <h3 className="text-sm font-semibold text-foreground">{invoice.invoiceNumber}</h3>
+                          <span className="rounded-full bg-muted px-2 py-1 text-xs font-medium text-foreground">
                             {invoice.status}
                           </span>
                         </div>
-                        <p className="text-sm text-slate-600">{invoice.customer}</p>
-                        <div className="flex items-center justify-between text-sm text-slate-500">
+                        <p className="text-sm text-muted-foreground">{invoice.customer}</p>
+                        <div className="flex items-center justify-between text-sm text-muted-foreground">
                           <span>{dateFormatter.format(new Date(invoice.issuedAt))}</span>
                           <span>{currencyFormatter.format(invoice.amount)} {invoice.currency}</span>
                         </div>
@@ -297,9 +297,9 @@ export default function Sales(): ReactElement {
                     </div>
                   ))}
               {!invoicesLoading && invoices.length === 0 ? (
-                <div className="rounded-xl border border-dashed border-slate-200 bg-slate-50 p-6 text-center">
-                  <p className="text-sm font-medium text-slate-700">Keine Rechnungen vorhanden</p>
-                  <p className="text-xs text-slate-500">Sobald Rechnungen gebucht sind, erscheinen sie hier.</p>
+                <div className="rounded-[var(--radius)] border border-dashed border-border bg-muted p-6 text-center">
+                  <p className="text-sm font-medium text-foreground">Keine Rechnungen vorhanden</p>
+                  <p className="text-xs text-muted-foreground">Sobald Rechnungen gebucht sind, erscheinen sie hier.</p>
                 </div>
               ) : null}
             </div>
