@@ -270,6 +270,16 @@ from app.api.v1.endpoints import (
     stuecklisten,
 )
 
+# Fachliche Vertiefung Wave 8 — Rohwarengruppen, Qualitäten, Zu-/Abschlag-Staffeln
+from app.api.v1.endpoints import rohwarengruppen
+
+# Fachliche Vertiefung Wave 9 — Betriebsstätten, Individuelle Artikelnummern, Versandprofile
+from app.api.v1.endpoints import (
+    betriebsstaetten,
+    individuelle_artikelnummern,
+    versandprofile,
+)
+
 # Import domain routers
 from app.domains.agrar.api import psm, psm_proplanta
 from app.domains.inventory.api import router as inventory_domain_router
@@ -1567,6 +1577,14 @@ api_router.include_router(fibu_zahlungsmeldungen.router)
 api_router.include_router(dauerauftraege.router)
 api_router.include_router(individualpreise.router)
 api_router.include_router(stuecklisten.router)
+
+# Fachliche Vertiefung Wave 8
+api_router.include_router(rohwarengruppen.router)
+
+# Fachliche Vertiefung Wave 9
+api_router.include_router(betriebsstaetten.router)
+api_router.include_router(individuelle_artikelnummern.router)
+api_router.include_router(versandprofile.router)
 
 # Report/Print: Partie-Genealogie, Wiegeschein-PDF-Preview, GS1-Labels
 api_router.include_router(report_print.router)
