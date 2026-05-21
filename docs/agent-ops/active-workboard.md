@@ -2,6 +2,54 @@
 
 Stand: `2026-05-12`
 
+## CONTAINER-HEALTH-CRM-INVENTORY-001
+
+**Von:** Claude Code / Codex Integration
+**Owner:** Team
+**Stand:** abgeschlossen 2026-05-21
+**Ziel des Slices:** Container-Health-Probleme in Backend, Inventory und CRM-Services nach Neustart-/Healthcheck-Diagnose repo-seitig stabilisieren.
+**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/agent-ops/slices/CONTAINER-HEALTH-CRM-INVENTORY-001.yaml`, `app/api/v1/endpoints/*.py` 204-Response-Korrekturen, `services/inventory/app/workflows/registration.py`, `services/crm-*/**`, `services/crm-analytics/Dockerfile`, `services/crm-communication/Dockerfile`, `services/crm-multichannel/Dockerfile`, `services/crm-security/main.py`, `services/crm-workflow/Dockerfile`
+**Abnahmekriterien:** FastAPI-Routen mit 204 liefern keine Response-Body-Definition mehr; Inventory-Workflow-Registrierung ist Pydantic-v2-kompatibel; CRM-Services nutzen absolute Imports und `pydantic-settings`; Docker-Builds koennen Dependency-Layer gezielt invalidieren; verbleibende Containerstarts sind separat ueber Compose-Health zu beobachten.
+**Erledigt:** 115 FastAPI-204-Routen gehaertet; CRM-Konfigurationen auf `pydantic-settings` und absolute Imports gezogen; reservierte SQLAlchemy-`metadata`-Attribute umbenannt; Inventory-URL-Cast fuer Pydantic v2 korrigiert; CRM-Dockerfiles mit `CACHEBUST`-Arg fuer reproduzierbare Dependency-Rebuilds ergaenzt.
+**Checks:** Commit `67f8b9c51`; gezielte Docker-/Containerdiagnose; finales Git-Diff der Nachlieferung beschraenkt auf CRM-Dockerfiles und `services/crm-security/main.py`.
+**Offene Risiken:** Einzelne Container koennen weiterhin an laufzeitabhaengigen externen Dependencies, Migrationen oder Credentials scheitern; untracked Analyseartefakte bleiben ausserhalb dieses Slices.
+
+## DESIGN-MERIDIAN-SCREENS-001
+
+**Von:** Codex
+**Owner:** Codex
+**Stand:** abgeschlossen 2026-05-21
+**Ziel des Slices:** Die wichtigsten sichtbaren Fach-/Maskenflaechen nach der Shell-Umstellung weiter auf Meridian tokenisieren.
+**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/agent-ops/slices/DESIGN-MERIDIAN-SCREENS-001.yaml`, `packages/frontend-web/src/components/mask-builder/ListReport.tsx`, `packages/frontend-web/src/components/mask-builder/ObjectPage.tsx`, `packages/frontend-web/src/components/mask-builder/OverviewPage.tsx`, `packages/frontend-web/src/features/dashboard/DashboardCharts.tsx`, `packages/frontend-web/src/features/contracts/Contracts.tsx`, `packages/frontend-web/src/features/inventory/Inventory.tsx`, `packages/frontend-web/src/features/weighing/Weighing.tsx`, `packages/frontend-web/src/features/sales/Sales.tsx`
+**Abnahmekriterien:** Masken-Builder-Basisflaechen nutzen Meridian-Oberflaechen, Tabellen-/Filter-/Header-Muster und 44px Controls; Dashboard-Charts und Kernfeatures vermeiden generische Slate/Blue/Green-Mischung in den sichtbarsten Cards; Frontend-Typecheck und Workboard-Validierung sind gruen.
+**Erledigt:** Masken-Builder `ListReport`, `ObjectPage` und `OverviewPage` auf Meridian-Header, tokenisierte Oberflaechen, Primary/Harvest/Destructive-Zustandsfarben und 44px-kompatible Controls nachgezogen; Dashboard-Charts auf tokenisierte Empty/Error/Skeleton-Zustaende und Ocean/Harvest-Akzentkanten umgestellt; Contracts, Inventory, Weighing und Sales von generischen Slate/Blue/Green/Yellow/Red-Utility-Mustern auf Meridian-Cards, Badges, Listen-Items und Leerzustaende gezogen.
+**Checks:** `pnpm --filter @valero-neuroerp/frontend-web type-check`; `python scripts/agent_workboard_supervisor.py validate`; `node scripts/docs-markdown-check.cjs docs/agent-ops/active-workboard.md docs/agent-ops/slices/DESIGN-MERIDIAN-SCREENS-001.yaml`; `git diff --check` fuer Slice-Dateien; `docker compose up -d --build frontend-web`; Playwright-Check auf `http://localhost:3000` mit `data-theme=meridian`, H1 `App Starter`, Topbar `56px`, Input `44px`.
+**Offene Risiken:** Tiefe Modulunterseiten enthalten weiterhin harte Utility-Farben und brauchen bei Bedarf weitere fachbereichsweise Slices.
+
+## DESIGN-MERIDIAN-SHELL-001
+
+**Von:** Codex
+**Owner:** Codex
+**Stand:** abgeschlossen 2026-05-21
+**Ziel des Slices:** Meridian sichtbar in Frontend-Shell und Core-UI aktivieren, damit `localhost:3000` die beschlossene Designrichtung zeigt.
+**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/agent-ops/slices/DESIGN-MERIDIAN-SHELL-001.yaml`, `packages/frontend-web/index.html`, `packages/frontend-web/src/index.css`, `packages/frontend-web/src/styles/design-tokens-meridian.css`, `packages/frontend-web/tailwind.config.js`, `packages/frontend-web/src/layouts/DashboardLayout.tsx`, `packages/frontend-web/src/components/layout/AppShell.tsx`, `packages/frontend-web/src/components/navigation/AppShell.tsx`, `packages/frontend-web/src/components/navigation/Sidebar.tsx`, `packages/frontend-web/src/components/navigation/SidebarFavorites.tsx`, `packages/frontend-web/src/components/navigation/SidebarSettingsLink.tsx`, `packages/frontend-web/src/components/navigation/TopBar.tsx`, `packages/frontend-web/src/components/ui/button.tsx`, `packages/frontend-web/src/components/ui/input.tsx`, `packages/frontend-web/src/components/ui/card.tsx`, `packages/frontend-web/src/components/ui/table.tsx`, `packages/frontend-web/src/components/ui/data-table.tsx`, `packages/frontend-web/src/features/dashboard/Dashboard.tsx`, `packages/frontend-web/src/pages/start-dashboard.tsx`
+**Abnahmekriterien:** Meridian-Theme ist am Root aktiv; sichtbare Shell nutzt Navy-Sidebar, tokenbasierte Breiten und kompaktere Topbar; Button/Input-Defaults erfuellen 44px-Touch-Target; Dashboard/ListReport-Basismuster zeigen Ocean-Blue/Harvest-Akzente statt generischer Slate/Blue-Mischung; Frontend-Typecheck und Workboard-Validierung sind gruen.
+**Erledigt:** Meridian am HTML-Root aktiviert; alte Brand-/Neutral-Aliase auf Ocean-Blue, Harvest und blau getoente Neutrals gezogen; echte Runtime-Shell (`DashboardLayout`/`components/navigation`) startet expanded mit 240px Navy-Sidebar, 56px Topbar und 44px Sidebar-Zielen; Legacy-Shell ebenfalls auf Meridian-Breiten/-Farben nachgezogen; Button/Input/Card/Table-Basis auf Meridian-Masse und Fokusverhalten angepasst; Start-Dashboard und Analytics-Dashboard zeigen tokenbasierte Oberflaechen und Harvest/Ocean-Akzente.
+**Checks:** `pnpm --filter @valero-neuroerp/frontend-web type-check`; `python scripts/agent_workboard_supervisor.py validate`; `node scripts/docs-markdown-check.cjs docs/agent-ops/active-workboard.md docs/agent-ops/slices/DESIGN-MERIDIAN-SHELL-001.yaml`; `git diff --check`; Playwright computed-style check auf `http://localhost:3001` und nach Frontend-Container-Rebuild auf `http://localhost:3000` mit `data-theme=meridian`, Sidebar `240px`, Topbar `56px`, Input `44px`, min. Sidebar-Target `44px`.
+**Offene Risiken:** Viele Fachseiten enthalten weiterhin harte Tailwind-Farben und brauchen Folgeslices; dieser Slice fokussiert die sichtbarste Shell/Core-UI-Schicht.
+
+## KEYCLOAK-PSQL-DB-001
+
+**Von:** Codex
+**Owner:** Codex
+**Stand:** abgeschlossen 2026-05-21
+**Ziel des Slices:** Fehlende Keycloak-Datenbank im laufenden PostgreSQL anlegen und Init-Script fuer kuenftige Deployments absichern.
+**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/agent-ops/slices/KEYCLOAK-PSQL-DB-001.yaml`, `scripts/init.sql`
+**Abnahmekriterien:** Datenbank `keycloak` existiert im laufenden Postgres; Init-Script enthaelt Bootstrap fuer kuenftige Deployments; Keycloak startet ohne `database "keycloak" does not exist`; Claudes Dirty Files bleiben unberuehrt.
+**Erledigt:** Laufende PostgreSQL-DB `keycloak` mit Owner `keycloak` angelegt; Verbindung als User `keycloak` gegen DB `keycloak` geprueft; `scripts/init.sql` von ungueltigem `CREATE DATABASE` im `DO`-Block auf psql-`\\gexec`-Bootstrap umgestellt; Keycloak neu gestartet und Schema-Initialisierung im Log bestaetigt.
+**Checks:** `docker exec valeo-neuro-erp-postgres psql -U keycloak -d keycloak -tAc "SELECT current_database(), current_user;"`; `docker compose restart keycloak`; `docker logs --tail 40 valeo-neuro-erp-keycloak`; `python scripts/agent_workboard_supervisor.py validate`
+**Offene Risiken:** Keycloak kann nach DB-Anlage noch an separaten Realm-/Credential-/Healthcheck-Themen scheitern.
+
 ## UAT-AUFLAGEN-2026-05-17
 
 **Von:** Codex

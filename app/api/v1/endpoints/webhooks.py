@@ -5,7 +5,7 @@ GET/POST/DEL for webhook registrations + event areas.
 
 from typing import Optional
 
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import Response, APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel, HttpUrl, field_validator
 from sqlalchemy.orm import Session
 
@@ -114,7 +114,7 @@ async def register_webhook(
     return WebhookOut.model_validate(obj)
 
 
-@router.delete("/{webhook_id}", status_code=204)
+@router.delete("/{webhook_id}", status_code=204, response_class=Response)
 async def remove_webhook(webhook_id: str, db: Session = Depends(get_db)):
     """DEL Entfernen"""
     obj = db.query(WebhookRegistration).filter(WebhookRegistration.id == webhook_id).first()

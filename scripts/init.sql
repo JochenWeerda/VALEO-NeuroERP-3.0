@@ -15,13 +15,11 @@ BEGIN
   END IF;
 END $$;
 
--- Keycloak DB erstellen (wenn nicht vorhanden)
-DO $$
-BEGIN
-  IF NOT EXISTS (SELECT 1 FROM pg_database WHERE datname = 'keycloak') THEN
-    CREATE DATABASE keycloak OWNER keycloak;
-  END IF;
-END $$;
+-- Keycloak DB erstellen (wenn nicht vorhanden).
+-- CREATE DATABASE darf nicht in einem DO/Transaktionsblock laufen.
+SELECT 'CREATE DATABASE keycloak OWNER keycloak'
+WHERE NOT EXISTS (SELECT 1 FROM pg_database WHERE datname = 'keycloak')
+\gexec
 
 -- Sicherheitshalber: Rechte setzen (OWNER reicht meist, aber ist ok)
 GRANT ALL PRIVILEGES ON DATABASE keycloak TO keycloak;

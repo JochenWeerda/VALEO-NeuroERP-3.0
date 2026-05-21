@@ -113,10 +113,10 @@ const reduceSummary = (tickets: WeighingTicket[]): TicketSummary => {
 }
 
 const statusBadgeClasses: Record<(typeof TICKET_STATUSES)[number], string> = {
-  Draft: 'bg-slate-100 text-slate-700',
-  InProgress: 'bg-yellow-100 text-yellow-800',
-  Completed: 'bg-green-100 text-green-700',
-  Cancelled: 'bg-red-100 text-red-700',
+  Draft: 'bg-muted text-foreground',
+  InProgress: 'bg-[hsl(var(--accent)/0.14)] text-[hsl(var(--accent-foreground))]',
+  Completed: 'bg-primary/10 text-primary',
+  Cancelled: 'bg-destructive/10 text-destructive',
 }
 
 const dateFormatter = new Intl.DateTimeFormat('de-DE', {
@@ -155,7 +155,7 @@ export default function Weighing(): ReactElement {
     return (
       <div className="space-y-6">
         <div className="flex items-center justify-between">
-          <h1 className="text-2xl font-bold text-slate-900">Wiegescheine</h1>
+          <h1 className="text-xl font-bold text-foreground">Wiegescheine</h1>
           <Button variant="outline" onClick={() => void refetch()}>
             Erneut laden
           </Button>
@@ -169,11 +169,11 @@ export default function Weighing(): ReactElement {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">Wiegescheine</h1>
-          <p className="text-sm text-slate-500">Uebersicht der heutigen Tickets</p>
+          <h1 className="text-xl font-bold text-foreground">Wiegescheine</h1>
+          <p className="text-sm text-muted-foreground">Uebersicht der heutigen Tickets</p>
         </div>
         <Button variant="outline" onClick={() => void refetch()}>
           Aktualisieren
@@ -181,7 +181,7 @@ export default function Weighing(): ReactElement {
       </div>
 
       <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-        <Card className="rounded-2xl shadow-sm">
+        <Card className="border-l-4 border-l-primary shadow-sm">
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium">Tickets heute</CardTitle>
             <CardDescription>Anzahl der erfassten Tickets</CardDescription>
@@ -190,27 +190,27 @@ export default function Weighing(): ReactElement {
             {isPending ? <Skeleton className="h-8 w-24" /> : <p className="text-2xl font-semibold">{summary.total}</p>}
           </CardContent>
         </Card>
-        <Card className="rounded-2xl shadow-sm">
+        <Card className="border-l-4 border-l-[hsl(var(--accent))] shadow-sm">
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium">In Bearbeitung</CardTitle>
             <CardDescription>Tickets mit laufendem Wiegevorgang</CardDescription>
           </CardHeader>
           <CardContent>
-            {isPending ? <Skeleton className="h-8 w-24" /> : <p className="text-2xl font-semibold text-yellow-700">{summary.inProgress}</p>}
+            {isPending ? <Skeleton className="h-8 w-24" /> : <p className="text-2xl font-semibold tabular-nums text-[hsl(var(--accent-foreground))]">{summary.inProgress}</p>}
           </CardContent>
         </Card>
-        <Card className="rounded-2xl shadow-sm">
+        <Card className="border-l-4 border-l-primary shadow-sm">
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium">Abgeschlossen</CardTitle>
             <CardDescription>Heute finalisierte Tickets</CardDescription>
           </CardHeader>
           <CardContent>
-            {isPending ? <Skeleton className="h-8 w-24" /> : <p className="text-2xl font-semibold text-green-700">{summary.completed}</p>}
+            {isPending ? <Skeleton className="h-8 w-24" /> : <p className="text-2xl font-semibold tabular-nums text-primary">{summary.completed}</p>}
           </CardContent>
         </Card>
       </div>
 
-      <Card className="rounded-2xl shadow-sm">
+      <Card className="shadow-sm">
         <CardHeader>
           <CardTitle>Heute erfasste Tickets</CardTitle>
           <CardDescription>Mit Status und optionaler Vertragszuordnung</CardDescription>
@@ -219,7 +219,7 @@ export default function Weighing(): ReactElement {
           <div className="space-y-4">
             {isPending
               ? Array.from({ length: SKELETON_ROWS }).map((_, index) => (
-                  <div key={index} className="rounded-xl border border-slate-200 p-4">
+                  <div key={index} className="rounded-[var(--radius)] border border-border p-4">
                     <Skeleton className="h-5 w-32" />
                     <div className="mt-2 grid grid-cols-2 gap-3 text-sm">
                       <Skeleton className="h-4 w-24" />
@@ -228,20 +228,20 @@ export default function Weighing(): ReactElement {
                   </div>
                 ))
               : tickets.map((ticket) => (
-                  <div key={ticket.id} className="rounded-xl border border-slate-200 p-4 hover:bg-slate-50">
+                  <div key={ticket.id} className="rounded-[var(--radius)] border border-border p-4 transition-colors hover:bg-primary/5">
                     <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
                       <div className="space-y-2">
                         <div className="flex flex-wrap items-center gap-2">
-                          <h3 className="text-sm font-semibold text-slate-900">{ticket.ticketNumber}</h3>
+                          <h3 className="text-sm font-semibold text-foreground">{ticket.ticketNumber}</h3>
                           <span className={`rounded-full px-2 py-1 text-xs font-medium ${statusBadgeClasses[ticket.status]}`}>
                             {ticket.status}
                           </span>
                         </div>
-                        <div className="text-sm text-slate-600">
+                        <div className="text-sm text-muted-foreground">
                           Vertrag:{' '}
                           {ticket.contractId ?? 'kein Bezug'}
                         </div>
-                        <div className="text-sm text-slate-500">
+                        <div className="text-sm text-muted-foreground">
                           Erstellt: {dateFormatter.format(new Date(ticket.createdAt))}
                         </div>
                       </div>
@@ -259,9 +259,9 @@ export default function Weighing(): ReactElement {
                   </div>
                 ))}
             {!isPending && tickets.length === 0 ? (
-              <div className="rounded-xl border border-dashed border-slate-200 bg-slate-50 p-6 text-center">
-                <p className="text-sm font-medium text-slate-700">Keine Tickets fuer heute</p>
-                <p className="text-xs text-slate-500">Neue Wiegevorgaenge erscheinen automatisch.</p>
+              <div className="rounded-[var(--radius)] border border-dashed border-border bg-muted p-6 text-center">
+                <p className="text-sm font-medium text-foreground">Keine Tickets fuer heute</p>
+                <p className="text-xs text-muted-foreground">Neue Wiegevorgaenge erscheinen automatisch.</p>
               </div>
             ) : null}
           </div>

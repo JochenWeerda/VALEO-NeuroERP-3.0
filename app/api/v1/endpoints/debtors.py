@@ -6,7 +6,7 @@ Adapted to existing database schema (debitor_number, name, address JSONB)
 
 from typing import Optional
 import re
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import Response, APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 from sqlalchemy import text
 from decimal import Decimal
@@ -436,7 +436,7 @@ async def get_debtor_balance(
         raise HTTPException(status_code=500, detail=f"Failed to get debtor balance: {str(e)}")
 
 
-@router.delete("/{debtor_id}", status_code=204)
+@router.delete("/{debtor_id}", status_code=204, response_class=Response)
 async def delete_debtor(
     debtor_id: str,
     db: Session = Depends(get_db)

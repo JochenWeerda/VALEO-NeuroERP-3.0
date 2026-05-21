@@ -104,7 +104,7 @@ class Email(Base):
     # Metadata
     priority: Mapped[str] = mapped_column(String(16), default="normal")
     tags: Mapped[list[str]] = mapped_column(JSON, default=list)
-    metadata: Mapped[dict] = mapped_column(JSON, default=dict)
+    extra_metadata: Mapped[dict] = mapped_column(JSON, default=dict, name="metadata")
 
     created_by: Mapped[str | None] = mapped_column(String(64))
     updated_by: Mapped[str | None] = mapped_column(String(64))

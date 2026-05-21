@@ -4,7 +4,7 @@ FIBU-BNK-01: Bankstamm-UI – CRUD für Bankkonten inkl. Verknüpfung zum Konten
 """
 
 from typing import List, Optional
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import Response, APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 from sqlalchemy import text
 from decimal import Decimal
@@ -297,7 +297,7 @@ async def update_bank_account(
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.delete("/{account_id}", status_code=204)
+@router.delete("/{account_id}", status_code=204, response_class=Response)
 async def delete_bank_account(
     account_id: str,
     tenant_id: str = Depends(get_tenant_id),

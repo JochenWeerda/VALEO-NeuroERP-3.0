@@ -4,7 +4,7 @@ RESTful API for Tours with Stops, Delivery Notes, and Events
 """
 
 from typing import Optional, List
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import Response, APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 from pydantic import BaseModel, ConfigDict
 from datetime import datetime
@@ -279,7 +279,7 @@ async def update_tour(
     return tour
 
 
-@router.delete("/{tour_id}", status_code=204)
+@router.delete("/{tour_id}", status_code=204, response_class=Response)
 async def delete_tour(tour_id: str, db: Session = Depends(get_db)):
     """Delete a tour"""
     repo = TourRepository(db)

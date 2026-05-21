@@ -1391,3 +1391,142 @@ class ZertifikatAPIEntry(Base):
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
 
+
+# ── WAVE 107: KRITISCHE IN-MEMORY STORES → DB ────────────────────────────────
+
+class AgentContextDB(Base):
+    """Agent-Kontext (temporäre Delegations-Token) — ersetzt AgentContextStore"""
+    __tablename__ = "agent_contexts"
+    __table_args__ = {"schema": "domain_ops", "extend_existing": True}
+
+    id = Column(String, primary_key=True, default=default_prefixed_id("AC"))
+    context_id = Column(String(120), nullable=False, unique=True, index=True)
+    agent_id = Column(String(120), nullable=False, index=True)
+    tenant_id = Column(String(120), nullable=False, index=True)
+    delegated_roles = Column(JSONB, default=list)
+    context_expires_at = Column(DateTime(timezone=True), nullable=False)
+    widerrufen = Column(Boolean, default=False)
+    erstellt_am = Column(DateTime(timezone=True), server_default=func.now())
+
+
+class ErnteKampagneDB(Base):
+    """Ernte-Kampagne — ersetzt ErnteKampagneStore"""
+    __tablename__ = "ernte_kampagnen"
+    __table_args__ = {"schema": "domain_agrar", "extend_existing": True}
+
+    id = Column(String, primary_key=True, default=default_prefixed_id("EK"))
+    kampagne_id = Column(String(120), nullable=False, unique=True, index=True)
+    tenant_id = Column(String(120), nullable=False, index=True)
+    wirtschaftsjahr = Column(Integer, nullable=False)
+    ernte_art = Column(String(40), nullable=False)
+    bezeichnung = Column(String(255), nullable=False)
+    status = Column(String(30), default="geplant")  # geplant|aktiv|abgeschlossen
+    schlag_ziele = Column(JSONB, default=list)
+    erstellt_am = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+
+
+class ReklamationDB(Base):
+    """Reklamation (Lieferantenbeschwerde) — ersetzt ReklamationStore"""
+    __tablename__ = "reklamationen"
+    __table_args__ = {"schema": "domain_ops", "extend_existing": True}
+
+    id = Column(String, primary_key=True, default=default_prefixed_id("REK"))
+    reklamation_id = Column(String(120), nullable=False, unique=True, index=True)
+    tenant_id = Column(String(120), nullable=False, index=True)
+    lieferant_id = Column(String(120), nullable=False, index=True)
+    typ = Column(String(60), nullable=False)
+    positionen = Column(JSONB, default=list)
+    zustaendiger = Column(String(255), nullable=False)
+    frist_datum = Column(Date, nullable=False)
+    kontrakt_id = Column(String(120), nullable=True, index=True)
+    status = Column(String(30), default="offen")
+    crm_referenz = Column(JSONB, nullable=True)
+    dms_referenzen = Column(JSONB, default=list)
+    gobd_beleg_id = Column(String(120), nullable=True)
+    audit_trail = Column(JSONB, default=list)
+    erstellt_am = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+
+
+class BetriebsKennzahlDB(Base):
+    """Betriebs-Kennzahl (Benchmark) — ersetzt _kennzahlen_store dict"""
+    __tablename__ = "betriebs_kennzahlen"
+    __table_args__ = {"schema": "domain_ops", "extend_existing": True}
+
+    id = Column(String, primary_key=True, default=default_prefixed_id("BKZ"))
+    kz_id = Column(String(120), nullable=False, unique=True, index=True)
+    tenant_id = Column(String(120), nullable=False, index=True)
+    kz_name = Column(String(120), nullable=False)
+    einheit = Column(String(30), nullable=False)
+    wert = Column(DECIMAL(18, 4), nullable=False)
+    periode = Column(String(20), nullable=False, index=True)
+    berechnet_am = Column(Date, nullable=False)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+
+class SiloZelleDB(Base):
+    """Silo-Zelle — ersetzt SiloCellStore per-tenant registry"""
+    __tablename__ = "silo_zellen"
+    __table_args__ = {"schema": "domain_agrar", "extend_existing": True}
+
+    id = Column(String, primary_key=True, default=default_prefixed_id("SZ"))
+    silo_id = Column(String(120), nullable=False, unique=True, index=True)
+    tenant_id = Column(String(120), nullable=False, index=True)
+    bezeichnung = Column(String(255), nullable=False)
+    kapazitaet_t = Column(DECIMAL(14, 3), nullable=False)
+    bestand_t = Column(DECIMAL(14, 3), nullable=False, default=0)
+    sorte = Column(String(120), nullable=True)
+    gesperrt = Column(Boolean, default=False)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+
+    bewegungen = relationship("SiloBewegungDB", back_populates="zelle", cascade="all, delete-orphan")
+
+
+class SiloBewegungDB(Base):
+    """Silo-Bewegung (Ein-/Auslagerung)"""
+    __tablename__ = "silo_bewegungen"
+    __table_args__ = {"schema": "domain_agrar", "extend_existing": True}
+
+    id = Column(String, primary_key=True, default=default_prefixed_id("SB"))
+    bewegung_id = Column(String(120), nullable=False, unique=True, index=True)
+    silo_id = Column(String(120), ForeignKey("domain_agrar.silo_zellen.silo_id"), nullable=False, index=True)
+    typ = Column(String(20), nullable=False)  # einlagerung|auslagerung
+    menge_t = Column(DECIMAL(14, 3), nullable=False)
+    sorte = Column(String(120), nullable=True)
+    beleg_nr = Column(String(120), nullable=True)
+    zeitpunkt = Column(DateTime(timezone=True), server_default=func.now())
+
+    zelle = relationship("SiloZelleDB", back_populates="bewegungen")
+
+
+class PricingSourceDB(Base):
+    """Pricing-Source (Marktdatenquellen) — ersetzt _SOURCES dict"""
+    __tablename__ = "pricing_sources"
+    __table_args__ = {"schema": "domain_ops", "extend_existing": True}
+
+    id = Column(String, primary_key=True, default=default_prefixed_id("PS"))
+    source_id = Column(String(120), nullable=False, index=True)
+    tenant_id = Column(String(120), nullable=False, index=True)
+    source_data = Column(JSONB, nullable=False)  # full PricingSourceManifest as JSON
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+
+
+class ErnteDB(Base):
+    """Ernte-Planung/Übersicht — einfache Ernte-Erfassung (Schlag, Kultur, Menge)"""
+    __tablename__ = "ernte_planung"
+    __table_args__ = {"schema": "domain_agrar", "extend_existing": True}
+
+    id = Column(String, primary_key=True, default=default_prefixed_id("ERN"))
+    tenant_id = Column(String(120), nullable=False, index=True)
+    schlag = Column(String(255), nullable=False)
+    kultur = Column(String(120), nullable=False)
+    datum = Column(Date, nullable=False)
+    menge = Column(Float, nullable=False, default=0)
+    ertrag = Column(Float, nullable=False, default=0)
+    status = Column(String(30), default="geplant")  # geplant|laufend|abgeschlossen
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+

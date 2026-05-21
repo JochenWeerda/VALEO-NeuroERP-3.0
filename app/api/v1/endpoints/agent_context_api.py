@@ -1,18 +1,20 @@
 from __future__ import annotations
 
-from datetime import datetime, timedelta
 import uuid
+from datetime import datetime, timedelta, timezone
+from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import Response
 from pydantic import BaseModel
+from sqlalchemy.orm import Session
 
 from app.core.database import get_db
-from app.core.multi_context_agent import AgentContext, AgentContextStore, tenantbewusst_dispatch
+from app.core.multi_context_agent import AgentContext, tenantbewusst_dispatch
 from app.core.tenant_isolation_guard import TenantIsolationGuard
+from app.domains.operations.models import AgentContextDB
 
 router = APIRouter(prefix="/agent-context", tags=["agent-context"])
-_store = AgentContextStore()
 _guard = TenantIsolationGuard()
 
 
@@ -33,38 +35,64 @@ class AgentDispatchRequest(BaseModel):
 class AgentKnowledgePackRequest(BaseModel):
     rolle: str
     kanal: str = "CHAT"
-    capability_key: str | None = None
+    capability_key: Optional[str] = None
     query: str = ""
     limit: int = 4
 
 
+def _row_to_context(row: AgentContextDB) -> AgentContext:
+    return AgentContext(
+        context_id=row.context_id,
+        agent_id=row.agent_id,
+        tenant_id=row.tenant_id,
+        delegated_roles=row.delegated_roles or [],
+        context_expires_at=row.context_expires_at,
+        erstellt_am=row.erstellt_am,
+    )
+
+
+def _get_active_context(context_id: str, db: Session) -> AgentContextDB:
+    row = db.query(AgentContextDB).filter(AgentContextDB.context_id == context_id).first()
+    if not row:
+        raise HTTPException(404, "Kontext nicht gefunden")
+    if row.widerrufen:
+        raise HTTPException(410, "Kontext wurde widerrufen")
+    if row.context_expires_at.replace(tzinfo=timezone.utc) < datetime.now(tz=timezone.utc):
+        raise HTTPException(410, "Kontext ist abgelaufen")
+    return row
+
+
 @router.post("", status_code=201)
-def create_context(req: AgentContextCreateRequest) -> AgentContext:
-    context = AgentContext(
+def create_context(req: AgentContextCreateRequest, db: Session = Depends(get_db)):
+    expires = datetime.now(tz=timezone.utc) + timedelta(seconds=req.ttl_sekunden)
+    row = AgentContextDB(
         context_id=str(uuid.uuid4()),
         agent_id=req.agent_id,
         tenant_id=req.tenant_id,
         delegated_roles=req.delegated_roles,
-        context_expires_at=datetime.utcnow() + timedelta(seconds=req.ttl_sekunden),
-        erstellt_am=datetime.utcnow(),
+        context_expires_at=expires,
+        widerrufen=False,
     )
-    _store.add(context)
-    return context
+    db.add(row)
+    db.commit()
+    db.refresh(row)
+    return _row_to_context(row)
 
 
-@router.delete("/{context_id}", status_code=204)
-def widerrufen(context_id: str) -> Response:
-    ok = _store.widerrufen(context_id)
-    if not ok:
-        raise HTTPException(status_code=404, detail="Kontext nicht gefunden")
+@router.delete("/{context_id}", status_code=204, response_class=Response)
+def widerrufen(context_id: str, db: Session = Depends(get_db)):
+    row = db.query(AgentContextDB).filter(AgentContextDB.context_id == context_id).first()
+    if not row:
+        raise HTTPException(404, "Kontext nicht gefunden")
+    row.widerrufen = True
+    db.commit()
     return Response(status_code=204)
 
 
 @router.post("/{context_id}/dispatch")
-def dispatch(context_id: str, req: AgentDispatchRequest):
-    context = _store.get(context_id)
-    if context is None:
-        raise HTTPException(status_code=404, detail="Kontext nicht gefunden")
+def dispatch(context_id: str, req: AgentDispatchRequest, db: Session = Depends(get_db)):
+    row = _get_active_context(context_id, db)
+    context = _row_to_context(row)
     return tenantbewusst_dispatch(
         context=context,
         command_name=req.command_name,
@@ -76,14 +104,12 @@ def dispatch(context_id: str, req: AgentDispatchRequest):
 
 
 @router.post("/{context_id}/knowledge-pack")
-def knowledge_pack(context_id: str, req: AgentKnowledgePackRequest, db=Depends(get_db)):
+def knowledge_pack(context_id: str, req: AgentKnowledgePackRequest, db: Session = Depends(get_db)):
     from app.core.knowledge_core_contracts import KnowledgeChannel
     from app.core.knowledge_runtime import build_runtime_context_pack
 
-    context = _store.get(context_id)
-    if context is None:
-        raise HTTPException(status_code=404, detail="Kontext nicht gefunden")
-
+    row = _get_active_context(context_id, db)
+    context = _row_to_context(row)
     pack = build_runtime_context_pack(
         db=db,
         rolle=req.rolle,

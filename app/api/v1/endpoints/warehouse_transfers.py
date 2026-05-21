@@ -5,7 +5,7 @@ Covers Lager-zu-Lager, Bestandskorrektur, Lagerhallen, Lagerfaecher, Niederlassu
 
 from typing import Optional
 
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import Response, APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
@@ -315,7 +315,7 @@ async def post_transfer(
     return {"success": True, "movements_created": movements_created, "transfer_id": transfer_id}
 
 
-@router.delete("/{transfer_id}", status_code=204)
+@router.delete("/{transfer_id}", status_code=204, response_class=Response)
 async def delete_transfer(
     transfer_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -367,7 +367,7 @@ async def update_transfer_line(
     return TransferLineOut.model_validate(line)
 
 
-@router.delete("/{transfer_id}/lines/{line_id}", status_code=204)
+@router.delete("/{transfer_id}/lines/{line_id}", status_code=204, response_class=Response)
 async def delete_transfer_line(
     transfer_id: str,
     line_id: str,
@@ -478,7 +478,7 @@ async def update_correction(
     return CorrectionOut.model_validate(obj)
 
 
-@router.delete("/corrections/{corr_id}", status_code=204)
+@router.delete("/corrections/{corr_id}", status_code=204, response_class=Response)
 async def delete_correction(
     corr_id: str,
     tenant_id: str = Depends(get_tenant_id),

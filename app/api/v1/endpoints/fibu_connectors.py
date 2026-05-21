@@ -9,7 +9,7 @@ import json
 from typing import List, Optional
 from uuid import uuid4
 
-from fastapi import APIRouter, Depends, File, HTTPException, Query, Request, UploadFile
+from fastapi import Response, APIRouter, Depends, File, HTTPException, Query, Request, UploadFile
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
@@ -179,7 +179,7 @@ async def update_profile(
     return await get_profile(profile_id, tenant_id, db)
 
 
-@router.delete("/profiles/{profile_id}", status_code=204)
+@router.delete("/profiles/{profile_id}", status_code=204, response_class=Response)
 async def delete_profile(
   profile_id: str,
   tenant_id: str = Depends(get_tenant_id),

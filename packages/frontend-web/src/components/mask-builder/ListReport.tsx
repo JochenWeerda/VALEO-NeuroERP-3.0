@@ -252,13 +252,13 @@ const ListReport: React.FC<ListReportProps> = ({
   }
 
   return (
-    <div className="space-y-6 p-6">
+    <div className="space-y-8 p-4 md:p-8">
       {/* Header */}
-      <div className="flex flex-wrap items-start justify-between gap-3">
+      <div className="flex flex-wrap items-start justify-between gap-4 rounded-[var(--radius)] border border-border bg-card p-6 shadow-sm">
         <div>
-          <h1 className="text-3xl font-bold">{displayTitle}</h1>
+          <h1 className="text-xl font-bold tracking-normal text-foreground">{displayTitle}</h1>
           {displaySubtitle && (
-            <p className="text-muted-foreground">{displaySubtitle}</p>
+            <p className="mt-1 text-sm text-muted-foreground">{displaySubtitle}</p>
           )}
         </div>
         <div className="flex flex-wrap gap-2">
@@ -284,10 +284,10 @@ const ListReport: React.FC<ListReportProps> = ({
       </div>
 
       {/* Filters */}
-      <Card>
+      <Card className="border-l-4 border-l-primary">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Filter className="h-5 w-5" />
+          <CardTitle className="flex items-center gap-2 text-base">
+            <Filter className="h-5 w-5 text-primary" />
             {t('crud.list.searchAndFilter')}
           </CardTitle>
         </CardHeader>
@@ -363,7 +363,7 @@ const ListReport: React.FC<ListReportProps> = ({
 
       {/* Bulk Actions */}
       {selectedItems.length > 0 && config.bulkActions && (
-        <Card className="border-blue-500 bg-blue-50">
+        <Card className="border-primary/30 bg-primary/5">
           <CardContent className="pt-4">
             <div className="flex items-center justify-between">
               <span className="text-sm font-medium">
@@ -390,12 +390,12 @@ const ListReport: React.FC<ListReportProps> = ({
       {/* Table */}
       <Card>
         <CardHeader>
-          <CardTitle>
+          <CardTitle className="text-base">
             {t('crud.list.results', { count: filteredData.length, total })}
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="rounded-md border overflow-x-auto">
+          <div className="overflow-x-auto rounded-[var(--radius)] border border-border">
             <Table>
               <TableHeader>
                 <TableRow>
@@ -415,7 +415,7 @@ const ListReport: React.FC<ListReportProps> = ({
                   {config.columns.map(column => (
                     <TableHead
                       key={column.key}
-                      className={column.sortable ? 'cursor-pointer hover:bg-muted' : ''}
+                      className={column.sortable ? 'cursor-pointer hover:bg-primary/5' : ''}
                       onClick={() => column.sortable && handleSort(column.key)}
                     >
                       <div className="flex items-center gap-2">
@@ -492,7 +492,7 @@ const ListReport: React.FC<ListReportProps> = ({
                                     variant="ghost"
                                     size="sm"
                                     onClick={() => onAction(action.key, item)}
-                                    className={action.type === 'danger' ? 'text-red-600 hover:text-red-700' : undefined}
+                                    className={action.type === 'danger' ? 'text-destructive hover:text-destructive' : undefined}
                                   >
                                     {action.labelKey ? t(action.labelKey) : action.label}
                                   </Button>
@@ -509,7 +509,7 @@ const ListReport: React.FC<ListReportProps> = ({
                                     variant="ghost"
                                     size="sm"
                                     onClick={() => onDelete(item)}
-                                    className="text-red-600 hover:text-red-700"
+                                    className="text-destructive hover:text-destructive"
                                   >
                                     {t('crud.actions.delete')}
                                   </Button>
@@ -529,7 +529,7 @@ const ListReport: React.FC<ListReportProps> = ({
 
       {/* Simple Pagination */}
       {totalPages > 1 && (
-        <div className="flex justify-center items-center gap-4">
+        <div className="flex items-center justify-center gap-4 rounded-[var(--radius)] border border-border bg-card p-3 shadow-sm">
           <Button
             variant="outline"
             onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
@@ -538,7 +538,7 @@ const ListReport: React.FC<ListReportProps> = ({
             {t('crud.list.previous')}
           </Button>
 
-          <span className="text-sm">
+          <span className="text-sm text-muted-foreground">
             {t('crud.list.page')} {currentPage} {t('crud.list.of')} {totalPages}
           </span>
 

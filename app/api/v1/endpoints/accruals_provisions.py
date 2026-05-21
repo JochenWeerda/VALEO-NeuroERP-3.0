@@ -7,7 +7,7 @@ from typing import List, Optional
 from datetime import date, datetime
 from decimal import Decimal
 
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import Response, APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel, Field
 from sqlalchemy import text
 from sqlalchemy.orm import Session
@@ -188,7 +188,7 @@ async def update_accrual_provision(
     return _fetch_accrual_or_404(db, item_id, tenant_id)
 
 
-@router.delete("/{item_id}", status_code=204)
+@router.delete("/{item_id}", status_code=204, response_class=Response)
 async def delete_accrual_provision(
     item_id: str,
     tenant_id: str = Depends(get_tenant_id),

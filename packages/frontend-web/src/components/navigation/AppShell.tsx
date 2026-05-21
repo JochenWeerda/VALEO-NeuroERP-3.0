@@ -35,7 +35,7 @@ export function AppShell({ children, enableCommandPalette = true }: AppShellProp
   const commandPaletteFeatureEnabled = useFeature('commandPalette')
   const commandPaletteAvailable = enableCommandPalette && commandPaletteFeatureEnabled
   const [commandOpen, setCommandOpen] = useState<boolean>(false)
-  const [sidebarCollapsed, setSidebarCollapsed] = useState<boolean>(true)
+  const [sidebarCollapsed, setSidebarCollapsed] = useState<boolean>(false)
   const [mobileMenuOpen, setMobileMenuOpen] = useState<boolean>(false)
 
   const handleToggleSidebar = useCallback((): void => {

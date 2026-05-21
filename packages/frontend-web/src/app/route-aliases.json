@@ -77,6 +77,14 @@
       "path": "agrar/ernte"
     },
     {
+      "module": "@/pages/agrar/ernte/neu",
+      "path": "agrar/ernte/neu"
+    },
+    {
+      "module": "@/pages/agrar/ernte-annahme-erfassung",
+      "path": "agrar/ernte/:id"
+    },
+    {
       "module": "@/pages/agrar/ernte-annahme-erfassung",
       "path": "agrar/ernte-annahme-erfassung"
     },
@@ -993,6 +1001,54 @@
       "path": "fibu/quadriga-connector"
     },
     {
+      "module": "@/pages/fibu/buchungsjournal",
+      "path": "fibu/buchungsjournal"
+    },
+    {
+      "module": "@/pages/fibu/buchhaltungsuebersicht",
+      "path": "fibu/buchhaltungsuebersicht"
+    },
+    {
+      "module": "@/pages/fibu/monatswerte",
+      "path": "fibu/monatswerte"
+    },
+    {
+      "module": "@/pages/fibu/schnittstelle-fibu",
+      "path": "fibu/schnittstelle-fibu"
+    },
+    {
+      "module": "@/pages/fibu/schnittstellen-center",
+      "path": "fibu/schnittstellen-center"
+    },
+    {
+      "module": "@/pages/fibu/buchungsuebernahme-connectors",
+      "path": "fibu/buchungsuebernahme-connectors"
+    },
+    {
+      "module": "@/pages/fibu/anlagen",
+      "path": "fibu/anlage/neu"
+    },
+    {
+      "module": "@/pages/fibu/kreditlinien",
+      "path": "fibu/kreditlinie-neu"
+    },
+    {
+      "module": "@/pages/fibu/sicherheiten",
+      "path": "fibu/sicherheit-neu"
+    },
+    {
+      "module": "@/pages/crm/betriebsprofil-detail",
+      "path": "crm/betrieb/:id"
+    },
+    {
+      "module": "@/pages/einkauf/lieferanten-stamm",
+      "path": "einkauf/lieferant/neu"
+    },
+    {
+      "module": "@/pages/einkauf/lieferanten-stamm",
+      "path": "einkauf/lieferant/:id"
+    },
+    {
       "module": "@/pages/finance/abschluss",
       "path": "finance/abschluss"
     },
@@ -1631,6 +1687,222 @@
     {
       "module": "@/pages/wissen/wissensbasis",
       "path": "wissen/wissensbasis"
+    },
+    {
+      "module": "@/pages/finance/mahnwesen",
+      "path": "finance/dunning"
+    },
+    {
+      "module": "@/pages/finance/buchungserfassung",
+      "path": "finance/buchungen"
+    },
+    {
+      "module": "@/pages/fibu/offene-posten",
+      "path": "finance/offene-posten"
+    },
+    {
+      "module": "@/pages/finance/bankkonten-stamm",
+      "path": "finance/bank"
+    },
+    {
+      "module": "@/pages/finance/debitoren-stamm",
+      "path": "finance/debitoren/new"
+    },
+    {
+      "module": "@/pages/sales/auftraege-liste",
+      "path": "sales/auftraege-liste"
+    },
+    {
+      "module": "@/pages/sales/credit-note-editor",
+      "path": "sales/credit-notes"
+    },
+    {
+      "module": "@/pages/verkauf/lieferschein-erfassung",
+      "path": "sales/delivery-editor"
+    },
+    {
+      "module": "@/pages/crm/kontakte-liste",
+      "path": "crm/kontakte-liste"
+    },
+    {
+      "module": "@/pages/crm/lieferanten-liste",
+      "path": "crm/lieferanten/liste"
+    },
+    {
+      "module": "@/pages/futtermittel/einzelfuttermittel-liste",
+      "path": "futtermittel"
+    },
+    {
+      "module": "@/pages/futtermittel/futtermittel-bestellung",
+      "path": "futtermittel/bestellungen"
+    },
+    {
+      "module": "@/pages/futtermittel/futtermittel-wareneingang",
+      "path": "futtermittel/wareneingang"
+    },
+    {
+      "module": "@/pages/futtermittel/einzelfuttermittel-liste",
+      "path": "futtermittel/einzelfuttermittel/liste"
+    },
+    {
+      "module": "@/pages/futtermittel/einzelfuttermittel-stamm",
+      "path": "futtermittel/einzelfuttermittel/stamm/new"
+    },
+    {
+      "module": "@/pages/futtermittel/mischfuttermittel-liste",
+      "path": "futtermittel/mischfuttermittel/liste"
+    },
+    {
+      "module": "@/pages/futtermittel/mischfuttermittel-stamm",
+      "path": "futtermittel/mischfuttermittel/stamm/new"
+    },
+    {
+      "module": "@/pages/verladung/liste",
+      "path": "logistik/verladungen"
+    },
+    {
+      "module": "@/pages/personal/mitarbeiter-liste",
+      "path": "personal/mitarbeiter-liste"
+    },
+    {
+      "module": "@/pages/personal/stundenzettel-liste",
+      "path": "personal/stundenzettel-liste"
+    },
+    {
+      "module": "@/pages/wartung/anlagen-liste",
+      "path": "wartung/anlage/neu"
+    },
+    {
+      "module": "@/pages/zertifikate/liste",
+      "path": "zertifikate/neu"
+    },
+    {
+      "module": "@/pages/workflow/workflow-monitoring",
+      "path": "workflows/history"
+    },
+    {
+      "module": "@/pages/schaeden/meldung",
+      "path": "schaeden/liste"
+    },
+    {
+      "module": "@/pages/waage/liste",
+      "path": "waage/neu"
+    },
+    {
+      "module": "@/pages/admin/benutzer-liste",
+      "path": "admin/benutzer/neu"
+    },
+    {
+      "module": "@/pages/admin/rollen-verwaltung",
+      "path": "admin/rolle/neu"
+    },
+    {
+      "module": "@/pages/agrar/bodenproben/liste",
+      "path": "agrar/bodenprobe/neu"
+    },
+    {
+      "module": "@/pages/agrar/duenger/liste",
+      "path": "agrar/duenger/liste"
+    },
+    {
+      "module": "@/pages/agrar/psm/liste",
+      "path": "agrar/psm/liste"
+    },
+    {
+      "module": "@/pages/agrar/saatgut-liste",
+      "path": "agrar/saatgut-liste"
+    },
+    {
+      "module": "@/pages/annahme/klaerung-gesperrt",
+      "path": "annahme/klaerung-gesperrt"
+    },
+    {
+      "module": "@/pages/crm/aktivitaeten",
+      "path": "crm/activities/neu"
+    },
+    {
+      "module": "@/pages/crm/kunden-liste",
+      "path": "crm/customers"
+    },
+    {
+      "module": "@/pages/einkauf/auftragsbestaetigung",
+      "path": "einkauf/auftragsbestaetigung/neu"
+    },
+    {
+      "module": "@/pages/einkauf/rechnungseingaenge-liste",
+      "path": "einkauf/rechnungseingaenge-liste"
+    },
+    {
+      "module": "@/pages/kontrakte/KontraktAlarmDashboard",
+      "path": "kontrakte/alarme"
+    },
+    {
+      "module": "@/pages/kontrakte/KontraktPositionsmonitor",
+      "path": "kontrakte/positionen"
+    },
+    {
+      "module": "@/pages/sales/angebot-erstellen",
+      "path": "sales/angebot-erstellen"
+    },
+    {
+      "module": "@/pages/sales/angebote-liste",
+      "path": "sales/angebote-liste"
+    },
+    {
+      "module": "@/pages/sales/invoice-editor",
+      "path": "sales/invoice-editor"
+    },
+    {
+      "module": "@/pages/sales/order-editor",
+      "path": "sales/order-editor"
+    },
+    {
+      "module": "@/pages/preise/kalkulation",
+      "path": "sales/kalkulationen/neu"
+    },
+    {
+      "module": "@/pages/sales/lieferungen-liste",
+      "path": "sales/lieferungen/neu"
+    },
+    {
+      "module": "@/pages/transporte/fahrer-liste",
+      "path": "transporte/fahrer/neu"
+    },
+    {
+      "module": "@/pages/workflow/workflow-sandbox",
+      "path": "workflow/workflow-sandbox"
+    },
+    {
+      "module": "@/pages/finance/reports",
+      "path": "finance/umsatz"
+    },
+    {
+      "module": "@/pages/agrar/sammelabrechnung",
+      "path": "agrar"
+    },
+    {
+      "module": "@/pages/einkauf/bestellungen-liste",
+      "path": "einkauf"
+    },
+    {
+      "module": "@/pages/fibu/abschluss-cockpit",
+      "path": "fibu"
+    },
+    {
+      "module": "@/pages/sales/auftraege-liste",
+      "path": "sales"
+    },
+    {
+      "module": "@/pages/verkauf/lieferschein-erfassung",
+      "path": "verkauf"
+    },
+    {
+      "module": "@/pages/kasse/tagesabschluss",
+      "path": "kasse/historie"
+    },
+    {
+      "module": "@/pages/workflow/workflow-monitoring",
+      "path": "alerts"
     }
   ]
 }

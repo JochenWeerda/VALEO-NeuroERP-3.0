@@ -10,7 +10,7 @@ from pathlib import Path
 from typing import Any, Optional
 from uuid import uuid4
 
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import Response, APIRouter, Depends, HTTPException, Query
 from fastapi.responses import FileResponse
 from pydantic import BaseModel, Field
 from sqlalchemy import text
@@ -207,7 +207,7 @@ async def update_pos_terminal(
     return _map_row_to_model(row, PosTerminalOut)
 
 
-@router.delete("/pos/terminals/{terminal_id}", status_code=204)
+@router.delete("/pos/terminals/{terminal_id}", status_code=204, response_class=Response)
 async def delete_pos_terminal(
     terminal_id: str,
     tenant_id: str = Depends(get_tenant_id),

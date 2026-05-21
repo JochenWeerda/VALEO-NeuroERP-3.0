@@ -6,7 +6,7 @@ from datetime import datetime
 from decimal import Decimal
 from typing import Any, Optional
 
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import Response, APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel, Field
 from sqlalchemy.inspection import inspect as sa_inspect
 from sqlalchemy.orm import Session
@@ -191,7 +191,7 @@ async def update_fahrzeug(
     return _to_dict(fahrzeug)
 
 
-@router.delete("/fahrzeuge/{fahrzeug_id}", status_code=204)
+@router.delete("/fahrzeuge/{fahrzeug_id}", status_code=204, response_class=Response)
 async def delete_fahrzeug(fahrzeug_id: str, db: Session = Depends(get_db)):
     repo = FahrzeugRepository(db)
     if not repo.delete(fahrzeug_id):
@@ -273,7 +273,7 @@ async def update_terminart(
     return _to_dict(updated)
 
 
-@router.delete("/terminarten/{terminart_id}", status_code=204)
+@router.delete("/terminarten/{terminart_id}", status_code=204, response_class=Response)
 async def delete_terminart(terminart_id: str, db: Session = Depends(get_db)):
     repo = FuhrparkTerminartRepository(db)
     if not repo.delete(terminart_id):
@@ -318,7 +318,7 @@ async def update_rechnung(
     return _to_dict(updated)
 
 
-@router.delete("/rechnungen/{rechnung_id}", status_code=204)
+@router.delete("/rechnungen/{rechnung_id}", status_code=204, response_class=Response)
 async def delete_rechnung(rechnung_id: str, db: Session = Depends(get_db)):
     repo = FuhrparkRechnungRepository(db)
     if not repo.delete(rechnung_id):
@@ -359,7 +359,7 @@ async def update_ausgehendes_dokument(
     return _to_dict(updated)
 
 
-@router.delete("/ausgehende-dokumente/{dokument_id}", status_code=204)
+@router.delete("/ausgehende-dokumente/{dokument_id}", status_code=204, response_class=Response)
 async def delete_ausgehendes_dokument(dokument_id: str, db: Session = Depends(get_db)):
     repo = FuhrparkAusgehendesDokumentRepository(db)
     if not repo.delete(dokument_id):

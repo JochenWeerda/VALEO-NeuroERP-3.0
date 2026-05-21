@@ -8,10 +8,10 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
 
-from .app.api.v1.api import api_router
-from .app.config.settings import settings
-from .app.middleware.security import SecurityMiddleware
-from .app.middleware.audit import AuditMiddleware
+from app.api.v1.api import api_router
+from app.config.settings import settings
+from app.middleware.security import SecurityMiddleware
+from app.middleware.audit import AuditMiddleware
 
 app = FastAPI(
     title="CRM Security & Compliance Service",

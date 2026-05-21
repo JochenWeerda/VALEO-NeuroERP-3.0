@@ -184,13 +184,13 @@ function GlobalSearch(): ReactNode {
       </form>
 
       {summary !== null ? (
-        <div className="absolute left-0 right-0 top-[calc(100%+0.75rem)] z-40 rounded-2xl border border-slate-200 bg-white p-4 shadow-xl">
+        <div className="absolute left-0 right-0 top-[calc(100%+0.75rem)] z-40 rounded-[var(--radius)] border border-border bg-card p-4 shadow-xl">
           <div className="flex items-start justify-between gap-4">
             <div>
-              <p className="text-sm font-semibold text-slate-700">
+              <p className="text-sm font-semibold text-foreground">
                 Ergebnisse fuer "{summary.term}"
               </p>
-              <p className="text-xs text-slate-400">
+              <p className="text-xs text-muted-foreground">
                 Dauer {numberFormatter.format(summary.durationMs)} ms
               </p>
             </div>
@@ -208,10 +208,10 @@ function GlobalSearch(): ReactNode {
             {domainTotals.map(({ key, label, count }) => (
               <div
                 key={key}
-                className="flex items-center justify-between rounded-xl bg-slate-50 px-3 py-2 text-sm"
+                className="flex items-center justify-between rounded-[8px] bg-muted px-3 py-2 text-sm"
               >
-                <dt className="text-slate-500">{label}</dt>
-                <dd className="font-semibold text-slate-900">
+                <dt className="text-muted-foreground">{label}</dt>
+                <dd className="font-semibold text-foreground">
                   {numberFormatter.format(count)}
                 </dd>
               </div>
@@ -219,7 +219,7 @@ function GlobalSearch(): ReactNode {
           </dl>
 
           {domainErrors.length > 0 ? (
-            <div className="mt-4 rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-xs text-rose-600">
+            <div className="mt-4 rounded-[8px] border border-destructive/30 bg-destructive/10 px-3 py-2 text-xs text-destructive">
               <p className="font-semibold">Fehler bei Domain-Abfragen</p>
               <ul className="mt-2 space-y-1">
                 {domainErrors.map(({ key, label, message }) => (
@@ -244,7 +244,7 @@ export default function AppShell({ children }: AppShellProps): ReactNode {
   }
 
   return (
-    <div className="min-h-screen bg-slate-100 text-slate-900">
+    <div className="min-h-screen bg-background text-foreground">
       <a
         href="#main-content"
         className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-md focus:bg-white focus:px-4 focus:py-2 focus:text-sm focus:shadow-lg"
@@ -262,20 +262,21 @@ export default function AppShell({ children }: AppShellProps): ReactNode {
         />
         <nav
           className={clsx(
-            'fixed inset-y-0 left-0 z-50 flex w-72 max-w-full flex-col bg-white shadow-xl transition-transform duration-200',
+            'fixed inset-y-0 left-0 z-50 flex w-[var(--sidebar-width-expanded,240px)] max-w-full flex-col bg-[var(--sidebar-bg)] text-[var(--sidebar-fg)] shadow-xl transition-transform duration-200',
             sidebarOpen ? 'translate-x-0' : '-translate-x-full'
           )}
           aria-label="Hauptnavigation mobil"
         >
-          <div className="flex items-center justify-between border-b border-slate-200 px-4 py-4">
+          <div className="flex items-center justify-between border-b border-[var(--sidebar-border)] px-4 py-4">
             <div>
-              <p className="text-sm font-medium text-slate-500">Tenant</p>
-              <p className="text-base font-semibold text-slate-900">{tenantLabel}</p>
+              <p className="text-sm font-medium text-[hsl(210,20%,70%)]">Tenant</p>
+              <p className="text-base font-semibold text-white">{tenantLabel}</p>
             </div>
             <Button
               variant="ghost"
               size="icon"
               onClick={closeSidebar}
+              className="text-[hsl(210,20%,80%)] hover:bg-[var(--sidebar-item-hover-bg)] hover:text-white"
               aria-label="Navigation schliessen"
             >
               <X className="h-5 w-5" />
@@ -290,10 +291,10 @@ export default function AppShell({ children }: AppShellProps): ReactNode {
                     end={item.end}
                     className={({ isActive }): string =>
                       clsx(
-                        'flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium transition-colors',
+                        'flex items-center gap-3 rounded-[8px] border-l-[3px] px-3 py-2 text-sm font-medium transition-colors',
                         isActive
-                          ? 'bg-primary/10 text-primary'
-                          : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
+                          ? 'border-l-[var(--sidebar-item-active-indicator)] bg-[var(--sidebar-item-active-bg)] text-[var(--sidebar-item-active-fg)]'
+                          : 'border-l-transparent text-[hsl(210,20%,75%)] hover:bg-[var(--sidebar-item-hover-bg)] hover:text-white'
                       )
                     }
                     onClick={closeSidebar}
@@ -309,13 +310,13 @@ export default function AppShell({ children }: AppShellProps): ReactNode {
       </div>
 
       <aside
-        className="hidden lg:fixed lg:inset-y-0 lg:flex lg:w-72 lg:flex-col lg:border-r lg:border-slate-200 lg:bg-white lg:shadow-sm"
+        className="hidden lg:fixed lg:inset-y-0 lg:flex lg:w-[var(--sidebar-width-expanded,240px)] lg:flex-col lg:border-r lg:border-[var(--sidebar-border)] lg:bg-[var(--sidebar-bg)] lg:text-[var(--sidebar-fg)] lg:shadow-sm"
         aria-label="Hauptnavigation"
       >
-        <div className="flex h-20 flex-shrink-0 items-center border-b border-slate-200 px-6">
+        <div className="flex h-16 flex-shrink-0 items-center border-b border-[var(--sidebar-border)] px-6">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-wider text-primary">Valero NeuroERP</p>
-            <p className="text-sm text-slate-500">Tenant {tenantLabel}</p>
+            <p className="text-xs font-semibold uppercase tracking-wider text-white">VALEO NeuroERP</p>
+            <p className="text-sm text-[hsl(210,20%,70%)]">Tenant {tenantLabel}</p>
           </div>
         </div>
         <div className="flex flex-1 flex-col justify-between px-4 py-6">
@@ -328,10 +329,10 @@ export default function AppShell({ children }: AppShellProps): ReactNode {
                     end={item.end}
                     className={({ isActive }): string =>
                       clsx(
-                        'flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium transition-colors',
+                        'flex items-center gap-3 rounded-[8px] border-l-[3px] px-3 py-2 text-sm font-medium transition-colors',
                         isActive
-                          ? 'bg-primary/10 text-primary'
-                          : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
+                          ? 'border-l-[var(--sidebar-item-active-indicator)] bg-[var(--sidebar-item-active-bg)] text-[var(--sidebar-item-active-fg)]'
+                          : 'border-l-transparent text-[hsl(210,20%,75%)] hover:bg-[var(--sidebar-item-hover-bg)] hover:text-white'
                       )
                     }
                   >
@@ -342,15 +343,15 @@ export default function AppShell({ children }: AppShellProps): ReactNode {
               ))}
             </ul>
           </nav>
-          <div className="mt-8 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-xs text-slate-500 shadow-inner">
-            <p className="font-semibold text-slate-700">Support</p>
+          <div className="mt-8 rounded-[var(--radius)] border border-[var(--sidebar-border)] bg-[hsl(215,30%,18%)] px-4 py-3 text-xs text-[hsl(210,20%,70%)] shadow-inner">
+            <p className="font-semibold text-white">Support</p>
             <p>Bei Fragen bitte das Ops-Team informieren.</p>
           </div>
         </div>
       </aside>
 
-      <div className="lg:pl-72">
-        <header className="sticky top-0 z-30 flex h-20 items-center border-b border-slate-200 bg-white/80 backdrop-blur">
+      <div className="lg:pl-[var(--sidebar-width-expanded,240px)]">
+        <header className="sticky top-0 z-30 flex h-[var(--toolbar-height,56px)] items-center border-b border-border bg-card/90 backdrop-blur">
           <div className="flex flex-1 items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
             <div className="flex items-center gap-3">
               <Button
@@ -366,9 +367,9 @@ export default function AppShell({ children }: AppShellProps): ReactNode {
             </div>
             <div className="flex items-center gap-4">
               <GlobalStatusIndicator />
-              <div className="flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-1">
-                <span className="text-xs font-semibold uppercase text-slate-500">Tenant</span>
-                <span className="text-sm font-medium text-slate-900">{tenantLabel}</span>
+              <div className="flex items-center gap-2 rounded-full border border-border bg-background px-3 py-1">
+                <span className="text-xs font-semibold uppercase text-muted-foreground">Tenant</span>
+                <span className="text-sm font-medium text-foreground">{tenantLabel}</span>
               </div>
               <Button variant="outline" size="sm">
                 Einstellungen
@@ -377,8 +378,8 @@ export default function AppShell({ children }: AppShellProps): ReactNode {
           </div>
         </header>
 
-        <main id="main-content" className="min-h-[calc(100vh-5rem)] bg-transparent">
-          <div className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 lg:px-10">
+        <main id="main-content" className="min-h-[calc(100vh-var(--toolbar-height,56px))] bg-transparent">
+          <div className="mx-auto w-full max-w-[var(--content-max-width,1400px)] px-4 py-8 sm:px-6 lg:px-8">
             {children}
           </div>
         </main>

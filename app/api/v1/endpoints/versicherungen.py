@@ -4,7 +4,7 @@ from datetime import datetime
 from decimal import Decimal
 from typing import Any, Optional
 
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import Response, APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
@@ -102,7 +102,7 @@ def update_versicherung(versicherung_id: str, payload: VersicherungPatch, db: Se
     return _to_dict(obj)
 
 
-@router.delete("/{versicherung_id}", status_code=204)
+@router.delete("/{versicherung_id}", status_code=204, response_class=Response)
 def delete_versicherung(versicherung_id: str, db: Session = Depends(get_db)):
     obj = db.query(Versicherung).filter(Versicherung.id == versicherung_id).first()
     if not obj:

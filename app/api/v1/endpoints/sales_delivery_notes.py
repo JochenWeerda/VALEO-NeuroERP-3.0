@@ -8,7 +8,7 @@ from typing import Optional
 import json
 from app.core.uuid7 import uuid7
 
-from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
+from fastapi import Response, APIRouter, Depends, HTTPException, Query, Request, status
 from pydantic import BaseModel, Field
 from sqlalchemy import text
 from sqlalchemy.orm import Session
@@ -432,7 +432,7 @@ async def update_delivery_note(
     )
 
 
-@router.delete("/{ls_id}", status_code=204)
+@router.delete("/{ls_id}", status_code=204, response_class=Response)
 async def delete_delivery_note(
     ls_id: str,
     tenant_id: str = Depends(get_tenant_id),

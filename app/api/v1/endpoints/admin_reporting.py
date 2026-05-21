@@ -7,7 +7,7 @@ from datetime import datetime
 from typing import Any
 from uuid import UUID, uuid4
 
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import Response, APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel, Field
 from sqlalchemy import text
 from sqlalchemy.orm import Session
@@ -174,7 +174,7 @@ def update_report_permission(
     return get_report_permission(permission_id, tenant_id, db)
 
 
-@router.delete("/report-permissions/{permission_id}", status_code=204)
+@router.delete("/report-permissions/{permission_id}", status_code=204, response_class=Response)
 def delete_report_permission(
     permission_id: str,
     tenant_id: str = Depends(get_tenant_id),
