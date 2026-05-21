@@ -1,0 +1,38 @@
+id: SERVICE-LAYER-LEGACY-ENDPOINTS-001
+title: Legacy-Endpunkte final in Service-Layer ueberfuehren
+owner: Codex
+status: reserviert
+claimed_at: 2026-05-21
+goal: >
+  Die bekannten grossen Legacy-Endpunkte final aus dem README-Tech-Debt
+  herausfuehren: harvest_acceptance.py, agrar_settlements.py und docflow.py
+  sollen als Thin-Router mit dedizierten Service-Klassen nachgewiesen sein.
+scope:
+  - Aktuellen Service-Layer-Stand fuer harvest_acceptance, agrar_settlements und docflow pruefen.
+  - Verbliebene Inline-Fachlogik aus den Routern in bestehende Services verschieben.
+  - README und UAT-Abnahmeprotokoll auf den finalen Service-Layer-Status korrigieren.
+  - Fokussierte Tests und Doku-Checks ausfuehren.
+file_ownership:
+  - docs/agent-ops/active-workboard.md
+  - docs/agent-ops/slices/SERVICE-LAYER-LEGACY-ENDPOINTS-001.yaml
+  - README.md
+  - docs/uat/ABNAHMEPROTOKOLL-WAVE-2026-05-17.md
+  - app/api/v1/endpoints/harvest_acceptance.py
+  - app/api/v1/endpoints/agrar_settlements.py
+  - app/api/v1/endpoints/docflow.py
+  - app/services/harvest_acceptance_service.py
+  - app/services/agrar_settlement_service.py
+  - app/services/docflow_service.py
+  - tests/test_harvest_acceptance.py
+  - tests/test_agrar_settlements_api.py
+acceptance_criteria:
+  - harvest_acceptance.py, agrar_settlements.py und docflow.py haben dedizierte Services.
+  - Verbliebene Router enthalten nur Request-/Response-Schema, Dependency-Wiring und HTTP-Fehler-Mapping.
+  - README und UAT-Doku fuehren keine offenen grossen Legacy-Service-Layer-Gaps mehr.
+  - Fokussierte API-/Unit-Tests und Doku-Checks sind gruen.
+checks: []
+done: []
+risks:
+  - Sehr grosse fachliche Services koennen spaeter weiter modularisiert werden.
+  - Dieser Slice schliesst die Endpoint-Tech-Debt-Aussage, nicht jede interne Service-Feinstruktur.
+next_step: Ist-Stand vermessen und verbliebene Inline-Fachlogik aus den Routern verschieben.
