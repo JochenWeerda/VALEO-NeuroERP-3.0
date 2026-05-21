@@ -80,6 +80,7 @@ packages/frontend-web/tests/e2e/.generated-routes.json
 packages/frontend-web/tests/e2e/smoke-results.json
 packages/frontend-web/tests/e2e/smoke-report.html
 packages/frontend-web/artifacts/
+packages/frontend-web/visual-tour-results/
 packages/frontend-web/vite-dev.*.log
 packages/frontend-web/package-lock.json
 packages/*/package-lock.json
@@ -134,3 +135,7 @@ nul
 .aider*
 !.aider.conf.yml
 !.aiderignore
+
+# Local analysis artifacts
+service_erp_endpoints.txt
+C*Tempanalyze.py
