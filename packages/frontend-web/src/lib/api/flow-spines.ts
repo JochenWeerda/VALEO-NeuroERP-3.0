@@ -383,7 +383,7 @@ type FlowSpineInstancesResponse = {
   instances: FlowSpineInstance[]
 }
 
-export function useFlowSpineInstances(processKey: string, search?: string) {
+export function useFlowSpineInstances(processKey: string, search?: string, ready = true) {
   return useQuery<FlowSpineInstance[]>({
     queryKey: ['workflow', 'flow-spine', processKey, 'instances', search ?? ''],
     queryFn: async () => {
@@ -395,7 +395,9 @@ export function useFlowSpineInstances(processKey: string, search?: string) {
       return res.data.instances
     },
     retry: false,
-    enabled: !!processKey,
+    enabled: !!processKey && ready,
+    staleTime: 60_000,
+    refetchOnWindowFocus: false,
   })
 }
 
