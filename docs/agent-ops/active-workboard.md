@@ -2,6 +2,16 @@
 
 Stand: `2026-05-12`
 
+## SERVICE-LAYER-LEGACY-ENDPOINTS-001
+
+**Von:** Codex
+**Owner:** Codex
+**Stand:** reserviert 2026-05-21
+**Ziel des Slices:** Die bekannten grossen Legacy-Endpunkte final aus dem README-Tech-Debt herausfuehren: `harvest_acceptance.py`, `agrar_settlements.py` und `docflow.py` sollen als Thin-Router mit dedizierten Service-Klassen nachgewiesen sein.
+**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/agent-ops/slices/SERVICE-LAYER-LEGACY-ENDPOINTS-001.yaml`, `README.md`, `docs/uat/ABNAHMEPROTOKOLL-WAVE-2026-05-17.md`, `app/api/v1/endpoints/harvest_acceptance.py`, `app/api/v1/endpoints/agrar_settlements.py`, `app/api/v1/endpoints/docflow.py`, `app/services/harvest_acceptance_service.py`, `app/services/agrar_settlement_service.py`, `app/services/docflow_service.py`, fokussierte Tests fuer die betroffenen Routen.
+**Abnahmekriterien:** Die drei bekannten Legacy-Dateien haben dedizierte Services; verbliebene Router enthalten nur Request-/Response-Schema, Dependency-Wiring und HTTP-Fehler-Mapping; README/UAT-Doku fuehren keine offenen grossen Legacy-Service-Layer-Gaps mehr; fokussierte API-/Unit-Tests und Doku-Checks sind gruen.
+**Offene Risiken:** Sehr grosse fachliche Services koennen spaeter weiter modularisiert werden; dieser Slice schliesst die Endpoint-Tech-Debt-Aussage, nicht jede interne Service-Feinstruktur.
+
 ## README-STATUS-2026-05-21
 
 **Von:** Codex
