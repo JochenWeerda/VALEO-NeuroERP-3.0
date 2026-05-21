@@ -219,6 +219,14 @@ from app.api.v1.endpoints import asset_accounting, budget_planning, liquidity_pl
 # VALEO / Wave-104 extensions
 from app.api.v1.endpoints import rohware_sammelabrechnung, ebilanz_elster, waagen_vorlagen
 
+# Fachliche Vertiefung Wave 1 — Massebilanz, Zinsabrechnung, Hofliste, Artikelstamm-Erw.
+from app.api.v1.endpoints import (
+    massebilanz,
+    zinsabrechnung,
+    hofliste,
+    artikel_stamm_ext,
+)
+
 # Import domain routers
 from app.domains.agrar.api import psm, psm_proplanta
 from app.domains.inventory.api import router as inventory_domain_router
@@ -1479,6 +1487,12 @@ api_router.include_router(
     prefix="/gs1/barcode",
     tags=["gs1", "barcode", "utility"],
 )
+
+# Fachliche Vertiefung Wave 1
+api_router.include_router(massebilanz.router)
+api_router.include_router(zinsabrechnung.router)
+api_router.include_router(hofliste.router)
+api_router.include_router(artikel_stamm_ext.router)
 
 # Report/Print: Partie-Genealogie, Wiegeschein-PDF-Preview, GS1-Labels
 api_router.include_router(report_print.router)
