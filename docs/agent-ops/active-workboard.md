@@ -6,10 +6,12 @@ Stand: `2026-05-12`
 
 **Von:** Codex
 **Owner:** Codex
-**Stand:** reserviert 2026-05-21
+**Stand:** abgeschlossen 2026-05-21
 **Ziel des Slices:** Root-README auf den aktuellen GitHub-/Repo-Lieferstand nach Meridian-, UAT-, Gap-Closure-, Container-Health- und Keycloak-Nachlieferungen aktualisieren.
 **Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/agent-ops/slices/README-STATUS-2026-05-21.yaml`, `README.md`
 **Abnahmekriterien:** README nennt Stand 2026-05-21, verweist auf aktuelle Source-of-Truth-Dokumente, beschreibt Meridian-Shell/Core-UI, UAT-Auflagen, Phase-2/3-Gap-Closure, Container-/Keycloak-Hardening und trennt repo-seitig geschlossene Punkte von externen Gates.
+**Erledigt:** Root-README deutsch/englisch auf Stand 2026-05-21 gezogen; Test-/Coverage-Angaben korrigiert; Service-Layer-Aussage von pauschal abgeschlossen auf Hauptwellen plus bekannte Legacy-Tech-Debt geschaerft; Meridian, UAT, Keycloak-/Container-Hardening und externe Gates ergaenzt.
+**Checks:** `rg` gegen veraltete README-Aussagen; `python scripts/agent_workboard_supervisor.py validate`; `node scripts/docs-markdown-check.cjs README.md docs/agent-ops/active-workboard.md docs/agent-ops/slices/README-STATUS-2026-05-21.yaml`; `git diff --check`
 **Offene Risiken:** Tiefe Fachstatusdetails bleiben in den verlinkten Status-/Gap-/UAT-Dokumenten statt in der README.
 
 ## REPO-HYGIENE-LOCAL-ARTIFACTS-001

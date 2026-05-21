@@ -20,27 +20,31 @@ VALEO NeuroERP 3.0 ist ein mehrdomäniges ERP-System für Agrargenossenschaften 
 
 | Kennzahl | Stand |
 |----------|-------|
-| Doku-Stand | `2026-05-16` |
+| Doku-Stand | `2026-05-21` |
 | Produktreife | aktive Entwicklung, nicht allgemein produktionsreif |
 | Frontend TypeScript | 0 Fehler |
-| Backend-Testabdeckung | ~43 % gesamt; kritische Kernpfade über Ratchet-Schwellen |
+| Backend-Testabdeckung | 64,85 % gesamt; 18/18 kritische Ratchet-Pfade grün |
 | Alembic | 1 Head |
-| Service-Layer | vollständig refaktoriert — alle Endpoints auf thin-router + Service-Klassen |
-| Docker-Erstinstallation | abgesichert mit Alembic-Bootstrap und Schema-Prüfung |
+| Service-Layer | Hauptwellen refaktoriert; einzelne große Legacy-Endpoint-Dateien bleiben Tech-Debt |
+| Docker/Container | Erstinstallation, Keycloak-DB-Bootstrap und mehrere Healthcheck-/CRM-/Inventory-Fixes nachgezogen |
+| UAT | Abgenommen mit dokumentierten externen Gates; repo-seitige UAT-Auflagen nachgeliefert |
 
 Der belastbare Ist-Zustand liegt in:
 
 - [Process Kernel Status](docs/architecture/process-kernel/STATUS.md)
 - [Open Gaps and Known Issues](docs/project-context/open-gaps-and-known-issues.md)
 - [Active Workboard](docs/agent-ops/active-workboard.md)
+- [UAT Master Plan](docs/uat/UAT-MASTER-PLAN.md)
+- [Meridian Design Concept](docs/design/DESIGN-KONZEPT-1-MERIDIAN.md)
 
 ### Was das System heute abdeckt
 
 - **12+ Fachdomänen**: Agrar (Ernteannahme, Kontrakte, Trocknungsregeln), Verkauf, Einkauf, Lager, Finanzen/FIBU, CRM, Logistik, Compliance, HRM, POS, Futtermittel/Rationsoptimierung
 - **Multi-Tenancy** via `X-Tenant-ID` Header, OIDC-Authentifizierung (Keycloak/Azure AD/Auth0)
 - **Prozesskernel** — Waves 1–104 abgeschlossen, 8564 Tests grün
-- **Service-Layer** — alle Endpoints auf dünnen Router + domänenspezifische Service-Klassen umgestellt
+- **Service-Layer** — zentrale Refaktorierungswellen abgeschlossen; bekannte große Legacy-Endpunkte werden weiter in Slices abgebaut
 - **React-Frontend** mit Mask-Builder-Framework (ObjectPage, ListReport, Wizard, Worklist)
+- **Meridian UI** — Root-Theme aktiv, Navy-Sidebar, 56px Topbar, 44px Button/Input-Ziele und tokenisierte Dashboard-/ListReport-/Kernscreen-Muster
 - **Event-Bus** via NATS JetStream mit Outbox-Pattern
 - **Agent-Ops**, Voice-Kanal, RAG/Wissensbase, Superglue-Integration
 
@@ -130,17 +134,20 @@ powershell -ExecutionPolicy Bypass -File scripts/smoke_first_install_docker.ps1 
 
 **Belastbar vorhanden:**
 - Breiter Domänenschnitt über 12+ ERP-Bereiche
-- Vollständig refaktorierter Service-Layer (thin-router + Domain-Services)
-- Prozesskernel mit Waves 1–104 abgeschlossen, 8564 Tests
+- Prozesskernel mit Waves 1–104 abgeschlossen, 8564 Tests im letzten formalen Kernel-Status
+- Backend-Abdeckung 64,85 % im letzten formalen Kernel-Status; kritische Ratchet-Pfade grün
+- Service-Layer-Hauptwellen, Base-Worker/-Repository, Domain-Error-Konzept und viele thin-router Domain-Services
+- Meridian-Shell und sichtbare Core-UI auf `localhost:3000`
 - HRM-Betriebsfreigabe-Gates mit ausfüllbaren Vorlagen
-- Abgesicherter Alembic-/Docker-Erstinstallationspfad
+- UAT-Dokumentation mit Masterplan, Traceability, API-Contracts und Playwright-UAT-Evidence
+- Abgesicherter Alembic-/Docker-Erstinstallationspfad inklusive Keycloak-Datenbank-Bootstrap
 - UX-Baukasten vollständig ausgerollt (Seitentyp-Logik)
 
 **Bewusst noch offen:**
-- Backend-Gesamtabdeckung ~43 % (kritische Pfade über Ratchet gesichert)
-- NATS/Event-Bus läuft nicht standardmäßig im Dev-Betrieb
-- Einige Live-Integrationen benötigen externe Credentials und Ops-Setups
-- Fachliche Tiefe der Domänen ist nicht überall gleich
+- Einige große Legacy-Endpoint-Dateien sind weiterhin Service-Layer-Tech-Debt
+- Tiefe Modulunterseiten enthalten noch harte Tailwind-Farben und brauchen weitere Meridian-Slices
+- Externe Gates bleiben außerhalb des Repos: echte UAT-Unterschriften, Steuerberater-/DATEV-Mapping, DMS-Live-Probe, TSE-/DSFinV-K-Prüfwerkzeug, ERiC/ELSTER und Provider-Credentials
+- Fachliche Tiefe der Domänen ist nicht überall gleich und wird über Gap-/Parity-Dokumente weitergeführt
 
 Offene Punkte sind vollständig in [open-gaps-and-known-issues.md](docs/project-context/open-gaps-and-known-issues.md) dokumentiert.
 
@@ -164,27 +171,31 @@ VALEO NeuroERP 3.0 is a multi-domain ERP system for agricultural cooperatives an
 
 | Metric | As of |
 |--------|-------|
-| Docs date | `2026-05-16` |
+| Docs date | `2026-05-21` |
 | Maturity | active development, not generally production-ready |
 | Frontend TypeScript | 0 errors |
-| Backend test coverage | ~43 % overall; critical paths secured via ratchet |
+| Backend test coverage | 64.85 % overall; 18/18 critical ratchet paths green |
 | Alembic | 1 head |
-| Service layer | fully refactored — all endpoints on thin-router + service classes |
-| Docker first install | secured with Alembic bootstrap and schema validation |
+| Service layer | main refactoring waves delivered; a few large legacy endpoint files remain tech debt |
+| Docker/containers | first install, Keycloak DB bootstrap and several healthcheck/CRM/Inventory fixes delivered |
+| UAT | accepted with documented external gates; repo-side UAT conditions delivered |
 
 Authoritative status documents:
 
 - [Process Kernel Status](docs/architecture/process-kernel/STATUS.md)
 - [Open Gaps and Known Issues](docs/project-context/open-gaps-and-known-issues.md)
 - [Active Workboard](docs/agent-ops/active-workboard.md)
+- [UAT Master Plan](docs/uat/UAT-MASTER-PLAN.md)
+- [Meridian Design Concept](docs/design/DESIGN-KONZEPT-1-MERIDIAN.md)
 
 ### What the System Covers Today
 
 - **12+ business domains**: Agrar (harvest acceptance, contracts, drying rules), Sales, Procurement, Inventory, Finance/Accounting, CRM, Logistics, Compliance, HRM, POS, Feed/Ration Optimization
 - **Multi-tenancy** via `X-Tenant-ID` header, OIDC authentication (Keycloak/Azure AD/Auth0)
 - **Process kernel** — Waves 1–104 completed, 8564 tests green
-- **Service layer** — all endpoints refactored to thin routers + domain service classes
+- **Service layer** — central refactoring waves completed; known large legacy endpoints are being reduced in follow-up slices
 - **React frontend** with Mask Builder Framework (ObjectPage, ListReport, Wizard, Worklist)
+- **Meridian UI** — root theme active, navy sidebar, 56px top bar, 44px button/input targets and tokenized dashboard/list-report/core-screen patterns
 - **Event bus** via NATS JetStream with outbox pattern
 - **Agent-Ops**, voice channel, RAG/knowledge base, Superglue integration
 
@@ -274,17 +285,20 @@ powershell -ExecutionPolicy Bypass -File scripts/smoke_first_install_docker.ps1 
 
 **Solid and working:**
 - Broad domain coverage across 12+ ERP areas
-- Fully refactored service layer (thin-router + domain services)
-- Process kernel with Waves 1–104 completed, 8564 tests
+- Process kernel with Waves 1–104 completed, 8564 tests in the latest formal kernel status
+- Backend coverage 64.85 % in the latest formal kernel status; critical ratchet paths green
+- Main service-layer waves, BaseWorker/BaseRepository, domain error model and many thin-router domain services
+- Meridian shell and visible core UI on `localhost:3000`
 - HRM operating-release gates with fillable template packages
-- Secured Alembic/Docker first-install path
+- UAT documentation with master plan, traceability, API contracts and Playwright UAT evidence
+- Secured Alembic/Docker first-install path including Keycloak database bootstrap
 - UX component kit fully rolled out (page-type logic)
 
 **Intentionally still open:**
-- Overall backend coverage ~43 % (critical paths secured via ratchet)
-- NATS/event bus not started by default in dev mode
-- Some live integrations require external credentials and ops setup
-- Domain depth is not uniform across all areas
+- A few large legacy endpoint files remain service-layer tech debt
+- Deep module pages still contain hard-coded Tailwind colors and need further Meridian slices
+- External gates remain outside the repository: real UAT signatures, tax-advisor/DATEV mapping, DMS live probe, TSE/DSFinV-K validation tooling, ERiC/ELSTER and provider credentials
+- Domain depth is not uniform across all areas and remains tracked through gap/parity documents
 
 All open items are fully documented in [open-gaps-and-known-issues.md](docs/project-context/open-gaps-and-known-issues.md).
 
