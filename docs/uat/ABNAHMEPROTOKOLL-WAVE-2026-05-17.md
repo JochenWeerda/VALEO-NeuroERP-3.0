@@ -232,9 +232,9 @@
 | Mängel-ID | Beschreibung | Auswirkung | Status |
 |-----------|-------------|-----------|--------|
 | M-001 | `POST /api/v1/compliance/pcn-meldungen` fehlt im Backend | PCN/UFI-Meldung nicht absetzbar; Frontend zeigt benutzerfreundlichen Error-Toast | Repo-seitig erledigt 2026-05-18: Endpoint mit UFI-/Statusvalidierung und UAT-Contract-Test |
-| M-002 | `harvest_acceptance.py` (1.692 Zeilen, 14 Routen) — kein dedizierter Service; create-Route >163 Zeilen | Wartbarkeit eingeschränkt | Repo-seitig erledigt: `app/services/harvest_acceptance_service.py` vorhanden; weitere Feinschnitte bleiben normale Tech-Debt-Welle |
-| M-003 | `agrar_settlements.py` (2.264 Zeilen, 31 Routen) — Service nur teilweise vorhanden | Drying/PDF/Approval inline | Repo-seitig erledigt: `app/services/agrar_settlement_service.py` deckt Approval/Completion/PDF-nahe Pfade ab |
-| M-004 | `docflow.py` (1.853 Zeilen, 11 Routen) — Idempotenz + Outbox-Events komplex | Refactoring aufwändig | Offen — Backlog |
+| M-002 | `harvest_acceptance.py` (1.692 Zeilen, 14 Routen) — kein dedizierter Service; create-Route >163 Zeilen | Wartbarkeit eingeschränkt | Repo-seitig erledigt: `app/services/harvest_acceptance_service.py` kapselt Annahme-CRUD, Release, Qualitaetsprotokoll, Settlement- und Frachtkostenpfade |
+| M-003 | `agrar_settlements.py` (2.264 Zeilen, 31 Routen) — Service nur teilweise vorhanden | Drying/PDF/Approval inline | Repo-seitig erledigt 2026-05-21: `app/services/agrar_settlement_service.py` kapselt Preview-, Drying-, Backfill-, PDF-, Approval-, FIBU- und Completion-Pfade |
+| M-004 | `docflow.py` (1.853 Zeilen, 11 Routen) — Idempotenz + Outbox-Events komplex | Refactoring aufwändig | Repo-seitig erledigt 2026-05-21: `app/services/docflow_service.py` kapselt Idempotenz, Outbox/Audit, Customer-Eligibility, Create/Update/Convert/Post/Reverse |
 
 ### 4.3 Geringe Mängel (Minor)
 
@@ -279,7 +279,7 @@
 Die Wave 2026-05-17 bleibt abgenommen. Die repo-seitigen Auflagen wurden am 2026-05-18 nachgezogen; externe Betriebsfreigaben bleiben gesondert:
 
 1. **Auflage 1 (M-001):** `POST /api/v1/compliance/pcn-meldungen` implementiert und mit UAT-API-Contract-Test abgesichert.
-2. **Auflage 2 (M-002/M-003):** Service-Layer-Nachlieferung fuer `harvest_acceptance.py` und `agrar_settlements.py` repo-seitig nachgewiesen; weitere Zerlegung bleibt nicht-blockierende Tech-Debt-Verbesserung.
+2. **Auflage 2 (M-002/M-003/M-004):** Service-Layer-Nachlieferung fuer `harvest_acceptance.py`, `agrar_settlements.py` und `docflow.py` repo-seitig nachgewiesen; Router enthalten nur noch HTTP-/Schema-/Dependency-Wiring und Fehler-Mapping, waehrend Fachlogik in dedizierten Services liegt.
 3. **Auflage 3 (M-008):** Enum-Constraint fuer `KontraktKlasse.variante` als Pydantic `Literal` nachgezogen.
 
 ☐ ABGELEHNT

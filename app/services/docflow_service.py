@@ -12,6 +12,7 @@ from sqlalchemy import text
 from sqlalchemy.orm import Session
 
 from app.core.exceptions import ConflictError, EntityNotFoundError, ValidationFailedError
+from app.services.customer_sales_eligibility import assert_customer_allowed_for_invoice
 
 # ── document-type constants ───────────────────────────────────────────────────
 
@@ -60,6 +61,10 @@ class DocflowService:
     def __init__(self, db: Session, tenant_id: str) -> None:
         self.db = db
         self.tenant_id = tenant_id
+
+    def _assert_invoice_customer_allowed(self, customer_id: Any) -> None:
+        if customer_id:
+            assert_customer_allowed_for_invoice(self.db, self.tenant_id, str(customer_id))
 
     # ── reads ─────────────────────────────────────────────────────────────────
 
@@ -459,6 +464,8 @@ class DocflowService:
 
     def create_document(self, payload: Any) -> str:
         """Creates header + items + POS compliance. Returns doc_id."""
+        if payload.doc_type == "sales_invoice":
+            self._assert_invoice_customer_allowed(payload.customer_id)
         if payload.idempotency_key:
             existing = self.load_create_idempotency(payload.idempotency_key)
             if existing:
@@ -527,6 +534,12 @@ class DocflowService:
         header = self.fetch_header(doc_id)
         if not header:
             raise EntityNotFoundError("DocflowDocument", doc_id)
+        effective_doc_type = str(header.get("doc_type") or "")
+        if effective_doc_type == "sales_invoice":
+            effective_customer_id = (
+                payload.customer_id if payload.customer_id is not None else header.get("customer_id")
+            )
+            self._assert_invoice_customer_allowed(effective_customer_id)
         if payload.expected_version and int(header.get("version") or 1) != payload.expected_version:
             raise ConflictError("Version conflict")
         if str(header.get("status")) in {"posted", "reversed", "cancelled"}:
@@ -634,6 +647,8 @@ class DocflowService:
         source = self.bootstrap_doc(doc_id)
         if not source:
             raise EntityNotFoundError("DocflowDocument", doc_id)
+        if payload.target_doc_type == "sales_invoice":
+            self._assert_invoice_customer_allowed(source.get("customer_id"))
         if payload.expected_version and int(source.get("version") or 1) != payload.expected_version:
             raise ConflictError("Version conflict")
         source_type = str(source["doc_type"])
