@@ -256,6 +256,13 @@ from app.api.v1.endpoints import (
     fibu_geschaeftsjahre,
 )
 
+# Fachliche Vertiefung Wave 6 — Mengeneinheiten, Artikelverpackung, Zahlungsmeldungen
+from app.api.v1.endpoints import (
+    artikel_mengeneinheiten,
+    artikel_verpackung,
+    fibu_zahlungsmeldungen,
+)
+
 # Import domain routers
 from app.domains.agrar.api import psm, psm_proplanta
 from app.domains.inventory.api import router as inventory_domain_router
@@ -1543,6 +1550,11 @@ api_router.include_router(logistik_frachttabellen.router)
 api_router.include_router(vermehrungsvertrag.router)
 api_router.include_router(vertreterstamm.router)
 api_router.include_router(fibu_geschaeftsjahre.router)
+
+# Fachliche Vertiefung Wave 6
+api_router.include_router(artikel_mengeneinheiten.router)
+api_router.include_router(artikel_verpackung.router)
+api_router.include_router(fibu_zahlungsmeldungen.router)
 
 # Report/Print: Partie-Genealogie, Wiegeschein-PDF-Preview, GS1-Labels
 api_router.include_router(report_print.router)
