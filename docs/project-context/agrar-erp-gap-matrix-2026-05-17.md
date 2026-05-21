@@ -76,15 +76,15 @@ Schlüsselfelder, die in VALEO noch fehlen:
 | Rüstliste (Kommissioniervorbereitung) | Lager | L3-LAGER-001 | P2 |
 | Streckengeschäft Import-Endpoint | Strecke | L3-LAGER-002 | P2 |
 | BestandskorrekturGrund Stamm | Lager | L3-LAGER-003 | P2 |
-| Verbotsliste / Sanktionsprüfung (Compliance) | Agrar-Zusatzmodul | AMIC-COMP-001 | P1 |
-| Aktionärs-/Gesellschafterverwaltung (Genossenschaft) | Agrar-Zusatzmodul | AMIC-GEN-001 | P1 |
-| Saatzucht-Modul | Agrar-Zusatzmodul | AMIC-SAATZ-001 | P2 |
-| Gelangensbestätigung (§ 17a UStDV) | Agrar-FIBU | AMIC-FIBU-001 | P1 |
-| Intrastat (EU-Handelsstatistik) | Agrar-FIBU | AMIC-FIBU-002 | P1 |
-| ATLAS Zollausfuhr | Agrar-FIBU | AMIC-FIBU-003 | P2 |
-| Wechselbuchhaltung | Agrar-FIBU | AMIC-FIBU-004 | P2 |
-| e-Clearing | Agrar-FIBU | AMIC-FIBU-005 | P2 |
-| eBilanz / ELSTER direkt | Agrar-FIBU | AMIC-FIBU-006 | P1 |
+| Verbotsliste / Sanktionsprüfung (Compliance) | Agrar-Zusatzmodul | VALEO-COMP-001 | P1 |
+| Aktionärs-/Gesellschafterverwaltung (Genossenschaft) | Agrar-Zusatzmodul | VALEO-GEN-001 | P1 |
+| Saatzucht-Modul | Agrar-Zusatzmodul | VALEO-SAATZ-001 | P2 |
+| Gelangensbestätigung (§ 17a UStDV) | Agrar-FIBU | VALEO-FIBU-001 | P1 |
+| Intrastat (EU-Handelsstatistik) | Agrar-FIBU | VALEO-FIBU-002 | P1 |
+| ATLAS Zollausfuhr | Agrar-FIBU | VALEO-FIBU-003 | P2 |
+| Wechselbuchhaltung | Agrar-FIBU | VALEO-FIBU-004 | P2 |
+| e-Clearing | Agrar-FIBU | VALEO-FIBU-005 | P2 |
+| eBilanz / ELSTER direkt | Agrar-FIBU | VALEO-FIBU-006 | P1 |
 | AlternativArtikel per Kontraktposition | Kontrakt | L3-KONTRAKT-006 | P2 |
 | Kontraktparitäten-Stamm (INCOTERMS) | Kontrakt | L3-KONTRAKT-007 | P2 |
 | NVE/SSCC Lifecycle vollständig | Lager | L3-NVE-001 | P2 |
@@ -104,11 +104,11 @@ Schlüsselfelder, die in VALEO noch fehlen:
 6. **L3-ERECHNUNG-001**: e-Rechnung Import (ZUGFeRD / XRechnung)
 7. **L3-PREIS-001**: Preis berechnen Endpoint
 8. **L3-CRM-002**: Interessent → Kunde Konvertierung
-9. **AMIC-COMP-001**: Sanktionsliste/Verbotsliste
-10. **AMIC-GEN-001**: Aktionärs-/Gesellschafterverwaltung
-11. **AMIC-FIBU-001**: Gelangensbestätigung (§17a UStDV)
-12. **AMIC-FIBU-002**: Intrastat
-13. **AMIC-FIBU-006**: eBilanz/ELSTER-Schnittstelle (Stub)
+9. **VALEO-COMP-001**: Sanktionsliste/Verbotsliste
+10. **VALEO-GEN-001**: Aktionärs-/Gesellschafterverwaltung
+11. **VALEO-FIBU-001**: Gelangensbestätigung (§17a UStDV)
+12. **VALEO-FIBU-002**: Intrastat
+13. **VALEO-FIBU-006**: eBilanz/ELSTER-Schnittstelle (Stub)
 
 ### P2 — Komfort (nächste Sprint-Welle)
 14. GS1 Barcode Parse, Umkreissuche, Webhook-System, Webshop, Rüstliste, Strecke, etc.

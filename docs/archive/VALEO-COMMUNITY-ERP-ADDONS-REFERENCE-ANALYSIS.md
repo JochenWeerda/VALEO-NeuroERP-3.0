@@ -22,7 +22,7 @@ Die fruehere Langfassung mit produktspezifischer Benennung wurde bewusst durch d
 
 1. neutrale Community-ERP-Referenzen
 2. SAP-Fiori-/OpenUI5-UIX-Muster
-3. AMIC als fachliches Tiefenbild
+3. VALEO als fachliches Tiefenbild
 
 ## Lizenzregel
 

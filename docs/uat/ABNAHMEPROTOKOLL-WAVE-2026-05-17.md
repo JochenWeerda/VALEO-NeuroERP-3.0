@@ -1,5 +1,5 @@
 # Abnahmeprotokoll — VALEO NeuroERP 3.0
-## Wave 2026-05-17: AMIC Agrarhandel + L3-Connect + Compliance-Vertiefung
+## Wave 2026-05-17: VALEO Agrarhandel + L3-Connect + Compliance-Vertiefung
 
 ---
 
@@ -21,8 +21,8 @@
 
 | Gruppe | Beschreibung | Commits / Dateien |
 |--------|-------------|-------------------|
-| **AMIC Agrarhandel** | Kontrakt-Klassen (FIXPREIS/BASIS/PRÄMIE/POOLPREIS), Kontrakt-Hedging/MATIF, E-Rechnung ZUGFeRD/XRechnung Import, Dynamische Preiskalkulation | `kontrakt_klassen.py`, `kontrakt_hedging.py`, `erechnung_import.py`, `price_calculation.py` |
-| **AMIC Wave-104 Ext.** | Rohware-Sammelabrechnung, eBilanz/ELSTER, Waagenvorlagen | `rohware_sammelabrechnung.py`, `ebilanz_elster.py`, `waagen_vorlagen.py` |
+| **VALEO Agrarhandel** | Kontrakt-Klassen (FIXPREIS/BASIS/PRÄMIE/POOLPREIS), Kontrakt-Hedging/MATIF, E-Rechnung ZUGFeRD/XRechnung Import, Dynamische Preiskalkulation | `kontrakt_klassen.py`, `kontrakt_hedging.py`, `erechnung_import.py`, `price_calculation.py` |
+| **VALEO Wave-104 Ext.** | Rohware-Sammelabrechnung, eBilanz/ELSTER, Waagenvorlagen | `rohware_sammelabrechnung.py`, `ebilanz_elster.py`, `waagen_vorlagen.py` |
 | **L3-Connect** | Inventory Counts, Inventory Operations, Weighing Tickets, Warehouse Transfers, Preparation Lists, Pick Lists, GS1-Parser, NVE/SSCC | `inventory_counts.py`, `weighing_tickets.py`, `warehouse_transfers.py`, `preparation_lists.py`, `pick_lists.py`, `gs1_parser.py`, `nve.py`, `gs1_barcode.py` |
 | **Compliance-Vertiefung** | Gelangensbestätigung §17a UStDV, Sanktionsliste (EU/UN/OFAC/HM_TREASURY), EUDR (EU Deforestation Regulation), Genossenschaft Mitgliederverwaltung, Intrastat | `gelangensbestaetigung.py`, `sanctions_compliance.py`, `compliance.py` (EUDR-Extension), `genossenschaft.py`, `intrastat.py` |
 | **Go-Live Hardening** | AuditMiddleware, DSFinV-K v2.3 Export, POS Retoure, Knowledge Base API, Neuro-Core Lanes | `audit_middleware.py`, `pos_dsfinvk.py`, `pos_retoure.py`, `knowledge_api.py` |

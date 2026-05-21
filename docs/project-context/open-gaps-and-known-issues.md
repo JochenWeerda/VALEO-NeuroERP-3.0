@@ -113,13 +113,13 @@ Stand Wave 2026-05-17 (P0/P1 Gaps implementiert):
 - `L3-KONTRAKT-001/002` (Klassen/Hedging): in Arbeit
 - `L3-ERECHNUNG-001` (XRechnung/ZUGFeRD Import): in Arbeit
 - `L3-PREIS-001` (Preis berechnen Endpoint): in Arbeit
-- `AMIC-COMP-001` (Sanktionsliste): in Arbeit
-- `AMIC-GEN-001` (Genossenschaftsverwaltung): in Arbeit
-- `AMIC-FIBU-001/002` (Gelangensbestaetigung, Intrastat): in Arbeit
+- `VALEO-COMP-001` (Sanktionsliste): in Arbeit
+- `VALEO-GEN-001` (Genossenschaftsverwaltung): in Arbeit
+- `VALEO-FIBU-001/002` (Gelangensbestaetigung, Intrastat): in Arbeit
 
 | Gap-ID | Kurzbeschreibung | Prioritaet | Status |
 |--------|-----------------|------------|--------|
-| AMIC-PARITY-001 | O2C/P2P/Partie-Kette — UAT-Pfad fehlt | P0 | repo-seitig vorbereitet; UAT-Unterschrift extern |
+| VALEO-PARITY-001 | O2C/P2P/Partie-Kette — UAT-Pfad fehlt | P0 | repo-seitig vorbereitet; UAT-Unterschrift extern |
 | WAAGE-LIVE-001 | Waage: Live-Hardware, Eich-Nachweis | P0 | implementiert (Repo), UAT offen |
 | SILO-LEER-001 | Silo-Leermeldung, Schwundbuchung | P0 | implementiert |
 | L3-WAAGE-001 | Doppelwiegung (Wiegung1/2), Gosse, WaageId | P0 | implementiert |
@@ -130,10 +130,10 @@ Stand Wave 2026-05-17 (P0/P1 Gaps implementiert):
 | L3-ERECHNUNG-001 | e-Rechnung Import ZUGFeRD/XRechnung | P1 | implementiert |
 | L3-PREIS-001 | Preis berechnen Endpoint (Kalkulationsengine) | P1 | implementiert |
 | L3-CRM-002 | Interessent → Kunde Konvertierung | P1 | implementiert |
-| AMIC-COMP-001 | Sanktionsliste / Verbotsliste | P1 | implementiert |
-| AMIC-GEN-001 | Aktionaers-/Gesellschafterverwaltung (Genossenschaft) | P1 | implementiert |
-| AMIC-FIBU-001 | Gelangensbestaetigung (§17a UStDV) | P1 | implementiert |
-| AMIC-FIBU-002 | Intrastat EU-Handelsstatistik | P1 | implementiert |
+| VALEO-COMP-001 | Sanktionsliste / Verbotsliste | P1 | implementiert |
+| VALEO-GEN-001 | Aktionaers-/Gesellschafterverwaltung (Genossenschaft) | P1 | implementiert |
+| VALEO-FIBU-001 | Gelangensbestaetigung (§17a UStDV) | P1 | implementiert |
+| VALEO-FIBU-002 | Intrastat EU-Handelsstatistik | P1 | implementiert |
 | PARTIE-PFLICHT-001 | Partiepflicht-Validierung je Artikel/Wiegetyp | P1 | implementiert |
 | ROHWARE-SCHEMA-001 | Abrechnungsschema-Editor + Testrechnung | P1 | implementiert |
 | CTS-H2S-UAT-001 | Rohware-UAT Schemata, Varianten, Nachtraege | P0 | offen (UAT extern) |
@@ -141,15 +141,15 @@ Stand Wave 2026-05-17 (P0/P1 Gaps implementiert):
 | DMS-DOC-002 | DMS-Live-Probe, Redirect-Failure, Audit-Paket | P1 | repo-seitig vorbereitet; Live-Probe extern |
 | POS-DSFINVK-001 | TSE-/DSFinV-K-Abnahme | P1 | repo-seitig implementiert; Pruefwerkzeug-Abnahme extern |
 | REPORT-PRINT-001 | Partie-Genealogie, Wiegschein-PDF, Etikett | P1 | repo-seitig implementiert; Drucker-/UAT-Abnahme extern |
-| AMIC-FIBU-006 | eBilanz/ELSTER-Direktschnittstelle | P1 | repo-seitig implementiert; ERiC-/Steuerberater-Gate extern |
-| AMIC-FIBU-003 | ATLAS Zollausfuhr | P2 | implementiert; ATLAS-Zertifikat extern |
+| VALEO-FIBU-006 | eBilanz/ELSTER-Direktschnittstelle | P1 | repo-seitig implementiert; ERiC-/Steuerberater-Gate extern |
+| VALEO-FIBU-003 | ATLAS Zollausfuhr | P2 | implementiert; ATLAS-Zertifikat extern |
 | L3-CRM-001 | Umkreissuche Kunden (Geo-Radius) | P2 | implementiert |
 | L3-WEBHOOK-001 | Outbound Webhook-Registrierung | P2 | implementiert |
 | L3-WEBSHOP-001 | Webshop B2B-Bestellintegration | P2 | implementiert |
 | L3-GS1-001 | GS1 Barcode Parse Service | P2 | implementiert |
 | L3-LAGER-001 | Ruestliste (Kommissioniervorbereitung) | P2 | implementiert |
-| AMIC-WAAGE-VORL | Waagenvorlagen/Wiederholfall-Anlieferungen | P2 | implementiert |
-| AMIC-SAATZ-001 | Saatzucht-Modul | P2 | implementiert |
+| VALEO-WAAGE-VORL | Waagenvorlagen/Wiederholfall-Anlieferungen | P2 | implementiert |
+| VALEO-SAATZ-001 | Saatzucht-Modul | P2 | implementiert |
 
 ## Enterprise-Domain-Gap-Closure (Marktführende ERP-Systeme/Odoo/Agrar-Spezialsoftware) 2026-05-17
 

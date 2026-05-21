@@ -9,20 +9,20 @@ Methodik: Direktvergleich Branchenspezifische-Agrarsoftware-Kernfunktionen gegen
 
 | # | Agrar-Spezialsoftware-Funktion | VALEO-IST (Kurzform) | Gap / Naechster Schritt | Gap-ID | Prioritaet |
 |---|---------------|----------------------|------------------------|--------|------------|
-| 1 | Warenwirtschaft Verbuchung — saubere Bestandsfuehrung, Dispo, Lieferung, Faktura, Rohertrag, Nebenbuecher | O2C/P2P/Inventory/Settlement Flow-Spines; `disposition.py`, `charges.py`, `agrar_settlements.py` | Browser-/CRUD-Abnahme der vollstaendigen Folgeobjektkette (Annahme→Silo→Settlement→FIBU-Buchung) fehlt als UAT-Pfad | AMIC-PARITY-001 | P0 |
+| 1 | Warenwirtschaft Verbuchung — saubere Bestandsfuehrung, Dispo, Lieferung, Faktura, Rohertrag, Nebenbuecher | O2C/P2P/Inventory/Settlement Flow-Spines; `disposition.py`, `charges.py`, `agrar_settlements.py` | Browser-/CRUD-Abnahme der vollstaendigen Folgeobjektkette (Annahme→Silo→Settlement→FIBU-Buchung) fehlt als UAT-Pfad | VALEO-PARITY-001 | P0 |
 | 2 | Rohware/Vermarktung — Qualitaets-, Mengen-, Preis-, Abschlags- und finale Abrechnung | `harvest_acceptance.py` (POST/PUT/release/cancel/qualitaetsprotokoll), `agrar_settlements.py` (preview/drying/post-fibu), Trocknungs-Engine | UAT gegen echte Rohwaren-Schemata, regionale Varianten (NRW, BY), Abrechnungsnachtraege; kein End-to-End-Testpfad mit realen Felddaten | CTS-H2S-UAT-001 | P0 |
 | 3 | Abrechnungsschemata — Rohwarengruppen, Qualitaetszeilen, Sekundaerwaren, Kosten/Verguetung, Default-Schemata | Preis-/Settlement-Engine + Qualitaetsprotokolle vorhanden; keine Schema-Editor-UI | Schema-Editor/Katalog mit Versionierung, Gueltigkeit und Testrechnung fehlt; keine maschinenlesbare Schemadefinitions-API | ROHWARE-SCHEMA-001 | P1 |
-| 4 | Rohwarenkontrakte — Gruppe, Schema, Abschlagspreise, Mindestpreis, Weltmarktpreisfestsetzung | `kontrakte.py` (CRUD + movements + cancel + MATIF-Lookup + positionen) | Teilmengen, Restmengen, Ueberbuchungs-Validierung, Nachtragsprozess und E2E-UAT von Kontraktanlage bis Settlement-Uebergabe fehlen | AMIC-PARITY-001 | P0 |
+| 4 | Rohwarenkontrakte — Gruppe, Schema, Abschlagspreise, Mindestpreis, Weltmarktpreisfestsetzung | `kontrakte.py` (CRUD + movements + cancel + MATIF-Lookup + positionen) | Teilmengen, Restmengen, Ueberbuchungs-Validierung, Nachtragsprozess und E2E-UAT von Kontraktanlage bis Settlement-Uebergabe fehlen | VALEO-PARITY-001 | P0 |
 | 5 | Rohwaren-Anlieferung — Vorerfassung und Weiterbearbeitung | `harvest_acceptance.py` (POST/release/cancel/frachtkosten), Avis-/QR-Schnittstellen | Schnellstart/Vorerfassung ("unvollstaendig starten, sauber abschliessen"-Pfad) fehlt als gefuehrter Klienten-Pfad; UAT-Nachweis ausstehend | CTS-H2S-UAT-001 | P1 |
 | 6 | Waage — ASCII-Waagenimport, Satzarten, Fehlerakzeptanz, Qualitaetsfelder | `waage.py` (CRUD Waagen + Wiegungen), Waagen-UX, API und Tests; Coverage-Ratchet gruen | Live-Hardware-/Dateiimport-Test, Eich-/Kalibrierungsnachweise, Offline-/Fehlerqueue bei Verbindungsabbruch fehlen | WAAGE-LIVE-001 | P0 |
 | 7 | Waagenvorlagen — Vorlage mit Kontrakt/Fahrer/LKW/Lager/Silo/Sorte/Kunde/Schlag | Waagen- und Annahmeflaechen vorhanden; keine Wiederholfall-/Vorlagen-Logik sichtbar | Vorlage-/Wiederholfall-Mechanismus fuer wiederkehrende Anlieferungen fehlt (kein Endpunkt, kein UI-Pattern) | PARTIE-PFLICHT-001 | P2 |
-| 8 | Partie/Charge — Soll-/Ist-Mengen, Werte, Partiepreise, Rohertrag, Rueckverfolgung EK-Produktion-VK | `charges.py` (CRUD + freigabe + qs-readiness), `silo.py` (lots + movements), Silo-Lot-Snapshots | Partie-Genealogie UAT + Druck/Etikett/Report + physische Kette Waage→Silo-Lot→Settlement→VK fehlt als Nachweis | AMIC-PARITY-001 | P0 |
+| 8 | Partie/Charge — Soll-/Ist-Mengen, Werte, Partiepreise, Rohertrag, Rueckverfolgung EK-Produktion-VK | `charges.py` (CRUD + freigabe + qs-readiness), `silo.py` (lots + movements), Silo-Lot-Snapshots | Partie-Genealogie UAT + Druck/Etikett/Report + physische Kette Waage→Silo-Lot→Settlement→VK fehlt als Nachweis | VALEO-PARITY-001 | P0 |
 | 9 | Partiepflicht Waage — Pflicht je Artikel/Wiegetyp (Rohware, Saatgut) | Artikel-, Saatgut-, Charge- und Waagen-Endpunkte vorhanden | Harte Validierungsregel "Artikel/Wiegetyp verlangt Partie" fehlt zentral (kein Backend-Constraint, kein Fehler-Feedback im Wiegefluss) | PARTIE-PFLICHT-001 | P1 |
 | 10 | Silo-Leermeldung — Leermeldung ueber Waagenbeleg, Schwundsilo, Prozessvoraussetzungen | `silo.py` (kapazitaeten, lots, movements), `silo_operations_api.py` (einlagern/auslagern/bestand) | Leermeldung-Endpunkt, Schwundbuchung, Fehlermatrix und Waagenbeleg-Kopplung fehlen vollstaendig | SILO-LEER-001 | P0 |
 | 11 | DATEV/FIBU — SKR03/SKR04, Steuerberaterabstimmung, Export | `fibu_connectors.py` (profiles + imports + validate/post), DATEV-Export, FIBU-Suite, Cutover-Validator | Extern freigegebenes Konto-/Steuer-Mapping + Steuerberaterabnahme fehlen (EXT-002); Cutover-Script repo-seitig bereit | FIBU-CUTOVER-002 | P0 |
-| 12 | Bank/e-Clearing — MT940-Import, maschinelle Auszeichnung | `bank_statement_import.py` (POST import, GET lines), Bankabgleich, Auto-Matching | Realbank-Testdateien, Sonderfaelle (Ruecklastschrift, Sammelposten), UAT-Abgleich mit Steuerberater fehlen | AMIC-PARITY-001 | P1 |
+| 12 | Bank/e-Clearing — MT940-Import, maschinelle Auszeichnung | `bank_statement_import.py` (POST import, GET lines), Bankabgleich, Auto-Matching | Realbank-Testdateien, Sonderfaelle (Ruecklastschrift, Sammelposten), UAT-Abgleich mit Steuerberater fehlen | VALEO-PARITY-001 | P1 |
 | 13 | Kasse/DSFinV-K — DSFinV-K Pflicht-Export fuer Kassenpruefung | `pos_dsfinvk.py` (GET export, GET status), TSE-Endpunkte, POS-Offline-Queue | Produktive TSE-Abnahme + reales DSFinV-K-Exportpaket mit Pruefwerkzeug-Validierung fehlen | POS-DSFINVK-001 | P1 |
-| 14 | UX — funktionsdicht, aber altmodisch | Systemweiter UX-Baukasten (ObjectPage/ListReport/Wizard) rollout abgeschlossen | Kein Flaechen-Gap; UAT-Reviews je Kernmaske ausstehend | AMIC-PARITY-001 | P2 |
+| 14 | UX — funktionsdicht, aber altmodisch | Systemweiter UX-Baukasten (ObjectPage/ListReport/Wizard) rollout abgeschlossen | Kein Flaechen-Gap; UAT-Reviews je Kernmaske ausstehend | VALEO-PARITY-001 | P2 |
 
 ---
 
@@ -51,7 +51,7 @@ Methodik: Direktvergleich Branchenspezifische-Agrarsoftware-Kernfunktionen gegen
 
 | Gap-ID | Beschreibung | Prioritaet | Owner-Domain | Abnahmekriterium |
 |--------|--------------|------------|--------------|------------------|
-| AMIC-PARITY-001 | Vollstaendige Browser-/CRUD-Abnahme der O2C/P2P-Folgeobjektkette von Annahme bis FIBU-Buchung fehlt als UAT-Pfad | P0 | Agrar / Supply / Finance | Repo-seitig vorbereitet: `/uat/o2c/readiness` und 7-Schritt-Szenario-Runner decken O2C/P2P/Partie-Kette ab; externe Browser-UAT-Unterschrift bleibt Gate |
+| VALEO-PARITY-001 | Vollstaendige Browser-/CRUD-Abnahme der O2C/P2P-Folgeobjektkette von Annahme bis FIBU-Buchung fehlt als UAT-Pfad | P0 | Agrar / Supply / Finance | Repo-seitig vorbereitet: `/uat/o2c/readiness` und 7-Schritt-Szenario-Runner decken O2C/P2P/Partie-Kette ab; externe Browser-UAT-Unterschrift bleibt Gate |
 | WAAGE-LIVE-001 | Live-Hardware-/Dateiimport (ASCII-Waagenformat), Eich-/Kalibrierungsnachweise und Offline-Fehlerqueue nicht produktiv abgenommen | P0 | Agrar / Waage | Realgeraet oder ASCII-Datei-Import-Test gruen; Fehlerqueue-Roundtrip dokumentiert |
 | SILO-LEER-001 | Leermeldung-Endpunkt, Schwundbuchung, Fehlermatrix und Waagenbeleg-Kopplung fehlen vollstaendig | P0 | Agrar / Lager | `POST /silo/silos/{id}/leermeldung` + Schwundbuchung + 3 Fehler-Szenario-Tests gruen |
 | PARTIE-PFLICHT-001 | Harte Validierungsregel "Artikel/Wiegetyp verlangt Partie" fehlt zentral im Backend | P1 | Agrar / Waage | Backend-Constraint wirft 422 bei Wiegung ohne Charge wenn Artikelstamm Partiepflicht traegt |
@@ -67,7 +67,7 @@ Methodik: Direktvergleich Branchenspezifische-Agrarsoftware-Kernfunktionen gegen
 ## Umsetzungsplan (6 Phasen)
 
 ### Phase 1 — Rohware-UAT-Fundament (Woche 1–2)
-**Ziel:** CTS-H2S-UAT-001 + AMIC-PARITY-001 (Rohware-Kette — Agrar-Spezialsoftware-Parität)
+**Ziel:** CTS-H2S-UAT-001 + VALEO-PARITY-001 (Rohware-Kette — Agrar-Spezialsoftware-Parität)
 
 - UAT-Testdaten fuer mind. 3 Rohwarengruppen (Getreide, Oelfruechte, Leguminosen) anlegen
 - Playwright-Pfad: Annahme → Qualitaetsprotokoll → Settlement-Preview → Settlement-Post → FIBU-Buchung
