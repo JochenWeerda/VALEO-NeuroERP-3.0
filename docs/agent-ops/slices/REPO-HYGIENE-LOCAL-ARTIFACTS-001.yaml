@@ -1,0 +1,27 @@
+id: REPO-HYGIENE-LOCAL-ARTIFACTS-001
+title: Lokale Analyseartefakte ignorieren
+owner: Codex
+status: reserviert
+claimed_at: 2026-05-21
+goal: >
+  Lokal generierte Analyse- und Visual-Inspection-Artefakte aus dem Git-Status
+  heraushalten, ohne sie zu loeschen oder fachliche Dateien zu veraendern.
+scope:
+  - Untracked lokale Analyseartefakte identifizieren.
+  - .gitignore gezielt um lokale Visual-Tour- und Endpoint-Dump-Artefakte erweitern.
+  - Workboard und Slice-Doku aktualisieren.
+file_ownership:
+  - docs/agent-ops/active-workboard.md
+  - docs/agent-ops/slices/REPO-HYGIENE-LOCAL-ARTIFACTS-001.yaml
+  - .gitignore
+acceptance_criteria:
+  - packages/frontend-web/visual-tour-results/ wird ignoriert.
+  - service_erp_endpoints.txt wird als lokaler Endpoint-Dump ignoriert.
+  - temporaere Templanalyze-Skripte werden ignoriert.
+  - Vorhandene lokale Artefakte bleiben erhalten.
+  - Workboard-Validierung und Diff-Checks sind gruen.
+checks: []
+done: []
+risks:
+  - Weitere lokal erzeugte Tool-Artefakte koennen spaeter separate Ignore-Regeln benoetigen.
+next_step: Ignore-Regeln ergaenzen, pruefen und Slice abschliessen.

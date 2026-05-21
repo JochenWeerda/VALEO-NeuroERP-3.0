@@ -2,6 +2,16 @@
 
 Stand: `2026-05-12`
 
+## REPO-HYGIENE-LOCAL-ARTIFACTS-001
+
+**Von:** Codex
+**Owner:** Codex
+**Stand:** reserviert 2026-05-21
+**Ziel des Slices:** Lokal generierte Analyse- und Visual-Inspection-Artefakte aus dem Git-Status heraushalten, ohne sie zu loeschen.
+**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/agent-ops/slices/REPO-HYGIENE-LOCAL-ARTIFACTS-001.yaml`, `.gitignore`
+**Abnahmekriterien:** `packages/frontend-web/visual-tour-results/`, lokale Endpoint-Dumps und temporaere Analyse-Skripte werden ignoriert; vorhandene Artefakte bleiben lokal erhalten; Workboard-Validierung und Diff-Checks sind gruen.
+**Offene Risiken:** Weitere lokal erzeugte Tool-Artefakte koennen spaeter separate Ignore-Regeln benoetigen.
+
 ## CONTAINER-HEALTH-CRM-INVENTORY-001
 
 **Von:** Claude Code / Codex Integration
