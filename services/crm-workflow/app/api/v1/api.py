@@ -1,6 +1,6 @@
 """CRM Workflow API v1 router."""
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
 
 from .endpoints.workflows import router as workflows_router
 

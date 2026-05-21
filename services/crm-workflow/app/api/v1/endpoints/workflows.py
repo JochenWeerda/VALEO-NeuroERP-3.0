@@ -3,7 +3,7 @@
 from typing import Optional
 from uuid import UUID
 
-from fastapi import APIRouter, HTTPException, Query, status
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from ....db.session import get_db
@@ -17,7 +17,7 @@ router = APIRouter()
 @router.post("/", response_model=Workflow, status_code=status.HTTP_201_CREATED)
 async def create_workflow(
     workflow_data: WorkflowCreate,
-    db: AsyncSession = get_db
+    db: AsyncSession = Depends(get_db)
 ):
     """Create a new workflow."""
     workflow = WorkflowModel(**workflow_data.model_dump())
@@ -33,7 +33,7 @@ async def list_workflows(
     status: Optional[str] = Query(None),
     skip: int = Query(0, ge=0),
     limit: int = Query(100, ge=1, le=1000),
-    db: AsyncSession = get_db
+    db: AsyncSession = Depends(get_db)
 ):
     """List workflows with pagination and filtering."""
     query = db.query(WorkflowModel)
@@ -60,7 +60,7 @@ async def list_workflows(
 @router.get("/{workflow_id}", response_model=Workflow)
 async def get_workflow(
     workflow_id: UUID,
-    db: AsyncSession = get_db
+    db: AsyncSession = Depends(get_db)
 ):
     """Get a specific workflow by ID."""
     workflow = await db.get(WorkflowModel, workflow_id)
@@ -73,7 +73,7 @@ async def get_workflow(
 async def update_workflow(
     workflow_id: UUID,
     workflow_data: WorkflowUpdate,
-    db: AsyncSession = get_db
+    db: AsyncSession = Depends(get_db)
 ):
     """Update a workflow."""
     workflow = await db.get(WorkflowModel, workflow_id)
@@ -92,7 +92,7 @@ async def update_workflow(
 @router.delete("/{workflow_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_workflow(
     workflow_id: UUID,
-    db: AsyncSession = get_db
+    db: AsyncSession = Depends(get_db)
 ):
     """Delete a workflow."""
     workflow = await db.get(WorkflowModel, workflow_id)
@@ -107,7 +107,7 @@ async def delete_workflow(
 async def execute_workflow(
     workflow_id: UUID,
     trigger_event: dict = {},
-    db: AsyncSession = get_db
+    db: AsyncSession = Depends(get_db)
 ):
     """Manually execute a workflow."""
     workflow = await db.get(WorkflowModel, workflow_id)
@@ -137,7 +137,7 @@ async def execute_workflow(
 @router.get("/{workflow_id}/executions", response_model=list[WorkflowExecution])
 async def get_workflow_executions(
     workflow_id: UUID,
-    db: AsyncSession = get_db
+    db: AsyncSession = Depends(get_db)
 ):
     """Get execution history for a workflow."""
     workflow = await db.get(WorkflowModel, workflow_id)

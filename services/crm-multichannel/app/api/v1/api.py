@@ -1,6 +1,6 @@
 """CRM Multi-Channel API v1 router."""
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
 
 from .endpoints.multichannel import router as multichannel_router
 

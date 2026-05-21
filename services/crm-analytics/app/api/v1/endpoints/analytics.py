@@ -3,7 +3,7 @@
 from typing import Optional
 from uuid import UUID
 
-from fastapi import APIRouter, HTTPException, Query, status
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from ....db.session import get_db
@@ -18,7 +18,7 @@ router = APIRouter()
 async def get_dashboard_data(
     tenant_id: Optional[str] = Query(None),
     dashboard_type: str = Query("executive", description="Dashboard type"),
-    db: AsyncSession = get_db
+    db: AsyncSession = Depends(get_db)
 ):
     """Get dashboard data with metrics and charts."""
     # For now, return mock data - in production this would aggregate from all CRM services
@@ -105,7 +105,7 @@ async def get_report_data(
     tenant_id: Optional[str] = Query(None),
     start_date: Optional[str] = Query(None),
     end_date: Optional[str] = Query(None),
-    db: AsyncSession = get_db
+    db: AsyncSession = Depends(get_db)
 ):
     """Get predefined report data."""
     effective_tenant_id = tenant_id or "00000000-0000-0000-0000-000000000001"
@@ -178,7 +178,7 @@ async def generate_custom_report(
     config: dict,
     tenant_id: str = Query(..., description="Tenant ID"),
     name: str = Query("Custom Report", description="Report name"),
-    db: AsyncSession = get_db
+    db: AsyncSession = Depends(get_db)
 ):
     """Generate a custom report based on configuration."""
     # Mock custom report generation
@@ -208,7 +208,7 @@ async def generate_custom_report(
 async def get_metric_value(
     metric_name: str,
     tenant_id: Optional[str] = Query(None),
-    db: AsyncSession = get_db
+    db: AsyncSession = Depends(get_db)
 ):
     """Get current value for a specific metric."""
     effective_tenant_id = tenant_id or "00000000-0000-0000-0000-000000000001"

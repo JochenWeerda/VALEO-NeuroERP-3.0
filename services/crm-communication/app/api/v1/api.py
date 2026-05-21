@@ -1,6 +1,6 @@
 """CRM Communication API v1 router."""
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
 
 from .endpoints.communication import router as communication_router
 

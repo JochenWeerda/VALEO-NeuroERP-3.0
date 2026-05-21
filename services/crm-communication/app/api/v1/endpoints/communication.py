@@ -3,7 +3,7 @@
 from typing import Optional
 from uuid import UUID
 
-from fastapi import APIRouter, HTTPException, Query, status, UploadFile, File
+from fastapi import APIRouter, Depends, HTTPException, Query, status, UploadFile, File
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from ....db.session import get_db
@@ -20,7 +20,7 @@ router = APIRouter()
 @router.post("/emails/send", response_model=Email, status_code=status.HTTP_201_CREATED)
 async def send_email(
     email_data: EmailSend,
-    db: AsyncSession = get_db
+    db: AsyncSession = Depends(get_db)
 ):
     """Send an email with optional template and attachments."""
     # For now, create the email record - actual sending would be handled by background task
@@ -46,7 +46,7 @@ async def list_emails(
     direction: Optional[str] = Query(None),
     skip: int = Query(0, ge=0),
     limit: int = Query(50, ge=1, le=200),
-    db: AsyncSession = get_db
+    db: AsyncSession = Depends(get_db)
 ):
     """List emails with filtering and pagination."""
     query = db.query(EmailModel)
@@ -81,7 +81,7 @@ async def list_emails(
 @router.get("/emails/{email_id}", response_model=Email)
 async def get_email(
     email_id: UUID,
-    db: AsyncSession = get_db
+    db: AsyncSession = Depends(get_db)
 ):
     """Get a specific email by ID."""
     email = await db.get(EmailModel, email_id)
@@ -98,7 +98,7 @@ async def list_templates(
     is_active: Optional[bool] = Query(None),
     skip: int = Query(0, ge=0),
     limit: int = Query(50, ge=1, le=200),
-    db: AsyncSession = get_db
+    db: AsyncSession = Depends(get_db)
 ):
     """List email templates with filtering."""
     query = db.query(TemplateModel)
@@ -129,7 +129,7 @@ async def list_templates(
 @router.post("/templates", response_model=Template, status_code=status.HTTP_201_CREATED)
 async def create_template(
     template_data: TemplateCreate,
-    db: AsyncSession = get_db
+    db: AsyncSession = Depends(get_db)
 ):
     """Create a new email template."""
     template = TemplateModel(**template_data.model_dump())
@@ -143,7 +143,7 @@ async def create_template(
 async def update_template(
     template_id: UUID,
     template_data: TemplateUpdate,
-    db: AsyncSession = get_db
+    db: AsyncSession = Depends(get_db)
 ):
     """Update an email template."""
     template = await db.get(TemplateModel, template_id)
@@ -162,7 +162,7 @@ async def update_template(
 @router.post("/campaigns", response_model=Campaign, status_code=status.HTTP_201_CREATED)
 async def create_campaign(
     campaign_data: CampaignCreate,
-    db: AsyncSession = get_db
+    db: AsyncSession = Depends(get_db)
 ):
     """Create a new email campaign."""
     campaign = CampaignModel(**campaign_data.model_dump())
@@ -178,7 +178,7 @@ async def list_campaigns(
     status: Optional[str] = Query(None),
     skip: int = Query(0, ge=0),
     limit: int = Query(50, ge=1, le=200),
-    db: AsyncSession = get_db
+    db: AsyncSession = Depends(get_db)
 ):
     """List email campaigns."""
     query = db.query(CampaignModel)
@@ -205,7 +205,7 @@ async def list_campaigns(
 @router.post("/campaigns/{campaign_id}/send")
 async def send_campaign(
     campaign_id: UUID,
-    db: AsyncSession = get_db
+    db: AsyncSession = Depends(get_db)
 ):
     """Send an email campaign."""
     campaign = await db.get(CampaignModel, campaign_id)
