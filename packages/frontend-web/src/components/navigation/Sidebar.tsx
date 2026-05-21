@@ -1,4 +1,4 @@
-import { Suspense, lazy, useEffect, useMemo, useState } from 'react'
+import { Suspense, lazy, useEffect, useMemo, useRef, useState } from 'react'
 import { clsx } from 'clsx'
 import { Link, NavLink } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
@@ -32,6 +32,7 @@ export function Sidebar({ collapsed, onToggle, onNavigate }: SidebarProps): JSX.
   const navSections = useNavSections()
   const userRoles = useUserRole()
   const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set())
+  const hoverTimers = useRef<Map<string, ReturnType<typeof setTimeout>>>(new Map())
 
   const filteredNavItems = useMemo(() => {
     function isVisible(item: NavItem): boolean {
@@ -101,6 +102,40 @@ export function Sidebar({ collapsed, onToggle, onNavigate }: SidebarProps): JSX.
     })
   }
 
+  function handleGroupMouseEnter(id: string): void {
+    const existing = hoverTimers.current.get(id)
+    if (existing) clearTimeout(existing)
+    const timer = setTimeout(() => {
+      setExpandedGroups((prev) => new Set([...prev, id]))
+      hoverTimers.current.delete(id)
+    }, 220)
+    hoverTimers.current.set(id, timer)
+  }
+
+  function handleGroupMouseLeave(id: string): void {
+    const existing = hoverTimers.current.get(id)
+    if (existing) {
+      clearTimeout(existing)
+      hoverTimers.current.delete(id)
+    }
+    const closeTimer = setTimeout(() => {
+      setExpandedGroups((prev) => {
+        const next = new Set(prev)
+        next.delete(id)
+        return next
+      })
+    }, 350)
+    hoverTimers.current.set(`close:${id}`, closeTimer)
+  }
+
+  function handleGroupMouseEnterCancel(id: string): void {
+    const closeTimer = hoverTimers.current.get(`close:${id}`)
+    if (closeTimer) {
+      clearTimeout(closeTimer)
+      hoverTimers.current.delete(`close:${id}`)
+    }
+  }
+
   function resolveEffectivePath(item: NavItem): string | null {
     if (item.path && !item.path.includes(':')) {
       return item.path
@@ -151,7 +186,11 @@ export function Sidebar({ collapsed, onToggle, onNavigate }: SidebarProps): JSX.
     }
 
     return (
-      <div key={item.id}>
+      <div
+        key={item.id}
+        onMouseEnter={() => { handleGroupMouseEnterCancel(item.id); handleGroupMouseEnter(item.id) }}
+        onMouseLeave={() => handleGroupMouseLeave(item.id)}
+      >
         <button
           onClick={() => toggleGroup(item.id)}
           className={clsx(
