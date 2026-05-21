@@ -20,5 +20,7 @@ export const entries: AutoGroupRouteEntry[] = [
   {
     "module": "@/pages/service/abschluss",
     "path": "abschluss"
-  }
+  },
+  { "module": "@/pages/service/anfrage-detail", "path": "anfrage-detail" },
+  { "module": "@/pages/service/anfrage-neu", "path": "anfrage-neu" },
 ]

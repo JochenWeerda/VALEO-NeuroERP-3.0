@@ -14,4 +14,5 @@ export const entries: AutoGroupRouteEntry[] = [
   { "module": "@/pages/workflow/flow-spine-service-to-customer", "path": "flow-spine-service-to-customer" },
   { "module": "@/pages/workflow/flow-spine-finance-to-close", "path": "flow-spine-finance-to-close" },
   { "module": "@/pages/workflow/flow-spine-compliance-to-report", "path": "flow-spine-compliance-to-report" },
+  { "module": "@/pages/workflow/process-mining-analytics", "path": "process-mining-analytics" },
 ]

@@ -144,5 +144,8 @@ export const entries: AutoGroupRouteEntry[] = [
   {
     "module": "@/pages/agrar/wetterwarnung",
     "path": "wetterwarnung"
-  }
+  },
+  { "module": "@/pages/agrar/ernte/neu", "path": "ernte/neu" },
+  { "module": "@/pages/agrar/saatzucht", "path": "saatzucht" },
+  { "module": "@/pages/agrar/sammelabrechnung", "path": "sammelabrechnung" },
 ]

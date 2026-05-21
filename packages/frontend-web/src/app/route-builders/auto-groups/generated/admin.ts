@@ -68,5 +68,11 @@ export const entries: AutoGroupRouteEntry[] = [
   {
     "module": "@/pages/admin/setup/dms-integration",
     "path": "setup/dms-integration"
-  }
+  },
+  { "module": "@/pages/admin/command-monitor", "path": "command-monitor" },
+  { "module": "@/pages/admin/nummernkreise", "path": "nummernkreise" },
+  { "module": "@/pages/admin/terminologie", "path": "terminologie" },
+  { "module": "@/pages/admin/voice-channel", "path": "voice-channel" },
+  { "module": "@/pages/admin/webhooks", "path": "webhooks" },
+  { "module": "@/pages/admin/webshop", "path": "webshop" },
 ]

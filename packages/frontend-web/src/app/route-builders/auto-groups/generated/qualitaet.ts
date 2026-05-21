@@ -20,5 +20,8 @@ export const entries: AutoGroupRouteEntry[] = [
   {
     "module": "@/pages/qualitaet/reklamation-detail",
     "path": "reklamation/:id"
-  }
+  },
+  { "module": "@/pages/qualitaet/ausnahmen", "path": "ausnahmen" },
+  { "module": "@/pages/qualitaet/labor-detail", "path": "labor-detail" },
+  { "module": "@/pages/qualitaet/reklamation-detail", "path": "reklamation-detail" },
 ]

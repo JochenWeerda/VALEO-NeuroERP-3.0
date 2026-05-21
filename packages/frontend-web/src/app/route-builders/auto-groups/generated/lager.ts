@@ -28,5 +28,7 @@ export const entries: AutoGroupRouteEntry[] = [
   {
     "module": "@/pages/lager/terminal",
     "path": "terminal"
-  }
+  },
+  { "module": "@/pages/lager/bestandskorrektur", "path": "bestandskorrektur" },
+  { "module": "@/pages/lager/gs1-scanner", "path": "gs1-scanner" },
 ]

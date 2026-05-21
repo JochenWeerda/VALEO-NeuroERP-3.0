@@ -32,5 +32,7 @@ export const entries: AutoGroupRouteEntry[] = [
   {
     "module": "@/pages/pos/uebernahme-kasse",
     "path": "uebernahme-kasse"
-  }
+  },
+  { "module": "@/pages/pos/promotionen", "path": "promotionen" },
+  { "module": "@/pages/pos/retoure", "path": "retoure" },
 ]
