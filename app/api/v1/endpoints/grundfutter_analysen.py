@@ -681,7 +681,7 @@ def patch_analyse(
     return _analyse_to_dict(a)
 
 
-@router.delete("/grundfutter-analysen/{analyse_id}", status_code=204, response_class=Response)
+@router.delete("/grundfutter-analysen/{analyse_id}", status_code=204, response_class=Response, response_model=None)
 def delete_analyse(
     analyse_id: str,
     db: Session = Depends(get_db),

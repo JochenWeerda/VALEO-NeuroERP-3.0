@@ -160,7 +160,7 @@ async def update_waage(
     return _to_dict(waage)
 
 
-@router.delete("/waagen/{waage_id}", status_code=204, response_class=Response)
+@router.delete("/waagen/{waage_id}", status_code=204, response_class=Response, response_model=None)
 async def delete_waage(waage_id: str, db: Session = Depends(get_db)):
     """Delete a Waage"""
     repo = WaageRepository(db)
@@ -231,7 +231,7 @@ async def create_wiegung(
         raise HTTPException(status_code=400, detail=str(e))
 
 
-@router.delete("/wiegungen/{wiegung_id}", status_code=204, response_class=Response)
+@router.delete("/wiegungen/{wiegung_id}", status_code=204, response_class=Response, response_model=None)
 async def delete_wiegung(wiegung_id: str, db: Session = Depends(get_db)):
     """Delete a Wiegung"""
     repo = WiegungRepository(db)
@@ -438,7 +438,7 @@ async def retry_fehlerqueue_entry(entry_id: str):
     raise HTTPException(status_code=404, detail=f"Fehlerqueue-Eintrag {entry_id} nicht gefunden")
 
 
-@router.delete("/waagen/import/fehlerqueue/{entry_id}", status_code=204, response_class=Response)
+@router.delete("/waagen/import/fehlerqueue/{entry_id}", status_code=204, response_class=Response, response_model=None)
 async def delete_fehlerqueue_entry(entry_id: str):
     """Löscht einen Eintrag aus der Import-Fehlerqueue."""
     global _fehlerqueue

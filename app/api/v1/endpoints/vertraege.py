@@ -112,7 +112,7 @@ async def update_rahmenvertrag(vertrag_id: str, data: VertragUpdate, db: Session
     return _to_dict(vertrag)
 
 
-@router.delete("/rahmenvertraege/{vertrag_id}", status_code=204, response_class=Response)
+@router.delete("/rahmenvertraege/{vertrag_id}", status_code=204, response_class=Response, response_model=None)
 async def delete_rahmenvertrag(vertrag_id: str, db: Session = Depends(get_db)):
     repo = RahmenvertragRepository(db)
     if not repo.delete(vertrag_id):

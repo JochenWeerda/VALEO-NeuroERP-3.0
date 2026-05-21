@@ -174,7 +174,7 @@ def update_report_permission(
     return get_report_permission(permission_id, tenant_id, db)
 
 
-@router.delete("/report-permissions/{permission_id}", status_code=204, response_class=Response)
+@router.delete("/report-permissions/{permission_id}", status_code=204, response_class=Response, response_model=None)
 def delete_report_permission(
     permission_id: str,
     tenant_id: str = Depends(get_tenant_id),

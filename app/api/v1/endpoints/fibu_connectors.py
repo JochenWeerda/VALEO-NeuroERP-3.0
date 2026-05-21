@@ -179,7 +179,7 @@ async def update_profile(
     return await get_profile(profile_id, tenant_id, db)
 
 
-@router.delete("/profiles/{profile_id}", status_code=204, response_class=Response)
+@router.delete("/profiles/{profile_id}", status_code=204, response_class=Response, response_model=None)
 async def delete_profile(
   profile_id: str,
   tenant_id: str = Depends(get_tenant_id),

@@ -91,7 +91,7 @@ async def update_preparation_list(
     return PrepListOut.model_validate(obj)
 
 
-@router.delete("/{list_id}", status_code=204, response_class=Response)
+@router.delete("/{list_id}", status_code=204, response_class=Response, response_model=None)
 async def delete_preparation_list(list_id: str, db: Session = Depends(get_db)):
     """DELETE Rüstliste (nur offene)"""
     obj = db.query(PreparationList).filter(PreparationList.id == list_id).first()

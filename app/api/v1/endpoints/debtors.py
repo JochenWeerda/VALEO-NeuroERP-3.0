@@ -436,7 +436,7 @@ async def get_debtor_balance(
         raise HTTPException(status_code=500, detail=f"Failed to get debtor balance: {str(e)}")
 
 
-@router.delete("/{debtor_id}", status_code=204, response_class=Response)
+@router.delete("/{debtor_id}", status_code=204, response_class=Response, response_model=None)
 async def delete_debtor(
     debtor_id: str,
     db: Session = Depends(get_db)

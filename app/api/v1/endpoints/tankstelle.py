@@ -83,7 +83,7 @@ def create_zapfung(payload: ZapfungPayload, db: Session = Depends(get_db)):
     return _to_dict(obj)
 
 
-@router.delete("/zapfungen/{zapfung_id}", status_code=204, response_class=Response)
+@router.delete("/zapfungen/{zapfung_id}", status_code=204, response_class=Response, response_model=None)
 def delete_zapfung(zapfung_id: str, db: Session = Depends(get_db)):
     obj = db.query(Zapfung).filter(Zapfung.id == zapfung_id).first()
     if not obj:

@@ -134,7 +134,7 @@ async def create_article_selection(
     return SelectionOut.model_validate(obj)
 
 
-@router.delete("/selections/{sel_id}", status_code=204, response_class=Response)
+@router.delete("/selections/{sel_id}", status_code=204, response_class=Response, response_model=None)
 async def delete_article_selection(sel_id: str, db: Session = Depends(get_db)):
     """DEL Artikel Selektionen löschen"""
     obj = db.query(ArticleSelection).filter(ArticleSelection.id == sel_id).first()

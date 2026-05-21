@@ -104,7 +104,7 @@ def update_ernte(ernte_id: str, payload: ErntePatch, db: Session = Depends(get_d
     return _to_dict(row)
 
 
-@router.delete("/{ernte_id}", status_code=204, response_class=Response)
+@router.delete("/{ernte_id}", status_code=204, response_class=Response, response_model=None)
 def delete_ernte(ernte_id: str, db: Session = Depends(get_db)):
     row = db.query(ErnteDB).filter(ErnteDB.id == ernte_id).first()
     if not row:

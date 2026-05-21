@@ -77,7 +77,7 @@ def get_kampagne(kampagne_id: str, db: Session = Depends(get_db)):
     return _to_dict(row)
 
 
-@router.delete("/{kampagne_id}", status_code=204, response_class=Response)
+@router.delete("/{kampagne_id}", status_code=204, response_class=Response, response_model=None)
 def delete_kampagne(kampagne_id: str, db: Session = Depends(get_db)):
     row = db.query(ErnteKampagneDB).filter(ErnteKampagneDB.kampagne_id == kampagne_id).first()
     if not row:

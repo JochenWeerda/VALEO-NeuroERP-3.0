@@ -1076,7 +1076,7 @@ async def approve_closing_checklist(
     return await get_closing_checklist(checklist_id, tenant_id, db)
 
 
-@router.delete("/{checklist_id}", status_code=204, response_class=Response)
+@router.delete("/{checklist_id}", status_code=204, response_class=Response, response_model=None)
 async def delete_closing_checklist(
     checklist_id: str,
     tenant_id: str = Query("system", description="Tenant ID"),

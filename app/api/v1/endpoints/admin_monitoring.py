@@ -337,7 +337,7 @@ def update_monitoring_rule(rule_id: str, payload: MonitoringRuleIn, tenant_id: s
     return MonitoringRuleOut(**item)
 
 
-@router.delete("/rules/{rule_id}", status_code=204, response_class=Response)
+@router.delete("/rules/{rule_id}", status_code=204, response_class=Response, response_model=None)
 def delete_monitoring_rule(rule_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
     settings = _load_tenant_settings(db, tenant_id)
     cfg = _monitoring_cfg(settings)
@@ -384,7 +384,7 @@ def update_monitoring_channel(channel_id: str, payload: MonitoringChannelIn, ten
     return MonitoringChannelOut(**item)
 
 
-@router.delete("/channels/{channel_id}", status_code=204, response_class=Response)
+@router.delete("/channels/{channel_id}", status_code=204, response_class=Response, response_model=None)
 def delete_monitoring_channel(channel_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
     settings = _load_tenant_settings(db, tenant_id)
     cfg = _monitoring_cfg(settings)
@@ -431,7 +431,7 @@ def update_scheduler_job(job_id: str, payload: SchedulerJobIn, tenant_id: str = 
     return SchedulerJobOut(**item)
 
 
-@router.delete("/scheduler-jobs/{job_id}", status_code=204, response_class=Response)
+@router.delete("/scheduler-jobs/{job_id}", status_code=204, response_class=Response, response_model=None)
 def delete_scheduler_job(job_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
     settings = _load_tenant_settings(db, tenant_id)
     cfg = _monitoring_cfg(settings)

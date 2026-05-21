@@ -81,7 +81,7 @@ async def update_frachttarif(
     return _to_dict(updated)
 
 
-@router.delete("/frachttarife/{tarif_id}", status_code=204, response_class=Response)
+@router.delete("/frachttarife/{tarif_id}", status_code=204, response_class=Response, response_model=None)
 async def delete_frachttarif(tarif_id: str, db: Session = Depends(get_db)):
     repo = SpeditionFrachttarifRepository(db)
     if not repo.delete(tarif_id):

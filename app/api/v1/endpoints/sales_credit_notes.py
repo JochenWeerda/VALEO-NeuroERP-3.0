@@ -186,7 +186,7 @@ async def list_credit_notes(
     ]
 
 
-@router.delete("/credit-notes/{cn_id}", status_code=204, response_class=Response)
+@router.delete("/credit-notes/{cn_id}", status_code=204, response_class=Response, response_model=None)
 async def delete_credit_note(
     cn_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -353,7 +353,7 @@ async def list_returns(
     ]
 
 
-@router.delete("/returns/{return_id}", status_code=204, response_class=Response)
+@router.delete("/returns/{return_id}", status_code=204, response_class=Response, response_model=None)
 async def delete_return(
     return_id: str,
     tenant_id: str = Depends(get_tenant_id),

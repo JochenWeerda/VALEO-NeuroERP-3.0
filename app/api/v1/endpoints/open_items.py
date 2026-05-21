@@ -509,7 +509,7 @@ async def patch_open_item(op_id: str, payload: OpenItemUpdate, request: Request,
     return await update_open_item(op_id, merged, tenant_id, db, request)
 
 
-@router.delete("/{op_id}", status_code=204, response_class=Response)
+@router.delete("/{op_id}", status_code=204, response_class=Response, response_model=None)
 async def delete_open_item(op_id: str, request: Request, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
     row = db.execute(
         text("SELECT id, op_status FROM offene_posten WHERE id = :id AND tenant_id = :tenant_id"),

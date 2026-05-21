@@ -114,7 +114,7 @@ async def register_webhook(
     return WebhookOut.model_validate(obj)
 
 
-@router.delete("/{webhook_id}", status_code=204, response_class=Response)
+@router.delete("/{webhook_id}", status_code=204, response_class=Response, response_model=None)
 async def remove_webhook(webhook_id: str, db: Session = Depends(get_db)):
     """DEL Entfernen"""
     obj = db.query(WebhookRegistration).filter(WebhookRegistration.id == webhook_id).first()

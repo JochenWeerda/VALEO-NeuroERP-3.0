@@ -94,7 +94,7 @@ async def update_dokument(
     return dokument
 
 
-@router.delete("/{dokument_id}", status_code=204, response_class=Response)
+@router.delete("/{dokument_id}", status_code=204, response_class=Response, response_model=None)
 async def delete_dokument(
     dokument_id: str,
     hard_delete: bool = Query(False, description="Hard delete vs soft delete"),

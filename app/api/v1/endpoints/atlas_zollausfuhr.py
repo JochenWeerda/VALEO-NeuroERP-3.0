@@ -226,7 +226,7 @@ def update_anmeldung(
     return get_anmeldung(id, db, tenant_id)
 
 
-@router.delete("/ausfuhranmeldungen/{id}", status_code=204, response_class=Response)
+@router.delete("/ausfuhranmeldungen/{id}", status_code=204, response_class=Response, response_model=None)
 def delete_anmeldung(
     id: str,
     db: Session = Depends(get_db),

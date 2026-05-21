@@ -113,7 +113,7 @@ async def update_tenant(
         raise HTTPException(status_code=500, detail=f"Failed to update tenant: {str(e)}")
 
 
-@router.delete("/{tenant_id}", status_code=204, response_class=Response)
+@router.delete("/{tenant_id}", status_code=204, response_class=Response, response_model=None)
 async def delete_tenant(
     tenant_id: str,
     db: Session = Depends(get_db)

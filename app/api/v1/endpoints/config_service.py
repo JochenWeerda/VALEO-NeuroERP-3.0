@@ -175,7 +175,7 @@ async def update_connector(
     return await get_connector(connector_id, db, tenant_id)
 
 
-@router.delete("/connectors/{connector_id}", status_code=204, response_class=Response)
+@router.delete("/connectors/{connector_id}", status_code=204, response_class=Response, response_model=None)
 async def delete_connector(
     connector_id: str,
     db: Session = Depends(get_db),
@@ -355,7 +355,7 @@ async def update_reporting_unit(
     )
 
 
-@router.delete("/reporting-units/{unit_id}", status_code=204, response_class=Response)
+@router.delete("/reporting-units/{unit_id}", status_code=204, response_class=Response, response_model=None)
 async def delete_reporting_unit(
     unit_id: str,
     db: Session = Depends(get_db),
@@ -574,7 +574,7 @@ async def update_schedule(
     )
 
 
-@router.delete("/schedules/{schedule_id}", status_code=204, response_class=Response)
+@router.delete("/schedules/{schedule_id}", status_code=204, response_class=Response, response_model=None)
 async def delete_schedule(
     schedule_id: str,
     db: Session = Depends(get_db),

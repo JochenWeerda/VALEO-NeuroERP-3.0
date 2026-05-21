@@ -297,7 +297,7 @@ async def update_bank_account(
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.delete("/{account_id}", status_code=204, response_class=Response)
+@router.delete("/{account_id}", status_code=204, response_class=Response, response_model=None)
 async def delete_bank_account(
     account_id: str,
     tenant_id: str = Depends(get_tenant_id),

@@ -171,7 +171,7 @@ async def update_anfrage(
     return item
 
 
-@router.delete("/anfragen/{anfrage_id}", response_class=Response, status_code=204)
+@router.delete("/anfragen/{anfrage_id}", response_class=Response, status_code=204, response_model=None)
 async def delete_anfrage(
     anfrage_id: str,
     x_tenant_id: str = Header("default", alias="X-Tenant-ID"),

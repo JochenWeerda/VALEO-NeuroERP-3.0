@@ -198,7 +198,7 @@ async def trigger_lohn_import(
     }
 
 
-@router.delete("/runs/{run_id}", status_code=204, response_class=Response)
+@router.delete("/runs/{run_id}", status_code=204, response_class=Response, response_model=None)
 async def delete_lohn_import_run(
     run_id: str,
     tenant_id: str = Depends(get_tenant_id),

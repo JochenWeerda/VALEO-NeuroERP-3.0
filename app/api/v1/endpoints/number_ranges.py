@@ -122,7 +122,7 @@ def update_number_range(
         raise HTTPException(status_code=422, detail=str(exc)) from exc
 
 
-@router.delete("/{range_type}", status_code=204, response_class=Response)
+@router.delete("/{range_type}", status_code=204, response_class=Response, response_model=None)
 def delete_number_range(range_type: str, db: Session = Depends(get_db)) -> Response:
     tenant_id = get_current_tenant_id()
     svc = NumberRangeService(db)

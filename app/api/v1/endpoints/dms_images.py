@@ -151,7 +151,7 @@ async def upload_dms_document(
     )
 
 
-@router.delete("/documents/{doc_id}", status_code=204, response_class=Response)
+@router.delete("/documents/{doc_id}", status_code=204, response_class=Response, response_model=None)
 async def delete_dms_document(
     doc_id: str,
     tenant_id: str = Depends(get_tenant_id),
