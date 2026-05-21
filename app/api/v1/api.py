@@ -263,6 +263,13 @@ from app.api.v1.endpoints import (
     fibu_zahlungsmeldungen,
 )
 
+# Fachliche Vertiefung Wave 7 — Daueraufträge, Individualpreise, Stücklisten
+from app.api.v1.endpoints import (
+    dauerauftraege,
+    individualpreise,
+    stuecklisten,
+)
+
 # Import domain routers
 from app.domains.agrar.api import psm, psm_proplanta
 from app.domains.inventory.api import router as inventory_domain_router
@@ -1555,6 +1562,11 @@ api_router.include_router(fibu_geschaeftsjahre.router)
 api_router.include_router(artikel_mengeneinheiten.router)
 api_router.include_router(artikel_verpackung.router)
 api_router.include_router(fibu_zahlungsmeldungen.router)
+
+# Fachliche Vertiefung Wave 7
+api_router.include_router(dauerauftraege.router)
+api_router.include_router(individualpreise.router)
+api_router.include_router(stuecklisten.router)
 
 # Report/Print: Partie-Genealogie, Wiegeschein-PDF-Preview, GS1-Labels
 api_router.include_router(report_print.router)
