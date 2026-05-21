@@ -23,8 +23,8 @@ USER app
 EXPOSE 5700
 
 # Health check
-HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \
-    CMD curl -f http://localhost:5700/health || exit 1
+HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
+    CMD python3 -c "import urllib.request; urllib.request.urlopen('http://localhost:6400/health')"
 
 # Run the application
 CMD ["python", "main.py"]
