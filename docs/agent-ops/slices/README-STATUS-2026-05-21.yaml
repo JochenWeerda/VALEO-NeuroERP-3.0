@@ -1,0 +1,28 @@
+id: README-STATUS-2026-05-21
+title: Root README auf aktuellen Lieferstand ziehen
+owner: Codex
+status: reserviert
+claimed_at: 2026-05-21
+goal: >
+  Root-README auf den aktuellen GitHub-/Repo-Lieferstand nach Meridian-,
+  UAT-, Gap-Closure-, Container-Health- und Keycloak-Nachlieferungen
+  aktualisieren.
+scope:
+  - Root-README gegen aktuelle Status-, Gap-, UAT- und Workboard-Dokumente abgleichen.
+  - Deutsche und englische README-Sektionen auf Stand 2026-05-21 bringen.
+  - Repo-seitig geschlossene Punkte sauber von externen Gates abgrenzen.
+file_ownership:
+  - docs/agent-ops/active-workboard.md
+  - docs/agent-ops/slices/README-STATUS-2026-05-21.yaml
+  - README.md
+acceptance_criteria:
+  - README nennt Stand 2026-05-21.
+  - README verweist auf aktuelle Source-of-Truth-Dokumente.
+  - README beschreibt Meridian-Shell/Core-UI, UAT-Auflagen, Phase-2/3-Gap-Closure, Container-/Keycloak-Hardening.
+  - README trennt repo-seitig geschlossene Punkte von externen Gates.
+  - Workboard-Validierung, Markdown-Check und Diff-Check sind gruen.
+checks: []
+done: []
+risks:
+  - Tiefe Fachstatusdetails bleiben in den verlinkten Status-/Gap-/UAT-Dokumenten statt in der README.
+next_step: README aktualisieren und Slice abschliessen.

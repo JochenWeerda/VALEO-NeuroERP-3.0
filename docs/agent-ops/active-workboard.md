@@ -2,6 +2,16 @@
 
 Stand: `2026-05-12`
 
+## README-STATUS-2026-05-21
+
+**Von:** Codex
+**Owner:** Codex
+**Stand:** reserviert 2026-05-21
+**Ziel des Slices:** Root-README auf den aktuellen GitHub-/Repo-Lieferstand nach Meridian-, UAT-, Gap-Closure-, Container-Health- und Keycloak-Nachlieferungen aktualisieren.
+**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/agent-ops/slices/README-STATUS-2026-05-21.yaml`, `README.md`
+**Abnahmekriterien:** README nennt Stand 2026-05-21, verweist auf aktuelle Source-of-Truth-Dokumente, beschreibt Meridian-Shell/Core-UI, UAT-Auflagen, Phase-2/3-Gap-Closure, Container-/Keycloak-Hardening und trennt repo-seitig geschlossene Punkte von externen Gates.
+**Offene Risiken:** Tiefe Fachstatusdetails bleiben in den verlinkten Status-/Gap-/UAT-Dokumenten statt in der README.
+
 ## REPO-HYGIENE-LOCAL-ARTIFACTS-001
 
 **Von:** Codex
