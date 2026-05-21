@@ -249,6 +249,13 @@ from app.api.v1.endpoints import (
     logistik_frachttabellen,
 )
 
+# Fachliche Vertiefung Wave 5 — Vermehrungsvertrag, Vertreterstamm, Geschäftsjahre, Periodische Buchungen
+from app.api.v1.endpoints import (
+    vermehrungsvertrag,
+    vertreterstamm,
+    fibu_geschaeftsjahre,
+)
+
 # Import domain routers
 from app.domains.agrar.api import psm, psm_proplanta
 from app.domains.inventory.api import router as inventory_domain_router
@@ -1531,6 +1538,11 @@ api_router.include_router(preis_rabattgruppen.router)
 api_router.include_router(hausbankenstamm.router)
 api_router.include_router(artikel_bestandteile.router)
 api_router.include_router(logistik_frachttabellen.router)
+
+# Fachliche Vertiefung Wave 5
+api_router.include_router(vermehrungsvertrag.router)
+api_router.include_router(vertreterstamm.router)
+api_router.include_router(fibu_geschaeftsjahre.router)
 
 # Report/Print: Partie-Genealogie, Wiegeschein-PDF-Preview, GS1-Labels
 api_router.include_router(report_print.router)
