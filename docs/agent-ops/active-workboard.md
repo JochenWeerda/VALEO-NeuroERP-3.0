@@ -6,10 +6,12 @@ Stand: `2026-05-12`
 
 **Von:** Codex
 **Owner:** Codex
-**Stand:** reserviert 2026-05-21
+**Stand:** abgeschlossen 2026-05-21
 **Ziel des Slices:** Fehlende Keycloak-Datenbank im laufenden PostgreSQL anlegen und Init-Script fuer kuenftige Deployments absichern.
 **Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/agent-ops/slices/KEYCLOAK-PSQL-DB-001.yaml`, `scripts/init.sql`
 **Abnahmekriterien:** Datenbank `keycloak` existiert im laufenden Postgres; Init-Script enthaelt Bootstrap fuer kuenftige Deployments; Keycloak startet ohne `database "keycloak" does not exist`; Claudes Dirty Files bleiben unberuehrt.
+**Erledigt:** Laufende PostgreSQL-DB `keycloak` mit Owner `keycloak` angelegt; Verbindung als User `keycloak` gegen DB `keycloak` geprueft; `scripts/init.sql` von ungueltigem `CREATE DATABASE` im `DO`-Block auf psql-`\\gexec`-Bootstrap umgestellt; Keycloak neu gestartet und Schema-Initialisierung im Log bestaetigt.
+**Checks:** `docker exec valeo-neuro-erp-postgres psql -U keycloak -d keycloak -tAc "SELECT current_database(), current_user;"`; `docker compose restart keycloak`; `docker logs --tail 40 valeo-neuro-erp-keycloak`; `python scripts/agent_workboard_supervisor.py validate`
 **Offene Risiken:** Keycloak kann nach DB-Anlage noch an separaten Realm-/Credential-/Healthcheck-Themen scheitern.
 
 ## UAT-AUFLAGEN-2026-05-17

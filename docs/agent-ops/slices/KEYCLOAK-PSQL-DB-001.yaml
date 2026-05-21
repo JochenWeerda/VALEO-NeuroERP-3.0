@@ -1,8 +1,9 @@
 id: KEYCLOAK-PSQL-DB-001
 title: Keycloak PostgreSQL Database Bootstrap
 owner: Codex
-status: reserviert
+status: abgeschlossen
 claimed_at: 2026-05-21
+completed_at: 2026-05-21
 goal: Fehlende Keycloak-Datenbank im laufenden PostgreSQL anlegen und Init-Script fuer kuenftige Deployments absichern.
 scope:
   - scripts/init.sql gegen erwartete Keycloak-Datenbank/Owner-Konfiguration pruefen
@@ -24,4 +25,8 @@ checks:
   - python scripts/agent_workboard_supervisor.py validate
 risks:
   - Keycloak kann nach DB-Anlage noch an separaten Realm-/Credential-/Healthcheck-Themen scheitern.
-next_step: Laufende DB anlegen, Init-Script ggf. angleichen, Keycloak neu starten.
+next_step: Keycloak-Healthcheck nach Startphase erneut pruefen und ggf. Realm-/Credential-Themen separat behandeln.
+result: >
+  Laufende PostgreSQL-Datenbank keycloak mit Owner keycloak angelegt,
+  Verbindung als Keycloak-User verifiziert, Init-Script fuer kuenftige
+  Deployments auf psql-gexec-Bootstrap korrigiert und Keycloak neu gestartet.
