@@ -1,6 +1,6 @@
 """CRM Analytics API v1 router."""
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
 
 from .endpoints.analytics import router as analytics_router
 

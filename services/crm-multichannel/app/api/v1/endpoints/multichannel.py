@@ -3,7 +3,7 @@
 from typing import Optional
 from uuid import UUID
 
-from fastapi import APIRouter, HTTPException, Query, status, Request
+from fastapi import APIRouter, Depends, HTTPException, Query, status, Request
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from ....db.session import get_db
@@ -45,7 +45,7 @@ async def list_conversations(
     customer_id: Optional[UUID] = Query(None),
     skip: int = Query(0, ge=0),
     limit: int = Query(50, ge=1, le=200),
-    db: AsyncSession = get_db
+    db: AsyncSession = Depends(get_db)
 ):
     """List omnichannel conversations with filtering."""
     # Mock conversations data
@@ -94,7 +94,7 @@ async def list_conversations(
 @router.get("/conversations/{conversation_id}", response_model=Conversation)
 async def get_conversation(
     conversation_id: UUID,
-    db: AsyncSession = get_db
+    db: AsyncSession = Depends(get_db)
 ):
     """Get a specific conversation by ID."""
     # Mock conversation data
@@ -132,7 +132,7 @@ async def get_conversation_messages(
     conversation_id: UUID,
     skip: int = Query(0, ge=0),
     limit: int = Query(50, ge=1, le=200),
-    db: AsyncSession = get_db
+    db: AsyncSession = Depends(get_db)
 ):
     """Get messages for a specific conversation."""
     # Mock messages data
@@ -194,7 +194,7 @@ async def get_conversation_messages(
 @router.post("/messages/send", response_model=SendMessageResponse, status_code=status.HTTP_201_CREATED)
 async def send_message(
     request: SendMessageRequest,
-    db: AsyncSession = get_db
+    db: AsyncSession = Depends(get_db)
 ):
     """Send a message across any connected channel."""
     # Mock message sending
@@ -212,7 +212,7 @@ async def list_forms(
     is_published: Optional[bool] = Query(None),
     skip: int = Query(0, ge=0),
     limit: int = Query(50, ge=1, le=200),
-    db: AsyncSession = get_db
+    db: AsyncSession = Depends(get_db)
 ):
     """List available web forms."""
     # Mock forms data
@@ -262,7 +262,7 @@ async def list_forms(
 @router.post("/forms", response_model=WebForm, status_code=status.HTTP_201_CREATED)
 async def create_form(
     form_data: WebFormCreate,
-    db: AsyncSession = get_db
+    db: AsyncSession = Depends(get_db)
 ):
     """Create a new web form."""
     # Mock form creation
@@ -288,7 +288,7 @@ async def create_form(
 async def submit_form(
     form_id: UUID,
     submission_data: FormSubmissionCreate,
-    db: AsyncSession = get_db
+    db: AsyncSession = Depends(get_db)
 ):
     """Submit a web form."""
     # Mock form submission processing
@@ -314,7 +314,7 @@ async def list_integrations(
     status: Optional[str] = Query(None),
     skip: int = Query(0, ge=0),
     limit: int = Query(50, ge=1, le=200),
-    db: AsyncSession = get_db
+    db: AsyncSession = Depends(get_db)
 ):
     """List external system integrations."""
     # Mock integrations data
@@ -359,7 +359,7 @@ async def list_integrations(
 async def trigger_sync(
     integration_id: UUID,
     entities: Optional[list[str]] = None,
-    db: AsyncSession = get_db
+    db: AsyncSession = Depends(get_db)
 ):
     """Trigger data synchronization with external systems."""
     # Mock sync trigger
