@@ -233,6 +233,14 @@ from app.api.v1.endpoints import (
     produktion_rezepturgruppen,
 )
 
+# Fachliche Vertiefung Wave 3 — Kundenbanken, PIV, Stoffstrom, Skonto-Auszifferung
+from app.api.v1.endpoints import (
+    kundenbanken,
+    inventur_piv,
+    artikel_stoffstrom,
+    op_skonto_auszifferung,
+)
+
 # Import domain routers
 from app.domains.agrar.api import psm, psm_proplanta
 from app.domains.inventory.api import router as inventory_domain_router
@@ -1503,6 +1511,12 @@ api_router.include_router(artikel_stamm_ext.router)
 # Fachliche Vertiefung Wave 2
 api_router.include_router(kontrakt_mengenzeitraum.router)
 api_router.include_router(produktion_rezepturgruppen.router)
+
+# Fachliche Vertiefung Wave 3
+api_router.include_router(kundenbanken.router)
+api_router.include_router(inventur_piv.router)
+api_router.include_router(artikel_stoffstrom.router)
+api_router.include_router(op_skonto_auszifferung.router)
 
 # Report/Print: Partie-Genealogie, Wiegeschein-PDF-Preview, GS1-Labels
 api_router.include_router(report_print.router)
