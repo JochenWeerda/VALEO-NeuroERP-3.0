@@ -18,8 +18,8 @@ export default function SidebarFavorites({ favorites, onNavigate }: SidebarFavor
   }
 
   return (
-    <div className="mb-3 rounded-md border bg-muted/30 p-2">
-      <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Favoriten</p>
+    <div className="mb-3 rounded-[8px] border border-[var(--sidebar-border)] bg-[hsl(215,30%,18%)] p-2">
+      <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-[hsl(210,20%,70%)]">Favoriten</p>
       <div className="space-y-1">
         {favorites.map((favorite) => {
           const FavoriteIcon = favorite.item.icon
@@ -30,9 +30,9 @@ export default function SidebarFavorites({ favorites, onNavigate }: SidebarFavor
               onClick={onNavigate}
               className={({ isActive }) =>
                 clsx(
-                  'flex items-center gap-2 rounded-md px-2 py-1.5 text-xs font-medium transition-colors',
-                  'hover:bg-accent hover:text-accent-foreground',
-                  isActive ? 'bg-accent text-accent-foreground' : 'text-muted-foreground',
+                  'flex min-h-11 items-center gap-2 rounded-[8px] px-2 py-1.5 text-xs font-medium transition-colors',
+                  'hover:bg-[var(--sidebar-item-hover-bg)] hover:text-white',
+                  isActive ? 'bg-[var(--sidebar-item-active-bg)] text-white' : 'text-[hsl(210,20%,75%)]',
                 )
               }
             >
