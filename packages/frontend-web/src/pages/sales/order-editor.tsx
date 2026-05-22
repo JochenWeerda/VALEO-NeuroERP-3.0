@@ -860,7 +860,8 @@ export default function SalesOrderEditorPage(): JSX.Element {
 
   // ── Speichern ──────────────────────────────────────────────────────────────
 
-  const handleSave = async (): Promise<string | null> => {
+  // Pure worker — no isSaving management. Callers own the guard.
+  const persistOrder = async (): Promise<string | null> => {
     if (!state.customer) {
       push('Bitte zuerst einen Kunden auswählen')
       return null
@@ -869,52 +870,56 @@ export default function SalesOrderEditorPage(): JSX.Element {
       push(salesEligibility.reasons.join(' ') || 'Kunde ist für Aufträge nicht freigegeben (Stammdaten).')
       return null
     }
+    const payload = {
+      order_number: state.auftragNr || undefined,
+      customer_id: state.customer.id,
+      subject: state.betreff || (state.auftragNr ? `Auftrag ${state.auftragNr}` : 'Neuer Auftrag'),
+      description: state.notizen,
+      total_amount: summen.netto,
+      currency: 'EUR',
+      status: state.statusBestaetigt ? 'confirmed' : 'open',
+      contact_person: state.vertreter || null,
+      delivery_date: state.liefertermin ? new Date(state.liefertermin).toISOString() : null,
+      delivery_address: state.customer.address
+        ? [state.customer.address.street, state.customer.address.postalCode, state.customer.address.city]
+            .filter(Boolean).join(', ')
+        : null,
+      shipping_method: state.versandart || null,
+      payment_terms: state.customer.paymentTerms
+        ? `${state.customer.paymentTerms} Tage netto`
+        : null,
+      items: state.positionen.map((p) => ({
+        article_number: p.artikelNr,
+        description: p.bezeichnung,
+        quantity: p.menge,
+        unit_price: p.listenpreis,
+        discount_percent: p.rabatt,
+      })),
+    }
+
+    if (state.id) {
+      await apiClient.put(`/api/v1/sales/orders/${state.id}`, payload)
+      await persistWorkflowResume(state.id)
+      push('Auftrag gespeichert')
+      return state.id
+    } else {
+      const saved = await apiClient.post<{ id: string; order_number: string }>('/api/v1/sales/orders/', payload)
+      setState((prev) => ({ ...prev, id: saved.id, auftragNr: saved.order_number }))
+      await persistWorkflowResume(saved.id)
+      const resumeQuery = buildWorkflowResumeQuery(saved.id)
+      navigate(`/sales/order-editor${resumeQuery ? `?${resumeQuery}` : ''}`, { replace: true })
+      push('Auftrag angelegt')
+      return saved.id
+    }
+  }
+
+  // Button wrapper for direct Speichern action — owns the guard.
+  const handleSaveClick = async (): Promise<void> => {
     setIsSaving(true)
     try {
-      const payload = {
-        order_number: state.auftragNr || undefined,
-        customer_id: state.customer.id,
-        subject: state.betreff || (state.auftragNr ? `Auftrag ${state.auftragNr}` : 'Neuer Auftrag'),
-        description: state.notizen,
-        total_amount: summen.netto,
-        currency: 'EUR',
-        status: state.statusBestaetigt ? 'confirmed' : 'open',
-        contact_person: state.vertreter || null,
-        delivery_date: state.liefertermin ? new Date(state.liefertermin).toISOString() : null,
-        delivery_address: state.customer.address
-          ? [state.customer.address.street, state.customer.address.postalCode, state.customer.address.city]
-              .filter(Boolean).join(', ')
-          : null,
-        shipping_method: state.versandart || null,
-        payment_terms: state.customer.paymentTerms
-          ? `${state.customer.paymentTerms} Tage netto`
-          : null,
-        items: state.positionen.map((p) => ({
-          article_number: p.artikelNr,
-          description: p.bezeichnung,
-          quantity: p.menge,
-          unit_price: p.listenpreis,
-          discount_percent: p.rabatt,
-        })),
-      }
-
-      if (state.id) {
-        await apiClient.put(`/api/v1/sales/orders/${state.id}`, payload)
-        await persistWorkflowResume(state.id)
-        push('Auftrag gespeichert')
-        return state.id
-      } else {
-        const saved = await apiClient.post<{ id: string; order_number: string }>('/api/v1/sales/orders/', payload)
-        setState((prev) => ({ ...prev, id: saved.id, auftragNr: saved.order_number }))
-        await persistWorkflowResume(saved.id)
-        const resumeQuery = buildWorkflowResumeQuery(saved.id)
-        navigate(`/sales/order-editor${resumeQuery ? `?${resumeQuery}` : ''}`, { replace: true })
-        push('Auftrag angelegt')
-        return saved.id
-      }
+      await persistOrder()
     } catch (error: any) {
       push(`Speichern fehlgeschlagen: ${error.response?.data?.detail || error.message}`)
-      return null
     } finally {
       setIsSaving(false)
     }
@@ -951,7 +956,7 @@ export default function SalesOrderEditorPage(): JSX.Element {
     try {
       let id = state.id
       if (!id) {
-        id = await handleSave()
+        id = await persistOrder()
         if (!id) return
       }
       const params = new URLSearchParams()
@@ -1032,22 +1037,21 @@ export default function SalesOrderEditorPage(): JSX.Element {
   const handleCreateLieferschein = async (): Promise<void> => {
     setIsSaving(true)
     try {
-      const id = state.id || (await handleSave())
+      const id = state.id || (await persistOrder())
       if (!id) return
       navigate(`/verkauf/lieferschein-erfassung?auftrag=${id}`)
+    } catch (error: any) {
+      push(`Fehler beim Erstellen des Lieferscheins: ${error.response?.data?.detail || error.message}`)
     } finally {
       setIsSaving(false)
     }
   }
 
   const handleSofortRechnung = async () => {
-    let orderId = state.id
-    if (!orderId) {
-      try { orderId = await handleSave() } catch { return }
-    }
-    if (!orderId) return
     setIsSaving(true)
     try {
+      const orderId = state.id || (await persistOrder())
+      if (!orderId) return
       const res = await apiClient.post<{
         command: string
         target_doc_id?: string
@@ -1080,7 +1084,7 @@ export default function SalesOrderEditorPage(): JSX.Element {
     'open-customer-selection': () => setShowCustomerDialog(true),
     'open-article-selection': () => setShowArticleDialog(true),
     'confirm-position': () => handlePositionOK(),
-    'save-document': () => void handleSave(),
+    'save-document': () => void handleSaveClick(),
     'print-document': () => { if (!showPrintDialog) setShowPrintDialog(true) },
     'delete-document': () => setShowDeleteDialog(true),
     'close-document': () => navigate(-1),
@@ -1979,7 +1983,7 @@ export default function SalesOrderEditorPage(): JSX.Element {
         </div>
         <div className="flex gap-2">
           <ShortcutHintButton shortcut="Strg+F4">
-            <Button onClick={() => void handleSave()} size="sm" className="gap-2" disabled={isSaving}>
+            <Button onClick={() => void handleSaveClick()} size="sm" className="gap-2" disabled={isSaving}>
               <Save className="h-4 w-4" />
               Speichern
             </Button>
