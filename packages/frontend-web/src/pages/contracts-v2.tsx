@@ -169,7 +169,7 @@ export default function ContractsPageV2(): JSX.Element {
     fetchAmendments();
   }, [selectedContract]);
 
-  // Amendment-Vorlagen laden, wenn Dialog geÃ¶ffnet wird
+  // Amendment-Vorlagen laden, wenn Dialog geöffnet wird
   React.useEffect(() => {
     if (!amendmentDialogOpen) return;
     const fetchTemplates = async () => {
@@ -256,7 +256,7 @@ export default function ContractsPageV2(): JSX.Element {
   // Create amendment handler
   const handleCreateAmendment = async () => {
     if (!selectedContract || !amendmentForm.reason || amendmentForm.reason.trim().length < 10) {
-      toast({ title: 'Pflichtfeld', description: t('crud.dialogs.amend.errorRequired', { defaultValue: 'Bitte geben Sie einen Ã„nderungsgrund mit mindestens 10 Zeichen an.' }), variant: 'destructive' });
+      toast({ title: 'Pflichtfeld', description: t('crud.dialogs.amend.errorRequired', { defaultValue: 'Bitte geben Sie einen Änderungsgrund mit mindestens 10 Zeichen an.' }), variant: 'destructive' });
       return;
     }
 
@@ -284,7 +284,7 @@ export default function ContractsPageV2(): JSX.Element {
       }
     } catch (error) {
       console.error('Error creating amendment:', error);
-      toast({ title: 'Fehler', description: t('crud.messages.createError', { entityType: t('crud.entities.amendment', { defaultValue: 'Ã„nderung' }), defaultValue: 'Erstellen fehlgeschlagen.' }), variant: 'destructive' });
+      toast({ title: 'Fehler', description: t('crud.messages.createError', { entityType: t('crud.entities.amendment', { defaultValue: 'Änderung' }), defaultValue: 'Erstellen fehlgeschlagen.' }), variant: 'destructive' });
     }
   };
 
@@ -741,7 +741,7 @@ export default function ContractsPageV2(): JSX.Element {
                 <Label className="text-xs text-muted-foreground">Vorlagentext</Label>
                 <pre className="max-h-48 overflow-auto whitespace-pre-wrap break-words text-xs font-sans">
                   {selectedTemplate.bodyMarkdown.slice(0, 2000)}
-                  {selectedTemplate.bodyMarkdown.length > 2000 ? '\nâ€¦' : ''}
+                  {selectedTemplate.bodyMarkdown.length > 2000 ? '\n…' : ''}
                 </pre>
               </div>
             )}

@@ -241,7 +241,7 @@ export function StockManagement() {
                       <TableCell className="text-right">{article.available_stock}</TableCell>
                       <TableCell className="text-right">{article.reserved_stock}</TableCell>
                       <TableCell className="text-right">{article.min_stock || '-'}</TableCell>
-                      <TableCell className="text-right">â‚¬{article.sales_price.toFixed(2)}</TableCell>
+                      <TableCell className="text-right">€{article.sales_price.toFixed(2)}</TableCell>
                       <TableCell>
                         <Badge variant={stockStatus.color as any}>
                           {stockStatus.status.replace('_', ' ')}

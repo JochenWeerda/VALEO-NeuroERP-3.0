@@ -8,5 +8,10 @@
   },
   "status": {
     "ok": "Tout est operationnel"
+  },
+  "pattern": {
+    "listreport": {
+      "items_count": "{{count}} elements"
+    }
   }
 }

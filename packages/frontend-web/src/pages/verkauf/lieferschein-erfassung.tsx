@@ -2854,7 +2854,7 @@ export default function LieferscheinErfassungPage(): JSX.Element {
             <span className="text-muted-foreground">Artikel:</span><span>{currentPosition.artikelNr}</span>
             <span className="text-muted-foreground">Bezeichnung:</span><span className="col-span-2">{currentPosition.artikelBezeichnung || '–'}</span>
             <span className="text-muted-foreground">Menge:</span><span>{currentPosition.mengeGebinde} {currentPosition.einheit}</span>
-            <span className="text-muted-foreground">Listenpreis:</span><span>{currentPosition.listenpreis.toFixed(2)} â‚¬</span>
+            <span className="text-muted-foreground">Listenpreis:</span><span>{currentPosition.listenpreis.toFixed(2)} €</span>
             <span className="text-muted-foreground">Rabatt:</span><span>{currentPosition.rabatt} %</span>
             <span className="text-muted-foreground">Verfügbar:</span><span>{currentPosition.verfuegbar} {currentPosition.einheit}</span>
             <span className="text-muted-foreground">Kontrakt-Nr.:</span><span>{currentPosition.kontraktNr || '–'}</span>
@@ -2877,10 +2877,10 @@ export default function LieferscheinErfassungPage(): JSX.Element {
             <span className="text-muted-foreground">Bezeichnung 2:</span><span>{currentPosition.artikelBezeichnung2 || '–'}</span>
             <span className="text-muted-foreground">Menge (Gebinde):</span><span>{currentPosition.mengeGebinde}</span>
             <span className="text-muted-foreground">Einheit:</span><span>{currentPosition.einheit}</span>
-            <span className="text-muted-foreground">Listenpreis:</span><span>{currentPosition.listenpreis.toFixed(2)} â‚¬</span>
-            <span className="text-muted-foreground">Einh.-Preis:</span><span>{currentPosition.einhPreis.toFixed(2)} â‚¬</span>
+            <span className="text-muted-foreground">Listenpreis:</span><span>{currentPosition.listenpreis.toFixed(2)} €</span>
+            <span className="text-muted-foreground">Einh.-Preis:</span><span>{currentPosition.einhPreis.toFixed(2)} €</span>
             <span className="text-muted-foreground">Rabatt:</span><span>{currentPosition.rabatt} %</span>
-            <span className="text-muted-foreground">Betrag (Netto):</span><span>{currentPosition.betrag.toFixed(2)} â‚¬</span>
+            <span className="text-muted-foreground">Betrag (Netto):</span><span>{currentPosition.betrag.toFixed(2)} €</span>
             <span className="text-muted-foreground">MWSt.:</span><span>{currentPosition.mwstProzent} %</span>
             <span className="text-muted-foreground">Gewicht/Einh.:</span><span>{currentPosition.artikelGewicht} kg</span>
             <span className="text-muted-foreground">Gefahrgut-Pkte.:</span><span>{currentPosition.artikelGefahrgutPunkte}</span>

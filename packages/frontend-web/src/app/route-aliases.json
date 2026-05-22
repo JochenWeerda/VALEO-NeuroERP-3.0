@@ -385,6 +385,42 @@
       "path": "produktion/mischfutter"
     },
     {
+      "module": "@/pages/produktion/mischfutter-produktion",
+      "path": "produktion"
+    },
+    {
+      "module": "@/pages/produktion/produktions-dokumente-drucken",
+      "path": "produktion/dokumente"
+    },
+    {
+      "module": "@/pages/versand/frachtdokumente",
+      "path": "versand/frachtdokumente"
+    },
+    {
+      "module": "@/pages/versand/paket-etikett",
+      "path": "versand/paket-etikett"
+    },
+    {
+      "module": "@/pages/versand/versand-avis",
+      "path": "versand/versand-avis"
+    },
+    {
+      "module": "@/pages/versand/frachtdokumente",
+      "path": "versand"
+    },
+    {
+      "module": "@/pages/personal/bewerbungen",
+      "path": "personal/bewerbungen"
+    },
+    {
+      "module": "@/pages/personal/hrm-operations-gates",
+      "path": "personal/hrm-operations-gates"
+    },
+    {
+      "module": "@/pages/personal/organigramm",
+      "path": "personal/organigramm"
+    },
+    {
       "module": "@/pages/sales/angebot-erstellen",
       "path": "sales/angebot/:id"
     },
@@ -1237,6 +1273,14 @@
       "path": "lager/terminal"
     },
     {
+      "module": "@/pages/lager/bestandskorrektur",
+      "path": "lager/bestandskorrektur"
+    },
+    {
+      "module": "@/pages/lager/gs1-scanner",
+      "path": "lager/gs1-scanner"
+    },
+    {
       "module": "@/pages/logistik/frachtbriefe",
       "path": "logistik/frachtbriefe"
     },
@@ -1519,6 +1563,26 @@
     {
       "module": "@/pages/silo/kapazitaeten",
       "path": "silo/kapazitaeten"
+    },
+    {
+      "module": "@/pages/silo/kapazitaeten",
+      "path": "silo"
+    },
+    {
+      "module": "@/pages/energie/verbrauch",
+      "path": "energie"
+    },
+    {
+      "module": "@/pages/genossenschaft/mitglieder",
+      "path": "genossenschaft/mitglieder"
+    },
+    {
+      "module": "@/pages/genossenschaft/mitglieder",
+      "path": "genossenschaft"
+    },
+    {
+      "module": "@/pages/tankstelle/zapfungen",
+      "path": "tankstelle"
     },
     {
       "module": "@/pages/statistik/bewegungen",
@@ -1895,6 +1959,22 @@
     {
       "module": "@/pages/verkauf/lieferschein-erfassung",
       "path": "verkauf"
+    },
+    {
+      "module": "@/pages/sales/auftraege-liste",
+      "path": "verkauf/auftraege"
+    },
+    {
+      "module": "@/pages/sales/order-editor",
+      "path": "verkauf/auftraege/neu"
+    },
+    {
+      "module": "@/pages/sales/rechnungen-liste",
+      "path": "verkauf/rechnungen"
+    },
+    {
+      "module": "@/pages/sales/invoice-editor",
+      "path": "verkauf/rechnungen/neu"
     },
     {
       "module": "@/pages/kasse/tagesabschluss",

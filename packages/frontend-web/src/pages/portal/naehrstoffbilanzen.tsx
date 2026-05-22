@@ -392,7 +392,7 @@ export default function PortalNaehrstoffbilanzen() {
                   <TableCell className="text-right">{N_GRENZWERT} kg/ha (3-J.Ø)</TableCell>
                 </TableRow>
                 <TableRow>
-                  <TableCell className="font-medium">Phosphor (Pâ‚‚Oâ‚…)</TableCell>
+                  <TableCell className="font-medium">Phosphor (P₂O₅)</TableCell>
                   <TableCell className="text-right">{currentBilanz.phosphor.zugang} kg/ha</TableCell>
                   <TableCell className="text-right">{currentBilanz.phosphor.abgang} kg/ha</TableCell>
                   <TableCell className={`text-right font-bold ${getSaldoColor(currentBilanz.phosphor.saldo, P_GRENZWERT)}`}>
@@ -401,7 +401,7 @@ export default function PortalNaehrstoffbilanzen() {
                   <TableCell className="text-right">{P_GRENZWERT} kg/ha (3-J.Ø)</TableCell>
                 </TableRow>
                 <TableRow>
-                  <TableCell className="font-medium">Kalium (Kâ‚‚O)</TableCell>
+                  <TableCell className="font-medium">Kalium (K₂O)</TableCell>
                   <TableCell className="text-right">{currentBilanz.kalium.zugang} kg/ha</TableCell>
                   <TableCell className="text-right">{currentBilanz.kalium.abgang} kg/ha</TableCell>
                   <TableCell className={`text-right font-bold ${currentBilanz.kalium.saldo < 0 ? 'text-blue-600' : 'text-emerald-600'}`}>
@@ -531,7 +531,7 @@ export default function PortalNaehrstoffbilanzen() {
         <AlertTitle>Hinweis zur Düngeverordnung</AlertTitle>
         <AlertDescription>
           Die Nährstoffbilanzen werden gemäß DüV erstellt. Der 3-Jahres-Durchschnitt für Stickstoff 
-          darf 50 kg N/ha und für Phosphor 10 kg Pâ‚‚Oâ‚…/ha nicht überschreiten.
+          darf 50 kg N/ha und für Phosphor 10 kg P₂O₅/ha nicht überschreiten.
         </AlertDescription>
       </Alert>
     </div>

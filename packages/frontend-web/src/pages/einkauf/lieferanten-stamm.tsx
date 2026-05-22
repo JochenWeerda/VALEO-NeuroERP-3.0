@@ -118,7 +118,7 @@ type LieferantData = {
   bemerkungen?: string
 }
 
-/** Dokumenttypen im Lieferantenstamm (hÃ¤ufig bis seltener) */
+/** Dokumenttypen im Lieferantenstamm (häufig bis seltener) */
 export type DokumentTyp =
   | 'rahmenvertrag'      // Lieferantenvertrag / Rahmenvertrag
   | 'preisliste'         // Preislisten / Konditionenblatt
@@ -131,7 +131,7 @@ export type DokumentTyp =
   | 'rohstoff_deklaration' // Rohstoffdeklarationen / Herkunftsnachweise
   | 'kommunikation'     // Kommunikation / Schriftverkehr
   | 'foto_scan'         // Fotos / Scanbelege
-  | 'signatur'          // Signatur-/PrÃ¼fdateien (z. B. PGP)
+  | 'signatur'          // Signatur-/Prüfdateien (z. B. PGP)
   | 'nda'
   | 'esg'
   | 'sonstiges'
@@ -148,13 +148,13 @@ const DOKUMENT_TYP_LABELS: Record<DokumentTyp, string> = {
   rohstoff_deklaration: 'Rohstoffdeklarationen / Herkunftsnachweise',
   kommunikation: 'Kommunikation / Schriftverkehr',
   foto_scan: 'Fotos / Scanbelege',
-  signatur: 'Signatur-/PrÃ¼fdateien (z. B. PGP)',
+  signatur: 'Signatur-/Prüfdateien (z. B. PGP)',
   nda: 'NDA',
   esg: 'ESG',
   sonstiges: 'Sonstiges',
 }
 
-/** Kurzbezeichnungen fÃ¼r die Dokumenttyp-Spalte (Tabelle) */
+/** Kurzbezeichnungen für die Dokumenttyp-Spalte (Tabelle) */
 const DOKUMENT_TYP_SHORT: Record<DokumentTyp, string> = {
   rahmenvertrag: 'Rahmenvertrag',
   preisliste: 'Preisliste/Konditionen',
@@ -167,7 +167,7 @@ const DOKUMENT_TYP_SHORT: Record<DokumentTyp, string> = {
   rohstoff_deklaration: 'Rohstoff/Herkunft',
   kommunikation: 'Kommunikation',
   foto_scan: 'Foto/Scan',
-  signatur: 'Signatur/PrÃ¼fdatei',
+  signatur: 'Signatur/Prüfdatei',
   nda: 'NDA',
   esg: 'ESG',
   sonstiges: 'Sonstiges',
@@ -231,7 +231,7 @@ export default function LieferantenStammPage(): JSX.Element {
           toast({
             variant: 'destructive',
             title: 'Lieferant konnte nicht geladen werden',
-            description: 'Bitte prÃ¼fen Sie die Verbindung oder ob der Lieferant existiert.',
+            description: 'Bitte prüfen Sie die Verbindung oder ob der Lieferant existiert.',
           })
           setLieferant((prev) => ({ ...prev, id: id || '', name: '', legalName: '' }))
           setLoading(false)
@@ -641,7 +641,7 @@ export default function LieferantenStammPage(): JSX.Element {
                     onValueChange={(value) => setLieferant(prev => ({ ...prev, kategorie: value }))}
                     options={[
                       { value: 'Saatgut', label: t('crud.fields.categorySeed') },
-                      { value: 'DÃ¼ngemittel', label: t('crud.fields.categoryFertilizer') },
+                      { value: 'Düngemittel', label: t('crud.fields.categoryFertilizer') },
                       { value: 'Landtechnik', label: t('crud.fields.categoryMachinery') },
                       { value: 'Sonstiges', label: t('common.other') },
                     ]}
@@ -1114,7 +1114,7 @@ export default function LieferantenStammPage(): JSX.Element {
                   />
                 </div>
                 <div>
-                  <Label htmlFor="kreditlimit">{t('crud.fields.creditLimit')} (â‚¬)</Label>
+                  <Label htmlFor="kreditlimit">{t('crud.fields.creditLimit')} (€)</Label>
                   <Input
                     id="kreditlimit"
                     type="number"
@@ -1427,7 +1427,7 @@ export default function LieferantenStammPage(): JSX.Element {
                   value: typ,
                   label: DOKUMENT_TYP_LABELS[typ],
                 }))}
-                placeholder="Dokumenttyp wÃ¤hlen"
+                placeholder="Dokumenttyp wählen"
               />
             </div>
             <div>
@@ -1668,7 +1668,7 @@ function NewClassificationForm({ onSave, onCancel }: { onSave: (klass: any) => v
               { value: 'Branche', label: t('crud.fields.industry') },
               { value: 'Zertifizierung', label: t('crud.fields.certification') },
               { value: 'Risiko', label: t('crud.fields.risk') },
-              { value: 'GrÃ¶ÃŸe', label: t('crud.fields.size') },
+              { value: 'Größe', label: t('crud.fields.size') },
             ]}
             placeholder={t('crud.fields.selectType')}
           />

@@ -1,7 +1,7 @@
 /**
  * Payment Matching UI
- * FIBU-AR-03: ZahlungseingÃ¤nge & Matching
- * Payment-Match-UI fÃ¼r Bankimport und OP-Zuordnung
+ * FIBU-AR-03: Zahlungseingänge & Matching
+ * Payment-Match-UI für Bankimport und OP-Zuordnung
  */
 
 import { useState, useEffect } from 'react'

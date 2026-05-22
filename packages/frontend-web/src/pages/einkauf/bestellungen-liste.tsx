@@ -134,7 +134,6 @@ const createBestellungenConfig = (
     {
       key: 'externalReference',
       label: 'Ext. Referenz',
-      labelKey: 'crud.fields.externalReference',
       sortable: true,
       render: (value) => value ? <span className="text-xs font-mono">{value as string}</span> : <span className="text-muted-foreground">–</span>
     },
@@ -148,7 +147,7 @@ const createBestellungenConfig = (
       options: [
         { value: 'ENTWURF', label: t('status.draft'), labelKey: 'status.draft' },
         { value: 'FREIGEGEBEN', label: t('status.approved'), labelKey: 'status.approved' },
-        { value: 'BESTELLT', label: 'Bestellt', labelKey: 'status.ordered' },
+        { value: 'BESTELLT', label: 'Bestellt' },
         { value: 'TEILGELIEFERT', label: t('status.partial'), labelKey: 'status.partial' },
         { value: 'GELIEFERT', label: 'Geliefert', labelKey: 'status.delivered' },
         { value: 'STORNIERT', label: t('status.cancelled'), labelKey: 'status.cancelled' }

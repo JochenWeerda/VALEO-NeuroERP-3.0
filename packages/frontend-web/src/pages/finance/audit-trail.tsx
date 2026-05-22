@@ -1,6 +1,6 @@
 /**
  * GoBD Audit Trail View
- * Zeigt alle Audit-Trail-EintrÃ¤ge mit Hash-Chain-Validierung
+ * Zeigt alle Audit-Trail-Einträge mit Hash-Chain-Validierung
  * FIBU-COMP-01: GoBD / Audit Trail UI
  */
 

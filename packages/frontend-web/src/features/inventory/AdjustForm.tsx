@@ -34,7 +34,7 @@ export function AdjustForm({ sku, onSubmit, submitting }: {
         <Input value={sku} readOnly />
       </div>
       <div>
-        <Label>Delta (±)</Label>
+        <Label>Delta (Â±)</Label>
         <Input
           placeholder="z. B. -5,5"
           value={deltaInput}

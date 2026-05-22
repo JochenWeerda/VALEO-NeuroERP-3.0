@@ -166,7 +166,7 @@ export default function PortalDashboard() {
           value={data.kpis.offeneRechnungen}
           icon={<Receipt className="h-5 w-5" />}
           link="/portal/rechnungen"
-          suffix={`â‚¬ ${data.kpis.offenerBetrag.toLocaleString('de-DE', { minimumFractionDigits: 2 })}`}
+          suffix={`€ ${data.kpis.offenerBetrag.toLocaleString('de-DE', { minimumFractionDigits: 2 })}`}
           color="amber"
         />
         <KPICard
@@ -213,7 +213,7 @@ export default function PortalDashboard() {
                       <p className="text-sm text-muted-foreground">{bestellung.artikel}</p>
                     </div>
                     <div className="text-right">
-                      <p className="font-semibold">â‚¬ {bestellung.betrag.toLocaleString('de-DE', { minimumFractionDigits: 2 })}</p>
+                      <p className="font-semibold">€ {bestellung.betrag.toLocaleString('de-DE', { minimumFractionDigits: 2 })}</p>
                       <p className="text-xs text-muted-foreground">{bestellung.datum}</p>
                     </div>
                   </div>
