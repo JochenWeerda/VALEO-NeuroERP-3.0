@@ -287,6 +287,13 @@ from app.api.v1.endpoints import (
     zahlungsbedingungen,
 )
 
+# Fachliche Vertiefung Wave 11 — Partiestamm, Forderungsgruppen, Periodische Buchungen
+from app.api.v1.endpoints import (
+    partiestamm,
+    forderungsgruppen,
+    periodische_buchungen,
+)
+
 # Import domain routers
 from app.domains.agrar.api import psm, psm_proplanta
 from app.domains.inventory.api import router as inventory_domain_router
@@ -1597,6 +1604,11 @@ api_router.include_router(versandprofile.router)
 api_router.include_router(warengruppen.router)
 api_router.include_router(erloeskennziffern.router)
 api_router.include_router(zahlungsbedingungen.router)
+
+# Fachliche Vertiefung Wave 11
+api_router.include_router(partiestamm.router)
+api_router.include_router(forderungsgruppen.router)
+api_router.include_router(periodische_buchungen.router)
 
 # Report/Print: Partie-Genealogie, Wiegeschein-PDF-Preview, GS1-Labels
 api_router.include_router(report_print.router)
