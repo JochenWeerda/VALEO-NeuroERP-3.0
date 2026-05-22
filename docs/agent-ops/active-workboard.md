@@ -2,6 +2,16 @@
 
 Stand: `2026-05-12`
 
+## QA-FACHLICHE-VERTIEFUNG-WAVES-001
+
+**Von:** Codex
+**Owner:** Codex
+**Stand:** reserviert 2026-05-22
+**Ziel des Slices:** Alle QA-Blocker aus der fachlichen Vertiefung Wave 1-10 schliessen: Alembic-Head bereinigen, unvollstaendige Wave-11-Arbeit aus dem Abnahmepfad halten, API-Smokes/CRUD-Vertraege absichern, Frontend-Verlinkung fuer Warengruppen korrigieren und Traceability-Doku nachziehen.
+**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/agent-ops/slices/QA-FACHLICHE-VERTIEFUNG-WAVES-001.yaml`, `docs/FACHLICHE-VERTIEFUNG-ABNAHME.md`, `alembic/versions/merge_heads_20260522.py`, `app/api/v1/endpoints/warengruppen.py`, `app/api/v1/endpoints/erloeskennziffern.py`, `app/api/v1/endpoints/zahlungsbedingungen.py`, `packages/frontend-web/src/lib/api/einkauf.ts`, `packages/frontend-web/src/pages/einkauf/warengruppen.tsx`, `tests/test_api_smoke_waves.py`.
+**Abnahmekriterien:** `alembic heads` hat wieder einen Head fuer den fachlichen Abnahmepfad; Wave-11-Fragmente sind nicht Teil des Commits; API-Smokes pruefen zentrale Wave-10-Routen inklusive CRUD/Lookup-Fehlerpfade; Warengruppen-UI nutzt den neuen Backend-Vertrag; Doku beschreibt Abdeckung, Restgates und Pruefergebnis; Backend-/Frontend-/Doku-Checks sind gruen.
+**Offene Risiken:** Breite fachliche Vollabdeckung aller 5118 Referenzseiten bleibt nur ueber weitere domänenspezifische UATs beweisbar; dieser Slice schliesst die konkreten QA-Blocker aus der Abnahme.
+
 ## SERVICE-LAYER-LEGACY-ENDPOINTS-001
 
 **Von:** Codex

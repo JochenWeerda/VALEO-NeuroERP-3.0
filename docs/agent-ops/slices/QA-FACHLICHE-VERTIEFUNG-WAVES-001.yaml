@@ -1,0 +1,37 @@
+id: QA-FACHLICHE-VERTIEFUNG-WAVES-001
+title: QA-Blocker fachliche Vertiefung Wave 1-10 schliessen
+owner: Codex
+status: reserviert
+claimed_at: 2026-05-22
+goal: >
+  Alle konkreten QA-Blocker aus der Abnahme der fachlichen Vertiefung
+  Wave 1-10 repo-seitig schliessen: Migration-Head, API-Smokes,
+  Frontend-Verlinkung, CRUD-Vertrag und Traceability-Doku.
+scope:
+  - Alembic-Head-Situation fuer fachliche Vertiefung und Agrar-Ernteplanung bereinigen.
+  - Uncommitted Wave-11-Fragmente aus diesem Abnahmepfad heraushalten.
+  - Zentrale Wave-10-APIs mit TestClient-Smokes absichern.
+  - Warengruppen-Frontend auf den neuen Backend-Vertrag ausrichten.
+  - Abnahme-/Traceability-Doku fuer Wave 1-10 nachziehen.
+file_ownership:
+  - docs/agent-ops/active-workboard.md
+  - docs/agent-ops/slices/QA-FACHLICHE-VERTIEFUNG-WAVES-001.yaml
+  - docs/FACHLICHE-VERTIEFUNG-ABNAHME.md
+  - alembic/versions/merge_heads_20260522.py
+  - app/api/v1/endpoints/warengruppen.py
+  - app/api/v1/endpoints/erloeskennziffern.py
+  - app/api/v1/endpoints/zahlungsbedingungen.py
+  - packages/frontend-web/src/lib/api/einkauf.ts
+  - packages/frontend-web/src/pages/einkauf/warengruppen.tsx
+  - tests/test_api_smoke_waves.py
+acceptance_criteria:
+  - alembic heads zeigt keinen ungemergten Head-Konflikt fuer Wave 1-10.
+  - API-Smokes pruefen zentrale Wave-10-Routen mit DB-Override und Fehlerpfaden.
+  - Warengruppen-UI nutzt /api/v1/stammdaten/warengruppen und passende Felder.
+  - Doku beschreibt Abdeckung, Grenzen, UI-/CRUD-Status und Pruefergebnis.
+  - Workboard-, Backend-, Frontend- und Doku-Checks sind gruen.
+checks: []
+done: []
+risks:
+  - Vollstaendige fachliche Gleichwertigkeit aller Referenzseiten braucht weiterhin echte UAT-Testdaten und Fachabnahme.
+next_step: Bestehende uncommitted QA-Fix-Dateien pruefen und fertigstellen.
