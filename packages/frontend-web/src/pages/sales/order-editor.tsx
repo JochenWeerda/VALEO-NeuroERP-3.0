@@ -102,7 +102,7 @@ function LazyDialogBoundary({ children }: { children: JSX.Element }) {
   return <Suspense fallback={null}>{children}</Suspense>
 }
 
-// â”€â”€ API Response Type â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── API Response Type ──────────────────────────────────────────────────────────
 
 type AuftragResponse = {
   id: string
@@ -130,7 +130,7 @@ type AuftragResponse = {
   }>
 }
 
-// â”€â”€ Types â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Types ──────────────────────────────────────────────────────────────────────
 
 export type Position = {
   posNr: number
@@ -220,7 +220,7 @@ type Angebot = {
   datum: string
 }
 
-// â”€â”€ Helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Helpers ────────────────────────────────────────────────────────────────────
 
 function formatDateForInput(date: Date): string {
   const y = date.getFullYear()
@@ -265,7 +265,7 @@ function mapResponseItemsToPositionen(items: AuftragResponse['items']): Position
   })
 }
 
-// â”€â”€ Component â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Component ──────────────────────────────────────────────────────────────────
 
 export default function SalesOrderEditorPage(): JSX.Element {
   const navigate = useNavigate()
@@ -330,7 +330,7 @@ export default function SalesOrderEditorPage(): JSX.Element {
     return name.length > 2 ? name.substring(0, 2) : name
   }
 
-  // â”€â”€ Haupt-State â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── Haupt-State ────────────────────────────────────────────────────────────
   const [state, setState] = useState<AuftragState>({
     id: null,
     auftragNr: '',
@@ -646,7 +646,7 @@ export default function SalesOrderEditorPage(): JSX.Element {
       showInformationDialog, showNiederlassungDialog, showVertreterDialog,
       showBelegfolgeDialog]);
 
-  // â”€â”€ Handler â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── Handler ────────────────────────────────────────────────────────────────
 
   async function handleCustomerSelect(c: Customer): Promise<void> {
     setState((prev) => ({
@@ -857,7 +857,7 @@ export default function SalesOrderEditorPage(): JSX.Element {
     }))
   }
 
-  // â”€â”€ Speichern â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── Speichern ──────────────────────────────────────────────────────────────
 
   const handleSave = async (): Promise<string | null> => {
     if (!state.customer) {
@@ -916,7 +916,7 @@ export default function SalesOrderEditorPage(): JSX.Element {
     }
   }
 
-  // â”€â”€ Drucken â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── Drucken ────────────────────────────────────────────────────────────────
 
   const handlePrint = async (options: PrintOptions): Promise<void> => {
     if (state.statusGedruckt || state.statusBestaetigt) {
@@ -964,7 +964,7 @@ export default function SalesOrderEditorPage(): JSX.Element {
     }
   }
 
-  // â”€â”€ Löschen â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── Löschen ────────────────────────────────────────────────────────────────
 
   const handleDelete = async (): Promise<void> => {
     if (!state.id) {
@@ -987,7 +987,7 @@ export default function SalesOrderEditorPage(): JSX.Element {
     }
   }
 
-  // â”€â”€ Belegfolge-Positionsübernahme â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── Belegfolge-Positionsübernahme ──────────────────────────────────────────
 
   function handleBelegfolgePositionen(incoming: BelegfolgePosition[]): void {
     const baseNr =
@@ -1023,7 +1023,7 @@ export default function SalesOrderEditorPage(): JSX.Element {
     push(`${newPositionen.length} Position${newPositionen.length !== 1 ? 'en' : ''} übernommen`)
   }
 
-  // â”€â”€ In Lieferschein wandeln â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── In Lieferschein wandeln ────────────────────────────────────────────────
 
   const handleCreateLieferschein = async (): Promise<void> => {
     const id = state.id || (await handleSave())
@@ -1062,7 +1062,7 @@ export default function SalesOrderEditorPage(): JSX.Element {
     }
   }
 
-  // â”€â”€ Globale Shortcuts â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── Globale Shortcuts ──────────────────────────────────────────────────────
 
   useGlobalShortcutsWithVoice({
     'open-customer-selection': () => setShowCustomerDialog(true),
@@ -1101,7 +1101,7 @@ export default function SalesOrderEditorPage(): JSX.Element {
     },
   })
 
-  // â”€â”€ JSX â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── JSX ────────────────────────────────────────────────────────────────────
 
   return (
     <div className="h-screen flex flex-col bg-gray-50">
@@ -1149,7 +1149,7 @@ export default function SalesOrderEditorPage(): JSX.Element {
         ) : null}
 
 
-        {/* â”€â”€ Kopf-Bereich (3 Spalten) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+        {/* ── Kopf-Bereich (3 Spalten) ──────────────────────────────────────── */}
         <div className="mb-4 space-y-4">
           <RoleFocusBar
             roles={salesOrderRoleProfiles}
@@ -1597,7 +1597,7 @@ export default function SalesOrderEditorPage(): JSX.Element {
           </div>
         </Card>
 
-        {/* â”€â”€ Positionen-Grid â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+        {/* ── Positionen-Grid ───────────────────────────────────────────────── */}
         <Card className="mb-4 p-4">
           <h2 className="mb-2 font-semibold text-sm">Positionen</h2>
           <div className="overflow-x-auto">
@@ -1712,7 +1712,7 @@ export default function SalesOrderEditorPage(): JSX.Element {
           </div>
         </Card>
 
-        {/* â”€â”€ Positions-Details â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+        {/* ── Positions-Details ─────────────────────────────────────────────── */}
         <Card className="mb-4 p-4">
           <h2 className="mb-2 font-semibold text-sm">
             {state.aktivePositionIndex !== null
@@ -1888,7 +1888,7 @@ export default function SalesOrderEditorPage(): JSX.Element {
           </div>
         </Card>
 
-        {/* â”€â”€ Summen â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+        {/* ── Summen ────────────────────────────────────────────────────────── */}
         <Card className="mb-4 p-4">
           <div className="grid grid-cols-7 gap-4">
             <div className="space-y-1">
@@ -1929,7 +1929,7 @@ export default function SalesOrderEditorPage(): JSX.Element {
 
       </div>
 
-      {/* â”€â”€ Bottom-Toolbar â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+      {/* ── Bottom-Toolbar ────────────────────────────────────────────────── */}
       <div className="border-t bg-white px-4 py-2 flex items-center justify-between">
         <div className="flex gap-2 flex-wrap">
           <Button onClick={() => setShowPrintDialog(true)} variant="outline" size="sm" className="gap-2">
@@ -1980,7 +1980,7 @@ export default function SalesOrderEditorPage(): JSX.Element {
         </div>
       </div>
 
-      {/* â”€â”€ Dialoge â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+      {/* ── Dialoge ──────────────────────────────────────────────────────────── */}
 
       {/* Auftrag-Auswahl */}
       <Dialog open={showAuftragAuswahl} onOpenChange={setShowAuftragAuswahl}>
@@ -2034,7 +2034,7 @@ export default function SalesOrderEditorPage(): JSX.Element {
                     <TableCell className="py-1">{a.kunde}</TableCell>
                     <TableCell className="py-1">{a.liefertermin}</TableCell>
                     <TableCell className="py-1 text-right">
-                      {a.betrag.toLocaleString('de-DE', { minimumFractionDigits: 2 })} â‚¬
+                      {a.betrag.toLocaleString('de-DE', { minimumFractionDigits: 2 })} €
                     </TableCell>
                     <TableCell className="py-1">{a.status}</TableCell>
                   </TableRow>

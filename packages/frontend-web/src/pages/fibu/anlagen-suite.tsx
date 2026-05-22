@@ -372,12 +372,12 @@ export default function AnlagenSuitePage(): JSX.Element {
               {importRun.counts && (
                 <div className="text-sm text-muted-foreground">
                   Zeilen: {importRun.counts.lines_total ?? 0} gesamt, {importRun.counts.lines_ok ?? 0} OK, {importRun.counts.lines_err ?? 0} Fehler
-                  {importRun.counts.journal_entries_created != null && ` Â· Gebucht: ${importRun.counts.journal_entries_created} Belege`}
+                  {importRun.counts.journal_entries_created != null && ` · Gebucht: ${importRun.counts.journal_entries_created} Belege`}
                 </div>
               )}
               {importRun.totals && (
                 <div className="text-sm">
-                  Soll: {importRun.totals.debit ?? '–'} Â· Haben: {importRun.totals.credit ?? '–'}
+                  Soll: {importRun.totals.debit ?? '–'} · Haben: {importRun.totals.credit ?? '–'}
                 </div>
               )}
               {importRun.error_summary && (

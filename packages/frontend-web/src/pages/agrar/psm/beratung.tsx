@@ -200,7 +200,7 @@ export default function PSMBeratungPage(): JSX.Element {
               onValueChange={setSaison}
               placeholder="Saison auswaehlen"
               options={[
-                { value: 'Fr?hjahr', label: 'Fr?hjahr' },
+                { value: 'Frühjahr', label: 'Frühjahr' },
                 { value: 'Sommer', label: 'Sommer' },
                 { value: 'Herbst', label: 'Herbst' },
                 { value: 'Winter', label: 'Winter' },

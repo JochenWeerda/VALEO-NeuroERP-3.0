@@ -221,5 +221,10 @@
       "article": "Article",
       "unit": "Unit"
     }
+  },
+  "pattern": {
+    "listreport": {
+      "items_count": "{{count}} items"
+    }
   }
 }

@@ -861,7 +861,8 @@
       "requestedAt": "Angefragt am",
       "completedAt": "Abgeschlossen am",
       "verifiedAt": "Verifiziert am",
-      "selfRequest": "Selbstanfrage"
+      "selfRequest": "Selbstanfrage",
+      "dunningText": "Mahntext"
     },
     "messages": {
       "createSuccess": "{{entityType}} erfolgreich erstellt",
@@ -1413,7 +1414,8 @@
           "project": "Projekt für die Zuordnung",
           "matchStatus": "Status des 2/3-Wege-Abgleichs",
           "matchLink": "Zur 2/3-Wege-Abgleich-Seite navigieren",
-          "deviations": "Abweichungen zwischen Rechnung, Bestellung und Wareneingang"
+          "deviations": "Abweichungen zwischen Rechnung, Bestellung und Wareneingang",
+          "dunningText": "Mahntext eingeben..."
         },
         "fields": {
           "linkedOrder": "Verknüpfte Bestellung (PO)",
@@ -1650,6 +1652,11 @@
       "keys": "Schl\u00fcssel",
       "lastUpdated": "Zuletzt aktualisiert",
       "generatedBy": "Generiert durch KI-\u00dcbersetzungs-Engine"
+    }
+  },
+  "pattern": {
+    "listreport": {
+      "items_count": "{{count}} Einträge"
     }
   }
 }

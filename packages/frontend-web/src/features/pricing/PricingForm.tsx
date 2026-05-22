@@ -86,7 +86,7 @@ export function PricingForm({
 
       <div className="grid grid-cols-3 gap-3">
         <div>
-          <Label>Währung</Label>
+          <Label>WÃ¤hrung</Label>
           <Input value={values.currency} onChange={(event) => setValues((current) => ({ ...current, currency: event.target.value }))} />
           {errors.currency !== undefined ? <p className="text-sm text-red-600">{errors.currency}</p> : null}
         </div>
@@ -106,7 +106,7 @@ export function PricingForm({
         <div className="flex items-center justify-between">
           <h4 className="font-semibold">Staffelpreise</h4>
           <Button type="button" size="sm" onClick={addTier}>
-            Tier hinzufügen
+            Tier hinzufÃ¼gen
           </Button>
         </div>
         <div className="space-y-2">

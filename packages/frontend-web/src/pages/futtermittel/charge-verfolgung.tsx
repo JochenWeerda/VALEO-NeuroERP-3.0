@@ -9,10 +9,10 @@ import { ListConfig } from '@/components/mask-builder/types'
 import { toast } from '@/hooks/use-toast'
 import { api } from '@/lib/axios'
 
-// Konfiguration fÃ¼r Charge-Verfolgung ListReport
+// Konfiguration für Charge-Verfolgung ListReport
 const chargeVerfolgungConfig: ListConfig = {
   title: 'Charge-Verfolgung',
-  subtitle: 'RÃ¼ckverfolgbarkeit nach EU 178/2002 - Vom Feld bis zum Tier',
+  subtitle: 'Rückverfolgbarkeit nach EU 178/2002 - Vom Feld bis zum Tier',
   type: 'list-report',
   columns: [
     {
@@ -93,7 +93,7 @@ const chargeVerfolgungConfig: ListConfig = {
     },
     {
       key: 'rueckverfolgbarkeit',
-      label: 'RÃ¼ckverfolgung',
+      label: 'Rückverfolgung',
       render: (value) => (
         <div className="flex gap-1">
           {value?.feld && <Badge variant="outline" className="text-xs">Feld</Badge>}
@@ -208,7 +208,7 @@ export default function ChargeVerfolgungPage(): JSX.Element {
         label: 'Recall einleiten',
         type: 'danger' as const,
         onClick: async (items: any[]) => {
-          if (!confirm(`RÃ¼ckruf fÃ¼r ${items.length} Charge(n) einleiten?`)) return
+          if (!confirm(`Rückruf für ${items.length} Charge(n) einleiten?`)) return
           let ok = 0; let err = 0
           for (const item of items) {
             try {
@@ -218,7 +218,7 @@ export default function ChargeVerfolgungPage(): JSX.Element {
           }
           queryClient.invalidateQueries({ queryKey: ['futter', 'chargen'] })
           toast({
-            title: 'RÃ¼ckruf eingeleitet',
+            title: 'Rückruf eingeleitet',
             description: `${ok} Charge(n) auf Recall gesetzt${err ? `, ${err} Fehler` : ''}.`,
             variant: 'destructive'
           })
@@ -226,7 +226,7 @@ export default function ChargeVerfolgungPage(): JSX.Element {
       },
       {
         key: 'trace',
-        label: 'RÃ¼ckverfolgung',
+        label: 'Rückverfolgung',
         type: 'secondary' as const,
         onClick: (items: any[]) => {
           if (items.length === 0) return
@@ -251,13 +251,13 @@ export default function ChargeVerfolgungPage(): JSX.Element {
 
   const handleDelete = async (item: any) => {
     if (!item?.id) return
-    if (!confirm(`Charge "${item.chargenNummer ?? item.id}" wirklich lÃ¶schen?`)) return
+    if (!confirm(`Charge "${item.chargenNummer ?? item.id}" wirklich löschen?`)) return
     try {
       await api.delete(`/api/v1/futter/chargen/${item.id}`)
-      toast({ title: 'GelÃ¶scht', description: 'Charge wurde gelÃ¶scht.' })
+      toast({ title: 'Gelöscht', description: 'Charge wurde gelöscht.' })
       queryClient.invalidateQueries({ queryKey: ['futter', 'chargen'] })
     } catch (e: any) {
-      toast({ title: 'LÃ¶schen fehlgeschlagen', description: e.response?.data?.detail ?? e.message, variant: 'destructive' })
+      toast({ title: 'Löschen fehlgeschlagen', description: e.response?.data?.detail ?? e.message, variant: 'destructive' })
     }
   }
 

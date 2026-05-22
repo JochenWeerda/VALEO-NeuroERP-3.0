@@ -1,6 +1,6 @@
 ﻿/**
- * DÃ¼nger-Stammdaten Maske
- * ObjectPage fÃ¼r DÃ¼nger-Verwaltung mit vollstÃ¤ndiger CRUD-FunktionalitÃ¤t
+ * Dünger-Stammdaten Maske
+ * ObjectPage für Dünger-Verwaltung mit vollständiger CRUD-Funktionalität
  */
 
 import React, { useState, useEffect } from 'react';
@@ -23,7 +23,7 @@ import { ModuleToolbar } from '@/components/navigation/ModuleToolbar';
 const apiClient = {
   async getDuenger(id: string) {
     const response = await fetch(`/api/v1/agrar/duenger/${id}`);
-    if (!response.ok) throw new Error('Failed to fetch DÃ¼nger');
+    if (!response.ok) throw new Error('Failed to fetch Dünger');
     return response.json();
   },
 
@@ -33,7 +33,7 @@ const apiClient = {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data),
     });
-    if (!response.ok) throw new Error('Failed to create DÃ¼nger');
+    if (!response.ok) throw new Error('Failed to create Dünger');
     return response.json();
   },
 
@@ -43,7 +43,7 @@ const apiClient = {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data),
     });
-    if (!response.ok) throw new Error('Failed to update DÃ¼nger');
+    if (!response.ok) throw new Error('Failed to update Dünger');
     return response.json();
   },
 };
@@ -73,7 +73,7 @@ interface DuengerFormData {
   vk_preis: number | null;
   waehrung: string;
   lagerbestand: number;
-  // Compliance - ErklÃ¤rung des Landwirts fÃ¼r Ausgangsstoffe fÃ¼r Explosivstoffe
+  // Compliance - Erklärung des Landwirts für Ausgangsstoffe für Explosivstoffe
   ausgangsstoff_explosivstoffe: boolean;
   erklaerung_landwirt_erforderlich: boolean;
   erklaerung_landwirt_status: string;
@@ -159,7 +159,7 @@ const DuengerStammPage: React.FC = () => {
     vk_preis: null,
     waehrung: 'EUR',
     lagerbestand: 0,
-    // Compliance - ErklÃ¤rung des Landwirts fÃ¼r Ausgangsstoffe fÃ¼r Explosivstoffe
+    // Compliance - Erklärung des Landwirts für Ausgangsstoffe für Explosivstoffe
     ausgangsstoff_explosivstoffe: false,
     erklaerung_landwirt_erforderlich: false,
     erklaerung_landwirt_status: '',
@@ -178,7 +178,7 @@ const DuengerStammPage: React.FC = () => {
   const createMutation = useMutation({
     mutationFn: apiClient.createDuenger,
     onSuccess: () => {
-      toast.success('DÃ¼nger erfolgreich erstellt');
+      toast.success('Dünger erfolgreich erstellt');
       queryClient.invalidateQueries({ queryKey: ['duenger'] });
       navigate('/agrar/duenger-liste');
     },
@@ -193,7 +193,7 @@ const DuengerStammPage: React.FC = () => {
   const updateMutation = useMutation({
     mutationFn: ({ id, data }: { id: string; data: any }) => apiClient.updateDuenger(id, data),
     onSuccess: () => {
-      toast.success('DÃ¼nger erfolgreich aktualisiert');
+      toast.success('Dünger erfolgreich aktualisiert');
       queryClient.invalidateQueries({ queryKey: ['duenger', id] });
     },
     onError: (error: any) => {
@@ -228,7 +228,7 @@ const DuengerStammPage: React.FC = () => {
         vk_preis: duenger.vk_preis || null,
         waehrung: duenger.waehrung || 'EUR',
         lagerbestand: duenger.lagerbestand || 0,
-        // Compliance - ErklÃ¤rung des Landwirts fÃ¼r Ausgangsstoffe fÃ¼r Explosivstoffe
+        // Compliance - Erklärung des Landwirts für Ausgangsstoffe für Explosivstoffe
         ausgangsstoff_explosivstoffe: duenger.ausgangsstoff_explosivstoffe || false,
         erklaerung_landwirt_erforderlich: duenger.erklaerung_landwirt_erforderlich || false,
         erklaerung_landwirt_status: duenger.erklaerung_landwirt_status || '',
@@ -274,16 +274,16 @@ const DuengerStammPage: React.FC = () => {
     // Dosierung validation
     if (formData.dosierung_min !== null && formData.dosierung_max !== null &&
         formData.dosierung_min > formData.dosierung_max) {
-      newErrors.dosierung_min = 'Mindestdosierung darf nicht grÃ¶ÃŸer als HÃ¶chstdosierung sein';
+      newErrors.dosierung_min = 'Mindestdosierung darf nicht größer als Höchstdosierung sein';
     }
 
-    // Compliance validation - Ausgangsstoffe fÃ¼r Explosivstoffe
+    // Compliance validation - Ausgangsstoffe für Explosivstoffe
     if (formData.ausgangsstoff_explosivstoffe && !formData.erklaerung_landwirt_erforderlich) {
-      newErrors.erklaerung_landwirt_erforderlich = 'Bei Ausgangsstoffen fÃ¼r Explosivstoffe ist eine Landwirt-ErklÃ¤rung erforderlich';
+      newErrors.erklaerung_landwirt_erforderlich = 'Bei Ausgangsstoffen für Explosivstoffe ist eine Landwirt-Erklärung erforderlich';
     }
 
     if (formData.erklaerung_landwirt_erforderlich && !formData.erklaerung_landwirt_status) {
-      newErrors.erklaerung_landwirt_status = 'Status der Landwirt-ErklÃ¤rung muss angegeben werden';
+      newErrors.erklaerung_landwirt_status = 'Status der Landwirt-Erklärung muss angegeben werden';
     }
 
     setErrors(newErrors);
@@ -319,20 +319,20 @@ const DuengerStammPage: React.FC = () => {
 
   return (
     <div className="p-6 max-w-6xl mx-auto">
-      <ModuleToolbar backTarget="/agrar/duenger-liste" closeTarget="/agrar/duenger-liste" title={isEditing ? 'DÃ¼nger bearbeiten' : 'Neuer DÃ¼nger'} />
+      <ModuleToolbar backTarget="/agrar/duenger-liste" closeTarget="/agrar/duenger-liste" title={isEditing ? 'Dünger bearbeiten' : 'Neuer Dünger'} />
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-4">
           <Button variant="outline" size="sm" onClick={handleCancel}>
             <ArrowLeft className="w-4 h-4 mr-2" />
-            ZurÃ¼ck
+            Zurück
           </Button>
           <div>
             <h1 className="text-2xl font-bold">
-              {isEditing ? 'DÃ¼nger bearbeiten' : 'Neuer DÃ¼nger'}
+              {isEditing ? 'Dünger bearbeiten' : 'Neuer Dünger'}
             </h1>
             <p className="text-muted-foreground">
-              {isEditing ? `Artikel: ${formData.artikelnummer}` : 'Stammdaten fÃ¼r DÃ¼nger anlegen'}
+              {isEditing ? `Artikel: ${formData.artikelnummer}` : 'Stammdaten für Dünger anlegen'}
             </p>
           </div>
         </div>
@@ -442,7 +442,7 @@ const DuengerStammPage: React.FC = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="p_gehalt">Phosphor (Pâ‚‚Oâ‚…) %</Label>
+                  <Label htmlFor="p_gehalt">Phosphor (P₂O₅) %</Label>
                   <Input
                     id="p_gehalt"
                     type="number"
@@ -459,7 +459,7 @@ const DuengerStammPage: React.FC = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="k_gehalt">Kalium (Kâ‚‚O) %</Label>
+                  <Label htmlFor="k_gehalt">Kalium (K₂O) %</Label>
                   <Input
                     id="k_gehalt"
                     type="number"
@@ -530,7 +530,7 @@ const DuengerStammPage: React.FC = () => {
             <TabsContent value="zulassungen" className="space-y-6">
               <div className="grid grid-cols-2 gap-6">
                 <div className="space-y-2">
-                  <Label htmlFor="dmv_nummer">DÃ¼MV-Nummer</Label>
+                  <Label htmlFor="dmv_nummer">DüMV-Nummer</Label>
                   <Input
                     id="dmv_nummer"
                     value={formData.dmv_nummer}
@@ -601,7 +601,7 @@ const DuengerStammPage: React.FC = () => {
                     ) : (
                       <Droplets className="w-4 h-4 text-gray-400" />
                     )}
-                    WassergefÃ¤hrdend
+                    Wassergefährdend
                   </Label>
                 </div>
               </div>
@@ -617,7 +617,7 @@ const DuengerStammPage: React.FC = () => {
                {formData.wassergefaehrdend && (
                  <Badge variant="secondary" className="bg-blue-100 text-blue-800 flex items-center gap-1">
                    <Droplets className="w-3 h-3" />
-                   WassergefÃ¤hrdend
+                   Wassergefährdend
                  </Badge>
                )}
                {formData.lagerklasse && (
@@ -627,9 +627,9 @@ const DuengerStammPage: React.FC = () => {
                )}
              </div>
 
-             {/* Compliance Section - ErklÃ¤rung des Landwirts fÃ¼r Ausgangsstoffe fÃ¼r Explosivstoffe */}
+             {/* Compliance Section - Erklärung des Landwirts für Ausgangsstoffe für Explosivstoffe */}
              <div className="space-y-4 border-t pt-4">
-               <h4 className="font-semibold">Compliance - Ausgangsstoffe fÃ¼r Explosivstoffe</h4>
+               <h4 className="font-semibold">Compliance - Ausgangsstoffe für Explosivstoffe</h4>
                <div className="grid grid-cols-1 gap-4">
                  <div className="flex items-center space-x-2">
                    <input
@@ -645,7 +645,7 @@ const DuengerStammPage: React.FC = () => {
                      ) : (
                        <AlertTriangle className="w-4 h-4 text-gray-400" />
                      )}
-                     EnthÃ¤lt Ausgangsstoffe fÃ¼r Explosivstoffe
+                     Enthält Ausgangsstoffe für Explosivstoffe
                    </Label>
                  </div>
 
@@ -665,13 +665,13 @@ const DuengerStammPage: React.FC = () => {
                          ) : (
                            <XCircle className="w-4 h-4 text-gray-400" />
                          )}
-                         ErklÃ¤rung des Landwirts erforderlich
+                         Erklärung des Landwirts erforderlich
                        </Label>
                      </div>
 
                      {formData.erklaerung_landwirt_erforderlich && (
                        <div className="space-y-2">
-                         <Label htmlFor="erklaerung_landwirt_status">Status der ErklÃ¤rung</Label>
+                         <Label htmlFor="erklaerung_landwirt_status">Status der Erklärung</Label>
                          <NativeSelect
                            id="erklaerung_landwirt_status"
                            value={formData.erklaerung_landwirt_status}
@@ -704,9 +704,9 @@ const DuengerStammPage: React.FC = () => {
                        ) : (
                          <AlertTriangle className="w-3 h-3" />
                        )}
-                       Landwirt-ErklÃ¤rung: {
+                       Landwirt-Erklärung: {
                          formData.erklaerung_landwirt_status === 'eingegangen' ? 'Eingegangen' :
-                         formData.erklaerung_landwirt_status === 'geprueft' ? 'GeprÃ¼ft' :
+                         formData.erklaerung_landwirt_status === 'geprueft' ? 'Geprüft' :
                          formData.erklaerung_landwirt_status === 'abgelehnt' ? 'Abgelehnt' :
                          'Nicht eingereicht'
                        }
@@ -737,7 +737,7 @@ const DuengerStammPage: React.FC = () => {
                     id="zeitpunkt"
                     value={formData.zeitpunkt}
                     onChange={(e) => handleInputChange('zeitpunkt', e.target.value)}
-                    placeholder="z.B. Herbst, FrÃ¼hjahr, vor Aussaat"
+                    placeholder="z.B. Herbst, Frühjahr, vor Aussaat"
                   />
                 </div>
 
@@ -757,7 +757,7 @@ const DuengerStammPage: React.FC = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="dosierung_max">HÃ¶chstdosierung (kg/ha)</Label>
+                  <Label htmlFor="dosierung_max">Höchstdosierung (kg/ha)</Label>
                   <Input
                     id="dosierung_max"
                     type="number"

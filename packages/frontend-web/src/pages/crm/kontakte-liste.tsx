@@ -91,7 +91,7 @@ export default function KontakteListePage(): JSX.Element {
       <div className="grid gap-4 md:grid-cols-3">
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">{t('crud.list.total')}</CardTitle>
+            <CardTitle className="text-sm font-medium">{t('crud.fields.total')}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{totalContacts}</div>

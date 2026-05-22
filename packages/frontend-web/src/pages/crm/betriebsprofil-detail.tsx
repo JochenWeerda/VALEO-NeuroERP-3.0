@@ -419,7 +419,7 @@ export default function BetriebsprofilePage(): JSX.Element {
                     ...farmProfile.location,
                     address: e.target.value
                   })}
-                  placeholder="StraÃŸe, PLZ, Ort, Land"
+                  placeholder="Straße, PLZ, Ort, Land"
                   rows={3}
                 />
               </div>
@@ -440,7 +440,7 @@ export default function BetriebsprofilePage(): JSX.Element {
                   />
                 </div>
                 <div>
-                  <Label htmlFor="longitude">LÃ¤ngengrad</Label>
+                  <Label htmlFor="longitude">Längengrad</Label>
                   <Input
                     id="longitude"
                     type="number"
@@ -456,7 +456,7 @@ export default function BetriebsprofilePage(): JSX.Element {
               </div>
 
               <div className="text-sm text-muted-foreground">
-                <p>Koordinaten kÃ¶nnen automatisch aus der Adresse ermittelt werden oder manuell eingetragen werden.</p>
+                <p>Koordinaten können automatisch aus der Adresse ermittelt werden oder manuell eingetragen werden.</p>
               </div>
             </CardContent>
           </Card>

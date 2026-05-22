@@ -1926,7 +1926,7 @@ export default function ErnteAnnahmeErfassungPage(): JSX.Element {
                 </TableHeader>
                 <TableBody>
                   <TableRow>
-                    <TableCell>â–º Windabgang</TableCell>
+                    <TableCell>► Windabgang</TableCell>
                     <TableCell>
                       <Input
                         type="number"

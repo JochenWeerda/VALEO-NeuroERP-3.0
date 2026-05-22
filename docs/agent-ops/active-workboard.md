@@ -2,6 +2,18 @@
 
 Stand: `2026-05-12`
 
+## FRONTEND-DOMAIN-AUDIT-REPAIR-001
+
+**Von:** Codex
+**Owner:** Codex
+**Stand:** abgeschlossen 2026-05-22
+**Ziel des Slices:** Claudes lokale Domain-Audit-Nacharbeiten vor dem Push qualitaetssichern: korrumpierte i18n-/Encoding-Aenderungen reparieren, temporaere Skripte entfernen, Routing-Aenderungen validieren, Workboard nachziehen und lokale Commit-Historie mit korrektem Autor konsolidieren.
+**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/agent-ops/slices/FRONTEND-DOMAIN-AUDIT-REPAIR-001.yaml`, `packages/frontend-web/src/app/route-aliases.json`, `packages/frontend-web/src/app/page-module-loader.ts`, `packages/frontend-web/src/app/page-module-groups/commercial.ts`, `packages/frontend-web/src/i18n/locales/*.json`, betroffene Frontend-Pages mit Encoding-Korrekturen.
+**Abnahmekriterien:** Keine neu eingefuehrte deutsche Locale-Mojibake; temporaere Reparaturskripte sind aus dem Worktree entfernt; Routing-Aliases referenzieren existierende Module; Typecheck, JSON-Parse, Encoding-Scan und Diff-Checks sind gruen; lokale sieben Claude-Commits sind vor Push zu einem sauberen Commit mit korrektem Autor zusammengefuehrt.
+**Erledigt:** Deutsche Locale-Korruption aus dem lokalen Audit-Stand zurueckgenommen und `pattern.listreport.items_count` gezielt in `de/en/es/fr` ergaenzt; verbleibende neue Mojibake-Funde in den aktuell betroffenen Pages repariert; temporaere Root-Skripte entfernt; Route-Aliases gegen existierende Module validiert; lokale unpushed Historie fuer Konsolidierung vorbereitet.
+**Checks:** JSON-Parse fuer `de/en/es/fr`; Encoding-Scan auf aktuell betroffene Locale-/Page-Dateien; Route-Alias-Modulvalidierung; `pnpm --filter @valero-neuroerp/frontend-web type-check`; `git diff --check`; Workboard-/Doku-Checks.
+**Offene Risiken:** Bestehende Alt-Mojibake in nicht bearbeiteten Legacy-Kommentaren oder Altmasken kann separat behandelt werden; dieser Slice blockiert nur neue/aktuelle Audit-Aenderungen.
+
 ## QA-FACHLICHE-VERTIEFUNG-GATES-001
 
 **Von:** Codex
@@ -2415,10 +2427,10 @@ Archiv des vorherigen Boards:
 
 **Von:** Codex
 **Owner:** Codex
-**Stand:** reserviert 2026-05-22
-**Ziel des Slices:** Claude-Domain-Audit-Fixes qualitaetssichern, Encoding-/i18n-/Routing-Reste bereinigen, Git-Historie korrigieren und Gates fuer den Frontend-Domain-Audit schliessen.
+**Stand:** abgeschlossen 2026-05-22
+**Ziel des Slices:** Claude-Domain-Audit-Fixes vor Push qualitaetssichern: i18n-/Encoding-Korruption reparieren, temporaere Skripte entfernen, Routing- und Module-Registrierung validieren und lokale Commit-Historie mit korrektem Autor konsolidieren.
 **Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/agent-ops/slices/FRONTEND-DOMAIN-AUDIT-REPAIR-001.yaml`, `packages/frontend-web/src/app/route-aliases.json`, `packages/frontend-web/src/app/page-module-loader.ts`, `packages/frontend-web/src/app/page-module-groups/commercial.ts`, `packages/frontend-web/src/i18n/locales/*/translation.json`, `packages/frontend-web/src/pages/**/*.tsx`
 **Abnahmekriterien:** Keine neue UTF-8-Mojibake in geaenderten Frontend-Dateien; route-aliases verweisen auf ladbare Page-Module; fehlende i18n-Keys aus dem Audit sind ergaenzt ohne Locale-Korruption; Typecheck und Workboard-Validierung sind gruen; unpushte Commits haben korrekte Autoren-Metadaten.
-**Erledigt:** reserviert.
-**Checks:** ausstehend.
-**Offene Risiken:** Browser-Massenpruefung bleibt stichprobenartig; backendabhaengige Datenladefehler werden nur von Frontend-Routing/Rendering getrennt bewertet.
+**Erledigt:** Locale-Dateien de/en/es/fr auf sauberen Stand zurueckgefuehrt und `pattern.listreport.items_count` gezielt ergaenzt; Encoding-Funde im gesamten `packages/frontend-web/src` bereinigt; ungueltige UTF-8-Dateien nach UTF-8 konvertiert; temporaere Reparatur-Skripte entfernt; Route-Aliases gegen existierende Module validiert; lokale unpushed Historie vor Push auf saubere Autor-/Commitstruktur konsolidiert.
+**Checks:** `node` JSON-Parse fuer `packages/frontend-web/src/i18n/locales/de|en|es|fr/translation.json`; Encoding-Scan `rg -n "Ã|Â|â" packages/frontend-web/src`; UTF-8-Validierung fuer `packages/frontend-web/src`; Route-Alias-Modulvalidierung gegen `packages/frontend-web/src`; `pnpm --filter @valero-neuroerp/frontend-web type-check`; `pnpm --filter @valero-neuroerp/frontend-web lint`; `pnpm --filter @valero-neuroerp/frontend-web build`; `python scripts/agent_workboard_supervisor.py validate`; `node scripts/docs-governance-check.cjs docs/agent-ops/active-workboard.md docs/agent-ops/slices/FRONTEND-DOMAIN-AUDIT-REPAIR-001.yaml`; `node scripts/docs-markdown-check.cjs docs/agent-ops/active-workboard.md docs/agent-ops/slices/FRONTEND-DOMAIN-AUDIT-REPAIR-001.yaml`; `git diff --check`
+**Offene Risiken:** Vite-Build meldet weiterhin bestehende, nicht blockierende Warnungen aus CSS-Minifizierung und POS-Doppelimport; backendabhaengige Datenladefehler sind von Frontend-Routing/Rendering getrennt zu bewerten.

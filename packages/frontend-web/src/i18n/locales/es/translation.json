@@ -221,5 +221,10 @@
       "article": "Art\u00edculo",
       "unit": "Unidad"
     }
+  },
+  "pattern": {
+    "listreport": {
+      "items_count": "{{count}} elementos"
+    }
   }
 }

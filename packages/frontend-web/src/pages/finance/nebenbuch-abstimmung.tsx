@@ -335,13 +335,13 @@ export default function NebenbuchAbstimmungPage(): JSX.Element {
                     <TableCell className="font-medium">{entry.account_number}</TableCell>
                     <TableCell>{entry.account_name}</TableCell>
                     <TableCell className="text-right">
-                      {parseFloat(entry.subsidiary_balance).toFixed(2)} â‚¬
+                      {parseFloat(entry.subsidiary_balance).toFixed(2)} €
                     </TableCell>
                     <TableCell className="text-right">
-                      {parseFloat(entry.general_ledger_balance).toFixed(2)} â‚¬
+                      {parseFloat(entry.general_ledger_balance).toFixed(2)} €
                     </TableCell>
                     <TableCell className={`text-right ${Math.abs(parseFloat(entry.difference)) >= 0.01 ? 'text-red-600 font-bold' : ''}`}>
-                      {parseFloat(entry.difference).toFixed(2)} â‚¬
+                      {parseFloat(entry.difference).toFixed(2)} €
                     </TableCell>
                     <TableCell>
                       {entry.is_balanced ? (
@@ -415,7 +415,7 @@ export default function NebenbuchAbstimmungPage(): JSX.Element {
                     <TableCell>{detail.entry_date}</TableCell>
                     <TableCell>{detail.description}</TableCell>
                     <TableCell className="text-right">
-                      {parseFloat(detail.amount).toFixed(2)} â‚¬
+                      {parseFloat(detail.amount).toFixed(2)} €
                     </TableCell>
                     <TableCell>{detail.source}</TableCell>
                     <TableCell>
