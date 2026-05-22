@@ -59,7 +59,6 @@ export default function OpportunitiesForecastPage(): JSX.Element {
         setForecastData(response.data || [])
       }
     } catch (error) {
-      console.error('Fehler beim Laden der Forecast-Daten:', error)
       toast({ variant: 'destructive', title: t('crud.messages.loadError') })
     } finally {
       setLoading(false)

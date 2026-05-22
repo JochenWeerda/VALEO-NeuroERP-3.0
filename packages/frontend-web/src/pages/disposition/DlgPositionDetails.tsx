@@ -11,6 +11,7 @@ import { Button } from '@/components/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { getCellDrilldown, requestOverride } from '@/lib/api/positions'
+import { toast } from '@/hooks/use-toast'
 
 type DlgPositionDetailsProps = {
   articleId: string
@@ -66,8 +67,8 @@ export function DlgPositionDetails({
         reason: `Freigabe für Short-Position ${articleId} / ${periodKey}`,
       })
       onOpenChange(false)
-    } catch (e) {
-      console.error(e)
+    } catch (e: any) {
+      toast({ variant: 'destructive', title: 'Freigabe-Anforderung fehlgeschlagen', description: e?.message })
     }
   }
 

@@ -2182,15 +2182,15 @@
     },
     {
       "module": "@/pages/kontrakte/LstKontraktUebersicht",
-      "path": "kontrakte/LstKontraktUebersicht"
+      "path": "kontrakte/kontrakt-uebersicht"
     },
     {
       "module": "@/pages/kontrakte/KontraktAlarmDashboard",
-      "path": "kontrakte/KontraktAlarmDashboard"
+      "path": "kontrakte/kontrakt-alarm-dashboard"
     },
     {
       "module": "@/pages/kontrakte/KontraktPositionsmonitor",
-      "path": "kontrakte/KontraktPositionsmonitor"
+      "path": "kontrakte/kontrakt-positionsmonitor"
     },
     {
       "module": "@/pages/pos/tagesabschluss-enhanced",

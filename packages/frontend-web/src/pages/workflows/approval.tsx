@@ -41,30 +41,30 @@ export default function WorkflowApprovalPage(): JSX.Element {
         workflowId,
         approved: true
       })
-      
+
       // Navigate to success page or workflows list
       navigate('/workflows/history')
-    } catch (error) {
-      console.error('Approval failed:', error)
+    } catch (error: any) {
+      toast({ variant: 'destructive', title: 'Genehmigung fehlgeschlagen', description: error?.message })
     }
   }
-  
+
   const handleReject = async (): Promise<void> => {
     if (!workflowId || !rejectionReason.trim()) {
       toast({ title: 'Ablehnungsgrund fehlt', description: 'Bitte geben Sie einen Ablehnungsgrund an.', variant: 'destructive' })
       return
     }
-    
+
     try {
       await approveWorkflow.mutateAsync({
         workflowId,
         approved: false,
         rejection_reason: rejectionReason
       })
-      
+
       navigate('/workflows/history')
-    } catch (error) {
-      console.error('Rejection failed:', error)
+    } catch (error: any) {
+      toast({ variant: 'destructive', title: 'Ablehnung fehlgeschlagen', description: error?.message })
     }
   }
   

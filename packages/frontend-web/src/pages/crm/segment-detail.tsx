@@ -186,8 +186,8 @@ function SegmentMembersList({ segmentId }: { segmentId: string }) {
         if (response.success) {
           setMembers(response.data || [])
         }
-      } catch (error) {
-        console.error('Fehler beim Laden der Mitglieder:', error)
+      } catch (error: any) {
+        toast({ variant: 'destructive', title: 'Fehler beim Laden der Mitglieder', description: error?.message })
       } finally {
         setLoading(false)
       }
@@ -244,8 +244,8 @@ function SegmentPerformanceTab({ segmentId }: { segmentId: string }) {
         if (response.success) {
           setPerformance(response.data || [])
         }
-      } catch (error) {
-        console.error('Fehler beim Laden der Performance:', error)
+      } catch (error: any) {
+        toast({ variant: 'destructive', title: 'Fehler beim Laden der Performance-Daten', description: error?.message })
       } finally {
         setLoading(false)
       }
@@ -332,7 +332,6 @@ export default function SegmentDetailPage(): JSX.Element {
       })
       navigate('/crm/segments')
     } catch (error: any) {
-      console.error('Save error:', error)
       toast({
         variant: 'destructive',
         title: getErrorMessage(t, isNew ? 'create' : 'update', entityType),

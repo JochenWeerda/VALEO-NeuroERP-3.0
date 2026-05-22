@@ -181,7 +181,6 @@ export default function BankKontenStammPage(): JSX.Element {
       }
     },
     onError: (error) => {
-      console.warn('IBAN lookup failed:', error)
     },
     autoLookup: false
   })

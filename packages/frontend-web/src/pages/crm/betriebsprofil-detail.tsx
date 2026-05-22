@@ -70,7 +70,6 @@ export default function BetriebsprofilePage(): JSX.Element {
     },
     onError: (error) => {
       toast.push(getErrorMessage(t, 'create', entityType))
-      console.error('Create error:', error)
     },
   })
 
@@ -92,7 +91,6 @@ export default function BetriebsprofilePage(): JSX.Element {
     },
     onError: (error) => {
       toast.push(getErrorMessage(t, 'update', entityType))
-      console.error('Update error:', error)
     },
   })
 

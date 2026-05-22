@@ -273,7 +273,6 @@ export default function LieferantenStammPage(): JSX.Element {
         })
       }
     } catch (error: any) {
-      console.error('Fehler beim Laden des Lieferanten:', error)
       toast({
         variant: 'destructive',
         title: t('crud.messages.loadDataError'),
@@ -325,7 +324,6 @@ export default function LieferantenStammPage(): JSX.Element {
         navigate('/einkauf/lieferanten')
       }
     } catch (error: any) {
-      console.error('Fehler beim Speichern:', error)
       toast({
         variant: 'destructive',
         title: t('crud.messages.updateError', { entityType: entityTypeLabel }),
@@ -357,7 +355,6 @@ export default function LieferantenStammPage(): JSX.Element {
       setDuplicateResults(duplicates)
       setDuplicateCheckDialogOpen(true)
     } catch (error: any) {
-      console.error('Fehler beim Dublettencheck:', error)
       toast({
         variant: 'destructive',
         title: t('crud.messages.loadDataError'),
@@ -389,7 +386,6 @@ export default function LieferantenStammPage(): JSX.Element {
       setBlockDialogOpen(false)
       setBlockReason('')
     } catch (error: any) {
-      console.error('Fehler beim Sperren:', error)
       toast({
         variant: 'destructive',
         title: t('crud.messages.updateError', { entityType: entityTypeLabel }),
@@ -412,7 +408,6 @@ export default function LieferantenStammPage(): JSX.Element {
       setArchiveDialogOpen(false)
       navigate('/einkauf/lieferanten')
     } catch (error: any) {
-      console.error('Fehler beim Archivieren:', error)
       toast({
         variant: 'destructive',
         title: t('crud.messages.updateError', { entityType: entityTypeLabel }),

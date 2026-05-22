@@ -199,7 +199,6 @@ export default function ChartOfAccountsPage(): JSX.Element {
     },
     onError: (mutationError) => {
       toast.error('Fehler beim Erstellen des Kontos')
-      console.error('Create error:', mutationError)
     },
   })
 
@@ -214,7 +213,6 @@ export default function ChartOfAccountsPage(): JSX.Element {
     },
     onError: (mutationError) => {
       toast.error('Fehler beim Aktualisieren des Kontos')
-      console.error('Update error:', mutationError)
     },
   })
 
@@ -226,7 +224,6 @@ export default function ChartOfAccountsPage(): JSX.Element {
     },
     onError: (mutationError) => {
       toast.error('Fehler beim Deaktivieren des Kontos')
-      console.error('Delete error:', mutationError)
     },
   })
 

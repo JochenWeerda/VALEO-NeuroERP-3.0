@@ -70,7 +70,6 @@ export default function AktivitaetDetailPage(): JSX.Element {
     },
     onError: (error) => {
       toast.push(getErrorMessage(t, 'create', entityType))
-      console.error('Create error:', error)
     },
   })
 
@@ -93,7 +92,6 @@ export default function AktivitaetDetailPage(): JSX.Element {
     },
     onError: (error) => {
       toast.push(getErrorMessage(t, 'update', entityType))
-      console.error('Update error:', error)
     },
   })
 
@@ -107,7 +105,6 @@ export default function AktivitaetDetailPage(): JSX.Element {
     },
     onError: (error) => {
       toast.push(getErrorMessage(t, 'delete', entityType))
-      console.error('Delete error:', error)
     },
   })
 

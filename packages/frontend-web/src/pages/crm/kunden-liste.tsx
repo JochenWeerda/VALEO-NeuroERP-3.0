@@ -297,7 +297,6 @@ export default function KundenListePage(): JSX.Element {
       const res = await api.post('/api/v1/crm/import/kunden', form, { headers: { 'Content-Type': 'multipart/form-data' } })
       const { created, updated, errors } = res.data as { created: number; updated: number; errors: string[] }
       toast({ title: 'Import abgeschlossen', description: `${created} neu, ${updated} aktualisiert${errors.length ? `, ${errors.length} Fehler` : ''}.` })
-      if (errors.length) console.warn('Import-Fehler:', errors)
       invalidate()
     } catch (e: any) {
       toast({ title: 'Import fehlgeschlagen', description: e.response?.data?.detail ?? e.message, variant: 'destructive' })

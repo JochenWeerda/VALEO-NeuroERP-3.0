@@ -61,7 +61,6 @@ function LegacyLeadDetailPage(): JSX.Element {
     },
     onError: (error) => {
       toast.push(getErrorMessage(t, 'create', entityType))
-      console.error('Create error:', error)
     },
   })
 
@@ -76,7 +75,6 @@ function LegacyLeadDetailPage(): JSX.Element {
     },
     onError: (error) => {
       toast.push(getErrorMessage(t, 'update', entityType))
-      console.error('Update error:', error)
     },
   })
 
@@ -90,7 +88,6 @@ function LegacyLeadDetailPage(): JSX.Element {
     },
     onError: (error) => {
       toast.push(getErrorMessage(t, 'delete', entityType))
-      console.error('Delete error:', error)
     },
   })
 

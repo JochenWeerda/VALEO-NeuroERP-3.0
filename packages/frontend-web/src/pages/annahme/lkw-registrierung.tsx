@@ -93,8 +93,8 @@ export default function LKWRegistrierungPage(): JSX.Element {
           return
         }
         setArtikelOptionen(items)
-      } catch (error) {
-        console.warn('Article options for LKW registration could not be loaded:', error)
+      } catch {
+        // Artikel-Dropdown bleibt leer — LKW-Registrierung ist trotzdem möglich
       }
     }
 

@@ -1,5 +1,6 @@
 import { useEffect } from 'react'
 import { useAuth } from '@/hooks/useAuth'
+import { toast } from '@/hooks/use-toast'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Loader2 } from 'lucide-react'
@@ -18,8 +19,8 @@ export default function LoginPage(): JSX.Element {
   const handleLogin = async (): Promise<void> => {
     try {
       await login()
-    } catch (error) {
-      console.error('Login failed:', error)
+    } catch (error: any) {
+      toast({ variant: 'destructive', title: 'Anmeldung fehlgeschlagen', description: error?.message ?? 'OIDC-Redirect konnte nicht gestartet werden.' })
     }
   }
 

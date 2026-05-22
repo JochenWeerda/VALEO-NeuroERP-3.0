@@ -69,21 +69,16 @@ export default function FarmersPage(): JSX.Element {
 
   // Delete handler
   const handleDelete = async (id: string, reason: string) => {
-    try {
-      const response = await fetch(`/api/agribusiness/farmers/${id}`, {
-        method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ reason }),
-      });
-      if (response.ok) {
-        setFarmers(farmers.filter(f => f.id !== id));
-        setSelectedFarmer(null);
-      } else {
-        throw new Error('Failed to delete farmer');
-      }
-    } catch (error) {
-      console.error('Error deleting farmer:', error);
-      throw error;
+    const response = await fetch(`/api/agribusiness/farmers/${id}`, {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ reason }),
+    });
+    if (response.ok) {
+      setFarmers(farmers.filter(f => f.id !== id));
+      setSelectedFarmer(null);
+    } else {
+      throw new Error('Failed to delete farmer');
     }
   };
 

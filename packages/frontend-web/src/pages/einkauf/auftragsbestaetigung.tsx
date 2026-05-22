@@ -167,8 +167,8 @@ export default function AuftragsbestaetigungPage(): JSX.Element {
     try {
       await saveData(formData)
       navigate('/einkauf/auftragsbestaetigungen')
-    } catch (error) {
-      console.error(t('crud.messages.updateError', { entityType: entityTypeLabel }), error)
+    } catch (error: any) {
+      toast({ variant: 'destructive', title: t('crud.messages.updateError', { entityType: entityTypeLabel }), description: error?.message })
     } finally {
       setLoading(false)
     }

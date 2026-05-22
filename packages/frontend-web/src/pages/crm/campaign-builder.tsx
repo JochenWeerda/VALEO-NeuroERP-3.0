@@ -104,8 +104,8 @@ export default function CampaignBuilderPage(): JSX.Element {
 
         setTemplates(templatesRes.data ?? [])
         setSegments(segmentsRes.data ?? [])
-      } catch (error) {
-        console.error('Fehler beim Laden der Daten:', error)
+      } catch {
+        // Vorlagen/Segmente bleiben leer — Formular ist weiter bedienbar
       }
     }
     loadData()
@@ -186,7 +186,6 @@ export default function CampaignBuilderPage(): JSX.Element {
         navigate(`/crm/campaign/${campaignId}`)
       }
     } catch (error: any) {
-      console.error('Create error:', error)
       toast({
         variant: 'destructive',
         title: t('crud.messages.createError', { entityType: t('crud.entities.campaign') }),

@@ -54,7 +54,6 @@ function LeadMaskDetailPage(): JSX.Element {
     },
     onError: (err) => {
       toast.push(getErrorMessage(t, 'create', entityType))
-      console.error('Create error:', err)
     },
   })
 
@@ -69,7 +68,6 @@ function LeadMaskDetailPage(): JSX.Element {
     },
     onError: (err) => {
       toast.push(getErrorMessage(t, 'update', entityType))
-      console.error('Update error:', err)
     },
   })
 
@@ -83,7 +81,6 @@ function LeadMaskDetailPage(): JSX.Element {
     },
     onError: (err) => {
       toast.push(getErrorMessage(t, 'delete', entityType))
-      console.error('Delete error:', err)
     },
   })
 

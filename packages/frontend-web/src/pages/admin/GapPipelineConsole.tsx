@@ -47,7 +47,7 @@ export default function GapPipelineConsole() {
       setStatus(s)
       setError(null)
     } catch (e: any) {
-      console.error('Status-Abruf fehlgeschlagen:', e)
+      setError(e?.message ?? 'Status-Abruf fehlgeschlagen')
     }
   }
 

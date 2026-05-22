@@ -110,12 +110,7 @@ export default function FieldServiceTasksPage(): JSX.Element {
 
   // Delete handler
   const handleDelete = async (id: string, reason: string) => {
-    try {
-      await deleteMutation.mutateAsync({ id, reason });
-    } catch (error) {
-      console.error('Error deleting task:', error);
-      throw error;
-    }
+    await deleteMutation.mutateAsync({ id, reason });
   };
 
   const {
@@ -142,12 +137,7 @@ export default function FieldServiceTasksPage(): JSX.Element {
 
   // Cancel handler
   const handleCancel = async (id: string, reason: string) => {
-    try {
-      await cancelMutation.mutateAsync({ id, reason });
-    } catch (error) {
-      console.error('Error cancelling task:', error);
-      throw error;
-    }
+    await cancelMutation.mutateAsync({ id, reason });
   };
 
   const {

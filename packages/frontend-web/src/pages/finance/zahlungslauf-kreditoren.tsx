@@ -421,7 +421,6 @@ function ZahlungenTable({ data: _data, onChange }: { data: any[], onChange: (_da
             }
           } catch (error) {
             // Silent error for auto-lookup
-            console.warn('IBAN lookup failed:', error)
           }
         }, 1000)
       }
@@ -630,7 +629,6 @@ export default function ZahlungslaufKreditorenPage(): JSX.Element {
         }
       } catch (error) {
         // Silent error for auto-lookup
-        console.warn('IBAN lookup failed:', error)
       }
     }
   }

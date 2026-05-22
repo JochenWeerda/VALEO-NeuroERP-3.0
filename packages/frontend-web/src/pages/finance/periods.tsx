@@ -66,7 +66,6 @@ export default function PeriodsPage(): JSX.Element {
       )
       setPeriods(data)
     } catch (error) {
-      console.error('Error fetching periods:', error)
       toast({
         title: t('common.error'),
         description: t('crud.feedback.fetchError', { entityType: 'Perioden' }),
@@ -89,7 +88,6 @@ export default function PeriodsPage(): JSX.Element {
       setNewPeriod({ tenant_id: 'default', period: '', start_date: '', end_date: '', status: 'OPEN' })
       await fetchPeriods()
     } catch (error: any) {
-      console.error('Error creating period:', error)
       toast({
         title: t('common.error'),
         description: error?.response?.data?.detail || error.message || t('crud.feedback.createError', { entityType: 'Periode' }),
@@ -124,7 +122,6 @@ export default function PeriodsPage(): JSX.Element {
       setCloseBy('')
       await fetchPeriods()
     } catch (error: any) {
-      console.error('Error closing period:', error)
       toast({
         title: t('common.error'),
         description: error?.response?.data?.detail || error.message || t('finance.periods.closeError'),
@@ -145,7 +142,6 @@ export default function PeriodsPage(): JSX.Element {
       })
       await fetchPeriods()
     } catch (error: any) {
-      console.error('Error reopening period:', error)
       toast({
         title: t('common.error'),
         description: error?.response?.data?.detail || error.message || 'Fehler beim Wiedereröffnen der Periode.',

@@ -181,7 +181,6 @@ export default function GutschriftenBelastungenPage(): JSX.Element {
       const response = (await apiClient.get<CreditMemo[]>('/api/v1/einkauf/credit-memos')) as unknown as CreditMemo[]
       setCreditMemos(response ?? [])
     } catch (error) {
-      console.error('Fehler beim Laden der Gutschriften:', error)
       toast({
         variant: 'destructive',
         title: t('crud.messages.loadError'),
@@ -198,7 +197,6 @@ export default function GutschriftenBelastungenPage(): JSX.Element {
       const response = (await apiClient.get<DebitMemo[]>('/api/v1/einkauf/debit-memos')) as unknown as DebitMemo[]
       setDebitMemos(response ?? [])
     } catch (error) {
-      console.error('Fehler beim Laden der Belastungen:', error)
       toast({
         variant: 'destructive',
         title: t('crud.messages.loadError'),
@@ -243,8 +241,8 @@ export default function GutschriftenBelastungenPage(): JSX.Element {
         }
       })
       setOpenInvoices(invoices)
-    } catch (error) {
-      console.error('Fehler beim Laden der offenen Rechnungen:', error)
+    } catch (error: any) {
+      toast({ variant: 'destructive', title: t('crud.messages.loadError'), description: error?.message })
     }
   }
 
@@ -264,7 +262,6 @@ export default function GutschriftenBelastungenPage(): JSX.Element {
         items: response.items,
       }))
     } catch (error) {
-      console.error('Fehler beim Laden des Settlement-Korrekturentwurfs:', error)
       toast({
         variant: 'destructive',
         title: t('crud.messages.loadError'),
@@ -361,7 +358,6 @@ export default function GutschriftenBelastungenPage(): JSX.Element {
         loadDebitMemos()
       }
     } catch (error: any) {
-      console.error('Fehler beim Erstellen des Memos:', error)
       toast({
         variant: 'destructive',
         title: t('crud.messages.createError'),
@@ -414,7 +410,6 @@ export default function GutschriftenBelastungenPage(): JSX.Element {
       }
       loadOpenInvoices()
     } catch (error: any) {
-      console.error('Fehler beim Verrechnen:', error)
       toast({
         variant: 'destructive',
         title: t('crud.messages.settlementError'),

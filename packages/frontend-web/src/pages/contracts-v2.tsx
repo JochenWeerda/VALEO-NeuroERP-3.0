@@ -190,21 +190,16 @@ export default function ContractsPageV2(): JSX.Element {
 
   // Delete handler
   const handleDelete = async (id: string, reason: string) => {
-    try {
-      const response = await fetch(`/api/contracts/${id}`, {
-        method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ reason, tenantId }),
-      });
-      if (response.ok) {
-        setContracts(contracts.filter(c => c.id !== id));
-        setSelectedContract(null);
-      } else {
-        throw new Error('Failed to delete contract');
-      }
-    } catch (error) {
-      console.error('Error deleting contract:', error);
-      throw error;
+    const response = await fetch(`/api/contracts/${id}`, {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ reason, tenantId }),
+    });
+    if (response.ok) {
+      setContracts(contracts.filter(c => c.id !== id));
+      setSelectedContract(null);
+    } else {
+      throw new Error('Failed to delete contract');
     }
   };
 
@@ -222,22 +217,17 @@ export default function ContractsPageV2(): JSX.Element {
 
   // Cancel handler
   const handleCancel = async (id: string, reason: string) => {
-    try {
-      const response = await fetch(`/api/contracts/${id}/cancel`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ reason, tenantId, cancelledBy: user?.sub ?? 'current-user' }),
-      });
-      if (response.ok) {
-        const updated = await response.json();
-        setContracts(contracts.map(c => c.id === id ? updated : c));
-        setSelectedContract(null);
-      } else {
-        throw new Error('Failed to cancel contract');
-      }
-    } catch (error) {
-      console.error('Error cancelling contract:', error);
-      throw error;
+    const response = await fetch(`/api/contracts/${id}/cancel`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ reason, tenantId, cancelledBy: user?.sub ?? 'current-user' }),
+    });
+    if (response.ok) {
+      const updated = await response.json();
+      setContracts(contracts.map(c => c.id === id ? updated : c));
+      setSelectedContract(null);
+    } else {
+      throw new Error('Failed to cancel contract');
     }
   };
 
@@ -283,7 +273,6 @@ export default function ContractsPageV2(): JSX.Element {
         throw new Error('Failed to create amendment');
       }
     } catch (error) {
-      console.error('Error creating amendment:', error);
       toast({ title: 'Fehler', description: t('crud.messages.createError', { entityType: t('crud.entities.amendment', { defaultValue: 'Änderung' }), defaultValue: 'Erstellen fehlgeschlagen.' }), variant: 'destructive' });
     }
   };

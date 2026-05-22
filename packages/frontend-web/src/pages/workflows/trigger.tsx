@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
+import { toast } from '@/hooks/use-toast'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -22,8 +23,8 @@ export default function WorkflowTriggerPage(): JSX.Element {
       
       // Navigate to approval page
       navigate(`/workflows/approval/${result.workflow_id}`)
-    } catch (error) {
-      console.error('Failed to trigger workflow:', error)
+    } catch (error: any) {
+      toast({ variant: 'destructive', title: 'Workflow-Start fehlgeschlagen', description: error?.message })
     }
   }
   
