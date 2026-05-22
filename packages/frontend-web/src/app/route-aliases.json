@@ -405,6 +405,54 @@
       "path": "versand/versand-avis"
     },
     {
+      "module": "@/pages/strecke/menu",
+      "path": "strecke/menu"
+    },
+    {
+      "module": "@/pages/strecke/streckengeschaeft",
+      "path": "strecke/streckengeschaeft"
+    },
+    {
+      "module": "@/pages/strecke/disposition",
+      "path": "strecke/disposition"
+    },
+    {
+      "module": "@/pages/strecke/vorlaeufige-streckengeschaefte",
+      "path": "strecke/vorlaeufige-streckengeschaefte"
+    },
+    {
+      "module": "@/pages/strecke/dokumente-drucken",
+      "path": "strecke/dokumente-drucken"
+    },
+    {
+      "module": "@/pages/strecke/qualitaets-abweichung",
+      "path": "strecke/qualitaets-abweichung"
+    },
+    {
+      "module": "@/pages/strecke/speditionen-fracht-preise",
+      "path": "strecke/speditionen-fracht-preise"
+    },
+    {
+      "module": "@/pages/strecke/nawaro-vertraege-pruefen",
+      "path": "strecke/nawaro-vertraege-pruefen"
+    },
+    {
+      "module": "@/pages/strecke/nawaro-uebersicht",
+      "path": "strecke/nawaro-uebersicht"
+    },
+    {
+      "module": "@/pages/strecke/nawaro-uebersicht-drucken",
+      "path": "strecke/nawaro-uebersicht-drucken"
+    },
+    {
+      "module": "@/pages/strecke/nawaro-lieferungen",
+      "path": "strecke/nawaro-lieferungen"
+    },
+    {
+      "module": "@/pages/strecke/nawaro-ernterklaerung-drucken",
+      "path": "strecke/nawaro-ernterklaerung-drucken"
+    },
+    {
       "module": "@/pages/versand/frachtdokumente",
       "path": "versand"
     },
