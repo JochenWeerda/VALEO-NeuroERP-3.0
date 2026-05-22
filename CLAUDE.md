@@ -175,3 +175,14 @@ Mutation-critical user actions must be protected against duplicate execution.
 - Visible error feedback on failure
 
 **Exempt:** idempotent reads, pure downloads, navigation-only actions, handlers already guarded by a parent form or mutation component.
+
+### Nested Async Handler Guard Invariant
+
+If one mutation handler calls another mutation helper internally, pending-state ownership must be held by the outermost user-triggered handler.
+
+- Shared worker functions must not set or reset loading/saving state.
+- Direct button handlers may wrap worker functions with loading guards.
+- Composed handlers must keep the guard active until all nested awaits and follow-up mutations are complete.
+- Avoid short false-windows where a button becomes enabled before the full mutation chain has finished.
+
+**Pattern:** extract the work into `persistX()` (no guard), wrap with `handleXClick()` for direct button use, and call `persistX()` directly from composed handlers that own the guard.
