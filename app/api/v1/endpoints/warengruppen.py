@@ -115,6 +115,26 @@ def create_hauptwarengruppe(
     return HauptwarengruppeOut(**dict(row._mapping))
 
 
+@router.put("/haupt/{gruppe_nr}", response_model=HauptwarengruppeOut)
+def update_hauptwarengruppe(
+    gruppe_nr: str,
+    payload: HauptwarengruppeCreate,
+    db=Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
+):
+    result = db.execute(text("""
+        UPDATE domain_shared.hauptwarengruppen SET bezeichnung = :bez
+        WHERE tenant_id = :tid AND gruppe_nr = :nr AND aktiv = true
+    """), {"bez": payload.bezeichnung, "tid": tenant_id, "nr": gruppe_nr})
+    db.commit()
+    if result.rowcount == 0:
+        raise HTTPException(404, f"Hauptwarengruppe {gruppe_nr} nicht gefunden.")
+    row = db.execute(text("""
+        SELECT * FROM domain_shared.hauptwarengruppen WHERE tenant_id = :tid AND gruppe_nr = :nr
+    """), {"tid": tenant_id, "nr": gruppe_nr}).fetchone()
+    return HauptwarengruppeOut(**dict(row._mapping))
+
+
 @router.delete("/haupt/{gruppe_nr}")
 def delete_hauptwarengruppe(
     gruppe_nr: str,
@@ -176,6 +196,26 @@ def create_oberwarengruppe(
     return OberwarengruppeOut(**dict(row._mapping))
 
 
+@router.put("/ober/{gruppe_nr}", response_model=OberwarengruppeOut)
+def update_oberwarengruppe(
+    gruppe_nr: str,
+    payload: OberwarengruppeCreate,
+    db=Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
+):
+    result = db.execute(text("""
+        UPDATE domain_shared.oberwarengruppen SET bezeichnung = :bez, haupt_id = :hid
+        WHERE tenant_id = :tid AND gruppe_nr = :nr AND aktiv = true
+    """), {"bez": payload.bezeichnung, "hid": payload.haupt_id, "tid": tenant_id, "nr": gruppe_nr})
+    db.commit()
+    if result.rowcount == 0:
+        raise HTTPException(404, f"Oberwarengruppe {gruppe_nr} nicht gefunden.")
+    row = db.execute(text("""
+        SELECT * FROM domain_shared.oberwarengruppen WHERE tenant_id = :tid AND gruppe_nr = :nr
+    """), {"tid": tenant_id, "nr": gruppe_nr}).fetchone()
+    return OberwarengruppeOut(**dict(row._mapping))
+
+
 @router.delete("/ober/{gruppe_nr}")
 def delete_oberwarengruppe(
     gruppe_nr: str,
@@ -234,6 +274,26 @@ def create_warengruppe(
     row = db.execute(text(
         "SELECT * FROM domain_shared.warengruppen WHERE id = :id"
     ), {"id": new_id}).fetchone()
+    return WarengruppeOut(**dict(row._mapping))
+
+
+@router.put("/{gruppe_nr}", response_model=WarengruppeOut)
+def update_warengruppe(
+    gruppe_nr: str,
+    payload: WarengruppeCreate,
+    db=Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
+):
+    result = db.execute(text("""
+        UPDATE domain_shared.warengruppen SET bezeichnung = :bez, ober_id = :oid
+        WHERE tenant_id = :tid AND gruppe_nr = :nr AND aktiv = true
+    """), {"bez": payload.bezeichnung, "oid": payload.ober_id, "tid": tenant_id, "nr": gruppe_nr})
+    db.commit()
+    if result.rowcount == 0:
+        raise HTTPException(404, f"Warengruppe {gruppe_nr} nicht gefunden.")
+    row = db.execute(text("""
+        SELECT * FROM domain_shared.warengruppen WHERE tenant_id = :tid AND gruppe_nr = :nr
+    """), {"tid": tenant_id, "nr": gruppe_nr}).fetchone()
     return WarengruppeOut(**dict(row._mapping))
 
 

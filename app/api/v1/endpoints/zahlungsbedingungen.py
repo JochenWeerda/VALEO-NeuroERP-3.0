@@ -122,6 +122,36 @@ def create_zahlungsbedingung(
     return ZahlungsbedingungOut(**dict(row._mapping))
 
 
+@router.put("/{zabd_nr}", response_model=ZahlungsbedingungOut)
+def update_zahlungsbedingung(
+    zabd_nr: str,
+    payload: ZahlungsbedingungCreate,
+    db=Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
+):
+    result = db.execute(text("""
+        UPDATE domain_shared.zahlungsbedingungen SET
+            bezeichnung = :bez, zahlungsziel_tage = :zt,
+            skonto1_tage = :s1t, skonto1_prozent = :s1p,
+            skonto2_tage = :s2t, skonto2_prozent = :s2p,
+            netto_tage = :nt, manuelles_datum = :md, zahlungsart = :za
+        WHERE tenant_id = :tid AND zabd_nr = :nr AND aktiv = true
+    """), {
+        "bez": payload.bezeichnung, "zt": payload.zahlungsziel_tage,
+        "s1t": payload.skonto1_tage, "s1p": payload.skonto1_prozent,
+        "s2t": payload.skonto2_tage, "s2p": payload.skonto2_prozent,
+        "nt": payload.netto_tage, "md": payload.manuelles_datum,
+        "za": payload.zahlungsart, "tid": tenant_id, "nr": zabd_nr,
+    })
+    db.commit()
+    if result.rowcount == 0:
+        raise HTTPException(404, f"Zahlungsbedingung {zabd_nr} nicht gefunden.")
+    row = db.execute(text("""
+        SELECT * FROM domain_shared.zahlungsbedingungen WHERE tenant_id = :tid AND zabd_nr = :nr
+    """), {"tid": tenant_id, "nr": zabd_nr}).fetchone()
+    return ZahlungsbedingungOut(**dict(row._mapping))
+
+
 @router.delete("/{zabd_nr}")
 def delete_zahlungsbedingung(
     zabd_nr: str,
