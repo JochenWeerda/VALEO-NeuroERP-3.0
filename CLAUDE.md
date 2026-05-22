@@ -152,3 +152,12 @@ Key variables (see `.env.example`):
 - Frontend unit tests: Vitest
 - Frontend E2E: Playwright
 - Coverage reports: terminal + HTML + XML
+
+## Error Handling Invariant
+
+- No empty catch blocks.
+- Removing `console.*` must not remove error semantics.
+- In user-triggered UI flows (save, load, approve, reject, login, trigger, import, export, delete):
+  - catch blocks must either show user feedback (`toast()`), set error state (`setError()`), rethrow, or use the existing project error-handling pattern.
+- Best-effort failures may be swallowed only with a concrete comment explaining why the failure is non-critical (e.g. secondary data, optional pre-fill, non-blocking background cache).
+- Do not add dummy comments just to satisfy lint.
