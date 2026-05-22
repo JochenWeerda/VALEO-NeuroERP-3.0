@@ -26,7 +26,8 @@
     "other": "Sonstige",
     "yes": "Ja",
     "no": "Nein",
-    "alerts": "Benachrichtigungen"
+    "alerts": "Benachrichtigungen",
+    "all": "Alle"
   },
   "status": {
     "ok": "Alles in Ordnung",
@@ -67,7 +68,15 @@
     "manual": "Manuell zugeordnet",
     "granted": "Erteilt",
     "denied": "Abgelehnt",
-    "revoked": "Widerrufen"
+    "revoked": "Widerrufen",
+    "open": "Offen",
+    "settled": "Ausgeglichen",
+    "prospecting": "Akquise",
+    "qualification": "Qualifizierung",
+    "proposal": "Angebot",
+    "negotiation": "Verhandlung",
+    "closedWon": "Gewonnen",
+    "closedLost": "Verloren"
   },
   "crud": {
     "actions": {
@@ -165,7 +174,31 @@
       "deactivate": "Deaktivieren",
       "next": "Weiter",
       "markCompleted": "Als abgeschlossen markieren",
-      "back": "Zurück"
+      "back": "Zurück",
+      "start": "Starten",
+      "pause": "Pausieren",
+      "add": "Hinzufügen",
+      "calculate": "Berechnen",
+      "match": "Zuordnen",
+      "submit": "Absenden",
+      "verify": "Verifizieren",
+      "process": "Verarbeiten",
+      "actions": "Aktionen",
+      "createConsent": "Einwilligung erstellen",
+      "createDunning": "Mahnung erstellen",
+      "createGDPRRequest": "DSGVO-Anfrage erstellen",
+      "deleteData": "Daten löschen",
+      "downloadExport": "Export herunterladen",
+      "generateExport": "Export generieren",
+      "newRequest": "Neue Anfrage",
+      "qualityAudit": "Qualitätsaudit",
+      "recordPayment": "Zahlung erfassen",
+      "resendConfirmation": "Bestätigung erneut senden",
+      "searchPlaceholder": "Suchen…",
+      "sendNewsletter": "Newsletter senden",
+      "useDiscount": "Rabatt nutzen",
+      "checkReturns": "Retouren prüfen",
+      "checkStatus": "Status prüfen"
     },
     "kanban": {
       "pipeline": "Pipeline: {{entityType}}",
@@ -272,6 +305,37 @@
           "deliveryTermsChange": "Lieferbedingungen-Änderung",
           "other": "Sonstiges"
         }
+      },
+      "sendRfq": {
+        "description": "Anfrage an Lieferanten senden"
+      },
+      "sendPo": {
+        "description": "Bestellung absenden",
+        "recipientInfo": "Empfängerinformation",
+        "portalInfo": "Über Lieferantenportal senden"
+      },
+      "createMemo": {
+        "description": "Gutschrift / Belastung erstellen"
+      },
+      "settle": {
+        "description": "Abrechnung durchführen"
+      },
+      "compareBids": {
+        "description": "Angebote vergleichen"
+      },
+      "bid": {
+        "description": "Angebot einreichen"
+      },
+      "awardBid": {
+        "description": "Zuschlag erteilen"
+      },
+      "importBids": {
+        "description": "Angebote importieren",
+        "supportedFormats": "Unterstützte Formate: CSV, Excel"
+      },
+      "createReturn": {
+        "description": "Retoure anlegen",
+        "creditMemoInfo": "Gutschrift wird automatisch erstellt"
       }
     },
     "fields": {
@@ -864,7 +928,120 @@
       "verifiedAt": "Verifiziert am",
       "selfRequest": "Selbstanfrage",
       "dunningText": "Mahntext",
-      "actions": "Aktionen"
+      "actions": "Aktionen",
+      "subject": "Betreff",
+      "segment": "Segment",
+      "template": "Vorlage",
+      "senderName": "Absendername",
+      "senderEmail": "Absender-E-Mail",
+      "scheduledAt": "Geplant für",
+      "budget": "Budget",
+      "usageCount": "Verwendungen",
+      "stage": "Phase",
+      "expectedRevenue": "Erwarteter Umsatz",
+      "probability": "Wahrscheinlichkeit",
+      "expectedCloseDate": "Erw. Abschlussdatum",
+      "actualCloseDate": "Tatsächl. Abschlussdatum",
+      "potential": "Potenzial",
+      "leadSource": "Lead-Quelle",
+      "leadInformation": "Lead-Information",
+      "leadTime": "Lieferzeit",
+      "value": "Wert",
+      "totalValue": "Gesamtwert",
+      "totalPrice": "Gesamtpreis",
+      "totalPotential": "Gesamtpotenzial",
+      "unitPrice": "Stückpreis",
+      "campaign": "Kampagne",
+      "category": "Kategorie",
+      "categoryFertilizer": "Dünger",
+      "categoryMachinery": "Maschinen",
+      "categorySeed": "Saatgut",
+      "service": "Service",
+      "website": "Website",
+      "firstName": "Vorname",
+      "lastName": "Nachname",
+      "companyName": "Firmenname",
+      "legalName": "Rechtlicher Name",
+      "salutation": "Anrede",
+      "salutationMr": "Herr",
+      "salutationMrs": "Frau",
+      "salutationCompany": "Firma",
+      "salutationFamily": "Familie",
+      "function": "Funktion",
+      "contacts": "Kontakte",
+      "contactId": "Kontakt",
+      "rating": "Bewertung",
+      "risk": "Risiko",
+      "classification": "Klassifizierung",
+      "certification": "Zertifizierung",
+      "bioCert": "Bio-Zertifikat",
+      "qsCert": "QS-Zertifikat",
+      "productArea": "Produktbereich",
+      "products": "Produkte",
+      "group": "Gruppe",
+      "groupBasic": "Basis",
+      "groupStandard": "Standard",
+      "groupPremium": "Premium",
+      "minOrderValue": "Mindestbestellwert",
+      "selectGroup": "Gruppe wählen",
+      "selectType": "Typ wählen",
+      "allTypes": "Alle Typen",
+      "reference": "Referenz",
+      "requestId": "Anfrage-ID",
+      "verificationMethod": "Verifizierungsweg",
+      "expiresAt": "Läuft ab",
+      "revokedAt": "Widerrufen am",
+      "deniedAt": "Abgelehnt am",
+      "rejectedAt": "Zurückgewiesen am",
+      "rejectionReason": "Ablehnungsgrund",
+      "sentAt": "Gesendet am",
+      "openedAt": "Geöffnet am",
+      "clickedAt": "Geklickt am",
+      "startedAt": "Gestartet am",
+      "timestamp": "Zeitstempel",
+      "dateRange": "Zeitraum",
+      "entryNumber": "Buchungsnr.",
+      "eventType": "Ereignistyp",
+      "entityType": "Objekttyp",
+      "action": "Aktion",
+      "changes": "Änderungen",
+      "ipAddress": "IP-Adresse",
+      "debtorNumber": "Debitorennr.",
+      "importLog": "Importprotokoll",
+      "fileFormat": "Dateiformat",
+      "payment": "Zahlung",
+      "purchaseOrder": "Bestellung",
+      "qualityNumber": "Qualitätsnr.",
+      "active": "Aktiv",
+      "default": "Standard",
+      "accepted": "Akzeptiert",
+      "qualified": "Qualifiziert",
+      "matched": "Zugeordnet",
+      "unmatched": "Nicht zugeordnet",
+      "balanced": "Ausgeglichen",
+      "unbalanced": "Nicht ausgeglichen",
+      "highPriority": "Hohe Priorität",
+      "discountPeriod": "Skontofrist",
+      "size": "Größe",
+      "summary": "Zusammenfassung",
+      "details": "Details",
+      "bodyText": "Text",
+      "bodyHtml": "HTML-Inhalt",
+      "statusAndRating": "Status & Bewertung",
+      "statusBlocked": "Gesperrt",
+      "sourceWebsite": "Website",
+      "sourceReferral": "Empfehlung",
+      "sourceColdCall": "Kaltakquise",
+      "sourceTradeShow": "Messe",
+      "sourceSocialMedia": "Social Media",
+      "settlementHistory": "Abrechnungsverlauf",
+      "settlementHistoryEmpty": "Kein Abrechnungsverlauf",
+      "countryDK": "Dänemark",
+      "countryPL": "Polen",
+      "opKreditoren.subtitle": "Offene Verbindlichkeiten verwalten",
+      "rejected": "Abgelehnt",
+      "percentage": "Prozentsatz",
+      "schedule": "Zeitplan"
     },
     "messages": {
       "createSuccess": "{{entityType}} erfolgreich erstellt",
@@ -986,9 +1163,9 @@
       "useTableToAddDirectDebits": "Verwenden Sie die Tabelle um Lastschriften hinzuzufügen",
       "selectAtLeastOneSupplier": "Bitte wählen Sie mindestens einen Lieferanten aus",
       "noSuppliersAvailable": "Keine Lieferanten verfügbar",
-      "rfqSentSuccess": "RFQ erfolgreich versendet",
+      "rfqSentSuccess": "Anfrage gesendet",
       "rfqSentToSuppliers": "RFQ wurde an {{count}} Lieferant(en) versendet",
-      "rfqSendError": "Fehler beim Versenden der RFQ",
+      "rfqSendError": "Fehler beim Senden der Anfrage",
       "mandateValidationInfo": "Mandatsprüfung-Funktion wird implementiert",
       "approvalFunctionInfo": "Freigabe-Funktion wird implementiert",
       "confirmDeleteDebtor": "Debitor \"{{name}}\" wirklich löschen?",
@@ -1008,7 +1185,133 @@
       "yes": "Ja",
       "no": "Nein",
       "consentRevoked": "Einwilligung widerrufen",
-      "consentRevokeError": "Fehler beim Widerrufen der Einwilligung"
+      "consentRevokeError": "Fehler beim Widerrufen der Einwilligung",
+      "error": "Fehler",
+      "success": "Erfolgreich",
+      "loading": "Wird geladen …",
+      "saved": "Gespeichert",
+      "saveSuccess": "Erfolgreich gespeichert",
+      "unknownError": "Unbekannter Fehler",
+      "fillRequiredFields": "Bitte alle Pflichtfelder ausfüllen",
+      "noHistory": "Kein Verlauf vorhanden",
+      "noRecipients": "Keine Empfänger vorhanden",
+      "noPerformanceData": "Keine Performance-Daten",
+      "noConsents": "Keine Einwilligungen",
+      "noGDPRRequests": "Keine DSGVO-Anfragen",
+      "noDocuments": "Keine Dokumente",
+      "noEvents": "Keine Ereignisse",
+      "noQuotes": "Keine Angebote",
+      "noMembers": "Keine Mitglieder",
+      "noBids": "Keine Angebote eingegangen",
+      "noImportErrors": "Keine Importfehler",
+      "noDiscountAvailable": "Kein Rabatt verfügbar",
+      "exportCreated": "Export erstellt",
+      "exportGenerated": "Export generiert",
+      "exportReady": "Export bereit",
+      "exportStarted": "Export gestartet",
+      "importSuccess": "Import erfolgreich",
+      "processing": "Wird verarbeitet …",
+      "executed": "Ausgeführt",
+      "readError": "Fehler beim Lesen",
+      "loadErrorDescription": "Daten konnten nicht geladen werden",
+      "unsavedChangesDescription": "Es gibt ungespeicherte Änderungen",
+      "campaignStarted": "Kampagne gestartet",
+      "campaignStartError": "Fehler beim Starten der Kampagne",
+      "campaignPaused": "Kampagne pausiert",
+      "campaignPauseError": "Fehler beim Pausieren der Kampagne",
+      "campaignCancelled": "Kampagne abgebrochen",
+      "campaignCancelError": "Fehler beim Abbrechen der Kampagne",
+      "segmentCalculated": "Segment berechnet",
+      "segmentCalculationError": "Fehler bei der Segmentberechnung",
+      "templateActivated": "Vorlage aktiviert",
+      "templateActivateError": "Fehler beim Aktivieren",
+      "templateDeactivated": "Vorlage deaktiviert",
+      "templateDeactivateError": "Fehler beim Deaktivieren",
+      "templateDuplicated": "Vorlage dupliziert",
+      "templateDuplicateError": "Fehler beim Duplizieren",
+      "consentConfirmed": "Einwilligung bestätigt",
+      "consentConfirmError": "Fehler beim Bestätigen",
+      "dataDeleted": "Daten gelöscht",
+      "requestCreated": "Anfrage erstellt",
+      "requestError": "Fehler beim Erstellen der Anfrage",
+      "requestRejected": "Anfrage abgelehnt",
+      "requestNotFound": "Anfrage nicht gefunden",
+      "requestIdRequired": "Anfrage-ID erforderlich",
+      "verificationSuccess": "Verifizierung erfolgreich",
+      "verificationError": "Verifizierungsfehler",
+      "confirmationSent": "Bestätigung gesendet",
+      "confirmationSendError": "Fehler beim Senden der Bestätigung",
+      "invalidConfirmationLink": "Ungültiger Bestätigungslink",
+      "dunningCreated": "Mahnung erstellt",
+      "dunningError": "Fehler bei der Mahnung",
+      "dunningPreview": "Mahnungsvorschau",
+      "approveSuccess": "Freigabe erteilt",
+      "approveError": "Fehler bei der Freigabe",
+      "rejectError": "Fehler bei der Ablehnung",
+      "stageChanged": "Phase geändert",
+      "paymentRecorded": "Zahlung erfasst",
+      "matchSuccess": "Erfolgreich zugeordnet",
+      "matchSuccessDesc": "Zahlung wurde zugeordnet",
+      "matchError": "Fehler bei der Zuordnung",
+      "autoMatchSuccess": "Auto-Abgleich erfolgreich",
+      "autoMatchSuccessDesc": "Zahlungen automatisch zugeordnet",
+      "autoMatchError": "Fehler beim Auto-Abgleich",
+      "poSentSuccess": "Bestellung gesendet",
+      "poSentToSupplier": "Bestellung an Lieferant gesendet",
+      "poSendError": "Fehler beim Senden",
+      "awardSuccess": "Zuschlag erteilt",
+      "bidAwarded": "Angebot ausgewählt",
+      "minimumTwoBidsRequired": "Mindestens zwei Angebote erforderlich",
+      "downloadStarted": "Download gestartet",
+      "downloadInfo": "Download wird vorbereitet",
+      "downloadError": "Fehler beim Download",
+      "discountUsed": "Rabatt angewendet",
+      "recalculateFunction": "Neuberechnungsfunktion",
+      "selectGoodsReceipt": "Wareneingang auswählen",
+      "selectReturnItems": "Rückgabepositionen auswählen",
+      "paymentMatching": {
+        "title": "Zahlungsabgleich",
+        "subtitle": "Offene Posten automatisch zuordnen",
+        "bankImport": "Bankimport",
+        "startAutoMatch": "Auto-Abgleich starten",
+        "filterAndSearch": "Filtern & Suchen",
+        "searchPlaceholder": "Zahlung suchen …",
+        "loading": "Wird geladen …",
+        "matched": "Zugeordnet",
+        "unmatched": "Offen",
+        "partial": "Teilweise",
+        "manual": "Manuell",
+        "match": "Zuordnen",
+        "clarify": "Klären",
+        "matching": "Abgleich läuft …",
+        "allStatus": "Alle Status",
+        "autoMatchRate": "Auto-Trefferquote",
+        "showing": "Angezeigt",
+        "totalFiltered": "Gesamt gefiltert",
+        "unmatchedPayments": "Offene Zahlungen",
+        "columns": {
+          "date": "Datum",
+          "amount": "Betrag",
+          "reference": "Referenz",
+          "accountHolder": "Kontoinhaber",
+          "status": "Status",
+          "confidence": "Konfidenz",
+          "actions": "Aktionen"
+        },
+        "matchDialog": {
+          "title": "Zahlung zuordnen",
+          "description": "Rechnung für diese Zahlung auswählen",
+          "date": "Datum",
+          "amount": "Betrag",
+          "reference": "Referenz",
+          "customer": "Kunde",
+          "invoice": "Rechnung",
+          "due": "Fällig",
+          "open": "Offen",
+          "action": "Zuordnen",
+          "noOpenItems": "Keine offenen Posten"
+        }
+      }
     },
     "audit": {
       "title": "Änderungshistorie",
@@ -1099,7 +1402,9 @@
       "payment": "Zahlung",
       "dunning": "Mahnung",
       "bankReconciliation": "Bankabgleich",
-      "apInvoice": "Eingangsrechnung"
+      "apInvoice": "Eingangsrechnung",
+      "recipient": "Empfänger",
+      "suppliers": "Lieferanten"
     },
     "subtitles": {
       "managePurchaseOrders": "Einkaufsbestellungen verwalten",
@@ -1113,13 +1418,22 @@
       "procurementReports": "Standardreports für den Einkauf (Offene Bestellungen, Spend-Analyse, Lieferantenperformance, Toleranzen)",
       "manageOrderConfirmations": "Lieferanten-Rückmeldungen verwalten",
       "manageConsents": "Einwilligungen verwalten und DSGVO-Compliance sicherstellen",
-      "manageGDPRRequests": "DSGVO-Anfragen (Auskunft, Löschung, Widerspruch) bearbeiten"
+      "manageGDPRRequests": "DSGVO-Anfragen (Auskunft, Löschung, Widerspruch) bearbeiten",
+      "manageSuppliers": "Lieferanten verwalten",
+      "manageOpportunities": "Chancen verwalten",
+      "manageBids": "Angebote verwalten"
     },
     "sources": {
       "webForm": "Web-Formular",
       "api": "API",
       "import": "Import",
-      "manual": "Manuell"
+      "manual": "Manuell",
+      "web": "Web",
+      "referral": "Empfehlung",
+      "email": "E-Mail",
+      "phone": "Telefon",
+      "tradeShow": "Messe",
+      "other": "Sonstige"
     },
     "gdpr": {
       "requestTypes": {
@@ -1127,6 +1441,21 @@
         "deletion": "Löschungsrecht",
         "portability": "Datenübertragbarkeit",
         "objection": "Widerspruchsrecht"
+      },
+      "verification": "Verifizierung",
+      "verificationEmailSent": "Verifizierungs-E-Mail gesendet",
+      "response": "Antwort",
+      "export": "Export",
+      "gdprRequest": "DSGVO-Anfrage",
+      "publicTitle": "Datenschutzanfrage",
+      "publicDescription": "Ihre Datenschutzanfrage wird bearbeitet",
+      "confirmDeleteData": "Datenlöschung bestätigen",
+      "enterRejectionReason": "Ablehnungsgrund eingeben",
+      "verificationMethods": {
+        "email": "E-Mail",
+        "idCard": "Ausweis",
+        "manual": "Manuell",
+        "other": "Sonstige"
       }
     },
     "campaigns": {
@@ -1168,6 +1497,42 @@
       },
       "status": {
         "scheduled": "Geplant"
+      },
+      "recipients": "Empfänger",
+      "schedule": "Zeitplan",
+      "template": "Vorlage",
+      "templateContent": "Vorlageninhalt",
+      "performance": "Performance",
+      "events": {
+        "sent": "Gesendet",
+        "delivered": "Zugestellt",
+        "opened": "Geöffnet",
+        "clicked": "Geklickt",
+        "bounced": "Bounce",
+        "converted": "Konvertiert"
+      },
+      "builder": {
+        "title": "Kampagnen-Builder",
+        "subtitle": "Neue Kampagne erstellen",
+        "steps": {
+          "type": "Typ",
+          "template": "Vorlage",
+          "segment": "Segment",
+          "abtest": "A/B-Test",
+          "schedule": "Zeitplan",
+          "review": "Überprüfung"
+        },
+        "selectSegment": "Segment auswählen",
+        "segmentInfo": "Zielgruppe festlegen",
+        "noTemplate": "Keine Vorlage gewählt",
+        "percentage": "Prozentsatz",
+        "variant": "Variante",
+        "enableAbtest": "A/B-Test aktivieren",
+        "immediate": "Sofort senden",
+        "scheduleInfo": "Sendezeitpunkt festlegen",
+        "reviewTitle": "Kampagne überprüfen",
+        "reviewDescription": "Bitte alle Angaben prüfen",
+        "members": "Mitglieder"
       }
     },
     "list": {
@@ -1199,7 +1564,9 @@
       "quickActions": "Schnellaktionen",
       "quickFilters": "Schnellfilter",
       "quickSearch": "Schnellsuche",
-      "newEntity": "{{entityType}} anlegen"
+      "newEntity": "{{entityType}} anlegen",
+      "noSelection": "Kein Eintrag ausgewählt",
+      "noItems": "Keine Einträge vorhanden"
     },
     "detail": {
       "title": "{{entityType}}: {{entityName}}",
@@ -1211,7 +1578,14 @@
       "dealInfo": "Deal-Informationen",
       "sourceAndMarketing": "Quelle & Marketing",
       "quotes": "Angebote",
-      "manage": "{{entityType}} verwalten"
+      "manage": "{{entityType}} verwalten",
+      "createNew": "Neu erstellen",
+      "timestamps": "Zeitstempel",
+      "details": "Details",
+      "gdprRequests": "DSGVO-Anfragen",
+      "consents": "Einwilligungen",
+      "notes": "Notizen",
+      "offerDetails": "Angebotsdetails"
     },
     "tooltips": {
       "fields": {
@@ -1264,7 +1638,22 @@
         "differenceMustBeZeroForValidBooking": "Muss 0,00 sein für gültige Buchung",
         "gobdDocumentArchiving": "GoBD: Belege müssen digital archiviert werden",
         "vatMinusInputTax": "Umsatzsteuer abzüglich Vorsteuer",
-        "subsidiaryLedgerReconciliation": "Abgleich zwischen Nebenbuch (AR/AP/Bank) und Hauptbuch (GL)"
+        "subsidiaryLedgerReconciliation": "Abgleich zwischen Nebenbuch (AR/AP/Bank) und Hauptbuch (GL)",
+        "accountCode": "Buchungskonto",
+        "taxCode": "Steuerschlüssel",
+        "taxRate": "Steuersatz",
+        "costCenter": "Kostenstelle",
+        "project": "Projekt",
+        "matchStatus": "Abgleichstatus",
+        "creditNote": "Gutschrift",
+        "linkedOrder": "Verknüpfte Bestellung",
+        "linkedRequest": "Verknüpfte Anfrage",
+        "linkedGoodsReceipt": "Verknüpfter Wareneingang",
+        "orderConfirmation": "Auftragsbestätigung",
+        "discountAvailable": "Skonto verfügbar",
+        "discountDeadline": "Skontofrist",
+        "balanceReadonly": "Saldo (schreibgeschützt)",
+        "accountingBalanceFromLedger": "Buchungssaldo aus Hauptbuch"
       },
       "actions": {
         "create": "Neuen Datensatz erstellen",
@@ -1398,7 +1787,51 @@
         "website": "Website",
         "certification": "Zertifizierung",
         "risk": "Risiko",
-        "size": "Größe"
+        "size": "Größe",
+        "description": "Beschreibung eingeben …",
+        "senderName": "Name des Absenders",
+        "senderEmail": "E-Mail des Absenders",
+        "subject": "Betreff eingeben …",
+        "scheduledAt": "Datum und Uhrzeit wählen",
+        "budget": "Budget in EUR",
+        "campaign": "Kampagne auswählen",
+        "contactId": "Kontakt auswählen",
+        "country": "Land auswählen",
+        "firstName": "Vorname",
+        "lastName": "Nachname",
+        "opportunityName": "Name der Chance",
+        "expectedCloseDate": "Erwartetes Abschlussdatum",
+        "actualCloseDate": "Tatsächliches Abschlussdatum",
+        "potential": "Potenzial in EUR",
+        "probability": "Wahrscheinlichkeit in %",
+        "owner": "Verantwortlicher",
+        "leadSource": "Lead-Quelle wählen",
+        "leadNotes": "Notizen zum Lead",
+        "selectCustomer": "Kunde auswählen",
+        "selectContact": "Kontakt auswählen",
+        "selectSupplier": "Lieferant auswählen",
+        "selectInvoice": "Rechnung auswählen",
+        "selectSource": "Quelle auswählen",
+        "selectPriority": "Priorität wählen",
+        "selectRequestType": "Anfragetyp wählen",
+        "assignedTo": "Zugewiesen an",
+        "internalNotes": "Interne Notizen",
+        "customerNotes": "Kundennotizen",
+        "optionalNotes": "Optionale Notizen",
+        "productName": "Produktname",
+        "dunningText": "Mahntext",
+        "decisionReason": "Entscheidungsgrund",
+        "creditNoteNumber": "Gutschriftnummer",
+        "creditNoteReason": "Grund der Gutschrift",
+        "documentTitle": "Dokumenttitel",
+        "expiresAt": "Ablaufdatum",
+        "validUntilOptional": "Gültig bis (optional)",
+        "requestId": "Anfrage-ID",
+        "discountPeriod": "Skontofrist in Tagen",
+        "bodyText": "Textinhalt",
+        "bodyHtml": "HTML-Inhalt",
+        "autoCalculated": "Wird automatisch berechnet",
+        "sendMessage": "Nachricht senden …"
       },
       "tooltips": {
         "placeholders": {
@@ -1588,7 +2021,10 @@
           "dunningLevel": "Mahnstufe",
           "lastPayment": "Letzte Zahlung"
         }
-      }
+      },
+      "contractReference": "Referenz auf verknüpften Kontrakt",
+      "requisitionReference": "Referenz auf Bestellanforderung",
+      "rfqReference": "Referenz auf Angebotsanfrage"
     },
     "paymentTerms": {
       "net30": "30 Tage netto",
@@ -1624,7 +2060,42 @@
       },
       "status": {
         "archived": "Archiviert"
-      }
+      },
+      "rules": "Regeln",
+      "rulesInfo": "Segmentregeln verwalten",
+      "members": "Mitglieder",
+      "membersInfo": "Segmentmitglieder",
+      "performance": "Performance",
+      "performanceInfo": "Segmentperformance"
+    },
+    "stages": {
+      "initialContact": "Erstkontakt",
+      "needsAnalysis": "Bedarfsanalyse",
+      "valueProposition": "Wertangebot",
+      "identifyDecisionMakers": "Entscheider identifizieren",
+      "proposalPriceQuote": "Angebot / Preisanfrage",
+      "negotiationReview": "Verhandlung",
+      "closedWon": "Gewonnen",
+      "closedLost": "Verloren"
+    },
+    "consent": {
+      "confirmationTitle": "Einwilligung bestätigen"
+    },
+    "tabs": {
+      "general": "Allgemein",
+      "basicData": "Stammdaten"
+    },
+    "feedback": {
+      "createSuccess": "Feedback erstellt",
+      "fetchError": "Fehler beim Laden des Feedbacks",
+      "createError": "Fehler beim Erstellen des Feedbacks"
+    },
+    "status": {
+      "offerPhase": "Angebotsphase"
+    },
+    "descriptions": {
+      "creditDebitMemo": "Gutschrift / Belastung",
+      "goodsReturn": "Warenrückgabe"
     }
   },
   "admin": {
@@ -1683,14 +2154,89 @@
       "paymentsList": "Zahlungsliste",
       "bookingDate": "Buchungsdatum",
       "reference": "Referenz",
-      "remittanceInfo": "Verwendungszweck"
+      "remittanceInfo": "Verwendungszweck",
+      "importTitle": "Zahlungen importieren",
+      "importSuccess": "Import erfolgreich",
+      "importError": "Importfehler",
+      "matchTitle": "Zahlung zuordnen",
+      "matchSuccess": "Zahlung zugeordnet",
+      "matchError": "Fehler bei der Zuordnung",
+      "autoMatchSuccess": "Auto-Abgleich abgeschlossen",
+      "autoMatchError": "Auto-Abgleich fehlgeschlagen",
+      "match": "Zuordnen",
+      "selectedPayment": "Ausgewählte Zahlung",
+      "selectOpenItem": "Offenen Posten auswählen",
+      "selectOpenItemPlaceholder": "Rechnungsnummer suchen …",
+      "bankAccount": "Bankkonto",
+      "csvFile": "CSV-Datei",
+      "csvFormat": "CSV-Format",
+      "status": {
+        "matched": "Zugeordnet",
+        "unmatched": "Offen",
+        "partial": "Teilweise",
+        "manual": "Manuell"
+      }
     },
     "periods": {
       "title": "Buchungsperioden",
       "description": "Verwaltung der Buchungsperioden",
       "createPeriod": "Periode anlegen",
       "infoTitle": "Information",
-      "infoDescription": "Offene Perioden können bebucht werden. Geschlossene Perioden sind gesperrt."
+      "infoDescription": "Offene Perioden können bebucht werden. Geschlossene Perioden sind gesperrt.",
+      "periodsList": "Perioden",
+      "period": "Periode",
+      "startDate": "Von",
+      "endDate": "Bis",
+      "close": "Schließen",
+      "closePeriod": "Periode schließen",
+      "closeConfirm": "Periode wirklich schließen?",
+      "periodClosed": "Periode geschlossen",
+      "closeError": "Fehler beim Schließen der Periode",
+      "closedBy": "Geschlossen von",
+      "closedByPlaceholder": "Benutzername",
+      "status": {
+        "open": "Offen",
+        "closed": "Geschlossen",
+        "adjusting": "Abschlussbuchungen"
+      }
+    },
+    "apInvoices": {
+      "loadError": "Fehler beim Laden der Eingangsrechnungen",
+      "postSuccess": "Rechnung gebucht",
+      "postError": "Fehler beim Buchen",
+      "supplierPlaceholder": "Lieferant auswählen",
+      "notesPlaceholder": "Notizen eingeben …",
+      "approvedBy": "Freigegeben von",
+      "pendingApproval": "Ausstehende Freigabe",
+      "requestApproval": "Freigabe anfragen",
+      "requestApprovalSuccess": "Freigabe angefragt",
+      "requestApprovalError": "Fehler beim Anfordern der Freigabe"
+    },
+    "auditTrail": {
+      "title": "Audit-Protokoll",
+      "description": "Vollständige Änderungshistorie",
+      "totalEntries": "Einträge gesamt",
+      "uniqueActions": "Aktionen",
+      "entityTypes": "Objekttypen",
+      "topUsers": "Aktivste Benutzer",
+      "auditLogs": "Audit-Logs"
     }
+  },
+  "dunningLevels": {
+    "1": "Mahnstufe 1",
+    "2": "Mahnstufe 2",
+    "3": "Mahnstufe 3"
+  },
+  "paymentTerms": {
+    "prepay": "Vorkasse"
+  },
+  "livestock": {
+    "dairyCows": "Milchkühe",
+    "beefCattle": "Mastrinder",
+    "calves": "Kälber",
+    "pigs": "Schweine",
+    "sheep": "Schafe",
+    "poultry": "Geflügel",
+    "horses": "Pferde"
   }
 }
