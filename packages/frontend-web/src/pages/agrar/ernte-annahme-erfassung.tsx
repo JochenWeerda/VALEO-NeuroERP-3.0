@@ -595,6 +595,7 @@ export default function ErnteAnnahmeErfassungPage(): JSX.Element {
   const [intermediateDealerName, setIntermediateDealerName] = useState('')
   const [showZusFelderDialog, setShowZusFelderDialog] = useState(false)
   const [showUstIdDialog, setShowUstIdDialog] = useState(false)
+  const [isSaving, setIsSaving] = useState(false)
   const [ustIdDialogValue, setUstIdDialogValue] = useState('')
   const importAnalyseInputRef = useRef<HTMLInputElement | null>(null)
 
@@ -619,6 +620,7 @@ export default function ErnteAnnahmeErfassungPage(): JSX.Element {
 
   // Speichern
   const handleSave = async (): Promise<string | null> => {
+    setIsSaving(true)
     try {
       if (!state.customer) {
         push('Bitte wählen Sie einen Kunden aus')
@@ -699,6 +701,8 @@ export default function ErnteAnnahmeErfassungPage(): JSX.Element {
     } catch (error: any) {
       push(`Fehler beim Speichern: ${error.response?.data?.detail || error.message}`)
       return null
+    } finally {
+      setIsSaving(false)
     }
   }
 
@@ -831,6 +835,7 @@ export default function ErnteAnnahmeErfassungPage(): JSX.Element {
       return
     }
 
+    setIsSaving(true)
     try {
       await apiClient.post(`/api/v1/agrar/harvest-acceptance/${state.id}/release`, {
         release_status: status,
@@ -846,6 +851,8 @@ export default function ErnteAnnahmeErfassungPage(): JSX.Element {
       }))
     } catch (error: any) {
       push(`Fehler bei der Freigabe: ${error.response?.data?.detail || error.message}`)
+    } finally {
+      setIsSaving(false)
     }
   }
 
@@ -1070,6 +1077,7 @@ export default function ErnteAnnahmeErfassungPage(): JSX.Element {
       return
     }
 
+    setIsSaving(true)
     try {
       await apiClient.delete(`/api/v1/agrar/harvest-acceptance/${state.id}`)
       push('Ernte-Annahme erfolgreich gelöscht')
@@ -1077,6 +1085,8 @@ export default function ErnteAnnahmeErfassungPage(): JSX.Element {
       navigate('/agrar/ernte')
     } catch (error: any) {
       push(`Fehler beim Löschen: ${error.response?.data?.detail || error.message}`)
+    } finally {
+      setIsSaving(false)
     }
   }
 
@@ -1143,7 +1153,7 @@ export default function ErnteAnnahmeErfassungPage(): JSX.Element {
         </div>
         <div className="flex gap-2">
           <ShortcutHintButton shortcut="Strg+S">
-            <Button onClick={() => void handleSave()} size="sm" className="gap-2">
+            <Button onClick={() => void handleSave()} size="sm" className="gap-2" disabled={isSaving}>
               <Save className="h-4 w-4" />
               Speichern
             </Button>
@@ -1842,7 +1852,7 @@ export default function ErnteAnnahmeErfassungPage(): JSX.Element {
                   <Printer className="h-4 w-4" />
                   Annahmeschein drucken
                 </Button>
-                <Button variant="outline" size="sm" className="gap-2" onClick={() => void handleRelease('provisional')}>
+                <Button variant="outline" size="sm" className="gap-2" onClick={() => void handleRelease('provisional')} disabled={isSaving}>
                   Berechnung und Freigabe
                 </Button>
               </div>
@@ -2278,7 +2288,7 @@ export default function ErnteAnnahmeErfassungPage(): JSX.Element {
             <Button variant="outline" onClick={() => setShowDeleteDialog(false)}>
               Abbrechen
             </Button>
-            <Button variant="destructive" onClick={() => void handleDelete()}>
+            <Button variant="destructive" onClick={() => void handleDelete()} disabled={isSaving}>
               Löschen
             </Button>
           </DialogFooter>

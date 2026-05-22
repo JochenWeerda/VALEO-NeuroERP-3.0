@@ -164,6 +164,7 @@ function LieferantSuchDialog({
   const [search, setSearch] = useState('')
   const [results, setResults] = useState<Lieferant[]>([])
   const [loading, setLoading] = useState(false)
+  const [isSaving, setIsSaving] = useState(false)
 
   const handleSearch = async (): Promise<void> => {
     if (!search.trim()) return
@@ -654,6 +655,7 @@ export default function EinkaufLieferscheinErfassungPage(): JSX.Element {
       push('Bitte wählen Sie einen Lieferanten aus')
       return null
     }
+    setIsSaving(true)
     try {
       const payload = {
         lieferschein_nr: state.lieferscheinNr,
@@ -710,6 +712,8 @@ export default function EinkaufLieferscheinErfassungPage(): JSX.Element {
     } catch (err: any) {
       push(`Fehler beim Speichern: ${err.response?.data?.detail || err.message}`)
       return null
+    } finally {
+      setIsSaving(false)
     }
   }
 
@@ -1447,7 +1451,7 @@ export default function EinkaufLieferscheinErfassungPage(): JSX.Element {
         </div>
         <div className="flex gap-2">
           <ShortcutHintButton shortcut="Strg+F4">
-            <Button onClick={() => void handleSave()} size="sm" className="gap-2">
+            <Button onClick={() => void handleSave()} size="sm" className="gap-2" disabled={isSaving}>
               <Save className="h-4 w-4" />
               Speichern
             </Button>

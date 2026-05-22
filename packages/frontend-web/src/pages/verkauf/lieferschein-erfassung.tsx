@@ -557,6 +557,7 @@ export default function LieferscheinErfassungPage(): JSX.Element {
   const [showPositionPopUpDialog, setShowPositionPopUpDialog] = useState(false)
   const [showPositionDetailsDialog, setShowPositionDetailsDialog] = useState(false)
   const [showKontraktLookup, setShowKontraktLookup] = useState(false)
+  const [isSaving, setIsSaving] = useState(false)
   const { resolveKontrakt, isResolving: isResolvingKontrakt } = useKontraktLookup()
   const [vertreterInput, setVertreterInput] = useState('')
   const [branchesList, setBranchesList] = useState<Array<{ id: string; branch_number: number; name: string }>>([])
@@ -937,6 +938,7 @@ export default function LieferscheinErfassungPage(): JSX.Element {
 
   // Lieferschein speichern
   const handleSave = async (): Promise<string | null> => {
+    setIsSaving(true)
     try {
       if (!state.customer) {
         push('Bitte wählen Sie einen Kunden aus')
@@ -1019,6 +1021,8 @@ export default function LieferscheinErfassungPage(): JSX.Element {
     } catch (error: any) {
       push(`Fehler beim Speichern: ${error.response?.data?.detail || error.message}`)
       return null // Return null on error
+    } finally {
+      setIsSaving(false)
     }
   }
 
@@ -2618,7 +2622,7 @@ export default function LieferscheinErfassungPage(): JSX.Element {
         </div>
         <div className="flex gap-2">
           <ShortcutHintButton shortcut="Strg+F4">
-            <Button onClick={handleSave} size="sm" className="gap-2">
+            <Button onClick={handleSave} size="sm" className="gap-2" disabled={isSaving}>
               <Save className="h-4 w-4" />
               Speichern
             </Button>

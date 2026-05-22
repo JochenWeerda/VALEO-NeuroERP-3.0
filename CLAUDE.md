@@ -161,3 +161,12 @@ Key variables (see `.env.example`):
   - catch blocks must either show user feedback (`toast()`), set error state (`setError()`), rethrow, or use the existing project error-handling pattern.
 - Best-effort failures may be swallowed only with a concrete comment explaining why the failure is non-critical (e.g. secondary data, optional pre-fill, non-blocking background cache).
 - Do not add dummy comments just to satisfy lint.
+
+## Async UI Handler Invariant
+
+For every async `onClick` handler that triggers a non-idempotent action (save, delete, release, approve, reject, convert, export, import):
+
+1. **Loading state**: The handler must set a boolean loading flag (`isSaving`, `loading`, or equivalent) to `true` at the start and reset it in a `finally` block.
+2. **Button guard**: The triggering button must carry `disabled={<loadingFlag>}` so that double-submit is impossible at the UI level.
+3. **finally reset**: `setLoading(false)` (or equivalent) must live in a `finally` block, not only in the happy path or catch — otherwise a thrown error leaves the button permanently disabled.
+4. **Idempotent reads are exempt**: `GET`-only handlers (search, refresh, load) do not require a double-submit guard, only a visual loading indicator if the round-trip is perceptible.
