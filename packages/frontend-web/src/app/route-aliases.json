@@ -2031,6 +2031,158 @@
     {
       "module": "@/pages/workflow/workflow-monitoring",
       "path": "alerts"
+    },
+    {
+      "module": "@/pages/admin/nummernkreise",
+      "path": "admin/nummernkreise"
+    },
+    {
+      "module": "@/pages/admin/webhooks",
+      "path": "admin/webhooks"
+    },
+    {
+      "module": "@/pages/admin/webshop",
+      "path": "admin/webshop"
+    },
+    {
+      "module": "@/pages/agrar/erntefenster-konfig",
+      "path": "agrar/erntefenster-konfig"
+    },
+    {
+      "module": "@/pages/agrar/saatzucht",
+      "path": "agrar/saatzucht"
+    },
+    {
+      "module": "@/pages/annahme/qr-scanner",
+      "path": "annahme/qr-scanner"
+    },
+    {
+      "module": "@/pages/annahme/rohware",
+      "path": "annahme/rohware"
+    },
+    {
+      "module": "@/pages/compliance/gelangensbestaetigung",
+      "path": "compliance/gelangensbestaetigung"
+    },
+    {
+      "module": "@/pages/compliance/intrastat",
+      "path": "compliance/intrastat"
+    },
+    {
+      "module": "@/pages/compliance/lksg",
+      "path": "compliance/lksg"
+    },
+    {
+      "module": "@/pages/compliance/pcn-liste",
+      "path": "compliance/pcn-liste"
+    },
+    {
+      "module": "@/pages/compliance/sanktionspruefung",
+      "path": "compliance/sanktionspruefung"
+    },
+    {
+      "module": "@/pages/einkauf/anfrage-erfassung",
+      "path": "einkauf/anfrage-erfassung"
+    },
+    {
+      "module": "@/pages/einkauf/bestellvorschlag-lager",
+      "path": "einkauf/bestellvorschlag-lager"
+    },
+    {
+      "module": "@/pages/einkauf/bestellvorschlag-rohware",
+      "path": "einkauf/bestellvorschlag-rohware"
+    },
+    {
+      "module": "@/pages/einkauf/bestellvorschlag-verkauf",
+      "path": "einkauf/bestellvorschlag-verkauf"
+    },
+    {
+      "module": "@/pages/einkauf/frachtauftraege-eingang",
+      "path": "einkauf/frachtauftraege-eingang"
+    },
+    {
+      "module": "@/pages/einkauf/lieferschein-erfassung",
+      "path": "einkauf/lieferschein-erfassung"
+    },
+    {
+      "module": "@/pages/einkauf/rechnung-eingang-erfassung",
+      "path": "einkauf/rechnung-eingang-erfassung"
+    },
+    {
+      "module": "@/pages/fibu/quadriga-connector",
+      "path": "fibu/quadriga-connector"
+    },
+    {
+      "module": "@/pages/finance/bank-stamm",
+      "path": "finance/bank-stamm"
+    },
+    {
+      "module": "@/pages/finance/buchungsimport",
+      "path": "finance/buchungsimport"
+    },
+    {
+      "module": "@/pages/finance/buchungsvorlagen",
+      "path": "finance/buchungsvorlagen"
+    },
+    {
+      "module": "@/pages/finance/wechselkurse",
+      "path": "finance/wechselkurse"
+    },
+    {
+      "module": "@/pages/fuhrpark/ausgehende-belege-dokumente",
+      "path": "fuhrpark/ausgehende-belege-dokumente"
+    },
+    {
+      "module": "@/pages/fuhrpark/fuhrpark-auswertung-kosten-pro-fahrzeug",
+      "path": "fuhrpark/fuhrpark-auswertung-kosten-pro-fahrzeug"
+    },
+    {
+      "module": "@/pages/fuhrpark/fuhrpark-rechnungen",
+      "path": "fuhrpark/fuhrpark-rechnungen"
+    },
+    {
+      "module": "@/pages/fuhrpark/fuhrpark-stammdaten",
+      "path": "fuhrpark/fuhrpark-stammdaten"
+    },
+    {
+      "module": "@/pages/fuhrpark/uebersicht",
+      "path": "fuhrpark/uebersicht"
+    },
+    {
+      "module": "@/pages/futtermittel/grundfutteranalysen",
+      "path": "futtermittel/grundfutteranalysen"
+    },
+    {
+      "module": "@/pages/futtermittel/rations-zugang",
+      "path": "futtermittel/rations-zugang"
+    },
+    {
+      "module": "@/pages/kontrakte/kontraktklassen",
+      "path": "kontrakte/kontraktklassen"
+    },
+    {
+      "module": "@/pages/pos/promotionen",
+      "path": "pos/promotionen"
+    },
+    {
+      "module": "@/pages/pos/uebernahme-kasse",
+      "path": "pos/uebernahme-kasse"
+    },
+    {
+      "module": "@/pages/verkauf/betriebs-auftraege",
+      "path": "verkauf/betriebs-auftraege"
+    },
+    {
+      "module": "@/pages/verkauf/kommissions-auftraege",
+      "path": "verkauf/kommissions-auftraege"
+    },
+    {
+      "module": "@/pages/verkauf/unerledigte-auftrags-positionen",
+      "path": "verkauf/unerledigte-auftrags-positionen"
+    },
+    {
+      "module": "@/pages/waage/vorlagen",
+      "path": "waage/vorlagen"
     }
   ]
 }
