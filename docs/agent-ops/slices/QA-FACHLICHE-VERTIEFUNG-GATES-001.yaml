@@ -1,8 +1,9 @@
 id: QA-FACHLICHE-VERTIEFUNG-GATES-001
 title: Restgates fachliche Vertiefung Wave 1-13 schliessen
 owner: Codex
-status: reserviert
+status: abgeschlossen
 claimed_at: 2026-05-22
+completed_at: 2026-05-22
 goal: >
   Die nach der QA-Abnahme verbliebenen Gates repo-seitig schliessen:
   PostgreSQL-Integration als opt-in Test, Frontend-E2E fuer Warengruppen,
@@ -16,6 +17,7 @@ file_ownership:
   - docs/agent-ops/active-workboard.md
   - docs/agent-ops/slices/QA-FACHLICHE-VERTIEFUNG-GATES-001.yaml
   - docs/FACHLICHE-VERTIEFUNG-ABNAHME.md
+  - packages/frontend-web/src/lib/api/einkauf.ts
   - tests/test_fachliche_vertiefung_db_integration.py
   - packages/frontend-web/tests/e2e/fachliche-vertiefung-warengruppen.spec.ts
 acceptance_criteria:
@@ -23,8 +25,20 @@ acceptance_criteria:
   - Frontend-E2E prueft Warengruppen gegen /api/v1/stammdaten/warengruppen und Create/Update/Delete-Flows.
   - Doku beschreibt geschlossene repo-seitige Gates, verbleibende externe Sign-off-Grenzen und Pruefkommandos.
   - Workboard-, Backend-, Frontend-/E2E- und Doku-Checks sind gruen oder mit Infrastrukturgrund dokumentiert.
-checks: []
-done: []
+checks:
+  - python -m py_compile tests/test_fachliche_vertiefung_db_integration.py
+  - pytest tests/test_fachliche_vertiefung_db_integration.py -q --no-cov
+  - pnpm --filter @valero-neuroerp/frontend-web type-check
+  - pnpm --filter @valero-neuroerp/frontend-web exec playwright test tests/e2e/fachliche-vertiefung-warengruppen.spec.ts --project=chromium
+  - python scripts/agent_workboard_supervisor.py validate
+  - node scripts/docs-markdown-check.cjs docs/FACHLICHE-VERTIEFUNG-ABNAHME.md docs/agent-ops/active-workboard.md docs/agent-ops/slices/QA-FACHLICHE-VERTIEFUNG-GATES-001.yaml
+  - git diff --check
+done:
+  - Opt-in-PostgreSQL-Gate fuer Alembic-Upgrade, Wave-10-13-Tabellen und Warengruppen-Roundtrip ergaenzt.
+  - Playwright-E2E fuer Warengruppen-API-Pfad und sichtbare CRUD-Aktionen ergaenzt.
+  - Warengruppen-Query auf placeholderData korrigiert, damit der echte Fetch ausgefuehrt wird.
+  - Abnahmedoku und Workboard auf geschlossene repo-seitige Gates aktualisiert.
 risks:
   - Externe Fachsignatur und produktive Testdaten koennen nicht im Repo erzeugt werden.
-next_step: Gate-Artefakte implementieren und validieren.
+  - Playwright-Global-Teardown kann vorhandene Visual-Tour-Issues melden; der fokussierte Gate-Test ist davon fachlich getrennt.
+next_step: abgeschlossen

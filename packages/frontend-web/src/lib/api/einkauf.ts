@@ -241,7 +241,7 @@ export function useWarengruppen() {
   return useQuery({
     queryKey: einkaufKeys.warengruppen(),
     queryFn: async () => (await apiClient.get<Warengruppe[]>('/api/v1/stammdaten/warengruppen')).data,
-    initialData: [],
+    placeholderData: [],
     staleTime: 5 * 60 * 1000,
   })
 }

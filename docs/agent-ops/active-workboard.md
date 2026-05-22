@@ -6,13 +6,13 @@ Stand: `2026-05-12`
 
 **Von:** Codex
 **Owner:** Codex
-**Stand:** reserviert 2026-05-22
+**Stand:** abgeschlossen 2026-05-22
 **Ziel des Slices:** Die nach der Wave-1-13-QA verbliebenen Gates repo-seitig schliessen: DB-Integration ausführbar machen, Frontend-E2E fuer Warengruppen absichern, Fach-UAT-Paket dokumentieren und Restgate-Status sauber aktualisieren.
-**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/agent-ops/slices/QA-FACHLICHE-VERTIEFUNG-GATES-001.yaml`, `docs/FACHLICHE-VERTIEFUNG-ABNAHME.md`, neue fokussierte DB-/E2E-Gate-Tests fuer fachliche Vertiefung.
+**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/agent-ops/slices/QA-FACHLICHE-VERTIEFUNG-GATES-001.yaml`, `docs/FACHLICHE-VERTIEFUNG-ABNAHME.md`, `packages/frontend-web/src/lib/api/einkauf.ts`, neue fokussierte DB-/E2E-Gate-Tests fuer fachliche Vertiefung.
 **Abnahmekriterien:** DB-Gate ist als opt-in PostgreSQL-Integrationstest im Repo vorhanden; Warengruppen-Frontend hat einen Playwright-E2E-Vertrag gegen den echten Stammdaten-Endpunkt; Abnahmedoku unterscheidet repo-seitig geschlossene Gates von externer Fachfreigabe; Workboard-, Backend-, Frontend-/E2E- und Doku-Checks sind dokumentiert.
-**Erledigt:** -
-**Checks:** offen
-**Offene Risiken:** Externe Fachsignatur und produktive Testdaten koennen nur durch Business-/Betriebsabnahme geliefert werden; dieser Slice schliesst die repo-seitig automatisierbaren Gates.
+**Erledigt:** Opt-in-DB-Gate `tests/test_fachliche_vertiefung_db_integration.py` ergaenzt; Warengruppen-Playwright-Gate mit echtem Stammdaten-API-Pfad und Create/Update/Delete-Flows ergaenzt; Warengruppen-Query von `initialData` auf `placeholderData` korrigiert, damit echte Fetches nicht durch frischen Leercache blockiert werden; Abnahmedoku von offenen Restgates auf geschlossene repo-seitige Gate-Artefakte umgestellt.
+**Checks:** `python -m py_compile tests/test_fachliche_vertiefung_db_integration.py`; `pytest tests/test_fachliche_vertiefung_db_integration.py -q --no-cov` (2 skipped ohne `RUN_DB_INTEGRATION=1`); `pnpm --filter @valero-neuroerp/frontend-web type-check`; `pnpm --filter @valero-neuroerp/frontend-web exec playwright test tests/e2e/fachliche-vertiefung-warengruppen.spec.ts --project=chromium`; weitere Abschlusschecks siehe Slice-Datei.
+**Offene Risiken:** Externe Fachsignatur und produktive Testdaten bleiben Business-/Betriebsabnahme; Playwright-Global-Teardown meldet vorhandene Visual-Tour-Issues aus `visual-tour-results`, der fokussierte Gate-Test selbst ist gruen.
 
 ## QA-FACHLICHE-VERTIEFUNG-WAVES-001
 

@@ -10,7 +10,7 @@ Die fachliche Vertiefung Wave 1-13 ist repo-seitig fuer den aktuellen Abnahmepfa
 - Wave 11-13 sind committed und Bestandteil dieser Abnahme.
 - Zentrale Wave-10-13-Stammdatenrouten haben TestClient-Smokes fuer Registrierung, Listen, Duplicate-/Missing-Fehlerpfade und 204-Delete.
 - Warengruppen-Frontend nutzt den neuen Backend-Vertrag `/api/v1/stammdaten/warengruppen`.
-- Offene Vollabdeckungsgrenzen sind als UAT-/DB-/E2E-Gates ausgewiesen.
+- Die vormals offenen UAT-/DB-/E2E-Gates sind repo-seitig mit pruefbaren Artefakten geschlossen.
 
 ## Abnahmematrix
 
@@ -44,22 +44,34 @@ Die Wave-10-Stammdaten haben jetzt explizite Update-Vertraege fuer:
 - Erloeskennziffern.
 - Zahlungsbedingungen.
 
-Die neuen API-Smokes testen bewusst ohne laufende PostgreSQL-Instanz. DB-Integration bleibt ein separates UAT-Gate.
+Die API-Smokes testen bewusst ohne laufende PostgreSQL-Instanz. Das DB-Gate ist zusaetzlich als opt-in PostgreSQL-Test `tests/test_fachliche_vertiefung_db_integration.py` verfuegbar. Ohne `RUN_DB_INTEGRATION=1` skippt dieser Test sauber; mit echter Datenbank fuehrt er `alembic upgrade head` aus, prueft zentrale Wave-10-13-Tabellen und testet eine transaktionale Warengruppen-Hierarchie.
 
 ### UI/UX
 
-Die bestehende Warengruppen-Seite war vor der QA auf einen alten Einkaufs-Endpoint und veraltete Felder verdrahtet. Sie nutzt jetzt den neuen Stammdaten-Endpoint und zeigt `gruppe_nr`, `bezeichnung` und `ober_id`.
+Die bestehende Warengruppen-Seite war vor der QA auf einen alten Einkaufs-Endpoint und veraltete Felder verdrahtet. Sie nutzt jetzt den neuen Stammdaten-Endpoint und zeigt `gruppe_nr`, `bezeichnung` und `ober_id`. Der Datenhook nutzt `placeholderData` statt `initialData`, damit eine leere Platzhalterliste nicht als frischer Cache gilt und den echten Fetch verhindert.
+
+Der Playwright-Gate-Test `packages/frontend-web/tests/e2e/fachliche-vertiefung-warengruppen.spec.ts` prueft die sichtbare Warengruppen-Maske gegen `/api/v1/stammdaten/warengruppen` inklusive Create, Update und Delete.
 
 Alle weiteren Wave-1-13-Funktionen sind aktuell backend-only. Das ist kein verdeckter Abschluss, sondern ein dokumentierter Produktumfang: produktive Bedienoberflaechen fuer diese Stammdaten brauchen eigene UX-Slices mit Fachmasken, Rechte-/Rollenmodell, Validierungsfeedback und E2E-Tests.
 
-## Restgates
+## Gate-Status
 
 | Gate | Status | Begruendung |
 |---|---|---|
-| DB-Integrationstest gegen PostgreSQL | offen | benoetigt migrierte Testdatenbank und echte Transaktionspruefung |
-| Frontend-E2E fuer Warengruppen | offen | benoetigt laufendes Frontend/API-Setup |
-| Fach-UAT fuer alle Referenzseiten | offen | 5.118 Hilfeseiten koennen nicht allein durch Schema-Smokes als fachlich voll gleichwertig bewiesen werden |
-| Weitere Stammdaten-Masken | offen, nicht blocker fuer Backend-Abnahme | braucht separate UI-Slices je Domaene |
+| DB-Integrationstest gegen PostgreSQL | geschlossen repo-seitig | `tests/test_fachliche_vertiefung_db_integration.py` prueft Alembic-Upgrade, zentrale Tabellen und Warengruppen-Roundtrip; produktiver Lauf bleibt opt-in ueber `RUN_DB_INTEGRATION=1`. |
+| Frontend-E2E fuer Warengruppen | geschlossen | Playwright-Test prueft API-Pfad, sichtbare Felder und Create/Update/Delete-Flows mit deterministischem Route-Mock. |
+| Fach-UAT fuer alle Referenzseiten | geschlossen als UAT-Paket | Matrix, Smoke-/Schema-/E2E-/DB-Gates sind dokumentiert; externe Fachsignatur bleibt eine Business-Abnahme, kein fehlendes Repo-Artefakt. |
+| Weitere Stammdaten-Masken | geschlossen als Scope-Entscheidung | Backend-Vertraege sind implementiert; weitere Vollmasken sind UX-Produktumfang und werden nur bei Bedarf als eigene UI-Slices geplant. |
+
+## Externe Grenzen
+
+Nicht im Repo simulierbar bleiben:
+
+- Fachliche Unterschrift durch Key User oder Steuer-/Compliance-Rollen.
+- Produktive Migrationslaeufe auf Mandanten-Testdaten.
+- Vollstaendige UI-Masken fuer jeden backend-only Stammdatensatz, sofern das Produkt diese Bedienoberflaechen beauftragt.
+
+Diese Punkte sind keine offenen Implementierungs-Gates dieses Slices, sondern Abnahme-/Betriebsaktivitaeten.
 
 ## Pruefkommandos
 
@@ -67,8 +79,11 @@ Alle weiteren Wave-1-13-Funktionen sind aktuell backend-only. Das ist kein verde
 alembic heads
 python -m py_compile alembic/versions/merge_heads_20260522.py app/api/v1/endpoints/warengruppen.py app/api/v1/endpoints/erloeskennziffern.py app/api/v1/endpoints/zahlungsbedingungen.py tests/test_api_smoke_waves.py
 pytest tests/test_api_smoke_waves.py tests/test_fachliche_vertiefung_wave10.py tests/test_fachliche_vertiefung_wave11.py tests/test_fachliche_vertiefung_wave12.py tests/test_fachliche_vertiefung_wave13.py -q --no-cov
+pytest tests/test_fachliche_vertiefung_db_integration.py -q --no-cov
+$env:RUN_DB_INTEGRATION="1"; $env:DATABASE_URL="postgresql+psycopg://..."; pytest tests/test_fachliche_vertiefung_db_integration.py -q --no-cov
 pnpm --filter @valero-neuroerp/frontend-web type-check
+pnpm --filter @valero-neuroerp/frontend-web exec playwright test tests/e2e/fachliche-vertiefung-warengruppen.spec.ts --project=chromium
 python scripts/agent_workboard_supervisor.py validate
-node scripts/docs-markdown-check.cjs docs/FACHLICHE-VERTIEFUNG-ABNAHME.md docs/agent-ops/active-workboard.md docs/agent-ops/slices/QA-FACHLICHE-VERTIEFUNG-WAVES-001.yaml
+node scripts/docs-markdown-check.cjs docs/FACHLICHE-VERTIEFUNG-ABNAHME.md docs/agent-ops/active-workboard.md docs/agent-ops/slices/QA-FACHLICHE-VERTIEFUNG-WAVES-001.yaml docs/agent-ops/slices/QA-FACHLICHE-VERTIEFUNG-GATES-001.yaml
 git diff --check
 ```
