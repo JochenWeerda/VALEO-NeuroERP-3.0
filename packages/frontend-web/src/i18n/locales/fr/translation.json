@@ -13,5 +13,47 @@
     "listreport": {
       "items_count": "{{count}} elements"
     }
+  },
+  "crud": {
+    "campaigns": {
+      "status": {
+        "scheduled": "Planifié"
+      }
+    },
+    "segments": {
+      "types": {
+        "dynamic": "Dynamique",
+        "static": "Statique",
+        "hybrid": "Hybride"
+      },
+      "status": {
+        "archived": "Archivé"
+      }
+    },
+    "actions": {
+      "back": "Retour"
+    },
+    "fields": {
+      "actions": "Actions"
+    }
+  },
+  "finance": {
+    "payments": {
+      "title": "Réception de paiements",
+      "description": "Comptabiliser et réconcilier automatiquement les paiements",
+      "import": "Importer",
+      "autoMatch": "Réconciliation auto.",
+      "paymentsList": "Liste des paiements",
+      "bookingDate": "Date de comptabilisation",
+      "reference": "Référence",
+      "remittanceInfo": "Motif de paiement"
+    },
+    "periods": {
+      "title": "Périodes comptables",
+      "description": "Gestion des périodes comptables",
+      "createPeriod": "Créer une période",
+      "infoTitle": "Information",
+      "infoDescription": "Les périodes ouvertes peuvent être imputées. Les périodes fermées sont verrouillées."
+    }
   }
 }

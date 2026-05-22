@@ -164,7 +164,8 @@
       "activate": "Aktivieren",
       "deactivate": "Deaktivieren",
       "next": "Weiter",
-      "markCompleted": "Als abgeschlossen markieren"
+      "markCompleted": "Als abgeschlossen markieren",
+      "back": "Zurück"
     },
     "kanban": {
       "pipeline": "Pipeline: {{entityType}}",
@@ -862,7 +863,8 @@
       "completedAt": "Abgeschlossen am",
       "verifiedAt": "Verifiziert am",
       "selfRequest": "Selbstanfrage",
-      "dunningText": "Mahntext"
+      "dunningText": "Mahntext",
+      "actions": "Aktionen"
     },
     "messages": {
       "createSuccess": "{{entityType}} erfolgreich erstellt",
@@ -1163,6 +1165,9 @@
         "push": "Push-Benachrichtigung",
         "social": "Social Media",
         "unknown": "Unbekannt"
+      },
+      "status": {
+        "scheduled": "Geplant"
       }
     },
     "list": {
@@ -1610,6 +1615,16 @@
       "1": "1. Mahnung",
       "2": "2. Mahnung",
       "3": "3. Mahnung"
+    },
+    "segments": {
+      "types": {
+        "dynamic": "Dynamisch",
+        "static": "Statisch",
+        "hybrid": "Hybrid"
+      },
+      "status": {
+        "archived": "Archiviert"
+      }
     }
   },
   "admin": {
@@ -1623,7 +1638,7 @@
       "language": "Sprache",
       "languagePackages": "Sprachpakete",
       "timezone": "Zeitzone",
-      "currency": "W\u00e4hrung",
+      "currency": "Währung",
       "companyName": "Firmenname",
       "taxNumber": "Steuernummer",
       "commercialRegister": "Handelsregister",
@@ -1634,29 +1649,48 @@
     },
     "languagePackage": {
       "title": "Sprachpaket-Verwaltung",
-      "subtitle": "Verwalten Sie die Sprachpakete f\u00fcr das ERP-System. Das Umstellen der Systemsprache kann einen Moment dauern, da alle \u00dcbersetzungen geladen werden m\u00fcssen.",
+      "subtitle": "Verwalten Sie die Sprachpakete für das ERP-System. Das Umstellen der Systemsprache kann einen Moment dauern, da alle Übersetzungen geladen werden müssen.",
       "currentLanguage": "Aktuelle Systemsprache",
-      "availablePackages": "Verf\u00fcgbare Sprachpakete",
+      "availablePackages": "Verfügbare Sprachpakete",
       "status": "Status",
       "active": "Aktiv",
-      "available": "Verf\u00fcgbar",
-      "generating": "Wird generiert\u2026",
-      "notAvailable": "Nicht verf\u00fcgbar",
+      "available": "Verfügbar",
+      "generating": "Wird generiert…",
+      "notAvailable": "Nicht verfügbar",
       "activate": "Aktivieren",
       "generate": "Paket generieren",
-      "generatingHint": "Das \u00dcbersetzungsprogramm generiert das Sprachpaket. Dies kann je nach Umfang einige Minuten dauern.",
-      "switchWarning": "Das Umstellen der Systemsprache l\u00e4dt die Oberfl\u00e4che neu. Nicht gespeicherte \u00c4nderungen k\u00f6nnen verloren gehen.",
+      "generatingHint": "Das Übersetzungsprogramm generiert das Sprachpaket. Dies kann je nach Umfang einige Minuten dauern.",
+      "switchWarning": "Das Umstellen der Systemsprache lädt die Oberfläche neu. Nicht gespeicherte Änderungen können verloren gehen.",
       "switchConfirm": "Sprache wechseln",
       "switchCancel": "Abbrechen",
-      "coverage": "\u00dcbersetzungsabdeckung",
-      "keys": "Schl\u00fcssel",
+      "coverage": "Übersetzungsabdeckung",
+      "keys": "Schlüssel",
       "lastUpdated": "Zuletzt aktualisiert",
-      "generatedBy": "Generiert durch KI-\u00dcbersetzungs-Engine"
+      "generatedBy": "Generiert durch KI-Übersetzungs-Engine"
     }
   },
   "pattern": {
     "listreport": {
       "items_count": "{{count}} Einträge"
+    }
+  },
+  "finance": {
+    "payments": {
+      "title": "Zahlungseingang",
+      "description": "Zahlungen verbuchen und automatisch abgleichen",
+      "import": "Import",
+      "autoMatch": "Auto-Abgleich",
+      "paymentsList": "Zahlungsliste",
+      "bookingDate": "Buchungsdatum",
+      "reference": "Referenz",
+      "remittanceInfo": "Verwendungszweck"
+    },
+    "periods": {
+      "title": "Buchungsperioden",
+      "description": "Verwaltung der Buchungsperioden",
+      "createPeriod": "Periode anlegen",
+      "infoTitle": "Information",
+      "infoDescription": "Offene Perioden können bebucht werden. Geschlossene Perioden sind gesperrt."
     }
   }
 }
