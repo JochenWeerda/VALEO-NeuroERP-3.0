@@ -1781,10 +1781,6 @@
       "path": "workflow/flow-spine-compliance-to-report"
     },
     {
-      "module": "@/pages/admin/data-quality",
-      "path": "admin/data-quality"
-    },
-    {
       "module": "@/pages/qualitaet/ausnahmen",
       "path": "qualitaet/ausnahmen"
     },
@@ -1990,7 +1986,7 @@
     },
     {
       "module": "@/pages/agrar/sammelabrechnung",
-      "path": "agrar"
+      "path": "agrar/sammelabrechnung"
     },
     {
       "module": "@/pages/einkauf/bestellungen-liste",
@@ -2110,7 +2106,7 @@
     },
     {
       "module": "@/pages/fibu/quadriga-connector",
-      "path": "fibu/quadriga-connector"
+      "path": "fibu/quadriga-config"
     },
     {
       "module": "@/pages/finance/bank-stamm",
@@ -2183,6 +2179,42 @@
     {
       "module": "@/pages/waage/vorlagen",
       "path": "waage/vorlagen"
+    },
+    {
+      "module": "@/pages/kontrakte/LstKontraktUebersicht",
+      "path": "kontrakte/LstKontraktUebersicht"
+    },
+    {
+      "module": "@/pages/kontrakte/KontraktAlarmDashboard",
+      "path": "kontrakte/KontraktAlarmDashboard"
+    },
+    {
+      "module": "@/pages/kontrakte/KontraktPositionsmonitor",
+      "path": "kontrakte/KontraktPositionsmonitor"
+    },
+    {
+      "module": "@/pages/pos/tagesabschluss-enhanced",
+      "path": "pos/tagesabschluss"
+    },
+    {
+      "module": "@/pages/preise/kalkulation",
+      "path": "preise/kalkulation"
+    },
+    {
+      "module": "@/pages/agrar/psm/stamm",
+      "path": "agrar/psm/stamm"
+    },
+    {
+      "module": "@/pages/agrar/aussaat/liste",
+      "path": "agrar/aussaat/liste"
+    },
+    {
+      "module": "@/pages/agrar/kulturpflanzen/liste",
+      "path": "agrar/kulturpflanzen/liste"
+    },
+    {
+      "module": "@/pages/produktion/produktions-dokumente-drucken",
+      "path": "produktion/produktions-dokumente-drucken"
     }
   ]
 }
