@@ -280,6 +280,13 @@ from app.api.v1.endpoints import (
     versandprofile,
 )
 
+# Fachliche Vertiefung Wave 10 — Warengruppen, Erlöskennziffern, Zahlungsbedingungen
+from app.api.v1.endpoints import (
+    warengruppen,
+    erloeskennziffern,
+    zahlungsbedingungen,
+)
+
 # Import domain routers
 from app.domains.agrar.api import psm, psm_proplanta
 from app.domains.inventory.api import router as inventory_domain_router
@@ -1585,6 +1592,11 @@ api_router.include_router(rohwarengruppen.router)
 api_router.include_router(betriebsstaetten.router)
 api_router.include_router(individuelle_artikelnummern.router)
 api_router.include_router(versandprofile.router)
+
+# Fachliche Vertiefung Wave 10
+api_router.include_router(warengruppen.router)
+api_router.include_router(erloeskennziffern.router)
+api_router.include_router(zahlungsbedingungen.router)
 
 # Report/Print: Partie-Genealogie, Wiegeschein-PDF-Preview, GS1-Labels
 api_router.include_router(report_print.router)
