@@ -2,6 +2,18 @@
 
 Stand: `2026-05-12`
 
+## QA-FACHLICHE-VERTIEFUNG-GATES-001
+
+**Von:** Codex
+**Owner:** Codex
+**Stand:** reserviert 2026-05-22
+**Ziel des Slices:** Die nach der Wave-1-13-QA verbliebenen Gates repo-seitig schliessen: DB-Integration ausführbar machen, Frontend-E2E fuer Warengruppen absichern, Fach-UAT-Paket dokumentieren und Restgate-Status sauber aktualisieren.
+**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/agent-ops/slices/QA-FACHLICHE-VERTIEFUNG-GATES-001.yaml`, `docs/FACHLICHE-VERTIEFUNG-ABNAHME.md`, neue fokussierte DB-/E2E-Gate-Tests fuer fachliche Vertiefung.
+**Abnahmekriterien:** DB-Gate ist als opt-in PostgreSQL-Integrationstest im Repo vorhanden; Warengruppen-Frontend hat einen Playwright-E2E-Vertrag gegen den echten Stammdaten-Endpunkt; Abnahmedoku unterscheidet repo-seitig geschlossene Gates von externer Fachfreigabe; Workboard-, Backend-, Frontend-/E2E- und Doku-Checks sind dokumentiert.
+**Erledigt:** -
+**Checks:** offen
+**Offene Risiken:** Externe Fachsignatur und produktive Testdaten koennen nur durch Business-/Betriebsabnahme geliefert werden; dieser Slice schliesst die repo-seitig automatisierbaren Gates.
+
 ## QA-FACHLICHE-VERTIEFUNG-WAVES-001
 
 **Von:** Codex
