@@ -142,7 +142,6 @@ export default function LeadExplorer(): JSX.Element {
     } catch (e: any) {
       // Fehler stillschweigend ignorieren, wenn Pipeline-Controls nicht angezeigt werden
       if (showPipelineControls) {
-        console.error('Pipeline-Status-Abruf fehlgeschlagen:', e)
         // Nur Fehler anzeigen, wenn es kein Netzwerkfehler ist (dann ist der Server möglicherweise nicht erreichbar)
         if (!e.message?.includes('Failed to fetch') && !e.message?.includes('ERR_CONNECTION')) {
           setPipelineError(`Status-Abruf fehlgeschlagen: ${e.message}`)

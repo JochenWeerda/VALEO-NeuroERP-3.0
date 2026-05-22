@@ -346,7 +346,6 @@ export default function KreditorenStammPage(): JSX.Element {
     },
     onError: (error) => {
       // Silent error - user can still enter IBAN manually
-      console.warn('IBAN lookup failed:', error)
     },
     autoLookup: false // Manual lookup via button
   })

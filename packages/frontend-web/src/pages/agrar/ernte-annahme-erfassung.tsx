@@ -452,8 +452,8 @@ export default function ErnteAnnahmeErfassungPage(): JSX.Element {
             vatRatePercent: matched.vat_rate || matched.mwst_prozent || matched.mehrwertsteuer_prozent || prev.vatRatePercent,
           }
         })
-      } catch (error) {
-        console.warn('Article lookup for handover failed:', error)
+      } catch {
+        // Artikel-Vorbelegung bei Übergabe schlägt still fehl — Felder bleiben leer
       }
     }
 
@@ -491,8 +491,8 @@ export default function ErnteAnnahmeErfassungPage(): JSX.Element {
               city: customerData.city,
               chefanweisung: customerData.chefanweisung || customerData.executive_note,
             }
-          } catch (err) {
-            console.warn('Kunde konnte nicht geladen werden:', err)
+          } catch {
+            // Kunden-Vorbelegung schlägt still fehl — Felder werden manuell befüllt
           }
         }
 
@@ -573,7 +573,6 @@ export default function ErnteAnnahmeErfassungPage(): JSX.Element {
 
         push('Ernte-Annahme geladen')
       } catch (error: any) {
-        console.error('Fehler beim Laden der Ernte-Annahme:', error)
         push(`Fehler beim Laden: ${error.response?.data?.detail || error.message}`)
       }
     }
@@ -698,7 +697,6 @@ export default function ErnteAnnahmeErfassungPage(): JSX.Element {
       push('Ernte-Annahme erfolgreich gespeichert')
       return response.id
     } catch (error: any) {
-      console.error('Save error:', error)
       push(`Fehler beim Speichern: ${error.response?.data?.detail || error.message}`)
       return null
     }
@@ -719,7 +717,6 @@ export default function ErnteAnnahmeErfassungPage(): JSX.Element {
       const response = await apiClient.get<HarvestAcceptanceResponse>(`/api/v1/agrar/harvest-acceptance/${state.id}`)
       _applyAcceptanceResponse(response)
     } catch (error: any) {
-      console.error('Calculate error:', error)
       push(`Fehler bei der Berechnung: ${error.response?.data?.detail || error.message}`)
     }
   }
@@ -848,7 +845,6 @@ export default function ErnteAnnahmeErfassungPage(): JSX.Element {
         releaseStatus: response.release_status as HarvestAcceptanceState['releaseStatus'],
       }))
     } catch (error: any) {
-      console.error('Release error:', error)
       push(`Fehler bei der Freigabe: ${error.response?.data?.detail || error.message}`)
     }
   }
@@ -969,8 +965,8 @@ export default function ErnteAnnahmeErfassungPage(): JSX.Element {
             city: customerData.city,
             chefanweisung: customerData.chefanweisung || customerData.executive_note,
           }
-        } catch (err) {
-          console.warn('Kunde konnte nicht geladen werden:', err)
+        } catch {
+          // Kunden-Vorbelegung schlägt still fehl — Felder werden manuell befüllt
         }
       }
 
@@ -1058,7 +1054,6 @@ export default function ErnteAnnahmeErfassungPage(): JSX.Element {
 
       push('Daten vom vorherigen Annahmeschein übernommen')
     } catch (error: any) {
-      console.error('Fehler beim Laden des vorherigen Annahmescheins:', error)
       push(`Fehler: ${error.response?.data?.detail || error.message}`)
     }
   }
@@ -1081,7 +1076,6 @@ export default function ErnteAnnahmeErfassungPage(): JSX.Element {
       setShowDeleteDialog(false)
       navigate('/agrar/ernte')
     } catch (error: any) {
-      console.error('Delete error:', error)
       push(`Fehler beim Löschen: ${error.response?.data?.detail || error.message}`)
     }
   }

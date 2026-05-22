@@ -291,7 +291,6 @@ export default function OpportunitiesListePage(): JSX.Element {
         setTotal((response.data as any).total || 0)
       }
     } catch (error) {
-      console.error('Fehler beim Laden der Daten:', error)
       toast({
         variant: 'destructive',
         title: t('crud.messages.loadError')

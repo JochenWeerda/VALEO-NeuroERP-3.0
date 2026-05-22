@@ -258,7 +258,6 @@ export default function RetourenPage(): JSX.Element {
       await refetchReceipts()
       await refetchRetouren()
     } catch (error: any) {
-      console.error('Fehler beim Erstellen der Retoure:', error)
       toast({
         variant: 'destructive',
         title: t('crud.messages.createError'),

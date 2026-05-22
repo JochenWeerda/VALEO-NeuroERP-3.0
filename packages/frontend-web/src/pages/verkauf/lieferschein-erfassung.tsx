@@ -355,8 +355,8 @@ export default function LieferscheinErfassungPage(): JSX.Element {
               city: customerData.city,
               chefanweisung: customerData.chefanweisung || customerData.executive_note,
             }
-          } catch (err) {
-            console.warn('Kunde konnte nicht geladen werden:', err)
+          } catch {
+            // Kunden-Vorbelegung schlägt still fehl — Felder werden manuell befüllt
           }
         }
 
@@ -372,8 +372,8 @@ export default function LieferscheinErfassungPage(): JSX.Element {
                 artikelGewicht = artikelResponse.weight || artikelResponse.gewicht || 0
                 artikelGefahrgutPunkte = artikelResponse.gefahrgut_punkte || artikelResponse.gefahrgutpunkte || 
                   artikelResponse.gefahrgutPunkte || (artikelResponse.gefahrgutklasse ? parseFloat(artikelResponse.gefahrgutklasse) || 0 : 0)
-              } catch (err) {
-                console.warn(`Artikel-Daten konnten nicht geladen werden für Artikel ${pos.artikel_id}:`, err)
+              } catch {
+                // Artikel-Stammdaten schlagen still fehl — Gefahrgut-Punkte bleiben 0
               }
             }
             const gesamtGewicht = artikelGewicht * pos.menge
@@ -433,8 +433,8 @@ export default function LieferscheinErfassungPage(): JSX.Element {
             niederlassung = branch.branch_number || 0
             // Cache speichern
             setBranchCache((prev) => new Map(prev).set(niederlassung, branchId))
-          } catch (error) {
-            console.warn('Fehler beim Laden der Branch:', error)
+          } catch {
+            // Branch-ID-Lookup schlägt still fehl — kein Blocker für Lieferschein
           }
         }
 
@@ -463,7 +463,6 @@ export default function LieferscheinErfassungPage(): JSX.Element {
 
         push('Lieferschein geladen')
       } catch (error: any) {
-        console.error('Fehler beim Laden des Lieferscheins:', error)
         push(`Fehler beim Laden: ${error.response?.data?.detail || error.message}`)
       }
     }
@@ -638,7 +637,6 @@ export default function LieferscheinErfassungPage(): JSX.Element {
         : 0
       setVorgaengerCount(mapped.length + quotesCount + portalCount)
     } catch (error) {
-      console.warn('Fehler beim Laden der Vorgänger-Belege:', error)
       setBestellungen([])
       setVorgaengerCount(0)
     }
@@ -736,7 +734,6 @@ export default function LieferscheinErfassungPage(): JSX.Element {
             }))
           }
         } catch (error) {
-          console.warn('Fehler beim Abrufen des Listenpreises aus Preisliste:', error)
           // Fallback: Verwende bereits gesetzten sales_price
         }
       })()
@@ -1020,7 +1017,6 @@ export default function LieferscheinErfassungPage(): JSX.Element {
       push('Lieferschein erfolgreich gespeichert')
       return response.id // Return ID for use in executePrint
     } catch (error: any) {
-      console.error('Save error:', error)
       push(`Fehler beim Speichern: ${error.response?.data?.detail || error.message}`)
       return null // Return null on error
     }
@@ -1269,7 +1265,6 @@ export default function LieferscheinErfassungPage(): JSX.Element {
       setCurrentPosition(createEmptyCurrentPosition(10))
       setBestellungen([])
     } catch (error: any) {
-      console.error('Print error:', error)
       push(`Fehler beim Drucken: ${error.response?.data?.detail || error.message}`)
     }
   }
@@ -1361,7 +1356,6 @@ export default function LieferscheinErfassungPage(): JSX.Element {
         }))
       } catch (error: any) {
         if (cancelled) return
-        console.warn('Positionskontext konnte nicht geladen werden:', error)
         setPositionContext(null)
         setPositionContextError(
           error?.response?.data?.detail || error?.message || 'Positionskontext konnte nicht geladen werden.',
@@ -1429,8 +1423,8 @@ export default function LieferscheinErfassungPage(): JSX.Element {
               email: customerData.email,
               chefanweisung: customerData.chefanweisung || customerData.executive_note,
             }
-          } catch (err) {
-            console.warn('Kunde konnte nicht geladen werden:', err)
+          } catch {
+            // Kunden-Vorbelegung schlägt still fehl — Felder werden manuell befüllt
           }
         }
         
@@ -1446,8 +1440,8 @@ export default function LieferscheinErfassungPage(): JSX.Element {
                 artikelGewicht = artikelResponse.weight || artikelResponse.gewicht || 0
                 artikelGefahrgutPunkte = artikelResponse.gefahrgut_punkte || artikelResponse.gefahrgutpunkte || 
                   artikelResponse.gefahrgutPunkte || (artikelResponse.gefahrgutklasse ? parseFloat(artikelResponse.gefahrgutklasse) || 0 : 0)
-              } catch (err) {
-                console.warn(`Artikel-Daten konnten nicht geladen werden für Artikel ${pos.artikel_id}:`, err)
+              } catch {
+                // Artikel-Stammdaten schlagen still fehl — Gefahrgut-Punkte bleiben 0
               }
             }
             const gesamtGewicht = artikelGewicht * pos.menge
@@ -1519,7 +1513,6 @@ export default function LieferscheinErfassungPage(): JSX.Element {
         
         push('Daten vom vorherigen Beleg übernommen')
       } catch (error: any) {
-        console.error('Fehler beim Laden des vorherigen Belegs:', error)
         push(`Fehler: ${error.response?.data?.detail || error.message}`)
       }
     },
@@ -1555,8 +1548,8 @@ export default function LieferscheinErfassungPage(): JSX.Element {
                 artikelGewicht = artikelResponse.weight || artikelResponse.gewicht || 0
                 artikelGefahrgutPunkte = artikelResponse.gefahrgut_punkte || artikelResponse.gefahrgutpunkte || 
                   artikelResponse.gefahrgutPunkte || (artikelResponse.gefahrgutklasse ? parseFloat(artikelResponse.gefahrgutklasse) || 0 : 0)
-              } catch (err) {
-                console.warn(`Artikel-Daten konnten nicht geladen werden für Artikel ${pos.artikel_id}:`, err)
+              } catch {
+                // Artikel-Stammdaten schlagen still fehl — Gefahrgut-Punkte bleiben 0
               }
             }
             const gesamtGewicht = artikelGewicht * pos.menge
@@ -1610,7 +1603,6 @@ export default function LieferscheinErfassungPage(): JSX.Element {
         
         push(`${positionen.length} Positionen vom vorherigen Beleg übernommen`)
       } catch (error: any) {
-        console.error('Fehler beim Laden der Positionen:', error)
         push(`Fehler: ${error.response?.data?.detail || error.message}`)
       }
     },

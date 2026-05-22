@@ -58,8 +58,8 @@ const createRechnungseingangConfig = (t: any, entityTypeLabel: string): MaskConf
                     // Trigger update for supplierId field
                   }
                 }
-              } catch (error) {
-                console.error('Fehler beim Laden der Bestellung:', error)
+              } catch {
+                // Bestellungs-Vorbelegung schlägt still fehl — Felder werden manuell befüllt
               }
             }
           }
@@ -468,8 +468,8 @@ export default function RechnungseingangPage(): JSX.Element {
     try {
       await saveData(formData)
       navigate('/einkauf/rechnungseingaenge')
-    } catch (error) {
-      console.error(t('crud.messages.updateError', { entityType: entityTypeLabel }), error)
+    } catch (error: any) {
+      toast({ variant: 'destructive', title: t('crud.messages.updateError', { entityType: entityTypeLabel }), description: error?.message })
     } finally {
       setLoading(false)
     }

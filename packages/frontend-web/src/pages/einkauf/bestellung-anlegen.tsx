@@ -182,7 +182,6 @@ export default function BestellungAnlegenPage(): JSX.Element {
         toast({ title: 'Bedarfsmeldung geladen', description: `Felder aus Bedarfsmeldung ${req.anfrageNummer || id} vorbelegt.` })
       }
     } catch (error) {
-      console.error('Fehler beim Laden der Requisition:', error)
       toast({
         title: 'Bedarfsmeldung konnte nicht geladen werden',
         description: getErrorMessage(error),
@@ -210,7 +209,6 @@ export default function BestellungAnlegenPage(): JSX.Element {
         toast({ title: 'Vertrag geladen', description: `Felder aus Vertrag ${contract.contractNo || id} vorbelegt.` })
       }
     } catch (error) {
-      console.error('Fehler beim Laden des Vertrags:', error)
       toast({
         title: 'Vertrag konnte nicht geladen werden',
         description: getErrorMessage(error),
@@ -236,7 +234,6 @@ export default function BestellungAnlegenPage(): JSX.Element {
         toast({ title: 'Anfrage geladen', description: `Felder aus Anfrage ${rfq.anfrageNummer || id} vorbelegt.` })
       }
     } catch (error) {
-      console.error('Fehler beim Laden der RFQ:', error)
       toast({
         title: 'Anfrage konnte nicht geladen werden',
         description: getErrorMessage(error),
@@ -369,7 +366,6 @@ export default function BestellungAnlegenPage(): JSX.Element {
         navigate('/einkauf/bestellungen')
       }
     } catch (error) {
-      console.error('Fehler beim Erstellen der Bestellung:', error)
       toast({ title: t('common.error', { defaultValue: 'Fehler' }), description: t('crud.messages.createError', { entityType: entityTypeLabel, defaultValue: 'Erstellen fehlgeschlagen.' }), variant: 'destructive' })
     }
   }

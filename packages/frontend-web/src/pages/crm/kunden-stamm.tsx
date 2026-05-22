@@ -341,8 +341,8 @@ function GDPRRequestsList({ contactId }: { contactId?: string }) {
         } else {
           setRequests([])
         }
-      } catch (error) {
-        console.error('Fehler beim Laden der GDPR-Requests:', error)
+      } catch (error: any) {
+        toast({ variant: 'destructive', title: 'Fehler beim Laden der DSGVO-Anfragen', description: error?.message })
       } finally {
         setLoading(false)
       }
@@ -458,8 +458,8 @@ function ConsentsList({ contactId }: { contactId?: string }) {
         if (response.success) {
           setConsents(Array.isArray(response.data) ? response.data : [])
         }
-      } catch (error) {
-        console.error('Fehler beim Laden der Consents:', error)
+      } catch (error: any) {
+        toast({ variant: 'destructive', title: 'Fehler beim Laden der Einwilligungen', description: error?.message })
       } finally {
         setLoading(false)
       }

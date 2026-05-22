@@ -117,7 +117,6 @@ export default function DmsIntegrationCard(): JSX.Element {
         setBaseUrl(data.base)
       }
     } catch (error) {
-      console.error('Failed to load DMS status:', error)
       setStatus(null)
     }
   }, [])

@@ -303,6 +303,14 @@ from app.api.v1.endpoints import (
 # Fachliche Vertiefung Wave 13 — Zahlungsformulare, Zinsgruppen, Leergutarten
 from app.api.v1.endpoints import fibu_stammdaten
 
+# Previously unreachable endpoints — now registered
+from app.api.v1.endpoints import (
+    ki_usability,
+    pos_payments_promotions,
+    system_metrics,
+    websocket,
+)
+
 # Import domain routers
 from app.domains.agrar.api import psm, psm_proplanta
 from app.domains.inventory.api import router as inventory_domain_router
@@ -1672,3 +1680,9 @@ api_router.include_router(tankstelle.router, tags=["tankstelle", "zapfungen"])
 api_router.include_router(verladung.router, tags=["verladung", "logistik"])
 api_router.include_router(projekte.router, tags=["projekte"])
 api_router.include_router(transporte.router, tags=["transporte", "fahrer"])
+
+# Previously unregistered endpoints — now reachable
+api_router.include_router(ki_usability.router, prefix="/ki", tags=["ki", "usability"])
+api_router.include_router(pos_payments_promotions.router, tags=["pos", "payments", "promotions"])
+api_router.include_router(system_metrics.router, prefix="/system", tags=["system", "metrics", "agents"])
+api_router.include_router(websocket.router, tags=["websocket", "realtime"])

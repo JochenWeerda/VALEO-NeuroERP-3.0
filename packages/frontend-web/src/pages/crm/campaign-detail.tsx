@@ -138,8 +138,8 @@ function CampaignRecipientsList({ campaignId }: { campaignId: string }) {
           const data = response.success ? response.data : response
           setRecipients(Array.isArray(data) ? data : [])
         }
-      } catch (error) {
-        console.error('Fehler beim Laden der Empfaenger:', error)
+      } catch (error: any) {
+        toast({ variant: 'destructive', title: 'Fehler beim Laden der Empfänger', description: error?.message })
       } finally {
         setLoading(false)
       }
@@ -195,8 +195,8 @@ function CampaignPerformanceTab({ campaignId }: { campaignId: string }) {
           const campaign = campaignResponse.success ? campaignResponse.data : campaignResponse
           setMetrics(campaign)
         }
-      } catch (error) {
-        console.error('Fehler beim Laden der Performance:', error)
+      } catch (error: any) {
+        toast({ variant: 'destructive', title: 'Fehler beim Laden der Performance', description: error?.message })
       } finally {
         setLoading(false)
       }
@@ -262,8 +262,8 @@ function CampaignEventsList({ campaignId }: { campaignId: string }) {
           const data = response.success ? response.data : response
           setEvents(Array.isArray(data) ? data : [])
         }
-      } catch (error) {
-        console.error('Fehler beim Laden der Events:', error)
+      } catch (error: any) {
+        toast({ variant: 'destructive', title: 'Fehler beim Laden der Events', description: error?.message })
       } finally {
         setLoading(false)
       }
@@ -325,7 +325,6 @@ export default function CampaignDetailPage(): JSX.Element {
       if (isNew && data?.id) navigate(`/crm/campaign/${data.id}`)
       else navigate('/crm/campaigns')
     } catch (error: any) {
-      console.error('Save error:', error)
       toast({ variant: 'destructive', title: getErrorMessage(t, isNew ? 'create' : 'update', entityType), description: error.message || t('crud.messages.unknownError') })
     } finally {
       setLoading(false)

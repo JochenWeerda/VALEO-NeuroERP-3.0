@@ -48,8 +48,8 @@ export default function NebenbuchAbstimmungPage(): JSX.Element {
         { params: { period } },
       )
       setSummary(data)
-    } catch (error) {
-      console.error('Error loading summary:', error)
+    } catch {
+      // Zusammenfassung ist sekundär; Hauptabstimmung hat eigene Fehlerbehandlung
     }
   }
 
@@ -80,8 +80,8 @@ export default function NebenbuchAbstimmungPage(): JSX.Element {
         { params: { account_number: accountNumber, period } },
       )
       setDetails(Array.isArray(data) ? data : [])
-    } catch (error) {
-      console.error('Error loading details:', error)
+    } catch {
+      // Details-Anfrage schlägt still fehl; Tab bleibt leer
     }
   }
 

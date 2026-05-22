@@ -162,7 +162,6 @@ export default function WareneingangPage(): JSX.Element {
         })),
       })))
     } catch (error) {
-      console.error('Fehler beim Laden der Bestellungen:', error)
       toast({
         variant: 'destructive',
         title: t('crud.messages.loadDataError'),
@@ -203,7 +202,6 @@ export default function WareneingangPage(): JSX.Element {
         items,
       }))
     } catch (error) {
-      console.error('Fehler beim Laden der Bestellung:', error)
       toast({
         variant: 'destructive',
         title: t('crud.messages.loadDataError'),
@@ -278,7 +276,6 @@ export default function WareneingangPage(): JSX.Element {
 
       navigate('/einkauf/bestellungen')
     } catch (error: any) {
-      console.error('Fehler beim Buchen des Wareneingangs:', error)
       toast({
         variant: 'destructive',
         title: t('crud.messages.createError', { entityType: entityTypeLabel }),

@@ -244,8 +244,8 @@ function GDPRRequestHistoryTab({ requestId }: { requestId: string }) {
         if (response.success) {
           setHistory(response.data || [])
         }
-      } catch (error) {
-        console.error('Fehler beim Laden der History:', error)
+      } catch (error: any) {
+        toast({ variant: 'destructive', title: 'Fehler beim Laden der History', description: error?.message })
       } finally {
         setLoading(false)
       }
@@ -342,7 +342,6 @@ export default function GDPRRequestDetailPage(): JSX.Element {
       })
       navigate('/crm/gdpr-requests')
     } catch (error: any) {
-      console.error('Save error:', error)
       toast({
         variant: 'destructive',
         title: getErrorMessage(t, isNew ? 'create' : 'update', entityType),

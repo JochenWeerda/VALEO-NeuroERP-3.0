@@ -303,7 +303,6 @@ export default function DebitorenStammPage(): JSX.Element {
       }
     },
     onError: (error) => {
-      console.warn('IBAN lookup failed:', error)
     },
     autoLookup: false
   })

@@ -90,7 +90,6 @@ export default function OpportunitiesKanbanPage(): JSX.Element {
         setStages(stagesResponse.data || [])
       }
     } catch (error) {
-      console.error('Fehler beim Laden der Daten:', error)
       toast({
         variant: 'destructive',
         title: t('crud.messages.loadError')

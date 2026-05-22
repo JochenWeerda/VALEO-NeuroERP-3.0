@@ -121,8 +121,8 @@ export default function AnlieferavisPage(): JSX.Element {
     try {
       await saveData(formData)
       navigate('/einkauf/anlieferavis')
-    } catch (error) {
-      console.error('Fehler beim Speichern:', error)
+    } catch (error: any) {
+      toast({ variant: 'destructive', title: 'Fehler beim Speichern', description: error?.message })
     } finally {
       setLoading(false)
     }

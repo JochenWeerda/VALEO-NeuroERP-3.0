@@ -108,7 +108,6 @@ export default function RechnungAbgleichPage(): JSX.Element {
       }))
       setInvoices(normalized.filter((x: any) => ['ERFASST', 'GEPRUEFT'].includes(x.status)))
     } catch (error) {
-      console.error('Fehler beim Laden der Rechnungen:', error)
       toast({
         variant: 'destructive',
         title: t('crud.messages.loadDataError'),
@@ -143,8 +142,8 @@ export default function RechnungAbgleichPage(): JSX.Element {
       if (invoiceWareneingangId) {
         try {
           goodsReceipt = await apiClient.get<any>(`/api/purchase-workflow/orders/${invoiceBestellungId}/goods-receipt/${invoiceWareneingangId}`)
-        } catch (grError) {
-          console.warn('Wareneingang nicht gefunden:', grError)
+        } catch {
+          // Wareneingang optional — Abgleich läuft auch ohne WE-Daten
         }
       }
 
@@ -158,7 +157,6 @@ export default function RechnungAbgleichPage(): JSX.Element {
       )
       setBlocked(hasBlockingExceptions && match.overallStatus !== 'matched')
     } catch (error: any) {
-      console.error('Fehler beim Abgleich:', error)
       toast({
         variant: 'destructive',
         title: t('crud.messages.loadDataError'),
@@ -351,7 +349,6 @@ export default function RechnungAbgleichPage(): JSX.Element {
 
       navigate('/einkauf/rechnungseingaenge-liste')
     } catch (error: any) {
-      console.error('Fehler beim Freigeben:', error)
       toast({
         variant: 'destructive',
         title: t('crud.messages.approveError', { entityType: entityTypeLabel }),

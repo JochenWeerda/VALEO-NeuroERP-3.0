@@ -242,8 +242,8 @@ export default function DebitorenListePage(): JSX.Element {
         setData((response.data as any).data || [])
         setTotal((response.data as any).total || 0)
       }
-    } catch (error) {
-      console.error(t('crud.messages.loadDataError'), error)
+    } catch (error: any) {
+      toast({ variant: 'destructive', title: t('crud.messages.loadDataError'), description: error?.message })
     } finally {
       setLoading(false)
     }
@@ -320,7 +320,6 @@ export default function DebitorenListePage(): JSX.Element {
       const res = await api.post('/api/v1/finance/import/debitoren', form, { headers: { 'Content-Type': 'multipart/form-data' } })
       const { created, updated, errors } = res.data as { created: number; updated: number; errors: string[] }
       toast({ title: 'Import abgeschlossen', description: `${created} neu, ${updated} aktualisiert${errors.length ? `, ${errors.length} Fehler` : ''}.` })
-      if (errors.length) console.warn('Import-Fehler:', errors)
       loadData()
     } catch (e: any) {
       toast({ title: 'Import fehlgeschlagen', description: e.response?.data?.detail ?? e.message, variant: 'destructive' })

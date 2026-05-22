@@ -313,8 +313,8 @@ export default function BestellungStammPage(): JSX.Element {
               after: formData,
             },
           })
-        } catch (auditError) {
-          console.warn('Audit-Log konnte nicht erstellt werden:', auditError)
+        } catch {
+          // Audit-Log-Erstellung schlägt still fehl — Hauptaktion (Speichern/Storno) ist abgeschlossen
         }
       }
 
@@ -337,7 +337,6 @@ export default function BestellungStammPage(): JSX.Element {
 
       navigate('/einkauf/bestellungen')
     } catch (error: any) {
-      console.error(t('crud.messages.updateError', { entityType: entityTypeLabel }), error)
       toast({
         variant: 'destructive',
         title: t('crud.messages.updateError', { entityType: entityTypeLabel }),
@@ -386,8 +385,8 @@ export default function BestellungStammPage(): JSX.Element {
             reason: stornoReason,
           },
         })
-      } catch (auditError) {
-        console.warn('Audit-Log konnte nicht erstellt werden:', auditError)
+      } catch {
+        // Audit-Log-Erstellung schlägt still fehl — Hauptaktion (Speichern/Storno) ist abgeschlossen
       }
 
       toast({
@@ -398,7 +397,6 @@ export default function BestellungStammPage(): JSX.Element {
       setStornoReason('')
       navigate('/einkauf/bestellungen')
     } catch (error: any) {
-      console.error(t('crud.messages.cancelError', { entityType: entityTypeLabel }), error)
       toast({
         variant: 'destructive',
         title: t('crud.messages.cancelError', { entityType: entityTypeLabel }),
@@ -791,7 +789,6 @@ export default function BestellungStammPage(): JSX.Element {
                   setSendDialogOpen(false)
                   setSendMessage('')
                 } catch (error: any) {
-                  console.error('Fehler beim Versenden der PO:', error)
                   toast({
                     variant: 'destructive',
                     title: t('crud.messages.poSendError'),

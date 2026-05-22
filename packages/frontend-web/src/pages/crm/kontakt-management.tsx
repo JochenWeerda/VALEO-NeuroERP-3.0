@@ -242,8 +242,8 @@ export default function KontaktManagementPage(): JSX.Element {
         setData((response.data as any).data || [])
         setTotal((response.data as any).total || 0)
       }
-    } catch (error) {
-      console.error('Fehler beim Laden der Daten:', error)
+    } catch (error: any) {
+      toast({ variant: 'destructive', title: 'Fehler beim Laden der Kontakte', description: error?.message })
     } finally {
       setLoading(false)
     }

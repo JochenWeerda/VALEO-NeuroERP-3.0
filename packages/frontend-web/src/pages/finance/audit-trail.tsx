@@ -69,7 +69,6 @@ export default function AuditTrailPage(): JSX.Element {
         const { data } = await apiClient.get<AuditLogEntry[]>('/api/v1/audit/logs', { params })
         setLogs(data)
       } catch (error) {
-        console.error('Error fetching audit logs:', error)
         toast({
           title: t('common.error'),
           description: t('crud.feedback.fetchError', { entityType: 'Audit-Logs' }),
@@ -84,8 +83,8 @@ export default function AuditTrailPage(): JSX.Element {
       try {
         const { data } = await apiClient.get<AuditStats>('/api/v1/audit/stats')
         setStats(data)
-      } catch (error) {
-        console.error('Error fetching audit stats:', error)
+      } catch {
+        // Statistik-Widget ist sekundär; Log-Liste hat eigene Fehlerbehandlung mit Toast
       }
     }
 

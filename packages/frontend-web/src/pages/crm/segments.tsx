@@ -187,7 +187,6 @@ export default function SegmentsPage(): JSX.Element {
         setTotal(totalCount)
       }
     } catch (error) {
-      console.error('Fehler beim Laden der Segmente:', error)
       toast({
         variant: 'destructive',
         title: t('crud.messages.loadError')

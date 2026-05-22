@@ -203,7 +203,6 @@ export default function CampaignTemplateDetailPage(): JSX.Element {
         navigate('/crm/campaign-templates')
       }
     } catch (error: any) {
-      console.error('Save error:', error)
       toast({
         variant: 'destructive',
         title: getErrorMessage(t, isNew ? 'create' : 'update', entityType),

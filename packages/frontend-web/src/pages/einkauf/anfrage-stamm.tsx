@@ -197,8 +197,8 @@ export default function AnfrageStammPage(): JSX.Element {
       try {
         const suppliers = (await apiClient.get<any[] | { data?: any[] }>('/api/v1/crm/business-partners?type=supplier')).data
         setAvailableSuppliers(Array.isArray(suppliers) ? suppliers : suppliers?.data || [])
-      } catch (error) {
-        console.error('Fehler beim Laden der Lieferanten:', error)
+      } catch {
+        // Lieferantenliste im RFQ-Dialog bleibt leer — kein Blocker für den Nutzer
       }
     }
     if (sendRfqDialogOpen) {
@@ -237,7 +237,6 @@ export default function AnfrageStammPage(): JSX.Element {
       })
       navigate('/einkauf/anfragen')
     } catch (error: any) {
-      console.error(t('crud.messages.updateError', { entityType: entityTypeLabel }), error)
       toast({
         variant: 'destructive',
         title: t('crud.messages.updateError', { entityType: entityTypeLabel }),
@@ -274,7 +273,6 @@ export default function AnfrageStammPage(): JSX.Element {
       setApproveDialogOpen(false)
       loadData()
     } catch (error: any) {
-      console.error('Fehler beim Freigeben:', error)
       toast({
         variant: 'destructive',
         title: t('crud.messages.approveError', { entityType: entityTypeLabel }),
@@ -316,7 +314,6 @@ export default function AnfrageStammPage(): JSX.Element {
       setRejectReason('')
       loadData()
     } catch (error: any) {
-      console.error('Fehler beim Ablehnen:', error)
       toast({
         variant: 'destructive',
         title: t('crud.messages.cancelError', { entityType: entityTypeLabel }),
@@ -350,7 +347,6 @@ export default function AnfrageStammPage(): JSX.Element {
 
       setConvertDialogOpen(false)
     } catch (error: any) {
-      console.error('Fehler beim Umwandeln:', error)
       toast({
         variant: 'destructive',
         title: t('crud.messages.createError', { entityType: entityTypeLabel }),
@@ -396,7 +392,6 @@ export default function AnfrageStammPage(): JSX.Element {
       setSelectedSuppliers([])
       loadData()
     } catch (error: any) {
-      console.error('Fehler beim Versenden der RFQ:', error)
       toast({
         variant: 'destructive',
         title: t('crud.messages.rfqSendError'),

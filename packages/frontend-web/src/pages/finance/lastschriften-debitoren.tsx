@@ -233,8 +233,8 @@ function LastschriftenTable({ data: _data, onChange }: { data: any[]; onChange: 
                 }),
               )
             }
-          } catch (error) {
-            console.warn('IBAN lookup failed:', error)
+          } catch {
+            // IBAN-Suche schlägt still fehl — Feld bleibt leer, manuelle Eingabe möglich
           }
         }, 1000)
       }
@@ -493,8 +493,8 @@ export default function LastschriftenDebitorenPage(): JSX.Element {
                 }),
               )
             }
-          } catch (error) {
-            console.warn('IBAN lookup failed:', error)
+          } catch {
+            // IBAN-Suche schlägt still fehl — Feld bleibt leer, manuelle Eingabe möglich
           }
         }, 1000)
       }
