@@ -164,9 +164,14 @@ Key variables (see `.env.example`):
 
 ## Async UI Handler Invariant
 
-For every async `onClick` handler that triggers a non-idempotent action (save, delete, release, approve, reject, convert, export, import):
+Mutation-critical user actions must be protected against duplicate execution.
 
-1. **Loading state**: The handler must set a boolean loading flag (`isSaving`, `loading`, or equivalent) to `true` at the start and reset it in a `finally` block.
-2. **Button guard**: The triggering button must carry `disabled={<loadingFlag>}` so that double-submit is impossible at the UI level.
-3. **finally reset**: `setLoading(false)` (or equivalent) must live in a `finally` block, not only in the happy path or catch — otherwise a thrown error leaves the button permanently disabled.
-4. **Idempotent reads are exempt**: `GET`-only handlers (search, refresh, load) do not require a double-submit guard, only a visual loading indicator if the round-trip is perceptible.
+**Applies to:** save, create, update, delete, approve/reject/release, trigger, submit, convert/generate follow-up documents, import/export if it mutates server state.
+
+**Required:**
+- Local loading/saving/submitting state or mutation pending state
+- Triggering button `disabled` while pending
+- Loading state reset in `finally`
+- Visible error feedback on failure
+
+**Exempt:** idempotent reads, pure downloads, navigation-only actions, handlers already guarded by a parent form or mutation component.
