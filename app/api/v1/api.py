@@ -294,6 +294,12 @@ from app.api.v1.endpoints import (
     periodische_buchungen,
 )
 
+# Fachliche Vertiefung Wave 12 — Zu-/Abschlaggruppen/-klassen, Vertreterprovisionen
+from app.api.v1.endpoints import (
+    zu_abschlaggruppen,
+    vertreterprovisionen,
+)
+
 # Import domain routers
 from app.domains.agrar.api import psm, psm_proplanta
 from app.domains.inventory.api import router as inventory_domain_router
@@ -1609,6 +1615,10 @@ api_router.include_router(zahlungsbedingungen.router)
 api_router.include_router(partiestamm.router)
 api_router.include_router(forderungsgruppen.router)
 api_router.include_router(periodische_buchungen.router)
+
+# Fachliche Vertiefung Wave 12
+api_router.include_router(zu_abschlaggruppen.router)
+api_router.include_router(vertreterprovisionen.router)
 
 # Report/Print: Partie-Genealogie, Wiegeschein-PDF-Preview, GS1-Labels
 api_router.include_router(report_print.router)
