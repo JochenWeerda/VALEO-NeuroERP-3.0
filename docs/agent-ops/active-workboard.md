@@ -2410,3 +2410,15 @@ Archiv des vorherigen Boards:
 **Erledigt:** Open-Gaps-Doku auf abgeschlossene UX-Seitentyp-Logik aktualisiert; Portal-Dokumente von Rollenleiste, Management-Entscheidung und CRUD-Checkliste auf leichte Self-Service-Fuehrung reduziert; RAT-OPT-001 im Workboard als abgeschlossen und historisch eingeordnet; Coverage/Domain-Parity als Qualitaetsprogramme und HRM-/Live-Gates als Betriebsnachweise abgegrenzt.
 **Checks:** `pnpm --filter @valero-neuroerp/frontend-web type-check`; `python scripts/agent_workboard_supervisor.py validate`; `node scripts/docs-governance-check.cjs`; `node scripts/docs-markdown-check.cjs docs/project-context/open-gaps-and-known-issues.md docs/agent-ops/active-workboard.md docs/agent-ops/slices/UX-GAP-CLOSURE-001.yaml`; `git diff --check`
 **Offene Risiken:** Kuenftige neue Fachfunktionen koennen neue UX-Detailreviews ausloesen; aktuell bestehen keine offenen UX-Baukasten-Rollout-Gaps.
+
+## FRONTEND-DOMAIN-AUDIT-REPAIR-001
+
+**Von:** Codex
+**Owner:** Codex
+**Stand:** reserviert 2026-05-22
+**Ziel des Slices:** Claude-Domain-Audit-Fixes qualitaetssichern, Encoding-/i18n-/Routing-Reste bereinigen, Git-Historie korrigieren und Gates fuer den Frontend-Domain-Audit schliessen.
+**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/agent-ops/slices/FRONTEND-DOMAIN-AUDIT-REPAIR-001.yaml`, `packages/frontend-web/src/app/route-aliases.json`, `packages/frontend-web/src/app/page-module-loader.ts`, `packages/frontend-web/src/app/page-module-groups/commercial.ts`, `packages/frontend-web/src/i18n/locales/*/translation.json`, `packages/frontend-web/src/pages/**/*.tsx`
+**Abnahmekriterien:** Keine neue UTF-8-Mojibake in geaenderten Frontend-Dateien; route-aliases verweisen auf ladbare Page-Module; fehlende i18n-Keys aus dem Audit sind ergaenzt ohne Locale-Korruption; Typecheck und Workboard-Validierung sind gruen; unpushte Commits haben korrekte Autoren-Metadaten.
+**Erledigt:** reserviert.
+**Checks:** ausstehend.
+**Offene Risiken:** Browser-Massenpruefung bleibt stichprobenartig; backendabhaengige Datenladefehler werden nur von Frontend-Routing/Rendering getrennt bewertet.
