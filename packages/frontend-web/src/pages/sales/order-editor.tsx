@@ -378,6 +378,7 @@ export default function SalesOrderEditorPage(): JSX.Element {
   const [showNiederlassungDialog, setShowNiederlassungDialog] = useState(false)
   const [showVertreterDialog, setShowVertreterDialog] = useState(false)
   const [showKontraktLookup, setShowKontraktLookup] = useState(false)
+  const [isSaving, setIsSaving] = useState(false)
   const { resolveKontrakt, isResolving: isResolvingKontrakt } = useKontraktLookup()
   const [vertreterInput, setVertreterInput] = useState('')
   const [roleFocus, setRoleFocus] = useState<SalesOrderRoleFocus>('all')
@@ -868,6 +869,7 @@ export default function SalesOrderEditorPage(): JSX.Element {
       push(salesEligibility.reasons.join(' ') || 'Kunde ist für Aufträge nicht freigegeben (Stammdaten).')
       return null
     }
+    setIsSaving(true)
     try {
       const payload = {
         order_number: state.auftragNr || undefined,
@@ -913,6 +915,8 @@ export default function SalesOrderEditorPage(): JSX.Element {
     } catch (error: any) {
       push(`Speichern fehlgeschlagen: ${error.response?.data?.detail || error.message}`)
       return null
+    } finally {
+      setIsSaving(false)
     }
   }
 
@@ -1026,9 +1030,14 @@ export default function SalesOrderEditorPage(): JSX.Element {
   // ── In Lieferschein wandeln ────────────────────────────────────────────────
 
   const handleCreateLieferschein = async (): Promise<void> => {
-    const id = state.id || (await handleSave())
-    if (!id) return
-    navigate(`/verkauf/lieferschein-erfassung?auftrag=${id}`)
+    setIsSaving(true)
+    try {
+      const id = state.id || (await handleSave())
+      if (!id) return
+      navigate(`/verkauf/lieferschein-erfassung?auftrag=${id}`)
+    } finally {
+      setIsSaving(false)
+    }
   }
 
   const handleSofortRechnung = async () => {
@@ -1037,6 +1046,7 @@ export default function SalesOrderEditorPage(): JSX.Element {
       try { orderId = await handleSave() } catch { return }
     }
     if (!orderId) return
+    setIsSaving(true)
     try {
       const res = await apiClient.post<{
         command: string
@@ -1059,6 +1069,8 @@ export default function SalesOrderEditorPage(): JSX.Element {
       }
     } catch (e: any) {
       push(`Sofort-Rechnung fehlgeschlagen: ${e.response?.data?.detail ?? e.message}`)
+    } finally {
+      setIsSaving(false)
     }
   }
 
@@ -1951,11 +1963,11 @@ export default function SalesOrderEditorPage(): JSX.Element {
             Kontrakte
           </Button>
           <Button variant="outline" size="sm" className="gap-2"
-            onClick={() => void handleCreateLieferschein()}>
+            onClick={() => void handleCreateLieferschein()} disabled={isSaving}>
             <LinkIcon className="h-4 w-4" />
             In Lieferschein wandeln
           </Button>
-          <Button variant="outline" size="sm" className="gap-2" onClick={() => void handleSofortRechnung()} title="Direkt Rechnung aus Auftrag">
+          <Button variant="outline" size="sm" className="gap-2" onClick={() => void handleSofortRechnung()} title="Direkt Rechnung aus Auftrag" disabled={isSaving}>
             <Receipt className="h-4 w-4" />
             Sofort-Rechnung
           </Button>
@@ -1967,7 +1979,7 @@ export default function SalesOrderEditorPage(): JSX.Element {
         </div>
         <div className="flex gap-2">
           <ShortcutHintButton shortcut="Strg+F4">
-            <Button onClick={() => void handleSave()} size="sm" className="gap-2">
+            <Button onClick={() => void handleSave()} size="sm" className="gap-2" disabled={isSaving}>
               <Save className="h-4 w-4" />
               Speichern
             </Button>

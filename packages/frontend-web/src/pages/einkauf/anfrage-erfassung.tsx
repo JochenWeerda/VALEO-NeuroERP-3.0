@@ -279,6 +279,7 @@ export default function AnfrageErfassungPage(): JSX.Element {
 
   const handleSave = async (): Promise<string | null> => {
     if (!state.lieferant) { push('Bitte Lieferant auswählen'); return null }
+    setLoading(true)
     try {
       const payload = {
         anfrage_nr: state.anfrageNr,
@@ -315,6 +316,8 @@ export default function AnfrageErfassungPage(): JSX.Element {
     } catch (err: any) {
       push(`Fehler: ${err.response?.data?.detail || err.message}`)
       return null
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -790,7 +793,7 @@ export default function AnfrageErfassungPage(): JSX.Element {
         </div>
         <div className="flex gap-2">
           <ShortcutHintButton shortcut="Strg+F4">
-            <Button onClick={() => void handleSave()} size="sm" className="gap-2">
+            <Button onClick={() => void handleSave()} size="sm" className="gap-2" disabled={loading}>
               <Save className="h-4 w-4" />Speichern
             </Button>
           </ShortcutHintButton>
