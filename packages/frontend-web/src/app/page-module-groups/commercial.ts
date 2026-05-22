@@ -11,6 +11,7 @@ export const PAGE_MODULES = import.meta.glob([
   '../../pages/service/**/*.tsx',
   '../../pages/termine/**/*.tsx',
   '../../pages/prospecting/**/*.tsx',
+  '../../pages/analytics/**/*.tsx',
   '../../pages/dashboard/**/*.tsx',
   '../../pages/dashboards/**/*.tsx',
   '../../pages/management/**/*.tsx',
