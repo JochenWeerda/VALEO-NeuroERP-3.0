@@ -15,7 +15,7 @@
     "sort": "Ordenar",
     "print": "Imprimir",
     "export": "Exportar",
-    "loading": "Cargando\u2026",
+    "loading": "Cargando…",
     "noData": "No se encontraron datos",
     "error": "Error",
     "success": "Correcto",
@@ -24,7 +24,7 @@
     "unknownError": "Error desconocido",
     "notSpecified": "No especificado",
     "other": "Otros",
-    "yes": "S\u00ed",
+    "yes": "Sí",
     "no": "No",
     "alerts": "Notificaciones"
   },
@@ -38,7 +38,7 @@
     "draft": "Borrador",
     "inProgress": "En Progreso",
     "onHold": "En Pausa",
-    "requiresReview": "Requiere Revisi\u00f3n",
+    "requiresReview": "Requiere Revisión",
     "approved": "Aprobado",
     "partial": "Parcialmente Asignado",
     "recorded": "Registrado",
@@ -52,7 +52,7 @@
     "locked": "Bloqueado",
     "blocked": "Bloqueado",
     "planned": "Planificado",
-    "inTransit": "En Tr\u00e1nsito",
+    "inTransit": "En Tránsito",
     "delivered": "Entregado",
     "invoiced": "Facturado",
     "partiallyDelivered": "Parcialmente Entregado",
@@ -60,7 +60,7 @@
     "fulfilled": "Cumplido",
     "overdue": "Vencido",
     "failed": "Fallido",
-    "running": "En Ejecuci\u00f3n",
+    "running": "En Ejecución",
     "unknown": "Desconocido",
     "unmatched": "Sin Asignar",
     "matched": "Asignado",
@@ -71,8 +71,8 @@
   },
   "admin": {
     "settings": {
-      "title": "Configuraci\u00f3n del Sistema",
-      "subtitle": "Configuraci\u00f3n",
+      "title": "Configuración del Sistema",
+      "subtitle": "Configuración",
       "save": "Guardar",
       "general": "General",
       "companyData": "Datos de la Empresa",
@@ -82,33 +82,33 @@
       "timezone": "Zona Horaria",
       "currency": "Moneda",
       "companyName": "Nombre de la Empresa",
-      "taxNumber": "N\u00famero Fiscal",
+      "taxNumber": "Número Fiscal",
       "commercialRegister": "Registro Mercantil",
-      "address": "Direcci\u00f3n",
+      "address": "Dirección",
       "connected": "Conectado",
       "notConnected": "No Conectado",
-      "saved": "Configuraci\u00f3n guardada"
+      "saved": "Configuración guardada"
     },
     "languagePackage": {
-      "title": "Gesti\u00f3n de Paquetes de Idioma",
+      "title": "Gestión de Paquetes de Idioma",
       "subtitle": "Administre los paquetes de idioma del sistema ERP. El cambio de idioma puede tardar un momento mientras se cargan todas las traducciones.",
       "currentLanguage": "Idioma Actual del Sistema",
       "availablePackages": "Paquetes de Idioma Disponibles",
       "status": "Estado",
       "active": "Activo",
       "available": "Disponible",
-      "generating": "Generando\u2026",
+      "generating": "Generando…",
       "notAvailable": "No Disponible",
       "activate": "Activar",
       "generate": "Generar Paquete",
-      "generatingHint": "El programa de traducci\u00f3n est\u00e1 generando el paquete de idioma. Esto puede tardar unos minutos dependiendo del alcance.",
-      "switchWarning": "Cambiar el idioma del sistema recargar\u00e1 la interfaz. Los cambios no guardados pueden perderse.",
+      "generatingHint": "El programa de traducción está generando el paquete de idioma. Esto puede tardar unos minutos dependiendo del alcance.",
+      "switchWarning": "Cambiar el idioma del sistema recargará la interfaz. Los cambios no guardados pueden perderse.",
       "switchConfirm": "Cambiar Idioma",
       "switchCancel": "Cancelar",
-      "coverage": "Cobertura de Traducci\u00f3n",
+      "coverage": "Cobertura de Traducción",
       "keys": "Claves",
-      "lastUpdated": "\u00daltima Actualizaci\u00f3n",
-      "generatedBy": "Generado por Motor de Traducci\u00f3n IA"
+      "lastUpdated": "Última Actualización",
+      "generatedBy": "Generado por Motor de Traducción IA"
     }
   },
   "crud": {
@@ -139,18 +139,19 @@
       "duplicate": "Duplicar",
       "activate": "Activar",
       "deactivate": "Desactivar",
-      "next": "Siguiente"
+      "next": "Siguiente",
+      "back": "Volver"
     },
     "list": {
       "title": "Lista de {{entityType}}",
       "noResults": "No se encontraron {{entityType}}",
-      "loading": "Cargando {{entityType}}\u2026",
+      "loading": "Cargando {{entityType}}…",
       "actions": "Acciones",
-      "page": "P\u00e1gina",
+      "page": "Página",
       "of": "de",
-      "itemsPerPage": "Elementos por p\u00e1gina",
+      "itemsPerPage": "Elementos por página",
       "total": "mostrados",
-      "searchPlaceholder": "Buscar\u2026",
+      "searchPlaceholder": "Buscar…",
       "previous": "Anterior",
       "next": "Siguiente",
       "overview": "Vista general de todos los {{entityType}}",
@@ -159,8 +160,8 @@
     },
     "detail": {
       "title": "{{entityType}}: {{entityName}}",
-      "basicInfo": "Informaci\u00f3n B\u00e1sica",
-      "additionalInfo": "Informaci\u00f3n Adicional",
+      "basicInfo": "Información Básica",
+      "additionalInfo": "Información Adicional",
       "relatedItems": "Elementos Relacionados",
       "history": "Historial",
       "summary": "Resumen"
@@ -175,9 +176,9 @@
       "deleteError": "Error al eliminar",
       "loadError": "Error al cargar datos",
       "notFound": "{{entityType}} no encontrado",
-      "validationError": "Error de validaci\u00f3n",
-      "discardChanges": "\u00bfRealmente descartar cambios?",
-      "unsavedChanges": "Los cambios no guardados se perder\u00e1n. \u00bfRealmente cancelar?"
+      "validationError": "Error de validación",
+      "discardChanges": "¿Realmente descartar cambios?",
+      "unsavedChanges": "Los cambios no guardados se perderán. ¿Realmente cancelar?"
     },
     "entities": {
       "contract": "Pedido de Compra",
@@ -196,7 +197,7 @@
     },
     "fields": {
       "name": "Nombre",
-      "description": "Descripci\u00f3n",
+      "description": "Descripción",
       "status": "Estado",
       "type": "Tipo",
       "date": "Fecha",
@@ -204,27 +205,62 @@
       "price": "Precio",
       "total": "Total",
       "totalAmount": "Importe Total",
-      "email": "Correo Electr\u00f3nico",
-      "phone": "Tel\u00e9fono",
-      "address": "Direcci\u00f3n",
+      "email": "Correo Electrónico",
+      "phone": "Teléfono",
+      "address": "Dirección",
       "city": "Ciudad",
-      "country": "Pa\u00eds",
+      "country": "País",
       "createdAt": "Creado",
       "updatedAt": "Actualizado",
       "createdBy": "Creado por",
       "updatedBy": "Actualizado por",
-      "number": "N\u00famero",
+      "number": "Número",
       "currency": "Moneda",
       "balance": "Saldo",
       "amount": "Importe",
       "positions": "Posiciones",
-      "article": "Art\u00edculo",
-      "unit": "Unidad"
+      "article": "Artículo",
+      "unit": "Unidad",
+      "actions": "Acciones"
+    },
+    "campaigns": {
+      "status": {
+        "scheduled": "Programado"
+      }
+    },
+    "segments": {
+      "types": {
+        "dynamic": "Dinámico",
+        "static": "Estático",
+        "hybrid": "Híbrido"
+      },
+      "status": {
+        "archived": "Archivado"
+      }
     }
   },
   "pattern": {
     "listreport": {
       "items_count": "{{count}} elementos"
+    }
+  },
+  "finance": {
+    "payments": {
+      "title": "Recepción de pagos",
+      "description": "Contabilizar y conciliar pagos automáticamente",
+      "import": "Importar",
+      "autoMatch": "Conciliación auto.",
+      "paymentsList": "Lista de pagos",
+      "bookingDate": "Fecha de contabilización",
+      "reference": "Referencia",
+      "remittanceInfo": "Concepto de pago"
+    },
+    "periods": {
+      "title": "Períodos contables",
+      "description": "Gestión de períodos contables",
+      "createPeriod": "Crear período",
+      "infoTitle": "Información",
+      "infoDescription": "Los períodos abiertos pueden contabilizarse. Los períodos cerrados están bloqueados."
     }
   }
 }

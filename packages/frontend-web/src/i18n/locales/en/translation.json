@@ -15,7 +15,7 @@
     "sort": "Sort",
     "print": "Print",
     "export": "Export",
-    "loading": "Loading\u2026",
+    "loading": "Loading…",
     "noData": "No data found",
     "error": "Error",
     "success": "Success",
@@ -97,7 +97,7 @@
       "status": "Status",
       "active": "Active",
       "available": "Available",
-      "generating": "Generating\u2026",
+      "generating": "Generating…",
       "notAvailable": "Not Available",
       "activate": "Activate",
       "generate": "Generate Package",
@@ -139,18 +139,19 @@
       "duplicate": "Duplicate",
       "activate": "Activate",
       "deactivate": "Deactivate",
-      "next": "Next"
+      "next": "Next",
+      "back": "Back"
     },
     "list": {
       "title": "{{entityType}} List",
       "noResults": "No {{entityType}} found",
-      "loading": "Loading {{entityType}}\u2026",
+      "loading": "Loading {{entityType}}…",
       "actions": "Actions",
       "page": "Page",
       "of": "of",
       "itemsPerPage": "Items per page",
       "total": "shown",
-      "searchPlaceholder": "Search\u2026",
+      "searchPlaceholder": "Search…",
       "previous": "Previous",
       "next": "Next",
       "overview": "Overview of all {{entityType}}",
@@ -219,12 +220,47 @@
       "amount": "Amount",
       "positions": "Positions",
       "article": "Article",
-      "unit": "Unit"
+      "unit": "Unit",
+      "actions": "Actions"
+    },
+    "campaigns": {
+      "status": {
+        "scheduled": "Scheduled"
+      }
+    },
+    "segments": {
+      "types": {
+        "dynamic": "Dynamic",
+        "static": "Static",
+        "hybrid": "Hybrid"
+      },
+      "status": {
+        "archived": "Archived"
+      }
     }
   },
   "pattern": {
     "listreport": {
       "items_count": "{{count}} items"
+    }
+  },
+  "finance": {
+    "payments": {
+      "title": "Payment Receipt",
+      "description": "Book payments and auto-match",
+      "import": "Import",
+      "autoMatch": "Auto-Match",
+      "paymentsList": "Payments List",
+      "bookingDate": "Booking Date",
+      "reference": "Reference",
+      "remittanceInfo": "Remittance Info"
+    },
+    "periods": {
+      "title": "Booking Periods",
+      "description": "Manage booking periods",
+      "createPeriod": "Create Period",
+      "infoTitle": "Information",
+      "infoDescription": "Open periods can be posted to. Closed periods are locked."
     }
   }
 }
