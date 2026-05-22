@@ -121,6 +121,26 @@ def create_erloeskennziffer(
     return ErloeskennzifferOut(**dict(row._mapping))
 
 
+@router.put("/{ekz_nr}", response_model=ErloeskennzifferOut)
+def update_erloeskennziffer(
+    ekz_nr: str,
+    payload: ErloeskennzifferCreate,
+    db=Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
+):
+    result = db.execute(text("""
+        UPDATE domain_shared.erloeskennziffern SET bezeichnung = :bez
+        WHERE tenant_id = :tid AND ekz_nr = :nr AND aktiv = true
+    """), {"bez": payload.bezeichnung, "tid": tenant_id, "nr": ekz_nr})
+    db.commit()
+    if result.rowcount == 0:
+        raise HTTPException(404, f"Erlöskennziffer {ekz_nr} nicht gefunden.")
+    row = db.execute(text("""
+        SELECT * FROM domain_shared.erloeskennziffern WHERE tenant_id = :tid AND ekz_nr = :nr
+    """), {"tid": tenant_id, "nr": ekz_nr}).fetchone()
+    return ErloeskennzifferOut(**dict(row._mapping))
+
+
 @router.delete("/{ekz_nr}")
 def delete_erloeskennziffer(
     ekz_nr: str,

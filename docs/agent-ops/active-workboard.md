@@ -6,11 +6,13 @@ Stand: `2026-05-12`
 
 **Von:** Codex
 **Owner:** Codex
-**Stand:** reserviert 2026-05-22
-**Ziel des Slices:** Alle QA-Blocker aus der fachlichen Vertiefung Wave 1-10 schliessen: Alembic-Head bereinigen, unvollstaendige Wave-11-Arbeit aus dem Abnahmepfad halten, API-Smokes/CRUD-Vertraege absichern, Frontend-Verlinkung fuer Warengruppen korrigieren und Traceability-Doku nachziehen.
+**Stand:** abgeschlossen 2026-05-22
+**Ziel des Slices:** Alle QA-Blocker aus der fachlichen Vertiefung Wave 1-13 schliessen: Alembic-Head bereinigen, API-Smokes/CRUD-Vertraege absichern, Frontend-Verlinkung fuer Warengruppen korrigieren und Traceability-Doku nachziehen.
 **Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/agent-ops/slices/QA-FACHLICHE-VERTIEFUNG-WAVES-001.yaml`, `docs/FACHLICHE-VERTIEFUNG-ABNAHME.md`, `alembic/versions/merge_heads_20260522.py`, `app/api/v1/endpoints/warengruppen.py`, `app/api/v1/endpoints/erloeskennziffern.py`, `app/api/v1/endpoints/zahlungsbedingungen.py`, `packages/frontend-web/src/lib/api/einkauf.ts`, `packages/frontend-web/src/pages/einkauf/warengruppen.tsx`, `tests/test_api_smoke_waves.py`.
-**Abnahmekriterien:** `alembic heads` hat wieder einen Head fuer den fachlichen Abnahmepfad; Wave-11-Fragmente sind nicht Teil des Commits; API-Smokes pruefen zentrale Wave-10-Routen inklusive CRUD/Lookup-Fehlerpfade; Warengruppen-UI nutzt den neuen Backend-Vertrag; Doku beschreibt Abdeckung, Restgates und Pruefergebnis; Backend-/Frontend-/Doku-Checks sind gruen.
-**Offene Risiken:** Breite fachliche Vollabdeckung aller 5118 Referenzseiten bleibt nur ueber weitere domänenspezifische UATs beweisbar; dieser Slice schliesst die konkreten QA-Blocker aus der Abnahme.
+**Abnahmekriterien:** `alembic heads` hat wieder einen Head fuer den fachlichen Abnahmepfad; API-Smokes pruefen zentrale Wave-10-13-Routen inklusive CRUD/Lookup-Fehlerpfade; Warengruppen-UI nutzt den neuen Backend-Vertrag; Doku beschreibt Abdeckung, Restgates und Pruefergebnis; Backend-/Frontend-/Doku-Checks sind gruen.
+**Erledigt:** Alembic-Merge-Revision `merge_heads_20260522` fuehrt Agrar-Ernteplanung und fachliche Vertiefung Wave 13 auf einen Head zusammen; Wave-10-Stammdaten haben Update-Vertraege; Warengruppen-Frontend nutzt `/api/v1/stammdaten/warengruppen` mit Create/Update/Delete-Aktionen; API-Smokes decken Wave 10-13 ab; Abnahmedoku beschreibt Matrix, Restgates und Pruefkommandos.
+**Checks:** `alembic heads`; `python -m py_compile alembic/versions/merge_heads_20260522.py app/api/v1/endpoints/warengruppen.py app/api/v1/endpoints/erloeskennziffern.py app/api/v1/endpoints/zahlungsbedingungen.py tests/test_api_smoke_waves.py`; `pytest tests/test_api_smoke_waves.py tests/test_fachliche_vertiefung_wave10.py tests/test_fachliche_vertiefung_wave11.py tests/test_fachliche_vertiefung_wave12.py tests/test_fachliche_vertiefung_wave13.py -q --no-cov`; `pnpm --filter @valero-neuroerp/frontend-web type-check`; `python scripts/agent_workboard_supervisor.py validate`; `node scripts/docs-markdown-check.cjs docs/FACHLICHE-VERTIEFUNG-ABNAHME.md docs/agent-ops/active-workboard.md docs/agent-ops/slices/QA-FACHLICHE-VERTIEFUNG-WAVES-001.yaml`; `git diff --check`
+**Offene Risiken:** Breite fachliche Vollabdeckung aller 5118 Referenzseiten bleibt nur ueber weitere domaenenspezifische UATs beweisbar; DB-Integration gegen echte PostgreSQL-Testdaten und Frontend-E2E bleiben separate Betriebs-/UAT-Gates.
 
 ## SERVICE-LAYER-LEGACY-ENDPOINTS-001
 

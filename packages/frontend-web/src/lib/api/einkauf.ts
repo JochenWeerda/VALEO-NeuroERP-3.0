@@ -21,10 +21,17 @@ export type Bestellvorschlag = {
 
 export type Warengruppe = {
   id: string
-  name: string
-  kategorie: string
-  artikel: number
-  umsatz: number
+  gruppe_nr: string
+  bezeichnung: string
+  ober_id: string
+  aktiv: boolean
+  created_at: string
+}
+
+export type WarengruppeCreate = {
+  gruppe_nr: string
+  bezeichnung: string
+  ober_id: string
 }
 
 export type EinkaufAnfrage = {
@@ -233,9 +240,36 @@ export function useBestellvorschlaege() {
 export function useWarengruppen() {
   return useQuery({
     queryKey: einkaufKeys.warengruppen(),
-    queryFn: async () => (await apiClient.get<Warengruppe[]>('/api/v1/einkauf/warengruppen')).data,
+    queryFn: async () => (await apiClient.get<Warengruppe[]>('/api/v1/stammdaten/warengruppen')).data,
     initialData: [],
     staleTime: 5 * 60 * 1000,
+  })
+}
+
+export function useCreateWarengruppe() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async (payload: WarengruppeCreate) =>
+      (await apiClient.post<Warengruppe>('/api/v1/stammdaten/warengruppen', payload)).data,
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: einkaufKeys.warengruppen() }),
+  })
+}
+
+export function useUpdateWarengruppe() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async ({ gruppe_nr, payload }: { gruppe_nr: string; payload: WarengruppeCreate }) =>
+      (await apiClient.put<Warengruppe>(`/api/v1/stammdaten/warengruppen/${encodeURIComponent(gruppe_nr)}`, payload)).data,
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: einkaufKeys.warengruppen() }),
+  })
+}
+
+export function useDeleteWarengruppe() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async (gruppe_nr: string) =>
+      apiClient.delete(`/api/v1/stammdaten/warengruppen/${encodeURIComponent(gruppe_nr)}`),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: einkaufKeys.warengruppen() }),
   })
 }
 

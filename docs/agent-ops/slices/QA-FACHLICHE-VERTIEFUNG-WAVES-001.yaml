@@ -1,16 +1,17 @@
 id: QA-FACHLICHE-VERTIEFUNG-WAVES-001
-title: QA-Blocker fachliche Vertiefung Wave 1-10 schliessen
+title: QA-Blocker fachliche Vertiefung Wave 1-13 schliessen
 owner: Codex
-status: reserviert
+status: abgeschlossen
 claimed_at: 2026-05-22
+completed_at: 2026-05-22
 goal: >
   Alle konkreten QA-Blocker aus der Abnahme der fachlichen Vertiefung
-  Wave 1-10 repo-seitig schliessen: Migration-Head, API-Smokes,
+  Wave 1-13 repo-seitig schliessen: Migration-Head, API-Smokes,
   Frontend-Verlinkung, CRUD-Vertrag und Traceability-Doku.
 scope:
   - Alembic-Head-Situation fuer fachliche Vertiefung und Agrar-Ernteplanung bereinigen.
-  - Uncommitted Wave-11-Fragmente aus diesem Abnahmepfad heraushalten.
-  - Zentrale Wave-10-APIs mit TestClient-Smokes absichern.
+  - Wave 11-13 in den aktuellen Abnahmepfad aufnehmen.
+  - Zentrale Wave-10-13-APIs mit TestClient-Smokes absichern.
   - Warengruppen-Frontend auf den neuen Backend-Vertrag ausrichten.
   - Abnahme-/Traceability-Doku fuer Wave 1-10 nachziehen.
 file_ownership:
@@ -26,12 +27,24 @@ file_ownership:
   - tests/test_api_smoke_waves.py
 acceptance_criteria:
   - alembic heads zeigt keinen ungemergten Head-Konflikt fuer Wave 1-10.
-  - API-Smokes pruefen zentrale Wave-10-Routen mit DB-Override und Fehlerpfaden.
+  - API-Smokes pruefen zentrale Wave-10-13-Routen mit DB-Override und Fehlerpfaden.
   - Warengruppen-UI nutzt /api/v1/stammdaten/warengruppen und passende Felder.
   - Doku beschreibt Abdeckung, Grenzen, UI-/CRUD-Status und Pruefergebnis.
   - Workboard-, Backend-, Frontend- und Doku-Checks sind gruen.
-checks: []
-done: []
+checks:
+  - alembic heads
+  - python -m py_compile alembic/versions/merge_heads_20260522.py app/api/v1/endpoints/warengruppen.py app/api/v1/endpoints/erloeskennziffern.py app/api/v1/endpoints/zahlungsbedingungen.py tests/test_api_smoke_waves.py
+  - pytest tests/test_api_smoke_waves.py tests/test_fachliche_vertiefung_wave10.py tests/test_fachliche_vertiefung_wave11.py tests/test_fachliche_vertiefung_wave12.py tests/test_fachliche_vertiefung_wave13.py -q --no-cov
+  - pnpm --filter @valero-neuroerp/frontend-web type-check
+  - python scripts/agent_workboard_supervisor.py validate
+  - node scripts/docs-markdown-check.cjs docs/FACHLICHE-VERTIEFUNG-ABNAHME.md docs/agent-ops/active-workboard.md docs/agent-ops/slices/QA-FACHLICHE-VERTIEFUNG-WAVES-001.yaml
+  - git diff --check
+done:
+  - Alembic-Merge-Revision merge_heads_20260522 ergaenzt.
+  - Wave-10-Stammdaten um Update-Vertraege erweitert.
+  - Warengruppen-Frontend auf den neuen Backend-Vertrag mit Create/Update/Delete-Aktionen gezogen.
+  - API-Smokes fuer zentrale Wave-10-13-Routen ergaenzt.
+  - Abnahme-/Traceability-Doku fuer Wave 1-13 erstellt.
 risks:
   - Vollstaendige fachliche Gleichwertigkeit aller Referenzseiten braucht weiterhin echte UAT-Testdaten und Fachabnahme.
-next_step: Bestehende uncommitted QA-Fix-Dateien pruefen und fertigstellen.
+next_step: abgeschlossen
