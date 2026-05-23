@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { apiClient } from '@/lib/api-client'
+import { useToast } from '@/hooks/use-toast'
 
 type SuperglueAdminState = {
   tenant_id: string
@@ -37,9 +38,11 @@ type SuperglueWizard = {
 }
 
 export default function AdminControlCenterSupergluePage(): JSX.Element {
+  const { toast } = useToast()
   const [connectorKey, setConnectorKey] = useState('document_search')
   const [systemUrl, setSystemUrl] = useState('https://documents.example.invalid/api')
   const [runRetentionDays, setRunRetentionDays] = useState('30')
+  const [pendingAction, setPendingAction] = useState<string | null>(null)
 
   const adminStateQuery = useQuery({
     queryKey: ['agent', 'superglue-admin-state'],
@@ -55,42 +58,69 @@ export default function AdminControlCenterSupergluePage(): JSX.Element {
   }
 
   const applyConnectorOverride = async (): Promise<void> => {
-    await apiClient.post(`/api/v1/agent/integrations/providers/superglue/tenants/default/connectors/${connectorKey}/config`, {
-      system_url: systemUrl,
-    })
-    await apiClient.post('/api/v1/agent/integrations/providers/superglue/tenants/default/wizard/apply', {
-      connector_key: connectorKey,
-      system_url: systemUrl,
-      completed_step: 'systems',
-      next_step: 'policy',
-    })
-    await refetchAll()
+    if (pendingAction) return
+    setPendingAction('connector')
+    try {
+      await apiClient.post(`/api/v1/agent/integrations/providers/superglue/tenants/default/connectors/${connectorKey}/config`, {
+        system_url: systemUrl,
+      })
+      await apiClient.post('/api/v1/agent/integrations/providers/superglue/tenants/default/wizard/apply', {
+        connector_key: connectorKey,
+        system_url: systemUrl,
+        completed_step: 'systems',
+        next_step: 'policy',
+      })
+      await refetchAll()
+      toast({ title: 'Connector Override gespeichert' })
+    } catch (err: any) {
+      toast({ title: 'Fehler', description: err?.response?.data?.detail ?? err?.message, variant: 'destructive' })
+    } finally {
+      setPendingAction(null)
+    }
   }
 
   const applyPolicyOverride = async (): Promise<void> => {
-    await apiClient.post('/api/v1/agent/integrations/providers/superglue/tenants/default/policy', {
-      execution_enabled: true,
-      require_tenant_secrets: true,
-      run_retention_days: Number(runRetentionDays) || 30,
-      artifact_retention_days: 14,
-    })
-    await apiClient.post('/api/v1/agent/integrations/providers/superglue/tenants/default/wizard/apply', {
-      execution_enabled: true,
-      require_tenant_secrets: true,
-      run_retention_days: Number(runRetentionDays) || 30,
-      artifact_retention_days: 14,
-      completed_step: 'policy',
-      next_step: 'bootstrap',
-    })
-    await refetchAll()
+    if (pendingAction) return
+    setPendingAction('policy')
+    try {
+      await apiClient.post('/api/v1/agent/integrations/providers/superglue/tenants/default/policy', {
+        execution_enabled: true,
+        require_tenant_secrets: true,
+        run_retention_days: Number(runRetentionDays) || 30,
+        artifact_retention_days: 14,
+      })
+      await apiClient.post('/api/v1/agent/integrations/providers/superglue/tenants/default/wizard/apply', {
+        execution_enabled: true,
+        require_tenant_secrets: true,
+        run_retention_days: Number(runRetentionDays) || 30,
+        artifact_retention_days: 14,
+        completed_step: 'policy',
+        next_step: 'bootstrap',
+      })
+      await refetchAll()
+      toast({ title: 'Policy Override gespeichert' })
+    } catch (err: any) {
+      toast({ title: 'Fehler', description: err?.response?.data?.detail ?? err?.message, variant: 'destructive' })
+    } finally {
+      setPendingAction(null)
+    }
   }
 
   const markCredentialsPrepared = async (): Promise<void> => {
-    await apiClient.post('/api/v1/agent/integrations/providers/superglue/tenants/default/wizard/apply', {
-      completed_step: 'credentials',
-      next_step: 'systems',
-    })
-    await refetchAll()
+    if (pendingAction) return
+    setPendingAction('credentials')
+    try {
+      await apiClient.post('/api/v1/agent/integrations/providers/superglue/tenants/default/wizard/apply', {
+        completed_step: 'credentials',
+        next_step: 'systems',
+      })
+      await refetchAll()
+      toast({ title: 'Credentials als vorbereitet markiert' })
+    } catch (err: any) {
+      toast({ title: 'Fehler', description: err?.response?.data?.detail ?? err?.message, variant: 'destructive' })
+    } finally {
+      setPendingAction(null)
+    }
   }
 
   const adminState = adminStateQuery.data
@@ -131,12 +161,16 @@ export default function AdminControlCenterSupergluePage(): JSX.Element {
               <label className="text-sm font-medium" htmlFor="system-url">System URL</label>
               <Input id="system-url" value={systemUrl} onChange={(event) => setSystemUrl(event.target.value)} />
             </div>
-            <Button type="button" onClick={() => void applyConnectorOverride()}>Connector Override speichern</Button>
+            <Button type="button" disabled={pendingAction !== null} onClick={() => void applyConnectorOverride()}>
+              {pendingAction === 'connector' ? 'Speichert…' : 'Connector Override speichern'}
+            </Button>
 
             <div className="space-y-2 border-t pt-4">
               <label className="text-sm font-medium" htmlFor="run-retention">Run Retention Days</label>
               <Input id="run-retention" value={runRetentionDays} onChange={(event) => setRunRetentionDays(event.target.value)} />
-              <Button type="button" variant="outline" onClick={() => void applyPolicyOverride()}>Policy Override speichern</Button>
+              <Button type="button" variant="outline" disabled={pendingAction !== null} onClick={() => void applyPolicyOverride()}>
+                {pendingAction === 'policy' ? 'Speichert…' : 'Policy Override speichern'}
+              </Button>
             </div>
           </CardContent>
         </Card>
@@ -167,9 +201,15 @@ export default function AdminControlCenterSupergluePage(): JSX.Element {
               ))}
             </div>
             <div className="flex flex-wrap gap-2">
-              <Button type="button" variant="outline" onClick={() => void markCredentialsPrepared()}>Credentials vorbereitet</Button>
-              <Button type="button" variant="outline" onClick={() => void applyConnectorOverride()}>Systeme anwenden</Button>
-              <Button type="button" onClick={() => void applyPolicyOverride()}>Policy anwenden</Button>
+              <Button type="button" variant="outline" disabled={pendingAction !== null} onClick={() => void markCredentialsPrepared()}>
+                {pendingAction === 'credentials' ? 'Markiert…' : 'Credentials vorbereitet'}
+              </Button>
+              <Button type="button" variant="outline" disabled={pendingAction !== null} onClick={() => void applyConnectorOverride()}>
+                {pendingAction === 'connector' ? 'Speichert…' : 'Systeme anwenden'}
+              </Button>
+              <Button type="button" disabled={pendingAction !== null} onClick={() => void applyPolicyOverride()}>
+                {pendingAction === 'policy' ? 'Speichert…' : 'Policy anwenden'}
+              </Button>
             </div>
           </CardContent>
         </Card>
