@@ -566,6 +566,7 @@ export default function ZahlungslaufKreditorenPage(): JSX.Element {
   const navigate = useNavigate()
   const [isDirty, setIsDirty] = useState(false)
   const [formData, setFormData] = useState<any>({})
+  const [loadingActionKey, setLoadingActionKey] = useState<string | null>(null)
   const [roleFocus, setRoleFocus] = useState<FinanceRoleFocus>('all')
   const currentActor = localStorage.getItem('userEmail') || localStorage.getItem('username') || 'api'
   const entityType = 'paymentRun'
@@ -684,6 +685,7 @@ export default function ZahlungslaufKreditorenPage(): JSX.Element {
         return
       }
 
+      setLoadingActionKey('approve')
       try {
         const response = await fetch(`/api/v1/finance/payment-runs/${formData.id}/approve`, {
           method: 'POST',
@@ -715,6 +717,8 @@ export default function ZahlungslaufKreditorenPage(): JSX.Element {
           title: t('crud.messages.networkError'),
           description: t('crud.messages.networkErrorDesc'),
         })
+      } finally {
+        setLoadingActionKey(null)
       }
     } else if (action === 'execute') {
       const errors = validate(formData)
@@ -916,7 +920,9 @@ export default function ZahlungslaufKreditorenPage(): JSX.Element {
         onChange={handleFormChange}
         onSave={handleSave}
         onCancel={handleCancel}
+        onAction={handleAction}
         isLoading={loading}
+        loadingActionKey={loadingActionKey}
       />
     </>
   )
