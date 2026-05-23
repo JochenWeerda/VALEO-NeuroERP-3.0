@@ -937,23 +937,23 @@ export default function LieferscheinErfassungPage(): JSX.Element {
   }
 
   // Lieferschein speichern
-  const handleSave = async (): Promise<string | null> => {
-    setIsSaving(true)
+  // Pure worker — no isSaving management. Callers own the guard.
+  const persistDeliveryNote = async (): Promise<string | null> => {
+    if (!state.customer) {
+      push('Bitte wählen Sie einen Kunden aus')
+      return null
+    }
+    if (salesEligibility && !salesEligibility.allowed_delivery) {
+      push(salesEligibility.reasons.join(' ') || 'Kunde ist für Lieferscheine nicht freigegeben (Stammdaten).')
+      return null
+    }
+
+    const [hours, minutes] = state.uhrzeit.split(':')
+    const deliveryTime = `${hours}:${minutes}:00`
+
+    const branch = branchesList.find((b) => b.branch_number === state.niederlassung)
     try {
-      if (!state.customer) {
-        push('Bitte wählen Sie einen Kunden aus')
-        return null
-      }
-      if (salesEligibility && !salesEligibility.allowed_delivery) {
-        push(salesEligibility.reasons.join(' ') || 'Kunde ist für Lieferscheine nicht freigegeben (Stammdaten).')
-        return null
-      }
-
-      const [hours, minutes] = state.uhrzeit.split(':')
-      const deliveryTime = `${hours}:${minutes}:00`
-
-      const branch = branchesList.find((b) => b.branch_number === state.niederlassung)
-      const payload = {
+    const payload = {
         customer_id: state.customer.id,
         branch_id: branch?.id ?? null,
         sales_rep_id: null,
@@ -1017,10 +1017,18 @@ export default function LieferscheinErfassungPage(): JSX.Element {
         fakturiertRechnNr: response.invoice_number || '', // Vom Backend gesetzt nach Fakturierung
       }))
       push('Lieferschein erfolgreich gespeichert')
-      return response.id // Return ID for use in executePrint
+      return response.id
     } catch (error: any) {
       push(`Fehler beim Speichern: ${error.response?.data?.detail || error.message}`)
-      return null // Return null on error
+      return null
+    }
+  }
+
+  // Button wrapper for direct Speichern action — owns the guard.
+  const handleSave = async (): Promise<void> => {
+    setIsSaving(true)
+    try {
+      await persistDeliveryNote()
     } finally {
       setIsSaving(false)
     }
@@ -1102,8 +1110,9 @@ export default function LieferscheinErfassungPage(): JSX.Element {
 
   // Sofort-Rechnung: Lieferschein speichern, dann per Docflow in Rechnung umwandeln
   const handleCreateInvoice = async (): Promise<void> => {
+    setIsSaving(true)
     try {
-      const savedId = await handleSave()
+      const savedId = await persistDeliveryNote()
       if (!savedId) {
         push('Lieferschein muss zuerst gespeichert werden.')
         return
@@ -1133,6 +1142,8 @@ export default function LieferscheinErfassungPage(): JSX.Element {
       }
     } catch (error: any) {
       push(`Sofort-Rechnung fehlgeschlagen: ${error.response?.data?.detail || error.message}`)
+    } finally {
+      setIsSaving(false)
     }
   }
 
@@ -1173,14 +1184,15 @@ export default function LieferscheinErfassungPage(): JSX.Element {
     // Other actions (cancel, post, reopen) are not handled yet
   }
 
-  // Druck ausführen
+  // Druck ausführen — owns the guard for the full save→print→post chain.
   const executePrint = async (options: PrintOptions, attestation?: string): Promise<void> => {
+    setIsSaving(true)
     try {
       // Wenn noch nicht gespeichert (keine ID), erst speichern
       let lsId = state.id
       if (!lsId) {
         try {
-          lsId = await handleSave()
+          lsId = await persistDeliveryNote()
           // Update state with new ID
           if (lsId) {
             setState((prev) => ({ ...prev, id: lsId }))
@@ -1270,6 +1282,8 @@ export default function LieferscheinErfassungPage(): JSX.Element {
       setBestellungen([])
     } catch (error: any) {
       push(`Fehler beim Drucken: ${error.response?.data?.detail || error.message}`)
+    } finally {
+      setIsSaving(false)
     }
   }
 

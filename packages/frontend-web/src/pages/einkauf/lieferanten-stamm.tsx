@@ -283,10 +283,9 @@ export default function LieferantenStammPage(): JSX.Element {
     }
   }
 
-  const handleSave = async () => {
-    setLoading(true)
-    try {
-      const payload = {
+  // Pure worker — no loading management. Callers own the guard.
+  const persistLieferant = async () => {
+    const payload = {
         name: lieferant.name,
         legalName: lieferant.legalName,
         type: lieferant.typ,
@@ -323,6 +322,14 @@ export default function LieferantenStammPage(): JSX.Element {
         })
         navigate('/einkauf/lieferanten')
       }
+  }
+
+  // Button wrapper for direct Speichern action — owns the guard.
+  const handleSave = async () => {
+    setLoading(true)
+    try {
+      await persistLieferant()
+      toast({ title: t('crud.messages.updateSuccess', { entityType: entityTypeLabel }) })
     } catch (error: any) {
       toast({
         variant: 'destructive',
@@ -378,7 +385,7 @@ export default function LieferantenStammPage(): JSX.Element {
     setLoading(true)
     try {
       setLieferant(prev => ({ ...prev, status: 'gesperrt' }))
-      await handleSave()
+      await persistLieferant()
       toast({
         title: t('crud.messages.updateSuccess', { entityType: entityTypeLabel }),
         description: 'Lieferant wurde gesperrt',
@@ -400,7 +407,7 @@ export default function LieferantenStammPage(): JSX.Element {
     setLoading(true)
     try {
       setLieferant(prev => ({ ...prev, status: 'archiviert' }))
-      await handleSave()
+      await persistLieferant()
       toast({
         title: t('crud.messages.updateSuccess', { entityType: entityTypeLabel }),
         description: 'Lieferant wurde archiviert',

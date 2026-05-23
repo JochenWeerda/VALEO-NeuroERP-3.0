@@ -470,35 +470,33 @@ export default function OpportunityDetailPage(): JSX.Element {
   })
 
 
+  // Pure worker — no loading management. Callers own the guard.
+  const persistOpportunity = async (formData: any) => {
+    if (formData.amount && formData.probability) {
+      formData.expected_revenue = formData.amount * (formData.probability / 100)
+    }
+    if (!formData.owner_id && formData.assigned_to) {
+      formData.owner_id = formData.assigned_to
+    }
+    const validationResult = validateOpportunityForm(formData, t)
+    if (!validationResult.valid) {
+      toast({
+        variant: 'destructive',
+        title: t('crud.messages.validationError'),
+        description: validationResult.errors.join(', ')
+      })
+      return
+    }
+    await saveData(formData)
+    toast({ title: getSuccessMessage(t, isNew ? 'create' : 'update', entityType) })
+    navigate('/crm/opportunities')
+  }
+
+  // Button wrapper for direct Speichern action — owns the guard.
   const handleSave = async (formData: any) => {
     setLoading(true)
     try {
-      // Calculate expected_revenue if amount and probability are provided
-      if (formData.amount && formData.probability) {
-        formData.expected_revenue = formData.amount * (formData.probability / 100)
-      }
-
-      // Set owner_id from assigned_to if not provided
-      if (!formData.owner_id && formData.assigned_to) {
-        formData.owner_id = formData.assigned_to
-      }
-
-      // Validate
-      const validationResult = validateOpportunityForm(formData, t)
-      if (!validationResult.valid) {
-        toast({
-          variant: 'destructive',
-          title: t('crud.messages.validationError'),
-          description: validationResult.errors.join(', ')
-        })
-        return
-      }
-
-      await saveData(formData)
-      toast({
-        title: getSuccessMessage(t, isNew ? 'create' : 'update', entityType),
-      })
-      navigate('/crm/opportunities')
+      await persistOpportunity(formData)
     } catch (error: any) {
       toast({
         variant: 'destructive',
@@ -521,8 +519,19 @@ export default function OpportunityDetailPage(): JSX.Element {
       if (id && id !== 'neu' && id !== 'new') {
         navigate(`/sales/angebot-erstellen?opportunityId=${id}`)
       } else {
-        // Opportunity not saved yet — save first then redirect
-        await handleSave(formData)
+        // Opportunity not saved yet — save first then redirect; navigation follows, no extra POST
+        setLoading(true)
+        try {
+          await persistOpportunity(formData)
+        } catch (error: any) {
+          toast({
+            variant: 'destructive',
+            title: getErrorMessage(t, 'create', entityType),
+            description: error.message || t('crud.messages.unknownError')
+          })
+        } finally {
+          setLoading(false)
+        }
       }
     } else if (action === 'markAsWon' && id) {
       try {
