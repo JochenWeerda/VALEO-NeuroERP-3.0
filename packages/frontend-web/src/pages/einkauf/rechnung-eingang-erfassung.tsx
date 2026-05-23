@@ -207,6 +207,7 @@ export default function RechnungEingangErfassungPage(): JSX.Element {
   const [showArticleDialog, setShowArticleDialog] = useState(false)
   const [showAttachmentDialog, setShowAttachmentDialog] = useState(false)
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
+  const [isSaving, setIsSaving] = useState(false)
 
   useEffect(() => {
     if (user) setState((p) => ({ ...p, bediener: getBediener() }))
@@ -336,17 +337,29 @@ export default function RechnungEingangErfassungPage(): JSX.Element {
   }
 
   /** Beleg drucken und buchen: Speichern, dann Workflow Prüfen → Freigeben → Verbuchen. */
-  const handlePrintAndBook = async (): Promise<void> => {
-    const id = await handleSave()
-    if (!id) return
-    const base = '/api/v1/einkauf/rechnungseingaenge'
+  const handleSaveClick = async (): Promise<void> => {
+    setIsSaving(true)
     try {
+      await handleSave()
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
+  const handlePrintAndBook = async (): Promise<void> => {
+    setIsSaving(true)
+    try {
+      const id = await handleSave()
+      if (!id) return
+      const base = '/api/v1/einkauf/rechnungseingaenge'
       await apiClient.post(`${base}/${encodeURIComponent(id)}/pruefen`)
       await apiClient.post(`${base}/${encodeURIComponent(id)}/freigeben`)
       await apiClient.post(`${base}/${encodeURIComponent(id)}/verbuchen`)
       push('Beleg verbucht.')
     } catch (err: any) {
       push(`Buchung: ${err.response?.data?.detail || err.message}`)
+    } finally {
+      setIsSaving(false)
     }
   }
 
@@ -354,7 +367,7 @@ export default function RechnungEingangErfassungPage(): JSX.Element {
     'open-customer-selection': () => setShowLieferantDialog(true),
     'open-article-selection': () => setShowArticleDialog(true),
     'confirm-position': () => handlePositionOK(),
-    'save-document': () => void handleSave(),
+    'save-document': () => void handleSaveClick(),
     'delete-document': () => setShowDeleteDialog(true),
     'close-document': () => navigate(-1),
     cancel: () => { setShowLieferantDialog(false); setShowArticleDialog(false) },
@@ -827,6 +840,7 @@ export default function RechnungEingangErfassungPage(): JSX.Element {
       <div className="border-t bg-white px-4 py-2 flex items-center justify-between">
         <div className="flex gap-2 flex-wrap">
           <Button variant="outline" size="sm" className="gap-2"
+            disabled={isSaving}
             onClick={() => void handlePrintAndBook()}>
             <Printer className="h-4 w-4" />Beleg drucken und buchen
           </Button>
@@ -848,7 +862,7 @@ export default function RechnungEingangErfassungPage(): JSX.Element {
         </div>
         <div className="flex gap-2">
           <ShortcutHintButton shortcut="Strg+F4">
-            <Button onClick={() => void handleSave()} size="sm" className="gap-2">
+            <Button onClick={() => void handleSaveClick()} disabled={isSaving} size="sm" className="gap-2">
               <Save className="h-4 w-4" />Speichern
             </Button>
           </ShortcutHintButton>
