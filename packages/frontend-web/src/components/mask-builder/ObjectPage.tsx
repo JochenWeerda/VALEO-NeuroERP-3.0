@@ -38,7 +38,7 @@ const ObjectPage: React.FC<ObjectPageProps> = ({
   isLoading = false,
   onAction,
   loadingActionKey = null,
-  splitLayout = false,
+  splitLayout = true,
 }) => {
   const { toast } = useToast()
   const [activeTab, setActiveTab] = useState(config.tabs[0]?.key || '')
@@ -306,7 +306,61 @@ const ObjectPage: React.FC<ObjectPageProps> = ({
     )
   }
 
-  const renderTabContent = (tab: any) => {
+  const renderTabSidePanel = (tab: MaskTab) => {
+    const errorCount = tab.fields.filter((field) => {
+      const fieldName = getFieldName(field)
+      return Boolean(errors[fieldName])
+    }).length
+
+    const helpFields = tab.fields.filter((field) => field.helpText)
+
+    return (
+      <div className="space-y-4">
+        <Card className="border-accent/20 bg-accent/5">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-base text-accent-foreground">Uebersicht</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3 text-sm">
+            <div className="flex justify-between gap-4">
+              <span className="text-muted-foreground">Register</span>
+              <span className="font-medium text-foreground">{tab.label}</span>
+            </div>
+            <div className="flex justify-between gap-4">
+              <span className="text-muted-foreground">Felder</span>
+              <span className="tabular-nums font-medium text-foreground">{tab.fields.length}</span>
+            </div>
+            {errorCount > 0 && (
+              <div className="flex justify-between gap-4 text-destructive">
+                <span>Validierung</span>
+                <span className="tabular-nums font-medium">{errorCount} offen</span>
+              </div>
+            )}
+            {isDirty && (
+              <p className="text-xs text-muted-foreground">Ungespeicherte Aenderungen vorhanden.</p>
+            )}
+          </CardContent>
+        </Card>
+
+        {helpFields.length > 0 && (
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-base">Hinweise</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-2 text-xs text-muted-foreground">
+              {helpFields.slice(0, 4).map((field) => (
+                <p key={getFieldName(field)}>
+                  <span className="font-medium text-foreground">{field.label}: </span>
+                  {field.helpText}
+                </p>
+              ))}
+            </CardContent>
+          </Card>
+        )}
+      </div>
+    )
+  }
+
+  const renderTabContent = (tab: MaskTab) => {
     if (typeof tab.customRender === 'function') {
       return tab.customRender(watch(), (nextData: any) => {
         reset(nextData)
@@ -464,7 +518,7 @@ const ObjectPage: React.FC<ObjectPageProps> = ({
             <TabsContent key={tab.key} value={tab.key} className="space-y-6">
               {activatedTabs.has(tab.key) ? (
                 splitLayout ? (
-                  <div className="grid gap-6" style={{ gridTemplateColumns: '61.8fr 38.2fr' }}>
+                  <div className="grid gap-6 lg:grid-cols-[61.8fr_38.2fr]">
                     <Card>
                       <CardHeader>
                         <CardTitle>{tab.label}</CardTitle>
@@ -473,7 +527,7 @@ const ObjectPage: React.FC<ObjectPageProps> = ({
                         {renderTabContent(tab)}
                       </CardContent>
                     </Card>
-                    <div className="space-y-4" />
+                    {renderTabSidePanel(tab)}
                   </div>
                 ) : (
                   <Card>

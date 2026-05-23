@@ -273,7 +273,7 @@ export function DataTable<T>({
                   return (
                     <TableCell
                       key={String(column.id ?? column.accessorKey ?? columnIndex)}
-                      className={column.numeric ? `text-right font-mono ${column.className ?? ''}` : column.className}
+                      className={column.numeric ? `text-right tabular-nums ${column.className ?? ''}` : column.className}
                     >
                       {cellContent as ReactNode}
                     </TableCell>

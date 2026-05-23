@@ -1,0 +1,37 @@
+id: DESIGN-TERRA-AGRAR-PORTAL-001
+title: Terra Theme auf Agrar-Routen im Kundenportal
+owner: Claude Code
+status: abgeschlossen
+claimed_at: 2026-05-23
+completed_at: 2026-05-23
+depends_on:
+  - DESIGN-MERIDIAN-QUICK-WINS-001
+goal: >
+  Terra-Theme auf Agrar-Self-Service-Routen im Kundenportal aktivieren,
+  ohne MERIDIAN-Haupt-ERP oder Nicht-Agrar-Portal-Routen zu beeinflussen.
+scope:
+  - theme-terra auf /portal/feldbuch, /portal/naehrstoffbilanzen, /portal/rationsoptimierung.
+  - CustomerPortalLayout bedingtes Theme-Switching ohne Flash.
+  - Terra-Tokens aus design-tokens-terra.css fuer Sidebar und Akzente.
+file_ownership:
+  - docs/agent-ops/active-workboard.md
+  - docs/agent-ops/slices/DESIGN-TERRA-AGRAR-PORTAL-001.yaml
+  - packages/frontend-web/src/lib/portal-theme.ts
+  - packages/frontend-web/src/layouts/CustomerPortalLayout.tsx
+  - packages/frontend-web/src/pages/portal/feldbuch.tsx
+  - packages/frontend-web/src/pages/portal/naehrstoffbilanzen.tsx
+  - packages/frontend-web/src/pages/portal/rationsoptimierung.tsx
+acceptance_criteria:
+  - Terra-Routen rendern mit theme-terra und sichtbarer Waldgruen/Gold-Identitaet.
+  - Restliches Portal und ERP-Shell bleiben MERIDIAN.
+  - Keine Token-Leaks auf Shop, Rechnungen, Dokumente etc.
+  - Frontend-Typecheck ist gruen.
+checks:
+  - pnpm --filter @valero-neuroerp/frontend-web type-check
+  - python scripts/agent_workboard_supervisor.py validate
+  - node scripts/docs-markdown-check.cjs docs/agent-ops/active-workboard.md docs/agent-ops/slices/DESIGN-TERRA-AGRAR-PORTAL-001.yaml
+  - git diff --check
+done:
+  - portal-theme.ts mit isTerraAgrarPortalPath.
+  - CustomerPortalLayout aktiviert theme-terra bedingt auf Agrar-Routen.
+next_step: none

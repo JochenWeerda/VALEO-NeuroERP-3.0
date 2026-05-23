@@ -83,10 +83,20 @@ Empfohlen als Inspiration für:
   - Tailwind-Mapping (tailwind.config.js)
 
 Noch offen (Phase 1):
-  - muted-foreground Kontrast: neutral-500 → neutral-600 (4.5:1 erfüllen)
-  - Button-Höhe auf 40px standardisieren (aktuell h-9=36px)
-  - Sidebar-Breite als CSS-Token (--sidebar-width: 240px)
-  - Sidebar: Navy-Blue Colors implementieren
+  - ~~muted-foreground Kontrast: neutral-500 → neutral-600 (4.5:1 erfüllen)~~ ✓ erledigt (index.css)
+  - ~~Button-Höhe auf 40px standardisieren (aktuell h-9=36px)~~ ✓ erledigt (h-11=44px, button.tsx)
+  - ~~Sidebar-Breite als CSS-Token (--sidebar-width: 240px)~~ ✓ erledigt (index.css)
+  - ~~Sidebar: Navy-Blue Colors implementieren~~ ✓ erledigt (design-tokens-meridian.css + Sidebar.tsx)
+
+Phase 1 Rest (Quick-Wins-Slice DESIGN-MERIDIAN-QUICK-WINS-001):
+  - ~~Badge-Status-Semantik auf Meridian-Token (badge.tsx)~~ ✓ erledigt
+  - ~~EMPFEHLUNG-Checkboxen final synchronisieren~~ ✓ erledigt
+
+Phase 4 (Slice DESIGN-MERIDIAN-PHASE4-001):
+  - ~~ObjectPage Golden-Ratio 61.8/38.2~~ ✓ erledigt (splitLayout default + Sidepanel)
+  - ~~KPI-Cards Amber-Akzent~~ ✓ erledigt (KPICard warning → accent/harvest)
+  - ~~WCAG-Audit dokumentiert~~ ✓ docs/design/WCAG-AUDIT-2026-05-23.md
+  - Terra Agrar-Portal: Slice DESIGN-TERRA-AGRAR-PORTAL-001 ✓ erledigt
 ```
 
 ### Phase 2 — Komponenten-Standardisierung (1 Sprint, ~20h)

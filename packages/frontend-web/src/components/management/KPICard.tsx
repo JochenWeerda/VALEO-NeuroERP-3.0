@@ -50,19 +50,19 @@ const colorStyles = {
     value: 'text-primary',
   },
   success: {
-    bg: 'bg-emerald-50 border-emerald-200',
-    icon: 'bg-emerald-100 text-emerald-600',
-    value: 'text-emerald-600',
+    bg: 'bg-[hsl(var(--color-semantic-success-50-hsl))] border-[hsl(var(--color-semantic-success-500-hsl)/0.25)]',
+    icon: 'bg-[hsl(var(--color-semantic-success-500-hsl)/0.15)] text-[hsl(var(--color-semantic-success-700-hsl))]',
+    value: 'text-[hsl(var(--color-semantic-success-700-hsl))]',
   },
   warning: {
-    bg: 'bg-amber-50 border-amber-200',
-    icon: 'bg-amber-100 text-amber-600',
-    value: 'text-amber-600',
+    bg: 'bg-secondary border-accent/30',
+    icon: 'bg-accent/20 text-accent-foreground',
+    value: 'text-accent-foreground',
   },
   danger: {
-    bg: 'bg-red-50 border-red-200',
-    icon: 'bg-red-100 text-red-600',
-    value: 'text-red-600',
+    bg: 'bg-destructive/5 border-destructive/25',
+    icon: 'bg-destructive/10 text-destructive',
+    value: 'text-destructive',
   },
 }
 

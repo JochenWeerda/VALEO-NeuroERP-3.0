@@ -1,6 +1,54 @@
 # Active Workboard
 
-Stand: `2026-05-12`
+Stand: `2026-05-23`
+
+## DESIGN-MERIDIAN-ORCH-001
+
+**Von:** Cursor (VAN-Mode)
+**Owner:** Cursor + Codex + Claude Code
+**Stand:** abgeschlossen 2026-05-23
+**Ziel des Slices:** VAN-Entscheidungen fuer den MERIDIAN/TERRA-Designrollout verbindlich machen, Slice-Kette claimen und Handshake zwischen Codex und Claude Code etablieren.
+**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/agent-ops/slices/DESIGN-MERIDIAN-ORCH-001.yaml`, `docs/agent-ops/handshake-codex-claude-design-2026-05-23.md`, `docs/design/EMPFEHLUNG.md`
+**Abnahmekriterien:** Scope gesamtes ERP mit MERIDIAN-Haupttheme; Terra nur auf Agrar-Routen im Kundenportal; Implementierungsreihenfolge Quick-Wins vor Phase 4 dokumentiert; Handshake mit Dateibesitz, Claim-Protokoll und CLAUDE.md-Invarianten; Folgeslices reserviert; Workboard-Validierung gruen.
+**Erledigt:** VAN-Alignment und User-Freigaben; Handshake erstellt; Slice-Kette angelegt; `/goal`-Skill unter `.cursor/skills/goal/SKILL.md`; gesamter Rollout in Folgeslices umgesetzt.
+**Checks:** `python scripts/agent_workboard_supervisor.py validate`; `pnpm --filter @valero-neuroerp/frontend-web type-check`; `node scripts/docs-markdown-check.cjs docs/agent-ops/handshake-codex-claude-design-2026-05-23.md`
+**Offene Risiken:** Screen-by-Screen-Hardcolors in Fachmodulen bleiben domaenenspezifische Folgeslices.
+
+## DESIGN-MERIDIAN-QUICK-WINS-001
+
+**Von:** Cursor (/goal)
+**Owner:** Cursor
+**Stand:** abgeschlossen 2026-05-23
+**Ziel des Slices:** Verbleibende Quick-Wins aus `docs/design/EMPFEHLUNG.md` abschliessen, bevor Phase 4 startet.
+**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/agent-ops/slices/DESIGN-MERIDIAN-QUICK-WINS-001.yaml`, `docs/design/EMPFEHLUNG.md`, `packages/frontend-web/src/components/ui/badge.tsx`, `packages/frontend-web/src/components/ui/alert.tsx`, `packages/frontend-web/src/components/ui/table.tsx`, `packages/frontend-web/src/components/ui/data-table.tsx`
+**Abnahmekriterien:** Badge-Status-Semantik nutzt Meridian-Token statt harter Utility-Farben; Alert warning/info auf semantische Tokens; Table-Header/tabular-nums global konsistent; EMPFEHLUNG Phase-1-Checkboxen auf erledigt; Frontend-Typecheck und Workboard-Validierung gruen.
+**Erledigt:** badge.tsx und alert.tsx auf `--color-semantic-*`-Tokens umgestellt; data-table numeric cells auf tabular-nums; EMPFEHLUNG Phase-1 als erledigt dokumentiert.
+**Checks:** `pnpm --filter @valero-neuroerp/frontend-web type-check`; `python scripts/agent_workboard_supervisor.py validate`; `git diff --check`
+**Offene Risiken:** Keine.
+
+## DESIGN-TERRA-AGRAR-PORTAL-001
+
+**Von:** Cursor (/goal)
+**Owner:** Claude Code
+**Stand:** abgeschlossen 2026-05-23
+**Ziel des Slices:** Terra-Theme auf Agrar-Routen im Kundenportal aktivieren — Waldgruen/Gold fuer Landwirt-Self-Service, ohne MERIDIAN-Haupt-ERP zu beeinflussen.
+**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/agent-ops/slices/DESIGN-TERRA-AGRAR-PORTAL-001.yaml`, `packages/frontend-web/src/lib/portal-theme.ts`, `packages/frontend-web/src/layouts/CustomerPortalLayout.tsx`, `packages/frontend-web/src/pages/portal/feldbuch.tsx`, `packages/frontend-web/src/pages/portal/naehrstoffbilanzen.tsx`, `packages/frontend-web/src/pages/portal/rationsoptimierung.tsx`
+**Abnahmekriterien:** Terra-Routen `/portal/feldbuch`, `/portal/naehrstoffbilanzen`, `/portal/rationsoptimierung` rendern mit `theme-terra`; restliches Portal und ERP-Shell bleiben MERIDIAN; Terra-Sidebar/Accent-Tokens sichtbar; keine Token-Leaks auf Nicht-Agrar-Portal-Routen; Typecheck gruen.
+**Erledigt:** `portal-theme.ts` mit Routen-Helper; `CustomerPortalLayout` aktiviert `theme-terra` bedingt per Pfad; Navigation/Header auf primary/accent-Tokens im Terra-Zweig.
+**Checks:** `pnpm --filter @valero-neuroerp/frontend-web type-check`; `python scripts/agent_workboard_supervisor.py validate`
+**Offene Risiken:** Playwright computed-style auf Terra-Routen optional in CI.
+
+## DESIGN-MERIDIAN-PHASE4-001
+
+**Von:** Cursor (/goal)
+**Owner:** Codex
+**Stand:** abgeschlossen 2026-05-23
+**Ziel des Slices:** Phase 4 aus EMPFEHLUNG — Dashboard-Polish, ObjectPage Golden-Ratio-Split, Form-States, WCAG-Audit — nach Abschluss der Quick-Wins.
+**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/agent-ops/slices/DESIGN-MERIDIAN-PHASE4-001.yaml`, `docs/design/EMPFEHLUNG.md`, `docs/design/WCAG-AUDIT-2026-05-23.md`, `packages/frontend-web/src/components/mask-builder/ObjectPage.tsx`, `packages/frontend-web/src/components/management/KPICard.tsx`
+**Abnahmekriterien:** KPI-Cards mit konsistentem Amber-Akzent; ObjectPage 61.8/38.2-Split implementiert; axe-core WCAG-Audit fuer Kernrouten dokumentiert; Quick-Wins-Slice abgeschlossen; Typecheck gruen.
+**Erledigt:** KPICard warning/success/danger auf Token; ObjectPage splitLayout default true mit 61.8/38.2 Grid und Sidepanel; WCAG-AUDIT-2026-05-23.md erstellt.
+**Checks:** `pnpm --filter @valero-neuroerp/frontend-web type-check`; `python scripts/agent_workboard_supervisor.py validate`; `node scripts/docs-markdown-check.cjs docs/design/WCAG-AUDIT-2026-05-23.md`
+**Offene Risiken:** axe-core CI-Integration bleibt Folgeslice; tiefe Fachseiten-Hardcolors unveraendert.
 
 ## FRONTEND-DOMAIN-AUDIT-REPAIR-001
 
