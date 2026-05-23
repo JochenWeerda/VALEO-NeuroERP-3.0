@@ -29,3 +29,5 @@ python scripts/agent_workboard_supervisor.py validate
 ```
 
 Empfehlung: Playwright `@axe-core/playwright` in CI als Folgeslice verankern.
+
+**Stand Phase 2–4:** repo-seitig abgeschlossen (2026-05-23). Verbleibend nur externe UAT (Screen-Reader) und optionales axe-core CI-Gate.

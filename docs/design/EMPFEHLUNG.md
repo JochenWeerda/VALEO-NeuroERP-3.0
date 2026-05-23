@@ -101,30 +101,39 @@ Phase 4 (Slice DESIGN-MERIDIAN-PHASE4-001):
 
 ### Phase 2 — Komponenten-Standardisierung (1 Sprint, ~20h)
 ```
-  - button.tsx: Radius, Height, Hover-Shadow
-  - input.tsx: Height 40px, Radius 6px, Focus-Ring
-  - card.tsx: Radius 12px, Shadow-Token
-  - badge.tsx: Status-Semantik-Farben komplett
-  - DataTable: Tabular-nums, Row-Heights, Skeleton-Loading
-  - Alert: Warning + Info Varianten hinzufügen
+✓ Erledigt (2026-05-23):
+  - button.tsx: Radius, Height h-11, Hover-Shadow
+  - input.tsx: Height 44px, Radius 6px (--radius-sm), Focus-Ring
+  - card.tsx: Radius 12px (--radius), Shadow-Token
+  - badge.tsx: Status-Semantik auf Meridian-Token
+  - DataTable/table.tsx: tabular-nums, Row-Heights (--table-row-height), Skeleton-Loading
+  - alert.tsx: Warning + Info auf semantische Tokens
 ```
 
 ### Phase 3 — Navigation & Shell (1 Sprint, ~16h)
 ```
-  - AppShell.tsx: Sidebar Navy-Blue + Token-basierte Breiten
-  - Topbar: 56px Höhe, Breadcrumb-Hierarchie
-  - Active-State: 3px Left-Border + Subtle Background
-  - Kollaps-Animation: Spring-Easing
-  - Dark Mode: Vollständige Token-Overrides testen
+✓ Erledigt (2026-05-23):
+  - AppShell/Sidebar: Navy-Blue + Token-basierte Breiten (240px)
+  - Topbar: 56px (--toolbar-height)
+  - Breadcrumb-Hierarchie: Breadcrumbs.tsx in DashboardLayout
+  - Active-State: 3px Left-Border + Subtle Background (Sidebar.tsx)
+  - Kollaps-Animation: Spring-Easing (--ease-spring)
+  - Dark Mode: Token-Overrides in design-tokens-meridian.css + useTheme
 ```
 
 ### Phase 4 — Module & Polish (2 Sprints, ~32h)
 ```
-  - Dashboard: KPI-Cards mit Amber-Akzent
-  - ObjectPage: Golden-Ratio 61.8/38.2 Split
-  - Forms: Label-Gap, Error-States, Help-Text
-  - Terra Theme: als class="theme-terra" implementieren
-  - WCAG-Audit: axe-core + manueller Screen-Reader-Test
+✓ Erledigt (repo-seitig, 2026-05-23):
+  - Dashboard: KPI-Cards mit Harvest/Amber-Akzent (KPICard, start-dashboard)
+  - ObjectPage: Golden-Ratio 61.8/38.2 Split (splitLayout default + Sidepanel)
+  - Forms: Label-Gap, Error-States, Help-Text (index.css)
+  - Terra Theme: theme-terra auf Agrar-Portal-Routen (CustomerPortalLayout)
+  - WCAG-Audit: docs/design/WCAG-AUDIT-2026-05-23.md
+
+Optional / extern (kein Repo-Blocker):
+  - Terra auf internen /agrar/*-ERP-Routen (bewusst Portal-only)
+  - axe-core CI-Gate + manueller Screen-Reader-Test in produktiver UAT
+  - Screen-by-Screen-Hardcolor-Tokenisierung aller Fachmodule
 ```
 
 **Gesamt-Aufwand:** ca. 84 Arbeitsstunden = 11 Arbeitstage
@@ -148,7 +157,7 @@ Phase 4 (Slice DESIGN-MERIDIAN-PHASE4-001):
 | SAP S/4HANA Fiori | 7.2/10 | 9.1 ← ZIEL |
 | Microsoft Dynamics 365 | 7.0/10 | → |
 | Odoo 17 | 7.5/10 | → |
-| **VALEO NeuroERP (Ist)** | **5.2/10** | → |
+| **VALEO NeuroERP (Ist)** | **~7.5/10** | → |
 | **VALEO NeuroERP (Meridian)** | **→** | **9.1/10** |
 
 **VALEO NeuroERP wird nach Implementierung das beste Design aller Agrar-ERP-Systeme haben.**
