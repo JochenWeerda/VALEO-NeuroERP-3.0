@@ -159,6 +159,7 @@ export default function DeliveryEditorNewPage(): JSX.Element {
   const [showArticleDialog, setShowArticleDialog] = useState(false)
   const [showPrintDialog, setShowPrintDialog] = useState(false)
   const [roleFocus, setRoleFocus] = useState<DeliveryRoleFocus>('all')
+  const [isSaving, setIsSaving] = useState(false)
 
   const handleCustomerSelect = (customer: Customer): void => {
     setDeliveryNote((prev) => ({
@@ -216,6 +217,7 @@ export default function DeliveryEditorNewPage(): JSX.Element {
   }
 
   const handlePrint = async (options: PrintOptions): Promise<void> => {
+    setIsSaving(true)
     try {
       const noteId = deliveryNote.deliveryNumber
       const params = new URLSearchParams()
@@ -244,19 +246,28 @@ export default function DeliveryEditorNewPage(): JSX.Element {
       }))
     } catch (error: any) {
       push(`Fehler beim Drucken: ${error.response?.data?.detail || error.message}`)
+    } finally {
+      setIsSaving(false)
     }
   }
 
+  const persistDelivery = async (): Promise<void> => {
+    await apiClient.post('/api/v1/sales/delivery-notes', {
+      deliveryNumber: deliveryNote.deliveryNumber,
+      customerId: deliveryNote.customerId,
+      positions: deliveryNote.positions,
+    })
+    push('Lieferschein erfolgreich gespeichert')
+  }
+
   const handleSave = async (): Promise<void> => {
+    setIsSaving(true)
     try {
-      await apiClient.post('/api/v1/sales/delivery-notes', {
-        deliveryNumber: deliveryNote.deliveryNumber,
-        customerId: deliveryNote.customerId,
-        positions: deliveryNote.positions,
-      })
-      push('Lieferschein erfolgreich gespeichert')
+      await persistDelivery()
     } catch (error) {
       push('Fehler beim Speichern des Lieferscheins')
+    } finally {
+      setIsSaving(false)
     }
   }
 
@@ -675,13 +686,13 @@ export default function DeliveryEditorNewPage(): JSX.Element {
       {/* Buttons */}
       <div className="flex justify-between">
         <div className="flex gap-2">
-          <Button onClick={() => setShowPrintDialog(true)} className="gap-2">
+          <Button onClick={() => setShowPrintDialog(true)} disabled={isSaving} className="gap-2">
             <Printer className="h-4 w-4" />
             LS drucken
           </Button>
         </div>
         <div className="flex gap-2">
-          <Button onClick={handleSave} className="gap-2">
+          <Button onClick={() => void handleSave()} disabled={isSaving} className="gap-2">
             <Save className="h-4 w-4" />
             Speichern
           </Button>
