@@ -30,4 +30,18 @@ python scripts/agent_workboard_supervisor.py validate
 
 Empfehlung: Playwright `@axe-core/playwright` in CI als Folgeslice verankern.
 
-**Stand Phase 2–4:** repo-seitig abgeschlossen (2026-05-23). Verbleibend nur externe UAT (Screen-Reader) und optionales axe-core CI-Gate.
+**Stand Phase 2–4:** repo-seitig abgeschlossen (2026-05-23).
+
+## axe-core CI (DESIGN-MERIDIAN-AXE-CI-001)
+
+Stand: **2026-05-23** — implementiert und in `quality-gate.yml` als blockierendes Gate.
+
+**Kernrouten (8):** `/`, `/agrar`, `/einkauf/bestellungen`, `/finance`, `/lager`, `/portal/feldbuch`, `/portal/naehrstoffbilanzen`, `/portal/rationsoptimierung`
+
+```bash
+pnpm --filter @valero-neuroerp/frontend-web test:e2e:accessibility
+```
+
+**Behobene Shell-Verstoesse:** Breadcrumbs Home-Link, CopilotDockPanel inert/Contrast, ShortcutHelpPanel labels/inert, AskVALEO FAB aria-label, NativeSelect ariaLabel.
+
+Verbleibend extern: manueller Screen-Reader-UAT (NVDA/VoiceOver).

@@ -36,7 +36,7 @@ export function CopilotDockPanel({
     <>
       <Button
         onClick={onToggleOpen}
-        className="fixed z-40 rounded-full bg-emerald-600 shadow-lg hover:bg-emerald-700"
+        className="fixed z-40 rounded-full bg-emerald-800 text-white shadow-lg hover:bg-emerald-900 font-semibold"
         style={{
           bottom: `${BUTTON_BOTTOM_OFFSET}px`,
           right: `${BUTTON_RIGHT_OFFSET}px`,
@@ -53,7 +53,7 @@ export function CopilotDockPanel({
           open ? 'translate-x-0' : 'translate-x-full'
         }`}
         style={{ width: `${DOCK_WIDTH}px` }}
-        aria-hidden={!open}
+        {...(!open ? { inert: true as const } : { role: 'dialog' as const, 'aria-modal': true as const, 'aria-label': 'Copilot Advisor' })}
       >
         <div className="border-b bg-gradient-to-r from-emerald-50 to-teal-50 p-3">
           <div className="flex items-center justify-between">

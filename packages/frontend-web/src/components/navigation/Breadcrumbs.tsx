@@ -103,12 +103,13 @@ export function Breadcrumbs() {
               <Link
                 to={crumb.path}
                 className="hover:text-foreground transition-colors"
+                aria-label={i === 0 ? 'Home' : undefined}
               >
-                {i === 0 ? <Home className="h-3.5 w-3.5" /> : crumb.label}
+                {i === 0 ? <Home className="h-3.5 w-3.5" aria-hidden="true" /> : crumb.label}
               </Link>
             ) : (
               <span className={isLast ? 'font-medium text-foreground' : ''}>
-                {i === 0 ? <Home className="h-3.5 w-3.5" /> : crumb.label}
+                {i === 0 ? <Home className="h-3.5 w-3.5" aria-hidden="true" /> : crumb.label}
               </span>
             )}
           </span>

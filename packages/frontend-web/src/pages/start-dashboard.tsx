@@ -352,7 +352,7 @@ export default function StartDashboardPage(): JSX.Element {
       {pinnedTiles.length > 0 ? (
         <section className="space-y-3">
           <div className="flex items-center gap-2">
-            <Pin className="h-4 w-4 text-amber-500" />
+            <Pin className="h-4 w-4 text-amber-700" aria-hidden="true" />
             <h2 className="text-lg font-semibold">Favoriten</h2>
           </div>
           <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">

@@ -132,7 +132,7 @@ Phase 4 (Slice DESIGN-MERIDIAN-PHASE4-001):
 
 Optional / extern (kein Repo-Blocker):
   - Terra auf internen /agrar/*-ERP-Routen (bewusst Portal-only)
-  - axe-core CI-Gate + manueller Screen-Reader-Test in produktiver UAT
+  - ~~axe-core CI-Gate + manueller Screen-Reader-Test in produktiver UAT~~ ✓ CI-Gate (DESIGN-MERIDIAN-AXE-CI-001); Screen-Reader-UAT extern
   - Screen-by-Screen-Hardcolor-Tokenisierung aller Fachmodule
 ```
 

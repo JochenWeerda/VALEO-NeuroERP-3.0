@@ -50,6 +50,18 @@ Stand: `2026-05-23`
 **Checks:** `pnpm --filter @valero-neuroerp/frontend-web type-check`; `python scripts/agent_workboard_supervisor.py validate`; `node scripts/docs-markdown-check.cjs docs/design/WCAG-AUDIT-2026-05-23.md`
 **Offene Risiken:** axe-core CI-Integration bleibt Folgeslice; tiefe Fachseiten-Hardcolors unveraendert.
 
+## DESIGN-MERIDIAN-AXE-CI-001
+
+**Von:** Cursor (/goal weiter)
+**Owner:** Cursor
+**Stand:** abgeschlossen 2026-05-23
+**Ziel des Slices:** @axe-core/playwright fuer MERIDIAN/TERRA-Kernrouten in CI verankern und blockierende A11y-Verstoesse in Shell/Global-Komponenten beheben.
+**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/agent-ops/slices/DESIGN-MERIDIAN-AXE-CI-001.yaml`, `docs/design/WCAG-AUDIT-2026-05-23.md`, `.github/workflows/quality-gate.yml`, `packages/frontend-web/tests/e2e/accessibility.spec.ts`, `packages/frontend-web/package.json`
+**Abnahmekriterien:** axe-Tests auf 8 Kernrouten lokal und in quality-gate gruen; @axe-core/playwright installiert; Shell-Komponenten ohne kritische Verstoesse auf Kernrouten.
+**Erledigt:** accessibility.spec.ts mit 8 Routen; A11y-Fixes (Breadcrumbs Home-Link, Copilot inert, ShortcutHelp aria-labels, AskVALEO FAB, NativeSelect ariaLabel); quality-gate Job `frontend-accessibility`.
+**Checks:** `pnpm --filter @valero-neuroerp/frontend-web test:e2e:accessibility`; `pnpm --filter @valero-neuroerp/frontend-web type-check`; `python scripts/agent_workboard_supervisor.py validate`
+**Offene Risiken:** Fachseiten ausserhalb der 8 Kernrouten ungeprueft; manueller Screen-Reader-UAT bleibt extern.
+
 ## FRONTEND-DOMAIN-AUDIT-REPAIR-001
 
 **Von:** Codex

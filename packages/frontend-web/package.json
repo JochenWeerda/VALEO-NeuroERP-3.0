@@ -31,6 +31,7 @@
     "typecheck": "pnpm run type-check",
     "check:routing-integrity": "node scripts/check-routing-integrity.mjs",
     "test:e2e": "playwright test",
+    "test:e2e:accessibility": "playwright test tests/e2e/accessibility.spec.ts --grep @accessibility",
     "test:e2e:routing-smoke": "playwright test tests/e2e/main-routes-smoke.spec.ts",
     "test:e2e:rations-compound": "playwright test tests/e2e/rations-compound-upload.spec.ts",
     "test:e2e:service-to-customer": "playwright test tests/e2e/service-to-customer-smoke.e2e.ts",
@@ -88,6 +89,7 @@
     "zustand": "^5.0.8"
   },
   "devDependencies": {
+    "@axe-core/playwright": "^4.11.3",
     "@playwright/test": "1.48.0",
     "@storybook/addon-docs": "^8.6.14",
     "@storybook/addon-essentials": "^8.6.14",

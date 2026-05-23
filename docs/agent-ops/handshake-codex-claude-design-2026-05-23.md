@@ -144,4 +144,4 @@ Erledigt (2026-05-23):
 | Claude Code | TERRA-Portal (umgesetzt via /goal) | ✅ |
 | Codex | PHASE4 (umgesetzt via /goal) | ✅ |
 
-**Naechster konkreter Schritt:** Optional domaenenspezifische Screen-Tokenisierung oder axe-core CI-Gate.
+**Naechster konkreter Schritt:** Optional domaenenspezifische Screen-Tokenisierung oder manueller Screen-Reader-UAT. axe-core CI-Gate abgeschlossen (DESIGN-MERIDIAN-AXE-CI-001).
