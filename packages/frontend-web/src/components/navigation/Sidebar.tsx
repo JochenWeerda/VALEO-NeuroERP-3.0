@@ -243,7 +243,7 @@ export function Sidebar({ collapsed, onToggle, onNavigate }: SidebarProps): JSX.
         'border-[var(--sidebar-border)]',
         collapsed ? 'w-[var(--sidebar-width-collapsed,64px)]' : 'w-[var(--sidebar-width-expanded,240px)]',
       )}
-      style={{ transitionProperty: 'width', transitionDuration: '250ms', transitionTimingFunction: 'cubic-bezier(0.175,0.885,0.32,1.275)' }}
+      style={{ transitionProperty: 'width', transitionDuration: 'var(--duration-normal,250ms)', transitionTimingFunction: 'var(--ease-spring)' }}
       role="navigation"
       aria-label="Main navigation"
       data-mcp-component="sidebar"
