@@ -188,3 +188,22 @@ If one mutation handler calls another mutation helper internally, pending-state 
 **Pattern:** extract the work into `persistX()` (no guard), wrap with `handleXClick()` for direct button use, and call `persistX()` directly from composed handlers that own the guard.
 
 > **Rule of thumb:** event handlers own UI state; worker functions do work only.
+
+## Mutation Lifecycle Invariant
+
+Every user-triggered mutation must have a complete UI lifecycle.
+
+**Applies to:** create, update, save, delete, approve, reject, release, block, archive, submit, trigger, import, convert/generate follow-up documents, any non-idempotent server-side action.
+
+**Required:**
+- A duplicate-submit guard using `loading`/`saving`/`submitting`/`isPending` state
+- The triggering control `disabled` while pending
+- Reliable pending-state cleanup, preferably in `finally`
+- Visible error feedback via `toast()`, `setError()`, `throw`, or the established page-level error pattern
+- A visible success outcome via `toast()`, `navigate()`, dialog close, list refresh, or visible state update
+
+**Worker functions:** must not own UI pending state; must not set or reset loading/saving/submitting; should perform work only.
+
+**Nested mutations:** the outermost user-triggered handler owns the guard; composed handlers must keep the guard active until all nested awaits and follow-up mutations are complete; avoid false-windows where controls become enabled before the full mutation chain is finished.
+
+**Exempt:** idempotent reads, pure downloads, navigation-only actions, handlers already guarded by a parent form or mutation component.

@@ -55,6 +55,15 @@ export default function APInvoicesListPage(): JSX.Element {
 
   const [searchTerm, setSearchTerm] = useState('')
   const [filters, setFilters] = useState<Record<string, string | Date | undefined>>({})
+  const [pendingActions, setPendingActions] = useState<Set<string>>(new Set())
+
+  const withPending = async (key: string, fn: () => Promise<void>) => {
+    if (pendingActions.has(key)) return
+    setPendingActions(prev => new Set([...prev, key]))
+    try { await fn() } finally {
+      setPendingActions(prev => { const s = new Set(prev); s.delete(key); return s })
+    }
+  }
 
   const queryKey = useMemo(() => ['finance', 'ap', 'invoices', searchTerm, filters], [searchTerm, filters])
   const {
@@ -149,28 +158,21 @@ export default function APInvoicesListPage(): JSX.Element {
             <Button
               variant="outline"
               size="sm"
-              onClick={async () => {
-                try {
-                  await apiClient.post('/api/v1/ap/approval-workflow/request', {
-                    invoice_id: row.original.number,
-                    requested_by: 'current_user',
-                  })
-                  toast({
-                    title: t('common.success'),
-                    description: t('finance.apInvoices.requestApprovalSuccess', {
-                      defaultValue: 'Freigabe wurde angefordert',
-                    }),
-                  })
-                  await refetch()
-                } catch (e: any) {
-                  const msg =
-                    e?.response?.data?.detail ||
-                    t('finance.apInvoices.requestApprovalError', {
-                      defaultValue: 'Freigabeanforderung fehlgeschlagen',
-                    })
-                  toast({ title: t('common.error'), description: msg, variant: 'destructive' })
-                }
-              }}
+              disabled={pendingActions.has(`approval-${row.original.number}`)}
+              onClick={() => void withPending(`approval-${row.original.number}`, async () => {
+                await apiClient.post('/api/v1/ap/approval-workflow/request', {
+                  invoice_id: row.original.number,
+                  requested_by: 'current_user',
+                })
+                toast({
+                  title: t('common.success'),
+                  description: t('finance.apInvoices.requestApprovalSuccess', { defaultValue: 'Freigabe wurde angefordert' }),
+                })
+                await refetch()
+              }).catch((e: any) => {
+                const msg = e?.response?.data?.detail || t('finance.apInvoices.requestApprovalError', { defaultValue: 'Freigabeanforderung fehlgeschlagen' })
+                toast({ title: t('common.error'), description: msg, variant: 'destructive' })
+              })}
             >
               <CheckCircle2 className="h-4 w-4 mr-1" />
               {t('finance.apInvoices.requestApproval', { defaultValue: 'Freigabe anfordern' })}
@@ -180,16 +182,15 @@ export default function APInvoicesListPage(): JSX.Element {
             <Button
               variant="outline"
               size="sm"
-              onClick={async () => {
-                try {
-                  await apiClient.post(`/api/v1/finance/ap/invoices/${row.original.number}/post?posted_by=current_user`)
-                  toast({ title: t('common.success'), description: t('finance.apInvoices.postSuccess', { defaultValue: 'Eingangsrechnung verbucht' }) })
-                  await refetch()
-                } catch (e: any) {
-                  const msg = e?.response?.data?.detail || t('finance.apInvoices.postError', { defaultValue: 'Verbuchen fehlgeschlagen' })
-                  toast({ title: t('common.error'), description: msg, variant: 'destructive' })
-                }
-              }}
+              disabled={pendingActions.has(`post-${row.original.number}`)}
+              onClick={() => void withPending(`post-${row.original.number}`, async () => {
+                await apiClient.post(`/api/v1/finance/ap/invoices/${row.original.number}/post?posted_by=current_user`)
+                toast({ title: t('common.success'), description: t('finance.apInvoices.postSuccess', { defaultValue: 'Eingangsrechnung verbucht' }) })
+                await refetch()
+              }).catch((e: any) => {
+                const msg = e?.response?.data?.detail || t('finance.apInvoices.postError', { defaultValue: 'Verbuchen fehlgeschlagen' })
+                toast({ title: t('common.error'), description: msg, variant: 'destructive' })
+              })}
             >
               <CheckCircle2 className="h-4 w-4 mr-1" />
               {t('crud.actions.post', { defaultValue: 'Verbuchen' })}
