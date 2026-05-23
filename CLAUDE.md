@@ -186,3 +186,5 @@ If one mutation handler calls another mutation helper internally, pending-state 
 - Avoid short false-windows where a button becomes enabled before the full mutation chain has finished.
 
 **Pattern:** extract the work into `persistX()` (no guard), wrap with `handleXClick()` for direct button use, and call `persistX()` directly from composed handlers that own the guard.
+
+> **Rule of thumb:** event handlers own UI state; worker functions do work only.

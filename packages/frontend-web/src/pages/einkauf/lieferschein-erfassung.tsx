@@ -650,12 +650,12 @@ export default function EinkaufLieferscheinErfassungPage(): JSX.Element {
   }
 
   // Lieferschein speichern
-  const handleSave = async (): Promise<string | null> => {
+  // Pure worker — no isSaving management. Callers own the guard.
+  const persistEinkaufLS = async (): Promise<string | null> => {
     if (!state.lieferant) {
       push('Bitte wählen Sie einen Lieferanten aus')
       return null
     }
-    setIsSaving(true)
     try {
       const payload = {
         lieferschein_nr: state.lieferscheinNr,
@@ -712,17 +712,26 @@ export default function EinkaufLieferscheinErfassungPage(): JSX.Element {
     } catch (err: any) {
       push(`Fehler beim Speichern: ${err.response?.data?.detail || err.message}`)
       return null
+    }
+  }
+
+  // Button wrapper for direct Speichern action — owns the guard.
+  const handleSave = async (): Promise<void> => {
+    setIsSaving(true)
+    try {
+      await persistEinkaufLS()
     } finally {
       setIsSaving(false)
     }
   }
 
-  // Drucken
+  // Drucken — owns the guard for the full save→print chain.
   const handlePrint = async (options: PrintOptions): Promise<void> => {
+    setIsSaving(true)
     try {
       let id = state.id
       if (!id) {
-        id = await handleSave()
+        id = await persistEinkaufLS()
         if (!id) return
       }
       const params = new URLSearchParams({
@@ -734,6 +743,8 @@ export default function EinkaufLieferscheinErfassungPage(): JSX.Element {
       setShowPrintDialog(false)
     } catch (err: any) {
       push(`Fehler beim Drucken: ${err.response?.data?.detail || err.message}`)
+    } finally {
+      setIsSaving(false)
     }
   }
 
