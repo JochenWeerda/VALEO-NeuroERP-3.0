@@ -27,6 +27,7 @@ import {
   type LucideIcon,
 } from 'lucide-react'
 import { useAuth } from '@/hooks/useAuth'
+import { isTerraAgrarPortalPath } from '@/lib/portal-theme'
 
 interface NavItem {
   label: string
@@ -62,11 +63,13 @@ function PortalNavLink({
   active,
   onNavigate,
   compact = false,
+  terra = false,
 }: {
   item: NavItem
   active: boolean
   onNavigate?: () => void
   compact?: boolean
+  terra?: boolean
 }) {
   const Icon = item.icon
 
@@ -76,8 +79,14 @@ function PortalNavLink({
       onClick={onNavigate}
       className={clsx(
         'flex items-center justify-between rounded-lg px-4 py-3 text-sm font-medium transition-colors',
-        active ? 'bg-emerald-100 text-emerald-900' : 'text-gray-600 hover:bg-gray-100',
-        compact && 'px-3 py-2'
+        terra
+          ? active
+            ? 'bg-primary/10 text-primary'
+            : 'text-muted-foreground hover:bg-muted hover:text-foreground'
+          : active
+            ? 'bg-emerald-100 text-emerald-900'
+            : 'text-gray-600 hover:bg-gray-100',
+        compact && 'px-3 py-2',
       )}
     >
       <span className="flex items-center gap-3">
@@ -108,6 +117,14 @@ export default function CustomerPortalLayout() {
   const userMenuRef = useRef<HTMLDivElement>(null)
 
   const isAnwender = hasRole('admin') || hasRole('user') || hasRole('manager')
+  const isTerraAgrar = isTerraAgrarPortalPath(location.pathname)
+
+  const navActiveClass = isTerraAgrar
+    ? 'bg-primary/10 text-primary'
+    : 'bg-emerald-100 text-emerald-900'
+  const navInactiveClass = isTerraAgrar
+    ? 'text-muted-foreground hover:bg-muted hover:text-foreground'
+    : 'text-gray-600 hover:bg-gray-100'
 
   const isActivePath = (path: string) => {
     if (path === '/portal') {
@@ -136,8 +153,20 @@ export default function CustomerPortalLayout() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-white to-amber-50">
-      <header className="sticky top-0 z-50 border-b bg-white/80 backdrop-blur-md">
+    <div
+      className={clsx(
+        'min-h-screen',
+        isTerraAgrar
+          ? 'theme-terra bg-background text-foreground'
+          : 'bg-gradient-to-br from-emerald-50 via-white to-amber-50',
+      )}
+    >
+      <header
+        className={clsx(
+          'sticky top-0 z-50 border-b backdrop-blur-md',
+          isTerraAgrar ? 'border-border bg-card/90' : 'bg-white/80',
+        )}
+      >
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4">
           <div className="flex items-center gap-3">
             <Button
@@ -150,11 +179,21 @@ export default function CustomerPortalLayout() {
             </Button>
 
             <Link to="/portal" className="flex items-center gap-2">
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-emerald-500 to-emerald-700 shadow-lg">
+              <div
+                className={clsx(
+                  'flex h-10 w-10 items-center justify-center rounded-lg shadow-lg',
+                  isTerraAgrar
+                    ? 'bg-primary text-primary-foreground'
+                    : 'bg-gradient-to-br from-emerald-500 to-emerald-700',
+                )}
+              >
                 <Leaf className="h-6 w-6 text-white" />
               </div>
-              <span className="hidden text-xl font-bold text-gray-900 sm:block">
-                VALEO <span className="text-emerald-600">Portal</span>
+              <span className="hidden text-xl font-bold sm:block">
+                VALEO{' '}
+                <span className={isTerraAgrar ? 'text-primary' : 'text-emerald-600'}>
+                  Portal
+                </span>
               </span>
             </Link>
 
@@ -178,9 +217,7 @@ export default function CustomerPortalLayout() {
                   to={item.path}
                   className={clsx(
                     'flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-colors',
-                    isActivePath(item.path)
-                      ? 'bg-emerald-100 text-emerald-900'
-                      : 'text-gray-600 hover:bg-gray-100'
+                    isActivePath(item.path) ? navActiveClass : navInactiveClass,
                   )}
                 >
                   <Icon className="h-5 w-5" />
@@ -211,6 +248,7 @@ export default function CustomerPortalLayout() {
                       item={item}
                       active={isActivePath(item.path)}
                       compact
+                      terra={isTerraAgrar}
                       onNavigate={() => setMoreMenuOpen(false)}
                     />
                   ))}
@@ -237,7 +275,9 @@ export default function CustomerPortalLayout() {
               >
                 <Avatar className="h-8 w-8">
                   <AvatarImage src={mockCustomer.avatar} />
-                  <AvatarFallback className="bg-emerald-100 text-emerald-700">
+                  <AvatarFallback
+                    className={isTerraAgrar ? 'bg-primary/10 text-primary' : 'bg-emerald-100 text-emerald-700'}
+                  >
                     {mockCustomer.initials}
                   </AvatarFallback>
                 </Avatar>
@@ -285,7 +325,7 @@ export default function CustomerPortalLayout() {
           <aside className="relative h-full w-80 max-w-[85vw] overflow-y-auto border-r bg-white p-4 shadow-xl">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2 text-lg font-semibold">
-                <Leaf className="h-6 w-6 text-emerald-600" />
+                <Leaf className={clsx('h-6 w-6', isTerraAgrar ? 'text-primary' : 'text-emerald-600')} />
                 Kundenportal
               </div>
               <Button variant="ghost" size="icon" onClick={() => setMobileMenuOpen(false)}>
@@ -311,6 +351,7 @@ export default function CustomerPortalLayout() {
                   key={item.path}
                   item={item}
                   active={isActivePath(item.path)}
+                  terra={isTerraAgrar}
                   onNavigate={() => setMobileMenuOpen(false)}
                 />
               ))}
@@ -323,7 +364,12 @@ export default function CustomerPortalLayout() {
         <Outlet />
       </main>
 
-      <nav className="fixed bottom-0 left-0 right-0 z-50 border-t bg-white/80 backdrop-blur-md lg:hidden">
+      <nav
+        className={clsx(
+          'fixed bottom-0 left-0 right-0 z-50 border-t backdrop-blur-md lg:hidden',
+          isTerraAgrar ? 'border-border bg-card/90' : 'bg-white/80',
+        )}
+      >
         <div className="flex justify-around py-2">
           {customerNavItems.slice(0, 5).map((item) => {
             const Icon = item.icon
@@ -333,7 +379,13 @@ export default function CustomerPortalLayout() {
                 to={item.path}
                 className={clsx(
                   'flex flex-col items-center gap-1 rounded-lg px-3 py-2 text-xs transition-colors',
-                  isActivePath(item.path) ? 'text-emerald-600' : 'text-gray-500'
+                  isActivePath(item.path)
+                    ? isTerraAgrar
+                      ? 'text-primary'
+                      : 'text-emerald-600'
+                    : isTerraAgrar
+                      ? 'text-muted-foreground'
+                      : 'text-gray-500',
                 )}
               >
                 <Icon className="h-5 w-5" />
