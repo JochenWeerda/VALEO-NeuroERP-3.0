@@ -13,6 +13,7 @@ interface NativeSelectProps {
   options?: NativeSelectOption[]
   placeholder?: string
   id?: string
+  ariaLabel?: string
   className?: string
   disabled?: boolean
   children?: ReactNode
@@ -25,6 +26,7 @@ export function NativeSelect({
   options = [],
   placeholder,
   id,
+  ariaLabel,
   className,
   disabled = false,
   children,
@@ -32,6 +34,7 @@ export function NativeSelect({
   return (
     <select
       id={id}
+      aria-label={ariaLabel}
       value={value}
       onChange={(event) => {
         onChange?.(event)

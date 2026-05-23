@@ -94,6 +94,7 @@ export function ShortcutHelpPanel({
       )}
       onMouseEnter={() => setIsHovering(true)}
       onMouseLeave={() => setIsHovering(false)}
+      {...(!isExpanded ? { inert: true as const } : {})}
     >
       <Card
         className={clsx(
@@ -121,6 +122,7 @@ export function ShortcutHelpPanel({
               }}
               className="text-xs px-2 py-1 rounded border bg-white"
               onClick={(e) => e.stopPropagation()}
+              aria-label="Anzeigemodus Tastenkuerzel"
             >
               <option value="always">Immer</option>
               <option value="hover">Bei Hover</option>
@@ -132,11 +134,12 @@ export function ShortcutHelpPanel({
               size="sm"
               className="h-6 w-6 p-0"
               onClick={() => setIsExpanded(!isExpanded)}
+              aria-label={isExpanded ? 'Tastenkuerzel-Panel einklappen' : 'Tastenkuerzel-Panel ausklappen'}
             >
               {isExpanded ? (
-                <ChevronLeft className="h-4 w-4" />
+                <ChevronLeft className="h-4 w-4" aria-hidden="true" />
               ) : (
-                <ChevronLeft className="h-4 w-4 rotate-180" />
+                <ChevronLeft className="h-4 w-4 rotate-180" aria-hidden="true" />
               )}
             </Button>
           </div>

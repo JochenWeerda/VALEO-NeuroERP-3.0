@@ -63,7 +63,7 @@ export default function AppLayout(): JSX.Element {
     if (connectionState === "error") {
       return { label: "Disconnected", className: "text-red-500" }
     }
-    return { label: "Connecting", className: "text-amber-500" }
+    return { label: "Connecting", className: "text-amber-700" }
   }, [connectionState, realtimeEnabled])
 
   return (

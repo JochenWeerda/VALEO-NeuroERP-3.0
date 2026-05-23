@@ -36,4 +36,4 @@ done:
   - KPICard auf semantic/accent-Tokens.
   - ObjectPage splitLayout default mit Sidepanel (61.8/38.2).
   - WCAG-AUDIT-2026-05-23.md dokumentiert.
-next_step: axe-core in CI als Folgeslice.
+next_step: axe-core CI abgeschlossen (DESIGN-MERIDIAN-AXE-CI-001); Screen-Reader-UAT extern.

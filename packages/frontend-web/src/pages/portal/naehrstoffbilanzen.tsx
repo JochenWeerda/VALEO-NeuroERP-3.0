@@ -167,6 +167,7 @@ export default function PortalNaehrstoffbilanzen() {
         <NativeSelect
           value={selectedJahr}
           onValueChange={setSelectedJahr}
+          ariaLabel="Jahr waehlen"
           placeholder="Jahr waehlen"
           options={bilanzen.map((b) => ({ value: b.jahr.toString(), label: String(b.jahr) }))}
         />
