@@ -207,3 +207,16 @@ Every user-triggered mutation must have a complete UI lifecycle.
 **Nested mutations:** the outermost user-triggered handler owns the guard; composed handlers must keep the guard active until all nested awaits and follow-up mutations are complete; avoid false-windows where controls become enabled before the full mutation chain is finished.
 
 **Exempt:** idempotent reads, pure downloads, navigation-only actions, handlers already guarded by a parent form or mutation component.
+
+### Per-Entity Pending State Invariant
+
+For row-level or item-level mutations in lists and tables, pending state must be tracked per entity/action key — not with a single global boolean.
+
+Use a keyed pending structure (`Set<string>`, `Record<string, boolean>`, or `loadingActionKey`) when:
+- Multiple rows can trigger the same mutation independently
+- Disabling all rows would be unnecessary or misleading
+- The UI needs row-level disabled states or spinners
+
+A single boolean is acceptable only when the whole page or form must be blocked (e.g., bulk operations, page-level saves).
+
+**Pattern:** `withPending(key, fn)` — a helper that checks, sets, executes, and finally-resets a `Set<string>` guard keyed by `entityId + actionType`.
