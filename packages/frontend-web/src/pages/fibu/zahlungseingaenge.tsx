@@ -77,6 +77,7 @@ export default function ZahlungseingangsPage(): JSX.Element {
   const [bankImportFormat, setBankImportFormat] = useState<'CAMT' | 'MT940' | 'CSV'>('CAMT')
   const [bankImportAccountId, setBankImportAccountId] = useState<string>('')
   const [bankImportSubmitting, setBankImportSubmitting] = useState(false)
+  const [confirmingMatch, setConfirmingMatch] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const {
@@ -239,8 +240,8 @@ export default function ZahlungseingangsPage(): JSX.Element {
   }
 
   const handleConfirmMatch = async (opId: string) => {
-    if (!selectedPayment) return
-
+    if (!selectedPayment || confirmingMatch) return
+    setConfirmingMatch(true)
     try {
       await apiClient.post(
         `/api/v1/finance/payments/match/${selectedPayment.id}?op_id=${opId}&match_type=MANUAL&tenant_id=${tenantId}`,
@@ -258,6 +259,8 @@ export default function ZahlungseingangsPage(): JSX.Element {
         title: t('crud.messages.matchError'),
         description: getAxiosErrorMessage(error)
       })
+    } finally {
+      setConfirmingMatch(false)
     }
   }
 
@@ -561,7 +564,7 @@ export default function ZahlungseingangsPage(): JSX.Element {
                         </td>
                         <td className="p-2 text-right">{new Date(op.due_date).toLocaleDateString('de-DE')}</td>
                         <td className="p-2 text-center">
-                          <Button size="sm" onClick={() => handleConfirmMatch(op.op_id)}>
+                          <Button size="sm" disabled={confirmingMatch} onClick={() => void handleConfirmMatch(op.op_id)}>
                             {t('crud.messages.paymentMatching.match')}
                           </Button>
                         </td>

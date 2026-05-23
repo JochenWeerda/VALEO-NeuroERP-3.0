@@ -74,6 +74,9 @@ export default function PaymentMatchingPage(): JSX.Element {
   const [selectedOpId, setSelectedOpId] = useState<string>('')
   const [bankAccount, setBankAccount] = useState('')
   const [csvFile, setCsvFile] = useState<File | null>(null)
+  const [isImporting, setIsImporting] = useState(false)
+  const [isAutoMatching, setIsAutoMatching] = useState(false)
+  const [isMatching, setIsMatching] = useState(false)
 
   useEffect(() => {
     fetchUnmatchedPayments()
@@ -105,7 +108,7 @@ export default function PaymentMatchingPage(): JSX.Element {
       })
       return
     }
-
+    setIsImporting(true)
     try {
       const formData = new FormData()
       formData.append('file', csvFile)
@@ -129,6 +132,8 @@ export default function PaymentMatchingPage(): JSX.Element {
         description: t('finance.payments.importError'),
         variant: 'destructive',
       })
+    } finally {
+      setIsImporting(false)
     }
   }
 
@@ -144,7 +149,7 @@ export default function PaymentMatchingPage(): JSX.Element {
 
   async function matchPayment(): Promise<void> {
     if (!selectedPayment || !selectedOpId) return
-
+    setIsMatching(true)
     try {
       const { data: result } = await apiClient.post<MatchResult>(
         `/api/v1/finance/payments/match/${selectedPayment.id}?op_id=${selectedOpId}&match_type=MANUAL`
@@ -176,10 +181,13 @@ export default function PaymentMatchingPage(): JSX.Element {
         description: errorMessage,
         variant: 'destructive',
       })
+    } finally {
+      setIsMatching(false)
     }
   }
 
   async function autoMatch(): Promise<void> {
+    setIsAutoMatching(true)
     try {
       const { data: results } = await apiClient.post<MatchResult[]>('/api/v1/finance/payments/auto-match')
       toast({
@@ -194,6 +202,8 @@ export default function PaymentMatchingPage(): JSX.Element {
         description: t('finance.payments.autoMatchError'),
         variant: 'destructive',
       })
+    } finally {
+      setIsAutoMatching(false)
     }
   }
 
@@ -407,15 +417,15 @@ export default function PaymentMatchingPage(): JSX.Element {
                 <Button variant="outline" onClick={() => setIsImportDialogOpen(false)}>
                   {t('common.cancel')}
                 </Button>
-                <Button onClick={handleCsvImport} disabled={!csvFile || !bankAccount}>
+                <Button onClick={() => void handleCsvImport()} disabled={isImporting || !csvFile || !bankAccount}>
                   {t('finance.payments.import')}
                 </Button>
               </DialogFooter>
             </DialogContent>
           </Dialog>
-          <Button onClick={autoMatch}>
+          <Button onClick={() => void autoMatch()} disabled={isAutoMatching}>
             <CheckCircle2 className="h-4 w-4 mr-2" />
-            {t('finance.payments.autoMatch')}
+            {isAutoMatching ? t('finance.payments.autoMatching', { defaultValue: 'Matching läuft…' }) : t('finance.payments.autoMatch')}
           </Button>
         </div>
       </div>
@@ -475,7 +485,7 @@ export default function PaymentMatchingPage(): JSX.Element {
             <Button variant="outline" onClick={() => setIsMatchDialogOpen(false)}>
               {t('common.cancel')}
             </Button>
-            <Button onClick={matchPayment} disabled={!selectedOpId}>
+            <Button onClick={() => void matchPayment()} disabled={isMatching || !selectedOpId}>
               <Link2 className="h-4 w-4 mr-2" />
               {t('finance.payments.match')}
             </Button>
