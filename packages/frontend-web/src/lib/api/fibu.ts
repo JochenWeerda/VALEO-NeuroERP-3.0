@@ -163,6 +163,9 @@ export const fibuKeys = {
   connectorProfiles: (connectorType: 'PAYROLL' | 'ASSET_LEDGER') => [...fibuKeys.all, 'connector-profiles', connectorType] as const,
   erloeskennziffern: () => [...fibuKeys.all, 'erloeskennziffern'] as const,
   zahlungsbedingungen: () => [...fibuKeys.all, 'zahlungsbedingungen'] as const,
+  erloeskontenzuordnungen: (filters?: { ekz_id?: string; steuerschluessel?: string }) =>
+    [...fibuKeys.all, 'erloeskontenzuordnungen', filters ?? {}] as const,
+  erloeskontenLookup: () => [...fibuKeys.all, 'erloeskonten-lookup'] as const,
 }
 
 const EMPTY_RECORD: Record<string, unknown> = {}
@@ -917,5 +920,103 @@ export function useDeleteZahlungsbedingung() {
     mutationFn: async (zabd_nr: string) =>
       apiClient.delete(`/api/v1/fibu/zahlungsbedingungen/${encodeURIComponent(zabd_nr)}`),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: fibuKeys.zahlungsbedingungen() }),
+  })
+}
+
+// ── Wave 10 EKZZ: Erlöskontenzuordnung + Lookup ─────────────────────────────
+
+export type Erloeskontenzuordnung = {
+  id: string
+  ekz_id: string
+  gueltig_ab: string
+  steuerschluessel: string | null
+  'erlösklasse': string | null
+  steuergruppe: string | null
+  buchungsklasse: string | null
+  konto_erloese: string | null
+  konto_aufwand: string | null
+  konto_umsatzsteuer: string | null
+  konto_vorsteuer: string | null
+  created_at: string
+}
+
+export type ErloeskontenzuordnungCreate = {
+  ekz_id: string
+  gueltig_ab: string
+  steuerschluessel?: string | null
+  'erlösklasse'?: string | null
+  steuergruppe?: string | null
+  buchungsklasse?: string | null
+  konto_erloese?: string | null
+  konto_aufwand?: string | null
+  konto_umsatzsteuer?: string | null
+  konto_vorsteuer?: string | null
+}
+
+export type ErloeskontenLookupParams = {
+  ekz_nr: string
+  steuerschluessel?: string
+  'erlösklasse'?: string
+  buchungsklasse?: string
+  datum?: string
+}
+
+export type ErloeskontenLookupResult = {
+  ekz_nr: string
+  konto_erloese: string | null
+  konto_aufwand: string | null
+  konto_umsatzsteuer: string | null
+  konto_vorsteuer: string | null
+  gueltig_ab: string
+}
+
+export function useErloeskontenzuordnungen(filters?: { ekz_id?: string; steuerschluessel?: string }) {
+  return useQuery({
+    queryKey: fibuKeys.erloeskontenzuordnungen(filters),
+    queryFn: async () => {
+      const params = new URLSearchParams()
+      if (filters?.ekz_id) params.set('ekz_id', filters.ekz_id)
+      if (filters?.steuerschluessel) params.set('steuerschluessel', filters.steuerschluessel)
+      const suffix = params.size > 0 ? `?${params.toString()}` : ''
+      return (
+        await apiClient.get<Erloeskontenzuordnung[]>(`/api/v1/fibu/erloeskennziffern/zuordnungen${suffix}`)
+      ).data
+    },
+    placeholderData: [],
+    staleTime: 5 * 60 * 1000,
+  })
+}
+
+/** POST mit Upsert-Semantik (Backend ON CONFLICT DO UPDATE). */
+export function useUpsertErloeskontenzuordnung() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async (payload: ErloeskontenzuordnungCreate) =>
+      (
+        await apiClient.post<Erloeskontenzuordnung>(
+          '/api/v1/fibu/erloeskennziffern/zuordnungen',
+          payload,
+        )
+      ).data,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [...fibuKeys.all, 'erloeskontenzuordnungen'] })
+    },
+  })
+}
+
+export function useErloeskontenLookup() {
+  return useMutation({
+    mutationFn: async (params: ErloeskontenLookupParams) => {
+      const search = new URLSearchParams({ ekz_nr: params.ekz_nr })
+      if (params.steuerschluessel) search.set('steuerschluessel', params.steuerschluessel)
+      if (params['erlösklasse']) search.set('erlösklasse', params['erlösklasse'])
+      if (params.buchungsklasse) search.set('buchungsklasse', params.buchungsklasse)
+      if (params.datum) search.set('datum', params.datum)
+      return (
+        await apiClient.get<ErloeskontenLookupResult>(
+          `/api/v1/fibu/erloeskennziffern/lookup?${search.toString()}`,
+        )
+      ).data
+    },
   })
 }

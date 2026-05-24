@@ -25,7 +25,7 @@ Die fachliche Vertiefung Wave 1-13 ist repo-seitig fuer den aktuellen Abnahmepfa
 | 7 | Dauerauftraege, Individualpreise, Stuecklisten/Rezepturen | implementiert | `fachliche_vertiefung_wave7_20260521` | backend-only | Schema/Unit |
 | 8 | Rohwarengruppen, Qualitaeten, Zu-/Abschlag-Staffeln | implementiert | `fachliche_vertiefung_wave8_20260521` | backend-only | Schema/Unit |
 | 9 | Betriebsstaetten, individuelle Artikelnummern, Versandprofile, Lieferavise | implementiert | `fachliche_vertiefung_wave9_20260521` | backend-only | Schema/Unit |
-| 10 | Warengruppen, Erloeskennziffern, Zahlungsbedingungen | implementiert inkl. Update-Contracts | `fachliche_vertiefung_wave10_20260521` | Warengruppen, Erlöskennziffern und Zahlungsbedingungen angebunden | Schema/Unit + API-Smoke + E2E |
+| 10 | Warengruppen, Erloeskennziffern, Zahlungsbedingungen, Erlöskontenzuordnung (EKZZ) | implementiert inkl. Update-Contracts | `fachliche_vertiefung_wave10_20260521` | Warengruppen, Erlöskennziffern, Zahlungsbedingungen und EKZZ angebunden | Schema/Unit + API-Smoke + E2E |
 | 11 | Partiestamm, Forderungsgruppen, periodische Buchungen | implementiert | `fachliche_vertiefung_wave11_20260522` | backend-only | Schema/Unit + API-Smoke |
 | 12 | Zu-/Abschlaggruppen, Vertreterprovisionsgruppen/-staffeln | implementiert | `fachliche_vertiefung_wave12_20260522` | backend-only | Schema/Unit + API-Smoke |
 | 13 | Zahlungsformulare, Zinsgruppen, Leergutarten | implementiert | `fachliche_vertiefung_wave13_20260522` | backend-only | Schema/Unit + API-Smoke |
@@ -58,6 +58,13 @@ Wave-10-Ergaenzung (Slice `FACHLICHE-VERTIEFUNG-UX-W10-001`, 2026-05-23):
 - Zahlungsbedingungen: `packages/frontend-web/src/pages/einkauf/zahlungsbedingungen.tsx` gegen `/api/v1/fibu/zahlungsbedingungen` (Felder laut Backend-Schema inkl. Skonto/Zahlungsziel/Zahlungsart).
 - Playwright-Gates: `fachliche-vertiefung-erloeskennziffern.spec.ts`, `fachliche-vertiefung-zahlungsbedingungen.spec.ts`.
 
+Wave-10-EKZZ (Slice `FACHLICHE-VERTIEFUNG-UX-W10-EKZZ-001`, 2026-05-23):
+
+- Erlöskontenzuordnung: `packages/frontend-web/src/pages/fibu/erloeskontenzuordnung.tsx` unter `/fibu/erloeskontenzuordnung`.
+- Zuordnungen: `GET` und `POST` (Upsert) gegen `/api/v1/fibu/erloeskennziffern/zuordnungen` — kein `PUT`/`DELETE` im Backend.
+- Lookup: `GET` gegen `/api/v1/fibu/erloeskennziffern/lookup` mit Query-Parametern `ekz_nr`, optional `steuerschluessel`, `erlösklasse`, `buchungsklasse`, `datum`.
+- Playwright-Gate: `fachliche-vertiefung-ekzz.spec.ts`.
+
 Waves 11-13 bleiben backend-only. Das ist kein verdeckter Abschluss, sondern dokumentierter Produktumfang.
 
 ## Gate-Status
@@ -68,6 +75,7 @@ Waves 11-13 bleiben backend-only. Das ist kein verdeckter Abschluss, sondern dok
 | Frontend-E2E fuer Warengruppen | geschlossen | Playwright-Test prueft API-Pfad, sichtbare Felder und Create/Update/Delete-Flows mit deterministischem Route-Mock. |
 | Frontend-E2E fuer Erlöskennziffern | geschlossen | Playwright-Test prueft `/api/v1/fibu/erloeskennziffern` inkl. CRUD. |
 | Frontend-E2E fuer Zahlungsbedingungen | geschlossen | Playwright-Test prueft `/api/v1/fibu/zahlungsbedingungen` inkl. CRUD. |
+| Frontend-E2E fuer Erlöskontenzuordnung (EKZZ) | geschlossen | Playwright-Test prueft `/zuordnungen` und `/lookup` inkl. Upsert und Lookup. |
 | Fach-UAT fuer alle Referenzseiten | geschlossen als UAT-Paket | Matrix, Smoke-/Schema-/E2E-/DB-Gates sind dokumentiert; externe Fachsignatur bleibt eine Business-Abnahme, kein fehlendes Repo-Artefakt. |
 | Weitere Stammdaten-Masken (Wave 11-13) | geschlossen als Scope-Entscheidung | Backend-Vertraege implementiert; Vollmasken nur bei Bedarf als eigene UI-Slices. |
 
@@ -91,7 +99,10 @@ pytest tests/test_fachliche_vertiefung_db_integration.py -q --no-cov
 $env:RUN_DB_INTEGRATION="1"; $env:DATABASE_URL="postgresql+psycopg://..."; pytest tests/test_fachliche_vertiefung_db_integration.py -q --no-cov
 pnpm --filter @valero-neuroerp/frontend-web type-check
 pnpm --filter @valero-neuroerp/frontend-web exec playwright test tests/e2e/fachliche-vertiefung-warengruppen.spec.ts --project=chromium
+pnpm --filter @valero-neuroerp/frontend-web exec playwright test tests/e2e/fachliche-vertiefung-erloeskennziffern.spec.ts --project=chromium
+pnpm --filter @valero-neuroerp/frontend-web exec playwright test tests/e2e/fachliche-vertiefung-zahlungsbedingungen.spec.ts --project=chromium
+pnpm --filter @valero-neuroerp/frontend-web exec playwright test tests/e2e/fachliche-vertiefung-ekzz.spec.ts --project=chromium
 python scripts/agent_workboard_supervisor.py validate
-node scripts/docs-markdown-check.cjs docs/FACHLICHE-VERTIEFUNG-ABNAHME.md docs/agent-ops/active-workboard.md docs/agent-ops/slices/QA-FACHLICHE-VERTIEFUNG-WAVES-001.yaml docs/agent-ops/slices/QA-FACHLICHE-VERTIEFUNG-GATES-001.yaml
+node scripts/docs-markdown-check.cjs docs/FACHLICHE-VERTIEFUNG-ABNAHME.md docs/agent-ops/active-workboard.md docs/agent-ops/slices/QA-FACHLICHE-VERTIEFUNG-WAVES-001.yaml docs/agent-ops/slices/QA-FACHLICHE-VERTIEFUNG-GATES-001.yaml docs/agent-ops/slices/FACHLICHE-VERTIEFUNG-UX-W10-EKZZ-001.yaml
 git diff --check
 ```

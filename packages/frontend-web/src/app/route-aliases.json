@@ -1017,6 +1017,10 @@
       "path": "fibu/erloeskennziffern"
     },
     {
+      "module": "@/pages/fibu/erloeskontenzuordnung",
+      "path": "fibu/erloeskontenzuordnung"
+    },
+    {
       "module": "@/pages/fibu/guv",
       "path": "fibu/guv"
     },

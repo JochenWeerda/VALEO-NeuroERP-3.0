@@ -72,7 +72,19 @@ Stand: `2026-05-23`
 **Abnahmekriterien:** Beide Masken CRUD-faehig gegen echte Endpoints; Warengruppen ohne Regression; E2E + Typecheck gruen.
 **Erledigt:** API-Hooks in fibu.ts; erloeskennziffern.tsx (ekz_nr, bezeichnung); zahlungsbedingungen.tsx (ZABD-Felder laut Schema); Navigation/Routes; Playwright-Gates.
 **Checks:** type-check; warengruppen/erloeskennziffern/zahlungsbedingungen Playwright; workboard validate
-**Offene Risiken:** Erlöskontenzuordnung (EKZZ) bleibt backend-only; Waves 11-13 unveraendert backend-only.
+**Offene Risiken:** Keine — EKZZ ist als eigener Slice abgeschlossen; Waves 11-13 unveraendert backend-only.
+
+## FACHLICHE-VERTIEFUNG-UX-W10-EKZZ-001
+
+**Von:** Cursor (Composer 2.5)
+**Owner:** Cursor
+**Stand:** abgeschlossen 2026-05-23
+**Ziel des Slices:** Produktive EKZZ-Maske fuer Erlöskontenzuordnung und Konto-Lookup gegen Wave-10-FIBU-Backend-Vertraege.
+**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/agent-ops/slices/FACHLICHE-VERTIEFUNG-UX-W10-EKZZ-001.yaml`, `docs/FACHLICHE-VERTIEFUNG-ABNAHME.md`, `packages/frontend-web/src/lib/api/fibu.ts`, `packages/frontend-web/src/pages/fibu/erloeskontenzuordnung.tsx`, Navigation/Routes, E2E-Spec
+**Abnahmekriterien:** Zuordnungen Liste/Filter/Upsert; Lookup nutzbar; keine Regression Wave-10-Masken; E2E + Typecheck gruen.
+**Erledigt:** API-Hooks; erloeskontenzuordnung.tsx unter `/fibu/erloeskontenzuordnung`; Navigation FIBU; Playwright-Gate `fachliche-vertiefung-ekzz.spec.ts`.
+**Checks:** type-check; warengruppen/erloeskennziffern/zahlungsbedingungen/ekzz Playwright; workboard validate; docs-markdown-check
+**Offene Risiken:** Kein DELETE-Endpunkt im Backend — UI bietet nur Upsert/Update, kein Loeschen.
 
 ## FRONTEND-DOMAIN-AUDIT-REPAIR-001
 

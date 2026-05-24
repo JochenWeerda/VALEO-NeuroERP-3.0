@@ -34,6 +34,10 @@ export const entries: AliasGroupRouteEntry[] = [
     "path": "erloeskennziffern"
   },
   {
+    "module": "@/pages/fibu/erloeskontenzuordnung",
+    "path": "erloeskontenzuordnung"
+  },
+  {
     "module": "@/pages/fibu/guv",
     "path": "guv"
   },
