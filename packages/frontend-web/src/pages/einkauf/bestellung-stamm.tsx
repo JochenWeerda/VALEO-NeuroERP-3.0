@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { ObjectPage } from '@/components/mask-builder'
-import { useMaskData } from '@/components/mask-builder/hooks'
+import { useMaskData, useMaskActions } from '@/components/mask-builder/hooks'
 import { MaskConfig } from '@/components/mask-builder/types'
 import { getEntityTypeLabel } from '@/features/crud/utils/i18n-helpers'
 import { CrudAuditTrailPanel } from '@/features/crud/components'
@@ -353,6 +353,33 @@ export default function BestellungStammPage(): JSX.Element {
     }
   }
 
+  const { handleAction, loadingActionKey } = useMaskActions(async (key: string, formData: any) => {
+    const purchaseOrderId = id || formData?.id || data?.id || data?.nummer || data?.purchaseOrderNumber
+    if (key === 'freigeben') {
+      if (!purchaseOrderId) {
+        toast({
+          variant: 'destructive',
+          title: 'Freigabe nicht moeglich',
+          description: 'Die Bestellung muss zuerst gespeichert werden.',
+        })
+        return
+      }
+      await approvePurchaseOrder.mutateAsync(String(purchaseOrderId))
+      toast({ title: 'Bestellung freigegeben', description: `Bestellung ${data?.nummer || data?.purchaseOrderNumber || purchaseOrderId} wurde freigegeben.` })
+      navigate('/einkauf/bestellungen')
+    } else if (key === 'stornieren') {
+      setStornoDialogOpen(true)
+    } else if (key === 'drucken') {
+      if (purchaseOrderId) {
+        window.open(`/api/mcp/documents/purchase_order/${purchaseOrderId}/print?locale=${sendLanguage}`, '_blank')
+      }
+    } else if (key === 'senden') {
+      if (formData?.lieferantId || data?.lieferantId) {
+        setSendDialogOpen(true)
+      }
+    }
+  })
+
   const handleStorno = async () => {
     if (!stornoReason || stornoReason.length < 10) {
       toast({
@@ -523,47 +550,8 @@ export default function BestellungStammPage(): JSX.Element {
         onSave={handleSave}
         onCancel={handleCancel}
         isLoading={loading}
-        onAction={async (key, formData) => {
-          const purchaseOrderId = id || formData?.id || data?.id || data?.nummer || data?.purchaseOrderNumber
-          if (key === 'freigeben') {
-            if (!purchaseOrderId) {
-              toast({
-                variant: 'destructive',
-                title: 'Freigabe nicht moeglich',
-                description: 'Die Bestellung muss zuerst gespeichert werden.',
-              })
-              return
-            }
-            setLoading(true)
-            try {
-              await approvePurchaseOrder.mutateAsync(String(purchaseOrderId))
-              toast({ title: 'Bestellung freigegeben', description: `Bestellung ${data?.nummer || data?.purchaseOrderNumber || purchaseOrderId} wurde freigegeben.` })
-              navigate('/einkauf/bestellungen')
-            } catch (error: any) {
-              toast({
-                variant: 'destructive',
-                title: 'Freigabe fehlgeschlagen',
-                description: error.response?.data?.detail || error.message,
-              })
-            } finally {
-              setLoading(false)
-            }
-            return
-          }
-          if (key === 'stornieren') {
-            setStornoDialogOpen(true)
-            return
-          }
-          if (key === 'drucken') {
-            if (purchaseOrderId) {
-              window.open(`/api/mcp/documents/purchase_order/${purchaseOrderId}/print?locale=${sendLanguage}`, '_blank')
-            }
-          } else if (key === 'senden') {
-            if (formData?.lieferantId || data?.lieferantId) {
-              setSendDialogOpen(true)
-            }
-          }
-        }}
+        onAction={handleAction}
+        loadingActionKey={loadingActionKey}
       />
 
       {/* Change-Log Panel (wenn ID vorhanden) */}
