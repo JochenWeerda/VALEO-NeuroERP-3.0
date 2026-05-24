@@ -22,6 +22,30 @@ import { useTenant } from '@/hooks/useTenant';
 import { ModuleToolbar } from '@/components/navigation/ModuleToolbar';
 import { apiClient } from '@/lib/api-client';
 
+// API response type (server returns strings for dates, all fields optional)
+interface SaatgutApiData {
+  artikelnummer?: string
+  name?: string
+  sorte?: string
+  art?: string
+  zuechter?: string
+  zulassungsnummer?: string
+  bsa_zulassung?: boolean
+  eu_zulassung?: boolean
+  ablauf_zulassung?: string | null
+  tkm?: number | null
+  keimfaehigkeit?: number | null
+  aussaatstaerke?: number | null
+  ek_preis?: number | null
+  vk_preis?: number | null
+  waehrung?: string
+  mindestabnahme?: number | null
+  lagerbestand?: number
+  reserviert?: number
+  verfuegbar?: number
+  lagerort?: string
+}
+
 // Form Data Interface
 interface SaatgutFormData {
   artikelnummer: string;
@@ -82,9 +106,12 @@ const SaatgutStammPage: React.FC = () => {
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   // Queries
-  const { data: saatgut, isLoading } = useQuery({
+  const { data: saatgut, isLoading } = useQuery<SaatgutApiData>({
     queryKey: ['saatgut', id],
-    queryFn: async () => { const r = await apiClient.get(`/api/v1/agrar/saatgut/${id}`); return r.data },
+    queryFn: async () => {
+      const r = await apiClient.get<SaatgutApiData>(`/api/v1/agrar/saatgut/${id}`)
+      return r.data
+    },
     enabled: isEditing && !!id,
   });
 

@@ -224,6 +224,15 @@ export const RAW_NAV_SECTIONS: RawNavItem[] = [
         keywords: ['zuschlag', 'abschlag', 'gruppen', 'klassen', 'konditionen', 'zagr', 'zakl'],
         mcp: { businessDomain: 'agrar', scope: 'agrar:read' },
       },
+      {
+        id: 'rabattgruppen',
+        label: 'Rabattgruppen & -klassen [RAG/RAK]',
+        icon: Scale,
+        module: '@/pages/preise/rabattgruppen',
+        preferredPath: 'preise/rabattgruppen',
+        keywords: ['rabatt', 'rabattgruppe', 'rabattklasse', 'rag', 'rak', 'rabattsatz', 'konditionen'],
+        mcp: { businessDomain: 'agrar', scope: 'agrar:read' },
+      },
     ],
   },
   {

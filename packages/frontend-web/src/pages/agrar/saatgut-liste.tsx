@@ -75,9 +75,12 @@ export default function SaatgutListePage(): JSX.Element {
   const { toast } = useToast()
   const [search, setSearch] = useState('')
 
-  const { data: saatgutList, isLoading } = useQuery({
+  const { data: saatgutList, isLoading } = useQuery<{ items: SaatgutItem[] }>({
     queryKey: ['saatgut-list'],
-    queryFn: async () => { const r = await apiClient.get('/api/v1/agrar/saatgut?limit=100'); return r.data },
+    queryFn: async () => {
+      const r = await apiClient.get<{ items: SaatgutItem[] }>('/api/v1/agrar/saatgut?limit=100')
+      return r.data
+    },
   })
 
   const columns = useMemo(

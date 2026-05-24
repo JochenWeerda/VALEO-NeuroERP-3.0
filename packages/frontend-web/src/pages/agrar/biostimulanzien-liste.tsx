@@ -159,10 +159,10 @@ const BiostimulanzienListePage: React.FC = () => {
   const [search, setSearch] = useState<string>('');
 
   // Queries
-  const { data: biostimulanzienList, isLoading } = useQuery({
+  const { data: biostimulanzienList, isLoading } = useQuery<{ items: BiostimulanzienItem[] }>({
     queryKey: ['biostimulanzien-list'],
     queryFn: async () => {
-      const r = await apiClient.get('/api/v1/agrar/biostimulanzien?limit=100')
+      const r = await apiClient.get<{ items: BiostimulanzienItem[] }>('/api/v1/agrar/biostimulanzien?limit=100')
       return r.data
     },
   });

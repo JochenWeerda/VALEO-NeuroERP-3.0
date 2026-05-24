@@ -6,7 +6,7 @@ import { ObjectPage } from '@/components/mask-builder'
 import { useMaskData, useMaskActions } from '@/components/mask-builder/hooks'
 import { MaskConfig } from '@/components/mask-builder/types'
 import { getEntityTypeLabel, getDetailTitle, getSuccessMessage, getErrorMessage, getStatusLabel } from '@/features/crud/utils/i18n-helpers'
-import { createApiClient } from '@/components/mask-builder/utils/api'
+
 import { apiClient as httpClient } from '@/lib/api-client'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -16,8 +16,6 @@ import { useTenant } from '@/hooks/useTenant'
 import { useAuth } from '@/hooks/useAuth'
 import { ArrowLeft, History, Download, FileText } from 'lucide-react'
 
-// API Client
-const apiClient = createApiClient('/api/v1/gdpr')
 
 // Zod-Schema für GDPR-Requests
 const createGDPRRequestSchema = (t: any) => z.object({
@@ -241,7 +239,7 @@ function GDPRRequestHistoryTab({ requestId }: { requestId: string }) {
   useEffect(() => {
     const loadHistory = async () => {
       try {
-        const response = await apiClient.get(`/requests/${requestId}/history`)
+        const response = await httpClient.get(`/api/v1/gdpr/requests/${requestId}/history`)
         if (response.success) {
           setHistory(response.data || [])
         }
@@ -365,7 +363,7 @@ export default function GDPRRequestDetailPage(): JSX.Element {
     if (action === 'verify') {
       const method = prompt('Verifizierungsmethode wählen (email, id_card, manual, other):', 'manual') || 'manual'
       try {
-        await apiClient.post(`/requests/${id}/verify`, {
+        await httpClient.post(`/api/v1/gdpr/requests/${id}/verify`, {
           verification_method: method,
           verification_token: null
         })
@@ -377,7 +375,7 @@ export default function GDPRRequestDetailPage(): JSX.Element {
     } else if (action === 'generateExport') {
       const format = prompt('Export-Format wählen (json, csv, pdf):', 'json') || 'json'
       try {
-        await apiClient.post(`/requests/${id}/export`, {
+        await httpClient.post(`/api/v1/gdpr/requests/${id}/export`, {
           format: format,
           data_areas: ['all']
         })
@@ -389,7 +387,7 @@ export default function GDPRRequestDetailPage(): JSX.Element {
     } else if (action === 'deleteData') {
       if (confirm(t('crud.gdpr.confirmDeleteData'))) {
         try {
-          await apiClient.post(`/requests/${id}/delete`, {
+          await httpClient.post(`/api/v1/gdpr/requests/${id}/delete`, {
             reason: t('crud.gdpr.gdprRequest'),
             anonymize_only: true
           })
@@ -403,7 +401,7 @@ export default function GDPRRequestDetailPage(): JSX.Element {
       const reason = prompt(t('crud.gdpr.enterRejectionReason'))
       if (reason) {
         try {
-          await apiClient.post(`/requests/${id}/reject`, { rejection_reason: reason })
+          await httpClient.post(`/api/v1/gdpr/requests/${id}/reject`, { rejection_reason: reason })
           toast({ title: t('crud.messages.requestRejected') })
           window.location.reload()
         } catch (error) {

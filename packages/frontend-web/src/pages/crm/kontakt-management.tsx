@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { ListReport } from '@/components/mask-builder'
 import { useMaskActions } from '@/components/mask-builder/hooks'
 import { ListConfig } from '@/components/mask-builder/types'
-import { createApiClient } from '@/components/mask-builder/utils/api'
+import { apiClient } from '@/lib/api-client'
 import { toast } from '@/hooks/use-toast'
 import { api } from '@/lib/axios'
 import { OperationalCaseHeader } from '@/components/workflow/OperationalCaseHeader'
@@ -14,7 +14,6 @@ import { OperationalTimeline } from '@/components/workflow/OperationalTimeline'
 import { summarizeCustomerOperations } from '@/lib/domain-depth'
 import { normalizeOperationalStatus } from '@/lib/operational-status'
 
-const apiClient = createApiClient('/api/v1/crm')
 
 const createKontaktListConfig = (handlers: {
   exportSelected: (items: any[]) => void
@@ -237,7 +236,7 @@ export default function KontaktManagementPage(): JSX.Element {
   const loadData = async () => {
     setLoading(true)
     try {
-      const response = await apiClient.get('/kontakte')
+      const response = await apiClient.get('/api/v1/crm/kontakte')
       if (response.success) {
         setData((response.data as any).data || [])
         setTotal((response.data as any).total || 0)
@@ -275,7 +274,7 @@ export default function KontaktManagementPage(): JSX.Element {
     if (!confirm(`Kontakt "${item.name}" wirklich loeschen?`)) return
     void withPending(String(item.id), async () => {
       try {
-        await apiClient.delete(`/kontakte/${item.id}`)
+        await apiClient.delete(`/api/v1/crm/kontakte/${item.id}`)
         await loadData()
       } catch {
         toast({
@@ -397,7 +396,7 @@ export default function KontaktManagementPage(): JSX.Element {
         deactivateSelected: async (items) => {
           if (!ensureSelection(items)) return
           try {
-            await Promise.all(items.map((item) => apiClient.put(`/kontakte/${item.id}`, { status: 'inaktiv' })))
+            await Promise.all(items.map((item) => apiClient.put(`/api/v1/crm/kontakte/${item.id}`, { status: 'inaktiv' })))
             toast({
               title: 'Kontakte deaktiviert',
               description: `${items.length} Kontakt(e) wurden auf inaktiv gesetzt.`,

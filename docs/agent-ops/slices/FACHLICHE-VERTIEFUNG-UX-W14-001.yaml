@@ -1,0 +1,45 @@
+id: FACHLICHE-VERTIEFUNG-UX-W14-001
+title: "Fachliche Vertiefung Wave 14 UX: Rabattgruppen und Betriebsstaetten"
+status: abgeschlossen
+owner: Claude Sonnet 4.6
+priority: high
+
+goal: >
+  UI fuer Rabattgruppen/klassen [RAG/RAK] und Betriebsstaetten/Filialen [FILS]
+  bereitstellen. Beide Entitaeten haben vollstaendige Backend-CRUD-Endpoints
+  seit Wave 4 (Rabatte) und Wave 9 (Betriebsstaetten). Diese Wave schliesst
+  die Frontend-Luecken.
+
+file_ownership:
+  - docs/agent-ops/slices/FACHLICHE-VERTIEFUNG-UX-W14-001.yaml
+  - docs/agent-ops/active-workboard.md
+  - packages/frontend-web/src/lib/api/rabattgruppen.ts
+  - packages/frontend-web/src/lib/api/betriebsstaetten.ts
+  - packages/frontend-web/src/pages/preise/rabattgruppen.tsx
+  - packages/frontend-web/src/pages/stammdaten/betriebsstaetten.tsx
+  - packages/frontend-web/src/app/navigation/domains/commercial.tsx
+  - packages/frontend-web/src/app/navigation/domains/core.tsx
+  - packages/frontend-web/src/app/route-builders/alias-groups/generated/preise.ts
+  - packages/frontend-web/src/app/route-builders/alias-groups/generated/stammdaten.ts
+  - packages/frontend-web/src/app/route-builders/auto-groups/generated/preise.ts
+  - packages/frontend-web/src/app/route-builders/auto-groups/generated/stammdaten.ts
+  - packages/frontend-web/tests/e2e/fachliche-vertiefung-rabattgruppen.spec.ts
+  - packages/frontend-web/tests/e2e/fachliche-vertiefung-betriebsstaetten.spec.ts
+
+acceptance_criteria:
+  - "rabattgruppen.ts: useRabattgruppen, useCreateRabattgruppe, useDeleteRabattgruppe vorhanden"
+  - "rabattgruppen.ts: useRabattklassen, useCreateRabattklasse, useDeleteRabattklasse vorhanden"
+  - "rabattgruppen.ts: useRabattsaetze, useCreateRabattsatz, useDeleteRabattsatz vorhanden"
+  - "betriebsstaetten.ts: useBetriebsstaetten, useCreateBetriebsstaette, useUpdateBetriebsstaette, useDeleteBetriebsstaette vorhanden"
+  - "RabattgruppenPage: 3 Tabs (Gruppen, Klassen, Saetze) mit Formular und Tabelle"
+  - "BetriebsstaettenPage: Liste, Anlegen-Formular, Edit-Dialog mit allen Feldern"
+  - "Navigation commercial.tsx: Preise-Sektion enthaelt Rabattgruppen-Eintrag"
+  - "Navigation core.tsx: Administration enthaelt Betriebsstaetten-Eintrag"
+  - "Route-Builder-Eintraege fuer preise/rabattgruppen und stammdaten/betriebsstaetten"
+  - "E2E-Gate rabattgruppen: zeigt Gruppen-Liste, legt neue an, prueeft Klassen-Tab, Saetze-Tab"
+  - "E2E-Gate betriebsstaetten: zeigt Liste mit Zentrale/Filiale-Badge, legt neue an"
+
+risks:
+  - "Checkbox-Komponente muss in den Frontend-UI-Paketen vorhanden sein"
+  - "Dialog-Komponente muss vorhanden sein"
+  - "E2E-Pfade muessen mit Vite-Dev-Server-Routing uebereinstimmen"
