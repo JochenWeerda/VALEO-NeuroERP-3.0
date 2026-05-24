@@ -22,6 +22,10 @@ export const entries: AutoGroupRouteEntry[] = [
     "path": "lagerbewegungen"
   },
   {
+    "module": "@/pages/lager/partiestamm",
+    "path": "partiestamm"
+  },
+  {
     "module": "@/pages/lager/lagerplaetze",
     "path": "lagerplaetze"
   },

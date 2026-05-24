@@ -1021,6 +1021,14 @@
       "path": "fibu/erloeskontenzuordnung"
     },
     {
+      "module": "@/pages/fibu/forderungsgruppen",
+      "path": "fibu/forderungsgruppen"
+    },
+    {
+      "module": "@/pages/fibu/periodische-buchungen",
+      "path": "fibu/periodische-buchungen"
+    },
+    {
       "module": "@/pages/fibu/guv",
       "path": "fibu/guv"
     },
@@ -1323,6 +1331,10 @@
     {
       "module": "@/pages/lager/lagerbewegungen",
       "path": "lager/lagerbewegungen"
+    },
+    {
+      "module": "@/pages/lager/partiestamm",
+      "path": "lager/partiestamm"
     },
     {
       "module": "@/pages/lager/lagerplaetze",

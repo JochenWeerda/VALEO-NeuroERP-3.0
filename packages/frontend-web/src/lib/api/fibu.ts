@@ -166,6 +166,11 @@ export const fibuKeys = {
   erloeskontenzuordnungen: (filters?: { ekz_id?: string; steuerschluessel?: string }) =>
     [...fibuKeys.all, 'erloeskontenzuordnungen', filters ?? {}] as const,
   erloeskontenLookup: () => [...fibuKeys.all, 'erloeskonten-lookup'] as const,
+  forderungsgruppen: () => [...fibuKeys.all, 'forderungsgruppen'] as const,
+  periodischeBuchungen: (filters?: { gesperrt?: boolean; turnus?: string }) =>
+    [...fibuKeys.all, 'periodische-buchungen', filters ?? {}] as const,
+  periodischeBuchungenFaellig: (stichtag?: string) =>
+    [...fibuKeys.all, 'periodische-buchungen-faellig', stichtag ?? ''] as const,
 }
 
 const EMPTY_RECORD: Record<string, unknown> = {}
@@ -1017,6 +1022,189 @@ export function useErloeskontenLookup() {
           `/api/v1/fibu/erloeskennziffern/lookup?${search.toString()}`,
         )
       ).data
+    },
+  })
+}
+
+// ── Wave 11: Forderungsgruppen + Periodische Buchungen ───────────────────────
+
+export type Forderungsgruppe = {
+  id: string
+  gruppe_nr: string
+  bezeichnung: string
+  konto_forderungen: string | null
+  konto_verbindlichkeiten: string | null
+  konto_sammel_1: string | null
+  konto_sammel_2: string | null
+  konto_sammel_3: string | null
+  aktiv: boolean
+  created_at: string
+}
+
+export type ForderungsgruppeCreate = {
+  gruppe_nr: string
+  bezeichnung: string
+  konto_forderungen?: string | null
+  konto_verbindlichkeiten?: string | null
+  konto_sammel_1?: string | null
+  konto_sammel_2?: string | null
+  konto_sammel_3?: string | null
+}
+
+export type PeriodischeBuchung = {
+  id: string
+  bezeichnung: string
+  vorgangsklasse: string
+  konto: string
+  gegenkonto: string
+  buchungstext: string | null
+  betrag: string
+  turnus: string
+  gueltig_ab: string
+  gueltig_bis: string | null
+  gesperrt: boolean
+  kostenstelle: string | null
+  aktiv: boolean
+  created_at: string
+}
+
+export type PeriodischeBuchungCreate = {
+  bezeichnung: string
+  vorgangsklasse?: string
+  konto: string
+  gegenkonto: string
+  buchungstext?: string | null
+  betrag: number
+  turnus?: string
+  gueltig_ab: string
+  gueltig_bis?: string | null
+  gesperrt?: boolean
+  kostenstelle?: string | null
+}
+
+export type FaelligePeriodischeBuchung = {
+  id: string
+  bezeichnung: string
+  konto: string
+  gegenkonto: string
+  betrag: string
+  vorgangsklasse: string
+  turnus: string
+  gueltig_ab: string
+}
+
+export const PERIODISCHE_TURNUS = ['monatlich', 'quartalsweise', 'halbjaehrlich', 'jaehrlich', 'einmalig'] as const
+export const PERIODISCHE_VORGANGSKLASSEN = ['ZA', 'ER', 'AR', 'UM'] as const
+
+export function useForderungsgruppen() {
+  return useQuery({
+    queryKey: fibuKeys.forderungsgruppen(),
+    queryFn: async () =>
+      (await apiClient.get<Forderungsgruppe[]>('/api/v1/fibu/forderungsgruppen')).data,
+    placeholderData: [],
+    staleTime: 5 * 60 * 1000,
+  })
+}
+
+export function useCreateForderungsgruppe() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async (payload: ForderungsgruppeCreate) =>
+      (await apiClient.post<Forderungsgruppe>('/api/v1/fibu/forderungsgruppen', payload)).data,
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: fibuKeys.forderungsgruppen() }),
+  })
+}
+
+export function useUpdateForderungsgruppe() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async ({ gruppe_nr, payload }: { gruppe_nr: string; payload: ForderungsgruppeCreate }) =>
+      (await apiClient.put<Forderungsgruppe>(
+        `/api/v1/fibu/forderungsgruppen/${encodeURIComponent(gruppe_nr)}`,
+        payload,
+      )).data,
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: fibuKeys.forderungsgruppen() }),
+  })
+}
+
+export function useDeleteForderungsgruppe() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async (gruppe_nr: string) =>
+      apiClient.delete(`/api/v1/fibu/forderungsgruppen/${encodeURIComponent(gruppe_nr)}`),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: fibuKeys.forderungsgruppen() }),
+  })
+}
+
+export function usePeriodischeBuchungen(filters?: { gesperrt?: boolean; turnus?: string }) {
+  return useQuery({
+    queryKey: fibuKeys.periodischeBuchungen(filters),
+    queryFn: async () => {
+      const params = new URLSearchParams()
+      if (filters?.gesperrt !== undefined) params.set('gesperrt', String(filters.gesperrt))
+      if (filters?.turnus) params.set('turnus', filters.turnus)
+      const suffix = params.size > 0 ? `?${params.toString()}` : ''
+      return (
+        await apiClient.get<PeriodischeBuchung[]>(`/api/v1/fibu/periodische-buchungen${suffix}`)
+      ).data
+    },
+    placeholderData: [],
+    staleTime: 5 * 60 * 1000,
+  })
+}
+
+export function useFaelligePeriodischeBuchungen(stichtag?: string) {
+  return useQuery({
+    queryKey: fibuKeys.periodischeBuchungenFaellig(stichtag),
+    queryFn: async () => {
+      const suffix = stichtag ? `?stichtag=${encodeURIComponent(stichtag)}` : ''
+      return (
+        await apiClient.get<FaelligePeriodischeBuchung[]>(
+          `/api/v1/fibu/periodische-buchungen/faellig${suffix}`,
+        )
+      ).data
+    },
+    placeholderData: [],
+    staleTime: 60 * 1000,
+  })
+}
+
+export function useCreatePeriodischeBuchung() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async (payload: PeriodischeBuchungCreate) =>
+      (await apiClient.post<PeriodischeBuchung>('/api/v1/fibu/periodische-buchungen', payload)).data,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [...fibuKeys.all, 'periodische-buchungen'] })
+      queryClient.invalidateQueries({ queryKey: [...fibuKeys.all, 'periodische-buchungen-faellig'] })
+    },
+  })
+}
+
+export function useSperrenPeriodischeBuchung() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async ({ id, gesperrt }: { id: string; gesperrt: boolean }) =>
+      (
+        await apiClient.patch<{ id: string; gesperrt: boolean }>(
+          `/api/v1/fibu/periodische-buchungen/${encodeURIComponent(id)}/sperren?gesperrt=${gesperrt}`,
+        )
+      ).data,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [...fibuKeys.all, 'periodische-buchungen'] })
+      queryClient.invalidateQueries({ queryKey: [...fibuKeys.all, 'periodische-buchungen-faellig'] })
+    },
+  })
+}
+
+export function useDeletePeriodischeBuchung() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async (id: string) =>
+      apiClient.delete(`/api/v1/fibu/periodische-buchungen/${encodeURIComponent(id)}`),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [...fibuKeys.all, 'periodische-buchungen'] })
+      queryClient.invalidateQueries({ queryKey: [...fibuKeys.all, 'periodische-buchungen-faellig'] })
     },
   })
 }
