@@ -10,13 +10,11 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { Badge } from '@/components/ui/badge'
 import { NativeSelect } from '@/components/ui/native-select'
 import { ArrowLeft, ArrowRight, Check, Mail, Users, Calendar, BarChart3, Settings } from 'lucide-react'
-import { createApiClient } from '@/components/mask-builder/utils/api'
+import { apiClient } from '@/lib/api-client'
 import { formatCurrency } from '@/components/mask-builder/utils/formatting'
 import { toast } from '@/hooks/use-toast'
 import { useTenant } from '@/hooks/useTenant'
 
-// API Client
-const apiClient = createApiClient('/api/v1/marketing')
 
 type CampaignBuilderStep = 'type' | 'template' | 'segment' | 'abtest' | 'schedule' | 'review'
 
@@ -94,16 +92,12 @@ export default function CampaignBuilderPage(): JSX.Element {
     const loadData = async () => {
       try {
         const [templatesRes, segmentsRes] = await Promise.all([
-          apiClient.get<CampaignTemplateSummary[]>('/campaigns/templates', {
-            params: { tenant_id: tenantId }
-          }),
-          apiClient.get<CampaignSegmentSummary[]>('/segments', {
-            params: { tenant_id: tenantId }
-          })
+          apiClient.get('/api/v1/crm/campaigns/templates', { params: { tenant_id: tenantId } }),
+          apiClient.get('/api/v1/crm/segments', { params: { tenant_id: tenantId } })
         ])
 
-        setTemplates(templatesRes.data ?? [])
-        setSegments(segmentsRes.data ?? [])
+        setTemplates(Array.isArray(templatesRes.data) ? templatesRes.data : (templatesRes.data?.data ?? []))
+        setSegments(Array.isArray(segmentsRes.data) ? segmentsRes.data : (segmentsRes.data?.data ?? []))
       } catch {
         // Vorlagen/Segmente bleiben leer — Formular ist weiter bedienbar
       }
@@ -174,10 +168,10 @@ export default function CampaignBuilderPage(): JSX.Element {
         budget: campaignData.budget || null,
       }
 
-      const response = await apiClient.post<{ id?: string; success?: boolean; data?: { id?: string } }>('/campaigns', payload)
-      
-      if (response.success || response.id) {
-        const campaignId = response.success ? response.data?.id || response.id : response.id
+      const res = await apiClient.post('/api/v1/crm/campaigns', payload)
+      const response = res.data
+      if (response?.id || response?.data?.id) {
+        const campaignId = response.id || response.data?.id
         
         toast({
           title: t('crud.messages.createSuccess', { entityType: t('crud.entities.campaign') }),

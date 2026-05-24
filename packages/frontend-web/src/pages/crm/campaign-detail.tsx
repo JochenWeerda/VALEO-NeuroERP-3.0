@@ -6,7 +6,7 @@ import { useMaskData } from '@/components/mask-builder/hooks'
 
 import { MaskConfig } from '@/components/mask-builder/types'
 import { getEntityTypeLabel, getDetailTitle, getSuccessMessage, getErrorMessage } from '@/features/crud/utils/i18n-helpers'
-import { createApiClient } from '@/components/mask-builder/utils/api'
+import { apiClient } from '@/lib/api-client'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -20,7 +20,6 @@ const CampaignDetailPerformanceChart = lazy(() =>
   import('@/pages/crm/charts/CampaignDetailPerformanceChart').then((module) => ({ default: module.default })),
 )
 
-const apiClient = createApiClient('/api/v1/marketing')
 
 function validateCampaignForm(formData: Record<string, any>, t: any): { valid: boolean; errors: string[] } {
   const errorMessage = t('crud.messages.validationError')
@@ -133,11 +132,9 @@ function CampaignRecipientsList({ campaignId }: { campaignId: string }) {
   useEffect(() => {
     const loadRecipients = async () => {
       try {
-        const response = await apiClient.get(`/campaigns/${campaignId}/recipients`)
-        if (response.success || Array.isArray(response)) {
-          const data = response.success ? response.data : response
-          setRecipients(Array.isArray(data) ? data : [])
-        }
+        const response = await apiClient.get(`/api/v1/crm/campaigns/${campaignId}/recipients`)
+        const data = response.data
+        setRecipients(Array.isArray(data) ? data : (data?.items ?? []))
       } catch (error: any) {
         toast({ variant: 'destructive', title: 'Fehler beim Laden der Empfänger', description: error?.message })
       } finally {
@@ -185,16 +182,11 @@ function CampaignPerformanceTab({ campaignId }: { campaignId: string }) {
   useEffect(() => {
     const loadPerformance = async () => {
       try {
-        const response = await apiClient.get(`/campaigns/${campaignId}/performance`)
-        if (response.success || Array.isArray(response)) {
-          const data = response.success ? response.data : response
-          setPerformance(Array.isArray(data) ? data : [])
-        }
-        const campaignResponse = await apiClient.get(`/campaigns/${campaignId}`)
-        if (campaignResponse.success || campaignResponse.id) {
-          const campaign = campaignResponse.success ? campaignResponse.data : campaignResponse
-          setMetrics(campaign)
-        }
+        const response = await apiClient.get(`/api/v1/crm/campaigns/${campaignId}/analytics`)
+        const perfData = response.data
+        setPerformance(Array.isArray(perfData?.timeline) ? perfData.timeline : [])
+        const campaignResponse = await apiClient.get(`/api/v1/crm/campaigns/${campaignId}`)
+        setMetrics(campaignResponse.data)
       } catch (error: any) {
         toast({ variant: 'destructive', title: 'Fehler beim Laden der Performance', description: error?.message })
       } finally {
@@ -257,11 +249,9 @@ function CampaignEventsList({ campaignId }: { campaignId: string }) {
   useEffect(() => {
     const loadEvents = async () => {
       try {
-        const response = await apiClient.get(`/campaigns/${campaignId}/events`)
-        if (response.success || Array.isArray(response)) {
-          const data = response.success ? response.data : response
-          setEvents(Array.isArray(data) ? data : [])
-        }
+        const response = await apiClient.get(`/api/v1/crm/campaigns/${campaignId}/recipients`)
+        const evData = response.data
+        setEvents(Array.isArray(evData) ? evData : (evData?.items ?? []))
       } catch (error: any) {
         toast({ variant: 'destructive', title: 'Fehler beim Laden der Events', description: error?.message })
       } finally {
@@ -340,7 +330,7 @@ export default function CampaignDetailPage(): JSX.Element {
     if (!id || pendingAction !== null) return
     setPendingAction('start')
     try {
-      await apiClient.post(`/campaigns/${id}/start`)
+      await apiClient.post(`/api/v1/crm/campaigns/${id}/activate`)
       toast({ title: t('crud.messages.campaignStarted') })
       window.location.reload()
     } catch {
@@ -354,7 +344,7 @@ export default function CampaignDetailPage(): JSX.Element {
     if (!id || pendingAction !== null) return
     setPendingAction('pause')
     try {
-      await apiClient.post(`/campaigns/${id}/pause`)
+      await apiClient.post(`/api/v1/crm/campaigns/${id}/pause`)
       toast({ title: t('crud.messages.campaignPaused') })
       window.location.reload()
     } catch {
@@ -369,7 +359,7 @@ export default function CampaignDetailPage(): JSX.Element {
     if (confirm(t('crud.dialogs.cancel.descriptionGeneric', { entityType: entityTypeLabel }))) {
       setPendingAction('cancel')
       try {
-        await apiClient.post(`/campaigns/${id}/cancel`)
+        await apiClient.post(`/api/v1/crm/campaigns/${id}/archive`)
         toast({ title: t('crud.messages.campaignCancelled') })
         window.location.reload()
       } catch {

@@ -8,7 +8,7 @@ import { NativeSelect } from '@/components/ui/native-select'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Skeleton } from '@/components/ui/skeleton'
 import { ArrowLeft, TrendingUp, Mail, Target, BarChart3, Info } from 'lucide-react'
-import { createApiClient } from '@/components/mask-builder/utils/api'
+import { apiClient } from '@/lib/api-client'
 import { formatDate, formatCurrency } from '@/components/mask-builder/utils/formatting'
 import { toast } from '@/hooks/use-toast'
 import { useTenant } from '@/hooks/useTenant'
@@ -18,7 +18,6 @@ const CampaignPerformanceCharts = lazy(() =>
   import('@/pages/crm/charts/CampaignPerformanceCharts').then((module) => ({ default: module.default })),
 )
 
-const apiClient = createApiClient('/api/v1/marketing')
 
 interface CampaignSummary {
   id: string
@@ -67,37 +66,33 @@ export default function CampaignPerformanceDashboardPage(): JSX.Element {
     setLoading(true)
     try {
       const [campaignsRes, performanceRes] = await Promise.all([
-        apiClient.get<CampaignSummary[]>('/campaigns', { params: { tenant_id: tenantId, status: 'completed' } }),
-        apiClient.get<CampaignPerformancePoint[]>('/campaigns/performance', { params: { tenant_id: tenantId, time_range: timeRange } }),
+        apiClient.get('/api/v1/crm/campaigns', { params: { tenant_id: tenantId, state: 'completed' } }),
+        apiClient.get('/api/v1/crm/campaigns', { params: { tenant_id: tenantId, state: 'active' } }),
       ])
 
-      if (campaignsRes.success || Array.isArray(campaignsRes.data)) {
-        const items = campaignsRes.data ?? []
-        setCampaigns(items)
+      const items: CampaignSummary[] = Array.isArray(campaignsRes.data) ? campaignsRes.data : (campaignsRes.data?.items ?? [])
+      setCampaigns(items)
 
-        const totalSent = items.reduce((sum, campaign) => sum + (campaign.sent_count || 0), 0)
-        const totalOpened = items.reduce((sum, campaign) => sum + (campaign.open_count || 0), 0)
-        const totalClicked = items.reduce((sum, campaign) => sum + (campaign.click_count || 0), 0)
-        const totalConverted = items.reduce((sum, campaign) => sum + (campaign.conversion_count || 0), 0)
-        const totalSpent = items.reduce((sum, campaign) => sum + (campaign.spent || 0), 0)
+      const totalSent = items.reduce((sum, campaign) => sum + (campaign.sent_count || 0), 0)
+      const totalOpened = items.reduce((sum, campaign) => sum + (campaign.open_count || 0), 0)
+      const totalClicked = items.reduce((sum, campaign) => sum + (campaign.click_count || 0), 0)
+      const totalConverted = items.reduce((sum, campaign) => sum + (campaign.conversion_count || 0), 0)
+      const totalSpent = items.reduce((sum, campaign) => sum + (campaign.spent || 0), 0)
 
-        setSummary({
-          totalCampaigns: items.length,
-          totalSent,
-          totalOpened,
-          totalClicked,
-          totalConverted,
-          totalSpent,
-          avgOpenRate: totalSent > 0 ? (totalOpened / totalSent) * 100 : 0,
-          avgClickRate: totalSent > 0 ? (totalClicked / totalSent) * 100 : 0,
-          avgConversionRate: totalSent > 0 ? (totalConverted / totalSent) * 100 : 0,
-        })
-      }
+      setSummary({
+        totalCampaigns: items.length,
+        totalSent,
+        totalOpened,
+        totalClicked,
+        totalConverted,
+        totalSpent,
+        avgOpenRate: totalSent > 0 ? (totalOpened / totalSent) * 100 : 0,
+        avgClickRate: totalSent > 0 ? (totalClicked / totalSent) * 100 : 0,
+        avgConversionRate: totalSent > 0 ? (totalConverted / totalSent) * 100 : 0,
+      })
 
-      if (performanceRes.success || Array.isArray(performanceRes.data)) {
-        const perf = performanceRes.data ?? []
-        setPerformance(perf)
-      }
+      const perfItems: CampaignPerformancePoint[] = Array.isArray(performanceRes.data) ? performanceRes.data : (performanceRes.data?.items ?? [])
+      setPerformance(perfItems)
     } catch {
       toast({ variant: 'destructive', title: t('crud.messages.loadError') })
     } finally {
