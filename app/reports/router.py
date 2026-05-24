@@ -16,7 +16,7 @@ from sqlalchemy.orm import Session
 
 logger = logging.getLogger(__name__)
 
-router = APIRouter(prefix="/api/reports", tags=["reports"])
+router = APIRouter(prefix="/reports", tags=["reports"])
 
 def get_reports_service(db: Session = Depends(get_db)) -> ReportsService:
     """Dependency to get ReportsService with database session"""
