@@ -161,12 +161,12 @@ const createSegmentConfig = (t: any, entityTypeLabel: string): MaskConfig => ({
     }
   ],
   api: {
-    baseUrl: '/api/v1/marketing/segments',
+    baseUrl: '/api/v1/crm/segments',
     endpoints: {
-      get: '/api/v1/marketing/segments/{id}',
-      create: '/api/v1/marketing/segments',
-      update: '/api/v1/marketing/segments/{id}',
-      delete: '/api/v1/marketing/segments/{id}'
+      get: '/api/v1/crm/segments/{id}',
+      create: '/api/v1/crm/segments',
+      update: '/api/v1/crm/segments/{id}',
+      delete: '/api/v1/crm/segments/{id}'
     }
   },
   permissions: ['crm.read', 'marketing.read', 'marketing.write']

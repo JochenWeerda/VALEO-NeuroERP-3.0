@@ -114,13 +114,13 @@ const createSegmentsConfig = (t: any, entityTypeLabel: string): ListConfig => ({
     { key: 'delete', label: t('crud.actions.delete'), type: 'danger' }
   ],
   api: {
-    baseUrl: '/api/v1/marketing/segments',
+    baseUrl: '/api/v1/crm/segments',
     endpoints: {
-      list: '/api/v1/marketing/segments',
-      get: '/api/v1/marketing/segments/{id}',
-      create: '/api/v1/marketing/segments',
-      update: '/api/v1/marketing/segments/{id}',
-      delete: '/api/v1/marketing/segments/{id}'
+      list: '/api/v1/crm/segments',
+      get: '/api/v1/crm/segments/{id}',
+      create: '/api/v1/crm/segments',
+      update: '/api/v1/crm/segments/{id}',
+      delete: '/api/v1/crm/segments/{id}'
     }
   },
   permissions: ['crm.read', 'marketing.read', 'marketing.write']
