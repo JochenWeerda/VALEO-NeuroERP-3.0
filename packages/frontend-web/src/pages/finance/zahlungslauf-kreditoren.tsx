@@ -26,6 +26,7 @@ import { buildDecisionView } from '@/policy/decision-view'
 import { ProcessStatusPanel } from '@/components/workflow/ProcessStatusPanel'
 import { useApprovalDensityProfile } from '@/features/workflow/useApprovalDensityProfile'
 import { normalizeOperationalStatus } from '@/lib/operational-status'
+import { apiClient } from '@/lib/api-client'
 
 type FinanceRoleFocus = 'all' | 'accounting' | 'treasury' | 'controller' | 'tax-advisor' | 'management'
 
@@ -335,27 +336,26 @@ const createZahlungslaufConfig = (t: any, entityTypeLabel: string): MaskConfig =
           return
         }
         try {
-          const response = await fetch(`/api/v1/finance/payment-runs/${data.id}/returns`)
-          if (response.ok) {
-            const returns = await response.json()
-            if (returns.length > 0) {
-              toast({
-                variant: 'destructive',
-                title: t('crud.messages.returnsFound', { count: returns.length }),
-                description: t('crud.messages.returnsNeedProcessing')
-              })
-            } else {
-              toast({
-                title: t('crud.messages.noReturns'),
-                description: t('crud.messages.allPaymentsSuccessful')
-              })
-            }
+          const res = await apiClient.get<any>(`/api/v1/finance/payment-runs/${data.id}`)
+          const run = res.data
+          const returnedCount = (run?.payments ?? []).filter((p: any) => p.status === 'returned').length
+          if (returnedCount > 0) {
+            toast({
+              variant: 'destructive',
+              title: t('crud.messages.returnsFound', { count: returnedCount }),
+              description: t('crud.messages.returnsNeedProcessing')
+            })
+          } else {
+            toast({
+              title: t('crud.messages.noReturns'),
+              description: t('crud.messages.allPaymentsSuccessful')
+            })
           }
         } catch (error: any) {
           toast({
             variant: 'destructive',
             title: t('crud.messages.loadDataError'),
-            description: error.message
+            description: error.response?.data?.detail || error.message
           })
         }
       }
@@ -565,7 +565,7 @@ export default function ZahlungslaufKreditorenPage(): JSX.Element {
   const { t } = useTranslation()
   const navigate = useNavigate()
   const [isDirty, setIsDirty] = useState(false)
-  const [formData, setFormData] = useState<any>({})
+  const [formData, setFormData] = useState<any>({})
   const [roleFocus, setRoleFocus] = useState<FinanceRoleFocus>('all')
   const currentActor = localStorage.getItem('userEmail') || localStorage.getItem('username') || 'api'
   const entityType = 'paymentRun'
@@ -683,7 +683,7 @@ export default function ZahlungslaufKreditorenPage(): JSX.Element {
         })
         return
       }
-
+
       try {
         const response = await fetch(`/api/v1/finance/payment-runs/${formData.id}/approve`, {
           method: 'POST',
