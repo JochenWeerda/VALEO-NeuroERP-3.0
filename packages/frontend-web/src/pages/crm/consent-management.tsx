@@ -1,6 +1,8 @@
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { useMaskActions } from '@/components/mask-builder/hooks'
 import { ListReport } from '@/components/mask-builder'
 import { formatDate } from '@/components/mask-builder/utils/formatting'
 import { Badge } from '@/components/ui/badge'
@@ -212,48 +214,51 @@ export default function ConsentManagementPage(): JSX.Element {
     staleTime: 2 * 60 * 1000,
   })
 
+  const [pendingRows, setPendingRows] = useState<Set<string>>(new Set())
+
+  const invalidate = () => queryClient.invalidateQueries({ queryKey: ['crm', 'consents'] })
+
+  async function withPending(key: string, fn: () => Promise<void>) {
+    if (pendingRows.has(key)) return
+    setPendingRows(prev => new Set(prev).add(key))
+    try { await fn() } finally {
+      setPendingRows(prev => { const s = new Set(prev); s.delete(key); return s })
+    }
+  }
+
+  const { handleAction } = useMaskActions(async (action: string, item: any) => {
+    if (action === 'edit' && item) {
+      navigate(`/crm/consent/${item.id}`)
+    } else if (action === 'delete' && item) {
+      if (!confirm(t('crud.dialogs.delete.descriptionGeneric', { entityType: entityTypeLabel }))) return
+      await withPending(String(item.id), async () => {
+        try {
+          await apiClient.delete(`/api/v1/crm/consents/${item.id}`)
+          toast({ title: getSuccessMessage(t, 'delete', entityType) })
+          invalidate()
+        } catch {
+          toast({ variant: 'destructive', title: getErrorMessage(t, 'delete', entityType) })
+        }
+      })
+    } else if (action === 'revoke' && item) {
+      await withPending(String(item.id), async () => {
+        try {
+          await apiClient.post(`/api/v1/crm/consents/${item.id}/revoke`)
+          toast({ title: t('crud.messages.consentRevoked') })
+          invalidate()
+        } catch {
+          toast({ variant: 'destructive', title: t('crud.messages.consentRevokeError') })
+        }
+      })
+    }
+  })
+
   if (isError) {
     return <ErrorState error={error as Error} onRetry={() => { void refetch() }} />
   }
 
   const data = queryData?.items || []
   const total = queryData?.total || 0
-
-  const invalidate = () => queryClient.invalidateQueries({ queryKey: ['crm', 'consents'] })
-
-  const handleAction = async (action: string, item: any) => {
-    if (action === 'edit' && item) {
-      navigate(`/crm/consent/${item.id}`)
-    } else if (action === 'delete' && item) {
-      if (confirm(t('crud.dialogs.delete.descriptionGeneric', { entityType: entityTypeLabel }))) {
-        try {
-          await apiClient.delete(`/api/v1/crm/consents/${item.id}`)
-          toast({
-            title: getSuccessMessage(t, 'delete', entityType),
-          })
-          invalidate()
-        } catch {
-          toast({
-            variant: 'destructive',
-            title: getErrorMessage(t, 'delete', entityType),
-          })
-        }
-      }
-    } else if (action === 'revoke' && item) {
-      try {
-        await apiClient.post(`/api/v1/crm/consents/${item.id}/revoke`)
-        toast({
-          title: t('crud.messages.consentRevoked'),
-        })
-        invalidate()
-      } catch {
-        toast({
-          variant: 'destructive',
-          title: t('crud.messages.consentRevokeError'),
-        })
-      }
-    }
-  }
 
   const handleCreate = () => {
     navigate('/crm/consent/new')
@@ -295,6 +300,7 @@ export default function ConsentManagementPage(): JSX.Element {
       data={data}
       total={total}
       loading={isLoading}
+      pendingRows={pendingRows}
       onAction={handleAction}
       onCreate={handleCreate}
       onExport={handleExport}

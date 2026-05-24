@@ -1,6 +1,8 @@
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { useMaskActions } from '@/components/mask-builder/hooks'
 import { ListReport } from '@/components/mask-builder'
 import { formatDate } from '@/components/mask-builder/utils/formatting'
 import { Badge } from '@/components/ui/badge'
@@ -174,35 +176,41 @@ export default function GDPRRequestsPage(): JSX.Element {
     staleTime: 2 * 60 * 1000,
   })
 
+  const [pendingRows, setPendingRows] = useState<Set<string>>(new Set())
+
+  const invalidate = () => queryClient.invalidateQueries({ queryKey: ['crm', 'gdpr-requests'] })
+
+  async function withPending(key: string, fn: () => Promise<void>) {
+    if (pendingRows.has(key)) return
+    setPendingRows(prev => new Set(prev).add(key))
+    try { await fn() } finally {
+      setPendingRows(prev => { const s = new Set(prev); s.delete(key); return s })
+    }
+  }
+
+  const { handleAction } = useMaskActions(async (action: string, item: any) => {
+    if (action === 'edit' && item) {
+      navigate(`/crm/gdpr-request/${item.id}`)
+    } else if (action === 'delete' && item) {
+      if (!confirm(t('crud.dialogs.delete.descriptionGeneric', { entityType: entityTypeLabel }))) return
+      await withPending(String(item.id), async () => {
+        try {
+          await apiClient.delete(`/api/v1/gdpr/requests/${item.id}`)
+          toast({ title: getSuccessMessage(t, 'delete', entityType) })
+          invalidate()
+        } catch {
+          toast({ variant: 'destructive', title: getErrorMessage(t, 'delete', entityType) })
+        }
+      })
+    }
+  })
+
   if (isError) {
     return <ErrorState error={error as Error} onRetry={() => { void refetch() }} />
   }
 
   const data = queryData?.items || []
   const total = queryData?.total || 0
-
-  const invalidate = () => queryClient.invalidateQueries({ queryKey: ['crm', 'gdpr-requests'] })
-
-  const handleAction = async (action: string, item: any) => {
-    if (action === 'edit' && item) {
-      navigate(`/crm/gdpr-request/${item.id}`)
-    } else if (action === 'delete' && item) {
-      if (confirm(t('crud.dialogs.delete.descriptionGeneric', { entityType: entityTypeLabel }))) {
-        try {
-          await apiClient.delete(`/api/v1/gdpr/requests/${item.id}`)
-          toast({
-            title: getSuccessMessage(t, 'delete', entityType),
-          })
-          invalidate()
-        } catch {
-          toast({
-            variant: 'destructive',
-            title: getErrorMessage(t, 'delete', entityType),
-          })
-        }
-      }
-    }
-  }
 
   const handleCreate = () => {
     navigate('/crm/gdpr-request/new')
@@ -244,6 +252,7 @@ export default function GDPRRequestsPage(): JSX.Element {
       data={data}
       total={total}
       loading={isLoading}
+      pendingRows={pendingRows}
       onAction={handleAction}
       onCreate={handleCreate}
       onExport={handleExport}

@@ -138,24 +138,30 @@ export default function SegmentsPage(): JSX.Element {
   const entityTypeLabel = getEntityTypeLabel(t, entityType, 'Segment')
   const segmentsConfig = createSegmentsConfig(t, entityTypeLabel)
 
+  const [pendingRows, setPendingRows] = useState<Set<string>>(new Set())
+
+  async function withPending(key: string, fn: () => Promise<void>) {
+    if (pendingRows.has(key)) return
+    setPendingRows(prev => new Set(prev).add(key))
+    try { await fn() } finally {
+      setPendingRows(prev => { const s = new Set(prev); s.delete(key); return s })
+    }
+  }
+
   const { handleAction } = useMaskActions(async (action: string, item: any) => {
     if (action === 'edit' && item) {
       navigate(`/crm/segment/${item.id}`)
     } else if (action === 'delete' && item) {
-      if (confirm(t('crud.dialogs.delete.descriptionGeneric', { entityType: entityTypeLabel }))) {
+      if (!confirm(t('crud.dialogs.delete.descriptionGeneric', { entityType: entityTypeLabel }))) return
+      await withPending(String(item.id), async () => {
         try {
           await apiClient.delete(`/segments/${item.id}`)
-          toast({
-            title: getSuccessMessage(t, 'delete', entityType),
-          })
+          toast({ title: getSuccessMessage(t, 'delete', entityType) })
           loadData()
-        } catch (error) {
-          toast({
-            variant: 'destructive',
-            title: getErrorMessage(t, 'delete', entityType),
-          })
+        } catch {
+          toast({ variant: 'destructive', title: getErrorMessage(t, 'delete', entityType) })
         }
-      }
+      })
     } else if (action === 'calculate' && item) {
       try {
         await apiClient.post(`/segments/${item.id}/calculate`, { force_full: false })
@@ -240,6 +246,7 @@ export default function SegmentsPage(): JSX.Element {
       data={data}
       total={total}
       isLoading={loading}
+      pendingRows={pendingRows}
       onAction={handleAction}
       onBulkAction={async (key: string, items: any[]) => {
         if (key === 'calculate' && items.length) {

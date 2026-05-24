@@ -347,26 +347,39 @@ export default function BestellungenListePage(): JSX.Element {
     },
   ]
 
+  const [pendingRows, setPendingRows] = useState<Set<string>>(new Set())
+
+  async function withPending(key: string, fn: () => Promise<void>) {
+    if (pendingRows.has(key)) return
+    setPendingRows(prev => new Set(prev).add(key))
+    try { await fn() } finally {
+      setPendingRows(prev => { const s = new Set(prev); s.delete(key); return s })
+    }
+  }
+
   const { handleAction } = useMaskActions(async (action: string, item: any) => {
     if (action === 'edit' && item) {
       navigate(`/einkauf/bestellungen/${item.id}`)
     } else if (action === 'freigeben' && item) {
-      try {
-        await approveMutation.mutateAsync(item.id)
-        toast({ title: 'Bestellung freigegeben' })
-      } catch {
-        toast({ variant: 'destructive', title: t('crud.messages.updateError', { entityType: entityTypeLabel }) })
-      }
+      await withPending(String(item.id), async () => {
+        try {
+          await approveMutation.mutateAsync(item.id)
+          toast({ title: 'Bestellung freigegeben' })
+        } catch {
+          toast({ variant: 'destructive', title: t('crud.messages.updateError', { entityType: entityTypeLabel }) })
+        }
+      })
     } else if (action === 'stornieren' && item) {
       const reason = prompt('Stornierungsgrund:')
-      if (reason) {
+      if (!reason) return
+      await withPending(String(item.id), async () => {
         try {
           await cancelMutation.mutateAsync({ id: item.id, reason })
           toast({ title: 'Bestellung storniert' })
         } catch {
           toast({ variant: 'destructive', title: t('crud.messages.updateError', { entityType: entityTypeLabel }) })
         }
-      }
+      })
     }
   })
 
@@ -484,6 +497,8 @@ export default function BestellungenListePage(): JSX.Element {
         onEdit={handleEdit}
         onExport={handleExport}
         onImport={handleImportClick}
+        pendingRows={pendingRows}
+        onAction={handleAction}
         isLoading={isLoading}
       />
       <Dialog open={importOpen} onOpenChange={setImportOpen}>

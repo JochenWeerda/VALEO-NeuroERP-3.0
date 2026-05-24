@@ -219,18 +219,19 @@ export default function DebitorenListePage(): JSX.Element {
     bulkActions: NonNullable<ListConfig['bulkActions']>
   }
 
+  const [pendingRows, setPendingRows] = useState<Set<string>>(new Set())
+
+  async function withPending(key: string, fn: () => Promise<void>) {
+    if (pendingRows.has(key)) return
+    setPendingRows(prev => new Set(prev).add(key))
+    try { await fn() } finally {
+      setPendingRows(prev => { const s = new Set(prev); s.delete(key); return s })
+    }
+  }
+
   const { handleAction } = useMaskActions(async (action: string, item: any) => {
     if (action === 'edit' && item) {
       navigate(`/finance/debitoren/${item.id}`)
-    } else if (action === 'delete' && item) {
-      if (confirm(t('crud.messages.confirmDeleteDebtor', { name: item.kunde }))) {
-        try {
-          await apiClient.delete(`/debitoren/${item.id}`)
-          loadData() // Liste neu laden
-        } catch (error) {
-          toast({ title: t('common.error', { defaultValue: 'Fehler' }), description: t('crud.messages.deleteError', { defaultValue: 'Löschen fehlgeschlagen.' }), variant: 'destructive' })
-        }
-      }
     }
   })
 
@@ -304,7 +305,15 @@ export default function DebitorenListePage(): JSX.Element {
   }
 
   const handleDelete = (item: any) => {
-    handleAction('delete', item)
+    if (!confirm(t('crud.messages.confirmDeleteDebtor', { name: item.kunde }))) return
+    void withPending(String(item.id), async () => {
+      try {
+        await apiClient.delete(`/debitoren/${item.id}`)
+        loadData()
+      } catch {
+        toast({ title: t('common.error', { defaultValue: 'Fehler' }), description: t('crud.messages.deleteError', { defaultValue: 'Löschen fehlgeschlagen.' }), variant: 'destructive' })
+      }
+    })
   }
 
   const handleExport = async () => {
@@ -337,6 +346,7 @@ export default function DebitorenListePage(): JSX.Element {
         onCreate={handleCreate}
         onEdit={handleEdit}
         onDelete={handleDelete}
+        pendingRows={pendingRows}
         onExport={handleExport}
         onImport={() => importInputRef.current?.click()}
         isLoading={loading}

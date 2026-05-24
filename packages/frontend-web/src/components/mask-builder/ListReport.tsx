@@ -28,6 +28,7 @@ interface ListReportProps {
   onCreate?: () => void
   onEdit?: (_item: any) => void
   onDelete?: (_item: any) => void
+  pendingRows?: Set<string>
   onExport?: () => void
   onImport?: () => void
   /** Generic row action: (actionKey, item). When set, row buttons use config.actions and call this. */
@@ -47,6 +48,7 @@ const ListReport: React.FC<ListReportProps> = ({
   onCreate,
   onEdit,
   onDelete,
+  pendingRows,
   onExport,
   onImport,
   onAction,
@@ -492,6 +494,7 @@ const ListReport: React.FC<ListReportProps> = ({
                                     variant="ghost"
                                     size="sm"
                                     onClick={() => onAction(action.key, item)}
+                                    disabled={pendingRows?.has(String(item.id))}
                                     className={action.type === 'danger' ? 'text-destructive hover:text-destructive' : undefined}
                                   >
                                     {action.labelKey ? t(action.labelKey) : action.label}
@@ -509,6 +512,7 @@ const ListReport: React.FC<ListReportProps> = ({
                                     variant="ghost"
                                     size="sm"
                                     onClick={() => onDelete(item)}
+                                    disabled={pendingRows?.has(String(item.id))}
                                     className="text-destructive hover:text-destructive"
                                   >
                                     {t('crud.actions.delete')}
