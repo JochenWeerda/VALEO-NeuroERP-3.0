@@ -32,6 +32,7 @@ import {
   Search,
   Trash2,
 } from 'lucide-react'
+import { apiClient } from '@/lib/api-client'
 
 const PAGE_SIZE = 20
 const YEAR_RANGE = 3
@@ -279,25 +280,10 @@ export default function LeadExplorer(): JSX.Element {
     
     try {
       const allYearsParam = allYears ? '&all_years=true' : ''
-      const response = await fetch(`/api/v1/gap/reset-gap-data?year=${refYear}&confirm=true&tables=all${allYearsParam}`, {
-        method: 'DELETE',
-        headers: {
-          'Authorization': 'Bearer dev-token',
-          'Content-Type': 'application/json'
-        }
-      })
-      
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}: ${response.statusText}`)
-      }
-      
-      const contentType = response.headers.get('content-type')
-      if (!contentType || !contentType.includes('application/json')) {
-        const text = await response.text()
-        throw new Error(`Unerwartete Antwort vom Server: ${text}`)
-      }
-      
-      const result = await response.json()
+      const res = await apiClient.delete(
+        `/api/v1/gap/reset-gap-data?year=${refYear}&confirm=true&tables=all${allYearsParam}`
+      )
+      const result = res.data
       
       if (!result.success) {
         throw new Error(result.message || result.error || 'Reset fehlgeschlagen')

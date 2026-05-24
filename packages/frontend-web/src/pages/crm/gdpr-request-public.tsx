@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { createApiClient } from '@/components/mask-builder/utils/api'
+import { apiClient as httpClient } from '@/lib/api-client'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -99,21 +100,16 @@ export default function GDPRRequestPublicPage(): JSX.Element {
     if (!requestId) return
 
     try {
-      const response = await fetch(`/api/v1/gdpr/requests/${requestId}/download`)
-      if (response.ok) {
-        const blob = await response.blob()
-        const url = window.URL.createObjectURL(blob)
-        const link = document.createElement('a')
-        link.href = url
-        link.download = `gdpr-export-${requestId}.${statusData?.response_file_format || 'json'}`
-        link.click()
-        window.URL.revokeObjectURL(url)
-        toast({
-          title: t('crud.messages.downloadStarted'),
-        })
-      } else {
-        throw new Error('Download failed')
-      }
+      const res = await httpClient.get(`/api/v1/gdpr/requests/${requestId}/download`, { responseType: 'blob' })
+      const url = window.URL.createObjectURL(res.data as Blob)
+      const link = document.createElement('a')
+      link.href = url
+      link.download = `gdpr-export-${requestId}.${statusData?.response_file_format || 'json'}`
+      link.click()
+      window.URL.revokeObjectURL(url)
+      toast({
+        title: t('crud.messages.downloadStarted'),
+      })
     } catch (error) {
       toast({
         variant: 'destructive',
