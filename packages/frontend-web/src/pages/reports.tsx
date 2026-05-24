@@ -5,6 +5,7 @@ import { useMcpQuery } from '@/lib/mcp'
 import { useToast } from '@/components/ui/toast-provider'
 import { Toolbar } from '@/components/ui/toolbar'
 import { Download, BarChart3, TrendingUp, Users, Package, Euro } from 'lucide-react'
+import { apiClient } from '@/lib/api-client'
 
 const ReportsDashboardCharts = lazy(() =>
   import('@/pages/reports/ReportsDashboardCharts').then((module) => ({ default: module.default })),
@@ -53,18 +54,20 @@ export default function ReportsDashboard(): JSX.Element {
 
   const handleExport = async (format: 'json' | 'csv' = 'json') => {
     try {
-      const response = await fetch(`/api/v1/reports/export/${selectedReport}?format=${format}&start_date=${startDate}&end_date=${endDate}`)
+      const params = new URLSearchParams({ format, start_date: startDate, end_date: endDate })
+      const res = await apiClient.get(
+        `/api/v1/reports/export/${selectedReport}?${params.toString()}`,
+        { responseType: format === 'csv' ? 'blob' : 'json' },
+      )
       if (format === 'csv') {
-        const blob = await response.blob()
-        const url = window.URL.createObjectURL(blob)
+        const url = window.URL.createObjectURL(res.data as Blob)
         const a = document.createElement('a')
         a.href = url
         a.download = `${selectedReport}_report.csv`
         a.click()
         window.URL.revokeObjectURL(url)
       } else {
-        const data = await response.json()
-        const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })
+        const blob = new Blob([JSON.stringify(res.data, null, 2)], { type: 'application/json' })
         const url = window.URL.createObjectURL(blob)
         const a = document.createElement('a')
         a.href = url

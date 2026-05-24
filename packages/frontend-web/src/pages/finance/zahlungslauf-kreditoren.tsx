@@ -209,24 +209,16 @@ const createZahlungslaufConfig = (t: any, entityTypeLabel: string): MaskConfig =
         }
         try {
           const actor = localStorage.getItem('userEmail') || localStorage.getItem('username') || 'api'
-          const response = await fetch(`/api/v1/finance/payment-runs/${data.id}/approve`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ approved_by: actor })
+          await apiClient.post(`/api/v1/finance/payment-runs/${data.id}/approve`, { approved_by: actor })
+          toast({
+            title: t('crud.messages.paymentRunApproved'),
+            description: t('crud.messages.paymentRunApprovedDesc')
           })
-          if (response.ok) {
-            toast({
-              title: t('crud.messages.paymentRunApproved'),
-              description: t('crud.messages.paymentRunApprovedDesc')
-            })
-          } else {
-            throw new Error(await response.text())
-          }
         } catch (error: any) {
           toast({
             variant: 'destructive',
             title: t('crud.messages.updateError', { entityType: entityTypeLabel }),
-            description: error.message
+            description: error.response?.data?.detail || error.message
           })
         }
       }
@@ -245,19 +237,14 @@ const createZahlungslaufConfig = (t: any, entityTypeLabel: string): MaskConfig =
           return
         }
         try {
-          const response = await fetch(`/api/v1/finance/payment-runs/${data.id}/sepa-xml`)
-          if (response.ok) {
-            const blob = await response.blob()
-            const url = window.URL.createObjectURL(blob)
-            window.open(url, '_blank')
-          } else {
-            throw new Error(await response.text())
-          }
+          const res = await apiClient.get(`/api/v1/finance/payment-runs/${data.id}/sepa-xml`, { responseType: 'blob' })
+          const url = window.URL.createObjectURL(res.data as Blob)
+          window.open(url, '_blank')
         } catch (error: any) {
           toast({
             variant: 'destructive',
             title: t('crud.messages.loadDataError'),
-            description: error.message
+            description: error.response?.data?.detail || error.message
           })
         }
       }
@@ -284,40 +271,26 @@ const createZahlungslaufConfig = (t: any, entityTypeLabel: string): MaskConfig =
           return
         }
         try {
-          // Execute payment run (generates SEPA XML and updates status)
           const actor = localStorage.getItem('userEmail') || localStorage.getItem('username') || 'api'
-          const executeResponse = await fetch(`/api/v1/finance/payment-runs/${data.id}/execute`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ executed_by: actor })
+          await apiClient.post(`/api/v1/finance/payment-runs/${data.id}/execute`, { executed_by: actor })
+          const sepaRes = await apiClient.get(`/api/v1/finance/payment-runs/${data.id}/sepa-xml`, { responseType: 'blob' })
+          const url = window.URL.createObjectURL(sepaRes.data as Blob)
+          const a = document.createElement('a')
+          a.href = url
+          a.download = `SEPA_${data.laufNummer || data.run_number || data.id}.xml`
+          document.body.appendChild(a)
+          a.click()
+          document.body.removeChild(a)
+          window.URL.revokeObjectURL(url)
+          toast({
+            title: t('crud.messages.sepaExportSuccess'),
+            description: t('crud.messages.sepaFileDownloaded')
           })
-          if (!executeResponse.ok) {
-            throw new Error(await executeResponse.text())
-          }
-          // Download SEPA XML
-          const sepaResponse = await fetch(`/api/v1/finance/payment-runs/${data.id}/sepa-xml`)
-          if (sepaResponse.ok) {
-            const blob = await sepaResponse.blob()
-            const url = window.URL.createObjectURL(blob)
-            const a = document.createElement('a')
-            a.href = url
-            a.download = `SEPA_${data.laufNummer || data.run_number || data.id}.xml`
-            document.body.appendChild(a)
-            a.click()
-            document.body.removeChild(a)
-            window.URL.revokeObjectURL(url)
-            toast({
-              title: t('crud.messages.sepaExportSuccess'),
-              description: t('crud.messages.sepaFileDownloaded')
-            })
-          } else {
-            throw new Error(await sepaResponse.text())
-          }
         } catch (error: any) {
           toast({
             variant: 'destructive',
             title: t('crud.messages.sepaExportError'),
-            description: error.message
+            description: error.response?.data?.detail || error.message
           })
         }
       }
@@ -685,35 +658,17 @@ export default function ZahlungslaufKreditorenPage(): JSX.Element {
       }
 
       try {
-        const response = await fetch(`/api/v1/finance/payment-runs/${formData.id}/approve`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${localStorage.getItem('token')}`,
-          },
-          body: JSON.stringify({ approved_by: currentActor }),
+        await apiClient.post(`/api/v1/finance/payment-runs/${formData.id}/approve`, { approved_by: currentActor })
+        toast({
+          title: t('crud.messages.approvalSuccess'),
+          description: t('crud.messages.paymentRunApproved'),
         })
-
-        if (response.ok) {
-          toast({
-            title: t('crud.messages.approvalSuccess'),
-            description: t('crud.messages.paymentRunApproved'),
-          })
-          // Refresh data
-          window.location.reload()
-        } else {
-          const error = await response.json()
-          toast({
-            variant: 'destructive',
-            title: t('crud.messages.approvalError'),
-            description: error.detail || t('common.unknownError'),
-          })
-        }
-      } catch (error) {
+        window.location.reload()
+      } catch (error: any) {
         toast({
           variant: 'destructive',
-          title: t('crud.messages.networkError'),
-          description: t('crud.messages.networkErrorDesc'),
+          title: t('crud.messages.approvalError'),
+          description: error.response?.data?.detail || t('common.unknownError'),
         })
       }
     } else if (action === 'execute') {

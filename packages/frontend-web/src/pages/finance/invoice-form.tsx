@@ -212,17 +212,7 @@ export default function FinanceInvoiceFormPage(): JSX.Element {
         totalGross,
       };
 
-      const response = await fetch("/api/v1/finance/invoices", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(invoiceData),
-      });
-
-      if (!response.ok) {
-        throw new Error("Fehler beim Speichern der Rechnung");
-      }
+      await apiClient.post("/api/v1/finance/invoices", invoiceData);
 
       toast({
         title: "Erfolg",
