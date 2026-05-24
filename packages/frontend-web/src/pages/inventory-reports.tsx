@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useQuery } from '@tanstack/react-query';
 import { Download, TrendingUp, AlertTriangle, Package, DollarSign } from 'lucide-react';
+import { apiClient } from '@/lib/api-client';
 
 type StockLevelsResponse = {
   total_articles: number;
@@ -69,8 +70,8 @@ export default function InventoryReportsPage() {
   const { data: stockLevels } = useQuery({
     queryKey: ['inventory', 'stock-levels'],
     queryFn: async (): Promise<StockLevelsResponse> => {
-      const response = await fetch('/api/v1/inventory/reports/stock-levels');
-      return response.json();
+      const r = await apiClient.get('/api/v1/inventory/reports/stock-levels');
+      return r.data;
     },
     initialData: EMPTY_STOCK_LEVELS,
   });
@@ -78,8 +79,8 @@ export default function InventoryReportsPage() {
   const { data: alerts } = useQuery({
     queryKey: ['inventory', 'alerts'],
     queryFn: async (): Promise<AlertsResponse> => {
-      const response = await fetch('/api/v1/inventory/reports/stock-alerts');
-      return response.json();
+      const r = await apiClient.get('/api/v1/inventory/reports/stock-alerts');
+      return r.data;
     },
     initialData: EMPTY_ALERTS,
   });
@@ -87,8 +88,8 @@ export default function InventoryReportsPage() {
   const { data: replenishment } = useQuery({
     queryKey: ['inventory', 'replenishment'],
     queryFn: async (): Promise<ReplenishmentResponse> => {
-      const response = await fetch('/api/v1/inventory/reports/replenishment-suggestions');
-      return response.json();
+      const r = await apiClient.get('/api/v1/inventory/reports/replenishment-suggestions');
+      return r.data;
     },
     initialData: EMPTY_REPLENISHMENT,
   });
@@ -96,8 +97,8 @@ export default function InventoryReportsPage() {
   const { data: turnover } = useQuery({
     queryKey: ['inventory', 'turnover'],
     queryFn: async (): Promise<TurnoverResponse> => {
-      const response = await fetch('/api/v1/inventory/reports/turnover-analysis');
-      return response.json();
+      const r = await apiClient.get('/api/v1/inventory/reports/turnover-analysis');
+      return r.data;
     },
     initialData: EMPTY_TURNOVER,
   });
