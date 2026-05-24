@@ -30,6 +30,10 @@ export const entries: AliasGroupRouteEntry[] = [
     "path": "debitoren"
   },
   {
+    "module": "@/pages/fibu/erloeskennziffern",
+    "path": "erloeskennziffern"
+  },
+  {
     "module": "@/pages/fibu/guv",
     "path": "guv"
   },

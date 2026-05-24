@@ -465,6 +465,15 @@ export const RAW_NAV_SECTIONS: RawNavItem[] = [
         mcp: { businessDomain: 'procurement', scope: 'procurement:read' },
       },
       {
+        id: 'zahlungsbedingungen',
+        label: 'Zahlungsbedingungen',
+        icon: Euro,
+        module: '@/pages/einkauf/zahlungsbedingungen',
+        preferredPath: 'einkauf/zahlungsbedingungen',
+        keywords: ['zahlungsbedingungen', 'skonto', 'zahlungsziel', 'zabd'],
+        mcp: { businessDomain: 'procurement', scope: 'procurement:read' },
+      },
+      {
         id: 'anfragen',
         label: 'Anfragen (RFQ)',
         icon: FileText,

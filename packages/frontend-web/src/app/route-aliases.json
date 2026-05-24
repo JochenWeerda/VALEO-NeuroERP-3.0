@@ -977,6 +977,10 @@
       "path": "einkauf/warengruppen"
     },
     {
+      "module": "@/pages/einkauf/zahlungsbedingungen",
+      "path": "einkauf/zahlungsbedingungen"
+    },
+    {
       "module": "@/pages/energie/verbrauch",
       "path": "energie/verbrauch"
     },
@@ -1007,6 +1011,10 @@
     {
       "module": "@/pages/fibu/debitoren",
       "path": "fibu/debitoren"
+    },
+    {
+      "module": "@/pages/fibu/erloeskennziffern",
+      "path": "fibu/erloeskennziffern"
     },
     {
       "module": "@/pages/fibu/guv",

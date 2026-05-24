@@ -62,6 +62,18 @@ Stand: `2026-05-23`
 **Checks:** `pnpm --filter @valero-neuroerp/frontend-web test:e2e:accessibility`; `pnpm --filter @valero-neuroerp/frontend-web type-check`; `python scripts/agent_workboard_supervisor.py validate`
 **Offene Risiken:** Fachseiten ausserhalb der 8 Kernrouten ungeprueft; manueller Screen-Reader-UAT bleibt extern.
 
+## FACHLICHE-VERTIEFUNG-UX-W10-001
+
+**Von:** Cursor (Composer)
+**Owner:** Cursor
+**Stand:** abgeschlossen 2026-05-23
+**Ziel des Slices:** Produktive CRUD-Stammdaten-Masken fuer Wave-10 Erlöskennziffern und Zahlungsbedingungen gegen FIBU-Backend-Vertraege.
+**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/agent-ops/slices/FACHLICHE-VERTIEFUNG-UX-W10-001.yaml`, `docs/FACHLICHE-VERTIEFUNG-ABNAHME.md`, `packages/frontend-web/src/lib/api/fibu.ts`, `packages/frontend-web/src/pages/fibu/erloeskennziffern.tsx`, `packages/frontend-web/src/pages/einkauf/zahlungsbedingungen.tsx`, E2E-Specs
+**Abnahmekriterien:** Beide Masken CRUD-faehig gegen echte Endpoints; Warengruppen ohne Regression; E2E + Typecheck gruen.
+**Erledigt:** API-Hooks in fibu.ts; erloeskennziffern.tsx (ekz_nr, bezeichnung); zahlungsbedingungen.tsx (ZABD-Felder laut Schema); Navigation/Routes; Playwright-Gates.
+**Checks:** type-check; warengruppen/erloeskennziffern/zahlungsbedingungen Playwright; workboard validate
+**Offene Risiken:** Erlöskontenzuordnung (EKZZ) bleibt backend-only; Waves 11-13 unveraendert backend-only.
+
 ## FRONTEND-DOMAIN-AUDIT-REPAIR-001
 
 **Von:** Codex

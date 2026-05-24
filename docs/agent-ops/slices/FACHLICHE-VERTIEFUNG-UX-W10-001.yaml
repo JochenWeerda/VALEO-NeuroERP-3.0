@@ -1,0 +1,39 @@
+id: FACHLICHE-VERTIEFUNG-UX-W10-001
+title: Wave 10 Stammdaten-Masken Erlöskennziffern und Zahlungsbedingungen
+owner: Cursor
+status: abgeschlossen
+claimed_at: 2026-05-23
+completed_at: 2026-05-23
+depends_on:
+  - QA-FACHLICHE-VERTIEFUNG-GATES-001
+goal: >
+  Produktive CRUD-Stammdaten-Masken fuer Erlöskennziffern und Zahlungsbedingungen
+  gegen die Wave-10-FIBU-Backend-Vertraege; Warengruppen unveraendert lassen.
+scope:
+  - Erlöskennziffern-Liste/Form an /api/v1/fibu/erloeskennziffern
+  - Zahlungsbedingungen-Liste/Form an /api/v1/fibu/zahlungsbedingungen
+  - Navigation, Route-Aliases, Playwright-Gates
+file_ownership:
+  - docs/agent-ops/active-workboard.md
+  - docs/agent-ops/slices/FACHLICHE-VERTIEFUNG-UX-W10-001.yaml
+  - docs/FACHLICHE-VERTIEFUNG-ABNAHME.md
+  - packages/frontend-web/src/lib/api/fibu.ts
+  - packages/frontend-web/src/pages/fibu/erloeskennziffern.tsx
+  - packages/frontend-web/src/pages/einkauf/zahlungsbedingungen.tsx
+  - packages/frontend-web/tests/e2e/fachliche-vertiefung-erloeskennziffern.spec.ts
+  - packages/frontend-web/tests/e2e/fachliche-vertiefung-zahlungsbedingungen.spec.ts
+acceptance_criteria:
+  - Erlöskennziffern-Maske unterstuetzt Liste, Create, Update, Delete gegen echten FIBU-Endpoint.
+  - Zahlungsbedingungen-Maske unterstuetzt Liste, Create, Update, Delete mit Backend-Feldern.
+  - Playwright-Gates fuer beide Masken sind gruen; Typecheck gruen; Warengruppen unveraendert.
+checks:
+  - pnpm --filter @valero-neuroerp/frontend-web type-check
+  - pnpm --filter @valero-neuroerp/frontend-web exec playwright test tests/e2e/fachliche-vertiefung-warengruppen.spec.ts --project=chromium
+  - pnpm --filter @valero-neuroerp/frontend-web exec playwright test tests/e2e/fachliche-vertiefung-erloeskennziffern.spec.ts --project=chromium
+  - pnpm --filter @valero-neuroerp/frontend-web exec playwright test tests/e2e/fachliche-vertiefung-zahlungsbedingungen.spec.ts --project=chromium
+  - python scripts/agent_workboard_supervisor.py validate
+done:
+  - fibu.ts Hooks mit placeholderData fuer Wave-10-Stammdaten.
+  - erloeskennziffern.tsx und zahlungsbedingungen.tsx als CRUD-Masken.
+  - Navigation, Route-Aliases, E2E-Mocks.
+next_step: Weitere Wave-11-13-Stammdaten nur bei explizitem UX-Slice.
