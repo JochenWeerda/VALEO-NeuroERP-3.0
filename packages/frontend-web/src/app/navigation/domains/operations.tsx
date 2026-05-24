@@ -93,6 +93,15 @@ export const RAW_NAV_SECTIONS: RawNavItem[] = [
         mcp: { businessDomain: 'inventory', scope: 'inventory:read' },
       },
       {
+        id: 'partiestamm',
+        label: 'Partiestamm',
+        icon: Tag,
+        module: '@/pages/lager/partiestamm',
+        preferredPath: 'lager/partiestamm',
+        keywords: ['partie', 'partiestamm', 'charge', 'lot', 'pgr'],
+        mcp: { businessDomain: 'inventory', scope: 'inventory:read' },
+      },
+      {
         id: 'gs1-scanner',
         label: 'GS1 Barcode Workbench',
         icon: QrCode,

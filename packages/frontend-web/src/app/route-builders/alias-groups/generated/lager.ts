@@ -22,6 +22,10 @@ export const entries: AliasGroupRouteEntry[] = [
     "path": "lagerbewegungen"
   },
   {
+    "module": "@/pages/lager/partiestamm",
+    "path": "partiestamm"
+  },
+  {
     "module": "@/pages/lager/lagerplaetze",
     "path": "lagerplaetze"
   },

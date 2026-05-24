@@ -54,6 +54,14 @@ export const entries: AutoGroupRouteEntry[] = [
     "path": "erloeskontenzuordnung"
   },
   {
+    "module": "@/pages/fibu/forderungsgruppen",
+    "path": "forderungsgruppen"
+  },
+  {
+    "module": "@/pages/fibu/periodische-buchungen",
+    "path": "periodische-buchungen"
+  },
+  {
     "module": "@/pages/fibu/erloeskennziffern",
     "path": "erloeskennziffern"
   },

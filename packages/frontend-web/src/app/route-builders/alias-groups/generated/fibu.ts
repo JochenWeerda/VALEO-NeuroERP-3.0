@@ -38,6 +38,14 @@ export const entries: AliasGroupRouteEntry[] = [
     "path": "erloeskontenzuordnung"
   },
   {
+    "module": "@/pages/fibu/forderungsgruppen",
+    "path": "forderungsgruppen"
+  },
+  {
+    "module": "@/pages/fibu/periodische-buchungen",
+    "path": "periodische-buchungen"
+  },
+  {
     "module": "@/pages/fibu/guv",
     "path": "guv"
   },
