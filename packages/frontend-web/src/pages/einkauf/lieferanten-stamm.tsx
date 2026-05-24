@@ -996,11 +996,8 @@ export default function LieferantenStammPage(): JSX.Element {
                                 onClick={async () => {
                                   try {
                                     const url = `/api/v1/einkauf/lieferanten/${id}/dokumente/${doc.id}/download`
-                                    const response = await fetch(url, { credentials: 'include' })
-                                    if (!response.ok) {
-                                      throw new Error(`HTTP ${response.status}`)
-                                    }
-                                    const blob = await response.blob()
+                                    const res = await apiClient.get(url, { responseType: 'blob' })
+                                    const blob = res.data as Blob
                                     if (!blob || blob.size === 0) {
                                       throw new Error('empty-file')
                                     }

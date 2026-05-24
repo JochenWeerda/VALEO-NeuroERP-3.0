@@ -7,6 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
 import { useToast } from '@/hooks/use-toast'
+import { apiClient } from '@/lib/api-client'
 import { useCreateCustomer, useCustomers, type Customer } from '@/lib/api/crm'
 import { summarizeCustomerOperations } from '@/lib/domain-depth'
 import { OperationalCaseHeader } from '@/components/workflow/OperationalCaseHeader'
@@ -209,8 +210,8 @@ function LegacyKundenStammModern(): JSX.Element {
           return
         }
         try {
-          const response = await fetch(`/api/vies/validate/${encodeURIComponent(vatId)}`)
-          const result = await response.json()
+          const res = await apiClient.get(`/api/v1/vies/validate/${encodeURIComponent(vatId)}`)
+          const result = res.data
           toast({
             title: result.valid ? 'USt-ID gueltig' : 'USt-ID ungueltig',
             description: result.valid ? `USt-ID ${vatId} wurde validiert.` : result.error || 'Validierung fehlgeschlagen.',

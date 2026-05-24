@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { useToast } from '@/hooks/use-toast'
-import { getAxiosErrorMessage } from '@/lib/api-client'
+import { apiClient, getAxiosErrorMessage } from '@/lib/api-client'
 import { Badge } from '@/components/ui/badge'
 import { CheckCircle2, ExternalLink, Loader2 } from 'lucide-react'
 import {
@@ -106,12 +106,8 @@ export default function DmsIntegrationCard(): JSX.Element {
 
   const loadStatus = useCallback(async (): Promise<void> => {
     try {
-      const response = await fetch('/api/admin/dms/status')
-      if (!response.ok || !response.headers.get('content-type')?.includes('application/json')) {
-        setStatus(null)
-        return
-      }
-      const data = (await response.json()) as DmsStatus
+      const res = await apiClient.get<DmsStatus>('/api/v1/admin/dms/status')
+      const data = res.data
       setStatus(data)
       if (data && isNonEmptyString(data.base)) {
         setBaseUrl(data.base)
@@ -141,13 +137,8 @@ export default function DmsIntegrationCard(): JSX.Element {
 
     setLoading(true)
     try {
-      const response = await fetch('/api/admin/dms/test', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ base: baseUrl, token }),
-      })
-
-      const payload = (await response.json()) as TestConnectionResult
+      const res = await apiClient.post<TestConnectionResult>('/api/v1/admin/dms/test', { base: baseUrl, token })
+      const payload = res.data
       const nextState: TestState = payload.ok ? 'ok' : 'fail'
       setTestState(nextState)
 
@@ -176,13 +167,8 @@ export default function DmsIntegrationCard(): JSX.Element {
 
     setLoading(true)
     try {
-      const response = await fetch('/api/admin/dms/bootstrap', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ base: baseUrl, token }),
-      })
-
-      const payload = (await response.json()) as BootstrapResult
+      const res = await apiClient.post<BootstrapResult>('/api/v1/admin/dms/bootstrap', { base: baseUrl, token })
+      const payload = res.data
       if (payload.ok) {
         toast({
           title: BOOTSTRAP_SUCCESS_TITLE,

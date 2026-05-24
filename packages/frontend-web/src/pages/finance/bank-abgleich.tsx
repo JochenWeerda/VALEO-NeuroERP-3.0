@@ -306,7 +306,7 @@ export default function BankAbgleichPage(): JSX.Element {
   const { t } = useTranslation()
   const navigate = useNavigate()
   const { tenantId } = useTenant()
-  const [isDirty, setIsDirty] = useState(false)
+  const [isDirty, setIsDirty] = useState(false)
   const entityType = 'bankReconciliation'
   const entityTypeLabel = getEntityTypeLabel(t, entityType, 'Bank-Abgleich')
   const bankAbgleichConfig = createBankAbgleichConfig(t, entityTypeLabel)
@@ -395,20 +395,12 @@ export default function BankAbgleichPage(): JSX.Element {
         uploadFormData.append('file', formData.camtFile)
 
         // Call import API
-        const response = await fetch(
+        const res = await apiClient.post(
           `/api/v1/finance/bank-statements/import?format=${format}&bank_account_id=${formData.kontoId}&tenant_id=${encodeURIComponent(tenantId)}`,
-          {
-            method: 'POST',
-            body: uploadFormData,
-          }
+          uploadFormData,
+          { headers: { 'Content-Type': 'multipart/form-data' } }
         )
-
-        if (!response.ok) {
-          const error = await response.json()
-          throw new Error(error.detail || t('crud.messages.importError'))
-        }
-
-        const result = await response.json()
+        const result = res.data
 
         // Transform API response to form data format
         const umsaetze = result.lines.map((line: any) => ({
@@ -508,15 +500,10 @@ export default function BankAbgleichPage(): JSX.Element {
       }
 
       try {
-        const response = await fetch(
+        const res = await apiClient.get(
           `/api/v1/finance/bank-reconciliation/${formData.statementId}/reconcile?bank_account_id=${formData.kontoId}&tenant_id=${encodeURIComponent(tenantId)}&auto_book=false`
         )
-
-        if (!response.ok) {
-          throw new Error(t('crud.messages.reconciliationError'))
-        }
-
-        const result = await response.json()
+        const result = res.data
 
         // Update form data with reconciliation results
         formData.abgleichsDifferenz = Math.abs(result.balance_comparison.difference)
@@ -564,17 +551,12 @@ export default function BankAbgleichPage(): JSX.Element {
       if (differenz >= 0.01) {
         toast({ variant: 'destructive', title: t('crud.messages.bookingNotPossible'), description: t('crud.messages.reconciliationMustBeBalanced') })
         return
-      }
+      }
       try {
-        const response = await fetch(
-          `/api/v1/finance/bank-reconciliation/${formData.statementId}/reconcile?bank_account_id=${formData.kontoId}&tenant_id=${encodeURIComponent(tenantId)}&auto_book=true`,
-          { method: 'POST' }
+        const res = await apiClient.post(
+          `/api/v1/finance/bank-reconciliation/${formData.statementId}/reconcile?bank_account_id=${formData.kontoId}&tenant_id=${encodeURIComponent(tenantId)}&auto_book=true`
         )
-        if (!response.ok) {
-          const error = await response.json().catch(() => ({}))
-          throw new Error(error?.detail || t('crud.messages.reconciliationError'))
-        }
-        const result = await response.json()
+        const result = res.data
         formData.zugeordnet = result.line_counts?.matched || formData.zugeordnet || 0
         formData.nichtZugeordnet = result.line_counts?.unmatched || formData.nichtZugeordnet || 0
         formData.abgleichsDifferenz = Math.abs(result.balance_comparison?.difference || 0)
@@ -589,7 +571,7 @@ export default function BankAbgleichPage(): JSX.Element {
       if (!formData.id) {
         toast({ variant: 'destructive', title: t('common.error'), description: t('crud.messages.saveReconciliationFirst') })
         return
-      }
+      }
       try {
         const res = await apiClient.post<{ url?: string }>('/api/v1/export/list', { entity: 'bank_reconciliation', format: 'pdf', id: formData.id })
         if (res?.url) window.open(res.url, '_blank')
