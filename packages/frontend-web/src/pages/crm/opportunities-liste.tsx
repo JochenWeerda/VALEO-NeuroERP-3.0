@@ -264,21 +264,19 @@ export default function OpportunitiesListePage(): JSX.Element {
   const entityTypeLabel = getEntityTypeLabel(t, entityType, 'Opportunity')
   const importInputRef = useRef<HTMLInputElement>(null)
 
+  const [pendingRows, setPendingRows] = useState<Set<string>>(new Set())
+
+  async function withPending(key: string, fn: () => Promise<void>) {
+    if (pendingRows.has(key)) return
+    setPendingRows(prev => new Set(prev).add(key))
+    try { await fn() } finally {
+      setPendingRows(prev => { const s = new Set(prev); s.delete(key); return s })
+    }
+  }
+
   const { handleAction } = useMaskActions(async (action: string, item: any) => {
     if (action === 'edit' && item) {
       navigate(`/crm/opportunity/${item.id}`)
-    } else if (action === 'delete' && item) {
-      if (confirm(t('crud.dialogs.delete.descriptionGeneric', { entityType: entityTypeLabel }))) {
-        try {
-          await apiClient.delete(`/opportunities/${item.id}`)
-          loadData() // Liste neu laden
-        } catch (error) {
-          toast({
-            variant: 'destructive',
-            title: t('crud.messages.deleteError', { entityType: entityTypeLabel })
-          })
-        }
-      }
     }
   })
 
@@ -452,7 +450,15 @@ export default function OpportunitiesListePage(): JSX.Element {
   }
 
   const handleDelete = (item: any) => {
-    handleAction('delete', item)
+    if (!confirm(t('crud.dialogs.delete.descriptionGeneric', { entityType: entityTypeLabel }))) return
+    void withPending(String(item.id), async () => {
+      try {
+        await apiClient.delete(`/opportunities/${item.id}`)
+        loadData()
+      } catch {
+        toast({ variant: 'destructive', title: t('crud.messages.deleteError', { entityType: entityTypeLabel }) })
+      }
+    })
   }
 
   const handleExport = () => {
@@ -609,6 +615,7 @@ export default function OpportunitiesListePage(): JSX.Element {
         onCreate={handleCreate}
         onEdit={handleEdit}
         onDelete={handleDelete}
+        pendingRows={pendingRows}
         onExport={handleExport}
         onImport={() => importInputRef.current?.click()}
         isLoading={loading}

@@ -253,14 +253,27 @@ export default function KontaktManagementPage(): JSX.Element {
     void loadData()
   }, [])
 
+  const [pendingRows, setPendingRows] = useState<Set<string>>(new Set())
+
+  async function withPending(key: string, fn: () => Promise<void>) {
+    if (pendingRows.has(key)) return
+    setPendingRows(prev => new Set(prev).add(key))
+    try { await fn() } finally {
+      setPendingRows(prev => { const s = new Set(prev); s.delete(key); return s })
+    }
+  }
+
   const { handleAction } = useMaskActions(async (action: string, item: any) => {
     if (action === 'edit' && item) {
       navigate(`/crm/kontakte/${item.id}`)
-      return
     }
+  })
 
-    if (action === 'delete' && item) {
-      if (!confirm(`Kontakt "${item.name}" wirklich loeschen?`)) return
+  const handleCreate = () => navigate('/crm/kontakte/new')
+  const handleEdit = (item: any) => { void handleAction('edit', item) }
+  const handleDelete = (item: any) => {
+    if (!confirm(`Kontakt "${item.name}" wirklich loeschen?`)) return
+    void withPending(String(item.id), async () => {
       try {
         await apiClient.delete(`/kontakte/${item.id}`)
         await loadData()
@@ -271,12 +284,8 @@ export default function KontaktManagementPage(): JSX.Element {
           description: 'Der Kontakt konnte nicht geloescht werden.',
         })
       }
-    }
-  })
-
-  const handleCreate = () => navigate('/crm/kontakte/new')
-  const handleEdit = (item: any) => { void handleAction('edit', item) }
-  const handleDelete = (item: any) => { void handleAction('delete', item) }
+    })
+  }
 
   const handleExport = (rows: any[] = data) => {
     try {
@@ -500,6 +509,7 @@ export default function KontaktManagementPage(): JSX.Element {
         onCreate={handleCreate}
         onEdit={handleEdit}
         onDelete={handleDelete}
+        pendingRows={pendingRows}
         onExport={() => handleExport()}
         onImport={() => importInputRef.current?.click()}
         isLoading={loading}
