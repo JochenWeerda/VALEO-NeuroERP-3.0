@@ -236,7 +236,7 @@ export default function KontaktManagementPage(): JSX.Element {
   const loadData = async () => {
     setLoading(true)
     try {
-      const response = await apiClient.get('/api/v1/crm/kontakte')
+      const response = await apiClient.get('/api/v1/crm/contacts')
       setData((response.data as any).data || (response.data as any).items || [])
       setTotal((response.data as any).total || 0)
     } catch (error: any) {
@@ -272,7 +272,7 @@ export default function KontaktManagementPage(): JSX.Element {
     if (!confirm(`Kontakt "${item.name}" wirklich loeschen?`)) return
     void withPending(String(item.id), async () => {
       try {
-        await apiClient.delete(`/api/v1/crm/kontakte/${item.id}`)
+        await apiClient.delete(`/api/v1/crm/contacts/${item.id}`)
         await loadData()
       } catch {
         toast({
@@ -394,7 +394,7 @@ export default function KontaktManagementPage(): JSX.Element {
         deactivateSelected: async (items) => {
           if (!ensureSelection(items)) return
           try {
-            await Promise.all(items.map((item) => apiClient.put(`/api/v1/crm/kontakte/${item.id}`, { status: 'inaktiv' })))
+            await Promise.all(items.map((item) => apiClient.put(`/api/v1/crm/contacts/${item.id}`, { status: 'inaktiv' })))
             toast({
               title: 'Kontakte deaktiviert',
               description: `${items.length} Kontakt(e) wurden auf inaktiv gesetzt.`,

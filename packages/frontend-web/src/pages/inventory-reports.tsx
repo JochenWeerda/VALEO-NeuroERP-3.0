@@ -70,7 +70,7 @@ export default function InventoryReportsPage() {
   const { data: stockLevels } = useQuery({
     queryKey: ['inventory', 'stock-levels'],
     queryFn: async (): Promise<StockLevelsResponse> => {
-      const r = await apiClient.get('/api/v1/inventory/reports/stock-levels');
+      const r = await apiClient.get<StockLevelsResponse>('/api/v1/inventory/reports/stock-levels');
       return r.data;
     },
     initialData: EMPTY_STOCK_LEVELS,
@@ -79,7 +79,7 @@ export default function InventoryReportsPage() {
   const { data: alerts } = useQuery({
     queryKey: ['inventory', 'alerts'],
     queryFn: async (): Promise<AlertsResponse> => {
-      const r = await apiClient.get('/api/v1/inventory/reports/stock-alerts');
+      const r = await apiClient.get<AlertsResponse>('/api/v1/inventory/reports/stock-alerts');
       return r.data;
     },
     initialData: EMPTY_ALERTS,
@@ -88,7 +88,7 @@ export default function InventoryReportsPage() {
   const { data: replenishment } = useQuery({
     queryKey: ['inventory', 'replenishment'],
     queryFn: async (): Promise<ReplenishmentResponse> => {
-      const r = await apiClient.get('/api/v1/inventory/reports/replenishment-suggestions');
+      const r = await apiClient.get<ReplenishmentResponse>('/api/v1/inventory/reports/replenishment-suggestions');
       return r.data;
     },
     initialData: EMPTY_REPLENISHMENT,
@@ -97,7 +97,7 @@ export default function InventoryReportsPage() {
   const { data: turnover } = useQuery({
     queryKey: ['inventory', 'turnover'],
     queryFn: async (): Promise<TurnoverResponse> => {
-      const r = await apiClient.get('/api/v1/inventory/reports/turnover-analysis');
+      const r = await apiClient.get<TurnoverResponse>('/api/v1/inventory/reports/turnover-analysis');
       return r.data;
     },
     initialData: EMPTY_TURNOVER,

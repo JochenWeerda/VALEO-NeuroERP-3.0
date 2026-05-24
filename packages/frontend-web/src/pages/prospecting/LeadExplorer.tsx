@@ -280,20 +280,25 @@ export default function LeadExplorer(): JSX.Element {
     
     try {
       const allYearsParam = allYears ? '&all_years=true' : ''
-      const res = await apiClient.delete(
+      type GapResetResult = {
+        success: boolean
+        message?: string
+        error?: string
+        deleted_counts?: { debug_remaining_years?: { year: number; count: number }[] }
+      }
+      const res = await apiClient.delete<GapResetResult>(
         `/api/v1/gap/reset-gap-data?year=${refYear}&confirm=true&tables=all${allYearsParam}`
       )
       const result = res.data
-      
+
       if (!result.success) {
         throw new Error(result.message || result.error || 'Reset fehlgeschlagen')
       }
-      
-      // Debug-Informationen aus der Antwort anzeigen
+
       const debugInfo = result.deleted_counts?.debug_remaining_years || []
       const debugText = debugInfo.length > 0 ?
-        `\n\nDebug - Verbleibende Daten: ${debugInfo.map((y: { year: number; count: number }) => `${y.year}: ${y.count}`).join(', ')}` : ''
-      
+        `\n\nDebug - Verbleibende Daten: ${debugInfo.map((y) => `${y.year}: ${y.count}`).join(', ')}` : ''
+
       setPipelineSuccess(`✅ ${result.message}${debugText}`)
       
       // Status aktualisieren nach erfolgreichem Reset
