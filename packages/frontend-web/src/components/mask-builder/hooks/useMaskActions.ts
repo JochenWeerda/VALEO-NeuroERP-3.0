@@ -1,4 +1,4 @@
-import { useCallback } from 'react'
+import { useCallback, useRef, useState } from 'react'
 import { useToast } from '@/hooks/use-toast'
 import { getAxiosErrorMessage } from '@/lib/api-client'
 
@@ -8,14 +8,19 @@ interface ActionHandler {
 
 export function useMaskActions(onAction?: ActionHandler) {
   const { toast } = useToast()
+  const loadingRef = useRef<string | null>(null)
+  const [loadingActionKey, setLoadingActionKey] = useState<string | null>(null)
 
   const handleAction = useCallback(async (actionKey: string, data?: any) => {
+    if (loadingRef.current !== null) return
+    loadingRef.current = actionKey
+    setLoadingActionKey(actionKey)
     try {
       if (onAction) {
         await onAction(actionKey, data)
       }
 
-      // Show success toast for common actions
+      // Show success toast for common actions that don't manage their own feedback
       switch (actionKey) {
         case 'save':
           toast({
@@ -52,6 +57,9 @@ export function useMaskActions(onAction?: ActionHandler) {
       })
 
       throw error
+    } finally {
+      loadingRef.current = null
+      setLoadingActionKey(null)
     }
   }, [onAction, toast])
 
@@ -74,10 +82,13 @@ export function useMaskActions(onAction?: ActionHandler) {
     const message = `Möchten Sie die Aktion "${actionKey}" wirklich auf ${items.length} Element(e) anwenden?`
 
     if (window.confirm(message)) {
+      if (loadingRef.current !== null) return
+      loadingRef.current = actionKey
+      setLoadingActionKey(actionKey)
       try {
-        // Handle bulk actions
-        console.log('Bulk action:', actionKey, items, data)
-
+        if (onAction) {
+          await onAction(actionKey, { items, ...data })
+        }
         toast({
           title: "Massenaktion ausgeführt",
           description: `Die Aktion wurde auf ${items.length} Element(e) angewendet.`,
@@ -90,13 +101,17 @@ export function useMaskActions(onAction?: ActionHandler) {
           description: errorMessage,
           variant: "destructive",
         })
+      } finally {
+        loadingRef.current = null
+        setLoadingActionKey(null)
       }
     }
-  }, [toast])
+  }, [onAction, toast])
 
   return {
     handleAction,
     confirmAction,
     handleBulkAction,
+    loadingActionKey,
   }
 }

@@ -414,9 +414,15 @@ const ObjectPage: React.FC<ObjectPageProps> = ({
                 variant={action.type === 'primary' ? 'default' : 'outline'}
                 onClick={() => {
                   if (onAction) {
-                    void Promise.resolve(onAction(action.key, watch())).catch(() => { })
+                    void Promise.resolve(onAction(action.key, watch())).catch((err: unknown) => {
+                      const msg = err instanceof Error ? err.message : 'Aktion fehlgeschlagen'
+                      toast({ title: 'Fehler', description: msg, variant: 'destructive' })
+                    })
                   } else {
-                    void Promise.resolve(action.onClick?.(watch())).catch(() => {})
+                    void Promise.resolve(action.onClick?.(watch())).catch((err: unknown) => {
+                      const msg = err instanceof Error ? err.message : 'Aktion fehlgeschlagen'
+                      toast({ title: 'Fehler', description: msg, variant: 'destructive' })
+                    })
                   }
                 }}
                 disabled={action.disabled || isThisLoading}

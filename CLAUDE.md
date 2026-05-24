@@ -208,6 +208,27 @@ Every user-triggered mutation must have a complete UI lifecycle.
 
 **Exempt:** idempotent reads, pure downloads, navigation-only actions, handlers already guarded by a parent form or mutation component.
 
+### Mask Builder Action Invariant
+
+Mask-builder actions that trigger non-idempotent work must use a pending action key.
+
+- `useMaskActions` owns `loadingActionKey` — pages must not manage it separately.
+- Pages using `useMaskActions` must pass `loadingActionKey` into `ObjectPage`.
+- `ObjectPage` action errors must not be swallowed silently — toast or rethrow.
+- Action handlers must keep the pending key active until the full async chain completes.
+- `useMaskActions.handleAction` blocks concurrent actions via `loadingRef` (a ref guard, not state, to avoid stale closure).
+- Save-only form submits may rely on the react-hook-form `isSubmitting` guard (EXEMPT).
+- Navigation-only, idempotent reads, and pure downloads are EXEMPT.
+
+**Pattern:**
+```tsx
+const { handleAction, loadingActionKey } = useMaskActions(async (action, data) => {
+  // page-specific logic with own try/catch and toast
+})
+
+<ObjectPage onAction={handleAction} loadingActionKey={loadingActionKey} />
+```
+
 ### Per-Entity Pending State Invariant
 
 For row-level or item-level mutations in lists and tables, pending state must be tracked per entity/action key — not with a single global boolean.
