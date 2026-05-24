@@ -20,6 +20,36 @@ import { useTenant } from '@/hooks/useTenant';
 import { ModuleToolbar } from '@/components/navigation/ModuleToolbar';
 import { apiClient } from '@/lib/api-client';
 
+// API response type (server returns strings for dates, all fields optional)
+interface DuengerApiData {
+  artikelnummer?: string
+  name?: string
+  typ?: string
+  hersteller?: string
+  n_gehalt?: number | null
+  p_gehalt?: number | null
+  k_gehalt?: number | null
+  s_gehalt?: number | null
+  mg_gehalt?: number | null
+  dmv_nummer?: string
+  eu_zulassung?: string
+  ablauf_zulassung?: string | null
+  gefahrstoff_klasse?: string
+  wassergefaehrdend?: boolean
+  lagerklasse?: string
+  kultur_typ?: string
+  dosierung_min?: number | null
+  dosierung_max?: number | null
+  zeitpunkt?: string
+  ek_preis?: number | null
+  vk_preis?: number | null
+  waehrung?: string
+  lagerbestand?: number
+  ausgangsstoff_explosivstoffe?: boolean
+  erklaerung_landwirt_erforderlich?: boolean
+  erklaerung_landwirt_status?: string
+}
+
 // Form Data Interface
 interface DuengerFormData {
   artikelnummer: string;
@@ -140,9 +170,12 @@ const DuengerStammPage: React.FC = () => {
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   // Queries
-  const { data: duenger, isLoading } = useQuery({
+  const { data: duenger, isLoading } = useQuery<DuengerApiData>({
     queryKey: ['duenger', id],
-    queryFn: async () => { const r = await apiClient.get(`/api/v1/agrar/duenger/${id}`); return r.data },
+    queryFn: async () => {
+      const r = await apiClient.get<DuengerApiData>(`/api/v1/agrar/duenger/${id}`)
+      return r.data
+    },
     enabled: isEditing && !!id,
   });
 

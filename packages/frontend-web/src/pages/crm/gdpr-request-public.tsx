@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { createApiClient } from '@/components/mask-builder/utils/api'
+
 import { apiClient as httpClient } from '@/lib/api-client'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -13,8 +13,6 @@ import { CheckCircle2, XCircle, Loader2, FileText, ShieldCheck } from 'lucide-re
 import { toast } from '@/hooks/use-toast'
 import { useTenant } from '@/hooks/useTenant'
 
-// API Client
-const apiClient = createApiClient('/api/v1/gdpr')
 
 export default function GDPRRequestPublicPage(): JSX.Element {
   const { t } = useTranslation()
@@ -36,7 +34,7 @@ export default function GDPRRequestPublicPage(): JSX.Element {
     setLoading(true)
 
     try {
-      const response = await apiClient.post('/requests', {
+      const response = await httpClient.post('/api/v1/gdpr/requests', {
         tenant_id: tenantId,
         request_type: formData.request_type,
         contact_id: formData.contact_id,
@@ -45,7 +43,7 @@ export default function GDPRRequestPublicPage(): JSX.Element {
         notes: formData.notes,
       })
 
-      if (response.success) {
+      if (response.data) {
         setRequestId(response.data.id)
         toast({
           title: t('crud.messages.requestCreated'),
@@ -53,7 +51,7 @@ export default function GDPRRequestPublicPage(): JSX.Element {
         })
         setStep('status')
       } else {
-        throw new Error(response.error || 'Request failed')
+        throw new Error('Request failed')
       }
     } catch (error: any) {
       toast({
@@ -77,8 +75,8 @@ export default function GDPRRequestPublicPage(): JSX.Element {
 
     setLoading(true)
     try {
-      const response = await apiClient.get(`/requests/${requestId}`)
-      if (response.success) {
+      const response = await httpClient.get(`/api/v1/gdpr/requests/${requestId}`)
+      if (response.data) {
         setStatusData(response.data)
         if (response.data.status === 'completed' && response.data.response_file_path) {
           setStep('download')

@@ -381,6 +381,15 @@ export const RAW_NAV_SECTIONS: RawNavItem[] = [
         keywords: ['webhook', 'integration', 'events', 'http'],
         mcp: { businessDomain: 'admin', scope: 'admin:write' },
       },
+      {
+        id: 'betriebsstaetten',
+        label: 'Betriebsstätten & Filialen [FILS]',
+        icon: Building2,
+        module: '@/pages/stammdaten/betriebsstaetten',
+        preferredPath: 'stammdaten/betriebsstaetten',
+        keywords: ['betriebsstätte', 'filiale', 'filialsystem', 'fils', 'zentrale', 'standort'],
+        mcp: { businessDomain: 'admin', scope: 'admin:read' },
+      },
     ],
   },
   {

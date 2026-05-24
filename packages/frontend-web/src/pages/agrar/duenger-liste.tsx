@@ -29,6 +29,27 @@ import {
 } from 'lucide-react'
 import { apiClient } from '@/lib/api-client'
 
+interface DuengerListItem {
+  id: string
+  artikelnummer: string
+  name: string
+  typ: string
+  hersteller?: string
+  gefahrstoff_klasse?: string
+  wassergefaehrdend?: boolean
+  lagerklasse?: string
+  kultur_typ?: string
+  vk_preis?: number | null
+  lagerbestand?: number
+  [key: string]: unknown
+}
+
+interface DuengerStats {
+  total_duenger?: number
+  by_safety?: Record<string, number>
+  stock_summary?: { total_stock?: number }
+}
+
 const TYP_OPTIONS = [
   { value: 'all-types', label: 'Alle Typen' },
   { value: 'Mineralduenger', label: 'Mineralduenger' },
@@ -62,7 +83,7 @@ export default function DuengerListePage(): JSX.Element {
   const [kulturTypFilter, setKulturTypFilter] = useState('all-kultur')
   const [safetyFilter, setSafetyFilter] = useState('all-safety')
 
-  const { data: duengerList, isLoading } = useQuery({
+  const { data: duengerList, isLoading } = useQuery<{ items: DuengerListItem[] }>({
     queryKey: ['duenger-list', searchTerm, typFilter, herstellerFilter, kulturTypFilter, safetyFilter],
     queryFn: async () => {
       const params = new URLSearchParams({ limit: '100' })
@@ -70,15 +91,15 @@ export default function DuengerListePage(): JSX.Element {
       if (typFilter !== 'all-types') params.set('typ', typFilter)
       if (herstellerFilter) params.set('hersteller', herstellerFilter)
       if (kulturTypFilter !== 'all-kultur') params.set('kultur_typ', kulturTypFilter)
-      const r = await apiClient.get(`/api/v1/agrar/duenger?${params.toString()}`)
+      const r = await apiClient.get<{ items: DuengerListItem[] }>(`/api/v1/agrar/duenger?${params.toString()}`)
       return r.data
     },
   })
 
-  const { data: stats } = useQuery({
+  const { data: stats } = useQuery<DuengerStats>({
     queryKey: ['duenger-stats'],
     queryFn: async () => {
-      const r = await apiClient.get('/api/v1/agrar/duenger/stats/overview')
+      const r = await apiClient.get<DuengerStats>('/api/v1/agrar/duenger/stats/overview')
       return r.data
     },
   })
