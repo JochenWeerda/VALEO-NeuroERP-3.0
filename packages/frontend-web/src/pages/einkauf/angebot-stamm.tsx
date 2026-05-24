@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { ObjectPage } from '@/components/mask-builder'
-import { useMaskData } from '@/components/mask-builder/hooks'
+import { useMaskData, useMaskActions } from '@/components/mask-builder/hooks'
 import { MaskConfig } from '@/components/mask-builder/types'
 import { getEntityTypeLabel } from '@/features/crud/utils/i18n-helpers'
 import { toast } from '@/hooks/use-toast'
@@ -152,6 +152,27 @@ export default function AngebotStammPage(): JSX.Element {
     id: id || undefined
   })
 
+  const { handleAction, loadingActionKey } = useMaskActions(async (actionKey: string) => {
+          if (!id || !transitionMap[actionKey]) {
+            toast({ title: 'Aktion nicht moeglich', description: 'Das Angebot muss zuerst gespeichert werden.', variant: 'destructive' })
+            return
+          }
+          try {
+            const response = await apiClient.post<{ purchaseOrderId?: string; purchaseOrderNumber?: string }>(
+              `/api/v1/einkauf/angebote/${encodeURIComponent(id)}/${transitionMap[actionKey]}`,
+            )
+            if (actionKey === 'inBestellung' && response.data?.purchaseOrderId) {
+              toast({ title: 'Bestellung erzeugt', description: response.data.purchaseOrderNumber || 'Folgebeleg erzeugt.' })
+              navigate(`/einkauf/bestellungen/${encodeURIComponent(response.data.purchaseOrderId)}`)
+              return
+            }
+            toast({ title: 'Aktion ausgefuehrt', description: `Angebot ${id} wurde aktualisiert.` })
+            navigate('/einkauf/angebote')
+          } catch (error: any) {
+            toast({ title: 'Aktion fehlgeschlagen', description: error.response?.data?.detail || error.message, variant: 'destructive' })
+          }
+  })
+
   const handleSave = async (formData: any) => {
     setLoading(true)
     try {
@@ -229,29 +250,8 @@ export default function AngebotStammPage(): JSX.Element {
         onSave={handleSave}
         onCancel={handleCancel}
         isLoading={loading}
-        onAction={async (actionKey) => {
-          if (!id || !transitionMap[actionKey]) {
-            toast({ title: 'Aktion nicht moeglich', description: 'Das Angebot muss zuerst gespeichert werden.', variant: 'destructive' })
-            return
-          }
-          setLoading(true)
-          try {
-            const response = await apiClient.post<{ purchaseOrderId?: string; purchaseOrderNumber?: string }>(
-              `/api/v1/einkauf/angebote/${encodeURIComponent(id)}/${transitionMap[actionKey]}`,
-            )
-            if (actionKey === 'inBestellung' && response.data?.purchaseOrderId) {
-              toast({ title: 'Bestellung erzeugt', description: response.data.purchaseOrderNumber || 'Folgebeleg erzeugt.' })
-              navigate(`/einkauf/bestellungen/${encodeURIComponent(response.data.purchaseOrderId)}`)
-              return
-            }
-            toast({ title: 'Aktion ausgefuehrt', description: `Angebot ${id} wurde aktualisiert.` })
-            navigate('/einkauf/angebote')
-          } catch (error: any) {
-            toast({ title: 'Aktion fehlgeschlagen', description: error.response?.data?.detail || error.message, variant: 'destructive' })
-          } finally {
-            setLoading(false)
-          }
-        }}
+        onAction={handleAction}
+        loadingActionKey={loadingActionKey}
       />
     </div>
   )

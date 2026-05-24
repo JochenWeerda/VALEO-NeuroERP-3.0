@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { useQuery } from '@tanstack/react-query'
 import { z } from 'zod'
 import { ObjectPage } from '@/components/mask-builder'
-import { useMaskData } from '@/components/mask-builder/hooks'
+import { useMaskData, useMaskActions } from '@/components/mask-builder/hooks'
 
 import { MaskConfig } from '@/components/mask-builder/types'
 import { getEntityTypeLabel, getDetailTitle, getSuccessMessage, getErrorMessage } from '@/features/crud/utils/i18n-helpers'
@@ -514,7 +514,7 @@ export default function OpportunityDetailPage(): JSX.Element {
     }
   }
 
-  const handleAction = async (action: string, formData: any) => {
+  const { handleAction, loadingActionKey } = useMaskActions(async (action: string, formData: any) => {
     if (action === 'convertToQuote') {
       if (id && id !== 'neu' && id !== 'new') {
         navigate(`/sales/angebot-erstellen?opportunityId=${id}`)
@@ -565,7 +565,7 @@ export default function OpportunityDetailPage(): JSX.Element {
         })
       }
     }
-  }
+  })
 
   const operationalStatus = normalizeOperationalStatus(
     data?.status === 'closed_won'
@@ -699,6 +699,7 @@ export default function OpportunityDetailPage(): JSX.Element {
             onCancel={handleCancel}
             onAction={handleAction}
             isLoading={loading || dataLoading}
+            loadingActionKey={loadingActionKey}
           />
         </div>
 

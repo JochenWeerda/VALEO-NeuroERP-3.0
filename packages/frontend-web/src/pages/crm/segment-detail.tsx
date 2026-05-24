@@ -3,7 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { z } from 'zod'
 import { ObjectPage } from '@/components/mask-builder'
-import { useMaskData } from '@/components/mask-builder/hooks'
+import { useMaskData, useMaskActions } from '@/components/mask-builder/hooks'
 
 import { MaskConfig } from '@/components/mask-builder/types'
 import { getEntityTypeLabel, getDetailTitle, getSuccessMessage, getErrorMessage } from '@/features/crud/utils/i18n-helpers'
@@ -348,7 +348,7 @@ export default function SegmentDetailPage(): JSX.Element {
     }
   }
 
-  const handleAction = async (action: string) => {
+  const { handleAction, loadingActionKey } = useMaskActions(async (action: string) => {
     if (!id) return
 
     if (action === 'calculate') {
@@ -394,7 +394,7 @@ export default function SegmentDetailPage(): JSX.Element {
         })
       }
     }
-  }
+  })
 
   if (dataLoading && !isNew) {
     return (
@@ -434,6 +434,7 @@ export default function SegmentDetailPage(): JSX.Element {
             onCancel={handleCancel}
             onAction={handleAction}
             isLoading={loading || dataLoading}
+            loadingActionKey={loadingActionKey}
           />
         </div>
 
