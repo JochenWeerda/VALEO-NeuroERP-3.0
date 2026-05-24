@@ -10,4 +10,5 @@ export const entries: AutoGroupRouteEntry[] = [
     "path": "konditionen"
   },
   { "module": "@/pages/preise/kalkulation", "path": "kalkulation" },
+  { "module": "@/pages/preise/zu-abschlaggruppen", "path": "zu-abschlaggruppen" },
 ]

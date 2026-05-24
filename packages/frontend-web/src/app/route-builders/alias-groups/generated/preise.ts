@@ -8,5 +8,9 @@ export const entries: AliasGroupRouteEntry[] = [
   {
     "module": "@/pages/preise/konditionen",
     "path": "konditionen"
+  },
+  {
+    "module": "@/pages/preise/zu-abschlaggruppen",
+    "path": "zu-abschlaggruppen"
   }
 ]

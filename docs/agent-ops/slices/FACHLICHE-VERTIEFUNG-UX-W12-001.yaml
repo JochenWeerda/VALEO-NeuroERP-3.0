@@ -1,0 +1,54 @@
+id: FACHLICHE-VERTIEFUNG-UX-W12-001
+title: Wave 12 Stammdaten-Masken Zu-/Abschlaggruppen und Vertreterprovisionen
+owner: Cursor
+status: abgeschlossen
+claimed_at: 2026-05-24
+completed_at: 2026-05-24
+depends_on:
+  - FACHLICHE-VERTIEFUNG-UX-W11-001
+goal: >
+  Produktive Wave-12-Stammdaten-Masken fuer Zu-/Abschlaggruppen/-klassen und
+  Vertreterprovisionsgruppen/-staffeln gegen die bestehenden Backend-Vertraege.
+scope:
+  - Zu-/Abschlaggruppen [ZAGR] und -klassen [ZAKL] an /api/v1/preise/zu-abschlaege
+  - Vertreterprovisionsgruppen und -staffeln an /api/v1/crm/vertreter/provisionen
+  - Navigation commercial.tsx, Route-Aliases, Playwright-Gates
+  - Konditionen-UI und Vertreter-Einzelstamm bleiben separater Folgeslice
+file_ownership:
+  - docs/agent-ops/slices/FACHLICHE-VERTIEFUNG-UX-W12-001.yaml
+  - packages/frontend-web/src/lib/api/zu-abschlaege.ts
+  - packages/frontend-web/src/lib/api/vertreterprovisionen.ts
+  - packages/frontend-web/src/pages/preise/zu-abschlaggruppen.tsx
+  - packages/frontend-web/src/pages/crm/vertreterprovisionen.tsx
+  - packages/frontend-web/src/app/navigation/domains/commercial.tsx
+  - packages/frontend-web/src/app/route-aliases.json
+  - packages/frontend-web/src/app/route-builders/alias-groups/generated/preise.ts
+  - packages/frontend-web/src/app/route-builders/alias-groups/generated/crm.ts
+  - packages/frontend-web/src/app/route-builders/auto-groups/generated/preise.ts
+  - packages/frontend-web/src/app/route-builders/auto-groups/generated/crm.ts
+  - packages/frontend-web/tests/e2e/fachliche-vertiefung-zuabschlaggruppen.spec.ts
+  - packages/frontend-web/tests/e2e/fachliche-vertiefung-vertreterprovisionen.spec.ts
+acceptance_criteria:
+  - Zu-/Abschlaggruppen unter /preise/zu-abschlaggruppen mit Tab-Navigation ZAGR/ZAKL bedienbar.
+  - Gruppen und Klassen anlegen, nach Richtung filtern, deaktivieren.
+  - Vertreterprovisionen unter /crm/vertreterprovisionen mit Fix- und Staffel-Typen bedienbar.
+  - Staffeln: Accordion je Gruppe, Zeilen-Editor, Anlegen via POST.
+  - Loading-Skeletons, Leerzustaende, Toast-Feedback konsistent.
+  - A11y: aria-label und htmlFor vollstaendig.
+  - Playwright-Gates Wave 12 gruen; Typecheck gruen.
+checks:
+  - pnpm --filter @valero-neuroerp/frontend-web type-check
+  - pnpm --filter @valero-neuroerp/frontend-web exec playwright test tests/e2e/fachliche-vertiefung-zuabschlaggruppen.spec.ts --project=chromium
+  - pnpm --filter @valero-neuroerp/frontend-web exec playwright test tests/e2e/fachliche-vertiefung-vertreterprovisionen.spec.ts --project=chromium
+  - python scripts/agent_workboard_supervisor.py validate
+  - git diff --check
+done:
+  - zu-abschlaege.ts Hooks fuer Gruppen, Klassen und Konditionen (GET/POST/DELETE).
+  - vertreterprovisionen.ts Hooks fuer Provisionsgruppen und Staffeln.
+  - zu-abschlaggruppen.tsx Tab-Maske mit Gruppen-/Klassen-Formularen, Tabellen, Richtungsfilter.
+  - vertreterprovisionen.tsx Masken mit Fix/Staffel-Typ, Accordion-Staffeleditor.
+  - Navigation commercial.tsx: Preise-Section + Vertreter-&-Provisionen-Section.
+  - Route-Aliases und Auto-Groups fuer preise und crm konsistent erweitert.
+  - Playwright-E2E-Gates mit funktionsbasierten URL-Matchern deterministisch.
+  - TypeScript-Check gruen.
+next_step: Wave 13 UX oder Konditionen-UI als separater Slice bei Bedarf.
