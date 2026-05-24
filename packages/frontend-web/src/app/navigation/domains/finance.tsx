@@ -14,6 +14,7 @@ import {
   Globe,
   Hash,
   LayoutDashboard,
+  Link2,
   LayoutGrid,
   Leaf,
   Package,
@@ -88,6 +89,15 @@ export const RAW_NAV_SECTIONS: RawNavItem[] = [
         module: '@/pages/fibu/erloeskennziffern',
         preferredPath: 'fibu/erloeskennziffern',
         keywords: ['erloeskennziffer', 'ekz', 'stammdaten'],
+        mcp: { businessDomain: 'finance', scope: 'finance:read' },
+      },
+      {
+        id: 'erloeskontenzuordnung',
+        label: 'Erlöskontenzuordnung',
+        icon: Link2,
+        module: '@/pages/fibu/erloeskontenzuordnung',
+        preferredPath: 'fibu/erloeskontenzuordnung',
+        keywords: ['ekzz', 'erloeskontenzuordnung', 'lookup', 'kontenzuordnung'],
         mcp: { businessDomain: 'finance', scope: 'finance:read' },
       },
       {
