@@ -16,6 +16,7 @@ import { CrudDeleteDialog, CrudCancelDialog, CrudAuditTrailPanel, CrudPrintButto
 import { useCrudDelete, useCrudCancel, useCrudAuditTrail } from '@/features/crud/hooks';
 import { crudPrintService } from '@/features/crud/services';
 import { getEntityTypeLabel, getListTitle, getDetailTitle } from '@/features/crud/utils/i18n-helpers';
+import { apiClient } from '@/lib/api-client';
 
 interface Farmer {
   id: string;
@@ -48,16 +49,8 @@ export default function FarmersPage(): JSX.Element {
     const fetchFarmers = async () => {
       setIsLoading(true);
       try {
-        const response = await fetch('/api/agribusiness/farmers');
-        if (
-          response.ok &&
-          response.headers.get('content-type')?.includes('application/json')
-        ) {
-          const data = await response.json();
-          setFarmers(Array.isArray(data?.data) ? data.data : []);
-        } else {
-          setFarmers([]);
-        }
+        const r = await apiClient.get('/api/v1/agribusiness/farmers');
+        setFarmers(Array.isArray(r.data?.data) ? r.data.data : (Array.isArray(r.data) ? r.data : []));
       } catch {
         setFarmers([]);
       } finally {
@@ -69,17 +62,9 @@ export default function FarmersPage(): JSX.Element {
 
   // Delete handler
   const handleDelete = async (id: string, reason: string) => {
-    const response = await fetch(`/api/agribusiness/farmers/${id}`, {
-      method: 'DELETE',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ reason }),
-    });
-    if (response.ok) {
-      setFarmers(farmers.filter(f => f.id !== id));
-      setSelectedFarmer(null);
-    } else {
-      throw new Error('Failed to delete farmer');
-    }
+    await apiClient.delete(`/api/v1/agribusiness/farmers/${id}`, { data: { reason } });
+    setFarmers(farmers.filter(f => f.id !== id));
+    setSelectedFarmer(null);
   };
 
   const {
@@ -111,12 +96,12 @@ export default function FarmersPage(): JSX.Element {
 
   // Audit trail
   const fetchAuditTrail = async (entityType: string, entityId: string) => {
-    const response = await fetch(`/api/audit/change-logs/audit-trail/${entityType}/${entityId}`);
-    if (response.ok) {
-      const data = await response.json();
-      return data.data || [];
+    try {
+      const r = await apiClient.get(`/api/v1/audit/change-logs/audit-trail/${entityType}/${entityId}`);
+      return r.data?.data || [];
+    } catch {
+      return [];
     }
-    return [];
   };
 
   const {
