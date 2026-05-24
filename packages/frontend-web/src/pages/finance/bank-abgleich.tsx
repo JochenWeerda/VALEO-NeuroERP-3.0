@@ -350,6 +350,14 @@ export default function BankAbgleichPage(): JSX.Element {
     Number(data?.nichtZugeordnet || 0) > 0 ? { label: 'Manuelle Klaerung offen', detail: `${data.nichtZugeordnet} Umsatzzeile(n) ohne Zuordnung` } : null,
   ].filter((item): item is { label: string; detail: string } => item !== null)
 
+  type ReconcileResult = {
+    balance_comparison: { difference: number; is_balanced: boolean }
+    line_counts?: { matched?: number; unmatched?: number }
+    total_differences?: number
+    differences?: unknown[]
+    booking_suggestions?: unknown
+  }
+
   const validate = (formData: any) => validateFields(getFieldsFromMaskConfig(bankAbgleichConfig), formData ?? {})
   const showValidationToast = (errors: Record<string, string>) => {
     toast({
@@ -395,7 +403,24 @@ export default function BankAbgleichPage(): JSX.Element {
         uploadFormData.append('file', formData.camtFile)
 
         // Call import API
-        const res = await apiClient.post(
+        type ImportResult = {
+          statement_id: string
+          imported_lines: number
+          error_lines: number
+          import_errors: string[]
+          opening_balance: string
+          closing_balance: string
+          lines: Array<{
+            booking_date: string
+            amount: string
+            remittance_info?: string
+            reference?: string
+            status: string
+            creditor_name?: string
+            debtor_name?: string
+          }>
+        }
+        const res = await apiClient.post<ImportResult>(
           `/api/v1/finance/bank-statements/import?format=${format}&bank_account_id=${formData.kontoId}&tenant_id=${encodeURIComponent(tenantId)}`,
           uploadFormData,
           { headers: { 'Content-Type': 'multipart/form-data' } }
@@ -500,12 +525,11 @@ export default function BankAbgleichPage(): JSX.Element {
       }
 
       try {
-        const res = await apiClient.get(
+        const res = await apiClient.post<ReconcileResult>(
           `/api/v1/finance/bank-reconciliation/${formData.statementId}/reconcile?bank_account_id=${formData.kontoId}&tenant_id=${encodeURIComponent(tenantId)}&auto_book=false`
         )
         const result = res.data
 
-        // Update form data with reconciliation results
         formData.abgleichsDifferenz = Math.abs(result.balance_comparison.difference)
         formData.zugeordnet = result.line_counts?.matched || 0
         formData.nichtZugeordnet = result.line_counts?.unmatched || 0
@@ -553,7 +577,7 @@ export default function BankAbgleichPage(): JSX.Element {
         return
       }
       try {
-        const res = await apiClient.post(
+        const res = await apiClient.post<ReconcileResult>(
           `/api/v1/finance/bank-reconciliation/${formData.statementId}/reconcile?bank_account_id=${formData.kontoId}&tenant_id=${encodeURIComponent(tenantId)}&auto_book=true`
         )
         const result = res.data
