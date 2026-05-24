@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { ListReport } from '@/components/mask-builder'
 import { useMaskActions } from '@/components/mask-builder/hooks'
-import { createApiClient } from '@/components/mask-builder/utils/api'
+import { apiClient } from '@/lib/api-client'
 import { formatDate, formatCurrency } from '@/components/mask-builder/utils/formatting'
 import { Badge } from '@/components/ui/badge'
 import { ListConfig } from '@/components/mask-builder/types'
@@ -19,7 +19,6 @@ import {
 } from '@/components/workflow'
 
 // API Client für Opportunities
-const apiClient = createApiClient('/api/v1/crm')
 
 type CrmRoleFocus = 'all' | 'sales' | 'inside-sales' | 'management' | 'finance' | 'customer-success'
 
@@ -283,8 +282,8 @@ export default function OpportunitiesListePage(): JSX.Element {
   const loadData = async () => {
     setLoading(true)
     try {
-      const response = await apiClient.get('/opportunities')
-      if (response.success) {
+      const response = await apiClient.get('/api/v1/crm/opportunities')
+      if (response.data) {
         setData((response.data as any).items || [])
         setTotal((response.data as any).total || 0)
       }
@@ -323,7 +322,7 @@ export default function OpportunitiesListePage(): JSX.Element {
     }
 
     try {
-      await Promise.all(items.map((item) => apiClient.put(`/opportunities/${item.id}`, payload)))
+      await Promise.all(items.map((item) => apiClient.put(`/api/v1/crm/opportunities/${item.id}`, payload)))
       toast({ title: successTitle, description: successDescription })
       await loadData()
     } catch (error) {
@@ -418,7 +417,7 @@ export default function OpportunitiesListePage(): JSX.Element {
           customer_name: get(['customer', 'kunde', 'customer_name']) || undefined,
           owner_id: get(['owner', 'owner_id']) || undefined,
         }
-        await apiClient.post('/opportunities', payload)
+        await apiClient.post('/api/v1/crm/opportunities', payload)
         created += 1
       }
 
@@ -453,7 +452,7 @@ export default function OpportunitiesListePage(): JSX.Element {
     if (!confirm(t('crud.dialogs.delete.descriptionGeneric', { entityType: entityTypeLabel }))) return
     void withPending(String(item.id), async () => {
       try {
-        await apiClient.delete(`/opportunities/${item.id}`)
+        await apiClient.delete(`/api/v1/crm/opportunities/${item.id}`)
         loadData()
       } catch {
         toast({ variant: 'destructive', title: t('crud.messages.deleteError', { entityType: entityTypeLabel }) })

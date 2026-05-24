@@ -8,8 +8,7 @@ import { useMaskData, useMaskActions } from '@/components/mask-builder/hooks'
 
 import { MaskConfig } from '@/components/mask-builder/types'
 import { getEntityTypeLabel, getDetailTitle, getSuccessMessage, getErrorMessage } from '@/features/crud/utils/i18n-helpers'
-import { createApiClient } from '@/components/mask-builder/utils/api'
-import { apiClient as globalApiClient } from '@/lib/api-client'
+import { apiClient } from '@/lib/api-client'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -22,7 +21,6 @@ import { OperationalTimeline } from '@/components/workflow/OperationalTimeline'
 import { summarizeOpportunityOperations } from '@/lib/domain-depth'
 import { normalizeOperationalStatus } from '@/lib/operational-status'
 
-const apiClient = createApiClient('/api/v1/crm')
 
 // Zod-Schema für Opportunities
 const createOpportunitySchema = (t: any) => z.object({
@@ -49,7 +47,7 @@ const createOpportunitySchema = (t: any) => z.object({
 
 function validateOpportunityForm(formData: unknown, t: any): { valid: boolean; errors: string[] } {
   const result = createOpportunitySchema(t).safeParse(formData)
-  return result.success
+  return result
     ? { valid: true, errors: [] }
     : { valid: false, errors: result.error.issues.map((issue) => issue.message) }
 }
@@ -296,8 +294,8 @@ function OpportunityHistoryTab({ opportunityId }: { opportunityId: string }) {
   useEffect(() => {
     const loadHistory = async () => {
       try {
-        const response = await apiClient.get(`/opportunities/${opportunityId}/history`)
-        if (response.success) {
+        const response = await apiClient.get(`/api/v1/crm/opportunities/${opportunityId}/history`)
+        if (response.data) {
           setHistory(response.data || [])
         }
       } catch (error: any) {
@@ -364,8 +362,8 @@ function OpportunityQuotesTab({ opportunityId }: { opportunityId: string }) {
   useEffect(() => {
     const loadQuotes = async () => {
       try {
-        const response = await apiClient.get(`/opportunities/${opportunityId}/quotes`)
-        if (response.success) {
+        const response = await apiClient.get(`/api/v1/crm/opportunities/${opportunityId}/quotes`)
+        if (response.data) {
           setQuotes((response.data as any) || [])
         }
       } catch {
@@ -434,7 +432,7 @@ export default function OpportunityDetailPage(): JSX.Element {
   const { data: customersData } = useQuery({
     queryKey: ['crm', 'customers-lookup'],
     queryFn: async () => {
-      const r = await globalApiClient.get<{ items: any[]; total: number }>('/api/v1/crm/customers')
+      const r = await apiClient.get<{ items: any[]; total: number }>('/api/v1/crm/customers')
       return r.data?.items || []
     },
     staleTime: 10 * 60 * 1000,
@@ -442,7 +440,7 @@ export default function OpportunityDetailPage(): JSX.Element {
   const { data: contactsData } = useQuery({
     queryKey: ['crm', 'contacts-lookup'],
     queryFn: async () => {
-      const r = await globalApiClient.get<any[] | { items?: any[] }>('/api/v1/crm/contacts')
+      const r = await apiClient.get<any[] | { items?: any[] }>('/api/v1/crm/contacts')
       const items = Array.isArray(r.data) ? r.data : r.data?.items || []
       return items
     },
@@ -535,7 +533,7 @@ export default function OpportunityDetailPage(): JSX.Element {
       }
     } else if (action === 'markAsWon' && id) {
       try {
-        await apiClient.put(`/opportunities/${id}`, {
+        await apiClient.put(`/api/v1/crm/opportunities/${id}`, {
           status: 'closed_won',
           actual_close_date: new Date().toISOString()
         })
@@ -551,7 +549,7 @@ export default function OpportunityDetailPage(): JSX.Element {
       }
     } else if (action === 'markAsLost' && id) {
       try {
-        await apiClient.put(`/opportunities/${id}`, {
+        await apiClient.put(`/api/v1/crm/opportunities/${id}`, {
           status: 'closed_lost'
         })
         toast({

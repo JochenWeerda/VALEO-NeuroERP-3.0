@@ -1,14 +1,13 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { createApiClient } from '@/components/mask-builder/utils/api'
+import { apiClient } from '@/lib/api-client'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { CheckCircle2, XCircle, Loader2 } from 'lucide-react'
 
 // API Client
-const apiClient = createApiClient('/api/v1/crm')
 
 export default function ConsentConfirmPage(): JSX.Element {
   const { t } = useTranslation()
@@ -29,11 +28,11 @@ export default function ConsentConfirmPage(): JSX.Element {
       }
 
       try {
-        const response = await apiClient.post(`/consents/${consentId}/confirm`, null, {
+        const response = await apiClient.post(`/api/v1/crm/consents/${consentId}/confirm`, null, {
           params: { token }
         })
 
-        if (response.success) {
+        if (response.data) {
           setStatus('success')
           setMessage(t('crud.messages.consentConfirmed'))
         } else {

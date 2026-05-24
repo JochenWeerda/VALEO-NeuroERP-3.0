@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { ListReport } from '@/components/mask-builder'
 import { useMaskActions } from '@/components/mask-builder/hooks'
-import { createApiClient } from '@/components/mask-builder/utils/api'
+import { apiClient } from '@/lib/api-client'
 import { formatDate } from '@/components/mask-builder/utils/formatting'
 import { Badge } from '@/components/ui/badge'
 import { ListConfig } from '@/components/mask-builder/types'
@@ -12,7 +12,6 @@ import { toast } from '@/hooks/use-toast'
 import { useTenant } from '@/hooks/useTenant'
 
 // API Client
-const apiClient = createApiClient('/api/v1/marketing')
 
 // Konfiguration für Segmente ListReport
 const createSegmentsConfig = (t: any, entityTypeLabel: string): ListConfig => ({
@@ -155,7 +154,7 @@ export default function SegmentsPage(): JSX.Element {
       if (!confirm(t('crud.dialogs.delete.descriptionGeneric', { entityType: entityTypeLabel }))) return
       await withPending(String(item.id), async () => {
         try {
-          await apiClient.delete(`/segments/${item.id}`)
+          await apiClient.delete(`/api/v1/crm/segments/${item.id}`)
           toast({ title: getSuccessMessage(t, 'delete', entityType) })
           loadData()
         } catch {
@@ -164,7 +163,7 @@ export default function SegmentsPage(): JSX.Element {
       })
     } else if (action === 'calculate' && item) {
       try {
-        await apiClient.post(`/segments/${item.id}/calculate`, { force_full: false })
+        await apiClient.post(`/api/v1/crm/segments/${item.id}/calculate`, { force_full: false })
         toast({
           title: t('crud.messages.segmentCalculated'),
         })
@@ -181,11 +180,11 @@ export default function SegmentsPage(): JSX.Element {
   const loadData = async () => {
     setLoading(true)
     try {
-      const response = await apiClient.get('/segments', {
+      const response = await apiClient.get('/api/v1/crm/segments', {
         params: { tenant_id: tenantId }
       })
       
-      if (response.success) {
+      if (response.data) {
         const raw = response.data
         const items = Array.isArray(raw) ? raw : (raw && typeof raw === 'object' && Array.isArray((raw as { items?: unknown[] }).items) ? (raw as { items: any[] }).items : [])
         const totalCount = Array.isArray(raw) ? raw.length : (raw && typeof raw === 'object' && typeof (raw as { total?: number }).total === 'number' ? (raw as { total: number }).total : items.length)
@@ -252,7 +251,7 @@ export default function SegmentsPage(): JSX.Element {
         if (key === 'calculate' && items.length) {
           try {
             for (const item of items) {
-              await apiClient.post(`/segments/${item.id}/calculate`, { force_full: false })
+              await apiClient.post(`/api/v1/crm/segments/${item.id}/calculate`, { force_full: false })
             }
             toast({ title: t('crud.messages.segmentCalculated') })
             loadData()

@@ -1,6 +1,6 @@
 import { Suspense, lazy, useEffect, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { createApiClient } from '@/components/mask-builder/utils/api'
+import { apiClient } from '@/lib/api-client'
 import { formatCurrency } from '@/components/mask-builder/utils/formatting'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -17,7 +17,6 @@ const OpportunitiesForecastCharts = lazy(() =>
   import('@/pages/crm/charts/OpportunitiesForecastCharts').then((module) => ({ default: module.default })),
 )
 
-const apiClient = createApiClient('/api/v1/crm')
 
 interface ForecastData {
   period: string
@@ -54,8 +53,8 @@ export default function OpportunitiesForecastPage(): JSX.Element {
       if (filterOwner) params.owner_id = filterOwner
       if (filterStage !== 'all') params.stage = filterStage
 
-      const response = await apiClient.get('/opportunities/forecast', { params })
-      if (response.success) {
+      const response = await apiClient.get('/api/v1/crm/opportunities/forecast', { params })
+      if (response.data) {
         setForecastData(response.data || [])
       }
     } catch (error) {

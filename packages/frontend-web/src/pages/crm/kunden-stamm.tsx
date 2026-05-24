@@ -15,7 +15,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { DataTable } from '@/components/ui/data-table'
 import { Badge } from '@/components/ui/badge'
 import { Plus, ExternalLink, Mail, Phone, ShieldCheck } from 'lucide-react'
-import { createApiClient } from '@/components/mask-builder/utils/api'
+import { apiClient } from '@/lib/api-client'
 import { formatDate } from '@/components/mask-builder/utils/formatting'
 import { useTenant } from '@/hooks/useTenant'
 
@@ -319,7 +319,7 @@ function GDPRRequestsList({ contactId }: { contactId?: string }) {
   const { tenantId } = useTenant()
   const [requests, setRequests] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
-  const gdprApiClient = createApiClient('/api/v1/gdpr')
+  // gdprApiClient → apiClient
 
   useEffect(() => {
     const loadRequests = async () => {
@@ -329,14 +329,14 @@ function GDPRRequestsList({ contactId }: { contactId?: string }) {
       }
 
       try {
-        const response = await gdprApiClient.get('/requests', {
+        const response = await apiClient.get('/api/v1/gdpr/requests', {
           params: {
             tenant_id: tenantId,
             contact_id: contactId
           }
         })
-        
-        if (response.success && Array.isArray(response.data)) {
+
+        if (Array.isArray(response.data)) {
           setRequests(response.data)
         } else {
           setRequests([])
@@ -439,7 +439,7 @@ function ConsentsList({ contactId }: { contactId?: string }) {
   const { tenantId } = useTenant()
   const [consents, setConsents] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
-  const consentApiClient = createApiClient('/api/v1/crm')
+  // consentApiClient → apiClient
 
   useEffect(() => {
     const loadConsents = async () => {
@@ -449,13 +449,13 @@ function ConsentsList({ contactId }: { contactId?: string }) {
       }
 
       try {
-        const response = await consentApiClient.get(`/consents/contact/${contactId}`, {
+        const response = await apiClient.get(`/api/v1/crm/consents/contact/${contactId}`, {
           params: {
             tenant_id: tenantId
           }
         })
         
-        if (response.success) {
+        if (response.data) {
           setConsents(Array.isArray(response.data) ? response.data : [])
         }
       } catch (error: any) {

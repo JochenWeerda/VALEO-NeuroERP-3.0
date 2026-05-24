@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { createApiClient } from '@/components/mask-builder/utils/api'
+import { apiClient } from '@/lib/api-client'
 import { formatDate, formatCurrency } from '@/components/mask-builder/utils/formatting'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -23,7 +23,6 @@ import {
 } from 'lucide-react'
 
 // API Client
-const apiClient = createApiClient('/api/v1/crm')
 
 interface Opportunity {
   id: string
@@ -72,21 +71,21 @@ export default function OpportunitiesKanbanPage(): JSX.Element {
     setLoading(true)
     try {
       // Load opportunities
-      const oppsResponse = await apiClient.get('/opportunities', {
+      const oppsResponse = await apiClient.get('/api/v1/crm/opportunities', {
         params: {
           ...(filterOwner && { owner_id: filterOwner }),
           ...(filterStatus && { status: filterStatus })
         }
       })
       
-      if (oppsResponse.success) {
+      if (oppsResponse.data) {
         const data = oppsResponse.data as any
         setOpportunities((data.items || data) as Opportunity[])
       }
 
       // Load stages
-      const stagesResponse = await apiClient.get('/opportunities/stages')
-      if (stagesResponse.success) {
+      const stagesResponse = await apiClient.get('/api/v1/crm/opportunities/stages')
+      if (stagesResponse.data) {
         setStages(stagesResponse.data || [])
       }
     } catch (error) {
@@ -174,7 +173,7 @@ export default function OpportunitiesKanbanPage(): JSX.Element {
       setOpportunities(updatedOpportunities)
 
       // Update via API
-      await apiClient.put(`/opportunities/${draggedOpportunity.id}`, {
+      await apiClient.put(`/api/v1/crm/opportunities/${draggedOpportunity.id}`, {
         stage: targetStage
       }, {
         params: {

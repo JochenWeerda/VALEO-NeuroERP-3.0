@@ -7,7 +7,7 @@ import { useMaskData, useMaskActions } from '@/components/mask-builder/hooks'
 
 import { MaskConfig } from '@/components/mask-builder/types'
 import { getEntityTypeLabel, getDetailTitle, getSuccessMessage, getErrorMessage } from '@/features/crud/utils/i18n-helpers'
-import { createApiClient } from '@/components/mask-builder/utils/api'
+import { apiClient } from '@/lib/api-client'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { formatDate } from '@/components/mask-builder/utils/formatting'
@@ -18,7 +18,6 @@ import { ModuleToolbar } from '@/components/navigation/ModuleToolbar'
 import { DataTable } from '@/components/ui/data-table'
 
 // API Client
-const apiClient = createApiClient('/api/v1/marketing')
 
 // Zod-Schema für Segmente
 const createSegmentSchema = (t: any) => z.object({
@@ -30,7 +29,7 @@ const createSegmentSchema = (t: any) => z.object({
 
 function validateSegmentForm(formData: unknown, t: any): { valid: boolean; errors: string[] } {
   const result = createSegmentSchema(t).safeParse(formData)
-  return result.success
+  return result
     ? { valid: true, errors: [] }
     : { valid: false, errors: result.error.issues.map((issue) => issue.message) }
 }
@@ -182,8 +181,8 @@ function SegmentMembersList({ segmentId }: { segmentId: string }) {
   useEffect(() => {
     const loadMembers = async () => {
       try {
-        const response = await apiClient.get(`/segments/${segmentId}/members`)
-        if (response.success) {
+        const response = await apiClient.get(`/api/v1/crm/segments/${segmentId}/members`)
+        if (response.data) {
           setMembers(response.data || [])
         }
       } catch (error: any) {
@@ -240,8 +239,8 @@ function SegmentPerformanceTab({ segmentId }: { segmentId: string }) {
   useEffect(() => {
     const loadPerformance = async () => {
       try {
-        const response = await apiClient.get(`/segments/${segmentId}/performance`)
-        if (response.success) {
+        const response = await apiClient.get(`/api/v1/crm/segments/${segmentId}/performance`)
+        if (response.data) {
           setPerformance(response.data || [])
         }
       } catch (error: any) {
@@ -353,7 +352,7 @@ export default function SegmentDetailPage(): JSX.Element {
 
     if (action === 'calculate') {
       try {
-        await apiClient.post(`/segments/${id}/calculate`, { force_full: false })
+        await apiClient.post(`/api/v1/crm/segments/${id}/calculate`, { force_full: false })
         toast({
           title: t('crud.messages.segmentCalculated'),
         })
@@ -366,8 +365,8 @@ export default function SegmentDetailPage(): JSX.Element {
       }
     } else if (action === 'export') {
       try {
-        const response = await apiClient.get(`/segments/${id}/members`)
-        if (response.success) {
+        const response = await apiClient.get(`/api/v1/crm/segments/${id}/members`)
+        if (response.data) {
           const members = response.data || []
           const csvHeader = `${t('crud.entities.contact')};${t('crud.fields.addedAt')}\n`
           const csvContent = members.map((member: any) =>
