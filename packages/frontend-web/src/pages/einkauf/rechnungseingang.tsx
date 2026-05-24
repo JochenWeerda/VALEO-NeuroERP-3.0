@@ -11,6 +11,7 @@ import {
   useRechnungseingangFreigeben,
   useRechnungseingangVerbuchen,
 } from '@/lib/api/einkauf'
+import { apiClient } from '@/lib/api-client'
 import { ModuleToolbar } from '@/components/navigation/ModuleToolbar'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -50,13 +51,11 @@ const createRechnungseingangConfig = (t: any, entityTypeLabel: string): MaskConf
             // Automatisches Laden von PO-Daten
             if (value) {
               try {
-                const response = await fetch(`/api/mcp/documents/purchase_order/${value}`)
-                if (response.ok) {
-                  const po = await response.json()
-                  // Setze Lieferant automatisch
-                  if (po.supplierId) {
-                    // Trigger update for supplierId field
-                  }
+                const res = await apiClient.get(`/api/mcp/documents/purchase_order/${value}`)
+                const po = res.data
+                // Setze Lieferant automatisch
+                if (po.supplierId) {
+                  // Trigger update for supplierId field
                 }
               } catch {
                 // Bestellungs-Vorbelegung schlägt still fehl — Felder werden manuell befüllt

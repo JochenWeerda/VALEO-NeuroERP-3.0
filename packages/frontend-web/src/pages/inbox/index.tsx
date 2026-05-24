@@ -3,7 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { useToast } from '@/hooks/use-toast'
-import { getAxiosErrorMessage } from '@/lib/api-client'
+import { apiClient, getAxiosErrorMessage } from '@/lib/api-client'
 import { CheckCircle2, ExternalLink, FileText, XCircle } from 'lucide-react'
 
 interface InboxDocument {
@@ -28,7 +28,7 @@ interface InboxCreateResponse {
   message?: string
 }
 
-const INBOX_ENDPOINT = '/api/dms/inbox'
+const INBOX_ENDPOINT = '/api/v1/dms/inbox'
 const CREATE_ENDPOINT = (id: string): string => `${INBOX_ENDPOINT}/${id}/create`
 const DELETE_ENDPOINT = (id: string): string => `${INBOX_ENDPOINT}/${id}`
 const HIGH_CONFIDENCE_THRESHOLD = 0.8
@@ -64,14 +64,8 @@ export default function InboxPage(): JSX.Element {
   const loadInbox = useCallback(async (): Promise<void> => {
     try {
       setLoading(true)
-      const response = await fetch(INBOX_ENDPOINT)
-      const contentType = response.headers.get('content-type') ?? ''
-      if (!response.ok || !contentType.includes('application/json')) {
-        setDocuments([])
-        return
-      }
-      const data = (await response.json()) as InboxListResponse
-
+      const res = await apiClient.get<InboxListResponse>(INBOX_ENDPOINT)
+      const data = res.data
       if (data?.ok && Array.isArray(data.items)) {
         setDocuments(data.items)
       } else {
@@ -101,21 +95,8 @@ export default function InboxPage(): JSX.Element {
 
   const createFromInbox = useCallback(async (doc: InboxDocument): Promise<void> => {
     try {
-      const response = await fetch(CREATE_ENDPOINT(doc.id), {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({}),
-      })
-
-      if (!response.headers.get('content-type')?.includes('application/json')) {
-        toast({
-          title: 'Erstellen fehlgeschlagen',
-          description: 'Ungültige Server-Antwort',
-          variant: 'destructive',
-        })
-        return
-      }
-      const data = (await response.json()) as InboxCreateResponse
+      const res = await apiClient.post<InboxCreateResponse>(CREATE_ENDPOINT(doc.id), {})
+      const data = res.data
 
       if (data?.ok) {
         toast({
@@ -147,10 +128,7 @@ export default function InboxPage(): JSX.Element {
     }
 
     try {
-      const response = await fetch(DELETE_ENDPOINT(docId), { method: 'DELETE' })
-      if (!response.ok) {
-        throw new Error(`Status ${response.status}`)
-      }
+      await apiClient.delete(DELETE_ENDPOINT(docId))
 
       toast({
         title: 'Dokument verworfen',

@@ -124,14 +124,12 @@ export default function NebenbuchAbstimmungPage(): JSX.Element {
   const exportCsv = async () => {
     setExporting(true)
     try {
-      const response = await fetch(
+      const response = await apiClient.get(
         `/api/v1/finance/subsidiary-ledger-reconciliation/${ledgerType.toLowerCase()}/export?period=${encodeURIComponent(period)}`,
+        { responseType: 'blob' }
       )
-      if (!response.ok) {
-        throw new Error('Export fehlgeschlagen')
-      }
 
-      const blob = await response.blob()
+      const blob = response.data as Blob
       const url = window.URL.createObjectURL(blob)
       const a = document.createElement('a')
       a.href = url

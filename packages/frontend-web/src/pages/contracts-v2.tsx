@@ -28,6 +28,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { NativeSelect } from '@/components/ui/native-select';
 import { useAuth } from '@/hooks/useAuth';
+import { apiClient } from '@/lib/api-client';
 import { useTenant } from '@/hooks/useTenant';
 import { summarizeContractHedge } from '@/lib/professional-control-centers';
 import { summarizeContractOperations } from '@/lib/domain-depth';
@@ -126,17 +127,8 @@ export default function ContractsPageV2(): JSX.Element {
     const fetchContracts = async () => {
       setIsLoading(true);
       try {
-        const response = await fetch('/api/contracts');
-        if (response.ok && response.headers.get('content-type')?.includes('application/json')) {
-          try {
-            const data = await response.json();
-            setContracts((data?.items ?? []) as Contract[]);
-          } catch {
-            setContracts([]);
-          }
-        } else {
-          setContracts([]);
-        }
+        const res = await apiClient.get<{ items: Contract[] }>('/api/v1/kontrakte?limit=100');
+        setContracts(res.data?.items ?? []);
       } catch {
         setContracts([]);
       } finally {
@@ -155,13 +147,8 @@ export default function ContractsPageV2(): JSX.Element {
 
     const fetchAmendments = async () => {
       try {
-        const response = await fetch(`/api/contracts/${selectedContract.id}/amendments`);
-        if (response.ok && response.headers.get('content-type')?.includes('application/json')) {
-          const data = await response.json();
-          setAmendments(data?.items ?? []);
-        } else {
-          setAmendments([]);
-        }
+        const res = await apiClient.get<{ items: unknown[] }>(`/api/v1/kontrakte/${selectedContract.id}/amendments`);
+        setAmendments(res.data?.items ?? []);
       } catch {
         setAmendments([]);
       }
@@ -174,13 +161,8 @@ export default function ContractsPageV2(): JSX.Element {
     if (!amendmentDialogOpen) return;
     const fetchTemplates = async () => {
       try {
-        const response = await fetch('/api/contracts/amendment-templates?activeOnly=true');
-        if (response.ok && response.headers.get('content-type')?.includes('application/json')) {
-          const data = await response.json();
-          setAmendmentTemplates(data?.items ?? []);
-        } else {
-          setAmendmentTemplates([]);
-        }
+        const res = await apiClient.get<{ items: unknown[] }>('/api/v1/kontrakte/amendment-templates?activeOnly=true');
+        setAmendmentTemplates(res.data?.items ?? []);
       } catch {
         setAmendmentTemplates([]);
       }
@@ -190,17 +172,9 @@ export default function ContractsPageV2(): JSX.Element {
 
   // Delete handler
   const handleDelete = async (id: string, reason: string) => {
-    const response = await fetch(`/api/contracts/${id}`, {
-      method: 'DELETE',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ reason, tenantId }),
-    });
-    if (response.ok) {
-      setContracts(contracts.filter(c => c.id !== id));
-      setSelectedContract(null);
-    } else {
-      throw new Error('Failed to delete contract');
-    }
+    await apiClient.delete(`/api/v1/kontrakte/${id}`, { data: { reason, tenantId } });
+    setContracts(contracts.filter(c => c.id !== id));
+    setSelectedContract(null);
   };
 
   const {
@@ -217,18 +191,9 @@ export default function ContractsPageV2(): JSX.Element {
 
   // Cancel handler
   const handleCancel = async (id: string, reason: string) => {
-    const response = await fetch(`/api/contracts/${id}/cancel`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ reason, tenantId, cancelledBy: user?.sub ?? 'current-user' }),
-    });
-    if (response.ok) {
-      const updated = await response.json();
-      setContracts(contracts.map(c => c.id === id ? updated : c));
-      setSelectedContract(null);
-    } else {
-      throw new Error('Failed to cancel contract');
-    }
+    const res = await apiClient.post<Contract>(`/api/v1/kontrakte/${id}/cancel`, { reason, tenantId, cancelledBy: user?.sub ?? 'current-user' });
+    setContracts(contracts.map(c => c.id === id ? res.data : c));
+    setSelectedContract(null);
   };
 
   const {
@@ -251,27 +216,18 @@ export default function ContractsPageV2(): JSX.Element {
     }
 
     try {
-      const response = await fetch(`/api/contracts/${selectedContract.id}/amendments`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          contractId: selectedContract.id,
-          tenantId,
-          type: amendmentForm.type,
-          reason: amendmentForm.reason,
-          changes: amendmentForm.changes,
-          createdBy: user?.sub ?? 'current-user',
-        }),
+      const res = await apiClient.post(`/api/v1/kontrakte/${selectedContract.id}/amendments`, {
+        contractId: selectedContract.id,
+        tenantId,
+        type: amendmentForm.type,
+        reason: amendmentForm.reason,
+        changes: amendmentForm.changes,
+        createdBy: user?.sub ?? 'current-user',
       });
-      if (response.ok) {
-        const amendment = await response.json();
-        setAmendments([...amendments, amendment]);
-        setAmendmentDialogOpen(false);
-        setSelectedTemplate(null);
-        setAmendmentForm({ type: '', reason: '', changes: {} });
-      } else {
-        throw new Error('Failed to create amendment');
-      }
+      setAmendments([...amendments, res.data]);
+      setAmendmentDialogOpen(false);
+      setSelectedTemplate(null);
+      setAmendmentForm({ type: '', reason: '', changes: {} });
     } catch (error) {
       toast({ title: 'Fehler', description: t('crud.messages.createError', { entityType: t('crud.entities.amendment', { defaultValue: 'Änderung' }), defaultValue: 'Erstellen fehlgeschlagen.' }), variant: 'destructive' });
     }
@@ -279,12 +235,12 @@ export default function ContractsPageV2(): JSX.Element {
 
   // Audit trail
   const fetchAuditTrail = async (entityType: string, entityId: string) => {
-    const response = await fetch(`/api/audit/change-logs/audit-trail/${entityType}/${entityId}`);
-    if (response.ok) {
-      const data = await response.json();
-      return data.data || [];
+    try {
+      const res = await apiClient.get<{ data: unknown[] }>(`/api/v1/audit/change-logs/audit-trail/${entityType}/${entityId}`);
+      return res.data?.data || [];
+    } catch {
+      return [];
     }
-    return [];
   };
 
   const {
