@@ -424,7 +424,7 @@ export default function SalesOrderEditorPage(): JSX.Element {
               chefanweisung: cd.chefanweisung ?? cd.executive_note,
               paymentTerms: cd.payment_terms,
             }
-          } catch { /* ignore */ }
+          } catch { /* Kunden-Prefill ist optional — Fehler blockiert nicht das Öffnen des Auftrags */ }
         }
         setState((prev) => ({
           ...prev,

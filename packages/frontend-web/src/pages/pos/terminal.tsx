@@ -256,7 +256,7 @@ export default function POSTerminalPage(): JSX.Element {
       const next = new Set(prev)
       if (next.has(artikelnr)) next.delete(artikelnr)
       else next.add(artikelnr)
-      try { localStorage.setItem('pos-favorites', JSON.stringify(Array.from(next))) } catch { /* */ }
+      try { localStorage.setItem('pos-favorites', JSON.stringify(Array.from(next))) } catch { /* localStorage nicht verfügbar — Favoriten werden nicht persistiert */ }
       return next
     })
   }
@@ -565,7 +565,7 @@ export default function POSTerminalPage(): JSX.Element {
               checked={showTouchBedienfeld}
               onCheckedChange={(v) => {
                 setShowTouchBedienfeld(v)
-                try { localStorage.setItem(POS_TOUCH_PANEL_KEY, String(v)) } catch { /* */ }
+                try { localStorage.setItem(POS_TOUCH_PANEL_KEY, String(v)) } catch { /* localStorage nicht verfügbar — Einstellung wird nicht persistiert */ }
               }}
               className="scale-90"
             />
@@ -951,7 +951,7 @@ export default function POSTerminalPage(): JSX.Element {
                 value={kassierer}
                 onChange={(e) => {
                   setKassierer(e.target.value)
-                  try { localStorage.setItem(POS_KASSIERER_KEY, e.target.value) } catch { /* */ }
+                  try { localStorage.setItem(POS_KASSIERER_KEY, e.target.value) } catch { /* localStorage nicht verfügbar — Einstellung wird nicht persistiert */ }
                 }}
               />
             </div>
@@ -964,7 +964,7 @@ export default function POSTerminalPage(): JSX.Element {
                 checked={showTouchBedienfeld}
                 onCheckedChange={(v) => {
                   setShowTouchBedienfeld(v)
-                  try { localStorage.setItem(POS_TOUCH_PANEL_KEY, String(v)) } catch { /* */ }
+                  try { localStorage.setItem(POS_TOUCH_PANEL_KEY, String(v)) } catch { /* localStorage nicht verfügbar — Einstellung wird nicht persistiert */ }
                 }}
               />
             </div>

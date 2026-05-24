@@ -176,7 +176,7 @@ export default function BestellvorschlagLagerPage(): JSX.Element {
           einhPreis: 0,
           einheit: 't',
         })))
-      } catch { /* ignore */ }
+      } catch { /* Kontrakt-Preload ist optional — schlägt bei fehlendem Endpunkt still fehl */ }
     }
   }
 
