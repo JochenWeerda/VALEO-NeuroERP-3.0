@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { ObjectPage } from '@/components/mask-builder'
-import { useMaskData } from '@/components/mask-builder/hooks'
+import { useMaskData, useMaskActions } from '@/components/mask-builder/hooks'
 import { MaskConfig } from '@/components/mask-builder/types'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -116,6 +116,20 @@ export default function AnlieferavisPage(): JSX.Element {
     id: id || undefined
   })
 
+  const { handleAction, loadingActionKey } = useMaskActions(async (actionKey: string) => {
+          if (!id || !actionMap[actionKey]) {
+            toast({ title: 'Aktion nicht moeglich', description: 'Das Avis muss zuerst gespeichert werden.', variant: 'destructive' })
+            return
+          }
+          try {
+            await apiClient.post(`/api/v1/einkauf/anlieferavis/${encodeURIComponent(id)}/${actionMap[actionKey]}`)
+            toast({ title: 'Aktion ausgefuehrt', description: `Anlieferavis ${id} wurde aktualisiert.` })
+            navigate('/einkauf/anlieferavis')
+          } catch (error: any) {
+            toast({ title: 'Aktion fehlgeschlagen', description: error.response?.data?.detail || error.message, variant: 'destructive' })
+          }
+  })
+
   const handleSave = async (formData: any) => {
     setLoading(true)
     try {
@@ -212,22 +226,8 @@ export default function AnlieferavisPage(): JSX.Element {
         onSave={handleSave}
         onCancel={handleCancel}
         isLoading={loading}
-        onAction={async (actionKey) => {
-          if (!id || !actionMap[actionKey]) {
-            toast({ title: 'Aktion nicht moeglich', description: 'Das Avis muss zuerst gespeichert werden.', variant: 'destructive' })
-            return
-          }
-          setLoading(true)
-          try {
-            await apiClient.post(`/api/v1/einkauf/anlieferavis/${encodeURIComponent(id)}/${actionMap[actionKey]}`)
-            toast({ title: 'Aktion ausgefuehrt', description: `Anlieferavis ${id} wurde aktualisiert.` })
-            navigate('/einkauf/anlieferavis')
-          } catch (error: any) {
-            toast({ title: 'Aktion fehlgeschlagen', description: error.response?.data?.detail || error.message, variant: 'destructive' })
-          } finally {
-            setLoading(false)
-          }
-        }}
+        onAction={handleAction}
+        loadingActionKey={loadingActionKey}
       />
     </div>
   )
