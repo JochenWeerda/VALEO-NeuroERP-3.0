@@ -29,9 +29,9 @@ const createSegmentSchema = (t: any) => z.object({
 
 function validateSegmentForm(formData: unknown, t: any): { valid: boolean; errors: string[] } {
   const result = createSegmentSchema(t).safeParse(formData)
-  return result
+  return result.success
     ? { valid: true, errors: [] }
-    : { valid: false, errors: result.error.issues.map((issue) => issue.message) }
+    : { valid: false, errors: result.error.issues.map((issue: { message: string }) => issue.message) }
 }
 
 // Konfiguration für Segment ObjectPage
@@ -181,7 +181,7 @@ function SegmentMembersList({ segmentId }: { segmentId: string }) {
   useEffect(() => {
     const loadMembers = async () => {
       try {
-        const response = await apiClient.get(`/api/v1/crm/segments/${segmentId}/members`)
+        const response = await apiClient.get<any[]>(`/api/v1/crm/segments/${segmentId}/members`)
         if (response.data) {
           setMembers(response.data || [])
         }
@@ -239,7 +239,7 @@ function SegmentPerformanceTab({ segmentId }: { segmentId: string }) {
   useEffect(() => {
     const loadPerformance = async () => {
       try {
-        const response = await apiClient.get(`/api/v1/crm/segments/${segmentId}/performance`)
+        const response = await apiClient.get<any[]>(`/api/v1/crm/segments/${segmentId}/performance`)
         if (response.data) {
           setPerformance(response.data || [])
         }
@@ -365,7 +365,7 @@ export default function SegmentDetailPage(): JSX.Element {
       }
     } else if (action === 'export') {
       try {
-        const response = await apiClient.get(`/api/v1/crm/segments/${id}/members`)
+        const response = await apiClient.get<any[]>(`/api/v1/crm/segments/${id}/members`)
         if (response.data) {
           const members = response.data || []
           const csvHeader = `${t('crud.entities.contact')};${t('crud.fields.addedAt')}\n`

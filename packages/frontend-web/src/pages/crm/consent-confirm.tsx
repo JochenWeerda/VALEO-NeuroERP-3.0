@@ -37,7 +37,7 @@ export default function ConsentConfirmPage(): JSX.Element {
           setMessage(t('crud.messages.consentConfirmed'))
         } else {
           setStatus('error')
-          setMessage(response.error || t('crud.messages.consentConfirmError'))
+          setMessage(t('crud.messages.consentConfirmError'))
         }
       } catch (error: any) {
         setStatus('error')

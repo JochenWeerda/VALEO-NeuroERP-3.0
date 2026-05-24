@@ -239,7 +239,7 @@ function GDPRRequestHistoryTab({ requestId }: { requestId: string }) {
   useEffect(() => {
     const loadHistory = async () => {
       try {
-        const response = await httpClient.get(`/api/v1/gdpr/requests/${requestId}/history`)
+        const response = await httpClient.get<unknown[]>(`/api/v1/gdpr/requests/${requestId}/history`)
         setHistory(response.data || [])
       } catch (error: any) {
         toast({ variant: 'destructive', title: 'Fehler beim Laden der History', description: error?.message })

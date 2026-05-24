@@ -47,9 +47,9 @@ const createOpportunitySchema = (t: any) => z.object({
 
 function validateOpportunityForm(formData: unknown, t: any): { valid: boolean; errors: string[] } {
   const result = createOpportunitySchema(t).safeParse(formData)
-  return result
+  return result.success
     ? { valid: true, errors: [] }
-    : { valid: false, errors: result.error.issues.map((issue) => issue.message) }
+    : { valid: false, errors: result.error.issues.map((issue: { message: string }) => issue.message) }
 }
 
 // Konfiguration für Opportunity ObjectPage
@@ -294,7 +294,7 @@ function OpportunityHistoryTab({ opportunityId }: { opportunityId: string }) {
   useEffect(() => {
     const loadHistory = async () => {
       try {
-        const response = await apiClient.get(`/api/v1/crm/opportunities/${opportunityId}/history`)
+        const response = await apiClient.get<unknown[]>(`/api/v1/crm/opportunities/${opportunityId}/history`)
         if (response.data) {
           setHistory(response.data || [])
         }

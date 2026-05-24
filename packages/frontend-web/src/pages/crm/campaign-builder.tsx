@@ -92,12 +92,12 @@ export default function CampaignBuilderPage(): JSX.Element {
     const loadData = async () => {
       try {
         const [templatesRes, segmentsRes] = await Promise.all([
-          apiClient.get('/api/v1/crm/campaigns/templates', { params: { tenant_id: tenantId } }),
-          apiClient.get('/api/v1/crm/segments', { params: { tenant_id: tenantId } })
+          apiClient.get<CampaignTemplateSummary[] | { data?: CampaignTemplateSummary[] }>('/api/v1/crm/campaigns/templates', { params: { tenant_id: tenantId } }),
+          apiClient.get<CampaignSegmentSummary[] | { data?: CampaignSegmentSummary[] }>('/api/v1/crm/segments', { params: { tenant_id: tenantId } })
         ])
 
-        setTemplates(Array.isArray(templatesRes.data) ? templatesRes.data : (templatesRes.data?.data ?? []))
-        setSegments(Array.isArray(segmentsRes.data) ? segmentsRes.data : (segmentsRes.data?.data ?? []))
+        setTemplates(Array.isArray(templatesRes.data) ? templatesRes.data : ((templatesRes.data as { data?: CampaignTemplateSummary[] }).data ?? []))
+        setSegments(Array.isArray(segmentsRes.data) ? segmentsRes.data : ((segmentsRes.data as { data?: CampaignSegmentSummary[] }).data ?? []))
       } catch {
         // Vorlagen/Segmente bleiben leer — Formular ist weiter bedienbar
       }
@@ -168,7 +168,7 @@ export default function CampaignBuilderPage(): JSX.Element {
         budget: campaignData.budget || null,
       }
 
-      const res = await apiClient.post('/api/v1/crm/campaigns', payload)
+      const res = await apiClient.post<{ id?: string; data?: { id?: string } }>('/api/v1/crm/campaigns', payload)
       const response = res.data
       if (response?.id || response?.data?.id) {
         const campaignId = response.id || response.data?.id
