@@ -6,7 +6,7 @@ import { ObjectPage } from '@/components/mask-builder'
 import { useMaskData, useMaskActions } from '@/components/mask-builder/hooks'
 import { MaskConfig } from '@/components/mask-builder/types'
 import { getEntityTypeLabel, getDetailTitle, getSuccessMessage, getErrorMessage, getStatusLabel } from '@/features/crud/utils/i18n-helpers'
-import { createApiClient } from '@/components/mask-builder/utils/api'
+import { apiClient } from '@/lib/api-client'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { formatDate } from '@/components/mask-builder/utils/formatting'
@@ -15,7 +15,6 @@ import { useTenant } from '@/hooks/useTenant'
 import { ArrowLeft, History } from 'lucide-react'
 
 // API Client
-const apiClient = createApiClient('/api/v1/crm')
 
 // Zod-Schema für Consents
 const createConsentSchema = (t: any) => z.object({
@@ -28,7 +27,7 @@ const createConsentSchema = (t: any) => z.object({
 
 function validateConsentForm(formData: unknown, t: any): { valid: boolean; errors: string[] } {
   const result = createConsentSchema(t).safeParse(formData)
-  return result.success
+  return result
     ? { valid: true, errors: [] }
     : { valid: false, errors: result.error.issues.map((issue) => issue.message) }
 }
@@ -195,8 +194,8 @@ function ConsentHistoryTab({ consentId }: { consentId: string }) {
   useEffect(() => {
     const loadHistory = async () => {
       try {
-        const response = await apiClient.get(`/consents/${consentId}/history`)
-        if (response.success) {
+        const response = await apiClient.get(`/api/v1/crm/consents/${consentId}/history`)
+        if (response.data) {
           setHistory(response.data || [])
         }
       } catch (error: any) {
@@ -322,7 +321,7 @@ export default function ConsentDetailPage(): JSX.Element {
   const { handleAction, loadingActionKey } = useMaskActions(async (action: string) => {
     if (action === 'revoke' && id) {
       try {
-        await apiClient.post(`/consents/${id}/revoke`)
+        await apiClient.post(`/api/v1/crm/consents/${id}/revoke`)
         toast({
           title: t('crud.messages.consentRevoked'),
         })
@@ -335,7 +334,7 @@ export default function ConsentDetailPage(): JSX.Element {
       }
     } else if (action === 'resendConfirmation' && id) {
       try {
-        await apiClient.post(`/consents/${id}/resend-confirmation`)
+        await apiClient.post(`/api/v1/crm/consents/${id}/resend-confirmation`)
         toast({ title: t('crud.messages.confirmationSent', { defaultValue: 'Bestätigung gesendet' }) })
       } catch (error) {
         toast({ variant: 'destructive', title: t('crud.messages.confirmationSendError', { defaultValue: 'Fehler beim Senden' }) })

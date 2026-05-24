@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { ListReport } from '@/components/mask-builder'
 import { useMaskActions } from '@/components/mask-builder/hooks'
-import { createApiClient } from '@/components/mask-builder/utils/api'
+import { apiClient } from '@/lib/api-client'
 import { formatCurrency, formatNumber } from '@/components/mask-builder/utils/formatting'
 import { Badge } from '@/components/ui/badge'
 import { ListConfig } from '@/components/mask-builder/types'
@@ -11,7 +11,6 @@ import { toast } from '@/hooks/use-toast'
 import { api } from '@/lib/axios'
 
 // API Client für Debitoren (Liste)
-const apiClient = createApiClient('/api/v1/finance')
 
 // Konfiguration für Debitoren ListReport (wird in Komponente mit i18n erstellt)
 const createDebitorenListConfig = (t: any): ListConfig => ({
@@ -238,8 +237,8 @@ export default function DebitorenListePage(): JSX.Element {
   const loadData = async () => {
     setLoading(true)
     try {
-      const response = await apiClient.get('/debitoren')
-      if (response.success) {
+      const response = await apiClient.get('/api/v1/finance/debitoren')
+      if (response.data) {
         setData((response.data as any).data || [])
         setTotal((response.data as any).total || 0)
       }
@@ -308,7 +307,7 @@ export default function DebitorenListePage(): JSX.Element {
     if (!confirm(t('crud.messages.confirmDeleteDebtor', { name: item.kunde }))) return
     void withPending(String(item.id), async () => {
       try {
-        await apiClient.delete(`/debitoren/${item.id}`)
+        await apiClient.delete(`/api/v1/finance/debitoren/${item.id}`)
         loadData()
       } catch {
         toast({ title: t('common.error', { defaultValue: 'Fehler' }), description: t('crud.messages.deleteError', { defaultValue: 'Löschen fehlgeschlagen.' }), variant: 'destructive' })
