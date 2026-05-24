@@ -420,7 +420,6 @@ export default function UStVAPage(): JSX.Element {
   const workflowProcess = searchParams.get('workflowProcess')
   const workflowCase = searchParams.get('workflowCase')
   const [isDirty, setIsDirty] = useState(false)
-  const [actionLoadingKey, setActionLoadingKey] = useState<string | null>(null)
   const [workspaceData, setWorkspaceData] = useState<any>({})
   const [roleFocus, setRoleFocus] = useState<VatRoleFocus>('all')
   const entityType = 'ustva'
@@ -488,9 +487,8 @@ export default function UStVAPage(): JSX.Element {
     })
   }
 
-  const { handleAction } = useMaskActions(async (action: string, formData: any) => {
+  const { handleAction, loadingActionKey } = useMaskActions(async (action: string, formData: any) => {
     if (action === 'calculate') {
-      setActionLoadingKey('calculate')
       try {
         const result = (await apiClient.post<Record<string, unknown>>('/api/v1/finance/vat-return/calculate', {
           period: formData?.periode,
@@ -500,8 +498,6 @@ export default function UStVAPage(): JSX.Element {
       } catch (error: any) {
         const msg = error.response?.data?.detail ?? error.message
         toast({ variant: 'destructive', title: t('common.error'), description: msg })
-      } finally {
-        setActionLoadingKey(null)
       }
       return
     }
@@ -593,7 +589,6 @@ export default function UStVAPage(): JSX.Element {
         toast({ variant: 'destructive', title: t('common.error'), description: t('crud.messages.saveUstvaFirst') })
         return
       }
-      setActionLoadingKey('export')
       try {
         const res = (await apiClient.post<{ url?: string }>('/api/v1/export/list', { entity: 'vat_return', format: 'xml', id: formData.id })).data
         if (res?.url) window.open(res.url, '_blank')
@@ -601,8 +596,6 @@ export default function UStVAPage(): JSX.Element {
       } catch (error: any) {
         const msg = error.response?.data?.detail ?? error.message
         toast({ variant: 'destructive', title: t('common.error'), description: msg })
-      } finally {
-        setActionLoadingKey(null)
       }
     }
   })
@@ -786,7 +779,7 @@ export default function UStVAPage(): JSX.Element {
         onCancel={handleCancel}
         isLoading={loading}
         onAction={(key, formData) => handleAction(key, formData)}
-        loadingActionKey={actionLoadingKey}
+        loadingActionKey={loadingActionKey}
       />
     </>
   )

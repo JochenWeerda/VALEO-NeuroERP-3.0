@@ -447,8 +447,7 @@ function KassensturzForm({ data: _data, erwarteterBestand, onChange }: {
 export default function KassePage(): JSX.Element {
   const { t } = useTranslation()
   const navigate = useNavigate()
-  const [isDirty, setIsDirty] = useState(false)
-  const [actionLoadingKey, setActionLoadingKey] = useState<string | null>(null)
+  const [isDirty, setIsDirty] = useState(false)
   const entityType = 'cash'
   const entityTypeLabel = getEntityTypeLabel(t, entityType, 'Kasse')
   const kasseConfig = createKasseConfig(t, entityTypeLabel)
@@ -467,7 +466,7 @@ export default function KassePage(): JSX.Element {
     })
   }
 
-  const { handleAction } = useMaskActions(async (action: string, formData: any) => {
+  const { handleAction, loadingActionKey } = useMaskActions(async (action: string, formData: any) => {
     if (action === 'add-movement') {
       // Neue Bewegung hinzufügen wird in der Tabelle behandelt
       toast({
@@ -508,8 +507,7 @@ export default function KassePage(): JSX.Element {
       if (!formData.id) {
         toast({ variant: 'destructive', title: t('common.error'), description: t('crud.messages.saveCashClosingFirst') })
         return
-      }
-      setActionLoadingKey('close')
+      }
       try {
         await apiClient.post('/api/v1/finance/cash/close-day', { id: formData.id, ...formData })
         toast({ title: t('crud.messages.dailyClosingPerformed'), description: t('crud.messages.cashClosingClosed') })
@@ -518,8 +516,6 @@ export default function KassePage(): JSX.Element {
       } catch (error: any) {
         const msg = error.response?.data?.detail ?? error.message
         toast({ variant: 'destructive', title: t('common.error'), description: msg })
-      } finally {
-        setActionLoadingKey(null)
       }
     } else if (action === 'approve') {
       const validationErrors = validate(formData)
@@ -560,8 +556,7 @@ export default function KassePage(): JSX.Element {
       if (!formData.id) {
         toast({ variant: 'destructive', title: t('common.error'), description: t('crud.messages.saveCashClosingFirst') })
         return
-      }
-      setActionLoadingKey('export')
+      }
       try {
         const res = await apiClient.post<{ url?: string }>('/api/v1/export/list', { entity: 'cash', format: 'pdf', id: formData.id })
         if (res?.url) window.open(res.url, '_blank')
@@ -569,8 +564,6 @@ export default function KassePage(): JSX.Element {
       } catch (error: any) {
         const msg = error.response?.data?.detail ?? error.message
         toast({ variant: 'destructive', title: t('common.error'), description: msg })
-      } finally {
-        setActionLoadingKey(null)
       }
     }
   })
@@ -596,7 +589,7 @@ export default function KassePage(): JSX.Element {
         onCancel={handleCancel}
         isLoading={loading}
         onAction={(key, formData) => handleAction(key, formData)}
-        loadingActionKey={actionLoadingKey}
+        loadingActionKey={loadingActionKey}
       />
     </>
   )

@@ -386,7 +386,6 @@ export default function LastschriftenDebitorenPage(): JSX.Element {
   const navigate = useNavigate()
   const [isDirty, setIsDirty] = useState(false)
   const [formData, setFormData] = useState<any>({})
-  const [actionLoadingKey, setActionLoadingKey] = useState<string | null>(null)
   const entityType = 'directDebit'
   const entityTypeLabel = getEntityTypeLabel(t, entityType, 'Lastschriften Debitoren')
   const lastschriftenConfig = createLastschriftenConfig(t, entityTypeLabel)
@@ -501,7 +500,7 @@ export default function LastschriftenDebitorenPage(): JSX.Element {
     }
   }
 
-  const { handleAction } = useMaskActions(async (action: string, currentFormData: any) => {
+  const { handleAction, loadingActionKey } = useMaskActions(async (action: string, currentFormData: any) => {
     if (action === 'add-direct-debit') {
       toast({ title: 'Hinweis', description: 'Lastschriften werden direkt in der Tabelle hinzugefuegt.' })
       return
@@ -533,7 +532,6 @@ export default function LastschriftenDebitorenPage(): JSX.Element {
         toast({ variant: 'destructive', title: t('common.error'), description: t('crud.messages.saveFirst') })
         return
       }
-      setActionLoadingKey('preview')
       try {
         const response = await apiClient.get<{
           total_amount: number
@@ -550,8 +548,6 @@ export default function LastschriftenDebitorenPage(): JSX.Element {
       } catch (error: any) {
         const msg = error.response?.data?.detail ?? error.message
         toast({ variant: 'destructive', title: t('common.error'), description: msg })
-      } finally {
-        setActionLoadingKey(null)
       }
       return
     }
@@ -563,7 +559,6 @@ export default function LastschriftenDebitorenPage(): JSX.Element {
         return
       }
 
-      setActionLoadingKey('approve')
       try {
         const runId = currentFormData?.id
         if (runId) {
@@ -587,8 +582,6 @@ export default function LastschriftenDebitorenPage(): JSX.Element {
       } catch (error: any) {
         const msg = error.response?.data?.detail ?? error.message
         toast({ variant: 'destructive', title: t('common.error'), description: msg })
-      } finally {
-        setActionLoadingKey(null)
       }
       return
     }
@@ -600,7 +593,6 @@ export default function LastschriftenDebitorenPage(): JSX.Element {
         return
       }
 
-      setActionLoadingKey('execute')
       try {
         const runId = currentFormData?.id
         if (runId) {
@@ -623,8 +615,6 @@ export default function LastschriftenDebitorenPage(): JSX.Element {
       } catch (error: any) {
         const msg = error.response?.data?.detail ?? error.message
         toast({ variant: 'destructive', title: t('common.error'), description: msg })
-      } finally {
-        setActionLoadingKey(null)
       }
       return
     }
@@ -635,7 +625,6 @@ export default function LastschriftenDebitorenPage(): JSX.Element {
         toast({ variant: 'destructive', title: t('common.error'), description: t('crud.messages.saveFirst') })
         return
       }
-      setActionLoadingKey('export')
       try {
         const response = await apiClient.post<{ export_id: string; download_url: string | null }>(
           `/api/v1/finance/followup/lastschriften/${runId}/export`,
@@ -653,8 +642,6 @@ export default function LastschriftenDebitorenPage(): JSX.Element {
       } catch (error: any) {
         const msg = error.response?.data?.detail ?? error.message
         toast({ variant: 'destructive', title: t('common.error'), description: msg })
-      } finally {
-        setActionLoadingKey(null)
       }
     }
   })
@@ -722,7 +709,7 @@ export default function LastschriftenDebitorenPage(): JSX.Element {
         onCancel={handleCancel}
         isLoading={loading}
         onAction={(key, fd) => handleAction(key, fd ?? safeFormData)}
-        loadingActionKey={actionLoadingKey}
+        loadingActionKey={loadingActionKey}
       />
     </>
   )

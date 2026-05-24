@@ -306,8 +306,7 @@ export default function BankAbgleichPage(): JSX.Element {
   const { t } = useTranslation()
   const navigate = useNavigate()
   const { tenantId } = useTenant()
-  const [isDirty, setIsDirty] = useState(false)
-  const [actionLoadingKey, setActionLoadingKey] = useState<string | null>(null)
+  const [isDirty, setIsDirty] = useState(false)
   const entityType = 'bankReconciliation'
   const entityTypeLabel = getEntityTypeLabel(t, entityType, 'Bank-Abgleich')
   const bankAbgleichConfig = createBankAbgleichConfig(t, entityTypeLabel)
@@ -360,7 +359,7 @@ export default function BankAbgleichPage(): JSX.Element {
     })
   }
 
-  const { handleAction } = useMaskActions(async (action: string, formData: any) => {
+  const { handleAction, loadingActionKey } = useMaskActions(async (action: string, formData: any) => {
     if (action === 'import') {
       // Bank Statement Import - use real API
       if (!formData.camtFile) {
@@ -565,8 +564,7 @@ export default function BankAbgleichPage(): JSX.Element {
       if (differenz >= 0.01) {
         toast({ variant: 'destructive', title: t('crud.messages.bookingNotPossible'), description: t('crud.messages.reconciliationMustBeBalanced') })
         return
-      }
-      setActionLoadingKey('book')
+      }
       try {
         const response = await fetch(
           `/api/v1/finance/bank-reconciliation/${formData.statementId}/reconcile?bank_account_id=${formData.kontoId}&tenant_id=${encodeURIComponent(tenantId)}&auto_book=true`,
@@ -586,15 +584,12 @@ export default function BankAbgleichPage(): JSX.Element {
       } catch (error: any) {
         const msg = error.response?.data?.detail ?? error.message
         toast({ variant: 'destructive', title: t('common.error'), description: msg })
-      } finally {
-        setActionLoadingKey(null)
       }
     } else if (action === 'export') {
       if (!formData.id) {
         toast({ variant: 'destructive', title: t('common.error'), description: t('crud.messages.saveReconciliationFirst') })
         return
-      }
-      setActionLoadingKey('export')
+      }
       try {
         const res = await apiClient.post<{ url?: string }>('/api/v1/export/list', { entity: 'bank_reconciliation', format: 'pdf', id: formData.id })
         if (res?.url) window.open(res.url, '_blank')
@@ -602,8 +597,6 @@ export default function BankAbgleichPage(): JSX.Element {
       } catch (error: any) {
         const msg = error.response?.data?.detail ?? error.message
         toast({ variant: 'destructive', title: t('common.error'), description: msg })
-      } finally {
-        setActionLoadingKey(null)
       }
     }
   })
@@ -642,7 +635,7 @@ export default function BankAbgleichPage(): JSX.Element {
         onCancel={handleCancel}
         isLoading={loading}
         onAction={(key, formData) => handleAction(key, formData)}
-        loadingActionKey={actionLoadingKey}
+        loadingActionKey={loadingActionKey}
       />
     </div>
   )
