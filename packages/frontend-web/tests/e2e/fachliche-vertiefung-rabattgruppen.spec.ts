@@ -124,7 +124,7 @@ test.describe('Fachliche Vertiefung Gate: Rabattgruppen & -klassen (Wave 14)', (
     await expect(page.getByText('A-Kunden')).toBeVisible()
 
     await page.getByLabel('Klassen-Nr').fill('RAK02')
-    await page.getByLabel('Bezeichnung').nth(1).fill('B-Kunden')
+    await page.getByLabel('Bezeichnung').nth(0).fill('B-Kunden')
     await page.getByRole('button', { name: /Anlegen/i }).first().click()
 
     await expect(page.getByText('RAK02')).toBeVisible()

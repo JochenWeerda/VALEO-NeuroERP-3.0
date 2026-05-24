@@ -80,6 +80,7 @@ const GROUP_BY_PREFIX: Record<string, PageModuleGroupName> = {
   service: 'commercial',
   setup: 'core',
   silo: 'operations',
+  stammdaten: 'core',
   'start-dashboard': 'core',
   statistik: 'operations',
   'stock-management': 'core',
