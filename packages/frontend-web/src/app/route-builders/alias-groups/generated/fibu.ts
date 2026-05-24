@@ -46,6 +46,10 @@ export const entries: AliasGroupRouteEntry[] = [
     "path": "periodische-buchungen"
   },
   {
+    "module": "@/pages/fibu/stammdaten",
+    "path": "stammdaten"
+  },
+  {
     "module": "@/pages/fibu/guv",
     "path": "guv"
   },

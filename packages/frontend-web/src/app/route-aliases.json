@@ -1033,6 +1033,10 @@
       "path": "fibu/periodische-buchungen"
     },
     {
+      "module": "@/pages/fibu/stammdaten",
+      "path": "fibu/stammdaten"
+    },
+    {
       "module": "@/pages/fibu/guv",
       "path": "fibu/guv"
     },

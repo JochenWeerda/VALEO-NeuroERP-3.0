@@ -62,6 +62,10 @@ export const entries: AutoGroupRouteEntry[] = [
     "path": "periodische-buchungen"
   },
   {
+    "module": "@/pages/fibu/stammdaten",
+    "path": "stammdaten"
+  },
+  {
     "module": "@/pages/fibu/erloeskennziffern",
     "path": "erloeskennziffern"
   },
