@@ -1630,7 +1630,7 @@ function Wizard({
           return
         }
       }
-    } catch { /* ignore */ }
+    } catch { /* localStorage nicht verfügbar (z.B. privater Modus) — Auswahl wird nicht persistiert */ }
     // Fallback: alle DLG-Feeds aktivieren
     setSelectedFeedIds(new Set(feeds.map((f) => f.id)))
   }, [feeds, restoredFromStorage, resumeFrom])
