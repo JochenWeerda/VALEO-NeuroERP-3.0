@@ -666,7 +666,7 @@ export default function KundenStammPage(): JSX.Element {
     toast({ variant: 'destructive', title: t('crud.messages.validationError'), description: `${Object.keys(errors).length} Feld(er) muessen korrigiert werden.` })
   }
 
-  const { handleAction } = useMaskActions(async (action: string, formData: any) => {
+  const { handleAction, loadingActionKey } = useMaskActions(async (action: string, formData: any) => {
     if (action === 'save') {
       const errors = validate(formData)
       if (Object.keys(errors).length > 0) {
@@ -710,6 +710,7 @@ export default function KundenStammPage(): JSX.Element {
         onSave={handleSave}
         onCancel={handleCancel}
         onAction={handleAction}
+        loadingActionKey={loadingActionKey}
         isLoading={loading}
       />
       
