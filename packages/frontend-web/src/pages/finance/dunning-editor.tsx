@@ -212,7 +212,7 @@ export default function DunningEditorPage(): JSX.Element {
   const { t } = useTranslation()
   const navigate = useNavigate()
   const { id } = useParams()
-  const [isDirty, setIsDirty] = useState(false)
+  const [isDirty, setIsDirty] = useState(false)
   const entityType = 'dunning'
   const entityTypeLabel = getEntityTypeLabel(t, entityType, 'Mahnung')
   const dunningConfig = createDunningConfig(t, entityTypeLabel)
@@ -273,7 +273,7 @@ export default function DunningEditorPage(): JSX.Element {
   }
 
   const { handleAction, loadingActionKey } = useMaskActions(async (action: string, formData: Record<string, unknown>) => {
-    if (action === 'generate') {
+    if (action === 'generate') {
       try {
         await apiClient.post('/api/v1/finance/dunning/run', formData ?? {})
         toast({ title: t('crud.messages.dunningGenerated'), description: t('crud.messages.dunningGeneratedDesc', { level: formData?.dunningLevel ?? 1 }) })
@@ -324,38 +324,18 @@ export default function DunningEditorPage(): JSX.Element {
       }
 
       try {
-        const response = await fetch(`/api/v1/finance/dunning/${id}/payment`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${localStorage.getItem('token')}`,
-          },
-          body: JSON.stringify({
-            betrag: formData.totalAmount || 0,
-            datum: new Date().toISOString().split('T')[0]
-          })
+        await apiClient.put(`/api/v1/finance/dunning/${id}/paid`)
+        formData.status = 'paid'
+        formData.paymentDate = new Date().toISOString().split('T')[0]
+        toast({
+          title: t('crud.messages.paymentBooked'),
+          description: t('crud.messages.paymentBookedDesc'),
         })
-
-        if (response.ok) {
-          formData.status = 'paid'
-          formData.paymentDate = new Date().toISOString().split('T')[0]
-          toast({
-            title: t('crud.messages.paymentBooked'),
-            description: t('crud.messages.paymentBookedDesc'),
-          })
-        } else {
-          const error = await response.json()
-          toast({
-            variant: 'destructive',
-            title: t('crud.messages.paymentError'),
-            description: error.detail || t('crud.messages.paymentErrorDesc'),
-          })
-        }
-      } catch (error) {
+      } catch (error: any) {
         toast({
           variant: 'destructive',
-          title: t('crud.messages.networkError'),
-          description: t('crud.messages.networkErrorDesc'),
+          title: t('crud.messages.paymentError'),
+          description: error.response?.data?.detail || t('crud.messages.paymentErrorDesc'),
         })
       }
     } else if (action === 'escalate') {
@@ -391,7 +371,7 @@ export default function DunningEditorPage(): JSX.Element {
       if (!id || id === 'new') {
         toast({ variant: 'destructive', title: t('common.error'), description: t('crud.messages.saveFirst') })
         return
-      }
+      }
       try {
         const res = await apiClient.post<{ url?: string }>('/api/v1/export/list', { entity: 'dunning', format: 'pdf', id })
         if (res?.url) window.open(res.url, '_blank')

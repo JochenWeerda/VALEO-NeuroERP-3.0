@@ -403,7 +403,7 @@ export default function OPDebitorenPage(): JSX.Element {
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
   const { data: fibuCockpit } = useFibuCockpit()
-  const [isDirty, setIsDirty] = useState(false)
+  const [isDirty, setIsDirty] = useState(false)
   const entityType = 'openItem'
   const entityTypeLabel = getEntityTypeLabel(t, entityType, 'OP-Verwaltung (Debitoren)')
 
@@ -575,10 +575,18 @@ export default function OPDebitorenPage(): JSX.Element {
         return
       }
 
-      // OTC-011-P2: apiClient statt raw fetch (OIDC-kompatibel)
       try {
-        await apiClient.post(`/api/v1/finance/dunning/${formData.id}/mahnung`)
-        formData.mahnstufe = (formData.mahnstufe || 0) + 1
+        const today = new Date().toISOString().split('T')[0]
+        const nextLevel = (formData.mahnstufe || 0) + 1
+        await apiClient.post('/api/v1/finance/dunning', {
+          op_id: formData.id,
+          debtor_id: formData.debitorId || 'unknown',
+          dunning_level: nextLevel,
+          dunning_date: today,
+          due_date: formData.faelligkeit || today,
+          open_amount: formData.offen ?? formData.betrag ?? 0,
+        })
+        formData.mahnstufe = nextLevel
         toast.success(t('crud.messages.dunningCreated', { level: formData.mahnstufe }))
       } catch (error: any) {
         const msg = error.response?.data?.detail ?? error.message ?? t('crud.messages.dunningError')
@@ -588,7 +596,7 @@ export default function OPDebitorenPage(): JSX.Element {
       if (!formData.id) {
         toast.error(t('crud.messages.saveFirstGeneric'))
         return
-      }
+      }
       try {
         const res = await apiClient.post<{ url?: string }>('/api/v1/export/list', { entity: 'open_items', format: 'pdf', id: formData.id })
         if (res?.url) window.open(res.url, '_blank')
