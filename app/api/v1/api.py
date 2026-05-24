@@ -104,6 +104,7 @@ from app.api.v1.endpoints import (
     zertifikate,
     foerderung,
     marketing,
+    crm_campaigns,
     labor,
     fuhrpark,
     strecke_speditionen,
@@ -1171,6 +1172,12 @@ api_router.include_router(
 # Marketing API
 api_router.include_router(
     marketing.router
+)
+
+# CRM Campaigns API
+api_router.include_router(
+    crm_campaigns.router,
+    prefix="/crm",
 )
 
 # Labor API (kanonisch /labor; Alias /qualitaet fuer Frontend-Hooks)

@@ -118,13 +118,13 @@ const createCampaignsConfig = (t: any, entityTypeLabel: string): ListConfig => (
   bulkActions: [],
   actions: [],
   api: {
-    baseUrl: '/api/v1/marketing/campaigns',
+    baseUrl: '/api/v1/crm/campaigns',
     endpoints: {
-      list: '/api/v1/marketing/campaigns',
-      get: '/api/v1/marketing/campaigns/{id}',
-      create: '/api/v1/marketing/campaigns',
-      update: '/api/v1/marketing/campaigns/{id}',
-      delete: '/api/v1/marketing/campaigns/{id}'
+      list: '/api/v1/crm/campaigns',
+      get: '/api/v1/crm/campaigns/{id}',
+      create: '/api/v1/crm/campaigns',
+      update: '/api/v1/crm/campaigns/{id}',
+      delete: '/api/v1/crm/campaigns/{id}'
     }
   },
   permissions: ['crm.read', 'marketing.read', 'marketing.write']
@@ -141,7 +141,7 @@ export default function CampaignsPage(): JSX.Element {
   const { data: queryData, isLoading, isError, error, refetch } = useQuery({
     queryKey: ['crm', 'campaigns'],
     queryFn: async () => {
-      const r = await apiClient.get('/api/v1/marketing/campaigns')
+      const r = await apiClient.get('/api/v1/crm/campaigns')
       const items = Array.isArray(r.data) ? r.data : ((r.data as any).data || [])
       return { items, total: items.length }
     },
@@ -201,7 +201,7 @@ export default function CampaignsPage(): JSX.Element {
       onDelete={async (item) => {
         if (confirm(t('crud.dialogs.delete.descriptionGeneric', { entityType: entityTypeLabel }))) {
           try {
-            await apiClient.delete(`/api/v1/marketing/kampagnen/${item.id}`)
+            await apiClient.delete(`/api/v1/crm/campaigns/${item.id}`)
             toast({
               title: getSuccessMessage(t, 'delete', entityType),
             })
