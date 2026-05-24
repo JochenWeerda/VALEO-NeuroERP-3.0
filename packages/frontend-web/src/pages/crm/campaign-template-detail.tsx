@@ -7,14 +7,12 @@ import { useMaskData } from '@/components/mask-builder/hooks'
 
 import { MaskConfig } from '@/components/mask-builder/types'
 import { getEntityTypeLabel, getDetailTitle, getSuccessMessage, getErrorMessage } from '@/features/crud/utils/i18n-helpers'
-import { createApiClient } from '@/components/mask-builder/utils/api'
+import { apiClient } from '@/lib/api-client'
 import { Button } from '@/components/ui/button'
 import { toast } from '@/hooks/use-toast'
 import { useTenant } from '@/hooks/useTenant'
 import { ArrowLeft, Copy } from 'lucide-react'
 
-// API Client
-const apiClient = createApiClient('/api/v1/marketing')
 
 // Zod-Schema für Campaign Templates
 const createTemplateSchema = (t: any) => z.object({
@@ -148,12 +146,12 @@ const createTemplateConfig = (t: any, entityTypeLabel: string): MaskConfig => ({
     }
   ],
   api: {
-    baseUrl: '/api/v1/marketing/campaigns/templates',
+    baseUrl: '/api/v1/crm/campaigns/templates',
     endpoints: {
-      get: '/api/v1/marketing/campaigns/templates/{id}',
-      create: '/api/v1/marketing/campaigns/templates',
-      update: '/api/v1/marketing/campaigns/templates/{id}',
-      delete: '/api/v1/marketing/campaigns/templates/{id}'
+      get: '/api/v1/crm/campaigns/templates/{id}',
+      create: '/api/v1/crm/campaigns/templates',
+      update: '/api/v1/crm/campaigns/templates/{id}',
+      delete: '/api/v1/crm/campaigns/templates/{id}'
     }
   },
   permissions: ['crm.read', 'marketing.read', 'marketing.write']
@@ -222,9 +220,10 @@ export default function CampaignTemplateDetailPage(): JSX.Element {
   const handleDuplicate = async () => {
     if (!id) return
     try {
-      const response = await apiClient.post<{ id?: string; success?: boolean; data?: { id?: string } }>(`/campaigns/templates/${id}/duplicate`)
-      if (response.success || response.id) {
-        const newId = response.success ? response.data?.id || response.data?.id : response.id
+      const res = await apiClient.post(`/api/v1/crm/campaigns/templates/${id}/duplicate`)
+      const response = res.data
+      if (response?.id) {
+        const newId = response.id
         toast({
           title: t('crud.messages.templateDuplicated'),
         })
