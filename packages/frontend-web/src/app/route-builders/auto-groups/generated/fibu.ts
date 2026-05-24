@@ -50,6 +50,10 @@ export const entries: AutoGroupRouteEntry[] = [
     "path": "debitoren-api"
   },
   {
+    "module": "@/pages/fibu/erloeskennziffern",
+    "path": "erloeskennziffern"
+  },
+  {
     "module": "@/pages/fibu/elster-online",
     "path": "elster-online"
   },

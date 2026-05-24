@@ -12,6 +12,7 @@ import {
   FileText,
   FlaskConical,
   Globe,
+  Hash,
   LayoutDashboard,
   LayoutGrid,
   Leaf,
@@ -78,6 +79,15 @@ export const RAW_NAV_SECTIONS: RawNavItem[] = [
         icon: FileText,
         module: '@/pages/fibu/kontenplan',
         keywords: ['kontenplan'],
+        mcp: { businessDomain: 'finance', scope: 'finance:read' },
+      },
+      {
+        id: 'erloeskennziffern',
+        label: 'Erlöskennziffern',
+        icon: Hash,
+        module: '@/pages/fibu/erloeskennziffern',
+        preferredPath: 'fibu/erloeskennziffern',
+        keywords: ['erloeskennziffer', 'ekz', 'stammdaten'],
         mcp: { businessDomain: 'finance', scope: 'finance:read' },
       },
       {

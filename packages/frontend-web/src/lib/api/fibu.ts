@@ -161,6 +161,8 @@ export const fibuKeys = {
   cockpit: () => [...fibuKeys.all, 'cockpit'] as const,
   periods: () => [...fibuKeys.all, 'periods'] as const,
   connectorProfiles: (connectorType: 'PAYROLL' | 'ASSET_LEDGER') => [...fibuKeys.all, 'connector-profiles', connectorType] as const,
+  erloeskennziffern: () => [...fibuKeys.all, 'erloeskennziffern'] as const,
+  zahlungsbedingungen: () => [...fibuKeys.all, 'zahlungsbedingungen'] as const,
 }
 
 const EMPTY_RECORD: Record<string, unknown> = {}
@@ -784,4 +786,136 @@ export async function downloadELSTERXml(returnId: string, period: string, tenant
   a.download = filename
   a.click()
   URL.revokeObjectURL(a.href)
+}
+
+// ── Wave 10 Stammdaten: Erlöskennziffern / Zahlungsbedingungen ───────────────
+
+export type Erloeskennziffer = {
+  id: string
+  ekz_nr: string
+  bezeichnung: string
+  aktiv: boolean
+  created_at: string
+}
+
+export type ErloeskennzifferCreate = {
+  ekz_nr: string
+  bezeichnung: string
+}
+
+export type Zahlungsbedingung = {
+  id: string
+  zabd_nr: string
+  bezeichnung: string
+  zahlungsziel_tage: number
+  skonto1_tage: number | null
+  skonto1_prozent: number | null
+  skonto2_tage: number | null
+  skonto2_prozent: number | null
+  netto_tage: number | null
+  manuelles_datum: boolean
+  zahlungsart: string
+  aktiv: boolean
+  created_at: string
+}
+
+export type ZahlungsbedingungCreate = {
+  zabd_nr: string
+  bezeichnung: string
+  zahlungsziel_tage: number
+  skonto1_tage?: number | null
+  skonto1_prozent?: number | null
+  skonto2_tage?: number | null
+  skonto2_prozent?: number | null
+  netto_tage?: number | null
+  manuelles_datum?: boolean
+  zahlungsart?: string
+}
+
+export const ZAHLUNGSARTEN = [
+  { value: 'ueberweisung', label: 'Ueberweisung' },
+  { value: 'lastschrift', label: 'Lastschrift' },
+  { value: 'scheck', label: 'Scheck' },
+  { value: 'kasse', label: 'Kasse' },
+  { value: 'vorkasse', label: 'Vorkasse' },
+] as const
+
+export function useErloeskennziffern() {
+  return useQuery({
+    queryKey: fibuKeys.erloeskennziffern(),
+    queryFn: async () =>
+      (await apiClient.get<Erloeskennziffer[]>('/api/v1/fibu/erloeskennziffern')).data,
+    placeholderData: [],
+    staleTime: 5 * 60 * 1000,
+  })
+}
+
+export function useCreateErloeskennziffer() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async (payload: ErloeskennzifferCreate) =>
+      (await apiClient.post<Erloeskennziffer>('/api/v1/fibu/erloeskennziffern', payload)).data,
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: fibuKeys.erloeskennziffern() }),
+  })
+}
+
+export function useUpdateErloeskennziffer() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async ({ ekz_nr, payload }: { ekz_nr: string; payload: ErloeskennzifferCreate }) =>
+      (await apiClient.put<Erloeskennziffer>(
+        `/api/v1/fibu/erloeskennziffern/${encodeURIComponent(ekz_nr)}`,
+        payload,
+      )).data,
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: fibuKeys.erloeskennziffern() }),
+  })
+}
+
+export function useDeleteErloeskennziffer() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async (ekz_nr: string) =>
+      apiClient.delete(`/api/v1/fibu/erloeskennziffern/${encodeURIComponent(ekz_nr)}`),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: fibuKeys.erloeskennziffern() }),
+  })
+}
+
+export function useZahlungsbedingungen() {
+  return useQuery({
+    queryKey: fibuKeys.zahlungsbedingungen(),
+    queryFn: async () =>
+      (await apiClient.get<Zahlungsbedingung[]>('/api/v1/fibu/zahlungsbedingungen')).data,
+    placeholderData: [],
+    staleTime: 5 * 60 * 1000,
+  })
+}
+
+export function useCreateZahlungsbedingung() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async (payload: ZahlungsbedingungCreate) =>
+      (await apiClient.post<Zahlungsbedingung>('/api/v1/fibu/zahlungsbedingungen', payload)).data,
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: fibuKeys.zahlungsbedingungen() }),
+  })
+}
+
+export function useUpdateZahlungsbedingung() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async ({ zabd_nr, payload }: { zabd_nr: string; payload: ZahlungsbedingungCreate }) =>
+      (await apiClient.put<Zahlungsbedingung>(
+        `/api/v1/fibu/zahlungsbedingungen/${encodeURIComponent(zabd_nr)}`,
+        payload,
+      )).data,
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: fibuKeys.zahlungsbedingungen() }),
+  })
+}
+
+export function useDeleteZahlungsbedingung() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async (zabd_nr: string) =>
+      apiClient.delete(`/api/v1/fibu/zahlungsbedingungen/${encodeURIComponent(zabd_nr)}`),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: fibuKeys.zahlungsbedingungen() }),
+  })
 }
