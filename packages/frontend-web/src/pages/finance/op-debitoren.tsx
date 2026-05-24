@@ -403,8 +403,7 @@ export default function OPDebitorenPage(): JSX.Element {
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
   const { data: fibuCockpit } = useFibuCockpit()
-  const [isDirty, setIsDirty] = useState(false)
-  const [actionLoadingKey, setActionLoadingKey] = useState<string | null>(null)
+  const [isDirty, setIsDirty] = useState(false)
   const entityType = 'openItem'
   const entityTypeLabel = getEntityTypeLabel(t, entityType, 'OP-Verwaltung (Debitoren)')
 
@@ -477,7 +476,7 @@ export default function OPDebitorenPage(): JSX.Element {
     toast.error(`${Object.keys(errors).length} Feld(er) muessen korrigiert werden.`)
   }
 
-  const { handleAction } = useMaskActions(async (action: string, formData: any) => {
+  const { handleAction, loadingActionKey } = useMaskActions(async (action: string, formData: any) => {
     if (action === 'zahlung') {
       // Zahlung buchen - fügt automatisch eine neue Zahlung hinzu
       const newZahlung = {
@@ -589,8 +588,7 @@ export default function OPDebitorenPage(): JSX.Element {
       if (!formData.id) {
         toast.error(t('crud.messages.saveFirstGeneric'))
         return
-      }
-      setActionLoadingKey('export')
+      }
       try {
         const res = await apiClient.post<{ url?: string }>('/api/v1/export/list', { entity: 'open_items', format: 'pdf', id: formData.id })
         if (res?.url) window.open(res.url, '_blank')
@@ -598,8 +596,6 @@ export default function OPDebitorenPage(): JSX.Element {
       } catch (error: any) {
         const msg = error.response?.data?.detail ?? error.message
         toast.error(msg)
-      } finally {
-        setActionLoadingKey(null)
       }
     }
   })
@@ -690,7 +686,7 @@ export default function OPDebitorenPage(): JSX.Element {
         onCancel={handleCancel}
         isLoading={loading || resolvingOp}
         onAction={(key, formData) => handleAction(key, formData)}
-        loadingActionKey={actionLoadingKey}
+        loadingActionKey={loadingActionKey}
       />
     </div>
   )

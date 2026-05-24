@@ -137,8 +137,7 @@ export default function BankKontenStammPage(): JSX.Element {
   const navigate = useNavigate()
   const { tenantId } = useTenant()
   const [isDirty, setIsDirty] = useState(false)
-  const [formData, setFormData] = useState<any>({})
-  const [actionLoadingKey, setActionLoadingKey] = useState<string | null>(null)
+  const [formData, setFormData] = useState<any>({})
   const entityType = 'bankAccount'
   const entityTypeLabel = getEntityTypeLabel(t, entityType, 'Bankkonto')
   const bankKontenConfig = createBankKontenConfig(t, entityTypeLabel)
@@ -234,7 +233,7 @@ export default function BankKontenStammPage(): JSX.Element {
     }
   }
 
-  const { handleAction } = useMaskActions(async (action: string, formData: any) => {
+  const { handleAction, loadingActionKey } = useMaskActions(async (action: string, formData: any) => {
     if (action === 'save') {
       const isValid = validateBankKontenForm(formData, t)
       if (!isValid.isValid) {
@@ -265,8 +264,7 @@ export default function BankKontenStammPage(): JSX.Element {
       } else {
         toast.error(Object.values(isValid.errors).join(', '))
       }
-    } else if (action === 'export') {
-      setActionLoadingKey('export')
+    } else if (action === 'export') {
       try {
         const res = await apiClient.post<{ url?: string }>('/api/v1/export/list', { entity: 'bank_accounts', format: 'pdf', id: formData?.id })
         if (res?.url) window.open(res.url, '_blank')
@@ -274,8 +272,6 @@ export default function BankKontenStammPage(): JSX.Element {
       } catch (error: any) {
         const msg = error.response?.data?.detail ?? error.message
         toast.error(msg)
-      } finally {
-        setActionLoadingKey(null)
       }
     }
   })
@@ -311,7 +307,7 @@ export default function BankKontenStammPage(): JSX.Element {
         onCancel={handleCancel}
         isLoading={loading || isIbanLoading}
         onAction={(key, fd) => handleAction(key, fd ?? safeFormData)}
-        loadingActionKey={actionLoadingKey}
+        loadingActionKey={loadingActionKey}
       />
     </>
   )

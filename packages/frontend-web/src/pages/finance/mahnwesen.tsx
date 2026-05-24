@@ -221,7 +221,6 @@ export default function MahnwesenPage(): JSX.Element {
   const { t } = useTranslation()
   const navigate = useNavigate()
   const [isDirty, setIsDirty] = useState(false)
-  const [actionLoadingKey, setActionLoadingKey] = useState<string | null>(null)
   const [roleFocus, setRoleFocus] = useState<DunningRoleFocus>('all')
   const entityType = 'dunning'
   const entityTypeLabel = getEntityTypeLabel(t, entityType, 'Mahnwesen')
@@ -321,22 +320,18 @@ export default function MahnwesenPage(): JSX.Element {
     })
   }
 
-  const { handleAction } = useMaskActions(async (action: string, formData: any) => {
+  const { handleAction, loadingActionKey } = useMaskActions(async (action: string, formData: any) => {
     if (action === 'generate') {
-      setActionLoadingKey('generate')
       try {
         await apiClient.post('/api/v1/finance/dunning/run', formData ?? {})
         toast({ title: t('crud.messages.dunningGenerated'), description: t('crud.messages.dunningGeneratedDesc', { level: formData?.mahnstufe ?? 1 }) })
       } catch (error: any) {
         const msg = error.response?.data?.detail ?? error.message
         toast({ variant: 'destructive', title: t('common.error'), description: msg })
-      } finally {
-        setActionLoadingKey(null)
       }
       return
     }
     if (action === 'preview') {
-      setActionLoadingKey('preview')
       try {
         const response = await apiClient.get<{
           open_items_count: number
@@ -352,8 +347,6 @@ export default function MahnwesenPage(): JSX.Element {
       } catch (error: any) {
         const msg = error.response?.data?.detail ?? error.message
         toast({ variant: 'destructive', title: t('common.error'), description: msg })
-      } finally {
-        setActionLoadingKey(null)
       }
       return
     } else if (action === 'send') {
@@ -379,7 +372,6 @@ export default function MahnwesenPage(): JSX.Element {
         toast({ variant: 'destructive', title: t('common.error'), description: t('crud.messages.saveFirst') })
         return
       }
-      setActionLoadingKey('payment')
       try {
         await apiClient.put(`/api/v1/finance/dunning/${formData.id}/paid`, {
           betrag: formData.gesamtForderung || 0,
@@ -389,26 +381,20 @@ export default function MahnwesenPage(): JSX.Element {
       } catch (error: any) {
         const msg = error.response?.data?.detail ?? error.message
         toast({ variant: 'destructive', title: t('crud.messages.paymentError'), description: msg })
-      } finally {
-        setActionLoadingKey(null)
       }
     } else if (action === 'inkasso') {
       if (!formData.id) {
         toast({ variant: 'destructive', title: t('common.error'), description: t('crud.messages.saveFirst') })
         return
       }
-      setActionLoadingKey('inkasso')
       try {
         await apiClient.put(`/api/v1/finance/dunning/${formData.id}/send`)
         toast({ title: t('crud.messages.collectionHandedOver'), description: t('crud.messages.collectionHandedOverDesc') })
       } catch (error: any) {
         const msg = error.response?.data?.detail ?? error.message
         toast({ variant: 'destructive', title: t('crud.messages.collectionError'), description: msg })
-      } finally {
-        setActionLoadingKey(null)
       }
     } else if (action === 'export') {
-      setActionLoadingKey('export')
       try {
         const response = await apiClient.post<{ export_id: string; download_url: string | null }>(
           '/api/v1/finance/followup/mahnwesen/export',
@@ -426,8 +412,6 @@ export default function MahnwesenPage(): JSX.Element {
       } catch (error: any) {
         const msg = error.response?.data?.detail ?? error.message
         toast({ variant: 'destructive', title: t('common.error'), description: msg })
-      } finally {
-        setActionLoadingKey(null)
       }
     }
   })
@@ -560,7 +544,7 @@ export default function MahnwesenPage(): JSX.Element {
         onCancel={handleCancel}
         isLoading={loading}
         onAction={(key, formData) => handleAction(key, formData)}
-        loadingActionKey={actionLoadingKey}
+        loadingActionKey={loadingActionKey}
       />
     </>
   )

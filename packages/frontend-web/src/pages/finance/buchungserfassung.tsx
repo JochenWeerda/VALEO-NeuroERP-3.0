@@ -299,8 +299,7 @@ export default function BuchungserfassungPage(): JSX.Element {
   const [isDirty, setIsDirty] = useState(false)
   const [isStornoDialogOpen, setIsStornoDialogOpen] = useState(false)
   const [isStornoLoading, setIsStornoLoading] = useState(false)
-  const [isDeleteLoading, setIsDeleteLoading] = useState(false)
-  const [actionLoadingKey, setActionLoadingKey] = useState<string | null>(null)
+  const [isDeleteLoading, setIsDeleteLoading] = useState(false)
   const entityType = 'booking'
   const entityTypeLabel = getEntityTypeLabel(t, entityType, 'Buchungserfassung')
   const buchungConfig = createBuchungConfig(t, entityTypeLabel)
@@ -360,14 +359,13 @@ export default function BuchungserfassungPage(): JSX.Element {
     }
   }
 
-  const { handleAction } = useMaskActions(async (action: string, formData: any) => {
+  const { handleAction, loadingActionKey } = useMaskActions(async (action: string, formData: any) => {
     if (action === 'save') {
       const errors = validate(formData)
       if (Object.keys(errors).length > 0) {
         showValidationToast(errors)
         return
-      }
-      setActionLoadingKey('save')
+      }
       try {
         const period = String(formData?.periode ?? '').trim()
         if (period) {
@@ -401,8 +399,6 @@ export default function BuchungserfassungPage(): JSX.Element {
       } catch (error: any) {
         const msg = error.response?.data?.detail ?? error.message
         toast({ variant: 'destructive', title: t('common.error'), description: msg })
-      } finally {
-        setActionLoadingKey(null)
       }
       return
     }
@@ -431,8 +427,7 @@ export default function BuchungserfassungPage(): JSX.Element {
       }
       setIsStornoDialogOpen(true)
     }
-    if (action === 'export') {
-      setActionLoadingKey('export')
+    if (action === 'export') {
       try {
         const res = (await apiClient.post<{ url?: string }>('/api/v1/export/list', { entity: 'journal_entries', format: 'datev' })).data
         if (res?.url) window.open(res.url, '_blank')
@@ -440,8 +435,6 @@ export default function BuchungserfassungPage(): JSX.Element {
       } catch (error: any) {
         const msg = error.response?.data?.detail ?? error.message
         toast({ variant: 'destructive', title: t('common.error'), description: msg })
-      } finally {
-        setActionLoadingKey(null)
       }
     }
   })
@@ -575,7 +568,7 @@ export default function BuchungserfassungPage(): JSX.Element {
         onCancel={handleCancel}
         isLoading={loading}
         onAction={(key, formData) => handleAction(key, formData)}
-        loadingActionKey={actionLoadingKey}
+        loadingActionKey={loadingActionKey}
       />
       <StornoDialog
         open={isStornoDialogOpen}

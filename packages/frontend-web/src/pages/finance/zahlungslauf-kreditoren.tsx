@@ -565,8 +565,7 @@ export default function ZahlungslaufKreditorenPage(): JSX.Element {
   const { t } = useTranslation()
   const navigate = useNavigate()
   const [isDirty, setIsDirty] = useState(false)
-  const [formData, setFormData] = useState<any>({})
-  const [loadingActionKey, setLoadingActionKey] = useState<string | null>(null)
+  const [formData, setFormData] = useState<any>({})
   const [roleFocus, setRoleFocus] = useState<FinanceRoleFocus>('all')
   const currentActor = localStorage.getItem('userEmail') || localStorage.getItem('username') || 'api'
   const entityType = 'paymentRun'
@@ -648,7 +647,7 @@ export default function ZahlungslaufKreditorenPage(): JSX.Element {
     }
   }
 
-  const { handleAction } = useMaskActions(async (action: string, formData: any) => {
+  const { handleAction, loadingActionKey } = useMaskActions(async (action: string, formData: any) => {
     if (action === 'add-payment') {
       // Neue Zahlung hinzufügen wird in der Tabelle behandelt
       // Dieser Button ist redundant, da die Tabelle ihren eigenen Button hat
@@ -684,8 +683,7 @@ export default function ZahlungslaufKreditorenPage(): JSX.Element {
         })
         return
       }
-
-      setLoadingActionKey('approve')
+
       try {
         const response = await fetch(`/api/v1/finance/payment-runs/${formData.id}/approve`, {
           method: 'POST',
@@ -717,8 +715,6 @@ export default function ZahlungslaufKreditorenPage(): JSX.Element {
           title: t('crud.messages.networkError'),
           description: t('crud.messages.networkErrorDesc'),
         })
-      } finally {
-        setLoadingActionKey(null)
       }
     } else if (action === 'execute') {
       const errors = validate(formData)

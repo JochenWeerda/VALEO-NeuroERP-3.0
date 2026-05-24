@@ -492,8 +492,7 @@ export default function AbschlussPage(): JSX.Element {
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
   const workflowContext = readWorkflowEntryContext(searchParams)
-  const [isDirty, setIsDirty] = useState(false)
-  const [actionLoadingKey, setActionLoadingKey] = useState<string | null>(null)
+  const [isDirty, setIsDirty] = useState(false)
   const [workspaceData, setWorkspaceData] = useState<any>({})
   const [roleFocus, setRoleFocus] = useState<CloseRoleFocus>('all')
   const currentActor = localStorage.getItem('userEmail') || localStorage.getItem('username') || 'api'
@@ -571,17 +570,14 @@ export default function AbschlussPage(): JSX.Element {
     })
   }
 
-  const { handleAction } = useMaskActions(async (action: string, formData: any) => {
-    if (action === 'calculate') {
-      setActionLoadingKey('calculate')
+  const { handleAction, loadingActionKey } = useMaskActions(async (action: string, formData: any) => {
+    if (action === 'calculate') {
       try {
         const response = await apiClient.post('/api/v1/finance/closing/calculate', buildClosingActionPayload(formData))
         applyWorkspaceResponse(response)
         toast({ title: 'Berechnung abgeschlossen', description: 'Abschlusszahlen wurden berechnet.' })
       } catch (error: any) {
         toast({ variant: 'destructive', title: 'Fehler', description: error.response?.data?.detail ?? error.message })
-      } finally {
-        setActionLoadingKey(null)
       }
       return
     }
@@ -594,16 +590,13 @@ export default function AbschlussPage(): JSX.Element {
       }
       return
     }
-    if (action === 'approve') {
-      setActionLoadingKey('approve')
+    if (action === 'approve') {
       try {
         const response = await apiClient.post('/api/v1/finance/closing/approve', buildClosingActionPayload(formData))
         applyWorkspaceResponse(response)
         toast({ title: 'Abschluss freigegeben', description: 'Abschlussgenehmigung wurde erteilt.' })
       } catch (error: any) {
         toast({ variant: 'destructive', title: 'Fehler', description: error.response?.data?.detail ?? error.message })
-      } finally {
-        setActionLoadingKey(null)
       }
       return
     }
@@ -612,8 +605,7 @@ export default function AbschlussPage(): JSX.Element {
       if (Object.keys(errors).length > 0) {
         showValidationToast(errors)
         return
-      }
-      setActionLoadingKey('close')
+      }
       try {
         const response = await apiClient.post('/api/v1/finance/closing/run', buildClosingActionPayload(formData))
         applyWorkspaceResponse(response)
@@ -623,14 +615,11 @@ export default function AbschlussPage(): JSX.Element {
       } catch (error: any) {
         const msg = error.response?.data?.detail ?? error.message
         toast({ variant: 'destructive', title: 'Fehler', description: msg })
-      } finally {
-        setActionLoadingKey(null)
       }
       return
     }
     if (action === 'lock') {
-      if (!confirm('Abschluss sperren? Diese Aktion kann nicht rückgängig gemacht werden.')) return
-      setActionLoadingKey('lock')
+      if (!confirm('Abschluss sperren? Diese Aktion kann nicht rückgängig gemacht werden.')) return
       try {
         const response = await apiClient.post('/api/v1/finance/closing/lock', buildClosingActionPayload(formData))
         applyWorkspaceResponse(response)
@@ -638,13 +627,10 @@ export default function AbschlussPage(): JSX.Element {
         navigate('/finance/abschluss')
       } catch (error: any) {
         toast({ variant: 'destructive', title: 'Fehler', description: error.response?.data?.detail ?? error.message })
-      } finally {
-        setActionLoadingKey(null)
       }
       return
     }
-    if (action === 'export') {
-      setActionLoadingKey('export')
+    if (action === 'export') {
       try {
         const res = await apiClient.post<{ url?: string }>('/api/v1/export/list', { entity: 'closing', format: 'pdf' })
         if (res?.url) window.open(res.url, '_blank')
@@ -652,8 +638,6 @@ export default function AbschlussPage(): JSX.Element {
       } catch (error: any) {
         const msg = error.response?.data?.detail ?? error.message
         toast({ variant: 'destructive', title: 'Fehler', description: msg })
-      } finally {
-        setActionLoadingKey(null)
       }
     }
   })
@@ -891,7 +875,7 @@ export default function AbschlussPage(): JSX.Element {
         onCancel={handleCancel}
         isLoading={loading}
         onAction={(key, formData) => handleAction(key, formData)}
-        loadingActionKey={actionLoadingKey}
+        loadingActionKey={loadingActionKey}
       />
     </>
   )

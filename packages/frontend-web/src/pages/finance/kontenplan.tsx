@@ -198,8 +198,7 @@ const kontenplanConfig: MaskConfig = {
 
 export default function KontenplanPage(): JSX.Element {
   const navigate = useNavigate()
-  const [isDirty, setIsDirty] = useState(false)
-  const [actionLoadingKey, setActionLoadingKey] = useState<string | null>(null)
+  const [isDirty, setIsDirty] = useState(false)
 
   const { data, loading, saveData } = useMaskData({
     apiUrl: kontenplanConfig.api.baseUrl,
@@ -207,7 +206,7 @@ export default function KontenplanPage(): JSX.Element {
   })
 
 
-  const { handleAction } = useMaskActions(async (action: string, formData: any) => {
+  const { handleAction, loadingActionKey } = useMaskActions(async (action: string, formData: any) => {
     if (action === 'save') {
       const isValid = validateKontenplanForm(formData)
       if (!isValid.isValid) {
@@ -223,21 +222,17 @@ export default function KontenplanPage(): JSX.Element {
       }
       return
     }
-    if (action === 'validate') {
-      setActionLoadingKey('validate')
+    if (action === 'validate') {
       try {
         await apiClient.post('/api/v1/finance/chart-of-accounts/validate', formData ?? {})
         toast({ title: 'Validierung erfolgreich' })
       } catch (error: any) {
         const msg = error.response?.data?.detail ?? error.message
         toast({ variant: 'destructive', title: 'Validierung fehlgeschlagen', description: msg })
-      } finally {
-        setActionLoadingKey(null)
       }
       return
     }
-    if (action === 'export') {
-      setActionLoadingKey('export')
+    if (action === 'export') {
       try {
         const res = await apiClient.post<{ url?: string }>('/api/v1/finance/chart-of-accounts/datev-export', formData ?? {})
         if (res?.url) window.open(res.url, '_blank')
@@ -245,8 +240,6 @@ export default function KontenplanPage(): JSX.Element {
       } catch (error: any) {
         const msg = error.response?.data?.detail ?? error.message
         toast({ variant: 'destructive', title: 'Export fehlgeschlagen', description: msg })
-      } finally {
-        setActionLoadingKey(null)
       }
     }
   })
@@ -270,7 +263,7 @@ export default function KontenplanPage(): JSX.Element {
       onCancel={handleCancel}
       isLoading={loading}
       onAction={(key, formData) => handleAction(key, formData)}
-      loadingActionKey={actionLoadingKey}
+      loadingActionKey={loadingActionKey}
     />
   )
 }
