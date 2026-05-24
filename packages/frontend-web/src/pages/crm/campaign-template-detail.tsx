@@ -220,7 +220,7 @@ export default function CampaignTemplateDetailPage(): JSX.Element {
   const handleDuplicate = async () => {
     if (!id) return
     try {
-      const res = await apiClient.post(`/api/v1/crm/campaigns/templates/${id}/duplicate`)
+      const res = await apiClient.post<{ id?: string }>(`/api/v1/crm/campaigns/templates/${id}/duplicate`)
       const response = res.data
       if (response?.id) {
         const newId = response.id

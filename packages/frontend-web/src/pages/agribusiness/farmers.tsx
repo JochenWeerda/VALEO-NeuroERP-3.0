@@ -13,6 +13,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Toolbar } from '@/components/ui/toolbar';
 import { DetailDrawer } from '@/components/ui/detail-drawer';
 import { CrudDeleteDialog, CrudCancelDialog, CrudAuditTrailPanel, CrudPrintButton } from '@/features/crud/components';
+import type { ChangeLog } from '@/features/crud/components/CrudAuditTrailPanel';
 import { useCrudDelete, useCrudCancel, useCrudAuditTrail } from '@/features/crud/hooks';
 import { crudPrintService } from '@/features/crud/services';
 import { getEntityTypeLabel, getListTitle, getDetailTitle } from '@/features/crud/utils/i18n-helpers';
@@ -49,8 +50,9 @@ export default function FarmersPage(): JSX.Element {
     const fetchFarmers = async () => {
       setIsLoading(true);
       try {
-        const r = await apiClient.get('/api/v1/agribusiness/farmers');
-        setFarmers(Array.isArray(r.data?.data) ? r.data.data : (Array.isArray(r.data) ? r.data : []));
+        const r = await apiClient.get<{ data?: Farmer[] } | Farmer[]>('/api/v1/agribusiness/farmers');
+        const rd = r.data
+        setFarmers(Array.isArray((rd as { data?: Farmer[] }).data) ? (rd as { data: Farmer[] }).data : (Array.isArray(rd) ? rd : []));
       } catch {
         setFarmers([]);
       } finally {
@@ -97,7 +99,7 @@ export default function FarmersPage(): JSX.Element {
   // Audit trail
   const fetchAuditTrail = async (entityType: string, entityId: string) => {
     try {
-      const r = await apiClient.get(`/api/v1/audit/change-logs/audit-trail/${entityType}/${entityId}`);
+      const r = await apiClient.get<{ data?: ChangeLog[] }>(`/api/v1/audit/change-logs/audit-trail/${entityType}/${entityId}`);
       return r.data?.data || [];
     } catch {
       return [];

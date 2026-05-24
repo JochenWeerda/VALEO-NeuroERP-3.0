@@ -66,11 +66,11 @@ export default function CampaignPerformanceDashboardPage(): JSX.Element {
     setLoading(true)
     try {
       const [campaignsRes, performanceRes] = await Promise.all([
-        apiClient.get('/api/v1/crm/campaigns', { params: { tenant_id: tenantId, state: 'completed' } }),
-        apiClient.get('/api/v1/crm/campaigns', { params: { tenant_id: tenantId, state: 'active' } }),
+        apiClient.get<CampaignSummary[] | { items?: CampaignSummary[] }>('/api/v1/crm/campaigns', { params: { tenant_id: tenantId, state: 'completed' } }),
+        apiClient.get<CampaignSummary[] | { items?: CampaignSummary[] }>('/api/v1/crm/campaigns', { params: { tenant_id: tenantId, state: 'active' } }),
       ])
 
-      const items: CampaignSummary[] = Array.isArray(campaignsRes.data) ? campaignsRes.data : (campaignsRes.data?.items ?? [])
+      const items: CampaignSummary[] = Array.isArray(campaignsRes.data) ? campaignsRes.data : ((campaignsRes.data as { items?: CampaignSummary[] }).items ?? [])
       setCampaigns(items)
 
       const totalSent = items.reduce((sum, campaign) => sum + (campaign.sent_count || 0), 0)
@@ -91,7 +91,8 @@ export default function CampaignPerformanceDashboardPage(): JSX.Element {
         avgConversionRate: totalSent > 0 ? (totalConverted / totalSent) * 100 : 0,
       })
 
-      const perfItems: CampaignPerformancePoint[] = Array.isArray(performanceRes.data) ? performanceRes.data : (performanceRes.data?.items ?? [])
+      const perfRaw = performanceRes.data as unknown
+      const perfItems: CampaignPerformancePoint[] = Array.isArray(perfRaw) ? (perfRaw as CampaignPerformancePoint[]) : ((perfRaw as { items?: CampaignPerformancePoint[] }).items ?? [])
       setPerformance(perfItems)
     } catch {
       toast({ variant: 'destructive', title: t('crud.messages.loadError') })

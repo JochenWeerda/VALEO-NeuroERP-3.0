@@ -13,6 +13,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Toolbar } from '@/components/ui/toolbar';
 import { DetailDrawer } from '@/components/ui/detail-drawer';
 import { CrudDeleteDialog, CrudCancelDialog, CrudAuditTrailPanel, CrudPrintButton } from '@/features/crud/components';
+import type { ChangeLog } from '@/features/crud/components/CrudAuditTrailPanel';
 import { useCrudDelete, useCrudCancel, useCrudAuditTrail } from '@/features/crud/hooks';
 import { Badge } from '@/components/ui/badge';
 import { getEntityTypeLabel, getListTitle, getDetailTitle, getStatusLabel } from '@/features/crud/utils/i18n-helpers';
@@ -147,7 +148,7 @@ export default function ContractsPageV2(): JSX.Element {
 
     const fetchAmendments = async () => {
       try {
-        const res = await apiClient.get<{ items: unknown[] }>(`/api/v1/kontrakte/${selectedContract.id}/amendments`);
+        const res = await apiClient.get<{ items: Amendment[] }>(`/api/v1/kontrakte/${selectedContract.id}/amendments`);
         setAmendments(res.data?.items ?? []);
       } catch {
         setAmendments([]);
@@ -161,7 +162,7 @@ export default function ContractsPageV2(): JSX.Element {
     if (!amendmentDialogOpen) return;
     const fetchTemplates = async () => {
       try {
-        const res = await apiClient.get<{ items: unknown[] }>('/api/v1/kontrakte/amendment-templates?activeOnly=true');
+        const res = await apiClient.get<{ items: AmendmentTemplate[] }>('/api/v1/kontrakte/amendment-templates?activeOnly=true');
         setAmendmentTemplates(res.data?.items ?? []);
       } catch {
         setAmendmentTemplates([]);
@@ -216,7 +217,7 @@ export default function ContractsPageV2(): JSX.Element {
     }
 
     try {
-      const res = await apiClient.post(`/api/v1/kontrakte/${selectedContract.id}/amendments`, {
+      const res = await apiClient.post<Amendment>(`/api/v1/kontrakte/${selectedContract.id}/amendments`, {
         contractId: selectedContract.id,
         tenantId,
         type: amendmentForm.type,
@@ -236,7 +237,7 @@ export default function ContractsPageV2(): JSX.Element {
   // Audit trail
   const fetchAuditTrail = async (entityType: string, entityId: string) => {
     try {
-      const res = await apiClient.get<{ data: unknown[] }>(`/api/v1/audit/change-logs/audit-trail/${entityType}/${entityId}`);
+      const res = await apiClient.get<{ data: ChangeLog[] }>(`/api/v1/audit/change-logs/audit-trail/${entityType}/${entityId}`);
       return res.data?.data || [];
     } catch {
       return [];

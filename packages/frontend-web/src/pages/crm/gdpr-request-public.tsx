@@ -34,7 +34,7 @@ export default function GDPRRequestPublicPage(): JSX.Element {
     setLoading(true)
 
     try {
-      const response = await httpClient.post('/api/v1/gdpr/requests', {
+      const response = await httpClient.post<{ id: string }>('/api/v1/gdpr/requests', {
         tenant_id: tenantId,
         request_type: formData.request_type,
         contact_id: formData.contact_id,
@@ -75,7 +75,7 @@ export default function GDPRRequestPublicPage(): JSX.Element {
 
     setLoading(true)
     try {
-      const response = await httpClient.get(`/api/v1/gdpr/requests/${requestId}`)
+      const response = await httpClient.get<{ status: string; response_file_path?: string }>(`/api/v1/gdpr/requests/${requestId}`)
       if (response.data) {
         setStatusData(response.data)
         if (response.data.status === 'completed' && response.data.response_file_path) {

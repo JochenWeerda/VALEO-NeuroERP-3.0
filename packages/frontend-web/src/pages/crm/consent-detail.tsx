@@ -27,9 +27,9 @@ const createConsentSchema = (t: any) => z.object({
 
 function validateConsentForm(formData: unknown, t: any): { valid: boolean; errors: string[] } {
   const result = createConsentSchema(t).safeParse(formData)
-  return result
+  return result.success
     ? { valid: true, errors: [] }
-    : { valid: false, errors: result.error.issues.map((issue) => issue.message) }
+    : { valid: false, errors: result.error.issues.map((issue: { message: string }) => issue.message) }
 }
 
 // Konfiguration für Consent ObjectPage
@@ -194,7 +194,7 @@ function ConsentHistoryTab({ consentId }: { consentId: string }) {
   useEffect(() => {
     const loadHistory = async () => {
       try {
-        const response = await apiClient.get(`/api/v1/crm/consents/${consentId}/history`)
+        const response = await apiClient.get<unknown[]>(`/api/v1/crm/consents/${consentId}/history`)
         if (response.data) {
           setHistory(response.data || [])
         }

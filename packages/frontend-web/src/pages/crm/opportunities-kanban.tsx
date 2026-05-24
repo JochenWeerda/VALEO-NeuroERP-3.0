@@ -71,20 +71,20 @@ export default function OpportunitiesKanbanPage(): JSX.Element {
     setLoading(true)
     try {
       // Load opportunities
-      const oppsResponse = await apiClient.get('/api/v1/crm/opportunities', {
+      const oppsResponse = await apiClient.get<{ items?: Opportunity[] } | Opportunity[]>('/api/v1/crm/opportunities', {
         params: {
           ...(filterOwner && { owner_id: filterOwner }),
           ...(filterStatus && { status: filterStatus })
         }
       })
-      
+
       if (oppsResponse.data) {
-        const data = oppsResponse.data as any
-        setOpportunities((data.items || data) as Opportunity[])
+        const data = oppsResponse.data as { items?: Opportunity[] } | Opportunity[]
+        setOpportunities(((data as { items?: Opportunity[] }).items || data) as Opportunity[])
       }
 
       // Load stages
-      const stagesResponse = await apiClient.get('/api/v1/crm/opportunities/stages')
+      const stagesResponse = await apiClient.get<any[]>('/api/v1/crm/opportunities/stages')
       if (stagesResponse.data) {
         setStages(stagesResponse.data || [])
       }

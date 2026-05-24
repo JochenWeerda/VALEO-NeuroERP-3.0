@@ -53,7 +53,7 @@ export default function OpportunitiesForecastPage(): JSX.Element {
       if (filterOwner) params.owner_id = filterOwner
       if (filterStage !== 'all') params.stage = filterStage
 
-      const response = await apiClient.get('/api/v1/crm/opportunities/forecast', { params })
+      const response = await apiClient.get<ForecastData[]>('/api/v1/crm/opportunities/forecast', { params })
       if (response.data) {
         setForecastData(response.data || [])
       }

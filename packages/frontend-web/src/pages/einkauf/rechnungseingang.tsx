@@ -51,7 +51,7 @@ const createRechnungseingangConfig = (t: any, entityTypeLabel: string): MaskConf
             // Automatisches Laden von PO-Daten
             if (value) {
               try {
-                const res = await apiClient.get(`/api/mcp/documents/purchase_order/${value}`)
+                const res = await apiClient.get<{ supplierId?: string }>(`/api/mcp/documents/purchase_order/${value}`)
                 const po = res.data
                 // Setze Lieferant automatisch
                 if (po.supplierId) {

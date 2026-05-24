@@ -132,9 +132,9 @@ function CampaignRecipientsList({ campaignId }: { campaignId: string }) {
   useEffect(() => {
     const loadRecipients = async () => {
       try {
-        const response = await apiClient.get(`/api/v1/crm/campaigns/${campaignId}/recipients`)
+        const response = await apiClient.get<any[] | { items?: any[] }>(`/api/v1/crm/campaigns/${campaignId}/recipients`)
         const data = response.data
-        setRecipients(Array.isArray(data) ? data : (data?.items ?? []))
+        setRecipients(Array.isArray(data) ? data : ((data as { items?: any[] }).items ?? []))
       } catch (error: any) {
         toast({ variant: 'destructive', title: 'Fehler beim Laden der Empfänger', description: error?.message })
       } finally {
@@ -182,10 +182,10 @@ function CampaignPerformanceTab({ campaignId }: { campaignId: string }) {
   useEffect(() => {
     const loadPerformance = async () => {
       try {
-        const response = await apiClient.get(`/api/v1/crm/campaigns/${campaignId}/analytics`)
+        const response = await apiClient.get<{ timeline?: any[] }>(`/api/v1/crm/campaigns/${campaignId}/analytics`)
         const perfData = response.data
         setPerformance(Array.isArray(perfData?.timeline) ? perfData.timeline : [])
-        const campaignResponse = await apiClient.get(`/api/v1/crm/campaigns/${campaignId}`)
+        const campaignResponse = await apiClient.get<any>(`/api/v1/crm/campaigns/${campaignId}`)
         setMetrics(campaignResponse.data)
       } catch (error: any) {
         toast({ variant: 'destructive', title: 'Fehler beim Laden der Performance', description: error?.message })
@@ -249,9 +249,9 @@ function CampaignEventsList({ campaignId }: { campaignId: string }) {
   useEffect(() => {
     const loadEvents = async () => {
       try {
-        const response = await apiClient.get(`/api/v1/crm/campaigns/${campaignId}/recipients`)
+        const response = await apiClient.get<any[] | { items?: any[] }>(`/api/v1/crm/campaigns/${campaignId}/recipients`)
         const evData = response.data
-        setEvents(Array.isArray(evData) ? evData : (evData?.items ?? []))
+        setEvents(Array.isArray(evData) ? evData : ((evData as { items?: any[] }).items ?? []))
       } catch (error: any) {
         toast({ variant: 'destructive', title: 'Fehler beim Laden der Events', description: error?.message })
       } finally {

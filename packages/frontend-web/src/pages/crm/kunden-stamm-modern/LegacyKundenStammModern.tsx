@@ -210,7 +210,7 @@ function LegacyKundenStammModern(): JSX.Element {
           return
         }
         try {
-          const res = await apiClient.get(`/api/v1/vies/validate/${encodeURIComponent(vatId)}`)
+          const res = await apiClient.get<{ valid: boolean; error?: string }>(`/api/v1/vies/validate/${encodeURIComponent(vatId)}`)
           const result = res.data
           toast({
             title: result.valid ? 'USt-ID gueltig' : 'USt-ID ungueltig',
