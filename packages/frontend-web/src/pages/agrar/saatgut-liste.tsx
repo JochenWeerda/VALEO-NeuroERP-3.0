@@ -9,19 +9,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { ListReport } from '@/components/patterns/ListReport'
 import { useToast } from '@/hooks/use-toast'
 import { CheckCircle, Edit, Eye, FileDown, Sprout, XCircle } from 'lucide-react'
-
-const apiClient = {
-  async getSaatgutList(params: any = {}) {
-    try {
-      const queryString = new URLSearchParams(params).toString()
-      const response = await fetch(`/api/v1/agrar/saatgut?${queryString}`)
-      if (!response.ok) throw new Error('Failed to fetch Saatgut list')
-      return response.json()
-    } catch {
-      return { items: [], total: 0 }
-    }
-  },
-}
+import { apiClient } from '@/lib/api-client'
 
 interface SaatgutItem {
   id: string
@@ -89,7 +77,7 @@ export default function SaatgutListePage(): JSX.Element {
 
   const { data: saatgutList, isLoading } = useQuery({
     queryKey: ['saatgut-list'],
-    queryFn: () => apiClient.getSaatgutList({ limit: 100 }),
+    queryFn: async () => { const r = await apiClient.get('/api/v1/agrar/saatgut?limit=100'); return r.data },
   })
 
   const columns = useMemo(

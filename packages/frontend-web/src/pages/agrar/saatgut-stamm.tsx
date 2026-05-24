@@ -20,35 +20,7 @@ import { Save, ArrowLeft, CheckCircle, XCircle, AlertTriangle, Pencil } from 'lu
 import { toast } from 'sonner';
 import { useTenant } from '@/hooks/useTenant';
 import { ModuleToolbar } from '@/components/navigation/ModuleToolbar';
-
-// API Client
-const apiClient = {
-  async getSaatgut(id: string) {
-    const response = await fetch(`/api/v1/agrar/saatgut/${id}`);
-    if (!response.ok) throw new Error('Failed to fetch Saatgut');
-    return response.json();
-  },
-
-  async createSaatgut(data: any) {
-    const response = await fetch('/api/v1/agrar/saatgut', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data),
-    });
-    if (!response.ok) throw new Error('Failed to create Saatgut');
-    return response.json();
-  },
-
-  async updateSaatgut(id: string, data: any) {
-    const response = await fetch(`/api/v1/agrar/saatgut/${id}`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data),
-    });
-    if (!response.ok) throw new Error('Failed to update Saatgut');
-    return response.json();
-  },
-};
+import { apiClient } from '@/lib/api-client';
 
 // Form Data Interface
 interface SaatgutFormData {
@@ -112,13 +84,13 @@ const SaatgutStammPage: React.FC = () => {
   // Queries
   const { data: saatgut, isLoading } = useQuery({
     queryKey: ['saatgut', id],
-    queryFn: () => apiClient.getSaatgut(id ?? ''),
+    queryFn: async () => { const r = await apiClient.get(`/api/v1/agrar/saatgut/${id}`); return r.data },
     enabled: isEditing && !!id,
   });
 
   // Mutations
   const createMutation = useMutation({
-    mutationFn: apiClient.createSaatgut,
+    mutationFn: async (data: any) => { const r = await apiClient.post('/api/v1/agrar/saatgut', data); return r.data },
     onSuccess: () => {
       toast.success('Saatgut erfolgreich erstellt');
       queryClient.invalidateQueries({ queryKey: ['saatgut'] });
@@ -133,7 +105,7 @@ const SaatgutStammPage: React.FC = () => {
   });
 
   const updateMutation = useMutation({
-    mutationFn: ({ id, data }: { id: string; data: any }) => apiClient.updateSaatgut(id, data),
+    mutationFn: async ({ id, data }: { id: string; data: any }) => { const r = await apiClient.put(`/api/v1/agrar/saatgut/${id}`, data); return r.data },
     onSuccess: () => {
       toast.success('Saatgut erfolgreich aktualisiert');
       queryClient.invalidateQueries({ queryKey: ['saatgut', id] });
