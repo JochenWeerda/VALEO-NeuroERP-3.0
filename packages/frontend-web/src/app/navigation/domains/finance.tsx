@@ -119,6 +119,15 @@ export const RAW_NAV_SECTIONS: RawNavItem[] = [
         mcp: { businessDomain: 'finance', scope: 'finance:read' },
       },
       {
+        id: 'fibu-stammdaten',
+        label: 'Zusatzstammdaten',
+        icon: Settings,
+        module: '@/pages/fibu/stammdaten',
+        preferredPath: 'fibu/stammdaten',
+        keywords: ['zahlungsformular', 'fizaf', 'zinsgruppe', 'leergutart', 'pfand', 'palette'],
+        mcp: { businessDomain: 'finance', scope: 'finance:read' },
+      },
+      {
         id: 'bilanz',
         label: 'Bilanz',
         icon: BarChart3,
