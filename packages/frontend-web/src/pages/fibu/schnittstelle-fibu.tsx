@@ -74,17 +74,10 @@ export default function SchnittstelleFibuPage(): JSX.Element {
       }
 
       if (download) {
-        // Datei-Download: fetch direkt, dann Blob speichern
-        const response = await fetch('/api/v1/finance/buchungsuebergabe-export', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', Accept: '*/*' },
-          body: JSON.stringify(body),
+        const response = await apiClient.post('/api/v1/finance/buchungsuebergabe-export', body, {
+          responseType: 'blob',
         })
-        if (!response.ok) {
-          const err = await response.json().catch(() => ({ detail: 'Fehler beim Export' }))
-          throw new Error(err.detail ?? 'Export fehlgeschlagen')
-        }
-        const blob = await response.blob()
+        const blob = response.data as Blob
         const url = URL.createObjectURL(blob)
         const a = document.createElement('a')
         const dateiname = `FIBU_Buchungsuebergabe_${von.replace(/-/g, '')}_${bis.replace(/-/g, '')}.ASC`

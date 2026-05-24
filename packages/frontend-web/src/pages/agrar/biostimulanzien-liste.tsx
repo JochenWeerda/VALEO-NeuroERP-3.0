@@ -13,32 +13,7 @@ import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/hooks/use-toast';
 import { CheckCircle, XCircle, Edit, Eye } from 'lucide-react';
-
-// API Client
-const apiClient = {
-  async getBiostimulanzienList(params: any = {}) {
-    try {
-      const queryString = new URLSearchParams(params).toString();
-      const response = await fetch(`/api/v1/agrar/biostimulanzien?${queryString}`);
-      if (!response.ok) throw new Error('Failed to fetch Biostimulanzien list');
-      return response.json();
-    } catch (_error) {
-      // API nicht erreichbar - leere Daten zurückgeben
-      return { items: [], total: 0 };
-    }
-  },
-
-  async getBiostimulanzienStats() {
-    try {
-      const response = await fetch('/api/v1/agrar/biostimulanzien/stats/overview');
-      if (!response.ok) throw new Error('Failed to fetch stats');
-      return response.json();
-    } catch (_error) {
-      // API nicht erreichbar - leere Stats zurückgeben
-      return { total_biostimulanzien: 0, by_typ: {}, stock_summary: { total_stock: 0 } };
-    }
-  },
-};
+import { apiClient } from '@/lib/api-client';
 
 interface BiostimulanzienItem {
   id: string;
@@ -186,7 +161,10 @@ const BiostimulanzienListePage: React.FC = () => {
   // Queries
   const { data: biostimulanzienList, isLoading } = useQuery({
     queryKey: ['biostimulanzien-list'],
-    queryFn: () => apiClient.getBiostimulanzienList({ limit: 100 }),
+    queryFn: async () => {
+      const r = await apiClient.get('/api/v1/agrar/biostimulanzien?limit=100')
+      return r.data
+    },
   });
 
   const columns = useMemo<ColumnDef<BiostimulanzienItem>[]>(

@@ -27,6 +27,7 @@ import {
   Shield,
   XCircle,
 } from 'lucide-react'
+import { apiClient } from '@/lib/api-client'
 
 const TYP_OPTIONS = [
   { value: 'all-types', label: 'Alle Typen' },
@@ -53,36 +54,6 @@ const SAFETY_OPTIONS = [
   { value: 'gefahrstoff', label: 'Gefahrstoff' },
 ]
 
-const apiClient = {
-  async getDuengerList(params: Record<string, string | number | undefined> = {}) {
-    try {
-      const queryString = new URLSearchParams(
-        Object.entries(params).reduce<Record<string, string>>((acc, [key, value]) => {
-          if (value !== undefined) {
-            acc[key] = String(value)
-          }
-          return acc
-        }, {}),
-      ).toString()
-      const response = await fetch(`/api/v1/agrar/duenger?${queryString}`)
-      if (!response.ok) return { items: [], total: 0 }
-      return response.json()
-    } catch {
-      return { items: [], total: 0 }
-    }
-  },
-
-  async getDuengerStats() {
-    try {
-      const response = await fetch('/api/v1/agrar/duenger/stats/overview')
-      if (!response.ok) return null
-      return response.json()
-    } catch {
-      return null
-    }
-  },
-}
-
 export default function DuengerListePage(): JSX.Element {
   const navigate = useNavigate()
   const [searchTerm, setSearchTerm] = useState('')
@@ -93,19 +64,23 @@ export default function DuengerListePage(): JSX.Element {
 
   const { data: duengerList, isLoading } = useQuery({
     queryKey: ['duenger-list', searchTerm, typFilter, herstellerFilter, kulturTypFilter, safetyFilter],
-    queryFn: () =>
-      apiClient.getDuengerList({
-        search: searchTerm || undefined,
-        typ: typFilter !== 'all-types' ? typFilter : undefined,
-        hersteller: herstellerFilter || undefined,
-        kultur_typ: kulturTypFilter !== 'all-kultur' ? kulturTypFilter : undefined,
-        limit: 100,
-      }),
+    queryFn: async () => {
+      const params = new URLSearchParams({ limit: '100' })
+      if (searchTerm) params.set('search', searchTerm)
+      if (typFilter !== 'all-types') params.set('typ', typFilter)
+      if (herstellerFilter) params.set('hersteller', herstellerFilter)
+      if (kulturTypFilter !== 'all-kultur') params.set('kultur_typ', kulturTypFilter)
+      const r = await apiClient.get(`/api/v1/agrar/duenger?${params.toString()}`)
+      return r.data
+    },
   })
 
   const { data: stats } = useQuery({
     queryKey: ['duenger-stats'],
-    queryFn: apiClient.getDuengerStats,
+    queryFn: async () => {
+      const r = await apiClient.get('/api/v1/agrar/duenger/stats/overview')
+      return r.data
+    },
   })
 
   const filteredData = useMemo(() => {

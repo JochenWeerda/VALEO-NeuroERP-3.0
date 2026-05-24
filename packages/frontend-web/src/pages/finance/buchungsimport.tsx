@@ -14,6 +14,7 @@ import { OperationalContextPanel } from '@/components/workflow/OperationalContex
 import { OperationalTimeline } from '@/components/workflow/OperationalTimeline'
 import { Upload, FileText, CheckCircle2, AlertCircle, ArrowRight, RotateCcw } from 'lucide-react'
 import { normalizeOperationalStatus } from '@/lib/operational-status'
+import { apiClient } from '@/lib/api-client'
 
 type ImportError = {
   row_number: number
@@ -40,19 +41,12 @@ function useImportCsv() {
       const form = new FormData()
       form.append('file', file)
       const params = new URLSearchParams({ period, dry_run: String(dry_run) })
-      const res = await fetch(`/api/v1/bulk-journal-import/csv?${params.toString()}`, {
-        method: 'POST',
-        body: form,
-        headers: {
-          // Don't set Content-Type — browser sets it with boundary for multipart
-          Accept: 'application/json',
-        },
-      })
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({ detail: 'Unbekannter Fehler' }))
-        throw new Error(err.detail ?? 'Import fehlgeschlagen')
-      }
-      return res.json() as Promise<ImportResult>
+      // Don't set Content-Type — axios sets it with boundary for multipart
+      const res = await apiClient.post<ImportResult>(
+        `/api/v1/bulk-journal-import/csv?${params.toString()}`,
+        form,
+      )
+      return res.data
     },
   })
 }

@@ -18,35 +18,7 @@ import { Save, ArrowLeft, CheckCircle, XCircle, AlertTriangle, Droplets, Shield 
 import { toast } from 'sonner';
 import { useTenant } from '@/hooks/useTenant';
 import { ModuleToolbar } from '@/components/navigation/ModuleToolbar';
-
-// API Client
-const apiClient = {
-  async getDuenger(id: string) {
-    const response = await fetch(`/api/v1/agrar/duenger/${id}`);
-    if (!response.ok) throw new Error('Failed to fetch Dünger');
-    return response.json();
-  },
-
-  async createDuenger(data: any) {
-    const response = await fetch('/api/v1/agrar/duenger', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data),
-    });
-    if (!response.ok) throw new Error('Failed to create Dünger');
-    return response.json();
-  },
-
-  async updateDuenger(id: string, data: any) {
-    const response = await fetch(`/api/v1/agrar/duenger/${id}`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data),
-    });
-    if (!response.ok) throw new Error('Failed to update Dünger');
-    return response.json();
-  },
-};
+import { apiClient } from '@/lib/api-client';
 
 // Form Data Interface
 interface DuengerFormData {
@@ -170,13 +142,13 @@ const DuengerStammPage: React.FC = () => {
   // Queries
   const { data: duenger, isLoading } = useQuery({
     queryKey: ['duenger', id],
-    queryFn: () => apiClient.getDuenger(id ?? ''),
+    queryFn: async () => { const r = await apiClient.get(`/api/v1/agrar/duenger/${id}`); return r.data },
     enabled: isEditing && !!id,
   });
 
   // Mutations
   const createMutation = useMutation({
-    mutationFn: apiClient.createDuenger,
+    mutationFn: async (data: any) => { const r = await apiClient.post('/api/v1/agrar/duenger', data); return r.data },
     onSuccess: () => {
       toast.success('Dünger erfolgreich erstellt');
       queryClient.invalidateQueries({ queryKey: ['duenger'] });
@@ -191,7 +163,7 @@ const DuengerStammPage: React.FC = () => {
   });
 
   const updateMutation = useMutation({
-    mutationFn: ({ id, data }: { id: string; data: any }) => apiClient.updateDuenger(id, data),
+    mutationFn: async ({ id, data }: { id: string; data: any }) => { const r = await apiClient.put(`/api/v1/agrar/duenger/${id}`, data); return r.data },
     onSuccess: () => {
       toast.success('Dünger erfolgreich aktualisiert');
       queryClient.invalidateQueries({ queryKey: ['duenger', id] });
