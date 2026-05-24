@@ -295,7 +295,7 @@ export default function CreditNoteEditorPage(): JSX.Element {
     toast({ variant: 'destructive', title: t('crud.messages.validationError'), description: `${Object.keys(errors).length} Feld(er) muessen korrigiert werden.` })
   }
 
-  const { handleAction } = useMaskActions(async (action: string, formData: Record<string, unknown>) => {
+  const { handleAction, loadingActionKey } = useMaskActions(async (action: string, formData: Record<string, unknown>) => {
     if (action === 'calculate') {
       toast({ title: 'Neuberechnung', description: t('crud.messages.recalculateFunction', { defaultValue: 'Beträge werden neu berechnet.' }) })
     } else if (action === 'preview') {
@@ -484,6 +484,7 @@ export default function CreditNoteEditorPage(): JSX.Element {
         onSave={handleSave}
         onCancel={handleCancel}
         onAction={handleAction}
+        loadingActionKey={loadingActionKey}
         isLoading={loading}
       />
     </div>

@@ -303,6 +303,7 @@ export default function CampaignDetailPage(): JSX.Element {
   const { id } = useParams<{ id: string }>()
   const { tenantId } = useTenant()
   const [loading, setLoading] = useState(false)
+  const [pendingAction, setPendingAction] = useState<string | null>(null)
   const entityType = 'campaign'
   const entityTypeLabel = getEntityTypeLabel(t, entityType, 'Kampagne')
   const campaignConfig = createCampaignConfig(t, entityTypeLabel)
@@ -336,36 +337,45 @@ export default function CampaignDetailPage(): JSX.Element {
   }
 
   const handleStart = async () => {
-    if (!id) return
+    if (!id || pendingAction !== null) return
+    setPendingAction('start')
     try {
       await apiClient.post(`/campaigns/${id}/start`)
       toast({ title: t('crud.messages.campaignStarted') })
       window.location.reload()
     } catch {
       toast({ variant: 'destructive', title: t('crud.messages.campaignStartError') })
+    } finally {
+      setPendingAction(null)
     }
   }
 
   const handlePause = async () => {
-    if (!id) return
+    if (!id || pendingAction !== null) return
+    setPendingAction('pause')
     try {
       await apiClient.post(`/campaigns/${id}/pause`)
       toast({ title: t('crud.messages.campaignPaused') })
       window.location.reload()
     } catch {
       toast({ variant: 'destructive', title: t('crud.messages.campaignPauseError') })
+    } finally {
+      setPendingAction(null)
     }
   }
 
   const handleCancelCampaign = async () => {
-    if (!id) return
+    if (!id || pendingAction !== null) return
     if (confirm(t('crud.dialogs.cancel.descriptionGeneric', { entityType: entityTypeLabel }))) {
+      setPendingAction('cancel')
       try {
         await apiClient.post(`/campaigns/${id}/cancel`)
         toast({ title: t('crud.messages.campaignCancelled') })
         window.location.reload()
       } catch {
         toast({ variant: 'destructive', title: t('crud.messages.campaignCancelError') })
+      } finally {
+        setPendingAction(null)
       }
     }
   }
@@ -383,9 +393,9 @@ export default function CampaignDetailPage(): JSX.Element {
         </div>
         {!isNew && id && data?.status && (
           <div className="flex gap-2">
-            {(data.status === 'draft' || data.status === 'scheduled' || data.status === 'paused') && <Button onClick={handleStart} variant="default"><Play className="mr-2 h-4 w-4" />{t('crud.actions.start')}</Button>}
-            {data.status === 'running' && <Button onClick={handlePause} variant="secondary"><Pause className="mr-2 h-4 w-4" />{t('crud.actions.pause')}</Button>}
-            {data.status !== 'completed' && data.status !== 'cancelled' && <Button onClick={handleCancelCampaign} variant="destructive"><X className="mr-2 h-4 w-4" />{t('crud.actions.cancel')}</Button>}
+            {(data.status === 'draft' || data.status === 'scheduled' || data.status === 'paused') && <Button onClick={handleStart} variant="default" disabled={pendingAction !== null}><Play className="mr-2 h-4 w-4" />{t('crud.actions.start')}</Button>}
+            {data.status === 'running' && <Button onClick={handlePause} variant="secondary" disabled={pendingAction !== null}><Pause className="mr-2 h-4 w-4" />{t('crud.actions.pause')}</Button>}
+            {data.status !== 'completed' && data.status !== 'cancelled' && <Button onClick={handleCancelCampaign} variant="destructive" disabled={pendingAction !== null}><X className="mr-2 h-4 w-4" />{t('crud.actions.cancel')}</Button>}
           </div>
         )}
       </div>

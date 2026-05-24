@@ -487,7 +487,7 @@ export default function OffenePostenPage(): JSX.Element {
                     >
                       Bearbeiten
                     </Button>
-                    <Button size="sm" variant="outline" onClick={() => deleteMutation.mutate(posten.id)}>Loeschen</Button>
+                    <Button size="sm" variant="outline" onClick={() => deleteMutation.mutate(posten.id)} disabled={deleteMutation.isPending}>Loeschen</Button>
                   </div>
                 ))}
               </div>

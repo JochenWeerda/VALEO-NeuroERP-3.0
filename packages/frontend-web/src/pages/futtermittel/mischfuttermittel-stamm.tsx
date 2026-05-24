@@ -156,7 +156,7 @@ export default function MischfuttermittelStammPage(): JSX.Element {
     })
   }
 
-  const { handleAction } = useMaskActions(async (action: string, formData: any) => {
+  const { handleAction, loadingActionKey } = useMaskActions(async (action: string, formData: any) => {
     if (action === 'save') {
       const errors = validate(formData)
       if (Object.keys(errors).length > 0) {
@@ -266,6 +266,7 @@ export default function MischfuttermittelStammPage(): JSX.Element {
       onSave={handleSave}
       onCancel={handleCancel}
       isLoading={loading}
+      loadingActionKey={loadingActionKey}
     />
   )
 }
