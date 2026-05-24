@@ -53,7 +53,7 @@ export default function ReportsDashboard(): JSX.Element {
 
   const handleExport = async (format: 'json' | 'csv' = 'json') => {
     try {
-      const response = await fetch(`/api/reports/export/${selectedReport}?format=${format}&start_date=${startDate}&end_date=${endDate}`)
+      const response = await fetch(`/api/v1/reports/export/${selectedReport}?format=${format}&start_date=${startDate}&end_date=${endDate}`)
       if (format === 'csv') {
         const blob = await response.blob()
         const url = window.URL.createObjectURL(blob)

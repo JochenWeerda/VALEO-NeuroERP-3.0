@@ -201,7 +201,7 @@ export default function CampaignsPage(): JSX.Element {
       onDelete={async (item) => {
         if (confirm(t('crud.dialogs.delete.descriptionGeneric', { entityType: entityTypeLabel }))) {
           try {
-            await apiClient.delete(`/api/v1/marketing/campaigns/${item.id}`)
+            await apiClient.delete(`/api/v1/marketing/kampagnen/${item.id}`)
             toast({
               title: getSuccessMessage(t, 'delete', entityType),
             })
