@@ -845,6 +845,10 @@
       "path": "crm/lieferanten/:id"
     },
     {
+      "module": "@/pages/crm/vertreterprovisionen",
+      "path": "crm/vertreterprovisionen"
+    },
+    {
       "module": "@/pages/dashboard/customizable",
       "path": "dashboard/customizable"
     },
@@ -1523,6 +1527,10 @@
     {
       "module": "@/pages/preise/konditionen",
       "path": "preise/konditionen"
+    },
+    {
+      "module": "@/pages/preise/zu-abschlaggruppen",
+      "path": "preise/zu-abschlaggruppen"
     },
     {
       "module": "@/pages/pricing",

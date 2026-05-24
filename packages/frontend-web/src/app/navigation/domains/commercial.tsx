@@ -215,6 +215,15 @@ export const RAW_NAV_SECTIONS: RawNavItem[] = [
         keywords: ['konditionen', 'rabatt', 'preis', 'staffel'],
         mcp: { businessDomain: 'agrar', scope: 'agrar:read' },
       },
+      {
+        id: 'zu-abschlaggruppen',
+        label: 'Zu-/Abschlaggruppen',
+        icon: ArrowUpDown,
+        module: '@/pages/preise/zu-abschlaggruppen',
+        preferredPath: 'preise/zu-abschlaggruppen',
+        keywords: ['zuschlag', 'abschlag', 'gruppen', 'klassen', 'konditionen', 'zagr', 'zakl'],
+        mcp: { businessDomain: 'agrar', scope: 'agrar:read' },
+      },
     ],
   },
   {
@@ -353,6 +362,23 @@ export const RAW_NAV_SECTIONS: RawNavItem[] = [
     icon: UserCog,
     mcp: { businessDomain: 'crm', scope: 'crm:read' },
     children: CRM_CHILDREN,
+  },
+  {
+    id: 'vertreter',
+    label: 'Vertreter & Provisionen',
+    icon: Users2,
+    mcp: { businessDomain: 'crm', scope: 'crm:read' },
+    children: [
+      {
+        id: 'vertreterprovisionen',
+        label: 'Provisionsgruppen & -staffeln',
+        icon: Euro,
+        module: '@/pages/crm/vertreterprovisionen',
+        preferredPath: 'crm/vertreterprovisionen',
+        keywords: ['provisionen', 'vertreter', 'außendienst', 'staffel', 'provisionsgruppe'],
+        mcp: { businessDomain: 'crm', scope: 'crm:read' },
+      },
+    ],
   },
   {
     id: 'einkauf',

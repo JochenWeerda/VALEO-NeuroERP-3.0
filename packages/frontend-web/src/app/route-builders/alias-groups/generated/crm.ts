@@ -156,5 +156,9 @@ export const entries: AliasGroupRouteEntry[] = [
   {
     "module": "@/pages/crm/lieferanten-stamm",
     "path": "lieferanten/:id"
+  },
+  {
+    "module": "@/pages/crm/vertreterprovisionen",
+    "path": "vertreterprovisionen"
   }
 ]
