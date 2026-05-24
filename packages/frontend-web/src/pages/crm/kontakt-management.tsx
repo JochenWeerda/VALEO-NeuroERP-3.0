@@ -237,10 +237,8 @@ export default function KontaktManagementPage(): JSX.Element {
     setLoading(true)
     try {
       const response = await apiClient.get('/api/v1/crm/kontakte')
-      if (response.success) {
-        setData((response.data as any).data || [])
-        setTotal((response.data as any).total || 0)
-      }
+      setData((response.data as any).data || (response.data as any).items || [])
+      setTotal((response.data as any).total || 0)
     } catch (error: any) {
       toast({ variant: 'destructive', title: 'Fehler beim Laden der Kontakte', description: error?.message })
     } finally {

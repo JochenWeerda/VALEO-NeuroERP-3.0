@@ -240,9 +240,7 @@ function GDPRRequestHistoryTab({ requestId }: { requestId: string }) {
     const loadHistory = async () => {
       try {
         const response = await httpClient.get(`/api/v1/gdpr/requests/${requestId}/history`)
-        if (response.success) {
-          setHistory(response.data || [])
-        }
+        setHistory(response.data || [])
       } catch (error: any) {
         toast({ variant: 'destructive', title: 'Fehler beim Laden der History', description: error?.message })
       } finally {
