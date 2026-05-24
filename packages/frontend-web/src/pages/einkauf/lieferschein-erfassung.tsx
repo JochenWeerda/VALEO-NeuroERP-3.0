@@ -164,7 +164,6 @@ function LieferantSuchDialog({
   const [search, setSearch] = useState('')
   const [results, setResults] = useState<Lieferant[]>([])
   const [loading, setLoading] = useState(false)
-  const [isSaving, setIsSaving] = useState(false)
 
   const handleSearch = async (): Promise<void> => {
     if (!search.trim()) return
@@ -337,6 +336,7 @@ export default function EinkaufLieferscheinErfassungPage(): JSX.Element {
   const [bestellungenList, setBestellungenList] = useState<Array<{ id: string; bestellnummer: string; bestelldatum: string | null; status: string; positionen_anz: number }>>([])
   const [selectedBestellungId, setSelectedBestellungId] = useState<string | null>(null)
   const [loadingBestellungen, setLoadingBestellungen] = useState(false)
+  const [isSaving, setIsSaving] = useState(false)
 
   // Bediener aus Session aktualisieren
   useEffect(() => {

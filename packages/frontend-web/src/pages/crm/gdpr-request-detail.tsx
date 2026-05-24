@@ -3,7 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { z } from 'zod'
 import { ObjectPage } from '@/components/mask-builder'
-import { useMaskData } from '@/components/mask-builder/hooks'
+import { useMaskData, useMaskActions } from '@/components/mask-builder/hooks'
 import { MaskConfig } from '@/components/mask-builder/types'
 import { getEntityTypeLabel, getDetailTitle, getSuccessMessage, getErrorMessage, getStatusLabel } from '@/features/crud/utils/i18n-helpers'
 import { createApiClient } from '@/components/mask-builder/utils/api'
@@ -358,42 +358,32 @@ export default function GDPRRequestDetailPage(): JSX.Element {
     }
   }
 
-  const handleAction = async (action: string) => {
+  const { handleAction, loadingActionKey } = useMaskActions(async (action: string) => {
     if (!id) return
 
     if (action === 'verify') {
+      const method = prompt('Verifizierungsmethode wählen (email, id_card, manual, other):', 'manual') || 'manual'
       try {
-        const method = prompt('Verifizierungsmethode wählen (email, id_card, manual, other):', 'manual') || 'manual'
         await apiClient.post(`/requests/${id}/verify`, {
           verification_method: method,
           verification_token: null
         })
-        toast({
-          title: t('crud.messages.verificationSuccess'),
-        })
-        window.location.reload() // Reload to show updated status
+        toast({ title: t('crud.messages.verificationSuccess') })
+        window.location.reload()
       } catch (error) {
-        toast({
-          variant: 'destructive',
-          title: t('crud.messages.verificationError')
-        })
+        toast({ variant: 'destructive', title: t('crud.messages.verificationError') })
       }
     } else if (action === 'generateExport') {
+      const format = prompt('Export-Format wählen (json, csv, pdf):', 'json') || 'json'
       try {
-        const format = prompt('Export-Format wählen (json, csv, pdf):', 'json') || 'json'
         await apiClient.post(`/requests/${id}/export`, {
           format: format,
           data_areas: ['all']
         })
-        toast({
-          title: t('crud.messages.exportGenerated'),
-        })
+        toast({ title: t('crud.messages.exportGenerated') })
         window.location.reload()
       } catch (error) {
-        toast({
-          variant: 'destructive',
-          title: t('crud.messages.exportError')
-        })
+        toast({ variant: 'destructive', title: t('crud.messages.exportError') })
       }
     } else if (action === 'deleteData') {
       if (confirm(t('crud.gdpr.confirmDeleteData'))) {
@@ -402,33 +392,21 @@ export default function GDPRRequestDetailPage(): JSX.Element {
             reason: t('crud.gdpr.gdprRequest'),
             anonymize_only: true
           })
-          toast({
-            title: t('crud.messages.dataDeleted'),
-          })
+          toast({ title: t('crud.messages.dataDeleted') })
           window.location.reload()
         } catch (error) {
-          toast({
-            variant: 'destructive',
-            title: t('crud.messages.deleteError')
-          })
+          toast({ variant: 'destructive', title: t('crud.messages.deleteError') })
         }
       }
     } else if (action === 'reject') {
       const reason = prompt(t('crud.gdpr.enterRejectionReason'))
       if (reason) {
         try {
-          await apiClient.post(`/requests/${id}/reject`, {
-            rejection_reason: reason
-          })
-          toast({
-            title: t('crud.messages.requestRejected'),
-          })
+          await apiClient.post(`/requests/${id}/reject`, { rejection_reason: reason })
+          toast({ title: t('crud.messages.requestRejected') })
           window.location.reload()
         } catch (error) {
-          toast({
-            variant: 'destructive',
-            title: t('crud.messages.rejectError')
-          })
+          toast({ variant: 'destructive', title: t('crud.messages.rejectError') })
         }
       }
     } else if (action === 'downloadExport') {
@@ -442,20 +420,15 @@ export default function GDPRRequestDetailPage(): JSX.Element {
           link.download = `gdpr-export-${id}.${data?.response_file_format || 'json'}`
           link.click()
           window.URL.revokeObjectURL(url)
-          toast({
-            title: t('crud.messages.downloadStarted'),
-          })
+          toast({ title: t('crud.messages.downloadStarted') })
         } else {
           throw new Error('Download failed')
         }
       } catch (error) {
-        toast({
-          variant: 'destructive',
-          title: t('crud.messages.downloadError')
-        })
+        toast({ variant: 'destructive', title: t('crud.messages.downloadError') })
       }
     }
-  }
+  })
 
   if (dataLoading && !isNew) {
     return (
@@ -494,6 +467,7 @@ export default function GDPRRequestDetailPage(): JSX.Element {
             onCancel={handleCancel}
             onAction={handleAction}
             isLoading={loading || dataLoading}
+            loadingActionKey={loadingActionKey}
           />
         </div>
 
@@ -526,6 +500,7 @@ export default function GDPRRequestDetailPage(): JSX.Element {
                     </div>
                     <Button
                       onClick={() => void handleAction('downloadExport')}
+                      disabled={loadingActionKey !== null}
                       className="w-full"
                     >
                       <Download className="h-4 w-4 mr-2" />

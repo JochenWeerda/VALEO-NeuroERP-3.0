@@ -210,6 +210,7 @@ export default function AnfrageErfassungPage(): JSX.Element {
   const [showArticleDialog, setShowArticleDialog] = useState(false)
   const [showAttachmentDialog, setShowAttachmentDialog] = useState(false)
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
+  const [loading, setLoading] = useState(false)
 
   useEffect(() => {
     if (user) setState((p) => ({ ...p, bediener: getBediener() }))
