@@ -387,6 +387,15 @@ export const RAW_NAV_SECTIONS: RawNavItem[] = [
         keywords: ['provisionen', 'vertreter', 'außendienst', 'staffel', 'provisionsgruppe'],
         mcp: { businessDomain: 'crm', scope: 'crm:read' },
       },
+      {
+        id: 'vertreterstamm',
+        label: 'Vertreterstamm [VERT/VGRP]',
+        icon: UserCog,
+        module: '@/pages/crm/vertreterstamm',
+        preferredPath: 'crm/vertreterstamm',
+        keywords: ['vertreter', 'außendienst', 'vertretergruppe', 'vertreterstamm'],
+        mcp: { businessDomain: 'crm', scope: 'crm:read' },
+      },
     ],
   },
   {
