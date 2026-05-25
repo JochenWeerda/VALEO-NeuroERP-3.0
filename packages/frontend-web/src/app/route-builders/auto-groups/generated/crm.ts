@@ -150,4 +150,5 @@ export const entries: AutoGroupRouteEntry[] = [
   { "module": "@/pages/crm/lead-detail/leadmaskdetailpage", "path": "lead-detail/leadmaskdetailpage" },
   { "module": "@/pages/crm/lead-detail/legacyleaddetailpage", "path": "lead-detail/legacyleaddetailpage" },
   { "module": "@/pages/crm/vertreterprovisionen", "path": "vertreterprovisionen" },
+  { "module": "@/pages/crm/vertreterstamm", "path": "vertreterstamm" },
 ]

@@ -4,5 +4,9 @@ export const entries: AliasGroupRouteEntry[] = [
   {
     "module": "@/pages/stammdaten/betriebsstaetten",
     "path": "betriebsstaetten"
+  },
+  {
+    "module": "@/pages/stammdaten/hausbanken",
+    "path": "hausbanken"
   }
 ]

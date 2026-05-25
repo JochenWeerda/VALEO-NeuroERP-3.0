@@ -1,0 +1,47 @@
+id: FACHLICHE-VERTIEFUNG-UX-W15-001
+title: Wave 15 Stammdaten-Masken Vertreterstamm und Hausbankenstamm
+owner: Claude Sonnet 4.6
+status: in arbeit
+claimed_at: 2026-05-25
+depends_on:
+  - FACHLICHE-VERTIEFUNG-UX-W14-001
+goal: >
+  Produktive Wave-15-Stammdaten-Masken fuer Vertreterstamm [VERT/VGRP] und
+  Hausbankenstamm [BNKH] gegen die bestehenden Backend-Vertraege.
+  Vertreterstamm ist die natuerliche Ergaenzung zu Wave-12-Vertreterprovisionen.
+  Hausbankenstamm schliesst die eigenen Bankverbindungen des Mandanten fachlich ab.
+scope:
+  - Vertretergruppen [VGRP] und Vertreter [VERT] an /api/v1/crm/vertreter
+  - Hausbankenstamm [BNKH] an /api/v1/stammdaten/hausbanken
+  - Navigation commercial.tsx und finance.tsx
+  - Route-Aliases und Auto-Groups fuer crm und stammdaten
+  - Playwright-Gates Wave 15
+file_ownership:
+  - docs/agent-ops/slices/FACHLICHE-VERTIEFUNG-UX-W15-001.yaml
+  - packages/frontend-web/src/lib/api/vertreterstamm.ts
+  - packages/frontend-web/src/lib/api/hausbanken.ts
+  - packages/frontend-web/src/pages/crm/vertreterstamm.tsx
+  - packages/frontend-web/src/pages/stammdaten/hausbanken.tsx
+  - packages/frontend-web/src/app/navigation/domains/commercial.tsx
+  - packages/frontend-web/src/app/navigation/domains/finance.tsx
+  - packages/frontend-web/src/app/route-builders/alias-groups/generated/crm.ts
+  - packages/frontend-web/src/app/route-builders/auto-groups/generated/crm.ts
+  - packages/frontend-web/src/app/route-builders/alias-groups/generated/stammdaten.ts
+  - packages/frontend-web/src/app/route-builders/auto-groups/generated/stammdaten.ts
+  - packages/frontend-web/tests/e2e/fachliche-vertiefung-vertreterstamm.spec.ts
+  - packages/frontend-web/tests/e2e/fachliche-vertiefung-hausbanken.spec.ts
+acceptance_criteria:
+  - Vertreterstamm unter /crm/vertreterstamm mit 2 Tabs VGRP/VERT bedienbar.
+  - Vertretergruppen anlegen und deaktivieren.
+  - Vertreter anlegen, bearbeiten (Edit-Dialog) und deaktivieren.
+  - Hausbankenstamm unter /stammdaten/hausbanken mit Liste, Anlegen-Formular und Edit-Dialog.
+  - IBAN-Feld mit Pflichtvalidierung; eRechnung- und Standard-Flags korrekt angezeigt.
+  - Loading-Skeletons, Leerzustaende, Toast-Feedback konsistent.
+  - A11y-konform: aria-label und htmlFor vollstaendig.
+  - Playwright-Gates Wave 15 gruen; Typecheck gruen.
+checks:
+  - pnpm --filter @valero-neuroerp/frontend-web type-check
+  - pnpm --filter @valero-neuroerp/frontend-web exec playwright test tests/e2e/fachliche-vertiefung-vertreterstamm.spec.ts --project=chromium
+  - pnpm --filter @valero-neuroerp/frontend-web exec playwright test tests/e2e/fachliche-vertiefung-hausbanken.spec.ts --project=chromium
+  - python scripts/agent_workboard_supervisor.py validate
+  - git diff --check

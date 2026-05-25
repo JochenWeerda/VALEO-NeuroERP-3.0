@@ -128,6 +128,15 @@ export const RAW_NAV_SECTIONS: RawNavItem[] = [
         mcp: { businessDomain: 'finance', scope: 'finance:read' },
       },
       {
+        id: 'hausbankenstamm',
+        label: 'Hausbankenstamm [BNKH]',
+        icon: Building2,
+        module: '@/pages/stammdaten/hausbanken',
+        preferredPath: 'stammdaten/hausbanken',
+        keywords: ['hausbank', 'bnkh', 'iban', 'bic', 'sepa', 'erechnung', 'bankverbindung'],
+        mcp: { businessDomain: 'finance', scope: 'finance:read' },
+      },
+      {
         id: 'bilanz',
         label: 'Bilanz',
         icon: BarChart3,
