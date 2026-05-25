@@ -1,8 +1,9 @@
 id: FACHLICHE-VERTIEFUNG-UX-W15-001
 title: Wave 15 Stammdaten-Masken Vertreterstamm und Hausbankenstamm
 owner: Claude Sonnet 4.6
-status: in arbeit
+status: abgeschlossen
 claimed_at: 2026-05-25
+completed_at: 2026-05-25
 depends_on:
   - FACHLICHE-VERTIEFUNG-UX-W14-001
 goal: >
@@ -45,3 +46,13 @@ checks:
   - pnpm --filter @valero-neuroerp/frontend-web exec playwright test tests/e2e/fachliche-vertiefung-hausbanken.spec.ts --project=chromium
   - python scripts/agent_workboard_supervisor.py validate
   - git diff --check
+done:
+  - vertreterstamm.ts Hooks fuer Vertretergruppen (GET/POST/DELETE) und Vertreter (GET/POST/PUT/DELETE).
+  - hausbanken.ts Hooks fuer Hausbankenstamm (GET/POST/PUT/DELETE).
+  - vertreterstamm.tsx Tab-Maske VGRP/VERT mit Anlegen, Edit-Dialog und Deaktivieren.
+  - hausbanken.tsx Liste mit IBAN/BIC/eRechnung/SEPA/Standard-Badges, Anlegen-Formular, Edit-Dialog.
+  - Navigation commercial.tsx Vertreterstamm in Vertreter-Provisionen-Sektion.
+  - Navigation finance.tsx Hausbankenstamm in FIBU-Stammdaten-Sektion.
+  - Route-Aliases und Auto-Groups crm + stammdaten konsistent erweitert.
+  - E2E-Gates Wave 15 gruen; TypeScript-Check gruen; Workboard validate gruen.
+next_step: Wave 16 UX oder weiterer Stammdaten-Slice bei Bedarf.
