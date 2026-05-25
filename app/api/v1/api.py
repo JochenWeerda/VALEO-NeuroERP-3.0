@@ -91,6 +91,8 @@ from app.api.v1.endpoints import (
     messages,
     channel_work_surfaces,
     dms_images,
+    dms_inbox,
+    admin_dms,
     sales_shipping_ext,
     master_data,
     charges,
@@ -1090,6 +1092,17 @@ api_router.include_router(
 )
 
 api_router.include_router(
+    dms_inbox.router,
+    prefix="/dms",
+    tags=["dms"]
+)
+
+api_router.include_router(
+    admin_dms.router,
+    tags=["admin", "dms"]
+)
+
+api_router.include_router(
     sales_shipping_ext.router,
     prefix="/sales-shipping",
     tags=["sales", "shipping"]
@@ -1701,3 +1714,11 @@ api_router.include_router(ki_usability.router, prefix="/ki", tags=["ki", "usabil
 api_router.include_router(pos_payments_promotions.router, tags=["pos", "payments", "promotions"])
 api_router.include_router(system_metrics.router, prefix="/system", tags=["system", "metrics", "agents"])
 api_router.include_router(websocket.router, tags=["websocket", "realtime"])
+
+# Agribusiness — Farmer master data
+from app.api.v1.endpoints import agribusiness  # noqa: E402
+api_router.include_router(
+    agribusiness.router,
+    prefix="/agribusiness",
+    tags=["agribusiness", "farmers"],
+)
