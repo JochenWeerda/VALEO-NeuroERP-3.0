@@ -1516,12 +1516,16 @@ api_router.include_router(
 
 # GDPR (Right-to-Access, Right-to-Delete, Data-Portability)
 from app.api.v1.endpoints import gdpr
+from app.api.v1.endpoints import gdpr_requests
 
 api_router.include_router(
     gdpr.router,
     prefix="/gdpr",
     tags=["gdpr", "compliance"],
 )
+
+# GDPR Data-Subject Requests (create/verify/export/delete/reject/download)
+api_router.include_router(gdpr_requests.router)
 
 # ROHWARE-SCHEMA-001 — Abrechnungsschema-Katalog
 api_router.include_router(
