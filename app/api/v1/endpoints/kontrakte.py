@@ -8,7 +8,7 @@ from typing import Any, Literal, Optional
 from app.services.position_guard_service import PositionGuardService
 
 from fastapi import APIRouter, Body, Depends, HTTPException, Query
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 from sqlalchemy import func, text as _sql_text
 from sqlalchemy.orm import Session
 
@@ -17,6 +17,7 @@ from app.core.database import get_db
 from app.core.tenant import get_tenant_id
 from app.core.uuid7 import uuid7
 from app.domains.operations.models import KonContract, KonContractLine, KonContractMovement
+from app.infrastructure.models.l3c_models import ContractAmendment, AmendmentTemplate
 from app.services.kontrakte_adapters import ArticleLookupAdapter, PartyLookupAdapter
 from app.services.kontrakte_service import (
     KontraktAuditService,
@@ -947,6 +948,238 @@ async def list_kontrakt_audit(
             for line_item in logs
         ]
     }
+
+
+# ===========================================================================
+# AMENDMENTS — Vertragsänderungen & Vorlagen
+# NOTE: /amendment-templates MUST be defined BEFORE /{contract_id}/amendments
+#       to avoid FastAPI treating "amendment-templates" as a path param.
+# ===========================================================================
+
+class AmendmentCreate(BaseModel):
+    type: str
+    reason: str
+    changes: dict = {}
+    created_by: str = "system"
+
+
+class AmendmentResponse(BaseModel):
+    id: str
+    contract_id: str
+    type: str
+    reason: str
+    status: str
+    changes: dict
+    tenant_id: str
+    created_by: Optional[str]
+    created_at: datetime
+    model_config = ConfigDict(from_attributes=True)
+
+
+class AmendmentTemplateResponse(BaseModel):
+    id: str
+    code: str
+    name: str
+    description: Optional[str]
+    body_markdown: Optional[str]
+    sections_schema: Optional[dict]
+    is_active: bool
+    created_at: datetime
+    model_config = ConfigDict(from_attributes=True)
+
+
+class AmendmentStatusUpdate(BaseModel):
+    status: Literal["approved", "rejected"]
+
+
+@router.get("/amendment-templates")
+async def list_amendment_templates(
+    activeOnly: bool = Query(True),
+    db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
+    user: User = Depends(get_current_user),
+):
+    """Listet Vorlagen für Vertragsänderungen."""
+    _require_roles(
+        user,
+        KontraktSecurityService.ROLE_LESEN,
+        KontraktSecurityService.ROLE_BEARBEITEN,
+        KontraktSecurityService.ROLE_ADMIN,
+    )
+    q = db.query(AmendmentTemplate)
+    if activeOnly:
+        q = q.filter(AmendmentTemplate.is_active.is_(True))
+    templates = q.order_by(AmendmentTemplate.name.asc()).all()
+    return {
+        "items": [
+            AmendmentTemplateResponse(
+                id=t.id,
+                code=t.code,
+                name=t.name,
+                description=t.description,
+                body_markdown=t.body_markdown,
+                sections_schema=t.sections_schema,
+                is_active=t.is_active,
+                created_at=t.created_at,
+            ).model_dump()
+            for t in templates
+        ]
+    }
+
+
+@router.get("/{contract_id}/amendments")
+async def list_amendments(
+    contract_id: str,
+    db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
+    user: User = Depends(get_current_user),
+):
+    """Listet alle Änderungen (Amendments) zu einem Kontrakt."""
+    _require_roles(
+        user,
+        KontraktSecurityService.ROLE_LESEN,
+        KontraktSecurityService.ROLE_BEARBEITEN,
+        KontraktSecurityService.ROLE_ADMIN,
+    )
+    contract = (
+        db.query(KonContract)
+        .filter(KonContract.tenant_id == tenant_id, KonContract.contract_id == contract_id)
+        .first()
+    )
+    if not contract:
+        raise HTTPException(status_code=404, detail="Contract not found")
+    amendments = (
+        db.query(ContractAmendment)
+        .filter(
+            ContractAmendment.tenant_id == tenant_id,
+            ContractAmendment.contract_id == contract_id,
+        )
+        .order_by(ContractAmendment.created_at.desc())
+        .all()
+    )
+    return {
+        "items": [
+            AmendmentResponse(
+                id=a.id,
+                contract_id=a.contract_id,
+                type=a.type,
+                reason=a.reason,
+                status=a.status,
+                changes=a.changes or {},
+                tenant_id=a.tenant_id,
+                created_by=a.created_by,
+                created_at=a.created_at,
+            ).model_dump()
+            for a in amendments
+        ]
+    }
+
+
+@router.post("/{contract_id}/amendments", status_code=201)
+async def create_amendment(
+    contract_id: str,
+    payload: AmendmentCreate,
+    db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
+    user: User = Depends(get_current_user),
+):
+    """Legt eine neue Vertragsänderung (Amendment) an."""
+    _require_roles(user, KontraktSecurityService.ROLE_BEARBEITEN, KontraktSecurityService.ROLE_ADMIN)
+    contract = (
+        db.query(KonContract)
+        .filter(KonContract.tenant_id == tenant_id, KonContract.contract_id == contract_id)
+        .first()
+    )
+    if not contract:
+        raise HTTPException(status_code=404, detail="Contract not found")
+
+    amendment = ContractAmendment(
+        id=uuid7(),
+        contract_id=contract_id,
+        type=payload.type,
+        reason=payload.reason,
+        status="pending",
+        changes=payload.changes,
+        tenant_id=tenant_id,
+        created_by=user.get("sub") or payload.created_by,
+    )
+    db.add(amendment)
+    db.flush()
+
+    KontraktAuditService(db).log_change(
+        tenant_id=tenant_id,
+        entity_type="contract_amendment",
+        entity_id=contract_id,
+        field_name="type",
+        action="CREATE",
+        changed_by=user.get("sub"),
+        old_value=None,
+        new_value=payload.type,
+    )
+    db.commit()
+    db.refresh(amendment)
+    return AmendmentResponse(
+        id=amendment.id,
+        contract_id=amendment.contract_id,
+        type=amendment.type,
+        reason=amendment.reason,
+        status=amendment.status,
+        changes=amendment.changes or {},
+        tenant_id=amendment.tenant_id,
+        created_by=amendment.created_by,
+        created_at=amendment.created_at,
+    ).model_dump()
+
+
+@router.patch("/{contract_id}/amendments/{amendment_id}")
+async def update_amendment_status(
+    contract_id: str,
+    amendment_id: str,
+    payload: AmendmentStatusUpdate,
+    db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
+    user: User = Depends(get_current_user),
+):
+    """Aktualisiert den Status eines Amendments (pending → approved / rejected)."""
+    _require_roles(user, KontraktSecurityService.ROLE_BEARBEITEN, KontraktSecurityService.ROLE_ADMIN)
+    amendment = (
+        db.query(ContractAmendment)
+        .filter(
+            ContractAmendment.tenant_id == tenant_id,
+            ContractAmendment.contract_id == contract_id,
+            ContractAmendment.id == amendment_id,
+        )
+        .first()
+    )
+    if not amendment:
+        raise HTTPException(status_code=404, detail="Amendment not found")
+
+    old_status = amendment.status
+    amendment.status = payload.status
+
+    KontraktAuditService(db).log_change(
+        tenant_id=tenant_id,
+        entity_type="contract_amendment",
+        entity_id=contract_id,
+        field_name="status",
+        action="UPDATE",
+        changed_by=user.get("sub"),
+        old_value=old_status,
+        new_value=payload.status,
+    )
+    db.commit()
+    db.refresh(amendment)
+    return AmendmentResponse(
+        id=amendment.id,
+        contract_id=amendment.contract_id,
+        type=amendment.type,
+        reason=amendment.reason,
+        status=amendment.status,
+        changes=amendment.changes or {},
+        tenant_id=amendment.tenant_id,
+        created_by=amendment.created_by,
+        created_at=amendment.created_at,
+    ).model_dump()
 
 
 @router.post("/lookup/verkauf")
