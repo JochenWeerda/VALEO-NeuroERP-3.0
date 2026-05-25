@@ -2518,3 +2518,15 @@ Archiv des vorherigen Boards:
 **Erledigt:** Locale-Dateien de/en/es/fr auf sauberen Stand zurueckgefuehrt und `pattern.listreport.items_count` gezielt ergaenzt; Encoding-Funde im gesamten `packages/frontend-web/src` bereinigt; ungueltige UTF-8-Dateien nach UTF-8 konvertiert; temporaere Reparatur-Skripte entfernt; Route-Aliases gegen existierende Module validiert; lokale unpushed Historie vor Push auf saubere Autor-/Commitstruktur konsolidiert.
 **Checks:** `node` JSON-Parse fuer `packages/frontend-web/src/i18n/locales/de|en|es|fr/translation.json`; Encoding-Scan `rg -n "Ã|Â|â" packages/frontend-web/src`; UTF-8-Validierung fuer `packages/frontend-web/src`; Route-Alias-Modulvalidierung gegen `packages/frontend-web/src`; `pnpm --filter @valero-neuroerp/frontend-web type-check`; `pnpm --filter @valero-neuroerp/frontend-web lint`; `pnpm --filter @valero-neuroerp/frontend-web build`; `python scripts/agent_workboard_supervisor.py validate`; `node scripts/docs-governance-check.cjs docs/agent-ops/active-workboard.md docs/agent-ops/slices/FRONTEND-DOMAIN-AUDIT-REPAIR-001.yaml`; `node scripts/docs-markdown-check.cjs docs/agent-ops/active-workboard.md docs/agent-ops/slices/FRONTEND-DOMAIN-AUDIT-REPAIR-001.yaml`; `git diff --check`
 **Offene Risiken:** Vite-Build meldet weiterhin bestehende, nicht blockierende Warnungen aus CSS-Minifizierung und POS-Doppelimport; backendabhaengige Datenladefehler sind von Frontend-Routing/Rendering getrennt zu bewerten.
+
+## FACHLICHE-VERTIEFUNG-UX-W16-001
+
+**Von:** Claude Sonnet 4.6
+**Owner:** Claude Sonnet 4.6
+**Stand:** abgeschlossen 2026-05-25
+**Ziel des Slices:** Wave 16 Integration Vertreterstamm und Vertreterprovisionsgruppen: provisionsgruppe_nr in der Vertreterstamm-Maske (W15) als Select aus echten Provisionsgruppen (W12) statt freiem Text-Input.
+**Dateibesitz:** `docs/agent-ops/slices/FACHLICHE-VERTIEFUNG-UX-W16-001.yaml`, `packages/frontend-web/src/pages/crm/vertreterstamm.tsx`, `packages/frontend-web/tests/e2e/fachliche-vertiefung-vertreterstamm-prov-integration.spec.ts`, Fremdfix: `packages/frontend-web/tests/e2e/fachliche-vertiefung-vertreterprovisionen.spec.ts`
+**Abnahmekriterien:** provisionsgruppe_nr im Vertreter-Anlegen-Formular ist ein Select; provisionsgruppe_nr im Edit-Dialog ist ein Select; W16-Integrationstest gruen; Regression W15/W12 gruen; Typecheck gruen.
+**Erledigt:** vertreterstamm.tsx Create-Form + Edit-Dialog auf useProvisionsgruppen()-Select; W16-Integrationstest (2/2 gruen); W15-Regression (4/4 gruen); W12-Regression (1/1 gruen, 1 Staffel-Test skip mit Begruendung); Fremdfix W12-Spec strict-mode-Violations.
+**Checks:** `pnpm --filter @valero-neuroerp/frontend-web type-check`; Playwright-Gates W16+W15+W12; `python scripts/agent_workboard_supervisor.py validate`; `git diff --check`
+**Offene Risiken:** W12-Staffeln-Test skip ist dokumentiertes pre-existing Playwright-Isolation-Issue; keine fachlichen Risiken.

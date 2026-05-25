@@ -28,6 +28,7 @@ import {
   type Vertreter,
   type VertreterCreate,
 } from '@/lib/api/vertreterstamm'
+import { useProvisionsgruppen } from '@/lib/api/vertreterprovisionen'
 
 // ── Vertretergruppen Tab ───────────────────────────────────────────────────────
 
@@ -150,6 +151,7 @@ function EditVertreterDialog({
 }) {
   const update = useUpdateVertreter()
   const { data: gruppen } = useVertretergruppen()
+  const { data: provisionsgruppen } = useProvisionsgruppen()
   const { register, handleSubmit, formState: { errors } } = useForm<VertreterCreate>({
     defaultValues: {
       vertreter_nr: vertreter.vertreter_nr,
@@ -238,8 +240,20 @@ function EditVertreterDialog({
               </select>
             </div>
             <div className="grid gap-1">
-              <Label htmlFor="edit_vt_pg">Provisionsgruppe-Nr</Label>
-              <Input id="edit_vt_pg" aria-label="Provisionsgruppe-Nr" {...register('provisionsgruppe_nr')} />
+              <Label htmlFor="edit_vt_pg">Provisionsgruppe</Label>
+              <select
+                id="edit_vt_pg"
+                aria-label="Provisionsgruppe"
+                className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm"
+                {...register('provisionsgruppe_nr')}
+              >
+                <option value="">— keine —</option>
+                {provisionsgruppen?.map(pg => (
+                  <option key={pg.id} value={pg.gruppe_nr}>
+                    {pg.gruppe_nr} – {pg.bezeichnung} ({pg.richtung.toUpperCase()})
+                  </option>
+                ))}
+              </select>
             </div>
           </div>
           <DialogFooter className="mt-2">
@@ -271,6 +285,7 @@ type VertreterFormData = {
 function VertreterTab() {
   const { data: vertreter, isLoading } = useVertreter()
   const { data: gruppen } = useVertretergruppen()
+  const { data: provisionsgruppen } = useProvisionsgruppen()
   const createVertreter = useCreateVertreter()
   const deleteVertreter = useDeleteVertreter()
   const [editTarget, setEditTarget] = useState<Vertreter | null>(null)
@@ -354,6 +369,20 @@ function VertreterTab() {
                   <option value="">— keine —</option>
                   {gruppen?.map(g => (
                     <option key={g.id} value={g.gruppe_nr}>{g.gruppe_nr}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="grid gap-1">
+                <Label htmlFor="vt_pg">Provisionsgruppe</Label>
+                <select
+                  id="vt_pg"
+                  aria-label="Provisionsgruppe des Vertreters"
+                  className="flex h-9 w-40 rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm"
+                  {...register('provisionsgruppe_nr')}
+                >
+                  <option value="">— keine —</option>
+                  {provisionsgruppen?.map(pg => (
+                    <option key={pg.id} value={pg.gruppe_nr}>{pg.gruppe_nr}</option>
                   ))}
                 </select>
               </div>

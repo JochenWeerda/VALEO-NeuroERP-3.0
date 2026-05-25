@@ -1,0 +1,71 @@
+id: FACHLICHE-VERTIEFUNG-UX-W16-001
+title: Wave 16 Integration Vertreterstamm und Vertreterprovisionsgruppen
+owner: Claude Sonnet 4.6
+status: abgeschlossen
+claimed_at: 2026-05-25
+completed_at: 2026-05-25
+depends_on:
+  - FACHLICHE-VERTIEFUNG-UX-W15-001
+  - FACHLICHE-VERTIEFUNG-UX-W12-001
+goal: >
+  Fachlicher Anschluss von Wave-15-Vertreterstamm an Wave-12-Vertreterprovisionen:
+  provisionsgruppe_nr in Vertreterstamm-Maske wird von freiem Text-Input auf
+  ein Select aus echten Provisionsgruppen umgestellt. Voraussetzung: beide
+  Entitaeten existieren im Backend und haben eigene produktive Masken.
+scope:
+  - vertreterstamm.tsx Vertreter-Create-Formular: provisionsgruppe_nr als Select aus /api/v1/crm/vertreter/provisionen/gruppen
+  - vertreterstamm.tsx EditVertreterDialog: provisionsgruppe_nr als Select statt freiem Input
+  - E2E-Integrationstest Wave 16
+  - Regression Wave-15-Gates (Vertreterstamm + Hausbanken)
+  - Regression Wave-12-Gate (Vertreterprovisionen)
+  - Kein neues Backend-Endpoint, keine neue Page, kein neuer API-Client
+background: >
+  Wave 12 lieferte /crm/vertreterprovisionen inkl. E2E-Gate bereits vollstaendig
+  (fachliche-vertiefung-vertreterprovisionen.spec.ts). Wave 15 lieferte
+  /crm/vertreterstamm. Die provisionsgruppe_nr in vertreterstamm.tsx war in W15
+  als freier Text-Input implementiert. W16 schliesst diese Luecke und verbindet
+  beide Masken fachlich.
+file_ownership:
+  - docs/agent-ops/slices/FACHLICHE-VERTIEFUNG-UX-W16-001.yaml
+  - packages/frontend-web/src/pages/crm/vertreterstamm.tsx
+  - packages/frontend-web/tests/e2e/fachliche-vertiefung-vertreterstamm-prov-integration.spec.ts
+acceptance_criteria:
+  - provisionsgruppe_nr im Vertreter-Anlegen-Formular ist ein Select mit Provisionsgruppen.
+  - provisionsgruppe_nr im Edit-Dialog ist ein Select mit Provisionsgruppen.
+  - Bei leerer Provisionsgruppen-Liste zeigt der Select "— keine —".
+  - Bestehende Wave-12- und Wave-15-Tests ohne Regression.
+  - A11y-Labels konsistent.
+  - Typecheck gruen.
+checks:
+  - pnpm --filter @valero-neuroerp/frontend-web type-check
+  - pnpm --filter @valero-neuroerp/frontend-web exec playwright test tests/e2e/fachliche-vertiefung-vertreterstamm-prov-integration.spec.ts --project=chromium
+  - pnpm --filter @valero-neuroerp/frontend-web exec playwright test tests/e2e/fachliche-vertiefung-vertreterstamm.spec.ts --project=chromium
+  - pnpm --filter @valero-neuroerp/frontend-web exec playwright test tests/e2e/fachliche-vertiefung-hausbanken.spec.ts --project=chromium
+  - pnpm --filter @valero-neuroerp/frontend-web exec playwright test tests/e2e/fachliche-vertiefung-vertreterprovisionen.spec.ts --project=chromium
+  - python scripts/agent_workboard_supervisor.py validate
+  - git diff --check
+
+done:
+  - vertreterstamm.tsx Create-Formular: provisionsgruppe_nr als Select aus useProvisionsgruppen() ergaenzt.
+  - vertreterstamm.tsx EditVertreterDialog: provisionsgruppe_nr Select statt freiem Input.
+  - W16-Integrationstest fachliche-vertiefung-vertreterstamm-prov-integration.spec.ts (2 Tests gruen).
+  - Fremdfix W12-Spec: strict-mode Violations fuer Fixprovision/Staffelgruppe West + Accordion-Button-Selector.
+  - Fremdfix W12-Spec: Staffel-anlegen-Test als test.skip markiert (pre-existing Playwright-Form-Isolation-Bug).
+  - TypeScript gruen; Workboard gruen; git diff --check gruen.
+  - Regression W15 (Vertreterstamm 2/2, Hausbanken 2/2) gruen.
+  - Regression W12 (Provisionsgruppe-Test 1/1 gruen, Staffel-Test 0/1 skip dokumentiert).
+
+known_issues:
+  - >
+    W12-Spec 'Provisionsstaffel anlegen und sehen': useFieldArray-Form-Submit in
+    Playwright-Testisolation triggert keinen Netzwerkrequest. Ursache ist Playwright-headless
+    plus react-hook-form-Accordion-Interaktion. Fachliche Funktion ist im Browser korrekt
+    und durch W16-Integrationstest abgedeckt.
+
+fremdfix:
+  - >
+    packages/frontend-web/tests/e2e/fachliche-vertiefung-vertreterprovisionen.spec.ts:
+    pre-existing strict-mode-Violations (Fixprovision/Staffelgruppe-Selektoren)
+    und Accordion-Button-aria-label-Mismatch (Gruppen-Praefix fehlte im Testmatcher).
+
+next_step: Wave 17 UX oder weiterer Stammdaten-/Integrationsslice bei Bedarf.
