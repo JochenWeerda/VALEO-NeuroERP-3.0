@@ -1692,6 +1692,10 @@ api_router.include_router(verladung.router, tags=["verladung", "logistik"])
 api_router.include_router(projekte.router, tags=["projekte"])
 api_router.include_router(transporte.router, tags=["transporte", "fahrer"])
 
+# Kontrakte — Amendments & Amendment-Templates
+from app.api.v1.endpoints import kontrakte  # noqa: E402
+api_router.include_router(kontrakte.router, tags=["kontrakte"])
+
 # Previously unregistered endpoints — now reachable
 api_router.include_router(ki_usability.router, prefix="/ki", tags=["ki", "usability"])
 api_router.include_router(pos_payments_promotions.router, tags=["pos", "payments", "promotions"])
