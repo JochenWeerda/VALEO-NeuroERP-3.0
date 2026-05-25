@@ -14,7 +14,7 @@ from typing import Any, Dict, List, Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Request, status
 from fastapi.responses import StreamingResponse
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 from sqlalchemy import Column, DateTime, String, Text, func
 from sqlalchemy.orm import Session
 
@@ -91,8 +91,7 @@ class GdprRequestResponse(BaseModel):
     updated_at: Optional[datetime]
     created_by: Optional[str]
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class GdprHistoryEntry(BaseModel):
@@ -104,8 +103,7 @@ class GdprHistoryEntry(BaseModel):
     note: Optional[str]
     changed_at: datetime
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 # ---------------------------------------------------------------------------

@@ -8,7 +8,7 @@ import logging
 from typing import Any, Dict, List, Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Body, Response
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 from sqlalchemy import Column, Float, Integer, String, Text, DateTime
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Session
@@ -53,8 +53,7 @@ class ParsedFields(BaseModel):
     supplier_id: Optional[str] = None
     domain: Optional[str] = None
 
-    class Config:
-        extra = "allow"
+    model_config = ConfigDict(extra="allow")
 
 
 class InboxDocument(BaseModel):
