@@ -148,5 +148,9 @@ export const entries: AliasGroupRouteEntry[] = [
   {
     "module": "@/pages/agrar/wetterwarnung",
     "path": "wetterwarnung"
+  },
+  {
+    "module": "@/pages/agrar/rohwarengruppen",
+    "path": "rohwarengruppen"
   }
 ]
