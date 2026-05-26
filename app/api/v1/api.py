@@ -1470,7 +1470,7 @@ from app.api.v1.endpoints import (
 
 api_router.include_router(neuro_guardrails.router)
 api_router.include_router(neuro_fast_track.router)
-ws_router.include_router(copilot_ws.router)  # WebSocket — excluded from global auth dependency
+api_router.include_router(copilot_ws.router)
 api_router.include_router(neuro_event_policy.router)
 api_router.include_router(neuro_event_monitoring.router)
 api_router.include_router(security_monitoring.router)

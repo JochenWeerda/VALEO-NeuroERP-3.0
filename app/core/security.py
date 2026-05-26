@@ -35,6 +35,10 @@ async def require_bearer_token(
     if _is_path_exempt(request.url.path):
         return ""
 
+    # WebSocket connections handle auth at the handler level (query-param token)
+    if request.scope.get("type") == "websocket":
+        return ""
+
     if not isinstance(credentials, HTTPAuthorizationCredentials):
         credentials = await http_bearer(request)
 
