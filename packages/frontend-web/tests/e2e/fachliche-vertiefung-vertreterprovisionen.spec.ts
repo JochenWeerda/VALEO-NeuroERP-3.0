@@ -142,12 +142,7 @@ test.describe('Fachliche Vertiefung Gate: Vertreterprovisionen (Wave 12)', () =>
     expect(requests.some((r) => r.startsWith('POST /api/v1/crm/vertreter/provisionen/gruppen'))).toBe(true)
   })
 
-  // Known pre-existing issue (tracked since W12): the react-hook-form useFieldArray
-  // submit inside the StaffelPanel accordion does not trigger a network request when
-  // submitted programmatically in Playwright's isolated browser context (headless).
-  // The form, accordion open state, and GET-route all work correctly (verified above).
-  // The functional path is covered by the W16 integration test and manual QA.
-  test.skip('Provisionsstaffel anlegen und sehen', async ({ page }) => {
+  test('Provisionsstaffel anlegen und sehen', async ({ page }) => {
     const requests: string[] = []
 
     const staffelGruppe: ProvisionsGruppe = {
@@ -218,7 +213,7 @@ test.describe('Fachliche Vertiefung Gate: Vertreterprovisionen (Wave 12)', () =>
             vertreterklasse: string | null
             zeilen: { zeile_nr: number; ab_wert: number; provisionssatz: number }[]
           }
-          const newStaffelId = `stf-${Date.now()}`
+          const newStaffelId = 'stf-test'
           const created: ProvisionsStaffel = {
             id: newStaffelId,
             gruppe_id: payload.gruppe_id,
@@ -258,29 +253,28 @@ test.describe('Fachliche Vertiefung Gate: Vertreterprovisionen (Wave 12)', () =>
       .click()
 
     await expect(page.getByText('Keine Staffeln vorhanden.')).toBeVisible()
-    await page.waitForLoadState('networkidle')
 
+    // Fill with values that are unambiguously valid for the step constraints
     await page.locator('#zeile_nr_0').fill('1')
-    await page.locator('#ab_wert_0').fill('10000')
-    await page.locator('#ps_0').fill('2.5')
+    await page.locator('#ab_wert_0').fill('100.00')
+    await page.locator('#ps_0').fill('2.50')
 
-    const postPromise = page.waitForRequest(
-      req => req.method() === 'POST' && req.url().includes('/provisionen/staffeln'),
-      { timeout: 10000 },
-    ).catch(() => null)
+    // Wait for the POST *response* (not just the request) — ensures mutation has resolved
+    // before we check persistent UI state, so we don't race against the ephemeral toast.
+    const staffelPostResponse = page.waitForResponse(
+      (res) =>
+        res.request().method() === 'POST' && isStaffelnCollection(new URL(res.url())),
+      { timeout: 15000 },
+    )
 
-    await page.locator('#zeile_nr_0').press('Enter')
+    // Submit via the button's exact aria-label — mirrors how W16 integration test works
+    await page.locator('[aria-label="Staffel speichern"]').click()
 
-    const postReq = await postPromise
-    if (!postReq) {
-      await page.evaluate(() => {
-        const allForms = Array.from(document.querySelectorAll('form'))
-        const staffelForm = allForms.find(f => f.textContent?.includes('Neue Staffel anlegen'))
-        if (staffelForm) staffelForm.requestSubmit()
-      })
-    }
+    await staffelPostResponse
 
-    await expect(page.getByText('Staffel angelegt.')).toBeVisible({ timeout: 20000 })
+    // The staffel row is persistent UI — more robust than asserting the ephemeral toast.
+    // (toast.success IS called, but can vanish before toBeVisible retries.)
+    await expect(page.getByRole('cell').filter({ hasText: '100.00' })).toBeVisible()
 
     expect(requests.some((r) => r.startsWith('GET /api/v1/crm/vertreter/provisionen/gruppen'))).toBe(true)
     expect(requests.some((r) => r.startsWith('GET /api/v1/crm/vertreter/provisionen/staffeln'))).toBe(true)
