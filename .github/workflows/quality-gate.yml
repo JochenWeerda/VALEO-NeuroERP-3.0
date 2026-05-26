@@ -155,6 +155,9 @@ jobs:
       - name: Pagination regression check
         run: python scripts/check_pagination.py --threshold 52
 
+      - name: Godfile regression check (>1000 LOC)
+        run: python scripts/check_file_size.py --threshold 12
+
       - name: Check core contamination guardrail
         run: python scripts/check_no_core_contamination.py
 
