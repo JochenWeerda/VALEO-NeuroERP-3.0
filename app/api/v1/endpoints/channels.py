@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from fastapi import APIRouter, Depends, Request, Response
+from fastapi import APIRouter, Depends, HTTPException, Request, Response
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 from typing import Any, Optional
@@ -44,7 +44,9 @@ async def whatsapp_verify(request: Request):
     token = request.query_params.get("hub.verify_token")
     challenge = request.query_params.get("hub.challenge")
 
-    verify_token = settings.CHANNEL_WHATSAPP_VERIFY_TOKEN or "valeo_whatsapp_verify_2026"
+    verify_token = settings.CHANNEL_WHATSAPP_VERIFY_TOKEN
+    if not verify_token:
+        raise HTTPException(status_code=503, detail="CHANNEL_WHATSAPP_VERIFY_TOKEN not configured")
     if mode == "subscribe" and token == verify_token:
         return Response(content=challenge, media_type="text/plain")
     return Response(content="Forbidden", status_code=403)
