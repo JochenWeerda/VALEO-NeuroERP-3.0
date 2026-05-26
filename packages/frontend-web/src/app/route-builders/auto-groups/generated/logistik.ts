@@ -6,7 +6,15 @@ export const entries: AutoGroupRouteEntry[] = [
     "path": "frachtbriefe"
   },
   {
+    "module": "@/pages/logistik/frachttabellen",
+    "path": "frachttabellen"
+  },
+  {
     "module": "@/pages/logistik/tourenplanung",
     "path": "tourenplanung"
+  },
+  {
+    "module": "@/pages/logistik/versandprofile",
+    "path": "versandprofile"
   }
 ]

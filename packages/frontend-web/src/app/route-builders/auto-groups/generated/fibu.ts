@@ -148,5 +148,13 @@ export const entries: AutoGroupRouteEntry[] = [
   {
     "module": "@/pages/fibu/zahlungsvorschlaege",
     "path": "zahlungsvorschlaege"
+  },
+  {
+    "module": "@/pages/fibu/geschaeftsjahre",
+    "path": "geschaeftsjahre"
+  },
+  {
+    "module": "@/pages/fibu/zahlungsmeldungen",
+    "path": "zahlungsmeldungen"
   }
 ]
