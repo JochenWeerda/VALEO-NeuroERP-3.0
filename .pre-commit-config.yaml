@@ -1,0 +1,29 @@
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.6.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+      - id: check-json
+      - id: check-merge-conflict
+      - id: check-added-large-files
+        args: ['--maxkb=500']
+      - id: no-commit-to-branch
+        args: ['--branch', 'main']
+
+  - repo: local
+    hooks:
+      - id: sql-fstring-check
+        name: SQL f-string injection check
+        entry: python scripts/check_sql_fstrings.py
+        language: python
+        pass_filenames: false
+        stages: [commit]
+
+      - id: tenant-isolation-check
+        name: Tenant isolation audit
+        entry: python scripts/check_tenant_isolation.py
+        language: python
+        pass_filenames: false
+        stages: [commit]
