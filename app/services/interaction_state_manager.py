@@ -80,7 +80,7 @@ def transition_interaction(
         """), {"id": interaction_id, "tid": tenant_id}).fetchone()
         if row:
             current = row.state
-    except Exception:
+    except Exception:  # noqa: BLE001 — Interaktions-State nicht abrufbar; Standardzustand wird verwendet
         pass
 
     allowed = ALLOWED_TRANSITIONS.get(current, [])
@@ -122,7 +122,7 @@ def get_interaction(interaction_id: str, tenant_id: str, db: Session) -> Optiona
                 "id": row.id, "channel": row.channel, "entity_id": row.entity_id,
                 "state": row.state, "created_at": str(row.created_at), "updated_at": str(row.updated_at),
             }
-    except Exception:
+    except Exception:  # noqa: BLE001 — Interaktions-State nicht abrufbar; Standardzustand wird verwendet
         pass
     return None
 

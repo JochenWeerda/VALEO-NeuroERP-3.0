@@ -15,6 +15,9 @@ from sqlalchemy.orm import Session
 
 from ....core.config import settings
 from ....core.database import get_db
+import logging
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter()
 DEFAULT_TENANT = settings.DEFAULT_TENANT_ID
@@ -141,7 +144,7 @@ def _get_account_mapping(db, tenant_id: str, article_id: str):
                 "gegenkonto_zugang": row["gegenkonto_zugang"] or DEFAULT_ACCOUNTS["gegenkonto_zugang"],
                 "gegenkonto_abgang": row["gegenkonto_abgang"] or DEFAULT_ACCOUNTS["gegenkonto_abgang"],
             }
-    except Exception:
+    except Exception:  # noqa: BLE001 — Kontenzuordnung nicht gefunden; Standard-Konten werden verwendet
         pass
     return DEFAULT_ACCOUNTS
 
@@ -405,8 +408,8 @@ async def create_mhd_abschreibung(
             """),
             {"menge": payload.menge, "tid": tenant_id or DEFAULT_TENANT, "charge": payload.charge, "article_id": payload.article_id},
         )
-    except Exception:
-        pass
+    except Exception as e:  # noqa: BLE001
+        logger.warning("Chargen-UPDATE fehlgeschlagen (Tabelle evtl. nicht vorhanden): %s", e)
 
     korrektur = BestandskorrekturIn(
         article_id=payload.article_id,

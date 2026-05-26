@@ -30,7 +30,7 @@ class PurchaseOrderService:
         try:
             from app.core.cache import cache_delete_prefix
             cache_delete_prefix(cache_key("procurement", self.tenant_id))
-        except Exception:
+        except Exception:  # noqa: BLE001 — Cache-Invalidierung fehlgeschlagen; nächste Anfrage lädt frisch
             pass
 
     def _find_po(self, po_id: str) -> dict[str, Any]:

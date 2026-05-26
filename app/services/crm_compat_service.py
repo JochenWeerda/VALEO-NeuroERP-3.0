@@ -22,7 +22,7 @@ class CrmCompatService:
         try:
             from app.core.crm_core_client import crm_get_dashboard
             return crm_get_dashboard(tenant_id=self.tenant_id)
-        except Exception:
+        except Exception:  # noqa: BLE001 — CRM-Core-Client nicht verfügbar; Fallback auf Doc-Store
             pass
         customers = list_docs(self.db, "crm_customer", tenant_id=self.tenant_id)
         cases = list_docs(self.db, "crm_case", tenant_id=self.tenant_id)
@@ -36,7 +36,7 @@ class CrmCompatService:
         try:
             from app.core.crm_core_client import crm_list_customers
             return crm_list_customers(tenant_id=self.tenant_id, search=search, limit=limit)
-        except Exception:
+        except Exception:  # noqa: BLE001 — CRM-Core-Client nicht verfügbar; Fallback auf Doc-Store
             pass
         customers = list_docs(self.db, "crm_customer", tenant_id=self.tenant_id)
         if search:
@@ -50,7 +50,7 @@ class CrmCompatService:
         try:
             from app.core.crm_core_client import crm_get_customer
             return crm_get_customer(customer_id, tenant_id=self.tenant_id)
-        except Exception:
+        except Exception:  # noqa: BLE001 — CRM-Core-Client nicht verfügbar; Fallback auf Doc-Store
             pass
         repo = doc_repo(self.db)
         doc = repo.get("crm_customer", customer_id)
@@ -68,7 +68,7 @@ class CrmCompatService:
         try:
             from app.core.crm_core_client import crm_create_case
             return crm_create_case(payload, tenant_id=self.tenant_id)
-        except Exception:
+        except Exception:  # noqa: BLE001 — CRM-Core-Client nicht verfügbar; Fallback auf Doc-Store
             pass
         repo = doc_repo(self.db)
         doc = {"id": uuid7(), "tenantId": self.tenant_id, "status": "OFFEN",

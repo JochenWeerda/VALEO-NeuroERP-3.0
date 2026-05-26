@@ -396,7 +396,7 @@ def delete_secret(key: str, deleted_by: str = "system") -> bool:
             if keyring_module is not None:
                 try:
                     keyring_module.delete_password(_KEYRING_SERVICE_NAME, key)
-                except Exception:
+                except Exception:  # noqa: BLE001 — Keyring-Löschung fehlgeschlagen; wird fortgesetzt
                     pass
                 index = _load_keyring_index(keyring_module)
                 index.pop(key, None)
@@ -410,7 +410,7 @@ def delete_secret(key: str, deleted_by: str = "system") -> bool:
         if value is not None:
             try:
                 keyring_module.delete_password(_KEYRING_SERVICE_NAME, key)
-            except Exception:
+            except Exception:  # noqa: BLE001 — Keyring-Löschung fehlgeschlagen; wird fortgesetzt
                 pass
             index = _load_keyring_index(keyring_module)
             index.pop(key, None)

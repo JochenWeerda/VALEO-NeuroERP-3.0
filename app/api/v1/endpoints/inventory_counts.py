@@ -17,6 +17,9 @@ from ....core.config import settings
 from ....core.database import get_db
 from ....infrastructure.models import InventoryCount, InventoryCountLine
 from ..schemas.base import PaginatedResponse, BaseSchema
+import logging
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter()
 DEFAULT_TENANT = settings.DEFAULT_TENANT_ID
@@ -328,8 +331,8 @@ async def post_inventory_count(
                     amount=amount,
                     reference=f"INVENTUR-{count_id[:8].upper()}",
                 )
-    except Exception:
-        pass
+    except Exception as e:  # noqa: BLE001
+        logger.warning("Journal-Buchungen für Inventur konnten nicht erstellt werden: %s", e)
 
     # Update count status
     count.status = "posted"

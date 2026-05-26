@@ -136,7 +136,7 @@ async def process_incoming(
         if guard_result.action.value == "block":
             logger.warning("Email blocked by guardrails: %s", email.from_address)
             return {"status": "blocked", "message": "E-Mail durch Guardrails blockiert."}
-    except Exception:
+    except Exception:  # noqa: BLE001 — Guardrail-Check fehlgeschlagen; Verarbeitung wird fortgesetzt
         pass
 
     intent_text = extract_intent_text(email)

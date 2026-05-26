@@ -69,7 +69,7 @@ def cache_set_json(key: str, value: Any, ttl_seconds: int | None = None) -> None
         try:
             client.setex(key, ttl, payload)
             return
-        except Exception:
+        except Exception:  # noqa: BLE001 — Redis-Operation fehlgeschlagen; Cache-Degraded-Mode aktiv
             pass
 
     with _mem_lock:
@@ -88,7 +88,7 @@ def cache_delete_prefix(prefix: str) -> None:
                 if cursor == 0:
                     break
             return
-        except Exception:
+        except Exception:  # noqa: BLE001 — Redis-Operation fehlgeschlagen; Cache-Degraded-Mode aktiv
             pass
 
     with _mem_lock:

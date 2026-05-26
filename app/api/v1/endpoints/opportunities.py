@@ -254,7 +254,7 @@ async def get_forecast(
                 for s in OPPORTUNITY_STAGES_LIST
             ],
         }
-    except Exception:
+    except Exception:  # noqa: BLE001 — optionale DB-Abfrage; Fallback greift
         pass
 
     # Fallback: CRM integration

@@ -500,7 +500,7 @@ class ATLASCustomsService:
                     if isinstance(data.get("waren_positionen"), str):
                         data["waren_positionen"] = json.loads(data["waren_positionen"])
                     return data
-            except Exception:
+            except Exception:  # noqa: BLE001 — DB-Abfrage fehlgeschlagen; Fallback-Store wird verwendet
                 pass
         return self._fallback_store.get(anmeldung_id)
 
@@ -521,7 +521,7 @@ class ATLASCustomsService:
                     if isinstance(data.get("waren_positionen"), str):
                         data["waren_positionen"] = json.loads(data["waren_positionen"])
                     return data
-            except Exception:
+            except Exception:  # noqa: BLE001 — DB-Abfrage fehlgeschlagen; Fallback-Store wird verwendet
                 pass
         # Fallback-Store durchsuchen
         for v in self._fallback_store.values():

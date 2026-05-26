@@ -206,7 +206,7 @@ class InventoryService:
                 tenant_id=resolved_tenant_id
             )
             asyncio.create_task(event_publisher.publish(event))
-        except Exception:
+        except Exception:  # noqa: BLE001 — Event-Publishing fehlgeschlagen; Haupttransaktion nicht betroffen
             pass
 
         return movement

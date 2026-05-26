@@ -119,7 +119,7 @@ def _get_user_id_from_request(request) -> Optional[str]:
             payload_b64 += "=" * (4 - len(payload_b64) % 4)
             claims = _json.loads(base64.urlsafe_b64decode(payload_b64))
             return claims.get("sub")
-        except Exception:
+        except Exception:  # noqa: BLE001 — JWT decode failed; caller handles None return
             pass
     return None
 

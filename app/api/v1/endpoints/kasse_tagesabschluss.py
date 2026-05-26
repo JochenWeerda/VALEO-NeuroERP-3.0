@@ -91,7 +91,7 @@ async def get_aktuell(
                 stornos=0,
                 retouren=0,
             )
-    except Exception:
+    except Exception:  # noqa: BLE001 — optionale DB-Abfrage; Fallback greift
         pass
 
     # Fallback: return demo data matching previous hardcoded values

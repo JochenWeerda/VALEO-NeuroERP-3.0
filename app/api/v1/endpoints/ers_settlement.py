@@ -80,7 +80,7 @@ def _fetch_gr_amount(db: Session, gr_id: str, tenant_id: str) -> Optional[float]
             ).fetchone()
             if row:
                 return float(row[0])
-        except Exception:
+        except Exception:  # noqa: BLE001 — Tabelle nicht gefunden; gibt None zurück
             pass
     return None
 

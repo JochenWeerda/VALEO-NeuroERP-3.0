@@ -878,16 +878,16 @@ async def gdpr_anonymize(
             """),
             {"pid": partner_id},
         )
-    except Exception:
-        pass
+    except Exception as e:  # noqa: BLE001
+        logger.warning("DSGVO-Löschoperation fehlgeschlagen (best-effort): %s", e)
 
     try:
         db.execute(
             text("UPDATE domain_crm.crm_consents SET granted = FALSE, revoked_at = NOW() WHERE partner_id = :pid AND tenant_id = :tid"),
             {"pid": partner_id, "tid": tenant_id},
         )
-    except Exception:
-        pass
+    except Exception as e:  # noqa: BLE001
+        logger.warning("DSGVO-Löschoperation fehlgeschlagen (best-effort): %s", e)
 
     db.commit()
     logger.info("GDPR anonymization for partner %s by tenant %s: %s", partner_id, tenant_id, reason)

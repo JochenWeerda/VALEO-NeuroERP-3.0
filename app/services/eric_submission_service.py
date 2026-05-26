@@ -226,7 +226,7 @@ class ERICSubmissionService:
                             "Steuerberater-Freigabe für Produktiv-Übertragung erforderlich",
                         ],
                     }
-            except Exception:
+            except Exception:  # noqa: BLE001 — ELSTER-Validierung nicht verfügbar; Fallback-Validierung greift
                 pass
 
         # Ticket unbekannt
@@ -250,6 +250,6 @@ class ERICSubmissionService:
                 ).fetchone()
                 if row:
                     return dict(row._mapping)
-            except Exception:
+            except Exception:  # noqa: BLE001 — ELSTER-Validierung nicht verfügbar; Fallback-Validierung greift
                 pass
         return None

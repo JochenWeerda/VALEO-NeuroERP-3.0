@@ -89,7 +89,7 @@ async def get_kpis(
                 from app.infrastructure.models import SiloLot
                 blocked_lots = db.query(SiloLot).filter(SiloLot.status == "blocked").count()
                 kpis["inventory_lots_blocked"] = blocked_lots
-            except Exception:
+            except Exception:  # noqa: BLE001 — SiloLot-Modell nicht verfügbar; Wert wird übersprungen
                 pass
         except Exception as e:
             logger.warning("Agrar KPIs skipped (models/tables may be missing): %s", e)

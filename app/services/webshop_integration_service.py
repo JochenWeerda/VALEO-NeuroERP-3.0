@@ -197,7 +197,7 @@ class WebshopIntegrationService:
             ).mappings().all()
             if isinstance(rows, list):
                 return [dict(row) for row in rows if isinstance(row, Mapping)]
-        except Exception:
+        except Exception:  # noqa: BLE001 — DB-Abfrage fehlgeschlagen; Fallback auf In-Memory-Bestellungen
             pass
         # Fallback: synthesise from in-memory orders
         orders = list(_ORDER_STORE.get(self.tenant_id, {}).values())

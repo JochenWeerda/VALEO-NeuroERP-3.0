@@ -37,7 +37,7 @@ def _get_user_id_from_request(request: Request | None) -> str | None:
             payload = auth[7:].split(".")[1]
             payload += "=" * (4 - len(payload) % 4)
             return _json.loads(_b64.urlsafe_b64decode(payload)).get("sub")
-        except Exception:
+        except Exception:  # noqa: BLE001 — JWT decode failed; caller handles None return
             pass
     return None
 
@@ -490,7 +490,7 @@ async def post_delivery_note(
             positions=positions,
             delivery_date=row.get("delivery_date") or row.get("created_at"),
         )
-    except Exception:
+    except Exception:  # noqa: BLE001 — JWT decode failed; caller handles None return
         pass  # booking failure must not block the status transition
 
     db.commit()

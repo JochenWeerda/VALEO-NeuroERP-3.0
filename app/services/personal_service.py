@@ -447,7 +447,7 @@ class PersonalService:
             ).mappings().all()
             if rows:
                 return [dict(r) for r in rows], "database"
-        except Exception:
+        except Exception:  # noqa: BLE001 — DB-Abfrage fehlgeschlagen; nächste Fallback-Strategie wird versucht
             pass
 
         # fallback: domain_shared.users
@@ -462,7 +462,7 @@ class PersonalService:
             ).mappings().all()
             if user_rows:
                 return [dict(r) for r in user_rows], "users-fallback"
-        except Exception:
+        except Exception:  # noqa: BLE001 — DB-Abfrage fehlgeschlagen; nächste Fallback-Strategie wird versucht
             pass
 
         return [], "empty"

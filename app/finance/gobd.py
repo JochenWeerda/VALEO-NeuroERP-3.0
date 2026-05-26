@@ -513,7 +513,7 @@ async def get_verfahrensdokumentation(
         if row:
             firmenname = row.name or firmenname
             steuernummer = row.tax_id or steuernummer
-    except Exception:
+    except Exception:  # noqa: BLE001 — Audit-Zählabfrage nicht verfügbar; Standardwert 0 bleibt
         pass  # Fallback-Werte werden verwendet
 
     # Audit-Statistik
@@ -525,7 +525,7 @@ async def get_verfahrensdokumentation(
         ).fetchone()
         if audit_row:
             audit_count = int(audit_row.cnt)
-    except Exception:
+    except Exception:  # noqa: BLE001 — Audit-Zählabfrage nicht verfügbar; Standardwert 0 bleibt
         pass
 
     buchungsjahr = datetime.now().year

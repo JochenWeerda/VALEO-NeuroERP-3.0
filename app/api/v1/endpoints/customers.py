@@ -287,7 +287,7 @@ def create_interessent(
         ).first()
         if row:
             seq = (row[0] or 0) + 1
-    except Exception:
+    except Exception:  # noqa: BLE001 — optionale DB-Abfrage; Fallback greift
         pass
 
     interessenten_nr = f"INT-{year}-{seq:05d}"

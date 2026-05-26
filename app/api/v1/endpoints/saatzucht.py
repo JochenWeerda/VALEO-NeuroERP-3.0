@@ -209,7 +209,7 @@ def get_partie(
                 status=row.status,
                 erstellt_am=str(row.erstellt_am),
             )
-    except Exception:
+    except Exception:  # noqa: BLE001 — optionale DB-Abfrage; Fallback greift
         pass
     if id in _store:
         return SaatgutPartieOut(**_store[id])

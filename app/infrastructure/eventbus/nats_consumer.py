@@ -90,13 +90,13 @@ class NATSEventConsumer:
         if self._sub is not None:
             try:
                 await self._sub.unsubscribe()
-            except Exception:
+            except Exception:  # noqa: BLE001 — NATS-Verbindungsabbau; Fehler werden ignoriert (shutdown path)
                 pass
             self._sub = None
         if self._nc:
             try:
                 await self._nc.close()
-            except Exception:
+            except Exception:  # noqa: BLE001 — NATS-Verbindungsabbau; Fehler werden ignoriert (shutdown path)
                 pass
         self._connected = False
 

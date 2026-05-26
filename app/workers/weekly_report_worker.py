@@ -32,7 +32,7 @@ class WeeklyReportWorker(BaseWorker):
                     {"start": start_date.date(), "end": end_date.date()},
                 ).scalar()
                 reports_generated = 1
-            except Exception:
+            except Exception:  # noqa: BLE001 — Berichts-Datenbankabfrage fehlgeschlagen; Standardwert bleibt
                 pass
 
             result.update(

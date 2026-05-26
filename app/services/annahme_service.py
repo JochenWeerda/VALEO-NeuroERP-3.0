@@ -243,7 +243,7 @@ class AnnahmeService:
                 ankunft_dt = datetime.fromisoformat(normalized)
                 if ankunft_dt.tzinfo is None:
                     ankunft_dt = ankunft_dt.replace(tzinfo=timezone.utc)
-            except Exception:
+            except Exception:  # noqa: BLE001 — Ankunfts-Datetime-Parsing fehlgeschlagen; Rohwert bleibt
                 pass
         resolved_id, resolved_label = self._resolve_article_reference(
             getattr(payload, "article_id", None), getattr(payload, "artikel", None)

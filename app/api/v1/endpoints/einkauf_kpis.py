@@ -13,7 +13,10 @@ GET /einkauf/kpis
 """
 from __future__ import annotations
 
+import logging
 from typing import Any, Optional
+
+logger = logging.getLogger(__name__)
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy import text
@@ -59,8 +62,8 @@ def get_kpis(
             date_params,
         ).scalar()
         on_time_delivery_rate = float(row) if row is not None else None
-    except Exception:
-        pass
+    except Exception as e:  # noqa: BLE001
+        logger.debug("KPI-Abfrage nicht verfügbar (Tabelle fehlt oder Schema-Fehler): %s", e)
 
     # ── Fill Rate ─────────────────────────────────────────────────────────
     fill_rate: Optional[float] = None
@@ -77,8 +80,8 @@ def get_kpis(
             date_params,
         ).scalar()
         fill_rate = float(row) if row is not None else None
-    except Exception:
-        pass
+    except Exception as e:  # noqa: BLE001
+        logger.debug("KPI-Abfrage nicht verfügbar (Tabelle fehlt oder Schema-Fehler): %s", e)
 
     # ── Price Variance ────────────────────────────────────────────────────
     price_variance: Optional[float] = None
@@ -94,8 +97,8 @@ def get_kpis(
             date_params,
         ).scalar()
         price_variance = float(row) if row is not None else None
-    except Exception:
-        pass
+    except Exception as e:  # noqa: BLE001
+        logger.debug("KPI-Abfrage nicht verfügbar (Tabelle fehlt oder Schema-Fehler): %s", e)
 
     # ── Avg Lead Time ─────────────────────────────────────────────────────
     avg_lead_time_days: Optional[float] = None
@@ -112,8 +115,8 @@ def get_kpis(
             date_params,
         ).scalar()
         avg_lead_time_days = round(float(row), 2) if row is not None else None
-    except Exception:
-        pass
+    except Exception as e:  # noqa: BLE001
+        logger.debug("KPI-Abfrage nicht verfügbar (Tabelle fehlt oder Schema-Fehler): %s", e)
 
     # ── Top-5 Suppliers by Spend ──────────────────────────────────────────
     top_5_suppliers: list[dict[str, Any]] = []
@@ -133,8 +136,8 @@ def get_kpis(
         top_5_suppliers = [
             {"supplier_id": str(r[0]), "total_spend": float(r[1])} for r in rows
         ]
-    except Exception:
-        pass
+    except Exception as e:  # noqa: BLE001
+        logger.debug("KPI-Abfrage nicht verfügbar (Tabelle fehlt oder Schema-Fehler): %s", e)
 
     # ── ABC-Analyse ───────────────────────────────────────────────────────
     abc_analysis: dict[str, Any] = {}
@@ -183,8 +186,8 @@ def get_kpis(
                 "spend": float(r[2]) if r[2] else 0.0,
                 "spend_percent": round(float(r[2]) / grand * 100, 2) if r[2] and grand else 0.0,
             }
-    except Exception:
-        pass
+    except Exception as e:  # noqa: BLE001
+        logger.debug("KPI-Abfrage nicht verfügbar (Tabelle fehlt oder Schema-Fehler): %s", e)
 
     return {
         "date_from": date_from,

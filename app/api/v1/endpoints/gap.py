@@ -1272,7 +1272,7 @@ def _execute_gap_pipeline_optimized(year: int, csv_path: Optional[str] = None, b
                 progress = PipelineProgress(batch_id, year)
                 error_msg = f"Optimierte Pipeline-Fehler: {str(e)}"
                 progress.error(error_msg)
-        except Exception:
+        except Exception:  # noqa: BLE001 — Progress-Reporting fehlgeschlagen; Fehler wird unten geloggt
             pass
             
         print("[GAP OPTIMIZED PIPELINE] === OPTIMIZED PIPELINE FAILED ===")
@@ -1339,7 +1339,7 @@ def _execute_gap_pipeline_with_plz_filter(year: int, csv_path: Optional[str] = N
                 progress = PipelineProgress(batch_id, year)
                 error_msg = f"Pipeline-Fehler: {str(e)}"
                 progress.error(error_msg)
-        except Exception:
+        except Exception:  # noqa: BLE001 — Progress-Reporting fehlgeschlagen; Fehler folgt im print
             pass
             
         print("[GAP PIPELINE] === PIPELINE FAILED ===")

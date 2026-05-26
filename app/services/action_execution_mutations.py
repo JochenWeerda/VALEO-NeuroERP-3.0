@@ -62,7 +62,7 @@ def apply_accepted_action_mutations(
     except Exception:
         try:
             db.rollback()
-        except Exception:
+        except Exception:  # noqa: BLE001 — Metrik-Inkrement fehlgeschlagen (Prometheus nicht verfügbar)
             pass
         raise
 
@@ -118,11 +118,11 @@ def _persist_kernel_action_audit_no_commit(
             from app.core.metrics import neuro_kernel_audit_inserts_total
 
             neuro_kernel_audit_inserts_total.inc()
-        except Exception:
+        except Exception:  # noqa: BLE001 — Metrik-Inkrement fehlgeschlagen (Prometheus nicht verfügbar)
             pass
     except Exception as exc:
         logger.debug("Kernel action audit skipped: %s", exc)
         try:
             db.rollback()
-        except Exception:
+        except Exception:  # noqa: BLE001 — Metrik-Inkrement fehlgeschlagen (Prometheus nicht verfügbar)
             pass

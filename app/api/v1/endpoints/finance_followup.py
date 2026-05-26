@@ -304,7 +304,7 @@ async def export_mahnwesen(
         row = result.fetchone()
         if row:
             record_count = row.cnt or 0
-    except Exception:
+    except Exception:  # noqa: BLE001 — optionale DB-Abfrage; Fallback greift
         pass
 
     dms_meta: dict = {"dms_upload": None, "dms_url": None}
@@ -433,7 +433,7 @@ async def get_lastschrift_preview(
         if row:
             total_amount = float(row.total_amount or 0)
             debitor_count = row.debitor_count or 0
-    except Exception:
+    except Exception:  # noqa: BLE001 — optionale DB-Abfrage; Fallback greift
         pass
 
     try:
@@ -451,7 +451,7 @@ async def get_lastschrift_preview(
         if mrow:
             mandate_valid_count = mrow.valid_count or 0
             mandate_expired_count = mrow.expired_count or 0
-    except Exception:
+    except Exception:  # noqa: BLE001 — optionale DB-Abfrage; Fallback greift
         pass
 
     preview = LastschriftPreview(
@@ -490,7 +490,7 @@ async def export_lastschriften(
         row = result.fetchone()
         if row:
             record_count = row.cnt or 0
-    except Exception:
+    except Exception:  # noqa: BLE001 — optionale DB-Abfrage; Fallback greift
         pass
 
     dms_meta: dict = {}
@@ -618,7 +618,7 @@ async def get_kassenfolge_preview(
         ).fetchone()
         if row:
             total = int(row.cnt or 0)
-    except Exception:
+    except Exception:  # noqa: BLE001 — optionale DB-Abfrage; Fallback greift
         pass
 
     try:
@@ -669,7 +669,7 @@ async def export_kassenfolge(
         ).fetchone()
         if row:
             record_count = int(row.cnt or 0)
-    except Exception:
+    except Exception:  # noqa: BLE001 — optionale DB-Abfrage; Fallback greift
         pass
 
     fmt = str(body.get("format") or "zip")[:32]

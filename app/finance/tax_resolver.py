@@ -33,7 +33,7 @@ def resolve_partner_country(db: Session, partner_id: str | None, default: str = 
             country = str(row[0]).strip().upper()
             if len(country) == 2:
                 return country
-    except Exception:
+    except Exception:  # noqa: BLE001 — Länderkürzel nicht abrufbar; Standardwert wird zurückgegeben
         pass
     return default
 

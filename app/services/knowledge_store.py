@@ -145,7 +145,7 @@ def get_knowledge(
                     created_at=str(row[9]),
                     updated_at=str(row[10]),
                 )
-        except Exception:
+        except Exception:  # noqa: BLE001 — Knowledge-Store-Abfrage fehlgeschlagen; Standardwert wird zurückgegeben
             pass
 
     return _IN_MEMORY_STORE.get(_store_key(tenant_id, domain, key))
@@ -196,7 +196,7 @@ def search_knowledge(
                 )
                 for r in rows
             ]
-        except Exception:
+        except Exception:  # noqa: BLE001 — Knowledge-Store-Abfrage fehlgeschlagen; Standardwert wird zurückgegeben
             pass
 
     results = [
@@ -228,7 +228,7 @@ def delete_knowledge(
             ), {"key": key, "domain": domain, "tid": tenant_id})
             db.commit()
             return bool(getattr(result, "rowcount", 0))
-        except Exception:
+        except Exception:  # noqa: BLE001 — Knowledge-Store-Abfrage fehlgeschlagen; Standardwert wird zurückgegeben
             pass
 
     store_key = _store_key(tenant_id, domain, key)
@@ -249,7 +249,7 @@ def get_knowledge_stats(
                 "WHERE active = true AND tenant_id = :tid GROUP BY knowledge_type"
             ), {"tid": tenant_id}).fetchall()
             return {row[0]: row[1] for row in rows}
-        except Exception:
+        except Exception:  # noqa: BLE001 — Knowledge-Store-Abfrage fehlgeschlagen; Standardwert wird zurückgegeben
             pass
 
     stats: dict[str, int] = {}

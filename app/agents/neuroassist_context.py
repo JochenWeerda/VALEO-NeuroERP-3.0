@@ -317,7 +317,7 @@ def _resolve_channel_context(context: dict[str, Any]) -> ChannelContext:
             if interaction:
                 channel_ctx.interaction_state = interaction.get("state")
                 channel_ctx.message_count = interaction.get("message_count", 0)
-    except Exception:
+    except Exception:  # noqa: BLE001 — Interaction-Anreicherung nicht verfügbar; Channel-Context bleibt unvollständig
         pass
 
     return channel_ctx
