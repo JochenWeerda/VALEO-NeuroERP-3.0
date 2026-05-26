@@ -24,7 +24,10 @@ _JWKS_CACHE: Dict[str, Any] = {"url": None, "keys": None, "expires_at": 0.0}
 _JWKS_CACHE_TTL = 60 * 60  # 1 hour
 
 
-async def require_bearer_token(request: Request) -> str:
+async def require_bearer_token(
+    request: Request,
+    credentials: HTTPAuthorizationCredentials | None = Depends(http_bearer),
+) -> str:
     """
     Validate bearer token and attach claims to the request state.
     Supports a development token (API_DEV_TOKEN) and OIDC JWT validation.
@@ -32,18 +35,16 @@ async def require_bearer_token(request: Request) -> str:
     if _is_path_exempt(request.url.path):
         return ""
 
-    # WebSocket connections handle auth at the handler level (query-param token)
-    if request.scope.get("type") == "websocket":
-        return ""
+    if not isinstance(credentials, HTTPAuthorizationCredentials):
+        credentials = await http_bearer(request)
 
-    auth_header = request.headers.get("authorization", "")
-    if not auth_header.lower().startswith("bearer "):
+    if credentials is None or credentials.scheme.lower() != "bearer":
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Missing bearer token",
         )
 
-    token = auth_header[7:].strip()
+    token = credentials.credentials.strip()
     expected = settings.API_DEV_TOKEN
 
     if expected and token == expected:

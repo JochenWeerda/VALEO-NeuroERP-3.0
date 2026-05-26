@@ -482,6 +482,8 @@ app.include_router(gdpr_router, prefix="/api/v1/gdpr", tags=["GDPR"])
 # Include WebSocket API (Phase 3 - Realtime)
 from app.api.v1.endpoints.websocket import router as websocket_router
 app.include_router(websocket_router, prefix="/api/v1", tags=["WebSocket"])
+from app.api.v1.endpoints.copilot_ws import router as copilot_ws_router
+app.include_router(copilot_ws_router, prefix="/api/v1", tags=["WebSocket", "copilot"])
 
 # Include Authentication Router (⚠️ NUR FÜR ENTWICKLUNG!)
 app.include_router(auth_router)
