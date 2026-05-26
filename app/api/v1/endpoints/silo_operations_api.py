@@ -62,7 +62,15 @@ def create_silo_zelle(req: SiloZelleCreateRequest, db: Session = Depends(get_db)
     return _zelle_to_dict(row)
 
 
-@router.get("/zellen/{tenant_id}")
+@router.get("/zellen/{zelle_id}")
+def get_silo_zelle(zelle_id: str, db: Session = Depends(get_db)):
+    row = db.query(SiloZelleDB).filter(SiloZelleDB.silo_id == zelle_id).first()
+    if not row:
+        raise HTTPException(404, "Silo-Zelle nicht gefunden")
+    return _zelle_to_dict(row)
+
+
+@router.get("/by-tenant/{tenant_id}")
 def list_zellen(tenant_id: str, db: Session = Depends(get_db)):
     rows = db.query(SiloZelleDB).filter(SiloZelleDB.tenant_id == tenant_id).all()
     return [_zelle_to_dict(r) for r in rows]
