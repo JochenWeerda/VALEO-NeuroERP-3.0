@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import datetime, timezone
 from enum import Enum
 from typing import Optional
 
@@ -30,11 +30,11 @@ class AgentContext(BaseModel):
     def ist_aktiv(self, jetzt: Optional[datetime] = None) -> bool:
         if self.status != AgentContextStatus.AKTIV:
             return False
-        jetzt = jetzt or datetime.utcnow()
+        jetzt = jetzt or datetime.now(timezone.utc)
         return jetzt < self.context_expires_at
 
     def verbleibende_sekunden(self, jetzt: Optional[datetime] = None) -> float:
-        jetzt = jetzt or datetime.utcnow()
+        jetzt = jetzt or datetime.now(timezone.utc)
         return max(0.0, (self.context_expires_at - jetzt).total_seconds())
 
     def widerrufen(self) -> "AgentContext":
@@ -69,7 +69,7 @@ class AgentContextStore(BaseModel):
         return True
 
     def aktive_kontexte(self, tenant_id: str, jetzt: Optional[datetime] = None) -> list[AgentContext]:
-        jetzt = jetzt or datetime.utcnow()
+        jetzt = jetzt or datetime.now(timezone.utc)
         return [
             context
             for context in self.kontexte.values()
@@ -77,7 +77,7 @@ class AgentContextStore(BaseModel):
         ]
 
     def bereinige_abgelaufene(self, jetzt: Optional[datetime] = None) -> int:
-        jetzt = jetzt or datetime.utcnow()
+        jetzt = jetzt or datetime.now(timezone.utc)
         count = 0
         for context in self.kontexte.values():
             if context.status == AgentContextStatus.AKTIV and jetzt >= context.context_expires_at:
