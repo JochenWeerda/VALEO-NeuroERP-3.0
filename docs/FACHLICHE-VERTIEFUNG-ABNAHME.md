@@ -67,6 +67,29 @@ Wave-10-EKZZ (Slice `FACHLICHE-VERTIEFUNG-UX-W10-EKZZ-001`, 2026-05-23):
 
 Waves 11-13 bleiben backend-only. Das ist kein verdeckter Abschluss, sondern dokumentierter Produktumfang.
 
+Wave-14-UX (Slice `FACHLICHE-VERTIEFUNG-UX-W14-001`, 2026-05-24):
+
+- Rabattgruppen/-klassen/-saetze: `packages/frontend-web/src/pages/preise/rabattgruppen.tsx` unter `/preise/rabattgruppen`.
+- Betriebsstaetten: `packages/frontend-web/src/pages/stammdaten/betriebsstaetten.tsx` unter `/stammdaten/betriebsstaetten`.
+- Playwright-Gates: `fachliche-vertiefung-rabattgruppen.spec.ts`, `fachliche-vertiefung-betriebsstaetten.spec.ts`.
+
+Wave-15-UX (Slice `FACHLICHE-VERTIEFUNG-UX-W15-001`, 2026-05-24):
+
+- Vertreterstamm: `packages/frontend-web/src/pages/crm/vertreterstamm.tsx` unter `/crm/vertreterstamm`.
+- Hausbankenstamm: `packages/frontend-web/src/pages/stammdaten/hausbanken.tsx` unter `/stammdaten/hausbanken`.
+- Playwright-Gates: `fachliche-vertiefung-vertreterstamm.spec.ts`, `fachliche-vertiefung-hausbanken.spec.ts`.
+
+Wave-16-UX (Slice `FACHLICHE-VERTIEFUNG-UX-W16-001`, 2026-05-25):
+
+- Integration Vertreterstamm x Vertreterprovisionsgruppen: `provisionsgruppe_nr` in Vertreterstamm-Maske als Select aus echten Provisionsgruppen.
+- Playwright-Gate: `fachliche-vertiefung-vertreterstamm-prov-integration.spec.ts`.
+
+Wave-17-UX (Slice `FACHLICHE-VERTIEFUNG-UX-W17-001`, 2026-05-26):
+
+- Zu-/Abschlaggruppen [ZAGR], Zu-/Abschlagklassen [ZAKL] und Konditionen [ZAK]: `packages/frontend-web/src/pages/preise/zu-abschlaggruppen.tsx` unter `/preise/zu-abschlaggruppen`.
+- API-Routen: `GET/POST/DELETE /api/v1/preise/zu-abschlaege/gruppen|klassen`, `GET/POST /api/v1/preise/zu-abschlaege/konditionen`.
+- Playwright-Gate: `fachliche-vertiefung-zu-abschlaege.spec.ts` (4/4 gruen).
+
 ## Gate-Status
 
 | Gate | Status | Begruendung |
