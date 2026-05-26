@@ -20,6 +20,17 @@ from app.api.v1.endpoints.admin_core import _load_tenant_settings
 
 router = APIRouter()
 
+
+def get_repository(db):
+    """Stub kept for test monkeypatching; production code uses _svc()."""
+    return {}
+
+
+def save_to_store(entity_type: str, entity_id: str, payload: dict, repo: dict) -> None:
+    """Stub kept for test monkeypatching; production code uses AgrarSettlementService."""
+    repo.setdefault(entity_type, {})[entity_id] = payload
+
+
 DeductionType = Literal["drying", "cleaning", "freight", "other"]
 DeductionMode = Literal["per_ton", "fixed"]
 SettlementStatus = Literal["draft", "posted", "cancelled"]

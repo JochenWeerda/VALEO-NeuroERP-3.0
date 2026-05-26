@@ -174,7 +174,7 @@ def test_erechnung_zugferd_detected():
 </rsm:CrossIndustryInvoice>"""
 
     file = _make_upload_file("rechnung.xml", content)
-    result = asyncio.get_event_loop().run_until_complete(
+    result = asyncio.run(
         import_erechnung(file=file, db=_raising_db(), tenant_id=TENANT)
     )
     assert result.format == "ZUGFERD_2_1"
@@ -192,7 +192,7 @@ def test_erechnung_xrechnung_detected():
 </ubl:Invoice>"""
 
     file = _make_upload_file("xrechnung.xml", content)
-    result = asyncio.get_event_loop().run_until_complete(
+    result = asyncio.run(
         import_erechnung(file=file, db=_raising_db(), tenant_id=TENANT)
     )
     assert result.format == "XRECHNUNG_3_0"
@@ -207,7 +207,7 @@ def test_erechnung_unknown_format():
     content = b"This is a plain text invoice document without XML markup."
     file = _make_upload_file("rechnung.txt", content)
 
-    result = asyncio.get_event_loop().run_until_complete(
+    result = asyncio.run(
         import_erechnung(file=file, db=_raising_db(), tenant_id=TENANT)
     )
     assert result.format == "UNKNOWN"
@@ -227,7 +227,7 @@ def test_erechnung_rechnungsnummer_extracted_zugferd():
 </rsm:CrossIndustryInvoice>"""
 
     file = _make_upload_file("re.xml", content)
-    result = asyncio.get_event_loop().run_until_complete(
+    result = asyncio.run(
         import_erechnung(file=file, db=_raising_db(), tenant_id=TENANT)
     )
     assert result.rechnungsnummer == "RE-2026-999"

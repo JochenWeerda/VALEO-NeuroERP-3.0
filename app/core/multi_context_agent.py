@@ -4,7 +4,7 @@ from datetime import datetime, timezone
 from enum import Enum
 from typing import Optional
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 
 from app.core.tenant_isolation_guard import IsolationDecision, TenantIsolationGuard
 
@@ -26,6 +26,13 @@ class AgentContext(BaseModel):
     erstellt_am: datetime
     status: AgentContextStatus = AgentContextStatus.AKTIV
     schema_version: int = 1
+
+    @field_validator("context_expires_at", "erstellt_am", mode="before")
+    @classmethod
+    def _ensure_utc(cls, v: datetime) -> datetime:
+        if isinstance(v, datetime) and v.tzinfo is None:
+            return v.replace(tzinfo=timezone.utc)
+        return v
 
     def ist_aktiv(self, jetzt: Optional[datetime] = None) -> bool:
         if self.status != AgentContextStatus.AKTIV:
