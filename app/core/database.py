@@ -30,11 +30,15 @@ Base = declarative_base()
 
 def get_db() -> Session:
     """
-    Dependency to get database session
+    Dependency to get database session.
+    Rolls back on any unhandled exception so partial state is never left behind.
     """
     db = SessionLocal()
     try:
         yield db
+    except Exception:
+        db.rollback()
+        raise
     finally:
         db.close()
 

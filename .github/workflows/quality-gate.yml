@@ -143,6 +143,15 @@ jobs:
       - name: Check migrations (single head)
         run: python scripts/check_alembic_single_head.py
 
+      - name: SQL injection check (f-string in text())
+        run: python scripts/check_sql_fstrings.py
+
+      - name: Tenant isolation audit
+        run: python scripts/check_tenant_isolation.py
+
+      - name: Response model coverage (regression check)
+        run: python scripts/check_response_models.py --threshold 843
+
       - name: Check core contamination guardrail
         run: python scripts/check_no_core_contamination.py
 
