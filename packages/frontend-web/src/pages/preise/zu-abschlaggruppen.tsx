@@ -8,8 +8,11 @@ import {
   useZuAbschlagklassen,
   useCreateZuAbschlagklasse,
   useDeleteZuAbschlagklasse,
+  useZuAbschlagKonditionen,
+  useCreateZuAbschlagKondition,
   type Richtung,
-} from '@/lib/api/zu-abschlaege'
+  type KonditionTyp,
+} from '@/lib/api/zuAbschlaggruppen'
 import {
   Card,
   CardContent,
@@ -51,33 +54,46 @@ type KlasseFormData = {
   richtung: Richtung
 }
 
+type KonditionFormData = {
+  gruppe_id: string
+  klasse_id: string
+  kondition_typ: KonditionTyp
+  wert: string
+  gueltig_ab: string
+  gueltig_bis: string
+  beschreibung: string
+}
+
 function RichtungBadge({ richtung }: { richtung: Richtung }) {
   return (
     <Badge variant={richtung === 'vk' ? 'default' : 'secondary'}>
-      {richtung === 'vk' ? 'Verkauf' : 'Einkauf'}
+      {richtung.toUpperCase()}
     </Badge>
   )
 }
 
+// ── Gruppen-Tab ───────────────────────────────────────────────────────────────
+
 function GruppenTab() {
-  const [filterRichtung, setFilterRichtung] = useState<Richtung | undefined>()
-  const [deletingKey, setDeletingKey] = useState<string | null>(null)
-  const { data: gruppen, isLoading } = useZuAbschlaggruppen(filterRichtung)
+  const { data: gruppen, isLoading, isError } = useZuAbschlaggruppen()
   const createMutation = useCreateZuAbschlaggruppe()
   const deleteMutation = useDeleteZuAbschlaggruppe()
+  const [deletingKey, setDeletingKey] = useState<string | null>(null)
 
-  const { register, handleSubmit, reset, setValue, watch, formState: { errors, isSubmitting } } = useForm<GruppeFormData>({
-    defaultValues: { richtung: 'vk' },
-  })
+  const { register, handleSubmit, reset, setValue, watch, formState: { isSubmitting } } =
+    useForm<GruppeFormData>({
+      defaultValues: { gruppe_nr: '', bezeichnung: '', richtung: 'vk' },
+    })
+
   const richtungValue = watch('richtung')
 
   const onSubmit = async (data: GruppeFormData) => {
     try {
       await createMutation.mutateAsync(data)
-      toast.success(`Zu-/Abschlaggruppe "${data.gruppe_nr}" angelegt.`)
-      reset({ richtung: 'vk' })
+      toast.success(`Zu-/Abschlaggruppe ${data.gruppe_nr} angelegt.`)
+      reset()
     } catch {
-      toast.error('Fehler beim Anlegen der Gruppe. Prüfen Sie Duplikate.')
+      toast.error('Fehler beim Anlegen der Zu-/Abschlaggruppe.')
     }
   }
 
@@ -87,64 +103,56 @@ function GruppenTab() {
     setDeletingKey(key)
     try {
       await deleteMutation.mutateAsync({ gruppe_nr, richtung })
-      toast.success(`Gruppe "${gruppe_nr}" deaktiviert.`)
+      toast.success(`Zu-/Abschlaggruppe ${gruppe_nr} deaktiviert.`)
     } catch {
-      toast.error('Fehler beim Deaktivieren.')
+      toast.error('Fehler beim Deaktivieren der Zu-/Abschlaggruppe.')
     } finally {
       setDeletingKey(null)
     }
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       <Card>
         <CardHeader>
-          <CardTitle>Neue Zu-/Abschlaggruppe</CardTitle>
+          <CardTitle>Neue Zu-/Abschlaggruppe [ZAGR]</CardTitle>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSubmit(onSubmit)} className="grid grid-cols-1 gap-4 sm:grid-cols-4">
-            <div className="space-y-1">
-              <Label htmlFor="gruppe_nr">Gruppen-Nr.</Label>
+          <form onSubmit={handleSubmit(onSubmit)} noValidate className="grid grid-cols-1 gap-3 sm:grid-cols-4">
+            <div>
+              <Label htmlFor="zagr_nr">Gruppen-Nr.</Label>
               <Input
-                id="gruppe_nr"
-                {...register('gruppe_nr', { required: 'Pflichtfeld' })}
-                placeholder="z.B. ZAG-001"
-                aria-invalid={!!errors.gruppe_nr}
+                id="zagr_nr"
+                placeholder="z. B. ZAGR-01"
+                {...register('gruppe_nr', { required: true })}
               />
-              {errors.gruppe_nr && (
-                <p className="text-destructive text-xs">{errors.gruppe_nr.message}</p>
-              )}
             </div>
-            <div className="space-y-1 sm:col-span-2">
-              <Label htmlFor="bezeichnung_gr">Bezeichnung</Label>
+            <div className="sm:col-span-2">
+              <Label htmlFor="zagr_bez">Bezeichnung</Label>
               <Input
-                id="bezeichnung_gr"
-                {...register('bezeichnung', { required: 'Pflichtfeld' })}
-                placeholder="z.B. Qualitätszuschlag Weizen"
-                aria-invalid={!!errors.bezeichnung}
+                id="zagr_bez"
+                placeholder="z. B. Frachtaufschlag Fern"
+                {...register('bezeichnung', { required: true })}
               />
-              {errors.bezeichnung && (
-                <p className="text-destructive text-xs">{errors.bezeichnung.message}</p>
-              )}
             </div>
-            <div className="space-y-1">
-              <Label htmlFor="richtung_gr">Richtung</Label>
+            <div>
+              <Label htmlFor="zagr_richtung">Richtung</Label>
               <Select
                 value={richtungValue}
                 onValueChange={(v) => setValue('richtung', v as Richtung)}
               >
-                <SelectTrigger id="richtung_gr" aria-label="Richtung Gruppe">
+                <SelectTrigger id="zagr_richtung" aria-label="Richtung der Zu-/Abschlaggruppe">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="vk">Verkauf (VK)</SelectItem>
-                  <SelectItem value="ek">Einkauf (EK)</SelectItem>
+                  <SelectItem value="vk">VK</SelectItem>
+                  <SelectItem value="ek">EK</SelectItem>
                 </SelectContent>
               </Select>
             </div>
             <div className="sm:col-span-4 flex justify-end">
-              <Button type="submit" disabled={isSubmitting} aria-label="Gruppe anlegen">
-                <Plus className="mr-2 h-4 w-4" />
+              <Button type="submit" disabled={isSubmitting} aria-label="Zu-/Abschlaggruppe anlegen">
+                <Plus className="mr-1 h-4 w-4" aria-hidden="true" />
                 Anlegen
               </Button>
             </div>
@@ -153,60 +161,53 @@ function GruppenTab() {
       </Card>
 
       <Card>
-        <CardHeader className="flex flex-row items-center justify-between">
+        <CardHeader>
           <CardTitle>Zu-/Abschlaggruppen</CardTitle>
-          <Select
-            value={filterRichtung ?? 'all'}
-            onValueChange={(v) => setFilterRichtung(v === 'all' ? undefined : (v as Richtung))}
-          >
-            <SelectTrigger className="w-36" aria-label="Richtung filtern">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Alle</SelectItem>
-              <SelectItem value="vk">Verkauf (VK)</SelectItem>
-              <SelectItem value="ek">Einkauf (EK)</SelectItem>
-            </SelectContent>
-          </Select>
         </CardHeader>
         <CardContent>
-          {isLoading ? (
+          {isLoading && (
             <div className="space-y-2">
-              {[...Array(4)].map((_, i) => <Skeleton key={i} className="h-10 w-full" />)}
+              {[0, 1, 2].map((i) => <Skeleton key={i} className="h-9 w-full" />)}
             </div>
-          ) : !gruppen?.length ? (
-            <p className="text-muted-foreground text-sm py-4 text-center">
-              Keine Gruppen vorhanden.
-            </p>
-          ) : (
+          )}
+          {isError && (
+            <p className="text-sm text-destructive">Fehler beim Laden der Zu-/Abschlaggruppen.</p>
+          )}
+          {!isLoading && !isError && (!gruppen || gruppen.length === 0) && (
+            <p className="text-sm text-muted-foreground">Keine Zu-/Abschlaggruppen vorhanden.</p>
+          )}
+          {gruppen && gruppen.length > 0 && (
             <Table>
               <TableHeader>
                 <TableRow>
                   <TableHead>Gruppen-Nr.</TableHead>
                   <TableHead>Bezeichnung</TableHead>
                   <TableHead>Richtung</TableHead>
-                  <TableHead className="w-16" />
+                  <TableHead aria-label="Aktionen" />
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {gruppen.map((g) => (
-                  <TableRow key={g.id}>
-                    <TableCell className="font-mono">{g.gruppe_nr}</TableCell>
-                    <TableCell>{g.bezeichnung}</TableCell>
-                    <TableCell><RichtungBadge richtung={g.richtung} /></TableCell>
-                    <TableCell>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        aria-label={`Gruppe ${g.gruppe_nr} löschen`}
-                        disabled={deletingKey === `${g.gruppe_nr}/${g.richtung}`}
-                        onClick={() => handleDelete(g.gruppe_nr, g.richtung)}
-                      >
-                        <Trash2 className="h-4 w-4 text-destructive" />
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                ))}
+                {gruppen.map((g) => {
+                  const key = `${g.gruppe_nr}/${g.richtung}`
+                  return (
+                    <TableRow key={g.id}>
+                      <TableCell className="font-mono text-sm">{g.gruppe_nr}</TableCell>
+                      <TableCell>{g.bezeichnung}</TableCell>
+                      <TableCell><RichtungBadge richtung={g.richtung} /></TableCell>
+                      <TableCell className="text-right">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          disabled={deletingKey === key}
+                          onClick={() => handleDelete(g.gruppe_nr, g.richtung)}
+                          aria-label={`Zu-/Abschlaggruppe ${g.gruppe_nr} deaktivieren`}
+                        >
+                          <Trash2 className="h-4 w-4" aria-hidden="true" />
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  )
+                })}
               </TableBody>
             </Table>
           )}
@@ -216,25 +217,28 @@ function GruppenTab() {
   )
 }
 
+// ── Klassen-Tab ───────────────────────────────────────────────────────────────
+
 function KlassenTab() {
-  const [filterRichtung, setFilterRichtung] = useState<Richtung | undefined>()
-  const [deletingKey, setDeletingKey] = useState<string | null>(null)
-  const { data: klassen, isLoading } = useZuAbschlagklassen(filterRichtung)
+  const { data: klassen, isLoading, isError } = useZuAbschlagklassen()
   const createMutation = useCreateZuAbschlagklasse()
   const deleteMutation = useDeleteZuAbschlagklasse()
+  const [deletingKey, setDeletingKey] = useState<string | null>(null)
 
-  const { register, handleSubmit, reset, setValue, watch, formState: { errors, isSubmitting } } = useForm<KlasseFormData>({
-    defaultValues: { richtung: 'vk' },
-  })
+  const { register, handleSubmit, reset, setValue, watch, formState: { isSubmitting } } =
+    useForm<KlasseFormData>({
+      defaultValues: { klasse_nr: '', bezeichnung: '', richtung: 'vk' },
+    })
+
   const richtungValue = watch('richtung')
 
   const onSubmit = async (data: KlasseFormData) => {
     try {
       await createMutation.mutateAsync(data)
-      toast.success(`Zu-/Abschlagklasse "${data.klasse_nr}" angelegt.`)
-      reset({ richtung: 'vk' })
+      toast.success(`Zu-/Abschlagklasse ${data.klasse_nr} angelegt.`)
+      reset()
     } catch {
-      toast.error('Fehler beim Anlegen der Klasse. Prüfen Sie Duplikate.')
+      toast.error('Fehler beim Anlegen der Zu-/Abschlagklasse.')
     }
   }
 
@@ -244,64 +248,56 @@ function KlassenTab() {
     setDeletingKey(key)
     try {
       await deleteMutation.mutateAsync({ klasse_nr, richtung })
-      toast.success(`Klasse "${klasse_nr}" deaktiviert.`)
+      toast.success(`Zu-/Abschlagklasse ${klasse_nr} deaktiviert.`)
     } catch {
-      toast.error('Fehler beim Deaktivieren.')
+      toast.error('Fehler beim Deaktivieren der Zu-/Abschlagklasse.')
     } finally {
       setDeletingKey(null)
     }
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       <Card>
         <CardHeader>
-          <CardTitle>Neue Zu-/Abschlagklasse</CardTitle>
+          <CardTitle>Neue Zu-/Abschlagklasse [ZAKL]</CardTitle>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSubmit(onSubmit)} className="grid grid-cols-1 gap-4 sm:grid-cols-4">
-            <div className="space-y-1">
-              <Label htmlFor="klasse_nr">Klassen-Nr.</Label>
+          <form onSubmit={handleSubmit(onSubmit)} noValidate className="grid grid-cols-1 gap-3 sm:grid-cols-4">
+            <div>
+              <Label htmlFor="zakl_nr">Klassen-Nr.</Label>
               <Input
-                id="klasse_nr"
-                {...register('klasse_nr', { required: 'Pflichtfeld' })}
-                placeholder="z.B. ZAK-001"
-                aria-invalid={!!errors.klasse_nr}
+                id="zakl_nr"
+                placeholder="z. B. ZAKL-A"
+                {...register('klasse_nr', { required: true })}
               />
-              {errors.klasse_nr && (
-                <p className="text-destructive text-xs">{errors.klasse_nr.message}</p>
-              )}
             </div>
-            <div className="space-y-1 sm:col-span-2">
-              <Label htmlFor="bezeichnung_kl">Bezeichnung</Label>
+            <div className="sm:col-span-2">
+              <Label htmlFor="zakl_bez">Bezeichnung</Label>
               <Input
-                id="bezeichnung_kl"
-                {...register('bezeichnung', { required: 'Pflichtfeld' })}
-                placeholder="z.B. Großkunde Stufe 1"
-                aria-invalid={!!errors.bezeichnung}
+                id="zakl_bez"
+                placeholder="z. B. Großhändler"
+                {...register('bezeichnung', { required: true })}
               />
-              {errors.bezeichnung && (
-                <p className="text-destructive text-xs">{errors.bezeichnung.message}</p>
-              )}
             </div>
-            <div className="space-y-1">
-              <Label htmlFor="richtung_kl">Richtung</Label>
+            <div>
+              <Label htmlFor="zakl_richtung">Richtung</Label>
               <Select
                 value={richtungValue}
                 onValueChange={(v) => setValue('richtung', v as Richtung)}
               >
-                <SelectTrigger id="richtung_kl" aria-label="Richtung Klasse">
+                <SelectTrigger id="zakl_richtung" aria-label="Richtung der Zu-/Abschlagklasse">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="vk">Verkauf (VK)</SelectItem>
-                  <SelectItem value="ek">Einkauf (EK)</SelectItem>
+                  <SelectItem value="vk">VK</SelectItem>
+                  <SelectItem value="ek">EK</SelectItem>
                 </SelectContent>
               </Select>
             </div>
             <div className="sm:col-span-4 flex justify-end">
-              <Button type="submit" disabled={isSubmitting} aria-label="Klasse anlegen">
-                <Plus className="mr-2 h-4 w-4" />
+              <Button type="submit" disabled={isSubmitting} aria-label="Zu-/Abschlagklasse anlegen">
+                <Plus className="mr-1 h-4 w-4" aria-hidden="true" />
                 Anlegen
               </Button>
             </div>
@@ -310,57 +306,262 @@ function KlassenTab() {
       </Card>
 
       <Card>
-        <CardHeader className="flex flex-row items-center justify-between">
+        <CardHeader>
           <CardTitle>Zu-/Abschlagklassen</CardTitle>
-          <Select
-            value={filterRichtung ?? 'all'}
-            onValueChange={(v) => setFilterRichtung(v === 'all' ? undefined : (v as Richtung))}
-          >
-            <SelectTrigger className="w-36" aria-label="Richtung filtern">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Alle</SelectItem>
-              <SelectItem value="vk">Verkauf (VK)</SelectItem>
-              <SelectItem value="ek">Einkauf (EK)</SelectItem>
-            </SelectContent>
-          </Select>
         </CardHeader>
         <CardContent>
-          {isLoading ? (
+          {isLoading && (
             <div className="space-y-2">
-              {[...Array(4)].map((_, i) => <Skeleton key={i} className="h-10 w-full" />)}
+              {[0, 1, 2].map((i) => <Skeleton key={i} className="h-9 w-full" />)}
             </div>
-          ) : !klassen?.length ? (
-            <p className="text-muted-foreground text-sm py-4 text-center">
-              Keine Klassen vorhanden.
-            </p>
-          ) : (
+          )}
+          {isError && (
+            <p className="text-sm text-destructive">Fehler beim Laden der Zu-/Abschlagklassen.</p>
+          )}
+          {!isLoading && !isError && (!klassen || klassen.length === 0) && (
+            <p className="text-sm text-muted-foreground">Keine Zu-/Abschlagklassen vorhanden.</p>
+          )}
+          {klassen && klassen.length > 0 && (
             <Table>
               <TableHeader>
                 <TableRow>
                   <TableHead>Klassen-Nr.</TableHead>
                   <TableHead>Bezeichnung</TableHead>
                   <TableHead>Richtung</TableHead>
-                  <TableHead className="w-16" />
+                  <TableHead aria-label="Aktionen" />
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {klassen.map((k) => (
+                {klassen.map((k) => {
+                  const key = `${k.klasse_nr}/${k.richtung}`
+                  return (
+                    <TableRow key={k.id}>
+                      <TableCell className="font-mono text-sm">{k.klasse_nr}</TableCell>
+                      <TableCell>{k.bezeichnung}</TableCell>
+                      <TableCell><RichtungBadge richtung={k.richtung} /></TableCell>
+                      <TableCell className="text-right">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          disabled={deletingKey === key}
+                          onClick={() => handleDelete(k.klasse_nr, k.richtung)}
+                          aria-label={`Zu-/Abschlagklasse ${k.klasse_nr} deaktivieren`}
+                        >
+                          <Trash2 className="h-4 w-4" aria-hidden="true" />
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  )
+                })}
+              </TableBody>
+            </Table>
+          )}
+        </CardContent>
+      </Card>
+    </div>
+  )
+}
+
+// ── Konditionen-Tab ───────────────────────────────────────────────────────────
+
+function KonditionenTab() {
+  const { data: gruppen } = useZuAbschlaggruppen()
+  const { data: klassen } = useZuAbschlagklassen()
+  const { data: konditionen, isLoading, isError } = useZuAbschlagKonditionen()
+  const createMutation = useCreateZuAbschlagKondition()
+
+  const { register, handleSubmit, reset, setValue, watch, formState: { isSubmitting } } =
+    useForm<KonditionFormData>({
+      defaultValues: {
+        gruppe_id: '',
+        klasse_id: '',
+        kondition_typ: 'prozent',
+        wert: '',
+        gueltig_ab: '',
+        gueltig_bis: '',
+        beschreibung: '',
+      },
+    })
+
+  const konditionTypValue = watch('kondition_typ')
+  const gruppeIdValue = watch('gruppe_id')
+  const klasseIdValue = watch('klasse_id')
+
+  const onSubmit = async (data: KonditionFormData) => {
+    try {
+      await createMutation.mutateAsync({
+        gruppe_id: data.gruppe_id,
+        klasse_id: data.klasse_id,
+        kondition_typ: data.kondition_typ,
+        wert: parseFloat(data.wert),
+        gueltig_ab: data.gueltig_ab,
+        gueltig_bis: data.gueltig_bis || null,
+        beschreibung: data.beschreibung || null,
+      })
+      toast.success('Zu-/Abschlagkondition angelegt.')
+      reset()
+    } catch {
+      toast.error('Fehler beim Anlegen der Zu-/Abschlagkondition.')
+    }
+  }
+
+  const gruppeLabel = (id: string) => {
+    const g = gruppen?.find((x) => x.id === id)
+    return g ? `${g.gruppe_nr} — ${g.bezeichnung}` : id
+  }
+
+  const klasseLabel = (id: string) => {
+    const k = klassen?.find((x) => x.id === id)
+    return k ? `${k.klasse_nr} — ${k.bezeichnung}` : id
+  }
+
+  return (
+    <div className="space-y-4">
+      <Card>
+        <CardHeader>
+          <CardTitle>Neue Zu-/Abschlagkondition [ZAK]</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleSubmit(onSubmit)} noValidate className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            <div>
+              <Label htmlFor="zak_gruppe">Zu-/Abschlaggruppe</Label>
+              <select
+                id="zak_gruppe"
+                value={gruppeIdValue}
+                onChange={(e) => setValue('gruppe_id', e.target.value)}
+                className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm"
+                aria-label="Zu-/Abschlaggruppe der Kondition"
+              >
+                <option value="">— Gruppe wählen —</option>
+                {(gruppen ?? []).map((g) => (
+                  <option key={g.id} value={g.id}>
+                    {g.gruppe_nr} — {g.bezeichnung} ({g.richtung.toUpperCase()})
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <Label htmlFor="zak_klasse">Zu-/Abschlagklasse</Label>
+              <select
+                id="zak_klasse"
+                value={klasseIdValue}
+                onChange={(e) => setValue('klasse_id', e.target.value)}
+                className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm"
+                aria-label="Zu-/Abschlagklasse der Kondition"
+              >
+                <option value="">— Klasse wählen —</option>
+                {(klassen ?? []).map((k) => (
+                  <option key={k.id} value={k.id}>
+                    {k.klasse_nr} — {k.bezeichnung} ({k.richtung.toUpperCase()})
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <Label htmlFor="zak_typ">Konditionstyp</Label>
+              <Select
+                value={konditionTypValue}
+                onValueChange={(v) => setValue('kondition_typ', v as KonditionTyp)}
+              >
+                <SelectTrigger id="zak_typ" aria-label="Konditionstyp">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="prozent">Prozent (%)</SelectItem>
+                  <SelectItem value="betrag">Betrag (€)</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label htmlFor="zak_wert">
+                Wert ({konditionTypValue === 'prozent' ? '%' : '€'}, negativ = Abschlag)
+              </Label>
+              <Input
+                id="zak_wert"
+                type="number"
+                step="0.01"
+                placeholder="z. B. 2.50 oder -1.00"
+                {...register('wert', { required: true })}
+              />
+            </div>
+            <div>
+              <Label htmlFor="zak_ab">Gültig ab</Label>
+              <Input
+                id="zak_ab"
+                type="date"
+                {...register('gueltig_ab', { required: true })}
+              />
+            </div>
+            <div>
+              <Label htmlFor="zak_bis">Gültig bis (optional)</Label>
+              <Input
+                id="zak_bis"
+                type="date"
+                {...register('gueltig_bis')}
+              />
+            </div>
+            <div className="sm:col-span-2">
+              <Label htmlFor="zak_beschreibung">Beschreibung (optional)</Label>
+              <Input
+                id="zak_beschreibung"
+                placeholder="z. B. Frachtaufschlag Region Nord"
+                {...register('beschreibung')}
+              />
+            </div>
+            <div className="sm:col-span-2 flex justify-end">
+              <Button type="submit" disabled={isSubmitting} aria-label="Zu-/Abschlagkondition anlegen">
+                <Plus className="mr-1 h-4 w-4" aria-hidden="true" />
+                Kondition anlegen
+              </Button>
+            </div>
+          </form>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Aktive Konditionen</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {isLoading && (
+            <div className="space-y-2">
+              {[0, 1, 2].map((i) => <Skeleton key={i} className="h-9 w-full" />)}
+            </div>
+          )}
+          {isError && (
+            <p className="text-sm text-destructive">Fehler beim Laden der Konditionen.</p>
+          )}
+          {!isLoading && !isError && (!konditionen || konditionen.length === 0) && (
+            <p className="text-sm text-muted-foreground">Keine aktiven Konditionen vorhanden.</p>
+          )}
+          {konditionen && konditionen.length > 0 && (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Gruppe</TableHead>
+                  <TableHead>Klasse</TableHead>
+                  <TableHead>Typ</TableHead>
+                  <TableHead className="text-right">Wert</TableHead>
+                  <TableHead>Gültig ab</TableHead>
+                  <TableHead>Gültig bis</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {konditionen.map((k) => (
                   <TableRow key={k.id}>
-                    <TableCell className="font-mono">{k.klasse_nr}</TableCell>
-                    <TableCell>{k.bezeichnung}</TableCell>
-                    <TableCell><RichtungBadge richtung={k.richtung} /></TableCell>
+                    <TableCell className="font-mono text-sm">{gruppeLabel(k.gruppe_id)}</TableCell>
+                    <TableCell className="font-mono text-sm">{klasseLabel(k.klasse_id)}</TableCell>
                     <TableCell>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        aria-label={`Klasse ${k.klasse_nr} löschen`}
-                        disabled={deletingKey === `${k.klasse_nr}/${k.richtung}`}
-                        onClick={() => handleDelete(k.klasse_nr, k.richtung)}
-                      >
-                        <Trash2 className="h-4 w-4 text-destructive" />
-                      </Button>
+                      <Badge variant="outline">
+                        {k.kondition_typ === 'prozent' ? '%' : '€'}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="text-right font-mono text-sm">
+                      {k.wert > 0 ? '+' : ''}{Number(k.wert).toFixed(2)}
+                    </TableCell>
+                    <TableCell className="text-sm">{k.gueltig_ab}</TableCell>
+                    <TableCell className="text-sm text-muted-foreground">
+                      {k.gueltig_bis ?? '—'}
                     </TableCell>
                   </TableRow>
                 ))}
@@ -373,25 +574,36 @@ function KlassenTab() {
   )
 }
 
+// ── Hauptseite ────────────────────────────────────────────────────────────────
+
 export default function ZuAbschlaggruppenPage() {
   return (
     <div className="p-6 space-y-4">
       <div>
         <h1 className="text-2xl font-semibold">Zu-/Abschlaggruppen & -klassen</h1>
-        <p className="text-muted-foreground text-sm mt-1">
-          Konditionsstammdaten: Gruppen werden Artikeln, Klassen werden Kunden/Lieferanten zugeordnet.
+        <p className="text-sm text-muted-foreground mt-1">
+          Konditionsstammdaten — Gruppen [ZAGR] werden Artikeln zugeordnet,
+          Klassen [ZAKL] Kunden/Lieferanten. Die Kombination ergibt die Zu-/Abschläge [ZAK].
         </p>
       </div>
+
       <Tabs defaultValue="gruppen">
         <TabsList>
           <TabsTrigger value="gruppen">Gruppen [ZAGR]</TabsTrigger>
           <TabsTrigger value="klassen">Klassen [ZAKL]</TabsTrigger>
+          <TabsTrigger value="konditionen">Konditionen [ZAK]</TabsTrigger>
         </TabsList>
+
         <TabsContent value="gruppen" className="mt-4">
           <GruppenTab />
         </TabsContent>
+
         <TabsContent value="klassen" className="mt-4">
           <KlassenTab />
+        </TabsContent>
+
+        <TabsContent value="konditionen" className="mt-4">
+          <KonditionenTab />
         </TabsContent>
       </Tabs>
     </div>
