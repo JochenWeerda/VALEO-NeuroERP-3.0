@@ -8,5 +8,9 @@ export const entries: AliasGroupRouteEntry[] = [
   {
     "module": "@/pages/stammdaten/hausbanken",
     "path": "hausbanken"
+  },
+  {
+    "module": "@/pages/stammdaten/mengeneinheiten",
+    "path": "mengeneinheiten"
   }
 ]

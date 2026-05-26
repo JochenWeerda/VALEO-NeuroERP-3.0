@@ -124,5 +124,13 @@ export const entries: AliasGroupRouteEntry[] = [
   {
     "module": "@/pages/fibu/anlagen-suite",
     "path": "quadriga-connector"
+  },
+  {
+    "module": "@/pages/fibu/geschaeftsjahre",
+    "path": "geschaeftsjahre"
+  },
+  {
+    "module": "@/pages/fibu/zahlungsmeldungen",
+    "path": "zahlungsmeldungen"
   }
 ]
