@@ -10,8 +10,10 @@ from typing import Any
 from datetime import datetime
 from contextvars import ContextVar
 
-# Context variable for correlation ID
+# Context variables for structured logging
 correlation_id_var: ContextVar[str] = ContextVar('correlation_id', default='')
+tenant_id_var: ContextVar[str] = ContextVar('tenant_id', default='')
+user_id_var: ContextVar[str] = ContextVar('user_id', default='')
 
 # Backward-compatible module logger for imports like:
 # `from app.core.logging import logger`
@@ -35,19 +37,22 @@ class JSONFormatter(logging.Formatter):
             "line": record.lineno,
         }
         
-        # Add correlation ID if present
-        correlation_id = correlation_id_var.get()
-        if correlation_id:
-            log_data["correlation_id"] = correlation_id
-        
-        # Add extra fields from record
-        if hasattr(record, 'event_id'):
-            log_data["event_id"] = record.event_id
-        if hasattr(record, 'aggregate_id'):
-            log_data["aggregate_id"] = record.aggregate_id
-        if hasattr(record, 'user_id'):
-            log_data["user_id"] = record.user_id
-        
+        # Inject context variables
+        if cid := correlation_id_var.get():
+            log_data["correlation_id"] = cid
+        if tid := tenant_id_var.get():
+            log_data["tenant_id"] = tid
+        if uid := user_id_var.get():
+            log_data["user_id"] = uid
+
+        # Pass through any extra= fields added by the caller
+        _STDLIB_ATTRS = frozenset(logging.LogRecord(
+            "", 0, "", 0, "", (), None
+        ).__dict__.keys()) | {"message", "asctime"}
+        for key, value in record.__dict__.items():
+            if key not in _STDLIB_ATTRS and not key.startswith("_"):
+                log_data[key] = value
+
         # Add exception info if present
         if record.exc_info:
             log_data["exception"] = self.formatException(record.exc_info)
@@ -94,13 +99,23 @@ class PIIRedactionFilter(logging.Filter):
 
 
 def get_correlation_id() -> str:
-    """Get the current correlation ID."""
     return correlation_id_var.get()
 
 
 def set_correlation_id(correlation_id: str) -> None:
-    """Set the correlation ID for the current context."""
     correlation_id_var.set(correlation_id)
+
+
+def set_log_context(
+    *,
+    tenant_id: str = "",
+    user_id: str = "",
+) -> None:
+    """Set per-request context that all log lines will carry automatically."""
+    if tenant_id:
+        tenant_id_var.set(tenant_id)
+    if user_id:
+        user_id_var.set(user_id)
 
 
 def setup_logging(json_format: bool = True):
