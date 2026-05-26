@@ -6,19 +6,61 @@ import pytest
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
+from app.core.database import SessionLocal, get_db
+from app.domains.operations.models import ReklamationDB
 from app.api.v1.endpoints import reklamation_api
+
+# Tenant-IDs used by the three tests — cleaned up before/after each test.
+_TEST_TENANTS = {"TENANT-REK-1", "TENANT-REK-2", "TENANT-REK-3"}
+
+
+def _db_reachable() -> bool:
+    try:
+        db = SessionLocal()
+        from sqlalchemy import text
+        db.execute(text("SELECT 1"))
+        db.close()
+        return True
+    except Exception:
+        return False
 
 
 @pytest.fixture(autouse=True)
 def _clear_store():
+    # _store is an empty dict kept for API compatibility; clearing it is a no-op.
     reklamation_api._store.clear()
+    _purge_test_rows()
     yield
     reklamation_api._store.clear()
+    _purge_test_rows()
+
+
+def _purge_test_rows():
+    """Remove any reklamationen rows created by these tests."""
+    if not _db_reachable():
+        return
+    db = SessionLocal()
+    try:
+        db.query(ReklamationDB).filter(
+            ReklamationDB.tenant_id.in_(_TEST_TENANTS)
+        ).delete(synchronize_session=False)
+        db.commit()
+    finally:
+        db.close()
 
 
 @pytest.fixture
-def client() -> TestClient:
+def client(require_db) -> TestClient:
+    """Standalone FastAPI app wired to the real PostgreSQL DB via get_db override."""
+    def override_get_db():
+        db = SessionLocal()
+        try:
+            yield db
+        finally:
+            db.close()
+
     app = FastAPI()
+    app.dependency_overrides[get_db] = override_get_db
     app.include_router(reklamation_api.router)
     return TestClient(app, raise_server_exceptions=True)
 
