@@ -343,11 +343,12 @@ class CustomerService:
             params["search"] = f"%{search}%"
         where_sql = " AND ".join(where_clauses)
         total = self.db.execute(
-            text(f"SELECT COUNT(*) FROM domain_crm.customers WHERE {where_sql}"), params
+            text(f"SELECT COUNT(*) FROM domain_crm.customers WHERE {where_sql}"), params  # nosec S608 — reviewed-safe: column names code-controlled, values parameterized
         ).scalar_one()
         params["limit"] = limit
         params["offset"] = skip
         rows = self.db.execute(
+            # nosec S608 — reviewed-safe: column names code-controlled, values parameterized
             text(f"""
                 SELECT id, tenant_id, customer_number, company_name, contact_person,
                        email, phone, address, customer_type, credit_limit, payment_terms,

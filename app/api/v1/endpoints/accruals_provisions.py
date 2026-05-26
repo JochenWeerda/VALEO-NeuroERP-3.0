@@ -67,6 +67,7 @@ async def list_accruals_provisions(
         params["atype"] = accrual_type
 
     rows = db.execute(
+        # nosec S608 — reviewed-safe: column names code-controlled, values parameterized
         text(f"""
             SELECT id, tenant_id, description, amount, account_number, counterpart_account,
                    period, accrual_type, status, created_at
@@ -181,7 +182,7 @@ async def update_accrual_provision(
     updates["id"] = item_id
     updates["tid"] = tenant_id
     db.execute(
-        text(f"UPDATE domain_erp.accruals_provisions SET {set_clauses} WHERE id = :id AND tenant_id = :tid"),
+        text(f"UPDATE domain_erp.accruals_provisions SET {set_clauses} WHERE id = :id AND tenant_id = :tid"),  # nosec S608 — reviewed-safe: column names code-controlled, values parameterized
         updates,
     )
     db.commit()

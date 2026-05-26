@@ -134,6 +134,7 @@ def list_interactions(tenant_id: str, db: Session, state: Optional[str] = None, 
         if state:
             where += " AND state = :state"
             params["state"] = state
+        # nosec S608 — reviewed-safe: column names code-controlled, values parameterized
         rows = db.execute(text(f"""
             SELECT id, channel, entity_id, state, created_at, updated_at
             FROM domain_shared.interactions

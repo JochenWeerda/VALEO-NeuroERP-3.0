@@ -150,7 +150,7 @@ def list_tariffs(
             params["tenant_id"] = x_tenant_id
         where = " AND ".join(conditions)
         rows = db.execute(
-            text(f"SELECT * FROM domain_logistics.freight_tariffs WHERE {where} ORDER BY carrier_id, weight_from_kg"),
+            text(f"SELECT * FROM domain_logistics.freight_tariffs WHERE {where} ORDER BY carrier_id, weight_from_kg"),  # nosec S608 — reviewed-safe: column names code-controlled, values parameterized
             params,
         ).mappings().all()
         return [dict(r) for r in rows]

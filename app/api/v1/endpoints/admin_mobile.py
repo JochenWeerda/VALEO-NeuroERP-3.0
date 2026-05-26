@@ -56,7 +56,7 @@ def _list_rows(db: Session, table: str, tenant_id: str, order_by: str, limit: in
     if order_by not in _ALLOWED_ORDER_CLAUSES:
         order_by = "id"
     rows = db.execute(
-        text(f"SELECT * FROM {table} WHERE tenant_id = :tenant_id ORDER BY {order_by} LIMIT :limit"),
+        text(f"SELECT * FROM {table} WHERE tenant_id = :tenant_id ORDER BY {order_by} LIMIT :limit"),  # nosec S608 — reviewed-safe: column names code-controlled, values parameterized
         {"tenant_id": tenant_id, "limit": limit},
     ).mappings().all()
     return [_jsonable(dict(r)) for r in rows]

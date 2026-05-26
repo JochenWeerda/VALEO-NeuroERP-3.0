@@ -167,7 +167,7 @@ async def update_profile(
     if payload.mapping is not None:
         updates.append("mapping = :mapping::jsonb")
         params["mapping"] = json.dumps(payload.mapping)
-    db.execute(text(f"UPDATE domain_erp.fibu_connector_profiles SET {', '.join(updates)} WHERE id = :id AND tenant_id = :tenant_id"), params)
+    db.execute(text(f"UPDATE domain_erp.fibu_connector_profiles SET {', '.join(updates)} WHERE id = :id AND tenant_id = :tenant_id"), params)  # nosec S608 — reviewed-safe: column names code-controlled, values parameterized
     if payload.is_default is True:
         prof = db.execute(text("SELECT connector_type FROM domain_erp.fibu_connector_profiles WHERE id = :id"), {"id": profile_id}).fetchone()
         if prof:

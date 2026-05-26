@@ -5,7 +5,7 @@ from typing import AsyncGenerator
 
 from fastapi import FastAPI
 
-from app.api.v1.api import api_router
+from app.api.v1.api import api_router, ws_router
 from app.core.config import settings
 from app.core.exceptions import register_domain_exception_handlers
 from app.domains.shared.events import (
@@ -42,5 +42,6 @@ register_domain_exception_handlers(app)
 app.add_middleware(AuditMiddleware)
 app.add_middleware(TenantEnforcementMiddleware)
 app.include_router(api_router, prefix="/api/v1")
+app.include_router(ws_router, prefix="/api/v1")
 
 __all__ = ["app"]

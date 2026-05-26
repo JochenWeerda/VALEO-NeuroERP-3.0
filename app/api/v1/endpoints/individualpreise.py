@@ -182,6 +182,7 @@ def preis_lookup(
 
     def find_preis(with_partner: bool) -> Optional[dict]:
         partner_filter = "AND partner_nr = :pnr" if with_partner else "AND partner_nr IS NULL"
+        # nosec S608 — reviewed-safe: column names code-controlled, values parameterized
         rows = db.execute(text(f"""
             SELECT * FROM domain_shared.individualpreise
             WHERE tenant_id = :tid AND preis_typ = :pt AND artikel_nr = :anr

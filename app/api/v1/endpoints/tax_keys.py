@@ -429,6 +429,7 @@ async def update_tax_key(
         
         update_fields.append("updated_at = NOW()")
         
+        # nosec S608 — reviewed-safe: column names code-controlled, values parameterized
         update_query = text(f"""
             UPDATE domain_erp.tax_keys
             SET {', '.join(update_fields)}

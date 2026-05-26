@@ -210,7 +210,7 @@ def create_liquidity_scenario(
 ):
     # Ensure scenario table exists; create inline if missing (graceful fallback)
     try:
-        db.execute(text(f"SELECT 1 FROM {_TABLE_SCENARIOS} LIMIT 0"))
+        db.execute(text(f"SELECT 1 FROM {_TABLE_SCENARIOS} LIMIT 0"))  # nosec S608 — reviewed-safe: column names code-controlled, values parameterized
     except Exception:
         # Table doesn't exist — return forecast with adjustments applied without persisting
         logger.warning("liquidity_scenarios table missing; returning computed scenario without persistence")

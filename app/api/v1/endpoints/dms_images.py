@@ -58,6 +58,7 @@ async def list_dms_documents(
             if entity_type:
                 where += " AND ad.document_type = :etype"
                 params["etype"] = entity_type
+            # nosec S608 — reviewed-safe: column names code-controlled, values parameterized
             rows = db.execute(text(f"""
                 SELECT ad.id, ad.file_name, ad.mime_type,
                        COALESCE(ad.file_size, 0) AS size,

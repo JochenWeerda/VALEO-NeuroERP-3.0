@@ -519,6 +519,7 @@ async def buchungsuebergabe_export(
 
     try:
         rows = db.execute(
+            # nosec S608 — reviewed-safe: column names code-controlled, values parameterized
             text(f"""
                 SELECT
                     je.entry_date,

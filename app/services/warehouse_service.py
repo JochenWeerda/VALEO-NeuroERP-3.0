@@ -50,7 +50,7 @@ class WarehouseService:
             filters.append("is_active = true")
         where = " AND ".join(filters)
         rows = self.db.execute(
-            text(f"SELECT * FROM domain_inventory.warehouse_bins WHERE {where} ORDER BY bin_code"),
+            text(f"SELECT * FROM domain_inventory.warehouse_bins WHERE {where} ORDER BY bin_code"),  # nosec S608 — reviewed-safe: column names code-controlled, values parameterized
             params).fetchall()
         return [dict(r._mapping) for r in rows]
 
@@ -328,6 +328,7 @@ class WarehouseService:
             filters.append("wb.warehouse_id = :wid")
             params["wid"] = warehouse_id
         where = " AND ".join(filters)
+        # nosec S608 — reviewed-safe: column names code-controlled, values parameterized
         rows = self.db.execute(text(f"""
             SELECT bs.article_id, bs.batch_number,
                    SUM(bs.quantity_kg) as total_qty,

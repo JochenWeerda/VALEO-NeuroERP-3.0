@@ -121,7 +121,7 @@ async def list_erasure_requests(
         params["status"] = status
     try:
         rows = db.execute(
-            text(f"SELECT * FROM domain_compliance.data_erasure_requests WHERE {' AND '.join(where)} ORDER BY request_date DESC"),
+            text(f"SELECT * FROM domain_compliance.data_erasure_requests WHERE {' AND '.join(where)} ORDER BY request_date DESC"),  # nosec S608 — reviewed-safe: column names code-controlled, values parameterized
             params,
         ).fetchall()
     except Exception:

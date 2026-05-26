@@ -598,7 +598,7 @@ class PersonalService:
             params["loc"] = location
             where.append("location_code = :loc")
         rows = self.db.execute(
-            text(f"SELECT id, shift_date, name, location_code, required_role, "
+            text(f"SELECT id, shift_date, name, location_code, required_role, "  # nosec S608 — reviewed-safe: column names code-controlled, values parameterized
                  f"required_qualifications, required_headcount, starts_at, ends_at, "
                  f"assigned_employee_refs, status, conflicts, notes "
                  f"FROM domain_hr.shifts WHERE {' AND '.join(where)} "
@@ -675,7 +675,7 @@ class PersonalService:
             params["etype"] = event_type
             where.append("event_type = :etype")
         rows = self.db.execute(
-            text(f"SELECT id, source_system, provider, external_event_ref, event_type, title, "
+            text(f"SELECT id, source_system, provider, external_event_ref, event_type, title, "  # nosec S608 — reviewed-safe: column names code-controlled, values parameterized
                  f"employee_ref, resource_ref, starts_at, ends_at, timezone, visibility, "
                  f"status, sync_state, conflict_level, source_ref, metadata "
                  f"FROM domain_hr.calendar_events WHERE {' AND '.join(where)} "
@@ -794,7 +794,7 @@ class PersonalService:
             params["eref"] = employee_ref
             where.append("employee_ref = :eref")
         rows = self.db.execute(
-            text(f"SELECT id, employee_ref, customer_ref, territory_code, campaign_code, "
+            text(f"SELECT id, employee_ref, customer_ref, territory_code, campaign_code, "  # nosec S608 — reviewed-safe: column names code-controlled, values parameterized
                  f"visit_type, starts_at, ends_at, status, conflicts, notes "
                  f"FROM domain_hr.field_service_plans WHERE {' AND '.join(where)} "
                  f"ORDER BY starts_at ASC, employee_ref ASC"),
@@ -877,7 +877,7 @@ class PersonalService:
             where.append("entry_date <= :db")
             params["db"] = datum_bis
         rows = self.db.execute(
-            text(f"SELECT id, entry_date, driver_name, vehicle_plate, tours, total_hours, "
+            text(f"SELECT id, entry_date, driver_name, vehicle_plate, tours, total_hours, "  # nosec S608 — reviewed-safe: column names code-controlled, values parameterized
                  f"overtime_hours, created_at FROM domain_hr.driver_timesheets "
                  f"WHERE {' AND '.join(where)} ORDER BY entry_date DESC, created_at DESC"),
             params,

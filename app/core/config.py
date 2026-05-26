@@ -252,6 +252,7 @@ class Settings(BaseSettings):
     CHANNEL_SLACK_SIGNING_SECRET: Optional[str] = None
     CHANNEL_SLACK_BOT_TOKEN: Optional[str] = None
     CHANNEL_TEAMS_WEBHOOK_SECRET: Optional[str] = None
+    CHANNEL_WHATSAPP_VERIFY_TOKEN: Optional[str] = None
     CHANNEL_INGRESS_MAX_AGE_SECONDS: int = 300
     API_AUTH_EXEMPT_PATHS: List[str] = [
         "/api/v1/health",

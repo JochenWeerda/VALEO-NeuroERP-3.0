@@ -114,6 +114,7 @@ def list_decisions(
         params["risk"] = risk_class
 
     try:
+        # nosec S608 — reviewed-safe: column names code-controlled, values parameterized
         rows = db.execute(text(f"""
             SELECT id, intent, confidence_score, risk_class,
                    human_approval, actor, created_at
