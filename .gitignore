@@ -118,6 +118,7 @@ runtime/
 data/gap/
 data/paperless-consume/
 data/policies.db
+data/series.json
 files/
 
 # update_todos.py (lokal generiert, groß)
