@@ -22,6 +22,7 @@ import {
   ShieldCheck,
   ShoppingCart,
   Sprout,
+  Tag,
   Target,
   Tractor,
   Truck,
@@ -32,6 +33,8 @@ import {
   Search,
   BookOpen,
   Users2,
+  Layers,
+  Box,
 } from 'lucide-react'
 import type { RawNavItem } from '@/app/navigation/types'
 import { ENABLE_PROSPECTING_UI } from '@/features/prospecting/feature-flags'
@@ -233,6 +236,15 @@ export const RAW_NAV_SECTIONS: RawNavItem[] = [
         keywords: ['rabatt', 'rabattgruppe', 'rabattklasse', 'rag', 'rak', 'rabattsatz', 'konditionen'],
         mcp: { businessDomain: 'agrar', scope: 'agrar:read' },
       },
+      {
+        id: 'individualpreise',
+        label: 'Individualpreise [PRI/PRIE]',
+        icon: Tag,
+        module: '@/pages/preise/individualpreise',
+        preferredPath: 'preise/individualpreise',
+        keywords: ['individualpreis', 'pri', 'prie', 'kundenpreis', 'lieferantenpreis', 'staffelpreis'],
+        mcp: { businessDomain: 'agrar', scope: 'agrar:read' },
+      },
     ],
   },
   {
@@ -345,6 +357,15 @@ export const RAW_NAV_SECTIONS: RawNavItem[] = [
         module: '@/pages/verkauf/betriebs-auftraege',
         preferredPath: 'verkauf/betriebs-auftraege',
         keywords: ['betriebs', 'aufträge', 'interne aufträge'],
+        mcp: { businessDomain: 'sales', scope: 'sales:read' },
+      },
+      {
+        id: 'dauerauftraege',
+        label: 'Daueraufträge',
+        icon: RefreshCw,
+        module: '@/pages/verkauf/dauerauftraege',
+        preferredPath: 'verkauf/dauerauftraege',
+        keywords: ['dauerauftrag', 'wiederkehrend', 'abo', 'intervall'],
         mcp: { businessDomain: 'sales', scope: 'sales:read' },
       },
       {
@@ -509,6 +530,15 @@ export const RAW_NAV_SECTIONS: RawNavItem[] = [
         mcp: { businessDomain: 'procurement', scope: 'procurement:read' },
       },
       {
+        id: 'mengeneinheiten',
+        label: 'Mengeneinheiten & Gruppen',
+        icon: Scale,
+        module: '@/pages/stammdaten/mengeneinheiten',
+        preferredPath: 'stammdaten/mengeneinheiten',
+        keywords: ['mengeneinheit', 'einheitengruppe', 'umrechnung', 'kg', 'tonne'],
+        mcp: { businessDomain: 'agrar', scope: 'agrar:read' },
+      },
+      {
         id: 'zahlungsbedingungen',
         label: 'Zahlungsbedingungen',
         icon: Euro,
@@ -649,6 +679,32 @@ export const RAW_NAV_SECTIONS: RawNavItem[] = [
         module: '@/pages/einkauf/edi-portal',
         keywords: ['edi', 'portal', 'ordner', 'messages'],
         mcp: { businessDomain: 'procurement', scope: 'procurement:write' },
+      },
+    ],
+  },
+  {
+    id: 'artikel-stammdaten',
+    label: 'Artikel-Stammdaten',
+    icon: Package,
+    mcp: { businessDomain: 'admin', scope: 'admin:read' },
+    children: [
+      {
+        id: 'artikel-bestandteile',
+        label: 'Artikel-Bestandteile',
+        icon: Layers,
+        module: '@/pages/stammdaten/artikelbestandteile',
+        preferredPath: 'stammdaten/artikelbestandteile',
+        keywords: ['bestandteile', 'inhaltsstoffe', 'qualität', 'analyse'],
+        mcp: { businessDomain: 'admin', scope: 'admin:read' },
+      },
+      {
+        id: 'artikel-verpackung',
+        label: 'Artikelverpackung',
+        icon: Box,
+        module: '@/pages/stammdaten/artikelverpackung',
+        preferredPath: 'stammdaten/artikelverpackung',
+        keywords: ['verpackung', 'palette', 'karton', 'stück', 'vpk'],
+        mcp: { businessDomain: 'admin', scope: 'admin:read' },
       },
     ],
   },
