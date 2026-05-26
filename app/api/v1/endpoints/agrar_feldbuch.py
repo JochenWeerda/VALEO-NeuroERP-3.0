@@ -13,7 +13,7 @@ from typing import Any, Optional
 from fastapi import APIRouter, Depends, HTTPException, Query
 from fastapi.responses import Response
 from pydantic import BaseModel, Field
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, selectinload
 
 from app.core.database import get_db
 from app.core.tenant import get_tenant_id
@@ -316,7 +316,12 @@ async def list_massnahmen(
         q = q.filter(FeldbuchMassnahme.datum >= datetime.fromisoformat(von))
     if bis:
         q = q.filter(FeldbuchMassnahme.datum <= datetime.fromisoformat(bis))
-    return [_massnahme_to_dict(m) for m in q.order_by(FeldbuchMassnahme.datum.desc()).offset(skip).limit(limit).all()]
+    return [
+        _massnahme_to_dict(m)
+        for m in q.options(selectinload(FeldbuchMassnahme.schlag))
+        .order_by(FeldbuchMassnahme.datum.desc())
+        .offset(skip).limit(limit).all()
+    ]
 
 
 @router.post("/feldbuch/massnahmen", status_code=201)
