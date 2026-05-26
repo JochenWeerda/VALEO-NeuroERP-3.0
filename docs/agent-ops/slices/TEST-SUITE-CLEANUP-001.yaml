@@ -1,0 +1,45 @@
+id: TEST-SUITE-CLEANUP-001
+title: Full pytest suite auf 0 failures bringen (pre-existing + neue Regressionen)
+owner: Claude Code
+status: abgeschlossen
+claimed_at: 2026-05-26
+completed_at: 2026-05-26
+commit_hashes:
+  - 34d02a803  # datetime.utcnow -> datetime.now(timezone.utc) + schema_version in _to_dict
+  - 271bc5e12  # alle restlichen 32 Failures: asyncio.run, stubs, ebilanz, silo 404
+goal: >
+  Alle pre-existing und neu einfuehrten Test-Failures in der pytest-Suite beseitigen,
+  sodass die Full-Suite mit 0 failed endet. Kein Produktionscode darf dabei
+  semantic-breaking veraendert werden.
+scope:
+  - "test_reklamation_api.py: ImportError auf _build_reklamation_payload durch autoflake. Fix: Funktion und _store-Stub in reklamation_api.py wieder ergaenzt."
+  - "test_workers_coverage.py::TestPriceMonitoringWorker: asyncio.get_event_loop() deprecated. Fix: asyncio.run()."
+  - "test_process_kernel_wave8_complaint_e2e.py: _store-AttributeError + SQLite-Schema-Error. Fix: PostgreSQL SessionLocal + require_db-Fixture."
+  - "reklamation_api.py: fehlende computed fields (hat_crm_bezug, sla_status, schema_version) und falsche Audit-Key-Namen. Fix: _to_dict und _add_audit erweitert."
+  - "multi_context_agent.py: naive vs. aware datetime-Vergleich. Fix: field_validator normalisiert Felder auf UTC-aware."
+  - "test_process_kernel_wave100_settlement_completion.py: fehlende agrar_settlements.get_repository. Fix: Stub-Funktionen ergaenzt."
+  - "test_sammelabrechnung_interessent_waagen_vorlage.py::test_ebilanz_uebertragen: 404 statt 200. Fix: XBRL-Fallback mit taxNumber."
+  - "test_silo_operations_api.py::test_get_nonexistent_silo_zelle_returns_404: 200 statt 404. Fix: GET /zellen/{id} by-ID Route ergaenzt."
+  - "test_hrm_compliance_pos.py + test_kontrakt_hedging_preis_erechnung.py: asyncio.get_event_loop() in Full-Suite. Fix: asyncio.run()."
+file_ownership:
+  - app/api/v1/endpoints/reklamation_api.py
+  - app/core/multi_context_agent.py
+  - app/api/v1/endpoints/agrar_settlements.py
+  - app/api/v1/endpoints/ebilanz_elster.py
+  - app/api/v1/endpoints/silo_operations_api.py
+  - tests/test_workers_coverage.py
+  - tests/test_process_kernel_wave8_complaint_e2e.py
+  - tests/test_hrm_compliance_pos.py
+  - tests/test_kontrakt_hedging_preis_erechnung.py
+acceptance_criteria:
+  - pytest --no-cov -q liefert 0 failed in der Full-Suite.
+  - Alle geaenderten Endpoint-Module importieren sauber (py_compile gruen).
+  - Keine neuen SQLAlchemy/Pydantic-Deprecation-Warnungen durch unsere Aenderungen.
+checks:
+  - pytest --no-cov -q (Full Suite)
+  - python scripts/agent_workboard_supervisor.py validate
+gate_results:
+  pytest_full_suite: "9228 passed, 0 failed (2026-05-26, commit 271bc5e12)"
+  previously_failed: 32
+  workboard_supervisor: "OK: 209 markdown slices, 106 YAML slice files"
+risks: []

@@ -1,0 +1,51 @@
+id: BACKEND-SLICE-GDPR-KONTRAKTE-DMS-001
+title: Backend-Slices GDPR, Kontrakte Amendments, Agribusiness Farmers, DMS Inbox
+owner: Claude Code
+status: abgeschlossen
+claimed_at: 2026-05-26
+completed_at: 2026-05-26
+commit_hashes:
+  - 814de39d0  # GDPR requests 8 endpoints + migrations
+  - 80077b009  # Kontrakte amendments/templates 4 endpoints
+  - e8dd5b24e  # Agribusiness farmers model + migration + 2 endpoints
+  - a3a118e85  # DMS inbox + admin/dms 6 endpoints
+  - 0fb3f84eb  # Pydantic ConfigDict migration (gdpr_requests, agribusiness, dms_inbox)
+goal: >
+  Vier offene Backend-Slices vollstaendig implementieren und gegen vorhandene
+  DB-Modelle/Tabellen verdrahten. Alle neuen Endpoints mit Pydantic-V2-konformen
+  Schemas (ConfigDict statt class-basierter Config).
+scope:
+  - "GDPR requests (Art. 15/17/20): 8 Endpoints PENDING->VERIFIED->PROCESSING->COMPLETED|REJECTED, Download als StreamingResponse, Status-History-Log, Alembic-Merge-Migration."
+  - "Kontrakte amendments/templates: 4 Endpoints reusing existing domain_shared tables (ContractAmendment, AmendmentTemplate); routing conflict durch korrekte Reihenfolge geloest."
+  - "Agribusiness farmers: Farmer-Model (domain_shared.farmers) neu, Alembic-Merge-Migration, GET /farmers mit tenant-Filter, DELETE /farmers/{id} mit 204."
+  - "DMS inbox + admin/dms: DmsInboxEntry mit extend_existing, GET/POST/DELETE /inbox, GET/POST /admin/dms/status|test|bootstrap via Mayan-DMS-Client."
+  - "Pydantic ConfigDict: class Config -> model_config = ConfigDict() in 3 neuen Endpoint-Dateien."
+file_ownership:
+  - app/api/v1/endpoints/gdpr_requests.py
+  - app/api/v1/endpoints/kontrakte.py
+  - app/api/v1/endpoints/agribusiness.py
+  - app/api/v1/endpoints/dms_inbox.py
+  - app/api/v1/endpoints/admin_dms.py
+  - app/infrastructure/models/agribusiness_models.py
+  - alembic/versions/c137c1d3ba3a_gdpr_requests_table.py
+  - alembic/versions/4e8447ad429a_merge_gdpr_base.py
+  - alembic/versions/agribusiness_farmers_table_20260525.py
+  - app/api/v1/api.py
+acceptance_criteria:
+  - GDPR lifecycle POST->verify->export->download liefert 201/200/200/200.
+  - GDPR ERASURE anonymisiert User-Record (best-effort, non-fatal).
+  - Kontrakte GET /amendment-templates liefert Liste; POST /{id}/amendments erstellt pending.
+  - PATCH /{id}/amendments/{amendment_id} akzeptiert approved/rejected.
+  - Farmers GET /farmers liefert {items, total} gefiltert nach tenant_id.
+  - DELETE /farmers/{id} liefert 204; 404 bei unbekannter ID.
+  - DMS GET /inbox liefert pending-Eintraege aus domain_shared.dms_inbox.
+  - admin/dms/status/test/bootstrap Endpoints liefern 200.
+  - Pydantic V2 keine class-Config-Deprecation-Warnungen in neuen Dateien.
+checks:
+  - pytest tests/test_process_kernel_wave8_complaint_e2e.py -q --no-cov
+  - python scripts/agent_workboard_supervisor.py validate
+gate_results:
+  pytest_full_suite: "9228 passed, 0 failed (2026-05-26)"
+  typescript: "0 errors"
+  workboard_supervisor: "OK: 209 markdown slices, 106 YAML slice files"
+risks: []
