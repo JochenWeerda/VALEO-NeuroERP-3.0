@@ -165,7 +165,7 @@ def _parse_roles(raw: Any) -> list[str]:
             parsed = json.loads(value)
             if isinstance(parsed, list):
                 return [str(role).strip() for role in parsed if str(role).strip()]
-        except Exception:
+        except Exception:  # noqa: BLE001 — JSON parse failed, fallback to comma-split
             pass
         return [part.strip() for part in value.split(",") if part.strip()]
     return []

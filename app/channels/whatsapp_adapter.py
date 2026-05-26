@@ -158,7 +158,7 @@ async def process_incoming(
                     "status": "no_consent",
                     "message": "Kein Consent fuer WhatsApp-Kommunikation vorhanden.",
                 }
-        except Exception:
+        except Exception:  # noqa: BLE001 — Consent-Prüfung fehlgeschlagen; Verarbeitung wird fortgesetzt
             pass
 
     try:
@@ -167,7 +167,7 @@ async def process_incoming(
         if guard_result.action.value == "block":
             logger.warning("WhatsApp message blocked by guardrails: %s", incoming.from_number)
             return {"status": "blocked", "message": "Nachricht durch Guardrails blockiert."}
-    except Exception:
+    except Exception:  # noqa: BLE001 — Guardrail-Check fehlgeschlagen; Verarbeitung wird fortgesetzt
         pass
 
     try:

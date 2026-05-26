@@ -39,7 +39,7 @@ def _user_from_request(request: Optional[Any]) -> tuple[str, str]:
         if auth.startswith("Bearer ") and hasattr(request.app.state, "decode_token"):
             # App könnte decode_token bereitstellen
             pass
-    except Exception:
+    except Exception:  # noqa: BLE001 — Token-Dekodierung fehlgeschlagen; System-User-ID wird verwendet
         pass
     return SYSTEM_USER_ID, SYSTEM_USER_EMAIL
 

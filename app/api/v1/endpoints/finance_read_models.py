@@ -428,7 +428,7 @@ def _persist_projection_registry_entry(
     except Exception:
         try:
             db.rollback()
-        except Exception:
+        except Exception:  # noqa: BLE001 — Rollback-Fehler ignorieren (z.B. bereits geschlossen)
             pass
 
 
@@ -476,7 +476,7 @@ def _persist_projection_snapshot(
     except Exception:
         try:
             db.rollback()
-        except Exception:
+        except Exception:  # noqa: BLE001 — Rollback-Fehler ignorieren (z.B. bereits geschlossen)
             pass
 
 
@@ -555,7 +555,7 @@ def persist_projection_cursor(
     except Exception:
         try:
             db.rollback()
-        except Exception:
+        except Exception:  # noqa: BLE001 — Rollback-Fehler ignorieren (z.B. bereits geschlossen)
             pass
 
 

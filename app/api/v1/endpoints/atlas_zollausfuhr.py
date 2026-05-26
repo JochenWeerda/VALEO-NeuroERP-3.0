@@ -179,7 +179,7 @@ def get_anmeldung(
         ).fetchone()
         if row:
             return _row_to_out(row)
-    except Exception:
+    except Exception:  # noqa: BLE001 — optionale DB-Abfrage; Fallback greift
         pass
     if id in _store:
         return ZollausfuhrAnmeldungOut(**_store[id])

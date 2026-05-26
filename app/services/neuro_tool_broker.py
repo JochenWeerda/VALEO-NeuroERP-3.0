@@ -662,7 +662,7 @@ class NeuroToolBroker:
             logger.warning("State transition persistence failed for step %s: %s", step.action, exc)
             try:
                 db.rollback()
-            except Exception:
+            except Exception:  # noqa: BLE001 — Rollback-Fehler ignorieren (Verbindung bereits geschlossen)
                 pass
 
     # ------------------------------------------------------------------
@@ -729,14 +729,14 @@ class NeuroToolBroker:
                 from app.core.metrics import neuro_kernel_audit_inserts_total
 
                 neuro_kernel_audit_inserts_total.inc()
-            except Exception:
+            except Exception:  # noqa: BLE001 — Rollback-Fehler ignorieren (Verbindung bereits geschlossen)
                 pass
             db.commit()
         except Exception as exc:
             logger.debug("Step audit trace write skipped (table may not exist): %s", exc)
             try:
                 db.rollback()
-            except Exception:
+            except Exception:  # noqa: BLE001 — Rollback-Fehler ignorieren (Verbindung bereits geschlossen)
                 pass
 
     def _build_rollback_plan(

@@ -118,5 +118,5 @@ def persist_projection_cursor(
     except Exception:
         try:
             db.rollback()
-        except Exception:
+        except Exception:  # noqa: BLE001 — Rollback-Fehler ignorieren (Verbindung bereits geschlossen)
             pass

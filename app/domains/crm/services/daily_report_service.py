@@ -353,7 +353,7 @@ class DailyReportService:
                     try:
                         date_obj = datetime.fromisoformat(date_str.replace('Z', '+00:00'))
                         date_str = date_obj.strftime('%d.%m.%Y')
-                    except Exception:
+                    except Exception:  # noqa: BLE001 — Datumsformatierung fehlgeschlagen; Rohwert wird verwendet
                         pass
                 lines.append(f"- **{date_str or 'Kein Datum'}** - {follow_up['customer']}: {follow_up['action']}")
             lines.append("")

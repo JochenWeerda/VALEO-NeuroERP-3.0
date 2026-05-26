@@ -122,7 +122,7 @@ def _get_user_id_from_request(request) -> Optional[str]:
             payload_b64 = auth[7:].split(".")[1]
             payload_b64 += "=" * (4 - len(payload_b64) % 4)
             return _json.loads(base64.urlsafe_b64decode(payload_b64)).get("sub")
-        except Exception:
+        except Exception:  # noqa: BLE001 — JWT decode failed; caller handles None return
             pass
     return None
 
@@ -406,7 +406,7 @@ async def preview_self_billing(
                 "net_amount_eur": netto,
                 "quality_grade": r.qualitaet,
             })
-    except Exception:
+    except Exception:  # noqa: BLE001 — Positionen aus harvest_acceptance nicht verfügbar; line_items bleibt leer
         pass
 
     calculated_net = sum(li["net_amount_eur"] for li in line_items) if line_items else payload.total_net_amount_eur

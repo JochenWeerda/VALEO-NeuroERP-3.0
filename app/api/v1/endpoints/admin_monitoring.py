@@ -234,7 +234,7 @@ def list_admin_monitoring_alerts(
                     timestamp=today_iso,
                 )
             )
-    except Exception:
+    except Exception:  # noqa: BLE001 — optionale DB-Abfrage; Fallback greift
         pass
 
     alerts.extend(_build_security_alerts(tenant_id))

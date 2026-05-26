@@ -103,7 +103,7 @@ def _resolve_customer_name(db: Session, customer_id: str) -> str:
         ).fetchone()
         if row and row[0]:
             customer_name = str(row[0])
-    except Exception:
+    except Exception:  # noqa: BLE001 — optionale DB-Abfrage; Fallback greift
         pass
     return customer_name
 

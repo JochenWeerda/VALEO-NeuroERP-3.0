@@ -97,7 +97,7 @@ class NATSEventPublisher(IEventPublisher):
         if self._nc:
             try:
                 await self._nc.close()
-            except Exception:
+            except Exception:  # noqa: BLE001 — NATS-Verbindungsabbau; Fehler werden ignoriert (shutdown path)
                 pass
             logger.info("NATS connection closed")
         self._connected = False

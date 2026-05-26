@@ -84,7 +84,7 @@ async def route_message(
                 event_type="incoming",
                 payload=message.to_dict(),
             )
-        except Exception:
+        except Exception:  # noqa: BLE001 — Audit-Log fehlgeschlagen; Verarbeitung wird fortgesetzt
             pass
 
     try:
@@ -96,7 +96,7 @@ async def route_message(
                 recipient_id=message.sender_id,
                 text="Ihre Nachricht konnte nicht verarbeitet werden.",
             )
-    except Exception:
+    except Exception:  # noqa: BLE001 — Fehler-Antwort an Nutzer konnte nicht gesendet werden; wird ignoriert
         pass
 
     try:
@@ -128,7 +128,7 @@ async def route_message(
                 user_id=message.sender_id,
                 channel=message.channel.value,
             )
-        except Exception:
+        except Exception:  # noqa: BLE001 — Audit-Log fehlgeschlagen; Verarbeitung wird fortgesetzt
             pass
 
     return ChannelResponse(

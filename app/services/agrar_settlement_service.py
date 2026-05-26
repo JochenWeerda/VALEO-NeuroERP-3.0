@@ -720,7 +720,7 @@ class AgrarSettlementService:
             partner = get_from_store("partner", settlement.supplier_id, get_repository(self.db))
             if partner:
                 supplier_name = partner.get("name")
-        except Exception:
+        except Exception:  # noqa: BLE001 — Lieferantenname nicht abrufbar; bleibt None
             pass
 
         amount = float(settlement.net_amount_eur)

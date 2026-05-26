@@ -750,7 +750,7 @@ async def execute_abstimmung(
                   AND TO_CHAR(posting_date, 'YYYY-MM') = :periode
             """), {"tid": tenant_id, "periode": ab.periode}).scalar() or 0
         )
-    except Exception:
+    except Exception:  # noqa: BLE001 — Buchungs-Zählabfrage nicht verfügbar; Wert bleibt 0
         pass
 
     differenz = round(nb_saldo - hb_saldo, 2)

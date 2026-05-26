@@ -2645,7 +2645,7 @@ async def delete_suspended_sale(
     """Pausierten Verkauf loeschen — entfernt aus Document-Store."""
     try:
         PosCompatService(db, tenant_id).delete_suspended_sale(sale_id)
-    except Exception:
+    except Exception:  # noqa: BLE001 — POS-Pausierten-Verkauf-Löschung fehlgeschlagen; 204 wird trotzdem zurückgegeben (idempotent)
         pass
     return Response(status_code=204)
 
@@ -3112,7 +3112,7 @@ async def list_field_service_tasks() -> list[dict[str, Any]]:
         cases, _total = await crm_list_cases(skip=0, limit=200)
         if cases:
             return [_case_to_field_service_task(dict(c)) for c in cases]
-    except Exception:
+    except Exception:  # noqa: BLE001 — CRM-Cases nicht abrufbar; Demo-Daten werden zurückgegeben
         pass
     return list(_DEMO_FIELD_SERVICE_TASKS)
 

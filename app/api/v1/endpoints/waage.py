@@ -46,7 +46,7 @@ async def get_partiepflicht_config(db: Session = Depends(get_db)) -> dict:
         ).fetchall()
         if rows:
             config_source = "articles_table"
-    except Exception:
+    except Exception:  # noqa: BLE001 — optionale DB-Abfrage; Fallback greift
         pass
     return {
         "partiepflichtige_wiegetypen": _PARTIEPFLICHTIGE_WIEGETYPEN,
@@ -72,7 +72,7 @@ async def check_partiepflicht(
             ).fetchone()
             if row and row[0] in _PARTIEPFLICHTIGE_ARTIKEL_GRUPPEN:
                 pflicht = True
-        except Exception:
+        except Exception:  # noqa: BLE001 — Artikel-Gruppe nicht ermittelbar; Partiepflicht bleibt wie initialisiert
             pass
 
     if pflicht and not payload.partie_id:

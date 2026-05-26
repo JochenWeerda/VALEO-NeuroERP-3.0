@@ -133,7 +133,7 @@ class DMSParser:
                 parts = date_str.split(".")
                 year = f"20{parts[2]}" if int(parts[2]) < 50 else f"19{parts[2]}"
                 return f"{year}-{parts[1]:0>2}-{parts[0]:0>2}"
-        except Exception:
+        except Exception:  # noqa: BLE001 — Datumsformatierung fehlgeschlagen; Rohwert bleibt unverändert
             pass
         
         return date_str

@@ -156,7 +156,7 @@ def get_preisauskunft(
                 sorte=sorte, qualitaet=qualitaet, stichtag=stichtag,
                 preis_eur_t=float(row.fixed_price), verfuegbar=True,
             )
-    except Exception:
+    except Exception:  # noqa: BLE001 — optionale DB-Abfrage; Fallback greift
         pass
 
     return SupplierPreisauskunft(

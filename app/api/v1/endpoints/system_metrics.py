@@ -183,7 +183,7 @@ async def get_business_metrics(
                 {"today": today_start, "tenant_id": tenant_id},
             ).scalar()
             workflow_metrics["completed_today"] = completed_today or 0
-        except Exception:
+        except Exception:  # noqa: BLE001 — Workflow-Metrik nicht verfügbar; Standardwert bleibt
             pass
         
         # 4. Document Processing Queue

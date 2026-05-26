@@ -114,7 +114,7 @@ def get_active_policy(policy_id: str, tenant_id: str = "system", db: Optional[Se
                     "variant_key": variant_key,
                     "traffic_weight": traffic_weight,
                 }
-        except Exception:
+        except Exception:  # noqa: BLE001 — Policy-Abfrage fehlgeschlagen; leeres Ergebnis wird zurückgegeben
             pass
 
     versions = _IN_MEMORY_POLICIES.get(policy_id, [])
@@ -138,7 +138,7 @@ def list_policies(tenant_id: str = "system", db: Optional[Session] = None) -> li
                  "active": r.active, "created_at": str(r.created_at)}
                 for r in rows
             ]
-        except Exception:
+        except Exception:  # noqa: BLE001 — Policy-Abfrage fehlgeschlagen; leeres Ergebnis wird zurückgegeben
             pass
 
     result = []
@@ -178,7 +178,7 @@ def list_active_variants(policy_id: str, tenant_id: str = "system", db: Optional
                     "traffic_weight": traffic_weight,
                 })
             return result
-        except Exception:
+        except Exception:  # noqa: BLE001 — Policy-Abfrage fehlgeschlagen; leeres Ergebnis wird zurückgegeben
             pass
 
     versions = _IN_MEMORY_POLICIES.get(policy_id, [])

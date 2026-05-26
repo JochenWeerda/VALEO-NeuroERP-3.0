@@ -142,7 +142,7 @@ def _load_from_db_or_store(id: str, db: Session, tenant_id: str) -> Optional[dic
                 "erstellt_am": str(row.erstellt_am),
                 "abgeschlossen_am": str(row.abgeschlossen_am) if row.abgeschlossen_am else None,
             }
-    except Exception:
+    except Exception:  # noqa: BLE001 — optionale DB-Abfrage; Fallback greift
         pass
     return _store.get(id)
 

@@ -146,7 +146,7 @@ def _run_duplicate_check(db: Session, rule: DuplicateRule, tenant_id: str) -> li
                         severity="error",
                     )
                 )
-    except Exception:
+    except Exception:  # noqa: BLE001 — optionale DB-Abfrage; Fallback greift
         pass  # Tabelle/Schema fehlt evtl.
     return violations
 
@@ -178,7 +178,7 @@ def _run_required_check(db: Session, rule: RequiredFieldRule, tenant_id: str) ->
                     severity="error",
                 )
             )
-    except Exception:
+    except Exception:  # noqa: BLE001 — optionale DB-Abfrage; Fallback greift
         pass
     return violations
 
@@ -210,7 +210,7 @@ def _run_reference_check(db: Session, rule: ReferenceRule, tenant_id: str) -> li
                     severity="error",
                 )
             )
-    except Exception:
+    except Exception:  # noqa: BLE001 — optionale DB-Abfrage; Fallback greift
         pass
     return violations
 

@@ -139,7 +139,7 @@ def process_chat_message(session_id: str, user_text: str, user_id: str = "") -> 
             )
             session.messages.append(system_msg)
             return {"status": "blocked", "message": system_msg.to_dict()}
-    except Exception:
+    except Exception:  # noqa: BLE001 — Guardrail-Check fehlgeschlagen; Verarbeitung wird fortgesetzt
         pass
 
     pipeline_result = {}

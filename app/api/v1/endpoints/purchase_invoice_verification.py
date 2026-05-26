@@ -87,7 +87,7 @@ def _fetch_po_amount(db: Session, po_id: str, tenant_id: str) -> Optional[float]
             ).fetchone()
             if row:
                 return float(row[0])
-        except Exception:
+        except Exception:  # noqa: BLE001 — Tabelle nicht gefunden; gibt None zurück
             pass
     return None
 
@@ -106,7 +106,7 @@ def _fetch_gr_amount(db: Session, gr_id: str, tenant_id: str) -> Optional[float]
             ).fetchone()
             if row:
                 return float(row[0])
-        except Exception:
+        except Exception:  # noqa: BLE001 — Tabelle nicht gefunden; gibt None zurück
             pass
     return None
 
@@ -125,7 +125,7 @@ def _fetch_invoice_amount(db: Session, invoice_id: str, tenant_id: str) -> Optio
             ).fetchone()
             if row:
                 return float(row[0])
-        except Exception:
+        except Exception:  # noqa: BLE001 — Tabelle nicht gefunden; gibt None zurück
             pass
     return None
 

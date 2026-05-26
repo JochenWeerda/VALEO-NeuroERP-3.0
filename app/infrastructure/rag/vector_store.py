@@ -136,7 +136,7 @@ class VectorStoreService:
         """Delete and recreate a collection."""
         try:
             self.client.delete_collection(name=collection_name)
-        except Exception:
+        except Exception:  # noqa: BLE001 — Collection existiert nicht; delete vor create ist best-effort
             pass
         self.client.create_collection(name=collection_name)
         logger.info(f"Reset collection {collection_name}")

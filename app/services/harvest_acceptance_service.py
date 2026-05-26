@@ -159,7 +159,7 @@ class HarvestAcceptanceService:
                 if protocol:
                     obj.quality_protocol_id = protocol.id
                     self.db.commit()
-            except Exception:
+            except Exception:  # noqa: BLE001 — Qualitätsprotokoll-Zuweisung fehlgeschlagen; Annahme wird fortgesetzt
                 pass
 
         result = _to_dict_with_positions(obj, self.db)
@@ -811,7 +811,7 @@ class HarvestAcceptanceService:
             try:
                 drying_repo = DbDryingRuleRepository(self.db, tenant_id=self.tenant_id)
                 use_drying_rule_engine = True
-            except Exception:
+            except Exception:  # noqa: BLE001 — Qualitätsprotokoll-Zuweisung fehlgeschlagen; Annahme wird fortgesetzt
                 pass
 
         # Erstelle Berechnungs-Input

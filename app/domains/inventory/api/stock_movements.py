@@ -43,7 +43,7 @@ def _is_agrar_enabled(db: Session, tenant_id: str) -> bool:
             modules = parsed.get("enabled_modules") if isinstance(parsed, dict) else None
             if isinstance(modules, list):
                 return "agrar" in [str(m).strip() for m in modules]
-        except Exception:
+        except Exception:  # noqa: BLE001 — Modul-Flags nicht lesbar; Agrar-Modus wird nicht aktiviert
             pass
 
     initialize_module_registry()

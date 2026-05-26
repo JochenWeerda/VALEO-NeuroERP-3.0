@@ -388,7 +388,7 @@ class DocflowService:
                     "new_values": json.dumps({"tenant_id": self.tenant_id, **payload}),
                 },
             )
-        except Exception:
+        except Exception:  # noqa: BLE001 — Audit-Log-Eintrag fehlgeschlagen; Hauptoperation wird fortgesetzt
             pass
 
     # ── POS compliance ────────────────────────────────────────────────────────

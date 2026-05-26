@@ -39,7 +39,7 @@ class EinkaufCompatService:
         try:
             from app.core.cache import cache_delete_prefix
             cache_delete_prefix(cache_key("procurement", self.tenant_id))
-        except Exception:
+        except Exception:  # noqa: BLE001 — Cache-Invalidierung fehlgeschlagen; nächste Anfrage lädt frisch
             pass
 
     # ── Lieferanten ──────────────────────────────────────────────────────────
@@ -279,7 +279,7 @@ class EinkaufCompatService:
                 document_type="wareneingang",
                 period=received_date[:7] if received_date else None,
             )
-        except Exception:
+        except Exception:  # noqa: BLE001 — Cache-Invalidierung fehlgeschlagen; nächste Anfrage lädt frisch
             pass  # booking failure must not block receipt creation
 
     # ── Anfragen ──────────────────────────────────────────────────────────────
