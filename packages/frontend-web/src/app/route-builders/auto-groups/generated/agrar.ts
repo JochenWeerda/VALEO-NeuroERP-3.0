@@ -148,4 +148,7 @@ export const entries: AutoGroupRouteEntry[] = [
   { "module": "@/pages/agrar/ernte/neu", "path": "ernte/neu" },
   { "module": "@/pages/agrar/saatzucht", "path": "saatzucht" },
   { "module": "@/pages/agrar/sammelabrechnung", "path": "sammelabrechnung" },
+  { "module": "@/pages/agrar/rohwarengruppen", "path": "rohwarengruppen" },
+  { "module": "@/pages/agrar/vermehrungsvertraege", "path": "vermehrungsvertraege" },
+  { "module": "@/pages/agrar/zinsabrechnung", "path": "zinsabrechnung" },
 ]

@@ -1,0 +1,68 @@
+id: FACHLICHE-VERTIEFUNG-UX-W21-001
+titel: "Wave 21 — Verbleibende fachliche Vertiefung (6 Frontend-Pages)"
+von: Claude Code
+owner: Claude Code
+stand: abgeschlossen 2026-05-26
+ziel: >
+  6 fehlende Frontend-Pages implementieren: Daueraufträge (Verkauf),
+  Massebilanz (Lager), Vermehrungsverträge (Agrar/Saatzucht),
+  Zinsabrechnung (Agrar), Artikel-Bestandteile (Stammdaten),
+  Artikelverpackung (Stammdaten). Inkl. API-Clients, Navigation,
+  Routen und E2E-Tests.
+
+dateibesitz:
+  - packages/frontend-web/src/lib/api/dauerauftraege.ts
+  - packages/frontend-web/src/lib/api/massebilanz.ts
+  - packages/frontend-web/src/lib/api/vermehrungsvertraege.ts
+  - packages/frontend-web/src/lib/api/zinsabrechnung.ts
+  - packages/frontend-web/src/lib/api/artikelbestandteile.ts
+  - packages/frontend-web/src/lib/api/artikelverpackung.ts
+  - packages/frontend-web/src/pages/verkauf/dauerauftraege.tsx
+  - packages/frontend-web/src/pages/lager/massebilanz.tsx
+  - packages/frontend-web/src/pages/agrar/vermehrungsvertraege.tsx
+  - packages/frontend-web/src/pages/agrar/zinsabrechnung.tsx
+  - packages/frontend-web/src/pages/stammdaten/artikelbestandteile.tsx
+  - packages/frontend-web/src/pages/stammdaten/artikelverpackung.tsx
+  - packages/frontend-web/src/app/navigation/domains/commercial.tsx
+  - packages/frontend-web/src/app/navigation/domains/operations.tsx
+  - packages/frontend-web/src/app/route-builders/auto-groups/generated/verkauf.ts
+  - packages/frontend-web/src/app/route-builders/auto-groups/generated/lager.ts
+  - packages/frontend-web/src/app/route-builders/auto-groups/generated/agrar.ts
+  - packages/frontend-web/src/app/route-builders/auto-groups/generated/stammdaten.ts
+  - packages/frontend-web/tests/e2e/fachliche-vertiefung-dauerauftraege.spec.ts
+  - packages/frontend-web/tests/e2e/fachliche-vertiefung-massebilanz.spec.ts
+  - packages/frontend-web/tests/e2e/fachliche-vertiefung-vermehrungsvertraege.spec.ts
+  - packages/frontend-web/tests/e2e/fachliche-vertiefung-zinsabrechnung.spec.ts
+  - packages/frontend-web/tests/e2e/fachliche-vertiefung-artikelbestandteile.spec.ts
+  - packages/frontend-web/tests/e2e/fachliche-vertiefung-artikelverpackung.spec.ts
+  - docs/agent-ops/slices/FACHLICHE-VERTIEFUNG-UX-W21-001.yaml
+
+abnahmekriterien:
+  - 6 API-Clients mit useQuery/useMutation nach Standardmuster
+  - 6 Pages mit Loading/Empty/Error-States
+  - Mutation Lifecycle Guards (Submit/Delete disabled while pending)
+  - Per-entity Pending State fuer row-level mutations
+  - Toast-Feedback auf alle nicht-idempotenten Aktionen
+  - Navigation in commercial.tsx (Dauerauftraege, Artikel-Stammdaten)
+  - Navigation in operations.tsx (Massebilanz, Vermehrungsvertraege, Zinsabrechnung)
+  - Route-Builder-Eintraege fuer alle 6 neuen Seiten
+  - E2E-Tests: 6/6 gruen (mocked API)
+  - pnpm type-check gruen
+
+erledigt:
+  - 6 API-Clients (TanStack Query) erstellt
+  - 6 Frontend-Pages nach Pattern zu-abschlaggruppen.tsx erstellt
+  - Navigation commercial.tsx + operations.tsx aktualisiert
+  - Route-Builder auto-groups generated/*.ts aktualisiert
+  - 6 E2E-Tests mit MSW-Mock-Pattern erstellt
+  - TypeCheck: 0 Fehler
+  - Bugfix vermehrungsvertraege.tsx: SelectItem value="" → "__none__" (Radix-UI-Laufzeitfehler)
+  - E2E-Gates: 6/6 gruen (2026-05-26, develop)
+
+checks:
+  - "pnpm --filter @valero-neuroerp/frontend-web type-check"
+  - "pnpm --filter @valero-neuroerp/frontend-web exec playwright test tests/e2e/fachliche-vertiefung-*.spec.ts --project=chromium"
+
+gate_ergebnis: "6/6 E2E-Tests gruen, TypeCheck 0 Fehler (2026-05-26, develop)"
+
+offene_risiken: Keine.

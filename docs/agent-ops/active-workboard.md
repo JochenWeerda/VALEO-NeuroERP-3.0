@@ -2543,6 +2543,19 @@ Archiv des vorherigen Boards:
 **Checks:** `pnpm --filter @valero-neuroerp/frontend-web type-check`; Playwright-Gates W16+W15+W12; `python scripts/agent_workboard_supervisor.py validate`; `git diff --check`
 **Offene Risiken:** W12-Staffeln-Test skip ist dokumentiertes pre-existing Playwright-Isolation-Issue; keine fachlichen Risiken.
 
+## FACHLICHE-VERTIEFUNG-UX-W21-001
+
+**Von:** Claude Code
+**Owner:** Claude Code
+**Stand:** abgeschlossen 2026-05-26
+**Ziel des Slices:** Wave 21 — 6 fehlende Frontend-Pages: Daueraufträge, Massebilanz, Vermehrungsverträge, Zinsabrechnung, Artikel-Bestandteile, Artikelverpackung. Inkl. API-Clients, Navigation, Routen und E2E-Tests.
+**Dateibesitz:** `packages/frontend-web/src/lib/api/dauerauftraege.ts`, `packages/frontend-web/src/lib/api/massebilanz.ts`, `packages/frontend-web/src/lib/api/vermehrungsvertraege.ts`, `packages/frontend-web/src/lib/api/zinsabrechnung.ts`, `packages/frontend-web/src/lib/api/artikelbestandteile.ts`, `packages/frontend-web/src/lib/api/artikelverpackung.ts`, `packages/frontend-web/src/pages/verkauf/dauerauftraege.tsx`, `packages/frontend-web/src/pages/lager/massebilanz.tsx`, `packages/frontend-web/src/pages/agrar/vermehrungsvertraege.tsx`, `packages/frontend-web/src/pages/agrar/zinsabrechnung.tsx`, `packages/frontend-web/src/pages/stammdaten/artikelbestandteile.tsx`, `packages/frontend-web/src/pages/stammdaten/artikelverpackung.tsx`, Navigation- und Route-Builder-Dateien, 6 E2E-Specs
+**Abnahmekriterien:** 6 API-Clients + 6 Pages mit Mutation Lifecycle Guards; Toast-Feedback; Navigation aktualisiert; Route-Builder-Einträge; 6 E2E-Tests gruen; TypeCheck gruen.
+**Erledigt:** 6 API-Clients, 6 Pages, Navigation und Route-Builder aktualisiert, 6 E2E-Tests. TypeCheck: 0 Fehler. Bugfix vermehrungsvertraege.tsx (Radix SelectItem value="").
+**Checks:** `pnpm --filter @valero-neuroerp/frontend-web type-check`; Playwright-Gates W21; `python scripts/agent_workboard_supervisor.py validate`
+**Gate-Ergebnis:** 6/6 E2E-Tests gruen, TypeCheck 0 Fehler (2026-05-26, develop)
+**Offene Risiken:** Keine.
+
 ## BACKEND-SLICE-GDPR-KONTRAKTE-DMS-001
 
 **Von:** Claude Code

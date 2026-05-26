@@ -101,6 +101,7 @@ Wave-17-UX (Slice `FACHLICHE-VERTIEFUNG-UX-W17-001`, 2026-05-26):
 | Frontend-E2E fuer Erlöskontenzuordnung (EKZZ) | geschlossen | Playwright-Test prueft `/zuordnungen` und `/lookup` inkl. Upsert und Lookup. |
 | Fach-UAT fuer alle Referenzseiten | geschlossen als UAT-Paket | Matrix, Smoke-/Schema-/E2E-/DB-Gates sind dokumentiert; externe Fachsignatur bleibt eine Business-Abnahme, kein fehlendes Repo-Artefakt. |
 | Weitere Stammdaten-Masken (Wave 11-13) | geschlossen als Scope-Entscheidung | Backend-Vertraege implementiert; Vollmasken nur bei Bedarf als eigene UI-Slices. |
+| Wave 21 — Daueraufträge, Massebilanz, Vermehrungsverträge, Zinsabrechnung, Artikel-Bestandteile, Artikelverpackung | geschlossen | 6 Frontend-Pages mit API-Clients, Navigation, Route-Builder und E2E-Tests (Wave 21, 2026-05-26). 6/6 E2E-Gates gruen, TypeCheck 0 Fehler. |
 
 ## Externe Grenzen
 
@@ -125,6 +126,7 @@ pnpm --filter @valero-neuroerp/frontend-web exec playwright test tests/e2e/fachl
 pnpm --filter @valero-neuroerp/frontend-web exec playwright test tests/e2e/fachliche-vertiefung-erloeskennziffern.spec.ts --project=chromium
 pnpm --filter @valero-neuroerp/frontend-web exec playwright test tests/e2e/fachliche-vertiefung-zahlungsbedingungen.spec.ts --project=chromium
 pnpm --filter @valero-neuroerp/frontend-web exec playwright test tests/e2e/fachliche-vertiefung-ekzz.spec.ts --project=chromium
+pnpm --filter @valero-neuroerp/frontend-web exec playwright test tests/e2e/fachliche-vertiefung-dauerauftraege.spec.ts tests/e2e/fachliche-vertiefung-massebilanz.spec.ts tests/e2e/fachliche-vertiefung-vermehrungsvertraege.spec.ts tests/e2e/fachliche-vertiefung-zinsabrechnung.spec.ts tests/e2e/fachliche-vertiefung-artikelbestandteile.spec.ts tests/e2e/fachliche-vertiefung-artikelverpackung.spec.ts --project=chromium
 python scripts/agent_workboard_supervisor.py validate
 node scripts/docs-markdown-check.cjs docs/FACHLICHE-VERTIEFUNG-ABNAHME.md docs/agent-ops/active-workboard.md docs/agent-ops/slices/QA-FACHLICHE-VERTIEFUNG-WAVES-001.yaml docs/agent-ops/slices/QA-FACHLICHE-VERTIEFUNG-GATES-001.yaml docs/agent-ops/slices/FACHLICHE-VERTIEFUNG-UX-W10-EKZZ-001.yaml
 git diff --check
