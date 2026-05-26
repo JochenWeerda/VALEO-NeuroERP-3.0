@@ -2519,6 +2519,18 @@ Archiv des vorherigen Boards:
 **Checks:** `node` JSON-Parse fuer `packages/frontend-web/src/i18n/locales/de|en|es|fr/translation.json`; Encoding-Scan `rg -n "Ã|Â|â" packages/frontend-web/src`; UTF-8-Validierung fuer `packages/frontend-web/src`; Route-Alias-Modulvalidierung gegen `packages/frontend-web/src`; `pnpm --filter @valero-neuroerp/frontend-web type-check`; `pnpm --filter @valero-neuroerp/frontend-web lint`; `pnpm --filter @valero-neuroerp/frontend-web build`; `python scripts/agent_workboard_supervisor.py validate`; `node scripts/docs-governance-check.cjs docs/agent-ops/active-workboard.md docs/agent-ops/slices/FRONTEND-DOMAIN-AUDIT-REPAIR-001.yaml`; `node scripts/docs-markdown-check.cjs docs/agent-ops/active-workboard.md docs/agent-ops/slices/FRONTEND-DOMAIN-AUDIT-REPAIR-001.yaml`; `git diff --check`
 **Offene Risiken:** Vite-Build meldet weiterhin bestehende, nicht blockierende Warnungen aus CSS-Minifizierung und POS-Doppelimport; backendabhaengige Datenladefehler sind von Frontend-Routing/Rendering getrennt zu bewerten.
 
+## FACHLICHE-VERTIEFUNG-UX-W17-001
+
+**Von:** Claude Sonnet 4.6
+**Owner:** Claude Sonnet 4.6
+**Stand:** abgeschlossen 2026-05-26
+**Ziel des Slices:** Wave 17 UX — Zu-/Abschlaggruppen [ZAGR], Zu-/Abschlagklassen [ZAKL] und Zu-/Abschlagkonditionen [ZAK] als vollständige produktive Maske unter `/preise/zu-abschlaggruppen`.
+**Dateibesitz:** `docs/agent-ops/slices/FACHLICHE-VERTIEFUNG-UX-W17-001.yaml`, `packages/frontend-web/src/lib/api/zuAbschlaggruppen.ts`, `packages/frontend-web/src/pages/preise/zu-abschlaggruppen.tsx`, `packages/frontend-web/tests/e2e/fachliche-vertiefung-zu-abschlaege.spec.ts`
+**Abnahmekriterien:** Tabs ZAGR/ZAKL/ZAK produktiv; CREATE + DELETE für Gruppen und Klassen; CREATE + Listenansicht für Konditionen; E2E 4/4 grün; Regression Rabattgruppen + Betriebsstätten grün; Typecheck grün; Workboard grün.
+**Erledigt:** API-Client `zuAbschlaggruppen.ts`; UI-Maske mit 3 Tabs; Navigation + Route-Builder bereits vorhanden; E2E 4/4; Regression 9/9; TypeScript grün; alle Gates grün.
+**Checks:** `pnpm --filter @valero-neuroerp/frontend-web type-check`; Playwright-Gates W17 + Regression W14; `python scripts/agent_workboard_supervisor.py validate`; `git diff --check`
+**Offene Risiken:** Keine.
+
 ## FACHLICHE-VERTIEFUNG-UX-W16-001
 
 **Von:** Claude Sonnet 4.6
