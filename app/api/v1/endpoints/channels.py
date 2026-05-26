@@ -7,6 +7,7 @@ from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 from typing import Any, Optional
 
+from app.core.config import settings
 from app.core.database import get_db
 from app.core.tenant import get_tenant_id
 
@@ -43,7 +44,7 @@ async def whatsapp_verify(request: Request):
     token = request.query_params.get("hub.verify_token")
     challenge = request.query_params.get("hub.challenge")
 
-    verify_token = "valeo_whatsapp_verify_2026"
+    verify_token = settings.CHANNEL_WHATSAPP_VERIFY_TOKEN or "valeo_whatsapp_verify_2026"
     if mode == "subscribe" and token == verify_token:
         return Response(content=challenge, media_type="text/plain")
     return Response(content="Forbidden", status_code=403)

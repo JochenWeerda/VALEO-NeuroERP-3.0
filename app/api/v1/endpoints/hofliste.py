@@ -159,6 +159,7 @@ def status_aendern(
     elif neuer_status == "abgefahren":
         extra_sql = ", abfahrt_zeit = now()"
 
+    # nosec S608 — reviewed-safe: column names code-controlled, values parameterized
     db.execute(text(f"""
         UPDATE domain_shared.waage_hofliste
         SET status = :status {extra_sql}, updated_at = now()

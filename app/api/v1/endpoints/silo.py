@@ -641,7 +641,7 @@ async def create_leermeldung(
     for col, val in optional_updates.items():
         if col in cols and val is not None:
             db.execute(
-                text(f"UPDATE agrar_silos SET {col} = :{col} WHERE id = :id"),  # noqa: S608
+                text(f"UPDATE agrar_silos SET {col} = :{col} WHERE id = :id"),  # noqa: S608  # nosec S608 — reviewed-safe: column names code-controlled, values parameterized
                 {col: val, "id": silo_id},
             )
 

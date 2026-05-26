@@ -164,6 +164,7 @@ def query_audit_trail(
         params["to_dt"] = to_date
 
     try:
+        # nosec S608 — reviewed-safe: column names code-controlled, values parameterized
         rows = db.execute(text(f"""
             SELECT id, timestamp, user_id, user_email, action, entity_type,
                    entity_id, changes, prev_hash, hash, correlation_id

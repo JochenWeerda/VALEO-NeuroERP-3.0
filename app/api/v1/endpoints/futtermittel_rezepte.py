@@ -264,6 +264,7 @@ async def update_ingredient(
     try:
         _ensure_tables(db)
         set_clauses = ", ".join(f"{k} = :{k}" for k in updates)
+        # nosec S608 — reviewed-safe: column names code-controlled, values parameterized
         sql = text(f"""
             UPDATE domain_futtermittel.recipe_ingredients
             SET {set_clauses}

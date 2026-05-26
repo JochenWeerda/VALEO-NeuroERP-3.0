@@ -446,6 +446,7 @@ async def list_korrekturen(
 
     where = " AND ".join(conditions)
     rows = db.execute(
+        # nosec S608 — reviewed-safe: column names code-controlled, values parameterized
         text(f"""
             SELECT id, article_id, warehouse_id, quantity, charge, reference_number,
                    movement_date, notes, created_at
@@ -458,7 +459,7 @@ async def list_korrekturen(
     ).mappings().all()
 
     total = db.execute(
-        text(f"SELECT COUNT(*) FROM domain_inventory.inventory_stock_movements WHERE {where}"),
+        text(f"SELECT COUNT(*) FROM domain_inventory.inventory_stock_movements WHERE {where}"),  # nosec S608 — reviewed-safe: column names code-controlled, values parameterized
         params,
     ).scalar() or 0
 

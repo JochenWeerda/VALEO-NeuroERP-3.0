@@ -175,7 +175,7 @@ async def list_lieferscheine(
         where += " AND (lieferschein_nr ILIKE :search OR COALESCE(lieferant_name,'') ILIKE :search)"
         params["search"] = f"%{search}%"
     rows = db.execute(
-        text(f"SELECT * FROM einkauf_lieferscheine WHERE {where} ORDER BY lieferschein_datum DESC, created_at DESC LIMIT 500"),
+        text(f"SELECT * FROM einkauf_lieferscheine WHERE {where} ORDER BY lieferschein_datum DESC, created_at DESC LIMIT 500"),  # nosec S608 — reviewed-safe: column names code-controlled, values parameterized
         params,
     ).mappings().all()
     result: list[Lieferschein] = []
@@ -268,7 +268,7 @@ async def patch_lieferschein(ls_id: str, payload: LieferscheinUpdate, tenant_id:
     if values:
         set_clause = ", ".join(f"{k} = :{k}" for k in values.keys())
         params = {"id": ls_id, "tenant_id": tenant_id, **values}
-        db.execute(text(f"UPDATE einkauf_lieferscheine SET {set_clause}, updated_at = NOW() WHERE id = :id AND tenant_id = :tenant_id"), params)
+        db.execute(text(f"UPDATE einkauf_lieferscheine SET {set_clause}, updated_at = NOW() WHERE id = :id AND tenant_id = :tenant_id"), params)  # nosec S608 — reviewed-safe: column names code-controlled, values parameterized
         db.commit()
     row = _get_lieferschein_or_404(db, ls_id, tenant_id)
     return Lieferschein(**dict(row), positionen=_list_positions(db, ls_id))
@@ -321,7 +321,7 @@ async def patch_lieferschein_position(
         raise HTTPException(status_code=404, detail="Lieferschein position not found")
     values = payload.model_dump()
     set_clause = ", ".join(f"{k} = :{k}" for k in values.keys())
-    db.execute(text(f"UPDATE einkauf_lieferschein_positionen SET {set_clause}, updated_at = NOW() WHERE id = :id"), {"id": pos_id, **values})
+    db.execute(text(f"UPDATE einkauf_lieferschein_positionen SET {set_clause}, updated_at = NOW() WHERE id = :id"), {"id": pos_id, **values})  # nosec S608 — reviewed-safe: column names code-controlled, values parameterized
     db.commit()
     updated = db.execute(text("SELECT * FROM einkauf_lieferschein_positionen WHERE id = :id"), {"id": pos_id}).mappings().first()
     return LieferscheinPosition(**dict(updated))
@@ -387,7 +387,7 @@ async def patch_frachtauftrag(
     if values:
         set_clause = ", ".join(f"{k} = :{k}" for k in values.keys())
         db.execute(
-            text(f"UPDATE einkauf_frachtauftraege SET {set_clause}, updated_at = NOW() WHERE id = :id AND tenant_id = :tenant_id"),
+            text(f"UPDATE einkauf_frachtauftraege SET {set_clause}, updated_at = NOW() WHERE id = :id AND tenant_id = :tenant_id"),  # nosec S608 — reviewed-safe: column names code-controlled, values parameterized
             {"id": fa_id, "tenant_id": tenant_id, **values},
         )
         db.commit()

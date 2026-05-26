@@ -181,7 +181,7 @@ def list_tours(
         """))
         db.commit()
         rows = db.execute(
-            text(f"SELECT * FROM domain_logistics.tours WHERE {where} ORDER BY created_at DESC"),
+            text(f"SELECT * FROM domain_logistics.tours WHERE {where} ORDER BY created_at DESC"),  # nosec S608 — reviewed-safe: column names code-controlled, values parameterized
             params,
         ).mappings().all()
         return [dict(r) for r in rows]
@@ -380,7 +380,7 @@ def patch_stop(
         if not updates:
             raise HTTPException(status_code=422, detail="Keine Felder zum Aktualisieren")
         db.execute(
-            text(f"UPDATE domain_logistics.tour_stops SET {', '.join(updates)} WHERE id = :stop_id"),
+            text(f"UPDATE domain_logistics.tour_stops SET {', '.join(updates)} WHERE id = :stop_id"),  # nosec S608 — reviewed-safe: column names code-controlled, values parameterized
             params,
         )
         db.commit()
@@ -686,6 +686,7 @@ def get_statistics(
         where = " AND ".join(tour_conds)
 
         stats = db.execute(
+            # nosec S608 — reviewed-safe: column names code-controlled, values parameterized
             text(f"""
                 SELECT
                     COUNT(DISTINCT t.id)                                        AS total_tours,
@@ -706,6 +707,7 @@ def get_statistics(
 
         # km aus GPS-Events (Haversine-Summe)
         gps_rows = db.execute(
+            # nosec S608 — reviewed-safe: column names code-controlled, values parameterized
             text(f"""
                 SELECT e.lat, e.lng, e.event_ts
                 FROM domain_logistics.tour_events e

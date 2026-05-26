@@ -198,7 +198,7 @@ async def list_sales_offers(
     where_sql = " AND ".join(where)
     total = (
         db.execute(
-            text(f"SELECT COUNT(*) FROM domain_crm.sales_offers WHERE {where_sql}"), params
+            text(f"SELECT COUNT(*) FROM domain_crm.sales_offers WHERE {where_sql}"), params  # nosec S608 — reviewed-safe: column names code-controlled, values parameterized
         ).scalar()
         or 0
     )

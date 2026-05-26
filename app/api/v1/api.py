@@ -3,7 +3,9 @@ VALEO-NeuroERP API v1 Router
 Main API router that includes all domain routers
 """
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
+
+from app.core.security import require_bearer_token
 
 from app.api.v1.endpoints import (
     export_service,
@@ -321,8 +323,11 @@ from app.documents.router import router as documents_router
 from app.reports.router import router as reports_router
 from app.verkauf.router import router as verkauf_router
 
-# Create main API router
-api_router = APIRouter()
+# Create main API router — auth enforced globally; exempt paths handled in require_bearer_token
+api_router = APIRouter(dependencies=[Depends(require_bearer_token)])
+
+# WebSocket routes manage their own auth; excluded from the global auth dependency
+ws_router = APIRouter()
 
 
 @api_router.get("/status", tags=["meta"])
@@ -1465,7 +1470,7 @@ from app.api.v1.endpoints import (
 
 api_router.include_router(neuro_guardrails.router)
 api_router.include_router(neuro_fast_track.router)
-api_router.include_router(copilot_ws.router)
+ws_router.include_router(copilot_ws.router)  # WebSocket — excluded from global auth dependency
 api_router.include_router(neuro_event_policy.router)
 api_router.include_router(neuro_event_monitoring.router)
 api_router.include_router(security_monitoring.router)
@@ -1713,7 +1718,7 @@ api_router.include_router(kontrakte.router, tags=["kontrakte"])
 api_router.include_router(ki_usability.router, prefix="/ki", tags=["ki", "usability"])
 api_router.include_router(pos_payments_promotions.router, tags=["pos", "payments", "promotions"])
 api_router.include_router(system_metrics.router, prefix="/system", tags=["system", "metrics", "agents"])
-api_router.include_router(websocket.router, tags=["websocket", "realtime"])
+ws_router.include_router(websocket.router, tags=["websocket", "realtime"])
 
 # Agribusiness — Farmer master data
 from app.api.v1.endpoints import agribusiness  # noqa: E402

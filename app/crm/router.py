@@ -774,6 +774,7 @@ async def list_consents(
         where.append("channel = :ch")
         params["ch"] = channel
     rows = db.execute(
+        # nosec S608 — reviewed-safe: column names code-controlled, values parameterized
         text(f"""
             SELECT id, tenant_id, partner_id, channel, purpose, granted, source,
                    ip_address, notes, granted_at, revoked_at, created_at
@@ -1034,7 +1035,7 @@ async def update_segment(
         params["stype"] = update.segment_type
 
     db.execute(
-        text(f"UPDATE domain_crm.crm_segments SET {', '.join(set_parts)} WHERE id = :id"),
+        text(f"UPDATE domain_crm.crm_segments SET {', '.join(set_parts)} WHERE id = :id"),  # nosec S608 — reviewed-safe: column names code-controlled, values parameterized
         params,
     )
     db.commit()

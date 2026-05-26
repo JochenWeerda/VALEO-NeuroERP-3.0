@@ -12,9 +12,9 @@ import re
 from urllib import parse, request
 from typing import Any
 
-from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
+from app.core.config import settings
 from app.core.outbound_security import validate_outbound_http_target
 from app.core.mcp_tool_contracts import MCPRequestPayloadMode, MCPToolContract
 from app.integrations.services.superglue_secret_resolver import resolve_superglue_auth_token
@@ -140,11 +140,8 @@ class NeuroToolExecutionService:
 
     def _get_client(self) -> TestClient:
         if self._client is None:
-            app = FastAPI()
-            from app.api.v1.api import api_router
-
-            app.include_router(api_router, prefix="/api/v1")
-            self._client = TestClient(app, raise_server_exceptions=False)
+            from app.main import app as main_app
+            self._client = TestClient(main_app, raise_server_exceptions=False)
         return self._client
 
     def _build_request_spec(
@@ -198,7 +195,7 @@ class NeuroToolExecutionService:
             "json": body,
             "headers": {
                 "Authorization": (
-                    f"Bearer {context.get('auth_token') or (resolve_superglue_auth_token(tenant_id, allow_global_fallback=True) if context.get('provider_key') == 'superglue' else None) or 'neuro-tool-broker'}"
+                    f"Bearer {context.get('auth_token') or (resolve_superglue_auth_token(tenant_id, allow_global_fallback=True) if context.get('provider_key') == 'superglue' else None) or settings.API_DEV_TOKEN or 'neuro-tool-broker'}"
                 ),
                 "X-Tenant-ID": tenant_id,
                 "Content-Type": "application/json",

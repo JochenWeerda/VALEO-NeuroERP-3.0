@@ -2,6 +2,7 @@
 Zentrale Test-Fixtures für VALEO NeuroERP 3.0.
 
 - Setzt API_DEV_TOKEN automatisch für alle Tests (kein Keycloak nötig).
+- Bypassed require_bearer_token via dependency_overrides (kein Authorization-Header nötig).
 - Stellt skip_if_db_unavailable() als Hilfsfunktion bereit.
 - Marker needs_live_db: wird Tests zugewiesen, die die Fixture require_db nutzen
   (für CI: pytest -m needs_live_db mit PYTEST_REQUIRE_DB_STRICT=1).
@@ -27,9 +28,20 @@ def pytest_collection_modifyitems(config: pytest.Config, items: list) -> None:
 
 @pytest.fixture(autouse=True)
 def _enable_dev_token(monkeypatch):
-    """Aktiviert den Dev-Token-Bypass in allen Tests."""
+    """Aktiviert den Dev-Token-Bypass und bypassed require_bearer_token in allen Tests.
+
+    Zwei-Schicht-Ansatz:
+    1. API_DEV_TOKEN setzen — für Tests die selbst 'Authorization: Bearer dev-token' senden
+    2. dependency_overrides — für Tests die keine Auth-Header senden (Großteil der Suite)
+    """
     monkeypatch.setattr(settings, "API_DEV_TOKEN", "dev-token")
     monkeypatch.setattr(security.settings, "API_DEV_TOKEN", "dev-token")
+
+    # Bypass require_bearer_token für alle TestClient-Anfragen ohne Authorization-Header
+    from app.main import app as _app
+    _app.dependency_overrides[security.require_bearer_token] = lambda: "dev-token"
+    yield
+    _app.dependency_overrides.pop(security.require_bearer_token, None)
 
 
 def skip_if_db_unavailable(response):

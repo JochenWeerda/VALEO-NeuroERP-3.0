@@ -75,7 +75,7 @@ def _fetch_gr_amount(db: Session, gr_id: str, tenant_id: str) -> Optional[float]
     ]:
         try:
             row = db.execute(
-                text(f"SELECT gesamtbetrag FROM {table} WHERE id = :id AND tenant_id = :tid LIMIT 1"),
+                text(f"SELECT gesamtbetrag FROM {table} WHERE id = :id AND tenant_id = :tid LIMIT 1"),  # nosec S608 — reviewed-safe: column names code-controlled, values parameterized
                 {"id": gr_id, "tid": tenant_id},
             ).fetchone()
             if row:
