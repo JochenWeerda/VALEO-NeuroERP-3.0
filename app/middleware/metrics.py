@@ -18,16 +18,33 @@ http_requests_total = Counter(
     ['method', 'endpoint', 'status']
 )
 
+# SLO target: P99 < 500ms  →  buckets tuned around the 500ms threshold
+_SLO_LATENCY_BUCKETS = (0.025, 0.05, 0.1, 0.25, 0.5, 1.0, 2.5, 5.0, 10.0)
+
 http_request_duration_seconds = Histogram(
     'http_request_duration_seconds',
     'HTTP request latency in seconds',
-    ['method', 'endpoint']
+    ['method', 'endpoint'],
+    buckets=_SLO_LATENCY_BUCKETS,
 )
 
 http_requests_in_progress = Gauge(
     'http_requests_in_progress',
     'HTTP requests currently in progress',
     ['method', 'endpoint']
+)
+
+# SLO breach counters — alert when these increase
+http_slo_latency_violations_total = Counter(
+    'http_slo_latency_violations_total',
+    'HTTP requests that exceeded the P99 SLO threshold (500ms)',
+    ['method', 'endpoint'],
+)
+
+http_slo_error_violations_total = Counter(
+    'http_slo_error_violations_total',
+    'HTTP 5xx responses (SLO: error rate < 0.1%)',
+    ['method', 'endpoint'],
 )
 
 
@@ -73,15 +90,22 @@ class PrometheusMiddleware(BaseHTTPMiddleware):
             raise
             
         finally:
-            # Track duration
             duration = time.time() - start_time
             http_request_duration_seconds.labels(
                 method=method,
-                endpoint=endpoint
+                endpoint=endpoint,
             ).observe(duration)
-            
-            # Decrement in-progress
             http_requests_in_progress.labels(method=method, endpoint=endpoint).dec()
+
+            # SLO breach tracking
+            if duration > 0.5:
+                http_slo_latency_violations_total.labels(
+                    method=method, endpoint=endpoint
+                ).inc()
+            if "status" in locals() and status >= 500:
+                http_slo_error_violations_total.labels(
+                    method=method, endpoint=endpoint
+                ).inc()
     
     def _simplify_path(self, path: str) -> str:
         """Simplify path by replacing UUIDs and IDs with placeholders."""
