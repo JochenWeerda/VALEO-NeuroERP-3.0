@@ -1,6 +1,6 @@
 # Active Workboard
 
-Stand: `2026-05-23`
+Stand: `2026-05-26`
 
 ## DESIGN-MERIDIAN-ORCH-001
 
@@ -2530,3 +2530,29 @@ Archiv des vorherigen Boards:
 **Erledigt:** vertreterstamm.tsx Create-Form + Edit-Dialog auf useProvisionsgruppen()-Select; W16-Integrationstest (2/2 gruen); W15-Regression (4/4 gruen); W12-Regression (1/1 gruen, 1 Staffel-Test skip mit Begruendung); Fremdfix W12-Spec strict-mode-Violations.
 **Checks:** `pnpm --filter @valero-neuroerp/frontend-web type-check`; Playwright-Gates W16+W15+W12; `python scripts/agent_workboard_supervisor.py validate`; `git diff --check`
 **Offene Risiken:** W12-Staffeln-Test skip ist dokumentiertes pre-existing Playwright-Isolation-Issue; keine fachlichen Risiken.
+
+## BACKEND-SLICE-GDPR-KONTRAKTE-DMS-001
+
+**Von:** Claude Code
+**Owner:** Claude Code
+**Stand:** abgeschlossen 2026-05-26
+**Ziel des Slices:** Vier offene Backend-Slices implementieren: GDPR-requests-Lifecycle (Art. 15/17/20), Kontrakte-Amendments/Templates, Agribusiness-Farmers und DMS-Inbox + admin/dms. Pydantic-V2-ConfigDict-Migration in allen neuen Endpoint-Dateien.
+**Dateibesitz:** `app/api/v1/endpoints/gdpr_requests.py`, `app/api/v1/endpoints/kontrakte.py`, `app/api/v1/endpoints/agribusiness.py`, `app/api/v1/endpoints/dms_inbox.py`, `app/api/v1/endpoints/admin_dms.py`, `app/infrastructure/models/agribusiness_models.py`, Alembic-Migrationen fuer GDPR und Farmers, `app/api/v1/api.py`
+**Abnahmekriterien:** GDPR-Lifecycle (PENDING→VERIFIED→PROCESSING→COMPLETED|REJECTED) mit Download; Kontrakte GET amendments-templates + POST/PATCH amendments; Farmers GET/DELETE mit 204; DMS GET/POST/DELETE inbox + admin status/test/bootstrap; Pydantic V2 ohne Config-Deprecation-Warnungen.
+**Erledigt:** 8 GDPR-Endpoints (814de39d0); 4 Kontrakte-Amendments-Endpoints (80077b009); Farmer-Model + Migration + 2 Endpoints (e8dd5b24e); 6 DMS-Inbox/Admin-Endpoints via Mayan-Client (a3a118e85); Pydantic-ConfigDict-Fix (0fb3f84eb).
+**Checks:** `pytest tests/test_process_kernel_wave8_complaint_e2e.py -q --no-cov`; `python scripts/agent_workboard_supervisor.py validate`
+**Gate-Ergebnis:** pytest Full Suite 9228 passed, 0 failed (2026-05-26, develop 271bc5e12)
+**Offene Risiken:** Keine.
+
+## TEST-SUITE-CLEANUP-001
+
+**Von:** Claude Code
+**Owner:** Claude Code
+**Stand:** abgeschlossen 2026-05-26
+**Ziel des Slices:** Alle 32 pre-existing und neu einfuehrten Failures in der pytest-Full-Suite auf 0 bringen. Kein semantic-breaking Code-Change.
+**Dateibesitz:** `app/api/v1/endpoints/reklamation_api.py`, `app/core/multi_context_agent.py`, `app/api/v1/endpoints/agrar_settlements.py`, `app/api/v1/endpoints/ebilanz_elster.py`, `app/api/v1/endpoints/silo_operations_api.py`, `tests/test_workers_coverage.py`, `tests/test_process_kernel_wave8_complaint_e2e.py`, `tests/test_hrm_compliance_pos.py`, `tests/test_kontrakt_hedging_preis_erechnung.py`
+**Abnahmekriterien:** `pytest --no-cov -q` liefert 0 failed in der Full-Suite.
+**Erledigt:** reklamation_api.py: _build_reklamation_payload + _store-Stub + computed fields + audit-key-fix (34d02a803); multi_context_agent.py: field_validator UTC-aware + datetime.now(timezone.utc) (34d02a803); asyncio.run() in test_workers_coverage + test_hrm_compliance_pos + test_kontrakt_hedging_preis_erechnung; agrar_settlements.py: get_repository/save_to_store Stubs; ebilanz_elster.py: XBRL-Fallback mit taxNumber; silo_operations_api.py: GET /zellen/{id} by-ID Route; wave8_complaint: PostgreSQL SessionLocal statt SQLite (271bc5e12).
+**Checks:** `pytest --no-cov -q` (Full Suite)
+**Gate-Ergebnis:** 9228 passed, 0 failed (2026-05-26, develop 271bc5e12) — zuvor 32 Failures
+**Offene Risiken:** Keine.
