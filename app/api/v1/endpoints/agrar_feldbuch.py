@@ -201,6 +201,8 @@ def _massnahme_to_dict(m: FeldbuchMassnahme) -> dict[str, Any]:
 async def list_schlaege(
     customer_id: Optional[str] = Query(None),
     status: Optional[str] = Query(None),
+    skip: int = Query(0, ge=0),
+    limit: int = Query(200, ge=1, le=1000),
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
 ) -> list[dict[str, Any]]:
@@ -209,7 +211,7 @@ async def list_schlaege(
         q = q.filter(FeldbuchSchlag.customer_id == customer_id)
     if status:
         q = q.filter(FeldbuchSchlag.status == status)
-    return [_schlag_to_dict(s) for s in q.order_by(FeldbuchSchlag.name).all()]
+    return [_schlag_to_dict(s) for s in q.order_by(FeldbuchSchlag.name).offset(skip).limit(limit).all()]
 
 
 @router.post("/schlaege", status_code=201)
@@ -295,6 +297,8 @@ async def list_massnahmen(
     typ: Optional[str] = Query(None),
     von: Optional[str] = Query(None),   # ISO date string
     bis: Optional[str] = Query(None),   # ISO date string
+    skip: int = Query(0, ge=0),
+    limit: int = Query(200, ge=1, le=1000),
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
 ) -> list[dict[str, Any]]:
@@ -312,7 +316,7 @@ async def list_massnahmen(
         q = q.filter(FeldbuchMassnahme.datum >= datetime.fromisoformat(von))
     if bis:
         q = q.filter(FeldbuchMassnahme.datum <= datetime.fromisoformat(bis))
-    return [_massnahme_to_dict(m) for m in q.order_by(FeldbuchMassnahme.datum.desc()).all()]
+    return [_massnahme_to_dict(m) for m in q.order_by(FeldbuchMassnahme.datum.desc()).offset(skip).limit(limit).all()]
 
 
 @router.post("/feldbuch/massnahmen", status_code=201)

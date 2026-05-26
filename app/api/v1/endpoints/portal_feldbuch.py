@@ -261,6 +261,8 @@ def _require_portal_massnahme(
 
 @router.get("/feldbuch/schlaege")
 async def portal_list_schlaege(
+    skip: int = Query(0, ge=0),
+    limit: int = Query(200, ge=1, le=1000),
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
     customer_id: str = Depends(_get_customer_id),
@@ -273,6 +275,7 @@ async def portal_list_schlaege(
                 FeldbuchSchlag.customer_id == customer_id,
             )
             .order_by(FeldbuchSchlag.name)
+            .offset(skip).limit(limit)
             .all()
         )
         data = [_schlag_to_dict(s) for s in schlaege]
@@ -344,6 +347,8 @@ async def portal_list_massnahmen(
     typ: Optional[str] = Query(None),
     von: Optional[str] = Query(None),
     bis: Optional[str] = Query(None),
+    skip: int = Query(0, ge=0),
+    limit: int = Query(200, ge=1, le=1000),
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
     customer_id: str = Depends(_get_customer_id),
@@ -367,6 +372,7 @@ async def portal_list_massnahmen(
         massnahmen = (
             q.options(selectinload(FeldbuchMassnahme.schlag))
             .order_by(FeldbuchMassnahme.datum.desc())
+            .offset(skip).limit(limit)
             .all()
         )
         data = [_massnahme_to_dict(m) for m in massnahmen]
