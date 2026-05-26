@@ -1,6 +1,6 @@
 # Fachliche Vertiefung - QA-Abnahme Wave 1-13
 
-Stand: 2026-05-23
+Stand: 2026-05-26
 
 ## Ergebnis
 
@@ -17,17 +17,17 @@ Die fachliche Vertiefung Wave 1-13 ist repo-seitig fuer den aktuellen Abnahmepfa
 | Wave | Fachliche Konzepte | Backend | Migration | UI | Tests |
 |---|---|---|---|---|---|
 | 1 | Massebilanz, Zinsabrechnung, Hofliste, Folgeartikel/Inventurgruppen/Wiegungsgruppen | implementiert | `fachliche_vertiefung_wave1_20260521` | Hofliste vorhanden; weitere Stammdaten backend-only | Schema/Unit |
-| 2 | Kontraktmengenzeitraeume, Kontrakt-Zu-/Abschlaege, Rezepturgruppen, Produktions-Schnellerfassung | implementiert | `fachliche_vertiefung_wave2_20260521` | backend-only | Schema/Unit |
+| 2 | Kontraktmengenzeitraeume, Kontrakt-Zu-/Abschlaege, Rezepturgruppen, Produktions-Schnellerfassung | implementiert | `fachliche_vertiefung_wave2_20260521` | Rezepturgruppen: `/produktion/rezepturgruppen` (Wave 22) | Schema/Unit + E2E |
 | 3 | Kundenbanken, Permanente Inventur, Stoffstrom, OP-Skonto-Aus­zifferung | implementiert | `fachliche_vertiefung_wave3_20260521` | backend-only | Schema/Unit |
-| 4 | Rabattgruppen/-klassen, Hausbankenstamm, Artikel-Bestandteile, Frachttabellen | implementiert | `fachliche_vertiefung_wave4_20260521` | backend-only | Schema/Unit |
-| 5 | Vermehrungsvertrag, Vertreterstamm, Geschaeftsjahre, periodische Buchungen | implementiert | `fachliche_vertiefung_wave5_20260521` | backend-only | Schema/Unit |
-| 6 | Mengeneinheiten, Artikelverpackung, Zahlungsmeldungen | implementiert | `fachliche_vertiefung_wave6_20260521` | backend-only | Schema/Unit |
-| 7 | Dauerauftraege, Individualpreise, Stuecklisten/Rezepturen | implementiert | `fachliche_vertiefung_wave7_20260521` | backend-only | Schema/Unit |
-| 8 | Rohwarengruppen, Qualitaeten, Zu-/Abschlag-Staffeln | implementiert | `fachliche_vertiefung_wave8_20260521` | backend-only | Schema/Unit |
-| 9 | Betriebsstaetten, individuelle Artikelnummern, Versandprofile, Lieferavise | implementiert | `fachliche_vertiefung_wave9_20260521` | backend-only | Schema/Unit |
+| 4 | Rabattgruppen/-klassen, Hausbankenstamm, Artikel-Bestandteile, Frachttabellen | implementiert | `fachliche_vertiefung_wave4_20260521` | Frachttabellen: `/logistik/frachttabellen` (Wave 22); Artikel-Bestandteile: `/stammdaten/artikelbestandteile` (Wave 21) | Schema/Unit + E2E |
+| 5 | Vermehrungsvertrag, Vertreterstamm, Geschaeftsjahre, periodische Buchungen | implementiert | `fachliche_vertiefung_wave5_20260521` | Geschaeftsjahre: `/fibu/geschaeftsjahre` (Wave 22); Periodische Buchungen: `/fibu/periodische-buchungen` (Wave 11 UI); Vermehrungsvertraege: `/agrar/vermehrungsvertraege` (Wave 21) | Schema/Unit + E2E |
+| 6 | Mengeneinheiten, Artikelverpackung, Zahlungsmeldungen | implementiert | `fachliche_vertiefung_wave6_20260521` | Mengeneinheiten: `/stammdaten/mengeneinheiten` (Wave 22); Zahlungsmeldungen: `/fibu/zahlungsmeldungen` (Wave 22); Artikelverpackung: `/stammdaten/artikelverpackung` (Wave 21) | Schema/Unit + E2E |
+| 7 | Dauerauftraege, Individualpreise, Stuecklisten/Rezepturen | implementiert | `fachliche_vertiefung_wave7_20260521` | Dauerauftraege: `/verkauf/dauerauftraege` (Wave 21); Individualpreise: `/preise/individualpreise` (Wave 22) | Schema/Unit + E2E |
+| 8 | Rohwarengruppen, Qualitaeten, Zu-/Abschlag-Staffeln | implementiert | `fachliche_vertiefung_wave8_20260521` | Rohwarengruppen: `/stammdaten/rohwarengruppen` (Wave 20) | Schema/Unit + E2E |
+| 9 | Betriebsstaetten, individuelle Artikelnummern, Versandprofile, Lieferavise | implementiert | `fachliche_vertiefung_wave9_20260521` | Versandprofile: `/logistik/versandprofile` (Wave 22) | Schema/Unit + E2E |
 | 10 | Warengruppen, Erloeskennziffern, Zahlungsbedingungen, Erlöskontenzuordnung (EKZZ) | implementiert inkl. Update-Contracts | `fachliche_vertiefung_wave10_20260521` | Warengruppen, Erlöskennziffern, Zahlungsbedingungen und EKZZ angebunden | Schema/Unit + API-Smoke + E2E |
-| 11 | Partiestamm, Forderungsgruppen, periodische Buchungen | implementiert | `fachliche_vertiefung_wave11_20260522` | backend-only | Schema/Unit + API-Smoke |
-| 12 | Zu-/Abschlaggruppen, Vertreterprovisionsgruppen/-staffeln | implementiert | `fachliche_vertiefung_wave12_20260522` | backend-only | Schema/Unit + API-Smoke |
+| 11 | Partiestamm, Forderungsgruppen, periodische Buchungen | implementiert | `fachliche_vertiefung_wave11_20260522` | Partiestamm: `/lager/partiestamm`; Forderungsgruppen: `/fibu/forderungsgruppen`; Periodische Buchungen: `/fibu/periodische-buchungen` (Wave 11 UI, 2026-05-24) | Schema/Unit + API-Smoke + E2E |
+| 12 | Zu-/Abschlaggruppen, Vertreterprovisionsgruppen/-staffeln | implementiert | `fachliche_vertiefung_wave12_20260522` | Zu-/Abschlaggruppen: `/preise/zu-abschlaggruppen` (Wave 17 UI); Provisionsgruppen: via Vertreterstamm-Integration (Wave 16 UI) | Schema/Unit + API-Smoke + E2E |
 | 13 | Zahlungsformulare, Zinsgruppen, Leergutarten | implementiert | `fachliche_vertiefung_wave13_20260522` | backend-only | Schema/Unit + API-Smoke |
 
 ## QA-Entscheidungen
@@ -65,7 +65,28 @@ Wave-10-EKZZ (Slice `FACHLICHE-VERTIEFUNG-UX-W10-EKZZ-001`, 2026-05-23):
 - Lookup: `GET` gegen `/api/v1/fibu/erloeskennziffern/lookup` mit Query-Parametern `ekz_nr`, optional `steuerschluessel`, `erlösklasse`, `buchungsklasse`, `datum`.
 - Playwright-Gate: `fachliche-vertiefung-ekzz.spec.ts`.
 
-Waves 11-13 bleiben backend-only. Das ist kein verdeckter Abschluss, sondern dokumentierter Produktumfang.
+Wave-11-UX (Slice FACHLICHE-VERTIEFUNG-UX-W11-001, 2026-05-24):
+
+- Partiestamm/PGR: `packages/frontend-web/src/pages/lager/partiestamm.tsx` unter `/lager/partiestamm`.
+- Forderungsgruppen: `packages/frontend-web/src/pages/fibu/forderungsgruppen.tsx` unter `/fibu/forderungsgruppen`.
+- Periodische Buchungen: `packages/frontend-web/src/pages/fibu/periodische-buchungen.tsx` unter `/fibu/periodische-buchungen`.
+- Playwright-Gates: `fachliche-vertiefung-partiestamm.spec.ts`, `fachliche-vertiefung-forderungsgruppen.spec.ts`, `fachliche-vertiefung-periodische-buchungen.spec.ts` (3/3 gruen, 2026-05-26).
+
+Wave-20-UX (Slice FACHLICHE-VERTIEFUNG-UX-W20-001, 2026-05-26):
+
+- Rohwarengruppen: `packages/frontend-web/src/pages/stammdaten/rohwarengruppen.tsx` unter `/stammdaten/rohwarengruppen`.
+- Playwright-Gate: `fachliche-vertiefung-rohwarengruppen.spec.ts`.
+
+Wave-22-UX (2026-05-26):
+
+- Frachttabellen: `/logistik/frachttabellen` (Positionen, CRUD). Playwright-Gate: `fachliche-vertiefung-frachttabellen.spec.ts`.
+- Versandprofile: `/logistik/versandprofile` (Email/Fax/EDI-Profil-CRUD). Playwright-Gate: `fachliche-vertiefung-versandprofile.spec.ts`.
+- Rezepturgruppen: `/produktion/rezepturgruppen`. Playwright-Gate: `fachliche-vertiefung-rezepturgruppen.spec.ts`.
+- Geschaeftsjahre: `/fibu/geschaeftsjahre` (CRUD). Playwright-Gate: `fachliche-vertiefung-geschaeftsjahre.spec.ts`.
+- Zahlungsmeldungen: `/fibu/zahlungsmeldungen` (CRUD). Playwright-Gate: `fachliche-vertiefung-zahlungsmeldungen.spec.ts`.
+- Individualpreise: `/preise/individualpreise` (VK/EK-Tabs, CRUD). Playwright-Gate: `fachliche-vertiefung-individualpreise.spec.ts`.
+- Mengeneinheiten: `/stammdaten/mengeneinheiten` (CRUD). Playwright-Gate: `fachliche-vertiefung-mengeneinheiten.spec.ts`.
+- Wave-22: 7/7 E2E-Gates gruen, TypeCheck 0 Fehler.
 
 Wave-14-UX (Slice `FACHLICHE-VERTIEFUNG-UX-W14-001`, 2026-05-24):
 
@@ -102,6 +123,10 @@ Wave-17-UX (Slice `FACHLICHE-VERTIEFUNG-UX-W17-001`, 2026-05-26):
 | Fach-UAT fuer alle Referenzseiten | geschlossen als UAT-Paket | Matrix, Smoke-/Schema-/E2E-/DB-Gates sind dokumentiert; externe Fachsignatur bleibt eine Business-Abnahme, kein fehlendes Repo-Artefakt. |
 | Weitere Stammdaten-Masken (Wave 11-13) | geschlossen als Scope-Entscheidung | Backend-Vertraege implementiert; Vollmasken nur bei Bedarf als eigene UI-Slices. |
 | Wave 21 — Daueraufträge, Massebilanz, Vermehrungsverträge, Zinsabrechnung, Artikel-Bestandteile, Artikelverpackung | geschlossen | 6 Frontend-Pages mit API-Clients, Navigation, Route-Builder und E2E-Tests (Wave 21, 2026-05-26). 6/6 E2E-Gates gruen, TypeCheck 0 Fehler. |
+| Wave 11 UI — Partiestamm, Forderungsgruppen, Periodische Buchungen | geschlossen | 3 Frontend-Pages mit API-Clients und E2E-Tests (Wave 11 UI, 2026-05-24/26). 3/3 E2E-Gates gruen. |
+| Wave 20 — Rohwarengruppen | geschlossen | Frontend-Page mit API-Client, Navigation und E2E-Test (Wave 20, 2026-05-26). |
+| Wave 22 — Frachttabellen, Versandprofile, Rezepturgruppen, Geschaeftsjahre, Zahlungsmeldungen, Individualpreise, Mengeneinheiten | geschlossen | 7 Frontend-Pages mit API-Clients, Navigation, Route-Builder und E2E-Tests (Wave 22, 2026-05-26). 7/7 E2E-Gates gruen, TypeCheck 0 Fehler. |
+| Backend-Security: globale Auth-Erzwingung, RFC-7807, nosec SQL | geschlossen | `api.py` mit globalem Bearer-Token-Dependency; `ws_router` fuer WebSocket ohne Auth; `exceptions.py` auf RFC-7807 Problem-Details; 62 Endpoints mit nosec-S608-Annotierungen (2026-05-26). |
 
 ## Externe Grenzen
 
