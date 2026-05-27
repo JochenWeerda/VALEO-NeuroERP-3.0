@@ -3,6 +3,7 @@ titel: "Wave 21 — Verbleibende fachliche Vertiefung (6 Frontend-Pages)"
 von: Claude Code
 owner: Claude Code
 stand: abgeschlossen 2026-05-26
+status: abgeschlossen
 ziel: >
   6 fehlende Frontend-Pages implementieren: Daueraufträge (Verkauf),
   Massebilanz (Lager), Vermehrungsverträge (Agrar/Saatzucht),
@@ -10,7 +11,7 @@ ziel: >
   Artikelverpackung (Stammdaten). Inkl. API-Clients, Navigation,
   Routen und E2E-Tests.
 
-dateibesitz:
+file_ownership:
   - packages/frontend-web/src/lib/api/dauerauftraege.ts
   - packages/frontend-web/src/lib/api/massebilanz.ts
   - packages/frontend-web/src/lib/api/vermehrungsvertraege.ts
