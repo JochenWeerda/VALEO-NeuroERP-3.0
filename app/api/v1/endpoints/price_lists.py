@@ -17,6 +17,7 @@ from sqlalchemy.orm import Session
 
 from app.core.config import settings
 from app.core.database import get_db
+from app.core.read_model_cache import cached_read_model, invalidate_tenant_prefix
 from app.core.uuid7 import uuid7
 
 logger = logging.getLogger(__name__)
@@ -127,6 +128,7 @@ async def create_price_list(
         )
 
     db.commit()
+    invalidate_tenant_prefix("price_lists", tid)
     return PriceList(
         id=pl_id, tenant_id=tid, name=payload.name,
         description=payload.description, currency=payload.currency,
@@ -138,6 +140,7 @@ async def create_price_list(
 
 
 @router.get("/", response_model=List[PriceList], summary="Price lists auflisten")
+@cached_read_model("price_lists", ttl=300)
 async def list_price_lists(
     tenant_id: str = Query(DEFAULT_TENANT),
     is_active: Optional[bool] = None,

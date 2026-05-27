@@ -13,6 +13,7 @@ from pydantic import BaseModel, Field, field_validator
 import logging
 
 from ....core.database import get_db
+from app.core.read_model_cache import cached_read_model, invalidate_tenant_prefix
 from app.core.tenant import get_tenant_id
 from app.core.uuid7 import uuid7
 
@@ -125,6 +126,7 @@ class TaxKeyResponse(BaseModel):
 
 
 @router.get("", response_model=List[TaxKeyResponse], summary="Tax keys auflisten")
+@cached_read_model("tax_keys", ttl=3600)
 async def list_tax_keys(
     tenant_id: str = Depends(get_tenant_id),
     active_only: bool = Query(True, description="Show only active tax keys"),

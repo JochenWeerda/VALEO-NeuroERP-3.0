@@ -230,6 +230,11 @@ else:
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
+# RFC 7807 Problem Details for DomainError, HTTPException, RequestValidationError.
+# Registered before the generic Exception handler so specific types take precedence.
+from app.core.exceptions import register_domain_exception_handlers
+register_domain_exception_handlers(app)
+
 app.add_middleware(CORSMiddleware, **cors_kwargs)
 
 app.add_middleware(GZipMiddleware, minimum_size=500)
@@ -335,16 +340,24 @@ async def log_requests(request: Request, call_next):
         )
         raise
 
-# Global exception handler
+# Catch-all for truly unhandled exceptions — RFC 7807 format.
+# Specific handlers (HTTPException, RequestValidationError, DomainError) are
+# registered earlier via register_domain_exception_handlers() and take precedence.
 @app.exception_handler(Exception)
 async def global_exception_handler(request: Request, exc: Exception):
-    """Global exception handler for unhandled errors"""
-    logger.error(f"Unhandled exception: {exc}", exc_info=True)
-    content = {"detail": "Internal server error", "type": "internal_error"}
+    logger.error("Unhandled exception: %s", exc, exc_info=True)
+    body = {
+        "type": "https://valeo-erp.de/errors/internal-server-error",
+        "title": "Interner Serverfehler",
+        "status": 500,
+        "detail": "Interner Serverfehler",
+        "instance": str(request.url.path),
+        "error": "INTERNAL_SERVER_ERROR",
+    }
     if getattr(settings, "DEBUG", False):
-        content["detail"] = str(exc)
-        content["exception_type"] = type(exc).__name__
-    return JSONResponse(status_code=500, content=content)
+        body["detail"] = str(exc)
+        body["exception_type"] = type(exc).__name__
+    return JSONResponse(status_code=500, content=body, media_type="application/problem+json")
 
 # Health check endpoint (liveness)
 @app.get("/healthz")

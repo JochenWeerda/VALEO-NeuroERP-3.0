@@ -15,16 +15,26 @@ CORRELATION_ID_HEADER = "X-Correlation-ID"
 
 
 class CorrelationMiddleware(BaseHTTPMiddleware):
-    """Middleware that propagates correlation ID and tenant context to log ContextVars."""
+    """Middleware that propagates correlation ID and tenant context to log ContextVars.
+
+    ContextVars are set with token-based reset so values cannot leak between
+    concurrent requests processed on the same thread/task.
+    """
 
     async def dispatch(self, request: Request, call_next):
+        from app.core.logging import correlation_id_var, tenant_id_var
+
         correlation_id = request.headers.get(CORRELATION_ID_HEADER) or uuid7()
-        set_correlation_id(correlation_id)
 
-        # Propagate tenant_id so all log lines carry it without explicit extra=
-        set_log_context(tenant_id=request.headers.get("X-Tenant-ID", ""))
+        # Token-based set/reset guarantees cleanup even on exceptions.
+        tok_cid = correlation_id_var.set(correlation_id)
+        tok_tid = tenant_id_var.set(request.headers.get("X-Tenant-ID", ""))
+        try:
+            response = await call_next(request)
+        finally:
+            correlation_id_var.reset(tok_cid)
+            tenant_id_var.reset(tok_tid)
 
-        response = await call_next(request)
         response.headers[CORRELATION_ID_HEADER] = correlation_id
         return response
 
