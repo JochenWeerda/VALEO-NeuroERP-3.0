@@ -8,6 +8,7 @@ from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
+from app.core.tenant import get_tenant_id
 from app.domains.operations.repository import BankKontoRepository
 
 router = APIRouter(prefix="/banken", tags=["Banken"])
@@ -140,7 +141,9 @@ class UeberweisungRequest(BaseModel):
     pin: str = Field("", description="Nur für einmalige Übertragung — empfohlen: Env-Var FINTS_PIN")
 
 
-@router.get("/banken/fints/konten", summary="Konten via FinTS/HBCI abrufen")
+@router.get("/banken/fints/konten", summary="Konten via FinTS/HBCI abrufen",
+    response_model=dict
+)
 async def fints_get_konten(
     blz: str = Query("", description="Bankleitzahl (optional wenn via Env-Var)"),
     user_id: str = Query("", description="Online-Banking Benutzerkennung"),
@@ -164,7 +167,9 @@ async def fints_get_konten(
     }
 
 
-@router.get("/banken/fints/umsaetze", summary="Kontoumsätze via FinTS/HBCI abrufen (HKKAZ)")
+@router.get("/banken/fints/umsaetze", summary="Kontoumsätze via FinTS/HBCI abrufen (HKKAZ,
+    response_model=dict
+)")
 async def fints_get_umsaetze(
     iban: str = Query(..., description="IBAN des Kontos"),
     von: str = Query(..., description="Von-Datum YYYY-MM-DD"),
@@ -199,7 +204,9 @@ async def fints_get_umsaetze(
     }
 
 
-@router.post("/banken/fints/ueberweisung", summary="SEPA-Überweisung via FinTS senden (HKCCM)")
+@router.post("/banken/fints/ueberweisung", summary="SEPA-Überweisung via FinTS senden (HKCCM,
+    response_model=dict
+)")
 async def fints_send_ueberweisung(
     body: UeberweisungRequest,
     tenant_id: str = Depends(get_tenant_id),
@@ -213,6 +220,78 @@ async def fints_send_ueberweisung(
         empfaenger_name=body.empfaenger_name,
         betrag=_Decimal(str(body.betrag)),
         verwendungszweck=body.verwendungszweck,
+        blz=body.blz,
+        user_id=body.user_id,
+        pin=body.pin,
+    )
+    return {"erfolg": result.erfolg, "fehler": result.fehler, "details": result.rohdaten}
+
+
+class TanInitRequest(BaseModel):
+    auftraggeber_iban: str
+    empfaenger_iban: str
+    empfaenger_name: str
+    betrag: float
+    verwendungszweck: str
+    tan_verfahren_id: str = ""
+    blz: str = ""
+    user_id: str = ""
+    pin: str = ""
+
+
+class TanBestaetigenRequest(BaseModel):
+    session_token: str
+    tan: str
+    blz: str = ""
+    user_id: str = ""
+    pin: str = ""
+
+
+@router.get("/banken/fints/tan-medien", response_model=dict, summary="Verfügbare TAN-Medien abrufen (ChipTAN/pushTAN)")
+async def fints_tan_medien(tenant_id: str = Depends(get_tenant_id)) -> dict:
+    """Listet alle konfigurierten TAN-Verfahren des FinTS-Zugangs."""
+    from app.services.fints_connector import get_tan_medien
+    result = get_tan_medien()
+    return {"erfolg": result.erfolg, "fehler": result.fehler, "tan_medien": result.rohdaten}
+
+
+@router.post("/banken/fints/ueberweisung/tan-initiieren", response_model=dict, summary="Überweisung mit TAN einleiten (Schritt 1)")
+async def fints_tan_initiieren(body: TanInitRequest, tenant_id: str = Depends(get_tenant_id)) -> dict:
+    """Leitet SEPA-Überweisung ein und gibt TAN-Challenge zurück (ChipTAN/pushTAN Schritt 1)."""
+    from decimal import Decimal as _Decimal
+    from app.services.fints_connector import initiiere_ueberweisung_mit_tan
+    ergebnis, challenge = initiiere_ueberweisung_mit_tan(
+        auftraggeber_iban=body.auftraggeber_iban,
+        empfaenger_iban=body.empfaenger_iban,
+        empfaenger_name=body.empfaenger_name,
+        betrag=_Decimal(str(body.betrag)),
+        verwendungszweck=body.verwendungszweck,
+        blz=body.blz,
+        user_id=body.user_id,
+        pin=body.pin,
+        tan_verfahren_id=body.tan_verfahren_id,
+    )
+    return {
+        "erfolg": ergebnis.erfolg,
+        "fehler": ergebnis.fehler,
+        "schritt": "challenge" if challenge else "abgeschlossen",
+        "challenge": {
+            "tan_medium": challenge.tan_medium,
+            "challenge_text": challenge.challenge_text,
+            "challenge_hhduc": challenge.challenge_hhduc,
+            "tan_verfahren": challenge.tan_verfahren,
+            "session_token": challenge.session_token,
+        } if challenge else None,
+    }
+
+
+@router.post("/banken/fints/ueberweisung/tan-bestaetigen", response_model=dict, summary="TAN bestätigen und Überweisung abschließen (Schritt 2)")
+async def fints_tan_bestaetigen(body: TanBestaetigenRequest, tenant_id: str = Depends(get_tenant_id)) -> dict:
+    """Bestätigt TAN und schließt die Überweisung ab (ChipTAN/pushTAN Schritt 2)."""
+    from app.services.fints_connector import bestaetige_tan
+    result = bestaetige_tan(
+        session_token=body.session_token,
+        tan=body.tan,
         blz=body.blz,
         user_id=body.user_id,
         pin=body.pin,

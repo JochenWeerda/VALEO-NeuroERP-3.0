@@ -7,7 +7,7 @@ from datetime import date
 from typing import Any, Optional
 
 from fastapi import APIRouter, Depends, HTTPException
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
@@ -124,7 +124,9 @@ class EricReadinessOut(BaseModel):
 # Endpoints
 # ---------------------------------------------------------------------------
 
-@router.get("/taxonomie-felder", summary="Felder taxonomie")
+@router.get("/taxonomie-felder", summary="Felder taxonomie",
+    response_model=dict
+)
 def taxonomie_felder() -> list[dict]:
     """Return the list of XBRL taxonomy fields with GCD/GAAP classification."""
     return _TAXONOMY_FELDER
@@ -181,7 +183,9 @@ def validieren_ebilanz(
     }
 
 
-@router.get("/meldungen", summary="Meldungen auflisten")
+@router.get("/meldungen", summary="Meldungen auflisten",
+    response_model=dict
+)
 def list_meldungen(
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
@@ -265,7 +269,9 @@ def erstellen(
     }
 
 
-@router.post("/export/{export_id}/validieren", summary="Validieren")
+@router.post("/export/{export_id}/validieren", summary="Validieren",
+    response_model=dict
+)
 def validieren(
     export_id: str,
     db: Session = Depends(get_db),
@@ -301,7 +307,9 @@ def validieren(
     }
 
 
-@router.post("/export/{export_id}/uebertragen", summary="Uebertragen")
+@router.post("/export/{export_id}/uebertragen", summary="Uebertragen",
+    response_model=dict
+)
 def uebertragen(
     export_id: str,
     db: Session = Depends(get_db),
@@ -368,7 +376,9 @@ def uebertragen(
     }
 
 
-@router.get("/export/{export_id}/uebertragungsstatus", summary="Uebertragungsstatus")
+@router.get("/export/{export_id}/uebertragungsstatus", summary="Uebertragungsstatus",
+    response_model=dict
+)
 def uebertragungsstatus(
     export_id: str,
     db: Session = Depends(get_db),
@@ -400,7 +410,9 @@ def uebertragungsstatus(
     return svc.get_transmission_status(ticket, db=db)
 
 
-@router.get("/exports", summary="Exports auflisten")
+@router.get("/exports", summary="Exports auflisten",
+    response_model=dict
+)
 def list_exports(
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
@@ -538,7 +550,9 @@ async def submit_ustva(
     )
 
 
-@router.get("/elster/ustva", summary="UStVA-Übermittlungen auflisten")
+@router.get("/elster/ustva", summary="UStVA-Übermittlungen auflisten",
+    response_model=dict
+)
 async def list_ustva(
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
