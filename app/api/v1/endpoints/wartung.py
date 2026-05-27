@@ -58,7 +58,7 @@ class AnlagePatch(BaseModel):
 
 
 @router.get("/anlagen", summary="Anlagen auflisten",
-    response_model=dict
+    response_model=list
 )
 def list_anlagen(
     status: Optional[str] = None,

@@ -50,7 +50,7 @@ def _to_dict(row: ErnteDB) -> dict:
 
 
 @router.get("", summary="Ernten auflisten",
-    response_model=dict
+    response_model=list
 )
 def list_ernten(
     status: Optional[str] = None,

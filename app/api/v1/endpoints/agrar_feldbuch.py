@@ -198,7 +198,7 @@ def _massnahme_to_dict(m: FeldbuchMassnahme) -> dict[str, Any]:
 # ────────────────────────────────────────────────────────────────────────────
 
 @router.get("/schlaege", summary="Schlaege auflisten",
-    response_model=dict
+    response_model=list
 )
 async def list_schlaege(
     customer_id: Optional[str] = Query(None),
@@ -401,7 +401,7 @@ async def get_all_schlaege_geojson(
 # ────────────────────────────────────────────────────────────────────────────
 
 @router.get("/feldbuch/massnahmen", summary="Massnahmen auflisten",
-    response_model=dict
+    response_model=list
 )
 async def list_massnahmen(
     schlag_id: Optional[str] = Query(None),

@@ -332,7 +332,7 @@ def create_interessent(
 
 
 @router.get("/interessenten", summary="Interessenten auflisten",
-    response_model=dict
+    response_model=list
 )
 def list_interessenten(
     db: Session = Depends(get_db),

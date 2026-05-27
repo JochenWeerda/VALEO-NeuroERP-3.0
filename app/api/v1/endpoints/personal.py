@@ -4285,7 +4285,7 @@ class ApplicationStagePatch(BaseModel):
 
 
 @router.get("/applications", summary="Applications auflisten",
-    response_model=dict
+    response_model=list
 )
 async def list_applications(
     status: str | None = Query(None),

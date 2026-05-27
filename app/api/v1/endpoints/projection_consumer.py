@@ -56,7 +56,7 @@ async def list_projections(
 
 
 @router.get("/stale", summary="Stale projections auflisten",
-    response_model=dict
+    response_model=list
 )
 async def list_stale_projections(
     tenant_id: str = Depends(get_tenant_id),

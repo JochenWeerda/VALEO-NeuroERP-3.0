@@ -62,7 +62,7 @@ class ProjektPatch(BaseModel):
 
 
 @router.get("", summary="Projekte auflisten",
-    response_model=dict
+    response_model=list
 )
 def list_projekte(
     status: Optional[str] = None,

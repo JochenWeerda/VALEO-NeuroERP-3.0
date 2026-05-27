@@ -193,7 +193,7 @@ def create_pick_list(payload: PickListIn, svc: WarehouseService = Depends(_svc))
 
 
 @router.get("/pick-lists", summary="Pick lists auflisten",
-    response_model=dict
+    response_model=list
 )
 def list_pick_lists(
     warehouse_id: Optional[str] = Query(None),

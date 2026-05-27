@@ -108,7 +108,7 @@ async def create_erasure_request(
 
 
 @router.get("/erasure-requests", summary="Erasure requests auflisten",
-    response_model=dict
+    response_model=list
 )
 async def list_erasure_requests(
     status: Optional[str] = Query(None),

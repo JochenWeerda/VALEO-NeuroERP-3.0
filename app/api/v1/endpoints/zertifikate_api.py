@@ -68,7 +68,7 @@ def create_zertifikat(req: ZertifikatCreateRequest, db: Session = Depends(get_db
 
 
 @router.get("/tenant/{tenant_id}", summary="By tenant abrufen",
-    response_model=dict
+    response_model=list
 )
 def get_by_tenant(tenant_id: str, db: Session = Depends(get_db)):
     rows = db.query(ZertifikatAPIEntry).filter(ZertifikatAPIEntry.tenant_id == tenant_id).all()
@@ -76,7 +76,7 @@ def get_by_tenant(tenant_id: str, db: Session = Depends(get_db)):
 
 
 @router.get("/ablaufend", summary="Ablaufend abrufen",
-    response_model=dict
+    response_model=list
 )
 def get_ablaufend(tage_vorwarnung: int = Query(30), db: Session = Depends(get_db)):
     from datetime import timedelta

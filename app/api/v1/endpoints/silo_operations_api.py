@@ -75,7 +75,7 @@ def get_silo_zelle(zelle_id: str, db: Session = Depends(get_db)):
 
 
 @router.get("/by-tenant/{tenant_id}", summary="Zellen auflisten",
-    response_model=dict
+    response_model=list
 )
 def list_zellen(tenant_id: str, db: Session = Depends(get_db)):
     rows = db.query(SiloZelleDB).filter(SiloZelleDB.tenant_id == tenant_id).all()

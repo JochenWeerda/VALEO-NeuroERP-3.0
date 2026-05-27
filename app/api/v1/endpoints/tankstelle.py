@@ -47,7 +47,7 @@ class ZapfungPayload(BaseModel):
 
 
 @router.get("/zapfungen", summary="Zapfungen auflisten",
-    response_model=dict
+    response_model=list
 )
 def list_zapfungen(
     kennzeichen: Optional[str] = None,

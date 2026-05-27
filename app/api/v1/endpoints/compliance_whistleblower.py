@@ -87,7 +87,7 @@ async def report_status(token: str, db: Session = Depends(get_db)):
 
 
 @router.get("/reports", summary="Reports auflisten",
-    response_model=dict
+    response_model=list
 )
 async def list_reports(db: Session = Depends(get_db)):
     _ensure_table(db)

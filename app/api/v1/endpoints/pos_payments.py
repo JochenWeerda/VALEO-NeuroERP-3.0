@@ -78,7 +78,7 @@ class PromotionCheckIn(BaseModel):
 # ── Payment Methods ────────────────────────────────────────────────────────
 
 @router.get("/payment-methods", summary="Payment methods auflisten",
-    response_model=dict
+    response_model=list
 )
 async def list_payment_methods(
     db: Session = Depends(get_db),
@@ -128,7 +128,7 @@ async def split_payment(
 # ── Promotions ─────────────────────────────────────────────────────────────
 
 @router.get("/promotions", summary="Promotions auflisten",
-    response_model=dict
+    response_model=list
 )
 async def list_promotions(
     db: Session = Depends(get_db),

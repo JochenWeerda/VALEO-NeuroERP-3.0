@@ -90,7 +90,7 @@ def _fetch_gr_amount(db: Session, gr_id: str, tenant_id: str) -> Optional[float]
 # ─────────────────────────────────────────────────────────────────────────────
 
 @router.get("/suppliers", summary="Ers suppliers auflisten",
-    response_model=dict
+    response_model=list
 )
 def list_ers_suppliers(
     db: Session = Depends(get_db),
@@ -235,7 +235,7 @@ def trigger_ers(
 
 
 @router.get("/invoices", summary="Ers invoices auflisten",
-    response_model=dict
+    response_model=list
 )
 def list_ers_invoices(
     db: Session = Depends(get_db),

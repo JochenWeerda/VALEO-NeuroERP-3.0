@@ -60,7 +60,7 @@ class VersicherungPatch(BaseModel):
 
 
 @router.get("", summary="Versicherungen auflisten",
-    response_model=dict
+    response_model=list
 )
 def list_versicherungen(
     status: Optional[str] = None,

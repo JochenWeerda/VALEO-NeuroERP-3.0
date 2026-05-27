@@ -59,7 +59,7 @@ def empfange_nachricht(req: EdiNachrichtEmpfangRequest, db: Session = Depends(ge
 
 
 @router.get("/nachrichten/offene", summary="Offene nachrichten abrufen",
-    response_model=dict
+    response_model=list
 )
 def get_offene_nachrichten(empfaenger_gln: str, db: Session = Depends(get_db)):
     rows = db.query(EdiNachrichtDB).filter(
@@ -97,7 +97,7 @@ def create_partner(req: EdiPartnerCreateRequest, db: Session = Depends(get_db)):
 
 
 @router.get("/partner", summary="Partner auflisten",
-    response_model=dict
+    response_model=list
 )
 def list_partner(tenant_id: str, db: Session = Depends(get_db)):
     rows = db.query(EdiPartnerDB).filter(EdiPartnerDB.tenant_id == tenant_id).all()

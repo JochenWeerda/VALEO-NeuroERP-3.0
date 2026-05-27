@@ -184,7 +184,7 @@ def validieren_ebilanz(
 
 
 @router.get("/meldungen", summary="Meldungen auflisten",
-    response_model=dict
+    response_model=list
 )
 def list_meldungen(
     limit: int = 100,
@@ -413,7 +413,7 @@ def uebertragungsstatus(
 
 
 @router.get("/exports", summary="Exports auflisten",
-    response_model=dict
+    response_model=list
 )
 def list_exports(
     limit: int = 100,
@@ -555,7 +555,7 @@ async def submit_ustva(
 
 
 @router.get("/elster/ustva", summary="UStVA-Übermittlungen auflisten",
-    response_model=dict
+    response_model=list
 )
 async def list_ustva(
     tenant_id: str = Depends(get_tenant_id),

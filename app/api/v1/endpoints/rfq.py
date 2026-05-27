@@ -98,7 +98,7 @@ def _get_rfq(db: Session, rfq_id: int, tenant_id: str) -> Any:
 # ─────────────────────────────────────────────────────────────────────────────
 
 @router.get("", summary="Rfq auflisten",
-    response_model=dict
+    response_model=list
 )
 def list_rfq(
     db: Session = Depends(get_db),

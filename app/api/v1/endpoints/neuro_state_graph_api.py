@@ -226,7 +226,7 @@ async def create_node(req: CreateNodeRequest, db: Session | None = Depends(get_d
 
 
 @router.get("/state-graph/nodes", tags=["neuro-state-graph"], summary="Nodes auflisten",
-    response_model=dict
+    response_model=list
 )
 async def list_nodes(
     tenant_id: str = Query(...),
@@ -378,7 +378,7 @@ async def transition_node(
 
 
 @router.get("/state-graph/nodes/{node_id}/transitions", tags=["neuro-state-graph"], summary="Transitions auflisten",
-    response_model=dict
+    response_model=list
 )
 async def list_transitions(
     node_id: str,
@@ -459,7 +459,7 @@ async def create_edge(req: CreateEdgeRequest, db: Session | None = Depends(get_d
 
 
 @router.get("/state-graph/edges", tags=["neuro-state-graph"], summary="Edges auflisten",
-    response_model=dict
+    response_model=list
 )
 async def list_edges(
     tenant_id: str = Query(...),
@@ -586,7 +586,7 @@ async def record_confidence(req: RecordConfidenceRequest, db: Session | None = D
 
 
 @router.get("/confidence-ledger/entries", tags=["confidence-ledger"], summary="Confidence entries auflisten",
-    response_model=dict
+    response_model=list
 )
 async def list_confidence_entries(
     tenant_id: str = Query(...),
