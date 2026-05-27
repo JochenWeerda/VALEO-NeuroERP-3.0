@@ -57,6 +57,38 @@ export interface VoiceSynthesizeResponse {
   error?: string
 }
 
+export interface VoicePipelineRequest {
+  mode: 'dictate' | 'summary' | 'intent'
+  text?: string
+  audio_base64?: string
+  audio_format?: string
+  language?: string
+  tone?: 'business' | 'casual' | 'formal'
+  context?: { domain?: string; mask?: string; tenant_id?: string }
+  synthesize?: boolean
+}
+
+export interface VoicePipelineResponse {
+  mode: string
+  raw_text?: string
+  polished_text?: string
+  source_text?: string
+  summary_text?: string
+  provider?: string
+  polish_applied?: boolean
+  summary_applied?: boolean
+  estimated_seconds?: number
+  text?: string
+  resolved?: {
+    action_id: string
+    params: Record<string, unknown>
+    confidence: number
+    raw_text: string
+  } | null
+  tts?: VoiceSynthesizeResponse
+  error?: string
+}
+
 /** Base URL for ki-usability-api (dev: use Vite proxy /api/ki-usability → localhost:5200) */
 const BASE =
   (import.meta.env as Record<string, string | undefined>).VITE_KI_USABILITY_API_URL ?? '/api/ki-usability'
@@ -103,4 +135,14 @@ export async function synthesizeVoice(body: VoiceSynthesizeRequest): Promise<Voi
   })
   if (!res.ok) return null
   return (await res.json()) as VoiceSynthesizeResponse
+}
+
+export async function runVoicePipeline(body: VoicePipelineRequest): Promise<VoicePipelineResponse | null> {
+  const res = await fetch(`${BASE}/api/v1/voice/pipeline`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  })
+  if (!res.ok) return null
+  return (await res.json()) as VoicePipelineResponse
 }

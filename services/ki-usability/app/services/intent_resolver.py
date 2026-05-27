@@ -9,6 +9,47 @@ from app.schemas.voice import VoiceResolveOut
 from app.services.action_registry import action_registry
 
 
+DOMAIN_ALIASES: Dict[str, str] = {
+    "lager": "lager",
+    "inventory": "lager",
+    "einkauf": "einkauf",
+    "procurement": "einkauf",
+    "hr": "hr",
+    "personal": "hr",
+    "sales": "sales",
+    "verkauf": "sales",
+    "crm": "crm",
+    "finance": "finance",
+    "fibu": "finance",
+    "compliance": "compliance",
+    "agrar": "agrar",
+    "agriculture": "agrar",
+    "logistics": "logistics",
+    "logistik": "logistics",
+}
+
+
+def _normalize_context_domain(context: Optional[Dict]) -> Optional[str]:
+    if not context:
+        return None
+    raw = context.get("domain")
+    if not isinstance(raw, str) or not raw.strip():
+        return None
+    return DOMAIN_ALIASES.get(raw.strip().lower(), raw.strip().lower())
+
+
+def _action_allowed_for_domain(action_id: str, domain: Optional[str]) -> bool:
+    if not domain:
+        return True
+    action = action_registry.get(action_id)
+    if not action:
+        return True
+    action_domain = (action.domain or "").lower()
+    if not action_domain:
+        return action_id.startswith("nav-") or action_id.startswith("save-") or action_id.startswith("cancel")
+    return action_domain == domain or action_domain == DOMAIN_ALIASES.get(domain, domain)
+
+
 def _norm(text: str) -> str:
     value = " ".join((text or "").lower().strip().split())
     replacements = {
@@ -332,16 +373,21 @@ class IntentResolver:
             return None
 
         normalized = _norm(text)
+        domain = _normalize_context_domain(context)
         domain_result = _domain_specific(text, normalized)
-        if domain_result:
+        if domain_result and _action_allowed_for_domain(domain_result.action_id, domain):
             return domain_result
 
         if any(word in normalized for word in ["rechnung", "rechnungen"]) and any(
             word in normalized for word in ["neu", "anlegen", "erstellen"]
         ):
-            return _voice_out("action-new-invoice", text)
+            candidate = _voice_out("action-new-invoice", text)
+            if _action_allowed_for_domain(candidate.action_id, domain):
+                return candidate
 
         for action_id in action_registry.all_ids():
+            if not _action_allowed_for_domain(action_id, domain):
+                continue
             phrases = action_registry.intent_phrases_for_action(action_id)
             if _match_phrases(normalized, phrases):
                 params = _extract_params(text)

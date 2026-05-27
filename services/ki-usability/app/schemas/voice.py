@@ -96,3 +96,34 @@ class VoiceSynthesizeOut(BaseModel):
     language: str = "de-DE"
     hint: Optional[str] = None
     error: Optional[str] = None
+
+
+class VoicePipelineIn(BaseModel):
+    """WhisperBar unified pipeline input."""
+
+    mode: str = Field(..., description="dictate | summary | intent")
+    text: Optional[str] = Field(default=None, description="Text or clipboard content")
+    audio_base64: Optional[str] = Field(default=None, description="Optional STT audio")
+    audio_format: str = Field(default="wav")
+    language: str = Field(default="de-DE")
+    tone: str = Field(default="business")
+    context: Optional[Dict[str, Any]] = Field(default_factory=dict)
+    synthesize: bool = Field(default=False, description="TTS for summary mode")
+
+
+class VoicePipelineOut(BaseModel):
+    """WhisperBar pipeline result (mode-specific fields)."""
+
+    mode: str
+    raw_text: Optional[str] = None
+    polished_text: Optional[str] = None
+    source_text: Optional[str] = None
+    summary_text: Optional[str] = None
+    provider: Optional[str] = None
+    polish_applied: Optional[bool] = None
+    summary_applied: Optional[bool] = None
+    estimated_seconds: Optional[int] = None
+    text: Optional[str] = None
+    resolved: Optional[Dict[str, Any]] = None
+    tts: Optional[Dict[str, Any]] = None
+    error: Optional[str] = None
