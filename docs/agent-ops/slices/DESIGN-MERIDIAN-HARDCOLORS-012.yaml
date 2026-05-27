@@ -1,7 +1,8 @@
 id: DESIGN-MERIDIAN-HARDCOLORS-012
 owner: Codex
-status: reserviert
+status: abgeschlossen
 created: 2026-05-27
+completed: 2026-05-27
 goal: >
   Zweiter Meridian-Hardcolor-Batch fuer sichtbare Admin-/Monitoring-Fachseiten.
 file_ownership:
@@ -18,5 +19,13 @@ checks:
   - pnpm --filter @valero-neuroerp/frontend-web type-check
   - python scripts/agent_workboard_supervisor.py validate
   - git diff --check
+done:
+  - Command Monitor von red/orange/slate-Hardcolors auf destructive, warning und muted Tokens umgestellt.
+  - Audit Log auf success/destructive/primary Tokens gezogen.
+  - Compliance Dashboard auf Badge-Varianten und semantische Score-Farben umgestellt.
+  - APInvoiceApprovalPanel vom gruenen Button-Hardcolor auf Default-Button-Token gezogen.
+  - Monitoring Alerts auf semantic warning/info/success und destructive Tokens umgestellt.
+remaining_scope:
+  - Weitere Admin-, Finance-, Agrar- und Monitoring-Unterseiten bleiben Folgeslices.
 risks:
   - Weitere Fachseiten-Hardcolors bleiben Folgescope.

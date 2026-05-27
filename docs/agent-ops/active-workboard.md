@@ -6,10 +6,12 @@ Stand: `2026-05-26`
 
 **Von:** Codex
 **Owner:** Codex
-**Stand:** reserviert 2026-05-27
+**Stand:** abgeschlossen 2026-05-27
 **Ziel des Slices:** Zweiter Meridian-Hardcolor-Batch fuer sichtbare Admin-/Monitoring-Fachseiten.
 **Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/agent-ops/slices/DESIGN-MERIDIAN-HARDCOLORS-012.yaml`, priorisierte Dateien unter `packages/frontend-web/src/pages/admin/` und `packages/frontend-web/src/features/workflow/`.
 **Abnahmekriterien:** Ausgewaehlte Admin-/Monitoring-Seiten nutzen semantische Meridian-Tokens statt generischer Tailwind-Hardcolors; gezielter Hardcolor-Scan auf bearbeiteten Dateien ohne Treffer; Typecheck, Workboard-Validierung und Diff-Checks sind gruen.
+**Erledigt:** Command Monitor, Audit Log, Compliance Dashboard, APInvoiceApprovalPanel und Monitoring Alerts auf `primary`, `muted`, `destructive`, Badge-Varianten und semantische Meridian-Token umgestellt.
+**Checks:** `pnpm --filter @valero-neuroerp/frontend-web type-check`; gezielter Hardcolor-Scan auf den bearbeiteten Dateien ohne Treffer; `git diff --check`.
 **Offene Risiken:** Weitere Fachseiten-Hardcolors bleiben Folgescope.
 
 ## DESIGN-MERIDIAN-HARDCOLORS-011
@@ -2659,3 +2661,14 @@ Archiv des vorherigen Boards:
 **Erledigt:** 15 Lager/Einkauf/HR-Intents in der ActionRegistry, robuste Keyword-/Phrase-Aufloesung inklusive EAN-, Mengen-, Betrags- und HR-Datumsparametern sowie Frontend-AI-Shortcuts fuer die drei Domaenen.
 **Checks:** `python -m pytest tests/test_voice_intent_lager_einkauf_hr.py -q --no-cov` in `services/ki-usability`; `pnpm --filter @valero-neuroerp/frontend-web type-check`.
 **Offene Risiken:** VoiceButton-Integration auf einzelnen Fachseiten bleibt Folgeslice.
+
+## SLICE-011-VOICE-VERKAUF-CRM-001
+
+**Von:** Claude Sonnet 4.6
+**Owner:** Claude Sonnet 4.6
+**Stand:** abgeschlossen 2026-05-27
+**Ziel des Slices:** Dispatch-Nachzug fuer Slice-010 (NAV_ACTIONS) + Voice Wave A fuer Verkauf und CRM.
+**Dateibesitz:** `ActionDispatchContext.tsx`, `action_registry.py`, `intent_resolver.py`, `ai-shortcuts.tsx`, `tests/test_voice_intent_verkauf_crm.py`.
+**Gate-Ergebnis:** pytest 62/62 ✅ (39 Slice-010 + 23 Slice-011) · TypeScript 0 Fehler ✅ · 52 Actions in Registry ✅
+**Erledigt:** 14 NAV_ACTIONS fuer Slice-010 nachgezogen; 15 neue Verkauf/CRM-Intents; Resolver-Fallbacks + Param-Extraktion; AI-Shortcuts Verkauf/CRM.
+**Offene Risiken:** Wave B (FiBu/Compliance) und Wave C (Agrar/Logistik) folgen als Slice-012+.

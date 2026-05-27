@@ -50,9 +50,9 @@ export default function CommandMonitorPage(): JSX.Element {
       )}
 
       {isError && (
-        <Card className="border-red-300 bg-red-50">
+        <Card className="border-destructive/30 bg-destructive/10">
           <CardContent className="pt-6">
-            <div className="flex items-center gap-2 text-red-800">
+            <div className="flex items-center gap-2 text-destructive">
               <AlertCircle className="h-5 w-5" />
               <span>Idempotency-Daten konnten nicht geladen werden. Backend-Endpoint prüfen.</span>
             </div>
@@ -61,9 +61,9 @@ export default function CommandMonitorPage(): JSX.Element {
       )}
 
       {!isLoading && !isError && !overview && (
-        <Card className="border-orange-300 bg-orange-50">
+        <Card className="border-[hsl(var(--color-semantic-warning-500-hsl)/0.3)] bg-[hsl(var(--color-semantic-warning-50-hsl))]">
           <CardContent className="pt-6">
-            <div className="flex items-center gap-2 text-orange-800">
+            <div className="flex items-center gap-2 text-[hsl(var(--color-semantic-warning-700-hsl))]">
               <AlertCircle className="h-5 w-5" />
               <span>Keine Idempotenz-Daten verfügbar. Bitte Backend-Konfiguration prüfen.</span>
             </div>
@@ -86,7 +86,7 @@ export default function CommandMonitorPage(): JSX.Element {
                 <h3 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-2">Aggregate</h3>
                 <div className="flex flex-wrap gap-2">
                   {overview.store.aggregates.map((agg) => (
-                    <span key={agg} className="inline-block rounded border bg-slate-50 px-2 py-0.5 font-mono text-xs">{agg}</span>
+                    <span key={agg} className="inline-block rounded border bg-muted px-2 py-0.5 font-mono text-xs">{agg}</span>
                   ))}
                 </div>
               </div>
@@ -94,7 +94,7 @@ export default function CommandMonitorPage(): JSX.Element {
                 <h3 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-2">Commands</h3>
                 <div className="flex flex-wrap gap-2">
                   {overview.store.commands.map((cmd) => (
-                    <span key={cmd} className="inline-block rounded border bg-slate-50 px-2 py-0.5 font-mono text-xs">{cmd}</span>
+                    <span key={cmd} className="inline-block rounded border bg-muted px-2 py-0.5 font-mono text-xs">{cmd}</span>
                   ))}
                 </div>
               </div>

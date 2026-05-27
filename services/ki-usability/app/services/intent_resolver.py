@@ -100,6 +100,34 @@ def _extract_hr_params(text: str) -> Dict[str, str]:
     return params
 
 
+def _extract_verkauf_params(text: str) -> Dict[str, str]:
+    params: Dict[str, str] = {}
+    match = re.search(r"kunde\s+([a-z0-9\s\-]+?)(?:\s+angebot|\s+auftrag|$)", text, re.I)
+    if match:
+        params["customer_name"] = match.group(1).strip()
+    match = re.search(r"artikel\s+([a-z0-9\-./]+)", text, re.I)
+    if match:
+        params["article_number"] = match.group(1).strip()
+    match = re.search(r"betrag\s+([\d,.]+)\s*(?:eur|euro)?", text, re.I)
+    if match:
+        params["amount"] = match.group(1).replace(",", ".")
+    return params
+
+
+def _extract_crm_params(text: str) -> Dict[str, str]:
+    params: Dict[str, str] = {}
+    match = re.search(r"kontakt\s+([a-z0-9\s\-]+?)(?:\s+suchen|\s+finden|$)", text, re.I)
+    if match:
+        params["contact_name"] = match.group(1).strip()
+    match = re.search(r"lead\s+([a-z0-9\s\-]+?)(?:\s+anlegen|\s+erfassen|$)", text, re.I)
+    if match:
+        params["lead_name"] = match.group(1).strip()
+    match = re.search(r"(\d{1,2})\.(\d{1,2})\.(\d{4})", text)
+    if match:
+        params["date"] = f"{match.group(3)}-{match.group(2).zfill(2)}-{match.group(1).zfill(2)}"
+    return params
+
+
 def _voice_out(action_id: str, text: str, params: Optional[Dict[str, str]] = None, confidence: float = 0.85) -> VoiceResolveOut:
     return VoiceResolveOut(
         action_id=action_id,
@@ -150,6 +178,42 @@ def _domain_specific(text: str, normalized: str) -> Optional[VoiceResolveOut]:
         word in normalized for word in ["oeffnen", "zeigen", "gehe", "geh"]
     ):
         return _voice_out("nav-hr", text)
+
+    if any(word in normalized for word in ["neues angebot", "angebot anlegen", "verkaufsangebot"]):
+        return _voice_out("verkauf-angebot-neu", text, _extract_verkauf_params(text), 0.88)
+    if any(word in normalized for word in ["neuer lieferschein", "lieferschein anlegen", "lieferung erfassen"]):
+        return _voice_out("verkauf-lieferschein-neu", text, _extract_verkauf_params(text), 0.88)
+    if "angebotsliste" in normalized or ("angebote" in normalized and any(word in normalized for word in ["zeigen", "oeffnen", "gehe"])):
+        return _voice_out("nav-angebote", text)
+    if "lieferscheinliste" in normalized or ("lieferschein" in normalized and any(word in normalized for word in ["zeigen", "oeffnen", "gehe"])):
+        return _voice_out("nav-lieferscheine", text)
+    if any(word in normalized for word in ["verkauf", "vertrieb"]) and any(
+        word in normalized for word in ["oeffnen", "zeigen", "gehe", "geh"]
+    ):
+        return _voice_out("nav-verkauf", text)
+    if "kundenstamm suchen" in normalized or "verkaufskunde finden" in normalized:
+        return _voice_out("verkauf-kunde-suche", text, _extract_verkauf_params(text))
+    if "verkaufsartikel suchen" in normalized or "artikelstamm oeffnen" in normalized:
+        return _voice_out("verkauf-artikel-suche", text, _extract_verkauf_params(text))
+
+    if any(word in normalized for word in ["neuer lead", "lead anlegen", "verkaufschance anlegen"]):
+        return _voice_out("crm-lead-neu", text, _extract_crm_params(text), 0.88)
+    if any(word in normalized for word in ["neue aktivitaet", "aktivitaet anlegen", "termin erfassen crm"]):
+        return _voice_out("crm-aktivitaet-neu", text, _extract_crm_params(text), 0.88)
+    if any(word in normalized for word in ["kontakt suchen", "kontaktsuche crm", "kontakt finden"]):
+        return _voice_out("crm-kontakt-suche", text, _extract_crm_params(text))
+    if "leadliste" in normalized or ("leads" in normalized and any(word in normalized for word in ["zeigen", "oeffnen", "gehe"])):
+        return _voice_out("nav-crm-leads", text)
+    if "aktivitaetenliste" in normalized or ("aktivitaeten" in normalized and any(word in normalized for word in ["zeigen", "oeffnen", "gehe"])):
+        return _voice_out("nav-crm-aktivitaeten", text)
+    if "betriebsprofile" in normalized and any(word in normalized for word in ["zeigen", "oeffnen", "gehe"]):
+        return _voice_out("nav-crm-betriebsprofile", text)
+    if "kontaktliste" in normalized or ("kontakte" in normalized and any(word in normalized for word in ["zeigen", "oeffnen", "gehe"])):
+        return _voice_out("nav-crm-kontakte", text)
+    if any(word in normalized for word in ["crm", "marketing"]) and any(
+        word in normalized for word in ["oeffnen", "zeigen", "gehe", "geh"]
+    ):
+        return _voice_out("nav-crm", text)
     return None
 
 
@@ -180,6 +244,12 @@ class IntentResolver:
                     params.update(_extract_einkauf_params(text))
                 elif action_id.startswith("hr-"):
                     params.update(_extract_hr_params(text))
+                elif action_id.startswith("verkauf-"):
+                    params.update(_extract_verkauf_params(text))
+                elif action_id.startswith("crm-"):
+                    params.update(_extract_crm_params(text))
+                elif action_id.startswith("nav-crm"):
+                    params.update(_extract_crm_params(text))
                 return _voice_out(action_id, text, params, 0.9)
 
         if any(word in normalized for word in ["speichern", "sichern"]):

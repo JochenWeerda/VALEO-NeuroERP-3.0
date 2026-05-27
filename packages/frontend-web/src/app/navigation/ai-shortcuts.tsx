@@ -1,4 +1,4 @@
-import { Package, Search, ShieldCheck, ShoppingCart, Users, Zap } from 'lucide-react'
+import { FileText, Package, Search, ShieldCheck, ShoppingCart, Target, Users, Zap } from 'lucide-react'
 import type { AiShortcut } from '@/app/navigation/types'
 import { resolveRoutePathFromModule } from '@/app/navigation/route-paths'
 
@@ -53,5 +53,23 @@ export const AI_SHORTCUTS: AiShortcut[] = [
     eventName: 'voice-intent',
     eventPayload: { domain: 'hr' },
     keywords: ['personal', 'hr', 'mitarbeiter', 'abwesenheit', 'lohnlauf', 'voice'],
+  },
+  {
+    id: 'ai-voice-verkauf',
+    label: 'Verkauf - Voice-Befehl',
+    icon: FileText,
+    type: 'event',
+    eventName: 'voice-intent',
+    eventPayload: { domain: 'sales' },
+    keywords: ['verkauf', 'angebot', 'lieferschein', 'auftrag', 'voice', 'vertrieb'],
+  },
+  {
+    id: 'ai-voice-crm',
+    label: 'CRM - Voice-Befehl',
+    icon: Target,
+    type: 'event',
+    eventName: 'voice-intent',
+    eventPayload: { domain: 'crm' },
+    keywords: ['crm', 'lead', 'kontakt', 'aktivitaet', 'marketing', 'voice'],
   },
 ]
