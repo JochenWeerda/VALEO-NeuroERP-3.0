@@ -52,6 +52,7 @@ export type AiShortcut =
       icon: ComponentType<{ className?: string }>
       type: 'event'
       eventName: string
+      eventPayload?: Record<string, unknown>
       keywords?: string[]
     }
   | {
