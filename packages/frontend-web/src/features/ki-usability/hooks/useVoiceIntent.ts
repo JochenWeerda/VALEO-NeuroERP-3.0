@@ -32,19 +32,22 @@ export function useVoiceIntent(options: UseVoiceIntentOptions = {}) {
       onError?.('Spracherkennung wird in diesem Browser nicht unterstützt.')
       return
     }
-    const Recognition = (window as any).SpeechRecognition ?? (window as any).webkitSpeechRecognition
-    const recognition = new Recognition()
+    // vendor-prefixed experimental API — no stable TS types yet
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const Recognition = ((window as any).SpeechRecognition ?? (window as any).webkitSpeechRecognition) as new () => any
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const recognition: any = new Recognition()
     recognition.lang = 'de-DE'
     recognition.continuous = false
     recognition.interimResults = false
 
     recognition.onstart = () => setListening(true)
     recognition.onend = () => setListening(false)
-    recognition.onerror = (e: any) => {
+    recognition.onerror = (e: { error: string }) => {
       setListening(false)
       onError?.(e.error === 'no-speech' ? 'Keine Sprache erkannt.' : 'Spracherkennung fehlgeschlagen.')
     }
-    recognition.onresult = async (e: any) => {
+    recognition.onresult = async (e: { results: ArrayLike<ArrayLike<{ transcript: string }>> }) => {
       const raw = (e.results?.[0]?.[0]?.transcript ?? '').trim()
       setTranscript(raw)
       setPolishedTranscript(null)
