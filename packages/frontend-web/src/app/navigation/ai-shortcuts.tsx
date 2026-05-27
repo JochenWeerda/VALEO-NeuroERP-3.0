@@ -1,4 +1,4 @@
-import { FileText, Package, Search, ShieldCheck, ShoppingCart, Target, Users, Zap } from 'lucide-react'
+import { Euro, FileText, Leaf, Package, Search, ShieldCheck, ShoppingCart, Target, Truck, Users, Zap } from 'lucide-react'
 import type { AiShortcut } from '@/app/navigation/types'
 import { resolveRoutePathFromModule } from '@/app/navigation/route-paths'
 
@@ -71,5 +71,41 @@ export const AI_SHORTCUTS: AiShortcut[] = [
     eventName: 'voice-intent',
     eventPayload: { domain: 'crm' },
     keywords: ['crm', 'lead', 'kontakt', 'aktivitaet', 'marketing', 'voice'],
+  },
+  {
+    id: 'ai-voice-fibu',
+    label: 'Finanzen - Voice-Befehl',
+    icon: Euro,
+    type: 'event',
+    eventName: 'voice-intent',
+    eventPayload: { domain: 'finance' },
+    keywords: ['fibu', 'buchhaltung', 'buchung', 'op', 'zahlungslauf', 'voice'],
+  },
+  {
+    id: 'ai-voice-compliance',
+    label: 'Compliance - Voice-Befehl',
+    icon: ShieldCheck,
+    type: 'event',
+    eventName: 'voice-intent',
+    eventPayload: { domain: 'compliance' },
+    keywords: ['compliance', 'dsgvo', 'datenpanne', 'sanktion', 'voice'],
+  },
+  {
+    id: 'ai-voice-agrar',
+    label: 'Agrar - Voice-Befehl',
+    icon: Leaf,
+    type: 'event',
+    eventName: 'voice-intent',
+    eventPayload: { domain: 'agrar' },
+    keywords: ['agrar', 'ernte', 'feldbuch', 'silo', 'schlag', 'voice'],
+  },
+  {
+    id: 'ai-voice-logistik',
+    label: 'Logistik - Voice-Befehl',
+    icon: Truck,
+    type: 'event',
+    eventName: 'voice-intent',
+    eventPayload: { domain: 'logistics' },
+    keywords: ['logistik', 'tour', 'fracht', 'versand', 'voice'],
   },
 ]

@@ -187,6 +187,8 @@ def validieren_ebilanz(
     response_model=dict
 )
 def list_meldungen(
+    limit: int = 100,
+    skip: int = 0,
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
 ) -> list[dict]:
@@ -199,9 +201,9 @@ def list_meldungen(
                 "wirtschaftsjahr, bilanzart, berichtsperiode_von, berichtsperiode_bis, "
                 "steuernummer, finanzamt_nr, elster_transfer_ticket, uebertragen_am, erstellt_am "
                 "FROM domain_finance.ebilanz_exports WHERE tenant_id=:tenant_id "
-                "ORDER BY erstellt_am DESC"
+                "ORDER BY erstellt_am DESC LIMIT :limit OFFSET :skip"
             ),
-            {"tenant_id": tenant_id},
+            {"tenant_id": tenant_id, "limit": limit, "skip": skip},
         ).mappings().all()
         return [dict(r) for r in rows]
     except Exception:
@@ -414,6 +416,8 @@ def uebertragungsstatus(
     response_model=dict
 )
 def list_exports(
+    limit: int = 100,
+    skip: int = 0,
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
 ) -> list[dict]:
@@ -423,9 +427,9 @@ def list_exports(
                 "SELECT id AS export_id, status, taxonomie_version, xbrl_paketgroesse_kb, "
                 "wirtschaftsjahr, bilanzart, erstellt_am "
                 "FROM domain_finance.ebilanz_exports WHERE tenant_id=:tenant_id "
-                "ORDER BY erstellt_am DESC"
+                "ORDER BY erstellt_am DESC LIMIT :limit OFFSET :skip"
             ),
-            {"tenant_id": tenant_id},
+            {"tenant_id": tenant_id, "limit": limit, "skip": skip},
         ).mappings().all()
         return [dict(r) for r in rows]
     except Exception:
