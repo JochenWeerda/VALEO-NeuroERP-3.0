@@ -1,7 +1,8 @@
 id: DESIGN-MERIDIAN-HARDCOLORS-011
 owner: Codex
-status: reserviert
+status: abgeschlossen
 created: 2026-05-27
+completed: 2026-05-27
 goal: >
   Fachseiten-Hardcolors in einem ersten risikoarmen Folgeslice auf
   Meridian-/semantische Tokens ziehen.
@@ -19,5 +20,12 @@ checks:
   - pnpm --filter @valero-neuroerp/frontend-web type-check
   - python scripts/agent_workboard_supervisor.py validate
   - git diff --check
+done:
+  - Workflow-Oversight-Board auf Badge-Varianten und semantische Meridian-Token umgestellt.
+  - ApprovalPanel von grauen/gruenen Utility-Hardcolors auf muted/default Tokens gezogen.
+  - Copilot Dock und Insights von Emerald/Teal/Gray-Hardcolors auf primary/card/muted Tokens gezogen.
+  - CRUD-Audit, Cancel/Delete-Dialoge und AlertBanner auf Badge-Varianten, destructive und semantische Tokens umgestellt.
+remaining_scope:
+  - Weitere historische Hardcolors in Admin-, Finance-, Agrar- und Monitoring-Fachseiten bleiben Folgeslices.
 risks:
   - Der Bestand enthaelt sehr viele historische Hardcolors; dieser Slice schliesst einen priorisierten Batch und keinen kompletten Big-Bang-Refactor.

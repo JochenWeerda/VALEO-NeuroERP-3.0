@@ -72,13 +72,13 @@ export default function ApprovalPanel({ domain, doc }: ApprovalPanelProps): JSX.
   }
 
   return (
-    <div className="flex items-center gap-3 rounded-lg border bg-gray-50 p-4">
+    <div className="flex items-center gap-3 rounded-lg border bg-muted/50 p-4">
       <StatusBadge status={state} data-testid="approval-status-badge" />
 
       <div className="flex-1" />
 
       <div className="flex items-center gap-2">
-        {loading ? <Loader2 className="h-4 w-4 animate-spin text-gray-500" /> : null}
+        {loading ? <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" /> : null}
 
         {allowedActions.submit ? (
           <Button disabled={loading} onClick={handleSubmit} variant="outline" data-testid="btn-submit">
@@ -99,13 +99,7 @@ export default function ApprovalPanel({ domain, doc }: ApprovalPanelProps): JSX.
         ) : null}
 
         {allowedActions.post ? (
-          <Button
-            disabled={loading}
-            onClick={handlePost}
-            variant="default"
-            className="bg-green-600 hover:bg-green-700"
-            data-testid="btn-post"
-          >
+          <Button disabled={loading} onClick={handlePost} variant="default" data-testid="btn-post">
             Buchen
           </Button>
         ) : null}

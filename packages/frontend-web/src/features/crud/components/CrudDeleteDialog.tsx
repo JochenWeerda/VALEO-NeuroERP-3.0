@@ -102,10 +102,10 @@ export function CrudDeleteDialog({
               }}
               placeholder={t('crud.dialogs.delete.reasonPlaceholder')}
               rows={4}
-              className={error ? 'border-red-500' : ''}
+              className={error ? 'border-destructive' : ''}
             />
             {error && (
-              <p className="text-sm text-red-500">{error}</p>
+              <p className="text-sm text-destructive">{error}</p>
             )}
             <p className="text-xs text-muted-foreground">
               {t('crud.dialogs.delete.reasonMinLength')}
@@ -119,7 +119,7 @@ export function CrudDeleteDialog({
           <AlertDialogAction
             onClick={handleConfirm}
             disabled={isLoading || !reason || reason.trim().length < 10}
-            className="bg-red-600 hover:bg-red-700"
+            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
           >
             {isLoading ? t('crud.dialogs.delete.confirming') : t('crud.dialogs.delete.confirmButton')}
           </AlertDialogAction>
