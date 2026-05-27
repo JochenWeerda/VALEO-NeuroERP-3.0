@@ -165,7 +165,7 @@ export default function VoiceChannelPage() {
                   className="flex items-start gap-3 text-sm border-b last:border-0 pb-2 last:pb-0"
                 >
                   {entry.ok ? (
-                    <CheckCircle2 className="h-4 w-4 text-green-500 mt-0.5 shrink-0" />
+                    <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-[hsl(var(--color-semantic-success-700-hsl))]" />
                   ) : (
                     <XCircle className="h-4 w-4 text-destructive mt-0.5 shrink-0" />
                   )}

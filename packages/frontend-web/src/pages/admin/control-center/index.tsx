@@ -193,7 +193,7 @@ export default function AdminControlCenterPage(): JSX.Element {
       <div className="grid gap-4 px-6 xl:grid-cols-4">
         <Card>
           <CardContent className="flex items-center gap-3 p-4">
-            <Siren className="h-5 w-5 text-red-600" />
+            <Siren className="h-5 w-5 text-destructive" />
             <div>
               <p className="text-xs uppercase tracking-wide text-muted-foreground">Offene Vorfaelle</p>
               <p className="text-2xl font-semibold">{incidents.incident_count}</p>
@@ -202,7 +202,7 @@ export default function AdminControlCenterPage(): JSX.Element {
         </Card>
         <Card>
           <CardContent className="flex items-center gap-3 p-4">
-            <AlertTriangle className="h-5 w-5 text-amber-600" />
+            <AlertTriangle className="h-5 w-5 text-[hsl(var(--color-semantic-warning-700-hsl))]" />
             <div>
               <p className="text-xs uppercase tracking-wide text-muted-foreground">Blockierte Connectoren</p>
               <p className="text-2xl font-semibold">{incidents.blocked_connector_count}</p>
@@ -211,7 +211,7 @@ export default function AdminControlCenterPage(): JSX.Element {
         </Card>
         <Card>
           <CardContent className="flex items-center gap-3 p-4">
-            <TimerReset className="h-5 w-5 text-slate-600" />
+            <TimerReset className="h-5 w-5 text-muted-foreground" />
             <div>
               <p className="text-xs uppercase tracking-wide text-muted-foreground">Stale / Review</p>
               <p className="text-2xl font-semibold">{incidents.stale_ticket_count + incidents.review_ticket_count}</p>
@@ -220,7 +220,7 @@ export default function AdminControlCenterPage(): JSX.Element {
         </Card>
         <Card>
           <CardContent className="flex items-center gap-3 p-4">
-            <CalendarClock className="h-5 w-5 text-blue-600" />
+            <CalendarClock className="h-5 w-5 text-primary" />
             <div>
               <p className="text-xs uppercase tracking-wide text-muted-foreground">Geplante Slots</p>
               <p className="text-2xl font-semibold">{planning.summary.planned_item_count}</p>
@@ -239,7 +239,7 @@ export default function AdminControlCenterPage(): JSX.Element {
           </CardHeader>
           <CardContent className="space-y-4">
             {highestPriorityIncident ? (
-              <div className="rounded-lg border border-red-200 bg-red-50 p-4">
+              <div className="rounded-lg border border-destructive/30 bg-destructive/10 p-4">
                 <div className="flex flex-wrap items-center gap-2">
                   <Badge variant={severityVariant(highestPriorityIncident.severity)}>{highestPriorityIncident.severity}</Badge>
                   <Badge variant="outline">{sourceLabel(highestPriorityIncident.source)}</Badge>

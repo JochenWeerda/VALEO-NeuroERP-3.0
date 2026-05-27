@@ -263,7 +263,7 @@ export default function DmsIntegrationCard(): JSX.Element {
           <div className="space-y-3 p-6">
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <span>Base-URL:</span>
-              <code className="bg-gray-100 px-2 py-1 rounded text-xs">{configuredBaseUrl}</code>
+              <code className="rounded bg-muted px-2 py-1 text-xs">{configuredBaseUrl}</code>
             </div>
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <span>Document Types:</span>
@@ -325,12 +325,14 @@ export default function DmsIntegrationCard(): JSX.Element {
                 {testState !== 'idle' && (
                   <div
                     className={`p-3 rounded-lg ${
-                      testState === 'ok' ? 'bg-green-50 border border-green-200' : 'bg-red-50 border border-red-200'
+                      testState === 'ok'
+                        ? 'border border-[hsl(var(--color-semantic-success-500-hsl)/0.3)] bg-[hsl(var(--color-semantic-success-50-hsl))]'
+                        : 'border border-destructive/30 bg-destructive/10'
                     }`}
                   >
                     <p
                       className={`text-sm font-medium ${
-                        testState === 'ok' ? 'text-green-900' : 'text-red-900'
+                        testState === 'ok' ? 'text-[hsl(var(--color-semantic-success-700-hsl))]' : 'text-destructive'
                       }`}
                     >
                       {testState === 'ok' ? 'Verbindung erfolgreich getestet' : 'Verbindung fehlgeschlagen'}

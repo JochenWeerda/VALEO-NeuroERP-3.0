@@ -60,7 +60,7 @@ export default function RollenVerwaltungPage(): JSX.Element {
       key: 'name' as const,
       label: 'Rolle',
       render: (r: Rolle) => (
-        <button onClick={() => navigate(`/admin/rolle/${r.id}`)} className="font-medium text-blue-600 hover:underline">
+        <button onClick={() => navigate(`/admin/rolle/${r.id}`)} className="font-medium text-primary hover:underline">
           {r.name}
         </button>
       ),
@@ -134,7 +134,7 @@ export default function RollenVerwaltungPage(): JSX.Element {
           </CardHeader>
           <CardContent>
             <div className="flex items-center gap-2">
-              <Shield className="h-5 w-5 text-blue-600" />
+              <Shield className="h-5 w-5 text-primary" />
               <span className="text-2xl font-bold">{filteredList.length}</span>
             </div>
           </CardContent>

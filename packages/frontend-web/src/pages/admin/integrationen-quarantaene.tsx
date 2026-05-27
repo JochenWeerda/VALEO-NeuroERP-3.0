@@ -47,7 +47,7 @@ export default function IntegrationenQuarantaenePage(): JSX.Element {
                 <div className="text-xs text-muted-foreground">
                   connector={item.connector_id} · retries={item.retry_count} · {item.created_at}
                 </div>
-                {item.message ? <div className="text-xs text-red-600">{item.message}</div> : null}
+                {item.message ? <div className="text-xs text-destructive">{item.message}</div> : null}
               </div>
               <div className="flex items-center gap-2">
                 <Badge variant="destructive">{item.status}</Badge>

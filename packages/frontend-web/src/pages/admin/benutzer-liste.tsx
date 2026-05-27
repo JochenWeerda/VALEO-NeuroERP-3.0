@@ -77,7 +77,7 @@ export default function BenutzerListePage(): JSX.Element {
       key: 'name' as const,
       label: 'Name',
       render: (b: Benutzer) => (
-        <button onClick={() => navigate(`/admin/benutzer/${b.id}`)} className="font-medium text-blue-600 hover:underline">
+        <button onClick={() => navigate(`/admin/benutzer/${b.id}`)} className="font-medium text-primary hover:underline">
           {b.name}
         </button>
       ),
@@ -87,7 +87,7 @@ export default function BenutzerListePage(): JSX.Element {
     {
       key: 'status' as const,
       label: 'Status',
-      render: (b: Benutzer) => <Badge variant={b.status === 'aktiv' ? 'outline' : 'secondary'}>{b.status === 'aktiv' ? 'Aktiv' : 'Inaktiv'}</Badge>,
+      render: (b: Benutzer) => <Badge variant={b.status === 'aktiv' ? 'success' : 'secondary'}>{b.status === 'aktiv' ? 'Aktiv' : 'Inaktiv'}</Badge>,
     },
     {
       key: 'letzteAnmeldung' as const,

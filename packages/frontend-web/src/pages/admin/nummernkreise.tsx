@@ -82,7 +82,7 @@ export default function NummernkreisePage() {
         </Button>
       </div>
 
-      <div className="rounded-lg border bg-amber-50 p-4 text-sm text-amber-800 dark:bg-amber-950/30 dark:text-amber-200">
+      <div className="rounded-lg border border-[hsl(var(--color-semantic-warning-500-hsl)/0.3)] bg-[hsl(var(--color-semantic-warning-50-hsl))] p-4 text-sm text-[hsl(var(--color-semantic-warning-700-hsl))]">
         <div className="flex items-start gap-2">
           <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
           <div>
@@ -100,7 +100,7 @@ export default function NummernkreisePage() {
             <CardHeader className="pb-3">
               <div className="flex items-center justify-between">
                 <CardTitle className="text-base">{RANGE_TYPE_LABELS[r.range_type] || r.range_type}</CardTitle>
-                <Badge variant={r.is_active ? 'default' : 'secondary'}>
+                <Badge variant={r.is_active ? 'success' : 'secondary'}>
                   {r.is_active ? 'Aktiv' : 'Inaktiv'}
                 </Badge>
               </div>

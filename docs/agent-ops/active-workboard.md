@@ -6,10 +6,12 @@ Stand: `2026-05-26`
 
 **Von:** Codex
 **Owner:** Codex
-**Stand:** reserviert 2026-05-27
+**Stand:** abgeschlossen 2026-05-27
 **Ziel des Slices:** Vierter Meridian-Hardcolor-Batch fuer verbleibende Admin-Resttreffer.
 **Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/agent-ops/slices/DESIGN-MERIDIAN-HARDCOLORS-014.yaml`, priorisierte Dateien unter `packages/frontend-web/src/pages/admin/`.
 **Abnahmekriterien:** Bearbeitete Admin-Restseiten nutzen semantische Meridian-Tokens statt generischer Tailwind-Hardcolors; gezielter Hardcolor-Scan auf bearbeiteten Dateien ohne Treffer; Typecheck und Diff-Checks sind gruen.
+**Erledigt:** Benutzerliste, Rollenverwaltung, Integrationen-Quarantaene, Nummernkreise, Control Center, DMS-Setup und Voice-Channel auf `primary`, `muted`, `destructive`, Badge-Varianten und semantische Success-/Warning-Tokens umgestellt.
+**Checks:** `pnpm --filter @valero-neuroerp/frontend-web type-check`; gezielter Hardcolor-Scan auf den bearbeiteten Dateien ohne Treffer; `git diff --check`.
 **Offene Risiken:** Weitere Hardcolors ausserhalb Admin bleiben Folgescope.
 
 ## DESIGN-MERIDIAN-HARDCOLORS-013
