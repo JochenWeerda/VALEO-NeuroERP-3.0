@@ -83,7 +83,7 @@ async def list_customers(
 
 
 @router.get("/quick-search", summary="Search customers quick",
-    response_model=dict
+    response_model=list
 )
 def quick_search_customers(
     q: str = Query("", description="Suchterm (Name oder Kundennummer)"),
@@ -101,7 +101,7 @@ def quick_search_customers(
 
 
 @router.get("/recent", summary="Customers recent",
-    response_model=dict
+    response_model=list
 )
 def recent_customers(
     limit: int = Query(10, ge=1, le=25),

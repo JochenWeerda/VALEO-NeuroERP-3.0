@@ -24,12 +24,26 @@ def _require_customer_table(db) -> None:
         pytest.skip("DB nicht erreichbar oder domain_crm.customers fehlt.")
 
 
+PICKER_TEST_IDS = {"cust-picker-api-001", "cust-picker-api-002", "cust-picker-api-003"}
+
+
 @pytest.fixture
 def db():
     session = SessionLocal()
+    # Clean up any leftover test rows from previous failed runs
+    try:
+        session.query(Customer).filter(Customer.id.in_(PICKER_TEST_IDS)).delete(synchronize_session=False)
+        session.commit()
+    except Exception:
+        session.rollback()
     try:
         yield session
     finally:
+        try:
+            session.query(Customer).filter(Customer.id.in_(PICKER_TEST_IDS)).delete(synchronize_session=False)
+            session.commit()
+        except Exception:
+            session.rollback()
         session.close()
 
 
@@ -64,9 +78,7 @@ def test_customer_quick_search_returns_picker_payload(db):
         "postal_code": "26121",
         "is_active": True,
     }
-
-    db.delete(customer)
-    db.commit()
+    # Cleanup handled by db fixture teardown
 
 
 def test_customer_recent_returns_most_recent_active_customers(db):
@@ -111,7 +123,4 @@ def test_customer_recent_returns_most_recent_active_customers(db):
     assert new_customer.id in ids
     assert old_customer.id in ids
     assert ids.index(new_customer.id) < ids.index(old_customer.id)
-
-    db.delete(new_customer)
-    db.delete(old_customer)
-    db.commit()
+    # Cleanup handled by db fixture teardown
