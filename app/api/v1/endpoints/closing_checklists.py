@@ -3,7 +3,7 @@ Closing Checklists API
 FIBU-CLS-01: Abschlusschecklisten
 """
 
-from typing import List, Dict, Any
+from typing import Any, Dict, List, Optional
 from fastapi import Response, APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 from sqlalchemy import text
