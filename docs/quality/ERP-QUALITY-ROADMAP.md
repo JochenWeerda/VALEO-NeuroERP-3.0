@@ -294,5 +294,20 @@ Basierend auf dem IST-SOLL-Vergleich mit SAP/Oracle/MS Dynamics wurden folgende 
 
 ---
 
+## 10. Roadmap-Closure-Slice (2026-05-27)
+
+Repo-seitig wurden die verbleibenden sofort umsetzbaren Punkte geschlossen:
+
+- FinTS TAN-Verfahren: ChipTAN/pushTAN-Challenge-Response ist simulatorfaehig und ueber `/api/v1/banken/fints/ueberweisung/tan-initiieren` sowie `/api/v1/banken/fints/ueberweisung/tan-bestaetigen` erreichbar.
+- GIS Frontend-Karte: Die Feldbuch-Schlagkartei nutzt eine MapLibre-Komponente mit GeoJSON-FeatureCollection aus `/api/v1/agrar/feldbuch/schlaege/geojson/all`.
+- Agent-Orchestration: Der Low-Stock-Agent reagiert auf `erp.lager.bestand_unterschritten`, berechnet EOQ-basierte Bestellvorschlaege und ist per API simulierbar.
+- Voice-First CRUD: Lager/Einkauf/HR-Intents sind in Registry, Resolver und Frontend-AI-Shortcuts verdrahtet.
+- E2E-Ausbau: Zusaetzliche GIS/Lohn/FinTS-Specs sind angelegt.
+- Response-Model-Gate: `check_response_models.py --threshold 0` bleibt gruen mit 0 untyped routes.
+
+Nicht repo-seitig abschliessbar bleiben ELSTER-Produktivuebermittlung, Fiskaly-Produktivbetrieb und GoBD-Fachabnahme, weil dafuer externe Zertifikate, Anbieterzugaenge und Pruefungsnachweise erforderlich sind.
+
+**Verifizierte Checks:** `python -m pytest tests/test_roadmap_closure_fints_low_stock.py -q --no-cov`; `python -m pytest tests/test_voice_intent_lager_einkauf_hr.py -q --no-cov` in `services/ki-usability`; `pnpm --filter @valero-neuroerp/frontend-web type-check`; `python scripts/check_response_models.py --threshold 0`; `python scripts/agent_workboard_supervisor.py validate`.
+
 *Dokument gepflegt als lebendige Roadmap. Fortschritt per Wave dokumentiert.*
 *Referenzstandards: SAP Clean Core, Oracle Fusion Architecture Principles, OWASP ASVS Level 2, GoBD 2019, KassenSichV § 146a AO.*

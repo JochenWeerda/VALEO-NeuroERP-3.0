@@ -188,6 +188,152 @@ def get_umsaetze(
         return FinTSErgebnis(erfolg=False, fehler=str(exc))
 
 
+@dataclass
+class TanChallenge:
+    tan_medium: str
+    challenge_text: str
+    challenge_hhduc: Optional[str] = None
+    tan_verfahren: str = "pushTAN"
+    session_token: Optional[str] = None
+
+
+@dataclass
+class TanMedium:
+    name: str
+    tan_verfahren: str
+    aktiv: bool = True
+
+
+def get_tan_medien(blz: str = "", user_id: str = "", pin: str = "", server_url: str = "") -> FinTSErgebnis:
+    """Listet verfuegbare TAN-Medien bzw. TAN-Verfahren."""
+    blz = blz or _BLZ
+    user_id = user_id or _USER_ID
+    pin = pin or _PIN
+    server_url = server_url or _SERVER_URL
+
+    if not _is_configured():
+        return FinTSErgebnis(
+            erfolg=True,
+            rohdaten={
+                "mode": "simulator",
+                "tan_medien": [
+                    {"name": "Meine SparkassenCard", "tan_verfahren": "chipTAN", "aktiv": True},
+                    {"name": "pushTAN-App", "tan_verfahren": "pushTAN", "aktiv": True},
+                ],
+            },
+        )
+
+    try:
+        from fints.client import FinTS3PinTanClient  # type: ignore[import-untyped]
+
+        client = FinTS3PinTanClient(blz, user_id, pin, server_url)
+        with client:
+            mechanisms = client.get_tan_mechanisms()
+            return FinTSErgebnis(
+                erfolg=True,
+                rohdaten={
+                    "mode": "produktiv",
+                    "tan_medien": [
+                        {"id": key, "name": mechanism.name, "tan_verfahren": key, "aktiv": True}
+                        for key, mechanism in mechanisms.items()
+                    ],
+                },
+            )
+    except Exception as exc:
+        return FinTSErgebnis(erfolg=False, fehler=str(exc))
+
+
+def initiiere_ueberweisung_mit_tan(
+    auftraggeber_iban: str,
+    empfaenger_iban: str,
+    empfaenger_name: str,
+    betrag: Decimal,
+    verwendungszweck: str,
+    blz: str = "",
+    user_id: str = "",
+    pin: str = "",
+    server_url: str = "",
+    tan_verfahren_id: str = "",
+) -> tuple[FinTSErgebnis, Optional[TanChallenge]]:
+    """Schritt 1 des TAN-Flows: Ueberweisung einleiten und Challenge liefern."""
+    if not _is_configured():
+        challenge = TanChallenge(
+            tan_medium="pushTAN-App (Simulator)",
+            challenge_text="Bitte bestaetigen Sie die Ueberweisung in Ihrer Banking-App.",
+            tan_verfahren="pushTAN",
+            session_token=f"SIM-{auftraggeber_iban[-4:]}-{empfaenger_iban[-4:]}-{abs(hash((betrag, verwendungszweck))) % 100000}",
+        )
+        return FinTSErgebnis(erfolg=True, rohdaten={"mode": "simulator", "schritt": "challenge"}), challenge
+
+    try:
+        from fints.client import FinTS3PinTanClient, NeedTANResponse  # type: ignore[import-untyped]
+
+        blz = blz or _BLZ
+        user_id = user_id or _USER_ID
+        pin = pin or _PIN
+        server_url = server_url or _SERVER_URL
+
+        client = FinTS3PinTanClient(blz, user_id, pin, server_url)
+        with client:
+            if tan_verfahren_id:
+                mechanisms = client.get_tan_mechanisms()
+                if tan_verfahren_id in mechanisms:
+                    client.set_tan_mechanism(mechanisms[tan_verfahren_id])
+
+            sepa_konten = client.get_sepa_accounts()
+            konto = next((k for k in sepa_konten if k.iban == auftraggeber_iban), None)
+            if not konto:
+                return FinTSErgebnis(erfolg=False, fehler=f"Konto {auftraggeber_iban} nicht gefunden"), None
+
+            try:
+                client.simple_sepa_transfer(konto, empfaenger_iban, empfaenger_name, betrag, verwendungszweck)
+                return FinTSErgebnis(erfolg=True, rohdaten={"schritt": "abgeschlossen"}), None
+            except NeedTANResponse as tan_request:
+                challenge = TanChallenge(
+                    tan_medium=getattr(tan_request, "tan_medium_name", "TAN-Medium"),
+                    challenge_text=getattr(tan_request, "challenge", "Bitte TAN eingeben"),
+                    challenge_hhduc=getattr(tan_request, "challenge_hhduc", None),
+                    tan_verfahren=tan_verfahren_id or "unbekannt",
+                    session_token=getattr(tan_request, "challenge_label", None),
+                )
+                return FinTSErgebnis(erfolg=True, rohdaten={"schritt": "challenge"}), challenge
+    except Exception as exc:
+        return FinTSErgebnis(erfolg=False, fehler=str(exc)), None
+
+
+def bestaetige_tan(
+    session_token: str,
+    tan: str,
+    blz: str = "",
+    user_id: str = "",
+    pin: str = "",
+    server_url: str = "",
+) -> FinTSErgebnis:
+    """Schritt 2 des TAN-Flows: TAN bestaetigen und Auftrag abschliessen."""
+    if not _is_configured():
+        if tan == "000000":
+            return FinTSErgebnis(
+                erfolg=True,
+                rohdaten={"mode": "simulator", "schritt": "abgeschlossen", "session_token": session_token},
+            )
+        return FinTSErgebnis(erfolg=False, fehler="TAN ungueltig (Simulator: '000000' verwenden)")
+
+    try:
+        from fints.client import FinTS3PinTanClient  # type: ignore[import-untyped]
+
+        blz = blz or _BLZ
+        user_id = user_id or _USER_ID
+        pin = pin or _PIN
+        server_url = server_url or _SERVER_URL
+
+        client = FinTS3PinTanClient(blz, user_id, pin, server_url)
+        with client:
+            client.send_tan(tan, session_token)
+        return FinTSErgebnis(erfolg=True, rohdaten={"schritt": "abgeschlossen"})
+    except Exception as exc:
+        return FinTSErgebnis(erfolg=False, fehler=str(exc))
+
+
 def send_ueberweisung(
     auftraggeber_iban: str,
     empfaenger_iban: str,

@@ -148,6 +148,17 @@ class AgentSkillPackUpdateRequest(BaseModel):
     changed_by: str = "admin-ui"
 
 
+class LowStockSimulateRequest(BaseModel):
+    tenant_id: str = "default"
+    artikel_id: str
+    artikel_name: str
+    bestand: float = Field(ge=0)
+    mindestbestand: float = Field(gt=0)
+    einheit: str = "Stk"
+    lieferant_id: str | None = None
+    durchschnittlicher_verbrauch_pro_tag: float | None = Field(default=None, ge=0)
+
+
 class AgentPersistenceStatusResponse(BaseModel):
     tenant_id: str
     state_path: str
@@ -588,4 +599,44 @@ async def get_neuroassist_plugin_boundary_review(tenant_id: str = "system"):
     except Exception as exc:
         logger.error("NeuroASSIST plugin boundary review failed: %s", exc, exc_info=True)
         raise HTTPException(status_code=500, detail=f"NeuroASSIST plugin boundary review failed: {str(exc)}")
+
+
+@router.get("/agents/low-stock/status", response_model=dict, summary="Low-Stock-Agent Status abrufen")
+async def get_low_stock_agent_status():
+    from ....workers.low_stock_agent import AGENT_ENABLED, MAX_ORDER_FACTOR, NATS_URL
+
+    return {
+        "agent": "low-stock-bestellvorschlag",
+        "enabled": AGENT_ENABLED,
+        "nats_url": NATS_URL,
+        "subject": "erp.lager.bestand_unterschritten",
+        "max_order_factor": MAX_ORDER_FACTOR,
+        "mode": "event-driven" if AGENT_ENABLED else "manual-or-batch",
+    }
+
+
+@router.post("/agents/low-stock/simulate", response_model=dict, summary="Low-Stock-Event simulieren")
+async def simulate_low_stock_event(request: LowStockSimulateRequest):
+    from ....workers.low_stock_agent import LowStockEvent, handle_low_stock_event
+
+    result = await handle_low_stock_event(
+        LowStockEvent(
+            tenant_id=request.tenant_id,
+            artikel_id=request.artikel_id,
+            artikel_name=request.artikel_name,
+            bestand=request.bestand,
+            mindestbestand=request.mindestbestand,
+            einheit=request.einheit,
+            lieferant_id=request.lieferant_id,
+            durchschnittlicher_verbrauch_pro_tag=request.durchschnittlicher_verbrauch_pro_tag,
+        )
+    )
+    return {
+        "erfolg": result.erfolg,
+        "vorschlag_id": result.vorschlag_id,
+        "artikel_id": result.artikel_id,
+        "empfohlene_menge": result.empfohlene_menge,
+        "begruendung": result.begruendung,
+        "fehler": result.fehler,
+    }
 
