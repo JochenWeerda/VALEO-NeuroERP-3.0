@@ -1,0 +1,22 @@
+id: SLICE-013B-VOICE-SUMMARY-TTS-001
+title: Slice-013b — Voice Summary (Ollama) + Local TTS (Piper)
+owner: Claude Sonnet 4.6
+status: abgeschlossen
+completed_at: 2026-05-27
+depends_on:
+  - SLICE-013-VOICE-LOCAL-POLISH-001
+goal: >
+  Text-zu-15s-Zusammenfassung via Ollama und lokale Sprachausgabe via Piper;
+  POST /voice/summary + POST /voice/synthesize; Frontend-Wiedergabe mit Browser-Fallback.
+scope:
+  - services/ki-usability/app/services/voice_summary.py
+  - services/ki-usability/app/services/local_tts.py
+  - services/ki-usability/app/api/v1/endpoints/voice.py
+  - app/services/voice_adapter.py (Provider piper)
+  - packages/frontend-web/src/features/ki-usability/
+acceptance_criteria:
+  - POST /voice/summary liefert speakable Summary (~15s)
+  - POST /voice/synthesize liefert audio_base64 (Piper) oder Browser-Hinweis
+  - voice_adapter.py unterstuetzt VOICE_TTS_PROVIDER=piper
+  - VoiceFeedback zeigt Summary + Vorlesen-Button
+  - pytest fuer Summary/Synthesize (mock Ollama/Piper)
