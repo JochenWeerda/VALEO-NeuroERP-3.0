@@ -2613,3 +2613,13 @@ Archiv des vorherigen Boards:
 **Dateibesitz:** `docs/agent-ops/slices/SLICE-009-DSGVO-ART33-BREACH-001.yaml`, `app/api/v1/endpoints/gdpr_art33_breach.py`, `packages/frontend-web/src/lib/api/gdpr-art33.ts`, `packages/frontend-web/src/pages/compliance/datenpannen.tsx`, `packages/frontend-web/tests/e2e/slice-009-dsgvo-art33.spec.ts`, `tests/test_gdpr_art33_breach.py`.
 **Gate-Ergebnis:** pytest 24/24 ✅ · E2E 5/5 ✅ · TypeScript 0 Fehler ✅
 **Offene Risiken:** E-Mail-Versand an Behörde bleibt Folgeslice.
+
+## SLICE-010-VOICE-LAGER-EINKAUF-HR-001
+
+**Von:** Claude Sonnet 4.6
+**Owner:** Claude Sonnet 4.6
+**Stand:** reserviert 2026-05-27
+**Ziel des Slices:** Voice-Intent für Lager / Einkauf / HR ausbauen — 15 neue Intents in action_registry.py, Keyword-Fallbacks im IntentResolver, Frontend-AI-Shortcuts.
+**Dateibesitz:** `services/ki-usability/app/services/action_registry.py`, `services/ki-usability/app/services/intent_resolver.py`, `packages/frontend-web/src/app/navigation/ai-shortcuts.tsx`, `tests/test_voice_intent_lager_einkauf_hr.py`.
+**Abnahmekriterien:** 15 neue Intents; Resolver löst alle Phrasen auf; pytest grün; TypeScript 0 Fehler.
+**Offene Risiken:** VoiceButton-Integration auf Seiten bleibt Folgeslice.
