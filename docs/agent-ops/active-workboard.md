@@ -2,6 +2,16 @@
 
 Stand: `2026-05-26`
 
+## DESIGN-MERIDIAN-HARDCOLORS-012
+
+**Von:** Codex
+**Owner:** Codex
+**Stand:** reserviert 2026-05-27
+**Ziel des Slices:** Zweiter Meridian-Hardcolor-Batch fuer sichtbare Admin-/Monitoring-Fachseiten.
+**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/agent-ops/slices/DESIGN-MERIDIAN-HARDCOLORS-012.yaml`, priorisierte Dateien unter `packages/frontend-web/src/pages/admin/` und `packages/frontend-web/src/features/workflow/`.
+**Abnahmekriterien:** Ausgewaehlte Admin-/Monitoring-Seiten nutzen semantische Meridian-Tokens statt generischer Tailwind-Hardcolors; gezielter Hardcolor-Scan auf bearbeiteten Dateien ohne Treffer; Typecheck, Workboard-Validierung und Diff-Checks sind gruen.
+**Offene Risiken:** Weitere Fachseiten-Hardcolors bleiben Folgescope.
+
 ## DESIGN-MERIDIAN-HARDCOLORS-011
 
 **Von:** Codex
