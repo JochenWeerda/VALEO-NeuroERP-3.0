@@ -135,6 +135,15 @@ const CRM_CHILDREN: RawNavItem[] = [
     keywords: ['dsgvo', 'art30', 'ropa', 'verarbeitungsverzeichnis', 'datenschutz'],
     mcp: { businessDomain: 'compliance', scope: 'compliance:write' },
   },
+  {
+    id: 'datenpannen',
+    label: 'Datenpannen-Meldeprozess (Art. 33)',
+    icon: ShieldCheck,
+    module: '@/pages/compliance/datenpannen',
+    preferredPath: 'compliance/datenpannen',
+    keywords: ['dsgvo', 'art33', 'datenpanne', 'breach', 'meldepflicht', '72h', 'datenschutz'],
+    mcp: { businessDomain: 'compliance', scope: 'compliance:write' },
+  },
 ]
 
 if (ENABLE_PROSPECTING_UI) {

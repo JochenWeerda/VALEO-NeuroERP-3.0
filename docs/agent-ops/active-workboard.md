@@ -2608,8 +2608,8 @@ Archiv des vorherigen Boards:
 
 **Von:** Claude Sonnet 4.6
 **Owner:** Claude Sonnet 4.6
-**Stand:** reserviert 2026-05-27
-**Ziel des Slices:** DSGVO Art. 33 Datenpannen-Meldeprozess — Backend CRUD + 72h-Fristüberwachung + Frontend-Maske mit Ampelindikator. Art. 33 ist nach Art. 30 die nächste offene DSGVO-Pflicht.
+**Stand:** abgeschlossen 2026-05-27
+**Ziel des Slices:** DSGVO Art. 33 Datenpannen-Meldeprozess — Backend CRUD + 72h-Fristüberwachung + Frontend-Maske mit Ampelindikator. Fremdfix: banken.py (get_tenant_id fehlte) + ebilanz_elster.py (Field fehlte).
 **Dateibesitz:** `docs/agent-ops/slices/SLICE-009-DSGVO-ART33-BREACH-001.yaml`, `app/api/v1/endpoints/gdpr_art33_breach.py`, `packages/frontend-web/src/lib/api/gdpr-art33.ts`, `packages/frontend-web/src/pages/compliance/datenpannen.tsx`, `packages/frontend-web/tests/e2e/slice-009-dsgvo-art33.spec.ts`, `tests/test_gdpr_art33_breach.py`.
-**Abnahmekriterien:** Pflichtfelder Art. 33 Abs. 3; 72h-Deadline; Status-Workflow; Ampel-UI; pytest + E2E grün; TypeScript 0 Fehler.
+**Gate-Ergebnis:** pytest 24/24 ✅ · E2E 5/5 ✅ · TypeScript 0 Fehler ✅
 **Offene Risiken:** E-Mail-Versand an Behörde bleibt Folgeslice.

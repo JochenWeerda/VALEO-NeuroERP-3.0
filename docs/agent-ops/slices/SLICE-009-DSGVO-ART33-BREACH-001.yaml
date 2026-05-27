@@ -1,8 +1,9 @@
 id: SLICE-009-DSGVO-ART33-BREACH-001
 title: Slice-009 — DSGVO Art. 33 Datenpannen-Meldeprozess
 owner: Claude Sonnet 4.6
-status: reserviert
+status: abgeschlossen
 claimed_at: 2026-05-27
+completed_at: 2026-05-27
 depends_on:
   - SLICE-008-DSGVO-ART30-ROPA-001
 goal: >

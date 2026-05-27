@@ -1569,6 +1569,10 @@ api_router.include_router(sales_invoice_einvoice.router)
 from app.api.v1.endpoints import gdpr_art30_ropa  # noqa: E402
 api_router.include_router(gdpr_art30_ropa.router)
 
+# Slice-009: DSGVO Art. 33 Datenpannen-Meldeprozess
+from app.api.v1.endpoints import gdpr_art33_breach  # noqa: E402
+api_router.include_router(gdpr_art33_breach.router)
+
 # Dynamische Preis-Kalkulations-Engine
 api_router.include_router(price_calculation.router)
 
