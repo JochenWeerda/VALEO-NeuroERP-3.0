@@ -1,8 +1,8 @@
 id: SLICE-013D-VOICE-DOMAIN-CONTEXT-001
 title: Slice-013d — Voice Domain Context + voice-intent Events
 owner: Claude Sonnet 4.6
-status: reserviert
-claimed_at: 2026-05-27
+status: abgeschlossen
+completed_at: 2026-05-27
 depends_on:
   - SLICE-013C-VOICE-WHISPERBAR-SHORTCUTS-001
 goal: >
