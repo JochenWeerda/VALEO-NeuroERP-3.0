@@ -53,4 +53,5 @@ export const entries: AutoGroupRouteEntry[] = [
   { "module": "@/pages/compliance/intrastat", "path": "intrastat" },
   { "module": "@/pages/compliance/lksg", "path": "lksg" },
   { "module": "@/pages/compliance/sanktionspruefung", "path": "sanktionspruefung" },
+  { "module": "@/pages/compliance/verarbeitungsverzeichnis", "path": "verarbeitungsverzeichnis" },
 ]

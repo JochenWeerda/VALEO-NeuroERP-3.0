@@ -2598,8 +2598,8 @@ Archiv des vorherigen Boards:
 
 **Von:** Claude Sonnet 4.6
 **Owner:** Claude Sonnet 4.6
-**Stand:** reserviert 2026-05-27
-**Ziel des Slices:** DSGVO Art. 30 Verzeichnis von Verarbeitungstätigkeiten (Records of Processing Activities). Backend CRUD + JSON-Export + Frontend-Verwaltungsmaske. Art. 15/17/20 bereits implementiert — Art. 30 ist die letzte zentrale DSGVO-Pflicht-Lücke.
+**Stand:** abgeschlossen 2026-05-27
+**Ziel des Slices:** DSGVO Art. 30 Verzeichnis von Verarbeitungstätigkeiten (Records of Processing Activities). Backend CRUD + JSON-Export + Frontend-Verwaltungsmaske. Art. 15/17/20 bereits implementiert — Art. 30 war die letzte zentrale DSGVO-Pflicht-Lücke.
 **Dateibesitz:** `docs/agent-ops/slices/SLICE-008-DSGVO-ART30-ROPA-001.yaml`, `app/api/v1/endpoints/gdpr_art30_ropa.py`, `packages/frontend-web/src/lib/api/gdpr-art30.ts`, `packages/frontend-web/src/pages/compliance/verarbeitungsverzeichnis.tsx`, `packages/frontend-web/tests/e2e/slice-008-dsgvo-art30.spec.ts`, `tests/test_gdpr_art30_ropa.py`.
-**Abnahmekriterien:** Pflichtfelder Art. 30 Abs. 1 a-h; CRUD + JSON-Export; Mutation-Guards; pytest + E2E grün; TypeScript 0 Fehler.
-**Offene Risiken:** Produktive DB-Persistenz bleibt Folgeslice wenn DocumentRepository nicht migriert ist.
+**Gate-Ergebnis:** pytest 20/20 ✅ · E2E 5/5 ✅ · TypeScript 0 Fehler ✅ · Routing fixiert ✅
+**Offene Risiken:** Produktive DB-Persistenz bleibt Folgeslice (In-Memory-Store als Fallback aktiv).

@@ -126,6 +126,15 @@ const CRM_CHILDREN: RawNavItem[] = [
     keywords: ['dsgvo', 'gdpr', 'datenschutz'],
     mcp: { businessDomain: 'crm', scope: 'compliance:read' },
   },
+  {
+    id: 'verarbeitungsverzeichnis',
+    label: 'Verarbeitungsverzeichnis (Art. 30)',
+    icon: ShieldCheck,
+    module: '@/pages/compliance/verarbeitungsverzeichnis',
+    preferredPath: 'compliance/verarbeitungsverzeichnis',
+    keywords: ['dsgvo', 'art30', 'ropa', 'verarbeitungsverzeichnis', 'datenschutz'],
+    mcp: { businessDomain: 'compliance', scope: 'compliance:write' },
+  },
 ]
 
 if (ENABLE_PROSPECTING_UI) {
