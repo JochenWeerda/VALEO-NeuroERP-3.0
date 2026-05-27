@@ -10,6 +10,7 @@ import ApprovalPanel from "@/features/workflow/ApprovalPanel"
 import invoiceSchema from "@/domain-schemas/sales_invoice.schema.json"
 import { getEntityTypeLabel, getSuccessMessage, getErrorMessage } from "@/features/crud/utils/i18n-helpers"
 import { apiClient } from "@/lib/api-client"
+import { downloadXRechnung, downloadZugferd } from "@/lib/api/einvoice"
 import { CustomerSalesEligibilityBanner } from "@/components/sales/CustomerSalesEligibilityBanner"
 import { useCustomerSalesEligibility } from "@/hooks/useCustomerSalesEligibility"
 import {
@@ -208,6 +209,31 @@ export default function SalesInvoiceEditorPage(): JSX.Element {
     }
   }
 
+  const [einvoicePending, setEinvoicePending] = useState<'xrechnung' | 'zugferd' | null>(null)
+
+  async function exportEInvoice(format: 'xrechnung' | 'zugferd'): Promise<void> {
+    const invoiceNumber = invoice.number?.trim()
+    if (!invoiceNumber) {
+      push('Rechnungsnummer fehlt — bitte zuerst speichern')
+      return
+    }
+    if (einvoicePending) return
+    setEinvoicePending(format)
+    try {
+      if (format === 'xrechnung') {
+        await downloadXRechnung(invoiceNumber)
+      } else {
+        await downloadZugferd(invoiceNumber)
+      }
+      push(`E-Rechnung (${format.toUpperCase()}) generiert`)
+    } catch (error) {
+      const detail = error instanceof Error ? error.message : 'Generierung fehlgeschlagen'
+      push(`E-Rechnung-Export fehlgeschlagen: ${detail}`)
+    } finally {
+      setEinvoicePending(null)
+    }
+  }
+
   // Rechnung ist End-Beleg, keine Folgebelege
   const nextTypes: Array<{ to: string; label: string }> = []
   const hasCustomer = Boolean(invoice.customerId)
@@ -367,6 +393,26 @@ export default function SalesInvoiceEditorPage(): JSX.Element {
             </Button>
             <Button type="button" variant="outline" size="sm" onClick={() => void recordExport()}>
               Export protokollieren
+            </Button>
+            <Button
+              type="button"
+              variant="default"
+              size="sm"
+              onClick={() => void exportEInvoice('xrechnung')}
+              disabled={einvoicePending !== null || !invoice.number?.trim()}
+              data-testid="einvoice-xrechnung"
+            >
+              {einvoicePending === 'xrechnung' ? 'Erzeuge…' : 'XRechnung (XML)'}
+            </Button>
+            <Button
+              type="button"
+              variant="default"
+              size="sm"
+              onClick={() => void exportEInvoice('zugferd')}
+              disabled={einvoicePending !== null || !invoice.number?.trim()}
+              data-testid="einvoice-zugferd"
+            >
+              {einvoicePending === 'zugferd' ? 'Erzeuge…' : 'ZUGFeRD (PDF/A-3)'}
             </Button>
             {invoice.number?.trim() ? (
               <Button
