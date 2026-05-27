@@ -7,6 +7,7 @@
  * Anforderungen: maplibre-gl (npm install maplibre-gl)
  */
 import { useEffect, useRef, useState } from 'react'
+import 'maplibre-gl/dist/maplibre-gl.css'
 import { useSchlagGeojsonAll } from '@/lib/api/agrar'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Alert, AlertDescription } from '@/components/ui/alert'

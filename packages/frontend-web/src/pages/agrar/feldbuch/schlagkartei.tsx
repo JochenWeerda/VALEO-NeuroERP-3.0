@@ -44,6 +44,7 @@ import {
   Trash2
 } from 'lucide-react'
 import { FeldblockfinderIntegration, SchlagData } from '@/components/agrar/FeldblockfinderIntegration'
+import { SchlagKarte } from '@/components/agrar/SchlagKarte'
 
 // Types
 type Schlag = {
@@ -588,25 +589,11 @@ export default function SchlagkarteiPage(): JSX.Element {
             <CardHeader>
               <CardTitle>Kartenansicht</CardTitle>
               <CardDescription>
-                Visualisierung der Schläge auf einer interaktiven Karte (in Entwicklung)
+                Ackerschlaege als GeoJSON-Polygone auf OpenStreetMap - RFC 7946 GIS-Integration
               </CardDescription>
             </CardHeader>
-            <CardContent>
-              <div className="h-96 bg-gradient-to-br from-green-100 to-blue-100 dark:from-green-900/30 dark:to-blue-900/30 rounded-lg flex items-center justify-center">
-                <div className="text-center space-y-4">
-                  <Map className="h-16 w-16 mx-auto text-green-600" />
-                  <div>
-                    <h3 className="text-lg font-semibold">Kartenintegration</h3>
-                    <p className="text-sm text-muted-foreground">
-                      GIS-Kartenansicht mit OpenStreetMap/Leaflet wird in einer zukünftigen Version verfügbar sein.
-                    </p>
-                  </div>
-                  <Button variant="outline" onClick={() => setFeldblockDialogOpen(true)}>
-                    <Map className="h-4 w-4 mr-2" />
-                    Feldblockfinder öffnen
-                  </Button>
-                </div>
-              </div>
+            <CardContent className="p-0 overflow-hidden rounded-b-lg">
+              <SchlagKarte height="520px" />
             </CardContent>
           </Card>
         </TabsContent>

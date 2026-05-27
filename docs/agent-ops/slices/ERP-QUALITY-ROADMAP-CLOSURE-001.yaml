@@ -1,7 +1,8 @@
 id: ERP-QUALITY-ROADMAP-CLOSURE-001
 owner: Codex
-status: reserviert
+status: abgeschlossen
 created: 2026-05-27
+completed: 2026-05-27
 goal: >
   Noch repo-seitig umsetzbare Punkte aus docs/quality/ERP-QUALITY-ROADMAP.md
   abschliessen oder belastbar als externe Betriebs-/Zertifizierungsgates abgrenzen.
@@ -29,6 +30,15 @@ checks:
   - python scripts/agent_workboard_supervisor.py validate
   - node scripts/docs-markdown-check.cjs docs/quality/ERP-QUALITY-ROADMAP.md docs/agent-ops/active-workboard.md
   - python scripts/check_response_models.py --threshold 0
+  - python -m pytest tests/test_roadmap_closure_fints_low_stock.py -q --no-cov
+  - python -m pytest tests/test_voice_intent_lager_einkauf_hr.py -q --no-cov
+  - pnpm --filter @valero-neuroerp/frontend-web type-check
+done:
+  - FinTS TAN-Challenge-Response simulatorfaehig und API-seitig verdrahtet.
+  - MapLibre-Schlagkarte in der Feldbuch-Schlagkartei eingebunden.
+  - Low-Stock-Agent mit NATS-Subject, EOQ-Heuristik und API-Simulation angelegt.
+  - Lager/Einkauf/HR Voice-Intents in Registry, Resolver und Frontend-Shortcuts integriert.
+  - Externe ELSTER/Fiskaly/GoBD-Gates in der Roadmap abgegrenzt.
 risks:
   - ELSTER-Org-Zertifikat, Fiskaly-Produktivzugang und Wirtschaftsprüfer-Testat bleiben externe Gates.
   - Godfile- und Pagination-Komplettreduktion ist ein mehrwoechiges Programm.

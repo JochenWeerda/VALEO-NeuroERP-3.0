@@ -451,6 +451,63 @@ export function useDeleteSchlag() {
   })
 }
 
+export interface SchlagGeometry {
+  type: 'Polygon' | 'MultiPolygon'
+  coordinates: number[][][] | number[][][][]
+}
+
+export interface SchlagFeatureCollection {
+  type: 'FeatureCollection'
+  features: Array<{
+    type: 'Feature'
+    geometry: SchlagGeometry
+    properties?: Record<string, unknown>
+  }>
+}
+
+export function useSchlagGeojsonAll() {
+  return useQuery({
+    queryKey: [...agrarKeys.all, 'geojson-all'],
+    queryFn: async () => {
+      const res = await apiClient.get<SchlagFeatureCollection>(
+        '/api/v1/agrar/feldbuch/schlaege/geojson/all',
+      )
+      return res.data
+    },
+    staleTime: 5 * 60 * 1000,
+  })
+}
+
+export function useSchlagGeometry(schlagId: string) {
+  return useQuery({
+    queryKey: [...agrarKeys.all, 'geometry', schlagId],
+    queryFn: async () => {
+      const res = await apiClient.get<SchlagGeometry>(
+        `/api/v1/agrar/feldbuch/schlaege/${schlagId}/geometry`,
+      )
+      return res.data
+    },
+    enabled: !!schlagId,
+  })
+}
+
+export function useUpdateSchlagGeometry() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async ({ schlagId, geometry }: { schlagId: string; geometry: SchlagGeometry }) => {
+      const res = await apiClient.put<{ schlag_id: string; geometry_saved: boolean }>(
+        `/api/v1/agrar/feldbuch/schlaege/${schlagId}/geometry`,
+        { geometry_geojson: JSON.stringify(geometry) },
+      )
+      return res.data
+    },
+    onSuccess: (_data, { schlagId }) => {
+      queryClient.invalidateQueries({ queryKey: [...agrarKeys.all, 'geometry', schlagId] })
+      queryClient.invalidateQueries({ queryKey: [...agrarKeys.all, 'geojson-all'] })
+    },
+  })
+}
+
 export function useAussaaten() {
   return useQuery({
     queryKey: [...agrarKeys.all, 'aussaaten'],

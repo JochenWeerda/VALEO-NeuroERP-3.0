@@ -1,8 +1,9 @@
 id: SLICE-010-VOICE-LAGER-EINKAUF-HR-001
 title: Slice-010 — Voice-Intent für Lager / Einkauf / HR ausbauen
 owner: Claude Sonnet 4.6
-status: reserviert
+status: abgeschlossen
 claimed_at: 2026-05-27
+completed_at: 2026-05-27
 depends_on:
   - SLICE-009-DSGVO-ART33-BREACH-001
 goal: >
@@ -53,5 +54,13 @@ acceptance_criteria:
   - Frontend ai-shortcuts.tsx um 3 Domain-Shortcuts erweitert
   - TypeScript 0 Fehler
 fremdfix: noch keine
+done:
+  - 15 neue Lager/Einkauf/HR-Intents in action_registry.py registriert.
+  - intent_resolver.py loest typische Lager/Einkauf/HR-Phrasen und Parameter robust auf.
+  - Frontend-AI-Shortcuts fuer Lager, Einkauf und Personal ergaenzt.
+  - Regression gegen bestehende Sales/CRM/Finance-Voice-Intents abgesichert.
+checks:
+  - python -m pytest tests/test_voice_intent_lager_einkauf_hr.py -q --no-cov
+  - pnpm --filter @valero-neuroerp/frontend-web type-check
 open_risks:
   - VoiceButton-Einbindung auf Lager/Einkauf/HR-Seiten bleibt Folgeslice (nur Registry-Erweiterung hier)

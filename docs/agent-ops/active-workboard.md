@@ -6,10 +6,12 @@ Stand: `2026-05-26`
 
 **Von:** Codex
 **Owner:** Codex
-**Stand:** reserviert 2026-05-27
+**Stand:** abgeschlossen 2026-05-27
 **Ziel des Slices:** Noch repo-seitig umsetzbare Punkte aus `docs/quality/ERP-QUALITY-ROADMAP.md` abschliessen oder belastbar als externe Betriebs-/Zertifizierungsgates abgrenzen.
 **Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/agent-ops/slices/ERP-QUALITY-ROADMAP-CLOSURE-001.yaml`, `docs/quality/ERP-QUALITY-ROADMAP.md`, `app/services/fints_connector.py`, `app/api/v1/endpoints/banken.py`, `packages/frontend-web/src/lib/api/agrar.ts`, `packages/frontend-web/src/components/agrar/SchlagKarte.tsx`, `packages/frontend-web/src/pages/agrar/feldbuch/schlagkartei.tsx`, `app/workers/low_stock_agent.py`, `app/api/v1/endpoints/agents.py`, fokussierte Tests/E2E-Specs fuer Roadmap-Abschluss.
 **Abnahmekriterien:** FinTS TAN-Challenge-Flow ist simulatorfaehig und API-seitig erreichbar; MapLibre-Schlagkarte ist im Feldbuch verdrahtet und typecheckt; Low-Stock-Agent hat einen testbaren Event-/Batch-Pfad; Response-Model-Gate bleibt bei 0; externe ELSTER/Fiskaly/GoBD-Gates sind als nicht repo-seitig abschliessbare Betriebsnachweise dokumentiert; Workboard-, Doku-, Backend- und Frontend-Checks sind dokumentiert.
+**Erledigt:** FinTS-TAN-Challenge-Response mit Simulator und API-Endpunkten nachgezogen; MapLibre-Schlagkarte in der Feldbuch-Schlagkartei eingebunden; Low-Stock-Agent mit EOQ-Heuristik, NATS-Subject und Status-/Simulations-API angelegt; Lager/Einkauf/HR-Voice-Intents integriert; fokussierte Backend-, Voice- und Frontend-Gates gruen.
+**Checks:** `python -m compileall -q app\api\v1\endpoints\banken.py app\api\v1\endpoints\agents.py app\services\fints_connector.py app\workers\low_stock_agent.py services\ki-usability\app\services\action_registry.py services\ki-usability\app\services\intent_resolver.py`; `python -m pytest tests\test_roadmap_closure_fints_low_stock.py -q --no-cov`; `python -m pytest tests\test_voice_intent_lager_einkauf_hr.py -q --no-cov` in `services/ki-usability`; `pnpm --filter @valero-neuroerp/frontend-web type-check`; `python scripts\check_response_models.py --threshold 0`; `python scripts\agent_workboard_supervisor.py validate`.
 **Offene Risiken:** Externe Zertifikate/Zugaenge (ELSTER-Org-Zertifikat, Fiskaly-Produktivzugang, Wirtschaftsprüfer-Testat) bleiben ausserhalb des Repos; breite Godfile-/Pagination-Komplettreduktion ist ein mehrwoechiges Programm und wird nur soweit risikoarm innerhalb dieses Slices geschlossen.
 
 ## DESIGN-MERIDIAN-ORCH-001
@@ -2628,8 +2630,10 @@ Archiv des vorherigen Boards:
 
 **Von:** Claude Sonnet 4.6
 **Owner:** Claude Sonnet 4.6
-**Stand:** reserviert 2026-05-27
+**Stand:** abgeschlossen 2026-05-27
 **Ziel des Slices:** Voice-Intent für Lager / Einkauf / HR ausbauen — 15 neue Intents in action_registry.py, Keyword-Fallbacks im IntentResolver, Frontend-AI-Shortcuts.
 **Dateibesitz:** `services/ki-usability/app/services/action_registry.py`, `services/ki-usability/app/services/intent_resolver.py`, `packages/frontend-web/src/app/navigation/ai-shortcuts.tsx`, `tests/test_voice_intent_lager_einkauf_hr.py`.
 **Abnahmekriterien:** 15 neue Intents; Resolver löst alle Phrasen auf; pytest grün; TypeScript 0 Fehler.
-**Offene Risiken:** VoiceButton-Integration auf Seiten bleibt Folgeslice.
+**Erledigt:** 15 Lager/Einkauf/HR-Intents in der ActionRegistry, robuste Keyword-/Phrase-Aufloesung inklusive EAN-, Mengen-, Betrags- und HR-Datumsparametern sowie Frontend-AI-Shortcuts fuer die drei Domaenen.
+**Checks:** `python -m pytest tests/test_voice_intent_lager_einkauf_hr.py -q --no-cov` in `services/ki-usability`; `pnpm --filter @valero-neuroerp/frontend-web type-check`.
+**Offene Risiken:** VoiceButton-Integration auf einzelnen Fachseiten bleibt Folgeslice.
