@@ -132,7 +132,9 @@ class ScenarioCreate(BaseModel):
 # GET /finance/liquidity/forecast
 # ---------------------------------------------------------------------------
 
-@router.get("/forecast", tags=["finance", "liquidity"], summary="Forecast liquidity")
+@router.get("/forecast", tags=["finance", "liquidity"], summary="Forecast liquidity",
+    response_model=dict
+)
 def liquidity_forecast(
     weeks: int = Query(13, ge=1, le=52),
     tenant_id: str = Depends(get_tenant_id),
@@ -179,7 +181,9 @@ def liquidity_forecast(
 # GET /finance/liquidity/cash-position
 # ---------------------------------------------------------------------------
 
-@router.get("/cash-position", tags=["finance", "liquidity"], summary="Position cash")
+@router.get("/cash-position", tags=["finance", "liquidity"], summary="Position cash",
+    response_model=dict
+)
 def cash_position(
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
@@ -202,7 +206,9 @@ def cash_position(
 # POST /finance/liquidity/scenarios
 # ---------------------------------------------------------------------------
 
-@router.post("/scenarios", status_code=201, tags=["finance", "liquidity"], summary="Liquidity scenario anlegen")
+@router.post("/scenarios", status_code=201, tags=["finance", "liquidity"], summary="Liquidity scenario anlegen",
+    response_model=dict
+)
 def create_liquidity_scenario(
     body: ScenarioCreate,
     tenant_id: str = Depends(get_tenant_id),

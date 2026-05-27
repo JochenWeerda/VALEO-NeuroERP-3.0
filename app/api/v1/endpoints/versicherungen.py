@@ -59,7 +59,9 @@ class VersicherungPatch(BaseModel):
     email: Optional[str] = None
 
 
-@router.get("", summary="Versicherungen auflisten")
+@router.get("", summary="Versicherungen auflisten",
+    response_model=dict
+)
 def list_versicherungen(
     status: Optional[str] = None,
     skip: int = Query(0, ge=0),
@@ -72,7 +74,9 @@ def list_versicherungen(
     return [_to_dict(v) for v in q.order_by(Versicherung.art).offset(skip).limit(limit).all()]
 
 
-@router.get("/{versicherung_id}", summary="Versicherung abrufen")
+@router.get("/{versicherung_id}", summary="Versicherung abrufen",
+    response_model=dict
+)
 def get_versicherung(versicherung_id: str, db: Session = Depends(get_db)):
     obj = db.query(Versicherung).filter(Versicherung.id == versicherung_id).first()
     if not obj:
@@ -80,7 +84,9 @@ def get_versicherung(versicherung_id: str, db: Session = Depends(get_db)):
     return _to_dict(obj)
 
 
-@router.post("", status_code=201, summary="Versicherung anlegen")
+@router.post("", status_code=201, summary="Versicherung anlegen",
+    response_model=dict
+)
 def create_versicherung(payload: VersicherungPayload, db: Session = Depends(get_db)):
     obj = Versicherung(**payload.model_dump())
     db.add(obj)
@@ -89,7 +95,9 @@ def create_versicherung(payload: VersicherungPayload, db: Session = Depends(get_
     return _to_dict(obj)
 
 
-@router.patch("/{versicherung_id}", summary="Versicherung aktualisieren")
+@router.patch("/{versicherung_id}", summary="Versicherung aktualisieren",
+    response_model=dict
+)
 def update_versicherung(versicherung_id: str, payload: VersicherungPatch, db: Session = Depends(get_db)):
     obj = db.query(Versicherung).filter(Versicherung.id == versicherung_id).first()
     if not obj:

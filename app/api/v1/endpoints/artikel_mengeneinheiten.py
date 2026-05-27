@@ -147,7 +147,9 @@ def update_mengeneinheit(
     return MengeneinheitOut(**dict(updated._mapping))
 
 
-@router.delete("/stamm/{einheit_kuerzel}", summary="Mengeneinheit löschen")
+@router.delete("/stamm/{einheit_kuerzel}", summary="Mengeneinheit löschen",
+    response_model=dict
+)
 def delete_mengeneinheit(
     einheit_kuerzel: str,
     db=Depends(get_db),
@@ -161,7 +163,9 @@ def delete_mengeneinheit(
     return Response(status_code=204)
 
 
-@router.get("/stamm/umrechnen", summary="Umrechnen")
+@router.get("/stamm/umrechnen", summary="Umrechnen",
+    response_model=None
+)
 def umrechnen(
     wert: Decimal,
     von_einheit: str,
@@ -289,7 +293,9 @@ def update_mengeneinheitengruppe(
     return MengeneinheitengruppeOut(**dict(updated._mapping))
 
 
-@router.delete("/gruppen/{gruppe_nr}", summary="Mengeneinheitengruppe löschen")
+@router.delete("/gruppen/{gruppe_nr}", summary="Mengeneinheitengruppe löschen",
+    response_model=dict
+)
 def delete_mengeneinheitengruppe(
     gruppe_nr: str,
     db=Depends(get_db),

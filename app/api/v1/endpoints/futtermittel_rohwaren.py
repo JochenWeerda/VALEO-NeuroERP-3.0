@@ -171,7 +171,9 @@ async def list_rohwaren(
         raise HTTPException(status_code=503, detail="Datenbank nicht erreichbar")
 
 
-@router.post("", status_code=201, summary="Rohware anlegen")
+@router.post("", status_code=201, summary="Rohware anlegen",
+    response_model=dict
+)
 async def create_rohware(
     payload: RohwareIn,
     tenant_id: str = Depends(get_tenant_id),
@@ -211,7 +213,9 @@ async def create_rohware(
         raise HTTPException(status_code=503, detail="Datenbank nicht erreichbar")
 
 
-@router.get("/vergleich", summary="Rohwaren vergleich")
+@router.get("/vergleich", summary="Rohwaren vergleich",
+    response_model=dict
+)
 async def vergleich_rohwaren(
     ids: str = Query(..., description="Komma-getrennte IDs"),
     tenant_id: str = Depends(get_tenant_id),
@@ -254,7 +258,9 @@ async def vergleich_rohwaren(
         raise HTTPException(status_code=503, detail="Datenbank nicht erreichbar")
 
 
-@router.get("/{rohware_id}", summary="Rohware abrufen")
+@router.get("/{rohware_id}", summary="Rohware abrufen",
+    response_model=dict
+)
 async def get_rohware(
     rohware_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -276,7 +282,9 @@ async def get_rohware(
     return _row_to_dict(row)
 
 
-@router.patch("/{rohware_id}", summary="Rohware aktualisieren")
+@router.patch("/{rohware_id}", summary="Rohware aktualisieren",
+    response_model=dict
+)
 async def update_rohware(
     rohware_id: str,
     payload: RohwarePatch,
@@ -308,7 +316,9 @@ async def update_rohware(
     return _row_to_dict(row)
 
 
-@router.get("/{rohware_id}/analysen", summary="Analysen auflisten")
+@router.get("/{rohware_id}/analysen", summary="Analysen auflisten",
+    response_model=dict
+)
 async def list_analysen(
     rohware_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -330,7 +340,9 @@ async def list_analysen(
         raise HTTPException(status_code=503, detail="Datenbank nicht erreichbar")
 
 
-@router.post("/{rohware_id}/analysen", status_code=201, summary="Analyse anlegen")
+@router.post("/{rohware_id}/analysen", status_code=201, summary="Analyse anlegen",
+    response_model=dict
+)
 async def create_analyse(
     rohware_id: str,
     payload: AnalyseIn,

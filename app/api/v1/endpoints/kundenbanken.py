@@ -135,7 +135,9 @@ def create_bankverbindung(
     return BankverbindungOut.from_row(dict(row._mapping))
 
 
-@router.patch("/{kunden_nr}/bankverbindungen/{bv_id}/standard", summary="Standard bankverbindung setzen")
+@router.patch("/{kunden_nr}/bankverbindungen/{bv_id}/standard", summary="Standard bankverbindung setzen",
+    response_model=dict
+)
 def set_standard_bankverbindung(
     kunden_nr: str,
     bv_id: str,
@@ -159,7 +161,9 @@ def set_standard_bankverbindung(
     return {"id": bv_id, "standard": True}
 
 
-@router.delete("/{kunden_nr}/bankverbindungen/{bv_id}", summary="Bankverbindung löschen")
+@router.delete("/{kunden_nr}/bankverbindungen/{bv_id}", summary="Bankverbindung löschen",
+    response_model=dict
+)
 def delete_bankverbindung(
     kunden_nr: str,
     bv_id: str,

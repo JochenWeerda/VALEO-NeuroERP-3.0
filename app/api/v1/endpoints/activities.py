@@ -159,7 +159,9 @@ async def update_activity(activity_id: str, payload: ActivityUpdate):
     return Activity.model_validate(_adapt_activity(updated))
 
 
-@router.delete("/{activity_id}", status_code=status.HTTP_204_NO_CONTENT, summary="Activity löschen")
+@router.delete("/{activity_id}", status_code=status.HTTP_204_NO_CONTENT, summary="Activity löschen",
+    response_model=None
+)
 async def delete_activity(activity_id: str):
     try:
         await crm_core_client.delete_activity(activity_id)
@@ -203,7 +205,9 @@ async def replace_activity_main_topic(
     return str(updated[item_index])
 
 
-@router.delete("/{activity_id}/main-topics/{item_index}", status_code=status.HTTP_204_NO_CONTENT, summary="Activity main topic löschen")
+@router.delete("/{activity_id}/main-topics/{item_index}", status_code=status.HTTP_204_NO_CONTENT, summary="Activity main topic löschen",
+    response_model=None
+)
 async def delete_activity_main_topic(activity_id: str, item_index: int = Path(..., ge=0)):
     items = [str(item) for item in await _load_list_field(activity_id, "main_topics")]
     _validate_item_index(items, item_index, "Main topic")
@@ -243,7 +247,9 @@ async def replace_activity_order_placed(
     return str(updated[item_index])
 
 
-@router.delete("/{activity_id}/orders-placed/{item_index}", status_code=status.HTTP_204_NO_CONTENT, summary="Activity order placed löschen")
+@router.delete("/{activity_id}/orders-placed/{item_index}", status_code=status.HTTP_204_NO_CONTENT, summary="Activity order placed löschen",
+    response_model=None
+)
 async def delete_activity_order_placed(activity_id: str, item_index: int = Path(..., ge=0)):
     items = [str(item) for item in await _load_list_field(activity_id, "orders_placed")]
     _validate_item_index(items, item_index, "Order")
@@ -282,7 +288,9 @@ async def replace_activity_follow_up_action(
     return updated[item_index]
 
 
-@router.delete("/{activity_id}/follow-up-actions/{item_index}", status_code=status.HTTP_204_NO_CONTENT, summary="Activity follow up action löschen")
+@router.delete("/{activity_id}/follow-up-actions/{item_index}", status_code=status.HTTP_204_NO_CONTENT, summary="Activity follow up action löschen",
+    response_model=None
+)
 async def delete_activity_follow_up_action(activity_id: str, item_index: int = Path(..., ge=0)):
     items = await _load_list_field(activity_id, "follow_up_actions")
     _validate_item_index(items, item_index, "Follow-up action")

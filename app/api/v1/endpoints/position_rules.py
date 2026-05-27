@@ -211,7 +211,9 @@ def update_rule(
     )
 
 
-@router.delete("/{rule_id}", status_code=200, summary="Rule löschen")
+@router.delete("/{rule_id}", status_code=200, summary="Rule löschen",
+    response_model=dict
+)
 def delete_rule(
     rule_id: str,
     tenant_id: str = Depends(get_tenant_id),

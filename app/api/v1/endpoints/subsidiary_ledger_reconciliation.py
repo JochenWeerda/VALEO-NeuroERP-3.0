@@ -492,7 +492,9 @@ async def get_reconciliation_details(
         return []
 
 
-@router.get("/{ledger_type}/export", summary="Reconciliation csv exportieren")
+@router.get("/{ledger_type}/export", summary="Reconciliation csv exportieren",
+    response_model=dict
+)
 async def export_reconciliation_csv(
     ledger_type: str,
     period: str = Query(..., description="Accounting period (YYYY-MM)"),

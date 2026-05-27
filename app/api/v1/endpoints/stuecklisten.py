@@ -233,7 +233,9 @@ def update_stueckliste(
     return _row_to_out(db, updated)
 
 
-@router.delete("/{stueckliste_nr}", summary="Stueckliste löschen")
+@router.delete("/{stueckliste_nr}", summary="Stueckliste löschen",
+    response_model=dict
+)
 def delete_stueckliste(
     stueckliste_nr: str,
     db=Depends(get_db),

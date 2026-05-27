@@ -161,7 +161,9 @@ async def update_case(case_id: str, case_data: CaseUpdate):
     return Case.model_validate(updated)
 
 
-@router.delete("/{case_id}", status_code=status.HTTP_204_NO_CONTENT, summary="Case löschen")
+@router.delete("/{case_id}", status_code=status.HTTP_204_NO_CONTENT, summary="Case löschen",
+    response_model=None
+)
 async def delete_case(case_id: str):
     """Delete a support case via crm-service."""
     try:

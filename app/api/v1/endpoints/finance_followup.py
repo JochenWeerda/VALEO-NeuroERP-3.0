@@ -389,7 +389,9 @@ async def export_mahnwesen(
     return out
 
 
-@router.get("/mahnwesen/export/{export_id}/download", summary="Mahnwesen export herunterladen")
+@router.get("/mahnwesen/export/{export_id}/download", summary="Mahnwesen export herunterladen",
+    response_model=dict
+)
 async def download_mahnwesen_export(
     export_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -575,7 +577,9 @@ async def export_lastschriften(
     return out
 
 
-@router.get("/lastschriften/{run_id}/export/{export_id}/download", summary="Lastschrift export herunterladen")
+@router.get("/lastschriften/{run_id}/export/{export_id}/download", summary="Lastschrift export herunterladen",
+    response_model=dict
+)
 async def download_lastschrift_export(
     run_id: str,
     export_id: str,
@@ -754,7 +758,9 @@ async def export_kassenfolge(
     return out
 
 
-@router.get("/kasse/export/{export_id}/download", summary="Kasse export herunterladen")
+@router.get("/kasse/export/{export_id}/download", summary="Kasse export herunterladen",
+    response_model=dict
+)
 async def download_kasse_export(
     export_id: str,
     tenant_id: str = Depends(get_tenant_id),

@@ -98,7 +98,9 @@ async def convert_lead_to_customer(
     return CustomerBrief.model_validate(customer)
 
 
-@router.post("/operator-status", summary="Operator status aktualisieren")
+@router.post("/operator-status", summary="Operator status aktualisieren",
+    response_model=dict
+)
 async def update_operator_status(payload: OperatorStatusUpdate, db: Session = Depends(get_db)):
     """POST Kontakt Bediener Gelesen/Erledigt setzen"""
     contact = db.query(Contact).filter(Contact.id == payload.contact_id).first()

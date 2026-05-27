@@ -128,7 +128,9 @@ def anmelden(
     return HoflisteOut(**dict(row._mapping))
 
 
-@router.post("/{eintrag_id}/status", summary="Aendern status")
+@router.post("/{eintrag_id}/status", summary="Aendern status",
+    response_model=dict
+)
 def status_aendern(
     eintrag_id: str,
     neuer_status: str,
@@ -172,7 +174,9 @@ def status_aendern(
     return HoflisteOut(**dict(row._mapping))
 
 
-@router.delete("/{eintrag_id}", summary="Abmelden")
+@router.delete("/{eintrag_id}", summary="Abmelden",
+    response_model=dict
+)
 def abmelden(
     eintrag_id: str,
     db=Depends(get_db),
@@ -195,7 +199,9 @@ def abmelden(
     return Response(status_code=204)
 
 
-@router.get("/statistik", summary="Statistik hofliste")
+@router.get("/statistik", summary="Statistik hofliste",
+    response_model=None
+)
 def hofliste_statistik(
     standort_id: Optional[str] = Query(None),
     db=Depends(get_db),

@@ -626,7 +626,9 @@ async def einkauf_rechnungseingaenge_list(
     return EinkaufCompatService(db, tenant_id).list_rechnungseingaenge()
 
 
-@router.post("/einkauf/rechnungseingaenge/{rechnung_id}/pruefen", summary="Rechnungseingang pruefen einkauf")
+@router.post("/einkauf/rechnungseingaenge/{rechnung_id}/pruefen", summary="Rechnungseingang pruefen einkauf",
+    response_model=dict
+)
 async def einkauf_rechnungseingang_pruefen(
     rechnung_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
 ) -> dict[str, Any]:
@@ -638,7 +640,9 @@ async def einkauf_rechnungseingang_pruefen(
         raise HTTPException(status_code=400, detail=str(exc)) from exc
 
 
-@router.post("/einkauf/rechnungseingaenge/{rechnung_id}/freigeben", summary="Rechnungseingang freigeben einkauf")
+@router.post("/einkauf/rechnungseingaenge/{rechnung_id}/freigeben", summary="Rechnungseingang freigeben einkauf",
+    response_model=dict
+)
 async def einkauf_rechnungseingang_freigeben(
     rechnung_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
 ) -> dict[str, Any]:
@@ -650,7 +654,9 @@ async def einkauf_rechnungseingang_freigeben(
         raise HTTPException(status_code=400, detail=str(exc)) from exc
 
 
-@router.post("/einkauf/rechnungseingaenge/{rechnung_id}/verbuchen", summary="Rechnungseingang verbuchen einkauf")
+@router.post("/einkauf/rechnungseingaenge/{rechnung_id}/verbuchen", summary="Rechnungseingang verbuchen einkauf",
+    response_model=dict
+)
 async def einkauf_rechnungseingang_verbuchen(
     rechnung_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
 ) -> dict[str, Any]:
@@ -2357,7 +2363,9 @@ async def ack_edi_message(msg_id: str, tenant_id: str = Depends(get_tenant_id), 
 # Lager Dashboard KPIs
 # ---------------------------------------------------------------------------
 
-@router.get("/lager/dashboard", tags=["lager"], summary="Dashboard lager")
+@router.get("/lager/dashboard", tags=["lager"], summary="Dashboard lager",
+    response_model=None
+)
 async def lager_dashboard(
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
@@ -2922,7 +2930,9 @@ async def save_firma(
 
 # ── Management Dashboard ────────────────────────────────────────────
 
-@router.get("/management/dashboard", summary="Dashboard management")
+@router.get("/management/dashboard", summary="Dashboard management",
+    response_model=None
+)
 async def management_dashboard(
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
@@ -2986,7 +2996,9 @@ async def management_dashboard(
 
 # ── Benachrichtigungen ──────────────────────────────────────────────
 
-@router.get("/benachrichtigungen", summary="Benachrichtigungen auflisten")
+@router.get("/benachrichtigungen", summary="Benachrichtigungen auflisten",
+    response_model=dict
+)
 async def list_benachrichtigungen(
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
@@ -3106,7 +3118,9 @@ _DEMO_FIELD_SERVICE_TASKS: list[dict[str, Any]] = [
 ]
 
 
-@router.get("/agribusiness/field-service-tasks", summary="Field service tasks auflisten")
+@router.get("/agribusiness/field-service-tasks", summary="Field service tasks auflisten",
+    response_model=dict
+)
 async def list_field_service_tasks() -> list[dict[str, Any]]:
     """Liste Field-Service-Aufgaben (CRM-Fälle); bei Ausfall des CRM-Dienstes Demo-Daten."""
     try:
@@ -3118,7 +3132,9 @@ async def list_field_service_tasks() -> list[dict[str, Any]]:
     return list(_DEMO_FIELD_SERVICE_TASKS)
 
 
-@router.get("/agribusiness/field-service-tasks/{task_id}", summary="Field service task abrufen")
+@router.get("/agribusiness/field-service-tasks/{task_id}", summary="Field service task abrufen",
+    response_model=dict
+)
 async def get_field_service_task(task_id: str) -> dict[str, Any]:
     """Einzelne Field-Service-Aufgabe (CRM-Case oder Demo)."""
     if task_id.startswith("fst-seed-"):
@@ -3141,7 +3157,9 @@ class FieldServiceTaskCreateBody(BaseModel):
     priority: str = Field("MEDIUM", max_length=20)
 
 
-@router.post("/agribusiness/field-service-tasks", summary="Field service task anlegen")
+@router.post("/agribusiness/field-service-tasks", summary="Field service task anlegen",
+    response_model=dict
+)
 async def create_field_service_task(
     body: FieldServiceTaskCreateBody,
     tenant_id: str = Depends(get_tenant_id),
@@ -3182,7 +3200,9 @@ class FieldServiceTaskUpdateBody(BaseModel):
     status: Optional[str] = Field(None, max_length=30)
 
 
-@router.put("/agribusiness/field-service-tasks/{task_id}", summary="Field service task aktualisieren")
+@router.put("/agribusiness/field-service-tasks/{task_id}", summary="Field service task aktualisieren",
+    response_model=dict
+)
 async def update_field_service_task(task_id: str, body: FieldServiceTaskUpdateBody) -> dict[str, Any]:
     """Aufgabe aktualisieren (CRM update_case oder Demo-Liste)."""
     if task_id.startswith("fst-seed-"):
@@ -3224,7 +3244,9 @@ class FieldServiceTaskDeleteBody(BaseModel):
     reason: str = ""
 
 
-@router.delete("/agribusiness/field-service-tasks/{task_id}", summary="Field service task löschen")
+@router.delete("/agribusiness/field-service-tasks/{task_id}", summary="Field service task löschen",
+    response_model=dict
+)
 async def delete_field_service_task(
     task_id: str,
     body: FieldServiceTaskDeleteBody | None = Body(None),
@@ -3242,7 +3264,9 @@ class FieldServiceTaskCancelBody(BaseModel):
     reason: str = ""
 
 
-@router.post("/agribusiness/field-service-tasks/{task_id}/cancel", summary="Field service task stornieren")
+@router.post("/agribusiness/field-service-tasks/{task_id}/cancel", summary="Field service task stornieren",
+    response_model=dict
+)
 async def cancel_field_service_task(
     task_id: str,
     body: FieldServiceTaskCancelBody | None = None,
@@ -3259,7 +3283,9 @@ async def cancel_field_service_task(
 
 # ── Globale Suche ─────────────────────────────────────────────────────────
 
-@router.get("/search", summary="Search global")
+@router.get("/search", summary="Search global",
+    response_model=dict
+)
 async def global_search(
     q: str = "",
     limit: int = 12,

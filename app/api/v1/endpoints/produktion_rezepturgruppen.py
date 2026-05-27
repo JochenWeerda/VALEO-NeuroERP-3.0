@@ -118,7 +118,9 @@ def create_rezepturgruppe(
     return RezepturGruppeOut(**dict(row._mapping))
 
 
-@router.delete("/rezepturgruppen/{gruppe_id}", summary="Rezepturgruppe löschen")
+@router.delete("/rezepturgruppen/{gruppe_id}", summary="Rezepturgruppe löschen",
+    response_model=dict
+)
 def delete_rezepturgruppe(
     gruppe_id: str,
     db=Depends(get_db),
@@ -175,7 +177,9 @@ def create_schnellerfassung(
     return SchnellerfassungOut(**dict(row._mapping))
 
 
-@router.post("/schnellerfassung/{vorlage_id}/buchen", summary="Schnellerfassung buche")
+@router.post("/schnellerfassung/{vorlage_id}/buchen", summary="Schnellerfassung buche",
+    response_model=None
+)
 def buche_schnellerfassung(
     vorlage_id: str,
     payload: SchnellerfassungBuchenPayload,

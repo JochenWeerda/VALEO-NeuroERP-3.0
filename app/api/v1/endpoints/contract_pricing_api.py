@@ -21,7 +21,9 @@ class LotCreateRequest(BaseModel):
     preis_typ: str = "fest"
     lieferdatum_soll: str
 
-@router.post("/price-matrix", status_code=201, summary="Price matrix anlegen")
+@router.post("/price-matrix", status_code=201, summary="Price matrix anlegen",
+    response_model=dict
+)
 def create_price_matrix(req: PriceMatrixCreateRequest):
     from app.core.contract_pricing import PriceMatrix, PriceMatrixEintrag, PreisTyp
     from datetime import date as _date
@@ -43,7 +45,9 @@ def create_price_matrix(req: PriceMatrixCreateRequest):
     )
     return matrix
 
-@router.post("/lots", status_code=201, summary="Lot anlegen")
+@router.post("/lots", status_code=201, summary="Lot anlegen",
+    response_model=dict
+)
 def create_lot(req: LotCreateRequest):
     from app.core.contract_pricing import KonContractLot, PreisTyp
     from datetime import date as _date

@@ -227,7 +227,9 @@ def berechnen(
     }
 
 
-@router.post("/{sammelabrechnung_id}/buchen", summary="Buchen")
+@router.post("/{sammelabrechnung_id}/buchen", summary="Buchen",
+    response_model=dict
+)
 def buchen(
     sammelabrechnung_id: str,
     db: Session = Depends(get_db),

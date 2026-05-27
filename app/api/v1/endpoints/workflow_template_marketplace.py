@@ -17,7 +17,9 @@ from app.core.workflow_template_marketplace import (
 router = APIRouter(prefix="/workflow/templates/marketplace", tags=["workflow", "templates", "marketplace"])
 
 
-@router.get("", summary="Interner Workflow-Template-Marketplace")
+@router.get("", summary="Interner Workflow-Template-Marketplace",
+    response_model=dict
+)
 def list_workflow_templates(
     category: str | None = Query(default=None, description="Optional category filter"),
     search: str | None = Query(default=None, description="Optional free-text filter"),
@@ -27,7 +29,9 @@ def list_workflow_templates(
     return build_workflow_template_marketplace_catalog(category=category, search=search, tenant_id=tenant_id, db=db).as_dict()
 
 
-@router.get("/installed", summary="Bereits installierte Workflow-Templates")
+@router.get("/installed", summary="Bereits installierte Workflow-Templates",
+    response_model=dict
+)
 def list_installed_workflow_templates(
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
@@ -45,7 +49,9 @@ def list_installed_workflow_templates(
     return catalog.as_dict()
 
 
-@router.get("/{template_id}", summary="Einzelnes Workflow-Template")
+@router.get("/{template_id}", summary="Einzelnes Workflow-Template",
+    response_model=dict
+)
 def get_workflow_template(
     template_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -57,7 +63,9 @@ def get_workflow_template(
     return template.as_dict()
 
 
-@router.post("/{template_id}/preview", summary="Workflow-Template vor Installation previewen")
+@router.post("/{template_id}/preview", summary="Workflow-Template vor Installation previewen",
+    response_model=dict
+)
 def preview_workflow_template(
     template_id: str,
     payload: dict,
@@ -80,7 +88,9 @@ def preview_workflow_template(
         raise HTTPException(status_code=404, detail=str(exc)) from exc
 
 
-@router.post("/{template_id}/publish-preview", summary="Workflow-Template fuer Publikation previewen")
+@router.post("/{template_id}/publish-preview", summary="Workflow-Template fuer Publikation previewen",
+    response_model=dict
+)
 def publish_preview_workflow_template(
     template_id: str,
     payload: dict,
@@ -103,7 +113,9 @@ def publish_preview_workflow_template(
         raise HTTPException(status_code=404, detail=str(exc)) from exc
 
 
-@router.post("/{template_id}/clone", summary="Workflow-Template klonen")
+@router.post("/{template_id}/clone", summary="Workflow-Template klonen",
+    response_model=dict
+)
 def clone_workflow_template_endpoint(
     template_id: str,
     payload: dict,
@@ -125,7 +137,9 @@ def clone_workflow_template_endpoint(
         raise HTTPException(status_code=404, detail=str(exc)) from exc
 
 
-@router.post("/{template_id}/install", summary="Workflow-Template intern installieren")
+@router.post("/{template_id}/install", summary="Workflow-Template intern installieren",
+    response_model=dict
+)
 def install_workflow_template_endpoint(
     template_id: str,
     payload: dict,

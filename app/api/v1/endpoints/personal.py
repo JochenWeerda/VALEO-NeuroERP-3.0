@@ -3694,7 +3694,9 @@ async def get_time_cockpit(
     return _build_time_cockpit(target_date, entries, driver_time, source="database")
 
 
-@router.post("/stundenzettel", summary="Stundenzettel anlegen")
+@router.post("/stundenzettel", summary="Stundenzettel anlegen",
+    response_model=dict
+)
 async def create_stundenzettel(
     payload: StundenzettelIn,
     tenant_id: str = Depends(get_tenant_id),
@@ -3820,7 +3822,9 @@ async def delete_shift(
 # ---------------------------------------------------------------------------
 
 
-@router.post("/driver-time/events", status_code=201, summary="Driver time event anlegen")
+@router.post("/driver-time/events", status_code=201, summary="Driver time event anlegen",
+    response_model=None
+)
 async def create_driver_time_event(
     payload: DriverTimeEventIn,
     tenant_id: str = Depends(get_tenant_id),
@@ -3854,7 +3858,9 @@ async def create_driver_time_event(
     return {"id": event_id, "status": "created"}
 
 
-@router.get("/driver-time/events", summary="Driver time events auflisten")
+@router.get("/driver-time/events", summary="Driver time events auflisten",
+    response_model=dict
+)
 async def list_driver_time_events(
     employee_ref: str | None = Query(default=None),
     vehicle_id: str | None = Query(default=None),
@@ -3923,7 +3929,9 @@ async def get_driver_time_absence_collisions(
     return [DriverTimeCollisionOut(**dict(r._mapping)) for r in rows]
 
 
-@router.get("/driver-time/events/{event_id}", summary="Driver time event abrufen")
+@router.get("/driver-time/events/{event_id}", summary="Driver time event abrufen",
+    response_model=dict
+)
 async def get_driver_time_event(
     event_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -3938,7 +3946,9 @@ async def get_driver_time_event(
     return dict(row._mapping)
 
 
-@router.patch("/driver-time/events/{event_id}", summary="Driver time event aktualisieren")
+@router.patch("/driver-time/events/{event_id}", summary="Driver time event aktualisieren",
+    response_model=dict
+)
 async def update_driver_time_event(
     event_id: str,
     payload: DriverTimeEventPatch,
@@ -4002,7 +4012,9 @@ def _build_org_tree(rows: list[dict], parent_id: Any = None) -> list[dict]:
     return children
 
 
-@router.get("/org-chart", summary="Org chart abrufen")
+@router.get("/org-chart", summary="Org chart abrufen",
+    response_model=None
+)
 async def get_org_chart(
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
@@ -4037,7 +4049,9 @@ async def get_org_chart(
     return {"org_chart": tree}
 
 
-@router.get("/org-chart/{unit_id}", summary="Org subtree abrufen")
+@router.get("/org-chart/{unit_id}", summary="Org subtree abrufen",
+    response_model=dict
+)
 async def get_org_subtree(
     unit_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -4075,7 +4089,9 @@ async def get_org_subtree(
     return {"org_chart": tree[0] if tree else {}}
 
 
-@router.post("/org-units", status_code=201, summary="Org unit anlegen")
+@router.post("/org-units", status_code=201, summary="Org unit anlegen",
+    response_model=dict
+)
 async def create_org_unit(
     payload: OrgUnitIn,
     tenant_id: str = Depends(get_tenant_id),
@@ -4109,7 +4125,9 @@ async def create_org_unit(
     return {"id": unit_id, "status": "created"}
 
 
-@router.patch("/org-units/{unit_id}", summary="Org unit aktualisieren")
+@router.patch("/org-units/{unit_id}", summary="Org unit aktualisieren",
+    response_model=dict
+)
 async def patch_org_unit(
     unit_id: str,
     payload: OrgUnitPatch,
@@ -4146,7 +4164,9 @@ class TimeAccountAdjustIn(BaseModel):
     adjustment_date: str | None = None  # ISO date, default: today
 
 
-@router.get("/time-accounts/{employee_ref}", summary="Time account abrufen")
+@router.get("/time-accounts/{employee_ref}", summary="Time account abrufen",
+    response_model=dict
+)
 async def get_time_account(
     employee_ref: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -4210,7 +4230,9 @@ async def get_time_account(
     }
 
 
-@router.post("/time-accounts/{employee_ref}/adjust", status_code=201, summary="Time account adjust")
+@router.post("/time-accounts/{employee_ref}/adjust", status_code=201, summary="Time account adjust",
+    response_model=dict
+)
 async def adjust_time_account(
     employee_ref: str,
     payload: TimeAccountAdjustIn,
@@ -4262,7 +4284,9 @@ class ApplicationStagePatch(BaseModel):
     note: str | None = None
 
 
-@router.get("/applications", summary="Applications auflisten")
+@router.get("/applications", summary="Applications auflisten",
+    response_model=dict
+)
 async def list_applications(
     status: str | None = Query(None),
     position_id: str | None = Query(None),
@@ -4289,7 +4313,9 @@ async def list_applications(
     return [dict(r._mapping) for r in rows]
 
 
-@router.post("/applications", status_code=201, summary="Application anlegen")
+@router.post("/applications", status_code=201, summary="Application anlegen",
+    response_model=dict
+)
 async def create_application(
     payload: ApplicationIn,
     tenant_id: str = Depends(get_tenant_id),
@@ -4323,7 +4349,9 @@ async def create_application(
     return {"id": app_id, "status": "EINGANG"}
 
 
-@router.patch("/applications/{application_id}/stage", summary="Application stage aktualisieren")
+@router.patch("/applications/{application_id}/stage", summary="Application stage aktualisieren",
+    response_model=dict
+)
 async def update_application_stage(
     application_id: str,
     payload: ApplicationStagePatch,
@@ -4370,7 +4398,11 @@ class LohnBerechnungRequest(BaseModel):
     zusatzbeitrag_kv: float = Field(0.017, ge=0, le=0.04, description="Individueller KV-Zusatzbeitrag (ø 2025: 1,7 %)")
 
 
-@router.post("/lohn/berechnung", summary="Brutto-Netto-Berechnung (§ 38 EStG, SGB IV 2025)")
+@router.post(
+    "/lohn/berechnung",
+    summary="Brutto-Netto-Berechnung (§ 38 EStG, SGB IV 2025)",
+    response_model=dict,
+)
 async def berechne_lohn(
     payload: LohnBerechnungRequest,
     tenant_id: str = Depends(get_tenant_id),  # noqa: ARG001 — tenant_id für spätere Mandantenprofile

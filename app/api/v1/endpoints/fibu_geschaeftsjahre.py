@@ -202,7 +202,9 @@ def list_perioden(
     return [FibuPeriodeOut(**dict(r._mapping)) for r in rows]
 
 
-@router.patch("/{jahr_nr}/perioden/{periode_nr}/sperren", summary="Sperren periode")
+@router.patch("/{jahr_nr}/perioden/{periode_nr}/sperren", summary="Sperren periode",
+    response_model=dict
+)
 def periode_sperren(
     jahr_nr: int,
     periode_nr: int,
@@ -264,7 +266,9 @@ def create_periodische_buchung(
     return PeriodischeBuchungOut(**dict(row._mapping))
 
 
-@router.post("/periodisch/{buchung_id}/ausfuehren", summary="Buchung ausfuehren periodische")
+@router.post("/periodisch/{buchung_id}/ausfuehren", summary="Buchung ausfuehren periodische",
+    response_model=dict
+)
 def periodische_buchung_ausfuehren(
     buchung_id: str,
     db=Depends(get_db),
@@ -342,7 +346,9 @@ def periodische_buchung_ausfuehren(
     }
 
 
-@router.delete("/periodisch/{buchung_id}", summary="Periodische buchung löschen")
+@router.delete("/periodisch/{buchung_id}", summary="Periodische buchung löschen",
+    response_model=dict
+)
 def delete_periodische_buchung(
     buchung_id: str,
     db=Depends(get_db),

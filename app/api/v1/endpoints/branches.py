@@ -177,7 +177,9 @@ async def update_branch(
     return Branch(**dict(row))
 
 
-@router.delete("/{branch_id}", status_code=status.HTTP_204_NO_CONTENT, summary="Branch löschen")
+@router.delete("/{branch_id}", status_code=status.HTTP_204_NO_CONTENT, summary="Branch löschen",
+    response_model=None
+)
 async def delete_branch(
     branch_id: str,
     tenant_id: str = Query(DEFAULT_TENANT),

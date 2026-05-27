@@ -400,7 +400,9 @@ async def reject_gdpr_request(
     return GdprRequestResponse.model_validate(obj)
 
 
-@router.get("/{request_id}/download", summary="Gdpr export herunterladen")
+@router.get("/{request_id}/download", summary="Gdpr export herunterladen",
+    response_model=dict
+)
 async def download_gdpr_export(
     request_id: str,
     db: Session = Depends(get_db),

@@ -175,7 +175,9 @@ def update_stoffstrom(
     return StoffstromOut(**dict(row._mapping))
 
 
-@router.delete("/{stoffstrom_id}", summary="Stoffstrom löschen")
+@router.delete("/{stoffstrom_id}", summary="Stoffstrom löschen",
+    response_model=dict
+)
 def delete_stoffstrom(
     stoffstrom_id: str,
     db=Depends(get_db),
@@ -189,7 +191,9 @@ def delete_stoffstrom(
     return Response(status_code=204)
 
 
-@router.get("/report/thg-summary", summary="Summary thg")
+@router.get("/report/thg-summary", summary="Summary thg",
+    response_model=None
+)
 def thg_summary(
     anbauland: Optional[str] = Query(None),
     db=Depends(get_db),

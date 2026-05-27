@@ -282,7 +282,9 @@ def abschliessen(
     return PIVAbschlussOut(**dict(row._mapping))
 
 
-@router.get("/{abschluss_id}/differenzliste", summary="Differenzliste")
+@router.get("/{abschluss_id}/differenzliste", summary="Differenzliste",
+    response_model=dict
+)
 def differenzliste(
     abschluss_id: str,
     nur_mit_differenz: bool = Query(True),

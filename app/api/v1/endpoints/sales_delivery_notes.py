@@ -505,7 +505,9 @@ async def post_delivery_note(
     )
 
 
-@router.post("/{ls_id}/print", summary="Delivery note drucken")
+@router.post("/{ls_id}/print", summary="Delivery note drucken",
+    response_model=None
+)
 async def print_delivery_note(
     ls_id: str,
     attestation: Optional[str] = Query(None, description="Reason for printing (required if already posted)"),

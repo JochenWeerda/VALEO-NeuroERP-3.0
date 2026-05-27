@@ -158,7 +158,9 @@ async def update_farm_profile(profile_id: str, payload: FarmProfileUpdate):
     return FarmProfile.model_validate(_adapt_farm_profile(updated))
 
 
-@router.delete("/{profile_id}", status_code=status.HTTP_204_NO_CONTENT, summary="Farm profile löschen")
+@router.delete("/{profile_id}", status_code=status.HTTP_204_NO_CONTENT, summary="Farm profile löschen",
+    response_model=None
+)
 async def delete_farm_profile(profile_id: str):
     try:
         await crm_core_client.delete_farm_profile(profile_id)
@@ -196,7 +198,9 @@ async def replace_farm_profile_crop(
     return dict(updated[item_index])
 
 
-@router.delete("/{profile_id}/crops/{item_index}", status_code=status.HTTP_204_NO_CONTENT, summary="Farm profile crop löschen")
+@router.delete("/{profile_id}/crops/{item_index}", status_code=status.HTTP_204_NO_CONTENT, summary="Farm profile crop löschen",
+    response_model=None
+)
 async def delete_farm_profile_crop(profile_id: str, item_index: int = Path(..., ge=0)):
     items = await _load_list_field(profile_id, "crops")
     _validate_item_index(items, item_index, "Crop")
@@ -230,7 +234,9 @@ async def replace_farm_profile_livestock(
     return dict(updated[item_index])
 
 
-@router.delete("/{profile_id}/livestock/{item_index}", status_code=status.HTTP_204_NO_CONTENT, summary="Farm profile livestock löschen")
+@router.delete("/{profile_id}/livestock/{item_index}", status_code=status.HTTP_204_NO_CONTENT, summary="Farm profile livestock löschen",
+    response_model=None
+)
 async def delete_farm_profile_livestock(profile_id: str, item_index: int = Path(..., ge=0)):
     items = await _load_list_field(profile_id, "livestock")
     _validate_item_index(items, item_index, "Livestock")
@@ -270,7 +276,9 @@ async def replace_farm_profile_certification(
     return str(updated[item_index])
 
 
-@router.delete("/{profile_id}/certifications/{item_index}", status_code=status.HTTP_204_NO_CONTENT, summary="Farm profile certification löschen")
+@router.delete("/{profile_id}/certifications/{item_index}", status_code=status.HTTP_204_NO_CONTENT, summary="Farm profile certification löschen",
+    response_model=None
+)
 async def delete_farm_profile_certification(profile_id: str, item_index: int = Path(..., ge=0)):
     items = [str(item) for item in await _load_list_field(profile_id, "certifications")]
     _validate_item_index(items, item_index, "Certification")

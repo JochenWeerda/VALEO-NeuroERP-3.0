@@ -129,7 +129,9 @@ async def update_account(
     return Account.model_validate(account)
 
 
-@router.delete("/{account_id}", summary="Account löschen")
+@router.delete("/{account_id}", summary="Account löschen",
+    response_model=dict
+)
 async def delete_account(account_id: str, request: Request, db: Session = Depends(get_db)):
     """Delete an account (soft delete by setting is_active to False)."""
     account = db.query(AccountModel).filter(AccountModel.id == account_id).first()
@@ -185,7 +187,9 @@ async def validate_chart_of_accounts(
     return ValidateResponse(valid=len(errors) == 0, errors=errors)
 
 
-@router.post("/datev-export", summary="Export chart of accounts datev")
+@router.post("/datev-export", summary="Export chart of accounts datev",
+    response_model=dict
+)
 async def datev_export_chart_of_accounts(
     von_datum: str = Query(..., description="Start date YYYY-MM-DD"),
     bis_datum: Optional[str] = Query(None, description="End date YYYY-MM-DD"),

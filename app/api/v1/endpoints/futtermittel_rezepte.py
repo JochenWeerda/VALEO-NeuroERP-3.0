@@ -140,7 +140,9 @@ def _get_ingredients(db: Session, rezept_id: str, tenant_id: str) -> List[dict]:
 # Endpoints
 # ---------------------------------------------------------------------------
 
-@router.get("", summary="Rezepte auflisten")
+@router.get("", summary="Rezepte auflisten",
+    response_model=dict
+)
 async def list_rezepte(
     tierart: Optional[str] = Query(None),
     status: Optional[str] = Query(None),
@@ -165,7 +167,9 @@ async def list_rezepte(
         raise HTTPException(status_code=503, detail="Datenbank nicht erreichbar")
 
 
-@router.post("", status_code=201, summary="Rezept anlegen")
+@router.post("", status_code=201, summary="Rezept anlegen",
+    response_model=dict
+)
 async def create_rezept(
     payload: RezeptIn,
     tenant_id: str = Depends(get_tenant_id),
@@ -198,7 +202,9 @@ async def create_rezept(
         raise HTTPException(status_code=503, detail="Datenbank nicht erreichbar")
 
 
-@router.get("/{rezept_id}", summary="Rezept abrufen")
+@router.get("/{rezept_id}", summary="Rezept abrufen",
+    response_model=dict
+)
 async def get_rezept(
     rezept_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -216,7 +222,9 @@ async def get_rezept(
         raise HTTPException(status_code=503, detail="Datenbank nicht erreichbar")
 
 
-@router.post("/{rezept_id}/ingredients", status_code=201, summary="Ingredient hinzufügen")
+@router.post("/{rezept_id}/ingredients", status_code=201, summary="Ingredient hinzufügen",
+    response_model=dict
+)
 async def add_ingredient(
     rezept_id: str,
     payload: IngredientIn,
@@ -250,7 +258,9 @@ async def add_ingredient(
         raise HTTPException(status_code=503, detail="Datenbank nicht erreichbar")
 
 
-@router.patch("/{rezept_id}/ingredients/{ingredient_id}", summary="Ingredient aktualisieren")
+@router.patch("/{rezept_id}/ingredients/{ingredient_id}", summary="Ingredient aktualisieren",
+    response_model=dict
+)
 async def update_ingredient(
     rezept_id: str,
     ingredient_id: str,
@@ -302,7 +312,9 @@ async def delete_ingredient(
         raise HTTPException(status_code=503, detail="Datenbank nicht erreichbar")
 
 
-@router.post("/{rezept_id}/copy", status_code=201, summary="Rezept kopieren")
+@router.post("/{rezept_id}/copy", status_code=201, summary="Rezept kopieren",
+    response_model=None
+)
 async def copy_rezept(
     rezept_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -363,7 +375,9 @@ async def copy_rezept(
         raise HTTPException(status_code=503, detail="Datenbank nicht erreichbar")
 
 
-@router.post("/{rezept_id}/activate", summary="Rezept aktivieren")
+@router.post("/{rezept_id}/activate", summary="Rezept aktivieren",
+    response_model=dict
+)
 async def activate_rezept(
     rezept_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -405,7 +419,9 @@ async def activate_rezept(
         raise HTTPException(status_code=503, detail="Datenbank nicht erreichbar")
 
 
-@router.get("/{rezept_id}/naehrstoffanalyse", summary="Naehrstoffanalyse")
+@router.get("/{rezept_id}/naehrstoffanalyse", summary="Naehrstoffanalyse",
+    response_model=dict
+)
 async def naehrstoffanalyse(
     rezept_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -462,7 +478,9 @@ async def naehrstoffanalyse(
         raise HTTPException(status_code=503, detail="Datenbank nicht erreichbar")
 
 
-@router.get("/{rezept_id}/deklaration", summary="Deklaration")
+@router.get("/{rezept_id}/deklaration", summary="Deklaration",
+    response_model=dict
+)
 async def deklaration(
     rezept_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -521,7 +539,9 @@ async def deklaration(
         raise HTTPException(status_code=503, detail="Datenbank nicht erreichbar")
 
 
-@router.get("/{rezept_id}/etikett", summary="Etikett")
+@router.get("/{rezept_id}/etikett", summary="Etikett",
+    response_model=dict
+)
 async def etikett(
     rezept_id: str,
     hersteller_adresse: Optional[str] = Query(None),

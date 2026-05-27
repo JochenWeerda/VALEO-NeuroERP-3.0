@@ -46,7 +46,9 @@ class ProcessMiningReportRequest(BaseModel):
     tenant_id: str
 
 
-@router.get("/data-products", summary="Data products abrufen")
+@router.get("/data-products", summary="Data products abrufen",
+    response_model=dict
+)
 def get_data_products(
     tenant_id: str = Query(...),
     requesting_tenant: str | None = Query(None),
@@ -122,7 +124,9 @@ def post_process_mining_report(
     )
 
 
-@router.get("/isolation/check", summary="Isolation check abrufen")
+@router.get("/isolation/check", summary="Isolation check abrufen",
+    response_model=dict
+)
 def get_isolation_check(
     requesting_tenant: str = Query(...),
     resource_tenant: str = Query(...),

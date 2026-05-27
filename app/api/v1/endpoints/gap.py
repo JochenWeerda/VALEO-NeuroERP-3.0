@@ -189,7 +189,9 @@ async def run_gap_pipeline_year_filtered(
         )
 
 
-@router.post("/pipeline/csv-streaming-test", summary="Csv streaming pipeline testen")
+@router.post("/pipeline/csv-streaming-test", summary="Csv streaming pipeline testen",
+    response_model=dict
+)
 async def test_csv_streaming_pipeline(
     plz_filter: str = Query("49,48", description="PLZ-Bereiche für CSV-Streaming Test (z.B. '49,48')"),
     background_tasks: BackgroundTasks = None
@@ -373,7 +375,9 @@ async def upload_gap_csv(
         )
 
 
-@router.get("/pipeline/status", summary="Pipeline status abrufen")
+@router.get("/pipeline/status", summary="Pipeline status abrufen",
+    response_model=dict
+)
 async def get_pipeline_status(year: int = Query(..., description="Referenzjahr")):
     """
     Prüft den Status der GAP-Pipeline für ein Jahr.
@@ -450,7 +454,9 @@ async def get_pipeline_progress(job_id: str):
         )
 
 
-@router.get("/pipeline/test-direct", summary="Pipeline direct testen")
+@router.get("/pipeline/test-direct", summary="Pipeline direct testen",
+    response_model=dict
+)
 async def test_pipeline_direct():
     """
     Test-Endpoint: Führt Pipeline-Funktionen direkt aus (ohne Background-Task)
@@ -487,7 +493,9 @@ async def test_pipeline_direct():
         )
 
 
-@router.get("/pipeline/simple-test", summary="Test simple")
+@router.get("/pipeline/simple-test", summary="Test simple",
+    response_model=dict
+)
 async def simple_test():
     """
     ✅ SUPER-EINFACHER Test - nur zum Checken ob Server läuft
@@ -512,7 +520,9 @@ async def simple_test():
         }
 
 
-@router.get("/pipeline/csv-check", summary="Csv file prüfen")
+@router.get("/pipeline/csv-check", summary="Csv file prüfen",
+    response_model=dict
+)
 async def check_csv_file():
     """
     📁 Checkt ob CSV-Datei existiert und lesbar ist
@@ -553,7 +563,9 @@ async def check_csv_file():
         }
 
 
-@router.post("/pipeline/run-snapshot-manual", summary="Snapshot manual ausführen")
+@router.post("/pipeline/run-snapshot-manual", summary="Snapshot manual ausführen",
+    response_model=dict
+)
 async def run_snapshot_manual(
     year: int = Query(2024, description="Jahr für Snapshot-Erstellung")
 ):
@@ -591,7 +603,9 @@ async def run_snapshot_manual(
         }
 
 
-@router.delete("/reset-gap-data", summary="Gap data zurücksetzen")
+@router.delete("/reset-gap-data", summary="Gap data zurücksetzen",
+    response_model=dict
+)
 async def reset_gap_data(
     year: int = Query(2024, description="Jahr für Daten-Reset"),
     confirm: bool = Query(False, description="Bestätigung erforderlich"),
@@ -726,7 +740,9 @@ async def reset_gap_data(
         }
 
 
-@router.get("/leads/generate-from-gap", summary="Leads from gap frontend generieren")
+@router.get("/leads/generate-from-gap", summary="Leads from gap frontend generieren",
+    response_model=dict
+)
 async def generate_leads_from_gap_frontend(
     year: int = Query(2024, description="Jahr für Lead-Generation"),
     plz_min: Optional[str] = Query(None, description="Min PLZ"),
@@ -859,7 +875,9 @@ async def generate_leads_from_gap_frontend(
         }
 
 
-@router.get("/leads/check-farmers-available", summary="Farmers available prüfen")
+@router.get("/leads/check-farmers-available", summary="Farmers available prüfen",
+    response_model=dict
+)
 async def check_farmers_available():
     """
     🚜 FARMERS-CHECK: Prüft ob Landwirte für Lead-Generation verfügbar sind
@@ -935,7 +953,9 @@ async def check_farmers_available():
         }
 
 
-@router.get("/test-view-direct", summary="View direct testen")
+@router.get("/test-view-direct", summary="View direct testen",
+    response_model=dict
+)
 async def test_view_direct(year: int = Query(2024, description="Jahr für View-Test")):
     """
     🔍 VIEW-DIAGNOSE: Direkter Test der gap_payments_direct_agg View
@@ -994,7 +1014,9 @@ async def test_view_direct(year: int = Query(2024, description="Jahr für View-T
         }
 
 
-@router.get("/check-measure-codes", summary="Measure codes prüfen")
+@router.get("/check-measure-codes", summary="Measure codes prüfen",
+    response_model=dict
+)
 async def check_measure_codes(year: int = Query(2024, description="Jahr für Code-Check")):
     """
     🔍 MEASURE-CODES: Prüft welche measure_code Werte in den Daten vorhanden sind
@@ -1059,7 +1081,9 @@ async def check_measure_codes(year: int = Query(2024, description="Jahr für Cod
         }
 
 
-@router.post("/fix-view-definition", summary="View definition fix")
+@router.post("/fix-view-definition", summary="View definition fix",
+    response_model=dict
+)
 async def fix_view_definition():
     """
     🔧 VIEW-FIX: Erstellt die gap_payments_direct_agg View mit korrigiertem Filter neu
@@ -1119,7 +1143,9 @@ async def fix_view_definition():
         }
 
 
-@router.get("/debug-gap-years", summary="Gap years debug")
+@router.get("/debug-gap-years", summary="Gap years debug",
+    response_model=dict
+)
 async def debug_gap_years():
     """
     🔍 DEBUG: Zeigt alle Jahre mit GAP-Daten und deren Anzahl
@@ -1165,7 +1191,9 @@ async def debug_gap_years():
         }
 
 
-@router.get("/gap-statistics", summary="Gap statistics abrufen")
+@router.get("/gap-statistics", summary="Gap statistics abrufen",
+    response_model=dict
+)
 async def get_gap_statistics(year: int = Query(2024, description="Jahr für Statistiken")):
     """
     📊 GAP-STATISTIKEN: Zeigt aktuelle Zähler für GAP-Daten
@@ -1476,7 +1504,9 @@ def _execute_gap_command(
         print(traceback.format_exc())
 
 
-@router.get("/search-krummhoern", summary="Krummhoern suchen")
+@router.get("/search-krummhoern", summary="Krummhoern suchen",
+    response_model=dict
+)
 async def search_krummhoern(db: Session = Depends(get_db)):
     """🔍 Suche spezifisch nach PLZ 26736 Krummhörn - Test für Spaltenverschiebung"""
     try:
@@ -1573,7 +1603,9 @@ async def search_krummhoern(db: Session = Depends(get_db)):
         return {"error": str(e), "details": "Fehler bei Krummhörn-Suche"}
 
 
-@router.get("/analyze-csv-structure", summary="Csv structure analyze")
+@router.get("/analyze-csv-structure", summary="Csv structure analyze",
+    response_model=dict
+)
 async def analyze_csv_structure():
     """🔍 Direkte CSV-Struktur-Analyse für Spaltenverschiebungs-Diagnose"""
     try:
@@ -1714,7 +1746,9 @@ async def analyze_csv_structure():
         return {"error": str(e), "details": "Fehler bei CSV-Struktur-Analyse"}
 
 
-@router.get("/search-krummhoern-csv", summary="Krummhoern csv suchen")
+@router.get("/search-krummhoern-csv", summary="Krummhoern csv suchen",
+    response_model=dict
+)
 async def search_krummhoern_csv():
     """🔍 Direkte Suche nach Krummhörn in CSV mit korrigiertem Typo"""
     try:
@@ -1824,7 +1858,9 @@ async def search_krummhoern_csv():
         }
 
 
-@router.get("/simple-plz-check", summary="Plz check simple")
+@router.get("/simple-plz-check", summary="Plz check simple",
+    response_model=dict
+)
 async def simple_plz_check(db: Session = Depends(get_db)):
     """🔍 Einfacher Check der PLZ-Daten ohne komplexe Queries"""
     try:
@@ -1879,7 +1915,9 @@ async def simple_plz_check(db: Session = Depends(get_db)):
         return {"error": str(e)}
 
 
-@router.get("/debug-plz-data", summary="Plz data debug")
+@router.get("/debug-plz-data", summary="Plz data debug",
+    response_model=dict
+)
 async def debug_plz_data(db: Session = Depends(get_db)):
     """🔍 Debug endpoint to analyze postal code data distribution"""
     try:

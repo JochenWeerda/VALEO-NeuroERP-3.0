@@ -142,7 +142,7 @@ class UeberweisungRequest(BaseModel):
 
 
 @router.get("/banken/fints/konten", summary="Konten via FinTS/HBCI abrufen",
-    response_model=dict
+    response_model=None
 )
 async def fints_get_konten(
     blz: str = Query("", description="Bankleitzahl (optional wenn via Env-Var)"),
@@ -167,9 +167,11 @@ async def fints_get_konten(
     }
 
 
-@router.get("/banken/fints/umsaetze", summary="Kontoumsätze via FinTS/HBCI abrufen (HKKAZ,
-    response_model=dict
-)")
+@router.get(
+    "/banken/fints/umsaetze",
+    summary="Kontoumsätze via FinTS/HBCI abrufen (HKKAZ)",
+    response_model=dict,
+)
 async def fints_get_umsaetze(
     iban: str = Query(..., description="IBAN des Kontos"),
     von: str = Query(..., description="Von-Datum YYYY-MM-DD"),
@@ -204,9 +206,11 @@ async def fints_get_umsaetze(
     }
 
 
-@router.post("/banken/fints/ueberweisung", summary="SEPA-Überweisung via FinTS senden (HKCCM,
-    response_model=dict
-)")
+@router.post(
+    "/banken/fints/ueberweisung",
+    summary="SEPA-Überweisung via FinTS senden (HKCCM)",
+    response_model=dict,
+)
 async def fints_send_ueberweisung(
     body: UeberweisungRequest,
     tenant_id: str = Depends(get_tenant_id),

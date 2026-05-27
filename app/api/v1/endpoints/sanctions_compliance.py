@@ -127,7 +127,9 @@ def _status_from_treffer(treffer: list[SanktionsTreffer]) -> str:
 # ---------------------------------------------------------------------------
 
 
-@router.get("/eintraege", summary="Sanktionsliste abfragen")
+@router.get("/eintraege", summary="Sanktionsliste abfragen",
+    response_model=dict
+)
 def list_eintraege(
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
@@ -148,7 +150,9 @@ def list_eintraege(
         return []
 
 
-@router.post("/eintraege", status_code=201, summary="Sanktionseintrag anlegen")
+@router.post("/eintraege", status_code=201, summary="Sanktionseintrag anlegen",
+    response_model=dict
+)
 def create_eintrag(
     payload: SanktionsEintragCreate,
     db: Session = Depends(get_db),
@@ -182,7 +186,9 @@ def create_eintrag(
         raise HTTPException(status_code=503, detail={"error": str(exc), "migration_hint": MIGRATION_HINT})
 
 
-@router.post("/pruefen", summary="Name gegen Sanktionsliste prüfen")
+@router.post("/pruefen", summary="Name gegen Sanktionsliste prüfen",
+    response_model=dict
+)
 def pruefen(
     payload: SanktionsPruefungInput,
     db: Session = Depends(get_db),
@@ -238,7 +244,9 @@ def pruefen(
     )
 
 
-@router.get("/pruefprotokoll", summary="Sanktionsprüf-Protokoll abrufen")
+@router.get("/pruefprotokoll", summary="Sanktionsprüf-Protokoll abrufen",
+    response_model=dict
+)
 def pruefprotokoll(
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),

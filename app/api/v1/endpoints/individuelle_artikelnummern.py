@@ -114,7 +114,9 @@ def create_individuelle_nummer(
     return IndivArtikelNrOut(**dict(row._mapping))
 
 
-@router.get("/lookup", summary="Interne nummer lookup")
+@router.get("/lookup", summary="Interne nummer lookup",
+    response_model=dict
+)
 def lookup_interne_nummer(
     partner_nr: str = Query(...),
     indiv_artikel_nr: str = Query(...),
@@ -137,7 +139,9 @@ def lookup_interne_nummer(
     return {"interne_artikel_nr": row.artikel_nr, "indiv_bezeichnung": row.indiv_bezeichnung}
 
 
-@router.delete("/{indiv_id}", summary="Individuelle nummer löschen")
+@router.delete("/{indiv_id}", summary="Individuelle nummer löschen",
+    response_model=dict
+)
 def delete_individuelle_nummer(
     indiv_id: str,
     db=Depends(get_db),

@@ -141,7 +141,9 @@ def update_forderungsgruppe(
     return ForderungsgruppeOut(**dict(row._mapping))
 
 
-@router.delete("/{gruppe_nr}", summary="Forderungsgruppe löschen")
+@router.delete("/{gruppe_nr}", summary="Forderungsgruppe löschen",
+    response_model=dict
+)
 def delete_forderungsgruppe(
     gruppe_nr: str,
     db=Depends(get_db),

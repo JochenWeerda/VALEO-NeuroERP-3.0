@@ -62,7 +62,9 @@ def _get_active_context(context_id: str, db: Session) -> AgentContextDB:
     return row
 
 
-@router.post("", status_code=201, summary="Context anlegen")
+@router.post("", status_code=201, summary="Context anlegen",
+    response_model=dict
+)
 def create_context(req: AgentContextCreateRequest, db: Session = Depends(get_db)):
     expires = datetime.now(tz=timezone.utc) + timedelta(seconds=req.ttl_sekunden)
     row = AgentContextDB(
@@ -89,7 +91,9 @@ def widerrufen(context_id: str, db: Session = Depends(get_db)):
     return Response(status_code=204)
 
 
-@router.post("/{context_id}/dispatch", summary="Dispatch")
+@router.post("/{context_id}/dispatch", summary="Dispatch",
+    response_model=None
+)
 def dispatch(context_id: str, req: AgentDispatchRequest, db: Session = Depends(get_db)):
     row = _get_active_context(context_id, db)
     context = _row_to_context(row)
@@ -103,7 +107,9 @@ def dispatch(context_id: str, req: AgentDispatchRequest, db: Session = Depends(g
     )
 
 
-@router.post("/{context_id}/knowledge-pack", summary="Pack knowledge")
+@router.post("/{context_id}/knowledge-pack", summary="Pack knowledge",
+    response_model=dict
+)
 def knowledge_pack(context_id: str, req: AgentKnowledgePackRequest, db: Session = Depends(get_db)):
     from app.core.knowledge_core_contracts import KnowledgeChannel
     from app.core.knowledge_runtime import build_runtime_context_pack

@@ -703,7 +703,9 @@ async def auto_match(
         raise HTTPException(status_code=500, detail=f"Failed to perform auto-matching: {str(e)}")
 
 
-@router.post("/match/{line_id}/apply", summary="Match apply")
+@router.post("/match/{line_id}/apply", summary="Match apply",
+    response_model=None
+)
 async def apply_match(
     line_id: str,
     op_id: str = Query(..., description="Open item ID to match"),

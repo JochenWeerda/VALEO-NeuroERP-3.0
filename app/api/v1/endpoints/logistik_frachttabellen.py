@@ -132,7 +132,9 @@ def create_frachttabelle(
     return FrachttabelleOut(**dict(row._mapping))
 
 
-@router.delete("/{tabelle_nr}", summary="Frachttabelle löschen")
+@router.delete("/{tabelle_nr}", summary="Frachttabelle löschen",
+    response_model=dict
+)
 def delete_frachttabelle(
     tabelle_nr: str,
     db=Depends(get_db),
@@ -195,7 +197,9 @@ def create_position(
     return FrachttabellePositionOut(**dict(row._mapping))
 
 
-@router.delete("/{tabelle_nr}/positionen/{pos_id}", summary="Position löschen")
+@router.delete("/{tabelle_nr}/positionen/{pos_id}", summary="Position löschen",
+    response_model=None
+)
 def delete_position(
     tabelle_nr: str,
     pos_id: str,
@@ -265,7 +269,9 @@ def create_zuordnung(
     return FrachttabelleZuordnungOut(**dict(row._mapping))
 
 
-@router.delete("/zuordnungen/{zuordnung_id}", summary="Zuordnung löschen")
+@router.delete("/zuordnungen/{zuordnung_id}", summary="Zuordnung löschen",
+    response_model=dict
+)
 def delete_zuordnung(
     zuordnung_id: str,
     db=Depends(get_db),
@@ -279,7 +285,9 @@ def delete_zuordnung(
     return Response(status_code=204)
 
 
-@router.get("/zuordnungen/lookup", summary="Frachttabelle lookup")
+@router.get("/zuordnungen/lookup", summary="Frachttabelle lookup",
+    response_model=None
+)
 def lookup_frachttabelle(
     frachtklasse: str,
     frachtgruppe: str,

@@ -175,7 +175,9 @@ def meldung_abweisen(
     return ZahlungsmeldungOut(**dict(updated._mapping))
 
 
-@router.get("/offen/zusammenfassung", summary="Meldungen zusammenfassung offene")
+@router.get("/offen/zusammenfassung", summary="Meldungen zusammenfassung offene",
+    response_model=dict
+)
 def offene_meldungen_zusammenfassung(
     db=Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),

@@ -259,7 +259,9 @@ def _require_portal_massnahme(
 # Schläge
 # ────────────────────────────────────────────────────────────────────────────
 
-@router.get("/feldbuch/schlaege", summary="List schlaege portal")
+@router.get("/feldbuch/schlaege", summary="List schlaege portal",
+    response_model=dict
+)
 async def portal_list_schlaege(
     skip: int = Query(0, ge=0),
     limit: int = Query(200, ge=1, le=1000),
@@ -291,7 +293,9 @@ async def portal_list_schlaege(
         raise HTTPException(status_code=500, detail=str(e)) from e
 
 
-@router.post("/feldbuch/schlaege", status_code=201, summary="Create schlag portal")
+@router.post("/feldbuch/schlaege", status_code=201, summary="Create schlag portal",
+    response_model=dict
+)
 async def portal_create_schlag(
     data: PortalSchlagCreate,
     db: Session = Depends(get_db),
@@ -311,7 +315,9 @@ async def portal_create_schlag(
     return _schlag_to_dict(schlag)
 
 
-@router.put("/feldbuch/schlaege/{schlag_id}", summary="Update schlag portal")
+@router.put("/feldbuch/schlaege/{schlag_id}", summary="Update schlag portal",
+    response_model=dict
+)
 async def portal_update_schlag(
     schlag_id: str,
     data: PortalSchlagUpdate,
@@ -341,7 +347,9 @@ async def portal_update_schlag(
 # Maßnahmen
 # ────────────────────────────────────────────────────────────────────────────
 
-@router.get("/feldbuch/massnahmen", summary="List massnahmen portal")
+@router.get("/feldbuch/massnahmen", summary="List massnahmen portal",
+    response_model=dict
+)
 async def portal_list_massnahmen(
     schlag_id: Optional[str] = Query(None),
     typ: Optional[str] = Query(None),
@@ -388,7 +396,9 @@ async def portal_list_massnahmen(
         raise HTTPException(status_code=500, detail=str(e)) from e
 
 
-@router.post("/feldbuch/massnahmen", status_code=201, summary="Create massnahme portal")
+@router.post("/feldbuch/massnahmen", status_code=201, summary="Create massnahme portal",
+    response_model=dict
+)
 async def portal_create_massnahme(
     data: PortalMassnahmeCreate,
     db: Session = Depends(get_db),
@@ -408,7 +418,9 @@ async def portal_create_massnahme(
     return _massnahme_to_dict(massnahme)
 
 
-@router.put("/feldbuch/massnahmen/{massnahme_id}", summary="Update massnahme portal")
+@router.put("/feldbuch/massnahmen/{massnahme_id}", summary="Update massnahme portal",
+    response_model=dict
+)
 async def portal_update_massnahme(
     massnahme_id: str,
     data: PortalMassnahmeUpdate,
@@ -434,7 +446,9 @@ async def portal_update_massnahme(
 # Stats
 # ────────────────────────────────────────────────────────────────────────────
 
-@router.get("/feldbuch/stats", summary="Feldbuch stats portal")
+@router.get("/feldbuch/stats", summary="Feldbuch stats portal",
+    response_model=dict
+)
 async def portal_feldbuch_stats(
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
@@ -482,7 +496,9 @@ async def portal_feldbuch_stats(
 # Export
 # ────────────────────────────────────────────────────────────────────────────
 
-@router.get("/feldbuch/export", summary="Export portal")
+@router.get("/feldbuch/export", summary="Export portal",
+    response_model=dict
+)
 async def portal_export(
     format: str = Query("csv", description="'csv' oder 'ackerschlagkartei'"),
     schlag_id: Optional[str] = Query(None),
@@ -602,7 +618,9 @@ async def portal_export(
 # Import
 # ────────────────────────────────────────────────────────────────────────────
 
-@router.post("/feldbuch/import", summary="Import portal")
+@router.post("/feldbuch/import", summary="Import portal",
+    response_model=dict
+)
 async def portal_import(
     file: UploadFile = File(...),
     db: Session = Depends(get_db),

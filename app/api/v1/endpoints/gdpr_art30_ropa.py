@@ -250,7 +250,11 @@ def _serialize(obj: Any) -> Any:
     return obj
 
 
-@router.get("/activities/export/json", summary="RoPA-Export als JSON (Datenschutzbehörde)")
+@router.get(
+    "/activities/export/json",
+    summary="RoPA-Export als JSON (Datenschutzbehörde)",
+    response_model=dict,
+)
 def export_activities_json(
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
@@ -363,7 +367,9 @@ def update_activity(
     return {**updated, "tenant_id": tenant_id}
 
 
-@router.delete("/activities/{activity_id}", status_code=204, summary="Verarbeitungstätigkeit löschen")
+@router.delete("/activities/{activity_id}", status_code=204, summary="Verarbeitungstätigkeit löschen",
+    response_model=None
+)
 def delete_activity(
     activity_id: str,
     db: Session = Depends(get_db),

@@ -392,7 +392,9 @@ def _filename(entity: str, fmt: str) -> str:
     return f"export_{entity}_{today}.{ext}"
 
 
-@router.post("/list", response_class=StreamingResponse, summary="List exportieren")
+@router.post("/list", response_class=StreamingResponse, summary="List exportieren",
+    response_model=dict
+)
 async def export_list(
     body: ExportListRequest,
     tenant_id: str = Depends(get_tenant_id),
@@ -436,7 +438,9 @@ async def export_list(
     )
 
 
-@router.get("/entities", summary="Export entities auflisten")
+@router.get("/entities", summary="Export entities auflisten",
+    response_model=dict
+)
 async def list_export_entities():
     """Return supported entity values for export/list."""
     return {"entities": SUPPORTED_ENTITIES}

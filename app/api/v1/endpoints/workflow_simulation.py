@@ -32,7 +32,9 @@ _SCENARIO_DESCRIPTIONS: dict[str, str] = {
 }
 
 
-@router.get("/scenarios", summary="Alle verfuegbaren Simulationsszenarien")
+@router.get("/scenarios", summary="Alle verfuegbaren Simulationsszenarien",
+    response_model=dict
+)
 def list_scenarios() -> list[dict]:
     """Gibt alle SimulationScenario-Werte mit ihrer Beschreibung zurueck."""
     return [
@@ -44,7 +46,9 @@ def list_scenarios() -> list[dict]:
     ]
 
 
-@router.get("/sandbox/scenarios", summary="Sandbox-Szenarien fuer neue Workflows")
+@router.get("/sandbox/scenarios", summary="Sandbox-Szenarien fuer neue Workflows",
+    response_model=dict
+)
 def list_sandbox_scenarios() -> list[dict]:
     """Gibt die Sandbox-Szenarien mit Hinweisen fuer den Go-Live-Review zurueck."""
     return [
@@ -86,6 +90,7 @@ def preview_workflow_sandbox_endpoint(body: WorkflowSandboxPreviewInput) -> Work
 @router.get(
     "/scenarios/{scenario}/description",
     summary="Beschreibung eines Szenarios",
+    response_model=dict
 )
 def get_scenario_description(scenario: SimulationScenario) -> dict:
     """Gibt die kurze Beschreibung eines einzelnen Simulationsszenarios zurueck."""

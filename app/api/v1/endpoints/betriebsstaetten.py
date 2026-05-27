@@ -195,7 +195,9 @@ def update_betriebsstaette(
     return BetriebsstaetteOut(**d)
 
 
-@router.delete("/{filial_nr}", summary="Betriebsstaette löschen")
+@router.delete("/{filial_nr}", summary="Betriebsstaette löschen",
+    response_model=dict
+)
 def delete_betriebsstaette(
     filial_nr: str,
     db=Depends(get_db),

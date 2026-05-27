@@ -278,7 +278,9 @@ def festschreiben(
     return MassebilanzOut(**dict(row._mapping))
 
 
-@router.get("/{bilanz_id}/bericht", summary="Bericht massebilanz")
+@router.get("/{bilanz_id}/bericht", summary="Bericht massebilanz",
+    response_model=dict
+)
 def massebilanz_bericht(
     bilanz_id: str,
     db=Depends(get_db),

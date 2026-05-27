@@ -28,7 +28,9 @@ class DispatchRequest(BaseModel):
     aggregate_state: dict[str, Any] = Field(default_factory=dict)
 
 
-@router.get("/catalog", summary="Vollstaendiger Command-Katalog")
+@router.get("/catalog", summary="Vollstaendiger Command-Katalog",
+    response_model=dict
+)
 def get_command_catalog(
     tenant_id: str = Depends(get_tenant_id),
 ) -> list[dict]:
@@ -37,7 +39,9 @@ def get_command_catalog(
     return [cd.model_dump() for cd in catalog]
 
 
-@router.get("/agent-manifest", summary="Agent-Command-Manifest")
+@router.get("/agent-manifest", summary="Agent-Command-Manifest",
+    response_model=dict
+)
 def get_agent_manifest(
     tenant_id: str = Depends(get_tenant_id),
 ) -> dict:
@@ -46,7 +50,9 @@ def get_agent_manifest(
     return manifest.model_dump()
 
 
-@router.get("/ui-density-manifest", summary="UI-Density-Manifest aus produktiven Command-Contracts")
+@router.get("/ui-density-manifest", summary="UI-Density-Manifest aus produktiven Command-Contracts",
+    response_model=dict
+)
 def get_ui_density_manifest(
     tenant_id: str = Depends(get_tenant_id),
 ) -> dict:
@@ -54,7 +60,9 @@ def get_ui_density_manifest(
     return manifest.model_dump()
 
 
-@router.post("/dispatch", summary="Command dispatchen und validieren")
+@router.post("/dispatch", summary="Command dispatchen und validieren",
+    response_model=dict
+)
 def dispatch_command(
     body: DispatchRequest,
     issuer_role: Optional[str] = Query(default=None, description="Rolle des Ausstellers"),

@@ -11,7 +11,9 @@ from app.core.terminology_registry import build_landhandel_terminology_registry
 router = APIRouter(prefix="/terminology", tags=["terminology", "i18n"])
 
 
-@router.get("/registry", summary="Landhandel terminology registry")
+@router.get("/registry", summary="Landhandel terminology registry",
+    response_model=dict
+)
 def get_terminology_registry(
     domain: str | None = Query(default=None, description="Optional domain filter"),
     q: str | None = Query(default=None, description="Optional search query"),
@@ -20,7 +22,9 @@ def get_terminology_registry(
     return registry.as_dict(query=q, domain=domain)
 
 
-@router.get("/terms/{term_key}", summary="Single terminology entry")
+@router.get("/terms/{term_key}", summary="Single terminology entry",
+    response_model=dict
+)
 def get_terminology_entry(term_key: str) -> dict:
     registry = build_landhandel_terminology_registry()
     entry = registry.by_term_key(term_key)

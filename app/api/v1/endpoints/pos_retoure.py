@@ -96,7 +96,9 @@ async def create_retoure(
     )
 
 
-@router.post("/checkout", summary="Checkout pos")
+@router.post("/checkout", summary="Checkout pos",
+    response_model=dict
+)
 async def pos_checkout(
     data: dict,
     db: Session = Depends(get_db),

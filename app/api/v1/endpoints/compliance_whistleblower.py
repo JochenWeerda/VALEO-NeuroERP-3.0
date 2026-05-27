@@ -46,7 +46,9 @@ class NoteIn(BaseModel):
     new_status: Optional[str] = None
 
 
-@router.post("/reports", status_code=201, summary="Report einreichen")
+@router.post("/reports", status_code=201, summary="Report einreichen",
+    response_model=dict
+)
 async def submit_report(payload: ReportIn, db: Session = Depends(get_db)):
     _ensure_table(db)
     report_id = str(uuid4())
@@ -67,7 +69,9 @@ async def submit_report(payload: ReportIn, db: Session = Depends(get_db)):
     }
 
 
-@router.get("/reports/status/{token}", summary="Status report")
+@router.get("/reports/status/{token}", summary="Status report",
+    response_model=dict
+)
 async def report_status(token: str, db: Session = Depends(get_db)):
     _ensure_table(db)
     try:
@@ -82,7 +86,9 @@ async def report_status(token: str, db: Session = Depends(get_db)):
     return {"status": row.status, "submitted_at": str(row.submitted_at)}
 
 
-@router.get("/reports", summary="Reports auflisten")
+@router.get("/reports", summary="Reports auflisten",
+    response_model=dict
+)
 async def list_reports(db: Session = Depends(get_db)):
     _ensure_table(db)
     try:
@@ -94,7 +100,9 @@ async def list_reports(db: Session = Depends(get_db)):
     return [dict(r._mapping) for r in rows]
 
 
-@router.patch("/reports/{report_id}/update", summary="Report aktualisieren")
+@router.patch("/reports/{report_id}/update", summary="Report aktualisieren",
+    response_model=dict
+)
 async def update_report(report_id: str, payload: NoteIn, db: Session = Depends(get_db)):
     _ensure_table(db)
     try:

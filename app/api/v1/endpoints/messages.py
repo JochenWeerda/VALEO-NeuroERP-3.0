@@ -81,7 +81,9 @@ async def send_message(
     return MessageOut.model_validate(msg)
 
 
-@router.get("/health", summary="Health messages")
+@router.get("/health", summary="Health messages",
+    response_model=dict
+)
 async def messages_health():
     """GET Health"""
     return {"status": "ok", "service": "messages"}

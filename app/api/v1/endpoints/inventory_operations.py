@@ -236,7 +236,9 @@ def _post_inventory_journal(
 
 # ── Routes ──────────────────────────────────────────────────────
 
-@router.get("/reason-codes", tags=["lager"], summary="Reason codes auflisten")
+@router.get("/reason-codes", tags=["lager"], summary="Reason codes auflisten",
+    response_model=dict
+)
 async def list_reason_codes():
     """GET alle verfügbaren Korrektur-Gründe."""
     return [{"code": k, "label": v} for k, v in REASON_CODES.items()]
@@ -423,7 +425,9 @@ async def create_mhd_abschreibung(
     return await create_bestandskorrektur(korrektur, tenant_id, db)
 
 
-@router.get("/korrekturen", tags=["lager"], summary="Korrekturen auflisten")
+@router.get("/korrekturen", tags=["lager"], summary="Korrekturen auflisten",
+    response_model=dict
+)
 async def list_korrekturen(
     tenant_id: Optional[str] = Query(None),
     article_id: Optional[str] = Query(None),
@@ -482,7 +486,9 @@ async def list_korrekturen(
     }
 
 
-@router.get("/korrekturen/{korrektur_id}", tags=["lager"], summary="Korrektur abrufen")
+@router.get("/korrekturen/{korrektur_id}", tags=["lager"], summary="Korrektur abrufen",
+    response_model=dict
+)
 async def get_korrektur(
     korrektur_id: str,
     tenant_id: Optional[str] = Query(None),

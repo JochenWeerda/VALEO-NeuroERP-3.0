@@ -22,7 +22,9 @@ router = APIRouter(tags=["neuro-core", "audit"])
 
 # ── Audit Trail ────────────────────────────────────────────────
 
-@router.get("/audit/trail", summary="Trail abrufen")
+@router.get("/audit/trail", summary="Trail abrufen",
+    response_model=dict
+)
 async def get_trail(
     aggregate_id: Optional[str] = None,
     from_date: Optional[str] = None,
@@ -34,7 +36,9 @@ async def get_trail(
     return {"items": query_audit_trail(db, tenant_id, aggregate_id, from_date, to_date, limit)}
 
 
-@router.get("/audit/trail/validate", summary="Trail validieren")
+@router.get("/audit/trail/validate", summary="Trail validieren",
+    response_model=dict
+)
 async def validate_trail(
     limit: int = 1000,
     tenant_id: str = Depends(get_tenant_id),
@@ -56,7 +60,9 @@ class RecordDecisionRequest(BaseModel):
     explanation: str = ""
 
 
-@router.post("/neuro/decisions", summary="Decision anlegen")
+@router.post("/neuro/decisions", summary="Decision anlegen",
+    response_model=dict
+)
 async def create_decision(
     request: RecordDecisionRequest,
     tenant_id: str = Depends(get_tenant_id),
@@ -75,7 +81,9 @@ async def create_decision(
     )
 
 
-@router.get("/neuro/decisions/{decision_id}", summary="One decision abrufen")
+@router.get("/neuro/decisions/{decision_id}", summary="One decision abrufen",
+    response_model=dict
+)
 async def get_one_decision(
     decision_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -87,7 +95,9 @@ async def get_one_decision(
     return result
 
 
-@router.get("/neuro/decisions", summary="All decisions auflisten")
+@router.get("/neuro/decisions", summary="All decisions auflisten",
+    response_model=dict
+)
 async def list_all_decisions(
     risk_class: Optional[str] = None,
     limit: int = 50,
@@ -97,7 +107,9 @@ async def list_all_decisions(
     return {"items": list_decisions(db, tenant_id, limit, risk_class)}
 
 
-@router.get("/neuro/kernel-step-audit/summary", summary="Kernel step audit summary neuro")
+@router.get("/neuro/kernel-step-audit/summary", summary="Kernel step audit summary neuro",
+    response_model=dict
+)
 async def neuro_kernel_step_audit_summary(
     days: int = Query(7, ge=1, le=366),
     tenant_id: str = Depends(get_tenant_id),

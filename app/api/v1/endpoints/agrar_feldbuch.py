@@ -197,7 +197,9 @@ def _massnahme_to_dict(m: FeldbuchMassnahme) -> dict[str, Any]:
 # Schläge Endpoints
 # ────────────────────────────────────────────────────────────────────────────
 
-@router.get("/schlaege", summary="Schlaege auflisten")
+@router.get("/schlaege", summary="Schlaege auflisten",
+    response_model=dict
+)
 async def list_schlaege(
     customer_id: Optional[str] = Query(None),
     status: Optional[str] = Query(None),
@@ -214,7 +216,9 @@ async def list_schlaege(
     return [_schlag_to_dict(s) for s in q.order_by(FeldbuchSchlag.name).offset(skip).limit(limit).all()]
 
 
-@router.post("/schlaege", status_code=201, summary="Schlag anlegen")
+@router.post("/schlaege", status_code=201, summary="Schlag anlegen",
+    response_model=dict
+)
 async def create_schlag(
     data: SchlagCreate,
     db: Session = Depends(get_db),
@@ -231,7 +235,9 @@ async def create_schlag(
     return _schlag_to_dict(schlag)
 
 
-@router.get("/schlaege/{schlag_id}", summary="Schlag abrufen")
+@router.get("/schlaege/{schlag_id}", summary="Schlag abrufen",
+    response_model=dict
+)
 async def get_schlag(
     schlag_id: str,
     db: Session = Depends(get_db),
@@ -247,7 +253,9 @@ async def get_schlag(
     return _schlag_to_dict(schlag)
 
 
-@router.put("/schlaege/{schlag_id}", summary="Schlag aktualisieren")
+@router.put("/schlaege/{schlag_id}", summary="Schlag aktualisieren",
+    response_model=dict
+)
 async def update_schlag(
     schlag_id: str,
     data: SchlagUpdate,
@@ -294,7 +302,9 @@ class GeometryUpdate(BaseModel):
     geometry_geojson: str  # RFC 7946 GeoJSON Polygon/MultiPolygon als JSON-String
 
 
-@router.get("/schlaege/{schlag_id}/geometry", summary="GeoJSON Polygon eines Schlags abrufen")
+@router.get("/schlaege/{schlag_id}/geometry", summary="GeoJSON Polygon eines Schlags abrufen",
+    response_model=None
+)
 async def get_schlag_geometry(
     schlag_id: str,
     db: Session = Depends(get_db),
@@ -324,7 +334,9 @@ async def get_schlag_geometry(
     }
 
 
-@router.put("/schlaege/{schlag_id}/geometry", summary="GeoJSON Polygon eines Schlags speichern")
+@router.put("/schlaege/{schlag_id}/geometry", summary="GeoJSON Polygon eines Schlags speichern",
+    response_model=dict
+)
 async def put_schlag_geometry(
     schlag_id: str,
     data: GeometryUpdate,
@@ -351,7 +363,9 @@ async def put_schlag_geometry(
     return {"schlag_id": schlag_id, "geometry_saved": True}
 
 
-@router.get("/schlaege/geojson/all", summary="Alle Schläge als GeoJSON FeatureCollection")
+@router.get("/schlaege/geojson/all", summary="Alle Schläge als GeoJSON FeatureCollection",
+    response_model=dict
+)
 async def get_all_schlaege_geojson(
     customer_id: Optional[str] = Query(None),
     db: Session = Depends(get_db),
@@ -386,7 +400,9 @@ async def get_all_schlaege_geojson(
 # Maßnahmen Endpoints
 # ────────────────────────────────────────────────────────────────────────────
 
-@router.get("/feldbuch/massnahmen", summary="Massnahmen auflisten")
+@router.get("/feldbuch/massnahmen", summary="Massnahmen auflisten",
+    response_model=dict
+)
 async def list_massnahmen(
     schlag_id: Optional[str] = Query(None),
     customer_id: Optional[str] = Query(None),
@@ -420,7 +436,9 @@ async def list_massnahmen(
     ]
 
 
-@router.post("/feldbuch/massnahmen", status_code=201, summary="Massnahme anlegen")
+@router.post("/feldbuch/massnahmen", status_code=201, summary="Massnahme anlegen",
+    response_model=dict
+)
 async def create_massnahme(
     data: MassnahmeCreate,
     db: Session = Depends(get_db),
@@ -456,7 +474,9 @@ async def create_massnahme(
     return result
 
 
-@router.put("/feldbuch/massnahmen/{massnahme_id}", summary="Massnahme aktualisieren")
+@router.put("/feldbuch/massnahmen/{massnahme_id}", summary="Massnahme aktualisieren",
+    response_model=dict
+)
 async def update_massnahme(
     massnahme_id: str,
     data: MassnahmeUpdate,
@@ -561,7 +581,9 @@ async def bulk_delete_massnahmen(
     )
 
 
-@router.post("/feldbuch/massnahmen/from-lieferschein", status_code=201, summary="From lieferschein massnahme")
+@router.post("/feldbuch/massnahmen/from-lieferschein", status_code=201, summary="From lieferschein massnahme",
+    response_model=None
+)
 async def massnahme_from_lieferschein(
     data: FromLieferscheinCreate,
     db: Session = Depends(get_db),
@@ -605,7 +627,9 @@ _DUENGER_N_GEHALT: dict[str, float] = {
 }
 
 
-@router.get("/feldbuch/duengebilanz", summary="Duengebilanz abrufen")
+@router.get("/feldbuch/duengebilanz", summary="Duengebilanz abrufen",
+    response_model=dict
+)
 async def get_duengebilanz(
     customer_id: Optional[str] = Query(None),
     schlag_id: Optional[str] = Query(None),
@@ -708,7 +732,9 @@ async def get_duengebilanz(
 # AGR-COM-03: Cross-Compliance-Bericht
 # ────────────────────────────────────────────────────────────────────────────
 
-@router.get("/feldbuch/cross-compliance", summary="Cross compliance report abrufen")
+@router.get("/feldbuch/cross-compliance", summary="Cross compliance report abrufen",
+    response_model=dict
+)
 async def get_cross_compliance_report(
     customer_id: Optional[str] = Query(None),
     jahr: int = Query(default=datetime.now().year),
@@ -828,7 +854,9 @@ async def get_cross_compliance_report(
 # AGR-OPS-04: Feldkalender
 # ────────────────────────────────────────────────────────────────────────────
 
-@router.get("/feldbuch/calendar", summary="Feldkalender abrufen")
+@router.get("/feldbuch/calendar", summary="Feldkalender abrufen",
+    response_model=dict
+)
 async def get_feldkalender(
     von: str = Query(..., description="Startdatum (YYYY-MM-DD)"),
     bis: str = Query(..., description="Enddatum (YYYY-MM-DD)"),
@@ -887,7 +915,9 @@ _FELDBLOCKFINDER_URLS: dict[str, str] = {
 }
 
 
-@router.get("/config/feldblockfinder", summary="Feldblockfinder config abrufen")
+@router.get("/config/feldblockfinder", summary="Feldblockfinder config abrufen",
+    response_model=dict
+)
 async def get_feldblockfinder_config() -> dict[str, Any]:
     """
     AGR-FLD-03: Feldblockfinder-URLs pro Bundesland für iframe-Integration.
@@ -898,7 +928,9 @@ async def get_feldblockfinder_config() -> dict[str, Any]:
     }
 
 
-@router.post("/compliance/qs-export", summary="Export qs")
+@router.post("/compliance/qs-export", summary="Export qs",
+    response_model=dict
+)
 async def qs_export(
     jahr: int = Query(default=datetime.now().year),
     format: str = Query("json", description="json | csv"),
@@ -920,7 +952,9 @@ async def qs_export(
     return {"jahr": jahr, "format": format, "count": len(items), "data": items}
 
 
-@router.post("/compliance/lea-export", summary="Export lea")
+@router.post("/compliance/lea-export", summary="Export lea",
+    response_model=dict
+)
 async def lea_export(
     jahr: int = Query(default=datetime.now().year),
     db: Session = Depends(get_db),
@@ -946,7 +980,9 @@ async def lea_export(
 # AGR-INV-04: Mindestbestand-Warnung (Betriebsmittel)
 # ────────────────────────────────────────────────────────────────────────────
 
-@router.get("/inventory/low-stock", summary="Low stock warnings abrufen")
+@router.get("/inventory/low-stock", summary="Low stock warnings abrufen",
+    response_model=dict
+)
 async def get_low_stock_warnings(
     threshold: float = Query(0, ge=0, description="Schwellwert: Artikel mit Bestand <= threshold"),
     db: Session = Depends(get_db),

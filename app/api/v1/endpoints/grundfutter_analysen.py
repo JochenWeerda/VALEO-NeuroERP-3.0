@@ -586,7 +586,9 @@ def _analyse_to_dict(a: GrundfutterAnalyse) -> Dict[str, Any]:
 # Endpoints
 # ---------------------------------------------------------------------------
 
-@router.get("/grundfutter-analysen", summary="Analysen auflisten")
+@router.get("/grundfutter-analysen", summary="Analysen auflisten",
+    response_model=dict
+)
 def list_analysen(
     probenart: Optional[str] = Query(default=None),
     verifiziert: Optional[bool] = Query(default=None),
@@ -608,7 +610,9 @@ def list_analysen(
     return {"total": total, "items": [_analyse_to_dict(a) for a in items]}
 
 
-@router.get("/grundfutter-analysen/{analyse_id}", summary="Analyse abrufen")
+@router.get("/grundfutter-analysen/{analyse_id}", summary="Analyse abrufen",
+    response_model=dict
+)
 def get_analyse(
     analyse_id: str,
     db: Session = Depends(get_db),
@@ -626,7 +630,9 @@ def get_analyse(
     return _analyse_to_dict(a)
 
 
-@router.post("/grundfutter-analysen", status_code=201, summary="Analyse anlegen")
+@router.post("/grundfutter-analysen", status_code=201, summary="Analyse anlegen",
+    response_model=dict
+)
 def create_analyse(
     data: GrundfutterAnalyseIn,
     db: Session = Depends(get_db),
@@ -659,7 +665,9 @@ def create_analyse(
     return _analyse_to_dict(a)
 
 
-@router.patch("/grundfutter-analysen/{analyse_id}", summary="Analyse aktualisieren")
+@router.patch("/grundfutter-analysen/{analyse_id}", summary="Analyse aktualisieren",
+    response_model=dict
+)
 def patch_analyse(
     analyse_id: str,
     data: GrundfutterAnalysePatch,
@@ -701,7 +709,9 @@ def delete_analyse(
     return Response(status_code=204)
 
 
-@router.post("/grundfutter-analysen/upload-pdf", summary="Pdf hochladen")
+@router.post("/grundfutter-analysen/upload-pdf", summary="Pdf hochladen",
+    response_model=None
+)
 async def upload_pdf(
     file: UploadFile = File(...),
     save: bool = Query(default=False, description="Direkt in DB speichern"),
@@ -776,7 +786,9 @@ async def upload_pdf(
     }
 
 
-@router.post("/grundfutter-analysen/upload-csv", summary="Csv hochladen")
+@router.post("/grundfutter-analysen/upload-csv", summary="Csv hochladen",
+    response_model=dict
+)
 async def upload_csv(
     file: UploadFile = File(...),
     save: bool = Query(default=False),
@@ -808,7 +820,9 @@ async def upload_csv(
     return {"saved": False, "parsed": parsed.model_dump()}
 
 
-@router.post("/grundfutter-analysen/{analyse_id}/as-feed", summary="As feed promote")
+@router.post("/grundfutter-analysen/{analyse_id}/as-feed", summary="As feed promote",
+    response_model=dict
+)
 def promote_as_feed(
     analyse_id: str,
     db: Session = Depends(get_db),

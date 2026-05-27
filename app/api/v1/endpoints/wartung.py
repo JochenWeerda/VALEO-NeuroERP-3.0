@@ -57,7 +57,9 @@ class AnlagePatch(BaseModel):
     notiz: Optional[str] = None
 
 
-@router.get("/anlagen", summary="Anlagen auflisten")
+@router.get("/anlagen", summary="Anlagen auflisten",
+    response_model=dict
+)
 def list_anlagen(
     status: Optional[str] = None,
     skip: int = Query(0, ge=0),
@@ -70,7 +72,9 @@ def list_anlagen(
     return [_to_dict(a) for a in q.order_by(WartungAnlage.name).offset(skip).limit(limit).all()]
 
 
-@router.get("/anlagen/{anlage_id}", summary="Anlage abrufen")
+@router.get("/anlagen/{anlage_id}", summary="Anlage abrufen",
+    response_model=dict
+)
 def get_anlage(anlage_id: str, db: Session = Depends(get_db)):
     obj = db.query(WartungAnlage).filter(WartungAnlage.id == anlage_id).first()
     if not obj:
@@ -80,7 +84,9 @@ def get_anlage(anlage_id: str, db: Session = Depends(get_db)):
     return data
 
 
-@router.post("/anlagen", status_code=201, summary="Anlage anlegen")
+@router.post("/anlagen", status_code=201, summary="Anlage anlegen",
+    response_model=dict
+)
 def create_anlage(payload: AnlagePayload, db: Session = Depends(get_db)):
     obj = WartungAnlage(**payload.model_dump())
     db.add(obj)
@@ -89,7 +95,9 @@ def create_anlage(payload: AnlagePayload, db: Session = Depends(get_db)):
     return _to_dict(obj)
 
 
-@router.patch("/anlagen/{anlage_id}", summary="Anlage aktualisieren")
+@router.patch("/anlagen/{anlage_id}", summary="Anlage aktualisieren",
+    response_model=dict
+)
 def update_anlage(anlage_id: str, payload: AnlagePatch, db: Session = Depends(get_db)):
     obj = db.query(WartungAnlage).filter(WartungAnlage.id == anlage_id).first()
     if not obj:
@@ -123,7 +131,9 @@ class ProtokollPayload(BaseModel):
     tenant_id: str = "default"
 
 
-@router.get("/anlagen/{anlage_id}/protokolle", summary="Protokolle auflisten")
+@router.get("/anlagen/{anlage_id}/protokolle", summary="Protokolle auflisten",
+    response_model=None
+)
 def list_protokolle(anlage_id: str, db: Session = Depends(get_db)):
     return [
         _to_dict(p)
@@ -134,7 +144,9 @@ def list_protokolle(anlage_id: str, db: Session = Depends(get_db)):
     ]
 
 
-@router.post("/anlagen/{anlage_id}/protokolle", status_code=201, summary="Protokoll anlegen")
+@router.post("/anlagen/{anlage_id}/protokolle", status_code=201, summary="Protokoll anlegen",
+    response_model=dict
+)
 def create_protokoll(anlage_id: str, payload: ProtokollPayload, db: Session = Depends(get_db)):
     anlage = db.query(WartungAnlage).filter(WartungAnlage.id == anlage_id).first()
     if not anlage:

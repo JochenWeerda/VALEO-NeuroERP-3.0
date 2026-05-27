@@ -14,7 +14,9 @@ from app.core.agent_tool_contract_manifest import build_agent_tool_contract_mani
 router = APIRouter(prefix="/agent/tool-contracts", tags=["agents", "mcp", "openapi"])
 
 
-@router.get("", summary="External Agent Tool Contract Manifest")
+@router.get("", summary="External Agent Tool Contract Manifest",
+    response_model=dict
+)
 def get_agent_tool_contract_manifest(
     domain: str | None = Query(default=None, description="Optional domain filter"),
     tool_name: str | None = Query(default=None, description="Optional tool name filter"),
@@ -23,7 +25,9 @@ def get_agent_tool_contract_manifest(
     return manifest.model_dump()
 
 
-@router.get("/mcp", summary="MCP Tool Definitions")
+@router.get("/mcp", summary="MCP Tool Definitions",
+    response_model=dict
+)
 def get_mcp_tool_definitions(
     domain: str | None = Query(default=None, description="Optional domain filter"),
     tool_name: str | None = Query(default=None, description="Optional tool name filter"),
@@ -40,7 +44,9 @@ def get_mcp_tool_definitions(
     }
 
 
-@router.get("/openapi", summary="OpenAPI-linked Tool Contracts")
+@router.get("/openapi", summary="OpenAPI-linked Tool Contracts",
+    response_model=dict
+)
 def get_openapi_tool_contracts(
     domain: str | None = Query(default=None, description="Optional domain filter"),
 ) -> dict:
@@ -69,7 +75,9 @@ def get_openapi_tool_contracts(
     }
 
 
-@router.get("/{tool_name}", summary="Single Tool Contract")
+@router.get("/{tool_name}", summary="Single Tool Contract",
+    response_model=dict
+)
 def get_agent_tool_contract(tool_name: str) -> dict:
     manifest = build_agent_tool_contract_manifest(tool_name=tool_name)
     if not manifest.tools:

@@ -518,7 +518,9 @@ def _sha256_hex(content: bytes) -> str:
     return hashlib.sha256(content).hexdigest()
 
 
-@router.get("/audit-package", summary="Audit package abrufen")
+@router.get("/audit-package", summary="Audit package abrufen",
+    response_model=dict
+)
 async def get_audit_package(
     from_date: Optional[date] = Query(None, description="Von-Datum (inkl.)"),
     to_date: Optional[date] = Query(None, description="Bis-Datum (inkl.)"),

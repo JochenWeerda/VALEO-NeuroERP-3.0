@@ -46,7 +46,9 @@ class ListQuery(BaseModel):
     limit: int = Field(100, ge=1, le=500)
 
 
-@router.get("/", summary="All auflisten")
+@router.get("/", summary="All auflisten",
+    response_model=dict
+)
 async def list_all(
     status: Optional[str] = None,
     priority: Optional[str] = None,
@@ -61,7 +63,9 @@ async def list_all(
     return {"count": len(cases), "cases": [c.to_dict() for c in cases]}
 
 
-@router.get("/dashboard", summary="Dashboard")
+@router.get("/dashboard", summary="Dashboard",
+    response_model=dict
+)
 async def dashboard(
     tenant_id: str = Depends(get_tenant_id),
 ):
@@ -69,7 +73,9 @@ async def dashboard(
     return get_dashboard_stats(tenant_id)
 
 
-@router.get("/{case_id}", summary="Single abrufen")
+@router.get("/{case_id}", summary="Single abrufen",
+    response_model=dict
+)
 async def get_single(case_id: str):
     """Einzelnen Case abrufen."""
     case = get_case(case_id)
@@ -78,7 +84,9 @@ async def get_single(case_id: str):
     return case.to_dict()
 
 
-@router.post("/{case_id}/assign", summary="Zuweisen")
+@router.post("/{case_id}/assign", summary="Zuweisen",
+    response_model=dict
+)
 async def assign(case_id: str, request: AssignRequest):
     """Case einem Benutzer zuweisen."""
     case = assign_case(case_id, request.user_id)
@@ -87,7 +95,9 @@ async def assign(case_id: str, request: AssignRequest):
     return case.to_dict()
 
 
-@router.post("/{case_id}/decide", summary="Decide")
+@router.post("/{case_id}/decide", summary="Decide",
+    response_model=dict
+)
 async def decide(case_id: str, request: DecideRequest):
     """Case entscheiden (genehmigen/ablehnen)."""
     decision = ApprovalDecision(request.decision)
@@ -97,7 +107,9 @@ async def decide(case_id: str, request: DecideRequest):
     return case.to_dict()
 
 
-@router.post("/{case_id}/escalate", summary="Escalate")
+@router.post("/{case_id}/escalate", summary="Escalate",
+    response_model=dict
+)
 async def escalate(case_id: str, request: EscalateRequest):
     """Case eskalieren."""
     case = escalate_case(case_id, request.escalate_to, request.reason)
@@ -106,7 +118,9 @@ async def escalate(case_id: str, request: EscalateRequest):
     return case.to_dict()
 
 
-@router.post("/{case_id}/close", summary="Abschließen")
+@router.post("/{case_id}/close", summary="Abschließen",
+    response_model=dict
+)
 async def close(case_id: str):
     """Case schliessen."""
     case = close_case(case_id)
@@ -115,7 +129,9 @@ async def close(case_id: str):
     return case.to_dict()
 
 
-@router.post("/escalate-overdue", summary="Overdue escalate")
+@router.post("/escalate-overdue", summary="Overdue escalate",
+    response_model=dict
+)
 async def escalate_overdue():
     """Alle ueberfaelligen Cases automatisch eskalieren."""
     escalated = check_and_escalate_overdue()

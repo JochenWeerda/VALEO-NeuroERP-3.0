@@ -83,7 +83,9 @@ class BinTransferIn(BaseModel):
 
 # ── Zones ──────────────────────────────────────────────────────────────────
 
-@router.get("/zones", summary="Zones auflisten")
+@router.get("/zones", summary="Zones auflisten",
+    response_model=dict
+)
 def list_zones(
     warehouse_id: str = Query(...),
     svc: WarehouseService = Depends(_svc),
@@ -91,7 +93,9 @@ def list_zones(
     return svc.list_zones(warehouse_id)
 
 
-@router.post("/zones", status_code=status.HTTP_201_CREATED, summary="Zone anlegen")
+@router.post("/zones", status_code=status.HTTP_201_CREATED, summary="Zone anlegen",
+    response_model=dict
+)
 def create_zone(
     warehouse_id: str = Query(...),
     payload: ZoneIn = ...,
@@ -102,7 +106,9 @@ def create_zone(
 
 # ── Bins ───────────────────────────────────────────────────────────────────
 
-@router.get("/bins", summary="Bins auflisten")
+@router.get("/bins", summary="Bins auflisten",
+    response_model=dict
+)
 def list_bins(
     warehouse_id: Optional[str] = Query(None),
     zone_id: Optional[str] = Query(None),
@@ -112,7 +118,9 @@ def list_bins(
     return svc.list_bins(warehouse_id, zone_id, only_active)
 
 
-@router.post("/bins", status_code=status.HTTP_201_CREATED, summary="Bin anlegen")
+@router.post("/bins", status_code=status.HTTP_201_CREATED, summary="Bin anlegen",
+    response_model=dict
+)
 def create_bin(
     zone_id: str = Query(...),
     warehouse_id: str = Query(...),
@@ -122,14 +130,18 @@ def create_bin(
     return svc.create_bin(zone_id, warehouse_id, payload.model_dump())
 
 
-@router.get("/bins/{bin_id}/stock", summary="Bin stock abrufen")
+@router.get("/bins/{bin_id}/stock", summary="Bin stock abrufen",
+    response_model=dict
+)
 def get_bin_stock(bin_id: str, svc: WarehouseService = Depends(_svc)):
     return svc.get_bin_stock(bin_id)
 
 
 # ── Stock Movements ────────────────────────────────────────────────────────
 
-@router.post("/stock-movements", status_code=status.HTTP_201_CREATED, summary="Stock movement book")
+@router.post("/stock-movements", status_code=status.HTTP_201_CREATED, summary="Stock movement book",
+    response_model=dict
+)
 def book_stock_movement(payload: StockMovementIn, svc: WarehouseService = Depends(_svc)):
     from datetime import date as date_type
     bbd = date_type.fromisoformat(payload.best_before_date) if payload.best_before_date else None
@@ -149,7 +161,9 @@ def book_stock_movement(payload: StockMovementIn, svc: WarehouseService = Depend
     return {"movement_id": mv_id}
 
 
-@router.post("/stock-movements/fefo-suggestion", summary="Suggestion fefo")
+@router.post("/stock-movements/fefo-suggestion", summary="Suggestion fefo",
+    response_model=dict
+)
 def fefo_suggestion(payload: FefoSuggestionIn, svc: WarehouseService = Depends(_svc)):
     result = svc.fefo_pick_suggestion(payload.warehouse_id, payload.article_id, payload.quantity_needed)
     total_available = sum(r["pick_kg"] for r in result)
@@ -163,7 +177,9 @@ def fefo_suggestion(payload: FefoSuggestionIn, svc: WarehouseService = Depends(_
 
 # ── Pick Lists ─────────────────────────────────────────────────────────────
 
-@router.post("/pick-lists", status_code=status.HTTP_201_CREATED, summary="Pick list anlegen")
+@router.post("/pick-lists", status_code=status.HTTP_201_CREATED, summary="Pick list anlegen",
+    response_model=dict
+)
 def create_pick_list(payload: PickListIn, svc: WarehouseService = Depends(_svc)):
     items = [item.model_dump() for item in payload.items]
     return svc.create_pick_list(
@@ -176,7 +192,9 @@ def create_pick_list(payload: PickListIn, svc: WarehouseService = Depends(_svc))
     )
 
 
-@router.get("/pick-lists", summary="Pick lists auflisten")
+@router.get("/pick-lists", summary="Pick lists auflisten",
+    response_model=dict
+)
 def list_pick_lists(
     warehouse_id: Optional[str] = Query(None),
     status_filter: Optional[str] = Query(None, alias="status"),
@@ -199,7 +217,9 @@ def list_pick_lists(
     return [dict(r._mapping) for r in rows]
 
 
-@router.get("/pick-lists/{pick_list_id}", summary="Pick list abrufen")
+@router.get("/pick-lists/{pick_list_id}", summary="Pick list abrufen",
+    response_model=dict
+)
 def get_pick_list(pick_list_id: str, svc: WarehouseService = Depends(_svc)):
     from sqlalchemy import text
     pl = svc.db.execute(
@@ -215,7 +235,9 @@ def get_pick_list(pick_list_id: str, svc: WarehouseService = Depends(_svc)):
     return {**dict(pl._mapping), "lines": [dict(l._mapping) for l in lines]}
 
 
-@router.post("/pick-lists/{pick_list_id}/confirm", summary="Pick list bestätigen")
+@router.post("/pick-lists/{pick_list_id}/confirm", summary="Pick list bestätigen",
+    response_model=dict
+)
 def confirm_pick_list(
     pick_list_id: str,
     payload: PickConfirmIn,
@@ -229,7 +251,9 @@ def confirm_pick_list(
 
 # ── Transfers ──────────────────────────────────────────────────────────────
 
-@router.post("/bin-transfers", status_code=status.HTTP_201_CREATED, summary="Transfer bin")
+@router.post("/bin-transfers", status_code=status.HTTP_201_CREATED, summary="Transfer bin",
+    response_model=dict
+)
 def bin_transfer(payload: BinTransferIn, svc: WarehouseService = Depends(_svc)):
     from datetime import date as date_type
     bbd = date_type.fromisoformat(payload.best_before_date) if payload.best_before_date else None
@@ -248,7 +272,9 @@ def bin_transfer(payload: BinTransferIn, svc: WarehouseService = Depends(_svc)):
 
 # ── MHD Ampel ─────────────────────────────────────────────────────────────
 
-@router.get("/mhd-alert", summary="Alert mhd")
+@router.get("/mhd-alert", summary="Alert mhd",
+    response_model=dict
+)
 def mhd_alert(
     warehouse_id: str = Query(...),
     days_warning: int = Query(30),
@@ -260,7 +286,9 @@ def mhd_alert(
 
 # ── Stock Valuation ────────────────────────────────────────────────────────
 
-@router.get("/stock-valuation", summary="Valuation stock")
+@router.get("/stock-valuation", summary="Valuation stock",
+    response_model=dict
+)
 def stock_valuation(
     warehouse_id: Optional[str] = Query(None),
     svc: WarehouseService = Depends(_svc),

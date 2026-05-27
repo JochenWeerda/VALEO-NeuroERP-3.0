@@ -377,7 +377,9 @@ async def import_journal_entries_csv(
         raise HTTPException(status_code=500, detail=f"Failed to import journal entries: {str(e)}")
 
 
-@router.get("/template", summary="Import template abrufen")
+@router.get("/template", summary="Import template abrufen",
+    response_model=dict
+)
 async def get_import_template():
     """
     Get CSV template for journal entry import.

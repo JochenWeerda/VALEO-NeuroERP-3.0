@@ -34,7 +34,9 @@ class EdiPartnerCreateRequest(BaseModel):
     aktive_nachrichtentypen: list[str]
 
 
-@router.post("/nachrichten", status_code=201, summary="Nachricht empfange")
+@router.post("/nachrichten", status_code=201, summary="Nachricht empfange",
+    response_model=dict
+)
 def empfange_nachricht(req: EdiNachrichtEmpfangRequest, db: Session = Depends(get_db)):
     typ = EdiNachrichtenTyp(req.typ)
     ergebnis = parse_edi_nachricht(req.payload_raw, typ)
@@ -56,7 +58,9 @@ def empfange_nachricht(req: EdiNachrichtEmpfangRequest, db: Session = Depends(ge
     return {"nachricht_id": ergebnis.nachricht_id, "success": ergebnis.success, "schema_version": 1}
 
 
-@router.get("/nachrichten/offene", summary="Offene nachrichten abrufen")
+@router.get("/nachrichten/offene", summary="Offene nachrichten abrufen",
+    response_model=dict
+)
 def get_offene_nachrichten(empfaenger_gln: str, db: Session = Depends(get_db)):
     rows = db.query(EdiNachrichtDB).filter(
         EdiNachrichtDB.empfaenger_gln == empfaenger_gln,
@@ -74,7 +78,9 @@ def get_offene_nachrichten(empfaenger_gln: str, db: Session = Depends(get_db)):
     ]
 
 
-@router.post("/partner", status_code=201, summary="Partner anlegen")
+@router.post("/partner", status_code=201, summary="Partner anlegen",
+    response_model=dict
+)
 def create_partner(req: EdiPartnerCreateRequest, db: Session = Depends(get_db)):
     pid = str(uuid.uuid4())
     row = EdiPartnerDB(
@@ -90,7 +96,9 @@ def create_partner(req: EdiPartnerCreateRequest, db: Session = Depends(get_db)):
     return {"partner_id": row.partner_id, "gln": row.gln, "name": row.name}
 
 
-@router.get("/partner", summary="Partner auflisten")
+@router.get("/partner", summary="Partner auflisten",
+    response_model=dict
+)
 def list_partner(tenant_id: str, db: Session = Depends(get_db)):
     rows = db.query(EdiPartnerDB).filter(EdiPartnerDB.tenant_id == tenant_id).all()
     return [{"partner_id": r.partner_id, "gln": r.gln, "name": r.name, "aktive_nachrichtentypen": r.aktive_nachrichtentypen} for r in rows]

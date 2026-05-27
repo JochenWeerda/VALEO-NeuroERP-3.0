@@ -6509,7 +6509,9 @@ class _CompoundFeedParsed(BaseModel):
 # Routes
 # ---------------------------------------------------------------------------
 
-@router.get("/health", summary="Health rations")
+@router.get("/health", summary="Health rations",
+    response_model=dict
+)
 async def rations_health():
     base_url = get_rations_base_url()
     feeds = _get_feeds()
@@ -6532,7 +6534,9 @@ async def rations_health():
     return await _proxy_request("GET", "/health")
 
 
-@router.get("/feeds", summary="Feeds abrufen")
+@router.get("/feeds", summary="Feeds abrufen",
+    response_model=dict
+)
 async def get_feeds(
     request: Request,
     group: Optional[str] = Query(None, description="Filter nach Futtergruppe"),
@@ -6589,7 +6593,9 @@ async def get_feeds(
     return await _proxy_request("GET", "/api/v1/feeds", tenant_id=tenant_id, params=params)
 
 
-@router.get("/feeds/{feed_id}", summary="Feed abrufen")
+@router.get("/feeds/{feed_id}", summary="Feed abrufen",
+    response_model=dict
+)
 async def get_feed(
     feed_id: str,
     request: Request,
@@ -6605,7 +6611,9 @@ async def get_feed(
     return await _proxy_request("GET", f"/api/v1/feeds/{feed_id}", tenant_id=tenant_id)
 
 
-@router.post("/optimize/from-profile", summary="From profile optimize")
+@router.post("/optimize/from-profile", summary="From profile optimize",
+    response_model=dict
+)
 async def optimize_from_profile(
     body: _OptimizeFromProfileBody,
     request: Request,
@@ -6654,7 +6662,9 @@ async def optimize_from_profile(
     )
 
 
-@router.post("/optimize/demo", summary="Demo optimize")
+@router.post("/optimize/demo", summary="Demo optimize",
+    response_model=dict
+)
 async def optimize_demo(
     request: Request,
     x_tenant_id: Optional[str] = Header(None, alias="X-Tenant-Id"),
@@ -6718,7 +6728,9 @@ async def optimize_demo(
     return await _proxy_request("POST", "/api/v1/optimize/demo", tenant_id=tenant_id)
 
 
-@router.post("/optimize", summary="Optimize")
+@router.post("/optimize", summary="Optimize",
+    response_model=dict
+)
 async def optimize(
     request: Request,
     x_tenant_id: Optional[str] = Header(None, alias="X-Tenant-Id"),
@@ -6735,7 +6747,9 @@ async def optimize(
     return await _proxy_request("POST", "/api/v1/optimize", tenant_id=tenant_id, json_body=body)
 
 
-@router.post("/requirements/calculate", summary="Requirements berechnen")
+@router.post("/requirements/calculate", summary="Requirements berechnen",
+    response_model=dict
+)
 async def calculate_requirements(
     request: Request,
     x_tenant_id: Optional[str] = Header(None, alias="X-Tenant-Id"),
@@ -6765,7 +6779,9 @@ async def calculate_requirements(
     return await _proxy_request("POST", "/api/v1/requirements/calculate", tenant_id=tenant_id, json_body=body)
 
 
-@router.post("/requirements/maintenance", summary="Requirements maintenance")
+@router.post("/requirements/maintenance", summary="Requirements maintenance",
+    response_model=dict
+)
 async def maintenance_requirements(
     request: Request,
     body_weight_kg: float = Query(...),
@@ -6789,7 +6805,9 @@ async def maintenance_requirements(
     )
 
 
-@router.post("/feeds/validate", summary="Feeds validieren")
+@router.post("/feeds/validate", summary="Feeds validieren",
+    response_model=dict
+)
 async def validate_feeds(
     request: Request,
     x_tenant_id: Optional[str] = Header(None, alias="X-Tenant-Id"),
@@ -6801,7 +6819,9 @@ async def validate_feeds(
     return await _proxy_request("POST", "/api/v1/feeds/validate", tenant_id=tenant_id, json_body=body)
 
 
-@router.post("/dlg/strukturindex", summary="Strukturindex berechnen")
+@router.post("/dlg/strukturindex", summary="Strukturindex berechnen",
+    response_model=dict
+)
 async def calculate_strukturindex(request: Request):
     """
     Berechne Strukturindex nach DLG 01|2023 (Rutzmoser et al. 2011).
@@ -6830,7 +6850,9 @@ async def calculate_strukturindex(request: Request):
     })
 
 
-@router.get("/dlg/info", summary="Info dlg")
+@router.get("/dlg/info", summary="Info dlg",
+    response_model=dict
+)
 async def dlg_info():
     """DLG-Futterdatenbank-Status: Anzahl Einträge, Quelle, Aktualität."""
     from datetime import datetime, timezone
@@ -6866,7 +6888,9 @@ async def dlg_info():
     })
 
 
-@router.post("/dlg/refresh", summary="Refresh dlg")
+@router.post("/dlg/refresh", summary="Refresh dlg",
+    response_model=dict
+)
 async def dlg_refresh():
     """
     Leert den Feed-Cache und prüft ob neue DLG-Daten vorliegen.
@@ -6883,7 +6907,9 @@ async def dlg_refresh():
     })
 
 
-@router.post("/compound-feed/upload", summary="Compound feed document hochladen")
+@router.post("/compound-feed/upload", summary="Compound feed document hochladen",
+    response_model=dict
+)
 async def upload_compound_feed_document(file: UploadFile = File(...)):
     if not file.filename:
         raise HTTPException(400, "Dateiname fehlt")
@@ -6902,7 +6928,9 @@ async def upload_compound_feed_document(file: UploadFile = File(...)):
     )
 
 
-@router.post("/feeds/from-grundfutter", summary="From grundfutter feed")
+@router.post("/feeds/from-grundfutter", summary="From grundfutter feed",
+    response_model=dict
+)
 async def feed_from_grundfutter(request: Request):
     """
     Konvertiert eine GrundfutterAnalyse in ein LP-kompatibles Futtermittel-Dict.

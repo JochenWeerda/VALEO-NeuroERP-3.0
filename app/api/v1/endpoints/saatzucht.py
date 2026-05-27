@@ -295,7 +295,9 @@ def etikett(
     )
 
 
-@router.get("/partien/{id}/kontrollprotokoll", summary="Kontrollprotokoll")
+@router.get("/partien/{id}/kontrollprotokoll", summary="Kontrollprotokoll",
+    response_model=dict
+)
 def kontrollprotokoll(
     id: str,
     db: Session = Depends(get_db),
@@ -315,7 +317,9 @@ def kontrollprotokoll(
     }
 
 
-@router.get("/statistik", summary="Statistik")
+@router.get("/statistik", summary="Statistik",
+    response_model=dict
+)
 def statistik(
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),

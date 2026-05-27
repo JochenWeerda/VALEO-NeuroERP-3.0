@@ -150,7 +150,9 @@ def create_periodische_buchung(
     return PeriodischeBuchungOut(**dict(row._mapping))
 
 
-@router.patch("/{buchung_id}/sperren", summary="Buchung sperren")
+@router.patch("/{buchung_id}/sperren", summary="Buchung sperren",
+    response_model=dict
+)
 def sperren_buchung(
     buchung_id: str,
     gesperrt: bool = Query(...),
@@ -167,7 +169,9 @@ def sperren_buchung(
     return {"id": buchung_id, "gesperrt": gesperrt}
 
 
-@router.delete("/{buchung_id}", summary="Periodische buchung löschen")
+@router.delete("/{buchung_id}", summary="Periodische buchung löschen",
+    response_model=dict
+)
 def delete_periodische_buchung(
     buchung_id: str,
     db=Depends(get_db),

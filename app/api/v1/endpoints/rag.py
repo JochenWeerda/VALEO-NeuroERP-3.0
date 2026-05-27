@@ -139,7 +139,9 @@ async def index_customers(
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.get("/stats/{collection}", summary="Collection stats abrufen")
+@router.get("/stats/{collection}", summary="Collection stats abrufen",
+    response_model=dict
+)
 async def get_collection_stats(collection: str):
     """Get statistics for a collection."""
     try:
