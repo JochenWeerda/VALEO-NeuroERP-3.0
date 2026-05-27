@@ -1,4 +1,4 @@
-import { Euro, FileText, Leaf, Package, Search, ShieldCheck, ShoppingCart, Target, Truck, Users, Zap } from 'lucide-react'
+import { Euro, FileText, Leaf, Mic, Package, Search, ShieldCheck, ShoppingCart, Target, Truck, Users, Volume2, Zap } from 'lucide-react'
 import type { AiShortcut } from '@/app/navigation/types'
 import { resolveRoutePathFromModule } from '@/app/navigation/route-paths'
 
@@ -107,5 +107,21 @@ export const AI_SHORTCUTS: AiShortcut[] = [
     eventName: 'voice-intent',
     eventPayload: { domain: 'logistics' },
     keywords: ['logistik', 'tour', 'fracht', 'versand', 'voice'],
+  },
+  {
+    id: 'ai-whisperbar-dictate',
+    label: 'WhisperBar Diktat (Strg+Shift+1)',
+    icon: Mic,
+    type: 'event',
+    eventName: 'whisperbar-dictate-start',
+    keywords: ['diktat', 'whisperbar', 'sprache', 'voice', 'mikrofon'],
+  },
+  {
+    id: 'ai-whisperbar-summary',
+    label: 'WhisperBar Summary (Strg+Shift+2)',
+    icon: Volume2,
+    type: 'event',
+    eventName: 'whisperbar-summary-clipboard',
+    keywords: ['summary', 'zusammenfassung', 'vorlesen', 'whisperbar', 'clipboard'],
   },
 ]

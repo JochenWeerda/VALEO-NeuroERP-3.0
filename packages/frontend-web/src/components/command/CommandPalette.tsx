@@ -96,7 +96,10 @@ export function CommandPalette() {
         }
         return {
           ...base,
-          action: () => window.dispatchEvent(new CustomEvent(shortcut.eventName)),
+          action: () =>
+            window.dispatchEvent(
+              new CustomEvent(shortcut.eventName, { detail: shortcut.eventPayload }),
+            ),
         }
       }),
     [navigate],

@@ -762,7 +762,13 @@ export function buildPaletteCommands({
     icon: shortcut.icon,
     category: 'KI',
     actionId: shortcut.id,
-    actionParams: shortcut.type === 'navigate' ? { path: shortcut.path } : { eventName: shortcut.eventName },
+    actionParams:
+      shortcut.type === 'navigate'
+        ? { path: shortcut.path }
+        : {
+            eventName: shortcut.eventName,
+            eventDetail: shortcut.eventPayload,
+          },
     mcp: {
       intent: 'ai-action',
       businessDomain: 'ai',

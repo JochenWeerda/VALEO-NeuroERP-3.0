@@ -1,6 +1,6 @@
 import { Suspense, lazy, useCallback, useEffect, useMemo, useState } from "react"
 import { Outlet } from "react-router-dom"
-import { ActionDispatchProvider } from "@/features/ki-usability"
+import { ActionDispatchProvider, VoiceWhisperBarHost } from "@/features/ki-usability"
 import { AppShell } from "@/components/navigation/AppShell"
 import { AdvisorDock } from "@/features/copilot/AdvisorDock"
 import { useFeature } from "@/hooks/useFeature"
@@ -24,6 +24,7 @@ const CallWidget = lazy(() =>
 
 export default function AppLayout(): JSX.Element {
   const commandPaletteEnabled = useFeature('commandPalette')
+  const voiceControlEnabled = useFeature('voiceControl')
   const realtimeEnabled = useFeature('sse')
 
   const [lastEvent, setLastEvent] = useState<string>(realtimeEnabled ? "idle" : "disabled")
@@ -97,6 +98,7 @@ export default function AppLayout(): JSX.Element {
       <Suspense fallback={null}>
         <AskVALEO />
       </Suspense>
+      <VoiceWhisperBarHost enabled={voiceControlEnabled} />
     </AppShell>
     </ActionDispatchProvider>
   )
