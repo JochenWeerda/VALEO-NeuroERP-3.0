@@ -56,7 +56,7 @@ class FahrerPatch(BaseModel):
 
 
 @router.get("/fahrer", summary="Fahrer auflisten",
-    response_model=dict
+    response_model=list
 )
 def list_fahrer(
     status: Optional[str] = None,

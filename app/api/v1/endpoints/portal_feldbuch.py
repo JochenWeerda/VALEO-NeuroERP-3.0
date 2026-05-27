@@ -260,7 +260,7 @@ def _require_portal_massnahme(
 # ────────────────────────────────────────────────────────────────────────────
 
 @router.get("/feldbuch/schlaege", summary="List schlaege portal",
-    response_model=dict
+    response_model=list
 )
 async def portal_list_schlaege(
     skip: int = Query(0, ge=0),
@@ -348,7 +348,7 @@ async def portal_update_schlag(
 # ────────────────────────────────────────────────────────────────────────────
 
 @router.get("/feldbuch/massnahmen", summary="List massnahmen portal",
-    response_model=dict
+    response_model=list
 )
 async def portal_list_massnahmen(
     schlag_id: Optional[str] = Query(None),
