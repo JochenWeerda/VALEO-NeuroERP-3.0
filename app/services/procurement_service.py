@@ -6,7 +6,7 @@ from datetime import datetime
 from typing import Any, Optional
 from sqlalchemy import func as sqlfunc
 from sqlalchemy.exc import DataError
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, selectinload
 
 from app.core.exceptions import ConflictError, EntityNotFoundError, ValidationFailedError
 from app.core.uuid7 import uuid7
@@ -61,7 +61,9 @@ class ProcurementService:
     # ── Bestellvorschläge CRUD ────────────────────────────────────────────────
 
     def list_vorschlaege(self, vorschlag_typ=None, status=None, von=None, bis=None) -> list[dict]:
-        q = self.db.query(EinkaufBestellvorschlag).filter(EinkaufBestellvorschlag.tenant_id == self.tenant_id)
+        q = self.db.query(EinkaufBestellvorschlag).options(
+            selectinload(EinkaufBestellvorschlag.positionen)
+        ).filter(EinkaufBestellvorschlag.tenant_id == self.tenant_id)
         if vorschlag_typ:
             q = q.filter(EinkaufBestellvorschlag.vorschlag_typ == vorschlag_typ)
         if status:
@@ -332,7 +334,10 @@ class ProcurementService:
     # ── Bestellungen CRUD ─────────────────────────────────────────────────────
 
     def list_bestellungen(self, lieferant_id=None, status=None, von=None, bis=None) -> list[dict]:
-        q = self.db.query(EinkaufBestellung).filter(EinkaufBestellung.tenant_id == self.tenant_id)
+        q = self.db.query(EinkaufBestellung).options(
+            selectinload(EinkaufBestellung.positionen),
+            selectinload(EinkaufBestellung.lieferant),
+        ).filter(EinkaufBestellung.tenant_id == self.tenant_id)
         if lieferant_id:
             q = q.filter(EinkaufBestellung.lieferant_id == lieferant_id)
         if status:

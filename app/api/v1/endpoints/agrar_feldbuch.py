@@ -814,7 +814,9 @@ async def qs_export(
     Liefert strukturierte Feldbuch-Daten für QS-Audits.
     """
     from sqlalchemy import extract
-    q = db.query(FeldbuchMassnahme).filter(
+    q = db.query(FeldbuchMassnahme).options(
+        selectinload(FeldbuchMassnahme.schlag)
+    ).filter(
         FeldbuchMassnahme.tenant_id == tenant_id,
         extract("year", FeldbuchMassnahme.datum) == jahr,
     )
