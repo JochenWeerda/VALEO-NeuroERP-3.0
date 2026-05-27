@@ -25,16 +25,16 @@ export function CopilotInsights(): JSX.Element {
 
   if (loading || insight === null) {
     return (
-      <div className="border rounded-xl p-4 bg-gradient-to-r from-gray-50 to-emerald-50">
+      <div className="rounded-xl border bg-muted/50 p-4">
         🤖 KI lädt …
       </div>
     )
   }
 
   return (
-    <div className="animate-in fade-in-0 border rounded-xl bg-gradient-to-r from-emerald-50 to-teal-50 p-4 shadow duration-200 space-y-2">
-      <div className="font-semibold text-emerald-700">🤖 Copilot-Analyse</div>
-      <p className="text-sm text-gray-800">{insight.summary}</p>
+    <div className="animate-in fade-in-0 space-y-2 rounded-xl border bg-card p-4 shadow duration-200">
+      <div className="font-semibold text-primary">🤖 Copilot-Analyse</div>
+      <p className="text-sm text-foreground">{insight.summary}</p>
 
       <div className="mt-2">
         <div className="text-xs uppercase opacity-70">Hauptfaktoren</div>
@@ -76,7 +76,7 @@ export function CopilotInsights(): JSX.Element {
       </div>
 
       {response !== null && (
-        <div className="animate-in fade-in-0 mt-3 border-t pt-2 text-sm italic text-gray-700 duration-200">
+        <div className="animate-in fade-in-0 mt-3 border-t pt-2 text-sm italic text-muted-foreground duration-200">
           {response}
         </div>
       )}

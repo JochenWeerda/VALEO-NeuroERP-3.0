@@ -36,7 +36,7 @@ export function CopilotDockPanel({
     <>
       <Button
         onClick={onToggleOpen}
-        className="fixed z-40 rounded-full bg-emerald-800 text-white shadow-lg hover:bg-emerald-900 font-semibold"
+        className="fixed z-40 rounded-full font-semibold shadow-lg"
         style={{
           bottom: `${BUTTON_BOTTOM_OFFSET}px`,
           right: `${BUTTON_RIGHT_OFFSET}px`,
@@ -49,21 +49,21 @@ export function CopilotDockPanel({
       </Button>
 
       <div
-        className={`fixed right-0 top-0 z-50 flex h-full flex-col border-l border-emerald-200 bg-white shadow-2xl transition-transform duration-300 ease-out ${
+        className={`fixed right-0 top-0 z-50 flex h-full flex-col border-l bg-card shadow-2xl transition-transform duration-300 ease-out ${
           open ? 'translate-x-0' : 'translate-x-full'
         }`}
         style={{ width: `${DOCK_WIDTH}px` }}
         {...(!open ? { inert: true as const } : { role: 'dialog' as const, 'aria-modal': true as const, 'aria-label': 'Copilot Advisor' })}
       >
-        <div className="border-b bg-gradient-to-r from-emerald-50 to-teal-50 p-3">
+        <div className="border-b bg-muted/50 p-3">
           <div className="flex items-center justify-between">
-            <span className="font-semibold text-emerald-700">Copilot Advisor</span>
+            <span className="font-semibold text-primary">Copilot Advisor</span>
             <Button size="sm" variant="ghost" onClick={onToggleOpen} aria-label="Chat schliessen">
               x
             </Button>
           </div>
           <div className="mt-2 flex flex-wrap items-center gap-2 text-xs">
-            <Badge variant={connected ? 'outline' : 'secondary'} className={connected ? 'border-emerald-300 text-emerald-700' : ''}>
+            <Badge variant={connected ? 'success' : 'secondary'}>
               {connected ? 'Stream verbunden' : 'Offline'}
             </Badge>
             {sessionId ? <Badge variant="secondary">Session {sessionId.slice(0, 8)}</Badge> : null}
@@ -72,7 +72,7 @@ export function CopilotDockPanel({
 
         <div className="flex-1 space-y-2 overflow-y-auto p-3">
           {messages.length === 0 ? (
-            <div className="mt-8 rounded-xl border border-dashed border-emerald-200 bg-emerald-50/50 p-4 text-sm text-gray-600">
+            <div className="mt-8 rounded-xl border border-dashed bg-muted/50 p-4 text-sm text-muted-foreground">
               Stelle eine Frage zu KPIs, Lager, Preisen oder Prognosen.
             </div>
           ) : null}
@@ -80,13 +80,13 @@ export function CopilotDockPanel({
             <div
               key={msg.id}
               className={`max-w-[88%] rounded-xl p-2 ${
-                msg.role === 'user' ? 'ml-auto bg-emerald-600 text-white' : 'bg-emerald-100 text-gray-800'
+                msg.role === 'user' ? 'ml-auto bg-primary text-primary-foreground' : 'bg-muted text-foreground'
               }`}
             >
               {msg.content.length > 0 ? msg.content : '...'}
             </div>
           ))}
-          {loading ? <div className="text-sm italic text-gray-500">Copilot denkt ...</div> : null}
+          {loading ? <div className="text-sm italic text-muted-foreground">Copilot denkt ...</div> : null}
         </div>
 
         <form className="flex gap-2 border-t p-3" onSubmit={onSubmit}>

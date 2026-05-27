@@ -21,13 +21,13 @@ type HumanOversightBoardProps = {
 function statusBadge(status: RunListItem['status']) {
   switch (status) {
     case 'completed':
-      return <Badge variant="outline" className="border-emerald-300 text-emerald-700">Abgeschlossen</Badge>
+      return <Badge variant="success">Abgeschlossen</Badge>
     case 'pending_approval':
-      return <Badge className="bg-amber-500">Freigabe ausstehend</Badge>
+      return <Badge variant="warning">Freigabe ausstehend</Badge>
     case 'rejected':
-      return <Badge variant="outline" className="border-red-300 text-red-600">Abgelehnt</Badge>
+      return <Badge variant="destructive">Abgelehnt</Badge>
     case 'running':
-      return <Badge variant="outline" className="border-violet-300 text-violet-700">Laeuft</Badge>
+      return <Badge variant="info">Laeuft</Badge>
     case 'failed':
       return <Badge variant="destructive">Fehlgeschlagen</Badge>
     default:
@@ -38,13 +38,13 @@ function statusBadge(status: RunListItem['status']) {
 function statusIcon(status: RunListItem['status']) {
   switch (status) {
     case 'completed':
-      return <CheckCircle className="h-4 w-4 text-emerald-500" />
+      return <CheckCircle className="h-4 w-4 text-[hsl(var(--color-semantic-success-600-hsl))]" />
     case 'pending_approval':
-      return <Clock className="h-4 w-4 text-amber-500" />
+      return <Clock className="h-4 w-4 text-[hsl(var(--color-semantic-warning-600-hsl))]" />
     case 'rejected':
-      return <XCircle className="h-4 w-4 text-red-500" />
+      return <XCircle className="h-4 w-4 text-destructive" />
     default:
-      return <Activity className="h-4 w-4 text-slate-400" />
+      return <Activity className="h-4 w-4 text-muted-foreground" />
   }
 }
 
@@ -92,12 +92,12 @@ export function HumanOversightBoard({
 
   return (
     <div className="grid gap-6 xl:grid-cols-[1.2fr_0.8fr]">
-      <Card className="border-slate-200">
-        <CardHeader className="border-b bg-slate-50/70">
+      <Card>
+        <CardHeader className="border-b bg-muted/40">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
             <div>
               <CardTitle className="flex items-center gap-2">
-                <ShieldCheck className="h-5 w-5 text-slate-700" />
+                <ShieldCheck className="h-5 w-5 text-primary" />
                 Human Oversight Cases
               </CardTitle>
               <p className="mt-1 text-sm text-muted-foreground">
@@ -109,20 +109,20 @@ export function HumanOversightBoard({
             </Button>
           </div>
           <div className="grid gap-3 md:grid-cols-4">
-            <div className="rounded-xl border bg-white p-3">
+            <div className="rounded-xl border bg-card p-3">
               <div className="text-xs uppercase text-muted-foreground">Gesamt</div>
               <div className="mt-1 text-2xl font-semibold">{runs.length}</div>
             </div>
-            <div className="rounded-xl border bg-amber-50 p-3">
-              <div className="text-xs uppercase text-amber-700">Freigabe ausstehend</div>
-              <div className="mt-1 text-2xl font-semibold text-amber-700">{pendingRuns}</div>
+            <div className="rounded-xl border border-[hsl(var(--color-semantic-warning-500-hsl)/0.25)] bg-[hsl(var(--color-semantic-warning-50-hsl))] p-3">
+              <div className="text-xs uppercase text-[hsl(var(--color-semantic-warning-700-hsl))]">Freigabe ausstehend</div>
+              <div className="mt-1 text-2xl font-semibold text-[hsl(var(--color-semantic-warning-700-hsl))]">{pendingRuns}</div>
             </div>
-            <div className="rounded-xl border bg-emerald-50 p-3">
-              <div className="text-xs uppercase text-emerald-700">Abgeschlossen</div>
-              <div className="mt-1 text-2xl font-semibold text-emerald-700">{completedRuns}</div>
+            <div className="rounded-xl border border-[hsl(var(--color-semantic-success-500-hsl)/0.25)] bg-[hsl(var(--color-semantic-success-50-hsl))] p-3">
+              <div className="text-xs uppercase text-[hsl(var(--color-semantic-success-700-hsl))]">Abgeschlossen</div>
+              <div className="mt-1 text-2xl font-semibold text-[hsl(var(--color-semantic-success-700-hsl))]">{completedRuns}</div>
             </div>
-            <div className="rounded-xl border bg-slate-100 p-3">
-              <div className="text-xs uppercase text-slate-600">Capabilitys</div>
+            <div className="rounded-xl border bg-muted p-3">
+              <div className="text-xs uppercase text-muted-foreground">Capabilitys</div>
               <div className="mt-1 text-2xl font-semibold">{new Set(runs.map((run) => run.capability_key)).size}</div>
             </div>
           </div>
@@ -163,7 +163,7 @@ export function HumanOversightBoard({
                     key={run.run_id}
                     type="button"
                     className={`flex w-full items-start justify-between gap-4 px-4 py-4 text-left transition-colors ${
-                      isSelected ? 'bg-slate-100' : 'hover:bg-slate-50'
+                      isSelected ? 'bg-muted' : 'hover:bg-muted/60'
                     }`}
                     onClick={() => {
                       startTransition(() => setSelectedRunId(run.run_id))
@@ -190,8 +190,8 @@ export function HumanOversightBoard({
         </CardContent>
       </Card>
 
-      <Card className="border-slate-200">
-        <CardHeader className="border-b bg-white">
+      <Card>
+        <CardHeader className="border-b bg-card">
           <CardTitle>Case-Detail</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4 p-4">
@@ -199,7 +199,7 @@ export function HumanOversightBoard({
             <div className="text-sm text-muted-foreground">Kein Run ausgewaehlt.</div>
           ) : (
             <>
-              <div className="space-y-2 rounded-xl border bg-slate-50 p-4">
+              <div className="space-y-2 rounded-xl border bg-muted/50 p-4">
                 <div className="flex items-center justify-between gap-3">
                   <div>
                     <div className="text-sm text-muted-foreground">Capability</div>
@@ -223,7 +223,7 @@ export function HumanOversightBoard({
 
               <div className="space-y-2">
                 <div className="text-sm font-medium">Gate- und Ergebnisdaten</div>
-                <pre className="max-h-72 overflow-auto rounded-xl border bg-slate-950 p-3 text-xs text-slate-100">
+                <pre className="max-h-72 overflow-auto rounded-xl border bg-foreground p-3 text-xs text-background">
                   {JSON.stringify(selectedRun.result, null, 2)}
                 </pre>
               </div>
@@ -231,18 +231,18 @@ export function HumanOversightBoard({
               {selectedRun.status === 'pending_approval' ? (
                 <>
                   {canActOnRun(selectedRun) ? (
-                    <div className="space-y-3 rounded-xl border border-amber-200 bg-amber-50 p-4">
-                      <div className="text-sm font-medium text-amber-900">Manuelle Entscheidung</div>
+                    <div className="space-y-3 rounded-xl border border-[hsl(var(--color-semantic-warning-500-hsl)/0.25)] bg-[hsl(var(--color-semantic-warning-50-hsl))] p-4">
+                      <div className="text-sm font-medium text-[hsl(var(--color-semantic-warning-800-hsl))]">Manuelle Entscheidung</div>
                       <Input
                         value={rejectionInput[selectedRun.run_id] ?? ''}
                         onChange={(event) => onRejectionInputChange(selectedRun.run_id, event.target.value)}
                         placeholder="Ablehnungsgrund"
                       />
                       <div className="flex gap-2">
-                        <Button className="flex-1 bg-emerald-600 hover:bg-emerald-700" onClick={() => onApprove(selectedRun.run_id)}>
+                        <Button className="flex-1" onClick={() => onApprove(selectedRun.run_id)}>
                           Freigeben
                         </Button>
-                        <Button variant="outline" className="flex-1 border-red-300 text-red-600 hover:bg-red-50" onClick={() => onReject(selectedRun.run_id)}>
+                        <Button variant="destructive" className="flex-1" onClick={() => onReject(selectedRun.run_id)}>
                           Ablehnen
                         </Button>
                       </div>

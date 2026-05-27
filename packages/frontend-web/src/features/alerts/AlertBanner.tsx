@@ -27,10 +27,10 @@ export function AlertBanner({ items }: AlertBannerProps): JSX.Element | null {
 
   const bgClass =
     topAlert.severity === "crit"
-      ? "bg-red-50 border-red-300 text-red-800"
+      ? "border-destructive/30 bg-destructive/10 text-destructive"
       : topAlert.severity === "warn"
-        ? "bg-amber-50 border-amber-300 text-amber-800"
-        : "bg-emerald-50 border-emerald-300 text-emerald-800"
+        ? "border-[hsl(var(--color-semantic-warning-500-hsl)/0.3)] bg-[hsl(var(--color-semantic-warning-50-hsl))] text-[hsl(var(--color-semantic-warning-800-hsl))]"
+        : "border-[hsl(var(--color-semantic-success-500-hsl)/0.3)] bg-[hsl(var(--color-semantic-success-50-hsl))] text-[hsl(var(--color-semantic-success-800-hsl))]"
 
   return (
     <div
@@ -63,10 +63,10 @@ export function AlertList({ items }: AlertListProps): JSX.Element {
       {items.map((alert): JSX.Element => {
         const severityClass =
           alert.severity === "crit"
-            ? "text-red-700 font-medium"
+            ? "font-medium text-destructive"
             : alert.severity === "warn"
-              ? "text-amber-700 font-medium"
-              : "text-emerald-700 font-medium"
+              ? "font-medium text-[hsl(var(--color-semantic-warning-700-hsl))]"
+              : "font-medium text-[hsl(var(--color-semantic-success-700-hsl))]"
 
         return (
           <li key={alert.id} className="text-sm border rounded-lg p-3">

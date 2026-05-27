@@ -30,13 +30,13 @@ export interface CrudAuditTrailPanelProps {
   isLoading?: boolean;
 }
 
-const actionColors: Record<string, string> = {
-  CREATE: 'bg-green-100 text-green-800',
-  UPDATE: 'bg-blue-100 text-blue-800',
-  DELETE: 'bg-red-100 text-red-800',
-  CANCEL: 'bg-orange-100 text-orange-800',
-  AMEND: 'bg-purple-100 text-purple-800',
-  RESTORE: 'bg-gray-100 text-gray-800',
+const actionVariants: Record<ChangeLog['action'], React.ComponentProps<typeof Badge>['variant']> = {
+  CREATE: 'success',
+  UPDATE: 'info',
+  DELETE: 'destructive',
+  CANCEL: 'warning',
+  AMEND: 'secondary',
+  RESTORE: 'muted',
 };
 
 // Action labels will be loaded from i18n
@@ -111,9 +111,7 @@ export function CrudAuditTrailPanel({
                     {format(timestamp, 'dd.MM.yyyy HH:mm:ss', { locale: de })}
                   </TableCell>
                   <TableCell>
-                    <Badge
-                      className={actionColors[log.action] || 'bg-gray-100 text-gray-800'}
-                    >
+                    <Badge variant={actionVariants[log.action] ?? 'muted'}>
                       {getActionLabel(log.action)}
                     </Badge>
                   </TableCell>

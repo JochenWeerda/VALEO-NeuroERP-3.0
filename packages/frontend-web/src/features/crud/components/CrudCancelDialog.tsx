@@ -102,10 +102,10 @@ export function CrudCancelDialog({
               }}
               placeholder={t('crud.dialogs.cancel.reasonPlaceholder')}
               rows={4}
-              className={error ? 'border-red-500' : ''}
+              className={error ? 'border-destructive' : ''}
             />
             {error && (
-              <p className="text-sm text-red-500">{error}</p>
+              <p className="text-sm text-destructive">{error}</p>
             )}
             <p className="text-xs text-muted-foreground">
               {t('crud.dialogs.cancel.reasonMinLength')}
@@ -119,7 +119,7 @@ export function CrudCancelDialog({
           <AlertDialogAction
             onClick={handleConfirm}
             disabled={isLoading || !reason || reason.trim().length < 10}
-            className="bg-orange-600 hover:bg-orange-700"
+            className="bg-[hsl(var(--color-semantic-warning-600-hsl))] text-white hover:bg-[hsl(var(--color-semantic-warning-700-hsl))]"
           >
             {isLoading ? t('crud.dialogs.cancel.confirming') : t('crud.dialogs.cancel.confirmButton')}
           </AlertDialogAction>

@@ -6,10 +6,12 @@ Stand: `2026-05-26`
 
 **Von:** Codex
 **Owner:** Codex
-**Stand:** reserviert 2026-05-27
+**Stand:** abgeschlossen 2026-05-27
 **Ziel des Slices:** Fachseiten-Hardcolors in einem ersten risikoarmen Folgeslice auf Meridian-/semantische Tokens ziehen.
 **Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/agent-ops/slices/DESIGN-MERIDIAN-HARDCOLORS-011.yaml`, fokussierte Frontend-Fachseiten/-Features nach Audit.
 **Abnahmekriterien:** Ein klar abgegrenzter Satz sichtbarer Fachseiten/Feature-Komponenten nutzt keine generischen Tailwind-Hardcolors mehr fuer Status-, Surface- und Textsemantik; Typecheck, Workboard-Validierung und Diff-Checks sind gruen; verbleibende Hardcolors werden als Folgescope dokumentiert.
+**Erledigt:** Workflow-Oversight, ApprovalPanel, Copilot Dock/Insights, CRUD-Audit/Cancel/Delete und AlertBanner von generischen Slate/Gray/Green/Red/Amber/Emerald-Hardcolors auf `primary`, `muted`, `card`, `destructive` und semantische Meridian-Token gezogen.
+**Checks:** `pnpm --filter @valero-neuroerp/frontend-web type-check`; `python scripts\agent_workboard_supervisor.py validate`; gezielter `rg`-Hardcolor-Scan auf den bearbeiteten Dateien ohne Treffer; `git diff --check`.
 **Offene Risiken:** Repo enthaelt sehr viele historische Hardcolors; dieser Slice schliesst bewusst einen priorisierten Batch statt alle Fachseiten in einem grossen Refactor.
 
 ## ERP-QUALITY-ROADMAP-CLOSURE-001
