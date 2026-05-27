@@ -42,8 +42,8 @@ def _503(hint: str = "alembic upgrade head") -> HTTPException:
 def _check_tables(db: Session) -> None:
     """Raise 503 if required tables are missing."""
     try:
-        db.execute(text(f"SELECT 1 FROM {_TABLE_ASSETS} LIMIT 0"))  # nosec S608 — reviewed-safe: column names code-controlled, values parameterized
-        db.execute(text(f"SELECT 1 FROM {_TABLE_RUNS} LIMIT 0"))  # nosec S608 — reviewed-safe: column names code-controlled, values parameterized
+        db.execute(text("SELECT 1 FROM domain_finance.fixed_assets LIMIT 0"))
+        db.execute(text("SELECT 1 FROM domain_finance.asset_depreciation_runs LIMIT 0"))
     except Exception:
         raise _503()
 
@@ -185,7 +185,7 @@ def get_asset(
     _check_tables(db)
     try:
         row = db.execute(
-            text(f"SELECT * FROM {_TABLE_ASSETS} WHERE id = :id AND tenant_id = :tid"),  # nosec S608 — reviewed-safe: column names code-controlled, values parameterized
+            text("SELECT * FROM domain_finance.fixed_assets WHERE id = :id AND tenant_id = :tid"),
             {"id": asset_id, "tid": tenant_id},
         ).mappings().first()
         if not row:
@@ -230,7 +230,7 @@ def update_asset(
             raise HTTPException(409, "Anlage hat bereits AfA-Läufe; Änderung nicht erlaubt")
 
         asset_row = db.execute(
-            text(f"SELECT id FROM {_TABLE_ASSETS} WHERE id = :id AND tenant_id = :tid"),  # nosec S608 — reviewed-safe: column names code-controlled, values parameterized
+            text("SELECT id FROM domain_finance.fixed_assets WHERE id = :id AND tenant_id = :tid"),
             {"id": asset_id, "tid": tenant_id},
         ).first()
         if not asset_row:
