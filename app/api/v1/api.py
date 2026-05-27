@@ -1561,6 +1561,10 @@ api_router.include_router(kontrakt_hedging.router)
 # E-Rechnung Import (ZUGFeRD / XRechnung)
 api_router.include_router(erechnung_import.router)
 
+# Slice-006: E-Rechnung Export (XRechnung 3.0 / ZUGFeRD 2.x) für B2B-Verkaufsrechnungen
+from app.api.v1.endpoints import sales_invoice_einvoice  # noqa: E402
+api_router.include_router(sales_invoice_einvoice.router)
+
 # Dynamische Preis-Kalkulations-Engine
 api_router.include_router(price_calculation.router)
 
