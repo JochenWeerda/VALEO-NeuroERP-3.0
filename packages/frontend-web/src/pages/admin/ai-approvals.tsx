@@ -73,7 +73,7 @@ export default function AiApprovalsPage(): JSX.Element {
         <CardContent>
           {pendingItems.length === 0 ? (
             <div className="flex flex-col items-center justify-center gap-4 rounded-lg border border-dashed py-12">
-              <CheckCircle2 className="h-12 w-12 text-green-500" />
+              <CheckCircle2 className="h-12 w-12 text-[hsl(var(--color-semantic-success-700-hsl))]" />
               <p className="text-center text-muted-foreground">
                 Keine ausstehenden Freigabe-Aktionen. Alle AP-Rechnungen sind aktuell verarbeitet.
               </p>
@@ -108,7 +108,7 @@ export default function AiApprovalsPage(): JSX.Element {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <CheckCircle2 className="h-5 w-5 text-green-600" />
+            <CheckCircle2 className="h-5 w-5 text-[hsl(var(--color-semantic-success-700-hsl))]" />
             Freigabe-Endpunkte
           </CardTitle>
         </CardHeader>

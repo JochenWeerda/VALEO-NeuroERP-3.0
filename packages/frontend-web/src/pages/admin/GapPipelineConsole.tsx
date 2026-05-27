@@ -246,7 +246,7 @@ export default function GapPipelineConsole() {
                 <div className="flex items-center gap-2">
                   <span className="text-sm font-medium">Status:</span>
                   {pipelineComplete ? (
-                    <Badge variant="default" className="bg-green-500">
+                    <Badge variant="success">
                       <CheckCircle2 className="mr-1 h-3 w-3" />
                       Komplett
                     </Badge>
