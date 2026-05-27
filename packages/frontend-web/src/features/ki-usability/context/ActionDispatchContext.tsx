@@ -64,6 +64,36 @@ const NAV_ACTIONS: Record<string, string> = {
   'crm-lead-neu': '/crm/leads',
   'crm-aktivitaet-neu': '/crm/aktivitaeten',
   'crm-kontakt-suche': '/crm/kontakte-liste',
+  // Slice-012 Wave B: Finanzen
+  'nav-fibu-hauptbuch': '/fibu/hauptbuch',
+  'nav-op-debitoren': '/finance/op-debitoren',
+  'nav-op-kreditoren': '/finance/op-kreditoren',
+  'nav-zahlungslaeufe': '/fibu/zahlungslaeufe',
+  'finance-booking': '/finance/bookings/new',
+  'nav-buchungsjournal': '/fibu/buchungsjournal',
+  'nav-ustva': '/export/ustva',
+  'nav-bilanz': '/fibu/bilanz',
+  // Slice-012 Wave B: Compliance
+  'nav-compliance-dashboard': '/admin/compliance',
+  'nav-verarbeitungsverzeichnis': '/compliance/verarbeitungsverzeichnis',
+  'nav-datenpannen': '/compliance/datenpannen',
+  'compliance-dsgvo-anfragen': '/crm/gdpr-requests',
+  'nav-sanktionspruefung': '/compliance/sanktionspruefung',
+  // Slice-012 Wave C: Agrar
+  'nav-agrar': '/agrar/ernte-annahme-erfassung',
+  'nav-ernte-annahme': '/agrar/annahme',
+  'agrar-ernte-erfassen': '/agrar/ernte-annahme-erfassung',
+  'nav-agrar-vertraege': '/agrar/vertraege',
+  'nav-schlaege': '/agrar/schlaege',
+  'nav-silos': '/lager/silos',
+  'nav-rohware-annahme': '/agrar/annahme/rohware',
+  'nav-feldbuch': '/agrar/schlaege',
+  // Slice-012 Wave C: Logistik
+  'nav-logistik': '/logistik/tourenplanung',
+  'nav-tourenplanung': '/logistik/tourenplanung',
+  'nav-frachtbriefe': '/logistik/frachtbriefe',
+  'nav-versandprofile': '/logistik/versandprofile',
+  'logistik-tour-planen': '/logistik/tourenplanung',
 }
 
 const GLOBAL_SHORTCUT_ACTION_IDS = new Set<string>([

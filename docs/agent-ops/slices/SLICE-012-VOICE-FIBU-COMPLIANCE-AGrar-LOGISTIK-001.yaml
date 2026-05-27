@@ -1,0 +1,20 @@
+id: SLICE-012-VOICE-FIBU-COMPLIANCE-AGrar-LOGISTIK-001
+title: Slice-012 — Voice Wave B (FiBu/Compliance) + Wave C (Agrar/Logistik)
+owner: Claude Sonnet 4.6
+status: abgeschlossen
+claimed_at: 2026-05-27
+completed_at: 2026-05-27
+depends_on:
+  - SLICE-011-VOICE-VERKAUF-CRM-001
+goal: >
+  Voice-Intents fuer die verbleibenden ERP-Domains: Finanzbuchhaltung, Compliance,
+  Agrar und Logistik. Inklusive NAV_ACTIONS-Dispatch und pytest-Abdeckung.
+new_intents:
+  finance: 8
+  compliance: 5
+  agrar: 8
+  logistik: 5
+acceptance_criteria:
+  - 26 neue Intents registriert und routbar
+  - pytest gruen (gesamt Voice-Suite)
+  - TypeScript 0 Fehler

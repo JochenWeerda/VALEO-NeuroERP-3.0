@@ -463,6 +463,230 @@ ACTIONS: List[ActionOut] = [
         domain="crm",
         intent_phrases=["Kontakt suchen", "Kontaktsuche CRM", "Kontakt finden"],
     ),
+
+    # -------------------------------------------------------------------------
+    # Slice-012 Wave B: Finanzen-Intents
+    # -------------------------------------------------------------------------
+    ActionOut(
+        id="nav-fibu-hauptbuch",
+        label="Hauptbuch",
+        description="Hauptbuch oeffnen",
+        category="navigation",
+        domain="finance",
+        intent_phrases=["Hauptbuch oeffnen", "Gehe zu Hauptbuch", "Hauptbuch anzeigen", "Hauptbuch Fibu"],
+    ),
+    ActionOut(
+        id="nav-op-debitoren",
+        label="OP Debitoren",
+        description="Offene Posten Debitoren oeffnen",
+        category="navigation",
+        domain="finance",
+        intent_phrases=["OP Debitoren", "Offene Posten Debitoren", "Forderungen offen", "Debitoren OP"],
+    ),
+    ActionOut(
+        id="nav-op-kreditoren",
+        label="OP Kreditoren",
+        description="Offene Posten Kreditoren oeffnen",
+        category="navigation",
+        domain="finance",
+        intent_phrases=["OP Kreditoren", "Offene Posten Kreditoren", "Verbindlichkeiten offen", "Kreditoren OP"],
+    ),
+    ActionOut(
+        id="nav-zahlungslaeufe",
+        label="Zahlungslaeufe",
+        description="Zahlungslaeufe oeffnen",
+        category="navigation",
+        domain="finance",
+        intent_phrases=["Zahlungslaeufe", "Zahlungslauf oeffnen", "Gehe zu Zahlungslaeufen", "Zahlungen ausfuehren"],
+    ),
+    ActionOut(
+        id="finance-booking",
+        label="Buchung erfassen",
+        description="Neue Fibu-Buchung erfassen",
+        category="action",
+        domain="finance",
+        intent_phrases=["Buchung erfassen", "Neue Buchung", "Buchung anlegen", "Fibu buchen"],
+    ),
+    ActionOut(
+        id="nav-buchungsjournal",
+        label="Buchungsjournal",
+        description="Buchungsjournal oeffnen",
+        category="navigation",
+        domain="finance",
+        intent_phrases=["Buchungsjournal", "Journal oeffnen", "Gehe zum Buchungsjournal", "Buchungen Journal"],
+    ),
+    ActionOut(
+        id="nav-ustva",
+        label="USt-Voranmeldung",
+        description="Umsatzsteuer-Voranmeldung oeffnen",
+        category="navigation",
+        domain="finance",
+        intent_phrases=["UStVA", "Umsatzsteuer Voranmeldung", "USt Voranmeldung", "Finanzamt Meldung"],
+    ),
+    ActionOut(
+        id="nav-bilanz",
+        label="Bilanz",
+        description="Bilanz oeffnen",
+        category="navigation",
+        domain="finance",
+        intent_phrases=["Bilanz oeffnen", "Gehe zur Bilanz", "Bilanz anzeigen", "Jahresbilanz"],
+    ),
+
+    # -------------------------------------------------------------------------
+    # Slice-012 Wave B: Compliance-Intents
+    # -------------------------------------------------------------------------
+    ActionOut(
+        id="nav-compliance-dashboard",
+        label="Compliance Dashboard",
+        description="Compliance-Uebersicht oeffnen",
+        category="navigation",
+        domain="compliance",
+        intent_phrases=["Compliance Dashboard", "Compliance oeffnen", "Gehe zu Compliance", "Aufsicht Dashboard"],
+    ),
+    ActionOut(
+        id="nav-verarbeitungsverzeichnis",
+        label="Verarbeitungsverzeichnis",
+        description="DSGVO Art. 30 Verarbeitungsverzeichnis oeffnen",
+        category="navigation",
+        domain="compliance",
+        intent_phrases=["Verarbeitungsverzeichnis", "Art 30 oeffnen", "RoPA oeffnen", "DSGVO Verzeichnis"],
+    ),
+    ActionOut(
+        id="nav-datenpannen",
+        label="Datenpannen",
+        description="DSGVO Art. 33 Datenpannen-Meldung oeffnen",
+        category="navigation",
+        domain="compliance",
+        intent_phrases=["Datenpannen", "Datenpanne melden", "Art 33 oeffnen", "Breach Meldung"],
+    ),
+    ActionOut(
+        id="compliance-dsgvo-anfragen",
+        label="DSGVO-Anfragen",
+        description="Betroffenenanfragen oeffnen",
+        category="action",
+        domain="compliance",
+        intent_phrases=["DSGVO Anfragen", "Betroffenenanfrage", "Auskunftsanfrage DSGVO", "GDPR Anfragen"],
+    ),
+    ActionOut(
+        id="nav-sanktionspruefung",
+        label="Sanktionspruefung",
+        description="Sanktionslisten-Pruefung oeffnen",
+        category="navigation",
+        domain="compliance",
+        intent_phrases=["Sanktionspruefung", "Sanktionsliste pruefen", "Sanktionen oeffnen", "Compliance Pruefung"],
+    ),
+
+    # -------------------------------------------------------------------------
+    # Slice-012 Wave C: Agrar-Intents
+    # -------------------------------------------------------------------------
+    ActionOut(
+        id="nav-agrar",
+        label="Agrar",
+        description="Agrar-Bereich oeffnen",
+        category="navigation",
+        domain="agrar",
+        intent_phrases=["Gehe zu Agrar", "Agrar oeffnen", "Warenwirtschaft Agrar", "Agrar Bereich"],
+    ),
+    ActionOut(
+        id="nav-ernte-annahme",
+        label="Ernte-Annahme",
+        description="Ernte-Annahme oeffnen",
+        category="navigation",
+        domain="agrar",
+        intent_phrases=["Ernte Annahme", "Ernteannahme oeffnen", "Gehe zur Ernteannahme", "Warenannahme Ernte"],
+    ),
+    ActionOut(
+        id="agrar-ernte-erfassen",
+        label="Ernte erfassen",
+        description="Neue Ernte-Annahme erfassen",
+        category="action",
+        domain="agrar",
+        intent_phrases=["Ernte erfassen", "Ernte annehmen", "Annahme erfassen Agrar", "Harvest erfassen"],
+    ),
+    ActionOut(
+        id="nav-agrar-vertraege",
+        label="Agrar-Vertraege",
+        description="Agrar-Vertraege oeffnen",
+        category="navigation",
+        domain="agrar",
+        intent_phrases=["Agrar Vertraege", "Liefervertraege Agrar", "Gehe zu Agrarvertraegen", "Kontrakte Agrar"],
+    ),
+    ActionOut(
+        id="nav-schlaege",
+        label="Schlaege Feldbuch",
+        description="Schlagkartei und Feldbuch oeffnen",
+        category="navigation",
+        domain="agrar",
+        intent_phrases=["Schlaege oeffnen", "Feldbuch Schlaege", "Gehe zu Schlaegen", "Schlagkartei"],
+    ),
+    ActionOut(
+        id="nav-silos",
+        label="Silo-Status",
+        description="Silo-Uebersicht oeffnen",
+        category="navigation",
+        domain="agrar",
+        intent_phrases=["Silos oeffnen", "Silo Status", "Gehe zu Silos", "Getreidesilo"],
+    ),
+    ActionOut(
+        id="nav-rohware-annahme",
+        label="Rohware-Annahme",
+        description="Rohware-Annahme oeffnen",
+        category="navigation",
+        domain="agrar",
+        intent_phrases=["Rohware Annahme", "Rohware annehmen", "Gehe zur Rohwareannahme", "Rohstoff Annahme"],
+    ),
+    ActionOut(
+        id="nav-feldbuch",
+        label="Feldbuch",
+        description="Feldbuch oeffnen",
+        category="navigation",
+        domain="agrar",
+        intent_phrases=["Feldbuch oeffnen", "Gehe zum Feldbuch", "Feldbuch anzeigen", "Agrar Feldbuch"],
+    ),
+
+    # -------------------------------------------------------------------------
+    # Slice-012 Wave C: Logistik-Intents
+    # -------------------------------------------------------------------------
+    ActionOut(
+        id="nav-logistik",
+        label="Logistik",
+        description="Logistik-Bereich oeffnen",
+        category="navigation",
+        domain="logistics",
+        intent_phrases=["Gehe zu Logistik", "Logistik oeffnen", "Logistik Bereich", "Disposition Logistik"],
+    ),
+    ActionOut(
+        id="nav-tourenplanung",
+        label="Tourenplanung",
+        description="Tourenplanung oeffnen",
+        category="navigation",
+        domain="logistics",
+        intent_phrases=["Tourenplanung", "Touren planen", "Gehe zur Tourenplanung", "Tourplanung oeffnen"],
+    ),
+    ActionOut(
+        id="nav-frachtbriefe",
+        label="Frachtbriefe",
+        description="Frachtbriefe oeffnen",
+        category="navigation",
+        domain="logistics",
+        intent_phrases=["Frachtbriefe", "Frachtbrief oeffnen", "Gehe zu Frachtbriefen", "CMR Briefe"],
+    ),
+    ActionOut(
+        id="nav-versandprofile",
+        label="Versandprofile",
+        description="Versandprofile oeffnen",
+        category="navigation",
+        domain="logistics",
+        intent_phrases=["Versandprofile", "Versandprofil oeffnen", "Gehe zu Versandprofilen", "Lieferprofile"],
+    ),
+    ActionOut(
+        id="logistik-tour-planen",
+        label="Tour planen",
+        description="Neue Tour in der Tourenplanung anlegen",
+        category="action",
+        domain="logistics",
+        intent_phrases=["Tour planen", "Neue Tour", "Tour anlegen", "Lieferung planen"],
+    ),
 ]
 
 _action_by_id: Dict[str, ActionOut] = {a.id: a for a in ACTIONS}

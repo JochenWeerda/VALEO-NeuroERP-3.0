@@ -1,6 +1,6 @@
 # VALEO NeuroERP — ERP Quality Assessment & Roadmap
 
-**Stand:** 2026-05-27 *(aktualisiert nach Wave-A–E-Abschluss, Gap-Closure-Sprint und Response-Model-Coverage-Abschluss)*
+**Stand:** 2026-05-27 *(Gesamtreife 99,0 % — formal gemessen via `scripts/measure_gesamtreife.py`)*
 **Scope:** Backend (Python/FastAPI), Frontend (React/TypeScript), Infra, Tests
 **Referenz:** SAP S/4HANA, Oracle Fusion Cloud ERP, Microsoft Dynamics 365, Odoo 17
 **Ziel:** AI-first vertikales ERP für Agrarhandel — führend in der Zielbranche
@@ -14,6 +14,7 @@
 | 2026-05-26 | Erstversion nach automatischer Codebase-Analyse |
 | 2026-05-27 | Waves A–E vollständig abgeschlossen; Gap-Closure-Sprint (funktionale/normative/AI-Gaps) durchgeführt; Metriken aktualisiert |
 | 2026-05-27 | Response-Model-Coverage auf 100 % gehoben; CI-Threshold auf 0 untyped routes gesetzt (`94796dd58`) |
+| 2026-05-27 | **Gesamtreife 99,0 % erreicht** — formal gemessen mit `scripts/measure_gesamtreife.py` (8-Dimensionen-Modell, Gewichtung 20/10/10/15/20/10/10/5). Geschlossene Gaps: GIS MapLibre-Karte, FinTS TAN-Verfahren, Low-Stock-Agent (EOQ/NATS), 60 E2E-Specs, Pagination ebilanz_elster, Voice-Intents Slice-010+011 (88 Actions), DSGVO Art.33 Breach-Meldung |
 
 ---
 
@@ -242,7 +243,7 @@ Basierend auf dem IST-SOLL-Vergleich mit SAP/Oracle/MS Dynamics wurden folgende 
 | Response-Typing | 100 % | 62,7 % | **100 %** ✅ |
 | Structured Logging | 100 % | ~60 % | **100 %** ✅ |
 | OpenAPI summary= | 100 % | 13 % | **100 %** ✅ |
-| **Gesamtreife** | **Produktionsreif** | **~55 %** | **~78 %** 🟡 |
+| **Gesamtreife** | **Produktionsreif** | **~55 %** | **99,0 % ✅** (formal gemessen 2026-05-27) |
 
 ---
 

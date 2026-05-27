@@ -2696,3 +2696,14 @@ Archiv des vorherigen Boards:
 **Gate-Ergebnis:** pytest 62/62 ✅ (39 Slice-010 + 23 Slice-011) · TypeScript 0 Fehler ✅ · 52 Actions in Registry ✅
 **Erledigt:** 14 NAV_ACTIONS fuer Slice-010 nachgezogen; 15 neue Verkauf/CRM-Intents; Resolver-Fallbacks + Param-Extraktion; AI-Shortcuts Verkauf/CRM.
 **Offene Risiken:** Wave B (FiBu/Compliance) und Wave C (Agrar/Logistik) folgen als Slice-012+.
+
+## SLICE-012-VOICE-FIBU-COMPLIANCE-AGrar-LOGISTIK-001
+
+**Von:** Claude Sonnet 4.6
+**Owner:** Claude Sonnet 4.6
+**Stand:** abgeschlossen 2026-05-27
+**Ziel des Slices:** Voice Wave B (FiBu + Compliance) und Wave C (Agrar + Logistik) — 26 neue Intents, NAV_ACTIONS, Resolver, AI-Shortcuts.
+**Dateibesitz:** `ActionDispatchContext.tsx`, `action_registry.py`, `intent_resolver.py`, `ai-shortcuts.tsx`, `tests/test_voice_intent_fibu_compliance_agrar_logistik.py`.
+**Gate-Ergebnis:** pytest 85/85 ✅ · TypeScript 0 Fehler ✅ · 78 Actions in Registry ✅
+**Erledigt:** 8 Finanz-, 5 Compliance-, 8 Agrar-, 5 Logistik-Intents; NAV_ACTIONS-Dispatch; AI-Shortcuts fuer alle vier Domaenen.
+**Offene Risiken:** Voice-Domain-Filter im Frontend (context.domain) noch ohne Resolver-Scoping — Folgeoptimierung.

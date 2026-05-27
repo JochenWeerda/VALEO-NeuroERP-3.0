@@ -128,6 +128,53 @@ def _extract_crm_params(text: str) -> Dict[str, str]:
     return params
 
 
+def _extract_finance_params(text: str) -> Dict[str, str]:
+    params: Dict[str, str] = {}
+    match = re.search(r"betrag\s+([\d,.]+)\s*(?:eur|euro)?", text, re.I)
+    if match:
+        params["amount"] = match.group(1).replace(",", ".")
+    match = re.search(r"konto\s+([0-9]{3,8})", text, re.I)
+    if match:
+        params["account_number"] = match.group(1)
+    match = re.search(r"periode\s+(\d{4}[-/]?\d{0,2})", text, re.I)
+    if match:
+        params["period"] = match.group(1).replace("/", "-")
+    return params
+
+
+def _extract_compliance_params(text: str) -> Dict[str, str]:
+    params: Dict[str, str] = {}
+    match = re.search(r"art\.?\s*(\d{1,2})", text, re.I)
+    if match:
+        params["gdpr_article"] = match.group(1)
+    return params
+
+
+def _extract_agrar_params(text: str) -> Dict[str, str]:
+    params: Dict[str, str] = {}
+    match = re.search(r"(\d+(?:[,.]\d+)?)\s*(?:t|tonnen|dt|dt\/ha)\b", text, re.I)
+    if match:
+        params["quantity"] = match.group(1).replace(",", ".")
+    match = re.search(r"kultur\s+([a-zäöüß]+)", text, re.I)
+    if match:
+        params["crop"] = match.group(1).strip()
+    match = re.search(r"schlag\s+([a-z0-9\-]+)", text, re.I)
+    if match:
+        params["field_id"] = match.group(1).upper()
+    return params
+
+
+def _extract_logistik_params(text: str) -> Dict[str, str]:
+    params: Dict[str, str] = {}
+    match = re.search(r"tour\s+([a-z0-9\-]+)", text, re.I)
+    if match:
+        params["tour_id"] = match.group(1).strip()
+    match = re.search(r"(\d{1,2})\.(\d{1,2})\.(\d{4})", text)
+    if match:
+        params["date"] = f"{match.group(3)}-{match.group(2).zfill(2)}-{match.group(1).zfill(2)}"
+    return params
+
+
 def _voice_out(action_id: str, text: str, params: Optional[Dict[str, str]] = None, confidence: float = 0.85) -> VoiceResolveOut:
     return VoiceResolveOut(
         action_id=action_id,
@@ -214,6 +261,66 @@ def _domain_specific(text: str, normalized: str) -> Optional[VoiceResolveOut]:
         word in normalized for word in ["oeffnen", "zeigen", "gehe", "geh"]
     ):
         return _voice_out("nav-crm", text)
+
+    if any(word in normalized for word in ["buchung erfassen", "neue buchung", "fibu buchen"]):
+        return _voice_out("finance-booking", text, _extract_finance_params(text), 0.88)
+    if "op debitoren" in normalized or "offene posten debitoren" in normalized:
+        return _voice_out("nav-op-debitoren", text)
+    if "op kreditoren" in normalized or "offene posten kreditoren" in normalized:
+        return _voice_out("nav-op-kreditoren", text)
+    if "zahlungslauf" in normalized or "zahlungslaeufe" in normalized:
+        return _voice_out("nav-zahlungslaeufe", text)
+    if "buchungsjournal" in normalized or "journal oeffnen" in normalized:
+        return _voice_out("nav-buchungsjournal", text)
+    if "ustva" in normalized or "umsatzsteuer voranmeldung" in normalized:
+        return _voice_out("nav-ustva", text)
+    if "bilanz oeffnen" in normalized or "gehe zur bilanz" in normalized:
+        return _voice_out("nav-bilanz", text)
+    if "hauptbuch" in normalized and any(word in normalized for word in ["oeffnen", "zeigen", "gehe"]):
+        return _voice_out("nav-fibu-hauptbuch", text)
+
+    if "verarbeitungsverzeichnis" in normalized or "ropa oeffnen" in normalized:
+        return _voice_out("nav-verarbeitungsverzeichnis", text, _extract_compliance_params(text))
+    if "datenpanne" in normalized or "breach meldung" in normalized:
+        return _voice_out("nav-datenpannen", text, _extract_compliance_params(text))
+    if "dsgvo anfragen" in normalized or "betroffenenanfrage" in normalized:
+        return _voice_out("compliance-dsgvo-anfragen", text)
+    if "sanktionspruefung" in normalized or "sanktionsliste pruefen" in normalized:
+        return _voice_out("nav-sanktionspruefung", text)
+    if "compliance dashboard" in normalized or ("compliance" in normalized and any(word in normalized for word in ["oeffnen", "zeigen", "gehe"])):
+        return _voice_out("nav-compliance-dashboard", text)
+
+    if any(word in normalized for word in ["ernte erfassen", "ernte annehmen", "harvest erfassen"]):
+        return _voice_out("agrar-ernte-erfassen", text, _extract_agrar_params(text), 0.88)
+    if "ernte annahme" in normalized or "ernteannahme" in normalized:
+        return _voice_out("nav-ernte-annahme", text, _extract_agrar_params(text))
+    if "rohware annahme" in normalized or "rohstoff annahme" in normalized:
+        return _voice_out("nav-rohware-annahme", text, _extract_agrar_params(text))
+    if "agrar vertraege" in normalized or "agrarvertraegen" in normalized:
+        return _voice_out("nav-agrar-vertraege", text)
+    if "schlagkartei" in normalized or ("schlaege" in normalized and any(word in normalized for word in ["oeffnen", "zeigen", "gehe"])):
+        return _voice_out("nav-schlaege", text, _extract_agrar_params(text))
+    if "feldbuch" in normalized and any(word in normalized for word in ["oeffnen", "zeigen", "gehe"]):
+        return _voice_out("nav-feldbuch", text)
+    if "silo status" in normalized or ("silos" in normalized and any(word in normalized for word in ["oeffnen", "zeigen", "gehe"])):
+        return _voice_out("nav-silos", text)
+    if any(word in normalized for word in ["agrar", "warenwirtschaft agrar"]) and any(
+        word in normalized for word in ["oeffnen", "zeigen", "gehe", "geh"]
+    ):
+        return _voice_out("nav-agrar", text)
+
+    if any(word in normalized for word in ["tour planen", "neue tour", "lieferung planen"]):
+        return _voice_out("logistik-tour-planen", text, _extract_logistik_params(text), 0.88)
+    if "tourenplanung" in normalized or "tourplanung" in normalized:
+        return _voice_out("nav-tourenplanung", text, _extract_logistik_params(text))
+    if "frachtbrief" in normalized:
+        return _voice_out("nav-frachtbriefe", text)
+    if "versandprofil" in normalized:
+        return _voice_out("nav-versandprofile", text)
+    if any(word in normalized for word in ["logistik", "disposition logistik"]) and any(
+        word in normalized for word in ["oeffnen", "zeigen", "gehe", "geh"]
+    ):
+        return _voice_out("nav-logistik", text)
     return None
 
 
@@ -250,6 +357,14 @@ class IntentResolver:
                     params.update(_extract_crm_params(text))
                 elif action_id.startswith("nav-crm"):
                     params.update(_extract_crm_params(text))
+                elif action_id.startswith("finance-") or action_id.startswith("nav-op-") or action_id.startswith("nav-zahlungs") or action_id.startswith("nav-buchungs") or action_id.startswith("nav-ustva") or action_id.startswith("nav-bilanz") or action_id.startswith("nav-fibu-"):
+                    params.update(_extract_finance_params(text))
+                elif action_id.startswith("compliance-") or action_id.startswith("nav-verarbeitungs") or action_id.startswith("nav-datenpannen") or action_id.startswith("nav-sanktions") or action_id.startswith("nav-compliance"):
+                    params.update(_extract_compliance_params(text))
+                elif action_id.startswith("agrar-") or action_id.startswith("nav-ernte") or action_id.startswith("nav-agrar") or action_id.startswith("nav-schlaege") or action_id.startswith("nav-silos") or action_id.startswith("nav-rohware") or action_id.startswith("nav-feldbuch"):
+                    params.update(_extract_agrar_params(text))
+                elif action_id.startswith("logistik-") or action_id.startswith("nav-logistik") or action_id.startswith("nav-touren") or action_id.startswith("nav-fracht") or action_id.startswith("nav-versand"):
+                    params.update(_extract_logistik_params(text))
                 return _voice_out(action_id, text, params, 0.9)
 
         if any(word in normalized for word in ["speichern", "sichern"]):
