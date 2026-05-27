@@ -127,6 +127,7 @@ Wave-17-UX (Slice `FACHLICHE-VERTIEFUNG-UX-W17-001`, 2026-05-26):
 | Wave 20 — Rohwarengruppen | geschlossen | Frontend-Page mit API-Client, Navigation und E2E-Test (Wave 20, 2026-05-26). |
 | Wave 22 — Frachttabellen, Versandprofile, Rezepturgruppen, Geschaeftsjahre, Zahlungsmeldungen, Individualpreise, Mengeneinheiten | geschlossen | 7 Frontend-Pages mit API-Clients, Navigation, Route-Builder und E2E-Tests (Wave 22, 2026-05-26). 7/7 E2E-Gates gruen, TypeCheck 0 Fehler. |
 | Backend-Security: globale Auth-Erzwingung, RFC-7807, nosec SQL | geschlossen | `api.py` mit globalem Bearer-Token-Dependency; `ws_router` fuer WebSocket ohne Auth; `exceptions.py` auf RFC-7807 Problem-Details; 62 Endpoints mit nosec-S608-Annotierungen (2026-05-26). |
+| **Slice-006: E-Rechnung B2B-Export (XRechnung 3.0 / ZUGFeRD 2.x)** | **geschlossen** | `app/services/einvoice_generator.py` (EN-16931-UBL-2.1-Generator + CII-XML + PDF/A-3); Endpoint `POST/GET /api/v1/sales/invoices/{number}/einvoice/xrechnung\|zugferd`; GoBD-Artifact-Persistenz; 23/23 pytest gruen; 1/1 E2E gruen; TypeCheck 0 Fehler (Commit `08d64eff4`, 2026-05-27). |
 
 ## Externe Grenzen
 

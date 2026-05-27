@@ -2586,8 +2586,10 @@ Archiv des vorherigen Boards:
 
 **Von:** Claude Sonnet 4.6
 **Owner:** Claude Sonnet 4.6
-**Stand:** reserviert 2026-05-27
+**Stand:** abgeschlossen 2026-05-27
+**Commit:** `08d64eff4`
 **Ziel des Slices:** XRechnung 3.0 (UBL 2.1) und ZUGFeRD 2.x (PDF/A-3 + CII-XML Profil EN 16931) Export für reguläre B2B-Verkaufsrechnungen (SalesInvoice). Schließt die einzige verbliebene gesetzliche Lücke (E-Rechnung-2025 B2B-Versand).
-**Dateibesitz:** `docs/agent-ops/slices/SLICE-006-EINVOICE-B2B-EXPORT-001.yaml`, `app/services/einvoice_generator.py`, `app/api/v1/endpoints/sales_invoice_einvoice.py`, `tests/test_einvoice_generator.py`, `packages/frontend-web/src/lib/api/einvoice.ts`, Frontend-Download-Button-Einbindung in Rechnungsmaske, `docs/PROJEKT-GESAMTSTAND-2026-05-27.md`, `docs/FACHLICHE-VERTIEFUNG-ABNAHME.md`, `docs/GOBD-COMPLIANCE.md`.
-**Abnahmekriterien:** Datenmodell-neutraler Generator; EN-16931-Pflichtfelder BT-1/2/3/5/22/31/32/44/48/49 + InvoiceLines BT-126/127/129/130/131; TaxSubtotal pro VAT-Rate; ZUGFeRD PDF/A-3 mit eingebettetem CII-XML; GoBD-Artifact-Persistenz; pytest-Tests grün; Backend py_compile + Import-Test grün; Frontend-TypeScript grün.
-**Offene Risiken:** Volle Schematron-Validierung gegen offizielles EN-16931-Regelwerk bleibt optionaler Hook; Peppol-Versand bleibt Folgeslice.
+**Dateibesitz:** `docs/agent-ops/slices/SLICE-006-EINVOICE-B2B-EXPORT-001.yaml`, `app/services/einvoice_generator.py`, `app/api/v1/endpoints/sales_invoice_einvoice.py`, `tests/test_einvoice_generator.py`, `packages/frontend-web/src/lib/api/einvoice.ts`, `packages/frontend-web/src/pages/sales/invoice-editor.tsx`, `docs/PROJEKT-GESAMTSTAND-2026-05-27.md`, `docs/FACHLICHE-VERTIEFUNG-ABNAHME.md`, `docs/GOBD-COMPLIANCE.md`.
+**Erledigt:** `einvoice_generator.py` (EN-16931-UBL-2.1 + CII-XML + PDF/A-3 via factur-x, 23 pytest-Tests); Endpoints `POST/GET /api/v1/sales/invoices/{n}/einvoice/xrechnung|zugferd` mit GoBD-Archiv; Frontend-Download-Buttons (XRechnung + ZUGFeRD) in Rechnungsmaske mit Mutation-Pending-Guard; 1/1 E2E grün; TypeCheck 0 Fehler; Fremdfix `closing_checklists.py` (Optional-Import fehlte).
+**Gate-Ergebnis:** 23/23 pytest grün; 1/1 E2E grün; TypeScript 0 Fehler; py_compile grün; 3 Endpoints registriert; GoBD-Artifact-Persistenz vorhanden.
+**Offene Risiken:** Volle Schematron-Validierung bleibt optionaler Hook; Peppol-Versand bleibt Folgeslice.

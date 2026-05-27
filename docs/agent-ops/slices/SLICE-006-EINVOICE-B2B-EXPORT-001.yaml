@@ -1,8 +1,10 @@
 id: SLICE-006-EINVOICE-B2B-EXPORT-001
 title: Slice-006 — E-Rechnung XRechnung/ZUGFeRD Export für B2B-Verkaufsrechnungen
 owner: Claude Sonnet 4.6
-status: reserviert
+status: abgeschlossen
 claimed_at: 2026-05-27
+completed_at: 2026-05-27
+commit: 08d64eff4
 depends_on:
   - FACHLICHE-VERTIEFUNG-UX-W22-001
 goal: >
