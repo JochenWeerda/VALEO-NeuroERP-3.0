@@ -51,22 +51,51 @@ def _cache_key(prefix: str, tenant_id: str, **kwargs) -> str:
 
 def cached_read_model(prefix: str, ttl: int = 30):
     """
-    Dekorator für synchrone GET-Handler. Cached das Ergebnis in Redis.
+    Dekorator für synchrone und asynchrone GET-Handler. Cached das Ergebnis in Redis.
 
-    Verwendung:
+    Verwendung (sync):
         @router.get("/controlling/kpis")
         @cached_read_model("kpis", ttl=30)
         def list_kpis(tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
             ...
+
+    Verwendung (async):
+        @router.get("/articles/")
+        @cached_read_model("articles", ttl=300)
+        async def list_articles(tenant_id: str = Depends(get_tenant_id), ...):
+            ...
     """
+    import inspect
+
     def decorator(fn: Callable) -> Callable:
+        if inspect.iscoroutinefunction(fn):
+            @wraps(fn)
+            async def async_wrapper(*args, **kwargs):
+                tenant_id = kwargs.get("tenant_id", "unknown")
+                cache_kwargs = {k: v for k, v in kwargs.items() if k not in ("db", "tenant_id")}
+                key = _cache_key(prefix, tenant_id, **cache_kwargs)
+                r = _get_redis()
+                if r is not None:
+                    try:
+                        hit = r.get(key)
+                        if hit is not None:
+                            return json.loads(hit)
+                    except Exception as exc:
+                        logger.debug("Cache-read fehlgeschlagen: %s", exc)
+                result = await fn(*args, **kwargs)
+                if r is not None:
+                    try:
+                        r.setex(key, ttl, json.dumps(result, default=str))
+                    except Exception as exc:
+                        logger.debug("Cache-write fehlgeschlagen: %s", exc)
+                return result
+            return async_wrapper
+
         @wraps(fn)
         def wrapper(*args, **kwargs):
             tenant_id = kwargs.get("tenant_id", "unknown")
-            # Cache-Key aus Parametern (ohne db-Session)
             cache_kwargs = {k: v for k, v in kwargs.items() if k not in ("db", "tenant_id")}
             key = _cache_key(prefix, tenant_id, **cache_kwargs)
-
             r = _get_redis()
             if r is not None:
                 try:
@@ -75,15 +104,12 @@ def cached_read_model(prefix: str, ttl: int = 30):
                         return json.loads(hit)
                 except Exception as exc:
                     logger.debug("Cache-read fehlgeschlagen: %s", exc)
-
             result = fn(*args, **kwargs)
-
             if r is not None:
                 try:
                     r.setex(key, ttl, json.dumps(result, default=str))
                 except Exception as exc:
                     logger.debug("Cache-write fehlgeschlagen: %s", exc)
-
             return result
         return wrapper
     return decorator

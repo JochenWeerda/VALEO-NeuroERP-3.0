@@ -158,6 +158,9 @@ jobs:
       - name: Godfile regression check (>1000 LOC)
         run: python scripts/check_file_size.py --threshold 12
 
+      - name: OpenAPI docs coverage (summary= on all routes)
+        run: python scripts/check_openapi_docs.py --threshold 0
+
       - name: Check core contamination guardrail
         run: python scripts/check_no_core_contamination.py
 
