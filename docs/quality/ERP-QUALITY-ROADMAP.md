@@ -1,6 +1,6 @@
 # VALEO NeuroERP — ERP Quality Assessment & Roadmap
 
-**Stand:** 2026-05-27 *(aktualisiert nach Wave-A–E-Abschluss + Gap-Closure-Sprint)*
+**Stand:** 2026-05-27 *(aktualisiert nach Wave-A–E-Abschluss, Gap-Closure-Sprint und Response-Model-Coverage-Abschluss)*
 **Scope:** Backend (Python/FastAPI), Frontend (React/TypeScript), Infra, Tests
 **Referenz:** SAP S/4HANA, Oracle Fusion Cloud ERP, Microsoft Dynamics 365, Odoo 17
 **Ziel:** AI-first vertikales ERP für Agrarhandel — führend in der Zielbranche
@@ -13,6 +13,7 @@
 |-------|----------|
 | 2026-05-26 | Erstversion nach automatischer Codebase-Analyse |
 | 2026-05-27 | Waves A–E vollständig abgeschlossen; Gap-Closure-Sprint (funktionale/normative/AI-Gaps) durchgeführt; Metriken aktualisiert |
+| 2026-05-27 | Response-Model-Coverage auf 100 % gehoben; CI-Threshold auf 0 untyped routes gesetzt (`94796dd58`) |
 
 ---
 
@@ -90,7 +91,7 @@
 | **Sicherheit** | Hardcoded Secrets | 0 | 0 | 🟢 |
 | **Fehlerformat** | RFC 7807 Problem Details | 100 % 4xx/5xx | 100 % | 🟢 |
 | **Typsicherheit** | Frontend TypeScript any | ~0 (nach Wave B4) | <50 | 🟢 |
-| **Typsicherheit** | Ungetypte API-Routes | 843 (Threshold gehalten) | 0 | 🟡 |
+| **Typsicherheit** | Ungetypte API-Routes | 0 (Threshold 0) | 0 | 🟢 |
 | **Wartbarkeit** | Dateien >1.000 LOC (neue Godfiles) | 0 neue | 0 | 🟢 |
 | **Wartbarkeit** | Dateien >500 LOC | 51 (abnehmend) | 0 | 🟡 |
 | **Skalierbarkeit** | Pagination-Gate | 53 Dateien (Threshold 53) | 0 | 🟢 |
@@ -99,7 +100,7 @@
 | **Datenintegrität** | GoBD Hash-Chain | Auto-Trigger bei jedem Write | 100 % | 🟢 |
 | **Datenintegrität** | Alembic Migrationen | 187 | — | 🟢 |
 | **API-Qualität** | OpenAPI summary= | 100 % (Wave D2) | 100 % | 🟢 |
-| **API-Qualität** | Response-Model Coverage | 68,4 % | 100 % | 🟡 |
+| **API-Qualität** | Response-Model Coverage | 100 % (2698/2698 Routen) | 100 % | 🟢 |
 | **Observability** | Structured Logging | JSON + tenant_id + trace_id | 100 % | 🟢 |
 | **Observability** | SLO-Histogramme | Prometheus-Buckets aktiv | ✅ | 🟢 |
 | **Fachlich** | Lohnabrechnung (SK I–VI) | ✅ vollständig (Wave Gap-A) | 100 % | 🟢 |
@@ -215,7 +216,7 @@ Basierend auf dem IST-SOLL-Vergleich mit SAP/Oracle/MS Dynamics wurden folgende 
 | GoBD externe Fachabnahme | Normativ | Technisch implementiert | Wirtschaftsprüfer-Testat für Verfahrensdokumentation |
 | FinTS TAN-Verfahren | Funktional | Single-Step implementiert | ChipTAN/pushTAN-Challenge-Response für HKCCM |
 | GIS Frontend-Karte | UX | Backend done | MapLibre-Komponente in feldbuch/schlaege.tsx einbinden |
-| Response-Model Coverage | Qualität | 68,4 % | Ziel 100 % — systematisch je Domain |
+| Response-Model Coverage | Qualität | 100 % abgeschlossen | CI-Gate `check_response_models.py --threshold 0` beibehalten |
 | Agent-Orchestration autonom | AI | 13 Endpoints | Event-Bus-reaktive Agenten (Low-Stock-Trigger) |
 | Godfiles >500 LOC | Wartbarkeit | 51 Dateien | Wave B3 fortführen (rations_optimization, personal, compat) |
 | E2E Playwright Specs | Tests | 48 Specs | Ziel >60 — Order-to-Cash + Erntekampagne |
@@ -238,7 +239,7 @@ Basierend auf dem IST-SOLL-Vergleich mit SAP/Oracle/MS Dynamics wurden folgende 
 | RFC 7807 Fehler | 100 % | Inkonsistent | **100 %** ✅ |
 | Pagination | 100 % | ~85 % | **Gate: 53 Dateien** 🟡 |
 | Godfiles | 0 | 30 >1.000 LOC | **0 neue** ✅ |
-| Response-Typing | 100 % | 62,7 % | **68,4 %** 🟡 |
+| Response-Typing | 100 % | 62,7 % | **100 %** ✅ |
 | Structured Logging | 100 % | ~60 % | **100 %** ✅ |
 | OpenAPI summary= | 100 % | 13 % | **100 %** ✅ |
 | **Gesamtreife** | **Produktionsreif** | **~55 %** | **~78 %** 🟡 |
@@ -255,7 +256,7 @@ Basierend auf dem IST-SOLL-Vergleich mit SAP/Oracle/MS Dynamics wurden folgende 
 5. **GIS Frontend** — MapLibre-Komponente in `feldbuch/schlaege.tsx`
 
 ### Phase 2 — Qualitätsvervollständigung (4–8 Wochen)
-1. **Response-Model Coverage 68 → 100 %** — systematisch je Domain (Finanz → Agrar → CRM)
+1. **Response-Model Coverage 100 % halten** — CI-Gate mit Threshold 0; neue Routen nur mit `response_model` oder bewusstem `response_model=None`
 2. **Godfile-Extraktion fortführen** — `rations_optimization.py` (6.939 LOC), `personal.py` (4.357 LOC)
 3. **E2E-Tests ausbauen** — 48 → 60+ Playwright-Specs (Order-to-Cash, Erntekampagne)
 4. **Pagination-Gap schließen** — verbleibende 53 Dateien mit `.limit()` nachrüsten
@@ -275,7 +276,7 @@ Basierend auf dem IST-SOLL-Vergleich mit SAP/Oracle/MS Dynamics wurden folgende 
 | Tenant Isolation | `check_tenant_isolation.py` | 0 ungeschützt | 🟢 |
 | Pagination | `check_pagination.py` | ≤53 Dateien | 🟢 |
 | Godfiles | `check_file_size.py` | 0 neue >1.000 LOC | 🟢 |
-| Response Models | `check_response_models.py` | ≤843 untyped | 🟢 |
+| Response Models | `check_response_models.py` | 0 untyped | 🟢 |
 | OpenAPI Doku | `check_openapi_docs.py` | 0 fehlend | 🟢 |
 | Workboard | `agent_workboard_supervisor.py validate` | 0 Fehler | 🟢 |
 | TypeScript | `tsc --noEmit` | 0 Errors | 🟢 |
