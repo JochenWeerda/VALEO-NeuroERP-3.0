@@ -67,7 +67,7 @@ class InventoryCountOut(BaseSchema):
 
 # ── Routes ───────────────────────────────────────────────────────
 
-@router.get("/", response_model=PaginatedResponse[InventoryCountOut])
+@router.get("/", response_model=PaginatedResponse[InventoryCountOut], summary="Inventory counts auflisten")
 async def list_inventory_counts(
     tenant_id: Optional[str] = Query(None),
     skip: int = Query(0, ge=0),
@@ -88,7 +88,7 @@ async def list_inventory_counts(
     )
 
 
-@router.post("/", response_model=InventoryCountOut, status_code=201)
+@router.post("/", response_model=InventoryCountOut, status_code=201, summary="Inventory count anlegen")
 async def create_inventory_count(
     payload: InventoryCountCreate,
     tenant_id: Optional[str] = Query(None),
@@ -113,7 +113,7 @@ async def create_inventory_count(
     return InventoryCountOut.model_validate(obj)
 
 
-@router.get("/{count_id}", response_model=InventoryCountOut)
+@router.get("/{count_id}", response_model=InventoryCountOut, summary="Inventory count abrufen")
 async def get_inventory_count(count_id: str, db: Session = Depends(get_db)):
     """Inventur-Kopf Detail."""
     obj = db.query(InventoryCount).filter(InventoryCount.id == count_id).first()
@@ -122,7 +122,7 @@ async def get_inventory_count(count_id: str, db: Session = Depends(get_db)):
     return InventoryCountOut.model_validate(obj)
 
 
-@router.delete("/{count_id}", status_code=204, response_class=Response, response_model=None)
+@router.delete("/{count_id}", status_code=204, response_class=Response, response_model=None, summary="Inventory count löschen")
 async def delete_inventory_count(count_id: str, db: Session = Depends(get_db)):
     """Inventur-Kopf loeschen."""
     obj = db.query(InventoryCount).filter(InventoryCount.id == count_id).first()
@@ -133,7 +133,7 @@ async def delete_inventory_count(count_id: str, db: Session = Depends(get_db)):
     db.commit()
 
 
-@router.get("/{count_id}/lines", response_model=list[InventoryCountLineOut])
+@router.get("/{count_id}/lines", response_model=list[InventoryCountLineOut], summary="Count lines abrufen")
 async def get_count_lines(count_id: str, db: Session = Depends(get_db)):
     """GET Inventur Positionen"""
     lines = db.query(InventoryCountLine).filter(
@@ -142,7 +142,7 @@ async def get_count_lines(count_id: str, db: Session = Depends(get_db)):
     return [InventoryCountLineOut.model_validate(line_item) for line_item in lines]
 
 
-@router.post("/lines", response_model=InventoryCountLineOut, status_code=201)
+@router.post("/lines", response_model=InventoryCountLineOut, status_code=201, summary="Count line anlegen")
 async def create_count_line(
     payload: InventoryCountLineCreate,
     count_id: str = Query(...),
@@ -170,7 +170,7 @@ async def create_count_line(
     return InventoryCountLineOut.model_validate(line)
 
 
-@router.patch("/lines/{line_id}", response_model=InventoryCountLineOut)
+@router.patch("/lines/{line_id}", response_model=InventoryCountLineOut, summary="Count line aktualisieren")
 async def update_count_line(
     line_id: str,
     payload: InventoryCountLineUpdate,
@@ -190,7 +190,7 @@ async def update_count_line(
     return InventoryCountLineOut.model_validate(line)
 
 
-@router.delete("/lines/{line_id}", status_code=204, response_class=Response, response_model=None)
+@router.delete("/lines/{line_id}", status_code=204, response_class=Response, response_model=None, summary="Count line löschen")
 async def delete_count_line(line_id: str, db: Session = Depends(get_db)):
     """POST Inventur Daten löschen"""
     line = db.query(InventoryCountLine).filter(InventoryCountLine.id == line_id).first()
@@ -210,7 +210,7 @@ class InventurPostResult(BaseModel):
     status: str
 
 
-@router.post("/{count_id}/post", response_model=InventurPostResult, tags=["inventory"])
+@router.post("/{count_id}/post", response_model=InventurPostResult, tags=["inventory"], summary="Inventory count erstellen")
 async def post_inventory_count(
     count_id: str,
     tenant_id: Optional[str] = Query(None),
@@ -357,7 +357,7 @@ class PeriodCloseResult(BaseModel):
     status: str
 
 
-@router.post("/period-close", response_model=PeriodCloseResult, tags=["inventory"])
+@router.post("/period-close", response_model=PeriodCloseResult, tags=["inventory"], summary="Close period")
 async def period_close(
     period: str = Query(..., description="Periode z.B. 2026-Q1 oder 2026-12"),
     tenant_id: Optional[str] = Query(None),

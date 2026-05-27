@@ -79,7 +79,7 @@ def _ensure_schema(db: Session) -> None:
     db.execute(text("CREATE SCHEMA IF NOT EXISTS domain_pricing"))
 
 
-@router.post("/", response_model=PriceList, status_code=201)
+@router.post("/", response_model=PriceList, status_code=201, summary="Price list anlegen")
 async def create_price_list(
     payload: PriceListCreate,
     tenant_id: str = Query(DEFAULT_TENANT),
@@ -137,7 +137,7 @@ async def create_price_list(
     )
 
 
-@router.get("/", response_model=List[PriceList])
+@router.get("/", response_model=List[PriceList], summary="Price lists auflisten")
 async def list_price_lists(
     tenant_id: str = Query(DEFAULT_TENANT),
     is_active: Optional[bool] = None,
@@ -174,7 +174,7 @@ async def list_price_lists(
     ]
 
 
-@router.get("/{pl_id}", response_model=PriceList)
+@router.get("/{pl_id}", response_model=PriceList, summary="Price list abrufen")
 async def get_price_list(
     pl_id: str,
     db: Session = Depends(get_db),
@@ -222,7 +222,7 @@ async def get_price_list(
     )
 
 
-@router.put("/{pl_id}", response_model=PriceList)
+@router.put("/{pl_id}", response_model=PriceList, summary="Price list aktualisieren")
 async def update_price_list(
     pl_id: str,
     payload: PriceListUpdate,
@@ -276,7 +276,7 @@ async def update_price_list(
     return await get_price_list(pl_id, db)
 
 
-@router.delete("/{pl_id}", status_code=204, response_class=Response, response_model=None)
+@router.delete("/{pl_id}", status_code=204, response_class=Response, response_model=None, summary="Price list löschen")
 async def delete_price_list(pl_id: str, db: Session = Depends(get_db)):
     """Delete price list and its items."""
     existing = db.execute(

@@ -34,7 +34,7 @@ class MessageCreate(BaseModel):
     body: Optional[str] = None
 
 
-@router.get("/", response_model=PaginatedResponse[MessageOut])
+@router.get("/", response_model=PaginatedResponse[MessageOut], summary="Messages auflisten")
 async def list_messages(
     recipient_id: Optional[str] = Query(None),
     tenant_id: Optional[str] = Query(None),
@@ -58,7 +58,7 @@ async def list_messages(
     )
 
 
-@router.post("/", response_model=MessageOut, status_code=201)
+@router.post("/", response_model=MessageOut, status_code=201, summary="Message senden")
 async def send_message(
     payload: MessageCreate,
     tenant_id: Optional[str] = Query(None),
@@ -81,7 +81,7 @@ async def send_message(
     return MessageOut.model_validate(msg)
 
 
-@router.get("/health")
+@router.get("/health", summary="Health messages")
 async def messages_health():
     """GET Health"""
     return {"status": "ok", "service": "messages"}

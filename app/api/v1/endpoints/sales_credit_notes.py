@@ -77,7 +77,7 @@ class CreditNoteOut(CreditNoteBase):
     updated_at: Optional[datetime] = None
 
 
-@router.post("/credit-notes", response_model=CreditNoteOut, status_code=201)
+@router.post("/credit-notes", response_model=CreditNoteOut, status_code=201, summary="Credit note anlegen")
 async def create_credit_note(
     payload: CreditNoteCreate,
     request: Request,
@@ -146,7 +146,7 @@ async def create_credit_note(
     )
 
 
-@router.get("/credit-notes", response_model=List[CreditNoteOut])
+@router.get("/credit-notes", response_model=List[CreditNoteOut], summary="Credit notes auflisten")
 async def list_credit_notes(
     tenant_id: str = Depends(get_tenant_id),
     status: Optional[str] = None,
@@ -187,7 +187,7 @@ async def list_credit_notes(
     ]
 
 
-@router.delete("/credit-notes/{cn_id}", status_code=204, response_class=Response, response_model=None)
+@router.delete("/credit-notes/{cn_id}", status_code=204, response_class=Response, response_model=None, summary="Credit note löschen")
 async def delete_credit_note(
     cn_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -208,7 +208,7 @@ async def delete_credit_note(
     db.commit()
 
 
-@router.post("/credit-notes/{cn_id}/post", response_model=dict)
+@router.post("/credit-notes/{cn_id}/post", response_model=dict, summary="Credit note erstellen")
 async def post_credit_note(
     cn_id: str,
     request: Request,
@@ -286,7 +286,7 @@ class ReturnOut(ReturnBase):
     updated_at: Optional[datetime] = None
 
 
-@router.post("/returns", response_model=ReturnOut, status_code=201)
+@router.post("/returns", response_model=ReturnOut, status_code=201, summary="Return anlegen")
 async def create_return(
     payload: ReturnCreate,
     tenant_id: str = Depends(get_tenant_id),
@@ -318,7 +318,7 @@ async def create_return(
     return ReturnOut(id=ret_id, tenant_id=tid, **payload.model_dump(exclude={"tenant_id"}))
 
 
-@router.get("/returns", response_model=List[ReturnOut])
+@router.get("/returns", response_model=List[ReturnOut], summary="Returns auflisten")
 async def list_returns(
     tenant_id: str = Depends(get_tenant_id),
     status: Optional[str] = None,
@@ -355,7 +355,7 @@ async def list_returns(
     ]
 
 
-@router.delete("/returns/{return_id}", status_code=204, response_class=Response, response_model=None)
+@router.delete("/returns/{return_id}", status_code=204, response_class=Response, response_model=None, summary="Return löschen")
 async def delete_return(
     return_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -376,7 +376,7 @@ async def delete_return(
     db.commit()
 
 
-@router.patch("/returns/{return_id}/status", response_model=dict)
+@router.patch("/returns/{return_id}/status", response_model=dict, summary="Return status aktualisieren")
 async def update_return_status(
     return_id: str,
     new_status: str = Query(..., description="New status: open, processing, completed, cancelled"),

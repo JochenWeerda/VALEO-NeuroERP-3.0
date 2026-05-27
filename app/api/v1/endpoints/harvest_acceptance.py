@@ -305,7 +305,7 @@ def _svc(db: Session, tenant_id: str) -> HarvestAcceptanceService:
     return HarvestAcceptanceService(db, tenant_id)
 
 
-@router.post("/", response_model=HarvestAcceptanceOut, status_code=201)
+@router.post("/", response_model=HarvestAcceptanceOut, status_code=201, summary="Harvest acceptance anlegen")
 async def create_harvest_acceptance(
     payload: HarvestAcceptanceCreate,
     request: Request,
@@ -324,7 +324,7 @@ async def create_harvest_acceptance(
         raise HTTPException(status_code=422, detail=exc.detail)
 
 
-@router.get("/", response_model=list[HarvestAcceptanceOut])
+@router.get("/", response_model=list[HarvestAcceptanceOut], summary="Harvest acceptances auflisten")
 async def list_harvest_acceptances(
     customer_id: Optional[str] = Query(None, description="Filter nach Kunde"),
     contract_id: Optional[str] = Query(None, description="Filter nach Vertrag"),
@@ -342,7 +342,7 @@ async def list_harvest_acceptances(
     )
 
 
-@router.get("/last", response_model=Optional[HarvestAcceptanceOut])
+@router.get("/last", response_model=Optional[HarvestAcceptanceOut], summary="Last harvest acceptance abrufen")
 async def get_last_harvest_acceptance(
     operator_id: Optional[str] = Query(None, description="Filter nach Operator-ID (Benutzer, der die Ernte-Annahme erstellt hat)"),
     customer_id: Optional[str] = Query(None, description="Filter nach Kunde"),
@@ -353,7 +353,7 @@ async def get_last_harvest_acceptance(
     return _svc(db, tenant_id).get_last_acceptance(operator_id=operator_id, customer_id=customer_id)
 
 
-@router.get("/{acceptance_id}", response_model=HarvestAcceptanceOut)
+@router.get("/{acceptance_id}", response_model=HarvestAcceptanceOut, summary="Harvest acceptance abrufen")
 async def get_harvest_acceptance(
     acceptance_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -366,7 +366,7 @@ async def get_harvest_acceptance(
         raise HTTPException(status_code=404, detail=exc.detail)
 
 
-@router.put("/{acceptance_id}", response_model=HarvestAcceptanceOut)
+@router.put("/{acceptance_id}", response_model=HarvestAcceptanceOut, summary="Harvest acceptance aktualisieren")
 async def update_harvest_acceptance(
     acceptance_id: str,
     payload: HarvestAcceptanceUpdate,
@@ -384,7 +384,7 @@ async def update_harvest_acceptance(
         raise HTTPException(status_code=422, detail=exc.detail)
 
 
-@router.delete("/{acceptance_id}", status_code=204, response_class=Response, response_model=None)
+@router.delete("/{acceptance_id}", status_code=204, response_class=Response, response_model=None, summary="Harvest acceptance löschen")
 async def delete_harvest_acceptance(
     acceptance_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -400,7 +400,7 @@ async def delete_harvest_acceptance(
         raise HTTPException(status_code=400, detail=exc.detail)
 
 
-@router.post("/{acceptance_id}/calculate", response_model=dict)
+@router.post("/{acceptance_id}/calculate", response_model=dict, summary="Harvest settlement endpoint berechnen")
 async def calculate_harvest_settlement_endpoint(
     acceptance_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -415,7 +415,7 @@ async def calculate_harvest_settlement_endpoint(
         raise HTTPException(status_code=400, detail=exc.detail)
 
 
-@router.post("/{acceptance_id}/derive-nuts2", response_model=dict)
+@router.post("/{acceptance_id}/derive-nuts2", response_model=dict, summary="Nuts2 from postal code endpoint derive")
 async def derive_nuts2_from_postal_code_endpoint(
     acceptance_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -430,7 +430,7 @@ async def derive_nuts2_from_postal_code_endpoint(
         raise HTTPException(status_code=400, detail=exc.detail)
 
 
-@router.post("/{acceptance_id}/release", response_model=HarvestAcceptanceOut)
+@router.post("/{acceptance_id}/release", response_model=HarvestAcceptanceOut, summary="Harvest acceptance freigeben")
 async def release_harvest_acceptance(
     acceptance_id: str,
     release_status: ReleaseStatus = Query(..., description="Neuer Freigabe-Status: provisional oder final"),
@@ -452,7 +452,7 @@ async def release_harvest_acceptance(
         raise HTTPException(status_code=400, detail=exc.detail)
 
 
-@router.post("/{acceptance_id}/cancel", response_model=HarvestAcceptanceOut)
+@router.post("/{acceptance_id}/cancel", response_model=HarvestAcceptanceOut, summary="Harvest acceptance stornieren")
 async def cancel_harvest_acceptance(
     acceptance_id: str,
     reason: str = Query(..., min_length=1, description="Pflichtbegründung für Stornierung"),
@@ -474,7 +474,7 @@ async def cancel_harvest_acceptance(
 # QUALITÄTSPROTOKOLL-INTEGRATION
 # ============================================================================
 
-@router.post("/{acceptance_id}/qualitaetsprotokoll", response_model=dict)
+@router.post("/{acceptance_id}/qualitaetsprotokoll", response_model=dict, summary="Qualitaetsprotokoll anlegen")
 async def create_qualitaetsprotokoll(
     acceptance_id: str,
     data: dict,
@@ -491,7 +491,7 @@ async def create_qualitaetsprotokoll(
 
 
 
-@router.get("/{acceptance_id}/qualitaetsprotokoll", response_model=dict)
+@router.get("/{acceptance_id}/qualitaetsprotokoll", response_model=dict, summary="Qualitaetsprotokoll abrufen")
 async def get_qualitaetsprotokoll(
     acceptance_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -508,7 +508,7 @@ async def get_qualitaetsprotokoll(
 # FRACHTKOSTEN-BERECHNUNG
 # ============================================================================
 
-@router.post("/{acceptance_id}/frachtkosten", response_model=dict)
+@router.post("/{acceptance_id}/frachtkosten", response_model=dict, summary="Frachtkosten berechnen")
 async def calculate_frachtkosten(
     acceptance_id: str,
     data: dict,
@@ -524,7 +524,7 @@ async def calculate_frachtkosten(
         raise HTTPException(status_code=400, detail=exc.detail)
 
 
-@router.get("/{acceptance_id}/frachtkosten", response_model=dict)
+@router.get("/{acceptance_id}/frachtkosten", response_model=dict, summary="Frachtkosten abrufen")
 async def get_frachtkosten(
     acceptance_id: str,
     tenant_id: str = Depends(get_tenant_id),

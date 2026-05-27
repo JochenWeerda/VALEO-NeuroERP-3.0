@@ -89,7 +89,7 @@ class MatchingStatistics(BaseModel):
     by_match_type: Dict[str, int]
 
 
-@router.get("/rules", response_model=List[MatchingRule])
+@router.get("/rules", response_model=List[MatchingRule], summary="Matching rules auflisten")
 async def list_matching_rules(
     active_only: bool = Query(True, description="Show only active rules"),
     tenant_id: str = Query("system", description="Tenant ID"),
@@ -175,7 +175,7 @@ async def list_matching_rules(
         ]
 
 
-@router.post("/rules", response_model=MatchingRule, status_code=201)
+@router.post("/rules", response_model=MatchingRule, status_code=201, summary="Matching rule anlegen")
 async def create_matching_rule(
     rule: MatchingRuleCreate,
     tenant_id: str = Query("system", description="Tenant ID"),
@@ -234,7 +234,7 @@ async def create_matching_rule(
         raise HTTPException(status_code=500, detail=f"Failed to create matching rule: {str(e)}")
 
 
-@router.get("/rules/{rule_id}", response_model=MatchingRule)
+@router.get("/rules/{rule_id}", response_model=MatchingRule, summary="Matching rule abrufen")
 async def get_matching_rule(
     rule_id: str,
     tenant_id: str = Query("system", description="Tenant ID"),
@@ -266,7 +266,7 @@ async def get_matching_rule(
         raise HTTPException(status_code=500, detail=f"Failed to get rule: {str(e)}")
 
 
-@router.put("/rules/{rule_id}", response_model=MatchingRule)
+@router.put("/rules/{rule_id}", response_model=MatchingRule, summary="Matching rule aktualisieren")
 async def update_matching_rule(
     rule_id: str,
     rule: MatchingRuleCreate,
@@ -312,7 +312,7 @@ async def update_matching_rule(
         raise HTTPException(status_code=500, detail=f"Failed to update rule: {str(e)}")
 
 
-@router.delete("/rules/{rule_id}", status_code=204, response_class=Response, response_model=None)
+@router.delete("/rules/{rule_id}", status_code=204, response_class=Response, response_model=None, summary="Matching rule löschen")
 async def delete_matching_rule(
     rule_id: str,
     tenant_id: str = Query("system", description="Tenant ID"),
@@ -432,7 +432,7 @@ def _calculate_date_match_confidence(
         return 0.0
 
 
-@router.post("/match", response_model=List[MatchResult])
+@router.post("/match", response_model=List[MatchResult], summary="Match auto")
 async def auto_match(
     request: AutoMatchRequest,
     db: Session = Depends(get_db)
@@ -703,7 +703,7 @@ async def auto_match(
         raise HTTPException(status_code=500, detail=f"Failed to perform auto-matching: {str(e)}")
 
 
-@router.post("/match/{line_id}/apply")
+@router.post("/match/{line_id}/apply", summary="Match apply")
 async def apply_match(
     line_id: str,
     op_id: str = Query(..., description="Open item ID to match"),
@@ -764,7 +764,7 @@ async def apply_match(
         raise HTTPException(status_code=500, detail=f"Failed to apply match: {str(e)}")
 
 
-@router.get("/statistics", response_model=MatchingStatistics)
+@router.get("/statistics", response_model=MatchingStatistics, summary="Matching statistics abrufen")
 async def get_matching_statistics(
     statement_id: Optional[str] = Query(None, description="Filter by statement ID"),
     tenant_id: str = Query("system", description="Tenant ID"),

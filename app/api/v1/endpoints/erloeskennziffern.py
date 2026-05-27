@@ -86,7 +86,7 @@ class KontoLookupResult(BaseModel):
 
 # ── Erlöskennziffern CRUD ─────────────────────────────────────────────────────
 
-@router.get("", response_model=list[ErloeskennzifferOut])
+@router.get("", response_model=list[ErloeskennzifferOut], summary="Erloeskennziffern auflisten")
 def list_erloeskennziffern(
     db=Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
@@ -98,7 +98,7 @@ def list_erloeskennziffern(
     return [ErloeskennzifferOut(**dict(r._mapping)) for r in rows]
 
 
-@router.post("", response_model=ErloeskennzifferOut, status_code=201)
+@router.post("", response_model=ErloeskennzifferOut, status_code=201, summary="Erloeskennziffer anlegen")
 def create_erloeskennziffer(
     payload: ErloeskennzifferCreate,
     db=Depends(get_db),
@@ -121,7 +121,7 @@ def create_erloeskennziffer(
     return ErloeskennzifferOut(**dict(row._mapping))
 
 
-@router.put("/{ekz_nr}", response_model=ErloeskennzifferOut)
+@router.put("/{ekz_nr}", response_model=ErloeskennzifferOut, summary="Erloeskennziffer aktualisieren")
 def update_erloeskennziffer(
     ekz_nr: str,
     payload: ErloeskennzifferCreate,
@@ -141,7 +141,7 @@ def update_erloeskennziffer(
     return ErloeskennzifferOut(**dict(row._mapping))
 
 
-@router.delete("/{ekz_nr}")
+@router.delete("/{ekz_nr}", summary="Erloeskennziffer löschen")
 def delete_erloeskennziffer(
     ekz_nr: str,
     db=Depends(get_db),
@@ -157,7 +157,7 @@ def delete_erloeskennziffer(
 
 # ── Erlöskontenzuordnung CRUD ─────────────────────────────────────────────────
 
-@router.get("/zuordnungen", response_model=list[ErloeskontenzuordnungOut])
+@router.get("/zuordnungen", response_model=list[ErloeskontenzuordnungOut], summary="Zuordnungen auflisten")
 def list_zuordnungen(
     ekz_id: Optional[str] = Query(None),
     steuerschluessel: Optional[str] = Query(None),
@@ -181,7 +181,7 @@ def list_zuordnungen(
     return [ErloeskontenzuordnungOut(**dict(r._mapping)) for r in rows]
 
 
-@router.post("/zuordnungen", response_model=ErloeskontenzuordnungOut, status_code=201)
+@router.post("/zuordnungen", response_model=ErloeskontenzuordnungOut, status_code=201, summary="Zuordnung anlegen")
 def create_zuordnung(
     payload: ErloeskontenzuordnungCreate,
     db=Depends(get_db),
@@ -225,7 +225,7 @@ def create_zuordnung(
     return ErloeskontenzuordnungOut(**dict(row._mapping))
 
 
-@router.get("/lookup", response_model=KontoLookupResult)
+@router.get("/lookup", response_model=KontoLookupResult, summary="Lookup konto")
 def konto_lookup(
     ekz_nr: str = Query(...),
     steuerschluessel: Optional[str] = Query(None),

@@ -97,7 +97,7 @@ def _row_to_out(row) -> ZollausfuhrAnmeldungOut:
 
 # ── Endpoints ─────────────────────────────────────────────────────────────────
 
-@router.get("/ausfuhranmeldungen", response_model=list[ZollausfuhrAnmeldungOut])
+@router.get("/ausfuhranmeldungen", response_model=list[ZollausfuhrAnmeldungOut], summary="Anmeldungen auflisten")
 def list_anmeldungen(
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
@@ -115,7 +115,7 @@ def list_anmeldungen(
         return list(_store.values())
 
 
-@router.post("/ausfuhranmeldungen", response_model=ZollausfuhrAnmeldungOut, status_code=201)
+@router.post("/ausfuhranmeldungen", response_model=ZollausfuhrAnmeldungOut, status_code=201, summary="Anmeldung anlegen")
 def create_anmeldung(
     payload: ZollausfuhrAnmeldungCreate,
     db: Session = Depends(get_db),
@@ -163,7 +163,7 @@ def create_anmeldung(
     return record
 
 
-@router.get("/ausfuhranmeldungen/{id}", response_model=ZollausfuhrAnmeldungOut)
+@router.get("/ausfuhranmeldungen/{id}", response_model=ZollausfuhrAnmeldungOut, summary="Anmeldung abrufen")
 def get_anmeldung(
     id: str,
     db: Session = Depends(get_db),
@@ -187,7 +187,7 @@ def get_anmeldung(
     raise HTTPException(status_code=404, detail="Anmeldung nicht gefunden")
 
 
-@router.put("/ausfuhranmeldungen/{id}", response_model=ZollausfuhrAnmeldungOut)
+@router.put("/ausfuhranmeldungen/{id}", response_model=ZollausfuhrAnmeldungOut, summary="Anmeldung aktualisieren")
 def update_anmeldung(
     id: str,
     payload: ZollausfuhrAnmeldungCreate,
@@ -226,7 +226,7 @@ def update_anmeldung(
     return get_anmeldung(id, db, tenant_id)
 
 
-@router.delete("/ausfuhranmeldungen/{id}", status_code=204, response_class=Response, response_model=None)
+@router.delete("/ausfuhranmeldungen/{id}", status_code=204, response_class=Response, response_model=None, summary="Anmeldung löschen")
 def delete_anmeldung(
     id: str,
     db: Session = Depends(get_db),
@@ -249,7 +249,7 @@ def delete_anmeldung(
     return Response(status_code=204)
 
 
-@router.post("/ausfuhranmeldungen/{id}/uebermitteln")
+@router.post("/ausfuhranmeldungen/{id}/uebermitteln", summary="Uebermitteln")
 def uebermitteln(
     id: str,
     db: Session = Depends(get_db),
@@ -270,7 +270,7 @@ def uebermitteln(
         raise
 
 
-@router.post("/ausfuhranmeldungen/{id}/vorab-validieren")
+@router.post("/ausfuhranmeldungen/{id}/vorab-validieren", summary="Validieren vorab")
 def vorab_validieren(
     id: str,
     db: Session = Depends(get_db),
@@ -285,7 +285,7 @@ def vorab_validieren(
     return svc.validate_anmeldung(anmeldung)
 
 
-@router.get("/ausfuhrnachrichten/{mrn}")
+@router.get("/ausfuhrnachrichten/{mrn}", summary="Ausfuhrnachricht")
 def ausfuhrnachricht(
     mrn: str,
     db: Session = Depends(get_db),
@@ -297,7 +297,7 @@ def ausfuhrnachricht(
     return svc.get_ausfuhrnachricht(mrn=mrn, db=db)
 
 
-@router.post("/atlas-callback")
+@router.post("/atlas-callback", summary="Callback atlas")
 def atlas_callback(
     body: ZollausfuhrStatusUpdate,
     db: Session = Depends(get_db),
@@ -321,7 +321,7 @@ def atlas_callback(
     return {"empfangen": True}
 
 
-@router.get("/warennummern/suche")
+@router.get("/warennummern/suche", summary="Suche warennummern")
 def warennummern_suche(q: str = Query(default="")):
     """HS tariff number search (static agricultural seed data)."""
     q_lower = q.lower()

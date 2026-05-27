@@ -57,7 +57,7 @@ class LeadSourceSummary(BaseModel):
     conversion_rate: float
 
 
-@router.get("/pipeline-funnel", response_model=PipelineFunnelReport)
+@router.get("/pipeline-funnel", response_model=PipelineFunnelReport, summary="Pipeline funnel report abrufen")
 async def get_pipeline_funnel_report(
     tenant_id: str = Query(DEFAULT_TENANT),
     db: Session = Depends(get_db),
@@ -130,7 +130,7 @@ async def get_pipeline_funnel_report(
         )
 
 
-@router.get("/win-loss", response_model=WinLossSummary)
+@router.get("/win-loss", response_model=WinLossSummary, summary="Win loss report abrufen")
 async def get_win_loss_report(
     period_from: Optional[date] = None,
     period_to: Optional[date] = None,
@@ -198,7 +198,7 @@ async def get_win_loss_report(
         )
 
 
-@router.get("/lead-sources", response_model=List[LeadSourceSummary])
+@router.get("/lead-sources", response_model=List[LeadSourceSummary], summary="Lead sources report abrufen")
 async def get_lead_sources_report(
     tenant_id: str = Query(DEFAULT_TENANT),
     db: Session = Depends(get_db),

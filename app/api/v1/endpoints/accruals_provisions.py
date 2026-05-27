@@ -39,7 +39,7 @@ class AccrualItem(AccrualItemBase):
     created_at: Optional[datetime] = None
 
 
-@router.get("", response_model=List[AccrualItem])
+@router.get("", response_model=List[AccrualItem], summary="Accruals provisions auflisten")
 async def list_accruals_provisions(
     period: Optional[str] = Query(None, description="Filter by period YYYY-MM"),
     accrual_type: Optional[str] = Query(None, description="Filter: rechnungsabgrenzungsposten or rueckstellung"),
@@ -87,7 +87,7 @@ async def list_accruals_provisions(
     ]
 
 
-@router.post("", response_model=AccrualItem, status_code=201)
+@router.post("", response_model=AccrualItem, status_code=201, summary="Accrual provision anlegen")
 async def create_accrual_provision(
     item: AccrualItemCreate,
     tenant_id: str = Depends(get_tenant_id),
@@ -144,7 +144,7 @@ def _fetch_accrual_or_404(db: Session, item_id: str, tenant_id: str) -> AccrualI
     )
 
 
-@router.get("/{item_id}", response_model=AccrualItem)
+@router.get("/{item_id}", response_model=AccrualItem, summary="Accrual provision abrufen")
 async def get_accrual_provision(
     item_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -163,7 +163,7 @@ class AccrualItemUpdate(BaseModel):
     accrual_type: Optional[str] = None
 
 
-@router.put("/{item_id}", response_model=AccrualItem)
+@router.put("/{item_id}", response_model=AccrualItem, summary="Accrual provision aktualisieren")
 async def update_accrual_provision(
     item_id: str,
     payload: AccrualItemUpdate,
@@ -189,7 +189,7 @@ async def update_accrual_provision(
     return _fetch_accrual_or_404(db, item_id, tenant_id)
 
 
-@router.delete("/{item_id}", status_code=204, response_class=Response, response_model=None)
+@router.delete("/{item_id}", status_code=204, response_class=Response, response_model=None, summary="Accrual provision löschen")
 async def delete_accrual_provision(
     item_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -206,7 +206,7 @@ async def delete_accrual_provision(
     db.commit()
 
 
-@router.post("/{item_id}/post", response_model=dict)
+@router.post("/{item_id}/post", response_model=dict, summary="Accrual provision erstellen")
 async def post_accrual_provision(
     item_id: str,
     tenant_id: str = Depends(get_tenant_id),

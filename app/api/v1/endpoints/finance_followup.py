@@ -224,7 +224,7 @@ def _kasse_csv_rows(db: Session, tenant_id: str) -> list[list[object]]:
 # Mahnwesen
 # ---------------------------------------------------------------------------
 
-@router.get("/mahnwesen/preview", response_model=dict)
+@router.get("/mahnwesen/preview", response_model=dict, summary="Mahnwesen preview abrufen")
 async def get_mahnwesen_preview(
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
@@ -268,7 +268,7 @@ async def get_mahnwesen_preview(
     return preview.model_dump(mode="json")
 
 
-@router.post("/mahnwesen/export", response_model=dict, status_code=202)
+@router.post("/mahnwesen/export", response_model=dict, status_code=202, summary="Mahnwesen exportieren")
 async def export_mahnwesen(
     body: dict,
     tenant_id: str = Depends(get_tenant_id),
@@ -389,7 +389,7 @@ async def export_mahnwesen(
     return out
 
 
-@router.get("/mahnwesen/export/{export_id}/download")
+@router.get("/mahnwesen/export/{export_id}/download", summary="Mahnwesen export herunterladen")
 async def download_mahnwesen_export(
     export_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -410,7 +410,7 @@ async def download_mahnwesen_export(
 # Lastschriften
 # ---------------------------------------------------------------------------
 
-@router.get("/lastschriften/{run_id}/preview", response_model=dict)
+@router.get("/lastschriften/{run_id}/preview", response_model=dict, summary="Lastschrift preview abrufen")
 async def get_lastschrift_preview(
     run_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -466,7 +466,7 @@ async def get_lastschrift_preview(
     return preview.model_dump(mode="json")
 
 
-@router.post("/lastschriften/{run_id}/export", response_model=dict, status_code=202)
+@router.post("/lastschriften/{run_id}/export", response_model=dict, status_code=202, summary="Lastschriften exportieren")
 async def export_lastschriften(
     run_id: str,
     body: dict,
@@ -575,7 +575,7 @@ async def export_lastschriften(
     return out
 
 
-@router.get("/lastschriften/{run_id}/export/{export_id}/download")
+@router.get("/lastschriften/{run_id}/export/{export_id}/download", summary="Lastschrift export herunterladen")
 async def download_lastschrift_export(
     run_id: str,
     export_id: str,
@@ -597,7 +597,7 @@ async def download_lastschrift_export(
 # ---------------------------------------------------------------------------
 
 
-@router.get("/kasse/preview", response_model=dict)
+@router.get("/kasse/preview", response_model=dict, summary="Kassenfolge preview abrufen")
 async def get_kassenfolge_preview(
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
@@ -647,7 +647,7 @@ async def get_kassenfolge_preview(
     return preview.model_dump(mode="json")
 
 
-@router.post("/kasse/export", response_model=dict, status_code=202)
+@router.post("/kasse/export", response_model=dict, status_code=202, summary="Kassenfolge exportieren")
 async def export_kassenfolge(
     body: dict,
     tenant_id: str = Depends(get_tenant_id),
@@ -754,7 +754,7 @@ async def export_kassenfolge(
     return out
 
 
-@router.get("/kasse/export/{export_id}/download")
+@router.get("/kasse/export/{export_id}/download", summary="Kasse export herunterladen")
 async def download_kasse_export(
     export_id: str,
     tenant_id: str = Depends(get_tenant_id),

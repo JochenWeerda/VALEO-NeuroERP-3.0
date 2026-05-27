@@ -53,7 +53,7 @@ class ForderungsgruppeOut(BaseModel):
 
 # ── CRUD ──────────────────────────────────────────────────────────────────────
 
-@router.get("", response_model=list[ForderungsgruppeOut])
+@router.get("", response_model=list[ForderungsgruppeOut], summary="Forderungsgruppen auflisten")
 def list_forderungsgruppen(
     db=Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
@@ -65,7 +65,7 @@ def list_forderungsgruppen(
     return [ForderungsgruppeOut(**dict(r._mapping)) for r in rows]
 
 
-@router.get("/{gruppe_nr}", response_model=ForderungsgruppeOut)
+@router.get("/{gruppe_nr}", response_model=ForderungsgruppeOut, summary="Forderungsgruppe abrufen")
 def get_forderungsgruppe(
     gruppe_nr: str,
     db=Depends(get_db),
@@ -80,7 +80,7 @@ def get_forderungsgruppe(
     return ForderungsgruppeOut(**dict(row._mapping))
 
 
-@router.post("", response_model=ForderungsgruppeOut, status_code=201)
+@router.post("", response_model=ForderungsgruppeOut, status_code=201, summary="Forderungsgruppe anlegen")
 def create_forderungsgruppe(
     payload: ForderungsgruppeCreate,
     db=Depends(get_db),
@@ -109,7 +109,7 @@ def create_forderungsgruppe(
     return ForderungsgruppeOut(**dict(row._mapping))
 
 
-@router.put("/{gruppe_nr}", response_model=ForderungsgruppeOut)
+@router.put("/{gruppe_nr}", response_model=ForderungsgruppeOut, summary="Forderungsgruppe aktualisieren")
 def update_forderungsgruppe(
     gruppe_nr: str,
     payload: ForderungsgruppeCreate,
@@ -141,7 +141,7 @@ def update_forderungsgruppe(
     return ForderungsgruppeOut(**dict(row._mapping))
 
 
-@router.delete("/{gruppe_nr}")
+@router.delete("/{gruppe_nr}", summary="Forderungsgruppe löschen")
 def delete_forderungsgruppe(
     gruppe_nr: str,
     db=Depends(get_db),

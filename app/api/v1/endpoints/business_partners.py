@@ -1217,7 +1217,7 @@ def _apply_payload(row: BusinessPartner, payload: BusinessPartnerPayload) -> Non
             setattr(row, field_name, legacy_values[field_name])
 
 
-@router.post("/", response_model=BusinessPartnerEnvelope, status_code=201)
+@router.post("/", response_model=BusinessPartnerEnvelope, status_code=201, summary="Business partner anlegen")
 async def create_business_partner(
     payload: BusinessPartnerEnvelope,
     tenant_id: str = Depends(get_tenant_id),
@@ -1239,7 +1239,7 @@ async def create_business_partner(
     return _to_out(row)
 
 
-@router.get("/", response_model=list[BusinessPartnerEnvelope])
+@router.get("/", response_model=list[BusinessPartnerEnvelope], summary="Business partners auflisten")
 async def list_business_partners(
     status: Optional[str] = Query(None),
     search: Optional[str] = Query(None),
@@ -1253,7 +1253,7 @@ async def list_business_partners(
     return [_to_out(r) for r in rows]
 
 
-@router.get("/{partner_id}", response_model=BusinessPartnerEnvelope)
+@router.get("/{partner_id}", response_model=BusinessPartnerEnvelope, summary="Business partner abrufen")
 async def get_business_partner(
     partner_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -1265,7 +1265,7 @@ async def get_business_partner(
         raise HTTPException(status_code=404, detail="Business partner not found")
 
 
-@router.put("/{partner_id}", response_model=BusinessPartnerEnvelope)
+@router.put("/{partner_id}", response_model=BusinessPartnerEnvelope, summary="Business partner aktualisieren")
 async def update_business_partner(
     partner_id: str,
     payload: BusinessPartnerEnvelope,
@@ -1352,7 +1352,7 @@ def _to_price_agreement(row: BusinessPartnerPriceAgreement) -> PriceAgreement:
     )
 
 
-@router.get("/{partner_id}/discount-items", response_model=list[DiscountItem])
+@router.get("/{partner_id}/discount-items", response_model=list[DiscountItem], summary="Discount items auflisten")
 async def list_discount_items(
     partner_id: str,
     article_number: Optional[str] = Query(None),
@@ -1366,7 +1366,7 @@ async def list_discount_items(
     return [_to_discount_item(r) for r in rows]
 
 
-@router.post("/{partner_id}/discount-items", response_model=DiscountItem, status_code=201)
+@router.post("/{partner_id}/discount-items", response_model=DiscountItem, status_code=201, summary="Discount item anlegen")
 async def create_discount_item(
     partner_id: str,
     payload: DiscountItemCreate,
@@ -1385,7 +1385,7 @@ async def create_discount_item(
     return _to_discount_item(row)
 
 
-@router.get("/{partner_id}/discount-items/{item_id}", response_model=DiscountItem)
+@router.get("/{partner_id}/discount-items/{item_id}", response_model=DiscountItem, summary="Discount item abrufen")
 async def get_discount_item(
     partner_id: str, item_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
 ):
@@ -1397,7 +1397,7 @@ async def get_discount_item(
     return _to_discount_item(row)
 
 
-@router.put("/{partner_id}/discount-items/{item_id}", response_model=DiscountItem)
+@router.put("/{partner_id}/discount-items/{item_id}", response_model=DiscountItem, summary="Discount item aktualisieren")
 async def update_discount_item(
     partner_id: str, item_id: str, payload: DiscountItemCreate,
     tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db),
@@ -1415,7 +1415,7 @@ async def update_discount_item(
     return _to_discount_item(row)
 
 
-@router.patch("/{partner_id}/discount-items/{item_id}", response_model=DiscountItem)
+@router.patch("/{partner_id}/discount-items/{item_id}", response_model=DiscountItem, summary="Discount item aktualisieren")
 async def patch_discount_item(
     partner_id: str, item_id: str, payload: DiscountItemUpdate,
     tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db),
@@ -1433,7 +1433,7 @@ async def patch_discount_item(
     return _to_discount_item(row)
 
 
-@router.delete("/{partner_id}/discount-items/{item_id}", status_code=204, response_class=Response, response_model=None)
+@router.delete("/{partner_id}/discount-items/{item_id}", status_code=204, response_class=Response, response_model=None, summary="Discount item löschen")
 async def delete_discount_item(
     partner_id: str, item_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
 ):
@@ -1444,7 +1444,7 @@ async def delete_discount_item(
     return None
 
 
-@router.get("/{partner_id}/price-agreements", response_model=list[PriceAgreement])
+@router.get("/{partner_id}/price-agreements", response_model=list[PriceAgreement], summary="Price agreements auflisten")
 async def list_price_agreements(
     partner_id: str,
     article_number: Optional[str] = Query(None),
@@ -1458,7 +1458,7 @@ async def list_price_agreements(
     return [_to_price_agreement(r) for r in rows]
 
 
-@router.post("/{partner_id}/price-agreements", response_model=PriceAgreement, status_code=201)
+@router.post("/{partner_id}/price-agreements", response_model=PriceAgreement, status_code=201, summary="Price agreement anlegen")
 async def create_price_agreement(
     partner_id: str, payload: PriceAgreementCreate,
     tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db),
@@ -1476,7 +1476,7 @@ async def create_price_agreement(
     return _to_price_agreement(row)
 
 
-@router.get("/{partner_id}/price-agreements/{agreement_id}", response_model=PriceAgreement)
+@router.get("/{partner_id}/price-agreements/{agreement_id}", response_model=PriceAgreement, summary="Price agreement abrufen")
 async def get_price_agreement(
     partner_id: str, agreement_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
 ):
@@ -1488,7 +1488,7 @@ async def get_price_agreement(
     return _to_price_agreement(row)
 
 
-@router.put("/{partner_id}/price-agreements/{agreement_id}", response_model=PriceAgreement)
+@router.put("/{partner_id}/price-agreements/{agreement_id}", response_model=PriceAgreement, summary="Price agreement aktualisieren")
 async def update_price_agreement(
     partner_id: str, agreement_id: str, payload: PriceAgreementCreate,
     tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db),
@@ -1507,7 +1507,7 @@ async def update_price_agreement(
     return _to_price_agreement(row)
 
 
-@router.patch("/{partner_id}/price-agreements/{agreement_id}", response_model=PriceAgreement)
+@router.patch("/{partner_id}/price-agreements/{agreement_id}", response_model=PriceAgreement, summary="Price agreement aktualisieren")
 async def patch_price_agreement(
     partner_id: str, agreement_id: str, payload: PriceAgreementUpdate,
     tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db),
@@ -1526,7 +1526,7 @@ async def patch_price_agreement(
     return _to_price_agreement(row)
 
 
-@router.delete("/{partner_id}/price-agreements/{agreement_id}", status_code=204, response_class=Response, response_model=None)
+@router.delete("/{partner_id}/price-agreements/{agreement_id}", status_code=204, response_class=Response, response_model=None, summary="Price agreement löschen")
 async def delete_price_agreement(
     partner_id: str, agreement_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
 ):
@@ -1692,7 +1692,7 @@ def _to_cpd_account(row: BusinessPartnerCpdAccount) -> CpdAccount:
     )
 
 
-@router.get("/{partner_id}/instructions", response_model=list[Instruction])
+@router.get("/{partner_id}/instructions", response_model=list[Instruction], summary="Instructions auflisten")
 async def list_instructions(
     partner_id: str,
     skip: int = Query(0, ge=0), limit: int = Query(50, ge=1, le=500),
@@ -1705,7 +1705,7 @@ async def list_instructions(
     return [_to_instruction(r) for r in rows]
 
 
-@router.post("/{partner_id}/instructions", response_model=Instruction, status_code=201)
+@router.post("/{partner_id}/instructions", response_model=Instruction, status_code=201, summary="Instruction anlegen")
 async def create_instruction(
     partner_id: str, payload: InstructionCreate,
     tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db),
@@ -1720,7 +1720,7 @@ async def create_instruction(
     return _to_instruction(row)
 
 
-@router.get("/{partner_id}/instructions/{instruction_id}", response_model=Instruction)
+@router.get("/{partner_id}/instructions/{instruction_id}", response_model=Instruction, summary="Instruction abrufen")
 async def get_instruction(
     partner_id: str, instruction_id: str,
     tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db),
@@ -1732,7 +1732,7 @@ async def get_instruction(
     return _to_instruction(row)
 
 
-@router.put("/{partner_id}/instructions/{instruction_id}", response_model=Instruction)
+@router.put("/{partner_id}/instructions/{instruction_id}", response_model=Instruction, summary="Instruction aktualisieren")
 async def update_instruction(
     partner_id: str, instruction_id: str, payload: InstructionCreate,
     tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db),
@@ -1749,7 +1749,7 @@ async def update_instruction(
     return _to_instruction(row)
 
 
-@router.patch("/{partner_id}/instructions/{instruction_id}", response_model=Instruction)
+@router.patch("/{partner_id}/instructions/{instruction_id}", response_model=Instruction, summary="Instruction aktualisieren")
 async def patch_instruction(
     partner_id: str, instruction_id: str, payload: InstructionUpdate,
     tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db),
@@ -1764,7 +1764,7 @@ async def patch_instruction(
     return _to_instruction(row)
 
 
-@router.delete("/{partner_id}/instructions/{instruction_id}", status_code=204, response_class=Response, response_model=None)
+@router.delete("/{partner_id}/instructions/{instruction_id}", status_code=204, response_class=Response, response_model=None, summary="Instruction löschen")
 async def delete_instruction(
     partner_id: str, instruction_id: str,
     tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db),
@@ -1776,7 +1776,7 @@ async def delete_instruction(
     return None
 
 
-@router.get("/{partner_id}/contacts", response_model=list[Contact])
+@router.get("/{partner_id}/contacts", response_model=list[Contact], summary="Contacts auflisten")
 async def list_contacts(
     partner_id: str,
     skip: int = Query(0, ge=0), limit: int = Query(50, ge=1, le=500),
@@ -1789,7 +1789,7 @@ async def list_contacts(
     return [_to_contact(r) for r in rows]
 
 
-@router.post("/{partner_id}/contacts", response_model=Contact, status_code=201)
+@router.post("/{partner_id}/contacts", response_model=Contact, status_code=201, summary="Contact anlegen")
 async def create_contact(
     partner_id: str, payload: ContactCreate,
     tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db),
@@ -1804,7 +1804,7 @@ async def create_contact(
     return _to_contact(row)
 
 
-@router.get("/{partner_id}/contacts/{contact_id}", response_model=Contact)
+@router.get("/{partner_id}/contacts/{contact_id}", response_model=Contact, summary="Contact abrufen")
 async def get_contact(
     partner_id: str, contact_id: str,
     tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db),
@@ -1816,7 +1816,7 @@ async def get_contact(
     return _to_contact(row)
 
 
-@router.put("/{partner_id}/contacts/{contact_id}", response_model=Contact)
+@router.put("/{partner_id}/contacts/{contact_id}", response_model=Contact, summary="Contact aktualisieren")
 async def update_contact(
     partner_id: str, contact_id: str, payload: ContactCreate,
     tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db),
@@ -1833,7 +1833,7 @@ async def update_contact(
     return _to_contact(row)
 
 
-@router.patch("/{partner_id}/contacts/{contact_id}", response_model=Contact)
+@router.patch("/{partner_id}/contacts/{contact_id}", response_model=Contact, summary="Contact aktualisieren")
 async def patch_contact(
     partner_id: str,
     contact_id: str,
@@ -1851,7 +1851,7 @@ async def patch_contact(
     return _to_contact(row)
 
 
-@router.delete("/{partner_id}/contacts/{contact_id}", status_code=204, response_class=Response, response_model=None)
+@router.delete("/{partner_id}/contacts/{contact_id}", status_code=204, response_class=Response, response_model=None, summary="Contact löschen")
 async def delete_contact(
     partner_id: str, contact_id: str,
     tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db),
@@ -1863,7 +1863,7 @@ async def delete_contact(
     return None
 
 
-@router.get("/{partner_id}/addresses", response_model=list[Address])
+@router.get("/{partner_id}/addresses", response_model=list[Address], summary="Addresses auflisten")
 async def list_addresses(
     partner_id: str,
     address_type: Optional[str] = Query(None),
@@ -1877,7 +1877,7 @@ async def list_addresses(
     return [_to_address(r) for r in rows]
 
 
-@router.post("/{partner_id}/addresses", response_model=Address, status_code=201)
+@router.post("/{partner_id}/addresses", response_model=Address, status_code=201, summary="Address anlegen")
 async def create_address(
     partner_id: str, payload: AddressCreate,
     tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db),
@@ -1892,7 +1892,7 @@ async def create_address(
     return _to_address(row)
 
 
-@router.get("/{partner_id}/addresses/{address_id}", response_model=Address)
+@router.get("/{partner_id}/addresses/{address_id}", response_model=Address, summary="Address abrufen")
 async def get_address(
     partner_id: str, address_id: str,
     tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db),
@@ -1904,7 +1904,7 @@ async def get_address(
     return _to_address(row)
 
 
-@router.put("/{partner_id}/addresses/{address_id}", response_model=Address)
+@router.put("/{partner_id}/addresses/{address_id}", response_model=Address, summary="Address aktualisieren")
 async def update_address(
     partner_id: str, address_id: str, payload: AddressCreate,
     tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db),
@@ -1921,7 +1921,7 @@ async def update_address(
     return _to_address(row)
 
 
-@router.patch("/{partner_id}/addresses/{address_id}", response_model=Address)
+@router.patch("/{partner_id}/addresses/{address_id}", response_model=Address, summary="Address aktualisieren")
 async def patch_address(
     partner_id: str, address_id: str, payload: AddressUpdate,
     tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db),
@@ -1936,7 +1936,7 @@ async def patch_address(
     return _to_address(row)
 
 
-@router.delete("/{partner_id}/addresses/{address_id}", status_code=204, response_class=Response, response_model=None)
+@router.delete("/{partner_id}/addresses/{address_id}", status_code=204, response_class=Response, response_model=None, summary="Address löschen")
 async def delete_address(
     partner_id: str, address_id: str,
     tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db),
@@ -1948,7 +1948,7 @@ async def delete_address(
     return None
 
 
-@router.get("/{partner_id}/billing-config", response_model=BillingConfig)
+@router.get("/{partner_id}/billing-config", response_model=BillingConfig, summary="Billing config abrufen")
 async def get_billing_config(
     partner_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
 ):
@@ -1959,7 +1959,7 @@ async def get_billing_config(
     return _to_billing_config(row)
 
 
-@router.put("/{partner_id}/billing-config", response_model=BillingConfig)
+@router.put("/{partner_id}/billing-config", response_model=BillingConfig, summary="Billing config put")
 async def put_billing_config(
     partner_id: str, payload: BillingConfigCreate,
     tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db),
@@ -1977,7 +1977,7 @@ async def put_billing_config(
     return _to_billing_config(row)
 
 
-@router.patch("/{partner_id}/billing-config", response_model=BillingConfig)
+@router.patch("/{partner_id}/billing-config", response_model=BillingConfig, summary="Billing config aktualisieren")
 async def patch_billing_config(
     partner_id: str, payload: BillingConfigUpdate,
     tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db),
@@ -1996,7 +1996,7 @@ async def patch_billing_config(
     return _to_billing_config(row)
 
 
-@router.get("/{partner_id}/cpd-accounts", response_model=list[CpdAccount])
+@router.get("/{partner_id}/cpd-accounts", response_model=list[CpdAccount], summary="Cpd accounts auflisten")
 async def list_cpd_accounts(
     partner_id: str,
     skip: int = Query(0, ge=0), limit: int = Query(50, ge=1, le=500),
@@ -2009,7 +2009,7 @@ async def list_cpd_accounts(
     return [_to_cpd_account(r) for r in rows]
 
 
-@router.post("/{partner_id}/cpd-accounts", response_model=CpdAccount, status_code=201)
+@router.post("/{partner_id}/cpd-accounts", response_model=CpdAccount, status_code=201, summary="Cpd account anlegen")
 async def create_cpd_account(
     partner_id: str, payload: CpdAccountCreate,
     tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db),
@@ -2026,7 +2026,7 @@ async def create_cpd_account(
     return _to_cpd_account(row)
 
 
-@router.get("/{partner_id}/cpd-accounts/{account_id}", response_model=CpdAccount)
+@router.get("/{partner_id}/cpd-accounts/{account_id}", response_model=CpdAccount, summary="Cpd account abrufen")
 async def get_cpd_account(
     partner_id: str, account_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
 ):
@@ -2037,7 +2037,7 @@ async def get_cpd_account(
     return _to_cpd_account(row)
 
 
-@router.put("/{partner_id}/cpd-accounts/{account_id}", response_model=CpdAccount)
+@router.put("/{partner_id}/cpd-accounts/{account_id}", response_model=CpdAccount, summary="Cpd account aktualisieren")
 async def update_cpd_account(
     partner_id: str, account_id: str, payload: CpdAccountCreate,
     tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db),
@@ -2055,7 +2055,7 @@ async def update_cpd_account(
     return _to_cpd_account(row)
 
 
-@router.patch("/{partner_id}/cpd-accounts/{account_id}", response_model=CpdAccount)
+@router.patch("/{partner_id}/cpd-accounts/{account_id}", response_model=CpdAccount, summary="Cpd account aktualisieren")
 async def patch_cpd_account(
     partner_id: str, account_id: str, payload: CpdAccountUpdate,
     tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db),
@@ -2073,7 +2073,7 @@ async def patch_cpd_account(
     return _to_cpd_account(row)
 
 
-@router.delete("/{partner_id}/cpd-accounts/{account_id}", status_code=204, response_class=Response, response_model=None)
+@router.delete("/{partner_id}/cpd-accounts/{account_id}", status_code=204, response_class=Response, response_model=None, summary="Cpd account löschen")
 async def delete_cpd_account(
     partner_id: str, account_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
 ):
@@ -2102,7 +2102,7 @@ def _to_pricing_rule(row: BusinessPartnerPricingRule) -> PricingRule:
     )
 
 
-@router.get("/{partner_id}/pricing-rules", response_model=list[PricingRule])
+@router.get("/{partner_id}/pricing-rules", response_model=list[PricingRule], summary="Pricing rules auflisten")
 async def list_pricing_rules(
     partner_id: str,
     skip: int = Query(0, ge=0), limit: int = Query(50, ge=1, le=500),
@@ -2115,7 +2115,7 @@ async def list_pricing_rules(
     return [_to_pricing_rule(r) for r in rows]
 
 
-@router.post("/{partner_id}/pricing-rules", response_model=PricingRule, status_code=201)
+@router.post("/{partner_id}/pricing-rules", response_model=PricingRule, status_code=201, summary="Pricing rule anlegen")
 async def create_pricing_rule(
     partner_id: str, payload: PricingRuleCreate,
     tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db),
@@ -2132,7 +2132,7 @@ async def create_pricing_rule(
     return _to_pricing_rule(row)
 
 
-@router.get("/{partner_id}/pricing-rules/{rule_id}", response_model=PricingRule)
+@router.get("/{partner_id}/pricing-rules/{rule_id}", response_model=PricingRule, summary="Pricing rule abrufen")
 async def get_pricing_rule(
     partner_id: str, rule_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
 ):
@@ -2143,7 +2143,7 @@ async def get_pricing_rule(
     return _to_pricing_rule(row)
 
 
-@router.put("/{partner_id}/pricing-rules/{rule_id}", response_model=PricingRule)
+@router.put("/{partner_id}/pricing-rules/{rule_id}", response_model=PricingRule, summary="Pricing rule aktualisieren")
 async def update_pricing_rule(
     partner_id: str, rule_id: str, payload: PricingRuleCreate,
     tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db),
@@ -2160,7 +2160,7 @@ async def update_pricing_rule(
     return _to_pricing_rule(row)
 
 
-@router.patch("/{partner_id}/pricing-rules/{rule_id}", response_model=PricingRule)
+@router.patch("/{partner_id}/pricing-rules/{rule_id}", response_model=PricingRule, summary="Pricing rule aktualisieren")
 async def patch_pricing_rule(
     partner_id: str, rule_id: str, payload: PricingRuleUpdate,
     tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db),
@@ -2178,7 +2178,7 @@ async def patch_pricing_rule(
     return _to_pricing_rule(row)
 
 
-@router.delete("/{partner_id}/pricing-rules/{rule_id}", status_code=204, response_class=Response, response_model=None)
+@router.delete("/{partner_id}/pricing-rules/{rule_id}", status_code=204, response_class=Response, response_model=None, summary="Pricing rule löschen")
 async def delete_pricing_rule(
     partner_id: str, rule_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
 ):
@@ -2206,7 +2206,7 @@ def _to_interest_setting(row: BusinessPartnerInterestSetting) -> InterestSetting
     )
 
 
-@router.get("/{partner_id}/interest-settings", response_model=list[InterestSetting])
+@router.get("/{partner_id}/interest-settings", response_model=list[InterestSetting], summary="Interest settings auflisten")
 async def list_interest_settings(
     partner_id: str,
     skip: int = Query(0, ge=0), limit: int = Query(50, ge=1, le=500),
@@ -2219,7 +2219,7 @@ async def list_interest_settings(
     return [_to_interest_setting(r) for r in rows]
 
 
-@router.post("/{partner_id}/interest-settings", response_model=InterestSetting, status_code=201)
+@router.post("/{partner_id}/interest-settings", response_model=InterestSetting, status_code=201, summary="Interest setting anlegen")
 async def create_interest_setting(
     partner_id: str, payload: InterestSettingCreate,
     tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db),
@@ -2234,7 +2234,7 @@ async def create_interest_setting(
     return _to_interest_setting(row)
 
 
-@router.put("/{partner_id}/interest-settings/{setting_id}", response_model=InterestSetting)
+@router.put("/{partner_id}/interest-settings/{setting_id}", response_model=InterestSetting, summary="Interest setting aktualisieren")
 async def update_interest_setting(
     partner_id: str, setting_id: str, payload: InterestSettingCreate,
     tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db),
@@ -2249,7 +2249,7 @@ async def update_interest_setting(
     return _to_interest_setting(row)
 
 
-@router.patch("/{partner_id}/interest-settings/{setting_id}", response_model=InterestSetting)
+@router.patch("/{partner_id}/interest-settings/{setting_id}", response_model=InterestSetting, summary="Interest setting aktualisieren")
 async def patch_interest_setting(
     partner_id: str, setting_id: str, payload: InterestSettingUpdate,
     tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db),
@@ -2264,7 +2264,7 @@ async def patch_interest_setting(
     return _to_interest_setting(row)
 
 
-@router.delete("/{partner_id}/interest-settings/{setting_id}", status_code=204, response_class=Response, response_model=None)
+@router.delete("/{partner_id}/interest-settings/{setting_id}", status_code=204, response_class=Response, response_model=None, summary="Interest setting löschen")
 async def delete_interest_setting(
     partner_id: str, setting_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
 ):
@@ -2291,7 +2291,7 @@ def _to_dispatch_medium(row: BusinessPartnerDispatchMedium) -> DispatchMedium:
     )
 
 
-@router.get("/{partner_id}/dispatch-media", response_model=list[DispatchMedium])
+@router.get("/{partner_id}/dispatch-media", response_model=list[DispatchMedium], summary="Dispatch media auflisten")
 async def list_dispatch_media(
     partner_id: str,
     skip: int = Query(0, ge=0), limit: int = Query(50, ge=1, le=500),
@@ -2304,7 +2304,7 @@ async def list_dispatch_media(
     return [_to_dispatch_medium(r) for r in rows]
 
 
-@router.post("/{partner_id}/dispatch-media", response_model=DispatchMedium, status_code=201)
+@router.post("/{partner_id}/dispatch-media", response_model=DispatchMedium, status_code=201, summary="Dispatch medium anlegen")
 async def create_dispatch_medium(
     partner_id: str, payload: DispatchMediumCreate,
     tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db),
@@ -2319,7 +2319,7 @@ async def create_dispatch_medium(
     return _to_dispatch_medium(row)
 
 
-@router.put("/{partner_id}/dispatch-media/{medium_id}", response_model=DispatchMedium)
+@router.put("/{partner_id}/dispatch-media/{medium_id}", response_model=DispatchMedium, summary="Dispatch medium aktualisieren")
 async def update_dispatch_medium(
     partner_id: str, medium_id: str, payload: DispatchMediumCreate,
     tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db),
@@ -2334,7 +2334,7 @@ async def update_dispatch_medium(
     return _to_dispatch_medium(row)
 
 
-@router.patch("/{partner_id}/dispatch-media/{medium_id}", response_model=DispatchMedium)
+@router.patch("/{partner_id}/dispatch-media/{medium_id}", response_model=DispatchMedium, summary="Dispatch medium aktualisieren")
 async def patch_dispatch_medium(
     partner_id: str, medium_id: str, payload: DispatchMediumUpdate,
     tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db),
@@ -2349,7 +2349,7 @@ async def patch_dispatch_medium(
     return _to_dispatch_medium(row)
 
 
-@router.delete("/{partner_id}/dispatch-media/{medium_id}", status_code=204, response_class=Response, response_model=None)
+@router.delete("/{partner_id}/dispatch-media/{medium_id}", status_code=204, response_class=Response, response_model=None, summary="Dispatch medium löschen")
 async def delete_dispatch_medium(
     partner_id: str, medium_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
 ):
@@ -2378,7 +2378,7 @@ def _to_coop(row: BusinessPartnerCooperativeMembership) -> CooperativeMembership
     )
 
 
-@router.get("/{partner_id}/cooperative-memberships", response_model=list[CooperativeMembership])
+@router.get("/{partner_id}/cooperative-memberships", response_model=list[CooperativeMembership], summary="Cooperative memberships auflisten")
 async def list_cooperative_memberships(
     partner_id: str,
     skip: int = Query(0, ge=0), limit: int = Query(50, ge=1, le=500),
@@ -2391,7 +2391,7 @@ async def list_cooperative_memberships(
     return [_to_coop(r) for r in rows]
 
 
-@router.post("/{partner_id}/cooperative-memberships", response_model=CooperativeMembership, status_code=201)
+@router.post("/{partner_id}/cooperative-memberships", response_model=CooperativeMembership, status_code=201, summary="Cooperative membership anlegen")
 async def create_cooperative_membership(
     partner_id: str, payload: CooperativeMembershipCreate,
     tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db),
@@ -2406,7 +2406,7 @@ async def create_cooperative_membership(
     return _to_coop(row)
 
 
-@router.patch("/{partner_id}/cooperative-memberships/{membership_id}", response_model=CooperativeMembership)
+@router.patch("/{partner_id}/cooperative-memberships/{membership_id}", response_model=CooperativeMembership, summary="Cooperative membership aktualisieren")
 async def patch_cooperative_membership(
     partner_id: str, membership_id: str, payload: CooperativeMembershipUpdate,
     tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db),
@@ -2421,7 +2421,7 @@ async def patch_cooperative_membership(
     return _to_coop(row)
 
 
-@router.delete("/{partner_id}/cooperative-memberships/{membership_id}", status_code=204, response_class=Response, response_model=None)
+@router.delete("/{partner_id}/cooperative-memberships/{membership_id}", status_code=204, response_class=Response, response_model=None, summary="Cooperative membership löschen")
 async def delete_cooperative_membership(
     partner_id: str, membership_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
 ):
@@ -2445,7 +2445,7 @@ def _to_email_distribution(row: BusinessPartnerEmailDistribution) -> EmailDistri
     )
 
 
-@router.get("/{partner_id}/email-distributions", response_model=list[EmailDistribution])
+@router.get("/{partner_id}/email-distributions", response_model=list[EmailDistribution], summary="Email distributions auflisten")
 async def list_email_distributions(
     partner_id: str,
     skip: int = Query(0, ge=0), limit: int = Query(50, ge=1, le=500),
@@ -2458,7 +2458,7 @@ async def list_email_distributions(
     return [_to_email_distribution(r) for r in rows]
 
 
-@router.post("/{partner_id}/email-distributions", response_model=EmailDistribution, status_code=201)
+@router.post("/{partner_id}/email-distributions", response_model=EmailDistribution, status_code=201, summary="Email distribution anlegen")
 async def create_email_distribution(
     partner_id: str, payload: EmailDistributionCreate,
     tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db),
@@ -2473,7 +2473,7 @@ async def create_email_distribution(
     return _to_email_distribution(row)
 
 
-@router.patch("/{partner_id}/email-distributions/{distribution_id}", response_model=EmailDistribution)
+@router.patch("/{partner_id}/email-distributions/{distribution_id}", response_model=EmailDistribution, summary="Email distribution aktualisieren")
 async def patch_email_distribution(
     partner_id: str, distribution_id: str, payload: EmailDistributionUpdate,
     tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db),
@@ -2488,7 +2488,7 @@ async def patch_email_distribution(
     return _to_email_distribution(row)
 
 
-@router.delete("/{partner_id}/email-distributions/{distribution_id}", status_code=204, response_class=Response, response_model=None)
+@router.delete("/{partner_id}/email-distributions/{distribution_id}", status_code=204, response_class=Response, response_model=None, summary="Email distribution löschen")
 async def delete_email_distribution(
     partner_id: str, distribution_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
 ):
@@ -2520,13 +2520,13 @@ def _to_community_member(row: BusinessPartnerCommunityMember) -> CommunityMember
     )
 
 
-@router.get("/catalog/communities", response_model=list[Community])
+@router.get("/catalog/communities", response_model=list[Community], summary="Communities auflisten")
 async def list_communities(db: Session = Depends(get_db)):
     rows = BusinessPartnerService(db, "").list_communities()
     return [_to_community(r) for r in rows]
 
 
-@router.post("/catalog/communities", response_model=Community, status_code=201)
+@router.post("/catalog/communities", response_model=Community, status_code=201, summary="Community anlegen")
 async def create_community(payload: CommunityCreate, db: Session = Depends(get_db)):
     try:
         row = BusinessPartnerService(db, "").create_community(payload.model_dump())
@@ -2535,7 +2535,7 @@ async def create_community(payload: CommunityCreate, db: Session = Depends(get_d
     return _to_community(row)
 
 
-@router.patch("/catalog/communities/{community_id}", response_model=Community)
+@router.patch("/catalog/communities/{community_id}", response_model=Community, summary="Community aktualisieren")
 async def patch_community(community_id: str, payload: CommunityUpdate, db: Session = Depends(get_db)):
     try:
         row = BusinessPartnerService(db, "").patch_community(community_id, payload.model_dump(exclude_unset=True))
@@ -2546,7 +2546,7 @@ async def patch_community(community_id: str, payload: CommunityUpdate, db: Sessi
     return _to_community(row)
 
 
-@router.delete("/catalog/communities/{community_id}", status_code=204, response_class=Response, response_model=None)
+@router.delete("/catalog/communities/{community_id}", status_code=204, response_class=Response, response_model=None, summary="Community löschen")
 async def delete_community(community_id: str, db: Session = Depends(get_db)):
     try:
         BusinessPartnerService(db, "").delete_community(community_id)
@@ -2555,13 +2555,13 @@ async def delete_community(community_id: str, db: Session = Depends(get_db)):
     return None
 
 
-@router.get("/catalog/communities/{community_id}/members", response_model=list[CommunityMember])
+@router.get("/catalog/communities/{community_id}/members", response_model=list[CommunityMember], summary="Community members auflisten")
 async def list_community_members(community_id: str, db: Session = Depends(get_db)):
     rows = BusinessPartnerService(db, "").list_community_members(community_id)
     return [_to_community_member(r) for r in rows]
 
 
-@router.post("/catalog/communities/{community_id}/members", response_model=CommunityMember, status_code=201)
+@router.post("/catalog/communities/{community_id}/members", response_model=CommunityMember, status_code=201, summary="Community member anlegen")
 async def create_community_member(community_id: str, payload: CommunityMemberCreate, db: Session = Depends(get_db)):
     _ensure_partner_exists(payload.partner_id, db)
     try:
@@ -2571,7 +2571,7 @@ async def create_community_member(community_id: str, payload: CommunityMemberCre
     return _to_community_member(row)
 
 
-@router.patch("/catalog/communities/{community_id}/members/{member_id}", response_model=CommunityMember)
+@router.patch("/catalog/communities/{community_id}/members/{member_id}", response_model=CommunityMember, summary="Community member aktualisieren")
 async def patch_community_member(
     community_id: str, member_id: str, payload: CommunityMemberUpdate, db: Session = Depends(get_db)
 ):
@@ -2587,7 +2587,7 @@ async def patch_community_member(
     return _to_community_member(row)
 
 
-@router.delete("/catalog/communities/{community_id}/members/{member_id}", status_code=204, response_class=Response, response_model=None)
+@router.delete("/catalog/communities/{community_id}/members/{member_id}", status_code=204, response_class=Response, response_model=None, summary="Community member löschen")
 async def delete_community_member(community_id: str, member_id: str, db: Session = Depends(get_db)):
     try:
         BusinessPartnerService(db, "").delete_community_member(member_id)
@@ -2618,7 +2618,7 @@ def _to_profile(row: BusinessPartnerProfile) -> Profile:
     )
 
 
-@router.get("/{partner_id}/profile", response_model=Profile)
+@router.get("/{partner_id}/profile", response_model=Profile, summary="Profile abrufen")
 async def get_profile(
     partner_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
 ):
@@ -2629,7 +2629,7 @@ async def get_profile(
     return _to_profile(row)
 
 
-@router.put("/{partner_id}/profile", response_model=Profile)
+@router.put("/{partner_id}/profile", response_model=Profile, summary="Profile put")
 async def put_profile(
     partner_id: str, payload: ProfileCreate,
     tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db),
@@ -2644,7 +2644,7 @@ async def put_profile(
     return _to_profile(row)
 
 
-@router.patch("/{partner_id}/profile", response_model=Profile)
+@router.patch("/{partner_id}/profile", response_model=Profile, summary="Profile aktualisieren")
 async def patch_profile(
     partner_id: str, payload: ProfileUpdate,
     tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db),
@@ -2675,7 +2675,7 @@ def _to_interface_profile(row: BusinessPartnerInterfaceProfile) -> InterfaceProf
     )
 
 
-@router.get("/{partner_id}/interface-profile", response_model=InterfaceProfile)
+@router.get("/{partner_id}/interface-profile", response_model=InterfaceProfile, summary="Interface profile abrufen")
 async def get_interface_profile(
     partner_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
 ):
@@ -2686,7 +2686,7 @@ async def get_interface_profile(
     return _to_interface_profile(row)
 
 
-@router.put("/{partner_id}/interface-profile", response_model=InterfaceProfile)
+@router.put("/{partner_id}/interface-profile", response_model=InterfaceProfile, summary="Interface profile put")
 async def put_interface_profile(
     partner_id: str, payload: InterfaceProfileCreate,
     tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db),
@@ -2701,7 +2701,7 @@ async def put_interface_profile(
     return _to_interface_profile(row)
 
 
-@router.patch("/{partner_id}/interface-profile", response_model=InterfaceProfile)
+@router.patch("/{partner_id}/interface-profile", response_model=InterfaceProfile, summary="Interface profile aktualisieren")
 async def patch_interface_profile(
     partner_id: str, payload: InterfaceProfileUpdate,
     tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db),

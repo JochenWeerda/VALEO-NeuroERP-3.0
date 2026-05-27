@@ -32,7 +32,7 @@ class DMSImageOut(BaseModel):
     full_url: str
 
 
-@router.get("/documents", response_model=list[DMSDocumentOut])
+@router.get("/documents", response_model=list[DMSDocumentOut], summary="Dms documents auflisten")
 async def list_dms_documents(
     entity_type: Optional[str] = Query(None, description="e.g. 'article', 'customer'"),
     entity_id: Optional[str] = Query(None),
@@ -83,7 +83,7 @@ async def list_dms_documents(
         return []
 
 
-@router.get("/images", response_model=list[DMSImageOut])
+@router.get("/images", response_model=list[DMSImageOut], summary="Dms images auflisten")
 async def list_dms_images(
     document_id: Optional[str] = Query(None),
     db: Session = Depends(get_db),
@@ -114,7 +114,7 @@ async def list_dms_images(
         return []
 
 
-@router.post("/documents", response_model=DMSDocumentOut, status_code=201)
+@router.post("/documents", response_model=DMSDocumentOut, status_code=201, summary="Dms document hochladen")
 async def upload_dms_document(
     file: UploadFile = File(...),
     entity_type: str = Form("article"),
@@ -152,7 +152,7 @@ async def upload_dms_document(
     )
 
 
-@router.delete("/documents/{doc_id}", status_code=204, response_class=Response, response_model=None)
+@router.delete("/documents/{doc_id}", status_code=204, response_class=Response, response_model=None, summary="Dms document löschen")
 async def delete_dms_document(
     doc_id: str,
     tenant_id: str = Depends(get_tenant_id),

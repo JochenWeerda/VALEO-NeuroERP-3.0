@@ -25,12 +25,12 @@ class SynthesizeRequest(BaseModel):
     text: str
 
 
-@router.post("/session")
+@router.post("/session", summary="Session starten")
 async def start_session(request: SessionRequest):
     return create_session(request.language, request.channel)
 
 
-@router.delete("/session/{session_id}")
+@router.delete("/session/{session_id}", summary="Session abschließen")
 async def close_session(session_id: str):
     result = end_session(session_id)
     if "error" in result:
@@ -38,7 +38,7 @@ async def close_session(session_id: str):
     return result
 
 
-@router.post("/transcribe")
+@router.post("/transcribe", summary="Transcribe do")
 async def do_transcribe(request: TranscribeRequest):
     result = await transcribe(request.session_id, request.audio_format)
     if "error" in result:
@@ -46,7 +46,7 @@ async def do_transcribe(request: TranscribeRequest):
     return result
 
 
-@router.post("/synthesize")
+@router.post("/synthesize", summary="Synthesize do")
 async def do_synthesize(request: SynthesizeRequest):
     result = await synthesize(request.session_id, request.text)
     if "error" in result:

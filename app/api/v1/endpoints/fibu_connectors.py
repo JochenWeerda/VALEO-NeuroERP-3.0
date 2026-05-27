@@ -37,7 +37,7 @@ def _user_from_request(request: Optional[Request]) -> Optional[str]:
 
 # ---------- Profiles ----------
 
-@router.get("/profiles", response_model=List[ConnectorProfile])
+@router.get("/profiles", response_model=List[ConnectorProfile], summary="Profiles auflisten")
 async def list_profiles(
     type: str = Query(..., pattern="^(PAYROLL|ASSET_LEDGER)$"),
     tenant_id: str = Depends(get_tenant_id),
@@ -72,7 +72,7 @@ async def list_profiles(
     ]
 
 
-@router.post("/profiles", response_model=ConnectorProfile, status_code=201)
+@router.post("/profiles", response_model=ConnectorProfile, status_code=201, summary="Profile anlegen")
 async def create_profile(
     payload: ConnectorProfileCreate,
     tenant_id: str = Depends(get_tenant_id),
@@ -115,7 +115,7 @@ async def create_profile(
     )
 
 
-@router.get("/profiles/{profile_id}", response_model=ConnectorProfile)
+@router.get("/profiles/{profile_id}", response_model=ConnectorProfile, summary="Profile abrufen")
 async def get_profile(
     profile_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -137,7 +137,7 @@ async def get_profile(
     )
 
 
-@router.put("/profiles/{profile_id}", response_model=ConnectorProfile)
+@router.put("/profiles/{profile_id}", response_model=ConnectorProfile, summary="Profile aktualisieren")
 async def update_profile(
   profile_id: str,
   payload: ConnectorProfileUpdate,
@@ -179,7 +179,7 @@ async def update_profile(
     return await get_profile(profile_id, tenant_id, db)
 
 
-@router.delete("/profiles/{profile_id}", status_code=204, response_class=Response, response_model=None)
+@router.delete("/profiles/{profile_id}", status_code=204, response_class=Response, response_model=None, summary="Profile löschen")
 async def delete_profile(
   profile_id: str,
   tenant_id: str = Depends(get_tenant_id),
@@ -202,7 +202,7 @@ async def delete_profile(
 
 # ---------- Imports (Runs) ----------
 
-@router.post("/{connector_type}/imports", response_model=ImportUploadResponse, status_code=201)
+@router.post("/{connector_type}/imports", response_model=ImportUploadResponse, status_code=201, summary="Import run anlegen")
 async def create_import_run(
     connector_type: str,
     request: Request,
@@ -228,7 +228,7 @@ async def create_import_run(
     return ImportUploadResponse(run_id=run_id, status="PARSED", message="Upload und Parse erfolgreich.")
 
 
-@router.get("/imports/{run_id}", response_model=ConnectorRunSummary)
+@router.get("/imports/{run_id}", response_model=ConnectorRunSummary, summary="Import run abrufen")
 async def get_import_run(
     run_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -254,7 +254,7 @@ async def get_import_run(
     )
 
 
-@router.get("/imports/{run_id}/items", response_model=List[ConnectorRunItem])
+@router.get("/imports/{run_id}/items", response_model=List[ConnectorRunItem], summary="Run items auflisten")
 async def list_run_items(
     run_id: str,
     only_errors: bool = Query(False),
@@ -287,7 +287,7 @@ async def list_run_items(
     ]
 
 
-@router.post("/imports/{run_id}/validate", response_model=ConnectorRunSummary)
+@router.post("/imports/{run_id}/validate", response_model=ConnectorRunSummary, summary="Import run validieren")
 async def validate_import_run(
     run_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -300,7 +300,7 @@ async def validate_import_run(
     return await get_import_run(run_id, tenant_id, db)
 
 
-@router.post("/imports/{run_id}/post", response_model=ConnectorRunSummary)
+@router.post("/imports/{run_id}/post", response_model=ConnectorRunSummary, summary="Import run erstellen")
 async def post_import_run(
     run_id: str,
     request: Request,
@@ -314,7 +314,7 @@ async def post_import_run(
     return await get_import_run(run_id, tenant_id, db)
 
 
-@router.post("/imports/{run_id}/cancel", response_model=ConnectorRunSummary)
+@router.post("/imports/{run_id}/cancel", response_model=ConnectorRunSummary, summary="Import run stornieren")
 async def cancel_import_run(
     run_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -327,7 +327,7 @@ async def cancel_import_run(
     return await get_import_run(run_id, tenant_id, db)
 
 
-@router.post("/imports/{run_id}/reverse", response_model=ConnectorRunSummary)
+@router.post("/imports/{run_id}/reverse", response_model=ConnectorRunSummary, summary="Import run reverse")
 async def reverse_import_run(
     run_id: str,
     request: Request,

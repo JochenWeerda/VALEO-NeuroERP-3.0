@@ -66,7 +66,7 @@ class HoflisteOut(BaseModel):
 
 # ── Endpoints ─────────────────────────────────────────────────────────────────
 
-@router.get("", response_model=list[HoflisteOut])
+@router.get("", response_model=list[HoflisteOut], summary="Hofliste abrufen")
 def get_hofliste(
     status: Optional[str] = Query(None, description="vorgemeldet,auf_hof,in_waegung,gewogen,abgefahren"),
     standort_id: Optional[str] = Query(None),
@@ -93,7 +93,7 @@ def get_hofliste(
     return [HoflisteOut(**dict(r._mapping)) for r in rows]
 
 
-@router.post("", response_model=HoflisteOut, status_code=201)
+@router.post("", response_model=HoflisteOut, status_code=201, summary="Anmelden")
 def anmelden(
     payload: HoflisteCreate,
     db=Depends(get_db),
@@ -128,7 +128,7 @@ def anmelden(
     return HoflisteOut(**dict(row._mapping))
 
 
-@router.post("/{eintrag_id}/status")
+@router.post("/{eintrag_id}/status", summary="Aendern status")
 def status_aendern(
     eintrag_id: str,
     neuer_status: str,
@@ -172,7 +172,7 @@ def status_aendern(
     return HoflisteOut(**dict(row._mapping))
 
 
-@router.delete("/{eintrag_id}")
+@router.delete("/{eintrag_id}", summary="Abmelden")
 def abmelden(
     eintrag_id: str,
     db=Depends(get_db),
@@ -195,7 +195,7 @@ def abmelden(
     return Response(status_code=204)
 
 
-@router.get("/statistik")
+@router.get("/statistik", summary="Statistik hofliste")
 def hofliste_statistik(
     standort_id: Optional[str] = Query(None),
     db=Depends(get_db),

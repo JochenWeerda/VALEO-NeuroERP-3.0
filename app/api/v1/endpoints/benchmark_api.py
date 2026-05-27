@@ -31,7 +31,7 @@ class KennzahlSubmitRequest(BaseModel):
     periode: str
 
 
-@router.post("/kennzahlen", status_code=201)
+@router.post("/kennzahlen", status_code=201, summary="Kennzahl einreichen")
 def submit_kennzahl(req: KennzahlSubmitRequest, db: Session = Depends(get_db)):
     kz_id = str(uuid.uuid4())
     row = BetriebsKennzahlDB(
@@ -57,7 +57,7 @@ def submit_kennzahl(req: KennzahlSubmitRequest, db: Session = Depends(get_db)):
     }
 
 
-@router.get("/report/{verbund_id}")
+@router.get("/report/{verbund_id}", summary="Benchmark report abrufen")
 def get_benchmark_report(verbund_id: str, periode: str = Query(...), db: Session = Depends(get_db)):
     rows = db.query(BetriebsKennzahlDB).filter(BetriebsKennzahlDB.periode == periode).all()
     from app.core.betriebskennzahlen import BetriebsKennzahl
@@ -81,7 +81,7 @@ def get_benchmark_report(verbund_id: str, periode: str = Query(...), db: Session
     return report
 
 
-@router.get("/process-mining/{verbund_id}")
+@router.get("/process-mining/{verbund_id}", summary="Process mining benchmark report abrufen")
 def get_process_mining_benchmark_report(
     verbund_id: str,
     periode: str = Query(...),
@@ -102,6 +102,6 @@ def get_process_mining_benchmark_report(
     )
 
 
-@router.get("/katalog")
+@router.get("/katalog", summary="Kz katalog abrufen")
 def get_kz_katalog():
     return {"katalog": DEFAULT_KZ_KATALOG, "count": len(DEFAULT_KZ_KATALOG), "schema_version": 1}

@@ -160,7 +160,7 @@ def _get_row(db: Session, tenant_id: str, strecke_id: str) -> Streckengeschaeft 
 # ---------------------------------------------------------------------------
 
 
-@router.get("", response_model=list[StreckengeschaeftOut])
+@router.get("", response_model=list[StreckengeschaeftOut], summary="Streckengeschaefte auflisten")
 async def list_streckengeschaefte(
     skip: int = Query(0, ge=0),
     limit: int = Query(200, ge=1, le=1000),
@@ -180,7 +180,7 @@ async def list_streckengeschaefte(
         return []
 
 
-@router.get("/{strecke_id}", response_model=StreckengeschaeftOut)
+@router.get("/{strecke_id}", response_model=StreckengeschaeftOut, summary="Streckengeschaeft abrufen")
 async def get_streckengeschaeft(
     strecke_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -193,7 +193,7 @@ async def get_streckengeschaeft(
     return _to_out(row)
 
 
-@router.post("", response_model=StreckengeschaeftOut, status_code=201)
+@router.post("", response_model=StreckengeschaeftOut, status_code=201, summary="Streckengeschaeft anlegen")
 async def create_streckengeschaeft(
     payload: StreckengeschaeftCreate,
     tenant_id: str = Depends(get_tenant_id),
@@ -238,7 +238,7 @@ async def create_streckengeschaeft(
     return _to_out(row)
 
 
-@router.patch("/{strecke_id}", response_model=StreckengeschaeftOut)
+@router.patch("/{strecke_id}", response_model=StreckengeschaeftOut, summary="Streckengeschaeft aktualisieren")
 async def update_streckengeschaeft(
     strecke_id: str,
     payload: StreckengeschaeftUpdate,
@@ -269,7 +269,7 @@ async def update_streckengeschaeft(
     return _to_out(row)
 
 
-@router.delete("/{strecke_id}", status_code=204, response_class=Response, response_model=None)
+@router.delete("/{strecke_id}", status_code=204, response_class=Response, response_model=None, summary="Streckengeschaeft löschen")
 async def delete_streckengeschaeft(
     strecke_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -284,7 +284,7 @@ async def delete_streckengeschaeft(
     return Response(status_code=204)
 
 
-@router.post("/{strecke_id}/close", response_model=StreckengeschaeftOut)
+@router.post("/{strecke_id}/close", response_model=StreckengeschaeftOut, summary="Streckengeschaeft abschließen")
 async def close_streckengeschaeft(
     strecke_id: str,
     rechnungsnr: str = Query(..., description="Rechnungsnummer des Lieferanten"),

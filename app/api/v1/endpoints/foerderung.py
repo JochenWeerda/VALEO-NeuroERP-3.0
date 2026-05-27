@@ -42,7 +42,7 @@ def _seed(db: Session) -> None:
     db.commit()
 
 
-@router.get("/antraege", response_model=dict)
+@router.get("/antraege", response_model=dict, summary="Antraege auflisten")
 async def list_antraege(status: Optional[str] = Query(None, description="Filter by status"), db: Session = Depends(get_db)) -> dict:
     _seed(db)
     query = db.query(FoerderAntrag)
@@ -68,7 +68,7 @@ async def list_antraege(status: Optional[str] = Query(None, description="Filter 
     }
 
 
-@router.get("/stats", response_model=dict)
+@router.get("/stats", response_model=dict, summary="Foerderung stats abrufen")
 async def get_foerderung_stats(db: Session = Depends(get_db)) -> dict:
     _seed(db)
     items = db.query(FoerderAntrag).all()
@@ -106,7 +106,7 @@ class FoerderAntragUpdate(BaseModel):
 from fastapi import HTTPException
 
 
-@router.post("/antraege", response_model=dict, status_code=201)
+@router.post("/antraege", response_model=dict, status_code=201, summary="Antrag anlegen")
 async def create_antrag(
     body: FoerderAntragCreate,
     db: Session = Depends(get_db),
@@ -134,7 +134,7 @@ async def create_antrag(
     }
 
 
-@router.get("/antraege/{antrag_id}", response_model=dict)
+@router.get("/antraege/{antrag_id}", response_model=dict, summary="Antrag abrufen")
 async def get_antrag(antrag_id: int, db: Session = Depends(get_db)) -> dict:
     """Einzelnen Förderantrag abrufen."""
     antrag = db.query(FoerderAntrag).filter(FoerderAntrag.id == antrag_id).first()
@@ -151,7 +151,7 @@ async def get_antrag(antrag_id: int, db: Session = Depends(get_db)) -> dict:
     }
 
 
-@router.delete("/antraege/{antrag_id}", status_code=204, response_class=Response, response_model=None)
+@router.delete("/antraege/{antrag_id}", status_code=204, response_class=Response, response_model=None, summary="Antrag löschen")
 async def delete_antrag(antrag_id: int, db: Session = Depends(get_db)) -> None:
     """Förderantrag löschen (nur im Entwurfsstatus)."""
     antrag = db.query(FoerderAntrag).filter(FoerderAntrag.id == antrag_id).first()
@@ -163,7 +163,7 @@ async def delete_antrag(antrag_id: int, db: Session = Depends(get_db)) -> None:
     db.commit()
 
 
-@router.put("/antraege/{antrag_id}", response_model=dict)
+@router.put("/antraege/{antrag_id}", response_model=dict, summary="Antrag aktualisieren")
 async def update_antrag(
     antrag_id: int,
     body: FoerderAntragUpdate,

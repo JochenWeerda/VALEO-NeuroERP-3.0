@@ -78,7 +78,7 @@ def resolve_tenant_policy_override(
 
 # Endpoints
 
-@router.get("/policy/list")
+@router.get("/policy/list", summary="Policies auflisten")
 async def list_policies() -> Dict[str, Any]:
     """
     Listet alle Policies auf
@@ -94,7 +94,7 @@ async def list_policies() -> Dict[str, Any]:
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.post("/policy/upsert")
+@router.post("/policy/upsert", summary="Policies upsert")
 async def upsert_policies(request: UpsertRequest) -> Dict[str, Any]:
     """
     Erstellt oder aktualisiert Policies (bulk)
@@ -114,7 +114,7 @@ async def upsert_policies(request: UpsertRequest) -> Dict[str, Any]:
         raise HTTPException(status_code=400, detail=str(e))
 
 
-@router.post("/policy/create")
+@router.post("/policy/create", summary="Policy anlegen")
 async def create_policy(rule: Rule) -> Dict[str, Any]:
     """
     Erstellt oder aktualisiert eine einzelne Policy
@@ -134,7 +134,7 @@ async def create_policy(rule: Rule) -> Dict[str, Any]:
         raise HTTPException(status_code=400, detail=str(e))
 
 
-@router.post("/policy/update")
+@router.post("/policy/update", summary="Policy aktualisieren")
 async def update_policy(rule: Rule) -> Dict[str, Any]:
     """
     Aktualisiert eine existierende Policy
@@ -160,7 +160,7 @@ async def update_policy(rule: Rule) -> Dict[str, Any]:
         raise HTTPException(status_code=400, detail=str(e))
 
 
-@router.post("/policy/delete")
+@router.post("/policy/delete", summary="Policy löschen")
 async def delete_policy(request: DeleteRequest) -> Dict[str, Any]:
     """
     Löscht eine Policy
@@ -186,7 +186,7 @@ async def delete_policy(request: DeleteRequest) -> Dict[str, Any]:
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.post("/policy/test", response_model=TestResponse)
+@router.post("/policy/test", response_model=TestResponse, summary="Policy testen")
 async def test_policy(
     request: TestRequest,
     tenant_id: str = Query("system", description="Tenant ID"),
@@ -236,7 +236,7 @@ async def test_policy(
         raise HTTPException(status_code=400, detail=str(e))
 
 
-@router.get("/policy/export")
+@router.get("/policy/export", summary="Policies exportieren")
 @limiter.limit("10/minute")
 async def export_policies(request: Request):
     """
@@ -261,7 +261,7 @@ async def export_policies(request: Request):
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.post("/policy/restore")
+@router.post("/policy/restore", summary="Policies wiederherstellen")
 @limiter.limit("5/minute")
 async def restore_policies(request: Request, request_body: RestoreRequest) -> Dict[str, Any]:
     """

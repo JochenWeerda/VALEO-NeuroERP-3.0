@@ -346,7 +346,7 @@ def _derive_balance(
     return derived, str(ticket_kg_dec), str(settlement_kg_dec), str(input_tons)
 
 
-@router.get('/raps-profiles', response_model=list[RapsProfileOut])
+@router.get('/raps-profiles', response_model=list[RapsProfileOut], summary="Raps profiles auflisten")
 async def list_raps_profiles(
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
@@ -361,7 +361,7 @@ async def list_raps_profiles(
     return [_profile_out(db, item) for item in items]
 
 
-@router.get('/raps-profiles/{profile_id}', response_model=RapsProfileOut)
+@router.get('/raps-profiles/{profile_id}', response_model=RapsProfileOut, summary="Raps profile abrufen")
 async def get_raps_profile(
     profile_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -377,7 +377,7 @@ async def get_raps_profile(
     return _profile_out(db, item)
 
 
-@router.post('/raps-profiles', response_model=RapsProfileOut, status_code=201)
+@router.post('/raps-profiles', response_model=RapsProfileOut, status_code=201, summary="Raps profile anlegen")
 async def create_raps_profile(
     payload: RapsProfileIn,
     tenant_id: str = Depends(get_tenant_id),
@@ -407,7 +407,7 @@ async def create_raps_profile(
     return _profile_out(db, item)
 
 
-@router.put('/raps-profiles/{profile_id}', response_model=RapsProfileOut)
+@router.put('/raps-profiles/{profile_id}', response_model=RapsProfileOut, summary="Raps profile aktualisieren")
 async def update_raps_profile(
     profile_id: str,
     payload: RapsProfileIn,
@@ -441,7 +441,7 @@ async def update_raps_profile(
     return _profile_out(db, item)
 
 
-@router.delete('/raps-profiles/{profile_id}', response_model=dict)
+@router.delete('/raps-profiles/{profile_id}', response_model=dict, summary="Raps profile löschen")
 async def delete_raps_profile(
     profile_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -468,7 +468,7 @@ async def delete_raps_profile(
     return {'ok': True, 'id': profile_id}
 
 
-@router.post('/raps-profiles/{profile_id}/derive-from-ops', response_model=RapsDeriveOut)
+@router.post('/raps-profiles/{profile_id}/derive-from-ops', response_model=RapsDeriveOut, summary="Raps profile from ops derive")
 async def derive_raps_profile_from_ops(
     profile_id: str,
     period: str | None = None,

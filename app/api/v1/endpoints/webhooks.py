@@ -58,7 +58,7 @@ class EventAreaOut(BaseModel):
     description: str
 
 
-@router.get("/", response_model=PaginatedResponse[WebhookOut])
+@router.get("/", response_model=PaginatedResponse[WebhookOut], summary="Webhooks auflisten")
 async def list_webhooks(
     tenant_id: Optional[str] = Query(None),
     skip: int = Query(0, ge=0),
@@ -83,13 +83,13 @@ async def list_webhooks(
     )
 
 
-@router.get("/areas", response_model=list[EventAreaOut])
+@router.get("/areas", response_model=list[EventAreaOut], summary="Event areas auflisten")
 async def list_event_areas():
     """GET Bereiche"""
     return [EventAreaOut(name=a, description=f"Events for {a}") for a in EVENT_AREAS]
 
 
-@router.post("/", response_model=WebhookOut, status_code=201)
+@router.post("/", response_model=WebhookOut, status_code=201, summary="Webhook registrieren")
 async def register_webhook(
     payload: WebhookCreate,
     tenant_id: Optional[str] = Query(None),
@@ -114,7 +114,7 @@ async def register_webhook(
     return WebhookOut.model_validate(obj)
 
 
-@router.delete("/{webhook_id}", status_code=204, response_class=Response, response_model=None)
+@router.delete("/{webhook_id}", status_code=204, response_class=Response, response_model=None, summary="Webhook entfernen")
 async def remove_webhook(webhook_id: str, db: Session = Depends(get_db)):
     """DEL Entfernen"""
     obj = db.query(WebhookRegistration).filter(WebhookRegistration.id == webhook_id).first()

@@ -15,7 +15,7 @@ class FileUploadResponse(BaseModel):
     message: str
 
 
-@router.post("/file-upload", response_model=FileUploadResponse)
+@router.post("/file-upload", response_model=FileUploadResponse, summary="Delivery note file hochladen")
 async def upload_delivery_note_file(
     delivery_note_id: str = Query(..., description="ID of the sales delivery note"),
     file: UploadFile = File(...),

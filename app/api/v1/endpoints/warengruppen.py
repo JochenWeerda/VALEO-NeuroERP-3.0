@@ -80,7 +80,7 @@ class WarengruppeHierarchieOut(BaseModel):
 
 # ── Hauptwarengruppen ─────────────────────────────────────────────────────────
 
-@router.get("/haupt", response_model=list[HauptwarengruppeOut])
+@router.get("/haupt", response_model=list[HauptwarengruppeOut], summary="Hauptwarengruppen auflisten")
 def list_hauptwarengruppen(
     db=Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
@@ -92,7 +92,7 @@ def list_hauptwarengruppen(
     return [HauptwarengruppeOut(**dict(r._mapping)) for r in rows]
 
 
-@router.post("/haupt", response_model=HauptwarengruppeOut, status_code=201)
+@router.post("/haupt", response_model=HauptwarengruppeOut, status_code=201, summary="Hauptwarengruppe anlegen")
 def create_hauptwarengruppe(
     payload: HauptwarengruppeCreate,
     db=Depends(get_db),
@@ -115,7 +115,7 @@ def create_hauptwarengruppe(
     return HauptwarengruppeOut(**dict(row._mapping))
 
 
-@router.put("/haupt/{gruppe_nr}", response_model=HauptwarengruppeOut)
+@router.put("/haupt/{gruppe_nr}", response_model=HauptwarengruppeOut, summary="Hauptwarengruppe aktualisieren")
 def update_hauptwarengruppe(
     gruppe_nr: str,
     payload: HauptwarengruppeCreate,
@@ -135,7 +135,7 @@ def update_hauptwarengruppe(
     return HauptwarengruppeOut(**dict(row._mapping))
 
 
-@router.delete("/haupt/{gruppe_nr}")
+@router.delete("/haupt/{gruppe_nr}", summary="Hauptwarengruppe löschen")
 def delete_hauptwarengruppe(
     gruppe_nr: str,
     db=Depends(get_db),
@@ -151,7 +151,7 @@ def delete_hauptwarengruppe(
 
 # ── Oberwarengruppen ──────────────────────────────────────────────────────────
 
-@router.get("/ober", response_model=list[OberwarengruppeOut])
+@router.get("/ober", response_model=list[OberwarengruppeOut], summary="Oberwarengruppen auflisten")
 def list_oberwarengruppen(
     haupt_id: Optional[str] = None,
     db=Depends(get_db),
@@ -167,7 +167,7 @@ def list_oberwarengruppen(
     return [OberwarengruppeOut(**dict(r._mapping)) for r in rows]
 
 
-@router.post("/ober", response_model=OberwarengruppeOut, status_code=201)
+@router.post("/ober", response_model=OberwarengruppeOut, status_code=201, summary="Oberwarengruppe anlegen")
 def create_oberwarengruppe(
     payload: OberwarengruppeCreate,
     db=Depends(get_db),
@@ -196,7 +196,7 @@ def create_oberwarengruppe(
     return OberwarengruppeOut(**dict(row._mapping))
 
 
-@router.put("/ober/{gruppe_nr}", response_model=OberwarengruppeOut)
+@router.put("/ober/{gruppe_nr}", response_model=OberwarengruppeOut, summary="Oberwarengruppe aktualisieren")
 def update_oberwarengruppe(
     gruppe_nr: str,
     payload: OberwarengruppeCreate,
@@ -216,7 +216,7 @@ def update_oberwarengruppe(
     return OberwarengruppeOut(**dict(row._mapping))
 
 
-@router.delete("/ober/{gruppe_nr}")
+@router.delete("/ober/{gruppe_nr}", summary="Oberwarengruppe löschen")
 def delete_oberwarengruppe(
     gruppe_nr: str,
     db=Depends(get_db),
@@ -232,7 +232,7 @@ def delete_oberwarengruppe(
 
 # ── Warengruppen ──────────────────────────────────────────────────────────────
 
-@router.get("", response_model=list[WarengruppeOut])
+@router.get("", response_model=list[WarengruppeOut], summary="Warengruppen auflisten")
 def list_warengruppen(
     ober_id: Optional[str] = None,
     db=Depends(get_db),
@@ -248,7 +248,7 @@ def list_warengruppen(
     return [WarengruppeOut(**dict(r._mapping)) for r in rows]
 
 
-@router.post("", response_model=WarengruppeOut, status_code=201)
+@router.post("", response_model=WarengruppeOut, status_code=201, summary="Warengruppe anlegen")
 def create_warengruppe(
     payload: WarengruppeCreate,
     db=Depends(get_db),
@@ -277,7 +277,7 @@ def create_warengruppe(
     return WarengruppeOut(**dict(row._mapping))
 
 
-@router.put("/{gruppe_nr}", response_model=WarengruppeOut)
+@router.put("/{gruppe_nr}", response_model=WarengruppeOut, summary="Warengruppe aktualisieren")
 def update_warengruppe(
     gruppe_nr: str,
     payload: WarengruppeCreate,
@@ -297,7 +297,7 @@ def update_warengruppe(
     return WarengruppeOut(**dict(row._mapping))
 
 
-@router.delete("/{gruppe_nr}")
+@router.delete("/{gruppe_nr}", summary="Warengruppe löschen")
 def delete_warengruppe(
     gruppe_nr: str,
     db=Depends(get_db),
@@ -311,7 +311,7 @@ def delete_warengruppe(
     return Response(status_code=204)
 
 
-@router.get("/{gruppe_nr}/hierarchie", response_model=WarengruppeHierarchieOut)
+@router.get("/{gruppe_nr}/hierarchie", response_model=WarengruppeHierarchieOut, summary="Warengruppe hierarchie abrufen")
 def get_warengruppe_hierarchie(
     gruppe_nr: str,
     db=Depends(get_db),

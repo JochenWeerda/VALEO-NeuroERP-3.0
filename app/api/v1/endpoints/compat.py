@@ -95,7 +95,7 @@ async def _enqueue_event(
 # CRM dashboard + suppliers -------------------------------------------------
 
 
-@router.get("/crm/dashboard", response_model=dict)
+@router.get("/crm/dashboard", response_model=dict, summary="Dashboard crm")
 async def crm_dashboard() -> dict:
     try:
         customers, customers_total = await crm_list_customers(skip=0, limit=500, search=None)
@@ -123,7 +123,7 @@ async def crm_dashboard() -> dict:
     }
 
 
-@router.get("/crm/suppliers", response_model=dict)
+@router.get("/crm/suppliers", response_model=dict, summary="Suppliers crm")
 async def crm_suppliers(
     search: Optional[str] = Query(None),
     is_active: Optional[bool] = Query(None),
@@ -190,7 +190,7 @@ async def crm_suppliers(
 # Purchase orders -----------------------------------------------------------
 
 
-@router.get("/purchase-orders", response_model=dict)
+@router.get("/purchase-orders", response_model=dict, summary="List po")
 async def po_list(
     status: Optional[str] = Query(None),
     supplierId: Optional[str] = Query(None),
@@ -223,7 +223,7 @@ async def po_list(
     return {"data": items, "page": page, "pageSize": pageSize, "total": total, "totalPages": total_pages}
 
 
-@router.get("/purchase-orders/{po_id}", response_model=dict)
+@router.get("/purchase-orders/{po_id}", response_model=dict, summary="Get po")
 async def po_get(po_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)) -> dict:
     docs = _list_docs(db, "purchase_order", limit=5000, tenant_id=tenant_id)
     if not docs:
@@ -295,12 +295,12 @@ async def _create_compat_purchase_order(
     return doc
 
 
-@router.post("/purchase-orders", response_model=dict, status_code=201)
+@router.post("/purchase-orders", response_model=dict, status_code=201, summary="Create po")
 async def po_create(payload: dict[str, Any], tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)) -> dict:
     return await _create_compat_purchase_order(db, tenant_id=tenant_id, payload=payload)
 
 
-@router.patch("/purchase-orders/{po_id}", response_model=dict)
+@router.patch("/purchase-orders/{po_id}", response_model=dict, summary="Patch po")
 async def po_patch(po_id: str, payload: dict[str, Any], tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)) -> dict:
     doc = await po_get(po_id, tenant_id, db)
     now = _now_iso()
@@ -324,7 +324,7 @@ async def po_patch(po_id: str, payload: dict[str, Any], tenant_id: str = Depends
     return doc
 
 
-@router.post("/purchase-orders/{po_id}/approve", response_model=dict)
+@router.post("/purchase-orders/{po_id}/approve", response_model=dict, summary="Approve po")
 async def po_approve(po_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)) -> dict:
     doc = await po_get(po_id, tenant_id, db)
     now = _now_iso()
@@ -354,7 +354,7 @@ async def po_approve(po_id: str, tenant_id: str = Depends(get_tenant_id), db: Se
     return doc
 
 
-@router.post("/purchase-orders/{po_id}/cancel-with-reason", response_model=dict)
+@router.post("/purchase-orders/{po_id}/cancel-with-reason", response_model=dict, summary="Cancel po")
 async def po_cancel(po_id: str, payload: dict[str, Any], tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)) -> dict:
     doc = await po_get(po_id, tenant_id, db)
     now = _now_iso()
@@ -390,7 +390,7 @@ async def po_cancel(po_id: str, payload: dict[str, Any], tenant_id: str = Depend
     return doc
 
 
-@router.get("/purchase-orders/statistics", response_model=dict)
+@router.get("/purchase-orders/statistics", response_model=dict, summary="Statistics po")
 async def po_statistics(tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)) -> dict:
     docs = _list_docs(db, "purchase_order", limit=5000, tenant_id=tenant_id)
     by_status: dict[str, int] = {}
@@ -402,7 +402,7 @@ async def po_statistics(tenant_id: str = Depends(get_tenant_id), db: Session = D
     return {"totalOrders": len(docs), "totalValue": round(total_value, 2), "byStatus": by_status}
 
 
-@router.get("/purchase-orders/{po_id}/changelog", response_model=list)
+@router.get("/purchase-orders/{po_id}/changelog", response_model=list, summary="Changelog po")
 async def po_changelog(po_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)) -> list[dict[str, Any]]:
     doc = await po_get(po_id, tenant_id, db)
     return doc.get("changelog", [])
@@ -411,7 +411,7 @@ async def po_changelog(po_id: str, tenant_id: str = Depends(get_tenant_id), db: 
 # Sales bridge --------------------------------------------------------------
 
 
-@router.get("/sales/{doc_type}", response_model=dict)
+@router.get("/sales/{doc_type}", response_model=dict, summary="Bridge sales")
 async def sales_bridge(doc_type: str, db: Session = Depends(get_db)) -> dict:
     mapping = {
         "auftraege": "sales_order",
@@ -432,14 +432,14 @@ async def sales_bridge(doc_type: str, db: Session = Depends(get_db)) -> dict:
 # Einkauf compatibility -----------------------------------------------------
 
 
-@router.get("/einkauf/goods-receipts", response_model=list)
+@router.get("/einkauf/goods-receipts", response_model=list, summary="Goods receipts einkauf")
 async def einkauf_goods_receipts(
     tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
 ) -> list[dict[str, Any]]:
     return EinkaufCompatService(db, tenant_id).list_goods_receipts()
 
 
-@router.post("/einkauf/goods-receipts", response_model=dict, status_code=201)
+@router.post("/einkauf/goods-receipts", response_model=dict, status_code=201, summary="Goods receipts create einkauf")
 async def einkauf_goods_receipts_create(
     payload: dict[str, Any],
     tenant_id: str = Depends(get_tenant_id),
@@ -453,7 +453,7 @@ async def einkauf_goods_receipts_create(
         raise HTTPException(status_code=400, detail=str(exc)) from exc
 
 
-@router.get("/einkauf/bestellvorschlaege", response_model=list)
+@router.get("/einkauf/bestellvorschlaege", response_model=list, summary="Bestellvorschlaege einkauf")
 async def einkauf_bestellvorschlaege(db: Session = Depends(get_db)) -> list[dict[str, Any]]:
     rows = db.query(Charge).order_by(Charge.eingang.desc()).limit(200).all()
     return [
@@ -473,7 +473,7 @@ async def einkauf_bestellvorschlaege(db: Session = Depends(get_db)) -> list[dict
     ]
 
 
-@router.get("/einkauf/warengruppen", response_model=list)
+@router.get("/einkauf/warengruppen", response_model=list, summary="Warengruppen einkauf")
 async def einkauf_warengruppen(db: Session = Depends(get_db)) -> list[dict[str, Any]]:
     items = db.query(ArticleModel).filter(ArticleModel.is_active == True).limit(500).all()  # noqa: E712
     grouped: dict[str, dict[str, Any]] = {}
@@ -485,7 +485,7 @@ async def einkauf_warengruppen(db: Session = Depends(get_db)) -> list[dict[str, 
     return list(grouped.values())
 
 
-@router.get("/einkauf/anfragen", response_model=list)
+@router.get("/einkauf/anfragen", response_model=list, summary="Anfragen list einkauf")
 async def einkauf_anfragen_list(
     tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
 ) -> list[dict[str, Any]]:
@@ -501,7 +501,7 @@ def _load_einkauf_anfrage(db: Session, anfrage_id: str):
         return None
 
 
-@router.get("/einkauf/anfragen/{anfrage_id}", response_model=dict)
+@router.get("/einkauf/anfragen/{anfrage_id}", response_model=dict, summary="Anfrage get einkauf")
 async def einkauf_anfrage_get(
     anfrage_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
 ) -> dict[str, Any]:
@@ -511,7 +511,7 @@ async def einkauf_anfrage_get(
     return result
 
 
-@router.post("/einkauf/anfragen/{anfrage_id}/convert-to-order", response_model=dict)
+@router.post("/einkauf/anfragen/{anfrage_id}/convert-to-order", response_model=dict, summary="Anfrage convert to order einkauf")
 async def einkauf_anfrage_convert_to_order(
     anfrage_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -523,7 +523,7 @@ async def einkauf_anfrage_convert_to_order(
         raise HTTPException(status_code=404, detail=str(exc)) from exc
 
 
-@router.get("/contracts/{contract_id}", response_model=dict)
+@router.get("/contracts/{contract_id}", response_model=dict, summary="Contract get compat")
 async def compat_contract_get(
     contract_id: str,
     db: Session = Depends(get_db),
@@ -532,14 +532,14 @@ async def compat_contract_get(
     return await get_contract_via_router(contract_id=contract_id, db=db, tenant_id=tenant_id)
 
 
-@router.get("/einkauf/angebote", response_model=list)
+@router.get("/einkauf/angebote", response_model=list, summary="Angebote list einkauf")
 async def einkauf_angebote_list(
     tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
 ) -> list[dict[str, Any]]:
     return EinkaufCompatService(db, tenant_id).list_angebote()
 
 
-@router.post("/einkauf/angebote/{angebot_id}/review", response_model=dict)
+@router.post("/einkauf/angebote/{angebot_id}/review", response_model=dict, summary="Angebot review einkauf")
 async def einkauf_angebot_review(
     angebot_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
 ) -> dict[str, Any]:
@@ -549,7 +549,7 @@ async def einkauf_angebot_review(
         raise HTTPException(status_code=404, detail=str(exc)) from exc
 
 
-@router.post("/einkauf/angebote/{angebot_id}/approve", response_model=dict)
+@router.post("/einkauf/angebote/{angebot_id}/approve", response_model=dict, summary="Angebot approve einkauf")
 async def einkauf_angebot_approve(
     angebot_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
 ) -> dict[str, Any]:
@@ -559,7 +559,7 @@ async def einkauf_angebot_approve(
         raise HTTPException(status_code=404, detail=str(exc)) from exc
 
 
-@router.post("/einkauf/angebote/{angebot_id}/reject", response_model=dict)
+@router.post("/einkauf/angebote/{angebot_id}/reject", response_model=dict, summary="Angebot reject einkauf")
 async def einkauf_angebot_reject(
     angebot_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
 ) -> dict[str, Any]:
@@ -569,7 +569,7 @@ async def einkauf_angebot_reject(
         raise HTTPException(status_code=404, detail=str(exc)) from exc
 
 
-@router.post("/einkauf/angebote/{angebot_id}/convert-to-order", response_model=dict)
+@router.post("/einkauf/angebote/{angebot_id}/convert-to-order", response_model=dict, summary="Angebot convert to order einkauf")
 async def einkauf_angebot_convert_to_order(
     angebot_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
 ) -> dict[str, Any]:
@@ -579,14 +579,14 @@ async def einkauf_angebot_convert_to_order(
         raise HTTPException(status_code=404, detail=str(exc)) from exc
 
 
-@router.get("/einkauf/anlieferavis", response_model=list)
+@router.get("/einkauf/anlieferavis", response_model=list, summary="Anlieferavis list einkauf")
 async def einkauf_anlieferavis_list(
     tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
 ) -> list[dict[str, Any]]:
     return EinkaufCompatService(db, tenant_id).list_anlieferavis()
 
 
-@router.post("/einkauf/anlieferavis/{avis_id}/{action}", response_model=dict)
+@router.post("/einkauf/anlieferavis/{avis_id}/{action}", response_model=dict, summary="Anlieferavis transition einkauf")
 async def einkauf_anlieferavis_transition(
     avis_id: str, action: str,
     tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
@@ -599,14 +599,14 @@ async def einkauf_anlieferavis_transition(
         raise HTTPException(status_code=404, detail=str(exc)) from exc
 
 
-@router.get("/einkauf/auftragsbestaetigungen", response_model=list)
+@router.get("/einkauf/auftragsbestaetigungen", response_model=list, summary="Auftragsbestaetigungen list einkauf")
 async def einkauf_auftragsbestaetigungen_list(
     tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
 ) -> list[dict[str, Any]]:
     return EinkaufCompatService(db, tenant_id).list_auftragsbestaetigungen()
 
 
-@router.post("/einkauf/auftragsbestaetigungen/{bestaetigung_id}/{action}", response_model=dict)
+@router.post("/einkauf/auftragsbestaetigungen/{bestaetigung_id}/{action}", response_model=dict, summary="Auftragsbestaetigung transition einkauf")
 async def einkauf_auftragsbestaetigung_transition(
     bestaetigung_id: str, action: str,
     tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
@@ -619,14 +619,14 @@ async def einkauf_auftragsbestaetigung_transition(
         raise HTTPException(status_code=404, detail=str(exc)) from exc
 
 
-@router.get("/einkauf/rechnungseingaenge", response_model=list)
+@router.get("/einkauf/rechnungseingaenge", response_model=list, summary="Rechnungseingaenge list einkauf")
 async def einkauf_rechnungseingaenge_list(
     tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
 ) -> list[dict[str, Any]]:
     return EinkaufCompatService(db, tenant_id).list_rechnungseingaenge()
 
 
-@router.post("/einkauf/rechnungseingaenge/{rechnung_id}/pruefen")
+@router.post("/einkauf/rechnungseingaenge/{rechnung_id}/pruefen", summary="Rechnungseingang pruefen einkauf")
 async def einkauf_rechnungseingang_pruefen(
     rechnung_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
 ) -> dict[str, Any]:
@@ -638,7 +638,7 @@ async def einkauf_rechnungseingang_pruefen(
         raise HTTPException(status_code=400, detail=str(exc)) from exc
 
 
-@router.post("/einkauf/rechnungseingaenge/{rechnung_id}/freigeben")
+@router.post("/einkauf/rechnungseingaenge/{rechnung_id}/freigeben", summary="Rechnungseingang freigeben einkauf")
 async def einkauf_rechnungseingang_freigeben(
     rechnung_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
 ) -> dict[str, Any]:
@@ -650,7 +650,7 @@ async def einkauf_rechnungseingang_freigeben(
         raise HTTPException(status_code=400, detail=str(exc)) from exc
 
 
-@router.post("/einkauf/rechnungseingaenge/{rechnung_id}/verbuchen")
+@router.post("/einkauf/rechnungseingaenge/{rechnung_id}/verbuchen", summary="Rechnungseingang verbuchen einkauf")
 async def einkauf_rechnungseingang_verbuchen(
     rechnung_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
 ) -> dict[str, Any]:
@@ -662,7 +662,7 @@ async def einkauf_rechnungseingang_verbuchen(
         raise HTTPException(status_code=400, detail=str(exc)) from exc
 
 
-@router.get("/einkauf/reports", response_model=dict)
+@router.get("/einkauf/reports", response_model=dict, summary="Reports einkauf")
 async def einkauf_reports(tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)) -> dict:
     cache_key = _cache_key("procurement", tenant_id, "reports")
     cached = cache_get_json(cache_key)
@@ -719,21 +719,21 @@ async def einkauf_reports(tenant_id: str = Depends(get_tenant_id), db: Session =
     return payload
 
 
-@router.get("/einkauf/anfragen/{anfrage_id}/bids", response_model=list)
+@router.get("/einkauf/anfragen/{anfrage_id}/bids", response_model=list, summary="Bids einkauf")
 async def einkauf_bids(
     anfrage_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
 ) -> list[dict[str, Any]]:
     return EinkaufCompatService(db, tenant_id).list_bids(anfrage_id)
 
 
-@router.get("/einkauf/retouren", response_model=list)
+@router.get("/einkauf/retouren", response_model=list, summary="Retouren einkauf")
 async def einkauf_retouren(
     tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
 ) -> list[dict[str, Any]]:
     return EinkaufCompatService(db, tenant_id).list_retouren()
 
 
-@router.post("/einkauf/retouren", response_model=dict, status_code=201)
+@router.post("/einkauf/retouren", response_model=dict, status_code=201, summary="Retouren create einkauf")
 async def einkauf_retouren_create(
     payload: dict[str, Any], tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
 ) -> dict:
@@ -761,21 +761,21 @@ class FutterBulkDeleteOut(BaseModel):
     errors: list[FutterBulkDeleteErrorOut] = Field(default_factory=list)
 
 
-@router.get("/futter/einzelfuttermittel", response_model=list)
+@router.get("/futter/einzelfuttermittel", response_model=list, summary="Einzel futter")
 async def futter_einzel(
     tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
 ) -> list[dict[str, Any]]:
     return FutterCompatService(db, tenant_id).list_einzelfuttermittel()
 
 
-@router.get("/futter/mischfuttermittel", response_model=list)
+@router.get("/futter/mischfuttermittel", response_model=list, summary="Misch futter")
 async def futter_misch(
     tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
 ) -> list[dict[str, Any]]:
     return FutterCompatService(db, tenant_id).list_mischfuttermittel()
 
 
-@router.delete("/futter/einzelfuttermittel/{item_id}", status_code=204, response_class=Response, response_model=None)
+@router.delete("/futter/einzelfuttermittel/{item_id}", status_code=204, response_class=Response, response_model=None, summary="Futter einzel item löschen")
 async def delete_futter_einzel_item(
     item_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
 ) -> Response:
@@ -785,7 +785,7 @@ async def delete_futter_einzel_item(
     return Response(status_code=204)
 
 
-@router.post("/futter/einzelfuttermittel/bulk-delete", response_model=FutterBulkDeleteOut)
+@router.post("/futter/einzelfuttermittel/bulk-delete", response_model=FutterBulkDeleteOut, summary="Delete futter einzel Bulk")
 async def bulk_delete_futter_einzel(
     payload: FutterBulkDeleteIn, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
 ) -> FutterBulkDeleteOut:
@@ -793,7 +793,7 @@ async def bulk_delete_futter_einzel(
     return FutterBulkDeleteOut(**result)
 
 
-@router.delete("/futter/mischfuttermittel/{item_id}", status_code=204, response_class=Response, response_model=None)
+@router.delete("/futter/mischfuttermittel/{item_id}", status_code=204, response_class=Response, response_model=None, summary="Futter misch item löschen")
 async def delete_futter_misch_item(
     item_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
 ) -> Response:
@@ -803,7 +803,7 @@ async def delete_futter_misch_item(
     return Response(status_code=204)
 
 
-@router.post("/futter/mischfuttermittel/bulk-delete", response_model=FutterBulkDeleteOut)
+@router.post("/futter/mischfuttermittel/bulk-delete", response_model=FutterBulkDeleteOut, summary="Delete futter misch Bulk")
 async def bulk_delete_futter_misch(
     payload: FutterBulkDeleteIn, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
 ) -> FutterBulkDeleteOut:
@@ -811,21 +811,21 @@ async def bulk_delete_futter_misch(
     return FutterBulkDeleteOut(**result)
 
 
-@router.get("/futter/chargen", response_model=list)
+@router.get("/futter/chargen", response_model=list, summary="Chargen futter")
 async def futter_chargen(
     tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
 ) -> list[dict[str, Any]]:
     return FutterCompatService(db, tenant_id).list_chargen()
 
 
-@router.get("/futter/qualitaetskontrolle", response_model=list)
+@router.get("/futter/qualitaetskontrolle", response_model=list, summary="Qc futter")
 async def futter_qc(
     tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
 ) -> list[dict[str, Any]]:
     return FutterCompatService(db, tenant_id).list_qualitaetskontrolle()
 
 
-@router.get("/futter/statistik", response_model=dict)
+@router.get("/futter/statistik", response_model=dict, summary="Stats futter")
 async def futter_stats(
     tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
 ) -> dict:
@@ -913,7 +913,7 @@ def _soft_delete_futter_articles(
     )
 
 
-@router.post("/futter/mischfuttermittel/naehrwerte/berechnen", response_model=NaehrwertBerechnungResult)
+@router.post("/futter/mischfuttermittel/naehrwerte/berechnen", response_model=NaehrwertBerechnungResult, summary="Naehrwerte berechne")
 async def berechne_naehrwerte(
     body: NaehrwertBerechnungRequest,
     db: Session = Depends(get_db),
@@ -1020,7 +1020,7 @@ class SanktionsPruefungRequest(BaseModel):
     land: str = Field(default="DE")
 
 
-@router.post("/crm/sanktionspruefung", response_model=dict)
+@router.post("/crm/sanktionspruefung", response_model=dict, summary="Sanktionspruefung")
 async def sanktionspruefung(body: SanktionsPruefungRequest) -> dict:
     """
     Prüft eine Person/Firma auf EU-, UN- und US-OFAC-Sanktionslisten.
@@ -1060,7 +1060,7 @@ class NewsletterRequest(BaseModel):
     text: Optional[str] = None
 
 
-@router.post("/crm/kommunikation/newsletter", response_model=dict)
+@router.post("/crm/kommunikation/newsletter", response_model=dict, summary="Newsletter crm")
 async def crm_newsletter(body: NewsletterRequest) -> dict:
     """
     Initiiert Newsletter-Versand an Lieferanten/Kunden.
@@ -1087,7 +1087,7 @@ async def crm_newsletter(body: NewsletterRequest) -> dict:
     }
 
 
-@router.patch("/crm/lieferanten/{lieferant_id}", response_model=dict)
+@router.patch("/crm/lieferanten/{lieferant_id}", response_model=dict, summary="Lieferant aktualisieren")
 async def patch_lieferant(lieferant_id: str, body: dict = Body(default={}), db: Session = Depends(get_db)) -> dict:
     """Partielle Aktualisierung eines Lieferanten (z.B. Status sperren)."""
     q = text("""
@@ -1107,7 +1107,7 @@ async def patch_lieferant(lieferant_id: str, body: dict = Body(default={}), db: 
     return {"id": lieferant_id, "status": body.get("status", "aktiv"), "updated": True}
 
 
-@router.patch("/crm/kunden/{kunden_id}", response_model=dict)
+@router.patch("/crm/kunden/{kunden_id}", response_model=dict, summary="Kunde aktualisieren")
 async def patch_kunde(
     kunden_id: str,
     body: dict = Body(default={}),
@@ -1345,7 +1345,7 @@ def _validate_csv_article_row(norm: dict[str, str]) -> str | None:
     return "; ".join(v.meldung for v in result.verletzungen if v.severity == "FEHLER")
 
 
-@router.post("/crm/import/kunden", response_model=dict)
+@router.post("/crm/import/kunden", response_model=dict, summary="Kunden csv importieren")
 async def import_kunden_csv(
     file: UploadFile = File(...),
     db: Session = Depends(get_db),
@@ -1431,7 +1431,7 @@ async def import_kunden_csv(
     return {"created": created, "updated": updated, "errors": errors}
 
 
-@router.post("/finance/import/debitoren", response_model=dict)
+@router.post("/finance/import/debitoren", response_model=dict, summary="Debitoren csv importieren")
 async def import_debitoren_csv(
     file: UploadFile = File(...),
     db: Session = Depends(get_db),
@@ -1513,7 +1513,7 @@ async def import_debitoren_csv(
     return {"created": created, "updated": updated, "errors": errors}
 
 
-@router.post("/futter/import/einzelfuttermittel", response_model=dict)
+@router.post("/futter/import/einzelfuttermittel", response_model=dict, summary="Einzelfuttermittel csv importieren")
 async def import_einzelfuttermittel_csv(
     file: UploadFile = File(...), tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
 ) -> dict:
@@ -1533,7 +1533,7 @@ async def import_einzelfuttermittel_csv(
     return result
 
 
-@router.post("/futter/import/mischfuttermittel", response_model=dict)
+@router.post("/futter/import/mischfuttermittel", response_model=dict, summary="Mischfuttermittel csv importieren")
 async def import_mischfuttermittel_csv(
     file: UploadFile = File(...), tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
 ) -> dict:
@@ -1552,7 +1552,7 @@ async def import_mischfuttermittel_csv(
     return result
 
 
-@router.post("/futter/import/chargen", response_model=dict)
+@router.post("/futter/import/chargen", response_model=dict, summary="Chargen csv importieren")
 async def import_chargen_csv(
     file: UploadFile = File(...), tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
 ) -> dict:
@@ -1564,21 +1564,21 @@ async def import_chargen_csv(
 # Inventory extra endpoints -------------------------------------------------
 
 
-@router.get("/inventory/inventur", response_model=dict)
+@router.get("/inventory/inventur", response_model=dict, summary="Inventur inventory")
 async def inventory_inventur(
     tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
 ) -> dict:
     return InventoryCompatService(db, tenant_id).list_inventur_counts()
 
 
-@router.post("/inventory/inventur/complete", response_model=dict)
+@router.post("/inventory/inventur/complete", response_model=dict, summary="Inventur complete inventory")
 async def inventory_inventur_complete(
     payload: dict[str, list[str]], tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
 ) -> dict:
     return InventoryCompatService(db, tenant_id).complete_inventur_counts(payload.get("ids", []))
 
 
-@router.delete("/inventory/inventur/{item_id}", status_code=204, response_class=Response, response_model=None)
+@router.delete("/inventory/inventur/{item_id}", status_code=204, response_class=Response, response_model=None, summary="Inventur stornieren inventory")
 async def inventory_inventur_stornieren(
     item_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
 ):
@@ -1589,28 +1589,28 @@ async def inventory_inventur_stornieren(
     return None
 
 
-@router.get("/inventory/mhd-warnings", response_model=dict)
+@router.get("/inventory/mhd-warnings", response_model=dict, summary="Mhd inventory")
 async def inventory_mhd(
     tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
 ) -> dict:
     return InventoryCompatService(db, tenant_id).get_mhd_warnings()
 
 
-@router.get("/inventory/top-sellers", response_model=dict)
+@router.get("/inventory/top-sellers", response_model=dict, summary="Top sellers inventory")
 async def inventory_top_sellers(
     tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
 ) -> dict:
     return InventoryCompatService(db, tenant_id).get_top_sellers()
 
 
-@router.get("/inventory/slow-movers", response_model=dict)
+@router.get("/inventory/slow-movers", response_model=dict, summary="Slow movers inventory")
 async def inventory_slow_movers(
     tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
 ) -> dict:
     return InventoryCompatService(db, tenant_id).get_slow_movers()
 
 
-@router.get("/inventory/lots", response_model=dict)
+@router.get("/inventory/lots", response_model=dict, summary="Lots inventory")
 async def inventory_lots(
     search: Optional[str] = Query(None),
     tenant_id: str = Depends(get_tenant_id),
@@ -1619,7 +1619,7 @@ async def inventory_lots(
     return InventoryCompatService(db, tenant_id).list_lots(search=search)
 
 
-@router.get("/inventory/lots/{lot_id}", response_model=dict)
+@router.get("/inventory/lots/{lot_id}", response_model=dict, summary="Lot trace inventory")
 async def inventory_lot_trace(
     lot_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
 ) -> dict:
@@ -1727,14 +1727,14 @@ def _repair_lkw_article_reference(
     return None, None, "not_found"
 
 
-@router.get("/annahme/warteschlange", response_model=dict)
+@router.get("/annahme/warteschlange", response_model=dict, summary="Warteschlange annahme")
 async def annahme_warteschlange(
     tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
 ) -> dict:
     return AnnahmeService(db, tenant_id).list_lkw_db()
 
 
-@router.get("/annahme/warteschlange/{reg_id}", response_model=dict)
+@router.get("/annahme/warteschlange/{reg_id}", response_model=dict, summary="Warteschlange get annahme")
 async def annahme_warteschlange_get(
     reg_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
 ) -> dict:
@@ -1749,7 +1749,7 @@ class AnnahmeStatusUpdate(BaseModel):
     klaerung: Optional[dict[str, Any]] = Field(default=None, description="Klaerungsdaten fuer gesperrte Ware")
 
 
-@router.patch("/annahme/warteschlange/{reg_id}", response_model=dict)
+@router.patch("/annahme/warteschlange/{reg_id}", response_model=dict, summary="Warteschlange patch annahme")
 async def annahme_warteschlange_patch(
     reg_id: str,
     body: AnnahmeStatusUpdate,
@@ -1764,7 +1764,7 @@ async def annahme_warteschlange_patch(
         raise HTTPException(status_code=400, detail=str(exc)) from exc
 
 
-@router.post("/annahme/warteschlange/{reg_id}/repair-article", response_model=dict)
+@router.post("/annahme/warteschlange/{reg_id}/repair-article", response_model=dict, summary="Warteschlange repair article annahme")
 async def annahme_warteschlange_repair_article(
     reg_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
 ) -> dict:
@@ -1798,7 +1798,7 @@ class AnnahmeUploadOut(BaseModel):
     filename: str
 
 
-@router.post("/annahme/upload", response_model=AnnahmeUploadOut, status_code=201, tags=["annahme"])
+@router.post("/annahme/upload", response_model=AnnahmeUploadOut, status_code=201, tags=["annahme"], summary="Upload annahme")
 async def annahme_upload(
     file: UploadFile = File(..., description="Foto/Scan Kennzeichen oder Lieferschein/Barcode"),
     tenant_id: str = Depends(get_tenant_id),
@@ -1826,7 +1826,7 @@ async def annahme_upload(
     return AnnahmeUploadOut(id=upload_id, filename=file.filename or safe_name)
 
 
-@router.post("/annahme/lkw-registrierung", response_model=LKWRegistrierungOut, status_code=201, tags=["annahme"])
+@router.post("/annahme/lkw-registrierung", response_model=LKWRegistrierungOut, status_code=201, tags=["annahme"], summary="Lkw registrierung anlegen")
 async def create_lkw_registrierung(
     payload: LKWRegistrierungIn,
     tenant_id: str = Depends(get_tenant_id),
@@ -1836,7 +1836,7 @@ async def create_lkw_registrierung(
     return LKWRegistrierungOut(**result)
 
 
-@router.post("/annahme/warteschlange", response_model=LKWRegistrierungOut, status_code=201, tags=["annahme"])
+@router.post("/annahme/warteschlange", response_model=LKWRegistrierungOut, status_code=201, tags=["annahme"], summary="Lkw warteschlange alias anlegen")
 async def create_lkw_warteschlange_alias(
     payload: LKWRegistrierungIn,
     tenant_id: str = Depends(get_tenant_id),
@@ -1849,35 +1849,35 @@ async def create_lkw_warteschlange_alias(
 # Portal compatibility ------------------------------------------------------
 
 
-@router.get("/portal/dashboard", response_model=dict)
+@router.get("/portal/dashboard", response_model=dict, summary="Dashboard portal")
 async def portal_dashboard(
     tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
 ) -> dict:
     return PortalCompatService(db, tenant_id).get_portal_dashboard_full()
 
 
-@router.get("/portal/anfragen", response_model=list)
+@router.get("/portal/anfragen", response_model=list, summary="Anfragen portal")
 async def portal_anfragen(
     tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
 ) -> list[dict[str, Any]]:
     return PortalCompatService(db, tenant_id).list_portal_anfragen()
 
 
-@router.get("/portal/bestellungen", response_model=list)
+@router.get("/portal/bestellungen", response_model=list, summary="Bestellungen portal")
 async def portal_bestellungen(
     tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
 ) -> list[dict[str, Any]]:
     return PortalCompatService(db, tenant_id).list_portal_bestellungen()
 
 
-@router.get("/portal/dokumente", response_model=list)
+@router.get("/portal/dokumente", response_model=list, summary="Dokumente portal")
 async def portal_dokumente(
     tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
 ) -> list[dict[str, Any]]:
     return PortalCompatService(db, tenant_id).list_portal_dokumente()
 
 
-@router.get("/portal/feldbuch", response_model=list)
+@router.get("/portal/feldbuch", response_model=list, summary="Feldbuch portal")
 async def portal_feldbuch(
     customer_id: Optional[str] = Query(None),
     tenant_id: Optional[str] = Depends(get_tenant_id),
@@ -1886,28 +1886,28 @@ async def portal_feldbuch(
     return PortalCompatService(db, tenant_id or "").list_portal_feldbuch(customer_id=customer_id)
 
 
-@router.get("/portal/naehrstoffbilanzen", response_model=list)
+@router.get("/portal/naehrstoffbilanzen", response_model=list, summary="Naehrstoffbilanzen portal")
 async def portal_naehrstoffbilanzen(
     tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
 ) -> list[dict[str, Any]]:
     return PortalCompatService(db, tenant_id).list_portal_naehrstoffbilanzen()
 
 
-@router.get("/portal/rechnungen", response_model=list)
+@router.get("/portal/rechnungen", response_model=list, summary="Rechnungen portal")
 async def portal_rechnungen(
     tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
 ) -> list[dict[str, Any]]:
     return PortalCompatService(db, tenant_id).list_portal_rechnungen()
 
 
-@router.get("/portal/shop", response_model=list)
+@router.get("/portal/shop", response_model=list, summary="Shop portal")
 async def portal_shop(
     tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
 ) -> list[dict[str, Any]]:
     return PortalCompatService(db, tenant_id).list_portal_shop()
 
 
-@router.get("/portal/products", response_model=dict)
+@router.get("/portal/products", response_model=dict, summary="Products portal")
 async def portal_products(
     kategorie: Optional[str] = Query(None),
     search: Optional[str] = Query(None),
@@ -1921,7 +1921,7 @@ async def portal_products(
     )
 
 
-@router.get("/portal/orders", response_model=dict)
+@router.get("/portal/orders", response_model=dict, summary="Orders portal")
 async def portal_orders(
     skip: int = Query(0, ge=0),
     limit: int = Query(50, ge=1, le=200),
@@ -1934,7 +1934,7 @@ async def portal_orders(
     )
 
 
-@router.get("/portal/orders/{order_id}", response_model=dict)
+@router.get("/portal/orders/{order_id}", response_model=dict, summary="Order detail portal")
 async def portal_order_detail(
     order_id: str, tenant_id: Optional[str] = Depends(get_tenant_id), db: Session = Depends(get_db)
 ) -> dict[str, Any]:
@@ -1944,7 +1944,7 @@ async def portal_order_detail(
         raise HTTPException(status_code=404, detail=str(exc)) from exc
 
 
-@router.post("/portal/orders", response_model=dict)
+@router.post("/portal/orders", response_model=dict, summary="Create order portal")
 async def portal_create_order(
     body: dict = Body(...),
     tenant_id: Optional[str] = Depends(get_tenant_id),
@@ -1955,28 +1955,28 @@ async def portal_create_order(
     return result
 
 
-@router.get("/portal/contracts", response_model=list)
+@router.get("/portal/contracts", response_model=list, summary="Contracts portal")
 async def portal_contracts(
     tenant_id: Optional[str] = Depends(get_tenant_id), db: Session = Depends(get_db)
 ) -> list[dict[str, Any]]:
     return PortalCompatService(db, tenant_id or "").list_portal_contracts()
 
 
-@router.get("/portal/pre-purchases", response_model=list)
+@router.get("/portal/pre-purchases", response_model=list, summary="Pre purchases portal")
 async def portal_pre_purchases(
     tenant_id: Optional[str] = Depends(get_tenant_id), db: Session = Depends(get_db)
 ) -> list[dict[str, Any]]:
     return PortalCompatService(db, tenant_id or "").list_portal_pre_purchases()
 
 
-@router.get("/portal/vertraege", response_model=list)
+@router.get("/portal/vertraege", response_model=list, summary="Vertraege portal")
 async def portal_vertraege(
     tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
 ) -> list[dict[str, Any]]:
     return PortalCompatService(db, tenant_id).list_portal_vertraege()
 
 
-@router.get("/portal/zertifikate", response_model=list)
+@router.get("/portal/zertifikate", response_model=list, summary="Zertifikate portal")
 async def portal_zertifikate(
     tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
 ) -> list[dict[str, Any]]:
@@ -1993,7 +1993,7 @@ def _safe_float(value: Any) -> float:
         return 0.0
 
 
-@router.get("/einkauf/supplier-ratings", response_model=dict)
+@router.get("/einkauf/supplier-ratings", response_model=dict, summary="Ratings supplier")
 async def supplier_ratings(tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)) -> dict:
     cache_key = _cache_key("procurement", tenant_id, "supplier-ratings")
     cached = cache_get_json(cache_key)
@@ -2031,7 +2031,7 @@ async def supplier_ratings(tenant_id: str = Depends(get_tenant_id), db: Session 
     return payload
 
 
-@router.post("/einkauf/supplier-ratings/{supplier_id}", response_model=dict)
+@router.post("/einkauf/supplier-ratings/{supplier_id}", response_model=dict, summary="Supplier rating upsert")
 async def upsert_supplier_rating(
     supplier_id: str,
     payload: dict[str, Any],
@@ -2041,7 +2041,7 @@ async def upsert_supplier_rating(
     return EinkaufCompatService(db, tenant_id).upsert_supplier_rating(supplier_id, payload)
 
 
-@router.get("/einkauf/suppliers/{supplier_id}/documents", response_model=list)
+@router.get("/einkauf/suppliers/{supplier_id}/documents", response_model=list, summary="Documents supplier")
 async def supplier_documents(supplier_id: str, db: Session = Depends(get_db)) -> list[dict[str, Any]]:
     docs = (
         db.query(Dokument)
@@ -2063,7 +2063,7 @@ async def supplier_documents(supplier_id: str, db: Session = Depends(get_db)) ->
     ]
 
 
-@router.post("/einkauf/suppliers/{supplier_id}/documents", response_model=dict, status_code=201)
+@router.post("/einkauf/suppliers/{supplier_id}/documents", response_model=dict, status_code=201, summary="Supplier document anlegen")
 async def create_supplier_document(supplier_id: str, payload: dict[str, Any], db: Session = Depends(get_db)) -> dict:
     doc = Dokument(
         name=str(payload.get("name") or f"Lieferanten-Dokument {supplier_id}"),
@@ -2081,7 +2081,7 @@ async def create_supplier_document(supplier_id: str, payload: dict[str, Any], db
     return {"id": doc.id, "message": "Supplier document created"}
 
 
-@router.delete("/einkauf/suppliers/{supplier_id}/documents/{doc_id}", response_model=dict)
+@router.delete("/einkauf/suppliers/{supplier_id}/documents/{doc_id}", response_model=dict, summary="Supplier document löschen")
 async def delete_supplier_document(supplier_id: str, doc_id: str, db: Session = Depends(get_db)) -> dict:
     doc = (
         db.query(Dokument)
@@ -2103,13 +2103,13 @@ def _find_po_by_id(db: Session, po_id: str, tenant_id: Optional[str] = None) -> 
     raise HTTPException(status_code=404, detail="Purchase order not found")
 
 
-@router.get("/purchase-orders/{po_id}/communications", response_model=list)
+@router.get("/purchase-orders/{po_id}/communications", response_model=list, summary="Communications po")
 async def po_communications(po_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)) -> list[dict[str, Any]]:
     po = _find_po_by_id(db, po_id, tenant_id=tenant_id)
     return po.get("communications", [])
 
 
-@router.post("/purchase-orders/{po_id}/communications", response_model=dict, status_code=201)
+@router.post("/purchase-orders/{po_id}/communications", response_model=dict, status_code=201, summary="Add communication po")
 async def po_add_communication(
     po_id: str,
     payload: dict[str, Any],
@@ -2143,7 +2143,7 @@ async def po_add_communication(
     return item
 
 
-@router.post("/purchase-orders/{po_id}/communications/email", response_model=dict, status_code=201)
+@router.post("/purchase-orders/{po_id}/communications/email", response_model=dict, status_code=201, summary="Send email po")
 async def po_send_email(
     po_id: str,
     payload: dict[str, Any],
@@ -2154,7 +2154,7 @@ async def po_send_email(
     return await po_add_communication(po_id, payload, tenant_id, db)
 
 
-@router.post("/purchase-orders/{po_id}/communications/portal", response_model=dict, status_code=201)
+@router.post("/purchase-orders/{po_id}/communications/portal", response_model=dict, status_code=201, summary="Send portal po")
 async def po_send_portal(
     po_id: str,
     payload: dict[str, Any],
@@ -2165,7 +2165,7 @@ async def po_send_portal(
     return await po_add_communication(po_id, payload, tenant_id, db)
 
 
-@router.get("/einkauf/retouren/{retour_id}", response_model=dict)
+@router.get("/einkauf/retouren/{retour_id}", response_model=dict, summary="Retoure get einkauf")
 async def einkauf_retoure_get(
     retour_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
 ) -> dict:
@@ -2175,7 +2175,7 @@ async def einkauf_retoure_get(
         raise HTTPException(status_code=404, detail=str(exc)) from exc
 
 
-@router.patch("/einkauf/retouren/{retour_id}", response_model=dict)
+@router.patch("/einkauf/retouren/{retour_id}", response_model=dict, summary="Retoure patch einkauf")
 async def einkauf_retoure_patch(
     retour_id: str, payload: dict[str, Any],
     tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
@@ -2185,7 +2185,7 @@ async def einkauf_retoure_patch(
     return result
 
 
-@router.get("/einkauf/service-entry-sheets", response_model=dict)
+@router.get("/einkauf/service-entry-sheets", response_model=dict, summary="Service entry sheets auflisten")
 async def list_service_entry_sheets(
     status: Optional[str] = Query(None),
     tenant_id: str = Depends(get_tenant_id),
@@ -2194,7 +2194,7 @@ async def list_service_entry_sheets(
     return EinkaufCompatService(db, tenant_id).list_service_entry_sheets(status=status)
 
 
-@router.post("/einkauf/service-entry-sheets", response_model=dict, status_code=201)
+@router.post("/einkauf/service-entry-sheets", response_model=dict, status_code=201, summary="Service entry sheet anlegen")
 async def create_service_entry_sheet(
     payload: dict[str, Any],
     tenant_id: str = Depends(get_tenant_id),
@@ -2206,7 +2206,7 @@ async def create_service_entry_sheet(
     return result
 
 
-@router.patch("/einkauf/service-entry-sheets/{ses_id}", response_model=dict)
+@router.patch("/einkauf/service-entry-sheets/{ses_id}", response_model=dict, summary="Service entry sheet aktualisieren")
 async def update_service_entry_sheet(
     ses_id: str,
     payload: dict[str, Any],
@@ -2219,17 +2219,17 @@ async def update_service_entry_sheet(
         raise HTTPException(status_code=404, detail=str(exc)) from exc
 
 
-@router.get("/einkauf/credit-memos", response_model=list)
+@router.get("/einkauf/credit-memos", response_model=list, summary="Credit memos auflisten")
 async def list_credit_memos(tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)) -> list[dict[str, Any]]:
     return EinkaufCompatService(db, tenant_id).list_credit_memos()
 
 
-@router.get("/einkauf/debit-memos", response_model=list)
+@router.get("/einkauf/debit-memos", response_model=list, summary="Debit memos auflisten")
 async def list_debit_memos(tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)) -> list[dict[str, Any]]:
     return EinkaufCompatService(db, tenant_id).list_debit_memos()
 
 
-@router.post("/einkauf/credit-memos", response_model=dict, status_code=201)
+@router.post("/einkauf/credit-memos", response_model=dict, status_code=201, summary="Credit memo anlegen")
 async def create_credit_memo(
     payload: dict[str, Any],
     tenant_id: str = Depends(get_tenant_id),
@@ -2240,7 +2240,7 @@ async def create_credit_memo(
     return result
 
 
-@router.post("/einkauf/debit-memos", response_model=dict, status_code=201)
+@router.post("/einkauf/debit-memos", response_model=dict, status_code=201, summary="Debit memo anlegen")
 async def create_debit_memo(
     payload: dict[str, Any],
     tenant_id: str = Depends(get_tenant_id),
@@ -2251,7 +2251,7 @@ async def create_debit_memo(
     return result
 
 
-@router.post("/einkauf/credit-memos/{memo_id}/settle", response_model=dict)
+@router.post("/einkauf/credit-memos/{memo_id}/settle", response_model=dict, summary="Credit memo settle")
 async def settle_credit_memo(
     memo_id: str,
     payload: dict[str, Any],
@@ -2268,7 +2268,7 @@ async def settle_credit_memo(
         raise HTTPException(status_code=409, detail=str(exc)) from exc
 
 
-@router.post("/einkauf/debit-memos/{memo_id}/settle", response_model=dict)
+@router.post("/einkauf/debit-memos/{memo_id}/settle", response_model=dict, summary="Debit memo settle")
 async def settle_debit_memo(
     memo_id: str,
     payload: dict[str, Any],
@@ -2285,7 +2285,7 @@ async def settle_debit_memo(
         raise HTTPException(status_code=409, detail=str(exc)) from exc
 
 
-@router.get("/einkauf/reports/standard", response_model=dict)
+@router.get("/einkauf/reports/standard", response_model=dict, summary="Reports standard einkauf")
 async def einkauf_reports_standard(tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)) -> dict:
     cache_key = _cache_key("procurement", tenant_id, "reports-standard")
     cached = cache_get_json(cache_key)
@@ -2308,7 +2308,7 @@ async def einkauf_reports_standard(tenant_id: str = Depends(get_tenant_id), db: 
     return payload
 
 
-@router.get("/einkauf/audit-trail/{doc_type}/{doc_id}", response_model=dict)
+@router.get("/einkauf/audit-trail/{doc_type}/{doc_id}", response_model=dict, summary="Audit trail einkauf")
 async def einkauf_audit_trail(
     doc_type: str,
     doc_id: str,
@@ -2327,12 +2327,12 @@ async def einkauf_audit_trail(
     return {"documentType": doc_type, "documentId": doc_id, "events": chain, "total": len(chain)}
 
 
-@router.get("/einkauf/edi/messages", response_model=dict)
+@router.get("/einkauf/edi/messages", response_model=dict, summary="Messages edi")
 async def edi_messages(tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)) -> dict:
     return EinkaufCompatService(db, tenant_id).list_edi_messages()
 
 
-@router.post("/einkauf/edi/messages", response_model=dict, status_code=201)
+@router.post("/einkauf/edi/messages", response_model=dict, status_code=201, summary="Edi message anlegen")
 async def create_edi_message(
     payload: dict[str, Any],
     tenant_id: str = Depends(get_tenant_id),
@@ -2343,7 +2343,7 @@ async def create_edi_message(
     return result
 
 
-@router.post("/einkauf/edi/messages/{msg_id}/ack", response_model=dict)
+@router.post("/einkauf/edi/messages/{msg_id}/ack", response_model=dict, summary="Edi message ack")
 async def ack_edi_message(msg_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)) -> dict:
     try:
         result = await EinkaufCompatService(db, tenant_id).ack_edi_message(msg_id)
@@ -2357,7 +2357,7 @@ async def ack_edi_message(msg_id: str, tenant_id: str = Depends(get_tenant_id), 
 # Lager Dashboard KPIs
 # ---------------------------------------------------------------------------
 
-@router.get("/lager/dashboard", tags=["lager"])
+@router.get("/lager/dashboard", tags=["lager"], summary="Dashboard lager")
 async def lager_dashboard(
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
@@ -2435,7 +2435,7 @@ class EinlagerungOut(BaseModel):
     status: str
 
 
-@router.post("/lager/einlagerung", response_model=EinlagerungOut, status_code=201, tags=["lager"])
+@router.post("/lager/einlagerung", response_model=EinlagerungOut, status_code=201, tags=["lager"], summary="Einlagerung anlegen")
 async def create_einlagerung(
     payload: EinlagerungIn,
     tenant_id: str = Depends(get_tenant_id),
@@ -2523,7 +2523,7 @@ class AuslagerungOut(BaseModel):
     status: str
 
 
-@router.post("/lager/auslagerung", response_model=AuslagerungOut, status_code=201, tags=["lager"])
+@router.post("/lager/auslagerung", response_model=AuslagerungOut, status_code=201, tags=["lager"], summary="Auslagerung anlegen")
 async def create_auslagerung(
     payload: AuslagerungIn,
     tenant_id: str = Depends(get_tenant_id),
@@ -2614,7 +2614,7 @@ async def create_auslagerung(
 # POS Pausierte Verkäufe (Suspended Sales)
 # ---------------------------------------------------------------------------
 
-@router.get("/pos/suspended-sales", response_model=list, tags=["pos"])
+@router.get("/pos/suspended-sales", response_model=list, tags=["pos"], summary="Suspended sales auflisten")
 async def list_suspended_sales(
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
@@ -2637,7 +2637,7 @@ async def list_suspended_sales(
         return []
 
 
-@router.delete("/pos/suspended-sales/{sale_id}", status_code=204, tags=["pos"], response_class=Response, response_model=None)
+@router.delete("/pos/suspended-sales/{sale_id}", status_code=204, tags=["pos"], response_class=Response, response_model=None, summary="Suspended sale löschen")
 async def delete_suspended_sale(
     sale_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -2702,7 +2702,7 @@ def _ensure_chart_account(db: Session, tenant_id: str, account_number: str, acco
     return acc_id
 
 
-@router.post("/pos/tagesabschluss", response_model=TagesabschlussOut, status_code=201, tags=["pos"])
+@router.post("/pos/tagesabschluss", response_model=TagesabschlussOut, status_code=201, tags=["pos"], summary="Tagesabschluss anlegen")
 async def create_tagesabschluss(
     payload: TagesabschlussIn,
     tenant_id: str = Depends(get_tenant_id),
@@ -2857,7 +2857,7 @@ _FIRMA_KEY = "firma.stammdaten"
 _FIRMA_CATEGORY = "setup"
 
 
-@router.get("/setup/firma", response_model=dict, tags=["setup"])
+@router.get("/setup/firma", response_model=dict, tags=["setup"], summary="Firma abrufen")
 async def get_firma(
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
@@ -2880,7 +2880,7 @@ async def get_firma(
     return {}
 
 
-@router.put("/setup/firma", response_model=dict, tags=["setup"])
+@router.put("/setup/firma", response_model=dict, tags=["setup"], summary="Firma save")
 async def save_firma(
     payload: dict = Body(...),
     tenant_id: str = Depends(get_tenant_id),
@@ -2922,7 +2922,7 @@ async def save_firma(
 
 # ── Management Dashboard ────────────────────────────────────────────
 
-@router.get("/management/dashboard")
+@router.get("/management/dashboard", summary="Dashboard management")
 async def management_dashboard(
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
@@ -2986,7 +2986,7 @@ async def management_dashboard(
 
 # ── Benachrichtigungen ──────────────────────────────────────────────
 
-@router.get("/benachrichtigungen")
+@router.get("/benachrichtigungen", summary="Benachrichtigungen auflisten")
 async def list_benachrichtigungen(
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
@@ -3106,7 +3106,7 @@ _DEMO_FIELD_SERVICE_TASKS: list[dict[str, Any]] = [
 ]
 
 
-@router.get("/agribusiness/field-service-tasks")
+@router.get("/agribusiness/field-service-tasks", summary="Field service tasks auflisten")
 async def list_field_service_tasks() -> list[dict[str, Any]]:
     """Liste Field-Service-Aufgaben (CRM-Fälle); bei Ausfall des CRM-Dienstes Demo-Daten."""
     try:
@@ -3118,7 +3118,7 @@ async def list_field_service_tasks() -> list[dict[str, Any]]:
     return list(_DEMO_FIELD_SERVICE_TASKS)
 
 
-@router.get("/agribusiness/field-service-tasks/{task_id}")
+@router.get("/agribusiness/field-service-tasks/{task_id}", summary="Field service task abrufen")
 async def get_field_service_task(task_id: str) -> dict[str, Any]:
     """Einzelne Field-Service-Aufgabe (CRM-Case oder Demo)."""
     if task_id.startswith("fst-seed-"):
@@ -3141,7 +3141,7 @@ class FieldServiceTaskCreateBody(BaseModel):
     priority: str = Field("MEDIUM", max_length=20)
 
 
-@router.post("/agribusiness/field-service-tasks")
+@router.post("/agribusiness/field-service-tasks", summary="Field service task anlegen")
 async def create_field_service_task(
     body: FieldServiceTaskCreateBody,
     tenant_id: str = Depends(get_tenant_id),
@@ -3182,7 +3182,7 @@ class FieldServiceTaskUpdateBody(BaseModel):
     status: Optional[str] = Field(None, max_length=30)
 
 
-@router.put("/agribusiness/field-service-tasks/{task_id}")
+@router.put("/agribusiness/field-service-tasks/{task_id}", summary="Field service task aktualisieren")
 async def update_field_service_task(task_id: str, body: FieldServiceTaskUpdateBody) -> dict[str, Any]:
     """Aufgabe aktualisieren (CRM update_case oder Demo-Liste)."""
     if task_id.startswith("fst-seed-"):
@@ -3224,7 +3224,7 @@ class FieldServiceTaskDeleteBody(BaseModel):
     reason: str = ""
 
 
-@router.delete("/agribusiness/field-service-tasks/{task_id}")
+@router.delete("/agribusiness/field-service-tasks/{task_id}", summary="Field service task löschen")
 async def delete_field_service_task(
     task_id: str,
     body: FieldServiceTaskDeleteBody | None = Body(None),
@@ -3242,7 +3242,7 @@ class FieldServiceTaskCancelBody(BaseModel):
     reason: str = ""
 
 
-@router.post("/agribusiness/field-service-tasks/{task_id}/cancel")
+@router.post("/agribusiness/field-service-tasks/{task_id}/cancel", summary="Field service task stornieren")
 async def cancel_field_service_task(
     task_id: str,
     body: FieldServiceTaskCancelBody | None = None,
@@ -3259,7 +3259,7 @@ async def cancel_field_service_task(
 
 # ── Globale Suche ─────────────────────────────────────────────────────────
 
-@router.get("/search")
+@router.get("/search", summary="Search global")
 async def global_search(
     q: str = "",
     limit: int = 12,

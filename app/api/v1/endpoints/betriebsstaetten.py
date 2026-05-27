@@ -75,7 +75,7 @@ def _load_untergeordnete(db, tenant_id: str, filial_nr: str) -> list[str]:
     return [r.filial_nr for r in rows]
 
 
-@router.get("", response_model=list[BetriebsstaetteOut])
+@router.get("", response_model=list[BetriebsstaetteOut], summary="Betriebsstaetten auflisten")
 def list_betriebsstaetten(
     nur_zentralen: bool = Query(False),
     nur_aktive: bool = Query(True),
@@ -98,7 +98,7 @@ def list_betriebsstaetten(
     return result
 
 
-@router.get("/{filial_nr}", response_model=BetriebsstaetteOut)
+@router.get("/{filial_nr}", response_model=BetriebsstaetteOut, summary="Betriebsstaette abrufen")
 def get_betriebsstaette(
     filial_nr: str,
     db=Depends(get_db),
@@ -115,7 +115,7 @@ def get_betriebsstaette(
     return BetriebsstaetteOut(**d)
 
 
-@router.post("", response_model=BetriebsstaetteOut, status_code=201)
+@router.post("", response_model=BetriebsstaetteOut, status_code=201, summary="Betriebsstaette anlegen")
 def create_betriebsstaette(
     payload: BetriebsstaetteCreate,
     db=Depends(get_db),
@@ -159,7 +159,7 @@ def create_betriebsstaette(
     return BetriebsstaetteOut(**d)
 
 
-@router.put("/{filial_nr}", response_model=BetriebsstaetteOut)
+@router.put("/{filial_nr}", response_model=BetriebsstaetteOut, summary="Betriebsstaette aktualisieren")
 def update_betriebsstaette(
     filial_nr: str,
     payload: BetriebsstaetteCreate,
@@ -195,7 +195,7 @@ def update_betriebsstaette(
     return BetriebsstaetteOut(**d)
 
 
-@router.delete("/{filial_nr}")
+@router.delete("/{filial_nr}", summary="Betriebsstaette löschen")
 def delete_betriebsstaette(
     filial_nr: str,
     db=Depends(get_db),

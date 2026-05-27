@@ -112,7 +112,7 @@ _METADATA_TYPES = [
 # Endpoints
 # ---------------------------------------------------------------------------
 
-@router.get("/status", response_model=DmsStatusResponse, tags=["admin", "dms"])
+@router.get("/status", response_model=DmsStatusResponse, tags=["admin", "dms"], summary="Dms status abrufen")
 async def get_dms_status():
     """Gibt den aktuellen DMS-Konfigurationsstatus zurück."""
     cfg = _load_config()
@@ -133,7 +133,7 @@ async def get_dms_status():
     )
 
 
-@router.post("/test", response_model=DmsTestResponse, tags=["admin", "dms"])
+@router.post("/test", response_model=DmsTestResponse, tags=["admin", "dms"], summary="Dms connection testen")
 async def test_dms_connection(body: DmsConnectionRequest):
     """Testet die Verbindung zu Mayan-DMS mit den angegebenen Credentials."""
     try:
@@ -152,7 +152,7 @@ async def test_dms_connection(body: DmsConnectionRequest):
         return DmsTestResponse(ok=False, error=str(exc))
 
 
-@router.post("/bootstrap", response_model=DmsBootstrapResponse, tags=["admin", "dms"])
+@router.post("/bootstrap", response_model=DmsBootstrapResponse, tags=["admin", "dms"], summary="Dms bootstrap")
 async def bootstrap_dms(body: DmsConnectionRequest):
     """
     Erstellt oder aktualisiert Dokumenttypen und Metadatenfelder in Mayan-DMS

@@ -93,7 +93,7 @@ class WiegungsgruppeOut(BaseModel):
 
 # ── Folgeartikel ──────────────────────────────────────────────────────────────
 
-@router.get("/folgeartikel", response_model=list[FolgeartikelOut])
+@router.get("/folgeartikel", response_model=list[FolgeartikelOut], summary="Folgeartikel auflisten")
 def list_folgeartikel(
     artikel_nr: Optional[str] = Query(None),
     db=Depends(get_db),
@@ -112,7 +112,7 @@ def list_folgeartikel(
     return [FolgeartikelOut(**dict(r._mapping)) for r in rows]
 
 
-@router.get("/folgeartikel/{artikel_nr}/aktuell")
+@router.get("/folgeartikel/{artikel_nr}/aktuell", summary="Aktueller folgeartikel abrufen")
 def get_aktueller_folgeartikel(
     artikel_nr: str,
     stichtag: Optional[date] = Query(None, description="Stichtag für Gültigkeit (default: heute)"),
@@ -142,7 +142,7 @@ def get_aktueller_folgeartikel(
     }
 
 
-@router.post("/folgeartikel", response_model=FolgeartikelOut, status_code=201)
+@router.post("/folgeartikel", response_model=FolgeartikelOut, status_code=201, summary="Folgeartikel anlegen")
 def create_folgeartikel(
     payload: FolgeartikelCreate,
     db=Depends(get_db),
@@ -170,7 +170,7 @@ def create_folgeartikel(
     return FolgeartikelOut(**dict(row._mapping))
 
 
-@router.delete("/folgeartikel/{folgeartikel_id}")
+@router.delete("/folgeartikel/{folgeartikel_id}", summary="Folgeartikel löschen")
 def delete_folgeartikel(
     folgeartikel_id: str,
     db=Depends(get_db),
@@ -186,7 +186,7 @@ def delete_folgeartikel(
 
 # ── Inventurgruppen ───────────────────────────────────────────────────────────
 
-@router.get("/inventurgruppen", response_model=list[InventurgruppeOut])
+@router.get("/inventurgruppen", response_model=list[InventurgruppeOut], summary="Inventurgruppen auflisten")
 def list_inventurgruppen(
     db=Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
@@ -199,7 +199,7 @@ def list_inventurgruppen(
     return [InventurgruppeOut(**dict(r._mapping)) for r in rows]
 
 
-@router.post("/inventurgruppen", response_model=InventurgruppeOut, status_code=201)
+@router.post("/inventurgruppen", response_model=InventurgruppeOut, status_code=201, summary="Inventurgruppe anlegen")
 def create_inventurgruppe(
     payload: InventurgruppeCreate,
     db=Depends(get_db),
@@ -230,7 +230,7 @@ def create_inventurgruppe(
     return InventurgruppeOut(**dict(row._mapping))
 
 
-@router.delete("/inventurgruppen/{gruppe_id}")
+@router.delete("/inventurgruppen/{gruppe_id}", summary="Inventurgruppe löschen")
 def delete_inventurgruppe(
     gruppe_id: str,
     db=Depends(get_db),
@@ -246,7 +246,7 @@ def delete_inventurgruppe(
 
 # ── Wiegungsgruppen (Raffen / Aufteilen) ─────────────────────────────────────
 
-@router.get("/wiegungsgruppen", response_model=list[WiegungsgruppeOut])
+@router.get("/wiegungsgruppen", response_model=list[WiegungsgruppeOut], summary="Wiegungsgruppen auflisten")
 def list_wiegungsgruppen(
     typ: Optional[str] = Query(None, description="gerafft oder aufgeteilt"),
     status: Optional[str] = Query(None),
@@ -269,7 +269,7 @@ def list_wiegungsgruppen(
     return [WiegungsgruppeOut(**dict(r._mapping)) for r in rows]
 
 
-@router.post("/wiegungsgruppen", response_model=WiegungsgruppeOut, status_code=201)
+@router.post("/wiegungsgruppen", response_model=WiegungsgruppeOut, status_code=201, summary="Wiegungsgruppe anlegen")
 def create_wiegungsgruppe(
     payload: WiegungsgruppeCreate,
     db=Depends(get_db),

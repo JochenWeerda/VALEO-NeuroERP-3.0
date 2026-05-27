@@ -64,7 +64,7 @@ class StoffstromOut(BaseModel):
 
 # ── Endpoints ─────────────────────────────────────────────────────────────────
 
-@router.get("", response_model=list[StoffstromOut])
+@router.get("", response_model=list[StoffstromOut], summary="Stoffstrom auflisten")
 def list_stoffstrom(
     artikel_nr: Optional[str] = Query(None),
     nur_nachhaltig: bool = Query(False),
@@ -89,7 +89,7 @@ def list_stoffstrom(
     return [StoffstromOut(**dict(r._mapping)) for r in rows]
 
 
-@router.get("/artikel/{artikel_nr}", response_model=list[StoffstromOut])
+@router.get("/artikel/{artikel_nr}", response_model=list[StoffstromOut], summary="Stoffstrom fuer artikel abrufen")
 def get_stoffstrom_fuer_artikel(
     artikel_nr: str,
     stichtag: Optional[date] = Query(None),
@@ -108,7 +108,7 @@ def get_stoffstrom_fuer_artikel(
     return [StoffstromOut(**dict(r._mapping)) for r in rows]
 
 
-@router.post("", response_model=StoffstromOut, status_code=201)
+@router.post("", response_model=StoffstromOut, status_code=201, summary="Stoffstrom anlegen")
 def create_stoffstrom(
     payload: StoffstromCreate,
     db=Depends(get_db),
@@ -138,7 +138,7 @@ def create_stoffstrom(
     return StoffstromOut(**dict(row._mapping))
 
 
-@router.put("/{stoffstrom_id}", response_model=StoffstromOut)
+@router.put("/{stoffstrom_id}", response_model=StoffstromOut, summary="Stoffstrom aktualisieren")
 def update_stoffstrom(
     stoffstrom_id: str,
     payload: StoffstromCreate,
@@ -175,7 +175,7 @@ def update_stoffstrom(
     return StoffstromOut(**dict(row._mapping))
 
 
-@router.delete("/{stoffstrom_id}")
+@router.delete("/{stoffstrom_id}", summary="Stoffstrom löschen")
 def delete_stoffstrom(
     stoffstrom_id: str,
     db=Depends(get_db),
@@ -189,7 +189,7 @@ def delete_stoffstrom(
     return Response(status_code=204)
 
 
-@router.get("/report/thg-summary")
+@router.get("/report/thg-summary", summary="Summary thg")
 def thg_summary(
     anbauland: Optional[str] = Query(None),
     db=Depends(get_db),

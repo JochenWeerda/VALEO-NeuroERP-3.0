@@ -104,7 +104,7 @@ def _recalculate_bilanz(db, bilanz_id: str) -> None:
 
 # ── Endpoints ─────────────────────────────────────────────────────────────────
 
-@router.get("", response_model=list[MassebilanzOut])
+@router.get("", response_model=list[MassebilanzOut], summary="Massebilanzen auflisten")
 def list_massebilanzen(
     periode: Optional[str] = Query(None, description="YYYY-MM"),
     status: Optional[str] = Query(None),
@@ -135,7 +135,7 @@ def list_massebilanzen(
     return [MassebilanzOut(**dict(r._mapping)) for r in rows]
 
 
-@router.post("", response_model=MassebilanzOut, status_code=201)
+@router.post("", response_model=MassebilanzOut, status_code=201, summary="Massebilanz anlegen")
 def create_massebilanz(
     payload: MassebilanzCreate,
     db=Depends(get_db),
@@ -172,7 +172,7 @@ def create_massebilanz(
     return MassebilanzOut(**dict(row._mapping))
 
 
-@router.get("/{bilanz_id}", response_model=MassebilanzOut)
+@router.get("/{bilanz_id}", response_model=MassebilanzOut, summary="Massebilanz abrufen")
 def get_massebilanz(
     bilanz_id: str,
     db=Depends(get_db),
@@ -187,7 +187,7 @@ def get_massebilanz(
     return MassebilanzOut(**dict(row._mapping))
 
 
-@router.post("/{bilanz_id}/bewegungen", response_model=BewegungOut, status_code=201)
+@router.post("/{bilanz_id}/bewegungen", response_model=BewegungOut, status_code=201, summary="Bewegung hinzufügen")
 def add_bewegung(
     bilanz_id: str,
     payload: BewegungCreate,
@@ -227,7 +227,7 @@ def add_bewegung(
     return BewegungOut(**dict(row._mapping))
 
 
-@router.get("/{bilanz_id}/bewegungen", response_model=list[BewegungOut])
+@router.get("/{bilanz_id}/bewegungen", response_model=list[BewegungOut], summary="Bewegungen auflisten")
 def list_bewegungen(
     bilanz_id: str,
     db=Depends(get_db),
@@ -242,7 +242,7 @@ def list_bewegungen(
     return [BewegungOut(**dict(r._mapping)) for r in rows]
 
 
-@router.post("/{bilanz_id}/festschreiben", response_model=MassebilanzOut)
+@router.post("/{bilanz_id}/festschreiben", response_model=MassebilanzOut, summary="Festschreiben")
 def festschreiben(
     bilanz_id: str,
     db=Depends(get_db),
@@ -278,7 +278,7 @@ def festschreiben(
     return MassebilanzOut(**dict(row._mapping))
 
 
-@router.get("/{bilanz_id}/bericht")
+@router.get("/{bilanz_id}/bericht", summary="Bericht massebilanz")
 def massebilanz_bericht(
     bilanz_id: str,
     db=Depends(get_db),

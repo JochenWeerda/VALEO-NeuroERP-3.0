@@ -125,7 +125,7 @@ def _row_to_debtor(row) -> Debtor:
     )
 
 
-@router.post("/", response_model=Debtor, status_code=201)
+@router.post("/", response_model=Debtor, status_code=201, summary="Debtor anlegen")
 async def create_debtor(
     debtor_data: DebtorCreate,
     db: Session = Depends(get_db)
@@ -192,7 +192,7 @@ async def create_debtor(
         raise HTTPException(status_code=500, detail=f"Failed to create debtor: {str(e)}")
 
 
-@router.get("/", response_model=PaginatedResponse[Debtor])
+@router.get("/", response_model=PaginatedResponse[Debtor], summary="Debtors auflisten")
 async def list_debtors(
     tenant_id: Optional[str] = Query(None, description="Filter by tenant ID"),
     is_active: Optional[bool] = Query(None, description="Filter by active status"),
@@ -257,7 +257,7 @@ async def list_debtors(
         raise HTTPException(status_code=500, detail=f"Failed to list debtors: {str(e)}")
 
 
-@router.get("/{debtor_id}", response_model=Debtor)
+@router.get("/{debtor_id}", response_model=Debtor, summary="Debtor abrufen")
 async def get_debtor(
     debtor_id: str,
     db: Session = Depends(get_db)
@@ -285,7 +285,7 @@ async def get_debtor(
         raise HTTPException(status_code=500, detail=f"Failed to retrieve debtor: {str(e)}")
 
 
-@router.put("/{debtor_id}", response_model=Debtor)
+@router.put("/{debtor_id}", response_model=Debtor, summary="Debtor aktualisieren")
 async def update_debtor(
     debtor_id: str,
     debtor_data: DebtorUpdate,
@@ -404,7 +404,7 @@ async def update_debtor(
         raise HTTPException(status_code=500, detail=f"Failed to update debtor: {str(e)}")
 
 
-@router.get("/{debtor_id}/balance", response_model=dict)
+@router.get("/{debtor_id}/balance", response_model=dict, summary="Debtor balance abrufen")
 async def get_debtor_balance(
     debtor_id: str,
     db: Session = Depends(get_db)
@@ -439,7 +439,7 @@ async def get_debtor_balance(
         raise HTTPException(status_code=500, detail=f"Failed to get debtor balance: {str(e)}")
 
 
-@router.delete("/{debtor_id}", status_code=204, response_class=Response, response_model=None)
+@router.delete("/{debtor_id}", status_code=204, response_class=Response, response_model=None, summary="Debtor löschen")
 async def delete_debtor(
     debtor_id: str,
     db: Session = Depends(get_db)

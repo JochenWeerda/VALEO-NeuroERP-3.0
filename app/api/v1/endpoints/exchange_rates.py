@@ -73,7 +73,7 @@ class CurrencyConversionResponse(BaseModel):
     rate_type: str
 
 
-@router.get("", response_model=List[ExchangeRateResponse])
+@router.get("", response_model=List[ExchangeRateResponse], summary="Exchange rates auflisten")
 async def list_exchange_rates(
     from_currency: Optional[str] = Query(None, description="Filter by source currency"),
     to_currency: Optional[str] = Query(None, description="Filter by target currency"),
@@ -141,7 +141,7 @@ async def list_exchange_rates(
         return []
 
 
-@router.get("/{rate_id}", response_model=ExchangeRateResponse)
+@router.get("/{rate_id}", response_model=ExchangeRateResponse, summary="Exchange rate abrufen")
 async def get_exchange_rate(
     rate_id: str,
     tenant_id: str = Query("system", description="Tenant ID"),
@@ -186,7 +186,7 @@ async def get_exchange_rate(
         raise HTTPException(status_code=500, detail=f"Failed to get exchange rate: {str(e)}")
 
 
-@router.post("", response_model=ExchangeRateResponse, status_code=201)
+@router.post("", response_model=ExchangeRateResponse, status_code=201, summary="Exchange rate anlegen")
 async def create_exchange_rate(
     rate: ExchangeRateCreate,
     tenant_id: str = Query("system", description="Tenant ID"),
@@ -271,7 +271,7 @@ async def create_exchange_rate(
         raise HTTPException(status_code=500, detail=f"Failed to create exchange rate: {str(e)}")
 
 
-@router.put("/{rate_id}", response_model=ExchangeRateResponse)
+@router.put("/{rate_id}", response_model=ExchangeRateResponse, summary="Exchange rate aktualisieren")
 async def update_exchange_rate(
     rate_id: str,
     rate: ExchangeRateUpdate,
@@ -341,7 +341,7 @@ async def update_exchange_rate(
         raise HTTPException(status_code=500, detail=f"Failed to update exchange rate: {str(e)}")
 
 
-@router.post("/convert", response_model=CurrencyConversionResponse)
+@router.post("/convert", response_model=CurrencyConversionResponse, summary="Currency umwandeln")
 async def convert_currency(
     request: CurrencyConversionRequest,
     tenant_id: str = Query("system", description="Tenant ID"),
@@ -445,7 +445,7 @@ async def convert_currency(
         raise HTTPException(status_code=500, detail=f"Failed to convert currency: {str(e)}")
 
 
-@router.get("/latest/{from_currency}/{to_currency}", response_model=ExchangeRateResponse)
+@router.get("/latest/{from_currency}/{to_currency}", response_model=ExchangeRateResponse, summary="Latest rate abrufen")
 async def get_latest_rate(
     from_currency: str,
     to_currency: str,

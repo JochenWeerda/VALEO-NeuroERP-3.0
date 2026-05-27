@@ -48,7 +48,7 @@ class AuditLogCreate(BaseModel):
     user_agent: Optional[str] = None
 
 
-@router.post("/log", response_model=AuditLogEntry)
+@router.post("/log", response_model=AuditLogEntry, summary="Audit log anlegen")
 async def create_audit_log(
     entry: AuditLogCreate,
     db: Session = Depends(get_db)
@@ -85,7 +85,7 @@ async def create_audit_log(
     return log_entry
 
 
-@router.get("/logs", response_model=List[AuditLogEntry])
+@router.get("/logs", response_model=List[AuditLogEntry], summary="Audit logs abrufen")
 async def get_audit_logs(
     tenant_id: Optional[str] = Query(None),
     entity_type: Optional[str] = Query(None),
@@ -144,7 +144,7 @@ async def get_audit_logs(
         return []
 
 
-@router.get("/stats")
+@router.get("/stats", summary="Audit stats abrufen")
 async def get_audit_stats(
     tenant_id: Optional[str] = Query(None),
     db: Session = Depends(get_db)

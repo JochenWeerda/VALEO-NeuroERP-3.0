@@ -93,7 +93,7 @@ def _seed_if_empty() -> None:
 # ── Endpoints ───────────────────────────────────────────────────────────
 
 
-@router.get("/anfragen", response_model=dict)
+@router.get("/anfragen", response_model=dict, summary="Anfragen auflisten")
 async def list_anfragen(
     status: Optional[str] = Query(None),
     prioritaet: Optional[str] = Query(None),
@@ -114,7 +114,7 @@ async def list_anfragen(
     return {"items": items, "total": total, "skip": skip, "limit": limit}
 
 
-@router.get("/anfragen/{anfrage_id}", response_model=dict)
+@router.get("/anfragen/{anfrage_id}", response_model=dict, summary="Anfrage abrufen")
 async def get_anfrage(
     anfrage_id: str,
     x_tenant_id: str = Header("default", alias="X-Tenant-ID"),
@@ -127,7 +127,7 @@ async def get_anfrage(
     return item
 
 
-@router.post("/anfragen", response_model=dict, status_code=201)
+@router.post("/anfragen", response_model=dict, status_code=201, summary="Anfrage anlegen")
 async def create_anfrage(
     body: ServiceAnfrageCreate,
     x_tenant_id: str = Header("default", alias="X-Tenant-ID"),
@@ -154,7 +154,7 @@ async def create_anfrage(
     return item
 
 
-@router.put("/anfragen/{anfrage_id}", response_model=dict)
+@router.put("/anfragen/{anfrage_id}", response_model=dict, summary="Anfrage aktualisieren")
 async def update_anfrage(
     anfrage_id: str,
     body: ServiceAnfrageUpdate,
@@ -171,7 +171,7 @@ async def update_anfrage(
     return item
 
 
-@router.delete("/anfragen/{anfrage_id}", response_class=Response, status_code=204, response_model=None)
+@router.delete("/anfragen/{anfrage_id}", response_class=Response, status_code=204, response_model=None, summary="Anfrage löschen")
 async def delete_anfrage(
     anfrage_id: str,
     x_tenant_id: str = Header("default", alias="X-Tenant-ID"),
@@ -185,7 +185,7 @@ async def delete_anfrage(
     return Response(status_code=204)
 
 
-@router.post("/rueckmeldungen", response_model=dict, status_code=201)
+@router.post("/rueckmeldungen", response_model=dict, status_code=201, summary="Rueckmeldung anlegen")
 async def create_rueckmeldung(
     body: RueckmeldungCreate,
     x_tenant_id: str = Header("default", alias="X-Tenant-ID"),
@@ -207,7 +207,7 @@ async def create_rueckmeldung(
     return rm
 
 
-@router.post("/abschluss", response_model=dict)
+@router.post("/abschluss", response_model=dict, summary="Service case abschließen")
 async def close_service_case(
     body: AbschlussCreate,
     x_tenant_id: str = Header("default", alias="X-Tenant-ID"),

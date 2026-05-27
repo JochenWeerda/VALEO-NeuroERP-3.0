@@ -68,12 +68,12 @@ def _require_fields(data: dict[str, Any], keys: list[str]) -> None:
         raise HTTPException(status_code=400, detail=f"Missing required fields: {', '.join(missing)}")
 
 
-@router.get("/stations", response_model=list[dict[str, Any]])
+@router.get("/stations", response_model=list[dict[str, Any]], summary="Stations auflisten")
 async def list_stations(tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
     return _list_rows(db, "domain_shared.admin_stations", tenant_id, "station_code ASC")
 
 
-@router.post("/stations", response_model=dict, status_code=201)
+@router.post("/stations", response_model=dict, status_code=201, summary="Station anlegen")
 async def create_station(payload: JsonPayload, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
     _require_fields(payload.data, ["station_code", "name"])
     item_id = str(uuid4())
@@ -93,7 +93,7 @@ async def create_station(payload: JsonPayload, tenant_id: str = Depends(get_tena
     return _jsonable(dict(row))
 
 
-@router.put("/stations/{item_id}", response_model=dict)
+@router.put("/stations/{item_id}", response_model=dict, summary="Station aktualisieren")
 async def update_station(item_id: str, payload: JsonPayload, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
     _require_fields(payload.data, ["station_code", "name"])
     updated = db.execute(
@@ -116,7 +116,7 @@ async def update_station(item_id: str, payload: JsonPayload, tenant_id: str = De
     return _jsonable(dict(row))
 
 
-@router.delete("/stations/{item_id}", status_code=204, response_class=Response, response_model=None)
+@router.delete("/stations/{item_id}", status_code=204, response_class=Response, response_model=None, summary="Station löschen")
 async def delete_station(item_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
     deleted = db.execute(
         text("DELETE FROM domain_shared.admin_stations WHERE tenant_id=:tenant_id AND id=:id"),
@@ -128,7 +128,7 @@ async def delete_station(item_id: str, tenant_id: str = Depends(get_tenant_id), 
     return None
 
 
-@router.get("/station-devices", response_model=list[dict[str, Any]])
+@router.get("/station-devices", response_model=list[dict[str, Any]], summary="Station devices auflisten")
 async def list_station_devices(
     station_id: str | None = Query(default=None),
     tenant_id: str = Depends(get_tenant_id),
@@ -153,7 +153,7 @@ async def list_station_devices(
     return [_jsonable(dict(r)) for r in rows]
 
 
-@router.post("/station-devices", response_model=dict, status_code=201)
+@router.post("/station-devices", response_model=dict, status_code=201, summary="Station device anlegen")
 async def create_station_device(payload: JsonPayload, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
     _require_fields(payload.data, ["station_id", "device_id", "device_role"])
     item_id = str(uuid4())
@@ -185,7 +185,7 @@ async def create_station_device(payload: JsonPayload, tenant_id: str = Depends(g
     return _jsonable(dict(row))
 
 
-@router.put("/station-devices/{item_id}", response_model=dict)
+@router.put("/station-devices/{item_id}", response_model=dict, summary="Station device aktualisieren")
 async def update_station_device(item_id: str, payload: JsonPayload, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
     _require_fields(payload.data, ["station_id", "device_id", "device_role"])
     updated = db.execute(
@@ -218,7 +218,7 @@ async def update_station_device(item_id: str, payload: JsonPayload, tenant_id: s
     return _jsonable(dict(row))
 
 
-@router.delete("/station-devices/{item_id}", status_code=204, response_class=Response, response_model=None)
+@router.delete("/station-devices/{item_id}", status_code=204, response_class=Response, response_model=None, summary="Station device löschen")
 async def delete_station_device(item_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
     deleted = db.execute(
         text("DELETE FROM domain_shared.admin_station_devices WHERE tenant_id=:tenant_id AND id=:id"),
@@ -230,12 +230,12 @@ async def delete_station_device(item_id: str, tenant_id: str = Depends(get_tenan
     return None
 
 
-@router.get("/routing-rules", response_model=list[dict[str, Any]])
+@router.get("/routing-rules", response_model=list[dict[str, Any]], summary="Routing rules auflisten")
 async def list_routing_rules(tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
     return _list_rows(db, "domain_shared.admin_routing_rules", tenant_id, "priority ASC, rule_code ASC")
 
 
-@router.post("/routing-rules", response_model=dict, status_code=201)
+@router.post("/routing-rules", response_model=dict, status_code=201, summary="Routing rule anlegen")
 async def create_routing_rule(payload: JsonPayload, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
     _require_fields(payload.data, ["rule_code", "name", "document_type", "process_code"])
     item_id = str(uuid4())
@@ -259,7 +259,7 @@ async def create_routing_rule(payload: JsonPayload, tenant_id: str = Depends(get
     return _jsonable(dict(row))
 
 
-@router.put("/routing-rules/{item_id}", response_model=dict)
+@router.put("/routing-rules/{item_id}", response_model=dict, summary="Routing rule aktualisieren")
 async def update_routing_rule(item_id: str, payload: JsonPayload, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
     _require_fields(payload.data, ["rule_code", "name", "document_type", "process_code"])
     updated = db.execute(
@@ -299,7 +299,7 @@ async def update_routing_rule(item_id: str, payload: JsonPayload, tenant_id: str
     return _jsonable(dict(row))
 
 
-@router.delete("/routing-rules/{item_id}", status_code=204, response_class=Response, response_model=None)
+@router.delete("/routing-rules/{item_id}", status_code=204, response_class=Response, response_model=None, summary="Routing rule löschen")
 async def delete_routing_rule(item_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
     deleted = db.execute(
         text("DELETE FROM domain_shared.admin_routing_rules WHERE tenant_id=:tenant_id AND id=:id"),
@@ -311,12 +311,12 @@ async def delete_routing_rule(item_id: str, tenant_id: str = Depends(get_tenant_
     return None
 
 
-@router.get("/scan-profiles", response_model=list[dict[str, Any]])
+@router.get("/scan-profiles", response_model=list[dict[str, Any]], summary="Scan profiles auflisten")
 async def list_scan_profiles(tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
     return _list_rows(db, "domain_shared.admin_scan_profiles", tenant_id, "profile_code ASC")
 
 
-@router.post("/scan-profiles", response_model=dict, status_code=201)
+@router.post("/scan-profiles", response_model=dict, status_code=201, summary="Scan profile anlegen")
 async def create_scan_profile(payload: JsonPayload, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
     _require_fields(payload.data, ["profile_code", "name", "target_action"])
     item_id = str(uuid4())
@@ -339,7 +339,7 @@ async def create_scan_profile(payload: JsonPayload, tenant_id: str = Depends(get
     return _jsonable(dict(row))
 
 
-@router.put("/scan-profiles/{item_id}", response_model=dict)
+@router.put("/scan-profiles/{item_id}", response_model=dict, summary="Scan profile aktualisieren")
 async def update_scan_profile(item_id: str, payload: JsonPayload, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
     _require_fields(payload.data, ["profile_code", "name", "target_action"])
     updated = db.execute(
@@ -376,7 +376,7 @@ async def update_scan_profile(item_id: str, payload: JsonPayload, tenant_id: str
     return _jsonable(dict(row))
 
 
-@router.delete("/scan-profiles/{item_id}", status_code=204, response_class=Response, response_model=None)
+@router.delete("/scan-profiles/{item_id}", status_code=204, response_class=Response, response_model=None, summary="Scan profile löschen")
 async def delete_scan_profile(item_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
     deleted = db.execute(
         text("DELETE FROM domain_shared.admin_scan_profiles WHERE tenant_id=:tenant_id AND id=:id"),
@@ -388,12 +388,12 @@ async def delete_scan_profile(item_id: str, tenant_id: str = Depends(get_tenant_
     return None
 
 
-@router.get("/mobile-devices", response_model=list[dict[str, Any]])
+@router.get("/mobile-devices", response_model=list[dict[str, Any]], summary="Mobile devices auflisten")
 async def list_mobile_devices(tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
     return _list_rows(db, "domain_shared.admin_mobile_devices", tenant_id, "device_code ASC")
 
 
-@router.post("/mobile-devices", response_model=dict, status_code=201)
+@router.post("/mobile-devices", response_model=dict, status_code=201, summary="Mobile device anlegen")
 async def create_mobile_device(payload: JsonPayload, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
     _require_fields(payload.data, ["device_code", "name"])
     item_id = str(uuid4())
@@ -435,7 +435,7 @@ async def create_mobile_device(payload: JsonPayload, tenant_id: str = Depends(ge
     return _jsonable(dict(row))
 
 
-@router.put("/mobile-devices/{item_id}", response_model=dict)
+@router.put("/mobile-devices/{item_id}", response_model=dict, summary="Mobile device aktualisieren")
 async def update_mobile_device(item_id: str, payload: JsonPayload, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
     _require_fields(payload.data, ["device_code", "name"])
     updated = db.execute(
@@ -478,7 +478,7 @@ async def update_mobile_device(item_id: str, payload: JsonPayload, tenant_id: st
     return _jsonable(dict(row))
 
 
-@router.delete("/mobile-devices/{item_id}", status_code=204, response_class=Response, response_model=None)
+@router.delete("/mobile-devices/{item_id}", status_code=204, response_class=Response, response_model=None, summary="Mobile device löschen")
 async def delete_mobile_device(item_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
     deleted = db.execute(
         text("DELETE FROM domain_shared.admin_mobile_devices WHERE tenant_id=:tenant_id AND id=:id"),
@@ -490,12 +490,12 @@ async def delete_mobile_device(item_id: str, tenant_id: str = Depends(get_tenant
     return None
 
 
-@router.get("/connectors", response_model=list[dict[str, Any]])
+@router.get("/connectors", response_model=list[dict[str, Any]], summary="Connectors auflisten")
 async def list_connectors(tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
     return _list_rows(db, "domain_shared.admin_connector_configs", tenant_id, "connector_type ASC, config_code ASC")
 
 
-@router.post("/connectors", response_model=dict, status_code=201)
+@router.post("/connectors", response_model=dict, status_code=201, summary="Connector anlegen")
 async def create_connector(payload: JsonPayload, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
     _require_fields(payload.data, ["config_code", "name", "connector_type"])
     item_id = str(uuid4())
@@ -520,7 +520,7 @@ async def create_connector(payload: JsonPayload, tenant_id: str = Depends(get_te
     return _jsonable(dict(row))
 
 
-@router.put("/connectors/{item_id}", response_model=dict)
+@router.put("/connectors/{item_id}", response_model=dict, summary="Connector aktualisieren")
 async def update_connector(item_id: str, payload: JsonPayload, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
     _require_fields(payload.data, ["config_code", "name", "connector_type"])
     updated = db.execute(
@@ -561,7 +561,7 @@ async def update_connector(item_id: str, payload: JsonPayload, tenant_id: str = 
     return _jsonable(dict(row))
 
 
-@router.delete("/connectors/{item_id}", status_code=204, response_class=Response, response_model=None)
+@router.delete("/connectors/{item_id}", status_code=204, response_class=Response, response_model=None, summary="Connector löschen")
 async def delete_connector(item_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
     deleted = db.execute(
         text("DELETE FROM domain_shared.admin_connector_configs WHERE tenant_id=:tenant_id AND id=:id"),
@@ -573,7 +573,7 @@ async def delete_connector(item_id: str, tenant_id: str = Depends(get_tenant_id)
     return None
 
 
-@router.get("/connector-events", response_model=list[dict[str, Any]])
+@router.get("/connector-events", response_model=list[dict[str, Any]], summary="Connector events auflisten")
 async def list_connector_events(
     connector_id: str | None = Query(default=None),
     status: str | None = Query(default=None),
@@ -604,7 +604,7 @@ async def list_connector_events(
     return [_jsonable(dict(r)) for r in rows]
 
 
-@router.get("/connector-events/quarantine", response_model=list[dict[str, Any]])
+@router.get("/connector-events/quarantine", response_model=list[dict[str, Any]], summary="Connector events quarantine auflisten")
 async def list_connector_events_quarantine(
     connector_id: str | None = Query(default=None),
     limit: int = Query(default=250, ge=1, le=2000),
@@ -631,7 +631,7 @@ async def list_connector_events_quarantine(
     return [_jsonable(dict(r)) for r in rows]
 
 
-@router.post("/connector-events", response_model=dict, status_code=201)
+@router.post("/connector-events", response_model=dict, status_code=201, summary="Connector event anlegen")
 async def create_connector_event(payload: JsonPayload, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
     _require_fields(payload.data, ["connector_id", "event_type"])
     item_id = str(uuid4())
@@ -664,7 +664,7 @@ async def create_connector_event(payload: JsonPayload, tenant_id: str = Depends(
     return _jsonable(dict(row))
 
 
-@router.put("/connector-events/{item_id}", response_model=dict)
+@router.put("/connector-events/{item_id}", response_model=dict, summary="Connector event aktualisieren")
 async def update_connector_event(item_id: str, payload: JsonPayload, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
     _require_fields(payload.data, ["status"])
     updated = db.execute(
@@ -695,7 +695,7 @@ async def update_connector_event(item_id: str, payload: JsonPayload, tenant_id: 
     return _jsonable(dict(row))
 
 
-@router.delete("/connector-events/{item_id}", status_code=204, response_class=Response, response_model=None)
+@router.delete("/connector-events/{item_id}", status_code=204, response_class=Response, response_model=None, summary="Connector event löschen")
 async def delete_connector_event(item_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
     deleted = db.execute(
         text("DELETE FROM domain_shared.admin_connector_events WHERE tenant_id=:tenant_id AND id=:id"),
@@ -707,7 +707,7 @@ async def delete_connector_event(item_id: str, tenant_id: str = Depends(get_tena
     return None
 
 
-@router.post("/connector-events/{item_id}/retry", response_model=dict)
+@router.post("/connector-events/{item_id}/retry", response_model=dict, summary="Connector event wiederholen")
 async def retry_connector_event(item_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
     updated = db.execute(
         text(
@@ -733,7 +733,7 @@ async def retry_connector_event(item_id: str, tenant_id: str = Depends(get_tenan
     return _jsonable(dict(row))
 
 
-@router.post("/connector-events/{item_id}/resolve", response_model=dict)
+@router.post("/connector-events/{item_id}/resolve", response_model=dict, summary="Connector event resolve")
 async def resolve_connector_event(item_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
     updated = db.execute(
         text(

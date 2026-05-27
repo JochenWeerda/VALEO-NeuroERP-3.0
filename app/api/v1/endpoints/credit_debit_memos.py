@@ -166,7 +166,7 @@ def get_invoice_number(invoice_id: str, db: Session) -> Optional[str]:
     return None
 
 
-@router.post("/credit-memos", response_model=CreditMemoResponse)
+@router.post("/credit-memos", response_model=CreditMemoResponse, summary="Credit memo anlegen")
 async def create_credit_memo(
     memo: CreditMemoCreate,
     db: Session = Depends(get_db),
@@ -232,7 +232,7 @@ async def create_credit_memo(
         raise HTTPException(status_code=500, detail=f"Failed to create credit memo: {str(e)}")
 
 
-@router.post("/debit-memos", response_model=DebitMemoResponse)
+@router.post("/debit-memos", response_model=DebitMemoResponse, summary="Debit memo anlegen")
 async def create_debit_memo(
     memo: DebitMemoCreate,
     db: Session = Depends(get_db),
@@ -297,7 +297,7 @@ async def create_debit_memo(
         raise HTTPException(status_code=500, detail=f"Failed to create debit memo: {str(e)}")
 
 
-@router.get("/credit-memos", response_model=List[CreditMemoResponse])
+@router.get("/credit-memos", response_model=List[CreditMemoResponse], summary="Credit memos auflisten")
 async def list_credit_memos(
     skip: int = 0,
     limit: int = 100,
@@ -336,7 +336,7 @@ async def list_credit_memos(
         raise HTTPException(status_code=500, detail=f"Failed to list credit memos: {str(e)}")
 
 
-@router.get("/debit-memos", response_model=List[DebitMemoResponse])
+@router.get("/debit-memos", response_model=List[DebitMemoResponse], summary="Debit memos auflisten")
 async def list_debit_memos(
     skip: int = 0,
     limit: int = 100,
@@ -375,7 +375,7 @@ async def list_debit_memos(
         raise HTTPException(status_code=500, detail=f"Failed to list debit memos: {str(e)}")
 
 
-@router.get("/credit-memos/{memo_id}", response_model=CreditMemoResponse)
+@router.get("/credit-memos/{memo_id}", response_model=CreditMemoResponse, summary="Credit memo abrufen")
 async def get_credit_memo(
     memo_id: str,
     db: Session = Depends(get_db)
@@ -395,7 +395,7 @@ async def get_credit_memo(
         raise HTTPException(status_code=500, detail=f"Failed to fetch credit memo: {str(e)}")
 
 
-@router.get("/debit-memos/{memo_id}", response_model=DebitMemoResponse)
+@router.get("/debit-memos/{memo_id}", response_model=DebitMemoResponse, summary="Debit memo abrufen")
 async def get_debit_memo(
     memo_id: str,
     db: Session = Depends(get_db)
@@ -415,7 +415,7 @@ async def get_debit_memo(
         raise HTTPException(status_code=500, detail=f"Failed to fetch debit memo: {str(e)}")
 
 
-@router.post("/credit-memos/{memo_id}/settle")
+@router.post("/credit-memos/{memo_id}/settle", summary="Credit memo settle")
 async def settle_credit_memo(
     memo_id: str,
     settlement: SettlementRequest,
@@ -476,7 +476,7 @@ async def settle_credit_memo(
         raise HTTPException(status_code=500, detail=f"Failed to settle credit memo: {str(e)}")
 
 
-@router.post("/debit-memos/{memo_id}/settle")
+@router.post("/debit-memos/{memo_id}/settle", summary="Debit memo settle")
 async def settle_debit_memo(
     memo_id: str,
     settlement: SettlementRequest,
@@ -558,7 +558,7 @@ def _approve_memo_for_booking(
     return memo
 
 
-@router.post("/credit-memos/{memo_id}/freigabe")
+@router.post("/credit-memos/{memo_id}/freigabe", summary="Credit memo for booking genehmigen")
 async def approve_credit_memo_for_booking(
     memo_id: str,
     db: Session = Depends(get_db),
@@ -576,7 +576,7 @@ async def approve_credit_memo_for_booking(
         raise HTTPException(status_code=500, detail=str(e)) from e
 
 
-@router.post("/debit-memos/{memo_id}/freigabe")
+@router.post("/debit-memos/{memo_id}/freigabe", summary="Debit memo for booking genehmigen")
 async def approve_debit_memo_for_booking(
     memo_id: str,
     db: Session = Depends(get_db),
@@ -636,7 +636,7 @@ def _book_memo_to_store(
     return booking
 
 
-@router.post("/credit-memos/{memo_id}/buchung")
+@router.post("/credit-memos/{memo_id}/buchung", summary="Credit memo book")
 async def book_credit_memo(
     memo_id: str,
     db: Session = Depends(get_db),
@@ -665,7 +665,7 @@ async def book_credit_memo(
         raise HTTPException(status_code=500, detail=f"Failed to book credit memo: {str(e)}")
 
 
-@router.post("/debit-memos/{memo_id}/buchung")
+@router.post("/debit-memos/{memo_id}/buchung", summary="Debit memo book")
 async def book_debit_memo(
     memo_id: str,
     db: Session = Depends(get_db),

@@ -368,7 +368,7 @@ def parse_csv(content: bytes) -> dict:
         raise ValueError(f"Failed to parse CSV: {str(e)}")
 
 
-@router.post("/import", response_model=BankStatementImportResult)
+@router.post("/import", response_model=BankStatementImportResult, summary="Bank statement importieren")
 async def import_bank_statement(
     file: UploadFile = File(...),
     format: str = Query(..., description="File format: CAMT, MT940, or CSV"),
@@ -586,7 +586,7 @@ async def import_bank_statement(
         raise HTTPException(status_code=500, detail=f"Failed to import bank statement: {str(e)}")
 
 
-@router.get("/{statement_id}/lines", response_model=List[BankStatementLine])
+@router.get("/{statement_id}/lines", response_model=List[BankStatementLine], summary="Statement lines abrufen")
 async def get_statement_lines(
     statement_id: str,
     tenant_id: str = Query("system", description="Tenant ID"),

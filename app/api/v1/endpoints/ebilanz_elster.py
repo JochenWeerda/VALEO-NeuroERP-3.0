@@ -124,13 +124,13 @@ class EricReadinessOut(BaseModel):
 # Endpoints
 # ---------------------------------------------------------------------------
 
-@router.get("/taxonomie-felder")
+@router.get("/taxonomie-felder", summary="Felder taxonomie")
 def taxonomie_felder() -> list[dict]:
     """Return the list of XBRL taxonomy fields with GCD/GAAP classification."""
     return _TAXONOMY_FELDER
 
 
-@router.get("/eric-readiness", response_model=EricReadinessOut)
+@router.get("/eric-readiness", response_model=EricReadinessOut, summary="Readiness eric")
 def eric_readiness() -> dict:
     """Repo-side readiness view for the external ELSTER ERiC runtime."""
     return {
@@ -154,7 +154,7 @@ def eric_readiness() -> dict:
     }
 
 
-@router.post("/validieren", response_model=EBilanzValidierungsResult)
+@router.post("/validieren", response_model=EBilanzValidierungsResult, summary="Ebilanz validieren")
 def validieren_ebilanz(
     payload: EBilanzValidierungsRequest,
 ) -> dict:
@@ -181,7 +181,7 @@ def validieren_ebilanz(
     }
 
 
-@router.get("/meldungen")
+@router.get("/meldungen", summary="Meldungen auflisten")
 def list_meldungen(
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
@@ -204,7 +204,7 @@ def list_meldungen(
         return []
 
 
-@router.post("/export/erstellen", response_model=EBilanzExportResult, status_code=201)
+@router.post("/export/erstellen", response_model=EBilanzExportResult, status_code=201, summary="Erstellen")
 def erstellen(
     payload: EBilanzExportRequest,
     db: Session = Depends(get_db),
@@ -265,7 +265,7 @@ def erstellen(
     }
 
 
-@router.post("/export/{export_id}/validieren")
+@router.post("/export/{export_id}/validieren", summary="Validieren")
 def validieren(
     export_id: str,
     db: Session = Depends(get_db),
@@ -301,7 +301,7 @@ def validieren(
     }
 
 
-@router.post("/export/{export_id}/uebertragen")
+@router.post("/export/{export_id}/uebertragen", summary="Uebertragen")
 def uebertragen(
     export_id: str,
     db: Session = Depends(get_db),
@@ -368,7 +368,7 @@ def uebertragen(
     }
 
 
-@router.get("/export/{export_id}/uebertragungsstatus")
+@router.get("/export/{export_id}/uebertragungsstatus", summary="Uebertragungsstatus")
 def uebertragungsstatus(
     export_id: str,
     db: Session = Depends(get_db),
@@ -400,7 +400,7 @@ def uebertragungsstatus(
     return svc.get_transmission_status(ticket, db=db)
 
 
-@router.get("/exports")
+@router.get("/exports", summary="Exports auflisten")
 def list_exports(
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),

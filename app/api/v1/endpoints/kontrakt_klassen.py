@@ -65,7 +65,7 @@ VALID_VARIANTEN = {"FIXPREIS", "BASIS", "PRAEMIE", "POOLPREIS"}
 VALID_PARITAETEN = {"EXW", "FCA", "CPT", "CIF", "DAP", "DDP"}
 
 
-@router.get("", response_model=List[KontraktKlasseOut])
+@router.get("", response_model=List[KontraktKlasseOut], summary="Kontrakt klassen auflisten")
 def list_kontrakt_klassen(
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
@@ -84,7 +84,7 @@ def list_kontrakt_klassen(
         return []  # migration_hint: domain_agrar.kontrakt_klassen not yet migrated
 
 
-@router.post("", response_model=KontraktKlasseOut, status_code=201)
+@router.post("", response_model=KontraktKlasseOut, status_code=201, summary="Kontrakt klasse anlegen")
 def create_kontrakt_klasse(
     payload: KontraktKlasseCreate,
     db: Session = Depends(get_db),
@@ -124,7 +124,7 @@ def create_kontrakt_klasse(
     )
 
 
-@router.put("/{klasse_id}", response_model=KontraktKlasseOut)
+@router.put("/{klasse_id}", response_model=KontraktKlasseOut, summary="Kontrakt klasse aktualisieren")
 def update_kontrakt_klasse(
     klasse_id: str,
     payload: KontraktKlasseCreate,
@@ -156,7 +156,7 @@ def update_kontrakt_klasse(
     return KontraktKlasseOut(id=klasse_id, **payload.model_dump())
 
 
-@router.delete("/{klasse_id}", status_code=204, response_class=Response, response_model=None)
+@router.delete("/{klasse_id}", status_code=204, response_class=Response, response_model=None, summary="Kontrakt klasse löschen")
 def delete_kontrakt_klasse(
     klasse_id: str,
     db: Session = Depends(get_db),

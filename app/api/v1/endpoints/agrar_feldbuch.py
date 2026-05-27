@@ -197,7 +197,7 @@ def _massnahme_to_dict(m: FeldbuchMassnahme) -> dict[str, Any]:
 # Schläge Endpoints
 # ────────────────────────────────────────────────────────────────────────────
 
-@router.get("/schlaege")
+@router.get("/schlaege", summary="Schlaege auflisten")
 async def list_schlaege(
     customer_id: Optional[str] = Query(None),
     status: Optional[str] = Query(None),
@@ -214,7 +214,7 @@ async def list_schlaege(
     return [_schlag_to_dict(s) for s in q.order_by(FeldbuchSchlag.name).offset(skip).limit(limit).all()]
 
 
-@router.post("/schlaege", status_code=201)
+@router.post("/schlaege", status_code=201, summary="Schlag anlegen")
 async def create_schlag(
     data: SchlagCreate,
     db: Session = Depends(get_db),
@@ -231,7 +231,7 @@ async def create_schlag(
     return _schlag_to_dict(schlag)
 
 
-@router.get("/schlaege/{schlag_id}")
+@router.get("/schlaege/{schlag_id}", summary="Schlag abrufen")
 async def get_schlag(
     schlag_id: str,
     db: Session = Depends(get_db),
@@ -247,7 +247,7 @@ async def get_schlag(
     return _schlag_to_dict(schlag)
 
 
-@router.put("/schlaege/{schlag_id}")
+@router.put("/schlaege/{schlag_id}", summary="Schlag aktualisieren")
 async def update_schlag(
     schlag_id: str,
     data: SchlagUpdate,
@@ -268,7 +268,7 @@ async def update_schlag(
     return _schlag_to_dict(schlag)
 
 
-@router.delete("/schlaege/{schlag_id}", status_code=204, response_class=Response, response_model=None)
+@router.delete("/schlaege/{schlag_id}", status_code=204, response_class=Response, response_model=None, summary="Schlag deaktivieren")
 async def deactivate_schlag(
     schlag_id: str,
     db: Session = Depends(get_db),
@@ -290,7 +290,7 @@ async def deactivate_schlag(
 # Maßnahmen Endpoints
 # ────────────────────────────────────────────────────────────────────────────
 
-@router.get("/feldbuch/massnahmen")
+@router.get("/feldbuch/massnahmen", summary="Massnahmen auflisten")
 async def list_massnahmen(
     schlag_id: Optional[str] = Query(None),
     customer_id: Optional[str] = Query(None),
@@ -324,7 +324,7 @@ async def list_massnahmen(
     ]
 
 
-@router.post("/feldbuch/massnahmen", status_code=201)
+@router.post("/feldbuch/massnahmen", status_code=201, summary="Massnahme anlegen")
 async def create_massnahme(
     data: MassnahmeCreate,
     db: Session = Depends(get_db),
@@ -360,7 +360,7 @@ async def create_massnahme(
     return result
 
 
-@router.put("/feldbuch/massnahmen/{massnahme_id}")
+@router.put("/feldbuch/massnahmen/{massnahme_id}", summary="Massnahme aktualisieren")
 async def update_massnahme(
     massnahme_id: str,
     data: MassnahmeUpdate,
@@ -404,7 +404,7 @@ async def update_massnahme(
     return result
 
 
-@router.delete("/feldbuch/massnahmen/{massnahme_id}", status_code=204, response_class=Response, response_model=None)
+@router.delete("/feldbuch/massnahmen/{massnahme_id}", status_code=204, response_class=Response, response_model=None, summary="Massnahme löschen")
 async def delete_massnahme(
     massnahme_id: str,
     db: Session = Depends(get_db),
@@ -422,7 +422,7 @@ async def delete_massnahme(
     return Response(status_code=204)
 
 
-@router.post("/feldbuch/massnahmen/bulk-delete", response_model=MassnahmeBulkDeleteOut)
+@router.post("/feldbuch/massnahmen/bulk-delete", response_model=MassnahmeBulkDeleteOut, summary="Delete massnahmen Bulk")
 async def bulk_delete_massnahmen(
     payload: MassnahmeBulkDeleteIn,
     db: Session = Depends(get_db),
@@ -465,7 +465,7 @@ async def bulk_delete_massnahmen(
     )
 
 
-@router.post("/feldbuch/massnahmen/from-lieferschein", status_code=201)
+@router.post("/feldbuch/massnahmen/from-lieferschein", status_code=201, summary="From lieferschein massnahme")
 async def massnahme_from_lieferschein(
     data: FromLieferscheinCreate,
     db: Session = Depends(get_db),
@@ -509,7 +509,7 @@ _DUENGER_N_GEHALT: dict[str, float] = {
 }
 
 
-@router.get("/feldbuch/duengebilanz")
+@router.get("/feldbuch/duengebilanz", summary="Duengebilanz abrufen")
 async def get_duengebilanz(
     customer_id: Optional[str] = Query(None),
     schlag_id: Optional[str] = Query(None),
@@ -612,7 +612,7 @@ async def get_duengebilanz(
 # AGR-COM-03: Cross-Compliance-Bericht
 # ────────────────────────────────────────────────────────────────────────────
 
-@router.get("/feldbuch/cross-compliance")
+@router.get("/feldbuch/cross-compliance", summary="Cross compliance report abrufen")
 async def get_cross_compliance_report(
     customer_id: Optional[str] = Query(None),
     jahr: int = Query(default=datetime.now().year),
@@ -732,7 +732,7 @@ async def get_cross_compliance_report(
 # AGR-OPS-04: Feldkalender
 # ────────────────────────────────────────────────────────────────────────────
 
-@router.get("/feldbuch/calendar")
+@router.get("/feldbuch/calendar", summary="Feldkalender abrufen")
 async def get_feldkalender(
     von: str = Query(..., description="Startdatum (YYYY-MM-DD)"),
     bis: str = Query(..., description="Enddatum (YYYY-MM-DD)"),
@@ -791,7 +791,7 @@ _FELDBLOCKFINDER_URLS: dict[str, str] = {
 }
 
 
-@router.get("/config/feldblockfinder")
+@router.get("/config/feldblockfinder", summary="Feldblockfinder config abrufen")
 async def get_feldblockfinder_config() -> dict[str, Any]:
     """
     AGR-FLD-03: Feldblockfinder-URLs pro Bundesland für iframe-Integration.
@@ -802,7 +802,7 @@ async def get_feldblockfinder_config() -> dict[str, Any]:
     }
 
 
-@router.post("/compliance/qs-export")
+@router.post("/compliance/qs-export", summary="Export qs")
 async def qs_export(
     jahr: int = Query(default=datetime.now().year),
     format: str = Query("json", description="json | csv"),
@@ -822,7 +822,7 @@ async def qs_export(
     return {"jahr": jahr, "format": format, "count": len(items), "data": items}
 
 
-@router.post("/compliance/lea-export")
+@router.post("/compliance/lea-export", summary="Export lea")
 async def lea_export(
     jahr: int = Query(default=datetime.now().year),
     db: Session = Depends(get_db),
@@ -848,7 +848,7 @@ async def lea_export(
 # AGR-INV-04: Mindestbestand-Warnung (Betriebsmittel)
 # ────────────────────────────────────────────────────────────────────────────
 
-@router.get("/inventory/low-stock")
+@router.get("/inventory/low-stock", summary="Low stock warnings abrufen")
 async def get_low_stock_warnings(
     threshold: float = Query(0, ge=0, description="Schwellwert: Artikel mit Bestand <= threshold"),
     db: Session = Depends(get_db),

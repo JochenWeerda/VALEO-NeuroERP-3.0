@@ -53,7 +53,7 @@ class DispatcherCreate(BaseModel):
 
 # ── Generic master-data ─────────────────────────────────────────
 
-@router.get("/", response_model=PaginatedResponse[MasterDataOut])
+@router.get("/", response_model=PaginatedResponse[MasterDataOut], summary="Master data auflisten")
 async def list_master_data(
     category: Optional[str] = Query(None, description="Filter by category"),
     tenant_id: Optional[str] = Query(None),
@@ -81,7 +81,7 @@ async def list_master_data(
     )
 
 
-@router.post("/", response_model=MasterDataOut, status_code=201)
+@router.post("/", response_model=MasterDataOut, status_code=201, summary="Master data anlegen")
 async def create_master_data(
     payload: MasterDataCreate,
     tenant_id: Optional[str] = Query(None),
@@ -106,7 +106,7 @@ async def create_master_data(
 
 # ── Convenience category endpoints ──────────────────────────────
 
-@router.get("/branches", response_model=list[MasterDataOut])
+@router.get("/branches", response_model=list[MasterDataOut], summary="Branches auflisten")
 async def list_branches(tenant_id: Optional[str] = Query(None), db: Session = Depends(get_db)):
     """GET Branchen"""
     tid = tenant_id or DEFAULT_TENANT
@@ -118,7 +118,7 @@ async def list_branches(tenant_id: Optional[str] = Query(None), db: Session = De
     return [MasterDataOut.model_validate(i) for i in items]
 
 
-@router.get("/countries", response_model=list[MasterDataOut])
+@router.get("/countries", response_model=list[MasterDataOut], summary="Countries auflisten")
 async def list_countries(tenant_id: Optional[str] = Query(None), db: Session = Depends(get_db)):
     """GET Staaten ermitteln"""
     tid = tenant_id or DEFAULT_TENANT
@@ -130,7 +130,7 @@ async def list_countries(tenant_id: Optional[str] = Query(None), db: Session = D
     return [MasterDataOut.model_validate(i) for i in items]
 
 
-@router.get("/shipping-methods", response_model=list[MasterDataOut])
+@router.get("/shipping-methods", response_model=list[MasterDataOut], summary="Shipping methods auflisten")
 async def list_shipping_methods(tenant_id: Optional[str] = Query(None), db: Session = Depends(get_db)):
     """GET Versandarten"""
     tid = tenant_id or DEFAULT_TENANT
@@ -142,7 +142,7 @@ async def list_shipping_methods(tenant_id: Optional[str] = Query(None), db: Sess
     return [MasterDataOut.model_validate(i) for i in items]
 
 
-@router.get("/units", response_model=list[MasterDataOut])
+@router.get("/units", response_model=list[MasterDataOut], summary="Units of measure auflisten")
 async def list_units_of_measure(tenant_id: Optional[str] = Query(None), db: Session = Depends(get_db)):
     """GET MengenEinheiten"""
     tid = tenant_id or DEFAULT_TENANT
@@ -154,7 +154,7 @@ async def list_units_of_measure(tenant_id: Optional[str] = Query(None), db: Sess
     return [MasterDataOut.model_validate(i) for i in items]
 
 
-@router.get("/container-units", response_model=list[MasterDataOut])
+@router.get("/container-units", response_model=list[MasterDataOut], summary="Container units auflisten")
 async def list_container_units(tenant_id: Optional[str] = Query(None), db: Session = Depends(get_db)):
     """GET GebindeEinheiten"""
     tid = tenant_id or DEFAULT_TENANT
@@ -166,7 +166,7 @@ async def list_container_units(tenant_id: Optional[str] = Query(None), db: Sessi
     return [MasterDataOut.model_validate(i) for i in items]
 
 
-@router.get("/contact-types", response_model=list[MasterDataOut])
+@router.get("/contact-types", response_model=list[MasterDataOut], summary="Contact types auflisten")
 async def list_contact_types(tenant_id: Optional[str] = Query(None), db: Session = Depends(get_db)):
     """GET Kontaktarten ermitteln"""
     tid = tenant_id or DEFAULT_TENANT
@@ -178,7 +178,7 @@ async def list_contact_types(tenant_id: Optional[str] = Query(None), db: Session
     return [MasterDataOut.model_validate(i) for i in items]
 
 
-@router.post("/contact-types", response_model=MasterDataOut, status_code=201)
+@router.post("/contact-types", response_model=MasterDataOut, status_code=201, summary="Contact type anlegen")
 async def create_contact_type(
     payload: MasterDataCreate,
     tenant_id: Optional[str] = Query(None),
@@ -201,7 +201,7 @@ async def create_contact_type(
     return MasterDataOut.model_validate(obj)
 
 
-@router.delete("/contact-types/{ct_id}", status_code=204, response_class=Response, response_model=None)
+@router.delete("/contact-types/{ct_id}", status_code=204, response_class=Response, response_model=None, summary="Contact type löschen")
 async def delete_contact_type(ct_id: str, db: Session = Depends(get_db)):
     """DEL Kontaktart Löschen"""
     obj = db.query(MasterDataEntry).filter(MasterDataEntry.id == ct_id).first()
@@ -213,7 +213,7 @@ async def delete_contact_type(ct_id: str, db: Session = Depends(get_db)):
 
 # ── Dispatchers ──────────────────────────────────────────────────
 
-@router.get("/dispatchers", response_model=list[DispatcherOut])
+@router.get("/dispatchers", response_model=list[DispatcherOut], summary="Dispatchers auflisten")
 async def list_dispatchers(tenant_id: Optional[str] = Query(None), db: Session = Depends(get_db)):
     """GET Disponent ermitteln"""
     tid = tenant_id or DEFAULT_TENANT
@@ -224,7 +224,7 @@ async def list_dispatchers(tenant_id: Optional[str] = Query(None), db: Session =
     return [DispatcherOut.model_validate(i) for i in items]
 
 
-@router.post("/dispatchers", response_model=DispatcherOut, status_code=201)
+@router.post("/dispatchers", response_model=DispatcherOut, status_code=201, summary="Dispatcher anlegen")
 async def create_dispatcher(
     payload: DispatcherCreate,
     tenant_id: Optional[str] = Query(None),
@@ -247,7 +247,7 @@ async def create_dispatcher(
     return DispatcherOut.model_validate(obj)
 
 
-@router.put("/dispatchers/{disp_id}", response_model=DispatcherOut)
+@router.put("/dispatchers/{disp_id}", response_model=DispatcherOut, summary="Dispatcher aktualisieren")
 async def update_dispatcher(
     disp_id: str, payload: DispatcherCreate, db: Session = Depends(get_db),
 ):
@@ -262,7 +262,7 @@ async def update_dispatcher(
     return DispatcherOut.model_validate(obj)
 
 
-@router.delete("/dispatchers/{disp_id}", status_code=204, response_class=Response, response_model=None)
+@router.delete("/dispatchers/{disp_id}", status_code=204, response_class=Response, response_model=None, summary="Dispatcher löschen")
 async def delete_dispatcher(disp_id: str, db: Session = Depends(get_db)):
     """DEL Disponent löschen"""
     obj = db.query(Dispatcher).filter(Dispatcher.id == disp_id).first()

@@ -41,7 +41,7 @@ def _tenant_store(tenant_id: str) -> dict[str, Any]:
 # Evidence-Eintraege
 # ---------------------------------------------------------------------------
 
-@router.get("", response_model=list[dict])
+@router.get("", response_model=list[dict], summary="Evidence entries auflisten")
 async def list_evidence_entries(
     aggregate_type: str | None = None,
     aggregate_id: str | None = None,
@@ -95,7 +95,7 @@ async def list_evidence_entries(
         return entries
 
 
-@router.get("/{audit_entry_id}", response_model=dict)
+@router.get("/{audit_entry_id}", response_model=dict, summary="Evidence entry abrufen")
 async def get_evidence_entry(
     audit_entry_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -133,7 +133,7 @@ async def get_evidence_entry(
     return entry.model_dump(mode="json")
 
 
-@router.post("", response_model=dict, status_code=201)
+@router.post("", response_model=dict, status_code=201, summary="Evidence entry anlegen")
 async def create_evidence_entry(
     body: dict,
     tenant_id: str = Depends(get_tenant_id),
@@ -174,7 +174,7 @@ async def create_evidence_entry(
     return entry.model_dump(mode="json")
 
 
-@router.post("/{audit_entry_id}/evidence-refs", response_model=dict, status_code=201)
+@router.post("/{audit_entry_id}/evidence-refs", response_model=dict, status_code=201, summary="Evidence ref attach")
 async def attach_evidence_ref(
     audit_entry_id: str,
     body: dict,
@@ -241,14 +241,14 @@ async def attach_evidence_ref(
 # Belegpflicht-Richtlinie
 # ---------------------------------------------------------------------------
 
-@router.get("/policy/document-evidence", response_model=dict)
+@router.get("/policy/document-evidence", response_model=dict, summary="Evidence policy abrufen")
 async def get_evidence_policy(tenant_id: str = Depends(get_tenant_id)):
     """Liefert die GoBD-Belegpflicht-Richtlinie des Mandanten."""
     policy = build_default_evidence_policy(tenant_id)
     return policy.model_dump(mode="json")
 
 
-@router.get("/policy/gobd-check/{aggregate_type}/{aggregate_id}", response_model=dict)
+@router.get("/policy/gobd-check/{aggregate_type}/{aggregate_id}", response_model=dict, summary="Gobd compliance prüfen")
 async def check_gobd_compliance(
     aggregate_type: str,
     aggregate_id: str,

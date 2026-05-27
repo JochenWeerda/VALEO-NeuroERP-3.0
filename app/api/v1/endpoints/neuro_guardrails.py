@@ -19,13 +19,13 @@ class DictRequest(BaseModel):
     data: dict
 
 
-@router.post("/check-input")
+@router.post("/check-input", summary="Check input do")
 async def do_check_input(request: TextRequest):
     result = check_input(request.text)
     return result.to_dict()
 
 
-@router.post("/sanitize-output")
+@router.post("/sanitize-output", summary="Sanitize output do")
 async def do_sanitize_output(request: TextRequest):
     result = sanitize_output(request.text)
     resp = result.to_dict()
@@ -33,7 +33,7 @@ async def do_sanitize_output(request: TextRequest):
     return resp
 
 
-@router.post("/detect-pii")
+@router.post("/detect-pii", summary="Detect pii do")
 async def do_detect_pii(request: TextRequest):
     matches = detect_pii(request.text)
     return {
@@ -42,18 +42,18 @@ async def do_detect_pii(request: TextRequest):
     }
 
 
-@router.post("/mask")
+@router.post("/mask", summary="Mask do")
 async def do_mask(request: TextRequest):
     return {"masked": mask_irreversible(request.text)}
 
 
-@router.post("/mask-reversible")
+@router.post("/mask-reversible", summary="Mask reversible do")
 async def do_mask_reversible(request: TextRequest):
     masked, token_map = mask_reversible(request.text)
     return {"masked": masked, "tokens": len(token_map)}
 
 
-@router.post("/scan-dict")
+@router.post("/scan-dict", summary="Scan dict do")
 async def do_scan_dict(request: DictRequest):
     matches = scan_dict(request.data)
     return {

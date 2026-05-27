@@ -76,7 +76,7 @@ class BestandteilZuordnungOut(BaseModel):
 
 # ── Stammdaten ────────────────────────────────────────────────────────────────
 
-@router.get("/stamm", response_model=list[BestandteilDefOut])
+@router.get("/stamm", response_model=list[BestandteilDefOut], summary="Bestandteile def auflisten")
 def list_bestandteile_def(
     nutzung: Optional[str] = Query(None),
     typ: Optional[str] = Query(None),
@@ -99,7 +99,7 @@ def list_bestandteile_def(
     return [BestandteilDefOut(**dict(r._mapping)) for r in rows]
 
 
-@router.post("/stamm", response_model=BestandteilDefOut, status_code=201)
+@router.post("/stamm", response_model=BestandteilDefOut, status_code=201, summary="Bestandteil def anlegen")
 def create_bestandteil_def(
     payload: BestandteilDefCreate,
     db=Depends(get_db),
@@ -134,7 +134,7 @@ def create_bestandteil_def(
     return BestandteilDefOut(**dict(row._mapping))
 
 
-@router.put("/stamm/{bestandteil_nr}", response_model=BestandteilDefOut)
+@router.put("/stamm/{bestandteil_nr}", response_model=BestandteilDefOut, summary="Bestandteil def aktualisieren")
 def update_bestandteil_def(
     bestandteil_nr: str,
     payload: BestandteilDefCreate,
@@ -169,7 +169,7 @@ def update_bestandteil_def(
     return BestandteilDefOut(**dict(updated._mapping))
 
 
-@router.delete("/stamm/{bestandteil_nr}")
+@router.delete("/stamm/{bestandteil_nr}", summary="Bestandteil def löschen")
 def delete_bestandteil_def(
     bestandteil_nr: str,
     db=Depends(get_db),
@@ -185,7 +185,7 @@ def delete_bestandteil_def(
 
 # ── Artikel-Zuordnungen ───────────────────────────────────────────────────────
 
-@router.get("/{artikel_nr}/zuordnungen", response_model=list[BestandteilZuordnungOut])
+@router.get("/{artikel_nr}/zuordnungen", response_model=list[BestandteilZuordnungOut], summary="Zuordnungen auflisten")
 def list_zuordnungen(
     artikel_nr: str,
     db=Depends(get_db),
@@ -201,7 +201,7 @@ def list_zuordnungen(
 
 
 @router.post("/{artikel_nr}/zuordnungen",
-             response_model=BestandteilZuordnungOut, status_code=201)
+             response_model=BestandteilZuordnungOut, status_code=201, summary="Zuordnung anlegen")
 def create_zuordnung(
     artikel_nr: str,
     payload: BestandteilZuordnungCreate,
@@ -231,7 +231,7 @@ def create_zuordnung(
     return BestandteilZuordnungOut(**dict(row._mapping))
 
 
-@router.delete("/{artikel_nr}/zuordnungen/{zuordnung_id}")
+@router.delete("/{artikel_nr}/zuordnungen/{zuordnung_id}", summary="Zuordnung löschen")
 def delete_zuordnung(
     artikel_nr: str,
     zuordnung_id: str,

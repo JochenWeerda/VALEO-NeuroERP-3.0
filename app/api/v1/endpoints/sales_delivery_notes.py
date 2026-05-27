@@ -198,7 +198,7 @@ def _list_positions(db: Session, delivery_note_id: str) -> list[dict]:
     return [dict(row) for row in rows]
 
 
-@router.post("", response_model=DeliveryNote, status_code=status.HTTP_201_CREATED)
+@router.post("", response_model=DeliveryNote, status_code=status.HTTP_201_CREATED, summary="Delivery note anlegen")
 async def create_delivery_note(
     payload: DeliveryNoteCreate,
     request: Request,
@@ -323,7 +323,7 @@ async def create_delivery_note(
     )
 
 
-@router.get("/{ls_id}", response_model=DeliveryNote)
+@router.get("/{ls_id}", response_model=DeliveryNote, summary="Delivery note abrufen")
 async def get_delivery_note(
     ls_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -339,7 +339,7 @@ async def get_delivery_note(
     )
 
 
-@router.put("/{ls_id}", response_model=DeliveryNote)
+@router.put("/{ls_id}", response_model=DeliveryNote, summary="Delivery note aktualisieren")
 async def update_delivery_note(
     ls_id: str,
     payload: DeliveryNoteUpdate,
@@ -433,7 +433,7 @@ async def update_delivery_note(
     )
 
 
-@router.delete("/{ls_id}", status_code=204, response_class=Response, response_model=None)
+@router.delete("/{ls_id}", status_code=204, response_class=Response, response_model=None, summary="Delivery note löschen")
 async def delete_delivery_note(
     ls_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -460,7 +460,7 @@ async def delete_delivery_note(
     db.commit()
 
 
-@router.post("/{ls_id}/post", response_model=DeliveryNote)
+@router.post("/{ls_id}/post", response_model=DeliveryNote, summary="Delivery note erstellen")
 async def post_delivery_note(
     ls_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -505,7 +505,7 @@ async def post_delivery_note(
     )
 
 
-@router.post("/{ls_id}/print")
+@router.post("/{ls_id}/print", summary="Delivery note drucken")
 async def print_delivery_note(
     ls_id: str,
     attestation: Optional[str] = Query(None, description="Reason for printing (required if already posted)"),
@@ -557,7 +557,7 @@ async def print_delivery_note(
     return {"ok": True, "message": "Delivery note printed"}
 
 
-@router.post("/{ls_id}/ship", response_model=DeliveryNote)
+@router.post("/{ls_id}/ship", response_model=DeliveryNote, summary="Delivery note ship")
 async def ship_delivery_note(
     ls_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -577,7 +577,7 @@ async def ship_delivery_note(
     return DeliveryNote(**dict(row), positionen=[DeliveryNotePosition(**dict(p)) for p in positions])
 
 
-@router.post("/{ls_id}/deliver", response_model=DeliveryNote)
+@router.post("/{ls_id}/deliver", response_model=DeliveryNote, summary="Delivery note deliver")
 async def deliver_delivery_note(
     ls_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -597,7 +597,7 @@ async def deliver_delivery_note(
     return DeliveryNote(**dict(row), positionen=[DeliveryNotePosition(**dict(p)) for p in positions])
 
 
-@router.get("", response_model=list[DeliveryNote])
+@router.get("", response_model=list[DeliveryNote], summary="Delivery notes auflisten")
 async def list_delivery_notes(
     customer_id: Optional[str] = Query(None),
     status_filter: Optional[str] = Query(None),
@@ -640,7 +640,7 @@ async def list_delivery_notes(
     return result
 
 
-@router.get("/last", response_model=Optional[DeliveryNote])
+@router.get("/last", response_model=Optional[DeliveryNote], summary="Last delivery note abrufen")
 async def get_last_delivery_note(
     operator_id: Optional[str] = Query(None, description="Filter by operator ID (user who created the delivery note)"),
     customer_id: Optional[str] = Query(None, description="Filter by customer ID"),
@@ -676,7 +676,7 @@ async def get_last_delivery_note(
     )
 
 
-@router.post("/{ls_id}/create-invoice", response_model=dict, status_code=201)
+@router.post("/{ls_id}/create-invoice", response_model=dict, status_code=201, summary="Invoice from delivery anlegen")
 async def create_invoice_from_delivery(
     ls_id: str,
     tenant_id: str = Depends(get_tenant_id),

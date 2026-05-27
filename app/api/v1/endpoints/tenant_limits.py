@@ -24,7 +24,7 @@ class TenantRateLimitCheckIn(BaseModel):
     zeitfenster_sekunden: int = Field(default=60, ge=1)
 
 
-@router.get("/overview", response_model=dict)
+@router.get("/overview", response_model=dict, summary="Tenant limit overview abrufen")
 def get_tenant_limit_overview(
     tenant_id: str = Query(min_length=1),
     domain: str = "",
@@ -38,7 +38,7 @@ def get_tenant_limit_overview(
     }
 
 
-@router.get("/cache-configs/{tenant_id}", response_model=dict)
+@router.get("/cache-configs/{tenant_id}", response_model=dict, summary="Tenant cache config abrufen")
 def get_tenant_cache_config(tenant_id: str) -> dict[str, Any]:
     registry = get_tenant_isolation_registry()
     cache_config = registry.get_cache_config(tenant_id)
@@ -49,7 +49,7 @@ def get_tenant_cache_config(tenant_id: str) -> dict[str, Any]:
     }
 
 
-@router.get("/rate-limits", response_model=dict)
+@router.get("/rate-limits", response_model=dict, summary="Rate limits auflisten")
 def list_rate_limits(domain: str = "") -> dict[str, Any]:
     registry = get_tenant_isolation_registry()
     policies = registry.get_policies(domain)
@@ -63,7 +63,7 @@ def list_rate_limits(domain: str = "") -> dict[str, Any]:
     }
 
 
-@router.post("/rate-limits/check", response_model=dict)
+@router.post("/rate-limits/check", response_model=dict, summary="Rate limit prüfen")
 def check_rate_limit(body: TenantRateLimitCheckIn) -> dict[str, Any]:
     registry = get_tenant_isolation_registry()
     request = RateLimitRequest(

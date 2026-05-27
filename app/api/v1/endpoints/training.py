@@ -62,7 +62,7 @@ def _load_optional_row(
     return _clean(dict(row))
 
 
-@router.get("/courses", response_model=list[dict[str, Any]])
+@router.get("/courses", response_model=list[dict[str, Any]], summary="Courses auflisten")
 async def list_courses(
     include_inactive: bool = Query(default=False),
     tenant_id: str = Depends(get_tenant_id),
@@ -78,7 +78,7 @@ async def list_courses(
     )
 
 
-@router.post("/courses", response_model=dict[str, Any], status_code=201)
+@router.post("/courses", response_model=dict[str, Any], status_code=201, summary="Course anlegen")
 async def create_course(payload: Payload, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
     d = payload.data
     for key in ("course_code", "title"):
@@ -120,7 +120,7 @@ async def create_course(payload: Payload, tenant_id: str = Depends(get_tenant_id
     return _clean(dict(row))
 
 
-@router.put("/courses/{item_id}", response_model=dict[str, Any])
+@router.put("/courses/{item_id}", response_model=dict[str, Any], summary="Course aktualisieren")
 async def update_course(item_id: str, payload: Payload, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
     d = payload.data
     for key in ("course_code", "title"):
@@ -161,7 +161,7 @@ async def update_course(item_id: str, payload: Payload, tenant_id: str = Depends
     return _clean(dict(row))
 
 
-@router.delete("/courses/{item_id}", status_code=204, response_class=Response, response_model=None)
+@router.delete("/courses/{item_id}", status_code=204, response_class=Response, response_model=None, summary="Course löschen")
 async def delete_course(item_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
     deleted = db.execute(
         text("DELETE FROM domain_hr.training_courses WHERE tenant_id=:tenant_id AND id=:id"),
@@ -173,7 +173,7 @@ async def delete_course(item_id: str, tenant_id: str = Depends(get_tenant_id), d
     return None
 
 
-@router.get("/assignments", response_model=list[dict[str, Any]])
+@router.get("/assignments", response_model=list[dict[str, Any]], summary="Assignments auflisten")
 async def list_assignments(
     employee_ref: str | None = Query(default=None),
     status: str | None = Query(default=None),
@@ -201,7 +201,7 @@ async def list_assignments(
     )
 
 
-@router.post("/assignments", response_model=dict[str, Any], status_code=201)
+@router.post("/assignments", response_model=dict[str, Any], status_code=201, summary="Assignment anlegen")
 async def create_assignment(payload: Payload, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
     d = payload.data
     for key in ("course_id", "employee_ref"):
@@ -243,7 +243,7 @@ async def create_assignment(payload: Payload, tenant_id: str = Depends(get_tenan
     return _clean(dict(row))
 
 
-@router.put("/assignments/{item_id}", response_model=dict[str, Any])
+@router.put("/assignments/{item_id}", response_model=dict[str, Any], summary="Assignment aktualisieren")
 async def update_assignment(item_id: str, payload: Payload, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
     d = payload.data
     for key in ("course_id", "employee_ref"):
@@ -282,7 +282,7 @@ async def update_assignment(item_id: str, payload: Payload, tenant_id: str = Dep
     return _clean(dict(row))
 
 
-@router.delete("/assignments/{item_id}", status_code=204, response_class=Response, response_model=None)
+@router.delete("/assignments/{item_id}", status_code=204, response_class=Response, response_model=None, summary="Assignment löschen")
 async def delete_assignment(item_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
     deleted = db.execute(
         text("DELETE FROM domain_hr.training_assignments WHERE tenant_id=:tenant_id AND id=:id"),
@@ -294,7 +294,7 @@ async def delete_assignment(item_id: str, tenant_id: str = Depends(get_tenant_id
     return None
 
 
-@router.get("/certificates", response_model=list[dict[str, Any]])
+@router.get("/certificates", response_model=list[dict[str, Any]], summary="Certificates auflisten")
 async def list_certificates(
     employee_ref: str | None = Query(default=None),
     status: str | None = Query(default=None),
@@ -316,7 +316,7 @@ async def list_certificates(
     )
 
 
-@router.post("/certificates", response_model=dict[str, Any], status_code=201)
+@router.post("/certificates", response_model=dict[str, Any], status_code=201, summary="Certificate anlegen")
 async def create_certificate(payload: Payload, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
     d = payload.data
     for key in ("employee_ref", "certificate_type", "certificate_name"):
@@ -355,7 +355,7 @@ async def create_certificate(payload: Payload, tenant_id: str = Depends(get_tena
     return _clean(dict(row))
 
 
-@router.put("/certificates/{item_id}", response_model=dict[str, Any])
+@router.put("/certificates/{item_id}", response_model=dict[str, Any], summary="Certificate aktualisieren")
 async def update_certificate(item_id: str, payload: Payload, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
     d = payload.data
     for key in ("employee_ref", "certificate_type", "certificate_name"):
@@ -396,7 +396,7 @@ async def update_certificate(item_id: str, payload: Payload, tenant_id: str = De
     return _clean(dict(row))
 
 
-@router.delete("/certificates/{item_id}", status_code=204, response_class=Response, response_model=None)
+@router.delete("/certificates/{item_id}", status_code=204, response_class=Response, response_model=None, summary="Certificate löschen")
 async def delete_certificate(item_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
     deleted = db.execute(
         text("DELETE FROM domain_hr.employee_certificates WHERE tenant_id=:tenant_id AND id=:id"),
@@ -408,7 +408,7 @@ async def delete_certificate(item_id: str, tenant_id: str = Depends(get_tenant_i
     return None
 
 
-@router.get("/qualifications", response_model=list[dict[str, Any]])
+@router.get("/qualifications", response_model=list[dict[str, Any]], summary="Qualifications auflisten")
 async def list_qualifications(
     employee_ref: str | None = Query(default=None),
     tenant_id: str = Depends(get_tenant_id),
@@ -426,7 +426,7 @@ async def list_qualifications(
     )
 
 
-@router.post("/qualifications", response_model=dict[str, Any], status_code=201)
+@router.post("/qualifications", response_model=dict[str, Any], status_code=201, summary="Qualification anlegen")
 async def create_qualification(payload: Payload, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
     d = payload.data
     for key in ("employee_ref", "role_code"):
@@ -464,7 +464,7 @@ async def create_qualification(payload: Payload, tenant_id: str = Depends(get_te
     return _clean(dict(row))
 
 
-@router.put("/qualifications/{item_id}", response_model=dict[str, Any])
+@router.put("/qualifications/{item_id}", response_model=dict[str, Any], summary="Qualification aktualisieren")
 async def update_qualification(item_id: str, payload: Payload, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
     d = payload.data
     for key in ("employee_ref", "role_code"):
@@ -500,7 +500,7 @@ async def update_qualification(item_id: str, payload: Payload, tenant_id: str = 
     return _clean(dict(row))
 
 
-@router.delete("/qualifications/{item_id}", status_code=204, response_class=Response, response_model=None)
+@router.delete("/qualifications/{item_id}", status_code=204, response_class=Response, response_model=None, summary="Qualification löschen")
 async def delete_qualification(item_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
     deleted = db.execute(
         text("DELETE FROM domain_hr.qualification_profiles WHERE tenant_id=:tenant_id AND id=:id"),
@@ -512,7 +512,7 @@ async def delete_qualification(item_id: str, tenant_id: str = Depends(get_tenant
     return None
 
 
-@router.get("/onboarding/checklists", response_model=list[dict[str, Any]])
+@router.get("/onboarding/checklists", response_model=list[dict[str, Any]], summary="Checklists auflisten")
 async def list_checklists(
     include_inactive: bool = Query(default=False),
     tenant_id: str = Depends(get_tenant_id),
@@ -528,7 +528,7 @@ async def list_checklists(
     )
 
 
-@router.post("/onboarding/checklists", response_model=dict[str, Any], status_code=201)
+@router.post("/onboarding/checklists", response_model=dict[str, Any], status_code=201, summary="Checklist anlegen")
 async def create_checklist(payload: Payload, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
     d = payload.data
     for key in ("checklist_code", "title"):
@@ -566,7 +566,7 @@ async def create_checklist(payload: Payload, tenant_id: str = Depends(get_tenant
     return _clean(dict(row))
 
 
-@router.put("/onboarding/checklists/{item_id}", response_model=dict[str, Any])
+@router.put("/onboarding/checklists/{item_id}", response_model=dict[str, Any], summary="Checklist aktualisieren")
 async def update_checklist(item_id: str, payload: Payload, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
     d = payload.data
     for key in ("checklist_code", "title"):
@@ -602,7 +602,7 @@ async def update_checklist(item_id: str, payload: Payload, tenant_id: str = Depe
     return _clean(dict(row))
 
 
-@router.delete("/onboarding/checklists/{item_id}", status_code=204, response_class=Response, response_model=None)
+@router.delete("/onboarding/checklists/{item_id}", status_code=204, response_class=Response, response_model=None, summary="Checklist löschen")
 async def delete_checklist(item_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
     deleted = db.execute(
         text("DELETE FROM domain_hr.onboarding_checklists WHERE tenant_id=:tenant_id AND id=:id"),
@@ -614,7 +614,7 @@ async def delete_checklist(item_id: str, tenant_id: str = Depends(get_tenant_id)
     return None
 
 
-@router.get("/onboarding/runs", response_model=list[dict[str, Any]])
+@router.get("/onboarding/runs", response_model=list[dict[str, Any]], summary="Runs auflisten")
 async def list_runs(
     employee_ref: str | None = Query(default=None),
     status: str | None = Query(default=None),
@@ -642,7 +642,7 @@ async def list_runs(
     )
 
 
-@router.post("/onboarding/runs", response_model=dict[str, Any], status_code=201)
+@router.post("/onboarding/runs", response_model=dict[str, Any], status_code=201, summary="Run anlegen")
 async def create_run(payload: Payload, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
     d = payload.data
     for key in ("checklist_id", "employee_ref"):
@@ -683,7 +683,7 @@ async def create_run(payload: Payload, tenant_id: str = Depends(get_tenant_id), 
     return _clean(dict(row))
 
 
-@router.put("/onboarding/runs/{item_id}", response_model=dict[str, Any])
+@router.put("/onboarding/runs/{item_id}", response_model=dict[str, Any], summary="Run aktualisieren")
 async def update_run(item_id: str, payload: Payload, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
     d = payload.data
     for key in ("checklist_id", "employee_ref"):
@@ -722,7 +722,7 @@ async def update_run(item_id: str, payload: Payload, tenant_id: str = Depends(ge
     return _clean(dict(row))
 
 
-@router.delete("/onboarding/runs/{item_id}", status_code=204, response_class=Response, response_model=None)
+@router.delete("/onboarding/runs/{item_id}", status_code=204, response_class=Response, response_model=None, summary="Run löschen")
 async def delete_run(item_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
     deleted = db.execute(
         text("DELETE FROM domain_hr.onboarding_runs WHERE tenant_id=:tenant_id AND id=:id"),
@@ -734,7 +734,7 @@ async def delete_run(item_id: str, tenant_id: str = Depends(get_tenant_id), db: 
     return None
 
 
-@router.post("/onboarding/workspaces", response_model=dict[str, Any])
+@router.post("/onboarding/workspaces", response_model=dict[str, Any], summary="Onboarding workspace anlegen")
 async def create_onboarding_workspace(
     payload: OnboardingWorkspaceRequest,
     tenant_id: str = Depends(get_tenant_id),

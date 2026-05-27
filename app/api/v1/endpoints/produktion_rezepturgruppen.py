@@ -75,7 +75,7 @@ class SchnellerfassungBuchenPayload(BaseModel):
 
 # ── Rezepturgruppen ───────────────────────────────────────────────────────────
 
-@router.get("/rezepturgruppen", response_model=list[RezepturGruppeOut])
+@router.get("/rezepturgruppen", response_model=list[RezepturGruppeOut], summary="Rezepturgruppen auflisten")
 def list_rezepturgruppen(
     db=Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
@@ -88,7 +88,7 @@ def list_rezepturgruppen(
     return [RezepturGruppeOut(**dict(r._mapping)) for r in rows]
 
 
-@router.post("/rezepturgruppen", response_model=RezepturGruppeOut, status_code=201)
+@router.post("/rezepturgruppen", response_model=RezepturGruppeOut, status_code=201, summary="Rezepturgruppe anlegen")
 def create_rezepturgruppe(
     payload: RezepturGruppeCreate,
     db=Depends(get_db),
@@ -118,7 +118,7 @@ def create_rezepturgruppe(
     return RezepturGruppeOut(**dict(row._mapping))
 
 
-@router.delete("/rezepturgruppen/{gruppe_id}")
+@router.delete("/rezepturgruppen/{gruppe_id}", summary="Rezepturgruppe löschen")
 def delete_rezepturgruppe(
     gruppe_id: str,
     db=Depends(get_db),
@@ -134,7 +134,7 @@ def delete_rezepturgruppe(
 
 # ── Schnellerfassung ──────────────────────────────────────────────────────────
 
-@router.get("/schnellerfassung", response_model=list[SchnellerfassungOut])
+@router.get("/schnellerfassung", response_model=list[SchnellerfassungOut], summary="Schnellerfassung auflisten")
 def list_schnellerfassung(
     db=Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
@@ -148,7 +148,7 @@ def list_schnellerfassung(
     return [SchnellerfassungOut(**dict(r._mapping)) for r in rows]
 
 
-@router.post("/schnellerfassung", response_model=SchnellerfassungOut, status_code=201)
+@router.post("/schnellerfassung", response_model=SchnellerfassungOut, status_code=201, summary="Schnellerfassung anlegen")
 def create_schnellerfassung(
     payload: SchnellerfassungCreate,
     db=Depends(get_db),
@@ -175,7 +175,7 @@ def create_schnellerfassung(
     return SchnellerfassungOut(**dict(row._mapping))
 
 
-@router.post("/schnellerfassung/{vorlage_id}/buchen")
+@router.post("/schnellerfassung/{vorlage_id}/buchen", summary="Schnellerfassung buche")
 def buche_schnellerfassung(
     vorlage_id: str,
     payload: SchnellerfassungBuchenPayload,

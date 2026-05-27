@@ -332,7 +332,7 @@ class SEPAXMLGenerator:
         return reparsed.toprettyxml(indent="  ", encoding='utf-8').decode('utf-8')
 
 
-@router.post("/plan", response_model=PaymentRunPlanResponse)
+@router.post("/plan", response_model=PaymentRunPlanResponse, summary="Payment run plan")
 async def plan_payment_run(
     request: PaymentRunPlanRequest,
     db: Session = Depends(get_db),
@@ -402,7 +402,7 @@ async def plan_payment_run(
     )
 
 
-@router.post("", response_model=PaymentRunResponse, status_code=201)
+@router.post("", response_model=PaymentRunResponse, status_code=201, summary="Payment run anlegen")
 async def create_payment_run(
     payment_run: PaymentRunCreate,
     tenant_id: str = Query("system", description="Tenant ID"),
@@ -516,7 +516,7 @@ async def create_payment_run(
         raise HTTPException(status_code=500, detail=f"Failed to create payment run: {str(e)}")
 
 
-@router.get("", response_model=List[PaymentRunResponse])
+@router.get("", response_model=List[PaymentRunResponse], summary="Payment runs auflisten")
 async def list_payment_runs(
     status: Optional[str] = Query(None, description="Filter by status"),
     tenant_id: str = Query("system", description="Tenant ID"),
@@ -584,7 +584,7 @@ async def list_payment_runs(
         return []
 
 
-@router.get("/{run_id}", response_model=PaymentRunResponse)
+@router.get("/{run_id}", response_model=PaymentRunResponse, summary="Payment run abrufen")
 async def get_payment_run(
     run_id: str,
     tenant_id: str = Query("system", description="Tenant ID"),
@@ -648,7 +648,7 @@ async def get_payment_run(
         raise HTTPException(status_code=500, detail=f"Failed to get payment run: {str(e)}")
 
 
-@router.post("/{run_id}/approve", response_model=PaymentRunResponse)
+@router.post("/{run_id}/approve", response_model=PaymentRunResponse, summary="Payment run genehmigen")
 async def approve_payment_run(
     run_id: str,
     request: ApprovePaymentRunRequest,
@@ -687,7 +687,7 @@ async def approve_payment_run(
         raise HTTPException(status_code=500, detail=f"Failed to approve payment run: {str(e)}")
 
 
-@router.post("/{run_id}/execute", response_model=PaymentRunResponse)
+@router.post("/{run_id}/execute", response_model=PaymentRunResponse, summary="Payment run ausführen")
 async def execute_payment_run(
     run_id: str,
     request: ExecutePaymentRunRequest,
@@ -793,7 +793,7 @@ async def execute_payment_run(
         raise HTTPException(status_code=500, detail=f"Failed to execute payment run: {str(e)}")
 
 
-@router.get("/{run_id}/sepa-xml")
+@router.get("/{run_id}/sepa-xml", summary="Sepa xml abrufen")
 async def get_sepa_xml(
     run_id: str,
     tenant_id: str = Query("system", description="Tenant ID"),
@@ -840,7 +840,7 @@ async def get_sepa_xml(
         raise HTTPException(status_code=500, detail=f"Failed to generate SEPA XML: {str(e)}")
 
 
-@router.post("/{run_id}/return-payment")
+@router.post("/{run_id}/return-payment", summary="Payment return")
 async def return_payment(
     run_id: str,
     request: ReturnPaymentRequest,

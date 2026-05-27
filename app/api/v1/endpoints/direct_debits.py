@@ -13,7 +13,7 @@ from ....core.database import get_db
 router = APIRouter(prefix="/direct-debits", tags=["finance", "direct-debits"])
 
 
-@router.get("", response_model=list[dict])
+@router.get("", response_model=list[dict], summary="Direct debits auflisten")
 async def list_direct_debits(
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
@@ -49,7 +49,7 @@ async def list_direct_debits(
         return []
 
 
-@router.get("/new", response_model=dict)
+@router.get("/new", response_model=dict, summary="New direct debit template abrufen")
 async def get_new_direct_debit_template(tenant_id: str = Depends(get_tenant_id)):
     """Return default values for direct debit create forms."""
     return {
@@ -100,7 +100,7 @@ class DirectDebitRunCreate(BaseModel):
 # --------------- POST / DELETE ---------------
 
 
-@router.post("", response_model=dict, status_code=201)
+@router.post("", response_model=dict, status_code=201, summary="Direct debit run anlegen")
 async def create_direct_debit_run(
     body: DirectDebitRunCreate,
     tenant_id: str = Depends(get_tenant_id),
@@ -140,7 +140,7 @@ async def create_direct_debit_run(
     }
 
 
-@router.get("/{run_id}", response_model=dict)
+@router.get("/{run_id}", response_model=dict, summary="Direct debit run abrufen")
 async def get_direct_debit_run(
     run_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -182,7 +182,7 @@ async def get_direct_debit_run(
     }
 
 
-@router.post("/{run_id}/export", response_model=dict)
+@router.post("/{run_id}/export", response_model=dict, summary="Direct debit run exportieren")
 async def export_direct_debit_run(
     run_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -204,7 +204,7 @@ async def export_direct_debit_run(
     return {"ok": True, "run_id": run_id, "exported_items": result.rowcount}
 
 
-@router.delete("/{run_id}", response_class=Response, status_code=204, response_model=None)
+@router.delete("/{run_id}", response_class=Response, status_code=204, response_model=None, summary="Direct debit run stornieren")
 async def cancel_direct_debit_run(
     run_id: str,
     tenant_id: str = Depends(get_tenant_id),

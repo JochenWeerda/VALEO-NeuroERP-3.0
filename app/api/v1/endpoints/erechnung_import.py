@@ -119,7 +119,7 @@ def _parse_xrechnung(content: str) -> dict:
 # Endpoints
 # ---------------------------------------------------------------------------
 
-@router.post("/import", response_model=ERechnungImportResult, status_code=200)
+@router.post("/import", response_model=ERechnungImportResult, status_code=200, summary="Erechnung importieren")
 async def import_erechnung(
     file: UploadFile = File(...),
     db: Session = Depends(get_db),
@@ -180,7 +180,7 @@ async def import_erechnung(
         )
 
 
-@router.get("/imports", response_model=List[ERechnungImportResult])
+@router.get("/imports", response_model=List[ERechnungImportResult], summary="Imports auflisten")
 def list_imports(
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
@@ -201,7 +201,7 @@ def list_imports(
         return []  # migration_hint: domain_finance.erechnung_imports not yet migrated
 
 
-@router.post("/imports/{import_id}/buchen")
+@router.post("/imports/{import_id}/buchen", summary="Buchen")
 def buchen(
     import_id: str,
     db: Session = Depends(get_db),

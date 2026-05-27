@@ -83,7 +83,7 @@ def _next_delivery_note_number(db: Session) -> str:
 # Endpoints
 # ---------------------------------------------------------------------------
 
-@router.post("/collective-invoice", response_model=CollectiveInvoiceOut, status_code=status.HTTP_201_CREATED)
+@router.post("/collective-invoice", response_model=CollectiveInvoiceOut, status_code=status.HTTP_201_CREATED, summary="Collective invoice anlegen")
 async def create_collective_invoice(
     payload: CollectiveInvoiceCreate,
     tenant_id: str = Depends(get_tenant_id),
@@ -154,7 +154,7 @@ async def create_collective_invoice(
     )
 
 
-@router.post("/collective-delivery", response_model=CollectiveDeliveryOut, status_code=status.HTTP_201_CREATED)
+@router.post("/collective-delivery", response_model=CollectiveDeliveryOut, status_code=status.HTTP_201_CREATED, summary="Collective delivery anlegen")
 async def create_collective_delivery(
     payload: CollectiveDeliveryCreate,
     tenant_id: str = Depends(get_tenant_id),
@@ -224,7 +224,7 @@ async def create_collective_delivery(
     )
 
 
-@router.get("/collective-invoice/{invoice_id}", response_model=dict)
+@router.get("/collective-invoice/{invoice_id}", response_model=dict, summary="Collective invoice abrufen")
 async def get_collective_invoice(
     invoice_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -251,7 +251,7 @@ async def get_collective_invoice(
     return {**r, "source_document_ids": src_ids}
 
 
-@router.get("/customers/{customer_id}/collective-eligible", response_model=list[EligibleDeliveryNoteOut])
+@router.get("/customers/{customer_id}/collective-eligible", response_model=list[EligibleDeliveryNoteOut], summary="Eligible collective")
 async def collective_eligible(
     customer_id: str,
     tenant_id: str = Depends(get_tenant_id),

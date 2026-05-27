@@ -77,7 +77,7 @@ class PromotionCheckIn(BaseModel):
 
 # ── Payment Methods ────────────────────────────────────────────────────────
 
-@router.get("/payment-methods")
+@router.get("/payment-methods", summary="Payment methods auflisten")
 async def list_payment_methods(
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
@@ -101,7 +101,7 @@ async def list_payment_methods(
     ]
 
 
-@router.post("/checkout/split-payment", status_code=201)
+@router.post("/checkout/split-payment", status_code=201, summary="Payment aufteilen")
 async def split_payment(
     payload: SplitPaymentIn,
     db: Session = Depends(get_db),
@@ -123,7 +123,7 @@ async def split_payment(
 
 # ── Promotions ─────────────────────────────────────────────────────────────
 
-@router.get("/promotions")
+@router.get("/promotions", summary="Promotions auflisten")
 async def list_promotions(
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
@@ -144,7 +144,7 @@ async def list_promotions(
     return [dict(r._mapping) for r in rows]
 
 
-@router.post("/promotions", status_code=201)
+@router.post("/promotions", status_code=201, summary="Promotion anlegen")
 async def create_promotion(
     payload: PromotionIn,
     db: Session = Depends(get_db),
@@ -171,7 +171,7 @@ async def create_promotion(
     return {"id": promo_id, **payload.model_dump()}
 
 
-@router.post("/promotions/check")
+@router.post("/promotions/check", summary="Promotion prüfen")
 async def check_promotion(
     payload: PromotionCheckIn,
     db: Session = Depends(get_db),
@@ -214,7 +214,7 @@ async def check_promotion(
 
 # ── X/Z-Report ─────────────────────────────────────────────────────────────
 
-@router.get("/x-report")
+@router.get("/x-report", summary="Report x")
 async def x_report(
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
@@ -237,7 +237,7 @@ async def x_report(
         return {"report_type": "X", "date": date.today().isoformat(), "total_eur": 0.0, "by_payment_method": []}
 
 
-@router.get("/z-report/{report_date}")
+@router.get("/z-report/{report_date}", summary="Report z")
 async def z_report(
     report_date: str,
     db: Session = Depends(get_db),
@@ -263,7 +263,7 @@ async def z_report(
         return {"report_type": "Z", "date": report_date, "total_eur": 0.0, "closed": True}
 
 
-@router.post("/checkout/preview")
+@router.post("/checkout/preview", summary="Preview checkout")
 async def checkout_preview(
     payload: SplitPaymentIn,
     db: Session = Depends(get_db),

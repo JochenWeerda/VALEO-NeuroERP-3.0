@@ -44,7 +44,7 @@ def _to_schema(row: NutrientComposition) -> dict:
     }
 
 
-@router.get("/", response_model=PaginatedResponse[dict])
+@router.get("/", response_model=PaginatedResponse[dict], summary="Nutrient compositions auflisten")
 async def list_nutrient_compositions(
     tenant_id: Optional[str] = Query(None, description="Filter by tenant ID"),
     search: Optional[str] = Query(None, description="Search in name/number"),
@@ -84,7 +84,7 @@ async def list_nutrient_compositions(
     )
 
 
-@router.get("/search", response_model=list[dict])
+@router.get("/search", response_model=list[dict], summary="Nutrient compositions suchen")
 async def search_nutrient_compositions(
     q: str = Query(..., min_length=1, description="Search term"),
     limit: int = Query(10, ge=1, le=50),
@@ -105,7 +105,7 @@ async def search_nutrient_compositions(
     return [_to_schema(item) for item in items]
 
 
-@router.get("/{composition_id}", response_model=dict)
+@router.get("/{composition_id}", response_model=dict, summary="Nutrient composition abrufen")
 async def get_nutrient_composition(
     composition_id: str,
     tenant_id: Optional[str] = Query(None),
@@ -126,7 +126,7 @@ async def get_nutrient_composition(
     return _to_schema(item)
 
 
-@router.post("/", response_model=dict, status_code=status.HTTP_201_CREATED)
+@router.post("/", response_model=dict, status_code=status.HTTP_201_CREATED, summary="Nutrient composition anlegen")
 async def create_nutrient_composition(
     data: dict,
     db: Session = Depends(get_db),
@@ -175,7 +175,7 @@ async def create_nutrient_composition(
     return _to_schema(item)
 
 
-@router.put("/{composition_id}", response_model=dict)
+@router.put("/{composition_id}", response_model=dict, summary="Nutrient composition aktualisieren")
 async def update_nutrient_composition(
     composition_id: str,
     data: dict,
@@ -239,7 +239,7 @@ async def update_nutrient_composition(
     return _to_schema(item)
 
 
-@router.delete("/{composition_id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete("/{composition_id}", status_code=status.HTTP_204_NO_CONTENT, summary="Nutrient composition löschen")
 async def delete_nutrient_composition(
     composition_id: str,
     tenant_id: Optional[str] = Query(None),

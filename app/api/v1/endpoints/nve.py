@@ -35,7 +35,7 @@ class NVECreate(BaseModel):
     contents: Optional[list] = None
 
 
-@router.get("/", response_model=PaginatedResponse[NVEOut])
+@router.get("/", response_model=PaginatedResponse[NVEOut], summary="Nves auflisten")
 async def list_nves(
     tenant_id: Optional[str] = Query(None),
     skip: int = Query(0, ge=0),
@@ -56,7 +56,7 @@ async def list_nves(
     )
 
 
-@router.post("/", response_model=NVEOut, status_code=201)
+@router.post("/", response_model=NVEOut, status_code=201, summary="Nve anlegen")
 async def create_nve(
     payload: NVECreate,
     tenant_id: Optional[str] = Query(None),

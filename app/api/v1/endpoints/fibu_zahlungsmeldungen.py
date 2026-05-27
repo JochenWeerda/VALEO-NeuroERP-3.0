@@ -63,7 +63,7 @@ class ZahlungsmeldungOut(BaseModel):
 
 # ── Endpoints ─────────────────────────────────────────────────────────────────
 
-@router.get("", response_model=list[ZahlungsmeldungOut])
+@router.get("", response_model=list[ZahlungsmeldungOut], summary="Zahlungsmeldungen auflisten")
 def list_zahlungsmeldungen(
     kunden_nr: Optional[str] = Query(None),
     status: Optional[str] = Query(None),
@@ -91,7 +91,7 @@ def list_zahlungsmeldungen(
     return [ZahlungsmeldungOut(**dict(r._mapping)) for r in rows]
 
 
-@router.post("", response_model=ZahlungsmeldungOut, status_code=201)
+@router.post("", response_model=ZahlungsmeldungOut, status_code=201, summary="Zahlungsmeldung anlegen")
 def create_zahlungsmeldung(
     payload: ZahlungsmeldungCreate,
     db=Depends(get_db),
@@ -119,7 +119,7 @@ def create_zahlungsmeldung(
     return ZahlungsmeldungOut(**dict(row._mapping))
 
 
-@router.post("/{meldung_id}/verarbeiten", response_model=ZahlungsmeldungOut)
+@router.post("/{meldung_id}/verarbeiten", response_model=ZahlungsmeldungOut, summary="Verarbeiten meldung")
 def meldung_verarbeiten(
     meldung_id: str,
     db=Depends(get_db),
@@ -147,7 +147,7 @@ def meldung_verarbeiten(
     return ZahlungsmeldungOut(**dict(updated._mapping))
 
 
-@router.post("/{meldung_id}/abweisen", response_model=ZahlungsmeldungOut)
+@router.post("/{meldung_id}/abweisen", response_model=ZahlungsmeldungOut, summary="Abweisen meldung")
 def meldung_abweisen(
     meldung_id: str,
     db=Depends(get_db),
@@ -175,7 +175,7 @@ def meldung_abweisen(
     return ZahlungsmeldungOut(**dict(updated._mapping))
 
 
-@router.get("/offen/zusammenfassung")
+@router.get("/offen/zusammenfassung", summary="Meldungen zusammenfassung offene")
 def offene_meldungen_zusammenfassung(
     db=Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),

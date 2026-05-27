@@ -48,7 +48,7 @@ class DocumentArtifactOut(BaseModel):
     created_by: Optional[str]
 
 
-@router.post("/artifacts", response_model=DocumentArtifactOut)
+@router.post("/artifacts", response_model=DocumentArtifactOut, summary="Document artifact registrieren")
 async def register_document_artifact(
     payload: DocumentArtifactCreate,
     tenant_id: Optional[str] = Query(None),
@@ -114,7 +114,7 @@ async def register_document_artifact(
     return JSONResponse(content=body)
 
 
-@router.get("/artifacts", response_model=list[DocumentArtifactOut])
+@router.get("/artifacts", response_model=list[DocumentArtifactOut], summary="Document artifacts auflisten")
 async def list_document_artifacts(
     header_id: Optional[str] = Query(None),
     tenant_id: Optional[str] = Query(None),
@@ -166,7 +166,7 @@ class ArtifactVeri4Out(BaseModel):
     file_name: Optional[str]
 
 
-@router.get("/artifacts/{art_id}/veri4", response_model=Optional[ArtifactVeri4Out])
+@router.get("/artifacts/{art_id}/veri4", response_model=Optional[ArtifactVeri4Out], summary="Artifact veri4 abrufen")
 async def get_artifact_veri4(
     art_id: str,
     tenant_id: Optional[str] = Query(None),
@@ -218,7 +218,7 @@ class InvoiceXmlOut(BaseModel):
     created_by: Optional[str]
 
 
-@router.post("/e-invoice-xml", response_model=InvoiceXmlOut)
+@router.post("/e-invoice-xml", response_model=InvoiceXmlOut, summary="Invoice xml store")
 async def store_invoice_xml(
     payload: InvoiceXmlCreate,
     tenant_id: Optional[str] = Query(None),
@@ -276,7 +276,7 @@ async def store_invoice_xml(
     )
 
 
-@router.get("/e-invoice-xml/{header_id}", response_model=Optional[InvoiceXmlOut])
+@router.get("/e-invoice-xml/{header_id}", response_model=Optional[InvoiceXmlOut], summary="Invoice xml abrufen")
 async def get_invoice_xml(
     header_id: str,
     tenant_id: Optional[str] = Query(None),
@@ -518,7 +518,7 @@ def _sha256_hex(content: bytes) -> str:
     return hashlib.sha256(content).hexdigest()
 
 
-@router.get("/audit-package")
+@router.get("/audit-package", summary="Audit package abrufen")
 async def get_audit_package(
     from_date: Optional[date] = Query(None, description="Von-Datum (inkl.)"),
     to_date: Optional[date] = Query(None, description="Bis-Datum (inkl.)"),
@@ -624,7 +624,7 @@ class ArtifactVerifyOut(BaseModel):
     integrity_status: str  # "verified" | "mismatch" | "unchecked"
 
 
-@router.get("/artifacts/{artifact_id}/verify", response_model=ArtifactVerifyOut)
+@router.get("/artifacts/{artifact_id}/verify", response_model=ArtifactVerifyOut, summary="Artifact hash verifizieren")
 async def verify_artifact_hash(
     artifact_id: str,
     provided_hash: Optional[str] = Query(
@@ -685,7 +685,7 @@ class InvoiceXmlValidateIn(BaseModel):
     validation_errors: Optional[dict[str, Any]] = None
 
 
-@router.patch("/e-invoice-xml/{header_id}/validate", response_model=InvoiceXmlOut)
+@router.patch("/e-invoice-xml/{header_id}/validate", response_model=InvoiceXmlOut, summary="Invoice xml validation setzen")
 async def set_invoice_xml_validation(
     header_id: str,
     payload: InvoiceXmlValidateIn,

@@ -61,7 +61,7 @@ class MarkToMarketResult(BaseModel):
 # Endpoints
 # ---------------------------------------------------------------------------
 
-@router.get("/{kontrakt_id}/hedges", response_model=List[HedgeOut])
+@router.get("/{kontrakt_id}/hedges", response_model=List[HedgeOut], summary="Hedges auflisten")
 def list_hedges(
     kontrakt_id: str,
     db: Session = Depends(get_db),
@@ -84,7 +84,7 @@ def list_hedges(
         return []  # migration_hint: domain_agrar.kontrakt_hedges not yet migrated
 
 
-@router.post("/{kontrakt_id}/hedges", response_model=HedgeOut, status_code=201)
+@router.post("/{kontrakt_id}/hedges", response_model=HedgeOut, status_code=201, summary="Hedge anlegen")
 def create_hedge(
     kontrakt_id: str,
     payload: HedgeCreate,
@@ -128,6 +128,7 @@ def create_hedge(
 @router.post(
     "/{kontrakt_id}/hedges/{hedge_id}/mark-to-market",
     response_model=MarkToMarketResult,
+    summary="To market markieren",
 )
 def mark_to_market(
     kontrakt_id: str,
@@ -173,7 +174,7 @@ def mark_to_market(
 @router.delete(
     "/{kontrakt_id}/hedges/{hedge_id}",
     status_code=204,
-    response_class=Response, response_model=None)
+    response_class=Response, response_model=None, summary="Hedge stornieren")
 def cancel_hedge(
     kontrakt_id: str,
     hedge_id: str,

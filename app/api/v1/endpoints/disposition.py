@@ -49,7 +49,7 @@ def _seed(db: Session) -> None:
     db.commit()
 
 
-@router.get("", response_model=dict)
+@router.get("", response_model=dict, summary="Disposition auflisten")
 async def list_disposition(
     prioritaet: Optional[str] = Query(None, description="Filter by priority"),
     limit: int = Query(100, ge=1, le=1000),
@@ -83,7 +83,7 @@ async def list_disposition(
     }
 
 
-@router.get("/stats", response_model=dict)
+@router.get("/stats", response_model=dict, summary="Disposition stats abrufen")
 async def get_disposition_stats(db: Session = Depends(get_db)) -> dict:
     _seed(db)
     all_items = db.query(DispositionPosition).all()
@@ -135,7 +135,7 @@ from fastapi import HTTPException
 from starlette.responses import Response
 
 
-@router.post("", response_model=dict, status_code=201)
+@router.post("", response_model=dict, status_code=201, summary="Disposition position anlegen")
 async def create_disposition_position(
     body: DispositionPositionCreate,
     db: Session = Depends(get_db),
@@ -165,7 +165,7 @@ async def create_disposition_position(
     }
 
 
-@router.put("/{position_id}", response_model=dict)
+@router.put("/{position_id}", response_model=dict, summary="Disposition position aktualisieren")
 async def update_disposition_position(
     position_id: str,
     body: DispositionPositionUpdate,
@@ -191,7 +191,7 @@ async def update_disposition_position(
     }
 
 
-@router.delete("/{position_id}", response_class=Response, status_code=204, response_model=None)
+@router.delete("/{position_id}", response_class=Response, status_code=204, response_model=None, summary="Disposition position löschen")
 async def delete_disposition_position(
     position_id: str,
     db: Session = Depends(get_db),

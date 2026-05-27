@@ -45,7 +45,7 @@ class RebuildRequestBody(BaseModel):
 # ---------------------------------------------------------------------------
 
 
-@router.get("")
+@router.get("", summary="Projections auflisten")
 async def list_projections(
     tenant_id: str = Depends(get_tenant_id),
 ) -> dict:
@@ -53,7 +53,7 @@ async def list_projections(
     return _REGISTRY.model_dump()
 
 
-@router.get("/stale")
+@router.get("/stale", summary="Stale projections auflisten")
 async def list_stale_projections(
     tenant_id: str = Depends(get_tenant_id),
 ) -> list[dict]:
@@ -62,7 +62,7 @@ async def list_stale_projections(
     return [c.model_dump() for c in stale]
 
 
-@router.get("/{projection_name}")
+@router.get("/{projection_name}", summary="Projection abrufen")
 async def get_projection(
     projection_name: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -77,7 +77,7 @@ async def get_projection(
     return consumer.model_dump()
 
 
-@router.post("/{projection_name}/rebuild", status_code=202)
+@router.post("/{projection_name}/rebuild", status_code=202, summary="Rebuild request")
 async def request_rebuild(
     projection_name: str,
     body: RebuildRequestBody,
@@ -111,7 +111,7 @@ async def request_rebuild(
     )
 
 
-@router.get("/{projection_name}/rebuild-status")
+@router.get("/{projection_name}/rebuild-status", summary="Rebuild status abrufen")
 async def get_rebuild_status(
     projection_name: str,
     tenant_id: str = Depends(get_tenant_id),

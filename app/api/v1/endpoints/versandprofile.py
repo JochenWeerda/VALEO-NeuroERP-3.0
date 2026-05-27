@@ -95,7 +95,7 @@ class LieferavisOut(BaseModel):
 
 # ── Versandprofile ────────────────────────────────────────────────────────────
 
-@router.get("/profile", response_model=list[VersandprofilOut])
+@router.get("/profile", response_model=list[VersandprofilOut], summary="Versandprofile auflisten")
 def list_versandprofile(
     versandart: Optional[str] = Query(None),
     db=Depends(get_db),
@@ -111,7 +111,7 @@ def list_versandprofile(
     return [VersandprofilOut(**dict(r._mapping)) for r in rows]
 
 
-@router.post("/profile", response_model=VersandprofilOut, status_code=201)
+@router.post("/profile", response_model=VersandprofilOut, status_code=201, summary="Versandprofil anlegen")
 def create_versandprofil(
     payload: VersandprofilCreate,
     db=Depends(get_db),
@@ -149,7 +149,7 @@ def create_versandprofil(
     return VersandprofilOut(**dict(row._mapping))
 
 
-@router.delete("/profile/{profil_nr}")
+@router.delete("/profile/{profil_nr}", summary="Versandprofil löschen")
 def delete_versandprofil(
     profil_nr: str,
     db=Depends(get_db),
@@ -165,7 +165,7 @@ def delete_versandprofil(
 
 # ── Lieferavise ───────────────────────────────────────────────────────────────
 
-@router.get("/avise", response_model=list[LieferavisOut])
+@router.get("/avise", response_model=list[LieferavisOut], summary="Avise auflisten")
 def list_avise(
     lieferant_nr: Optional[str] = Query(None),
     kunden_nr: Optional[str] = Query(None),
@@ -189,7 +189,7 @@ def list_avise(
     return [LieferavisOut(**dict(r._mapping)) for r in rows]
 
 
-@router.post("/avise", response_model=LieferavisOut, status_code=201)
+@router.post("/avise", response_model=LieferavisOut, status_code=201, summary="Avis anlegen")
 def create_avis(
     payload: LieferavisCreate,
     db=Depends(get_db),
@@ -224,7 +224,7 @@ def create_avis(
     return LieferavisOut(**dict(row._mapping))
 
 
-@router.patch("/avise/{avis_nr}/status")
+@router.patch("/avise/{avis_nr}/status", summary="Status avis")
 def avis_status(
     avis_nr: str,
     neuer_status: str = Query(...),

@@ -194,7 +194,7 @@ def _assert_transition(current: str, target: str) -> None:
 
 # ─── Campaign Templates ───────────────────────────────────────────────────────
 
-@router.get("/templates", response_model=List[dict])
+@router.get("/templates", response_model=List[dict], summary="Templates auflisten")
 async def list_templates(
     tenant_id: str = Query("system"),
     is_active: Optional[bool] = Query(None),
@@ -213,7 +213,7 @@ async def list_templates(
     return [_row_to_template(r) for r in rows]
 
 
-@router.post("/templates", response_model=dict, status_code=201)
+@router.post("/templates", response_model=dict, status_code=201, summary="Template anlegen")
 async def create_template(
     payload: TemplateCreate,
     tenant_id: str = Query("system"),
@@ -246,7 +246,7 @@ async def create_template(
     return _row_to_template(row)
 
 
-@router.get("/templates/{template_id}", response_model=dict)
+@router.get("/templates/{template_id}", response_model=dict, summary="Template abrufen")
 async def get_template(
     template_id: str,
     tenant_id: str = Query("system"),
@@ -261,7 +261,7 @@ async def get_template(
     return _row_to_template(row)
 
 
-@router.put("/templates/{template_id}", response_model=dict)
+@router.put("/templates/{template_id}", response_model=dict, summary="Template aktualisieren")
 async def update_template(
     template_id: str,
     payload: TemplateUpdate,
@@ -295,7 +295,7 @@ async def update_template(
     return _row_to_template(updated)
 
 
-@router.post("/templates/{template_id}/duplicate", response_model=dict, status_code=201)
+@router.post("/templates/{template_id}/duplicate", response_model=dict, status_code=201, summary="Template duplicate")
 async def duplicate_template(
     template_id: str,
     tenant_id: str = Query("system"),
@@ -336,7 +336,7 @@ async def duplicate_template(
     return _row_to_template(copy)
 
 
-@router.post("/templates/{template_id}/activate", response_model=dict)
+@router.post("/templates/{template_id}/activate", response_model=dict, summary="Template aktivieren")
 async def activate_template(
     template_id: str,
     tenant_id: str = Query("system"),
@@ -356,7 +356,7 @@ async def activate_template(
     return _row_to_template(row)
 
 
-@router.post("/templates/{template_id}/deactivate", response_model=dict)
+@router.post("/templates/{template_id}/deactivate", response_model=dict, summary="Template deaktivieren")
 async def deactivate_template(
     template_id: str,
     tenant_id: str = Query("system"),
@@ -376,7 +376,7 @@ async def deactivate_template(
     return _row_to_template(row)
 
 
-@router.delete("/templates/{template_id}", status_code=204, response_class=Response)
+@router.delete("/templates/{template_id}", status_code=204, response_class=Response, summary="Template löschen")
 async def delete_template(
     template_id: str,
     tenant_id: str = Query("system"),
@@ -394,7 +394,7 @@ async def delete_template(
 
 # ─── Campaigns CRUD ───────────────────────────────────────────────────────────
 
-@router.get("", response_model=List[dict])
+@router.get("", response_model=List[dict], summary="Campaigns auflisten")
 async def list_campaigns(
     tenant_id: str = Query("system"),
     state: Optional[str] = Query(None),
@@ -417,7 +417,7 @@ async def list_campaigns(
     return [_row_to_campaign(r) for r in rows]
 
 
-@router.post("", response_model=dict, status_code=201)
+@router.post("", response_model=dict, status_code=201, summary="Campaign anlegen")
 async def create_campaign(
     payload: CampaignCreate,
     tenant_id: str = Query("system"),
@@ -466,7 +466,7 @@ async def create_campaign(
     return _row_to_campaign(row)
 
 
-@router.get("/{campaign_id}", response_model=dict)
+@router.get("/{campaign_id}", response_model=dict, summary="Campaign abrufen")
 async def get_campaign(
     campaign_id: str,
     tenant_id: str = Query("system"),
@@ -481,7 +481,7 @@ async def get_campaign(
     return _row_to_campaign(row)
 
 
-@router.put("/{campaign_id}", response_model=dict)
+@router.put("/{campaign_id}", response_model=dict, summary="Campaign aktualisieren")
 async def update_campaign(
     campaign_id: str,
     payload: CampaignUpdate,
@@ -517,7 +517,7 @@ async def update_campaign(
     return _row_to_campaign(updated)
 
 
-@router.delete("/{campaign_id}", status_code=204, response_class=Response)
+@router.delete("/{campaign_id}", status_code=204, response_class=Response, summary="Campaign löschen")
 async def delete_campaign(
     campaign_id: str,
     tenant_id: str = Query("system"),
@@ -573,7 +573,7 @@ def _transition(campaign_id: str, tenant_id: str, target: str, db: Session) -> d
     return _row_to_campaign(updated)
 
 
-@router.post("/{campaign_id}/activate", response_model=dict)
+@router.post("/{campaign_id}/activate", response_model=dict, summary="Campaign aktivieren")
 async def activate_campaign(
     campaign_id: str, tenant_id: str = Query("system"), db: Session = Depends(get_db)
 ) -> dict:
@@ -581,7 +581,7 @@ async def activate_campaign(
     return _transition(campaign_id, tenant_id, "active", db)
 
 
-@router.post("/{campaign_id}/pause", response_model=dict)
+@router.post("/{campaign_id}/pause", response_model=dict, summary="Campaign pausieren")
 async def pause_campaign(
     campaign_id: str, tenant_id: str = Query("system"), db: Session = Depends(get_db)
 ) -> dict:
@@ -589,7 +589,7 @@ async def pause_campaign(
     return _transition(campaign_id, tenant_id, "paused", db)
 
 
-@router.post("/{campaign_id}/resume", response_model=dict)
+@router.post("/{campaign_id}/resume", response_model=dict, summary="Campaign fortsetzen")
 async def resume_campaign(
     campaign_id: str, tenant_id: str = Query("system"), db: Session = Depends(get_db)
 ) -> dict:
@@ -597,7 +597,7 @@ async def resume_campaign(
     return _transition(campaign_id, tenant_id, "active", db)
 
 
-@router.post("/{campaign_id}/complete", response_model=dict)
+@router.post("/{campaign_id}/complete", response_model=dict, summary="Campaign complete")
 async def complete_campaign(
     campaign_id: str, tenant_id: str = Query("system"), db: Session = Depends(get_db)
 ) -> dict:
@@ -605,7 +605,7 @@ async def complete_campaign(
     return _transition(campaign_id, tenant_id, "completed", db)
 
 
-@router.post("/{campaign_id}/archive", response_model=dict)
+@router.post("/{campaign_id}/archive", response_model=dict, summary="Campaign archivieren")
 async def archive_campaign(
     campaign_id: str, tenant_id: str = Query("system"), db: Session = Depends(get_db)
 ) -> dict:
@@ -615,7 +615,7 @@ async def archive_campaign(
 
 # ─── Recipients ───────────────────────────────────────────────────────────────
 
-@router.get("/{campaign_id}/recipients", response_model=List[dict])
+@router.get("/{campaign_id}/recipients", response_model=List[dict], summary="Recipients auflisten")
 async def list_recipients(
     campaign_id: str,
     tenant_id: str = Query("system"),
@@ -642,7 +642,7 @@ async def list_recipients(
     ]
 
 
-@router.post("/{campaign_id}/recipients", response_model=dict, status_code=201)
+@router.post("/{campaign_id}/recipients", response_model=dict, status_code=201, summary="Recipient hinzufügen")
 async def add_recipient(
     campaign_id: str,
     payload: RecipientAdd,
@@ -674,7 +674,7 @@ async def add_recipient(
     return {"id": nid, "campaign_id": campaign_id, "recipient_id": payload.recipient_id, "status": "queued"}
 
 
-@router.patch("/{campaign_id}/recipients/{recipient_id}", response_model=dict)
+@router.patch("/{campaign_id}/recipients/{recipient_id}", response_model=dict, summary="Recipient status aktualisieren")
 async def update_recipient_status(
     campaign_id: str,
     recipient_id: str,
@@ -745,7 +745,7 @@ def _rebuild_kpis(campaign_id: str, tenant_id: str, db: Session) -> None:
         db.commit()
 
 
-@router.get("/{campaign_id}/analytics", response_model=dict)
+@router.get("/{campaign_id}/analytics", response_model=dict, summary="Analytics abrufen")
 async def get_analytics(
     campaign_id: str,
     tenant_id: str = Query("system"),

@@ -55,7 +55,7 @@ class IndivArtikelNrOut(BaseModel):
 
 # ── Endpoints ─────────────────────────────────────────────────────────────────
 
-@router.get("", response_model=list[IndivArtikelNrOut])
+@router.get("", response_model=list[IndivArtikelNrOut], summary="Individuelle nummern auflisten")
 def list_individuelle_nummern(
     partner_nr: Optional[str] = Query(None),
     partner_typ: Optional[str] = Query(None, pattern="^(kunden|lieferanten)$"),
@@ -79,7 +79,7 @@ def list_individuelle_nummern(
     return [IndivArtikelNrOut(**dict(r._mapping)) for r in rows]
 
 
-@router.post("", response_model=IndivArtikelNrOut, status_code=201)
+@router.post("", response_model=IndivArtikelNrOut, status_code=201, summary="Individuelle nummer anlegen")
 def create_individuelle_nummer(
     payload: IndivArtikelNrCreate,
     db=Depends(get_db),
@@ -114,7 +114,7 @@ def create_individuelle_nummer(
     return IndivArtikelNrOut(**dict(row._mapping))
 
 
-@router.get("/lookup")
+@router.get("/lookup", summary="Interne nummer lookup")
 def lookup_interne_nummer(
     partner_nr: str = Query(...),
     indiv_artikel_nr: str = Query(...),
@@ -137,7 +137,7 @@ def lookup_interne_nummer(
     return {"interne_artikel_nr": row.artikel_nr, "indiv_bezeichnung": row.indiv_bezeichnung}
 
 
-@router.delete("/{indiv_id}")
+@router.delete("/{indiv_id}", summary="Individuelle nummer löschen")
 def delete_individuelle_nummer(
     indiv_id: str,
     db=Depends(get_db),

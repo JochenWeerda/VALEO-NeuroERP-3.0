@@ -62,7 +62,7 @@ class ZahlungsbedingungOut(BaseModel):
 
 # ── CRUD ──────────────────────────────────────────────────────────────────────
 
-@router.get("", response_model=list[ZahlungsbedingungOut])
+@router.get("", response_model=list[ZahlungsbedingungOut], summary="Zahlungsbedingungen auflisten")
 def list_zahlungsbedingungen(
     db=Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
@@ -74,7 +74,7 @@ def list_zahlungsbedingungen(
     return [ZahlungsbedingungOut(**dict(r._mapping)) for r in rows]
 
 
-@router.get("/{zabd_nr}", response_model=ZahlungsbedingungOut)
+@router.get("/{zabd_nr}", response_model=ZahlungsbedingungOut, summary="Zahlungsbedingung abrufen")
 def get_zahlungsbedingung(
     zabd_nr: str,
     db=Depends(get_db),
@@ -89,7 +89,7 @@ def get_zahlungsbedingung(
     return ZahlungsbedingungOut(**dict(row._mapping))
 
 
-@router.post("", response_model=ZahlungsbedingungOut, status_code=201)
+@router.post("", response_model=ZahlungsbedingungOut, status_code=201, summary="Zahlungsbedingung anlegen")
 def create_zahlungsbedingung(
     payload: ZahlungsbedingungCreate,
     db=Depends(get_db),
@@ -122,7 +122,7 @@ def create_zahlungsbedingung(
     return ZahlungsbedingungOut(**dict(row._mapping))
 
 
-@router.put("/{zabd_nr}", response_model=ZahlungsbedingungOut)
+@router.put("/{zabd_nr}", response_model=ZahlungsbedingungOut, summary="Zahlungsbedingung aktualisieren")
 def update_zahlungsbedingung(
     zabd_nr: str,
     payload: ZahlungsbedingungCreate,
@@ -152,7 +152,7 @@ def update_zahlungsbedingung(
     return ZahlungsbedingungOut(**dict(row._mapping))
 
 
-@router.delete("/{zabd_nr}")
+@router.delete("/{zabd_nr}", summary="Zahlungsbedingung löschen")
 def delete_zahlungsbedingung(
     zabd_nr: str,
     db=Depends(get_db),

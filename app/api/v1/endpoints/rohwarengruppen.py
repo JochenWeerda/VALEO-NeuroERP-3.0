@@ -208,7 +208,7 @@ def _load_staffel_zeilen(db, staffel_id: str) -> list:
 
 # ── Rohwarengruppen CRUD ──────────────────────────────────────────────────────
 
-@router.get("", response_model=list[RohwarengruppeOut])
+@router.get("", response_model=list[RohwarengruppeOut], summary="Rohwarengruppen auflisten")
 def list_rohwarengruppen(
     nur_aktive: bool = Query(True),
     db=Depends(get_db),
@@ -223,7 +223,7 @@ def list_rohwarengruppen(
     return [RohwarengruppeOut(**dict(r._mapping)) for r in rows]
 
 
-@router.post("", response_model=RohwarengruppeOut, status_code=201)
+@router.post("", response_model=RohwarengruppeOut, status_code=201, summary="Rohwarengruppe anlegen")
 def create_rohwarengruppe(
     payload: RohwarengruppeCreate,
     db=Depends(get_db),
@@ -254,7 +254,7 @@ def create_rohwarengruppe(
     return RohwarengruppeOut(**dict(row._mapping))
 
 
-@router.delete("/{gruppe_nr}")
+@router.delete("/{gruppe_nr}", summary="Rohwarengruppe löschen")
 def delete_rohwarengruppe(
     gruppe_nr: str,
     db=Depends(get_db),
@@ -270,7 +270,7 @@ def delete_rohwarengruppe(
 
 # ── Abrechnungsschemata ───────────────────────────────────────────────────────
 
-@router.get("/schemata", response_model=list[AbrechnungsschemaOut])
+@router.get("/schemata", response_model=list[AbrechnungsschemaOut], summary="Schemata auflisten")
 def list_schemata(
     gruppe_id: Optional[str] = Query(None),
     db=Depends(get_db),
@@ -286,7 +286,7 @@ def list_schemata(
     return [AbrechnungsschemaOut(**dict(r._mapping)) for r in rows]
 
 
-@router.post("/schemata", response_model=AbrechnungsschemaOut, status_code=201)
+@router.post("/schemata", response_model=AbrechnungsschemaOut, status_code=201, summary="Schema anlegen")
 def create_schema(
     payload: AbrechnungsschemaCreate,
     db=Depends(get_db),
@@ -324,7 +324,7 @@ def create_schema(
 
 # ── Qualitätsdefinitionen ─────────────────────────────────────────────────────
 
-@router.get("/qualitaeten", response_model=list[RohwareQualitaetOut])
+@router.get("/qualitaeten", response_model=list[RohwareQualitaetOut], summary="Qualitaeten auflisten")
 def list_qualitaeten(
     gruppe_id: Optional[str] = Query(None),
     schema_id: Optional[str] = Query(None),
@@ -344,7 +344,7 @@ def list_qualitaeten(
     return [RohwareQualitaetOut(**dict(r._mapping)) for r in rows]
 
 
-@router.post("/qualitaeten", response_model=RohwareQualitaetOut, status_code=201)
+@router.post("/qualitaeten", response_model=RohwareQualitaetOut, status_code=201, summary="Qualitaet anlegen")
 def create_qualitaet(
     payload: RohwareQualitaetCreate,
     db=Depends(get_db),
@@ -381,7 +381,7 @@ def create_qualitaet(
 
 # ── Zu-/Abschlag-Staffeln ─────────────────────────────────────────────────────
 
-@router.get("/staffeln", response_model=list[ZaStaffelOut])
+@router.get("/staffeln", response_model=list[ZaStaffelOut], summary="Staffeln auflisten")
 def list_staffeln(
     gruppe_id: Optional[str] = Query(None),
     db=Depends(get_db),
@@ -402,7 +402,7 @@ def list_staffeln(
     return result
 
 
-@router.post("/staffeln", response_model=ZaStaffelOut, status_code=201)
+@router.post("/staffeln", response_model=ZaStaffelOut, status_code=201, summary="Staffel anlegen")
 def create_staffel(
     payload: ZaStaffelCreate,
     db=Depends(get_db),
@@ -447,7 +447,7 @@ def create_staffel(
     return ZaStaffelOut(**d)
 
 
-@router.post("/staffeln/{staffel_nr}/berechnen", response_model=StaffelBerechnungResult)
+@router.post("/staffeln/{staffel_nr}/berechnen", response_model=StaffelBerechnungResult, summary="Berechnen staffel")
 def staffel_berechnen(
     staffel_nr: str,
     analysewert: Decimal,

@@ -59,7 +59,7 @@ class VersicherungPatch(BaseModel):
     email: Optional[str] = None
 
 
-@router.get("")
+@router.get("", summary="Versicherungen auflisten")
 def list_versicherungen(
     status: Optional[str] = None,
     skip: int = Query(0, ge=0),
@@ -72,7 +72,7 @@ def list_versicherungen(
     return [_to_dict(v) for v in q.order_by(Versicherung.art).offset(skip).limit(limit).all()]
 
 
-@router.get("/{versicherung_id}")
+@router.get("/{versicherung_id}", summary="Versicherung abrufen")
 def get_versicherung(versicherung_id: str, db: Session = Depends(get_db)):
     obj = db.query(Versicherung).filter(Versicherung.id == versicherung_id).first()
     if not obj:
@@ -80,7 +80,7 @@ def get_versicherung(versicherung_id: str, db: Session = Depends(get_db)):
     return _to_dict(obj)
 
 
-@router.post("", status_code=201)
+@router.post("", status_code=201, summary="Versicherung anlegen")
 def create_versicherung(payload: VersicherungPayload, db: Session = Depends(get_db)):
     obj = Versicherung(**payload.model_dump())
     db.add(obj)
@@ -89,7 +89,7 @@ def create_versicherung(payload: VersicherungPayload, db: Session = Depends(get_
     return _to_dict(obj)
 
 
-@router.patch("/{versicherung_id}")
+@router.patch("/{versicherung_id}", summary="Versicherung aktualisieren")
 def update_versicherung(versicherung_id: str, payload: VersicherungPatch, db: Session = Depends(get_db)):
     obj = db.query(Versicherung).filter(Versicherung.id == versicherung_id).first()
     if not obj:
@@ -102,7 +102,7 @@ def update_versicherung(versicherung_id: str, payload: VersicherungPatch, db: Se
     return _to_dict(obj)
 
 
-@router.delete("/{versicherung_id}", status_code=204, response_class=Response, response_model=None)
+@router.delete("/{versicherung_id}", status_code=204, response_class=Response, response_model=None, summary="Versicherung löschen")
 def delete_versicherung(versicherung_id: str, db: Session = Depends(get_db)):
     obj = db.query(Versicherung).filter(Versicherung.id == versicherung_id).first()
     if not obj:

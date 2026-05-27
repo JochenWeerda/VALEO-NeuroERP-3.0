@@ -36,7 +36,7 @@ router = APIRouter(prefix="/tenant", tags=["tenant", "governance"])
 # AP3: Tenant-/Verbundmodell
 # ---------------------------------------------------------------------------
 
-@router.get("/structure", response_model=TenantStructure)
+@router.get("/structure", response_model=TenantStructure, summary="Tenant structure abrufen")
 async def get_tenant_structure(tenant_id: str = Depends(get_tenant_id)):
     """AP3: Liefert die Verbundstruktur für den aktuellen Mandanten."""
     # Default: single-tenant structure (no verbund)
@@ -62,7 +62,7 @@ async def get_tenant_structure(tenant_id: str = Depends(get_tenant_id)):
 # AP4: Rollen- und Berechtigungsvererbung
 # ---------------------------------------------------------------------------
 
-@router.get("/role-inheritance", response_model=RoleInheritanceChain)
+@router.get("/role-inheritance", response_model=RoleInheritanceChain, summary="Role inheritance abrufen")
 async def get_role_inheritance(tenant_id: str = Depends(get_tenant_id)):
     """AP4: Liefert die effektive Rollenvererbungskette für den Mandanten."""
     return RoleInheritanceChain(
@@ -110,7 +110,7 @@ async def get_role_inheritance(tenant_id: str = Depends(get_tenant_id)):
 # AP5: Agenten- und Delegationssicherheitsmodell
 # ---------------------------------------------------------------------------
 
-@router.get("/agent-manifests", response_model=list[AgentManifest])
+@router.get("/agent-manifests", response_model=list[AgentManifest], summary="Agent manifests auflisten")
 async def list_agent_manifests(tenant_id: str = Depends(get_tenant_id)):
     """AP5: Listet alle registrierten Agenten-Manifeste für den Mandanten."""
     return [
@@ -138,7 +138,7 @@ async def list_agent_manifests(tenant_id: str = Depends(get_tenant_id)):
     ]
 
 
-@router.get("/delegation-policy", response_model=DelegationPolicy)
+@router.get("/delegation-policy", response_model=DelegationPolicy, summary="Delegation policy abrufen")
 async def get_delegation_policy(tenant_id: str = Depends(get_tenant_id)):
     """AP5: Liefert die aktive Delegationsrichtlinie des Mandanten."""
     return DelegationPolicy(
@@ -154,13 +154,13 @@ async def get_delegation_policy(tenant_id: str = Depends(get_tenant_id)):
 # AP6: Export- und Datenresidenzregeln
 # ---------------------------------------------------------------------------
 
-@router.get("/data-residency", response_model=ExportGovernancePolicy)
+@router.get("/data-residency", response_model=ExportGovernancePolicy, summary="Data residency abrufen")
 async def get_data_residency(tenant_id: str = Depends(get_tenant_id)):
     """AP6: Liefert die Export- und Datenresidenzregeln des Mandanten (GoBD-konform)."""
     return build_default_governance(tenant_id)
 
 
-@router.get("/runtime-shield", response_model=dict)
+@router.get("/runtime-shield", response_model=dict, summary="Runtime shield abrufen")
 async def get_runtime_shield(tenant_id: str = Depends(get_tenant_id)) -> dict:
     """Liefert tenant-isolierte Cache- und Rate-Limit-Defaults fuer Agenten und Workloads."""
     return {

@@ -88,7 +88,7 @@ class RabattsatzOut(BaseModel):
 
 # ── Rabattgruppen ─────────────────────────────────────────────────────────────
 
-@router.get("/gruppen", response_model=list[RabattgruppeOut])
+@router.get("/gruppen", response_model=list[RabattgruppeOut], summary="Rabattgruppen auflisten")
 def list_rabattgruppen(
     richtung: Optional[str] = Query(None, description="EK oder VK"),
     db=Depends(get_db),
@@ -104,7 +104,7 @@ def list_rabattgruppen(
     return [RabattgruppeOut(**dict(r._mapping)) for r in rows]
 
 
-@router.post("/gruppen", response_model=RabattgruppeOut, status_code=201)
+@router.post("/gruppen", response_model=RabattgruppeOut, status_code=201, summary="Rabattgruppe anlegen")
 def create_rabattgruppe(
     payload: RabattgruppeCreate,
     db=Depends(get_db),
@@ -131,7 +131,7 @@ def create_rabattgruppe(
     return RabattgruppeOut(**dict(row._mapping))
 
 
-@router.delete("/gruppen/{gruppe_id}")
+@router.delete("/gruppen/{gruppe_id}", summary="Rabattgruppe löschen")
 def delete_rabattgruppe(
     gruppe_id: str,
     db=Depends(get_db),
@@ -147,7 +147,7 @@ def delete_rabattgruppe(
 
 # ── Rabattklassen ─────────────────────────────────────────────────────────────
 
-@router.get("/klassen", response_model=list[RabattklasseOut])
+@router.get("/klassen", response_model=list[RabattklasseOut], summary="Rabattklassen auflisten")
 def list_rabattklassen(
     richtung: Optional[str] = Query(None),
     db=Depends(get_db),
@@ -163,7 +163,7 @@ def list_rabattklassen(
     return [RabattklasseOut(**dict(r._mapping)) for r in rows]
 
 
-@router.post("/klassen", response_model=RabattklasseOut, status_code=201)
+@router.post("/klassen", response_model=RabattklasseOut, status_code=201, summary="Rabattklasse anlegen")
 def create_rabattklasse(
     payload: RabattklasseCreate,
     db=Depends(get_db),
@@ -190,7 +190,7 @@ def create_rabattklasse(
     return RabattklasseOut(**dict(row._mapping))
 
 
-@router.delete("/klassen/{klasse_id}")
+@router.delete("/klassen/{klasse_id}", summary="Rabattklasse löschen")
 def delete_rabattklasse(
     klasse_id: str,
     db=Depends(get_db),
@@ -206,7 +206,7 @@ def delete_rabattklasse(
 
 # ── Rabattsätze ───────────────────────────────────────────────────────────────
 
-@router.get("/saetze", response_model=list[RabattsatzOut])
+@router.get("/saetze", response_model=list[RabattsatzOut], summary="Rabattsaetze auflisten")
 def list_rabattsaetze(
     rabattgruppe_nr: Optional[str] = Query(None),
     rabattklasse_nr: Optional[str] = Query(None),
@@ -234,7 +234,7 @@ def list_rabattsaetze(
     return [RabattsatzOut(**dict(r._mapping)) for r in rows]
 
 
-@router.post("/saetze", response_model=RabattsatzOut, status_code=201)
+@router.post("/saetze", response_model=RabattsatzOut, status_code=201, summary="Rabattsatz anlegen")
 def create_rabattsatz(
     payload: RabattsatzCreate,
     db=Depends(get_db),
@@ -261,7 +261,7 @@ def create_rabattsatz(
     return RabattsatzOut(**dict(row._mapping))
 
 
-@router.delete("/saetze/{satz_id}")
+@router.delete("/saetze/{satz_id}", summary="Rabattsatz löschen")
 def delete_rabattsatz(
     satz_id: str,
     db=Depends(get_db),
@@ -275,7 +275,7 @@ def delete_rabattsatz(
     return Response(status_code=204)
 
 
-@router.get("/saetze/lookup")
+@router.get("/saetze/lookup", summary="Rabatt lookup")
 def lookup_rabatt(
     rabattgruppe_nr: str,
     rabattklasse_nr: str,

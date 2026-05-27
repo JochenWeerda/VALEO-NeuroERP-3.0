@@ -1,4 +1,4 @@
-﻿"""
+"""
 Sustainability API endpoints.
 
 Runtime-only integrations for external sustainability and compliance sources.
@@ -42,7 +42,7 @@ class EmissionsEstimateRequest(BaseModel):
     data_version: Optional[str] = Field(None, description="Optional Climatiq data version")
 
 
-@router.get("/providers/status")
+@router.get("/providers/status", summary="Provider status abrufen")
 async def get_provider_status() -> dict[str, Any]:
     """Return external provider availability and configuration status."""
     return {
@@ -89,7 +89,7 @@ def _build_esg_from_db_or_fallback(tenant_id: str, jahr: int, db: Session):
     return report
 
 
-@router.get("/catalog")
+@router.get("/catalog", summary="Sustainability catalog abrufen")
 async def get_sustainability_catalog(
     tenant_id: str = Query("TENANT-001", description="Tenant context for the catalog"),
     jahr: int = Query(2026, ge=2020, le=2100, description="Reporting year"),
@@ -100,7 +100,7 @@ async def get_sustainability_catalog(
     return build_sustainability_catalog(report).as_dict()
 
 
-@router.get("/read-model")
+@router.get("/read-model", summary="Sustainability read model abrufen")
 async def get_sustainability_read_model(
     tenant_id: str = Query("TENANT-001", description="Tenant context for the read model"),
     jahr: int = Query(2026, ge=2020, le=2100, description="Reporting year"),
@@ -111,7 +111,7 @@ async def get_sustainability_read_model(
     return build_sustainability_read_model(report).as_dict()
 
 
-@router.get("/psm/{zulassungsnummer}")
+@router.get("/psm/{zulassungsnummer}", summary="Psm runtime abrufen")
 async def get_psm_runtime(
     zulassungsnummer: str,
     tenant_id: str = Query("system", description="Tenant context for mapping"),
@@ -139,7 +139,7 @@ async def get_psm_runtime(
     }
 
 
-@router.post("/emissions/estimate")
+@router.post("/emissions/estimate", summary="Emissions estimate")
 async def estimate_emissions(payload: EmissionsEstimateRequest) -> dict[str, Any]:
     """
     Estimate CO2 emissions via Climatiq.
@@ -193,7 +193,7 @@ async def estimate_emissions(payload: EmissionsEstimateRequest) -> dict[str, Any
     }
 
 
-@router.get("/nutrients/crop")
+@router.get("/nutrients/crop", summary="Crop nutrients abrufen")
 async def get_crop_nutrients(
     dataset: str = Query(
         "inputs/fertilizersnutrientelements",
@@ -308,7 +308,7 @@ def _compute_esg_report(*, year: int, customer_id: Optional[str], db: Session) -
     }
 
 
-@router.get("/esg-report")
+@router.get("/esg-report", summary="Esg report abrufen")
 async def get_esg_report(
     year: int = Query(..., ge=2020, le=2030),
     customer_id: Optional[str] = Query(None),
@@ -321,7 +321,7 @@ async def get_esg_report(
     return _compute_esg_report(year=year, customer_id=customer_id, db=db)
 
 
-@router.get("/esg-report/export.csv")
+@router.get("/esg-report/export.csv", summary="Esg report csv exportieren")
 async def export_esg_report_csv(
     year: int = Query(..., ge=2020, le=2030),
     customer_id: Optional[str] = Query(None),
@@ -359,7 +359,7 @@ async def export_esg_report_csv(
     )
 
 
-@router.get("/esg-report/export.pdf")
+@router.get("/esg-report/export.pdf", summary="Esg report pdf exportieren")
 async def export_esg_report_pdf(
     year: int = Query(..., ge=2020, le=2030),
     customer_id: Optional[str] = Query(None),
@@ -397,7 +397,7 @@ async def export_esg_report_pdf(
 
 # ── /reports alias (mirrors /read-model for flow-spine compatibility) ─────────
 
-@router.get("/reports")
+@router.get("/reports", summary="Sustainability reports abrufen")
 async def get_sustainability_reports(
     tenant_id: str = Query("TENANT-001", description="Tenant context"),
     jahr: int = Query(2026, ge=2020, le=2100, description="Reporting year"),

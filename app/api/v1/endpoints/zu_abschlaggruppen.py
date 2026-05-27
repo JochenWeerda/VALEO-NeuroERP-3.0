@@ -96,7 +96,7 @@ class ZuAbschlagKonditionOut(BaseModel):
 
 # ── Zu-/Abschlaggruppen CRUD ──────────────────────────────────────────────────
 
-@router.get("/gruppen", response_model=list[ZuAbschlaggruppeOut])
+@router.get("/gruppen", response_model=list[ZuAbschlaggruppeOut], summary="Zu abschlaggruppen auflisten")
 def list_zu_abschlaggruppen(
     richtung: Optional[str] = Query(None),
     db=Depends(get_db),
@@ -112,7 +112,7 @@ def list_zu_abschlaggruppen(
     return [ZuAbschlaggruppeOut(**dict(r._mapping)) for r in rows]
 
 
-@router.post("/gruppen", response_model=ZuAbschlaggruppeOut, status_code=201)
+@router.post("/gruppen", response_model=ZuAbschlaggruppeOut, status_code=201, summary="Zu abschlaggruppe anlegen")
 def create_zu_abschlaggruppe(
     payload: ZuAbschlaggruppeCreate,
     db=Depends(get_db),
@@ -135,7 +135,7 @@ def create_zu_abschlaggruppe(
     return ZuAbschlaggruppeOut(**dict(row._mapping))
 
 
-@router.delete("/gruppen/{gruppe_nr}")
+@router.delete("/gruppen/{gruppe_nr}", summary="Zu abschlaggruppe löschen")
 def delete_zu_abschlaggruppe(
     gruppe_nr: str,
     richtung: str = Query("vk"),
@@ -152,7 +152,7 @@ def delete_zu_abschlaggruppe(
 
 # ── Zu-/Abschlagklassen CRUD ──────────────────────────────────────────────────
 
-@router.get("/klassen", response_model=list[ZuAbschlagklasseOut])
+@router.get("/klassen", response_model=list[ZuAbschlagklasseOut], summary="Zu abschlagklassen auflisten")
 def list_zu_abschlagklassen(
     richtung: Optional[str] = Query(None),
     db=Depends(get_db),
@@ -168,7 +168,7 @@ def list_zu_abschlagklassen(
     return [ZuAbschlagklasseOut(**dict(r._mapping)) for r in rows]
 
 
-@router.post("/klassen", response_model=ZuAbschlagklasseOut, status_code=201)
+@router.post("/klassen", response_model=ZuAbschlagklasseOut, status_code=201, summary="Zu abschlagklasse anlegen")
 def create_zu_abschlagklasse(
     payload: ZuAbschlagklasseCreate,
     db=Depends(get_db),
@@ -191,7 +191,7 @@ def create_zu_abschlagklasse(
     return ZuAbschlagklasseOut(**dict(row._mapping))
 
 
-@router.delete("/klassen/{klasse_nr}")
+@router.delete("/klassen/{klasse_nr}", summary="Zu abschlagklasse löschen")
 def delete_zu_abschlagklasse(
     klasse_nr: str,
     richtung: str = Query("vk"),
@@ -208,7 +208,7 @@ def delete_zu_abschlagklasse(
 
 # ── Zu-/Abschlagkonditionen (Gruppe × Klasse → Wert) ─────────────────────────
 
-@router.get("/konditionen", response_model=list[ZuAbschlagKonditionOut])
+@router.get("/konditionen", response_model=list[ZuAbschlagKonditionOut], summary="Zu abschlag konditionen auflisten")
 def list_zu_abschlag_konditionen(
     gruppe_id: Optional[str] = Query(None),
     klasse_id: Optional[str] = Query(None),
@@ -236,7 +236,7 @@ def list_zu_abschlag_konditionen(
     return [ZuAbschlagKonditionOut(**dict(r._mapping)) for r in rows]
 
 
-@router.post("/konditionen", response_model=ZuAbschlagKonditionOut, status_code=201)
+@router.post("/konditionen", response_model=ZuAbschlagKonditionOut, status_code=201, summary="Zu abschlag kondition anlegen")
 def create_zu_abschlag_kondition(
     payload: ZuAbschlagKonditionCreate,
     db=Depends(get_db),

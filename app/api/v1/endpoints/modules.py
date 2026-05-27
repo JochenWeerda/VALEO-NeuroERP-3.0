@@ -14,13 +14,13 @@ from modules.bootstrap import initialize_module_registry
 router = APIRouter(tags=["modules"])
 
 
-@router.get("/modules")
+@router.get("/modules", summary="Modules auflisten")
 async def list_modules(tenant_id: Optional[str] = Query(None)):
     initialize_module_registry()
     return {"items": registry.as_dict(tenant_id=tenant_id), "tenant_id": tenant_id}
 
 
-@router.get("/modules/{module_name}")
+@router.get("/modules/{module_name}", summary="Module abrufen")
 async def get_module(module_name: str, tenant_id: Optional[str] = Query(None)):
     initialize_module_registry()
     module = registry.get(module_name)
@@ -37,7 +37,7 @@ async def get_module(module_name: str, tenant_id: Optional[str] = Query(None)):
     }
 
 
-@router.get("/modules/agrar/contracts")
+@router.get("/modules/agrar/contracts", summary="Agrar contracts abrufen")
 async def get_agrar_contracts():
     initialize_module_registry()
     event_schemas = {

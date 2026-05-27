@@ -96,7 +96,7 @@ class ApplyTemplateResponse(BaseModel):
     applied_at: datetime
 
 
-@router.get("", response_model=List[BookingTemplateResponse])
+@router.get("", response_model=List[BookingTemplateResponse], summary="Booking templates auflisten")
 async def list_booking_templates(
     category: Optional[str] = Query(None, description="Filter by category"),
     active_only: bool = Query(True, description="Show only active templates"),
@@ -162,7 +162,7 @@ async def list_booking_templates(
         return []
 
 
-@router.get("/{template_id}", response_model=BookingTemplateResponse)
+@router.get("/{template_id}", response_model=BookingTemplateResponse, summary="Booking template abrufen")
 async def get_booking_template(
     template_id: str,
     tenant_id: str = Query("system", description="Tenant ID"),
@@ -215,7 +215,7 @@ async def get_booking_template(
         raise HTTPException(status_code=500, detail=f"Failed to get booking template: {str(e)}")
 
 
-@router.post("", response_model=BookingTemplateResponse, status_code=201)
+@router.post("", response_model=BookingTemplateResponse, status_code=201, summary="Booking template anlegen")
 async def create_booking_template(
     template: BookingTemplateCreate,
     tenant_id: str = Query("system", description="Tenant ID"),
@@ -294,7 +294,7 @@ async def create_booking_template(
         raise HTTPException(status_code=500, detail=f"Failed to create booking template: {str(e)}")
 
 
-@router.post("/{template_id}/apply", response_model=ApplyTemplateResponse)
+@router.post("/{template_id}/apply", response_model=ApplyTemplateResponse, summary="Booking template apply")
 async def apply_booking_template(
     template_id: str,
     request: ApplyTemplateRequest,
@@ -463,7 +463,7 @@ async def apply_booking_template(
         raise HTTPException(status_code=500, detail=f"Failed to apply booking template: {str(e)}")
 
 
-@router.put("/{template_id}", response_model=BookingTemplateResponse)
+@router.put("/{template_id}", response_model=BookingTemplateResponse, summary="Booking template aktualisieren")
 async def update_booking_template(
     template_id: str,
     template: BookingTemplateUpdate,
@@ -566,7 +566,7 @@ async def update_booking_template(
         raise HTTPException(status_code=500, detail=f"Failed to update booking template: {str(e)}")
 
 
-@router.delete("/{template_id}", status_code=204, response_class=Response, response_model=None)
+@router.delete("/{template_id}", status_code=204, response_class=Response, response_model=None, summary="Booking template löschen")
 async def delete_booking_template(
     template_id: str,
     tenant_id: str = Query("system", description="Tenant ID"),

@@ -242,7 +242,7 @@ def _to_factor_range_out(r: DryingRuleFactorRange) -> DryingFactorRangeOut:
 
 # ── DryingRuleSet routes ──────────────────────────────────────────────────────
 
-@router.get("/drying-rules", response_model=list[DryingRuleSetOut])
+@router.get("/drying-rules", response_model=list[DryingRuleSetOut], summary="Drying rules auflisten")
 async def list_drying_rules(
     crop_code: Optional[str] = Query(None),
     contract_id: Optional[str] = Query(None),
@@ -259,7 +259,7 @@ async def list_drying_rules(
     return [_to_drying_rule_out(r) for r in rules]
 
 
-@router.get("/drying-rules/{rule_id}", response_model=DryingRuleSetOut)
+@router.get("/drying-rules/{rule_id}", response_model=DryingRuleSetOut, summary="Drying rule abrufen")
 async def get_drying_rule(
     rule_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -273,7 +273,7 @@ async def get_drying_rule(
     return _to_drying_rule_out(rule)
 
 
-@router.post("/drying-rules", response_model=DryingRuleSetOut, status_code=201)
+@router.post("/drying-rules", response_model=DryingRuleSetOut, status_code=201, summary="Drying rule anlegen")
 async def create_drying_rule(
     payload: DryingRuleSetCreate,
     request: Request,
@@ -287,7 +287,7 @@ async def create_drying_rule(
     return _to_drying_rule_out(rule)
 
 
-@router.put("/drying-rules/{rule_id}", response_model=DryingRuleSetOut)
+@router.put("/drying-rules/{rule_id}", response_model=DryingRuleSetOut, summary="Drying rule aktualisieren")
 async def update_drying_rule(
     rule_id: str,
     payload: DryingRuleSetUpdate,
@@ -305,7 +305,7 @@ async def update_drying_rule(
     return _to_drying_rule_out(rule)
 
 
-@router.delete("/drying-rules/{rule_id}", status_code=204, response_class=Response, response_model=None)
+@router.delete("/drying-rules/{rule_id}", status_code=204, response_class=Response, response_model=None, summary="Drying rule löschen")
 async def delete_drying_rule(
     rule_id: str,
     request: Request,
@@ -321,7 +321,7 @@ async def delete_drying_rule(
         raise HTTPException(status_code=404, detail=exc.detail)
 
 
-@router.get("/drying-rules/{rule_id}/download", response_model=dict)
+@router.get("/drying-rules/{rule_id}/download", response_model=dict, summary="Drying rule document herunterladen")
 async def download_drying_rule_document(
     rule_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -336,7 +336,7 @@ async def download_drying_rule_document(
 
 # ── Lookup Rows ───────────────────────────────────────────────────────────────
 
-@router.get("/drying-rules/{rule_id}/lookup-rows", response_model=list[DryingLookupRowOut])
+@router.get("/drying-rules/{rule_id}/lookup-rows", response_model=list[DryingLookupRowOut], summary="Drying lookup rows auflisten")
 async def list_drying_lookup_rows(
     rule_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -350,7 +350,7 @@ async def list_drying_lookup_rows(
     return [_to_lookup_row_out(r) for r in rows]
 
 
-@router.post("/drying-rules/lookup-rows", response_model=DryingLookupRowOut, status_code=201)
+@router.post("/drying-rules/lookup-rows", response_model=DryingLookupRowOut, status_code=201, summary="Drying lookup row anlegen")
 async def create_drying_lookup_row(
     payload: DryingLookupRowCreate,
     request: Request,
@@ -370,7 +370,7 @@ async def create_drying_lookup_row(
     return _to_lookup_row_out(row)
 
 
-@router.put("/drying-rules/lookup-rows/{row_id}", response_model=DryingLookupRowOut)
+@router.put("/drying-rules/lookup-rows/{row_id}", response_model=DryingLookupRowOut, summary="Drying lookup row aktualisieren")
 async def update_drying_lookup_row(
     row_id: str,
     payload: DryingLookupRowUpdate,
@@ -389,7 +389,7 @@ async def update_drying_lookup_row(
     return _to_lookup_row_out(row)
 
 
-@router.delete("/drying-rules/lookup-rows/{row_id}", status_code=204, response_class=Response, response_model=None)
+@router.delete("/drying-rules/lookup-rows/{row_id}", status_code=204, response_class=Response, response_model=None, summary="Drying lookup row löschen")
 async def delete_drying_lookup_row(
     row_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -405,7 +405,7 @@ async def delete_drying_lookup_row(
 
 # ── Factor Ranges ─────────────────────────────────────────────────────────────
 
-@router.get("/drying-rules/{rule_id}/factor-ranges", response_model=list[DryingFactorRangeOut])
+@router.get("/drying-rules/{rule_id}/factor-ranges", response_model=list[DryingFactorRangeOut], summary="Drying factor ranges auflisten")
 async def list_drying_factor_ranges(
     rule_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -419,7 +419,7 @@ async def list_drying_factor_ranges(
     return [_to_factor_range_out(r) for r in ranges]
 
 
-@router.post("/drying-rules/factor-ranges", response_model=DryingFactorRangeOut, status_code=201)
+@router.post("/drying-rules/factor-ranges", response_model=DryingFactorRangeOut, status_code=201, summary="Drying factor range anlegen")
 async def create_drying_factor_range(
     payload: DryingFactorRangeCreate,
     request: Request,
@@ -439,7 +439,7 @@ async def create_drying_factor_range(
     return _to_factor_range_out(range_obj)
 
 
-@router.put("/drying-rules/factor-ranges/{range_id}", response_model=DryingFactorRangeOut)
+@router.put("/drying-rules/factor-ranges/{range_id}", response_model=DryingFactorRangeOut, summary="Drying factor range aktualisieren")
 async def update_drying_factor_range(
     range_id: str,
     payload: DryingFactorRangeUpdate,
@@ -458,7 +458,7 @@ async def update_drying_factor_range(
     return _to_factor_range_out(range_obj)
 
 
-@router.delete("/drying-rules/factor-ranges/{range_id}", status_code=204, response_class=Response, response_model=None)
+@router.delete("/drying-rules/factor-ranges/{range_id}", status_code=204, response_class=Response, response_model=None, summary="Drying factor range löschen")
 async def delete_drying_factor_range(
     range_id: str,
     tenant_id: str = Depends(get_tenant_id),

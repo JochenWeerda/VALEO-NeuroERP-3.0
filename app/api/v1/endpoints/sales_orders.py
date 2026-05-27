@@ -179,7 +179,7 @@ def _row_to_order(row: dict, items: Optional[list[SalesOrderItemOut]] = None) ->
     )
 
 
-@router.get("/", response_model=PaginatedResponse[SalesOrder])
+@router.get("/", response_model=PaginatedResponse[SalesOrder], summary="Sales orders auflisten")
 async def list_sales_orders(
     customer_id: Optional[str] = Query(None, description="Filter by customer ID"),
     search: Optional[str] = Query(None),
@@ -239,7 +239,7 @@ async def list_sales_orders(
     )
 
 
-@router.get("/{order_id}", response_model=SalesOrder)
+@router.get("/{order_id}", response_model=SalesOrder, summary="Sales order abrufen")
 async def get_sales_order(
     order_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -249,7 +249,7 @@ async def get_sales_order(
     return _row_to_order(row, _fetch_items(db, order_id, tenant_id))
 
 
-@router.post("/", response_model=SalesOrder, status_code=status.HTTP_201_CREATED)
+@router.post("/", response_model=SalesOrder, status_code=status.HTTP_201_CREATED, summary="Sales order anlegen")
 async def create_sales_order(
     payload: SalesOrderCreate,
     tenant_id: str = Depends(get_tenant_id),
@@ -365,7 +365,7 @@ async def create_sales_order(
     return _row_to_order(row, _fetch_items(db, order_id, effective_tenant))
 
 
-@router.put("/{order_id}", response_model=SalesOrder)
+@router.put("/{order_id}", response_model=SalesOrder, summary="Sales order aktualisieren")
 async def update_sales_order(
     order_id: str,
     payload: SalesOrderUpdate,
@@ -483,7 +483,7 @@ async def update_sales_order(
     return _row_to_order(row, _fetch_items(db, order_id, effective_tenant))
 
 
-@router.post("/{order_id}/create-delivery-note", response_model=dict, status_code=201)
+@router.post("/{order_id}/create-delivery-note", response_model=dict, status_code=201, summary="Delivery from order anlegen")
 async def create_delivery_from_order(
     order_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -554,7 +554,7 @@ async def create_delivery_from_order(
     return {"ok": True, "delivery_note_id": dn_id, "delivery_note_number": dn_nr, "order_id": order_id}
 
 
-@router.delete("/{order_id}", status_code=status.HTTP_204_NO_CONTENT, response_class=Response)
+@router.delete("/{order_id}", status_code=status.HTTP_204_NO_CONTENT, response_class=Response, summary="Sales order löschen")
 async def delete_sales_order(
     order_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -586,7 +586,7 @@ async def delete_sales_order(
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 
-@router.post("/{order_id}/confirm", response_model=SalesOrder)
+@router.post("/{order_id}/confirm", response_model=SalesOrder, summary="Sales order bestätigen")
 async def confirm_sales_order(
     order_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -604,7 +604,7 @@ async def confirm_sales_order(
     return _row_to_order(_get_sales_order_row(db, order_id, tenant_id))
 
 
-@router.post("/{order_id}/complete", response_model=SalesOrder)
+@router.post("/{order_id}/complete", response_model=SalesOrder, summary="Sales order complete")
 async def complete_sales_order(
     order_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -622,7 +622,7 @@ async def complete_sales_order(
     return _row_to_order(_get_sales_order_row(db, order_id, tenant_id))
 
 
-@router.post("/{order_id}/cancel", response_model=SalesOrder)
+@router.post("/{order_id}/cancel", response_model=SalesOrder, summary="Sales order stornieren")
 async def cancel_sales_order(
     order_id: str,
     tenant_id: str = Depends(get_tenant_id),

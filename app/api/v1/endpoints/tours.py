@@ -183,7 +183,7 @@ class AssignDeliveryNotesRequest(BaseModel):
 
 # === TOUR ENDPOINTS ===
 
-@router.get("", response_model=List[TourResponse])
+@router.get("", response_model=List[TourResponse], summary="Tours auflisten")
 async def list_tours(
     skip: int = Query(0, ge=0),
     limit: int = Query(100, ge=1, le=1000),
@@ -201,14 +201,14 @@ async def list_tours(
     return tours
 
 
-@router.get("/week/{week}", response_model=List[TourResponse])
+@router.get("/week/{week}", response_model=List[TourResponse], summary="Tours by week abrufen")
 async def get_tours_by_week(week: str, db: Session = Depends(get_db)):
     """Get all tours for a specific week (e.g., 2026-W07)"""
     repo = TourRepository(db)
     return repo.get_by_week(week)
 
 
-@router.get("/today", response_model=List[TourResponse])
+@router.get("/today", response_model=List[TourResponse], summary="Today tours abrufen")
 async def get_today_tours(db: Session = Depends(get_db)):
     """Get all tours for today"""
     repo = TourRepository(db)
@@ -219,7 +219,7 @@ async def get_today_tours(db: Session = Depends(get_db)):
     return repo.get_by_date(today_date)
 
 
-@router.get("/{tour_id}", response_model=TourResponse)
+@router.get("/{tour_id}", response_model=TourResponse, summary="Tour abrufen")
 async def get_tour(tour_id: str, db: Session = Depends(get_db)):
     """Get a single tour with all details"""
     tour_repo = TourRepository(db)
@@ -246,7 +246,7 @@ async def get_tour(tour_id: str, db: Session = Depends(get_db)):
     }
 
 
-@router.post("", response_model=TourResponse, status_code=201)
+@router.post("", response_model=TourResponse, status_code=201, summary="Tour anlegen")
 async def create_tour(
     tour_data: CreateTourRequest,
     db: Session = Depends(get_db)
@@ -265,7 +265,7 @@ async def create_tour(
     return tour
 
 
-@router.patch("/{tour_id}", response_model=TourResponse)
+@router.patch("/{tour_id}", response_model=TourResponse, summary="Tour aktualisieren")
 async def update_tour(
     tour_id: str,
     tour_data: dict,
@@ -279,7 +279,7 @@ async def update_tour(
     return tour
 
 
-@router.delete("/{tour_id}", status_code=204, response_class=Response, response_model=None)
+@router.delete("/{tour_id}", status_code=204, response_class=Response, response_model=None, summary="Tour löschen")
 async def delete_tour(tour_id: str, db: Session = Depends(get_db)):
     """Delete a tour"""
     repo = TourRepository(db)
@@ -289,7 +289,7 @@ async def delete_tour(tour_id: str, db: Session = Depends(get_db)):
 
 # === STATUS ENDPOINTS ===
 
-@router.post("/{tour_id}/start-loading", response_model=TourResponse)
+@router.post("/{tour_id}/start-loading", response_model=TourResponse, summary="Loading starten")
 async def start_loading(
     tour_id: str,
     user_id: str = Query(...),
@@ -304,7 +304,7 @@ async def start_loading(
     return tour
 
 
-@router.post("/{tour_id}/finish-loading", response_model=TourResponse)
+@router.post("/{tour_id}/finish-loading", response_model=TourResponse, summary="Loading finish")
 async def finish_loading(
     tour_id: str,
     user_id: str = Query(...),
@@ -319,7 +319,7 @@ async def finish_loading(
     return tour
 
 
-@router.post("/{tour_id}/dispatch", response_model=TourResponse)
+@router.post("/{tour_id}/dispatch", response_model=TourResponse, summary="Tour dispatch")
 async def dispatch_tour(
     tour_id: str,
     user_id: str = Query(...),
@@ -336,7 +336,7 @@ async def dispatch_tour(
 
 # === STOP ENDPOINTS ===
 
-@router.get("/{tour_id}/stops", response_model=List[StopResponse])
+@router.get("/{tour_id}/stops", response_model=List[StopResponse], summary="Stops auflisten")
 async def list_stops(tour_id: str, db: Session = Depends(get_db)):
     """List all stops for a tour"""
     # Verify tour exists
@@ -349,7 +349,7 @@ async def list_stops(tour_id: str, db: Session = Depends(get_db)):
     return repo.get_all(tour_id)
 
 
-@router.post("/{tour_id}/stops", response_model=StopResponse, status_code=201)
+@router.post("/{tour_id}/stops", response_model=StopResponse, status_code=201, summary="Stop anlegen")
 async def create_stop(
     tour_id: str,
     stop_data: CreateStopRequest,
@@ -370,7 +370,7 @@ async def create_stop(
     return stop
 
 
-@router.post("/{tour_id}/stops/{stop_id}/delivery-notes", response_model=List[DeliveryNoteResponse])
+@router.post("/{tour_id}/stops/{stop_id}/delivery-notes", response_model=List[DeliveryNoteResponse], summary="Delivery notes zuweisen")
 async def assign_delivery_notes(
     tour_id: str,
     stop_id: str,
@@ -383,7 +383,7 @@ async def assign_delivery_notes(
     return dns
 
 
-@router.post("/{tour_id}/stops/{stop_id}/deliver", response_model=DeliveryNoteResponse)
+@router.post("/{tour_id}/stops/{stop_id}/deliver", response_model=DeliveryNoteResponse, summary="Delivered markieren")
 async def mark_delivered(
     tour_id: str,
     stop_id: str,
@@ -400,7 +400,7 @@ async def mark_delivered(
 
 # === EVENTS ENDPOINTS ===
 
-@router.get("/{tour_id}/events", response_model=List[EventResponse])
+@router.get("/{tour_id}/events", response_model=List[EventResponse], summary="Events auflisten")
 async def list_events(tour_id: str, db: Session = Depends(get_db)):
     """List all events for a tour"""
     # Verify tour exists

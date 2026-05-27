@@ -70,7 +70,7 @@ class BankverbindungOut(BaseModel):
 
 # ── Endpoints ─────────────────────────────────────────────────────────────────
 
-@router.get("/{kunden_nr}/bankverbindungen", response_model=list[BankverbindungOut])
+@router.get("/{kunden_nr}/bankverbindungen", response_model=list[BankverbindungOut], summary="Bankverbindungen auflisten")
 def list_bankverbindungen(
     kunden_nr: str,
     nur_aktive: bool = Query(True),
@@ -90,7 +90,7 @@ def list_bankverbindungen(
 
 
 @router.post("/{kunden_nr}/bankverbindungen",
-             response_model=BankverbindungOut, status_code=201)
+             response_model=BankverbindungOut, status_code=201, summary="Bankverbindung anlegen")
 def create_bankverbindung(
     kunden_nr: str,
     payload: BankverbindungCreate,
@@ -135,7 +135,7 @@ def create_bankverbindung(
     return BankverbindungOut.from_row(dict(row._mapping))
 
 
-@router.patch("/{kunden_nr}/bankverbindungen/{bv_id}/standard")
+@router.patch("/{kunden_nr}/bankverbindungen/{bv_id}/standard", summary="Standard bankverbindung setzen")
 def set_standard_bankverbindung(
     kunden_nr: str,
     bv_id: str,
@@ -159,7 +159,7 @@ def set_standard_bankverbindung(
     return {"id": bv_id, "standard": True}
 
 
-@router.delete("/{kunden_nr}/bankverbindungen/{bv_id}")
+@router.delete("/{kunden_nr}/bankverbindungen/{bv_id}", summary="Bankverbindung löschen")
 def delete_bankverbindung(
     kunden_nr: str,
     bv_id: str,

@@ -124,7 +124,7 @@ def calculate_invoice_totals(invoice: SalesInvoice) -> SalesInvoice:
     return invoice
 
 
-@router.post("/")
+@router.post("/", summary="Ap invoice anlegen")
 async def create_ap_invoice(doc: SalesInvoice, db: Session = Depends(get_db)) -> dict:
     """Erstellt eine neue Eingangsrechnung (Kreditoren)."""
     logger.info(f"Creating AP invoice: {doc.number}")
@@ -148,7 +148,7 @@ async def create_ap_invoice(doc: SalesInvoice, db: Session = Depends(get_db)) ->
         raise HTTPException(status_code=500, detail=f"Failed to create AP invoice: {str(e)}")
 
 
-@router.get("/{invoice_id}")
+@router.get("/{invoice_id}", summary="Ap invoice abrufen")
 async def get_ap_invoice(invoice_id: str, db: Session = Depends(get_db)) -> dict:
     """Ruft eine Eingangsrechnung anhand ihrer ID ab."""
     logger.info(f"Fetching AP invoice: {invoice_id}")
@@ -159,7 +159,7 @@ async def get_ap_invoice(invoice_id: str, db: Session = Depends(get_db)) -> dict
     return await _enrich_invoice_with_approval(invoice, db)
 
 
-@router.put("/{invoice_id}")
+@router.put("/{invoice_id}", summary="Ap invoice aktualisieren")
 async def update_ap_invoice(invoice_id: str, doc: SalesInvoice, db: Session = Depends(get_db)) -> dict:
     """Aktualisiert eine bestehende Eingangsrechnung."""
     logger.info(f"Updating AP invoice: {invoice_id}")
@@ -178,7 +178,7 @@ async def update_ap_invoice(invoice_id: str, doc: SalesInvoice, db: Session = De
     return {"status": "ok", "message": "AP Invoice updated", "data": result}
 
 
-@router.get("/")
+@router.get("/", summary="Ap invoices auflisten")
 async def list_ap_invoices(
     skip: int = 0,
     limit: int = 100,
@@ -211,7 +211,7 @@ async def list_ap_invoices(
     return filtered_invoices[skip : skip + limit]
 
 
-@router.delete("/{invoice_id}")
+@router.delete("/{invoice_id}", summary="Ap invoice löschen")
 async def delete_ap_invoice(invoice_id: str, db: Session = Depends(get_db)) -> dict:
     """Löscht eine Eingangsrechnung."""
     logger.info(f"Deleting AP invoice: {invoice_id}")
@@ -222,7 +222,7 @@ async def delete_ap_invoice(invoice_id: str, db: Session = Depends(get_db)) -> d
     return {"status": "ok", "message": "AP Invoice deleted"}
 
 
-@router.post("/{invoice_id}/approve")
+@router.post("/{invoice_id}/approve", summary="Ap invoice genehmigen")
 async def approve_ap_invoice(
     invoice_id: str,
     approved_by: str = Query(...),
@@ -267,7 +267,7 @@ async def approve_ap_invoice(
     }
 
 
-@router.post("/{invoice_id}/post")
+@router.post("/{invoice_id}/post", summary="Ap invoice erstellen")
 async def post_ap_invoice(
     invoice_id: str,
     posted_by: str = Query(...),

@@ -61,7 +61,7 @@ class ProjektPatch(BaseModel):
     notiz: Optional[str] = None
 
 
-@router.get("")
+@router.get("", summary="Projekte auflisten")
 def list_projekte(
     status: Optional[str] = None,
     skip: int = Query(0, ge=0),
@@ -74,7 +74,7 @@ def list_projekte(
     return [_to_dict(p) for p in q.order_by(Projekt.name).offset(skip).limit(limit).all()]
 
 
-@router.get("/{projekt_id}")
+@router.get("/{projekt_id}", summary="Projekt abrufen")
 def get_projekt(projekt_id: str, db: Session = Depends(get_db)):
     obj = db.query(Projekt).filter(Projekt.id == projekt_id).first()
     if not obj:
@@ -84,7 +84,7 @@ def get_projekt(projekt_id: str, db: Session = Depends(get_db)):
     return data
 
 
-@router.post("", status_code=201)
+@router.post("", status_code=201, summary="Projekt anlegen")
 def create_projekt(payload: ProjektPayload, db: Session = Depends(get_db)):
     obj = Projekt(**payload.model_dump())
     db.add(obj)
@@ -93,7 +93,7 @@ def create_projekt(payload: ProjektPayload, db: Session = Depends(get_db)):
     return _to_dict(obj)
 
 
-@router.patch("/{projekt_id}")
+@router.patch("/{projekt_id}", summary="Projekt aktualisieren")
 def update_projekt(projekt_id: str, payload: ProjektPatch, db: Session = Depends(get_db)):
     obj = db.query(Projekt).filter(Projekt.id == projekt_id).first()
     if not obj:
@@ -106,7 +106,7 @@ def update_projekt(projekt_id: str, payload: ProjektPatch, db: Session = Depends
     return _to_dict(obj)
 
 
-@router.delete("/{projekt_id}", status_code=204, response_class=Response, response_model=None)
+@router.delete("/{projekt_id}", status_code=204, response_class=Response, response_model=None, summary="Projekt löschen")
 def delete_projekt(projekt_id: str, db: Session = Depends(get_db)):
     obj = db.query(Projekt).filter(Projekt.id == projekt_id).first()
     if not obj:
@@ -135,7 +135,7 @@ class AufgabePatch(BaseModel):
     status: Optional[str] = None
 
 
-@router.get("/{projekt_id}/aufgaben")
+@router.get("/{projekt_id}/aufgaben", summary="Aufgaben auflisten")
 def list_aufgaben(projekt_id: str, db: Session = Depends(get_db)):
     return [
         _to_dict(a)
@@ -146,7 +146,7 @@ def list_aufgaben(projekt_id: str, db: Session = Depends(get_db)):
     ]
 
 
-@router.post("/{projekt_id}/aufgaben", status_code=201)
+@router.post("/{projekt_id}/aufgaben", status_code=201, summary="Aufgabe anlegen")
 def create_aufgabe(projekt_id: str, payload: AufgabePayload, db: Session = Depends(get_db)):
     projekt = db.query(Projekt).filter(Projekt.id == projekt_id).first()
     if not projekt:
@@ -158,7 +158,7 @@ def create_aufgabe(projekt_id: str, payload: AufgabePayload, db: Session = Depen
     return _to_dict(obj)
 
 
-@router.patch("/{projekt_id}/aufgaben/{aufgabe_id}")
+@router.patch("/{projekt_id}/aufgaben/{aufgabe_id}", summary="Aufgabe aktualisieren")
 def update_aufgabe(projekt_id: str, aufgabe_id: str, payload: AufgabePatch, db: Session = Depends(get_db)):
     obj = db.query(ProjektAufgabe).filter(
         ProjektAufgabe.id == aufgabe_id,
@@ -173,7 +173,7 @@ def update_aufgabe(projekt_id: str, aufgabe_id: str, payload: AufgabePatch, db: 
     return _to_dict(obj)
 
 
-@router.delete("/{projekt_id}/aufgaben/{aufgabe_id}", status_code=204, response_class=Response, response_model=None)
+@router.delete("/{projekt_id}/aufgaben/{aufgabe_id}", status_code=204, response_class=Response, response_model=None, summary="Aufgabe löschen")
 def delete_aufgabe(projekt_id: str, aufgabe_id: str, db: Session = Depends(get_db)):
     obj = db.query(ProjektAufgabe).filter(
         ProjektAufgabe.id == aufgabe_id,

@@ -93,7 +93,7 @@ class ZuAbschlagOut(BaseModel):
 
 # ── Mengenzeitraum Endpoints ──────────────────────────────────────────────────
 
-@router.get("/{kontrakt_nr}/mengenzeitraeume", response_model=list[MengenzeitraumOut])
+@router.get("/{kontrakt_nr}/mengenzeitraeume", response_model=list[MengenzeitraumOut], summary="Mengenzeitraeume auflisten")
 def list_mengenzeitraeume(
     kontrakt_nr: str,
     db=Depends(get_db),
@@ -109,7 +109,7 @@ def list_mengenzeitraeume(
 
 
 @router.post("/{kontrakt_nr}/mengenzeitraeume",
-             response_model=MengenzeitraumOut, status_code=201)
+             response_model=MengenzeitraumOut, status_code=201, summary="Mengenzeitraum anlegen")
 def create_mengenzeitraum(
     kontrakt_nr: str,
     payload: MengenzeitraumCreate,
@@ -142,7 +142,7 @@ def create_mengenzeitraum(
 
 
 @router.patch("/{kontrakt_nr}/mengenzeitraeume/{zeitraum_id}",
-              response_model=MengenzeitraumOut)
+              response_model=MengenzeitraumOut, summary="Mengenzeitraum aktualisieren")
 def update_mengenzeitraum(
     kontrakt_nr: str,
     zeitraum_id: str,
@@ -188,7 +188,7 @@ def update_mengenzeitraum(
     return MengenzeitraumOut(**dict(row._mapping))
 
 
-@router.delete("/{kontrakt_nr}/mengenzeitraeume/{zeitraum_id}")
+@router.delete("/{kontrakt_nr}/mengenzeitraeume/{zeitraum_id}", summary="Mengenzeitraum löschen")
 def delete_mengenzeitraum(
     kontrakt_nr: str,
     zeitraum_id: str,
@@ -210,7 +210,7 @@ def delete_mengenzeitraum(
     return Response(status_code=204)
 
 
-@router.post("/{kontrakt_nr}/mengenzeitraeume/generieren")
+@router.post("/{kontrakt_nr}/mengenzeitraeume/generieren", summary="Mengenzeitraeume generiere")
 def generiere_mengenzeitraeume(
     kontrakt_nr: str,
     von_datum: date,
@@ -279,7 +279,7 @@ def generiere_mengenzeitraeume(
 
 # ── Zu-/Abschläge Endpoints ──────────────────────────────────────────────────
 
-@router.get("/zuabschlagsgruppen")
+@router.get("/zuabschlagsgruppen", summary="Zuabschlagsgruppen auflisten")
 def list_zuabschlagsgruppen(
     typ: Optional[str] = Query(None, description="zuschlag oder abschlag"),
     db=Depends(get_db),
@@ -298,7 +298,7 @@ def list_zuabschlagsgruppen(
     return [dict(r._mapping) for r in rows]
 
 
-@router.post("/zuabschlagsgruppen", status_code=201)
+@router.post("/zuabschlagsgruppen", status_code=201, summary="Zuabschlagsgruppe anlegen")
 def create_zuabschlagsgruppe(
     payload: ZuAbschlagsGruppeCreate,
     db=Depends(get_db),
@@ -323,7 +323,7 @@ def create_zuabschlagsgruppe(
 
 
 @router.get("/zuabschlagsgruppen/{gruppe_id}/positionen",
-            response_model=list[ZuAbschlagOut])
+            response_model=list[ZuAbschlagOut], summary="Zuabschlaege auflisten")
 def list_zuabschlaege(
     gruppe_id: str,
     kontrakt_nr: Optional[str] = Query(None),
@@ -349,7 +349,7 @@ def list_zuabschlaege(
 
 
 @router.post("/zuabschlagsgruppen/{gruppe_id}/positionen",
-             response_model=ZuAbschlagOut, status_code=201)
+             response_model=ZuAbschlagOut, status_code=201, summary="Zuabschlag anlegen")
 def create_zuabschlag(
     gruppe_id: str,
     payload: ZuAbschlagCreate,

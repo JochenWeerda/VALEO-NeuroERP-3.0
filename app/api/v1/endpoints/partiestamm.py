@@ -87,7 +87,7 @@ class PartieUmbuchungCreate(BaseModel):
 
 # ── Partiegruppen CRUD ────────────────────────────────────────────────────────
 
-@router.get("/gruppen", response_model=list[PartiegruppeOut])
+@router.get("/gruppen", response_model=list[PartiegruppeOut], summary="Partiegruppen auflisten")
 def list_partiegruppen(
     db=Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
@@ -99,7 +99,7 @@ def list_partiegruppen(
     return [PartiegruppeOut(**dict(r._mapping)) for r in rows]
 
 
-@router.post("/gruppen", response_model=PartiegruppeOut, status_code=201)
+@router.post("/gruppen", response_model=PartiegruppeOut, status_code=201, summary="Partiegruppe anlegen")
 def create_partiegruppe(
     payload: PartiegruppeCreate,
     db=Depends(get_db),
@@ -122,7 +122,7 @@ def create_partiegruppe(
     return PartiegruppeOut(**dict(row._mapping))
 
 
-@router.delete("/gruppen/{gruppe_nr}")
+@router.delete("/gruppen/{gruppe_nr}", summary="Partiegruppe löschen")
 def delete_partiegruppe(
     gruppe_nr: str,
     db=Depends(get_db),
@@ -138,7 +138,7 @@ def delete_partiegruppe(
 
 # ── Partiestamm CRUD ──────────────────────────────────────────────────────────
 
-@router.get("", response_model=list[PartiestammOut])
+@router.get("", response_model=list[PartiestammOut], summary="Partien auflisten")
 def list_partien(
     artikel_nr: Optional[str] = Query(None),
     lager_nr: Optional[str] = Query(None),
@@ -166,7 +166,7 @@ def list_partien(
     return [PartiestammOut(**dict(r._mapping)) for r in rows]
 
 
-@router.get("/{partie_nr}", response_model=PartiestammOut)
+@router.get("/{partie_nr}", response_model=PartiestammOut, summary="Partie abrufen")
 def get_partie(
     partie_nr: str,
     db=Depends(get_db),
@@ -181,7 +181,7 @@ def get_partie(
     return PartiestammOut(**dict(row._mapping))
 
 
-@router.post("", response_model=PartiestammOut, status_code=201)
+@router.post("", response_model=PartiestammOut, status_code=201, summary="Partie anlegen")
 def create_partie(
     payload: PartiestammCreate,
     db=Depends(get_db),
@@ -219,7 +219,7 @@ def create_partie(
     return PartiestammOut(**dict(row._mapping))
 
 
-@router.patch("/{partie_nr}/status")
+@router.patch("/{partie_nr}/status", summary="Partie status setzen")
 def set_partie_status(
     partie_nr: str,
     status: str = Query(...),
@@ -238,7 +238,7 @@ def set_partie_status(
     return {"partie_nr": partie_nr, "status": status}
 
 
-@router.post("/{partie_nr}/umbuchung")
+@router.post("/{partie_nr}/umbuchung", summary="Umbuchung partie")
 def partie_umbuchung(
     partie_nr: str,
     payload: PartieUmbuchungCreate,
@@ -263,7 +263,7 @@ def partie_umbuchung(
     return {"partie_nr": partie_nr, "neues_lager": payload.ziel_lager_nr}
 
 
-@router.delete("/{partie_nr}")
+@router.delete("/{partie_nr}", summary="Partie löschen")
 def delete_partie(
     partie_nr: str,
     db=Depends(get_db),

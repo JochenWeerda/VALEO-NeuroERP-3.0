@@ -46,7 +46,7 @@ class ProcessMiningReportRequest(BaseModel):
     tenant_id: str
 
 
-@router.get("/data-products")
+@router.get("/data-products", summary="Data products abrufen")
 def get_data_products(
     tenant_id: str = Query(...),
     requesting_tenant: str | None = Query(None),
@@ -67,7 +67,7 @@ def get_data_products(
     return {"items": products, "count": len(products), "schema_version": 1}
 
 
-@router.post("/run", response_model=ReportResult)
+@router.post("/run", response_model=ReportResult, summary="Run report erstellen")
 def post_run_report(
     request: RunReportRequest,
     store: ReadModelSnapshotStore = Depends(_get_store),
@@ -98,7 +98,7 @@ def post_run_report(
     )
 
 
-@router.post("/process-mining/report", response_model=ProcessMiningReport)
+@router.post("/process-mining/report", response_model=ProcessMiningReport, summary="Process mining report erstellen")
 def post_process_mining_report(
     request: ProcessMiningReportRequest,
     db: Session = Depends(get_db),
@@ -122,7 +122,7 @@ def post_process_mining_report(
     )
 
 
-@router.get("/isolation/check")
+@router.get("/isolation/check", summary="Isolation check abrufen")
 def get_isolation_check(
     requesting_tenant: str = Query(...),
     resource_tenant: str = Query(...),

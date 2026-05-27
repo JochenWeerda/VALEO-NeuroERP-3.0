@@ -57,7 +57,7 @@ class DruckauftragResponse(BaseModel):
 
 # ── Drucker ────────────────────────────────────────────────────────────────────
 
-@router.get("/drucker", response_model=List[Drucker])
+@router.get("/drucker", response_model=List[Drucker], summary="Drucker auflisten")
 async def list_drucker(
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
@@ -97,7 +97,7 @@ async def list_drucker(
 
 # ── Druckaufträge ─────────────────────────────────────────────────────────────
 
-@router.post("/druckauftrag", response_model=DruckauftragResponse, status_code=201)
+@router.post("/druckauftrag", response_model=DruckauftragResponse, status_code=201, summary="Druckauftrag anlegen")
 async def create_druckauftrag(
     data: DruckauftragCreate,
     tenant_id: str = Depends(get_tenant_id),

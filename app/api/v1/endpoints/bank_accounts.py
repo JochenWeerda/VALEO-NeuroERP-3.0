@@ -42,7 +42,7 @@ def _validate_iban(iban: Optional[str]) -> None:
 router = APIRouter(prefix="/bank-accounts", tags=["finance", "bank-accounts"])
 
 
-@router.get("/new", response_model=dict)
+@router.get("/new", response_model=dict, summary="New bank account template abrufen")
 async def get_new_bank_account_template(tenant_id: str = Depends(get_tenant_id)):
     """Return default values for bank account create forms."""
     return {
@@ -126,7 +126,7 @@ def _ensure_gl_account(
     )
 
 
-@router.get("", response_model=List[BankAccountResponse])
+@router.get("", response_model=List[BankAccountResponse], summary="Bank accounts auflisten")
 async def list_bank_accounts(
     tenant_id: str = Depends(get_tenant_id),
     is_active: Optional[bool] = Query(None),
@@ -174,7 +174,7 @@ async def list_bank_accounts(
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.get("/{account_id}", response_model=BankAccountResponse)
+@router.get("/{account_id}", response_model=BankAccountResponse, summary="Bank account abrufen")
 async def get_bank_account(
     account_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -205,7 +205,7 @@ async def get_bank_account(
     )
 
 
-@router.post("", response_model=BankAccountResponse, status_code=201)
+@router.post("", response_model=BankAccountResponse, status_code=201, summary="Bank account anlegen")
 async def create_bank_account(
     payload: BankAccountCreate,
     tenant_id: str = Depends(get_tenant_id),
@@ -244,7 +244,7 @@ async def create_bank_account(
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.put("/{account_id}", response_model=BankAccountResponse)
+@router.put("/{account_id}", response_model=BankAccountResponse, summary="Bank account aktualisieren")
 async def update_bank_account(
     account_id: str,
     payload: BankAccountUpdate,
@@ -297,7 +297,7 @@ async def update_bank_account(
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.delete("/{account_id}", status_code=204, response_class=Response, response_model=None)
+@router.delete("/{account_id}", status_code=204, response_class=Response, response_model=None, summary="Bank account löschen")
 async def delete_bank_account(
     account_id: str,
     tenant_id: str = Depends(get_tenant_id),

@@ -38,7 +38,7 @@ class PickListBooking(BaseModel):
     order_id: Optional[str] = None
 
 
-@router.get("/", response_model=PaginatedResponse[PickListOut])
+@router.get("/", response_model=PaginatedResponse[PickListOut], summary="Pick lists auflisten")
 async def list_pick_lists(
     tenant_id: Optional[str] = Query(None),
     skip: int = Query(0, ge=0),
@@ -59,7 +59,7 @@ async def list_pick_lists(
     )
 
 
-@router.post("/{pl_id}/edit", response_model=PickListOut)
+@router.post("/{pl_id}/edit", response_model=PickListOut, summary="Pick list bearbeiten")
 async def edit_pick_list(
     pl_id: str, payload: PickListEdit, db: Session = Depends(get_db),
 ):
@@ -74,7 +74,7 @@ async def edit_pick_list(
     return PickListOut.model_validate(obj)
 
 
-@router.post("/{pl_id}/cancel", response_model=PickListOut)
+@router.post("/{pl_id}/cancel", response_model=PickListOut, summary="Pick list stornieren")
 async def cancel_pick_list(pl_id: str, db: Session = Depends(get_db)):
     """POST Pickliste bearbeiten abbrechen"""
     obj = db.query(PickList).filter(PickList.id == pl_id).first()
@@ -86,7 +86,7 @@ async def cancel_pick_list(pl_id: str, db: Session = Depends(get_db)):
     return PickListOut.model_validate(obj)
 
 
-@router.post("/{pl_id}/cancel-delete", response_model=PickListOut)
+@router.post("/{pl_id}/cancel-delete", response_model=PickListOut, summary="Delete pick list stornieren")
 async def cancel_delete_pick_list(pl_id: str, db: Session = Depends(get_db)):
     """POST Pickliste bearbeiten abbrechen (Buchungen löschen)"""
     obj = db.query(PickList).filter(PickList.id == pl_id).first()
@@ -98,7 +98,7 @@ async def cancel_delete_pick_list(pl_id: str, db: Session = Depends(get_db)):
     return PickListOut.model_validate(obj)
 
 
-@router.post("/{pl_id}/book-order", response_model=PickListOut)
+@router.post("/{pl_id}/book-order", response_model=PickListOut, summary="Pick list order book")
 async def book_pick_list_order(
     pl_id: str, payload: PickListBooking, db: Session = Depends(get_db),
 ):
@@ -116,7 +116,7 @@ async def book_pick_list_order(
     return PickListOut.model_validate(obj)
 
 
-@router.post("/{pl_id}/park-order", response_model=PickListOut)
+@router.post("/{pl_id}/park-order", response_model=PickListOut, summary="Pick list order park")
 async def park_pick_list_order(
     pl_id: str, payload: PickListBooking, db: Session = Depends(get_db),
 ):
@@ -134,7 +134,7 @@ async def park_pick_list_order(
     return PickListOut.model_validate(obj)
 
 
-@router.post("/{pl_id}/book-internal", response_model=PickListOut)
+@router.post("/{pl_id}/book-internal", response_model=PickListOut, summary="Pick list internal book")
 async def book_pick_list_internal(
     pl_id: str, db: Session = Depends(get_db),
 ):
@@ -148,7 +148,7 @@ async def book_pick_list_internal(
     return PickListOut.model_validate(obj)
 
 
-@router.post("/{pl_id}/park-internal", response_model=PickListOut)
+@router.post("/{pl_id}/park-internal", response_model=PickListOut, summary="Pick list internal park")
 async def park_pick_list_internal(
     pl_id: str, db: Session = Depends(get_db),
 ):
@@ -162,7 +162,7 @@ async def park_pick_list_internal(
     return PickListOut.model_validate(obj)
 
 
-@router.post("/{pl_id}/book-free", response_model=PickListOut)
+@router.post("/{pl_id}/book-free", response_model=PickListOut, summary="Pick list free book")
 async def book_pick_list_free(
     pl_id: str, db: Session = Depends(get_db),
 ):

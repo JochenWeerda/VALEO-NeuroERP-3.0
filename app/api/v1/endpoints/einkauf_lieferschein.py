@@ -163,7 +163,7 @@ def _list_positions(db: Session, ls_id: str) -> list[LieferscheinPosition]:
     return [LieferscheinPosition(**dict(r)) for r in rows]
 
 
-@router.get("/lieferscheine", response_model=list[Lieferschein])
+@router.get("/lieferscheine", response_model=list[Lieferschein], summary="Lieferscheine auflisten")
 async def list_lieferscheine(
     tenant_id: str = Query("system"),
     search: Optional[str] = Query(None),
@@ -184,7 +184,7 @@ async def list_lieferscheine(
     return result
 
 
-@router.post("/lieferscheine", response_model=Lieferschein, status_code=201)
+@router.post("/lieferscheine", response_model=Lieferschein, status_code=201, summary="Lieferschein anlegen")
 async def create_lieferschein(
     payload: LieferscheinCreate,
     tenant_id: str = Query("system"),
@@ -231,7 +231,7 @@ async def create_lieferschein(
     return Lieferschein(**dict(row), positionen=_list_positions(db, ls_id))
 
 
-@router.get("/lieferscheine/last", response_model=Optional[Lieferschein])
+@router.get("/lieferscheine/last", response_model=Optional[Lieferschein], summary="Last lieferschein abrufen")
 async def get_last_lieferschein(
     lieferant_id: Optional[str] = Query(None, description="Filter by supplier (last LS for this supplier)"),
     tenant_id: str = Query("system"),
@@ -255,13 +255,13 @@ async def get_last_lieferschein(
     return Lieferschein(**dict(row), positionen=_list_positions(db, ls_id))
 
 
-@router.get("/lieferscheine/{ls_id}", response_model=Lieferschein)
+@router.get("/lieferscheine/{ls_id}", response_model=Lieferschein, summary="Lieferschein abrufen")
 async def get_lieferschein(ls_id: str, tenant_id: str = Query("system"), db: Session = Depends(get_db)):
     row = _get_lieferschein_or_404(db, ls_id, tenant_id)
     return Lieferschein(**dict(row), positionen=_list_positions(db, ls_id))
 
 
-@router.patch("/lieferscheine/{ls_id}", response_model=Lieferschein)
+@router.patch("/lieferscheine/{ls_id}", response_model=Lieferschein, summary="Lieferschein aktualisieren")
 async def patch_lieferschein(ls_id: str, payload: LieferscheinUpdate, tenant_id: str = Query("system"), db: Session = Depends(get_db)):
     _get_lieferschein_or_404(db, ls_id, tenant_id)
     values = payload.model_dump(exclude_unset=True)
@@ -274,7 +274,7 @@ async def patch_lieferschein(ls_id: str, payload: LieferscheinUpdate, tenant_id:
     return Lieferschein(**dict(row), positionen=_list_positions(db, ls_id))
 
 
-@router.delete("/lieferscheine/{ls_id}", status_code=204, response_class=Response, response_model=None)
+@router.delete("/lieferscheine/{ls_id}", status_code=204, response_class=Response, response_model=None, summary="Lieferschein löschen")
 async def delete_lieferschein(ls_id: str, tenant_id: str = Query("system"), db: Session = Depends(get_db)):
     _get_lieferschein_or_404(db, ls_id, tenant_id)
     db.execute(text("DELETE FROM einkauf_lieferscheine WHERE id = :id AND tenant_id = :tenant_id"), {"id": ls_id, "tenant_id": tenant_id})
@@ -282,7 +282,7 @@ async def delete_lieferschein(ls_id: str, tenant_id: str = Query("system"), db: 
     return None
 
 
-@router.post("/lieferscheine/{ls_id}/positionen", response_model=LieferscheinPosition, status_code=201)
+@router.post("/lieferscheine/{ls_id}/positionen", response_model=LieferscheinPosition, status_code=201, summary="Lieferschein position hinzufügen")
 async def add_lieferschein_position(ls_id: str, payload: LieferscheinPositionCreate, tenant_id: str = Query("system"), db: Session = Depends(get_db)):
     _get_lieferschein_or_404(db, ls_id, tenant_id)
     pos_id = uuid7()
@@ -307,7 +307,7 @@ async def add_lieferschein_position(ls_id: str, payload: LieferscheinPositionCre
     return LieferscheinPosition(**dict(row))
 
 
-@router.patch("/lieferscheine/{ls_id}/positionen/{pos_id}", response_model=LieferscheinPosition)
+@router.patch("/lieferscheine/{ls_id}/positionen/{pos_id}", response_model=LieferscheinPosition, summary="Lieferschein position aktualisieren")
 async def patch_lieferschein_position(
     ls_id: str,
     pos_id: str,
@@ -327,7 +327,7 @@ async def patch_lieferschein_position(
     return LieferscheinPosition(**dict(updated))
 
 
-@router.delete("/lieferscheine/{ls_id}/positionen/{pos_id}", status_code=204, response_class=Response, response_model=None)
+@router.delete("/lieferscheine/{ls_id}/positionen/{pos_id}", status_code=204, response_class=Response, response_model=None, summary="Lieferschein position löschen")
 async def delete_lieferschein_position(ls_id: str, pos_id: str, tenant_id: str = Query("system"), db: Session = Depends(get_db)):
     _get_lieferschein_or_404(db, ls_id, tenant_id)
     row = db.execute(text("SELECT id FROM einkauf_lieferschein_positionen WHERE id = :id AND lieferschein_id = :ls_id"), {"id": pos_id, "ls_id": ls_id}).first()
@@ -338,7 +338,7 @@ async def delete_lieferschein_position(ls_id: str, pos_id: str, tenant_id: str =
     return None
 
 
-@router.get("/frachtauftraege", response_model=list[Frachtauftrag])
+@router.get("/frachtauftraege", response_model=list[Frachtauftrag], summary="Frachtauftraege auflisten")
 async def list_frachtauftraege(tenant_id: str = Query("system"), db: Session = Depends(get_db)):
     try:
         rows = db.execute(
@@ -351,7 +351,7 @@ async def list_frachtauftraege(tenant_id: str = Query("system"), db: Session = D
     return [Frachtauftrag(**dict(r)) for r in rows]
 
 
-@router.post("/frachtauftraege", response_model=Frachtauftrag, status_code=201)
+@router.post("/frachtauftraege", response_model=Frachtauftrag, status_code=201, summary="Frachtauftrag anlegen")
 async def create_frachtauftrag(payload: FrachtauftragCreate, tenant_id: str = Query("system"), db: Session = Depends(get_db)):
     fa_id = uuid7()
     db.execute(
@@ -373,7 +373,7 @@ async def create_frachtauftrag(payload: FrachtauftragCreate, tenant_id: str = Qu
     return Frachtauftrag(**dict(row))
 
 
-@router.patch("/frachtauftraege/{fa_id}", response_model=Frachtauftrag)
+@router.patch("/frachtauftraege/{fa_id}", response_model=Frachtauftrag, summary="Frachtauftrag aktualisieren")
 async def patch_frachtauftrag(
     fa_id: str,
     payload: FrachtauftragUpdate,
@@ -395,7 +395,7 @@ async def patch_frachtauftrag(
     return Frachtauftrag(**dict(updated))
 
 
-@router.delete("/frachtauftraege/{fa_id}", status_code=204, response_class=Response, response_model=None)
+@router.delete("/frachtauftraege/{fa_id}", status_code=204, response_class=Response, response_model=None, summary="Frachtauftrag löschen")
 async def delete_frachtauftrag(fa_id: str, tenant_id: str = Query("system"), db: Session = Depends(get_db)):
     row = db.execute(text("SELECT id FROM einkauf_frachtauftraege WHERE id = :id AND tenant_id = :tenant_id"), {"id": fa_id, "tenant_id": tenant_id}).first()
     if not row:

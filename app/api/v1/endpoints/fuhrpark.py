@@ -141,7 +141,7 @@ class FuhrparkAusgehendesDokumentPayload(BaseModel):
     letzter_druck: Optional[datetime] = None
 
 
-@router.get("/fahrzeuge", response_model=list[dict])
+@router.get("/fahrzeuge", response_model=list[dict], summary="Fahrzeuge auflisten")
 async def list_fahrzeuge(
     skip: int = Query(0, ge=0),
     limit: int = Query(100, ge=1, le=1000),
@@ -154,7 +154,7 @@ async def list_fahrzeuge(
     return [_to_dict(x) for x in repo.get_all(skip=skip, limit=limit)]
 
 
-@router.get("/fahrzeuge/{fahrzeug_id}", response_model=dict)
+@router.get("/fahrzeuge/{fahrzeug_id}", response_model=dict, summary="Fahrzeug abrufen")
 async def get_fahrzeug(fahrzeug_id: str, db: Session = Depends(get_db)):
     repo = FahrzeugRepository(db)
     fahrzeug = repo.get_by_id(fahrzeug_id)
@@ -163,7 +163,7 @@ async def get_fahrzeug(fahrzeug_id: str, db: Session = Depends(get_db)):
     return _to_dict(fahrzeug)
 
 
-@router.post("/fahrzeuge", response_model=dict, status_code=201)
+@router.post("/fahrzeuge", response_model=dict, status_code=201, summary="Fahrzeug anlegen")
 async def create_fahrzeug(payload: FuhrparkFahrzeugPayload, db: Session = Depends(get_db)):
     repo = FahrzeugRepository(db)
     existing = repo.get_by_kennzeichen(payload.kennzeichen)
@@ -173,7 +173,7 @@ async def create_fahrzeug(payload: FuhrparkFahrzeugPayload, db: Session = Depend
     return _to_dict(fahrzeug)
 
 
-@router.patch("/fahrzeuge/{fahrzeug_id}", response_model=dict)
+@router.patch("/fahrzeuge/{fahrzeug_id}", response_model=dict, summary="Fahrzeug aktualisieren")
 async def update_fahrzeug(
     fahrzeug_id: str,
     payload: FuhrparkFahrzeugPayload,
@@ -191,14 +191,14 @@ async def update_fahrzeug(
     return _to_dict(fahrzeug)
 
 
-@router.delete("/fahrzeuge/{fahrzeug_id}", status_code=204, response_class=Response, response_model=None)
+@router.delete("/fahrzeuge/{fahrzeug_id}", status_code=204, response_class=Response, response_model=None, summary="Fahrzeug löschen")
 async def delete_fahrzeug(fahrzeug_id: str, db: Session = Depends(get_db)):
     repo = FahrzeugRepository(db)
     if not repo.delete(fahrzeug_id):
         raise HTTPException(status_code=404, detail=f"Fahrzeug {fahrzeug_id} not found")
 
 
-@router.post("/fahrzeuge/{fahrzeug_id}/drucker-einrichten", response_model=dict)
+@router.post("/fahrzeuge/{fahrzeug_id}/drucker-einrichten", response_model=dict, summary="Fahrzeug printer setup")
 async def setup_fahrzeug_printer(
     fahrzeug_id: str,
     payload: DruckerSetupPayload,
@@ -211,7 +211,7 @@ async def setup_fahrzeug_printer(
     return {"ok": True, "fahrzeug_id": fahrzeug_id, "drucker_name": payload.drucker_name}
 
 
-@router.post("/fahrzeuge/{fahrzeug_id}/drucken", response_model=dict)
+@router.post("/fahrzeuge/{fahrzeug_id}/drucken", response_model=dict, summary="Fahrzeugakte drucken")
 async def print_fahrzeugakte(fahrzeug_id: str, db: Session = Depends(get_db)):
     repo = FahrzeugRepository(db)
     fahrzeug = repo.get_by_id(fahrzeug_id)
@@ -220,7 +220,7 @@ async def print_fahrzeugakte(fahrzeug_id: str, db: Session = Depends(get_db)):
     return {"ok": True, "fahrzeug_id": fahrzeug_id, "aktion": "fahrzeugakte_gedruckt"}
 
 
-@router.post("/fahrzeuge/{fahrzeug_id}/unfall-anzeige", response_model=dict)
+@router.post("/fahrzeuge/{fahrzeug_id}/unfall-anzeige", response_model=dict, summary="Unfall anzeige anlegen")
 async def create_unfall_anzeige(
     fahrzeug_id: str,
     payload: UnfallAnzeigePayload,
@@ -239,13 +239,13 @@ async def create_unfall_anzeige(
     }
 
 
-@router.get("/terminarten", response_model=list[dict])
+@router.get("/terminarten", response_model=list[dict], summary="Terminarten auflisten")
 async def list_terminarten(db: Session = Depends(get_db)):
     repo = FuhrparkTerminartRepository(db)
     return [_to_dict(row) for row in repo.get_all()]
 
 
-@router.post("/terminarten", response_model=dict, status_code=201)
+@router.post("/terminarten", response_model=dict, status_code=201, summary="Terminart anlegen")
 async def create_terminart(payload: FuhrparkTerminartPayload, db: Session = Depends(get_db)):
     repo = FuhrparkTerminartRepository(db)
     duplicate = repo.get_by_name(payload.terminart)
@@ -255,7 +255,7 @@ async def create_terminart(payload: FuhrparkTerminartPayload, db: Session = Depe
     return _to_dict(row)
 
 
-@router.patch("/terminarten/{terminart_id}", response_model=dict)
+@router.patch("/terminarten/{terminart_id}", response_model=dict, summary="Terminart aktualisieren")
 async def update_terminart(
     terminart_id: str,
     payload: FuhrparkTerminartPayload,
@@ -273,14 +273,14 @@ async def update_terminart(
     return _to_dict(updated)
 
 
-@router.delete("/terminarten/{terminart_id}", status_code=204, response_class=Response, response_model=None)
+@router.delete("/terminarten/{terminart_id}", status_code=204, response_class=Response, response_model=None, summary="Terminart löschen")
 async def delete_terminart(terminart_id: str, db: Session = Depends(get_db)):
     repo = FuhrparkTerminartRepository(db)
     if not repo.delete(terminart_id):
         raise HTTPException(status_code=404, detail=f"Terminart {terminart_id} not found")
 
 
-@router.get("/rechnungen", response_model=list[dict])
+@router.get("/rechnungen", response_model=list[dict], summary="Rechnungen auflisten")
 async def list_rechnungen(
     skip: int = Query(0, ge=0),
     limit: int = Query(200, ge=1, le=1000),
@@ -290,7 +290,7 @@ async def list_rechnungen(
     return [_to_dict(row) for row in repo.get_all(skip=skip, limit=limit)]
 
 
-@router.post("/rechnungen", response_model=dict, status_code=201)
+@router.post("/rechnungen", response_model=dict, status_code=201, summary="Rechnung anlegen")
 async def create_rechnung(payload: FuhrparkRechnungPayload, db: Session = Depends(get_db)):
     repo = FuhrparkRechnungRepository(db)
     duplicate = repo.get_by_rechnungs_nr(payload.rechnungs_nr)
@@ -300,7 +300,7 @@ async def create_rechnung(payload: FuhrparkRechnungPayload, db: Session = Depend
     return _to_dict(row)
 
 
-@router.patch("/rechnungen/{rechnung_id}", response_model=dict)
+@router.patch("/rechnungen/{rechnung_id}", response_model=dict, summary="Rechnung aktualisieren")
 async def update_rechnung(
     rechnung_id: str,
     payload: FuhrparkRechnungPayload,
@@ -318,14 +318,14 @@ async def update_rechnung(
     return _to_dict(updated)
 
 
-@router.delete("/rechnungen/{rechnung_id}", status_code=204, response_class=Response, response_model=None)
+@router.delete("/rechnungen/{rechnung_id}", status_code=204, response_class=Response, response_model=None, summary="Rechnung löschen")
 async def delete_rechnung(rechnung_id: str, db: Session = Depends(get_db)):
     repo = FuhrparkRechnungRepository(db)
     if not repo.delete(rechnung_id):
         raise HTTPException(status_code=404, detail=f"Rechnung {rechnung_id} not found")
 
 
-@router.get("/ausgehende-dokumente", response_model=list[dict])
+@router.get("/ausgehende-dokumente", response_model=list[dict], summary="Ausgehende dokumente auflisten")
 async def list_ausgehende_dokumente(
     skip: int = Query(0, ge=0),
     limit: int = Query(200, ge=1, le=1000),
@@ -335,7 +335,7 @@ async def list_ausgehende_dokumente(
     return [_to_dict(row) for row in repo.get_all(skip=skip, limit=limit)]
 
 
-@router.post("/ausgehende-dokumente", response_model=dict, status_code=201)
+@router.post("/ausgehende-dokumente", response_model=dict, status_code=201, summary="Ausgehendes dokument anlegen")
 async def create_ausgehendes_dokument(
     payload: FuhrparkAusgehendesDokumentPayload,
     db: Session = Depends(get_db),
@@ -345,7 +345,7 @@ async def create_ausgehendes_dokument(
     return _to_dict(row)
 
 
-@router.patch("/ausgehende-dokumente/{dokument_id}", response_model=dict)
+@router.patch("/ausgehende-dokumente/{dokument_id}", response_model=dict, summary="Ausgehendes dokument aktualisieren")
 async def update_ausgehendes_dokument(
     dokument_id: str,
     payload: FuhrparkAusgehendesDokumentPayload,
@@ -359,7 +359,7 @@ async def update_ausgehendes_dokument(
     return _to_dict(updated)
 
 
-@router.delete("/ausgehende-dokumente/{dokument_id}", status_code=204, response_class=Response, response_model=None)
+@router.delete("/ausgehende-dokumente/{dokument_id}", status_code=204, response_class=Response, response_model=None, summary="Ausgehendes dokument löschen")
 async def delete_ausgehendes_dokument(dokument_id: str, db: Session = Depends(get_db)):
     repo = FuhrparkAusgehendesDokumentRepository(db)
     if not repo.delete(dokument_id):

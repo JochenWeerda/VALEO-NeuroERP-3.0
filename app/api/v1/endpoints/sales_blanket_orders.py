@@ -126,7 +126,7 @@ def _row_to_blanket(row: dict) -> BlanketOrderOut:
 # Endpoints
 # ---------------------------------------------------------------------------
 
-@router.get("/", response_model=list[BlanketOrderOut])
+@router.get("/", response_model=list[BlanketOrderOut], summary="Blanket orders auflisten")
 async def list_blanket_orders(
     customer_id: Optional[str] = Query(None),
     status_filter: Optional[str] = Query(None, alias="status"),
@@ -157,7 +157,7 @@ async def list_blanket_orders(
     return [_row_to_blanket(dict(r)) for r in rows]
 
 
-@router.post("/", response_model=BlanketOrderOut, status_code=status.HTTP_201_CREATED)
+@router.post("/", response_model=BlanketOrderOut, status_code=status.HTTP_201_CREATED, summary="Blanket order anlegen")
 async def create_blanket_order(
     payload: BlanketOrderCreate,
     tenant_id: str = Depends(get_tenant_id),
@@ -196,7 +196,7 @@ async def create_blanket_order(
     return _row_to_blanket(_get_blanket_order(db, oid, tenant_id))
 
 
-@router.get("/{order_id}", response_model=dict)
+@router.get("/{order_id}", response_model=dict, summary="Blanket order abrufen")
 async def get_blanket_order(
     order_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -219,7 +219,7 @@ async def get_blanket_order(
     }
 
 
-@router.patch("/{order_id}", response_model=BlanketOrderOut)
+@router.patch("/{order_id}", response_model=BlanketOrderOut, summary="Blanket order aktualisieren")
 async def update_blanket_order(
     order_id: str,
     payload: BlanketOrderUpdate,
@@ -247,7 +247,7 @@ async def update_blanket_order(
     return _row_to_blanket(_get_blanket_order(db, order_id, tenant_id))
 
 
-@router.post("/{order_id}/release", response_model=ReleaseOut, status_code=status.HTTP_201_CREATED)
+@router.post("/{order_id}/release", response_model=ReleaseOut, status_code=status.HTTP_201_CREATED, summary="Release anlegen")
 async def create_release(
     order_id: str,
     payload: ReleaseCreate,
@@ -300,7 +300,7 @@ async def create_release(
     )
 
 
-@router.get("/{order_id}/remaining", response_model=RemainingOut)
+@router.get("/{order_id}/remaining", response_model=RemainingOut, summary="Remaining abrufen")
 async def get_remaining(
     order_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -321,7 +321,7 @@ async def get_remaining(
     )
 
 
-@router.post("/{order_id}/close", response_model=BlanketOrderOut)
+@router.post("/{order_id}/close", response_model=BlanketOrderOut, summary="Blanket order abschließen")
 async def close_blanket_order(
     order_id: str,
     tenant_id: str = Depends(get_tenant_id),

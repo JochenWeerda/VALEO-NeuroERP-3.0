@@ -32,7 +32,7 @@ class ValidateResponse(BaseModel):
     errors: List[str] = Field(default_factory=list)
 
 
-@router.get("/", response_model=PaginatedResponse[Account])
+@router.get("/", response_model=PaginatedResponse[Account], summary="Accounts auflisten")
 async def list_accounts(
     tenant_id: Optional[str] = Query(None, description="Filter by tenant ID"),
     search: Optional[str] = Query(None, description="Search in account number or name"),
@@ -69,7 +69,7 @@ async def list_accounts(
     )
 
 
-@router.get("/{account_id}", response_model=Account)
+@router.get("/{account_id}", response_model=Account, summary="Account abrufen")
 async def get_account(account_id: str, db: Session = Depends(get_db)):
     """Fetch a single account by identifier."""
     account = db.query(AccountModel).filter(AccountModel.id == account_id).first()
@@ -78,7 +78,7 @@ async def get_account(account_id: str, db: Session = Depends(get_db)):
     return Account.model_validate(account)
 
 
-@router.post("/", response_model=Account)
+@router.post("/", response_model=Account, summary="Account anlegen")
 async def create_account(account: AccountCreate, request: Request, db: Session = Depends(get_db)):
     """Create a new account."""
     # Check if account number already exists
@@ -101,7 +101,7 @@ async def create_account(account: AccountCreate, request: Request, db: Session =
     return Account.model_validate(db_account)
 
 
-@router.put("/{account_id}", response_model=Account)
+@router.put("/{account_id}", response_model=Account, summary="Account aktualisieren")
 async def update_account(
     account_id: str,
     account_update: AccountUpdate,
@@ -129,7 +129,7 @@ async def update_account(
     return Account.model_validate(account)
 
 
-@router.delete("/{account_id}")
+@router.delete("/{account_id}", summary="Account löschen")
 async def delete_account(account_id: str, request: Request, db: Session = Depends(get_db)):
     """Delete an account (soft delete by setting is_active to False)."""
     account = db.query(AccountModel).filter(AccountModel.id == account_id).first()
@@ -153,7 +153,7 @@ async def delete_account(account_id: str, request: Request, db: Session = Depend
     return {"message": "Account deactivated successfully"}
 
 
-@router.post("/validate", response_model=ValidateResponse)
+@router.post("/validate", response_model=ValidateResponse, summary="Chart of accounts validieren")
 async def validate_chart_of_accounts(
     tenant_id: Optional[str] = Query(None, description="Tenant ID"),
     db: Session = Depends(get_db),
@@ -185,7 +185,7 @@ async def validate_chart_of_accounts(
     return ValidateResponse(valid=len(errors) == 0, errors=errors)
 
 
-@router.post("/datev-export")
+@router.post("/datev-export", summary="Export chart of accounts datev")
 async def datev_export_chart_of_accounts(
     von_datum: str = Query(..., description="Start date YYYY-MM-DD"),
     bis_datum: Optional[str] = Query(None, description="End date YYYY-MM-DD"),

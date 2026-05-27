@@ -120,7 +120,7 @@ class BWA(BaseModel):
     net_result: Decimal
 
 
-@router.get("/balance-sheet", response_model=BalanceSheet)
+@router.get("/balance-sheet", response_model=BalanceSheet, summary="Balance sheet abrufen")
 async def get_balance_sheet(
     period: str = Query(..., description="Accounting period (YYYY-MM)"),
     as_of_date: Optional[date] = Query(None, description="As of date (defaults to end of period)"),
@@ -239,7 +239,7 @@ async def get_balance_sheet(
         return _empty_balance_sheet(period, as_of_date)
 
 
-@router.get("/profit-loss", response_model=ProfitLoss)
+@router.get("/profit-loss", response_model=ProfitLoss, summary="Profit loss abrufen")
 async def get_profit_loss(
     period: str = Query(..., description="Accounting period (YYYY-MM)"),
     tenant_id: str = Query("system", description="Tenant ID"),
@@ -356,7 +356,7 @@ async def get_profit_loss(
         return _empty_profit_loss(period)
 
 
-@router.get("/bwa", response_model=BWA)
+@router.get("/bwa", response_model=BWA, summary="Bwa abrufen")
 async def get_bwa(
     period: str = Query(..., description="Accounting period (YYYY-MM)"),
     tenant_id: str = Query("system", description="Tenant ID"),
@@ -475,7 +475,7 @@ async def get_bwa(
         return _empty_bwa(period)
 
 
-@router.get("/drilldown", response_model=List[Dict[str, Any]])
+@router.get("/drilldown", response_model=List[Dict[str, Any]], summary="Report drilldown abrufen")
 async def get_report_drilldown(
     account_number: str = Query(..., description="Account number to drill into"),
     period: str = Query(..., description="Accounting period (YYYY-MM)"),
@@ -566,7 +566,7 @@ def _report_to_rows(report_type: str, data: Any) -> List[List[str]]:
     return rows
 
 
-@router.get("/export/{report_type}")
+@router.get("/export/{report_type}", summary="Report exportieren")
 async def export_report(
     report_type: str,
     period: str = Query(..., description="Accounting period (YYYY-MM)"),

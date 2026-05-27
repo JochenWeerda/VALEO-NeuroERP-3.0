@@ -48,7 +48,7 @@ class ConnectorUpdateIn(BaseModel):
     is_active: Optional[bool] = None
 
 
-@router.get("/connectors", response_model=list[ConnectorOut])
+@router.get("/connectors", response_model=list[ConnectorOut], summary="Connectors auflisten")
 async def list_connectors(
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
@@ -78,7 +78,7 @@ async def list_connectors(
     ]
 
 
-@router.get("/connectors/{connector_id}", response_model=ConnectorOut)
+@router.get("/connectors/{connector_id}", response_model=ConnectorOut, summary="Connector abrufen")
 async def get_connector(
     connector_id: str,
     db: Session = Depends(get_db),
@@ -108,7 +108,7 @@ async def get_connector(
     )
 
 
-@router.put("/connectors", response_model=ConnectorOut, status_code=201)
+@router.put("/connectors", response_model=ConnectorOut, status_code=201, summary="Connector upsert")
 async def upsert_connector(
     payload: ConnectorCreateIn,
     db: Session = Depends(get_db),
@@ -140,7 +140,7 @@ async def upsert_connector(
     return await get_connector(uid, db, tenant_id)
 
 
-@router.patch("/connectors/{connector_id}", response_model=ConnectorOut)
+@router.patch("/connectors/{connector_id}", response_model=ConnectorOut, summary="Connector aktualisieren")
 async def update_connector(
     connector_id: str,
     payload: ConnectorUpdateIn,
@@ -175,7 +175,7 @@ async def update_connector(
     return await get_connector(connector_id, db, tenant_id)
 
 
-@router.delete("/connectors/{connector_id}", status_code=204, response_class=Response, response_model=None)
+@router.delete("/connectors/{connector_id}", status_code=204, response_class=Response, response_model=None, summary="Connector löschen")
 async def delete_connector(
     connector_id: str,
     db: Session = Depends(get_db),
@@ -223,7 +223,7 @@ class ReportingUnitUpdateIn(BaseModel):
     is_active: Optional[bool] = None
 
 
-@router.get("/reporting-units", response_model=list[ReportingUnitOut])
+@router.get("/reporting-units", response_model=list[ReportingUnitOut], summary="Reporting units auflisten")
 async def list_reporting_units(
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
@@ -253,7 +253,7 @@ async def list_reporting_units(
     ]
 
 
-@router.put("/reporting-units", response_model=ReportingUnitOut, status_code=201)
+@router.put("/reporting-units", response_model=ReportingUnitOut, status_code=201, summary="Reporting unit upsert")
 async def upsert_reporting_unit(
     payload: ReportingUnitCreateIn,
     db: Session = Depends(get_db),
@@ -301,7 +301,7 @@ async def upsert_reporting_unit(
     )
 
 
-@router.patch("/reporting-units/{unit_id}", response_model=ReportingUnitOut)
+@router.patch("/reporting-units/{unit_id}", response_model=ReportingUnitOut, summary="Reporting unit aktualisieren")
 async def update_reporting_unit(
     unit_id: str,
     payload: ReportingUnitUpdateIn,
@@ -355,7 +355,7 @@ async def update_reporting_unit(
     )
 
 
-@router.delete("/reporting-units/{unit_id}", status_code=204, response_class=Response, response_model=None)
+@router.delete("/reporting-units/{unit_id}", status_code=204, response_class=Response, response_model=None, summary="Reporting unit löschen")
 async def delete_reporting_unit(
     unit_id: str,
     db: Session = Depends(get_db),
@@ -415,7 +415,7 @@ class ScheduleUpdateIn(BaseModel):
     is_active: Optional[bool] = None
 
 
-@router.get("/schedules", response_model=list[ScheduleOut])
+@router.get("/schedules", response_model=list[ScheduleOut], summary="Schedules auflisten")
 async def list_schedules(
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
@@ -450,7 +450,7 @@ async def list_schedules(
     ]
 
 
-@router.put("/schedules", response_model=ScheduleOut, status_code=201)
+@router.put("/schedules", response_model=ScheduleOut, status_code=201, summary="Schedule upsert")
 async def upsert_schedule(
     payload: ScheduleCreateIn,
     db: Session = Depends(get_db),
@@ -507,7 +507,7 @@ async def upsert_schedule(
     )
 
 
-@router.patch("/schedules/{schedule_id}", response_model=ScheduleOut)
+@router.patch("/schedules/{schedule_id}", response_model=ScheduleOut, summary="Schedule aktualisieren")
 async def update_schedule(
     schedule_id: str,
     payload: ScheduleUpdateIn,
@@ -574,7 +574,7 @@ async def update_schedule(
     )
 
 
-@router.delete("/schedules/{schedule_id}", status_code=204, response_class=Response, response_model=None)
+@router.delete("/schedules/{schedule_id}", status_code=204, response_class=Response, response_model=None, summary="Schedule löschen")
 async def delete_schedule(
     schedule_id: str,
     db: Session = Depends(get_db),

@@ -36,7 +36,7 @@ class ZertifikatCreateRequest(BaseModel):
     zertifikatsnummer: Optional[str] = None
 
 
-@router.post("", status_code=201)
+@router.post("", status_code=201, summary="Zertifikat anlegen")
 def create_zertifikat(req: ZertifikatCreateRequest, db: Session = Depends(get_db)):
     import uuid
     from datetime import datetime
@@ -65,13 +65,13 @@ def create_zertifikat(req: ZertifikatCreateRequest, db: Session = Depends(get_db
     return _row_to_dict(row)
 
 
-@router.get("/tenant/{tenant_id}")
+@router.get("/tenant/{tenant_id}", summary="By tenant abrufen")
 def get_by_tenant(tenant_id: str, db: Session = Depends(get_db)):
     rows = db.query(ZertifikatAPIEntry).filter(ZertifikatAPIEntry.tenant_id == tenant_id).all()
     return [_row_to_dict(r) for r in rows]
 
 
-@router.get("/ablaufend")
+@router.get("/ablaufend", summary="Ablaufend abrufen")
 def get_ablaufend(tage_vorwarnung: int = Query(30), db: Session = Depends(get_db)):
     from datetime import timedelta
     deadline = datetime.now(tz=timezone.utc) + timedelta(days=tage_vorwarnung)

@@ -19,7 +19,7 @@ router = APIRouter()
 DEFAULT_TENANT = settings.DEFAULT_TENANT_ID
 
 
-@router.get("/integrations/superglue/carrier-rollout", response_model=dict)
+@router.get("/integrations/superglue/carrier-rollout", response_model=dict, summary="Superglue carrier rollout abrufen")
 async def get_superglue_carrier_rollout(tenant_id: Optional[str] = Query(None, description="Tenant ID for rollout summary")):
     """Thin logistics rollout surface for Superglue carrier connectors."""
     from app.integrations.services.superglue_domain_rollouts import build_superglue_domain_rollout_summary
@@ -35,7 +35,7 @@ async def get_superglue_carrier_rollout(tenant_id: Optional[str] = Query(None, d
     }
 
 
-@router.get("/", response_model=PaginatedResponse[Warehouse])
+@router.get("/", response_model=PaginatedResponse[Warehouse], summary="Warehouses auflisten")
 async def list_warehouses(
     tenant_id: Optional[str] = Query(None, description="Filter by tenant ID"),
     search: Optional[str] = Query(None, description="Search in warehouse code or name"),
@@ -72,7 +72,7 @@ async def list_warehouses(
     )
 
 
-@router.get("/{warehouse_id}", response_model=Warehouse)
+@router.get("/{warehouse_id}", response_model=Warehouse, summary="Warehouse abrufen")
 async def get_warehouse(warehouse_id: str, db: Session = Depends(get_db)):
     """Fetch a single warehouse by identifier."""
     warehouse = db.query(WarehouseModel).filter(WarehouseModel.id == warehouse_id).first()
@@ -81,7 +81,7 @@ async def get_warehouse(warehouse_id: str, db: Session = Depends(get_db)):
     return Warehouse.model_validate(warehouse)
 
 
-@router.post("/", response_model=Warehouse, status_code=201)
+@router.post("/", response_model=Warehouse, status_code=201, summary="Warehouse anlegen")
 async def create_warehouse(payload: WarehouseCreate, db: Session = Depends(get_db)):
     """Neues Lager anlegen."""
     existing = db.query(WarehouseModel).filter(
@@ -111,7 +111,7 @@ async def create_warehouse(payload: WarehouseCreate, db: Session = Depends(get_d
     return Warehouse.model_validate(wh)
 
 
-@router.put("/{warehouse_id}", response_model=Warehouse)
+@router.put("/{warehouse_id}", response_model=Warehouse, summary="Warehouse aktualisieren")
 async def update_warehouse(
     warehouse_id: str,
     payload: WarehouseUpdate,
@@ -128,7 +128,7 @@ async def update_warehouse(
     return Warehouse.model_validate(wh)
 
 
-@router.delete("/{warehouse_id}", status_code=204, response_class=Response, response_model=None)
+@router.delete("/{warehouse_id}", status_code=204, response_class=Response, response_model=None, summary="Warehouse löschen")
 async def delete_warehouse(warehouse_id: str, db: Session = Depends(get_db)):
     """Lager deaktivieren (Soft-Delete)."""
     wh = db.query(WarehouseModel).filter(WarehouseModel.id == warehouse_id).first()

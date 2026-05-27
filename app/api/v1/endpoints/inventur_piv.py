@@ -79,7 +79,7 @@ class PIVPositionOut(BaseModel):
 
 # ── Endpoints ─────────────────────────────────────────────────────────────────
 
-@router.get("", response_model=list[PIVAbschlussOut])
+@router.get("", response_model=list[PIVAbschlussOut], summary="Piv abschluesse auflisten")
 def list_piv_abschluesse(
     status: Optional[str] = Query(None),
     lager_nr: Optional[str] = Query(None),
@@ -102,7 +102,7 @@ def list_piv_abschluesse(
     return [PIVAbschlussOut(**dict(r._mapping)) for r in rows]
 
 
-@router.post("", response_model=PIVAbschlussOut, status_code=201)
+@router.post("", response_model=PIVAbschlussOut, status_code=201, summary="Piv abschluss anlegen")
 def create_piv_abschluss(
     payload: PIVAbschlussCreate,
     db=Depends(get_db),
@@ -130,7 +130,7 @@ def create_piv_abschluss(
 
 
 @router.post("/{abschluss_id}/positionen",
-             response_model=PIVPositionOut, status_code=201)
+             response_model=PIVPositionOut, status_code=201, summary="Piv position hinzufügen")
 def add_piv_position(
     abschluss_id: str,
     payload: PIVPositionCreate,
@@ -172,7 +172,7 @@ def add_piv_position(
     return PIVPositionOut(**dict(row._mapping))
 
 
-@router.get("/{abschluss_id}/positionen", response_model=list[PIVPositionOut])
+@router.get("/{abschluss_id}/positionen", response_model=list[PIVPositionOut], summary="Piv positionen auflisten")
 def list_piv_positionen(
     abschluss_id: str,
     nur_nicht_erfasst: bool = Query(False),
@@ -192,7 +192,7 @@ def list_piv_positionen(
 
 
 @router.patch("/{abschluss_id}/positionen/{pos_id}/zaehlen",
-              response_model=PIVPositionOut)
+              response_model=PIVPositionOut, summary="Zaehlen")
 def zaehlen(
     abschluss_id: str,
     pos_id: str,
@@ -235,7 +235,7 @@ def zaehlen(
     return PIVPositionOut(**dict(row._mapping))
 
 
-@router.post("/{abschluss_id}/abschliessen", response_model=PIVAbschlussOut)
+@router.post("/{abschluss_id}/abschliessen", response_model=PIVAbschlussOut, summary="Abschliessen")
 def abschliessen(
     abschluss_id: str,
     abgeschlossen_von: Optional[str] = None,
@@ -282,7 +282,7 @@ def abschliessen(
     return PIVAbschlussOut(**dict(row._mapping))
 
 
-@router.get("/{abschluss_id}/differenzliste")
+@router.get("/{abschluss_id}/differenzliste", summary="Differenzliste")
 def differenzliste(
     abschluss_id: str,
     nur_mit_differenz: bool = Query(True),

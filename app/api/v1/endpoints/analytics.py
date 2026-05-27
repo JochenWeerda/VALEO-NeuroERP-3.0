@@ -22,7 +22,7 @@ def get_reports_service(db: Session = Depends(get_db)) -> ReportsService:
     return ReportsService(db_session=db)
 
 
-@router.get("/kpis")
+@router.get("/kpis", summary="Kpis abrufen")
 async def get_kpis(
     start_date: Optional[str] = Query(None, description="Start date (YYYY-MM-DD)"),
     end_date: Optional[str] = Query(None, description="End date (YYYY-MM-DD)"),
@@ -111,7 +111,7 @@ async def get_kpis(
         }
 
 
-@router.get("/trends")
+@router.get("/trends", summary="Kpi trends abrufen")
 async def get_kpi_trends(
     metric: str = Query(..., description="Metric to get trend for"),
     period: str = Query("monthly", description="Aggregation period: daily, weekly, monthly"),
@@ -152,7 +152,7 @@ _BRANCH_REFERENCE = {
 }
 
 
-@router.get("/benchmark")
+@router.get("/benchmark", summary="Benchmark abrufen")
 async def get_benchmark(
     start_date: Optional[str] = Query(None, description="Start date (YYYY-MM-DD)"),
     end_date: Optional[str] = Query(None, description="End date (YYYY-MM-DD)"),

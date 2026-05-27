@@ -43,7 +43,7 @@ def _to_dict(row: ErnteKampagneDB) -> dict:
     }
 
 
-@router.post("", status_code=201)
+@router.post("", status_code=201, summary="Kampagne anlegen")
 def create_kampagne(req: ErnteKampagneCreateRequest, db: Session = Depends(get_db)):
     ErnteArt(req.ernte_art)  # validate enum value
     row = ErnteKampagneDB(
@@ -61,7 +61,7 @@ def create_kampagne(req: ErnteKampagneCreateRequest, db: Session = Depends(get_d
     return _to_dict(row)
 
 
-@router.get("/tenant/{tenant_id}")
+@router.get("/tenant/{tenant_id}", summary="Kampagnen abrufen")
 def get_kampagnen(tenant_id: str, wirtschaftsjahr: Optional[int] = None, db: Session = Depends(get_db)):
     q = db.query(ErnteKampagneDB).filter(ErnteKampagneDB.tenant_id == tenant_id)
     if wirtschaftsjahr is not None:
@@ -69,7 +69,7 @@ def get_kampagnen(tenant_id: str, wirtschaftsjahr: Optional[int] = None, db: Ses
     return [_to_dict(r) for r in q.all()]
 
 
-@router.get("/{kampagne_id}")
+@router.get("/{kampagne_id}", summary="Kampagne abrufen")
 def get_kampagne(kampagne_id: str, db: Session = Depends(get_db)):
     row = db.query(ErnteKampagneDB).filter(ErnteKampagneDB.kampagne_id == kampagne_id).first()
     if not row:
@@ -77,7 +77,7 @@ def get_kampagne(kampagne_id: str, db: Session = Depends(get_db)):
     return _to_dict(row)
 
 
-@router.delete("/{kampagne_id}", status_code=204, response_class=Response, response_model=None)
+@router.delete("/{kampagne_id}", status_code=204, response_class=Response, response_model=None, summary="Kampagne löschen")
 def delete_kampagne(kampagne_id: str, db: Session = Depends(get_db)):
     row = db.query(ErnteKampagneDB).filter(ErnteKampagneDB.kampagne_id == kampagne_id).first()
     if not row:
@@ -89,7 +89,7 @@ def delete_kampagne(kampagne_id: str, db: Session = Depends(get_db)):
     return Response(status_code=204)
 
 
-@router.post("/{kampagne_id}/start")
+@router.post("/{kampagne_id}/start", summary="Kampagne starten")
 def start_kampagne(kampagne_id: str, db: Session = Depends(get_db)):
     row = db.query(ErnteKampagneDB).filter(ErnteKampagneDB.kampagne_id == kampagne_id).first()
     if not row:
@@ -102,7 +102,7 @@ def start_kampagne(kampagne_id: str, db: Session = Depends(get_db)):
     return _to_dict(row)
 
 
-@router.post("/{kampagne_id}/abschliessen")
+@router.post("/{kampagne_id}/abschliessen", summary="Kampagne abschliessen")
 def abschliessen_kampagne(kampagne_id: str, db: Session = Depends(get_db)):
     row = db.query(ErnteKampagneDB).filter(ErnteKampagneDB.kampagne_id == kampagne_id).first()
     if not row:

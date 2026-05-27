@@ -107,7 +107,7 @@ def _row_to_out(db, row) -> StuecklisteOut:
 
 # ── Endpoints ─────────────────────────────────────────────────────────────────
 
-@router.get("", response_model=list[StuecklisteOut])
+@router.get("", response_model=list[StuecklisteOut], summary="Stuecklisten auflisten")
 def list_stuecklisten(
     artikel_nr: Optional[str] = Query(None),
     nur_aktive: bool = Query(True),
@@ -126,7 +126,7 @@ def list_stuecklisten(
     return [_row_to_out(db, r) for r in rows]
 
 
-@router.get("/{stueckliste_nr}", response_model=StuecklisteOut)
+@router.get("/{stueckliste_nr}", response_model=StuecklisteOut, summary="Stueckliste abrufen")
 def get_stueckliste(
     stueckliste_nr: str,
     db=Depends(get_db),
@@ -141,7 +141,7 @@ def get_stueckliste(
     return _row_to_out(db, row)
 
 
-@router.post("", response_model=StuecklisteOut, status_code=201)
+@router.post("", response_model=StuecklisteOut, status_code=201, summary="Stueckliste anlegen")
 def create_stueckliste(
     payload: StuecklisteCreate,
     db=Depends(get_db),
@@ -187,7 +187,7 @@ def create_stueckliste(
     return _row_to_out(db, row)
 
 
-@router.put("/{stueckliste_nr}", response_model=StuecklisteOut)
+@router.put("/{stueckliste_nr}", response_model=StuecklisteOut, summary="Stueckliste aktualisieren")
 def update_stueckliste(
     stueckliste_nr: str,
     payload: StuecklisteCreate,
@@ -233,7 +233,7 @@ def update_stueckliste(
     return _row_to_out(db, updated)
 
 
-@router.delete("/{stueckliste_nr}")
+@router.delete("/{stueckliste_nr}", summary="Stueckliste löschen")
 def delete_stueckliste(
     stueckliste_nr: str,
     db=Depends(get_db),
@@ -248,7 +248,7 @@ def delete_stueckliste(
     return Response(status_code=204)
 
 
-@router.get("/{stueckliste_nr}/mengenbedarf", response_model=MengenbedarfResult)
+@router.get("/{stueckliste_nr}/mengenbedarf", response_model=MengenbedarfResult, summary="Mengenbedarf")
 def mengenbedarf(
     stueckliste_nr: str,
     produktionsmenge: Decimal = Query(..., gt=0),

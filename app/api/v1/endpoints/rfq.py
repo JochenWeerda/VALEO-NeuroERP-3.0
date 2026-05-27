@@ -97,7 +97,7 @@ def _get_rfq(db: Session, rfq_id: int, tenant_id: str) -> Any:
 # Endpoints
 # ─────────────────────────────────────────────────────────────────────────────
 
-@router.get("")
+@router.get("", summary="Rfq auflisten")
 def list_rfq(
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
@@ -128,7 +128,7 @@ def list_rfq(
     ]
 
 
-@router.post("")
+@router.post("", summary="Rfq anlegen")
 def create_rfq(
     body: RfqCreate,
     db: Session = Depends(get_db),
@@ -165,7 +165,7 @@ def create_rfq(
     }
 
 
-@router.get("/{rfq_id}")
+@router.get("/{rfq_id}", summary="Rfq abrufen")
 def get_rfq(
     rfq_id: int,
     db: Session = Depends(get_db),
@@ -208,7 +208,7 @@ def get_rfq(
     }
 
 
-@router.post("/{rfq_id}/send")
+@router.post("/{rfq_id}/send", summary="Rfq senden")
 def send_rfq(
     rfq_id: int,
     body: SendRequest,
@@ -245,7 +245,7 @@ def send_rfq(
     }
 
 
-@router.post("/{rfq_id}/quotes")
+@router.post("/{rfq_id}/quotes", summary="Quote hinzufügen")
 def add_quote(
     rfq_id: int,
     body: QuoteCreate,
@@ -300,7 +300,7 @@ def add_quote(
     }
 
 
-@router.get("/{rfq_id}/comparison")
+@router.get("/{rfq_id}/comparison", summary="Quotes compare")
 def compare_quotes(
     rfq_id: int,
     db: Session = Depends(get_db),
@@ -347,7 +347,7 @@ def compare_quotes(
     }
 
 
-@router.post("/{rfq_id}/accept/{quote_id}")
+@router.post("/{rfq_id}/accept/{quote_id}", summary="Quote akzeptieren")
 def accept_quote(
     rfq_id: int,
     quote_id: int,

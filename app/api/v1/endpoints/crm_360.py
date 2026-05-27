@@ -27,7 +27,7 @@ def _safe_query(db: Session, sql: str, params: dict, many: bool = True) -> Any:
         return None
 
 
-@router.get("/{customer_id}/360", response_model=dict, tags=["crm", "customers"])
+@router.get("/{customer_id}/360", response_model=dict, tags=["crm", "customers"], summary="Customer 360 abrufen")
 async def get_customer_360(
     customer_id: str,
     tenant_id: Optional[str] = Query(None),

@@ -81,7 +81,7 @@ def _parse_gs1(raw: str) -> tuple[dict[str, str], list[str]]:
     return elements, errors
 
 
-@router.post("/parse", response_model=GS1ParseResponse)
+@router.post("/parse", response_model=GS1ParseResponse, summary="Gs1 barcode parse")
 async def parse_gs1_barcode(payload: GS1ParseRequest):
     """POST GS1 Parse – parses GS1-128/DataMatrix barcodes."""
     elements, errors = _parse_gs1(payload.barcode)

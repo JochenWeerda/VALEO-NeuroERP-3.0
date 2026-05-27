@@ -57,7 +57,7 @@ class ReconciliationResult(BaseModel):
     booking_suggestions: Optional[List[dict]] = None
 
 
-@router.get("/{statement_id}/balance-comparison", response_model=BalanceComparison)
+@router.get("/{statement_id}/balance-comparison", response_model=BalanceComparison, summary="Balance comparison abrufen")
 async def get_balance_comparison(
     statement_id: str,
     bank_account_id: str = Query(..., description="Bank account ID"),
@@ -148,7 +148,7 @@ async def get_balance_comparison(
         raise HTTPException(status_code=500, detail=f"Failed to compare balances: {str(e)}")
 
 
-@router.get("/{statement_id}/differences", response_model=List[DifferenceItem])
+@router.get("/{statement_id}/differences", response_model=List[DifferenceItem], summary="Reconciliation differences abrufen")
 async def get_reconciliation_differences(
     statement_id: str,
     bank_account_id: str = Query(..., description="Bank account ID"),
@@ -200,7 +200,7 @@ async def get_reconciliation_differences(
         return []
 
 
-@router.post("/{statement_id}/reconcile", response_model=ReconciliationResult)
+@router.post("/{statement_id}/reconcile", response_model=ReconciliationResult, summary="Bank statement reconcile")
 async def reconcile_bank_statement(
     statement_id: str,
     bank_account_id: str = Query(..., description="Bank account ID"),
@@ -403,7 +403,7 @@ async def reconcile_bank_statement(
         raise HTTPException(status_code=500, detail=f"Failed to reconcile: {str(e)}")
 
 
-@router.get("/{statement_id}/summary", response_model=dict)
+@router.get("/{statement_id}/summary", response_model=dict, summary="Reconciliation summary abrufen")
 async def get_reconciliation_summary(
     statement_id: str,
     bank_account_id: str = Query(..., description="Bank account ID"),

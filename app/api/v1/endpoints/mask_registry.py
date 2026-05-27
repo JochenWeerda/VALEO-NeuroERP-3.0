@@ -21,14 +21,14 @@ router = APIRouter(prefix="/ui/mask-registry", tags=["ui", "masks"])
 _REGISTRY: MaskRegistry = build_mask_registry()
 
 
-@router.get("", response_model=dict)
+@router.get("", response_model=dict, summary="Mask registry abrufen")
 async def get_mask_registry(tenant_id: str = Depends(get_tenant_id)):
     """Liefert das vollstaendige Masken-Register mit A/B/C-Klassifizierung."""
     _ = tenant_id
     return _REGISTRY.model_dump(mode="json")
 
 
-@router.get("/class/{mask_class}", response_model=list[dict])
+@router.get("/class/{mask_class}", response_model=list[dict], summary="Masks by class abrufen")
 async def get_masks_by_class(
     mask_class: MaskClass,
     tenant_id: str = Depends(get_tenant_id),
@@ -38,7 +38,7 @@ async def get_masks_by_class(
     return [m.model_dump(mode="json") for m in _REGISTRY.get_by_class(mask_class)]
 
 
-@router.get("/domain/{domain}", response_model=list[dict])
+@router.get("/domain/{domain}", response_model=list[dict], summary="Masks by domain abrufen")
 async def get_masks_by_domain(
     domain: MaskDomain,
     tenant_id: str = Depends(get_tenant_id),
@@ -48,7 +48,7 @@ async def get_masks_by_domain(
     return [m.model_dump(mode="json") for m in _REGISTRY.get_by_domain(domain)]
 
 
-@router.get("/gap-report", response_model=dict)
+@router.get("/gap-report", response_model=dict, summary="Class a gap report abrufen")
 async def get_class_a_gap_report(tenant_id: str = Depends(get_tenant_id)):
     """
     Liefert Klasse-A-Masken ohne Wave-1-Contract (technische Schulden).

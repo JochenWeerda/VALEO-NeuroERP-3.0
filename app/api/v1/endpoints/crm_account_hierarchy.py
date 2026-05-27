@@ -84,7 +84,7 @@ def _load_children(db: Session, account_id: str, tenant_id: str) -> list[dict[st
 # GET /{id}/hierarchy
 # ---------------------------------------------------------------------------
 
-@router.get("/{account_id}/hierarchy", response_model=dict, tags=["crm", "accounts"])
+@router.get("/{account_id}/hierarchy", response_model=dict, tags=["crm", "accounts"], summary="Account hierarchy abrufen")
 async def get_account_hierarchy(
     account_id: str,
     db: Session = Depends(get_db),
@@ -125,7 +125,7 @@ async def get_account_hierarchy(
 # POST /{id}/set-parent
 # ---------------------------------------------------------------------------
 
-@router.post("/{account_id}/set-parent", response_model=dict, tags=["crm", "accounts"])
+@router.post("/{account_id}/set-parent", response_model=dict, tags=["crm", "accounts"], summary="Account parent setzen")
 async def set_account_parent(
     account_id: str,
     parent_id: Optional[str] = Query(None, description="Parent-Account-ID (null = root)"),
@@ -187,7 +187,7 @@ async def set_account_parent(
 # GET /{id}/consolidated — konsolidierter Umsatz
 # ---------------------------------------------------------------------------
 
-@router.get("/{account_id}/consolidated", response_model=dict, tags=["crm", "accounts"])
+@router.get("/{account_id}/consolidated", response_model=dict, tags=["crm", "accounts"], summary="Consolidated revenue abrufen")
 async def get_consolidated_revenue(
     account_id: str,
     db: Session = Depends(get_db),

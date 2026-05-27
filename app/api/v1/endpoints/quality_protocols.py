@@ -150,7 +150,7 @@ def _to_out(protocol) -> QualityProtocolOut:
 
 # ── API Endpoints ───────────────────────────────────────────────────────────────
 
-@router.post("", response_model=QualityProtocolOut, status_code=201)
+@router.post("", response_model=QualityProtocolOut, status_code=201, summary="Protocol anlegen")
 async def create_protocol(
     payload: QualityProtocolCreateIn,
     db: Session = Depends(get_db),
@@ -186,7 +186,7 @@ async def create_protocol(
     return _to_out(protocol)
 
 
-@router.get("/{protocol_id}", response_model=QualityProtocolOut)
+@router.get("/{protocol_id}", response_model=QualityProtocolOut, summary="Protocol abrufen")
 async def get_protocol(
     protocol_id: str,
     db: Session = Depends(get_db),
@@ -205,7 +205,7 @@ async def get_protocol(
     return _to_out(protocol)
 
 
-@router.get("/harvest-acceptance/{harvest_acceptance_id}", response_model=list[QualityProtocolOut])
+@router.get("/harvest-acceptance/{harvest_acceptance_id}", response_model=list[QualityProtocolOut], summary="Protocols by harvest acceptance abrufen")
 async def get_protocols_by_harvest_acceptance(
     harvest_acceptance_id: str,
     db: Session = Depends(get_db),
@@ -221,7 +221,7 @@ async def get_protocols_by_harvest_acceptance(
     return [_to_out(p) for p in protocols]
 
 
-@router.get("/harvest-acceptance/{harvest_acceptance_id}/latest", response_model=QualityProtocolOut)
+@router.get("/harvest-acceptance/{harvest_acceptance_id}/latest", response_model=QualityProtocolOut, summary="Latest protocol for harvest acceptance abrufen")
 async def get_latest_protocol_for_harvest_acceptance(
     harvest_acceptance_id: str,
     db: Session = Depends(get_db),
@@ -240,7 +240,7 @@ async def get_latest_protocol_for_harvest_acceptance(
     return _to_out(protocol)
 
 
-@router.put("/{protocol_id}", response_model=QualityProtocolOut)
+@router.put("/{protocol_id}", response_model=QualityProtocolOut, summary="Protocol aktualisieren")
 async def update_protocol(
     protocol_id: str,
     payload: QualityProtocolUpdateIn,
@@ -274,8 +274,8 @@ async def update_protocol(
     return _to_out(protocol)
 
 
-@router.post("/{protocol_id}/approve", response_model=QualityProtocolOut)
-@router.post("/{protocol_id}/finalize", response_model=QualityProtocolOut)
+@router.post("/{protocol_id}/approve", response_model=QualityProtocolOut, summary="Protocol finalize")
+@router.post("/{protocol_id}/finalize", response_model=QualityProtocolOut, summary="Protocol finalize")
 async def finalize_protocol(
     protocol_id: str,
     payload: QualityProtocolFinalizeIn,
@@ -296,7 +296,7 @@ async def finalize_protocol(
     return _to_out(protocol)
 
 
-@router.post("/import/csv", response_model=QualityProtocolOut, status_code=201)
+@router.post("/import/csv", response_model=QualityProtocolOut, status_code=201, summary="Protocol from csv importieren")
 async def import_protocol_from_csv(
     harvest_acceptance_id: Optional[str] = Form(None),
     file: UploadFile = File(...),
@@ -349,7 +349,7 @@ async def import_protocol_from_csv(
     return _to_out(protocol)
 
 
-@router.post("/import/json", response_model=QualityProtocolOut, status_code=201)
+@router.post("/import/json", response_model=QualityProtocolOut, status_code=201, summary="Protocol from json importieren")
 async def import_protocol_from_json(
     harvest_acceptance_id: Optional[str] = Form(None),
     file: UploadFile = File(...),

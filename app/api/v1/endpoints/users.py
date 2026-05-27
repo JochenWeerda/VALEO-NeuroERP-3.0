@@ -20,7 +20,7 @@ from ..schemas.base import PaginatedResponse
 router = APIRouter(tags=["users"])
 
 
-@router.post("/", response_model=User, status_code=status.HTTP_201_CREATED)
+@router.post("/", response_model=User, status_code=status.HTTP_201_CREATED, summary="User anlegen")
 async def create_user(
     user_data: UserCreate,
     db: Session = Depends(get_db)
@@ -51,7 +51,7 @@ async def create_user(
         raise HTTPException(status_code=500, detail=f"Failed to create user: {str(e)}")
 
 
-@router.get("/me", response_model=User)
+@router.get("/me", response_model=User, summary="Current user abrufen")
 async def get_current_user(
     oidc_user: OIDCUser = Depends(get_current_user),
     db: Session = Depends(get_db)
@@ -77,7 +77,7 @@ async def get_current_user(
         raise HTTPException(status_code=500, detail=f"Failed to retrieve current user: {str(e)}")
 
 
-@router.get("/{user_id}", response_model=User)
+@router.get("/{user_id}", response_model=User, summary="User abrufen")
 async def get_user(
     user_id: str,
     oidc_user: OIDCUser = Depends(get_current_user),
@@ -104,7 +104,7 @@ async def get_user(
         raise HTTPException(status_code=500, detail=f"Failed to retrieve user: {str(e)}")
 
 
-@router.get("/", response_model=PaginatedResponse[User])
+@router.get("/", response_model=PaginatedResponse[User], summary="Users auflisten")
 async def list_users(
     tenant_id: Optional[str] = Query(None, description="Filter by tenant ID"),
     skip: int = Query(0, ge=0, description="Number of items to skip"),
@@ -139,7 +139,7 @@ async def list_users(
         raise HTTPException(status_code=500, detail=f"Failed to list users: {str(e)}")
 
 
-@router.put("/{user_id}", response_model=User)
+@router.put("/{user_id}", response_model=User, summary="User aktualisieren")
 async def update_user(
     user_id: str,
     user_data: UserUpdate,
@@ -173,7 +173,7 @@ async def update_user(
         raise HTTPException(status_code=500, detail=f"Failed to update user: {str(e)}")
 
 
-@router.delete("/{user_id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete("/{user_id}", status_code=status.HTTP_204_NO_CONTENT, summary="User löschen")
 async def delete_user(
     user_id: str,
     oidc_user: OIDCUser = Depends(get_current_user),
@@ -199,7 +199,7 @@ async def delete_user(
         raise HTTPException(status_code=500, detail=f"Failed to delete user: {str(e)}")
 
 
-@router.post("/login", response_model=dict)
+@router.post("/login", response_model=dict, summary="Anmelden")
 async def login(
     login_data: UserLogin,
     db: Session = Depends(get_db)
@@ -219,7 +219,7 @@ async def login(
     }
 
 
-@router.post("/change-password")
+@router.post("/change-password", summary="Password change")
 async def change_password(
     password_data: ChangePasswordRequest,
     oidc_user: OIDCUser = Depends(get_current_user),

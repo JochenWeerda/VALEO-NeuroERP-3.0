@@ -347,7 +347,7 @@ def _to_api_key_out(row: dict[str, Any]) -> AdminApiKeyOut:
     )
 
 
-@router.get("/benutzer", response_model=list[AdminUserOut])
+@router.get("/benutzer", response_model=list[AdminUserOut], summary="Admin users auflisten")
 async def list_admin_users(
     search: str | None = Query(default=None),
     tenant_id: str = Depends(get_tenant_id),
@@ -395,7 +395,7 @@ async def list_admin_users(
     return result
 
 
-@router.get("/benutzer/{user_id}", response_model=AdminUserOut)
+@router.get("/benutzer/{user_id}", response_model=AdminUserOut, summary="Admin user abrufen")
 async def get_admin_user(
     user_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -425,7 +425,7 @@ async def get_admin_user(
     )
 
 
-@router.post("/benutzer", response_model=AdminUserOut, status_code=201)
+@router.post("/benutzer", response_model=AdminUserOut, status_code=201, summary="Admin user anlegen")
 async def create_admin_user(
     payload: AdminUserCreate,
     tenant_id: str = Depends(get_tenant_id),
@@ -478,7 +478,7 @@ async def create_admin_user(
     return await get_admin_user(user_id=user_id, tenant_id=tenant_id, db=db)
 
 
-@router.put("/benutzer/{user_id}", response_model=AdminUserOut)
+@router.put("/benutzer/{user_id}", response_model=AdminUserOut, summary="Admin user aktualisieren")
 async def update_admin_user(
     user_id: str,
     payload: AdminUserUpdate,
@@ -554,7 +554,7 @@ async def update_admin_user(
     return await get_admin_user(user_id=user_id, tenant_id=tenant_id, db=db)
 
 
-@router.delete("/benutzer/{user_id}", status_code=204, response_class=Response, response_model=None)
+@router.delete("/benutzer/{user_id}", status_code=204, response_class=Response, response_model=None, summary="Admin user löschen")
 async def delete_admin_user(
     user_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -582,7 +582,7 @@ async def delete_admin_user(
     db.commit()
 
 
-@router.get("/rollen", response_model=list[AdminRoleOut])
+@router.get("/rollen", response_model=list[AdminRoleOut], summary="Admin roles auflisten")
 async def list_admin_roles(
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
@@ -619,7 +619,7 @@ async def list_admin_roles(
     return rows
 
 
-@router.post("/rollen", response_model=AdminRoleOut, status_code=201)
+@router.post("/rollen", response_model=AdminRoleOut, status_code=201, summary="Admin role anlegen")
 async def create_admin_role(
     payload: AdminRoleCreate,
     tenant_id: str = Depends(get_tenant_id),
@@ -653,7 +653,7 @@ async def create_admin_role(
     raise HTTPException(status_code=500, detail="Role created but not retrievable")
 
 
-@router.put("/rollen/{role_id}", response_model=AdminRoleOut)
+@router.put("/rollen/{role_id}", response_model=AdminRoleOut, summary="Admin role aktualisieren")
 async def update_admin_role(
     role_id: str,
     payload: AdminRoleUpdate,
@@ -690,7 +690,7 @@ async def update_admin_role(
     raise HTTPException(status_code=500, detail="Role updated but not retrievable")
 
 
-@router.delete("/rollen/{role_id}", status_code=204, response_class=Response, response_model=None)
+@router.delete("/rollen/{role_id}", status_code=204, response_class=Response, response_model=None, summary="Admin role löschen")
 async def delete_admin_role(
     role_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -720,7 +720,7 @@ async def delete_admin_role(
     db.commit()
 
 
-@router.get("/audit-log", response_model=list[AdminAuditOut])
+@router.get("/audit-log", response_model=list[AdminAuditOut], summary="Admin audit log auflisten")
 async def list_admin_audit_log(
     search: str | None = Query(default=None),
     limit: int = Query(default=250, ge=1, le=1000),
@@ -783,7 +783,7 @@ async def list_admin_audit_log(
     return result
 
 
-@router.get("/api-keys", response_model=list[AdminApiKeyOut])
+@router.get("/api-keys", response_model=list[AdminApiKeyOut], summary="Admin api keys auflisten")
 async def list_admin_api_keys(
     include_revoked: bool = Query(default=False),
     tenant_id: str = Depends(get_tenant_id),
@@ -806,7 +806,7 @@ async def list_admin_api_keys(
     return [_to_api_key_out(dict(row)) for row in rows]
 
 
-@router.get("/agent-manifest", response_model=AgentManifestOut)
+@router.get("/agent-manifest", response_model=AgentManifestOut, summary="Agent manifest abrufen")
 async def get_agent_manifest() -> AgentManifestOut:
     """
     Maschinenlesbarer Einstiegspunkt fuer externe Agenten (Gap 048).
@@ -887,7 +887,7 @@ async def get_agent_manifest() -> AgentManifestOut:
     )
 
 
-@router.post("/api-keys", response_model=AdminApiKeySecretOut, status_code=201)
+@router.post("/api-keys", response_model=AdminApiKeySecretOut, status_code=201, summary="Admin api key anlegen")
 async def create_admin_api_key(
     payload: AdminApiKeyCreate,
     tenant_id: str = Depends(get_tenant_id),
@@ -947,7 +947,7 @@ async def create_admin_api_key(
     )
 
 
-@router.put("/api-keys/{key_id}", response_model=AdminApiKeyOut)
+@router.put("/api-keys/{key_id}", response_model=AdminApiKeyOut, summary="Admin api key aktualisieren")
 async def update_admin_api_key(
     key_id: str,
     payload: AdminApiKeyUpdate,
@@ -1031,7 +1031,7 @@ async def update_admin_api_key(
     return _to_api_key_out(dict(row))
 
 
-@router.post("/api-keys/{key_id}/rotate", response_model=AdminApiKeySecretOut)
+@router.post("/api-keys/{key_id}/rotate", response_model=AdminApiKeySecretOut, summary="Admin api key rotate")
 async def rotate_admin_api_key(
     key_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -1085,7 +1085,7 @@ async def rotate_admin_api_key(
     )
 
 
-@router.post("/api-keys/{key_id}/revoke", status_code=204, response_class=Response, response_model=None)
+@router.post("/api-keys/{key_id}/revoke", status_code=204, response_class=Response, response_model=None, summary="Admin api key revoke")
 async def revoke_admin_api_key(
     key_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -1138,7 +1138,7 @@ class ProcessVariantsOut(BaseModel):
     )
 
 
-@router.get("/process-variants", response_model=ProcessVariantsOut)
+@router.get("/process-variants", response_model=ProcessVariantsOut, summary="Process variants abrufen")
 async def get_process_variants(
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
@@ -1160,7 +1160,7 @@ async def get_process_variants(
     return ProcessVariantsOut(variants=DEFAULT_PROCESS_VARIANTS)
 
 
-@router.put("/process-variants", response_model=ProcessVariantsOut)
+@router.put("/process-variants", response_model=ProcessVariantsOut, summary="Process variants put")
 async def put_process_variants(
     payload: ProcessVariantsOut,
     tenant_id: str = Depends(get_tenant_id),
@@ -1194,7 +1194,7 @@ class PolicyOverridesOut(BaseModel):
     )
 
 
-@router.get("/policy-overrides", response_model=PolicyOverridesOut)
+@router.get("/policy-overrides", response_model=PolicyOverridesOut, summary="Policy overrides abrufen")
 async def get_policy_overrides(
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
@@ -1210,7 +1210,7 @@ async def get_policy_overrides(
     return PolicyOverridesOut(overrides={})
 
 
-@router.put("/policy-overrides", response_model=PolicyOverridesOut)
+@router.put("/policy-overrides", response_model=PolicyOverridesOut, summary="Policy overrides put")
 async def put_policy_overrides(
     payload: PolicyOverridesOut,
     tenant_id: str = Depends(get_tenant_id),
@@ -1345,7 +1345,7 @@ def _campaign_matches_preview(
     )
 
 
-@router.get("/erntefenster-templates", response_model=list[ErntefensterTemplateOut])
+@router.get("/erntefenster-templates", response_model=list[ErntefensterTemplateOut], summary="Erntefenster templates abrufen")
 async def get_erntefenster_templates():
     """
     Erntefenster-Vorlagen abrufen (Gap 005).
@@ -1365,7 +1365,7 @@ async def get_erntefenster_templates():
     ]
 
 
-@router.get("/erntefenster-campaigns", response_model=list[ErntefensterCampaignOut])
+@router.get("/erntefenster-campaigns", response_model=list[ErntefensterCampaignOut], summary="Erntefenster campaigns abrufen")
 async def get_erntefenster_campaigns(
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
@@ -1378,7 +1378,7 @@ async def get_erntefenster_campaigns(
     return [ErntefensterCampaignOut(**c) for c in campaigns if isinstance(c, dict)]
 
 
-@router.post("/erntefenster-from-template", response_model=ErntefensterCampaignOut, status_code=201)
+@router.post("/erntefenster-from-template", response_model=ErntefensterCampaignOut, status_code=201, summary="Erntefenster from template anlegen")
 async def create_erntefenster_from_template(
     payload: ErntefensterFromTemplateIn,
     tenant_id: str = Depends(get_tenant_id),
@@ -1420,7 +1420,7 @@ async def create_erntefenster_from_template(
     return ErntefensterCampaignOut(**campaign)
 
 
-@router.post("/workflow-sandbox/preview", response_model=WorkflowSandboxPreviewOut)
+@router.post("/workflow-sandbox/preview", response_model=WorkflowSandboxPreviewOut, summary="Workflow sandbox vorschauen")
 async def preview_workflow_sandbox(
     payload: WorkflowSandboxPreviewIn,
     tenant_id: str = Depends(get_tenant_id),

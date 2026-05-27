@@ -1,4 +1,4 @@
-﻿"""
+"""
 GDPR Data-Subject Requests API
 Implements the request lifecycle: create → verify → export/delete/reject → download
 GDPR Articles 15 (access), 17 (erasure), 20 (portability)
@@ -153,7 +153,7 @@ def _current_user(request: Request) -> Optional[str]:
 # Endpoints
 # ---------------------------------------------------------------------------
 
-@router.post("", response_model=GdprRequestResponse, status_code=status.HTTP_201_CREATED)
+@router.post("", response_model=GdprRequestResponse, status_code=status.HTTP_201_CREATED, summary="Gdpr request anlegen")
 async def create_gdpr_request(
     payload: GdprRequestCreate,
     request: Request,
@@ -190,7 +190,7 @@ async def create_gdpr_request(
     return GdprRequestResponse.model_validate(obj)
 
 
-@router.get("/{request_id}", response_model=GdprRequestResponse)
+@router.get("/{request_id}", response_model=GdprRequestResponse, summary="Gdpr request abrufen")
 async def get_gdpr_request(
     request_id: str,
     db: Session = Depends(get_db),
@@ -201,7 +201,7 @@ async def get_gdpr_request(
     return GdprRequestResponse.model_validate(obj)
 
 
-@router.get("/{request_id}/history", response_model=List[GdprHistoryEntry])
+@router.get("/{request_id}/history", response_model=List[GdprHistoryEntry], summary="Gdpr request history abrufen")
 async def get_gdpr_request_history(
     request_id: str,
     db: Session = Depends(get_db),
@@ -221,7 +221,7 @@ async def get_gdpr_request_history(
     return [GdprHistoryEntry.model_validate(e) for e in entries]
 
 
-@router.post("/{request_id}/verify", response_model=GdprRequestResponse)
+@router.post("/{request_id}/verify", response_model=GdprRequestResponse, summary="Gdpr request verifizieren")
 async def verify_gdpr_request(
     request_id: str,
     request: Request,
@@ -250,7 +250,7 @@ async def verify_gdpr_request(
     return GdprRequestResponse.model_validate(obj)
 
 
-@router.post("/{request_id}/export", response_model=GdprRequestResponse)
+@router.post("/{request_id}/export", response_model=GdprRequestResponse, summary="Gdpr request exportieren")
 async def export_gdpr_request(
     request_id: str,
     request: Request,
@@ -311,7 +311,7 @@ async def export_gdpr_request(
     return GdprRequestResponse.model_validate(obj)
 
 
-@router.post("/{request_id}/delete", response_model=GdprRequestResponse)
+@router.post("/{request_id}/delete", response_model=GdprRequestResponse, summary="Subject data löschen")
 async def delete_subject_data(
     request_id: str,
     request: Request,
@@ -369,7 +369,7 @@ async def delete_subject_data(
     return GdprRequestResponse.model_validate(obj)
 
 
-@router.post("/{request_id}/reject", response_model=GdprRequestResponse)
+@router.post("/{request_id}/reject", response_model=GdprRequestResponse, summary="Gdpr request ablehnen")
 async def reject_gdpr_request(
     request_id: str,
     request: Request,
@@ -400,7 +400,7 @@ async def reject_gdpr_request(
     return GdprRequestResponse.model_validate(obj)
 
 
-@router.get("/{request_id}/download")
+@router.get("/{request_id}/download", summary="Gdpr export herunterladen")
 async def download_gdpr_export(
     request_id: str,
     db: Session = Depends(get_db),

@@ -73,7 +73,7 @@ class VermehrungsvertragOut(BaseModel):
 
 # ── Endpoints ─────────────────────────────────────────────────────────────────
 
-@router.get("", response_model=list[VermehrungsvertragOut])
+@router.get("", response_model=list[VermehrungsvertragOut], summary="Vermehrungsvertraege auflisten")
 def list_vermehrungsvertraege(
     erntejahr: Optional[int] = Query(None),
     vermehrer_kunden_nr: Optional[str] = Query(None),
@@ -104,7 +104,7 @@ def list_vermehrungsvertraege(
     return [VermehrungsvertragOut(**dict(r._mapping)) for r in rows]
 
 
-@router.get("/{vertrag_nr}", response_model=VermehrungsvertragOut)
+@router.get("/{vertrag_nr}", response_model=VermehrungsvertragOut, summary="Vermehrungsvertrag abrufen")
 def get_vermehrungsvertrag(
     vertrag_nr: str,
     db=Depends(get_db),
@@ -119,7 +119,7 @@ def get_vermehrungsvertrag(
     return VermehrungsvertragOut(**dict(row._mapping))
 
 
-@router.post("", response_model=VermehrungsvertragOut, status_code=201)
+@router.post("", response_model=VermehrungsvertragOut, status_code=201, summary="Vermehrungsvertrag anlegen")
 def create_vermehrungsvertrag(
     payload: VermehrungsvertragCreate,
     db=Depends(get_db),
@@ -157,7 +157,7 @@ def create_vermehrungsvertrag(
     return VermehrungsvertragOut(**dict(row._mapping))
 
 
-@router.put("/{vertrag_nr}", response_model=VermehrungsvertragOut)
+@router.put("/{vertrag_nr}", response_model=VermehrungsvertragOut, summary="Vermehrungsvertrag aktualisieren")
 def update_vermehrungsvertrag(
     vertrag_nr: str,
     payload: VermehrungsvertragCreate,
@@ -200,7 +200,7 @@ def update_vermehrungsvertrag(
     return VermehrungsvertragOut(**dict(updated._mapping))
 
 
-@router.post("/{vertrag_nr}/status", response_model=VermehrungsvertragOut)
+@router.post("/{vertrag_nr}/status", response_model=VermehrungsvertragOut, summary="Status setzen")
 def set_status(
     vertrag_nr: str,
     neuer_status: str,

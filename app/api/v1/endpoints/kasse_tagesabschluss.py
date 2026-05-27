@@ -53,7 +53,7 @@ class TagesabschlussSubmitOut(BaseModel):
 # Endpoints
 # ---------------------------------------------------------------------------
 
-@router.get("/aktuell", response_model=TagesabschlussAktuell)
+@router.get("/aktuell", response_model=TagesabschlussAktuell, summary="Aktuell abrufen")
 async def get_aktuell(
     datum: Optional[str] = None,
     tenant_id: str = Depends(get_tenant_id),
@@ -106,7 +106,7 @@ async def get_aktuell(
     )
 
 
-@router.post("", response_model=TagesabschlussSubmitOut, status_code=201)
+@router.post("", response_model=TagesabschlussSubmitOut, status_code=201, summary="Tagesabschluss einreichen")
 async def submit_tagesabschluss(
     payload: TagesabschlussSubmitIn,
     tenant_id: str = Depends(get_tenant_id),

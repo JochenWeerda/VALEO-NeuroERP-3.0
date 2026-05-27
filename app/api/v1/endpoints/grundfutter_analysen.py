@@ -586,7 +586,7 @@ def _analyse_to_dict(a: GrundfutterAnalyse) -> Dict[str, Any]:
 # Endpoints
 # ---------------------------------------------------------------------------
 
-@router.get("/grundfutter-analysen")
+@router.get("/grundfutter-analysen", summary="Analysen auflisten")
 def list_analysen(
     probenart: Optional[str] = Query(default=None),
     verifiziert: Optional[bool] = Query(default=None),
@@ -608,7 +608,7 @@ def list_analysen(
     return {"total": total, "items": [_analyse_to_dict(a) for a in items]}
 
 
-@router.get("/grundfutter-analysen/{analyse_id}")
+@router.get("/grundfutter-analysen/{analyse_id}", summary="Analyse abrufen")
 def get_analyse(
     analyse_id: str,
     db: Session = Depends(get_db),
@@ -626,7 +626,7 @@ def get_analyse(
     return _analyse_to_dict(a)
 
 
-@router.post("/grundfutter-analysen", status_code=201)
+@router.post("/grundfutter-analysen", status_code=201, summary="Analyse anlegen")
 def create_analyse(
     data: GrundfutterAnalyseIn,
     db: Session = Depends(get_db),
@@ -659,7 +659,7 @@ def create_analyse(
     return _analyse_to_dict(a)
 
 
-@router.patch("/grundfutter-analysen/{analyse_id}")
+@router.patch("/grundfutter-analysen/{analyse_id}", summary="Analyse aktualisieren")
 def patch_analyse(
     analyse_id: str,
     data: GrundfutterAnalysePatch,
@@ -681,7 +681,7 @@ def patch_analyse(
     return _analyse_to_dict(a)
 
 
-@router.delete("/grundfutter-analysen/{analyse_id}", status_code=204, response_class=Response, response_model=None)
+@router.delete("/grundfutter-analysen/{analyse_id}", status_code=204, response_class=Response, response_model=None, summary="Analyse löschen")
 def delete_analyse(
     analyse_id: str,
     db: Session = Depends(get_db),
@@ -701,7 +701,7 @@ def delete_analyse(
     return Response(status_code=204)
 
 
-@router.post("/grundfutter-analysen/upload-pdf")
+@router.post("/grundfutter-analysen/upload-pdf", summary="Pdf hochladen")
 async def upload_pdf(
     file: UploadFile = File(...),
     save: bool = Query(default=False, description="Direkt in DB speichern"),
@@ -776,7 +776,7 @@ async def upload_pdf(
     }
 
 
-@router.post("/grundfutter-analysen/upload-csv")
+@router.post("/grundfutter-analysen/upload-csv", summary="Csv hochladen")
 async def upload_csv(
     file: UploadFile = File(...),
     save: bool = Query(default=False),
@@ -808,7 +808,7 @@ async def upload_csv(
     return {"saved": False, "parsed": parsed.model_dump()}
 
 
-@router.post("/grundfutter-analysen/{analyse_id}/as-feed")
+@router.post("/grundfutter-analysen/{analyse_id}/as-feed", summary="As feed promote")
 def promote_as_feed(
     analyse_id: str,
     db: Session = Depends(get_db),

@@ -162,7 +162,7 @@ def _build_zip(export_date: str) -> bytes:
 # Endpunkte
 # ---------------------------------------------------------------------------
 
-@router.get("/dsfinvk/export")
+@router.get("/dsfinvk/export", summary="Export dsfinvk")
 async def dsfinvk_export():
     """
     DSFinV-K-kompatibler ZIP-Export (KassenSichV §4 Abs. 3 AEAO).
@@ -189,7 +189,7 @@ async def dsfinvk_export():
     )
 
 
-@router.get("/dsfinvk/status", response_model=DsfinvkStatusResponse)
+@router.get("/dsfinvk/status", response_model=DsfinvkStatusResponse, summary="Status dsfinvk")
 async def dsfinvk_status():
     """
     Gibt den aktuellen DSFinV-K-Exportstatus zurück

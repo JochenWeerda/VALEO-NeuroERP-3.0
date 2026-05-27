@@ -149,7 +149,7 @@ def _load_from_db_or_store(id: str, db: Session, tenant_id: str) -> Optional[dic
 
 # ── Endpoints ─────────────────────────────────────────────────────────────────
 
-@router.get("/readiness")
+@router.get("/readiness", summary="Readiness")
 def readiness(
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
@@ -170,7 +170,7 @@ def readiness(
     }
 
 
-@router.get("/szenarien", response_model=list[UATSzenarioOut])
+@router.get("/szenarien", response_model=list[UATSzenarioOut], summary="Szenarien auflisten")
 def list_szenarien(
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
@@ -207,7 +207,7 @@ def list_szenarien(
         return [UATSzenarioOut(**v) for v in _store.values()]
 
 
-@router.post("/szenarien", response_model=UATSzenarioOut, status_code=201)
+@router.post("/szenarien", response_model=UATSzenarioOut, status_code=201, summary="Szenario anlegen")
 def create_szenario(
     payload: UATSzenarioCreate,
     db: Session = Depends(get_db),
@@ -259,7 +259,7 @@ def create_szenario(
     return UATSzenarioOut(**record)
 
 
-@router.post("/szenarien/{id}/schritt/{nr}/ausfuehren")
+@router.post("/szenarien/{id}/schritt/{nr}/ausfuehren", summary="Ausfuehren schritt")
 def schritt_ausfuehren(
     id: str,
     nr: int,
@@ -315,7 +315,7 @@ def schritt_ausfuehren(
     }
 
 
-@router.get("/szenarien/{id}/bericht")
+@router.get("/szenarien/{id}/bericht", summary="Bericht")
 def bericht(
     id: str,
     db: Session = Depends(get_db),
@@ -344,7 +344,7 @@ def bericht(
     }
 
 
-@router.post("/szenarien/{id}/reset")
+@router.post("/szenarien/{id}/reset", summary="Szenario zurücksetzen")
 def reset_szenario(
     id: str,
     db: Session = Depends(get_db),

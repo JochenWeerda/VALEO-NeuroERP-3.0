@@ -16,16 +16,16 @@ class ClassifyRequest(BaseModel):
     has_ai_context: bool = Field(False)
 
 
-@router.post("/classify")
+@router.post("/classify", summary="Classify")
 async def classify(request: ClassifyRequest):
     return classify_request(request.method, request.path, request.has_ai_context)
 
 
-@router.get("/whitelist")
+@router.get("/whitelist", summary="Whitelist abrufen")
 async def get_whitelist():
     return {"paths": sorted(FAST_TRACK_WHITELIST), "count": len(FAST_TRACK_WHITELIST)}
 
 
-@router.get("/check")
+@router.get("/check", summary="Prüfen")
 async def check(method: str = "GET", path: str = "/api/v1/articles"):
     return {"is_fast_track": is_fast_track(method, path), "method": method, "path": path}

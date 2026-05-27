@@ -83,7 +83,7 @@ def _compute_sla(
     }
 
 
-@router.post("/", response_model=Case, status_code=status.HTTP_201_CREATED)
+@router.post("/", response_model=Case, status_code=status.HTTP_201_CREATED, summary="Case anlegen")
 async def create_case(case_data: CaseCreate):
     """Create a new support case via crm-service."""
     try:
@@ -95,7 +95,7 @@ async def create_case(case_data: CaseCreate):
     return Case.model_validate(created)
 
 
-@router.get("/", response_model=PaginatedResponse[Case])
+@router.get("/", response_model=PaginatedResponse[Case], summary="Cases auflisten")
 async def list_cases(
     tenant_id: Optional[str] = Query(None, description="Filter by tenant ID"),
     status: Optional[str] = Query(None, description="Filter by status"),
@@ -133,7 +133,7 @@ async def list_cases(
     )
 
 
-@router.get("/{case_id}", response_model=Case)
+@router.get("/{case_id}", response_model=Case, summary="Case abrufen")
 async def get_case(case_id: str):
     """Get a specific support case by ID."""
     try:
@@ -147,7 +147,7 @@ async def get_case(case_id: str):
     return Case.model_validate(case)
 
 
-@router.put("/{case_id}", response_model=Case)
+@router.put("/{case_id}", response_model=Case, summary="Case aktualisieren")
 async def update_case(case_id: str, case_data: CaseUpdate):
     """Update a support case via crm-service."""
     try:
@@ -161,7 +161,7 @@ async def update_case(case_id: str, case_data: CaseUpdate):
     return Case.model_validate(updated)
 
 
-@router.delete("/{case_id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete("/{case_id}", status_code=status.HTTP_204_NO_CONTENT, summary="Case löschen")
 async def delete_case(case_id: str):
     """Delete a support case via crm-service."""
     try:
@@ -174,7 +174,7 @@ async def delete_case(case_id: str):
         raise HTTPException(status_code=500, detail=f"Failed to delete case: {exc}") from exc
 
 
-@router.post("/{case_id}/escalate", response_model=dict)
+@router.post("/{case_id}/escalate", response_model=dict, summary="Case escalate")
 async def escalate_case(
     case_id: str,
     reason: str = Query(..., description="Reason for escalation"),
@@ -232,7 +232,7 @@ async def escalate_case(
 # SLA endpoints
 # ---------------------------------------------------------------------------
 
-@router.get("/sla-dashboard", response_model=dict, tags=["crm", "cases", "sla"])
+@router.get("/sla-dashboard", response_model=dict, tags=["crm", "cases", "sla"], summary="Sla dashboard abrufen")
 async def get_sla_dashboard(
     tenant_id: Optional[str] = Query(None),
     db: Session = Depends(get_db),
@@ -298,7 +298,7 @@ async def get_sla_dashboard(
     }
 
 
-@router.get("/{case_id}/sla-status", response_model=dict, tags=["crm", "cases", "sla"])
+@router.get("/{case_id}/sla-status", response_model=dict, tags=["crm", "cases", "sla"], summary="Case sla status abrufen")
 async def get_case_sla_status(
     case_id: str,
     db: Session = Depends(get_db),

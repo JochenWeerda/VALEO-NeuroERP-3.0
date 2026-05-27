@@ -138,7 +138,7 @@ def _row_to_creditor(row) -> Creditor:
     )
 
 
-@router.post("/", response_model=Creditor, status_code=201)
+@router.post("/", response_model=Creditor, status_code=201, summary="Creditor anlegen")
 async def create_creditor(
     payload: CreditorCreate,
     tenant_id: str = Depends(get_tenant_id),
@@ -198,7 +198,7 @@ async def create_creditor(
         raise HTTPException(status_code=500, detail=f"Fehler beim Anlegen des Kreditors: {str(e)}")
 
 
-@router.get("/", response_model=PaginatedResponse[Creditor])
+@router.get("/", response_model=PaginatedResponse[Creditor], summary="Creditors auflisten")
 async def list_creditors(
     is_active: Optional[bool] = Query(None),
     search: Optional[str] = Query(None),
@@ -246,7 +246,7 @@ async def list_creditors(
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.get("/{creditor_id}", response_model=Creditor)
+@router.get("/{creditor_id}", response_model=Creditor, summary="Creditor abrufen")
 async def get_creditor(
     creditor_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -264,7 +264,7 @@ async def get_creditor(
     return _row_to_creditor(row)
 
 
-@router.put("/{creditor_id}", response_model=Creditor)
+@router.put("/{creditor_id}", response_model=Creditor, summary="Creditor aktualisieren")
 async def update_creditor(
     creditor_id: str,
     payload: CreditorUpdate,
@@ -375,7 +375,7 @@ async def update_creditor(
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.get("/{creditor_id}/balance", response_model=dict)
+@router.get("/{creditor_id}/balance", response_model=dict, summary="Creditor balance abrufen")
 async def get_creditor_balance(
     creditor_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -412,7 +412,7 @@ async def get_creditor_balance(
         raise HTTPException(status_code=500, detail=f"OP-Saldo konnte nicht ermittelt werden: {str(e)}")
 
 
-@router.delete("/{creditor_id}", status_code=204, response_class=Response, response_model=None)
+@router.delete("/{creditor_id}", status_code=204, response_class=Response, response_model=None, summary="Creditor löschen")
 async def delete_creditor(
     creditor_id: str,
     tenant_id: str = Depends(get_tenant_id),

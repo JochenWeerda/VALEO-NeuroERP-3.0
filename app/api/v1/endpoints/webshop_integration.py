@@ -65,7 +65,7 @@ def _svc(db: Session, tenant_id: str) -> WebshopIntegrationService:
     return WebshopIntegrationService(db, tenant_id)
 
 
-@router.get("/konfigurationen", response_model=list[WebshopKonfigurationOut])
+@router.get("/konfigurationen", response_model=list[WebshopKonfigurationOut], summary="Konfigurationen auflisten")
 def list_konfigurationen(
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
@@ -74,7 +74,7 @@ def list_konfigurationen(
     return _svc(db, tenant_id).list_configurations()
 
 
-@router.post("/konfigurationen", response_model=WebshopKonfigurationOut, status_code=201)
+@router.post("/konfigurationen", response_model=WebshopKonfigurationOut, status_code=201, summary="Konfiguration anlegen")
 def create_konfiguration(
     payload: WebshopKonfiguration,
     db: Session = Depends(get_db),
@@ -84,7 +84,7 @@ def create_konfiguration(
     return _svc(db, tenant_id).create_configuration(payload.model_dump())
 
 
-@router.delete("/konfigurationen/{id}", status_code=204, response_class=Response, response_model=None)
+@router.delete("/konfigurationen/{id}", status_code=204, response_class=Response, response_model=None, summary="Konfiguration löschen")
 def delete_konfiguration(
     id: str,
     db: Session = Depends(get_db),
@@ -95,7 +95,7 @@ def delete_konfiguration(
     return Response(status_code=204)
 
 
-@router.get("/bestellungen", response_model=list[WebshopBestellung])
+@router.get("/bestellungen", response_model=list[WebshopBestellung], summary="Bestellungen auflisten")
 def list_bestellungen(
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
@@ -104,7 +104,7 @@ def list_bestellungen(
     return _svc(db, tenant_id).list_orders()
 
 
-@router.get("/bestellungen/{external_order_no}", response_model=WebshopBestellung)
+@router.get("/bestellungen/{external_order_no}", response_model=WebshopBestellung, summary="Bestellung abrufen")
 def get_bestellung(
     external_order_no: str,
     db: Session = Depends(get_db),
@@ -117,7 +117,7 @@ def get_bestellung(
     return order
 
 
-@router.post("/bestellungen/import", response_model=WebshopSyncResult)
+@router.post("/bestellungen/import", response_model=WebshopSyncResult, summary="Bestellungen importieren")
 def import_bestellungen(
     bestellungen: list[WebshopBestellung],
     db: Session = Depends(get_db),
@@ -127,7 +127,7 @@ def import_bestellungen(
     return _svc(db, tenant_id).import_orders([b.model_dump() for b in bestellungen])
 
 
-@router.post("/bestellungen/{id}/verarbeiten")
+@router.post("/bestellungen/{id}/verarbeiten", summary="Verarbeiten")
 def verarbeiten(
     id: str,
     db: Session = Depends(get_db),
@@ -137,7 +137,7 @@ def verarbeiten(
     return _svc(db, tenant_id).process_order(id)
 
 
-@router.get("/sync-status")
+@router.get("/sync-status", summary="Status synchronisieren")
 def sync_status(
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
@@ -146,7 +146,7 @@ def sync_status(
     return _svc(db, tenant_id).sync_status()
 
 
-@router.get("/orders")
+@router.get("/orders", summary="Orders auflisten")
 def list_orders(
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
@@ -161,7 +161,7 @@ class ConvertOrderResult(BaseModel):
     positionen_count: int
 
 
-@router.post("/orders/{order_id}/convert", response_model=ConvertOrderResult)
+@router.post("/orders/{order_id}/convert", response_model=ConvertOrderResult, summary="Order umwandeln")
 def convert_order(
     order_id: str,
     db: Session = Depends(get_db),
@@ -191,7 +191,7 @@ def convert_order(
     )
 
 
-@router.get("/sync-log")
+@router.get("/sync-log", summary="Log synchronisieren")
 def sync_log(
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),

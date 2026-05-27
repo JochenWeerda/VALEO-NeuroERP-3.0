@@ -114,7 +114,7 @@ def _record_to_response(record: KnowledgeObjectRecord) -> KnowledgeObjectRespons
 # ── Endpoints ───────────────────────────────────────────────────────────────────
 
 
-@router.get("/search", response_model=KnowledgeSearchResult)
+@router.get("/search", response_model=KnowledgeSearchResult, summary="Knowledge suchen")
 def search_knowledge(
     q: str = Query("", description="Suchbegriff (ILIKE auf Titel und Inhalt)"),
     limit: int = Query(20, ge=1, le=100),
@@ -145,7 +145,7 @@ def search_knowledge(
         return KnowledgeSearchResult(items=[], total=0, query=q)
 
 
-@router.get("/stats", response_model=KnowledgeStatsResponse)
+@router.get("/stats", response_model=KnowledgeStatsResponse, summary="Knowledge stats abrufen")
 def get_knowledge_stats(db: Session = Depends(get_db)) -> KnowledgeStatsResponse:
     """Statistiken: Anzahl je Typ, Status und Format."""
     try:
@@ -205,7 +205,7 @@ def get_knowledge_stats(db: Session = Depends(get_db)) -> KnowledgeStatsResponse
         )
 
 
-@router.get("/", response_model=list[KnowledgeObjectResponse])
+@router.get("/", response_model=list[KnowledgeObjectResponse], summary="Knowledge auflisten")
 def list_knowledge(
     typ: Optional[str] = Query(None),
     status: Optional[str] = Query(None),
@@ -251,7 +251,7 @@ def list_knowledge(
         return []
 
 
-@router.post("/", response_model=KnowledgeObjectResponse, status_code=201)
+@router.post("/", response_model=KnowledgeObjectResponse, status_code=201, summary="Knowledge anlegen")
 def create_knowledge(
     payload: KnowledgeObjectCreate,
     db: Session = Depends(get_db),
@@ -280,7 +280,7 @@ def create_knowledge(
     return _record_to_response(record)
 
 
-@router.get("/{knowledge_id}", response_model=KnowledgeObjectResponse)
+@router.get("/{knowledge_id}", response_model=KnowledgeObjectResponse, summary="Knowledge abrufen")
 def get_knowledge(
     knowledge_id: str,
     db: Session = Depends(get_db),
@@ -297,7 +297,7 @@ def get_knowledge(
     return _record_to_response(record)
 
 
-@router.put("/{knowledge_id}", response_model=KnowledgeObjectResponse)
+@router.put("/{knowledge_id}", response_model=KnowledgeObjectResponse, summary="Knowledge aktualisieren")
 def update_knowledge(
     knowledge_id: str,
     payload: KnowledgeObjectUpdate,
@@ -331,7 +331,7 @@ def update_knowledge(
     return _record_to_response(record)
 
 
-@router.delete("/{knowledge_id}", status_code=204, response_class=Response, response_model=None)
+@router.delete("/{knowledge_id}", status_code=204, response_class=Response, response_model=None, summary="Knowledge archivieren")
 def archive_knowledge(
     knowledge_id: str,
     db: Session = Depends(get_db),
@@ -350,7 +350,7 @@ def archive_knowledge(
     return Response(status_code=204)
 
 
-@router.post("/{knowledge_id}/versionen", response_model=KnowledgeObjectResponse, status_code=201)
+@router.post("/{knowledge_id}/versionen", response_model=KnowledgeObjectResponse, status_code=201, summary="Version hinzufügen")
 def add_version(
     knowledge_id: str,
     payload: KnowledgeVersionCreate,

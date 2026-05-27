@@ -36,7 +36,7 @@ class PriceCalculationResponse(BaseModel):
     contract_id: Optional[str] = None
 
 
-@router.get("/calculate", response_model=PriceCalculationResponse)
+@router.get("/calculate", response_model=PriceCalculationResponse, summary="Price berechnen")
 async def calculate_price(
     article_id: str = Query(..., description="Article ID"),
     customer_id: Optional[str] = Query(None, description="Customer ID"),

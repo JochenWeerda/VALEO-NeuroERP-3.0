@@ -40,7 +40,7 @@ class FrachttarifPayload(BaseModel):
     notiz: Optional[str] = None
 
 
-@router.get("/frachttarife", response_model=list[dict])
+@router.get("/frachttarife", response_model=list[dict], summary="Frachttarife auflisten")
 async def list_frachttarife(
     skip: int = Query(0, ge=0),
     limit: int = Query(500, ge=1, le=2000),
@@ -51,7 +51,7 @@ async def list_frachttarife(
     return [_to_dict(row) for row in repo.get_all(skip=skip, limit=limit, aktiv_only=aktiv_only)]
 
 
-@router.get("/frachttarife/{tarif_id}", response_model=dict)
+@router.get("/frachttarife/{tarif_id}", response_model=dict, summary="Frachttarif abrufen")
 async def get_frachttarif(tarif_id: str, db: Session = Depends(get_db)):
     repo = SpeditionFrachttarifRepository(db)
     row = repo.get_by_id(tarif_id)
@@ -60,14 +60,14 @@ async def get_frachttarif(tarif_id: str, db: Session = Depends(get_db)):
     return _to_dict(row)
 
 
-@router.post("/frachttarife", response_model=dict, status_code=201)
+@router.post("/frachttarife", response_model=dict, status_code=201, summary="Frachttarif anlegen")
 async def create_frachttarif(payload: FrachttarifPayload, db: Session = Depends(get_db)):
     repo = SpeditionFrachttarifRepository(db)
     row = repo.create(payload.model_dump())
     return _to_dict(row)
 
 
-@router.patch("/frachttarife/{tarif_id}", response_model=dict)
+@router.patch("/frachttarife/{tarif_id}", response_model=dict, summary="Frachttarif aktualisieren")
 async def update_frachttarif(
     tarif_id: str,
     payload: FrachttarifPayload,
@@ -81,7 +81,7 @@ async def update_frachttarif(
     return _to_dict(updated)
 
 
-@router.delete("/frachttarife/{tarif_id}", status_code=204, response_class=Response, response_model=None)
+@router.delete("/frachttarife/{tarif_id}", status_code=204, response_class=Response, response_model=None, summary="Frachttarif löschen")
 async def delete_frachttarif(tarif_id: str, db: Session = Depends(get_db)):
     repo = SpeditionFrachttarifRepository(db)
     if not repo.delete(tarif_id):
