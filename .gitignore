@@ -140,3 +140,4 @@ nul
 # Local analysis artifacts
 service_erp_endpoints.txt
 C*Tempanalyze.py
+packages/frontend-web/config/sync_schedules.json
