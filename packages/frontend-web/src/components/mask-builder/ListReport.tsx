@@ -10,7 +10,10 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Search, Filter, Plus, Download, Upload } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts'
-import { ListConfig, ListColumn } from './types'
+import { ListConfig, ListColumn, Action, Field } from './types'
+
+type ListFilter = Field & { labelKey?: string; placeholderKey?: string }
+type BulkAction = Action & { labelKey?: string }
 
 export interface ServerPaginationParams {
   page: number
@@ -23,18 +26,18 @@ export interface ServerPaginationParams {
 
 interface ListReportProps {
   config: ListConfig
-  data: any[]
+  data: Record<string, unknown>[]
   total: number
   onCreate?: () => void
-  onEdit?: (_item: any) => void
-  onDelete?: (_item: any) => void
+  onEdit?: (_item: Record<string, unknown>) => void
+  onDelete?: (_item: Record<string, unknown>) => void
   pendingRows?: Set<string>
   onExport?: () => void
   onImport?: () => void
   /** Generic row action: (actionKey, item). When set, row buttons use config.actions and call this. */
-  onAction?: (_actionKey: string, _item: any) => void
+  onAction?: (_actionKey: string, _item: Record<string, unknown>) => void
   /** Generic bulk action: (actionKey, selectedItems). Called when bulk action has no onClick. */
-  onBulkAction?: (_actionKey: string, _items: any[]) => void
+  onBulkAction?: (_actionKey: string, _items: Record<string, unknown>[]) => void
   /** Called when config.serverPagination is true and page/sort/filter changes. */
   onPageChange?: (_params: ServerPaginationParams) => void
   isLoading?: boolean
@@ -121,7 +124,7 @@ const ListReport: React.FC<ListReportProps> = ({
   }
 
   // i18n-Helper für Filter-Labels
-  const getFilterLabel = (filter: any): string => {
+  const getFilterLabel = (filter: ListFilter): string => {
     if (filter.labelKey) {
       return t(filter.labelKey)
     }
@@ -129,7 +132,7 @@ const ListReport: React.FC<ListReportProps> = ({
   }
 
   // i18n-Helper für Filter-Placeholder
-  const getFilterPlaceholder = (filter: any): string => {
+  const getFilterPlaceholder = (filter: ListFilter): string => {
     if (filter.placeholderKey) {
       return t(filter.placeholderKey)
     }
@@ -137,7 +140,7 @@ const ListReport: React.FC<ListReportProps> = ({
   }
 
   // i18n-Helper für Bulk-Action-Labels
-  const getBulkActionLabel = (action: any): string => {
+  const getBulkActionLabel = (action: BulkAction): string => {
     if (action.labelKey) {
       return t(action.labelKey)
     }
@@ -175,10 +178,10 @@ const ListReport: React.FC<ListReportProps> = ({
     ? filteredData
     : [...filteredData].sort((a, b) => {
         if (!sortField) return 0
-        const aValue = a[sortField]
-        const bValue = b[sortField]
-        if (aValue < bValue) return sortDirection === 'asc' ? -1 : 1
-        if (aValue > bValue) return sortDirection === 'asc' ? 1 : -1
+        const aValue = a[sortField] as string | number | null | undefined
+        const bValue = b[sortField] as string | number | null | undefined
+        if ((aValue ?? '') < (bValue ?? '')) return sortDirection === 'asc' ? -1 : 1
+        if ((aValue ?? '') > (bValue ?? '')) return sortDirection === 'asc' ? 1 : -1
         return 0
       })
 
@@ -195,7 +198,7 @@ const ListReport: React.FC<ListReportProps> = ({
     }
   }
 
-  const handleFilterChange = (field: string, value: any) => {
+  const handleFilterChange = (field: string, value: unknown) => {
     setFilters(prev => ({
       ...prev,
       [field]: value
@@ -203,7 +206,7 @@ const ListReport: React.FC<ListReportProps> = ({
     setCurrentPage(1) // Reset to first page when filtering
   }
 
-  const handleBulkAction = (action: any) => {
+  const handleBulkAction = (action: BulkAction) => {
     if (selectedItems.length === 0) {
       toast({
         title: t('crud.messages.noSelection'),
@@ -220,7 +223,7 @@ const ListReport: React.FC<ListReportProps> = ({
     }
   }
 
-  const renderCell = (column: ListColumn, item: any) => {
+  const renderCell = (column: ListColumn, item: Record<string, unknown>) => {
     const value = item[column.key]
 
     if (column.render) {
@@ -250,7 +253,8 @@ const ListReport: React.FC<ListReportProps> = ({
       )
     }
 
-    return value ?? '-'
+    if (value === null || value === undefined) return '-'
+    return String(value)
   }
 
   return (
@@ -320,8 +324,8 @@ const ListReport: React.FC<ListReportProps> = ({
                   <NativeSelect
                     value={filters[filterName] || ''}
                     onValueChange={(value) => handleFilterChange(filterName, value)}
-                    options={((filter as any).options ?? []).map((option: any) => ({
-                      value: option.value,
+                    options={((filter['options'] as Array<{ value: string | number; label: string; labelKey?: string }>) ?? []).map((option) => ({
+                      value: String(option.value),
                       label: option.labelKey ? t(option.labelKey) : option.label,
                     }))}
                     placeholder={getFilterPlaceholder(filter)}
@@ -333,9 +337,9 @@ const ListReport: React.FC<ListReportProps> = ({
                       placeholder={getFilterPlaceholder(filter) || t('crud.placeholders.enterAmount')}
                       value={filters[filterName] || ''}
                       onChange={(e) => handleFilterChange(filterName, e.target.value)}
-                      min={(filter as any).min}
-                      max={(filter as any).max}
-                      step={(filter as any).step || '0.01'}
+                      min={filter['min'] as number | undefined}
+                      max={filter['max'] as number | undefined}
+                      step={(filter['step'] as number | undefined) || 0.01}
                       className="pr-8"
                     />
                     <span className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">€</span>
@@ -346,8 +350,8 @@ const ListReport: React.FC<ListReportProps> = ({
                     placeholder={getFilterPlaceholder(filter)}
                     value={filters[filterName] || ''}
                     onChange={(e) => handleFilterChange(filterName, e.target.value)}
-                    max={(filter as any).maxDate || new Date().toISOString().split('T')[0]}
-                    min={(filter as any).minDate}
+                    max={(filter['maxDate'] as string | undefined) || new Date().toISOString().split('T')[0]}
+                    min={filter['minDate'] as string | undefined}
                     lang="de-DE"
                   />
                 ) : (
@@ -464,7 +468,7 @@ const ListReport: React.FC<ListReportProps> = ({
                   </TableRow>
                 ) : (
                   paginatedData.map((item, index) => (
-                    <TableRow key={item.id || index}>
+                    <TableRow key={typeof item.id === 'string' || typeof item.id === 'number' ? item.id : index}>
                       <TableCell>
                         <input
                           type="checkbox"

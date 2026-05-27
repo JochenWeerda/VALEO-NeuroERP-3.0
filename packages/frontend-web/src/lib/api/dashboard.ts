@@ -6,6 +6,34 @@
 import { useQuery } from '@tanstack/react-query'
 import { apiClient } from '../api-client'
 
+interface ArticleItem {
+  id: string
+  name: string
+  stock_quantity?: number
+  min_stock?: number
+  price?: number
+}
+
+interface JournalEntry {
+  amount: number | string
+}
+
+interface PurchaseOrder {
+  id: string
+  purchaseOrderNumber?: string
+  supplierName?: string
+  supplier_id?: string
+  totalAmount?: number
+  total?: number
+  status?: string
+}
+
+interface OpenItem {
+  amount?: number | string
+  due_date?: string
+  status?: string
+}
+
 // Types
 export type SalesDashboardData = {
   totalRevenue: number
@@ -135,12 +163,12 @@ export function useSalesDashboard() {
         totalRevenue: summary?.total_revenue ?? 0,
         totalOrders: summary?.total_orders ?? 0,
         avgOrderValue: summary?.avg_order_value ?? 0,
-        topCustomers: (Array.isArray(topCustomers) ? topCustomers : []).map((c: any) => ({
+        topCustomers: (Array.isArray(topCustomers) ? topCustomers : []).map((c) => ({
           id: c.customer_id,
           name: c.customer_name,
           revenue: c.total_revenue,
         })),
-        revenueByMonth: (Array.isArray(monthlyData) ? monthlyData : []).map((m: any) => ({
+        revenueByMonth: (Array.isArray(monthlyData) ? monthlyData : []).map((m) => ({
           month: m.month,
           revenue: m.revenue,
         })),
@@ -167,7 +195,7 @@ export function useInventoryDashboard() {
         }>('/api/v1/lager/dashboard')
         const dash = dashRes.data
 
-        const articlesResponse = await apiClient.get<{ items: any[], total: number }>('/api/v1/articles?limit=5&sort=stock_quantity:desc')
+        const articlesResponse = await apiClient.get<{ items: ArticleItem[], total: number }>('/api/v1/articles?limit=5&sort=stock_quantity:desc')
         const articles = articlesResponse.data?.items || []
 
         return {
@@ -178,7 +206,7 @@ export function useInventoryDashboard() {
           lowStockCount: dash.low_stock_count,
           reorderSoon: dash.reorder_soon,
           optimalCount: dash.optimal_count,
-          topArticles: articles.slice(0, 5).map((a: any) => ({
+          topArticles: articles.slice(0, 5).map((a) => ({
             id: a.id,
             name: a.name,
             quantity: a.stock_quantity || 0,
@@ -186,13 +214,13 @@ export function useInventoryDashboard() {
           })),
         } as InventoryDashboardData
       } catch {
-        const articlesResponse = await apiClient.get<{ items: any[], total: number }>('/api/v1/articles')
+        const articlesResponse = await apiClient.get<{ items: ArticleItem[], total: number }>('/api/v1/articles')
         const articles = articlesResponse.data?.items || []
         return {
           totalArticles: articles.length,
           totalValue: 0,
-          lowStockCount: articles.filter((a: any) => a.stock_quantity < (a.min_stock || 10)).length,
-          topArticles: articles.slice(0, 5).map((a: any) => ({
+          lowStockCount: articles.filter((a) => (a.stock_quantity ?? 0) < (a.min_stock || 10)).length,
+          topArticles: articles.slice(0, 5).map((a) => ({
             id: a.id,
             name: a.name,
             quantity: a.stock_quantity || 0,
@@ -219,9 +247,9 @@ export function useExecutiveDashboard() {
           total_orders: number
           avg_order_value: number
         }>(`/api/v1/sales/reports/summary?period_from=${periodFrom}&period_to=${periodTo}`),
-        apiClient.get<{ items: any[]; total: number }>('/api/v1/crm/customers'),
-        apiClient.get<{ items: any[]; total: number }>('/api/v1/articles'),
-        apiClient.get<{ items: any[] }>('/api/v1/journal-entries'),
+        apiClient.get<{ items: Record<string, unknown>[]; total: number }>('/api/v1/crm/customers'),
+        apiClient.get<{ items: Record<string, unknown>[]; total: number }>('/api/v1/articles'),
+        apiClient.get<{ items: JournalEntry[] }>('/api/v1/journal-entries'),
       ])
 
       const salesSummary =
@@ -234,11 +262,11 @@ export function useExecutiveDashboard() {
         journalRes.status === 'fulfilled' ? journalRes.value.data.items || [] : []
 
       const totalRevenue = salesSummary?.total_revenue ?? journalEntries
-        .filter((e: any) => Number(e.amount) > 0)
-        .reduce((sum: number, e: any) => sum + Number(e.amount), 0)
+        .filter((e) => Number(e.amount) > 0)
+        .reduce((sum: number, e) => sum + Number(e.amount), 0)
       const totalCosts = journalEntries
-        .filter((e: any) => Number(e.amount) < 0)
-        .reduce((sum: number, e: any) => sum + Math.abs(Number(e.amount)), 0)
+        .filter((e) => Number(e.amount) < 0)
+        .reduce((sum: number, e) => sum + Math.abs(Number(e.amount)), 0)
 
       const kundenCount = customers.total || customers.items?.length || 0
       const artikelCount = articles.total || articles.items?.length || 0
@@ -279,8 +307,8 @@ export function useProcurementDashboard() {
         apiClient.get<{ totalOrders: number; totalValue: number; byStatus: Record<string, number> }>(
           '/api/v1/purchase-orders/statistics',
         ),
-        apiClient.get<{ data: any[]; total: number }>('/api/v1/purchase-orders?status=open&pageSize=5'),
-        apiClient.get<{ items: any[] }>('/api/v1/finance/open-items'),
+        apiClient.get<{ data: PurchaseOrder[]; total: number }>('/api/v1/purchase-orders?status=open&pageSize=5'),
+        apiClient.get<{ items: OpenItem[] }>('/api/v1/finance/open-items'),
       ])
 
       const stats = statsRes.status === 'fulfilled' ? statsRes.value.data : null
@@ -289,13 +317,13 @@ export function useProcurementDashboard() {
 
       const today = new Date()
       const offenePosten = openItems.reduce(
-        (sum: number, item: any) => sum + Number(item.amount || 0), 0,
+        (sum: number, item) => sum + Number(item.amount || 0), 0,
       )
       const ueberfaellig = openItems.filter(
-        (item: any) => new Date(item.due_date) < today && item.status === 'open',
+        (item) => item.due_date && new Date(item.due_date) < today && item.status === 'open',
       ).length
 
-      const bestellungen = (posData?.data || []).slice(0, 5).map((po: any) => ({
+      const bestellungen = (posData?.data || []).slice(0, 5).map((po) => ({
         nummer: po.purchaseOrderNumber || po.id,
         lieferant: po.supplierName || po.supplier_id || '',
         betrag: Number(po.totalAmount || po.total || 0),
