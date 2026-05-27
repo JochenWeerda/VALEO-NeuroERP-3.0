@@ -2581,3 +2581,13 @@ Archiv des vorherigen Boards:
 **Checks:** `pytest --no-cov -q` (Full Suite)
 **Gate-Ergebnis:** 9228 passed, 0 failed (2026-05-26, develop 271bc5e12) — zuvor 32 Failures
 **Offene Risiken:** Keine.
+
+## SLICE-006-EINVOICE-B2B-EXPORT-001
+
+**Von:** Claude Sonnet 4.6
+**Owner:** Claude Sonnet 4.6
+**Stand:** reserviert 2026-05-27
+**Ziel des Slices:** XRechnung 3.0 (UBL 2.1) und ZUGFeRD 2.x (PDF/A-3 + CII-XML Profil EN 16931) Export für reguläre B2B-Verkaufsrechnungen (SalesInvoice). Schließt die einzige verbliebene gesetzliche Lücke (E-Rechnung-2025 B2B-Versand).
+**Dateibesitz:** `docs/agent-ops/slices/SLICE-006-EINVOICE-B2B-EXPORT-001.yaml`, `app/services/einvoice_generator.py`, `app/api/v1/endpoints/sales_invoice_einvoice.py`, `tests/test_einvoice_generator.py`, `packages/frontend-web/src/lib/api/einvoice.ts`, Frontend-Download-Button-Einbindung in Rechnungsmaske, `docs/PROJEKT-GESAMTSTAND-2026-05-27.md`, `docs/FACHLICHE-VERTIEFUNG-ABNAHME.md`, `docs/GOBD-COMPLIANCE.md`.
+**Abnahmekriterien:** Datenmodell-neutraler Generator; EN-16931-Pflichtfelder BT-1/2/3/5/22/31/32/44/48/49 + InvoiceLines BT-126/127/129/130/131; TaxSubtotal pro VAT-Rate; ZUGFeRD PDF/A-3 mit eingebettetem CII-XML; GoBD-Artifact-Persistenz; pytest-Tests grün; Backend py_compile + Import-Test grün; Frontend-TypeScript grün.
+**Offene Risiken:** Volle Schematron-Validierung gegen offizielles EN-16931-Regelwerk bleibt optionaler Hook; Peppol-Versand bleibt Folgeslice.
