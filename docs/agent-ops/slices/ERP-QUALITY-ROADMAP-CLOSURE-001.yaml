@@ -1,0 +1,34 @@
+id: ERP-QUALITY-ROADMAP-CLOSURE-001
+owner: Codex
+status: reserviert
+created: 2026-05-27
+goal: >
+  Noch repo-seitig umsetzbare Punkte aus docs/quality/ERP-QUALITY-ROADMAP.md
+  abschliessen oder belastbar als externe Betriebs-/Zertifizierungsgates abgrenzen.
+file_ownership:
+  - docs/agent-ops/active-workboard.md
+  - docs/agent-ops/slices/ERP-QUALITY-ROADMAP-CLOSURE-001.yaml
+  - docs/quality/ERP-QUALITY-ROADMAP.md
+  - app/services/fints_connector.py
+  - app/api/v1/endpoints/banken.py
+  - packages/frontend-web/src/lib/api/agrar.ts
+  - packages/frontend-web/src/components/agrar/SchlagKarte.tsx
+  - packages/frontend-web/src/pages/agrar/feldbuch/schlagkartei.tsx
+  - app/workers/low_stock_agent.py
+  - app/api/v1/endpoints/agents.py
+  - tests/test_roadmap_closure_*.py
+  - packages/frontend-web/tests/e2e/gis-lohn-banking.spec.ts
+acceptance_criteria:
+  - FinTS TAN-Challenge-Flow ist simulatorfaehig und API-seitig erreichbar.
+  - MapLibre-Schlagkarte ist im Feldbuch verdrahtet und typecheckt.
+  - Low-Stock-Agent hat einen testbaren Event-/Batch-Pfad.
+  - Response-Model-Gate bleibt bei 0 untyped routes.
+  - Externe ELSTER/Fiskaly/GoBD-Gates sind als Betriebsnachweise dokumentiert.
+  - Workboard-, Doku-, Backend- und Frontend-Checks sind dokumentiert.
+checks:
+  - python scripts/agent_workboard_supervisor.py validate
+  - node scripts/docs-markdown-check.cjs docs/quality/ERP-QUALITY-ROADMAP.md docs/agent-ops/active-workboard.md
+  - python scripts/check_response_models.py --threshold 0
+risks:
+  - ELSTER-Org-Zertifikat, Fiskaly-Produktivzugang und Wirtschaftsprüfer-Testat bleiben externe Gates.
+  - Godfile- und Pagination-Komplettreduktion ist ein mehrwoechiges Programm.

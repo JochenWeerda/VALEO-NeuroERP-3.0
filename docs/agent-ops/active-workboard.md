@@ -2,6 +2,16 @@
 
 Stand: `2026-05-26`
 
+## ERP-QUALITY-ROADMAP-CLOSURE-001
+
+**Von:** Codex
+**Owner:** Codex
+**Stand:** reserviert 2026-05-27
+**Ziel des Slices:** Noch repo-seitig umsetzbare Punkte aus `docs/quality/ERP-QUALITY-ROADMAP.md` abschliessen oder belastbar als externe Betriebs-/Zertifizierungsgates abgrenzen.
+**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/agent-ops/slices/ERP-QUALITY-ROADMAP-CLOSURE-001.yaml`, `docs/quality/ERP-QUALITY-ROADMAP.md`, `app/services/fints_connector.py`, `app/api/v1/endpoints/banken.py`, `packages/frontend-web/src/lib/api/agrar.ts`, `packages/frontend-web/src/components/agrar/SchlagKarte.tsx`, `packages/frontend-web/src/pages/agrar/feldbuch/schlagkartei.tsx`, `app/workers/low_stock_agent.py`, `app/api/v1/endpoints/agents.py`, fokussierte Tests/E2E-Specs fuer Roadmap-Abschluss.
+**Abnahmekriterien:** FinTS TAN-Challenge-Flow ist simulatorfaehig und API-seitig erreichbar; MapLibre-Schlagkarte ist im Feldbuch verdrahtet und typecheckt; Low-Stock-Agent hat einen testbaren Event-/Batch-Pfad; Response-Model-Gate bleibt bei 0; externe ELSTER/Fiskaly/GoBD-Gates sind als nicht repo-seitig abschliessbare Betriebsnachweise dokumentiert; Workboard-, Doku-, Backend- und Frontend-Checks sind dokumentiert.
+**Offene Risiken:** Externe Zertifikate/Zugaenge (ELSTER-Org-Zertifikat, Fiskaly-Produktivzugang, Wirtschaftsprüfer-Testat) bleiben ausserhalb des Repos; breite Godfile-/Pagination-Komplettreduktion ist ein mehrwoechiges Programm und wird nur soweit risikoarm innerhalb dieses Slices geschlossen.
+
 ## DESIGN-MERIDIAN-ORCH-001
 
 **Von:** Cursor (VAN-Mode)
