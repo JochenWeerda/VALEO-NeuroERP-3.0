@@ -11,6 +11,8 @@ export interface UseVoiceIntentOptions {
   minConfidence?: number
   /** Polish transcript via Ollama before intent resolve (default true) */
   enablePolish?: boolean
+  /** Optional domain scope for intent resolution */
+  domain?: string
   /** Callback when intent resolved (before dispatch) */
   onResolved?: (actionId: string, params: Record<string, unknown>, confidence: number) => void
   /** Callback after polish step with raw and polished text */
@@ -20,7 +22,7 @@ export interface UseVoiceIntentOptions {
 }
 
 export function useVoiceIntent(options: UseVoiceIntentOptions = {}) {
-  const { minConfidence = 0.7, enablePolish = true, onResolved, onPolished, onError } = options
+  const { minConfidence = 0.7, enablePolish = true, domain, onResolved, onPolished, onError } = options
   const dispatchContext = useActionDispatchOptional()
   const [listening, setListening] = useState(false)
   const [transcript, setTranscript] = useState<string | null>(null)
@@ -63,7 +65,10 @@ export function useVoiceIntent(options: UseVoiceIntentOptions = {}) {
         }
       }
 
-      const result = await resolveVoice({ text: textForResolve, context: {} })
+      const result = await resolveVoice({
+        text: textForResolve,
+        context: domain ? { domain } : {},
+      })
       if (!result) {
         onError?.('Befehl nicht erkannt.')
         setResolvedAction(null)
@@ -83,7 +88,7 @@ export function useVoiceIntent(options: UseVoiceIntentOptions = {}) {
     }
 
     recognition.start()
-  }, [minConfidence, enablePolish, onResolved, onPolished, onError, dispatchContext])
+  }, [minConfidence, enablePolish, domain, onResolved, onPolished, onError, dispatchContext])
 
   const reset = useCallback(() => {
     setTranscript(null)
