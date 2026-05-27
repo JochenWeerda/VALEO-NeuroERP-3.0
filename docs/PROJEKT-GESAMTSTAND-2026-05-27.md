@@ -104,8 +104,8 @@ Waves 18/19 waren bereits vorbefüllt und wurden im Sweep gestoppt.
 | Persistente Import-Records | ✅ | `domain_finance.erechnung_imports` |
 | Buchen aus Import | ✅ | `POST /erechnung/imports/{id}/buchen` |
 | **Export Self-Billing-Gutschriften** | ✅ | `modules/agrar/services/self_billing_service.py` (XRechnung UBL 2.1, ZUGFeRD PDF/A-3 via `factur-x`) |
-| **Export B2B-Verkaufsrechnungen XRechnung** | ⚠️ **OFFEN — Slice-006** | — |
-| **Export B2B-Verkaufsrechnungen ZUGFeRD** | ⚠️ **OFFEN — Slice-006** | — |
+| **Export B2B-Verkaufsrechnungen XRechnung** | ✅ **Implementiert** | `app/services/einvoice_generator.py` + `sales_invoice_einvoice.py` (Slice-006, Commit `08d64eff4`) |
+| **Export B2B-Verkaufsrechnungen ZUGFeRD** | ✅ **Implementiert** | `app/services/einvoice_generator.py::build_zugferd_pdf` via `factur-x` |
 | EN-16931-Schematron-Validierung | ⚠️ optionaler Hook via `set_xrechnung_generator()` | — |
 
 ### 4.4 Weitere Normen
@@ -164,7 +164,7 @@ Voice-Provider: Whisper / Azure / OpenAI TTS konfigurierbar, Browser-Fallback.
 
 | Slice | Beschreibung | Priorität | Status |
 |---|---|---|---|
-| **Slice-006** | XRechnung/ZUGFeRD-Generierung für B2B-Verkaufsrechnungen (E-Rechnung 2025 B2B-Pflicht) | **P1** | offen — nächster Slice |
+| **Slice-006** | XRechnung/ZUGFeRD-Generierung für B2B-Verkaufsrechnungen (E-Rechnung 2025 B2B-Pflicht) | **P1** | ✅ abgeschlossen (Commit `08d64eff4`, 2026-05-27) |
 | Slice-007 | Ctrl+K Universal Command Palette | P2 | offen |
 | Slice-008 | DSGVO Art. 30 Verarbeitungsverzeichnis automatisiert | P2 | offen |
 | Slice-009 | DSGVO Art. 33 Datenpannen-Meldeprozess (workflow) | P2 | offen |

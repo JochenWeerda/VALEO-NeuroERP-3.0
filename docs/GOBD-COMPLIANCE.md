@@ -134,8 +134,8 @@ Rechtsgrundlage: § 14 UStG i.V.m. Wachstumschancengesetz; Pflichtformat ist ein
 | Buchen aus Import | ✅ Implementiert | `POST /erechnung/imports/{id}/buchen` |
 | Self-Billing-Gutschriften XRechnung (UBL 2.1) | ✅ Implementiert | `modules/agrar/services/self_billing_service.py::generate_einvoice_xrechnung` |
 | Self-Billing-Gutschriften ZUGFeRD PDF/A-3 | ✅ Implementiert | `modules/agrar/services/self_billing_service.py::generate_einvoice_zugferd` (via `factur-x`) |
-| **Export B2B-Verkaufsrechnungen XRechnung 3.0** | ⚠️ **Slice-006 — offen** | — |
-| **Export B2B-Verkaufsrechnungen ZUGFeRD 2.x** | ⚠️ **Slice-006 — offen** | — |
+| **Export B2B-Verkaufsrechnungen XRechnung 3.0** | ✅ **Implementiert (Slice-006)** | `app/api/v1/endpoints/sales_invoice_einvoice.py` + `app/services/einvoice_generator.py` |
+| **Export B2B-Verkaufsrechnungen ZUGFeRD 2.x** | ✅ **Implementiert (Slice-006)** | `app/services/einvoice_generator.py::build_zugferd_pdf` (factur-x) |
 | EN-16931-Schematron-Validierung | ⚠️ Hook via `set_xrechnung_generator()` | optional pluggable |
 
 **Hinweis für Slice-006:** Der bestehende UBL-2.1-Generator in `self_billing_service.py` kann als Vorlage für einen allgemeinen `einvoice_generator`-Service dienen, der gegen `sales_invoices`/`finance_invoices` läuft.
