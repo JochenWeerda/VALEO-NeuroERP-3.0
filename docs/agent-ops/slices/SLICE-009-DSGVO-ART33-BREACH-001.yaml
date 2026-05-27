@@ -1,0 +1,52 @@
+id: SLICE-009-DSGVO-ART33-BREACH-001
+title: Slice-009 — DSGVO Art. 33 Datenpannen-Meldeprozess
+owner: Claude Sonnet 4.6
+status: reserviert
+claimed_at: 2026-05-27
+depends_on:
+  - SLICE-008-DSGVO-ART30-ROPA-001
+goal: >
+  Art. 33 DSGVO verlangt, dass Datenpannen (Personal Data Breaches) innerhalb
+  von 72 Stunden der zuständigen Datenschutzbehörde gemeldet werden.
+  Pflichtinhalt nach Art. 33 Abs. 3: Art der Verletzung, betroffene Datenkategorien,
+  Anzahl betroffener Personen, voraussichtliche Folgen, ergriffene Maßnahmen,
+  Kontaktdaten DSB. Backend CRUD + Fristüberwachung (72h-Deadline) + Frontend-Maske.
+background: >
+  Art. 15/17/20/30 DSGVO implementiert. Art. 33/34 (Datenpannenmeldung an Behörde
+  und Benachrichtigung Betroffener) fehlen noch vollständig.
+  Slice-009 deckt Art. 33 (Behördenmeldung); Art. 34 bleibt Folgeslice.
+scope:
+  - app/api/v1/endpoints/gdpr_art33_breach.py (neu)
+  - app/api/v1/api.py (Router-Registrierung)
+  - packages/frontend-web/src/lib/api/gdpr-art33.ts (neu)
+  - packages/frontend-web/src/pages/compliance/datenpannen.tsx (neu)
+  - packages/frontend-web/src/app/route-builders/auto-groups/generated/compliance.ts
+  - packages/frontend-web/tests/e2e/slice-009-dsgvo-art33.spec.ts (neu)
+  - tests/test_gdpr_art33_breach.py (neu)
+  - docs/agent-ops/active-workboard.md
+file_ownership:
+  - docs/agent-ops/slices/SLICE-009-DSGVO-ART33-BREACH-001.yaml
+  - app/api/v1/endpoints/gdpr_art33_breach.py
+  - packages/frontend-web/src/lib/api/gdpr-art33.ts
+  - packages/frontend-web/src/pages/compliance/datenpannen.tsx
+  - packages/frontend-web/tests/e2e/slice-009-dsgvo-art33.spec.ts
+  - tests/test_gdpr_art33_breach.py
+api_routes:
+  - GET /api/v1/gdpr/art33/breaches
+  - POST /api/v1/gdpr/art33/breaches
+  - GET /api/v1/gdpr/art33/breaches/{breach_id}
+  - PUT /api/v1/gdpr/art33/breaches/{breach_id}
+  - POST /api/v1/gdpr/art33/breaches/{breach_id}/notify
+  - GET /api/v1/gdpr/art33/breaches/{breach_id}/deadline
+acceptance_criteria:
+  - Pflichtfelder nach Art. 33 Abs. 3 vollständig (breach_type, categories, persons_count, likely_consequences, measures, dpo_contact)
+  - 72h-Deadline-Berechnung ab discovered_at
+  - Status-Workflow: ENTDECKT → GEMELDET → ABGESCHLOSSEN
+  - Notify-Endpoint markiert als behördengemeldet + Zeitstempel
+  - Frontend: Ampelindikator (rot < 24h, orange 24–72h, grün gemeldet)
+  - pytest-Tests: CRUD + Deadline + Notify grün
+  - E2E: Anlegen + Ampel sichtbar
+  - TypeScript 0 Fehler
+fremdfix: noch keine
+open_risks:
+  - E-Mail-Versand an Behörde ist nicht Teil dieses Slices (SMTP bleibt Folgeslice)

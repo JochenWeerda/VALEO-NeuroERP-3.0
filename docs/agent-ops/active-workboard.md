@@ -2603,3 +2603,13 @@ Archiv des vorherigen Boards:
 **Dateibesitz:** `docs/agent-ops/slices/SLICE-008-DSGVO-ART30-ROPA-001.yaml`, `app/api/v1/endpoints/gdpr_art30_ropa.py`, `packages/frontend-web/src/lib/api/gdpr-art30.ts`, `packages/frontend-web/src/pages/compliance/verarbeitungsverzeichnis.tsx`, `packages/frontend-web/tests/e2e/slice-008-dsgvo-art30.spec.ts`, `tests/test_gdpr_art30_ropa.py`.
 **Gate-Ergebnis:** pytest 20/20 ✅ · E2E 5/5 ✅ · TypeScript 0 Fehler ✅ · Routing fixiert ✅
 **Offene Risiken:** Produktive DB-Persistenz bleibt Folgeslice (In-Memory-Store als Fallback aktiv).
+
+## SLICE-009-DSGVO-ART33-BREACH-001
+
+**Von:** Claude Sonnet 4.6
+**Owner:** Claude Sonnet 4.6
+**Stand:** reserviert 2026-05-27
+**Ziel des Slices:** DSGVO Art. 33 Datenpannen-Meldeprozess — Backend CRUD + 72h-Fristüberwachung + Frontend-Maske mit Ampelindikator. Art. 33 ist nach Art. 30 die nächste offene DSGVO-Pflicht.
+**Dateibesitz:** `docs/agent-ops/slices/SLICE-009-DSGVO-ART33-BREACH-001.yaml`, `app/api/v1/endpoints/gdpr_art33_breach.py`, `packages/frontend-web/src/lib/api/gdpr-art33.ts`, `packages/frontend-web/src/pages/compliance/datenpannen.tsx`, `packages/frontend-web/tests/e2e/slice-009-dsgvo-art33.spec.ts`, `tests/test_gdpr_art33_breach.py`.
+**Abnahmekriterien:** Pflichtfelder Art. 33 Abs. 3; 72h-Deadline; Status-Workflow; Ampel-UI; pytest + E2E grün; TypeScript 0 Fehler.
+**Offene Risiken:** E-Mail-Versand an Behörde bleibt Folgeslice.
