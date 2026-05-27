@@ -2,6 +2,16 @@
 
 Stand: `2026-05-26`
 
+## DESIGN-MERIDIAN-HARDCOLORS-011
+
+**Von:** Codex
+**Owner:** Codex
+**Stand:** reserviert 2026-05-27
+**Ziel des Slices:** Fachseiten-Hardcolors in einem ersten risikoarmen Folgeslice auf Meridian-/semantische Tokens ziehen.
+**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/agent-ops/slices/DESIGN-MERIDIAN-HARDCOLORS-011.yaml`, fokussierte Frontend-Fachseiten/-Features nach Audit.
+**Abnahmekriterien:** Ein klar abgegrenzter Satz sichtbarer Fachseiten/Feature-Komponenten nutzt keine generischen Tailwind-Hardcolors mehr fuer Status-, Surface- und Textsemantik; Typecheck, Workboard-Validierung und Diff-Checks sind gruen; verbleibende Hardcolors werden als Folgescope dokumentiert.
+**Offene Risiken:** Repo enthaelt sehr viele historische Hardcolors; dieser Slice schliesst bewusst einen priorisierten Batch statt alle Fachseiten in einem grossen Refactor.
+
 ## ERP-QUALITY-ROADMAP-CLOSURE-001
 
 **Von:** Codex
