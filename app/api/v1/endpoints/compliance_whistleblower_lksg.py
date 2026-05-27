@@ -97,7 +97,7 @@ async def create_whistleblower_report(
 
 
 @router.get("/whistleblower/reports", summary="Whistleblower reports auflisten",
-    response_model=dict
+    response_model=list
 )
 async def list_whistleblower_reports(
     status: str | None = Query(None),
@@ -193,7 +193,7 @@ async def create_lksg_supplier_risk_assessment(
 
 
 @router.get("/lksg/supplier-risk-assessments", summary="Lksg supplier risk assessments auflisten",
-    response_model=dict
+    response_model=list
 )
 async def list_lksg_supplier_risk_assessments(
     risk_level: str | None = Query(None),

@@ -317,7 +317,7 @@ async def update_rohware(
 
 
 @router.get("/{rohware_id}/analysen", summary="Analysen auflisten",
-    response_model=dict
+    response_model=list
 )
 async def list_analysen(
     rohware_id: str,

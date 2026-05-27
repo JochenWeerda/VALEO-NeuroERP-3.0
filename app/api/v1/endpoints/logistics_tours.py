@@ -141,7 +141,7 @@ def _tours_table_check(db: Session) -> None:
 
 
 @router.get("/tours", summary="Tours auflisten",
-    response_model=dict
+    response_model=list
 )
 def list_tours(
     date: Optional[str] = Query(None),

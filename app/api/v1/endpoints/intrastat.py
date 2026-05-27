@@ -112,7 +112,7 @@ def _gen_meldenummer(db: Session, meldezeitraum: str, meldungsart: str) -> str:
 
 
 @router.get("/meldungen", summary="Intrastat-Meldungen auflisten",
-    response_model=dict
+    response_model=list
 )
 def list_meldungen(
     meldezeitraum: Optional[str] = Query(None, description="YYYY-MM"),

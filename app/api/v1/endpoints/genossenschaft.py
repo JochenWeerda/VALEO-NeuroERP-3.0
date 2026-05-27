@@ -97,7 +97,7 @@ def _gen_mitglieds_nr(db: Session) -> str:
 
 
 @router.get("/mitglieder", summary="Mitgliederliste",
-    response_model=dict
+    response_model=list
 )
 def list_mitglieder(
     db: Session = Depends(get_db),

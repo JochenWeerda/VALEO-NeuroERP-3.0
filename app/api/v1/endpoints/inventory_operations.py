@@ -237,7 +237,7 @@ def _post_inventory_journal(
 # ── Routes ──────────────────────────────────────────────────────
 
 @router.get("/reason-codes", tags=["lager"], summary="Reason codes auflisten",
-    response_model=dict
+    response_model=list
 )
 async def list_reason_codes():
     """GET alle verfügbaren Korrektur-Gründe."""

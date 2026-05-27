@@ -89,7 +89,7 @@ def _gen_token() -> str:
 
 
 @router.get("", summary="Gelangensbestätigungen auflisten",
-    response_model=dict
+    response_model=list
 )
 def list_gelangensbestaetigung(
     status: Optional[str] = Query(None, description="AUSSTEHEND | ERHALTEN | ABGELAUFEN"),
@@ -215,7 +215,7 @@ def bestaetigen(
 
 
 @router.get("/faellig", summary="Überfällige Gelangensbestätigungen",
-    response_model=dict
+    response_model=list
 )
 def list_faellig(
     db: Session = Depends(get_db),

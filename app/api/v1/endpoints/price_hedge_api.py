@@ -59,7 +59,7 @@ def create_hedge(req: HedgeCreateRequest, db: Session = Depends(get_db)):
 
 
 @router.get("/hedges", summary="Hedges auflisten",
-    response_model=dict
+    response_model=list
 )
 def list_hedges(tenant_id: str, db: Session = Depends(get_db)):
     rows = db.query(HedgeReferenceDB).filter(HedgeReferenceDB.tenant_id == tenant_id).all()

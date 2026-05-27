@@ -141,7 +141,7 @@ def _get_ingredients(db: Session, rezept_id: str, tenant_id: str) -> List[dict]:
 # ---------------------------------------------------------------------------
 
 @router.get("", summary="Rezepte auflisten",
-    response_model=dict
+    response_model=list
 )
 async def list_rezepte(
     tierart: Optional[str] = Query(None),

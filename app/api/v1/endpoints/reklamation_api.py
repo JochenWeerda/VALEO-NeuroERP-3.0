@@ -260,7 +260,7 @@ def add_dms_referenzen(reklamation_id: str, req: ReklamationReferenzUpdateReques
 
 
 @router.get("/crm/{crm_case_id}", summary="By crm case abrufen",
-    response_model=dict
+    response_model=list
 )
 def get_by_crm_case(crm_case_id: str, db: Session = Depends(get_db)):
     rows = db.query(ReklamationDB).filter(
@@ -270,7 +270,7 @@ def get_by_crm_case(crm_case_id: str, db: Session = Depends(get_db)):
 
 
 @router.get("/offene/{tenant_id}", summary="Offene abrufen",
-    response_model=dict
+    response_model=list
 )
 def get_offene(tenant_id: str, db: Session = Depends(get_db)):
     rows = db.query(ReklamationDB).filter(
@@ -281,7 +281,7 @@ def get_offene(tenant_id: str, db: Session = Depends(get_db)):
 
 
 @router.get("/ueberfaellige/{tenant_id}", summary="Ueberfaellige abrufen",
-    response_model=dict
+    response_model=list
 )
 def get_ueberfaellige(tenant_id: str, db: Session = Depends(get_db)):
     rows = db.query(ReklamationDB).filter(

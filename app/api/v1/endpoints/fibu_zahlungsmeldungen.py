@@ -176,7 +176,7 @@ def meldung_abweisen(
 
 
 @router.get("/offen/zusammenfassung", summary="Meldungen zusammenfassung offene",
-    response_model=dict
+    response_model=list
 )
 def offene_meldungen_zusammenfassung(
     db=Depends(get_db),

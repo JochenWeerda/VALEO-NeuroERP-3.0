@@ -132,7 +132,7 @@ class FreightCalcIn(BaseModel):
 # ---------------------------------------------------------------------------
 
 @router.get("/freight-tariffs", summary="Tariffs auflisten",
-    response_model=dict
+    response_model=list
 )
 def list_tariffs(
     carrier_id: Optional[str] = Query(None),

@@ -56,7 +56,7 @@ class CheckpointRequest(BaseModel):
 
 
 @router.get("/instances", summary="Instances auflisten",
-    response_model=dict
+    response_model=list
 )
 async def list_instances(
     status: Optional[str] = None,

@@ -284,7 +284,7 @@ def generiere_mengenzeitraeume(
 # ── Zu-/Abschläge Endpoints ──────────────────────────────────────────────────
 
 @router.get("/zuabschlagsgruppen", summary="Zuabschlagsgruppen auflisten",
-    response_model=dict
+    response_model=list
 )
 def list_zuabschlagsgruppen(
     typ: Optional[str] = Query(None, description="zuschlag oder abschlag"),

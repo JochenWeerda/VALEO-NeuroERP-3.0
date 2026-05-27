@@ -61,7 +61,7 @@ class VerladungPatch(BaseModel):
 
 
 @router.get("", summary="Verladungen auflisten",
-    response_model=dict
+    response_model=list
 )
 def list_verladungen(
     status: Optional[str] = None,

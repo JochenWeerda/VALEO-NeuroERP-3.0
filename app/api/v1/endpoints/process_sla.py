@@ -53,7 +53,7 @@ class EvaluateSLARequest(BaseModel):
 
 
 @router.get("/policies", summary="Sla policies auflisten",
-    response_model=dict
+    response_model=list
 )
 async def list_sla_policies(
     tenant_id: str = Depends(get_tenant_id),
@@ -108,7 +108,7 @@ async def evaluate_sla_endpoint(
 
 
 @router.get("/violations", summary="Violations auflisten",
-    response_model=dict
+    response_model=list
 )
 async def list_violations(
     tenant_id: str = Depends(get_tenant_id),

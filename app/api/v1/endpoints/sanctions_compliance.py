@@ -128,7 +128,7 @@ def _status_from_treffer(treffer: list[SanktionsTreffer]) -> str:
 
 
 @router.get("/eintraege", summary="Sanktionsliste abfragen",
-    response_model=dict
+    response_model=list
 )
 def list_eintraege(
     db: Session = Depends(get_db),
@@ -245,7 +245,7 @@ def pruefen(
 
 
 @router.get("/pruefprotokoll", summary="Sanktionsprüf-Protokoll abrufen",
-    response_model=dict
+    response_model=list
 )
 def pruefprotokoll(
     db: Session = Depends(get_db),

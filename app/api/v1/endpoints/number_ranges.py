@@ -55,7 +55,7 @@ def _to_out(nr, svc: NumberRangeService, tenant_id: str) -> dict[str, Any]:
 
 
 @router.get("/", summary="Number ranges auflisten",
-    response_model=dict
+    response_model=list
 )
 def list_number_ranges(
     db: Session = Depends(get_db),

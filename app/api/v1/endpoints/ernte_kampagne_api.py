@@ -64,7 +64,7 @@ def create_kampagne(req: ErnteKampagneCreateRequest, db: Session = Depends(get_d
 
 
 @router.get("/tenant/{tenant_id}", summary="Kampagnen abrufen",
-    response_model=dict
+    response_model=list
 )
 def get_kampagnen(tenant_id: str, wirtschaftsjahr: Optional[int] = None, db: Session = Depends(get_db)):
     q = db.query(ErnteKampagneDB).filter(ErnteKampagneDB.tenant_id == tenant_id)

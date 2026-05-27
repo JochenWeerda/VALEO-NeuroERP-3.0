@@ -29,7 +29,7 @@ class DispatchRequest(BaseModel):
 
 
 @router.get("/catalog", summary="Vollstaendiger Command-Katalog",
-    response_model=dict
+    response_model=list
 )
 def get_command_catalog(
     tenant_id: str = Depends(get_tenant_id),

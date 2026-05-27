@@ -233,7 +233,7 @@ def match_invoice(
 
 
 @router.get("/pending", summary="Pending auflisten",
-    response_model=dict
+    response_model=list
 )
 def list_pending(
     db: Session = Depends(get_db),

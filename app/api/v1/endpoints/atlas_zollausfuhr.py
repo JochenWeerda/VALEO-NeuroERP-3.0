@@ -330,7 +330,7 @@ def atlas_callback(
 
 
 @router.get("/warennummern/suche", summary="Suche warennummern",
-    response_model=dict
+    response_model=list
 )
 def warennummern_suche(q: str = Query(default="")):
     """HS tariff number search (static agricultural seed data)."""
