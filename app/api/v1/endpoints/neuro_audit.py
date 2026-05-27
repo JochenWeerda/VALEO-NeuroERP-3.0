@@ -22,7 +22,7 @@ router = APIRouter(tags=["neuro-core", "audit"])
 
 # ── Audit Trail ────────────────────────────────────────────────
 
-@router.get("/audit/trail")
+@router.get("/audit/trail", summary="Trail abrufen")
 async def get_trail(
     aggregate_id: Optional[str] = None,
     from_date: Optional[str] = None,
@@ -34,7 +34,7 @@ async def get_trail(
     return {"items": query_audit_trail(db, tenant_id, aggregate_id, from_date, to_date, limit)}
 
 
-@router.get("/audit/trail/validate")
+@router.get("/audit/trail/validate", summary="Trail validieren")
 async def validate_trail(
     limit: int = 1000,
     tenant_id: str = Depends(get_tenant_id),
@@ -56,7 +56,7 @@ class RecordDecisionRequest(BaseModel):
     explanation: str = ""
 
 
-@router.post("/neuro/decisions")
+@router.post("/neuro/decisions", summary="Decision anlegen")
 async def create_decision(
     request: RecordDecisionRequest,
     tenant_id: str = Depends(get_tenant_id),
@@ -75,7 +75,7 @@ async def create_decision(
     )
 
 
-@router.get("/neuro/decisions/{decision_id}")
+@router.get("/neuro/decisions/{decision_id}", summary="One decision abrufen")
 async def get_one_decision(
     decision_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -87,7 +87,7 @@ async def get_one_decision(
     return result
 
 
-@router.get("/neuro/decisions")
+@router.get("/neuro/decisions", summary="All decisions auflisten")
 async def list_all_decisions(
     risk_class: Optional[str] = None,
     limit: int = 50,
@@ -97,7 +97,7 @@ async def list_all_decisions(
     return {"items": list_decisions(db, tenant_id, limit, risk_class)}
 
 
-@router.get("/neuro/kernel-step-audit/summary")
+@router.get("/neuro/kernel-step-audit/summary", summary="Kernel step audit summary neuro")
 async def neuro_kernel_step_audit_summary(
     days: int = Query(7, ge=1, le=366),
     tenant_id: str = Depends(get_tenant_id),

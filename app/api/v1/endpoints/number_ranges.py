@@ -54,7 +54,7 @@ def _to_out(nr, svc: NumberRangeService, tenant_id: str) -> dict[str, Any]:
     }
 
 
-@router.get("/")
+@router.get("/", summary="Number ranges auflisten")
 def list_number_ranges(
     db: Session = Depends(get_db),
 ) -> list[dict[str, Any]]:
@@ -64,7 +64,7 @@ def list_number_ranges(
     return [_to_out(r, svc, tenant_id) for r in ranges]
 
 
-@router.post("/", status_code=201)
+@router.post("/", status_code=201, summary="Number range configure")
 def configure_number_range(
     body: NumberRangeConfigRequest,
     db: Session = Depends(get_db),
@@ -87,7 +87,7 @@ def configure_number_range(
         raise HTTPException(status_code=422, detail=str(exc)) from exc
 
 
-@router.get("/{range_type}")
+@router.get("/{range_type}", summary="Number range abrufen")
 def get_number_range(range_type: str, db: Session = Depends(get_db)) -> dict[str, Any]:
     tenant_id = get_current_tenant_id()
     svc = NumberRangeService(db)
@@ -98,7 +98,7 @@ def get_number_range(range_type: str, db: Session = Depends(get_db)) -> dict[str
     return _to_out(nr, svc, tenant_id)
 
 
-@router.put("/{range_type}")
+@router.put("/{range_type}", summary="Number range aktualisieren")
 def update_number_range(
     range_type: str,
     body: NumberRangeConfigRequest,
@@ -122,7 +122,7 @@ def update_number_range(
         raise HTTPException(status_code=422, detail=str(exc)) from exc
 
 
-@router.delete("/{range_type}", status_code=204, response_class=Response, response_model=None)
+@router.delete("/{range_type}", status_code=204, response_class=Response, response_model=None, summary="Number range löschen")
 def delete_number_range(range_type: str, db: Session = Depends(get_db)) -> Response:
     tenant_id = get_current_tenant_id()
     svc = NumberRangeService(db)
@@ -135,7 +135,7 @@ def delete_number_range(range_type: str, db: Session = Depends(get_db)) -> Respo
     return Response(status_code=204)
 
 
-@router.get("/{range_type}/peek")
+@router.get("/{range_type}/peek", summary="Next number peek")
 def peek_next_number(
     range_type: str,
     db: Session = Depends(get_db),

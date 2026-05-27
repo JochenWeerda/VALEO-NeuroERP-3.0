@@ -130,7 +130,7 @@ def _row_to_out(db, tenant_id: str, row) -> DauerauftragOut:
 
 # ── Endpoints ─────────────────────────────────────────────────────────────────
 
-@router.get("", response_model=list[DauerauftragOut])
+@router.get("", response_model=list[DauerauftragOut], summary="Dauerauftraege auflisten")
 def list_dauerauftraege(
     kunden_nr: Optional[str] = Query(None),
     nur_aktive: bool = Query(True),
@@ -153,7 +153,7 @@ def list_dauerauftraege(
     return [_row_to_out(db, tenant_id, r) for r in rows]
 
 
-@router.get("/{da_nr}", response_model=DauerauftragOut)
+@router.get("/{da_nr}", response_model=DauerauftragOut, summary="Dauerauftrag abrufen")
 def get_dauerauftrag(
     da_nr: str,
     db=Depends(get_db),
@@ -168,7 +168,7 @@ def get_dauerauftrag(
     return _row_to_out(db, tenant_id, row)
 
 
-@router.post("", response_model=DauerauftragOut, status_code=201)
+@router.post("", response_model=DauerauftragOut, status_code=201, summary="Dauerauftrag anlegen")
 def create_dauerauftrag(
     payload: DauerauftragCreate,
     db=Depends(get_db),
@@ -219,7 +219,7 @@ def create_dauerauftrag(
     return _row_to_out(db, tenant_id, row)
 
 
-@router.post("/{da_nr}/starten", response_model=AusfuehrungOut)
+@router.post("/{da_nr}/starten", response_model=AusfuehrungOut, summary="Starten dauerauftrag")
 def dauerauftrag_starten(
     da_nr: str,
     db=Depends(get_db),
@@ -263,7 +263,7 @@ def dauerauftrag_starten(
     return AusfuehrungOut(**dict(aus_row._mapping))
 
 
-@router.get("/{da_nr}/ausfuehrungen", response_model=list[AusfuehrungOut])
+@router.get("/{da_nr}/ausfuehrungen", response_model=list[AusfuehrungOut], summary="Ausfuehrungen auflisten")
 def list_ausfuehrungen(
     da_nr: str,
     db=Depends(get_db),
@@ -284,7 +284,7 @@ def list_ausfuehrungen(
     return [AusfuehrungOut(**dict(r._mapping)) for r in rows]
 
 
-@router.patch("/{da_nr}/deaktivieren")
+@router.patch("/{da_nr}/deaktivieren", summary="Deaktivieren")
 def deaktivieren(
     da_nr: str,
     db=Depends(get_db),

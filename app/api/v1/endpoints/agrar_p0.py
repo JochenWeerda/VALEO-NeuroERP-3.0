@@ -29,7 +29,7 @@ class PsmProtokolleintragRequest(BaseModel):
     flaeche_ha: float
     zulassungsnummer: Optional[str] = None
 
-@router.post("/duenge-bilanz")
+@router.post("/duenge-bilanz", summary="Duenge bilanz berechne")
 def berechne_duenge_bilanz(req: DuengeBilanzRequest):
     from app.core.duenge_bilanz import DuengeBilanz, DuengemittelEintrag, NaehrstoffTyp
     from datetime import date as _date
@@ -53,7 +53,7 @@ def berechne_duenge_bilanz(req: DuengeBilanzRequest):
     )
     return bilanz
 
-@router.post("/psm-protokoll", status_code=201)
+@router.post("/psm-protokoll", status_code=201, summary="Psm protokoll erstelle")
 def erstelle_psm_protokoll(req: PsmProtokolleintragRequest):
     from app.core.psm_protokoll import PsmAnwendungProtokoll
     protokoll = PsmAnwendungProtokoll(
@@ -72,7 +72,7 @@ def erstelle_psm_protokoll(req: PsmProtokolleintragRequest):
     )
     return {"protokoll_id": protokoll.protokoll_id, "gobd_vollstaendig": protokoll.ist_gobd_vollstaendig(), "schema_version": 1}
 
-@router.get("/schlag/{schlag_id}/flik")
+@router.get("/schlag/{schlag_id}/flik", summary="Schlag flik abrufen")
 def get_schlag_flik(schlag_id: str):
     """Gibt FLIK-Informationen eines Schlages zurück (Stub für Wave 6)."""
     return {"schlag_id": schlag_id, "flik_id": None, "geometry_wkt": None, "nuts3_region": None, "schema_version": 1}

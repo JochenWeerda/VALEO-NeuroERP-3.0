@@ -72,7 +72,7 @@ def _parse_supported_channel(channel: str) -> KnowledgeChannel:
     return KnowledgeChannel(normalized)
 
 
-@router.post("/{channel}/knowledge-query")
+@router.post("/{channel}/knowledge-query", summary="Knowledge query channel")
 def channel_knowledge_query(channel: str, payload: ChannelKnowledgeQueryRequest, db=Depends(get_db)):
     if not payload.rolle:
         raise HTTPException(status_code=400, detail="Feld 'rolle' ist erforderlich")
@@ -92,7 +92,7 @@ def channel_knowledge_query(channel: str, payload: ChannelKnowledgeQueryRequest,
     return result.as_dict()
 
 
-@router.post("/{channel}/process-actions/execute")
+@router.post("/{channel}/process-actions/execute", summary="Process execute channel")
 def channel_process_execute(channel: str, payload: ChannelProcessActionRequest, db=Depends(get_db)):
     from app.core.blockchain_anchor_runtime import anchor_channel_process_thread
 
@@ -119,7 +119,7 @@ def channel_process_execute(channel: str, payload: ChannelProcessActionRequest, 
     return body
 
 
-@router.get("/{channel}/process-actions/{thread_id}")
+@router.get("/{channel}/process-actions/{thread_id}", summary="Channel process thread abrufen")
 def get_channel_process_thread(channel: str, thread_id: str, db=Depends(get_db)):
     _parse_supported_channel(channel)
     thread = get_channel_process_thread_store(db).get(thread_id)
@@ -128,7 +128,7 @@ def get_channel_process_thread(channel: str, thread_id: str, db=Depends(get_db))
     return thread.as_dict()
 
 
-@router.get("/{channel}/process-actions")
+@router.get("/{channel}/process-actions", summary="Channel process threads auflisten")
 def list_channel_process_threads(
     channel: str,
     tenant_id: str | None = None,
@@ -158,7 +158,7 @@ def list_channel_process_threads(
     }
 
 
-@router.get("/{channel}/process-actions/{thread_id}/audit")
+@router.get("/{channel}/process-actions/{thread_id}/audit", summary="Channel process thread audit abrufen")
 def get_channel_process_thread_audit(channel: str, thread_id: str, db=Depends(get_db)):
     _parse_supported_channel(channel)
     store = get_channel_process_thread_store(db)
@@ -174,7 +174,7 @@ def get_channel_process_thread_audit(channel: str, thread_id: str, db=Depends(ge
     }
 
 
-@router.post("/{channel}/process-actions/{thread_id}/decision")
+@router.post("/{channel}/process-actions/{thread_id}/decision", summary="Process decision channel")
 def channel_process_decision(channel: str, thread_id: str, payload: ChannelApprovalDecisionRequest, db=Depends(get_db)):
     from app.core.blockchain_anchor_runtime import anchor_channel_process_thread
 
@@ -203,13 +203,13 @@ def channel_process_decision(channel: str, thread_id: str, payload: ChannelAppro
     return body
 
 
-@router.get("/knowledge-graph")
+@router.get("/knowledge-graph", summary="Knowledge graph abrufen")
 def get_knowledge_graph(tenant_id: str | None = None, db=Depends(get_db)):
     graph = build_runtime_knowledge_graph(db, tenant_id=tenant_id)
     return graph.as_dict()
 
 
-@router.get("/knowledge-graph/nodes/{node_id}")
+@router.get("/knowledge-graph/nodes/{node_id}", summary="Knowledge graph node abrufen")
 def get_knowledge_graph_node(node_id: str, tenant_id: str | None = None, db=Depends(get_db)):
     graph = build_runtime_knowledge_graph(db, tenant_id=tenant_id)
     node = graph.get_node(node_id)
@@ -221,7 +221,7 @@ def get_knowledge_graph_node(node_id: str, tenant_id: str | None = None, db=Depe
     }
 
 
-@router.post("/knowledge-graph/path")
+@router.post("/knowledge-graph/path", summary="Knowledge graph path abrufen")
 def get_knowledge_graph_path(payload: KnowledgeGraphPathRequest, db=Depends(get_db)):
     graph = build_runtime_knowledge_graph(db, tenant_id=payload.tenant_id)
     path = graph.find_path(payload.source_id, payload.target_id)
@@ -233,7 +233,7 @@ def get_knowledge_graph_path(payload: KnowledgeGraphPathRequest, db=Depends(get_
     }
 
 
-@router.post("/slack/events")
+@router.post("/slack/events", summary="Events slack")
 async def slack_events(request: Request, db=Depends(get_db)):
     raw_body = await request.body()
     timestamp = request.headers.get("X-Slack-Request-Timestamp")
@@ -256,7 +256,7 @@ async def slack_events(request: Request, db=Depends(get_db)):
         raise HTTPException(status_code=400, detail=str(exc)) from exc
 
 
-@router.post("/teams/events")
+@router.post("/teams/events", summary="Events teams")
 async def teams_events(request: Request, db=Depends(get_db)):
     raw_body = await request.body()
     signature = request.headers.get("X-Teams-Signature")

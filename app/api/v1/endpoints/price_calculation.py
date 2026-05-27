@@ -64,7 +64,7 @@ MWST = 19.0
 # Endpoint
 # ---------------------------------------------------------------------------
 
-@router.post("/berechne", response_model=PreisKalkulationResult)
+@router.post("/berechne", response_model=PreisKalkulationResult, summary="Preis berechne")
 def berechne_preis(
     payload: PreisKalkulationInput,
     db: Session = Depends(get_db),

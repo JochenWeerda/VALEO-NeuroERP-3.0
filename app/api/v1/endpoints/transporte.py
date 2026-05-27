@@ -55,7 +55,7 @@ class FahrerPatch(BaseModel):
     touren_heute: Optional[int] = None
 
 
-@router.get("/fahrer")
+@router.get("/fahrer", summary="Fahrer auflisten")
 def list_fahrer(
     status: Optional[str] = None,
     skip: int = Query(0, ge=0),
@@ -74,7 +74,7 @@ def list_fahrer(
     return result
 
 
-@router.get("/fahrer/{fahrer_id}")
+@router.get("/fahrer/{fahrer_id}", summary="Fahrer abrufen")
 def get_fahrer(fahrer_id: str, db: Session = Depends(get_db)):
     obj = db.query(Fahrer).filter(Fahrer.id == fahrer_id).first()
     if not obj:
@@ -84,7 +84,7 @@ def get_fahrer(fahrer_id: str, db: Session = Depends(get_db)):
     return data
 
 
-@router.post("/fahrer", status_code=201)
+@router.post("/fahrer", status_code=201, summary="Fahrer anlegen")
 def create_fahrer(payload: FahrerPayload, db: Session = Depends(get_db)):
     obj = Fahrer(**payload.model_dump())
     db.add(obj)
@@ -93,7 +93,7 @@ def create_fahrer(payload: FahrerPayload, db: Session = Depends(get_db)):
     return _to_dict(obj)
 
 
-@router.patch("/fahrer/{fahrer_id}")
+@router.patch("/fahrer/{fahrer_id}", summary="Fahrer aktualisieren")
 def update_fahrer(fahrer_id: str, payload: FahrerPatch, db: Session = Depends(get_db)):
     obj = db.query(Fahrer).filter(Fahrer.id == fahrer_id).first()
     if not obj:
@@ -106,7 +106,7 @@ def update_fahrer(fahrer_id: str, payload: FahrerPatch, db: Session = Depends(ge
     return _to_dict(obj)
 
 
-@router.delete("/fahrer/{fahrer_id}", status_code=204, response_class=Response, response_model=None)
+@router.delete("/fahrer/{fahrer_id}", status_code=204, response_class=Response, response_model=None, summary="Fahrer löschen")
 def delete_fahrer(fahrer_id: str, db: Session = Depends(get_db)):
     obj = db.query(Fahrer).filter(Fahrer.id == fahrer_id).first()
     if not obj:

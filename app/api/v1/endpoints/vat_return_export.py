@@ -162,7 +162,7 @@ class VATReturnVorberechnung(BaseModel):
     positionen: List[Dict[str, Any]] = Field(default_factory=list)
 
 
-@router.get("/vorberechnung", response_model=VATReturnVorberechnung)
+@router.get("/vorberechnung", response_model=VATReturnVorberechnung, summary="Ustva vorberechnung")
 async def vorberechnung_ustva(
     zeitraum: str = Query(..., description="Zeitraum im Format YYYY-MM oder YYYY-QN"),
     tenant_id: str = Depends(get_tenant_id),
@@ -251,7 +251,7 @@ async def vorberechnung_ustva(
         )
 
 
-@router.post("/calculate", response_model=VATReturnResponse)
+@router.post("/calculate", response_model=VATReturnResponse, summary="Vat return berechnen")
 async def calculate_vat_return(
     request: VATReturnCalculationRequest,
     tenant_id: str = Depends(get_tenant_id),
@@ -434,7 +434,7 @@ async def calculate_vat_return(
         raise HTTPException(status_code=500, detail=f"Failed to calculate VAT return: {str(e)}")
 
 
-@router.get("/{return_id}", response_model=VATReturnResponse)
+@router.get("/{return_id}", response_model=VATReturnResponse, summary="Vat return abrufen")
 async def get_vat_return(
     return_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -473,7 +473,7 @@ async def get_vat_return(
         raise HTTPException(status_code=500, detail=f"Failed to get VAT return: {str(e)}")
 
 
-@router.get("/export/{return_id}")
+@router.get("/export/{return_id}", summary="Vat return download exportieren")
 async def export_vat_return_download(
     return_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -485,7 +485,7 @@ async def export_vat_return_download(
     return await export_elster_xml(return_id, tenant_id, db)
 
 
-@router.get("/{return_id}/elster-xml")
+@router.get("/{return_id}/elster-xml", summary="Elster xml exportieren")
 async def export_elster_xml(
     return_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -528,7 +528,7 @@ async def export_elster_xml(
         raise HTTPException(status_code=500, detail=f"Failed to export ELSTER XML: {str(e)}")
 
 
-@router.post("/{return_id}/validate")
+@router.post("/{return_id}/validate", summary="Vat return validieren")
 async def validate_vat_return(
     return_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -616,7 +616,7 @@ async def validate_vat_return(
         raise HTTPException(status_code=500, detail=f"Failed to validate VAT return: {str(e)}")
 
 
-@router.get("", response_model=List[VATReturnResponse])
+@router.get("", response_model=List[VATReturnResponse], summary="Vat returns auflisten")
 async def list_vat_returns(
     period: Optional[str] = Query(None, description="Filter by period (YYYY-MM)"),
     tenant_id: str = Depends(get_tenant_id),
@@ -659,7 +659,7 @@ async def list_vat_returns(
         return []
 
 
-@router.post("/{return_id}/approve", response_model=VATReturnResponse)
+@router.post("/{return_id}/approve", response_model=VATReturnResponse, summary="Vat return genehmigen")
 async def approve_vat_return(
     return_id: str,
     request: VATReturnApprovalRequest,
@@ -701,7 +701,7 @@ async def approve_vat_return(
         raise HTTPException(status_code=500, detail=f"Failed to approve VAT return: {str(e)}")
 
 
-@router.post("/{return_id}/submit", response_model=VATReturnResponse)
+@router.post("/{return_id}/submit", response_model=VATReturnResponse, summary="Vat return einreichen")
 async def submit_vat_return(
     return_id: str,
     request: VATReturnSubmitRequest,

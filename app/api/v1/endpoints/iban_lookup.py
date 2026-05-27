@@ -62,7 +62,7 @@ class IBANLookupResponse(BaseModel):
     message: Optional[str] = None
 
 
-@router.get("/validate/{iban}", response_model=IBANLookupResponse)
+@router.get("/validate/{iban}", response_model=IBANLookupResponse, summary="Iban lookup")
 async def lookup_iban(
     iban: str,
     get_bic: bool = Query(True, description="Include BIC in response"),

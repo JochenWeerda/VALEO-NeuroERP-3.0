@@ -187,7 +187,7 @@ def _to_article_schema(row: ArticleModel) -> Article:
     )
 
 
-@router.get("/", response_model=PaginatedResponse[Article])
+@router.get("/", response_model=PaginatedResponse[Article], summary="Articles auflisten")
 async def list_articles(
     tenant_id: str = Depends(get_tenant_id),
     search: Optional[str] = Query(None, description="Search in name, number or barcode"),
@@ -222,7 +222,7 @@ async def list_articles(
     )
 
 
-@router.get("/search", response_model=list[Article])
+@router.get("/search", response_model=list[Article], summary="Articles suchen")
 async def search_articles(
     q: str = Query(..., min_length=2, description="Search term"),
     limit: int = Query(10, ge=1, le=50, description="Maximum number of results"),
@@ -248,7 +248,7 @@ async def search_articles(
     return [_to_article_schema(item) for item in query.all()]
 
 
-@router.get("/{article_id}", response_model=Article)
+@router.get("/{article_id}", response_model=Article, summary="Article abrufen")
 async def get_article(
     article_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -259,7 +259,7 @@ async def get_article(
     return _to_article_schema(article)
 
 
-@router.post("/", response_model=Article, status_code=status.HTTP_201_CREATED)
+@router.post("/", response_model=Article, status_code=status.HTTP_201_CREATED, summary="Article anlegen")
 async def create_article(
     article_data: ArticleCreate,
     tenant_id: str = Depends(get_tenant_id),
@@ -373,7 +373,7 @@ async def create_article(
     return _to_article_schema(article)
 
 
-@router.put("/{article_id}", response_model=Article)
+@router.put("/{article_id}", response_model=Article, summary="Article aktualisieren")
 async def update_article(
     article_id: str,
     article_data: ArticleUpdate,
@@ -424,6 +424,7 @@ async def update_article(
     "/{article_id}",
     status_code=status.HTTP_204_NO_CONTENT,
     response_class=Response,
+    summary="Article löschen",
 )
 async def delete_article(
     article_id: str,
@@ -446,7 +447,7 @@ async def delete_article(
 from ....infrastructure.models import BusinessPartnerDiscountItem, BusinessPartnerPriceAgreement  # noqa: F811
 
 
-@router.get("/{article_id}/suppliers", response_model=dict)
+@router.get("/{article_id}/suppliers", response_model=dict, summary="Article suppliers abrufen")
 async def get_article_suppliers(
     article_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -484,7 +485,7 @@ async def get_article_suppliers(
     }
 
 
-@router.get("/{article_id}/discounts", response_model=dict)
+@router.get("/{article_id}/discounts", response_model=dict, summary="Article discounts abrufen")
 async def get_article_discounts(
     article_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -518,7 +519,7 @@ async def get_article_discounts(
     }
 
 
-@router.get("/{article_id}/prices", response_model=dict)
+@router.get("/{article_id}/prices", response_model=dict, summary="Article prices abrufen")
 async def get_article_prices(
     article_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -553,7 +554,7 @@ async def get_article_prices(
     }
 
 
-@router.get("/{article_id}/documents", response_model=dict)
+@router.get("/{article_id}/documents", response_model=dict, summary="Article documents abrufen")
 async def get_article_documents(
     article_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -586,7 +587,7 @@ async def get_article_documents(
     }
 
 
-@router.get("/{article_id}/stock", response_model=dict)
+@router.get("/{article_id}/stock", response_model=dict, summary="Article stock abrufen")
 async def get_article_stock(
     article_id: str,
     branch_id: Optional[str] = Query(None, description="Filter by branch"),
@@ -661,7 +662,7 @@ async def get_article_stock(
     }
 
 
-@router.get("/{article_id}/position-context", response_model=dict)
+@router.get("/{article_id}/position-context", response_model=dict, summary="Article position context abrufen")
 async def get_article_position_context(
     article_id: str,
     customer_id: Optional[str] = Query(None, description="Customer ID for pricing history"),
@@ -912,7 +913,7 @@ async def get_article_position_context(
     }
 
 
-@router.get("/{article_id}/stock-movements", response_model=dict)
+@router.get("/{article_id}/stock-movements", response_model=dict, summary="Article stock movements abrufen")
 async def get_article_stock_movements(
     article_id: str,
     from_date: Optional[str] = Query(None, description="From date (YYYY-MM-DD)"),
@@ -1031,7 +1032,7 @@ async def _do_enrich(article_ids: list[str], db: Session, tenant_id: str) -> Enr
     return EnrichImagesResponse(enriched=enriched, skipped=skipped, failed=failed, results=results)
 
 
-@router.post("/{article_id}/fetch-image", response_model=ImageEnrichResult)
+@router.post("/{article_id}/fetch-image", response_model=ImageEnrichResult, summary="Article image abrufen")
 async def fetch_article_image(
     article_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -1051,7 +1052,7 @@ async def fetch_article_image(
     return ImageEnrichResult(article_id=article_id, image_url=url, source=source)
 
 
-@router.post("/enrich-images", response_model=EnrichImagesResponse)
+@router.post("/enrich-images", response_model=EnrichImagesResponse, summary="Article images anreichern")
 async def enrich_article_images(
     article_ids: Optional[list[str]] = None,
     tenant_id: str = Depends(get_tenant_id),

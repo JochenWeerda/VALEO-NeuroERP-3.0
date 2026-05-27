@@ -142,7 +142,7 @@ def _create_audit_record(db: Session, vat_code_id: str, action: str, change_type
 
 # ============= CRUD Endpoints =============
 
-@router.get("", response_model=List[VatCodeResponse])
+@router.get("", response_model=List[VatCodeResponse], summary="Vat codes auflisten")
 async def list_vat_codes(
     category: Optional[VatCodeCategory] = Query(None),
     is_active: Optional[bool] = Query(None),
@@ -167,7 +167,7 @@ async def list_vat_codes(
     return query.order_by(VatCode.category, VatCode.rate).all()
 
 
-@router.get("/{vat_code_id}", response_model=VatCodeResponse)
+@router.get("/{vat_code_id}", response_model=VatCodeResponse, summary="Vat code abrufen")
 async def get_vat_code(
     vat_code_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -185,7 +185,7 @@ async def get_vat_code(
     return code
 
 
-@router.post("", response_model=VatCodeResponse)
+@router.post("", response_model=VatCodeResponse, summary="Vat code anlegen")
 async def create_vat_code(
     data: VatCodeCreate,
     tenant_id: str = Depends(get_tenant_id),
@@ -240,7 +240,7 @@ async def create_vat_code(
     return vat_code
 
 
-@router.patch("/{vat_code_id}", response_model=VatCodeResponse)
+@router.patch("/{vat_code_id}", response_model=VatCodeResponse, summary="Vat code aktualisieren")
 async def update_vat_code(
     vat_code_id: str,
     data: VatCodeUpdate,
@@ -287,7 +287,7 @@ async def update_vat_code(
     return vat_code
 
 
-@router.delete("/{vat_code_id}")
+@router.delete("/{vat_code_id}", summary="Vat code löschen")
 async def delete_vat_code(
     vat_code_id: str,
     reason: Optional[str] = Query(None, description="Reason for deletion"),
@@ -321,7 +321,7 @@ async def delete_vat_code(
     return {"ok": True, "message": f"VAT code {vat_code_id} deactivated"}
 
 
-@router.get("/{vat_code_id}/audit", response_model=List[VatCodeAuditResponse])
+@router.get("/{vat_code_id}/audit", response_model=List[VatCodeAuditResponse], summary="Vat code audit abrufen")
 async def get_vat_code_audit(
     vat_code_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -342,7 +342,7 @@ async def get_vat_code_audit(
     ).order_by(VatCodeAudit.changed_at.desc()).all()
 
 
-@router.post("/seed-defaults")
+@router.post("/seed-defaults", summary="Default vat codes seed")
 async def seed_default_vat_codes(
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),

@@ -66,7 +66,7 @@ def _dict_to_out(d: dict) -> SaatgutPartieOut:
 
 # ── Endpoints ─────────────────────────────────────────────────────────────────
 
-@router.get("/partien", response_model=list[SaatgutPartieOut])
+@router.get("/partien", response_model=list[SaatgutPartieOut], summary="Partien auflisten")
 def list_partien(
     art_code: Optional[str] = Query(default=None),
     z_stufe: Optional[str] = Query(default=None),
@@ -121,7 +121,7 @@ def list_partien(
         return [SaatgutPartieOut(**i) for i in items]
 
 
-@router.post("/partien", response_model=SaatgutPartieOut, status_code=201)
+@router.post("/partien", response_model=SaatgutPartieOut, status_code=201, summary="Partie anlegen")
 def create_partie(
     payload: SaatgutPartieCreate,
     db: Session = Depends(get_db),
@@ -180,7 +180,7 @@ def create_partie(
     return record
 
 
-@router.get("/partien/{id}", response_model=SaatgutPartieOut)
+@router.get("/partien/{id}", response_model=SaatgutPartieOut, summary="Partie abrufen")
 def get_partie(
     id: str,
     db: Session = Depends(get_db),
@@ -216,7 +216,7 @@ def get_partie(
     raise HTTPException(status_code=404, detail="Partie nicht gefunden")
 
 
-@router.patch("/partien/{id}", response_model=SaatgutPartieOut)
+@router.patch("/partien/{id}", response_model=SaatgutPartieOut, summary="Partie aktualisieren")
 def update_partie(
     id: str,
     payload: dict,
@@ -245,7 +245,7 @@ def update_partie(
     return get_partie(id, db, tenant_id)
 
 
-@router.post("/partien/{id}/anerkennung", response_model=SaatgutPartieOut)
+@router.post("/partien/{id}/anerkennung", response_model=SaatgutPartieOut, summary="Anerkennung")
 def anerkennung(
     id: str,
     body: dict,
@@ -274,7 +274,7 @@ def anerkennung(
     return get_partie(id, db, tenant_id)
 
 
-@router.post("/partien/{id}/etikett", response_model=SaatgutEtikett)
+@router.post("/partien/{id}/etikett", response_model=SaatgutEtikett, summary="Etikett")
 def etikett(
     id: str,
     db: Session = Depends(get_db),
@@ -295,7 +295,7 @@ def etikett(
     )
 
 
-@router.get("/partien/{id}/kontrollprotokoll")
+@router.get("/partien/{id}/kontrollprotokoll", summary="Kontrollprotokoll")
 def kontrollprotokoll(
     id: str,
     db: Session = Depends(get_db),
@@ -315,7 +315,7 @@ def kontrollprotokoll(
     }
 
 
-@router.get("/statistik")
+@router.get("/statistik", summary="Statistik")
 def statistik(
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),

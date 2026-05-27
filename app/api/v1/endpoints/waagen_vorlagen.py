@@ -56,7 +56,7 @@ class WaagenVorlageOut(BaseModel):
 # Endpoints
 # ---------------------------------------------------------------------------
 
-@router.get("", response_model=list[WaagenVorlageOut])
+@router.get("", response_model=list[WaagenVorlageOut], summary="Vorlagen auflisten")
 def list_vorlagen(
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
@@ -77,7 +77,7 @@ def list_vorlagen(
         return []
 
 
-@router.post("", response_model=WaagenVorlageOut, status_code=status.HTTP_201_CREATED)
+@router.post("", response_model=WaagenVorlageOut, status_code=status.HTTP_201_CREATED, summary="Vorlage anlegen")
 def create_vorlage(
     payload: WaagenVorlageCreate,
     db: Session = Depends(get_db),
@@ -108,7 +108,7 @@ def create_vorlage(
     return {"id": new_id, **payload.model_dump(), "verwendungen_count": 0}
 
 
-@router.put("/{vorlage_id}", response_model=WaagenVorlageOut)
+@router.put("/{vorlage_id}", response_model=WaagenVorlageOut, summary="Vorlage aktualisieren")
 def update_vorlage(
     vorlage_id: str,
     payload: WaagenVorlageCreate,
@@ -139,7 +139,7 @@ def update_vorlage(
     return {"id": vorlage_id, **payload.model_dump(), "verwendungen_count": 0}
 
 
-@router.delete("/{vorlage_id}", status_code=status.HTTP_204_NO_CONTENT, response_class=Response)
+@router.delete("/{vorlage_id}", status_code=status.HTTP_204_NO_CONTENT, response_class=Response, summary="Vorlage löschen")
 def delete_vorlage(
     vorlage_id: str,
     db: Session = Depends(get_db),
@@ -164,7 +164,7 @@ def delete_vorlage(
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 
-@router.post("/{vorlage_id}/anwenden")
+@router.post("/{vorlage_id}/anwenden", summary="Anwenden")
 def anwenden(
     vorlage_id: str,
     db: Session = Depends(get_db),

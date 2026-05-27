@@ -90,7 +90,7 @@ class ProvisionsStaffelOut(BaseModel):
 
 # ── Provisionsgruppen CRUD ────────────────────────────────────────────────────
 
-@router.get("/gruppen", response_model=list[ProvisionsGruppeOut])
+@router.get("/gruppen", response_model=list[ProvisionsGruppeOut], summary="Provisionsgruppen auflisten")
 def list_provisionsgruppen(
     richtung: Optional[str] = None,
     db=Depends(get_db),
@@ -109,7 +109,7 @@ def list_provisionsgruppen(
     return [ProvisionsGruppeOut(**dict(r._mapping)) for r in rows]
 
 
-@router.post("/gruppen", response_model=ProvisionsGruppeOut, status_code=201)
+@router.post("/gruppen", response_model=ProvisionsGruppeOut, status_code=201, summary="Provisionsgruppe anlegen")
 def create_provisionsgruppe(
     payload: ProvisionsGruppeCreate,
     db=Depends(get_db),
@@ -136,7 +136,7 @@ def create_provisionsgruppe(
     return ProvisionsGruppeOut(**dict(row._mapping))
 
 
-@router.delete("/gruppen/{gruppe_nr}")
+@router.delete("/gruppen/{gruppe_nr}", summary="Provisionsgruppe löschen")
 def delete_provisionsgruppe(
     gruppe_nr: str,
     db=Depends(get_db),
@@ -152,7 +152,7 @@ def delete_provisionsgruppe(
 
 # ── Provisionsstaffeln CRUD ───────────────────────────────────────────────────
 
-@router.get("/staffeln", response_model=list[ProvisionsStaffelOut])
+@router.get("/staffeln", response_model=list[ProvisionsStaffelOut], summary="Provisionsstaffeln auflisten")
 def list_provisionsstaffeln(
     gruppe_id: Optional[str] = None,
     db=Depends(get_db),
@@ -181,7 +181,7 @@ def list_provisionsstaffeln(
     return result
 
 
-@router.post("/staffeln", response_model=ProvisionsStaffelOut, status_code=201)
+@router.post("/staffeln", response_model=ProvisionsStaffelOut, status_code=201, summary="Provisionsstaffel anlegen")
 def create_provisionsstaffel(
     payload: ProvisionsStaffelCreate,
     db=Depends(get_db),

@@ -53,7 +53,7 @@ def _check_tables(db: Session) -> None:
 # Schema CRUD
 # ---------------------------------------------------------------------------
 
-@router.get("", response_model=List[dict])
+@router.get("", response_model=List[dict], summary="Schemata auflisten")
 async def list_schemata(
     rohwaren_gruppe: Optional[str] = Query(None, description="GE | RO | SA | MA"),
     status: Optional[str] = Query(None, description="AKTIV | ENTWURF | ARCHIV"),
@@ -89,7 +89,7 @@ async def list_schemata(
         raise HTTPException(status_code=503, detail=f"DB-Fehler: {e}")
 
 
-@router.post("", response_model=dict, status_code=201)
+@router.post("", response_model=dict, status_code=201, summary="Schema anlegen")
 async def create_schema(
     payload: Dict[str, Any],
     db: Session = Depends(get_db),
@@ -134,7 +134,7 @@ async def create_schema(
         raise HTTPException(status_code=503, detail=f"DB-Fehler: {e}")
 
 
-@router.get("/{schema_id}", response_model=dict)
+@router.get("/{schema_id}", response_model=dict, summary="Schema abrufen")
 async def get_schema(schema_id: str, db: Session = Depends(get_db)):
     """Schema-Detail inkl. Positionen."""
     try:
@@ -158,7 +158,7 @@ async def get_schema(schema_id: str, db: Session = Depends(get_db)):
         raise HTTPException(status_code=503, detail=f"DB-Fehler: {e}")
 
 
-@router.patch("/{schema_id}", response_model=dict)
+@router.patch("/{schema_id}", response_model=dict, summary="Schema aktualisieren")
 async def update_schema(
     schema_id: str,
     payload: Dict[str, Any],
@@ -199,7 +199,7 @@ async def update_schema(
         raise HTTPException(status_code=503, detail=f"DB-Fehler: {e}")
 
 
-@router.post("/{schema_id}/aktivieren", response_model=dict)
+@router.post("/{schema_id}/aktivieren", response_model=dict, summary="Aktivieren")
 async def aktivieren(schema_id: str, db: Session = Depends(get_db)):
     """Setzt Status ENTWURF → AKTIV. Voraussetzung: gueltig_ab muss gesetzt sein."""
     try:
@@ -239,7 +239,7 @@ async def aktivieren(schema_id: str, db: Session = Depends(get_db)):
         raise HTTPException(status_code=503, detail=f"DB-Fehler: {e}")
 
 
-@router.post("/{schema_id}/archivieren", response_model=dict)
+@router.post("/{schema_id}/archivieren", response_model=dict, summary="Archivieren")
 async def archivieren(schema_id: str, db: Session = Depends(get_db)):
     """Setzt Status AKTIV → ARCHIV."""
     try:
@@ -278,7 +278,7 @@ async def archivieren(schema_id: str, db: Session = Depends(get_db)):
 # Schema Lines
 # ---------------------------------------------------------------------------
 
-@router.get("/{schema_id}/lines", response_model=List[dict])
+@router.get("/{schema_id}/lines", response_model=List[dict], summary="Lines auflisten")
 async def list_lines(schema_id: str, db: Session = Depends(get_db)):
     """Alle Positionen eines Schemas."""
     try:
@@ -296,7 +296,7 @@ async def list_lines(schema_id: str, db: Session = Depends(get_db)):
         raise HTTPException(status_code=503, detail=f"DB-Fehler: {e}")
 
 
-@router.post("/{schema_id}/lines", response_model=dict, status_code=201)
+@router.post("/{schema_id}/lines", response_model=dict, status_code=201, summary="Line hinzufügen")
 async def add_line(
     schema_id: str,
     payload: Dict[str, Any],
@@ -336,7 +336,7 @@ async def add_line(
         raise HTTPException(status_code=503, detail=f"DB-Fehler: {e}")
 
 
-@router.delete("/{schema_id}/lines/{line_id}", status_code=204, response_class=Response, response_model=None)
+@router.delete("/{schema_id}/lines/{line_id}", status_code=204, response_class=Response, response_model=None, summary="Line löschen")
 async def delete_line(
     schema_id: str,
     line_id: str,
@@ -390,7 +390,7 @@ def _eval_formula(formula: str, context: Dict[str, float]) -> Optional[float]:
         return None
 
 
-@router.post("/{schema_id}/testrechnung", response_model=dict)
+@router.post("/{schema_id}/testrechnung", response_model=dict, summary="Testrechnung")
 async def testrechnung(
     schema_id: str,
     payload: Dict[str, Any],

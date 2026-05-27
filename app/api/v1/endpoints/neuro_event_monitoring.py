@@ -17,7 +17,7 @@ _PROMETHEUS_COUNTERS = (
 )
 
 
-@router.get("/metrics")
+@router.get("/metrics", summary="Event bus metrics abrufen")
 async def get_event_bus_metrics() -> dict:
     out = event_bus_observer.get_metrics()
     out["prometheus"] = {
@@ -27,12 +27,12 @@ async def get_event_bus_metrics() -> dict:
     return out
 
 
-@router.get("/health")
+@router.get("/health", summary="Event bus health abrufen")
 async def get_event_bus_health() -> dict:
     return event_bus_observer.get_health()
 
 
-@router.get("/errors")
+@router.get("/errors", summary="Event bus errors abrufen")
 async def get_event_bus_errors(limit: int = Query(20, ge=1, le=200)) -> dict:
     return {
         "limit": limit,

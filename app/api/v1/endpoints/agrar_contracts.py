@@ -139,7 +139,7 @@ def _get_contract_or_404(db: Session, contract_id: str, tenant_id: str) -> Agrar
 
 # ── route handlers ────────────────────────────────────────────────────────────
 
-@router.get("/", response_model=PaginatedResponse[AgrarContractOut])
+@router.get("/", response_model=PaginatedResponse[AgrarContractOut], summary="Agrar contracts auflisten")
 async def list_agrar_contracts(
     status: Optional[ContractStatus] = Query(None),
     pricing_model: Optional[PricingModel] = Query(None),
@@ -159,7 +159,7 @@ async def list_agrar_contracts(
     )
 
 
-@router.get("/{contract_id}", response_model=AgrarContractOut)
+@router.get("/{contract_id}", response_model=AgrarContractOut, summary="Agrar contract abrufen")
 async def get_agrar_contract(
     contract_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -171,7 +171,7 @@ async def get_agrar_contract(
         raise _svc_errors(exc)
 
 
-@router.post("/", response_model=AgrarContractOut, status_code=201)
+@router.post("/", response_model=AgrarContractOut, status_code=201, summary="Agrar contract anlegen")
 async def create_agrar_contract(
     payload: AgrarContractCreate,
     tenant_id: str = Depends(get_tenant_id),
@@ -183,7 +183,7 @@ async def create_agrar_contract(
         raise _svc_errors(exc)
 
 
-@router.patch("/{contract_id}", response_model=AgrarContractOut)
+@router.patch("/{contract_id}", response_model=AgrarContractOut, summary="Agrar contract aktualisieren")
 async def update_agrar_contract(
     contract_id: str,
     payload: AgrarContractUpdate,
@@ -196,7 +196,7 @@ async def update_agrar_contract(
         raise _svc_errors(exc)
 
 
-@router.post("/{contract_id}/allocations", response_model=ContractAllocationOut, status_code=201)
+@router.post("/{contract_id}/allocations", response_model=ContractAllocationOut, status_code=201, summary="Contract quantity zuweisen")
 async def allocate_contract_quantity(
     contract_id: str,
     payload: ContractAllocationCreate,
@@ -212,7 +212,7 @@ async def allocate_contract_quantity(
         raise _svc_errors(exc)
 
 
-@router.get("/{contract_id}/allocations", response_model=list[ContractAllocationOut])
+@router.get("/{contract_id}/allocations", response_model=list[ContractAllocationOut], summary="Contract allocations auflisten")
 async def list_contract_allocations(
     contract_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -231,7 +231,7 @@ async def list_contract_allocations(
     return [_to_alloc_out(r) for r in rows]
 
 
-@router.delete("/{contract_id}", status_code=204, response_class=Response, response_model=None)
+@router.delete("/{contract_id}", status_code=204, response_class=Response, response_model=None, summary="Contract löschen")
 async def delete_contract(
     contract_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -243,7 +243,7 @@ async def delete_contract(
         raise _svc_errors(exc)
 
 
-@router.post("/{contract_id}/cancel", response_model=AgrarContractOut)
+@router.post("/{contract_id}/cancel", response_model=AgrarContractOut, summary="Contract stornieren")
 async def cancel_contract(
     contract_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -255,7 +255,7 @@ async def cancel_contract(
         raise _svc_errors(exc)
 
 
-@router.post("/{contract_id}/close", response_model=AgrarContractOut)
+@router.post("/{contract_id}/close", response_model=AgrarContractOut, summary="Contract abschließen")
 async def close_contract(
     contract_id: str,
     tenant_id: str = Depends(get_tenant_id),

@@ -47,7 +47,7 @@ def _zelle_to_dict(row: SiloZelleDB) -> dict:
     }
 
 
-@router.post("/zellen", status_code=201)
+@router.post("/zellen", status_code=201, summary="Silo zelle anlegen")
 def create_silo_zelle(req: SiloZelleCreateRequest, db: Session = Depends(get_db)):
     row = SiloZelleDB(
         silo_id=str(uuid.uuid4()),
@@ -62,7 +62,7 @@ def create_silo_zelle(req: SiloZelleCreateRequest, db: Session = Depends(get_db)
     return _zelle_to_dict(row)
 
 
-@router.get("/zellen/{zelle_id}")
+@router.get("/zellen/{zelle_id}", summary="Silo zelle abrufen")
 def get_silo_zelle(zelle_id: str, db: Session = Depends(get_db)):
     row = db.query(SiloZelleDB).filter(SiloZelleDB.silo_id == zelle_id).first()
     if not row:
@@ -70,13 +70,13 @@ def get_silo_zelle(zelle_id: str, db: Session = Depends(get_db)):
     return _zelle_to_dict(row)
 
 
-@router.get("/by-tenant/{tenant_id}")
+@router.get("/by-tenant/{tenant_id}", summary="Zellen auflisten")
 def list_zellen(tenant_id: str, db: Session = Depends(get_db)):
     rows = db.query(SiloZelleDB).filter(SiloZelleDB.tenant_id == tenant_id).all()
     return [_zelle_to_dict(r) for r in rows]
 
 
-@router.post("/einlagern", status_code=201)
+@router.post("/einlagern", status_code=201, summary="Einlagern")
 def einlagern(req: EinlagerungRequest, db: Session = Depends(get_db)):
     zelle = db.query(SiloZelleDB).filter(
         SiloZelleDB.silo_id == req.silo_id,
@@ -104,7 +104,7 @@ def einlagern(req: EinlagerungRequest, db: Session = Depends(get_db)):
     return {"bewegung_id": bewegung.bewegung_id, "typ": "einlagerung", "menge_t": req.menge_t, "silo_id": req.silo_id}
 
 
-@router.post("/auslagern", status_code=201)
+@router.post("/auslagern", status_code=201, summary="Auslagern")
 def auslagern(req: AuslagerungRequest, db: Session = Depends(get_db)):
     zelle = db.query(SiloZelleDB).filter(
         SiloZelleDB.silo_id == req.silo_id,
@@ -128,7 +128,7 @@ def auslagern(req: AuslagerungRequest, db: Session = Depends(get_db)):
     return {"bewegung_id": bewegung.bewegung_id, "typ": "auslagerung", "menge_t": req.menge_t, "silo_id": req.silo_id}
 
 
-@router.get("/bestand/{tenant_id}")
+@router.get("/bestand/{tenant_id}", summary="Bestand abrufen")
 def get_bestand(tenant_id: str, db: Session = Depends(get_db)):
     rows = db.query(SiloZelleDB).filter(SiloZelleDB.tenant_id == tenant_id).all()
     gesamtbestand = sum(float(r.bestand_t) for r in rows)

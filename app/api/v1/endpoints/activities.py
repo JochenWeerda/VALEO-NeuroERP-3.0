@@ -93,7 +93,7 @@ async def _replace_list_field(activity_id: str, field_name: str, items: list[Any
     return list(value or [])
 
 
-@router.get("/", response_model=PaginatedResponse[Activity])
+@router.get("/", response_model=PaginatedResponse[Activity], summary="Activities auflisten")
 async def list_activities(
     type_filter: str | None = Query(None, alias="type"),
     status_filter: str | None = Query(None, alias="status"),
@@ -122,7 +122,7 @@ async def list_activities(
     )
 
 
-@router.get("/{activity_id}", response_model=Activity)
+@router.get("/{activity_id}", response_model=Activity, summary="Activity abrufen")
 async def get_activity(activity_id: str):
     try:
         activity = await crm_core_client.get_activity(activity_id)
@@ -135,7 +135,7 @@ async def get_activity(activity_id: str):
     return Activity.model_validate(_adapt_activity(activity))
 
 
-@router.post("/", response_model=Activity, status_code=status.HTTP_201_CREATED)
+@router.post("/", response_model=Activity, status_code=status.HTTP_201_CREATED, summary="Activity anlegen")
 async def create_activity(payload: ActivityCreate):
     try:
         body = _map_activity_payload(payload)
@@ -145,7 +145,7 @@ async def create_activity(payload: ActivityCreate):
     return Activity.model_validate(_adapt_activity(created))
 
 
-@router.put("/{activity_id}", response_model=Activity)
+@router.put("/{activity_id}", response_model=Activity, summary="Activity aktualisieren")
 async def update_activity(activity_id: str, payload: ActivityUpdate):
     try:
         body = _map_activity_payload(payload)
@@ -159,7 +159,7 @@ async def update_activity(activity_id: str, payload: ActivityUpdate):
     return Activity.model_validate(_adapt_activity(updated))
 
 
-@router.delete("/{activity_id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete("/{activity_id}", status_code=status.HTTP_204_NO_CONTENT, summary="Activity löschen")
 async def delete_activity(activity_id: str):
     try:
         await crm_core_client.delete_activity(activity_id)
@@ -171,7 +171,7 @@ async def delete_activity(activity_id: str):
         raise HTTPException(status_code=500, detail=f"Failed to delete activity: {exc}") from exc
 
 
-@router.get("/{activity_id}/main-topics", response_model=list[str])
+@router.get("/{activity_id}/main-topics", response_model=list[str], summary="Activity main topics auflisten")
 async def list_activity_main_topics(activity_id: str):
     items = await _load_list_field(activity_id, "main_topics")
     return [str(item) for item in items]
@@ -181,6 +181,7 @@ async def list_activity_main_topics(activity_id: str):
     "/{activity_id}/main-topics",
     response_model=str,
     status_code=status.HTTP_201_CREATED,
+    summary="Activity main topic anlegen",
 )
 async def create_activity_main_topic(activity_id: str, payload: _StringListItem):
     items = [str(item) for item in await _load_list_field(activity_id, "main_topics")]
@@ -189,7 +190,7 @@ async def create_activity_main_topic(activity_id: str, payload: _StringListItem)
     return str(updated[-1])
 
 
-@router.put("/{activity_id}/main-topics/{item_index}", response_model=str)
+@router.put("/{activity_id}/main-topics/{item_index}", response_model=str, summary="Activity main topic replace")
 async def replace_activity_main_topic(
     activity_id: str,
     payload: _StringListItem,
@@ -202,7 +203,7 @@ async def replace_activity_main_topic(
     return str(updated[item_index])
 
 
-@router.delete("/{activity_id}/main-topics/{item_index}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete("/{activity_id}/main-topics/{item_index}", status_code=status.HTTP_204_NO_CONTENT, summary="Activity main topic löschen")
 async def delete_activity_main_topic(activity_id: str, item_index: int = Path(..., ge=0)):
     items = [str(item) for item in await _load_list_field(activity_id, "main_topics")]
     _validate_item_index(items, item_index, "Main topic")
@@ -210,7 +211,7 @@ async def delete_activity_main_topic(activity_id: str, item_index: int = Path(..
     await _replace_list_field(activity_id, "main_topics", items)
 
 
-@router.get("/{activity_id}/orders-placed", response_model=list[str])
+@router.get("/{activity_id}/orders-placed", response_model=list[str], summary="Activity orders placed auflisten")
 async def list_activity_orders_placed(activity_id: str):
     items = await _load_list_field(activity_id, "orders_placed")
     return [str(item) for item in items]
@@ -220,6 +221,7 @@ async def list_activity_orders_placed(activity_id: str):
     "/{activity_id}/orders-placed",
     response_model=str,
     status_code=status.HTTP_201_CREATED,
+    summary="Activity order placed anlegen",
 )
 async def create_activity_order_placed(activity_id: str, payload: _StringListItem):
     items = [str(item) for item in await _load_list_field(activity_id, "orders_placed")]
@@ -228,7 +230,7 @@ async def create_activity_order_placed(activity_id: str, payload: _StringListIte
     return str(updated[-1])
 
 
-@router.put("/{activity_id}/orders-placed/{item_index}", response_model=str)
+@router.put("/{activity_id}/orders-placed/{item_index}", response_model=str, summary="Activity order placed replace")
 async def replace_activity_order_placed(
     activity_id: str,
     payload: _StringListItem,
@@ -241,7 +243,7 @@ async def replace_activity_order_placed(
     return str(updated[item_index])
 
 
-@router.delete("/{activity_id}/orders-placed/{item_index}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete("/{activity_id}/orders-placed/{item_index}", status_code=status.HTTP_204_NO_CONTENT, summary="Activity order placed löschen")
 async def delete_activity_order_placed(activity_id: str, item_index: int = Path(..., ge=0)):
     items = [str(item) for item in await _load_list_field(activity_id, "orders_placed")]
     _validate_item_index(items, item_index, "Order")
@@ -249,7 +251,7 @@ async def delete_activity_order_placed(activity_id: str, item_index: int = Path(
     await _replace_list_field(activity_id, "orders_placed", items)
 
 
-@router.get("/{activity_id}/follow-up-actions", response_model=list[dict[str, Any] | str])
+@router.get("/{activity_id}/follow-up-actions", response_model=list[dict[str, Any] | str], summary="Activity follow up actions auflisten")
 async def list_activity_follow_up_actions(activity_id: str):
     return await _load_list_field(activity_id, "follow_up_actions")
 
@@ -258,6 +260,7 @@ async def list_activity_follow_up_actions(activity_id: str):
     "/{activity_id}/follow-up-actions",
     response_model=dict[str, Any] | str,
     status_code=status.HTTP_201_CREATED,
+    summary="Activity follow up action anlegen",
 )
 async def create_activity_follow_up_action(activity_id: str, payload: _FollowUpActionItem):
     items = await _load_list_field(activity_id, "follow_up_actions")
@@ -266,7 +269,7 @@ async def create_activity_follow_up_action(activity_id: str, payload: _FollowUpA
     return updated[-1]
 
 
-@router.put("/{activity_id}/follow-up-actions/{item_index}", response_model=dict[str, Any] | str)
+@router.put("/{activity_id}/follow-up-actions/{item_index}", response_model=dict[str, Any] | str, summary="Activity follow up action replace")
 async def replace_activity_follow_up_action(
     activity_id: str,
     payload: _FollowUpActionItem,
@@ -279,7 +282,7 @@ async def replace_activity_follow_up_action(
     return updated[item_index]
 
 
-@router.delete("/{activity_id}/follow-up-actions/{item_index}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete("/{activity_id}/follow-up-actions/{item_index}", status_code=status.HTTP_204_NO_CONTENT, summary="Activity follow up action löschen")
 async def delete_activity_follow_up_action(activity_id: str, item_index: int = Path(..., ge=0)):
     items = await _load_list_field(activity_id, "follow_up_actions")
     _validate_item_index(items, item_index, "Follow-up action")

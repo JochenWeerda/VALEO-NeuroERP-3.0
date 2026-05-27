@@ -81,7 +81,7 @@ class ArtikelVerpackungOut(BaseModel):
 
 # ── Endpoints ─────────────────────────────────────────────────────────────────
 
-@router.get("", response_model=list[ArtikelVerpackungOut])
+@router.get("", response_model=list[ArtikelVerpackungOut], summary="Verpackungen auflisten")
 def list_verpackungen(
     nur_aktive: bool = Query(True),
     stufen: Optional[int] = Query(None, description="Filter nach Stufen-Anzahl"),
@@ -100,7 +100,7 @@ def list_verpackungen(
     return [ArtikelVerpackungOut(**dict(r._mapping)) for r in rows]
 
 
-@router.get("/{verpackungs_nr}", response_model=ArtikelVerpackungOut)
+@router.get("/{verpackungs_nr}", response_model=ArtikelVerpackungOut, summary="Verpackung abrufen")
 def get_verpackung(
     verpackungs_nr: str,
     db=Depends(get_db),
@@ -115,7 +115,7 @@ def get_verpackung(
     return ArtikelVerpackungOut(**dict(row._mapping))
 
 
-@router.post("", response_model=ArtikelVerpackungOut, status_code=201)
+@router.post("", response_model=ArtikelVerpackungOut, status_code=201, summary="Verpackung anlegen")
 def create_verpackung(
     payload: ArtikelVerpackungCreate,
     db=Depends(get_db),
@@ -155,7 +155,7 @@ def create_verpackung(
     return ArtikelVerpackungOut(**dict(row._mapping))
 
 
-@router.put("/{verpackungs_nr}", response_model=ArtikelVerpackungOut)
+@router.put("/{verpackungs_nr}", response_model=ArtikelVerpackungOut, summary="Verpackung aktualisieren")
 def update_verpackung(
     verpackungs_nr: str,
     payload: ArtikelVerpackungCreate,
@@ -195,7 +195,7 @@ def update_verpackung(
     return ArtikelVerpackungOut(**dict(updated._mapping))
 
 
-@router.delete("/{verpackungs_nr}")
+@router.delete("/{verpackungs_nr}", summary="Verpackung löschen")
 def delete_verpackung(
     verpackungs_nr: str,
     db=Depends(get_db),
@@ -210,7 +210,7 @@ def delete_verpackung(
     return Response(status_code=204)
 
 
-@router.get("/{verpackungs_nr}/gesamtgewicht")
+@router.get("/{verpackungs_nr}/gesamtgewicht", summary="Gesamtgewicht berechne")
 def berechne_gesamtgewicht(
     verpackungs_nr: str,
     anzahl_stufe3: Optional[int] = Query(None),

@@ -90,7 +90,7 @@ class FrachttabelleZuordnungOut(BaseModel):
 
 # ── Frachttabellen ────────────────────────────────────────────────────────────
 
-@router.get("", response_model=list[FrachttabelleOut])
+@router.get("", response_model=list[FrachttabelleOut], summary="Frachttabellen auflisten")
 def list_frachttabellen(
     db=Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
@@ -103,7 +103,7 @@ def list_frachttabellen(
     return [FrachttabelleOut(**dict(r._mapping)) for r in rows]
 
 
-@router.post("", response_model=FrachttabelleOut, status_code=201)
+@router.post("", response_model=FrachttabelleOut, status_code=201, summary="Frachttabelle anlegen")
 def create_frachttabelle(
     payload: FrachttabelleCreate,
     db=Depends(get_db),
@@ -132,7 +132,7 @@ def create_frachttabelle(
     return FrachttabelleOut(**dict(row._mapping))
 
 
-@router.delete("/{tabelle_nr}")
+@router.delete("/{tabelle_nr}", summary="Frachttabelle löschen")
 def delete_frachttabelle(
     tabelle_nr: str,
     db=Depends(get_db),
@@ -149,7 +149,7 @@ def delete_frachttabelle(
 # ── Positionen (Staffelwerte) ─────────────────────────────────────────────────
 
 @router.get("/{tabelle_nr}/positionen",
-            response_model=list[FrachttabellePositionOut])
+            response_model=list[FrachttabellePositionOut], summary="Positionen auflisten")
 def list_positionen(
     tabelle_nr: str,
     db=Depends(get_db),
@@ -164,7 +164,7 @@ def list_positionen(
 
 
 @router.post("/{tabelle_nr}/positionen",
-             response_model=FrachttabellePositionOut, status_code=201)
+             response_model=FrachttabellePositionOut, status_code=201, summary="Position anlegen")
 def create_position(
     tabelle_nr: str,
     payload: FrachttabellePositionCreate,
@@ -195,7 +195,7 @@ def create_position(
     return FrachttabellePositionOut(**dict(row._mapping))
 
 
-@router.delete("/{tabelle_nr}/positionen/{pos_id}")
+@router.delete("/{tabelle_nr}/positionen/{pos_id}", summary="Position löschen")
 def delete_position(
     tabelle_nr: str,
     pos_id: str,
@@ -212,7 +212,7 @@ def delete_position(
 
 # ── Frachttabellen-Zuordnungen ────────────────────────────────────────────────
 
-@router.get("/zuordnungen", response_model=list[FrachttabelleZuordnungOut])
+@router.get("/zuordnungen", response_model=list[FrachttabelleZuordnungOut], summary="Zuordnungen auflisten")
 def list_zuordnungen(
     frachtklasse: Optional[str] = Query(None),
     frachtgruppe: Optional[str] = Query(None),
@@ -240,7 +240,7 @@ def list_zuordnungen(
 
 
 @router.post("/zuordnungen",
-             response_model=FrachttabelleZuordnungOut, status_code=201)
+             response_model=FrachttabelleZuordnungOut, status_code=201, summary="Zuordnung anlegen")
 def create_zuordnung(
     payload: FrachttabelleZuordnungCreate,
     db=Depends(get_db),
@@ -265,7 +265,7 @@ def create_zuordnung(
     return FrachttabelleZuordnungOut(**dict(row._mapping))
 
 
-@router.delete("/zuordnungen/{zuordnung_id}")
+@router.delete("/zuordnungen/{zuordnung_id}", summary="Zuordnung löschen")
 def delete_zuordnung(
     zuordnung_id: str,
     db=Depends(get_db),
@@ -279,7 +279,7 @@ def delete_zuordnung(
     return Response(status_code=204)
 
 
-@router.get("/zuordnungen/lookup")
+@router.get("/zuordnungen/lookup", summary="Frachttabelle lookup")
 def lookup_frachttabelle(
     frachtklasse: str,
     frachtgruppe: str,

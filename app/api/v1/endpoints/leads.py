@@ -61,7 +61,7 @@ def _map_update_payload(payload: LeadUpdate) -> dict:
     return body
 
 
-@router.get("/", response_model=PaginatedResponse[Lead])
+@router.get("/", response_model=PaginatedResponse[Lead], summary="Leads auflisten")
 async def list_leads(
     status_filter: str | None = Query(None, alias="status"),
     search: str | None = Query(None, description="Search in company/contact"),
@@ -85,7 +85,7 @@ async def list_leads(
     )
 
 
-@router.get("/{lead_id}", response_model=Lead)
+@router.get("/{lead_id}", response_model=Lead, summary="Lead abrufen")
 async def get_lead(lead_id: str):
     try:
         lead = await crm_core_client.get_lead(lead_id)
@@ -98,7 +98,7 @@ async def get_lead(lead_id: str):
     return Lead.model_validate(_adapt_lead(lead))
 
 
-@router.post("/", response_model=Lead, status_code=status.HTTP_201_CREATED)
+@router.post("/", response_model=Lead, status_code=status.HTTP_201_CREATED, summary="Lead anlegen")
 async def create_lead(payload: LeadCreate):
     try:
         created = await crm_core_client.create_lead(_map_create_payload(payload))
@@ -107,7 +107,7 @@ async def create_lead(payload: LeadCreate):
     return Lead.model_validate(_adapt_lead(created))
 
 
-@router.put("/{lead_id}", response_model=Lead)
+@router.put("/{lead_id}", response_model=Lead, summary="Lead aktualisieren")
 async def update_lead(lead_id: str, payload: LeadUpdate):
     try:
         updated = await crm_core_client.update_lead(lead_id, _map_update_payload(payload))
@@ -120,7 +120,7 @@ async def update_lead(lead_id: str, payload: LeadUpdate):
     return Lead.model_validate(_adapt_lead(updated))
 
 
-@router.delete("/{lead_id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete("/{lead_id}", status_code=status.HTTP_204_NO_CONTENT, summary="Lead löschen")
 async def delete_lead(lead_id: str):
     try:
         await crm_core_client.delete_lead(lead_id)

@@ -147,7 +147,7 @@ def _derive_billing_weight(
     )
 
 
-@router.get("/", response_model=PaginatedResponse[WeighingTicketOut])
+@router.get("/", response_model=PaginatedResponse[WeighingTicketOut], summary="Weighing tickets auflisten")
 async def list_weighing_tickets(
     tenant_id: Optional[str] = Query(None),
     skip: int = Query(0, ge=0),
@@ -173,7 +173,7 @@ class ArticleGroupOut(BaseModel):
     count: int
 
 
-@router.get("/article-groups", response_model=list[ArticleGroupOut])
+@router.get("/article-groups", response_model=list[ArticleGroupOut], summary="Article groups auflisten")
 async def list_article_groups(
     tenant_id: Optional[str] = Query(None),
     db: Session = Depends(get_db),
@@ -197,7 +197,7 @@ async def list_article_groups(
     return [ArticleGroupOut(warengruppe=r[0], count=r[1]) for r in rows]
 
 
-@router.post("/", response_model=WeighingTicketOut, status_code=201)
+@router.post("/", response_model=WeighingTicketOut, status_code=201, summary="Weighing ticket anlegen")
 async def create_weighing_ticket(
     payload: WeighingTicketCreate,
     tenant_id: Optional[str] = Query(None),
@@ -254,7 +254,7 @@ async def create_weighing_ticket(
     return WeighingTicketOut.model_validate(ticket)
 
 
-@router.put("/{ticket_id}", response_model=WeighingTicketOut)
+@router.put("/{ticket_id}", response_model=WeighingTicketOut, summary="Weighing ticket aktualisieren")
 async def update_weighing_ticket(
     ticket_id: str,
     payload: WeighingTicketUpdate,
@@ -297,7 +297,7 @@ async def update_weighing_ticket(
     return WeighingTicketOut.model_validate(ticket)
 
 
-@router.post("/{ticket_id}/allocate-contract", response_model=WeighingTicketContractAllocationOut, status_code=201)
+@router.post("/{ticket_id}/allocate-contract", response_model=WeighingTicketContractAllocationOut, status_code=201, summary="Ticket to contract zuweisen")
 async def allocate_ticket_to_contract(
     ticket_id: str,
     payload: WeighingTicketContractAllocationRequest,

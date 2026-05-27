@@ -63,7 +63,7 @@ def _row_to_config(row) -> ConnectorConfig:
     )
 
 
-@router.get("/config", response_model=Optional[ConnectorConfig])
+@router.get("/config", response_model=Optional[ConnectorConfig], summary="Asset ledger config abrufen")
 async def get_asset_ledger_config(
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
@@ -82,7 +82,7 @@ async def get_asset_ledger_config(
     return _row_to_config(row)
 
 
-@router.put("/config", response_model=ConnectorConfig)
+@router.put("/config", response_model=ConnectorConfig, summary="Asset ledger config put")
 async def put_asset_ledger_config(
     payload: ConnectorConfigUpdate,
     tenant_id: str = Depends(get_tenant_id),
@@ -149,7 +149,7 @@ async def put_asset_ledger_config(
     return _row_to_config(row)
 
 
-@router.post("/sync", response_model=dict)
+@router.post("/sync", response_model=dict, summary="Ledger sync asset")
 async def asset_ledger_sync(
     payload: AssetLedgerSyncRequest,
     tenant_id: str = Depends(get_tenant_id),
@@ -180,7 +180,7 @@ async def asset_ledger_sync(
     }
 
 
-@router.get("/config/list", response_model=List[ConnectorConfig])
+@router.get("/config/list", response_model=List[ConnectorConfig], summary="Connector configs auflisten")
 async def list_connector_configs(
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),

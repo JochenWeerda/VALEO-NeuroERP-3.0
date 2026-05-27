@@ -245,7 +245,7 @@ def _row_to_header_out(svc: DocflowService, header_id: str) -> DocflowHeaderOut:
 
 # ── routes ────────────────────────────────────────────────────────────────────
 
-@router.get("/", response_model=list[DocflowHeaderOut])
+@router.get("/", response_model=list[DocflowHeaderOut], summary="Documents auflisten")
 async def list_documents(
     tenant_id: Optional[str] = Query(None),
     doc_type: Optional[str] = Query(None),
@@ -258,7 +258,7 @@ async def list_documents(
     return [_row_to_header_out(svc, doc_id) for doc_id in doc_ids]
 
 
-@router.get("/{doc_id}", response_model=DocflowHeaderOut)
+@router.get("/{doc_id}", response_model=DocflowHeaderOut, summary="Document abrufen")
 async def get_document(
     doc_id: str,
     tenant_id: Optional[str] = Query(None),
@@ -273,7 +273,7 @@ async def get_document(
     return _row_to_header_out(svc, doc_id)
 
 
-@router.get("/{doc_id}/pos-compliance", response_model=dict[str, Any])
+@router.get("/{doc_id}/pos-compliance", response_model=dict[str, Any], summary="Pos compliance abrufen")
 async def get_pos_compliance(
     doc_id: str,
     tenant_id: Optional[str] = Query(None),
@@ -289,7 +289,7 @@ async def get_pos_compliance(
     return payload
 
 
-@router.post("/", response_model=DocflowHeaderOut)
+@router.post("/", response_model=DocflowHeaderOut, summary="Document anlegen")
 async def create_document(
     payload: DocflowCreateRequest,
     tenant_id: Optional[str] = Query(None),
@@ -312,7 +312,7 @@ async def create_document(
     return _row_to_header_out(svc, doc_id)
 
 
-@router.put("/{doc_id}", response_model=DocflowHeaderOut)
+@router.put("/{doc_id}", response_model=DocflowHeaderOut, summary="Document aktualisieren")
 async def update_document(
     doc_id: str,
     payload: DocflowUpdateRequest,
@@ -346,7 +346,7 @@ async def update_document(
     return _row_to_header_out(svc, doc_id)
 
 
-@router.post("/{doc_id}/release", response_model=DocflowCommandResult)
+@router.post("/{doc_id}/release", response_model=DocflowCommandResult, summary="Document freigeben")
 async def release_document(
     doc_id: str,
     payload: DocflowReleaseRequest,
@@ -371,7 +371,7 @@ async def release_document(
     return DocflowCommandResult(**result)
 
 
-@router.post("/{doc_id}/record-print", response_model=DocflowHeaderOut)
+@router.post("/{doc_id}/record-print", response_model=DocflowHeaderOut, summary="Print record")
 async def record_print(
     doc_id: str,
     payload: DocflowRecordPrintRequest,
@@ -390,7 +390,7 @@ async def record_print(
     return _row_to_header_out(svc, doc_id)
 
 
-@router.post("/{doc_id}/record-export", response_model=DocflowHeaderOut)
+@router.post("/{doc_id}/record-export", response_model=DocflowHeaderOut, summary="Export record")
 async def record_export(
     doc_id: str,
     payload: DocflowRecordExportRequest,
@@ -409,7 +409,7 @@ async def record_export(
     return _row_to_header_out(svc, doc_id)
 
 
-@router.post("/{doc_id}/convert", response_model=DocflowCommandResult)
+@router.post("/{doc_id}/convert", response_model=DocflowCommandResult, summary="Document umwandeln")
 async def convert_document(
     doc_id: str,
     payload: DocflowConvertRequest,
@@ -437,7 +437,7 @@ async def convert_document(
     return DocflowCommandResult(**result)
 
 
-@router.post("/{doc_id}/post", response_model=DocflowCommandResult)
+@router.post("/{doc_id}/post", response_model=DocflowCommandResult, summary="Document erstellen")
 async def post_document(
     doc_id: str,
     payload: DocflowPostRequest,
@@ -462,7 +462,7 @@ async def post_document(
     return DocflowCommandResult(**result)
 
 
-@router.post("/{doc_id}/reverse", response_model=DocflowCommandResult)
+@router.post("/{doc_id}/reverse", response_model=DocflowCommandResult, summary="Document reverse")
 async def reverse_document(
     doc_id: str,
     payload: DocflowReverseRequest,

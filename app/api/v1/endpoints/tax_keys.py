@@ -124,7 +124,7 @@ class TaxKeyResponse(BaseModel):
     updated_at: datetime
 
 
-@router.get("", response_model=List[TaxKeyResponse])
+@router.get("", response_model=List[TaxKeyResponse], summary="Tax keys auflisten")
 async def list_tax_keys(
     tenant_id: str = Depends(get_tenant_id),
     active_only: bool = Query(True, description="Show only active tax keys"),
@@ -189,7 +189,7 @@ async def list_tax_keys(
         return []
 
 
-@router.get("/{tax_key_id}", response_model=TaxKeyResponse)
+@router.get("/{tax_key_id}", response_model=TaxKeyResponse, summary="Tax key abrufen")
 async def get_tax_key(
     tax_key_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -245,7 +245,7 @@ async def get_tax_key(
         raise HTTPException(status_code=500, detail=f"Failed to get tax key: {str(e)}")
 
 
-@router.post("", response_model=TaxKeyResponse, status_code=201)
+@router.post("", response_model=TaxKeyResponse, status_code=201, summary="Tax key anlegen")
 async def create_tax_key(
     tax_key: TaxKeyCreate,
     tenant_id: str = Depends(get_tenant_id),
@@ -340,7 +340,7 @@ async def create_tax_key(
         raise HTTPException(status_code=500, detail=f"Failed to create tax key: {str(e)}")
 
 
-@router.put("/{tax_key_id}", response_model=TaxKeyResponse)
+@router.put("/{tax_key_id}", response_model=TaxKeyResponse, summary="Tax key aktualisieren")
 async def update_tax_key(
     tax_key_id: str,
     tax_key: TaxKeyUpdate,
@@ -477,7 +477,7 @@ async def update_tax_key(
         raise HTTPException(status_code=500, detail=f"Failed to update tax key: {str(e)}")
 
 
-@router.delete("/{tax_key_id}", status_code=204, response_class=Response, response_model=None)
+@router.delete("/{tax_key_id}", status_code=204, response_class=Response, response_model=None, summary="Tax key löschen")
 async def delete_tax_key(
     tax_key_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -511,7 +511,7 @@ async def delete_tax_key(
         raise HTTPException(status_code=500, detail=f"Failed to delete tax key: {str(e)}")
 
 
-@router.get("/code/{code}", response_model=TaxKeyResponse)
+@router.get("/code/{code}", response_model=TaxKeyResponse, summary="Tax key by code abrufen")
 async def get_tax_key_by_code(
     code: str,
     tenant_id: str = Depends(get_tenant_id),

@@ -44,7 +44,7 @@ class SupplierPreisauskunft(BaseModel):
 
 # --- Endpoints ---
 
-@router.get("/lieferanten/{lieferant_id}/lieferungen", response_model=list[SupplierLieferungView])
+@router.get("/lieferanten/{lieferant_id}/lieferungen", response_model=list[SupplierLieferungView], summary="Lieferant lieferungen abrufen")
 def get_lieferant_lieferungen(
     lieferant_id: str,
     von: Optional[str] = Query(None),
@@ -93,7 +93,7 @@ def get_lieferant_lieferungen(
         return []
 
 
-@router.get("/lieferanten/{lieferant_id}/kontrakte", response_model=list[SupplierKontraktView])
+@router.get("/lieferanten/{lieferant_id}/kontrakte", response_model=list[SupplierKontraktView], summary="Lieferant kontrakte abrufen")
 def get_lieferant_kontrakte(
     lieferant_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -131,7 +131,7 @@ def get_lieferant_kontrakte(
         return []
 
 
-@router.get("/preisauskunft", response_model=SupplierPreisauskunft)
+@router.get("/preisauskunft", response_model=SupplierPreisauskunft, summary="Preisauskunft abrufen")
 def get_preisauskunft(
     sorte: str = Query(...),
     qualitaet: str = Query(...),
@@ -165,7 +165,7 @@ def get_preisauskunft(
     )
 
 
-@router.get("/silo-bestaende")
+@router.get("/silo-bestaende", summary="Silo bestaende abrufen")
 def get_silo_bestaende(
     tenant_id: str = Depends(get_tenant_id),
     lieferant_id: Optional[str] = Query(None),

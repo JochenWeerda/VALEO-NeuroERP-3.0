@@ -44,7 +44,7 @@ def _jsonable(row: dict[str, Any]) -> dict[str, Any]:
     return out
 
 
-@router.get("/report-permissions", response_model=list[ReportPermissionOut])
+@router.get("/report-permissions", response_model=list[ReportPermissionOut], summary="Report permissions auflisten")
 def list_report_permissions(
     role_id: str | None = Query(default=None),
     report_key: str | None = Query(default=None),
@@ -76,7 +76,7 @@ def list_report_permissions(
     return [ReportPermissionOut(**_jsonable(dict(row))) for row in rows]
 
 
-@router.get("/report-permissions/{permission_id}", response_model=ReportPermissionOut)
+@router.get("/report-permissions/{permission_id}", response_model=ReportPermissionOut, summary="Report permission abrufen")
 def get_report_permission(
     permission_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -97,7 +97,7 @@ def get_report_permission(
     return ReportPermissionOut(**_jsonable(dict(row)))
 
 
-@router.post("/report-permissions", response_model=ReportPermissionOut, status_code=201)
+@router.post("/report-permissions", response_model=ReportPermissionOut, status_code=201, summary="Report permission anlegen")
 def create_report_permission(
     payload: ReportPermissionIn,
     tenant_id: str = Depends(get_tenant_id),
@@ -134,7 +134,7 @@ def create_report_permission(
     return ReportPermissionOut(**_jsonable(dict(row)))
 
 
-@router.put("/report-permissions/{permission_id}", response_model=ReportPermissionOut)
+@router.put("/report-permissions/{permission_id}", response_model=ReportPermissionOut, summary="Report permission aktualisieren")
 def update_report_permission(
     permission_id: str,
     payload: ReportPermissionIn,
@@ -174,7 +174,7 @@ def update_report_permission(
     return get_report_permission(permission_id, tenant_id, db)
 
 
-@router.delete("/report-permissions/{permission_id}", status_code=204, response_class=Response, response_model=None)
+@router.delete("/report-permissions/{permission_id}", status_code=204, response_class=Response, response_model=None, summary="Report permission löschen")
 def delete_report_permission(
     permission_id: str,
     tenant_id: str = Depends(get_tenant_id),

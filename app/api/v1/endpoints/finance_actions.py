@@ -48,7 +48,7 @@ class ClosingActionRequest(BaseModel):
 
 # ── Bank reconciliation run ─────────────────────────────────────────────────────
 
-@router.post("/bank-reconciliation/run", response_model=ActionResponse)
+@router.post("/bank-reconciliation/run", response_model=ActionResponse, summary="Bank reconciliation ausführen")
 async def run_bank_reconciliation(
     body: BankReconciliationRunRequest,
     tenant_id: str = Depends(get_tenant_id),
@@ -86,7 +86,7 @@ async def run_bank_reconciliation(
 
 # ── Journal entry post ─────────────────────────────────────────────────────────
 
-@router.post("/journal-entries/post", response_model=ActionResponse)
+@router.post("/journal-entries/post", response_model=ActionResponse, summary="Journal entry action erstellen")
 async def post_journal_entry_action(
     body: JournalEntryPostRequest,
     tenant_id: str = Depends(get_tenant_id),
@@ -159,7 +159,7 @@ async def post_journal_entry_action(
 
 # ── Cash close day ─────────────────────────────────────────────────────────────
 
-@router.post("/cash/close-day", response_model=ActionResponse)
+@router.post("/cash/close-day", response_model=ActionResponse, summary="Close day cash")
 async def cash_close_day(
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
@@ -217,7 +217,7 @@ async def cash_close_day(
 
 # ── Direct debit run ───────────────────────────────────────────────────────────
 
-@router.post("/direct-debit/run", response_model=ActionResponse)
+@router.post("/direct-debit/run", response_model=ActionResponse, summary="Direct debit ausführen")
 async def run_direct_debit(
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
@@ -277,7 +277,7 @@ class ClosingRunRequest(BaseModel):
     closing_type: str = Field("month", description="month | quarter | year")
 
 
-@router.post("/closing/calculate", response_model=dict)
+@router.post("/closing/calculate", response_model=dict, summary="Closing berechnen")
 async def calculate_closing(
     body: ClosingRunRequest,
     tenant_id: str = Depends(get_tenant_id),
@@ -320,7 +320,7 @@ async def calculate_closing(
         }
 
 
-@router.post("/closing/lock", response_model=ActionResponse)
+@router.post("/closing/lock", response_model=ActionResponse, summary="Closing sperren")
 async def lock_closing(
     body: ClosingRunRequest,
     tenant_id: str = Depends(get_tenant_id),
@@ -342,7 +342,7 @@ async def lock_closing(
         return ActionResponse(success=True, message=f"Periode {body.period} Sperrung vorgemerkt.")
 
 
-@router.post("/closing/run", response_model=ActionResponse)
+@router.post("/closing/run", response_model=ActionResponse, summary="Closing ausführen")
 async def run_closing(
     body: Optional[ClosingRunRequest] = None,
     tenant_id: str = Depends(get_tenant_id),
@@ -365,7 +365,7 @@ async def run_closing(
         return ActionResponse(success=True, message="Abschluss angestossen.")
 
 
-@router.post("/closing/approve", response_model=dict)
+@router.post("/closing/approve", response_model=dict, summary="Closing genehmigen")
 async def approve_closing(
     body: ClosingActionRequest,
     tenant_id: str = Depends(get_tenant_id),
@@ -391,7 +391,7 @@ async def approve_closing(
 
 # ── Credit limits ─────────────────────────────────────────────────────────────
 
-@router.get("/credit-limits", response_model=list[dict])
+@router.get("/credit-limits", response_model=list[dict], summary="Credit limits auflisten")
 async def list_credit_limits(
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
@@ -414,7 +414,7 @@ async def list_credit_limits(
 
 # ── Collaterals ───────────────────────────────────────────────────────────────
 
-@router.get("/collaterals", response_model=list[dict])
+@router.get("/collaterals", response_model=list[dict], summary="Collaterals auflisten")
 async def list_collaterals(
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
@@ -435,7 +435,7 @@ async def list_collaterals(
 
 # ── Payment suggestions ────────────────────────────────────────────────────────
 
-@router.get("/payment-suggestions", response_model=list[dict])
+@router.get("/payment-suggestions", response_model=list[dict], summary="Payment suggestions auflisten")
 async def list_payment_suggestions(
     days_ahead: int = Query(14, ge=1, le=365),
     tenant_id: str = Depends(get_tenant_id),
@@ -489,7 +489,7 @@ class BuchungsuebergabeExportSummary(BaseModel):
     message: str
 
 
-@router.post("/buchungsuebergabe-export")
+@router.post("/buchungsuebergabe-export", summary="Export buchungsuebergabe")
 async def buchungsuebergabe_export(
     body: BuchungsuebergabeExportRequest,
     tenant_id: str = Depends(get_tenant_id),
@@ -608,7 +608,7 @@ async def buchungsuebergabe_export(
 
 # ── Period-Close Readiness ────────────────────────────────────────────────────
 
-@router.get("/close-readiness", tags=["finance", "closing"])
+@router.get("/close-readiness", tags=["finance", "closing"], summary="Close readiness abrufen")
 async def get_close_readiness(
     tenant_id: str = Depends(get_tenant_id),
 ):

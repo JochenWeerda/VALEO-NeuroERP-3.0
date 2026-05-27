@@ -69,7 +69,7 @@ class VertretergruppeOut(BaseModel):
 
 # ── Vertretergruppen ──────────────────────────────────────────────────────────
 
-@router.get("/gruppen", response_model=list[VertretergruppeOut])
+@router.get("/gruppen", response_model=list[VertretergruppeOut], summary="Vertretergruppen auflisten")
 def list_vertretergruppen(
     db=Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
@@ -82,7 +82,7 @@ def list_vertretergruppen(
     return [VertretergruppeOut(**dict(r._mapping)) for r in rows]
 
 
-@router.post("/gruppen", response_model=VertretergruppeOut, status_code=201)
+@router.post("/gruppen", response_model=VertretergruppeOut, status_code=201, summary="Vertretergruppe anlegen")
 def create_vertretergruppe(
     payload: VertretergruppeCreate,
     db=Depends(get_db),
@@ -108,7 +108,7 @@ def create_vertretergruppe(
     return VertretergruppeOut(**dict(row._mapping))
 
 
-@router.delete("/gruppen/{gruppe_nr}")
+@router.delete("/gruppen/{gruppe_nr}", summary="Vertretergruppe löschen")
 def delete_vertretergruppe(
     gruppe_nr: str,
     db=Depends(get_db),
@@ -124,7 +124,7 @@ def delete_vertretergruppe(
 
 # ── Vertreter ─────────────────────────────────────────────────────────────────
 
-@router.get("", response_model=list[VertreterOut])
+@router.get("", response_model=list[VertreterOut], summary="Vertreter auflisten")
 def list_vertreter(
     vertretergruppe_nr: Optional[str] = Query(None),
     nur_aktive: bool = Query(True),
@@ -143,7 +143,7 @@ def list_vertreter(
     return [VertreterOut(**dict(r._mapping)) for r in rows]
 
 
-@router.get("/{vertreter_nr}", response_model=VertreterOut)
+@router.get("/{vertreter_nr}", response_model=VertreterOut, summary="Vertreter abrufen")
 def get_vertreter(
     vertreter_nr: str,
     db=Depends(get_db),
@@ -158,7 +158,7 @@ def get_vertreter(
     return VertreterOut(**dict(row._mapping))
 
 
-@router.post("", response_model=VertreterOut, status_code=201)
+@router.post("", response_model=VertreterOut, status_code=201, summary="Vertreter anlegen")
 def create_vertreter(
     payload: VertreterCreate,
     db=Depends(get_db),
@@ -191,7 +191,7 @@ def create_vertreter(
     return VertreterOut(**dict(row._mapping))
 
 
-@router.put("/{vertreter_nr}", response_model=VertreterOut)
+@router.put("/{vertreter_nr}", response_model=VertreterOut, summary="Vertreter aktualisieren")
 def update_vertreter(
     vertreter_nr: str,
     payload: VertreterCreate,
@@ -226,7 +226,7 @@ def update_vertreter(
     return VertreterOut(**dict(updated._mapping))
 
 
-@router.delete("/{vertreter_nr}")
+@router.delete("/{vertreter_nr}", summary="Vertreter löschen")
 def delete_vertreter(
     vertreter_nr: str,
     db=Depends(get_db),

@@ -156,7 +156,7 @@ def _to_out(invoice) -> SelfBillingInvoiceOut:
 
 # ── API Endpoints ───────────────────────────────────────────────────────────────
 
-@router.post("/harvest-acceptance/{harvest_acceptance_id}/create-credit-note", response_model=SelfBillingInvoiceOut, status_code=201)
+@router.post("/harvest-acceptance/{harvest_acceptance_id}/create-credit-note", response_model=SelfBillingInvoiceOut, status_code=201, summary="Credit note endpoint anlegen")
 async def create_credit_note_endpoint(
     harvest_acceptance_id: str,
     payload: CreditNoteCreateIn,
@@ -197,7 +197,7 @@ async def create_credit_note_endpoint(
     return _to_out(invoice)
 
 
-@router.get("/{invoice_id}", response_model=SelfBillingInvoiceOut)
+@router.get("/{invoice_id}", response_model=SelfBillingInvoiceOut, summary="Invoice abrufen")
 async def get_invoice(
     invoice_id: str,
     db: Session = Depends(get_db),
@@ -216,7 +216,7 @@ async def get_invoice(
     return _to_out(invoice)
 
 
-@router.get("/harvest-acceptance/{harvest_acceptance_id}", response_model=Optional[SelfBillingInvoiceOut])
+@router.get("/harvest-acceptance/{harvest_acceptance_id}", response_model=Optional[SelfBillingInvoiceOut], summary="Invoice by harvest acceptance abrufen")
 async def get_invoice_by_harvest_acceptance(
     harvest_acceptance_id: str,
     db: Session = Depends(get_db),
@@ -235,7 +235,7 @@ async def get_invoice_by_harvest_acceptance(
     return _to_out(invoice)
 
 
-@router.post("/{invoice_id}/issue", response_model=SelfBillingInvoiceOut)
+@router.post("/{invoice_id}/issue", response_model=SelfBillingInvoiceOut, summary="Invoice endpoint issue")
 async def issue_invoice_endpoint(
     invoice_id: str,
     db: Session = Depends(get_db),
@@ -258,7 +258,7 @@ async def issue_invoice_endpoint(
     return _to_out(invoice)
 
 
-@router.post("/{invoice_id}/generate-einvoice", response_model=SelfBillingInvoiceOut)
+@router.post("/{invoice_id}/generate-einvoice", response_model=SelfBillingInvoiceOut, summary="Einvoice endpoint generieren")
 async def generate_einvoice_endpoint(
     invoice_id: str,
     payload: EinvoiceGenerateIn,
@@ -287,7 +287,7 @@ async def generate_einvoice_endpoint(
     return _to_out(invoice)
 
 
-@router.post("/{invoice_id}/send", response_model=SelfBillingInvoiceOut)
+@router.post("/{invoice_id}/send", response_model=SelfBillingInvoiceOut, summary="Einvoice endpoint senden")
 async def send_einvoice_endpoint(
     invoice_id: str,
     recipient_email: Optional[str] = None,
@@ -308,7 +308,7 @@ async def send_einvoice_endpoint(
     return _to_out(invoice)
 
 
-@router.post("/{invoice_id}/dispute", response_model=dict)
+@router.post("/{invoice_id}/dispute", response_model=dict, summary="Dispute endpoint anlegen")
 async def create_dispute_endpoint(
     invoice_id: str,
     payload: DisputeCreateIn,
@@ -359,7 +359,7 @@ class PreviewIn(BaseModel):
     taxation_type: str = "regular"
 
 
-@router.post("/preview", response_model=dict)
+@router.post("/preview", response_model=dict, summary="Self billing vorschauen")
 async def preview_self_billing(
     payload: PreviewIn,
     db: Session = Depends(get_db),
@@ -423,7 +423,7 @@ async def preview_self_billing(
     }
 
 
-@router.post("/{invoice_id}/storno", response_model=dict)
+@router.post("/{invoice_id}/storno", response_model=dict, summary="Invoice storno")
 async def storno_invoice(
     invoice_id: str,
     db: Session = Depends(get_db),
@@ -468,7 +468,7 @@ async def storno_invoice(
     }
 
 
-@router.get("/{invoice_id}/export")
+@router.get("/{invoice_id}/export", summary="Invoice exportieren")
 async def export_invoice(
     invoice_id: str,
     format: str = "xml",  # xml | pdf
@@ -500,7 +500,7 @@ async def export_invoice(
     raise HTTPException(status_code=400, detail="format muss xml oder pdf sein")
 
 
-@router.get("/{invoice_id}/disputes", response_model=list[dict])
+@router.get("/{invoice_id}/disputes", response_model=list[dict], summary="Disputes abrufen")
 async def get_disputes(
     invoice_id: str,
     db: Session = Depends(get_db),
@@ -539,7 +539,7 @@ async def get_disputes(
 # BUCHUNGSKREISLAUF INTEGRATION
 # ============================================================================
 
-@router.post("/{invoice_id}/buchung", response_model=dict)
+@router.post("/{invoice_id}/buchung", response_model=dict, summary="Gutschrift buche")
 async def buche_gutschrift(
     invoice_id: str,
     db: Session = Depends(get_db),

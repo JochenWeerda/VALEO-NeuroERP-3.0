@@ -2865,17 +2865,17 @@ def _pilot_time_entries(target_date: str) -> list[dict[str, Any]]:
     ]
 
 
-@router.get("/hrm-readiness", response_model=HrmReadinessOut)
+@router.get("/hrm-readiness", response_model=HrmReadinessOut, summary="Hrm readiness abrufen")
 async def get_hrm_readiness(_tenant_id: str = Depends(get_tenant_id)):
     return build_hrm_readiness()
 
 
-@router.get("/hrm-operating-system", response_model=HrmOperatingSystemOut)
+@router.get("/hrm-operating-system", response_model=HrmOperatingSystemOut, summary="Hrm operating system abrufen")
 async def get_hrm_operating_system(_tenant_id: str = Depends(get_tenant_id)):
     return build_hrm_operating_system_contract()
 
 
-@router.get("/hrm-operations-gates", response_model=HrmOperationsGatesOut)
+@router.get("/hrm-operations-gates", response_model=HrmOperationsGatesOut, summary="Hrm operations gates abrufen")
 async def get_hrm_operations_gates(
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
@@ -2883,7 +2883,7 @@ async def get_hrm_operations_gates(
     return _get_hrm_operations_gates_runtime(db, tenant_id)
 
 
-@router.get("/hrm-operations-gates/go-live-policy", response_model=HrmOperationsGoLivePolicyOut)
+@router.get("/hrm-operations-gates/go-live-policy", response_model=HrmOperationsGoLivePolicyOut, summary="Hrm operations go live policy abrufen")
 async def get_hrm_operations_go_live_policy(
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
@@ -2899,7 +2899,7 @@ async def get_hrm_operations_go_live_policy(
     )
 
 
-@router.post("/hrm-operations-gates/{gate_id}/evidence", response_model=HrmOperationsGateEvidenceOut, status_code=201)
+@router.post("/hrm-operations-gates/{gate_id}/evidence", response_model=HrmOperationsGateEvidenceOut, status_code=201, summary="Hrm operations gate evidence anlegen")
 async def create_hrm_operations_gate_evidence(
     gate_id: str,
     payload: HrmOperationsGateEvidenceIn,
@@ -2925,7 +2925,7 @@ async def create_hrm_operations_gate_evidence(
     return _evidence_out(row)
 
 
-@router.post("/hrm-operations-gates/{gate_id}/decision", response_model=HrmOperationsGateActionOut)
+@router.post("/hrm-operations-gates/{gate_id}/decision", response_model=HrmOperationsGateActionOut, summary="Hrm operations gate decide")
 async def decide_hrm_operations_gate(
     gate_id: str,
     payload: HrmOperationsGateDecisionIn,
@@ -2954,7 +2954,7 @@ async def decide_hrm_operations_gate(
     return HrmOperationsGateActionOut(ok=True, gate=gate)
 
 
-@router.post("/hrm-operations-gates/{gate_id}/probe", response_model=HrmOperationsGateProbeOut, status_code=201)
+@router.post("/hrm-operations-gates/{gate_id}/probe", response_model=HrmOperationsGateProbeOut, status_code=201, summary="Hrm operations gate probe record")
 async def record_hrm_operations_gate_probe(
     gate_id: str,
     payload: HrmOperationsGateProbeIn,
@@ -2980,7 +2980,7 @@ async def record_hrm_operations_gate_probe(
     return _probe_out(row)
 
 
-@router.get("/employee-files/{employee_ref}", response_model=EmployeeFileOut)
+@router.get("/employee-files/{employee_ref}", response_model=EmployeeFileOut, summary="Employee file abrufen")
 async def get_employee_file(
     employee_ref: str,
     actor_role: str | None = Query(default="hr", alias="actorRole"),
@@ -2996,7 +2996,7 @@ async def get_employee_file(
     return _employee_file_response(employee_ref, role, source, documents, hidden_count)
 
 
-@router.post("/employee-files/{employee_ref}/documents", response_model=EmployeeFileDocumentOut, status_code=201)
+@router.post("/employee-files/{employee_ref}/documents", response_model=EmployeeFileDocumentOut, status_code=201, summary="Employee file document anlegen")
 async def create_employee_file_document(
     employee_ref: str,
     payload: EmployeeFileDocumentCreateIn,
@@ -3057,7 +3057,7 @@ async def create_employee_file_document(
     return _employee_file_document_from_row(row, role)
 
 
-@router.get("/time-profiles", response_model=EmployeeTimeProfileCatalogOut)
+@router.get("/time-profiles", response_model=EmployeeTimeProfileCatalogOut, summary="Time profiles auflisten")
 async def list_time_profiles(
     status: str | None = Query(default=None),
     role: str | None = Query(default=None),
@@ -3128,7 +3128,7 @@ async def list_time_profiles(
     return EmployeeTimeProfileCatalogOut(source="pilot-fallback", profiles=profiles, kpis=_profile_kpis(profiles))
 
 
-@router.get("/mitarbeiter", response_model=list[MitarbeiterOut])
+@router.get("/mitarbeiter", response_model=list[MitarbeiterOut], summary="Mitarbeiter auflisten")
 async def list_mitarbeiter(
     search: str | None = Query(default=None),
     status: str | None = Query(default=None),
@@ -3139,7 +3139,7 @@ async def list_mitarbeiter(
     return [MitarbeiterOut(**r) for r in rows]
 
 
-@router.get("/mitarbeiter/{user_id}", response_model=MitarbeiterOut)
+@router.get("/mitarbeiter/{user_id}", response_model=MitarbeiterOut, summary="Mitarbeiter abrufen")
 async def get_mitarbeiter(
     user_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -3151,7 +3151,7 @@ async def get_mitarbeiter(
         raise HTTPException(status_code=404, detail="Mitarbeiter nicht gefunden")
 
 
-@router.post("/mitarbeiter", response_model=MitarbeiterOut, status_code=201)
+@router.post("/mitarbeiter", response_model=MitarbeiterOut, status_code=201, summary="Mitarbeiter anlegen")
 async def create_mitarbeiter(
     payload: MitarbeiterIn,
     tenant_id: str = Depends(get_tenant_id),
@@ -3165,7 +3165,7 @@ async def create_mitarbeiter(
     return await get_mitarbeiter(user_id=user_id, tenant_id=tenant_id, db=db)
 
 
-@router.put("/mitarbeiter/{user_id}", response_model=MitarbeiterOut)
+@router.put("/mitarbeiter/{user_id}", response_model=MitarbeiterOut, summary="Mitarbeiter aktualisieren")
 async def update_mitarbeiter(
     user_id: str,
     payload: MitarbeiterIn,
@@ -3179,7 +3179,7 @@ async def update_mitarbeiter(
     return await get_mitarbeiter(user_id=user_id, tenant_id=tenant_id, db=db)
 
 
-@router.get("/zeiterfassung", response_model=list[ZeitEintragOut])
+@router.get("/zeiterfassung", response_model=list[ZeitEintragOut], summary="Zeiterfassung auflisten")
 async def list_zeiterfassung(
     datum: str | None = Query(default=None),
     tenant_id: str = Depends(get_tenant_id),
@@ -3200,7 +3200,7 @@ async def list_zeiterfassung(
     ]
 
 
-@router.post("/time-entries", response_model=TimeEntryBookingOut, status_code=201)
+@router.post("/time-entries", response_model=TimeEntryBookingOut, status_code=201, summary="Time entry anlegen")
 async def create_time_entry(
     payload: TimeEntryBookingCreateIn,
     tenant_id: str = Depends(get_tenant_id),
@@ -3211,7 +3211,7 @@ async def create_time_entry(
     return TimeEntryBookingOut(**data)
 
 
-@router.post("/time-entries/{entry_id}/submit", response_model=TimeEntryActionOut)
+@router.post("/time-entries/{entry_id}/submit", response_model=TimeEntryActionOut, summary="Time entry einreichen")
 async def submit_time_entry(
     entry_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -3225,7 +3225,7 @@ async def submit_time_entry(
         raise HTTPException(status_code=409, detail=exc.detail)
 
 
-@router.post("/time-entries/{entry_id}/approve", response_model=TimeEntryActionOut)
+@router.post("/time-entries/{entry_id}/approve", response_model=TimeEntryActionOut, summary="Time entry genehmigen")
 async def approve_time_entry(
     entry_id: str,
     payload: TimeEntryApproveIn,
@@ -3240,7 +3240,7 @@ async def approve_time_entry(
         raise HTTPException(status_code=409, detail=exc.detail)
 
 
-@router.post("/time-entries/{entry_id}/correct", response_model=TimeEntryActionOut)
+@router.post("/time-entries/{entry_id}/correct", response_model=TimeEntryActionOut, summary="Time entry correct")
 async def correct_time_entry(
     entry_id: str,
     payload: TimeEntryBookingCorrectionIn,
@@ -3257,7 +3257,7 @@ async def correct_time_entry(
         raise HTTPException(status_code=409, detail=exc.detail)
 
 
-@router.get("/absences", response_model=list[AbsenceOut])
+@router.get("/absences", response_model=list[AbsenceOut], summary="Absences auflisten")
 async def list_absences(
     datum_von: str | None = Query(default=None),
     datum_bis: str | None = Query(default=None),
@@ -3271,7 +3271,7 @@ async def list_absences(
     return [AbsenceOut(**r) for r in rows]
 
 
-@router.post("/absences/import", response_model=AbsenceImportOut, status_code=201)
+@router.post("/absences/import", response_model=AbsenceImportOut, status_code=201, summary="Absence importieren")
 async def import_absence(
     payload: AbsenceImportIn,
     tenant_id: str = Depends(get_tenant_id),
@@ -3285,7 +3285,7 @@ async def import_absence(
         raise HTTPException(status_code=400, detail=exc.detail)
 
 
-@router.get("/shifts", response_model=list[ShiftOut])
+@router.get("/shifts", response_model=list[ShiftOut], summary="Shifts auflisten")
 async def list_shifts(
     datum_von: str | None = Query(default=None),
     datum_bis: str | None = Query(default=None),
@@ -3299,7 +3299,7 @@ async def list_shifts(
     return [_shift_from_row(row) for row in rows]
 
 
-@router.post("/shifts", response_model=ShiftOut, status_code=201)
+@router.post("/shifts", response_model=ShiftOut, status_code=201, summary="Shift anlegen")
 async def create_shift(
     payload: ShiftCreateIn,
     tenant_id: str = Depends(get_tenant_id),
@@ -3333,7 +3333,7 @@ async def create_shift(
     return _shift_from_row(row)
 
 
-@router.get("/calendar-events", response_model=list[CalendarEventOut])
+@router.get("/calendar-events", response_model=list[CalendarEventOut], summary="Calendar events auflisten")
 async def list_calendar_events(
     start: str | None = Query(default=None),
     end: str | None = Query(default=None),
@@ -3348,7 +3348,7 @@ async def list_calendar_events(
     return [_calendar_event_from_row(row) for row in rows]
 
 
-@router.post("/calendar-events", response_model=CalendarEventOut, status_code=201)
+@router.post("/calendar-events", response_model=CalendarEventOut, status_code=201, summary="Calendar event anlegen")
 async def create_calendar_event(
     payload: CalendarEventIn,
     tenant_id: str = Depends(get_tenant_id),
@@ -3380,7 +3380,7 @@ async def create_calendar_event(
     return _calendar_event_from_row(row)
 
 
-@router.get("/payroll-exports", response_model=list[PayrollExportOut])
+@router.get("/payroll-exports", response_model=list[PayrollExportOut], summary="Payroll exports auflisten")
 async def list_payroll_exports(
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
@@ -3389,7 +3389,7 @@ async def list_payroll_exports(
     return [_payroll_export_from_row(row) for row in rows]
 
 
-@router.post("/payroll-exports", response_model=PayrollExportOut, status_code=201)
+@router.post("/payroll-exports", response_model=PayrollExportOut, status_code=201, summary="Payroll export anlegen")
 async def create_payroll_export(
     payload: PayrollExportCreateIn,
     tenant_id: str = Depends(get_tenant_id),
@@ -3416,7 +3416,7 @@ async def create_payroll_export(
     return _payroll_export_from_row(row)
 
 
-@router.get("/campaign-capacity", response_model=list[CampaignCapacityOut])
+@router.get("/campaign-capacity", response_model=list[CampaignCapacityOut], summary="Campaign capacity auflisten")
 async def list_campaign_capacity(
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
@@ -3425,7 +3425,7 @@ async def list_campaign_capacity(
     return [_campaign_capacity_from_row(row) for row in rows]
 
 
-@router.post("/campaign-capacity", response_model=CampaignCapacityOut, status_code=201)
+@router.post("/campaign-capacity", response_model=CampaignCapacityOut, status_code=201, summary="Campaign capacity anlegen")
 async def create_campaign_capacity(
     payload: CampaignCapacityCreateIn,
     tenant_id: str = Depends(get_tenant_id),
@@ -3455,7 +3455,7 @@ async def create_campaign_capacity(
     return _campaign_capacity_from_row(row)
 
 
-@router.get("/field-service-plan", response_model=list[FieldServicePlanOut])
+@router.get("/field-service-plan", response_model=list[FieldServicePlanOut], summary="Field service plan auflisten")
 async def list_field_service_plan(
     employee_ref: str | None = Query(default=None),
     tenant_id: str = Depends(get_tenant_id),
@@ -3465,7 +3465,7 @@ async def list_field_service_plan(
     return [_field_service_from_row(row) for row in rows]
 
 
-@router.post("/field-service-plan", response_model=FieldServicePlanOut, status_code=201)
+@router.post("/field-service-plan", response_model=FieldServicePlanOut, status_code=201, summary="Field service plan anlegen")
 async def create_field_service_plan(
     payload: FieldServicePlanCreateIn,
     tenant_id: str = Depends(get_tenant_id),
@@ -3496,7 +3496,7 @@ async def create_field_service_plan(
     return _field_service_from_row(row)
 
 
-@router.get("/work-plan", response_model=WorkPlanOut)
+@router.get("/work-plan", response_model=WorkPlanOut, summary="Work plan abrufen")
 async def get_work_plan(
     period_from: str = Query(...),
     period_to: str = Query(...),
@@ -3644,7 +3644,7 @@ async def get_work_plan(
     )
 
 
-@router.get("/driver-time/summary", response_model=DriverTimeSummaryOut)
+@router.get("/driver-time/summary", response_model=DriverTimeSummaryOut, summary="Driver time summary abrufen")
 async def get_driver_time_summary(
     datum: str | None = Query(default=None),
     tenant_id: str = Depends(get_tenant_id),
@@ -3672,7 +3672,7 @@ async def get_driver_time_summary(
     )
 
 
-@router.get("/time-cockpit", response_model=TimeCockpitOut)
+@router.get("/time-cockpit", response_model=TimeCockpitOut, summary="Time cockpit abrufen")
 async def get_time_cockpit(
     datum: str | None = Query(default=None),
     tenant_id: str = Depends(get_tenant_id),
@@ -3694,7 +3694,7 @@ async def get_time_cockpit(
     return _build_time_cockpit(target_date, entries, driver_time, source="database")
 
 
-@router.post("/stundenzettel")
+@router.post("/stundenzettel", summary="Stundenzettel anlegen")
 async def create_stundenzettel(
     payload: StundenzettelIn,
     tenant_id: str = Depends(get_tenant_id),
@@ -3731,7 +3731,7 @@ async def create_stundenzettel(
     return {"ok": True, "timesheet_id": timesheet_id}
 
 
-@router.get("/stundenzettel", response_model=list[StundenzettelOut])
+@router.get("/stundenzettel", response_model=list[StundenzettelOut], summary="Stundenzettel auflisten")
 async def list_stundenzettel(
     datum_von: str | None = Query(default=None),
     datum_bis: str | None = Query(default=None),
@@ -3773,7 +3773,7 @@ async def list_stundenzettel(
     return out
 
 
-@router.delete("/mitarbeiter/{user_id}", status_code=204, response_class=Response, response_model=None)
+@router.delete("/mitarbeiter/{user_id}", status_code=204, response_class=Response, response_model=None, summary="Mitarbeiter löschen")
 async def delete_mitarbeiter(
     user_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -3786,7 +3786,7 @@ async def delete_mitarbeiter(
         raise HTTPException(status_code=404, detail="Mitarbeiter nicht gefunden")
 
 
-@router.delete("/absences/{absence_id}", status_code=204, response_class=Response, response_model=None)
+@router.delete("/absences/{absence_id}", status_code=204, response_class=Response, response_model=None, summary="Absence löschen")
 async def delete_absence(
     absence_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -3802,7 +3802,7 @@ async def delete_absence(
         raise HTTPException(status_code=400, detail=exc.detail)
 
 
-@router.delete("/shifts/{shift_id}", status_code=204, response_class=Response, response_model=None)
+@router.delete("/shifts/{shift_id}", status_code=204, response_class=Response, response_model=None, summary="Shift löschen")
 async def delete_shift(
     shift_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -3820,7 +3820,7 @@ async def delete_shift(
 # ---------------------------------------------------------------------------
 
 
-@router.post("/driver-time/events", status_code=201)
+@router.post("/driver-time/events", status_code=201, summary="Driver time event anlegen")
 async def create_driver_time_event(
     payload: DriverTimeEventIn,
     tenant_id: str = Depends(get_tenant_id),
@@ -3854,7 +3854,7 @@ async def create_driver_time_event(
     return {"id": event_id, "status": "created"}
 
 
-@router.get("/driver-time/events")
+@router.get("/driver-time/events", summary="Driver time events auflisten")
 async def list_driver_time_events(
     employee_ref: str | None = Query(default=None),
     vehicle_id: str | None = Query(default=None),
@@ -3886,7 +3886,7 @@ async def list_driver_time_events(
     return {"data": [dict(r._mapping) for r in rows], "total": len(rows)}
 
 
-@router.get("/driver-time/events/absences/collisions", response_model=list[DriverTimeCollisionOut])
+@router.get("/driver-time/events/absences/collisions", response_model=list[DriverTimeCollisionOut], summary="Driver time absence collisions abrufen")
 async def get_driver_time_absence_collisions(
     employee_ref: str | None = Query(default=None),
     date_from: str | None = Query(default=None),
@@ -3923,7 +3923,7 @@ async def get_driver_time_absence_collisions(
     return [DriverTimeCollisionOut(**dict(r._mapping)) for r in rows]
 
 
-@router.get("/driver-time/events/{event_id}")
+@router.get("/driver-time/events/{event_id}", summary="Driver time event abrufen")
 async def get_driver_time_event(
     event_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -3938,7 +3938,7 @@ async def get_driver_time_event(
     return dict(row._mapping)
 
 
-@router.patch("/driver-time/events/{event_id}")
+@router.patch("/driver-time/events/{event_id}", summary="Driver time event aktualisieren")
 async def update_driver_time_event(
     event_id: str,
     payload: DriverTimeEventPatch,
@@ -3960,7 +3960,7 @@ async def update_driver_time_event(
     return {"id": event_id, "status": "updated"}
 
 
-@router.delete("/driver-time/events/{event_id}", status_code=204, response_class=Response, response_model=None)
+@router.delete("/driver-time/events/{event_id}", status_code=204, response_class=Response, response_model=None, summary="Driver time event löschen")
 async def delete_driver_time_event(
     event_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -4002,7 +4002,7 @@ def _build_org_tree(rows: list[dict], parent_id: Any = None) -> list[dict]:
     return children
 
 
-@router.get("/org-chart")
+@router.get("/org-chart", summary="Org chart abrufen")
 async def get_org_chart(
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
@@ -4037,7 +4037,7 @@ async def get_org_chart(
     return {"org_chart": tree}
 
 
-@router.get("/org-chart/{unit_id}")
+@router.get("/org-chart/{unit_id}", summary="Org subtree abrufen")
 async def get_org_subtree(
     unit_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -4075,7 +4075,7 @@ async def get_org_subtree(
     return {"org_chart": tree[0] if tree else {}}
 
 
-@router.post("/org-units", status_code=201)
+@router.post("/org-units", status_code=201, summary="Org unit anlegen")
 async def create_org_unit(
     payload: OrgUnitIn,
     tenant_id: str = Depends(get_tenant_id),
@@ -4109,7 +4109,7 @@ async def create_org_unit(
     return {"id": unit_id, "status": "created"}
 
 
-@router.patch("/org-units/{unit_id}")
+@router.patch("/org-units/{unit_id}", summary="Org unit aktualisieren")
 async def patch_org_unit(
     unit_id: str,
     payload: OrgUnitPatch,
@@ -4146,7 +4146,7 @@ class TimeAccountAdjustIn(BaseModel):
     adjustment_date: str | None = None  # ISO date, default: today
 
 
-@router.get("/time-accounts/{employee_ref}")
+@router.get("/time-accounts/{employee_ref}", summary="Time account abrufen")
 async def get_time_account(
     employee_ref: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -4210,7 +4210,7 @@ async def get_time_account(
     }
 
 
-@router.post("/time-accounts/{employee_ref}/adjust", status_code=201)
+@router.post("/time-accounts/{employee_ref}/adjust", status_code=201, summary="Time account adjust")
 async def adjust_time_account(
     employee_ref: str,
     payload: TimeAccountAdjustIn,
@@ -4262,7 +4262,7 @@ class ApplicationStagePatch(BaseModel):
     note: str | None = None
 
 
-@router.get("/applications")
+@router.get("/applications", summary="Applications auflisten")
 async def list_applications(
     status: str | None = Query(None),
     position_id: str | None = Query(None),
@@ -4289,7 +4289,7 @@ async def list_applications(
     return [dict(r._mapping) for r in rows]
 
 
-@router.post("/applications", status_code=201)
+@router.post("/applications", status_code=201, summary="Application anlegen")
 async def create_application(
     payload: ApplicationIn,
     tenant_id: str = Depends(get_tenant_id),
@@ -4323,7 +4323,7 @@ async def create_application(
     return {"id": app_id, "status": "EINGANG"}
 
 
-@router.patch("/applications/{application_id}/stage")
+@router.patch("/applications/{application_id}/stage", summary="Application stage aktualisieren")
 async def update_application_stage(
     application_id: str,
     payload: ApplicationStagePatch,

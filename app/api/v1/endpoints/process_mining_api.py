@@ -24,7 +24,7 @@ from app.core.tenant import get_tenant_id
 router = APIRouter(prefix="/process-mining", tags=["process-mining", "analytics"])
 
 
-@router.get("/finance/report", response_model=ProcessMiningReport)
+@router.get("/finance/report", response_model=ProcessMiningReport, summary="Finance process mining report abrufen")
 async def get_finance_process_mining_report(
     tenant_id: str = Depends(get_tenant_id),
     db: Any = Depends(get_db),
@@ -43,7 +43,7 @@ async def get_finance_process_mining_report(
     )
 
 
-@router.get("/finance/bottlenecks", response_model=list[dict])
+@router.get("/finance/bottlenecks", response_model=list[dict], summary="Finance process bottlenecks auflisten")
 async def list_finance_process_bottlenecks(
     tenant_id: str = Depends(get_tenant_id),
     db: Any = Depends(get_db),
@@ -52,7 +52,7 @@ async def list_finance_process_bottlenecks(
     return [entry.model_dump(mode="json") for entry in report.bottlenecks]
 
 
-@router.get("/finance/top-processes", response_model=list[ProcessMiningProcessSummary])
+@router.get("/finance/top-processes", response_model=list[ProcessMiningProcessSummary], summary="Finance top processes auflisten")
 async def list_finance_top_processes(
     tenant_id: str = Depends(get_tenant_id),
     db: Any = Depends(get_db),
@@ -62,7 +62,7 @@ async def list_finance_top_processes(
     return build_process_mining_top_processes(report, limit=limit)
 
 
-@router.get("/finance/drilldown/{projection_key}", response_model=ProcessMiningDrilldown)
+@router.get("/finance/drilldown/{projection_key}", response_model=ProcessMiningDrilldown, summary="Finance process drilldown abrufen")
 async def get_finance_process_drilldown(
     projection_key: str,
     tenant_id: str = Depends(get_tenant_id),

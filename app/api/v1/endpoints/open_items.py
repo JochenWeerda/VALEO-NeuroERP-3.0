@@ -244,7 +244,7 @@ def _validate_op(payload: OpenItemBase) -> None:
         raise HTTPException(status_code=400, detail="mahn_stufe must be 0..3")
 
 
-@router.get("", response_model=OpenItemListResponse)
+@router.get("", response_model=OpenItemListResponse, summary="Open items auflisten")
 async def list_open_items(
     tenant_id: str = Depends(get_tenant_id),
     konto_typ: Optional[str] = Query(None),
@@ -326,7 +326,7 @@ async def list_open_items(
     return OpenItemListResponse(items=items, summary=summary)
 
 
-@router.get("/{op_id}", response_model=OpenItem)
+@router.get("/{op_id}", response_model=OpenItem, summary="Open item abrufen")
 async def get_open_item(op_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
     table_ref, cols = _get_open_items_relation(db)
     select_sql = f"""
@@ -375,7 +375,7 @@ async def get_open_item(op_id: str, tenant_id: str = Depends(get_tenant_id), db:
     return _normalize_open_item(row)
 
 
-@router.post("", response_model=OpenItem, status_code=201)
+@router.post("", response_model=OpenItem, status_code=201, summary="Open item anlegen")
 async def create_open_item(payload: OpenItemCreate, request: Request, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
     _validate_op(payload)
     op_id = uuid7()
@@ -436,7 +436,7 @@ async def create_open_item(payload: OpenItemCreate, request: Request, tenant_id:
 OP_EDITABLE_STATUSES = {"offen", "teilweise"}
 
 
-@router.put("/{op_id}", response_model=OpenItem)
+@router.put("/{op_id}", response_model=OpenItem, summary="Open item aktualisieren")
 async def update_open_item(op_id: str, payload: OpenItemCreate, request: Request, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
     _validate_op(payload)
     row = db.execute(
@@ -502,14 +502,14 @@ async def update_open_item(op_id: str, payload: OpenItemCreate, request: Request
     return await get_open_item(op_id, tenant_id, db)
 
 
-@router.patch("/{op_id}", response_model=OpenItem)
+@router.patch("/{op_id}", response_model=OpenItem, summary="Open item aktualisieren")
 async def patch_open_item(op_id: str, payload: OpenItemUpdate, request: Request, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
     existing = await get_open_item(op_id, tenant_id, db)
     merged = OpenItemCreate(**{**existing.model_dump(exclude={"id", "tenant_id", "created_at", "updated_at"}), **payload.model_dump(exclude_unset=True)})
     return await update_open_item(op_id, merged, tenant_id, db, request)
 
 
-@router.delete("/{op_id}", status_code=204, response_class=Response, response_model=None)
+@router.delete("/{op_id}", status_code=204, response_class=Response, response_model=None, summary="Open item löschen")
 async def delete_open_item(op_id: str, request: Request, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
     row = db.execute(
         text("SELECT id, op_status FROM offene_posten WHERE id = :id AND tenant_id = :tenant_id"),
@@ -529,7 +529,7 @@ async def delete_open_item(op_id: str, request: Request, tenant_id: str = Depend
     return None
 
 
-@router.post("/batch-settle", response_model=BatchSettleResponse)
+@router.post("/batch-settle", response_model=BatchSettleResponse, summary="Settle open items Batch")
 async def batch_settle_open_items(
     body: BatchSettleRequest,
     tenant_id: str = Depends(get_tenant_id),
@@ -570,7 +570,7 @@ async def batch_settle_open_items(
     )
 
 
-@router.post("/{op_id}/settle", response_model=SettlementResult)
+@router.post("/{op_id}/settle", response_model=SettlementResult, summary="Open item settle")
 async def settle_open_item(
     op_id: str,
     settlement: OpenItemSettlement,
@@ -783,7 +783,7 @@ async def settle_open_item(
         raise HTTPException(status_code=500, detail=f"Failed to settle open item: {str(e)}")
 
 
-@router.get("/{op_id}/settlements", response_model=List[dict])
+@router.get("/{op_id}/settlements", response_model=List[dict], summary="Settlements abrufen")
 async def get_settlements(
     op_id: str,
     tenant_id: str = Query("system", description="Tenant ID"),
@@ -823,7 +823,7 @@ async def get_settlements(
         return []
 
 
-@router.post("/{op_id}/reverse-settlement", response_model=dict)
+@router.post("/{op_id}/reverse-settlement", response_model=dict, summary="Settlement reverse")
 async def reverse_settlement(
     op_id: str,
     settlement_id: str,

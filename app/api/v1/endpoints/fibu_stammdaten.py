@@ -114,7 +114,7 @@ class LeergutArtOut(BaseModel):
 
 # ── Zahlungsformulare CRUD ────────────────────────────────────────────────────
 
-@router.get("/zahlungsformulare", response_model=list[ZahlungsformularOut])
+@router.get("/zahlungsformulare", response_model=list[ZahlungsformularOut], summary="Zahlungsformulare auflisten")
 def list_zahlungsformulare(
     formularklasse: Optional[str] = None,
     db=Depends(get_db),
@@ -133,7 +133,7 @@ def list_zahlungsformulare(
     return [ZahlungsformularOut(**dict(r._mapping)) for r in rows]
 
 
-@router.post("/zahlungsformulare", response_model=ZahlungsformularOut, status_code=201)
+@router.post("/zahlungsformulare", response_model=ZahlungsformularOut, status_code=201, summary="Zahlungsformular anlegen")
 def create_zahlungsformular(
     payload: ZahlungsformularCreate,
     db=Depends(get_db),
@@ -162,7 +162,7 @@ def create_zahlungsformular(
     return ZahlungsformularOut(**dict(row._mapping))
 
 
-@router.delete("/zahlungsformulare/{formular_nr}")
+@router.delete("/zahlungsformulare/{formular_nr}", summary="Zahlungsformular löschen")
 def delete_zahlungsformular(
     formular_nr: str,
     db=Depends(get_db),
@@ -178,7 +178,7 @@ def delete_zahlungsformular(
 
 # ── Zinsgruppen CRUD ──────────────────────────────────────────────────────────
 
-@router.get("/zinsgruppen", response_model=list[ZinsgruppeOut])
+@router.get("/zinsgruppen", response_model=list[ZinsgruppeOut], summary="Zinsgruppen auflisten")
 def list_zinsgruppen(
     db=Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
@@ -190,7 +190,7 @@ def list_zinsgruppen(
     return [ZinsgruppeOut(**dict(r._mapping)) for r in rows]
 
 
-@router.post("/zinsgruppen", response_model=ZinsgruppeOut, status_code=201)
+@router.post("/zinsgruppen", response_model=ZinsgruppeOut, status_code=201, summary="Zinsgruppe anlegen")
 def create_zinsgruppe(
     payload: ZinsgruppeCreate,
     db=Depends(get_db),
@@ -219,7 +219,7 @@ def create_zinsgruppe(
     return ZinsgruppeOut(**dict(row._mapping))
 
 
-@router.delete("/zinsgruppen/{gruppe_nr}")
+@router.delete("/zinsgruppen/{gruppe_nr}", summary="Zinsgruppe löschen")
 def delete_zinsgruppe(
     gruppe_nr: str,
     db=Depends(get_db),
@@ -235,7 +235,7 @@ def delete_zinsgruppe(
 
 # ── Leergutarten CRUD ─────────────────────────────────────────────────────────
 
-@router.get("/leergutarten", response_model=list[LeergutArtOut])
+@router.get("/leergutarten", response_model=list[LeergutArtOut], summary="Leergutarten auflisten")
 def list_leergutarten(
     db=Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
@@ -247,7 +247,7 @@ def list_leergutarten(
     return [LeergutArtOut(**dict(r._mapping)) for r in rows]
 
 
-@router.post("/leergutarten", response_model=LeergutArtOut, status_code=201)
+@router.post("/leergutarten", response_model=LeergutArtOut, status_code=201, summary="Leergutart anlegen")
 def create_leergutart(
     payload: LeergutArtCreate,
     db=Depends(get_db),
@@ -274,7 +274,7 @@ def create_leergutart(
     return LeergutArtOut(**dict(row._mapping))
 
 
-@router.delete("/leergutarten/{art_nr}")
+@router.delete("/leergutarten/{art_nr}", summary="Leergutart löschen")
 def delete_leergutart(
     art_nr: str,
     db=Depends(get_db),

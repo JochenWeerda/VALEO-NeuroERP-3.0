@@ -78,7 +78,7 @@ def _override_to_out(r: PosPositionOverride) -> OverrideOut:
     )
 
 
-@router.get("", response_model=list[OverrideOut])
+@router.get("", response_model=list[OverrideOut], summary="Overrides auflisten")
 def list_overrides(
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
@@ -98,7 +98,7 @@ def list_overrides(
     return [_override_to_out(r) for r in rows]
 
 
-@router.post("", response_model=OverrideOut, status_code=201)
+@router.post("", response_model=OverrideOut, status_code=201, summary="Override request")
 def request_override(
     payload: OverrideRequestIn,
     tenant_id: str = Depends(get_tenant_id),
@@ -122,7 +122,7 @@ def request_override(
     return _override_to_out(row)
 
 
-@router.post("/{override_id}/approve", response_model=OverrideOut)
+@router.post("/{override_id}/approve", response_model=OverrideOut, summary="Override genehmigen")
 def approve_override(
     override_id: str,
     payload: OverrideApproveIn,
@@ -146,7 +146,7 @@ def approve_override(
     return _override_to_out(row)
 
 
-@router.post("/{override_id}/reject", response_model=OverrideOut)
+@router.post("/{override_id}/reject", response_model=OverrideOut, summary="Override ablehnen")
 def reject_override(
     override_id: str,
     payload: OverrideRejectIn,
@@ -169,7 +169,7 @@ def reject_override(
     return _override_to_out(row)
 
 
-@router.get("/{override_id}", response_model=OverrideOut)
+@router.get("/{override_id}", response_model=OverrideOut, summary="Override abrufen")
 def get_override(
     override_id: str,
     tenant_id: str = Depends(get_tenant_id),

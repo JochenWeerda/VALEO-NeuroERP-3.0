@@ -42,7 +42,7 @@ def _safe_float(val) -> float:
     return float(val)
 
 
-@router.get("/overview", response_model=LiquidityOverview)
+@router.get("/overview", response_model=LiquidityOverview, summary="Liquidity overview abrufen")
 async def get_liquidity_overview(
     tage_voraus: int = Query(90, ge=7, le=365, description="Prognosehorizont in Tagen"),
     tenant_id: str = Depends(get_tenant_id),

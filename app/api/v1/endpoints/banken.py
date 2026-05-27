@@ -47,7 +47,7 @@ def _to_dict(konto) -> dict:
     }
 
 
-@router.get("/konten", response_model=dict)
+@router.get("/konten", response_model=dict, summary="Bankkonten auflisten")
 async def list_bankkonten(
     kontoart: Optional[str] = Query(None, description="Filter by account type"),
     ist_aktiv: Optional[bool] = Query(None, description="Filter by active status"),
@@ -61,7 +61,7 @@ async def list_bankkonten(
     return {"items": [_to_dict(i) for i in items], "total": total, "limit": limit, "offset": offset}
 
 
-@router.get("/konten/{konto_id}", response_model=dict)
+@router.get("/konten/{konto_id}", response_model=dict, summary="Bankkonto abrufen")
 async def get_bankkonto(konto_id: str, db: Session = Depends(get_db)) -> dict:
     repo = BankKontoRepository(db)
     konto = repo.get_by_id(konto_id)
@@ -70,7 +70,7 @@ async def get_bankkonto(konto_id: str, db: Session = Depends(get_db)) -> dict:
     return _to_dict(konto)
 
 
-@router.post("/konten", response_model=dict, status_code=201)
+@router.post("/konten", response_model=dict, status_code=201, summary="Bankkonto anlegen")
 async def create_bankkonto(data: BankKontoCreate, db: Session = Depends(get_db)) -> dict:
     repo = BankKontoRepository(db)
     if repo.get_by_iban(data.iban):
@@ -90,7 +90,7 @@ async def create_bankkonto(data: BankKontoCreate, db: Session = Depends(get_db))
     return _to_dict(konto)
 
 
-@router.patch("/konten/{konto_id}", response_model=dict)
+@router.patch("/konten/{konto_id}", response_model=dict, summary="Bankkonto aktualisieren")
 async def update_bankkonto(konto_id: str, data: BankKontoUpdate, db: Session = Depends(get_db)) -> dict:
     repo = BankKontoRepository(db)
     payload = data.model_dump(exclude_unset=True)
@@ -102,20 +102,20 @@ async def update_bankkonto(konto_id: str, data: BankKontoUpdate, db: Session = D
     return _to_dict(konto)
 
 
-@router.delete("/konten/{konto_id}", status_code=204, response_class=Response, response_model=None)
+@router.delete("/konten/{konto_id}", status_code=204, response_class=Response, response_model=None, summary="Bankkonto löschen")
 async def delete_bankkonto(konto_id: str, db: Session = Depends(get_db)):
     repo = BankKontoRepository(db)
     if not repo.deactivate(konto_id):
         raise HTTPException(status_code=404, detail="Bankkonto not found")
 
 
-@router.get("/salden", response_model=dict)
+@router.get("/salden", response_model=dict, summary="Salden abrufen")
 async def get_salden(db: Session = Depends(get_db)) -> dict:
     repo = BankKontoRepository(db)
     return repo.get_salden()
 
 
-@router.get("/konten/iban-validate", response_model=dict)
+@router.get("/konten/iban-validate", response_model=dict, summary="Iban validieren")
 async def validate_iban(iban: str = Query(..., description="IBAN to validate")) -> dict:
     normalized = iban.replace(" ", "").upper()
     is_valid = len(normalized) >= 15 and normalized[:2].isalpha()

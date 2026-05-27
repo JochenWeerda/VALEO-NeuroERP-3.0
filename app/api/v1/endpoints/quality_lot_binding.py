@@ -37,14 +37,14 @@ def _decision_store(tenant_id: str) -> dict[str, Any]:
 # Endpoints
 # ---------------------------------------------------------------------------
 
-@router.get("", response_model=list[LotQualityProfile])
+@router.get("", response_model=list[LotQualityProfile], summary="Lots auflisten")
 async def list_lots(tenant_id: str = Depends(get_tenant_id)):
     """List all quality lot profiles for the tenant."""
     store = _lot_store(tenant_id)
     return list(store.values())
 
 
-@router.post("", response_model=LotQualityProfile, status_code=201)
+@router.post("", response_model=LotQualityProfile, status_code=201, summary="Lot anlegen")
 async def create_lot(
     profile: LotQualityProfile,
     tenant_id: str = Depends(get_tenant_id),
@@ -56,7 +56,7 @@ async def create_lot(
     return profile
 
 
-@router.get("/{lot_id}", response_model=LotQualityProfile)
+@router.get("/{lot_id}", response_model=LotQualityProfile, summary="Lot abrufen")
 async def get_lot(
     lot_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -68,7 +68,7 @@ async def get_lot(
     return store[lot_id]
 
 
-@router.post("/{lot_id}/release-decision", response_model=QualityReleaseDecision, status_code=201)
+@router.post("/{lot_id}/release-decision", response_model=QualityReleaseDecision, status_code=201, summary="Release decision anlegen")
 async def create_release_decision(
     lot_id: str,
     decision: QualityReleaseDecision,

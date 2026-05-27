@@ -14,7 +14,7 @@ _wiring = build_default_wiring()
 def _get_store(db: Session = Depends(get_db)) -> ReadModelSnapshotStore:
     return ReadModelSnapshotStore(db_session=db)
 
-@router.post("/snapshots", status_code=201)
+@router.post("/snapshots", status_code=201, summary="Snapshot anlegen")
 def create_snapshot(
     model_name: str,
     tenant_id: str,
@@ -24,7 +24,7 @@ def create_snapshot(
     snapshot = ReadModelSnapshot.build(model_name=model_name, tenant_id=tenant_id, payload=payload)
     return store.save(snapshot)
 
-@router.get("/snapshots/latest")
+@router.get("/snapshots/latest", summary="Latest snapshot abrufen")
 def get_latest_snapshot(
     model_name: str = Query(...),
     tenant_id: str = Query(...),
@@ -36,7 +36,7 @@ def get_latest_snapshot(
         raise HTTPException(status_code=404, detail="Kein Snapshot vorhanden")
     return snapshot
 
-@router.get("/snapshots/page")
+@router.get("/snapshots/page", summary="Snapshot page abrufen")
 def get_snapshot_page(
     model_name: str = Query(...),
     tenant_id: str = Query(...),
@@ -48,11 +48,11 @@ def get_snapshot_page(
     page = store.get_page(model_name=model_name, tenant_id=tenant_id, cursor=cursor)
     return {"items": page, "count": len(page), "schema_version": 1}
 
-@router.get("/wiring-health")
+@router.get("/wiring-health", summary="Wiring health abrufen")
 def get_wiring_health():
     return _wiring.health_check()
 
-@router.get("/wiring-subjects")
+@router.get("/wiring-subjects", summary="Wiring subjects abrufen")
 def get_wiring_subjects():
     return {
         "mappings": _wiring.mappings,

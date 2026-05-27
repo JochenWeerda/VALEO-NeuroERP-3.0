@@ -115,7 +115,7 @@ def _add_audit(row: ReklamationDB, aktion: str, aktor_id: str, kommentar: Option
     row.audit_trail = trail
 
 
-@router.post("", status_code=201)
+@router.post("", status_code=201, summary="Reklamation anlegen")
 def create_reklamation(req: ReklamationCreateRequest, db: Session = Depends(get_db)):
     ReklamationsTyp(req.typ)  # validate
     dms = [d.model_dump() for d in req.dms_referenzen]
@@ -146,7 +146,7 @@ def create_reklamation(req: ReklamationCreateRequest, db: Session = Depends(get_
     return _to_dict(row)
 
 
-@router.get("/{reklamation_id}")
+@router.get("/{reklamation_id}", summary="Reklamation abrufen")
 def get_reklamation(reklamation_id: str, db: Session = Depends(get_db)):
     row = db.query(ReklamationDB).filter(ReklamationDB.reklamation_id == reklamation_id).first()
     if not row:
@@ -154,7 +154,7 @@ def get_reklamation(reklamation_id: str, db: Session = Depends(get_db)):
     return _to_dict(row)
 
 
-@router.get("/{reklamation_id}/audit")
+@router.get("/{reklamation_id}/audit", summary="Audit trail abrufen")
 def get_audit_trail(reklamation_id: str, db: Session = Depends(get_db)):
     row = db.query(ReklamationDB).filter(ReklamationDB.reklamation_id == reklamation_id).first()
     if not row:
@@ -168,7 +168,7 @@ def get_audit_trail(reklamation_id: str, db: Session = Depends(get_db)):
     }
 
 
-@router.get("/{reklamation_id}/e2e")
+@router.get("/{reklamation_id}/e2e", summary="E2e overview abrufen")
 def get_e2e_overview(reklamation_id: str, db: Session = Depends(get_db)):
     row = db.query(ReklamationDB).filter(ReklamationDB.reklamation_id == reklamation_id).first()
     if not row:
@@ -187,7 +187,7 @@ def get_e2e_overview(reklamation_id: str, db: Session = Depends(get_db)):
     }
 
 
-@router.post("/{reklamation_id}/transition")
+@router.post("/{reklamation_id}/transition", summary="Status transition")
 def transition_status(
     reklamation_id: str,
     neuer_status: str,
@@ -209,7 +209,7 @@ def transition_status(
     return _to_dict(row)
 
 
-@router.post("/{reklamation_id}/crm-reference")
+@router.post("/{reklamation_id}/crm-reference", summary="Crm reference aktualisieren")
 def update_crm_reference(reklamation_id: str, req: ReklamationReferenzUpdateRequest, db: Session = Depends(get_db)):
     row = db.query(ReklamationDB).filter(ReklamationDB.reklamation_id == reklamation_id).first()
     if not row:
@@ -223,7 +223,7 @@ def update_crm_reference(reklamation_id: str, req: ReklamationReferenzUpdateRequ
     return _to_dict(row)
 
 
-@router.post("/{reklamation_id}/dms-referenzen")
+@router.post("/{reklamation_id}/dms-referenzen", summary="Dms referenzen hinzufügen")
 def add_dms_referenzen(reklamation_id: str, req: ReklamationReferenzUpdateRequest, db: Session = Depends(get_db)):
     row = db.query(ReklamationDB).filter(ReklamationDB.reklamation_id == reklamation_id).first()
     if not row:
@@ -245,7 +245,7 @@ def add_dms_referenzen(reklamation_id: str, req: ReklamationReferenzUpdateReques
     return _to_dict(row)
 
 
-@router.get("/crm/{crm_case_id}")
+@router.get("/crm/{crm_case_id}", summary="By crm case abrufen")
 def get_by_crm_case(crm_case_id: str, db: Session = Depends(get_db)):
     rows = db.query(ReklamationDB).filter(
         ReklamationDB.crm_referenz["crm_case_id"].astext == crm_case_id
@@ -253,7 +253,7 @@ def get_by_crm_case(crm_case_id: str, db: Session = Depends(get_db)):
     return [_to_dict(r) for r in rows]
 
 
-@router.get("/offene/{tenant_id}")
+@router.get("/offene/{tenant_id}", summary="Offene abrufen")
 def get_offene(tenant_id: str, db: Session = Depends(get_db)):
     rows = db.query(ReklamationDB).filter(
         ReklamationDB.tenant_id == tenant_id,
@@ -262,7 +262,7 @@ def get_offene(tenant_id: str, db: Session = Depends(get_db)):
     return [_to_dict(r) for r in rows]
 
 
-@router.get("/ueberfaellige/{tenant_id}")
+@router.get("/ueberfaellige/{tenant_id}", summary="Ueberfaellige abrufen")
 def get_ueberfaellige(tenant_id: str, db: Session = Depends(get_db)):
     rows = db.query(ReklamationDB).filter(
         ReklamationDB.tenant_id == tenant_id,

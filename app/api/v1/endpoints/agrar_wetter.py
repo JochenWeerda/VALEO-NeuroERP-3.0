@@ -146,7 +146,7 @@ class BodenDaten(BaseModel):
 # Endpoints
 # ────────────────────────────────────────────────────────────────────────────
 
-@router.get("/wetter/aktuell", response_model=WetterAktuell)
+@router.get("/wetter/aktuell", response_model=WetterAktuell, summary="Wetter aktuell abrufen")
 async def get_wetter_aktuell(
     lat: float = Query(..., description="Breitengrad (WGS84)"),
     lon: float = Query(..., description="Längengrad (WGS84)"),
@@ -181,7 +181,7 @@ async def get_wetter_aktuell(
     )
 
 
-@router.get("/wetter/warnungen", response_model=list[WetterWarnung])
+@router.get("/wetter/warnungen", response_model=list[WetterWarnung], summary="Wetter warnungen abrufen")
 async def get_wetter_warnungen(
     lat: float = Query(..., description="Breitengrad"),
     lon: float = Query(..., description="Längengrad"),
@@ -209,7 +209,7 @@ async def get_wetter_warnungen(
     return result
 
 
-@router.get("/wetter/stunden", response_model=list[dict])
+@router.get("/wetter/stunden", response_model=list[dict], summary="Wetter stunden abrufen")
 async def get_wetter_stunden(
     lat: float = Query(..., description="Breitengrad"),
     lon: float = Query(..., description="Längengrad"),
@@ -243,7 +243,7 @@ async def get_wetter_stunden(
     return records
 
 
-@router.get("/wetter/prognose", response_model=list[PrognoseTag])
+@router.get("/wetter/prognose", response_model=list[PrognoseTag], summary="Wetter prognose abrufen")
 async def get_wetter_prognose(
     lat: float = Query(..., description="Breitengrad"),
     lon: float = Query(..., description="Längengrad"),
@@ -302,7 +302,7 @@ async def get_wetter_prognose(
     return result
 
 
-@router.get("/wetter/boden", response_model=list[BodenDaten])
+@router.get("/wetter/boden", response_model=list[BodenDaten], summary="Wetter boden abrufen")
 async def get_wetter_boden(
     lat: float = Query(..., description="Breitengrad"),
     lon: float = Query(..., description="Längengrad"),

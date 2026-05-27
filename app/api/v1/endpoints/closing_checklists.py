@@ -168,7 +168,7 @@ class UpdateItemStatusRequest(BaseModel):
     notes: Optional[str] = None
 
 
-@router.get("/templates", response_model=List[Dict[str, Any]])
+@router.get("/templates", response_model=List[Dict[str, Any]], summary="Checklist templates auflisten")
 async def list_checklist_templates(
     closing_type: Optional[str] = Query(None, description="Filter by closing type"),
     active_only: bool = Query(True, description="Show only active templates"),
@@ -396,7 +396,7 @@ async def list_checklist_templates(
         ]
 
 
-@router.post("/templates", response_model=Dict[str, Any], status_code=201)
+@router.post("/templates", response_model=Dict[str, Any], status_code=201, summary="Checklist template anlegen")
 async def create_checklist_template(
     template: ChecklistTemplateCreate,
     tenant_id: str = Query("system", description="Tenant ID"),
@@ -451,7 +451,7 @@ async def create_checklist_template(
         raise HTTPException(status_code=500, detail=f"Failed to create checklist template: {str(e)}")
 
 
-@router.post("", response_model=ClosingChecklistResponse, status_code=201)
+@router.post("", response_model=ClosingChecklistResponse, status_code=201, summary="Closing checklist anlegen")
 async def create_closing_checklist(
     checklist: ClosingChecklistCreate,
     db: Session = Depends(get_db)
@@ -654,7 +654,7 @@ async def create_closing_checklist(
         raise HTTPException(status_code=500, detail=f"Failed to create closing checklist: {str(e)}")
 
 
-@router.get("/{checklist_id}", response_model=ClosingChecklistResponse)
+@router.get("/{checklist_id}", response_model=ClosingChecklistResponse, summary="Closing checklist abrufen")
 async def get_closing_checklist(
     checklist_id: str,
     tenant_id: str = Query("system", description="Tenant ID"),
@@ -692,7 +692,7 @@ async def get_closing_checklist(
         raise HTTPException(status_code=500, detail=f"Failed to get closing checklist: {str(e)}")
 
 
-@router.post("/{checklist_id}/items/{item_code}/complete")
+@router.post("/{checklist_id}/items/{item_code}/complete", summary="Checklist item complete")
 async def complete_checklist_item(
     checklist_id: str,
     item_code: str,
@@ -773,7 +773,7 @@ async def complete_checklist_item(
         raise HTTPException(status_code=500, detail=f"Failed to complete checklist item: {str(e)}")
 
 
-@router.post("/{checklist_id}/validate")
+@router.post("/{checklist_id}/validate", summary="Checklist items validieren")
 async def validate_checklist_items(
     checklist_id: str,
     tenant_id: str = Query("system", description="Tenant ID"),
@@ -889,7 +889,7 @@ async def validate_checklist_items(
         raise HTTPException(status_code=500, detail=f"Failed to validate checklist: {str(e)}")
 
 
-@router.get("", response_model=List[ClosingChecklistResponse])
+@router.get("", response_model=List[ClosingChecklistResponse], summary="Closing checklists auflisten")
 async def list_closing_checklists(
     period: Optional[str] = Query(None, description="Filter by period (YYYY-MM)"),
     closing_type: Optional[str] = Query(None, description="Filter by closing type"),
@@ -945,7 +945,7 @@ async def list_closing_checklists(
         return []
 
 
-@router.get("/cockpit/summary", response_model=Dict[str, Any])
+@router.get("/cockpit/summary", response_model=Dict[str, Any], summary="Closing cockpit summary abrufen")
 async def get_closing_cockpit_summary(
     tenant_id: str = Query("system", description="Tenant ID"),
     period: Optional[str] = Query(None, description="Period in YYYY-MM"),
@@ -1050,7 +1050,7 @@ async def get_closing_cockpit_summary(
     return result
 
 
-@router.post("/{checklist_id}/approve", response_model=ClosingChecklistResponse)
+@router.post("/{checklist_id}/approve", response_model=ClosingChecklistResponse, summary="Closing checklist genehmigen")
 async def approve_closing_checklist(
     checklist_id: str,
     approved_by: str = Query("system", description="Approver user ID"),
@@ -1076,7 +1076,7 @@ async def approve_closing_checklist(
     return await get_closing_checklist(checklist_id, tenant_id, db)
 
 
-@router.delete("/{checklist_id}", status_code=204, response_class=Response, response_model=None)
+@router.delete("/{checklist_id}", status_code=204, response_class=Response, response_model=None, summary="Closing checklist löschen")
 async def delete_closing_checklist(
     checklist_id: str,
     tenant_id: str = Query("system", description="Tenant ID"),

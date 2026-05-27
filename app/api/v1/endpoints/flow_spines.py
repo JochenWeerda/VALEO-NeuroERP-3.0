@@ -305,7 +305,7 @@ class ResumeRequest(BaseModel):
 
 # ── Catalog ──────────────────────────────────────────────────────────────────
 
-@router.get("/catalog")
+@router.get("/catalog", summary="Catalog abrufen")
 def get_catalog(lang: Optional[str] = Query(None)) -> JSONResponse:
     catalog = get_flow_spine_catalog(lang)
     etag = _flow_spine_etag(catalog)
@@ -320,7 +320,7 @@ def get_catalog(lang: Optional[str] = Query(None)) -> JSONResponse:
 
 # ── Workspace (with optional instance overlay) ───────────────────────────────
 
-@router.get("/{process_key}")
+@router.get("/{process_key}", summary="Workspace abrufen")
 def get_workspace(
     process_key: str,
     instance_id: Optional[str] = Query(None),
@@ -355,7 +355,7 @@ def get_workspace(
 
 # ── Instance CRUD ─────────────────────────────────────────────────────────────
 
-@router.post("/{process_key}/instances", status_code=201, response_model=dict)
+@router.post("/{process_key}/instances", status_code=201, response_model=dict, summary="Instance anlegen")
 async def create_instance(
     process_key: str,
     body: InstanceCreateRequest,
@@ -427,7 +427,7 @@ async def create_instance(
     return _instance_to_dict(inst)
 
 
-@router.get("/{process_key}/instances", response_model=dict)
+@router.get("/{process_key}/instances", response_model=dict, summary="Instances auflisten")
 def list_instances(
     process_key: str,
     skip: int = Query(default=0, ge=0, description="Anzahl übersprungener Einträge"),
@@ -467,7 +467,7 @@ def list_instances(
     }
 
 
-@router.get("/{process_key}/instances/{instance_id}", response_model=dict)
+@router.get("/{process_key}/instances/{instance_id}", response_model=dict, summary="Instance abrufen")
 def get_instance(
     process_key: str,
     instance_id: str,
@@ -478,7 +478,7 @@ def get_instance(
     return _instance_to_dict(inst)
 
 
-@router.patch("/{process_key}/instances/{instance_id}", response_model=dict)
+@router.patch("/{process_key}/instances/{instance_id}", response_model=dict, summary="Instance aktualisieren")
 def update_instance(
     process_key: str,
     instance_id: str,
@@ -536,7 +536,7 @@ def update_instance(
     return _instance_to_dict(inst)
 
 
-@router.post("/{process_key}/instances/{instance_id}/save", response_model=dict)
+@router.post("/{process_key}/instances/{instance_id}/save", response_model=dict, summary="Instance save")
 def save_instance(
     process_key: str,
     instance_id: str,
@@ -584,7 +584,7 @@ def save_instance(
     return _instance_to_dict(inst)
 
 
-@router.post("/{process_key}/instances/{instance_id}/resume", response_model=dict)
+@router.post("/{process_key}/instances/{instance_id}/resume", response_model=dict, summary="Instance fortsetzen")
 def resume_instance(
     process_key: str,
     instance_id: str,
@@ -631,7 +631,7 @@ def resume_instance(
     }
 
 
-@router.post("/{process_key}/instances/{instance_id}/hold", response_model=dict)
+@router.post("/{process_key}/instances/{instance_id}/hold", response_model=dict, summary="Instance hold")
 def hold_instance(
     process_key: str,
     instance_id: str,
@@ -670,7 +670,7 @@ def hold_instance(
     return _instance_to_dict(inst)
 
 
-@router.post("/{process_key}/instances/{instance_id}/complete", response_model=dict)
+@router.post("/{process_key}/instances/{instance_id}/complete", response_model=dict, summary="Instance complete")
 def complete_instance(
     process_key: str,
     instance_id: str,
@@ -722,7 +722,7 @@ def _validate_required_reason(body: LifecycleActionRequest) -> None:
         )
 
 
-@router.post("/{process_key}/instances/{instance_id}/cancel", response_model=dict)
+@router.post("/{process_key}/instances/{instance_id}/cancel", response_model=dict, summary="Instance stornieren")
 def cancel_instance(
     process_key: str,
     instance_id: str,
@@ -764,7 +764,7 @@ def cancel_instance(
     return _instance_to_dict(inst)
 
 
-@router.post("/{process_key}/instances/{instance_id}/fail", response_model=dict)
+@router.post("/{process_key}/instances/{instance_id}/fail", response_model=dict, summary="Instance fail")
 def fail_instance(
     process_key: str,
     instance_id: str,
@@ -806,7 +806,7 @@ def fail_instance(
     return _instance_to_dict(inst)
 
 
-@router.get("/{process_key}/instances/{instance_id}/timeline", response_model=dict)
+@router.get("/{process_key}/instances/{instance_id}/timeline", response_model=dict, summary="Instance timeline abrufen")
 def get_instance_timeline(
     process_key: str,
     instance_id: str,
@@ -831,7 +831,7 @@ def get_instance_timeline(
     }
 
 
-@router.post("/{process_key}/instances/{instance_id}/transitions", response_model=dict)
+@router.post("/{process_key}/instances/{instance_id}/transitions", response_model=dict, summary="Instance transition")
 async def transition_instance(
     process_key: str,
     instance_id: str,
@@ -894,7 +894,7 @@ async def transition_instance(
     return _instance_to_dict(inst)
 
 
-@router.delete("/{process_key}/instances/{instance_id}", status_code=204, response_class=Response, response_model=None)
+@router.delete("/{process_key}/instances/{instance_id}", status_code=204, response_class=Response, response_model=None, summary="Instance löschen")
 def delete_instance(
     process_key: str,
     instance_id: str,
@@ -909,7 +909,7 @@ def delete_instance(
 
 # ── Agent Action (GAP-104-H) ──────────────────────────────────────────────────
 
-@router.post("/{process_key}/agent-action", response_model=dict)
+@router.post("/{process_key}/agent-action", response_model=dict, summary="Agent action ausführen")
 async def execute_agent_action(
     process_key: str,
     body: AgentActionRequest,

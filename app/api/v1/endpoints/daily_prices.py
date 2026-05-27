@@ -149,7 +149,7 @@ def _to_out(price) -> DailyPriceOut:
 
 # ── API Endpoints ───────────────────────────────────────────────────────────────
 
-@router.get("", response_model=list[DailyPriceOut])
+@router.get("", response_model=list[DailyPriceOut], summary="Prices abrufen")
 async def get_prices(
     article_id: Optional[str] = Query(None),
     warengruppe: Optional[str] = Query(None),
@@ -176,7 +176,7 @@ async def get_prices(
     return []
 
 
-@router.get("/{price_id}", response_model=DailyPriceOut)
+@router.get("/{price_id}", response_model=DailyPriceOut, summary="Price abrufen")
 async def get_price(
     price_id: str,
     db: Session = Depends(get_db),
@@ -195,7 +195,7 @@ async def get_price(
     return _to_out(price)
 
 
-@router.post("", response_model=DailyPriceOut, status_code=201)
+@router.post("", response_model=DailyPriceOut, status_code=201, summary="Price anlegen")
 async def create_price(
     payload: DailyPriceCreateIn,
     db: Session = Depends(get_db),
@@ -228,7 +228,7 @@ async def create_price(
     return _to_out(price)
 
 
-@router.post("/bulk-import", response_model=list[DailyPriceOut], status_code=201)
+@router.post("/bulk-import", response_model=list[DailyPriceOut], status_code=201, summary="Import prices endpoint Bulk")
 async def bulk_import_prices_endpoint(
     payload: DailyPriceBulkCreateIn,
     db: Session = Depends(get_db),
@@ -264,7 +264,7 @@ async def bulk_import_prices_endpoint(
     return [_to_out(p) for p in prices]
 
 
-@router.post("/import", response_model=list[DailyPriceOut], status_code=201)
+@router.post("/import", response_model=list[DailyPriceOut], status_code=201, summary="Prices file importieren")
 async def import_prices_file(
     file: UploadFile = File(...),
     db: Session = Depends(get_db),
@@ -336,7 +336,7 @@ class PriceRuleEvaluateOut(BaseModel):
     final_price_eur_per_ton: float
 
 
-@router.post("/price-rules/evaluate", response_model=PriceRuleEvaluateOut)
+@router.post("/price-rules/evaluate", response_model=PriceRuleEvaluateOut, summary="Price rules evaluate")
 async def evaluate_price_rules(
     payload: PriceRuleEvaluateIn,
     db: Session = Depends(get_db),
@@ -362,7 +362,7 @@ async def evaluate_price_rules(
     )
 
 
-@router.get("/{article_id}/history", response_model=list[DailyPriceOut])
+@router.get("/{article_id}/history", response_model=list[DailyPriceOut], summary="Price history endpoint abrufen")
 async def get_price_history_endpoint(
     article_id: str,
     warengruppe: Optional[str] = Query(None),

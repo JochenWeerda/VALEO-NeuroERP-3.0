@@ -133,7 +133,7 @@ def _decimal_to_float(d: Optional[Decimal]) -> float:
     return float(d) if d is not None else 0.0
 
 
-@router.get("/matrix", response_model=MatrixResponse)
+@router.get("/matrix", response_model=MatrixResponse, summary="Matrix abrufen")
 def get_matrix(
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
@@ -205,7 +205,7 @@ def get_matrix(
     return MatrixResponse(period_keys=matrix.period_keys, rows=rows_out, as_of_date=matrix.as_of_date, period_mode=matrix.period_mode)
 
 
-@router.get("/cell/{article_id}/{period_key}", response_model=DrilldownResponse)
+@router.get("/cell/{article_id}/{period_key}", response_model=DrilldownResponse, summary="Cell drilldown abrufen")
 def get_cell_drilldown(
     article_id: str,
     period_key: str,
@@ -326,7 +326,7 @@ def _coverage_override_map(
     return out
 
 
-@router.get("/coverage-monitor", response_model=CoverageMonitorResponse)
+@router.get("/coverage-monitor", response_model=CoverageMonitorResponse, summary="Coverage monitor abrufen")
 def get_coverage_monitor(
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
@@ -390,7 +390,7 @@ def get_coverage_monitor(
     return CoverageMonitorResponse(items=items, total=total)
 
 
-@router.get("/kpi", response_model=KpiResponse)
+@router.get("/kpi", response_model=KpiResponse, summary="Kpi abrufen")
 def get_kpi(
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
@@ -427,7 +427,7 @@ def get_kpi(
     )
 
 
-@router.post("/refresh")
+@router.post("/refresh", summary="Snapshot aktualisieren")
 def refresh_snapshot(
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),

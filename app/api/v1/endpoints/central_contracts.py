@@ -176,7 +176,7 @@ def _next_version_number(db: Session, contract_id: str, tenant_id: str) -> int:
 # Endpoints
 # ---------------------------------------------------------------------------
 
-@router.get("/contracts", response_model=list[ContractOut])
+@router.get("/contracts", response_model=list[ContractOut], summary="Contracts auflisten")
 async def list_contracts(
     contract_type: Optional[str] = Query(None),
     status_filter: Optional[str] = Query(None, alias="status"),
@@ -211,7 +211,7 @@ async def list_contracts(
     return [_row_to_contract(dict(r)) for r in rows]
 
 
-@router.post("/contracts", response_model=ContractOut, status_code=status.HTTP_201_CREATED)
+@router.post("/contracts", response_model=ContractOut, status_code=status.HTTP_201_CREATED, summary="Contract anlegen")
 async def create_contract(
     payload: ContractCreate,
     tenant_id: str = Depends(get_tenant_id),
@@ -251,7 +251,7 @@ async def create_contract(
     return _row_to_contract(_get_contract(db, cid, tenant_id))
 
 
-@router.get("/contracts/expiring", response_model=list[ContractOut])
+@router.get("/contracts/expiring", response_model=list[ContractOut], summary="Contracts expiring")
 async def expiring_contracts(
     days_ahead: int = Query(90, ge=1, le=365),
     tenant_id: str = Depends(get_tenant_id),
@@ -277,7 +277,7 @@ async def expiring_contracts(
     return [_row_to_contract(dict(r)) for r in rows]
 
 
-@router.get("/contracts/{contract_id}", response_model=dict)
+@router.get("/contracts/{contract_id}", response_model=dict, summary="Contract abrufen")
 async def get_contract(
     contract_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -309,7 +309,7 @@ async def get_contract(
     }
 
 
-@router.patch("/contracts/{contract_id}", response_model=ContractOut)
+@router.patch("/contracts/{contract_id}", response_model=ContractOut, summary="Contract aktualisieren")
 async def update_contract(
     contract_id: str,
     payload: ContractUpdate,
@@ -344,7 +344,7 @@ async def update_contract(
     return _row_to_contract(_get_contract(db, contract_id, tenant_id))
 
 
-@router.post("/contracts/{contract_id}/obligations", response_model=ObligationOut, status_code=status.HTTP_201_CREATED)
+@router.post("/contracts/{contract_id}/obligations", response_model=ObligationOut, status_code=status.HTTP_201_CREATED, summary="Obligation hinzufügen")
 async def add_obligation(
     contract_id: str,
     payload: ObligationCreate,
@@ -387,7 +387,7 @@ async def add_obligation(
     )
 
 
-@router.get("/contracts/{contract_id}/obligations", response_model=list[ObligationOut])
+@router.get("/contracts/{contract_id}/obligations", response_model=list[ObligationOut], summary="Obligations auflisten")
 async def list_obligations(
     contract_id: str,
     status_filter: Optional[str] = Query(None, alias="status"),
@@ -419,7 +419,7 @@ async def list_obligations(
     ]
 
 
-@router.patch("/contracts/{contract_id}/obligations/{obligation_id}", response_model=ObligationOut)
+@router.patch("/contracts/{contract_id}/obligations/{obligation_id}", response_model=ObligationOut, summary="Obligation status aktualisieren")
 async def update_obligation_status(
     contract_id: str,
     obligation_id: str,
@@ -457,7 +457,7 @@ async def update_obligation_status(
     )
 
 
-@router.post("/contracts/{contract_id}/renew", response_model=ContractOut)
+@router.post("/contracts/{contract_id}/renew", response_model=ContractOut, summary="Contract renew")
 async def renew_contract(
     contract_id: str,
     payload: RenewBody,
@@ -483,7 +483,7 @@ async def renew_contract(
     return _row_to_contract(_get_contract(db, contract_id, tenant_id))
 
 
-@router.get("/analytics", response_model=dict)
+@router.get("/analytics", response_model=dict, summary="Analytics contract")
 async def contract_analytics(
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),

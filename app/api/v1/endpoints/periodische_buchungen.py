@@ -81,7 +81,7 @@ class FaelligBelegOut(BaseModel):
 
 # ── CRUD ──────────────────────────────────────────────────────────────────────
 
-@router.get("", response_model=list[PeriodischeBuchungOut])
+@router.get("", response_model=list[PeriodischeBuchungOut], summary="Periodische buchungen auflisten")
 def list_periodische_buchungen(
     gesperrt: Optional[bool] = Query(None),
     turnus: Optional[str] = Query(None),
@@ -104,7 +104,7 @@ def list_periodische_buchungen(
     return [PeriodischeBuchungOut(**dict(r._mapping)) for r in rows]
 
 
-@router.get("/faellig", response_model=list[FaelligBelegOut])
+@router.get("/faellig", response_model=list[FaelligBelegOut], summary="Faellige buchungen abrufen")
 def get_faellige_buchungen(
     stichtag: date = Query(default=None),
     db=Depends(get_db),
@@ -124,7 +124,7 @@ def get_faellige_buchungen(
     return [FaelligBelegOut(**dict(r._mapping)) for r in rows]
 
 
-@router.post("", response_model=PeriodischeBuchungOut, status_code=201)
+@router.post("", response_model=PeriodischeBuchungOut, status_code=201, summary="Periodische buchung anlegen")
 def create_periodische_buchung(
     payload: PeriodischeBuchungCreate,
     db=Depends(get_db),
@@ -150,7 +150,7 @@ def create_periodische_buchung(
     return PeriodischeBuchungOut(**dict(row._mapping))
 
 
-@router.patch("/{buchung_id}/sperren")
+@router.patch("/{buchung_id}/sperren", summary="Buchung sperren")
 def sperren_buchung(
     buchung_id: str,
     gesperrt: bool = Query(...),
@@ -167,7 +167,7 @@ def sperren_buchung(
     return {"id": buchung_id, "gesperrt": gesperrt}
 
 
-@router.delete("/{buchung_id}")
+@router.delete("/{buchung_id}", summary="Periodische buchung löschen")
 def delete_periodische_buchung(
     buchung_id: str,
     db=Depends(get_db),

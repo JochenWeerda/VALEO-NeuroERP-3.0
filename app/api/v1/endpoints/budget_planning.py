@@ -67,7 +67,7 @@ class BudgetLineUpdate(BaseModel):
 # GET /finance/budgets  (summary shortcut lives at /summary)
 # ---------------------------------------------------------------------------
 
-@router.get("", tags=["finance", "budget-planning"])
+@router.get("", tags=["finance", "budget-planning"], summary="Budget plans auflisten")
 def list_budget_plans(
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
@@ -86,7 +86,7 @@ def list_budget_plans(
         raise _503()
 
 
-@router.post("", status_code=201, tags=["finance", "budget-planning"])
+@router.post("", status_code=201, tags=["finance", "budget-planning"], summary="Budget plan anlegen")
 def create_budget_plan(
     body: BudgetPlanCreate,
     tenant_id: str = Depends(get_tenant_id),
@@ -119,7 +119,7 @@ def create_budget_plan(
 # GET /finance/budgets/summary  — muss VOR /{id} stehen!
 # ---------------------------------------------------------------------------
 
-@router.get("/summary", tags=["finance", "budget-planning"])
+@router.get("/summary", tags=["finance", "budget-planning"], summary="Summary budget")
 def budget_summary(
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
@@ -178,7 +178,7 @@ def budget_summary(
 # GET/POST /finance/budgets/{id}
 # ---------------------------------------------------------------------------
 
-@router.get("/{plan_id}", tags=["finance", "budget-planning"])
+@router.get("/{plan_id}", tags=["finance", "budget-planning"], summary="Budget plan abrufen")
 def get_budget_plan(
     plan_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -206,7 +206,7 @@ def get_budget_plan(
         raise _503()
 
 
-@router.post("/{plan_id}/approve", tags=["finance", "budget-planning"])
+@router.post("/{plan_id}/approve", tags=["finance", "budget-planning"], summary="Budget plan genehmigen")
 def approve_budget_plan(
     plan_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -236,7 +236,7 @@ def approve_budget_plan(
         raise _503()
 
 
-@router.get("/{plan_id}/vs-actual", tags=["finance", "budget-planning"])
+@router.get("/{plan_id}/vs-actual", tags=["finance", "budget-planning"], summary="Vs actual budget")
 def budget_vs_actual(
     plan_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -310,7 +310,7 @@ def budget_vs_actual(
         raise _503()
 
 
-@router.post("/{plan_id}/lines", status_code=201, tags=["finance", "budget-planning"])
+@router.post("/{plan_id}/lines", status_code=201, tags=["finance", "budget-planning"], summary="Budget line hinzufügen")
 def add_budget_line(
     plan_id: str,
     body: BudgetLineCreate,
@@ -356,7 +356,7 @@ def add_budget_line(
         raise _503()
 
 
-@router.patch("/{plan_id}/lines/{line_id}", tags=["finance", "budget-planning"])
+@router.patch("/{plan_id}/lines/{line_id}", tags=["finance", "budget-planning"], summary="Budget line aktualisieren")
 def update_budget_line(
     plan_id: str,
     line_id: str,

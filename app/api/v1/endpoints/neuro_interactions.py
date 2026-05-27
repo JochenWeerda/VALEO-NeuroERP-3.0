@@ -25,7 +25,7 @@ class TransitionRequest(BaseModel):
     target_state: str = Field(..., description="Zielzustand")
 
 
-@router.post("")
+@router.post("", summary="Anlegen")
 async def create(
     request: CreateInteractionRequest,
     tenant_id: str = Depends(get_tenant_id),
@@ -34,7 +34,7 @@ async def create(
     return create_interaction(request.channel, request.entity_id, tenant_id, db)
 
 
-@router.put("/{interaction_id}/transition")
+@router.put("/{interaction_id}/transition", summary="Transition")
 async def transition(
     interaction_id: str,
     request: TransitionRequest,
@@ -47,7 +47,7 @@ async def transition(
     return result
 
 
-@router.get("/{interaction_id}")
+@router.get("/{interaction_id}", summary="One abrufen")
 async def get_one(
     interaction_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -59,7 +59,7 @@ async def get_one(
     return result
 
 
-@router.get("")
+@router.get("", summary="All auflisten")
 async def list_all(
     state: Optional[str] = None,
     limit: int = 50,

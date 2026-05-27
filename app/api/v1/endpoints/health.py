@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 router = APIRouter()
 
 
-@router.get("/health", status_code=status.HTTP_200_OK)
+@router.get("/health", status_code=status.HTTP_200_OK, summary="Check health")
 async def health_check() -> Dict[str, Any]:
     """
     Basic health check - is the service alive?
@@ -30,7 +30,7 @@ async def health_check() -> Dict[str, Any]:
     }
 
 
-@router.get("/ready", status_code=status.HTTP_200_OK)
+@router.get("/ready", status_code=status.HTTP_200_OK, summary="Check readiness")
 async def readiness_check() -> JSONResponse:
     """
     Readiness check - is the service ready to accept traffic?
@@ -104,7 +104,7 @@ async def readiness_check() -> JSONResponse:
     )
 
 
-@router.get("/health/live", status_code=status.HTTP_200_OK)
+@router.get("/health/live", status_code=status.HTTP_200_OK, summary="Check liveness")
 async def liveness_check() -> Dict[str, str]:
     """
     Kubernetes liveness probe - is the process alive?
@@ -113,7 +113,7 @@ async def liveness_check() -> Dict[str, str]:
     return {"status": "alive"}
 
 
-@router.get("/health/startup", status_code=status.HTTP_200_OK)
+@router.get("/health/startup", status_code=status.HTTP_200_OK, summary="Check startup")
 async def startup_check(request: Request) -> Dict[str, Any]:
     """
     Kubernetes startup probe - has the service finished starting?

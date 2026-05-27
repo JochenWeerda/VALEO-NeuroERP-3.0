@@ -29,7 +29,7 @@ def _svc(db: Session, tenant_id: str) -> ReportPrintService:
     return ReportPrintService(db, tenant_id)
 
 
-@router.get("/readiness")
+@router.get("/readiness", summary="Report print readiness abrufen")
 def get_report_print_readiness(
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
@@ -38,7 +38,7 @@ def get_report_print_readiness(
     return _svc(db, tenant_id).build_readiness()
 
 
-@router.get("/parties/{partie_ref}/genealogy")
+@router.get("/parties/{partie_ref}/genealogy", summary="Partie genealogy abrufen")
 def get_partie_genealogy(
     partie_ref: str,
     db: Session = Depends(get_db),
@@ -48,7 +48,7 @@ def get_partie_genealogy(
     return _svc(db, tenant_id).build_partie_genealogy(partie_ref)
 
 
-@router.get("/weighing-tickets/{ticket_ref}/pdf-preview")
+@router.get("/weighing-tickets/{ticket_ref}/pdf-preview", summary="Weighing ticket pdf preview abrufen")
 def get_weighing_ticket_pdf_preview(
     ticket_ref: str,
     db: Session = Depends(get_db),
@@ -58,7 +58,7 @@ def get_weighing_ticket_pdf_preview(
     return _svc(db, tenant_id).build_weighing_pdf_preview(ticket_ref)
 
 
-@router.post("/labels", status_code=201)
+@router.post("/labels", status_code=201, summary="Label payload anlegen")
 def create_label_payload(
     payload: ReportPrintLabelRequest,
     db: Session = Depends(get_db),

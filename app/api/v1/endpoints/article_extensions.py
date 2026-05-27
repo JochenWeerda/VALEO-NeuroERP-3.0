@@ -51,7 +51,7 @@ class RecipeImportRequest(BaseModel):
     components: list[dict]
 
 
-@router.get("/batches", response_model=PaginatedResponse[BatchOut])
+@router.get("/batches", response_model=PaginatedResponse[BatchOut], summary="Article batches auflisten")
 async def list_article_batches(
     article_id: Optional[str] = Query(None),
     tenant_id: Optional[str] = Query(None),
@@ -75,7 +75,7 @@ async def list_article_batches(
     )
 
 
-@router.post("/file-upload", response_model=FileUploadResponse)
+@router.post("/file-upload", response_model=FileUploadResponse, summary="Article file hochladen")
 async def upload_article_file(
     article_id: str = Query(...),
     file: UploadFile = File(...),
@@ -89,7 +89,7 @@ async def upload_article_file(
     )
 
 
-@router.post("/recipe-import", status_code=201)
+@router.post("/recipe-import", status_code=201, summary="Recipe importieren")
 async def import_recipe(payload: RecipeImportRequest):
     """POST Rezeptur Import"""
     return {
@@ -101,7 +101,7 @@ async def import_recipe(payload: RecipeImportRequest):
 
 # ── Artikel Selektionen ─────────────────────────────────────────
 
-@router.get("/selections", response_model=list[SelectionOut])
+@router.get("/selections", response_model=list[SelectionOut], summary="Article selections auflisten")
 async def list_article_selections(
     tenant_id: Optional[str] = Query(None),
     db: Session = Depends(get_db),
@@ -112,7 +112,7 @@ async def list_article_selections(
     return [SelectionOut.model_validate(i) for i in items]
 
 
-@router.post("/selections", response_model=SelectionOut, status_code=201)
+@router.post("/selections", response_model=SelectionOut, status_code=201, summary="Article selection anlegen")
 async def create_article_selection(
     payload: SelectionCreate,
     tenant_id: Optional[str] = Query(None),
@@ -134,7 +134,7 @@ async def create_article_selection(
     return SelectionOut.model_validate(obj)
 
 
-@router.delete("/selections/{sel_id}", status_code=204, response_class=Response, response_model=None)
+@router.delete("/selections/{sel_id}", status_code=204, response_class=Response, response_model=None, summary="Article selection löschen")
 async def delete_article_selection(sel_id: str, db: Session = Depends(get_db)):
     """DEL Artikel Selektionen löschen"""
     obj = db.query(ArticleSelection).filter(ArticleSelection.id == sel_id).first()

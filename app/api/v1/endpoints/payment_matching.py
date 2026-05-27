@@ -83,7 +83,7 @@ def _build_payment_import_datensatz(
     }
 
 
-@router.post("/import/csv", response_model=List[PaymentEntry])
+@router.post("/import/csv", response_model=List[PaymentEntry], summary="Payments csv importieren")
 async def import_payments_csv(
     file: UploadFile = File(...),
     tenant_id: str = Query("default"),
@@ -221,7 +221,7 @@ async def import_payments_csv(
         raise HTTPException(status_code=500, detail=f"Failed to import CSV: {str(e)}")
 
 
-@router.get("/unmatched", response_model=List[PaymentEntry])
+@router.get("/unmatched", response_model=List[PaymentEntry], summary="Unmatched payments abrufen")
 async def get_unmatched_payments(
     tenant_id: str = Query("default"),
     bank_account: Optional[str] = Query(None),
@@ -270,7 +270,7 @@ async def get_unmatched_payments(
         return []
 
 
-@router.get("/open-items/{customer_id}", response_model=List[OpenItemMatch])
+@router.get("/open-items/{customer_id}", response_model=List[OpenItemMatch], summary="Open items for matching abrufen")
 async def get_open_items_for_matching(
     customer_id: str,
     tenant_id: str = Query("default"),
@@ -316,7 +316,7 @@ async def get_open_items_for_matching(
         return []
 
 
-@router.post("/match/{payment_id}", response_model=MatchResult)
+@router.post("/match/{payment_id}", response_model=MatchResult, summary="Payment match")
 async def match_payment(
     payment_id: str,
     op_id: Optional[str] = Query(None),
@@ -412,7 +412,7 @@ async def match_payment(
         raise HTTPException(status_code=500, detail=f"Failed to match payment: {str(e)}")
 
 
-@router.post("/auto-match", response_model=List[MatchResult])
+@router.post("/auto-match", response_model=List[MatchResult], summary="Match payments auto")
 async def auto_match_payments(
     tenant_id: str = Query("default"),
     bank_account: Optional[str] = Query(None),
@@ -575,7 +575,7 @@ async def auto_match_payments(
         raise HTTPException(status_code=500, detail=f"Failed to auto-match: {str(e)}")
 
 
-@router.get("/match-suggestions/{payment_id}", response_model=List[OpenItemMatch])
+@router.get("/match-suggestions/{payment_id}", response_model=List[OpenItemMatch], summary="Match suggestions abrufen")
 async def get_match_suggestions(
     payment_id: str,
     tenant_id: str = Query("default"),

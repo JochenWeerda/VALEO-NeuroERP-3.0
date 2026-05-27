@@ -50,7 +50,7 @@ def _seed(db: Session) -> None:
     db.commit()
 
 
-@router.get("", response_model=dict)
+@router.get("", response_model=dict, summary="Zertifikate auflisten")
 async def list_zertifikate(status: Optional[str] = Query(None, description="Filter by status"), db: Session = Depends(get_db)) -> dict:
     _seed(db)
     query = db.query(ZertifikatEintrag)
@@ -74,7 +74,7 @@ async def list_zertifikate(status: Optional[str] = Query(None, description="Filt
     }
 
 
-@router.get("/stats", response_model=dict)
+@router.get("/stats", response_model=dict, summary="Zertifikate stats abrufen")
 async def get_zertifikate_stats(db: Session = Depends(get_db)) -> dict:
     _seed(db)
     items = db.query(ZertifikatEintrag).all()
@@ -113,7 +113,7 @@ from fastapi import HTTPException
 from starlette.responses import Response
 
 
-@router.post("", response_model=dict, status_code=201)
+@router.post("", response_model=dict, status_code=201, summary="Zertifikat anlegen")
 async def create_zertifikat(
     body: ZertifikatCreate,
     db: Session = Depends(get_db),
@@ -141,7 +141,7 @@ async def create_zertifikat(
     }
 
 
-@router.put("/{zertifikat_id}", response_model=dict)
+@router.put("/{zertifikat_id}", response_model=dict, summary="Zertifikat aktualisieren")
 async def update_zertifikat(
     zertifikat_id: int,
     body: ZertifikatUpdate,
@@ -171,7 +171,7 @@ async def update_zertifikat(
     }
 
 
-@router.delete("/{zertifikat_id}", response_class=Response, status_code=204, response_model=None)
+@router.delete("/{zertifikat_id}", response_class=Response, status_code=204, response_model=None, summary="Zertifikat löschen")
 async def delete_zertifikat(
     zertifikat_id: int,
     db: Session = Depends(get_db),

@@ -57,7 +57,7 @@ def _get_branch_or_404(db: Session, branch_id: str, tenant_id: str) -> dict:
     return dict(row)
 
 
-@router.post("", response_model=Branch, status_code=status.HTTP_201_CREATED)
+@router.post("", response_model=Branch, status_code=status.HTTP_201_CREATED, summary="Branch anlegen")
 async def create_branch(
     payload: BranchCreate,
     tenant_id: str = Query(DEFAULT_TENANT),
@@ -106,7 +106,7 @@ async def create_branch(
     return Branch(**dict(row))
 
 
-@router.get("", response_model=list[Branch])
+@router.get("", response_model=list[Branch], summary="Branches auflisten")
 async def list_branches(
     tenant_id: str = Query(DEFAULT_TENANT),
     active_only: bool = Query(False),
@@ -128,7 +128,7 @@ async def list_branches(
     return [Branch(**dict(row)) for row in rows]
 
 
-@router.get("/{branch_id}", response_model=Branch)
+@router.get("/{branch_id}", response_model=Branch, summary="Branch abrufen")
 async def get_branch(
     branch_id: str,
     tenant_id: str = Query(DEFAULT_TENANT),
@@ -139,7 +139,7 @@ async def get_branch(
     return Branch(**dict(row))
 
 
-@router.put("/{branch_id}", response_model=Branch)
+@router.put("/{branch_id}", response_model=Branch, summary="Branch aktualisieren")
 async def update_branch(
     branch_id: str,
     payload: BranchUpdate,
@@ -177,7 +177,7 @@ async def update_branch(
     return Branch(**dict(row))
 
 
-@router.delete("/{branch_id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete("/{branch_id}", status_code=status.HTTP_204_NO_CONTENT, summary="Branch löschen")
 async def delete_branch(
     branch_id: str,
     tenant_id: str = Query(DEFAULT_TENANT),

@@ -176,7 +176,7 @@ def _ensure_invoice_tenant_access(invoice: dict[str, Any] | None, tenant_id: str
     return invoice
 
 
-@router.get("/rules", response_model=List[ApprovalRuleResponse])
+@router.get("/rules", response_model=List[ApprovalRuleResponse], summary="Approval rules auflisten")
 async def list_approval_rules(
     active_only: bool = Query(True, description="Show only active rules"),
     tenant_id: str = Depends(get_tenant_id),
@@ -272,7 +272,7 @@ async def list_approval_rules(
         ]
 
 
-@router.post("/rules", response_model=ApprovalRuleResponse, status_code=201)
+@router.post("/rules", response_model=ApprovalRuleResponse, status_code=201, summary="Approval rule anlegen")
 async def create_approval_rule(
     rule: ApprovalRuleCreate,
     tenant_id: str = Depends(get_tenant_id),
@@ -336,7 +336,7 @@ async def create_approval_rule(
         raise HTTPException(status_code=500, detail=f"Failed to create approval rule: {str(e)}")
 
 
-@router.post("/request", response_model=ApprovalStatusResponse)
+@router.post("/request", response_model=ApprovalStatusResponse, summary="Approval request")
 async def request_approval(
     request: ApprovalRequest,
     tenant_id: str = Depends(get_tenant_id),
@@ -464,7 +464,7 @@ async def request_approval(
         raise HTTPException(status_code=500, detail=f"Failed to request approval: {str(e)}")
 
 
-@router.post("/approve", response_model=ApprovalStatusResponse)
+@router.post("/approve", response_model=ApprovalStatusResponse, summary="Invoice genehmigen")
 async def approve_invoice(
     action: ApprovalAction,
     tenant_id: str = Depends(get_tenant_id),
@@ -631,7 +631,7 @@ async def approve_invoice(
         raise HTTPException(status_code=500, detail=f"Failed to approve invoice: {str(e)}")
 
 
-@router.get("/status/{invoice_id}", response_model=ApprovalStatusResponse)
+@router.get("/status/{invoice_id}", response_model=ApprovalStatusResponse, summary="Approval status abrufen")
 async def get_approval_status(
     invoice_id: str,
     tenant_id: str = Depends(get_tenant_id),

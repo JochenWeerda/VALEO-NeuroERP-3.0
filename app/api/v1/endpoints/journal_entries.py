@@ -43,7 +43,7 @@ def _serialize_value(v: Any) -> Any:
     return v
 
 
-@router.get("/new", response_model=dict)
+@router.get("/new", response_model=dict, summary="New journal entry template abrufen")
 async def get_new_journal_entry_template(tenant_id: str = Depends(get_tenant_id)):
     """Return default values for the manual booking form."""
     now = datetime.utcnow()
@@ -63,7 +63,7 @@ async def get_new_journal_entry_template(tenant_id: str = Depends(get_tenant_id)
     }
 
 
-@router.post("/", response_model=JournalEntry, status_code=201)
+@router.post("/", response_model=JournalEntry, status_code=201, summary="Journal entry anlegen")
 async def create_journal_entry(
     entry_data: JournalEntryCreate,
     request: Request,
@@ -132,7 +132,7 @@ async def create_journal_entry(
         raise HTTPException(status_code=500, detail=f"Failed to create journal entry: {str(e)}")
 
 
-@router.get("/", response_model=PaginatedResponse[JournalEntry])
+@router.get("/", response_model=PaginatedResponse[JournalEntry], summary="Journal entries auflisten")
 async def list_journal_entries(
     request: Request,
     tenant_id: str = Depends(get_tenant_id),
@@ -237,7 +237,7 @@ async def list_journal_entries(
         raise HTTPException(status_code=500, detail=f"Failed to list journal entries: {str(e)}")
 
 
-@router.get("/{entry_id}", response_model=JournalEntry)
+@router.get("/{entry_id}", response_model=JournalEntry, summary="Journal entry abrufen")
 async def get_journal_entry(
     entry_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -260,7 +260,7 @@ async def get_journal_entry(
         raise HTTPException(status_code=500, detail=f"Failed to retrieve journal entry: {str(e)}")
 
 
-@router.put("/{entry_id}", response_model=JournalEntry)
+@router.put("/{entry_id}", response_model=JournalEntry, summary="Journal entry aktualisieren")
 async def update_journal_entry(
     entry_id: str,
     entry_data: JournalEntryUpdate,
@@ -298,7 +298,7 @@ async def update_journal_entry(
         raise HTTPException(status_code=500, detail=f"Failed to update journal entry: {str(e)}")
 
 
-@router.post("/{entry_id}/post", response_model=JournalEntry)
+@router.post("/{entry_id}/post", response_model=JournalEntry, summary="Journal entry erstellen")
 async def post_journal_entry(
     entry_id: str,
     request: Request,
@@ -341,7 +341,7 @@ async def post_journal_entry(
         raise HTTPException(status_code=500, detail=f"Failed to post journal entry: {str(e)}")
 
 
-@router.post("/{entry_id}/reverse", response_model=None)
+@router.post("/{entry_id}/reverse", response_model=None, summary="Journal entry reverse")
 async def reverse_journal_entry(
     entry_id: str,
     request: Request,
@@ -385,7 +385,7 @@ async def reverse_journal_entry(
         raise HTTPException(status_code=500, detail=f"Failed to reverse journal entry: {str(e)}")
 
 
-@router.delete("/{entry_id}", status_code=204, response_class=Response, response_model=None)
+@router.delete("/{entry_id}", status_code=204, response_class=Response, response_model=None, summary="Journal entry löschen")
 async def delete_journal_entry(
     entry_id: str,
     request: Request,

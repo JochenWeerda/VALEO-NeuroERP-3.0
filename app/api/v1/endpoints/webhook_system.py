@@ -83,7 +83,7 @@ class WebhookOut(BaseModel):
 # ---------------------------------------------------------------------------
 
 
-@router.get("", response_model=list[WebhookOut], tags=["webhooks"])
+@router.get("", response_model=list[WebhookOut], tags=["webhooks"], summary="Webhooks auflisten")
 def list_webhooks(db: Session = Depends(get_db)) -> list[WebhookOut]:
     """List all registered webhooks."""
     try:
@@ -95,13 +95,13 @@ def list_webhooks(db: Session = Depends(get_db)) -> list[WebhookOut]:
         return []
 
 
-@router.get("/bereiche", response_model=list[str], tags=["webhooks"])
+@router.get("/bereiche", response_model=list[str], tags=["webhooks"], summary="Bereiche auflisten")
 def list_bereiche() -> list[str]:
     """List available webhook event areas."""
     return VALID_BEREICHE
 
 
-@router.post("/bereiche/{bereich}", response_model=WebhookOut, status_code=201, tags=["webhooks"])
+@router.post("/bereiche/{bereich}", response_model=WebhookOut, status_code=201, tags=["webhooks"], summary="Webhook registrieren")
 def register_webhook(bereich: str, payload: WebhookCreate, db: Session = Depends(get_db)) -> WebhookOut:
     """Register a new outbound webhook for a given event area."""
     # Validate bereich via model (will also be validated by Pydantic on the body, but bereich comes from path)
@@ -147,7 +147,7 @@ def register_webhook(bereich: str, payload: WebhookCreate, db: Session = Depends
         raise HTTPException(status_code=503, detail=str(exc), headers={"X-Migration-Hint": "CREATE TABLE domain_shared.webhooks (...)"}) from exc
 
 
-@router.delete("/{nr}", status_code=204, response_class=Response, tags=["webhooks"], response_model=None)
+@router.delete("/{nr}", status_code=204, response_class=Response, tags=["webhooks"], response_model=None, summary="Webhook abmelden")
 def unregister_webhook(nr: int, db: Session = Depends(get_db)) -> Response:
     """Unregister (delete) a webhook by its sequential number."""
     try:

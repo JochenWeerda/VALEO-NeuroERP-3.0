@@ -38,7 +38,7 @@ class SearchRequest(BaseModel):
     limit: int = Field(50, ge=1, le=200)
 
 
-@router.post("/")
+@router.post("/", summary="Store")
 async def store(
     request: StoreRequest,
     tenant_id: str = Depends(get_tenant_id),
@@ -57,7 +57,7 @@ async def store(
     return result.to_dict()
 
 
-@router.get("/{domain}/{key}")
+@router.get("/{domain}/{key}", summary="Entry abrufen")
 async def get_entry(
     domain: str,
     key: str,
@@ -71,7 +71,7 @@ async def get_entry(
     return entry.to_dict()
 
 
-@router.post("/search")
+@router.post("/search", summary="Suchen")
 async def search(
     request: SearchRequest,
     tenant_id: str = Depends(get_tenant_id),
@@ -83,7 +83,7 @@ async def search(
     return {"count": len(entries), "entries": [e.to_dict() for e in entries]}
 
 
-@router.delete("/{domain}/{key}")
+@router.delete("/{domain}/{key}", summary="Entfernen")
 async def remove(
     domain: str,
     key: str,
@@ -95,7 +95,7 @@ async def remove(
     return {"deleted": deleted, "domain": domain, "key": key}
 
 
-@router.get("/stats")
+@router.get("/stats", summary="Stats")
 async def stats(
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),

@@ -77,7 +77,7 @@ class SkontoBerechnung(BaseModel):
 
 # ── Endpoints ─────────────────────────────────────────────────────────────────
 
-@router.post("/berechnen")
+@router.post("/berechnen", summary="Skonto berechne")
 def berechne_skonto(payload: SkontoBerechnung):
     """Skontobetrag aus Rechnungsbetrag und Prozentsatz berechnen.
 
@@ -105,7 +105,7 @@ def berechne_skonto(payload: SkontoBerechnung):
     }
 
 
-@router.get("", response_model=list[SkontoAuszifferungOut])
+@router.get("", response_model=list[SkontoAuszifferungOut], summary="Auszifferungen auflisten")
 def list_auszifferungen(
     op_id: Optional[str] = Query(None),
     von_datum: Optional[date] = Query(None),
@@ -132,7 +132,7 @@ def list_auszifferungen(
     return [SkontoAuszifferungOut(**dict(r._mapping)) for r in rows]
 
 
-@router.post("", response_model=SkontoAuszifferungOut, status_code=201)
+@router.post("", response_model=SkontoAuszifferungOut, status_code=201, summary="Auszifferung anlegen")
 def create_auszifferung(
     payload: SkontoAuszifferungCreate,
     db=Depends(get_db),
@@ -176,7 +176,7 @@ def create_auszifferung(
     return SkontoAuszifferungOut(**dict(row._mapping))
 
 
-@router.post("/{auszifferung_id}/stornieren", response_model=SkontoAuszifferungOut)
+@router.post("/{auszifferung_id}/stornieren", response_model=SkontoAuszifferungOut, summary="Auszifferung storniere")
 def storniere_auszifferung(
     auszifferung_id: str,
     db=Depends(get_db),

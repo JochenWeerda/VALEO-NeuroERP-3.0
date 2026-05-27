@@ -245,12 +245,12 @@ def _to_out(settlement: AgrarSettlement, deductions: list[AgrarSettlementDeducti
     )
 
 
-@router.post("/billing-weight/preview", response_model=dict)
+@router.post("/billing-weight/preview", response_model=dict, summary="Billing weight vorschauen")
 async def preview_billing_weight(payload: BillingWeightPreviewRequest) -> dict:
     return AgrarSettlementService.preview_billing_weight(payload)
 
 
-@router.post("/drying/compute", response_model=DryingComputeResponse)
+@router.post("/drying/compute", response_model=DryingComputeResponse, summary="Drying settlement compute")
 async def compute_drying_settlement(
     payload: DryingComputeRequest,
     tenant_id: str = Depends(get_tenant_id),
@@ -263,7 +263,7 @@ async def compute_drying_settlement(
     return DryingComputeResponse(**data)
 
 
-@router.post("/preview", response_model=dict)
+@router.post("/preview", response_model=dict, summary="Settlement vorschauen")
 async def preview_settlement(payload: SettlementCreate):
     try:
         return AgrarSettlementService.preview_settlement(payload)
@@ -271,7 +271,7 @@ async def preview_settlement(payload: SettlementCreate):
         raise HTTPException(status_code=400, detail=exc.detail) from exc
 
 
-@router.post("/", response_model=SettlementOut, status_code=201)
+@router.post("/", response_model=SettlementOut, status_code=201, summary="Settlement anlegen")
 async def create_settlement(
     payload: SettlementCreate,
     tenant_id: str = Depends(get_tenant_id),
@@ -293,7 +293,7 @@ def _svc(db: Session, tenant_id: str) -> AgrarSettlementService:
 
 
 
-@router.get("/", response_model=list[SettlementOut])
+@router.get("/", response_model=list[SettlementOut], summary="Settlements auflisten")
 async def list_settlements(
     status: Optional[SettlementStatus] = Query(None),
     supplier_id: Optional[str] = Query(None),
@@ -307,7 +307,7 @@ async def list_settlements(
     return [_to_out(s, d) for s, d in pairs]
 
 
-@router.post("/campaign-reference/backfill", response_model=SettlementCampaignBackfillResponse)
+@router.post("/campaign-reference/backfill", response_model=SettlementCampaignBackfillResponse, summary="Settlement campaign reference backfill")
 async def backfill_settlement_campaign_reference(
     payload: SettlementCampaignBackfillRequest,
     tenant_id: str = Depends(get_tenant_id),
@@ -329,7 +329,7 @@ async def backfill_settlement_campaign_reference(
     return SettlementCampaignBackfillResponse(**plan_data)
 
 
-@router.get("/{settlement_id}", response_model=SettlementOut)
+@router.get("/{settlement_id}", response_model=SettlementOut, summary="Settlement abrufen")
 async def get_settlement(
     settlement_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -342,7 +342,7 @@ async def get_settlement(
     return _to_out(settlement, deductions)
 
 
-@router.post("/{settlement_id}/post-fibu", response_model=dict)
+@router.post("/{settlement_id}/post-fibu", response_model=dict, summary="Settlement to fibu erstellen")
 async def post_settlement_to_fibu(
     settlement_id: str,
     payload: SettlementPostRequest,
@@ -384,7 +384,7 @@ class SettlementCompletionStatusOut(BaseModel):
     linked_documents: list[dict] = Field(default_factory=list)
 
 
-@router.get("/{settlement_id}/correction-draft", response_model=SettlementCorrectionDraftOut)
+@router.get("/{settlement_id}/correction-draft", response_model=SettlementCorrectionDraftOut, summary="Settlement correction draft abrufen")
 async def get_settlement_correction_draft(
     settlement_id: str,
     memo_type: Literal["credit", "debit"] = Query(...),
@@ -400,7 +400,7 @@ async def get_settlement_correction_draft(
     return SettlementCorrectionDraftOut(**data)
 
 
-@router.get("/{settlement_id}/completion-status", response_model=SettlementCompletionStatusOut)
+@router.get("/{settlement_id}/completion-status", response_model=SettlementCompletionStatusOut, summary="Settlement completion status abrufen")
 async def get_settlement_completion_status(
     settlement_id: str,
     variant: Literal["GUTSCHRIFT", "BELASTUNG", "KORREKTUR"] = Query(...),
@@ -416,7 +416,7 @@ async def get_settlement_completion_status(
     return SettlementCompletionStatusOut(**data)
 
 
-@router.post("/{settlement_id}/cancel", response_model=dict)
+@router.post("/{settlement_id}/cancel", response_model=dict, summary="Settlement stornieren")
 async def cancel_settlement(
     settlement_id: str,
     expected_row_version: Optional[int] = Query(
@@ -448,7 +448,7 @@ async def cancel_settlement(
 # PDF-EXPORT FÜR ABRECHNUNGEN
 # ============================================================================
 
-@router.get("/{settlement_id}/export-pdf")
+@router.get("/{settlement_id}/export-pdf", summary="Settlement pdf exportieren")
 async def export_settlement_pdf(
     settlement_id: str,
     archive: bool = False,
@@ -494,7 +494,7 @@ class TrocknungsAbrechnungPreviewRequest(BaseModel):
     max_abzug_pct: Optional[float] = Field(default=None, ge=0, le=100)
 
 
-@router.post("/trocknungs-abrechnung/preview", response_model=dict, tags=["agrar", "trocknung"])
+@router.post("/trocknungs-abrechnung/preview", response_model=dict, tags=["agrar", "trocknung"], summary="Trocknungs abrechnung vorschauen")
 async def preview_trocknungs_abrechnung(payload: TrocknungsAbrechnungPreviewRequest):
     """
     Trocknungsabrechnung preview mit GoBD-konformem SHA-256 Audit-Hash.
@@ -509,7 +509,7 @@ async def preview_trocknungs_abrechnung(payload: TrocknungsAbrechnungPreviewRequ
         raise HTTPException(status_code=422, detail=exc.detail) from exc
 
 
-@router.get("/trocknungs-regelsets/defaults", response_model=dict, tags=["agrar", "trocknung"])
+@router.get("/trocknungs-regelsets/defaults", response_model=dict, tags=["agrar", "trocknung"], summary="Trocknungs regelsets defaults abrufen")
 async def get_trocknungs_regelsets_defaults():
     """
     Branchenrichtwerte für Trocknungsparameter je Fruchtart zurückgeben.
@@ -539,7 +539,7 @@ class SettlementFreigabeRequest(BaseModel):
     )
 
 
-@router.post("/freigabe/evaluate", response_model=dict, tags=["agrar", "settlement", "freigabe"])
+@router.post("/freigabe/evaluate", response_model=dict, tags=["agrar", "settlement", "freigabe"], summary="Settlement freigabe stateless evaluate")
 async def evaluate_settlement_freigabe_stateless(payload: SettlementFreigabeRequest):
     """
     Stateless Freigabe-Evaluation: Prüft ob ein Status-Übergang zulässig ist.
@@ -553,7 +553,7 @@ async def evaluate_settlement_freigabe_stateless(payload: SettlementFreigabeRequ
         raise HTTPException(status_code=422, detail=exc.detail) from exc
 
 
-@router.post("/{settlement_id}/freigabe", response_model=dict, tags=["agrar", "settlement", "freigabe"])
+@router.post("/{settlement_id}/freigabe", response_model=dict, tags=["agrar", "settlement", "freigabe"], summary="Freigabe settlement")
 async def settlement_freigabe(
     settlement_id: str,
     payload: SettlementFreigabeRequest,
@@ -583,7 +583,7 @@ async def settlement_freigabe(
     return result
 
 
-@router.post("/{settlement_id}/reject", response_model=dict, tags=["agrar", "settlement", "freigabe"])
+@router.post("/{settlement_id}/reject", response_model=dict, tags=["agrar", "settlement", "freigabe"], summary="Settlement ablehnen")
 async def reject_settlement(
     settlement_id: str,
     actor_id: str = Query(..., description="Benutzer-ID des Ablehnenden"),

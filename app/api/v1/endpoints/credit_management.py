@@ -149,7 +149,7 @@ def get_credit_status_data(db: Session, customer_id: str, tenant_id: str) -> Cre
 # Endpoints
 # ---------------------------------------------------------------------------
 
-@router.get("/customers/{customer_id}/credit-status", response_model=CreditStatusOut)
+@router.get("/customers/{customer_id}/credit-status", response_model=CreditStatusOut, summary="Status credit")
 async def credit_status(
     customer_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -163,7 +163,7 @@ async def credit_status(
         raise HTTPException(status_code=503, detail="Datenbankfehler")
 
 
-@router.post("/customers/{customer_id}/credit-limit", response_model=CreditLimitOut, status_code=status.HTTP_200_OK)
+@router.post("/customers/{customer_id}/credit-limit", response_model=CreditLimitOut, status_code=status.HTTP_200_OK, summary="Credit limit setzen")
 async def set_credit_limit(
     customer_id: str,
     payload: CreditLimitSet,
@@ -232,7 +232,7 @@ async def set_credit_limit(
     )
 
 
-@router.post("/customers/{customer_id}/credit-override", status_code=status.HTTP_201_CREATED)
+@router.post("/customers/{customer_id}/credit-override", status_code=status.HTTP_201_CREATED, summary="Override credit")
 async def credit_override(
     customer_id: str,
     payload: CreditOverride,
@@ -268,7 +268,7 @@ async def credit_override(
     return {"id": oid, "customer_id": customer_id, "status": "override_granted", "valid_until": payload.valid_until}
 
 
-@router.get("/credit-blocked-customers", response_model=list[BlockedCustomerOut])
+@router.get("/credit-blocked-customers", response_model=list[BlockedCustomerOut], summary="Blocked customers auflisten")
 async def list_blocked_customers(
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),

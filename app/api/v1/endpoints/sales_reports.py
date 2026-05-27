@@ -56,7 +56,7 @@ class SalesPipelineKPI(BaseModel):
     conversion_rate: Optional[float] = None
 
 
-@router.get("/summary", response_model=SalesSummary)
+@router.get("/summary", response_model=SalesSummary, summary="Sales summary abrufen")
 async def get_sales_summary(
     period_from: date = Query(..., description="Start date (YYYY-MM-DD)"),
     period_to: date = Query(..., description="End date (YYYY-MM-DD)"),
@@ -109,7 +109,7 @@ async def get_sales_summary(
         )
 
 
-@router.get("/top-customers", response_model=List[TopCustomer])
+@router.get("/top-customers", response_model=List[TopCustomer], summary="Top customers abrufen")
 async def get_top_customers(
     period_from: date = Query(...),
     period_to: date = Query(...),
@@ -142,7 +142,7 @@ async def get_top_customers(
         return []
 
 
-@router.get("/top-articles", response_model=List[TopArticle])
+@router.get("/top-articles", response_model=List[TopArticle], summary="Top articles abrufen")
 async def get_top_articles(
     period_from: date = Query(...),
     period_to: date = Query(...),
@@ -184,7 +184,7 @@ class MonthlyRevenue(BaseModel):
     order_count: int
 
 
-@router.get("/monthly-revenue", response_model=List[MonthlyRevenue])
+@router.get("/monthly-revenue", response_model=List[MonthlyRevenue], summary="Monthly revenue abrufen")
 async def get_monthly_revenue(
     period_from: date = Query(..., description="Start date (YYYY-MM-DD)"),
     period_to: date = Query(..., description="End date (YYYY-MM-DD)"),
@@ -219,7 +219,7 @@ async def get_monthly_revenue(
         return []
 
 
-@router.get("/pipeline", response_model=SalesPipelineKPI)
+@router.get("/pipeline", response_model=SalesPipelineKPI, summary="Sales pipeline kpi abrufen")
 async def get_sales_pipeline_kpi(
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),

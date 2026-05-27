@@ -71,7 +71,7 @@ class MengeneinheitengruppeOut(BaseModel):
 
 # ── Mengeneinheiten ───────────────────────────────────────────────────────────
 
-@router.get("/stamm", response_model=list[MengeneinheitOut])
+@router.get("/stamm", response_model=list[MengeneinheitOut], summary="Mengeneinheiten auflisten")
 def list_mengeneinheiten(
     db=Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
@@ -84,7 +84,7 @@ def list_mengeneinheiten(
     return [MengeneinheitOut(**dict(r._mapping)) for r in rows]
 
 
-@router.post("/stamm", response_model=MengeneinheitOut, status_code=201)
+@router.post("/stamm", response_model=MengeneinheitOut, status_code=201, summary="Mengeneinheit anlegen")
 def create_mengeneinheit(
     payload: MengeneinheitCreate,
     db=Depends(get_db),
@@ -115,7 +115,7 @@ def create_mengeneinheit(
     return MengeneinheitOut(**dict(row._mapping))
 
 
-@router.put("/stamm/{einheit_kuerzel}", response_model=MengeneinheitOut)
+@router.put("/stamm/{einheit_kuerzel}", response_model=MengeneinheitOut, summary="Mengeneinheit aktualisieren")
 def update_mengeneinheit(
     einheit_kuerzel: str,
     payload: MengeneinheitCreate,
@@ -147,7 +147,7 @@ def update_mengeneinheit(
     return MengeneinheitOut(**dict(updated._mapping))
 
 
-@router.delete("/stamm/{einheit_kuerzel}")
+@router.delete("/stamm/{einheit_kuerzel}", summary="Mengeneinheit löschen")
 def delete_mengeneinheit(
     einheit_kuerzel: str,
     db=Depends(get_db),
@@ -161,7 +161,7 @@ def delete_mengeneinheit(
     return Response(status_code=204)
 
 
-@router.get("/stamm/umrechnen")
+@router.get("/stamm/umrechnen", summary="Umrechnen")
 def umrechnen(
     wert: Decimal,
     von_einheit: str,
@@ -197,7 +197,7 @@ def umrechnen(
 
 # ── Mengeneinheitengruppen ────────────────────────────────────────────────────
 
-@router.get("/gruppen", response_model=list[MengeneinheitengruppeOut])
+@router.get("/gruppen", response_model=list[MengeneinheitengruppeOut], summary="Mengeneinheitengruppen auflisten")
 def list_mengeneinheitengruppen(
     db=Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
@@ -210,7 +210,7 @@ def list_mengeneinheitengruppen(
     return [MengeneinheitengruppeOut(**dict(r._mapping)) for r in rows]
 
 
-@router.get("/gruppen/{gruppe_nr}", response_model=MengeneinheitengruppeOut)
+@router.get("/gruppen/{gruppe_nr}", response_model=MengeneinheitengruppeOut, summary="Mengeneinheitengruppe abrufen")
 def get_mengeneinheitengruppe(
     gruppe_nr: str,
     db=Depends(get_db),
@@ -225,7 +225,7 @@ def get_mengeneinheitengruppe(
     return MengeneinheitengruppeOut(**dict(row._mapping))
 
 
-@router.post("/gruppen", response_model=MengeneinheitengruppeOut, status_code=201)
+@router.post("/gruppen", response_model=MengeneinheitengruppeOut, status_code=201, summary="Mengeneinheitengruppe anlegen")
 def create_mengeneinheitengruppe(
     payload: MengeneinheitengruppeCreate,
     db=Depends(get_db),
@@ -257,7 +257,7 @@ def create_mengeneinheitengruppe(
     return MengeneinheitengruppeOut(**dict(row._mapping))
 
 
-@router.put("/gruppen/{gruppe_nr}", response_model=MengeneinheitengruppeOut)
+@router.put("/gruppen/{gruppe_nr}", response_model=MengeneinheitengruppeOut, summary="Mengeneinheitengruppe aktualisieren")
 def update_mengeneinheitengruppe(
     gruppe_nr: str,
     payload: MengeneinheitengruppeCreate,
@@ -289,7 +289,7 @@ def update_mengeneinheitengruppe(
     return MengeneinheitengruppeOut(**dict(updated._mapping))
 
 
-@router.delete("/gruppen/{gruppe_nr}")
+@router.delete("/gruppen/{gruppe_nr}", summary="Mengeneinheitengruppe löschen")
 def delete_mengeneinheitengruppe(
     gruppe_nr: str,
     db=Depends(get_db),

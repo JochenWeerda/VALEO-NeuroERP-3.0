@@ -60,7 +60,7 @@ def _to_dict(vertrag) -> dict:
     }
 
 
-@router.get("/rahmenvertraege", response_model=dict)
+@router.get("/rahmenvertraege", response_model=dict, summary="Rahmenvertraege auflisten")
 async def list_rahmenvertraege(
     status: Optional[str] = Query(None, description="Filter by status"),
     typ: Optional[str] = Query(None, description="Filter by type"),
@@ -79,7 +79,7 @@ async def list_rahmenvertraege(
     }
 
 
-@router.get("/rahmenvertraege/{vertrag_id}", response_model=dict)
+@router.get("/rahmenvertraege/{vertrag_id}", response_model=dict, summary="Rahmenvertrag abrufen")
 async def get_rahmenvertrag(vertrag_id: str, db: Session = Depends(get_db)) -> dict:
     repo = RahmenvertragRepository(db)
     vertrag = repo.get_by_id(vertrag_id)
@@ -88,7 +88,7 @@ async def get_rahmenvertrag(vertrag_id: str, db: Session = Depends(get_db)) -> d
     return _to_dict(vertrag)
 
 
-@router.post("/rahmenvertraege", response_model=dict, status_code=201)
+@router.post("/rahmenvertraege", response_model=dict, status_code=201, summary="Rahmenvertrag anlegen")
 async def create_rahmenvertrag(data: VertragCreate, db: Session = Depends(get_db)) -> dict:
     repo = RahmenvertragRepository(db)
     if repo.get_by_nummer(data.nummer):
@@ -100,7 +100,7 @@ async def create_rahmenvertrag(data: VertragCreate, db: Session = Depends(get_db
     return _to_dict(vertrag)
 
 
-@router.patch("/rahmenvertraege/{vertrag_id}", response_model=dict)
+@router.patch("/rahmenvertraege/{vertrag_id}", response_model=dict, summary="Rahmenvertrag aktualisieren")
 async def update_rahmenvertrag(vertrag_id: str, data: VertragUpdate, db: Session = Depends(get_db)) -> dict:
     repo = RahmenvertragRepository(db)
     payload = data.model_dump(exclude_unset=True)
@@ -112,7 +112,7 @@ async def update_rahmenvertrag(vertrag_id: str, data: VertragUpdate, db: Session
     return _to_dict(vertrag)
 
 
-@router.delete("/rahmenvertraege/{vertrag_id}", status_code=204, response_class=Response, response_model=None)
+@router.delete("/rahmenvertraege/{vertrag_id}", status_code=204, response_class=Response, response_model=None, summary="Rahmenvertrag löschen")
 async def delete_rahmenvertrag(vertrag_id: str, db: Session = Depends(get_db)):
     repo = RahmenvertragRepository(db)
     if not repo.delete(vertrag_id):

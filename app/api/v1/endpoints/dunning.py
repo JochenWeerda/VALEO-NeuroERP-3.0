@@ -129,7 +129,7 @@ class DunningRunResponse(BaseModel):
     notices_created: int
 
 
-@router.get("/rules", response_model=List[DunningRuleResponse])
+@router.get("/rules", response_model=List[DunningRuleResponse], summary="Dunning rules auflisten")
 async def list_dunning_rules(
     active_only: bool = Query(True, description="Show only active rules"),
     tenant_id: str = Query("system", description="Tenant ID"),
@@ -232,7 +232,7 @@ async def list_dunning_rules(
         ]
 
 
-@router.post("/rules", response_model=DunningRuleResponse, status_code=201)
+@router.post("/rules", response_model=DunningRuleResponse, status_code=201, summary="Dunning rule anlegen")
 async def create_dunning_rule(
     rule: DunningRuleCreate,
     tenant_id: str = Query("system", description="Tenant ID"),
@@ -319,7 +319,7 @@ async def create_dunning_rule(
         raise HTTPException(status_code=500, detail=f"Failed to create dunning rule: {str(e)}")
 
 
-@router.post("/process", response_model=List[DunningResponse])
+@router.post("/process", response_model=List[DunningResponse], summary="Dunning verarbeiten")
 async def process_dunning(
     request: ProcessDunningRequest,
     db: Session = Depends(get_db)
@@ -512,7 +512,7 @@ async def process_dunning(
         raise HTTPException(status_code=500, detail=f"Failed to process dunning: {str(e)}")
 
 
-@router.post("/run", response_model=DunningRunResponse)
+@router.post("/run", response_model=DunningRunResponse, summary="Dunning ausführen")
 async def run_dunning(
     request: DunningRunRequest,
     db: Session = Depends(get_db),
@@ -534,7 +534,7 @@ async def run_dunning(
     )
 
 
-@router.post("", response_model=DunningResponse, status_code=201)
+@router.post("", response_model=DunningResponse, status_code=201, summary="Dunning anlegen")
 async def create_dunning(
     dunning: DunningCreate,
     tenant_id: str = Query("system", description="Tenant ID"),
@@ -666,7 +666,7 @@ async def create_dunning(
         raise HTTPException(status_code=500, detail=f"Failed to create dunning: {str(e)}")
 
 
-@router.get("", response_model=List[DunningResponse])
+@router.get("", response_model=List[DunningResponse], summary="Dunnings auflisten")
 async def list_dunnings(
     debtor_id: Optional[str] = Query(None, description="Filter by debtor ID"),
     op_id: Optional[str] = Query(None, description="Filter by open item ID"),
@@ -737,7 +737,7 @@ async def list_dunnings(
         return []
 
 
-@router.put("/{dunning_id}/send", response_model=DunningResponse)
+@router.put("/{dunning_id}/send", response_model=DunningResponse, summary="Dunning senden")
 async def send_dunning(
     dunning_id: str,
     tenant_id: str = Query("system", description="Tenant ID"),
@@ -800,7 +800,7 @@ async def send_dunning(
         raise HTTPException(status_code=500, detail=f"Failed to send dunning: {str(e)}")
 
 
-@router.put("/{dunning_id}/paid", response_model=DunningResponse)
+@router.put("/{dunning_id}/paid", response_model=DunningResponse, summary="Dunning paid markieren")
 async def mark_dunning_paid(
     dunning_id: str,
     tenant_id: str = Query("system", description="Tenant ID"),

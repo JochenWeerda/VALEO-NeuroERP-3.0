@@ -159,13 +159,13 @@ def _parse_gs1(barcode: str, fmt: str) -> GS1ParseResult:
 # Endpoints
 # ---------------------------------------------------------------------------
 
-@router.post("/parse", response_model=GS1ParseResult, tags=["gs1", "barcode"])
+@router.post("/parse", response_model=GS1ParseResult, tags=["gs1", "barcode"], summary="Gs1 parse")
 def parse_gs1(payload: GS1ParseInput) -> GS1ParseResult:
     """Parse a single GS1 barcode string and return structured AI fields."""
     return _parse_gs1(payload.barcode_string, payload.format)
 
 
-@router.post("/batch-parse", response_model=list[GS1ParseResult], tags=["gs1", "barcode"])
+@router.post("/batch-parse", response_model=list[GS1ParseResult], tags=["gs1", "barcode"], summary="Parse gs1 Batch")
 def batch_parse_gs1(payloads: list[GS1ParseInput]) -> list[GS1ParseResult]:
     """Parse up to 100 GS1 barcodes in one call."""
     if len(payloads) > 100:
@@ -227,7 +227,7 @@ def _gs1_mod10_check_digit(digits: str) -> int:
 # SSCC / Label Endpoints
 # ---------------------------------------------------------------------------
 
-@router.post("/sscc/generate", response_model=SSCCGenerateResult, tags=["gs1", "sscc"])
+@router.post("/sscc/generate", response_model=SSCCGenerateResult, tags=["gs1", "sscc"], summary="Sscc generieren")
 def generate_sscc(payload: SSCCGenerateInput) -> SSCCGenerateResult:
     """Generate a new SSCC-18 barcode from company prefix + serial reference."""
     base = "0" + payload.company_prefix + payload.serial_ref
@@ -243,7 +243,7 @@ def generate_sscc(payload: SSCCGenerateInput) -> SSCCGenerateResult:
     return SSCCGenerateResult(sscc=sscc, barcode_human_readable=human, check_digit=check)
 
 
-@router.get("/sscc/{sscc}/validate", response_model=SSCCValidateResult, tags=["gs1", "sscc"])
+@router.get("/sscc/{sscc}/validate", response_model=SSCCValidateResult, tags=["gs1", "sscc"], summary="Sscc validieren")
 def validate_sscc(sscc: str) -> SSCCValidateResult:
     """Validate an 18-digit SSCC and return check digit comparison."""
     if not re.fullmatch(r"\d{18}", sscc):
@@ -261,7 +261,7 @@ def validate_sscc(sscc: str) -> SSCCValidateResult:
     )
 
 
-@router.post("/labels/generate", response_model=LabelGenerateResult, tags=["gs1", "label"])
+@router.post("/labels/generate", response_model=LabelGenerateResult, tags=["gs1", "label"], summary="Label generieren")
 def generate_label(payload: LabelGenerateInput) -> LabelGenerateResult:
     """Generate GS1-128 label data dict for printing."""
     # Convert YYYY-MM-DD → YYMMDD

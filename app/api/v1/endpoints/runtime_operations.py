@@ -112,7 +112,7 @@ register_runtime_report_loader(_build_runtime_report)
 # Health
 # ---------------------------------------------------------------------------
 
-@router.get("/health", response_model=dict)
+@router.get("/health", response_model=dict, summary="Runtime health abrufen")
 async def get_runtime_health(
     tenant_id: str = Depends(get_tenant_id),
     db: Any = Depends(get_db),
@@ -122,7 +122,7 @@ async def get_runtime_health(
     return report.model_dump(mode="json")
 
 
-@router.get("/components", response_model=list[dict])
+@router.get("/components", response_model=list[dict], summary="Runtime components auflisten")
 async def list_runtime_components(
     tenant_id: str = Depends(get_tenant_id),
     db: Any = Depends(get_db),
@@ -136,7 +136,7 @@ async def list_runtime_components(
 # Replay
 # ---------------------------------------------------------------------------
 
-@router.post("/replay", response_model=dict, status_code=202)
+@router.post("/replay", response_model=dict, status_code=202, summary="Replay request anlegen")
 async def create_replay_request(
     body: dict,
     tenant_id: str = Depends(get_tenant_id),
@@ -170,7 +170,7 @@ async def create_replay_request(
     return req.model_dump(mode="json")
 
 
-@router.get("/replay", response_model=list[dict])
+@router.get("/replay", response_model=list[dict], summary="Replay requests auflisten")
 async def list_replay_requests(
     tenant_id: str = Depends(get_tenant_id),
 ):
@@ -183,7 +183,7 @@ async def list_replay_requests(
 # Rebuild
 # ---------------------------------------------------------------------------
 
-@router.post("/rebuild", response_model=dict, status_code=202)
+@router.post("/rebuild", response_model=dict, status_code=202, summary="Rebuild request anlegen")
 async def create_rebuild_request(
     body: dict,
     tenant_id: str = Depends(get_tenant_id),
@@ -201,7 +201,7 @@ async def create_rebuild_request(
     return req.model_dump(mode="json")
 
 
-@router.get("/rebuild", response_model=list[dict])
+@router.get("/rebuild", response_model=list[dict], summary="Rebuild requests auflisten")
 async def list_rebuild_requests(
     tenant_id: str = Depends(get_tenant_id),
 ):

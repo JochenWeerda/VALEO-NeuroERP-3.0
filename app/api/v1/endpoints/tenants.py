@@ -17,7 +17,7 @@ from ..schemas.base import PaginatedResponse
 router = APIRouter(tags=["tenants"])
 
 
-@router.post("/", response_model=Tenant, status_code=201)
+@router.post("/", response_model=Tenant, status_code=201, summary="Tenant anlegen")
 async def create_tenant(
     tenant_data: TenantCreate,
     db: Session = Depends(get_db)
@@ -36,7 +36,7 @@ async def create_tenant(
         raise HTTPException(status_code=400, detail=f"Failed to create tenant: {str(e)}")
 
 
-@router.get("/{tenant_id}", response_model=Tenant)
+@router.get("/{tenant_id}", response_model=Tenant, summary="Tenant abrufen")
 async def get_tenant(
     tenant_id: str,
     db: Session = Depends(get_db)
@@ -58,7 +58,7 @@ async def get_tenant(
         raise HTTPException(status_code=500, detail=f"Failed to retrieve tenant: {str(e)}")
 
 
-@router.get("/", response_model=PaginatedResponse[Tenant])
+@router.get("/", response_model=PaginatedResponse[Tenant], summary="Tenants auflisten")
 async def list_tenants(
     skip: int = Query(0, ge=0, description="Number of items to skip"),
     limit: int = Query(100, ge=1, le=1000, description="Maximum number of items to return"),
@@ -90,7 +90,7 @@ async def list_tenants(
         raise HTTPException(status_code=500, detail=f"Failed to list tenants: {str(e)}")
 
 
-@router.put("/{tenant_id}", response_model=Tenant)
+@router.put("/{tenant_id}", response_model=Tenant, summary="Tenant aktualisieren")
 async def update_tenant(
     tenant_id: str,
     tenant_data: TenantUpdate,
@@ -113,7 +113,7 @@ async def update_tenant(
         raise HTTPException(status_code=500, detail=f"Failed to update tenant: {str(e)}")
 
 
-@router.delete("/{tenant_id}", status_code=204, response_class=Response, response_model=None)
+@router.delete("/{tenant_id}", status_code=204, response_class=Response, response_model=None, summary="Tenant löschen")
 async def delete_tenant(
     tenant_id: str,
     db: Session = Depends(get_db)

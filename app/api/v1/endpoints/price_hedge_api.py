@@ -27,7 +27,7 @@ class HedgeCreateRequest(BaseModel):
     broker_referenz: Optional[str] = None
 
 
-@router.post("/hedges", status_code=201)
+@router.post("/hedges", status_code=201, summary="Hedge anlegen")
 def create_hedge(req: HedgeCreateRequest, db: Session = Depends(get_db)):
     hid = str(uuid.uuid4())
     row = HedgeReferenceDB(
@@ -56,7 +56,7 @@ def create_hedge(req: HedgeCreateRequest, db: Session = Depends(get_db)):
     }
 
 
-@router.get("/hedges")
+@router.get("/hedges", summary="Hedges auflisten")
 def list_hedges(tenant_id: str, db: Session = Depends(get_db)):
     rows = db.query(HedgeReferenceDB).filter(HedgeReferenceDB.tenant_id == tenant_id).all()
     return [
@@ -74,7 +74,7 @@ def list_hedges(tenant_id: str, db: Session = Depends(get_db)):
     ]
 
 
-@router.patch("/hedges/{hedge_id}/close")
+@router.patch("/hedges/{hedge_id}/close", summary="Hedge abschließen")
 def close_hedge(hedge_id: str, aktueller_preis: float, db: Session = Depends(get_db)):
     row = db.query(HedgeReferenceDB).filter(HedgeReferenceDB.hedge_id == hedge_id).first()
     if not row:
@@ -87,7 +87,7 @@ def close_hedge(hedge_id: str, aktueller_preis: float, db: Session = Depends(get
     return {"hedge_id": hedge_id, "status": "geschlossen", "pnl_eur": float(row.pnl_eur)}
 
 
-@router.get("/quote")
+@router.get("/quote", summary="Hedge quote abrufen")
 def get_hedge_quote(kontrakt_menge_t: float, hedge_menge_t: float):
     quote = berechne_hedge_quote(kontrakt_menge_t, hedge_menge_t)
     return {"kontrakt_menge_t": kontrakt_menge_t, "hedge_menge_t": hedge_menge_t, "hedge_quote_pct": quote, "schema_version": 1}

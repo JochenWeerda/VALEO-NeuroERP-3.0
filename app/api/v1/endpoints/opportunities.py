@@ -32,7 +32,7 @@ router = APIRouter()
 OPPORTUNITY_STAGES = ["LEAD", "QUALIFIZIERT", "ANGEBOT", "VERHANDLUNG", "GEWONNEN", "VERLOREN"]
 
 
-@router.post("/", response_model=Opportunity, status_code=status.HTTP_201_CREATED)
+@router.post("/", response_model=Opportunity, status_code=status.HTTP_201_CREATED, summary="Opportunity anlegen")
 async def create_opportunity(opportunity_data: OpportunityCreate):
     """Create a new sales opportunity via crm-sales."""
     try:
@@ -44,7 +44,7 @@ async def create_opportunity(opportunity_data: OpportunityCreate):
     return Opportunity.model_validate(created)
 
 
-@router.get("/", response_model=PaginatedResponse[Opportunity])
+@router.get("/", response_model=PaginatedResponse[Opportunity], summary="Opportunities auflisten")
 async def list_opportunities(
     tenant_id: Optional[str] = Query(None, description="Filter by tenant ID"),
     status: Optional[str] = Query(None, description="Filter by status"),
@@ -116,7 +116,7 @@ def _ensure_opp_columns(db: Session) -> None:
                 db.rollback()
 
 
-@router.get("/stages", response_model=list[dict])
+@router.get("/stages", response_model=list[dict], summary="Stages auflisten")
 async def list_stages():
     """Pipeline-Stages fuer Kanban-Board."""
     return OPPORTUNITY_STAGES_LIST
@@ -126,7 +126,7 @@ async def list_stages():
 # GET /pipeline — Kanban view grouped by stage
 # ---------------------------------------------------------------------------
 
-@router.get("/pipeline", response_model=dict, tags=["crm", "opportunities"])
+@router.get("/pipeline", response_model=dict, tags=["crm", "opportunities"], summary="Pipeline abrufen")
 async def get_pipeline(
     tenant_id: Optional[str] = Query(None),
     db: Session = Depends(get_db),
@@ -201,7 +201,7 @@ async def get_pipeline(
 # GET /forecast — weighted monthly forecast
 # ---------------------------------------------------------------------------
 
-@router.get("/forecast", response_model=dict)
+@router.get("/forecast", response_model=dict, summary="Forecast abrufen")
 async def get_forecast(
     tenant_id: Optional[str] = Query(None),
     period: Optional[str] = Query(None, description="YYYY-MM"),
@@ -292,7 +292,7 @@ async def get_forecast(
 # PATCH /{id}/stage — Stage-Wechsel mit History-Log
 # ---------------------------------------------------------------------------
 
-@router.patch("/{opportunity_id}/stage", response_model=dict, tags=["crm", "opportunities"])
+@router.patch("/{opportunity_id}/stage", response_model=dict, tags=["crm", "opportunities"], summary="Opportunity stage aktualisieren")
 async def patch_opportunity_stage(
     opportunity_id: str,
     new_stage: str = Query(..., description="Target stage (LEAD/QUALIFIZIERT/ANGEBOT/VERHANDLUNG/GEWONNEN/VERLOREN)"),
@@ -357,7 +357,7 @@ async def patch_opportunity_stage(
 # ---------------------------------------------------------------------------
 
 @router.post("/{opportunity_id}/activities", response_model=dict, status_code=status.HTTP_201_CREATED,
-             tags=["crm", "opportunities"])
+             tags=["crm", "opportunities"], summary="Opportunity activity hinzufügen")
 async def add_opportunity_activity(
     opportunity_id: str,
     activity_type: str = Query("NOTE", description="Aktivitätstyp (NOTE/CALL/EMAIL/MEETING)"),
@@ -406,7 +406,7 @@ async def add_opportunity_activity(
         raise HTTPException(status_code=500, detail=f"Aktivitaet konnte nicht erstellt werden: {exc}") from exc
 
 
-@router.get("/{opportunity_id}", response_model=Opportunity)
+@router.get("/{opportunity_id}", response_model=Opportunity, summary="Opportunity abrufen")
 async def get_opportunity(opportunity_id: str):
     """Get a specific sales opportunity by ID."""
     try:
@@ -420,7 +420,7 @@ async def get_opportunity(opportunity_id: str):
     return Opportunity.model_validate(opportunity)
 
 
-@router.put("/{opportunity_id}", response_model=Opportunity)
+@router.put("/{opportunity_id}", response_model=Opportunity, summary="Opportunity aktualisieren")
 async def update_opportunity(opportunity_id: str, opportunity_data: OpportunityUpdate):
     """Update a sales opportunity via crm-sales."""
     try:
@@ -434,7 +434,7 @@ async def update_opportunity(opportunity_id: str, opportunity_data: OpportunityU
     return Opportunity.model_validate(updated)
 
 
-@router.delete("/{opportunity_id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete("/{opportunity_id}", status_code=status.HTTP_204_NO_CONTENT, summary="Opportunity löschen")
 async def delete_opportunity(opportunity_id: str):
     """Delete a sales opportunity via crm-sales."""
     try:

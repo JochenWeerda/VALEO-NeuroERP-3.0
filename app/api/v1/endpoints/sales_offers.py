@@ -168,7 +168,7 @@ def _row_to_offer(row: dict, items: Optional[list[SalesOfferItemOut]] = None) ->
     )
 
 
-@router.get("/", response_model=PaginatedResponse[SalesOffer])
+@router.get("/", response_model=PaginatedResponse[SalesOffer], summary="Sales offers auflisten")
 async def list_sales_offers(
     customer_id: Optional[str] = Query(None, description="Filter by customer ID"),
     search: Optional[str] = Query(None),
@@ -233,7 +233,7 @@ async def list_sales_offers(
     )
 
 
-@router.get("/{offer_id}", response_model=SalesOffer)
+@router.get("/{offer_id}", response_model=SalesOffer, summary="Sales offer abrufen")
 async def get_sales_offer(
     offer_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -243,7 +243,7 @@ async def get_sales_offer(
     return _row_to_offer(row, _fetch_items(db, offer_id, tenant_id))
 
 
-@router.post("/", response_model=SalesOffer, status_code=status.HTTP_201_CREATED)
+@router.post("/", response_model=SalesOffer, status_code=status.HTTP_201_CREATED, summary="Sales offer anlegen")
 async def create_sales_offer(
     payload: SalesOfferCreate,
     tenant_id: str = Depends(get_tenant_id),
@@ -366,7 +366,7 @@ async def create_sales_offer(
     )
 
 
-@router.patch("/{offer_id}", response_model=SalesOffer)
+@router.patch("/{offer_id}", response_model=SalesOffer, summary="Sales offer aktualisieren")
 async def update_sales_offer(
     offer_id: str,
     payload: SalesOfferUpdate,
@@ -452,7 +452,7 @@ async def update_sales_offer(
     return _row_to_offer(updated_row, _fetch_items(db, offer_id, effective_tenant))
 
 
-@router.delete("/{offer_id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete("/{offer_id}", status_code=status.HTTP_204_NO_CONTENT, summary="Sales offer löschen")
 async def delete_sales_offer(
     offer_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -474,7 +474,7 @@ async def delete_sales_offer(
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 
-@router.post("/{offer_id}/convert-to-order", status_code=status.HTTP_200_OK)
+@router.post("/{offer_id}/convert-to-order", status_code=status.HTTP_200_OK, summary="Offer to order umwandeln")
 async def convert_offer_to_order(
     offer_id: str,
     tenant_id: str = Depends(get_tenant_id),

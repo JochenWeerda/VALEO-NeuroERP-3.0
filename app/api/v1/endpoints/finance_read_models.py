@@ -1586,7 +1586,7 @@ def rebuild_finance_projection_store(tenant_id: str, db: Session | None) -> Proj
 # Endpoints
 # ---------------------------------------------------------------------------
 
-@router.get("/ap-invoice-cockpit", response_model=APInvoiceCockpitReadModel)
+@router.get("/ap-invoice-cockpit", response_model=APInvoiceCockpitReadModel, summary="Ap invoice cockpit abrufen")
 async def get_ap_invoice_cockpit(
     tenant_id: str = Depends(get_tenant_id),
 ) -> APInvoiceCockpitReadModel:
@@ -1607,7 +1607,7 @@ async def get_ap_invoice_cockpit(
     )
 
 
-@router.get("/payment-run-cockpit", response_model=PaymentRunCockpitReadModel)
+@router.get("/payment-run-cockpit", response_model=PaymentRunCockpitReadModel, summary="Payment run cockpit abrufen")
 async def get_payment_run_cockpit(
     tenant_id: str = Depends(get_tenant_id),
 ) -> PaymentRunCockpitReadModel:
@@ -1627,7 +1627,7 @@ async def get_payment_run_cockpit(
     )
 
 
-@router.get("/process-observation", response_model=ProcessObservationReadModel)
+@router.get("/process-observation", response_model=ProcessObservationReadModel, summary="Process observation abrufen")
 async def get_process_observation(
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
@@ -1650,7 +1650,7 @@ async def get_process_observation(
     )
 
 
-@router.get("/cash-closings", response_model=CashClosingReadModel)
+@router.get("/cash-closings", response_model=CashClosingReadModel, summary="Cash closings abrufen")
 async def get_cash_closings(
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
@@ -1674,7 +1674,7 @@ async def get_cash_closings(
     )
 
 
-@router.get("/cash-closings/analysis", response_model=CashClosingAnalysisReadModel)
+@router.get("/cash-closings/analysis", response_model=CashClosingAnalysisReadModel, summary="Cash closing analysis abrufen")
 async def get_cash_closing_analysis(
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
@@ -1687,7 +1687,7 @@ async def get_cash_closing_analysis(
     )
 
 
-@router.get("/cash-closings/reporting", response_model=CashClosingReportingReadModel)
+@router.get("/cash-closings/reporting", response_model=CashClosingReportingReadModel, summary="Cash closing reporting abrufen")
 async def get_cash_closing_reporting(
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
@@ -1700,7 +1700,7 @@ async def get_cash_closing_reporting(
     )
 
 
-@router.post("/_rebuild", response_model=ProjectionRebuildResult)
+@router.post("/_rebuild", response_model=ProjectionRebuildResult, summary="Finance read model projections rebuild")
 async def rebuild_finance_read_model_projections(
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
@@ -1708,7 +1708,7 @@ async def rebuild_finance_read_model_projections(
     return rebuild_finance_projection_store(tenant_id=tenant_id, db=db)
 
 
-@router.get("/_status", response_model=ProjectionStatusReadModel)
+@router.get("/_status", response_model=ProjectionStatusReadModel, summary="Finance read model projection status abrufen")
 async def get_finance_read_model_projection_status(
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
@@ -1716,7 +1716,7 @@ async def get_finance_read_model_projection_status(
     return get_projection_status(tenant_id=tenant_id, db=db)
 
 
-@router.get("/cash-closings/{closing_id}", response_model=CashClosingSnapshot)
+@router.get("/cash-closings/{closing_id}", response_model=CashClosingSnapshot, summary="Cash closing detail abrufen")
 async def get_cash_closing_detail(
     closing_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -1756,7 +1756,7 @@ from ....core.finance_read_model_contracts import (  # noqa: E402
 )
 
 
-@router.get("/settlement-cockpit", response_model=dict)
+@router.get("/settlement-cockpit", response_model=dict, summary="Settlement cockpit abrufen")
 async def get_settlement_cockpit(
     tenant_id: str = Depends(get_tenant_id),
 ) -> dict:
@@ -1770,7 +1770,7 @@ async def get_settlement_cockpit(
     return snapshot.as_dict()
 
 
-@router.get("/position-exposure", response_model=dict)
+@router.get("/position-exposure", response_model=dict, summary="Position exposure abrufen")
 async def get_position_exposure(
     tenant_id: str = Depends(get_tenant_id),
 ) -> dict:

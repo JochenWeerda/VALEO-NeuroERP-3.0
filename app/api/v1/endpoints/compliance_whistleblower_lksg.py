@@ -61,7 +61,7 @@ def _risk_level(score: int) -> str:
     return "NIEDRIG"
 
 
-@router.post("/whistleblower/reports", status_code=201)
+@router.post("/whistleblower/reports", status_code=201, summary="Whistleblower report anlegen")
 async def create_whistleblower_report(
     payload: WhistleblowerReportIn,
     tenant_id: str = Depends(get_tenant_id),
@@ -94,7 +94,7 @@ async def create_whistleblower_report(
     return {"id": report_id, "status": "EINGEGANGEN", "anonymous": payload.anonymous}
 
 
-@router.get("/whistleblower/reports")
+@router.get("/whistleblower/reports", summary="Whistleblower reports auflisten")
 async def list_whistleblower_reports(
     status: str | None = Query(None),
     tenant_id: str = Depends(get_tenant_id),
@@ -121,7 +121,7 @@ async def list_whistleblower_reports(
     return [dict(row) for row in rows]
 
 
-@router.patch("/whistleblower/reports/{report_id}/status")
+@router.patch("/whistleblower/reports/{report_id}/status", summary="Whistleblower status aktualisieren")
 async def update_whistleblower_status(
     report_id: str,
     payload: WhistleblowerStatusIn,
@@ -148,7 +148,7 @@ async def update_whistleblower_status(
     return {"id": report_id, "status": payload.status}
 
 
-@router.post("/lksg/supplier-risk-assessments", status_code=201)
+@router.post("/lksg/supplier-risk-assessments", status_code=201, summary="Lksg supplier risk assessment anlegen")
 async def create_lksg_supplier_risk_assessment(
     payload: LksgRiskAssessmentIn,
     tenant_id: str = Depends(get_tenant_id),
@@ -184,7 +184,7 @@ async def create_lksg_supplier_risk_assessment(
     return {"id": assessment_id, "risk_score": score, "risk_level": level}
 
 
-@router.get("/lksg/supplier-risk-assessments")
+@router.get("/lksg/supplier-risk-assessments", summary="Lksg supplier risk assessments auflisten")
 async def list_lksg_supplier_risk_assessments(
     risk_level: str | None = Query(None),
     tenant_id: str = Depends(get_tenant_id),
@@ -211,7 +211,7 @@ async def list_lksg_supplier_risk_assessments(
     return [dict(row) for row in rows]
 
 
-@router.get("/lksg/annual-report-preview")
+@router.get("/lksg/annual-report-preview", summary="Annual report preview lksg")
 async def lksg_annual_report_preview(
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),

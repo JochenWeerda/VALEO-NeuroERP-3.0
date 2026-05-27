@@ -75,7 +75,7 @@ def _berechne_zins(basisbetrag: Decimal, zinssatz: Decimal,
 
 # ── Endpoints ─────────────────────────────────────────────────────────────────
 
-@router.get("", response_model=list[ZinsabrechnungOut])
+@router.get("", response_model=list[ZinsabrechnungOut], summary="Zinsabrechnungen auflisten")
 def list_zinsabrechnungen(
     kontrakt_nr: Optional[str] = Query(None),
     lieferant_nr: Optional[str] = Query(None),
@@ -106,7 +106,7 @@ def list_zinsabrechnungen(
     return [ZinsabrechnungOut(**dict(r._mapping)) for r in rows]
 
 
-@router.post("/berechnen", response_model=ZinsabrechnungOut, status_code=201)
+@router.post("/berechnen", response_model=ZinsabrechnungOut, status_code=201, summary="Zinsabrechnung berechne")
 def berechne_zinsabrechnung(
     payload: ZinsabrechnungCreate,
     db=Depends(get_db),
@@ -149,7 +149,7 @@ def berechne_zinsabrechnung(
     return ZinsabrechnungOut(**dict(row._mapping))
 
 
-@router.post("/{zins_id}/drucken")
+@router.post("/{zins_id}/drucken", summary="Zinsabrechnung drucke")
 def drucke_zinsabrechnung(
     zins_id: str,
     db=Depends(get_db),
@@ -192,7 +192,7 @@ def drucke_zinsabrechnung(
     }
 
 
-@router.post("/{zins_id}/buchen", response_model=ZinsabrechnungOut)
+@router.post("/{zins_id}/buchen", response_model=ZinsabrechnungOut, summary="Zinsabrechnung buche")
 def buche_zinsabrechnung(
     zins_id: str,
     beleg_nr: Optional[str] = None,
@@ -222,7 +222,7 @@ def buche_zinsabrechnung(
     return ZinsabrechnungOut(**dict(row._mapping))
 
 
-@router.post("/{zins_id}/stornieren", response_model=ZinsabrechnungOut)
+@router.post("/{zins_id}/stornieren", response_model=ZinsabrechnungOut, summary="Zinsabrechnung storniere")
 def storniere_zinsabrechnung(
     zins_id: str,
     db=Depends(get_db),

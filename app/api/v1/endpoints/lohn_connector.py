@@ -66,7 +66,7 @@ def _row_to_run(row) -> LohnImportRun:
     )
 
 
-@router.get("/runs", response_model=List[LohnImportRun])
+@router.get("/runs", response_model=List[LohnImportRun], summary="Lohn import runs auflisten")
 async def list_lohn_import_runs(
     tenant_id: str = Depends(get_tenant_id),
     period: Optional[str] = Query(None, description="Filter Periode YYYY-MM"),
@@ -90,7 +90,7 @@ async def list_lohn_import_runs(
     return [_row_to_run(r) for r in rows]
 
 
-@router.get("/runs/{run_id}", response_model=LohnImportRun)
+@router.get("/runs/{run_id}", response_model=LohnImportRun, summary="Lohn import run abrufen")
 async def get_lohn_import_run(
     run_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -111,7 +111,7 @@ async def get_lohn_import_run(
     return _row_to_run(row)
 
 
-@router.post("/runs", response_model=LohnImportRun, status_code=201)
+@router.post("/runs", response_model=LohnImportRun, status_code=201, summary="Lohn import run anlegen")
 async def create_lohn_import_run(
     payload: LohnImportRunCreate,
     tenant_id: str = Depends(get_tenant_id),
@@ -146,7 +146,7 @@ async def create_lohn_import_run(
     return _row_to_run(row)
 
 
-@router.post("/runs/trigger", response_model=dict)
+@router.post("/runs/trigger", response_model=dict, summary="Lohn import auslösen")
 async def trigger_lohn_import(
     payload: LohnImportTrigger,
     tenant_id: str = Depends(get_tenant_id),
@@ -198,7 +198,7 @@ async def trigger_lohn_import(
     }
 
 
-@router.delete("/runs/{run_id}", status_code=204, response_class=Response, response_model=None)
+@router.delete("/runs/{run_id}", status_code=204, response_class=Response, response_model=None, summary="Lohn import run löschen")
 async def delete_lohn_import_run(
     run_id: str,
     tenant_id: str = Depends(get_tenant_id),

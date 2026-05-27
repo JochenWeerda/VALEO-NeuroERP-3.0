@@ -37,12 +37,12 @@ def _get_sources(tenant_id: str, db: Session) -> list[PricingSourceManifest]:
     return defaults
 
 
-@router.get("/sources", response_model=list[PricingSourceManifest])
+@router.get("/sources", response_model=list[PricingSourceManifest], summary="Pricing sources auflisten")
 async def list_pricing_sources(tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
     return _get_sources(tenant_id, db)
 
 
-@router.get("/governance", response_model=PricingGovernancePolicy)
+@router.get("/governance", response_model=PricingGovernancePolicy, summary="Governance policy abrufen")
 async def get_governance_policy(tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
     sources = _get_sources(tenant_id, db)
     default_source_id = None

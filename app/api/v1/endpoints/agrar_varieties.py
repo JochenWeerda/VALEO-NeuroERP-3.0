@@ -57,7 +57,7 @@ def _ensure_seed(db: Session, tenant_id: str) -> None:
         db.commit()
 
 
-@router.get("/", response_model=list[VarietyOut])
+@router.get("/", response_model=list[VarietyOut], summary="Varieties auflisten")
 async def list_varieties(
     crop_type: Optional[str] = Query(None, description="Filtern nach Kulturart"),
     aktiv: bool = Query(True),
@@ -74,7 +74,7 @@ async def list_varieties(
     return q.order_by(AgrarSorte.name).all()
 
 
-@router.get("/{sorte_id}", response_model=VarietyOut)
+@router.get("/{sorte_id}", response_model=VarietyOut, summary="Variety abrufen")
 async def get_variety(
     sorte_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -89,7 +89,7 @@ async def get_variety(
     return item
 
 
-@router.post("/", response_model=VarietyOut, status_code=201)
+@router.post("/", response_model=VarietyOut, status_code=201, summary="Variety anlegen")
 async def create_variety(
     payload: VarietyIn,
     tenant_id: str = Depends(get_tenant_id),
@@ -103,7 +103,7 @@ async def create_variety(
     return item
 
 
-@router.put("/{sorte_id}", response_model=VarietyOut)
+@router.put("/{sorte_id}", response_model=VarietyOut, summary="Variety aktualisieren")
 async def update_variety(
     sorte_id: str,
     payload: VarietyIn,
@@ -123,7 +123,7 @@ async def update_variety(
     return item
 
 
-@router.delete("/{sorte_id}", status_code=204, response_class=Response, response_model=None)
+@router.delete("/{sorte_id}", status_code=204, response_class=Response, response_model=None, summary="Variety löschen")
 async def delete_variety(
     sorte_id: str,
     tenant_id: str = Depends(get_tenant_id),

@@ -68,7 +68,7 @@ def _promotion_discount(line: PosCartLine, rule: PromotionRule) -> float:
     return round(min(rule.value, base), 2)
 
 
-@router.get("/payment-methods")
+@router.get("/payment-methods", summary="Payment methods auflisten")
 async def list_payment_methods() -> dict:
     return {
         "methods": [
@@ -81,7 +81,7 @@ async def list_payment_methods() -> dict:
     }
 
 
-@router.post("/promotions/simulate")
+@router.post("/promotions/simulate", summary="Promotions simulate")
 async def simulate_promotions(payload: PosCheckoutPreviewIn) -> dict:
     discounts = []
     total_discount = 0.0
@@ -100,7 +100,7 @@ async def simulate_promotions(payload: PosCheckoutPreviewIn) -> dict:
     return {"discounts": discounts, "total_discount": round(total_discount, 2)}
 
 
-@router.post("/checkout/preview")
+@router.post("/checkout/preview", summary="Checkout vorschauen")
 async def preview_checkout(payload: PosCheckoutPreviewIn) -> dict:
     subtotal = round(sum(_line_gross(line) for line in payload.lines), 2)
     promotion_result = await simulate_promotions(payload)

@@ -42,7 +42,7 @@ def _to_http_exception(error: httpx.HTTPStatusError) -> HTTPException:
 
 
 
-@router.post("/", response_model=Customer, status_code=status.HTTP_201_CREATED)
+@router.post("/", response_model=Customer, status_code=status.HTTP_201_CREATED, summary="Customer anlegen")
 async def create_customer(
     customer_data: CustomerCreate,
     db: Session = Depends(get_db),
@@ -59,7 +59,7 @@ async def create_customer(
     return Customer.model_validate(d)
 
 
-@router.get("/", response_model=PaginatedResponse[Customer])
+@router.get("/", response_model=PaginatedResponse[Customer], summary="Customers auflisten")
 async def list_customers(
     tenant_id: Optional[str] = Query(None, description="Filter by tenant ID"),
     skip: int = Query(0, ge=0, description="Number of items to skip"),
@@ -82,7 +82,7 @@ async def list_customers(
     )
 
 
-@router.get("/quick-search")
+@router.get("/quick-search", summary="Search customers quick")
 def quick_search_customers(
     q: str = Query("", description="Suchterm (Name oder Kundennummer)"),
     limit: int = Query(8, ge=1, le=25),
@@ -98,7 +98,7 @@ def quick_search_customers(
     return _svc(db, tenant_id or DEFAULT_TENANT).quick_search(q or "", limit=limit)
 
 
-@router.get("/recent")
+@router.get("/recent", summary="Customers recent")
 def recent_customers(
     limit: int = Query(10, ge=1, le=25),
     db: Session = Depends(get_db),
@@ -108,7 +108,7 @@ def recent_customers(
     return _svc(db, tenant_id or DEFAULT_TENANT).recent(limit=limit)
 
 
-@router.get("/{customer_id}/sales-eligibility")
+@router.get("/{customer_id}/sales-eligibility", summary="Customer sales eligibility abrufen")
 async def get_customer_sales_eligibility(
     customer_id: str,
     db: Session = Depends(get_db),
@@ -120,7 +120,7 @@ async def get_customer_sales_eligibility(
     return describe_sales_eligibility(db, tenant_id, customer_id)
 
 
-@router.get("/{customer_id}", response_model=Customer)
+@router.get("/{customer_id}", response_model=Customer, summary="Customer abrufen")
 async def get_customer(
     customer_id: str,
     db: Session = Depends(get_db),
@@ -135,7 +135,7 @@ async def get_customer(
     return Customer.model_validate(d)
 
 
-@router.put("/{customer_id}", response_model=Customer)
+@router.put("/{customer_id}", response_model=Customer, summary="Customer aktualisieren")
 async def update_customer(
     customer_id: str,
     customer_data: CustomerUpdate,
@@ -157,6 +157,7 @@ async def update_customer(
     "/{customer_id}",
     status_code=status.HTTP_204_NO_CONTENT,
     response_class=Response,
+    summary="Customer löschen",
 )
 async def delete_customer(
     customer_id: str,
@@ -210,7 +211,7 @@ class UmkreissucheErgebnis(_BaseModel):
     entfernung_km: float
 
 
-@router.post("/umkreissuche")
+@router.post("/umkreissuche", summary="Umkreissuche")
 def umkreissuche(
     payload: UmkreissucheInput,
     db: Session = Depends(get_db),
@@ -266,7 +267,7 @@ class KonvertierungResult(_BaseModel):
     status: str  # KUNDE / INTERESSENT
 
 
-@router.post("/interessenten", status_code=status.HTTP_201_CREATED)
+@router.post("/interessenten", status_code=status.HTTP_201_CREATED, summary="Interessent anlegen")
 def create_interessent(
     payload: InteressentCreate,
     db: Session = Depends(get_db),
@@ -320,7 +321,7 @@ def create_interessent(
     }
 
 
-@router.get("/interessenten")
+@router.get("/interessenten", summary="Interessenten auflisten")
 def list_interessenten(
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
@@ -339,7 +340,7 @@ def list_interessenten(
         return []
 
 
-@router.post("/interessenten/{interessent_id}/konvertieren", response_model=KonvertierungResult)
+@router.post("/interessenten/{interessent_id}/konvertieren", response_model=KonvertierungResult, summary="Konvertieren")
 def konvertieren(
     interessent_id: str,
     db: Session = Depends(get_db),

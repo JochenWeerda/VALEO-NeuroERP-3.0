@@ -206,7 +206,7 @@ def _seed(db: Session) -> None:
     db.commit()
 
 
-@router.get("/cross-compliance", response_model=dict)
+@router.get("/cross-compliance", response_model=dict, summary="Cross compliance auflisten")
 async def list_cross_compliance(db: Session = Depends(get_db)) -> dict:
     _seed(db)
     items = db.query(ComplianceEintrag).all()
@@ -229,7 +229,7 @@ async def list_cross_compliance(db: Session = Depends(get_db)) -> dict:
     }
 
 
-@router.get("/enni-meldungen", response_model=dict)
+@router.get("/enni-meldungen", response_model=dict, summary="Enni meldungen auflisten")
 async def list_enni_meldungen(db: Session = Depends(get_db)) -> dict:
     _seed(db)
     items = db.query(ENNIMeldung).all()
@@ -250,7 +250,7 @@ async def list_enni_meldungen(db: Session = Depends(get_db)) -> dict:
     }
 
 
-@router.get("/qs-checkliste", response_model=dict)
+@router.get("/qs-checkliste", response_model=dict, summary="Qs checkliste auflisten")
 async def list_qs_checkliste(db: Session = Depends(get_db)) -> dict:
     _seed(db)
     items = db.query(QSCheckEintrag).all()
@@ -274,7 +274,7 @@ async def list_qs_checkliste(db: Session = Depends(get_db)) -> dict:
     }
 
 
-@router.get("/zulassungen-register", response_model=dict)
+@router.get("/zulassungen-register", response_model=dict, summary="Zulassungen auflisten")
 async def list_zulassungen(
     typ: Optional[str] = Query(None),
     status: Optional[str] = Query(None),
@@ -305,7 +305,7 @@ async def list_zulassungen(
     }
 
 
-@router.get("/sachkunde-register", response_model=dict)
+@router.get("/sachkunde-register", response_model=dict, summary="Sachkunde auflisten")
 async def list_sachkunde(status: Optional[str] = Query(None), db: Session = Depends(get_db)) -> dict:
     _seed(db)
     q = db.query(SachkundeEintrag)
@@ -332,7 +332,7 @@ async def list_sachkunde(status: Optional[str] = Query(None), db: Session = Depe
     }
 
 
-@router.get("/saatgut-nachbau", response_model=dict)
+@router.get("/saatgut-nachbau", response_model=dict, summary="Saatgut nachbau auflisten")
 async def list_saatgut_nachbau(db: Session = Depends(get_db)) -> dict:
     _seed(db)
     items = db.query(SaatgutNachbauEintrag).all()
@@ -354,7 +354,7 @@ async def list_saatgut_nachbau(db: Session = Depends(get_db)) -> dict:
     }
 
 
-@router.get("/vvvo-register", response_model=dict)
+@router.get("/vvvo-register", response_model=dict, summary="Vvvo auflisten")
 async def list_vvvo(db: Session = Depends(get_db)) -> dict:
     _seed(db)
     items = db.query(VVVOEintrag).all()
@@ -547,7 +547,7 @@ def _build_compliance_pdf_bytes(stats: dict, cross_items: list[dict]) -> bytes:
     return out.getvalue()
 
 
-@router.get("/report-pdf")
+@router.get("/report-pdf", summary="Compliance report pdf abrufen")
 async def get_compliance_report_pdf(
     inline: bool = Query(False, description="Vorschau im Browser (inline) statt Download"),
     db: Session = Depends(get_db),
@@ -566,7 +566,7 @@ async def get_compliance_report_pdf(
     )
 
 
-@router.get("/stats", response_model=dict)
+@router.get("/stats", response_model=dict, summary="Compliance stats abrufen")
 async def get_compliance_stats(db: Session = Depends(get_db)) -> dict:
     _seed(db)
     total_checks = db.query(ComplianceEintrag).count()
@@ -593,7 +593,7 @@ async def get_compliance_stats(db: Session = Depends(get_db)) -> dict:
     }
 
 
-@router.get("/exports/gefahrstoffdoku", response_model=dict)
+@router.get("/exports/gefahrstoffdoku", response_model=dict, summary="Gefahrstoffdoku exportieren")
 async def export_gefahrstoffdoku(
     year: Optional[int] = Query(None, ge=2000, le=2100),
     db: Session = Depends(get_db),
@@ -608,7 +608,7 @@ async def export_gefahrstoffdoku(
     }
 
 
-@router.get("/exports/gefahrstoffdoku.csv")
+@router.get("/exports/gefahrstoffdoku.csv", summary="Gefahrstoffdoku csv exportieren")
 async def export_gefahrstoffdoku_csv(
     year: Optional[int] = Query(None, ge=2000, le=2100),
     db: Session = Depends(get_db),
@@ -657,7 +657,7 @@ async def export_gefahrstoffdoku_csv(
     )
 
 
-@router.get("/exports/naehrstoffstrom", response_model=dict)
+@router.get("/exports/naehrstoffstrom", response_model=dict, summary="Naehrstoffstrom exportieren")
 async def export_naehrstoffstrom(
     year: int = Query(..., ge=2000, le=2100),
     db: Session = Depends(get_db),
@@ -668,7 +668,7 @@ async def export_naehrstoffstrom(
     return data
 
 
-@router.get("/exports/naehrstoffstrom.csv")
+@router.get("/exports/naehrstoffstrom.csv", summary="Naehrstoffstrom csv exportieren")
 async def export_naehrstoffstrom_csv(
     year: int = Query(..., ge=2000, le=2100),
     db: Session = Depends(get_db),
@@ -692,7 +692,7 @@ async def export_naehrstoffstrom_csv(
     )
 
 
-@router.get("/exports/chargen-trace/{lot_id}", response_model=dict)
+@router.get("/exports/chargen-trace/{lot_id}", response_model=dict, summary="Chargen trace report exportieren")
 async def export_chargen_trace_report(
     lot_id: str,
     db: Session = Depends(get_db),
@@ -719,7 +719,7 @@ from ....core.intrastat_model import (
 _INTRASTAT_STORE: dict[str, dict] = {}
 
 
-@router.get("/intrastat/meldungen", response_model=dict)
+@router.get("/intrastat/meldungen", response_model=dict, summary="Intrastat meldungen auflisten")
 async def list_intrastat_meldungen(
     meldezeitraum: Optional[str] = None,
     richtung: Optional[str] = None,
@@ -743,7 +743,7 @@ async def list_intrastat_meldungen(
     }
 
 
-@router.post("/intrastat/meldungen", response_model=dict, status_code=201)
+@router.post("/intrastat/meldungen", response_model=dict, status_code=201, summary="Intrastat meldung anlegen")
 async def create_intrastat_meldung(
     body: dict,
 ) -> dict:
@@ -780,7 +780,7 @@ async def create_intrastat_meldung(
     }
 
 
-@router.get("/intrastat/meldungen/{meldung_id}/validate", response_model=dict)
+@router.get("/intrastat/meldungen/{meldung_id}/validate", response_model=dict, summary="Intrastat meldung endpoint validieren")
 async def validate_intrastat_meldung_endpoint(meldung_id: str) -> dict:
     """
     Vollstaendigkeitspruefung einer einzelnen Intrastat-Meldung nach EU-VO 638/2004.
@@ -832,7 +832,7 @@ def _pcn_store_payload(meldung_id: str, body: dict, tenant_id: str) -> dict:
     }
 
 
-@router.post("/pcn-meldungen", response_model=dict, status_code=201)
+@router.post("/pcn-meldungen", response_model=dict, status_code=201, summary="Pcn meldung anlegen")
 async def create_pcn_meldung(
     body: dict,
     db: Session = Depends(get_db),
@@ -885,7 +885,7 @@ async def create_pcn_meldung(
     return _pcn_to_dict(meldung)
 
 
-@router.get("/pcn-meldungen", response_model=dict)
+@router.get("/pcn-meldungen", response_model=dict, summary="Pcn meldungen auflisten")
 async def list_pcn_meldungen(
     skip: int = Query(default=0, ge=0),
     limit: int = Query(default=50, ge=1, le=200),
@@ -919,7 +919,7 @@ async def list_pcn_meldungen(
 
 # ── EUDR (EU Deforestation Regulation) ───────────────────────────────────────
 
-@router.get("/eudr", response_model=dict)
+@router.get("/eudr", response_model=dict, summary="Eudr status abrufen")
 async def get_eudr_status(
     tenant_id: Optional[str] = Query(None, description="Tenant context"),
     db: Session = Depends(get_db),
@@ -975,7 +975,7 @@ async def get_eudr_status(
 
 # ── USTVA (Umsatzsteuer-Voranmeldung) ────────────────────────────────────────
 
-@router.get("/ustva", response_model=dict)
+@router.get("/ustva", response_model=dict, summary="Ustva status abrufen")
 async def get_ustva_status(
     tenant_id: Optional[str] = Query(None, description="Tenant context"),
     periode: Optional[str] = Query(None, description="Meldezeitraum z.B. 2026-03"),
@@ -1041,7 +1041,7 @@ async def get_ustva_status(
 
 # ── BVL-Umsatzmeldung (Pflanzenschutzmittel) ────────────────────────────────
 
-@router.get("/bvl-umsaetze", response_model=list)
+@router.get("/bvl-umsaetze", response_model=list, summary="Bvl umsaetze abrufen")
 async def get_bvl_umsaetze(
     tenant_id: Optional[str] = Query(None, description="Tenant context"),
     db: Session = Depends(get_db),

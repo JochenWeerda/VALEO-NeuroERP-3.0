@@ -78,7 +78,7 @@ class PreisLookupResult(BaseModel):
 
 # ── Endpoints ─────────────────────────────────────────────────────────────────
 
-@router.get("", response_model=list[IndividualpreisOut])
+@router.get("", response_model=list[IndividualpreisOut], summary="Individualpreise auflisten")
 def list_individualpreise(
     preis_typ: Optional[str] = Query(None, pattern="^(VK|EK)$"),
     artikel_nr: Optional[str] = Query(None),
@@ -106,7 +106,7 @@ def list_individualpreise(
     return [IndividualpreisOut(**dict(r._mapping)) for r in rows]
 
 
-@router.post("", response_model=IndividualpreisOut, status_code=201)
+@router.post("", response_model=IndividualpreisOut, status_code=201, summary="Individualpreis anlegen")
 def create_individualpreis(
     payload: IndividualpreisCreate,
     db=Depends(get_db),
@@ -150,7 +150,7 @@ def create_individualpreis(
     return IndividualpreisOut(**dict(row._mapping))
 
 
-@router.delete("/{preis_id}")
+@router.delete("/{preis_id}", summary="Individualpreis löschen")
 def delete_individualpreis(
     preis_id: str,
     db=Depends(get_db),
@@ -164,7 +164,7 @@ def delete_individualpreis(
     return Response(status_code=204)
 
 
-@router.get("/lookup", response_model=PreisLookupResult)
+@router.get("/lookup", response_model=PreisLookupResult, summary="Lookup preis")
 def preis_lookup(
     preis_typ: str = Query(..., pattern="^(VK|EK)$"),
     artikel_nr: str = Query(...),

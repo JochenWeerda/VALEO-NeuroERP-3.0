@@ -36,7 +36,7 @@ def _build_report(tenant_id: str, db: Any):
     )
 
 
-@router.get("/finance/observation", response_model=ProcessMiningObservationReadModel)
+@router.get("/finance/observation", response_model=ProcessMiningObservationReadModel, summary="Finance process observation abrufen")
 async def get_finance_process_observation(
     tenant_id: str = Depends(get_tenant_id),
     db: Any = Depends(get_db),
@@ -46,7 +46,7 @@ async def get_finance_process_observation(
     return build_process_mining_observation_read_model(report, top_n=top_n)
 
 
-@router.get("/finance/observation/{projection_key}", response_model=ProcessMiningObservationReadModel)
+@router.get("/finance/observation/{projection_key}", response_model=ProcessMiningObservationReadModel, summary="Finance process observation drilldown abrufen")
 async def get_finance_process_observation_drilldown(
     projection_key: str,
     tenant_id: str = Depends(get_tenant_id),

@@ -44,7 +44,7 @@ def _seed(db: Session) -> None:
     db.commit()
 
 
-@router.get("/kampagnen", response_model=dict)
+@router.get("/kampagnen", response_model=dict, summary="Kampagnen auflisten")
 async def list_kampagnen(status: Optional[str] = Query(None, description="Filter by status"), db: Session = Depends(get_db)) -> dict:
     _seed(db)
     query = db.query(MarketingKampagneEntry)
@@ -69,7 +69,7 @@ async def list_kampagnen(status: Optional[str] = Query(None, description="Filter
     }
 
 
-@router.get("/stats", response_model=dict)
+@router.get("/stats", response_model=dict, summary="Marketing stats abrufen")
 async def get_marketing_stats(db: Session = Depends(get_db)) -> dict:
     _seed(db)
     items = db.query(MarketingKampagneEntry).all()
@@ -81,7 +81,7 @@ async def get_marketing_stats(db: Session = Depends(get_db)) -> dict:
     }
 
 
-@router.get("/kampagnen/{kampagne_id}/kpis", response_model=dict)
+@router.get("/kampagnen/{kampagne_id}/kpis", response_model=dict, summary="Kampagne kpis abrufen")
 async def get_kampagne_kpis(kampagne_id: int, db: Session = Depends(get_db)) -> dict:
     """MKT-CAM-01: Kampagnen-KPIs (Budget Plan vs. Ist, Open-Rate, ROI-Stub)."""
     _seed(db)
@@ -131,7 +131,7 @@ class MarketingKampagneUpdate(BaseModel):
 from starlette.responses import Response
 
 
-@router.post("/kampagnen", response_model=dict, status_code=201)
+@router.post("/kampagnen", response_model=dict, status_code=201, summary="Kampagne anlegen")
 async def create_kampagne(
     body: MarketingKampagneCreate,
     db: Session = Depends(get_db),
@@ -161,7 +161,7 @@ async def create_kampagne(
     }
 
 
-@router.put("/kampagnen/{kampagne_id}", response_model=dict)
+@router.put("/kampagnen/{kampagne_id}", response_model=dict, summary="Kampagne aktualisieren")
 async def update_kampagne(
     kampagne_id: int,
     body: MarketingKampagneUpdate,
@@ -192,7 +192,7 @@ async def update_kampagne(
     }
 
 
-@router.delete("/kampagnen/{kampagne_id}", response_class=Response, status_code=204, response_model=None)
+@router.delete("/kampagnen/{kampagne_id}", response_class=Response, status_code=204, response_model=None, summary="Kampagne löschen")
 async def delete_kampagne(
     kampagne_id: int,
     db: Session = Depends(get_db),

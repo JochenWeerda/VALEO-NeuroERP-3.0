@@ -49,7 +49,7 @@ def _to_dict(row: ErnteDB) -> dict:
     }
 
 
-@router.get("")
+@router.get("", summary="Ernten auflisten")
 def list_ernten(
     status: Optional[str] = None,
     skip: int = Query(0, ge=0),
@@ -62,7 +62,7 @@ def list_ernten(
     return [_to_dict(r) for r in q.order_by(ErnteDB.datum.desc()).offset(skip).limit(limit).all()]
 
 
-@router.get("/{ernte_id}")
+@router.get("/{ernte_id}", summary="Ernte abrufen")
 def get_ernte(ernte_id: str, db: Session = Depends(get_db)):
     row = db.query(ErnteDB).filter(ErnteDB.id == ernte_id).first()
     if not row:
@@ -70,7 +70,7 @@ def get_ernte(ernte_id: str, db: Session = Depends(get_db)):
     return _to_dict(row)
 
 
-@router.post("", status_code=201)
+@router.post("", status_code=201, summary="Ernte anlegen")
 def create_ernte(payload: ErntePayload, db: Session = Depends(get_db)):
     datum = date.fromisoformat(payload.datum) if payload.datum else date.today()
     row = ErnteDB(
@@ -88,7 +88,7 @@ def create_ernte(payload: ErntePayload, db: Session = Depends(get_db)):
     return _to_dict(row)
 
 
-@router.patch("/{ernte_id}")
+@router.patch("/{ernte_id}", summary="Ernte aktualisieren")
 def update_ernte(ernte_id: str, payload: ErntePatch, db: Session = Depends(get_db)):
     row = db.query(ErnteDB).filter(ErnteDB.id == ernte_id).first()
     if not row:
@@ -104,7 +104,7 @@ def update_ernte(ernte_id: str, payload: ErntePatch, db: Session = Depends(get_d
     return _to_dict(row)
 
 
-@router.delete("/{ernte_id}", status_code=204, response_class=Response, response_model=None)
+@router.delete("/{ernte_id}", status_code=204, response_class=Response, response_model=None, summary="Ernte löschen")
 def delete_ernte(ernte_id: str, db: Session = Depends(get_db)):
     row = db.query(ErnteDB).filter(ErnteDB.id == ernte_id).first()
     if not row:

@@ -89,7 +89,7 @@ def _fetch_gr_amount(db: Session, gr_id: str, tenant_id: str) -> Optional[float]
 # Endpoints
 # ─────────────────────────────────────────────────────────────────────────────
 
-@router.get("/suppliers")
+@router.get("/suppliers", summary="Ers suppliers auflisten")
 def list_ers_suppliers(
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
@@ -120,7 +120,7 @@ def list_ers_suppliers(
     ]
 
 
-@router.post("/suppliers/{supplier_id}/qualify")
+@router.post("/suppliers/{supplier_id}/qualify", summary="Supplier qualify")
 def qualify_supplier(
     supplier_id: str,
     body: QualifyRequest,
@@ -156,7 +156,7 @@ def qualify_supplier(
     }
 
 
-@router.post("/trigger")
+@router.post("/trigger", summary="Ers auslösen")
 def trigger_ers(
     body: ErsRunRequest,
     db: Session = Depends(get_db),
@@ -228,7 +228,7 @@ def trigger_ers(
     }
 
 
-@router.get("/invoices")
+@router.get("/invoices", summary="Ers invoices auflisten")
 def list_ers_invoices(
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),

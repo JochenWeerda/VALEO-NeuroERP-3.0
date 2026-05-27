@@ -32,7 +32,7 @@ class CreateBlockchainAnchorRequest(BaseModel):
     oauth_credential_ref: str | None = None
 
 
-@router.post("/anchors")
+@router.post("/anchors", summary="Blockchain anchor anlegen")
 def create_blockchain_anchor(payload: CreateBlockchainAnchorRequest, db=Depends(get_db)):
     try:
         subject_type = BlockchainObjektTyp(payload.subject_type.strip().upper())
@@ -62,7 +62,7 @@ def create_blockchain_anchor(payload: CreateBlockchainAnchorRequest, db=Depends(
     return saved.as_dict()
 
 
-@router.get("/anchors")
+@router.get("/anchors", summary="Blockchain anchors auflisten")
 def list_blockchain_anchors(
     tenant_id: str | None = None,
     subject_type: str | None = None,
@@ -88,7 +88,7 @@ def list_blockchain_anchors(
     }
 
 
-@router.get("/anchors/{anchor_id}")
+@router.get("/anchors/{anchor_id}", summary="Blockchain anchor abrufen")
 def get_blockchain_anchor(anchor_id: str, db=Depends(get_db)):
     item = BlockchainAnchorRepository(db).get(anchor_id)
     if item is None:

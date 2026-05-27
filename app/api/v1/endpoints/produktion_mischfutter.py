@@ -86,7 +86,7 @@ class ProduktionsauftragStatusIn(BaseModel):
 # Endpoints
 # ---------------------------------------------------------------------------
 
-@router.get("/verfuegbarkeit", response_model=list[KomponenteVerfuegbarkeit])
+@router.get("/verfuegbarkeit", response_model=list[KomponenteVerfuegbarkeit], summary="Verfuegbarkeit abrufen")
 async def get_verfuegbarkeit(
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
@@ -117,7 +117,7 @@ async def get_verfuegbarkeit(
     ]
 
 
-@router.get("/rezepte", response_model=list[RezeptOut])
+@router.get("/rezepte", response_model=list[RezeptOut], summary="Rezepte abrufen")
 async def get_rezepte(
     tierart: Optional[str] = Query(None),
     tenant_id: str = Depends(get_tenant_id),
@@ -157,7 +157,7 @@ async def get_rezepte(
     ]
 
 
-@router.post("/auftrag", response_model=ProduktionsauftragOut, status_code=201)
+@router.post("/auftrag", response_model=ProduktionsauftragOut, status_code=201, summary="Produktionsauftrag anlegen")
 async def create_produktionsauftrag(
     payload: ProduktionsauftragIn,
     tenant_id: str = Depends(get_tenant_id),
@@ -223,7 +223,7 @@ async def create_produktionsauftrag(
     )
 
 
-@router.patch("/auftrag/{auftrag_id}/status", response_model=ProduktionsauftragOut)
+@router.patch("/auftrag/{auftrag_id}/status", response_model=ProduktionsauftragOut, summary="Auftrag status aktualisieren")
 async def update_auftrag_status(
     auftrag_id: str,
     payload: ProduktionsauftragStatusIn,
@@ -302,7 +302,7 @@ async def update_auftrag_status(
     )
 
 
-@router.get("/auftraege", response_model=list[ProduktionsauftragOut])
+@router.get("/auftraege", response_model=list[ProduktionsauftragOut], summary="Auftraege auflisten")
 async def list_auftraege(
     status: Optional[str] = Query(None),
     tenant_id: str = Depends(get_tenant_id),

@@ -37,7 +37,7 @@ class RetourResponse(BaseModel):
     message: str
 
 
-@router.post("/retoure", response_model=RetourResponse)
+@router.post("/retoure", response_model=RetourResponse, summary="Retoure anlegen")
 async def create_retoure(
     data: RetourRequest,
     db: Session = Depends(get_db),
@@ -96,7 +96,7 @@ async def create_retoure(
     )
 
 
-@router.post("/checkout")
+@router.post("/checkout", summary="Checkout pos")
 async def pos_checkout(
     data: dict,
     db: Session = Depends(get_db),

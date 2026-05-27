@@ -55,7 +55,7 @@ class SammelabrechnungOut(BaseModel):
 # Endpoints
 # ---------------------------------------------------------------------------
 
-@router.get("", response_model=list[SammelabrechnungOut])
+@router.get("", response_model=list[SammelabrechnungOut], summary="Sammelabrechnungen auflisten")
 def list_sammelabrechnungen(
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
@@ -75,7 +75,7 @@ def list_sammelabrechnungen(
         return []
 
 
-@router.post("", response_model=SammelabrechnungOut, status_code=status.HTTP_201_CREATED)
+@router.post("", response_model=SammelabrechnungOut, status_code=status.HTTP_201_CREATED, summary="Sammelabrechnung anlegen")
 def create_sammelabrechnung(
     payload: SammelabrechnungCreate,
     db: Session = Depends(get_db),
@@ -119,7 +119,7 @@ def create_sammelabrechnung(
     }
 
 
-@router.post("/{sammelabrechnung_id}/berechnen", response_model=SammelabrechnungOut)
+@router.post("/{sammelabrechnung_id}/berechnen", response_model=SammelabrechnungOut, summary="Berechnen")
 def berechnen(
     sammelabrechnung_id: str,
     db: Session = Depends(get_db),
@@ -227,7 +227,7 @@ def berechnen(
     }
 
 
-@router.post("/{sammelabrechnung_id}/buchen")
+@router.post("/{sammelabrechnung_id}/buchen", summary="Buchen")
 def buchen(
     sammelabrechnung_id: str,
     db: Session = Depends(get_db),
@@ -249,7 +249,7 @@ def buchen(
     return {"gebucht": True, "buchungsnr": buchungsnr}
 
 
-@router.delete("/{sammelabrechnung_id}", status_code=status.HTTP_204_NO_CONTENT, response_class=Response)
+@router.delete("/{sammelabrechnung_id}", status_code=status.HTTP_204_NO_CONTENT, response_class=Response, summary="Sammelabrechnung löschen")
 def delete_sammelabrechnung(
     sammelabrechnung_id: str,
     db: Session = Depends(get_db),

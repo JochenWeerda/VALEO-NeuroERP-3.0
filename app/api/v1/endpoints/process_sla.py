@@ -52,7 +52,7 @@ class EvaluateSLARequest(BaseModel):
 # ---------------------------------------------------------------------------
 
 
-@router.get("/policies")
+@router.get("/policies", summary="Sla policies auflisten")
 async def list_sla_policies(
     tenant_id: str = Depends(get_tenant_id),
 ) -> list[dict]:
@@ -60,7 +60,7 @@ async def list_sla_policies(
     return [p.model_dump() for p in _POLICIES]
 
 
-@router.post("/evaluate")
+@router.post("/evaluate", summary="Sla endpoint evaluate")
 async def evaluate_sla_endpoint(
     request: EvaluateSLARequest,
     tenant_id: str = Depends(get_tenant_id),
@@ -103,7 +103,7 @@ async def evaluate_sla_endpoint(
     return violation.model_dump()
 
 
-@router.get("/violations")
+@router.get("/violations", summary="Violations auflisten")
 async def list_violations(
     tenant_id: str = Depends(get_tenant_id),
 ) -> list[dict]:
@@ -114,7 +114,7 @@ async def list_violations(
     return [v.model_dump() for v in tenant_violations]
 
 
-@router.post("/violations/{violation_id}/acknowledge")
+@router.post("/violations/{violation_id}/acknowledge", summary="Violation acknowledge")
 async def acknowledge_violation(
     violation_id: str,
     tenant_id: str = Depends(get_tenant_id),

@@ -131,7 +131,7 @@ class FreightCalcIn(BaseModel):
 # Endpoints
 # ---------------------------------------------------------------------------
 
-@router.get("/freight-tariffs")
+@router.get("/freight-tariffs", summary="Tariffs auflisten")
 def list_tariffs(
     carrier_id: Optional[str] = Query(None),
     x_tenant_id: Optional[str] = Header(None),
@@ -160,7 +160,7 @@ def list_tariffs(
         raise HTTPException(status_code=503, detail=str(exc)) from exc
 
 
-@router.post("/freight-tariffs", status_code=201)
+@router.post("/freight-tariffs", status_code=201, summary="Tariff anlegen")
 def create_tariff(
     body: FreightTariffIn,
     x_tenant_id: Optional[str] = Header(None),
@@ -188,7 +188,7 @@ def create_tariff(
         raise HTTPException(status_code=503, detail=str(exc)) from exc
 
 
-@router.post("/freight-cost/calculate")
+@router.post("/freight-cost/calculate", summary="Freight berechnen")
 def calculate_freight(
     body: FreightCalcIn,
     db: Session = Depends(get_db),
@@ -198,7 +198,7 @@ def calculate_freight(
     return _calculate(db, body.carrier_id, body.weight_kg, body.postal_code_from, body.postal_code_to, body.distance_km)
 
 
-@router.get("/freight-cost/simulate")
+@router.get("/freight-cost/simulate", summary="Freight simulate")
 def simulate_freight(
     carrier_id: str = Query(...),
     distance_km: float = Query(...),

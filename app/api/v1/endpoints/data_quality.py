@@ -48,7 +48,7 @@ class ValidationResultOut(BaseModel):
     total_count: int
 
 
-@router.get("/rules", response_model=list[RuleOut])
+@router.get("/rules", response_model=list[RuleOut], summary="Data quality rules auflisten")
 async def list_data_quality_rules(
     entity_type: str | None = Query(None, description="Filter nach Entity-Typ"),
 ):
@@ -75,7 +75,7 @@ async def list_data_quality_rules(
     return rules
 
 
-@router.get("/catalog", response_model=dict)
+@router.get("/catalog", response_model=dict, summary="Data quality catalog abrufen")
 async def get_data_quality_catalog(
     entity_type: str | None = Query(None, description="Optionaler Filter nach Entity-Typ"),
 ):
@@ -83,13 +83,13 @@ async def get_data_quality_catalog(
     return get_dq_catalog(entity_typ=entity_type).as_dict()
 
 
-@router.get("/entity-types", response_model=list[str])
+@router.get("/entity-types", response_model=list[str], summary="Entity types auflisten")
 async def list_entity_types():
     """Liste aller Entity-Typen mit definierten Regeln."""
     return get_all_entity_types()
 
 
-@router.get("/rulesets/{entity_type}", response_model=dict)
+@router.get("/rulesets/{entity_type}", response_model=dict, summary="Data quality ruleset abrufen")
 async def get_data_quality_ruleset(entity_type: str):
     """Gibt das vollstaendige DQ-Regelset fuer einen Entity-Typ zurueck."""
     ruleset = get_dq_ruleset_for_entity(entity_type)
@@ -98,7 +98,7 @@ async def get_data_quality_ruleset(entity_type: str):
     return ruleset.as_dict()
 
 
-@router.get("/rulesets/{entity_type}/summary", response_model=dict)
+@router.get("/rulesets/{entity_type}/summary", response_model=dict, summary="Data quality ruleset summary abrufen")
 async def get_data_quality_ruleset_summary(entity_type: str):
     """Verdichtete Sicht auf ein einzelnes DQ-Regelset."""
     ruleset = get_dq_ruleset_for_entity(entity_type)
@@ -219,7 +219,7 @@ class ValidateRequest(BaseModel):
     entity_types: list[str] | None = Field(default=None, description="Entity-Typen zu prüfen; leer = alle")
 
 
-@router.post("/validate", response_model=list[ValidationResultOut])
+@router.post("/validate", response_model=list[ValidationResultOut], summary="Data quality validieren")
 async def validate_data_quality(
     body: ValidateRequest | None = None,
     db: Session = Depends(get_db),

@@ -53,7 +53,7 @@ class IndexResponse(BaseModel):
     status: str
 
 
-@router.post("/search", response_model=SearchResponse)
+@router.post("/search", response_model=SearchResponse, summary="Search semantic")
 async def semantic_search(request: SearchRequest):
     """
     Perform semantic search across indexed documents.
@@ -93,7 +93,7 @@ async def semantic_search(request: SearchRequest):
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.post("/index/articles", response_model=IndexResponse)
+@router.post("/index/articles", response_model=IndexResponse, summary="Articles index")
 async def index_articles(
     request: IndexRequest,
     db: Session = Depends(get_db)
@@ -116,7 +116,7 @@ async def index_articles(
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.post("/index/customers", response_model=IndexResponse)
+@router.post("/index/customers", response_model=IndexResponse, summary="Customers index")
 async def index_customers(
     request: IndexRequest,
     db: Session = Depends(get_db)
@@ -139,7 +139,7 @@ async def index_customers(
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.get("/stats/{collection}")
+@router.get("/stats/{collection}", summary="Collection stats abrufen")
 async def get_collection_stats(collection: str):
     """Get statistics for a collection."""
     try:

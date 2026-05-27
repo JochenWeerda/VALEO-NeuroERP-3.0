@@ -43,7 +43,7 @@ class PrepListRemark(BaseModel):
     notes: str
 
 
-@router.get("/", response_model=PaginatedResponse[PrepListOut])
+@router.get("/", response_model=PaginatedResponse[PrepListOut], summary="Preparation lists auflisten")
 async def list_preparation_lists(
     tenant_id: Optional[str] = Query(None),
     skip: int = Query(0, ge=0),
@@ -64,7 +64,7 @@ async def list_preparation_lists(
     )
 
 
-@router.get("/{list_id}", response_model=PrepListOut)
+@router.get("/{list_id}", response_model=PrepListOut, summary="Preparation list abrufen")
 async def get_preparation_list(list_id: str, db: Session = Depends(get_db)):
     """GET einzelne Rüstliste"""
     obj = db.query(PreparationList).filter(PreparationList.id == list_id).first()
@@ -73,7 +73,7 @@ async def get_preparation_list(list_id: str, db: Session = Depends(get_db)):
     return PrepListOut.model_validate(obj)
 
 
-@router.put("/{list_id}", response_model=PrepListOut)
+@router.put("/{list_id}", response_model=PrepListOut, summary="Preparation list aktualisieren")
 async def update_preparation_list(
     list_id: str,
     payload: PrepListRemark,
@@ -91,7 +91,7 @@ async def update_preparation_list(
     return PrepListOut.model_validate(obj)
 
 
-@router.delete("/{list_id}", status_code=204, response_class=Response, response_model=None)
+@router.delete("/{list_id}", status_code=204, response_class=Response, response_model=None, summary="Preparation list löschen")
 async def delete_preparation_list(list_id: str, db: Session = Depends(get_db)):
     """DELETE Rüstliste (nur offene)"""
     obj = db.query(PreparationList).filter(PreparationList.id == list_id).first()
@@ -103,7 +103,7 @@ async def delete_preparation_list(list_id: str, db: Session = Depends(get_db)):
     db.commit()
 
 
-@router.get("/{list_id}/lines", response_model=list[PrepListLineOut])
+@router.get("/{list_id}/lines", response_model=list[PrepListLineOut], summary="Prep list lines abrufen")
 async def get_prep_list_lines(list_id: str, db: Session = Depends(get_db)):
     """GET Rüstliste Positionen ermitteln"""
     lines = db.query(PreparationListLine).filter(
@@ -112,7 +112,7 @@ async def get_prep_list_lines(list_id: str, db: Session = Depends(get_db)):
     return [PrepListLineOut.model_validate(line_item) for line_item in lines]
 
 
-@router.post("/{list_id}/process", response_model=PrepListOut)
+@router.post("/{list_id}/process", response_model=PrepListOut, summary="Preparation list verarbeiten")
 async def process_preparation_list(
     list_id: str, payload: PrepListProcess, db: Session = Depends(get_db),
 ):
@@ -126,7 +126,7 @@ async def process_preparation_list(
     return PrepListOut.model_validate(obj)
 
 
-@router.post("/{list_id}/remark", response_model=PrepListOut)
+@router.post("/{list_id}/remark", response_model=PrepListOut, summary="Prep list remark hinzufügen")
 async def add_prep_list_remark(
     list_id: str, payload: PrepListRemark, db: Session = Depends(get_db),
 ):

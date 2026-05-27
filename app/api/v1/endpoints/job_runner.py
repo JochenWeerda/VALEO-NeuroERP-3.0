@@ -77,7 +77,7 @@ class JobCatalogOut(BaseModel):
 
 # ── Endpoints ───────────────────────────────────────────────────────────────────
 
-@router.post("/run", response_model=JobOut, status_code=201)
+@router.post("/run", response_model=JobOut, status_code=201, summary="Job ausführen")
 async def run_job(
     payload: JobRunIn,
     db: Session = Depends(get_db),
@@ -138,7 +138,7 @@ async def run_job(
     )
 
 
-@router.get("/catalog", response_model=JobCatalogOut)
+@router.get("/catalog", response_model=JobCatalogOut, summary="Job catalog abrufen")
 async def get_job_catalog(
     tenant_id: str = Depends(get_tenant_id),
 ):
@@ -154,7 +154,7 @@ async def get_job_catalog(
     )
 
 
-@router.get("", response_model=list[JobOut])
+@router.get("", response_model=list[JobOut], summary="Jobs auflisten")
 async def list_jobs(
     status: Optional[str] = Query(None),
     limit: int = Query(50, ge=1, le=500),
@@ -196,7 +196,7 @@ async def list_jobs(
     ]
 
 
-@router.get("/{job_id}", response_model=JobOut)
+@router.get("/{job_id}", response_model=JobOut, summary="Job abrufen")
 async def get_job(
     job_id: str,
     db: Session = Depends(get_db),
@@ -227,7 +227,7 @@ async def get_job(
     )
 
 
-@router.get("/{job_id}/artifacts", response_model=list[JobArtifactOut])
+@router.get("/{job_id}/artifacts", response_model=list[JobArtifactOut], summary="Job artifacts abrufen")
 async def get_job_artifacts(
     job_id: str,
     db: Session = Depends(get_db),

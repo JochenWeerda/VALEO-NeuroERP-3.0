@@ -42,14 +42,14 @@ def _readings_store(tenant_id: str) -> dict[str, list[Any]]:
 # Device management
 # ---------------------------------------------------------------------------
 
-@router.get("/devices", response_model=list[DeviceManifest])
+@router.get("/devices", response_model=list[DeviceManifest], summary="Devices auflisten")
 async def list_devices(tenant_id: str = Depends(get_tenant_id)):
     """List all registered IoT devices for the tenant."""
     store = _device_store(tenant_id)
     return list(store.values())
 
 
-@router.post("/devices", response_model=DeviceManifest, status_code=201)
+@router.post("/devices", response_model=DeviceManifest, status_code=201, summary="Device registrieren")
 async def register_device(
     manifest: DeviceManifest,
     tenant_id: str = Depends(get_tenant_id),
@@ -65,7 +65,7 @@ async def register_device(
 # Telemetry readings
 # ---------------------------------------------------------------------------
 
-@router.get("/devices/{device_id}/readings", response_model=list[TelemetryReading])
+@router.get("/devices/{device_id}/readings", response_model=list[TelemetryReading], summary="Readings abrufen")
 async def get_readings(
     device_id: str,
     limit: int = 100,
@@ -80,7 +80,7 @@ async def get_readings(
     return readings[-limit:]
 
 
-@router.post("/devices/{device_id}/readings", response_model=TelemetryReading, status_code=201)
+@router.post("/devices/{device_id}/readings", response_model=TelemetryReading, status_code=201, summary="Reading ingest")
 async def ingest_reading(
     device_id: str,
     reading: TelemetryReading,
@@ -100,7 +100,7 @@ async def ingest_reading(
 # Aggregation
 # ---------------------------------------------------------------------------
 
-@router.get("/devices/{device_id}/aggregation", response_model=TelemetryAggregation)
+@router.get("/devices/{device_id}/aggregation", response_model=TelemetryAggregation, summary="Aggregation abrufen")
 async def get_aggregation(
     device_id: str,
     tenant_id: str = Depends(get_tenant_id),

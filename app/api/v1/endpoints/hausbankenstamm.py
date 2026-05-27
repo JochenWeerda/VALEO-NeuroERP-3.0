@@ -70,7 +70,7 @@ class HausbankOut(BaseModel):
 
 # ── Endpoints ─────────────────────────────────────────────────────────────────
 
-@router.get("", response_model=list[HausbankOut])
+@router.get("", response_model=list[HausbankOut], summary="Hausbanken auflisten")
 def list_hausbanken(
     nur_aktive: bool = Query(True),
     nur_erechnung: bool = Query(False),
@@ -88,7 +88,7 @@ def list_hausbanken(
     return [HausbankOut(**dict(r._mapping)) for r in rows]
 
 
-@router.get("/{bank_nr}", response_model=HausbankOut)
+@router.get("/{bank_nr}", response_model=HausbankOut, summary="Hausbank abrufen")
 def get_hausbank(
     bank_nr: str,
     db=Depends(get_db),
@@ -103,7 +103,7 @@ def get_hausbank(
     return HausbankOut(**dict(row._mapping))
 
 
-@router.post("", response_model=HausbankOut, status_code=201)
+@router.post("", response_model=HausbankOut, status_code=201, summary="Hausbank anlegen")
 def create_hausbank(
     payload: HausbankCreate,
     db=Depends(get_db),
@@ -144,7 +144,7 @@ def create_hausbank(
     return HausbankOut(**dict(row._mapping))
 
 
-@router.put("/{bank_nr}", response_model=HausbankOut)
+@router.put("/{bank_nr}", response_model=HausbankOut, summary="Hausbank aktualisieren")
 def update_hausbank(
     bank_nr: str,
     payload: HausbankCreate,
@@ -186,7 +186,7 @@ def update_hausbank(
     return HausbankOut(**dict(updated._mapping))
 
 
-@router.delete("/{bank_nr}")
+@router.delete("/{bank_nr}", summary="Hausbank löschen")
 def delete_hausbank(
     bank_nr: str,
     db=Depends(get_db),

@@ -29,21 +29,21 @@ class ConsentRevokeRequest(BaseModel):
     consent_type: str
 
 
-@router.post("/check")
+@router.post("/check", summary="Check do")
 async def do_check(req: ConsentCheckRequest, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
     return check_consent(req.entity_id, req.consent_type, tenant_id, db)
 
 
-@router.post("/grant")
+@router.post("/grant", summary="Grant do")
 async def do_grant(req: ConsentGrantRequest, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
     return grant_consent(req.entity_id, req.consent_type, req.purpose, tenant_id, db)
 
 
-@router.post("/revoke")
+@router.post("/revoke", summary="Revoke do")
 async def do_revoke(req: ConsentRevokeRequest, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
     return revoke_consent(req.entity_id, req.consent_type, tenant_id, db)
 
 
-@router.get("/{entity_id}")
+@router.get("/{entity_id}", summary="Status abrufen")
 async def get_status(entity_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
     return {"entity_id": entity_id, "consents": get_consent_status(entity_id, tenant_id, db)}

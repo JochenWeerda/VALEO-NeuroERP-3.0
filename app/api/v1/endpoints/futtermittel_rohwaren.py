@@ -141,7 +141,7 @@ def _row_to_dict(row) -> dict:
 # Endpoints
 # ---------------------------------------------------------------------------
 
-@router.get("", response_model=List[Dict[str, Any]])
+@router.get("", response_model=List[Dict[str, Any]], summary="Rohwaren auflisten")
 async def list_rohwaren(
     kategorie: Optional[str] = Query(None),
     search: Optional[str] = Query(None),
@@ -171,7 +171,7 @@ async def list_rohwaren(
         raise HTTPException(status_code=503, detail="Datenbank nicht erreichbar")
 
 
-@router.post("", status_code=201)
+@router.post("", status_code=201, summary="Rohware anlegen")
 async def create_rohware(
     payload: RohwareIn,
     tenant_id: str = Depends(get_tenant_id),
@@ -211,7 +211,7 @@ async def create_rohware(
         raise HTTPException(status_code=503, detail="Datenbank nicht erreichbar")
 
 
-@router.get("/vergleich")
+@router.get("/vergleich", summary="Rohwaren vergleich")
 async def vergleich_rohwaren(
     ids: str = Query(..., description="Komma-getrennte IDs"),
     tenant_id: str = Depends(get_tenant_id),
@@ -254,7 +254,7 @@ async def vergleich_rohwaren(
         raise HTTPException(status_code=503, detail="Datenbank nicht erreichbar")
 
 
-@router.get("/{rohware_id}")
+@router.get("/{rohware_id}", summary="Rohware abrufen")
 async def get_rohware(
     rohware_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -276,7 +276,7 @@ async def get_rohware(
     return _row_to_dict(row)
 
 
-@router.patch("/{rohware_id}")
+@router.patch("/{rohware_id}", summary="Rohware aktualisieren")
 async def update_rohware(
     rohware_id: str,
     payload: RohwarePatch,
@@ -308,7 +308,7 @@ async def update_rohware(
     return _row_to_dict(row)
 
 
-@router.get("/{rohware_id}/analysen")
+@router.get("/{rohware_id}/analysen", summary="Analysen auflisten")
 async def list_analysen(
     rohware_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -330,7 +330,7 @@ async def list_analysen(
         raise HTTPException(status_code=503, detail="Datenbank nicht erreichbar")
 
 
-@router.post("/{rohware_id}/analysen", status_code=201)
+@router.post("/{rohware_id}/analysen", status_code=201, summary="Analyse anlegen")
 async def create_analyse(
     rohware_id: str,
     payload: AnalyseIn,

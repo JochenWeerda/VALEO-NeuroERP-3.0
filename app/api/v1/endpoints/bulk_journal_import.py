@@ -162,7 +162,7 @@ def validate_and_parse_row(
     return entry, None
 
 
-@router.post("/csv", response_model=ImportResult)
+@router.post("/csv", response_model=ImportResult, summary="Journal entries csv importieren")
 async def import_journal_entries_csv(
     file: UploadFile = File(...),
     period: str = Query(..., description="Accounting period (YYYY-MM)"),
@@ -377,7 +377,7 @@ async def import_journal_entries_csv(
         raise HTTPException(status_code=500, detail=f"Failed to import journal entries: {str(e)}")
 
 
-@router.get("/template")
+@router.get("/template", summary="Import template abrufen")
 async def get_import_template():
     """
     Get CSV template for journal entry import.

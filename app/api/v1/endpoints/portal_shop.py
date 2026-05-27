@@ -50,7 +50,7 @@ def get_customer_id_from_token(request: Request, tenant_id: str) -> str:
     return "customer-demo-001"
 
 
-@router.get("/products", response_model=PortalProductList)
+@router.get("/products", response_model=PortalProductList, summary="Portal products abrufen")
 async def get_portal_products(
     request: Request,
     tenant_id: str = Query(..., description="Mandanten-ID"),
@@ -230,7 +230,7 @@ async def get_portal_products(
     )
 
 
-@router.post("/orders", response_model=OrderResponse, status_code=status.HTTP_201_CREATED)
+@router.post("/orders", response_model=OrderResponse, status_code=status.HTTP_201_CREATED, summary="Order anlegen")
 async def create_order(
     request: Request,
     order_data: OrderCreate,
@@ -510,7 +510,7 @@ async def create_order(
     )
 
 
-@router.get("/orders", response_model=OrderList)
+@router.get("/orders", response_model=OrderList, summary="Orders auflisten")
 async def list_orders(
     request: Request,
     tenant_id: str = Query(..., description="Mandanten-ID"),
@@ -567,7 +567,7 @@ async def list_orders(
     )
 
 
-@router.get("/orders/{order_id}", response_model=OrderResponse)
+@router.get("/orders/{order_id}", response_model=OrderResponse, summary="Order abrufen")
 async def get_order(
     request: Request,
     order_id: str,
@@ -628,7 +628,7 @@ async def get_order(
     )
 
 
-@router.get("/contracts", response_model=list)
+@router.get("/contracts", response_model=list, summary="Contracts auflisten")
 async def list_contracts(
     request: Request,
     tenant_id: str = Query(..., description="Mandanten-ID"),
@@ -664,7 +664,7 @@ async def list_contracts(
     ]
 
 
-@router.get("/pre-purchases", response_model=list)
+@router.get("/pre-purchases", response_model=list, summary="Pre purchases auflisten")
 async def list_pre_purchases(
     request: Request,
     tenant_id: str = Query(..., description="Mandanten-ID"),
@@ -701,7 +701,7 @@ async def list_pre_purchases(
     ]
 
 
-@router.patch("/orders/{order_id}/status")
+@router.patch("/orders/{order_id}/status", summary="Order status aktualisieren")
 async def update_order_status(
     request: Request,
     order_id: str,
@@ -758,7 +758,7 @@ async def update_order_status(
     }
 
 
-@router.get("/orders/reconciliation")
+@router.get("/orders/reconciliation", summary="Orders reconcile")
 async def reconcile_orders(
     tenant_id: str = Query(..., description="Mandanten-ID"),
     stale_hours: int = Query(48, ge=1, le=720, description="Stunden ohne Statusänderung"),
@@ -817,7 +817,7 @@ async def reconcile_orders(
     }
 
 
-@router.get("/orders/observability")
+@router.get("/orders/observability", summary="Orders observability abrufen")
 async def get_orders_observability(
     tenant_id: str = Query(..., description="Mandanten-ID"),
     db: Session = Depends(get_db),

@@ -223,7 +223,7 @@ def _area_sheet_out(db: Session, item: NawaroAreaSheet) -> NawaroAreaSheetOut:
     )
 
 
-@router.get('/print-notifications', response_model=list[NawaroNotificationOut])
+@router.get('/print-notifications', response_model=list[NawaroNotificationOut], summary="Print notifications auflisten")
 async def list_print_notifications(
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
@@ -238,7 +238,7 @@ async def list_print_notifications(
     return [_notification_out(item) for item in items]
 
 
-@router.post('/print-notifications', response_model=NawaroNotificationOut, status_code=201)
+@router.post('/print-notifications', response_model=NawaroNotificationOut, status_code=201, summary="Print notification anlegen")
 async def create_print_notification(
     payload: NawaroNotificationIn,
     tenant_id: str = Depends(get_tenant_id),
@@ -263,7 +263,7 @@ async def create_print_notification(
     return _notification_out(item)
 
 
-@router.get('/print-notifications/{item_id}', response_model=NawaroNotificationOut)
+@router.get('/print-notifications/{item_id}', response_model=NawaroNotificationOut, summary="Print notification abrufen")
 async def get_print_notification(
     item_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -279,7 +279,7 @@ async def get_print_notification(
     return _notification_out(item)
 
 
-@router.put('/print-notifications/{item_id}', response_model=NawaroNotificationOut)
+@router.put('/print-notifications/{item_id}', response_model=NawaroNotificationOut, summary="Print notification aktualisieren")
 async def update_print_notification(
     item_id: str,
     payload: NawaroNotificationIn,
@@ -309,7 +309,7 @@ async def update_print_notification(
     return _notification_out(item)
 
 
-@router.delete('/print-notifications/{item_id}', response_model=dict)
+@router.delete('/print-notifications/{item_id}', response_model=dict, summary="Print notification löschen")
 async def delete_print_notification(
     item_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -327,7 +327,7 @@ async def delete_print_notification(
     return {'ok': True, 'id': item_id}
 
 
-@router.get('/contract-sheets', response_model=list[NawaroContractSheetOut])
+@router.get('/contract-sheets', response_model=list[NawaroContractSheetOut], summary="Contract sheets auflisten")
 async def list_contract_sheets(
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
@@ -342,7 +342,7 @@ async def list_contract_sheets(
     return [_contract_sheet_out(db, item) for item in items]
 
 
-@router.post('/contract-sheets', response_model=NawaroContractSheetOut, status_code=201)
+@router.post('/contract-sheets', response_model=NawaroContractSheetOut, status_code=201, summary="Contract sheet anlegen")
 async def create_contract_sheet(
     payload: NawaroContractSheetIn,
     tenant_id: str = Depends(get_tenant_id),
@@ -383,7 +383,7 @@ async def create_contract_sheet(
     return _contract_sheet_out(db, item)
 
 
-@router.get('/contract-sheets/{sheet_id}', response_model=NawaroContractSheetOut)
+@router.get('/contract-sheets/{sheet_id}', response_model=NawaroContractSheetOut, summary="Contract sheet abrufen")
 async def get_contract_sheet(
     sheet_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -399,7 +399,7 @@ async def get_contract_sheet(
     return _contract_sheet_out(db, item)
 
 
-@router.put('/contract-sheets/{sheet_id}', response_model=NawaroContractSheetOut)
+@router.put('/contract-sheets/{sheet_id}', response_model=NawaroContractSheetOut, summary="Contract sheet aktualisieren")
 async def update_contract_sheet(
     sheet_id: str,
     payload: NawaroContractSheetIn,
@@ -448,7 +448,7 @@ async def update_contract_sheet(
     return _contract_sheet_out(db, item)
 
 
-@router.delete('/contract-sheets/{sheet_id}', response_model=dict)
+@router.delete('/contract-sheets/{sheet_id}', response_model=dict, summary="Contract sheet löschen")
 async def delete_contract_sheet(
     sheet_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -471,7 +471,7 @@ async def delete_contract_sheet(
     return {'ok': True, 'id': sheet_id}
 
 
-@router.get('/area-sheets', response_model=list[NawaroAreaSheetOut])
+@router.get('/area-sheets', response_model=list[NawaroAreaSheetOut], summary="Area sheets auflisten")
 async def list_area_sheets(
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
@@ -486,7 +486,7 @@ async def list_area_sheets(
     return [_area_sheet_out(db, item) for item in items]
 
 
-@router.post('/area-sheets', response_model=NawaroAreaSheetOut, status_code=201)
+@router.post('/area-sheets', response_model=NawaroAreaSheetOut, status_code=201, summary="Area sheet anlegen")
 async def create_area_sheet(
     payload: NawaroAreaSheetIn,
     tenant_id: str = Depends(get_tenant_id),
@@ -532,7 +532,7 @@ async def create_area_sheet(
     return _area_sheet_out(db, item)
 
 
-@router.get('/area-sheets/{sheet_id}', response_model=NawaroAreaSheetOut)
+@router.get('/area-sheets/{sheet_id}', response_model=NawaroAreaSheetOut, summary="Area sheet abrufen")
 async def get_area_sheet(
     sheet_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -548,7 +548,7 @@ async def get_area_sheet(
     return _area_sheet_out(db, item)
 
 
-@router.put('/area-sheets/{sheet_id}', response_model=NawaroAreaSheetOut)
+@router.put('/area-sheets/{sheet_id}', response_model=NawaroAreaSheetOut, summary="Area sheet aktualisieren")
 async def update_area_sheet(
     sheet_id: str,
     payload: NawaroAreaSheetIn,
@@ -602,7 +602,7 @@ async def update_area_sheet(
     return _area_sheet_out(db, item)
 
 
-@router.delete('/area-sheets/{sheet_id}', response_model=dict)
+@router.delete('/area-sheets/{sheet_id}', response_model=dict, summary="Area sheet löschen")
 async def delete_area_sheet(
     sheet_id: str,
     tenant_id: str = Depends(get_tenant_id),

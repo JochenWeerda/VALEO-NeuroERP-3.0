@@ -93,7 +93,7 @@ def _seed(db: Session) -> None:
     db.commit()
 
 
-@router.get("/proben", response_model=dict)
+@router.get("/proben", response_model=dict, summary="Proben auflisten")
 async def list_proben(status: Optional[str] = Query(None, description="Filter by status"), db: Session = Depends(get_db)) -> dict:
     _seed(db)
     query = db.query(LaborProbe)
@@ -117,7 +117,7 @@ async def list_proben(status: Optional[str] = Query(None, description="Filter by
     }
 
 
-@router.get("/labor-auftraege", response_model=dict)
+@router.get("/labor-auftraege", response_model=dict, summary="Labor auftraege auflisten")
 async def list_labor_auftraege(db: Session = Depends(get_db)) -> dict:
     _seed(db)
     items = db.query(LaborAuftragEntry).order_by(LaborAuftragEntry.auftragsdatum.desc()).all()
@@ -127,7 +127,7 @@ async def list_labor_auftraege(db: Session = Depends(get_db)) -> dict:
     }
 
 
-@router.get("/labor-auftraege/{entry_id}", response_model=dict)
+@router.get("/labor-auftraege/{entry_id}", response_model=dict, summary="Labor auftrag abrufen")
 async def get_labor_auftrag(entry_id: str, db: Session = Depends(get_db)) -> dict:
     """Einzelner Labor-Auftrag fuer Detail-UI."""
     _seed(db)
@@ -137,7 +137,7 @@ async def get_labor_auftrag(entry_id: str, db: Session = Depends(get_db)) -> dic
     return _auftrag_to_dict(row)
 
 
-@router.post("/labor-auftraege", response_model=dict, status_code=201)
+@router.post("/labor-auftraege", response_model=dict, status_code=201, summary="Labor auftrag anlegen")
 async def create_labor_auftrag(body: LaborAuftragCreate, db: Session = Depends(get_db)) -> dict:
     """Neuen Labor-Auftrag anlegen (Wizard `labor-auftrag.tsx`)."""
     _seed(db)
@@ -167,7 +167,7 @@ async def create_labor_auftrag(body: LaborAuftragCreate, db: Session = Depends(g
     return _auftrag_to_dict(entry)
 
 
-@router.get("/stats", response_model=dict)
+@router.get("/stats", response_model=dict, summary="Labor stats abrufen")
 async def get_labor_stats(db: Session = Depends(get_db)) -> dict:
     _seed(db)
     items = db.query(LaborProbe).all()

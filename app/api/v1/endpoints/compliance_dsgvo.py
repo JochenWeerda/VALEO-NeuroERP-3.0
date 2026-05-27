@@ -69,7 +69,7 @@ def _anonymize_subject(db: Session, subject_type: str, subject_id: str, tenant_i
     return log
 
 
-@router.post("/erasure-requests", status_code=201)
+@router.post("/erasure-requests", status_code=201, summary="Erasure request anlegen")
 async def create_erasure_request(
     payload: ErasureRequestIn,
     tenant_id: str = Depends(get_tenant_id),
@@ -105,7 +105,7 @@ async def create_erasure_request(
     return {"id": req_id, "status": "EINGEGANGEN"}
 
 
-@router.get("/erasure-requests")
+@router.get("/erasure-requests", summary="Erasure requests auflisten")
 async def list_erasure_requests(
     status: Optional[str] = Query(None),
     tenant_id: str = Depends(get_tenant_id),
@@ -129,7 +129,7 @@ async def list_erasure_requests(
     return [dict(r._mapping) for r in rows]
 
 
-@router.get("/erasure-requests/{request_id}")
+@router.get("/erasure-requests/{request_id}", summary="Erasure request abrufen")
 async def get_erasure_request(
     request_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -148,7 +148,7 @@ async def get_erasure_request(
     return dict(row._mapping)
 
 
-@router.post("/erasure-requests/{request_id}/process")
+@router.post("/erasure-requests/{request_id}/process", summary="Erasure request verarbeiten")
 async def process_erasure_request(
     request_id: str,
     payload: ErasureProcessIn,
@@ -192,7 +192,7 @@ async def process_erasure_request(
     return {"id": request_id, "status": "ABGESCHLOSSEN", "deletion_log": deletion_log}
 
 
-@router.post("/erasure-requests/{request_id}/reject")
+@router.post("/erasure-requests/{request_id}/reject", summary="Erasure request ablehnen")
 async def reject_erasure_request(
     request_id: str,
     payload: ErasureRejectIn,

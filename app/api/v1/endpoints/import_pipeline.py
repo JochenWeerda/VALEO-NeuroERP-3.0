@@ -40,14 +40,14 @@ def _config_store(tenant_id: str) -> dict[str, Any]:
 # Job endpoints
 # ---------------------------------------------------------------------------
 
-@router.get("/jobs", response_model=list[ImportPipelineJob])
+@router.get("/jobs", response_model=list[ImportPipelineJob], summary="Jobs auflisten")
 async def list_jobs(tenant_id: str = Depends(get_tenant_id)):
     """List all import pipeline jobs for the tenant."""
     store = _job_store(tenant_id)
     return list(store.values())
 
 
-@router.post("/jobs", response_model=ImportPipelineJob, status_code=201)
+@router.post("/jobs", response_model=ImportPipelineJob, status_code=201, summary="Job anlegen")
 async def create_job(
     job: ImportPipelineJob,
     tenant_id: str = Depends(get_tenant_id),
@@ -64,7 +64,7 @@ async def create_job(
     return job
 
 
-@router.get("/jobs/{job_id}", response_model=ImportPipelineJob)
+@router.get("/jobs/{job_id}", response_model=ImportPipelineJob, summary="Job abrufen")
 async def get_job(
     job_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -76,7 +76,7 @@ async def get_job(
     return store[job_id]
 
 
-@router.post("/jobs/{job_id}/validate", response_model=ImportValidationResult)
+@router.post("/jobs/{job_id}/validate", response_model=ImportValidationResult, summary="Job validieren")
 async def validate_job(
     job_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -129,7 +129,7 @@ async def validate_job(
 # Config endpoints
 # ---------------------------------------------------------------------------
 
-@router.get("/configs", response_model=list[ImportPipelineConfig])
+@router.get("/configs", response_model=list[ImportPipelineConfig], summary="Configs auflisten")
 async def list_configs(tenant_id: str = Depends(get_tenant_id)):
     """List all import pipeline configs for the tenant."""
     store = _config_store(tenant_id)

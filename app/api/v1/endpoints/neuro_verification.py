@@ -38,7 +38,7 @@ class VerifyPlanResponse(BaseModel):
     plan_summary: str
 
 
-@router.post("", response_model=VerifyPlanResponse)
+@router.post("", response_model=VerifyPlanResponse, summary="Verifizieren")
 async def verify(
     request: VerifyPlanRequest,
     tenant_id: str = Depends(get_tenant_id),
@@ -50,7 +50,7 @@ async def verify(
     return VerifyPlanResponse(**result.to_dict())
 
 
-@router.get("/{trace_id}", response_model=VerifyPlanResponse)
+@router.get("/{trace_id}", response_model=VerifyPlanResponse, summary="Verification abrufen")
 async def get_verification(
     trace_id: str,
     db: Session = Depends(get_db),

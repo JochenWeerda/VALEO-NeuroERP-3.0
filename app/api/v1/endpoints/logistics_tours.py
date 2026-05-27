@@ -140,7 +140,7 @@ def _tours_table_check(db: Session) -> None:
     _ensure_schema(db)
 
 
-@router.get("/tours")
+@router.get("/tours", summary="Tours auflisten")
 def list_tours(
     date: Optional[str] = Query(None),
     vehicle_id: Optional[str] = Query(None),
@@ -191,7 +191,7 @@ def list_tours(
         raise HTTPException(status_code=503, detail=str(exc)) from exc
 
 
-@router.post("/tours", status_code=201)
+@router.post("/tours", status_code=201, summary="Tour anlegen")
 def create_tour(
     body: TourIn,
     x_tenant_id: Optional[str] = Header(None),
@@ -266,7 +266,7 @@ def create_tour(
 # Tour detail
 # ---------------------------------------------------------------------------
 
-@router.get("/tours/{tour_id}")
+@router.get("/tours/{tour_id}", summary="Tour abrufen")
 def get_tour(
     tour_id: str,
     x_tenant_id: Optional[str] = Header(None),
@@ -300,7 +300,7 @@ def get_tour(
 # Stops
 # ---------------------------------------------------------------------------
 
-@router.post("/tours/{tour_id}/stops", status_code=201)
+@router.post("/tours/{tour_id}/stops", status_code=201, summary="Stop hinzufügen")
 def add_stop(
     tour_id: str,
     body: TourStopIn,
@@ -349,7 +349,7 @@ def add_stop(
         raise HTTPException(status_code=503, detail=str(exc)) from exc
 
 
-@router.patch("/tours/{tour_id}/stops/{stop_id}")
+@router.patch("/tours/{tour_id}/stops/{stop_id}", summary="Stop aktualisieren")
 def patch_stop(
     tour_id: str,
     stop_id: str,
@@ -401,7 +401,7 @@ def patch_stop(
 # Events
 # ---------------------------------------------------------------------------
 
-@router.post("/tours/{tour_id}/events", status_code=201)
+@router.post("/tours/{tour_id}/events", status_code=201, summary="Event hinzufügen")
 def add_event(
     tour_id: str,
     body: TourEventIn,
@@ -443,7 +443,7 @@ def add_event(
 # Live-Status
 # ---------------------------------------------------------------------------
 
-@router.get("/tours/{tour_id}/live-status")
+@router.get("/tours/{tour_id}/live-status", summary="Status live")
 def live_status(
     tour_id: str,
     db: Session = Depends(get_db),
@@ -483,7 +483,7 @@ def live_status(
 # Optimierung (Nearest-Neighbor TSP)
 # ---------------------------------------------------------------------------
 
-@router.post("/tours/{tour_id}/optimize")
+@router.post("/tours/{tour_id}/optimize", summary="Stops optimize")
 def optimize_stops(
     tour_id: str,
     depot_lat: float = Query(0.0),
@@ -533,7 +533,7 @@ def optimize_stops(
 # Track & Trace (Feature 3)
 # ---------------------------------------------------------------------------
 
-@router.get("/tracking/{tour_id}")
+@router.get("/tracking/{tour_id}", summary="Tracking public")
 def public_tracking(
     tour_id: str,
     share_token: Optional[str] = Query(None),
@@ -585,7 +585,7 @@ def public_tracking(
 # ePOD
 # ---------------------------------------------------------------------------
 
-@router.post("/tours/{tour_id}/stops/{stop_id}/pod", status_code=201)
+@router.post("/tours/{tour_id}/stops/{stop_id}/pod", status_code=201, summary="Pod save")
 def save_pod(
     tour_id: str,
     stop_id: str,
@@ -620,7 +620,7 @@ def save_pod(
         raise HTTPException(status_code=503, detail=str(exc)) from exc
 
 
-@router.get("/tours/{tour_id}/stops/{stop_id}/pod")
+@router.get("/tours/{tour_id}/stops/{stop_id}/pod", summary="Pod abrufen")
 def get_pod(
     tour_id: str,
     stop_id: str,
@@ -648,7 +648,7 @@ def get_pod(
 # Transportstatistik (Feature 4)
 # ---------------------------------------------------------------------------
 
-@router.get("/statistics")
+@router.get("/statistics", summary="Statistics abrufen")
 def get_statistics(
     date_from: Optional[str] = Query(None),
     date_to: Optional[str] = Query(None),

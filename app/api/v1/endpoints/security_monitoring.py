@@ -9,17 +9,17 @@ from app.services.security_observability import security_observer
 router = APIRouter(prefix="/security/monitoring", tags=["security", "monitoring"])
 
 
-@router.get("/metrics")
+@router.get("/metrics", summary="Security metrics abrufen")
 async def get_security_metrics() -> dict:
     return security_observer.get_metrics()
 
 
-@router.get("/health")
+@router.get("/health", summary="Security health abrufen")
 async def get_security_health() -> dict:
     return security_observer.get_health()
 
 
-@router.get("/events")
+@router.get("/events", summary="Security events abrufen")
 async def get_security_events(
     limit: int = Query(20, ge=1, le=200),
     category: str | None = Query(None),

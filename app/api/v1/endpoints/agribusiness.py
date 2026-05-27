@@ -42,7 +42,7 @@ class DeleteFarmerRequest(BaseModel):
 
 # ── Routes ───────────────────────────────────────────────────────────────────
 
-@router.get("/farmers", response_model=FarmerListResponse)
+@router.get("/farmers", response_model=FarmerListResponse, summary="Farmers auflisten")
 def list_farmers(
     db: Session = Depends(get_db),
     tenant_id: Optional[str] = None,
@@ -81,7 +81,7 @@ def list_farmers(
     return FarmerListResponse(items=items, total=len(items))
 
 
-@router.delete("/farmers/{farmer_id}", status_code=204, response_class=Response)
+@router.delete("/farmers/{farmer_id}", status_code=204, response_class=Response, summary="Farmer löschen")
 def delete_farmer(
     farmer_id: str,
     body: DeleteFarmerRequest,

@@ -236,13 +236,13 @@ def _post_inventory_journal(
 
 # ── Routes ──────────────────────────────────────────────────────
 
-@router.get("/reason-codes", tags=["lager"])
+@router.get("/reason-codes", tags=["lager"], summary="Reason codes auflisten")
 async def list_reason_codes():
     """GET alle verfügbaren Korrektur-Gründe."""
     return [{"code": k, "label": v} for k, v in REASON_CODES.items()]
 
 
-@router.post("/bestandskorrektur", response_model=BestandskorrekturOut, status_code=201, tags=["lager"])
+@router.post("/bestandskorrektur", response_model=BestandskorrekturOut, status_code=201, tags=["lager"], summary="Bestandskorrektur anlegen")
 async def create_bestandskorrektur(
     payload: BestandskorrekturIn,
     tenant_id: Optional[str] = Query(None),
@@ -363,7 +363,7 @@ async def create_bestandskorrektur(
     )
 
 
-@router.post("/schwund", response_model=BestandskorrekturOut, status_code=201, tags=["lager"])
+@router.post("/schwund", response_model=BestandskorrekturOut, status_code=201, tags=["lager"], summary="Schwund anlegen")
 async def create_schwund(
     payload: SchwundBuchungIn,
     tenant_id: Optional[str] = Query(None),
@@ -385,7 +385,7 @@ async def create_schwund(
     return await create_bestandskorrektur(korrektur, tenant_id, db)
 
 
-@router.post("/mhd-abschreibung", response_model=BestandskorrekturOut, status_code=201, tags=["lager"])
+@router.post("/mhd-abschreibung", response_model=BestandskorrekturOut, status_code=201, tags=["lager"], summary="Mhd abschreibung anlegen")
 async def create_mhd_abschreibung(
     payload: MhdAbschreibungIn,
     tenant_id: Optional[str] = Query(None),
@@ -423,7 +423,7 @@ async def create_mhd_abschreibung(
     return await create_bestandskorrektur(korrektur, tenant_id, db)
 
 
-@router.get("/korrekturen", tags=["lager"])
+@router.get("/korrekturen", tags=["lager"], summary="Korrekturen auflisten")
 async def list_korrekturen(
     tenant_id: Optional[str] = Query(None),
     article_id: Optional[str] = Query(None),
@@ -482,7 +482,7 @@ async def list_korrekturen(
     }
 
 
-@router.get("/korrekturen/{korrektur_id}", tags=["lager"])
+@router.get("/korrekturen/{korrektur_id}", tags=["lager"], summary="Korrektur abrufen")
 async def get_korrektur(
     korrektur_id: str,
     tenant_id: Optional[str] = Query(None),

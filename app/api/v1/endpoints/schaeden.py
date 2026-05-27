@@ -57,7 +57,7 @@ class SchadenMeldungResponse(BaseModel):
 
 # ── Versicherungen ────────────────────────────────────────────────────────────
 
-@router.get("/versicherungen", response_model=List[Versicherung])
+@router.get("/versicherungen", response_model=List[Versicherung], summary="Versicherungen auflisten")
 async def list_versicherungen(
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
@@ -102,7 +102,7 @@ async def list_versicherungen(
 
 # ── Schadenmeldungen ──────────────────────────────────────────────────────────
 
-@router.post("/meldungen", response_model=SchadenMeldungResponse, status_code=201)
+@router.post("/meldungen", response_model=SchadenMeldungResponse, status_code=201, summary="Schadenmeldung anlegen")
 async def create_schadenmeldung(
     data: SchadenMeldungCreate,
     tenant_id: str = Depends(get_tenant_id),
@@ -147,7 +147,7 @@ async def create_schadenmeldung(
     )
 
 
-@router.get("/meldungen", response_model=List[SchadenMeldungResponse])
+@router.get("/meldungen", response_model=List[SchadenMeldungResponse], summary="Schadenmeldungen auflisten")
 async def list_schadenmeldungen(
     status: Optional[str] = Query(None, description="Filter nach Status"),
     tenant_id: str = Depends(get_tenant_id),

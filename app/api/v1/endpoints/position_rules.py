@@ -51,7 +51,7 @@ class PositionRuleOut(BaseModel):
     updated_at: Optional[datetime] = None
 
 
-@router.get("", response_model=list[PositionRuleOut])
+@router.get("", response_model=list[PositionRuleOut], summary="Rules auflisten")
 def list_rules(
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
@@ -86,7 +86,7 @@ def list_rules(
     ]
 
 
-@router.post("", response_model=PositionRuleOut, status_code=201)
+@router.post("", response_model=PositionRuleOut, status_code=201, summary="Rule anlegen")
 def create_rule(
     payload: PositionRuleIn,
     tenant_id: str = Depends(get_tenant_id),
@@ -132,7 +132,7 @@ def create_rule(
     )
 
 
-@router.get("/{rule_id}", response_model=PositionRuleOut)
+@router.get("/{rule_id}", response_model=PositionRuleOut, summary="Rule abrufen")
 def get_rule(
     rule_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -164,7 +164,7 @@ def get_rule(
     )
 
 
-@router.put("/{rule_id}", response_model=PositionRuleOut)
+@router.put("/{rule_id}", response_model=PositionRuleOut, summary="Rule aktualisieren")
 def update_rule(
     rule_id: str,
     payload: PositionRuleIn,
@@ -211,7 +211,7 @@ def update_rule(
     )
 
 
-@router.delete("/{rule_id}", status_code=200)
+@router.delete("/{rule_id}", status_code=200, summary="Rule löschen")
 def delete_rule(
     rule_id: str,
     tenant_id: str = Depends(get_tenant_id),

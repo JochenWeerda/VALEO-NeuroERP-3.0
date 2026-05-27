@@ -162,7 +162,7 @@ def _compute_match_status(
 # Endpoints
 # ─────────────────────────────────────────────────────────────────────────────
 
-@router.post("/match")
+@router.post("/match", summary="Invoice match")
 def match_invoice(
     body: MatchRequest,
     db: Session = Depends(get_db),
@@ -230,7 +230,7 @@ def match_invoice(
     }
 
 
-@router.get("/pending")
+@router.get("/pending", summary="Pending auflisten")
 def list_pending(
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
@@ -266,7 +266,7 @@ def list_pending(
     ]
 
 
-@router.patch("/{verification_id}/approve")
+@router.patch("/{verification_id}/approve", summary="Verification genehmigen")
 def approve_verification(
     verification_id: int,
     body: ApproveRequest,
@@ -303,7 +303,7 @@ def approve_verification(
     }
 
 
-@router.patch("/{verification_id}/block")
+@router.patch("/{verification_id}/block", summary="Verification blockieren")
 def block_verification(
     verification_id: int,
     body: BlockRequest,
@@ -334,7 +334,7 @@ def block_verification(
     return {"id": result[0], "match_status": result[1]}
 
 
-@router.get("/statistics")
+@router.get("/statistics", summary="Statistics abrufen")
 def get_statistics(
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),

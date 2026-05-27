@@ -14,7 +14,7 @@ router = APIRouter(prefix="/dokumente", tags=["Dokumente"])
 
 # === DOKUMENT ENDPOINTS ===
 
-@router.get("", response_model=dict)
+@router.get("", response_model=dict, summary="Dokumente auflisten")
 async def list_dokumente(
     kategorie: Optional[str] = Query(None, description="Filter by category"),
     typ: Optional[str] = Query(None, description="Filter by type"),
@@ -48,7 +48,7 @@ async def list_dokumente(
     }
 
 
-@router.get("/kategorien", response_model=dict)
+@router.get("/kategorien", response_model=dict, summary="Kategorien abrufen")
 async def get_kategorien(db: Session = Depends(get_db)):
     """Get all document categories with counts"""
     repo = DokumentRepository(db)
@@ -56,7 +56,7 @@ async def get_kategorien(db: Session = Depends(get_db)):
     return {"kategorien": stats.get("by_category", {})}
 
 
-@router.get("/{dokument_id}", response_model=dict)
+@router.get("/{dokument_id}", response_model=dict, summary="Dokument abrufen")
 async def get_dokument(dokument_id: str, db: Session = Depends(get_db)):
     """Get a single document by ID"""
     repo = DokumentRepository(db)
@@ -66,7 +66,7 @@ async def get_dokument(dokument_id: str, db: Session = Depends(get_db)):
     return dokument
 
 
-@router.post("", response_model=dict, status_code=201)
+@router.post("", response_model=dict, status_code=201, summary="Dokument anlegen")
 async def create_dokument(
     dokument_data: dict,
     db: Session = Depends(get_db)
@@ -80,7 +80,7 @@ async def create_dokument(
         raise HTTPException(status_code=400, detail=str(e))
 
 
-@router.patch("/{dokument_id}", response_model=dict)
+@router.patch("/{dokument_id}", response_model=dict, summary="Dokument aktualisieren")
 async def update_dokument(
     dokument_id: str,
     dokument_data: dict,
@@ -94,7 +94,7 @@ async def update_dokument(
     return dokument
 
 
-@router.delete("/{dokument_id}", status_code=204, response_class=Response, response_model=None)
+@router.delete("/{dokument_id}", status_code=204, response_class=Response, response_model=None, summary="Dokument löschen")
 async def delete_dokument(
     dokument_id: str,
     hard_delete: bool = Query(False, description="Hard delete vs soft delete"),
@@ -112,7 +112,7 @@ async def delete_dokument(
 
 # === DOKUMENT VERSION ENDPOINTS ===
 
-@router.get("/{dokument_id}/versionen", response_model=list)
+@router.get("/{dokument_id}/versionen", response_model=list, summary="Versionen auflisten")
 async def list_versionen(
     dokument_id: str,
     db: Session = Depends(get_db)
@@ -128,7 +128,7 @@ async def list_versionen(
     return repo.get_all(dokument_id)
 
 
-@router.post("/{dokument_id}/versionen", response_model=dict, status_code=201)
+@router.post("/{dokument_id}/versionen", response_model=dict, status_code=201, summary="Version anlegen")
 async def create_version(
     dokument_id: str,
     version_data: dict,

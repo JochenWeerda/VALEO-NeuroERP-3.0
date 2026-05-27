@@ -105,7 +105,7 @@ def _map_row_to_model(row: Any, model_cls: type[BaseModel]) -> BaseModel:
     return model_cls(**payload)
 
 
-@router.get("/pos/terminals", response_model=list[PosTerminalOut])
+@router.get("/pos/terminals", response_model=list[PosTerminalOut], summary="Pos terminals auflisten")
 async def list_pos_terminals(
     include_inactive: bool = Query(default=False),
     tenant_id: str = Depends(get_tenant_id),
@@ -124,7 +124,7 @@ async def list_pos_terminals(
     return [_map_row_to_model(row, PosTerminalOut) for row in rows]
 
 
-@router.post("/pos/terminals", response_model=PosTerminalOut, status_code=201)
+@router.post("/pos/terminals", response_model=PosTerminalOut, status_code=201, summary="Pos terminal anlegen")
 async def create_pos_terminal(
     payload: PosTerminalIn,
     tenant_id: str = Depends(get_tenant_id),
@@ -159,7 +159,7 @@ async def create_pos_terminal(
     return _map_row_to_model(row, PosTerminalOut)
 
 
-@router.put("/pos/terminals/{terminal_id}", response_model=PosTerminalOut)
+@router.put("/pos/terminals/{terminal_id}", response_model=PosTerminalOut, summary="Pos terminal aktualisieren")
 async def update_pos_terminal(
     terminal_id: str,
     payload: PosTerminalIn,
@@ -207,7 +207,7 @@ async def update_pos_terminal(
     return _map_row_to_model(row, PosTerminalOut)
 
 
-@router.delete("/pos/terminals/{terminal_id}", status_code=204, response_class=Response, response_model=None)
+@router.delete("/pos/terminals/{terminal_id}", status_code=204, response_class=Response, response_model=None, summary="Pos terminal löschen")
 async def delete_pos_terminal(
     terminal_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -229,7 +229,7 @@ async def delete_pos_terminal(
     return None
 
 
-@router.get("/pos/tse-devices", response_model=list[PosTseDeviceOut])
+@router.get("/pos/tse-devices", response_model=list[PosTseDeviceOut], summary="Tse devices auflisten")
 async def list_tse_devices(
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
@@ -248,7 +248,7 @@ async def list_tse_devices(
     return [_map_row_to_model(row, PosTseDeviceOut) for row in rows]
 
 
-@router.post("/pos/tse-devices", response_model=PosTseDeviceOut, status_code=201)
+@router.post("/pos/tse-devices", response_model=PosTseDeviceOut, status_code=201, summary="Tse device anlegen")
 async def create_tse_device(
     payload: PosTseDeviceIn,
     tenant_id: str = Depends(get_tenant_id),
@@ -295,7 +295,7 @@ async def create_tse_device(
     return _map_row_to_model(row, PosTseDeviceOut)
 
 
-@router.put("/pos/tse-devices/{device_id}", response_model=PosTseDeviceOut)
+@router.put("/pos/tse-devices/{device_id}", response_model=PosTseDeviceOut, summary="Tse device aktualisieren")
 async def update_tse_device(
     device_id: str,
     payload: PosTseDeviceIn,
@@ -345,7 +345,7 @@ async def update_tse_device(
     return _map_row_to_model(row, PosTseDeviceOut)
 
 
-@router.get("/pos/notices", response_model=list[PosNoticeOut])
+@router.get("/pos/notices", response_model=list[PosNoticeOut], summary="Pos notices auflisten")
 async def list_pos_notices(
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
@@ -364,7 +364,7 @@ async def list_pos_notices(
     return [_map_row_to_model(row, PosNoticeOut) for row in rows]
 
 
-@router.post("/pos/notices", response_model=PosNoticeOut, status_code=201)
+@router.post("/pos/notices", response_model=PosNoticeOut, status_code=201, summary="Pos notice anlegen")
 async def create_pos_notice(
     payload: PosNoticeIn,
     tenant_id: str = Depends(get_tenant_id),
@@ -401,7 +401,7 @@ async def create_pos_notice(
     return _map_row_to_model(row, PosNoticeOut)
 
 
-@router.post("/pos/dsfinvk-exports", response_model=DsfinvkExportOut, status_code=201)
+@router.post("/pos/dsfinvk-exports", response_model=DsfinvkExportOut, status_code=201, summary="Dsfinvk export ausführen")
 async def run_dsfinvk_export(
     payload: DsfinvkExportRequest,
     tenant_id: str = Depends(get_tenant_id),
@@ -552,7 +552,7 @@ async def run_dsfinvk_export(
     return _map_row_to_model(row, DsfinvkExportOut)
 
 
-@router.get("/pos/dsfinvk-exports", response_model=list[DsfinvkExportOut])
+@router.get("/pos/dsfinvk-exports", response_model=list[DsfinvkExportOut], summary="Dsfinvk exports auflisten")
 async def list_dsfinvk_exports(
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
@@ -571,7 +571,7 @@ async def list_dsfinvk_exports(
     return [_map_row_to_model(row, DsfinvkExportOut) for row in rows]
 
 
-@router.get("/pos/dsfinvk-exports/{export_id}/download")
+@router.get("/pos/dsfinvk-exports/{export_id}/download", summary="Dsfinvk export herunterladen")
 async def download_dsfinvk_export(
     export_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -618,7 +618,7 @@ class KasseUebernahmeResult(BaseModel):
     errors: list[str]
 
 
-@router.post("/pos/uebernahme-kasse", response_model=KasseUebernahmeResult)
+@router.post("/pos/uebernahme-kasse", response_model=KasseUebernahmeResult, summary="Kasse uebernahme")
 async def uebernahme_kasse(
     body: KasseUebernahmeRequest,
     tenant_id: str = Depends(get_tenant_id),
