@@ -126,11 +126,7 @@ export default function APInvoiceApprovalPanel({
             </>
           ) : null}
           {approval?.can_post && canPost ? (
-            <Button
-              disabled={isBusy}
-              onClick={() => void onPosted()}
-              className="bg-green-600 hover:bg-green-700"
-            >
+            <Button disabled={isBusy} onClick={() => void onPosted()}>
               Buchen
             </Button>
           ) : null}

@@ -112,7 +112,7 @@ export default function MonitoringAlertsPage(): JSX.Element {
           </CardHeader>
           <CardContent>
             <div className="flex items-center gap-2">
-              <AlertTriangle className="h-5 w-5 text-orange-600" />
+              <AlertTriangle className="h-5 w-5 text-[hsl(var(--color-semantic-warning-700-hsl))]" />
               <span className="text-2xl font-bold">{active}</span>
             </div>
           </CardContent>
@@ -124,8 +124,8 @@ export default function MonitoringAlertsPage(): JSX.Element {
           </CardHeader>
           <CardContent>
             <div className="flex items-center gap-2">
-              <XCircle className="h-5 w-5 text-red-600" />
-              <span className="text-2xl font-bold text-red-600">{critical}</span>
+              <XCircle className="h-5 w-5 text-destructive" />
+              <span className="text-2xl font-bold text-destructive">{critical}</span>
             </div>
           </CardContent>
         </Card>
@@ -136,8 +136,8 @@ export default function MonitoringAlertsPage(): JSX.Element {
           </CardHeader>
           <CardContent>
             <div className="flex items-center gap-2">
-              <AlertTriangle className="h-5 w-5 text-orange-600" />
-              <span className="text-2xl font-bold text-orange-600">{warning}</span>
+              <AlertTriangle className="h-5 w-5 text-[hsl(var(--color-semantic-warning-700-hsl))]" />
+              <span className="text-2xl font-bold text-[hsl(var(--color-semantic-warning-700-hsl))]">{warning}</span>
             </div>
           </CardContent>
         </Card>
@@ -149,21 +149,14 @@ export default function MonitoringAlertsPage(): JSX.Element {
           <CardContent>
             <div className="flex items-center gap-2">
               {systemStatus === 'offline' ? (
-                <XCircle className="h-5 w-5 text-red-600" />
+                <XCircle className="h-5 w-5 text-destructive" />
               ) : systemStatus === 'degraded' ? (
-                <AlertTriangle className="h-5 w-5 text-orange-600" />
+                <AlertTriangle className="h-5 w-5 text-[hsl(var(--color-semantic-warning-700-hsl))]" />
               ) : (
-                <CheckCircle className="h-5 w-5 text-green-600" />
+                <CheckCircle className="h-5 w-5 text-[hsl(var(--color-semantic-success-700-hsl))]" />
               )}
               <Badge
-                variant="outline"
-                className={
-                  systemStatus === 'offline'
-                    ? 'text-red-600'
-                    : systemStatus === 'degraded'
-                      ? 'text-orange-600'
-                      : 'text-green-600'
-                }
+                variant={systemStatus === 'offline' ? 'destructive' : systemStatus === 'degraded' ? 'warning' : 'success'}
               >
                 {systemStatus === 'offline' ? 'Offline' : systemStatus === 'degraded' ? 'Eingeschraenkt' : 'Online'}
               </Badge>
@@ -229,20 +222,20 @@ export default function MonitoringAlertsPage(): JSX.Element {
                 key={alert.id}
                 className={
                   alert.level === 'critical'
-                    ? 'border-red-500'
+                    ? 'border-destructive'
                     : alert.level === 'warning'
-                      ? 'border-orange-500'
-                      : 'border-blue-500'
+                      ? 'border-[hsl(var(--color-semantic-warning-500-hsl))]'
+                      : 'border-[hsl(var(--color-semantic-info-500-hsl))]'
                 }
               >
                 <CardContent className="pt-4">
                   <div className="flex items-start gap-4">
                     {alert.level === 'critical' ? (
-                      <XCircle className="h-8 w-8 text-red-600" />
+                      <XCircle className="h-8 w-8 text-destructive" />
                     ) : alert.level === 'warning' ? (
-                      <AlertTriangle className="h-8 w-8 text-orange-600" />
+                      <AlertTriangle className="h-8 w-8 text-[hsl(var(--color-semantic-warning-700-hsl))]" />
                     ) : (
-                      <Info className="h-8 w-8 text-blue-600" />
+                      <Info className="h-8 w-8 text-[hsl(var(--color-semantic-info-700-hsl))]" />
                     )}
                     <div className="flex-1">
                       <div className="mb-2 flex items-center gap-2">

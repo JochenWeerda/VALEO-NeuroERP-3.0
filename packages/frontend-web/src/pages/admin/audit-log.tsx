@@ -53,7 +53,7 @@ export default function AuditLogPage(): JSX.Element {
       key: 'status' as const,
       label: 'Status',
       render: (a: AuditEntry) => (
-        <Badge variant={a.status === 'erfolg' ? 'outline' : 'destructive'}>
+        <Badge variant={a.status === 'erfolg' ? 'success' : 'destructive'}>
           {a.status === 'erfolg' ? 'Erfolg' : 'Fehler'}
         </Badge>
       ),
@@ -76,7 +76,7 @@ export default function AuditLogPage(): JSX.Element {
           </CardHeader>
           <CardContent>
             <div className="flex items-center gap-2">
-              <FileText className="h-5 w-5 text-blue-600" />
+              <FileText className="h-5 w-5 text-primary" />
               <span className="text-2xl font-bold">{list.length}</span>
             </div>
           </CardContent>
@@ -87,7 +87,7 @@ export default function AuditLogPage(): JSX.Element {
             <CardTitle className="text-sm font-medium">Erfolgreiche Aktionen</CardTitle>
           </CardHeader>
           <CardContent>
-            <span className="text-2xl font-bold text-green-600">{list.filter((a) => a.status === 'erfolg').length}</span>
+            <span className="text-2xl font-bold text-[hsl(var(--color-semantic-success-700-hsl))]">{list.filter((a) => a.status === 'erfolg').length}</span>
           </CardContent>
         </Card>
 
@@ -96,7 +96,7 @@ export default function AuditLogPage(): JSX.Element {
             <CardTitle className="text-sm font-medium">Fehler</CardTitle>
           </CardHeader>
           <CardContent>
-            <span className="text-2xl font-bold text-red-600">{list.filter((a) => a.status === 'fehler').length}</span>
+            <span className="text-2xl font-bold text-destructive">{list.filter((a) => a.status === 'fehler').length}</span>
           </CardContent>
         </Card>
       </div>

@@ -88,18 +88,22 @@ const EMPTY_CROSS_COMPLIANCE_LIST: CrossComplianceList = {
 const statusBadge = (status: 'compliant' | 'warning' | 'pending' | 'error') => {
   switch (status) {
     case 'compliant':
-      return <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">Konform</Badge>
+      return <Badge variant="success">Konform</Badge>
     case 'warning':
-      return <Badge variant="outline" className="bg-orange-50 text-orange-700 border-orange-200">Warnung</Badge>
+      return <Badge variant="warning">Warnung</Badge>
     case 'pending':
-      return <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">Laufend</Badge>
+      return <Badge variant="info">Laufend</Badge>
     case 'error':
-      return <Badge variant="outline" className="bg-red-50 text-red-700 border-red-200">Offen</Badge>
+      return <Badge variant="destructive">Offen</Badge>
   }
 }
 
 const scoreColor = (score: number) =>
-  score >= 90 ? 'text-green-600' : score >= 70 ? 'text-orange-600' : 'text-red-600'
+  score >= 90
+    ? 'text-[hsl(var(--color-semantic-success-700-hsl))]'
+    : score >= 70
+      ? 'text-[hsl(var(--color-semantic-warning-700-hsl))]'
+      : 'text-destructive'
 
 // ─── Komponente ──────────────────────────────────────────────────────────────
 
@@ -267,7 +271,7 @@ export default function ComplianceDashboardPage(): JSX.Element {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold flex items-center gap-3">
-            <Shield className="h-8 w-8 text-blue-600" />
+            <Shield className="h-8 w-8 text-primary" />
             Compliance-Center
           </h1>
           <p className="text-muted-foreground">Übersicht aller Compliance-Anforderungen</p>
@@ -350,8 +354,8 @@ export default function ComplianceDashboardPage(): JSX.Element {
                 <>
                   <div className={`text-6xl font-bold ${scoreColor(overallScore)}`}>{overallScore}%</div>
                   <Badge
-                    variant="outline"
-                    className={`mt-2 ${overallScore >= 90 ? 'bg-green-50 text-green-700 border-green-200' : overallScore >= 70 ? 'bg-orange-50 text-orange-700 border-orange-200' : 'bg-red-50 text-red-700 border-red-200'}`}
+                    variant={overallScore >= 90 ? 'success' : overallScore >= 70 ? 'warning' : 'destructive'}
+                    className="mt-2"
                   >
                     {overallScore >= 90 ? 'Sehr gut' : overallScore >= 70 ? 'Verbesserungsbedarf' : 'Kritisch'}
                   </Badge>
@@ -403,7 +407,7 @@ export default function ComplianceDashboardPage(): JSX.Element {
               {Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} className="h-16" />)}
             </div>
           ) : recentActions.length === 0 ? (
-            <div className="flex items-center gap-2 text-green-700 py-4">
+            <div className="flex items-center gap-2 py-4 text-[hsl(var(--color-semantic-success-700-hsl))]">
               <CheckCircle className="h-5 w-5" />
               <span>Alle Cross-Compliance-Anforderungen erfüllt.</span>
             </div>
@@ -413,9 +417,9 @@ export default function ComplianceDashboardPage(): JSX.Element {
                 <div key={action.id} className="flex items-center justify-between p-4 rounded-lg border">
                   <div className="flex items-center gap-3">
                     {action.erfuellt ? (
-                      <CheckCircle className="h-5 w-5 text-green-600 shrink-0" />
+                      <CheckCircle className="h-5 w-5 shrink-0 text-[hsl(var(--color-semantic-success-700-hsl))]" />
                     ) : (
-                      <XCircle className="h-5 w-5 text-red-600 shrink-0" />
+                      <XCircle className="h-5 w-5 shrink-0 text-destructive" />
                     )}
                     <div>
                       <div className="font-semibold">{action.anforderung}</div>
@@ -428,8 +432,8 @@ export default function ComplianceDashboardPage(): JSX.Element {
                   </div>
                   <div className="flex items-center gap-2">
                     {action.erfuellt
-                      ? <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">Erfüllt</Badge>
-                      : <Badge variant="outline" className="bg-red-50 text-red-700 border-red-200">Offen</Badge>}
+                      ? <Badge variant="success">Erfüllt</Badge>
+                      : <Badge variant="destructive">Offen</Badge>}
                     <Button variant="ghost" size="sm" onClick={() => openComplianceDetails(action)}>Details</Button>
                   </div>
                 </div>
@@ -441,9 +445,9 @@ export default function ComplianceDashboardPage(): JSX.Element {
 
       {/* Warnungen */}
       {!isLoading && zulAbgelaufen > 0 && (
-        <Card className="border-orange-400 bg-orange-50">
+        <Card className="border-[hsl(var(--color-semantic-warning-500-hsl)/0.4)] bg-[hsl(var(--color-semantic-warning-50-hsl))]">
           <CardContent className="pt-4">
-            <div className="flex items-center gap-2 text-orange-800">
+            <div className="flex items-center gap-2 text-[hsl(var(--color-semantic-warning-700-hsl))]">
               <AlertTriangle className="h-5 w-5 shrink-0" />
               <span className="font-medium">
                 {zulAbgelaufen} Zulassung{zulAbgelaufen > 1 ? 'en' : ''} abgelaufen oder gesperrt — Erneuerung erforderlich.
