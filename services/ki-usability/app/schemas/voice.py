@@ -58,3 +58,41 @@ class VoiceTranscribeOut(BaseModel):
     provider: str = "faster-whisper"
     language: str = "de-DE"
     error: Optional[str] = None
+
+
+class VoiceSummaryIn(BaseModel):
+    """Input for voice summary."""
+
+    text: str = Field(..., min_length=1, description="Source text to summarize")
+    max_words: Optional[int] = Field(default=None, ge=10, le=120)
+
+
+class VoiceSummaryOut(BaseModel):
+    """Speakable summary (~15s)."""
+
+    source_text: str
+    summary_text: str
+    provider: str
+    summary_applied: bool = False
+    estimated_seconds: int = 0
+    error: Optional[str] = None
+
+
+class VoiceSynthesizeIn(BaseModel):
+    """Input for local TTS."""
+
+    text: str = Field(..., min_length=1, description="Text to speak")
+    language: str = Field(default="de-DE")
+
+
+class VoiceSynthesizeOut(BaseModel):
+    """TTS result — Piper audio or browser hint."""
+
+    text: str
+    provider: str
+    browser_hint: bool = False
+    audio_base64: Optional[str] = None
+    content_type: Optional[str] = None
+    language: str = "de-DE"
+    hint: Optional[str] = None
+    error: Optional[str] = None

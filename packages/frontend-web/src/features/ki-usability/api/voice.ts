@@ -27,6 +27,36 @@ export interface VoicePolishResponse {
   error?: string
 }
 
+export interface VoiceSummaryRequest {
+  text: string
+  max_words?: number
+}
+
+export interface VoiceSummaryResponse {
+  source_text: string
+  summary_text: string
+  provider: string
+  summary_applied: boolean
+  estimated_seconds: number
+  error?: string
+}
+
+export interface VoiceSynthesizeRequest {
+  text: string
+  language?: string
+}
+
+export interface VoiceSynthesizeResponse {
+  text: string
+  provider: string
+  browser_hint: boolean
+  audio_base64?: string | null
+  content_type?: string | null
+  language?: string
+  hint?: string
+  error?: string
+}
+
 /** Base URL for ki-usability-api (dev: use Vite proxy /api/ki-usability → localhost:5200) */
 const BASE =
   (import.meta.env as Record<string, string | undefined>).VITE_KI_USABILITY_API_URL ?? '/api/ki-usability'
@@ -53,4 +83,24 @@ export async function polishVoice(body: VoicePolishRequest): Promise<VoicePolish
   })
   if (!res.ok) return null
   return (await res.json()) as VoicePolishResponse
+}
+
+export async function summarizeVoice(body: VoiceSummaryRequest): Promise<VoiceSummaryResponse | null> {
+  const res = await fetch(`${BASE}/api/v1/voice/summary`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  })
+  if (!res.ok) return null
+  return (await res.json()) as VoiceSummaryResponse
+}
+
+export async function synthesizeVoice(body: VoiceSynthesizeRequest): Promise<VoiceSynthesizeResponse | null> {
+  const res = await fetch(`${BASE}/api/v1/voice/synthesize`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ text: body.text, language: body.language ?? 'de-DE' }),
+  })
+  if (!res.ok) return null
+  return (await res.json()) as VoiceSynthesizeResponse
 }
