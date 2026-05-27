@@ -1,0 +1,22 @@
+id: DESIGN-MERIDIAN-HARDCOLORS-012
+owner: Codex
+status: reserviert
+created: 2026-05-27
+goal: >
+  Zweiter Meridian-Hardcolor-Batch fuer sichtbare Admin-/Monitoring-Fachseiten.
+file_ownership:
+  - docs/agent-ops/active-workboard.md
+  - docs/agent-ops/slices/DESIGN-MERIDIAN-HARDCOLORS-012.yaml
+  - packages/frontend-web/src/pages/admin/
+  - packages/frontend-web/src/features/workflow/
+acceptance_criteria:
+  - Ausgewaehlte Admin-/Monitoring-Seiten nutzen semantische Meridian-Tokens statt generischer Tailwind-Hardcolors.
+  - Gezielter Hardcolor-Scan auf bearbeiteten Dateien liefert keine Treffer.
+  - Frontend-Typecheck bleibt gruen.
+  - Workboard-Validierung und Diff-Checks sind gruen.
+checks:
+  - pnpm --filter @valero-neuroerp/frontend-web type-check
+  - python scripts/agent_workboard_supervisor.py validate
+  - git diff --check
+risks:
+  - Weitere Fachseiten-Hardcolors bleiben Folgescope.
