@@ -2593,3 +2593,13 @@ Archiv des vorherigen Boards:
 **Erledigt:** `einvoice_generator.py` (EN-16931-UBL-2.1 + CII-XML + PDF/A-3 via factur-x, 23 pytest-Tests); Endpoints `POST/GET /api/v1/sales/invoices/{n}/einvoice/xrechnung|zugferd` mit GoBD-Archiv; Frontend-Download-Buttons (XRechnung + ZUGFeRD) in Rechnungsmaske mit Mutation-Pending-Guard; 1/1 E2E grün; TypeCheck 0 Fehler; Fremdfix `closing_checklists.py` (Optional-Import fehlte).
 **Gate-Ergebnis:** 23/23 pytest grün; 1/1 E2E grün; TypeScript 0 Fehler; py_compile grün; 3 Endpoints registriert; GoBD-Artifact-Persistenz vorhanden.
 **Offene Risiken:** Volle Schematron-Validierung bleibt optionaler Hook; Peppol-Versand bleibt Folgeslice.
+
+## SLICE-008-DSGVO-ART30-ROPA-001
+
+**Von:** Claude Sonnet 4.6
+**Owner:** Claude Sonnet 4.6
+**Stand:** reserviert 2026-05-27
+**Ziel des Slices:** DSGVO Art. 30 Verzeichnis von Verarbeitungstätigkeiten (Records of Processing Activities). Backend CRUD + JSON-Export + Frontend-Verwaltungsmaske. Art. 15/17/20 bereits implementiert — Art. 30 ist die letzte zentrale DSGVO-Pflicht-Lücke.
+**Dateibesitz:** `docs/agent-ops/slices/SLICE-008-DSGVO-ART30-ROPA-001.yaml`, `app/api/v1/endpoints/gdpr_art30_ropa.py`, `packages/frontend-web/src/lib/api/gdpr-art30.ts`, `packages/frontend-web/src/pages/compliance/verarbeitungsverzeichnis.tsx`, `packages/frontend-web/tests/e2e/slice-008-dsgvo-art30.spec.ts`, `tests/test_gdpr_art30_ropa.py`.
+**Abnahmekriterien:** Pflichtfelder Art. 30 Abs. 1 a-h; CRUD + JSON-Export; Mutation-Guards; pytest + E2E grün; TypeScript 0 Fehler.
+**Offene Risiken:** Produktive DB-Persistenz bleibt Folgeslice wenn DocumentRepository nicht migriert ist.
