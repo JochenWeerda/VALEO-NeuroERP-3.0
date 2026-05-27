@@ -143,6 +143,60 @@ def extract_invoice_pdf(
         else [],
     }
 
+    if engine == "claude" and content:
+        try:
+            import anthropic
+            import base64
+
+            client = anthropic.Anthropic()
+            pdf_b64 = base64.standard_b64encode(content).decode("utf-8")
+            msg = client.messages.create(
+                model="claude-opus-4-7",
+                max_tokens=1024,
+                messages=[
+                    {
+                        "role": "user",
+                        "content": [
+                            {
+                                "type": "document",
+                                "source": {
+                                    "type": "base64",
+                                    "media_type": "application/pdf",
+                                    "data": pdf_b64,
+                                },
+                            },
+                            {
+                                "type": "text",
+                                "text": (
+                                    "Extrahiere diese Felder aus der Rechnung als JSON (keine Markdown-Blöcke):\n"
+                                    '{"rechnungs_nummer":"...","rechnungs_datum":"YYYY-MM-DD",'
+                                    '"lieferant_name":"...","lieferant_adresse":"...",'
+                                    '"netto_betrag":0.00,"mwst_betrag":0.00,"brutto_betrag":0.00,'
+                                    '"waehrung":"EUR",'
+                                    '"positionen":[{"artikel_name":"...","menge":1,"einzelpreis":0.00,'
+                                    '"gesamtpreis":0.00,"mwst_satz":19.0}]}'
+                                ),
+                            },
+                        ],
+                    }
+                ],
+            )
+            import json as _json
+            raw = msg.content[0].text.strip()
+            extracted = _json.loads(raw)
+            return {
+                "extracted_data": extracted,
+                "confidence_score": 0.92,
+                "extraction_warnings": [],
+                "ocr_model": "claude-opus-4-7",
+                "processed_at": datetime.utcnow().isoformat(),
+            }
+        except ImportError:
+            warnings.append("anthropic SDK nicht installiert — pip install anthropic")
+        except Exception as exc:
+            logger.exception("claude_ocr_fehler")
+            warnings.append(f"Claude-Extraktion fehlgeschlagen: {exc}")
+
     confidence = 0.35 if engine == "pdfplumber" else 0.92
     if warnings:
         confidence *= 0.85

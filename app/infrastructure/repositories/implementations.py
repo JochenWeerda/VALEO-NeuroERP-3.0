@@ -428,6 +428,70 @@ class JournalEntryRepositoryImpl(BaseRepositoryImpl[JournalEntry, dict, dict], J
     def __init__(self, session: Session):
         super().__init__(session, JournalEntry)
 
+    @staticmethod
+    def _compute_hash(seq: int, entry_date: str, total_debit: float, total_credit: float, reference: str, hash_prev: str) -> str:
+        import hashlib, json
+        payload = json.dumps({
+            "seq": seq, "entry_date": str(entry_date),
+            "debit": str(total_debit), "credit": str(total_credit),
+            "reference": reference or "", "prev": hash_prev,
+        }, sort_keys=True)
+        return hashlib.sha256(payload.encode()).hexdigest()
+
+    async def create(self, data: dict, tenant_id: str) -> JournalEntry:
+        """Create a new journal entry with GoBD-compliant hash-chain."""
+        from sqlalchemy.exc import SQLAlchemyError
+        from ..repositories.base_repository import logger
+        try:
+            lines_data = data.pop("lines", [])
+            data.setdefault("tenant_id", tenant_id)
+
+            # GoBD: lückenlose Sequenz + Hash-Kette
+            last = (
+                self.session.query(JournalEntry)
+                .filter(JournalEntry.tenant_id == tenant_id)
+                .order_by(JournalEntry.sequence_number.desc())
+                .first()
+            )
+            seq = (last.sequence_number or 0) + 1 if last else 1
+            hash_prev = last.hash_current if last else "GENESIS"
+            entry_date = data.get("entry_date") or data.get("posting_date") or datetime.utcnow().isoformat()
+            hash_current = self._compute_hash(
+                seq, entry_date,
+                float(data.get("total_debit", 0)), float(data.get("total_credit", 0)),
+                data.get("reference", ""), hash_prev,
+            )
+            data["sequence_number"] = seq
+            data["hash_prev"] = hash_prev
+            data["hash_current"] = hash_current
+
+            # Strip keys not in ORM columns
+            orm_cols = {c.key for c in JournalEntry.__table__.columns}
+            clean = {k: v for k, v in data.items() if k in orm_cols}
+            entry = JournalEntry(**clean)
+            self.session.add(entry)
+            self.session.flush()
+
+            # Persist lines if provided as dicts
+            for line in lines_data:
+                if isinstance(line, dict):
+                    line.setdefault("tenant_id", tenant_id)
+                    line["journal_entry_id"] = entry.id
+                    line_orm = JournalEntryLine(**{
+                        k: v for k, v in line.items()
+                        if k in {c.key for c in JournalEntryLine.__table__.columns}
+                    })
+                    self.session.add(line_orm)
+
+            self.session.commit()
+            self.session.refresh(entry)
+            logger.info("Created JournalEntry %s seq=%s hash=%s…", entry.id, seq, hash_current[:8])
+            return entry
+        except SQLAlchemyError as e:
+            self.session.rollback()
+            logger.error("Error creating JournalEntry: %s", e)
+            raise
+
     async def get_all(self, tenant_id: str, skip: int = 0, limit: int = 100, **kwargs):
         """Get journal entries; optional reference= for exact match (e.g. Importlauf run_id)."""
         from sqlalchemy.exc import SQLAlchemyError

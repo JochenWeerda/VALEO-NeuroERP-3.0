@@ -287,6 +287,102 @@ async def deactivate_schlag(
 
 
 # ────────────────────────────────────────────────────────────────────────────
+# GIS / Geometry Endpoints
+# ────────────────────────────────────────────────────────────────────────────
+
+class GeometryUpdate(BaseModel):
+    geometry_geojson: str  # RFC 7946 GeoJSON Polygon/MultiPolygon als JSON-String
+
+
+@router.get("/schlaege/{schlag_id}/geometry", summary="GeoJSON Polygon eines Schlags abrufen")
+async def get_schlag_geometry(
+    schlag_id: str,
+    db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
+) -> dict[str, Any]:
+    """Liefert das GeoJSON-Polygon des Schlags für GIS-Visualisierung (z. B. MapLibre)."""
+    import json as _json
+    schlag = (
+        db.query(FeldbuchSchlag)
+        .filter(FeldbuchSchlag.id == schlag_id, FeldbuchSchlag.tenant_id == tenant_id)
+        .first()
+    )
+    if not schlag:
+        raise HTTPException(status_code=404, detail="Schlag nicht gefunden")
+    geojson = None
+    if schlag.geometry_geojson:
+        try:
+            geojson = _json.loads(schlag.geometry_geojson)
+        except ValueError:
+            geojson = None
+    return {
+        "schlag_id": schlag_id,
+        "flik": schlag.flik,
+        "name": schlag.name,
+        "flaeche": schlag.flaeche,
+        "geometry": geojson,
+    }
+
+
+@router.put("/schlaege/{schlag_id}/geometry", summary="GeoJSON Polygon eines Schlags speichern")
+async def put_schlag_geometry(
+    schlag_id: str,
+    data: GeometryUpdate,
+    db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
+) -> dict[str, Any]:
+    """Speichert oder aktualisiert das GeoJSON-Polygon des Schlags (Polygon-Erfassung / GPS-Import)."""
+    import json as _json
+    schlag = (
+        db.query(FeldbuchSchlag)
+        .filter(FeldbuchSchlag.id == schlag_id, FeldbuchSchlag.tenant_id == tenant_id)
+        .first()
+    )
+    if not schlag:
+        raise HTTPException(status_code=404, detail="Schlag nicht gefunden")
+    try:
+        parsed = _json.loads(data.geometry_geojson)
+        if parsed.get("type") not in ("Polygon", "MultiPolygon", "Feature", "FeatureCollection"):
+            raise HTTPException(status_code=422, detail="Ungültiger GeoJSON-Typ — erwartet: Polygon/MultiPolygon")
+        schlag.geometry_geojson = _json.dumps(parsed, ensure_ascii=False)
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=f"Ungültiges GeoJSON: {exc}") from exc
+    db.commit()
+    return {"schlag_id": schlag_id, "geometry_saved": True}
+
+
+@router.get("/schlaege/geojson/all", summary="Alle Schläge als GeoJSON FeatureCollection")
+async def get_all_schlaege_geojson(
+    customer_id: Optional[str] = Query(None),
+    db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
+) -> dict[str, Any]:
+    """Liefert alle Schläge mit Geometrie als GeoJSON FeatureCollection für Kartenansicht."""
+    import json as _json
+    q = db.query(FeldbuchSchlag).filter(FeldbuchSchlag.tenant_id == tenant_id)
+    if customer_id:
+        q = q.filter(FeldbuchSchlag.customer_id == customer_id)
+    features = []
+    for s in q.all():
+        geom = None
+        if s.geometry_geojson:
+            try:
+                geom = _json.loads(s.geometry_geojson)
+            except ValueError:
+                pass
+        features.append({
+            "type": "Feature",
+            "id": s.id,
+            "geometry": geom,
+            "properties": {
+                "name": s.name, "flik": s.flik, "flaeche": s.flaeche,
+                "kultur": s.kultur, "status": s.status, "customer_id": s.customer_id,
+            },
+        })
+    return {"type": "FeatureCollection", "features": features}
+
+
+# ────────────────────────────────────────────────────────────────────────────
 # Maßnahmen Endpoints
 # ────────────────────────────────────────────────────────────────────────────
 

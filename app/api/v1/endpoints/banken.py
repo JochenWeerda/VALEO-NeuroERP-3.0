@@ -125,3 +125,96 @@ async def validate_iban(iban: str = Query(..., description="IBAN to validate")) 
         "bic": "UNKNOWN",
         "bank": None,
     }
+
+
+# ── FinTS/HBCI Online-Banking Endpoints (PSD2 / § 25a KWG) ───────────────────
+
+class UeberweisungRequest(BaseModel):
+    auftraggeber_iban: str
+    empfaenger_iban: str
+    empfaenger_name: str
+    betrag: float = Field(..., gt=0)
+    verwendungszweck: str = Field(..., max_length=140)
+    blz: str = ""
+    user_id: str = ""
+    pin: str = Field("", description="Nur für einmalige Übertragung — empfohlen: Env-Var FINTS_PIN")
+
+
+@router.get("/banken/fints/konten", summary="Konten via FinTS/HBCI abrufen")
+async def fints_get_konten(
+    blz: str = Query("", description="Bankleitzahl (optional wenn via Env-Var)"),
+    user_id: str = Query("", description="Online-Banking Benutzerkennung"),
+    tenant_id: str = Depends(get_tenant_id),
+) -> dict:
+    """Liefert Konten und Salden via FinTS/HBCI (HKSAL). Simulator-Modus wenn nicht konfiguriert."""
+    from app.services.fints_connector import get_konten
+    result = get_konten(blz=blz, user_id=user_id)
+    return {
+        "erfolg": result.erfolg,
+        "fehler": result.fehler,
+        "konten": [
+            {
+                "iban": k.iban, "bic": k.bic, "kontoinhaber": k.kontoinhaber,
+                "saldo": float(k.saldo) if k.saldo is not None else None,
+                "saldo_datum": str(k.saldo_datum) if k.saldo_datum else None,
+            }
+            for k in result.konten
+        ],
+        "modus": result.rohdaten.get("mode", "produktiv") if result.rohdaten else "produktiv",
+    }
+
+
+@router.get("/banken/fints/umsaetze", summary="Kontoumsätze via FinTS/HBCI abrufen (HKKAZ)")
+async def fints_get_umsaetze(
+    iban: str = Query(..., description="IBAN des Kontos"),
+    von: str = Query(..., description="Von-Datum YYYY-MM-DD"),
+    bis: str = Query(..., description="Bis-Datum YYYY-MM-DD"),
+    tenant_id: str = Depends(get_tenant_id),
+) -> dict:
+    """Ruft Kontoumsätze ab via FinTS CAMT.052 (HKKAZ/HKCAZ)."""
+    from datetime import date as _date
+    from app.services.fints_connector import get_umsaetze
+    result = get_umsaetze(
+        iban=iban,
+        von=_date.fromisoformat(von),
+        bis=_date.fromisoformat(bis),
+    )
+    return {
+        "erfolg": result.erfolg,
+        "fehler": result.fehler,
+        "iban": iban,
+        "zeitraum": {"von": von, "bis": bis},
+        "buchungen": [
+            {
+                "datum": str(b.datum), "valuta": str(b.valuta),
+                "betrag": float(b.betrag), "waehrung": b.waehrung,
+                "auftraggeber": b.auftraggeber,
+                "verwendungszweck": b.verwendungszweck,
+                "end_to_end_id": b.end_to_end_id,
+            }
+            for b in result.buchungen
+        ],
+        "anzahl": len(result.buchungen),
+        "modus": result.rohdaten.get("mode", "produktiv") if result.rohdaten else "produktiv",
+    }
+
+
+@router.post("/banken/fints/ueberweisung", summary="SEPA-Überweisung via FinTS senden (HKCCM)")
+async def fints_send_ueberweisung(
+    body: UeberweisungRequest,
+    tenant_id: str = Depends(get_tenant_id),
+) -> dict:
+    """Sendet SEPA-Überweisung über FinTS/HBCI. Erfordert TAN in Produktion."""
+    from decimal import Decimal as _Decimal
+    from app.services.fints_connector import send_ueberweisung
+    result = send_ueberweisung(
+        auftraggeber_iban=body.auftraggeber_iban,
+        empfaenger_iban=body.empfaenger_iban,
+        empfaenger_name=body.empfaenger_name,
+        betrag=_Decimal(str(body.betrag)),
+        verwendungszweck=body.verwendungszweck,
+        blz=body.blz,
+        user_id=body.user_id,
+        pin=body.pin,
+    )
+    return {"erfolg": result.erfolg, "fehler": result.fehler, "details": result.rohdaten}

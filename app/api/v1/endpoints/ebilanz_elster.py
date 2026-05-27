@@ -418,3 +418,144 @@ def list_exports(
         return [dict(r) for r in rows]
     except Exception:
         return []
+
+
+# ── UStVA (Umsatzsteuervoranmeldung § 18 UStG) ───────────────────────────────
+
+class UStVARequest(BaseModel):
+    steuernummer: str = Field(..., description="Steuernummer des Unternehmens")
+    finanzamt_nr: str = Field(..., description="Finanzamtsnummer (4-stellig)")
+    voranmeldungszeitraum: str = Field(..., description="Monat YYYY-MM oder Quartal YYYY-Q1/Q2/Q3/Q4")
+    # Kennzahlen gemäß § 18 UStG Anlage UR
+    kz_81_steuerpflichtige_ums_19: float = Field(0.0, description="KZ 81: Steuerpfl. Umsätze 19 %")
+    kz_86_steuerpflichtige_ums_7:  float = Field(0.0, description="KZ 86: Steuerpfl. Umsätze 7 %")
+    kz_35_innergemeinschaftliche_lieferungen: float = Field(0.0, description="KZ 41/86: Innergem. Lieferungen")
+    kz_66_vorsteuer_rechnungen:    float = Field(0.0, description="KZ 66: Vorsteuer aus Rechnungen")
+    kz_61_einfuhrvorsteuer:        float = Field(0.0, description="KZ 61: Einfuhrumsatzsteuervorsteuer")
+    kz_67_innergemeinschaftlicher_erwerb_vorsteuer: float = Field(0.0, description="KZ 67: Vorsteuer innergem. Erwerb")
+    dauerfreistellung: bool = Field(False, description="§ 18 Abs. 2 UStG: Dauerfreist. von Voranmeldung")
+
+
+class UStVAErgebnis(BaseModel):
+    voranmeldungszeitraum: str
+    steuernummer: str
+    finanzamt_nr: str
+    zahllast_eur: float
+    erstattung_eur: float
+    elster_status: str
+    transfer_ticket: Optional[str] = None
+    hinweis: str
+
+
+@router.post("/elster/ustva", response_model=UStVAErgebnis, summary="UStVA erstellen und übermitteln (§ 18 UStG)")
+async def submit_ustva(
+    body: UStVARequest,
+    db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
+) -> UStVAErgebnis:
+    """
+    Erstellt Umsatzsteuervoranmeldung (UStVA) nach § 18 UStG und übermittelt
+    via ERiC-Simulation an ELSTER.
+
+    Berechnet:
+    - Umsatzsteuer 19 % (KZ 81) + 7 % (KZ 86)
+    - Abzug Vorsteuer (KZ 66, 61, 67)
+    - Zahllast / Erstattungsbetrag
+
+    In Produktion: ERiC-SDK-Aufruf mit ELSTER-Organisationszertifikat erforderlich.
+    """
+    # Steuerberechnung
+    ust_19 = round(body.kz_81_steuerpflichtige_ums_19 * 0.19, 2)
+    ust_7  = round(body.kz_86_steuerpflichtige_ums_7  * 0.07, 2)
+    ust_gesamt = ust_19 + ust_7
+
+    vorsteuer = (
+        body.kz_66_vorsteuer_rechnungen
+        + body.kz_61_einfuhrvorsteuer
+        + body.kz_67_innergemeinschaftlicher_erwerb_vorsteuer
+    )
+
+    zahllast = round(ust_gesamt - vorsteuer, 2)
+    erstattung = round(-zahllast, 2) if zahllast < 0 else 0.0
+    zahllast_pos = max(0.0, zahllast)
+
+    # ERiC-Simulation via bestehenden Service
+    from app.services.eric_submission_service import ERICSubmissionService
+    eric = ERICSubmissionService(db=db, tenant_id=tenant_id)
+
+    xbrl_mini = (
+        f'<?xml version="1.0" encoding="UTF-8"?>'
+        f'<xbrl xmlns="http://www.xbrl.org/2003/instance">'
+        f'<!-- UStVA {body.voranmeldungszeitraum} | Stnr: {body.steuernummer} | '
+        f'KZ81: {body.kz_81_steuerpflichtige_ums_19:.2f} KZ86: {body.kz_86_steuerpflichtige_ums_7:.2f} '
+        f'Zahllast: {zahllast_pos:.2f} -->'
+        f'<taxNumber>{body.steuernummer}</taxNumber>'
+        f'</xbrl>'
+    )
+    eric_result = eric.simulate_eric_transmission(xbrl_mini)
+
+    # In DB persistieren (domain_finance.ustva_voranmeldungen)
+    try:
+        import uuid as _uuid, json as _json
+        db.execute(
+            text("""
+                INSERT INTO domain_finance.ustva_voranmeldungen
+                    (id, tenant_id, steuernummer, finanzamt_nr, voranmeldungszeitraum,
+                     zahllast_eur, erstattung_eur, elster_status, transfer_ticket,
+                     payload_json, erstellt_am)
+                VALUES
+                    (:id, :tid, :stnr, :fanr, :zeitraum,
+                     :zahllast, :erstattung, :status, :ticket,
+                     CAST(:payload AS jsonb), NOW())
+                ON CONFLICT DO NOTHING
+            """),
+            {
+                "id": str(_uuid.uuid4()),
+                "tid": tenant_id,
+                "stnr": body.steuernummer,
+                "fanr": body.finanzamt_nr,
+                "zeitraum": body.voranmeldungszeitraum,
+                "zahllast": zahllast_pos,
+                "erstattung": erstattung,
+                "status": eric_result.get("eric_status", "FEHLER"),
+                "ticket": eric_result.get("transfer_ticket"),
+                "payload": _json.dumps(body.model_dump()),
+            },
+        )
+        db.commit()
+    except Exception:
+        db.rollback()  # Tabelle ggf. noch nicht migriert — non-blocking
+
+    return UStVAErgebnis(
+        voranmeldungszeitraum=body.voranmeldungszeitraum,
+        steuernummer=body.steuernummer,
+        finanzamt_nr=body.finanzamt_nr,
+        zahllast_eur=zahllast_pos,
+        erstattung_eur=erstattung,
+        elster_status=eric_result.get("eric_status", "FEHLER"),
+        transfer_ticket=eric_result.get("transfer_ticket"),
+        hinweis=eric_result.get("hinweis", "ERiC-Übertragung simuliert"),
+    )
+
+
+@router.get("/elster/ustva", summary="UStVA-Übermittlungen auflisten")
+async def list_ustva(
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+) -> list[dict]:
+    """Listet alle UStVA-Übermittlungen des Mandanten."""
+    try:
+        rows = db.execute(
+            text("""
+                SELECT id, steuernummer, finanzamt_nr, voranmeldungszeitraum,
+                       zahllast_eur, erstattung_eur, elster_status, transfer_ticket, erstellt_am
+                FROM domain_finance.ustva_voranmeldungen
+                WHERE tenant_id = :tid
+                ORDER BY erstellt_am DESC
+                LIMIT 100
+            """),
+            {"tid": tenant_id},
+        ).mappings().all()
+        return [dict(r) for r in rows]
+    except Exception:
+        return []

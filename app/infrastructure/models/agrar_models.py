@@ -284,6 +284,7 @@ class FeldbuchSchlag(Base):
     bodenart = Column(String(50), nullable=True)
     ackerzahl = Column(Float, nullable=True)        # Bodenpunktzahl
     status = Column(String(20), default='aktiv')    # aktiv/stillgelegt/brache
+    geometry_geojson = Column(Text, nullable=True)  # GeoJSON Polygon/MultiPolygon für GIS-Karte
 
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
