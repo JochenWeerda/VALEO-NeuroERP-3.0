@@ -186,7 +186,9 @@ def update_hausbank(
     return HausbankOut(**dict(updated._mapping))
 
 
-@router.delete("/{bank_nr}", summary="Hausbank löschen")
+@router.delete("/{bank_nr}", summary="Hausbank löschen",
+    response_model=dict
+)
 def delete_hausbank(
     bank_nr: str,
     db=Depends(get_db),

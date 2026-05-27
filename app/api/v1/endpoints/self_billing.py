@@ -468,7 +468,9 @@ async def storno_invoice(
     }
 
 
-@router.get("/{invoice_id}/export", summary="Invoice exportieren")
+@router.get("/{invoice_id}/export", summary="Invoice exportieren",
+    response_model=dict
+)
 async def export_invoice(
     invoice_id: str,
     format: str = "xml",  # xml | pdf

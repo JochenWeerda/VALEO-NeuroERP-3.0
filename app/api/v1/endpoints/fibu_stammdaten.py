@@ -162,7 +162,9 @@ def create_zahlungsformular(
     return ZahlungsformularOut(**dict(row._mapping))
 
 
-@router.delete("/zahlungsformulare/{formular_nr}", summary="Zahlungsformular löschen")
+@router.delete("/zahlungsformulare/{formular_nr}", summary="Zahlungsformular löschen",
+    response_model=dict
+)
 def delete_zahlungsformular(
     formular_nr: str,
     db=Depends(get_db),
@@ -219,7 +221,9 @@ def create_zinsgruppe(
     return ZinsgruppeOut(**dict(row._mapping))
 
 
-@router.delete("/zinsgruppen/{gruppe_nr}", summary="Zinsgruppe löschen")
+@router.delete("/zinsgruppen/{gruppe_nr}", summary="Zinsgruppe löschen",
+    response_model=None
+)
 def delete_zinsgruppe(
     gruppe_nr: str,
     db=Depends(get_db),
@@ -274,7 +278,9 @@ def create_leergutart(
     return LeergutArtOut(**dict(row._mapping))
 
 
-@router.delete("/leergutarten/{art_nr}", summary="Leergutart löschen")
+@router.delete("/leergutarten/{art_nr}", summary="Leergutart löschen",
+    response_model=dict
+)
 def delete_leergutart(
     art_nr: str,
     db=Depends(get_db),

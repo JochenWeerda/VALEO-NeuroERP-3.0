@@ -97,7 +97,9 @@ def _get_rfq(db: Session, rfq_id: int, tenant_id: str) -> Any:
 # Endpoints
 # ─────────────────────────────────────────────────────────────────────────────
 
-@router.get("", summary="Rfq auflisten")
+@router.get("", summary="Rfq auflisten",
+    response_model=dict
+)
 def list_rfq(
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
@@ -128,7 +130,9 @@ def list_rfq(
     ]
 
 
-@router.post("", summary="Rfq anlegen")
+@router.post("", summary="Rfq anlegen",
+    response_model=dict
+)
 def create_rfq(
     body: RfqCreate,
     db: Session = Depends(get_db),
@@ -165,7 +169,9 @@ def create_rfq(
     }
 
 
-@router.get("/{rfq_id}", summary="Rfq abrufen")
+@router.get("/{rfq_id}", summary="Rfq abrufen",
+    response_model=dict
+)
 def get_rfq(
     rfq_id: int,
     db: Session = Depends(get_db),
@@ -208,7 +214,9 @@ def get_rfq(
     }
 
 
-@router.post("/{rfq_id}/send", summary="Rfq senden")
+@router.post("/{rfq_id}/send", summary="Rfq senden",
+    response_model=dict
+)
 def send_rfq(
     rfq_id: int,
     body: SendRequest,
@@ -245,7 +253,9 @@ def send_rfq(
     }
 
 
-@router.post("/{rfq_id}/quotes", summary="Quote hinzufügen")
+@router.post("/{rfq_id}/quotes", summary="Quote hinzufügen",
+    response_model=dict
+)
 def add_quote(
     rfq_id: int,
     body: QuoteCreate,
@@ -300,7 +310,9 @@ def add_quote(
     }
 
 
-@router.get("/{rfq_id}/comparison", summary="Quotes compare")
+@router.get("/{rfq_id}/comparison", summary="Quotes compare",
+    response_model=dict
+)
 def compare_quotes(
     rfq_id: int,
     db: Session = Depends(get_db),
@@ -347,7 +359,9 @@ def compare_quotes(
     }
 
 
-@router.post("/{rfq_id}/accept/{quote_id}", summary="Quote akzeptieren")
+@router.post("/{rfq_id}/accept/{quote_id}", summary="Quote akzeptieren",
+    response_model=dict
+)
 def accept_quote(
     rfq_id: int,
     quote_id: int,

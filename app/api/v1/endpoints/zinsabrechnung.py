@@ -149,7 +149,9 @@ def berechne_zinsabrechnung(
     return ZinsabrechnungOut(**dict(row._mapping))
 
 
-@router.post("/{zins_id}/drucken", summary="Zinsabrechnung drucke")
+@router.post("/{zins_id}/drucken", summary="Zinsabrechnung drucke",
+    response_model=dict
+)
 def drucke_zinsabrechnung(
     zins_id: str,
     db=Depends(get_db),

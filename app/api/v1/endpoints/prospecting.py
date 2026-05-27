@@ -11,7 +11,9 @@ from app.core.database import get_db
 router = APIRouter(prefix="/prospecting", tags=["prospecting", "leads"])
 
 
-@router.get("/lead-candidates", summary="Lead candidates abrufen")
+@router.get("/lead-candidates", summary="Lead candidates abrufen",
+    response_model=dict
+)
 async def get_lead_candidates(
     ref_year: int = Query(..., description="Referenzjahr"),
     min_potential: Optional[float] = Query(None, description="Mindestpotenzial in EUR"),

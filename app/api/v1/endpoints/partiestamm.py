@@ -122,7 +122,9 @@ def create_partiegruppe(
     return PartiegruppeOut(**dict(row._mapping))
 
 
-@router.delete("/gruppen/{gruppe_nr}", summary="Partiegruppe löschen")
+@router.delete("/gruppen/{gruppe_nr}", summary="Partiegruppe löschen",
+    response_model=dict
+)
 def delete_partiegruppe(
     gruppe_nr: str,
     db=Depends(get_db),
@@ -219,7 +221,9 @@ def create_partie(
     return PartiestammOut(**dict(row._mapping))
 
 
-@router.patch("/{partie_nr}/status", summary="Partie status setzen")
+@router.patch("/{partie_nr}/status", summary="Partie status setzen",
+    response_model=None
+)
 def set_partie_status(
     partie_nr: str,
     status: str = Query(...),
@@ -238,7 +242,9 @@ def set_partie_status(
     return {"partie_nr": partie_nr, "status": status}
 
 
-@router.post("/{partie_nr}/umbuchung", summary="Umbuchung partie")
+@router.post("/{partie_nr}/umbuchung", summary="Umbuchung partie",
+    response_model=dict
+)
 def partie_umbuchung(
     partie_nr: str,
     payload: PartieUmbuchungCreate,
@@ -263,7 +269,9 @@ def partie_umbuchung(
     return {"partie_nr": partie_nr, "neues_lager": payload.ziel_lager_nr}
 
 
-@router.delete("/{partie_nr}", summary="Partie löschen")
+@router.delete("/{partie_nr}", summary="Partie löschen",
+    response_model=dict
+)
 def delete_partie(
     partie_nr: str,
     db=Depends(get_db),

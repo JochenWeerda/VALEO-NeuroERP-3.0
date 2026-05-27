@@ -27,20 +27,26 @@ class PipelineRequest(BaseModel):
     dry_run: bool = Field(False, description="Nur simulieren, nicht ausfuehren")
 
 
-@router.post("/classify", summary="Classify do")
+@router.post("/classify", summary="Classify do",
+    response_model=dict
+)
 async def do_classify(request: ClassifyRequest):
     """Intent aus User-Input klassifizieren."""
     result = classify(request.user_input, request.context)
     return result.to_dict()
 
 
-@router.get("/intents", summary="Intents auflisten")
+@router.get("/intents", summary="Intents auflisten",
+    response_model=dict
+)
 async def list_intents():
     """Alle unterstuetzten Intents auflisten."""
     return {"intents": get_supported_intents()}
 
 
-@router.post("/plan", summary="Plan do")
+@router.post("/plan", summary="Plan do",
+    response_model=dict
+)
 async def do_plan(
     request: ClassifyRequest,
     tenant_id: str = Depends(get_tenant_id),
@@ -56,7 +62,9 @@ async def do_plan(
     }
 
 
-@router.post("/execute", summary="Execute do")
+@router.post("/execute", summary="Execute do",
+    response_model=dict
+)
 async def do_execute(
     request: PipelineRequest,
     tenant_id: str = Depends(get_tenant_id),

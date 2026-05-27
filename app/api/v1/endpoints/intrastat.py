@@ -111,7 +111,9 @@ def _gen_meldenummer(db: Session, meldezeitraum: str, meldungsart: str) -> str:
 # ---------------------------------------------------------------------------
 
 
-@router.get("/meldungen", summary="Intrastat-Meldungen auflisten")
+@router.get("/meldungen", summary="Intrastat-Meldungen auflisten",
+    response_model=dict
+)
 def list_meldungen(
     meldezeitraum: Optional[str] = Query(None, description="YYYY-MM"),
     meldungsart: Optional[str] = Query(None),
@@ -147,7 +149,9 @@ def list_meldungen(
         return []
 
 
-@router.post("/meldungen", status_code=201, summary="Intrastat-Meldung erstellen")
+@router.post("/meldungen", status_code=201, summary="Intrastat-Meldung erstellen",
+    response_model=dict
+)
 def create_meldung(
     payload: IntrastatMeldungCreate,
     db: Session = Depends(get_db),
@@ -192,7 +196,9 @@ def create_meldung(
         )
 
 
-@router.put("/meldungen/{meldung_id}", summary="Intrastat-Meldung aktualisieren")
+@router.put("/meldungen/{meldung_id}", summary="Intrastat-Meldung aktualisieren",
+    response_model=dict
+)
 def update_meldung(
     meldung_id: str,
     payload: IntrastatMeldungUpdate,
@@ -271,7 +277,9 @@ def delete_meldung(
         )
 
 
-@router.get("/meldungen/{meldezeitraum}/zusammenfassung", summary="Zusammenfassung nach Meldezeitraum")
+@router.get("/meldungen/{meldezeitraum}/zusammenfassung", summary="Zusammenfassung nach Meldezeitraum",
+    response_model=None
+)
 def zusammenfassung(
     meldezeitraum: str,
     db: Session = Depends(get_db),
@@ -304,7 +312,11 @@ def zusammenfassung(
         return {"meldezeitraum": meldezeitraum, "positionen": [], "total_wert_eur": 0.0}
 
 
-@router.post("/meldungen/{meldezeitraum}/export-csv", summary="Intrastat-Meldung als CSV exportieren (INTRASTAT-DE)")
+@router.post(
+    "/meldungen/{meldezeitraum}/export-csv",
+    summary="Intrastat-Meldung als CSV exportieren (INTRASTAT-DE)",
+    response_model=dict,
+)
 def export_csv(
     meldezeitraum: str,
     db: Session = Depends(get_db),

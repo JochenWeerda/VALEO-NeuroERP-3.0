@@ -284,7 +284,9 @@ def list_ausfuehrungen(
     return [AusfuehrungOut(**dict(r._mapping)) for r in rows]
 
 
-@router.patch("/{da_nr}/deaktivieren", summary="Deaktivieren")
+@router.patch("/{da_nr}/deaktivieren", summary="Deaktivieren",
+    response_model=dict
+)
 def deaktivieren(
     da_nr: str,
     db=Depends(get_db),

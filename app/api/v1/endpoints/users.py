@@ -173,7 +173,9 @@ async def update_user(
         raise HTTPException(status_code=500, detail=f"Failed to update user: {str(e)}")
 
 
-@router.delete("/{user_id}", status_code=status.HTTP_204_NO_CONTENT, summary="User löschen")
+@router.delete("/{user_id}", status_code=status.HTTP_204_NO_CONTENT, summary="User löschen",
+    response_model=None
+)
 async def delete_user(
     user_id: str,
     oidc_user: OIDCUser = Depends(get_current_user),
@@ -219,7 +221,9 @@ async def login(
     }
 
 
-@router.post("/change-password", summary="Password change")
+@router.post("/change-password", summary="Password change",
+    response_model=dict
+)
 async def change_password(
     password_data: ChangePasswordRequest,
     oidc_user: OIDCUser = Depends(get_current_user),

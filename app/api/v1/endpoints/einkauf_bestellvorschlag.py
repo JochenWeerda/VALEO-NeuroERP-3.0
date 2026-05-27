@@ -242,7 +242,9 @@ def _not_found(exc: EntityNotFoundError, label: str) -> HTTPException:
 # Bestell-Vorschlag Engines
 # ─────────────────────────────────────────────────────────────────────────────
 
-@router.get("/einkauf/bestellvorschlaege/lager", summary="Lager vorschlag")
+@router.get("/einkauf/bestellvorschlaege/lager", summary="Lager vorschlag",
+    response_model=dict
+)
 async def vorschlag_lager(
     niederlassung_id: Optional[str] = Query(None),
     artikelgruppe: Optional[str] = Query(None),
@@ -255,7 +257,9 @@ async def vorschlag_lager(
     return _svc(db, tenant_id).compute_vorschlag_lager(niederlassung_id, artikelgruppe, artikel_nr, warehouse_id, nur_unter_meldebestand)
 
 
-@router.get("/einkauf/bestellvorschlaege/verkauf", summary="Verkauf vorschlag")
+@router.get("/einkauf/bestellvorschlaege/verkauf", summary="Verkauf vorschlag",
+    response_model=dict
+)
 async def vorschlag_verkauf(
     niederlassung_id: Optional[str] = Query(None),
     artikelgruppe: Optional[str] = Query(None),
@@ -267,7 +271,9 @@ async def vorschlag_verkauf(
     return _svc(db, tenant_id).compute_vorschlag_verkauf(niederlassung_id, artikelgruppe, von_datum, bis_datum)
 
 
-@router.get("/einkauf/bestellvorschlaege/rohware", summary="Rohware vorschlag")
+@router.get("/einkauf/bestellvorschlaege/rohware", summary="Rohware vorschlag",
+    response_model=dict
+)
 async def vorschlag_rohware(
     stichtag: Optional[date] = Query(None),
     niederlassung_id: Optional[str] = Query(None),
@@ -281,7 +287,9 @@ async def vorschlag_rohware(
 # Bestellvorschläge CRUD
 # ─────────────────────────────────────────────────────────────────────────────
 
-@router.get("/einkauf/bestellvorschlaege", summary="Bestellvorschlaege auflisten")
+@router.get("/einkauf/bestellvorschlaege", summary="Bestellvorschlaege auflisten",
+    response_model=dict
+)
 async def list_bestellvorschlaege(
     vorschlag_typ: Optional[str] = Query(None),
     status: Optional[str] = Query(None),
@@ -293,7 +301,9 @@ async def list_bestellvorschlaege(
     return _svc(db, tenant_id).list_vorschlaege(vorschlag_typ, status, von, bis)
 
 
-@router.post("/einkauf/bestellvorschlaege", status_code=201, summary="Bestellvorschlag anlegen")
+@router.post("/einkauf/bestellvorschlaege", status_code=201, summary="Bestellvorschlag anlegen",
+    response_model=dict
+)
 async def create_bestellvorschlag(
     data: VorschlagSaveRequest,
     db: Session = Depends(get_db),
@@ -302,7 +312,9 @@ async def create_bestellvorschlag(
     return _svc(db, tenant_id).create_vorschlag(data.vorschlag_typ, data.positionen, data.parameter, data.niederlassung_id, data.bezeichnung)
 
 
-@router.get("/einkauf/bestellvorschlaege/{vorschlag_id}", summary="Bestellvorschlag abrufen")
+@router.get("/einkauf/bestellvorschlaege/{vorschlag_id}", summary="Bestellvorschlag abrufen",
+    response_model=dict
+)
 async def get_bestellvorschlag(
     vorschlag_id: str,
     db: Session = Depends(get_db),
@@ -314,7 +326,9 @@ async def get_bestellvorschlag(
         raise HTTPException(404, "Vorschlag nicht gefunden")
 
 
-@router.put("/einkauf/bestellvorschlaege/{vorschlag_id}", summary="Bestellvorschlag aktualisieren")
+@router.put("/einkauf/bestellvorschlaege/{vorschlag_id}", summary="Bestellvorschlag aktualisieren",
+    response_model=dict
+)
 async def update_bestellvorschlag(
     vorschlag_id: str,
     data: dict[str, Any],
@@ -340,7 +354,9 @@ async def delete_bestellvorschlag(
     return Response(status_code=204)
 
 
-@router.post("/einkauf/bestellvorschlaege/{vorschlag_id}/zu-bestellung", status_code=201, summary="Freigeben vorschlag")
+@router.post("/einkauf/bestellvorschlaege/{vorschlag_id}/zu-bestellung", status_code=201, summary="Freigeben vorschlag",
+    response_model=None
+)
 async def vorschlag_freigeben(
     vorschlag_id: str,
     db: Session = Depends(get_db),
@@ -356,7 +372,9 @@ async def vorschlag_freigeben(
 # ArtikelLagerParameter CRUD
 # ─────────────────────────────────────────────────────────────────────────────
 
-@router.get("/einkauf/artikel-lager-parameter", summary="Artikel lager parameter auflisten")
+@router.get("/einkauf/artikel-lager-parameter", summary="Artikel lager parameter auflisten",
+    response_model=dict
+)
 async def list_artikel_lager_parameter(
     article_id: Optional[str] = Query(None),
     warehouse_id: Optional[str] = Query(None),
@@ -367,7 +385,9 @@ async def list_artikel_lager_parameter(
     return _svc(db, tenant_id).list_artikel_lager_parameter(article_id, warehouse_id, niederlassung_id)
 
 
-@router.post("/einkauf/artikel-lager-parameter", status_code=201, summary="Artikel lager parameter anlegen")
+@router.post("/einkauf/artikel-lager-parameter", status_code=201, summary="Artikel lager parameter anlegen",
+    response_model=dict
+)
 async def create_artikel_lager_parameter(
     data: ArtikelLagerParamCreate,
     db: Session = Depends(get_db),
@@ -379,7 +399,9 @@ async def create_artikel_lager_parameter(
         raise HTTPException(409, exc.detail)
 
 
-@router.put("/einkauf/artikel-lager-parameter/{param_id}", summary="Artikel lager parameter aktualisieren")
+@router.put("/einkauf/artikel-lager-parameter/{param_id}", summary="Artikel lager parameter aktualisieren",
+    response_model=dict
+)
 async def update_artikel_lager_parameter(
     param_id: str,
     data: ArtikelLagerParamUpdate,
@@ -409,7 +431,9 @@ async def delete_artikel_lager_parameter(
 # Lieferanten CRUD
 # ─────────────────────────────────────────────────────────────────────────────
 
-@router.get("/einkauf/lieferanten", summary="Lieferanten auflisten")
+@router.get("/einkauf/lieferanten", summary="Lieferanten auflisten",
+    response_model=None
+)
 async def list_lieferanten(
     suche: Optional[str] = Query(None),
     aktiv: Optional[bool] = Query(None),
@@ -419,7 +443,9 @@ async def list_lieferanten(
     return _svc(db, tenant_id).list_lieferanten(suche, aktiv)
 
 
-@router.post("/einkauf/lieferanten", status_code=201, summary="Lieferant anlegen")
+@router.post("/einkauf/lieferanten", status_code=201, summary="Lieferant anlegen",
+    response_model=dict
+)
 async def create_lieferant(
     data: LieferantCreate,
     db: Session = Depends(get_db),
@@ -428,7 +454,9 @@ async def create_lieferant(
     return _svc(db, tenant_id).create_lieferant(data.model_dump())
 
 
-@router.get("/einkauf/lieferanten/{lieferant_id}", summary="Lieferant abrufen")
+@router.get("/einkauf/lieferanten/{lieferant_id}", summary="Lieferant abrufen",
+    response_model=dict
+)
 async def get_lieferant(
     lieferant_id: str,
     db: Session = Depends(get_db),
@@ -440,7 +468,9 @@ async def get_lieferant(
         raise HTTPException(404, "Lieferant nicht gefunden")
 
 
-@router.put("/einkauf/lieferanten/{lieferant_id}", summary="Lieferant aktualisieren")
+@router.put("/einkauf/lieferanten/{lieferant_id}", summary="Lieferant aktualisieren",
+    response_model=dict
+)
 async def update_lieferant(
     lieferant_id: str,
     data: LieferantUpdate,
@@ -457,7 +487,9 @@ async def update_lieferant(
 # Kontrakte CRUD
 # ─────────────────────────────────────────────────────────────────────────────
 
-@router.get("/einkauf/kontrakte", summary="Kontrakte auflisten")
+@router.get("/einkauf/kontrakte", summary="Kontrakte auflisten",
+    response_model=dict
+)
 async def list_kontrakte(
     lieferant_id: Optional[str] = Query(None),
     status: Optional[str] = Query(None),
@@ -467,7 +499,9 @@ async def list_kontrakte(
     return _svc(db, tenant_id).list_kontrakte(lieferant_id, status)
 
 
-@router.post("/einkauf/kontrakte", status_code=201, summary="Kontrakt anlegen")
+@router.post("/einkauf/kontrakte", status_code=201, summary="Kontrakt anlegen",
+    response_model=dict
+)
 async def create_kontrakt(
     data: KontraktCreate,
     db: Session = Depends(get_db),
@@ -476,7 +510,9 @@ async def create_kontrakt(
     return _svc(db, tenant_id).create_kontrakt(data.model_dump())
 
 
-@router.get("/einkauf/kontrakte/{kontrakt_id}", summary="Kontrakt abrufen")
+@router.get("/einkauf/kontrakte/{kontrakt_id}", summary="Kontrakt abrufen",
+    response_model=dict
+)
 async def get_kontrakt(
     kontrakt_id: str,
     db: Session = Depends(get_db),
@@ -488,7 +524,9 @@ async def get_kontrakt(
         raise HTTPException(404, "Kontrakt nicht gefunden")
 
 
-@router.put("/einkauf/kontrakte/{kontrakt_id}", summary="Kontrakt aktualisieren")
+@router.put("/einkauf/kontrakte/{kontrakt_id}", summary="Kontrakt aktualisieren",
+    response_model=dict
+)
 async def update_kontrakt(
     kontrakt_id: str,
     data: KontraktCreate,
@@ -501,7 +539,9 @@ async def update_kontrakt(
         raise HTTPException(404, "Kontrakt nicht gefunden")
 
 
-@router.post("/einkauf/kontrakte/{kontrakt_id}/positionen", status_code=201, summary="Kontrakt position hinzufügen")
+@router.post("/einkauf/kontrakte/{kontrakt_id}/positionen", status_code=201, summary="Kontrakt position hinzufügen",
+    response_model=dict
+)
 async def add_kontrakt_position(
     kontrakt_id: str,
     data: KontraktPosCreate,
@@ -518,7 +558,9 @@ async def add_kontrakt_position(
 # Bestellungen CRUD
 # ─────────────────────────────────────────────────────────────────────────────
 
-@router.get("/einkauf/bestellungen", summary="Bestellungen auflisten")
+@router.get("/einkauf/bestellungen", summary="Bestellungen auflisten",
+    response_model=dict
+)
 async def list_bestellungen(
     lieferant_id: Optional[str] = Query(None),
     status: Optional[str] = Query(None),
@@ -530,7 +572,9 @@ async def list_bestellungen(
     return _svc(db, tenant_id).list_bestellungen(lieferant_id, status, von, bis)
 
 
-@router.post("/einkauf/bestellungen/import", summary="Bestellungen importieren")
+@router.post("/einkauf/bestellungen/import", summary="Bestellungen importieren",
+    response_model=dict
+)
 async def import_bestellungen(
     file: UploadFile = File(...),
     db: Session = Depends(get_db),
@@ -543,7 +587,9 @@ async def import_bestellungen(
             "filename": file.filename or "upload"}
 
 
-@router.post("/einkauf/bestellungen", status_code=201, summary="Bestellung anlegen")
+@router.post("/einkauf/bestellungen", status_code=201, summary="Bestellung anlegen",
+    response_model=dict
+)
 async def create_bestellung(
     data: BestellungCreate,
     db: Session = Depends(get_db),
@@ -552,7 +598,9 @@ async def create_bestellung(
     return _svc(db, tenant_id).create_bestellung(data.model_dump())
 
 
-@router.get("/einkauf/bestellungen/{bestellung_id}", summary="Bestellung abrufen")
+@router.get("/einkauf/bestellungen/{bestellung_id}", summary="Bestellung abrufen",
+    response_model=dict
+)
 async def get_bestellung(
     bestellung_id: str,
     db: Session = Depends(get_db),
@@ -564,7 +612,9 @@ async def get_bestellung(
         raise HTTPException(404, "Bestellung nicht gefunden")
 
 
-@router.put("/einkauf/bestellungen/{bestellung_id}", summary="Bestellung aktualisieren")
+@router.put("/einkauf/bestellungen/{bestellung_id}", summary="Bestellung aktualisieren",
+    response_model=dict
+)
 async def update_bestellung(
     bestellung_id: str,
     data: dict[str, Any],
@@ -577,7 +627,9 @@ async def update_bestellung(
         raise HTTPException(404, "Bestellung nicht gefunden")
 
 
-@router.post("/einkauf/bestellungen/{bestellung_id}/versenden", summary="Versenden bestellung")
+@router.post("/einkauf/bestellungen/{bestellung_id}/versenden", summary="Versenden bestellung",
+    response_model=dict
+)
 async def bestellung_versenden(
     bestellung_id: str,
     versand_art: str = Query("email"),
@@ -595,7 +647,9 @@ async def bestellung_versenden(
 # Lager-Konten-Zuordnung CRUD
 # ─────────────────────────────────────────────────────────────────────────────
 
-@router.get("/einkauf/lager-konten", summary="Lager konten auflisten")
+@router.get("/einkauf/lager-konten", summary="Lager konten auflisten",
+    response_model=dict
+)
 async def list_lager_konten(
     artikelgruppe: Optional[str] = Query(None),
     db: Session = Depends(get_db),
@@ -604,7 +658,9 @@ async def list_lager_konten(
     return _svc(db, tenant_id).list_lager_konten(artikelgruppe)
 
 
-@router.post("/einkauf/lager-konten", status_code=201, summary="Lager konto anlegen")
+@router.post("/einkauf/lager-konten", status_code=201, summary="Lager konto anlegen",
+    response_model=dict
+)
 async def create_lager_konto(
     data: LagerKontenzuordnungCreate,
     db: Session = Depends(get_db),
@@ -613,7 +669,9 @@ async def create_lager_konto(
     return _svc(db, tenant_id).create_lager_konto(data.model_dump())
 
 
-@router.put("/einkauf/lager-konten/{konto_id}", summary="Lager konto aktualisieren")
+@router.put("/einkauf/lager-konten/{konto_id}", summary="Lager konto aktualisieren",
+    response_model=dict
+)
 async def update_lager_konto(
     konto_id: str,
     data: LagerKontenzuordnungCreate,
@@ -630,7 +688,9 @@ async def update_lager_konto(
 # Paletten-Konto
 # ─────────────────────────────────────────────────────────────────────────────
 
-@router.get("/einkauf/paletten-konto/{partner_id}", summary="Paletten saldo abrufen")
+@router.get("/einkauf/paletten-konto/{partner_id}", summary="Paletten saldo abrufen",
+    response_model=dict
+)
 async def get_paletten_saldo(
     partner_id: str,
     paletten_typ: Optional[str] = Query(None),
@@ -640,7 +700,9 @@ async def get_paletten_saldo(
     return _svc(db, tenant_id).get_paletten_saldo(partner_id, paletten_typ)
 
 
-@router.post("/einkauf/paletten-konto", status_code=201, summary="Paletten buchung anlegen")
+@router.post("/einkauf/paletten-konto", status_code=201, summary="Paletten buchung anlegen",
+    response_model=dict
+)
 async def create_paletten_buchung(
     data: PalettenBuchungCreate,
     db: Session = Depends(get_db),
@@ -653,7 +715,9 @@ async def create_paletten_buchung(
 # Pfand-Konto
 # ─────────────────────────────────────────────────────────────────────────────
 
-@router.get("/einkauf/pfand-konto/{partner_id}", summary="Pfand saldo abrufen")
+@router.get("/einkauf/pfand-konto/{partner_id}", summary="Pfand saldo abrufen",
+    response_model=dict
+)
 async def get_pfand_saldo(
     partner_id: str,
     gebinde_typ: Optional[str] = Query(None),
@@ -663,7 +727,9 @@ async def get_pfand_saldo(
     return _svc(db, tenant_id).get_pfand_saldo(partner_id, gebinde_typ)
 
 
-@router.post("/einkauf/pfand-konto", status_code=201, summary="Pfand buchung anlegen")
+@router.post("/einkauf/pfand-konto", status_code=201, summary="Pfand buchung anlegen",
+    response_model=dict
+)
 async def create_pfand_buchung(
     data: PfandBuchungCreate,
     db: Session = Depends(get_db),
@@ -676,7 +742,9 @@ async def create_pfand_buchung(
 # Fremdwaren-Einlagerung
 # ─────────────────────────────────────────────────────────────────────────────
 
-@router.get("/einkauf/fremdwaren-einlagerung", summary="Fremdwaren auflisten")
+@router.get("/einkauf/fremdwaren-einlagerung", summary="Fremdwaren auflisten",
+    response_model=dict
+)
 async def list_fremdwaren(
     eigentuemer_id: Optional[str] = Query(None),
     status: Optional[str] = Query(None),
@@ -687,7 +755,9 @@ async def list_fremdwaren(
     return _svc(db, tenant_id).list_fremdwaren(eigentuemer_id, status, warehouse_id)
 
 
-@router.post("/einkauf/fremdwaren-einlagerung", status_code=201, summary="Fremdwaren einlagerung anlegen")
+@router.post("/einkauf/fremdwaren-einlagerung", status_code=201, summary="Fremdwaren einlagerung anlegen",
+    response_model=dict
+)
 async def create_fremdwaren_einlagerung(
     data: FremdwarenCreate,
     db: Session = Depends(get_db),
@@ -696,7 +766,9 @@ async def create_fremdwaren_einlagerung(
     return _svc(db, tenant_id).create_fremdwaren(data.model_dump())
 
 
-@router.put("/einkauf/fremdwaren-einlagerung/{einlagerung_id}", summary="Fremdwaren einlagerung aktualisieren")
+@router.put("/einkauf/fremdwaren-einlagerung/{einlagerung_id}", summary="Fremdwaren einlagerung aktualisieren",
+    response_model=dict
+)
 async def update_fremdwaren_einlagerung(
     einlagerung_id: str,
     data: dict[str, Any],
@@ -713,7 +785,9 @@ async def update_fremdwaren_einlagerung(
 # Bestellungen Workflow
 # ─────────────────────────────────────────────────────────────────────────────
 
-@router.post("/einkauf/bestellungen/{bestellung_id}/freigeben", summary="Freigeben bestellung")
+@router.post("/einkauf/bestellungen/{bestellung_id}/freigeben", summary="Freigeben bestellung",
+    response_model=dict
+)
 async def bestellung_freigeben(
     bestellung_id: str,
     db: Session = Depends(get_db),
@@ -727,7 +801,9 @@ async def bestellung_freigeben(
         raise HTTPException(400, exc.detail)
 
 
-@router.post("/einkauf/bestellungen/{bestellung_id}/stornieren", summary="Stornieren bestellung")
+@router.post("/einkauf/bestellungen/{bestellung_id}/stornieren", summary="Stornieren bestellung",
+    response_model=dict
+)
 async def bestellung_stornieren(
     bestellung_id: str,
     db: Session = Depends(get_db),

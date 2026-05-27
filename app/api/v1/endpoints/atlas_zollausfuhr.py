@@ -249,7 +249,9 @@ def delete_anmeldung(
     return Response(status_code=204)
 
 
-@router.post("/ausfuhranmeldungen/{id}/uebermitteln", summary="Uebermitteln")
+@router.post("/ausfuhranmeldungen/{id}/uebermitteln", summary="Uebermitteln",
+    response_model=None
+)
 def uebermitteln(
     id: str,
     db: Session = Depends(get_db),
@@ -270,7 +272,9 @@ def uebermitteln(
         raise
 
 
-@router.post("/ausfuhranmeldungen/{id}/vorab-validieren", summary="Validieren vorab")
+@router.post("/ausfuhranmeldungen/{id}/vorab-validieren", summary="Validieren vorab",
+    response_model=dict
+)
 def vorab_validieren(
     id: str,
     db: Session = Depends(get_db),
@@ -285,7 +289,9 @@ def vorab_validieren(
     return svc.validate_anmeldung(anmeldung)
 
 
-@router.get("/ausfuhrnachrichten/{mrn}", summary="Ausfuhrnachricht")
+@router.get("/ausfuhrnachrichten/{mrn}", summary="Ausfuhrnachricht",
+    response_model=dict
+)
 def ausfuhrnachricht(
     mrn: str,
     db: Session = Depends(get_db),
@@ -297,7 +303,9 @@ def ausfuhrnachricht(
     return svc.get_ausfuhrnachricht(mrn=mrn, db=db)
 
 
-@router.post("/atlas-callback", summary="Callback atlas")
+@router.post("/atlas-callback", summary="Callback atlas",
+    response_model=dict
+)
 def atlas_callback(
     body: ZollausfuhrStatusUpdate,
     db: Session = Depends(get_db),
@@ -321,7 +329,9 @@ def atlas_callback(
     return {"empfangen": True}
 
 
-@router.get("/warennummern/suche", summary="Suche warennummern")
+@router.get("/warennummern/suche", summary="Suche warennummern",
+    response_model=dict
+)
 def warennummern_suche(q: str = Query(default="")):
     """HS tariff number search (static agricultural seed data)."""
     q_lower = q.lower()

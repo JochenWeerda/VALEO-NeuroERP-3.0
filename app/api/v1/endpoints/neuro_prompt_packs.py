@@ -36,7 +36,9 @@ class RegisterPromptPackRequest(BaseModel):
     traffic_weight: Optional[float] = None
 
 
-@router.post("/neuro/prompt-packs", summary="Register prompt pack do")
+@router.post("/neuro/prompt-packs", summary="Register prompt pack do",
+    response_model=dict
+)
 async def do_register_prompt_pack(
     request: RegisterPromptPackRequest,
     tenant_id: str = Depends(get_tenant_id),
@@ -61,14 +63,18 @@ async def do_register_prompt_pack(
     )
 
 
-@router.get("/neuro/prompt-packs", summary="List prompt packs do")
+@router.get("/neuro/prompt-packs", summary="List prompt packs do",
+    response_model=dict
+)
 async def do_list_prompt_packs(
     tenant_id: str = Depends(get_tenant_id),
 ):
     return {"items": list_prompt_packs(tenant_id)}
 
 
-@router.get("/neuro/prompt-packs/{prompt_pack_key}", summary="Get prompt pack do")
+@router.get("/neuro/prompt-packs/{prompt_pack_key}", summary="Get prompt pack do",
+    response_model=dict
+)
 async def do_get_prompt_pack(
     prompt_pack_key: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -79,7 +85,9 @@ async def do_get_prompt_pack(
     return result
 
 
-@router.get("/neuro/prompt-packs/{prompt_pack_key}/variants", summary="List prompt pack variants do")
+@router.get("/neuro/prompt-packs/{prompt_pack_key}/variants", summary="List prompt pack variants do",
+    response_model=dict
+)
 async def do_list_prompt_pack_variants(
     prompt_pack_key: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -91,7 +99,9 @@ class SelectPromptPackRequest(BaseModel):
     seed: Optional[str] = None
 
 
-@router.post("/neuro/prompt-packs/{prompt_pack_key}/select", summary="Select prompt pack do")
+@router.post("/neuro/prompt-packs/{prompt_pack_key}/select", summary="Select prompt pack do",
+    response_model=dict
+)
 async def do_select_prompt_pack(
     prompt_pack_key: str,
     request: SelectPromptPackRequest,
@@ -103,7 +113,9 @@ async def do_select_prompt_pack(
     return result
 
 
-@router.post("/neuro/prompt-packs/{prompt_pack_key}/rollback", summary="Rollback prompt pack do")
+@router.post("/neuro/prompt-packs/{prompt_pack_key}/rollback", summary="Rollback prompt pack do",
+    response_model=dict
+)
 async def do_rollback_prompt_pack(
     prompt_pack_key: str,
     tenant_id: str = Depends(get_tenant_id),

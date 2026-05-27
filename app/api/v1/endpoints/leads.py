@@ -120,7 +120,9 @@ async def update_lead(lead_id: str, payload: LeadUpdate):
     return Lead.model_validate(_adapt_lead(updated))
 
 
-@router.delete("/{lead_id}", status_code=status.HTTP_204_NO_CONTENT, summary="Lead löschen")
+@router.delete("/{lead_id}", status_code=status.HTTP_204_NO_CONTENT, summary="Lead löschen",
+    response_model=None
+)
 async def delete_lead(lead_id: str):
     try:
         await crm_core_client.delete_lead(lead_id)

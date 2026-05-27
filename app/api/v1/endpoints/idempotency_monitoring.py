@@ -7,13 +7,17 @@ from app.core.action_idempotency import get_action_idempotency_store
 router = APIRouter(prefix="/process/idempotency", tags=["process-kernel", "idempotency", "monitoring"])
 
 
-@router.get("/summary", summary="Idempotency Summary")
+@router.get("/summary", summary="Idempotency Summary",
+    response_model=dict
+)
 def get_idempotency_summary() -> dict:
     store = get_action_idempotency_store()
     return store.summary()
 
 
-@router.get("/audit", summary="Idempotency Audit Feed")
+@router.get("/audit", summary="Idempotency Audit Feed",
+    response_model=dict
+)
 def get_idempotency_audit(
     tenant_id: str | None = Query(default=None, description="Optional tenant filter"),
     command_name: str | None = Query(default=None, description="Optional command filter"),

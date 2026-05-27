@@ -96,7 +96,9 @@ def _gen_mitglieds_nr(db: Session) -> str:
 # ---------------------------------------------------------------------------
 
 
-@router.get("/mitglieder", summary="Mitgliederliste")
+@router.get("/mitglieder", summary="Mitgliederliste",
+    response_model=dict
+)
 def list_mitglieder(
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
@@ -116,7 +118,9 @@ def list_mitglieder(
         return []
 
 
-@router.post("/mitglieder", status_code=201, summary="Mitglied anlegen")
+@router.post("/mitglieder", status_code=201, summary="Mitglied anlegen",
+    response_model=dict
+)
 def create_mitglied(
     payload: MitgliedCreate,
     db: Session = Depends(get_db),
@@ -157,7 +161,9 @@ def create_mitglied(
         )
 
 
-@router.get("/mitglieder/{mitglied_id}", summary="Mitglied Detailansicht")
+@router.get("/mitglieder/{mitglied_id}", summary="Mitglied Detailansicht",
+    response_model=dict
+)
 def get_mitglied(
     mitglied_id: str,
     db: Session = Depends(get_db),
@@ -200,7 +206,9 @@ def get_mitglied(
     return mitglied
 
 
-@router.patch("/mitglieder/{mitglied_id}", summary="Mitglied aktualisieren")
+@router.patch("/mitglieder/{mitglied_id}", summary="Mitglied aktualisieren",
+    response_model=dict
+)
 def patch_mitglied(
     mitglied_id: str,
     payload: MitgliedPatch,
@@ -241,7 +249,9 @@ def patch_mitglied(
         )
 
 
-@router.post("/mitglieder/{mitglied_id}/anteilsbewegung", status_code=201, summary="Anteilsbewegung buchen")
+@router.post("/mitglieder/{mitglied_id}/anteilsbewegung", status_code=201, summary="Anteilsbewegung buchen",
+    response_model=dict
+)
 def create_anteilsbewegung(
     mitglied_id: str,
     payload: AnteilsbewegungCreate,
@@ -290,7 +300,9 @@ def create_anteilsbewegung(
         )
 
 
-@router.get("/kapitaluebersicht", summary="Genossenschaftliches Kapital — Aggregatübersicht")
+@router.get("/kapitaluebersicht", summary="Genossenschaftliches Kapital — Aggregatübersicht",
+    response_model=dict
+)
 def kapitaluebersicht(
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),

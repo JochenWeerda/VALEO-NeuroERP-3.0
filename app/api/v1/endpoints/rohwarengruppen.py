@@ -254,7 +254,9 @@ def create_rohwarengruppe(
     return RohwarengruppeOut(**dict(row._mapping))
 
 
-@router.delete("/{gruppe_nr}", summary="Rohwarengruppe löschen")
+@router.delete("/{gruppe_nr}", summary="Rohwarengruppe löschen",
+    response_model=dict
+)
 def delete_rohwarengruppe(
     gruppe_nr: str,
     db=Depends(get_db),

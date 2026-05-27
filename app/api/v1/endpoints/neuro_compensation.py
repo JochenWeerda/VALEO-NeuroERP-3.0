@@ -18,7 +18,9 @@ class CompensateRequest(BaseModel):
     rollback_steps: Optional[list[dict]] = Field(default_factory=list)
 
 
-@router.post("", summary="Compensate do")
+@router.post("", summary="Compensate do",
+    response_model=dict
+)
 async def do_compensate(request: CompensateRequest):
     run = await compensate(
         error_context={"error": request.error, **(request.context or {})},
@@ -28,7 +30,9 @@ async def do_compensate(request: CompensateRequest):
     return run.to_dict()
 
 
-@router.get("/{run_id}", summary="Run abrufen")
+@router.get("/{run_id}", summary="Run abrufen",
+    response_model=dict
+)
 async def get_run(run_id: str):
     run = get_compensation_run(run_id)
     if not run:
@@ -36,7 +40,9 @@ async def get_run(run_id: str):
     return run.to_dict()
 
 
-@router.post("/{run_id}/retry", summary="Retry manual")
+@router.post("/{run_id}/retry", summary="Retry manual",
+    response_model=dict
+)
 async def manual_retry(run_id: str):
     run = get_compensation_run(run_id)
     if not run:

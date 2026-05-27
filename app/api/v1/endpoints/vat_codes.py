@@ -287,7 +287,9 @@ async def update_vat_code(
     return vat_code
 
 
-@router.delete("/{vat_code_id}", summary="Vat code löschen")
+@router.delete("/{vat_code_id}", summary="Vat code löschen",
+    response_model=dict
+)
 async def delete_vat_code(
     vat_code_id: str,
     reason: Optional[str] = Query(None, description="Reason for deletion"),
@@ -342,7 +344,9 @@ async def get_vat_code_audit(
     ).order_by(VatCodeAudit.changed_at.desc()).all()
 
 
-@router.post("/seed-defaults", summary="Default vat codes seed")
+@router.post("/seed-defaults", summary="Default vat codes seed",
+    response_model=dict
+)
 async def seed_default_vat_codes(
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),

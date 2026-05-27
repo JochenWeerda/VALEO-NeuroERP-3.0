@@ -427,7 +427,9 @@ def get_kpi(
     )
 
 
-@router.post("/refresh", summary="Snapshot aktualisieren")
+@router.post("/refresh", summary="Snapshot aktualisieren",
+    response_model=dict
+)
 def refresh_snapshot(
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),

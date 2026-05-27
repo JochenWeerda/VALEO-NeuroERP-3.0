@@ -18,7 +18,9 @@ logger = logging.getLogger(__name__)
 router = APIRouter()
 
 
-@router.get("/data-export/{user_id}", summary="User data exportieren")
+@router.get("/data-export/{user_id}", summary="User data exportieren",
+    response_model=dict
+)
 async def export_user_data(
     user_id: str,
     request: Request,
@@ -104,7 +106,9 @@ async def export_user_data(
         )
 
 
-@router.delete("/delete-user/{user_id}", status_code=status.HTTP_204_NO_CONTENT, summary="User data löschen")
+@router.delete("/delete-user/{user_id}", status_code=status.HTTP_204_NO_CONTENT, summary="User data löschen",
+    response_model=None
+)
 async def delete_user_data(
     user_id: str,
     request: Request,
@@ -166,7 +170,9 @@ async def delete_user_data(
         )
 
 
-@router.get("/export-portable/{user_id}", summary="Portable data exportieren")
+@router.get("/export-portable/{user_id}", summary="Portable data exportieren",
+    response_model=dict
+)
 async def export_portable_data(
     user_id: str,
     request: Request,

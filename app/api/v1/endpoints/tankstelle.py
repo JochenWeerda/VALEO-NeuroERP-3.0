@@ -46,7 +46,9 @@ class ZapfungPayload(BaseModel):
     tenant_id: str = "default"
 
 
-@router.get("/zapfungen", summary="Zapfungen auflisten")
+@router.get("/zapfungen", summary="Zapfungen auflisten",
+    response_model=dict
+)
 def list_zapfungen(
     kennzeichen: Optional[str] = None,
     artikel: Optional[str] = None,
@@ -62,7 +64,9 @@ def list_zapfungen(
     return [_to_dict(z) for z in q.order_by(Zapfung.zeitstempel.desc()).offset(skip).limit(limit).all()]
 
 
-@router.get("/zapfungen/{zapfung_id}", summary="Zapfung abrufen")
+@router.get("/zapfungen/{zapfung_id}", summary="Zapfung abrufen",
+    response_model=dict
+)
 def get_zapfung(zapfung_id: str, db: Session = Depends(get_db)):
     obj = db.query(Zapfung).filter(Zapfung.id == zapfung_id).first()
     if not obj:
@@ -70,7 +74,9 @@ def get_zapfung(zapfung_id: str, db: Session = Depends(get_db)):
     return _to_dict(obj)
 
 
-@router.post("/zapfungen", status_code=201, summary="Zapfung anlegen")
+@router.post("/zapfungen", status_code=201, summary="Zapfung anlegen",
+    response_model=dict
+)
 def create_zapfung(payload: ZapfungPayload, db: Session = Depends(get_db)):
     obj = Zapfung(**payload.model_dump())
     db.add(obj)
@@ -100,12 +106,16 @@ class TankBestandPatch(BaseModel):
     min_bestand: Optional[float] = None
 
 
-@router.get("/bestand", summary="Bestand auflisten")
+@router.get("/bestand", summary="Bestand auflisten",
+    response_model=None
+)
 def list_bestand(db: Session = Depends(get_db)):
     return [_to_dict(b) for b in db.query(TankBestand).all()]
 
 
-@router.patch("/bestand/{artikel}", summary="Bestand aktualisieren")
+@router.patch("/bestand/{artikel}", summary="Bestand aktualisieren",
+    response_model=dict
+)
 def update_bestand(artikel: str, payload: TankBestandPatch, db: Session = Depends(get_db)):
     obj = db.query(TankBestand).filter(TankBestand.artikel == artikel).first()
     if not obj:

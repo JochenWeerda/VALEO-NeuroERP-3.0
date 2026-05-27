@@ -205,7 +205,9 @@ async def list_vvvo(db: Session = Depends(get_db)) -> dict:
     }
 
 
-@router.get("/report-pdf", summary="Compliance report pdf abrufen")
+@router.get("/report-pdf", summary="Compliance report pdf abrufen",
+    response_model=dict
+)
 async def get_compliance_report_pdf(
     inline: bool = Query(False, description="Vorschau im Browser (inline) statt Download"),
     db: Session = Depends(get_db),
@@ -266,7 +268,9 @@ async def export_gefahrstoffdoku(
     }
 
 
-@router.get("/exports/gefahrstoffdoku.csv", summary="Gefahrstoffdoku csv exportieren")
+@router.get("/exports/gefahrstoffdoku.csv", summary="Gefahrstoffdoku csv exportieren",
+    response_model=dict
+)
 async def export_gefahrstoffdoku_csv(
     year: Optional[int] = Query(None, ge=2000, le=2100),
     db: Session = Depends(get_db),
@@ -326,7 +330,9 @@ async def export_naehrstoffstrom(
     return data
 
 
-@router.get("/exports/naehrstoffstrom.csv", summary="Naehrstoffstrom csv exportieren")
+@router.get("/exports/naehrstoffstrom.csv", summary="Naehrstoffstrom csv exportieren",
+    response_model=dict
+)
 async def export_naehrstoffstrom_csv(
     year: int = Query(..., ge=2000, le=2100),
     db: Session = Depends(get_db),

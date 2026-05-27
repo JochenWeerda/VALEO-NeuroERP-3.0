@@ -793,7 +793,9 @@ async def execute_payment_run(
         raise HTTPException(status_code=500, detail=f"Failed to execute payment run: {str(e)}")
 
 
-@router.get("/{run_id}/sepa-xml", summary="Sepa xml abrufen")
+@router.get("/{run_id}/sepa-xml", summary="Sepa xml abrufen",
+    response_model=dict
+)
 async def get_sepa_xml(
     run_id: str,
     tenant_id: str = Query("system", description="Tenant ID"),
@@ -840,7 +842,9 @@ async def get_sepa_xml(
         raise HTTPException(status_code=500, detail=f"Failed to generate SEPA XML: {str(e)}")
 
 
-@router.post("/{run_id}/return-payment", summary="Payment return")
+@router.post("/{run_id}/return-payment", summary="Payment return",
+    response_model=dict
+)
 async def return_payment(
     run_id: str,
     request: ReturnPaymentRequest,

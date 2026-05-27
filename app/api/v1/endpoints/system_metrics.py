@@ -25,7 +25,9 @@ _metrics_cache: dict = {}
 _CACHE_TTL = 30  # seconds
 
 
-@router.get("/system", summary="System metrics abrufen")
+@router.get("/system", summary="System metrics abrufen",
+    response_model=dict
+)
 async def get_system_metrics(
     current_user: User = Depends(get_current_user),
     tenant_id: str = Depends(get_tenant_id),
@@ -92,7 +94,9 @@ async def get_system_metrics(
         }
 
 
-@router.get("/business", summary="Business metrics abrufen")
+@router.get("/business", summary="Business metrics abrufen",
+    response_model=dict
+)
 async def get_business_metrics(
     current_user: User = Depends(get_current_user),
     tenant_id: str = Depends(get_tenant_id),
@@ -219,7 +223,9 @@ async def get_business_metrics(
         }
 
 
-@router.get("/optimization-signals", summary="Optimization signals abrufen")
+@router.get("/optimization-signals", summary="Optimization signals abrufen",
+    response_model=dict
+)
 async def get_optimization_signals(
     current_user: User = Depends(get_current_user),
     tenant_id: str = Depends(get_tenant_id),

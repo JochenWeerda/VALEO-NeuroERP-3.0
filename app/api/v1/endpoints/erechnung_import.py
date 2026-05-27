@@ -201,7 +201,9 @@ def list_imports(
         return []  # migration_hint: domain_finance.erechnung_imports not yet migrated
 
 
-@router.post("/imports/{import_id}/buchen", summary="Buchen")
+@router.post("/imports/{import_id}/buchen", summary="Buchen",
+    response_model=dict
+)
 def buchen(
     import_id: str,
     db: Session = Depends(get_db),

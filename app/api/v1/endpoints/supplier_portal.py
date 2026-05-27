@@ -165,7 +165,9 @@ def get_preisauskunft(
     )
 
 
-@router.get("/silo-bestaende", summary="Silo bestaende abrufen")
+@router.get("/silo-bestaende", summary="Silo bestaende abrufen",
+    response_model=dict
+)
 def get_silo_bestaende(
     tenant_id: str = Depends(get_tenant_id),
     lieferant_id: Optional[str] = Query(None),

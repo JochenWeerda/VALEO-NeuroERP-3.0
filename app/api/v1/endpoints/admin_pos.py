@@ -571,7 +571,9 @@ async def list_dsfinvk_exports(
     return [_map_row_to_model(row, DsfinvkExportOut) for row in rows]
 
 
-@router.get("/pos/dsfinvk-exports/{export_id}/download", summary="Dsfinvk export herunterladen")
+@router.get("/pos/dsfinvk-exports/{export_id}/download", summary="Dsfinvk export herunterladen",
+    response_model=None
+)
 async def download_dsfinvk_export(
     export_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -701,14 +703,18 @@ class TseFinishRequest(BaseModel):
     counter: int = 1
 
 
-@router.get("/pos/tse/status", summary="Fiskaly-Konnektivität und TSE-Status prüfen")
+@router.get("/pos/tse/status", summary="Fiskaly-Konnektivität und TSE-Status prüfen",
+    response_model=dict
+)
 async def get_tse_status(tenant_id: str = Depends(get_tenant_id)):
     """Prüft ob Fiskaly-API erreichbar und konfiguriert ist (oder Simulator läuft)."""
     from app.services.tse_fiskaly_service import get_status
     return get_status()
 
 
-@router.post("/pos/tse/create", status_code=201, summary="Neue TSS bei Fiskaly anlegen")
+@router.post("/pos/tse/create", status_code=201, summary="Neue TSS bei Fiskaly anlegen",
+    response_model=dict
+)
 async def create_tss(tss_id: Optional[str] = None, tenant_id: str = Depends(get_tenant_id)):
     """Legt eine neue Technical Security System (TSS) bei Fiskaly an."""
     from app.services.tse_fiskaly_service import create_tse
@@ -718,7 +724,11 @@ async def create_tss(tss_id: Optional[str] = None, tenant_id: str = Depends(get_
         raise HTTPException(status_code=502, detail=str(exc)) from exc
 
 
-@router.post("/pos/tse/transaction/start", summary="Kassentransaktion starten (StartTransaction)")
+@router.post(
+    "/pos/tse/transaction/start",
+    summary="Kassentransaktion starten (StartTransaction)",
+    response_model=dict,
+)
 async def tse_start_transaction(body: TseTransactionRequest, tenant_id: str = Depends(get_tenant_id)):
     """Startet eine signaturpflichtige Kassentransaktion und gibt Fiskaly-Signatur zurück."""
     from app.services.tse_fiskaly_service import start_transaction
@@ -728,7 +738,11 @@ async def tse_start_transaction(body: TseTransactionRequest, tenant_id: str = De
         raise HTTPException(status_code=502, detail=str(exc)) from exc
 
 
-@router.post("/pos/tse/transaction/finish", summary="Kassentransaktion abschließen (FinishTransaction)")
+@router.post(
+    "/pos/tse/transaction/finish",
+    summary="Kassentransaktion abschließen (FinishTransaction)",
+    response_model=dict,
+)
 async def tse_finish_transaction(body: TseFinishRequest, tenant_id: str = Depends(get_tenant_id)):
     """Schließt eine TSE-Transaktion ab und liefert die finale Signatur für den Bon."""
     from app.services.tse_fiskaly_service import finish_transaction
@@ -738,7 +752,9 @@ async def tse_finish_transaction(body: TseFinishRequest, tenant_id: str = Depend
         raise HTTPException(status_code=502, detail=str(exc)) from exc
 
 
-@router.post("/pos/tse/export", summary="DSFinV-K Export bei Fiskaly anfordern")
+@router.post("/pos/tse/export", summary="DSFinV-K Export bei Fiskaly anfordern",
+    response_model=dict
+)
 async def tse_export(
     tss_id: str,
     start_date: str = Query(..., description="ISO-Datum YYYY-MM-DD"),

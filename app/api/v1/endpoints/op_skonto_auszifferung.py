@@ -77,7 +77,9 @@ class SkontoBerechnung(BaseModel):
 
 # ── Endpoints ─────────────────────────────────────────────────────────────────
 
-@router.post("/berechnen", summary="Skonto berechne")
+@router.post("/berechnen", summary="Skonto berechne",
+    response_model=dict
+)
 def berechne_skonto(payload: SkontoBerechnung):
     """Skontobetrag aus Rechnungsbetrag und Prozentsatz berechnen.
 

@@ -37,7 +37,9 @@ class GenericMessageRequest(BaseModel):
     metadata: Optional[dict[str, Any]] = Field(default_factory=dict)
 
 
-@router.get("/whatsapp/webhook", summary="Verify whatsapp")
+@router.get("/whatsapp/webhook", summary="Verify whatsapp",
+    response_model=dict
+)
 async def whatsapp_verify(request: Request):
     """WhatsApp Webhook Verification (GET)."""
     mode = request.query_params.get("hub.mode")
@@ -52,7 +54,9 @@ async def whatsapp_verify(request: Request):
     return Response(content="Forbidden", status_code=403)
 
 
-@router.post("/whatsapp/webhook", summary="Webhook whatsapp")
+@router.post("/whatsapp/webhook", summary="Webhook whatsapp",
+    response_model=dict
+)
 async def whatsapp_webhook(
     request: Request,
     tenant_id: str = Depends(get_tenant_id),
@@ -76,7 +80,9 @@ async def whatsapp_webhook(
     return {"processed": len(results), "results": results}
 
 
-@router.post("/email/ingest", summary="Ingest email")
+@router.post("/email/ingest", summary="Ingest email",
+    response_model=dict
+)
 async def email_ingest(
     request: EmailIngressRequest,
     tenant_id: str = Depends(get_tenant_id),
@@ -98,7 +104,9 @@ async def email_ingest(
     return {"email": email.to_dict(), "result": result}
 
 
-@router.post("/route", summary="Generic route")
+@router.post("/route", summary="Generic route",
+    response_model=dict
+)
 async def route_generic(
     request: GenericMessageRequest,
     tenant_id: str = Depends(get_tenant_id),
@@ -135,7 +143,9 @@ class ChatMessageRequest(BaseModel):
     user_id: str = Field("")
 
 
-@router.post("/livechat/start", summary="Start livechat")
+@router.post("/livechat/start", summary="Start livechat",
+    response_model=dict
+)
 async def livechat_start(
     request: ChatStartRequest,
     tenant_id: str = Depends(get_tenant_id),
@@ -146,7 +156,9 @@ async def livechat_start(
     return session.to_dict()
 
 
-@router.post("/livechat/{session_id}/message", summary="Message livechat")
+@router.post("/livechat/{session_id}/message", summary="Message livechat",
+    response_model=dict
+)
 async def livechat_message(
     session_id: str,
     request: ChatMessageRequest,
@@ -157,7 +169,9 @@ async def livechat_message(
     return result
 
 
-@router.get("/livechat/{session_id}/history", summary="History livechat")
+@router.get("/livechat/{session_id}/history", summary="History livechat",
+    response_model=dict
+)
 async def livechat_history(session_id: str, limit: int = 50):
     """Chat-Historie einer Session abrufen."""
     from app.channels.livechat_channel import get_history
@@ -165,7 +179,9 @@ async def livechat_history(session_id: str, limit: int = 50):
     return {"count": len(messages), "messages": [m.to_dict() for m in messages]}
 
 
-@router.post("/livechat/{session_id}/close", summary="Close livechat")
+@router.post("/livechat/{session_id}/close", summary="Close livechat",
+    response_model=dict
+)
 async def livechat_close(session_id: str):
     """Live-Chat-Session schliessen."""
     from app.channels.livechat_channel import close_session
@@ -175,7 +191,9 @@ async def livechat_close(session_id: str):
     return session.to_dict()
 
 
-@router.get("/livechat/sessions", summary="Sessions livechat")
+@router.get("/livechat/sessions", summary="Sessions livechat",
+    response_model=dict
+)
 async def livechat_sessions(tenant_id: str = Depends(get_tenant_id)):
     """Aktive Chat-Sessions auflisten."""
     from app.channels.livechat_channel import list_active_sessions

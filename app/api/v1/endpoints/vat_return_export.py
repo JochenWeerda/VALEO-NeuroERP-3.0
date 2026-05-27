@@ -473,7 +473,9 @@ async def get_vat_return(
         raise HTTPException(status_code=500, detail=f"Failed to get VAT return: {str(e)}")
 
 
-@router.get("/export/{return_id}", summary="Vat return download exportieren")
+@router.get("/export/{return_id}", summary="Vat return download exportieren",
+    response_model=dict
+)
 async def export_vat_return_download(
     return_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -485,7 +487,9 @@ async def export_vat_return_download(
     return await export_elster_xml(return_id, tenant_id, db)
 
 
-@router.get("/{return_id}/elster-xml", summary="Elster xml exportieren")
+@router.get("/{return_id}/elster-xml", summary="Elster xml exportieren",
+    response_model=dict
+)
 async def export_elster_xml(
     return_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -528,7 +532,9 @@ async def export_elster_xml(
         raise HTTPException(status_code=500, detail=f"Failed to export ELSTER XML: {str(e)}")
 
 
-@router.post("/{return_id}/validate", summary="Vat return validieren")
+@router.post("/{return_id}/validate", summary="Vat return validieren",
+    response_model=dict
+)
 async def validate_vat_return(
     return_id: str,
     tenant_id: str = Depends(get_tenant_id),

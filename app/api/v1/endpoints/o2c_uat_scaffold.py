@@ -149,7 +149,9 @@ def _load_from_db_or_store(id: str, db: Session, tenant_id: str) -> Optional[dic
 
 # ── Endpoints ─────────────────────────────────────────────────────────────────
 
-@router.get("/readiness", summary="Readiness")
+@router.get("/readiness", summary="Readiness",
+    response_model=dict
+)
 def readiness(
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
@@ -259,7 +261,9 @@ def create_szenario(
     return UATSzenarioOut(**record)
 
 
-@router.post("/szenarien/{id}/schritt/{nr}/ausfuehren", summary="Ausfuehren schritt")
+@router.post("/szenarien/{id}/schritt/{nr}/ausfuehren", summary="Ausfuehren schritt",
+    response_model=dict
+)
 def schritt_ausfuehren(
     id: str,
     nr: int,
@@ -315,7 +319,9 @@ def schritt_ausfuehren(
     }
 
 
-@router.get("/szenarien/{id}/bericht", summary="Bericht")
+@router.get("/szenarien/{id}/bericht", summary="Bericht",
+    response_model=dict
+)
 def bericht(
     id: str,
     db: Session = Depends(get_db),
@@ -344,7 +350,9 @@ def bericht(
     }
 
 
-@router.post("/szenarien/{id}/reset", summary="Szenario zurücksetzen")
+@router.post("/szenarien/{id}/reset", summary="Szenario zurücksetzen",
+    response_model=dict
+)
 def reset_szenario(
     id: str,
     db: Session = Depends(get_db),

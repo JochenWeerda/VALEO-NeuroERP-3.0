@@ -112,7 +112,9 @@ def list_folgeartikel(
     return [FolgeartikelOut(**dict(r._mapping)) for r in rows]
 
 
-@router.get("/folgeartikel/{artikel_nr}/aktuell", summary="Aktueller folgeartikel abrufen")
+@router.get("/folgeartikel/{artikel_nr}/aktuell", summary="Aktueller folgeartikel abrufen",
+    response_model=dict
+)
 def get_aktueller_folgeartikel(
     artikel_nr: str,
     stichtag: Optional[date] = Query(None, description="Stichtag für Gültigkeit (default: heute)"),
@@ -170,7 +172,9 @@ def create_folgeartikel(
     return FolgeartikelOut(**dict(row._mapping))
 
 
-@router.delete("/folgeartikel/{folgeartikel_id}", summary="Folgeartikel löschen")
+@router.delete("/folgeartikel/{folgeartikel_id}", summary="Folgeartikel löschen",
+    response_model=dict
+)
 def delete_folgeartikel(
     folgeartikel_id: str,
     db=Depends(get_db),
@@ -230,7 +234,9 @@ def create_inventurgruppe(
     return InventurgruppeOut(**dict(row._mapping))
 
 
-@router.delete("/inventurgruppen/{gruppe_id}", summary="Inventurgruppe löschen")
+@router.delete("/inventurgruppen/{gruppe_id}", summary="Inventurgruppe löschen",
+    response_model=None
+)
 def delete_inventurgruppe(
     gruppe_id: str,
     db=Depends(get_db),

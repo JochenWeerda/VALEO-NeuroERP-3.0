@@ -169,7 +169,9 @@ def update_bestandteil_def(
     return BestandteilDefOut(**dict(updated._mapping))
 
 
-@router.delete("/stamm/{bestandteil_nr}", summary="Bestandteil def löschen")
+@router.delete("/stamm/{bestandteil_nr}", summary="Bestandteil def löschen",
+    response_model=dict
+)
 def delete_bestandteil_def(
     bestandteil_nr: str,
     db=Depends(get_db),
@@ -231,7 +233,9 @@ def create_zuordnung(
     return BestandteilZuordnungOut(**dict(row._mapping))
 
 
-@router.delete("/{artikel_nr}/zuordnungen/{zuordnung_id}", summary="Zuordnung löschen")
+@router.delete("/{artikel_nr}/zuordnungen/{zuordnung_id}", summary="Zuordnung löschen",
+    response_model=None
+)
 def delete_zuordnung(
     artikel_nr: str,
     zuordnung_id: str,

@@ -91,7 +91,9 @@ class BudgetLineIn(BaseModel):
 # GET /assets
 # ---------------------------------------------------------------------------
 
-@router.get("/assets", tags=["finance", "asset-accounting"], summary="Assets auflisten")
+@router.get("/assets", tags=["finance", "asset-accounting"], summary="Assets auflisten",
+    response_model=dict
+)
 def list_assets(
     asset_class: Optional[str] = Query(None),
     is_active: Optional[bool] = Query(None),
@@ -125,7 +127,9 @@ def list_assets(
 # POST /assets
 # ---------------------------------------------------------------------------
 
-@router.post("/assets", status_code=201, tags=["finance", "asset-accounting"], summary="Asset anlegen")
+@router.post("/assets", status_code=201, tags=["finance", "asset-accounting"], summary="Asset anlegen",
+    response_model=dict
+)
 def create_asset(
     body: AssetCreate,
     tenant_id: str = Depends(get_tenant_id),
@@ -176,7 +180,9 @@ def create_asset(
 # GET /assets/{id}
 # ---------------------------------------------------------------------------
 
-@router.get("/assets/{asset_id}", tags=["finance", "asset-accounting"], summary="Asset abrufen")
+@router.get("/assets/{asset_id}", tags=["finance", "asset-accounting"], summary="Asset abrufen",
+    response_model=dict
+)
 def get_asset(
     asset_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -210,7 +216,9 @@ def get_asset(
 # PATCH /assets/{id}
 # ---------------------------------------------------------------------------
 
-@router.patch("/assets/{asset_id}", tags=["finance", "asset-accounting"], summary="Asset aktualisieren")
+@router.patch("/assets/{asset_id}", tags=["finance", "asset-accounting"], summary="Asset aktualisieren",
+    response_model=dict
+)
 def update_asset(
     asset_id: str,
     body: AssetUpdate,
@@ -262,7 +270,9 @@ def update_asset(
 # POST /assets/{id}/dispose
 # ---------------------------------------------------------------------------
 
-@router.post("/assets/{asset_id}/dispose", tags=["finance", "asset-accounting"], summary="Asset dispose")
+@router.post("/assets/{asset_id}/dispose", tags=["finance", "asset-accounting"], summary="Asset dispose",
+    response_model=dict
+)
 def dispose_asset(
     asset_id: str,
     body: AssetDispose,
@@ -313,7 +323,9 @@ def dispose_asset(
 # POST /depreciation-run
 # ---------------------------------------------------------------------------
 
-@router.post("/depreciation-run", tags=["finance", "asset-accounting"], summary="Depreciation ausführen")
+@router.post("/depreciation-run", tags=["finance", "asset-accounting"], summary="Depreciation ausführen",
+    response_model=dict
+)
 def run_depreciation(
     body: DepreciationRunRequest,
     tenant_id: str = Depends(get_tenant_id),
@@ -413,7 +425,9 @@ def run_depreciation(
 # GET /asset-register  (Anlagespiegel)
 # ---------------------------------------------------------------------------
 
-@router.get("/asset-register", tags=["finance", "asset-accounting"], summary="Register asset")
+@router.get("/asset-register", tags=["finance", "asset-accounting"], summary="Register asset",
+    response_model=dict
+)
 def asset_register(
     year: int = Query(..., description="Geschäftsjahr"),
     tenant_id: str = Depends(get_tenant_id),
@@ -477,7 +491,9 @@ def asset_register(
 # GET /depreciation-forecast  (5-Jahres-Vorschau)
 # ---------------------------------------------------------------------------
 
-@router.get("/depreciation-forecast", tags=["finance", "asset-accounting"], summary="Forecast depreciation")
+@router.get("/depreciation-forecast", tags=["finance", "asset-accounting"], summary="Forecast depreciation",
+    response_model=dict
+)
 def depreciation_forecast(
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),

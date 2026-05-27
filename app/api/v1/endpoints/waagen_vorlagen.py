@@ -164,7 +164,9 @@ def delete_vorlage(
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 
-@router.post("/{vorlage_id}/anwenden", summary="Anwenden")
+@router.post("/{vorlage_id}/anwenden", summary="Anwenden",
+    response_model=None
+)
 def anwenden(
     vorlage_id: str,
     db: Session = Depends(get_db),

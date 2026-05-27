@@ -330,7 +330,9 @@ def _contract_to_out(contract: KonContract, line_out: list[dict[str, Any]], cont
     }
 
 
-@router.get("", summary="Kontrakte auflisten")
+@router.get("", summary="Kontrakte auflisten",
+    response_model=dict
+)
 async def list_kontrakte(
     status: Optional[StatusType] = Query(None),
     contract_type: Optional[ContractType] = Query(None),
@@ -412,7 +414,9 @@ async def list_kontrakte(
     return {"items": payload, "total": total, "skip": skip, "limit": limit}
 
 
-@router.get("/{contract_id}", summary="Kontrakt abrufen")
+@router.get("/{contract_id}", summary="Kontrakt abrufen",
+    response_model=dict
+)
 async def get_kontrakt(
     contract_id: str,
     db: Session = Depends(get_db),
@@ -435,7 +439,9 @@ async def get_kontrakt(
     return _contract_to_out(contract, line_out, rest.contract_rest)
 
 
-@router.post("", summary="Kontrakt anlegen")
+@router.post("", summary="Kontrakt anlegen",
+    response_model=dict
+)
 async def create_kontrakt(
     payload: KonContractIn,
     db: Session = Depends(get_db),
@@ -558,7 +564,9 @@ async def create_kontrakt(
     return await get_kontrakt(contract.contract_id, db, tenant_id, user)
 
 
-@router.patch("/{contract_id}", summary="Kontrakt aktualisieren")
+@router.patch("/{contract_id}", summary="Kontrakt aktualisieren",
+    response_model=dict
+)
 async def update_kontrakt(
     contract_id: str,
     payload: KonContractIn,
@@ -653,7 +661,9 @@ async def update_kontrakt(
     return await get_kontrakt(contract_id, db, tenant_id, user)
 
 
-@router.put("/{contract_id}", summary="Kontrakt replace")
+@router.put("/{contract_id}", summary="Kontrakt replace",
+    response_model=dict
+)
 async def replace_kontrakt(
     contract_id: str,
     payload: KonContractIn,
@@ -665,7 +675,9 @@ async def replace_kontrakt(
     return await update_kontrakt(contract_id, payload, db, tenant_id, user)
 
 
-@router.delete("/{contract_id}", summary="Kontrakt löschen")
+@router.delete("/{contract_id}", summary="Kontrakt löschen",
+    response_model=dict
+)
 async def delete_kontrakt(
     contract_id: str,
     force: bool = Query(False),
@@ -717,7 +729,9 @@ async def delete_kontrakt(
     return {"ok": True, "action": action}
 
 
-@router.post("/{contract_id}/cancel", summary="Kontrakt stornieren")
+@router.post("/{contract_id}/cancel", summary="Kontrakt stornieren",
+    response_model=dict
+)
 async def cancel_kontrakt(
     contract_id: str,
     reason: Optional[str] = Body(default=None, embed=True),
@@ -757,7 +771,9 @@ async def cancel_kontrakt(
     return await get_kontrakt(contract_id, db, tenant_id, user)
 
 
-@router.get("/{contract_id}/movements", summary="Kontrakt movements auflisten")
+@router.get("/{contract_id}/movements", summary="Kontrakt movements auflisten",
+    response_model=dict
+)
 async def list_kontrakt_movements(
     contract_id: str,
     include_archived: bool = Query(False),
@@ -813,7 +829,9 @@ async def list_kontrakt_movements(
     return {"items": payload, "verk_menge": float(verk_menge)}
 
 
-@router.post("/{contract_id}/movements", summary="Kontrakt movement anlegen")
+@router.post("/{contract_id}/movements", summary="Kontrakt movement anlegen",
+    response_model=dict
+)
 async def create_kontrakt_movement(
     contract_id: str,
     payload: KonContractMovementIn,
@@ -903,7 +921,9 @@ async def create_kontrakt_movement(
     ).model_dump()
 
 
-@router.get("/{contract_id}/audit", summary="Kontrakt audit auflisten")
+@router.get("/{contract_id}/audit", summary="Kontrakt audit auflisten",
+    response_model=dict
+)
 async def list_kontrakt_audit(
     contract_id: str,
     db: Session = Depends(get_db),
@@ -992,7 +1012,9 @@ class AmendmentStatusUpdate(BaseModel):
     status: Literal["approved", "rejected"]
 
 
-@router.get("/amendment-templates", summary="Amendment templates auflisten")
+@router.get("/amendment-templates", summary="Amendment templates auflisten",
+    response_model=dict
+)
 async def list_amendment_templates(
     activeOnly: bool = Query(True),
     db: Session = Depends(get_db),
@@ -1027,7 +1049,9 @@ async def list_amendment_templates(
     }
 
 
-@router.get("/{contract_id}/amendments", summary="Amendments auflisten")
+@router.get("/{contract_id}/amendments", summary="Amendments auflisten",
+    response_model=dict
+)
 async def list_amendments(
     contract_id: str,
     db: Session = Depends(get_db),
@@ -1075,7 +1099,9 @@ async def list_amendments(
     }
 
 
-@router.post("/{contract_id}/amendments", status_code=201, summary="Amendment anlegen")
+@router.post("/{contract_id}/amendments", status_code=201, summary="Amendment anlegen",
+    response_model=dict
+)
 async def create_amendment(
     contract_id: str,
     payload: AmendmentCreate,
@@ -1131,7 +1157,9 @@ async def create_amendment(
     ).model_dump()
 
 
-@router.patch("/{contract_id}/amendments/{amendment_id}", summary="Amendment status aktualisieren")
+@router.patch("/{contract_id}/amendments/{amendment_id}", summary="Amendment status aktualisieren",
+    response_model=dict
+)
 async def update_amendment_status(
     contract_id: str,
     amendment_id: str,
@@ -1182,7 +1210,9 @@ async def update_amendment_status(
     ).model_dump()
 
 
-@router.post("/lookup/verkauf", summary="Verkauf kontrakte lookup")
+@router.post("/lookup/verkauf", summary="Verkauf kontrakte lookup",
+    response_model=dict
+)
 async def lookup_verkauf_kontrakte(
     query: Optional[str] = Body(default=None),
     only_open: bool = Body(default=True),
@@ -1239,7 +1269,9 @@ async def lookup_verkauf_kontrakte(
 # Long/Short-Positionsmonitor
 # ---------------------------------------------------------------------------
 
-@router.get("/positionen", summary="Positionen abrufen")
+@router.get("/positionen", summary="Positionen abrufen",
+    response_model=dict
+)
 def get_positionen(  # noqa: E302
     article_ids: Optional[str] = Query(None, description="Komma-separierte Artikel-IDs"),
     include_done: bool = Query(False, description="Erledigte Kontrakte einbeziehen"),

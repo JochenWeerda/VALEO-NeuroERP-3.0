@@ -135,7 +135,9 @@ def create_zu_abschlaggruppe(
     return ZuAbschlaggruppeOut(**dict(row._mapping))
 
 
-@router.delete("/gruppen/{gruppe_nr}", summary="Zu abschlaggruppe löschen")
+@router.delete("/gruppen/{gruppe_nr}", summary="Zu abschlaggruppe löschen",
+    response_model=dict
+)
 def delete_zu_abschlaggruppe(
     gruppe_nr: str,
     richtung: str = Query("vk"),
@@ -191,7 +193,9 @@ def create_zu_abschlagklasse(
     return ZuAbschlagklasseOut(**dict(row._mapping))
 
 
-@router.delete("/klassen/{klasse_nr}", summary="Zu abschlagklasse löschen")
+@router.delete("/klassen/{klasse_nr}", summary="Zu abschlagklasse löschen",
+    response_model=None
+)
 def delete_zu_abschlagklasse(
     klasse_nr: str,
     richtung: str = Query("vk"),

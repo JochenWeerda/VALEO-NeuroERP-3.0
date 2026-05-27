@@ -54,7 +54,9 @@ def _to_out(nr, svc: NumberRangeService, tenant_id: str) -> dict[str, Any]:
     }
 
 
-@router.get("/", summary="Number ranges auflisten")
+@router.get("/", summary="Number ranges auflisten",
+    response_model=dict
+)
 def list_number_ranges(
     db: Session = Depends(get_db),
 ) -> list[dict[str, Any]]:
@@ -64,7 +66,9 @@ def list_number_ranges(
     return [_to_out(r, svc, tenant_id) for r in ranges]
 
 
-@router.post("/", status_code=201, summary="Number range configure")
+@router.post("/", status_code=201, summary="Number range configure",
+    response_model=dict
+)
 def configure_number_range(
     body: NumberRangeConfigRequest,
     db: Session = Depends(get_db),
@@ -87,7 +91,9 @@ def configure_number_range(
         raise HTTPException(status_code=422, detail=str(exc)) from exc
 
 
-@router.get("/{range_type}", summary="Number range abrufen")
+@router.get("/{range_type}", summary="Number range abrufen",
+    response_model=dict
+)
 def get_number_range(range_type: str, db: Session = Depends(get_db)) -> dict[str, Any]:
     tenant_id = get_current_tenant_id()
     svc = NumberRangeService(db)
@@ -98,7 +104,9 @@ def get_number_range(range_type: str, db: Session = Depends(get_db)) -> dict[str
     return _to_out(nr, svc, tenant_id)
 
 
-@router.put("/{range_type}", summary="Number range aktualisieren")
+@router.put("/{range_type}", summary="Number range aktualisieren",
+    response_model=dict
+)
 def update_number_range(
     range_type: str,
     body: NumberRangeConfigRequest,
@@ -135,7 +143,9 @@ def delete_number_range(range_type: str, db: Session = Depends(get_db)) -> Respo
     return Response(status_code=204)
 
 
-@router.get("/{range_type}/peek", summary="Next number peek")
+@router.get("/{range_type}/peek", summary="Next number peek",
+    response_model=None
+)
 def peek_next_number(
     range_type: str,
     db: Session = Depends(get_db),

@@ -152,7 +152,9 @@ def update_zahlungsbedingung(
     return ZahlungsbedingungOut(**dict(row._mapping))
 
 
-@router.delete("/{zabd_nr}", summary="Zahlungsbedingung löschen")
+@router.delete("/{zabd_nr}", summary="Zahlungsbedingung löschen",
+    response_model=dict
+)
 def delete_zahlungsbedingung(
     zabd_nr: str,
     db=Depends(get_db),

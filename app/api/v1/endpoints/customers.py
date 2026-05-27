@@ -82,7 +82,9 @@ async def list_customers(
     )
 
 
-@router.get("/quick-search", summary="Search customers quick")
+@router.get("/quick-search", summary="Search customers quick",
+    response_model=dict
+)
 def quick_search_customers(
     q: str = Query("", description="Suchterm (Name oder Kundennummer)"),
     limit: int = Query(8, ge=1, le=25),
@@ -98,7 +100,9 @@ def quick_search_customers(
     return _svc(db, tenant_id or DEFAULT_TENANT).quick_search(q or "", limit=limit)
 
 
-@router.get("/recent", summary="Customers recent")
+@router.get("/recent", summary="Customers recent",
+    response_model=dict
+)
 def recent_customers(
     limit: int = Query(10, ge=1, le=25),
     db: Session = Depends(get_db),
@@ -108,7 +112,9 @@ def recent_customers(
     return _svc(db, tenant_id or DEFAULT_TENANT).recent(limit=limit)
 
 
-@router.get("/{customer_id}/sales-eligibility", summary="Customer sales eligibility abrufen")
+@router.get("/{customer_id}/sales-eligibility", summary="Customer sales eligibility abrufen",
+    response_model=dict
+)
 async def get_customer_sales_eligibility(
     customer_id: str,
     db: Session = Depends(get_db),
@@ -211,7 +217,9 @@ class UmkreissucheErgebnis(_BaseModel):
     entfernung_km: float
 
 
-@router.post("/umkreissuche", summary="Umkreissuche")
+@router.post("/umkreissuche", summary="Umkreissuche",
+    response_model=None
+)
 def umkreissuche(
     payload: UmkreissucheInput,
     db: Session = Depends(get_db),
@@ -267,7 +275,9 @@ class KonvertierungResult(_BaseModel):
     status: str  # KUNDE / INTERESSENT
 
 
-@router.post("/interessenten", status_code=status.HTTP_201_CREATED, summary="Interessent anlegen")
+@router.post("/interessenten", status_code=status.HTTP_201_CREATED, summary="Interessent anlegen",
+    response_model=dict
+)
 def create_interessent(
     payload: InteressentCreate,
     db: Session = Depends(get_db),
@@ -321,7 +331,9 @@ def create_interessent(
     }
 
 
-@router.get("/interessenten", summary="Interessenten auflisten")
+@router.get("/interessenten", summary="Interessenten auflisten",
+    response_model=dict
+)
 def list_interessenten(
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),

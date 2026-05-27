@@ -239,7 +239,9 @@ async def update_nutrient_composition(
     return _to_schema(item)
 
 
-@router.delete("/{composition_id}", status_code=status.HTTP_204_NO_CONTENT, summary="Nutrient composition löschen")
+@router.delete("/{composition_id}", status_code=status.HTTP_204_NO_CONTENT, summary="Nutrient composition löschen",
+    response_model=None
+)
 async def delete_nutrient_composition(
     composition_id: str,
     tenant_id: Optional[str] = Query(None),

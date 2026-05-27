@@ -452,7 +452,9 @@ async def update_sales_offer(
     return _row_to_offer(updated_row, _fetch_items(db, offer_id, effective_tenant))
 
 
-@router.delete("/{offer_id}", status_code=status.HTTP_204_NO_CONTENT, summary="Sales offer löschen")
+@router.delete("/{offer_id}", status_code=status.HTTP_204_NO_CONTENT, summary="Sales offer löschen",
+    response_model=None
+)
 async def delete_sales_offer(
     offer_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -474,7 +476,9 @@ async def delete_sales_offer(
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 
-@router.post("/{offer_id}/convert-to-order", status_code=status.HTTP_200_OK, summary="Offer to order umwandeln")
+@router.post("/{offer_id}/convert-to-order", status_code=status.HTTP_200_OK, summary="Offer to order umwandeln",
+    response_model=dict
+)
 async def convert_offer_to_order(
     offer_id: str,
     tenant_id: str = Depends(get_tenant_id),

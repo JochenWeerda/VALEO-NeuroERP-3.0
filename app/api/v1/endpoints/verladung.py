@@ -60,7 +60,9 @@ class VerladungPatch(BaseModel):
     notiz: Optional[str] = None
 
 
-@router.get("", summary="Verladungen auflisten")
+@router.get("", summary="Verladungen auflisten",
+    response_model=dict
+)
 def list_verladungen(
     status: Optional[str] = None,
     datum_von: Optional[str] = None,
@@ -74,7 +76,9 @@ def list_verladungen(
     return [_to_dict(v) for v in q.order_by(Verladung.datum.desc()).offset(skip).limit(limit).all()]
 
 
-@router.get("/{verladung_id}", summary="Verladung abrufen")
+@router.get("/{verladung_id}", summary="Verladung abrufen",
+    response_model=dict
+)
 def get_verladung(verladung_id: str, db: Session = Depends(get_db)):
     obj = db.query(Verladung).filter(Verladung.id == verladung_id).first()
     if not obj:
@@ -82,7 +86,9 @@ def get_verladung(verladung_id: str, db: Session = Depends(get_db)):
     return _to_dict(obj)
 
 
-@router.post("", status_code=201, summary="Verladung anlegen")
+@router.post("", status_code=201, summary="Verladung anlegen",
+    response_model=dict
+)
 def create_verladung(payload: VerladungPayload, db: Session = Depends(get_db)):
     obj = Verladung(**payload.model_dump())
     db.add(obj)
@@ -91,7 +97,9 @@ def create_verladung(payload: VerladungPayload, db: Session = Depends(get_db)):
     return _to_dict(obj)
 
 
-@router.patch("/{verladung_id}", summary="Verladung aktualisieren")
+@router.patch("/{verladung_id}", summary="Verladung aktualisieren",
+    response_model=dict
+)
 def update_verladung(verladung_id: str, payload: VerladungPatch, db: Session = Depends(get_db)):
     obj = db.query(Verladung).filter(Verladung.id == verladung_id).first()
     if not obj:

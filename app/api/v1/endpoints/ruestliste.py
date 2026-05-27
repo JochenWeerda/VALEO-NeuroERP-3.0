@@ -143,7 +143,9 @@ def create_ruestliste(payload: RuestlisteCreate, db: Session = Depends(get_db)) 
     )
 
 
-@router.get("/{id}/positionen", tags=["lager", "ruestliste"], summary="Positionen abrufen")
+@router.get("/{id}/positionen", tags=["lager", "ruestliste"], summary="Positionen abrufen",
+    response_model=dict
+)
 def get_positionen(id: str, db: Session = Depends(get_db)) -> dict:
     """Return positions for a Rüstliste by id."""
     try:
@@ -199,19 +201,25 @@ def _set_status(nr: str, new_status: str, allowed_from: list[str], db: Session, 
     return {"ruestlisten_nr": nr, "status": new_status}
 
 
-@router.post("/{nr}/bearbeiten", tags=["lager", "ruestliste"], summary="Bearbeiten")
+@router.post("/{nr}/bearbeiten", tags=["lager", "ruestliste"], summary="Bearbeiten",
+    response_model=dict
+)
 def bearbeiten(nr: str, db: Session = Depends(get_db)) -> dict:
     """Set Rüstliste to IN_BEARBEITUNG (irreversible)."""
     return _set_status(nr, "IN_BEARBEITUNG", ["OFFEN"], db)
 
 
-@router.post("/{nr}/verarbeitet", tags=["lager", "ruestliste"], summary="Verarbeitet")
+@router.post("/{nr}/verarbeitet", tags=["lager", "ruestliste"], summary="Verarbeitet",
+    response_model=dict
+)
 def verarbeitet(nr: str, db: Session = Depends(get_db)) -> dict:
     """Complete Rüstliste — set to VERARBEITET."""
     return _set_status(nr, "VERARBEITET", ["IN_BEARBEITUNG"], db, verarbeitet=True)
 
 
-@router.post("/{nr}/verarbeitet/bemerkung", tags=["lager", "ruestliste"], summary="Hinzufuegen bemerkung")
+@router.post("/{nr}/verarbeitet/bemerkung", tags=["lager", "ruestliste"], summary="Hinzufuegen bemerkung",
+    response_model=dict
+)
 def bemerkung_hinzufuegen(nr: str, payload: RuestlisteBearbeiten, db: Session = Depends(get_db)) -> dict:
     """Add a note to an already-completed Rüstliste."""
     try:
@@ -235,7 +243,9 @@ def bemerkung_hinzufuegen(nr: str, payload: RuestlisteBearbeiten, db: Session = 
     return {"ruestlisten_nr": nr, "bemerkung": payload.bemerkung}
 
 
-@router.post("/{nr}/abbrechen", tags=["lager", "ruestliste"], summary="Abbrechen")
+@router.post("/{nr}/abbrechen", tags=["lager", "ruestliste"], summary="Abbrechen",
+    response_model=dict
+)
 def abbrechen(nr: str, db: Session = Depends(get_db)) -> dict:
     """Cancel a Rüstliste (only from OFFEN or IN_BEARBEITUNG)."""
     return _set_status(nr, "ABGEBROCHEN", ["OFFEN", "IN_BEARBEITUNG"], db)

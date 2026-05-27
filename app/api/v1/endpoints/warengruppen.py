@@ -135,7 +135,9 @@ def update_hauptwarengruppe(
     return HauptwarengruppeOut(**dict(row._mapping))
 
 
-@router.delete("/haupt/{gruppe_nr}", summary="Hauptwarengruppe löschen")
+@router.delete("/haupt/{gruppe_nr}", summary="Hauptwarengruppe löschen",
+    response_model=dict
+)
 def delete_hauptwarengruppe(
     gruppe_nr: str,
     db=Depends(get_db),
@@ -216,7 +218,9 @@ def update_oberwarengruppe(
     return OberwarengruppeOut(**dict(row._mapping))
 
 
-@router.delete("/ober/{gruppe_nr}", summary="Oberwarengruppe löschen")
+@router.delete("/ober/{gruppe_nr}", summary="Oberwarengruppe löschen",
+    response_model=None
+)
 def delete_oberwarengruppe(
     gruppe_nr: str,
     db=Depends(get_db),
@@ -297,7 +301,9 @@ def update_warengruppe(
     return WarengruppeOut(**dict(row._mapping))
 
 
-@router.delete("/{gruppe_nr}", summary="Warengruppe löschen")
+@router.delete("/{gruppe_nr}", summary="Warengruppe löschen",
+    response_model=dict
+)
 def delete_warengruppe(
     gruppe_nr: str,
     db=Depends(get_db),

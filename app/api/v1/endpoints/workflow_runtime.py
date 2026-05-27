@@ -55,7 +55,9 @@ class CheckpointRequest(BaseModel):
 # ---------------------------------------------------------------------------
 
 
-@router.get("/instances", summary="Instances auflisten")
+@router.get("/instances", summary="Instances auflisten",
+    response_model=dict
+)
 async def list_instances(
     status: Optional[str] = None,
     tenant_id: str = Depends(get_tenant_id),
@@ -78,7 +80,9 @@ async def list_instances(
     return [i.model_dump() for i in instances]
 
 
-@router.post("/instances", summary="Instance anlegen")
+@router.post("/instances", summary="Instance anlegen",
+    response_model=dict
+)
 async def create_instance(
     request: CreateInstanceRequest,
     tenant_id: str = Depends(get_tenant_id),
@@ -103,7 +107,9 @@ async def create_instance(
     return instance.model_dump()
 
 
-@router.get("/instances/{instance_id}", summary="Instance abrufen")
+@router.get("/instances/{instance_id}", summary="Instance abrufen",
+    response_model=dict
+)
 async def get_instance(
     instance_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -117,7 +123,9 @@ async def get_instance(
     return instance.model_dump()
 
 
-@router.post("/instances/{instance_id}/checkpoint", summary="Checkpoint hinzufügen")
+@router.post("/instances/{instance_id}/checkpoint", summary="Checkpoint hinzufügen",
+    response_model=dict
+)
 async def add_checkpoint(
     instance_id: str,
     request: CheckpointRequest,
@@ -142,7 +150,9 @@ async def add_checkpoint(
     return cp.model_dump()
 
 
-@router.post("/instances/{instance_id}/resume", summary="Instance fortsetzen")
+@router.post("/instances/{instance_id}/resume", summary="Instance fortsetzen",
+    response_model=dict
+)
 async def resume_instance(
     instance_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -165,7 +175,9 @@ async def resume_instance(
     return instance.model_dump()
 
 
-@router.post("/instances/{instance_id}/cancel", summary="Instance stornieren")
+@router.post("/instances/{instance_id}/cancel", summary="Instance stornieren",
+    response_model=dict
+)
 async def cancel_instance(
     instance_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -190,7 +202,9 @@ async def cancel_instance(
     return instance.model_dump()
 
 
-@router.get("/instances/{instance_id}/replay", summary="Replay abrufen")
+@router.get("/instances/{instance_id}/replay", summary="Replay abrufen",
+    response_model=dict
+)
 async def get_replay(
     instance_id: str,
     tenant_id: str = Depends(get_tenant_id),

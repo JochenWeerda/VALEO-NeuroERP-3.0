@@ -434,7 +434,9 @@ async def update_opportunity(opportunity_id: str, opportunity_data: OpportunityU
     return Opportunity.model_validate(updated)
 
 
-@router.delete("/{opportunity_id}", status_code=status.HTTP_204_NO_CONTENT, summary="Opportunity löschen")
+@router.delete("/{opportunity_id}", status_code=status.HTTP_204_NO_CONTENT, summary="Opportunity löschen",
+    response_model=None
+)
 async def delete_opportunity(opportunity_id: str):
     """Delete a sales opportunity via crm-sales."""
     try:

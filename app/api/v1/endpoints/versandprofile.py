@@ -149,7 +149,9 @@ def create_versandprofil(
     return VersandprofilOut(**dict(row._mapping))
 
 
-@router.delete("/profile/{profil_nr}", summary="Versandprofil löschen")
+@router.delete("/profile/{profil_nr}", summary="Versandprofil löschen",
+    response_model=dict
+)
 def delete_versandprofil(
     profil_nr: str,
     db=Depends(get_db),
@@ -224,7 +226,9 @@ def create_avis(
     return LieferavisOut(**dict(row._mapping))
 
 
-@router.patch("/avise/{avis_nr}/status", summary="Status avis")
+@router.patch("/avise/{avis_nr}/status", summary="Status avis",
+    response_model=None
+)
 def avis_status(
     avis_nr: str,
     neuer_status: str = Query(...),

@@ -11,7 +11,9 @@ from app.core.benchmark_cockpit import (
 router = APIRouter(prefix="/benchmark", tags=["benchmark", "analytics", "catalog"])
 
 
-@router.get("/catalog", summary="Benchmark Catalog")
+@router.get("/catalog", summary="Benchmark Catalog",
+    response_model=dict
+)
 def get_benchmark_catalog(
     tenant_id: str = "TENANT-001",
     genossenschaft_name: str = "Agrargenossenschaft Muster eG",
@@ -23,7 +25,9 @@ def get_benchmark_catalog(
     return build_benchmark_catalog(report).as_dict()
 
 
-@router.get("/read-model", summary="Benchmark Read Model")
+@router.get("/read-model", summary="Benchmark Read Model",
+    response_model=dict
+)
 def get_benchmark_read_model(
     tenant_id: str = "TENANT-001",
     genossenschaft_name: str = "Agrargenossenschaft Muster eG",

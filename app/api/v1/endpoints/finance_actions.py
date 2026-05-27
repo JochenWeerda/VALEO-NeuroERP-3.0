@@ -489,7 +489,9 @@ class BuchungsuebergabeExportSummary(BaseModel):
     message: str
 
 
-@router.post("/buchungsuebergabe-export", summary="Export buchungsuebergabe")
+@router.post("/buchungsuebergabe-export", summary="Export buchungsuebergabe",
+    response_model=dict
+)
 async def buchungsuebergabe_export(
     body: BuchungsuebergabeExportRequest,
     tenant_id: str = Depends(get_tenant_id),
@@ -608,7 +610,9 @@ async def buchungsuebergabe_export(
 
 # ── Period-Close Readiness ────────────────────────────────────────────────────
 
-@router.get("/close-readiness", tags=["finance", "closing"], summary="Close readiness abrufen")
+@router.get("/close-readiness", tags=["finance", "closing"], summary="Close readiness abrufen",
+    response_model=dict
+)
 async def get_close_readiness(
     tenant_id: str = Depends(get_tenant_id),
 ):

@@ -109,7 +109,9 @@ def _to_dict(m: AgrarMaschine) -> dict:
 # Endpoints
 # ────────────────────────────────────────────────────────────────────────────
 
-@router.get("/maschinen", summary="Maschinen auflisten")
+@router.get("/maschinen", summary="Maschinen auflisten",
+    response_model=dict
+)
 def list_maschinen(
     typ: Optional[str] = Query(default=None),
     status: Optional[str] = Query(default=None),
@@ -149,7 +151,9 @@ def list_maschinen(
     }
 
 
-@router.post("/maschinen", status_code=201, summary="Maschine anlegen")
+@router.post("/maschinen", status_code=201, summary="Maschine anlegen",
+    response_model=dict
+)
 def create_maschine(
     body: MaschineCreate,
     tenant_id: str = Depends(get_tenant_id),
@@ -166,7 +170,9 @@ def create_maschine(
     return _to_dict(m)
 
 
-@router.get("/maschinen/{maschine_id}", summary="Maschine abrufen")
+@router.get("/maschinen/{maschine_id}", summary="Maschine abrufen",
+    response_model=dict
+)
 def get_maschine(
     maschine_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -182,7 +188,9 @@ def get_maschine(
     return _to_dict(m)
 
 
-@router.patch("/maschinen/{maschine_id}", summary="Maschine aktualisieren")
+@router.patch("/maschinen/{maschine_id}", summary="Maschine aktualisieren",
+    response_model=dict
+)
 def update_maschine(
     maschine_id: str,
     body: MaschineUpdate,
@@ -223,7 +231,9 @@ def delete_maschine(
     return Response(status_code=204)
 
 
-@router.patch("/maschinen/{maschine_id}/stunden", summary="Betriebsstunden buch")
+@router.patch("/maschinen/{maschine_id}/stunden", summary="Betriebsstunden buch",
+    response_model=None
+)
 def buch_betriebsstunden(
     maschine_id: str,
     body: StundenBuchung,
@@ -244,7 +254,9 @@ def buch_betriebsstunden(
     return _to_dict(m)
 
 
-@router.patch("/maschinen/{maschine_id}/status", summary="Maschine status setzen")
+@router.patch("/maschinen/{maschine_id}/status", summary="Maschine status setzen",
+    response_model=dict
+)
 def set_maschine_status(
     maschine_id: str,
     body: StatusWechsel,

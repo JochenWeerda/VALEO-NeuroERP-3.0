@@ -144,7 +144,9 @@ async def get_audit_logs(
         return []
 
 
-@router.get("/stats", summary="Audit stats abrufen")
+@router.get("/stats", summary="Audit stats abrufen",
+    response_model=dict
+)
 async def get_audit_stats(
     tenant_id: Optional[str] = Query(None),
     db: Session = Depends(get_db)

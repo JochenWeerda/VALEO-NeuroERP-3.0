@@ -28,7 +28,9 @@ from app.core.tenant import get_tenant_id
 router = APIRouter(prefix="/einkauf", tags=["einkauf", "kpi"])
 
 
-@router.get("/kpis", summary="Kpis abrufen")
+@router.get("/kpis", summary="Kpis abrufen",
+    response_model=dict
+)
 def get_kpis(
     date_from: Optional[str] = Query(None, description="ISO-Datum, z.B. 2026-01-01"),
     date_to: Optional[str] = Query(None, description="ISO-Datum, z.B. 2026-12-31"),

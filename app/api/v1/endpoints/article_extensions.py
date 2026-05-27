@@ -89,7 +89,9 @@ async def upload_article_file(
     )
 
 
-@router.post("/recipe-import", status_code=201, summary="Recipe importieren")
+@router.post("/recipe-import", status_code=201, summary="Recipe importieren",
+    response_model=dict
+)
 async def import_recipe(payload: RecipeImportRequest):
     """POST Rezeptur Import"""
     return {

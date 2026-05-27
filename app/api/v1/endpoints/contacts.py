@@ -67,7 +67,9 @@ def _map_update_payload(payload: ContactUpdate) -> Dict[str, Any]:
     return mapped
 
 
-@router.get("/", summary="Contacts auflisten")
+@router.get("/", summary="Contacts auflisten",
+    response_model=dict
+)
 async def list_contacts(
     customer_id: Optional[str] = Query(None, description="Filter by customer ID"),
     search: Optional[str] = Query(None, description="Client-side search term"),
@@ -99,7 +101,9 @@ async def list_contacts(
         raise HTTPException(status_code=500, detail=f"Failed to list contacts: {exc}") from exc
 
 
-@router.get("/{contact_id}", summary="Contact abrufen")
+@router.get("/{contact_id}", summary="Contact abrufen",
+    response_model=dict
+)
 async def get_contact(contact_id: str):
     try:
         contact = await crm_core_client.get_contact(contact_id)
@@ -112,7 +116,9 @@ async def get_contact(contact_id: str):
     return {"data": _adapt_contact(contact)}
 
 
-@router.post("/", status_code=status.HTTP_201_CREATED, summary="Contact anlegen")
+@router.post("/", status_code=status.HTTP_201_CREATED, summary="Contact anlegen",
+    response_model=dict
+)
 async def create_contact(contact_data: ContactCreate):
     try:
         payload = _map_create_payload(contact_data)
@@ -122,7 +128,9 @@ async def create_contact(contact_data: ContactCreate):
         raise HTTPException(status_code=500, detail=f"Failed to create contact: {exc}") from exc
 
 
-@router.put("/{contact_id}", summary="Contact aktualisieren")
+@router.put("/{contact_id}", summary="Contact aktualisieren",
+    response_model=dict
+)
 async def update_contact(contact_id: str, contact_data: ContactUpdate):
     try:
         payload = _map_update_payload(contact_data)
@@ -136,7 +144,9 @@ async def update_contact(contact_id: str, contact_data: ContactUpdate):
         raise HTTPException(status_code=500, detail=f"Failed to update contact: {exc}") from exc
 
 
-@router.delete("/{contact_id}", status_code=status.HTTP_204_NO_CONTENT, summary="Contact löschen")
+@router.delete("/{contact_id}", status_code=status.HTTP_204_NO_CONTENT, summary="Contact löschen",
+    response_model=None
+)
 async def delete_contact(contact_id: str):
     try:
         await crm_core_client.delete_contact(contact_id)

@@ -566,7 +566,9 @@ def _report_to_rows(report_type: str, data: Any) -> List[List[str]]:
     return rows
 
 
-@router.get("/export/{report_type}", summary="Report exportieren")
+@router.get("/export/{report_type}", summary="Report exportieren",
+    response_model=dict
+)
 async def export_report(
     report_type: str,
     period: str = Query(..., description="Accounting period (YYYY-MM)"),

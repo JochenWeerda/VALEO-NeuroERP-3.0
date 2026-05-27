@@ -150,7 +150,9 @@ def create_individualpreis(
     return IndividualpreisOut(**dict(row._mapping))
 
 
-@router.delete("/{preis_id}", summary="Individualpreis löschen")
+@router.delete("/{preis_id}", summary="Individualpreis löschen",
+    response_model=dict
+)
 def delete_individualpreis(
     preis_id: str,
     db=Depends(get_db),

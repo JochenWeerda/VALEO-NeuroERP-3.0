@@ -195,7 +195,9 @@ def update_verpackung(
     return ArtikelVerpackungOut(**dict(updated._mapping))
 
 
-@router.delete("/{verpackungs_nr}", summary="Verpackung löschen")
+@router.delete("/{verpackungs_nr}", summary="Verpackung löschen",
+    response_model=dict
+)
 def delete_verpackung(
     verpackungs_nr: str,
     db=Depends(get_db),
@@ -210,7 +212,9 @@ def delete_verpackung(
     return Response(status_code=204)
 
 
-@router.get("/{verpackungs_nr}/gesamtgewicht", summary="Gesamtgewicht berechne")
+@router.get("/{verpackungs_nr}/gesamtgewicht", summary="Gesamtgewicht berechne",
+    response_model=None
+)
 def berechne_gesamtgewicht(
     verpackungs_nr: str,
     anzahl_stufe3: Optional[int] = Query(None),

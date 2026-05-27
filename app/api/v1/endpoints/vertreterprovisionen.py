@@ -136,7 +136,9 @@ def create_provisionsgruppe(
     return ProvisionsGruppeOut(**dict(row._mapping))
 
 
-@router.delete("/gruppen/{gruppe_nr}", summary="Provisionsgruppe löschen")
+@router.delete("/gruppen/{gruppe_nr}", summary="Provisionsgruppe löschen",
+    response_model=dict
+)
 def delete_provisionsgruppe(
     gruppe_nr: str,
     db=Depends(get_db),

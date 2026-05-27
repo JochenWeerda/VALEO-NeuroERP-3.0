@@ -141,7 +141,9 @@ def update_erloeskennziffer(
     return ErloeskennzifferOut(**dict(row._mapping))
 
 
-@router.delete("/{ekz_nr}", summary="Erloeskennziffer löschen")
+@router.delete("/{ekz_nr}", summary="Erloeskennziffer löschen",
+    response_model=dict
+)
 def delete_erloeskennziffer(
     ekz_nr: str,
     db=Depends(get_db),

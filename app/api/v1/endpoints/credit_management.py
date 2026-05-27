@@ -232,7 +232,9 @@ async def set_credit_limit(
     )
 
 
-@router.post("/customers/{customer_id}/credit-override", status_code=status.HTTP_201_CREATED, summary="Override credit")
+@router.post("/customers/{customer_id}/credit-override", status_code=status.HTTP_201_CREATED, summary="Override credit",
+    response_model=dict
+)
 async def credit_override(
     customer_id: str,
     payload: CreditOverride,

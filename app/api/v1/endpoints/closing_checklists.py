@@ -554,7 +554,9 @@ async def get_closing_checklist(
         raise HTTPException(status_code=500, detail=f"Failed to get closing checklist: {str(e)}")
 
 
-@router.post("/{checklist_id}/items/{item_code}/complete", summary="Checklist item complete")
+@router.post("/{checklist_id}/items/{item_code}/complete", summary="Checklist item complete",
+    response_model=dict
+)
 async def complete_checklist_item(
     checklist_id: str,
     item_code: str,
@@ -635,7 +637,9 @@ async def complete_checklist_item(
         raise HTTPException(status_code=500, detail=f"Failed to complete checklist item: {str(e)}")
 
 
-@router.post("/{checklist_id}/validate", summary="Checklist items validieren")
+@router.post("/{checklist_id}/validate", summary="Checklist items validieren",
+    response_model=dict
+)
 async def validate_checklist_items(
     checklist_id: str,
     tenant_id: str = Query("system", description="Tenant ID"),

@@ -131,7 +131,9 @@ def create_rabattgruppe(
     return RabattgruppeOut(**dict(row._mapping))
 
 
-@router.delete("/gruppen/{gruppe_id}", summary="Rabattgruppe löschen")
+@router.delete("/gruppen/{gruppe_id}", summary="Rabattgruppe löschen",
+    response_model=dict
+)
 def delete_rabattgruppe(
     gruppe_id: str,
     db=Depends(get_db),
@@ -190,7 +192,9 @@ def create_rabattklasse(
     return RabattklasseOut(**dict(row._mapping))
 
 
-@router.delete("/klassen/{klasse_id}", summary="Rabattklasse löschen")
+@router.delete("/klassen/{klasse_id}", summary="Rabattklasse löschen",
+    response_model=None
+)
 def delete_rabattklasse(
     klasse_id: str,
     db=Depends(get_db),
@@ -261,7 +265,9 @@ def create_rabattsatz(
     return RabattsatzOut(**dict(row._mapping))
 
 
-@router.delete("/saetze/{satz_id}", summary="Rabattsatz löschen")
+@router.delete("/saetze/{satz_id}", summary="Rabattsatz löschen",
+    response_model=dict
+)
 def delete_rabattsatz(
     satz_id: str,
     db=Depends(get_db),
@@ -275,7 +281,9 @@ def delete_rabattsatz(
     return Response(status_code=204)
 
 
-@router.get("/saetze/lookup", summary="Rabatt lookup")
+@router.get("/saetze/lookup", summary="Rabatt lookup",
+    response_model=None
+)
 def lookup_rabatt(
     rabattgruppe_nr: str,
     rabattklasse_nr: str,

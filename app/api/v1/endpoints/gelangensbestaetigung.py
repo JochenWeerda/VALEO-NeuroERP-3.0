@@ -88,7 +88,9 @@ def _gen_token() -> str:
 # ---------------------------------------------------------------------------
 
 
-@router.get("", summary="Gelangensbestätigungen auflisten")
+@router.get("", summary="Gelangensbestätigungen auflisten",
+    response_model=dict
+)
 def list_gelangensbestaetigung(
     status: Optional[str] = Query(None, description="AUSSTEHEND | ERHALTEN | ABGELAUFEN"),
     lieferschein_nr: Optional[str] = Query(None),
@@ -124,7 +126,9 @@ def list_gelangensbestaetigung(
         return []
 
 
-@router.post("", status_code=201, summary="Gelangensbestätigung erstellen")
+@router.post("", status_code=201, summary="Gelangensbestätigung erstellen",
+    response_model=dict
+)
 def create_gelangensbestaetigung(
     payload: GelangensbestaetigungCreate,
     db: Session = Depends(get_db),
@@ -175,7 +179,9 @@ def create_gelangensbestaetigung(
         )
 
 
-@router.post("/{entry_id}/bestaetigen", summary="Gelangensbestätigung durch Empfänger bestätigen")
+@router.post("/{entry_id}/bestaetigen", summary="Gelangensbestätigung durch Empfänger bestätigen",
+    response_model=dict
+)
 def bestaetigen(
     entry_id: str,
     db: Session = Depends(get_db),
@@ -208,7 +214,9 @@ def bestaetigen(
         )
 
 
-@router.get("/faellig", summary="Überfällige Gelangensbestätigungen")
+@router.get("/faellig", summary="Überfällige Gelangensbestätigungen",
+    response_model=dict
+)
 def list_faellig(
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
@@ -231,7 +239,11 @@ def list_faellig(
         return []
 
 
-@router.post("/{entry_id}/mahnung", summary="Erinnerung senden (Stub)")
+@router.post(
+    "/{entry_id}/mahnung",
+    response_model=dict,
+    summary="Erinnerung senden (Stub)",
+)
 def mahnung_senden(
     entry_id: str,
     db: Session = Depends(get_db),

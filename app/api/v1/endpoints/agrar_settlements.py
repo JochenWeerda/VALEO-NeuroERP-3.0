@@ -448,7 +448,9 @@ async def cancel_settlement(
 # PDF-EXPORT FÜR ABRECHNUNGEN
 # ============================================================================
 
-@router.get("/{settlement_id}/export-pdf", summary="Settlement pdf exportieren")
+@router.get("/{settlement_id}/export-pdf", summary="Settlement pdf exportieren",
+    response_model=dict
+)
 async def export_settlement_pdf(
     settlement_id: str,
     archive: bool = False,

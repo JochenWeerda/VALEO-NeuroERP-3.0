@@ -305,7 +305,9 @@ class ResumeRequest(BaseModel):
 
 # ── Catalog ──────────────────────────────────────────────────────────────────
 
-@router.get("/catalog", summary="Catalog abrufen")
+@router.get("/catalog", summary="Catalog abrufen",
+    response_model=dict
+)
 def get_catalog(lang: Optional[str] = Query(None)) -> JSONResponse:
     catalog = get_flow_spine_catalog(lang)
     etag = _flow_spine_etag(catalog)
@@ -320,7 +322,9 @@ def get_catalog(lang: Optional[str] = Query(None)) -> JSONResponse:
 
 # ── Workspace (with optional instance overlay) ───────────────────────────────
 
-@router.get("/{process_key}", summary="Workspace abrufen")
+@router.get("/{process_key}", summary="Workspace abrufen",
+    response_model=dict
+)
 def get_workspace(
     process_key: str,
     instance_id: Optional[str] = Query(None),

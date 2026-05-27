@@ -195,6 +195,7 @@ def _register_xml_artifact(
 @router.post(
     "/{invoice_number}/einvoice/xrechnung",
     summary="XRechnung 3.0 (UBL 2.1) generieren",
+    response_model=dict,
     response_class=Response,
 )
 def generate_xrechnung(
@@ -233,6 +234,7 @@ def generate_xrechnung(
 @router.post(
     "/{invoice_number}/einvoice/zugferd",
     summary="ZUGFeRD 2.x (PDF/A-3 + CII EN 16931) generieren",
+    response_model=dict,
     response_class=Response,
 )
 def generate_zugferd(

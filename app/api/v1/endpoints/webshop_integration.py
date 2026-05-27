@@ -127,7 +127,9 @@ def import_bestellungen(
     return _svc(db, tenant_id).import_orders([b.model_dump() for b in bestellungen])
 
 
-@router.post("/bestellungen/{id}/verarbeiten", summary="Verarbeiten")
+@router.post("/bestellungen/{id}/verarbeiten", summary="Verarbeiten",
+    response_model=None
+)
 def verarbeiten(
     id: str,
     db: Session = Depends(get_db),
@@ -137,7 +139,9 @@ def verarbeiten(
     return _svc(db, tenant_id).process_order(id)
 
 
-@router.get("/sync-status", summary="Status synchronisieren")
+@router.get("/sync-status", summary="Status synchronisieren",
+    response_model=dict
+)
 def sync_status(
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
@@ -146,7 +150,9 @@ def sync_status(
     return _svc(db, tenant_id).sync_status()
 
 
-@router.get("/orders", summary="Orders auflisten")
+@router.get("/orders", summary="Orders auflisten",
+    response_model=dict
+)
 def list_orders(
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
@@ -191,7 +197,9 @@ def convert_order(
     )
 
 
-@router.get("/sync-log", summary="Log synchronisieren")
+@router.get("/sync-log", summary="Log synchronisieren",
+    response_model=dict
+)
 def sync_log(
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),

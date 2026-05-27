@@ -63,7 +63,9 @@ def _to_request(body: SupplyChainBlockchainPrepareBody) -> SupplyChainBlockchain
     )
 
 
-@router.get("/profiles", summary="Supply chain blockchain profiles abrufen")
+@router.get("/profiles", summary="Supply chain blockchain profiles abrufen",
+    response_model=dict
+)
 async def get_supply_chain_blockchain_profiles() -> dict[str, Any]:
     return {
         "profile_count": len(get_blockchain_profile_catalog()),
@@ -71,12 +73,16 @@ async def get_supply_chain_blockchain_profiles() -> dict[str, Any]:
     }
 
 
-@router.post("/prepare", summary="Supply chain blockchain event prepare")
+@router.post("/prepare", summary="Supply chain blockchain event prepare",
+    response_model=dict
+)
 async def prepare_supply_chain_blockchain_event(body: SupplyChainBlockchainPrepareBody) -> dict[str, Any]:
     return build_supply_chain_blockchain_envelope(_to_request(body), body.profil).as_dict()
 
 
-@router.post("/dispatch", summary="Supply chain blockchain event dispatch")
+@router.post("/dispatch", summary="Supply chain blockchain event dispatch",
+    response_model=dict
+)
 async def dispatch_supply_chain_blockchain_event(body: SupplyChainBlockchainDispatchBody) -> dict[str, Any]:
     envelope = build_supply_chain_blockchain_envelope(_to_request(body), body.profil)
     result = await dispatch_supply_chain_blockchain_envelope(

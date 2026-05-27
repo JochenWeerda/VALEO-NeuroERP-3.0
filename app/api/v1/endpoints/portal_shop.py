@@ -701,7 +701,9 @@ async def list_pre_purchases(
     ]
 
 
-@router.patch("/orders/{order_id}/status", summary="Order status aktualisieren")
+@router.patch("/orders/{order_id}/status", summary="Order status aktualisieren",
+    response_model=dict
+)
 async def update_order_status(
     request: Request,
     order_id: str,
@@ -758,7 +760,9 @@ async def update_order_status(
     }
 
 
-@router.get("/orders/reconciliation", summary="Orders reconcile")
+@router.get("/orders/reconciliation", summary="Orders reconcile",
+    response_model=dict
+)
 async def reconcile_orders(
     tenant_id: str = Query(..., description="Mandanten-ID"),
     stale_hours: int = Query(48, ge=1, le=720, description="Stunden ohne Statusänderung"),
@@ -817,7 +821,9 @@ async def reconcile_orders(
     }
 
 
-@router.get("/orders/observability", summary="Orders observability abrufen")
+@router.get("/orders/observability", summary="Orders observability abrufen",
+    response_model=dict
+)
 async def get_orders_observability(
     tenant_id: str = Query(..., description="Mandanten-ID"),
     db: Session = Depends(get_db),

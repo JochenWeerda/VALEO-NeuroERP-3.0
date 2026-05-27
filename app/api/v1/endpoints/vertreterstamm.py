@@ -108,7 +108,9 @@ def create_vertretergruppe(
     return VertretergruppeOut(**dict(row._mapping))
 
 
-@router.delete("/gruppen/{gruppe_nr}", summary="Vertretergruppe löschen")
+@router.delete("/gruppen/{gruppe_nr}", summary="Vertretergruppe löschen",
+    response_model=dict
+)
 def delete_vertretergruppe(
     gruppe_nr: str,
     db=Depends(get_db),
@@ -226,7 +228,9 @@ def update_vertreter(
     return VertreterOut(**dict(updated._mapping))
 
 
-@router.delete("/{vertreter_nr}", summary="Vertreter löschen")
+@router.delete("/{vertreter_nr}", summary="Vertreter löschen",
+    response_model=None
+)
 def delete_vertreter(
     vertreter_nr: str,
     db=Depends(get_db),

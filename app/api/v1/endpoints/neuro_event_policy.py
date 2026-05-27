@@ -27,7 +27,9 @@ router = APIRouter(tags=["neuro-core", "events", "policy"])
 # Event Schema Registry
 # ---------------------------------------------------------------------------
 
-@router.get("/neuro/events/types", summary="Event types abrufen")
+@router.get("/neuro/events/types", summary="Event types abrufen",
+    response_model=dict
+)
 async def get_event_types():
     return {"types": list_event_types()}
 
@@ -37,7 +39,9 @@ class ValidateEventRequest(BaseModel):
     payload: dict[str, Any] = Field(default_factory=dict)
 
 
-@router.post("/neuro/events/validate", summary="Validate event do")
+@router.post("/neuro/events/validate", summary="Validate event do",
+    response_model=dict
+)
 async def do_validate_event(request: ValidateEventRequest):
     return validate_event(request.event_type, request.payload)
 
@@ -55,7 +59,9 @@ class RegisterPolicyRequest(BaseModel):
     traffic_weight: Optional[float] = None
 
 
-@router.post("/neuro/policies", summary="Register policy do")
+@router.post("/neuro/policies", summary="Register policy do",
+    response_model=dict
+)
 async def do_register_policy(
     request: RegisterPolicyRequest,
     tenant_id: str = Depends(get_tenant_id),
@@ -73,7 +79,9 @@ async def do_register_policy(
     )
 
 
-@router.get("/neuro/policies", summary="List policies do")
+@router.get("/neuro/policies", summary="List policies do",
+    response_model=dict
+)
 async def do_list_policies(
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
@@ -81,7 +89,9 @@ async def do_list_policies(
     return {"items": list_policies(tenant_id, db)}
 
 
-@router.get("/neuro/policies/{policy_id}", summary="Get policy do")
+@router.get("/neuro/policies/{policy_id}", summary="Get policy do",
+    response_model=dict
+)
 async def do_get_policy(
     policy_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -93,7 +103,9 @@ async def do_get_policy(
     return result
 
 
-@router.get("/neuro/policies/{policy_id}/variants", summary="List policy variants do")
+@router.get("/neuro/policies/{policy_id}/variants", summary="List policy variants do",
+    response_model=dict
+)
 async def do_list_policy_variants(
     policy_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -106,7 +118,9 @@ class SelectPolicyVariantRequest(BaseModel):
     seed: Optional[str] = None
 
 
-@router.post("/neuro/policies/{policy_id}/select", summary="Select policy variant do")
+@router.post("/neuro/policies/{policy_id}/select", summary="Select policy variant do",
+    response_model=dict
+)
 async def do_select_policy_variant(
     policy_id: str,
     request: SelectPolicyVariantRequest,
@@ -119,7 +133,9 @@ async def do_select_policy_variant(
     return result
 
 
-@router.post("/neuro/policies/{policy_id}/rollback", summary="Rollback policy do")
+@router.post("/neuro/policies/{policy_id}/rollback", summary="Rollback policy do",
+    response_model=dict
+)
 async def do_rollback_policy(
     policy_id: str,
     tenant_id: str = Depends(get_tenant_id),
