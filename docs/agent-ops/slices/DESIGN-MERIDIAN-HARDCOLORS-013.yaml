@@ -1,0 +1,21 @@
+id: DESIGN-MERIDIAN-HARDCOLORS-013
+owner: Codex
+status: reserviert
+created: 2026-05-27
+goal: >
+  Dritter Meridian-Hardcolor-Batch fuer verbleibende sichtbare Admin-Fachseiten.
+file_ownership:
+  - docs/agent-ops/active-workboard.md
+  - docs/agent-ops/slices/DESIGN-MERIDIAN-HARDCOLORS-013.yaml
+  - packages/frontend-web/src/pages/admin/
+acceptance_criteria:
+  - Ausgewaehlte Admin-Seiten nutzen semantische Meridian-Tokens statt generischer Tailwind-Hardcolors.
+  - Gezielter Hardcolor-Scan auf bearbeiteten Dateien liefert keine Treffer.
+  - Frontend-Typecheck bleibt gruen.
+  - Workboard-Validierung und Diff-Checks sind gruen.
+checks:
+  - pnpm --filter @valero-neuroerp/frontend-web type-check
+  - python scripts/agent_workboard_supervisor.py validate
+  - git diff --check
+risks:
+  - Weitere Domaenen ausserhalb Admin bleiben Folgescope.
