@@ -38,7 +38,7 @@ export default function WebhooksPage(): JSX.Element {
     { key: 'name' as const, label: 'Name', render: (w: WebhookItem) => <span className="font-medium">{w.name}</span> },
     { key: 'url' as const, label: 'URL', render: (w: WebhookItem) => <span className="font-mono text-xs">{w.url}</span> },
     { key: 'events' as const, label: 'Events', render: (w: WebhookItem) => <span className="text-sm">{w.events.join(', ')}</span> },
-    { key: 'aktiv' as const, label: 'Aktiv', render: (w: WebhookItem) => <Badge variant={w.aktiv ? 'default' : 'secondary'}>{w.aktiv ? 'Ja' : 'Nein'}</Badge> },
+    { key: 'aktiv' as const, label: 'Aktiv', render: (w: WebhookItem) => <Badge variant={w.aktiv ? 'success' : 'secondary'}>{w.aktiv ? 'Ja' : 'Nein'}</Badge> },
     { key: 'last_triggered' as const, label: 'Letzter Aufruf', render: (w: WebhookItem) => w.last_triggered ? new Date(w.last_triggered).toLocaleString('de-DE') : '–' },
   ]
 
@@ -55,7 +55,7 @@ export default function WebhooksPage(): JSX.Element {
 
         <div className="grid gap-4 md:grid-cols-3">
           <Card><CardHeader className="pb-2"><CardTitle className="text-sm flex items-center gap-2"><Webhook className="h-4 w-4" />Gesamt</CardTitle></CardHeader><CardContent><span className="text-2xl font-bold">{webhooks.length}</span></CardContent></Card>
-          <Card><CardHeader className="pb-2"><CardTitle className="text-sm">Aktiv</CardTitle></CardHeader><CardContent><span className="text-2xl font-bold text-green-600">{webhooks.filter((w) => w.aktiv).length}</span></CardContent></Card>
+          <Card><CardHeader className="pb-2"><CardTitle className="text-sm">Aktiv</CardTitle></CardHeader><CardContent><span className="text-2xl font-bold text-[hsl(var(--color-semantic-success-700-hsl))]">{webhooks.filter((w) => w.aktiv).length}</span></CardContent></Card>
           <Card><CardHeader className="pb-2"><CardTitle className="text-sm">Inaktiv</CardTitle></CardHeader><CardContent><span className="text-2xl font-bold text-muted-foreground">{webhooks.filter((w) => !w.aktiv).length}</span></CardContent></Card>
         </div>
 

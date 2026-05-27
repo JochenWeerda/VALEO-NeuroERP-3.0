@@ -6,10 +6,12 @@ Stand: `2026-05-26`
 
 **Von:** Codex
 **Owner:** Codex
-**Stand:** reserviert 2026-05-27
+**Stand:** abgeschlossen 2026-05-27
 **Ziel des Slices:** Dritter Meridian-Hardcolor-Batch fuer verbleibende sichtbare Admin-Fachseiten.
 **Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/agent-ops/slices/DESIGN-MERIDIAN-HARDCOLORS-013.yaml`, priorisierte Dateien unter `packages/frontend-web/src/pages/admin/`.
 **Abnahmekriterien:** Ausgewaehlte Admin-Seiten nutzen semantische Meridian-Tokens statt generischer Tailwind-Hardcolors; gezielter Hardcolor-Scan auf bearbeiteten Dateien ohne Treffer; Typecheck, Workboard-Validierung und Diff-Checks sind gruen.
+**Erledigt:** AI-Approvals, GAP-Pipeline-Console, Webhooks und Webshop von generischen Green-Hardcolors auf Badge-Varianten und semantische Success-Tokens umgestellt.
+**Checks:** `pnpm --filter @valero-neuroerp/frontend-web type-check`; gezielter Hardcolor-Scan auf den bearbeiteten Dateien ohne Treffer; `git diff --check`.
 **Offene Risiken:** Weitere Domaenen ausserhalb Admin bleiben Folgescope.
 
 ## DESIGN-MERIDIAN-HARDCOLORS-012

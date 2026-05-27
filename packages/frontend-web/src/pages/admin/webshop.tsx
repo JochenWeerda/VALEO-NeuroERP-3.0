@@ -72,7 +72,7 @@ export default function WebshopPage(): JSX.Element {
                   <CardTitle className="text-base">{c.name}</CardTitle>
                   <div className="flex items-center gap-2">
                     <Badge variant={PLATFORM_VARIANT[c.platform] ?? 'outline'}>{c.platform}</Badge>
-                    <Badge variant={c.aktiv ? 'default' : 'secondary'}>{c.aktiv ? 'Aktiv' : 'Inaktiv'}</Badge>
+                    <Badge variant={c.aktiv ? 'success' : 'secondary'}>{c.aktiv ? 'Aktiv' : 'Inaktiv'}</Badge>
                   </div>
                 </div>
               </CardHeader>
@@ -98,7 +98,7 @@ export default function WebshopPage(): JSX.Element {
                     <Download className="h-3 w-3" />Bestellungen importieren
                   </Button>
                   {importResult[c.id] !== undefined && (
-                    <span className="text-sm text-green-600">{importResult[c.id]} importiert</span>
+                    <span className="text-sm text-[hsl(var(--color-semantic-success-700-hsl))]">{importResult[c.id]} importiert</span>
                   )}
                 </div>
               </CardContent>

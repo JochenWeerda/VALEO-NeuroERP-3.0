@@ -1,7 +1,8 @@
 id: DESIGN-MERIDIAN-HARDCOLORS-013
 owner: Codex
-status: reserviert
+status: abgeschlossen
 created: 2026-05-27
+completed: 2026-05-27
 goal: >
   Dritter Meridian-Hardcolor-Batch fuer verbleibende sichtbare Admin-Fachseiten.
 file_ownership:
@@ -17,5 +18,12 @@ checks:
   - pnpm --filter @valero-neuroerp/frontend-web type-check
   - python scripts/agent_workboard_supervisor.py validate
   - git diff --check
+done:
+  - AI-Approvals Erfolgsicons auf semantic success Tokens umgestellt.
+  - GAP-Pipeline-Console Success-Badge auf Badge-Variante gezogen.
+  - Webhooks Aktiv-Status auf success Badge und semantic success Zahl gezogen.
+  - Webshop Aktiv-Status und Import-Ergebnis auf semantic success Tokens gezogen.
+remaining_scope:
+  - Weitere Admin- und Fachseiten-Hardcolors bleiben Folgeslices.
 risks:
   - Weitere Domaenen ausserhalb Admin bleiben Folgescope.
