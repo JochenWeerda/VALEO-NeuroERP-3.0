@@ -1,8 +1,9 @@
 id: SLICE-008-DSGVO-ART30-ROPA-001
 title: Slice-008 — DSGVO Art. 30 Verzeichnis von Verarbeitungstätigkeiten (RoPA)
 owner: Claude Sonnet 4.6
-status: reserviert
+status: abgeschlossen
 claimed_at: 2026-05-27
+completed_at: 2026-05-27
 depends_on:
   - SLICE-006-EINVOICE-B2B-EXPORT-001
 goal: >

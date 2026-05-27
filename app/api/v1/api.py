@@ -1565,6 +1565,10 @@ api_router.include_router(erechnung_import.router)
 from app.api.v1.endpoints import sales_invoice_einvoice  # noqa: E402
 api_router.include_router(sales_invoice_einvoice.router)
 
+# Slice-008: DSGVO Art. 30 Verarbeitungsverzeichnis (RoPA)
+from app.api.v1.endpoints import gdpr_art30_ropa  # noqa: E402
+api_router.include_router(gdpr_art30_ropa.router)
+
 # Dynamische Preis-Kalkulations-Engine
 api_router.include_router(price_calculation.router)
 
