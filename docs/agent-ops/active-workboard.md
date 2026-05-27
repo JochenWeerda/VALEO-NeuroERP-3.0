@@ -2718,3 +2718,14 @@ Archiv des vorherigen Boards:
 **Gate-Ergebnis:** pytest 93/93 ✅ · TypeScript 0 Fehler ✅
 **Erledigt:** POST `/voice/polish` + `/voice/transcribe`; Ollama-Polish mit Fallback auf Rohtext; faster-whisper in `voice_adapter.py`; Frontend zeigt Rohtext und polierten Text in `VoiceFeedback`.
 **Offene Risiken:** faster-whisper optional — ohne Install liefert `/transcribe` 503; Browser-STT bleibt Standard im Frontend bis Slice-013b.
+
+## SLICE-013B-VOICE-SUMMARY-TTS-001
+
+**Von:** Claude Sonnet 4.6
+**Owner:** Claude Sonnet 4.6
+**Stand:** abgeschlossen 2026-05-27
+**Ziel des Slices:** Ollama 15s-Summary + lokales Piper-TTS + Frontend-Wiedergabe mit Browser-Fallback.
+**Dateibesitz:** `voice_summary.py`, `local_tts.py`, `voice.py`, `voice_adapter.py`, `VoiceFeedback.tsx`, `useVoicePlayback.ts`, `VoiceButton.tsx`, `voice.ts`, `tests/test_voice_summary_tts.py`.
+**Gate-Ergebnis:** pytest 103/103 ✅ · TypeScript 0 Fehler ✅
+**Erledigt:** POST `/voice/summary` + `/voice/synthesize`; Piper in `voice_adapter.py`; Summary + Vorlesen-Button in `VoiceFeedback`; Browser-SpeechSynthesis-Fallback.
+**Offene Risiken:** Piper optional — ohne Modell/CLI nur Browser-TTS; Kokoro als Folge-Provider moeglich.

@@ -4,13 +4,15 @@ STT/TTS Adapter mit echten Provider-Anbindungen.
 
 Provider-Hierarchie:
   STT: 1) faster-whisper (lokal)  2) OpenAI Whisper API  3) Azure  4) Browser
-  TTS: 1) OpenAI TTS          2) Azure Cognitive Speech  3) Web Speech API (Browser)
+  TTS: 1) piper (lokal)  2) OpenAI TTS  3) Azure Cognitive Speech  4) Web Speech API (Browser)
 
 Konfiguration über Umgebungsvariablen:
   VOICE_STT_PROVIDER: faster-whisper | whisper | azure | browser (default: whisper)
   VOICE_FASTER_WHISPER_MODEL: small | medium | large-v3 (default: small)
   VOICE_FASTER_WHISPER_COMPUTE: int8 | float16 (default: int8)
-  VOICE_TTS_PROVIDER: openai | azure | browser (default: openai)
+  VOICE_TTS_PROVIDER: piper | openai | azure | browser (default: openai)
+  VOICE_PIPER_MODEL: Pfad zur .onnx Piper-Stimme (für piper)
+  VOICE_PIPER_EXECUTABLE: piper CLI (default: piper)
   OPENAI_API_KEY: für Whisper STT + OpenAI TTS
   AZURE_SPEECH_KEY + AZURE_SPEECH_REGION: für Azure Cognitive Speech
 """
@@ -34,6 +36,8 @@ _TTS_PROVIDER = os.getenv("VOICE_TTS_PROVIDER", "openai").lower()
 _FASTER_WHISPER_MODEL = os.getenv("VOICE_FASTER_WHISPER_MODEL", "small")
 _FASTER_WHISPER_COMPUTE = os.getenv("VOICE_FASTER_WHISPER_COMPUTE", "int8")
 _FASTER_WHISPER_DEVICE = os.getenv("VOICE_FASTER_WHISPER_DEVICE", "cpu")
+_PIPER_MODEL = os.getenv("VOICE_PIPER_MODEL", "")
+_PIPER_EXECUTABLE = os.getenv("VOICE_PIPER_EXECUTABLE", "piper")
 _OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
 _AZURE_SPEECH_KEY = os.getenv("AZURE_SPEECH_KEY", "")
 _AZURE_SPEECH_REGION = os.getenv("AZURE_SPEECH_REGION", "westeurope")
@@ -84,6 +88,18 @@ def _is_stt_ready() -> bool:
 
 
 def _is_tts_ready() -> bool:
+    if _TTS_PROVIDER == "piper":
+        import shutil
+        from pathlib import Path
+
+        if _PIPER_MODEL and Path(_PIPER_MODEL).exists():
+            try:
+                import piper  # noqa: F401
+
+                return True
+            except ImportError:
+                return bool(shutil.which(_PIPER_EXECUTABLE))
+        return False
     if _TTS_PROVIDER == "openai":
         return bool(_OPENAI_API_KEY)
     if _TTS_PROVIDER == "azure":
@@ -196,7 +212,9 @@ async def synthesize(session_id: str, text: str) -> dict:
         return {"session_id": session_id, "text": text, "error": "Empty text"}
 
     try:
-        if _TTS_PROVIDER == "openai":
+        if _TTS_PROVIDER == "piper":
+            audio_b64, content_type = await _piper_tts(text)
+        elif _TTS_PROVIDER == "openai":
             audio_b64, content_type = await _openai_tts(text, session.language)
         elif _TTS_PROVIDER == "azure":
             audio_b64, content_type = await _azure_tts(text, session.language)
@@ -387,6 +405,63 @@ async def _openai_tts(text: str, language: str) -> tuple[str, str]:
         audio_b64 = base64.b64encode(response.content).decode()
 
     return audio_b64, "audio/mpeg"
+
+
+async def _piper_tts(text: str) -> tuple[str, str]:
+    """Local Piper TTS synthesis (privacy-first)."""
+    import asyncio
+    import shutil
+    import subprocess
+    import tempfile
+    from pathlib import Path
+
+    if not _PIPER_MODEL or not Path(_PIPER_MODEL).exists():
+        raise RuntimeError(f"VOICE_PIPER_MODEL not found: {_PIPER_MODEL}")
+
+    def _run_python() -> tuple[str, str]:
+        import io
+        import wave
+
+        from piper import PiperVoice
+
+        voice = PiperVoice.load(_PIPER_MODEL)
+        buf = io.BytesIO()
+        with wave.open(buf, "wb") as wav_file:
+            voice.synthesize(text, wav_file)
+        return base64.b64encode(buf.getvalue()).decode(), "audio/wav"
+
+    def _run_cli() -> tuple[str, str]:
+        if not shutil.which(_PIPER_EXECUTABLE):
+            raise RuntimeError(f"Piper executable not found: {_PIPER_EXECUTABLE}")
+        with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as tmp:
+            out_path = tmp.name
+        try:
+            proc = subprocess.run(
+                [_PIPER_EXECUTABLE, "--model", _PIPER_MODEL, "--output_file", out_path],
+                input=text.encode("utf-8"),
+                capture_output=True,
+                check=False,
+            )
+            if proc.returncode != 0:
+                stderr = proc.stderr.decode("utf-8", errors="replace")
+                raise RuntimeError(f"Piper CLI failed: {stderr.strip() or proc.returncode}")
+            audio_bytes = Path(out_path).read_bytes()
+            return base64.b64encode(audio_bytes).decode(), "audio/wav"
+        finally:
+            try:
+                os.unlink(out_path)
+            except OSError:
+                pass
+
+    def _run() -> tuple[str, str]:
+        try:
+            import piper  # noqa: F401
+
+            return _run_python()
+        except ImportError:
+            return _run_cli()
+
+    return await asyncio.to_thread(_run)
 
 
 async def _azure_tts(text: str, language: str) -> tuple[str, str]:

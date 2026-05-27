@@ -7,13 +7,23 @@ export { useActionDispatch, useActionDispatchOptional } from './context/ActionDi
 export { VoiceButton } from './components/VoiceButton'
 export { VoiceFeedback } from './components/VoiceFeedback'
 export { useVoiceIntent } from './hooks/useVoiceIntent'
+export { useVoicePlayback } from './hooks/useVoicePlayback'
 export { useActionsForMask } from './hooks/useActionsForMask'
 export { useGlobalShortcutsWithVoice } from './hooks/useGlobalShortcutsWithVoice'
 export { fetchActions, fetchAction } from './api/actions'
 export type { Action, ActionListResponse } from './api/actions'
 export { buildToolbarActionsFromRegistry } from './toolbar-actions'
-export { resolveVoice } from './api/voice'
-export type { VoiceResolveRequest, VoiceResolveResponse } from './api/voice'
+export { resolveVoice, polishVoice, summarizeVoice, synthesizeVoice } from './api/voice'
+export type {
+  VoiceResolveRequest,
+  VoiceResolveResponse,
+  VoicePolishRequest,
+  VoicePolishResponse,
+  VoiceSummaryRequest,
+  VoiceSummaryResponse,
+  VoiceSynthesizeRequest,
+  VoiceSynthesizeResponse,
+} from './api/voice'
 export {
   limitItemsForDensity,
   limitProcessDetails,

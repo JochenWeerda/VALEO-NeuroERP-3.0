@@ -20,6 +20,13 @@ POLISH_SYSTEM_PROMPT = (
     "Antworte nur mit dem bereinigten Text, ohne Erklaerung."
 )
 
+SUMMARY_SYSTEM_PROMPT = (
+    "Du bist ein deutscher Business-Assistent fuer ERP-Sprachausgabe. "
+    "Fasse den Text in maximal der angegebenen Wortanzahl zusammen — "
+    "klar, praegnant, zum Vorlesen geeignet. "
+    "Antworte nur mit der Zusammenfassung, ohne Einleitung oder Erklaerung."
+)
+
 
 async def ollama_generate(
     user_prompt: str,
@@ -71,3 +78,15 @@ async def polish_transcript(raw_text: str, tone: str = "business") -> tuple[str,
         "Bereinigter Text:"
     )
     return await ollama_generate(prompt, system=POLISH_SYSTEM_PROMPT)
+
+
+async def summarize_transcript(raw_text: str, max_words: int = 45) -> tuple[str, str]:
+    """Summarize text for ~15s voice readback via Ollama."""
+    prompt = (
+        f"Fasse den folgenden Text in hoechstens {max_words} Woertern zusammen "
+        f"(ca. 15 Sekunden Vorlesezeit).\n\n"
+        f"Text:\n{raw_text.strip()}\n\n"
+        "Zusammenfassung:"
+    )
+    model = settings.OLLAMA_SUMMARY_MODEL or settings.OLLAMA_POLISH_MODEL
+    return await ollama_generate(prompt, system=SUMMARY_SYSTEM_PROMPT, model=model)

@@ -1,15 +1,21 @@
 /**
  * Toast-like feedback for voice result (success or error)
- * Slice-013: optional raw + polished transcript preview
+ * Slice-013: raw + polished transcript; Slice-013b: summary + play
  */
 
 import { useEffect } from 'react'
+import { Volume2, Loader2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { Button } from '@/components/ui/button'
 
 export interface VoiceFeedbackProps {
   message?: string
   rawText?: string | null
   polishedText?: string | null
+  summaryText?: string | null
+  estimatedSeconds?: number
+  onPlaySummary?: () => void
+  playingSummary?: boolean
   variant?: 'success' | 'error' | 'info'
   onDismiss: () => void
   autoHideMs?: number
@@ -19,9 +25,13 @@ export function VoiceFeedback({
   message,
   rawText,
   polishedText,
+  summaryText,
+  estimatedSeconds,
+  onPlaySummary,
+  playingSummary = false,
   variant = 'success',
   onDismiss,
-  autoHideMs = 4000,
+  autoHideMs = 6000,
 }: VoiceFeedbackProps): JSX.Element {
   useEffect(() => {
     const t = setTimeout(onDismiss, autoHideMs)
@@ -29,6 +39,7 @@ export function VoiceFeedback({
   }, [onDismiss, autoHideMs])
 
   const showTranscript = Boolean(rawText?.trim() || polishedText?.trim())
+  const showSummary = Boolean(summaryText?.trim())
 
   return (
     <div
@@ -57,6 +68,42 @@ export function VoiceFeedback({
               <p className="text-xs leading-snug">{polishedText}</p>
             </div>
           ) : null}
+        </div>
+      ) : null}
+      {showSummary ? (
+        <div
+          data-testid="voice-feedback-summary"
+          className={cn(
+            'space-y-2',
+            message || showTranscript ? 'mt-2 border-t border-white/20 pt-2' : ''
+          )}
+        >
+          <div className="flex items-start justify-between gap-2">
+            <div>
+              <span className="text-xs font-semibold opacity-90">
+                Zusammenfassung
+                {estimatedSeconds ? ` (~${estimatedSeconds}s)` : ''}
+              </span>
+              <p className="text-xs leading-snug">{summaryText}</p>
+            </div>
+            {onPlaySummary ? (
+              <Button
+                type="button"
+                size="icon"
+                variant="secondary"
+                className="h-7 w-7 shrink-0"
+                disabled={playingSummary}
+                aria-label="Zusammenfassung vorlesen"
+                onClick={onPlaySummary}
+              >
+                {playingSummary ? (
+                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                ) : (
+                  <Volume2 className="h-3.5 w-3.5" />
+                )}
+              </Button>
+            ) : null}
+          </div>
         </div>
       ) : null}
     </div>
