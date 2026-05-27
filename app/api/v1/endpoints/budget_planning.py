@@ -35,8 +35,8 @@ def _503(hint: str = "alembic upgrade head") -> HTTPException:
 
 def _check_tables(db: Session) -> None:
     try:
-        db.execute(text(f"SELECT 1 FROM {_TABLE_PLANS} LIMIT 0"))  # nosec S608 — reviewed-safe: column names code-controlled, values parameterized
-        db.execute(text(f"SELECT 1 FROM {_TABLE_LINES} LIMIT 0"))  # nosec S608 — reviewed-safe: column names code-controlled, values parameterized
+        db.execute(text("SELECT 1 FROM domain_finance.budget_plans LIMIT 0"))
+        db.execute(text("SELECT 1 FROM domain_finance.budget_lines LIMIT 0"))
     except Exception:
         raise _503()
 
@@ -75,7 +75,7 @@ def list_budget_plans(
     _check_tables(db)
     try:
         rows = db.execute(
-            text(f"SELECT * FROM {_TABLE_PLANS} WHERE tenant_id = :tid ORDER BY plan_year DESC, plan_name"),  # nosec S608 — reviewed-safe: column names code-controlled, values parameterized
+            text("SELECT * FROM domain_finance.budget_plans WHERE tenant_id = :tid ORDER BY plan_year DESC, plan_name"),
             {"tid": tenant_id},
         ).mappings().all()
         return {"items": [dict(r) for r in rows], "total": len(rows)}
@@ -139,7 +139,7 @@ def budget_summary(
             return {"message": "Kein genehmigtes Budget vorhanden", "total_budget_eur": 0, "pct_used": 0}
 
         total_budget = db.execute(
-            text(f"SELECT COALESCE(SUM(budgeted_amount), 0) FROM {_TABLE_LINES} WHERE plan_id = :pid AND tenant_id = :tid"),  # nosec S608 — reviewed-safe: column names code-controlled, values parameterized
+            text("SELECT COALESCE(SUM(budgeted_amount), 0) FROM domain_finance.budget_lines WHERE plan_id = :pid AND tenant_id = :tid"),
             {"pid": plan["id"], "tid": tenant_id},
         ).scalar() or 0
 
@@ -187,14 +187,14 @@ def get_budget_plan(
     _check_tables(db)
     try:
         plan = db.execute(
-            text(f"SELECT * FROM {_TABLE_PLANS} WHERE id = :id AND tenant_id = :tid"),  # nosec S608 — reviewed-safe: column names code-controlled, values parameterized
+            text("SELECT * FROM domain_finance.budget_plans WHERE id = :id AND tenant_id = :tid"),
             {"id": plan_id, "tid": tenant_id},
         ).mappings().first()
         if not plan:
             raise HTTPException(404, "Budget-Plan nicht gefunden")
 
         lines = db.execute(
-            text(f"SELECT * FROM {_TABLE_LINES} WHERE plan_id = :pid AND tenant_id = :tid ORDER BY period_month"),  # nosec S608 — reviewed-safe: column names code-controlled, values parameterized
+            text("SELECT * FROM domain_finance.budget_lines WHERE plan_id = :pid AND tenant_id = :tid ORDER BY period_month"),
             {"pid": plan_id, "tid": tenant_id},
         ).mappings().all()
 
@@ -215,7 +215,7 @@ def approve_budget_plan(
     _check_tables(db)
     try:
         plan = db.execute(
-            text(f"SELECT status FROM {_TABLE_PLANS} WHERE id = :id AND tenant_id = :tid"),  # nosec S608 — reviewed-safe: column names code-controlled, values parameterized
+            text("SELECT status FROM domain_finance.budget_plans WHERE id = :id AND tenant_id = :tid"),
             {"id": plan_id, "tid": tenant_id},
         ).first()
         if not plan:
@@ -223,7 +223,7 @@ def approve_budget_plan(
         if plan[0] != "ENTWURF":
             raise HTTPException(409, f"Budget ist bereits im Status '{plan[0]}' — Genehmigung nur aus ENTWURF möglich")
         db.execute(
-            text(f"UPDATE {_TABLE_PLANS} SET status = 'GENEHMIGT' WHERE id = :id AND tenant_id = :tid"),  # nosec S608 — reviewed-safe: column names code-controlled, values parameterized
+            text("UPDATE domain_finance.budget_plans SET status = 'GENEHMIGT' WHERE id = :id AND tenant_id = :tid"),
             {"id": plan_id, "tid": tenant_id},
         )
         db.commit()
@@ -245,7 +245,7 @@ def budget_vs_actual(
     _check_tables(db)
     try:
         plan = db.execute(
-            text(f"SELECT plan_year FROM {_TABLE_PLANS} WHERE id = :id AND tenant_id = :tid"),  # nosec S608 — reviewed-safe: column names code-controlled, values parameterized
+            text("SELECT plan_year FROM domain_finance.budget_plans WHERE id = :id AND tenant_id = :tid"),
             {"id": plan_id, "tid": tenant_id},
         ).first()
         if not plan:
@@ -320,7 +320,7 @@ def add_budget_line(
     _check_tables(db)
     try:
         plan = db.execute(
-            text(f"SELECT status FROM {_TABLE_PLANS} WHERE id = :id AND tenant_id = :tid"),  # nosec S608 — reviewed-safe: column names code-controlled, values parameterized
+            text("SELECT status FROM domain_finance.budget_plans WHERE id = :id AND tenant_id = :tid"),
             {"id": plan_id, "tid": tenant_id},
         ).first()
         if not plan:
@@ -367,7 +367,7 @@ def update_budget_line(
     _check_tables(db)
     try:
         plan = db.execute(
-            text(f"SELECT status FROM {_TABLE_PLANS} WHERE id = :id AND tenant_id = :tid"),  # nosec S608 — reviewed-safe: column names code-controlled, values parameterized
+            text("SELECT status FROM domain_finance.budget_plans WHERE id = :id AND tenant_id = :tid"),
             {"id": plan_id, "tid": tenant_id},
         ).first()
         if not plan:
@@ -376,7 +376,7 @@ def update_budget_line(
             raise HTTPException(409, "Budget ist gesperrt")
 
         line = db.execute(
-            text(f"SELECT id FROM {_TABLE_LINES} WHERE id = :id AND plan_id = :pid AND tenant_id = :tid"),  # nosec S608 — reviewed-safe: column names code-controlled, values parameterized
+            text("SELECT id FROM domain_finance.budget_lines WHERE id = :id AND plan_id = :pid AND tenant_id = :tid"),
             {"id": line_id, "pid": plan_id, "tid": tenant_id},
         ).first()
         if not line:
