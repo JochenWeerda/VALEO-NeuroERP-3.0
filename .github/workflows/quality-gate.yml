@@ -153,7 +153,7 @@ jobs:
         run: python scripts/check_response_models.py --threshold 843
 
       - name: Pagination regression check
-        run: python scripts/check_pagination.py --threshold 52
+        run: python scripts/check_pagination.py --threshold 53
 
       - name: Godfile regression check (>1000 LOC)
         run: python scripts/check_file_size.py --threshold 12

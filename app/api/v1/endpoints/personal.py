@@ -4356,3 +4356,51 @@ async def update_application_stage(
         db.rollback()
         raise HTTPException(status_code=503, detail="applications table not available")
     return {"id": application_id, "stage": payload.stage, "status": "updated"}
+
+
+
+# ── Lohnabrechnung (§ 38 EStG / SGB IV 2025) ─────────────────────────────────
+
+class LohnBerechnungRequest(BaseModel):
+    brutto: float = Field(..., gt=0, description="Monatliches Bruttogehalt EUR")
+    steuerklasse: int = Field(..., ge=1, le=6)
+    hat_kinder: bool = False
+    kinder_freibetraege: float = Field(0.0, ge=0)
+    kirchensteuersatz: float = Field(0.09, ge=0, le=0.12, description="0,08 (BaWü/Bay) oder 0,09")
+    zusatzbeitrag_kv: float = Field(0.017, ge=0, le=0.04, description="Individueller KV-Zusatzbeitrag (ø 2025: 1,7 %)")
+
+
+@router.post("/lohn/berechnung", summary="Brutto-Netto-Berechnung (§ 38 EStG, SGB IV 2025)")
+async def berechne_lohn(
+    payload: LohnBerechnungRequest,
+    tenant_id: str = Depends(get_tenant_id),  # noqa: ARG001 — tenant_id für spätere Mandantenprofile
+) -> dict:
+    """
+    Berechnet Nettogehalt aus Brutto für Steuerklasse I–VI (2025).
+
+    Berücksichtigt:
+    - Lohnsteuer nach § 32a EStG (Grundtarif, Näherungsformel)
+    - Solidaritätszuschlag § 3 SolZG
+    - Kirchensteuer (optional 8 % / 9 %)
+    - KV, RV, ALV, PV (AN-Anteil) mit BBG 2025
+    - Kinderlosenzuschlag PV (0,6 % für Kinderlose ≥ 23 J.)
+    """
+    from app.services.lohn_service import berechne_netto
+    ergebnis = berechne_netto(
+        brutto=payload.brutto,
+        steuerklasse=payload.steuerklasse,
+        hat_kinder=payload.hat_kinder,
+        kinder_freibetraege=payload.kinder_freibetraege,
+        kirchensteuersatz=payload.kirchensteuersatz,
+        zusatzbeitrag_kv=payload.zusatzbeitrag_kv,
+    )
+    return {
+        "eingabe": payload.model_dump(),
+        "ergebnis": ergebnis.as_dict(),
+        "hinweis": "Näherungsberechnung gemäß § 32a EStG 2025. Maßgeblich ist die amtliche LSt-Tabelle.",
+        "beitragsgrundlagen": {
+            "bbg_kv_monat": 5512.50,
+            "bbg_rv_monat": 8050.00,
+            "grundfreibetrag_monat": 1008.0,
+        },
+    }
