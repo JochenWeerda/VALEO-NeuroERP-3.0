@@ -15,6 +15,13 @@ scope:
   - services/ki-usability/app/services/intent_resolver.py
   - packages/frontend-web/src/app/navigation/ai-shortcuts.tsx
   - services/ki-usability/tests/test_voice_intent_verkauf_crm.py
+file_ownership:
+  - docs/agent-ops/slices/SLICE-011-VOICE-VERKAUF-CRM-001.yaml
+  - packages/frontend-web/src/features/ki-usability/context/ActionDispatchContext.tsx
+  - services/ki-usability/app/services/action_registry.py
+  - services/ki-usability/app/services/intent_resolver.py
+  - packages/frontend-web/src/app/navigation/ai-shortcuts.tsx
+  - services/ki-usability/tests/test_voice_intent_verkauf_crm.py
 new_intents:
   verkauf:
     - nav-verkauf
@@ -38,3 +45,6 @@ acceptance_criteria:
   - 15 neue Verkauf/CRM-Intents registriert
   - pytest gruen
   - TypeScript 0 Fehler
+checks:
+  - python -m pytest tests/test_voice_intent_verkauf_crm.py -q --no-cov
+  - pnpm --filter @valero-neuroerp/frontend-web type-check
