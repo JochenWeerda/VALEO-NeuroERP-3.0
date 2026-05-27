@@ -185,7 +185,7 @@ async def update_ap_invoice(invoice_id: str, doc: SalesInvoice, db: Session = De
 
 
 @router.get("/", summary="Ap invoices auflisten",
-    response_model=dict
+    response_model=list
 )
 async def list_ap_invoices(
     skip: int = 0,
