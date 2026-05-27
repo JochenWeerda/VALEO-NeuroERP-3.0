@@ -3,11 +3,13 @@ Voice Adapter Layer — NC-003
 STT/TTS Adapter mit echten Provider-Anbindungen.
 
 Provider-Hierarchie:
-  STT: 1) OpenAI Whisper API  2) Azure Cognitive Speech  3) Web Speech API (Browser)
+  STT: 1) faster-whisper (lokal)  2) OpenAI Whisper API  3) Azure  4) Browser
   TTS: 1) OpenAI TTS          2) Azure Cognitive Speech  3) Web Speech API (Browser)
 
 Konfiguration über Umgebungsvariablen:
-  VOICE_STT_PROVIDER: whisper | azure | browser (default: whisper)
+  VOICE_STT_PROVIDER: faster-whisper | whisper | azure | browser (default: whisper)
+  VOICE_FASTER_WHISPER_MODEL: small | medium | large-v3 (default: small)
+  VOICE_FASTER_WHISPER_COMPUTE: int8 | float16 (default: int8)
   VOICE_TTS_PROVIDER: openai | azure | browser (default: openai)
   OPENAI_API_KEY: für Whisper STT + OpenAI TTS
   AZURE_SPEECH_KEY + AZURE_SPEECH_REGION: für Azure Cognitive Speech
@@ -29,6 +31,9 @@ logger = logging.getLogger(__name__)
 # Provider configuration
 _STT_PROVIDER = os.getenv("VOICE_STT_PROVIDER", "whisper").lower()
 _TTS_PROVIDER = os.getenv("VOICE_TTS_PROVIDER", "openai").lower()
+_FASTER_WHISPER_MODEL = os.getenv("VOICE_FASTER_WHISPER_MODEL", "small")
+_FASTER_WHISPER_COMPUTE = os.getenv("VOICE_FASTER_WHISPER_COMPUTE", "int8")
+_FASTER_WHISPER_DEVICE = os.getenv("VOICE_FASTER_WHISPER_DEVICE", "cpu")
 _OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
 _AZURE_SPEECH_KEY = os.getenv("AZURE_SPEECH_KEY", "")
 _AZURE_SPEECH_REGION = os.getenv("AZURE_SPEECH_REGION", "westeurope")
@@ -62,6 +67,13 @@ def get_provider_status() -> dict:
 
 
 def _is_stt_ready() -> bool:
+    if _STT_PROVIDER == "faster-whisper":
+        try:
+            import faster_whisper  # noqa: F401
+
+            return True
+        except ImportError:
+            return False
     if _STT_PROVIDER == "whisper":
         return bool(_OPENAI_API_KEY)
     if _STT_PROVIDER == "azure":
@@ -128,7 +140,9 @@ async def transcribe(
         }
 
     try:
-        if _STT_PROVIDER == "whisper":
+        if _STT_PROVIDER == "faster-whisper":
+            text, confidence = await _faster_whisper_transcribe(audio_data, audio_format, session.language)
+        elif _STT_PROVIDER == "whisper":
             text, confidence = await _whisper_transcribe(audio_data, audio_format, session.language)
         elif _STT_PROVIDER == "azure":
             text, confidence = await _azure_stt(audio_data, audio_format, session.language)
@@ -220,6 +234,57 @@ async def synthesize(session_id: str, text: str) -> dict:
 # ---------------------------------------------------------------------------
 # Provider implementations
 # ---------------------------------------------------------------------------
+
+_faster_whisper_model = None
+
+
+def _get_faster_whisper_model():
+    global _faster_whisper_model
+    if _faster_whisper_model is None:
+        from faster_whisper import WhisperModel
+
+        _faster_whisper_model = WhisperModel(
+            _FASTER_WHISPER_MODEL,
+            device=_FASTER_WHISPER_DEVICE,
+            compute_type=_FASTER_WHISPER_COMPUTE,
+        )
+    return _faster_whisper_model
+
+
+async def _faster_whisper_transcribe(
+    audio_data: bytes, audio_format: str, language: str
+) -> tuple[str, float]:
+    """Local faster-whisper transcription (privacy-first, no cloud)."""
+    import asyncio
+    import math
+    import tempfile
+
+    lang = language.split("-")[0] if language else "de"
+    suffix = f".{audio_format}" if audio_format else ".wav"
+
+    def _run() -> tuple[str, float]:
+        model = _get_faster_whisper_model()
+        with tempfile.NamedTemporaryFile(suffix=suffix, delete=True) as tmp:
+            tmp.write(audio_data)
+            tmp.flush()
+            segments, _info = model.transcribe(tmp.name, language=lang, vad_filter=True)
+        parts: list[str] = []
+        logprobs: list[float] = []
+        for seg in segments:
+            if seg.text.strip():
+                parts.append(seg.text.strip())
+            if seg.avg_logprob is not None:
+                logprobs.append(seg.avg_logprob)
+        text = " ".join(parts).strip()
+        if logprobs:
+            avg = sum(logprobs) / len(logprobs)
+            confidence = min(1.0, max(0.0, math.exp(avg)))
+        else:
+            confidence = 0.85 if text else 0.0
+        return text, confidence
+
+    return await asyncio.to_thread(_run)
+
 
 async def _whisper_transcribe(audio_data: bytes, audio_format: str, language: str) -> tuple[str, float]:
     """OpenAI Whisper API transcription."""

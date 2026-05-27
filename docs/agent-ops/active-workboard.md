@@ -2707,3 +2707,14 @@ Archiv des vorherigen Boards:
 **Gate-Ergebnis:** pytest 85/85 ✅ · TypeScript 0 Fehler ✅ · 78 Actions in Registry ✅
 **Erledigt:** 8 Finanz-, 5 Compliance-, 8 Agrar-, 5 Logistik-Intents; NAV_ACTIONS-Dispatch; AI-Shortcuts fuer alle vier Domaenen.
 **Offene Risiken:** Voice-Domain-Filter im Frontend (context.domain) noch ohne Resolver-Scoping — Folgeoptimierung.
+
+## SLICE-013-VOICE-LOCAL-POLISH-001
+
+**Von:** Claude Sonnet 4.6
+**Owner:** Claude Sonnet 4.6
+**Stand:** abgeschlossen 2026-05-27
+**Ziel des Slices:** Privacy-First Diktat: faster-whisper STT + Ollama Text-Polish + Frontend Rohtext/Polish-Anzeige.
+**Dateibesitz:** `voice_adapter.py`, `services/ki-usability/app/services/voice_polish.py`, `local_stt.py`, `ollama_client.py`, `voice.py` (Endpoints), `VoiceFeedback.tsx`, `useVoiceIntent.ts`, `VoiceButton.tsx`, `tests/test_voice_polish.py`.
+**Gate-Ergebnis:** pytest 93/93 ✅ · TypeScript 0 Fehler ✅
+**Erledigt:** POST `/voice/polish` + `/voice/transcribe`; Ollama-Polish mit Fallback auf Rohtext; faster-whisper in `voice_adapter.py`; Frontend zeigt Rohtext und polierten Text in `VoiceFeedback`.
+**Offene Risiken:** faster-whisper optional — ohne Install liefert `/transcribe` 503; Browser-STT bleibt Standard im Frontend bis Slice-013b.
