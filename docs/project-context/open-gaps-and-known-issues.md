@@ -3,18 +3,23 @@
 ## Zweck
 
 Ehrliche, aktuelle Bestandsaufnahme aller offenen Restthemen, fachlichen Duennstellen und bekannten Risiken.
-Zuletzt vollstaendig auditiert: **2026-05-17** (Agrar-Spezialsoftware + externe Agrar-ERP-Plattform Browser-Analyse).
+Zuletzt vollstaendig auditiert: **2026-05-27** (Integrations-Gate Wave 18–22, Backend-Security, OpenAPI-Coverage).
+Aggregierte Gesamtsicht: [PROJEKT-GESAMTSTAND-2026-05-27.md](../PROJEKT-GESAMTSTAND-2026-05-27.md).
 
 ---
 
-## Build-Health (Stand 2026-05-16)
+## Build-Health (Stand 2026-05-27)
 
-- **TypeScript**: 0 Fehler (`tsc --noEmit`)
-- **Backend-Tests**: 8564 passed, 68 skipped, 1 xfailed, 0 failed — alle 18 Ratchet-Pfade gruen; Gesamtabdeckung 64,85%
+- **TypeScript**: 0 Fehler (`tsc --noEmit`) — Wave-22-Gate
+- **Backend-Tests**: 9228 passed, 0 failed (2026-05-26, Commit `271bc5e12`) — alle 18 Ratchet-Pfade gruen; Gesamtabdeckung 64,85%
+- **OpenAPI-Routen mit `summary=`**: 2663 (100%, Wave-D2 Commit `554625ae7`)
 - **Frontend-Imports**: 0 gebrochene Importe
 - **Alembic**: 1 Head
 - **Docker-Erstinstallation**: Alembic-Bootstrap und Mehr-Domaenen-Struktur auf leerer DB abgesichert
-- **Service-Layer**: Hauptwellen refaktoriert; bekannte grosse Legacy-Endpunkte `harvest_acceptance.py`, `agrar_settlements.py` und `docflow.py` repo-seitig mit dedizierten Services nachgezogen (Stand 2026-05-21)
+- **Service-Layer**: Hauptwellen refaktoriert; Legacy-Endpunkte `harvest_acceptance.py`, `agrar_settlements.py` und `docflow.py` repo-seitig mit dedizierten Services nachgezogen (Stand 2026-05-21)
+- **Backend-Security**: Globale Bearer-Token-Auth, RFC-7807 Problem-Details, 62 Endpoints mit nosec-S608-Annotierungen (Wave 22 Backend-Security, Commits `4ab228f92` + `732d84376`); CI-Gate `scripts/check_sql_fstrings.py` aktiv
+- **Tenant-Isolation**: CI-Gate eingezogen (Wave-A3 Commit `c106f74e8`)
+- **E2E-Tests Wave 18–22 + W11**: 23/23 grün (Integrations-Gate Commit `97c41d479`)
 
 ---
 

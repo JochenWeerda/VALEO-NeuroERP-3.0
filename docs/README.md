@@ -13,12 +13,13 @@ Sie richtet sich an:
 
 ## Vor jeder Aufgabe lesen
 
-1. [Process Kernel Status](c:/Users/Jochen/VALEO-NeuroERP-3.0/docs/architecture/process-kernel/STATUS.md)
-2. [System Overview](c:/Users/Jochen/VALEO-NeuroERP-3.0/docs/project-context/system-overview.md)
-3. [Domain Landhandel und Agrarhandel](c:/Users/Jochen/VALEO-NeuroERP-3.0/docs/project-context/domain-landhandel-und-agrarhandel.md)
-4. passende Datei unter `docs/workflows/`
-5. [Open Gaps and Known Issues](c:/Users/Jochen/VALEO-NeuroERP-3.0/docs/project-context/open-gaps-and-known-issues.md)
-6. [Browser-Use Checklists](c:/Users/Jochen/VALEO-NeuroERP-3.0/docs/quality-assurance/browser-use-checklists.md)
+1. [Projekt-Gesamtstand 2026-05-27](c:/Users/Jochen/VALEO-NeuroERP-3.0/docs/PROJEKT-GESAMTSTAND-2026-05-27.md) — aggregierte Sicht über alle Waves und Compliance
+2. [Process Kernel Status](c:/Users/Jochen/VALEO-NeuroERP-3.0/docs/architecture/process-kernel/STATUS.md)
+3. [System Overview](c:/Users/Jochen/VALEO-NeuroERP-3.0/docs/project-context/system-overview.md)
+4. [Domain Landhandel und Agrarhandel](c:/Users/Jochen/VALEO-NeuroERP-3.0/docs/project-context/domain-landhandel-und-agrarhandel.md)
+5. passende Datei unter `docs/workflows/`
+6. [Open Gaps and Known Issues](c:/Users/Jochen/VALEO-NeuroERP-3.0/docs/project-context/open-gaps-and-known-issues.md)
+7. [Browser-Use Checklists](c:/Users/Jochen/VALEO-NeuroERP-3.0/docs/quality-assurance/browser-use-checklists.md)
 
 ## Arbeitsregeln
 

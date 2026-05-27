@@ -123,6 +123,23 @@ This document maps VALEO NeuroERP FiBu (Financial Accounting) functions to Germa
 | Sequential numbering | ✅ Implemented | §146 - Ordered |
 | Archive | ✅ Implemented | §147 - Retention |
 
+### E-Rechnung 2025 (Wachstumschancengesetz / B2B-Pflicht)
+
+Rechtsgrundlage: § 14 UStG i.V.m. Wachstumschancengesetz; Pflichtformat ist eine **strukturierte elektronische Rechnung gemäß EN 16931** (XRechnung 3.0 oder ZUGFeRD 2.x ab Profil EN 16931).
+
+| Feature | Status | Implementiert in |
+|---------|--------|------------------|
+| Import XRechnung 3.0 / ZUGFeRD 2.1 | ✅ Implementiert | `app/api/v1/endpoints/erechnung_import.py` |
+| Persistente Import-Records | ✅ Implementiert | `domain_finance.erechnung_imports` |
+| Buchen aus Import | ✅ Implementiert | `POST /erechnung/imports/{id}/buchen` |
+| Self-Billing-Gutschriften XRechnung (UBL 2.1) | ✅ Implementiert | `modules/agrar/services/self_billing_service.py::generate_einvoice_xrechnung` |
+| Self-Billing-Gutschriften ZUGFeRD PDF/A-3 | ✅ Implementiert | `modules/agrar/services/self_billing_service.py::generate_einvoice_zugferd` (via `factur-x`) |
+| **Export B2B-Verkaufsrechnungen XRechnung 3.0** | ⚠️ **Slice-006 — offen** | — |
+| **Export B2B-Verkaufsrechnungen ZUGFeRD 2.x** | ⚠️ **Slice-006 — offen** | — |
+| EN-16931-Schematron-Validierung | ⚠️ Hook via `set_xrechnung_generator()` | optional pluggable |
+
+**Hinweis für Slice-006:** Der bestehende UBL-2.1-Generator in `self_billing_service.py` kann als Vorlage für einen allgemeinen `einvoice_generator`-Service dienen, der gegen `sales_invoices`/`finance_invoices` läuft.
+
 ---
 
 ## API Endpoints
