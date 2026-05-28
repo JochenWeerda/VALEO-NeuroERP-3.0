@@ -71,7 +71,7 @@ def _load_optional_row(
     return _clean(dict(row))
 
 
-@router.get("/courses", response_model=list[dict[str, Any]], summary="Courses auflisten")
+@router.get("/courses", response_model=list[TrainingOut], summary="Courses auflisten")
 async def list_courses(
     include_inactive: bool = Query(default=False),
     tenant_id: str = Depends(get_tenant_id),
@@ -182,7 +182,7 @@ async def delete_course(item_id: str, tenant_id: str = Depends(get_tenant_id), d
     return None
 
 
-@router.get("/assignments", response_model=list[dict[str, Any]], summary="Assignments auflisten")
+@router.get("/assignments", response_model=list[TrainingOut], summary="Assignments auflisten")
 async def list_assignments(
     employee_ref: str | None = Query(default=None),
     status: str | None = Query(default=None),
@@ -303,7 +303,7 @@ async def delete_assignment(item_id: str, tenant_id: str = Depends(get_tenant_id
     return None
 
 
-@router.get("/certificates", response_model=list[dict[str, Any]], summary="Certificates auflisten")
+@router.get("/certificates", response_model=list[TrainingOut], summary="Certificates auflisten")
 async def list_certificates(
     employee_ref: str | None = Query(default=None),
     status: str | None = Query(default=None),
@@ -417,7 +417,7 @@ async def delete_certificate(item_id: str, tenant_id: str = Depends(get_tenant_i
     return None
 
 
-@router.get("/qualifications", response_model=list[dict[str, Any]], summary="Qualifications auflisten")
+@router.get("/qualifications", response_model=list[TrainingOut], summary="Qualifications auflisten")
 async def list_qualifications(
     employee_ref: str | None = Query(default=None),
     tenant_id: str = Depends(get_tenant_id),
@@ -521,7 +521,7 @@ async def delete_qualification(item_id: str, tenant_id: str = Depends(get_tenant
     return None
 
 
-@router.get("/onboarding/checklists", response_model=list[dict[str, Any]], summary="Checklists auflisten")
+@router.get("/onboarding/checklists", response_model=list[TrainingOut], summary="Checklists auflisten")
 async def list_checklists(
     include_inactive: bool = Query(default=False),
     tenant_id: str = Depends(get_tenant_id),
@@ -623,7 +623,7 @@ async def delete_checklist(item_id: str, tenant_id: str = Depends(get_tenant_id)
     return None
 
 
-@router.get("/onboarding/runs", response_model=list[dict[str, Any]], summary="Runs auflisten")
+@router.get("/onboarding/runs", response_model=list[TrainingOut], summary="Runs auflisten")
 async def list_runs(
     employee_ref: str | None = Query(default=None),
     status: str | None = Query(default=None),

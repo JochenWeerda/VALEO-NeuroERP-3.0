@@ -11,11 +11,19 @@ from fastapi import APIRouter, HTTPException, Query
 
 from app.core.agent_tool_contract_manifest import build_agent_tool_contract_manifest
 
+from app.api.v1.schemas.base import BaseSchema
+from pydantic import ConfigDict as _ConfigDict
+
+
+class CompatFlexOut(BaseSchema):
+    model_config = _ConfigDict(extra="allow")
+
+
 router = APIRouter(prefix="/agent/tool-contracts", tags=["agents", "mcp", "openapi"])
 
 
 @router.get("", summary="External Agent Tool Contract Manifest",
-    response_model=dict
+    response_model=CompatFlexOut
 )
 def get_agent_tool_contract_manifest(
     domain: str | None = Query(default=None, description="Optional domain filter"),
@@ -26,7 +34,7 @@ def get_agent_tool_contract_manifest(
 
 
 @router.get("/mcp", summary="MCP Tool Definitions",
-    response_model=dict
+    response_model=CompatFlexOut
 )
 def get_mcp_tool_definitions(
     domain: str | None = Query(default=None, description="Optional domain filter"),
@@ -45,7 +53,7 @@ def get_mcp_tool_definitions(
 
 
 @router.get("/openapi", summary="OpenAPI-linked Tool Contracts",
-    response_model=dict
+    response_model=CompatFlexOut
 )
 def get_openapi_tool_contracts(
     domain: str | None = Query(default=None, description="Optional domain filter"),
@@ -76,7 +84,7 @@ def get_openapi_tool_contracts(
 
 
 @router.get("/{tool_name}", summary="Single Tool Contract",
-    response_model=dict
+    response_model=CompatFlexOut
 )
 def get_agent_tool_contract(tool_name: str) -> dict:
     manifest = build_agent_tool_contract_manifest(tool_name=tool_name)

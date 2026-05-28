@@ -18,6 +18,14 @@ from app.core.database import get_db
 from app.core.tenant import get_tenant_id
 from app.core.fibu_audit import log_fibu_audit
 
+from app.api.v1.schemas.base import BaseSchema
+from pydantic import ConfigDict as _ConfigDict
+
+
+class CompatFlexOut(BaseSchema):
+    model_config = _ConfigDict(extra="allow")
+
+
 router = APIRouter(prefix="/quadriga-connector", tags=["finance", "quadriga", "connectors"])
 
 QUADRIGA_CODE = "QUADRIGA"
@@ -148,7 +156,7 @@ async def put_quadriga_config(
     return _row_to_config(row)
 
 
-@router.post("/sync", response_model=dict, summary="Sync quadriga")
+@router.post("/sync", response_model=CompatFlexOut, summary="Sync quadriga")
 async def quadriga_sync(
     payload: QuadrigaSyncRequest,
     tenant_id: str = Depends(get_tenant_id),

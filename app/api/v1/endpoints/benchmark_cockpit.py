@@ -8,11 +8,19 @@ from app.core.benchmark_cockpit import (
     get_example_benchmark_report,
 )
 
+from app.api.v1.schemas.base import BaseSchema
+from pydantic import ConfigDict as _ConfigDict
+
+
+class CompatFlexOut(BaseSchema):
+    model_config = _ConfigDict(extra="allow")
+
+
 router = APIRouter(prefix="/benchmark", tags=["benchmark", "analytics", "catalog"])
 
 
 @router.get("/catalog", summary="Benchmark Catalog",
-    response_model=dict
+    response_model=CompatFlexOut
 )
 def get_benchmark_catalog(
     tenant_id: str = "TENANT-001",
@@ -26,7 +34,7 @@ def get_benchmark_catalog(
 
 
 @router.get("/read-model", summary="Benchmark Read Model",
-    response_model=dict
+    response_model=CompatFlexOut
 )
 def get_benchmark_read_model(
     tenant_id: str = "TENANT-001",

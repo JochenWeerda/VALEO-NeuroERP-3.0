@@ -20,6 +20,14 @@ from sqlalchemy.orm import Session
 from app.core.config import settings
 from app.core.database import get_db
 
+from app.api.v1.schemas.base import BaseSchema
+from pydantic import ConfigDict as _ConfigDict
+
+
+class CompatFlexOut(BaseSchema):
+    model_config = _ConfigDict(extra="allow")
+
+
 router = APIRouter(prefix="/gobd", tags=["GoBD", "Archiv"])
 DEFAULT_TENANT = settings.DEFAULT_TENANT_ID
 
@@ -519,7 +527,7 @@ def _sha256_hex(content: bytes) -> str:
 
 
 @router.get("/audit-package", summary="Audit package abrufen",
-    response_model=dict
+    response_model=CompatFlexOut
 )
 async def get_audit_package(
     from_date: Optional[date] = Query(None, description="Von-Datum (inkl.)"),

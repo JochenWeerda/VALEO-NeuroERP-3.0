@@ -22,6 +22,14 @@ from app.core.database import get_db
 from app.core.tenant import get_tenant_id
 
 
+from app.api.v1.schemas.base import BaseSchema
+from pydantic import ConfigDict as _ConfigDict
+
+
+class CompatFlexOut(BaseSchema):
+    model_config = _ConfigDict(extra="allow")
+
+
 router = APIRouter()
 
 # Supported entity identifiers for export
@@ -393,7 +401,7 @@ def _filename(entity: str, fmt: str) -> str:
 
 
 @router.post("/list", response_class=StreamingResponse, summary="List exportieren",
-    response_model=dict
+    response_model=CompatFlexOut
 )
 async def export_list(
     body: ExportListRequest,
@@ -439,7 +447,7 @@ async def export_list(
 
 
 @router.get("/entities", summary="Export entities auflisten",
-    response_model=dict
+    response_model=CompatFlexOut
 )
 async def list_export_entities():
     """Return supported entity values for export/list."""

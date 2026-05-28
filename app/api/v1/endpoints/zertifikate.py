@@ -9,6 +9,14 @@ from sqlalchemy.orm import Session
 from app.core.database import get_db
 from app.domains.operations.models import ZertifikatEintrag
 
+from app.api.v1.schemas.base import BaseSchema
+from pydantic import ConfigDict as _ConfigDict
+
+
+class CompatFlexOut(BaseSchema):
+    model_config = _ConfigDict(extra="allow")
+
+
 router = APIRouter(prefix="/zertifikate", tags=["Zertifikate"])
 
 
@@ -50,7 +58,7 @@ def _seed(db: Session) -> None:
     db.commit()
 
 
-@router.get("", response_model=dict, summary="Zertifikate auflisten")
+@router.get("", response_model=CompatFlexOut, summary="Zertifikate auflisten")
 async def list_zertifikate(status: Optional[str] = Query(None, description="Filter by status"), db: Session = Depends(get_db)) -> dict:
     _seed(db)
     query = db.query(ZertifikatEintrag)
@@ -74,7 +82,7 @@ async def list_zertifikate(status: Optional[str] = Query(None, description="Filt
     }
 
 
-@router.get("/stats", response_model=dict, summary="Zertifikate stats abrufen")
+@router.get("/stats", response_model=CompatFlexOut, summary="Zertifikate stats abrufen")
 async def get_zertifikate_stats(db: Session = Depends(get_db)) -> dict:
     _seed(db)
     items = db.query(ZertifikatEintrag).all()
@@ -113,7 +121,7 @@ from fastapi import HTTPException
 from starlette.responses import Response
 
 
-@router.post("", response_model=dict, status_code=201, summary="Zertifikat anlegen")
+@router.post("", response_model=CompatFlexOut, status_code=201, summary="Zertifikat anlegen")
 async def create_zertifikat(
     body: ZertifikatCreate,
     db: Session = Depends(get_db),
@@ -141,7 +149,7 @@ async def create_zertifikat(
     }
 
 
-@router.put("/{zertifikat_id}", response_model=dict, summary="Zertifikat aktualisieren")
+@router.put("/{zertifikat_id}", response_model=CompatFlexOut, summary="Zertifikat aktualisieren")
 async def update_zertifikat(
     zertifikat_id: int,
     body: ZertifikatUpdate,

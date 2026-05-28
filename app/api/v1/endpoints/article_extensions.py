@@ -90,7 +90,7 @@ async def upload_article_file(
 
 
 @router.post("/recipe-import", status_code=201, summary="Recipe importieren",
-    response_model=dict
+    response_model=BatchOut
 )
 async def import_recipe(payload: RecipeImportRequest):
     """POST Rezeptur Import"""

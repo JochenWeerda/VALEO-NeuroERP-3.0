@@ -15,6 +15,14 @@ from ....core.database import get_db
 from ....infrastructure.models import Customer, Lead, Contact
 from ..schemas.base import BaseSchema
 
+from app.api.v1.schemas.base import BaseSchema
+from pydantic import ConfigDict as _ConfigDict
+
+
+class CompatFlexOut(BaseSchema):
+    model_config = _ConfigDict(extra="allow")
+
+
 router = APIRouter()
 DEFAULT_TENANT = settings.DEFAULT_TENANT_ID
 
@@ -99,7 +107,7 @@ async def convert_lead_to_customer(
 
 
 @router.post("/operator-status", summary="Operator status aktualisieren",
-    response_model=dict
+    response_model=CompatFlexOut
 )
 async def update_operator_status(payload: OperatorStatusUpdate, db: Session = Depends(get_db)):
     """POST Kontakt Bediener Gelesen/Erledigt setzen"""

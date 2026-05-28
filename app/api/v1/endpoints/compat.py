@@ -3208,7 +3208,7 @@ _DEMO_FIELD_SERVICE_TASKS: list[dict[str, Any]] = [
 
 
 @router.get("/agribusiness/field-service-tasks", summary="Field service tasks auflisten",
-    response_model=list
+    response_model=list[PurchaseOrderListOut]
 )
 async def list_field_service_tasks() -> list[dict[str, Any]]:
     """Liste Field-Service-Aufgaben (CRM-FÃ¤lle); bei Ausfall des CRM-Dienstes Demo-Daten."""

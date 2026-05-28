@@ -29,6 +29,14 @@ from modules.agrar.services.quality_protocol_service import (
 )
 from modules.agrar.repositories.quality_protocol_repo import QualityProtocolRepositoryImpl
 
+from app.api.v1.schemas.base import BaseSchema
+from pydantic import ConfigDict as _ConfigDict
+
+
+class CompatFlexOut(BaseSchema):
+    model_config = _ConfigDict(extra="allow")
+
+
 router = APIRouter()
 
 

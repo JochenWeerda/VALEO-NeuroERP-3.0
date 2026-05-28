@@ -15,6 +15,14 @@ from ....infrastructure.rag.indexer import get_indexer
 
 logger = logging.getLogger(__name__)
 
+from app.api.v1.schemas.base import BaseSchema
+from pydantic import ConfigDict as _ConfigDict
+
+
+class CompatFlexOut(BaseSchema):
+    model_config = _ConfigDict(extra="allow")
+
+
 router = APIRouter()
 
 
@@ -140,7 +148,7 @@ async def index_customers(
 
 
 @router.get("/stats/{collection}", summary="Collection stats abrufen",
-    response_model=dict
+    response_model=CompatFlexOut
 )
 async def get_collection_stats(collection: str):
     """Get statistics for a collection."""

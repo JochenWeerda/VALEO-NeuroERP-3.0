@@ -15,6 +15,14 @@ from app.services.number_range_service import NumberRangeService
 
 logger = logging.getLogger(__name__)
 
+from app.api.v1.schemas.base import BaseSchema
+from pydantic import ConfigDict as _ConfigDict
+
+
+class CompatFlexOut(BaseSchema):
+    model_config = _ConfigDict(extra="allow")
+
+
 router = APIRouter(tags=["admin", "number-ranges"])
 
 
@@ -55,7 +63,7 @@ def _to_out(nr, svc: NumberRangeService, tenant_id: str) -> dict[str, Any]:
 
 
 @router.get("/", summary="Number ranges auflisten",
-    response_model=list
+    response_model=list[CompatFlexOut]
 )
 def list_number_ranges(
     db: Session = Depends(get_db),
@@ -67,7 +75,7 @@ def list_number_ranges(
 
 
 @router.post("/", status_code=201, summary="Number range configure",
-    response_model=dict
+    response_model=CompatFlexOut
 )
 def configure_number_range(
     body: NumberRangeConfigRequest,
@@ -92,7 +100,7 @@ def configure_number_range(
 
 
 @router.get("/{range_type}", summary="Number range abrufen",
-    response_model=dict
+    response_model=CompatFlexOut
 )
 def get_number_range(range_type: str, db: Session = Depends(get_db)) -> dict[str, Any]:
     tenant_id = get_current_tenant_id()
@@ -105,7 +113,7 @@ def get_number_range(range_type: str, db: Session = Depends(get_db)) -> dict[str
 
 
 @router.put("/{range_type}", summary="Number range aktualisieren",
-    response_model=dict
+    response_model=CompatFlexOut
 )
 def update_number_range(
     range_type: str,

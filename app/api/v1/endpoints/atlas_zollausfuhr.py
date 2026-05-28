@@ -14,6 +14,14 @@ from app.core.database import get_db
 from app.core.tenant import get_tenant_id
 from app.services.atlas_customs_service import ATLASCustomsService
 
+from app.api.v1.schemas.base import BaseSchema
+from pydantic import ConfigDict as _ConfigDict
+
+
+class CompatFlexOut(BaseSchema):
+    model_config = _ConfigDict(extra="allow")
+
+
 router = APIRouter(prefix="/zoll", tags=["zoll", "atlas", "customs"])
 
 # ── Schemas ───────────────────────────────────────────────────────────────────
@@ -273,7 +281,7 @@ def uebermitteln(
 
 
 @router.post("/ausfuhranmeldungen/{id}/vorab-validieren", summary="Validieren vorab",
-    response_model=dict
+    response_model=CompatFlexOut
 )
 def vorab_validieren(
     id: str,
@@ -290,7 +298,7 @@ def vorab_validieren(
 
 
 @router.get("/ausfuhrnachrichten/{mrn}", summary="Ausfuhrnachricht",
-    response_model=dict
+    response_model=CompatFlexOut
 )
 def ausfuhrnachricht(
     mrn: str,
@@ -304,7 +312,7 @@ def ausfuhrnachricht(
 
 
 @router.post("/atlas-callback", summary="Callback atlas",
-    response_model=dict
+    response_model=CompatFlexOut
 )
 def atlas_callback(
     body: ZollausfuhrStatusUpdate,
@@ -330,7 +338,7 @@ def atlas_callback(
 
 
 @router.get("/warennummern/suche", summary="Suche warennummern",
-    response_model=list
+    response_model=list[CompatFlexOut]
 )
 def warennummern_suche(q: str = Query(default="")):
     """HS tariff number search (static agricultural seed data)."""

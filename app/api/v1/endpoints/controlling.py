@@ -40,7 +40,7 @@ def _schema_error() -> HTTPException:
 
 # ── KPIs ──────────────────────────────────────────────────────────────────────
 
-@router.get("/kpis", response_model=list[dict[str, Any]], summary="Kpis auflisten")
+@router.get("/kpis", response_model=list[ControllingOut], summary="Kpis auflisten")
 @cached_read_model("ctrl_kpis", ttl=30)
 def list_kpis(tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
     return _svc(db, tenant_id).list_kpis()
@@ -84,7 +84,7 @@ async def delete_kpi(item_id: str, tenant_id: str = Depends(get_tenant_id), db: 
 
 # ── Dashboards ────────────────────────────────────────────────────────────────
 
-@router.get("/dashboards", response_model=list[dict[str, Any]], summary="Dashboards auflisten")
+@router.get("/dashboards", response_model=list[ControllingOut], summary="Dashboards auflisten")
 @cached_read_model("ctrl_dashboards", ttl=30)
 def list_dashboards(tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
     return _svc(db, tenant_id).list_dashboards()
@@ -128,7 +128,7 @@ async def delete_dashboard(item_id: str, tenant_id: str = Depends(get_tenant_id)
 
 # ── Widgets ───────────────────────────────────────────────────────────────────
 
-@router.get("/dashboards/{dashboard_id}/widgets", response_model=list[dict[str, Any]], summary="Widgets auflisten")
+@router.get("/dashboards/{dashboard_id}/widgets", response_model=list[ControllingOut], summary="Widgets auflisten")
 async def list_widgets(dashboard_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
     return _svc(db, tenant_id).list_widgets(dashboard_id)
 
@@ -169,7 +169,7 @@ async def delete_widget(item_id: str, tenant_id: str = Depends(get_tenant_id), d
 
 # ── Timeseries ────────────────────────────────────────────────────────────────
 
-@router.get("/timeseries", response_model=list[dict[str, Any]], summary="Timeseries auflisten")
+@router.get("/timeseries", response_model=list[ControllingOut], summary="Timeseries auflisten")
 @cached_read_model("ctrl_timeseries", ttl=60)
 def list_timeseries(kpi_id: Optional[str] = Query(default=None), tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
     return _svc(db, tenant_id).list_timeseries(kpi_id)
@@ -199,7 +199,7 @@ async def delete_timeseries(item_id: str, tenant_id: str = Depends(get_tenant_id
 
 # ── Actions ───────────────────────────────────────────────────────────────────
 
-@router.get("/actions", response_model=list[dict[str, Any]], summary="Actions auflisten")
+@router.get("/actions", response_model=list[ControllingOut], summary="Actions auflisten")
 @cached_read_model("ctrl_actions", ttl=15)
 def list_actions(status: Optional[str] = Query(default=None), tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
     return _svc(db, tenant_id).list_actions(status)

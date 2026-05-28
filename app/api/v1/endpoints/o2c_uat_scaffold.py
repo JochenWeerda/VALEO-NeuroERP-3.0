@@ -15,6 +15,14 @@ from sqlalchemy.orm import Session
 from app.core.database import get_db
 from app.core.tenant import get_tenant_id
 
+from app.api.v1.schemas.base import BaseSchema
+from pydantic import ConfigDict as _ConfigDict
+
+
+class CompatFlexOut(BaseSchema):
+    model_config = _ConfigDict(extra="allow")
+
+
 router = APIRouter(prefix="/uat/o2c", tags=["uat", "o2c", "testing"])
 
 # ── Predefined UAT steps ───────────────────────────────────────────────────────
@@ -150,7 +158,7 @@ def _load_from_db_or_store(id: str, db: Session, tenant_id: str) -> Optional[dic
 # ── Endpoints ─────────────────────────────────────────────────────────────────
 
 @router.get("/readiness", summary="Readiness",
-    response_model=dict
+    response_model=CompatFlexOut
 )
 def readiness(
     db: Session = Depends(get_db),
@@ -262,7 +270,7 @@ def create_szenario(
 
 
 @router.post("/szenarien/{id}/schritt/{nr}/ausfuehren", summary="Ausfuehren schritt",
-    response_model=dict
+    response_model=CompatFlexOut
 )
 def schritt_ausfuehren(
     id: str,
@@ -320,7 +328,7 @@ def schritt_ausfuehren(
 
 
 @router.get("/szenarien/{id}/bericht", summary="Bericht",
-    response_model=dict
+    response_model=CompatFlexOut
 )
 def bericht(
     id: str,
@@ -351,7 +359,7 @@ def bericht(
 
 
 @router.post("/szenarien/{id}/reset", summary="Szenario zurücksetzen",
-    response_model=dict
+    response_model=CompatFlexOut
 )
 def reset_szenario(
     id: str,

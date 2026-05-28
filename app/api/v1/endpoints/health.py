@@ -13,11 +13,19 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+from app.api.v1.schemas.base import BaseSchema
+from pydantic import ConfigDict as _ConfigDict
+
+
+class CompatFlexOut(BaseSchema):
+    model_config = _ConfigDict(extra="allow")
+
+
 router = APIRouter()
 
 
 @router.get("/health", status_code=status.HTTP_200_OK, summary="Check health",
-    response_model=dict
+    response_model=CompatFlexOut
 )
 async def health_check() -> Dict[str, Any]:
     """
@@ -33,7 +41,7 @@ async def health_check() -> Dict[str, Any]:
 
 
 @router.get("/ready", status_code=status.HTTP_200_OK, summary="Check readiness",
-    response_model=dict
+    response_model=CompatFlexOut
 )
 async def readiness_check() -> JSONResponse:
     """
@@ -109,7 +117,7 @@ async def readiness_check() -> JSONResponse:
 
 
 @router.get("/health/live", status_code=status.HTTP_200_OK, summary="Check liveness",
-    response_model=dict
+    response_model=CompatFlexOut
 )
 async def liveness_check() -> Dict[str, str]:
     """
@@ -120,7 +128,7 @@ async def liveness_check() -> Dict[str, str]:
 
 
 @router.get("/health/startup", status_code=status.HTTP_200_OK, summary="Check startup",
-    response_model=dict
+    response_model=CompatFlexOut
 )
 async def startup_check(request: Request) -> Dict[str, Any]:
     """

@@ -1,4 +1,4 @@
-"""
+﻿"""
 Closing Checklists API
 FIBU-CLS-01: Abschlusschecklisten
 """
@@ -27,10 +27,18 @@ from app.services.closing_checklists_service import (
 
 logger = logging.getLogger(__name__)
 
+from app.api.v1.schemas.base import BaseSchema
+from pydantic import ConfigDict as _ConfigDict
+
+
+class CompatFlexOut(BaseSchema):
+    model_config = _ConfigDict(extra="allow")
+
+
 router = APIRouter(prefix="/closing-checklists", tags=["finance", "closing"])
 
 
-@router.get("/templates", response_model=List[Dict[str, Any]], summary="Checklist templates auflisten")
+@router.get("/templates", response_model=list[CompatFlexOut], summary="Checklist templates auflisten")
 async def list_checklist_templates(
     closing_type: Optional[str] = Query(None, description="Filter by closing type"),
     active_only: bool = Query(True, description="Show only active templates"),
@@ -85,12 +93,12 @@ async def list_checklist_templates(
             {
                 "id": "1",
                 "template_name": "Standard Monatsabschluss",
-                "description": "Standard-Checkliste für monatlichen Abschluss",
+                "description": "Standard-Checkliste fÃ¼r monatlichen Abschluss",
                 "closing_type": "monthly",
                 "items": [
                     {
                         "item_code": "GL-001",
-                        "description": "Alle Buchungen für Periode erfasst",
+                        "description": "Alle Buchungen fÃ¼r Periode erfasst",
                         "category": "GL",
                         "validation_type": "automatic",
                         "validation_query": "SELECT COUNT(*) FROM journal_entries WHERE period = :period AND status = 'draft'",
@@ -100,7 +108,7 @@ async def list_checklist_templates(
                     },
                     {
                         "item_code": "GL-002",
-                        "description": "Saldenvorträge geprüft",
+                        "description": "SaldenvortrÃ¤ge geprÃ¼ft",
                         "category": "GL",
                         "validation_type": "manual",
                         "required": True,
@@ -109,7 +117,7 @@ async def list_checklist_templates(
                     },
                     {
                         "item_code": "AR-001",
-                        "description": "Debitoren-Abstimmung durchgeführt",
+                        "description": "Debitoren-Abstimmung durchgefÃ¼hrt",
                         "category": "AR",
                         "validation_type": "automatic",
                         "validation_query": "SELECT COUNT(*) FROM offene_posten WHERE debtor_id IS NOT NULL AND offen > 0",
@@ -119,7 +127,7 @@ async def list_checklist_templates(
                     },
                     {
                         "item_code": "AP-001",
-                        "description": "Kreditoren-Abstimmung durchgeführt",
+                        "description": "Kreditoren-Abstimmung durchgefÃ¼hrt",
                         "category": "AP",
                         "validation_type": "automatic",
                         "validation_query": "SELECT COUNT(*) FROM offene_posten WHERE creditor_id IS NOT NULL AND offen > 0",
@@ -166,12 +174,12 @@ async def list_checklist_templates(
             {
                 "id": "2",
                 "template_name": "Standard Jahresabschluss",
-                "description": "Standard-Checkliste für Jahresabschluss",
+                "description": "Standard-Checkliste fÃ¼r Jahresabschluss",
                 "closing_type": "yearly",
                 "items": [
                     {
                         "item_code": "GL-001",
-                        "description": "Alle Buchungen für Jahr erfasst",
+                        "description": "Alle Buchungen fÃ¼r Jahr erfasst",
                         "category": "GL",
                         "validation_type": "automatic",
                         "required": True,
@@ -189,7 +197,7 @@ async def list_checklist_templates(
                     },
                     {
                         "item_code": "INV-001",
-                        "description": "Inventur durchgeführt",
+                        "description": "Inventur durchgefÃ¼hrt",
                         "category": "INVENTORY",
                         "validation_type": "manual",
                         "required": True,
@@ -225,7 +233,7 @@ async def list_checklist_templates(
                     },
                     {
                         "item_code": "TAX-001",
-                        "description": "Jahressteuererklärung vorbereitet",
+                        "description": "JahressteuererklÃ¤rung vorbereitet",
                         "category": "TAX",
                         "validation_type": "manual",
                         "required": True,
@@ -258,7 +266,7 @@ async def list_checklist_templates(
         ]
 
 
-@router.post("/templates", response_model=Dict[str, Any], status_code=201, summary="Checklist template anlegen")
+@router.post("/templates", response_model=CompatFlexOut, status_code=201, summary="Checklist template anlegen")
 async def create_checklist_template(
     template: ChecklistTemplateCreate,
     tenant_id: str = Query("system", description="Tenant ID"),
@@ -350,7 +358,7 @@ async def create_closing_checklist(
                 items = [
                     {
                         "item_code": "GL-001",
-                        "description": "Alle Buchungen für Jahr erfasst",
+                        "description": "Alle Buchungen fÃ¼r Jahr erfasst",
                         "category": "GL",
                         "validation_type": "automatic",
                         "required": True,
@@ -390,7 +398,7 @@ async def create_closing_checklist(
                     },
                     {
                         "item_code": "TAX-001",
-                        "description": "Jahressteuererklärung vorbereitet",
+                        "description": "JahressteuererklÃ¤rung vorbereitet",
                         "category": "TAX",
                         "validation_type": "manual",
                         "required": True,
@@ -413,7 +421,7 @@ async def create_closing_checklist(
                 items = [
                     {
                         "item_code": "GL-001",
-                        "description": "Alle Buchungen für Periode erfasst",
+                        "description": "Alle Buchungen fÃ¼r Periode erfasst",
                         "category": "GL",
                         "validation_type": "automatic",
                         "required": True,
@@ -423,7 +431,7 @@ async def create_closing_checklist(
                     },
                     {
                         "item_code": "AR-001",
-                        "description": "Debitoren-Abstimmung durchgeführt",
+                        "description": "Debitoren-Abstimmung durchgefÃ¼hrt",
                         "category": "AR",
                         "validation_type": "automatic",
                         "required": True,
@@ -433,7 +441,7 @@ async def create_closing_checklist(
                     },
                     {
                         "item_code": "AP-001",
-                        "description": "Kreditoren-Abstimmung durchgeführt",
+                        "description": "Kreditoren-Abstimmung durchgefÃ¼hrt",
                         "category": "AP",
                         "validation_type": "automatic",
                         "required": True,
@@ -555,7 +563,7 @@ async def get_closing_checklist(
 
 
 @router.post("/{checklist_id}/items/{item_code}/complete", summary="Checklist item complete",
-    response_model=dict
+    response_model=CompatFlexOut
 )
 async def complete_checklist_item(
     checklist_id: str,
@@ -638,7 +646,7 @@ async def complete_checklist_item(
 
 
 @router.post("/{checklist_id}/validate", summary="Checklist items validieren",
-    response_model=dict
+    response_model=CompatFlexOut
 )
 async def validate_checklist_items(
     checklist_id: str,
@@ -659,7 +667,7 @@ async def validate_checklist_items(
                 # Execute validation query
                 try:
                     validation_query = item["validation_query"]
-                    # :period als gebundener Parameter — niemals per String-Ersatz interpolieren.
+                    # :period als gebundener Parameter â€” niemals per String-Ersatz interpolieren.
                     result = db.execute(
                         text(validation_query),
                         {"period": checklist.period},
@@ -811,7 +819,7 @@ async def list_closing_checklists(
         return []
 
 
-@router.get("/cockpit/summary", response_model=Dict[str, Any], summary="Closing cockpit summary abrufen")
+@router.get("/cockpit/summary", response_model=CompatFlexOut, summary="Closing cockpit summary abrufen")
 async def get_closing_cockpit_summary(
     tenant_id: str = Query("system", description="Tenant ID"),
     period: Optional[str] = Query(None, description="Period in YYYY-MM"),
@@ -923,7 +931,7 @@ async def approve_closing_checklist(
     tenant_id: str = Query("system", description="Tenant ID"),
     db: Session = Depends(get_db),
 ):
-    """Approve a completed checklist (completed → approved)."""
+    """Approve a completed checklist (completed â†’ approved)."""
     checklist = await get_closing_checklist(checklist_id, tenant_id, db)
     if checklist.status not in {"completed", "approved"}:
         raise HTTPException(
@@ -942,7 +950,7 @@ async def approve_closing_checklist(
     return await get_closing_checklist(checklist_id, tenant_id, db)
 
 
-@router.delete("/{checklist_id}", status_code=204, response_class=Response, response_model=None, summary="Closing checklist löschen")
+@router.delete("/{checklist_id}", status_code=204, response_class=Response, response_model=None, summary="Closing checklist lÃ¶schen")
 async def delete_closing_checklist(
     checklist_id: str,
     tenant_id: str = Query("system", description="Tenant ID"),
@@ -960,3 +968,4 @@ async def delete_closing_checklist(
         {"checklist_id": checklist_id, "tenant_id": tenant_id},
     )
     db.commit()
+

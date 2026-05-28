@@ -19,6 +19,14 @@ from app.core.database import get_db
 from app.core.dependencies import get_tenant_id
 from app.core.uuid7 import uuid7
 
+from app.api.v1.schemas.base import BaseSchema
+from pydantic import ConfigDict as _ConfigDict
+
+
+class CompatFlexOut(BaseSchema):
+    model_config = _ConfigDict(extra="allow")
+
+
 router = APIRouter(prefix="/preise/rabatte", tags=["Preise - Rabattgruppen & Rabattklassen"])
 
 RICHTUNGEN = ("EK", "VK")
@@ -132,7 +140,7 @@ def create_rabattgruppe(
 
 
 @router.delete("/gruppen/{gruppe_id}", summary="Rabattgruppe löschen",
-    response_model=dict
+    response_model=CompatFlexOut
 )
 def delete_rabattgruppe(
     gruppe_id: str,
@@ -266,7 +274,7 @@ def create_rabattsatz(
 
 
 @router.delete("/saetze/{satz_id}", summary="Rabattsatz löschen",
-    response_model=dict
+    response_model=CompatFlexOut
 )
 def delete_rabattsatz(
     satz_id: str,

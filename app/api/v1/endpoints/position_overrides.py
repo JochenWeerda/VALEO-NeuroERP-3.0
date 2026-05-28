@@ -17,6 +17,14 @@ from app.core.tenant import get_tenant_id
 from app.domains.operations.models import PosPositionOverride
 from app.services.position_guard_service import PositionGuardService
 
+from app.api.v1.schemas.base import BaseSchema
+from pydantic import ConfigDict as _ConfigDict
+
+
+class CompatFlexOut(BaseSchema):
+    model_config = _ConfigDict(extra="allow")
+
+
 router = APIRouter(prefix="/positions/overrides", tags=["positions", "commodity", "overrides"])
 
 

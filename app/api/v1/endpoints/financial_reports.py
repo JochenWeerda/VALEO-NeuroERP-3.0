@@ -1,4 +1,4 @@
-"""
+﻿"""
 Financial Reports API
 FIBU-REP-01: Standardreports (Bilanz/GuV/BWA) Backend-Integration
 """
@@ -19,6 +19,14 @@ from pydantic import BaseModel
 from ....core.database import get_db
 
 logger = logging.getLogger(__name__)
+
+from app.api.v1.schemas.base import BaseSchema
+from pydantic import ConfigDict as _ConfigDict
+
+
+class CompatFlexOut(BaseSchema):
+    model_config = _ConfigDict(extra="allow")
+
 
 router = APIRouter(prefix="/financial-reports", tags=["finance", "reports"])
 
@@ -390,7 +398,7 @@ async def get_bwa(
         # Revenue positions
         items.append(BWAItem(
             position="1",
-            description="Umsatzerlöse",
+            description="UmsatzerlÃ¶se",
             current_period=current_period_data.total_revenue,
             previous_period=previous_period_data.total_revenue,
             year_to_date=ytd_data.total_revenue,
@@ -450,7 +458,7 @@ async def get_bwa(
         
         items.append(BWAItem(
             position="5",
-            description="Jahresüberschuss/-fehlbetrag",
+            description="JahresÃ¼berschuss/-fehlbetrag",
             current_period=net_result,
             previous_period=previous_period_data.net_income,
             year_to_date=ytd_data.net_income,
@@ -475,7 +483,7 @@ async def get_bwa(
         return _empty_bwa(period)
 
 
-@router.get("/drilldown", response_model=List[Dict[str, Any]], summary="Report drilldown abrufen")
+@router.get("/drilldown", response_model=list[CompatFlexOut], summary="Report drilldown abrufen")
 async def get_report_drilldown(
     account_number: str = Query(..., description="Account number to drill into"),
     period: str = Query(..., description="Accounting period (YYYY-MM)"),
@@ -484,7 +492,7 @@ async def get_report_drilldown(
     db: Session = Depends(get_db),
 ):
     """
-    FIBU-REP-02: Drilldown — list journal entry lines for an account in a period.
+    FIBU-REP-02: Drilldown â€” list journal entry lines for an account in a period.
     """
     try:
         rows = db.execute(
@@ -542,15 +550,15 @@ def _report_to_rows(report_type: str, data: Any) -> List[List[str]]:
             rows.append([item.account_number, item.account_name, str(item.balance)])
         rows.append(["Summe Passiva", "", str(data.total_liabilities)])
     elif hasattr(data, "revenue") and hasattr(data, "expenses"):
-        rows.append(["Erlöse", "", ""])
+        rows.append(["ErlÃ¶se", "", ""])
         for item in data.revenue:
             rows.append([item.account_number, item.account_name, str(item.amount)])
-        rows.append(["Summe Erlöse", "", str(data.total_revenue)])
+        rows.append(["Summe ErlÃ¶se", "", str(data.total_revenue)])
         rows.append(["Aufwendungen", "", ""])
         for item in data.expenses:
             rows.append([item.account_number, item.account_name, str(item.amount)])
         rows.append(["Summe Aufwendungen", "", str(data.total_expenses)])
-        rows.append(["Jahresüberschuss/-fehlbetrag", "", str(data.net_income)])
+        rows.append(["JahresÃ¼berschuss/-fehlbetrag", "", str(data.net_income)])
     elif hasattr(data, "items"):
         rows.append(["Position", "Beschreibung", "Aktuelle Periode", "Vorperiode", "Jahr", "%"])
         for item in data.items:
@@ -567,7 +575,7 @@ def _report_to_rows(report_type: str, data: Any) -> List[List[str]]:
 
 
 @router.get("/export/{report_type}", summary="Report exportieren",
-    response_model=dict
+    response_model=CompatFlexOut
 )
 async def export_report(
     report_type: str,
@@ -658,4 +666,5 @@ async def export_report(
     except Exception as e:
         logger.error(f"Error exporting report: {e}")
         raise HTTPException(status_code=500, detail=f"Failed to export report: {str(e)}")
+
 

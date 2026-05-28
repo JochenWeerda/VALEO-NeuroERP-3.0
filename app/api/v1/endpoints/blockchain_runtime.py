@@ -13,6 +13,14 @@ from app.core.blockchain_anchor_contracts import (
 from app.core.database import get_db
 from app.repositories.blockchain_anchor_repository import BlockchainAnchorRepository
 
+from app.api.v1.schemas.base import BaseSchema
+from pydantic import ConfigDict as _ConfigDict
+
+
+class CompatFlexOut(BaseSchema):
+    model_config = _ConfigDict(extra="allow")
+
+
 router = APIRouter(prefix="/blockchain", tags=["blockchain", "audit", "integrations"])
 
 
@@ -33,7 +41,7 @@ class CreateBlockchainAnchorRequest(BaseModel):
 
 
 @router.post("/anchors", summary="Blockchain anchor anlegen",
-    response_model=dict
+    response_model=CompatFlexOut
 )
 def create_blockchain_anchor(payload: CreateBlockchainAnchorRequest, db=Depends(get_db)):
     try:
@@ -65,7 +73,7 @@ def create_blockchain_anchor(payload: CreateBlockchainAnchorRequest, db=Depends(
 
 
 @router.get("/anchors", summary="Blockchain anchors auflisten",
-    response_model=dict
+    response_model=CompatFlexOut
 )
 def list_blockchain_anchors(
     tenant_id: str | None = None,
@@ -93,7 +101,7 @@ def list_blockchain_anchors(
 
 
 @router.get("/anchors/{anchor_id}", summary="Blockchain anchor abrufen",
-    response_model=dict
+    response_model=CompatFlexOut
 )
 def get_blockchain_anchor(anchor_id: str, db=Depends(get_db)):
     item = BlockchainAnchorRepository(db).get(anchor_id)

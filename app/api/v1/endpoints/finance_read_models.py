@@ -23,6 +23,14 @@ from ....core.process_config import DEFAULT_PROCESS_VARIANTS
 from ....core.tenant import get_tenant_id
 from ....core.workflow_definitions import merge_workflow_variants
 
+from app.api.v1.schemas.base import BaseSchema
+from pydantic import ConfigDict as _ConfigDict
+
+
+class CompatFlexOut(BaseSchema):
+    model_config = _ConfigDict(extra="allow")
+
+
 router = APIRouter(prefix="/finance/read-models", tags=["finance", "read-models"])
 
 
@@ -1756,7 +1764,7 @@ from ....core.finance_read_model_contracts import (  # noqa: E402
 )
 
 
-@router.get("/settlement-cockpit", response_model=dict, summary="Settlement cockpit abrufen")
+@router.get("/settlement-cockpit", response_model=CompatFlexOut, summary="Settlement cockpit abrufen")
 async def get_settlement_cockpit(
     tenant_id: str = Depends(get_tenant_id),
 ) -> dict:
@@ -1770,7 +1778,7 @@ async def get_settlement_cockpit(
     return snapshot.as_dict()
 
 
-@router.get("/position-exposure", response_model=dict, summary="Position exposure abrufen")
+@router.get("/position-exposure", response_model=CompatFlexOut, summary="Position exposure abrufen")
 async def get_position_exposure(
     tenant_id: str = Depends(get_tenant_id),
 ) -> dict:

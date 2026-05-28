@@ -150,7 +150,7 @@ class FuhrparkAusgehendesDokumentPayload(BaseModel):
     letzter_druck: Optional[datetime] = None
 
 
-@router.get("/fahrzeuge", response_model=list[dict], summary="Fahrzeuge auflisten")
+@router.get("/fahrzeuge", response_model=list[FuhrparkOut], summary="Fahrzeuge auflisten")
 async def list_fahrzeuge(
     skip: int = Query(0, ge=0),
     limit: int = Query(100, ge=1, le=1000),
@@ -248,7 +248,7 @@ async def create_unfall_anzeige(
     }
 
 
-@router.get("/terminarten", response_model=list[dict], summary="Terminarten auflisten")
+@router.get("/terminarten", response_model=list[FuhrparkOut], summary="Terminarten auflisten")
 async def list_terminarten(db: Session = Depends(get_db)):
     repo = FuhrparkTerminartRepository(db)
     return [_to_dict(row) for row in repo.get_all()]
@@ -289,7 +289,7 @@ async def delete_terminart(terminart_id: str, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail=f"Terminart {terminart_id} not found")
 
 
-@router.get("/rechnungen", response_model=list[dict], summary="Rechnungen auflisten")
+@router.get("/rechnungen", response_model=list[FuhrparkOut], summary="Rechnungen auflisten")
 async def list_rechnungen(
     skip: int = Query(0, ge=0),
     limit: int = Query(200, ge=1, le=1000),
@@ -334,7 +334,7 @@ async def delete_rechnung(rechnung_id: str, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail=f"Rechnung {rechnung_id} not found")
 
 
-@router.get("/ausgehende-dokumente", response_model=list[dict], summary="Ausgehende dokumente auflisten")
+@router.get("/ausgehende-dokumente", response_model=list[FuhrparkOut], summary="Ausgehende dokumente auflisten")
 async def list_ausgehende_dokumente(
     skip: int = Query(0, ge=0),
     limit: int = Query(200, ge=1, le=1000),

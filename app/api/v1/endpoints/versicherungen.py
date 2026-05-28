@@ -11,6 +11,14 @@ from sqlalchemy.orm import Session
 from app.core.database import get_db
 from app.domains.operations.models import Versicherung, VersicherungStatus
 
+from app.api.v1.schemas.base import BaseSchema
+from pydantic import ConfigDict as _ConfigDict
+
+
+class CompatFlexOut(BaseSchema):
+    model_config = _ConfigDict(extra="allow")
+
+
 router = APIRouter(prefix="/versicherungen", tags=["Versicherungen"])
 
 
@@ -60,7 +68,7 @@ class VersicherungPatch(BaseModel):
 
 
 @router.get("", summary="Versicherungen auflisten",
-    response_model=list
+    response_model=list[CompatFlexOut]
 )
 def list_versicherungen(
     status: Optional[str] = None,
@@ -75,7 +83,7 @@ def list_versicherungen(
 
 
 @router.get("/{versicherung_id}", summary="Versicherung abrufen",
-    response_model=dict
+    response_model=CompatFlexOut
 )
 def get_versicherung(versicherung_id: str, db: Session = Depends(get_db)):
     obj = db.query(Versicherung).filter(Versicherung.id == versicherung_id).first()
@@ -85,7 +93,7 @@ def get_versicherung(versicherung_id: str, db: Session = Depends(get_db)):
 
 
 @router.post("", status_code=201, summary="Versicherung anlegen",
-    response_model=dict
+    response_model=CompatFlexOut
 )
 def create_versicherung(payload: VersicherungPayload, db: Session = Depends(get_db)):
     obj = Versicherung(**payload.model_dump())
@@ -96,7 +104,7 @@ def create_versicherung(payload: VersicherungPayload, db: Session = Depends(get_
 
 
 @router.patch("/{versicherung_id}", summary="Versicherung aktualisieren",
-    response_model=dict
+    response_model=CompatFlexOut
 )
 def update_versicherung(versicherung_id: str, payload: VersicherungPatch, db: Session = Depends(get_db)):
     obj = db.query(Versicherung).filter(Versicherung.id == versicherung_id).first()

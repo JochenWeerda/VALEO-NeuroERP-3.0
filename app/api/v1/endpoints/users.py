@@ -17,6 +17,14 @@ from ..schemas.shared import (
 )
 from ..schemas.base import PaginatedResponse
 
+from app.api.v1.schemas.base import BaseSchema
+from pydantic import ConfigDict as _ConfigDict
+
+
+class CompatFlexOut(BaseSchema):
+    model_config = _ConfigDict(extra="allow")
+
+
 router = APIRouter(tags=["users"])
 
 
@@ -201,7 +209,7 @@ async def delete_user(
         raise HTTPException(status_code=500, detail=f"Failed to delete user: {str(e)}")
 
 
-@router.post("/login", response_model=dict, summary="Anmelden")
+@router.post("/login", response_model=CompatFlexOut, summary="Anmelden")
 async def login(
     login_data: UserLogin,
     db: Session = Depends(get_db)
@@ -222,7 +230,7 @@ async def login(
 
 
 @router.post("/change-password", summary="Password change",
-    response_model=dict
+    response_model=CompatFlexOut
 )
 async def change_password(
     password_data: ChangePasswordRequest,

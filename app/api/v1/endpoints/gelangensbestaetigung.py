@@ -21,6 +21,14 @@ from app.core.tenant import get_tenant_id
 
 logger = logging.getLogger(__name__)
 
+from app.api.v1.schemas.base import BaseSchema
+from pydantic import ConfigDict as _ConfigDict
+
+
+class CompatFlexOut(BaseSchema):
+    model_config = _ConfigDict(extra="allow")
+
+
 router = APIRouter(prefix="/gelangensbestaetigung", tags=["Gelangensbestätigung", "UStDV"])
 
 MIGRATION_HINT = (
@@ -89,7 +97,7 @@ def _gen_token() -> str:
 
 
 @router.get("", summary="Gelangensbestätigungen auflisten",
-    response_model=list
+    response_model=list[CompatFlexOut]
 )
 def list_gelangensbestaetigung(
     status: Optional[str] = Query(None, description="AUSSTEHEND | ERHALTEN | ABGELAUFEN"),
@@ -127,7 +135,7 @@ def list_gelangensbestaetigung(
 
 
 @router.post("", status_code=201, summary="Gelangensbestätigung erstellen",
-    response_model=dict
+    response_model=CompatFlexOut
 )
 def create_gelangensbestaetigung(
     payload: GelangensbestaetigungCreate,
@@ -180,7 +188,7 @@ def create_gelangensbestaetigung(
 
 
 @router.post("/{entry_id}/bestaetigen", summary="Gelangensbestätigung durch Empfänger bestätigen",
-    response_model=dict
+    response_model=CompatFlexOut
 )
 def bestaetigen(
     entry_id: str,
@@ -215,7 +223,7 @@ def bestaetigen(
 
 
 @router.get("/faellig", summary="Überfällige Gelangensbestätigungen",
-    response_model=list
+    response_model=list[CompatFlexOut]
 )
 def list_faellig(
     db: Session = Depends(get_db),
@@ -241,7 +249,7 @@ def list_faellig(
 
 @router.post(
     "/{entry_id}/mahnung",
-    response_model=dict,
+    response_model=CompatFlexOut,
     summary="Erinnerung senden (Stub)",
 )
 def mahnung_senden(

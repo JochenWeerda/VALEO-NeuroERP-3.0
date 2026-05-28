@@ -21,6 +21,14 @@ from app.core.process_config import DEFAULT_ERNTEFENSTER_TEMPLATES, DEFAULT_PROC
 from app.core.tenant import get_tenant_id
 from app.core.workflow_definitions import merge_workflow_variants
 
+from app.api.v1.schemas.base import BaseSchema
+from pydantic import ConfigDict as _ConfigDict
+
+
+class CompatFlexOut(BaseSchema):
+    model_config = _ConfigDict(extra="allow")
+
+
 router = APIRouter()
 
 
