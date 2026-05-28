@@ -104,7 +104,7 @@ def create_fahrer(payload: FahrerPayload, db: Session = Depends(get_db)):
 
 
 @router.patch("/fahrer/{fahrer_id}", summary="Fahrer aktualisieren",
-    response_model=None
+    response_model=TransporteOut
 )
 def update_fahrer(fahrer_id: str, payload: FahrerPatch, db: Session = Depends(get_db)):
     obj = db.query(Fahrer).filter(Fahrer.id == fahrer_id).first()

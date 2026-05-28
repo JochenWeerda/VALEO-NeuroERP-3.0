@@ -169,7 +169,7 @@ async def create_disposition_position(
     }
 
 
-@router.put("/{position_id}", response_model=None, summary="Disposition position aktualisieren")
+@router.put("/{position_id}", response_model=DispositionOut, summary="Disposition position aktualisieren")
 async def update_disposition_position(
     position_id: str,
     body: DispositionPositionUpdate,

@@ -118,7 +118,7 @@ def create_individuelle_nummer(
 
 
 @router.get("/lookup", summary="Interne nummer lookup",
-    response_model=None
+    response_model=IndividuelleArtikelNrOut
 )
 def lookup_interne_nummer(
     partner_nr: str = Query(...),

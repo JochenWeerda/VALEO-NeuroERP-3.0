@@ -168,7 +168,7 @@ def delete_vorlage(
 
 
 @router.post("/{vorlage_id}/anwenden", summary="Anwenden",
-    response_model=None
+    response_model=WaagenVorlagenOut
 )
 def anwenden(
     vorlage_id: str,

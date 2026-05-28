@@ -104,7 +104,7 @@ def create_projekt(payload: ProjektPayload, db: Session = Depends(get_db)):
 
 
 @router.patch("/{projekt_id}", summary="Projekt aktualisieren",
-    response_model=None
+    response_model=ProjekteOut
 )
 def update_projekt(projekt_id: str, payload: ProjektPatch, db: Session = Depends(get_db)):
     obj = db.query(Projekt).filter(Projekt.id == projekt_id).first()
@@ -148,7 +148,7 @@ class AufgabePatch(BaseModel):
 
 
 @router.get("/{projekt_id}/aufgaben", summary="Aufgaben auflisten",
-    response_model=None
+    response_model=list[ProjekteOut]
 )
 def list_aufgaben(projekt_id: str, db: Session = Depends(get_db)):
     return [
@@ -175,7 +175,7 @@ def create_aufgabe(projekt_id: str, payload: AufgabePayload, db: Session = Depen
 
 
 @router.patch("/{projekt_id}/aufgaben/{aufgabe_id}", summary="Aufgabe aktualisieren",
-    response_model=None
+    response_model=ProjekteOut
 )
 def update_aufgabe(projekt_id: str, aufgabe_id: str, payload: AufgabePatch, db: Session = Depends(get_db)):
     obj = db.query(ProjektAufgabe).filter(

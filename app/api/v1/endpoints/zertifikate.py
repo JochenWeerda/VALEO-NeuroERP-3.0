@@ -145,7 +145,7 @@ async def create_zertifikat(
     }
 
 
-@router.put("/{zertifikat_id}", response_model=None, summary="Zertifikat aktualisieren")
+@router.put("/{zertifikat_id}", response_model=ZertifikateOut, summary="Zertifikat aktualisieren")
 async def update_zertifikat(
     zertifikat_id: int,
     body: ZertifikatUpdate,

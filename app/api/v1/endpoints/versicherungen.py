@@ -100,7 +100,7 @@ def create_versicherung(payload: VersicherungPayload, db: Session = Depends(get_
 
 
 @router.patch("/{versicherung_id}", summary="Versicherung aktualisieren",
-    response_model=None
+    response_model=VersicherungenOut
 )
 def update_versicherung(versicherung_id: str, payload: VersicherungPatch, db: Session = Depends(get_db)):
     obj = db.query(Versicherung).filter(Versicherung.id == versicherung_id).first()

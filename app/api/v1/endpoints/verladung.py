@@ -102,7 +102,7 @@ def create_verladung(payload: VerladungPayload, db: Session = Depends(get_db)):
 
 
 @router.patch("/{verladung_id}", summary="Verladung aktualisieren",
-    response_model=None
+    response_model=VerladungOut
 )
 def update_verladung(verladung_id: str, payload: VerladungPatch, db: Session = Depends(get_db)):
     obj = db.query(Verladung).filter(Verladung.id == verladung_id).first()

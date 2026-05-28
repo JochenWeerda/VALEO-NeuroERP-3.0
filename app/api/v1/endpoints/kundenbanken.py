@@ -139,7 +139,7 @@ def create_bankverbindung(
 
 
 @router.patch("/{kunden_nr}/bankverbindungen/{bv_id}/standard", summary="Standard bankverbindung setzen",
-    response_model=None
+    response_model=IDResponse
 )
 def set_standard_bankverbindung(
     kunden_nr: str,

@@ -100,7 +100,7 @@ def create_anlage(payload: AnlagePayload, db: Session = Depends(get_db)):
 
 
 @router.patch("/anlagen/{anlage_id}", summary="Anlage aktualisieren",
-    response_model=None
+    response_model=WartungOut
 )
 def update_anlage(anlage_id: str, payload: AnlagePatch, db: Session = Depends(get_db)):
     obj = db.query(WartungAnlage).filter(WartungAnlage.id == anlage_id).first()
@@ -136,7 +136,7 @@ class ProtokollPayload(BaseModel):
 
 
 @router.get("/anlagen/{anlage_id}/protokolle", summary="Protokolle auflisten",
-    response_model=None
+    response_model=list[WartungOut]
 )
 def list_protokolle(anlage_id: str, db: Session = Depends(get_db)):
     return [

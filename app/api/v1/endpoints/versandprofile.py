@@ -230,7 +230,7 @@ def create_avis(
 
 
 @router.patch("/avise/{avis_nr}/status", summary="Status avis",
-    response_model=None
+    response_model=VersandprofileOut
 )
 def avis_status(
     avis_nr: str,

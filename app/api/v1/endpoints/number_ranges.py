@@ -96,7 +96,7 @@ def configure_number_range(
 
 
 @router.get("/{range_type}", summary="Number range abrufen",
-    response_model=None
+    response_model=NumberRangesOut
 )
 def get_number_range(range_type: str, db: Session = Depends(get_db)) -> dict[str, Any]:
     tenant_id = get_current_tenant_id()
@@ -109,7 +109,7 @@ def get_number_range(range_type: str, db: Session = Depends(get_db)) -> dict[str
 
 
 @router.put("/{range_type}", summary="Number range aktualisieren",
-    response_model=None
+    response_model=NumberRangesOut
 )
 def update_number_range(
     range_type: str,

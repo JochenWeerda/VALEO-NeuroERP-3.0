@@ -222,7 +222,7 @@ class UmkreissucheErgebnis(_BaseModel):
 
 
 @router.post("/umkreissuche", summary="Umkreissuche",
-    response_model=None
+    response_model=CustomersOut
 )
 def umkreissuche(
     payload: UmkreissucheInput,

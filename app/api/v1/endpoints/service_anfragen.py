@@ -131,7 +131,7 @@ async def get_anfrage(
     return item
 
 
-@router.post("/anfragen", response_model=None, status_code=201, summary="Anfrage anlegen")
+@router.post("/anfragen", response_model=ServiceAnfragenOut, status_code=201, summary="Anfrage anlegen")
 async def create_anfrage(
     body: ServiceAnfrageCreate,
     x_tenant_id: str = Header("default", alias="X-Tenant-ID"),
@@ -158,7 +158,7 @@ async def create_anfrage(
     return item
 
 
-@router.put("/anfragen/{anfrage_id}", response_model=None, summary="Anfrage aktualisieren")
+@router.put("/anfragen/{anfrage_id}", response_model=ServiceAnfragenOut, summary="Anfrage aktualisieren")
 async def update_anfrage(
     anfrage_id: str,
     body: ServiceAnfrageUpdate,

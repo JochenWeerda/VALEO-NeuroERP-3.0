@@ -2450,7 +2450,7 @@ async def ack_edi_message(msg_id: str, tenant_id: str = Depends(get_tenant_id), 
 # ---------------------------------------------------------------------------
 
 @router.get("/lager/dashboard", tags=["lager"], summary="Dashboard lager",
-    response_model=None
+    response_model=CompatBridgeOut
 )
 async def lager_dashboard(
     tenant_id: str = Depends(get_tenant_id),
@@ -3017,7 +3017,7 @@ async def save_firma(
 # â”€â”€ Management Dashboard â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 @router.get("/management/dashboard", summary="Dashboard management",
-    response_model=None
+    response_model=CompatBridgeOut
 )
 async def management_dashboard(
     tenant_id: str = Depends(get_tenant_id),

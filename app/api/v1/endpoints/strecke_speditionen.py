@@ -71,7 +71,7 @@ async def create_frachttarif(payload: FrachttarifPayload, db: Session = Depends(
     return _to_dict(row)
 
 
-@router.patch("/frachttarife/{tarif_id}", response_model=None, summary="Frachttarif aktualisieren")
+@router.patch("/frachttarife/{tarif_id}", response_model=StreckeSpeditionenOut, summary="Frachttarif aktualisieren")
 async def update_frachttarif(
     tarif_id: str,
     payload: FrachttarifPayload,

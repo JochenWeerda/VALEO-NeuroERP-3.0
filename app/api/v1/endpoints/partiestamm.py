@@ -225,7 +225,7 @@ def create_partie(
 
 
 @router.patch("/{partie_nr}/status", summary="Partie status setzen",
-    response_model=None
+    response_model=PartiestammOut
 )
 def set_partie_status(
     partie_nr: str,
@@ -246,7 +246,7 @@ def set_partie_status(
 
 
 @router.post("/{partie_nr}/umbuchung", summary="Umbuchung partie",
-    response_model=None
+    response_model=PartiestammOut
 )
 def partie_umbuchung(
     partie_nr: str,
