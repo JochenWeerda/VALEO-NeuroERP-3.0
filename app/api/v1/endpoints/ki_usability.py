@@ -21,42 +21,6 @@ from ....core.ki_action_registry import (
     resolve_actions_for_context,
 )
 
-
-class ActionOut(BaseModel):
-    id: str
-    label: str
-    label_en: str | None = None
-    shortcut: str | None = None
-    description: str | None = None
-    category: str = "action"
-    domain: str | None = None
-    mask: str | None = None
-    intent_phrases: list[str] = Field(default_factory=list)
-    required_data: list[str] = Field(default_factory=list)
-    surfaces: list[ActionSurface] = Field(default_factory=list)
-    context_scope: ActionContextScope
-    relevance_score: int
-    priority: int
-    default_params: dict[str, Any] = Field(default_factory=dict)
-
-
-class ActionListResponse(BaseModel):
-    actions: list[ActionOut]
-    total: int
-
-
-class VoiceResolveIn(BaseModel):
-    text: str
-    context: dict[str, Any] | None = None
-
-
-class VoiceResolveOut(BaseModel):
-    action_id: str
-    params: dict[str, Any] = Field(default_factory=dict)
-    confidence: float
-    raw_text: str
-
-
 def _norm(text: str) -> str:
     return " ".join((text or "").lower().strip().split())
 
@@ -131,6 +95,12 @@ def resolve_voice(body: VoiceResolveIn) -> VoiceResolveOut | None:
 
 
 from app.api.v1.schemas.base import BaseSchema
+from app.api.v1.schemas.ki_usability_schemas import (
+    ActionListResponse,
+    ActionOut,
+    VoiceResolveIn,
+    VoiceResolveOut,
+)
 
 
 router = APIRouter(tags=["ki-usability"])

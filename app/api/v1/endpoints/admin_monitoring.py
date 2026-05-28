@@ -17,6 +17,15 @@ from ....core.tenant import get_tenant_id
 from ....services.security_observability import security_observer
 
 from app.api.v1.schemas.base import BaseSchema
+from app.api.v1.schemas.admin_monitoring_schemas import (
+    AdminAlertsResponse,
+    MonitoringChannelIn,
+    MonitoringChannelOut,
+    MonitoringRuleIn,
+    MonitoringRuleOut,
+    SchedulerJobIn,
+    SchedulerJobOut,
+)
 
 
 router = APIRouter()
@@ -29,15 +38,6 @@ class AdminAlert(BaseModel):
     message: str
     timestamp: str
 
-
-class AdminAlertsResponse(BaseModel):
-    active: int
-    critical: int
-    warning: int
-    system_status: Literal["online", "degraded", "offline"]
-    items: list[AdminAlert]
-
-
 class SecurityMonitoringSummary(BaseModel):
     status: Literal["ok", "warning", "critical"]
     event_count: int
@@ -48,50 +48,6 @@ class SecurityMonitoringSummary(BaseModel):
     channel_count: int
     rule_count: int
     recent_events: list[dict]
-
-
-class MonitoringRuleIn(BaseModel):
-    code: str = Field(..., min_length=1, max_length=80)
-    name: str = Field(..., min_length=1, max_length=140)
-    metric: str = Field(..., min_length=1, max_length=80)
-    level: Literal["critical", "warning", "info"] = "warning"
-    threshold: float | None = None
-    operator: Literal["gt", "gte", "lt", "lte", "eq", "neq"] = "gte"
-    active: bool = True
-    escalation_minutes: int = Field(default=30, ge=0, le=10080)
-    channel_ids: list[str] = Field(default_factory=list)
-
-
-class MonitoringRuleOut(MonitoringRuleIn):
-    id: str
-
-
-class MonitoringChannelIn(BaseModel):
-    code: str = Field(..., min_length=1, max_length=80)
-    name: str = Field(..., min_length=1, max_length=140)
-    channel_type: Literal["email", "sms", "webhook", "chatops"] = "email"
-    target: str = Field(..., min_length=1, max_length=255)
-    active: bool = True
-
-
-class MonitoringChannelOut(MonitoringChannelIn):
-    id: str
-
-
-class SchedulerJobIn(BaseModel):
-    code: str = Field(..., min_length=1, max_length=80)
-    name: str = Field(..., min_length=1, max_length=140)
-    cron: str = Field(..., min_length=5, max_length=120)
-    process: str = Field(..., min_length=1, max_length=80)
-    active: bool = True
-    retry_max: int = Field(default=3, ge=0, le=100)
-    timeout_seconds: int = Field(default=300, ge=10, le=86400)
-    channel_ids: list[str] = Field(default_factory=list)
-
-
-class SchedulerJobOut(SchedulerJobIn):
-    id: str
-
 
 def _load_tenant_settings(db: Session, tenant_id: str) -> dict:
     row = db.execute(

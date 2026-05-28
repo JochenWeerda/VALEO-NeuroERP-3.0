@@ -12,12 +12,13 @@ from app.core.database import get_db
 from app.core.tenant import get_tenant_id
 
 from app.api.v1.schemas.base import BaseSchema
+from app.api.v1.schemas.pos_payments_schemas import (
+    PosPaymentOut,
+    PromotionCheckIn,
+    PromotionIn,
+    SplitPaymentIn,
+)
 from pydantic import ConfigDict as _ConfigDict
-
-
-class PosPaymentOut(BaseSchema):
-    model_config = _ConfigDict(extra="allow")
-
 
 router = APIRouter()
 
@@ -58,30 +59,6 @@ def _ensure_tables(db: Session) -> None:
 class PaymentLine(BaseModel):
     method_code: str
     amount: float
-
-
-class SplitPaymentIn(BaseModel):
-    cart_total: float
-    payments: list[PaymentLine]
-    cart_ref: Optional[str] = None
-
-
-class PromotionIn(BaseModel):
-    name: str
-    promo_type: str  # PROZENT/BETRAG/BOGO/MENGENSTAFFEL
-    article_id: Optional[str] = None
-    article_group: Optional[str] = None
-    discount_value: float
-    min_quantity: float = 1.0
-    valid_from: Optional[str] = None
-    valid_to: Optional[str] = None
-
-
-class PromotionCheckIn(BaseModel):
-    article_id: str
-    quantity: float
-    price: float
-
 
 # ── Payment Methods ────────────────────────────────────────────────────────
 

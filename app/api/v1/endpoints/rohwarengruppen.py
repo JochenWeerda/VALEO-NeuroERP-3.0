@@ -34,6 +34,18 @@ from app.core.dependencies import get_tenant_id
 from app.core.uuid7 import uuid7
 
 from app.api.v1.schemas.base import BaseSchema
+from app.api.v1.schemas.rohwarengruppen_schemas import (
+    AbrechnungsschemaCreate,
+    AbrechnungsschemaOut,
+    RohwareQualitaetCreate,
+    RohwareQualitaetOut,
+    RohwarengruppeCreate,
+    RohwarengruppeOut,
+    StaffelZeileCreate,
+    StaffelZeileOut,
+    ZaStaffelCreate,
+    ZaStaffelOut,
+)
 
 
 router = APIRouter(prefix="/rohware/gruppen",
@@ -45,117 +57,6 @@ GUELTIGE_POSITIONS_TYPEN = ("qualitaet", "kosten", "verguetung", "ware")
 
 
 # ── Schemas ───────────────────────────────────────────────────────────────────
-
-class RohwarengruppeCreate(BaseModel):
-    gruppe_nr: str = Field(..., max_length=20)
-    bezeichnung: str
-    artikel_nr: Optional[str] = None
-    ek_aktiv: bool = True
-    vk_aktiv: bool = False
-    waehrung: str = Field(default="EUR", max_length=3)
-    mengeneinheit: Optional[str] = None
-
-
-class RohwarengruppeOut(BaseModel):
-    id: str
-    gruppe_nr: str
-    bezeichnung: str
-    artikel_nr: Optional[str]
-    ek_aktiv: bool
-    vk_aktiv: bool
-    waehrung: str
-    mengeneinheit: Optional[str]
-    aktiv: bool
-    created_at: datetime
-
-
-class AbrechnungsschemaCreate(BaseModel):
-    schema_nr: str = Field(..., max_length=20)
-    bezeichnung: str
-    gruppe_id: str
-    artikel_nr: Optional[str] = None
-
-
-class AbrechnungsschemaOut(BaseModel):
-    id: str
-    schema_nr: str
-    bezeichnung: str
-    gruppe_id: str
-    artikel_nr: Optional[str]
-    aktiv: bool
-    created_at: datetime
-
-
-class RohwareQualitaetCreate(BaseModel):
-    qualitaet_nr: str = Field(..., max_length=20)
-    bezeichnung: str
-    gruppe_id: str
-    schema_id: Optional[str] = None
-    basis_wert: Optional[Decimal] = None
-    basis_wert_bis: Optional[Decimal] = None
-    einheit: Optional[str] = None
-    position_typ: str = Field(default="qualitaet")
-
-
-class RohwareQualitaetOut(BaseModel):
-    id: str
-    qualitaet_nr: str
-    bezeichnung: str
-    gruppe_id: str
-    schema_id: Optional[str]
-    basis_wert: Optional[Decimal]
-    basis_wert_bis: Optional[Decimal]
-    einheit: Optional[str]
-    position_typ: str
-    aktiv: bool
-    created_at: datetime
-
-
-class StaffelZeileCreate(BaseModel):
-    zeile_nr: int
-    bis_wert: Decimal
-    umrechnungsfaktor: Decimal = Field(..., description="Faktor für dieses Intervall")
-
-
-class ZaStaffelCreate(BaseModel):
-    staffel_nr: str = Field(..., max_length=20)
-    bezeichnung: str
-    gruppe_id: str
-    qualitaet_id: Optional[str] = None
-    ergebnis_typ: str = Field(default="preiszuschlag")
-    abrechnung_typ: str = Field(default="einfacher_umrechnungsfaktor")
-    basiserweiterung: Decimal = Field(default=Decimal("0"), ge=0)
-    zeilen: list[StaffelZeileCreate] = []
-
-    @model_validator(mode="after")
-    def check_typen(self) -> "ZaStaffelCreate":
-        if self.ergebnis_typ not in GUELTIGE_ERGEBNIS_TYPEN:
-            raise ValueError(f"ergebnis_typ muss einer von {GUELTIGE_ERGEBNIS_TYPEN} sein.")
-        if self.abrechnung_typ not in GUELTIGE_ABRECHNUNG_TYPEN:
-            raise ValueError(f"abrechnung_typ muss einer von {GUELTIGE_ABRECHNUNG_TYPEN} sein.")
-        return self
-
-
-class StaffelZeileOut(BaseModel):
-    id: str
-    zeile_nr: int
-    bis_wert: Decimal
-    umrechnungsfaktor: Decimal
-
-
-class ZaStaffelOut(BaseModel):
-    id: str
-    staffel_nr: str
-    bezeichnung: str
-    gruppe_id: str
-    qualitaet_id: Optional[str]
-    ergebnis_typ: str
-    abrechnung_typ: str
-    basiserweiterung: Decimal
-    aktiv: bool
-    created_at: datetime
-    zeilen: list[StaffelZeileOut] = []
-
 
 class StaffelBerechnungResult(BaseModel):
     analysewert: Decimal

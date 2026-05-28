@@ -78,11 +78,6 @@ class DeliveryNotePositionBase(BaseModel):
     zus_beleg: Optional[str] = None
     anerken: Optional[str] = None
 
-
-class DeliveryNotePositionCreate(DeliveryNotePositionBase):
-    pass
-
-
 class DeliveryNotePosition(DeliveryNotePositionBase):
     id: str
     delivery_note_id: str
@@ -107,30 +102,6 @@ class DeliveryNoteBase(BaseModel):
     is_printed: bool = False
     is_delivered: bool = False
     invoice_number: Optional[str] = None
-
-
-class DeliveryNoteCreate(DeliveryNoteBase):
-    positionen: list[DeliveryNotePositionCreate] = []
-
-
-class DeliveryNoteUpdate(BaseModel):
-    customer_id: Optional[str] = None
-    branch_id: Optional[str] = None
-    sales_rep_id: Optional[str] = None
-    delivery_date: Optional[date] = None
-    delivery_time: Optional[time] = None
-    cost_center_id: Optional[str] = None
-    truck_number: Optional[int] = None
-    is_credit_note: Optional[bool] = None
-    is_self_pickup: Optional[bool] = None
-    is_early_payment: Optional[bool] = None
-    reference_invoice_number: Optional[str] = None
-    status: Optional[str] = None
-    is_printed: Optional[bool] = None
-    is_delivered: Optional[bool] = None
-    invoice_number: Optional[str] = None
-    positionen: Optional[list[DeliveryNotePositionCreate]] = None
-
 
 class DeliveryNote(DeliveryNoteBase):
     id: str

@@ -35,13 +35,12 @@ from app.core.uuid7 import uuid7
 logger = logging.getLogger(__name__)
 
 from app.api.v1.schemas.base import BaseSchema
+from app.api.v1.schemas.futtermittel_rezepte_schemas import (
+    FuttermittelRezeptOut,
+    IngredientIn,
+    RezeptIn,
+)
 from pydantic import ConfigDict as _ConfigDict
-
-
-class FuttermittelRezeptOut(BaseSchema):
-    """Typed response schema for FuttermittelRezeptOut endpoints (extra fields forwarded)."""
-    model_config = _ConfigDict(extra="allow")
-
 
 router = APIRouter(prefix="/futtermittel/rezepte", tags=["futtermittel", "rezepte"])
 
@@ -95,22 +94,6 @@ STATUSWERTE = {"ENTWURF", "AKTIV", "ARCHIV"}
 # ---------------------------------------------------------------------------
 # Schemas
 # ---------------------------------------------------------------------------
-
-class RezeptIn(BaseModel):
-    recipe_code: str = Field(..., min_length=1, max_length=50)
-    name: str = Field(..., min_length=1, max_length=200)
-    tierart: str = "SONSTIGE"
-    produktionsphase: str = "SONSTIGE"
-    erstellt_von: Optional[str] = None
-
-
-class IngredientIn(BaseModel):
-    material_id: str = Field(..., min_length=1)
-    anteil_percent: float = Field(..., gt=0, le=100)
-    min_anteil: Optional[float] = None
-    max_anteil: Optional[float] = None
-    sort_order: int = 0
-
 
 class IngredientPatch(BaseModel):
     anteil_percent: Optional[float] = Field(None, gt=0, le=100)

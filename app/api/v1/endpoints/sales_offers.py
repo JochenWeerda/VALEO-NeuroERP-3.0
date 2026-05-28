@@ -33,13 +33,6 @@ class SalesOfferItemInput(BaseModel):
     ek_price: Optional[float] = None
     discount_percent: float = Field(default=0.0, ge=0, le=100)
 
-
-class SalesOfferItemOut(SalesOfferItemInput):
-    id: str
-    line_number: int
-    line_total: float
-
-
 class SalesOfferBase(BaseModel):
     offer_number: str = Field(..., min_length=1, max_length=64)
     customer_id: Optional[str] = None
@@ -54,27 +47,6 @@ class SalesOfferBase(BaseModel):
     notes: Optional[str] = None
     is_pauschale: bool = False
     items: list[SalesOfferItemInput] = Field(default_factory=list)
-
-
-class SalesOfferCreate(SalesOfferBase):
-    tenant_id: Optional[str] = None
-
-
-class SalesOfferUpdate(BaseModel):
-    offer_number: Optional[str] = None
-    customer_id: Optional[str] = None
-    customer_name: Optional[str] = None
-    subject: Optional[str] = None
-    description: Optional[str] = None
-    total_amount: Optional[float] = None
-    currency: Optional[str] = None
-    status: Optional[str] = None
-    contact_person: Optional[str] = None
-    valid_until: Optional[datetime] = None
-    notes: Optional[str] = None
-    is_pauschale: Optional[bool] = None
-    items: Optional[list[SalesOfferItemInput]] = None
-
 
 class SalesOffer(SalesOfferBase):
     id: str

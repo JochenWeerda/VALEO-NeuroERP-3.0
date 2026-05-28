@@ -32,54 +32,9 @@ router = APIRouter(prefix="/inventur/piv", tags=["Lager - Permanente Inventur (P
 
 # ── Schemas ───────────────────────────────────────────────────────────────────
 
-class PIVAbschlussCreate(BaseModel):
-    abschluss_datum: date
-    inventurgruppe_nr: Optional[str] = None
-    lager_nr: Optional[str] = None
-    bemerkung: Optional[str] = None
-
-
-class PIVPositionCreate(BaseModel):
-    artikel_nr: str
-    lagerplatz: Optional[str] = None
-    buchbestand: Decimal
-    bewertungspreis_eur: Optional[Decimal] = None
-
-
 class PIVZaehlmenge(BaseModel):
     zaehlmenge: Decimal
     ignoriert: bool = False
-
-
-class PIVAbschlussOut(BaseModel):
-    id: str
-    abschluss_datum: date
-    inventurgruppe_nr: Optional[str]
-    lager_nr: Optional[str]
-    status: str
-    erfasst_von: Optional[str]
-    abgeschlossen_von: Optional[str]
-    abgeschlossen_am: Optional[datetime]
-    anzahl_positionen: int
-    differenzwert_eur: Optional[Decimal]
-    bemerkung: Optional[str]
-    created_at: datetime
-
-
-class PIVPositionOut(BaseModel):
-    id: str
-    abschluss_id: str
-    artikel_nr: str
-    lagerplatz: Optional[str]
-    buchbestand: Decimal
-    zaehlmenge: Optional[Decimal]
-    differenz: Optional[Decimal]
-    bewertungspreis_eur: Optional[Decimal]
-    differenzwert_eur: Optional[Decimal]
-    erfasst: bool
-    ignoriert: bool
-    created_at: datetime
-
 
 # ── Endpoints ─────────────────────────────────────────────────────────────────
 

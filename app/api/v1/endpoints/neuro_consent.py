@@ -16,23 +16,6 @@ from app.api.v1.schemas.neuro_consent_schemas import NeuroConsentOut
 
 router = APIRouter(prefix="/neuro/consent", tags=["neuro-core", "consent", "dsgvo"])
 
-
-class ConsentCheckRequest(BaseModel):
-    entity_id: str
-    consent_type: str
-
-
-class ConsentGrantRequest(BaseModel):
-    entity_id: str
-    consent_type: str
-    purpose: str = Field("", description="Zweckbindung")
-
-
-class ConsentRevokeRequest(BaseModel):
-    entity_id: str
-    consent_type: str
-
-
 @router.post("/check", summary="Check do",
     response_model=NeuroConsentOut
 )

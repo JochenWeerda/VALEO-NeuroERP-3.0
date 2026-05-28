@@ -10,13 +10,17 @@ from app.core.tenant import get_tenant_id
 from app.services.warehouse_service import WarehouseService
 
 from app.api.v1.schemas.base import BaseSchema
+from app.api.v1.schemas.warehouse_wms_schemas import (
+    BinIn,
+    BinTransferIn,
+    FefoSuggestionIn,
+    PickConfirmIn,
+    PickListIn,
+    StockMovementIn,
+    WarehouseWmsOut,
+    ZoneIn,
+)
 from pydantic import ConfigDict as _ConfigDict
-
-
-class WarehouseWmsOut(BaseSchema):
-    """Typed response schema for WarehouseWmsOut endpoints (extra fields forwarded)."""
-    model_config = _ConfigDict(extra="allow")
-
 
 router = APIRouter()
 
@@ -27,68 +31,14 @@ def _svc(db: Session = Depends(get_db), tenant_id: str = Depends(get_tenant_id))
 
 # ── Schemas ────────────────────────────────────────────────────────────────
 
-class ZoneIn(BaseModel):
-    zone_code: str
-    name: str
-    zone_type: str = "standard"
-    description: Optional[str] = None
-
-
-class BinIn(BaseModel):
-    bin_code: str
-    bin_type: str = "standard"
-    capacity_kg: Optional[Decimal] = None
-
-
-class StockMovementIn(BaseModel):
-    bin_id: str
-    article_id: str
-    batch_number: Optional[str] = None
-    best_before_date: Optional[str] = None
-    quantity_kg: Decimal
-    unit_cost: Optional[Decimal] = None
-    movement_type: str
-    reference: Optional[str] = None
-
-
-class FefoSuggestionIn(BaseModel):
-    warehouse_id: str
-    article_id: str
-    quantity_needed: Decimal
-
-
 class PickListItem(BaseModel):
     article_id: str
     quantity_required: Decimal
     unit: str = "kg"
 
-
-class PickListIn(BaseModel):
-    warehouse_id: str
-    items: list[PickListItem]
-    source_doc_ref: Optional[str] = None
-    source_doc_type: str = "MANUAL"
-    strategy: str = "FEFO"
-    created_by: Optional[str] = None
-
-
 class PickConfirmLine(BaseModel):
     line_id: str
     quantity_picked: Decimal
-
-
-class PickConfirmIn(BaseModel):
-    picked_lines: list[PickConfirmLine]
-
-
-class BinTransferIn(BaseModel):
-    from_bin_id: str
-    to_bin_id: str
-    article_id: str
-    batch_number: Optional[str] = None
-    quantity_kg: Decimal
-    best_before_date: Optional[str] = None
-
 
 # ── Zones ──────────────────────────────────────────────────────────────────
 

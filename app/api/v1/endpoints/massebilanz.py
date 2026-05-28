@@ -24,32 +24,17 @@ from app.core.dependencies import get_tenant_id
 from app.core.uuid7 import uuid7
 
 from app.api.v1.schemas.base import BaseSchema
+from app.api.v1.schemas.massebilanz_schemas import (
+    BewegungCreate,
+    BewegungOut,
+    MassebilanzCreate,
+)
 
 
 router = APIRouter(prefix="/massebilanz", tags=["Massebilanz"])
 
 
 # ── Pydantic Schemas ──────────────────────────────────────────────────────────
-
-class MassebilanzCreate(BaseModel):
-    periode: str = Field(..., pattern=r"^\d{4}-\d{2}$", description="YYYY-MM")
-    artikel_nr: Optional[str] = None
-    lager_nr: Optional[str] = None
-    anfangsbestand_kg: Decimal = Field(default=Decimal("0"))
-    bemerkung: Optional[str] = None
-
-
-class BewegungCreate(BaseModel):
-    massebilanz_id: str
-    beleg_nr: Optional[str] = None
-    beleg_typ: Optional[str] = Field(None, description="lieferschein, abschlag, finale, storno")
-    buchungsdatum: date
-    menge_kg: Decimal
-    vorzeichen: str = Field(default="+", pattern=r"^[+-]$")
-    kontrakt_nr: Optional[str] = None
-    lieferant_nr: Optional[str] = None
-    bemerkung: Optional[str] = None
-
 
 class MassebilanzOut(BaseModel):
     id: str
@@ -66,21 +51,6 @@ class MassebilanzOut(BaseModel):
     festgeschrieben_von: Optional[str]
     bemerkung: Optional[str]
     created_at: datetime
-
-
-class BewegungOut(BaseModel):
-    id: str
-    massebilanz_id: str
-    beleg_nr: Optional[str]
-    beleg_typ: Optional[str]
-    buchungsdatum: date
-    menge_kg: Decimal
-    vorzeichen: str
-    kontrakt_nr: Optional[str]
-    lieferant_nr: Optional[str]
-    storniert: bool
-    created_at: datetime
-
 
 # ── Helper ────────────────────────────────────────────────────────────────────
 

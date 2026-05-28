@@ -15,6 +15,11 @@ from ....core.database import get_db
 from ....core.tenant import get_tenant_id
 
 from app.api.v1.schemas.base import BaseSchema
+from app.api.v1.schemas.credit_management_schemas import (
+    BlockedCustomerOut,
+    CreditLimitOut,
+    CreditStatusOut,
+)
 
 
 router = APIRouter()
@@ -23,16 +28,6 @@ router = APIRouter()
 # ---------------------------------------------------------------------------
 # Pydantic schemas
 # ---------------------------------------------------------------------------
-
-class CreditStatusOut(BaseModel):
-    customer_id: str
-    credit_limit: float
-    current_exposure: float
-    utilization_percent: float
-    status: str  # OK | WARNING | BLOCKED
-    warning_threshold_percent: float
-    block_threshold_percent: float
-
 
 class CreditLimitSet(BaseModel):
     credit_limit_eur: float = Field(..., gt=0)
@@ -44,23 +39,6 @@ class CreditOverride(BaseModel):
     approved_by: str = Field(..., min_length=1)
     reason: str = Field(..., min_length=1)
     valid_until: datetime
-
-
-class CreditLimitOut(BaseModel):
-    id: str
-    customer_id: str
-    credit_limit_eur: float
-    warning_threshold_percent: float
-    block_threshold_percent: float
-    tenant_id: str
-
-
-class BlockedCustomerOut(BaseModel):
-    customer_id: str
-    credit_limit: float
-    current_exposure: float
-    utilization_percent: float
-
 
 # ---------------------------------------------------------------------------
 # Internal helper (also called from sales_orders.py)

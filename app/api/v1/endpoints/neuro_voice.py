@@ -13,22 +13,6 @@ from app.api.v1.schemas.neuro_voice_schemas import NeuroVoiceOut
 
 router = APIRouter(prefix="/neuro/voice", tags=["neuro-core", "voice"])
 
-
-class SessionRequest(BaseModel):
-    language: str = Field("de-DE")
-    channel: str = Field("phone")
-
-
-class TranscribeRequest(BaseModel):
-    session_id: str
-    audio_format: str = Field("wav")
-
-
-class SynthesizeRequest(BaseModel):
-    session_id: str
-    text: str
-
-
 @router.post("/session", summary="Session starten",
     response_model=NeuroVoiceOut
 )

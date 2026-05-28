@@ -1,4 +1,4 @@
-﻿"""
+"""
 CRM Campaign Management API
 Full CRUD + State Machine + Templates + Recipients + Analytics
 
@@ -23,95 +23,25 @@ from app.core.database import get_db
 from app.core.uuid7 import uuid7
 
 from app.api.v1.schemas.base import BaseSchema
+from app.api.v1.schemas.crm_campaigns_schemas import (
+    CampaignCreate,
+    CampaignUpdate,
+    CrmCampaignOut,
+    RecipientStatusUpdate,
+    TemplateCreate,
+    TemplateResponse,
+    TemplateUpdate,
+)
 from pydantic import ConfigDict as _ConfigDict
-
-
-class CrmCampaignOut(BaseSchema):
-    """Typed response schema for CrmCampaignOut endpoints (extra fields forwarded)."""
-    model_config = _ConfigDict(extra="allow")
-
 
 router = APIRouter(prefix="/crm/campaigns", tags=["crm", "campaigns", "marketing"])
 
 # â”€â”€â”€ Pydantic Schemas â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
-class TemplateCreate(BaseModel):
-    name: str = Field(..., min_length=1, max_length=255)
-    description: Optional[str] = None
-    campaign_type: str = Field("email", pattern=r"^(email|sms|post|event|webinar|push)$")
-    subject_line: Optional[str] = Field(None, max_length=500)
-    message_body: Optional[str] = None
-    is_active: bool = True
-    meta: Optional[dict] = None
-
-
-class TemplateUpdate(BaseModel):
-    name: Optional[str] = Field(None, min_length=1, max_length=255)
-    description: Optional[str] = None
-    campaign_type: Optional[str] = None
-    subject_line: Optional[str] = None
-    message_body: Optional[str] = None
-    is_active: Optional[bool] = None
-    meta: Optional[dict] = None
-
-
-class TemplateResponse(BaseModel):
-    id: str
-    tenant_id: str
-    name: str
-    description: Optional[str]
-    campaign_type: str
-    subject_line: Optional[str]
-    message_body: Optional[str]
-    is_active: bool
-    created_by: Optional[str]
-    meta: Optional[dict]
-    created_at: str
-    updated_at: str
-
-
-class CampaignCreate(BaseModel):
-    name: str = Field(..., min_length=1, max_length=255)
-    description: Optional[str] = None
-    campaign_type: str = Field("email", pattern=r"^(email|sms|post|event|webinar|push)$")
-    template_id: Optional[str] = None
-    segment_id: Optional[str] = None
-    start_date: Optional[date] = None
-    end_date: Optional[date] = None
-    budget: Optional[Decimal] = None
-    owner_id: Optional[str] = None
-    campaign_channel: Optional[str] = None
-    target_customer_type: Optional[str] = None
-    seasonal_context: Optional[str] = None
-    meta: Optional[dict] = None
-
-
-class CampaignUpdate(BaseModel):
-    name: Optional[str] = Field(None, min_length=1, max_length=255)
-    description: Optional[str] = None
-    campaign_type: Optional[str] = None
-    template_id: Optional[str] = None
-    segment_id: Optional[str] = None
-    start_date: Optional[date] = None
-    end_date: Optional[date] = None
-    budget: Optional[Decimal] = None
-    owner_id: Optional[str] = None
-    campaign_channel: Optional[str] = None
-    target_customer_type: Optional[str] = None
-    seasonal_context: Optional[str] = None
-    meta: Optional[dict] = None
-
-
 class RecipientAdd(BaseModel):
     recipient_id: str
     recipient_type: str = "contact"
     meta: Optional[dict] = None
-
-
-class RecipientStatusUpdate(BaseModel):
-    status: str = Field(..., pattern=r"^(queued|sent|bounced|opened|clicked|converted|unsubscribed)$")
-    bounce_reason: Optional[str] = None
-
 
 # â”€â”€â”€ Helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
