@@ -20,6 +20,14 @@ from app.core.database import get_db
 from app.core.dependencies import get_tenant_id
 from app.core.uuid7 import uuid7
 
+from app.api.v1.schemas.base import BaseSchema
+from pydantic import ConfigDict as _ConfigDict
+
+
+class CompatFlexOut(BaseSchema):
+    model_config = _ConfigDict(extra="allow")
+
+
 router = APIRouter(prefix="/kunden", tags=["CRM - Kundenbanken"])
 
 IBAN_PATTERN = re.compile(r'^[A-Z]{2}[0-9]{2}[A-Z0-9]{1,30}$')
@@ -136,7 +144,7 @@ def create_bankverbindung(
 
 
 @router.patch("/{kunden_nr}/bankverbindungen/{bv_id}/standard", summary="Standard bankverbindung setzen",
-    response_model=dict
+    response_model=CompatFlexOut
 )
 def set_standard_bankverbindung(
     kunden_nr: str,
@@ -162,7 +170,7 @@ def set_standard_bankverbindung(
 
 
 @router.delete("/{kunden_nr}/bankverbindungen/{bv_id}", summary="Bankverbindung löschen",
-    response_model=dict
+    response_model=CompatFlexOut
 )
 def delete_bankverbindung(
     kunden_nr: str,

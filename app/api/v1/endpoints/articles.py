@@ -24,6 +24,14 @@ from app.services.articles_service import (
     to_article_schema as _to_article_schema,
 )
 
+from app.api.v1.schemas.base import BaseSchema
+from pydantic import ConfigDict as _ConfigDict
+
+
+class CompatFlexOut(BaseSchema):
+    model_config = _ConfigDict(extra="allow")
+
+
 router = APIRouter()
 
 DEFAULT_TENANT = settings.DEFAULT_TENANT_ID
@@ -289,7 +297,7 @@ async def delete_article(
 from ....infrastructure.models import BusinessPartnerDiscountItem, BusinessPartnerPriceAgreement  # noqa: F811
 
 
-@router.get("/{article_id}/suppliers", response_model=dict, summary="Article suppliers abrufen")
+@router.get("/{article_id}/suppliers", response_model=CompatFlexOut, summary="Article suppliers abrufen")
 async def get_article_suppliers(
     article_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -327,7 +335,7 @@ async def get_article_suppliers(
     }
 
 
-@router.get("/{article_id}/discounts", response_model=dict, summary="Article discounts abrufen")
+@router.get("/{article_id}/discounts", response_model=CompatFlexOut, summary="Article discounts abrufen")
 async def get_article_discounts(
     article_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -361,7 +369,7 @@ async def get_article_discounts(
     }
 
 
-@router.get("/{article_id}/prices", response_model=dict, summary="Article prices abrufen")
+@router.get("/{article_id}/prices", response_model=CompatFlexOut, summary="Article prices abrufen")
 async def get_article_prices(
     article_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -396,7 +404,7 @@ async def get_article_prices(
     }
 
 
-@router.get("/{article_id}/documents", response_model=dict, summary="Article documents abrufen")
+@router.get("/{article_id}/documents", response_model=CompatFlexOut, summary="Article documents abrufen")
 async def get_article_documents(
     article_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -429,7 +437,7 @@ async def get_article_documents(
     }
 
 
-@router.get("/{article_id}/stock", response_model=dict, summary="Article stock abrufen")
+@router.get("/{article_id}/stock", response_model=CompatFlexOut, summary="Article stock abrufen")
 async def get_article_stock(
     article_id: str,
     branch_id: Optional[str] = Query(None, description="Filter by branch"),
@@ -504,7 +512,7 @@ async def get_article_stock(
     }
 
 
-@router.get("/{article_id}/position-context", response_model=dict, summary="Article position context abrufen")
+@router.get("/{article_id}/position-context", response_model=CompatFlexOut, summary="Article position context abrufen")
 async def get_article_position_context(
     article_id: str,
     customer_id: Optional[str] = Query(None, description="Customer ID for pricing history"),
@@ -755,7 +763,7 @@ async def get_article_position_context(
     }
 
 
-@router.get("/{article_id}/stock-movements", response_model=dict, summary="Article stock movements abrufen")
+@router.get("/{article_id}/stock-movements", response_model=CompatFlexOut, summary="Article stock movements abrufen")
 async def get_article_stock_movements(
     article_id: str,
     from_date: Optional[str] = Query(None, description="From date (YYYY-MM-DD)"),

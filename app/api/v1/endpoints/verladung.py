@@ -11,6 +11,14 @@ from sqlalchemy.orm import Session
 from app.core.database import get_db
 from app.domains.operations.models import Verladung, VerladungStatus
 
+from app.api.v1.schemas.base import BaseSchema
+from pydantic import ConfigDict as _ConfigDict
+
+
+class CompatFlexOut(BaseSchema):
+    model_config = _ConfigDict(extra="allow")
+
+
 router = APIRouter(prefix="/verladung", tags=["Verladung"])
 
 
@@ -61,7 +69,7 @@ class VerladungPatch(BaseModel):
 
 
 @router.get("", summary="Verladungen auflisten",
-    response_model=list
+    response_model=list[CompatFlexOut]
 )
 def list_verladungen(
     status: Optional[str] = None,
@@ -77,7 +85,7 @@ def list_verladungen(
 
 
 @router.get("/{verladung_id}", summary="Verladung abrufen",
-    response_model=dict
+    response_model=CompatFlexOut
 )
 def get_verladung(verladung_id: str, db: Session = Depends(get_db)):
     obj = db.query(Verladung).filter(Verladung.id == verladung_id).first()
@@ -87,7 +95,7 @@ def get_verladung(verladung_id: str, db: Session = Depends(get_db)):
 
 
 @router.post("", status_code=201, summary="Verladung anlegen",
-    response_model=dict
+    response_model=CompatFlexOut
 )
 def create_verladung(payload: VerladungPayload, db: Session = Depends(get_db)):
     obj = Verladung(**payload.model_dump())
@@ -98,7 +106,7 @@ def create_verladung(payload: VerladungPayload, db: Session = Depends(get_db)):
 
 
 @router.patch("/{verladung_id}", summary="Verladung aktualisieren",
-    response_model=dict
+    response_model=CompatFlexOut
 )
 def update_verladung(verladung_id: str, payload: VerladungPatch, db: Session = Depends(get_db)):
     obj = db.query(Verladung).filter(Verladung.id == verladung_id).first()

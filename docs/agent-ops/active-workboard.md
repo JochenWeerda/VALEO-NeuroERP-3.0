@@ -2729,3 +2729,25 @@ Archiv des vorherigen Boards:
 **Gate-Ergebnis:** pytest 103/103 ✅ · TypeScript 0 Fehler ✅
 **Erledigt:** POST `/voice/summary` + `/voice/synthesize`; Piper in `voice_adapter.py`; Summary + Vorlesen-Button in `VoiceFeedback`; Browser-SpeechSynthesis-Fallback.
 **Offene Risiken:** Piper optional — ohne Modell/CLI nur Browser-TTS; Kokoro als Folge-Provider moeglich.
+
+## SLICE-013C-VOICE-WHISPERBAR-SHORTCUTS-001
+
+**Von:** Claude Sonnet 4.6
+**Owner:** Claude Sonnet 4.6
+**Stand:** abgeschlossen 2026-05-27
+**Ziel des Slices:** WhisperBar Shortcuts Strg+Shift+1/2, AutoHotkey/PowerShell, POST /voice/pipeline.
+**Dateibesitz:** `tools/voice/whisperbar.ahk`, `whisperbar-summary.ps1`, `voice_pipeline.py`, `VoiceWhisperBarHost.tsx`, `useWhisperBarShortcuts.ts`, `ai-shortcuts.tsx`.
+**Gate-Ergebnis:** pytest 112/112 ✅ · TypeScript 0 Fehler ✅
+**Erledigt:** Browser-Shortcuts Diktat/Summary; AHK aktiviert ERP + ruft Summary-API; Pipeline-Endpoint dictate|summary|intent.
+**Offene Risiken:** AHK erfordert lokal installiertes AutoHotkey v1.1; ki-usability muss auf Port 5200 laufen fuer PS-Summary.
+
+## SLICE-013D-VOICE-DOMAIN-CONTEXT-001
+
+**Von:** Claude Sonnet 4.6
+**Owner:** Claude Sonnet 4.6
+**Stand:** abgeschlossen 2026-05-27
+**Ziel des Slices:** context.domain filtert Intent-Aufloesung; voice-intent Events mit Domain-Payload.
+**Dateibesitz:** `intent_resolver.py`, `useVoiceIntent.ts`, `command-palette-model.ts`, `CommandPalette.tsx`, `test_voice_domain_context.py`.
+**Gate-Ergebnis:** pytest 112/112 ✅
+**Erledigt:** Domain-Aliase und Registry-Filter; Command Palette dispatcht eventPayload als eventDetail; VoiceWhisperBarHost reagiert auf voice-intent.
+**Offene Risiken:** Sehr generische Phrasen koennen domain-uebergreifend kollidieren — weiteres Tuning bei Bedarf.

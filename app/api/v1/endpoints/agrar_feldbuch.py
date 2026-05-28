@@ -30,6 +30,15 @@ from modules.agrar.services.feldbuch_service import (
     validate_psm_compliance,
 )
 
+from app.api.v1.schemas.base import BaseSchema
+from pydantic import ConfigDict as _ConfigDict
+
+
+class AgrarFeldbuchOut(BaseSchema):
+    """Typed response schema for AgrarFeldbuchOut endpoints (extra fields forwarded)."""
+    model_config = _ConfigDict(extra="allow")
+
+
 router = APIRouter(tags=["agrar", "feldbuch"])
 
 
@@ -198,7 +207,7 @@ def _massnahme_to_dict(m: FeldbuchMassnahme) -> dict[str, Any]:
 # ────────────────────────────────────────────────────────────────────────────
 
 @router.get("/schlaege", summary="Schlaege auflisten",
-    response_model=list
+    response_model=list[AgrarFeldbuchOut]
 )
 async def list_schlaege(
     customer_id: Optional[str] = Query(None),
@@ -217,7 +226,7 @@ async def list_schlaege(
 
 
 @router.post("/schlaege", status_code=201, summary="Schlag anlegen",
-    response_model=dict
+    response_model=AgrarFeldbuchOut
 )
 async def create_schlag(
     data: SchlagCreate,
@@ -236,7 +245,7 @@ async def create_schlag(
 
 
 @router.get("/schlaege/{schlag_id}", summary="Schlag abrufen",
-    response_model=dict
+    response_model=AgrarFeldbuchOut
 )
 async def get_schlag(
     schlag_id: str,
@@ -254,7 +263,7 @@ async def get_schlag(
 
 
 @router.put("/schlaege/{schlag_id}", summary="Schlag aktualisieren",
-    response_model=dict
+    response_model=AgrarFeldbuchOut
 )
 async def update_schlag(
     schlag_id: str,
@@ -335,7 +344,7 @@ async def get_schlag_geometry(
 
 
 @router.put("/schlaege/{schlag_id}/geometry", summary="GeoJSON Polygon eines Schlags speichern",
-    response_model=dict
+    response_model=AgrarFeldbuchOut
 )
 async def put_schlag_geometry(
     schlag_id: str,
@@ -364,7 +373,7 @@ async def put_schlag_geometry(
 
 
 @router.get("/schlaege/geojson/all", summary="Alle Schläge als GeoJSON FeatureCollection",
-    response_model=dict
+    response_model=AgrarFeldbuchOut
 )
 async def get_all_schlaege_geojson(
     customer_id: Optional[str] = Query(None),
@@ -401,7 +410,7 @@ async def get_all_schlaege_geojson(
 # ────────────────────────────────────────────────────────────────────────────
 
 @router.get("/feldbuch/massnahmen", summary="Massnahmen auflisten",
-    response_model=list
+    response_model=list[AgrarFeldbuchOut]
 )
 async def list_massnahmen(
     schlag_id: Optional[str] = Query(None),
@@ -437,7 +446,7 @@ async def list_massnahmen(
 
 
 @router.post("/feldbuch/massnahmen", status_code=201, summary="Massnahme anlegen",
-    response_model=dict
+    response_model=AgrarFeldbuchOut
 )
 async def create_massnahme(
     data: MassnahmeCreate,
@@ -475,7 +484,7 @@ async def create_massnahme(
 
 
 @router.put("/feldbuch/massnahmen/{massnahme_id}", summary="Massnahme aktualisieren",
-    response_model=dict
+    response_model=AgrarFeldbuchOut
 )
 async def update_massnahme(
     massnahme_id: str,
@@ -628,7 +637,7 @@ _DUENGER_N_GEHALT: dict[str, float] = {
 
 
 @router.get("/feldbuch/duengebilanz", summary="Duengebilanz abrufen",
-    response_model=dict
+    response_model=AgrarFeldbuchOut
 )
 async def get_duengebilanz(
     customer_id: Optional[str] = Query(None),
@@ -733,7 +742,7 @@ async def get_duengebilanz(
 # ────────────────────────────────────────────────────────────────────────────
 
 @router.get("/feldbuch/cross-compliance", summary="Cross compliance report abrufen",
-    response_model=dict
+    response_model=AgrarFeldbuchOut
 )
 async def get_cross_compliance_report(
     customer_id: Optional[str] = Query(None),
@@ -855,7 +864,7 @@ async def get_cross_compliance_report(
 # ────────────────────────────────────────────────────────────────────────────
 
 @router.get("/feldbuch/calendar", summary="Feldkalender abrufen",
-    response_model=dict
+    response_model=AgrarFeldbuchOut
 )
 async def get_feldkalender(
     von: str = Query(..., description="Startdatum (YYYY-MM-DD)"),
@@ -916,7 +925,7 @@ _FELDBLOCKFINDER_URLS: dict[str, str] = {
 
 
 @router.get("/config/feldblockfinder", summary="Feldblockfinder config abrufen",
-    response_model=dict
+    response_model=AgrarFeldbuchOut
 )
 async def get_feldblockfinder_config() -> dict[str, Any]:
     """
@@ -929,7 +938,7 @@ async def get_feldblockfinder_config() -> dict[str, Any]:
 
 
 @router.post("/compliance/qs-export", summary="Export qs",
-    response_model=dict
+    response_model=AgrarFeldbuchOut
 )
 async def qs_export(
     jahr: int = Query(default=datetime.now().year),
@@ -953,7 +962,7 @@ async def qs_export(
 
 
 @router.post("/compliance/lea-export", summary="Export lea",
-    response_model=dict
+    response_model=AgrarFeldbuchOut
 )
 async def lea_export(
     jahr: int = Query(default=datetime.now().year),
@@ -981,7 +990,7 @@ async def lea_export(
 # ────────────────────────────────────────────────────────────────────────────
 
 @router.get("/inventory/low-stock", summary="Low stock warnings abrufen",
-    response_model=dict
+    response_model=AgrarFeldbuchOut
 )
 async def get_low_stock_warnings(
     threshold: float = Query(0, ge=0, description="Schwellwert: Artikel mit Bestand <= threshold"),

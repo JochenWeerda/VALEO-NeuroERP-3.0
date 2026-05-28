@@ -14,6 +14,14 @@ from ..schemas.shared import (
 )
 from ..schemas.base import PaginatedResponse
 
+from app.api.v1.schemas.base import BaseSchema
+from pydantic import ConfigDict as _ConfigDict
+
+
+class CompatFlexOut(BaseSchema):
+    model_config = _ConfigDict(extra="allow")
+
+
 router = APIRouter(tags=["tenants"])
 
 

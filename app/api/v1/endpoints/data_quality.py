@@ -24,6 +24,14 @@ from app.core.data_quality_rules import (
     ReferenceRule,
 )
 
+from app.api.v1.schemas.base import BaseSchema
+from pydantic import ConfigDict as _ConfigDict
+
+
+class DataQualityOut(BaseSchema):
+    model_config = _ConfigDict(extra="allow")
+
+
 router = APIRouter(prefix="/data-quality", tags=["admin", "data-quality"])
 
 
@@ -75,7 +83,7 @@ async def list_data_quality_rules(
     return rules
 
 
-@router.get("/catalog", response_model=dict, summary="Data quality catalog abrufen")
+@router.get("/catalog", response_model=DataQualityOut, summary="Data quality catalog abrufen")
 async def get_data_quality_catalog(
     entity_type: str | None = Query(None, description="Optionaler Filter nach Entity-Typ"),
 ):
@@ -89,7 +97,7 @@ async def list_entity_types():
     return get_all_entity_types()
 
 
-@router.get("/rulesets/{entity_type}", response_model=dict, summary="Data quality ruleset abrufen")
+@router.get("/rulesets/{entity_type}", response_model=DataQualityOut, summary="Data quality ruleset abrufen")
 async def get_data_quality_ruleset(entity_type: str):
     """Gibt das vollstaendige DQ-Regelset fuer einen Entity-Typ zurueck."""
     ruleset = get_dq_ruleset_for_entity(entity_type)
@@ -98,7 +106,7 @@ async def get_data_quality_ruleset(entity_type: str):
     return ruleset.as_dict()
 
 
-@router.get("/rulesets/{entity_type}/summary", response_model=dict, summary="Data quality ruleset summary abrufen")
+@router.get("/rulesets/{entity_type}/summary", response_model=DataQualityOut, summary="Data quality ruleset summary abrufen")
 async def get_data_quality_ruleset_summary(entity_type: str):
     """Verdichtete Sicht auf ein einzelnes DQ-Regelset."""
     ruleset = get_dq_ruleset_for_entity(entity_type)

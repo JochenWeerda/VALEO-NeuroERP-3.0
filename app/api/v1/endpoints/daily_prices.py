@@ -29,6 +29,14 @@ from modules.agrar.services.daily_price_service import (
 )
 from modules.agrar.repositories.daily_price_repo import DailyPriceRepositoryImpl
 
+from app.api.v1.schemas.base import BaseSchema
+from pydantic import ConfigDict as _ConfigDict
+
+
+class CompatFlexOut(BaseSchema):
+    model_config = _ConfigDict(extra="allow")
+
+
 router = APIRouter()
 
 

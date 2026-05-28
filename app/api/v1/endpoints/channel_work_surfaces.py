@@ -26,6 +26,15 @@ from app.core.human_approval_gate import ApprovalDecision
 from app.core.knowledge_core_contracts import KnowledgeChannel
 from app.core.knowledge_graph import build_runtime_knowledge_graph
 
+from app.api.v1.schemas.base import BaseSchema
+from pydantic import ConfigDict as _ConfigDict
+
+
+class ChannelWorkSurfaceOut(BaseSchema):
+    """Typed response schema for ChannelWorkSurfaceOut endpoints (extra fields forwarded)."""
+    model_config = _ConfigDict(extra="allow")
+
+
 router = APIRouter(prefix="/channels", tags=["channels", "knowledge"])
 
 
@@ -73,7 +82,7 @@ def _parse_supported_channel(channel: str) -> KnowledgeChannel:
 
 
 @router.post("/{channel}/knowledge-query", summary="Knowledge query channel",
-    response_model=dict
+    response_model=ChannelWorkSurfaceOut
 )
 def channel_knowledge_query(channel: str, payload: ChannelKnowledgeQueryRequest, db=Depends(get_db)):
     if not payload.rolle:
@@ -95,7 +104,7 @@ def channel_knowledge_query(channel: str, payload: ChannelKnowledgeQueryRequest,
 
 
 @router.post("/{channel}/process-actions/execute", summary="Process execute channel",
-    response_model=dict
+    response_model=ChannelWorkSurfaceOut
 )
 def channel_process_execute(channel: str, payload: ChannelProcessActionRequest, db=Depends(get_db)):
     from app.core.blockchain_anchor_runtime import anchor_channel_process_thread
@@ -124,7 +133,7 @@ def channel_process_execute(channel: str, payload: ChannelProcessActionRequest, 
 
 
 @router.get("/{channel}/process-actions/{thread_id}", summary="Channel process thread abrufen",
-    response_model=dict
+    response_model=ChannelWorkSurfaceOut
 )
 def get_channel_process_thread(channel: str, thread_id: str, db=Depends(get_db)):
     _parse_supported_channel(channel)
@@ -135,7 +144,7 @@ def get_channel_process_thread(channel: str, thread_id: str, db=Depends(get_db))
 
 
 @router.get("/{channel}/process-actions", summary="Channel process threads auflisten",
-    response_model=dict
+    response_model=ChannelWorkSurfaceOut
 )
 def list_channel_process_threads(
     channel: str,
@@ -167,7 +176,7 @@ def list_channel_process_threads(
 
 
 @router.get("/{channel}/process-actions/{thread_id}/audit", summary="Channel process thread audit abrufen",
-    response_model=dict
+    response_model=ChannelWorkSurfaceOut
 )
 def get_channel_process_thread_audit(channel: str, thread_id: str, db=Depends(get_db)):
     _parse_supported_channel(channel)
@@ -185,7 +194,7 @@ def get_channel_process_thread_audit(channel: str, thread_id: str, db=Depends(ge
 
 
 @router.post("/{channel}/process-actions/{thread_id}/decision", summary="Process decision channel",
-    response_model=dict
+    response_model=ChannelWorkSurfaceOut
 )
 def channel_process_decision(channel: str, thread_id: str, payload: ChannelApprovalDecisionRequest, db=Depends(get_db)):
     from app.core.blockchain_anchor_runtime import anchor_channel_process_thread
@@ -216,7 +225,7 @@ def channel_process_decision(channel: str, thread_id: str, payload: ChannelAppro
 
 
 @router.get("/knowledge-graph", summary="Knowledge graph abrufen",
-    response_model=dict
+    response_model=ChannelWorkSurfaceOut
 )
 def get_knowledge_graph(tenant_id: str | None = None, db=Depends(get_db)):
     graph = build_runtime_knowledge_graph(db, tenant_id=tenant_id)
@@ -224,7 +233,7 @@ def get_knowledge_graph(tenant_id: str | None = None, db=Depends(get_db)):
 
 
 @router.get("/knowledge-graph/nodes/{node_id}", summary="Knowledge graph node abrufen",
-    response_model=dict
+    response_model=ChannelWorkSurfaceOut
 )
 def get_knowledge_graph_node(node_id: str, tenant_id: str | None = None, db=Depends(get_db)):
     graph = build_runtime_knowledge_graph(db, tenant_id=tenant_id)
@@ -238,7 +247,7 @@ def get_knowledge_graph_node(node_id: str, tenant_id: str | None = None, db=Depe
 
 
 @router.post("/knowledge-graph/path", summary="Knowledge graph path abrufen",
-    response_model=dict
+    response_model=ChannelWorkSurfaceOut
 )
 def get_knowledge_graph_path(payload: KnowledgeGraphPathRequest, db=Depends(get_db)):
     graph = build_runtime_knowledge_graph(db, tenant_id=payload.tenant_id)
@@ -252,7 +261,7 @@ def get_knowledge_graph_path(payload: KnowledgeGraphPathRequest, db=Depends(get_
 
 
 @router.post("/slack/events", summary="Events slack",
-    response_model=dict
+    response_model=ChannelWorkSurfaceOut
 )
 async def slack_events(request: Request, db=Depends(get_db)):
     raw_body = await request.body()
@@ -277,7 +286,7 @@ async def slack_events(request: Request, db=Depends(get_db)):
 
 
 @router.post("/teams/events", summary="Events teams",
-    response_model=dict
+    response_model=ChannelWorkSurfaceOut
 )
 async def teams_events(request: Request, db=Depends(get_db)):
     raw_body = await request.body()

@@ -11,6 +11,14 @@ from app.core.config import settings
 from app.core.database import get_db
 from app.core.tenant import get_tenant_id
 
+from app.api.v1.schemas.base import BaseSchema
+from pydantic import ConfigDict as _ConfigDict
+
+
+class ChannelOut(BaseSchema):
+    model_config = _ConfigDict(extra="allow")
+
+
 router = APIRouter(prefix="/channels", tags=["neuro-core", "channels"])
 
 
@@ -38,7 +46,7 @@ class GenericMessageRequest(BaseModel):
 
 
 @router.get("/whatsapp/webhook", summary="Verify whatsapp",
-    response_model=dict
+    response_model=ChannelOut
 )
 async def whatsapp_verify(request: Request):
     """WhatsApp Webhook Verification (GET)."""
@@ -55,7 +63,7 @@ async def whatsapp_verify(request: Request):
 
 
 @router.post("/whatsapp/webhook", summary="Webhook whatsapp",
-    response_model=dict
+    response_model=ChannelOut
 )
 async def whatsapp_webhook(
     request: Request,
@@ -81,7 +89,7 @@ async def whatsapp_webhook(
 
 
 @router.post("/email/ingest", summary="Ingest email",
-    response_model=dict
+    response_model=ChannelOut
 )
 async def email_ingest(
     request: EmailIngressRequest,
@@ -105,7 +113,7 @@ async def email_ingest(
 
 
 @router.post("/route", summary="Generic route",
-    response_model=dict
+    response_model=ChannelOut
 )
 async def route_generic(
     request: GenericMessageRequest,
@@ -144,7 +152,7 @@ class ChatMessageRequest(BaseModel):
 
 
 @router.post("/livechat/start", summary="Start livechat",
-    response_model=dict
+    response_model=ChannelOut
 )
 async def livechat_start(
     request: ChatStartRequest,
@@ -157,7 +165,7 @@ async def livechat_start(
 
 
 @router.post("/livechat/{session_id}/message", summary="Message livechat",
-    response_model=dict
+    response_model=ChannelOut
 )
 async def livechat_message(
     session_id: str,
@@ -170,7 +178,7 @@ async def livechat_message(
 
 
 @router.get("/livechat/{session_id}/history", summary="History livechat",
-    response_model=dict
+    response_model=ChannelOut
 )
 async def livechat_history(session_id: str, limit: int = 50):
     """Chat-Historie einer Session abrufen."""
@@ -180,7 +188,7 @@ async def livechat_history(session_id: str, limit: int = 50):
 
 
 @router.post("/livechat/{session_id}/close", summary="Close livechat",
-    response_model=dict
+    response_model=ChannelOut
 )
 async def livechat_close(session_id: str):
     """Live-Chat-Session schliessen."""
@@ -192,7 +200,7 @@ async def livechat_close(session_id: str):
 
 
 @router.get("/livechat/sessions", summary="Sessions livechat",
-    response_model=dict
+    response_model=ChannelOut
 )
 async def livechat_sessions(tenant_id: str = Depends(get_tenant_id)):
     """Aktive Chat-Sessions auflisten."""

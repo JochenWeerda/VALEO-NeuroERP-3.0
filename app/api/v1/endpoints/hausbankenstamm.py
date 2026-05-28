@@ -21,6 +21,14 @@ from app.core.database import get_db
 from app.core.dependencies import get_tenant_id
 from app.core.uuid7 import uuid7
 
+from app.api.v1.schemas.base import BaseSchema
+from pydantic import ConfigDict as _ConfigDict
+
+
+class CompatFlexOut(BaseSchema):
+    model_config = _ConfigDict(extra="allow")
+
+
 router = APIRouter(prefix="/stammdaten/hausbanken", tags=["Stammdaten - Hausbankenstamm"])
 
 IBAN_PATTERN = re.compile(r'^[A-Z]{2}[0-9]{2}[A-Z0-9]{1,30}$')
@@ -187,7 +195,7 @@ def update_hausbank(
 
 
 @router.delete("/{bank_nr}", summary="Hausbank löschen",
-    response_model=dict
+    response_model=CompatFlexOut
 )
 def delete_hausbank(
     bank_nr: str,

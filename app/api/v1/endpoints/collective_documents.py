@@ -16,6 +16,14 @@ from sqlalchemy.orm import Session
 from ....core.database import get_db
 from ....core.tenant import get_tenant_id
 
+from app.api.v1.schemas.base import BaseSchema
+from pydantic import ConfigDict as _ConfigDict
+
+
+class CompatFlexOut(BaseSchema):
+    model_config = _ConfigDict(extra="allow")
+
+
 router = APIRouter()
 
 
@@ -224,7 +232,7 @@ async def create_collective_delivery(
     )
 
 
-@router.get("/collective-invoice/{invoice_id}", response_model=dict, summary="Collective invoice abrufen")
+@router.get("/collective-invoice/{invoice_id}", response_model=CompatFlexOut, summary="Collective invoice abrufen")
 async def get_collective_invoice(
     invoice_id: str,
     tenant_id: str = Depends(get_tenant_id),

@@ -24,6 +24,14 @@ from ..schemas.finance import (
 )
 from ..schemas.base import PaginatedResponse
 
+from app.api.v1.schemas.base import BaseSchema
+from pydantic import ConfigDict as _ConfigDict
+
+
+class CompatFlexOut(BaseSchema):
+    model_config = _ConfigDict(extra="allow")
+
+
 router = APIRouter()
 
 JOURNAL_ENTRY_ODATA_FIELDS = {
@@ -43,7 +51,7 @@ def _serialize_value(v: Any) -> Any:
     return v
 
 
-@router.get("/new", response_model=dict, summary="New journal entry template abrufen")
+@router.get("/new", response_model=CompatFlexOut, summary="New journal entry template abrufen")
 async def get_new_journal_entry_template(tenant_id: str = Depends(get_tenant_id)):
     """Return default values for the manual booking form."""
     now = datetime.utcnow()

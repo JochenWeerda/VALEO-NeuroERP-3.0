@@ -17,6 +17,14 @@ from app.core.tenant import get_tenant_id
 from app.core.uuid7 import uuid7
 from app.infrastructure.models.futtermittel_models import AgrarSorte
 
+from app.api.v1.schemas.base import BaseSchema
+from pydantic import ConfigDict as _ConfigDict
+
+
+class CompatFlexOut(BaseSchema):
+    model_config = _ConfigDict(extra="allow")
+
+
 router = APIRouter()
 
 

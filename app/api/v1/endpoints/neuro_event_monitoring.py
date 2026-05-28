@@ -6,6 +6,14 @@ from fastapi import APIRouter, Query
 
 from app.infrastructure.eventbus.observability import event_bus_observer
 
+from app.api.v1.schemas.base import BaseSchema
+from pydantic import ConfigDict as _ConfigDict
+
+
+class CompatFlexOut(BaseSchema):
+    model_config = _ConfigDict(extra="allow")
+
+
 router = APIRouter(prefix="/neuro/event-bus", tags=["neuro-event-bus", "monitoring"])
 
 
@@ -18,7 +26,7 @@ _PROMETHEUS_COUNTERS = (
 
 
 @router.get("/metrics", summary="Event bus metrics abrufen",
-    response_model=dict
+    response_model=CompatFlexOut
 )
 async def get_event_bus_metrics() -> dict:
     out = event_bus_observer.get_metrics()
@@ -30,14 +38,14 @@ async def get_event_bus_metrics() -> dict:
 
 
 @router.get("/health", summary="Event bus health abrufen",
-    response_model=dict
+    response_model=CompatFlexOut
 )
 async def get_event_bus_health() -> dict:
     return event_bus_observer.get_health()
 
 
 @router.get("/errors", summary="Event bus errors abrufen",
-    response_model=dict
+    response_model=CompatFlexOut
 )
 async def get_event_bus_errors(limit: int = Query(20, ge=1, le=200)) -> dict:
     return {

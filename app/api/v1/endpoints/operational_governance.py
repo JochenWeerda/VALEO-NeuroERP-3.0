@@ -18,6 +18,14 @@ from ....core.operational_governance import (
     OperationalGovernanceStore,
 )
 
+from app.api.v1.schemas.base import BaseSchema
+from pydantic import ConfigDict as _ConfigDict
+
+
+class OperationalGovernanceOut(BaseSchema):
+    model_config = _ConfigDict(extra="allow")
+
+
 router = APIRouter(prefix="/governance", tags=["governance", "audit"])
 
 _STORE: OperationalGovernanceStore = OperationalGovernanceStore()
@@ -27,7 +35,7 @@ _STORE: OperationalGovernanceStore = OperationalGovernanceStore()
 # Audit Trail
 # ---------------------------------------------------------------------------
 
-@router.get("/audit-trail", response_model=list[dict], summary="Audit trail abrufen")
+@router.get("/audit-trail", response_model=list[OperationalGovernanceOut], summary="Audit trail abrufen")
 async def get_audit_trail(
     governance_type: Optional[str] = None,
     tenant_id: str = Depends(get_tenant_id),
@@ -37,7 +45,7 @@ async def get_audit_trail(
     return [e.model_dump(mode="json") for e in entries]
 
 
-@router.post("/audit-trail", response_model=dict, status_code=201, summary="Audit entry anlegen")
+@router.post("/audit-trail", response_model=OperationalGovernanceOut, status_code=201, summary="Audit entry anlegen")
 async def create_audit_entry(
     body: dict,
     tenant_id: str = Depends(get_tenant_id),
@@ -63,7 +71,7 @@ async def create_audit_entry(
 # Delegation Reviews
 # ---------------------------------------------------------------------------
 
-@router.get("/delegation-reviews", response_model=list[dict], summary="Delegation reviews auflisten")
+@router.get("/delegation-reviews", response_model=list[OperationalGovernanceOut], summary="Delegation reviews auflisten")
 async def list_delegation_reviews(
     tenant_id: str = Depends(get_tenant_id),
 ):
@@ -72,7 +80,7 @@ async def list_delegation_reviews(
     return [r.model_dump(mode="json") for r in reviews]
 
 
-@router.post("/delegation-reviews", response_model=dict, status_code=201, summary="Delegation review anlegen")
+@router.post("/delegation-reviews", response_model=OperationalGovernanceOut, status_code=201, summary="Delegation review anlegen")
 async def create_delegation_review(
     body: dict,
     tenant_id: str = Depends(get_tenant_id),
@@ -90,7 +98,7 @@ async def create_delegation_review(
     return review.model_dump(mode="json")
 
 
-@router.post("/delegation-reviews/{review_id}/approve", response_model=dict, summary="Delegation review genehmigen")
+@router.post("/delegation-reviews/{review_id}/approve", response_model=OperationalGovernanceOut, summary="Delegation review genehmigen")
 async def approve_delegation_review(
     review_id: str,
     body: dict,
@@ -109,7 +117,7 @@ async def approve_delegation_review(
     return review.model_dump(mode="json")
 
 
-@router.post("/delegation-reviews/{review_id}/reject", response_model=dict, summary="Delegation review ablehnen")
+@router.post("/delegation-reviews/{review_id}/reject", response_model=OperationalGovernanceOut, summary="Delegation review ablehnen")
 async def reject_delegation_review(
     review_id: str,
     body: dict,
@@ -133,7 +141,7 @@ async def reject_delegation_review(
 # Export Reviews
 # ---------------------------------------------------------------------------
 
-@router.get("/export-reviews", response_model=list[dict], summary="Export reviews auflisten")
+@router.get("/export-reviews", response_model=list[OperationalGovernanceOut], summary="Export reviews auflisten")
 async def list_export_reviews(
     tenant_id: str = Depends(get_tenant_id),
 ):
@@ -142,7 +150,7 @@ async def list_export_reviews(
     return [r.model_dump(mode="json") for r in reviews]
 
 
-@router.post("/export-reviews", response_model=dict, status_code=201, summary="Export review anlegen")
+@router.post("/export-reviews", response_model=OperationalGovernanceOut, status_code=201, summary="Export review anlegen")
 async def create_export_review(
     body: dict,
     tenant_id: str = Depends(get_tenant_id),

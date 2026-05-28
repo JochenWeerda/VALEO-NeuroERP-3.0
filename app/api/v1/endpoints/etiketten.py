@@ -15,6 +15,14 @@ from ....core.uuid7 import uuid7
 
 logger = logging.getLogger(__name__)
 
+from app.api.v1.schemas.base import BaseSchema
+from pydantic import ConfigDict as _ConfigDict
+
+
+class CompatFlexOut(BaseSchema):
+    model_config = _ConfigDict(extra="allow")
+
+
 router = APIRouter(prefix="/etiketten", tags=["etiketten", "druck"])
 
 

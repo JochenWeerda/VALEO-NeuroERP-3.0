@@ -17,6 +17,14 @@ from app.core.tenant import get_tenant_id
 
 logger = logging.getLogger(__name__)
 
+from app.api.v1.schemas.base import BaseSchema
+from pydantic import ConfigDict as _ConfigDict
+
+
+class CompatFlexOut(BaseSchema):
+    model_config = _ConfigDict(extra="allow")
+
+
 router = APIRouter()
 
 
@@ -330,7 +338,7 @@ async def update_period(
         raise HTTPException(status_code=500, detail=f"Failed to update period: {str(e)}")
 
 
-@router.get("/check/{tenant_id}/{period}", response_model=dict, summary="Period status prüfen")
+@router.get("/check/{tenant_id}/{period}", response_model=CompatFlexOut, summary="Period status prüfen")
 async def check_period_status(
     tenant_id: str,
     period: str,
@@ -378,7 +386,7 @@ async def check_period_status(
         raise HTTPException(status_code=500, detail=f"Failed to check period status: {str(e)}")
 
 
-@router.get("/check/{period}", response_model=dict, summary="Period status for current tenant prüfen")
+@router.get("/check/{period}", response_model=CompatFlexOut, summary="Period status for current tenant prüfen")
 async def check_period_status_for_current_tenant(
     period: str,
     tenant_id: str = Depends(get_tenant_id),

@@ -29,6 +29,14 @@ from app.infrastructure.models import (
 )
 from app.domains.inventory.api.inventory_auth import require_inventory_admin
 
+from app.api.v1.schemas.base import BaseSchema
+from pydantic import ConfigDict as _ConfigDict
+
+
+class CompatFlexOut(BaseSchema):
+    model_config = _ConfigDict(extra="allow")
+
+
 router = APIRouter()
 
 ReleaseStatus = Literal["draft", "provisional", "final", "credit_note_created", "paid", "disputed", "cancelled"]
@@ -400,7 +408,7 @@ async def delete_harvest_acceptance(
         raise HTTPException(status_code=400, detail=exc.detail)
 
 
-@router.post("/{acceptance_id}/calculate", response_model=dict, summary="Harvest settlement endpoint berechnen")
+@router.post("/{acceptance_id}/calculate", response_model=CompatFlexOut, summary="Harvest settlement endpoint berechnen")
 async def calculate_harvest_settlement_endpoint(
     acceptance_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -415,7 +423,7 @@ async def calculate_harvest_settlement_endpoint(
         raise HTTPException(status_code=400, detail=exc.detail)
 
 
-@router.post("/{acceptance_id}/derive-nuts2", response_model=dict, summary="Nuts2 from postal code endpoint derive")
+@router.post("/{acceptance_id}/derive-nuts2", response_model=CompatFlexOut, summary="Nuts2 from postal code endpoint derive")
 async def derive_nuts2_from_postal_code_endpoint(
     acceptance_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -474,7 +482,7 @@ async def cancel_harvest_acceptance(
 # QUALITÄTSPROTOKOLL-INTEGRATION
 # ============================================================================
 
-@router.post("/{acceptance_id}/qualitaetsprotokoll", response_model=dict, summary="Qualitaetsprotokoll anlegen")
+@router.post("/{acceptance_id}/qualitaetsprotokoll", response_model=CompatFlexOut, summary="Qualitaetsprotokoll anlegen")
 async def create_qualitaetsprotokoll(
     acceptance_id: str,
     data: dict,
@@ -491,7 +499,7 @@ async def create_qualitaetsprotokoll(
 
 
 
-@router.get("/{acceptance_id}/qualitaetsprotokoll", response_model=dict, summary="Qualitaetsprotokoll abrufen")
+@router.get("/{acceptance_id}/qualitaetsprotokoll", response_model=CompatFlexOut, summary="Qualitaetsprotokoll abrufen")
 async def get_qualitaetsprotokoll(
     acceptance_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -508,7 +516,7 @@ async def get_qualitaetsprotokoll(
 # FRACHTKOSTEN-BERECHNUNG
 # ============================================================================
 
-@router.post("/{acceptance_id}/frachtkosten", response_model=dict, summary="Frachtkosten berechnen")
+@router.post("/{acceptance_id}/frachtkosten", response_model=CompatFlexOut, summary="Frachtkosten berechnen")
 async def calculate_frachtkosten(
     acceptance_id: str,
     data: dict,
@@ -524,7 +532,7 @@ async def calculate_frachtkosten(
         raise HTTPException(status_code=400, detail=exc.detail)
 
 
-@router.get("/{acceptance_id}/frachtkosten", response_model=dict, summary="Frachtkosten abrufen")
+@router.get("/{acceptance_id}/frachtkosten", response_model=CompatFlexOut, summary="Frachtkosten abrufen")
 async def get_frachtkosten(
     acceptance_id: str,
     tenant_id: str = Depends(get_tenant_id),

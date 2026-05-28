@@ -11,6 +11,14 @@ from sqlalchemy.orm import Session
 from app.core.database import get_db
 from app.domains.operations.models import Zapfung, TankBestand
 
+from app.api.v1.schemas.base import BaseSchema
+from pydantic import ConfigDict as _ConfigDict
+
+
+class CompatFlexOut(BaseSchema):
+    model_config = _ConfigDict(extra="allow")
+
+
 router = APIRouter(prefix="/tankstelle", tags=["Tankstelle"])
 
 
@@ -47,7 +55,7 @@ class ZapfungPayload(BaseModel):
 
 
 @router.get("/zapfungen", summary="Zapfungen auflisten",
-    response_model=list
+    response_model=list[CompatFlexOut]
 )
 def list_zapfungen(
     kennzeichen: Optional[str] = None,
@@ -65,7 +73,7 @@ def list_zapfungen(
 
 
 @router.get("/zapfungen/{zapfung_id}", summary="Zapfung abrufen",
-    response_model=dict
+    response_model=CompatFlexOut
 )
 def get_zapfung(zapfung_id: str, db: Session = Depends(get_db)):
     obj = db.query(Zapfung).filter(Zapfung.id == zapfung_id).first()
@@ -75,7 +83,7 @@ def get_zapfung(zapfung_id: str, db: Session = Depends(get_db)):
 
 
 @router.post("/zapfungen", status_code=201, summary="Zapfung anlegen",
-    response_model=dict
+    response_model=CompatFlexOut
 )
 def create_zapfung(payload: ZapfungPayload, db: Session = Depends(get_db)):
     obj = Zapfung(**payload.model_dump())
@@ -114,7 +122,7 @@ def list_bestand(db: Session = Depends(get_db)):
 
 
 @router.patch("/bestand/{artikel}", summary="Bestand aktualisieren",
-    response_model=dict
+    response_model=CompatFlexOut
 )
 def update_bestand(artikel: str, payload: TankBestandPatch, db: Session = Depends(get_db)):
     obj = db.query(TankBestand).filter(TankBestand.artikel == artikel).first()

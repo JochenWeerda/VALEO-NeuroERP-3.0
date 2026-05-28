@@ -32,6 +32,14 @@ from app.finance.tax_resolver import resolve_partner_country, resolve_tax_key_ac
 
 logger = logging.getLogger(__name__)
 
+from app.api.v1.schemas.base import BaseSchema
+from pydantic import ConfigDict as _ConfigDict
+
+
+class CompatFlexOut(BaseSchema):
+    model_config = _ConfigDict(extra="allow")
+
+
 router = APIRouter(prefix="/finance/invoices", tags=["finance", "invoices"])
 
 
@@ -297,7 +305,7 @@ async def _create_gl_booking_and_op(db: Session, invoice: SalesInvoice, tenant_i
     logger.info("Created/updated GL booking and OP for invoice %s", invoice.number)
 
 
-@router.post("", response_model=dict, summary="Invoice anlegen")
+@router.post("", response_model=CompatFlexOut, summary="Invoice anlegen")
 async def create_invoice(
     invoice: SalesInvoice,
     tenant_id: str = Depends(get_tenant_id),
@@ -364,7 +372,7 @@ async def create_invoice(
         raise HTTPException(status_code=500, detail=f"Failed to create invoice: {str(e)}")
 
 
-@router.get("/{invoice_number}", response_model=dict, summary="Invoice abrufen")
+@router.get("/{invoice_number}", response_model=CompatFlexOut, summary="Invoice abrufen")
 async def get_invoice(
     invoice_number: str,
     db: Session = Depends(get_db)
@@ -383,7 +391,7 @@ async def get_invoice(
         raise HTTPException(status_code=500, detail=f"Failed to get invoice: {str(e)}")
 
 
-@router.put("/{invoice_number}", response_model=dict, summary="Invoice aktualisieren")
+@router.put("/{invoice_number}", response_model=CompatFlexOut, summary="Invoice aktualisieren")
 async def update_invoice(
     invoice_number: str,
     invoice: SalesInvoice,
@@ -430,7 +438,7 @@ async def update_invoice(
         raise HTTPException(status_code=500, detail=f"Failed to update invoice: {str(e)}")
 
 
-@router.get("", response_model=dict, summary="Invoices auflisten")
+@router.get("", response_model=CompatFlexOut, summary="Invoices auflisten")
 async def list_invoices(
     skip: int = Query(0, ge=0),
     limit: int = Query(100, ge=1, le=1000),
@@ -493,7 +501,7 @@ async def delete_invoice(
         raise HTTPException(status_code=500, detail=f"Failed to delete invoice: {str(e)}")
 
 
-@router.post("/{invoice_number}/storno", response_model=dict, summary="Invoice storno")
+@router.post("/{invoice_number}/storno", response_model=CompatFlexOut, summary="Invoice storno")
 async def storno_invoice(
     invoice_number: str,
     tenant_id: str = Depends(get_tenant_id),

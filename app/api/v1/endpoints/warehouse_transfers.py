@@ -233,7 +233,7 @@ async def update_transfer(
     return TransferOut.model_validate(obj)
 
 
-@router.post("/{transfer_id}/post", response_model=dict, summary="Transfer erstellen")
+@router.post("/{transfer_id}/post", response_model=TransferOut, summary="Transfer erstellen")
 async def post_transfer(
     transfer_id: str,
     tenant_id: str = Depends(get_tenant_id),

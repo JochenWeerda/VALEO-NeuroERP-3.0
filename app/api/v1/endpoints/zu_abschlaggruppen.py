@@ -20,6 +20,14 @@ from app.core.database import get_db
 from app.core.dependencies import get_tenant_id
 from app.core.uuid7 import uuid7
 
+from app.api.v1.schemas.base import BaseSchema
+from pydantic import ConfigDict as _ConfigDict
+
+
+class CompatFlexOut(BaseSchema):
+    model_config = _ConfigDict(extra="allow")
+
+
 router = APIRouter(prefix="/preise/zu-abschlaege",
                    tags=["Preise/Konditionen - Zu-/Abschläge"])
 
@@ -136,7 +144,7 @@ def create_zu_abschlaggruppe(
 
 
 @router.delete("/gruppen/{gruppe_nr}", summary="Zu abschlaggruppe löschen",
-    response_model=dict
+    response_model=CompatFlexOut
 )
 def delete_zu_abschlaggruppe(
     gruppe_nr: str,

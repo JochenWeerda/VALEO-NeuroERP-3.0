@@ -1,4 +1,4 @@
-"""
+﻿"""
 Open Items (OP) management endpoints
 RESTful API for open items settlement and matching
 FIBU-AR-05: OP-Verwaltung Ausgleich/Verrechnung
@@ -22,6 +22,14 @@ from pydantic import BaseModel
 
 logger = logging.getLogger(__name__)
 
+from app.api.v1.schemas.base import BaseSchema
+from pydantic import ConfigDict as _ConfigDict
+
+
+class CompatFlexOut(BaseSchema):
+    model_config = _ConfigDict(extra="allow")
+
+
 router = APIRouter(prefix="/open-items", tags=["finance", "open-items"])
 
 
@@ -39,7 +47,7 @@ def _get_user_id_from_request(request: Request | None) -> str | None:
             payload = auth[7:].split(".")[1]
             payload += "=" * (4 - len(payload) % 4)
             return _json.loads(_b64.urlsafe_b64decode(payload)).get("sub")
-        except Exception:  # noqa: BLE001 — JWT decode failed; caller handles None return
+        except Exception:  # noqa: BLE001 â€” JWT decode failed; caller handles None return
             pass
     return None
 
@@ -90,7 +98,7 @@ class OpenItemBase(BaseModel):
     konto_name: Optional[str] = None
     konto_typ: str = "debitoren"  # debitoren|kreditoren
     op_status: str = "offen"  # offen|teilweise|geschlossen|storniert
-# Statusmaschine: offen → (teilweise|geschlossen); geschlossen/storniert = unveränderbar (nur Storno/Korrektur über reverse_settlement)
+# Statusmaschine: offen â†’ (teilweise|geschlossen); geschlossen/storniert = unverÃ¤nderbar (nur Storno/Korrektur Ã¼ber reverse_settlement)
     rechnungsnr: str
     rechnungsdatum: date
     faelligkeit: date
@@ -432,7 +440,7 @@ async def create_open_item(payload: OpenItemCreate, request: Request, tenant_id:
     return await get_open_item(op_id, tenant_id, db)
 
 
-# Statuswerte, bei denen Update/Delete erlaubt ist (GoBD: nach Verbuchung/Schließung nur Storno)
+# Statuswerte, bei denen Update/Delete erlaubt ist (GoBD: nach Verbuchung/SchlieÃŸung nur Storno)
 OP_EDITABLE_STATUSES = {"offen", "teilweise"}
 
 
@@ -449,7 +457,7 @@ async def update_open_item(op_id: str, payload: OpenItemCreate, request: Request
     if current_status not in OP_EDITABLE_STATUSES:
         raise HTTPException(
             status_code=400,
-            detail=f"Offener Posten mit Status '{current_status}' darf nicht geändert werden. Nur bei Status 'offen' oder 'teilweise' sind Änderungen erlaubt (GoBD).",
+            detail=f"Offener Posten mit Status '{current_status}' darf nicht geÃ¤ndert werden. Nur bei Status 'offen' oder 'teilweise' sind Ã„nderungen erlaubt (GoBD).",
         )
     db.execute(
         text(
@@ -509,7 +517,7 @@ async def patch_open_item(op_id: str, payload: OpenItemUpdate, request: Request,
     return await update_open_item(op_id, merged, tenant_id, db, request)
 
 
-@router.delete("/{op_id}", status_code=204, response_class=Response, response_model=None, summary="Open item löschen")
+@router.delete("/{op_id}", status_code=204, response_class=Response, response_model=None, summary="Open item lÃ¶schen")
 async def delete_open_item(op_id: str, request: Request, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
     row = db.execute(
         text("SELECT id, op_status FROM offene_posten WHERE id = :id AND tenant_id = :tenant_id"),
@@ -521,7 +529,7 @@ async def delete_open_item(op_id: str, request: Request, tenant_id: str = Depend
     if current_status not in OP_EDITABLE_STATUSES:
         raise HTTPException(
             status_code=400,
-            detail=f"Löschen nur bei Status 'offen' oder 'teilweise' erlaubt. Aktueller Status: '{current_status}' (GoBD).",
+            detail=f"LÃ¶schen nur bei Status 'offen' oder 'teilweise' erlaubt. Aktueller Status: '{current_status}' (GoBD).",
         )
     db.execute(text("DELETE FROM offene_posten WHERE id = :id AND tenant_id = :tenant_id"), {"id": op_id, "tenant_id": tenant_id})
     db.commit()
@@ -538,7 +546,7 @@ async def batch_settle_open_items(
 ):
     """
     Sammelausgleich: Mehrere offene Posten in einem Aufruf ausgleichen.
-    Jeder Eintrag wird einzeln gebucht; Fehler pro OP werden gesammelt, der Rest wird ausgeführt.
+    Jeder Eintrag wird einzeln gebucht; Fehler pro OP werden gesammelt, der Rest wird ausgefÃ¼hrt.
     """
     results: List[SettlementResult] = []
     errors: List[BatchSettleError] = []
@@ -783,7 +791,7 @@ async def settle_open_item(
         raise HTTPException(status_code=500, detail=f"Failed to settle open item: {str(e)}")
 
 
-@router.get("/{op_id}/settlements", response_model=List[dict], summary="Settlements abrufen")
+@router.get("/{op_id}/settlements", response_model=list[CompatFlexOut], summary="Settlements abrufen")
 async def get_settlements(
     op_id: str,
     tenant_id: str = Query("system", description="Tenant ID"),
@@ -823,7 +831,7 @@ async def get_settlements(
         return []
 
 
-@router.post("/{op_id}/reverse-settlement", response_model=dict, summary="Settlement reverse")
+@router.post("/{op_id}/reverse-settlement", response_model=CompatFlexOut, summary="Settlement reverse")
 async def reverse_settlement(
     op_id: str,
     settlement_id: str,
@@ -946,3 +954,4 @@ async def reverse_settlement(
     except Exception as e:
         db.rollback()
         raise HTTPException(status_code=500, detail=f"Failed to reverse settlement: {str(e)}")
+

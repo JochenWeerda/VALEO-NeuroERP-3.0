@@ -44,3 +44,10 @@ Ohne Registrierung werden bekannte Aktionen trotzdem ausgeführt: **Navigation**
 ## Feature-Flag
 
 - `voiceControl`: An/Aus für den Mikrofon-Button in der TopBar (env: `VITE_FEATURE_VOICE_CONTROL`).
+
+## WhisperBar (Slice-013c)
+
+- **Strg+Shift+1** — Diktat starten (Browser, poliert via Ollama)
+- **Strg+Shift+2** — Clipboard-Text zusammenfassen (~15s, in Zwischenablage)
+- Windows: `tools/voice/whisperbar.ahk` + `whisperbar-summary.ps1` (ki-usability auf Port 5200)
+- Pipeline-API: `POST /api/v1/voice/pipeline` mit `mode: dictate | summary | intent`

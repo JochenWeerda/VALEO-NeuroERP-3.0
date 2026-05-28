@@ -15,11 +15,19 @@ from fastapi import Request
 
 logger = logging.getLogger(__name__)
 
+from app.api.v1.schemas.base import BaseSchema
+from pydantic import ConfigDict as _ConfigDict
+
+
+class CompatFlexOut(BaseSchema):
+    model_config = _ConfigDict(extra="allow")
+
+
 router = APIRouter()
 
 
 @router.get("/data-export/{user_id}", summary="User data exportieren",
-    response_model=dict
+    response_model=CompatFlexOut
 )
 async def export_user_data(
     user_id: str,
@@ -171,7 +179,7 @@ async def delete_user_data(
 
 
 @router.get("/export-portable/{user_id}", summary="Portable data exportieren",
-    response_model=dict
+    response_model=CompatFlexOut
 )
 async def export_portable_data(
     user_id: str,

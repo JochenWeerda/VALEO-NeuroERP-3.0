@@ -13,6 +13,14 @@ from sqlalchemy.orm import Session
 from app.core.database import get_db
 from app.core.tenant import get_tenant_id
 
+from app.api.v1.schemas.base import BaseSchema
+from pydantic import ConfigDict as _ConfigDict
+
+
+class CompatFlexOut(BaseSchema):
+    model_config = _ConfigDict(extra="allow")
+
+
 router = APIRouter(prefix="/saatzucht", tags=["saatzucht", "agrar", "saatgut"])
 
 # ── Schemas ───────────────────────────────────────────────────────────────────
@@ -296,7 +304,7 @@ def etikett(
 
 
 @router.get("/partien/{id}/kontrollprotokoll", summary="Kontrollprotokoll",
-    response_model=dict
+    response_model=CompatFlexOut
 )
 def kontrollprotokoll(
     id: str,
@@ -318,7 +326,7 @@ def kontrollprotokoll(
 
 
 @router.get("/statistik", summary="Statistik",
-    response_model=dict
+    response_model=CompatFlexOut
 )
 def statistik(
     db: Session = Depends(get_db),

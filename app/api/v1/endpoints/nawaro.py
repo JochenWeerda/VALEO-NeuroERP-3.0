@@ -22,6 +22,14 @@ from app.infrastructure.models import (
     NawaroAreaSheetRow,
 )
 
+from app.api.v1.schemas.base import BaseSchema
+from pydantic import ConfigDict as _ConfigDict
+
+
+class CompatFlexOut(BaseSchema):
+    model_config = _ConfigDict(extra="allow")
+
+
 router = APIRouter()
 
 DeliveryOption = Literal[
@@ -309,7 +317,7 @@ async def update_print_notification(
     return _notification_out(item)
 
 
-@router.delete('/print-notifications/{item_id}', response_model=dict, summary="Print notification löschen")
+@router.delete('/print-notifications/{item_id}', response_model=CompatFlexOut, summary="Print notification löschen")
 async def delete_print_notification(
     item_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -448,7 +456,7 @@ async def update_contract_sheet(
     return _contract_sheet_out(db, item)
 
 
-@router.delete('/contract-sheets/{sheet_id}', response_model=dict, summary="Contract sheet löschen")
+@router.delete('/contract-sheets/{sheet_id}', response_model=CompatFlexOut, summary="Contract sheet löschen")
 async def delete_contract_sheet(
     sheet_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -602,7 +610,7 @@ async def update_area_sheet(
     return _area_sheet_out(db, item)
 
 
-@router.delete('/area-sheets/{sheet_id}', response_model=dict, summary="Area sheet löschen")
+@router.delete('/area-sheets/{sheet_id}', response_model=CompatFlexOut, summary="Area sheet löschen")
 async def delete_area_sheet(
     sheet_id: str,
     tenant_id: str = Depends(get_tenant_id),

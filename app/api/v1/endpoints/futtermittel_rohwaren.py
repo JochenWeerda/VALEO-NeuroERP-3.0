@@ -1,16 +1,16 @@
-"""
-Futtermittel Rohwaren-Stamm mit Nährstoffprofil
+﻿"""
+Futtermittel Rohwaren-Stamm mit NÃ¤hrstoffprofil
 
 Endpunkte:
-  GET/POST  /futtermittel/rohwaren                   — Liste / Erstellen
-  GET/PATCH /futtermittel/rohwaren/{id}               — Detail / Update
-  GET       /futtermittel/rohwaren/{id}/analysen      — Analyse-Historie
-  POST      /futtermittel/rohwaren/{id}/analysen      — Neue Laboranalyse
-  GET       /futtermittel/rohwaren/vergleich          — Nährstoffvergleich mehrerer Rohwaren
+  GET/POST  /futtermittel/rohwaren                   â€” Liste / Erstellen
+  GET/PATCH /futtermittel/rohwaren/{id}               â€” Detail / Update
+  GET       /futtermittel/rohwaren/{id}/analysen      â€” Analyse-Historie
+  POST      /futtermittel/rohwaren/{id}/analysen      â€” Neue Laboranalyse
+  GET       /futtermittel/rohwaren/vergleich          â€” NÃ¤hrstoffvergleich mehrerer Rohwaren
 
 Tabellen (schema: domain_futtermittel):
-  feed_raw_materials       — Rohwaren-Stamm mit Nährstoffprofil
-  raw_material_analyses    — Laboranalysen (JSONB werte)
+  feed_raw_materials       â€” Rohwaren-Stamm mit NÃ¤hrstoffprofil
+  raw_material_analyses    â€” Laboranalysen (JSONB werte)
 """
 
 from __future__ import annotations
@@ -31,6 +31,14 @@ from app.core.tenant import get_tenant_id
 from app.core.uuid7 import uuid7
 
 logger = logging.getLogger(__name__)
+
+from app.api.v1.schemas.base import BaseSchema
+from pydantic import ConfigDict as _ConfigDict
+
+
+class CompatFlexOut(BaseSchema):
+    model_config = _ConfigDict(extra="allow")
+
 
 router = APIRouter(prefix="/futtermittel/rohwaren", tags=["futtermittel", "rohwaren"])
 
@@ -141,7 +149,7 @@ def _row_to_dict(row) -> dict:
 # Endpoints
 # ---------------------------------------------------------------------------
 
-@router.get("", response_model=List[Dict[str, Any]], summary="Rohwaren auflisten")
+@router.get("", response_model=list[CompatFlexOut], summary="Rohwaren auflisten")
 async def list_rohwaren(
     kategorie: Optional[str] = Query(None),
     search: Optional[str] = Query(None),
@@ -172,7 +180,7 @@ async def list_rohwaren(
 
 
 @router.post("", status_code=201, summary="Rohware anlegen",
-    response_model=dict
+    response_model=CompatFlexOut
 )
 async def create_rohware(
     payload: RohwareIn,
@@ -181,7 +189,7 @@ async def create_rohware(
 ):
     """Neue Rohware anlegen."""
     if payload.kategorie not in KATEGORIEN:
-        raise HTTPException(status_code=422, detail=f"Ungültige Kategorie. Erlaubt: {sorted(KATEGORIEN)}")
+        raise HTTPException(status_code=422, detail=f"UngÃ¼ltige Kategorie. Erlaubt: {sorted(KATEGORIEN)}")
     try:
         _ensure_tables(db)
         new_id = uuid7()
@@ -214,14 +222,14 @@ async def create_rohware(
 
 
 @router.get("/vergleich", summary="Rohwaren vergleich",
-    response_model=dict
+    response_model=CompatFlexOut
 )
 async def vergleich_rohwaren(
     ids: str = Query(..., description="Komma-getrennte IDs"),
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
-    """Nährstoffvergleich mehrerer Rohwaren nebeneinander."""
+    """NÃ¤hrstoffvergleich mehrerer Rohwaren nebeneinander."""
     id_list = [i.strip() for i in ids.split(",") if i.strip()]
     if not id_list:
         raise HTTPException(status_code=422, detail="Parameter 'ids' darf nicht leer sein")
@@ -259,14 +267,14 @@ async def vergleich_rohwaren(
 
 
 @router.get("/{rohware_id}", summary="Rohware abrufen",
-    response_model=dict
+    response_model=CompatFlexOut
 )
 async def get_rohware(
     rohware_id: str,
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
-    """Rohware-Detail inkl. Nährstoffprofil."""
+    """Rohware-Detail inkl. NÃ¤hrstoffprofil."""
     try:
         _ensure_tables(db)
         sql = text("""
@@ -283,7 +291,7 @@ async def get_rohware(
 
 
 @router.patch("/{rohware_id}", summary="Rohware aktualisieren",
-    response_model=dict
+    response_model=CompatFlexOut
 )
 async def update_rohware(
     rohware_id: str,
@@ -298,7 +306,7 @@ async def update_rohware(
     try:
         _ensure_tables(db)
         set_clauses = ", ".join(f"{k} = :{k}" for k in updates)
-        # nosec S608 — reviewed-safe: column names code-controlled, values parameterized
+        # nosec S608 â€” reviewed-safe: column names code-controlled, values parameterized
         sql = text(f"""
             UPDATE domain_futtermittel.feed_raw_materials
             SET {set_clauses}, updated_at = NOW()
@@ -317,14 +325,14 @@ async def update_rohware(
 
 
 @router.get("/{rohware_id}/analysen", summary="Analysen auflisten",
-    response_model=list
+    response_model=list[CompatFlexOut]
 )
 async def list_analysen(
     rohware_id: str,
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
-    """Alle Laboranalysen für eine Rohware."""
+    """Alle Laboranalysen fÃ¼r eine Rohware."""
     try:
         _ensure_tables(db)
         sql = text("""
@@ -341,7 +349,7 @@ async def list_analysen(
 
 
 @router.post("/{rohware_id}/analysen", status_code=201, summary="Analyse anlegen",
-    response_model=dict
+    response_model=CompatFlexOut
 )
 async def create_analyse(
     rohware_id: str,
@@ -349,7 +357,7 @@ async def create_analyse(
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
-    """Neue Laboranalyse für eine Rohware erfassen."""
+    """Neue Laboranalyse fÃ¼r eine Rohware erfassen."""
     try:
         _ensure_tables(db)
         # Verify material exists
@@ -385,3 +393,4 @@ async def create_analyse(
         db.rollback()
         logger.exception("create_analyse failed: %s", exc)
         raise HTTPException(status_code=503, detail="Datenbank nicht erreichbar")
+

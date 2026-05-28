@@ -20,6 +20,14 @@ from app.core.workflow_runtime import (
     WorkflowRuntimeStore,
 )
 
+from app.api.v1.schemas.base import BaseSchema
+from pydantic import ConfigDict as _ConfigDict
+
+
+class WorkflowRuntimeOut(BaseSchema):
+    model_config = _ConfigDict(extra="allow")
+
+
 router = APIRouter(prefix="/workflow/runtime", tags=["workflow", "runtime"])
 
 # ---------------------------------------------------------------------------
@@ -56,7 +64,7 @@ class CheckpointRequest(BaseModel):
 
 
 @router.get("/instances", summary="Instances auflisten",
-    response_model=list
+    response_model=list[WorkflowRuntimeOut]
 )
 async def list_instances(
     status: Optional[str] = None,
@@ -81,7 +89,7 @@ async def list_instances(
 
 
 @router.post("/instances", summary="Instance anlegen",
-    response_model=dict
+    response_model=WorkflowRuntimeOut
 )
 async def create_instance(
     request: CreateInstanceRequest,
@@ -108,7 +116,7 @@ async def create_instance(
 
 
 @router.get("/instances/{instance_id}", summary="Instance abrufen",
-    response_model=dict
+    response_model=WorkflowRuntimeOut
 )
 async def get_instance(
     instance_id: str,
@@ -124,7 +132,7 @@ async def get_instance(
 
 
 @router.post("/instances/{instance_id}/checkpoint", summary="Checkpoint hinzufügen",
-    response_model=dict
+    response_model=WorkflowRuntimeOut
 )
 async def add_checkpoint(
     instance_id: str,
@@ -151,7 +159,7 @@ async def add_checkpoint(
 
 
 @router.post("/instances/{instance_id}/resume", summary="Instance fortsetzen",
-    response_model=dict
+    response_model=WorkflowRuntimeOut
 )
 async def resume_instance(
     instance_id: str,
@@ -176,7 +184,7 @@ async def resume_instance(
 
 
 @router.post("/instances/{instance_id}/cancel", summary="Instance stornieren",
-    response_model=dict
+    response_model=WorkflowRuntimeOut
 )
 async def cancel_instance(
     instance_id: str,
@@ -203,7 +211,7 @@ async def cancel_instance(
 
 
 @router.get("/instances/{instance_id}/replay", summary="Replay abrufen",
-    response_model=dict
+    response_model=WorkflowRuntimeOut
 )
 async def get_replay(
     instance_id: str,

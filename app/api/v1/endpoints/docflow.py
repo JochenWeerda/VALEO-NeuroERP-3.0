@@ -14,6 +14,14 @@ from ....core.database import get_db
 from app.core.exceptions import ConflictError, EntityNotFoundError, ValidationFailedError
 from app.services.docflow_service import DocflowService, POS_TYPES
 
+from app.api.v1.schemas.base import BaseSchema
+from pydantic import ConfigDict as _ConfigDict
+
+
+class DocflowOut(BaseSchema):
+    model_config = _ConfigDict(extra="allow")
+
+
 router = APIRouter()
 
 DEFAULT_TENANT = settings.DEFAULT_TENANT_ID
@@ -273,7 +281,7 @@ async def get_document(
     return _row_to_header_out(svc, doc_id)
 
 
-@router.get("/{doc_id}/pos-compliance", response_model=dict[str, Any], summary="Pos compliance abrufen")
+@router.get("/{doc_id}/pos-compliance", response_model=DocflowOut, summary="Pos compliance abrufen")
 async def get_pos_compliance(
     doc_id: str,
     tenant_id: Optional[str] = Query(None),

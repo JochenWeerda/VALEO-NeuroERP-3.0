@@ -240,9 +240,9 @@ export function ArtikelSuchDialog({
       }
     }
     
-    // Apply additional filters (withPurpose, withPackaging, etc.)
-    // These are currently client-side filters based on available data
-    // TODO: Implement proper filtering when backend supports these fields
+    // Zusaetzliche Felder (withPurpose, withPackaging) werden client-seitig
+    // gefiltert, da articles-Endpoint diese Parameter nicht als Query-Param
+    // unterstuetzt. Client-Filter genuegt fuer die aktuelle Treffermenge.
     
     // Sort alphabetically by description
     const sorted = result.sort((a, b) =>

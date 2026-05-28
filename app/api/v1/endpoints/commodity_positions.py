@@ -24,6 +24,14 @@ from app.services.position_service import (
 )
 from app.services.position_snapshot_service import PositionSnapshotService
 
+from app.api.v1.schemas.base import BaseSchema
+from pydantic import ConfigDict as _ConfigDict
+
+
+class CompatFlexOut(BaseSchema):
+    model_config = _ConfigDict(extra="allow")
+
+
 router = APIRouter(prefix="/positions", tags=["positions", "commodity"])
 
 
@@ -428,7 +436,7 @@ def get_kpi(
 
 
 @router.post("/refresh", summary="Snapshot aktualisieren",
-    response_model=dict
+    response_model=CompatFlexOut
 )
 def refresh_snapshot(
     tenant_id: str = Depends(get_tenant_id),
