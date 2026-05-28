@@ -21,41 +21,12 @@ from app.api.v1.schemas.rag_schemas import RagOut
 
 router = APIRouter()
 
-
-class SearchRequest(BaseModel):
-    """RAG search request."""
-    query: str
-    collection: str = "articles"
-    limit: int = 10
-    filters: Optional[Dict[str, Any]] = None
-
-
 class SearchResult(BaseModel):
     """RAG search result."""
     id: str
     text: str
     metadata: Dict[str, Any]
     distance: float
-
-
-class SearchResponse(BaseModel):
-    """RAG search response."""
-    query: str
-    results: List[SearchResult]
-    total: int
-
-
-class IndexRequest(BaseModel):
-    """Indexing request."""
-    tenant_id: str = "system"
-
-
-class IndexResponse(BaseModel):
-    """Indexing response."""
-    collection: str
-    documents_indexed: int
-    status: str
-
 
 @router.post("/search", response_model=SearchResponse, summary="Search semantic")
 async def semantic_search(request: SearchRequest):

@@ -51,50 +51,6 @@ DEFAULT_ACCOUNTS = {
 
 # ── Schemas ─────────────────────────────────────────────────────
 
-class BestandskorrekturIn(BaseModel):
-    article_id: str = Field(..., description="Artikel-ID")
-    warehouse_id: str = Field(..., description="Lagerort-ID")
-    menge: float = Field(..., description="Korrekturbetrag (positiv=Zugang, negativ=Abgang)")
-    grund: str = Field(..., description="Grund-Code: schwund, bruch, mhd_verfall, diebstahl, messdifferenz, qualitaetsmangel, sonstige")
-    bemerkung: Optional[str] = Field(None, description="Freitextbemerkung")
-    charge: Optional[str] = Field(None, description="Chargen-Nummer (optional)")
-    buchungsdatum: Optional[date] = Field(None, description="Buchungsdatum (default: heute)")
-
-
-class BestandskorrekturOut(BaseModel):
-    id: str
-    article_id: str
-    warehouse_id: str
-    menge: float
-    grund: str
-    grund_text: str
-    bemerkung: Optional[str]
-    charge: Optional[str]
-    buchungsdatum: date
-    movement_id: str
-    journal_entry_id: Optional[str]
-    status: str
-
-
-class SchwundBuchungIn(BaseModel):
-    article_id: str = Field(..., description="Artikel-ID")
-    warehouse_id: str = Field(..., description="Lagerort-ID")
-    menge: float = Field(..., gt=0, description="Schwundmenge (positiv)")
-    bemerkung: Optional[str] = Field(None)
-    charge: Optional[str] = Field(None)
-    buchungsdatum: Optional[date] = Field(None)
-
-
-class MhdAbschreibungIn(BaseModel):
-    article_id: str = Field(..., description="Artikel-ID")
-    warehouse_id: str = Field(..., description="Lagerort-ID")
-    menge: float = Field(..., gt=0, description="Abzuschreibende Menge")
-    charge: str = Field(..., description="Chargen-Nummer der abgelaufenen Ware")
-    mhd: date = Field(..., description="Mindesthaltbarkeitsdatum")
-    bemerkung: Optional[str] = Field(None)
-    buchungsdatum: Optional[date] = Field(None)
-
-
 # ── GL Posting Helper ──────────────────────────────────────────
 
 def _ensure_account(db, tenant_id: str, account_number: str, account_name: str, account_type: str, category: str) -> str:

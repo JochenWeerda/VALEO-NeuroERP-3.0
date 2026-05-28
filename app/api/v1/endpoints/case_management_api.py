@@ -22,30 +22,15 @@ from app.services.case_management import (
 )
 
 from app.api.v1.schemas.base import BaseSchema
+from app.api.v1.schemas.case_management_api_schemas import (
+    AssignRequest,
+    CaseManagementOut,
+    DecideRequest,
+    EscalateRequest,
+)
 from pydantic import ConfigDict as _ConfigDict
 
-
-class CaseManagementOut(BaseSchema):
-    model_config = _ConfigDict(extra="allow")
-
-
 router = APIRouter(prefix="/neuro/cases", tags=["neuro-core", "case-management"])
-
-
-class DecideRequest(BaseModel):
-    decision: str = Field(..., description="GENEHMIGT | ABGELEHNT | ESKALIERT")
-    decided_by: str = Field(...)
-    comment: str = Field("")
-
-
-class AssignRequest(BaseModel):
-    user_id: str = Field(...)
-
-
-class EscalateRequest(BaseModel):
-    escalate_to: str = Field(...)
-    reason: str = Field("")
-
 
 class ListQuery(BaseModel):
     status: Optional[str] = None

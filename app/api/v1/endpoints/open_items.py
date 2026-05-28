@@ -69,25 +69,10 @@ class SettlementResult(BaseModel):
     settlement_date: datetime
     audit_trail_id: Optional[str] = None
 
-
-class BatchSettleRequest(BaseModel):
-    """Request for batch settlement (Sammelausgleich)"""
-    items: List[OpenItemSettlement]
-
-
 class BatchSettleError(BaseModel):
     """Single error in batch settlement"""
     op_id: str
     detail: str
-
-
-class BatchSettleResponse(BaseModel):
-    """Result of batch settlement"""
-    results: List[SettlementResult]
-    success_count: int
-    error_count: int
-    errors: List[BatchSettleError]
-
 
 class OpenItemBase(BaseModel):
     konto_nr: Optional[str] = None
@@ -117,50 +102,11 @@ class OpenItemBase(BaseModel):
     kv_limit: Optional[Decimal] = None
     sperre_grund: Optional[str] = None
 
-
-class OpenItemCreate(OpenItemBase):
-    pass
-
-
-class OpenItemUpdate(BaseModel):
-    konto_nr: Optional[str] = None
-    konto_name: Optional[str] = None
-    konto_typ: Optional[str] = None
-    op_status: Optional[str] = None
-    rechnungsnr: Optional[str] = None
-    rechnungsdatum: Optional[date] = None
-    faelligkeit: Optional[date] = None
-    valuta: Optional[date] = None
-    op_betrag: Optional[Decimal] = None
-    saldo: Optional[Decimal] = None
-    offen: Optional[Decimal] = None
-    op_text: Optional[str] = None
-    waehrung: Optional[str] = None
-    kunde_id: Optional[str] = None
-    kunde_name: Optional[str] = None
-    lieferant_id: Optional[str] = None
-    lieferant_name: Optional[str] = None
-    skonto_prozent: Optional[Decimal] = None
-    skonto_bis: Optional[date] = None
-    mahn_stufe: Optional[int] = None
-    zahlbar: Optional[bool] = None
-    letzte_bewegung_am: Optional[date] = None
-    kredit_limit: Optional[Decimal] = None
-    kv_limit: Optional[Decimal] = None
-    sperre_grund: Optional[str] = None
-
-
 class OpenItem(OpenItemBase):
     id: str
     tenant_id: str
     created_at: datetime
     updated_at: datetime
-
-
-class OpenItemListResponse(BaseModel):
-    items: List[OpenItem]
-    summary: dict
-
 
 def _val(row: dict, key: str, default=None):
     return row.get(key, default)

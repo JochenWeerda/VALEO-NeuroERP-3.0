@@ -23,12 +23,13 @@ from app.core.database import get_db
 from app.core.tenant import get_tenant_id
 
 from app.api.v1.schemas.base import BaseSchema
+from app.api.v1.schemas.rfq_schemas import (
+    QuoteCreate,
+    RfqCreate,
+    RfqOut,
+    SendRequest,
+)
 from pydantic import ConfigDict as _ConfigDict
-
-
-class RfqOut(BaseSchema):
-    model_config = _ConfigDict(extra="allow")
-
 
 router = APIRouter(prefix="/einkauf/rfq", tags=["einkauf", "rfq"])
 
@@ -36,24 +37,6 @@ router = APIRouter(prefix="/einkauf/rfq", tags=["einkauf", "rfq"])
 # ─────────────────────────────────────────────────────────────────────────────
 # Schemas
 # ─────────────────────────────────────────────────────────────────────────────
-
-class RfqCreate(BaseModel):
-    article_id: str
-    quantity: float
-    needed_by_date: Optional[date] = None
-    notes: Optional[str] = None
-
-
-class QuoteCreate(BaseModel):
-    supplier_id: str
-    unit_price: float
-    delivery_days: Optional[int] = None
-    notes: Optional[str] = None
-
-
-class SendRequest(BaseModel):
-    supplier_ids: Optional[List[str]] = None
-
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Helpers

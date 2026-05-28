@@ -17,6 +17,12 @@ from pydantic import BaseModel, Field, field_validator
 logger = logging.getLogger(__name__)
 
 from app.api.v1.schemas.base import BaseSchema
+from app.api.v1.schemas.batch_schemas import (
+    BatchRequest,
+    BatchResponse,
+    SubRequest,
+    SubResponse,
+)
 
 
 router = APIRouter()
@@ -24,33 +30,6 @@ router = APIRouter()
 MAX_SUBREQUESTS = 10
 SUBREQUEST_TIMEOUT_S = 5.0
 ALLOWED_PATH_PREFIX = "/api/v1/"
-
-
-class SubRequest(BaseModel):
-    id: str = Field(description="Client-assigned correlation id")
-    path: str = Field(description="Relative API path, e.g. /api/v1/contacts?skip=0&limit=25")
-
-    @field_validator("path")
-    @classmethod
-    def _validate_path(cls, v: str) -> str:
-        if not v.startswith(ALLOWED_PATH_PREFIX):
-            raise ValueError(f"Only paths starting with {ALLOWED_PATH_PREFIX} are allowed")
-        return v
-
-
-class BatchRequest(BaseModel):
-    requests: list[SubRequest] = Field(max_length=MAX_SUBREQUESTS)
-
-
-class SubResponse(BaseModel):
-    id: str
-    status: int
-    body: Any
-
-
-class BatchResponse(BaseModel):
-    responses: list[SubResponse]
-
 
 async def _execute_subrequest(
     app: Any,

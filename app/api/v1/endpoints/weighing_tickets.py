@@ -24,6 +24,14 @@ from modules.agrar.services.weighing_domain import (
 from app.services.agrar_contract_service import _compute_status
 from ..schemas.base import PaginatedResponse, BaseSchema
 from app.core.uuid7 import uuid7
+from app.api.v1.schemas.weighing_tickets_schemas import (
+    ArticleGroupOut,
+    WeighingTicketContractAllocationOut,
+    WeighingTicketContractAllocationRequest,
+    WeighingTicketCreate,
+    WeighingTicketOut,
+    WeighingTicketUpdate,
+)
 
 router = APIRouter()
 DEFAULT_TENANT = settings.DEFAULT_TENANT_ID
@@ -37,90 +45,6 @@ def _build_weighing_ticket_dq_datensatz(data: dict[str, Any]) -> dict[str, objec
         "brutto_gewicht_kg": data.get("gross_weight"),
         "netto_gewicht_kg": data.get("net_weight"),
     }
-
-
-class WeighingTicketOut(BaseSchema):
-    id: str
-    ticket_number: str
-    scale_id: Optional[str] = None
-    vehicle_plate: Optional[str] = None
-    gross_weight: Optional[float] = None
-    tare_weight: Optional[float] = None
-    net_weight: Optional[float] = None
-    first_weighing_at: Optional[datetime] = None
-    second_weighing_at: Optional[datetime] = None
-    moisture_pct: Optional[float] = None
-    protein_pct: Optional[float] = None
-    impurities_pct: Optional[float] = None
-    hl_weight: Optional[float] = None
-    billing_weight: Optional[float] = None
-    quality_data: Optional[dict[str, Any]] = None
-    contract_id: Optional[str] = None
-    allocated_quantity_kg: Optional[float] = None
-    allocation_status: Optional[str] = "unallocated"
-    status: str = "open"
-    direction: str = "in"
-    reference_doc: Optional[str] = None
-    article_group: Optional[str] = None
-    article_id: Optional[str] = None
-    notes: Optional[str] = None
-
-
-class WeighingTicketCreate(BaseModel):
-    ticket_number: str
-    scale_id: Optional[str] = None
-    vehicle_plate: Optional[str] = None
-    gross_weight: Optional[float] = None
-    tare_weight: Optional[float] = None
-    net_weight: Optional[float] = None
-    first_weighing_at: Optional[datetime] = None
-    second_weighing_at: Optional[datetime] = None
-    moisture_pct: Optional[float] = Field(default=None, ge=0, le=100)
-    protein_pct: Optional[float] = Field(default=None, ge=0, le=100)
-    impurities_pct: Optional[float] = Field(default=None, ge=0, le=100)
-    hl_weight: Optional[float] = Field(default=None, ge=0)
-    billing_weight: Optional[float] = Field(default=None, ge=0)
-    quality_data: Optional[dict[str, Any]] = None
-    direction: str = "in"
-    reference_doc: Optional[str] = None
-    article_group: Optional[str] = None
-    article_id: Optional[str] = None
-    notes: Optional[str] = None
-
-
-class WeighingTicketUpdate(BaseModel):
-    gross_weight: Optional[float] = None
-    tare_weight: Optional[float] = None
-    net_weight: Optional[float] = None
-    first_weighing_at: Optional[datetime] = None
-    second_weighing_at: Optional[datetime] = None
-    moisture_pct: Optional[float] = Field(default=None, ge=0, le=100)
-    protein_pct: Optional[float] = Field(default=None, ge=0, le=100)
-    impurities_pct: Optional[float] = Field(default=None, ge=0, le=100)
-    hl_weight: Optional[float] = Field(default=None, ge=0)
-    billing_weight: Optional[float] = Field(default=None, ge=0)
-    quality_data: Optional[dict[str, Any]] = None
-    status: Optional[str] = None
-    vehicle_plate: Optional[str] = None
-    article_group: Optional[str] = None
-    article_id: Optional[str] = None
-    notes: Optional[str] = None
-
-
-class WeighingTicketContractAllocationRequest(BaseModel):
-    contract_id: str
-    allocation_quantity_kg: Optional[float] = Field(default=None, gt=0)
-    note: Optional[str] = None
-
-
-class WeighingTicketContractAllocationOut(BaseSchema):
-    ticket_id: str
-    contract_id: str
-    allocation_id: str
-    allocation_quantity_kg: float
-    contract_remaining_quantity_kg: float
-    contract_status: str
-
 
 def _validate_and_compute_weights(gross_weight: Optional[float], tare_weight: Optional[float], net_weight: Optional[float]) -> float | None:
     return _validate_and_compute_weights_impl(gross_weight, tare_weight, net_weight)
@@ -166,12 +90,6 @@ async def list_weighing_tickets(
         total=total, page=page, size=limit, pages=pages,
         has_next=(skip + limit) < total, has_prev=skip > 0,
     )
-
-
-class ArticleGroupOut(BaseModel):
-    warengruppe: str
-    count: int
-
 
 @router.get("/article-groups", response_model=list[ArticleGroupOut], summary="Article groups auflisten")
 async def list_article_groups(

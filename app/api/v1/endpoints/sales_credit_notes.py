@@ -27,6 +27,13 @@ from app.core.fibu_audit import log_fibu_audit
 logger = logging.getLogger(__name__)
 
 from app.api.v1.schemas.base import BaseSchema
+from app.api.v1.schemas.sales_credit_notes_schemas import (
+    CreditNoteCreate,
+    CreditNoteLineOut,
+    CreditNoteOut,
+    ReturnCreate,
+    ReturnOut,
+)
 
 
 router = APIRouter(prefix="/sales", tags=["sales", "credit-notes", "returns"])
@@ -50,12 +57,6 @@ class CreditNoteLineInput(BaseModel):
     unit_price: Decimal = Field(ge=Decimal("0"))
     tax_rate: Decimal = Field(default=Decimal("19"))
 
-
-class CreditNoteLineOut(CreditNoteLineInput):
-    id: str
-    line_total: Decimal
-
-
 class CreditNoteBase(BaseModel):
     credit_note_number: str = Field(..., min_length=1, max_length=64)
     customer_id: str
@@ -67,18 +68,6 @@ class CreditNoteBase(BaseModel):
     status: str = "draft"
     notes: Optional[str] = None
     lines: List[CreditNoteLineInput] = Field(default_factory=list)
-
-
-class CreditNoteCreate(CreditNoteBase):
-    tenant_id: Optional[str] = None
-
-
-class CreditNoteOut(CreditNoteBase):
-    id: str
-    tenant_id: str
-    created_at: Optional[datetime] = None
-    updated_at: Optional[datetime] = None
-
 
 @router.post("/credit-notes", response_model=CreditNoteOut, status_code=201, summary="Credit note anlegen")
 async def create_credit_note(
@@ -276,18 +265,6 @@ class ReturnBase(BaseModel):
     return_type: str = "full"
     status: str = "open"
     notes: Optional[str] = None
-
-
-class ReturnCreate(ReturnBase):
-    tenant_id: Optional[str] = None
-
-
-class ReturnOut(ReturnBase):
-    id: str
-    tenant_id: str
-    created_at: Optional[datetime] = None
-    updated_at: Optional[datetime] = None
-
 
 @router.post("/returns", response_model=ReturnOut, status_code=201, summary="Return anlegen")
 async def create_return(

@@ -16,6 +16,12 @@ from pydantic import BaseModel
 logger = logging.getLogger(__name__)
 
 from app.api.v1.schemas.base import BaseSchema
+from app.api.v1.schemas.admin_dms_schemas import (
+    DmsBootstrapResponse,
+    DmsConnectionRequest,
+    DmsStatusResponse,
+    DmsTestResponse,
+)
 
 
 router = APIRouter(prefix="/admin/dms")
@@ -27,34 +33,6 @@ _CONFIG_PATH = Path("data/config/dms.json")
 # ---------------------------------------------------------------------------
 # Pydantic schemas
 # ---------------------------------------------------------------------------
-
-class DmsStatusResponse(BaseModel):
-    ok: bool
-    configured: bool
-    base: Optional[str] = None
-    document_types: Optional[List[str]] = None
-    metadata_types: Optional[List[str]] = None
-    message: Optional[str] = None
-
-
-class DmsConnectionRequest(BaseModel):
-    base: str
-    token: str
-
-
-class DmsTestResponse(BaseModel):
-    ok: bool
-    error: Optional[str] = None
-
-
-class DmsBootstrapResponse(BaseModel):
-    ok: bool
-    created: Optional[int] = None
-    updated: Optional[int] = None
-    message: Optional[str] = None
-    document_types: Optional[List[str]] = None
-    metadata_types: Optional[List[str]] = None
-
 
 # ---------------------------------------------------------------------------
 # Helpers

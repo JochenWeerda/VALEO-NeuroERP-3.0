@@ -21,12 +21,13 @@ from app.services.policy_registry import (
 )
 
 from app.api.v1.schemas.base import BaseSchema
+from app.api.v1.schemas.neuro_event_policy_schemas import (
+    NeuroEventPolicyOut,
+    RegisterPolicyRequest,
+    SelectPolicyVariantRequest,
+    ValidateEventRequest,
+)
 from pydantic import ConfigDict as _ConfigDict
-
-
-class NeuroEventPolicyOut(BaseSchema):
-    model_config = _ConfigDict(extra="allow")
-
 
 router = APIRouter(tags=["neuro-core", "events", "policy"])
 
@@ -41,12 +42,6 @@ router = APIRouter(tags=["neuro-core", "events", "policy"])
 async def get_event_types():
     return {"types": list_event_types()}
 
-
-class ValidateEventRequest(BaseModel):
-    event_type: str
-    payload: dict[str, Any] = Field(default_factory=dict)
-
-
 @router.post("/neuro/events/validate", summary="Validate event do",
     response_model=NeuroEventPolicyOut
 )
@@ -57,15 +52,6 @@ async def do_validate_event(request: ValidateEventRequest):
 # ---------------------------------------------------------------------------
 # Policy Registry
 # ---------------------------------------------------------------------------
-
-class RegisterPolicyRequest(BaseModel):
-    policy_id: str
-    name: str
-    version: str = "1.0"
-    rules: dict[str, Any] = Field(default_factory=dict)
-    variant_key: Optional[str] = None
-    traffic_weight: Optional[float] = None
-
 
 @router.post("/neuro/policies", summary="Register policy do",
     response_model=NeuroEventPolicyOut
@@ -120,11 +106,6 @@ async def do_list_policy_variants(
     db: Session = Depends(get_db),
 ):
     return {"items": list_active_variants(policy_id, tenant_id, db)}
-
-
-class SelectPolicyVariantRequest(BaseModel):
-    seed: Optional[str] = None
-
 
 @router.post("/neuro/policies/{policy_id}/select", summary="Select policy variant do",
     response_model=NeuroEventPolicyOut

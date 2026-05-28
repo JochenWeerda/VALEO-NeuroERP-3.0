@@ -32,21 +32,6 @@ router = APIRouter(prefix="/einkauf/invoice-verification", tags=["einkauf", "3-w
 # Schemas
 # ─────────────────────────────────────────────────────────────────────────────
 
-class MatchRequest(BaseModel):
-    po_id: str
-    gr_id: str
-    invoice_id: str
-    tolerance_percent: float = 2.0
-
-
-class ApproveRequest(BaseModel):
-    comment: Optional[str] = None
-
-
-class BlockRequest(BaseModel):
-    reason: Optional[str] = None
-
-
 # ─────────────────────────────────────────────────────────────────────────────
 # Helpers
 # ─────────────────────────────────────────────────────────────────────────────

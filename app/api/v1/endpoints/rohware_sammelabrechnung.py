@@ -15,12 +15,13 @@ from app.core.database import get_db
 from app.core.tenant import get_tenant_id
 
 from app.api.v1.schemas.base import BaseSchema
+from app.api.v1.schemas.rohware_sammelabrechnung_schemas import (
+    RohwareSammelabrechnungOut,
+    SammelabrechnungCreate,
+    SammelabrechnungOut,
+    SammelabrechnungPositionOut,
+)
 from pydantic import ConfigDict as _ConfigDict
-
-
-class RohwareSammelabrechnungOut(BaseSchema):
-    model_config = _ConfigDict(extra="allow")
-
 
 router = APIRouter(prefix="/agrar/sammelabrechnung", tags=["agrar", "sammelabrechnung"])
 
@@ -28,36 +29,6 @@ router = APIRouter(prefix="/agrar/sammelabrechnung", tags=["agrar", "sammelabrec
 # ---------------------------------------------------------------------------
 # Schemas
 # ---------------------------------------------------------------------------
-
-class SammelabrechnungCreate(BaseModel):
-    bezeichnung: str
-    abrechnungsperiode: str  # e.g. "2026-08"
-    harvest_acceptance_ids: list[str] = Field(..., min_length=2)
-    abrechnungsschema_id: Optional[str] = None
-    sammeldatum: Optional[str] = None  # ISO date, default today
-
-
-class SammelabrechnungPositionOut(BaseModel):
-    harvest_acceptance_id: str
-    lieferant_id: Optional[str] = None
-    artikel_nr: Optional[str] = None
-    menge_kg: float = 0.0
-    qualitaet_feuchte: Optional[float] = None
-    qualitaet_besatz: Optional[float] = None
-    abrechnungspreis_eur_t: float = 0.0
-    abrechnungsbetrag_eur: float = 0.0
-
-
-class SammelabrechnungOut(BaseModel):
-    id: str
-    bezeichnung: str
-    abrechnungsperiode: str
-    status: str  # ENTWURF / BERECHNET / GEBUCHT
-    positionen: list[SammelabrechnungPositionOut] = []
-    summe_menge_kg: float = 0.0
-    summe_betrag_eur: float = 0.0
-    erstellt_am: str
-
 
 # ---------------------------------------------------------------------------
 # Endpoints
