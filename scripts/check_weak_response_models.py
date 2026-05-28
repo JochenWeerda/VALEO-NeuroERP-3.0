@@ -22,7 +22,7 @@ Verwendung:
     python scripts/check_weak_response_models.py --verbose
 
 Exit-Code 1 wenn Anzahl den Schwellwert überschreitet.
-Baseline: 1451 (Stand 2026-05-28) → 1427 (admin_mobile.py migriert) — bei jeder Migrierungswelle senken.
+Baseline: 1451 (Stand 2026-05-28) → 1427 (admin_mobile) → 1346 (compat) — bei jeder Migrierungswelle senken.
 """
 from __future__ import annotations
 
@@ -79,8 +79,8 @@ def main() -> int:
     parser.add_argument(
         "--threshold",
         type=int,
-        default=1427,
-        help="Max allowed weak response_model usages (baseline: 1451 → 1427 after admin_mobile.py, 2026-05-28)",
+        default=1346,
+        help="Max allowed weak response_model usages (baseline: 1451 → 1427 admin_mobile → 1346 compat, 2026-05-28)",
     )
     parser.add_argument("--verbose", action="store_true", help="Show all findings")
     parser.add_argument("--strict", action="store_true", help="Fail on any weak type (threshold=0)")
