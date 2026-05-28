@@ -35,6 +35,7 @@ Aggregierte Gesamtsicht: [PROJEKT-GESAMTSTAND-2026-05-27.md](../PROJEKT-GESAMTST
 - Auch `booking_templates.py`, `chart_of_accounts.py`, `inventory_counts.py`, `inventory_operations.py`, `exchange_rates.py`, `finance_actions.py`, `finance_followup.py`, `fibu_connectors.py`, `secrets_vault.py`, `tenant_enforcement.py`, `domains/shared/events.py` und `integration_bootstrap.py` liegen ueber den aktuellen Ratchet-Schwellen.
 - Naechster Schritt: Ratchet fuer weitere produktkritische Backend-Pfade anheben, insbesondere Integrations-Governance und externe Fehlerpfade.
 - Konkrete Reihenfolge und Ratchet-Hinweise liegen in [critical-backend-coverage-plan-2026-04-24.md](c:/Users/Jochen/VALEO-NeuroERP-3.0/docs/quality-assurance/critical-backend-coverage-plan-2026-04-24.md).
+- **COV-RATCHET-005 (2026-05-28):** 15 neue Wave-2026-05-17b-Endpoints in Ratchet aufgenommen: `gdpr_art30_ropa` (80%), `gdpr_art33_breach` (94%), `genossenschaft` (58%), `intrastat` (57%), `gelangensbestaetigung` (57%), `gs1_barcode` (63%), `kontrakt_hedging` (74%), `kontrakt_klassen` (75%), `price_calculation` (83%), `sanctions_compliance` (66%), `webhook_system` (61%), `erechnung_import` (78%), `sales_invoice_einvoice` (30%), `waagen_vorlagen` (50%), `rohware_sammelabrechnung` (32%). Gesamt: 33 Ratchet-Pfade in `scripts/check_critical_backend_coverage.py`.
 
 ### DOMAIN-PARITY-001: Fachliche Tiefe der Domains ist weiterhin ungleich
 
