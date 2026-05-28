@@ -14,7 +14,6 @@ from app.core.config import settings
 logger = logging.getLogger(__name__)
 
 from app.api.v1.schemas.base import BaseSchema
-from app.api.v1.schemas.base import CompatFlexOut
 
 
 router = APIRouter()

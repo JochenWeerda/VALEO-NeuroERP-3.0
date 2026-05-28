@@ -23,7 +23,6 @@ from app.core.process_sla import (
 )
 
 from app.api.v1.schemas.base import BaseSchema
-from app.api.v1.schemas.base import CompatFlexOut
 from app.api.v1.schemas.process_sla_schemas import ProcessSlaOut
 
 

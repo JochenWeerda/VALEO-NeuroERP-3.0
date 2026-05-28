@@ -9,7 +9,6 @@ from fastapi.responses import Response
 from pydantic import BaseModel
 
 from app.api.v1.schemas.base import BaseSchema
-from app.api.v1.schemas.base import CompatFlexOut
 from app.api.v1.schemas.service_anfragen_schemas import ServiceAnfragenOut
 
 

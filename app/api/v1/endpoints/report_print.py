@@ -13,7 +13,6 @@ from app.core.tenant import get_tenant_id
 from app.services.report_print_service import ReportPrintService
 
 from app.api.v1.schemas.base import BaseSchema
-from app.api.v1.schemas.base import CompatFlexOut
 from app.api.v1.schemas.report_print_schemas import ReportPrintOut
 
 

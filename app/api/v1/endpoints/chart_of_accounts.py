@@ -20,7 +20,6 @@ from ..schemas.base import PaginatedResponse
 from ..schemas.finance import Account, AccountCreate, AccountUpdate
 
 from app.api.v1.schemas.base import BaseSchema
-from app.api.v1.schemas.base import CompatFlexOut
 from app.api.v1.schemas.chart_of_accounts_schemas import ChartOfAccountsOut
 
 

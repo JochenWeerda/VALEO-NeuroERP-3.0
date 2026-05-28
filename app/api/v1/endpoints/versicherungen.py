@@ -12,7 +12,6 @@ from app.core.database import get_db
 from app.domains.operations.models import Versicherung, VersicherungStatus
 
 from app.api.v1.schemas.base import BaseSchema
-from app.api.v1.schemas.base import CompatFlexOut
 from app.api.v1.schemas.versicherungen_schemas import VersicherungenOut
 
 

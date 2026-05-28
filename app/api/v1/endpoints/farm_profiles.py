@@ -13,7 +13,6 @@ from ..schemas.base import PaginatedResponse
 from ..schemas.crm import FarmProfile, FarmProfileCreate, FarmProfileUpdate
 
 from app.api.v1.schemas.base import BaseSchema
-from app.api.v1.schemas.base import CompatFlexOut
 from app.api.v1.schemas.farm_profiles_schemas import FarmProfilesOut
 
 

@@ -16,7 +16,6 @@ from app.core.database import get_db
 from app.core.tenant import get_tenant_id
 
 from app.api.v1.schemas.base import BaseSchema
-from app.api.v1.schemas.base import CompatFlexOut
 from app.api.v1.schemas.o2c_uat_scaffold_schemas import O2cUatScaffoldOut
 
 

@@ -21,7 +21,6 @@ from app.core.process_mining_application import build_process_mining_benchmark_r
 from app.domains.operations.models import BetriebsKennzahlDB
 
 from app.api.v1.schemas.base import BaseSchema
-from app.api.v1.schemas.base import CompatFlexOut
 from app.api.v1.schemas.benchmark_api_schemas import BenchmarkApiOut
 
 

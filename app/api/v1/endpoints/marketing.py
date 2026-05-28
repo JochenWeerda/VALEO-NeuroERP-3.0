@@ -107,7 +107,6 @@ async def get_kampagne_kpis(kampagne_id: int, db: Session = Depends(get_db)) -> 
 
 # --------------- Pydantic Schemas ---------------
 from pydantic import BaseModel
-from app.api.v1.schemas.base import CompatFlexOut
 from app.api.v1.schemas.marketing_schemas import MarketingOut
 from datetime import date
 

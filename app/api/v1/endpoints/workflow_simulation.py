@@ -12,7 +12,6 @@ from app.core.workflow_simulation import (
 )
 
 from app.api.v1.schemas.base import BaseSchema
-from app.api.v1.schemas.base import CompatFlexOut
 from app.api.v1.schemas.workflow_simulation_schemas import WorkflowSimulationOut
 
 

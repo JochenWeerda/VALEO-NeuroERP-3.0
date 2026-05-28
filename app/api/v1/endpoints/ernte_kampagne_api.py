@@ -13,7 +13,6 @@ from app.core.ernte_kampagne import ErnteArt
 from app.domains.operations.models import ErnteKampagneDB
 
 from app.api.v1.schemas.base import BaseSchema
-from app.api.v1.schemas.base import CompatFlexOut
 from app.api.v1.schemas.ernte_kampagne_api_schemas import ErnteKampagneApiOut
 
 

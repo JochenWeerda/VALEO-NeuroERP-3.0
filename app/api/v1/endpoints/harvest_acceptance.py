@@ -29,7 +29,7 @@ from app.infrastructure.models import (
 )
 from app.domains.inventory.api.inventory_auth import require_inventory_admin
 
-from app.api.v1.schemas.base import BaseSchema, CompatFlexOut
+from app.api.v1.schemas.base import BaseSchema
 from app.api.v1.schemas.agrar_schemas import (
     HarvestSettlementOut,
     Nuts2DeriveOut,

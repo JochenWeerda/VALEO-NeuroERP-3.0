@@ -10,7 +10,6 @@ from app.core.tenant import get_tenant_id
 from app.services.neuro_simulation_engine import simulate_dry_run, simulate_what_if, get_simulation_result
 
 from app.api.v1.schemas.base import BaseSchema
-from app.api.v1.schemas.base import CompatFlexOut
 from app.api.v1.schemas.neuro_simulation_schemas import NeuroSimulationOut
 
 

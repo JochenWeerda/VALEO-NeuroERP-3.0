@@ -5,7 +5,6 @@ from fastapi import APIRouter, Query
 from app.core.action_idempotency import get_action_idempotency_store
 
 from app.api.v1.schemas.base import BaseSchema
-from app.api.v1.schemas.base import CompatFlexOut
 from app.api.v1.schemas.idempotency_monitoring_schemas import IdempotencyMonitoringOut
 
 

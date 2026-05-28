@@ -30,7 +30,6 @@ from ....core.tenant_governance import (
 from ....core.tenant_rate_limits import get_default_cache_configs, get_default_rate_limit_policies
 
 from app.api.v1.schemas.base import BaseSchema
-from app.api.v1.schemas.base import CompatFlexOut
 from app.api.v1.schemas.tenant_governance_schemas import TenantGovernanceOut
 
 

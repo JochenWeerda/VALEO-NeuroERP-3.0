@@ -20,7 +20,6 @@ from app.services.knowledge_store import (
 )
 
 from app.api.v1.schemas.base import BaseSchema
-from app.api.v1.schemas.base import CompatFlexOut
 from app.api.v1.schemas.neuro_knowledge_schemas import NeuroKnowledgeOut
 
 

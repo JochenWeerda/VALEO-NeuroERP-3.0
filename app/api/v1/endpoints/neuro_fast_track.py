@@ -8,7 +8,6 @@ from pydantic import BaseModel, Field
 from app.services.fast_track import classify_request, is_fast_track, FAST_TRACK_WHITELIST
 
 from app.api.v1.schemas.base import BaseSchema
-from app.api.v1.schemas.base import CompatFlexOut
 from app.api.v1.schemas.neuro_fast_track_schemas import NeuroFastTrackOut
 
 

@@ -15,7 +15,6 @@ from app.core.database import get_db
 from app.core.config import settings
 
 from app.api.v1.schemas.base import BaseSchema
-from app.api.v1.schemas.base import CompatFlexOut
 
 
 router = APIRouter(prefix="/pricing", tags=["pricing"])

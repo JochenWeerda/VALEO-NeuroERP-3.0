@@ -16,7 +16,6 @@ from ....core.sla_escalation import (
 )
 
 from app.api.v1.schemas.base import BaseSchema
-from app.api.v1.schemas.base import CompatFlexOut
 from app.api.v1.schemas.sla_escalation_api_schemas import SlaEscalationApiOut
 
 

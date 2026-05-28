@@ -33,7 +33,6 @@ from app.finance.tax_resolver import resolve_partner_country, resolve_tax_key_ac
 logger = logging.getLogger(__name__)
 
 from app.api.v1.schemas.base import BaseSchema
-from app.api.v1.schemas.base import CompatFlexOut
 from app.api.v1.schemas.finance_invoices_schemas import FinanceInvoicesOut
 
 

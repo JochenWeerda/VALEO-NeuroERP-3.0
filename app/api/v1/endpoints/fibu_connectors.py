@@ -27,7 +27,6 @@ from app.api.v1.schemas.fibu_connectors import (
 )
 
 from app.api.v1.schemas.base import BaseSchema
-from app.api.v1.schemas.base import CompatFlexOut
 
 
 router = APIRouter(prefix="/connectors", tags=["finance", "fibu-connectors"])

@@ -4,7 +4,6 @@ from pydantic import BaseModel
 import uuid
 
 from app.api.v1.schemas.base import BaseSchema
-from app.api.v1.schemas.base import CompatFlexOut
 from app.api.v1.schemas.contract_pricing_api_schemas import ContractPricingApiOut
 
 

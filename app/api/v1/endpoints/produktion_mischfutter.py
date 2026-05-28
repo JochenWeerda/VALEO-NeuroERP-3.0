@@ -26,7 +26,6 @@ from app.infrastructure.models.futtermittel_models import (
 
 
 from app.api.v1.schemas.base import BaseSchema
-from app.api.v1.schemas.base import CompatFlexOut
 
 
 router = APIRouter(prefix="/produktion/mischfutter", tags=["Produktion - Mischfutter"])

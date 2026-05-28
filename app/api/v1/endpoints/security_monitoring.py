@@ -7,7 +7,6 @@ from fastapi import APIRouter, Query
 from app.services.security_observability import security_observer
 
 from app.api.v1.schemas.base import BaseSchema
-from app.api.v1.schemas.base import CompatFlexOut
 from app.api.v1.schemas.security_monitoring_schemas import SecurityMonitoringOut
 
 

@@ -25,7 +25,6 @@ from app.services.articles_service import (
 )
 
 from app.api.v1.schemas.base import BaseSchema
-from app.api.v1.schemas.base import CompatFlexOut
 from app.api.v1.schemas.articles_schemas import ArticlesOut
 
 

@@ -12,7 +12,6 @@ from modules.agrar.contracts.hooks_v1 import agrar_hooks_as_dict
 from modules.bootstrap import initialize_module_registry
 
 from app.api.v1.schemas.base import BaseSchema
-from app.api.v1.schemas.base import CompatFlexOut
 from app.api.v1.schemas.modules_schemas import ModulesOut
 
 

@@ -18,7 +18,6 @@ from app.core.uuid7 import uuid7
 from app.infrastructure.models.futtermittel_models import AgrarSorte
 
 from app.api.v1.schemas.base import BaseSchema
-from app.api.v1.schemas.base import CompatFlexOut
 
 
 router = APIRouter()

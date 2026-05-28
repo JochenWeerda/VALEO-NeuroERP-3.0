@@ -12,7 +12,6 @@ from fastapi import APIRouter, HTTPException, Query
 from app.core.agent_tool_contract_manifest import build_agent_tool_contract_manifest
 
 from app.api.v1.schemas.base import BaseSchema
-from app.api.v1.schemas.base import CompatFlexOut
 from app.api.v1.schemas.agent_tool_contracts_schemas import AgentToolContractsOut
 
 

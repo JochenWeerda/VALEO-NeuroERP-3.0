@@ -18,7 +18,6 @@ from app.services.neuro_decision_protocol import (
 )
 
 from app.api.v1.schemas.base import BaseSchema
-from app.api.v1.schemas.base import CompatFlexOut
 from app.api.v1.schemas.neuro_audit_schemas import NeuroAuditOut
 
 

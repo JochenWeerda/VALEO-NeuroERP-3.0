@@ -13,7 +13,6 @@ from ..schemas.base import PaginatedResponse
 from ..schemas.crm import Lead, LeadCreate, LeadUpdate
 
 from app.api.v1.schemas.base import BaseSchema
-from app.api.v1.schemas.base import CompatFlexOut
 
 
 router = APIRouter()

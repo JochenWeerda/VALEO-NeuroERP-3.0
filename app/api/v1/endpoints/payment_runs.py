@@ -24,7 +24,6 @@ from app.infrastructure.eventbus.outbox import OutboxPublisher
 logger = logging.getLogger(__name__)
 
 from app.api.v1.schemas.base import BaseSchema
-from app.api.v1.schemas.base import CompatFlexOut
 from app.api.v1.schemas.payment_runs_schemas import PaymentRunsOut
 
 

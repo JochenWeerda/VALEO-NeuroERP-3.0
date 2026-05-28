@@ -25,7 +25,6 @@ from app.services.position_service import (
 from app.services.position_snapshot_service import PositionSnapshotService
 
 from app.api.v1.schemas.base import BaseSchema
-from app.api.v1.schemas.base import CompatFlexOut
 
 
 router = APIRouter(prefix="/positions", tags=["positions", "commodity"])

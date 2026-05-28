@@ -15,7 +15,6 @@ from ..schemas.base import PaginatedResponse
 from ..schemas.inventory import Warehouse, WarehouseCreate, WarehouseUpdate
 
 from app.api.v1.schemas.base import BaseSchema
-from app.api.v1.schemas.base import CompatFlexOut
 from app.api.v1.schemas.warehouses_schemas import WarehousesOut
 
 

@@ -190,7 +190,6 @@ from datetime import date as _date
 
 from sqlalchemy import text as _text
 from pydantic import BaseModel as _BaseModel
-from app.api.v1.schemas.base import CompatFlexOut
 from app.api.v1.schemas.customers_schemas import CustomersOut
 
 

@@ -18,7 +18,6 @@ from app.domains.operations.models import PosPositionOverride
 from app.services.position_guard_service import PositionGuardService
 
 from app.api.v1.schemas.base import BaseSchema
-from app.api.v1.schemas.base import CompatFlexOut
 
 
 router = APIRouter(prefix="/positions/overrides", tags=["positions", "commodity", "overrides"])

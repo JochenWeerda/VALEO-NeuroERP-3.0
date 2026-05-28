@@ -25,7 +25,6 @@ from app.infrastructure.models import (
 )
 
 from app.api.v1.schemas.base import BaseSchema
-from app.api.v1.schemas.base import CompatFlexOut
 
 
 router = APIRouter()

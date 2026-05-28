@@ -8,7 +8,6 @@ from app.core.e2e_chain import E2EProcessChain, ChainCompletenessReport
 from app.domains.operations.models import E2EProcessChainDB
 
 from app.api.v1.schemas.base import BaseSchema
-from app.api.v1.schemas.base import CompatFlexOut
 
 
 router = APIRouter(prefix="/process/e2e", tags=["process", "e2e", "chain"])

@@ -19,7 +19,6 @@ from app.core.uuid7 import uuid7
 from app.domains.operations.models import PosPositionRule
 
 from app.api.v1.schemas.base import BaseSchema
-from app.api.v1.schemas.base import CompatFlexOut
 from app.api.v1.schemas.position_rules_schemas import PositionRulesOut
 
 

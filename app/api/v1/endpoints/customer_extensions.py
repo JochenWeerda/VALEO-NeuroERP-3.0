@@ -16,7 +16,6 @@ from ....infrastructure.models import Customer, Lead, Contact
 from ..schemas.base import BaseSchema
 
 from app.api.v1.schemas.base import BaseSchema
-from app.api.v1.schemas.base import CompatFlexOut
 from app.api.v1.schemas.customer_extensions_schemas import CustomerExtensionsOut
 
 

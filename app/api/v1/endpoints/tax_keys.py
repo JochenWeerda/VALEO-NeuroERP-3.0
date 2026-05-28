@@ -20,7 +20,6 @@ from app.core.uuid7 import uuid7
 logger = logging.getLogger(__name__)
 
 from app.api.v1.schemas.base import BaseSchema
-from app.api.v1.schemas.base import CompatFlexOut
 
 
 router = APIRouter(prefix="/tax-keys", tags=["finance", "tax"])

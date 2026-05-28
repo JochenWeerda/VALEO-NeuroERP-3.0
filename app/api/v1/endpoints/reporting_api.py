@@ -23,7 +23,6 @@ from app.core.reporting_layer import (
 from app.core.tenant_isolation_guard import IsolationDecision, TenantIsolationGuard
 
 from app.api.v1.schemas.base import BaseSchema
-from app.api.v1.schemas.base import CompatFlexOut
 from app.api.v1.schemas.reporting_api_schemas import ReportingApiOut
 
 

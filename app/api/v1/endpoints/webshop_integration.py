@@ -14,7 +14,6 @@ from app.core.tenant import get_tenant_id
 from app.services.webshop_integration_service import WebshopIntegrationService
 
 from app.api.v1.schemas.base import BaseSchema
-from app.api.v1.schemas.base import CompatFlexOut
 from app.api.v1.schemas.webshop_integration_schemas import WebshopIntegrationOut
 
 
