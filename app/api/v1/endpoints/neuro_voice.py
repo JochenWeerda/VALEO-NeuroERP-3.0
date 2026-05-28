@@ -8,11 +8,7 @@ from pydantic import BaseModel, Field
 from app.services.voice_adapter import create_session, end_session, transcribe, synthesize
 
 from app.api.v1.schemas.base import BaseSchema
-from pydantic import ConfigDict as _ConfigDict
-
-
-class CompatFlexOut(BaseSchema):
-    model_config = _ConfigDict(extra="allow")
+from app.api.v1.schemas.base import CompatFlexOut
 
 
 router = APIRouter(prefix="/neuro/voice", tags=["neuro-core", "voice"])

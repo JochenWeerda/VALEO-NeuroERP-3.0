@@ -30,11 +30,7 @@ from ....core.tenant_governance import (
 from ....core.tenant_rate_limits import get_default_cache_configs, get_default_rate_limit_policies
 
 from app.api.v1.schemas.base import BaseSchema
-from pydantic import ConfigDict as _ConfigDict
-
-
-class CompatFlexOut(BaseSchema):
-    model_config = _ConfigDict(extra="allow")
+from app.api.v1.schemas.base import CompatFlexOut
 
 
 router = APIRouter(prefix="/tenant", tags=["tenant", "governance"])

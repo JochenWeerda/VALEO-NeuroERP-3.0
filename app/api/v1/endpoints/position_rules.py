@@ -19,11 +19,7 @@ from app.core.uuid7 import uuid7
 from app.domains.operations.models import PosPositionRule
 
 from app.api.v1.schemas.base import BaseSchema
-from pydantic import ConfigDict as _ConfigDict
-
-
-class CompatFlexOut(BaseSchema):
-    model_config = _ConfigDict(extra="allow")
+from app.api.v1.schemas.base import CompatFlexOut
 
 
 router = APIRouter(prefix="/positions/rules", tags=["positions", "commodity", "rules"])

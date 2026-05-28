@@ -18,11 +18,6 @@ from ..schemas.base import PaginatedResponse
 from ..schemas.crm import Customer, CustomerCreate, CustomerUpdate
 
 from app.api.v1.schemas.base import BaseSchema
-from pydantic import ConfigDict as _ConfigDict
-
-
-class CompatFlexOut(BaseSchema):
-    model_config = _ConfigDict(extra="allow")
 
 
 router = APIRouter()
@@ -195,6 +190,7 @@ from datetime import date as _date
 
 from sqlalchemy import text as _text
 from pydantic import BaseModel as _BaseModel
+from app.api.v1.schemas.base import CompatFlexOut
 
 
 # ---------------------------------------------------------------------------

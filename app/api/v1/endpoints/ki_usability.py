@@ -131,11 +131,7 @@ def resolve_voice(body: VoiceResolveIn) -> VoiceResolveOut | None:
 
 
 from app.api.v1.schemas.base import BaseSchema
-from pydantic import ConfigDict as _ConfigDict
-
-
-class CompatFlexOut(BaseSchema):
-    model_config = _ConfigDict(extra="allow")
+from app.api.v1.schemas.base import CompatFlexOut
 
 
 router = APIRouter(tags=["ki-usability"])

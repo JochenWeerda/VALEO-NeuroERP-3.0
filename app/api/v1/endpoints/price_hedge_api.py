@@ -14,11 +14,7 @@ from app.core.price_hedge import HedgeTyp, TerminmarktProdukt, berechne_hedge_qu
 from app.domains.operations.models import HedgeReferenceDB
 
 from app.api.v1.schemas.base import BaseSchema
-from pydantic import ConfigDict as _ConfigDict
-
-
-class CompatFlexOut(BaseSchema):
-    model_config = _ConfigDict(extra="allow")
+from app.api.v1.schemas.base import CompatFlexOut
 
 
 router = APIRouter(prefix="/price-hedge", tags=["price-hedge"])

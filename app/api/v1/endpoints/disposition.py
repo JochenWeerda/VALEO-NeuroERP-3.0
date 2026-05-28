@@ -10,11 +10,6 @@ from app.core.database import get_db
 from app.domains.operations.models import DispositionPosition
 
 from app.api.v1.schemas.base import BaseSchema
-from pydantic import ConfigDict as _ConfigDict
-
-
-class CompatFlexOut(BaseSchema):
-    model_config = _ConfigDict(extra="allow")
 
 
 router = APIRouter(prefix="/disposition", tags=["Disposition"])
@@ -116,6 +111,7 @@ async def get_disposition_stats(db: Session = Depends(get_db)) -> dict:
 
 # --------------- Pydantic Schemas ---------------
 from pydantic import BaseModel
+from app.api.v1.schemas.base import CompatFlexOut
 
 
 class DispositionPositionCreate(BaseModel):

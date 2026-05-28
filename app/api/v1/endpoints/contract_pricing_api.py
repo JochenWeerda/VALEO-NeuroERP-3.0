@@ -4,11 +4,7 @@ from pydantic import BaseModel
 import uuid
 
 from app.api.v1.schemas.base import BaseSchema
-from pydantic import ConfigDict as _ConfigDict
-
-
-class CompatFlexOut(BaseSchema):
-    model_config = _ConfigDict(extra="allow")
+from app.api.v1.schemas.base import CompatFlexOut
 
 
 router = APIRouter(prefix="/contract-pricing", tags=["contract-pricing"])

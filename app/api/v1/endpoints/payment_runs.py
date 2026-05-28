@@ -24,11 +24,7 @@ from app.infrastructure.eventbus.outbox import OutboxPublisher
 logger = logging.getLogger(__name__)
 
 from app.api.v1.schemas.base import BaseSchema
-from pydantic import ConfigDict as _ConfigDict
-
-
-class CompatFlexOut(BaseSchema):
-    model_config = _ConfigDict(extra="allow")
+from app.api.v1.schemas.base import CompatFlexOut
 
 
 router = APIRouter(prefix="/payment-runs", tags=["finance", "ap", "sepa"])

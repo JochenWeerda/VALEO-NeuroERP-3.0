@@ -9,11 +9,7 @@ from fastapi import APIRouter, HTTPException, Query
 from app.core.terminology_registry import build_landhandel_terminology_registry
 
 from app.api.v1.schemas.base import BaseSchema
-from pydantic import ConfigDict as _ConfigDict
-
-
-class CompatFlexOut(BaseSchema):
-    model_config = _ConfigDict(extra="allow")
+from app.api.v1.schemas.base import CompatFlexOut
 
 
 router = APIRouter(prefix="/terminology", tags=["terminology", "i18n"])

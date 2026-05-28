@@ -21,11 +21,7 @@ from app.services.kontrakt_movement_sync import sync_movements_for_delivery_note
 from app.services.sales_posting_service import SalesPostingService
 
 from app.api.v1.schemas.base import BaseSchema
-from pydantic import ConfigDict as _ConfigDict
-
-
-class CompatFlexOut(BaseSchema):
-    model_config = _ConfigDict(extra="allow")
+from app.api.v1.schemas.base import CompatFlexOut
 
 
 router = APIRouter(prefix="/sales/delivery-notes", tags=["sales", "delivery-notes"])

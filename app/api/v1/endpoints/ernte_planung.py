@@ -15,11 +15,7 @@ from app.core.database import get_db
 from app.domains.operations.models import ErnteDB
 
 from app.api.v1.schemas.base import BaseSchema
-from pydantic import ConfigDict as _ConfigDict
-
-
-class CompatFlexOut(BaseSchema):
-    model_config = _ConfigDict(extra="allow")
+from app.api.v1.schemas.base import CompatFlexOut
 
 
 router = APIRouter(prefix="/agrar/ernte", tags=["agrar", "ernte", "ernteplanung"])

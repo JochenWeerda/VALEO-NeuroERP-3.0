@@ -7,11 +7,7 @@ from fastapi import APIRouter, Query
 from app.services.security_observability import security_observer
 
 from app.api.v1.schemas.base import BaseSchema
-from pydantic import ConfigDict as _ConfigDict
-
-
-class CompatFlexOut(BaseSchema):
-    model_config = _ConfigDict(extra="allow")
+from app.api.v1.schemas.base import CompatFlexOut
 
 
 router = APIRouter(prefix="/security/monitoring", tags=["security", "monitoring"])

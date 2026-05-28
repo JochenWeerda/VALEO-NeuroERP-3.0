@@ -12,11 +12,7 @@ from fastapi import APIRouter, HTTPException, Query
 from app.core.agent_tool_contract_manifest import build_agent_tool_contract_manifest
 
 from app.api.v1.schemas.base import BaseSchema
-from pydantic import ConfigDict as _ConfigDict
-
-
-class CompatFlexOut(BaseSchema):
-    model_config = _ConfigDict(extra="allow")
+from app.api.v1.schemas.base import CompatFlexOut
 
 
 router = APIRouter(prefix="/agent/tool-contracts", tags=["agents", "mcp", "openapi"])

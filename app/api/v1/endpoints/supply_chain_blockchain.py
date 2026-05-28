@@ -16,11 +16,7 @@ from app.core.supply_chain_blockchain import (
 from app.core.supply_chain_tracking import LieferkettenPhase, TrackingStatusGesamtlage, TransportModus
 
 from app.api.v1.schemas.base import BaseSchema
-from pydantic import ConfigDict as _ConfigDict
-
-
-class CompatFlexOut(BaseSchema):
-    model_config = _ConfigDict(extra="allow")
+from app.api.v1.schemas.base import CompatFlexOut
 
 
 router = APIRouter(prefix="/supply-chain/blockchain", tags=["supply-chain", "blockchain", "integrations"])

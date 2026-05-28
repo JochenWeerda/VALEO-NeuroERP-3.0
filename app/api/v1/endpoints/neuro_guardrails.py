@@ -9,11 +9,7 @@ from app.services.guardrails import check_input, sanitize_output
 from app.services.pii_detector import detect_pii, mask_irreversible, mask_reversible, scan_dict
 
 from app.api.v1.schemas.base import BaseSchema
-from pydantic import ConfigDict as _ConfigDict
-
-
-class CompatFlexOut(BaseSchema):
-    model_config = _ConfigDict(extra="allow")
+from app.api.v1.schemas.base import CompatFlexOut
 
 
 router = APIRouter(prefix="/neuro/guardrails", tags=["neuro-core", "guardrails", "pii"])

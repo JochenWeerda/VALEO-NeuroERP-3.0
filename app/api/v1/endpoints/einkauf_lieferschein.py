@@ -16,11 +16,7 @@ from app.core.database import get_db
 
 
 from app.api.v1.schemas.base import BaseSchema
-from pydantic import ConfigDict as _ConfigDict
-
-
-class CompatFlexOut(BaseSchema):
-    model_config = _ConfigDict(extra="allow")
+from app.api.v1.schemas.base import CompatFlexOut
 
 
 router = APIRouter(prefix="/einkauf", tags=["einkauf", "lieferschein", "frachtauftrag"])
