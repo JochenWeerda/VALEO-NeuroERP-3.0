@@ -132,7 +132,7 @@ def import_bestellungen(
 
 
 @router.post("/bestellungen/{id}/verarbeiten", summary="Verarbeiten",
-    response_model=None
+    response_model=WebshopIntegrationOut
 )
 def verarbeiten(
     id: str,

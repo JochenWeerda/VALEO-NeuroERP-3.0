@@ -111,7 +111,7 @@ class TankBestandPatch(BaseModel):
 
 
 @router.get("/bestand", summary="Bestand auflisten",
-    response_model=None
+    response_model=list[TankstelleOut]
 )
 def list_bestand(db: Session = Depends(get_db)):
     return [_to_dict(b) for b in db.query(TankBestand).all()]

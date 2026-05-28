@@ -104,7 +104,7 @@ async def create_rahmenvertrag(data: VertragCreate, db: Session = Depends(get_db
     return _to_dict(vertrag)
 
 
-@router.patch("/rahmenvertraege/{vertrag_id}", response_model=None, summary="Rahmenvertrag aktualisieren")
+@router.patch("/rahmenvertraege/{vertrag_id}", response_model=VertraegeOut, summary="Rahmenvertrag aktualisieren")
 async def update_rahmenvertrag(vertrag_id: str, data: VertragUpdate, db: Session = Depends(get_db)) -> dict:
     repo = RahmenvertragRepository(db)
     payload = data.model_dump(exclude_unset=True)

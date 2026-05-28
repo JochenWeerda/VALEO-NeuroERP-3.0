@@ -670,7 +670,7 @@ def create_analyse(
 
 
 @router.patch("/grundfutter-analysen/{analyse_id}", summary="Analyse aktualisieren",
-    response_model=None
+    response_model=GrundfutterAnalysenOut
 )
 def patch_analyse(
     analyse_id: str,

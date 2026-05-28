@@ -17,7 +17,7 @@ from app.core.database import get_db
 from app.core.exceptions import ConflictError, EntityNotFoundError
 from app.core.tenant import get_tenant_id
 from app.services.personal_service import PersonalService
-from app.api.v1.schemas.base import BaseSchema
+from app.api.v1.schemas.base import BaseSchema, CompatBridgeOut
 from app.api.v1.schemas.personal_schemas import (
     HrmReadinessCapabilityOut,
     HrmReadinessIntegrationOut,
@@ -2666,7 +2666,7 @@ async def delete_shift(
 
 
 @router.post("/driver-time/events", status_code=201, summary="Driver time event anlegen",
-    response_model=None
+    response_model=IDResponse
 )
 async def create_driver_time_event(
     payload: DriverTimeEventIn,
@@ -2856,7 +2856,7 @@ def _build_org_tree(rows: list[dict], parent_id: Any = None) -> list[dict]:
 
 
 @router.get("/org-chart", summary="Org chart abrufen",
-    response_model=None
+    response_model=CompatBridgeOut
 )
 async def get_org_chart(
     tenant_id: str = Depends(get_tenant_id),

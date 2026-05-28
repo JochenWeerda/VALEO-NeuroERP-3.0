@@ -1,4 +1,4 @@
-﻿"""
+"""
 Einkauf â€” Bestell-Vorschlag Endpoints
 
 Bestellvorschlag-Engines (3 Typen):
@@ -440,7 +440,7 @@ async def delete_artikel_lager_parameter(
 # â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 @router.get("/einkauf/lieferanten", summary="Lieferanten auflisten",
-    response_model=None
+    response_model=EinkaufBestellvorschlagOut
 )
 async def list_lieferanten(
     suche: Optional[str] = Query(None),

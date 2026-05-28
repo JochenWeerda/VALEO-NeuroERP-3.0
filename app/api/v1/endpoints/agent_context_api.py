@@ -67,7 +67,7 @@ def _get_active_context(context_id: str, db: Session) -> AgentContextDB:
 
 
 @router.post("", status_code=201, summary="Context anlegen",
-    response_model=None
+    response_model=AgentContextApiOut
 )
 def create_context(req: AgentContextCreateRequest, db: Session = Depends(get_db)):
     expires = datetime.now(tz=timezone.utc) + timedelta(seconds=req.ttl_sekunden)

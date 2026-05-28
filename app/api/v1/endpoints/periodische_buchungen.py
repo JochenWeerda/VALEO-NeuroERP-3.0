@@ -154,7 +154,7 @@ def create_periodische_buchung(
 
 
 @router.patch("/{buchung_id}/sperren", summary="Buchung sperren",
-    response_model=None
+    response_model=IDResponse
 )
 def sperren_buchung(
     buchung_id: str,

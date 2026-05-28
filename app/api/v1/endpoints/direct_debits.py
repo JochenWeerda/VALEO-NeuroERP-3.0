@@ -186,7 +186,7 @@ async def get_direct_debit_run(
     }
 
 
-@router.post("/{run_id}/export", response_model=None, summary="Direct debit run exportieren")
+@router.post("/{run_id}/export", response_model=StatusResponse, summary="Direct debit run exportieren")
 async def export_direct_debit_run(
     run_id: str,
     tenant_id: str = Depends(get_tenant_id),

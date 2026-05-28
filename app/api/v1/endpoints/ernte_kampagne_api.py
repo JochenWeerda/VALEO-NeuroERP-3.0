@@ -48,7 +48,7 @@ def _to_dict(row: ErnteKampagneDB) -> dict:
 
 
 @router.post("", status_code=201, summary="Kampagne anlegen",
-    response_model=None
+    response_model=ErntekampagneApiOut
 )
 def create_kampagne(req: ErnteKampagneCreateRequest, db: Session = Depends(get_db)):
     ErnteArt(req.ernte_art)  # validate enum value
@@ -78,7 +78,7 @@ def get_kampagnen(tenant_id: str, wirtschaftsjahr: Optional[int] = None, db: Ses
 
 
 @router.get("/{kampagne_id}", summary="Kampagne abrufen",
-    response_model=None
+    response_model=ErntekampagneApiOut
 )
 def get_kampagne(kampagne_id: str, db: Session = Depends(get_db)):
     row = db.query(ErnteKampagneDB).filter(ErnteKampagneDB.kampagne_id == kampagne_id).first()
@@ -100,7 +100,7 @@ def delete_kampagne(kampagne_id: str, db: Session = Depends(get_db)):
 
 
 @router.post("/{kampagne_id}/start", summary="Kampagne starten",
-    response_model=None
+    response_model=ErntekampagneApiOut
 )
 def start_kampagne(kampagne_id: str, db: Session = Depends(get_db)):
     row = db.query(ErnteKampagneDB).filter(ErnteKampagneDB.kampagne_id == kampagne_id).first()

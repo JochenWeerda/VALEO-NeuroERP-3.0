@@ -165,7 +165,7 @@ async def create_kampagne(
     }
 
 
-@router.put("/kampagnen/{kampagne_id}", response_model=None, summary="Kampagne aktualisieren")
+@router.put("/kampagnen/{kampagne_id}", response_model=MarketingOut, summary="Kampagne aktualisieren")
 async def update_kampagne(
     kampagne_id: int,
     body: MarketingKampagneUpdate,

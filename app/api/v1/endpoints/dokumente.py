@@ -84,7 +84,7 @@ async def create_dokument(
         raise HTTPException(status_code=400, detail=str(e))
 
 
-@router.patch("/{dokument_id}", response_model=None, summary="Dokument aktualisieren")
+@router.patch("/{dokument_id}", response_model=DokumenteOut, summary="Dokument aktualisieren")
 async def update_dokument(
     dokument_id: str,
     dokument_data: dict,

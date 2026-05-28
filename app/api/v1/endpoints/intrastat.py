@@ -201,7 +201,7 @@ def create_meldung(
 
 
 @router.put("/meldungen/{meldung_id}", summary="Intrastat-Meldung aktualisieren",
-    response_model=None
+    response_model=IDResponse
 )
 def update_meldung(
     meldung_id: str,
@@ -282,7 +282,7 @@ def delete_meldung(
 
 
 @router.get("/meldungen/{meldezeitraum}/zusammenfassung", summary="Zusammenfassung nach Meldezeitraum",
-    response_model=None
+    response_model=IntrastatOut
 )
 def zusammenfassung(
     meldezeitraum: str,
