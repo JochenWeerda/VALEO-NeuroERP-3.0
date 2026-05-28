@@ -32,6 +32,15 @@ from app.documents.router_helpers import get_repository, list_from_store
 from app.integrations.bvl_psm_client import BVLPSMClient
 
 
+from app.api.v1.schemas.base import BaseSchema
+from pydantic import ConfigDict as _ConfigDict
+
+
+class SustainabilityOut(BaseSchema):
+    """Typed response schema for SustainabilityOut endpoints (extra fields forwarded)."""
+    model_config = _ConfigDict(extra="allow")
+
+
 router = APIRouter(prefix="/sustainability", tags=["Sustainability"])
 bvl_client = BVLPSMClient()
 
@@ -43,7 +52,7 @@ class EmissionsEstimateRequest(BaseModel):
 
 
 @router.get("/providers/status", summary="Provider status abrufen",
-    response_model=dict
+    response_model=SustainabilityOut
 )
 async def get_provider_status() -> dict[str, Any]:
     """Return external provider availability and configuration status."""
@@ -92,7 +101,7 @@ def _build_esg_from_db_or_fallback(tenant_id: str, jahr: int, db: Session):
 
 
 @router.get("/catalog", summary="Sustainability catalog abrufen",
-    response_model=dict
+    response_model=SustainabilityOut
 )
 async def get_sustainability_catalog(
     tenant_id: str = Query("TENANT-001", description="Tenant context for the catalog"),
@@ -105,7 +114,7 @@ async def get_sustainability_catalog(
 
 
 @router.get("/read-model", summary="Sustainability read model abrufen",
-    response_model=dict
+    response_model=SustainabilityOut
 )
 async def get_sustainability_read_model(
     tenant_id: str = Query("TENANT-001", description="Tenant context for the read model"),
@@ -118,7 +127,7 @@ async def get_sustainability_read_model(
 
 
 @router.get("/psm/{zulassungsnummer}", summary="Psm runtime abrufen",
-    response_model=dict
+    response_model=SustainabilityOut
 )
 async def get_psm_runtime(
     zulassungsnummer: str,
@@ -148,7 +157,7 @@ async def get_psm_runtime(
 
 
 @router.post("/emissions/estimate", summary="Emissions estimate",
-    response_model=dict
+    response_model=SustainabilityOut
 )
 async def estimate_emissions(payload: EmissionsEstimateRequest) -> dict[str, Any]:
     """
@@ -204,7 +213,7 @@ async def estimate_emissions(payload: EmissionsEstimateRequest) -> dict[str, Any
 
 
 @router.get("/nutrients/crop", summary="Crop nutrients abrufen",
-    response_model=dict
+    response_model=SustainabilityOut
 )
 async def get_crop_nutrients(
     dataset: str = Query(
@@ -321,7 +330,7 @@ def _compute_esg_report(*, year: int, customer_id: Optional[str], db: Session) -
 
 
 @router.get("/esg-report", summary="Esg report abrufen",
-    response_model=dict
+    response_model=SustainabilityOut
 )
 async def get_esg_report(
     year: int = Query(..., ge=2020, le=2030),
@@ -336,7 +345,7 @@ async def get_esg_report(
 
 
 @router.get("/esg-report/export.csv", summary="Esg report csv exportieren",
-    response_model=dict
+    response_model=SustainabilityOut
 )
 async def export_esg_report_csv(
     year: int = Query(..., ge=2020, le=2030),
@@ -376,7 +385,7 @@ async def export_esg_report_csv(
 
 
 @router.get("/esg-report/export.pdf", summary="Esg report pdf exportieren",
-    response_model=dict
+    response_model=SustainabilityOut
 )
 async def export_esg_report_pdf(
     year: int = Query(..., ge=2020, le=2030),
@@ -416,7 +425,7 @@ async def export_esg_report_pdf(
 # ── /reports alias (mirrors /read-model for flow-spine compatibility) ─────────
 
 @router.get("/reports", summary="Sustainability reports abrufen",
-    response_model=dict
+    response_model=SustainabilityOut
 )
 async def get_sustainability_reports(
     tenant_id: str = Query("TENANT-001", description="Tenant context"),

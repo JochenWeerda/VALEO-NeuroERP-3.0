@@ -18,6 +18,14 @@ from ....core.tenant import get_tenant_id
 
 logger = logging.getLogger(__name__)
 
+from app.api.v1.schemas.base import BaseSchema
+from pydantic import ConfigDict as _ConfigDict
+
+
+class BudgetPlanningOut(BaseSchema):
+    model_config = _ConfigDict(extra="allow")
+
+
 router = APIRouter(prefix="/finance/budgets", tags=["finance", "budget-planning"])
 
 _TABLE_PLANS = "domain_finance.budget_plans"
@@ -68,7 +76,7 @@ class BudgetLineUpdate(BaseModel):
 # ---------------------------------------------------------------------------
 
 @router.get("", tags=["finance", "budget-planning"], summary="Budget plans auflisten",
-    response_model=dict
+    response_model=BudgetPlanningOut
 )
 def list_budget_plans(
     tenant_id: str = Depends(get_tenant_id),
@@ -89,7 +97,7 @@ def list_budget_plans(
 
 
 @router.post("", status_code=201, tags=["finance", "budget-planning"], summary="Budget plan anlegen",
-    response_model=dict
+    response_model=BudgetPlanningOut
 )
 def create_budget_plan(
     body: BudgetPlanCreate,
@@ -124,7 +132,7 @@ def create_budget_plan(
 # ---------------------------------------------------------------------------
 
 @router.get("/summary", tags=["finance", "budget-planning"], summary="Summary budget",
-    response_model=dict
+    response_model=BudgetPlanningOut
 )
 def budget_summary(
     tenant_id: str = Depends(get_tenant_id),
@@ -185,7 +193,7 @@ def budget_summary(
 # ---------------------------------------------------------------------------
 
 @router.get("/{plan_id}", tags=["finance", "budget-planning"], summary="Budget plan abrufen",
-    response_model=dict
+    response_model=BudgetPlanningOut
 )
 def get_budget_plan(
     plan_id: str,
@@ -215,7 +223,7 @@ def get_budget_plan(
 
 
 @router.post("/{plan_id}/approve", tags=["finance", "budget-planning"], summary="Budget plan genehmigen",
-    response_model=dict
+    response_model=BudgetPlanningOut
 )
 def approve_budget_plan(
     plan_id: str,
@@ -247,7 +255,7 @@ def approve_budget_plan(
 
 
 @router.get("/{plan_id}/vs-actual", tags=["finance", "budget-planning"], summary="Vs actual budget",
-    response_model=dict
+    response_model=BudgetPlanningOut
 )
 def budget_vs_actual(
     plan_id: str,
@@ -323,7 +331,7 @@ def budget_vs_actual(
 
 
 @router.post("/{plan_id}/lines", status_code=201, tags=["finance", "budget-planning"], summary="Budget line hinzufügen",
-    response_model=dict
+    response_model=BudgetPlanningOut
 )
 def add_budget_line(
     plan_id: str,
@@ -371,7 +379,7 @@ def add_budget_line(
 
 
 @router.patch("/{plan_id}/lines/{line_id}", tags=["finance", "budget-planning"], summary="Budget line aktualisieren",
-    response_model=dict
+    response_model=BudgetPlanningOut
 )
 def update_budget_line(
     plan_id: str,

@@ -16,6 +16,14 @@ from app.core.background_jobs import (
     get_default_job_types,
 )
 
+from app.api.v1.schemas.base import BaseSchema
+from pydantic import ConfigDict as _ConfigDict
+
+
+class BackgroundJobOut(BaseSchema):
+    model_config = _ConfigDict(extra="allow")
+
+
 router = APIRouter(prefix="/process/background-jobs", tags=["process-kernel", "jobs"])
 
 
@@ -32,7 +40,7 @@ class BackgroundJobMutationIn(BaseModel):
     fehler_meldung: str = ""
 
 
-@router.get("/types", response_model=dict, summary="Job types auflisten")
+@router.get("/types", response_model=BackgroundJobOut, summary="Job types auflisten")
 def list_job_types() -> dict[str, Any]:
     definitions = get_default_job_types()
     return {
@@ -42,7 +50,7 @@ def list_job_types() -> dict[str, Any]:
     }
 
 
-@router.get("", response_model=dict, summary="Background jobs auflisten")
+@router.get("", response_model=BackgroundJobOut, summary="Background jobs auflisten")
 def list_background_jobs(
     status: str = "",
     tenant_id: str = "",
@@ -61,7 +69,7 @@ def list_background_jobs(
     }
 
 
-@router.get("/queue", response_model=dict, summary="Background job queue abrufen")
+@router.get("/queue", response_model=BackgroundJobOut, summary="Background job queue abrufen")
 def get_background_job_queue() -> dict[str, Any]:
     registry = get_background_job_registry()
     summary = registry.summary()
@@ -74,7 +82,7 @@ def get_background_job_queue() -> dict[str, Any]:
     }
 
 
-@router.post("/enqueue", response_model=dict, status_code=201, summary="Background job enqueue")
+@router.post("/enqueue", response_model=BackgroundJobOut, status_code=201, summary="Background job enqueue")
 def enqueue_background_job(body: BackgroundJobEnqueueIn) -> dict[str, Any]:
     registry = get_background_job_registry()
     req = JobEnqueueRequest(
@@ -93,7 +101,7 @@ def enqueue_background_job(body: BackgroundJobEnqueueIn) -> dict[str, Any]:
     }
 
 
-@router.post("/dequeue", response_model=dict, summary="Background job dequeue")
+@router.post("/dequeue", response_model=BackgroundJobOut, summary="Background job dequeue")
 def dequeue_background_job() -> dict[str, Any]:
     registry = get_background_job_registry()
     job = registry.dequeue_next()
@@ -106,7 +114,7 @@ def dequeue_background_job() -> dict[str, Any]:
     }
 
 
-@router.get("/{job_id}", response_model=dict, summary="Background job abrufen")
+@router.get("/{job_id}", response_model=BackgroundJobOut, summary="Background job abrufen")
 def get_background_job(job_id: str) -> dict[str, Any]:
     registry = get_background_job_registry()
     job = registry.get(job_id)
@@ -118,7 +126,7 @@ def get_background_job(job_id: str) -> dict[str, Any]:
     }
 
 
-@router.post("/{job_id}/complete", response_model=dict, summary="Background job complete")
+@router.post("/{job_id}/complete", response_model=BackgroundJobOut, summary="Background job complete")
 def complete_background_job(job_id: str, body: BackgroundJobMutationIn | None = None) -> dict[str, Any]:
     registry = get_background_job_registry()
     job = registry.complete(job_id, ergebnis_summary=(body.ergebnis_summary if body else ""))
@@ -131,7 +139,7 @@ def complete_background_job(job_id: str, body: BackgroundJobMutationIn | None = 
     }
 
 
-@router.post("/{job_id}/fail", response_model=dict, summary="Background job fail")
+@router.post("/{job_id}/fail", response_model=BackgroundJobOut, summary="Background job fail")
 def fail_background_job(job_id: str, body: BackgroundJobMutationIn | None = None) -> dict[str, Any]:
     registry = get_background_job_registry()
     job = registry.fail(job_id, fehler_meldung=(body.fehler_meldung if body else "Unspecified failure"))

@@ -17,6 +17,15 @@ from sqlalchemy.orm import Session
 
 from app.core.database import get_db
 
+from app.api.v1.schemas.base import BaseSchema
+from pydantic import ConfigDict as _ConfigDict
+
+
+class LogisticsTourOut(BaseSchema):
+    """Typed response schema for LogisticsTourOut endpoints (extra fields forwarded)."""
+    model_config = _ConfigDict(extra="allow")
+
+
 router = APIRouter(prefix="/logistik", tags=["logistik", "tourenplanung"])
 
 # ---------------------------------------------------------------------------
@@ -141,7 +150,7 @@ def _tours_table_check(db: Session) -> None:
 
 
 @router.get("/tours", summary="Tours auflisten",
-    response_model=list
+    response_model=list[LogisticsTourOut]
 )
 def list_tours(
     date: Optional[str] = Query(None),
@@ -194,7 +203,7 @@ def list_tours(
 
 
 @router.post("/tours", status_code=201, summary="Tour anlegen",
-    response_model=dict
+    response_model=LogisticsTourOut
 )
 def create_tour(
     body: TourIn,
@@ -271,7 +280,7 @@ def create_tour(
 # ---------------------------------------------------------------------------
 
 @router.get("/tours/{tour_id}", summary="Tour abrufen",
-    response_model=dict
+    response_model=LogisticsTourOut
 )
 def get_tour(
     tour_id: str,
@@ -307,7 +316,7 @@ def get_tour(
 # ---------------------------------------------------------------------------
 
 @router.post("/tours/{tour_id}/stops", status_code=201, summary="Stop hinzufügen",
-    response_model=dict
+    response_model=LogisticsTourOut
 )
 def add_stop(
     tour_id: str,
@@ -358,7 +367,7 @@ def add_stop(
 
 
 @router.patch("/tours/{tour_id}/stops/{stop_id}", summary="Stop aktualisieren",
-    response_model=dict
+    response_model=LogisticsTourOut
 )
 def patch_stop(
     tour_id: str,
@@ -412,7 +421,7 @@ def patch_stop(
 # ---------------------------------------------------------------------------
 
 @router.post("/tours/{tour_id}/events", status_code=201, summary="Event hinzufügen",
-    response_model=dict
+    response_model=LogisticsTourOut
 )
 def add_event(
     tour_id: str,
@@ -456,7 +465,7 @@ def add_event(
 # ---------------------------------------------------------------------------
 
 @router.get("/tours/{tour_id}/live-status", summary="Status live",
-    response_model=dict
+    response_model=LogisticsTourOut
 )
 def live_status(
     tour_id: str,
@@ -498,7 +507,7 @@ def live_status(
 # ---------------------------------------------------------------------------
 
 @router.post("/tours/{tour_id}/optimize", summary="Stops optimize",
-    response_model=dict
+    response_model=LogisticsTourOut
 )
 def optimize_stops(
     tour_id: str,
@@ -550,7 +559,7 @@ def optimize_stops(
 # ---------------------------------------------------------------------------
 
 @router.get("/tracking/{tour_id}", summary="Tracking public",
-    response_model=dict
+    response_model=LogisticsTourOut
 )
 def public_tracking(
     tour_id: str,
@@ -604,7 +613,7 @@ def public_tracking(
 # ---------------------------------------------------------------------------
 
 @router.post("/tours/{tour_id}/stops/{stop_id}/pod", status_code=201, summary="Pod save",
-    response_model=dict
+    response_model=LogisticsTourOut
 )
 def save_pod(
     tour_id: str,
@@ -641,7 +650,7 @@ def save_pod(
 
 
 @router.get("/tours/{tour_id}/stops/{stop_id}/pod", summary="Pod abrufen",
-    response_model=dict
+    response_model=LogisticsTourOut
 )
 def get_pod(
     tour_id: str,
@@ -671,7 +680,7 @@ def get_pod(
 # ---------------------------------------------------------------------------
 
 @router.get("/statistics", summary="Statistics abrufen",
-    response_model=dict
+    response_model=LogisticsTourOut
 )
 def get_statistics(
     date_from: Optional[str] = Query(None),

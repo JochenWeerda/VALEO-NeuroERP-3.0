@@ -21,6 +21,14 @@ import httpx
 from fastapi import APIRouter, HTTPException, Query
 from pydantic import BaseModel
 
+from app.api.v1.schemas.base import BaseSchema
+from pydantic import ConfigDict as _ConfigDict
+
+
+class AgrarWetterOut(BaseSchema):
+    model_config = _ConfigDict(extra="allow")
+
+
 router = APIRouter(tags=["agrar", "wetter"])
 
 BRIGHTSKY_BASE = "https://api.brightsky.dev"
@@ -209,7 +217,7 @@ async def get_wetter_warnungen(
     return result
 
 
-@router.get("/wetter/stunden", response_model=list[dict], summary="Wetter stunden abrufen")
+@router.get("/wetter/stunden", response_model=list[AgrarWetterOut], summary="Wetter stunden abrufen")
 async def get_wetter_stunden(
     lat: float = Query(..., description="Breitengrad"),
     lon: float = Query(..., description="Längengrad"),

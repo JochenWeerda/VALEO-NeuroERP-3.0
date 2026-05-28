@@ -16,6 +16,14 @@ from app.domains.operations.repository import ChargeRepository
 from app.domains.operations.models import ChargeStatus
 from app.middleware.odata_adapter import apply_odata
 
+from app.api.v1.schemas.base import BaseSchema
+from pydantic import ConfigDict as _ConfigDict
+
+
+class ChargeOut(BaseSchema):
+    model_config = _ConfigDict(extra="allow")
+
+
 router = APIRouter(prefix="/chargen", tags=["Charges"])
 
 CHARGE_ODATA_FIELDS = {
@@ -122,7 +130,7 @@ def _to_dict(charge) -> dict:
     }
 
 
-@router.get("", response_model=dict, summary="Charges auflisten")
+@router.get("", response_model=ChargeOut, summary="Charges auflisten")
 async def list_charges(
     request: Request,
     search: Optional[str] = Query(None, description="Search term"),
@@ -170,7 +178,7 @@ async def list_charges(
     return {"items": [_to_dict(i) for i in items], "total": total, "limit": limit, "offset": offset}
 
 
-@router.get("/{charge_id}", response_model=dict, summary="Charge abrufen")
+@router.get("/{charge_id}", response_model=ChargeOut, summary="Charge abrufen")
 async def get_charge(charge_id: str, db: Session = Depends(get_db)) -> dict:
     repo = ChargeRepository(db)
     charge = repo.get_by_id(charge_id)
@@ -179,7 +187,7 @@ async def get_charge(charge_id: str, db: Session = Depends(get_db)) -> dict:
     return _to_dict(charge)
 
 
-@router.post("", response_model=dict, status_code=201, summary="Charge anlegen")
+@router.post("", response_model=ChargeOut, status_code=201, summary="Charge anlegen")
 async def create_charge(data: ChargeCreate, db: Session = Depends(get_db)) -> dict:
     repo = ChargeRepository(db)
     if repo.get_by_chargen_id(data.chargen_id):
@@ -196,7 +204,7 @@ async def create_charge(data: ChargeCreate, db: Session = Depends(get_db)) -> di
     return _to_dict(charge)
 
 
-@router.patch("/{charge_id}", response_model=dict, summary="Charge aktualisieren")
+@router.patch("/{charge_id}", response_model=ChargeOut, summary="Charge aktualisieren")
 async def update_charge(charge_id: str, data: ChargeUpdate, db: Session = Depends(get_db)) -> dict:
     repo = ChargeRepository(db)
     payload = data.model_dump(exclude_unset=True)
@@ -212,13 +220,13 @@ async def update_charge(charge_id: str, data: ChargeUpdate, db: Session = Depend
     return _to_dict(charge)
 
 
-@router.put("/{charge_id}", response_model=dict, summary="Charge replace")
+@router.put("/{charge_id}", response_model=ChargeOut, summary="Charge replace")
 async def replace_charge(charge_id: str, data: ChargeUpdate, db: Session = Depends(get_db)) -> dict:
     """Full replacement — delegates to PATCH logic."""
     return await update_charge(charge_id, data, db)
 
 
-@router.post("/{charge_id}/freigabe", response_model=dict, summary="Charge freigabe")
+@router.post("/{charge_id}/freigabe", response_model=ChargeOut, summary="Charge freigabe")
 async def freigabe_charge(charge_id: str, db: Session = Depends(get_db)) -> dict:
     repo = ChargeRepository(db)
     charge = repo.get_by_id(charge_id)
@@ -244,13 +252,13 @@ async def delete_charge(charge_id: str, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Charge not found")
 
 
-@router.get("/stats/summary", response_model=dict, summary="Charge stats abrufen")
+@router.get("/stats/summary", response_model=ChargeOut, summary="Charge stats abrufen")
 async def get_charge_stats(db: Session = Depends(get_db)) -> dict:
     repo = ChargeRepository(db)
     return repo.get_stats()
 
 
-@router.get("/{charge_id}/qs-readiness", response_model=dict, summary="Qs readiness abrufen")
+@router.get("/{charge_id}/qs-readiness", response_model=ChargeOut, summary="Qs readiness abrufen")
 async def get_qs_readiness(charge_id: str, db: Session = Depends(get_db)) -> dict:
     repo = ChargeRepository(db)
     charge = repo.get_by_id(charge_id)

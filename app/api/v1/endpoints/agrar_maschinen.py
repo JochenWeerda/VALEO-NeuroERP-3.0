@@ -24,6 +24,14 @@ from app.core.database import get_db
 from app.core.tenant import get_tenant_id
 from app.infrastructure.models.agrar_models import AgrarMaschine
 
+from app.api.v1.schemas.base import BaseSchema
+from pydantic import ConfigDict as _ConfigDict
+
+
+class AgrarMaschinenOut(BaseSchema):
+    model_config = _ConfigDict(extra="allow")
+
+
 router = APIRouter(tags=["agrar", "maschinen"])
 
 
@@ -110,7 +118,7 @@ def _to_dict(m: AgrarMaschine) -> dict:
 # ────────────────────────────────────────────────────────────────────────────
 
 @router.get("/maschinen", summary="Maschinen auflisten",
-    response_model=dict
+    response_model=AgrarMaschinenOut
 )
 def list_maschinen(
     typ: Optional[str] = Query(default=None),
@@ -152,7 +160,7 @@ def list_maschinen(
 
 
 @router.post("/maschinen", status_code=201, summary="Maschine anlegen",
-    response_model=dict
+    response_model=AgrarMaschinenOut
 )
 def create_maschine(
     body: MaschineCreate,
@@ -171,7 +179,7 @@ def create_maschine(
 
 
 @router.get("/maschinen/{maschine_id}", summary="Maschine abrufen",
-    response_model=dict
+    response_model=AgrarMaschinenOut
 )
 def get_maschine(
     maschine_id: str,
@@ -189,7 +197,7 @@ def get_maschine(
 
 
 @router.patch("/maschinen/{maschine_id}", summary="Maschine aktualisieren",
-    response_model=dict
+    response_model=AgrarMaschinenOut
 )
 def update_maschine(
     maschine_id: str,
@@ -255,7 +263,7 @@ def buch_betriebsstunden(
 
 
 @router.patch("/maschinen/{maschine_id}/status", summary="Maschine status setzen",
-    response_model=dict
+    response_model=AgrarMaschinenOut
 )
 def set_maschine_status(
     maschine_id: str,

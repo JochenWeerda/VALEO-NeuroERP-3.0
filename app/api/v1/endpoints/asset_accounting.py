@@ -19,6 +19,14 @@ from ....core.tenant import get_tenant_id
 
 logger = logging.getLogger(__name__)
 
+from app.api.v1.schemas.base import BaseSchema
+from pydantic import ConfigDict as _ConfigDict
+
+
+class AssetAccountingOut(BaseSchema):
+    model_config = _ConfigDict(extra="allow")
+
+
 router = APIRouter(prefix="/finance/asset-accounting", tags=["finance", "asset-accounting"])
 
 # ---------------------------------------------------------------------------
@@ -92,7 +100,7 @@ class BudgetLineIn(BaseModel):
 # ---------------------------------------------------------------------------
 
 @router.get("/assets", tags=["finance", "asset-accounting"], summary="Assets auflisten",
-    response_model=dict
+    response_model=AssetAccountingOut
 )
 def list_assets(
     asset_class: Optional[str] = Query(None),
@@ -128,7 +136,7 @@ def list_assets(
 # ---------------------------------------------------------------------------
 
 @router.post("/assets", status_code=201, tags=["finance", "asset-accounting"], summary="Asset anlegen",
-    response_model=dict
+    response_model=AssetAccountingOut
 )
 def create_asset(
     body: AssetCreate,
@@ -181,7 +189,7 @@ def create_asset(
 # ---------------------------------------------------------------------------
 
 @router.get("/assets/{asset_id}", tags=["finance", "asset-accounting"], summary="Asset abrufen",
-    response_model=dict
+    response_model=AssetAccountingOut
 )
 def get_asset(
     asset_id: str,
@@ -217,7 +225,7 @@ def get_asset(
 # ---------------------------------------------------------------------------
 
 @router.patch("/assets/{asset_id}", tags=["finance", "asset-accounting"], summary="Asset aktualisieren",
-    response_model=dict
+    response_model=AssetAccountingOut
 )
 def update_asset(
     asset_id: str,
@@ -271,7 +279,7 @@ def update_asset(
 # ---------------------------------------------------------------------------
 
 @router.post("/assets/{asset_id}/dispose", tags=["finance", "asset-accounting"], summary="Asset dispose",
-    response_model=dict
+    response_model=AssetAccountingOut
 )
 def dispose_asset(
     asset_id: str,
@@ -324,7 +332,7 @@ def dispose_asset(
 # ---------------------------------------------------------------------------
 
 @router.post("/depreciation-run", tags=["finance", "asset-accounting"], summary="Depreciation ausführen",
-    response_model=dict
+    response_model=AssetAccountingOut
 )
 def run_depreciation(
     body: DepreciationRunRequest,
@@ -426,7 +434,7 @@ def run_depreciation(
 # ---------------------------------------------------------------------------
 
 @router.get("/asset-register", tags=["finance", "asset-accounting"], summary="Register asset",
-    response_model=dict
+    response_model=AssetAccountingOut
 )
 def asset_register(
     year: int = Query(..., description="Geschäftsjahr"),
@@ -492,7 +500,7 @@ def asset_register(
 # ---------------------------------------------------------------------------
 
 @router.get("/depreciation-forecast", tags=["finance", "asset-accounting"], summary="Forecast depreciation",
-    response_model=dict
+    response_model=AssetAccountingOut
 )
 def depreciation_forecast(
     tenant_id: str = Depends(get_tenant_id),
