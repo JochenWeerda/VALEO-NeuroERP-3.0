@@ -1,10 +1,24 @@
 """
 Base API schemas for VALEO-NeuroERP
-Common Pydantic models used across all API endpoints
+Common Pydantic models used across all API endpoints.
+
+Import convention:
+    from app.api.v1.schemas.base import (
+        BaseSchema, TimestampMixin, TenantMixin, AuditMixin,
+        StatusResponse, IDResponse, ListResponse, OffsetPaginatedResponse,
+        PaginatedResponse, ErrorResponse,
+    )
+
+Anti-patterns verboten:
+    response_model=dict          → StatusResponse / IDResponse / eigenes Schema
+    response_model=list          → ListResponse[T] oder eigenes Schema
+    response_model=Any           → eigenes Schema
 """
 
 from datetime import datetime
 from typing import Optional, Any, Dict, TypeVar, Generic
+from uuid import UUID
+
 from pydantic import BaseModel, Field, ConfigDict
 
 T = TypeVar('T')
@@ -78,3 +92,89 @@ class DatabaseHealthResponse(BaseSchema):
     total_tables: int = Field(description="Total number of tables")
     record_counts: Dict[str, int] = Field(description="Record counts per table")
     timestamp: float = Field(description="Unix timestamp")
+
+
+# ---------------------------------------------------------------------------
+# Tenant / Audit Mixins
+# ---------------------------------------------------------------------------
+
+class TenantMixin(BaseSchema):
+    """Mixin: Mandanten-Feld für mandantenfähige Entitäten."""
+    tenant_id: str = Field(description="Mandanten-ID (X-Tenant-ID)")
+
+
+class AuditMixin(BaseSchema):
+    """Mixin: Audit-Felder (erstellt/geändert von)."""
+    created_by: Optional[str] = Field(default=None, description="Erstellt von (User-ID)")
+    updated_by: Optional[str] = Field(default=None, description="Geändert von (User-ID)")
+
+
+# ---------------------------------------------------------------------------
+# Einheitliche Response-Typen
+# ---------------------------------------------------------------------------
+
+class StatusResponse(BaseSchema):
+    """Antwort für Operationen ohne Nutzlast (z. B. DELETE, Trigger, Status-Update).
+
+    Verwendung:
+        response_model=StatusResponse
+        return StatusResponse(success=True, message="Deleted")
+    """
+    success: bool = Field(description="Ob die Operation erfolgreich war")
+    message: Optional[str] = Field(default=None, description="Optionale Nachricht")
+
+
+class IDResponse(BaseSchema):
+    """Antwort für Create-Operationen, die eine neue ID zurückgeben.
+
+    Verwendung:
+        response_model=IDResponse
+        return IDResponse(id=str(new_obj.id))
+    """
+    id: str = Field(description="ID des erstellten Objekts")
+    message: Optional[str] = Field(default=None)
+
+
+class CountResponse(BaseSchema):
+    """Antwort für Operationen, die eine Anzahl zurückgeben."""
+    count: int = Field(description="Anzahl der betroffenen/gefundenen Datensätze")
+    message: Optional[str] = Field(default=None)
+
+
+class ListResponse(BaseSchema, Generic[T]):
+    """Einfache Listen-Antwort ohne Pagination.
+
+    Verwendung:
+        response_model=ListResponse[MySchema]
+        return ListResponse(items=rows, total=len(rows))
+    """
+    items: list[T] = Field(description="Listenelemente")
+    total: int = Field(description="Gesamtanzahl der Elemente")
+
+
+class OffsetPaginatedResponse(BaseSchema, Generic[T]):
+    """Paginierte Antwort mit Offset/Limit (häufiger ERP-Standard).
+
+    Verwendung:
+        response_model=OffsetPaginatedResponse[MySchema]
+        return OffsetPaginatedResponse(items=rows, total=n, limit=limit, offset=offset)
+    """
+    items: list[T] = Field(description="Listenelemente")
+    total: int = Field(description="Gesamtanzahl")
+    limit: int = Field(description="Max. Elemente pro Seite")
+    offset: int = Field(default=0, description="Startposition")
+
+
+class ValidationErrorItem(BaseSchema):
+    """Ein einzelner Validierungsfehler."""
+    field: str = Field(description="Feldname")
+    message: str = Field(description="Fehlermeldung")
+    code: Optional[str] = Field(default=None, description="Fehlercode")
+
+
+class BulkOperationResponse(BaseSchema):
+    """Antwort für Bulk-Operationen (Import, Massenaktualisierung)."""
+    success_count: int = Field(description="Erfolgreich verarbeitete Einträge")
+    error_count: int = Field(description="Fehlerhafte Einträge")
+    errors: list[ValidationErrorItem] = Field(default_factory=list, description="Fehlerdetails")
+    message: Optional[str] = Field(default=None)
