@@ -8,6 +8,7 @@ from app.infrastructure.eventbus.observability import event_bus_observer
 
 from app.api.v1.schemas.base import BaseSchema
 from app.api.v1.schemas.base import CompatFlexOut
+from app.api.v1.schemas.neuro_event_monitoring_schemas import NeuroEventMonitoringOut
 
 
 router = APIRouter(prefix="/neuro/event-bus", tags=["neuro-event-bus", "monitoring"])
@@ -22,7 +23,7 @@ _PROMETHEUS_COUNTERS = (
 
 
 @router.get("/metrics", summary="Event bus metrics abrufen",
-    response_model=CompatFlexOut
+    response_model=NeuroEventMonitoringOut
 )
 async def get_event_bus_metrics() -> dict:
     out = event_bus_observer.get_metrics()
@@ -34,14 +35,14 @@ async def get_event_bus_metrics() -> dict:
 
 
 @router.get("/health", summary="Event bus health abrufen",
-    response_model=CompatFlexOut
+    response_model=NeuroEventMonitoringOut
 )
 async def get_event_bus_health() -> dict:
     return event_bus_observer.get_health()
 
 
 @router.get("/errors", summary="Event bus errors abrufen",
-    response_model=CompatFlexOut
+    response_model=NeuroEventMonitoringOut
 )
 async def get_event_bus_errors(limit: int = Query(20, ge=1, le=200)) -> dict:
     return {

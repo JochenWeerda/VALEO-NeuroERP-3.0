@@ -29,6 +29,7 @@ from app.finance.tax_resolver import resolve_partner_country, resolve_tax_key_ac
 logger = logging.getLogger(__name__)
 from app.api.v1.schemas.base import BaseSchema
 from app.api.v1.schemas.base import CompatFlexOut
+from app.api.v1.schemas.ap_invoices_schemas import ApInvoicesOut
 
 
 router = APIRouter(prefix="/ap/invoices", tags=["finance", "ap", "invoices"])
@@ -129,7 +130,7 @@ def calculate_invoice_totals(invoice: SalesInvoice) -> SalesInvoice:
 
 
 @router.post("/", summary="Ap invoice anlegen",
-    response_model=CompatFlexOut
+    response_model=StatusResponse
 )
 async def create_ap_invoice(doc: SalesInvoice, db: Session = Depends(get_db)) -> dict:
     """Erstellt eine neue Eingangsrechnung (Kreditoren)."""
@@ -155,7 +156,7 @@ async def create_ap_invoice(doc: SalesInvoice, db: Session = Depends(get_db)) ->
 
 
 @router.get("/{invoice_id}", summary="Ap invoice abrufen",
-    response_model=CompatFlexOut
+    response_model=StatusResponse
 )
 async def get_ap_invoice(invoice_id: str, db: Session = Depends(get_db)) -> dict:
     """Ruft eine Eingangsrechnung anhand ihrer ID ab."""
@@ -168,7 +169,7 @@ async def get_ap_invoice(invoice_id: str, db: Session = Depends(get_db)) -> dict
 
 
 @router.put("/{invoice_id}", summary="Ap invoice aktualisieren",
-    response_model=CompatFlexOut
+    response_model=StatusResponse
 )
 async def update_ap_invoice(invoice_id: str, doc: SalesInvoice, db: Session = Depends(get_db)) -> dict:
     """Aktualisiert eine bestehende Eingangsrechnung."""
@@ -189,7 +190,7 @@ async def update_ap_invoice(invoice_id: str, doc: SalesInvoice, db: Session = De
 
 
 @router.get("/", summary="Ap invoices auflisten",
-    response_model=list[CompatFlexOut]
+    response_model=list[ApInvoicesOut]
 )
 async def list_ap_invoices(
     skip: int = 0,
@@ -224,7 +225,7 @@ async def list_ap_invoices(
 
 
 @router.delete("/{invoice_id}", summary="Ap invoice löschen",
-    response_model=CompatFlexOut
+    response_model=StatusResponse
 )
 async def delete_ap_invoice(invoice_id: str, db: Session = Depends(get_db)) -> dict:
     """Löscht eine Eingangsrechnung."""
@@ -237,7 +238,7 @@ async def delete_ap_invoice(invoice_id: str, db: Session = Depends(get_db)) -> d
 
 
 @router.post("/{invoice_id}/approve", summary="Ap invoice genehmigen",
-    response_model=CompatFlexOut
+    response_model=ApInvoicesOut
 )
 async def approve_ap_invoice(
     invoice_id: str,
@@ -284,7 +285,7 @@ async def approve_ap_invoice(
 
 
 @router.post("/{invoice_id}/post", summary="Ap invoice erstellen",
-    response_model=CompatFlexOut
+    response_model=ApInvoicesOut
 )
 async def post_ap_invoice(
     invoice_id: str,

@@ -20,6 +20,7 @@ logger = logging.getLogger(__name__)
 
 from app.api.v1.schemas.base import BaseSchema
 from app.api.v1.schemas.base import CompatFlexOut
+from app.api.v1.schemas.vat_codes_schemas import VatCodesOut
 
 
 router = APIRouter(prefix="/finance/vat-codes", tags=["finance", "vat-codes"])
@@ -292,7 +293,7 @@ async def update_vat_code(
 
 
 @router.delete("/{vat_code_id}", summary="Vat code löschen",
-    response_model=CompatFlexOut
+    response_model=StatusResponse
 )
 async def delete_vat_code(
     vat_code_id: str,
@@ -349,7 +350,7 @@ async def get_vat_code_audit(
 
 
 @router.post("/seed-defaults", summary="Default vat codes seed",
-    response_model=CompatFlexOut
+    response_model=VatCodesOut
 )
 async def seed_default_vat_codes(
     tenant_id: str = Depends(get_tenant_id),

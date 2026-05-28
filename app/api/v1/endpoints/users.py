@@ -19,6 +19,7 @@ from ..schemas.base import PaginatedResponse
 
 from app.api.v1.schemas.base import BaseSchema
 from app.api.v1.schemas.base import CompatFlexOut
+from app.api.v1.schemas.users_schemas import UsersOut
 
 
 router = APIRouter(tags=["users"])
@@ -205,7 +206,7 @@ async def delete_user(
         raise HTTPException(status_code=500, detail=f"Failed to delete user: {str(e)}")
 
 
-@router.post("/login", response_model=CompatFlexOut, summary="Anmelden")
+@router.post("/login", response_model=UsersOut, summary="Anmelden")
 async def login(
     login_data: UserLogin,
     db: Session = Depends(get_db)
@@ -226,7 +227,7 @@ async def login(
 
 
 @router.post("/change-password", summary="Password change",
-    response_model=CompatFlexOut
+    response_model=UsersOut
 )
 async def change_password(
     password_data: ChangePasswordRequest,

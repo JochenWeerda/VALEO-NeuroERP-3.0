@@ -140,7 +140,7 @@ def update_hauptwarengruppe(
 
 
 @router.delete("/haupt/{gruppe_nr}", summary="Hauptwarengruppe löschen",
-    response_model=CompatFlexOut
+    response_model=None
 )
 def delete_hauptwarengruppe(
     gruppe_nr: str,
@@ -306,7 +306,7 @@ def update_warengruppe(
 
 
 @router.delete("/{gruppe_nr}", summary="Warengruppe löschen",
-    response_model=CompatFlexOut
+    response_model=None
 )
 def delete_warengruppe(
     gruppe_nr: str,

@@ -20,6 +20,7 @@ from app.core.projection_consumer import (
 
 from app.api.v1.schemas.base import BaseSchema
 from app.api.v1.schemas.base import CompatFlexOut
+from app.api.v1.schemas.projection_consumer_schemas import ProjectionConsumerOut
 
 
 router = APIRouter(prefix="/projections", tags=["projections", "read-models"])
@@ -50,7 +51,7 @@ class RebuildRequestBody(BaseModel):
 
 
 @router.get("", summary="Projections auflisten",
-    response_model=CompatFlexOut
+    response_model=ProjectionConsumerOut
 )
 async def list_projections(
     tenant_id: str = Depends(get_tenant_id),
@@ -60,7 +61,7 @@ async def list_projections(
 
 
 @router.get("/stale", summary="Stale projections auflisten",
-    response_model=list[CompatFlexOut]
+    response_model=list[ProjectionConsumerOut]
 )
 async def list_stale_projections(
     tenant_id: str = Depends(get_tenant_id),
@@ -71,7 +72,7 @@ async def list_stale_projections(
 
 
 @router.get("/{projection_name}", summary="Projection abrufen",
-    response_model=CompatFlexOut
+    response_model=ProjectionConsumerOut
 )
 async def get_projection(
     projection_name: str,
@@ -88,7 +89,7 @@ async def get_projection(
 
 
 @router.post("/{projection_name}/rebuild", status_code=202, summary="Rebuild request",
-    response_model=CompatFlexOut
+    response_model=ProjectionConsumerOut
 )
 async def request_rebuild(
     projection_name: str,
@@ -124,7 +125,7 @@ async def request_rebuild(
 
 
 @router.get("/{projection_name}/rebuild-status", summary="Rebuild status abrufen",
-    response_model=CompatFlexOut
+    response_model=ProjectionConsumerOut
 )
 async def get_rebuild_status(
     projection_name: str,

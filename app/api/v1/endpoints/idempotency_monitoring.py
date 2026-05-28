@@ -6,13 +6,14 @@ from app.core.action_idempotency import get_action_idempotency_store
 
 from app.api.v1.schemas.base import BaseSchema
 from app.api.v1.schemas.base import CompatFlexOut
+from app.api.v1.schemas.idempotency_monitoring_schemas import IdempotencyMonitoringOut
 
 
 router = APIRouter(prefix="/process/idempotency", tags=["process-kernel", "idempotency", "monitoring"])
 
 
 @router.get("/summary", summary="Idempotency Summary",
-    response_model=CompatFlexOut
+    response_model=IdempotencyMonitoringOut
 )
 def get_idempotency_summary() -> dict:
     store = get_action_idempotency_store()
@@ -20,7 +21,7 @@ def get_idempotency_summary() -> dict:
 
 
 @router.get("/audit", summary="Idempotency Audit Feed",
-    response_model=CompatFlexOut
+    response_model=IdempotencyMonitoringOut
 )
 def get_idempotency_audit(
     tenant_id: str | None = Query(default=None, description="Optional tenant filter"),

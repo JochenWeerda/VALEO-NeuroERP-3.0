@@ -86,7 +86,7 @@ async def list_customers(
 
 
 @router.get("/quick-search", summary="Search customers quick",
-    response_model=list[CompatFlexOut]
+    response_model=list[CustomersOut]
 )
 def quick_search_customers(
     q: str = Query("", description="Suchterm (Name oder Kundennummer)"),
@@ -104,7 +104,7 @@ def quick_search_customers(
 
 
 @router.get("/recent", summary="Customers recent",
-    response_model=list[CompatFlexOut]
+    response_model=list[CustomersOut]
 )
 def recent_customers(
     limit: int = Query(10, ge=1, le=25),
@@ -116,7 +116,7 @@ def recent_customers(
 
 
 @router.get("/{customer_id}/sales-eligibility", summary="Customer sales eligibility abrufen",
-    response_model=CompatFlexOut
+    response_model=CustomersOut
 )
 async def get_customer_sales_eligibility(
     customer_id: str,
@@ -191,6 +191,7 @@ from datetime import date as _date
 from sqlalchemy import text as _text
 from pydantic import BaseModel as _BaseModel
 from app.api.v1.schemas.base import CompatFlexOut
+from app.api.v1.schemas.customers_schemas import CustomersOut
 
 
 # ---------------------------------------------------------------------------
@@ -280,7 +281,7 @@ class KonvertierungResult(_BaseModel):
 
 
 @router.post("/interessenten", status_code=status.HTTP_201_CREATED, summary="Interessent anlegen",
-    response_model=CompatFlexOut
+    response_model=CustomersOut
 )
 def create_interessent(
     payload: InteressentCreate,
@@ -336,7 +337,7 @@ def create_interessent(
 
 
 @router.get("/interessenten", summary="Interessenten auflisten",
-    response_model=list[CompatFlexOut]
+    response_model=list[CustomersOut]
 )
 def list_interessenten(
     db: Session = Depends(get_db),

@@ -432,7 +432,7 @@ def get_kpi(
 
 
 @router.post("/refresh", summary="Snapshot aktualisieren",
-    response_model=CompatFlexOut
+    response_model=StatusResponse
 )
 def refresh_snapshot(
     tenant_id: str = Depends(get_tenant_id),

@@ -11,6 +11,7 @@ from ....core.tenant import get_tenant_id
 
 from app.api.v1.schemas.base import BaseSchema
 from app.api.v1.schemas.base import CompatFlexOut
+from app.api.v1.schemas.supplier_portal_schemas import SupplierPortalOut
 
 
 router = APIRouter(prefix="/supplier-portal", tags=["supplier-portal"])
@@ -170,7 +171,7 @@ def get_preisauskunft(
 
 
 @router.get("/silo-bestaende", summary="Silo bestaende abrufen",
-    response_model=CompatFlexOut
+    response_model=SupplierPortalOut
 )
 def get_silo_bestaende(
     tenant_id: str = Depends(get_tenant_id),

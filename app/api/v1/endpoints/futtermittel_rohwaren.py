@@ -1,4 +1,4 @@
-﻿"""
+"""
 Futtermittel Rohwaren-Stamm mit NÃ¤hrstoffprofil
 
 Endpunkte:
@@ -34,6 +34,7 @@ logger = logging.getLogger(__name__)
 
 from app.api.v1.schemas.base import BaseSchema
 from app.api.v1.schemas.base import CompatFlexOut
+from app.api.v1.schemas.futtermittel_rohwaren_schemas import FuttermittelRohwarenOut
 
 
 router = APIRouter(prefix="/futtermittel/rohwaren", tags=["futtermittel", "rohwaren"])
@@ -145,7 +146,7 @@ def _row_to_dict(row) -> dict:
 # Endpoints
 # ---------------------------------------------------------------------------
 
-@router.get("", response_model=list[CompatFlexOut], summary="Rohwaren auflisten")
+@router.get("", response_model=list[FuttermittelRohwarenOut], summary="Rohwaren auflisten")
 async def list_rohwaren(
     kategorie: Optional[str] = Query(None),
     search: Optional[str] = Query(None),
@@ -176,7 +177,7 @@ async def list_rohwaren(
 
 
 @router.post("", status_code=201, summary="Rohware anlegen",
-    response_model=CompatFlexOut
+    response_model=FuttermittelRohwarenOut
 )
 async def create_rohware(
     payload: RohwareIn,
@@ -218,7 +219,7 @@ async def create_rohware(
 
 
 @router.get("/vergleich", summary="Rohwaren vergleich",
-    response_model=CompatFlexOut
+    response_model=FuttermittelRohwarenOut
 )
 async def vergleich_rohwaren(
     ids: str = Query(..., description="Komma-getrennte IDs"),
@@ -263,7 +264,7 @@ async def vergleich_rohwaren(
 
 
 @router.get("/{rohware_id}", summary="Rohware abrufen",
-    response_model=CompatFlexOut
+    response_model=FuttermittelRohwarenOut
 )
 async def get_rohware(
     rohware_id: str,
@@ -287,7 +288,7 @@ async def get_rohware(
 
 
 @router.patch("/{rohware_id}", summary="Rohware aktualisieren",
-    response_model=CompatFlexOut
+    response_model=FuttermittelRohwarenOut
 )
 async def update_rohware(
     rohware_id: str,
@@ -321,7 +322,7 @@ async def update_rohware(
 
 
 @router.get("/{rohware_id}/analysen", summary="Analysen auflisten",
-    response_model=list[CompatFlexOut]
+    response_model=list[FuttermittelRohwarenOut]
 )
 async def list_analysen(
     rohware_id: str,
@@ -345,7 +346,7 @@ async def list_analysen(
 
 
 @router.post("/{rohware_id}/analysen", status_code=201, summary="Analyse anlegen",
-    response_model=CompatFlexOut
+    response_model=FuttermittelRohwarenOut
 )
 async def create_analyse(
     rohware_id: str,

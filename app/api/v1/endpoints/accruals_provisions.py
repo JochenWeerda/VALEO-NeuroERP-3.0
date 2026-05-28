@@ -210,7 +210,7 @@ async def delete_accrual_provision(
     db.commit()
 
 
-@router.post("/{item_id}/post", response_model=CompatFlexOut, summary="Accrual provision erstellen")
+@router.post("/{item_id}/post", response_model=StatusResponse, summary="Accrual provision erstellen")
 async def post_accrual_provision(
     item_id: str,
     tenant_id: str = Depends(get_tenant_id),

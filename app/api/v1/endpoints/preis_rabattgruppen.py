@@ -136,7 +136,7 @@ def create_rabattgruppe(
 
 
 @router.delete("/gruppen/{gruppe_id}", summary="Rabattgruppe löschen",
-    response_model=CompatFlexOut
+    response_model=None
 )
 def delete_rabattgruppe(
     gruppe_id: str,
@@ -270,7 +270,7 @@ def create_rabattsatz(
 
 
 @router.delete("/saetze/{satz_id}", summary="Rabattsatz löschen",
-    response_model=CompatFlexOut
+    response_model=None
 )
 def delete_rabattsatz(
     satz_id: str,

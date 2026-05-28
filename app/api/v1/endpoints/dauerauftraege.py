@@ -289,7 +289,7 @@ def list_ausfuehrungen(
 
 
 @router.patch("/{da_nr}/deaktivieren", summary="Deaktivieren",
-    response_model=CompatFlexOut
+    response_model=None
 )
 def deaktivieren(
     da_nr: str,

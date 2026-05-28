@@ -259,7 +259,7 @@ def create_rohwarengruppe(
 
 
 @router.delete("/{gruppe_nr}", summary="Rohwarengruppe löschen",
-    response_model=CompatFlexOut
+    response_model=None
 )
 def delete_rohwarengruppe(
     gruppe_nr: str,

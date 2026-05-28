@@ -24,6 +24,7 @@ from app.core.tenant_isolation_guard import IsolationDecision, TenantIsolationGu
 
 from app.api.v1.schemas.base import BaseSchema
 from app.api.v1.schemas.base import CompatFlexOut
+from app.api.v1.schemas.reporting_api_schemas import ReportingApiOut
 
 
 router = APIRouter(prefix="/reporting", tags=["reporting"])
@@ -51,7 +52,7 @@ class ProcessMiningReportRequest(BaseModel):
 
 
 @router.get("/data-products", summary="Data products abrufen",
-    response_model=CompatFlexOut
+    response_model=ReportingApiOut
 )
 def get_data_products(
     tenant_id: str = Query(...),
@@ -129,7 +130,7 @@ def post_process_mining_report(
 
 
 @router.get("/isolation/check", summary="Isolation check abrufen",
-    response_model=CompatFlexOut
+    response_model=ReportingApiOut
 )
 def get_isolation_check(
     requesting_tenant: str = Query(...),

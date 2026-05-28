@@ -155,7 +155,7 @@ def create_individualpreis(
 
 
 @router.delete("/{preis_id}", summary="Individualpreis löschen",
-    response_model=CompatFlexOut
+    response_model=None
 )
 def delete_individualpreis(
     preis_id: str,

@@ -180,7 +180,7 @@ def update_stoffstrom(
 
 
 @router.delete("/{stoffstrom_id}", summary="Stoffstrom löschen",
-    response_model=CompatFlexOut
+    response_model=None
 )
 def delete_stoffstrom(
     stoffstrom_id: str,

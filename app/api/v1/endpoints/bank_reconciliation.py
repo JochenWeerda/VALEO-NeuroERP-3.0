@@ -19,6 +19,7 @@ logger = logging.getLogger(__name__)
 
 from app.api.v1.schemas.base import BaseSchema
 from app.api.v1.schemas.base import CompatFlexOut
+from app.api.v1.schemas.bank_reconciliation_schemas import BankReconciliationOut
 
 
 router = APIRouter(prefix="/bank-reconciliation", tags=["finance", "bank-reconciliation"])
@@ -407,7 +408,7 @@ async def reconcile_bank_statement(
         raise HTTPException(status_code=500, detail=f"Failed to reconcile: {str(e)}")
 
 
-@router.get("/{statement_id}/summary", response_model=CompatFlexOut, summary="Reconciliation summary abrufen")
+@router.get("/{statement_id}/summary", response_model=BankReconciliationOut, summary="Reconciliation summary abrufen")
 async def get_reconciliation_summary(
     statement_id: str,
     bank_account_id: str = Query(..., description="Bank account ID"),

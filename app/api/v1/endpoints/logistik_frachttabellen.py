@@ -137,7 +137,7 @@ def create_frachttabelle(
 
 
 @router.delete("/{tabelle_nr}", summary="Frachttabelle löschen",
-    response_model=CompatFlexOut
+    response_model=None
 )
 def delete_frachttabelle(
     tabelle_nr: str,
@@ -274,7 +274,7 @@ def create_zuordnung(
 
 
 @router.delete("/zuordnungen/{zuordnung_id}", summary="Zuordnung löschen",
-    response_model=CompatFlexOut
+    response_model=None
 )
 def delete_zuordnung(
     zuordnung_id: str,

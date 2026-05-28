@@ -16,6 +16,7 @@ from app.domains.operations.models import ErnteDB
 
 from app.api.v1.schemas.base import BaseSchema
 from app.api.v1.schemas.base import CompatFlexOut
+from app.api.v1.schemas.ernte_planung_schemas import ErntePlanungOut
 
 
 router = APIRouter(prefix="/agrar/ernte", tags=["agrar", "ernte", "ernteplanung"])
@@ -54,7 +55,7 @@ def _to_dict(row: ErnteDB) -> dict:
 
 
 @router.get("", summary="Ernten auflisten",
-    response_model=list[CompatFlexOut]
+    response_model=list[ErntePlanungOut]
 )
 def list_ernten(
     status: Optional[str] = None,
@@ -69,7 +70,7 @@ def list_ernten(
 
 
 @router.get("/{ernte_id}", summary="Ernte abrufen",
-    response_model=CompatFlexOut
+    response_model=None
 )
 def get_ernte(ernte_id: str, db: Session = Depends(get_db)):
     row = db.query(ErnteDB).filter(ErnteDB.id == ernte_id).first()
@@ -79,7 +80,7 @@ def get_ernte(ernte_id: str, db: Session = Depends(get_db)):
 
 
 @router.post("", status_code=201, summary="Ernte anlegen",
-    response_model=CompatFlexOut
+    response_model=None
 )
 def create_ernte(payload: ErntePayload, db: Session = Depends(get_db)):
     datum = date.fromisoformat(payload.datum) if payload.datum else date.today()
@@ -99,7 +100,7 @@ def create_ernte(payload: ErntePayload, db: Session = Depends(get_db)):
 
 
 @router.patch("/{ernte_id}", summary="Ernte aktualisieren",
-    response_model=CompatFlexOut
+    response_model=None
 )
 def update_ernte(ernte_id: str, payload: ErntePatch, db: Session = Depends(get_db)):
     row = db.query(ErnteDB).filter(ErnteDB.id == ernte_id).first()

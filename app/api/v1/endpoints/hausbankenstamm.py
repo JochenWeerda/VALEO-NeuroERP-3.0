@@ -191,7 +191,7 @@ def update_hausbank(
 
 
 @router.delete("/{bank_nr}", summary="Hausbank löschen",
-    response_model=CompatFlexOut
+    response_model=None
 )
 def delete_hausbank(
     bank_nr: str,

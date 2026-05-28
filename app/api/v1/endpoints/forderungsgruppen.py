@@ -146,7 +146,7 @@ def update_forderungsgruppe(
 
 
 @router.delete("/{gruppe_nr}", summary="Forderungsgruppe löschen",
-    response_model=CompatFlexOut
+    response_model=None
 )
 def delete_forderungsgruppe(
     gruppe_nr: str,

@@ -154,7 +154,7 @@ def berechne_zinsabrechnung(
 
 
 @router.post("/{zins_id}/drucken", summary="Zinsabrechnung drucke",
-    response_model=CompatFlexOut
+    response_model=ZinsabrechnungOut
 )
 def drucke_zinsabrechnung(
     zins_id: str,

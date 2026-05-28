@@ -1,4 +1,4 @@
-﻿"""
+"""
 CRM activity endpoints proxied via crm-core.
 """
 
@@ -15,6 +15,7 @@ from ..schemas.crm import Activity, ActivityCreate, ActivityUpdate
 
 from app.api.v1.schemas.base import BaseSchema
 from app.api.v1.schemas.base import CompatFlexOut
+from app.api.v1.schemas.activities_schemas import ActivitiesOut
 
 
 router = APIRouter()
@@ -261,14 +262,14 @@ async def delete_activity_order_placed(activity_id: str, item_index: int = Path(
     await _replace_list_field(activity_id, "orders_placed", items)
 
 
-@router.get("/{activity_id}/follow-up-actions", response_model=list[CompatFlexOut], summary="Activity follow up actions auflisten")
+@router.get("/{activity_id}/follow-up-actions", response_model=list[ActivitiesOut], summary="Activity follow up actions auflisten")
 async def list_activity_follow_up_actions(activity_id: str):
     return await _load_list_field(activity_id, "follow_up_actions")
 
 
 @router.post(
     "/{activity_id}/follow-up-actions",
-    response_model=CompatFlexOut | str,
+    response_model=ActivitiesOut | str,
     status_code=status.HTTP_201_CREATED,
     summary="Activity follow up action anlegen",
 )
@@ -279,7 +280,7 @@ async def create_activity_follow_up_action(activity_id: str, payload: _FollowUpA
     return updated[-1]
 
 
-@router.put("/{activity_id}/follow-up-actions/{item_index}", response_model=CompatFlexOut | str, summary="Activity follow up action replace")
+@router.put("/{activity_id}/follow-up-actions/{item_index}", response_model=ActivitiesOut | str, summary="Activity follow up action replace")
 async def replace_activity_follow_up_action(
     activity_id: str,
     payload: _FollowUpActionItem,

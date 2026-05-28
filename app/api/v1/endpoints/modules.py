@@ -13,13 +13,14 @@ from modules.bootstrap import initialize_module_registry
 
 from app.api.v1.schemas.base import BaseSchema
 from app.api.v1.schemas.base import CompatFlexOut
+from app.api.v1.schemas.modules_schemas import ModulesOut
 
 
 router = APIRouter(tags=["modules"])
 
 
 @router.get("/modules", summary="Modules auflisten",
-    response_model=CompatFlexOut
+    response_model=ModulesOut
 )
 async def list_modules(tenant_id: Optional[str] = Query(None)):
     initialize_module_registry()
@@ -27,7 +28,7 @@ async def list_modules(tenant_id: Optional[str] = Query(None)):
 
 
 @router.get("/modules/{module_name}", summary="Module abrufen",
-    response_model=CompatFlexOut
+    response_model=ModulesOut
 )
 async def get_module(module_name: str, tenant_id: Optional[str] = Query(None)):
     initialize_module_registry()
@@ -46,7 +47,7 @@ async def get_module(module_name: str, tenant_id: Optional[str] = Query(None)):
 
 
 @router.get("/modules/agrar/contracts", summary="Agrar contracts abrufen",
-    response_model=CompatFlexOut
+    response_model=ModulesOut
 )
 async def get_agrar_contracts():
     initialize_module_registry()

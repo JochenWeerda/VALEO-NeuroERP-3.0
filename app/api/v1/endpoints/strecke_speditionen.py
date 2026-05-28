@@ -17,6 +17,7 @@ from app.domains.operations.repository import SpeditionFrachttarifRepository
 
 from app.api.v1.schemas.base import BaseSchema
 from app.api.v1.schemas.base import CompatFlexOut
+from app.api.v1.schemas.strecke_speditionen_schemas import StreckeSpeditionenOut
 
 
 router = APIRouter(prefix="/strecke/speditionen", tags=["Strecke - Speditionen"])
@@ -44,7 +45,7 @@ class FrachttarifPayload(BaseModel):
     notiz: Optional[str] = None
 
 
-@router.get("/frachttarife", response_model=list[CompatFlexOut], summary="Frachttarife auflisten")
+@router.get("/frachttarife", response_model=list[StreckeSpeditionenOut], summary="Frachttarife auflisten")
 async def list_frachttarife(
     skip: int = Query(0, ge=0),
     limit: int = Query(500, ge=1, le=2000),
@@ -55,7 +56,7 @@ async def list_frachttarife(
     return [_to_dict(row) for row in repo.get_all(skip=skip, limit=limit, aktiv_only=aktiv_only)]
 
 
-@router.get("/frachttarife/{tarif_id}", response_model=CompatFlexOut, summary="Frachttarif abrufen")
+@router.get("/frachttarife/{tarif_id}", response_model=StreckeSpeditionenOut, summary="Frachttarif abrufen")
 async def get_frachttarif(tarif_id: str, db: Session = Depends(get_db)):
     repo = SpeditionFrachttarifRepository(db)
     row = repo.get_by_id(tarif_id)
@@ -64,14 +65,14 @@ async def get_frachttarif(tarif_id: str, db: Session = Depends(get_db)):
     return _to_dict(row)
 
 
-@router.post("/frachttarife", response_model=CompatFlexOut, status_code=201, summary="Frachttarif anlegen")
+@router.post("/frachttarife", response_model=StreckeSpeditionenOut, status_code=201, summary="Frachttarif anlegen")
 async def create_frachttarif(payload: FrachttarifPayload, db: Session = Depends(get_db)):
     repo = SpeditionFrachttarifRepository(db)
     row = repo.create(payload.model_dump())
     return _to_dict(row)
 
 
-@router.patch("/frachttarife/{tarif_id}", response_model=CompatFlexOut, summary="Frachttarif aktualisieren")
+@router.patch("/frachttarife/{tarif_id}", response_model=None, summary="Frachttarif aktualisieren")
 async def update_frachttarif(
     tarif_id: str,
     payload: FrachttarifPayload,

@@ -7,6 +7,7 @@ import uuid
 
 from app.api.v1.schemas.base import BaseSchema
 from app.api.v1.schemas.base import CompatFlexOut
+from app.api.v1.schemas.agrar_p0_schemas import AgrarP0Out
 
 
 router = APIRouter(prefix="/agrar/p0", tags=["agrar-p0"])
@@ -34,7 +35,7 @@ class PsmProtokolleintragRequest(BaseModel):
     zulassungsnummer: Optional[str] = None
 
 @router.post("/duenge-bilanz", summary="Duenge bilanz berechne",
-    response_model=CompatFlexOut
+    response_model=AgrarP0Out
 )
 def berechne_duenge_bilanz(req: DuengeBilanzRequest):
     from app.core.duenge_bilanz import DuengeBilanz, DuengemittelEintrag, NaehrstoffTyp
@@ -60,7 +61,7 @@ def berechne_duenge_bilanz(req: DuengeBilanzRequest):
     return bilanz
 
 @router.post("/psm-protokoll", status_code=201, summary="Psm protokoll erstelle",
-    response_model=CompatFlexOut
+    response_model=AgrarP0Out
 )
 def erstelle_psm_protokoll(req: PsmProtokolleintragRequest):
     from app.core.psm_protokoll import PsmAnwendungProtokoll
@@ -81,7 +82,7 @@ def erstelle_psm_protokoll(req: PsmProtokolleintragRequest):
     return {"protokoll_id": protokoll.protokoll_id, "gobd_vollstaendig": protokoll.ist_gobd_vollstaendig(), "schema_version": 1}
 
 @router.get("/schlag/{schlag_id}/flik", summary="Schlag flik abrufen",
-    response_model=CompatFlexOut
+    response_model=AgrarP0Out
 )
 def get_schlag_flik(schlag_id: str):
     """Gibt FLIK-Informationen eines Schlages zurück (Stub für Wave 6)."""

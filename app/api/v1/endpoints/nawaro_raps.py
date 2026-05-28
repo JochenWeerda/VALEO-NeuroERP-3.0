@@ -445,7 +445,7 @@ async def update_raps_profile(
     return _profile_out(db, item)
 
 
-@router.delete('/raps-profiles/{profile_id}', response_model=CompatFlexOut, summary="Raps profile löschen")
+@router.delete('/raps-profiles/{profile_id}', response_model=StatusResponse, summary="Raps profile löschen")
 async def delete_raps_profile(
     profile_id: str,
     tenant_id: str = Depends(get_tenant_id),

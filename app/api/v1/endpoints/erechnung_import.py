@@ -206,7 +206,7 @@ def list_imports(
 
 
 @router.post("/imports/{import_id}/buchen", summary="Buchen",
-    response_model=CompatFlexOut
+    response_model=StatusResponse
 )
 def buchen(
     import_id: str,

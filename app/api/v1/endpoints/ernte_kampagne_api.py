@@ -14,6 +14,7 @@ from app.domains.operations.models import ErnteKampagneDB
 
 from app.api.v1.schemas.base import BaseSchema
 from app.api.v1.schemas.base import CompatFlexOut
+from app.api.v1.schemas.ernte_kampagne_api_schemas import ErnteKampagneApiOut
 
 
 router = APIRouter(prefix="/ernte-kampagnen", tags=["ernte-kampagnen"])
@@ -48,7 +49,7 @@ def _to_dict(row: ErnteKampagneDB) -> dict:
 
 
 @router.post("", status_code=201, summary="Kampagne anlegen",
-    response_model=CompatFlexOut
+    response_model=None
 )
 def create_kampagne(req: ErnteKampagneCreateRequest, db: Session = Depends(get_db)):
     ErnteArt(req.ernte_art)  # validate enum value
@@ -68,7 +69,7 @@ def create_kampagne(req: ErnteKampagneCreateRequest, db: Session = Depends(get_d
 
 
 @router.get("/tenant/{tenant_id}", summary="Kampagnen abrufen",
-    response_model=list[CompatFlexOut]
+    response_model=list[ErnteKampagneApiOut]
 )
 def get_kampagnen(tenant_id: str, wirtschaftsjahr: Optional[int] = None, db: Session = Depends(get_db)):
     q = db.query(ErnteKampagneDB).filter(ErnteKampagneDB.tenant_id == tenant_id)
@@ -78,7 +79,7 @@ def get_kampagnen(tenant_id: str, wirtschaftsjahr: Optional[int] = None, db: Ses
 
 
 @router.get("/{kampagne_id}", summary="Kampagne abrufen",
-    response_model=CompatFlexOut
+    response_model=None
 )
 def get_kampagne(kampagne_id: str, db: Session = Depends(get_db)):
     row = db.query(ErnteKampagneDB).filter(ErnteKampagneDB.kampagne_id == kampagne_id).first()
@@ -115,7 +116,7 @@ def start_kampagne(kampagne_id: str, db: Session = Depends(get_db)):
 
 
 @router.post("/{kampagne_id}/abschliessen", summary="Kampagne abschliessen",
-    response_model=CompatFlexOut
+    response_model=ErnteKampagneApiOut
 )
 def abschliessen_kampagne(kampagne_id: str, db: Session = Depends(get_db)):
     row = db.query(ErnteKampagneDB).filter(ErnteKampagneDB.kampagne_id == kampagne_id).first()

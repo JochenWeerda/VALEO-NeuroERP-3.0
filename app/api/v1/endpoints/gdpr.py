@@ -17,13 +17,14 @@ logger = logging.getLogger(__name__)
 
 from app.api.v1.schemas.base import BaseSchema
 from app.api.v1.schemas.base import CompatFlexOut
+from app.api.v1.schemas.gdpr_schemas import GdprOut
 
 
 router = APIRouter()
 
 
 @router.get("/data-export/{user_id}", summary="User data exportieren",
-    response_model=CompatFlexOut
+    response_model=GdprOut
 )
 async def export_user_data(
     user_id: str,
@@ -175,7 +176,7 @@ async def delete_user_data(
 
 
 @router.get("/export-portable/{user_id}", summary="Portable data exportieren",
-    response_model=CompatFlexOut
+    response_model=GdprOut
 )
 async def export_portable_data(
     user_id: str,

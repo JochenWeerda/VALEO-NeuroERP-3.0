@@ -20,6 +20,7 @@ logger = logging.getLogger(__name__)
 
 from app.api.v1.schemas.base import BaseSchema
 from app.api.v1.schemas.base import CompatFlexOut
+from app.api.v1.schemas.liquidity_planning_schemas import LiquidityPlanningOut
 
 
 router = APIRouter(prefix="/finance/liquidity", tags=["finance", "liquidity"])
@@ -137,7 +138,7 @@ class ScenarioCreate(BaseModel):
 # ---------------------------------------------------------------------------
 
 @router.get("/forecast", tags=["finance", "liquidity"], summary="Forecast liquidity",
-    response_model=CompatFlexOut
+    response_model=LiquidityPlanningOut
 )
 def liquidity_forecast(
     weeks: int = Query(13, ge=1, le=52),
@@ -186,7 +187,7 @@ def liquidity_forecast(
 # ---------------------------------------------------------------------------
 
 @router.get("/cash-position", tags=["finance", "liquidity"], summary="Position cash",
-    response_model=CompatFlexOut
+    response_model=LiquidityPlanningOut
 )
 def cash_position(
     tenant_id: str = Depends(get_tenant_id),
@@ -211,7 +212,7 @@ def cash_position(
 # ---------------------------------------------------------------------------
 
 @router.post("/scenarios", status_code=201, tags=["finance", "liquidity"], summary="Liquidity scenario anlegen",
-    response_model=CompatFlexOut
+    response_model=LiquidityPlanningOut
 )
 def create_liquidity_scenario(
     body: ScenarioCreate,

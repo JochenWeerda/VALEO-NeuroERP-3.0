@@ -11,6 +11,7 @@ from app.services.neuro_simulation_engine import simulate_dry_run, simulate_what
 
 from app.api.v1.schemas.base import BaseSchema
 from app.api.v1.schemas.base import CompatFlexOut
+from app.api.v1.schemas.neuro_simulation_schemas import NeuroSimulationOut
 
 
 router = APIRouter(prefix="/neuro/simulate", tags=["neuro-core", "simulation"])
@@ -31,7 +32,7 @@ class WhatIfRequest(SimulateRequest):
 
 
 @router.post("/dry-run", summary="Run dry",
-    response_model=CompatFlexOut
+    response_model=NeuroSimulationOut
 )
 async def dry_run(request: SimulateRequest, tenant_id: str = Depends(get_tenant_id)):
     result = simulate_dry_run(request.model_dump(exclude_none=True), tenant_id)
@@ -39,7 +40,7 @@ async def dry_run(request: SimulateRequest, tenant_id: str = Depends(get_tenant_
 
 
 @router.post("", summary="If what",
-    response_model=CompatFlexOut
+    response_model=NeuroSimulationOut
 )
 async def what_if(request: WhatIfRequest, tenant_id: str = Depends(get_tenant_id)):
     result = simulate_what_if(request.model_dump(exclude_none=True), request.current_data, tenant_id)
@@ -47,7 +48,7 @@ async def what_if(request: WhatIfRequest, tenant_id: str = Depends(get_tenant_id
 
 
 @router.get("/{run_id}", summary="Result abrufen",
-    response_model=CompatFlexOut
+    response_model=NeuroSimulationOut
 )
 async def get_result(run_id: str):
     result = get_simulation_result(run_id)

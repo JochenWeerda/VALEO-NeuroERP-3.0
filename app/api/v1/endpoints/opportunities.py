@@ -25,6 +25,7 @@ from ..schemas.crm import Opportunity, OpportunityCreate, OpportunityUpdate
 
 from app.api.v1.schemas.base import BaseSchema
 from app.api.v1.schemas.base import CompatFlexOut
+from app.api.v1.schemas.opportunities_schemas import OpportunitiesOut
 
 
 router = APIRouter()
@@ -120,7 +121,7 @@ def _ensure_opp_columns(db: Session) -> None:
                 db.rollback()
 
 
-@router.get("/stages", response_model=list[CompatFlexOut], summary="Stages auflisten")
+@router.get("/stages", response_model=list[OpportunitiesOut], summary="Stages auflisten")
 async def list_stages():
     """Pipeline-Stages fuer Kanban-Board."""
     return OPPORTUNITY_STAGES_LIST
@@ -130,7 +131,7 @@ async def list_stages():
 # GET /pipeline — Kanban view grouped by stage
 # ---------------------------------------------------------------------------
 
-@router.get("/pipeline", response_model=CompatFlexOut, tags=["crm", "opportunities"], summary="Pipeline abrufen")
+@router.get("/pipeline", response_model=OpportunitiesOut, tags=["crm", "opportunities"], summary="Pipeline abrufen")
 async def get_pipeline(
     tenant_id: Optional[str] = Query(None),
     db: Session = Depends(get_db),
@@ -205,7 +206,7 @@ async def get_pipeline(
 # GET /forecast — weighted monthly forecast
 # ---------------------------------------------------------------------------
 
-@router.get("/forecast", response_model=CompatFlexOut, summary="Forecast abrufen")
+@router.get("/forecast", response_model=OpportunitiesOut, summary="Forecast abrufen")
 async def get_forecast(
     tenant_id: Optional[str] = Query(None),
     period: Optional[str] = Query(None, description="YYYY-MM"),
@@ -296,7 +297,7 @@ async def get_forecast(
 # PATCH /{id}/stage — Stage-Wechsel mit History-Log
 # ---------------------------------------------------------------------------
 
-@router.patch("/{opportunity_id}/stage", response_model=CompatFlexOut, tags=["crm", "opportunities"], summary="Opportunity stage aktualisieren")
+@router.patch("/{opportunity_id}/stage", response_model=OpportunitiesOut, tags=["crm", "opportunities"], summary="Opportunity stage aktualisieren")
 async def patch_opportunity_stage(
     opportunity_id: str,
     new_stage: str = Query(..., description="Target stage (LEAD/QUALIFIZIERT/ANGEBOT/VERHANDLUNG/GEWONNEN/VERLOREN)"),
@@ -360,7 +361,7 @@ async def patch_opportunity_stage(
 # POST /{id}/activities — Aktivität zur Opportunity
 # ---------------------------------------------------------------------------
 
-@router.post("/{opportunity_id}/activities", response_model=CompatFlexOut, status_code=status.HTTP_201_CREATED,
+@router.post("/{opportunity_id}/activities", response_model=OpportunitiesOut, status_code=status.HTTP_201_CREATED,
              tags=["crm", "opportunities"], summary="Opportunity activity hinzufügen")
 async def add_opportunity_activity(
     opportunity_id: str,

@@ -25,6 +25,7 @@ from app.core.uuid7 import uuid7
 
 from app.api.v1.schemas.base import BaseSchema
 from app.api.v1.schemas.base import CompatFlexOut
+from app.api.v1.schemas.inventur_piv_schemas import InventurPivOut
 
 
 router = APIRouter(prefix="/inventur/piv", tags=["Lager - Permanente Inventur (PIV)"])
@@ -287,7 +288,7 @@ def abschliessen(
 
 
 @router.get("/{abschluss_id}/differenzliste", summary="Differenzliste",
-    response_model=CompatFlexOut
+    response_model=InventurPivOut
 )
 def differenzliste(
     abschluss_id: str,

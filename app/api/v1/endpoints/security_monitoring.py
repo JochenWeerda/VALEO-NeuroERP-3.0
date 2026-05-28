@@ -8,27 +8,28 @@ from app.services.security_observability import security_observer
 
 from app.api.v1.schemas.base import BaseSchema
 from app.api.v1.schemas.base import CompatFlexOut
+from app.api.v1.schemas.security_monitoring_schemas import SecurityMonitoringOut
 
 
 router = APIRouter(prefix="/security/monitoring", tags=["security", "monitoring"])
 
 
 @router.get("/metrics", summary="Security metrics abrufen",
-    response_model=CompatFlexOut
+    response_model=SecurityMonitoringOut
 )
 async def get_security_metrics() -> dict:
     return security_observer.get_metrics()
 
 
 @router.get("/health", summary="Security health abrufen",
-    response_model=CompatFlexOut
+    response_model=SecurityMonitoringOut
 )
 async def get_security_health() -> dict:
     return security_observer.get_health()
 
 
 @router.get("/events", summary="Security events abrufen",
-    response_model=CompatFlexOut
+    response_model=SecurityMonitoringOut
 )
 async def get_security_events(
     limit: int = Query(20, ge=1, le=200),

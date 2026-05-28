@@ -200,7 +200,7 @@ def update_verpackung(
 
 
 @router.delete("/{verpackungs_nr}", summary="Verpackung löschen",
-    response_model=CompatFlexOut
+    response_model=None
 )
 def delete_verpackung(
     verpackungs_nr: str,

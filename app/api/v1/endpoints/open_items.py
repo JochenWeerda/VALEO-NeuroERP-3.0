@@ -1,4 +1,4 @@
-﻿"""
+"""
 Open Items (OP) management endpoints
 RESTful API for open items settlement and matching
 FIBU-AR-05: OP-Verwaltung Ausgleich/Verrechnung
@@ -24,6 +24,7 @@ logger = logging.getLogger(__name__)
 
 from app.api.v1.schemas.base import BaseSchema
 from app.api.v1.schemas.base import CompatFlexOut
+from app.api.v1.schemas.open_items_schemas import OpenItemsOut
 
 
 router = APIRouter(prefix="/open-items", tags=["finance", "open-items"])
@@ -787,7 +788,7 @@ async def settle_open_item(
         raise HTTPException(status_code=500, detail=f"Failed to settle open item: {str(e)}")
 
 
-@router.get("/{op_id}/settlements", response_model=list[CompatFlexOut], summary="Settlements abrufen")
+@router.get("/{op_id}/settlements", response_model=list[OpenItemsOut], summary="Settlements abrufen")
 async def get_settlements(
     op_id: str,
     tenant_id: str = Query("system", description="Tenant ID"),
@@ -827,7 +828,7 @@ async def get_settlements(
         return []
 
 
-@router.post("/{op_id}/reverse-settlement", response_model=CompatFlexOut, summary="Settlement reverse")
+@router.post("/{op_id}/reverse-settlement", response_model=OpenItemsOut, summary="Settlement reverse")
 async def reverse_settlement(
     op_id: str,
     settlement_id: str,

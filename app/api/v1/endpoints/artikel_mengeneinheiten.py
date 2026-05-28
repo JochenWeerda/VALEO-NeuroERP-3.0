@@ -152,7 +152,7 @@ def update_mengeneinheit(
 
 
 @router.delete("/stamm/{einheit_kuerzel}", summary="Mengeneinheit löschen",
-    response_model=CompatFlexOut
+    response_model=None
 )
 def delete_mengeneinheit(
     einheit_kuerzel: str,
@@ -298,7 +298,7 @@ def update_mengeneinheitengruppe(
 
 
 @router.delete("/gruppen/{gruppe_nr}", summary="Mengeneinheitengruppe löschen",
-    response_model=CompatFlexOut
+    response_model=None
 )
 def delete_mengeneinheitengruppe(
     gruppe_nr: str,

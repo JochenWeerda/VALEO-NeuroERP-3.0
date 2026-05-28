@@ -16,6 +16,7 @@ logger = logging.getLogger(__name__)
 
 from app.api.v1.schemas.base import BaseSchema
 from app.api.v1.schemas.base import CompatFlexOut
+from app.api.v1.schemas.audit_schemas import AuditOut
 
 
 router = APIRouter()
@@ -149,7 +150,7 @@ async def get_audit_logs(
 
 
 @router.get("/stats", summary="Audit stats abrufen",
-    response_model=CompatFlexOut
+    response_model=AuditOut
 )
 async def get_audit_stats(
     tenant_id: Optional[str] = Query(None),

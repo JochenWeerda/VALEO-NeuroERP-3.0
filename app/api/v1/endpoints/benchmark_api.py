@@ -22,6 +22,7 @@ from app.domains.operations.models import BetriebsKennzahlDB
 
 from app.api.v1.schemas.base import BaseSchema
 from app.api.v1.schemas.base import CompatFlexOut
+from app.api.v1.schemas.benchmark_api_schemas import BenchmarkApiOut
 
 
 router = APIRouter(prefix="/benchmark", tags=["benchmark"])
@@ -36,7 +37,7 @@ class KennzahlSubmitRequest(BaseModel):
 
 
 @router.post("/kennzahlen", status_code=201, summary="Kennzahl einreichen",
-    response_model=CompatFlexOut
+    response_model=BenchmarkApiOut
 )
 def submit_kennzahl(req: KennzahlSubmitRequest, db: Session = Depends(get_db)):
     kz_id = str(uuid.uuid4())
@@ -64,7 +65,7 @@ def submit_kennzahl(req: KennzahlSubmitRequest, db: Session = Depends(get_db)):
 
 
 @router.get("/report/{verbund_id}", summary="Benchmark report abrufen",
-    response_model=CompatFlexOut
+    response_model=BenchmarkApiOut
 )
 def get_benchmark_report(verbund_id: str, periode: str = Query(...), db: Session = Depends(get_db)):
     rows = db.query(BetriebsKennzahlDB).filter(BetriebsKennzahlDB.periode == periode).all()
@@ -90,7 +91,7 @@ def get_benchmark_report(verbund_id: str, periode: str = Query(...), db: Session
 
 
 @router.get("/process-mining/{verbund_id}", summary="Process mining benchmark report abrufen",
-    response_model=CompatFlexOut
+    response_model=BenchmarkApiOut
 )
 def get_process_mining_benchmark_report(
     verbund_id: str,
@@ -113,7 +114,7 @@ def get_process_mining_benchmark_report(
 
 
 @router.get("/katalog", summary="Kz katalog abrufen",
-    response_model=CompatFlexOut
+    response_model=BenchmarkApiOut
 )
 def get_kz_katalog():
     return {"katalog": DEFAULT_KZ_KATALOG, "count": len(DEFAULT_KZ_KATALOG), "schema_version": 1}

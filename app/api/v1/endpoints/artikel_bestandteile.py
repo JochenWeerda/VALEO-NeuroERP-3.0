@@ -174,7 +174,7 @@ def update_bestandteil_def(
 
 
 @router.delete("/stamm/{bestandteil_nr}", summary="Bestandteil def löschen",
-    response_model=CompatFlexOut
+    response_model=None
 )
 def delete_bestandteil_def(
     bestandteil_nr: str,

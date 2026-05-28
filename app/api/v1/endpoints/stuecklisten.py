@@ -238,7 +238,7 @@ def update_stueckliste(
 
 
 @router.delete("/{stueckliste_nr}", summary="Stueckliste löschen",
-    response_model=CompatFlexOut
+    response_model=None
 )
 def delete_stueckliste(
     stueckliste_nr: str,

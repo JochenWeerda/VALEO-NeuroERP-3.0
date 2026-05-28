@@ -20,6 +20,7 @@ from app.services.prompt_pack_registry import (
 
 from app.api.v1.schemas.base import BaseSchema
 from app.api.v1.schemas.base import CompatFlexOut
+from app.api.v1.schemas.neuro_prompt_packs_schemas import NeuroPromptPacksOut
 
 
 router = APIRouter(tags=["neuro-core", "prompt-packs"])
@@ -41,7 +42,7 @@ class RegisterPromptPackRequest(BaseModel):
 
 
 @router.post("/neuro/prompt-packs", summary="Register prompt pack do",
-    response_model=CompatFlexOut
+    response_model=NeuroPromptPacksOut
 )
 async def do_register_prompt_pack(
     request: RegisterPromptPackRequest,
@@ -68,7 +69,7 @@ async def do_register_prompt_pack(
 
 
 @router.get("/neuro/prompt-packs", summary="List prompt packs do",
-    response_model=CompatFlexOut
+    response_model=NeuroPromptPacksOut
 )
 async def do_list_prompt_packs(
     tenant_id: str = Depends(get_tenant_id),
@@ -77,7 +78,7 @@ async def do_list_prompt_packs(
 
 
 @router.get("/neuro/prompt-packs/{prompt_pack_key}", summary="Get prompt pack do",
-    response_model=CompatFlexOut
+    response_model=NeuroPromptPacksOut
 )
 async def do_get_prompt_pack(
     prompt_pack_key: str,
@@ -90,7 +91,7 @@ async def do_get_prompt_pack(
 
 
 @router.get("/neuro/prompt-packs/{prompt_pack_key}/variants", summary="List prompt pack variants do",
-    response_model=CompatFlexOut
+    response_model=NeuroPromptPacksOut
 )
 async def do_list_prompt_pack_variants(
     prompt_pack_key: str,
@@ -104,7 +105,7 @@ class SelectPromptPackRequest(BaseModel):
 
 
 @router.post("/neuro/prompt-packs/{prompt_pack_key}/select", summary="Select prompt pack do",
-    response_model=CompatFlexOut
+    response_model=NeuroPromptPacksOut
 )
 async def do_select_prompt_pack(
     prompt_pack_key: str,
@@ -118,7 +119,7 @@ async def do_select_prompt_pack(
 
 
 @router.post("/neuro/prompt-packs/{prompt_pack_key}/rollback", summary="Rollback prompt pack do",
-    response_model=CompatFlexOut
+    response_model=NeuroPromptPacksOut
 )
 async def do_rollback_prompt_pack(
     prompt_pack_key: str,

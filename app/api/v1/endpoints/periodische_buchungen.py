@@ -155,7 +155,7 @@ def create_periodische_buchung(
 
 
 @router.patch("/{buchung_id}/sperren", summary="Buchung sperren",
-    response_model=CompatFlexOut
+    response_model=None
 )
 def sperren_buchung(
     buchung_id: str,
@@ -174,7 +174,7 @@ def sperren_buchung(
 
 
 @router.delete("/{buchung_id}", summary="Periodische buchung löschen",
-    response_model=CompatFlexOut
+    response_model=None
 )
 def delete_periodische_buchung(
     buchung_id: str,

@@ -188,3 +188,12 @@ class CompatFlexOut(BaseSchema):
     Import from here instead of defining locally in each endpoint file.
     """
     model_config = ConfigDict(extra="allow")
+
+
+class CompatBridgeOut(BaseSchema):
+    """Bridge/proxy schema for compatibility endpoints.
+
+    Used in compat.py routes that proxy multiple backend domains with varying
+    response shapes. Replace with domain-specific schemas as endpoints stabilize.
+    """
+    model_config = ConfigDict(extra="allow")

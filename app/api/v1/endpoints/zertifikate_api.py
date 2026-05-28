@@ -13,6 +13,7 @@ from app.domains.operations.models import ZertifikatAPIEntry
 
 from app.api.v1.schemas.base import BaseSchema
 from app.api.v1.schemas.base import CompatFlexOut
+from app.api.v1.schemas.zertifikate_api_schemas import ZertifikateApiOut
 
 
 router = APIRouter(prefix="/zertifikate", tags=["zertifikate"])
@@ -41,7 +42,7 @@ class ZertifikatCreateRequest(BaseModel):
 
 
 @router.post("", status_code=201, summary="Zertifikat anlegen",
-    response_model=CompatFlexOut
+    response_model=ZertifikateApiOut
 )
 def create_zertifikat(req: ZertifikatCreateRequest, db: Session = Depends(get_db)):
     import uuid
@@ -72,7 +73,7 @@ def create_zertifikat(req: ZertifikatCreateRequest, db: Session = Depends(get_db
 
 
 @router.get("/tenant/{tenant_id}", summary="By tenant abrufen",
-    response_model=list[CompatFlexOut]
+    response_model=list[ZertifikateApiOut]
 )
 def get_by_tenant(tenant_id: str, db: Session = Depends(get_db)):
     rows = db.query(ZertifikatAPIEntry).filter(ZertifikatAPIEntry.tenant_id == tenant_id).all()
@@ -80,7 +81,7 @@ def get_by_tenant(tenant_id: str, db: Session = Depends(get_db)):
 
 
 @router.get("/ablaufend", summary="Ablaufend abrufen",
-    response_model=list[CompatFlexOut]
+    response_model=list[ZertifikateApiOut]
 )
 def get_ablaufend(tage_vorwarnung: int = Query(30), db: Session = Depends(get_db)):
     from datetime import timedelta

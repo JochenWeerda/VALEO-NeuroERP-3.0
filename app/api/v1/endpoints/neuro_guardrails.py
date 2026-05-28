@@ -10,6 +10,7 @@ from app.services.pii_detector import detect_pii, mask_irreversible, mask_revers
 
 from app.api.v1.schemas.base import BaseSchema
 from app.api.v1.schemas.base import CompatFlexOut
+from app.api.v1.schemas.neuro_guardrails_schemas import NeuroGuardrailsOut
 
 
 router = APIRouter(prefix="/neuro/guardrails", tags=["neuro-core", "guardrails", "pii"])
@@ -24,7 +25,7 @@ class DictRequest(BaseModel):
 
 
 @router.post("/check-input", summary="Check input do",
-    response_model=CompatFlexOut
+    response_model=NeuroGuardrailsOut
 )
 async def do_check_input(request: TextRequest):
     result = check_input(request.text)
@@ -32,7 +33,7 @@ async def do_check_input(request: TextRequest):
 
 
 @router.post("/sanitize-output", summary="Sanitize output do",
-    response_model=CompatFlexOut
+    response_model=NeuroGuardrailsOut
 )
 async def do_sanitize_output(request: TextRequest):
     result = sanitize_output(request.text)
@@ -42,7 +43,7 @@ async def do_sanitize_output(request: TextRequest):
 
 
 @router.post("/detect-pii", summary="Detect pii do",
-    response_model=CompatFlexOut
+    response_model=NeuroGuardrailsOut
 )
 async def do_detect_pii(request: TextRequest):
     matches = detect_pii(request.text)
@@ -53,14 +54,14 @@ async def do_detect_pii(request: TextRequest):
 
 
 @router.post("/mask", summary="Mask do",
-    response_model=CompatFlexOut
+    response_model=NeuroGuardrailsOut
 )
 async def do_mask(request: TextRequest):
     return {"masked": mask_irreversible(request.text)}
 
 
 @router.post("/mask-reversible", summary="Mask reversible do",
-    response_model=CompatFlexOut
+    response_model=NeuroGuardrailsOut
 )
 async def do_mask_reversible(request: TextRequest):
     masked, token_map = mask_reversible(request.text)
@@ -68,7 +69,7 @@ async def do_mask_reversible(request: TextRequest):
 
 
 @router.post("/scan-dict", summary="Scan dict do",
-    response_model=CompatFlexOut
+    response_model=NeuroGuardrailsOut
 )
 async def do_scan_dict(request: DictRequest):
     matches = scan_dict(request.data)

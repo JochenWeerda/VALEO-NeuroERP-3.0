@@ -283,7 +283,7 @@ def festschreiben(
 
 
 @router.get("/{bilanz_id}/bericht", summary="Bericht massebilanz",
-    response_model=CompatFlexOut
+    response_model=MassebilanzOut
 )
 def massebilanz_bericht(
     bilanz_id: str,

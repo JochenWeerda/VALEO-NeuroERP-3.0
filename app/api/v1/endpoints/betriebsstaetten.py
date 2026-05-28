@@ -200,7 +200,7 @@ def update_betriebsstaette(
 
 
 @router.delete("/{filial_nr}", summary="Betriebsstaette löschen",
-    response_model=CompatFlexOut
+    response_model=None
 )
 def delete_betriebsstaette(
     filial_nr: str,
