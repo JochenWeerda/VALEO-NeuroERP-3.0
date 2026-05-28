@@ -140,7 +140,7 @@ def create_zu_abschlaggruppe(
 
 
 @router.delete("/gruppen/{gruppe_nr}", summary="Zu abschlaggruppe löschen",
-    response_model=CompatFlexOut
+    response_model=None
 )
 def delete_zu_abschlaggruppe(
     gruppe_nr: str,

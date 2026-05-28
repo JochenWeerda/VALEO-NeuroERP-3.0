@@ -127,7 +127,7 @@ def create_partiegruppe(
 
 
 @router.delete("/gruppen/{gruppe_nr}", summary="Partiegruppe löschen",
-    response_model=CompatFlexOut
+    response_model=None
 )
 def delete_partiegruppe(
     gruppe_nr: str,
@@ -247,7 +247,7 @@ def set_partie_status(
 
 
 @router.post("/{partie_nr}/umbuchung", summary="Umbuchung partie",
-    response_model=CompatFlexOut
+    response_model=None
 )
 def partie_umbuchung(
     partie_nr: str,
@@ -274,7 +274,7 @@ def partie_umbuchung(
 
 
 @router.delete("/{partie_nr}", summary="Partie löschen",
-    response_model=CompatFlexOut
+    response_model=None
 )
 def delete_partie(
     partie_nr: str,

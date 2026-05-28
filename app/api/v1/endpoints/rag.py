@@ -17,6 +17,7 @@ logger = logging.getLogger(__name__)
 
 from app.api.v1.schemas.base import BaseSchema
 from app.api.v1.schemas.base import CompatFlexOut
+from app.api.v1.schemas.rag_schemas import RagOut
 
 
 router = APIRouter()
@@ -144,7 +145,7 @@ async def index_customers(
 
 
 @router.get("/stats/{collection}", summary="Collection stats abrufen",
-    response_model=CompatFlexOut
+    response_model=RagOut
 )
 async def get_collection_stats(collection: str):
     """Get statistics for a collection."""

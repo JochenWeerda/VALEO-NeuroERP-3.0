@@ -154,7 +154,7 @@ def create_versandprofil(
 
 
 @router.delete("/profile/{profil_nr}", summary="Versandprofil löschen",
-    response_model=CompatFlexOut
+    response_model=None
 )
 def delete_versandprofil(
     profil_nr: str,

@@ -25,6 +25,7 @@ logger = logging.getLogger(__name__)
 
 from app.api.v1.schemas.base import BaseSchema
 from app.api.v1.schemas.base import CompatFlexOut
+from app.api.v1.schemas.subsidiary_ledger_reconciliation_schemas import SubsidiaryLedgerReconciliationOut
 
 
 router = APIRouter(prefix="/subsidiary-ledger-reconciliation", tags=["finance", "reconciliation"])
@@ -497,7 +498,7 @@ async def get_reconciliation_details(
 
 
 @router.get("/{ledger_type}/export", summary="Reconciliation csv exportieren",
-    response_model=CompatFlexOut
+    response_model=SubsidiaryLedgerReconciliationOut
 )
 async def export_reconciliation_csv(
     ledger_type: str,
@@ -561,7 +562,7 @@ async def export_reconciliation_csv(
         raise HTTPException(status_code=500, detail=f"Failed to export reconciliation CSV: {str(e)}")
 
 
-@router.get("/summary", response_model=CompatFlexOut, summary="Reconciliation summary abrufen")
+@router.get("/summary", response_model=SubsidiaryLedgerReconciliationOut, summary="Reconciliation summary abrufen")
 async def get_reconciliation_summary(
     period: str = Query(..., description="Accounting period (YYYY-MM)"),
     tenant_id: str = Depends(get_tenant_id),

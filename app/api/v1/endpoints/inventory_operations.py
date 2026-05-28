@@ -21,6 +21,7 @@ logger = logging.getLogger(__name__)
 
 from app.api.v1.schemas.base import BaseSchema
 from app.api.v1.schemas.base import CompatFlexOut
+from app.api.v1.schemas.inventory_operations_schemas import InventoryOperationsOut
 
 
 router = APIRouter()
@@ -241,7 +242,7 @@ def _post_inventory_journal(
 # ── Routes ──────────────────────────────────────────────────────
 
 @router.get("/reason-codes", tags=["lager"], summary="Reason codes auflisten",
-    response_model=list[CompatFlexOut]
+    response_model=list[InventoryOperationsOut]
 )
 async def list_reason_codes():
     """GET alle verfügbaren Korrektur-Gründe."""
@@ -430,7 +431,7 @@ async def create_mhd_abschreibung(
 
 
 @router.get("/korrekturen", tags=["lager"], summary="Korrekturen auflisten",
-    response_model=CompatFlexOut
+    response_model=InventoryOperationsOut
 )
 async def list_korrekturen(
     tenant_id: Optional[str] = Query(None),
@@ -491,7 +492,7 @@ async def list_korrekturen(
 
 
 @router.get("/korrekturen/{korrektur_id}", tags=["lager"], summary="Korrektur abrufen",
-    response_model=CompatFlexOut
+    response_model=InventoryOperationsOut
 )
 async def get_korrektur(
     korrektur_id: str,

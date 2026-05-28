@@ -15,6 +15,7 @@ from app.services.webshop_integration_service import WebshopIntegrationService
 
 from app.api.v1.schemas.base import BaseSchema
 from app.api.v1.schemas.base import CompatFlexOut
+from app.api.v1.schemas.webshop_integration_schemas import WebshopIntegrationOut
 
 
 router = APIRouter(prefix="/webshop", tags=["webshop", "integration"])
@@ -144,7 +145,7 @@ def verarbeiten(
 
 
 @router.get("/sync-status", summary="Status synchronisieren",
-    response_model=CompatFlexOut
+    response_model=WebshopIntegrationOut
 )
 def sync_status(
     db: Session = Depends(get_db),
@@ -155,7 +156,7 @@ def sync_status(
 
 
 @router.get("/orders", summary="Orders auflisten",
-    response_model=CompatFlexOut
+    response_model=WebshopIntegrationOut
 )
 def list_orders(
     db: Session = Depends(get_db),
@@ -202,7 +203,7 @@ def convert_order(
 
 
 @router.get("/sync-log", summary="Log synchronisieren",
-    response_model=CompatFlexOut
+    response_model=WebshopIntegrationOut
 )
 def sync_log(
     db: Session = Depends(get_db),

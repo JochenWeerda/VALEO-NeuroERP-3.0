@@ -26,6 +26,7 @@ from app.core.uuid7 import uuid7
 
 from app.api.v1.schemas.base import BaseSchema
 from app.api.v1.schemas.base import CompatFlexOut
+from app.api.v1.schemas.op_skonto_auszifferung_schemas import OpSkontoAuszifferungOut
 
 
 router = APIRouter(prefix="/fibu/op-auszifferung", tags=["FIBU - OP Skonto-Auszifferung"])
@@ -82,7 +83,7 @@ class SkontoBerechnung(BaseModel):
 # ── Endpoints ─────────────────────────────────────────────────────────────────
 
 @router.post("/berechnen", summary="Skonto berechne",
-    response_model=CompatFlexOut
+    response_model=OpSkontoAuszifferungOut
 )
 def berechne_skonto(payload: SkontoBerechnung):
     """Skontobetrag aus Rechnungsbetrag und Prozentsatz berechnen.

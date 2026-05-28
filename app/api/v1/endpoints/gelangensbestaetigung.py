@@ -93,7 +93,7 @@ def _gen_token() -> str:
 
 
 @router.get("", summary="Gelangensbestätigungen auflisten",
-    response_model=list[CompatFlexOut]
+    response_model=list[GelangensbestaetigungOut]
 )
 def list_gelangensbestaetigung(
     status: Optional[str] = Query(None, description="AUSSTEHEND | ERHALTEN | ABGELAUFEN"),
@@ -131,7 +131,7 @@ def list_gelangensbestaetigung(
 
 
 @router.post("", status_code=201, summary="Gelangensbestätigung erstellen",
-    response_model=CompatFlexOut
+    response_model=GelangensbestaetigungOut
 )
 def create_gelangensbestaetigung(
     payload: GelangensbestaetigungCreate,
@@ -184,7 +184,7 @@ def create_gelangensbestaetigung(
 
 
 @router.post("/{entry_id}/bestaetigen", summary="Gelangensbestätigung durch Empfänger bestätigen",
-    response_model=CompatFlexOut
+    response_model=IDResponse
 )
 def bestaetigen(
     entry_id: str,
@@ -219,7 +219,7 @@ def bestaetigen(
 
 
 @router.get("/faellig", summary="Überfällige Gelangensbestätigungen",
-    response_model=list[CompatFlexOut]
+    response_model=list[GelangensbestaetigungOut]
 )
 def list_faellig(
     db: Session = Depends(get_db),
@@ -245,7 +245,7 @@ def list_faellig(
 
 @router.post(
     "/{entry_id}/mahnung",
-    response_model=CompatFlexOut,
+    response_model=GelangensbestaetigungOut,
     summary="Erinnerung senden (Stub)",
 )
 def mahnung_senden(

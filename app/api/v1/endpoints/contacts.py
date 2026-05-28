@@ -13,6 +13,7 @@ from ..schemas.crm import ContactCreate, ContactUpdate
 
 from app.api.v1.schemas.base import BaseSchema
 from app.api.v1.schemas.base import CompatFlexOut
+from app.api.v1.schemas.contacts_schemas import ContactsOut
 
 
 router = APIRouter()
@@ -72,7 +73,7 @@ def _map_update_payload(payload: ContactUpdate) -> Dict[str, Any]:
 
 
 @router.get("/", summary="Contacts auflisten",
-    response_model=CompatFlexOut
+    response_model=ContactsOut
 )
 async def list_contacts(
     customer_id: Optional[str] = Query(None, description="Filter by customer ID"),
@@ -106,7 +107,7 @@ async def list_contacts(
 
 
 @router.get("/{contact_id}", summary="Contact abrufen",
-    response_model=CompatFlexOut
+    response_model=ContactsOut
 )
 async def get_contact(contact_id: str):
     try:
@@ -121,7 +122,7 @@ async def get_contact(contact_id: str):
 
 
 @router.post("/", status_code=status.HTTP_201_CREATED, summary="Contact anlegen",
-    response_model=CompatFlexOut
+    response_model=ContactsOut
 )
 async def create_contact(contact_data: ContactCreate):
     try:
@@ -133,7 +134,7 @@ async def create_contact(contact_data: ContactCreate):
 
 
 @router.put("/{contact_id}", summary="Contact aktualisieren",
-    response_model=CompatFlexOut
+    response_model=ContactsOut
 )
 async def update_contact(contact_id: str, contact_data: ContactUpdate):
     try:

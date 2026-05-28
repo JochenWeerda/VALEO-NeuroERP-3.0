@@ -25,6 +25,7 @@ logger = logging.getLogger(__name__)
 
 from app.api.v1.schemas.base import BaseSchema
 from app.api.v1.schemas.base import CompatFlexOut
+from app.api.v1.schemas.gdpr_requests_schemas import GdprRequestsOut
 
 
 router = APIRouter(prefix="/gdpr/requests", tags=["gdpr"])
@@ -405,7 +406,7 @@ async def reject_gdpr_request(
 
 
 @router.get("/{request_id}/download", summary="Gdpr export herunterladen",
-    response_model=CompatFlexOut
+    response_model=GdprRequestsOut
 )
 async def download_gdpr_export(
     request_id: str,

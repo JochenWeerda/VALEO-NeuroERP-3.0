@@ -53,7 +53,7 @@ def _seed(db: Session) -> None:
     db.commit()
 
 
-@router.get("", response_model=CompatFlexOut, summary="Zertifikate auflisten")
+@router.get("", response_model=ZertifikateOut, summary="Zertifikate auflisten")
 async def list_zertifikate(status: Optional[str] = Query(None, description="Filter by status"), db: Session = Depends(get_db)) -> dict:
     _seed(db)
     query = db.query(ZertifikatEintrag)
@@ -77,7 +77,7 @@ async def list_zertifikate(status: Optional[str] = Query(None, description="Filt
     }
 
 
-@router.get("/stats", response_model=CompatFlexOut, summary="Zertifikate stats abrufen")
+@router.get("/stats", response_model=ZertifikateOut, summary="Zertifikate stats abrufen")
 async def get_zertifikate_stats(db: Session = Depends(get_db)) -> dict:
     _seed(db)
     items = db.query(ZertifikatEintrag).all()
@@ -91,6 +91,7 @@ async def get_zertifikate_stats(db: Session = Depends(get_db)) -> dict:
 # --------------- Pydantic Schemas ---------------
 from pydantic import BaseModel
 from app.api.v1.schemas.base import CompatFlexOut
+from app.api.v1.schemas.zertifikate_schemas import ZertifikateOut
 from datetime import date
 
 
@@ -117,7 +118,7 @@ from fastapi import HTTPException
 from starlette.responses import Response
 
 
-@router.post("", response_model=CompatFlexOut, status_code=201, summary="Zertifikat anlegen")
+@router.post("", response_model=ZertifikateOut, status_code=201, summary="Zertifikat anlegen")
 async def create_zertifikat(
     body: ZertifikatCreate,
     db: Session = Depends(get_db),
@@ -145,7 +146,7 @@ async def create_zertifikat(
     }
 
 
-@router.put("/{zertifikat_id}", response_model=CompatFlexOut, summary="Zertifikat aktualisieren")
+@router.put("/{zertifikat_id}", response_model=None, summary="Zertifikat aktualisieren")
 async def update_zertifikat(
     zertifikat_id: int,
     body: ZertifikatUpdate,

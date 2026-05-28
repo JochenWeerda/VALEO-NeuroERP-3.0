@@ -25,6 +25,7 @@ from ..schemas.crm import Case, CaseCreate, CaseUpdate
 
 from app.api.v1.schemas.base import BaseSchema
 from app.api.v1.schemas.base import CompatFlexOut
+from app.api.v1.schemas.cases_schemas import CasesOut
 
 
 router = APIRouter()
@@ -180,7 +181,7 @@ async def delete_case(case_id: str):
         raise HTTPException(status_code=500, detail=f"Failed to delete case: {exc}") from exc
 
 
-@router.post("/{case_id}/escalate", response_model=CompatFlexOut, summary="Case escalate")
+@router.post("/{case_id}/escalate", response_model=CasesOut, summary="Case escalate")
 async def escalate_case(
     case_id: str,
     reason: str = Query(..., description="Reason for escalation"),
@@ -238,7 +239,7 @@ async def escalate_case(
 # SLA endpoints
 # ---------------------------------------------------------------------------
 
-@router.get("/sla-dashboard", response_model=CompatFlexOut, tags=["crm", "cases", "sla"], summary="Sla dashboard abrufen")
+@router.get("/sla-dashboard", response_model=CasesOut, tags=["crm", "cases", "sla"], summary="Sla dashboard abrufen")
 async def get_sla_dashboard(
     tenant_id: Optional[str] = Query(None),
     db: Session = Depends(get_db),
@@ -304,7 +305,7 @@ async def get_sla_dashboard(
     }
 
 
-@router.get("/{case_id}/sla-status", response_model=CompatFlexOut, tags=["crm", "cases", "sla"], summary="Case sla status abrufen")
+@router.get("/{case_id}/sla-status", response_model=CasesOut, tags=["crm", "cases", "sla"], summary="Case sla status abrufen")
 async def get_case_sla_status(
     case_id: str,
     db: Session = Depends(get_db),

@@ -133,7 +133,7 @@ def anmelden(
 
 
 @router.post("/{eintrag_id}/status", summary="Aendern status",
-    response_model=CompatFlexOut
+    response_model=HoflisteOut
 )
 def status_aendern(
     eintrag_id: str,
@@ -179,7 +179,7 @@ def status_aendern(
 
 
 @router.delete("/{eintrag_id}", summary="Abmelden",
-    response_model=CompatFlexOut
+    response_model=None
 )
 def abmelden(
     eintrag_id: str,

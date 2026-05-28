@@ -14,6 +14,7 @@ from ..schemas.crm import FarmProfile, FarmProfileCreate, FarmProfileUpdate
 
 from app.api.v1.schemas.base import BaseSchema
 from app.api.v1.schemas.base import CompatFlexOut
+from app.api.v1.schemas.farm_profiles_schemas import FarmProfilesOut
 
 
 router = APIRouter()
@@ -176,12 +177,12 @@ async def delete_farm_profile(profile_id: str):
         raise HTTPException(status_code=500, detail=f"Failed to delete farm profile: {exc}") from exc
 
 
-@router.get("/{profile_id}/crops", response_model=list[CompatFlexOut], summary="Farm profile crops auflisten")
+@router.get("/{profile_id}/crops", response_model=list[FarmProfilesOut], summary="Farm profile crops auflisten")
 async def list_farm_profile_crops(profile_id: str):
     return await _load_list_field(profile_id, "crops")
 
 
-@router.post("/{profile_id}/crops", response_model=CompatFlexOut, status_code=status.HTTP_201_CREATED, summary="Farm profile crop anlegen")
+@router.post("/{profile_id}/crops", response_model=FarmProfilesOut, status_code=status.HTTP_201_CREATED, summary="Farm profile crop anlegen")
 async def create_farm_profile_crop(profile_id: str, payload: dict[str, Any]):
     items = await _load_list_field(profile_id, "crops")
     items.append(payload)
@@ -189,7 +190,7 @@ async def create_farm_profile_crop(profile_id: str, payload: dict[str, Any]):
     return dict(updated[-1])
 
 
-@router.put("/{profile_id}/crops/{item_index}", response_model=CompatFlexOut, summary="Farm profile crop replace")
+@router.put("/{profile_id}/crops/{item_index}", response_model=FarmProfilesOut, summary="Farm profile crop replace")
 async def replace_farm_profile_crop(
     profile_id: str,
     item_index: int = Path(..., ge=0),
@@ -212,12 +213,12 @@ async def delete_farm_profile_crop(profile_id: str, item_index: int = Path(..., 
     await _replace_list_field(profile_id, "crops", items)
 
 
-@router.get("/{profile_id}/livestock", response_model=list[CompatFlexOut], summary="Farm profile livestock auflisten")
+@router.get("/{profile_id}/livestock", response_model=list[FarmProfilesOut], summary="Farm profile livestock auflisten")
 async def list_farm_profile_livestock(profile_id: str):
     return await _load_list_field(profile_id, "livestock")
 
 
-@router.post("/{profile_id}/livestock", response_model=CompatFlexOut, status_code=status.HTTP_201_CREATED, summary="Farm profile livestock anlegen")
+@router.post("/{profile_id}/livestock", response_model=FarmProfilesOut, status_code=status.HTTP_201_CREATED, summary="Farm profile livestock anlegen")
 async def create_farm_profile_livestock(profile_id: str, payload: dict[str, Any]):
     items = await _load_list_field(profile_id, "livestock")
     items.append(payload)
@@ -225,7 +226,7 @@ async def create_farm_profile_livestock(profile_id: str, payload: dict[str, Any]
     return dict(updated[-1])
 
 
-@router.put("/{profile_id}/livestock/{item_index}", response_model=CompatFlexOut, summary="Farm profile livestock replace")
+@router.put("/{profile_id}/livestock/{item_index}", response_model=FarmProfilesOut, summary="Farm profile livestock replace")
 async def replace_farm_profile_livestock(
     profile_id: str,
     item_index: int = Path(..., ge=0),

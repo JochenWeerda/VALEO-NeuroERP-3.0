@@ -17,6 +17,7 @@ from ....core.tenant import get_tenant_id
 
 from app.api.v1.schemas.base import BaseSchema
 from app.api.v1.schemas.base import CompatFlexOut
+from app.api.v1.schemas.sales_blanket_orders_schemas import SalesBlanketOrdersOut
 
 
 router = APIRouter()
@@ -200,7 +201,7 @@ async def create_blanket_order(
     return _row_to_blanket(_get_blanket_order(db, oid, tenant_id))
 
 
-@router.get("/{order_id}", response_model=CompatFlexOut, summary="Blanket order abrufen")
+@router.get("/{order_id}", response_model=SalesBlanketOrdersOut, summary="Blanket order abrufen")
 async def get_blanket_order(
     order_id: str,
     tenant_id: str = Depends(get_tenant_id),

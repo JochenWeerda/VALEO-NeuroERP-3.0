@@ -13,6 +13,7 @@ from app.domains.operations.repository import RahmenvertragRepository
 
 from app.api.v1.schemas.base import BaseSchema
 from app.api.v1.schemas.base import CompatFlexOut
+from app.api.v1.schemas.vertraege_schemas import VertraegeOut
 
 
 router = APIRouter(prefix="/vertrag", tags=["Verträge"])
@@ -64,7 +65,7 @@ def _to_dict(vertrag) -> dict:
     }
 
 
-@router.get("/rahmenvertraege", response_model=CompatFlexOut, summary="Rahmenvertraege auflisten")
+@router.get("/rahmenvertraege", response_model=VertraegeOut, summary="Rahmenvertraege auflisten")
 async def list_rahmenvertraege(
     status: Optional[str] = Query(None, description="Filter by status"),
     typ: Optional[str] = Query(None, description="Filter by type"),
@@ -83,7 +84,7 @@ async def list_rahmenvertraege(
     }
 
 
-@router.get("/rahmenvertraege/{vertrag_id}", response_model=CompatFlexOut, summary="Rahmenvertrag abrufen")
+@router.get("/rahmenvertraege/{vertrag_id}", response_model=VertraegeOut, summary="Rahmenvertrag abrufen")
 async def get_rahmenvertrag(vertrag_id: str, db: Session = Depends(get_db)) -> dict:
     repo = RahmenvertragRepository(db)
     vertrag = repo.get_by_id(vertrag_id)
@@ -92,7 +93,7 @@ async def get_rahmenvertrag(vertrag_id: str, db: Session = Depends(get_db)) -> d
     return _to_dict(vertrag)
 
 
-@router.post("/rahmenvertraege", response_model=CompatFlexOut, status_code=201, summary="Rahmenvertrag anlegen")
+@router.post("/rahmenvertraege", response_model=VertraegeOut, status_code=201, summary="Rahmenvertrag anlegen")
 async def create_rahmenvertrag(data: VertragCreate, db: Session = Depends(get_db)) -> dict:
     repo = RahmenvertragRepository(db)
     if repo.get_by_nummer(data.nummer):
@@ -104,7 +105,7 @@ async def create_rahmenvertrag(data: VertragCreate, db: Session = Depends(get_db
     return _to_dict(vertrag)
 
 
-@router.patch("/rahmenvertraege/{vertrag_id}", response_model=CompatFlexOut, summary="Rahmenvertrag aktualisieren")
+@router.patch("/rahmenvertraege/{vertrag_id}", response_model=None, summary="Rahmenvertrag aktualisieren")
 async def update_rahmenvertrag(vertrag_id: str, data: VertragUpdate, db: Session = Depends(get_db)) -> dict:
     repo = RahmenvertragRepository(db)
     payload = data.model_dump(exclude_unset=True)

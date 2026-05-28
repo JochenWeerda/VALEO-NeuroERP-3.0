@@ -141,7 +141,7 @@ def create_provisionsgruppe(
 
 
 @router.delete("/gruppen/{gruppe_nr}", summary="Provisionsgruppe löschen",
-    response_model=CompatFlexOut
+    response_model=None
 )
 def delete_provisionsgruppe(
     gruppe_nr: str,

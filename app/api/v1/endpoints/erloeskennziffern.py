@@ -146,7 +146,7 @@ def update_erloeskennziffer(
 
 
 @router.delete("/{ekz_nr}", summary="Erloeskennziffer löschen",
-    response_model=CompatFlexOut
+    response_model=None
 )
 def delete_erloeskennziffer(
     ekz_nr: str,

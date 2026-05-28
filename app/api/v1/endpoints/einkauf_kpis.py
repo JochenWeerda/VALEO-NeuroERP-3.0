@@ -27,13 +27,14 @@ from app.core.tenant import get_tenant_id
 
 from app.api.v1.schemas.base import BaseSchema
 from app.api.v1.schemas.base import CompatFlexOut
+from app.api.v1.schemas.einkauf_kpis_schemas import EinkaufKpisOut
 
 
 router = APIRouter(prefix="/einkauf", tags=["einkauf", "kpi"])
 
 
 @router.get("/kpis", summary="Kpis abrufen",
-    response_model=CompatFlexOut
+    response_model=EinkaufKpisOut
 )
 def get_kpis(
     date_from: Optional[str] = Query(None, description="ISO-Datum, z.B. 2026-01-01"),

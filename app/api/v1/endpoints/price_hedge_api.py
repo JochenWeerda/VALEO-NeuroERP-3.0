@@ -15,6 +15,7 @@ from app.domains.operations.models import HedgeReferenceDB
 
 from app.api.v1.schemas.base import BaseSchema
 from app.api.v1.schemas.base import CompatFlexOut
+from app.api.v1.schemas.price_hedge_api_schemas import PriceHedgeApiOut
 
 
 router = APIRouter(prefix="/price-hedge", tags=["price-hedge"])
@@ -32,7 +33,7 @@ class HedgeCreateRequest(BaseModel):
 
 
 @router.post("/hedges", status_code=201, summary="Hedge anlegen",
-    response_model=CompatFlexOut
+    response_model=PriceHedgeApiOut
 )
 def create_hedge(req: HedgeCreateRequest, db: Session = Depends(get_db)):
     hid = str(uuid.uuid4())
@@ -63,7 +64,7 @@ def create_hedge(req: HedgeCreateRequest, db: Session = Depends(get_db)):
 
 
 @router.get("/hedges", summary="Hedges auflisten",
-    response_model=list[CompatFlexOut]
+    response_model=list[PriceHedgeApiOut]
 )
 def list_hedges(tenant_id: str, db: Session = Depends(get_db)):
     rows = db.query(HedgeReferenceDB).filter(HedgeReferenceDB.tenant_id == tenant_id).all()
@@ -83,7 +84,7 @@ def list_hedges(tenant_id: str, db: Session = Depends(get_db)):
 
 
 @router.patch("/hedges/{hedge_id}/close", summary="Hedge abschließen",
-    response_model=CompatFlexOut
+    response_model=PriceHedgeApiOut
 )
 def close_hedge(hedge_id: str, aktueller_preis: float, db: Session = Depends(get_db)):
     row = db.query(HedgeReferenceDB).filter(HedgeReferenceDB.hedge_id == hedge_id).first()
@@ -98,7 +99,7 @@ def close_hedge(hedge_id: str, aktueller_preis: float, db: Session = Depends(get
 
 
 @router.get("/quote", summary="Hedge quote abrufen",
-    response_model=CompatFlexOut
+    response_model=PriceHedgeApiOut
 )
 def get_hedge_quote(kontrakt_menge_t: float, hedge_menge_t: float):
     quote = berechne_hedge_quote(kontrakt_menge_t, hedge_menge_t)

@@ -17,6 +17,7 @@ from app.domains.operations.models import EdiNachrichtDB, EdiPartnerDB
 
 from app.api.v1.schemas.base import BaseSchema
 from app.api.v1.schemas.base import CompatFlexOut
+from app.api.v1.schemas.edi_api_schemas import EdiApiOut
 
 
 router = APIRouter(prefix="/edi", tags=["edi"])
@@ -39,7 +40,7 @@ class EdiPartnerCreateRequest(BaseModel):
 
 
 @router.post("/nachrichten", status_code=201, summary="Nachricht empfange",
-    response_model=CompatFlexOut
+    response_model=EdiApiOut
 )
 def empfange_nachricht(req: EdiNachrichtEmpfangRequest, db: Session = Depends(get_db)):
     typ = EdiNachrichtenTyp(req.typ)
@@ -63,7 +64,7 @@ def empfange_nachricht(req: EdiNachrichtEmpfangRequest, db: Session = Depends(ge
 
 
 @router.get("/nachrichten/offene", summary="Offene nachrichten abrufen",
-    response_model=list[CompatFlexOut]
+    response_model=list[EdiApiOut]
 )
 def get_offene_nachrichten(empfaenger_gln: str, db: Session = Depends(get_db)):
     rows = db.query(EdiNachrichtDB).filter(
@@ -83,7 +84,7 @@ def get_offene_nachrichten(empfaenger_gln: str, db: Session = Depends(get_db)):
 
 
 @router.post("/partner", status_code=201, summary="Partner anlegen",
-    response_model=CompatFlexOut
+    response_model=EdiApiOut
 )
 def create_partner(req: EdiPartnerCreateRequest, db: Session = Depends(get_db)):
     pid = str(uuid.uuid4())
@@ -101,7 +102,7 @@ def create_partner(req: EdiPartnerCreateRequest, db: Session = Depends(get_db)):
 
 
 @router.get("/partner", summary="Partner auflisten",
-    response_model=list[CompatFlexOut]
+    response_model=list[EdiApiOut]
 )
 def list_partner(tenant_id: str, db: Session = Depends(get_db)):
     rows = db.query(EdiPartnerDB).filter(EdiPartnerDB.tenant_id == tenant_id).all()

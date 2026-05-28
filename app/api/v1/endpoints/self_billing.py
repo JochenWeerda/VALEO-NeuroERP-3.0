@@ -30,6 +30,7 @@ from modules.agrar.repositories.self_billing_repo import SelfBillingRepositoryIm
 
 from app.api.v1.schemas.base import BaseSchema
 from app.api.v1.schemas.base import CompatFlexOut
+from app.api.v1.schemas.self_billing_schemas import SelfBillingOut
 
 
 router = APIRouter()
@@ -312,7 +313,7 @@ async def send_einvoice_endpoint(
     return _to_out(invoice)
 
 
-@router.post("/{invoice_id}/dispute", response_model=CompatFlexOut, summary="Dispute endpoint anlegen")
+@router.post("/{invoice_id}/dispute", response_model=SelfBillingOut, summary="Dispute endpoint anlegen")
 async def create_dispute_endpoint(
     invoice_id: str,
     payload: DisputeCreateIn,
@@ -363,7 +364,7 @@ class PreviewIn(BaseModel):
     taxation_type: str = "regular"
 
 
-@router.post("/preview", response_model=CompatFlexOut, summary="Self billing vorschauen")
+@router.post("/preview", response_model=SelfBillingOut, summary="Self billing vorschauen")
 async def preview_self_billing(
     payload: PreviewIn,
     db: Session = Depends(get_db),
@@ -427,7 +428,7 @@ async def preview_self_billing(
     }
 
 
-@router.post("/{invoice_id}/storno", response_model=CompatFlexOut, summary="Invoice storno")
+@router.post("/{invoice_id}/storno", response_model=SelfBillingOut, summary="Invoice storno")
 async def storno_invoice(
     invoice_id: str,
     db: Session = Depends(get_db),
@@ -473,7 +474,7 @@ async def storno_invoice(
 
 
 @router.get("/{invoice_id}/export", summary="Invoice exportieren",
-    response_model=CompatFlexOut
+    response_model=SelfBillingOut
 )
 async def export_invoice(
     invoice_id: str,
@@ -506,7 +507,7 @@ async def export_invoice(
     raise HTTPException(status_code=400, detail="format muss xml oder pdf sein")
 
 
-@router.get("/{invoice_id}/disputes", response_model=list[CompatFlexOut], summary="Disputes abrufen")
+@router.get("/{invoice_id}/disputes", response_model=list[SelfBillingOut], summary="Disputes abrufen")
 async def get_disputes(
     invoice_id: str,
     db: Session = Depends(get_db),
@@ -545,7 +546,7 @@ async def get_disputes(
 # BUCHUNGSKREISLAUF INTEGRATION
 # ============================================================================
 
-@router.post("/{invoice_id}/buchung", response_model=CompatFlexOut, summary="Gutschrift buche")
+@router.post("/{invoice_id}/buchung", response_model=SelfBillingOut, summary="Gutschrift buche")
 async def buche_gutschrift(
     invoice_id: str,
     db: Session = Depends(get_db),

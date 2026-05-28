@@ -22,6 +22,7 @@ from .credit_management import get_credit_status_data
 
 from app.api.v1.schemas.base import BaseSchema
 from app.api.v1.schemas.base import CompatFlexOut
+from app.api.v1.schemas.agrar_schemas import DeliveryNoteCreatedOut
 
 
 router = APIRouter()
@@ -487,7 +488,7 @@ async def update_sales_order(
     return _row_to_order(row, _fetch_items(db, order_id, effective_tenant))
 
 
-@router.post("/{order_id}/create-delivery-note", response_model=CompatFlexOut, status_code=201, summary="Delivery from order anlegen")
+@router.post("/{order_id}/create-delivery-note", response_model=DeliveryNoteCreatedOut, status_code=201, summary="Delivery from order anlegen")
 async def create_delivery_from_order(
     order_id: str,
     tenant_id: str = Depends(get_tenant_id),

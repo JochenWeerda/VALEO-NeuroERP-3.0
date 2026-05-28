@@ -31,6 +31,7 @@ from ....core.tenant_rate_limits import get_default_cache_configs, get_default_r
 
 from app.api.v1.schemas.base import BaseSchema
 from app.api.v1.schemas.base import CompatFlexOut
+from app.api.v1.schemas.tenant_governance_schemas import TenantGovernanceOut
 
 
 router = APIRouter(prefix="/tenant", tags=["tenant", "governance"])
@@ -164,7 +165,7 @@ async def get_data_residency(tenant_id: str = Depends(get_tenant_id)):
     return build_default_governance(tenant_id)
 
 
-@router.get("/runtime-shield", response_model=CompatFlexOut, summary="Runtime shield abrufen")
+@router.get("/runtime-shield", response_model=TenantGovernanceOut, summary="Runtime shield abrufen")
 async def get_runtime_shield(tenant_id: str = Depends(get_tenant_id)) -> dict:
     """Liefert tenant-isolierte Cache- und Rate-Limit-Defaults fuer Agenten und Workloads."""
     return {

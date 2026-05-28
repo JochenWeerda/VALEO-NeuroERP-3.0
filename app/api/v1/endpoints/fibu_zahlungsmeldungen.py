@@ -27,6 +27,7 @@ from app.core.uuid7 import uuid7
 
 from app.api.v1.schemas.base import BaseSchema
 from app.api.v1.schemas.base import CompatFlexOut
+from app.api.v1.schemas.fibu_zahlungsmeldungen_schemas import FibuZahlungsmeldungenOut
 
 
 router = APIRouter(prefix="/fibu/zahlungsmeldungen",
@@ -180,7 +181,7 @@ def meldung_abweisen(
 
 
 @router.get("/offen/zusammenfassung", summary="Meldungen zusammenfassung offene",
-    response_model=list[CompatFlexOut]
+    response_model=list[FibuZahlungsmeldungenOut]
 )
 def offene_meldungen_zusammenfassung(
     db=Depends(get_db),

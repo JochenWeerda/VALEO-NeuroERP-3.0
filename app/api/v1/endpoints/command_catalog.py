@@ -22,6 +22,7 @@ from app.core.ui_density_manifest import build_ui_density_manifest
 
 from app.api.v1.schemas.base import BaseSchema
 from app.api.v1.schemas.base import CompatFlexOut
+from app.api.v1.schemas.command_catalog_schemas import CommandCatalogOut
 
 
 router = APIRouter(prefix="/commands", tags=["commands", "process-kernel"])
@@ -33,7 +34,7 @@ class DispatchRequest(BaseModel):
 
 
 @router.get("/catalog", summary="Vollstaendiger Command-Katalog",
-    response_model=list[CompatFlexOut]
+    response_model=list[CommandCatalogOut]
 )
 def get_command_catalog(
     tenant_id: str = Depends(get_tenant_id),
@@ -44,7 +45,7 @@ def get_command_catalog(
 
 
 @router.get("/agent-manifest", summary="Agent-Command-Manifest",
-    response_model=CompatFlexOut
+    response_model=CommandCatalogOut
 )
 def get_agent_manifest(
     tenant_id: str = Depends(get_tenant_id),
@@ -55,7 +56,7 @@ def get_agent_manifest(
 
 
 @router.get("/ui-density-manifest", summary="UI-Density-Manifest aus produktiven Command-Contracts",
-    response_model=CompatFlexOut
+    response_model=CommandCatalogOut
 )
 def get_ui_density_manifest(
     tenant_id: str = Depends(get_tenant_id),
@@ -65,7 +66,7 @@ def get_ui_density_manifest(
 
 
 @router.post("/dispatch", summary="Command dispatchen und validieren",
-    response_model=CompatFlexOut
+    response_model=CommandCatalogOut
 )
 def dispatch_command(
     body: DispatchRequest,

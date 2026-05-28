@@ -21,6 +21,7 @@ from app.services.knowledge_store import (
 
 from app.api.v1.schemas.base import BaseSchema
 from app.api.v1.schemas.base import CompatFlexOut
+from app.api.v1.schemas.neuro_knowledge_schemas import NeuroKnowledgeOut
 
 
 router = APIRouter(prefix="/neuro/knowledge", tags=["neuro-core", "knowledge"])
@@ -43,7 +44,7 @@ class SearchRequest(BaseModel):
 
 
 @router.post("/", summary="Store",
-    response_model=CompatFlexOut
+    response_model=StatusResponse
 )
 async def store(
     request: StoreRequest,
@@ -64,7 +65,7 @@ async def store(
 
 
 @router.get("/{domain}/{key}", summary="Entry abrufen",
-    response_model=CompatFlexOut
+    response_model=StatusResponse
 )
 async def get_entry(
     domain: str,
@@ -80,7 +81,7 @@ async def get_entry(
 
 
 @router.post("/search", summary="Suchen",
-    response_model=CompatFlexOut
+    response_model=StatusResponse
 )
 async def search(
     request: SearchRequest,
@@ -94,7 +95,7 @@ async def search(
 
 
 @router.delete("/{domain}/{key}", summary="Entfernen",
-    response_model=CompatFlexOut
+    response_model=StatusResponse
 )
 async def remove(
     domain: str,
@@ -108,7 +109,7 @@ async def remove(
 
 
 @router.get("/stats", summary="Stats",
-    response_model=CompatFlexOut
+    response_model=NeuroKnowledgeOut
 )
 async def stats(
     tenant_id: str = Depends(get_tenant_id),

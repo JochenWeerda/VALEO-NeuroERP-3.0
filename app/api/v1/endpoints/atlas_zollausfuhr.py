@@ -16,6 +16,7 @@ from app.services.atlas_customs_service import ATLASCustomsService
 
 from app.api.v1.schemas.base import BaseSchema
 from app.api.v1.schemas.base import CompatFlexOut
+from app.api.v1.schemas.atlas_zollausfuhr_schemas import AtlasZollausfuhrOut
 
 
 router = APIRouter(prefix="/zoll", tags=["zoll", "atlas", "customs"])
@@ -277,7 +278,7 @@ def uebermitteln(
 
 
 @router.post("/ausfuhranmeldungen/{id}/vorab-validieren", summary="Validieren vorab",
-    response_model=CompatFlexOut
+    response_model=AtlasZollausfuhrOut
 )
 def vorab_validieren(
     id: str,
@@ -294,7 +295,7 @@ def vorab_validieren(
 
 
 @router.get("/ausfuhrnachrichten/{mrn}", summary="Ausfuhrnachricht",
-    response_model=CompatFlexOut
+    response_model=AtlasZollausfuhrOut
 )
 def ausfuhrnachricht(
     mrn: str,
@@ -308,7 +309,7 @@ def ausfuhrnachricht(
 
 
 @router.post("/atlas-callback", summary="Callback atlas",
-    response_model=CompatFlexOut
+    response_model=AtlasZollausfuhrOut
 )
 def atlas_callback(
     body: ZollausfuhrStatusUpdate,
@@ -334,7 +335,7 @@ def atlas_callback(
 
 
 @router.get("/warennummern/suche", summary="Suche warennummern",
-    response_model=list[CompatFlexOut]
+    response_model=list[AtlasZollausfuhrOut]
 )
 def warennummern_suche(q: str = Query(default="")):
     """HS tariff number search (static agricultural seed data)."""

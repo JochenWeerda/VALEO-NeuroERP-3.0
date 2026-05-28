@@ -22,6 +22,7 @@ from app.core.database import get_db
 
 from app.api.v1.schemas.base import BaseSchema
 from app.api.v1.schemas.base import CompatFlexOut
+from app.api.v1.schemas.gobd_archiv_schemas import GobdArchivOut
 
 
 router = APIRouter(prefix="/gobd", tags=["GoBD", "Archiv"])
@@ -523,7 +524,7 @@ def _sha256_hex(content: bytes) -> str:
 
 
 @router.get("/audit-package", summary="Audit package abrufen",
-    response_model=CompatFlexOut
+    response_model=GobdArchivOut
 )
 async def get_audit_package(
     from_date: Optional[date] = Query(None, description="Von-Datum (inkl.)"),

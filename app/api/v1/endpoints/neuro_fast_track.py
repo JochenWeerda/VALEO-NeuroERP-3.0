@@ -9,6 +9,7 @@ from app.services.fast_track import classify_request, is_fast_track, FAST_TRACK_
 
 from app.api.v1.schemas.base import BaseSchema
 from app.api.v1.schemas.base import CompatFlexOut
+from app.api.v1.schemas.neuro_fast_track_schemas import NeuroFastTrackOut
 
 
 router = APIRouter(prefix="/neuro/fast-track", tags=["neuro-core", "fast-track"])
@@ -21,21 +22,21 @@ class ClassifyRequest(BaseModel):
 
 
 @router.post("/classify", summary="Classify",
-    response_model=CompatFlexOut
+    response_model=NeuroFastTrackOut
 )
 async def classify(request: ClassifyRequest):
     return classify_request(request.method, request.path, request.has_ai_context)
 
 
 @router.get("/whitelist", summary="Whitelist abrufen",
-    response_model=CompatFlexOut
+    response_model=NeuroFastTrackOut
 )
 async def get_whitelist():
     return {"paths": sorted(FAST_TRACK_WHITELIST), "count": len(FAST_TRACK_WHITELIST)}
 
 
 @router.get("/check", summary="Prüfen",
-    response_model=CompatFlexOut
+    response_model=NeuroFastTrackOut
 )
 async def check(method: str = "GET", path: str = "/api/v1/articles"):
     return {"is_fast_track": is_fast_track(method, path), "method": method, "path": path}

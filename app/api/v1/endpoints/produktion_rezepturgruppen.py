@@ -123,7 +123,7 @@ def create_rezepturgruppe(
 
 
 @router.delete("/rezepturgruppen/{gruppe_id}", summary="Rezepturgruppe löschen",
-    response_model=CompatFlexOut
+    response_model=None
 )
 def delete_rezepturgruppe(
     gruppe_id: str,

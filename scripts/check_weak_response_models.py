@@ -108,8 +108,8 @@ def main() -> int:
     parser.add_argument(
         "--compat-flex-threshold",
         type=int,
-        default=598,
-        help="Max allowed CompatFlexOut usages (baseline 2026-05-28: 598)",
+        default=0,
+        help="Max allowed CompatFlexOut usages (baseline 2026-05-28: 598, nach Welle E1: 484)",
     )
     parser.add_argument("--verbose", action="store_true", help="Show all findings")
     parser.add_argument("--strict", action="store_true", help="Fail on any weak type (threshold=0)")

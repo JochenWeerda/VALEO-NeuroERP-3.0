@@ -16,6 +16,7 @@ from app.domains.operations.models import AgentContextDB
 
 from app.api.v1.schemas.base import BaseSchema
 from app.api.v1.schemas.base import CompatFlexOut
+from app.api.v1.schemas.agent_context_api_schemas import AgentContextApiOut
 
 
 router = APIRouter(prefix="/agent-context", tags=["agent-context"])
@@ -67,7 +68,7 @@ def _get_active_context(context_id: str, db: Session) -> AgentContextDB:
 
 
 @router.post("", status_code=201, summary="Context anlegen",
-    response_model=CompatFlexOut
+    response_model=None
 )
 def create_context(req: AgentContextCreateRequest, db: Session = Depends(get_db)):
     expires = datetime.now(tz=timezone.utc) + timedelta(seconds=req.ttl_sekunden)
@@ -112,7 +113,7 @@ def dispatch(context_id: str, req: AgentDispatchRequest, db: Session = Depends(g
 
 
 @router.post("/{context_id}/knowledge-pack", summary="Pack knowledge",
-    response_model=CompatFlexOut
+    response_model=AgentContextApiOut
 )
 def knowledge_pack(context_id: str, req: AgentKnowledgePackRequest, db: Session = Depends(get_db)):
     from app.core.knowledge_core_contracts import KnowledgeChannel

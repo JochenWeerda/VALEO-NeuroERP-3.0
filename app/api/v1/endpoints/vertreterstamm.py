@@ -113,7 +113,7 @@ def create_vertretergruppe(
 
 
 @router.delete("/gruppen/{gruppe_nr}", summary="Vertretergruppe löschen",
-    response_model=CompatFlexOut
+    response_model=None
 )
 def delete_vertretergruppe(
     gruppe_nr: str,
