@@ -29,6 +29,15 @@ from sqlalchemy.orm import Session
 
 from app.core.database import get_db
 
+from app.api.v1.schemas.base import BaseSchema
+from pydantic import ConfigDict as _ConfigDict
+
+
+class RohwareOut(BaseSchema):
+    """Typed response schema for RohwareOut endpoints (extra fields forwarded)."""
+    model_config = _ConfigDict(extra="allow")
+
+
 router = APIRouter()
 
 # ---------------------------------------------------------------------------
@@ -89,7 +98,7 @@ async def list_schemata(
         raise HTTPException(status_code=503, detail=f"DB-Fehler: {e}")
 
 
-@router.post("", response_model=dict, status_code=201, summary="Schema anlegen")
+@router.post("", response_model=RohwareOut, status_code=201, summary="Schema anlegen")
 async def create_schema(
     payload: Dict[str, Any],
     db: Session = Depends(get_db),
@@ -134,7 +143,7 @@ async def create_schema(
         raise HTTPException(status_code=503, detail=f"DB-Fehler: {e}")
 
 
-@router.get("/{schema_id}", response_model=dict, summary="Schema abrufen")
+@router.get("/{schema_id}", response_model=RohwareOut, summary="Schema abrufen")
 async def get_schema(schema_id: str, db: Session = Depends(get_db)):
     """Schema-Detail inkl. Positionen."""
     try:
@@ -158,7 +167,7 @@ async def get_schema(schema_id: str, db: Session = Depends(get_db)):
         raise HTTPException(status_code=503, detail=f"DB-Fehler: {e}")
 
 
-@router.patch("/{schema_id}", response_model=dict, summary="Schema aktualisieren")
+@router.patch("/{schema_id}", response_model=RohwareOut, summary="Schema aktualisieren")
 async def update_schema(
     schema_id: str,
     payload: Dict[str, Any],
@@ -199,7 +208,7 @@ async def update_schema(
         raise HTTPException(status_code=503, detail=f"DB-Fehler: {e}")
 
 
-@router.post("/{schema_id}/aktivieren", response_model=dict, summary="Aktivieren")
+@router.post("/{schema_id}/aktivieren", response_model=RohwareOut, summary="Aktivieren")
 async def aktivieren(schema_id: str, db: Session = Depends(get_db)):
     """Setzt Status ENTWURF → AKTIV. Voraussetzung: gueltig_ab muss gesetzt sein."""
     try:
@@ -239,7 +248,7 @@ async def aktivieren(schema_id: str, db: Session = Depends(get_db)):
         raise HTTPException(status_code=503, detail=f"DB-Fehler: {e}")
 
 
-@router.post("/{schema_id}/archivieren", response_model=dict, summary="Archivieren")
+@router.post("/{schema_id}/archivieren", response_model=RohwareOut, summary="Archivieren")
 async def archivieren(schema_id: str, db: Session = Depends(get_db)):
     """Setzt Status AKTIV → ARCHIV."""
     try:
@@ -296,7 +305,7 @@ async def list_lines(schema_id: str, db: Session = Depends(get_db)):
         raise HTTPException(status_code=503, detail=f"DB-Fehler: {e}")
 
 
-@router.post("/{schema_id}/lines", response_model=dict, status_code=201, summary="Line hinzufügen")
+@router.post("/{schema_id}/lines", response_model=RohwareOut, status_code=201, summary="Line hinzufügen")
 async def add_line(
     schema_id: str,
     payload: Dict[str, Any],
@@ -390,7 +399,7 @@ def _eval_formula(formula: str, context: Dict[str, float]) -> Optional[float]:
         return None
 
 
-@router.post("/{schema_id}/testrechnung", response_model=dict, summary="Testrechnung")
+@router.post("/{schema_id}/testrechnung", response_model=RohwareOut, summary="Testrechnung")
 async def testrechnung(
     schema_id: str,
     payload: Dict[str, Any],

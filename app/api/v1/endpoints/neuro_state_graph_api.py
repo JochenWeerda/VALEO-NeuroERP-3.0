@@ -45,6 +45,15 @@ from app.infrastructure.models.neuro_state_models import (
 
 logger = logging.getLogger(__name__)
 
+from app.api.v1.schemas.base import BaseSchema
+from pydantic import ConfigDict as _ConfigDict
+
+
+class NeuroStateOut(BaseSchema):
+    """Typed response schema for NeuroStateOut endpoints (extra fields forwarded)."""
+    model_config = _ConfigDict(extra="allow")
+
+
 router = APIRouter()
 
 
@@ -180,7 +189,7 @@ def _ledger_record_to_model(record: ConfidenceLedgerRecord) -> ConfidenceLedgerE
 # ---------------------------------------------------------------------------
 
 @router.post("/state-graph/nodes", tags=["neuro-state-graph"], summary="Node anlegen",
-    response_model=dict
+    response_model=NeuroStateOut
 )
 async def create_node(req: CreateNodeRequest, db: Session | None = Depends(get_db)):
     """Register a new business-object node in the state graph."""
@@ -226,7 +235,7 @@ async def create_node(req: CreateNodeRequest, db: Session | None = Depends(get_d
 
 
 @router.get("/state-graph/nodes", tags=["neuro-state-graph"], summary="Nodes auflisten",
-    response_model=list
+    response_model=list[NeuroStateOut]
 )
 async def list_nodes(
     tenant_id: str = Query(...),
@@ -254,7 +263,7 @@ async def list_nodes(
 
 
 @router.get("/state-graph/nodes/{node_id}", tags=["neuro-state-graph"], summary="Node abrufen",
-    response_model=dict
+    response_model=NeuroStateOut
 )
 async def get_node(node_id: str, db: Session | None = Depends(get_db)):
     """Retrieve a single state node."""
@@ -271,7 +280,7 @@ async def get_node(node_id: str, db: Session | None = Depends(get_db)):
 
 
 @router.get("/state-graph/nodes/{node_id}/reachable", tags=["neuro-state-graph"], summary="Phases reachable",
-    response_model=dict
+    response_model=NeuroStateOut
 )
 async def reachable_phases(node_id: str, db: Session | None = Depends(get_db)):
     """Return phases reachable from the node's current phase."""
@@ -301,7 +310,7 @@ async def reachable_phases(node_id: str, db: Session | None = Depends(get_db)):
 # ---------------------------------------------------------------------------
 
 @router.post("/state-graph/nodes/{node_id}/transitions", tags=["neuro-state-graph"], summary="Node transition",
-    response_model=dict
+    response_model=NeuroStateOut
 )
 async def transition_node(
     node_id: str,
@@ -378,7 +387,7 @@ async def transition_node(
 
 
 @router.get("/state-graph/nodes/{node_id}/transitions", tags=["neuro-state-graph"], summary="Transitions auflisten",
-    response_model=list
+    response_model=list[NeuroStateOut]
 )
 async def list_transitions(
     node_id: str,
@@ -406,7 +415,7 @@ async def list_transitions(
 # ---------------------------------------------------------------------------
 
 @router.post("/state-graph/edges", tags=["neuro-state-graph"], summary="Edge anlegen",
-    response_model=dict
+    response_model=NeuroStateOut
 )
 async def create_edge(req: CreateEdgeRequest, db: Session | None = Depends(get_db)):
     """Create a directed edge between two state nodes."""
@@ -459,7 +468,7 @@ async def create_edge(req: CreateEdgeRequest, db: Session | None = Depends(get_d
 
 
 @router.get("/state-graph/edges", tags=["neuro-state-graph"], summary="Edges auflisten",
-    response_model=list
+    response_model=list[NeuroStateOut]
 )
 async def list_edges(
     tenant_id: str = Query(...),
@@ -490,7 +499,7 @@ async def list_edges(
 # ---------------------------------------------------------------------------
 
 @router.get("/state-graph/meta/node-types", tags=["neuro-state-graph"], summary="Node types auflisten",
-    response_model=dict
+    response_model=NeuroStateOut
 )
 async def list_node_types():
     """Return all available node types with their allowed transitions."""
@@ -505,7 +514,7 @@ async def list_node_types():
 # ---------------------------------------------------------------------------
 
 @router.post("/confidence-ledger/entries", tags=["confidence-ledger"], summary="Confidence record",
-    response_model=dict
+    response_model=NeuroStateOut
 )
 async def record_confidence(req: RecordConfidenceRequest, db: Session | None = Depends(get_db)):
     """Append a new entry to the confidence ledger."""
@@ -586,7 +595,7 @@ async def record_confidence(req: RecordConfidenceRequest, db: Session | None = D
 
 
 @router.get("/confidence-ledger/entries", tags=["confidence-ledger"], summary="Confidence entries auflisten",
-    response_model=list
+    response_model=list[NeuroStateOut]
 )
 async def list_confidence_entries(
     tenant_id: str = Query(...),
@@ -625,7 +634,7 @@ async def list_confidence_entries(
 
 
 @router.get("/confidence-ledger/entries/{entry_id}", tags=["confidence-ledger"], summary="Confidence entry abrufen",
-    response_model=dict
+    response_model=NeuroStateOut
 )
 async def get_confidence_entry(entry_id: str, db: Session | None = Depends(get_db)):
     """Retrieve a single ledger entry."""
@@ -642,7 +651,7 @@ async def get_confidence_entry(entry_id: str, db: Session | None = Depends(get_d
 
 
 @router.post("/confidence-ledger/verify", tags=["confidence-ledger"], summary="Chain verifizieren",
-    response_model=dict
+    response_model=NeuroStateOut
 )
 async def verify_chain(tenant_id: str = Query(...), db: Session | None = Depends(get_db)):
     """Verify the hash-chain integrity for a tenant's ledger."""
@@ -686,7 +695,7 @@ async def verify_chain(tenant_id: str = Query(...), db: Session | None = Depends
 
 
 @router.get("/confidence-ledger/summary", tags=["confidence-ledger"], summary="Summary confidence",
-    response_model=dict
+    response_model=NeuroStateOut
 )
 async def confidence_summary(
     tenant_id: str = Query(...),

@@ -37,6 +37,15 @@ except ImportError as e:
     import_csv = None  # type: ignore[assignment]
     logger.warning("Portal Feldbuch: import_csv nicht verfügbar (%s)", e)
 
+from app.api.v1.schemas.base import BaseSchema
+from pydantic import ConfigDict as _ConfigDict
+
+
+class PortalFeldbuchOut(BaseSchema):
+    """Typed response schema for PortalFeldbuchOut endpoints (extra fields forwarded)."""
+    model_config = _ConfigDict(extra="allow")
+
+
 router = APIRouter(tags=["portal", "feldbuch"])
 
 
@@ -260,7 +269,7 @@ def _require_portal_massnahme(
 # ────────────────────────────────────────────────────────────────────────────
 
 @router.get("/feldbuch/schlaege", summary="List schlaege portal",
-    response_model=list
+    response_model=list[PortalFeldbuchOut]
 )
 async def portal_list_schlaege(
     skip: int = Query(0, ge=0),
@@ -294,7 +303,7 @@ async def portal_list_schlaege(
 
 
 @router.post("/feldbuch/schlaege", status_code=201, summary="Create schlag portal",
-    response_model=dict
+    response_model=PortalFeldbuchOut
 )
 async def portal_create_schlag(
     data: PortalSchlagCreate,
@@ -316,7 +325,7 @@ async def portal_create_schlag(
 
 
 @router.put("/feldbuch/schlaege/{schlag_id}", summary="Update schlag portal",
-    response_model=dict
+    response_model=PortalFeldbuchOut
 )
 async def portal_update_schlag(
     schlag_id: str,
@@ -348,7 +357,7 @@ async def portal_update_schlag(
 # ────────────────────────────────────────────────────────────────────────────
 
 @router.get("/feldbuch/massnahmen", summary="List massnahmen portal",
-    response_model=list
+    response_model=list[PortalFeldbuchOut]
 )
 async def portal_list_massnahmen(
     schlag_id: Optional[str] = Query(None),
@@ -397,7 +406,7 @@ async def portal_list_massnahmen(
 
 
 @router.post("/feldbuch/massnahmen", status_code=201, summary="Create massnahme portal",
-    response_model=dict
+    response_model=PortalFeldbuchOut
 )
 async def portal_create_massnahme(
     data: PortalMassnahmeCreate,
@@ -419,7 +428,7 @@ async def portal_create_massnahme(
 
 
 @router.put("/feldbuch/massnahmen/{massnahme_id}", summary="Update massnahme portal",
-    response_model=dict
+    response_model=PortalFeldbuchOut
 )
 async def portal_update_massnahme(
     massnahme_id: str,
@@ -447,7 +456,7 @@ async def portal_update_massnahme(
 # ────────────────────────────────────────────────────────────────────────────
 
 @router.get("/feldbuch/stats", summary="Feldbuch stats portal",
-    response_model=dict
+    response_model=PortalFeldbuchOut
 )
 async def portal_feldbuch_stats(
     db: Session = Depends(get_db),
@@ -497,7 +506,7 @@ async def portal_feldbuch_stats(
 # ────────────────────────────────────────────────────────────────────────────
 
 @router.get("/feldbuch/export", summary="Export portal",
-    response_model=dict
+    response_model=PortalFeldbuchOut
 )
 async def portal_export(
     format: str = Query("csv", description="'csv' oder 'ackerschlagkartei'"),
@@ -619,7 +628,7 @@ async def portal_export(
 # ────────────────────────────────────────────────────────────────────────────
 
 @router.post("/feldbuch/import", summary="Import portal",
-    response_model=dict
+    response_model=PortalFeldbuchOut
 )
 async def portal_import(
     file: UploadFile = File(...),

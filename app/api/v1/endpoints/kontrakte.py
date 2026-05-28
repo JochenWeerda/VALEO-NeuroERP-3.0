@@ -27,6 +27,15 @@ from app.services.kontrakte_service import (
     KontraktValidationService,
 )
 
+from app.api.v1.schemas.base import BaseSchema
+from pydantic import ConfigDict as _ConfigDict
+
+
+class KontraktOut(BaseSchema):
+    """Typed response schema for KontraktOut endpoints (extra fields forwarded)."""
+    model_config = _ConfigDict(extra="allow")
+
+
 router = APIRouter(prefix="/kontrakte", tags=["kontrakte"])
 
 ContractType = Literal["EINKAUF", "ZUKAUF", "VERKAUF"]
@@ -331,7 +340,7 @@ def _contract_to_out(contract: KonContract, line_out: list[dict[str, Any]], cont
 
 
 @router.get("", summary="Kontrakte auflisten",
-    response_model=dict
+    response_model=KontraktOut
 )
 async def list_kontrakte(
     status: Optional[StatusType] = Query(None),
@@ -415,7 +424,7 @@ async def list_kontrakte(
 
 
 @router.get("/{contract_id}", summary="Kontrakt abrufen",
-    response_model=dict
+    response_model=KontraktOut
 )
 async def get_kontrakt(
     contract_id: str,
@@ -440,7 +449,7 @@ async def get_kontrakt(
 
 
 @router.post("", summary="Kontrakt anlegen",
-    response_model=dict
+    response_model=KontraktOut
 )
 async def create_kontrakt(
     payload: KonContractIn,
@@ -565,7 +574,7 @@ async def create_kontrakt(
 
 
 @router.patch("/{contract_id}", summary="Kontrakt aktualisieren",
-    response_model=dict
+    response_model=KontraktOut
 )
 async def update_kontrakt(
     contract_id: str,
@@ -662,7 +671,7 @@ async def update_kontrakt(
 
 
 @router.put("/{contract_id}", summary="Kontrakt replace",
-    response_model=dict
+    response_model=KontraktOut
 )
 async def replace_kontrakt(
     contract_id: str,
@@ -676,7 +685,7 @@ async def replace_kontrakt(
 
 
 @router.delete("/{contract_id}", summary="Kontrakt löschen",
-    response_model=dict
+    response_model=KontraktOut
 )
 async def delete_kontrakt(
     contract_id: str,
@@ -730,7 +739,7 @@ async def delete_kontrakt(
 
 
 @router.post("/{contract_id}/cancel", summary="Kontrakt stornieren",
-    response_model=dict
+    response_model=KontraktOut
 )
 async def cancel_kontrakt(
     contract_id: str,
@@ -772,7 +781,7 @@ async def cancel_kontrakt(
 
 
 @router.get("/{contract_id}/movements", summary="Kontrakt movements auflisten",
-    response_model=dict
+    response_model=KontraktOut
 )
 async def list_kontrakt_movements(
     contract_id: str,
@@ -830,7 +839,7 @@ async def list_kontrakt_movements(
 
 
 @router.post("/{contract_id}/movements", summary="Kontrakt movement anlegen",
-    response_model=dict
+    response_model=KontraktOut
 )
 async def create_kontrakt_movement(
     contract_id: str,
@@ -922,7 +931,7 @@ async def create_kontrakt_movement(
 
 
 @router.get("/{contract_id}/audit", summary="Kontrakt audit auflisten",
-    response_model=dict
+    response_model=KontraktOut
 )
 async def list_kontrakt_audit(
     contract_id: str,
@@ -1013,7 +1022,7 @@ class AmendmentStatusUpdate(BaseModel):
 
 
 @router.get("/amendment-templates", summary="Amendment templates auflisten",
-    response_model=dict
+    response_model=KontraktOut
 )
 async def list_amendment_templates(
     activeOnly: bool = Query(True),
@@ -1050,7 +1059,7 @@ async def list_amendment_templates(
 
 
 @router.get("/{contract_id}/amendments", summary="Amendments auflisten",
-    response_model=dict
+    response_model=KontraktOut
 )
 async def list_amendments(
     contract_id: str,
@@ -1100,7 +1109,7 @@ async def list_amendments(
 
 
 @router.post("/{contract_id}/amendments", status_code=201, summary="Amendment anlegen",
-    response_model=dict
+    response_model=KontraktOut
 )
 async def create_amendment(
     contract_id: str,
@@ -1158,7 +1167,7 @@ async def create_amendment(
 
 
 @router.patch("/{contract_id}/amendments/{amendment_id}", summary="Amendment status aktualisieren",
-    response_model=dict
+    response_model=KontraktOut
 )
 async def update_amendment_status(
     contract_id: str,
@@ -1211,7 +1220,7 @@ async def update_amendment_status(
 
 
 @router.post("/lookup/verkauf", summary="Verkauf kontrakte lookup",
-    response_model=dict
+    response_model=KontraktOut
 )
 async def lookup_verkauf_kontrakte(
     query: Optional[str] = Body(default=None),
@@ -1270,7 +1279,7 @@ async def lookup_verkauf_kontrakte(
 # ---------------------------------------------------------------------------
 
 @router.get("/positionen", summary="Positionen abrufen",
-    response_model=dict
+    response_model=KontraktOut
 )
 def get_positionen(  # noqa: E302
     article_ids: Optional[str] = Query(None, description="Komma-separierte Artikel-IDs"),
@@ -1347,7 +1356,7 @@ def _ensure_disposition_table(db: Session) -> None:
         db.rollback()
 
 
-@router.get("/{kontrakt_id}/dispositionen", response_model=list, summary="Dispositionen auflisten")
+@router.get("/{kontrakt_id}/dispositionen", response_model=list[KontraktOut], summary="Dispositionen auflisten")
 async def list_dispositionen(
     kontrakt_id: str,
     db: Session = Depends(get_db),
@@ -1402,7 +1411,7 @@ async def list_dispositionen(
     ]
 
 
-@router.post("/{kontrakt_id}/dispositionen", response_model=dict, status_code=201, summary="Disposition anlegen")
+@router.post("/{kontrakt_id}/dispositionen", response_model=KontraktOut, status_code=201, summary="Disposition anlegen")
 async def create_disposition(
     kontrakt_id: str,
     payload: DispositionCreate,
@@ -1477,7 +1486,7 @@ async def create_disposition(
     }
 
 
-@router.patch("/{kontrakt_id}/dispositionen/{disp_id}/freigabe", response_model=dict, summary="Disposition freigabe")
+@router.patch("/{kontrakt_id}/dispositionen/{disp_id}/freigabe", response_model=KontraktOut, summary="Disposition freigabe")
 async def freigabe_disposition(
     kontrakt_id: str,
     disp_id: str,
@@ -1506,7 +1515,7 @@ async def freigabe_disposition(
     return {"id": result[0], "status": result[1]}
 
 
-@router.patch("/{kontrakt_id}/dispositionen/{disp_id}/geliefert", response_model=dict, summary="Disposition geliefert")
+@router.patch("/{kontrakt_id}/dispositionen/{disp_id}/geliefert", response_model=KontraktOut, summary="Disposition geliefert")
 async def geliefert_disposition(
     kontrakt_id: str,
     disp_id: str,
@@ -1547,7 +1556,7 @@ async def geliefert_disposition(
     return {"id": result[0], "status": result[1], "wiegeschein_nr": result[2]}
 
 
-@router.delete("/{kontrakt_id}/dispositionen/{disp_id}", response_model=dict, summary="Disposition storniere")
+@router.delete("/{kontrakt_id}/dispositionen/{disp_id}", response_model=KontraktOut, summary="Disposition storniere")
 async def storniere_disposition(
     kontrakt_id: str,
     disp_id: str,

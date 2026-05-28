@@ -12,6 +12,14 @@ from fastapi import APIRouter
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 
+from app.api.v1.schemas.base import BaseSchema
+from pydantic import ConfigDict as _ConfigDict
+
+
+class PosDsfinvkOut(BaseSchema):
+    model_config = _ConfigDict(extra="allow")
+
+
 router = APIRouter()
 
 # ---------------------------------------------------------------------------
@@ -163,7 +171,7 @@ def _build_zip(export_date: str) -> bytes:
 # ---------------------------------------------------------------------------
 
 @router.get("/dsfinvk/export", summary="Export dsfinvk",
-    response_model=dict
+    response_model=PosDsfinvkOut
 )
 async def dsfinvk_export():
     """

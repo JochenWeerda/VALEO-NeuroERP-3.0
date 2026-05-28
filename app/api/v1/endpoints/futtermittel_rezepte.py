@@ -34,6 +34,15 @@ from app.core.uuid7 import uuid7
 
 logger = logging.getLogger(__name__)
 
+from app.api.v1.schemas.base import BaseSchema
+from pydantic import ConfigDict as _ConfigDict
+
+
+class FuttermittelRezeptOut(BaseSchema):
+    """Typed response schema for FuttermittelRezeptOut endpoints (extra fields forwarded)."""
+    model_config = _ConfigDict(extra="allow")
+
+
 router = APIRouter(prefix="/futtermittel/rezepte", tags=["futtermittel", "rezepte"])
 
 _DDL = """
@@ -141,7 +150,7 @@ def _get_ingredients(db: Session, rezept_id: str, tenant_id: str) -> List[dict]:
 # ---------------------------------------------------------------------------
 
 @router.get("", summary="Rezepte auflisten",
-    response_model=list
+    response_model=list[FuttermittelRezeptOut]
 )
 async def list_rezepte(
     tierart: Optional[str] = Query(None),
@@ -168,7 +177,7 @@ async def list_rezepte(
 
 
 @router.post("", status_code=201, summary="Rezept anlegen",
-    response_model=dict
+    response_model=FuttermittelRezeptOut
 )
 async def create_rezept(
     payload: RezeptIn,
@@ -203,7 +212,7 @@ async def create_rezept(
 
 
 @router.get("/{rezept_id}", summary="Rezept abrufen",
-    response_model=dict
+    response_model=FuttermittelRezeptOut
 )
 async def get_rezept(
     rezept_id: str,
@@ -223,7 +232,7 @@ async def get_rezept(
 
 
 @router.post("/{rezept_id}/ingredients", status_code=201, summary="Ingredient hinzufügen",
-    response_model=dict
+    response_model=FuttermittelRezeptOut
 )
 async def add_ingredient(
     rezept_id: str,
@@ -259,7 +268,7 @@ async def add_ingredient(
 
 
 @router.patch("/{rezept_id}/ingredients/{ingredient_id}", summary="Ingredient aktualisieren",
-    response_model=dict
+    response_model=FuttermittelRezeptOut
 )
 async def update_ingredient(
     rezept_id: str,
@@ -376,7 +385,7 @@ async def copy_rezept(
 
 
 @router.post("/{rezept_id}/activate", summary="Rezept aktivieren",
-    response_model=dict
+    response_model=FuttermittelRezeptOut
 )
 async def activate_rezept(
     rezept_id: str,
@@ -420,7 +429,7 @@ async def activate_rezept(
 
 
 @router.get("/{rezept_id}/naehrstoffanalyse", summary="Naehrstoffanalyse",
-    response_model=dict
+    response_model=FuttermittelRezeptOut
 )
 async def naehrstoffanalyse(
     rezept_id: str,
@@ -479,7 +488,7 @@ async def naehrstoffanalyse(
 
 
 @router.get("/{rezept_id}/deklaration", summary="Deklaration",
-    response_model=dict
+    response_model=FuttermittelRezeptOut
 )
 async def deklaration(
     rezept_id: str,
@@ -540,7 +549,7 @@ async def deklaration(
 
 
 @router.get("/{rezept_id}/etikett", summary="Etikett",
-    response_model=dict
+    response_model=FuttermittelRezeptOut
 )
 async def etikett(
     rezept_id: str,

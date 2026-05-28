@@ -1,18 +1,18 @@
-"""
-Einkauf — Bestell-Vorschlag Endpoints
+﻿"""
+Einkauf â€” Bestell-Vorschlag Endpoints
 
 Bestellvorschlag-Engines (3 Typen):
-  GET /einkauf/bestellvorschlaege/lager    → aus Lagerbestand
-  GET /einkauf/bestellvorschlaege/verkauf  → aus offenen VK-Aufträgen
-  GET /einkauf/bestellvorschlaege/rohware  → aus Rohstoff-Bedarf
+  GET /einkauf/bestellvorschlaege/lager    â†’ aus Lagerbestand
+  GET /einkauf/bestellvorschlaege/verkauf  â†’ aus offenen VK-AuftrÃ¤gen
+  GET /einkauf/bestellvorschlaege/rohware  â†’ aus Rohstoff-Bedarf
 
-CRUD Bestellvorschläge:
-  GET    /einkauf/bestellvorschlaege        → Liste
-  POST   /einkauf/bestellvorschlaege        → Speichern
-  GET    /einkauf/bestellvorschlaege/{id}   → Detail
-  PUT    /einkauf/bestellvorschlaege/{id}   → Aktualisieren
-  DELETE /einkauf/bestellvorschlaege/{id}   → Löschen
-  POST   /einkauf/bestellvorschlaege/{id}/zu-bestellung → Freigabe → Bestellungen
+CRUD BestellvorschlÃ¤ge:
+  GET    /einkauf/bestellvorschlaege        â†’ Liste
+  POST   /einkauf/bestellvorschlaege        â†’ Speichern
+  GET    /einkauf/bestellvorschlaege/{id}   â†’ Detail
+  PUT    /einkauf/bestellvorschlaege/{id}   â†’ Aktualisieren
+  DELETE /einkauf/bestellvorschlaege/{id}   â†’ LÃ¶schen
+  POST   /einkauf/bestellvorschlaege/{id}/zu-bestellung â†’ Freigabe â†’ Bestellungen
 
 CRUD ArtikelLagerParameter:
   GET    /einkauf/artikel-lager-parameter
@@ -38,7 +38,7 @@ CRUD Bestellungen:
   POST   /einkauf/bestellungen
   GET    /einkauf/bestellungen/{id}
   PUT    /einkauf/bestellungen/{id}
-  POST   /einkauf/bestellungen/{id}/versenden    → E-Mail / Fax / EDI versenden
+  POST   /einkauf/bestellungen/{id}/versenden    â†’ E-Mail / Fax / EDI versenden
 """
 from __future__ import annotations
 
@@ -55,12 +55,20 @@ from app.core.tenant import get_tenant_id
 from app.core.exceptions import ConflictError, EntityNotFoundError, ValidationFailedError
 from app.services.procurement_service import ProcurementService
 
+from app.api.v1.schemas.base import BaseSchema
+from pydantic import ConfigDict as _ConfigDict
+
+
+class BestellvorschlagOut(BaseSchema):
+    model_config = _ConfigDict(extra="allow")
+
+
 router = APIRouter(tags=["einkauf", "bestellvorschlag"])
 
 
-# ─────────────────────────────────────────────────────────────────────────────
+# â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 # Pydantic Schemas
-# ─────────────────────────────────────────────────────────────────────────────
+# â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 class LieferantCreate(BaseModel):
     lieferantennummer: str
@@ -238,12 +246,12 @@ def _not_found(exc: EntityNotFoundError, label: str) -> HTTPException:
     return HTTPException(404, f"{label} nicht gefunden")
 
 
-# ─────────────────────────────────────────────────────────────────────────────
+# â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 # Bestell-Vorschlag Engines
-# ─────────────────────────────────────────────────────────────────────────────
+# â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 @router.get("/einkauf/bestellvorschlaege/lager", summary="Lager vorschlag",
-    response_model=dict
+    response_model=BestellvorschlagOut
 )
 async def vorschlag_lager(
     niederlassung_id: Optional[str] = Query(None),
@@ -258,7 +266,7 @@ async def vorschlag_lager(
 
 
 @router.get("/einkauf/bestellvorschlaege/verkauf", summary="Verkauf vorschlag",
-    response_model=dict
+    response_model=BestellvorschlagOut
 )
 async def vorschlag_verkauf(
     niederlassung_id: Optional[str] = Query(None),
@@ -272,7 +280,7 @@ async def vorschlag_verkauf(
 
 
 @router.get("/einkauf/bestellvorschlaege/rohware", summary="Rohware vorschlag",
-    response_model=dict
+    response_model=BestellvorschlagOut
 )
 async def vorschlag_rohware(
     stichtag: Optional[date] = Query(None),
@@ -283,12 +291,12 @@ async def vorschlag_rohware(
     return _svc(db, tenant_id).compute_vorschlag_rohware(stichtag, niederlassung_id)
 
 
-# ─────────────────────────────────────────────────────────────────────────────
-# Bestellvorschläge CRUD
-# ─────────────────────────────────────────────────────────────────────────────
+# â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# BestellvorschlÃ¤ge CRUD
+# â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 @router.get("/einkauf/bestellvorschlaege", summary="Bestellvorschlaege auflisten",
-    response_model=dict
+    response_model=BestellvorschlagOut
 )
 async def list_bestellvorschlaege(
     vorschlag_typ: Optional[str] = Query(None),
@@ -302,7 +310,7 @@ async def list_bestellvorschlaege(
 
 
 @router.post("/einkauf/bestellvorschlaege", status_code=201, summary="Bestellvorschlag anlegen",
-    response_model=dict
+    response_model=BestellvorschlagOut
 )
 async def create_bestellvorschlag(
     data: VorschlagSaveRequest,
@@ -313,7 +321,7 @@ async def create_bestellvorschlag(
 
 
 @router.get("/einkauf/bestellvorschlaege/{vorschlag_id}", summary="Bestellvorschlag abrufen",
-    response_model=dict
+    response_model=BestellvorschlagOut
 )
 async def get_bestellvorschlag(
     vorschlag_id: str,
@@ -327,7 +335,7 @@ async def get_bestellvorschlag(
 
 
 @router.put("/einkauf/bestellvorschlaege/{vorschlag_id}", summary="Bestellvorschlag aktualisieren",
-    response_model=dict
+    response_model=BestellvorschlagOut
 )
 async def update_bestellvorschlag(
     vorschlag_id: str,
@@ -341,7 +349,7 @@ async def update_bestellvorschlag(
         raise HTTPException(404, "Vorschlag nicht gefunden")
 
 
-@router.delete("/einkauf/bestellvorschlaege/{vorschlag_id}", status_code=204, response_class=Response, response_model=None, summary="Bestellvorschlag löschen")
+@router.delete("/einkauf/bestellvorschlaege/{vorschlag_id}", status_code=204, response_class=Response, response_model=None, summary="Bestellvorschlag lÃ¶schen")
 async def delete_bestellvorschlag(
     vorschlag_id: str,
     db: Session = Depends(get_db),
@@ -368,12 +376,12 @@ async def vorschlag_freigeben(
         raise HTTPException(404, "Vorschlag nicht gefunden")
 
 
-# ─────────────────────────────────────────────────────────────────────────────
+# â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 # ArtikelLagerParameter CRUD
-# ─────────────────────────────────────────────────────────────────────────────
+# â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 @router.get("/einkauf/artikel-lager-parameter", summary="Artikel lager parameter auflisten",
-    response_model=dict
+    response_model=BestellvorschlagOut
 )
 async def list_artikel_lager_parameter(
     article_id: Optional[str] = Query(None),
@@ -386,7 +394,7 @@ async def list_artikel_lager_parameter(
 
 
 @router.post("/einkauf/artikel-lager-parameter", status_code=201, summary="Artikel lager parameter anlegen",
-    response_model=dict
+    response_model=BestellvorschlagOut
 )
 async def create_artikel_lager_parameter(
     data: ArtikelLagerParamCreate,
@@ -400,7 +408,7 @@ async def create_artikel_lager_parameter(
 
 
 @router.put("/einkauf/artikel-lager-parameter/{param_id}", summary="Artikel lager parameter aktualisieren",
-    response_model=dict
+    response_model=BestellvorschlagOut
 )
 async def update_artikel_lager_parameter(
     param_id: str,
@@ -414,7 +422,7 @@ async def update_artikel_lager_parameter(
         raise HTTPException(404, "Parameter nicht gefunden")
 
 
-@router.delete("/einkauf/artikel-lager-parameter/{param_id}", status_code=204, response_class=Response, response_model=None, summary="Artikel lager parameter löschen")
+@router.delete("/einkauf/artikel-lager-parameter/{param_id}", status_code=204, response_class=Response, response_model=None, summary="Artikel lager parameter lÃ¶schen")
 async def delete_artikel_lager_parameter(
     param_id: str,
     db: Session = Depends(get_db),
@@ -427,9 +435,9 @@ async def delete_artikel_lager_parameter(
     return Response(status_code=204)
 
 
-# ─────────────────────────────────────────────────────────────────────────────
+# â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 # Lieferanten CRUD
-# ─────────────────────────────────────────────────────────────────────────────
+# â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 @router.get("/einkauf/lieferanten", summary="Lieferanten auflisten",
     response_model=None
@@ -444,7 +452,7 @@ async def list_lieferanten(
 
 
 @router.post("/einkauf/lieferanten", status_code=201, summary="Lieferant anlegen",
-    response_model=dict
+    response_model=BestellvorschlagOut
 )
 async def create_lieferant(
     data: LieferantCreate,
@@ -455,7 +463,7 @@ async def create_lieferant(
 
 
 @router.get("/einkauf/lieferanten/{lieferant_id}", summary="Lieferant abrufen",
-    response_model=dict
+    response_model=BestellvorschlagOut
 )
 async def get_lieferant(
     lieferant_id: str,
@@ -469,7 +477,7 @@ async def get_lieferant(
 
 
 @router.put("/einkauf/lieferanten/{lieferant_id}", summary="Lieferant aktualisieren",
-    response_model=dict
+    response_model=BestellvorschlagOut
 )
 async def update_lieferant(
     lieferant_id: str,
@@ -483,12 +491,12 @@ async def update_lieferant(
         raise HTTPException(404, "Lieferant nicht gefunden")
 
 
-# ─────────────────────────────────────────────────────────────────────────────
+# â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 # Kontrakte CRUD
-# ─────────────────────────────────────────────────────────────────────────────
+# â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 @router.get("/einkauf/kontrakte", summary="Kontrakte auflisten",
-    response_model=dict
+    response_model=BestellvorschlagOut
 )
 async def list_kontrakte(
     lieferant_id: Optional[str] = Query(None),
@@ -500,7 +508,7 @@ async def list_kontrakte(
 
 
 @router.post("/einkauf/kontrakte", status_code=201, summary="Kontrakt anlegen",
-    response_model=dict
+    response_model=BestellvorschlagOut
 )
 async def create_kontrakt(
     data: KontraktCreate,
@@ -511,7 +519,7 @@ async def create_kontrakt(
 
 
 @router.get("/einkauf/kontrakte/{kontrakt_id}", summary="Kontrakt abrufen",
-    response_model=dict
+    response_model=BestellvorschlagOut
 )
 async def get_kontrakt(
     kontrakt_id: str,
@@ -525,7 +533,7 @@ async def get_kontrakt(
 
 
 @router.put("/einkauf/kontrakte/{kontrakt_id}", summary="Kontrakt aktualisieren",
-    response_model=dict
+    response_model=BestellvorschlagOut
 )
 async def update_kontrakt(
     kontrakt_id: str,
@@ -539,8 +547,8 @@ async def update_kontrakt(
         raise HTTPException(404, "Kontrakt nicht gefunden")
 
 
-@router.post("/einkauf/kontrakte/{kontrakt_id}/positionen", status_code=201, summary="Kontrakt position hinzufügen",
-    response_model=dict
+@router.post("/einkauf/kontrakte/{kontrakt_id}/positionen", status_code=201, summary="Kontrakt position hinzufÃ¼gen",
+    response_model=BestellvorschlagOut
 )
 async def add_kontrakt_position(
     kontrakt_id: str,
@@ -554,12 +562,12 @@ async def add_kontrakt_position(
         raise HTTPException(404, "Kontrakt nicht gefunden")
 
 
-# ─────────────────────────────────────────────────────────────────────────────
+# â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 # Bestellungen CRUD
-# ─────────────────────────────────────────────────────────────────────────────
+# â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 @router.get("/einkauf/bestellungen", summary="Bestellungen auflisten",
-    response_model=dict
+    response_model=BestellvorschlagOut
 )
 async def list_bestellungen(
     lieferant_id: Optional[str] = Query(None),
@@ -573,7 +581,7 @@ async def list_bestellungen(
 
 
 @router.post("/einkauf/bestellungen/import", summary="Bestellungen importieren",
-    response_model=dict
+    response_model=BestellvorschlagOut
 )
 async def import_bestellungen(
     file: UploadFile = File(...),
@@ -588,7 +596,7 @@ async def import_bestellungen(
 
 
 @router.post("/einkauf/bestellungen", status_code=201, summary="Bestellung anlegen",
-    response_model=dict
+    response_model=BestellvorschlagOut
 )
 async def create_bestellung(
     data: BestellungCreate,
@@ -599,7 +607,7 @@ async def create_bestellung(
 
 
 @router.get("/einkauf/bestellungen/{bestellung_id}", summary="Bestellung abrufen",
-    response_model=dict
+    response_model=BestellvorschlagOut
 )
 async def get_bestellung(
     bestellung_id: str,
@@ -613,7 +621,7 @@ async def get_bestellung(
 
 
 @router.put("/einkauf/bestellungen/{bestellung_id}", summary="Bestellung aktualisieren",
-    response_model=dict
+    response_model=BestellvorschlagOut
 )
 async def update_bestellung(
     bestellung_id: str,
@@ -628,7 +636,7 @@ async def update_bestellung(
 
 
 @router.post("/einkauf/bestellungen/{bestellung_id}/versenden", summary="Versenden bestellung",
-    response_model=dict
+    response_model=BestellvorschlagOut
 )
 async def bestellung_versenden(
     bestellung_id: str,
@@ -643,12 +651,12 @@ async def bestellung_versenden(
         raise HTTPException(404, "Bestellung nicht gefunden")
 
 
-# ─────────────────────────────────────────────────────────────────────────────
+# â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 # Lager-Konten-Zuordnung CRUD
-# ─────────────────────────────────────────────────────────────────────────────
+# â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 @router.get("/einkauf/lager-konten", summary="Lager konten auflisten",
-    response_model=dict
+    response_model=BestellvorschlagOut
 )
 async def list_lager_konten(
     artikelgruppe: Optional[str] = Query(None),
@@ -659,7 +667,7 @@ async def list_lager_konten(
 
 
 @router.post("/einkauf/lager-konten", status_code=201, summary="Lager konto anlegen",
-    response_model=dict
+    response_model=BestellvorschlagOut
 )
 async def create_lager_konto(
     data: LagerKontenzuordnungCreate,
@@ -670,7 +678,7 @@ async def create_lager_konto(
 
 
 @router.put("/einkauf/lager-konten/{konto_id}", summary="Lager konto aktualisieren",
-    response_model=dict
+    response_model=BestellvorschlagOut
 )
 async def update_lager_konto(
     konto_id: str,
@@ -684,12 +692,12 @@ async def update_lager_konto(
         raise HTTPException(404, "Konten-Zuordnung nicht gefunden")
 
 
-# ─────────────────────────────────────────────────────────────────────────────
+# â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 # Paletten-Konto
-# ─────────────────────────────────────────────────────────────────────────────
+# â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 @router.get("/einkauf/paletten-konto/{partner_id}", summary="Paletten saldo abrufen",
-    response_model=dict
+    response_model=BestellvorschlagOut
 )
 async def get_paletten_saldo(
     partner_id: str,
@@ -701,7 +709,7 @@ async def get_paletten_saldo(
 
 
 @router.post("/einkauf/paletten-konto", status_code=201, summary="Paletten buchung anlegen",
-    response_model=dict
+    response_model=BestellvorschlagOut
 )
 async def create_paletten_buchung(
     data: PalettenBuchungCreate,
@@ -711,12 +719,12 @@ async def create_paletten_buchung(
     return _svc(db, tenant_id).create_paletten_buchung(data.model_dump())
 
 
-# ─────────────────────────────────────────────────────────────────────────────
+# â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 # Pfand-Konto
-# ─────────────────────────────────────────────────────────────────────────────
+# â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 @router.get("/einkauf/pfand-konto/{partner_id}", summary="Pfand saldo abrufen",
-    response_model=dict
+    response_model=BestellvorschlagOut
 )
 async def get_pfand_saldo(
     partner_id: str,
@@ -728,7 +736,7 @@ async def get_pfand_saldo(
 
 
 @router.post("/einkauf/pfand-konto", status_code=201, summary="Pfand buchung anlegen",
-    response_model=dict
+    response_model=BestellvorschlagOut
 )
 async def create_pfand_buchung(
     data: PfandBuchungCreate,
@@ -738,12 +746,12 @@ async def create_pfand_buchung(
     return _svc(db, tenant_id).create_pfand_buchung(data.model_dump())
 
 
-# ─────────────────────────────────────────────────────────────────────────────
+# â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 # Fremdwaren-Einlagerung
-# ─────────────────────────────────────────────────────────────────────────────
+# â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 @router.get("/einkauf/fremdwaren-einlagerung", summary="Fremdwaren auflisten",
-    response_model=dict
+    response_model=BestellvorschlagOut
 )
 async def list_fremdwaren(
     eigentuemer_id: Optional[str] = Query(None),
@@ -756,7 +764,7 @@ async def list_fremdwaren(
 
 
 @router.post("/einkauf/fremdwaren-einlagerung", status_code=201, summary="Fremdwaren einlagerung anlegen",
-    response_model=dict
+    response_model=BestellvorschlagOut
 )
 async def create_fremdwaren_einlagerung(
     data: FremdwarenCreate,
@@ -767,7 +775,7 @@ async def create_fremdwaren_einlagerung(
 
 
 @router.put("/einkauf/fremdwaren-einlagerung/{einlagerung_id}", summary="Fremdwaren einlagerung aktualisieren",
-    response_model=dict
+    response_model=BestellvorschlagOut
 )
 async def update_fremdwaren_einlagerung(
     einlagerung_id: str,
@@ -781,12 +789,12 @@ async def update_fremdwaren_einlagerung(
         raise HTTPException(404, "Einlagerung nicht gefunden")
 
 
-# ─────────────────────────────────────────────────────────────────────────────
+# â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 # Bestellungen Workflow
-# ─────────────────────────────────────────────────────────────────────────────
+# â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 @router.post("/einkauf/bestellungen/{bestellung_id}/freigeben", summary="Freigeben bestellung",
-    response_model=dict
+    response_model=BestellvorschlagOut
 )
 async def bestellung_freigeben(
     bestellung_id: str,
@@ -802,7 +810,7 @@ async def bestellung_freigeben(
 
 
 @router.post("/einkauf/bestellungen/{bestellung_id}/stornieren", summary="Stornieren bestellung",
-    response_model=dict
+    response_model=BestellvorschlagOut
 )
 async def bestellung_stornieren(
     bestellung_id: str,
@@ -815,3 +823,4 @@ async def bestellung_stornieren(
         raise HTTPException(404, "Bestellung nicht gefunden")
     except ValidationFailedError as exc:
         raise HTTPException(400, exc.detail)
+

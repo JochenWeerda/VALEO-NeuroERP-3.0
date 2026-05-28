@@ -20,6 +20,14 @@ from app.services.policy_registry import (
     select_policy_variant,
 )
 
+from app.api.v1.schemas.base import BaseSchema
+from pydantic import ConfigDict as _ConfigDict
+
+
+class NeuroEventPolicyOut(BaseSchema):
+    model_config = _ConfigDict(extra="allow")
+
+
 router = APIRouter(tags=["neuro-core", "events", "policy"])
 
 
@@ -28,7 +36,7 @@ router = APIRouter(tags=["neuro-core", "events", "policy"])
 # ---------------------------------------------------------------------------
 
 @router.get("/neuro/events/types", summary="Event types abrufen",
-    response_model=dict
+    response_model=NeuroEventPolicyOut
 )
 async def get_event_types():
     return {"types": list_event_types()}
@@ -40,7 +48,7 @@ class ValidateEventRequest(BaseModel):
 
 
 @router.post("/neuro/events/validate", summary="Validate event do",
-    response_model=dict
+    response_model=NeuroEventPolicyOut
 )
 async def do_validate_event(request: ValidateEventRequest):
     return validate_event(request.event_type, request.payload)
@@ -60,7 +68,7 @@ class RegisterPolicyRequest(BaseModel):
 
 
 @router.post("/neuro/policies", summary="Register policy do",
-    response_model=dict
+    response_model=NeuroEventPolicyOut
 )
 async def do_register_policy(
     request: RegisterPolicyRequest,
@@ -80,7 +88,7 @@ async def do_register_policy(
 
 
 @router.get("/neuro/policies", summary="List policies do",
-    response_model=dict
+    response_model=NeuroEventPolicyOut
 )
 async def do_list_policies(
     tenant_id: str = Depends(get_tenant_id),
@@ -90,7 +98,7 @@ async def do_list_policies(
 
 
 @router.get("/neuro/policies/{policy_id}", summary="Get policy do",
-    response_model=dict
+    response_model=NeuroEventPolicyOut
 )
 async def do_get_policy(
     policy_id: str,
@@ -104,7 +112,7 @@ async def do_get_policy(
 
 
 @router.get("/neuro/policies/{policy_id}/variants", summary="List policy variants do",
-    response_model=dict
+    response_model=NeuroEventPolicyOut
 )
 async def do_list_policy_variants(
     policy_id: str,
@@ -119,7 +127,7 @@ class SelectPolicyVariantRequest(BaseModel):
 
 
 @router.post("/neuro/policies/{policy_id}/select", summary="Select policy variant do",
-    response_model=dict
+    response_model=NeuroEventPolicyOut
 )
 async def do_select_policy_variant(
     policy_id: str,
@@ -134,7 +142,7 @@ async def do_select_policy_variant(
 
 
 @router.post("/neuro/policies/{policy_id}/rollback", summary="Rollback policy do",
-    response_model=dict
+    response_model=NeuroEventPolicyOut
 )
 async def do_rollback_policy(
     policy_id: str,

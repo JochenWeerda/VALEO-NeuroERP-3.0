@@ -33,6 +33,15 @@ from app.services.numbering_service import get_numbering
 logger = logging.getLogger(__name__)
 
 
+from app.api.v1.schemas.base import BaseSchema
+from pydantic import ConfigDict as _ConfigDict
+
+
+class FlowSpineOut(BaseSchema):
+    """Typed response schema for FlowSpineOut endpoints (extra fields forwarded)."""
+    model_config = _ConfigDict(extra="allow")
+
+
 router = APIRouter(prefix="/process/flow-spines", tags=["process", "flow-spines"])
 LIFECYCLE_STATUSES = {"draft", "in_progress", "on_hold", "completed", "cancelled", "failed"}
 REASON_CATEGORIES = {
@@ -306,7 +315,7 @@ class ResumeRequest(BaseModel):
 # ── Catalog ──────────────────────────────────────────────────────────────────
 
 @router.get("/catalog", summary="Catalog abrufen",
-    response_model=dict
+    response_model=FlowSpineOut
 )
 def get_catalog(lang: Optional[str] = Query(None)) -> JSONResponse:
     catalog = get_flow_spine_catalog(lang)
@@ -323,7 +332,7 @@ def get_catalog(lang: Optional[str] = Query(None)) -> JSONResponse:
 # ── Workspace (with optional instance overlay) ───────────────────────────────
 
 @router.get("/{process_key}", summary="Workspace abrufen",
-    response_model=dict
+    response_model=FlowSpineOut
 )
 def get_workspace(
     process_key: str,
@@ -359,7 +368,7 @@ def get_workspace(
 
 # ── Instance CRUD ─────────────────────────────────────────────────────────────
 
-@router.post("/{process_key}/instances", status_code=201, response_model=dict, summary="Instance anlegen")
+@router.post("/{process_key}/instances", status_code=201, response_model=FlowSpineOut, summary="Instance anlegen")
 async def create_instance(
     process_key: str,
     body: InstanceCreateRequest,
@@ -431,7 +440,7 @@ async def create_instance(
     return _instance_to_dict(inst)
 
 
-@router.get("/{process_key}/instances", response_model=dict, summary="Instances auflisten")
+@router.get("/{process_key}/instances", response_model=FlowSpineOut, summary="Instances auflisten")
 def list_instances(
     process_key: str,
     skip: int = Query(default=0, ge=0, description="Anzahl übersprungener Einträge"),
@@ -471,7 +480,7 @@ def list_instances(
     }
 
 
-@router.get("/{process_key}/instances/{instance_id}", response_model=dict, summary="Instance abrufen")
+@router.get("/{process_key}/instances/{instance_id}", response_model=FlowSpineOut, summary="Instance abrufen")
 def get_instance(
     process_key: str,
     instance_id: str,
@@ -482,7 +491,7 @@ def get_instance(
     return _instance_to_dict(inst)
 
 
-@router.patch("/{process_key}/instances/{instance_id}", response_model=dict, summary="Instance aktualisieren")
+@router.patch("/{process_key}/instances/{instance_id}", response_model=FlowSpineOut, summary="Instance aktualisieren")
 def update_instance(
     process_key: str,
     instance_id: str,
@@ -540,7 +549,7 @@ def update_instance(
     return _instance_to_dict(inst)
 
 
-@router.post("/{process_key}/instances/{instance_id}/save", response_model=dict, summary="Instance save")
+@router.post("/{process_key}/instances/{instance_id}/save", response_model=FlowSpineOut, summary="Instance save")
 def save_instance(
     process_key: str,
     instance_id: str,
@@ -588,7 +597,7 @@ def save_instance(
     return _instance_to_dict(inst)
 
 
-@router.post("/{process_key}/instances/{instance_id}/resume", response_model=dict, summary="Instance fortsetzen")
+@router.post("/{process_key}/instances/{instance_id}/resume", response_model=FlowSpineOut, summary="Instance fortsetzen")
 def resume_instance(
     process_key: str,
     instance_id: str,
@@ -635,7 +644,7 @@ def resume_instance(
     }
 
 
-@router.post("/{process_key}/instances/{instance_id}/hold", response_model=dict, summary="Instance hold")
+@router.post("/{process_key}/instances/{instance_id}/hold", response_model=FlowSpineOut, summary="Instance hold")
 def hold_instance(
     process_key: str,
     instance_id: str,
@@ -674,7 +683,7 @@ def hold_instance(
     return _instance_to_dict(inst)
 
 
-@router.post("/{process_key}/instances/{instance_id}/complete", response_model=dict, summary="Instance complete")
+@router.post("/{process_key}/instances/{instance_id}/complete", response_model=FlowSpineOut, summary="Instance complete")
 def complete_instance(
     process_key: str,
     instance_id: str,
@@ -726,7 +735,7 @@ def _validate_required_reason(body: LifecycleActionRequest) -> None:
         )
 
 
-@router.post("/{process_key}/instances/{instance_id}/cancel", response_model=dict, summary="Instance stornieren")
+@router.post("/{process_key}/instances/{instance_id}/cancel", response_model=FlowSpineOut, summary="Instance stornieren")
 def cancel_instance(
     process_key: str,
     instance_id: str,
@@ -768,7 +777,7 @@ def cancel_instance(
     return _instance_to_dict(inst)
 
 
-@router.post("/{process_key}/instances/{instance_id}/fail", response_model=dict, summary="Instance fail")
+@router.post("/{process_key}/instances/{instance_id}/fail", response_model=FlowSpineOut, summary="Instance fail")
 def fail_instance(
     process_key: str,
     instance_id: str,
@@ -810,7 +819,7 @@ def fail_instance(
     return _instance_to_dict(inst)
 
 
-@router.get("/{process_key}/instances/{instance_id}/timeline", response_model=dict, summary="Instance timeline abrufen")
+@router.get("/{process_key}/instances/{instance_id}/timeline", response_model=FlowSpineOut, summary="Instance timeline abrufen")
 def get_instance_timeline(
     process_key: str,
     instance_id: str,
@@ -835,7 +844,7 @@ def get_instance_timeline(
     }
 
 
-@router.post("/{process_key}/instances/{instance_id}/transitions", response_model=dict, summary="Instance transition")
+@router.post("/{process_key}/instances/{instance_id}/transitions", response_model=FlowSpineOut, summary="Instance transition")
 async def transition_instance(
     process_key: str,
     instance_id: str,
@@ -913,7 +922,7 @@ def delete_instance(
 
 # ── Agent Action (GAP-104-H) ──────────────────────────────────────────────────
 
-@router.post("/{process_key}/agent-action", response_model=dict, summary="Agent action ausführen")
+@router.post("/{process_key}/agent-action", response_model=FlowSpineOut, summary="Agent action ausführen")
 async def execute_agent_action(
     process_key: str,
     body: AgentActionRequest,

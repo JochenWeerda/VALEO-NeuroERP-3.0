@@ -11,6 +11,14 @@ from sqlalchemy.orm import Session
 from app.core.database import get_db
 from app.core.tenant import get_tenant_id
 
+from app.api.v1.schemas.base import BaseSchema
+from pydantic import ConfigDict as _ConfigDict
+
+
+class PosPaymentOut(BaseSchema):
+    model_config = _ConfigDict(extra="allow")
+
+
 router = APIRouter()
 
 
@@ -78,7 +86,7 @@ class PromotionCheckIn(BaseModel):
 # ── Payment Methods ────────────────────────────────────────────────────────
 
 @router.get("/payment-methods", summary="Payment methods auflisten",
-    response_model=list
+    response_model=list[PosPaymentOut]
 )
 async def list_payment_methods(
     db: Session = Depends(get_db),
@@ -104,7 +112,7 @@ async def list_payment_methods(
 
 
 @router.post("/checkout/split-payment", status_code=201, summary="Payment aufteilen",
-    response_model=dict
+    response_model=PosPaymentOut
 )
 async def split_payment(
     payload: SplitPaymentIn,
@@ -128,7 +136,7 @@ async def split_payment(
 # ── Promotions ─────────────────────────────────────────────────────────────
 
 @router.get("/promotions", summary="Promotions auflisten",
-    response_model=list
+    response_model=list[PosPaymentOut]
 )
 async def list_promotions(
     db: Session = Depends(get_db),
@@ -151,7 +159,7 @@ async def list_promotions(
 
 
 @router.post("/promotions", status_code=201, summary="Promotion anlegen",
-    response_model=dict
+    response_model=PosPaymentOut
 )
 async def create_promotion(
     payload: PromotionIn,
@@ -180,7 +188,7 @@ async def create_promotion(
 
 
 @router.post("/promotions/check", summary="Promotion prüfen",
-    response_model=dict
+    response_model=PosPaymentOut
 )
 async def check_promotion(
     payload: PromotionCheckIn,
@@ -225,7 +233,7 @@ async def check_promotion(
 # ── X/Z-Report ─────────────────────────────────────────────────────────────
 
 @router.get("/x-report", summary="Report x",
-    response_model=dict
+    response_model=PosPaymentOut
 )
 async def x_report(
     db: Session = Depends(get_db),
@@ -250,7 +258,7 @@ async def x_report(
 
 
 @router.get("/z-report/{report_date}", summary="Report z",
-    response_model=dict
+    response_model=PosPaymentOut
 )
 async def z_report(
     report_date: str,
@@ -278,7 +286,7 @@ async def z_report(
 
 
 @router.post("/checkout/preview", summary="Preview checkout",
-    response_model=dict
+    response_model=PosPaymentOut
 )
 async def checkout_preview(
     payload: SplitPaymentIn,
