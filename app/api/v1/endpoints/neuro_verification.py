@@ -12,6 +12,14 @@ from app.core.database import get_db
 from app.core.tenant import get_tenant_id
 from app.services.neuro_verification_engine import verify_plan, VerificationResult
 
+from app.api.v1.schemas.base import BaseSchema
+from pydantic import ConfigDict as _ConfigDict
+
+
+class CompatFlexOut(BaseSchema):
+    model_config = _ConfigDict(extra="allow")
+
+
 router = APIRouter(prefix="/neuro/verify", tags=["neuro-core", "verification"])
 
 

@@ -16,6 +16,14 @@ from ....core.database import get_db
 from ....core.tenant import get_tenant_id
 from ....services.security_observability import security_observer
 
+from app.api.v1.schemas.base import BaseSchema
+from pydantic import ConfigDict as _ConfigDict
+
+
+class CompatFlexOut(BaseSchema):
+    model_config = _ConfigDict(extra="allow")
+
+
 router = APIRouter()
 
 

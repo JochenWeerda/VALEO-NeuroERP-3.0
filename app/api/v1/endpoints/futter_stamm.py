@@ -23,6 +23,14 @@ from app.infrastructure.models.futtermittel_models import (
     RezeptKomponente,
 )
 
+from app.api.v1.schemas.base import BaseSchema
+from pydantic import ConfigDict as _ConfigDict
+
+
+class CompatFlexOut(BaseSchema):
+    model_config = _ConfigDict(extra="allow")
+
+
 router = APIRouter(tags=["futter", "stammdaten"])
 
 

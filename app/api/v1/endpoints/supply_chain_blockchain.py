@@ -15,6 +15,14 @@ from app.core.supply_chain_blockchain import (
 )
 from app.core.supply_chain_tracking import LieferkettenPhase, TrackingStatusGesamtlage, TransportModus
 
+from app.api.v1.schemas.base import BaseSchema
+from pydantic import ConfigDict as _ConfigDict
+
+
+class CompatFlexOut(BaseSchema):
+    model_config = _ConfigDict(extra="allow")
+
+
 router = APIRouter(prefix="/supply-chain/blockchain", tags=["supply-chain", "blockchain", "integrations"])
 
 
@@ -64,7 +72,7 @@ def _to_request(body: SupplyChainBlockchainPrepareBody) -> SupplyChainBlockchain
 
 
 @router.get("/profiles", summary="Supply chain blockchain profiles abrufen",
-    response_model=dict
+    response_model=CompatFlexOut
 )
 async def get_supply_chain_blockchain_profiles() -> dict[str, Any]:
     return {
@@ -74,14 +82,14 @@ async def get_supply_chain_blockchain_profiles() -> dict[str, Any]:
 
 
 @router.post("/prepare", summary="Supply chain blockchain event prepare",
-    response_model=dict
+    response_model=CompatFlexOut
 )
 async def prepare_supply_chain_blockchain_event(body: SupplyChainBlockchainPrepareBody) -> dict[str, Any]:
     return build_supply_chain_blockchain_envelope(_to_request(body), body.profil).as_dict()
 
 
 @router.post("/dispatch", summary="Supply chain blockchain event dispatch",
-    response_model=dict
+    response_model=CompatFlexOut
 )
 async def dispatch_supply_chain_blockchain_event(body: SupplyChainBlockchainDispatchBody) -> dict[str, Any]:
     envelope = build_supply_chain_blockchain_envelope(_to_request(body), body.profil)

@@ -11,6 +11,14 @@ from app.core.workflow_simulation import (
     preview_workflow_sandbox,
 )
 
+from app.api.v1.schemas.base import BaseSchema
+from pydantic import ConfigDict as _ConfigDict
+
+
+class CompatFlexOut(BaseSchema):
+    model_config = _ConfigDict(extra="allow")
+
+
 router = APIRouter(prefix="/workflow/simulation", tags=["workflow", "simulation"])
 
 _SCENARIO_DESCRIPTIONS: dict[str, str] = {
@@ -33,7 +41,7 @@ _SCENARIO_DESCRIPTIONS: dict[str, str] = {
 
 
 @router.get("/scenarios", summary="Alle verfuegbaren Simulationsszenarien",
-    response_model=list
+    response_model=list[CompatFlexOut]
 )
 def list_scenarios() -> list[dict]:
     """Gibt alle SimulationScenario-Werte mit ihrer Beschreibung zurueck."""
@@ -47,7 +55,7 @@ def list_scenarios() -> list[dict]:
 
 
 @router.get("/sandbox/scenarios", summary="Sandbox-Szenarien fuer neue Workflows",
-    response_model=list
+    response_model=list[CompatFlexOut]
 )
 def list_sandbox_scenarios() -> list[dict]:
     """Gibt die Sandbox-Szenarien mit Hinweisen fuer den Go-Live-Review zurueck."""
@@ -90,7 +98,7 @@ def preview_workflow_sandbox_endpoint(body: WorkflowSandboxPreviewInput) -> Work
 @router.get(
     "/scenarios/{scenario}/description",
     summary="Beschreibung eines Szenarios",
-    response_model=dict
+    response_model=CompatFlexOut
 )
 def get_scenario_description(scenario: SimulationScenario) -> dict:
     """Gibt die kurze Beschreibung eines einzelnen Simulationsszenarios zurueck."""

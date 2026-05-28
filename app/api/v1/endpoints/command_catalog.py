@@ -20,6 +20,14 @@ from app.core.command_dispatcher import CommandDispatcher
 from app.core.agent_command_manifest import build_agent_command_manifest
 from app.core.ui_density_manifest import build_ui_density_manifest
 
+from app.api.v1.schemas.base import BaseSchema
+from pydantic import ConfigDict as _ConfigDict
+
+
+class CompatFlexOut(BaseSchema):
+    model_config = _ConfigDict(extra="allow")
+
+
 router = APIRouter(prefix="/commands", tags=["commands", "process-kernel"])
 
 
@@ -29,7 +37,7 @@ class DispatchRequest(BaseModel):
 
 
 @router.get("/catalog", summary="Vollstaendiger Command-Katalog",
-    response_model=list
+    response_model=list[CompatFlexOut]
 )
 def get_command_catalog(
     tenant_id: str = Depends(get_tenant_id),
@@ -40,7 +48,7 @@ def get_command_catalog(
 
 
 @router.get("/agent-manifest", summary="Agent-Command-Manifest",
-    response_model=dict
+    response_model=CompatFlexOut
 )
 def get_agent_manifest(
     tenant_id: str = Depends(get_tenant_id),
@@ -51,7 +59,7 @@ def get_agent_manifest(
 
 
 @router.get("/ui-density-manifest", summary="UI-Density-Manifest aus produktiven Command-Contracts",
-    response_model=dict
+    response_model=CompatFlexOut
 )
 def get_ui_density_manifest(
     tenant_id: str = Depends(get_tenant_id),
@@ -61,7 +69,7 @@ def get_ui_density_manifest(
 
 
 @router.post("/dispatch", summary="Command dispatchen und validieren",
-    response_model=dict
+    response_model=CompatFlexOut
 )
 def dispatch_command(
     body: DispatchRequest,

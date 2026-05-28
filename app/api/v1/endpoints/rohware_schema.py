@@ -1,5 +1,5 @@
-"""
-ROHWARE-SCHEMA-001 — Abrechnungsschema-Katalog für Rohwaren (Getreide, Raps, Mais, etc.)
+﻿"""
+ROHWARE-SCHEMA-001 â€” Abrechnungsschema-Katalog fÃ¼r Rohwaren (Getreide, Raps, Mais, etc.)
 
 Endpoints:
   GET  /rohware/schemata
@@ -62,7 +62,7 @@ def _check_tables(db: Session) -> None:
 # Schema CRUD
 # ---------------------------------------------------------------------------
 
-@router.get("", response_model=List[dict], summary="Schemata auflisten")
+@router.get("", response_model=list[RohwareOut], summary="Schemata auflisten")
 async def list_schemata(
     rohwaren_gruppe: Optional[str] = Query(None, description="GE | RO | SA | MA"),
     status: Optional[str] = Query(None, description="AKTIV | ENTWURF | ARCHIV"),
@@ -88,7 +88,7 @@ async def list_schemata(
 
         where = ("WHERE " + " AND ".join(conditions)) if conditions else ""
         rows = db.execute(
-            text(f"SELECT * FROM rohware_schemata {where} ORDER BY gueltig_ab DESC NULLS LAST LIMIT :limit OFFSET :skip"),  # nosec S608 — reviewed-safe: column names code-controlled, values parameterized
+            text(f"SELECT * FROM rohware_schemata {where} ORDER BY gueltig_ab DESC NULLS LAST LIMIT :limit OFFSET :skip"),  # nosec S608 â€” reviewed-safe: column names code-controlled, values parameterized
             params,
         ).mappings().all()
         return [dict(r) for r in rows]
@@ -173,7 +173,7 @@ async def update_schema(
     payload: Dict[str, Any],
     db: Session = Depends(get_db),
 ):
-    """Schema aktualisieren — nur im Status ENTWURF erlaubt."""
+    """Schema aktualisieren â€” nur im Status ENTWURF erlaubt."""
     try:
         _check_tables(db)
         row = db.execute(
@@ -185,14 +185,14 @@ async def update_schema(
         if row["status"] != "ENTWURF":
             raise HTTPException(
                 status_code=422,
-                detail="Nur Schemata im Status ENTWURF können bearbeitet werden",
+                detail="Nur Schemata im Status ENTWURF kÃ¶nnen bearbeitet werden",
             )
         allowed = {"schema_code", "name", "rohwaren_gruppe", "gueltig_ab", "gueltig_bis", "version"}
         updates = {k: v for k, v in payload.items() if k in allowed}
         updates["updated_at"] = datetime.utcnow().isoformat()
         set_clause = ", ".join(f"{k} = :{k}" for k in updates)
         db.execute(
-            text(f"UPDATE rohware_schemata SET {set_clause} WHERE id = :id"),  # nosec S608 — reviewed-safe: column names code-controlled, values parameterized
+            text(f"UPDATE rohware_schemata SET {set_clause} WHERE id = :id"),  # nosec S608 â€” reviewed-safe: column names code-controlled, values parameterized
             {**updates, "id": schema_id},
         )
         db.commit()
@@ -210,7 +210,7 @@ async def update_schema(
 
 @router.post("/{schema_id}/aktivieren", response_model=RohwareOut, summary="Aktivieren")
 async def aktivieren(schema_id: str, db: Session = Depends(get_db)):
-    """Setzt Status ENTWURF → AKTIV. Voraussetzung: gueltig_ab muss gesetzt sein."""
+    """Setzt Status ENTWURF â†’ AKTIV. Voraussetzung: gueltig_ab muss gesetzt sein."""
     try:
         _check_tables(db)
         row = db.execute(
@@ -222,7 +222,7 @@ async def aktivieren(schema_id: str, db: Session = Depends(get_db)):
         if row["status"] != "ENTWURF":
             raise HTTPException(
                 status_code=422,
-                detail=f"Schema ist bereits '{row['status']}' — Aktivierung nur aus ENTWURF möglich",
+                detail=f"Schema ist bereits '{row['status']}' â€” Aktivierung nur aus ENTWURF mÃ¶glich",
             )
         if not row.get("gueltig_ab"):
             raise HTTPException(
@@ -250,7 +250,7 @@ async def aktivieren(schema_id: str, db: Session = Depends(get_db)):
 
 @router.post("/{schema_id}/archivieren", response_model=RohwareOut, summary="Archivieren")
 async def archivieren(schema_id: str, db: Session = Depends(get_db)):
-    """Setzt Status AKTIV → ARCHIV."""
+    """Setzt Status AKTIV â†’ ARCHIV."""
     try:
         _check_tables(db)
         row = db.execute(
@@ -262,7 +262,7 @@ async def archivieren(schema_id: str, db: Session = Depends(get_db)):
         if row["status"] != "AKTIV":
             raise HTTPException(
                 status_code=422,
-                detail=f"Schema ist '{row['status']}' — Archivierung nur aus AKTIV möglich",
+                detail=f"Schema ist '{row['status']}' â€” Archivierung nur aus AKTIV mÃ¶glich",
             )
         db.execute(
             text(
@@ -287,7 +287,7 @@ async def archivieren(schema_id: str, db: Session = Depends(get_db)):
 # Schema Lines
 # ---------------------------------------------------------------------------
 
-@router.get("/{schema_id}/lines", response_model=List[dict], summary="Lines auflisten")
+@router.get("/{schema_id}/lines", response_model=list[RohwareOut], summary="Lines auflisten")
 async def list_lines(schema_id: str, db: Session = Depends(get_db)):
     """Alle Positionen eines Schemas."""
     try:
@@ -305,13 +305,13 @@ async def list_lines(schema_id: str, db: Session = Depends(get_db)):
         raise HTTPException(status_code=503, detail=f"DB-Fehler: {e}")
 
 
-@router.post("/{schema_id}/lines", response_model=RohwareOut, status_code=201, summary="Line hinzufügen")
+@router.post("/{schema_id}/lines", response_model=RohwareOut, status_code=201, summary="Line hinzufÃ¼gen")
 async def add_line(
     schema_id: str,
     payload: Dict[str, Any],
     db: Session = Depends(get_db),
 ):
-    """Position zu einem Schema hinzufügen."""
+    """Position zu einem Schema hinzufÃ¼gen."""
     try:
         _check_tables(db)
         line_id = str(uuid.uuid4())
@@ -345,7 +345,7 @@ async def add_line(
         raise HTTPException(status_code=503, detail=f"DB-Fehler: {e}")
 
 
-@router.delete("/{schema_id}/lines/{line_id}", status_code=204, response_class=Response, response_model=None, summary="Line löschen")
+@router.delete("/{schema_id}/lines/{line_id}", status_code=204, response_class=Response, response_model=None, summary="Line lÃ¶schen")
 async def delete_line(
     schema_id: str,
     line_id: str,
@@ -461,3 +461,4 @@ async def testrechnung(
         "gesamt_preis": round(gesamt_preis, 4),
         "gesamt_wert_menge": round(gesamt_preis * context["menge_kg"] / 1000, 2),
     }
+

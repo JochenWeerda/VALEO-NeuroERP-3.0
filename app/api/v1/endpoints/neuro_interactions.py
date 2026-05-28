@@ -13,6 +13,14 @@ from app.services.interaction_state_manager import (
     create_interaction, transition_interaction, get_interaction, list_interactions,
 )
 
+from app.api.v1.schemas.base import BaseSchema
+from pydantic import ConfigDict as _ConfigDict
+
+
+class CompatFlexOut(BaseSchema):
+    model_config = _ConfigDict(extra="allow")
+
+
 router = APIRouter(prefix="/neuro/interactions", tags=["neuro-core", "interactions"])
 
 
@@ -26,7 +34,7 @@ class TransitionRequest(BaseModel):
 
 
 @router.post("", summary="Anlegen",
-    response_model=dict
+    response_model=CompatFlexOut
 )
 async def create(
     request: CreateInteractionRequest,
@@ -37,7 +45,7 @@ async def create(
 
 
 @router.put("/{interaction_id}/transition", summary="Transition",
-    response_model=dict
+    response_model=CompatFlexOut
 )
 async def transition(
     interaction_id: str,
@@ -52,7 +60,7 @@ async def transition(
 
 
 @router.get("/{interaction_id}", summary="One abrufen",
-    response_model=dict
+    response_model=CompatFlexOut
 )
 async def get_one(
     interaction_id: str,
@@ -66,7 +74,7 @@ async def get_one(
 
 
 @router.get("", summary="All auflisten",
-    response_model=dict
+    response_model=CompatFlexOut
 )
 async def list_all(
     state: Optional[str] = None,

@@ -25,6 +25,14 @@ from ....core.runtime_operations import (
 from ....core.scheduler_heartbeat import HeartbeatHealthResult, SchedulerNodeStatus
 from ....core.scheduler_recovery import build_scheduler_runtime_component
 from ....services.scheduler_service import get_scheduler_status
+from app.api.v1.schemas.base import BaseSchema
+from pydantic import ConfigDict as _ConfigDict
+
+
+class CompatFlexOut(BaseSchema):
+    model_config = _ConfigDict(extra="allow")
+
+
 router = APIRouter(prefix="/runtime", tags=["runtime", "operations"])
 
 _replay_requests: list[ReplayRequest] = []
@@ -112,7 +120,7 @@ register_runtime_report_loader(_build_runtime_report)
 # Health
 # ---------------------------------------------------------------------------
 
-@router.get("/health", response_model=dict, summary="Runtime health abrufen")
+@router.get("/health", response_model=CompatFlexOut, summary="Runtime health abrufen")
 async def get_runtime_health(
     tenant_id: str = Depends(get_tenant_id),
     db: Any = Depends(get_db),
@@ -122,7 +130,7 @@ async def get_runtime_health(
     return report.model_dump(mode="json")
 
 
-@router.get("/components", response_model=list[dict], summary="Runtime components auflisten")
+@router.get("/components", response_model=list[CompatFlexOut], summary="Runtime components auflisten")
 async def list_runtime_components(
     tenant_id: str = Depends(get_tenant_id),
     db: Any = Depends(get_db),
@@ -136,7 +144,7 @@ async def list_runtime_components(
 # Replay
 # ---------------------------------------------------------------------------
 
-@router.post("/replay", response_model=dict, status_code=202, summary="Replay request anlegen")
+@router.post("/replay", response_model=CompatFlexOut, status_code=202, summary="Replay request anlegen")
 async def create_replay_request(
     body: dict,
     tenant_id: str = Depends(get_tenant_id),
@@ -170,7 +178,7 @@ async def create_replay_request(
     return req.model_dump(mode="json")
 
 
-@router.get("/replay", response_model=list[dict], summary="Replay requests auflisten")
+@router.get("/replay", response_model=list[CompatFlexOut], summary="Replay requests auflisten")
 async def list_replay_requests(
     tenant_id: str = Depends(get_tenant_id),
 ):
@@ -183,7 +191,7 @@ async def list_replay_requests(
 # Rebuild
 # ---------------------------------------------------------------------------
 
-@router.post("/rebuild", response_model=dict, status_code=202, summary="Rebuild request anlegen")
+@router.post("/rebuild", response_model=CompatFlexOut, status_code=202, summary="Rebuild request anlegen")
 async def create_rebuild_request(
     body: dict,
     tenant_id: str = Depends(get_tenant_id),
@@ -201,7 +209,7 @@ async def create_rebuild_request(
     return req.model_dump(mode="json")
 
 
-@router.get("/rebuild", response_model=list[dict], summary="Rebuild requests auflisten")
+@router.get("/rebuild", response_model=list[CompatFlexOut], summary="Rebuild requests auflisten")
 async def list_rebuild_requests(
     tenant_id: str = Depends(get_tenant_id),
 ):

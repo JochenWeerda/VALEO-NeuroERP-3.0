@@ -8,11 +8,19 @@ from fastapi import APIRouter, Query, HTTPException
 from sqlalchemy import text
 from app.core.database import get_db
 
+from app.api.v1.schemas.base import BaseSchema
+from pydantic import ConfigDict as _ConfigDict
+
+
+class CompatFlexOut(BaseSchema):
+    model_config = _ConfigDict(extra="allow")
+
+
 router = APIRouter(prefix="/prospecting", tags=["prospecting", "leads"])
 
 
 @router.get("/lead-candidates", summary="Lead candidates abrufen",
-    response_model=dict
+    response_model=CompatFlexOut
 )
 async def get_lead_candidates(
     ref_year: int = Query(..., description="Referenzjahr"),

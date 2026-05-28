@@ -13,6 +13,14 @@ from app.core.database import get_db
 from app.core.tenant import get_tenant_id
 from app.services.webshop_integration_service import WebshopIntegrationService
 
+from app.api.v1.schemas.base import BaseSchema
+from pydantic import ConfigDict as _ConfigDict
+
+
+class CompatFlexOut(BaseSchema):
+    model_config = _ConfigDict(extra="allow")
+
+
 router = APIRouter(prefix="/webshop", tags=["webshop", "integration"])
 
 
@@ -140,7 +148,7 @@ def verarbeiten(
 
 
 @router.get("/sync-status", summary="Status synchronisieren",
-    response_model=dict
+    response_model=CompatFlexOut
 )
 def sync_status(
     db: Session = Depends(get_db),
@@ -151,7 +159,7 @@ def sync_status(
 
 
 @router.get("/orders", summary="Orders auflisten",
-    response_model=dict
+    response_model=CompatFlexOut
 )
 def list_orders(
     db: Session = Depends(get_db),
@@ -198,7 +206,7 @@ def convert_order(
 
 
 @router.get("/sync-log", summary="Log synchronisieren",
-    response_model=dict
+    response_model=CompatFlexOut
 )
 def sync_log(
     db: Session = Depends(get_db),

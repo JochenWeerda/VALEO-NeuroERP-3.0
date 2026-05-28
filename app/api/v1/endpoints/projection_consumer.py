@@ -18,6 +18,14 @@ from app.core.projection_consumer import (
     build_default_projection_registry,
 )
 
+from app.api.v1.schemas.base import BaseSchema
+from pydantic import ConfigDict as _ConfigDict
+
+
+class CompatFlexOut(BaseSchema):
+    model_config = _ConfigDict(extra="allow")
+
+
 router = APIRouter(prefix="/projections", tags=["projections", "read-models"])
 
 # ---------------------------------------------------------------------------
@@ -46,7 +54,7 @@ class RebuildRequestBody(BaseModel):
 
 
 @router.get("", summary="Projections auflisten",
-    response_model=dict
+    response_model=CompatFlexOut
 )
 async def list_projections(
     tenant_id: str = Depends(get_tenant_id),
@@ -56,7 +64,7 @@ async def list_projections(
 
 
 @router.get("/stale", summary="Stale projections auflisten",
-    response_model=list
+    response_model=list[CompatFlexOut]
 )
 async def list_stale_projections(
     tenant_id: str = Depends(get_tenant_id),
@@ -67,7 +75,7 @@ async def list_stale_projections(
 
 
 @router.get("/{projection_name}", summary="Projection abrufen",
-    response_model=dict
+    response_model=CompatFlexOut
 )
 async def get_projection(
     projection_name: str,
@@ -84,7 +92,7 @@ async def get_projection(
 
 
 @router.post("/{projection_name}/rebuild", status_code=202, summary="Rebuild request",
-    response_model=dict
+    response_model=CompatFlexOut
 )
 async def request_rebuild(
     projection_name: str,
@@ -120,7 +128,7 @@ async def request_rebuild(
 
 
 @router.get("/{projection_name}/rebuild-status", summary="Rebuild status abrufen",
-    response_model=dict
+    response_model=CompatFlexOut
 )
 async def get_rebuild_status(
     projection_name: str,

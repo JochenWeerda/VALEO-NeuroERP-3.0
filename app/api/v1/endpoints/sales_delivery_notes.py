@@ -20,6 +20,14 @@ from app.services.customer_sales_eligibility import assert_customer_allowed_for_
 from app.services.kontrakt_movement_sync import sync_movements_for_delivery_note
 from app.services.sales_posting_service import SalesPostingService
 
+from app.api.v1.schemas.base import BaseSchema
+from pydantic import ConfigDict as _ConfigDict
+
+
+class CompatFlexOut(BaseSchema):
+    model_config = _ConfigDict(extra="allow")
+
+
 router = APIRouter(prefix="/sales/delivery-notes", tags=["sales", "delivery-notes"])
 
 
@@ -678,7 +686,7 @@ async def get_last_delivery_note(
     )
 
 
-@router.post("/{ls_id}/create-invoice", response_model=dict, status_code=201, summary="Invoice from delivery anlegen")
+@router.post("/{ls_id}/create-invoice", response_model=CompatFlexOut, status_code=201, summary="Invoice from delivery anlegen")
 async def create_invoice_from_delivery(
     ls_id: str,
     tenant_id: str = Depends(get_tenant_id),

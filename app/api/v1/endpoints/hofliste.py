@@ -22,6 +22,14 @@ from app.core.database import get_db
 from app.core.dependencies import get_tenant_id
 from app.core.uuid7 import uuid7
 
+from app.api.v1.schemas.base import BaseSchema
+from pydantic import ConfigDict as _ConfigDict
+
+
+class CompatFlexOut(BaseSchema):
+    model_config = _ConfigDict(extra="allow")
+
+
 router = APIRouter(prefix="/waage/hofliste", tags=["Waage - Hofliste"])
 
 VALID_STATUS = ("vorgemeldet", "auf_hof", "in_waegung", "gewogen", "abgefahren")
@@ -129,7 +137,7 @@ def anmelden(
 
 
 @router.post("/{eintrag_id}/status", summary="Aendern status",
-    response_model=dict
+    response_model=CompatFlexOut
 )
 def status_aendern(
     eintrag_id: str,
@@ -175,7 +183,7 @@ def status_aendern(
 
 
 @router.delete("/{eintrag_id}", summary="Abmelden",
-    response_model=dict
+    response_model=CompatFlexOut
 )
 def abmelden(
     eintrag_id: str,

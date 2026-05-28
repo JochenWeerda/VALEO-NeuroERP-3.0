@@ -25,6 +25,14 @@ from app.core.database import get_db
 from app.core.dependencies import get_tenant_id
 from app.core.uuid7 import uuid7
 
+from app.api.v1.schemas.base import BaseSchema
+from pydantic import ConfigDict as _ConfigDict
+
+
+class CompatFlexOut(BaseSchema):
+    model_config = _ConfigDict(extra="allow")
+
+
 router = APIRouter(prefix="/produktion/stuecklisten",
                    tags=["Produktion - Stücklisten & Rezepturen"])
 
@@ -234,7 +242,7 @@ def update_stueckliste(
 
 
 @router.delete("/{stueckliste_nr}", summary="Stueckliste löschen",
-    response_model=dict
+    response_model=CompatFlexOut
 )
 def delete_stueckliste(
     stueckliste_nr: str,

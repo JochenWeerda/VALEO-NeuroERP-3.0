@@ -20,6 +20,14 @@ from sqlalchemy.orm import Session
 from app.core.database import get_db
 from app.core.tenant import get_tenant_id
 
+from app.api.v1.schemas.base import BaseSchema
+from pydantic import ConfigDict as _ConfigDict
+
+
+class CompatFlexOut(BaseSchema):
+    model_config = _ConfigDict(extra="allow")
+
+
 router = APIRouter(prefix="/erechnung", tags=["erechnung"])
 
 
@@ -202,7 +210,7 @@ def list_imports(
 
 
 @router.post("/imports/{import_id}/buchen", summary="Buchen",
-    response_model=dict
+    response_model=CompatFlexOut
 )
 def buchen(
     import_id: str,

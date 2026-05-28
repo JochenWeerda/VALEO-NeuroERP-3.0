@@ -14,6 +14,14 @@ from app.core.database import get_db
 
 logger = logging.getLogger(__name__)
 
+from app.api.v1.schemas.base import BaseSchema
+from pydantic import ConfigDict as _ConfigDict
+
+
+class CompatFlexOut(BaseSchema):
+    model_config = _ConfigDict(extra="allow")
+
+
 router = APIRouter()
 
 
@@ -145,7 +153,7 @@ async def get_audit_logs(
 
 
 @router.get("/stats", summary="Audit stats abrufen",
-    response_model=dict
+    response_model=CompatFlexOut
 )
 async def get_audit_stats(
     tenant_id: Optional[str] = Query(None),

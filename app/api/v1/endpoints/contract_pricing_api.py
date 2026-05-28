@@ -3,6 +3,14 @@ from fastapi import APIRouter
 from pydantic import BaseModel
 import uuid
 
+from app.api.v1.schemas.base import BaseSchema
+from pydantic import ConfigDict as _ConfigDict
+
+
+class CompatFlexOut(BaseSchema):
+    model_config = _ConfigDict(extra="allow")
+
+
 router = APIRouter(prefix="/contract-pricing", tags=["contract-pricing"])
 
 class PriceMatrixCreateRequest(BaseModel):
@@ -22,7 +30,7 @@ class LotCreateRequest(BaseModel):
     lieferdatum_soll: str
 
 @router.post("/price-matrix", status_code=201, summary="Price matrix anlegen",
-    response_model=dict
+    response_model=CompatFlexOut
 )
 def create_price_matrix(req: PriceMatrixCreateRequest):
     from app.core.contract_pricing import PriceMatrix, PriceMatrixEintrag, PreisTyp
@@ -46,7 +54,7 @@ def create_price_matrix(req: PriceMatrixCreateRequest):
     return matrix
 
 @router.post("/lots", status_code=201, summary="Lot anlegen",
-    response_model=dict
+    response_model=CompatFlexOut
 )
 def create_lot(req: LotCreateRequest):
     from app.core.contract_pricing import KonContractLot, PreisTyp

@@ -178,7 +178,7 @@ async def get_silo_capacities(
     }
 
 
-@router.get("/silos", response_model=list[dict], summary="Silos auflisten")
+@router.get("/silos", response_model=list[SiloOut], summary="Silos auflisten")
 async def list_silos(
     include_inactive: bool = Query(False),
     tenant_id: str = Depends(get_tenant_id),

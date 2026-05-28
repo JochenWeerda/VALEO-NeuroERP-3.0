@@ -12,6 +12,14 @@ from ....integrations import crm_core_client
 from ..schemas.base import PaginatedResponse
 from ..schemas.crm import Lead, LeadCreate, LeadUpdate
 
+from app.api.v1.schemas.base import BaseSchema
+from pydantic import ConfigDict as _ConfigDict
+
+
+class CompatFlexOut(BaseSchema):
+    model_config = _ConfigDict(extra="allow")
+
+
 router = APIRouter()
 
 

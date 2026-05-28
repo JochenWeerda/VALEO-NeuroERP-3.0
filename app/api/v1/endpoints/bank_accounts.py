@@ -39,10 +39,18 @@ def _validate_iban(iban: Optional[str]) -> None:
     if remainder != 1:
         raise HTTPException(status_code=400, detail="IBAN: Prüfziffer ungültig (Mod-97).")
 
+from app.api.v1.schemas.base import BaseSchema
+from pydantic import ConfigDict as _ConfigDict
+
+
+class CompatFlexOut(BaseSchema):
+    model_config = _ConfigDict(extra="allow")
+
+
 router = APIRouter(prefix="/bank-accounts", tags=["finance", "bank-accounts"])
 
 
-@router.get("/new", response_model=dict, summary="New bank account template abrufen")
+@router.get("/new", response_model=CompatFlexOut, summary="New bank account template abrufen")
 async def get_new_bank_account_template(tenant_id: str = Depends(get_tenant_id)):
     """Return default values for bank account create forms."""
     return {

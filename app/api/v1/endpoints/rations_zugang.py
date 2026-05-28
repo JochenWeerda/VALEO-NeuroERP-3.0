@@ -30,6 +30,14 @@ from sqlalchemy.orm import Session
 from app.core.database import get_db
 from app.infrastructure.models.futtermittel_models import RationsZugang
 
+from app.api.v1.schemas.base import BaseSchema
+from pydantic import ConfigDict as _ConfigDict
+
+
+class CompatFlexOut(BaseSchema):
+    model_config = _ConfigDict(extra="allow")
+
+
 router = APIRouter()
 
 # ---------------------------------------------------------------------------

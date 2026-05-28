@@ -26,6 +26,14 @@ from app.core.database import get_db
 from app.core.dependencies import get_tenant_id
 from app.core.uuid7 import uuid7
 
+from app.api.v1.schemas.base import BaseSchema
+from pydantic import ConfigDict as _ConfigDict
+
+
+class CompatFlexOut(BaseSchema):
+    model_config = _ConfigDict(extra="allow")
+
+
 router = APIRouter(prefix="/fibu/geschaeftsjahre",
                    tags=["FIBU - Geschäftsjahre & Periodische Buchungen"])
 
@@ -203,7 +211,7 @@ def list_perioden(
 
 
 @router.patch("/{jahr_nr}/perioden/{periode_nr}/sperren", summary="Sperren periode",
-    response_model=dict
+    response_model=CompatFlexOut
 )
 def periode_sperren(
     jahr_nr: int,
@@ -267,7 +275,7 @@ def create_periodische_buchung(
 
 
 @router.post("/periodisch/{buchung_id}/ausfuehren", summary="Buchung ausfuehren periodische",
-    response_model=dict
+    response_model=CompatFlexOut
 )
 def periodische_buchung_ausfuehren(
     buchung_id: str,
@@ -347,7 +355,7 @@ def periodische_buchung_ausfuehren(
 
 
 @router.delete("/periodisch/{buchung_id}", summary="Periodische buchung löschen",
-    response_model=dict
+    response_model=CompatFlexOut
 )
 def delete_periodische_buchung(
     buchung_id: str,

@@ -417,7 +417,7 @@ async def get_neuroassist_mobile_ops_overview(tenant_id: str = "system"):
         raise HTTPException(status_code=500, detail=f"NeuroASSIST mobile ops overview failed: {str(exc)}")
 
 
-@router.get("/neuroassist/ops/interventions", response_model=list[dict], summary="Neuroassist interventions auflisten")
+@router.get("/neuroassist/ops/interventions", response_model=list[AgentOut], summary="Neuroassist interventions auflisten")
 async def list_neuroassist_interventions(tenant_id: str = "system"):
     try:
         return [item.model_dump(mode="json") for item in _get_agent_ops_service().list_interventions(tenant_id)]
@@ -426,7 +426,7 @@ async def list_neuroassist_interventions(tenant_id: str = "system"):
         raise HTTPException(status_code=500, detail=f"NeuroASSIST interventions failed: {str(exc)}")
 
 
-@router.get("/neuroassist/ops/config-revisions", response_model=list[dict], summary="Neuroassist config revisions auflisten")
+@router.get("/neuroassist/ops/config-revisions", response_model=list[AgentOut], summary="Neuroassist config revisions auflisten")
 async def list_neuroassist_config_revisions(tenant_id: str = "system"):
     try:
         return [item.model_dump(mode="json") for item in _get_agent_ops_service().list_config_revisions(tenant_id)]
@@ -592,7 +592,7 @@ async def update_neuroassist_skill_pack(skill_pack_key: str, request: AgentSkill
         raise HTTPException(status_code=500, detail=f"NeuroASSIST skill pack update failed: {str(exc)}")
 
 
-@router.get("/neuroassist/ops/skill-packs", response_model=list[dict], summary="Neuroassist skill packs auflisten")
+@router.get("/neuroassist/ops/skill-packs", response_model=list[AgentOut], summary="Neuroassist skill packs auflisten")
 async def list_neuroassist_skill_packs(tenant_id: str = "system"):
     try:
         return [item.model_dump(mode="json") for item in _get_agent_ops_service().list_skill_packs(tenant_id)]

@@ -27,6 +27,14 @@ from app.core.database import get_db
 from app.core.dependencies import get_tenant_id
 from app.core.uuid7 import uuid7
 
+from app.api.v1.schemas.base import BaseSchema
+from pydantic import ConfigDict as _ConfigDict
+
+
+class CompatFlexOut(BaseSchema):
+    model_config = _ConfigDict(extra="allow")
+
+
 router = APIRouter(prefix="/artikel", tags=["Artikelstamm - Erweiterungen"])
 
 
@@ -113,7 +121,7 @@ def list_folgeartikel(
 
 
 @router.get("/folgeartikel/{artikel_nr}/aktuell", summary="Aktueller folgeartikel abrufen",
-    response_model=dict
+    response_model=CompatFlexOut
 )
 def get_aktueller_folgeartikel(
     artikel_nr: str,
@@ -173,7 +181,7 @@ def create_folgeartikel(
 
 
 @router.delete("/folgeartikel/{folgeartikel_id}", summary="Folgeartikel löschen",
-    response_model=dict
+    response_model=CompatFlexOut
 )
 def delete_folgeartikel(
     folgeartikel_id: str,

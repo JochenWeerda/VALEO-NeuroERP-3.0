@@ -23,6 +23,14 @@ from app.core.tenant import get_tenant_id
 
 logger = logging.getLogger(__name__)
 
+from app.api.v1.schemas.base import BaseSchema
+from pydantic import ConfigDict as _ConfigDict
+
+
+class CompatFlexOut(BaseSchema):
+    model_config = _ConfigDict(extra="allow")
+
+
 router = APIRouter(prefix="/intrastat", tags=["Intrastat", "Außenhandel"])
 
 MIGRATION_HINT = (
@@ -112,7 +120,7 @@ def _gen_meldenummer(db: Session, meldezeitraum: str, meldungsart: str) -> str:
 
 
 @router.get("/meldungen", summary="Intrastat-Meldungen auflisten",
-    response_model=list
+    response_model=list[CompatFlexOut]
 )
 def list_meldungen(
     meldezeitraum: Optional[str] = Query(None, description="YYYY-MM"),
@@ -150,7 +158,7 @@ def list_meldungen(
 
 
 @router.post("/meldungen", status_code=201, summary="Intrastat-Meldung erstellen",
-    response_model=dict
+    response_model=CompatFlexOut
 )
 def create_meldung(
     payload: IntrastatMeldungCreate,
@@ -197,7 +205,7 @@ def create_meldung(
 
 
 @router.put("/meldungen/{meldung_id}", summary="Intrastat-Meldung aktualisieren",
-    response_model=dict
+    response_model=CompatFlexOut
 )
 def update_meldung(
     meldung_id: str,
@@ -315,7 +323,7 @@ def zusammenfassung(
 @router.post(
     "/meldungen/{meldezeitraum}/export-csv",
     summary="Intrastat-Meldung als CSV exportieren (INTRASTAT-DE)",
-    response_model=dict,
+    response_model=CompatFlexOut,
 )
 def export_csv(
     meldezeitraum: str,

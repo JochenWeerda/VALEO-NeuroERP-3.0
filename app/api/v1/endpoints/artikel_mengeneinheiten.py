@@ -23,6 +23,14 @@ from app.core.database import get_db
 from app.core.dependencies import get_tenant_id
 from app.core.uuid7 import uuid7
 
+from app.api.v1.schemas.base import BaseSchema
+from pydantic import ConfigDict as _ConfigDict
+
+
+class CompatFlexOut(BaseSchema):
+    model_config = _ConfigDict(extra="allow")
+
+
 router = APIRouter(prefix="/artikel/mengeneinheiten",
                    tags=["Artikelstamm - Mengeneinheiten & Gruppen"])
 
@@ -148,7 +156,7 @@ def update_mengeneinheit(
 
 
 @router.delete("/stamm/{einheit_kuerzel}", summary="Mengeneinheit löschen",
-    response_model=dict
+    response_model=CompatFlexOut
 )
 def delete_mengeneinheit(
     einheit_kuerzel: str,
@@ -294,7 +302,7 @@ def update_mengeneinheitengruppe(
 
 
 @router.delete("/gruppen/{gruppe_nr}", summary="Mengeneinheitengruppe löschen",
-    response_model=dict
+    response_model=CompatFlexOut
 )
 def delete_mengeneinheitengruppe(
     gruppe_nr: str,

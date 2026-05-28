@@ -22,6 +22,14 @@ from app.core.reporting_layer import (
 )
 from app.core.tenant_isolation_guard import IsolationDecision, TenantIsolationGuard
 
+from app.api.v1.schemas.base import BaseSchema
+from pydantic import ConfigDict as _ConfigDict
+
+
+class CompatFlexOut(BaseSchema):
+    model_config = _ConfigDict(extra="allow")
+
+
 router = APIRouter(prefix="/reporting", tags=["reporting"])
 _guard = TenantIsolationGuard()
 
@@ -47,7 +55,7 @@ class ProcessMiningReportRequest(BaseModel):
 
 
 @router.get("/data-products", summary="Data products abrufen",
-    response_model=dict
+    response_model=CompatFlexOut
 )
 def get_data_products(
     tenant_id: str = Query(...),
@@ -125,7 +133,7 @@ def post_process_mining_report(
 
 
 @router.get("/isolation/check", summary="Isolation check abrufen",
-    response_model=dict
+    response_model=CompatFlexOut
 )
 def get_isolation_check(
     requesting_tenant: str = Query(...),

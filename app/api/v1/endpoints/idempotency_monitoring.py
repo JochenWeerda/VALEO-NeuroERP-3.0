@@ -4,11 +4,19 @@ from fastapi import APIRouter, Query
 
 from app.core.action_idempotency import get_action_idempotency_store
 
+from app.api.v1.schemas.base import BaseSchema
+from pydantic import ConfigDict as _ConfigDict
+
+
+class CompatFlexOut(BaseSchema):
+    model_config = _ConfigDict(extra="allow")
+
+
 router = APIRouter(prefix="/process/idempotency", tags=["process-kernel", "idempotency", "monitoring"])
 
 
 @router.get("/summary", summary="Idempotency Summary",
-    response_model=dict
+    response_model=CompatFlexOut
 )
 def get_idempotency_summary() -> dict:
     store = get_action_idempotency_store()
@@ -16,7 +24,7 @@ def get_idempotency_summary() -> dict:
 
 
 @router.get("/audit", summary="Idempotency Audit Feed",
-    response_model=dict
+    response_model=CompatFlexOut
 )
 def get_idempotency_audit(
     tenant_id: str | None = Query(default=None, description="Optional tenant filter"),
