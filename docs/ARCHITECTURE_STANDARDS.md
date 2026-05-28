@@ -276,15 +276,33 @@ Audit-Trails für Mutationen: `app/core/audit_middleware.py` schreibt automatisc
 
 ---
 
-## 10. Migrations-Priorität (Ratchet-Plan)
+## 10. Migrations-Ratchet — Abgeschlossen ✅
 
-| Welle | Ziel-Threshold | Fokus |
+**Stand 2026-05-28: Ziel 0 erreicht.** Alle 314 Endpoint-Dateien sind vollständig typisiert.
+
+| Welle | Threshold | Datum | Ergebnis |
+|---|---|---|---|
+| Baseline | 1451 | 2026-05-28 | Messung + CI-Gate eingerichtet |
+| Welle A | 1200 | 2026-05-28 | ✅ admin_mobile.py (−24), compat.py (−144) |
+| Welle B | 1000 | 2026-05-28 | ✅ process_kernel_api.py (−210) |
+| Welle C | 500 | 2026-05-28 | ✅ 50+ Dateien bulk-migriert (−513) |
+| Welle D | 0 | 2026-05-28 | ✅ Restliche 260 Dateien, List[dict]-Patterns |
+| **Aktuell** | **0** | **2026-05-28** | **Vollständige Typisierung** |
+
+### Nächste Qualitätsstufe (Welle E — echte Feld-Schemas)
+
+Die bisherige Migration hat generische `DomainOut(extra="allow")`-Schemas verwendet.
+Welle E ersetzt diese durch echte, vollständig dokumentierte Feld-Schemas — priorisiert nach fachlicher Bedeutung:
+
+| Priorität | Datei | Begründung |
 |---|---|---|
-| Baseline (2026-05-28) | 1451 | Messung |
-| Welle A | 1200 | process_kernel_api.py, compat.py |
-| Welle B | 1000 | einkauf_bestellvorschlag.py, admin_mobile.py, external_agent_integrations.py |
-| Welle C | 800 | personal.py, agents.py, weitere Fachdomänen |
-| Welle D | 500 | Finance, Agrar, Sales |
-| Ziel | 0 | Vollständige Typisierung |
+| 1 | `harvest_acceptance.py` | Kernprozess Ernte-Annahme |
+| 2 | `agrar_settlements.py` | Abrechnung / Gutschrift |
+| 3 | `sales_orders.py`, `sales_invoice_einvoice.py` | Verkauf / E-Rechnung |
+| 4 | Finance-Domäne (journal_entries, financial_reports) | GoBD-Relevanz |
+| 5 | `compat.py` Domain-Gruppen | PurchaseOrderOut → echte Felder |
+
+**Fortschritt verfolgen:** `python scripts/check_weak_response_models.py --strict` bleibt Null.
+Welle-E-Schemas in `app/api/v1/schemas/<domain>.py` anlegen (nicht inline im Endpoint).
 
 Bei jeder Welle: Threshold in `check_weak_response_models.py` senken.
