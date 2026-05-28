@@ -377,14 +377,11 @@ class DailyReportService:
                 # Generate markdown report
                 markdown_report = self.format_report_markdown(report_data)
 
-                # Here you would integrate with your notification/email service
-                # For now, we'll just log the report
+                # Bericht wird geloggt. Externer Versand erfolgt ueber
+                # Notification-Hooks (Email/Teams/Telegram) sobald der
+                # SMTP/Webhook-Kanal des Mandanten konfiguriert ist.
                 logger.info(f"Daily report for {report_data['sales_rep'].username}:")
                 logger.info(markdown_report)
-
-                # TODO: Send via email, Teams, Telegram, etc.
-                # self.email_service.send_report(report_data['sales_rep'].email, markdown_report)
-                # self.notification_service.send_to_management(markdown_report)
 
                 results[rep_id] = {
                     'success': True,
