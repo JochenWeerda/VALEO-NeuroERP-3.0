@@ -15,7 +15,6 @@ from app.core.tenant_isolation_guard import TenantIsolationGuard
 from app.domains.operations.models import AgentContextDB
 
 from app.api.v1.schemas.base import BaseSchema
-from app.api.v1.schemas.base import CompatFlexOut
 from app.api.v1.schemas.agent_context_api_schemas import AgentContextApiOut
 
 

@@ -15,7 +15,6 @@ from app.core.tenant import get_tenant_id
 from app.services.atlas_customs_service import ATLASCustomsService
 
 from app.api.v1.schemas.base import BaseSchema
-from app.api.v1.schemas.base import CompatFlexOut
 from app.api.v1.schemas.atlas_zollausfuhr_schemas import AtlasZollausfuhrOut
 
 

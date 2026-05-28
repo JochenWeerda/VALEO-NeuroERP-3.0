@@ -9,7 +9,6 @@ from sqlalchemy import text
 from app.core.database import get_db
 
 from app.api.v1.schemas.base import BaseSchema
-from app.api.v1.schemas.base import CompatFlexOut
 from app.api.v1.schemas.prospecting_schemas import ProspectingOut
 
 

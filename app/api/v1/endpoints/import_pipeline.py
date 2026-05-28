@@ -19,7 +19,6 @@ from ....core.import_pipeline import (
 )
 
 from app.api.v1.schemas.base import BaseSchema
-from app.api.v1.schemas.base import CompatFlexOut
 
 
 router = APIRouter(prefix="/import-pipeline", tags=["import", "pipeline"])

@@ -22,7 +22,6 @@ from app.core.process_mining_application import build_process_mining_report_for_
 from app.core.tenant import get_tenant_id
 
 from app.api.v1.schemas.base import BaseSchema
-from app.api.v1.schemas.base import CompatFlexOut
 from app.api.v1.schemas.process_mining_api_schemas import ProcessMiningApiOut
 
 

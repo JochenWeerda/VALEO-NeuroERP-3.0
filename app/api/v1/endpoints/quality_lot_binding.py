@@ -16,7 +16,6 @@ from ....core.quality_lot_binding import (
 )
 
 from app.api.v1.schemas.base import BaseSchema
-from app.api.v1.schemas.base import CompatFlexOut
 
 
 router = APIRouter(prefix="/agrar/quality-lots", tags=["agrar", "quality"])

@@ -35,7 +35,6 @@ from app.infrastructure.models.futtermittel_models import GrundfutterAnalyse, Ra
 logger = logging.getLogger(__name__)
 
 from app.api.v1.schemas.base import BaseSchema
-from app.api.v1.schemas.base import CompatFlexOut
 from app.api.v1.schemas.grundfutter_analysen_schemas import GrundfutterAnalysenOut
 
 

@@ -19,7 +19,6 @@ from app.services.prompt_pack_registry import (
 )
 
 from app.api.v1.schemas.base import BaseSchema
-from app.api.v1.schemas.base import CompatFlexOut
 from app.api.v1.schemas.neuro_prompt_packs_schemas import NeuroPromptPacksOut
 
 

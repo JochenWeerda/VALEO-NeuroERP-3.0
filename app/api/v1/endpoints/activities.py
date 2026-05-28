@@ -14,7 +14,6 @@ from ..schemas.base import PaginatedResponse
 from ..schemas.crm import Activity, ActivityCreate, ActivityUpdate
 
 from app.api.v1.schemas.base import BaseSchema
-from app.api.v1.schemas.base import CompatFlexOut
 from app.api.v1.schemas.activities_schemas import ActivitiesOut
 
 

@@ -26,7 +26,6 @@ from app.core.dependencies import get_tenant_id
 from app.core.uuid7 import uuid7
 
 from app.api.v1.schemas.base import BaseSchema
-from app.api.v1.schemas.base import CompatFlexOut
 from app.api.v1.schemas.fibu_zahlungsmeldungen_schemas import FibuZahlungsmeldungenOut
 
 

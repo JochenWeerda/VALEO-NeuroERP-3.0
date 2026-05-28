@@ -16,7 +16,6 @@ from app.core.tenant import get_tenant_id
 from app.services.eric_submission_service import ERICSubmissionService
 
 from app.api.v1.schemas.base import BaseSchema
-from app.api.v1.schemas.base import CompatFlexOut
 from app.api.v1.schemas.ebilanz_elster_schemas import EbilanzElsterOut
 
 

@@ -14,7 +14,6 @@ from app.core.database import get_db
 from app.repositories.blockchain_anchor_repository import BlockchainAnchorRepository
 
 from app.api.v1.schemas.base import BaseSchema
-from app.api.v1.schemas.base import CompatFlexOut
 from app.api.v1.schemas.blockchain_runtime_schemas import BlockchainRuntimeOut
 
 

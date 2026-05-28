@@ -18,7 +18,6 @@ from app.core.tenant import get_tenant_id
 logger = logging.getLogger(__name__)
 
 from app.api.v1.schemas.base import BaseSchema
-from app.api.v1.schemas.base import CompatFlexOut
 from app.api.v1.schemas.accounting_periods_schemas import AccountingPeriodsOut
 
 

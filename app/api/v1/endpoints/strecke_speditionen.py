@@ -16,7 +16,6 @@ from app.core.database import get_db
 from app.domains.operations.repository import SpeditionFrachttarifRepository
 
 from app.api.v1.schemas.base import BaseSchema
-from app.api.v1.schemas.base import CompatFlexOut
 from app.api.v1.schemas.strecke_speditionen_schemas import StreckeSpeditionenOut
 
 

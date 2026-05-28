@@ -29,7 +29,6 @@ from modules.agrar.services.self_billing_service import (
 from modules.agrar.repositories.self_billing_repo import SelfBillingRepositoryImpl
 
 from app.api.v1.schemas.base import BaseSchema
-from app.api.v1.schemas.base import CompatFlexOut
 from app.api.v1.schemas.self_billing_schemas import SelfBillingOut
 
 

@@ -16,7 +16,6 @@ from app.core.supply_chain_blockchain import (
 from app.core.supply_chain_tracking import LieferkettenPhase, TrackingStatusGesamtlage, TransportModus
 
 from app.api.v1.schemas.base import BaseSchema
-from app.api.v1.schemas.base import CompatFlexOut
 from app.api.v1.schemas.supply_chain_blockchain_schemas import SupplyChainBlockchainOut
 
 

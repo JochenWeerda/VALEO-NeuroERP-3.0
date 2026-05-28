@@ -26,7 +26,6 @@ from ....core.scheduler_heartbeat import HeartbeatHealthResult, SchedulerNodeSta
 from ....core.scheduler_recovery import build_scheduler_runtime_component
 from ....services.scheduler_service import get_scheduler_status
 from app.api.v1.schemas.base import BaseSchema
-from app.api.v1.schemas.base import CompatFlexOut
 from app.api.v1.schemas.runtime_operations_schemas import RuntimeOperationsOut
 
 

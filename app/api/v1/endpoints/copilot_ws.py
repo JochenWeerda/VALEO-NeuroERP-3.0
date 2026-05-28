@@ -16,7 +16,6 @@ from app.auth.jwt import decode_token
 from app.core.config import settings
 
 from app.api.v1.schemas.base import BaseSchema
-from app.api.v1.schemas.base import CompatFlexOut
 
 
 router = APIRouter(tags=["neuro-core", "copilot"])

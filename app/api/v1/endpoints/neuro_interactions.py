@@ -14,7 +14,6 @@ from app.services.interaction_state_manager import (
 )
 
 from app.api.v1.schemas.base import BaseSchema
-from app.api.v1.schemas.base import CompatFlexOut
 from app.api.v1.schemas.neuro_interactions_schemas import NeuroInteractionsOut
 
 

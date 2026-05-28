@@ -11,7 +11,6 @@ from app.core.tenant import get_tenant_id
 from app.services.consent_engine import check_consent, grant_consent, revoke_consent, get_consent_status
 
 from app.api.v1.schemas.base import BaseSchema
-from app.api.v1.schemas.base import CompatFlexOut
 from app.api.v1.schemas.neuro_consent_schemas import NeuroConsentOut
 
 

@@ -16,7 +16,6 @@ from app.documents.router_helpers import get_repository, save_to_store, get_from
 
 logger = logging.getLogger(__name__)
 from app.api.v1.schemas.base import BaseSchema
-from app.api.v1.schemas.base import CompatFlexOut
 from app.api.v1.schemas.credit_debit_memos_schemas import CreditDebitMemosOut
 
 

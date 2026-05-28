@@ -18,7 +18,6 @@ from app.domains.verladung.repository import (
 )
 
 from app.api.v1.schemas.base import BaseSchema
-from app.api.v1.schemas.base import CompatFlexOut
 
 
 router = APIRouter(prefix="/tours", tags=["Verladung", "Tours"])

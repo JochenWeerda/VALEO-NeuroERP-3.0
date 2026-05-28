@@ -14,7 +14,6 @@ from app.agents.neuro_planner import generate_plan, verify_plan
 from app.agents.neuro_pipeline import run_pipeline
 
 from app.api.v1.schemas.base import BaseSchema
-from app.api.v1.schemas.base import CompatFlexOut
 from app.api.v1.schemas.neuro_pipeline_schemas import NeuroPipelineOut
 
 

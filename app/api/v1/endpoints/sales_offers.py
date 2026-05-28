@@ -18,7 +18,6 @@ from ....services.customer_sales_eligibility import assert_customer_allowed_for_
 from ..schemas.base import PaginatedResponse
 
 from app.api.v1.schemas.base import BaseSchema
-from app.api.v1.schemas.base import CompatFlexOut
 from app.api.v1.schemas.sales_offers_schemas import SalesOffersOut
 
 

@@ -19,7 +19,6 @@ from ....core.database import get_db
 logger = logging.getLogger(__name__)
 
 from app.api.v1.schemas.base import BaseSchema
-from app.api.v1.schemas.base import CompatFlexOut
 
 
 router = APIRouter(prefix="/auto-matching", tags=["finance", "bank", "matching"])

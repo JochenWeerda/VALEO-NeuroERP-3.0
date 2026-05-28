@@ -21,7 +21,6 @@ from app.core.agent_command_manifest import build_agent_command_manifest
 from app.core.ui_density_manifest import build_ui_density_manifest
 
 from app.api.v1.schemas.base import BaseSchema
-from app.api.v1.schemas.base import CompatFlexOut
 from app.api.v1.schemas.command_catalog_schemas import CommandCatalogOut
 
 

@@ -12,7 +12,6 @@ from app.core.database import get_db
 from app.domains.operations.models import Projekt, ProjektAufgabe, ProjektStatus
 
 from app.api.v1.schemas.base import BaseSchema
-from app.api.v1.schemas.base import CompatFlexOut
 from app.api.v1.schemas.projekte_schemas import ProjekteOut
 
 

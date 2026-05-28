@@ -30,7 +30,6 @@ from modules.agrar.services.quality_protocol_service import (
 from modules.agrar.repositories.quality_protocol_repo import QualityProtocolRepositoryImpl
 
 from app.api.v1.schemas.base import BaseSchema
-from app.api.v1.schemas.base import CompatFlexOut
 
 
 router = APIRouter()

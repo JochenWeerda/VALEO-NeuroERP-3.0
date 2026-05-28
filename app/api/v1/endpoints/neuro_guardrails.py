@@ -9,7 +9,6 @@ from app.services.guardrails import check_input, sanitize_output
 from app.services.pii_detector import detect_pii, mask_irreversible, mask_reversible, scan_dict
 
 from app.api.v1.schemas.base import BaseSchema
-from app.api.v1.schemas.base import CompatFlexOut
 from app.api.v1.schemas.neuro_guardrails_schemas import NeuroGuardrailsOut
 
 

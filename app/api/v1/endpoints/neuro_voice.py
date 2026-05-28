@@ -8,7 +8,6 @@ from pydantic import BaseModel, Field
 from app.services.voice_adapter import create_session, end_session, transcribe, synthesize
 
 from app.api.v1.schemas.base import BaseSchema
-from app.api.v1.schemas.base import CompatFlexOut
 from app.api.v1.schemas.neuro_voice_schemas import NeuroVoiceOut
 
 

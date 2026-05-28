@@ -19,7 +19,6 @@ from app.core.uuid7 import uuid7
 logger = logging.getLogger(__name__)
 
 from app.api.v1.schemas.base import BaseSchema
-from app.api.v1.schemas.base import CompatFlexOut
 from app.api.v1.schemas.vat_codes_schemas import VatCodesOut
 
 

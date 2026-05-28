@@ -17,7 +17,6 @@ from ..schemas.finance import (
 from ..schemas.base import PaginatedResponse
 
 from app.api.v1.schemas.base import BaseSchema
-from app.api.v1.schemas.base import CompatFlexOut
 from app.api.v1.schemas.accounts_schemas import AccountsOut
 
 

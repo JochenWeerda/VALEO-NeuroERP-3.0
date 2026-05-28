@@ -12,7 +12,6 @@ from sqlalchemy.orm import Session
 from app.core.database import get_db
 
 from app.api.v1.schemas.base import BaseSchema
-from app.api.v1.schemas.base import CompatFlexOut
 from app.api.v1.schemas.compliance_whistleblower_schemas import ComplianceWhistleblowerOut
 
 

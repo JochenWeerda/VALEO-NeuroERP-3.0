@@ -21,7 +21,6 @@ from app.core.config import settings
 from app.core.database import get_db
 
 from app.api.v1.schemas.base import BaseSchema
-from app.api.v1.schemas.base import CompatFlexOut
 from app.api.v1.schemas.gobd_archiv_schemas import GobdArchivOut
 
 

@@ -9,7 +9,6 @@ from fastapi import APIRouter, HTTPException, Query
 from app.core.terminology_registry import build_landhandel_terminology_registry
 
 from app.api.v1.schemas.base import BaseSchema
-from app.api.v1.schemas.base import CompatFlexOut
 from app.api.v1.schemas.terminology_schemas import TerminologyOut
 
 

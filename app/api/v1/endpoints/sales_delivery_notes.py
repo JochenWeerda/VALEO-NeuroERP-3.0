@@ -21,7 +21,6 @@ from app.services.kontrakt_movement_sync import sync_movements_for_delivery_note
 from app.services.sales_posting_service import SalesPostingService
 
 from app.api.v1.schemas.base import BaseSchema
-from app.api.v1.schemas.base import CompatFlexOut
 from app.api.v1.schemas.sales_delivery_notes_schemas import SalesDeliveryNotesOut
 
 

@@ -7,7 +7,6 @@ from fastapi import APIRouter, Query
 from app.infrastructure.eventbus.observability import event_bus_observer
 
 from app.api.v1.schemas.base import BaseSchema
-from app.api.v1.schemas.base import CompatFlexOut
 from app.api.v1.schemas.neuro_event_monitoring_schemas import NeuroEventMonitoringOut
 
 

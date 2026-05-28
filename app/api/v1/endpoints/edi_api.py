@@ -16,7 +16,6 @@ from app.core.edi_integration import (
 from app.domains.operations.models import EdiNachrichtDB, EdiPartnerDB
 
 from app.api.v1.schemas.base import BaseSchema
-from app.api.v1.schemas.base import CompatFlexOut
 from app.api.v1.schemas.edi_api_schemas import EdiApiOut
 
 

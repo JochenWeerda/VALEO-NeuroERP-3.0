@@ -16,7 +16,6 @@ from app.services.number_range_service import NumberRangeService
 logger = logging.getLogger(__name__)
 
 from app.api.v1.schemas.base import BaseSchema
-from app.api.v1.schemas.base import CompatFlexOut
 from app.api.v1.schemas.number_ranges_schemas import NumberRangesOut
 
 

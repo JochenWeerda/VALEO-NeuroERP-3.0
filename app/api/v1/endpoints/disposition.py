@@ -111,7 +111,6 @@ async def get_disposition_stats(db: Session = Depends(get_db)) -> dict:
 
 # --------------- Pydantic Schemas ---------------
 from pydantic import BaseModel
-from app.api.v1.schemas.base import CompatFlexOut
 from app.api.v1.schemas.disposition_schemas import DispositionOut
 
 

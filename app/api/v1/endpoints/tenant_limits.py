@@ -13,7 +13,6 @@ from app.core.tenant_rate_limits import (
 )
 
 from app.api.v1.schemas.base import BaseSchema
-from app.api.v1.schemas.base import CompatFlexOut
 from app.api.v1.schemas.tenant_limits_schemas import TenantLimitsOut
 
 

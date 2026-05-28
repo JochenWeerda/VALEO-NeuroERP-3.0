@@ -90,7 +90,6 @@ async def get_zertifikate_stats(db: Session = Depends(get_db)) -> dict:
 
 # --------------- Pydantic Schemas ---------------
 from pydantic import BaseModel
-from app.api.v1.schemas.base import CompatFlexOut
 from app.api.v1.schemas.zertifikate_schemas import ZertifikateOut
 from datetime import date
 

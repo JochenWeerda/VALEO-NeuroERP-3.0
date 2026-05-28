@@ -12,7 +12,6 @@ from ....integrations import crm_core_client
 from ..schemas.crm import ContactCreate, ContactUpdate
 
 from app.api.v1.schemas.base import BaseSchema
-from app.api.v1.schemas.base import CompatFlexOut
 from app.api.v1.schemas.contacts_schemas import ContactsOut
 
 

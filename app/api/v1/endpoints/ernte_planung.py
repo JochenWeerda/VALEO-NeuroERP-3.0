@@ -15,7 +15,6 @@ from app.core.database import get_db
 from app.domains.operations.models import ErnteDB
 
 from app.api.v1.schemas.base import BaseSchema
-from app.api.v1.schemas.base import CompatFlexOut
 from app.api.v1.schemas.ernte_planung_schemas import ErntePlanungOut
 
 

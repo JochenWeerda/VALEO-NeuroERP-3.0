@@ -19,7 +19,6 @@ from app.core.projection_consumer import (
 )
 
 from app.api.v1.schemas.base import BaseSchema
-from app.api.v1.schemas.base import CompatFlexOut
 from app.api.v1.schemas.projection_consumer_schemas import ProjectionConsumerOut
 
 

@@ -14,7 +14,6 @@ from app.core.price_hedge import HedgeTyp, TerminmarktProdukt, berechne_hedge_qu
 from app.domains.operations.models import HedgeReferenceDB
 
 from app.api.v1.schemas.base import BaseSchema
-from app.api.v1.schemas.base import CompatFlexOut
 from app.api.v1.schemas.price_hedge_api_schemas import PriceHedgeApiOut
 
 

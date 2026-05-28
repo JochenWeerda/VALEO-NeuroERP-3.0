@@ -40,7 +40,6 @@ def _validate_iban(iban: Optional[str]) -> None:
         raise HTTPException(status_code=400, detail="IBAN: Prüfziffer ungültig (Mod-97).")
 
 from app.api.v1.schemas.base import BaseSchema
-from app.api.v1.schemas.base import CompatFlexOut
 from app.api.v1.schemas.bank_accounts_schemas import BankAccountsOut
 
 
