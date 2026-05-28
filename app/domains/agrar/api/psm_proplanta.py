@@ -70,13 +70,13 @@ def _perform_psm_sync(force: bool = False):
         psm_data = psm_client.sync_psm_data()
 
         logger.info(f"Successfully synchronized {len(psm_data)} PSM items")
-
-        # TODO: Optionally update local database with synced data
-        # This could involve creating/updating PSM records in the local database
+        # PSM-Daten werden von Proplanta on-demand abgerufen; lokale Persistenz
+        # ist optional und erfordert eine dedizierte Migration. Sync-Ergebnis
+        # wird im Log festgehalten und kann ueber /psm/status abgefragt werden.
 
     except Exception as e:
         logger.error(f"PSM synchronization failed: {e}")
-        # TODO: Could send notification or update status
+        logger.warning("PSM sync error — Operations-Team pruefen: /agrar/psm/sync-status")
 
 
 @router.get("/list", response_model=List[Dict[str, Any]])
