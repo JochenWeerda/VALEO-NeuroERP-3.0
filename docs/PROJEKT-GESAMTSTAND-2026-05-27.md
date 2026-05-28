@@ -160,16 +160,16 @@ Voice-Provider: Whisper / Azure / OpenAI TTS konfigurierbar, Browser-Fallback.
 
 ---
 
-## 7. Offene Punkte (Stand 2026-05-27)
+## 7. Offene Punkte (Stand 2026-05-28)
 
 | Slice | Beschreibung | Priorität | Status |
 |---|---|---|---|
 | **Slice-006** | XRechnung/ZUGFeRD-Generierung für B2B-Verkaufsrechnungen (E-Rechnung 2025 B2B-Pflicht) | **P1** | ✅ abgeschlossen (Commit `08d64eff4`, 2026-05-27) |
-| Slice-007 | Ctrl+K Universal Command Palette | P2 | offen |
-| Slice-008 | DSGVO Art. 30 Verarbeitungsverzeichnis automatisiert | P2 | offen |
-| Slice-009 | DSGVO Art. 33 Datenpannen-Meldeprozess (workflow) | P2 | offen |
-| Slice-010 | Voice-Intent für Lager/Einkauf/HR ausbauen | P3 | offen |
-| Slice-011 | Meridian-Fachseiten-Hardcolors (Folgeslices) | P3 | offen |
+| Slice-007 | Ctrl+K Universal Command Palette | P2 | ✅ abgeschlossen — `components/navigation/CommandPalette.tsx` + AppShell, Ctrl+K via `useFeature('commandPalette')` |
+| Slice-008 | DSGVO Art. 30 Verarbeitungsverzeichnis automatisiert | P2 | ✅ abgeschlossen — `gdpr_art30_ropa.py` + `test_gdpr_art30_ropa.py` (83% Coverage) |
+| Slice-009 | DSGVO Art. 33 Datenpannen-Meldeprozess (workflow) | P2 | ✅ abgeschlossen — `gdpr_art33_breach.py` + `test_gdpr_art33_breach.py` (97% Coverage) |
+| Slice-010 | Voice-Intent für Lager/Einkauf/HR ausbauen | P3 | ✅ abgeschlossen — `ActionDispatchContext.tsx` Lager/Einkauf/HR-Intents, `test_voice_intent_lager_einkauf_hr.py` |
+| Slice-011 | Meridian-Fachseiten-Hardcolors (Folgeslices) | P3 | ✅ abgeschlossen — DESIGN-MERIDIAN-HARDCOLORS-011 bis 014 (alle 2026-05-27) |
 
 ### Externe / nicht repo-seitig lösbar
 

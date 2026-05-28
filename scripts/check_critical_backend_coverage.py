@@ -55,6 +55,23 @@ CRITICAL_THRESHOLDS: dict[str, float] = {
 
     # ── Neue Pfade (COV-RATCHET-004 / DOMAIN-PARITY-COV-001) ─────────────────
     "api/v1/endpoints/strecke.py": 0.18,            #  ~22% estimated — Streckenhandel
+
+    # ── Wave 2026-05-17b: Agrar/Compliance/Finance-Erweiterungen ──────────────
+    "api/v1/endpoints/gdpr_art30_ropa.py": 0.80,    #  83% measured — DSGVO Art. 30 ROPA
+    "api/v1/endpoints/gdpr_art33_breach.py": 0.94,  #  97% measured — DSGVO Art. 33 Datenpanne
+    "api/v1/endpoints/genossenschaft.py": 0.58,     #  61% measured — Genossenschaftsverwaltung
+    "api/v1/endpoints/intrastat.py": 0.57,          #  60% measured — EU Intrastat
+    "api/v1/endpoints/gelangensbestaetigung.py": 0.57,  #  60% measured — §17a UStDV
+    "api/v1/endpoints/gs1_barcode.py": 0.63,        #  66% measured — GS1 Barcode Parse
+    "api/v1/endpoints/kontrakt_hedging.py": 0.74,   #  77% measured — MATIF Hedging
+    "api/v1/endpoints/kontrakt_klassen.py": 0.75,   #  78% measured — Kontraktklassen
+    "api/v1/endpoints/price_calculation.py": 0.83,  #  86% measured — Preiskalkulation
+    "api/v1/endpoints/sanctions_compliance.py": 0.66,  #  69% measured — Sanktionsliste
+    "api/v1/endpoints/webhook_system.py": 0.61,     #  64% measured — Webhook-System
+    "api/v1/endpoints/erechnung_import.py": 0.78,   #  81% measured — E-Rechnung Import
+    "api/v1/endpoints/sales_invoice_einvoice.py": 0.30,  #  33% measured — XRechnung/ZUGFeRD Export
+    "api/v1/endpoints/waagen_vorlagen.py": 0.50,    #  53% measured — Waagenvorlagen
+    "api/v1/endpoints/rohware_sammelabrechnung.py": 0.32,  #  35% measured — Sammelabrechnung
 }
 
 
