@@ -9,11 +9,7 @@ from typing import Any, Optional
 from app.services.compensation_engine import compensate, get_compensation_run
 
 from app.api.v1.schemas.base import BaseSchema
-from pydantic import ConfigDict as _ConfigDict
-
-
-class CompatFlexOut(BaseSchema):
-    model_config = _ConfigDict(extra="allow")
+from app.api.v1.schemas.base import CompatFlexOut
 
 
 router = APIRouter(prefix="/neuro/compensate", tags=["neuro-core", "compensation"])

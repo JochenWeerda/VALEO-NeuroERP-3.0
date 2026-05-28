@@ -21,11 +21,7 @@ from app.core.agent_command_manifest import build_agent_command_manifest
 from app.core.ui_density_manifest import build_ui_density_manifest
 
 from app.api.v1.schemas.base import BaseSchema
-from pydantic import ConfigDict as _ConfigDict
-
-
-class CompatFlexOut(BaseSchema):
-    model_config = _ConfigDict(extra="allow")
+from app.api.v1.schemas.base import CompatFlexOut
 
 
 router = APIRouter(prefix="/commands", tags=["commands", "process-kernel"])

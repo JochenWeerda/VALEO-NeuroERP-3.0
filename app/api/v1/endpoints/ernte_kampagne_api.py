@@ -13,11 +13,7 @@ from app.core.ernte_kampagne import ErnteArt
 from app.domains.operations.models import ErnteKampagneDB
 
 from app.api.v1.schemas.base import BaseSchema
-from pydantic import ConfigDict as _ConfigDict
-
-
-class CompatFlexOut(BaseSchema):
-    model_config = _ConfigDict(extra="allow")
+from app.api.v1.schemas.base import CompatFlexOut
 
 
 router = APIRouter(prefix="/ernte-kampagnen", tags=["ernte-kampagnen"])

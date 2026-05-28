@@ -11,11 +11,7 @@ from app.core.tenant import get_tenant_id
 from app.services.consent_engine import check_consent, grant_consent, revoke_consent, get_consent_status
 
 from app.api.v1.schemas.base import BaseSchema
-from pydantic import ConfigDict as _ConfigDict
-
-
-class CompatFlexOut(BaseSchema):
-    model_config = _ConfigDict(extra="allow")
+from app.api.v1.schemas.base import CompatFlexOut
 
 
 router = APIRouter(prefix="/neuro/consent", tags=["neuro-core", "consent", "dsgvo"])

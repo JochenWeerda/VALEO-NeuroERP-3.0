@@ -10,11 +10,7 @@ from app.core.tenant import get_tenant_id
 from app.services.neuro_simulation_engine import simulate_dry_run, simulate_what_if, get_simulation_result
 
 from app.api.v1.schemas.base import BaseSchema
-from pydantic import ConfigDict as _ConfigDict
-
-
-class CompatFlexOut(BaseSchema):
-    model_config = _ConfigDict(extra="allow")
+from app.api.v1.schemas.base import CompatFlexOut
 
 
 router = APIRouter(prefix="/neuro/simulate", tags=["neuro-core", "simulation"])

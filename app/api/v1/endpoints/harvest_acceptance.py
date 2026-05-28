@@ -30,11 +30,7 @@ from app.infrastructure.models import (
 from app.domains.inventory.api.inventory_auth import require_inventory_admin
 
 from app.api.v1.schemas.base import BaseSchema
-from pydantic import ConfigDict as _ConfigDict
-
-
-class CompatFlexOut(BaseSchema):
-    model_config = _ConfigDict(extra="allow")
+from app.api.v1.schemas.base import CompatFlexOut
 
 
 router = APIRouter()

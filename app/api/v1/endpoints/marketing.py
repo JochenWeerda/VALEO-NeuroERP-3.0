@@ -10,11 +10,6 @@ from app.core.database import get_db
 from app.domains.operations.models import MarketingKampagneEntry
 
 from app.api.v1.schemas.base import BaseSchema
-from pydantic import ConfigDict as _ConfigDict
-
-
-class CompatFlexOut(BaseSchema):
-    model_config = _ConfigDict(extra="allow")
 
 
 router = APIRouter(prefix="/marketing", tags=["Marketing"])
@@ -112,6 +107,7 @@ async def get_kampagne_kpis(kampagne_id: int, db: Session = Depends(get_db)) -> 
 
 # --------------- Pydantic Schemas ---------------
 from pydantic import BaseModel
+from app.api.v1.schemas.base import CompatFlexOut
 from datetime import date
 
 

@@ -33,11 +33,7 @@ from app.finance.tax_resolver import resolve_partner_country, resolve_tax_key_ac
 logger = logging.getLogger(__name__)
 
 from app.api.v1.schemas.base import BaseSchema
-from pydantic import ConfigDict as _ConfigDict
-
-
-class CompatFlexOut(BaseSchema):
-    model_config = _ConfigDict(extra="allow")
+from app.api.v1.schemas.base import CompatFlexOut
 
 
 router = APIRouter(prefix="/finance/invoices", tags=["finance", "invoices"])

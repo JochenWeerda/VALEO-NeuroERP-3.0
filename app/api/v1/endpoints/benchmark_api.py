@@ -21,11 +21,7 @@ from app.core.process_mining_application import build_process_mining_benchmark_r
 from app.domains.operations.models import BetriebsKennzahlDB
 
 from app.api.v1.schemas.base import BaseSchema
-from pydantic import ConfigDict as _ConfigDict
-
-
-class CompatFlexOut(BaseSchema):
-    model_config = _ConfigDict(extra="allow")
+from app.api.v1.schemas.base import CompatFlexOut
 
 
 router = APIRouter(prefix="/benchmark", tags=["benchmark"])

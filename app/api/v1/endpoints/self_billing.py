@@ -29,11 +29,7 @@ from modules.agrar.services.self_billing_service import (
 from modules.agrar.repositories.self_billing_repo import SelfBillingRepositoryImpl
 
 from app.api.v1.schemas.base import BaseSchema
-from pydantic import ConfigDict as _ConfigDict
-
-
-class CompatFlexOut(BaseSchema):
-    model_config = _ConfigDict(extra="allow")
+from app.api.v1.schemas.base import CompatFlexOut
 
 
 router = APIRouter()

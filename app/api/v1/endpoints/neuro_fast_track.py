@@ -8,11 +8,7 @@ from pydantic import BaseModel, Field
 from app.services.fast_track import classify_request, is_fast_track, FAST_TRACK_WHITELIST
 
 from app.api.v1.schemas.base import BaseSchema
-from pydantic import ConfigDict as _ConfigDict
-
-
-class CompatFlexOut(BaseSchema):
-    model_config = _ConfigDict(extra="allow")
+from app.api.v1.schemas.base import CompatFlexOut
 
 
 router = APIRouter(prefix="/neuro/fast-track", tags=["neuro-core", "fast-track"])

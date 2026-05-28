@@ -20,11 +20,7 @@ from app.core.tenant import get_tenant_id
 from app.core.fibu_audit import log_fibu_audit
 
 from app.api.v1.schemas.base import BaseSchema
-from pydantic import ConfigDict as _ConfigDict
-
-
-class CompatFlexOut(BaseSchema):
-    model_config = _ConfigDict(extra="allow")
+from app.api.v1.schemas.base import CompatFlexOut
 
 
 router = APIRouter(prefix="/lohn-connector", tags=["finance", "lohn", "connectors"])

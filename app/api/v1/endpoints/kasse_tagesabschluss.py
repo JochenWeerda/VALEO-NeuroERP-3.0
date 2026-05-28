@@ -17,11 +17,7 @@ from app.core.tenant import get_tenant_id
 
 
 from app.api.v1.schemas.base import BaseSchema
-from pydantic import ConfigDict as _ConfigDict
-
-
-class CompatFlexOut(BaseSchema):
-    model_config = _ConfigDict(extra="allow")
+from app.api.v1.schemas.base import CompatFlexOut
 
 
 router = APIRouter(prefix="/kasse/tagesabschluss", tags=["Kasse - Tagesabschluss"])

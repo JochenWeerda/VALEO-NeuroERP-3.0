@@ -12,11 +12,7 @@ from modules.agrar.contracts.hooks_v1 import agrar_hooks_as_dict
 from modules.bootstrap import initialize_module_registry
 
 from app.api.v1.schemas.base import BaseSchema
-from pydantic import ConfigDict as _ConfigDict
-
-
-class CompatFlexOut(BaseSchema):
-    model_config = _ConfigDict(extra="allow")
+from app.api.v1.schemas.base import CompatFlexOut
 
 
 router = APIRouter(tags=["modules"])

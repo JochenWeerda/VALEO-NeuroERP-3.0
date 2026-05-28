@@ -49,6 +49,7 @@ from app.services.portal_compat_service import PortalCompatService
 
 from app.api.v1.schemas.base import BaseSchema, StatusResponse
 from pydantic import ConfigDict as _ConfigDict
+from app.api.v1.schemas.base import CompatFlexOut
 
 
 # ---------------------------------------------------------------------------
@@ -129,10 +130,6 @@ class NewsletterOut(BaseSchema):
     typ: str = ""
     status: str = ""
     hinweis: str = ""
-
-
-class CompatFlexOut(BaseSchema):
-    model_config = _ConfigDict(extra="allow")
 
 
 
