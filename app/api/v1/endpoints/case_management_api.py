@@ -21,6 +21,14 @@ from app.services.case_management import (
     check_and_escalate_overdue,
 )
 
+from app.api.v1.schemas.base import BaseSchema
+from pydantic import ConfigDict as _ConfigDict
+
+
+class CaseManagementOut(BaseSchema):
+    model_config = _ConfigDict(extra="allow")
+
+
 router = APIRouter(prefix="/neuro/cases", tags=["neuro-core", "case-management"])
 
 
@@ -47,7 +55,7 @@ class ListQuery(BaseModel):
 
 
 @router.get("/", summary="All auflisten",
-    response_model=dict
+    response_model=CaseManagementOut
 )
 async def list_all(
     status: Optional[str] = None,
@@ -64,7 +72,7 @@ async def list_all(
 
 
 @router.get("/dashboard", summary="Dashboard",
-    response_model=dict
+    response_model=CaseManagementOut
 )
 async def dashboard(
     tenant_id: str = Depends(get_tenant_id),
@@ -74,7 +82,7 @@ async def dashboard(
 
 
 @router.get("/{case_id}", summary="Single abrufen",
-    response_model=dict
+    response_model=CaseManagementOut
 )
 async def get_single(case_id: str):
     """Einzelnen Case abrufen."""
@@ -85,7 +93,7 @@ async def get_single(case_id: str):
 
 
 @router.post("/{case_id}/assign", summary="Zuweisen",
-    response_model=dict
+    response_model=CaseManagementOut
 )
 async def assign(case_id: str, request: AssignRequest):
     """Case einem Benutzer zuweisen."""
@@ -96,7 +104,7 @@ async def assign(case_id: str, request: AssignRequest):
 
 
 @router.post("/{case_id}/decide", summary="Decide",
-    response_model=dict
+    response_model=CaseManagementOut
 )
 async def decide(case_id: str, request: DecideRequest):
     """Case entscheiden (genehmigen/ablehnen)."""
@@ -108,7 +116,7 @@ async def decide(case_id: str, request: DecideRequest):
 
 
 @router.post("/{case_id}/escalate", summary="Escalate",
-    response_model=dict
+    response_model=CaseManagementOut
 )
 async def escalate(case_id: str, request: EscalateRequest):
     """Case eskalieren."""
@@ -119,7 +127,7 @@ async def escalate(case_id: str, request: EscalateRequest):
 
 
 @router.post("/{case_id}/close", summary="Abschließen",
-    response_model=dict
+    response_model=CaseManagementOut
 )
 async def close(case_id: str):
     """Case schliessen."""
@@ -130,7 +138,7 @@ async def close(case_id: str):
 
 
 @router.post("/escalate-overdue", summary="Overdue escalate",
-    response_model=dict
+    response_model=CaseManagementOut
 )
 async def escalate_overdue():
     """Alle ueberfaelligen Cases automatisch eskalieren."""

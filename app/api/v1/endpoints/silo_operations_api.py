@@ -11,6 +11,14 @@ from sqlalchemy.orm import Session
 from app.core.database import get_db
 from app.domains.operations.models import SiloBewegungDB, SiloZelleDB
 
+from app.api.v1.schemas.base import BaseSchema
+from pydantic import ConfigDict as _ConfigDict
+
+
+class CompatFlexOut(BaseSchema):
+    model_config = _ConfigDict(extra="allow")
+
+
 router = APIRouter(prefix="/silo", tags=["silo-operations"])
 
 
@@ -48,7 +56,7 @@ def _zelle_to_dict(row: SiloZelleDB) -> dict:
 
 
 @router.post("/zellen", status_code=201, summary="Silo zelle anlegen",
-    response_model=dict
+    response_model=CompatFlexOut
 )
 def create_silo_zelle(req: SiloZelleCreateRequest, db: Session = Depends(get_db)):
     row = SiloZelleDB(
@@ -65,7 +73,7 @@ def create_silo_zelle(req: SiloZelleCreateRequest, db: Session = Depends(get_db)
 
 
 @router.get("/zellen/{zelle_id}", summary="Silo zelle abrufen",
-    response_model=dict
+    response_model=CompatFlexOut
 )
 def get_silo_zelle(zelle_id: str, db: Session = Depends(get_db)):
     row = db.query(SiloZelleDB).filter(SiloZelleDB.silo_id == zelle_id).first()
@@ -75,7 +83,7 @@ def get_silo_zelle(zelle_id: str, db: Session = Depends(get_db)):
 
 
 @router.get("/by-tenant/{tenant_id}", summary="Zellen auflisten",
-    response_model=list
+    response_model=list[CompatFlexOut]
 )
 def list_zellen(tenant_id: str, db: Session = Depends(get_db)):
     rows = db.query(SiloZelleDB).filter(SiloZelleDB.tenant_id == tenant_id).all()
@@ -83,7 +91,7 @@ def list_zellen(tenant_id: str, db: Session = Depends(get_db)):
 
 
 @router.post("/einlagern", status_code=201, summary="Einlagern",
-    response_model=dict
+    response_model=CompatFlexOut
 )
 def einlagern(req: EinlagerungRequest, db: Session = Depends(get_db)):
     zelle = db.query(SiloZelleDB).filter(
@@ -113,7 +121,7 @@ def einlagern(req: EinlagerungRequest, db: Session = Depends(get_db)):
 
 
 @router.post("/auslagern", status_code=201, summary="Auslagern",
-    response_model=dict
+    response_model=CompatFlexOut
 )
 def auslagern(req: AuslagerungRequest, db: Session = Depends(get_db)):
     zelle = db.query(SiloZelleDB).filter(
@@ -139,7 +147,7 @@ def auslagern(req: AuslagerungRequest, db: Session = Depends(get_db)):
 
 
 @router.get("/bestand/{tenant_id}", summary="Bestand abrufen",
-    response_model=dict
+    response_model=CompatFlexOut
 )
 def get_bestand(tenant_id: str, db: Session = Depends(get_db)):
     rows = db.query(SiloZelleDB).filter(SiloZelleDB.tenant_id == tenant_id).all()

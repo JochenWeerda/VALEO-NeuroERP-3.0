@@ -1,4 +1,4 @@
-"""
+﻿"""
 CRM activity endpoints proxied via crm-core.
 """
 
@@ -12,6 +12,14 @@ from ....core.config import settings
 from ....integrations import crm_core_client
 from ..schemas.base import PaginatedResponse
 from ..schemas.crm import Activity, ActivityCreate, ActivityUpdate
+
+from app.api.v1.schemas.base import BaseSchema
+from pydantic import ConfigDict as _ConfigDict
+
+
+class CompatFlexOut(BaseSchema):
+    model_config = _ConfigDict(extra="allow")
+
 
 router = APIRouter()
 
@@ -159,7 +167,7 @@ async def update_activity(activity_id: str, payload: ActivityUpdate):
     return Activity.model_validate(_adapt_activity(updated))
 
 
-@router.delete("/{activity_id}", status_code=status.HTTP_204_NO_CONTENT, summary="Activity löschen",
+@router.delete("/{activity_id}", status_code=status.HTTP_204_NO_CONTENT, summary="Activity lÃ¶schen",
     response_model=None
 )
 async def delete_activity(activity_id: str):
@@ -205,7 +213,7 @@ async def replace_activity_main_topic(
     return str(updated[item_index])
 
 
-@router.delete("/{activity_id}/main-topics/{item_index}", status_code=status.HTTP_204_NO_CONTENT, summary="Activity main topic löschen",
+@router.delete("/{activity_id}/main-topics/{item_index}", status_code=status.HTTP_204_NO_CONTENT, summary="Activity main topic lÃ¶schen",
     response_model=None
 )
 async def delete_activity_main_topic(activity_id: str, item_index: int = Path(..., ge=0)):
@@ -247,7 +255,7 @@ async def replace_activity_order_placed(
     return str(updated[item_index])
 
 
-@router.delete("/{activity_id}/orders-placed/{item_index}", status_code=status.HTTP_204_NO_CONTENT, summary="Activity order placed löschen",
+@router.delete("/{activity_id}/orders-placed/{item_index}", status_code=status.HTTP_204_NO_CONTENT, summary="Activity order placed lÃ¶schen",
     response_model=None
 )
 async def delete_activity_order_placed(activity_id: str, item_index: int = Path(..., ge=0)):
@@ -257,14 +265,14 @@ async def delete_activity_order_placed(activity_id: str, item_index: int = Path(
     await _replace_list_field(activity_id, "orders_placed", items)
 
 
-@router.get("/{activity_id}/follow-up-actions", response_model=list[dict[str, Any] | str], summary="Activity follow up actions auflisten")
+@router.get("/{activity_id}/follow-up-actions", response_model=list[CompatFlexOut], summary="Activity follow up actions auflisten")
 async def list_activity_follow_up_actions(activity_id: str):
     return await _load_list_field(activity_id, "follow_up_actions")
 
 
 @router.post(
     "/{activity_id}/follow-up-actions",
-    response_model=dict[str, Any] | str,
+    response_model=CompatFlexOut | str,
     status_code=status.HTTP_201_CREATED,
     summary="Activity follow up action anlegen",
 )
@@ -275,7 +283,7 @@ async def create_activity_follow_up_action(activity_id: str, payload: _FollowUpA
     return updated[-1]
 
 
-@router.put("/{activity_id}/follow-up-actions/{item_index}", response_model=dict[str, Any] | str, summary="Activity follow up action replace")
+@router.put("/{activity_id}/follow-up-actions/{item_index}", response_model=CompatFlexOut | str, summary="Activity follow up action replace")
 async def replace_activity_follow_up_action(
     activity_id: str,
     payload: _FollowUpActionItem,
@@ -288,7 +296,7 @@ async def replace_activity_follow_up_action(
     return updated[item_index]
 
 
-@router.delete("/{activity_id}/follow-up-actions/{item_index}", status_code=status.HTTP_204_NO_CONTENT, summary="Activity follow up action löschen",
+@router.delete("/{activity_id}/follow-up-actions/{item_index}", status_code=status.HTTP_204_NO_CONTENT, summary="Activity follow up action lÃ¶schen",
     response_model=None
 )
 async def delete_activity_follow_up_action(activity_id: str, item_index: int = Path(..., ge=0)):
@@ -296,3 +304,4 @@ async def delete_activity_follow_up_action(activity_id: str, item_index: int = P
     _validate_item_index(items, item_index, "Follow-up action")
     del items[item_index]
     await _replace_list_field(activity_id, "follow_up_actions", items)
+

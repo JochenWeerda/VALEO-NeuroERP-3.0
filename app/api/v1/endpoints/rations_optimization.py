@@ -30,6 +30,15 @@ from pydantic import BaseModel
 
 logger = logging.getLogger(__name__)
 
+from app.api.v1.schemas.base import BaseSchema
+from pydantic import ConfigDict as _ConfigDict
+
+
+class RationsOptimizationOut(BaseSchema):
+    """Typed response schema for RationsOptimizationOut endpoints (extra fields forwarded)."""
+    model_config = _ConfigDict(extra="allow")
+
+
 router = APIRouter(tags=["agrar", "rations-optimization"])
 
 # Refactor 2026-04-23: HTTP-Proxy ausgelagert nach app.agrar.rations.http.proxy.
@@ -6510,7 +6519,7 @@ class _CompoundFeedParsed(BaseModel):
 # ---------------------------------------------------------------------------
 
 @router.get("/health", summary="Health rations",
-    response_model=dict
+    response_model=RationsOptimizationOut
 )
 async def rations_health():
     base_url = get_rations_base_url()
@@ -6535,7 +6544,7 @@ async def rations_health():
 
 
 @router.get("/feeds", summary="Feeds abrufen",
-    response_model=dict
+    response_model=RationsOptimizationOut
 )
 async def get_feeds(
     request: Request,
@@ -6594,7 +6603,7 @@ async def get_feeds(
 
 
 @router.get("/feeds/{feed_id}", summary="Feed abrufen",
-    response_model=dict
+    response_model=RationsOptimizationOut
 )
 async def get_feed(
     feed_id: str,
@@ -6612,7 +6621,7 @@ async def get_feed(
 
 
 @router.post("/optimize/from-profile", summary="From profile optimize",
-    response_model=dict
+    response_model=RationsOptimizationOut
 )
 async def optimize_from_profile(
     body: _OptimizeFromProfileBody,
@@ -6663,7 +6672,7 @@ async def optimize_from_profile(
 
 
 @router.post("/optimize/demo", summary="Demo optimize",
-    response_model=dict
+    response_model=RationsOptimizationOut
 )
 async def optimize_demo(
     request: Request,
@@ -6729,7 +6738,7 @@ async def optimize_demo(
 
 
 @router.post("/optimize", summary="Optimize",
-    response_model=dict
+    response_model=RationsOptimizationOut
 )
 async def optimize(
     request: Request,
@@ -6748,7 +6757,7 @@ async def optimize(
 
 
 @router.post("/requirements/calculate", summary="Requirements berechnen",
-    response_model=dict
+    response_model=RationsOptimizationOut
 )
 async def calculate_requirements(
     request: Request,
@@ -6780,7 +6789,7 @@ async def calculate_requirements(
 
 
 @router.post("/requirements/maintenance", summary="Requirements maintenance",
-    response_model=dict
+    response_model=RationsOptimizationOut
 )
 async def maintenance_requirements(
     request: Request,
@@ -6806,7 +6815,7 @@ async def maintenance_requirements(
 
 
 @router.post("/feeds/validate", summary="Feeds validieren",
-    response_model=dict
+    response_model=RationsOptimizationOut
 )
 async def validate_feeds(
     request: Request,
@@ -6820,7 +6829,7 @@ async def validate_feeds(
 
 
 @router.post("/dlg/strukturindex", summary="Strukturindex berechnen",
-    response_model=dict
+    response_model=RationsOptimizationOut
 )
 async def calculate_strukturindex(request: Request):
     """
@@ -6851,7 +6860,7 @@ async def calculate_strukturindex(request: Request):
 
 
 @router.get("/dlg/info", summary="Info dlg",
-    response_model=dict
+    response_model=RationsOptimizationOut
 )
 async def dlg_info():
     """DLG-Futterdatenbank-Status: Anzahl Einträge, Quelle, Aktualität."""
@@ -6889,7 +6898,7 @@ async def dlg_info():
 
 
 @router.post("/dlg/refresh", summary="Refresh dlg",
-    response_model=dict
+    response_model=RationsOptimizationOut
 )
 async def dlg_refresh():
     """
@@ -6908,7 +6917,7 @@ async def dlg_refresh():
 
 
 @router.post("/compound-feed/upload", summary="Compound feed document hochladen",
-    response_model=dict
+    response_model=RationsOptimizationOut
 )
 async def upload_compound_feed_document(file: UploadFile = File(...)):
     if not file.filename:
@@ -6929,7 +6938,7 @@ async def upload_compound_feed_document(file: UploadFile = File(...)):
 
 
 @router.post("/feeds/from-grundfutter", summary="From grundfutter feed",
-    response_model=dict
+    response_model=RationsOptimizationOut
 )
 async def feed_from_grundfutter(request: Request):
     """

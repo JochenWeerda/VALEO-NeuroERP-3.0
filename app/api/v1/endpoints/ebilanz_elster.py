@@ -15,6 +15,14 @@ from app.core.database import get_db
 from app.core.tenant import get_tenant_id
 from app.services.eric_submission_service import ERICSubmissionService
 
+from app.api.v1.schemas.base import BaseSchema
+from pydantic import ConfigDict as _ConfigDict
+
+
+class CompatFlexOut(BaseSchema):
+    model_config = _ConfigDict(extra="allow")
+
+
 router = APIRouter(prefix="/ebilanz", tags=["finance", "ebilanz", "elster"])
 
 # ---------------------------------------------------------------------------
@@ -125,7 +133,7 @@ class EricReadinessOut(BaseModel):
 # ---------------------------------------------------------------------------
 
 @router.get("/taxonomie-felder", summary="Felder taxonomie",
-    response_model=dict
+    response_model=CompatFlexOut
 )
 def taxonomie_felder() -> list[dict]:
     """Return the list of XBRL taxonomy fields with GCD/GAAP classification."""
@@ -184,7 +192,7 @@ def validieren_ebilanz(
 
 
 @router.get("/meldungen", summary="Meldungen auflisten",
-    response_model=list
+    response_model=list[CompatFlexOut]
 )
 def list_meldungen(
     limit: int = 100,
@@ -272,7 +280,7 @@ def erstellen(
 
 
 @router.post("/export/{export_id}/validieren", summary="Validieren",
-    response_model=dict
+    response_model=CompatFlexOut
 )
 def validieren(
     export_id: str,
@@ -310,7 +318,7 @@ def validieren(
 
 
 @router.post("/export/{export_id}/uebertragen", summary="Uebertragen",
-    response_model=dict
+    response_model=CompatFlexOut
 )
 def uebertragen(
     export_id: str,
@@ -379,7 +387,7 @@ def uebertragen(
 
 
 @router.get("/export/{export_id}/uebertragungsstatus", summary="Uebertragungsstatus",
-    response_model=dict
+    response_model=CompatFlexOut
 )
 def uebertragungsstatus(
     export_id: str,
@@ -413,7 +421,7 @@ def uebertragungsstatus(
 
 
 @router.get("/exports", summary="Exports auflisten",
-    response_model=list
+    response_model=list[CompatFlexOut]
 )
 def list_exports(
     limit: int = 100,
@@ -555,7 +563,7 @@ async def submit_ustva(
 
 
 @router.get("/elster/ustva", summary="UStVA-Übermittlungen auflisten",
-    response_model=list
+    response_model=list[CompatFlexOut]
 )
 async def list_ustva(
     tenant_id: str = Depends(get_tenant_id),

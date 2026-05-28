@@ -15,6 +15,14 @@ from app.core.database import get_db
 from app.documents.router_helpers import get_repository, save_to_store, get_from_store, list_from_store
 
 logger = logging.getLogger(__name__)
+from app.api.v1.schemas.base import BaseSchema
+from pydantic import ConfigDict as _ConfigDict
+
+
+class CompatFlexOut(BaseSchema):
+    model_config = _ConfigDict(extra="allow")
+
+
 router = APIRouter(prefix="/einkauf", tags=["procurement", "ap", "memos"])
 
 
@@ -416,7 +424,7 @@ async def get_debit_memo(
 
 
 @router.post("/credit-memos/{memo_id}/settle", summary="Credit memo settle",
-    response_model=dict
+    response_model=CompatFlexOut
 )
 async def settle_credit_memo(
     memo_id: str,
@@ -479,7 +487,7 @@ async def settle_credit_memo(
 
 
 @router.post("/debit-memos/{memo_id}/settle", summary="Debit memo settle",
-    response_model=dict
+    response_model=CompatFlexOut
 )
 async def settle_debit_memo(
     memo_id: str,
@@ -563,7 +571,7 @@ def _approve_memo_for_booking(
 
 
 @router.post("/credit-memos/{memo_id}/freigabe", summary="Credit memo for booking genehmigen",
-    response_model=dict
+    response_model=CompatFlexOut
 )
 async def approve_credit_memo_for_booking(
     memo_id: str,
@@ -583,7 +591,7 @@ async def approve_credit_memo_for_booking(
 
 
 @router.post("/debit-memos/{memo_id}/freigabe", summary="Debit memo for booking genehmigen",
-    response_model=dict
+    response_model=CompatFlexOut
 )
 async def approve_debit_memo_for_booking(
     memo_id: str,
@@ -645,7 +653,7 @@ def _book_memo_to_store(
 
 
 @router.post("/credit-memos/{memo_id}/buchung", summary="Credit memo book",
-    response_model=dict
+    response_model=CompatFlexOut
 )
 async def book_credit_memo(
     memo_id: str,
@@ -676,7 +684,7 @@ async def book_credit_memo(
 
 
 @router.post("/debit-memos/{memo_id}/buchung", summary="Debit memo book",
-    response_model=dict
+    response_model=CompatFlexOut
 )
 async def book_debit_memo(
     memo_id: str,

@@ -15,10 +15,18 @@ from ....core.sla_escalation import (
     escalation_summary,
 )
 
+from app.api.v1.schemas.base import BaseSchema
+from pydantic import ConfigDict as _ConfigDict
+
+
+class CompatFlexOut(BaseSchema):
+    model_config = _ConfigDict(extra="allow")
+
+
 router = APIRouter(prefix="/process/sla", tags=["process-kernel", "sla"])
 
 
-@router.post("/scan", response_model=dict, summary="Sla violations scannen")
+@router.post("/scan", response_model=CompatFlexOut, summary="Sla violations scannen")
 def scan_sla_violations(body: dict) -> dict[str, Any]:
     """Prueft eine Liste von Workflow-Instanzen gegen alle aktiven SLA-Policies."""
     instances: list[dict] = body.get("instances", [])
@@ -35,7 +43,7 @@ def scan_sla_violations(body: dict) -> dict[str, Any]:
     }
 
 
-@router.post("/escalate", response_model=dict, status_code=202, summary="Escalation auslösen")
+@router.post("/escalate", response_model=CompatFlexOut, status_code=202, summary="Escalation auslösen")
 def trigger_escalation(body: dict) -> dict[str, Any]:
     """Erzeugt ein Eskalationsereignis fuer eine SLA-Verletzung."""
     from ....core.process_sla import SLAViolation

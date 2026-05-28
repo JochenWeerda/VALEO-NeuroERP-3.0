@@ -15,6 +15,15 @@ from sqlalchemy import text
 from sqlalchemy.orm import Session
 from app.core.database import get_db
 
+from app.api.v1.schemas.base import BaseSchema
+from pydantic import ConfigDict as _ConfigDict
+
+
+class GapOut(BaseSchema):
+    """Typed response schema for GapOut endpoints (extra fields forwarded)."""
+    model_config = _ConfigDict(extra="allow")
+
+
 router = APIRouter(prefix="/gap", tags=["gap", "prospecting"])
 
 
@@ -190,7 +199,7 @@ async def run_gap_pipeline_year_filtered(
 
 
 @router.post("/pipeline/csv-streaming-test", summary="Csv streaming pipeline testen",
-    response_model=dict
+    response_model=GapOut
 )
 async def test_csv_streaming_pipeline(
     plz_filter: str = Query("49,48", description="PLZ-Bereiche für CSV-Streaming Test (z.B. '49,48')"),
@@ -318,7 +327,7 @@ async def run_gap_command(
     )
 
 
-@router.post("/pipeline/upload", response_model=dict, summary="Gap csv hochladen")
+@router.post("/pipeline/upload", response_model=GapOut, summary="Gap csv hochladen")
 async def upload_gap_csv(
     file: UploadFile = File(..., description="GAP CSV-Datei"),
     year: Optional[int] = Query(None, description="Jahr (wird aus Dateiname extrahiert, falls nicht angegeben)")
@@ -376,7 +385,7 @@ async def upload_gap_csv(
 
 
 @router.get("/pipeline/status", summary="Pipeline status abrufen",
-    response_model=dict
+    response_model=GapOut
 )
 async def get_pipeline_status(year: int = Query(..., description="Referenzjahr")):
     """
@@ -455,7 +464,7 @@ async def get_pipeline_progress(job_id: str):
 
 
 @router.get("/pipeline/test-direct", summary="Pipeline direct testen",
-    response_model=dict
+    response_model=GapOut
 )
 async def test_pipeline_direct():
     """
@@ -494,7 +503,7 @@ async def test_pipeline_direct():
 
 
 @router.get("/pipeline/simple-test", summary="Test simple",
-    response_model=dict
+    response_model=GapOut
 )
 async def simple_test():
     """
@@ -521,7 +530,7 @@ async def simple_test():
 
 
 @router.get("/pipeline/csv-check", summary="Csv file prüfen",
-    response_model=dict
+    response_model=GapOut
 )
 async def check_csv_file():
     """
@@ -564,7 +573,7 @@ async def check_csv_file():
 
 
 @router.post("/pipeline/run-snapshot-manual", summary="Snapshot manual ausführen",
-    response_model=dict
+    response_model=GapOut
 )
 async def run_snapshot_manual(
     year: int = Query(2024, description="Jahr für Snapshot-Erstellung")
@@ -604,7 +613,7 @@ async def run_snapshot_manual(
 
 
 @router.delete("/reset-gap-data", summary="Gap data zurücksetzen",
-    response_model=dict
+    response_model=GapOut
 )
 async def reset_gap_data(
     year: int = Query(2024, description="Jahr für Daten-Reset"),
@@ -741,7 +750,7 @@ async def reset_gap_data(
 
 
 @router.get("/leads/generate-from-gap", summary="Leads from gap frontend generieren",
-    response_model=dict
+    response_model=GapOut
 )
 async def generate_leads_from_gap_frontend(
     year: int = Query(2024, description="Jahr für Lead-Generation"),
@@ -876,7 +885,7 @@ async def generate_leads_from_gap_frontend(
 
 
 @router.get("/leads/check-farmers-available", summary="Farmers available prüfen",
-    response_model=dict
+    response_model=GapOut
 )
 async def check_farmers_available():
     """
@@ -954,7 +963,7 @@ async def check_farmers_available():
 
 
 @router.get("/test-view-direct", summary="View direct testen",
-    response_model=dict
+    response_model=GapOut
 )
 async def test_view_direct(year: int = Query(2024, description="Jahr für View-Test")):
     """
@@ -1015,7 +1024,7 @@ async def test_view_direct(year: int = Query(2024, description="Jahr für View-T
 
 
 @router.get("/check-measure-codes", summary="Measure codes prüfen",
-    response_model=dict
+    response_model=GapOut
 )
 async def check_measure_codes(year: int = Query(2024, description="Jahr für Code-Check")):
     """
@@ -1082,7 +1091,7 @@ async def check_measure_codes(year: int = Query(2024, description="Jahr für Cod
 
 
 @router.post("/fix-view-definition", summary="View definition fix",
-    response_model=dict
+    response_model=GapOut
 )
 async def fix_view_definition():
     """
@@ -1144,7 +1153,7 @@ async def fix_view_definition():
 
 
 @router.get("/debug-gap-years", summary="Gap years debug",
-    response_model=dict
+    response_model=GapOut
 )
 async def debug_gap_years():
     """
@@ -1192,7 +1201,7 @@ async def debug_gap_years():
 
 
 @router.get("/gap-statistics", summary="Gap statistics abrufen",
-    response_model=dict
+    response_model=GapOut
 )
 async def get_gap_statistics(year: int = Query(2024, description="Jahr für Statistiken")):
     """
@@ -1505,7 +1514,7 @@ def _execute_gap_command(
 
 
 @router.get("/search-krummhoern", summary="Krummhoern suchen",
-    response_model=dict
+    response_model=GapOut
 )
 async def search_krummhoern(db: Session = Depends(get_db)):
     """🔍 Suche spezifisch nach PLZ 26736 Krummhörn - Test für Spaltenverschiebung"""
@@ -1604,7 +1613,7 @@ async def search_krummhoern(db: Session = Depends(get_db)):
 
 
 @router.get("/analyze-csv-structure", summary="Csv structure analyze",
-    response_model=dict
+    response_model=GapOut
 )
 async def analyze_csv_structure():
     """🔍 Direkte CSV-Struktur-Analyse für Spaltenverschiebungs-Diagnose"""
@@ -1747,7 +1756,7 @@ async def analyze_csv_structure():
 
 
 @router.get("/search-krummhoern-csv", summary="Krummhoern csv suchen",
-    response_model=dict
+    response_model=GapOut
 )
 async def search_krummhoern_csv():
     """🔍 Direkte Suche nach Krummhörn in CSV mit korrigiertem Typo"""
@@ -1859,7 +1868,7 @@ async def search_krummhoern_csv():
 
 
 @router.get("/simple-plz-check", summary="Plz check simple",
-    response_model=dict
+    response_model=GapOut
 )
 async def simple_plz_check(db: Session = Depends(get_db)):
     """🔍 Einfacher Check der PLZ-Daten ohne komplexe Queries"""
@@ -1916,7 +1925,7 @@ async def simple_plz_check(db: Session = Depends(get_db)):
 
 
 @router.get("/debug-plz-data", summary="Plz data debug",
-    response_model=dict
+    response_model=GapOut
 )
 async def debug_plz_data(db: Session = Depends(get_db)):
     """🔍 Debug endpoint to analyze postal code data distribution"""

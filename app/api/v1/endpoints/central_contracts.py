@@ -15,6 +15,14 @@ from sqlalchemy.orm import Session
 from ....core.database import get_db
 from ....core.tenant import get_tenant_id
 
+from app.api.v1.schemas.base import BaseSchema
+from pydantic import ConfigDict as _ConfigDict
+
+
+class CompatFlexOut(BaseSchema):
+    model_config = _ConfigDict(extra="allow")
+
+
 router = APIRouter()
 
 # ---------------------------------------------------------------------------
@@ -277,7 +285,7 @@ async def expiring_contracts(
     return [_row_to_contract(dict(r)) for r in rows]
 
 
-@router.get("/contracts/{contract_id}", response_model=dict, summary="Contract abrufen")
+@router.get("/contracts/{contract_id}", response_model=CompatFlexOut, summary="Contract abrufen")
 async def get_contract(
     contract_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -483,7 +491,7 @@ async def renew_contract(
     return _row_to_contract(_get_contract(db, contract_id, tenant_id))
 
 
-@router.get("/analytics", response_model=dict, summary="Analytics contract")
+@router.get("/analytics", response_model=CompatFlexOut, summary="Analytics contract")
 async def contract_analytics(
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),

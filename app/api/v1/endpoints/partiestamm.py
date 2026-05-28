@@ -24,6 +24,14 @@ from app.core.database import get_db
 from app.core.dependencies import get_tenant_id
 from app.core.uuid7 import uuid7
 
+from app.api.v1.schemas.base import BaseSchema
+from pydantic import ConfigDict as _ConfigDict
+
+
+class CompatFlexOut(BaseSchema):
+    model_config = _ConfigDict(extra="allow")
+
+
 router = APIRouter(prefix="/lager/partien", tags=["Lager - Partiestamm & Partiegruppen"])
 
 GUELTIGE_TYP = {"artikelstamm", "artikel_lager"}
@@ -123,7 +131,7 @@ def create_partiegruppe(
 
 
 @router.delete("/gruppen/{gruppe_nr}", summary="Partiegruppe löschen",
-    response_model=dict
+    response_model=CompatFlexOut
 )
 def delete_partiegruppe(
     gruppe_nr: str,
@@ -243,7 +251,7 @@ def set_partie_status(
 
 
 @router.post("/{partie_nr}/umbuchung", summary="Umbuchung partie",
-    response_model=dict
+    response_model=CompatFlexOut
 )
 def partie_umbuchung(
     partie_nr: str,
@@ -270,7 +278,7 @@ def partie_umbuchung(
 
 
 @router.delete("/{partie_nr}", summary="Partie löschen",
-    response_model=dict
+    response_model=CompatFlexOut
 )
 def delete_partie(
     partie_nr: str,

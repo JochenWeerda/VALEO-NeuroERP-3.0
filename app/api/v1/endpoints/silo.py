@@ -19,6 +19,15 @@ from app.core.database import get_db
 from app.core.tenant import get_tenant_id
 from app.infrastructure.models import Silo, SiloLot, SiloLotMovement, SiloQualitySnapshot
 
+from app.api.v1.schemas.base import BaseSchema
+from pydantic import ConfigDict as _ConfigDict
+
+
+class SiloOut(BaseSchema):
+    """Typed response schema for SiloOut endpoints (extra fields forwarded)."""
+    model_config = _ConfigDict(extra="allow")
+
+
 router = APIRouter()
 
 
@@ -113,7 +122,7 @@ class SiloLotMovementCreate(BaseModel):
     note: Optional[str] = None
 
 
-@router.get("/kapazitaeten", response_model=dict, summary="Silo capacities abrufen")
+@router.get("/kapazitaeten", response_model=SiloOut, summary="Silo capacities abrufen")
 async def get_silo_capacities(
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
@@ -169,7 +178,7 @@ async def get_silo_capacities(
     }
 
 
-@router.get("/silos", response_model=list[dict], summary="Silos auflisten")
+@router.get("/silos", response_model=list[SiloOut], summary="Silos auflisten")
 async def list_silos(
     include_inactive: bool = Query(False),
     tenant_id: str = Depends(get_tenant_id),
@@ -192,7 +201,7 @@ async def list_silos(
     ]
 
 
-@router.get("/silos/{silo_id}/details", response_model=dict, summary="Silo details abrufen")
+@router.get("/silos/{silo_id}/details", response_model=SiloOut, summary="Silo details abrufen")
 async def get_silo_details(
     silo_id: str,
     include_movements: bool = Query(True),
@@ -281,7 +290,7 @@ async def get_silo_details(
     }
 
 
-@router.post("/silos", response_model=dict, status_code=201, summary="Silo anlegen")
+@router.post("/silos", response_model=SiloOut, status_code=201, summary="Silo anlegen")
 async def create_silo(
     payload: SiloCreate,
     tenant_id: str = Depends(get_tenant_id),
@@ -317,7 +326,7 @@ async def create_silo(
     }
 
 
-@router.put("/silos/{silo_id}", response_model=dict, summary="Silo aktualisieren")
+@router.put("/silos/{silo_id}", response_model=SiloOut, summary="Silo aktualisieren")
 async def update_silo(
     silo_id: str,
     payload: SiloCreate,
@@ -361,7 +370,7 @@ async def delete_silo(
     db.commit()
 
 
-@router.post("/silos/{silo_id}/lots", response_model=dict, status_code=201, summary="Silo lot anlegen")
+@router.post("/silos/{silo_id}/lots", response_model=SiloOut, status_code=201, summary="Silo lot anlegen")
 async def create_silo_lot(
     silo_id: str,
     payload: SiloLotCreate,
@@ -430,7 +439,7 @@ async def create_silo_lot(
     }
 
 
-@router.put("/silos/{silo_id}/lots/{lot_id}", response_model=dict, summary="Silo lot aktualisieren")
+@router.put("/silos/{silo_id}/lots/{lot_id}", response_model=SiloOut, summary="Silo lot aktualisieren")
 async def update_silo_lot(
     silo_id: str,
     lot_id: str,
@@ -476,7 +485,7 @@ async def delete_silo_lot(
     db.commit()
 
 
-@router.post("/silos/{silo_id}/lots/{lot_id}/movements", response_model=dict, status_code=201, summary="Silo lot movement anlegen")
+@router.post("/silos/{silo_id}/lots/{lot_id}/movements", response_model=SiloOut, status_code=201, summary="Silo lot movement anlegen")
 async def create_silo_lot_movement(
     silo_id: str,
     lot_id: str,
@@ -562,7 +571,7 @@ def _silo_columns(db: Session) -> set[str]:
     return {r[0] for r in rows}
 
 
-@router.post("/silos/{silo_id}/leermeldung", response_model=dict, status_code=201, summary="Leermeldung anlegen")
+@router.post("/silos/{silo_id}/leermeldung", response_model=SiloOut, status_code=201, summary="Leermeldung anlegen")
 async def create_leermeldung(
     silo_id: str,
     payload: LeermeldungCreate,
@@ -683,7 +692,7 @@ async def create_leermeldung(
     }
 
 
-@router.get("/silos/{silo_id}/leermeldungen", response_model=list, summary="Leermeldungen auflisten")
+@router.get("/silos/{silo_id}/leermeldungen", response_model=list[SiloOut], summary="Leermeldungen auflisten")
 async def list_leermeldungen(
     silo_id: str,
     tenant_id: str = Depends(get_tenant_id),

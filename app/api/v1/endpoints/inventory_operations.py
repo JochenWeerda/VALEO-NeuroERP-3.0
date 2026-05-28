@@ -19,6 +19,14 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+from app.api.v1.schemas.base import BaseSchema
+from pydantic import ConfigDict as _ConfigDict
+
+
+class CompatFlexOut(BaseSchema):
+    model_config = _ConfigDict(extra="allow")
+
+
 router = APIRouter()
 DEFAULT_TENANT = settings.DEFAULT_TENANT_ID
 
@@ -237,7 +245,7 @@ def _post_inventory_journal(
 # ── Routes ──────────────────────────────────────────────────────
 
 @router.get("/reason-codes", tags=["lager"], summary="Reason codes auflisten",
-    response_model=list
+    response_model=list[CompatFlexOut]
 )
 async def list_reason_codes():
     """GET alle verfügbaren Korrektur-Gründe."""
@@ -426,7 +434,7 @@ async def create_mhd_abschreibung(
 
 
 @router.get("/korrekturen", tags=["lager"], summary="Korrekturen auflisten",
-    response_model=dict
+    response_model=CompatFlexOut
 )
 async def list_korrekturen(
     tenant_id: Optional[str] = Query(None),
@@ -487,7 +495,7 @@ async def list_korrekturen(
 
 
 @router.get("/korrekturen/{korrektur_id}", tags=["lager"], summary="Korrektur abrufen",
-    response_model=dict
+    response_model=CompatFlexOut
 )
 async def get_korrektur(
     korrektur_id: str,

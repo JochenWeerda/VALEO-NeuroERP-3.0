@@ -45,6 +45,15 @@ from app.integrations.services.superglue_tool_provisioning import (
     run_superglue_pilot_smoke,
 )
 
+from app.api.v1.schemas.base import BaseSchema
+from pydantic import ConfigDict as _ConfigDict
+
+
+class AgentIntegrationOut(BaseSchema):
+    """Typed response schema for AgentIntegrationOut endpoints (extra fields forwarded)."""
+    model_config = _ConfigDict(extra="allow")
+
+
 router = APIRouter(prefix="/agent/integrations", tags=["agents", "integrations", "openapi", "mcp"])
 
 
@@ -77,7 +86,7 @@ class SuperglueWizardApplyRequest(BaseModel):
 
 
 @router.get("", summary="External Agent Integration Catalog",
-    response_model=dict
+    response_model=AgentIntegrationOut
 )
 def get_external_agent_integration_catalog(
     domain: str | None = Query(default=None, description="Optional domain filter"),
@@ -88,7 +97,7 @@ def get_external_agent_integration_catalog(
 
 
 @router.get("/providers", summary="External Agent Provider Catalog",
-    response_model=dict
+    response_model=AgentIntegrationOut
 )
 def get_external_agent_provider_catalog(
     provider_key: str | None = Query(default=None, description="Optional provider filter"),
@@ -103,7 +112,7 @@ def get_external_agent_provider_catalog(
 
 
 @router.get("/providers/{provider_key}", summary="Single External Agent Provider",
-    response_model=dict
+    response_model=AgentIntegrationOut
 )
 def get_external_agent_provider(provider_key: str) -> dict:
     manifest = build_external_agent_integration_catalog(provider_key=provider_key)
@@ -113,63 +122,63 @@ def get_external_agent_provider(provider_key: str) -> dict:
 
 
 @router.get("/providers/superglue/tools", summary="Mapped Superglue Tool Catalog",
-    response_model=dict
+    response_model=AgentIntegrationOut
 )
 def get_superglue_tool_catalog() -> dict:
     return build_superglue_tool_summary()
 
 
 @router.get("/providers/superglue/tenants/{tenant_id}/tools", summary="Mapped Superglue Tool Catalog for a Tenant",
-    response_model=dict
+    response_model=AgentIntegrationOut
 )
 def get_superglue_tenant_tool_catalog(tenant_id: str) -> dict:
     return build_superglue_tenant_tool_summary(tenant_id)
 
 
 @router.get("/providers/superglue/sync-status", summary="Superglue Sync Status",
-    response_model=dict
+    response_model=AgentIntegrationOut
 )
 def get_superglue_sync_status() -> dict:
     return build_superglue_sync_status().model_dump()
 
 
 @router.get("/providers/superglue/health", summary="Superglue Health",
-    response_model=dict
+    response_model=AgentIntegrationOut
 )
 def get_superglue_health() -> dict:
     return build_superglue_health_status().model_dump()
 
 
 @router.get("/providers/superglue/config-summary", summary="Superglue Config Summary",
-    response_model=dict
+    response_model=AgentIntegrationOut
 )
 def get_superglue_config_summary() -> dict:
     return build_superglue_config_summary()
 
 
 @router.post("/providers/superglue/sync-status/refresh", summary="Refresh Superglue Sync Snapshot",
-    response_model=dict
+    response_model=AgentIntegrationOut
 )
 def refresh_superglue_sync() -> dict:
     return refresh_superglue_sync_snapshot()
 
 
 @router.get("/providers/superglue/sync-history", summary="Superglue Sync History",
-    response_model=dict
+    response_model=AgentIntegrationOut
 )
 def get_superglue_sync_history(limit: int = Query(default=20, ge=1, le=100)) -> dict:
     return build_superglue_sync_history(limit=limit)
 
 
 @router.get("/providers/superglue/quarantine", summary="Superglue Quarantine",
-    response_model=dict
+    response_model=AgentIntegrationOut
 )
 def get_superglue_quarantine() -> dict:
     return build_quarantine_summary()
 
 
 @router.post("/providers/superglue/quarantine/{entry_id}/resolve", summary="Resolve Superglue Quarantine Entry",
-    response_model=dict
+    response_model=AgentIntegrationOut
 )
 def resolve_superglue_quarantine(entry_id: str, resolved_by: str = Query(...), note: str | None = Query(default=None)) -> dict:
     try:
@@ -179,49 +188,49 @@ def resolve_superglue_quarantine(entry_id: str, resolved_by: str = Query(...), n
 
 
 @router.get("/providers/superglue/execution-journal", summary="Superglue Execution Journal",
-    response_model=dict
+    response_model=AgentIntegrationOut
 )
 def get_superglue_execution_journal(limit: int = Query(default=20, ge=1, le=100)) -> dict:
     return build_execution_journal_summary(limit=limit)
 
 
 @router.get("/providers/superglue/admin-overview", summary="Superglue Admin Overview",
-    response_model=dict
+    response_model=AgentIntegrationOut
 )
 def get_superglue_admin_overview(tenant_id: str = Query(default="default")) -> dict:
     return build_superglue_admin_overview(tenant_id)
 
 
 @router.get("/providers/superglue/monitoring", summary="Superglue Monitoring Summary",
-    response_model=dict
+    response_model=AgentIntegrationOut
 )
 def get_superglue_monitoring(tenant_id: str | None = Query(default=None)) -> dict:
     return build_superglue_monitoring_summary(tenant_id)
 
 
 @router.get("/providers/superglue/live-readiness", summary="Superglue live readiness for tenant onboarding",
-    response_model=dict
+    response_model=AgentIntegrationOut
 )
 def get_superglue_live_readiness(tenant_id: str = Query(default="default")) -> dict:
     return build_superglue_live_readiness(tenant_id)
 
 
 @router.get("/providers/superglue/onboarding-pack", summary="Superglue onboarding pack for tenant ops",
-    response_model=dict
+    response_model=AgentIntegrationOut
 )
 def get_superglue_onboarding_pack(tenant_id: str = Query(default="default")) -> dict:
     return build_superglue_onboarding_pack(tenant_id)
 
 
 @router.get("/providers/superglue/tenants/{tenant_id}/admin-state", summary="Superglue admin mutation state for a tenant",
-    response_model=dict
+    response_model=AgentIntegrationOut
 )
 def get_superglue_tenant_admin_state(tenant_id: str) -> dict:
     return get_superglue_admin_state(tenant_id)
 
 
 @router.post("/providers/superglue/tenants/{tenant_id}/connectors/{connector_key}/config", summary="Update tenant connector override",
-    response_model=dict
+    response_model=AgentIntegrationOut
 )
 def set_superglue_tenant_connector_config(tenant_id: str, connector_key: str, request: SuperglueConnectorConfigRequest) -> dict:
     return update_superglue_connector_override(
@@ -234,7 +243,7 @@ def set_superglue_tenant_connector_config(tenant_id: str, connector_key: str, re
 
 
 @router.post("/providers/superglue/tenants/{tenant_id}/policy", summary="Update tenant Superglue policy override",
-    response_model=dict
+    response_model=AgentIntegrationOut
 )
 def set_superglue_tenant_policy(tenant_id: str, request: SupergluePolicyOverrideRequest) -> dict:
     return update_superglue_policy_override(
@@ -249,14 +258,14 @@ def set_superglue_tenant_policy(tenant_id: str, request: SupergluePolicyOverride
 
 
 @router.get("/providers/superglue/tenants/{tenant_id}/wizard", summary="Tenant onboarding wizard for Superglue",
-    response_model=dict
+    response_model=AgentIntegrationOut
 )
 def get_superglue_tenant_onboarding_wizard(tenant_id: str) -> dict:
     return build_superglue_onboarding_wizard(tenant_id)
 
 
 @router.post("/providers/superglue/tenants/{tenant_id}/wizard/apply", summary="Apply a tenant onboarding wizard step for Superglue",
-    response_model=dict
+    response_model=AgentIntegrationOut
 )
 def apply_superglue_tenant_onboarding_wizard(tenant_id: str, request: SuperglueWizardApplyRequest) -> dict:
     return apply_superglue_onboarding_wizard(
@@ -275,35 +284,35 @@ def apply_superglue_tenant_onboarding_wizard(tenant_id: str, request: SuperglueW
 
 
 @router.post("/providers/superglue/pilot-tools/provision", summary="Provision canonical Superglue pilot tools",
-    response_model=dict
+    response_model=AgentIntegrationOut
 )
 def provision_superglue_pilots() -> dict:
     return provision_superglue_pilot_tools()
 
 
 @router.post("/providers/superglue/pilot-tools/smoke-run", summary="Run canonical Superglue pilot smoke",
-    response_model=dict
+    response_model=AgentIntegrationOut
 )
 def run_superglue_pilot_tool_smoke() -> dict:
     return run_superglue_pilot_smoke()
 
 
 @router.post("/providers/superglue/tenants/{tenant_id}/bootstrap", summary="Provision tenant-specific Superglue systems and tools",
-    response_model=dict
+    response_model=AgentIntegrationOut
 )
 def bootstrap_superglue_tenant_connectors(tenant_id: str) -> dict:
     return provision_superglue_tenant_connectors(tenant_id)
 
 
 @router.get("/providers/superglue/tenants/{tenant_id}/tool-lifecycle", summary="Superglue tenant tool lifecycle summary",
-    response_model=dict
+    response_model=AgentIntegrationOut
 )
 def get_superglue_tenant_tool_lifecycle(tenant_id: str) -> dict:
     return build_superglue_tool_lifecycle_summary(tenant_id)
 
 
 @router.post("/providers/superglue/quarantine/{entry_id}/retry", summary="Retry or dead-letter a Superglue quarantine entry",
-    response_model=dict
+    response_model=AgentIntegrationOut
 )
 def retry_superglue_quarantine(
     entry_id: str,
@@ -318,14 +327,14 @@ def retry_superglue_quarantine(
 
 
 @router.get("/providers/superglue/domain-rollouts", summary="Superglue domain rollout summary",
-    response_model=dict
+    response_model=AgentIntegrationOut
 )
 def get_superglue_domain_rollouts(tenant_id: str = Query(default="default")) -> dict:
     return build_superglue_domain_rollout_summary(tenant_id)
 
 
 @router.post("/providers/superglue/domain-rollouts/{domain_key}/preview", summary="Superglue domain rollout preview",
-    response_model=dict
+    response_model=AgentIntegrationOut
 )
 def run_superglue_domain_rollout_preview(
     domain_key: str,
@@ -339,7 +348,7 @@ def run_superglue_domain_rollout_preview(
 
 
 @router.get("/use-cases", summary="External Agent Use Cases",
-    response_model=dict
+    response_model=AgentIntegrationOut
 )
 def get_external_agent_use_cases(
     domain: str | None = Query(default=None, description="Optional domain filter"),
@@ -357,7 +366,7 @@ def get_external_agent_use_cases(
 
 
 @router.get("/use-cases/{use_case_id}", summary="Single External Agent Use Case",
-    response_model=dict
+    response_model=AgentIntegrationOut
 )
 def get_external_agent_use_case(use_case_id: str) -> dict:
     manifest = build_external_agent_integration_catalog(use_case_id=use_case_id)
@@ -367,7 +376,7 @@ def get_external_agent_use_case(use_case_id: str) -> dict:
 
 
 @router.get("/use-cases/{use_case_id}/install-pack", summary="Install Pack for External Agent Use Case",
-    response_model=dict
+    response_model=AgentIntegrationOut
 )
 def get_external_agent_install_pack(use_case_id: str) -> dict:
     try:

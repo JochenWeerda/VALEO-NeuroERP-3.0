@@ -48,6 +48,14 @@ def _validate_vat_id_format(vat_id: Optional[str]) -> None:
 from ..schemas.finance import Debtor, DebtorCreate, DebtorUpdate
 from ..schemas.base import PaginatedResponse
 
+from app.api.v1.schemas.base import BaseSchema
+from pydantic import ConfigDict as _ConfigDict
+
+
+class CompatFlexOut(BaseSchema):
+    model_config = _ConfigDict(extra="allow")
+
+
 router = APIRouter(prefix="/debtors", tags=["finance", "debtors"])
 
 
@@ -404,7 +412,7 @@ async def update_debtor(
         raise HTTPException(status_code=500, detail=f"Failed to update debtor: {str(e)}")
 
 
-@router.get("/{debtor_id}/balance", response_model=dict, summary="Debtor balance abrufen")
+@router.get("/{debtor_id}/balance", response_model=CompatFlexOut, summary="Debtor balance abrufen")
 async def get_debtor_balance(
     debtor_id: str,
     db: Session = Depends(get_db)

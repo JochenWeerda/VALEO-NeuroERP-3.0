@@ -11,6 +11,14 @@ from ....core.database import get_db
 from ....infrastructure.models import NutrientComposition
 from ..schemas.base import PaginatedResponse
 
+from app.api.v1.schemas.base import BaseSchema
+from pydantic import ConfigDict as _ConfigDict
+
+
+class CompatFlexOut(BaseSchema):
+    model_config = _ConfigDict(extra="allow")
+
+
 router = APIRouter()
 
 DEFAULT_TENANT = settings.DEFAULT_TENANT_ID
@@ -84,7 +92,7 @@ async def list_nutrient_compositions(
     )
 
 
-@router.get("/search", response_model=list[dict], summary="Nutrient compositions suchen")
+@router.get("/search", response_model=list[CompatFlexOut], summary="Nutrient compositions suchen")
 async def search_nutrient_compositions(
     q: str = Query(..., min_length=1, description="Search term"),
     limit: int = Query(10, ge=1, le=50),
@@ -105,7 +113,7 @@ async def search_nutrient_compositions(
     return [_to_schema(item) for item in items]
 
 
-@router.get("/{composition_id}", response_model=dict, summary="Nutrient composition abrufen")
+@router.get("/{composition_id}", response_model=CompatFlexOut, summary="Nutrient composition abrufen")
 async def get_nutrient_composition(
     composition_id: str,
     tenant_id: Optional[str] = Query(None),
@@ -126,7 +134,7 @@ async def get_nutrient_composition(
     return _to_schema(item)
 
 
-@router.post("/", response_model=dict, status_code=status.HTTP_201_CREATED, summary="Nutrient composition anlegen")
+@router.post("/", response_model=CompatFlexOut, status_code=status.HTTP_201_CREATED, summary="Nutrient composition anlegen")
 async def create_nutrient_composition(
     data: dict,
     db: Session = Depends(get_db),
@@ -175,7 +183,7 @@ async def create_nutrient_composition(
     return _to_schema(item)
 
 
-@router.put("/{composition_id}", response_model=dict, summary="Nutrient composition aktualisieren")
+@router.put("/{composition_id}", response_model=CompatFlexOut, summary="Nutrient composition aktualisieren")
 async def update_nutrient_composition(
     composition_id: str,
     data: dict,

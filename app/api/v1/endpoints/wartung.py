@@ -11,6 +11,14 @@ from sqlalchemy.orm import Session
 from app.core.database import get_db
 from app.domains.operations.models import WartungAnlage, WartungsProtokoll, WartungStatus
 
+from app.api.v1.schemas.base import BaseSchema
+from pydantic import ConfigDict as _ConfigDict
+
+
+class CompatFlexOut(BaseSchema):
+    model_config = _ConfigDict(extra="allow")
+
+
 router = APIRouter(prefix="/wartung", tags=["Wartung"])
 
 
@@ -58,7 +66,7 @@ class AnlagePatch(BaseModel):
 
 
 @router.get("/anlagen", summary="Anlagen auflisten",
-    response_model=list
+    response_model=list[CompatFlexOut]
 )
 def list_anlagen(
     status: Optional[str] = None,
@@ -73,7 +81,7 @@ def list_anlagen(
 
 
 @router.get("/anlagen/{anlage_id}", summary="Anlage abrufen",
-    response_model=dict
+    response_model=CompatFlexOut
 )
 def get_anlage(anlage_id: str, db: Session = Depends(get_db)):
     obj = db.query(WartungAnlage).filter(WartungAnlage.id == anlage_id).first()
@@ -85,7 +93,7 @@ def get_anlage(anlage_id: str, db: Session = Depends(get_db)):
 
 
 @router.post("/anlagen", status_code=201, summary="Anlage anlegen",
-    response_model=dict
+    response_model=CompatFlexOut
 )
 def create_anlage(payload: AnlagePayload, db: Session = Depends(get_db)):
     obj = WartungAnlage(**payload.model_dump())
@@ -96,7 +104,7 @@ def create_anlage(payload: AnlagePayload, db: Session = Depends(get_db)):
 
 
 @router.patch("/anlagen/{anlage_id}", summary="Anlage aktualisieren",
-    response_model=dict
+    response_model=CompatFlexOut
 )
 def update_anlage(anlage_id: str, payload: AnlagePatch, db: Session = Depends(get_db)):
     obj = db.query(WartungAnlage).filter(WartungAnlage.id == anlage_id).first()
@@ -145,7 +153,7 @@ def list_protokolle(anlage_id: str, db: Session = Depends(get_db)):
 
 
 @router.post("/anlagen/{anlage_id}/protokolle", status_code=201, summary="Protokoll anlegen",
-    response_model=dict
+    response_model=CompatFlexOut
 )
 def create_protokoll(anlage_id: str, payload: ProtokollPayload, db: Session = Depends(get_db)):
     anlage = db.query(WartungAnlage).filter(WartungAnlage.id == anlage_id).first()

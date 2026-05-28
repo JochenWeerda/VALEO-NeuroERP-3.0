@@ -6,6 +6,14 @@ from sqlalchemy.orm import Session
 from ....core.database import get_db
 from ....core.config import settings
 
+from app.api.v1.schemas.base import BaseSchema
+from pydantic import ConfigDict as _ConfigDict
+
+
+class PosRetourOut(BaseSchema):
+    model_config = _ConfigDict(extra="allow")
+
+
 router = APIRouter()
 
 DEFAULT_TENANT = settings.DEFAULT_TENANT_ID
@@ -97,7 +105,7 @@ async def create_retoure(
 
 
 @router.post("/checkout", summary="Checkout pos",
-    response_model=dict
+    response_model=PosRetourOut
 )
 async def pos_checkout(
     data: dict,

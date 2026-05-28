@@ -1,4 +1,4 @@
-"""
+﻿"""
 Waage API Endpoints - SQLAlchemy Version
 """
 
@@ -17,10 +17,19 @@ from app.core.database import get_db
 
 from app.domains.operations.repository import WaageRepository, WiegungRepository
 
+from app.api.v1.schemas.base import BaseSchema
+from pydantic import ConfigDict as _ConfigDict
+
+
+class WaageOut(BaseSchema):
+    """Typed response schema for WaageOut endpoints (extra fields forwarded)."""
+    model_config = _ConfigDict(extra="allow")
+
+
 router = APIRouter(prefix="/waage", tags=["Waage"])
 
 # ============================================================
-# PARTIE-PFLICHT-001 — Partiepflicht-Konfiguration
+# PARTIE-PFLICHT-001 â€” Partiepflicht-Konfiguration
 # ============================================================
 
 _PARTIEPFLICHTIGE_WIEGETYPEN = ["ROHWARE", "SAATGUT", "DUENGER"]
@@ -33,9 +42,9 @@ class PartiepflichtCheckRequest(BaseModel):
     partie_id: Optional[str] = None
 
 
-@router.get("/waagen/partiepflicht-config", response_model=dict, summary="Partiepflicht config abrufen")
+@router.get("/waagen/partiepflicht-config", response_model=WaageOut, summary="Partiepflicht config abrufen")
 async def get_partiepflicht_config(db: Session = Depends(get_db)) -> dict:
-    """PARTIE-PFLICHT-001: Gibt zurück, welche Wiegetypen/Artikelgruppen Partiepflicht haben."""
+    """PARTIE-PFLICHT-001: Gibt zurÃ¼ck, welche Wiegetypen/Artikelgruppen Partiepflicht haben."""
     config_source = "default"
     try:
         rows = db.execute(
@@ -46,7 +55,7 @@ async def get_partiepflicht_config(db: Session = Depends(get_db)) -> dict:
         ).fetchall()
         if rows:
             config_source = "articles_table"
-    except Exception:  # noqa: BLE001 — optionale DB-Abfrage; Fallback greift
+    except Exception:  # noqa: BLE001 â€” optionale DB-Abfrage; Fallback greift
         pass
     return {
         "partiepflichtige_wiegetypen": _PARTIEPFLICHTIGE_WIEGETYPEN,
@@ -55,12 +64,12 @@ async def get_partiepflicht_config(db: Session = Depends(get_db)) -> dict:
     }
 
 
-@router.post("/waagen/partiepflicht-check", response_model=dict, summary="Partiepflicht prüfen")
+@router.post("/waagen/partiepflicht-check", response_model=WaageOut, summary="Partiepflicht prÃ¼fen")
 async def check_partiepflicht(
     payload: PartiepflichtCheckRequest,
     db: Session = Depends(get_db),
 ) -> dict:
-    """PARTIE-PFLICHT-001: Prüft ob für Artikel/Wiegetyp eine Partie Pflicht ist."""
+    """PARTIE-PFLICHT-001: PrÃ¼ft ob fÃ¼r Artikel/Wiegetyp eine Partie Pflicht ist."""
     wiegetyp_upper = payload.wiegetyp.upper()
     pflicht = wiegetyp_upper in _PARTIEPFLICHTIGE_WIEGETYPEN
 
@@ -72,13 +81,13 @@ async def check_partiepflicht(
             ).fetchone()
             if row and row[0] in _PARTIEPFLICHTIGE_ARTIKEL_GRUPPEN:
                 pflicht = True
-        except Exception:  # noqa: BLE001 — Artikel-Gruppe nicht ermittelbar; Partiepflicht bleibt wie initialisiert
+        except Exception:  # noqa: BLE001 â€” Artikel-Gruppe nicht ermittelbar; Partiepflicht bleibt wie initialisiert
             pass
 
     if pflicht and not payload.partie_id:
         return {
             "valid": False,
-            "reason": f"Partie erforderlich für Wiegetyp {payload.wiegetyp}",
+            "reason": f"Partie erforderlich fÃ¼r Wiegetyp {payload.wiegetyp}",
         }
     return {"valid": True}
 
@@ -108,7 +117,7 @@ def _to_list(models: List[Any]) -> List[dict]:
 
 # === WAAGE ENDPOINTS ===
 
-@router.get("/waagen", response_model=List[dict], summary="Waagen auflisten")
+@router.get("/waagen", response_model=list[WaageOut], summary="Waagen auflisten")
 async def list_waagen(
     skip: int = Query(0, ge=0),
     limit: int = Query(100, ge=1, le=1000),
@@ -122,7 +131,7 @@ async def list_waagen(
     return _to_list(repo.get_all(skip=skip, limit=limit))
 
 
-@router.get("/waagen/{waage_id}", response_model=dict, summary="Waage abrufen")
+@router.get("/waagen/{waage_id}", response_model=WaageOut, summary="Waage abrufen")
 async def get_waage(waage_id: str, db: Session = Depends(get_db)):
     """Get a single Waage by ID"""
     repo = WaageRepository(db)
@@ -132,7 +141,7 @@ async def get_waage(waage_id: str, db: Session = Depends(get_db)):
     return _to_dict(waage)
 
 
-@router.post("/waagen", response_model=dict, status_code=201, summary="Waage anlegen")
+@router.post("/waagen", response_model=WaageOut, status_code=201, summary="Waage anlegen")
 async def create_waage(
     waage_data: dict,
     db: Session = Depends(get_db)
@@ -146,7 +155,7 @@ async def create_waage(
         raise HTTPException(status_code=400, detail=str(e))
 
 
-@router.patch("/waagen/{waage_id}", response_model=dict, summary="Waage aktualisieren")
+@router.patch("/waagen/{waage_id}", response_model=WaageOut, summary="Waage aktualisieren")
 async def update_waage(
     waage_id: str,
     waage_data: dict,
@@ -160,7 +169,7 @@ async def update_waage(
     return _to_dict(waage)
 
 
-@router.delete("/waagen/{waage_id}", status_code=204, response_class=Response, response_model=None, summary="Waage löschen")
+@router.delete("/waagen/{waage_id}", status_code=204, response_class=Response, response_model=None, summary="Waage lÃ¶schen")
 async def delete_waage(waage_id: str, db: Session = Depends(get_db)):
     """Delete a Waage"""
     repo = WaageRepository(db)
@@ -170,7 +179,7 @@ async def delete_waage(waage_id: str, db: Session = Depends(get_db)):
 
 # === WIEGUNG ENDPOINTS ===
 
-@router.get("/wiegungen", response_model=List[dict], summary="Wiegungen auflisten")
+@router.get("/wiegungen", response_model=list[WaageOut], summary="Wiegungen auflisten")
 async def list_wiegungen(
     skip: int = Query(0, ge=0),
     limit: int = Query(100, ge=1, le=1000),
@@ -188,7 +197,7 @@ async def list_wiegungen(
     return _to_list(repo.get_all(skip=skip, limit=limit))
 
 
-@router.get("/wiegungen/{wiegung_id}", response_model=dict, summary="Wiegung abrufen")
+@router.get("/wiegungen/{wiegung_id}", response_model=WaageOut, summary="Wiegung abrufen")
 async def get_wiegung(wiegung_id: str, db: Session = Depends(get_db)):
     """Get a single Wiegung by ID"""
     repo = WiegungRepository(db)
@@ -198,7 +207,7 @@ async def get_wiegung(wiegung_id: str, db: Session = Depends(get_db)):
     return _to_dict(wiegung)
 
 
-@router.post("/wiegungen", response_model=dict, status_code=201, summary="Wiegung anlegen")
+@router.post("/wiegungen", response_model=WaageOut, status_code=201, summary="Wiegung anlegen")
 async def create_wiegung(
     wiegung_data: dict,
     db: Session = Depends(get_db)
@@ -217,7 +226,7 @@ async def create_wiegung(
         if not partie:
             raise HTTPException(
                 status_code=422,
-                detail=f"Partie/Charge Pflichtfeld für Wiegetyp {wiegetyp}",
+                detail=f"Partie/Charge Pflichtfeld fÃ¼r Wiegetyp {wiegetyp}",
             )
 
     # Auto-calculate netto if not provided
@@ -231,7 +240,7 @@ async def create_wiegung(
         raise HTTPException(status_code=400, detail=str(e))
 
 
-@router.delete("/wiegungen/{wiegung_id}", status_code=204, response_class=Response, response_model=None, summary="Wiegung löschen")
+@router.delete("/wiegungen/{wiegung_id}", status_code=204, response_class=Response, response_model=None, summary="Wiegung lÃ¶schen")
 async def delete_wiegung(wiegung_id: str, db: Session = Depends(get_db)):
     """Delete a Wiegung"""
     repo = WiegungRepository(db)
@@ -240,7 +249,7 @@ async def delete_wiegung(wiegung_id: str, db: Session = Depends(get_db)):
 
 
 # ===========================================================================
-# WAAGE-LIVE-001 — ASCII-Import, Fehlerqueue, Kalibrierung
+# WAAGE-LIVE-001 â€” ASCII-Import, Fehlerqueue, Kalibrierung
 # ===========================================================================
 
 # Module-level in-memory Fehlerqueue
@@ -286,7 +295,7 @@ def _parse_q_line(parts: List[str]) -> Dict[str, Any]:
     }
 
 
-@router.post("/waagen/import/ascii", response_model=dict, status_code=200, summary="Ascii importieren")
+@router.post("/waagen/import/ascii", response_model=WaageOut, status_code=200, summary="Ascii importieren")
 async def import_ascii(
     file: UploadFile,
     waage_id: str = Form(...),
@@ -343,7 +352,7 @@ async def import_ascii(
                     imported += 1
                 except Exception as db_err:
                     db.rollback()
-                    # Tabelle nicht vorhanden oder anderer DB-Fehler → queue entry
+                    # Tabelle nicht vorhanden oder anderer DB-Fehler â†’ queue entry
                     entry_id = str(uuid.uuid4())
                     _fehlerqueue.append(
                         {
@@ -391,7 +400,7 @@ async def import_ascii(
                         db.commit()
                     except Exception:
                         db.rollback()
-                        # Qualitätstabelle fehlt → ignorieren (non-critical)
+                        # QualitÃ¤tstabelle fehlt â†’ ignorieren (non-critical)
                         pass
                 else:
                     skipped += 1
@@ -422,15 +431,15 @@ async def import_ascii(
 # 1b. Fehlerqueue
 # ---------------------------------------------------------------------------
 
-@router.get("/waagen/import/fehlerqueue", response_model=List[dict], summary="Fehlerqueue auflisten")
+@router.get("/waagen/import/fehlerqueue", response_model=list[WaageOut], summary="Fehlerqueue auflisten")
 async def list_fehlerqueue():
-    """Gibt alle Einträge der Import-Fehlerqueue zurück."""
+    """Gibt alle EintrÃ¤ge der Import-Fehlerqueue zurÃ¼ck."""
     return _fehlerqueue
 
 
-@router.post("/waagen/import/fehlerqueue/{entry_id}/retry", response_model=dict, summary="Fehlerqueue entry wiederholen")
+@router.post("/waagen/import/fehlerqueue/{entry_id}/retry", response_model=WaageOut, summary="Fehlerqueue entry wiederholen")
 async def retry_fehlerqueue_entry(entry_id: str):
-    """Erhöht retry_count für einen Fehlerqueue-Eintrag (Simulation)."""
+    """ErhÃ¶ht retry_count fÃ¼r einen Fehlerqueue-Eintrag (Simulation)."""
     for entry in _fehlerqueue:
         if entry["id"] == entry_id:
             entry["retry_count"] += 1
@@ -438,9 +447,9 @@ async def retry_fehlerqueue_entry(entry_id: str):
     raise HTTPException(status_code=404, detail=f"Fehlerqueue-Eintrag {entry_id} nicht gefunden")
 
 
-@router.delete("/waagen/import/fehlerqueue/{entry_id}", status_code=204, response_class=Response, response_model=None, summary="Fehlerqueue entry löschen")
+@router.delete("/waagen/import/fehlerqueue/{entry_id}", status_code=204, response_class=Response, response_model=None, summary="Fehlerqueue entry lÃ¶schen")
 async def delete_fehlerqueue_entry(entry_id: str):
-    """Löscht einen Eintrag aus der Import-Fehlerqueue."""
+    """LÃ¶scht einen Eintrag aus der Import-Fehlerqueue."""
     global _fehlerqueue
     before = len(_fehlerqueue)
     _fehlerqueue = [e for e in _fehlerqueue if e["id"] != entry_id]
@@ -466,9 +475,9 @@ def _kalibrierung_status(naechste_eichfaelligkeit: Optional[str]) -> str:
         return "unbekannt"
 
 
-@router.get("/waagen/{waage_id}/kalibrierung", response_model=dict, summary="Kalibrierung abrufen")
+@router.get("/waagen/{waage_id}/kalibrierung", response_model=WaageOut, summary="Kalibrierung abrufen")
 async def get_kalibrierung(waage_id: str, db: Session = Depends(get_db)):
-    """Gibt den Kalibrierungsstatus einer Waage zurück."""
+    """Gibt den Kalibrierungsstatus einer Waage zurÃ¼ck."""
     # Versuche kalibrierung_meta aus agrar_waagen zu lesen
     meta: Dict[str, Any] = {}
     try:
@@ -482,7 +491,7 @@ async def get_kalibrierung(waage_id: str, db: Session = Depends(get_db)):
     except HTTPException:
         raise
     except Exception:
-        # Tabelle/Spalte fehlt noch → leere Meta
+        # Tabelle/Spalte fehlt noch â†’ leere Meta
         meta = {}
 
     letztes_eichdatum = meta.get("letztes_eichdatum")
@@ -498,7 +507,7 @@ async def get_kalibrierung(waage_id: str, db: Session = Depends(get_db)):
     }
 
 
-@router.patch("/waagen/{waage_id}/kalibrierung", response_model=dict, summary="Kalibrierung aktualisieren")
+@router.patch("/waagen/{waage_id}/kalibrierung", response_model=WaageOut, summary="Kalibrierung aktualisieren")
 async def update_kalibrierung(
     waage_id: str,
     payload: Dict[str, Any],
@@ -509,7 +518,7 @@ async def update_kalibrierung(
     update_data = {k: v for k, v in payload.items() if k in allowed_keys}
 
     try:
-        # Lese bisherige Meta, merge, schreibe zurück
+        # Lese bisherige Meta, merge, schreibe zurÃ¼ck
         row = db.execute(
             text("SELECT kalibrierung_meta FROM agrar_waagen WHERE id = :id"),
             {"id": waage_id},
@@ -543,7 +552,7 @@ async def update_kalibrierung(
 
 
 # ===========================================================================
-# DUAL-WIEGUNG — Doppelwiegung (Brutto/Tara als zwei separate Wiegevorgänge)
+# DUAL-WIEGUNG â€” Doppelwiegung (Brutto/Tara als zwei separate WiegevorgÃ¤nge)
 # ===========================================================================
 
 import json as _json
@@ -576,7 +585,7 @@ class WiegescheinMitDoppelwiegung(BaseModel):
     kfz_kennzeichen: Optional[str] = None
 
 
-@router.post("/wiegungen/dual", response_model=dict, status_code=201, summary="Dual wiegung anlegen")
+@router.post("/wiegungen/dual", response_model=WaageOut, status_code=201, summary="Dual wiegung anlegen")
 async def create_dual_wiegung(
     payload: WiegescheinMitDoppelwiegung,
     db: Session = Depends(get_db),
@@ -638,7 +647,7 @@ async def create_dual_wiegung(
     except Exception as e:
         db.rollback()
         err_str = str(e).lower()
-        # Column missing → fallback: store everything as JSONB in extended_data column
+        # Column missing â†’ fallback: store everything as JSONB in extended_data column
         if "column" in err_str or "does not exist" in err_str or "relation" in err_str:
             try:
                 db.execute(
@@ -674,9 +683,9 @@ async def create_dual_wiegung(
     }
 
 
-@router.get("/wiegungen/{wiegeschein_id}/extended", response_model=dict, summary="Wiegung extended abrufen")
+@router.get("/wiegungen/{wiegeschein_id}/extended", response_model=WaageOut, summary="Wiegung extended abrufen")
 async def get_wiegung_extended(wiegeschein_id: str, db: Session = Depends(get_db)):
-    """Gibt erweiterte Daten einer Wiegung zurück inkl. Doppelwiegungsinformationen."""
+    """Gibt erweiterte Daten einer Wiegung zurÃ¼ck inkl. Doppelwiegungsinformationen."""
     try:
         row = db.execute(
             text(
@@ -706,3 +715,4 @@ async def get_wiegung_extended(wiegeschein_id: str, db: Session = Depends(get_db
         "extended_data": row[6] or {},
         "created_at": row[7].isoformat() if row[7] else None,
     }
+

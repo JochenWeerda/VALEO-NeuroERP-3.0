@@ -14,11 +14,19 @@ from app.core.workflow_template_marketplace import (
     preview_workflow_template_installation,
 )
 
+from app.api.v1.schemas.base import BaseSchema
+from pydantic import ConfigDict as _ConfigDict
+
+
+class WorkflowTemplateOut(BaseSchema):
+    model_config = _ConfigDict(extra="allow")
+
+
 router = APIRouter(prefix="/workflow/templates/marketplace", tags=["workflow", "templates", "marketplace"])
 
 
 @router.get("", summary="Interner Workflow-Template-Marketplace",
-    response_model=dict
+    response_model=WorkflowTemplateOut
 )
 def list_workflow_templates(
     category: str | None = Query(default=None, description="Optional category filter"),
@@ -30,7 +38,7 @@ def list_workflow_templates(
 
 
 @router.get("/installed", summary="Bereits installierte Workflow-Templates",
-    response_model=dict
+    response_model=WorkflowTemplateOut
 )
 def list_installed_workflow_templates(
     tenant_id: str = Depends(get_tenant_id),
@@ -50,7 +58,7 @@ def list_installed_workflow_templates(
 
 
 @router.get("/{template_id}", summary="Einzelnes Workflow-Template",
-    response_model=dict
+    response_model=WorkflowTemplateOut
 )
 def get_workflow_template(
     template_id: str,
@@ -64,7 +72,7 @@ def get_workflow_template(
 
 
 @router.post("/{template_id}/preview", summary="Workflow-Template vor Installation previewen",
-    response_model=dict
+    response_model=WorkflowTemplateOut
 )
 def preview_workflow_template(
     template_id: str,
@@ -89,7 +97,7 @@ def preview_workflow_template(
 
 
 @router.post("/{template_id}/publish-preview", summary="Workflow-Template fuer Publikation previewen",
-    response_model=dict
+    response_model=WorkflowTemplateOut
 )
 def publish_preview_workflow_template(
     template_id: str,
@@ -114,7 +122,7 @@ def publish_preview_workflow_template(
 
 
 @router.post("/{template_id}/clone", summary="Workflow-Template klonen",
-    response_model=dict
+    response_model=WorkflowTemplateOut
 )
 def clone_workflow_template_endpoint(
     template_id: str,
@@ -138,7 +146,7 @@ def clone_workflow_template_endpoint(
 
 
 @router.post("/{template_id}/install", summary="Workflow-Template intern installieren",
-    response_model=dict
+    response_model=WorkflowTemplateOut
 )
 def install_workflow_template_endpoint(
     template_id: str,

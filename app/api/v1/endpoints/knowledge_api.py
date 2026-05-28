@@ -23,6 +23,14 @@ from app.repositories.knowledge_repository import KnowledgeRepository
 
 logger = logging.getLogger(__name__)
 
+from app.api.v1.schemas.base import BaseSchema
+from pydantic import ConfigDict as _ConfigDict
+
+
+class KnowledgeOut(BaseSchema):
+    model_config = _ConfigDict(extra="allow")
+
+
 router = APIRouter()
 
 # ── Pydantic Schemas ────────────────────────────────────────────────────────────

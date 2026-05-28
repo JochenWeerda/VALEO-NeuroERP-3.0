@@ -9,6 +9,15 @@ from app.core.database import get_db
 from app.core.tenant import get_tenant_id
 from app.services.warehouse_service import WarehouseService
 
+from app.api.v1.schemas.base import BaseSchema
+from pydantic import ConfigDict as _ConfigDict
+
+
+class WarehouseWmsOut(BaseSchema):
+    """Typed response schema for WarehouseWmsOut endpoints (extra fields forwarded)."""
+    model_config = _ConfigDict(extra="allow")
+
+
 router = APIRouter()
 
 
@@ -84,7 +93,7 @@ class BinTransferIn(BaseModel):
 # ── Zones ──────────────────────────────────────────────────────────────────
 
 @router.get("/zones", summary="Zones auflisten",
-    response_model=dict
+    response_model=WarehouseWmsOut
 )
 def list_zones(
     warehouse_id: str = Query(...),
@@ -94,7 +103,7 @@ def list_zones(
 
 
 @router.post("/zones", status_code=status.HTTP_201_CREATED, summary="Zone anlegen",
-    response_model=dict
+    response_model=WarehouseWmsOut
 )
 def create_zone(
     warehouse_id: str = Query(...),
@@ -107,7 +116,7 @@ def create_zone(
 # ── Bins ───────────────────────────────────────────────────────────────────
 
 @router.get("/bins", summary="Bins auflisten",
-    response_model=dict
+    response_model=WarehouseWmsOut
 )
 def list_bins(
     warehouse_id: Optional[str] = Query(None),
@@ -119,7 +128,7 @@ def list_bins(
 
 
 @router.post("/bins", status_code=status.HTTP_201_CREATED, summary="Bin anlegen",
-    response_model=dict
+    response_model=WarehouseWmsOut
 )
 def create_bin(
     zone_id: str = Query(...),
@@ -131,7 +140,7 @@ def create_bin(
 
 
 @router.get("/bins/{bin_id}/stock", summary="Bin stock abrufen",
-    response_model=dict
+    response_model=WarehouseWmsOut
 )
 def get_bin_stock(bin_id: str, svc: WarehouseService = Depends(_svc)):
     return svc.get_bin_stock(bin_id)
@@ -140,7 +149,7 @@ def get_bin_stock(bin_id: str, svc: WarehouseService = Depends(_svc)):
 # ── Stock Movements ────────────────────────────────────────────────────────
 
 @router.post("/stock-movements", status_code=status.HTTP_201_CREATED, summary="Stock movement book",
-    response_model=dict
+    response_model=WarehouseWmsOut
 )
 def book_stock_movement(payload: StockMovementIn, svc: WarehouseService = Depends(_svc)):
     from datetime import date as date_type
@@ -162,7 +171,7 @@ def book_stock_movement(payload: StockMovementIn, svc: WarehouseService = Depend
 
 
 @router.post("/stock-movements/fefo-suggestion", summary="Suggestion fefo",
-    response_model=dict
+    response_model=WarehouseWmsOut
 )
 def fefo_suggestion(payload: FefoSuggestionIn, svc: WarehouseService = Depends(_svc)):
     result = svc.fefo_pick_suggestion(payload.warehouse_id, payload.article_id, payload.quantity_needed)
@@ -178,7 +187,7 @@ def fefo_suggestion(payload: FefoSuggestionIn, svc: WarehouseService = Depends(_
 # ── Pick Lists ─────────────────────────────────────────────────────────────
 
 @router.post("/pick-lists", status_code=status.HTTP_201_CREATED, summary="Pick list anlegen",
-    response_model=dict
+    response_model=WarehouseWmsOut
 )
 def create_pick_list(payload: PickListIn, svc: WarehouseService = Depends(_svc)):
     items = [item.model_dump() for item in payload.items]
@@ -193,7 +202,7 @@ def create_pick_list(payload: PickListIn, svc: WarehouseService = Depends(_svc))
 
 
 @router.get("/pick-lists", summary="Pick lists auflisten",
-    response_model=list
+    response_model=list[WarehouseWmsOut]
 )
 def list_pick_lists(
     warehouse_id: Optional[str] = Query(None),
@@ -218,7 +227,7 @@ def list_pick_lists(
 
 
 @router.get("/pick-lists/{pick_list_id}", summary="Pick list abrufen",
-    response_model=dict
+    response_model=WarehouseWmsOut
 )
 def get_pick_list(pick_list_id: str, svc: WarehouseService = Depends(_svc)):
     from sqlalchemy import text
@@ -236,7 +245,7 @@ def get_pick_list(pick_list_id: str, svc: WarehouseService = Depends(_svc)):
 
 
 @router.post("/pick-lists/{pick_list_id}/confirm", summary="Pick list bestätigen",
-    response_model=dict
+    response_model=WarehouseWmsOut
 )
 def confirm_pick_list(
     pick_list_id: str,
@@ -252,7 +261,7 @@ def confirm_pick_list(
 # ── Transfers ──────────────────────────────────────────────────────────────
 
 @router.post("/bin-transfers", status_code=status.HTTP_201_CREATED, summary="Transfer bin",
-    response_model=dict
+    response_model=WarehouseWmsOut
 )
 def bin_transfer(payload: BinTransferIn, svc: WarehouseService = Depends(_svc)):
     from datetime import date as date_type
@@ -273,7 +282,7 @@ def bin_transfer(payload: BinTransferIn, svc: WarehouseService = Depends(_svc)):
 # ── MHD Ampel ─────────────────────────────────────────────────────────────
 
 @router.get("/mhd-alert", summary="Alert mhd",
-    response_model=dict
+    response_model=WarehouseWmsOut
 )
 def mhd_alert(
     warehouse_id: str = Query(...),
@@ -287,7 +296,7 @@ def mhd_alert(
 # ── Stock Valuation ────────────────────────────────────────────────────────
 
 @router.get("/stock-valuation", summary="Valuation stock",
-    response_model=dict
+    response_model=WarehouseWmsOut
 )
 def stock_valuation(
     warehouse_id: Optional[str] = Query(None),

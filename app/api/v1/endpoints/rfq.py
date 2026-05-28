@@ -22,6 +22,14 @@ from sqlalchemy.orm import Session
 from app.core.database import get_db
 from app.core.tenant import get_tenant_id
 
+from app.api.v1.schemas.base import BaseSchema
+from pydantic import ConfigDict as _ConfigDict
+
+
+class RfqOut(BaseSchema):
+    model_config = _ConfigDict(extra="allow")
+
+
 router = APIRouter(prefix="/einkauf/rfq", tags=["einkauf", "rfq"])
 
 
@@ -98,7 +106,7 @@ def _get_rfq(db: Session, rfq_id: int, tenant_id: str) -> Any:
 # ─────────────────────────────────────────────────────────────────────────────
 
 @router.get("", summary="Rfq auflisten",
-    response_model=list
+    response_model=list[RfqOut]
 )
 def list_rfq(
     db: Session = Depends(get_db),
@@ -131,7 +139,7 @@ def list_rfq(
 
 
 @router.post("", summary="Rfq anlegen",
-    response_model=dict
+    response_model=RfqOut
 )
 def create_rfq(
     body: RfqCreate,
@@ -170,7 +178,7 @@ def create_rfq(
 
 
 @router.get("/{rfq_id}", summary="Rfq abrufen",
-    response_model=dict
+    response_model=RfqOut
 )
 def get_rfq(
     rfq_id: int,
@@ -215,7 +223,7 @@ def get_rfq(
 
 
 @router.post("/{rfq_id}/send", summary="Rfq senden",
-    response_model=dict
+    response_model=RfqOut
 )
 def send_rfq(
     rfq_id: int,
@@ -254,7 +262,7 @@ def send_rfq(
 
 
 @router.post("/{rfq_id}/quotes", summary="Quote hinzufügen",
-    response_model=dict
+    response_model=RfqOut
 )
 def add_quote(
     rfq_id: int,
@@ -311,7 +319,7 @@ def add_quote(
 
 
 @router.get("/{rfq_id}/comparison", summary="Quotes compare",
-    response_model=dict
+    response_model=RfqOut
 )
 def compare_quotes(
     rfq_id: int,
@@ -360,7 +368,7 @@ def compare_quotes(
 
 
 @router.post("/{rfq_id}/accept/{quote_id}", summary="Quote akzeptieren",
-    response_model=dict
+    response_model=RfqOut
 )
 def accept_quote(
     rfq_id: int,

@@ -1,8 +1,8 @@
 id: SLICE-013C-VOICE-WHISPERBAR-SHORTCUTS-001
 title: Slice-013c — WhisperBar Shortcuts (Browser + AutoHotkey)
 owner: Claude Sonnet 4.6
-status: reserviert
-claimed_at: 2026-05-27
+status: abgeschlossen
+completed_at: 2026-05-27
 depends_on:
   - SLICE-013B-VOICE-SUMMARY-TTS-001
 goal: >

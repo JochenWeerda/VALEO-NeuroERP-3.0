@@ -23,6 +23,14 @@ from ....core.database import get_db
 
 logger = logging.getLogger(__name__)
 
+from app.api.v1.schemas.base import BaseSchema
+from pydantic import ConfigDict as _ConfigDict
+
+
+class CompatFlexOut(BaseSchema):
+    model_config = _ConfigDict(extra="allow")
+
+
 router = APIRouter(prefix="/subsidiary-ledger-reconciliation", tags=["finance", "reconciliation"])
 
 
@@ -493,7 +501,7 @@ async def get_reconciliation_details(
 
 
 @router.get("/{ledger_type}/export", summary="Reconciliation csv exportieren",
-    response_model=dict
+    response_model=CompatFlexOut
 )
 async def export_reconciliation_csv(
     ledger_type: str,
@@ -557,7 +565,7 @@ async def export_reconciliation_csv(
         raise HTTPException(status_code=500, detail=f"Failed to export reconciliation CSV: {str(e)}")
 
 
-@router.get("/summary", response_model=Dict[str, Any], summary="Reconciliation summary abrufen")
+@router.get("/summary", response_model=CompatFlexOut, summary="Reconciliation summary abrufen")
 async def get_reconciliation_summary(
     period: str = Query(..., description="Accounting period (YYYY-MM)"),
     tenant_id: str = Depends(get_tenant_id),

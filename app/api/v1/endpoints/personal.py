@@ -18,6 +18,15 @@ from app.core.exceptions import ConflictError, EntityNotFoundError
 from app.core.tenant import get_tenant_id
 from app.services.personal_service import PersonalService
 
+from app.api.v1.schemas.base import BaseSchema
+from pydantic import ConfigDict as _ConfigDict
+
+
+class PersonalOut(BaseSchema):
+    """Typed response schema for PersonalOut endpoints (extra fields forwarded)."""
+    model_config = _ConfigDict(extra="allow")
+
+
 router = APIRouter(prefix="/personal", tags=["personal", "hr"])
 
 
@@ -3695,7 +3704,7 @@ async def get_time_cockpit(
 
 
 @router.post("/stundenzettel", summary="Stundenzettel anlegen",
-    response_model=dict
+    response_model=PersonalOut
 )
 async def create_stundenzettel(
     payload: StundenzettelIn,
@@ -3859,7 +3868,7 @@ async def create_driver_time_event(
 
 
 @router.get("/driver-time/events", summary="Driver time events auflisten",
-    response_model=dict
+    response_model=PersonalOut
 )
 async def list_driver_time_events(
     employee_ref: str | None = Query(default=None),
@@ -3930,7 +3939,7 @@ async def get_driver_time_absence_collisions(
 
 
 @router.get("/driver-time/events/{event_id}", summary="Driver time event abrufen",
-    response_model=dict
+    response_model=PersonalOut
 )
 async def get_driver_time_event(
     event_id: str,
@@ -3947,7 +3956,7 @@ async def get_driver_time_event(
 
 
 @router.patch("/driver-time/events/{event_id}", summary="Driver time event aktualisieren",
-    response_model=dict
+    response_model=PersonalOut
 )
 async def update_driver_time_event(
     event_id: str,
@@ -4050,7 +4059,7 @@ async def get_org_chart(
 
 
 @router.get("/org-chart/{unit_id}", summary="Org subtree abrufen",
-    response_model=dict
+    response_model=PersonalOut
 )
 async def get_org_subtree(
     unit_id: str,
@@ -4090,7 +4099,7 @@ async def get_org_subtree(
 
 
 @router.post("/org-units", status_code=201, summary="Org unit anlegen",
-    response_model=dict
+    response_model=PersonalOut
 )
 async def create_org_unit(
     payload: OrgUnitIn,
@@ -4126,7 +4135,7 @@ async def create_org_unit(
 
 
 @router.patch("/org-units/{unit_id}", summary="Org unit aktualisieren",
-    response_model=dict
+    response_model=PersonalOut
 )
 async def patch_org_unit(
     unit_id: str,
@@ -4165,7 +4174,7 @@ class TimeAccountAdjustIn(BaseModel):
 
 
 @router.get("/time-accounts/{employee_ref}", summary="Time account abrufen",
-    response_model=dict
+    response_model=PersonalOut
 )
 async def get_time_account(
     employee_ref: str,
@@ -4231,7 +4240,7 @@ async def get_time_account(
 
 
 @router.post("/time-accounts/{employee_ref}/adjust", status_code=201, summary="Time account adjust",
-    response_model=dict
+    response_model=PersonalOut
 )
 async def adjust_time_account(
     employee_ref: str,
@@ -4285,7 +4294,7 @@ class ApplicationStagePatch(BaseModel):
 
 
 @router.get("/applications", summary="Applications auflisten",
-    response_model=list
+    response_model=list[PersonalOut]
 )
 async def list_applications(
     status: str | None = Query(None),
@@ -4314,7 +4323,7 @@ async def list_applications(
 
 
 @router.post("/applications", status_code=201, summary="Application anlegen",
-    response_model=dict
+    response_model=PersonalOut
 )
 async def create_application(
     payload: ApplicationIn,
@@ -4350,7 +4359,7 @@ async def create_application(
 
 
 @router.patch("/applications/{application_id}/stage", summary="Application stage aktualisieren",
-    response_model=dict
+    response_model=PersonalOut
 )
 async def update_application_stage(
     application_id: str,
@@ -4401,7 +4410,7 @@ class LohnBerechnungRequest(BaseModel):
 @router.post(
     "/lohn/berechnung",
     summary="Brutto-Netto-Berechnung (§ 38 EStG, SGB IV 2025)",
-    response_model=dict,
+    response_model=PersonalOut,
 )
 async def berechne_lohn(
     payload: LohnBerechnungRequest,

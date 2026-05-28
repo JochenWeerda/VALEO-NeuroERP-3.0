@@ -19,6 +19,14 @@ from ....finance.export_datev import DATEVExporter
 from ..schemas.base import PaginatedResponse
 from ..schemas.finance import Account, AccountCreate, AccountUpdate
 
+from app.api.v1.schemas.base import BaseSchema
+from pydantic import ConfigDict as _ConfigDict
+
+
+class CompatFlexOut(BaseSchema):
+    model_config = _ConfigDict(extra="allow")
+
+
 router = APIRouter(prefix="/chart-of-accounts")
 
 DEFAULT_TENANT = settings.DEFAULT_TENANT_ID
@@ -130,7 +138,7 @@ async def update_account(
 
 
 @router.delete("/{account_id}", summary="Account löschen",
-    response_model=dict
+    response_model=CompatFlexOut
 )
 async def delete_account(account_id: str, request: Request, db: Session = Depends(get_db)):
     """Delete an account (soft delete by setting is_active to False)."""
@@ -188,7 +196,7 @@ async def validate_chart_of_accounts(
 
 
 @router.post("/datev-export", summary="Export chart of accounts datev",
-    response_model=dict
+    response_model=CompatFlexOut
 )
 async def datev_export_chart_of_accounts(
     von_datum: str = Query(..., description="Start date YYYY-MM-DD"),

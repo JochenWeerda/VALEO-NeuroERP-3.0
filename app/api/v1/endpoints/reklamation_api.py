@@ -13,6 +13,15 @@ from app.core.database import get_db
 from app.core.reklamation import Reklamation, ReklamationsStatus, ReklamationsTyp
 from app.domains.operations.models import ReklamationDB
 
+from app.api.v1.schemas.base import BaseSchema
+from pydantic import ConfigDict as _ConfigDict
+
+
+class ReklamationOut(BaseSchema):
+    """Typed response schema for ReklamationOut endpoints (extra fields forwarded)."""
+    model_config = _ConfigDict(extra="allow")
+
+
 router = APIRouter(prefix="/reklamationen", tags=["reklamationen"])
 
 # Kept for test-fixture compatibility (wave8 e2e tests call _store.clear()).
@@ -116,7 +125,7 @@ def _add_audit(row: ReklamationDB, aktion: str, aktor_id: str, kommentar: Option
 
 
 @router.post("", status_code=201, summary="Reklamation anlegen",
-    response_model=dict
+    response_model=ReklamationOut
 )
 def create_reklamation(req: ReklamationCreateRequest, db: Session = Depends(get_db)):
     ReklamationsTyp(req.typ)  # validate
@@ -149,7 +158,7 @@ def create_reklamation(req: ReklamationCreateRequest, db: Session = Depends(get_
 
 
 @router.get("/{reklamation_id}", summary="Reklamation abrufen",
-    response_model=dict
+    response_model=ReklamationOut
 )
 def get_reklamation(reklamation_id: str, db: Session = Depends(get_db)):
     row = db.query(ReklamationDB).filter(ReklamationDB.reklamation_id == reklamation_id).first()
@@ -159,7 +168,7 @@ def get_reklamation(reklamation_id: str, db: Session = Depends(get_db)):
 
 
 @router.get("/{reklamation_id}/audit", summary="Audit trail abrufen",
-    response_model=dict
+    response_model=ReklamationOut
 )
 def get_audit_trail(reklamation_id: str, db: Session = Depends(get_db)):
     row = db.query(ReklamationDB).filter(ReklamationDB.reklamation_id == reklamation_id).first()
@@ -175,7 +184,7 @@ def get_audit_trail(reklamation_id: str, db: Session = Depends(get_db)):
 
 
 @router.get("/{reklamation_id}/e2e", summary="E2e overview abrufen",
-    response_model=dict
+    response_model=ReklamationOut
 )
 def get_e2e_overview(reklamation_id: str, db: Session = Depends(get_db)):
     row = db.query(ReklamationDB).filter(ReklamationDB.reklamation_id == reklamation_id).first()
@@ -196,7 +205,7 @@ def get_e2e_overview(reklamation_id: str, db: Session = Depends(get_db)):
 
 
 @router.post("/{reklamation_id}/transition", summary="Status transition",
-    response_model=dict
+    response_model=ReklamationOut
 )
 def transition_status(
     reklamation_id: str,
@@ -220,7 +229,7 @@ def transition_status(
 
 
 @router.post("/{reklamation_id}/crm-reference", summary="Crm reference aktualisieren",
-    response_model=dict
+    response_model=ReklamationOut
 )
 def update_crm_reference(reklamation_id: str, req: ReklamationReferenzUpdateRequest, db: Session = Depends(get_db)):
     row = db.query(ReklamationDB).filter(ReklamationDB.reklamation_id == reklamation_id).first()
@@ -236,7 +245,7 @@ def update_crm_reference(reklamation_id: str, req: ReklamationReferenzUpdateRequ
 
 
 @router.post("/{reklamation_id}/dms-referenzen", summary="Dms referenzen hinzufügen",
-    response_model=dict
+    response_model=ReklamationOut
 )
 def add_dms_referenzen(reklamation_id: str, req: ReklamationReferenzUpdateRequest, db: Session = Depends(get_db)):
     row = db.query(ReklamationDB).filter(ReklamationDB.reklamation_id == reklamation_id).first()
@@ -260,7 +269,7 @@ def add_dms_referenzen(reklamation_id: str, req: ReklamationReferenzUpdateReques
 
 
 @router.get("/crm/{crm_case_id}", summary="By crm case abrufen",
-    response_model=list
+    response_model=list[ReklamationOut]
 )
 def get_by_crm_case(crm_case_id: str, db: Session = Depends(get_db)):
     rows = db.query(ReklamationDB).filter(
@@ -270,7 +279,7 @@ def get_by_crm_case(crm_case_id: str, db: Session = Depends(get_db)):
 
 
 @router.get("/offene/{tenant_id}", summary="Offene abrufen",
-    response_model=list
+    response_model=list[ReklamationOut]
 )
 def get_offene(tenant_id: str, db: Session = Depends(get_db)):
     rows = db.query(ReklamationDB).filter(
@@ -281,7 +290,7 @@ def get_offene(tenant_id: str, db: Session = Depends(get_db)):
 
 
 @router.get("/ueberfaellige/{tenant_id}", summary="Ueberfaellige abrufen",
-    response_model=list
+    response_model=list[ReklamationOut]
 )
 def get_ueberfaellige(tenant_id: str, db: Session = Depends(get_db)):
     rows = db.query(ReklamationDB).filter(

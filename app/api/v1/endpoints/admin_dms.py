@@ -15,6 +15,14 @@ from pydantic import BaseModel
 
 logger = logging.getLogger(__name__)
 
+from app.api.v1.schemas.base import BaseSchema
+from pydantic import ConfigDict as _ConfigDict
+
+
+class CompatFlexOut(BaseSchema):
+    model_config = _ConfigDict(extra="allow")
+
+
 router = APIRouter(prefix="/admin/dms")
 
 # Pfad zur DMS-Konfigurationsdatei (identisch mit dms_client.py)

@@ -1,10 +1,10 @@
-"""
+﻿"""
 CRM Campaign Management API
 Full CRUD + State Machine + Templates + Recipients + Analytics
 
 State Machine:
-  draft → active → paused → active → completed → archived
-  draft → archived (discard)
+  draft â†’ active â†’ paused â†’ active â†’ completed â†’ archived
+  draft â†’ archived (discard)
 """
 
 from __future__ import annotations
@@ -22,9 +22,18 @@ from sqlalchemy import text
 from app.core.database import get_db
 from app.core.uuid7 import uuid7
 
+from app.api.v1.schemas.base import BaseSchema
+from pydantic import ConfigDict as _ConfigDict
+
+
+class CrmCampaignOut(BaseSchema):
+    """Typed response schema for CrmCampaignOut endpoints (extra fields forwarded)."""
+    model_config = _ConfigDict(extra="allow")
+
+
 router = APIRouter(prefix="/crm/campaigns", tags=["crm", "campaigns", "marketing"])
 
-# ─── Pydantic Schemas ─────────────────────────────────────────────────────────
+# â”€â”€â”€ Pydantic Schemas â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 class TemplateCreate(BaseModel):
     name: str = Field(..., min_length=1, max_length=255)
@@ -104,7 +113,7 @@ class RecipientStatusUpdate(BaseModel):
     bounce_reason: Optional[str] = None
 
 
-# ─── Helpers ──────────────────────────────────────────────────────────────────
+# â”€â”€â”€ Helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 def _dt(v: Any) -> Optional[str]:
     if v is None:
@@ -188,13 +197,13 @@ def _assert_transition(current: str, target: str) -> None:
     if target not in allowed:
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-            detail=f"Statusübergang '{current}' → '{target}' ist nicht erlaubt. Erlaubt: {allowed}",
+            detail=f"StatusÃ¼bergang '{current}' â†’ '{target}' ist nicht erlaubt. Erlaubt: {allowed}",
         )
 
 
-# ─── Campaign Templates ───────────────────────────────────────────────────────
+# â”€â”€â”€ Campaign Templates â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
-@router.get("/templates", response_model=List[dict], summary="Templates auflisten")
+@router.get("/templates", response_model=list[CrmCampaignOut], summary="Templates auflisten")
 async def list_templates(
     tenant_id: str = Query("system"),
     is_active: Optional[bool] = Query(None),
@@ -207,13 +216,13 @@ async def list_templates(
         filters += " AND is_active = :active"
         params["active"] = is_active
     rows = db.execute(
-        text(f"SELECT * FROM domain_crm.crm_campaign_templates {filters} ORDER BY name"),  # nosec S608 — reviewed-safe: column names code-controlled, values parameterized
+        text(f"SELECT * FROM domain_crm.crm_campaign_templates {filters} ORDER BY name"),  # nosec S608 â€” reviewed-safe: column names code-controlled, values parameterized
         params,
     ).fetchall()
     return [_row_to_template(r) for r in rows]
 
 
-@router.post("/templates", response_model=dict, status_code=201, summary="Template anlegen")
+@router.post("/templates", response_model=CrmCampaignOut, status_code=201, summary="Template anlegen")
 async def create_template(
     payload: TemplateCreate,
     tenant_id: str = Query("system"),
@@ -246,7 +255,7 @@ async def create_template(
     return _row_to_template(row)
 
 
-@router.get("/templates/{template_id}", response_model=dict, summary="Template abrufen")
+@router.get("/templates/{template_id}", response_model=CrmCampaignOut, summary="Template abrufen")
 async def get_template(
     template_id: str,
     tenant_id: str = Query("system"),
@@ -261,7 +270,7 @@ async def get_template(
     return _row_to_template(row)
 
 
-@router.put("/templates/{template_id}", response_model=dict, summary="Template aktualisieren")
+@router.put("/templates/{template_id}", response_model=CrmCampaignOut, summary="Template aktualisieren")
 async def update_template(
     template_id: str,
     payload: TemplateUpdate,
@@ -284,7 +293,7 @@ async def update_template(
     updates["tid"] = tenant_id
     updates["now"] = datetime.utcnow()
     db.execute(
-        text(f"UPDATE domain_crm.crm_campaign_templates SET {set_clauses}, updated_at = :now WHERE id = :id AND tenant_id = :tid"),  # nosec S608 — reviewed-safe: column names code-controlled, values parameterized
+        text(f"UPDATE domain_crm.crm_campaign_templates SET {set_clauses}, updated_at = :now WHERE id = :id AND tenant_id = :tid"),  # nosec S608 â€” reviewed-safe: column names code-controlled, values parameterized
         updates,
     )
     db.commit()
@@ -295,7 +304,7 @@ async def update_template(
     return _row_to_template(updated)
 
 
-@router.post("/templates/{template_id}/duplicate", response_model=dict, status_code=201, summary="Template duplicate")
+@router.post("/templates/{template_id}/duplicate", response_model=CrmCampaignOut, status_code=201, summary="Template duplicate")
 async def duplicate_template(
     template_id: str,
     tenant_id: str = Query("system"),
@@ -336,7 +345,7 @@ async def duplicate_template(
     return _row_to_template(copy)
 
 
-@router.post("/templates/{template_id}/activate", response_model=dict, summary="Template aktivieren")
+@router.post("/templates/{template_id}/activate", response_model=CrmCampaignOut, summary="Template aktivieren")
 async def activate_template(
     template_id: str,
     tenant_id: str = Query("system"),
@@ -356,7 +365,7 @@ async def activate_template(
     return _row_to_template(row)
 
 
-@router.post("/templates/{template_id}/deactivate", response_model=dict, summary="Template deaktivieren")
+@router.post("/templates/{template_id}/deactivate", response_model=CrmCampaignOut, summary="Template deaktivieren")
 async def deactivate_template(
     template_id: str,
     tenant_id: str = Query("system"),
@@ -376,7 +385,7 @@ async def deactivate_template(
     return _row_to_template(row)
 
 
-@router.delete("/templates/{template_id}", status_code=204, response_class=Response, summary="Template löschen")
+@router.delete("/templates/{template_id}", status_code=204, response_class=Response, summary="Template lÃ¶schen")
 async def delete_template(
     template_id: str,
     tenant_id: str = Query("system"),
@@ -392,9 +401,9 @@ async def delete_template(
     return Response(status_code=204)
 
 
-# ─── Campaigns CRUD ───────────────────────────────────────────────────────────
+# â”€â”€â”€ Campaigns CRUD â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
-@router.get("", response_model=List[dict], summary="Campaigns auflisten")
+@router.get("", response_model=list[CrmCampaignOut], summary="Campaigns auflisten")
 async def list_campaigns(
     tenant_id: str = Query("system"),
     state: Optional[str] = Query(None),
@@ -411,13 +420,13 @@ async def list_campaigns(
         filters += " AND campaign_type = :ctype"
         params["ctype"] = campaign_type
     rows = db.execute(
-        text(f"SELECT * FROM domain_crm.crm_campaigns {filters} ORDER BY created_at DESC"),  # nosec S608 — reviewed-safe: column names code-controlled, values parameterized
+        text(f"SELECT * FROM domain_crm.crm_campaigns {filters} ORDER BY created_at DESC"),  # nosec S608 â€” reviewed-safe: column names code-controlled, values parameterized
         params,
     ).fetchall()
     return [_row_to_campaign(r) for r in rows]
 
 
-@router.post("", response_model=dict, status_code=201, summary="Campaign anlegen")
+@router.post("", response_model=CrmCampaignOut, status_code=201, summary="Campaign anlegen")
 async def create_campaign(
     payload: CampaignCreate,
     tenant_id: str = Query("system"),
@@ -466,7 +475,7 @@ async def create_campaign(
     return _row_to_campaign(row)
 
 
-@router.get("/{campaign_id}", response_model=dict, summary="Campaign abrufen")
+@router.get("/{campaign_id}", response_model=CrmCampaignOut, summary="Campaign abrufen")
 async def get_campaign(
     campaign_id: str,
     tenant_id: str = Query("system"),
@@ -481,7 +490,7 @@ async def get_campaign(
     return _row_to_campaign(row)
 
 
-@router.put("/{campaign_id}", response_model=dict, summary="Campaign aktualisieren")
+@router.put("/{campaign_id}", response_model=CrmCampaignOut, summary="Campaign aktualisieren")
 async def update_campaign(
     campaign_id: str,
     payload: CampaignUpdate,
@@ -506,7 +515,7 @@ async def update_campaign(
     updates["tid"] = tenant_id
     updates["now"] = datetime.utcnow()
     db.execute(
-        text(f"UPDATE domain_crm.crm_campaigns SET {set_clauses}, updated_at = :now WHERE id = :id AND tenant_id = :tid"),  # nosec S608 — reviewed-safe: column names code-controlled, values parameterized
+        text(f"UPDATE domain_crm.crm_campaigns SET {set_clauses}, updated_at = :now WHERE id = :id AND tenant_id = :tid"),  # nosec S608 â€” reviewed-safe: column names code-controlled, values parameterized
         updates,
     )
     db.commit()
@@ -517,7 +526,7 @@ async def update_campaign(
     return _row_to_campaign(updated)
 
 
-@router.delete("/{campaign_id}", status_code=204, response_class=Response, summary="Campaign löschen")
+@router.delete("/{campaign_id}", status_code=204, response_class=Response, summary="Campaign lÃ¶schen")
 async def delete_campaign(
     campaign_id: str,
     tenant_id: str = Query("system"),
@@ -530,7 +539,7 @@ async def delete_campaign(
     if not row:
         raise HTTPException(status_code=404, detail="Kampagne nicht gefunden")
     if row.state not in ("draft", "archived"):
-        raise HTTPException(status_code=422, detail="Nur Entwürfe und archivierte Kampagnen können gelöscht werden.")
+        raise HTTPException(status_code=422, detail="Nur EntwÃ¼rfe und archivierte Kampagnen kÃ¶nnen gelÃ¶scht werden.")
     db.execute(
         text("DELETE FROM domain_crm.crm_campaigns WHERE id = :id AND tenant_id = :tid"),
         {"id": campaign_id, "tid": tenant_id},
@@ -539,7 +548,7 @@ async def delete_campaign(
     return Response(status_code=204)
 
 
-# ─── State Machine ────────────────────────────────────────────────────────────
+# â”€â”€â”€ State Machine â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 def _transition(campaign_id: str, tenant_id: str, target: str, db: Session) -> dict:
     row = db.execute(
@@ -562,7 +571,7 @@ def _transition(campaign_id: str, tenant_id: str, target: str, db: Session) -> d
     ts_fields["id"] = campaign_id
     ts_fields["tid"] = tenant_id
     db.execute(
-        text(f"UPDATE domain_crm.crm_campaigns SET {set_clauses} WHERE id = :id AND tenant_id = :tid"),  # nosec S608 — reviewed-safe: column names code-controlled, values parameterized
+        text(f"UPDATE domain_crm.crm_campaigns SET {set_clauses} WHERE id = :id AND tenant_id = :tid"),  # nosec S608 â€” reviewed-safe: column names code-controlled, values parameterized
         ts_fields,
     )
     db.commit()
@@ -573,39 +582,39 @@ def _transition(campaign_id: str, tenant_id: str, target: str, db: Session) -> d
     return _row_to_campaign(updated)
 
 
-@router.post("/{campaign_id}/activate", response_model=dict, summary="Campaign aktivieren")
+@router.post("/{campaign_id}/activate", response_model=CrmCampaignOut, summary="Campaign aktivieren")
 async def activate_campaign(
     campaign_id: str, tenant_id: str = Query("system"), db: Session = Depends(get_db)
 ) -> dict:
-    """Kampagne aktivieren (draft/paused → active)"""
+    """Kampagne aktivieren (draft/paused â†’ active)"""
     return _transition(campaign_id, tenant_id, "active", db)
 
 
-@router.post("/{campaign_id}/pause", response_model=dict, summary="Campaign pausieren")
+@router.post("/{campaign_id}/pause", response_model=CrmCampaignOut, summary="Campaign pausieren")
 async def pause_campaign(
     campaign_id: str, tenant_id: str = Query("system"), db: Session = Depends(get_db)
 ) -> dict:
-    """Kampagne pausieren (active → paused)"""
+    """Kampagne pausieren (active â†’ paused)"""
     return _transition(campaign_id, tenant_id, "paused", db)
 
 
-@router.post("/{campaign_id}/resume", response_model=dict, summary="Campaign fortsetzen")
+@router.post("/{campaign_id}/resume", response_model=CrmCampaignOut, summary="Campaign fortsetzen")
 async def resume_campaign(
     campaign_id: str, tenant_id: str = Query("system"), db: Session = Depends(get_db)
 ) -> dict:
-    """Pausierte Kampagne fortsetzen (paused → active)"""
+    """Pausierte Kampagne fortsetzen (paused â†’ active)"""
     return _transition(campaign_id, tenant_id, "active", db)
 
 
-@router.post("/{campaign_id}/complete", response_model=dict, summary="Campaign complete")
+@router.post("/{campaign_id}/complete", response_model=CrmCampaignOut, summary="Campaign complete")
 async def complete_campaign(
     campaign_id: str, tenant_id: str = Query("system"), db: Session = Depends(get_db)
 ) -> dict:
-    """Kampagne abschließen (active → completed)"""
+    """Kampagne abschlieÃŸen (active â†’ completed)"""
     return _transition(campaign_id, tenant_id, "completed", db)
 
 
-@router.post("/{campaign_id}/archive", response_model=dict, summary="Campaign archivieren")
+@router.post("/{campaign_id}/archive", response_model=CrmCampaignOut, summary="Campaign archivieren")
 async def archive_campaign(
     campaign_id: str, tenant_id: str = Query("system"), db: Session = Depends(get_db)
 ) -> dict:
@@ -613,16 +622,16 @@ async def archive_campaign(
     return _transition(campaign_id, tenant_id, "archived", db)
 
 
-# ─── Recipients ───────────────────────────────────────────────────────────────
+# â”€â”€â”€ Recipients â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
-@router.get("/{campaign_id}/recipients", response_model=List[dict], summary="Recipients auflisten")
+@router.get("/{campaign_id}/recipients", response_model=list[CrmCampaignOut], summary="Recipients auflisten")
 async def list_recipients(
     campaign_id: str,
     tenant_id: str = Query("system"),
     status_filter: Optional[str] = Query(None, alias="status"),
     db: Session = Depends(get_db),
 ) -> List[dict]:
-    """Empfänger einer Kampagne auflisten"""
+    """EmpfÃ¤nger einer Kampagne auflisten"""
     sql = "SELECT * FROM domain_crm.crm_campaign_recipients WHERE campaign_id = :cid AND tenant_id = :tid"
     params: dict = {"cid": campaign_id, "tid": tenant_id}
     if status_filter:
@@ -642,20 +651,20 @@ async def list_recipients(
     ]
 
 
-@router.post("/{campaign_id}/recipients", response_model=dict, status_code=201, summary="Recipient hinzufügen")
+@router.post("/{campaign_id}/recipients", response_model=CrmCampaignOut, status_code=201, summary="Recipient hinzufÃ¼gen")
 async def add_recipient(
     campaign_id: str,
     payload: RecipientAdd,
     tenant_id: str = Query("system"),
     db: Session = Depends(get_db),
 ) -> dict:
-    """Empfänger zu Kampagne hinzufügen"""
+    """EmpfÃ¤nger zu Kampagne hinzufÃ¼gen"""
     existing = db.execute(
         text("SELECT id FROM domain_crm.crm_campaign_recipients WHERE campaign_id = :cid AND recipient_id = :rid"),
         {"cid": campaign_id, "rid": payload.recipient_id},
     ).fetchone()
     if existing:
-        raise HTTPException(status_code=409, detail="Empfänger bereits in dieser Kampagne vorhanden")
+        raise HTTPException(status_code=409, detail="EmpfÃ¤nger bereits in dieser Kampagne vorhanden")
 
     nid = uuid7()
     db.execute(
@@ -674,7 +683,7 @@ async def add_recipient(
     return {"id": nid, "campaign_id": campaign_id, "recipient_id": payload.recipient_id, "status": "queued"}
 
 
-@router.patch("/{campaign_id}/recipients/{recipient_id}", response_model=dict, summary="Recipient status aktualisieren")
+@router.patch("/{campaign_id}/recipients/{recipient_id}", response_model=CrmCampaignOut, summary="Recipient status aktualisieren")
 async def update_recipient_status(
     campaign_id: str,
     recipient_id: str,
@@ -682,7 +691,7 @@ async def update_recipient_status(
     tenant_id: str = Query("system"),
     db: Session = Depends(get_db),
 ) -> dict:
-    """Empfänger-Status aktualisieren (z.B. sent, opened, clicked, converted)"""
+    """EmpfÃ¤nger-Status aktualisieren (z.B. sent, opened, clicked, converted)"""
     ts_field = {"sent": "sent_at", "opened": "opened_at", "clicked": "clicked_at", "converted": "converted_at"}.get(payload.status)
     extra = f", {ts_field} = NOW()" if ts_field else ""
     bounce = ", bounce_reason = :bounce" if payload.bounce_reason else ""
@@ -692,11 +701,11 @@ async def update_recipient_status(
     if payload.bounce_reason:
         params["bounce"] = payload.bounce_reason
     result = db.execute(
-        text(f"UPDATE domain_crm.crm_campaign_recipients SET status = :status{extra}{bounce} WHERE campaign_id = :cid AND recipient_id = :rid AND tenant_id = :tid"),  # nosec S608 — reviewed-safe: column names code-controlled, values parameterized
+        text(f"UPDATE domain_crm.crm_campaign_recipients SET status = :status{extra}{bounce} WHERE campaign_id = :cid AND recipient_id = :rid AND tenant_id = :tid"),  # nosec S608 â€” reviewed-safe: column names code-controlled, values parameterized
         params,
     )
     if result.rowcount == 0:
-        raise HTTPException(status_code=404, detail="Empfänger nicht gefunden")
+        raise HTTPException(status_code=404, detail="EmpfÃ¤nger nicht gefunden")
     db.commit()
     # Rebuild KPI aggregates
     _rebuild_kpis(campaign_id, tenant_id, db)
@@ -707,7 +716,7 @@ async def update_recipient_status(
     return {"id": row.id, "campaign_id": campaign_id, "recipient_id": recipient_id, "status": row.status}
 
 
-# ─── Analytics ────────────────────────────────────────────────────────────────
+# â”€â”€â”€ Analytics â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 def _rebuild_kpis(campaign_id: str, tenant_id: str, db: Session) -> None:
     """KPI-Aggregation aus crm_campaign_recipients neu berechnen"""
@@ -745,7 +754,7 @@ def _rebuild_kpis(campaign_id: str, tenant_id: str, db: Session) -> None:
         db.commit()
 
 
-@router.get("/{campaign_id}/analytics", response_model=dict, summary="Analytics abrufen")
+@router.get("/{campaign_id}/analytics", response_model=CrmCampaignOut, summary="Analytics abrufen")
 async def get_analytics(
     campaign_id: str,
     tenant_id: str = Query("system"),
@@ -759,7 +768,7 @@ async def get_analytics(
     if not row:
         raise HTTPException(status_code=404, detail="Kampagne nicht gefunden")
 
-    # Zeitverlauf: täglich aggregiert
+    # Zeitverlauf: tÃ¤glich aggregiert
     timeline = db.execute(
         text("""
             SELECT
@@ -782,3 +791,4 @@ async def get_analytics(
         for t in timeline
     ]
     return campaign
+

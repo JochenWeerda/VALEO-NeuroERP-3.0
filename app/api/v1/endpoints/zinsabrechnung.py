@@ -21,6 +21,14 @@ from app.core.database import get_db
 from app.core.dependencies import get_tenant_id
 from app.core.uuid7 import uuid7
 
+from app.api.v1.schemas.base import BaseSchema
+from pydantic import ConfigDict as _ConfigDict
+
+
+class CompatFlexOut(BaseSchema):
+    model_config = _ConfigDict(extra="allow")
+
+
 router = APIRouter(prefix="/zinsabrechnung", tags=["Zinsabrechnung"])
 
 
@@ -150,7 +158,7 @@ def berechne_zinsabrechnung(
 
 
 @router.post("/{zins_id}/drucken", summary="Zinsabrechnung drucke",
-    response_model=dict
+    response_model=CompatFlexOut
 )
 def drucke_zinsabrechnung(
     zins_id: str,
