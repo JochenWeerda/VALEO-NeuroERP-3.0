@@ -14,6 +14,17 @@ scope:
   - services/ki-usability/app/api/v1/endpoints/voice.py
   - app/services/voice_adapter.py (Provider piper)
   - packages/frontend-web/src/features/ki-usability/
+file_ownership:
+  - docs/agent-ops/slices/SLICE-013B-VOICE-SUMMARY-TTS-001.yaml
+  - services/ki-usability/app/services/voice_summary.py
+  - services/ki-usability/app/services/local_tts.py
+  - services/ki-usability/app/api/v1/endpoints/voice.py
+  - app/services/voice_adapter.py
+  - packages/frontend-web/src/features/ki-usability/components/VoiceFeedback.tsx
+  - packages/frontend-web/src/features/ki-usability/hooks/useVoicePlayback.ts
+  - packages/frontend-web/src/features/ki-usability/components/VoiceButton.tsx
+  - packages/frontend-web/src/lib/api/voice.ts
+  - services/ki-usability/tests/test_voice_summary_tts.py
 acceptance_criteria:
   - POST /voice/summary liefert speakable Summary (~15s)
   - POST /voice/synthesize liefert audio_base64 (Piper) oder Browser-Hinweis

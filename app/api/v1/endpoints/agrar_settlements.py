@@ -16,7 +16,7 @@ from app.core.exceptions import ConflictError, EntityNotFoundError, ValidationFa
 from app.core.tenant import get_tenant_id
 from app.services.agrar_settlement_service import AgrarSettlementService
 from app.infrastructure.models import AgrarSettlement, AgrarSettlementDeduction
-from app.api.v1.endpoints.admin_core import _load_tenant_settings
+from app.services.admin_core_service import AdminCoreService
 
 from app.api.v1.schemas.base import BaseSchema
 from pydantic import ConfigDict as _ConfigDict
@@ -321,7 +321,7 @@ async def backfill_settlement_campaign_reference(
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
-    settings = _load_tenant_settings(db, tenant_id)
+    settings = AdminCoreService(db, tenant_id).load_tenant_settings()
     campaigns = settings.get("erntefenster_campaigns")
     campaign_list = [c for c in campaigns if isinstance(c, dict)] if isinstance(campaigns, list) else []
 

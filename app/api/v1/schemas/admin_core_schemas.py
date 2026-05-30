@@ -1,9 +1,10 @@
 """Pydantic schemas for the admin core domain."""
 from __future__ import annotations
 
-from typing import Any, Optional, List
-from pydantic import BaseModel, Field, ConfigDict
-from app.api.v1.schemas.base import BaseSchema
+from datetime import date, datetime
+from typing import Any
+
+from pydantic import BaseModel, Field
 
 
 class AdminUserOut(BaseModel):

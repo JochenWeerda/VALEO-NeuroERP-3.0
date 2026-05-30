@@ -14,6 +14,13 @@ new_intents:
   compliance: 5
   agrar: 8
   logistik: 5
+file_ownership:
+  - docs/agent-ops/slices/SLICE-012-VOICE-FIBU-COMPLIANCE-AGrar-LOGISTIK-001.yaml
+  - packages/frontend-web/src/features/ki-usability/components/ActionDispatchContext.tsx
+  - services/ki-usability/app/services/action_registry.py
+  - services/ki-usability/app/services/intent_resolver.py
+  - packages/frontend-web/src/app/navigation/ai-shortcuts.tsx
+  - services/ki-usability/tests/test_voice_intent_fibu_compliance_agrar_logistik.py
 acceptance_criteria:
   - 26 neue Intents registriert und routbar
   - pytest gruen (gesamt Voice-Suite)

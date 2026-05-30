@@ -230,6 +230,15 @@ class SystemStatusEvidenceOut(BaseModel):
     notes: str
 
 
+class DiagnosticManifestItemOut(BaseModel):
+    key: str
+    label: str
+    source: str
+    collection_status: Literal["not_collected"]
+    redaction: Literal["required", "metadata_only"]
+    notes: str
+
+
 def _evidence(
     *,
     key: str,
@@ -580,6 +589,18 @@ def _system_status_catalog() -> list[SystemStatusEvidenceOut]:
     ]
 
 
+def _diagnostic_manifest() -> list[DiagnosticManifestItemOut]:
+    return [
+        DiagnosticManifestItemOut(key="release_metadata", label="Release-Metadaten", source="docs/architecture/process-kernel/STATUS.md", collection_status="not_collected", redaction="metadata_only", notes="Commit, Version und Deployment-Referenz duerfen erst durch einen spaeteren Adapter gesammelt werden."),
+        DiagnosticManifestItemOut(key="health_summary", label="Health-Zusammenfassung", source="/api/v1/admin-suite/system-status", collection_status="not_collected", redaction="metadata_only", notes="Nur normalisierte Probe-Ergebnisse; keine Rohantworten oder Umgebungsvariablen."),
+        DiagnosticManifestItemOut(key="migration_summary", label="Migrationsstand", source="scripts/check_alembic_single_head.py", collection_status="not_collected", redaction="metadata_only", notes="Nur Revisionskennungen und Ergebnisstatus; keine Connection Strings."),
+        DiagnosticManifestItemOut(key="connector_summary", label="Connector-Konfiguration", source="/api/v1/admin-suite/connectors", collection_status="not_collected", redaction="required", notes="Nur redigierte Metadaten; keine Tokens, Secrets, URLs mit Credentials oder Payloads."),
+        DiagnosticManifestItemOut(key="event_bus_summary", label="Event-Bus-Metriken", source="monitoring/grafana/dashboards/event-bus-dashboard.json", collection_status="not_collected", redaction="required", notes="Nur aggregierte Zaehler und Statuswerte; keine Event-Payloads."),
+        DiagnosticManifestItemOut(key="worker_summary", label="Worker- und Jobstatus", source="app/workers", collection_status="not_collected", redaction="required", notes="Nur Jobname, Zustand und Zeitstempel; keine fachlichen Payloads oder personenbezogenen Daten."),
+        DiagnosticManifestItemOut(key="audit_summary", label="Audit-Zusammenfassung", source="/api/v1/admin/audit-log", collection_status="not_collected", redaction="required", notes="Nur aggregierte Anzahl und Zeitraum; keine Audit-Rohdaten im automatischen Supportpaket."),
+    ]
+
+
 @router.get("/readiness", response_model=AdminSuiteReadinessOut, summary="Admin Suite readiness abrufen")
 async def get_admin_suite_readiness() -> AdminSuiteReadinessOut:
     """Liefert konservative Go-Live-Evidenz ohne externe Live-Probes."""
@@ -753,3 +774,9 @@ async def get_compliance_center() -> list[ComplianceEvidenceOut]:
 async def get_system_status_center() -> list[SystemStatusEvidenceOut]:
     """Liefert Runtime-Probe-Metadaten ohne Live-Probes auszuloesen."""
     return _system_status_catalog()
+
+
+@router.get("/diagnostics", response_model=list[DiagnosticManifestItemOut], summary="Diagnosepaket Manifest abrufen")
+async def get_diagnostic_manifest() -> list[DiagnosticManifestItemOut]:
+    """Liefert erlaubte Diagnosekategorien ohne Daten zu sammeln oder zu exportieren."""
+    return _diagnostic_manifest()

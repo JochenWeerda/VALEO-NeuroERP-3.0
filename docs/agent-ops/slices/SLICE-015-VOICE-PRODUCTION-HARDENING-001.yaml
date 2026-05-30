@@ -14,6 +14,15 @@ scope:
   - docker-compose.voice.yml
   - packages/frontend-web/tests/e2e/slice-015-voice-whisperbar.spec.ts
   - packages/frontend-web/src/features/copilot/
+file_ownership:
+  - docs/agent-ops/slices/SLICE-015-VOICE-PRODUCTION-HARDENING-001.yaml
+  - services/ki-usability/Dockerfile.voice
+  - services/ki-usability/app/services/voice_status.py
+  - docker-compose.voice.yml
+  - packages/frontend-web/tests/e2e/slice-015-voice-whisperbar.spec.ts
+  - packages/frontend-web/src/features/copilot/useVoiceCopilotSummary.ts
+  - packages/frontend-web/src/features/copilot/CopilotDockPanel.tsx
+  - services/ki-usability/tests/test_voice_status.py
 acceptance_criteria:
   - Dockerfile.voice installiert faster-whisper + ffmpeg
   - GET /voice/status liefert stt_ready, tts_ready, ollama_reachable
