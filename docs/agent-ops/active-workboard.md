@@ -2,6 +2,16 @@
 
 Stand: `2026-05-26`
 
+## ADMIN-SUITE-001
+
+**Von:** Codex
+**Owner:** Codex
+**Stand:** reserviert 2026-05-30
+**Ziel des Slices:** Additive Grundstruktur fuer die VALEO Admin Suite mit zentralem Production-Readiness-Dashboard unter `/admin-suite`, ohne bestehende Health-, Integrations- oder Admin-Pfade zu duplizieren.
+**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/agent-ops/slices/ADMIN-SUITE-001.yaml`, `docs/project-context/admin-suite-roadmap-2026-05-30.md`, `app/api/v1/endpoints/admin_suite.py`, `app/api/v1/api.py`, `tests/test_admin_suite_readiness.py`, `packages/frontend-web/src/lib/api/admin-suite.ts`, `packages/frontend-web/src/pages/admin-suite/index.tsx`, `packages/frontend-web/src/app/navigation/domains/core.tsx`, fokussierte Frontend-Tests und generierte Route-Dateien falls erforderlich.
+**Abnahmekriterien:** `/api/v1/admin-suite/readiness` liefert nachvollziehbare Evidenz mit `ready`, `warning`, `blocked` oder `unchecked`; unbekannte oder externe Nachweise werden nie als Erfolg gewertet; `/admin-suite` zeigt Score, Evidenz und Links auf bestehende Admin-Bereiche; Navigation, Backend-Test, Frontend-Typecheck und Workboard-Validierung sind gruen.
+**Offene Risiken:** `app/api/v1/api.py` und Navigation sind Integrationsdateien mit moeglicher Parallelbearbeitung; bestehende fremde Worktree-Aenderungen bleiben erhalten. Externe Live-Probes sind explizit nicht Teil dieses Slices.
+
 ## DESIGN-MERIDIAN-HARDCOLORS-014
 
 **Von:** Codex
