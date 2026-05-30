@@ -724,6 +724,15 @@ export const RAW_NAV_SECTIONS: RawNavItem[] = [
         keywords: ['verpackung', 'palette', 'karton', 'stück', 'vpk'],
         mcp: { businessDomain: 'admin', scope: 'admin:read' },
       },
+      {
+        id: 'individuelle-artikelnummern',
+        label: 'Individuelle Artikelnummern',
+        icon: Tag,
+        module: '@/pages/stammdaten/individuelle-artikelnummern',
+        preferredPath: 'stammdaten/individuelle-artikelnummern',
+        keywords: ['individuelle', 'artikelnummer', 'partner', 'kunde', 'lieferant', 'mapping'],
+        mcp: { businessDomain: 'admin', scope: 'admin:read' },
+      },
     ],
   },
 ]
