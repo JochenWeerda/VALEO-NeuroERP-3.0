@@ -59,6 +59,36 @@ Stand: `2026-05-26`
 **Checks:** `python -m compileall -q app/api/v1/endpoints/admin_suite.py`; `python -m pytest tests/test_admin_suite_security.py tests/test_admin_suite_migration.py tests/test_admin_suite_setup.py tests/test_admin_suite_readiness.py -q --no-cov` (`11 passed`); `pnpm --filter @valero-neuroerp/frontend-web type-check`; fokussierter `git diff --check`.
 **Offene Risiken:** Normalisierte Permission Sets, Standort-/Lagerfilter und Break-glass-Schreibworkflow bleiben nachgelagerte, migrationspflichtige Governance-Erweiterungen.
 
+## ADMIN-SUITE-006
+
+**Von:** Codex
+**Owner:** Codex
+**Stand:** reserviert 2026-05-30
+**Ziel des Slices:** Read-only Connector Hub mit vereinheitlichtem Katalog, Credential-Metadaten und klarer Trennung von Konfiguration und Live-Probe einfuehren.
+**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/agent-ops/slices/ADMIN-SUITE-006.yaml`, `app/api/v1/endpoints/admin_suite.py`, `tests/test_admin_suite_operations.py`, `packages/frontend-web/src/lib/api/admin-suite.ts`, `packages/frontend-web/src/pages/admin-suite/connectors.tsx`, `packages/frontend-web/src/pages/admin-suite/index.tsx`, `packages/frontend-web/src/app/route-builders/auto-groups/generated/admin-suite.ts`.
+**Abnahmekriterien:** Kein Secret-Wert wird ausgegeben; vorhandene Integrationen sind katalogisiert; Konfigurationsstatus und Live-Probe bleiben getrennt.
+**Offene Risiken:** Provider-spezifische Retry-/DLQ-Schreibaktionen folgen erst nach Audit-Vertrag.
+
+## ADMIN-SUITE-007
+
+**Von:** Codex
+**Owner:** Codex
+**Stand:** reserviert 2026-05-30
+**Ziel des Slices:** Hardware Center als read-only Evidenzsicht ueber bestehende Device-, Mobile-, Waage- und POS-Vertraege einfuehren.
+**Dateibesitz:** Gemeinsam mit `ADMIN-SUITE-006/008` in additiven Admin-Suite-Dateien.
+**Abnahmekriterien:** Device-Kategorien, Registry-Quellen, Testaktionen und Live-Evidenzstatus sind sichtbar; Registrierung wird nicht als Hardware-UAT gewertet.
+**Offene Risiken:** Reale Heartbeats, Eichnachweise und Standort-UAT bleiben externe bzw. adapterpflichtige Nachweise.
+
+## ADMIN-SUITE-008
+
+**Von:** Codex
+**Owner:** Codex
+**Stand:** reserviert 2026-05-30
+**Ziel des Slices:** Operations Center fuer Backup, Restore, Release, Alembic und Diagnose als ehrliche Evidenzsicht einfuehren.
+**Dateibesitz:** Gemeinsam mit `ADMIN-SUITE-006/007` in additiven Admin-Suite-Dateien.
+**Abnahmekriterien:** Deploybare Jobs und nachgewiesene Betriebslaeufe bleiben unterscheidbar; simulierter Restore wird nie als produktiver Nachweis gewertet.
+**Offene Risiken:** Letzte reale Laufzeitdaten benoetigen spaeter einen Ops-Adapter oder Monitoring-Import.
+
 ## DESIGN-MERIDIAN-HARDCOLORS-014
 
 **Von:** Codex
