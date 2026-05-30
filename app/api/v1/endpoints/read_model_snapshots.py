@@ -28,7 +28,7 @@ def create_snapshot(
     store: ReadModelSnapshotStore = Depends(_get_store),
 ):
     snapshot = ReadModelSnapshot.build(model_name=model_name, tenant_id=tenant_id, payload=payload)
-    return store.save(snapshot)
+    return store.save(snapshot).model_dump()
 
 @router.get("/snapshots/latest", summary="Latest snapshot abrufen",
     response_model=ReadModelSnapshotsOut
@@ -42,7 +42,7 @@ def get_latest_snapshot(
     if snapshot is None:
         from fastapi import HTTPException
         raise HTTPException(status_code=404, detail="Kein Snapshot vorhanden")
-    return snapshot
+    return snapshot.model_dump()
 
 @router.get("/snapshots/page", summary="Snapshot page abrufen",
     response_model=ReadModelSnapshotsOut
@@ -62,7 +62,7 @@ def get_snapshot_page(
     response_model=ReadModelSnapshotsOut
 )
 def get_wiring_health():
-    return _wiring.health_check()
+    return _wiring.health_check().model_dump()
 
 @router.get("/wiring-subjects", summary="Wiring subjects abrufen",
     response_model=ReadModelSnapshotsOut

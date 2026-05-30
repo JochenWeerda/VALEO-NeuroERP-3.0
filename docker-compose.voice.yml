@@ -37,6 +37,9 @@ services:
       - valeo-network
 
   ki-usability:
+    build:
+      context: ./services/ki-usability
+      dockerfile: Dockerfile.voice
     environment:
       KI_USABILITY_OLLAMA_BASE_URL: http://ollama:11434
       KI_USABILITY_OLLAMA_POLISH_MODEL: mistral

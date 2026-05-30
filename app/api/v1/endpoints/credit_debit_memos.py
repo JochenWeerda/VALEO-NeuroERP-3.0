@@ -567,7 +567,7 @@ def _approve_memo_for_booking(
 
 
 @router.post("/credit-memos/{memo_id}/freigabe", summary="Credit memo for booking genehmigen",
-    response_model=StatusResponse
+    response_model=CreditDebitMemosOut
 )
 async def approve_credit_memo_for_booking(
     memo_id: str,
@@ -587,7 +587,7 @@ async def approve_credit_memo_for_booking(
 
 
 @router.post("/debit-memos/{memo_id}/freigabe", summary="Debit memo for booking genehmigen",
-    response_model=StatusResponse
+    response_model=CreditDebitMemosOut
 )
 async def approve_debit_memo_for_booking(
     memo_id: str,

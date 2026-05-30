@@ -10,6 +10,7 @@ import { useVoicePlayback } from '../hooks/useVoicePlayback'
 import {
   useWhisperBarShortcuts,
   VOICE_INTENT_EVENT,
+  VOICE_SUMMARY_READY_EVENT,
   WHISPERBAR_DICTATE_EVENT,
   WHISPERBAR_SUMMARY_EVENT,
 } from '../hooks/useWhisperBarShortcuts'
@@ -110,6 +111,15 @@ export function VoiceWhisperBarHost({ enabled = true }: VoiceWhisperBarHostProps
       setEstimatedSeconds(result.estimated_seconds)
       setFeedbackVariant('info')
       setFeedback('Zusammenfassung erstellt (in Zwischenablage)')
+
+      window.dispatchEvent(
+        new CustomEvent(VOICE_SUMMARY_READY_EVENT, {
+          detail: {
+            summaryText: result.summary_text,
+            estimatedSeconds: result.estimated_seconds,
+          },
+        }),
+      )
     } catch {
       toast.error('Summary-Pipeline fehlgeschlagen.')
     } finally {

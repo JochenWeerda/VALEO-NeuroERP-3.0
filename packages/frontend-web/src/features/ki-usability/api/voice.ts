@@ -174,3 +174,23 @@ export async function transcribeVoice(body: VoiceTranscribeRequest): Promise<Voi
   if (!res.ok) return null
   return (await res.json()) as VoiceTranscribeResponse
 }
+
+export interface VoiceStatusResponse {
+  stt_provider: string
+  stt_ready: boolean
+  tts_provider: string
+  tts_ready: boolean
+  ollama_base_url: string
+  ollama_reachable: boolean
+  voice_polish_enabled: boolean
+  voice_summary_enabled: boolean
+  kokoro_configured: boolean
+  piper_configured: boolean
+  faster_whisper_model: string
+}
+
+export async function fetchVoiceStatus(): Promise<VoiceStatusResponse | null> {
+  const res = await fetch(`${BASE}/api/v1/voice/status`)
+  if (!res.ok) return null
+  return (await res.json()) as VoiceStatusResponse
+}

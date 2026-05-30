@@ -100,8 +100,8 @@ def get_process_mining_benchmark_report(
     projection_status_loader = get_projection_status_loader()
     runtime_report_loader = get_runtime_report_loader()
     if projection_status_loader is None or runtime_report_loader is None:
-        return BenchmarkReport.build(verbund_id=verbund_id, periode=periode, kennzahlen_je_tenant={})
-    return build_process_mining_benchmark_report(
+        return BenchmarkReport.build(verbund_id=verbund_id, periode=periode, kennzahlen_je_tenant={}).model_dump()
+    result = build_process_mining_benchmark_report(
         verbund_id=verbund_id,
         periode=periode,
         tenant_ids=tenant_ids,
@@ -110,6 +110,7 @@ def get_process_mining_benchmark_report(
         device_store=get_telemetry_device_store(),
         reading_store=get_telemetry_reading_store(),
     )
+    return result.model_dump()
 
 
 @router.get("/katalog", summary="Kz katalog abrufen",
