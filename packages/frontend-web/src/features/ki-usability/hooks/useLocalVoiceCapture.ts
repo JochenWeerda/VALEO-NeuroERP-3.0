@@ -87,7 +87,7 @@ export async function captureLocalVoiceAudio(maxMs = DEFAULT_MAX_MS): Promise<Lo
 export function isLocalVoiceCaptureSupported(): boolean {
   return Boolean(
     typeof window !== 'undefined'
-    && navigator?.mediaDevices?.getUserMedia
+    && typeof navigator?.mediaDevices?.getUserMedia === 'function'
     && typeof MediaRecorder !== 'undefined',
   )
 }
