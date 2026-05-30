@@ -6,4 +6,5 @@ export const entries: AutoGroupRouteEntry[] = [
   { "module": "@/pages/stammdaten/mengeneinheiten", "path": "mengeneinheiten" },
   { "module": "@/pages/stammdaten/artikelbestandteile", "path": "artikelbestandteile" },
   { "module": "@/pages/stammdaten/artikelverpackung", "path": "artikelverpackung" },
+  { "module": "@/pages/stammdaten/individuelle-artikelnummern", "path": "individuelle-artikelnummern" },
 ]

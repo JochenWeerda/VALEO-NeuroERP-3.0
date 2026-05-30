@@ -144,6 +144,34 @@ async def run_gap_command(
     return GapPipelineResponse(success=True, message=message)
 
 
+# ── Lead-Generierung (Komfort-Endpoint) ───────────────────────────────────────
+
+
+@router.get("/leads/generate-from-gap", response_model=GapOut, summary="Leads from gap generieren")
+async def generate_leads_from_gap(
+    year: int = Query(2024, description="Referenzjahr (EU-GAP-Liste wird jährlich neu publiziert)"),
+    plz_min: Optional[str] = Query(None, description="Min PLZ"),
+    plz_max: Optional[str] = Query(None, description="Max PLZ"),
+    min_potential_eur: int = Query(50, description="Mindest-Potenzial in EUR"),
+    max_leads: int = Query(500, description="Maximale Anzahl Leads"),
+    segment: Optional[str] = Query(None, description="Segment-Filter (A, B, C)"),
+    db: Session = Depends(get_db),
+):
+    """Erstellt Kampagnen-Leads aus den GAP-Potenzial-Snapshots eines Jahres.
+
+    Komfort-Direktzugang; die CRM-Maske (LeadExplorer) nutzt regulär
+    ``/api/v1/prospecting/lead-candidates`` auf denselben Snapshot-Tabellen.
+    """
+    return GapPipelineService(db).generate_leads_from_snapshots(
+        year=year,
+        plz_min=plz_min,
+        plz_max=plz_max,
+        min_potential_eur=min_potential_eur,
+        max_leads=max_leads,
+        segment=segment,
+    )
+
+
 # ── Daten-Reset ───────────────────────────────────────────────────────────────
 
 
