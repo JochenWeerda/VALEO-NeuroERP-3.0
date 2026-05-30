@@ -51,10 +51,12 @@ Stand: `2026-05-26`
 
 **Von:** Codex
 **Owner:** Codex
-**Stand:** reserviert 2026-05-30
+**Stand:** abgeschlossen 2026-05-30
 **Ziel des Slices:** Lesendes Security- und Agent-Governance-Cockpit mit Rollenpaketen, effektiven Scopes, SoD-Warnungen und Rollen-Simulation einfuehren.
 **Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/agent-ops/slices/ADMIN-SUITE-005.yaml`, `app/api/v1/endpoints/admin_suite.py`, `tests/test_admin_suite_security.py`, `packages/frontend-web/src/lib/api/admin-suite.ts`, `packages/frontend-web/src/pages/admin-suite/security.tsx`, `packages/frontend-web/src/pages/admin-suite/index.tsx`, `packages/frontend-web/src/app/route-builders/auto-groups/generated/admin-suite.ts`.
 **Abnahmekriterien:** Bestehendes RBAC bleibt Source of Truth; Simulation liefert effektive Scopes ohne Persistenz; Agentenrollen sind sichtbar getrennt; kritische Scope-Kombinationen erzeugen SoD-Warnungen.
+**Erledigt:** Lesendes Governance-Cockpit unter `/admin-suite/security`, RBAC-Adapter, effektive Rechte-Simulation, SoD-Warnungen und getrennte Agentenrollen umgesetzt. Laufende Rollenvertraege werden nicht migriert.
+**Checks:** `python -m compileall -q app/api/v1/endpoints/admin_suite.py`; `python -m pytest tests/test_admin_suite_security.py tests/test_admin_suite_migration.py tests/test_admin_suite_setup.py tests/test_admin_suite_readiness.py -q --no-cov` (`11 passed`); `pnpm --filter @valero-neuroerp/frontend-web type-check`; fokussierter `git diff --check`.
 **Offene Risiken:** Normalisierte Permission Sets, Standort-/Lagerfilter und Break-glass-Schreibworkflow bleiben nachgelagerte, migrationspflichtige Governance-Erweiterungen.
 
 ## DESIGN-MERIDIAN-HARDCOLORS-014

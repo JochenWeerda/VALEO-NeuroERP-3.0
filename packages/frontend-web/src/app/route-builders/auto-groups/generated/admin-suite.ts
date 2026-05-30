@@ -12,5 +12,9 @@ export const entries: AutoGroupRouteEntry[] = [
   {
     "module": "@/pages/admin-suite/migration",
     "path": "migration"
+  },
+  {
+    "module": "@/pages/admin-suite/security",
+    "path": "security"
   }
 ]

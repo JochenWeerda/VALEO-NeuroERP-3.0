@@ -73,6 +73,18 @@ export type MigrationCockpit = {
   batches: MigrationBatch[]
 }
 
+export type SecurityRole = {
+  key: string
+  permissions: string[]
+  actor_type: 'human' | 'agent'
+  notes?: string | null
+}
+
+export type SecurityCockpit = {
+  roles: SecurityRole[]
+  agent_roles: SecurityRole[]
+}
+
 export function useAdminSuiteReadiness() {
   return useQuery({
     queryKey: ['admin-suite', 'readiness'],
@@ -101,5 +113,12 @@ export function useAdminSuiteMigration() {
   return useQuery({
     queryKey: ['admin-suite', 'migration'],
     queryFn: async () => (await apiClient.get<MigrationCockpit>('/api/v1/admin-suite/migration')).data,
+  })
+}
+
+export function useAdminSuiteSecurity() {
+  return useQuery({
+    queryKey: ['admin-suite', 'security'],
+    queryFn: async () => (await apiClient.get<SecurityCockpit>('/api/v1/admin-suite/security')).data,
   })
 }
