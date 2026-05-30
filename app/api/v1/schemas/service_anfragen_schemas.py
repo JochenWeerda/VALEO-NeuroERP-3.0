@@ -13,36 +13,3 @@ from pydantic import ConfigDict
 class ServiceAnfragenOut(BaseSchema):
     """Response schema for service anfragen endpoints."""
     model_config = ConfigDict(extra="allow")
-
-
-# --- Extracted from endpoint file ---
-class ServiceAnfrageCreate(BaseModel):
-    nummer: str | None = None
-    kunde: str
-    betreff: str
-    beschreibung: str | None = None
-    prioritaet: str = "normal"  # hoch | normal | niedrig
-    kategorie: str | None = None
-
-
-class ServiceAnfrageUpdate(BaseModel):
-    kunde: str | None = None
-    betreff: str | None = None
-    beschreibung: str | None = None
-    prioritaet: str | None = None
-    kategorie: str | None = None
-    status: str | None = None
-
-
-class RueckmeldungCreate(BaseModel):
-    anfrage_id: str
-    text: str
-    bewertet_von: str | None = None
-    bewertung: int | None = None  # 1-5
-
-
-class AbschlussCreate(BaseModel):
-    anfrage_id: str
-    abschluss_grund: str | None = None
-    notiz: str | None = None
-

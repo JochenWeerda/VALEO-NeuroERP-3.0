@@ -51,3 +51,10 @@ Ohne Registrierung werden bekannte Aktionen trotzdem ausgeführt: **Navigation**
 - **Strg+Shift+2** — Clipboard-Text zusammenfassen (~15s, in Zwischenablage)
 - Windows: `tools/voice/whisperbar.ahk` + `whisperbar-summary.ps1` (ki-usability auf Port 5200)
 - Pipeline-API: `POST /api/v1/voice/pipeline` mit `mode: dictate | summary | intent`
+
+## Local Voice Stack (Slice-014)
+
+- **STT:** `VITE_VOICE_STT_PROVIDER=local` → MediaRecorder + `POST /voice/transcribe` (faster-whisper), Fallback Browser
+- **TTS Kokoro:** `KI_USABILITY_VOICE_TTS_PROVIDER=kokoro` + Kokoro-FastAPI auf `:8880`
+- **Docker:** `docker compose -f docker-compose.yml -f docker-compose.voice.yml up -d ollama ki-usability`
+- Optional Kokoro: `--profile kokoro` (großes Image)

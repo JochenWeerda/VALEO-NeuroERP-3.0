@@ -13,20 +13,3 @@ from pydantic import ConfigDict
 class NeuroVoiceOut(BaseSchema):
     """Response schema for neuro voice endpoints."""
     model_config = ConfigDict(extra="allow")
-
-
-# --- Extracted from endpoint file ---
-class SessionRequest(BaseModel):
-    language: str = Field("de-DE")
-    channel: str = Field("phone")
-
-
-class TranscribeRequest(BaseModel):
-    session_id: str
-    audio_format: str = Field("wav")
-
-
-class SynthesizeRequest(BaseModel):
-    session_id: str
-    text: str
-

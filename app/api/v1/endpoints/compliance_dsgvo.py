@@ -24,6 +24,22 @@ router = APIRouter(prefix="/compliance/dsgvo", tags=["compliance", "dsgvo"])
 ERASURE_STATUSES = {"EINGEGANGEN", "IN_BEARBEITUNG", "ABGESCHLOSSEN", "ABGELEHNT"}
 SUBJECT_TYPES = {"CUSTOMER", "EMPLOYEE", "LEAD"}
 
+
+class ErasureRequestIn(BaseModel):
+    requester_name: str = Field(..., max_length=200)
+    requester_email: str = Field(..., max_length=200)
+    subject_id: str = Field(..., description="ID des betroffenen Datensatzes")
+    subject_type: str = Field(..., description="CUSTOMER/EMPLOYEE/LEAD")
+
+
+class ErasureProcessIn(BaseModel):
+    deletion_notes: str | None = None
+
+
+class ErasureRejectIn(BaseModel):
+    reason: str = Field(..., max_length=1000, description="z.B. gesetzliche Aufbewahrungspflicht")
+
+
 def _anonymize_subject(db: Session, subject_type: str, subject_id: str, tenant_id: str) -> list[dict]:
     """Anonymisiert/löscht Datensätze und gibt ein Protokoll zurück."""
     log: list[dict] = []

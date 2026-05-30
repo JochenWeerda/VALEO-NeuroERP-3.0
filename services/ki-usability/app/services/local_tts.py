@@ -1,5 +1,5 @@
 """
-Local TTS via Piper (optional) with browser fallback hint.
+Local TTS via Piper or Kokoro (optional) with browser fallback hint.
 """
 
 from __future__ import annotations
@@ -14,6 +14,7 @@ import tempfile
 from pathlib import Path
 
 from app.config import settings
+from app.services.local_kokoro import is_kokoro_configured, synthesize_kokoro
 
 logger = logging.getLogger(__name__)
 
@@ -28,6 +29,10 @@ def is_piper_available() -> bool:
         and Path(settings.PIPER_MODEL_PATH).exists()
         and shutil.which(exe)
     )
+
+
+def is_kokoro_available() -> bool:
+    return is_kokoro_configured()
 
 
 def _piper_python_available() -> bool:
@@ -94,7 +99,7 @@ def _synthesize_piper_python(text: str, model_path: str) -> tuple[str, str]:
 
 async def synthesize_speech(text: str, language: str = "de-DE") -> dict:
     """
-    Synthesize speech locally via Piper when available.
+    Synthesize speech locally via Kokoro or Piper when available.
     Otherwise return browser SpeechSynthesis hint for the client.
     """
     raw = (text or "").strip()
@@ -106,32 +111,51 @@ async def synthesize_speech(text: str, language: str = "de-DE") -> dict:
         }
 
     provider = settings.VOICE_TTS_PROVIDER.lower()
-    if provider == "browser" or not is_piper_available():
-        return {
-            "text": raw,
-            "provider": "browser",
-            "browser_hint": True,
-            "language": language,
-            "hint": "Use Web Speech API SpeechSynthesis on client side",
-        }
 
-    try:
-        audio_b64, content_type = await asyncio.to_thread(_synthesize_piper_sync, raw)
-        return {
-            "text": raw,
-            "audio_base64": audio_b64,
-            "content_type": content_type,
-            "provider": "piper",
-            "browser_hint": False,
-            "language": language,
-        }
-    except Exception as exc:
-        logger.warning("Piper TTS failed, returning browser hint: %s", exc)
-        return {
-            "text": raw,
-            "provider": "browser",
-            "browser_hint": True,
-            "language": language,
-            "hint": "Use Web Speech API SpeechSynthesis on client side",
-            "error": str(exc),
-        }
+    if provider == "browser":
+        return _browser_hint(raw, language)
+
+    if provider == "kokoro" and is_kokoro_available():
+        try:
+            audio_b64, content_type = await synthesize_kokoro(raw, language=language)
+            return {
+                "text": raw,
+                "audio_base64": audio_b64,
+                "content_type": content_type,
+                "provider": "kokoro",
+                "browser_hint": False,
+                "language": language,
+            }
+        except Exception as exc:
+            logger.warning("Kokoro TTS failed, returning browser hint: %s", exc)
+            return _browser_hint(raw, language, error=str(exc))
+
+    if provider == "piper" and is_piper_available():
+        try:
+            audio_b64, content_type = await asyncio.to_thread(_synthesize_piper_sync, raw)
+            return {
+                "text": raw,
+                "audio_base64": audio_b64,
+                "content_type": content_type,
+                "provider": "piper",
+                "browser_hint": False,
+                "language": language,
+            }
+        except Exception as exc:
+            logger.warning("Piper TTS failed, returning browser hint: %s", exc)
+            return _browser_hint(raw, language, error=str(exc))
+
+    return _browser_hint(raw, language)
+
+
+def _browser_hint(text: str, language: str, error: str | None = None) -> dict:
+    result = {
+        "text": text,
+        "provider": "browser",
+        "browser_hint": True,
+        "language": language,
+        "hint": "Use Web Speech API SpeechSynthesis on client side",
+    }
+    if error:
+        result["error"] = error
+    return result

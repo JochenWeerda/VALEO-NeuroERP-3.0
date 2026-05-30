@@ -20,14 +20,13 @@ from app.core.tenant import get_tenant_id
 from app.infrastructure.models import Silo, SiloLot, SiloLotMovement, SiloQualitySnapshot
 
 from app.api.v1.schemas.base import BaseSchema
-from app.api.v1.schemas.silo_schemas import (
-    LeermeldungCreate,
-    SiloCreate,
-    SiloLotCreate,
-    SiloLotMovementCreate,
-    SiloOut,
-)
 from pydantic import ConfigDict as _ConfigDict
+
+
+class SiloOut(BaseSchema):
+    """Typed response schema for SiloOut endpoints (extra fields forwarded)."""
+    model_config = _ConfigDict(extra="allow")
+
 
 router = APIRouter()
 
@@ -96,6 +95,32 @@ def _create_snapshot(db: Session, silo_id: str, tenant_id: str) -> SiloQualitySn
     )
     db.add(snapshot)
     return snapshot
+
+
+class SiloCreate(BaseModel):
+    silo_number: str = Field(..., min_length=1, max_length=50)
+    name: Optional[str] = Field(default=None, max_length=120)
+    article_id: Optional[str] = Field(default=None, max_length=64)
+    capacity_tons: float = Field(..., gt=0)
+
+
+class SiloLotCreate(BaseModel):
+    virtual_lot_number: str = Field(..., min_length=1, max_length=64)
+    source_ticket_id: Optional[str] = Field(default=None, max_length=64)
+    source_partner_id: Optional[str] = Field(default=None, max_length=64)
+    article_id: Optional[str] = Field(default=None, max_length=64)
+    quantity_tons: float = Field(..., gt=0)
+    moisture_pct: Optional[float] = Field(default=None, ge=0, le=100)
+    protein_pct: Optional[float] = Field(default=None, ge=0, le=100)
+    impurities_pct: Optional[float] = Field(default=None, ge=0, le=100)
+    hl_weight: Optional[float] = Field(default=None, ge=0)
+
+
+class SiloLotMovementCreate(BaseModel):
+    movement_type: str = Field(..., pattern="^(in|out|treatment)$")
+    quantity_tons: float = Field(..., gt=0)
+    note: Optional[str] = None
+
 
 @router.get("/kapazitaeten", response_model=SiloOut, summary="Silo capacities abrufen")
 async def get_silo_capacities(
@@ -527,6 +552,13 @@ async def create_silo_lot_movement(
 # ============================================================
 # SILO-LEER-001 — Silo-Leermeldung
 # ============================================================
+
+class LeermeldungCreate(BaseModel):
+    wiegung_id: Optional[str] = None
+    schwund_kg: float = Field(..., ge=0, description="Schwund in kg")
+    grund: str = Field(..., min_length=1)
+    bearbeiter: str = Field(..., min_length=1)
+
 
 def _silo_columns(db: Session) -> set[str]:
     """Return set of column names for agrar_silos table."""

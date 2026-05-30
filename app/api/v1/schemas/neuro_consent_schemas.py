@@ -13,21 +13,3 @@ from pydantic import ConfigDict
 class NeuroConsentOut(BaseSchema):
     """Response schema for neuro consent endpoints."""
     model_config = ConfigDict(extra="allow")
-
-
-# --- Extracted from endpoint file ---
-class ConsentCheckRequest(BaseModel):
-    entity_id: str
-    consent_type: str
-
-
-class ConsentGrantRequest(BaseModel):
-    entity_id: str
-    consent_type: str
-    purpose: str = Field("", description="Zweckbindung")
-
-
-class ConsentRevokeRequest(BaseModel):
-    entity_id: str
-    consent_type: str
-

@@ -21,6 +21,29 @@ from app.api.v1.schemas.agent_context_api_schemas import AgentContextApiOut
 router = APIRouter(prefix="/agent-context", tags=["agent-context"])
 _guard = TenantIsolationGuard()
 
+
+class AgentContextCreateRequest(BaseModel):
+    agent_id: str
+    tenant_id: str
+    delegated_roles: list[str]
+    ttl_sekunden: int = 3600
+
+
+class AgentDispatchRequest(BaseModel):
+    command_name: str
+    resource_tenant_id: str
+    resource_type: str = "agent_command"
+    issuer_role: str = "agent"
+
+
+class AgentKnowledgePackRequest(BaseModel):
+    rolle: str
+    kanal: str = "CHAT"
+    capability_key: Optional[str] = None
+    query: str = ""
+    limit: int = 4
+
+
 def _row_to_context(row: AgentContextDB) -> AgentContext:
     return AgentContext(
         context_id=row.context_id,

@@ -13,20 +13,3 @@ from pydantic import ConfigDict
 class CustomerExtensionsOut(BaseSchema):
     """Response schema for customer extensions endpoints."""
     model_config = ConfigDict(extra="allow")
-
-
-# --- Extracted from endpoint file ---
-class GeoSearchRequest(BaseModel):
-    latitude: float
-    longitude: float
-    radius_km: float = 50.0
-
-
-class ConvertLeadRequest(BaseModel):
-    lead_id: str
-
-
-class OperatorStatusUpdate(BaseModel):
-    contact_id: str
-    status: str  # "gelesen" | "erledigt"
-

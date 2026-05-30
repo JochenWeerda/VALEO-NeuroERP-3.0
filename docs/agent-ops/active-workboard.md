@@ -2751,3 +2751,14 @@ Archiv des vorherigen Boards:
 **Gate-Ergebnis:** pytest 112/112 ✅
 **Erledigt:** Domain-Aliase und Registry-Filter; Command Palette dispatcht eventPayload als eventDetail; VoiceWhisperBarHost reagiert auf voice-intent.
 **Offene Risiken:** Sehr generische Phrasen koennen domain-uebergreifend kollidieren — weiteres Tuning bei Bedarf.
+
+## SLICE-014-VOICE-LOCAL-STACK-001
+
+**Von:** Claude Sonnet 4.6
+**Owner:** Claude Sonnet 4.6
+**Stand:** abgeschlossen 2026-05-27
+**Ziel des Slices:** Kokoro TTS, Docker Voice Stack (Ollama), Frontend Local STT via faster-whisper.
+**Dateibesitz:** `local_kokoro.py`, `local_tts.py`, `docker-compose.voice.yml`, `useLocalVoiceCapture.ts`, `useVoiceIntent.ts`, `voice_adapter.py`, `test_voice_kokoro.py`.
+**Gate-Ergebnis:** pytest ✅ · TypeScript 0 Fehler ✅
+**Erledigt:** Kokoro HTTP-Provider; docker-compose.voice.yml; VITE_VOICE_STT_PROVIDER=local mit Browser-Fallback.
+**Offene Risiken:** faster-whisper/Kokoro muessen im ki-usability-Container oder lokal installiert sein; Kokoro-Image optional und gross.

@@ -23,11 +23,6 @@ from app.core.uuid7 import uuid7
 logger = logging.getLogger(__name__)
 
 from app.api.v1.schemas.base import BaseSchema
-from app.api.v1.schemas.price_lists_schemas import (
-    PriceListCreate,
-    PriceListItemOut,
-    PriceListUpdate,
-)
 
 
 router = APIRouter(prefix="/price-lists", tags=["sales", "pricing"])
@@ -45,6 +40,12 @@ class PriceListItemInput(BaseModel):
     valid_from: Optional[date] = None
     valid_until: Optional[date] = None
 
+
+class PriceListItemOut(PriceListItemInput):
+    id: str
+    price_list_id: str
+
+
 class PriceListBase(BaseModel):
     name: str = Field(..., min_length=1, max_length=200)
     description: Optional[str] = None
@@ -54,6 +55,21 @@ class PriceListBase(BaseModel):
     valid_until: Optional[date] = None
     is_active: bool = True
     items: List[PriceListItemInput] = Field(default_factory=list)
+
+
+class PriceListCreate(PriceListBase):
+    tenant_id: Optional[str] = None
+
+
+class PriceListUpdate(BaseModel):
+    name: Optional[str] = None
+    description: Optional[str] = None
+    currency: Optional[str] = None
+    valid_from: Optional[date] = None
+    valid_until: Optional[date] = None
+    is_active: Optional[bool] = None
+    items: Optional[List[PriceListItemInput]] = None
+
 
 class PriceList(PriceListBase):
     id: str

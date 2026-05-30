@@ -46,15 +46,44 @@ from app.integrations.services.superglue_tool_provisioning import (
 )
 
 from app.api.v1.schemas.base import BaseSchema
-from app.api.v1.schemas.external_agent_integrations_schemas import (
-    AgentIntegrationOut,
-    SuperglueConnectorConfigRequest,
-    SupergluePolicyOverrideRequest,
-    SuperglueWizardApplyRequest,
-)
 from pydantic import ConfigDict as _ConfigDict
 
+
+class AgentIntegrationOut(BaseSchema):
+    """Typed response schema for AgentIntegrationOut endpoints (extra fields forwarded)."""
+    model_config = _ConfigDict(extra="allow")
+
+
 router = APIRouter(prefix="/agent/integrations", tags=["agents", "integrations", "openapi", "mcp"])
+
+
+class SuperglueConnectorConfigRequest(BaseModel):
+    system_url: str | None = None
+    system_name: str | None = None
+    system_instructions: str | None = None
+
+
+class SupergluePolicyOverrideRequest(BaseModel):
+    require_tenant_secrets: bool | None = None
+    execution_enabled: bool | None = None
+    alert_error_rate_pct: float | None = Field(default=None, ge=0)
+    alert_open_quarantine_count: int | None = Field(default=None, ge=0)
+    run_retention_days: int | None = Field(default=None, ge=1)
+    artifact_retention_days: int | None = Field(default=None, ge=1)
+
+
+class SuperglueWizardApplyRequest(BaseModel):
+    connector_key: str | None = None
+    system_url: str | None = None
+    execution_enabled: bool | None = None
+    require_tenant_secrets: bool | None = None
+    alert_error_rate_pct: float | None = Field(default=None, ge=0)
+    alert_open_quarantine_count: int | None = Field(default=None, ge=0)
+    run_retention_days: int | None = Field(default=None, ge=1)
+    artifact_retention_days: int | None = Field(default=None, ge=1)
+    completed_step: str | None = None
+    next_step: str | None = None
+
 
 @router.get("", summary="External Agent Integration Catalog",
     response_model=AgentIntegrationOut
