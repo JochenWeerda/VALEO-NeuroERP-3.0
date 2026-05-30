@@ -18,11 +18,23 @@ Stand: `2026-05-26`
 
 **Von:** Codex
 **Owner:** Codex
-**Stand:** reserviert 2026-05-30
+**Stand:** abgeschlossen 2026-05-30
 **Ziel des Slices:** Persistierten, tenant-isolierten Setup-Wizard auf Basis der Admin-Suite-Roadmap einfuehren und vorhandene Fachmasken als gefuehrte Schritte verknuepfen.
 **Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/agent-ops/slices/ADMIN-SUITE-002.yaml`, `app/api/v1/endpoints/admin_suite.py`, `tests/test_admin_suite_setup.py`, `packages/frontend-web/src/lib/api/admin-suite.ts`, `packages/frontend-web/src/pages/admin-suite/setup.tsx`, `packages/frontend-web/src/pages/admin-suite/index.tsx`, `packages/frontend-web/src/app/route-builders/auto-groups/generated/admin-suite.ts`, fokussierte Frontend-Tests.
 **Abnahmekriterien:** Setup-Session und Schritte sind tenant-isoliert persistiert; `unchecked`, `in_progress`, `warning`, `blocked` und `completed` bleiben unterscheidbar; Navigation allein erzeugt keine Abschlussfreigabe; Resume nach Browser-Neustart ist abgesichert.
-**Offene Risiken:** Persistenzmodell und Evidenzadapter muessen vor Implementierung gegen vorhandene Setup-Endpunkte abgegrenzt werden; keine Uebernahme ohne separaten Claim-Commit.
+**Erledigt:** Tenant-isolierte Setup-Session in `domain_shared.tenants.settings`, explizite Step-Updates, Resume-Lesepfad und gefuehrte UI unter `/admin-suite/setup` umgesetzt. Vorhandene Fachmasken werden verlinkt, Navigation erzeugt keinen impliziten Abschluss.
+**Checks:** `python -m compileall -q app/api/v1/endpoints/admin_suite.py`; `python -m pytest tests/test_admin_suite_setup.py tests/test_admin_suite_readiness.py -q --no-cov` (`6 passed`); `pnpm --filter @valero-neuroerp/frontend-web type-check`; fokussierter `git diff --check`.
+**Offene Risiken:** Historisierung mehrerer Setup-Sessions bleibt Folgescope; fuer den initialen Wizard reicht der etablierte Tenant-Settings-Vertrag.
+
+## ADMIN-SUITE-003
+
+**Von:** Codex
+**Owner:** offen
+**Stand:** offen
+**Ziel des Slices:** Generischen Migration Core mit Source Profiles, Batches, Mapping-Version, Reconciliation-Gates und L3-/CSV-Cockpit einfuehren, ohne den bestehenden L3-Importer zu ersetzen.
+**Dateibesitz:** Vor Claim verbindlich festlegen; neue Admin-Suite-Migrationsdateien, fokussierte Tests und minimale additive Router-/UI-Integration.
+**Abnahmekriterien:** Dry Run und Staging bleiben Pflicht; Produktivfreigabe ist ohne Reconciliation blockiert; Batch-ID, Hash, Quelle und Mapping-Version sind sichtbar; L3 und CSV sind als Profile vorhanden.
+**Offene Risiken:** Keine produktiven Fachtabellen schreiben; bestehende `l3_staging`- und `app_control.l3_import_runs`-Logik nur referenzieren und spaeter kontrolliert anbinden.
 
 ## DESIGN-MERIDIAN-HARDCOLORS-014
 
@@ -2795,3 +2807,14 @@ Archiv des vorherigen Boards:
 **Gate-Ergebnis:** pytest 116/116 ✅ · TypeScript 0 Fehler ✅
 **Erledigt:** Dockerfile.voice + requirements-voice.txt; GET /voice/status; WhisperBar E2E Smoke; Copilot-Dock Voice-Summary mit Vorlesen.
 **Offene Risiken:** faster-whisper-Image groesser; Kokoro weiterhin optional.
+
+## SLICE-016-VOICE-ADMIN-STATUS-001
+
+**Von:** Claude Sonnet 4.6
+**Owner:** Claude Sonnet 4.6
+**Stand:** in arbeit 2026-05-30
+**Ziel des Slices:** Admin Voice-Kanal mit GET /voice/status Readiness und korrigiertem Transkript-Verlauf.
+**Dateibesitz:** `voice-channel.tsx`, `useVoiceStackStatus.ts`, `voice-channel.test.tsx`.
+**Gate-Ergebnis:** ausstehend
+**Erledigt:** —
+**Offene Risiken:** ki-usability muss laufen damit Status sichtbar ist.

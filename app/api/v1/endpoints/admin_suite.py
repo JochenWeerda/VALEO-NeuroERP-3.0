@@ -3,17 +3,38 @@
 from __future__ import annotations
 
 from datetime import datetime, timezone
+import json
 from typing import Any, Literal
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field
+from sqlalchemy import text
+from sqlalchemy.orm import Session
 
+from app.core.database import get_db
+from app.core.tenant import get_tenant_id
 from app.services.integration_bootstrap import build_integration_bootstrap_summary
 
 
 router = APIRouter(prefix="/admin-suite", tags=["admin-suite", "readiness"])
 
 ReadinessStatus = Literal["ready", "warning", "blocked", "unchecked"]
+SetupStepStatus = Literal["unchecked", "in_progress", "warning", "blocked", "completed"]
+
+SETUP_STEPS = (
+    ("company", "Firma", "/setup/firma"),
+    ("locations", "Standorte", "/stammdaten/betriebsstaetten"),
+    ("fiscal_year", "Geschaeftsjahr", "/fibu/geschaeftsjahre"),
+    ("chart_of_accounts", "Kontenrahmen", "/fibu/kontenplan"),
+    ("taxes", "Steuern", "/fibu/steuerkennzeichen"),
+    ("number_ranges", "Nummernkreise", "/admin/nummernkreise"),
+    ("users", "Benutzer", "/admin/benutzer"),
+    ("roles", "Rollen", "/admin/rollen-verwaltung"),
+    ("devices", "Geraete", None),
+    ("connectors", "Schnittstellen", "/admin/control-center/superglue"),
+    ("migration", "Import", None),
+    ("go_live_test", "Abschlusspruefung", "/admin-suite"),
+)
 
 
 class ReadinessEvidence(BaseModel):
@@ -36,6 +57,31 @@ class AdminSuiteReadinessOut(BaseModel):
     evaluated_count: int
     checked_at: datetime
     evidence: list[ReadinessEvidence]
+
+
+class SetupStepOut(BaseModel):
+    key: str
+    label: str
+    status: SetupStepStatus
+    target_path: str | None = None
+    evidence: str | None = None
+    responsible: str | None = None
+    updated_at: datetime | None = None
+
+
+class SetupSessionOut(BaseModel):
+    tenant_id: str
+    status: SetupStepStatus
+    completed_count: int
+    total_count: int
+    updated_at: datetime | None = None
+    steps: list[SetupStepOut]
+
+
+class SetupStepUpdate(BaseModel):
+    status: SetupStepStatus
+    evidence: str | None = Field(default=None, max_length=1000)
+    responsible: str | None = Field(default=None, max_length=120)
 
 
 def _evidence(
@@ -171,7 +217,112 @@ def build_admin_suite_readiness() -> AdminSuiteReadinessOut:
     )
 
 
+def _load_tenant_settings(db: Session, tenant_id: str) -> dict[str, Any]:
+    row = db.execute(
+        text("SELECT settings FROM domain_shared.tenants WHERE id = :tenant_id"),
+        {"tenant_id": tenant_id},
+    ).first()
+    if not row:
+        raise HTTPException(status_code=404, detail=f"Tenant not found: {tenant_id}")
+    raw = row[0]
+    if not raw:
+        return {}
+    if isinstance(raw, dict):
+        return raw
+    try:
+        parsed = json.loads(raw)
+        return parsed if isinstance(parsed, dict) else {}
+    except Exception:
+        return {}
+
+
+def _save_tenant_settings(db: Session, tenant_id: str, settings: dict[str, Any]) -> None:
+    db.execute(
+        text("UPDATE domain_shared.tenants SET settings = :settings, updated_at = NOW() WHERE id = :tenant_id"),
+        {"tenant_id": tenant_id, "settings": json.dumps(settings)},
+    )
+    db.commit()
+
+
+def _build_setup_session(tenant_id: str, payload: dict[str, Any] | None) -> SetupSessionOut:
+    stored = payload if isinstance(payload, dict) else {}
+    stored_steps = stored.get("steps") if isinstance(stored.get("steps"), dict) else {}
+    steps: list[SetupStepOut] = []
+    for key, label, target_path in SETUP_STEPS:
+        step = stored_steps.get(key) if isinstance(stored_steps.get(key), dict) else {}
+        steps.append(
+            SetupStepOut(
+                key=key,
+                label=label,
+                status=step.get("status", "unchecked"),
+                target_path=target_path,
+                evidence=step.get("evidence"),
+                responsible=step.get("responsible"),
+                updated_at=step.get("updated_at"),
+            )
+        )
+    completed_count = sum(step.status == "completed" for step in steps)
+    if any(step.status == "blocked" for step in steps):
+        status: SetupStepStatus = "blocked"
+    elif completed_count == len(steps):
+        status = "completed"
+    elif any(step.status in {"in_progress", "warning", "completed"} for step in steps):
+        status = "in_progress"
+    else:
+        status = "unchecked"
+    return SetupSessionOut(
+        tenant_id=tenant_id,
+        status=status,
+        completed_count=completed_count,
+        total_count=len(steps),
+        updated_at=stored.get("updated_at"),
+        steps=steps,
+    )
+
+
 @router.get("/readiness", response_model=AdminSuiteReadinessOut, summary="Admin Suite readiness abrufen")
 async def get_admin_suite_readiness() -> AdminSuiteReadinessOut:
     """Liefert konservative Go-Live-Evidenz ohne externe Live-Probes."""
     return build_admin_suite_readiness()
+
+
+@router.get("/setup", response_model=SetupSessionOut, summary="Admin Suite setup session abrufen")
+async def get_setup_session(
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+) -> SetupSessionOut:
+    """Liefert den wiederaufnehmbaren Setup-Fortschritt eines Tenants."""
+    settings = _load_tenant_settings(db, tenant_id)
+    return _build_setup_session(tenant_id, settings.get("admin_suite_setup"))
+
+
+@router.patch("/setup/steps/{step_key}", response_model=SetupSessionOut, summary="Admin Suite setup step aktualisieren")
+async def update_setup_step(
+    step_key: str,
+    payload: SetupStepUpdate,
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+) -> SetupSessionOut:
+    """Aktualisiert einen Setup-Schritt nur nach expliziter Nutzeraktion."""
+    allowed_steps = {key for key, _, _ in SETUP_STEPS}
+    if step_key not in allowed_steps:
+        raise HTTPException(status_code=404, detail=f"Unknown setup step: {step_key}")
+    settings = _load_tenant_settings(db, tenant_id)
+    setup = settings.get("admin_suite_setup")
+    if not isinstance(setup, dict):
+        setup = {}
+    steps = setup.get("steps")
+    if not isinstance(steps, dict):
+        steps = {}
+    checked_at = datetime.now(timezone.utc).isoformat()
+    steps[step_key] = {
+        "status": payload.status,
+        "evidence": payload.evidence,
+        "responsible": payload.responsible,
+        "updated_at": checked_at,
+    }
+    setup["steps"] = steps
+    setup["updated_at"] = checked_at
+    settings["admin_suite_setup"] = setup
+    _save_tenant_settings(db, tenant_id, settings)
+    return _build_setup_session(tenant_id, setup)
