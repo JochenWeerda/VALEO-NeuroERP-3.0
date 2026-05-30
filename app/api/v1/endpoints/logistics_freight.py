@@ -15,7 +15,7 @@ from sqlalchemy.orm import Session
 
 from app.core.database import get_db
 
-from app.api.v1.schemas.base import BaseSchema
+from app.api.v1.schemas.base import BaseSchema, IDResponse
 from app.api.v1.schemas.logistics_freight_schemas import LogisticsFreightOut
 
 

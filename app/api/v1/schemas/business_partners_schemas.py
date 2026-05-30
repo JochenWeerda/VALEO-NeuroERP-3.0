@@ -1,27 +1,10 @@
-"""Pydantic schemas for the business partners domain."""
 from __future__ import annotations
 
-from typing import Any, Optional, List
-from pydantic import BaseModel, Field, ConfigDict
+from typing import Any, List, Optional
+from datetime import date, datetime
+from decimal import Decimal
+from pydantic import BaseModel, ConfigDict, Field
 from app.api.v1.schemas.base import BaseSchema
-
-
-class BusinessPartnerPayload(BaseModel):
-    core_identity: CoreIdentity
-    roles: Roles = Roles()
-    contact_data: ContactData = ContactData()
-    banking: Banking = Banking()
-    finance: Finance = Finance()
-    agrar_extension: AgrarExtension = AgrarExtension()
-    logistics: Logistics = Logistics()
-    marketing_consent: MarketingConsent = MarketingConsent()
-    gdpr: Gdpr = Gdpr()
-    audit: Audit = Audit()
-    legacy_customer_fields: LegacyCustomerFields = LegacyCustomerFields()
-
-
-class DiscountItemCreate(DiscountItemBase):
-    pass
 
 
 class DiscountItemUpdate(BaseModel):
@@ -34,9 +17,6 @@ class DiscountItemUpdate(BaseModel):
     source_type: Optional[str] = None
     updated_by: Optional[str] = None
 
-
-class PriceAgreementCreate(PriceAgreementBase):
-    pass
 
 
 class PriceAgreementUpdate(BaseModel):
@@ -56,9 +36,6 @@ class PriceAgreementUpdate(BaseModel):
     updated_by: Optional[str] = None
 
 
-class InstructionCreate(InstructionBase):
-    pass
-
 
 class InstructionUpdate(BaseModel):
     instruction_text: Optional[str] = None
@@ -67,9 +44,6 @@ class InstructionUpdate(BaseModel):
     valid_to: Optional[date] = None
     updated_by: Optional[str] = None
 
-
-class ContactCreate(ContactBase):
-    pass
 
 
 class ContactUpdate(BaseModel):
@@ -101,9 +75,6 @@ class ContactUpdate(BaseModel):
     updated_by: Optional[str] = None
 
 
-class AddressCreate(AddressBase):
-    pass
-
 
 class AddressUpdate(BaseModel):
     address_type: Optional[str] = Field(default=None, pattern="^(customer|invoice|shipping|postal)$")
@@ -132,9 +103,6 @@ class AddressUpdate(BaseModel):
     updated_by: Optional[str] = None
 
 
-class BillingConfigCreate(BillingConfigBase):
-    pass
-
 
 class BillingConfigUpdate(BaseModel):
     customer_group: Optional[str] = None
@@ -157,9 +125,6 @@ class BillingConfigUpdate(BaseModel):
     vat_optimizer: Optional[bool] = None
     updated_by: Optional[str] = None
 
-
-class CpdAccountCreate(CpdAccountBase):
-    pass
 
 
 class CpdAccountUpdate(BaseModel):
@@ -196,9 +161,6 @@ class CpdAccountUpdate(BaseModel):
     updated_by: Optional[str] = None
 
 
-class PricingRuleCreate(PricingRuleBase):
-    pass
-
 
 class PricingRuleUpdate(BaseModel):
     direct_account: Optional[bool] = None
@@ -212,9 +174,6 @@ class PricingRuleUpdate(BaseModel):
     notes: Optional[str] = None
 
 
-class InterestSettingCreate(InterestSettingBase):
-    pass
-
 
 class InterestSettingUpdate(BaseModel):
     interest_table_debit_code: Optional[str] = None
@@ -227,9 +186,6 @@ class InterestSettingUpdate(BaseModel):
     valid_to: Optional[date] = None
 
 
-class DispatchMediumCreate(DispatchMediumBase):
-    pass
-
 
 class DispatchMediumUpdate(BaseModel):
     document_type: Optional[str] = None
@@ -240,9 +196,6 @@ class DispatchMediumUpdate(BaseModel):
     recipient_name: Optional[str] = None
     notes: Optional[str] = None
 
-
-class CooperativeMembershipCreate(CooperativeMembershipBase):
-    pass
 
 
 class CooperativeMembershipUpdate(BaseModel):
@@ -257,9 +210,6 @@ class CooperativeMembershipUpdate(BaseModel):
     terminated_mandatory_shares: Optional[int] = Field(default=None, ge=0)
 
 
-class EmailDistributionCreate(EmailDistributionBase):
-    pass
-
 
 class EmailDistributionUpdate(BaseModel):
     distribution_name: Optional[str] = None
@@ -268,26 +218,17 @@ class EmailDistributionUpdate(BaseModel):
     is_active: Optional[bool] = None
 
 
-class CommunityCreate(CommunityBase):
-    pass
-
 
 class CommunityUpdate(BaseModel):
     community_number: Optional[str] = None
     description: Optional[str] = None
 
 
-class CommunityMemberCreate(CommunityMemberBase):
-    pass
-
 
 class CommunityMemberUpdate(BaseModel):
     partner_id: Optional[str] = None
     share_percent: Optional[Decimal] = Field(default=None, ge=Decimal("0"), le=Decimal("100"))
 
-
-class ProfileCreate(ProfileBase):
-    pass
 
 
 class ProfileUpdate(BaseModel):
@@ -305,9 +246,6 @@ class ProfileUpdate(BaseModel):
     works_council: Optional[bool] = None
     company_philosophy: Optional[str] = None
 
-
-class InterfaceProfileCreate(InterfaceProfileBase):
-    pass
 
 
 class InterfaceProfileUpdate(BaseModel):

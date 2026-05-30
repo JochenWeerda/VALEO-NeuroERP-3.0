@@ -25,6 +25,7 @@ from app.core.dependencies import get_tenant_id
 from app.core.uuid7 import uuid7
 
 from app.api.v1.schemas.base import BaseSchema
+from app.api.v1.schemas.individuelle_artikelnummern_schemas import IndividuelleArtikelNrOut
 
 
 router = APIRouter(prefix="/artikel/individuelle-nummern",

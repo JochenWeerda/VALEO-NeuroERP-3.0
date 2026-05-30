@@ -24,7 +24,7 @@ from app.infrastructure.models import (
     WeighingTicket,
 )
 
-from app.api.v1.schemas.base import BaseSchema
+from app.api.v1.schemas.base import BaseSchema, StatusResponse
 
 
 router = APIRouter()

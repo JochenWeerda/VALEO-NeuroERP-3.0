@@ -4,6 +4,7 @@ from __future__ import annotations
 from typing import Any, Optional, List
 from pydantic import BaseModel, Field, ConfigDict
 from app.api.v1.schemas.base import BaseSchema
+from pydantic import ConfigDict as _ConfigDict
 
 
 class BudgetPlanningOut(BaseSchema):

@@ -19,7 +19,7 @@ from ....finance.export_datev import DATEVExporter
 from ..schemas.base import PaginatedResponse
 from ..schemas.finance import Account, AccountCreate, AccountUpdate
 
-from app.api.v1.schemas.base import BaseSchema
+from app.api.v1.schemas.base import BaseSchema, StatusResponse
 from app.api.v1.schemas.chart_of_accounts_schemas import ChartOfAccountsOut
 
 

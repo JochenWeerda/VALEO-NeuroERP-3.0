@@ -10,6 +10,7 @@ from app.core.database import get_db
 from app.domains.operations.models import FoerderAntrag
 
 from app.api.v1.schemas.base import BaseSchema
+from app.api.v1.schemas.foerderung_schemas import FoerderungOut
 
 
 router = APIRouter(prefix="/foerderung", tags=["Foerderung"])
@@ -85,7 +86,6 @@ async def get_foerderung_stats(db: Session = Depends(get_db)) -> dict:
 
 # --------------- Pydantic Schemas ---------------
 from pydantic import BaseModel
-from app.api.v1.schemas.foerderung_schemas import FoerderungOut
 from datetime import date
 
 

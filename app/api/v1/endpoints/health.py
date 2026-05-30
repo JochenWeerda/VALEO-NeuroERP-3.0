@@ -13,7 +13,7 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-from app.api.v1.schemas.base import BaseSchema
+from app.api.v1.schemas.base import BaseSchema, StatusResponse
 from app.api.v1.schemas.health_schemas import HealthOut
 
 

@@ -15,7 +15,7 @@ from app.core.database import get_db
 from app.documents.router_helpers import get_repository, save_to_store, get_from_store, list_from_store
 
 logger = logging.getLogger(__name__)
-from app.api.v1.schemas.base import BaseSchema
+from app.api.v1.schemas.base import BaseSchema, StatusResponse
 from app.api.v1.schemas.credit_debit_memos_schemas import CreditDebitMemosOut
 
 

@@ -27,7 +27,7 @@ from app.infrastructure.eventbus.outbox import OutboxPublisher
 from app.finance.tax_resolver import resolve_partner_country, resolve_tax_key_accounts
 
 logger = logging.getLogger(__name__)
-from app.api.v1.schemas.base import BaseSchema
+from app.api.v1.schemas.base import BaseSchema, StatusResponse
 from app.api.v1.schemas.ap_invoices_schemas import ApInvoicesOut
 
 

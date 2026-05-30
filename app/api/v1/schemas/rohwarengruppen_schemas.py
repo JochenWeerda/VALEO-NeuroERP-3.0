@@ -1,10 +1,10 @@
-"""Pydantic schemas for the rohwarengruppen domain."""
 from __future__ import annotations
 
-from typing import Any, Optional, List
-from pydantic import BaseModel, Field, ConfigDict
+from typing import Any, List, Optional
+from datetime import datetime
+from decimal import Decimal
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 from app.api.v1.schemas.base import BaseSchema
-
 
 class RohwarengruppeCreate(BaseModel):
     gruppe_nr: str = Field(..., max_length=20)
@@ -75,25 +75,6 @@ class StaffelZeileCreate(BaseModel):
     zeile_nr: int
     bis_wert: Decimal
     umrechnungsfaktor: Decimal = Field(..., description="Faktor für dieses Intervall")
-
-
-class ZaStaffelCreate(BaseModel):
-    staffel_nr: str = Field(..., max_length=20)
-    bezeichnung: str
-    gruppe_id: str
-    qualitaet_id: Optional[str] = None
-    ergebnis_typ: str = Field(default="preiszuschlag")
-    abrechnung_typ: str = Field(default="einfacher_umrechnungsfaktor")
-    basiserweiterung: Decimal = Field(default=Decimal("0"), ge=0)
-    zeilen: list[StaffelZeileCreate] = []
-
-    @model_validator(mode="after")
-    def check_typen(self) -> "ZaStaffelCreate":
-        if self.ergebnis_typ not in GUELTIGE_ERGEBNIS_TYPEN:
-            raise ValueError(f"ergebnis_typ muss einer von {GUELTIGE_ERGEBNIS_TYPEN} sein.")
-        if self.abrechnung_typ not in GUELTIGE_ABRECHNUNG_TYPEN:
-            raise ValueError(f"abrechnung_typ muss einer von {GUELTIGE_ABRECHNUNG_TYPEN} sein.")
-        return self
 
 
 class StaffelZeileOut(BaseModel):

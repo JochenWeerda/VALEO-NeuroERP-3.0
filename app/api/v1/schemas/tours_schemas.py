@@ -1,10 +1,9 @@
-"""Pydantic schemas for the tours domain."""
 from __future__ import annotations
 
-from typing import Any, Optional, List
-from pydantic import BaseModel, Field, ConfigDict
+from typing import Any, List, Optional
+from datetime import date, datetime
+from pydantic import BaseModel, ConfigDict, Field
 from app.api.v1.schemas.base import BaseSchema
-
 
 class DeliveryNoteResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
@@ -17,19 +16,6 @@ class DeliveryNoteResponse(BaseModel):
     items_summary: Optional[ItemsSummary] = None
 
 
-class StopResponse(BaseModel):
-    model_config = ConfigDict(from_attributes=True)
-
-    id: str
-    sequence: int
-    status: str
-    customer: Optional[CustomerInfo] = None
-    dropoff: Optional[DropoffInfo] = None
-    time_window: Optional[TimeWindow] = None
-    delivery_notes: List[DeliveryNoteResponse] = []
-    totals: StopTotals = StopTotals()
-
-
 class EventResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
@@ -38,24 +24,6 @@ class EventResponse(BaseModel):
     type: str
     by: Optional[UserInfo] = None
 
-
-class TourResponse(BaseModel):
-    model_config = ConfigDict(from_attributes=True)
-
-    id: str
-    tour_no: str
-    date: datetime
-    week: Optional[str] = None
-    type: str
-    status: str
-    driver: Optional[DriverInfo] = None
-    vehicle: Optional[VehicleInfo] = None
-    planned_departure_at: Optional[datetime] = None
-    actual_departure_at: Optional[datetime] = None
-    notes: Optional[str] = None
-    stops: List[StopResponse] = []
-    totals: TourTotals = TourTotals()
-    events: List[EventResponse] = []
 
 
 class CreateTourRequest(BaseModel):

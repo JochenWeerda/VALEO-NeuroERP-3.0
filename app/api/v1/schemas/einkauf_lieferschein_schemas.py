@@ -1,17 +1,10 @@
-"""Pydantic schemas for the einkauf lieferschein domain."""
 from __future__ import annotations
 
-from typing import Any, Optional, List
-from pydantic import BaseModel, Field, ConfigDict
+from typing import Any, List, Optional
+from datetime import date, datetime
+from decimal import Decimal
+from pydantic import BaseModel, ConfigDict, Field
 from app.api.v1.schemas.base import BaseSchema
-
-
-class LieferscheinPositionCreate(LieferscheinPositionBase):
-    pass
-
-
-class LieferscheinCreate(LieferscheinBase):
-    positionen: list[LieferscheinPositionCreate] = []
 
 
 class LieferscheinUpdate(BaseModel):
@@ -35,9 +28,6 @@ class LieferscheinUpdate(BaseModel):
     netto_betrag: Optional[Decimal] = None
     brutto_betrag: Optional[Decimal] = None
 
-
-class FrachtauftragCreate(FrachtauftragBase):
-    pass
 
 
 class FrachtauftragUpdate(BaseModel):
