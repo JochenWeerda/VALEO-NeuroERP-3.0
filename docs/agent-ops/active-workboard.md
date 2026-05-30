@@ -47,6 +47,16 @@ Stand: `2026-05-26`
 **Erledigt:** CSV-Profil ist verfuegbar. AMIC/A.eins ist als sichtbares, blockiertes Profil katalogisiert. Die produktive Aktivierung bleibt bis zum verifizierten Feldkatalog und Beispieldaten-UAT gesperrt.
 **Offene Risiken:** Eine scheinbar fertige AMIC-Anbindung ohne reale Quelltabellen und Feldkatalog waere fachlich gefaehrlicher als der explizite Blocker.
 
+## ADMIN-SUITE-005
+
+**Von:** Codex
+**Owner:** Codex
+**Stand:** reserviert 2026-05-30
+**Ziel des Slices:** Lesendes Security- und Agent-Governance-Cockpit mit Rollenpaketen, effektiven Scopes, SoD-Warnungen und Rollen-Simulation einfuehren.
+**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/agent-ops/slices/ADMIN-SUITE-005.yaml`, `app/api/v1/endpoints/admin_suite.py`, `tests/test_admin_suite_security.py`, `packages/frontend-web/src/lib/api/admin-suite.ts`, `packages/frontend-web/src/pages/admin-suite/security.tsx`, `packages/frontend-web/src/pages/admin-suite/index.tsx`, `packages/frontend-web/src/app/route-builders/auto-groups/generated/admin-suite.ts`.
+**Abnahmekriterien:** Bestehendes RBAC bleibt Source of Truth; Simulation liefert effektive Scopes ohne Persistenz; Agentenrollen sind sichtbar getrennt; kritische Scope-Kombinationen erzeugen SoD-Warnungen.
+**Offene Risiken:** Normalisierte Permission Sets, Standort-/Lagerfilter und Break-glass-Schreibworkflow bleiben nachgelagerte, migrationspflichtige Governance-Erweiterungen.
+
 ## DESIGN-MERIDIAN-HARDCOLORS-014
 
 **Von:** Codex
