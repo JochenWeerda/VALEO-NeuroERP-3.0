@@ -24,10 +24,10 @@ const CARD_LINKS: Record<string, string | null> = {
   setup: '/admin-suite/setup',
   migration: '/admin-suite/migration',
   security: '/admin-suite/security',
-  connectors: '/admin/control-center/superglue',
-  devices: null,
+  connectors: '/admin-suite/connectors',
+  devices: '/admin-suite/devices',
   compliance: '/admin/compliance',
-  backup_restore: null,
+  backup_restore: '/admin-suite/operations',
   system_status: '/admin/control-center',
 }
 

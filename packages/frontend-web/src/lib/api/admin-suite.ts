@@ -85,6 +85,35 @@ export type SecurityCockpit = {
   agent_roles: SecurityRole[]
 }
 
+export type Connector = {
+  key: string
+  label: string
+  config_status: 'configured' | 'partial' | 'disabled' | 'unchecked'
+  live_status: 'unchecked'
+  credential_status: 'set' | 'missing' | 'unchecked' | 'not_required'
+  source: string
+  notes: string
+}
+
+export type DeviceCapability = {
+  key: string
+  label: string
+  registry_source: string
+  registration_status: 'available' | 'partial' | 'planned'
+  live_status: 'unchecked'
+  test_actions: string[]
+  notes: string
+}
+
+export type OperationsEvidence = {
+  key: string
+  label: string
+  implementation_status: 'available' | 'partial' | 'planned'
+  runtime_status: 'unchecked'
+  source: string
+  notes: string
+}
+
 export function useAdminSuiteReadiness() {
   return useQuery({
     queryKey: ['admin-suite', 'readiness'],
@@ -121,4 +150,16 @@ export function useAdminSuiteSecurity() {
     queryKey: ['admin-suite', 'security'],
     queryFn: async () => (await apiClient.get<SecurityCockpit>('/api/v1/admin-suite/security')).data,
   })
+}
+
+export function useAdminSuiteConnectors() {
+  return useQuery({ queryKey: ['admin-suite', 'connectors'], queryFn: async () => (await apiClient.get<Connector[]>('/api/v1/admin-suite/connectors')).data })
+}
+
+export function useAdminSuiteDevices() {
+  return useQuery({ queryKey: ['admin-suite', 'devices'], queryFn: async () => (await apiClient.get<DeviceCapability[]>('/api/v1/admin-suite/devices')).data })
+}
+
+export function useAdminSuiteOperations() {
+  return useQuery({ queryKey: ['admin-suite', 'operations'], queryFn: async () => (await apiClient.get<OperationsEvidence[]>('/api/v1/admin-suite/operations')).data })
 }

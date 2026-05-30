@@ -56,6 +56,6 @@ describe('AdminSuiteHomePage', () => {
     expect(screen.getByText('Go-Live Readiness: 0%')).toBeInTheDocument()
     expect(screen.getByText('Nicht geprueft')).toBeInTheDocument()
     expect(screen.getByText('Produktive Live-Evidenz steht noch aus.')).toBeInTheDocument()
-    expect(screen.getAllByRole('link', { name: 'Bereich oeffnen' })[0]).toHaveAttribute('href', '/admin/setup')
+    expect(screen.getAllByRole('link', { name: 'Bereich oeffnen' })[0]).toHaveAttribute('href', '/admin-suite/setup')
   })
 })
