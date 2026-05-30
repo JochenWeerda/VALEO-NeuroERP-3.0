@@ -43,7 +43,7 @@ class SearchRequest(BaseModel):
 
 
 @router.post("/", summary="Store",
-    response_model=StatusResponse
+    response_model=NeuroKnowledgeOut
 )
 async def store(
     request: StoreRequest,
@@ -64,7 +64,7 @@ async def store(
 
 
 @router.get("/{domain}/{key}", summary="Entry abrufen",
-    response_model=StatusResponse
+    response_model=NeuroKnowledgeOut
 )
 async def get_entry(
     domain: str,
@@ -80,7 +80,7 @@ async def get_entry(
 
 
 @router.post("/search", summary="Suchen",
-    response_model=StatusResponse
+    response_model=NeuroKnowledgeOut
 )
 async def search(
     request: SearchRequest,
@@ -94,7 +94,7 @@ async def search(
 
 
 @router.delete("/{domain}/{key}", summary="Entfernen",
-    response_model=StatusResponse
+    response_model=NeuroKnowledgeOut
 )
 async def remove(
     domain: str,
