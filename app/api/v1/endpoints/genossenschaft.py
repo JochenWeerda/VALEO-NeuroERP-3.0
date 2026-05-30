@@ -20,7 +20,7 @@ from app.core.tenant import get_tenant_id
 
 logger = logging.getLogger(__name__)
 
-from app.api.v1.schemas.base import BaseSchema
+from app.api.v1.schemas.base import BaseSchema, IDResponse
 from app.api.v1.schemas.genossenschaft_schemas import GenossenschaftOut
 
 

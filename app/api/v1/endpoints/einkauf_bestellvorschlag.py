@@ -56,6 +56,7 @@ from app.core.exceptions import ConflictError, EntityNotFoundError, ValidationFa
 from app.services.procurement_service import ProcurementService
 
 from app.api.v1.schemas.base import BaseSchema
+from app.api.v1.schemas.einkauf_bestellvorschlag_schemas import EinkaufBestellvorschlagOut
 from pydantic import ConfigDict as _ConfigDict
 
 

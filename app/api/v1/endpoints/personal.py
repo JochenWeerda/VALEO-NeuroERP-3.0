@@ -17,7 +17,8 @@ from app.core.database import get_db
 from app.core.exceptions import ConflictError, EntityNotFoundError
 from app.core.tenant import get_tenant_id
 from app.services.personal_service import PersonalService
-from app.api.v1.schemas.base import BaseSchema, CompatBridgeOut
+from app.api.v1.schemas.base import BaseSchema, CompatBridgeOut, IDResponse
+from pydantic import ConfigDict as _ConfigDict
 from app.api.v1.schemas.personal_schemas import (
     HrmReadinessCapabilityOut,
     HrmReadinessIntegrationOut,

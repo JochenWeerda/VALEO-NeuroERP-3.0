@@ -19,7 +19,7 @@ from app.services.knowledge_store import (
     get_knowledge_stats,
 )
 
-from app.api.v1.schemas.base import BaseSchema
+from app.api.v1.schemas.base import BaseSchema, StatusResponse
 from app.api.v1.schemas.neuro_knowledge_schemas import NeuroKnowledgeOut
 
 

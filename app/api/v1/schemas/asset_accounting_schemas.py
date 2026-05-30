@@ -1,14 +1,10 @@
-"""Pydantic schemas for the asset accounting domain."""
 from __future__ import annotations
 
-from typing import Any, Optional, List
-from pydantic import BaseModel, Field, ConfigDict
+from typing import Any, List, Optional
+from datetime import date
+from decimal import Decimal
+from pydantic import ConfigDict as _ConfigDict, BaseModel, ConfigDict, Field
 from app.api.v1.schemas.base import BaseSchema
-
-
-class AssetAccountingOut(BaseSchema):
-    model_config = _ConfigDict(extra="allow")
-
 
 class AssetCreate(BaseModel):
     asset_number: str

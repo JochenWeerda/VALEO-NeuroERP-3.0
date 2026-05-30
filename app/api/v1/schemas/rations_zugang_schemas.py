@@ -1,14 +1,9 @@
-"""Pydantic schemas for the rations zugang domain."""
 from __future__ import annotations
 
-from typing import Any, Optional, List
-from pydantic import BaseModel, Field, ConfigDict
+from typing import Any, List, Optional
+from datetime import datetime
+from pydantic import BaseModel, ConfigDict, Field
 from app.api.v1.schemas.base import BaseSchema
-
-
-class ZugangCreate(ZugangBase):
-    pass
-
 
 class ZugangOut(BaseModel):
     id: str

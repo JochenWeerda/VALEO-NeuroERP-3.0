@@ -12,7 +12,7 @@ from ....core.logging import set_correlation_id
 
 logger = logging.getLogger(__name__)
 
-from app.api.v1.schemas.base import BaseSchema
+from app.api.v1.schemas.base import BaseSchema, StatusResponse
 from pydantic import ConfigDict as _ConfigDict
 
 

@@ -10,6 +10,7 @@ from app.core.database import get_db
 from app.domains.operations.models import MarketingKampagneEntry
 
 from app.api.v1.schemas.base import BaseSchema
+from app.api.v1.schemas.marketing_schemas import MarketingOut
 
 
 router = APIRouter(prefix="/marketing", tags=["Marketing"])
@@ -107,7 +108,6 @@ async def get_kampagne_kpis(kampagne_id: int, db: Session = Depends(get_db)) -> 
 
 # --------------- Pydantic Schemas ---------------
 from pydantic import BaseModel
-from app.api.v1.schemas.marketing_schemas import MarketingOut
 from datetime import date
 
 

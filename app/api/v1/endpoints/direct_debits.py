@@ -10,7 +10,8 @@ from sqlalchemy import text
 from ....core.tenant import get_tenant_id
 from ....core.database import get_db
 
-from app.api.v1.schemas.base import BaseSchema
+from app.api.v1.schemas.base import BaseSchema, StatusResponse
+from app.api.v1.schemas.direct_debits_schemas import DirectDebitsOut
 
 
 router = APIRouter(prefix="/direct-debits", tags=["finance", "direct-debits"])
@@ -74,7 +75,6 @@ async def get_new_direct_debit_template(tenant_id: str = Depends(get_tenant_id))
 
 # --------------- Pydantic Schemas ---------------
 from pydantic import BaseModel
-from app.api.v1.schemas.direct_debits_schemas import DirectDebitsOut
 from typing import Optional, List
 from datetime import datetime
 from starlette.responses import Response

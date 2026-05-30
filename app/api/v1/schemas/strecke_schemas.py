@@ -1,20 +1,8 @@
-"""Pydantic schemas for the strecke domain."""
 from __future__ import annotations
 
-from typing import Any, Optional, List
-from pydantic import BaseModel, Field, ConfigDict
+from typing import Any, List, Optional
+from pydantic import BaseModel, ConfigDict, Field
 from app.api.v1.schemas.base import BaseSchema
-
-
-class StreckengeschaeftCreate(StreckengeschaeftBase):
-    pass
-
-
-class StreckengeschaeftOut(StreckengeschaeftBase):
-    id: str
-    strecke_nr: str
-    erstellt: str
-
 
 class StreckengeschaeftUpdate(BaseModel):
     datum: Optional[str] = None
