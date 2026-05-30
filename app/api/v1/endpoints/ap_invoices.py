@@ -129,7 +129,7 @@ def calculate_invoice_totals(invoice: SalesInvoice) -> SalesInvoice:
 
 
 @router.post("/", summary="Ap invoice anlegen",
-    response_model=StatusResponse
+    response_model=ApInvoicesOut, status_code=201
 )
 async def create_ap_invoice(doc: SalesInvoice, db: Session = Depends(get_db)) -> dict:
     """Erstellt eine neue Eingangsrechnung (Kreditoren)."""
@@ -155,7 +155,7 @@ async def create_ap_invoice(doc: SalesInvoice, db: Session = Depends(get_db)) ->
 
 
 @router.get("/{invoice_id}", summary="Ap invoice abrufen",
-    response_model=StatusResponse
+    response_model=ApInvoicesOut
 )
 async def get_ap_invoice(invoice_id: str, db: Session = Depends(get_db)) -> dict:
     """Ruft eine Eingangsrechnung anhand ihrer ID ab."""
@@ -168,7 +168,7 @@ async def get_ap_invoice(invoice_id: str, db: Session = Depends(get_db)) -> dict
 
 
 @router.put("/{invoice_id}", summary="Ap invoice aktualisieren",
-    response_model=StatusResponse
+    response_model=ApInvoicesOut
 )
 async def update_ap_invoice(invoice_id: str, doc: SalesInvoice, db: Session = Depends(get_db)) -> dict:
     """Aktualisiert eine bestehende Eingangsrechnung."""
@@ -233,7 +233,7 @@ async def delete_ap_invoice(invoice_id: str, db: Session = Depends(get_db)) -> d
     success = delete_from_store("ap_invoice", invoice_id, repo)
     if not success:
         raise HTTPException(status_code=404, detail="AP Invoice not found")
-    return {"status": "ok", "message": "AP Invoice deleted"}
+    return {"success": True, "message": "AP Invoice deleted"}
 
 
 @router.post("/{invoice_id}/approve", summary="Ap invoice genehmigen",
