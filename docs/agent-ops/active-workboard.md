@@ -107,6 +107,16 @@ Stand: `2026-05-30`
 **Checks:** `python -m compileall -q app/api/v1/endpoints/admin_suite.py`; `python -m pytest tests/test_admin_suite_compliance.py tests/test_admin_suite_operations.py tests/test_admin_suite_security.py tests/test_admin_suite_migration.py tests/test_admin_suite_setup.py tests/test_admin_suite_readiness.py -q --no-cov --tb=short` (`17 passed`); `pnpm --filter @valero-neuroerp/frontend-web type-check`; fokussierte Doku-Checks; `git diff --check`.
 **Offene Risiken:** Externe Zertifikate, Behoerdenquittungen und produktive UAT-Nachweise bleiben ausserhalb des Repos.
 
+## ADMIN-SUITE-010
+
+**Von:** Codex
+**Owner:** Codex
+**Stand:** reserviert 2026-05-30
+**Ziel des Slices:** Read-only Systemstatus-Evidenzsicht fuer Health, Release, Migration, Event-Bus, Worker und Voice in die Admin Suite integrieren, ohne beim Cockpit-Aufruf Live-Probes auszuloesen.
+**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/agent-ops/slices/ADMIN-SUITE-010.yaml`, `docs/project-context/admin-suite-roadmap-2026-05-30.md`, `app/api/v1/endpoints/admin_suite.py`, `tests/test_admin_suite_system_status.py`, `packages/frontend-web/src/lib/api/admin-suite.ts`, `packages/frontend-web/src/pages/admin-suite/system-status.tsx`, `packages/frontend-web/src/pages/admin-suite/index.tsx`, `packages/frontend-web/src/app/route-builders/auto-groups/generated/admin-suite.ts`.
+**Abnahmekriterien:** Bestehende Health- und Monitoring-Vertraege bleiben Source of Truth; implementierte Probe, beobachteter Runtime-Status und Cockpit-Abruf bleiben getrennt; kein Cockpit-GET startet externe oder zustandsaendernde Probe; `/admin-suite/system-status` ist erreichbar; Backend-Test, Frontend-Typecheck und fokussierter Diff-Check sind gruen.
+**Offene Risiken:** Reale Laufzeitwerte benoetigen spaeter einen expliziten Ops-Adapter oder Monitoring-Import.
+
 ## DESIGN-MERIDIAN-HARDCOLORS-014
 
 **Von:** Codex
