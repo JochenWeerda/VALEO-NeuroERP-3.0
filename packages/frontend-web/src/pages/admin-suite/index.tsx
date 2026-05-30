@@ -28,7 +28,7 @@ const CARD_LINKS: Record<string, string | null> = {
   devices: '/admin-suite/devices',
   compliance: '/admin-suite/compliance',
   backup_restore: '/admin-suite/operations',
-  system_status: '/admin/control-center',
+  system_status: '/admin-suite/system-status',
 }
 
 const CARD_ICONS = {

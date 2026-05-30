@@ -125,6 +125,16 @@ export type ComplianceEvidence = {
   notes: string
 }
 
+export type SystemStatusEvidence = {
+  key: string
+  label: string
+  probe_status: 'available' | 'partial' | 'planned'
+  runtime_status: 'unchecked'
+  source: string
+  target_path?: string | null
+  notes: string
+}
+
 export function useAdminSuiteReadiness() {
   return useQuery({
     queryKey: ['admin-suite', 'readiness'],
@@ -177,4 +187,8 @@ export function useAdminSuiteOperations() {
 
 export function useAdminSuiteCompliance() {
   return useQuery({ queryKey: ['admin-suite', 'compliance'], queryFn: async () => (await apiClient.get<ComplianceEvidence[]>('/api/v1/admin-suite/compliance')).data })
+}
+
+export function useAdminSuiteSystemStatus() {
+  return useQuery({ queryKey: ['admin-suite', 'system-status'], queryFn: async () => (await apiClient.get<SystemStatusEvidence[]>('/api/v1/admin-suite/system-status')).data })
 }
