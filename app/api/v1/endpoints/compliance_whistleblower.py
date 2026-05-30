@@ -51,7 +51,7 @@ class NoteIn(BaseModel):
 
 
 @router.post("/reports", status_code=201, summary="Report einreichen",
-    response_model=StatusResponse
+    response_model=ComplianceWhistleblowerOut
 )
 async def submit_report(payload: ReportIn, db: Session = Depends(get_db)):
     _ensure_table(db)
@@ -74,7 +74,7 @@ async def submit_report(payload: ReportIn, db: Session = Depends(get_db)):
 
 
 @router.get("/reports/status/{token}", summary="Status report",
-    response_model=StatusResponse
+    response_model=ComplianceWhistleblowerOut
 )
 async def report_status(token: str, db: Session = Depends(get_db)):
     _ensure_table(db)
