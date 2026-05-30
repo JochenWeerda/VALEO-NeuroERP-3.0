@@ -114,6 +114,17 @@ export type OperationsEvidence = {
   notes: string
 }
 
+export type ComplianceEvidence = {
+  key: string
+  label: string
+  implementation_status: 'available' | 'partial' | 'planned'
+  runtime_status: 'unchecked'
+  external_gate: 'required' | 'not_required' | 'unchecked'
+  source: string
+  target_path?: string | null
+  notes: string
+}
+
 export function useAdminSuiteReadiness() {
   return useQuery({
     queryKey: ['admin-suite', 'readiness'],
@@ -162,4 +173,8 @@ export function useAdminSuiteDevices() {
 
 export function useAdminSuiteOperations() {
   return useQuery({ queryKey: ['admin-suite', 'operations'], queryFn: async () => (await apiClient.get<OperationsEvidence[]>('/api/v1/admin-suite/operations')).data })
+}
+
+export function useAdminSuiteCompliance() {
+  return useQuery({ queryKey: ['admin-suite', 'compliance'], queryFn: async () => (await apiClient.get<ComplianceEvidence[]>('/api/v1/admin-suite/compliance')).data })
 }

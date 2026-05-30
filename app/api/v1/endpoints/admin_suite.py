@@ -209,6 +209,17 @@ class OperationsEvidenceOut(BaseModel):
     notes: str
 
 
+class ComplianceEvidenceOut(BaseModel):
+    key: str
+    label: str
+    implementation_status: Literal["available", "partial", "planned"]
+    runtime_status: Literal["unchecked"]
+    external_gate: Literal["required", "not_required", "unchecked"]
+    source: str
+    target_path: str | None = None
+    notes: str
+
+
 def _evidence(
     *,
     key: str,
@@ -295,8 +306,8 @@ def build_admin_suite_readiness() -> AdminSuiteReadinessOut:
             key="compliance",
             label="Compliance",
             status="unchecked",
-            source="/admin/compliance",
-            evidence="Fachliche Compliance-Sichten existieren; produktive externe Abnahmen werden noch nicht aggregiert.",
+            source="/api/v1/admin-suite/compliance",
+            evidence="Compliance-Evidenzkatalog vorhanden; produktive Runtime-Nachweise und externe Abnahmen bleiben separat ungeprueft.",
             checked_at=checked_at,
         ),
         _evidence(
@@ -533,6 +544,19 @@ def _operations_catalog() -> list[OperationsEvidenceOut]:
     ]
 
 
+def _compliance_catalog() -> list[ComplianceEvidenceOut]:
+    return [
+        ComplianceEvidenceOut(key="gobd", label="GoBD und Buchungsnachweis", implementation_status="available", runtime_status="unchecked", external_gate="required", source="docs/GOBD-COMPLIANCE.md", target_path="/admin/audit-log", notes="Audit-, Archiv- und Stornovertraege sind vorhanden; produktiver Verfahrensnachweis und Testat bleiben externe Evidenz."),
+        ComplianceEvidenceOut(key="gdpr_art30", label="DSGVO Art. 30 Verarbeitungsverzeichnis", implementation_status="available", runtime_status="unchecked", external_gate="required", source="/api/v1/gdpr/art30/activities", target_path="/compliance/verarbeitungsverzeichnis", notes="CRUD und Export sind vorhanden; produktive Pflege und Datenschutzfreigabe muessen betrieblich nachgewiesen werden."),
+        ComplianceEvidenceOut(key="gdpr_art33", label="DSGVO Art. 33 Datenpannen", implementation_status="available", runtime_status="unchecked", external_gate="required", source="/api/v1/gdpr/art33/breaches", target_path="/compliance/datenpannen", notes="72h-Fristueberwachung ist vorhanden; Behoerdenkommunikation und reale Prozessprobe bleiben externe Nachweise."),
+        ComplianceEvidenceOut(key="pos_tse", label="POS / TSE und DSFinV-K", implementation_status="available", runtime_status="unchecked", external_gate="required", source="/api/v1/admin/pos/tse/status", target_path="/admin/pos", notes="TSE- und DSFinV-K-Vertraege sind vorhanden; produktiver Fiskaly-Zugang und Pruefwerkzeug-Abnahme bleiben extern."),
+        ComplianceEvidenceOut(key="elster", label="eBilanz / ELSTER", implementation_status="partial", runtime_status="unchecked", external_gate="required", source="/api/v1/ebilanz/eric-readiness", target_path="/fibu/ebilanz", notes="ERiC-Readiness ist repo-seitig vorbereitet; Zertifikat und Steuerberaterfreigabe fehlen als Betriebsnachweis."),
+        ComplianceEvidenceOut(key="atlas", label="ATLAS Zollausfuhr", implementation_status="partial", runtime_status="unchecked", external_gate="required", source="/api/v1/fibu/atlas", target_path="/fibu/atlas", notes="Zollausfuhrpfad ist implementiert; produktives ATLAS-Zertifikat bleibt externe Voraussetzung."),
+        ComplianceEvidenceOut(key="reporting", label="Meldewesen und Fachquittungen", implementation_status="available", runtime_status="unchecked", external_gate="required", source="/compliance/meldewesen-konsole", target_path="/compliance/meldewesen-konsole", notes="Meldewesen-Konsole und Exportpfade sind vorhanden; echte Einreichungsquittungen werden noch nicht aggregiert."),
+        ComplianceEvidenceOut(key="sanctions", label="Sanktionspruefung", implementation_status="available", runtime_status="unchecked", external_gate="unchecked", source="/api/v1/sanctions/check", target_path="/compliance/sanktionspruefung", notes="Pruefpfad ist vorhanden; produktive Listenquelle und Aktualisierungsnachweis muessen betrieblich verifiziert werden."),
+    ]
+
+
 @router.get("/readiness", response_model=AdminSuiteReadinessOut, summary="Admin Suite readiness abrufen")
 async def get_admin_suite_readiness() -> AdminSuiteReadinessOut:
     """Liefert konservative Go-Live-Evidenz ohne externe Live-Probes."""
@@ -694,3 +718,9 @@ async def get_device_center() -> list[DeviceCapabilityOut]:
 @router.get("/operations", response_model=list[OperationsEvidenceOut], summary="Operations Center abrufen")
 async def get_operations_center() -> list[OperationsEvidenceOut]:
     return _operations_catalog()
+
+
+@router.get("/compliance", response_model=list[ComplianceEvidenceOut], summary="Compliance Evidence Center abrufen")
+async def get_compliance_center() -> list[ComplianceEvidenceOut]:
+    """Liefert Compliance-Evidenzmetadaten ohne Live-Probes oder externe Erfolgsannahmen."""
+    return _compliance_catalog()
