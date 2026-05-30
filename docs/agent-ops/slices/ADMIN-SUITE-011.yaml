@@ -1,0 +1,30 @@
+id: ADMIN-SUITE-011
+title: Admin Suite Diagnostic Manifest
+owner: Codex
+status: abgeschlossen
+claimed_at: 2026-05-30
+completed_at: 2026-05-30
+goal: Redigierten read-only Diagnosepaket-Manifest-Katalog ohne implizite Datensammlung bereitstellen.
+file_ownership:
+  - docs/agent-ops/active-workboard.md
+  - docs/agent-ops/slices/ADMIN-SUITE-011.yaml
+  - docs/project-context/admin-suite-roadmap-2026-05-30.md
+  - app/api/v1/endpoints/admin_suite.py
+  - tests/test_admin_suite_diagnostics.py
+  - packages/frontend-web/src/lib/api/admin-suite.ts
+  - packages/frontend-web/src/pages/admin-suite/diagnostics.tsx
+  - packages/frontend-web/src/pages/admin-suite/operations.tsx
+  - packages/frontend-web/src/app/route-builders/auto-groups/generated/admin-suite.ts
+acceptance_criteria:
+  - Diagnosekategorien, Quellen, Redaktionspflicht und Sammelstatus sind sichtbar.
+  - Secret- und personenbezogene Inhalte werden nicht ausgegeben.
+  - Cockpit-GET sammelt oder exportiert keine Live-Daten.
+  - /admin-suite/diagnostics ist erreichbar.
+checks:
+  - python -m pytest tests/test_admin_suite_diagnostics.py tests/test_admin_suite_system_status.py tests/test_admin_suite_operations.py -q --no-cov
+  - pnpm --filter @valero-neuroerp/frontend-web type-check
+risks:
+  - Ein echter Diagnoseexport benoetigt spaeter Audit-Vertrag, Rollenpruefung, Retention und explizite Nutzeraktion.
+gate_results:
+  backend: "23 passed: complete admin-suite focused suite"
+  typescript: "0 errors"

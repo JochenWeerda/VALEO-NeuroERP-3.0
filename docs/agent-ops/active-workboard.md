@@ -123,10 +123,12 @@ Stand: `2026-05-30`
 
 **Von:** Codex
 **Owner:** Codex
-**Stand:** reserviert 2026-05-30
+**Stand:** abgeschlossen 2026-05-30
 **Ziel des Slices:** Redigierten read-only Diagnosepaket-Manifest-Katalog fuer Supportfaelle in die Admin Suite integrieren, ohne Logs, Secrets oder Live-Daten beim Cockpit-Aufruf zu exportieren.
 **Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/agent-ops/slices/ADMIN-SUITE-011.yaml`, `docs/project-context/admin-suite-roadmap-2026-05-30.md`, `app/api/v1/endpoints/admin_suite.py`, `tests/test_admin_suite_diagnostics.py`, `packages/frontend-web/src/lib/api/admin-suite.ts`, `packages/frontend-web/src/pages/admin-suite/diagnostics.tsx`, `packages/frontend-web/src/pages/admin-suite/operations.tsx`, `packages/frontend-web/src/app/route-builders/auto-groups/generated/admin-suite.ts`.
 **Abnahmekriterien:** Diagnosekategorien, Quellen, Redaktionspflicht und Sammelstatus sind sichtbar; Secret- und personenbezogene Inhalte werden nicht ausgegeben; Cockpit-GET sammelt oder exportiert keine Live-Daten; `/admin-suite/diagnostics` ist erreichbar; Backend-Test, Frontend-Typecheck und fokussierter Diff-Check sind gruen.
+**Erledigt:** Read-only Diagnosepaket-Manifest unter `/admin-suite/diagnostics` mit sieben Kategorien umgesetzt. Release, Health, Migration, Connectoren, Event-Bus, Worker und Audit zeigen Quelle, Redaktionspflicht und `not_collected`; das Operations Center verlinkt den Katalog.
+**Checks:** `python -m compileall -q app/api/v1/endpoints/admin_suite.py`; `python -m pytest tests/test_admin_suite_diagnostics.py tests/test_admin_suite_system_status.py tests/test_admin_suite_compliance.py tests/test_admin_suite_operations.py tests/test_admin_suite_security.py tests/test_admin_suite_migration.py tests/test_admin_suite_setup.py tests/test_admin_suite_readiness.py -q --no-cov --tb=short` (`23 passed`); `pnpm --filter @valero-neuroerp/frontend-web type-check`; `python scripts/agent_workboard_supervisor.py validate`; fokussierte Doku-Checks; `git diff --check`.
 **Offene Risiken:** Ein echter Diagnoseexport benoetigt spaeter Audit-Vertrag, Rollenpruefung, Retention und explizite Nutzeraktion.
 
 ## DESIGN-MERIDIAN-HARDCOLORS-014

@@ -209,6 +209,23 @@ Gate:
 - Frontend-Typecheck
 - Backend-Vertragstest
 
+#### `ADMIN-SUITE-011` - Diagnosepaket Manifest
+
+Ziel:
+- Read-only Katalog erlaubter Supportdaten fuer Release, Health, Migration,
+  Connectoren, Event-Bus, Worker und Audit
+- Sammelstatus und Redaktionspflicht je Kategorie sichtbar machen
+- Operations Center mit dem Diagnosemanifest verknuepfen
+
+Risikoanpassung:
+- Ein Cockpit-Aufruf sammelt oder exportiert keine Logs und Live-Daten.
+- Secret-, Payload- und personenbezogene Rohdaten bleiben ausgeschlossen.
+
+Gate:
+- Keine Secret-Werte oder Payloads im API-Vertrag
+- Frontend-Typecheck
+- Backend-Vertragstest
+
 ## Abhaengigkeiten
 
 | Slice | Abhaengig von |
@@ -223,10 +240,11 @@ Gate:
 | `ADMIN-SUITE-008` | `ADMIN-SUITE-001` |
 | `ADMIN-SUITE-009` | `ADMIN-SUITE-001` |
 | `ADMIN-SUITE-010` | `ADMIN-SUITE-001`, `ADMIN-SUITE-008` |
+| `ADMIN-SUITE-011` | `ADMIN-SUITE-008`, `ADMIN-SUITE-010` |
 
 ## Naechster konkreter Schritt
 
-Die repo-seitige MVP-Kette `ADMIN-SUITE-001` bis `ADMIN-SUITE-010` ist umgesetzt.
+Die repo-seitige MVP-Kette `ADMIN-SUITE-001` bis `ADMIN-SUITE-011` ist umgesetzt.
 Naechste Ausbauschritte sind bewusst evidenz- oder migrationspflichtig:
 
 - verifizierten AMIC-Feldkatalog und Beispieldaten-UAT bereitstellen
