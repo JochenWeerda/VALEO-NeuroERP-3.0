@@ -135,6 +135,15 @@ export type SystemStatusEvidence = {
   notes: string
 }
 
+export type DiagnosticManifestItem = {
+  key: string
+  label: string
+  source: string
+  collection_status: 'not_collected'
+  redaction: 'required' | 'metadata_only'
+  notes: string
+}
+
 export function useAdminSuiteReadiness() {
   return useQuery({
     queryKey: ['admin-suite', 'readiness'],
@@ -191,4 +200,8 @@ export function useAdminSuiteCompliance() {
 
 export function useAdminSuiteSystemStatus() {
   return useQuery({ queryKey: ['admin-suite', 'system-status'], queryFn: async () => (await apiClient.get<SystemStatusEvidence[]>('/api/v1/admin-suite/system-status')).data })
+}
+
+export function useAdminSuiteDiagnostics() {
+  return useQuery({ queryKey: ['admin-suite', 'diagnostics'], queryFn: async () => (await apiClient.get<DiagnosticManifestItem[]>('/api/v1/admin-suite/diagnostics')).data })
 }

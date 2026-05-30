@@ -36,5 +36,9 @@ export const entries: AutoGroupRouteEntry[] = [
   {
     "module": "@/pages/admin-suite/system-status",
     "path": "system-status"
+  },
+  {
+    "module": "@/pages/admin-suite/diagnostics",
+    "path": "diagnostics"
   }
 ]

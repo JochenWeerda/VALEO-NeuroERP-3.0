@@ -15,6 +15,17 @@ scope:
   - services/ki-usability/app/services/local_stt.py
   - services/ki-usability/app/api/v1/endpoints/voice.py
   - packages/frontend-web/src/features/ki-usability/
+file_ownership:
+  - docs/agent-ops/slices/SLICE-013-VOICE-LOCAL-POLISH-001.yaml
+  - app/services/voice_adapter.py
+  - services/ki-usability/app/services/voice_polish.py
+  - services/ki-usability/app/services/local_stt.py
+  - services/ki-usability/app/services/ollama_client.py
+  - services/ki-usability/app/api/v1/endpoints/voice.py
+  - packages/frontend-web/src/features/ki-usability/components/VoiceFeedback.tsx
+  - packages/frontend-web/src/features/ki-usability/hooks/useVoiceIntent.ts
+  - packages/frontend-web/src/features/ki-usability/components/VoiceButton.tsx
+  - services/ki-usability/tests/test_voice_polish.py
 acceptance_criteria:
   - POST /voice/polish liefert raw + polished + provider
   - POST /voice/transcribe akzeptiert Audio (base64) via faster-whisper
