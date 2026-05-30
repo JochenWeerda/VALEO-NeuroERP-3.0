@@ -13,6 +13,7 @@ from sqlalchemy import text
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
+from app.core.rbac import ROLE_PERMISSIONS, Role
 from app.core.tenant import get_tenant_id
 from app.services.integration_bootstrap import build_integration_bootstrap_summary
 
@@ -155,6 +156,28 @@ class MigrationBatchOut(BaseModel):
 class MigrationCockpitOut(BaseModel):
     profiles: list[MigrationProfileOut]
     batches: list[MigrationBatchOut]
+
+
+class SecurityRoleOut(BaseModel):
+    key: str
+    permissions: list[str]
+    actor_type: Literal["human", "agent"]
+    notes: str | None = None
+
+
+class SecuritySimulationIn(BaseModel):
+    roles: list[str]
+
+
+class SecuritySimulationOut(BaseModel):
+    roles: list[str]
+    effective_permissions: list[str]
+    sod_warnings: list[str]
+
+
+class SecurityCockpitOut(BaseModel):
+    roles: list[SecurityRoleOut]
+    agent_roles: list[SecurityRoleOut]
 
 
 def _evidence(
@@ -378,6 +401,50 @@ def _find_batch(store: dict[str, Any], batch_id: str) -> dict[str, Any]:
     return batch
 
 
+def _security_roles() -> list[SecurityRoleOut]:
+    return [
+        SecurityRoleOut(
+            key=role.value,
+            permissions=sorted(permission.value for permission in ROLE_PERMISSIONS.get(role, [])),
+            actor_type="human",
+        )
+        for role in Role
+    ]
+
+
+def _agent_roles() -> list[SecurityRoleOut]:
+    return [
+        SecurityRoleOut(
+            key="agent_readonly",
+            permissions=["view_audit_logs", "view_customers", "view_finance", "view_inventory"],
+            actor_type="agent",
+            notes="Lesende Assistenzrolle ohne Schreib- oder Freigaberechte.",
+        ),
+        SecurityRoleOut(
+            key="agent_inventory_assistant",
+            permissions=["create_inventory", "view_inventory"],
+            actor_type="agent",
+            notes="Operative Lagerassistenz; keine Bestandskorrektur und keine Adminrechte.",
+        ),
+    ]
+
+
+def _simulate_security(roles: list[str]) -> SecuritySimulationOut:
+    known_roles = {role.key: role for role in [*_security_roles(), *_agent_roles()]}
+    unknown = sorted(set(roles) - set(known_roles))
+    if unknown:
+        raise HTTPException(status_code=422, detail=f"Unknown roles: {', '.join(unknown)}")
+    permissions = sorted({permission for role in roles for permission in known_roles[role].permissions})
+    warnings: list[str] = []
+    if {"create_finance", "approve_payments"}.issubset(permissions):
+        warnings.append("SoD: Finance-Erfassung und Zahlungsfreigabe liegen in derselben effektiven Rolle.")
+    if {"pos_request_override", "pos_approve_override"}.issubset(permissions):
+        warnings.append("SoD: Override-Antrag und Override-Freigabe duerfen nicht zusammenfallen.")
+    if any(role.startswith("agent_") for role in roles) and "manage_system" in permissions:
+        warnings.append("Agentenrolle darf keine Systemadministration erhalten.")
+    return SecuritySimulationOut(roles=roles, effective_permissions=permissions, sod_warnings=warnings)
+
+
 @router.get("/readiness", response_model=AdminSuiteReadinessOut, summary="Admin Suite readiness abrufen")
 async def get_admin_suite_readiness() -> AdminSuiteReadinessOut:
     """Liefert konservative Go-Live-Evidenz ohne externe Live-Probes."""
@@ -512,3 +579,14 @@ async def approve_migration_batch(
     settings["admin_suite_migration"] = store
     _save_tenant_settings(db, tenant_id, settings)
     return MigrationBatchOut(**batch)
+
+
+@router.get("/security", response_model=SecurityCockpitOut, summary="Security Governance Cockpit abrufen")
+async def get_security_cockpit() -> SecurityCockpitOut:
+    return SecurityCockpitOut(roles=_security_roles(), agent_roles=_agent_roles())
+
+
+@router.post("/security/simulate", response_model=SecuritySimulationOut, summary="Effektive Rechte simulieren")
+async def simulate_security(payload: SecuritySimulationIn) -> SecuritySimulationOut:
+    """Simuliert effektive Rechte ohne Rollen oder Tenant-Daten zu veraendern."""
+    return _simulate_security(payload.roles)
