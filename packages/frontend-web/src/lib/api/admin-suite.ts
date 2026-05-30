@@ -46,6 +46,33 @@ export type SetupSession = {
   steps: SetupStep[]
 }
 
+export type MigrationProfile = {
+  key: string
+  label: string
+  status: 'available' | 'blocked' | 'planned'
+  adapter?: string | null
+  notes: string
+}
+
+export type MigrationBatch = {
+  id: string
+  tenant_id: string
+  source_profile: string
+  source_ref: string
+  source_hash: string
+  mapping_version: string
+  dry_run: boolean
+  status: 'dry_run' | 'staged' | 'reconciliation_pending' | 'approved' | 'blocked'
+  reconciliation: Record<string, boolean>
+  created_at: string
+  updated_at: string
+}
+
+export type MigrationCockpit = {
+  profiles: MigrationProfile[]
+  batches: MigrationBatch[]
+}
+
 export function useAdminSuiteReadiness() {
   return useQuery({
     queryKey: ['admin-suite', 'readiness'],
@@ -67,5 +94,12 @@ export function useUpdateAdminSuiteSetupStep() {
     mutationFn: async ({ key, status }: { key: string; status: SetupStepStatus }) =>
       (await apiClient.patch<SetupSession>(`/api/v1/admin-suite/setup/steps/${key}`, { status })).data,
     onSuccess: (data) => queryClient.setQueryData(['admin-suite', 'setup'], data),
+  })
+}
+
+export function useAdminSuiteMigration() {
+  return useQuery({
+    queryKey: ['admin-suite', 'migration'],
+    queryFn: async () => (await apiClient.get<MigrationCockpit>('/api/v1/admin-suite/migration')).data,
   })
 }

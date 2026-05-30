@@ -5,6 +5,7 @@ from __future__ import annotations
 from datetime import datetime, timezone
 import json
 from typing import Any, Literal
+from uuid import uuid4
 
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field
@@ -20,6 +21,7 @@ router = APIRouter(prefix="/admin-suite", tags=["admin-suite", "readiness"])
 
 ReadinessStatus = Literal["ready", "warning", "blocked", "unchecked"]
 SetupStepStatus = Literal["unchecked", "in_progress", "warning", "blocked", "completed"]
+MigrationBatchStatus = Literal["dry_run", "staged", "reconciliation_pending", "approved", "blocked"]
 
 SETUP_STEPS = (
     ("company", "Firma", "/setup/firma"),
@@ -35,6 +37,38 @@ SETUP_STEPS = (
     ("migration", "Import", None),
     ("go_live_test", "Abschlusspruefung", "/admin-suite"),
 )
+
+MIGRATION_PROFILES = (
+    {
+        "key": "l3",
+        "label": "L3 / zvoove Handel",
+        "status": "available",
+        "adapter": "scripts/import_l3.py",
+        "notes": "Bestehender Dry-Run-, Staging- und Run-Tracking-Pfad.",
+    },
+    {
+        "key": "csv",
+        "label": "CSV / Excel",
+        "status": "available",
+        "adapter": "admin-suite-control-plane",
+        "notes": "Profilierung und Mapping vor spaeterem Import erforderlich.",
+    },
+    {
+        "key": "amic",
+        "label": "AMIC / AMIC A.eins",
+        "status": "blocked",
+        "adapter": None,
+        "notes": "Produktives Quellenprofil und Feldkatalog muessen verifiziert werden.",
+    },
+    {
+        "key": "rest_api",
+        "label": "REST API",
+        "status": "planned",
+        "adapter": None,
+        "notes": "Folgeprofil nach CSV und AMIC.",
+    },
+)
+RECONCILIATION_KEYS = ("record_counts", "balances", "open_items", "inventory")
 
 
 class ReadinessEvidence(BaseModel):
@@ -82,6 +116,45 @@ class SetupStepUpdate(BaseModel):
     status: SetupStepStatus
     evidence: str | None = Field(default=None, max_length=1000)
     responsible: str | None = Field(default=None, max_length=120)
+
+
+class MigrationProfileOut(BaseModel):
+    key: str
+    label: str
+    status: Literal["available", "blocked", "planned"]
+    adapter: str | None = None
+    notes: str
+
+
+class MigrationBatchCreate(BaseModel):
+    source_profile: str
+    source_ref: str = Field(min_length=1, max_length=255)
+    source_hash: str = Field(min_length=8, max_length=128)
+    mapping_version: str = Field(min_length=1, max_length=80)
+    dry_run: Literal[True] = True
+
+
+class MigrationReconciliationUpdate(BaseModel):
+    checks: dict[str, bool]
+
+
+class MigrationBatchOut(BaseModel):
+    id: str
+    tenant_id: str
+    source_profile: str
+    source_ref: str
+    source_hash: str
+    mapping_version: str
+    dry_run: bool
+    status: MigrationBatchStatus
+    reconciliation: dict[str, bool]
+    created_at: datetime
+    updated_at: datetime
+
+
+class MigrationCockpitOut(BaseModel):
+    profiles: list[MigrationProfileOut]
+    batches: list[MigrationBatchOut]
 
 
 def _evidence(
@@ -280,6 +353,31 @@ def _build_setup_session(tenant_id: str, payload: dict[str, Any] | None) -> Setu
     )
 
 
+def _migration_store(settings: dict[str, Any]) -> dict[str, Any]:
+    store = settings.get("admin_suite_migration")
+    if not isinstance(store, dict):
+        store = {}
+    batches = store.get("batches")
+    if not isinstance(batches, list):
+        batches = []
+    store["batches"] = batches
+    return store
+
+
+def _migration_cockpit(tenant_id: str, store: dict[str, Any]) -> MigrationCockpitOut:
+    return MigrationCockpitOut(
+        profiles=[MigrationProfileOut(**profile) for profile in MIGRATION_PROFILES],
+        batches=[MigrationBatchOut(**batch) for batch in store.get("batches", [])],
+    )
+
+
+def _find_batch(store: dict[str, Any], batch_id: str) -> dict[str, Any]:
+    batch = next((item for item in store["batches"] if item.get("id") == batch_id), None)
+    if not isinstance(batch, dict):
+        raise HTTPException(status_code=404, detail=f"Migration batch not found: {batch_id}")
+    return batch
+
+
 @router.get("/readiness", response_model=AdminSuiteReadinessOut, summary="Admin Suite readiness abrufen")
 async def get_admin_suite_readiness() -> AdminSuiteReadinessOut:
     """Liefert konservative Go-Live-Evidenz ohne externe Live-Probes."""
@@ -326,3 +424,91 @@ async def update_setup_step(
     settings["admin_suite_setup"] = setup
     _save_tenant_settings(db, tenant_id, settings)
     return _build_setup_session(tenant_id, setup)
+
+
+@router.get("/migration", response_model=MigrationCockpitOut, summary="Migration Cockpit abrufen")
+async def get_migration_cockpit(
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+) -> MigrationCockpitOut:
+    settings = _load_tenant_settings(db, tenant_id)
+    return _migration_cockpit(tenant_id, _migration_store(settings))
+
+
+@router.post("/migration/batches", response_model=MigrationBatchOut, status_code=201, summary="Migration Dry Run Batch anlegen")
+async def create_migration_batch(
+    payload: MigrationBatchCreate,
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+) -> MigrationBatchOut:
+    profiles = {profile["key"]: profile for profile in MIGRATION_PROFILES}
+    profile = profiles.get(payload.source_profile)
+    if not profile:
+        raise HTTPException(status_code=404, detail=f"Unknown source profile: {payload.source_profile}")
+    if profile["status"] != "available":
+        raise HTTPException(status_code=409, detail=f"Source profile is not available: {payload.source_profile}")
+    settings = _load_tenant_settings(db, tenant_id)
+    store = _migration_store(settings)
+    checked_at = datetime.now(timezone.utc).isoformat()
+    batch = {
+        "id": str(uuid4()),
+        "tenant_id": tenant_id,
+        "source_profile": payload.source_profile,
+        "source_ref": payload.source_ref,
+        "source_hash": payload.source_hash,
+        "mapping_version": payload.mapping_version,
+        "dry_run": True,
+        "status": "dry_run",
+        "reconciliation": {key: False for key in RECONCILIATION_KEYS},
+        "created_at": checked_at,
+        "updated_at": checked_at,
+    }
+    store["batches"].append(batch)
+    settings["admin_suite_migration"] = store
+    _save_tenant_settings(db, tenant_id, settings)
+    return MigrationBatchOut(**batch)
+
+
+@router.patch("/migration/batches/{batch_id}/reconciliation", response_model=MigrationBatchOut, summary="Migration Reconciliation aktualisieren")
+async def update_migration_reconciliation(
+    batch_id: str,
+    payload: MigrationReconciliationUpdate,
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+) -> MigrationBatchOut:
+    unknown = sorted(set(payload.checks) - set(RECONCILIATION_KEYS))
+    if unknown:
+        raise HTTPException(status_code=422, detail=f"Unknown reconciliation checks: {', '.join(unknown)}")
+    settings = _load_tenant_settings(db, tenant_id)
+    store = _migration_store(settings)
+    batch = _find_batch(store, batch_id)
+    reconciliation = dict(batch.get("reconciliation") or {})
+    reconciliation.update(payload.checks)
+    batch["reconciliation"] = reconciliation
+    batch["status"] = "staged" if all(reconciliation.get(key) for key in RECONCILIATION_KEYS) else "reconciliation_pending"
+    batch["updated_at"] = datetime.now(timezone.utc).isoformat()
+    settings["admin_suite_migration"] = store
+    _save_tenant_settings(db, tenant_id, settings)
+    return MigrationBatchOut(**batch)
+
+
+@router.post("/migration/batches/{batch_id}/approve", response_model=MigrationBatchOut, summary="Migration Batch freigeben")
+async def approve_migration_batch(
+    batch_id: str,
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+) -> MigrationBatchOut:
+    settings = _load_tenant_settings(db, tenant_id)
+    store = _migration_store(settings)
+    batch = _find_batch(store, batch_id)
+    if not batch.get("dry_run"):
+        raise HTTPException(status_code=409, detail="Batch without dry run cannot be approved")
+    reconciliation = batch.get("reconciliation") or {}
+    missing = [key for key in RECONCILIATION_KEYS if not reconciliation.get(key)]
+    if missing:
+        raise HTTPException(status_code=409, detail=f"Reconciliation incomplete: {', '.join(missing)}")
+    batch["status"] = "approved"
+    batch["updated_at"] = datetime.now(timezone.utc).isoformat()
+    settings["admin_suite_migration"] = store
+    _save_tenant_settings(db, tenant_id, settings)
+    return MigrationBatchOut(**batch)
