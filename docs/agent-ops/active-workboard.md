@@ -17,10 +17,10 @@ Stand: `2026-05-26`
 ## ADMIN-SUITE-002
 
 **Von:** Codex
-**Owner:** offen
-**Stand:** offen
+**Owner:** Codex
+**Stand:** reserviert 2026-05-30
 **Ziel des Slices:** Persistierten, tenant-isolierten Setup-Wizard auf Basis der Admin-Suite-Roadmap einfuehren und vorhandene Fachmasken als gefuehrte Schritte verknuepfen.
-**Dateibesitz:** Vor Claim verbindlich festlegen; voraussichtlich neue Admin-Suite-Setup-Dateien, fokussierte Backend-/Frontend-Tests und minimale additive Router-/Navigationsintegration.
+**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/agent-ops/slices/ADMIN-SUITE-002.yaml`, `app/api/v1/endpoints/admin_suite.py`, `tests/test_admin_suite_setup.py`, `packages/frontend-web/src/lib/api/admin-suite.ts`, `packages/frontend-web/src/pages/admin-suite/setup.tsx`, `packages/frontend-web/src/pages/admin-suite/index.tsx`, `packages/frontend-web/src/app/route-builders/auto-groups/generated/admin-suite.ts`, fokussierte Frontend-Tests.
 **Abnahmekriterien:** Setup-Session und Schritte sind tenant-isoliert persistiert; `unchecked`, `in_progress`, `warning`, `blocked` und `completed` bleiben unterscheidbar; Navigation allein erzeugt keine Abschlussfreigabe; Resume nach Browser-Neustart ist abgesichert.
 **Offene Risiken:** Persistenzmodell und Evidenzadapter muessen vor Implementierung gegen vorhandene Setup-Endpunkte abgegrenzt werden; keine Uebernahme ohne separaten Claim-Commit.
 
