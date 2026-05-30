@@ -95,6 +95,16 @@ Stand: `2026-05-26`
 **Checks:** Gemeinsame Admin-Suite-Gates: `18 passed`, TypeScript gruen, Frontend-Smoke gruen, fokussierter Diff-Check gruen.
 **Offene Risiken:** Letzte reale Laufzeitdaten benoetigen spaeter einen Ops-Adapter oder Monitoring-Import.
 
+## ADMIN-SUITE-009
+
+**Von:** Codex
+**Owner:** Codex
+**Stand:** reserviert 2026-05-30
+**Ziel des Slices:** Read-only Compliance- und Audit-Evidenzsicht fuer GoBD, DSGVO, POS/TSE, Meldewesen und externe Betriebsabnahmen in die Admin Suite integrieren.
+**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/agent-ops/slices/ADMIN-SUITE-009.yaml`, `docs/project-context/admin-suite-roadmap-2026-05-30.md`, `app/api/v1/endpoints/admin_suite.py`, `tests/test_admin_suite_compliance.py`, `packages/frontend-web/src/lib/api/admin-suite.ts`, `packages/frontend-web/src/pages/admin-suite/compliance.tsx`, `packages/frontend-web/src/pages/admin-suite/index.tsx`, `packages/frontend-web/src/app/route-builders/auto-groups/generated/admin-suite.ts`.
+**Abnahmekriterien:** Bestehende Compliance-Vertraege bleiben Source of Truth; Implementierung, Runtime-Nachweis und externe Abnahme bleiben getrennt sichtbar; kein ungepruefter Nachweis wird als produktiv bereit bewertet; `/admin-suite/compliance` ist erreichbar; Backend-Test, Frontend-Typecheck und fokussierter Diff-Check sind gruen.
+**Offene Risiken:** Externe Zertifikate, Behoerdenquittungen und produktive UAT-Nachweise bleiben ausserhalb des Repos.
+
 ## DESIGN-MERIDIAN-HARDCOLORS-014
 
 **Von:** Codex
