@@ -129,6 +129,43 @@ Diese Statusdatei verdichtet den aktuellen Gesamtstand, ohne die Detailnachweise
 | Wave 65 | abgeschlossen | 155 | `wave-65/STATUS.md` |
 | Wave 66 | abgeschlossen | 163 | `wave-66/STATUS.md` |
 | Wave 67 | abgeschlossen | 192 | `wave-67/STATUS.md` |
+| Wave 68 | abgeschlossen | 164 | `wave-68/STATUS.md` |
+| Wave 69 | abgeschlossen | 27 | `wave-69/STATUS.md` |
+| Wave 70 | abgeschlossen | 8 | `wave-70/STATUS.md` |
+| Wave 71 | abgeschlossen | 4 | `wave-71/STATUS.md` |
+| Wave 72 | abgeschlossen | 4 | `wave-72/STATUS.md` |
+| Wave 73 | abgeschlossen | 9 | `wave-73/STATUS.md` |
+| Wave 74 | abgeschlossen | 37 | `wave-74/STATUS.md` |
+| Wave 75 | abgeschlossen | 49 | `wave-75/STATUS.md` |
+| Wave 76 | abgeschlossen | 37 | `wave-76/STATUS.md` |
+| Wave 77 | abgeschlossen | 34 | `wave-77/STATUS.md` |
+| Wave 78 | abgeschlossen | 46 | `wave-78/STATUS.md` |
+| Wave 79 | abgeschlossen | 52 | `wave-79/STATUS.md` |
+| Wave 80 | abgeschlossen | 40 | `wave-80/STATUS.md` |
+| Wave 81 | abgeschlossen | 31 | `wave-81/STATUS.md` |
+| Wave 82 | abgeschlossen | 33 | `wave-82/STATUS.md` |
+| Wave 83 | abgeschlossen | 30 | `wave-83/STATUS.md` |
+| Wave 84 | abgeschlossen | 43 | `wave-84/STATUS.md` |
+| Wave 85 | abgeschlossen | 28 | `wave-85/STATUS.md` |
+| Wave 86 | abgeschlossen | 36 | `wave-86/STATUS.md` |
+| Wave 87 | abgeschlossen | 28 | `wave-87/STATUS.md` |
+| Wave 88 | abgeschlossen | 8 | `wave-88/STATUS.md` |
+| Wave 89 | abgeschlossen | 4 | `wave-89/STATUS.md` |
+| Wave 90 | abgeschlossen | 3 | `wave-90/STATUS.md` |
+| Wave 91 | abgeschlossen | 17 | `wave-91/STATUS.md` |
+| Wave 92 | abgeschlossen | 66 | `wave-92/STATUS.md` |
+| Wave 93 | abgeschlossen | 66 | `wave-93/STATUS.md` |
+| Wave 94 | abgeschlossen | 66 | `wave-94/STATUS.md` |
+| Wave 95 | abgeschlossen | 69 | `wave-95/STATUS.md` |
+| Wave 96 | abgeschlossen | 69 | `wave-96/STATUS.md` |
+| Wave 97 | abgeschlossen | 69 | `wave-97/STATUS.md` |
+| Wave 98 | abgeschlossen | — | `wave-98/STATUS.md` |
+| Wave 99 | abgeschlossen | — | `wave-99/STATUS.md` |
+| Wave 100 | abgeschlossen | — | `wave-100/STATUS.md` |
+| Wave 101 | abgeschlossen | 0 | `wave-101/STATUS.md` |
+| Wave 102 | abgeschlossen | 109 | `wave-102/STATUS.md` |
+| Wave 103 | abgeschlossen | — | `wave-103/STATUS.md` |
+| Wave 104 | abgeschlossen | 23 | `wave-104/STATUS.md` |
 
 ## Abgeschlossene Waves 51–67 (Kernmodule)
 
