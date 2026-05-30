@@ -1,0 +1,30 @@
+id: ADMIN-SUITE-009
+title: Admin Suite Compliance Evidence Center
+owner: Codex
+status: abgeschlossen
+claimed_at: 2026-05-30
+completed_at: 2026-05-30
+goal: Read-only Evidenzsicht fuer Compliance-Vertraege, Laufzeitnachweise und externe Abnahmen bereitstellen.
+file_ownership:
+  - docs/agent-ops/active-workboard.md
+  - docs/agent-ops/slices/ADMIN-SUITE-009.yaml
+  - docs/project-context/admin-suite-roadmap-2026-05-30.md
+  - app/api/v1/endpoints/admin_suite.py
+  - tests/test_admin_suite_compliance.py
+  - packages/frontend-web/src/lib/api/admin-suite.ts
+  - packages/frontend-web/src/pages/admin-suite/compliance.tsx
+  - packages/frontend-web/src/pages/admin-suite/index.tsx
+  - packages/frontend-web/src/app/route-builders/auto-groups/generated/admin-suite.ts
+acceptance_criteria:
+  - Bestehende Compliance-Vertraege bleiben Source of Truth.
+  - Implementierung, Runtime-Nachweis und externe Abnahme bleiben getrennt sichtbar.
+  - Kein ungepruefter Nachweis wird als produktiv bereit bewertet.
+  - /admin-suite/compliance ist erreichbar.
+checks:
+  - python -m pytest tests/test_admin_suite_compliance.py tests/test_admin_suite_operations.py tests/test_admin_suite_readiness.py -q --no-cov
+  - pnpm --filter @valero-neuroerp/frontend-web type-check
+risks:
+  - Externe Zertifikate, Behoerdenquittungen und produktive UAT-Nachweise bleiben ausserhalb des Repos.
+gate_results:
+  backend: "17 passed: complete admin-suite focused suite"
+  typescript: "0 errors"

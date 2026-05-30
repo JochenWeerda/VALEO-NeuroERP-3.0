@@ -171,6 +171,25 @@ Gate:
 - Wiederherstellung in isolierter Umgebung
 - Nachweis mit Zeitstempel, Artefakt und Ergebnis
 
+#### `ADMIN-SUITE-009` - Compliance Evidence Center
+
+Ziel:
+- Read-only Katalog fuer GoBD, DSGVO, POS/TSE, ELSTER, ATLAS, Meldewesen und
+  Sanktionspruefung
+- Implementierungsstatus, Runtime-Nachweis und externe Freigabe getrennt
+  anzeigen
+- Bestehende Fachmasken und API-Vertraege als Sources of Truth verlinken
+
+Risikoanpassung:
+- Vorhandener Code wird nicht als produktiver Betriebsnachweis gewertet.
+- Zertifikate, Behoerdenquittungen, Testate und produktive UATs bleiben
+  explizite externe Gates.
+
+Gate:
+- Kein implizites `ready` fuer ungepruefte Runtime-Evidenz
+- Frontend-Typecheck
+- Backend-Vertragstest
+
 ## Abhaengigkeiten
 
 | Slice | Abhaengig von |
@@ -183,10 +202,11 @@ Gate:
 | `ADMIN-SUITE-006` | `ADMIN-SUITE-001` |
 | `ADMIN-SUITE-007` | `ADMIN-SUITE-001`, optional `ADMIN-SUITE-006` |
 | `ADMIN-SUITE-008` | `ADMIN-SUITE-001` |
+| `ADMIN-SUITE-009` | `ADMIN-SUITE-001` |
 
 ## Naechster konkreter Schritt
 
-Die repo-seitige MVP-Kette `ADMIN-SUITE-001` bis `ADMIN-SUITE-008` ist umgesetzt.
+Die repo-seitige MVP-Kette `ADMIN-SUITE-001` bis `ADMIN-SUITE-009` ist umgesetzt.
 Naechste Ausbauschritte sind bewusst evidenz- oder migrationspflichtig:
 
 - verifizierten AMIC-Feldkatalog und Beispieldaten-UAT bereitstellen
