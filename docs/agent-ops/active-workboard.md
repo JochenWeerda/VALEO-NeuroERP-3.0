@@ -2877,3 +2877,14 @@ Archiv des vorherigen Boards:
 **Gate-Ergebnis:** Vitest 1/1 ✅ · TypeScript 0 Fehler ✅
 **Erledigt:** Status-Panel STT/TTS/Ollama; Transkript im Verlauf; useVoiceStackStatus Hook.
 **Offene Risiken:** ki-usability muss laufen damit Status sichtbar ist.
+
+## FACHLICHE-VERTIEFUNG-UX-W23-KUNDENBANKEN-001
+
+**Von:** Claude Sonnet 4.6
+**Owner:** Claude Sonnet 4.6
+**Stand:** abgeschlossen 2026-05-30
+**Ziel des Slices:** Kundenbankverbindungen (IBAN/BIC, SEPA) in Kundenstamm gegen Wave-3-Backend.
+**Dateibesitz:** `kundenbanken.ts`, `KundenBankverbindungenPanel.tsx`, `kunden-stamm.tsx`, `fachliche-vertiefung-kundenbanken.spec.ts`.
+**Gate-Ergebnis:** E2E 1/1 ✅
+**Erledigt:** API-Client; Panel mit Anlegen/Standard/Löschen; Route-ID-Fix für Splat-Router; E2E gemockt.
+**Offene Risiken:** Keine.
