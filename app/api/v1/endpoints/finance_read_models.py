@@ -25,6 +25,7 @@ from app.api.v1.schemas.finance_read_models_schemas import (
     ProjectionRebuildResult,
     ProjectionStatusReadModel,
 )
+from app.services import finance_read_model_service as _frs
 from app.services.finance_read_model_service import (
     build_cash_closing_read_model,
     build_sla_profiles,
@@ -33,6 +34,8 @@ from app.services.finance_read_model_service import (
     get_projection_status,
     load_projection,
     persist_projection_registry_entry,
+    persist_projection_cursor,
+    persist_projection_snapshot,
     project_ap_invoice_cockpit,
     project_cash_closing_analysis,
     project_cash_closing_detail,
@@ -42,6 +45,60 @@ from app.services.finance_read_model_service import (
     rebuild_finance_projection_store,
     _get_ap_invoice_store,
     _get_payment_run_store,
+    # Re-exports for backwards-compatibility with tests
+    _as_float,
+    _parse_items_blob,
+    _iso_date,
+    _iso_datetime,
+    _reporting_period_key,
+    _map_cash_workflow_status,
+    _projection_bucket,
+    _projection_meta,
+    _count_projection_items,
+    _count_projection_payload_items,
+    _ensure_projection_registry_table,
+    _ensure_projection_snapshot_table,
+    _ensure_projection_cursor_table,
+    _load_persisted_projection_registry,
+    _load_persisted_projection_snapshot_meta,
+    _load_persisted_projection_cursor_meta,
+    _load_persisted_projection_cursor_entries,
+    _latest_outbox_event_id,
+    _latest_workflow_event_id,
+    _fetch_cash_closing_rows,
+    _fetch_cash_movement_count,
+    _batch_fetch_journal_entries_for_closings,
+    _cash_closing_row_belegnummer,
+    _infer_cursor_source,
+    _DEFAULT_PROJECTION_CONSUMER_ID,
+    project_cash_closing_snapshot,
+    project_cash_closing_read_model,
+)
+# Test compatibility: tests mutate _PROJECTION_STORE/_PROJECTION_META directly
+_PROJECTION_STORE = _frs._PROJECTION_STORE
+_PROJECTION_META = _frs._PROJECTION_META
+_cache_projection = cache_projection  # legacy private alias
+_load_projection = load_projection
+_build_cash_closing_read_model = build_cash_closing_read_model
+_build_sla_profiles = build_sla_profiles
+_persist_projection_registry_entry = persist_projection_registry_entry
+_persist_projection_snapshot = persist_projection_snapshot
+# Schema re-exports for backwards-compatibility with tests
+from app.api.v1.schemas.finance_read_models_schemas import (  # noqa: F401
+    APInvoiceBucket,
+    CashClosingAnalysisBucket,
+    CashClosingExceptionFlags,
+    CashClosingImportContext,
+    CashClosingPosting,
+    CashClosingReferenceContext,
+    CashClosingReportingBucket,
+    CashClosingSnapshot,
+    CashClosingTotals,
+    ProjectionRebuildEntry,
+    ProjectionStatusEntry,
+    WorkflowInstanceSummary,
+    WorkflowSlaProfile,
+    WorkflowStepSlaSummary,
 )
 
 router = APIRouter(prefix="/finance/read-models", tags=["finance", "read-models"])
