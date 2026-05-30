@@ -24,6 +24,7 @@ from typing import Any, Optional
 
 from fastapi import BackgroundTasks, UploadFile
 from sqlalchemy import text
+from sqlalchemy.exc import OperationalError, ProgrammingError
 from sqlalchemy.orm import Session
 
 from app.core.exceptions import BadRequestError
@@ -291,6 +292,145 @@ class GapPipelineService:
         from app.services.gap_progress import get_pipeline_progress
 
         return get_pipeline_progress(job_id)
+
+    # ── Lead-Generierung aus GAP-Snapshots ───────────────────────────────────
+
+    @staticmethod
+    def _lead_priority(potential_eur: float) -> str:
+        if potential_eur >= 100_000:
+            return "Hoch"
+        if potential_eur >= 50_000:
+            return "Mittel"
+        return "Niedrig"
+
+    def generate_leads_from_snapshots(
+        self,
+        year: int,
+        plz_min: Optional[str],
+        plz_max: Optional[str],
+        min_potential_eur: int,
+        max_leads: int,
+        segment: Optional[str],
+    ) -> dict[str, Any]:
+        """Erzeugt Kampagnen-Leads aus den GAP-Potenzial-Snapshots eines Jahres.
+
+        Komfort-Endpoint: Da die EU-GAP-Empfängerliste jährlich neu von Brüssel
+        publiziert wird, kann hiermit pro Referenzjahr direkt eine gefilterte
+        Lead-Liste (PLZ-Bereich, Segment, Mindest-Potenzial) gezogen werden.
+        Liest dieselben Tabellen wie ``/prospecting/lead-candidates``
+        (``customer_potential_snapshot`` JOIN ``customers``).
+        """
+        assert self.db is not None, "generate_leads_from_snapshots benötigt eine DB-Session"
+
+        params: dict[str, Any] = {
+            "year": year,
+            "min_potential": min_potential_eur,
+            "max_leads": max_leads,
+        }
+        plz_clause = ""
+        if plz_min and plz_max:
+            plz_clause = "AND c.postal_code BETWEEN :plz_min AND :plz_max"
+            params["plz_min"], params["plz_max"] = plz_min, plz_max
+        elif plz_min:
+            plz_clause = "AND c.postal_code >= :plz_min"
+            params["plz_min"] = plz_min
+        elif plz_max:
+            plz_clause = "AND c.postal_code <= :plz_max"
+            params["plz_max"] = plz_max
+
+        segment_clause = ""
+        if segment and segment in ("A", "B", "C"):
+            segment_clause = "AND s.segment = :segment"
+            params["segment"] = segment
+
+        query = text(
+            f"""
+            SELECT
+                s.customer_id,
+                c.name AS customer_name,
+                c.postal_code,
+                c.city,
+                s.potential_total_eur,
+                s.gap_direct_total_eur,
+                s.gap_estimated_area_ha,
+                s.segment,
+                s.share_of_wallet_total_pct,
+                COALESCE(c.status, 'lead') AS customer_status
+            FROM customer_potential_snapshot s
+            JOIN customers c ON c.id = s.customer_id
+            WHERE s.ref_year = :year
+              AND s.potential_total_eur >= :min_potential
+              {plz_clause}
+              {segment_clause}
+            ORDER BY s.potential_total_eur DESC
+            LIMIT :max_leads
+            """  # noqa: S608 — Filter-Klauseln sind code-kontrolliert, alle Werte parametrisiert
+        )
+
+        try:
+            rows = self.db.execute(query, params).mappings().all()
+        except (OperationalError, ProgrammingError):
+            self.db.rollback()
+            logger.exception("[GAP LEADS] Snapshot-Tabellen nicht verfügbar für Jahr %s", year)
+            return {
+                "success": False,
+                "leads": [],
+                "total_leads": 0,
+                "available_farmers": False,
+                "message": "Lead-Generierung fehlgeschlagen — keine GAP-Snapshots verfügbar. Pipeline für dieses Jahr zuerst ausführen.",
+            }
+
+        leads: list[dict[str, Any]] = []
+        for row in rows:
+            potential = float(row["potential_total_eur"] or 0)
+            area = float(row["gap_estimated_area_ha"] or 0)
+            status = row["customer_status"]
+            leads.append(
+                {
+                    "id": f"gap_{year}_{row['customer_id']}",
+                    "customer_id": str(row["customer_id"]),
+                    "name": row["customer_name"],
+                    "company": row["customer_name"],
+                    "postal_code": row["postal_code"],
+                    "city": row["city"],
+                    "potential_eur": potential,
+                    "gap_amount_eur": float(row["gap_direct_total_eur"] or 0),
+                    "estimated_hectares": area,
+                    "segment": row["segment"] or "C",
+                    "priority": self._lead_priority(potential),
+                    "share_of_wallet_pct": float(row["share_of_wallet_total_pct"] or 0),
+                    "source": f"GAP-Pipeline {year}",
+                    "description": f"Landwirtschafts-Potenzial: {round(potential)} EUR ({round(area, 1)} ha)",
+                    "lead_type": "Agricultural GAP Lead",
+                    "industry": "Agriculture",
+                    "year": year,
+                    "customer_status": status,
+                    "is_lead": status in (None, "lead"),
+                    "is_customer": status in ("active", "inactive"),
+                    "is_blocked": status == "blocked",
+                    "created_from_gap": True,
+                    "status": "lead" if status in (None, "lead") else "customer",
+                }
+            )
+
+        return {
+            "success": True,
+            "leads": leads,
+            "total_leads": len(leads),
+            "available_farmers": len(leads) > 0,
+            "filters_applied": {
+                "year": year,
+                "plz_range": f"{plz_min}-{plz_max}" if plz_min and plz_max else None,
+                "min_potential_eur": min_potential_eur,
+                "max_leads": max_leads,
+                "segment": segment,
+            },
+            "message": (
+                f"{len(leads)} Landwirtschafts-Leads generiert"
+                if leads
+                else "Noch keine Landwirte verfügbar — Pipeline/Snapshot für dieses Jahr erforderlich"
+            ),
+        }
 
     def reset_gap_data(self, year: int, tables: str, all_years: bool) -> dict[str, Any]:
         """Löscht GAP-Zahlungen/Snapshots/Matches für einen Neustart.

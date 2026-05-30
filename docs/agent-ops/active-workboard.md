@@ -2924,3 +2924,14 @@ Archiv des vorherigen Boards:
 **Gate-Ergebnis:** E2E 1/1 ✅
 **Erledigt:** API-Client; Panel mit Anlegen/Standard/Löschen; Route-ID-Fix für Splat-Router; E2E gemockt.
 **Offene Risiken:** Keine.
+
+## FACHLICHE-VERTIEFUNG-UX-W24-INDIVIDUELLE-ARTIKELNUMMERN-001
+
+**Von:** Claude Sonnet 4.6
+**Owner:** Claude Sonnet 4.6
+**Stand:** in arbeit 2026-05-30
+**Ziel des Slices:** Individuelle Artikelnummern (Kunde/Lieferant-Mapping) gegen Wave-9-Backend.
+**Dateibesitz:** `individuelleArtikelnummern.ts`, `individuelle-artikelnummern.tsx`, `stammdaten.ts`, `commercial.tsx`, `fachliche-vertiefung-individuelle-artikelnummern.spec.ts`.
+**Gate-Ergebnis:** offen
+**Erledigt:** API-Client; Seite mit Liste/Anlegen/Lookup/Löschen; Route + Navigation.
+**Offene Risiken:** E2E-Gate noch ausstehend.
