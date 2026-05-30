@@ -3,7 +3,11 @@ from __future__ import annotations
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
-from app.api.v1.endpoints.personal import build_hrm_readiness, router
+from app.api.v1.endpoints.personal import router
+from app.services.personal_service import PersonalService
+
+def build_hrm_readiness():
+    return PersonalService.build_hrm_readiness()
 
 
 _HEADERS = {"Authorization": "Bearer dev-token", "X-Tenant-ID": "tenant-hrm"}
