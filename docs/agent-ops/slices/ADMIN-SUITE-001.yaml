@@ -1,0 +1,47 @@
+id: ADMIN-SUITE-001
+title: Admin Suite Home und Production Readiness
+owner: Codex
+status: abgeschlossen
+claimed_at: 2026-05-30
+completed_at: 2026-05-30
+goal: >
+  Additive Admin-Suite-Grundstruktur mit ehrlichem Production-Readiness-Vertrag
+  und zentralem Dashboard unter /admin-suite einfuehren.
+scope:
+  - "GET /api/v1/admin-suite/readiness aggregiert konservative Evidenz ohne Live-Probes."
+  - "/admin-suite zeigt Score, Status, Quellen und Links auf bestehende Admin-Bereiche."
+  - "Fehlende oder externe Evidenz wird als unchecked oder warning sichtbar."
+file_ownership:
+  - docs/agent-ops/active-workboard.md
+  - docs/agent-ops/slices/ADMIN-SUITE-001.yaml
+  - docs/project-context/admin-suite-roadmap-2026-05-30.md
+  - app/api/v1/endpoints/admin_suite.py
+  - app/api/v1/api.py
+  - tests/test_admin_suite_readiness.py
+  - packages/frontend-web/src/lib/api/admin-suite.ts
+  - packages/frontend-web/src/pages/admin-suite/index.tsx
+  - packages/frontend-web/src/app/navigation/domains/core.tsx
+  - packages/frontend-web/src/app/page-module-loader.ts
+  - packages/frontend-web/src/app/page-module-groups/core.ts
+  - packages/frontend-web/src/app/route-builders/auto-groups/generated/admin-suite.ts
+acceptance_criteria:
+  - Readiness-Vertrag kennt ready, warning, blocked und unchecked.
+  - Konfigurationsstatus wird nicht als produktive Live-Evidenz ausgegeben.
+  - UI zeigt Kacheln, Score, Evidenzquelle und offene Pruefungen.
+  - Keine produktiven Secrets werden ausgegeben.
+checks:
+  - python -m pytest tests/test_admin_suite_readiness.py -q --no-cov
+  - pnpm --filter @valero-neuroerp/frontend-web type-check
+  - pnpm --filter @valero-neuroerp/frontend-web check:routing-integrity
+  - python scripts/agent_workboard_supervisor.py validate
+  - git diff --check
+gate_results:
+  backend: "7 passed: admin-suite readiness plus integration bootstrap"
+  frontend: "1 passed: AdminSuiteHomePage"
+  typescript: "0 errors"
+  diff_check: "passed for ADMIN-SUITE-001 files"
+  routing_integrity: "blocked by 3 pre-existing analytics page-module-group gaps outside slice ownership"
+  workboard_supervisor: "blocked by 6 pre-existing voice slice YAML files without file_ownership"
+risks:
+  - app/api/v1/api.py und Frontend-Navigation sind Integrationsdateien mit Parallelkonflikt-Risiko.
+  - Live-Probes und schreibende Aktionen bleiben bewusst ausserhalb des ersten Slices.
