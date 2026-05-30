@@ -220,6 +220,16 @@ class ComplianceEvidenceOut(BaseModel):
     notes: str
 
 
+class SystemStatusEvidenceOut(BaseModel):
+    key: str
+    label: str
+    probe_status: Literal["available", "partial", "planned"]
+    runtime_status: Literal["unchecked"]
+    source: str
+    target_path: str | None = None
+    notes: str
+
+
 def _evidence(
     *,
     key: str,
@@ -322,8 +332,8 @@ def build_admin_suite_readiness() -> AdminSuiteReadinessOut:
             key="system_status",
             label="Systemstatus",
             status="unchecked",
-            source="/api/v1/health/ready",
-            evidence="Technische Readiness-Probe existiert; sie wurde durch diesen lesenden Aggregator nicht ausgefuehrt.",
+            source="/api/v1/admin-suite/system-status",
+            evidence="Systemstatus-Katalog vorhanden; technische Probes werden durch den lesenden Cockpit-Aufruf nicht ausgefuehrt.",
             checked_at=checked_at,
         ),
     ]
@@ -557,6 +567,19 @@ def _compliance_catalog() -> list[ComplianceEvidenceOut]:
     ]
 
 
+def _system_status_catalog() -> list[SystemStatusEvidenceOut]:
+    return [
+        SystemStatusEvidenceOut(key="api_liveness", label="API Liveness", probe_status="available", runtime_status="unchecked", source="/health/live", target_path="/admin/control-center", notes="Liveness-Probe ist vorhanden; dieser Katalog fuehrt sie nicht aus."),
+        SystemStatusEvidenceOut(key="api_readiness", label="API Readiness", probe_status="available", runtime_status="unchecked", source="/ready", target_path="/admin/control-center", notes="Readiness-Probe ist vorhanden; beobachteter Laufzeitstatus benoetigt einen expliziten Probe-Adapter."),
+        SystemStatusEvidenceOut(key="startup", label="Startup Guards", probe_status="available", runtime_status="unchecked", source="/health/startup", target_path="/admin/control-center", notes="Startup-Probe und Guards sind vorhanden; letzter produktiver Status wird nicht importiert."),
+        SystemStatusEvidenceOut(key="release", label="Release und Deployment", probe_status="partial", runtime_status="unchecked", source="k8s/helm/valeo-erp", target_path="/admin-suite/operations", notes="Deployment-Manifeste sind vorhanden; deployte Version und Rollout-Status fehlen als Runtime-Evidenz."),
+        SystemStatusEvidenceOut(key="alembic", label="Alembic Head", probe_status="available", runtime_status="unchecked", source="scripts/check_alembic_single_head.py", target_path="/admin-suite/operations", notes="Repo-seitiger Single-Head-Check ist vorhanden; Zielsystem-Head wird nicht live abgefragt."),
+        SystemStatusEvidenceOut(key="event_bus", label="NATS Event Bus", probe_status="available", runtime_status="unchecked", source="monitoring/grafana/dashboards/event-bus-dashboard.json", target_path="/admin-suite/connectors", notes="Monitoring-Artefakte sind vorhanden; aktuelle Broker-Metriken benoetigen Monitoring-Import."),
+        SystemStatusEvidenceOut(key="workers", label="Worker und Jobs", probe_status="partial", runtime_status="unchecked", source="app/workers", target_path="/admin-suite/operations", notes="Worker und CronJobs sind implementiert; letzter Lauf und Queue-Lage werden noch nicht aggregiert."),
+        SystemStatusEvidenceOut(key="voice", label="Voice Stack", probe_status="available", runtime_status="unchecked", source="/voice/status", target_path="/admin/voice-channel", notes="Voice-Readiness-Vertrag ist vorhanden; Admin Suite startet keine Voice-Probe."),
+    ]
+
+
 @router.get("/readiness", response_model=AdminSuiteReadinessOut, summary="Admin Suite readiness abrufen")
 async def get_admin_suite_readiness() -> AdminSuiteReadinessOut:
     """Liefert konservative Go-Live-Evidenz ohne externe Live-Probes."""
@@ -724,3 +747,9 @@ async def get_operations_center() -> list[OperationsEvidenceOut]:
 async def get_compliance_center() -> list[ComplianceEvidenceOut]:
     """Liefert Compliance-Evidenzmetadaten ohne Live-Probes oder externe Erfolgsannahmen."""
     return _compliance_catalog()
+
+
+@router.get("/system-status", response_model=list[SystemStatusEvidenceOut], summary="System Status Evidence Center abrufen")
+async def get_system_status_center() -> list[SystemStatusEvidenceOut]:
+    """Liefert Runtime-Probe-Metadaten ohne Live-Probes auszuloesen."""
+    return _system_status_catalog()
