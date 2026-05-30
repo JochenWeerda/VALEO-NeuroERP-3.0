@@ -2812,9 +2812,9 @@ Archiv des vorherigen Boards:
 
 **Von:** Claude Sonnet 4.6
 **Owner:** Claude Sonnet 4.6
-**Stand:** in arbeit 2026-05-30
+**Stand:** abgeschlossen 2026-05-30
 **Ziel des Slices:** Admin Voice-Kanal mit GET /voice/status Readiness und korrigiertem Transkript-Verlauf.
 **Dateibesitz:** `voice-channel.tsx`, `useVoiceStackStatus.ts`, `voice-channel.test.tsx`.
-**Gate-Ergebnis:** ausstehend
-**Erledigt:** —
+**Gate-Ergebnis:** Vitest 1/1 ✅ · TypeScript 0 Fehler ✅
+**Erledigt:** Status-Panel STT/TTS/Ollama; Transkript im Verlauf; useVoiceStackStatus Hook.
 **Offene Risiken:** ki-usability muss laufen damit Status sichtbar ist.

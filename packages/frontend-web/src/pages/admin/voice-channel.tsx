@@ -4,14 +4,25 @@
  * Feature-Flag: ki-usability — partiell aktiv.
  * Ermöglicht das Testen von Sprachbefehlen, zeigt Erkennungsergebnis
  * und erlaubt die Konfiguration der Mindest-Konfidenz.
+ * Slice-016: Voice-Stack-Readiness via GET /voice/status.
  */
 
-import { useState, useCallback } from 'react'
-import { Mic, MicOff, Volume2, Settings2, CheckCircle2, XCircle } from 'lucide-react'
+import { useState, useCallback, useRef, useEffect } from 'react'
+import {
+  Mic,
+  MicOff,
+  Volume2,
+  Settings2,
+  CheckCircle2,
+  XCircle,
+  RefreshCw,
+  Server,
+} from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { useVoiceIntent } from '@/features/ki-usability/hooks/useVoiceIntent'
+import { useVoiceStackStatus } from '@/features/ki-usability/hooks/useVoiceStackStatus'
 
 interface HistoryEntry {
   ts: string
@@ -21,9 +32,20 @@ interface HistoryEntry {
   message: string
 }
 
-export default function VoiceChannelPage() {
+function readinessBadge(ready: boolean, readyLabel: string, fallbackLabel: string): JSX.Element {
+  return (
+    <Badge variant={ready ? 'success' : 'secondary'}>
+      {ready ? readyLabel : fallbackLabel}
+    </Badge>
+  )
+}
+
+export default function VoiceChannelPage(): JSX.Element {
   const [minConfidence, setMinConfidence] = useState(0.7)
   const [history, setHistory] = useState<HistoryEntry[]>([])
+  const transcriptRef = useRef('')
+
+  const { status, loading: statusLoading, error: statusError, refetch } = useVoiceStackStatus()
 
   const addEntry = useCallback(
     (transcript: string, action: string | null, ok: boolean, message: string) => {
@@ -43,15 +65,19 @@ export default function VoiceChannelPage() {
 
   const onResolved = useCallback(
     (actionId: string, _params: Record<string, unknown>, confidence: number) => {
-      // transcript is set via state in the hook; we use actionId here
-      addEntry('…', actionId, true, `Konfidenz ${Math.round(confidence * 100)} %`)
+      addEntry(
+        transcriptRef.current || '—',
+        actionId,
+        true,
+        `Konfidenz ${Math.round(confidence * 100)} %`,
+      )
     },
     [addEntry],
   )
 
   const onError = useCallback(
     (message: string) => {
-      addEntry('…', null, false, message)
+      addEntry(transcriptRef.current || '—', null, false, message)
     },
     [addEntry],
   )
@@ -62,7 +88,13 @@ export default function VoiceChannelPage() {
     onError,
   })
 
-  const handleStart = () => {
+  useEffect(() => {
+    if (transcript?.trim()) {
+      transcriptRef.current = transcript
+    }
+  }, [transcript])
+
+  const handleStart = (): void => {
     reset()
     startListening()
   }
@@ -79,7 +111,68 @@ export default function VoiceChannelPage() {
         </div>
       </div>
 
-      {/* Einstellungen */}
+      <Card data-testid="voice-stack-status">
+        <CardHeader className="pb-3">
+          <CardTitle className="text-sm font-medium flex items-center justify-between gap-2">
+            <span className="flex items-center gap-2">
+              <Server className="h-4 w-4" />
+              Voice-Stack Readiness
+            </span>
+            <Button
+              type="button"
+              size="sm"
+              variant="ghost"
+              className="h-7 gap-1"
+              disabled={statusLoading}
+              aria-label="Status aktualisieren"
+              onClick={refetch}
+            >
+              <RefreshCw className={`h-3.5 w-3.5 ${statusLoading ? 'animate-spin' : ''}`} />
+              Aktualisieren
+            </Button>
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          {statusError ? (
+            <p className="text-sm text-destructive" data-testid="voice-status-error">
+              ki-usability nicht erreichbar — Voice-Stack prüfen (Port 5200 / Docker).
+            </p>
+          ) : null}
+          {status ? (
+            <div className="flex flex-wrap gap-2" data-testid="voice-status-badges">
+              {readinessBadge(
+                status.stt_ready,
+                `STT: ${status.stt_provider}`,
+                `STT: ${status.stt_provider} (nicht bereit)`,
+              )}
+              {readinessBadge(
+                status.tts_ready,
+                `TTS: ${status.tts_provider}`,
+                `TTS: ${status.tts_provider} (nicht bereit)`,
+              )}
+              {readinessBadge(
+                status.ollama_reachable,
+                'Ollama erreichbar',
+                'Ollama offline',
+              )}
+              {status.voice_polish_enabled ? (
+                <Badge variant="secondary">Polish aktiv</Badge>
+              ) : null}
+              {status.voice_summary_enabled ? (
+                <Badge variant="secondary">Summary aktiv</Badge>
+              ) : null}
+            </div>
+          ) : statusLoading ? (
+            <p className="text-sm text-muted-foreground">Status wird geladen …</p>
+          ) : null}
+          {status ? (
+            <p className="text-xs text-muted-foreground">
+              Modell STT: {status.faster_whisper_model} · Ollama: {status.ollama_base_url}
+            </p>
+          ) : null}
+        </CardContent>
+      </Card>
+
       <Card>
         <CardHeader className="pb-3">
           <CardTitle className="text-sm font-medium flex items-center gap-2">
@@ -109,7 +202,6 @@ export default function VoiceChannelPage() {
         </CardContent>
       </Card>
 
-      {/* Sprachtest */}
       <Card>
         <CardHeader className="pb-3">
           <CardTitle className="text-sm font-medium flex items-center gap-2">
@@ -137,22 +229,21 @@ export default function VoiceChannelPage() {
             )}
           </Button>
 
-          {transcript && (
+          {transcript ? (
             <div className="rounded border bg-muted/40 p-3 text-sm space-y-1">
               <span className="text-xs text-muted-foreground">Transkript</span>
               <p className="font-medium">{transcript}</p>
-              {resolvedAction && (
+              {resolvedAction ? (
                 <Badge variant="secondary" className="mt-1">
                   Aktion: {resolvedAction}
                 </Badge>
-              )}
+              ) : null}
             </div>
-          )}
+          ) : null}
         </CardContent>
       </Card>
 
-      {/* Verlauf */}
-      {history.length > 0 && (
+      {history.length > 0 ? (
         <Card>
           <CardHeader className="pb-3">
             <CardTitle className="text-sm font-medium">Erkennungsverlauf</CardTitle>
@@ -161,7 +252,7 @@ export default function VoiceChannelPage() {
             <div className="space-y-2">
               {history.map((entry, i) => (
                 <div
-                  key={i}
+                  key={`${entry.ts}-${i}`}
                   className="flex items-start gap-3 text-sm border-b last:border-0 pb-2 last:pb-0"
                 >
                   {entry.ok ? (
@@ -170,12 +261,12 @@ export default function VoiceChannelPage() {
                     <XCircle className="h-4 w-4 text-destructive mt-0.5 shrink-0" />
                   )}
                   <div className="flex-1 min-w-0">
-                    {entry.transcript && entry.transcript !== '…' && (
+                    {entry.transcript && entry.transcript !== '—' ? (
                       <p className="truncate font-medium">{entry.transcript}</p>
-                    )}
-                    {entry.action && (
+                    ) : null}
+                    {entry.action ? (
                       <p className="text-xs text-muted-foreground">→ {entry.action}</p>
-                    )}
+                    ) : null}
                     <p className="text-xs text-muted-foreground">{entry.message}</p>
                   </div>
                   <span className="text-xs text-muted-foreground shrink-0">{entry.ts}</span>
@@ -184,11 +275,11 @@ export default function VoiceChannelPage() {
             </div>
           </CardContent>
         </Card>
-      )}
+      ) : null}
 
       <p className="text-xs text-muted-foreground">
-        Voraussetzung: HTTPS-Kontext und Browser-Berechtigung für das Mikrofon.
-        Derzeit unterstützte Browser: Chrome, Edge (Web Speech API).
+        STT: Local faster-whisper (Docker) oder Browser Web Speech API. TTS und Polish/Summary
+        über ki-usability — Status oben prüfen.
       </p>
     </div>
   )

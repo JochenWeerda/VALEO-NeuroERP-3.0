@@ -58,3 +58,9 @@ Ohne Registrierung werden bekannte Aktionen trotzdem ausgeführt: **Navigation**
 - **TTS Kokoro:** `KI_USABILITY_VOICE_TTS_PROVIDER=kokoro` + Kokoro-FastAPI auf `:8880`
 - **Docker:** `docker compose -f docker-compose.yml -f docker-compose.voice.yml up -d ollama ki-usability`
 - Optional Kokoro: `--profile kokoro` (großes Image)
+
+## Ops & Readiness (Slice-015/016)
+
+- **Status:** `GET /api/v1/voice/status` — STT/TTS/Ollama-Readiness
+- **Admin-UI:** `/admin/voice-channel` zeigt Stack-Status und Sprachtest
+- **Docker STT:** `Dockerfile.voice` installiert faster-whisper + ffmpeg
