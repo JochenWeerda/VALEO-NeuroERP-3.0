@@ -1,0 +1,32 @@
+id: ADMIN-SUITE-002
+title: Admin Suite Setup Wizard
+owner: Codex
+status: abgeschlossen
+claimed_at: 2026-05-30
+completed_at: 2026-05-30
+goal: >
+  Tenant-isolierten, wiederaufnehmbaren Setup-Wizard mit expliziten Statusaktionen
+  und Links auf vorhandene Fachmasken bereitstellen.
+file_ownership:
+  - docs/agent-ops/active-workboard.md
+  - docs/agent-ops/slices/ADMIN-SUITE-002.yaml
+  - app/api/v1/endpoints/admin_suite.py
+  - tests/test_admin_suite_setup.py
+  - packages/frontend-web/src/lib/api/admin-suite.ts
+  - packages/frontend-web/src/pages/admin-suite/setup.tsx
+  - packages/frontend-web/src/pages/admin-suite/index.tsx
+  - packages/frontend-web/src/app/route-builders/auto-groups/generated/admin-suite.ts
+acceptance_criteria:
+  - Setup-Schritte werden tenant-isoliert in domain_shared.tenants.settings persistiert.
+  - Oeffnen einer Fachmaske erzeugt keinen impliziten Abschluss.
+  - Status unchecked, in_progress, warning, blocked und completed bleiben unterscheidbar.
+checks:
+  - python -m pytest tests/test_admin_suite_setup.py tests/test_admin_suite_readiness.py -q --no-cov
+  - pnpm --filter @valero-neuroerp/frontend-web type-check
+  - git diff --check
+gate_results:
+  backend: "6 passed: setup plus readiness"
+  typescript: "0 errors"
+  diff_check: "passed for ADMIN-SUITE-002 files"
+risks:
+  - Historisierung mehrerer Setup-Sessions bleibt Folgescope; fuer den initialen Wizard reicht der etablierte Tenant-Settings-Vertrag.

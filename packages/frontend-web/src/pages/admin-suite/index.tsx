@@ -21,7 +21,7 @@ import { ErrorState, LoadingState } from '@/components/ErrorState'
 import { useAdminSuiteReadiness, type ReadinessEvidence, type ReadinessStatus } from '@/lib/api/admin-suite'
 
 const CARD_LINKS: Record<string, string | null> = {
-  setup: '/admin/setup',
+  setup: '/admin-suite/setup',
   migration: null,
   security: '/admin/rollen-verwaltung',
   connectors: '/admin/control-center/superglue',
