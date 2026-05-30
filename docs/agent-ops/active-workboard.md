@@ -30,11 +30,22 @@ Stand: `2026-05-26`
 
 **Von:** Codex
 **Owner:** Codex
-**Stand:** reserviert 2026-05-30
+**Stand:** abgeschlossen 2026-05-30
 **Ziel des Slices:** Generischen Migration Core mit Source Profiles, Batches, Mapping-Version, Reconciliation-Gates und L3-/CSV-Cockpit einfuehren, ohne den bestehenden L3-Importer zu ersetzen.
 **Dateibesitz:** Vor Claim verbindlich festlegen; neue Admin-Suite-Migrationsdateien, fokussierte Tests und minimale additive Router-/UI-Integration.
 **Abnahmekriterien:** Dry Run und Staging bleiben Pflicht; Produktivfreigabe ist ohne Reconciliation blockiert; Batch-ID, Hash, Quelle und Mapping-Version sind sichtbar; L3 und CSV sind als Profile vorhanden.
-**Offene Risiken:** Keine produktiven Fachtabellen schreiben; bestehende `l3_staging`- und `app_control.l3_import_runs`-Logik nur referenzieren und spaeter kontrolliert anbinden.
+**Erledigt:** Tenant-isolierter Migration-Control-Plane-Vertrag mit Source Profiles, Dry-Run-Batches, Hash, Mapping-Version und Reconciliation-Gates sowie Cockpit unter `/admin-suite/migration` umgesetzt. L3 und CSV sind verfuegbar; AMIC wird ohne verifizierten Feldkatalog sichtbar blockiert.
+**Checks:** `python -m compileall -q app/api/v1/endpoints/admin_suite.py`; `python -m pytest tests/test_admin_suite_migration.py tests/test_admin_suite_setup.py tests/test_admin_suite_readiness.py -q --no-cov` (`8 passed`); `pnpm --filter @valero-neuroerp/frontend-web type-check`; fokussierter `git diff --check`.
+**Offene Risiken:** Der Control Plane fuehrt bewusst keinen Produktivimport aus und ersetzt `scripts/import_l3.py` nicht. Ein produktives AMIC-Profil benoetigt einen verifizierten Feldkatalog und Beispieldaten-UAT.
+
+## ADMIN-SUITE-004
+
+**Von:** Codex
+**Owner:** Codex
+**Stand:** integriert in `ADMIN-SUITE-003` 2026-05-30
+**Ziel des Slices:** CSV und AMIC Source Profiles kontrolliert bereitstellen.
+**Erledigt:** CSV-Profil ist verfuegbar. AMIC/A.eins ist als sichtbares, blockiertes Profil katalogisiert. Die produktive Aktivierung bleibt bis zum verifizierten Feldkatalog und Beispieldaten-UAT gesperrt.
+**Offene Risiken:** Eine scheinbar fertige AMIC-Anbindung ohne reale Quelltabellen und Feldkatalog waere fachlich gefaehrlicher als der explizite Blocker.
 
 ## DESIGN-MERIDIAN-HARDCOLORS-014
 

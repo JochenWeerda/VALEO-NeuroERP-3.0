@@ -22,7 +22,7 @@ import { useAdminSuiteReadiness, type ReadinessEvidence, type ReadinessStatus } 
 
 const CARD_LINKS: Record<string, string | null> = {
   setup: '/admin-suite/setup',
-  migration: null,
+  migration: '/admin-suite/migration',
   security: '/admin/rollen-verwaltung',
   connectors: '/admin/control-center/superglue',
   devices: null,
