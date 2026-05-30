@@ -180,6 +180,35 @@ class SecurityCockpitOut(BaseModel):
     agent_roles: list[SecurityRoleOut]
 
 
+class ConnectorOut(BaseModel):
+    key: str
+    label: str
+    config_status: Literal["configured", "partial", "disabled", "unchecked"]
+    live_status: Literal["unchecked"]
+    credential_status: Literal["set", "missing", "unchecked", "not_required"]
+    source: str
+    notes: str
+
+
+class DeviceCapabilityOut(BaseModel):
+    key: str
+    label: str
+    registry_source: str
+    registration_status: Literal["available", "partial", "planned"]
+    live_status: Literal["unchecked"]
+    test_actions: list[str]
+    notes: str
+
+
+class OperationsEvidenceOut(BaseModel):
+    key: str
+    label: str
+    implementation_status: Literal["available", "partial", "planned"]
+    runtime_status: Literal["unchecked"]
+    source: str
+    notes: str
+
+
 def _evidence(
     *,
     key: str,
@@ -445,6 +474,65 @@ def _simulate_security(roles: list[str]) -> SecuritySimulationOut:
     return SecuritySimulationOut(roles=roles, effective_permissions=permissions, sod_warnings=warnings)
 
 
+def _connector_catalog() -> list[ConnectorOut]:
+    summary = build_integration_bootstrap_summary()
+    bootstrap = {item["integration_key"]: item for item in summary.get("integrations", [])}
+    items: list[ConnectorOut] = []
+    labels = {
+        "oidc": "OIDC / Keycloak",
+        "event_bus_nats": "NATS Event Bus",
+        "superglue": "Superglue",
+        "voice": "Voice / LLM",
+        "crm_downstream": "CRM Downstream",
+    }
+    for key, label in labels.items():
+        item = bootstrap.get(key, {})
+        status = item.get("status")
+        missing = item.get("missing") or []
+        items.append(
+            ConnectorOut(
+                key=key,
+                label=label,
+                config_status="configured" if status == "ready" else ("disabled" if status == "disabled" else "partial"),
+                live_status="unchecked",
+                credential_status="missing" if missing else ("not_required" if status == "disabled" else "set"),
+                source="app.services.integration_bootstrap",
+                notes="Live-Probe wurde nicht ausgefuehrt.",
+            )
+        )
+    items.extend(
+        [
+            ConnectorOut(key="dms", label="Paperless / Mayan DMS", config_status="unchecked", live_status="unchecked", credential_status="unchecked", source="/api/v1/admin/dms/status", notes="Separater Status- und Testvertrag vorhanden."),
+            ConnectorOut(key="fints", label="FinTS", config_status="unchecked", live_status="unchecked", credential_status="unchecked", source="/api/v1/banken/fints/konten", notes="TAN-Flow vorhanden; produktiver Bankzugang extern."),
+            ConnectorOut(key="elster", label="ELSTER / ERiC", config_status="unchecked", live_status="unchecked", credential_status="unchecked", source="/api/v1/ebilanz/eric-readiness", notes="ERiC-Readiness vorhanden; externes Zertifikat erforderlich."),
+            ConnectorOut(key="fiskaly", label="Fiskaly / TSE", config_status="unchecked", live_status="unchecked", credential_status="unchecked", source="app.services.tse_fiskaly_service", notes="TSE-Service vorhanden; produktive Abnahme extern."),
+            ConnectorOut(key="datev", label="DATEV", config_status="unchecked", live_status="unchecked", credential_status="unchecked", source="config/fibu_cutover_mapping.template.yaml", notes="Cutover-Mapping benoetigt fachliche Freigabe."),
+            ConnectorOut(key="webhooks", label="Webhooks", config_status="unchecked", live_status="unchecked", credential_status="not_required", source="/admin/webhooks", notes="Registrierung vorhanden; Laufzeitstatus nicht aggregiert."),
+        ]
+    )
+    return items
+
+
+def _device_catalog() -> list[DeviceCapabilityOut]:
+    return [
+        DeviceCapabilityOut(key="printer", label="Drucker", registry_source="/api/v1/admin/devices", registration_status="available", live_status="unchecked", test_actions=["test_print"], notes="Registry vorhanden; Testdruck-Evidenz noch nicht aggregiert."),
+        DeviceCapabilityOut(key="scanner", label="Scanner", registry_source="/api/v1/admin/devices", registration_status="available", live_status="unchecked", test_actions=["test_scan"], notes="Registry und Fachflows vorhanden; Heartbeat fehlt."),
+        DeviceCapabilityOut(key="scale", label="Waage", registry_source="/api/v1/waage/scales", registration_status="available", live_status="unchecked", test_actions=["test_weighing", "calibration_check"], notes="Waagen-CRUD und Kalibrierung vorhanden; Eich-UAT extern."),
+        DeviceCapabilityOut(key="pos_tse", label="POS / TSE", registry_source="/api/v1/admin/pos", registration_status="partial", live_status="unchecked", test_actions=["tse_smoke"], notes="Fiskaly-Service vorhanden; produktive TSE-Abnahme extern."),
+        DeviceCapabilityOut(key="mobile", label="Mobile Lagergeraete", registry_source="/api/v1/admin/mobile", registration_status="available", live_status="unchecked", test_actions=["sync_probe"], notes="Mobile Registry vorhanden; reale Heartbeats fehlen."),
+    ]
+
+
+def _operations_catalog() -> list[OperationsEvidenceOut]:
+    return [
+        OperationsEvidenceOut(key="database_backup", label="Datenbank-Backup", implementation_status="available", runtime_status="unchecked", source="k8s/helm/valeo-erp/templates/backup-cronjob.yaml", notes="CronJob deploybar; letzter produktiver Lauf nicht angebunden."),
+        OperationsEvidenceOut(key="restore_drill", label="Restore-Drill", implementation_status="available", runtime_status="unchecked", source="k8s/helm/valeo-erp/templates/restore-test-cronjob.yaml", notes="Restore-Test-Job deploybar; letzter realer Drill nicht als Evidenz importiert."),
+        OperationsEvidenceOut(key="release", label="Release-Stand", implementation_status="partial", runtime_status="unchecked", source="docs/architecture/process-kernel/STATUS.md", notes="Repo-Status vorhanden; deployte Version fehlt."),
+        OperationsEvidenceOut(key="alembic", label="Alembic Migration", implementation_status="available", runtime_status="unchecked", source="alembic/", notes="Migrationen vorhanden; Zielsystem-Head muss live geprueft werden."),
+        OperationsEvidenceOut(key="diagnostics", label="Diagnosepaket", implementation_status="planned", runtime_status="unchecked", source="admin-suite-roadmap", notes="Exportierbares Supportpaket folgt nach Ops-Adapter."),
+    ]
+
+
 @router.get("/readiness", response_model=AdminSuiteReadinessOut, summary="Admin Suite readiness abrufen")
 async def get_admin_suite_readiness() -> AdminSuiteReadinessOut:
     """Liefert konservative Go-Live-Evidenz ohne externe Live-Probes."""
@@ -590,3 +678,19 @@ async def get_security_cockpit() -> SecurityCockpitOut:
 async def simulate_security(payload: SecuritySimulationIn) -> SecuritySimulationOut:
     """Simuliert effektive Rechte ohne Rollen oder Tenant-Daten zu veraendern."""
     return _simulate_security(payload.roles)
+
+
+@router.get("/connectors", response_model=list[ConnectorOut], summary="Connector Hub abrufen")
+async def get_connector_hub() -> list[ConnectorOut]:
+    """Liefert redigierte Connector-Metadaten ohne Secrets oder Live-Probes."""
+    return _connector_catalog()
+
+
+@router.get("/devices", response_model=list[DeviceCapabilityOut], summary="Hardware Center abrufen")
+async def get_device_center() -> list[DeviceCapabilityOut]:
+    return _device_catalog()
+
+
+@router.get("/operations", response_model=list[OperationsEvidenceOut], summary="Operations Center abrufen")
+async def get_operations_center() -> list[OperationsEvidenceOut]:
+    return _operations_catalog()

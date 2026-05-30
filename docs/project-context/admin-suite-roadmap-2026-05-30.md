@@ -186,5 +186,11 @@ Gate:
 
 ## Naechster konkreter Schritt
 
-`ADMIN-SUITE-001` additiv implementieren und erst nach gruenen Gates den
-persistierten Setup-Wizard als naechsten Slice claimen.
+Die repo-seitige MVP-Kette `ADMIN-SUITE-001` bis `ADMIN-SUITE-008` ist umgesetzt.
+Naechste Ausbauschritte sind bewusst evidenz- oder migrationspflichtig:
+
+- verifizierten AMIC-Feldkatalog und Beispieldaten-UAT bereitstellen
+- produktiven L3-Execute-Adapter hinter den Reconciliation-Gates anbinden
+- normalisierte Permission Sets, Standort-/Lagerfilter und Break-glass Audit migrieren
+- Connector-Retry-/DLQ-Aktionen mit Audit-Vertrag freischalten
+- reale Heartbeats, Standort-UAT und Restore-Drill-Evidenz importieren
