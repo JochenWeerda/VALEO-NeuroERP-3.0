@@ -1,10 +1,19 @@
-"""Pydantic schemas for the kontrakte domain."""
+"""Pydantic schemas for the Kontrakte (contract) domain."""
 from __future__ import annotations
 
-from typing import Any, Optional, List
-from pydantic import BaseModel, Field, ConfigDict
-from app.api.v1.schemas.base import BaseSchema
+from datetime import datetime
+from typing import Any, Literal, Optional
+
+from pydantic import BaseModel, ConfigDict, Field
 from pydantic import ConfigDict as _ConfigDict
+
+from app.api.v1.schemas.base import BaseSchema
+
+# ── Type aliases ──────────────────────────────────────────────────────────────
+
+ContractType = Literal["EINKAUF", "ZUKAUF", "VERKAUF"]
+StatusType = Literal["OFFEN", "ERLEDIGT", "STORNIERT", "GELOESCHT"]
+QuantityType = Literal["GESAMTKONTRAKT", "EINZELMENGEN"]
 
 
 class KontraktOut(BaseSchema):
