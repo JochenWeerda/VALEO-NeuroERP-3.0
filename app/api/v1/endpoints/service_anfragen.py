@@ -9,11 +9,7 @@ from fastapi.responses import Response
 from pydantic import BaseModel
 
 from app.api.v1.schemas.base import BaseSchema
-from pydantic import ConfigDict as _ConfigDict
-
-
-class CompatFlexOut(BaseSchema):
-    model_config = _ConfigDict(extra="allow")
+from app.api.v1.schemas.service_anfragen_schemas import ServiceAnfragenOut
 
 
 router = APIRouter(prefix="/service", tags=["Service"])
@@ -101,7 +97,7 @@ def _seed_if_empty() -> None:
 # ── Endpoints ───────────────────────────────────────────────────────────
 
 
-@router.get("/anfragen", response_model=CompatFlexOut, summary="Anfragen auflisten")
+@router.get("/anfragen", response_model=ServiceAnfragenOut, summary="Anfragen auflisten")
 async def list_anfragen(
     status: Optional[str] = Query(None),
     prioritaet: Optional[str] = Query(None),
@@ -122,7 +118,7 @@ async def list_anfragen(
     return {"items": items, "total": total, "skip": skip, "limit": limit}
 
 
-@router.get("/anfragen/{anfrage_id}", response_model=CompatFlexOut, summary="Anfrage abrufen")
+@router.get("/anfragen/{anfrage_id}", response_model=ServiceAnfragenOut, summary="Anfrage abrufen")
 async def get_anfrage(
     anfrage_id: str,
     x_tenant_id: str = Header("default", alias="X-Tenant-ID"),
@@ -135,7 +131,7 @@ async def get_anfrage(
     return item
 
 
-@router.post("/anfragen", response_model=CompatFlexOut, status_code=201, summary="Anfrage anlegen")
+@router.post("/anfragen", response_model=ServiceAnfragenOut, status_code=201, summary="Anfrage anlegen")
 async def create_anfrage(
     body: ServiceAnfrageCreate,
     x_tenant_id: str = Header("default", alias="X-Tenant-ID"),
@@ -162,7 +158,7 @@ async def create_anfrage(
     return item
 
 
-@router.put("/anfragen/{anfrage_id}", response_model=CompatFlexOut, summary="Anfrage aktualisieren")
+@router.put("/anfragen/{anfrage_id}", response_model=ServiceAnfragenOut, summary="Anfrage aktualisieren")
 async def update_anfrage(
     anfrage_id: str,
     body: ServiceAnfrageUpdate,
@@ -193,7 +189,7 @@ async def delete_anfrage(
     return Response(status_code=204)
 
 
-@router.post("/rueckmeldungen", response_model=CompatFlexOut, status_code=201, summary="Rueckmeldung anlegen")
+@router.post("/rueckmeldungen", response_model=ServiceAnfragenOut, status_code=201, summary="Rueckmeldung anlegen")
 async def create_rueckmeldung(
     body: RueckmeldungCreate,
     x_tenant_id: str = Header("default", alias="X-Tenant-ID"),
@@ -215,7 +211,7 @@ async def create_rueckmeldung(
     return rm
 
 
-@router.post("/abschluss", response_model=CompatFlexOut, summary="Service case abschließen")
+@router.post("/abschluss", response_model=ServiceAnfragenOut, summary="Service case abschließen")
 async def close_service_case(
     body: AbschlussCreate,
     x_tenant_id: str = Header("default", alias="X-Tenant-ID"),

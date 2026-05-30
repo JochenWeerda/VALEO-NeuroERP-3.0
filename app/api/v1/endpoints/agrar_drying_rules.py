@@ -25,11 +25,7 @@ from app.infrastructure.models import DryingRuleFactorRange, DryingRuleLookupRow
 from app.services.agrar_drying_rule_service import DryingRuleService
 
 from app.api.v1.schemas.base import BaseSchema
-from pydantic import ConfigDict as _ConfigDict
-
-
-class CompatFlexOut(BaseSchema):
-    model_config = _ConfigDict(extra="allow")
+from app.api.v1.schemas.agrar_drying_rules_schemas import AgrarDryingRulesOut
 
 
 router = APIRouter()
@@ -329,7 +325,7 @@ async def delete_drying_rule(
         raise HTTPException(status_code=404, detail=exc.detail)
 
 
-@router.get("/drying-rules/{rule_id}/download", response_model=CompatFlexOut, summary="Drying rule document herunterladen")
+@router.get("/drying-rules/{rule_id}/download", response_model=AgrarDryingRulesOut, summary="Drying rule document herunterladen")
 async def download_drying_rule_document(
     rule_id: str,
     tenant_id: str = Depends(get_tenant_id),

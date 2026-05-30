@@ -9,11 +9,7 @@ from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
 
 from app.api.v1.schemas.base import BaseSchema
-from pydantic import ConfigDict as _ConfigDict
-
-
-class CompatFlexOut(BaseSchema):
-    model_config = _ConfigDict(extra="allow")
+from app.api.v1.schemas.pos_payments_promotions_schemas import PosPaymentsPromotionsOut
 
 
 router = APIRouter(prefix="/pos", tags=["pos", "payments", "promotions"])
@@ -77,7 +73,7 @@ def _promotion_discount(line: PosCartLine, rule: PromotionRule) -> float:
 
 
 @router.get("/payment-methods", summary="Payment methods auflisten",
-    response_model=CompatFlexOut
+    response_model=PosPaymentsPromotionsOut
 )
 async def list_payment_methods() -> dict:
     return {
@@ -92,7 +88,7 @@ async def list_payment_methods() -> dict:
 
 
 @router.post("/promotions/simulate", summary="Promotions simulate",
-    response_model=CompatFlexOut
+    response_model=PosPaymentsPromotionsOut
 )
 async def simulate_promotions(payload: PosCheckoutPreviewIn) -> dict:
     discounts = []
@@ -113,7 +109,7 @@ async def simulate_promotions(payload: PosCheckoutPreviewIn) -> dict:
 
 
 @router.post("/checkout/preview", summary="Checkout vorschauen",
-    response_model=CompatFlexOut
+    response_model=PosPaymentsPromotionsOut
 )
 async def preview_checkout(payload: PosCheckoutPreviewIn) -> dict:
     subtotal = round(sum(_line_gross(line) for line in payload.lines), 2)

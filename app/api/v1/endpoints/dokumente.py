@@ -10,11 +10,7 @@ from app.core.database import get_db
 from app.domains.operations.repository import DokumentRepository, DokumentVersionRepository
 
 from app.api.v1.schemas.base import BaseSchema
-from pydantic import ConfigDict as _ConfigDict
-
-
-class CompatFlexOut(BaseSchema):
-    model_config = _ConfigDict(extra="allow")
+from app.api.v1.schemas.dokumente_schemas import DokumenteOut
 
 
 router = APIRouter(prefix="/dokumente", tags=["Dokumente"])
@@ -22,7 +18,7 @@ router = APIRouter(prefix="/dokumente", tags=["Dokumente"])
 
 # === DOKUMENT ENDPOINTS ===
 
-@router.get("", response_model=CompatFlexOut, summary="Dokumente auflisten")
+@router.get("", response_model=DokumenteOut, summary="Dokumente auflisten")
 async def list_dokumente(
     kategorie: Optional[str] = Query(None, description="Filter by category"),
     typ: Optional[str] = Query(None, description="Filter by type"),
@@ -56,7 +52,7 @@ async def list_dokumente(
     }
 
 
-@router.get("/kategorien", response_model=CompatFlexOut, summary="Kategorien abrufen")
+@router.get("/kategorien", response_model=DokumenteOut, summary="Kategorien abrufen")
 async def get_kategorien(db: Session = Depends(get_db)):
     """Get all document categories with counts"""
     repo = DokumentRepository(db)
@@ -64,7 +60,7 @@ async def get_kategorien(db: Session = Depends(get_db)):
     return {"kategorien": stats.get("by_category", {})}
 
 
-@router.get("/{dokument_id}", response_model=CompatFlexOut, summary="Dokument abrufen")
+@router.get("/{dokument_id}", response_model=DokumenteOut, summary="Dokument abrufen")
 async def get_dokument(dokument_id: str, db: Session = Depends(get_db)):
     """Get a single document by ID"""
     repo = DokumentRepository(db)
@@ -74,7 +70,7 @@ async def get_dokument(dokument_id: str, db: Session = Depends(get_db)):
     return dokument
 
 
-@router.post("", response_model=CompatFlexOut, status_code=201, summary="Dokument anlegen")
+@router.post("", response_model=DokumenteOut, status_code=201, summary="Dokument anlegen")
 async def create_dokument(
     dokument_data: dict,
     db: Session = Depends(get_db)
@@ -88,7 +84,7 @@ async def create_dokument(
         raise HTTPException(status_code=400, detail=str(e))
 
 
-@router.patch("/{dokument_id}", response_model=CompatFlexOut, summary="Dokument aktualisieren")
+@router.patch("/{dokument_id}", response_model=DokumenteOut, summary="Dokument aktualisieren")
 async def update_dokument(
     dokument_id: str,
     dokument_data: dict,
@@ -120,7 +116,7 @@ async def delete_dokument(
 
 # === DOKUMENT VERSION ENDPOINTS ===
 
-@router.get("/{dokument_id}/versionen", response_model=list[CompatFlexOut], summary="Versionen auflisten")
+@router.get("/{dokument_id}/versionen", response_model=list[DokumenteOut], summary="Versionen auflisten")
 async def list_versionen(
     dokument_id: str,
     db: Session = Depends(get_db)
@@ -136,7 +132,7 @@ async def list_versionen(
     return repo.get_all(dokument_id)
 
 
-@router.post("/{dokument_id}/versionen", response_model=CompatFlexOut, status_code=201, summary="Version anlegen")
+@router.post("/{dokument_id}/versionen", response_model=DokumenteOut, status_code=201, summary="Version anlegen")
 async def create_version(
     dokument_id: str,
     version_data: dict,

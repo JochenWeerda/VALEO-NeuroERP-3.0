@@ -12,11 +12,7 @@ from app.core.database import get_db
 from app.domains.operations.models import Versicherung, VersicherungStatus
 
 from app.api.v1.schemas.base import BaseSchema
-from pydantic import ConfigDict as _ConfigDict
-
-
-class CompatFlexOut(BaseSchema):
-    model_config = _ConfigDict(extra="allow")
+from app.api.v1.schemas.versicherungen_schemas import VersicherungenOut
 
 
 router = APIRouter(prefix="/versicherungen", tags=["Versicherungen"])
@@ -68,7 +64,7 @@ class VersicherungPatch(BaseModel):
 
 
 @router.get("", summary="Versicherungen auflisten",
-    response_model=list[CompatFlexOut]
+    response_model=list[VersicherungenOut]
 )
 def list_versicherungen(
     status: Optional[str] = None,
@@ -83,7 +79,7 @@ def list_versicherungen(
 
 
 @router.get("/{versicherung_id}", summary="Versicherung abrufen",
-    response_model=CompatFlexOut
+    response_model=VersicherungenOut
 )
 def get_versicherung(versicherung_id: str, db: Session = Depends(get_db)):
     obj = db.query(Versicherung).filter(Versicherung.id == versicherung_id).first()
@@ -93,7 +89,7 @@ def get_versicherung(versicherung_id: str, db: Session = Depends(get_db)):
 
 
 @router.post("", status_code=201, summary="Versicherung anlegen",
-    response_model=CompatFlexOut
+    response_model=VersicherungenOut
 )
 def create_versicherung(payload: VersicherungPayload, db: Session = Depends(get_db)):
     obj = Versicherung(**payload.model_dump())
@@ -104,7 +100,7 @@ def create_versicherung(payload: VersicherungPayload, db: Session = Depends(get_
 
 
 @router.patch("/{versicherung_id}", summary="Versicherung aktualisieren",
-    response_model=CompatFlexOut
+    response_model=VersicherungenOut
 )
 def update_versicherung(versicherung_id: str, payload: VersicherungPatch, db: Session = Depends(get_db)):
     obj = db.query(Versicherung).filter(Versicherung.id == versicherung_id).first()

@@ -14,12 +14,7 @@ from sqlalchemy.orm import Session
 from ....core.database import get_db
 from ....core.tenant import get_tenant_id
 
-from app.api.v1.schemas.base import BaseSchema
-from pydantic import ConfigDict as _ConfigDict
-
-
-class CompatFlexOut(BaseSchema):
-    model_config = _ConfigDict(extra="allow")
+from app.api.v1.schemas.base import BaseSchema, IDResponse
 
 
 router = APIRouter()
@@ -241,7 +236,7 @@ async def set_credit_limit(
 
 
 @router.post("/customers/{customer_id}/credit-override", status_code=status.HTTP_201_CREATED, summary="Override credit",
-    response_model=CompatFlexOut
+    response_model=IDResponse
 )
 async def credit_override(
     customer_id: str,

@@ -15,12 +15,8 @@ from sqlalchemy.orm import Session
 from app.core.database import get_db
 from app.core.tenant import get_tenant_id
 
-from app.api.v1.schemas.base import BaseSchema
-from pydantic import ConfigDict as _ConfigDict
-
-
-class CompatFlexOut(BaseSchema):
-    model_config = _ConfigDict(extra="allow")
+from app.api.v1.schemas.base import BaseSchema, IDResponse
+from app.api.v1.schemas.compliance_dsgvo_schemas import ComplianceDsgvoOut
 
 
 router = APIRouter(prefix="/compliance/dsgvo", tags=["compliance", "dsgvo"])
@@ -78,7 +74,7 @@ def _anonymize_subject(db: Session, subject_type: str, subject_id: str, tenant_i
 
 
 @router.post("/erasure-requests", status_code=201, summary="Erasure request anlegen",
-    response_model=CompatFlexOut
+    response_model=IDResponse
 )
 async def create_erasure_request(
     payload: ErasureRequestIn,
@@ -116,7 +112,7 @@ async def create_erasure_request(
 
 
 @router.get("/erasure-requests", summary="Erasure requests auflisten",
-    response_model=list[CompatFlexOut]
+    response_model=list[ComplianceDsgvoOut]
 )
 async def list_erasure_requests(
     status: Optional[str] = Query(None),
@@ -142,7 +138,7 @@ async def list_erasure_requests(
 
 
 @router.get("/erasure-requests/{request_id}", summary="Erasure request abrufen",
-    response_model=CompatFlexOut
+    response_model=ComplianceDsgvoOut
 )
 async def get_erasure_request(
     request_id: str,
@@ -163,7 +159,7 @@ async def get_erasure_request(
 
 
 @router.post("/erasure-requests/{request_id}/process", summary="Erasure request verarbeiten",
-    response_model=CompatFlexOut
+    response_model=IDResponse
 )
 async def process_erasure_request(
     request_id: str,
@@ -209,7 +205,7 @@ async def process_erasure_request(
 
 
 @router.post("/erasure-requests/{request_id}/reject", summary="Erasure request ablehnen",
-    response_model=CompatFlexOut
+    response_model=IDResponse
 )
 async def reject_erasure_request(
     request_id: str,

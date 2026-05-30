@@ -33,11 +33,7 @@ from app.services.einvoice_generator import (
 logger = logging.getLogger(__name__)
 
 from app.api.v1.schemas.base import BaseSchema
-from pydantic import ConfigDict as _ConfigDict
-
-
-class CompatFlexOut(BaseSchema):
-    model_config = _ConfigDict(extra="allow")
+from app.api.v1.schemas.sales_invoice_einvoice_schemas import SalesInvoiceEinvoiceOut
 
 
 router = APIRouter(prefix="/sales/invoices", tags=["sales", "invoices", "einvoice"])
@@ -203,7 +199,7 @@ def _register_xml_artifact(
 @router.post(
     "/{invoice_number}/einvoice/xrechnung",
     summary="XRechnung 3.0 (UBL 2.1) generieren",
-    response_model=CompatFlexOut,
+    response_model=SalesInvoiceEinvoiceOut,
     response_class=Response,
 )
 def generate_xrechnung(
@@ -242,7 +238,7 @@ def generate_xrechnung(
 @router.post(
     "/{invoice_number}/einvoice/zugferd",
     summary="ZUGFeRD 2.x (PDF/A-3 + CII EN 16931) generieren",
-    response_model=CompatFlexOut,
+    response_model=SalesInvoiceEinvoiceOut,
     response_class=Response,
 )
 def generate_zugferd(

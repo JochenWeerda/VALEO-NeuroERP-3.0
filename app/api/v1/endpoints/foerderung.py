@@ -10,11 +10,7 @@ from app.core.database import get_db
 from app.domains.operations.models import FoerderAntrag
 
 from app.api.v1.schemas.base import BaseSchema
-from pydantic import ConfigDict as _ConfigDict
-
-
-class CompatFlexOut(BaseSchema):
-    model_config = _ConfigDict(extra="allow")
+from app.api.v1.schemas.foerderung_schemas import FoerderungOut
 
 
 router = APIRouter(prefix="/foerderung", tags=["Foerderung"])
@@ -50,7 +46,7 @@ def _seed(db: Session) -> None:
     db.commit()
 
 
-@router.get("/antraege", response_model=CompatFlexOut, summary="Antraege auflisten")
+@router.get("/antraege", response_model=FoerderungOut, summary="Antraege auflisten")
 async def list_antraege(status: Optional[str] = Query(None, description="Filter by status"), db: Session = Depends(get_db)) -> dict:
     _seed(db)
     query = db.query(FoerderAntrag)
@@ -76,7 +72,7 @@ async def list_antraege(status: Optional[str] = Query(None, description="Filter 
     }
 
 
-@router.get("/stats", response_model=CompatFlexOut, summary="Foerderung stats abrufen")
+@router.get("/stats", response_model=FoerderungOut, summary="Foerderung stats abrufen")
 async def get_foerderung_stats(db: Session = Depends(get_db)) -> dict:
     _seed(db)
     items = db.query(FoerderAntrag).all()
@@ -114,7 +110,7 @@ class FoerderAntragUpdate(BaseModel):
 from fastapi import HTTPException
 
 
-@router.post("/antraege", response_model=CompatFlexOut, status_code=201, summary="Antrag anlegen")
+@router.post("/antraege", response_model=FoerderungOut, status_code=201, summary="Antrag anlegen")
 async def create_antrag(
     body: FoerderAntragCreate,
     db: Session = Depends(get_db),
@@ -142,7 +138,7 @@ async def create_antrag(
     }
 
 
-@router.get("/antraege/{antrag_id}", response_model=CompatFlexOut, summary="Antrag abrufen")
+@router.get("/antraege/{antrag_id}", response_model=FoerderungOut, summary="Antrag abrufen")
 async def get_antrag(antrag_id: int, db: Session = Depends(get_db)) -> dict:
     """Einzelnen Förderantrag abrufen."""
     antrag = db.query(FoerderAntrag).filter(FoerderAntrag.id == antrag_id).first()
@@ -171,7 +167,7 @@ async def delete_antrag(antrag_id: int, db: Session = Depends(get_db)) -> None:
     db.commit()
 
 
-@router.put("/antraege/{antrag_id}", response_model=CompatFlexOut, summary="Antrag aktualisieren")
+@router.put("/antraege/{antrag_id}", response_model=FoerderungOut, summary="Antrag aktualisieren")
 async def update_antrag(
     antrag_id: int,
     body: FoerderAntragUpdate,

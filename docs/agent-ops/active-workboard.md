@@ -2,6 +2,99 @@
 
 Stand: `2026-05-26`
 
+## ADMIN-SUITE-001
+
+**Von:** Codex
+**Owner:** Codex
+**Stand:** abgeschlossen 2026-05-30
+**Ziel des Slices:** Additive Grundstruktur fuer die VALEO Admin Suite mit zentralem Production-Readiness-Dashboard unter `/admin-suite`, ohne bestehende Health-, Integrations- oder Admin-Pfade zu duplizieren.
+**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/agent-ops/slices/ADMIN-SUITE-001.yaml`, `docs/project-context/admin-suite-roadmap-2026-05-30.md`, `app/api/v1/endpoints/admin_suite.py`, `app/api/v1/api.py`, `tests/test_admin_suite_readiness.py`, `packages/frontend-web/src/lib/api/admin-suite.ts`, `packages/frontend-web/src/pages/admin-suite/index.tsx`, `packages/frontend-web/src/app/navigation/domains/core.tsx`, fokussierte Frontend-Tests und generierte Route-Dateien falls erforderlich.
+**Abnahmekriterien:** `/api/v1/admin-suite/readiness` liefert nachvollziehbare Evidenz mit `ready`, `warning`, `blocked` oder `unchecked`; unbekannte oder externe Nachweise werden nie als Erfolg gewertet; `/admin-suite` zeigt Score, Evidenz und Links auf bestehende Admin-Bereiche; Navigation, Backend-Test, Frontend-Typecheck und Workboard-Validierung sind gruen.
+**Erledigt:** Read-only Aggregator, konservative Evidenznormalisierung, Top-Level-Route, Navigation, Kachel-Dashboard, Roadmap und fokussierte Tests umgesetzt. Konfigurationsstatus wird nicht als Live-Erfolg bewertet.
+**Checks:** `python -m compileall -q app/api/v1/endpoints/admin_suite.py`; `python -m pytest tests/test_admin_suite_readiness.py tests/test_integration_bootstrap.py -q --no-cov` (`7 passed`); `pnpm --filter @valero-neuroerp/frontend-web test:run -- src/__tests__/pages/admin-suite/index.test.tsx` (`1 passed`); `pnpm --filter @valero-neuroerp/frontend-web type-check`; fokussierter `git diff --check`.
+**Offene Risiken:** Globaler Routing-Integritaetscheck bleibt wegen drei vorbestehenden Analytics-Page-Group-Luecken rot. Globaler Workboard-Supervisor bleibt wegen sechs vorbestehenden Voice-YAMLs ohne `file_ownership` rot. Externe Live-Probes sind explizit nicht Teil dieses Slices.
+
+## ADMIN-SUITE-002
+
+**Von:** Codex
+**Owner:** Codex
+**Stand:** abgeschlossen 2026-05-30
+**Ziel des Slices:** Persistierten, tenant-isolierten Setup-Wizard auf Basis der Admin-Suite-Roadmap einfuehren und vorhandene Fachmasken als gefuehrte Schritte verknuepfen.
+**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/agent-ops/slices/ADMIN-SUITE-002.yaml`, `app/api/v1/endpoints/admin_suite.py`, `tests/test_admin_suite_setup.py`, `packages/frontend-web/src/lib/api/admin-suite.ts`, `packages/frontend-web/src/pages/admin-suite/setup.tsx`, `packages/frontend-web/src/pages/admin-suite/index.tsx`, `packages/frontend-web/src/app/route-builders/auto-groups/generated/admin-suite.ts`, fokussierte Frontend-Tests.
+**Abnahmekriterien:** Setup-Session und Schritte sind tenant-isoliert persistiert; `unchecked`, `in_progress`, `warning`, `blocked` und `completed` bleiben unterscheidbar; Navigation allein erzeugt keine Abschlussfreigabe; Resume nach Browser-Neustart ist abgesichert.
+**Erledigt:** Tenant-isolierte Setup-Session in `domain_shared.tenants.settings`, explizite Step-Updates, Resume-Lesepfad und gefuehrte UI unter `/admin-suite/setup` umgesetzt. Vorhandene Fachmasken werden verlinkt, Navigation erzeugt keinen impliziten Abschluss.
+**Checks:** `python -m compileall -q app/api/v1/endpoints/admin_suite.py`; `python -m pytest tests/test_admin_suite_setup.py tests/test_admin_suite_readiness.py -q --no-cov` (`6 passed`); `pnpm --filter @valero-neuroerp/frontend-web type-check`; fokussierter `git diff --check`.
+**Offene Risiken:** Historisierung mehrerer Setup-Sessions bleibt Folgescope; fuer den initialen Wizard reicht der etablierte Tenant-Settings-Vertrag.
+
+## ADMIN-SUITE-003
+
+**Von:** Codex
+**Owner:** Codex
+**Stand:** abgeschlossen 2026-05-30
+**Ziel des Slices:** Generischen Migration Core mit Source Profiles, Batches, Mapping-Version, Reconciliation-Gates und L3-/CSV-Cockpit einfuehren, ohne den bestehenden L3-Importer zu ersetzen.
+**Dateibesitz:** Vor Claim verbindlich festlegen; neue Admin-Suite-Migrationsdateien, fokussierte Tests und minimale additive Router-/UI-Integration.
+**Abnahmekriterien:** Dry Run und Staging bleiben Pflicht; Produktivfreigabe ist ohne Reconciliation blockiert; Batch-ID, Hash, Quelle und Mapping-Version sind sichtbar; L3 und CSV sind als Profile vorhanden.
+**Erledigt:** Tenant-isolierter Migration-Control-Plane-Vertrag mit Source Profiles, Dry-Run-Batches, Hash, Mapping-Version und Reconciliation-Gates sowie Cockpit unter `/admin-suite/migration` umgesetzt. L3 und CSV sind verfuegbar; AMIC wird ohne verifizierten Feldkatalog sichtbar blockiert.
+**Checks:** `python -m compileall -q app/api/v1/endpoints/admin_suite.py`; `python -m pytest tests/test_admin_suite_migration.py tests/test_admin_suite_setup.py tests/test_admin_suite_readiness.py -q --no-cov` (`8 passed`); `pnpm --filter @valero-neuroerp/frontend-web type-check`; fokussierter `git diff --check`.
+**Offene Risiken:** Der Control Plane fuehrt bewusst keinen Produktivimport aus und ersetzt `scripts/import_l3.py` nicht. Ein produktives AMIC-Profil benoetigt einen verifizierten Feldkatalog und Beispieldaten-UAT.
+
+## ADMIN-SUITE-004
+
+**Von:** Codex
+**Owner:** Codex
+**Stand:** integriert in `ADMIN-SUITE-003` 2026-05-30
+**Ziel des Slices:** CSV und AMIC Source Profiles kontrolliert bereitstellen.
+**Erledigt:** CSV-Profil ist verfuegbar. AMIC/A.eins ist als sichtbares, blockiertes Profil katalogisiert. Die produktive Aktivierung bleibt bis zum verifizierten Feldkatalog und Beispieldaten-UAT gesperrt.
+**Offene Risiken:** Eine scheinbar fertige AMIC-Anbindung ohne reale Quelltabellen und Feldkatalog waere fachlich gefaehrlicher als der explizite Blocker.
+
+## ADMIN-SUITE-005
+
+**Von:** Codex
+**Owner:** Codex
+**Stand:** abgeschlossen 2026-05-30
+**Ziel des Slices:** Lesendes Security- und Agent-Governance-Cockpit mit Rollenpaketen, effektiven Scopes, SoD-Warnungen und Rollen-Simulation einfuehren.
+**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/agent-ops/slices/ADMIN-SUITE-005.yaml`, `app/api/v1/endpoints/admin_suite.py`, `tests/test_admin_suite_security.py`, `packages/frontend-web/src/lib/api/admin-suite.ts`, `packages/frontend-web/src/pages/admin-suite/security.tsx`, `packages/frontend-web/src/pages/admin-suite/index.tsx`, `packages/frontend-web/src/app/route-builders/auto-groups/generated/admin-suite.ts`.
+**Abnahmekriterien:** Bestehendes RBAC bleibt Source of Truth; Simulation liefert effektive Scopes ohne Persistenz; Agentenrollen sind sichtbar getrennt; kritische Scope-Kombinationen erzeugen SoD-Warnungen.
+**Erledigt:** Lesendes Governance-Cockpit unter `/admin-suite/security`, RBAC-Adapter, effektive Rechte-Simulation, SoD-Warnungen und getrennte Agentenrollen umgesetzt. Laufende Rollenvertraege werden nicht migriert.
+**Checks:** `python -m compileall -q app/api/v1/endpoints/admin_suite.py`; `python -m pytest tests/test_admin_suite_security.py tests/test_admin_suite_migration.py tests/test_admin_suite_setup.py tests/test_admin_suite_readiness.py -q --no-cov` (`11 passed`); `pnpm --filter @valero-neuroerp/frontend-web type-check`; fokussierter `git diff --check`.
+**Offene Risiken:** Normalisierte Permission Sets, Standort-/Lagerfilter und Break-glass-Schreibworkflow bleiben nachgelagerte, migrationspflichtige Governance-Erweiterungen.
+
+## ADMIN-SUITE-006
+
+**Von:** Codex
+**Owner:** Codex
+**Stand:** abgeschlossen 2026-05-30
+**Ziel des Slices:** Read-only Connector Hub mit vereinheitlichtem Katalog, Credential-Metadaten und klarer Trennung von Konfiguration und Live-Probe einfuehren.
+**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/agent-ops/slices/ADMIN-SUITE-006.yaml`, `app/api/v1/endpoints/admin_suite.py`, `tests/test_admin_suite_operations.py`, `packages/frontend-web/src/lib/api/admin-suite.ts`, `packages/frontend-web/src/pages/admin-suite/connectors.tsx`, `packages/frontend-web/src/pages/admin-suite/index.tsx`, `packages/frontend-web/src/app/route-builders/auto-groups/generated/admin-suite.ts`.
+**Abnahmekriterien:** Kein Secret-Wert wird ausgegeben; vorhandene Integrationen sind katalogisiert; Konfigurationsstatus und Live-Probe bleiben getrennt.
+**Erledigt:** Read-only Connector Hub unter `/admin-suite/connectors` mit redigierten Credential-Metadaten, vereinheitlichtem Katalog und getrennter Live-Evidenz umgesetzt.
+**Checks:** Gemeinsame Admin-Suite-Gates: `18 passed`, TypeScript gruen, Frontend-Smoke gruen, fokussierter Diff-Check gruen.
+**Offene Risiken:** Provider-spezifische Retry-/DLQ-Schreibaktionen folgen erst nach Audit-Vertrag.
+
+## ADMIN-SUITE-007
+
+**Von:** Codex
+**Owner:** Codex
+**Stand:** abgeschlossen 2026-05-30
+**Ziel des Slices:** Hardware Center als read-only Evidenzsicht ueber bestehende Device-, Mobile-, Waage- und POS-Vertraege einfuehren.
+**Dateibesitz:** Gemeinsam mit `ADMIN-SUITE-006/008` in additiven Admin-Suite-Dateien.
+**Abnahmekriterien:** Device-Kategorien, Registry-Quellen, Testaktionen und Live-Evidenzstatus sind sichtbar; Registrierung wird nicht als Hardware-UAT gewertet.
+**Erledigt:** Hardware Center unter `/admin-suite/devices` mit Registry-Quellen, Testaktionen und explizit ungepruefter Live-Evidenz umgesetzt.
+**Checks:** Gemeinsame Admin-Suite-Gates: `18 passed`, TypeScript gruen, Frontend-Smoke gruen, fokussierter Diff-Check gruen.
+**Offene Risiken:** Reale Heartbeats, Eichnachweise und Standort-UAT bleiben externe bzw. adapterpflichtige Nachweise.
+
+## ADMIN-SUITE-008
+
+**Von:** Codex
+**Owner:** Codex
+**Stand:** abgeschlossen 2026-05-30
+**Ziel des Slices:** Operations Center fuer Backup, Restore, Release, Alembic und Diagnose als ehrliche Evidenzsicht einfuehren.
+**Dateibesitz:** Gemeinsam mit `ADMIN-SUITE-006/007` in additiven Admin-Suite-Dateien.
+**Abnahmekriterien:** Deploybare Jobs und nachgewiesene Betriebslaeufe bleiben unterscheidbar; simulierter Restore wird nie als produktiver Nachweis gewertet.
+**Erledigt:** Operations Center unter `/admin-suite/operations` mit Backup-, Restore-, Release-, Alembic- und Diagnose-Evidenz umgesetzt. Deploybare Jobs werden nicht als erfolgreiche Betriebslaeufe gewertet.
+**Checks:** Gemeinsame Admin-Suite-Gates: `18 passed`, TypeScript gruen, Frontend-Smoke gruen, fokussierter Diff-Check gruen.
+**Offene Risiken:** Letzte reale Laufzeitdaten benoetigen spaeter einen Ops-Adapter oder Monitoring-Import.
+
 ## DESIGN-MERIDIAN-HARDCOLORS-014
 
 **Von:** Codex
@@ -2751,3 +2844,47 @@ Archiv des vorherigen Boards:
 **Gate-Ergebnis:** pytest 112/112 ✅
 **Erledigt:** Domain-Aliase und Registry-Filter; Command Palette dispatcht eventPayload als eventDetail; VoiceWhisperBarHost reagiert auf voice-intent.
 **Offene Risiken:** Sehr generische Phrasen koennen domain-uebergreifend kollidieren — weiteres Tuning bei Bedarf.
+
+## SLICE-014-VOICE-LOCAL-STACK-001
+
+**Von:** Claude Sonnet 4.6
+**Owner:** Claude Sonnet 4.6
+**Stand:** abgeschlossen 2026-05-27
+**Ziel des Slices:** Kokoro TTS, Docker Voice Stack (Ollama), Frontend Local STT via faster-whisper.
+**Dateibesitz:** `local_kokoro.py`, `local_tts.py`, `docker-compose.voice.yml`, `useLocalVoiceCapture.ts`, `useVoiceIntent.ts`, `voice_adapter.py`, `test_voice_kokoro.py`.
+**Gate-Ergebnis:** pytest ✅ · TypeScript 0 Fehler ✅
+**Erledigt:** Kokoro HTTP-Provider; docker-compose.voice.yml; VITE_VOICE_STT_PROVIDER=local mit Browser-Fallback.
+**Offene Risiken:** faster-whisper/Kokoro muessen im ki-usability-Container oder lokal installiert sein; Kokoro-Image optional und gross.
+
+## SLICE-015-VOICE-PRODUCTION-HARDENING-001
+
+**Von:** Claude Sonnet 4.6
+**Owner:** Claude Sonnet 4.6
+**Stand:** abgeschlossen 2026-05-30
+**Ziel des Slices:** Production Hardening — faster-whisper Docker, GET /voice/status, E2E WhisperBar-Smoke, Copilot Summary.
+**Dateibesitz:** `Dockerfile.voice`, `voice_status.py`, `docker-compose.voice.yml`, `slice-015-voice-whisperbar.spec.ts`, `useVoiceCopilotSummary.ts`, `CopilotDockPanel.tsx`.
+**Gate-Ergebnis:** pytest 116/116 ✅ · TypeScript 0 Fehler ✅
+**Erledigt:** Dockerfile.voice + requirements-voice.txt; GET /voice/status; WhisperBar E2E Smoke; Copilot-Dock Voice-Summary mit Vorlesen.
+**Offene Risiken:** faster-whisper-Image groesser; Kokoro weiterhin optional.
+
+## SLICE-016-VOICE-ADMIN-STATUS-001
+
+**Von:** Claude Sonnet 4.6
+**Owner:** Claude Sonnet 4.6
+**Stand:** abgeschlossen 2026-05-30
+**Ziel des Slices:** Admin Voice-Kanal mit GET /voice/status Readiness und korrigiertem Transkript-Verlauf.
+**Dateibesitz:** `voice-channel.tsx`, `useVoiceStackStatus.ts`, `voice-channel.test.tsx`.
+**Gate-Ergebnis:** Vitest 1/1 ✅ · TypeScript 0 Fehler ✅
+**Erledigt:** Status-Panel STT/TTS/Ollama; Transkript im Verlauf; useVoiceStackStatus Hook.
+**Offene Risiken:** ki-usability muss laufen damit Status sichtbar ist.
+
+## FACHLICHE-VERTIEFUNG-UX-W23-KUNDENBANKEN-001
+
+**Von:** Claude Sonnet 4.6
+**Owner:** Claude Sonnet 4.6
+**Stand:** abgeschlossen 2026-05-30
+**Ziel des Slices:** Kundenbankverbindungen (IBAN/BIC, SEPA) in Kundenstamm gegen Wave-3-Backend.
+**Dateibesitz:** `kundenbanken.ts`, `KundenBankverbindungenPanel.tsx`, `kunden-stamm.tsx`, `fachliche-vertiefung-kundenbanken.spec.ts`.
+**Gate-Ergebnis:** E2E 1/1 ✅
+**Erledigt:** API-Client; Panel mit Anlegen/Standard/Löschen; Route-ID-Fix für Splat-Router; E2E gemockt.
+**Offene Risiken:** Keine.

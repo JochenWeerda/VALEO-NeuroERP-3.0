@@ -18,11 +18,7 @@ from app.services.neuro_decision_protocol import (
 )
 
 from app.api.v1.schemas.base import BaseSchema
-from pydantic import ConfigDict as _ConfigDict
-
-
-class CompatFlexOut(BaseSchema):
-    model_config = _ConfigDict(extra="allow")
+from app.api.v1.schemas.neuro_audit_schemas import NeuroAuditOut
 
 
 router = APIRouter(tags=["neuro-core", "audit"])
@@ -31,7 +27,7 @@ router = APIRouter(tags=["neuro-core", "audit"])
 # ── Audit Trail ────────────────────────────────────────────────
 
 @router.get("/audit/trail", summary="Trail abrufen",
-    response_model=CompatFlexOut
+    response_model=NeuroAuditOut
 )
 async def get_trail(
     aggregate_id: Optional[str] = None,
@@ -45,7 +41,7 @@ async def get_trail(
 
 
 @router.get("/audit/trail/validate", summary="Trail validieren",
-    response_model=CompatFlexOut
+    response_model=NeuroAuditOut
 )
 async def validate_trail(
     limit: int = 1000,
@@ -69,7 +65,7 @@ class RecordDecisionRequest(BaseModel):
 
 
 @router.post("/neuro/decisions", summary="Decision anlegen",
-    response_model=CompatFlexOut
+    response_model=NeuroAuditOut
 )
 async def create_decision(
     request: RecordDecisionRequest,
@@ -90,7 +86,7 @@ async def create_decision(
 
 
 @router.get("/neuro/decisions/{decision_id}", summary="One decision abrufen",
-    response_model=CompatFlexOut
+    response_model=NeuroAuditOut
 )
 async def get_one_decision(
     decision_id: str,
@@ -104,7 +100,7 @@ async def get_one_decision(
 
 
 @router.get("/neuro/decisions", summary="All decisions auflisten",
-    response_model=CompatFlexOut
+    response_model=NeuroAuditOut
 )
 async def list_all_decisions(
     risk_class: Optional[str] = None,
@@ -116,7 +112,7 @@ async def list_all_decisions(
 
 
 @router.get("/neuro/kernel-step-audit/summary", summary="Kernel step audit summary neuro",
-    response_model=CompatFlexOut
+    response_model=NeuroAuditOut
 )
 async def neuro_kernel_step_audit_summary(
     days: int = Query(7, ge=1, le=366),

@@ -23,11 +23,7 @@ from app.core.process_sla import (
 )
 
 from app.api.v1.schemas.base import BaseSchema
-from pydantic import ConfigDict as _ConfigDict
-
-
-class CompatFlexOut(BaseSchema):
-    model_config = _ConfigDict(extra="allow")
+from app.api.v1.schemas.process_sla_schemas import ProcessSlaOut
 
 
 router = APIRouter(prefix="/process/sla", tags=["process", "sla"])
@@ -61,7 +57,7 @@ class EvaluateSLARequest(BaseModel):
 
 
 @router.get("/policies", summary="Sla policies auflisten",
-    response_model=list[CompatFlexOut]
+    response_model=list[ProcessSlaOut]
 )
 async def list_sla_policies(
     tenant_id: str = Depends(get_tenant_id),
@@ -71,7 +67,7 @@ async def list_sla_policies(
 
 
 @router.post("/evaluate", summary="Sla endpoint evaluate",
-    response_model=CompatFlexOut
+    response_model=ProcessSlaOut
 )
 async def evaluate_sla_endpoint(
     request: EvaluateSLARequest,
@@ -116,7 +112,7 @@ async def evaluate_sla_endpoint(
 
 
 @router.get("/violations", summary="Violations auflisten",
-    response_model=list[CompatFlexOut]
+    response_model=list[ProcessSlaOut]
 )
 async def list_violations(
     tenant_id: str = Depends(get_tenant_id),
@@ -129,7 +125,7 @@ async def list_violations(
 
 
 @router.post("/violations/{violation_id}/acknowledge", summary="Violation acknowledge",
-    response_model=CompatFlexOut
+    response_model=ProcessSlaOut
 )
 async def acknowledge_violation(
     violation_id: str,

@@ -20,12 +20,8 @@ from app.core.tenant import get_tenant_id
 
 logger = logging.getLogger(__name__)
 
-from app.api.v1.schemas.base import BaseSchema
-from pydantic import ConfigDict as _ConfigDict
-
-
-class CompatFlexOut(BaseSchema):
-    model_config = _ConfigDict(extra="allow")
+from app.api.v1.schemas.base import BaseSchema, IDResponse
+from app.api.v1.schemas.genossenschaft_schemas import GenossenschaftOut
 
 
 router = APIRouter(prefix="/genossenschaft", tags=["Genossenschaft"])
@@ -105,7 +101,7 @@ def _gen_mitglieds_nr(db: Session) -> str:
 
 
 @router.get("/mitglieder", summary="Mitgliederliste",
-    response_model=list[CompatFlexOut]
+    response_model=list[GenossenschaftOut]
 )
 def list_mitglieder(
     db: Session = Depends(get_db),
@@ -127,7 +123,7 @@ def list_mitglieder(
 
 
 @router.post("/mitglieder", status_code=201, summary="Mitglied anlegen",
-    response_model=CompatFlexOut
+    response_model=IDResponse
 )
 def create_mitglied(
     payload: MitgliedCreate,
@@ -170,7 +166,7 @@ def create_mitglied(
 
 
 @router.get("/mitglieder/{mitglied_id}", summary="Mitglied Detailansicht",
-    response_model=CompatFlexOut
+    response_model=GenossenschaftOut
 )
 def get_mitglied(
     mitglied_id: str,
@@ -215,7 +211,7 @@ def get_mitglied(
 
 
 @router.patch("/mitglieder/{mitglied_id}", summary="Mitglied aktualisieren",
-    response_model=CompatFlexOut
+    response_model=IDResponse
 )
 def patch_mitglied(
     mitglied_id: str,
@@ -258,7 +254,7 @@ def patch_mitglied(
 
 
 @router.post("/mitglieder/{mitglied_id}/anteilsbewegung", status_code=201, summary="Anteilsbewegung buchen",
-    response_model=CompatFlexOut
+    response_model=IDResponse
 )
 def create_anteilsbewegung(
     mitglied_id: str,
@@ -309,7 +305,7 @@ def create_anteilsbewegung(
 
 
 @router.get("/kapitaluebersicht", summary="Genossenschaftliches Kapital — Aggregatübersicht",
-    response_model=CompatFlexOut
+    response_model=GenossenschaftOut
 )
 def kapitaluebersicht(
     db: Session = Depends(get_db),

@@ -13,11 +13,7 @@ from app.core.tenant import get_tenant_id
 from app.services.report_print_service import ReportPrintService
 
 from app.api.v1.schemas.base import BaseSchema
-from pydantic import ConfigDict as _ConfigDict
-
-
-class CompatFlexOut(BaseSchema):
-    model_config = _ConfigDict(extra="allow")
+from app.api.v1.schemas.report_print_schemas import ReportPrintOut
 
 
 router = APIRouter(prefix="/report-print", tags=["report-print", "agrar", "waage"])
@@ -38,7 +34,7 @@ def _svc(db: Session, tenant_id: str) -> ReportPrintService:
 
 
 @router.get("/readiness", summary="Report print readiness abrufen",
-    response_model=CompatFlexOut
+    response_model=ReportPrintOut
 )
 def get_report_print_readiness(
     db: Session = Depends(get_db),
@@ -49,7 +45,7 @@ def get_report_print_readiness(
 
 
 @router.get("/parties/{partie_ref}/genealogy", summary="Partie genealogy abrufen",
-    response_model=CompatFlexOut
+    response_model=ReportPrintOut
 )
 def get_partie_genealogy(
     partie_ref: str,
@@ -61,7 +57,7 @@ def get_partie_genealogy(
 
 
 @router.get("/weighing-tickets/{ticket_ref}/pdf-preview", summary="Weighing ticket pdf preview abrufen",
-    response_model=CompatFlexOut
+    response_model=ReportPrintOut
 )
 def get_weighing_ticket_pdf_preview(
     ticket_ref: str,
@@ -73,7 +69,7 @@ def get_weighing_ticket_pdf_preview(
 
 
 @router.post("/labels", status_code=201, summary="Label payload anlegen",
-    response_model=CompatFlexOut
+    response_model=ReportPrintOut
 )
 def create_label_payload(
     payload: ReportPrintLabelRequest,

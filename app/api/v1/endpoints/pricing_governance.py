@@ -18,11 +18,6 @@ from app.core.pricing_governance import (
 from app.domains.operations.models import PricingSourceDB
 
 from app.api.v1.schemas.base import BaseSchema
-from pydantic import ConfigDict as _ConfigDict
-
-
-class CompatFlexOut(BaseSchema):
-    model_config = _ConfigDict(extra="allow")
 
 
 router = APIRouter(prefix="/pricing", tags=["pricing", "governance"])

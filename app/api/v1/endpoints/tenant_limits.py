@@ -13,11 +13,7 @@ from app.core.tenant_rate_limits import (
 )
 
 from app.api.v1.schemas.base import BaseSchema
-from pydantic import ConfigDict as _ConfigDict
-
-
-class CompatFlexOut(BaseSchema):
-    model_config = _ConfigDict(extra="allow")
+from app.api.v1.schemas.tenant_limits_schemas import TenantLimitsOut
 
 
 router = APIRouter(prefix="/process/tenant-limits", tags=["process-kernel", "limits"])
@@ -32,7 +28,7 @@ class TenantRateLimitCheckIn(BaseModel):
     zeitfenster_sekunden: int = Field(default=60, ge=1)
 
 
-@router.get("/overview", response_model=CompatFlexOut, summary="Tenant limit overview abrufen")
+@router.get("/overview", response_model=TenantLimitsOut, summary="Tenant limit overview abrufen")
 def get_tenant_limit_overview(
     tenant_id: str = Query(min_length=1),
     domain: str = "",
@@ -46,7 +42,7 @@ def get_tenant_limit_overview(
     }
 
 
-@router.get("/cache-configs/{tenant_id}", response_model=CompatFlexOut, summary="Tenant cache config abrufen")
+@router.get("/cache-configs/{tenant_id}", response_model=TenantLimitsOut, summary="Tenant cache config abrufen")
 def get_tenant_cache_config(tenant_id: str) -> dict[str, Any]:
     registry = get_tenant_isolation_registry()
     cache_config = registry.get_cache_config(tenant_id)
@@ -57,7 +53,7 @@ def get_tenant_cache_config(tenant_id: str) -> dict[str, Any]:
     }
 
 
-@router.get("/rate-limits", response_model=CompatFlexOut, summary="Rate limits auflisten")
+@router.get("/rate-limits", response_model=TenantLimitsOut, summary="Rate limits auflisten")
 def list_rate_limits(domain: str = "") -> dict[str, Any]:
     registry = get_tenant_isolation_registry()
     policies = registry.get_policies(domain)
@@ -71,7 +67,7 @@ def list_rate_limits(domain: str = "") -> dict[str, Any]:
     }
 
 
-@router.post("/rate-limits/check", response_model=CompatFlexOut, summary="Rate limit prüfen")
+@router.post("/rate-limits/check", response_model=TenantLimitsOut, summary="Rate limit prüfen")
 def check_rate_limit(body: TenantRateLimitCheckIn) -> dict[str, Any]:
     registry = get_tenant_isolation_registry()
     request = RateLimitRequest(

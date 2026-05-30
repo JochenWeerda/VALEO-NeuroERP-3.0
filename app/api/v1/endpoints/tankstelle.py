@@ -12,11 +12,7 @@ from app.core.database import get_db
 from app.domains.operations.models import Zapfung, TankBestand
 
 from app.api.v1.schemas.base import BaseSchema
-from pydantic import ConfigDict as _ConfigDict
-
-
-class CompatFlexOut(BaseSchema):
-    model_config = _ConfigDict(extra="allow")
+from app.api.v1.schemas.tankstelle_schemas import TankstelleOut
 
 
 router = APIRouter(prefix="/tankstelle", tags=["Tankstelle"])
@@ -55,7 +51,7 @@ class ZapfungPayload(BaseModel):
 
 
 @router.get("/zapfungen", summary="Zapfungen auflisten",
-    response_model=list[CompatFlexOut]
+    response_model=list[TankstelleOut]
 )
 def list_zapfungen(
     kennzeichen: Optional[str] = None,
@@ -73,7 +69,7 @@ def list_zapfungen(
 
 
 @router.get("/zapfungen/{zapfung_id}", summary="Zapfung abrufen",
-    response_model=CompatFlexOut
+    response_model=TankstelleOut
 )
 def get_zapfung(zapfung_id: str, db: Session = Depends(get_db)):
     obj = db.query(Zapfung).filter(Zapfung.id == zapfung_id).first()
@@ -83,7 +79,7 @@ def get_zapfung(zapfung_id: str, db: Session = Depends(get_db)):
 
 
 @router.post("/zapfungen", status_code=201, summary="Zapfung anlegen",
-    response_model=CompatFlexOut
+    response_model=TankstelleOut
 )
 def create_zapfung(payload: ZapfungPayload, db: Session = Depends(get_db)):
     obj = Zapfung(**payload.model_dump())
@@ -115,14 +111,14 @@ class TankBestandPatch(BaseModel):
 
 
 @router.get("/bestand", summary="Bestand auflisten",
-    response_model=None
+    response_model=list[TankstelleOut]
 )
 def list_bestand(db: Session = Depends(get_db)):
     return [_to_dict(b) for b in db.query(TankBestand).all()]
 
 
 @router.patch("/bestand/{artikel}", summary="Bestand aktualisieren",
-    response_model=CompatFlexOut
+    response_model=TankstelleOut
 )
 def update_bestand(artikel: str, payload: TankBestandPatch, db: Session = Depends(get_db)):
     obj = db.query(TankBestand).filter(TankBestand.artikel == artikel).first()

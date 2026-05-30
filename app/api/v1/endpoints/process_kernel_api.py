@@ -1,4 +1,4 @@
-﻿"""
+"""
 Process Kernel API â€” Wave 11
 
 Command-Catalog, Policy-Override-Resolution, Exception-Katalog,
@@ -1074,7 +1074,7 @@ def get_trocknungs_regelsets() -> dict[str, Any]:
 # ---------------------------------------------------------------------------
 
 
-@router.post("/workflow-migration/check", response_model=list[ProcessKernelOut], summary="Workflow migration prÃ¼fen")
+@router.post("/workflow-migration/check", response_model=ProcessKernelOut, summary="Workflow migration prüfen")
 def check_workflow_migration(body: dict) -> dict[str, Any]:
     """
     Prueft ob eine Workflow-Migrations-Definition sicher ist (Gap 011).

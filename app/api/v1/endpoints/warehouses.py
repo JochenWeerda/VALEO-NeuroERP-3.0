@@ -15,11 +15,7 @@ from ..schemas.base import PaginatedResponse
 from ..schemas.inventory import Warehouse, WarehouseCreate, WarehouseUpdate
 
 from app.api.v1.schemas.base import BaseSchema
-from pydantic import ConfigDict as _ConfigDict
-
-
-class CompatFlexOut(BaseSchema):
-    model_config = _ConfigDict(extra="allow")
+from app.api.v1.schemas.warehouses_schemas import WarehousesOut
 
 
 router = APIRouter()
@@ -27,7 +23,7 @@ router = APIRouter()
 DEFAULT_TENANT = settings.DEFAULT_TENANT_ID
 
 
-@router.get("/integrations/superglue/carrier-rollout", response_model=CompatFlexOut, summary="Superglue carrier rollout abrufen")
+@router.get("/integrations/superglue/carrier-rollout", response_model=WarehousesOut, summary="Superglue carrier rollout abrufen")
 async def get_superglue_carrier_rollout(tenant_id: Optional[str] = Query(None, description="Tenant ID for rollout summary")):
     """Thin logistics rollout surface for Superglue carrier connectors."""
     from app.integrations.services.superglue_domain_rollouts import build_superglue_domain_rollout_summary

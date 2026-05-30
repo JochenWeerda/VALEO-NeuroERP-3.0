@@ -12,11 +12,7 @@ from app.core.database import get_db
 from app.domains.operations.models import WartungAnlage, WartungsProtokoll, WartungStatus
 
 from app.api.v1.schemas.base import BaseSchema
-from pydantic import ConfigDict as _ConfigDict
-
-
-class CompatFlexOut(BaseSchema):
-    model_config = _ConfigDict(extra="allow")
+from app.api.v1.schemas.wartung_schemas import WartungOut
 
 
 router = APIRouter(prefix="/wartung", tags=["Wartung"])
@@ -66,7 +62,7 @@ class AnlagePatch(BaseModel):
 
 
 @router.get("/anlagen", summary="Anlagen auflisten",
-    response_model=list[CompatFlexOut]
+    response_model=list[WartungOut]
 )
 def list_anlagen(
     status: Optional[str] = None,
@@ -81,7 +77,7 @@ def list_anlagen(
 
 
 @router.get("/anlagen/{anlage_id}", summary="Anlage abrufen",
-    response_model=CompatFlexOut
+    response_model=WartungOut
 )
 def get_anlage(anlage_id: str, db: Session = Depends(get_db)):
     obj = db.query(WartungAnlage).filter(WartungAnlage.id == anlage_id).first()
@@ -93,7 +89,7 @@ def get_anlage(anlage_id: str, db: Session = Depends(get_db)):
 
 
 @router.post("/anlagen", status_code=201, summary="Anlage anlegen",
-    response_model=CompatFlexOut
+    response_model=WartungOut
 )
 def create_anlage(payload: AnlagePayload, db: Session = Depends(get_db)):
     obj = WartungAnlage(**payload.model_dump())
@@ -104,7 +100,7 @@ def create_anlage(payload: AnlagePayload, db: Session = Depends(get_db)):
 
 
 @router.patch("/anlagen/{anlage_id}", summary="Anlage aktualisieren",
-    response_model=CompatFlexOut
+    response_model=WartungOut
 )
 def update_anlage(anlage_id: str, payload: AnlagePatch, db: Session = Depends(get_db)):
     obj = db.query(WartungAnlage).filter(WartungAnlage.id == anlage_id).first()
@@ -140,7 +136,7 @@ class ProtokollPayload(BaseModel):
 
 
 @router.get("/anlagen/{anlage_id}/protokolle", summary="Protokolle auflisten",
-    response_model=None
+    response_model=list[WartungOut]
 )
 def list_protokolle(anlage_id: str, db: Session = Depends(get_db)):
     return [
@@ -153,7 +149,7 @@ def list_protokolle(anlage_id: str, db: Session = Depends(get_db)):
 
 
 @router.post("/anlagen/{anlage_id}/protokolle", status_code=201, summary="Protokoll anlegen",
-    response_model=CompatFlexOut
+    response_model=WartungOut
 )
 def create_protokoll(anlage_id: str, payload: ProtokollPayload, db: Session = Depends(get_db)):
     anlage = db.query(WartungAnlage).filter(WartungAnlage.id == anlage_id).first()

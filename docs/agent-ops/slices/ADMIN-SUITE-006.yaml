@@ -1,0 +1,20 @@
+id: ADMIN-SUITE-006
+title: Admin Suite Connector Hub
+owner: Codex
+status: abgeschlossen
+claimed_at: 2026-05-30
+completed_at: 2026-05-30
+goal: Redigierten Connector-Katalog mit getrenntem Config- und Live-Status bereitstellen.
+file_ownership:
+  - app/api/v1/endpoints/admin_suite.py
+  - packages/frontend-web/src/pages/admin-suite/connectors.tsx
+  - packages/frontend-web/src/lib/api/admin-suite.ts
+  - tests/test_admin_suite_operations.py
+checks:
+  - python -m pytest tests/test_admin_suite_operations.py -q --no-cov
+  - pnpm --filter @valero-neuroerp/frontend-web type-check
+risks:
+  - Schreibende Retry- und DLQ-Aktionen bleiben Folgescope.
+gate_results:
+  backend: "18 passed: complete admin-suite focused suite"
+  typescript: "0 errors"

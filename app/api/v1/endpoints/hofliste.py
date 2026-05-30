@@ -23,11 +23,6 @@ from app.core.dependencies import get_tenant_id
 from app.core.uuid7 import uuid7
 
 from app.api.v1.schemas.base import BaseSchema
-from pydantic import ConfigDict as _ConfigDict
-
-
-class CompatFlexOut(BaseSchema):
-    model_config = _ConfigDict(extra="allow")
 
 
 router = APIRouter(prefix="/waage/hofliste", tags=["Waage - Hofliste"])
@@ -137,7 +132,7 @@ def anmelden(
 
 
 @router.post("/{eintrag_id}/status", summary="Aendern status",
-    response_model=CompatFlexOut
+    response_model=HoflisteOut
 )
 def status_aendern(
     eintrag_id: str,
@@ -183,7 +178,7 @@ def status_aendern(
 
 
 @router.delete("/{eintrag_id}", summary="Abmelden",
-    response_model=CompatFlexOut
+    response_model=None
 )
 def abmelden(
     eintrag_id: str,

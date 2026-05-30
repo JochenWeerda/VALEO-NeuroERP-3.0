@@ -23,11 +23,7 @@ from ..schemas.finance import Creditor, CreditorCreate, CreditorUpdate
 from ..schemas.base import PaginatedResponse
 
 from app.api.v1.schemas.base import BaseSchema
-from pydantic import ConfigDict as _ConfigDict
-
-
-class CompatFlexOut(BaseSchema):
-    model_config = _ConfigDict(extra="allow")
+from app.api.v1.schemas.creditors_schemas import CreditorsOut
 
 
 router = APIRouter(prefix="/creditors", tags=["finance", "creditors"])
@@ -383,7 +379,7 @@ async def update_creditor(
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.get("/{creditor_id}/balance", response_model=CompatFlexOut, summary="Creditor balance abrufen")
+@router.get("/{creditor_id}/balance", response_model=CreditorsOut, summary="Creditor balance abrufen")
 async def get_creditor_balance(
     creditor_id: str,
     tenant_id: str = Depends(get_tenant_id),

@@ -5,6 +5,7 @@ POST /voice/summary - Ollama ~15s speakable summary
 POST /voice/synthesize - Local Piper TTS (browser fallback hint)
 POST /voice/pipeline - WhisperBar unified dictate/summary/intent
 POST /voice/transcribe - Local faster-whisper STT (base64 audio)
+GET  /voice/status  - STT/TTS/Ollama readiness
 """
 
 import base64
@@ -19,6 +20,7 @@ from app.schemas.voice import (
     VoicePolishOut,
     VoiceResolveIn,
     VoiceResolveOut,
+    VoiceStatusOut,
     VoiceSummaryIn,
     VoiceSummaryOut,
     VoiceSynthesizeIn,
@@ -31,9 +33,17 @@ from app.services.local_stt import is_faster_whisper_available, transcribe_audio
 from app.services.local_tts import synthesize_speech
 from app.services.voice_pipeline import run_voice_pipeline
 from app.services.voice_polish import polish_text
+from app.services.voice_status import get_voice_status
 from app.services.voice_summary import summarize_text
 
 router = APIRouter()
+
+
+@router.get("/status", response_model=VoiceStatusOut)
+async def voice_status() -> VoiceStatusOut:
+    """Return voice stack readiness (STT, TTS, Ollama)."""
+    result = await get_voice_status()
+    return VoiceStatusOut(**result)
 
 
 @router.post("/resolve", response_model=VoiceResolveOut | None)

@@ -1,0 +1,22 @@
+id: SLICE-015-VOICE-PRODUCTION-HARDENING-001
+title: Slice-015 — Voice Production Hardening
+owner: Claude Sonnet 4.6
+status: abgeschlossen
+completed_at: 2026-05-30
+depends_on:
+  - SLICE-014-VOICE-LOCAL-STACK-001
+goal: >
+  Voice-Stack produktionsreif: faster-whisper im Docker-Image, GET /voice/status,
+  Playwright WhisperBar-Smoke, Copilot-Dock Summary-Anzeige.
+scope:
+  - services/ki-usability/Dockerfile.voice
+  - services/ki-usability/app/services/voice_status.py
+  - docker-compose.voice.yml
+  - packages/frontend-web/tests/e2e/slice-015-voice-whisperbar.spec.ts
+  - packages/frontend-web/src/features/copilot/
+acceptance_criteria:
+  - Dockerfile.voice installiert faster-whisper + ffmpeg
+  - GET /voice/status liefert stt_ready, tts_ready, ollama_reachable
+  - E2E Smoke fuer WhisperBar Summary (gemockt)
+  - Copilot-Dock zeigt Voice-Summary mit Vorlesen-Button
+  - pytest fuer /voice/status

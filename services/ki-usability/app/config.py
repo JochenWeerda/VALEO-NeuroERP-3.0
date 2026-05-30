@@ -37,6 +37,11 @@ class Settings(BaseSettings):
     VOICE_TTS_PROVIDER: str = "piper"
     PIPER_MODEL_PATH: str = ""
     PIPER_EXECUTABLE: str = "piper"
+    KOKORO_BASE_URL: str = "http://localhost:8880"
+    KOKORO_MODEL: str = "kokoro"
+    KOKORO_VOICE: str = "af_sky"
+    KOKORO_RESPONSE_FORMAT: str = "mp3"
+    KOKORO_TIMEOUT_SEC: float = 60.0
     FASTER_WHISPER_MODEL: str = "small"
     FASTER_WHISPER_DEVICE: str = "cpu"
     FASTER_WHISPER_COMPUTE: str = "int8"

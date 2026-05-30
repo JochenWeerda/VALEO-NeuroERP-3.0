@@ -20,11 +20,7 @@ from app.core.tenant import get_tenant_id
 from app.core.fibu_audit import log_fibu_audit
 
 from app.api.v1.schemas.base import BaseSchema
-from pydantic import ConfigDict as _ConfigDict
-
-
-class CompatFlexOut(BaseSchema):
-    model_config = _ConfigDict(extra="allow")
+from app.api.v1.schemas.lohn_connector_schemas import LohnConnectorOut
 
 
 router = APIRouter(prefix="/lohn-connector", tags=["finance", "lohn", "connectors"])
@@ -154,7 +150,7 @@ async def create_lohn_import_run(
     return _row_to_run(row)
 
 
-@router.post("/runs/trigger", response_model=CompatFlexOut, summary="Lohn import auslösen")
+@router.post("/runs/trigger", response_model=LohnConnectorOut, summary="Lohn import auslösen")
 async def trigger_lohn_import(
     payload: LohnImportTrigger,
     tenant_id: str = Depends(get_tenant_id),

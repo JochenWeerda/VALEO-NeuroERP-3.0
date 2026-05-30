@@ -19,11 +19,6 @@ from ....core.import_pipeline import (
 )
 
 from app.api.v1.schemas.base import BaseSchema
-from pydantic import ConfigDict as _ConfigDict
-
-
-class CompatFlexOut(BaseSchema):
-    model_config = _ConfigDict(extra="allow")
 
 
 router = APIRouter(prefix="/import-pipeline", tags=["import", "pipeline"])

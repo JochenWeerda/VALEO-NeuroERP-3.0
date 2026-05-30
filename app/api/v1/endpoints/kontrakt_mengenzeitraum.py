@@ -23,11 +23,7 @@ from app.core.dependencies import get_tenant_id
 from app.core.uuid7 import uuid7
 
 from app.api.v1.schemas.base import BaseSchema
-from pydantic import ConfigDict as _ConfigDict
-
-
-class CompatFlexOut(BaseSchema):
-    model_config = _ConfigDict(extra="allow")
+from app.api.v1.schemas.kontrakt_mengenzeitraum_schemas import KontraktMengenzeitraumOut
 
 
 router = APIRouter(prefix="/kontrakte", tags=["Kontrakt - Mengenzeitraum & Zu-/Abschläge"])
@@ -197,7 +193,7 @@ def update_mengenzeitraum(
 
 
 @router.delete("/{kontrakt_nr}/mengenzeitraeume/{zeitraum_id}", summary="Mengenzeitraum löschen",
-    response_model=CompatFlexOut
+    response_model=None
 )
 def delete_mengenzeitraum(
     kontrakt_nr: str,
@@ -292,7 +288,7 @@ def generiere_mengenzeitraeume(
 # ── Zu-/Abschläge Endpoints ──────────────────────────────────────────────────
 
 @router.get("/zuabschlagsgruppen", summary="Zuabschlagsgruppen auflisten",
-    response_model=list[CompatFlexOut]
+    response_model=list[KontraktMengenzeitraumOut]
 )
 def list_zuabschlagsgruppen(
     typ: Optional[str] = Query(None, description="zuschlag oder abschlag"),
@@ -313,7 +309,7 @@ def list_zuabschlagsgruppen(
 
 
 @router.post("/zuabschlagsgruppen", status_code=201, summary="Zuabschlagsgruppe anlegen",
-    response_model=CompatFlexOut
+    response_model=KontraktMengenzeitraumOut
 )
 def create_zuabschlagsgruppe(
     payload: ZuAbschlagsGruppeCreate,

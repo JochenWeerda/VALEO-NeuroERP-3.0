@@ -14,11 +14,7 @@ from app.core.database import get_db
 from app.core.tenant import get_tenant_id
 
 from app.api.v1.schemas.base import BaseSchema
-from pydantic import ConfigDict as _ConfigDict
-
-
-class CompatFlexOut(BaseSchema):
-    model_config = _ConfigDict(extra="allow")
+from app.api.v1.schemas.waagen_vorlagen_schemas import WaagenVorlagenOut
 
 
 router = APIRouter(prefix="/waagen/vorlagen", tags=["agrar", "waage", "vorlagen"])
@@ -173,7 +169,7 @@ def delete_vorlage(
 
 
 @router.post("/{vorlage_id}/anwenden", summary="Anwenden",
-    response_model=None
+    response_model=WaagenVorlagenOut
 )
 def anwenden(
     vorlage_id: str,

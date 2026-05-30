@@ -18,11 +18,7 @@ from ....services.customer_sales_eligibility import assert_customer_allowed_for_
 from ..schemas.base import PaginatedResponse
 
 from app.api.v1.schemas.base import BaseSchema
-from pydantic import ConfigDict as _ConfigDict
-
-
-class CompatFlexOut(BaseSchema):
-    model_config = _ConfigDict(extra="allow")
+from app.api.v1.schemas.sales_offers_schemas import SalesOffersOut
 
 
 router = APIRouter()
@@ -485,7 +481,7 @@ async def delete_sales_offer(
 
 
 @router.post("/{offer_id}/convert-to-order", status_code=status.HTTP_200_OK, summary="Offer to order umwandeln",
-    response_model=CompatFlexOut
+    response_model=SalesOffersOut
 )
 async def convert_offer_to_order(
     offer_id: str,

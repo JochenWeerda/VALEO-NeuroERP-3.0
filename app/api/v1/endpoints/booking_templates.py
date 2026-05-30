@@ -19,11 +19,6 @@ from ....core.fibu_audit import log_fibu_audit
 logger = logging.getLogger(__name__)
 
 from app.api.v1.schemas.base import BaseSchema
-from pydantic import ConfigDict as _ConfigDict
-
-
-class CompatFlexOut(BaseSchema):
-    model_config = _ConfigDict(extra="allow")
 
 
 router = APIRouter(prefix="/booking-templates", tags=["finance", "templates"])

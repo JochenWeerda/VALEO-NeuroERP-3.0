@@ -24,11 +24,6 @@ from app.core.dependencies import get_tenant_id
 from app.core.uuid7 import uuid7
 
 from app.api.v1.schemas.base import BaseSchema
-from pydantic import ConfigDict as _ConfigDict
-
-
-class CompatFlexOut(BaseSchema):
-    model_config = _ConfigDict(extra="allow")
 
 
 router = APIRouter(prefix="/stammdaten/warengruppen",
@@ -144,7 +139,7 @@ def update_hauptwarengruppe(
 
 
 @router.delete("/haupt/{gruppe_nr}", summary="Hauptwarengruppe löschen",
-    response_model=CompatFlexOut
+    response_model=None
 )
 def delete_hauptwarengruppe(
     gruppe_nr: str,
@@ -310,7 +305,7 @@ def update_warengruppe(
 
 
 @router.delete("/{gruppe_nr}", summary="Warengruppe löschen",
-    response_model=CompatFlexOut
+    response_model=None
 )
 def delete_warengruppe(
     gruppe_nr: str,

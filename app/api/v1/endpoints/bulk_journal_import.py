@@ -25,11 +25,7 @@ from ....core.fibu_audit import log_fibu_audit
 logger = logging.getLogger(__name__)
 
 from app.api.v1.schemas.base import BaseSchema
-from pydantic import ConfigDict as _ConfigDict
-
-
-class CompatFlexOut(BaseSchema):
-    model_config = _ConfigDict(extra="allow")
+from app.api.v1.schemas.bulk_journal_import_schemas import BulkJournalImportOut
 
 
 router = APIRouter(prefix="/bulk-journal-import", tags=["finance", "import"])
@@ -386,7 +382,7 @@ async def import_journal_entries_csv(
 
 
 @router.get("/template", summary="Import template abrufen",
-    response_model=CompatFlexOut
+    response_model=BulkJournalImportOut
 )
 async def get_import_template():
     """

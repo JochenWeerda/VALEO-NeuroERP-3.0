@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useState, useEffect, useMemo } from 'react'
+import { useNavigate, useParams, useLocation } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { toast } from '@/hooks/use-toast'
 import { useQuery } from '@tanstack/react-query'
@@ -18,6 +18,26 @@ import { Plus, ExternalLink, Mail, Phone, ShieldCheck } from 'lucide-react'
 import { apiClient } from '@/lib/api-client'
 import { formatDate } from '@/components/mask-builder/utils/formatting'
 import { useTenant } from '@/hooks/useTenant'
+import { KundenBankverbindungenPanel } from '@/features/crm/components/KundenBankverbindungenPanel'
+
+function resolveCustomerRouteId(params: { id?: string }, pathname: string): string | undefined {
+  if (params.id?.trim() && params.id !== 'neu') {
+    return params.id.trim()
+  }
+  const match = pathname.match(/\/kunden\/([^/]+)\/?$/)
+  const segment = match?.[1]?.trim()
+  return segment && segment !== 'neu' ? segment : undefined
+}
+
+function resolveKundenNr(id: string, formData: Record<string, unknown> | null | undefined): string {
+  const candidates = [formData?.kunden_nr, formData?.kundenNr, formData?.customer_number, formData?.customerNumber]
+  for (const value of candidates) {
+    if (typeof value === 'string' && value.trim().length > 0) {
+      return value.trim()
+    }
+  }
+  return id
+}
 
 const createKundenConfig = (t: any, entityTypeLabel: string): MaskConfig => ({
   title: entityTypeLabel,
@@ -649,7 +669,12 @@ function ContactsList({ customerId }: { customerId?: string }) {
 export default function KundenStammPage(): JSX.Element {
   const { t } = useTranslation()
   const navigate = useNavigate()
-  const { id } = useParams()
+  const params = useParams()
+  const location = useLocation()
+  const id = useMemo(
+    () => resolveCustomerRouteId(params, location.pathname),
+    [params, location.pathname],
+  )
   const [isDirty, setIsDirty] = useState(false)
   const entityType = 'customer'
   const entityTypeLabel = getEntityTypeLabel(t, entityType, 'Kunde')
@@ -717,6 +742,8 @@ export default function KundenStammPage(): JSX.Element {
       {/* Kontakte-Liste für bestehende Kunden */}
       {!isNew && id && (
         <>
+          <KundenBankverbindungenPanel kundenNr={resolveKundenNr(id, data as Record<string, unknown> | null)} />
+
           <ContactsList customerId={id} />
           
           {/* Consents Tab as separate section */}

@@ -39,11 +39,7 @@ from app.core.tenant import get_tenant_id
 logger = logging.getLogger(__name__)
 
 from app.api.v1.schemas.base import BaseSchema
-from pydantic import ConfigDict as _ConfigDict
-
-
-class CompatFlexOut(BaseSchema):
-    model_config = _ConfigDict(extra="allow")
+from app.api.v1.schemas.gdpr_art30_ropa_schemas import GdprArt30RopaOut
 
 
 router = APIRouter(prefix="/gdpr/art30", tags=["gdpr", "compliance", "art30"])
@@ -261,7 +257,7 @@ def _serialize(obj: Any) -> Any:
 @router.get(
     "/activities/export/json",
     summary="RoPA-Export als JSON (Datenschutzbehörde)",
-    response_model=CompatFlexOut,
+    response_model=GdprArt30RopaOut,
 )
 def export_activities_json(
     db: Session = Depends(get_db),

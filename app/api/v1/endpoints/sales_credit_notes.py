@@ -26,12 +26,7 @@ from app.core.fibu_audit import log_fibu_audit
 
 logger = logging.getLogger(__name__)
 
-from app.api.v1.schemas.base import BaseSchema
-from pydantic import ConfigDict as _ConfigDict
-
-
-class CompatFlexOut(BaseSchema):
-    model_config = _ConfigDict(extra="allow")
+from app.api.v1.schemas.base import BaseSchema, StatusResponse
 
 
 router = APIRouter(prefix="/sales", tags=["sales", "credit-notes", "returns"])
@@ -216,7 +211,7 @@ async def delete_credit_note(
     db.commit()
 
 
-@router.post("/credit-notes/{cn_id}/post", response_model=CompatFlexOut, summary="Credit note erstellen")
+@router.post("/credit-notes/{cn_id}/post", response_model=StatusResponse, summary="Credit note erstellen")
 async def post_credit_note(
     cn_id: str,
     request: Request,
@@ -384,7 +379,7 @@ async def delete_return(
     db.commit()
 
 
-@router.patch("/returns/{return_id}/status", response_model=CompatFlexOut, summary="Return status aktualisieren")
+@router.patch("/returns/{return_id}/status", response_model=StatusResponse, summary="Return status aktualisieren")
 async def update_return_status(
     return_id: str,
     new_status: str = Query(..., description="New status: open, processing, completed, cancelled"),

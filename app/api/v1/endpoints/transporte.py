@@ -12,11 +12,7 @@ from app.core.database import get_db
 from app.domains.operations.models import Fahrer, FahrerStatus
 
 from app.api.v1.schemas.base import BaseSchema
-from pydantic import ConfigDict as _ConfigDict
-
-
-class CompatFlexOut(BaseSchema):
-    model_config = _ConfigDict(extra="allow")
+from app.api.v1.schemas.transporte_schemas import TransporteOut
 
 
 router = APIRouter(prefix="/transporte", tags=["Transporte"])
@@ -64,7 +60,7 @@ class FahrerPatch(BaseModel):
 
 
 @router.get("/fahrer", summary="Fahrer auflisten",
-    response_model=list[CompatFlexOut]
+    response_model=list[TransporteOut]
 )
 def list_fahrer(
     status: Optional[str] = None,
@@ -85,7 +81,7 @@ def list_fahrer(
 
 
 @router.get("/fahrer/{fahrer_id}", summary="Fahrer abrufen",
-    response_model=CompatFlexOut
+    response_model=TransporteOut
 )
 def get_fahrer(fahrer_id: str, db: Session = Depends(get_db)):
     obj = db.query(Fahrer).filter(Fahrer.id == fahrer_id).first()
@@ -97,7 +93,7 @@ def get_fahrer(fahrer_id: str, db: Session = Depends(get_db)):
 
 
 @router.post("/fahrer", status_code=201, summary="Fahrer anlegen",
-    response_model=CompatFlexOut
+    response_model=TransporteOut
 )
 def create_fahrer(payload: FahrerPayload, db: Session = Depends(get_db)):
     obj = Fahrer(**payload.model_dump())
@@ -108,7 +104,7 @@ def create_fahrer(payload: FahrerPayload, db: Session = Depends(get_db)):
 
 
 @router.patch("/fahrer/{fahrer_id}", summary="Fahrer aktualisieren",
-    response_model=CompatFlexOut
+    response_model=TransporteOut
 )
 def update_fahrer(fahrer_id: str, payload: FahrerPatch, db: Session = Depends(get_db)):
     obj = db.query(Fahrer).filter(Fahrer.id == fahrer_id).first()

@@ -15,12 +15,8 @@ from sqlalchemy.orm import Session
 
 from app.core.database import get_db
 
-from app.api.v1.schemas.base import BaseSchema
-from pydantic import ConfigDict as _ConfigDict
-
-
-class CompatFlexOut(BaseSchema):
-    model_config = _ConfigDict(extra="allow")
+from app.api.v1.schemas.base import BaseSchema, IDResponse
+from app.api.v1.schemas.logistics_freight_schemas import LogisticsFreightOut
 
 
 router = APIRouter(prefix="/logistik", tags=["logistik", "frachtkosten"])
@@ -140,7 +136,7 @@ class FreightCalcIn(BaseModel):
 # ---------------------------------------------------------------------------
 
 @router.get("/freight-tariffs", summary="Tariffs auflisten",
-    response_model=list[CompatFlexOut]
+    response_model=list[LogisticsFreightOut]
 )
 def list_tariffs(
     carrier_id: Optional[str] = Query(None),
@@ -171,7 +167,7 @@ def list_tariffs(
 
 
 @router.post("/freight-tariffs", status_code=201, summary="Tariff anlegen",
-    response_model=CompatFlexOut
+    response_model=IDResponse
 )
 def create_tariff(
     body: FreightTariffIn,
@@ -201,7 +197,7 @@ def create_tariff(
 
 
 @router.post("/freight-cost/calculate", summary="Freight berechnen",
-    response_model=CompatFlexOut
+    response_model=LogisticsFreightOut
 )
 def calculate_freight(
     body: FreightCalcIn,
@@ -213,7 +209,7 @@ def calculate_freight(
 
 
 @router.get("/freight-cost/simulate", summary="Freight simulate",
-    response_model=CompatFlexOut
+    response_model=LogisticsFreightOut
 )
 def simulate_freight(
     carrier_id: str = Query(...),

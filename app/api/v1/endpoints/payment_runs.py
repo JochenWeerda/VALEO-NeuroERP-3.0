@@ -24,11 +24,7 @@ from app.infrastructure.eventbus.outbox import OutboxPublisher
 logger = logging.getLogger(__name__)
 
 from app.api.v1.schemas.base import BaseSchema
-from pydantic import ConfigDict as _ConfigDict
-
-
-class CompatFlexOut(BaseSchema):
-    model_config = _ConfigDict(extra="allow")
+from app.api.v1.schemas.payment_runs_schemas import PaymentRunsOut
 
 
 router = APIRouter(prefix="/payment-runs", tags=["finance", "ap", "sepa"])
@@ -802,7 +798,7 @@ async def execute_payment_run(
 
 
 @router.get("/{run_id}/sepa-xml", summary="Sepa xml abrufen",
-    response_model=CompatFlexOut
+    response_model=PaymentRunsOut
 )
 async def get_sepa_xml(
     run_id: str,
@@ -851,7 +847,7 @@ async def get_sepa_xml(
 
 
 @router.post("/{run_id}/return-payment", summary="Payment return",
-    response_model=CompatFlexOut
+    response_model=PaymentRunsOut
 )
 async def return_payment(
     run_id: str,

@@ -1,4 +1,4 @@
-﻿"""
+"""
 Einkauf â€” Bestell-Vorschlag Endpoints
 
 Bestellvorschlag-Engines (3 Typen):
@@ -56,6 +56,7 @@ from app.core.exceptions import ConflictError, EntityNotFoundError, ValidationFa
 from app.services.procurement_service import ProcurementService
 
 from app.api.v1.schemas.base import BaseSchema
+from app.api.v1.schemas.einkauf_bestellvorschlag_schemas import EinkaufBestellvorschlagOut
 from pydantic import ConfigDict as _ConfigDict
 
 
@@ -251,7 +252,7 @@ def _not_found(exc: EntityNotFoundError, label: str) -> HTTPException:
 # â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 @router.get("/einkauf/bestellvorschlaege/lager", summary="Lager vorschlag",
-    response_model=BestellvorschlagOut
+    response_model=list[BestellvorschlagOut]
 )
 async def vorschlag_lager(
     niederlassung_id: Optional[str] = Query(None),
@@ -266,7 +267,7 @@ async def vorschlag_lager(
 
 
 @router.get("/einkauf/bestellvorschlaege/verkauf", summary="Verkauf vorschlag",
-    response_model=BestellvorschlagOut
+    response_model=list[BestellvorschlagOut]
 )
 async def vorschlag_verkauf(
     niederlassung_id: Optional[str] = Query(None),
@@ -280,7 +281,7 @@ async def vorschlag_verkauf(
 
 
 @router.get("/einkauf/bestellvorschlaege/rohware", summary="Rohware vorschlag",
-    response_model=BestellvorschlagOut
+    response_model=list[BestellvorschlagOut]
 )
 async def vorschlag_rohware(
     stichtag: Optional[date] = Query(None),
@@ -296,7 +297,7 @@ async def vorschlag_rohware(
 # â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 @router.get("/einkauf/bestellvorschlaege", summary="Bestellvorschlaege auflisten",
-    response_model=BestellvorschlagOut
+    response_model=list[BestellvorschlagOut]
 )
 async def list_bestellvorschlaege(
     vorschlag_typ: Optional[str] = Query(None),
@@ -440,7 +441,7 @@ async def delete_artikel_lager_parameter(
 # â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 @router.get("/einkauf/lieferanten", summary="Lieferanten auflisten",
-    response_model=None
+    response_model=EinkaufBestellvorschlagOut
 )
 async def list_lieferanten(
     suche: Optional[str] = Query(None),
@@ -567,7 +568,7 @@ async def add_kontrakt_position(
 # â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 @router.get("/einkauf/bestellungen", summary="Bestellungen auflisten",
-    response_model=BestellvorschlagOut
+    response_model=list[BestellvorschlagOut]
 )
 async def list_bestellungen(
     lieferant_id: Optional[str] = Query(None),

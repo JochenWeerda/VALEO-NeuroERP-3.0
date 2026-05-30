@@ -19,11 +19,7 @@ from app.core.uuid7 import uuid7
 from app.domains.operations.models import PosPositionRule
 
 from app.api.v1.schemas.base import BaseSchema
-from pydantic import ConfigDict as _ConfigDict
-
-
-class CompatFlexOut(BaseSchema):
-    model_config = _ConfigDict(extra="allow")
+from app.api.v1.schemas.position_rules_schemas import PositionRulesOut
 
 
 router = APIRouter(prefix="/positions/rules", tags=["positions", "commodity", "rules"])
@@ -220,7 +216,7 @@ def update_rule(
 
 
 @router.delete("/{rule_id}", status_code=200, summary="Rule löschen",
-    response_model=CompatFlexOut
+    response_model=PositionRulesOut
 )
 def delete_rule(
     rule_id: str,

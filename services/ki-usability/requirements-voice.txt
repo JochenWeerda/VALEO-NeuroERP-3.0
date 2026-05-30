@@ -1,0 +1,2 @@
+# Optional voice stack (Slice-015): local STT in Docker
+faster-whisper>=1.0.0

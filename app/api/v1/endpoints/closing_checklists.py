@@ -1,4 +1,4 @@
-﻿"""
+"""
 Closing Checklists API
 FIBU-CLS-01: Abschlusschecklisten
 """
@@ -28,17 +28,13 @@ from app.services.closing_checklists_service import (
 logger = logging.getLogger(__name__)
 
 from app.api.v1.schemas.base import BaseSchema
-from pydantic import ConfigDict as _ConfigDict
-
-
-class CompatFlexOut(BaseSchema):
-    model_config = _ConfigDict(extra="allow")
+from app.api.v1.schemas.closing_checklists_schemas import ClosingChecklistsOut
 
 
 router = APIRouter(prefix="/closing-checklists", tags=["finance", "closing"])
 
 
-@router.get("/templates", response_model=list[CompatFlexOut], summary="Checklist templates auflisten")
+@router.get("/templates", response_model=list[ClosingChecklistsOut], summary="Checklist templates auflisten")
 async def list_checklist_templates(
     closing_type: Optional[str] = Query(None, description="Filter by closing type"),
     active_only: bool = Query(True, description="Show only active templates"),
@@ -266,7 +262,7 @@ async def list_checklist_templates(
         ]
 
 
-@router.post("/templates", response_model=CompatFlexOut, status_code=201, summary="Checklist template anlegen")
+@router.post("/templates", response_model=ClosingChecklistsOut, status_code=201, summary="Checklist template anlegen")
 async def create_checklist_template(
     template: ChecklistTemplateCreate,
     tenant_id: str = Query("system", description="Tenant ID"),
@@ -563,7 +559,7 @@ async def get_closing_checklist(
 
 
 @router.post("/{checklist_id}/items/{item_code}/complete", summary="Checklist item complete",
-    response_model=CompatFlexOut
+    response_model=ClosingChecklistsOut
 )
 async def complete_checklist_item(
     checklist_id: str,
@@ -646,7 +642,7 @@ async def complete_checklist_item(
 
 
 @router.post("/{checklist_id}/validate", summary="Checklist items validieren",
-    response_model=CompatFlexOut
+    response_model=ClosingChecklistsOut
 )
 async def validate_checklist_items(
     checklist_id: str,
@@ -819,7 +815,7 @@ async def list_closing_checklists(
         return []
 
 
-@router.get("/cockpit/summary", response_model=CompatFlexOut, summary="Closing cockpit summary abrufen")
+@router.get("/cockpit/summary", response_model=ClosingChecklistsOut, summary="Closing cockpit summary abrufen")
 async def get_closing_cockpit_summary(
     tenant_id: str = Query("system", description="Tenant ID"),
     period: Optional[str] = Query(None, description="Period in YYYY-MM"),

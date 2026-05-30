@@ -11,12 +11,8 @@ from sqlalchemy.orm import Session
 
 from app.core.database import get_db
 
-from app.api.v1.schemas.base import BaseSchema
-from pydantic import ConfigDict as _ConfigDict
-
-
-class CompatFlexOut(BaseSchema):
-    model_config = _ConfigDict(extra="allow")
+from app.api.v1.schemas.base import BaseSchema, StatusResponse
+from app.api.v1.schemas.compliance_whistleblower_schemas import ComplianceWhistleblowerOut
 
 
 router = APIRouter()
@@ -55,7 +51,7 @@ class NoteIn(BaseModel):
 
 
 @router.post("/reports", status_code=201, summary="Report einreichen",
-    response_model=CompatFlexOut
+    response_model=ComplianceWhistleblowerOut
 )
 async def submit_report(payload: ReportIn, db: Session = Depends(get_db)):
     _ensure_table(db)
@@ -78,7 +74,7 @@ async def submit_report(payload: ReportIn, db: Session = Depends(get_db)):
 
 
 @router.get("/reports/status/{token}", summary="Status report",
-    response_model=CompatFlexOut
+    response_model=ComplianceWhistleblowerOut
 )
 async def report_status(token: str, db: Session = Depends(get_db)):
     _ensure_table(db)
@@ -95,7 +91,7 @@ async def report_status(token: str, db: Session = Depends(get_db)):
 
 
 @router.get("/reports", summary="Reports auflisten",
-    response_model=list[CompatFlexOut]
+    response_model=list[ComplianceWhistleblowerOut]
 )
 async def list_reports(db: Session = Depends(get_db)):
     _ensure_table(db)
@@ -109,7 +105,7 @@ async def list_reports(db: Session = Depends(get_db)):
 
 
 @router.patch("/reports/{report_id}/update", summary="Report aktualisieren",
-    response_model=CompatFlexOut
+    response_model=ComplianceWhistleblowerOut
 )
 async def update_report(report_id: str, payload: NoteIn, db: Session = Depends(get_db)):
     _ensure_table(db)

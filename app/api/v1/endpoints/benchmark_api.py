@@ -21,11 +21,7 @@ from app.core.process_mining_application import build_process_mining_benchmark_r
 from app.domains.operations.models import BetriebsKennzahlDB
 
 from app.api.v1.schemas.base import BaseSchema
-from pydantic import ConfigDict as _ConfigDict
-
-
-class CompatFlexOut(BaseSchema):
-    model_config = _ConfigDict(extra="allow")
+from app.api.v1.schemas.benchmark_api_schemas import BenchmarkApiOut
 
 
 router = APIRouter(prefix="/benchmark", tags=["benchmark"])
@@ -40,7 +36,7 @@ class KennzahlSubmitRequest(BaseModel):
 
 
 @router.post("/kennzahlen", status_code=201, summary="Kennzahl einreichen",
-    response_model=CompatFlexOut
+    response_model=BenchmarkApiOut
 )
 def submit_kennzahl(req: KennzahlSubmitRequest, db: Session = Depends(get_db)):
     kz_id = str(uuid.uuid4())
@@ -68,7 +64,7 @@ def submit_kennzahl(req: KennzahlSubmitRequest, db: Session = Depends(get_db)):
 
 
 @router.get("/report/{verbund_id}", summary="Benchmark report abrufen",
-    response_model=CompatFlexOut
+    response_model=BenchmarkApiOut
 )
 def get_benchmark_report(verbund_id: str, periode: str = Query(...), db: Session = Depends(get_db)):
     rows = db.query(BetriebsKennzahlDB).filter(BetriebsKennzahlDB.periode == periode).all()
@@ -94,7 +90,7 @@ def get_benchmark_report(verbund_id: str, periode: str = Query(...), db: Session
 
 
 @router.get("/process-mining/{verbund_id}", summary="Process mining benchmark report abrufen",
-    response_model=CompatFlexOut
+    response_model=BenchmarkApiOut
 )
 def get_process_mining_benchmark_report(
     verbund_id: str,
@@ -104,8 +100,8 @@ def get_process_mining_benchmark_report(
     projection_status_loader = get_projection_status_loader()
     runtime_report_loader = get_runtime_report_loader()
     if projection_status_loader is None or runtime_report_loader is None:
-        return BenchmarkReport.build(verbund_id=verbund_id, periode=periode, kennzahlen_je_tenant={})
-    return build_process_mining_benchmark_report(
+        return BenchmarkReport.build(verbund_id=verbund_id, periode=periode, kennzahlen_je_tenant={}).model_dump()
+    result = build_process_mining_benchmark_report(
         verbund_id=verbund_id,
         periode=periode,
         tenant_ids=tenant_ids,
@@ -114,10 +110,11 @@ def get_process_mining_benchmark_report(
         device_store=get_telemetry_device_store(),
         reading_store=get_telemetry_reading_store(),
     )
+    return result.model_dump()
 
 
 @router.get("/katalog", summary="Kz katalog abrufen",
-    response_model=CompatFlexOut
+    response_model=BenchmarkApiOut
 )
 def get_kz_katalog():
     return {"katalog": DEFAULT_KZ_KATALOG, "count": len(DEFAULT_KZ_KATALOG), "schema_version": 1}
