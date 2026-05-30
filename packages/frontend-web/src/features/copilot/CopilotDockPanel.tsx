@@ -1,4 +1,5 @@
 import * as React from 'react'
+import { Loader2, Volume2, X } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -19,6 +20,10 @@ type CopilotDockPanelProps = {
   loading: boolean
   connected: boolean
   sessionId: string | null
+  voiceSummary?: { summaryText: string; estimatedSeconds?: number } | null
+  onPlayVoiceSummary?: () => void
+  playingVoiceSummary?: boolean
+  onDismissVoiceSummary?: () => void
 }
 
 export function CopilotDockPanel({
@@ -31,6 +36,10 @@ export function CopilotDockPanel({
   loading,
   connected,
   sessionId,
+  voiceSummary,
+  onPlayVoiceSummary,
+  playingVoiceSummary = false,
+  onDismissVoiceSummary,
 }: CopilotDockPanelProps): JSX.Element {
   return (
     <>
@@ -71,6 +80,51 @@ export function CopilotDockPanel({
         </div>
 
         <div className="flex-1 space-y-2 overflow-y-auto p-3">
+          {voiceSummary?.summaryText ? (
+            <div
+              data-testid="copilot-voice-summary"
+              className="rounded-xl border border-primary/30 bg-primary/5 p-3 text-sm"
+            >
+              <div className="mb-1 flex items-center justify-between gap-2">
+                <span className="text-xs font-semibold text-primary">
+                  Voice-Zusammenfassung
+                  {voiceSummary.estimatedSeconds ? ` (~${voiceSummary.estimatedSeconds}s)` : ''}
+                </span>
+                <div className="flex items-center gap-1">
+                  {onPlayVoiceSummary ? (
+                    <Button
+                      type="button"
+                      size="icon"
+                      variant="ghost"
+                      className="h-7 w-7"
+                      disabled={playingVoiceSummary}
+                      aria-label="Zusammenfassung vorlesen"
+                      onClick={onPlayVoiceSummary}
+                    >
+                      {playingVoiceSummary ? (
+                        <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                      ) : (
+                        <Volume2 className="h-3.5 w-3.5" />
+                      )}
+                    </Button>
+                  ) : null}
+                  {onDismissVoiceSummary ? (
+                    <Button
+                      type="button"
+                      size="icon"
+                      variant="ghost"
+                      className="h-7 w-7"
+                      aria-label="Voice-Zusammenfassung schliessen"
+                      onClick={onDismissVoiceSummary}
+                    >
+                      <X className="h-3.5 w-3.5" />
+                    </Button>
+                  ) : null}
+                </div>
+              </div>
+              <p className="text-xs leading-snug text-foreground">{voiceSummary.summaryText}</p>
+            </div>
+          ) : null}
           {messages.length === 0 ? (
             <div className="mt-8 rounded-xl border border-dashed bg-muted/50 p-4 text-sm text-muted-foreground">
               Stelle eine Frage zu KPIs, Lager, Preisen oder Prognosen.

@@ -60,6 +60,22 @@ class VoiceTranscribeOut(BaseModel):
     error: Optional[str] = None
 
 
+class VoiceStatusOut(BaseModel):
+    """Voice stack readiness."""
+
+    stt_provider: str
+    stt_ready: bool
+    tts_provider: str
+    tts_ready: bool
+    ollama_base_url: str
+    ollama_reachable: bool
+    voice_polish_enabled: bool
+    voice_summary_enabled: bool
+    kokoro_configured: bool = False
+    piper_configured: bool = False
+    faster_whisper_model: str = "small"
+
+
 class VoiceSummaryIn(BaseModel):
     """Input for voice summary."""
 

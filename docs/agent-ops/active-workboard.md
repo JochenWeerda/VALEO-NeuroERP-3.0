@@ -2784,3 +2784,14 @@ Archiv des vorherigen Boards:
 **Gate-Ergebnis:** pytest ✅ · TypeScript 0 Fehler ✅
 **Erledigt:** Kokoro HTTP-Provider; docker-compose.voice.yml; VITE_VOICE_STT_PROVIDER=local mit Browser-Fallback.
 **Offene Risiken:** faster-whisper/Kokoro muessen im ki-usability-Container oder lokal installiert sein; Kokoro-Image optional und gross.
+
+## SLICE-015-VOICE-PRODUCTION-HARDENING-001
+
+**Von:** Claude Sonnet 4.6
+**Owner:** Claude Sonnet 4.6
+**Stand:** abgeschlossen 2026-05-30
+**Ziel des Slices:** Production Hardening — faster-whisper Docker, GET /voice/status, E2E WhisperBar-Smoke, Copilot Summary.
+**Dateibesitz:** `Dockerfile.voice`, `voice_status.py`, `docker-compose.voice.yml`, `slice-015-voice-whisperbar.spec.ts`, `useVoiceCopilotSummary.ts`, `CopilotDockPanel.tsx`.
+**Gate-Ergebnis:** pytest 116/116 ✅ · TypeScript 0 Fehler ✅
+**Erledigt:** Dockerfile.voice + requirements-voice.txt; GET /voice/status; WhisperBar E2E Smoke; Copilot-Dock Voice-Summary mit Vorlesen.
+**Offene Risiken:** faster-whisper-Image groesser; Kokoro weiterhin optional.

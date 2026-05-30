@@ -57,7 +57,7 @@ def berechne_duenge_bilanz(req: DuengeBilanzRequest):
         bedarf_p_kg_ha=req.bedarf_p_kg_ha,
         bedarf_k_kg_ha=req.bedarf_k_kg_ha,
     )
-    return bilanz
+    return bilanz.model_dump()
 
 @router.post("/psm-protokoll", status_code=201, summary="Psm protokoll erstelle",
     response_model=AgrarP0Out

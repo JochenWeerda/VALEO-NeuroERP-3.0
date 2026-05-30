@@ -47,7 +47,7 @@ def create_price_matrix(req: PriceMatrixCreateRequest):
         wirtschaftsjahr=req.wirtschaftsjahr,
         eintraege=eintraege,
     )
-    return matrix
+    return matrix.model_dump()
 
 @router.post("/lots", status_code=201, summary="Lot anlegen",
     response_model=ContractPricingApiOut
@@ -67,4 +67,4 @@ def create_lot(req: LotCreateRequest):
         preis_typ=PreisTyp(req.preis_typ),
         lieferdatum_soll=_date.fromisoformat(req.lieferdatum_soll),
     )
-    return lot
+    return lot.model_dump()
