@@ -26,11 +26,7 @@ from app.core.dependencies import get_tenant_id
 from app.core.uuid7 import uuid7
 
 from app.api.v1.schemas.base import BaseSchema
-from pydantic import ConfigDict as _ConfigDict
-
-
-class CompatFlexOut(BaseSchema):
-    model_config = _ConfigDict(extra="allow")
+from app.api.v1.schemas.fibu_zahlungsmeldungen_schemas import FibuZahlungsmeldungenOut
 
 
 router = APIRouter(prefix="/fibu/zahlungsmeldungen",
@@ -184,7 +180,7 @@ def meldung_abweisen(
 
 
 @router.get("/offen/zusammenfassung", summary="Meldungen zusammenfassung offene",
-    response_model=list[CompatFlexOut]
+    response_model=list[FibuZahlungsmeldungenOut]
 )
 def offene_meldungen_zusammenfassung(
     db=Depends(get_db),

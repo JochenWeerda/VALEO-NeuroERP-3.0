@@ -1,0 +1,57 @@
+# Privacy-First Voice Stack overlay for VALEO NeuroERP
+# Usage:
+#   docker compose -f docker-compose.yml -f docker-compose.voice.yml up -d ollama ki-usability
+# Optional Kokoro TTS (large image ~5GB):
+#   docker compose -f docker-compose.yml -f docker-compose.voice.yml --profile kokoro up -d kokoro-tts
+#
+# After Ollama start, pull models once:
+#   docker exec valeo-ollama ollama pull mistral
+
+services:
+  ollama:
+    image: ollama/ollama:latest
+    container_name: valeo-ollama
+    restart: unless-stopped
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+    networks:
+      - valeo-network
+    healthcheck:
+      test: ["CMD", "ollama", "list"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 20s
+
+  kokoro-tts:
+    image: ghcr.io/remsky/kokoro-fastapi-cpu:latest
+    container_name: valeo-kokoro-tts
+    restart: unless-stopped
+    profiles:
+      - kokoro
+    ports:
+      - "8880:8880"
+    networks:
+      - valeo-network
+
+  ki-usability:
+    build:
+      context: ./services/ki-usability
+      dockerfile: Dockerfile.voice
+    environment:
+      KI_USABILITY_OLLAMA_BASE_URL: http://ollama:11434
+      KI_USABILITY_OLLAMA_POLISH_MODEL: mistral
+      KI_USABILITY_OLLAMA_SUMMARY_MODEL: mistral
+      KI_USABILITY_VOICE_TTS_PROVIDER: ${VOICE_TTS_PROVIDER:-piper}
+      KI_USABILITY_KOKORO_BASE_URL: http://kokoro-tts:8880
+      KI_USABILITY_FASTER_WHISPER_MODEL: small
+      KI_USABILITY_FASTER_WHISPER_DEVICE: cpu
+      KI_USABILITY_FASTER_WHISPER_COMPUTE: int8
+    depends_on:
+      ollama:
+        condition: service_healthy
+
+volumes:
+  ollama_data:

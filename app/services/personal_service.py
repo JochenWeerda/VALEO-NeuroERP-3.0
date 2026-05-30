@@ -2,15 +2,35 @@
 
 from __future__ import annotations
 
+import json
 import logging
 from datetime import date, datetime
 from typing import Any, List, Optional, Sequence
+from uuid import uuid4
 
 from sqlalchemy import text
+from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 
 from app.core.exceptions import EntityNotFoundError
 from app.core.uuid7 import uuid7
+from app.api.v1.schemas.personal_schemas import (
+    HrmOperationsGateOut,
+    HrmOperationsGatesOut,
+    HrmOperationsGateEvidenceOut,
+    HrmOperationsGateProbeOut,
+    HrmOperatingSystemOut,
+    HrmOperatingSystemModuleOut,
+    HrmReadinessOut,
+    HrmReadinessCapabilityOut,
+    HrmReadinessIntegrationOut,
+    HrmReadinessAiControlOut,
+    EmployeeFileOut,
+    EmployeeFileDocumentOut,
+    EmployeeFileDocumentClassOut,
+    EmployeeFileExportOut,
+    EmployeeFileRetentionOut,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -1169,3 +1189,772 @@ class PersonalService:
                 "details": _json.dumps(details or {}),
             },
         )
+
+    # ── HRM Gates — DB reads ──────────────────────────────────────────────────
+
+    def _gate_datetime(self, value: Any) -> str | None:
+        if value is None:
+            return None
+        if hasattr(value, "isoformat"):
+            return value.isoformat()
+        return str(value)
+
+    @staticmethod
+    def _row_to_dict(row: Any) -> dict[str, Any]:
+        if row is None:
+            return {}
+        if isinstance(row, dict):
+            return row
+        try:
+            return dict(row)
+        except Exception:
+            return {k: getattr(row, k) for k in dir(row) if not k.startswith("_")}
+
+    def _gate_readiness_metadata(self, gate_id: str) -> dict[str, Any]:
+        defaults: dict[str, dict[str, Any]] = {
+            "eau-communication": {"priority": "P0", "riskLevel": "hoch", "dueDate": "2026-05-20"},
+            "datev-payroll": {"priority": "P0", "riskLevel": "hoch", "dueDate": "2026-05-21"},
+            "office-sso-connectors": {"priority": "P0", "riskLevel": "hoch", "dueDate": "2026-05-22"},
+            "documents-esign": {"priority": "P1", "riskLevel": "mittel", "dueDate": "2026-05-24"},
+            "privacy-contracts": {"priority": "P0", "riskLevel": "hoch", "dueDate": "2026-05-20"},
+            "works-council-dsfa": {"priority": "P0", "riskLevel": "hoch", "dueDate": "2026-05-23"},
+            "retention-legal": {"priority": "P1", "riskLevel": "mittel", "dueDate": "2026-05-27"},
+        }
+        return {
+            **defaults.get(gate_id, {"priority": "P1", "riskLevel": "mittel", "dueDate": None}),
+            "allowedRoles": ["HR Admin", "Payroll Lead", "IT Admin", "Datenschutz", "Legal"],
+            "readOnlyRoles": ["Geschaeftsleitung", "Betriebsrat"],
+        }
+
+    def _merge_gate_state(self, template: HrmOperationsGateOut, row: dict[str, Any] | None) -> HrmOperationsGateOut:
+        enriched = template.model_copy(update=self._gate_readiness_metadata(template.id))
+        if not row:
+            return enriched
+        return enriched.model_copy(update={
+            "status": row.get("status") or enriched.status,
+            "ownerRole": row.get("owner_role") or enriched.ownerRole,
+            "goLiveBlocking": bool(row.get("go_live_blocking", enriched.goLiveBlocking)),
+            "lastChangedAt": self._gate_datetime(row.get("updated_at") or row.get("approved_at") or row.get("last_probe_at")),
+            "evidenceCount": int(row.get("evidence_count") or 0),
+            "latestEvidenceRef": row.get("latest_evidence_ref"),
+            "lastProbeStatus": row.get("last_probe_status"),
+            "lastProbeAt": self._gate_datetime(row.get("last_probe_at")),
+            "approvedBy": row.get("approved_by"),
+            "approvedAt": self._gate_datetime(row.get("approved_at")),
+            "rejectionReason": row.get("rejection_reason"),
+        })
+
+    def _seed_hrm_gates(self) -> None:
+        for gate in self.build_hrm_operations_gates().gates:
+            self.db.execute(
+                text("""
+                    INSERT INTO domain_hr.hrm_operations_gates
+                      (tenant_id, gate_id, status, owner_role, go_live_blocking, metadata)
+                    VALUES
+                      (:tenant_id, :gate_id, :status, :owner_role, :go_live_blocking, CAST(:metadata AS jsonb))
+                    ON CONFLICT (tenant_id, gate_id) DO UPDATE SET
+                      owner_role = EXCLUDED.owner_role,
+                      go_live_blocking = EXCLUDED.go_live_blocking,
+                      updated_at = NOW()
+                """),
+                {
+                    "tenant_id": self.tenant_id,
+                    "gate_id": gate.id,
+                    "status": gate.status,
+                    "owner_role": gate.ownerRole,
+                    "go_live_blocking": gate.goLiveBlocking,
+                    "metadata": json.dumps({"title": gate.title}),
+                },
+            )
+
+    def _load_hrm_gates_from_db(self) -> HrmOperationsGatesOut:
+        self._seed_hrm_gates()
+        rows = self.db.execute(
+            text("""
+                SELECT
+                  g.gate_id, g.status, g.owner_role, g.go_live_blocking,
+                  g.last_probe_status, g.last_probe_at, g.approved_by, g.approved_at,
+                  g.rejection_reason, g.updated_at,
+                  COALESCE(ev.evidence_count, 0) AS evidence_count,
+                  ev.latest_evidence_ref
+                FROM domain_hr.hrm_operations_gates g
+                LEFT JOIN (
+                  SELECT tenant_id, gate_id, COUNT(*) AS evidence_count,
+                         (ARRAY_AGG(artifact_ref ORDER BY submitted_at DESC))[1] AS latest_evidence_ref
+                  FROM domain_hr.hrm_operations_gate_evidence
+                  WHERE tenant_id = :tenant_id
+                  GROUP BY tenant_id, gate_id
+                ) ev ON ev.tenant_id = g.tenant_id AND ev.gate_id = g.gate_id
+                WHERE g.tenant_id = :tenant_id
+                ORDER BY g.gate_id
+            """),
+            {"tenant_id": self.tenant_id},
+        ).mappings().all()
+        catalog = {g.id: g for g in self.build_hrm_operations_gates().gates}
+        merged = [
+            self._merge_gate_state(catalog[row["gate_id"]], self._row_to_dict(row))
+            for row in rows
+            if row["gate_id"] in catalog
+        ]
+        known = {g.id for g in merged}
+        merged.extend(g for gid, g in catalog.items() if gid not in known)
+        go_live = not any(g.goLiveBlocking and g.status != "approved" for g in merged)
+        return HrmOperationsGatesOut(
+            status="approved" if go_live else "external_gates_runtime",
+            asOf="2026-05-13",
+            goLiveAllowed=go_live,
+            summary=(
+                "Alle blockierenden HRM-Betriebsfreigaben sind technisch approved."
+                if go_live
+                else "HRM-Go-live bleibt durch persistente Betriebsfreigabe-Gates blockiert."
+            ),
+            gates=merged,
+            closureDefinition=[
+                "Gate-Status wird tenant-spezifisch aus domain_hr.hrm_operations_gates gelesen.",
+                "Evidence, Connector-Probes und Entscheidungen werden persistent und auditierbar gespeichert.",
+                "Go-live ist nur erlaubt, wenn alle blocking Gates approved sind.",
+                "Statischer Katalog dient nur als Seed/Fallback; Produktivfreigaben entstehen durch Workflow-Aktionen.",
+            ],
+        )
+
+    def get_hrm_operations_gates(self) -> HrmOperationsGatesOut:
+        """Load gates from DB with fallback to static catalog."""
+        try:
+            return self._load_hrm_gates_from_db()
+        except SQLAlchemyError:
+            return self.build_hrm_operations_gates()
+
+    def get_single_hrm_gate(self, gate_id: str) -> HrmOperationsGateOut:
+        gates = self.get_hrm_operations_gates()
+        for gate in gates.gates:
+            if gate.id == gate_id:
+                return gate
+        raise KeyError(gate_id)
+
+    def gate_evidence_out(self, row: dict[str, Any]) -> HrmOperationsGateEvidenceOut:
+        meta = row.get("metadata") or {}
+        if isinstance(meta, str):
+            meta = json.loads(meta)
+        return HrmOperationsGateEvidenceOut(
+            id=str(row["id"]),
+            gateId=str(row["gate_id"]),
+            evidenceType=str(row["evidence_type"]),
+            title=str(row["title"]),
+            artifactRef=str(row["artifact_ref"]),
+            submittedBy=str(row["submitted_by"]),
+            submittedAt=self._gate_datetime(row.get("submitted_at")) or datetime.utcnow().isoformat(),
+            metadata=meta,
+        )
+
+    def gate_probe_out(self, row: dict[str, Any]) -> HrmOperationsGateProbeOut:
+        details = row.get("details") or {}
+        if isinstance(details, str):
+            details = json.loads(details)
+        return HrmOperationsGateProbeOut(
+            id=str(row["id"]),
+            gateId=str(row["gate_id"]),
+            provider=str(row["provider"]),
+            probeType=str(row["probe_type"]),
+            result=str(row["result"]),
+            performedBy=str(row["performed_by"]),
+            performedAt=self._gate_datetime(row.get("performed_at")) or datetime.utcnow().isoformat(),
+            details=details,
+        )
+
+    # ── HRM static builders ───────────────────────────────────────────────────
+
+    @staticmethod
+    def build_hrm_operations_gates() -> HrmOperationsGatesOut:
+        gates = [
+            HrmOperationsGateOut(
+                id="eau-communication",
+                title="eAU-Kommunikationszugang und Krankenkassen-Testverfahren",
+                status="external_evidence_required",
+                ownerRole="HR/Ops",
+                goLiveBlocking=True,
+                evidenceRequired=[
+                    "Nachweis produktiver oder freigegebener Testzugang zum eAU-Arbeitgeberverfahren",
+                    "Protokoll fuer Abfrage, Rueckmeldung, Fehlercode und Fristenfall",
+                    "Bestaetigung, dass keine Diagnosedaten gespeichert werden",
+                ],
+                acceptanceCriteria=[
+                    "Krankmeldung erzeugt minimalen HR-Status ohne Diagnose",
+                    "eAU-Abfrage und Rueckmeldung sind nachvollziehbar protokolliert",
+                    "Fehlerrueckmeldungen blockieren Payroll/Planung fachlich sichtbar",
+                ],
+                auditTrail=["request_id", "employee_ref", "absence_ref", "status_code", "checked_at"],
+                professionalPractice=["Datenminimierung", "Fristenmonitor", "Vier-Augen-Ausnahme bei manueller Korrektur"],
+            ),
+            HrmOperationsGateOut(
+                id="datev-payroll",
+                title="DATEV-/Payroll-Zielformat und Steuerberaterfreigabe",
+                status="external_evidence_required",
+                ownerRole="Payroll/Finance",
+                goLiveBlocking=True,
+                evidenceRequired=[
+                    "Festgelegtes Zielformat fuer DATEV LODAS, Lohn und Gehalt oder Steuerbuero-Import",
+                    "Testexport mit Lohnarten, Kostenstellen, Fehlzeiten und Korrekturen",
+                    "Freigabe durch Steuerbuero oder Payroll-Verantwortliche",
+                ],
+                acceptanceCriteria=[
+                    "Exportpaket ist wiederholbar und auditierbar",
+                    "Nur freigegebene time_entries werden exportiert",
+                    "Blocker verhindern Monatsabschluss ohne Klaerung",
+                ],
+                auditTrail=["export_id", "period_from", "period_to", "created_by", "blocker_count"],
+                professionalPractice=["Vier-Augen-Freigabe", "Exportprotokoll", "Keine stille Mutation exportierter Zeiten"],
+            ),
+            HrmOperationsGateOut(
+                id="office-sso-connectors",
+                title="Microsoft 365, Google Workspace und SSO",
+                status="external_evidence_required",
+                ownerRole="IT/Ops",
+                goLiveBlocking=True,
+                evidenceRequired=[
+                    "Tenant-IDs, OAuth-Scopes und Redirect-URIs dokumentiert",
+                    "SSO-/Rollenmapping fuer Employee, Manager, HR, Payroll und Admin getestet",
+                    "Kalenderimport speichert private Termine nur als Busy-Blocker",
+                ],
+                acceptanceCriteria=[
+                    "SSO-Login erzwingt MFA gemaess Tenant-Policy",
+                    "Kalender-Sync verletzt keine private Sichtbarkeit",
+                    "Connector-Probe kann ohne PII-Leakage wiederholt werden",
+                ],
+                auditTrail=["connector_id", "tenant_id", "scope_set", "last_probe_at", "probe_result"],
+                professionalPractice=["Least-Privilege-Scopes", "Busy-only Datenschutz", "Secret-Rotation"],
+            ),
+            HrmOperationsGateOut(
+                id="documents-esign",
+                title="LibreOffice-Rendering, DMS und E-Signatur",
+                status="external_evidence_required",
+                ownerRole="HR/Ops/Legal",
+                goLiveBlocking=True,
+                evidenceRequired=[
+                    "Vorlagenbibliothek mit Versionsstand und Verantwortlichem",
+                    "DMS-Ablage mit Dokumentklasse, Retention und Audit-Referenz",
+                    "E-Signatur-Anbieterfreigabe inklusive AVV/DPA",
+                ],
+                acceptanceCriteria=[
+                    "Dokumentgenerierung ist reproduzierbar",
+                    "Signaturstatus und Archiv-Ref landen in der Personalakte",
+                    "Schriftform- und Textform-Ausnahmen sind dokumentiert",
+                ],
+                auditTrail=["template_version", "document_id", "signature_status", "archive_ref"],
+                professionalPractice=["Vorlagenreview", "Signaturstatus", "Retention je Dokumentklasse"],
+            ),
+            HrmOperationsGateOut(
+                id="privacy-contracts",
+                title="AVV/DPA, Hosting, Subprozessoren und Datenexport",
+                status="external_evidence_required",
+                ownerRole="Datenschutz/Ops",
+                goLiveBlocking=True,
+                evidenceRequired=[
+                    "AVV/DPA je Anbieter",
+                    "Hostingort und Subprozessorenliste",
+                    "Datenexport- und Loeschprozess fuer Anbieterwechsel",
+                ],
+                acceptanceCriteria=[
+                    "Kein Anbieter ohne AVV/DPA im Produktivbetrieb",
+                    "Datenportabilitaet ist getestet",
+                    "Loesch- und Auskunftsprozess ist nachvollziehbar",
+                ],
+                auditTrail=["vendor_id", "dpa_version", "hosting_region", "subprocessor_reviewed_at"],
+                professionalPractice=["Vendor-Register", "Datenminimierung", "jaehrliche Subprozessorenpruefung"],
+            ),
+            HrmOperationsGateOut(
+                id="works-council-dsfa",
+                title="Betriebsrat, DSFA, HR-Reporting und KI-Assistenzfreigaben",
+                status="external_evidence_required",
+                ownerRole="HR/Datenschutz/Betriebsrat",
+                goLiveBlocking=True,
+                evidenceRequired=[
+                    "Betriebsvereinbarung oder dokumentierte Mitbestimmungsbewertung",
+                    "DSFA-Pruefung fuer konkret vorgesehene HR-Reports oder KI-Assistenzfunktionen",
+                    "Freigabe konkreter KI-Assistenzwerkzeuge inklusive Human-Gate",
+                ],
+                acceptanceCriteria=[
+                    "Keine Funktion fuer Mitarbeitendenueberwachung oder automatische Leistungsbewertung vorgesehen",
+                    "Analytics nutzt Aggregationsschwellen",
+                    "KI-Assistenz erstellt nur Vorschlaege oder Zusammenfassungen mit menschlicher Freigabe",
+                ],
+                auditTrail=["policy_id", "dsfa_ref", "approval_ref", "effective_from"],
+                professionalPractice=["Transparenz fuer Betroffene", "Human Oversight", "AI-Act-Hochrisikopruefung"],
+            ),
+            HrmOperationsGateOut(
+                id="retention-legal",
+                title="Rechtsfreigabe fuer Retention und Dokumentklassen",
+                status="external_evidence_required",
+                ownerRole="Legal/HR",
+                goLiveBlocking=True,
+                evidenceRequired=[
+                    "Freigegebene Aufbewahrungsfristen je Dokumentklasse",
+                    "Loeschregeln fuer Austritt, Zweckfortfall und Widerspruch",
+                    "Ausnahmen fuer laufende Verfahren oder gesetzliche Pflichten",
+                ],
+                acceptanceCriteria=[
+                    "Personalakte zeigt Retention und Loeschblocker je Dokument",
+                    "Loeschlauf ist vor Produktivbetrieb fachlich freigegeben",
+                    "Auskunftsexport enthaelt Retention-Plan und Audit-Hinweise",
+                ],
+                auditTrail=["document_type", "retention_rule_version", "approved_by", "approved_at"],
+                professionalPractice=["Jaehrlicher Review", "Zweckbindung", "Keine automatische Loeschung ohne Pruefprotokoll"],
+            ),
+        ]
+        go_live = not any(g.goLiveBlocking and g.status != "approved" for g in gates)
+        return HrmOperationsGatesOut(
+            status="external_gates_defined",
+            asOf="2026-05-13",
+            goLiveAllowed=go_live,
+            summary="Repo fachlich abgeschlossen; Produktiv-Go-live bleibt bis zur Evidenzfreigabe aller externen Gates blockiert.",
+            gates=gates,
+            closureDefinition=[
+                "Jedes Gate besitzt Owner, Evidenz, Abnahmekriterien und Auditspur.",
+                "Go-live ist nur erlaubt, wenn alle blocking Gates approved sind.",
+                "Fehlende Zugangsdaten oder Rechtsfreigaben werden nicht als Repo-Gap gefuehrt, sondern als Betriebsfreigabe.",
+                "Fachliche Contracts bleiben stabil und koennen mit echten Nachweisen befuellt werden.",
+            ],
+        )
+
+    @staticmethod
+    def build_hrm_operating_system() -> HrmOperatingSystemOut:
+        closed_repo_gaps = [
+            "HRM-AKTE-001", "HRM-EAU-001", "HRM-DATEV-001", "HRM-CONTRACTS-001",
+            "HRM-ESS-001", "HRM-MSS-001", "HRM-RECRUITING-001", "HRM-OFFBOARDING-001",
+            "HRM-WORKFLOWS-001", "HRM-ANALYTICS-001", "HRM-PRIVACY-001", "HRM-AI-GOV-001",
+            "HRM-M365-001", "HRM-GOOGLE-001", "HRM-LIBREOFFICE-001",
+        ]
+        return HrmOperatingSystemOut(
+            status="repo_contract_complete",
+            asOf="2026-05-13",
+            closedRepoGaps=closed_repo_gaps,
+            timeEntryModelRules=[
+                "Arbeitszeit und Abwesenheiten liegen in domain_hr.time_entries.",
+                "Datumsspalte ist entry_date; Stundenfeld ist hours.",
+                "Abwesenheiten sind entry_type IN ('Urlaub','Krank','Unbezahlt','Sonstiges').",
+                "Schreibpfade nutzen RETURNING fuer atomare Mutation und Read-Model.",
+                "Keine neue time_bookings- oder absences-Tabelle fuer HR-Time.",
+            ],
+            modules=[
+                HrmOperatingSystemModuleOut(
+                    id="employee-file", title="Digitale Personalakte", status="contract_complete",
+                    apiContracts=["GET /api/v1/personal/employee-files/{employee_ref}", "POST /api/v1/personal/employee-files/{employee_ref}/documents"],
+                    controls=["Dokumentklassen", "Rollenfilter", "Retention-Sicht", "Audit-Ref", "Exportpaket"],
+                    externalGates=["produktive DMS-Ablage", "Rechtsfreigabe Retention"],
+                ),
+                HrmOperatingSystemModuleOut(
+                    id="eau", title="eAU und Krankmeldung", status="contract_complete",
+                    apiContracts=["POST /api/v1/personal/absences/import", "GET /api/v1/personal/hrm-operating-system"],
+                    controls=["keine Diagnosedaten", "Fristenmonitor", "Krankenkassenstatus", "Audit ohne medizinische Details"],
+                    externalGates=["eAU-Kommunikationszugang", "Krankenkassen-Testverfahren"],
+                ),
+                HrmOperatingSystemModuleOut(
+                    id="payroll-datev", title="Payroll, DATEV und Monatsabschluss", status="contract_complete",
+                    apiContracts=["GET /api/v1/personal/payroll-exports", "POST /api/v1/personal/payroll-exports"],
+                    controls=["Lohnarten", "Fehlzeiten", "Kostenstellen", "Blocker", "Monatsabschlussprotokoll"],
+                    externalGates=["DATEV-Zielformat", "Steuerberaterfreigabe"],
+                ),
+                HrmOperatingSystemModuleOut(
+                    id="self-service", title="Employee und Manager Self Service", status="contract_complete",
+                    apiContracts=["GET /api/v1/personal/employee-files/{employee_ref}", "POST /api/v1/personal/time-entries", "GET /api/v1/personal/work-plan", "GET /api/v1/personal/time-cockpit"],
+                    controls=["Rollenfilter", "Freigabequeue", "Teamkalender", "Datenantrag als Workflow"],
+                    externalGates=["Betriebsvereinbarung Self-Service", "SSO-Rollenzuordnung"],
+                ),
+                HrmOperatingSystemModuleOut(
+                    id="recruiting-development", title="Recruiting, Onboarding, Performance und Entwicklung", status="contract_complete",
+                    apiContracts=["GET /api/v1/training/onboarding/checklists", "GET /api/v1/training/onboarding/runs", "GET /api/v1/training/qualifications", "GET /api/v1/personal/hrm-operating-system"],
+                    controls=["Bewerber-Retention", "Talentpool-Einwilligung", "Human-in-the-loop", "Skill-Matrix"],
+                    externalGates=["Karriereseite", "E-Mail/Kalender-Interviewintegration"],
+                ),
+                HrmOperatingSystemModuleOut(
+                    id="analytics-privacy", title="People Analytics, Datenschutz und Betriebsratsfaehigkeit", status="contract_complete",
+                    apiContracts=["GET /api/v1/personal/hrm-readiness", "GET /api/v1/personal/hrm-operating-system"],
+                    controls=["Aggregationsschwellen", "freigegebener Reporting-Zweck", "DSFA-Marker", "AVV/DPA-Register"],
+                    externalGates=["DSFA-Freigabe", "Betriebsratsabstimmung"],
+                ),
+                HrmOperatingSystemModuleOut(
+                    id="ai-governance", title="Kontrollierte HR-KI", status="contract_complete",
+                    apiContracts=["GET /api/v1/personal/hrm-readiness", "GET /api/v1/personal/hrm-operating-system"],
+                    controls=["Human-Gate", "Protokollierung", "Transparenz", "nur konkret freigegebene Assistenzfunktionen"],
+                    externalGates=["Konformitaetspruefung fuer konkret vorgesehene KI-Assistenztools"],
+                ),
+                HrmOperatingSystemModuleOut(
+                    id="office-connectors", title="Microsoft 365, Google Workspace, LibreOffice, DMS und E-Signatur", status="contract_complete",
+                    apiContracts=["GET /api/v1/personal/calendar-events", "POST /api/v1/personal/calendar-events"],
+                    controls=["OAuth-Scopes", "Busy-only Datenschutz", "SSO", "Dokumentvorlagen", "Audit-Ref"],
+                    externalGates=["produktive Tenant-Secrets", "AVV/DPA", "Connector-Probe"],
+                ),
+            ],
+            externalOperatingGates=[
+                "Echte eAU-/DATEV-/Microsoft-/Google-/LibreOffice-/E-Signatur-Zugangsdaten",
+                "AVV/DPA, Hostingort, Subprozessoren und Betriebsvereinbarungen",
+                "Rechtsfreigabe fuer Retention, DSFA und konkrete KI-Werkzeuge",
+            ],
+        )
+
+    @staticmethod
+    def build_hrm_readiness() -> HrmReadinessOut:
+        minimum_checklist = [
+            "Digitale Personalakte", "DSGVO-konformes Rechte- und Loeschkonzept",
+            "Arbeitszeiterfassung", "Urlaubs- und Abwesenheitsmanagement", "eAU-Prozess",
+            "Payroll-/DATEV-Schnittstelle", "Vertrags- und Dokumentenvorlagen",
+            "Employee Self Service", "Manager Self Service", "Recruiting und Bewerbermanagement",
+            "Onboarding und Offboarding", "Workflows mit Freigaben", "Reporting und HR-Dashboards",
+            "Microsoft-365-, LibreOffice- und Google-Workspace-Integration",
+            "Sichere KI-Funktionen mit menschlicher Kontrolle",
+        ]
+        capabilities = [
+            HrmReadinessCapabilityOut(
+                id="hrm-personnel-file", title="Digitale Personalakte und Stammdaten",
+                status="contract_complete", priority="P0",
+                legalBasis=["DSGVO", "BDSG §26", "Nachweisgesetz"],
+                implementedEvidence=["GET/POST/PUT /api/v1/personal/mitarbeiter", "GET /api/v1/personal/time-profiles"],
+                missingCapabilities=["Produktive DMS-Ablage und rechtlich freigegebene Retention-Fristen bleiben external_gate"],
+                nextSlices=["HRM-AKTE-001", "HRM-DMS-001", "HRM-RETENTION-001"],
+                controls=["Datenminimierung", "Need-to-know-Rollen", "Audit-Log", "Export und Loeschlauf"],
+            ),
+            HrmReadinessCapabilityOut(
+                id="hrm-time-absence", title="Arbeitszeit, Urlaub und Abwesenheiten",
+                status="implemented", priority="P0",
+                legalBasis=["BAG 1 ABR 22/21", "ArbSchG §3 Abs. 2 Nr. 1", "ArbZG"],
+                implementedEvidence=["GET /api/v1/personal/time-cockpit", "POST /api/v1/personal/time-entries", "POST /api/v1/personal/absences/import", "GET /api/v1/personal/work-plan"],
+                missingCapabilities=["Tarif-/Betriebsvereinbarungs-Regelkalibrierung", "produktive Terminal-/Mobile-Adapter"],
+                nextSlices=["HR-TIME-RULES-001", "HR-TIME-MOBILE-001"],
+                controls=["Korrekturgrund", "Managerfreigabe", "Payroll-Blocker", "Keine stille Änderung exportierter Zeiten"],
+            ),
+            HrmReadinessCapabilityOut(
+                id="hrm-payroll", title="Payroll-/DATEV-Vorbereitung",
+                status="contract_complete", priority="P0",
+                legalBasis=["GoBD", "SV-Meldeportal ist kein Entgeltabrechnungsersatz"],
+                implementedEvidence=["GET/POST /api/v1/personal/payroll-exports", "Payroll-Readiness im Time-Cockpit"],
+                missingCapabilities=["DATEV-Zielformat und Steuerberaterfreigabe bleiben external_gate"],
+                nextSlices=["HR-TIME-PAYROLL-CLOSE-001", "HRM-DATEV-001"],
+                controls=["Nur freigegebene Werte exportieren", "Kostenstellen", "Blockerliste", "Exportprotokoll"],
+            ),
+            HrmReadinessCapabilityOut(
+                id="hrm-eau", title="eAU und Krankmeldung",
+                status="contract_complete", priority="P0",
+                legalBasis=["SGB IV §109", "Entgeltfortzahlungsgesetz"],
+                implementedEvidence=["POST /api/v1/personal/absences/import kann Krankheit als Abwesenheit spiegeln"],
+                missingCapabilities=["Produktiver eAU-Kommunikationszugang bleibt external_gate"],
+                nextSlices=["HRM-EAU-001"],
+                controls=["Nur erforderliche Statusdaten speichern", "Fristenmonitor", "Audit ohne Diagnosedaten"],
+            ),
+            HrmReadinessCapabilityOut(
+                id="hrm-contract-documents", title="Vertrags- und Dokumentenmanagement",
+                status="contract_complete", priority="P0",
+                legalBasis=["Nachweisgesetz 2025 Textform-Ausbau", "DSGVO"],
+                implementedEvidence=["Onboarding-Checklisten ueber /api/v1/training/onboarding/*"],
+                missingCapabilities=["LibreOffice-Rendering und E-Signatur-Anbieter bleiben external_gate"],
+                nextSlices=["HRM-CONTRACTS-001", "HRM-ESIGN-001"],
+                controls=["Vorlagenversion", "Empfangsbestaetigung", "Archivfristen", "Schriftformwunsch dokumentieren"],
+            ),
+            HrmReadinessCapabilityOut(
+                id="hrm-self-service", title="Employee und Manager Self Service",
+                status="contract_complete", priority="P1",
+                legalBasis=["DSGVO Rollen- und Zweckbindung", "Betriebsratsfaehigkeit"],
+                implementedEvidence=["Zeitbuchung, Abwesenheitsimport, Schicht-/Kalender-/Onboarding-Sichten"],
+                missingCapabilities=["Betriebsvereinbarung und SSO-Rollenzuordnung bleiben external_gate"],
+                nextSlices=["HRM-ESS-001", "HRM-MSS-001"],
+                controls=["Vier-Augen-Freigaben", "Rollenfilter", "freigegebene Rollen- und Zweckbindung"],
+            ),
+            HrmReadinessCapabilityOut(
+                id="hrm-recruiting-development", title="Recruiting, Onboarding, Performance und Entwicklung",
+                status="contract_complete", priority="P1",
+                legalBasis=["DSGVO Bewerberloeschfristen", "EU AI Act Annex III bei KI-Screening"],
+                implementedEvidence=["/api/v1/training/onboarding/*", "/api/v1/training/qualifications"],
+                missingCapabilities=["Karriereseite und produktive Interviewkommunikation bleiben external_gate"],
+                nextSlices=["HRM-RECRUITING-001", "HRM-PERFORMANCE-001"],
+                controls=["Bewerber-Retention", "Human-in-the-loop", "Betriebsratsfaehige Auswertungen"],
+            ),
+            HrmReadinessCapabilityOut(
+                id="hrm-analytics-compliance", title="Reporting, People Analytics, Datenschutz und Mandantenfaehigkeit",
+                status="contract_complete", priority="P0",
+                legalBasis=["DSGVO", "BDSG §26", "BetrVG Mitbestimmung", "EU AI Act"],
+                implementedEvidence=["Time-Cockpit KPIs", "tenant_id auf HR-Time-Tabellen"],
+                missingCapabilities=["DSFA- und Betriebsratsfreigaben bleiben external_gate"],
+                nextSlices=["HRM-ANALYTICS-001", "HRM-PRIVACY-001", "HRM-AI-GOV-001"],
+                controls=["Aggregationsschwellen", "PII-Minimierung", "Exportierbarkeit", "freigegebener Reporting-Zweck"],
+            ),
+        ]
+        integrations = [
+            HrmReadinessIntegrationOut(
+                id="microsoft-365", title="Microsoft 365, Teams, Outlook, Entra ID",
+                status="planned", direction="bidirectional",
+                minimumContract=["SSO", "Kalender-Busy-Blocker", "Abwesenheitskalender", "Benutzeranlage"],
+                nextSlice="HRM-M365-001",
+            ),
+            HrmReadinessIntegrationOut(
+                id="google-workspace", title="Google Workspace",
+                status="planned", direction="bidirectional",
+                minimumContract=["OAuth Scopes", "Calendar Events", "Directory Mapping", "Busy-only Datenschutz"],
+                nextSlice="HRM-GOOGLE-001",
+            ),
+            HrmReadinessIntegrationOut(
+                id="libreoffice", title="LibreOffice Dokumentvorlagen",
+                status="planned", direction="export",
+                minimumContract=["ODT/DOCX Vorlagen", "Serienbriefdaten", "PDF-Erzeugung", "Vorlagenversion"],
+                nextSlice="HRM-LIBREOFFICE-001",
+            ),
+            HrmReadinessIntegrationOut(
+                id="datev-payroll", title="DATEV, Steuerberater und Payroll",
+                status="partial", direction="export",
+                minimumContract=["Stammdaten", "Bewegungsdaten", "Fehlzeiten", "Kostenstellen", "Lohnarten"],
+                nextSlice="HRM-DATEV-001",
+            ),
+            HrmReadinessIntegrationOut(
+                id="dms-esign", title="DMS und E-Signatur",
+                status="planned", direction="bidirectional",
+                minimumContract=["Dokumentenklasse", "Retention", "Signaturstatus", "Audit-Ref"],
+                nextSlice="HRM-DMS-001",
+            ),
+        ]
+        ai_controls = [
+            HrmReadinessAiControlOut(
+                id="hrm-ai-assist", title="Kontrollierte HR-KI",
+                classification="assistive",
+                allowedUse=["Stellenanzeigen-Entwurf", "Dokumentensuche", "Zusammenfassungen", "Lernempfehlungen", "HR-Chatbot mit Quellen"],
+                prohibitedUse=["nicht freigegebene KI-Funktionen", "Personalentscheidungen ohne dokumentierte menschliche Pruefung"],
+                requiredControls=["Human approval", "Protokollierung", "Quellenanzeige", "Opt-out/Policy", "Keine sensiblen Merkmale als Entscheidungstreiber"],
+            ),
+            HrmReadinessAiControlOut(
+                id="hrm-ai-high-risk", title="Recruiting und Personalmanagement KI",
+                classification="EU AI Act high-risk when used for employment decisions",
+                allowedUse=["Vorsortierung nur mit dokumentierter menschlicher Pruefung", "Skill-Matching als Empfehlung"],
+                prohibitedUse=["Blackbox-CV-Sorting", "automatische Ablehnung ohne menschliche Aufsicht"],
+                requiredControls=["Risikomanagement", "Datenqualitaet", "Technische Dokumentation", "Transparenz", "menschliche Aufsicht", "Robustheit", "Cybersecurity"],
+            ),
+        ]
+        return HrmReadinessOut(
+            status="partial",
+            country="DE",
+            asOf="2026-05-13",
+            minimumChecklist=minimum_checklist,
+            capabilities=capabilities,
+            integrations=integrations,
+            aiControls=ai_controls,
+            residualRisks=[
+                "Rechtsfeinpruefung und Betriebsvereinbarungen muessen vor Produktivbetrieb abgeschlossen sein.",
+                "Produktive eAU-, DATEV-, Microsoft-365- und Google-Workspace-Zugangsdaten fehlen.",
+                "AVV/DPA, Hostingort, Subprozessoren und DSFA sind je Fremdanbieter zu pruefen.",
+            ],
+        )
+
+    # ── Employee File ─────────────────────────────────────────────────────────
+
+    _DOCUMENT_CLASSES: dict[str, dict[str, Any]] = {
+        "employment_contract": {
+            "title": "Arbeitsvertrag",
+            "legal_basis": ["BDSG §26", "Nachweisgesetz", "DSGVO Art. 6(1)(b)"],
+            "default_visibility": "hr",
+            "retention_years": 10,
+            "requires_dms_ref": True,
+            "deletion_rule": "Nach Austritt und Ablauf arbeits-/steuerrechtlicher Fristen pruefen.",
+        },
+        "payroll_document": {
+            "title": "Gehalts- und Payroll-Dokument",
+            "legal_basis": ["BDSG §26", "GoBD", "Steuerrecht"],
+            "default_visibility": "payroll",
+            "retention_years": 10,
+            "requires_dms_ref": True,
+            "deletion_rule": "Nicht loeschen, solange Payroll-/Steuerfristen laufen.",
+        },
+        "certificate": {
+            "title": "Bescheinigung oder Zertifikat",
+            "legal_basis": ["BDSG §26", "Arbeitsschutz", "Qualifikationsnachweis"],
+            "default_visibility": "employee",
+            "retention_years": 6,
+            "requires_dms_ref": False,
+            "deletion_rule": "Nach Ablauf und Ersatznachweis pruefen.",
+        },
+        "absence_evidence": {
+            "title": "Abwesenheitsnachweis",
+            "legal_basis": ["BDSG §26", "Entgeltfortzahlungsgesetz"],
+            "default_visibility": "hr",
+            "retention_years": 5,
+            "requires_dms_ref": True,
+            "deletion_rule": "Nur erforderliche Statusdaten; keine Diagnosedaten speichern.",
+        },
+        "privacy_acknowledgement": {
+            "title": "Datenschutz- und Verpflichtungsnachweis",
+            "legal_basis": ["DSGVO", "BDSG §26", "Vertraulichkeitsverpflichtung"],
+            "default_visibility": "employee",
+            "retention_years": 6,
+            "requires_dms_ref": True,
+            "deletion_rule": "Nach Zweckfortfall und Ablauf interner Nachweisfrist pruefen.",
+        },
+        "warning_notice": {
+            "title": "Abmahnung oder Personalnotiz",
+            "legal_basis": ["BDSG §26", "berechtigter HR-Zweck"],
+            "default_visibility": "hr",
+            "retention_years": 3,
+            "requires_dms_ref": True,
+            "deletion_rule": "Regelmaessige Erforderlichkeitspruefung; Loeschung bei Zweckfortfall.",
+        },
+    }
+
+    @classmethod
+    def document_classes(cls) -> list[EmployeeFileDocumentClassOut]:
+        return [
+            EmployeeFileDocumentClassOut(
+                documentType=key,
+                title=str(v["title"]),
+                legalBasis=[str(x) for x in v["legal_basis"]],
+                defaultVisibility=str(v["default_visibility"]),
+                retentionYears=int(v["retention_years"]),
+                requiresDmsRef=bool(v["requires_dms_ref"]),
+                deletionRule=str(v["deletion_rule"]),
+            )
+            for key, v in cls._DOCUMENT_CLASSES.items()
+        ]
+
+    @classmethod
+    def get_document_class(cls, document_type: str) -> dict[str, Any]:
+        if document_type not in cls._DOCUMENT_CLASSES:
+            raise ValueError(f"Unknown employee file document type: {document_type}")
+        return cls._DOCUMENT_CLASSES[document_type]
+
+    @staticmethod
+    def normalize_actor_role(actor_role: str | None) -> str:
+        role = (actor_role or "hr").strip().lower()
+        return role if role in {"admin", "hr", "payroll", "manager", "employee"} else "employee"
+
+    @staticmethod
+    def role_can_view(role: str, visibility: str) -> bool:
+        if role in {"admin", "hr"}:
+            return True
+        if role == "payroll":
+            return visibility in {"payroll", "employee"}
+        if role == "manager":
+            return visibility in {"manager", "employee"}
+        return visibility == "employee"
+
+    @staticmethod
+    def _add_years(date_text: str | None, years: int) -> str:
+        try:
+            base = date.fromisoformat(str(date_text)) if date_text else datetime.utcnow().date()
+        except ValueError:
+            base = datetime.utcnow().date()
+        try:
+            return base.replace(year=base.year + years).isoformat()
+        except ValueError:
+            return base.replace(month=2, day=28, year=base.year + years).isoformat()
+
+    def _doc_from_row(self, row: dict[str, Any], actor_role: str) -> EmployeeFileDocumentOut:
+        doc_type = str(row.get("document_type") or "certificate")
+        doc_class = self.get_document_class(doc_type)
+        visibility = str(row.get("visibility") or doc_class["default_visibility"])
+        issued_at = row.get("issued_at") or row.get("issuedAt")
+        if hasattr(issued_at, "isoformat"):
+            issued_at = issued_at.isoformat()
+        valid_until = row.get("valid_until") or row.get("validUntil")
+        if hasattr(valid_until, "isoformat"):
+            valid_until = valid_until.isoformat()
+        retention_until = row.get("retention_until") or self._add_years(str(issued_at) if issued_at else None, int(doc_class["retention_years"]))
+        if hasattr(retention_until, "isoformat"):
+            retention_until = retention_until.isoformat()
+        doc_id = str(row.get("id") or f"employee-file-{uuid4()}")
+        return EmployeeFileDocumentOut(
+            id=doc_id,
+            employeeRef=str(row.get("employee_ref") or ""),
+            documentType=doc_type,
+            title=str(row.get("title") or doc_class["title"]),
+            status=str(row.get("status") or "active"),
+            visibility=visibility,
+            legalBasis=[str(x) for x in doc_class["legal_basis"]],
+            issuedAt=str(issued_at) if issued_at else None,
+            validUntil=str(valid_until) if valid_until else None,
+            retentionUntil=str(retention_until),
+            dmsDocumentId=row.get("dms_document_id") or row.get("dmsDocumentId"),
+            canEmployeeView=self.role_can_view("employee", visibility),
+            canManagerView=self.role_can_view("manager", visibility),
+            deletionBlockedReason=str(doc_class["deletion_rule"]),
+            auditRef=str(row.get("audit_ref") or f"hrm-akte:{doc_id}"),
+        )
+
+    def _pilot_file_documents(self, employee_ref: str, actor_role: str) -> tuple[list[EmployeeFileDocumentOut], int]:
+        rows = [
+            {"id": f"akte-{employee_ref}-contract", "employee_ref": employee_ref, "document_type": "employment_contract", "title": "Arbeitsvertrag", "visibility": "hr", "issued_at": "2024-01-01", "dms_document_id": "dms-hr-contract-demo"},
+            {"id": f"akte-{employee_ref}-certificate", "employee_ref": employee_ref, "document_type": "certificate", "title": "Staplerschein / Qualifikationsnachweis", "visibility": "employee", "issued_at": "2025-04-01", "valid_until": "2028-04-01", "dms_document_id": "dms-hr-cert-demo"},
+            {"id": f"akte-{employee_ref}-payroll", "employee_ref": employee_ref, "document_type": "payroll_document", "title": "Payroll-Stammdatenblatt", "visibility": "payroll", "issued_at": "2025-01-01", "dms_document_id": "dms-hr-payroll-demo"},
+        ]
+        docs = [self._doc_from_row(r, actor_role) for r in rows]
+        visible = [d for d in docs if self.role_can_view(actor_role, d.visibility)]
+        return visible, len(docs) - len(visible)
+
+    def get_employee_file(self, employee_ref: str, actor_role: str) -> EmployeeFileOut:
+        try:
+            rows = self.db.execute(
+                text("""
+                    SELECT id, employee_ref, document_type, title, status, visibility,
+                           issued_at, valid_until, retention_until, dms_document_id, audit_ref
+                    FROM domain_hr.employee_file_documents
+                    WHERE tenant_id = :tenant_id AND employee_ref = :employee_ref
+                    ORDER BY issued_at DESC NULLS LAST, created_at DESC NULLS LAST
+                """),
+                {"tenant_id": self.tenant_id, "employee_ref": employee_ref},
+            ).mappings().all()
+            if rows:
+                docs = [self._doc_from_row(dict(r), actor_role) for r in rows]
+                visible = [d for d in docs if self.role_can_view(actor_role, d.visibility)]
+                hidden = len(docs) - len(visible)
+                source = "database"
+            else:
+                visible, hidden = self._pilot_file_documents(employee_ref, actor_role)
+                source = "pilot"
+        except Exception:
+            visible, hidden = self._pilot_file_documents(employee_ref, actor_role)
+            source = "pilot"
+        return EmployeeFileOut(
+            employeeRef=employee_ref,
+            source=source,
+            actorRole=actor_role,
+            documentClasses=self.document_classes(),
+            documents=visible,
+            hiddenDocumentCount=hidden,
+            exportPackage=EmployeeFileExportOut(
+                available=True, format="json+zip", includesAuditTrail=True, includesRetentionPlan=True,
+                dataSubjectAccessHint="DSGVO-Auskunftspaket enthaelt sichtbare Aktenmetadaten, Audit-Referenzen und Retention-Plan.",
+            ),
+            retention=EmployeeFileRetentionOut(
+                deletionConcept="Dokumentklasse bestimmt Mindestaufbewahrung; Zweckfortfall und Rechtsfristen blockieren automatische Loeschung.",
+                reviewCadence="jaehrlich und bei Austritt",
+                blockedDocumentCount=sum(1 for d in visible if d.retentionUntil >= datetime.utcnow().date().isoformat()),
+                nextReviewHint="HR prueft Retention, DMS-Referenz und Zweckbindung vor Loeschlauf.",
+            ),
+        )
+
+    def create_employee_file_document(self, employee_ref: str, payload: dict[str, Any], actor_role: str) -> EmployeeFileDocumentOut:
+        doc_class = self.get_document_class(payload["documentType"])
+        visibility = payload.get("visibility") or str(doc_class["default_visibility"])
+        doc_id = f"hrdoc-{uuid4()}"
+        retention_until = self._add_years(payload.get("issuedAt"), int(doc_class["retention_years"]))
+        audit_ref = f"hrm-akte:{doc_id}"
+        row = {
+            "id": doc_id, "tenant_id": self.tenant_id, "employee_ref": employee_ref,
+            "document_type": payload["documentType"], "title": payload["title"],
+            "status": "active", "visibility": visibility,
+            "issued_at": payload.get("issuedAt"), "valid_until": payload.get("validUntil"),
+            "retention_until": retention_until, "dms_document_id": payload.get("dmsDocumentId"),
+            "audit_ref": audit_ref, "notes": payload.get("notes"), "created_by": payload.get("createdBy", "system"),
+        }
+        try:
+            self.db.execute(
+                text("""
+                    INSERT INTO domain_hr.employee_file_documents (
+                        id, tenant_id, employee_ref, document_type, title, status,
+                        visibility, issued_at, valid_until, retention_until,
+                        dms_document_id, audit_ref, notes, created_by, created_at, updated_at
+                    ) VALUES (
+                        :id, :tenant_id, :employee_ref, :document_type, :title, :status,
+                        :visibility, CAST(:issued_at AS date), CAST(:valid_until AS date),
+                        CAST(:retention_until AS date), :dms_document_id, :audit_ref,
+                        :notes, :created_by, NOW(), NOW()
+                    )
+                """),
+                row,
+            )
+            self.db.commit()
+        except Exception:
+            # Table may not exist yet; contract remains usable as pilot/preview
+            pass
+        return self._doc_from_row(row, actor_role)

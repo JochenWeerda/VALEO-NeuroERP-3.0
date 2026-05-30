@@ -1,0 +1,27 @@
+id: FACHLICHE-VERTIEFUNG-UX-W23-KUNDENBANKEN-001
+title: Wave 23 UX — Kundenbanken (CRM)
+owner: Claude Sonnet 4.6
+status: abgeschlossen
+completed_at: 2026-05-30
+depends_on:
+  - FACHLICHE-VERTIEFUNG-UX-W16-001
+goal: >
+  Kundenbankverbindungen (IBAN/BIC, SEPA-Mandat) in der Kundenstamm-Maske
+  gegen /api/v1/kunden/{kunden_nr}/bankverbindungen.
+scope:
+  - packages/frontend-web/src/lib/api/kundenbanken.ts
+  - packages/frontend-web/src/features/crm/components/KundenBankverbindungenPanel.tsx
+  - packages/frontend-web/src/pages/crm/kunden-stamm.tsx
+  - packages/frontend-web/tests/e2e/fachliche-vertiefung-kundenbanken.spec.ts
+file_ownership:
+  - docs/agent-ops/slices/FACHLICHE-VERTIEFUNG-UX-W23-KUNDENBANKEN-001.yaml
+  - packages/frontend-web/src/lib/api/kundenbanken.ts
+  - packages/frontend-web/src/features/crm/components/KundenBankverbindungenPanel.tsx
+  - packages/frontend-web/src/pages/crm/kunden-stamm.tsx
+  - packages/frontend-web/tests/e2e/fachliche-vertiefung-kundenbanken.spec.ts
+acceptance_criteria:
+  - Bankverbindungen-Panel im Kundenstamm (bestehende Kunden)
+  - Anlegen, Standard setzen, Deaktivieren mit Mutation Guards
+  - Maskierte IBAN in der Liste
+  - E2E gemockt gruen
+  - TypeScript gruen

@@ -13,12 +13,8 @@ from sqlalchemy.orm import Session
 from app.core.database import get_db
 from app.core.tenant import get_tenant_id
 
-from app.api.v1.schemas.base import BaseSchema
-from pydantic import ConfigDict as _ConfigDict
-
-
-class CompatFlexOut(BaseSchema):
-    model_config = _ConfigDict(extra="allow")
+from app.api.v1.schemas.base import BaseSchema, IDResponse
+from app.api.v1.schemas.compliance_whistleblower_lksg_schemas import ComplianceWhistleblowerLksgOut
 
 
 router = APIRouter(prefix="/compliance", tags=["compliance", "whistleblower", "lksg"])
@@ -70,7 +66,7 @@ def _risk_level(score: int) -> str:
 
 
 @router.post("/whistleblower/reports", status_code=201, summary="Whistleblower report anlegen",
-    response_model=CompatFlexOut
+    response_model=IDResponse
 )
 async def create_whistleblower_report(
     payload: WhistleblowerReportIn,
@@ -105,7 +101,7 @@ async def create_whistleblower_report(
 
 
 @router.get("/whistleblower/reports", summary="Whistleblower reports auflisten",
-    response_model=list[CompatFlexOut]
+    response_model=list[ComplianceWhistleblowerLksgOut]
 )
 async def list_whistleblower_reports(
     status: str | None = Query(None),
@@ -134,7 +130,7 @@ async def list_whistleblower_reports(
 
 
 @router.patch("/whistleblower/reports/{report_id}/status", summary="Whistleblower status aktualisieren",
-    response_model=CompatFlexOut
+    response_model=IDResponse
 )
 async def update_whistleblower_status(
     report_id: str,
@@ -163,7 +159,7 @@ async def update_whistleblower_status(
 
 
 @router.post("/lksg/supplier-risk-assessments", status_code=201, summary="Lksg supplier risk assessment anlegen",
-    response_model=CompatFlexOut
+    response_model=IDResponse
 )
 async def create_lksg_supplier_risk_assessment(
     payload: LksgRiskAssessmentIn,
@@ -201,7 +197,7 @@ async def create_lksg_supplier_risk_assessment(
 
 
 @router.get("/lksg/supplier-risk-assessments", summary="Lksg supplier risk assessments auflisten",
-    response_model=list[CompatFlexOut]
+    response_model=list[ComplianceWhistleblowerLksgOut]
 )
 async def list_lksg_supplier_risk_assessments(
     risk_level: str | None = Query(None),
@@ -230,7 +226,7 @@ async def list_lksg_supplier_risk_assessments(
 
 
 @router.get("/lksg/annual-report-preview", summary="Annual report preview lksg",
-    response_model=CompatFlexOut
+    response_model=ComplianceWhistleblowerLksgOut
 )
 async def lksg_annual_report_preview(
     tenant_id: str = Depends(get_tenant_id),

@@ -23,11 +23,7 @@ from app.core.dependencies import get_tenant_id
 from app.core.uuid7 import uuid7
 
 from app.api.v1.schemas.base import BaseSchema
-from pydantic import ConfigDict as _ConfigDict
-
-
-class CompatFlexOut(BaseSchema):
-    model_config = _ConfigDict(extra="allow")
+from app.api.v1.schemas.versandprofile_schemas import VersandprofileOut
 
 
 router = APIRouter(prefix="/logistik/versand",
@@ -158,7 +154,7 @@ def create_versandprofil(
 
 
 @router.delete("/profile/{profil_nr}", summary="Versandprofil löschen",
-    response_model=CompatFlexOut
+    response_model=None
 )
 def delete_versandprofil(
     profil_nr: str,
@@ -235,7 +231,7 @@ def create_avis(
 
 
 @router.patch("/avise/{avis_nr}/status", summary="Status avis",
-    response_model=None
+    response_model=VersandprofileOut
 )
 def avis_status(
     avis_nr: str,

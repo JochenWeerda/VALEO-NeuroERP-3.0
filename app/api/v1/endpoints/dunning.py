@@ -19,11 +19,6 @@ from ....core.gobd_artifact import register_artifact, sha256_hex
 logger = logging.getLogger(__name__)
 
 from app.api.v1.schemas.base import BaseSchema
-from pydantic import ConfigDict as _ConfigDict
-
-
-class CompatFlexOut(BaseSchema):
-    model_config = _ConfigDict(extra="allow")
 
 
 router = APIRouter(prefix="/dunning", tags=["finance", "dunning"])

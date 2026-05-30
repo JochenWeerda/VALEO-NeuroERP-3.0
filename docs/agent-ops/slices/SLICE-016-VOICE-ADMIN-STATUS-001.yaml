@@ -1,0 +1,18 @@
+id: SLICE-016-VOICE-ADMIN-STATUS-001
+title: Slice-016 — Voice Admin Status & Ops
+owner: Claude Sonnet 4.6
+status: abgeschlossen
+completed_at: 2026-05-30
+depends_on:
+  - SLICE-015-VOICE-PRODUCTION-HARDENING-001
+goal: >
+  Admin Voice-Kanal zeigt GET /voice/status Readiness; Transkript im Verlauf korrigiert;
+  Ops-Dokumentation ergaenzt.
+scope:
+  - packages/frontend-web/src/pages/admin/voice-channel.tsx
+  - packages/frontend-web/src/features/ki-usability/hooks/useVoiceStackStatus.ts
+  - packages/frontend-web/src/__tests__/pages/admin/voice-channel.test.tsx
+acceptance_criteria:
+  - Voice-Kanal-Seite zeigt stt_ready, tts_ready, ollama_reachable
+  - Erkennungsverlauf speichert echtes Transkript
+  - Vitest fuer Status-Anzeige (gemockt)

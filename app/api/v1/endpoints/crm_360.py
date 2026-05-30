@@ -15,11 +15,7 @@ from sqlalchemy.orm import Session
 from ....core.database import get_db
 
 from app.api.v1.schemas.base import BaseSchema
-from pydantic import ConfigDict as _ConfigDict
-
-
-class CompatFlexOut(BaseSchema):
-    model_config = _ConfigDict(extra="allow")
+from app.api.v1.schemas.crm_360_schemas import Crm360Out
 
 
 router = APIRouter()
@@ -35,7 +31,7 @@ def _safe_query(db: Session, sql: str, params: dict, many: bool = True) -> Any:
         return None
 
 
-@router.get("/{customer_id}/360", response_model=CompatFlexOut, tags=["crm", "customers"], summary="Customer 360 abrufen")
+@router.get("/{customer_id}/360", response_model=Crm360Out, tags=["crm", "customers"], summary="Customer 360 abrufen")
 async def get_customer_360(
     customer_id: str,
     tenant_id: Optional[str] = Query(None),

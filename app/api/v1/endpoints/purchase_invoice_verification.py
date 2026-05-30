@@ -21,12 +21,8 @@ from sqlalchemy.orm import Session
 from app.core.database import get_db
 from app.core.tenant import get_tenant_id
 
-from app.api.v1.schemas.base import BaseSchema
-from pydantic import ConfigDict as _ConfigDict
-
-
-class CompatFlexOut(BaseSchema):
-    model_config = _ConfigDict(extra="allow")
+from app.api.v1.schemas.base import BaseSchema, IDResponse
+from app.api.v1.schemas.purchase_invoice_verification_schemas import PurchaseInvoiceVerificationOut
 
 
 router = APIRouter(prefix="/einkauf/invoice-verification", tags=["einkauf", "3-wege-match"])
@@ -171,7 +167,7 @@ def _compute_match_status(
 # ─────────────────────────────────────────────────────────────────────────────
 
 @router.post("/match", summary="Invoice match",
-    response_model=CompatFlexOut
+    response_model=PurchaseInvoiceVerificationOut
 )
 def match_invoice(
     body: MatchRequest,
@@ -241,7 +237,7 @@ def match_invoice(
 
 
 @router.get("/pending", summary="Pending auflisten",
-    response_model=list[CompatFlexOut]
+    response_model=list[PurchaseInvoiceVerificationOut]
 )
 def list_pending(
     db: Session = Depends(get_db),
@@ -279,7 +275,7 @@ def list_pending(
 
 
 @router.patch("/{verification_id}/approve", summary="Verification genehmigen",
-    response_model=CompatFlexOut
+    response_model=PurchaseInvoiceVerificationOut
 )
 def approve_verification(
     verification_id: int,
@@ -318,7 +314,7 @@ def approve_verification(
 
 
 @router.patch("/{verification_id}/block", summary="Verification blockieren",
-    response_model=CompatFlexOut
+    response_model=IDResponse
 )
 def block_verification(
     verification_id: int,
@@ -351,7 +347,7 @@ def block_verification(
 
 
 @router.get("/statistics", summary="Statistics abrufen",
-    response_model=CompatFlexOut
+    response_model=PurchaseInvoiceVerificationOut
 )
 def get_statistics(
     db: Session = Depends(get_db),

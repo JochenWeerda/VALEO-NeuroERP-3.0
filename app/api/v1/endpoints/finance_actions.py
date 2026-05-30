@@ -20,11 +20,15 @@ from ....core.gobd_artifact import register_artifact, sha256_hex
 from ....infrastructure.repositories import JournalEntryRepository
 
 from app.api.v1.schemas.base import BaseSchema
-from pydantic import ConfigDict as _ConfigDict
-
-
-class CompatFlexOut(BaseSchema):
-    model_config = _ConfigDict(extra="allow")
+from app.api.v1.schemas.finance_schemas import (
+    ClosingCalculateOut,
+    ClosingApproveOut,
+    CreditLimitOut,
+    CollateralOut,
+    PaymentSuggestionOut,
+    BuchungsuebergabeExportOut,
+    CloseReadinessOut,
+)
 
 
 router = APIRouter(tags=["finance", "actions"])
@@ -285,7 +289,7 @@ class ClosingRunRequest(BaseModel):
     closing_type: str = Field("month", description="month | quarter | year")
 
 
-@router.post("/closing/calculate", response_model=CompatFlexOut, summary="Closing berechnen")
+@router.post("/closing/calculate", response_model=ClosingCalculateOut, summary="Closing berechnen")
 async def calculate_closing(
     body: ClosingRunRequest,
     tenant_id: str = Depends(get_tenant_id),
@@ -373,7 +377,7 @@ async def run_closing(
         return ActionResponse(success=True, message="Abschluss angestossen.")
 
 
-@router.post("/closing/approve", response_model=CompatFlexOut, summary="Closing genehmigen")
+@router.post("/closing/approve", response_model=ClosingApproveOut, summary="Closing genehmigen")
 async def approve_closing(
     body: ClosingActionRequest,
     tenant_id: str = Depends(get_tenant_id),
@@ -399,7 +403,7 @@ async def approve_closing(
 
 # ── Credit limits ─────────────────────────────────────────────────────────────
 
-@router.get("/credit-limits", response_model=list[CompatFlexOut], summary="Credit limits auflisten")
+@router.get("/credit-limits", response_model=list[CreditLimitOut], summary="Credit limits auflisten")
 async def list_credit_limits(
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
@@ -422,7 +426,7 @@ async def list_credit_limits(
 
 # ── Collaterals ───────────────────────────────────────────────────────────────
 
-@router.get("/collaterals", response_model=list[CompatFlexOut], summary="Collaterals auflisten")
+@router.get("/collaterals", response_model=list[CollateralOut], summary="Collaterals auflisten")
 async def list_collaterals(
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
@@ -443,7 +447,7 @@ async def list_collaterals(
 
 # ── Payment suggestions ────────────────────────────────────────────────────────
 
-@router.get("/payment-suggestions", response_model=list[CompatFlexOut], summary="Payment suggestions auflisten")
+@router.get("/payment-suggestions", response_model=list[PaymentSuggestionOut], summary="Payment suggestions auflisten")
 async def list_payment_suggestions(
     days_ahead: int = Query(14, ge=1, le=365),
     tenant_id: str = Depends(get_tenant_id),
@@ -498,7 +502,7 @@ class BuchungsuebergabeExportSummary(BaseModel):
 
 
 @router.post("/buchungsuebergabe-export", summary="Export buchungsuebergabe",
-    response_model=CompatFlexOut
+    response_model=BuchungsuebergabeExportOut
 )
 async def buchungsuebergabe_export(
     body: BuchungsuebergabeExportRequest,
@@ -619,7 +623,7 @@ async def buchungsuebergabe_export(
 # ── Period-Close Readiness ────────────────────────────────────────────────────
 
 @router.get("/close-readiness", tags=["finance", "closing"], summary="Close readiness abrufen",
-    response_model=CompatFlexOut
+    response_model=CloseReadinessOut
 )
 async def get_close_readiness(
     tenant_id: str = Depends(get_tenant_id),

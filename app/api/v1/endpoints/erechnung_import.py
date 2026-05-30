@@ -20,12 +20,8 @@ from sqlalchemy.orm import Session
 from app.core.database import get_db
 from app.core.tenant import get_tenant_id
 
-from app.api.v1.schemas.base import BaseSchema
-from pydantic import ConfigDict as _ConfigDict
-
-
-class CompatFlexOut(BaseSchema):
-    model_config = _ConfigDict(extra="allow")
+from app.api.v1.schemas.base import BaseSchema, StatusResponse
+from app.api.v1.schemas.erechnung_import_schemas import ErrechnungImportOut
 
 
 router = APIRouter(prefix="/erechnung", tags=["erechnung"])
@@ -210,7 +206,7 @@ def list_imports(
 
 
 @router.post("/imports/{import_id}/buchen", summary="Buchen",
-    response_model=CompatFlexOut
+    response_model=ErrechnungImportOut
 )
 def buchen(
     import_id: str,

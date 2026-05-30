@@ -25,11 +25,7 @@ from app.core.dependencies import get_tenant_id
 from app.core.uuid7 import uuid7
 
 from app.api.v1.schemas.base import BaseSchema
-from pydantic import ConfigDict as _ConfigDict
-
-
-class CompatFlexOut(BaseSchema):
-    model_config = _ConfigDict(extra="allow")
+from app.api.v1.schemas.individuelle_artikelnummern_schemas import IndividuelleArtikelNrOut
 
 
 router = APIRouter(prefix="/artikel/individuelle-nummern",
@@ -123,7 +119,7 @@ def create_individuelle_nummer(
 
 
 @router.get("/lookup", summary="Interne nummer lookup",
-    response_model=CompatFlexOut
+    response_model=IndividuelleArtikelNrOut
 )
 def lookup_interne_nummer(
     partner_nr: str = Query(...),
@@ -148,7 +144,7 @@ def lookup_interne_nummer(
 
 
 @router.delete("/{indiv_id}", summary="Individuelle nummer löschen",
-    response_model=CompatFlexOut
+    response_model=None
 )
 def delete_individuelle_nummer(
     indiv_id: str,

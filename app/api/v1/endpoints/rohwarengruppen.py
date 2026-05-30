@@ -34,11 +34,6 @@ from app.core.dependencies import get_tenant_id
 from app.core.uuid7 import uuid7
 
 from app.api.v1.schemas.base import BaseSchema
-from pydantic import ConfigDict as _ConfigDict
-
-
-class CompatFlexOut(BaseSchema):
-    model_config = _ConfigDict(extra="allow")
 
 
 router = APIRouter(prefix="/rohware/gruppen",
@@ -263,7 +258,7 @@ def create_rohwarengruppe(
 
 
 @router.delete("/{gruppe_nr}", summary="Rohwarengruppe löschen",
-    response_model=CompatFlexOut
+    response_model=None
 )
 def delete_rohwarengruppe(
     gruppe_nr: str,

@@ -16,12 +16,7 @@ from app.core.database import get_db
 from app.core.tenant import get_tenant_id
 from app.core.uuid7 import uuid7
 
-from app.api.v1.schemas.base import BaseSchema
-from pydantic import ConfigDict as _ConfigDict
-
-
-class CompatFlexOut(BaseSchema):
-    model_config = _ConfigDict(extra="allow")
+from app.api.v1.schemas.base import BaseSchema, StatusResponse
 
 
 router = APIRouter(prefix="/accruals-provisions", tags=["finance", "closing"])
@@ -214,7 +209,7 @@ async def delete_accrual_provision(
     db.commit()
 
 
-@router.post("/{item_id}/post", response_model=CompatFlexOut, summary="Accrual provision erstellen")
+@router.post("/{item_id}/post", response_model=StatusResponse, summary="Accrual provision erstellen")
 async def post_accrual_provision(
     item_id: str,
     tenant_id: str = Depends(get_tenant_id),

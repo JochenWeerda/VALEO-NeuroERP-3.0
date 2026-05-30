@@ -35,11 +35,7 @@ from app.infrastructure.models.futtermittel_models import GrundfutterAnalyse, Ra
 logger = logging.getLogger(__name__)
 
 from app.api.v1.schemas.base import BaseSchema
-from pydantic import ConfigDict as _ConfigDict
-
-
-class CompatFlexOut(BaseSchema):
-    model_config = _ConfigDict(extra="allow")
+from app.api.v1.schemas.grundfutter_analysen_schemas import GrundfutterAnalysenOut
 
 
 router = APIRouter(tags=["agrar", "futtermittel", "grundfutter-analysen"])
@@ -595,7 +591,7 @@ def _analyse_to_dict(a: GrundfutterAnalyse) -> Dict[str, Any]:
 # ---------------------------------------------------------------------------
 
 @router.get("/grundfutter-analysen", summary="Analysen auflisten",
-    response_model=CompatFlexOut
+    response_model=GrundfutterAnalysenOut
 )
 def list_analysen(
     probenart: Optional[str] = Query(default=None),
@@ -619,7 +615,7 @@ def list_analysen(
 
 
 @router.get("/grundfutter-analysen/{analyse_id}", summary="Analyse abrufen",
-    response_model=CompatFlexOut
+    response_model=GrundfutterAnalysenOut
 )
 def get_analyse(
     analyse_id: str,
@@ -639,7 +635,7 @@ def get_analyse(
 
 
 @router.post("/grundfutter-analysen", status_code=201, summary="Analyse anlegen",
-    response_model=CompatFlexOut
+    response_model=GrundfutterAnalysenOut
 )
 def create_analyse(
     data: GrundfutterAnalyseIn,
@@ -674,7 +670,7 @@ def create_analyse(
 
 
 @router.patch("/grundfutter-analysen/{analyse_id}", summary="Analyse aktualisieren",
-    response_model=CompatFlexOut
+    response_model=GrundfutterAnalysenOut
 )
 def patch_analyse(
     analyse_id: str,
@@ -795,7 +791,7 @@ async def upload_pdf(
 
 
 @router.post("/grundfutter-analysen/upload-csv", summary="Csv hochladen",
-    response_model=CompatFlexOut
+    response_model=GrundfutterAnalysenOut
 )
 async def upload_csv(
     file: UploadFile = File(...),
@@ -829,7 +825,7 @@ async def upload_csv(
 
 
 @router.post("/grundfutter-analysen/{analyse_id}/as-feed", summary="As feed promote",
-    response_model=CompatFlexOut
+    response_model=GrundfutterAnalysenOut
 )
 def promote_as_feed(
     analyse_id: str,

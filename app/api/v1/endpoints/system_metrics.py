@@ -20,11 +20,7 @@ from app.core.tenant import get_tenant_id
 logger = logging.getLogger(__name__)
 
 from app.api.v1.schemas.base import BaseSchema
-from pydantic import ConfigDict as _ConfigDict
-
-
-class CompatFlexOut(BaseSchema):
-    model_config = _ConfigDict(extra="allow")
+from app.api.v1.schemas.system_metrics_schemas import SystemMetricsOut
 
 
 router = APIRouter()
@@ -34,7 +30,7 @@ _CACHE_TTL = 30  # seconds
 
 
 @router.get("/system", summary="System metrics abrufen",
-    response_model=CompatFlexOut
+    response_model=SystemMetricsOut
 )
 async def get_system_metrics(
     current_user: User = Depends(get_current_user),
@@ -103,7 +99,7 @@ async def get_system_metrics(
 
 
 @router.get("/business", summary="Business metrics abrufen",
-    response_model=CompatFlexOut
+    response_model=SystemMetricsOut
 )
 async def get_business_metrics(
     current_user: User = Depends(get_current_user),
@@ -232,7 +228,7 @@ async def get_business_metrics(
 
 
 @router.get("/optimization-signals", summary="Optimization signals abrufen",
-    response_model=CompatFlexOut
+    response_model=SystemMetricsOut
 )
 async def get_optimization_signals(
     current_user: User = Depends(get_current_user),

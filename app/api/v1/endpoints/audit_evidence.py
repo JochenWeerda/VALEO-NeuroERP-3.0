@@ -28,11 +28,7 @@ from ....core.audit_evidence import (
 logger = logging.getLogger(__name__)
 
 from app.api.v1.schemas.base import BaseSchema
-from pydantic import ConfigDict as _ConfigDict
-
-
-class CompatFlexOut(BaseSchema):
-    model_config = _ConfigDict(extra="allow")
+from app.api.v1.schemas.audit_evidence_schemas import AuditEvidenceOut
 
 
 router = APIRouter(prefix="/audit-evidence", tags=["audit", "evidence", "gobd"])
@@ -49,7 +45,7 @@ def _tenant_store(tenant_id: str) -> dict[str, Any]:
 # Evidence-Eintraege
 # ---------------------------------------------------------------------------
 
-@router.get("", response_model=list[CompatFlexOut], summary="Evidence entries auflisten")
+@router.get("", response_model=list[AuditEvidenceOut], summary="Evidence entries auflisten")
 async def list_evidence_entries(
     aggregate_type: str | None = None,
     aggregate_id: str | None = None,
@@ -103,7 +99,7 @@ async def list_evidence_entries(
         return entries
 
 
-@router.get("/{audit_entry_id}", response_model=CompatFlexOut, summary="Evidence entry abrufen")
+@router.get("/{audit_entry_id}", response_model=AuditEvidenceOut, summary="Evidence entry abrufen")
 async def get_evidence_entry(
     audit_entry_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -141,7 +137,7 @@ async def get_evidence_entry(
     return entry.model_dump(mode="json")
 
 
-@router.post("", response_model=CompatFlexOut, status_code=201, summary="Evidence entry anlegen")
+@router.post("", response_model=AuditEvidenceOut, status_code=201, summary="Evidence entry anlegen")
 async def create_evidence_entry(
     body: dict,
     tenant_id: str = Depends(get_tenant_id),
@@ -182,7 +178,7 @@ async def create_evidence_entry(
     return entry.model_dump(mode="json")
 
 
-@router.post("/{audit_entry_id}/evidence-refs", response_model=CompatFlexOut, status_code=201, summary="Evidence ref attach")
+@router.post("/{audit_entry_id}/evidence-refs", response_model=AuditEvidenceOut, status_code=201, summary="Evidence ref attach")
 async def attach_evidence_ref(
     audit_entry_id: str,
     body: dict,
@@ -249,14 +245,14 @@ async def attach_evidence_ref(
 # Belegpflicht-Richtlinie
 # ---------------------------------------------------------------------------
 
-@router.get("/policy/document-evidence", response_model=CompatFlexOut, summary="Evidence policy abrufen")
+@router.get("/policy/document-evidence", response_model=AuditEvidenceOut, summary="Evidence policy abrufen")
 async def get_evidence_policy(tenant_id: str = Depends(get_tenant_id)):
     """Liefert die GoBD-Belegpflicht-Richtlinie des Mandanten."""
     policy = build_default_evidence_policy(tenant_id)
     return policy.model_dump(mode="json")
 
 
-@router.get("/policy/gobd-check/{aggregate_type}/{aggregate_id}", response_model=CompatFlexOut, summary="Gobd compliance prüfen")
+@router.get("/policy/gobd-check/{aggregate_type}/{aggregate_id}", response_model=AuditEvidenceOut, summary="Gobd compliance prüfen")
 async def check_gobd_compliance(
     aggregate_type: str,
     aggregate_id: str,

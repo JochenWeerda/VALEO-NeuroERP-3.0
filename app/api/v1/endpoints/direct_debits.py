@@ -10,18 +10,14 @@ from sqlalchemy import text
 from ....core.tenant import get_tenant_id
 from ....core.database import get_db
 
-from app.api.v1.schemas.base import BaseSchema
-from pydantic import ConfigDict as _ConfigDict
-
-
-class CompatFlexOut(BaseSchema):
-    model_config = _ConfigDict(extra="allow")
+from app.api.v1.schemas.base import BaseSchema, StatusResponse
+from app.api.v1.schemas.direct_debits_schemas import DirectDebitsOut
 
 
 router = APIRouter(prefix="/direct-debits", tags=["finance", "direct-debits"])
 
 
-@router.get("", response_model=list[CompatFlexOut], summary="Direct debits auflisten")
+@router.get("", response_model=list[DirectDebitsOut], summary="Direct debits auflisten")
 async def list_direct_debits(
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
@@ -57,7 +53,7 @@ async def list_direct_debits(
         return []
 
 
-@router.get("/new", response_model=CompatFlexOut, summary="New direct debit template abrufen")
+@router.get("/new", response_model=DirectDebitsOut, summary="New direct debit template abrufen")
 async def get_new_direct_debit_template(tenant_id: str = Depends(get_tenant_id)):
     """Return default values for direct debit create forms."""
     return {
@@ -108,7 +104,7 @@ class DirectDebitRunCreate(BaseModel):
 # --------------- POST / DELETE ---------------
 
 
-@router.post("", response_model=CompatFlexOut, status_code=201, summary="Direct debit run anlegen")
+@router.post("", response_model=DirectDebitsOut, status_code=201, summary="Direct debit run anlegen")
 async def create_direct_debit_run(
     body: DirectDebitRunCreate,
     tenant_id: str = Depends(get_tenant_id),
@@ -148,7 +144,7 @@ async def create_direct_debit_run(
     }
 
 
-@router.get("/{run_id}", response_model=CompatFlexOut, summary="Direct debit run abrufen")
+@router.get("/{run_id}", response_model=DirectDebitsOut, summary="Direct debit run abrufen")
 async def get_direct_debit_run(
     run_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -190,7 +186,7 @@ async def get_direct_debit_run(
     }
 
 
-@router.post("/{run_id}/export", response_model=CompatFlexOut, summary="Direct debit run exportieren")
+@router.post("/{run_id}/export", response_model=StatusResponse, summary="Direct debit run exportieren")
 async def export_direct_debit_run(
     run_id: str,
     tenant_id: str = Depends(get_tenant_id),

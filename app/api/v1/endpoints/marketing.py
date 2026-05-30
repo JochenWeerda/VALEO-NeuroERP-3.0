@@ -10,11 +10,7 @@ from app.core.database import get_db
 from app.domains.operations.models import MarketingKampagneEntry
 
 from app.api.v1.schemas.base import BaseSchema
-from pydantic import ConfigDict as _ConfigDict
-
-
-class CompatFlexOut(BaseSchema):
-    model_config = _ConfigDict(extra="allow")
+from app.api.v1.schemas.marketing_schemas import MarketingOut
 
 
 router = APIRouter(prefix="/marketing", tags=["Marketing"])
@@ -52,7 +48,7 @@ def _seed(db: Session) -> None:
     db.commit()
 
 
-@router.get("/kampagnen", response_model=CompatFlexOut, summary="Kampagnen auflisten")
+@router.get("/kampagnen", response_model=MarketingOut, summary="Kampagnen auflisten")
 async def list_kampagnen(status: Optional[str] = Query(None, description="Filter by status"), db: Session = Depends(get_db)) -> dict:
     _seed(db)
     query = db.query(MarketingKampagneEntry)
@@ -77,7 +73,7 @@ async def list_kampagnen(status: Optional[str] = Query(None, description="Filter
     }
 
 
-@router.get("/stats", response_model=CompatFlexOut, summary="Marketing stats abrufen")
+@router.get("/stats", response_model=MarketingOut, summary="Marketing stats abrufen")
 async def get_marketing_stats(db: Session = Depends(get_db)) -> dict:
     _seed(db)
     items = db.query(MarketingKampagneEntry).all()
@@ -89,7 +85,7 @@ async def get_marketing_stats(db: Session = Depends(get_db)) -> dict:
     }
 
 
-@router.get("/kampagnen/{kampagne_id}/kpis", response_model=CompatFlexOut, summary="Kampagne kpis abrufen")
+@router.get("/kampagnen/{kampagne_id}/kpis", response_model=MarketingOut, summary="Kampagne kpis abrufen")
 async def get_kampagne_kpis(kampagne_id: int, db: Session = Depends(get_db)) -> dict:
     """MKT-CAM-01: Kampagnen-KPIs (Budget Plan vs. Ist, Open-Rate, ROI-Stub)."""
     _seed(db)
@@ -139,7 +135,7 @@ class MarketingKampagneUpdate(BaseModel):
 from starlette.responses import Response
 
 
-@router.post("/kampagnen", response_model=CompatFlexOut, status_code=201, summary="Kampagne anlegen")
+@router.post("/kampagnen", response_model=MarketingOut, status_code=201, summary="Kampagne anlegen")
 async def create_kampagne(
     body: MarketingKampagneCreate,
     db: Session = Depends(get_db),
@@ -169,7 +165,7 @@ async def create_kampagne(
     }
 
 
-@router.put("/kampagnen/{kampagne_id}", response_model=CompatFlexOut, summary="Kampagne aktualisieren")
+@router.put("/kampagnen/{kampagne_id}", response_model=MarketingOut, summary="Kampagne aktualisieren")
 async def update_kampagne(
     kampagne_id: int,
     body: MarketingKampagneUpdate,

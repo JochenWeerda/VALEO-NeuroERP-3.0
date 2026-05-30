@@ -22,11 +22,7 @@ from app.core.database import get_db
 from app.core.tenant import get_tenant_id
 
 from app.api.v1.schemas.base import BaseSchema
-from pydantic import ConfigDict as _ConfigDict
-
-
-class CompatFlexOut(BaseSchema):
-    model_config = _ConfigDict(extra="allow")
+from app.api.v1.schemas.ers_settlement_schemas import ErsSettlementOut
 
 
 router = APIRouter(prefix="/einkauf/ers", tags=["einkauf", "ers"])
@@ -98,7 +94,7 @@ def _fetch_gr_amount(db: Session, gr_id: str, tenant_id: str) -> Optional[float]
 # ─────────────────────────────────────────────────────────────────────────────
 
 @router.get("/suppliers", summary="Ers suppliers auflisten",
-    response_model=list[CompatFlexOut]
+    response_model=list[ErsSettlementOut]
 )
 def list_ers_suppliers(
     db: Session = Depends(get_db),
@@ -131,7 +127,7 @@ def list_ers_suppliers(
 
 
 @router.post("/suppliers/{supplier_id}/qualify", summary="Supplier qualify",
-    response_model=CompatFlexOut
+    response_model=ErsSettlementOut
 )
 def qualify_supplier(
     supplier_id: str,
@@ -169,7 +165,7 @@ def qualify_supplier(
 
 
 @router.post("/trigger", summary="Ers auslösen",
-    response_model=CompatFlexOut
+    response_model=ErsSettlementOut
 )
 def trigger_ers(
     body: ErsRunRequest,
@@ -243,7 +239,7 @@ def trigger_ers(
 
 
 @router.get("/invoices", summary="Ers invoices auflisten",
-    response_model=list[CompatFlexOut]
+    response_model=list[ErsSettlementOut]
 )
 def list_ers_invoices(
     db: Session = Depends(get_db),

@@ -2,9 +2,11 @@ import * as React from 'react'
 import { useState } from 'react'
 import { CopilotDockPanel } from './CopilotDockPanel'
 import { useCopilotChat } from './useCopilotChat'
+import { useVoiceCopilotSummary } from './useVoiceCopilotSummary'
 
 export function AdvisorDock(): JSX.Element {
   const { messages, sendMessage, loading, connected, sessionId } = useCopilotChat()
+  const { summary, playSummary, playing, clearSummary } = useVoiceCopilotSummary()
   const [open, setOpen] = useState<boolean>(false)
   const [text, setText] = useState<string>('')
 
@@ -33,6 +35,12 @@ export function AdvisorDock(): JSX.Element {
       loading={loading}
       connected={connected}
       sessionId={sessionId}
+      voiceSummary={summary}
+      onPlayVoiceSummary={() => {
+        void playSummary()
+      }}
+      playingVoiceSummary={playing}
+      onDismissVoiceSummary={clearSummary}
     />
   )
 }

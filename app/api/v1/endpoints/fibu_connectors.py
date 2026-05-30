@@ -27,11 +27,6 @@ from app.api.v1.schemas.fibu_connectors import (
 )
 
 from app.api.v1.schemas.base import BaseSchema
-from pydantic import ConfigDict as _ConfigDict
-
-
-class CompatFlexOut(BaseSchema):
-    model_config = _ConfigDict(extra="allow")
 
 
 router = APIRouter(prefix="/connectors", tags=["finance", "fibu-connectors"])

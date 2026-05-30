@@ -8,11 +8,7 @@ from pydantic import BaseModel, Field
 from app.services.voice_adapter import create_session, end_session, transcribe, synthesize
 
 from app.api.v1.schemas.base import BaseSchema
-from pydantic import ConfigDict as _ConfigDict
-
-
-class CompatFlexOut(BaseSchema):
-    model_config = _ConfigDict(extra="allow")
+from app.api.v1.schemas.neuro_voice_schemas import NeuroVoiceOut
 
 
 router = APIRouter(prefix="/neuro/voice", tags=["neuro-core", "voice"])
@@ -34,14 +30,14 @@ class SynthesizeRequest(BaseModel):
 
 
 @router.post("/session", summary="Session starten",
-    response_model=CompatFlexOut
+    response_model=NeuroVoiceOut
 )
 async def start_session(request: SessionRequest):
     return create_session(request.language, request.channel)
 
 
 @router.delete("/session/{session_id}", summary="Session abschließen",
-    response_model=CompatFlexOut
+    response_model=NeuroVoiceOut
 )
 async def close_session(session_id: str):
     result = end_session(session_id)
@@ -51,7 +47,7 @@ async def close_session(session_id: str):
 
 
 @router.post("/transcribe", summary="Transcribe do",
-    response_model=CompatFlexOut
+    response_model=NeuroVoiceOut
 )
 async def do_transcribe(request: TranscribeRequest):
     result = await transcribe(request.session_id, request.audio_format)
@@ -61,7 +57,7 @@ async def do_transcribe(request: TranscribeRequest):
 
 
 @router.post("/synthesize", summary="Synthesize do",
-    response_model=CompatFlexOut
+    response_model=NeuroVoiceOut
 )
 async def do_synthesize(request: SynthesizeRequest):
     result = await synthesize(request.session_id, request.text)

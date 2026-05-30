@@ -1,0 +1,19 @@
+id: ADMIN-SUITE-008
+title: Admin Suite Operations Center
+owner: Codex
+status: abgeschlossen
+claimed_at: 2026-05-30
+completed_at: 2026-05-30
+goal: Ehrliche Evidenzsicht fuer Backup, Restore, Release, Alembic und Diagnose bereitstellen.
+file_ownership:
+  - app/api/v1/endpoints/admin_suite.py
+  - packages/frontend-web/src/pages/admin-suite/operations.tsx
+  - packages/frontend-web/src/lib/api/admin-suite.ts
+  - tests/test_admin_suite_operations.py
+checks:
+  - python -m pytest tests/test_admin_suite_operations.py -q --no-cov
+risks:
+  - Laufzeitdaten benoetigen spaeter Monitoring-Import oder Ops-Adapter.
+gate_results:
+  backend: "18 passed: complete admin-suite focused suite"
+  typescript: "0 errors"

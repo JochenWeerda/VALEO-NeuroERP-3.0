@@ -19,12 +19,8 @@ from app.services.knowledge_store import (
     get_knowledge_stats,
 )
 
-from app.api.v1.schemas.base import BaseSchema
-from pydantic import ConfigDict as _ConfigDict
-
-
-class CompatFlexOut(BaseSchema):
-    model_config = _ConfigDict(extra="allow")
+from app.api.v1.schemas.base import BaseSchema, StatusResponse
+from app.api.v1.schemas.neuro_knowledge_schemas import NeuroKnowledgeOut
 
 
 router = APIRouter(prefix="/neuro/knowledge", tags=["neuro-core", "knowledge"])
@@ -47,7 +43,7 @@ class SearchRequest(BaseModel):
 
 
 @router.post("/", summary="Store",
-    response_model=CompatFlexOut
+    response_model=NeuroKnowledgeOut
 )
 async def store(
     request: StoreRequest,
@@ -68,7 +64,7 @@ async def store(
 
 
 @router.get("/{domain}/{key}", summary="Entry abrufen",
-    response_model=CompatFlexOut
+    response_model=NeuroKnowledgeOut
 )
 async def get_entry(
     domain: str,
@@ -84,7 +80,7 @@ async def get_entry(
 
 
 @router.post("/search", summary="Suchen",
-    response_model=CompatFlexOut
+    response_model=NeuroKnowledgeOut
 )
 async def search(
     request: SearchRequest,
@@ -98,7 +94,7 @@ async def search(
 
 
 @router.delete("/{domain}/{key}", summary="Entfernen",
-    response_model=CompatFlexOut
+    response_model=NeuroKnowledgeOut
 )
 async def remove(
     domain: str,
@@ -112,7 +108,7 @@ async def remove(
 
 
 @router.get("/stats", summary="Stats",
-    response_model=CompatFlexOut
+    response_model=NeuroKnowledgeOut
 )
 async def stats(
     tenant_id: str = Depends(get_tenant_id),

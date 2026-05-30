@@ -23,12 +23,8 @@ from app.core.tenant import get_tenant_id
 
 logger = logging.getLogger(__name__)
 
-from app.api.v1.schemas.base import BaseSchema
-from pydantic import ConfigDict as _ConfigDict
-
-
-class CompatFlexOut(BaseSchema):
-    model_config = _ConfigDict(extra="allow")
+from app.api.v1.schemas.base import BaseSchema, IDResponse
+from app.api.v1.schemas.intrastat_schemas import IntrastatOut
 
 
 router = APIRouter(prefix="/intrastat", tags=["Intrastat", "Außenhandel"])
@@ -120,7 +116,7 @@ def _gen_meldenummer(db: Session, meldezeitraum: str, meldungsart: str) -> str:
 
 
 @router.get("/meldungen", summary="Intrastat-Meldungen auflisten",
-    response_model=list[CompatFlexOut]
+    response_model=list[IntrastatOut]
 )
 def list_meldungen(
     meldezeitraum: Optional[str] = Query(None, description="YYYY-MM"),
@@ -158,7 +154,7 @@ def list_meldungen(
 
 
 @router.post("/meldungen", status_code=201, summary="Intrastat-Meldung erstellen",
-    response_model=CompatFlexOut
+    response_model=IDResponse
 )
 def create_meldung(
     payload: IntrastatMeldungCreate,
@@ -205,7 +201,7 @@ def create_meldung(
 
 
 @router.put("/meldungen/{meldung_id}", summary="Intrastat-Meldung aktualisieren",
-    response_model=CompatFlexOut
+    response_model=IDResponse
 )
 def update_meldung(
     meldung_id: str,
@@ -286,7 +282,7 @@ def delete_meldung(
 
 
 @router.get("/meldungen/{meldezeitraum}/zusammenfassung", summary="Zusammenfassung nach Meldezeitraum",
-    response_model=None
+    response_model=IntrastatOut
 )
 def zusammenfassung(
     meldezeitraum: str,
@@ -323,7 +319,7 @@ def zusammenfassung(
 @router.post(
     "/meldungen/{meldezeitraum}/export-csv",
     summary="Intrastat-Meldung als CSV exportieren (INTRASTAT-DE)",
-    response_model=CompatFlexOut,
+    response_model=IntrastatOut,
 )
 def export_csv(
     meldezeitraum: str,

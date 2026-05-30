@@ -12,7 +12,7 @@ from fastapi import APIRouter
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 
-from app.api.v1.schemas.base import BaseSchema
+from app.api.v1.schemas.base import BaseSchema, StatusResponse
 from pydantic import ConfigDict as _ConfigDict
 
 

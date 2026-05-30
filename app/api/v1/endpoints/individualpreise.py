@@ -31,11 +31,6 @@ from app.core.dependencies import get_tenant_id
 from app.core.uuid7 import uuid7
 
 from app.api.v1.schemas.base import BaseSchema
-from pydantic import ConfigDict as _ConfigDict
-
-
-class CompatFlexOut(BaseSchema):
-    model_config = _ConfigDict(extra="allow")
 
 
 router = APIRouter(prefix="/preise/individualpreise",
@@ -159,7 +154,7 @@ def create_individualpreis(
 
 
 @router.delete("/{preis_id}", summary="Individualpreis löschen",
-    response_model=CompatFlexOut
+    response_model=None
 )
 def delete_individualpreis(
     preis_id: str,

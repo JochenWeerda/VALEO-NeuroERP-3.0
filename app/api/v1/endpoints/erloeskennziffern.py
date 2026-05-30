@@ -29,11 +29,6 @@ from app.core.dependencies import get_tenant_id
 from app.core.uuid7 import uuid7
 
 from app.api.v1.schemas.base import BaseSchema
-from pydantic import ConfigDict as _ConfigDict
-
-
-class CompatFlexOut(BaseSchema):
-    model_config = _ConfigDict(extra="allow")
 
 
 router = APIRouter(prefix="/fibu/erloeskennziffern",
@@ -150,7 +145,7 @@ def update_erloeskennziffer(
 
 
 @router.delete("/{ekz_nr}", summary="Erloeskennziffer löschen",
-    response_model=CompatFlexOut
+    response_model=None
 )
 def delete_erloeskennziffer(
     ekz_nr: str,

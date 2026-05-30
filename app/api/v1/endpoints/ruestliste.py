@@ -16,12 +16,7 @@ from sqlalchemy.orm import Session
 
 from ....core.database import get_db
 
-from app.api.v1.schemas.base import BaseSchema
-from pydantic import ConfigDict as _ConfigDict
-
-
-class CompatFlexOut(BaseSchema):
-    model_config = _ConfigDict(extra="allow")
+from app.api.v1.schemas.base import BaseSchema, IDResponse
 
 
 router = APIRouter()
@@ -152,7 +147,7 @@ def create_ruestliste(payload: RuestlisteCreate, db: Session = Depends(get_db)) 
 
 
 @router.get("/{id}/positionen", tags=["lager", "ruestliste"], summary="Positionen abrufen",
-    response_model=CompatFlexOut
+    response_model=IDResponse
 )
 def get_positionen(id: str, db: Session = Depends(get_db)) -> dict:
     """Return positions for a Rüstliste by id."""
@@ -210,7 +205,7 @@ def _set_status(nr: str, new_status: str, allowed_from: list[str], db: Session, 
 
 
 @router.post("/{nr}/bearbeiten", tags=["lager", "ruestliste"], summary="Bearbeiten",
-    response_model=CompatFlexOut
+    response_model=RuestlisteOut
 )
 def bearbeiten(nr: str, db: Session = Depends(get_db)) -> dict:
     """Set Rüstliste to IN_BEARBEITUNG (irreversible)."""
@@ -218,7 +213,7 @@ def bearbeiten(nr: str, db: Session = Depends(get_db)) -> dict:
 
 
 @router.post("/{nr}/verarbeitet", tags=["lager", "ruestliste"], summary="Verarbeitet",
-    response_model=CompatFlexOut
+    response_model=RuestlisteOut
 )
 def verarbeitet(nr: str, db: Session = Depends(get_db)) -> dict:
     """Complete Rüstliste — set to VERARBEITET."""
@@ -226,7 +221,7 @@ def verarbeitet(nr: str, db: Session = Depends(get_db)) -> dict:
 
 
 @router.post("/{nr}/verarbeitet/bemerkung", tags=["lager", "ruestliste"], summary="Hinzufuegen bemerkung",
-    response_model=CompatFlexOut
+    response_model=RuestlisteOut
 )
 def bemerkung_hinzufuegen(nr: str, payload: RuestlisteBearbeiten, db: Session = Depends(get_db)) -> dict:
     """Add a note to an already-completed Rüstliste."""
@@ -252,7 +247,7 @@ def bemerkung_hinzufuegen(nr: str, payload: RuestlisteBearbeiten, db: Session = 
 
 
 @router.post("/{nr}/abbrechen", tags=["lager", "ruestliste"], summary="Abbrechen",
-    response_model=CompatFlexOut
+    response_model=RuestlisteOut
 )
 def abbrechen(nr: str, db: Session = Depends(get_db)) -> dict:
     """Cancel a Rüstliste (only from OFFEN or IN_BEARBEITUNG)."""

@@ -9,18 +9,14 @@ from sqlalchemy import text
 from app.core.database import get_db
 
 from app.api.v1.schemas.base import BaseSchema
-from pydantic import ConfigDict as _ConfigDict
-
-
-class CompatFlexOut(BaseSchema):
-    model_config = _ConfigDict(extra="allow")
+from app.api.v1.schemas.prospecting_schemas import ProspectingOut
 
 
 router = APIRouter(prefix="/prospecting", tags=["prospecting", "leads"])
 
 
 @router.get("/lead-candidates", summary="Lead candidates abrufen",
-    response_model=CompatFlexOut
+    response_model=ProspectingOut
 )
 async def get_lead_candidates(
     ref_year: int = Query(..., description="Referenzjahr"),

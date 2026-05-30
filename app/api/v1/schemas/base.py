@@ -178,3 +178,22 @@ class BulkOperationResponse(BaseSchema):
     error_count: int = Field(description="Fehlerhafte Einträge")
     errors: list[ValidationErrorItem] = Field(default_factory=list, description="Fehlerdetails")
     message: Optional[str] = Field(default=None)
+
+
+class CompatFlexOut(BaseSchema):
+    """Transitional open schema — allows arbitrary extra fields.
+
+    DEPRECATED: Replace with a proper typed schema for each endpoint.
+    Only use this when migrating legacy endpoints; do not use for new code.
+    Import from here instead of defining locally in each endpoint file.
+    """
+    model_config = ConfigDict(extra="allow")
+
+
+class CompatBridgeOut(BaseSchema):
+    """Bridge/proxy schema for compatibility endpoints.
+
+    Used in compat.py routes that proxy multiple backend domains with varying
+    response shapes. Replace with domain-specific schemas as endpoints stabilize.
+    """
+    model_config = ConfigDict(extra="allow")

@@ -9,6 +9,7 @@ export const PAGE_MODULES = import.meta.glob([
   '../../pages/system/**/*.tsx',
   '../../pages/public/**/*.tsx',
   '../../pages/admin/**/*.tsx',
+  '../../pages/admin-suite/**/*.tsx',
   '../../pages/workflow/**/*.tsx',
   '../../pages/workflows/**/*.tsx',
   '../../pages/personal/**/*.tsx',

@@ -312,7 +312,7 @@ class GeometryUpdate(BaseModel):
 
 
 @router.get("/schlaege/{schlag_id}/geometry", summary="GeoJSON Polygon eines Schlags abrufen",
-    response_model=None
+    response_model=AgrarFeldbuchOut
 )
 async def get_schlag_geometry(
     schlag_id: str,
@@ -591,7 +591,7 @@ async def bulk_delete_massnahmen(
 
 
 @router.post("/feldbuch/massnahmen/from-lieferschein", status_code=201, summary="From lieferschein massnahme",
-    response_model=None
+    response_model=AgrarFeldbuchOut
 )
 async def massnahme_from_lieferschein(
     data: FromLieferscheinCreate,

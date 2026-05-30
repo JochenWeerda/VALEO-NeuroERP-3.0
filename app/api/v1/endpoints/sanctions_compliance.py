@@ -20,12 +20,8 @@ from app.core.tenant import get_tenant_id
 
 logger = logging.getLogger(__name__)
 
-from app.api.v1.schemas.base import BaseSchema
-from pydantic import ConfigDict as _ConfigDict
-
-
-class CompatFlexOut(BaseSchema):
-    model_config = _ConfigDict(extra="allow")
+from app.api.v1.schemas.base import BaseSchema, IDResponse
+from app.api.v1.schemas.sanctions_compliance_schemas import SanctionsComplianceOut
 
 
 router = APIRouter(prefix="/compliance/sanctions", tags=["Compliance", "Sanctions"])
@@ -136,7 +132,7 @@ def _status_from_treffer(treffer: list[SanktionsTreffer]) -> str:
 
 
 @router.get("/eintraege", summary="Sanktionsliste abfragen",
-    response_model=list[CompatFlexOut]
+    response_model=list[SanctionsComplianceOut]
 )
 def list_eintraege(
     db: Session = Depends(get_db),
@@ -159,7 +155,7 @@ def list_eintraege(
 
 
 @router.post("/eintraege", status_code=201, summary="Sanktionseintrag anlegen",
-    response_model=CompatFlexOut
+    response_model=IDResponse
 )
 def create_eintrag(
     payload: SanktionsEintragCreate,
@@ -195,7 +191,7 @@ def create_eintrag(
 
 
 @router.post("/pruefen", summary="Name gegen Sanktionsliste prüfen",
-    response_model=CompatFlexOut
+    response_model=SanctionsComplianceOut
 )
 def pruefen(
     payload: SanktionsPruefungInput,
@@ -253,7 +249,7 @@ def pruefen(
 
 
 @router.get("/pruefprotokoll", summary="Sanktionsprüf-Protokoll abrufen",
-    response_model=list[CompatFlexOut]
+    response_model=list[SanctionsComplianceOut]
 )
 def pruefprotokoll(
     db: Session = Depends(get_db),

@@ -21,11 +21,7 @@ from ....core.database import get_db
 logger = logging.getLogger(__name__)
 
 from app.api.v1.schemas.base import BaseSchema
-from pydantic import ConfigDict as _ConfigDict
-
-
-class CompatFlexOut(BaseSchema):
-    model_config = _ConfigDict(extra="allow")
+from app.api.v1.schemas.vat_return_export_schemas import VatReturnExportOut
 
 
 router = APIRouter(prefix="/vat-return", tags=["finance", "tax", "vat"])
@@ -482,7 +478,7 @@ async def get_vat_return(
 
 
 @router.get("/export/{return_id}", summary="Vat return download exportieren",
-    response_model=CompatFlexOut
+    response_model=VatReturnExportOut
 )
 async def export_vat_return_download(
     return_id: str,
@@ -496,7 +492,7 @@ async def export_vat_return_download(
 
 
 @router.get("/{return_id}/elster-xml", summary="Elster xml exportieren",
-    response_model=CompatFlexOut
+    response_model=VatReturnExportOut
 )
 async def export_elster_xml(
     return_id: str,
@@ -541,7 +537,7 @@ async def export_elster_xml(
 
 
 @router.post("/{return_id}/validate", summary="Vat return validieren",
-    response_model=CompatFlexOut
+    response_model=VatReturnExportOut
 )
 async def validate_vat_return(
     return_id: str,

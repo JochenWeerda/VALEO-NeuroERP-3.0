@@ -20,11 +20,7 @@ from app.core.database import get_db
 from app.core.tenant import get_tenant_id
 
 from app.api.v1.schemas.base import BaseSchema
-from pydantic import ConfigDict as _ConfigDict
-
-
-class CompatFlexOut(BaseSchema):
-    model_config = _ConfigDict(extra="allow")
+from app.api.v1.schemas.admin_pos_schemas import AdminPosOut
 
 
 router = APIRouter()
@@ -712,7 +708,7 @@ class TseFinishRequest(BaseModel):
 
 
 @router.get("/pos/tse/status", summary="Fiskaly-Konnektivität und TSE-Status prüfen",
-    response_model=CompatFlexOut
+    response_model=AdminPosOut
 )
 async def get_tse_status(tenant_id: str = Depends(get_tenant_id)):
     """Prüft ob Fiskaly-API erreichbar und konfiguriert ist (oder Simulator läuft)."""
@@ -721,7 +717,7 @@ async def get_tse_status(tenant_id: str = Depends(get_tenant_id)):
 
 
 @router.post("/pos/tse/create", status_code=201, summary="Neue TSS bei Fiskaly anlegen",
-    response_model=CompatFlexOut
+    response_model=AdminPosOut
 )
 async def create_tss(tss_id: Optional[str] = None, tenant_id: str = Depends(get_tenant_id)):
     """Legt eine neue Technical Security System (TSS) bei Fiskaly an."""
@@ -735,7 +731,7 @@ async def create_tss(tss_id: Optional[str] = None, tenant_id: str = Depends(get_
 @router.post(
     "/pos/tse/transaction/start",
     summary="Kassentransaktion starten (StartTransaction)",
-    response_model=CompatFlexOut,
+    response_model=AdminPosOut,
 )
 async def tse_start_transaction(body: TseTransactionRequest, tenant_id: str = Depends(get_tenant_id)):
     """Startet eine signaturpflichtige Kassentransaktion und gibt Fiskaly-Signatur zurück."""
@@ -749,7 +745,7 @@ async def tse_start_transaction(body: TseTransactionRequest, tenant_id: str = De
 @router.post(
     "/pos/tse/transaction/finish",
     summary="Kassentransaktion abschließen (FinishTransaction)",
-    response_model=CompatFlexOut,
+    response_model=AdminPosOut,
 )
 async def tse_finish_transaction(body: TseFinishRequest, tenant_id: str = Depends(get_tenant_id)):
     """Schließt eine TSE-Transaktion ab und liefert die finale Signatur für den Bon."""
@@ -761,7 +757,7 @@ async def tse_finish_transaction(body: TseFinishRequest, tenant_id: str = Depend
 
 
 @router.post("/pos/tse/export", summary="DSFinV-K Export bei Fiskaly anfordern",
-    response_model=CompatFlexOut
+    response_model=AdminPosOut
 )
 async def tse_export(
     tss_id: str,

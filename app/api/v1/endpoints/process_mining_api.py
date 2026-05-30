@@ -22,11 +22,7 @@ from app.core.process_mining_application import build_process_mining_report_for_
 from app.core.tenant import get_tenant_id
 
 from app.api.v1.schemas.base import BaseSchema
-from pydantic import ConfigDict as _ConfigDict
-
-
-class CompatFlexOut(BaseSchema):
-    model_config = _ConfigDict(extra="allow")
+from app.api.v1.schemas.process_mining_api_schemas import ProcessMiningApiOut
 
 
 router = APIRouter(prefix="/process-mining", tags=["process-mining", "analytics"])
@@ -51,7 +47,7 @@ async def get_finance_process_mining_report(
     )
 
 
-@router.get("/finance/bottlenecks", response_model=list[CompatFlexOut], summary="Finance process bottlenecks auflisten")
+@router.get("/finance/bottlenecks", response_model=list[ProcessMiningApiOut], summary="Finance process bottlenecks auflisten")
 async def list_finance_process_bottlenecks(
     tenant_id: str = Depends(get_tenant_id),
     db: Any = Depends(get_db),

@@ -24,11 +24,6 @@ from app.core.dependencies import get_tenant_id
 from app.core.uuid7 import uuid7
 
 from app.api.v1.schemas.base import BaseSchema
-from pydantic import ConfigDict as _ConfigDict
-
-
-class CompatFlexOut(BaseSchema):
-    model_config = _ConfigDict(extra="allow")
 
 
 router = APIRouter(prefix="/artikel/stoffstrom", tags=["Artikelstamm - Stoffstrom & THG"])
@@ -184,7 +179,7 @@ def update_stoffstrom(
 
 
 @router.delete("/{stoffstrom_id}", summary="Stoffstrom löschen",
-    response_model=CompatFlexOut
+    response_model=None
 )
 def delete_stoffstrom(
     stoffstrom_id: str,

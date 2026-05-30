@@ -15,11 +15,7 @@ from app.reports.services import ReportsService
 logger = logging.getLogger(__name__)
 
 from app.api.v1.schemas.base import BaseSchema
-from pydantic import ConfigDict as _ConfigDict
-
-
-class CompatFlexOut(BaseSchema):
-    model_config = _ConfigDict(extra="allow")
+from app.api.v1.schemas.analytics_schemas import AnalyticsOut
 
 
 router = APIRouter(prefix="/analytics", tags=["analytics", "dashboard"])
@@ -31,7 +27,7 @@ def get_reports_service(db: Session = Depends(get_db)) -> ReportsService:
 
 
 @router.get("/kpis", summary="Kpis abrufen",
-    response_model=CompatFlexOut
+    response_model=AnalyticsOut
 )
 async def get_kpis(
     start_date: Optional[str] = Query(None, description="Start date (YYYY-MM-DD)"),
@@ -122,7 +118,7 @@ async def get_kpis(
 
 
 @router.get("/trends", summary="Kpi trends abrufen",
-    response_model=CompatFlexOut
+    response_model=AnalyticsOut
 )
 async def get_kpi_trends(
     metric: str = Query(..., description="Metric to get trend for"),
@@ -165,7 +161,7 @@ _BRANCH_REFERENCE = {
 
 
 @router.get("/benchmark", summary="Benchmark abrufen",
-    response_model=CompatFlexOut
+    response_model=AnalyticsOut
 )
 async def get_benchmark(
     start_date: Optional[str] = Query(None, description="Start date (YYYY-MM-DD)"),

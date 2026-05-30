@@ -29,11 +29,6 @@ from app.core.dependencies import get_tenant_id
 from app.core.uuid7 import uuid7
 
 from app.api.v1.schemas.base import BaseSchema
-from pydantic import ConfigDict as _ConfigDict
-
-
-class CompatFlexOut(BaseSchema):
-    model_config = _ConfigDict(extra="allow")
 
 
 router = APIRouter(prefix="/fibu/stammdaten", tags=["FIBU - Zusatzstammdaten"])
@@ -171,7 +166,7 @@ def create_zahlungsformular(
 
 
 @router.delete("/zahlungsformulare/{formular_nr}", summary="Zahlungsformular löschen",
-    response_model=CompatFlexOut
+    response_model=None
 )
 def delete_zahlungsformular(
     formular_nr: str,
@@ -287,7 +282,7 @@ def create_leergutart(
 
 
 @router.delete("/leergutarten/{art_nr}", summary="Leergutart löschen",
-    response_model=CompatFlexOut
+    response_model=None
 )
 def delete_leergutart(
     art_nr: str,

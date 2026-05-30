@@ -12,11 +12,7 @@ from app.core.database import get_db
 from app.domains.operations.models import Projekt, ProjektAufgabe, ProjektStatus
 
 from app.api.v1.schemas.base import BaseSchema
-from pydantic import ConfigDict as _ConfigDict
-
-
-class CompatFlexOut(BaseSchema):
-    model_config = _ConfigDict(extra="allow")
+from app.api.v1.schemas.projekte_schemas import ProjekteOut
 
 
 router = APIRouter(prefix="/projekte", tags=["Projekte"])
@@ -70,7 +66,7 @@ class ProjektPatch(BaseModel):
 
 
 @router.get("", summary="Projekte auflisten",
-    response_model=list[CompatFlexOut]
+    response_model=list[ProjekteOut]
 )
 def list_projekte(
     status: Optional[str] = None,
@@ -85,7 +81,7 @@ def list_projekte(
 
 
 @router.get("/{projekt_id}", summary="Projekt abrufen",
-    response_model=CompatFlexOut
+    response_model=ProjekteOut
 )
 def get_projekt(projekt_id: str, db: Session = Depends(get_db)):
     obj = db.query(Projekt).filter(Projekt.id == projekt_id).first()
@@ -97,7 +93,7 @@ def get_projekt(projekt_id: str, db: Session = Depends(get_db)):
 
 
 @router.post("", status_code=201, summary="Projekt anlegen",
-    response_model=CompatFlexOut
+    response_model=ProjekteOut
 )
 def create_projekt(payload: ProjektPayload, db: Session = Depends(get_db)):
     obj = Projekt(**payload.model_dump())
@@ -108,7 +104,7 @@ def create_projekt(payload: ProjektPayload, db: Session = Depends(get_db)):
 
 
 @router.patch("/{projekt_id}", summary="Projekt aktualisieren",
-    response_model=CompatFlexOut
+    response_model=ProjekteOut
 )
 def update_projekt(projekt_id: str, payload: ProjektPatch, db: Session = Depends(get_db)):
     obj = db.query(Projekt).filter(Projekt.id == projekt_id).first()
@@ -152,7 +148,7 @@ class AufgabePatch(BaseModel):
 
 
 @router.get("/{projekt_id}/aufgaben", summary="Aufgaben auflisten",
-    response_model=None
+    response_model=list[ProjekteOut]
 )
 def list_aufgaben(projekt_id: str, db: Session = Depends(get_db)):
     return [
@@ -165,7 +161,7 @@ def list_aufgaben(projekt_id: str, db: Session = Depends(get_db)):
 
 
 @router.post("/{projekt_id}/aufgaben", status_code=201, summary="Aufgabe anlegen",
-    response_model=CompatFlexOut
+    response_model=ProjekteOut
 )
 def create_aufgabe(projekt_id: str, payload: AufgabePayload, db: Session = Depends(get_db)):
     projekt = db.query(Projekt).filter(Projekt.id == projekt_id).first()
@@ -179,7 +175,7 @@ def create_aufgabe(projekt_id: str, payload: AufgabePayload, db: Session = Depen
 
 
 @router.patch("/{projekt_id}/aufgaben/{aufgabe_id}", summary="Aufgabe aktualisieren",
-    response_model=CompatFlexOut
+    response_model=ProjekteOut
 )
 def update_aufgabe(projekt_id: str, aufgabe_id: str, payload: AufgabePatch, db: Session = Depends(get_db)):
     obj = db.query(ProjektAufgabe).filter(

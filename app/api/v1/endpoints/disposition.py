@@ -10,11 +10,7 @@ from app.core.database import get_db
 from app.domains.operations.models import DispositionPosition
 
 from app.api.v1.schemas.base import BaseSchema
-from pydantic import ConfigDict as _ConfigDict
-
-
-class CompatFlexOut(BaseSchema):
-    model_config = _ConfigDict(extra="allow")
+from app.api.v1.schemas.disposition_schemas import DispositionOut
 
 
 router = APIRouter(prefix="/disposition", tags=["Disposition"])
@@ -57,7 +53,7 @@ def _seed(db: Session) -> None:
     db.commit()
 
 
-@router.get("", response_model=CompatFlexOut, summary="Disposition auflisten")
+@router.get("", response_model=DispositionOut, summary="Disposition auflisten")
 async def list_disposition(
     prioritaet: Optional[str] = Query(None, description="Filter by priority"),
     limit: int = Query(100, ge=1, le=1000),
@@ -91,7 +87,7 @@ async def list_disposition(
     }
 
 
-@router.get("/stats", response_model=CompatFlexOut, summary="Disposition stats abrufen")
+@router.get("/stats", response_model=DispositionOut, summary="Disposition stats abrufen")
 async def get_disposition_stats(db: Session = Depends(get_db)) -> dict:
     _seed(db)
     all_items = db.query(DispositionPosition).all()
@@ -143,7 +139,7 @@ from fastapi import HTTPException
 from starlette.responses import Response
 
 
-@router.post("", response_model=CompatFlexOut, status_code=201, summary="Disposition position anlegen")
+@router.post("", response_model=DispositionOut, status_code=201, summary="Disposition position anlegen")
 async def create_disposition_position(
     body: DispositionPositionCreate,
     db: Session = Depends(get_db),
@@ -173,7 +169,7 @@ async def create_disposition_position(
     }
 
 
-@router.put("/{position_id}", response_model=CompatFlexOut, summary="Disposition position aktualisieren")
+@router.put("/{position_id}", response_model=DispositionOut, summary="Disposition position aktualisieren")
 async def update_disposition_position(
     position_id: str,
     body: DispositionPositionUpdate,

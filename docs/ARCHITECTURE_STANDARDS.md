@@ -268,7 +268,8 @@ Audit-Trails für Mutationen: `app/core/audit_middleware.py` schreibt automatisc
 
 | Check | Script | Was wird geprüft |
 |---|---|---|
-| Schwache Response-Typen | `scripts/check_weak_response_models.py` | `response_model=dict/list/Any` |
+| Schwache Response-Typen (strict) | `scripts/check_weak_response_models.py` | `response_model=dict/list/Any` → Ziel: 0 |
+| CompatFlexOut-Ratchet | `scripts/check_weak_response_models.py --compat-flex` | Transitional open schema → Ratchet senken |
 | Fehlende `summary=` | `scripts/check_response_models.py` | Alle Routes haben summary |
 | SQL f-Strings | `scripts/check_sql_fstrings.py` | SQL-Injection-Risiko |
 | Tenant-Isolation | CI-Gate in `.github/workflows/quality-gate.yml` | |
@@ -276,15 +277,94 @@ Audit-Trails für Mutationen: `app/core/audit_middleware.py` schreibt automatisc
 
 ---
 
-## 10. Migrations-Priorität (Ratchet-Plan)
+## 10. Schema-Extraktion (Domain-Schema-Dateien)
 
-| Welle | Ziel-Threshold | Fokus |
+**Prinzip:** Schemas die von Service-Layer und Endpoint-Layer gemeinsam genutzt werden, dürfen **nicht** im Endpoint inline definiert sein. Sie gehören in `app/api/v1/schemas/<domain>_schemas.py`.
+
+### Wann extrahieren?
+
+- Schema wird in einem Service importiert (→ circular import verhindert inline-Definition)
+- Schema ist die Response-Basis für >3 Endpoints
+- Schema repräsentiert ein fachlich stabiles Objekt (DTO-Vertrag)
+
+### Beispiel: personal_schemas.py (Stand 2026-05-28)
+
+```
+app/api/v1/schemas/
+├── base.py                  # Basis-Klassen (BaseSchema, ListResponse, CompatFlexOut, ...)
+├── personal_schemas.py      # HRM-Domäne (HrmOperationsGateOut, EmployeeFileOut, ...)
+└── <domain>_schemas.py      # weitere Domänen nach Bedarf
+```
+
+### Import-Konvention
+
+```python
+# Im Endpoint
+from app.api.v1.schemas.personal_schemas import HrmOperationsGatesOut, EmployeeFileOut
+
+# Im Service (korrekte Richtung: Service importiert Schemas, nicht umgekehrt)
+from app.api.v1.schemas.personal_schemas import HrmOperationsGatesOut
+```
+
+### Architekturregeln
+
+- **Erlaubt:** Service → Schema-Datei (schemas sind stabile Verträge)
+- **Verboten:** Service → Endpoint-Datei (Endpoint ist HTTP-Layer)
+- **Verboten:** Schema → Service (circular)
+- Mapper-Funktionen (SQLAlchemy → Pydantic) gehören in den **Endpoint-Layer**, nicht in den Service
+
+---
+
+## 11. CompatFlexOut — Migrationspfad
+
+`CompatFlexOut` ist ein **transitionales Schema** (`extra="allow"`, akzeptiert beliebige JSON-Felder).
+Es wurde bei der Welle-D-Migration (2026-05-28) als Übergangsschritt zentralisiert.
+
+### Stand 2026-05-28
+
+- Baseline: **598 CompatFlexOut-Nutzungen** in 314 Endpoint-Dateien
+- Zentralisiert in `app.api.v1.schemas.base.CompatFlexOut` (nicht mehr inline definiert)
+- CI-Ratchet: `--compat-flex-threshold=598`
+
+### Migrationsstrategie (Welle E+)
+
+Für jeden Endpoint mit `response_model=CompatFlexOut`:
+
+1. **Action-Endpoints** (POST Trigger, Status-Updates ohne Response-Body) → `StatusResponse`
+2. **ID-Create-Endpoints** → `IDResponse`
+3. **Detail-Endpoints** → echtes Pydantic-Schema in `app/api/v1/schemas/<domain>_schemas.py`
+4. **List-Endpoints** → `list[EchtesSchema]` oder `ListResponse[EchtesSchema]`
+
+**Ratchet senken:** Nach jeder Migrationswelle `--compat-flex-threshold` in `check_weak_response_models.py` verringern.
+
+### Priorisierung nach fachlicher Bedeutung
+
+| Priorität | Datei / Bereich | Begründung |
 |---|---|---|
-| Baseline (2026-05-28) | 1451 | Messung |
-| Welle A | 1200 | process_kernel_api.py, compat.py |
-| Welle B | 1000 | einkauf_bestellvorschlag.py, admin_mobile.py, external_agent_integrations.py |
-| Welle C | 800 | personal.py, agents.py, weitere Fachdomänen |
-| Welle D | 500 | Finance, Agrar, Sales |
-| Ziel | 0 | Vollständige Typisierung |
+| P0 | `harvest_acceptance.py` | Kernprozess Ernte-Annahme |
+| P0 | `agrar_settlements.py` | Abrechnung / Gutschrift (GoBD) |
+| P0 | `sales_orders.py`, `sales_invoice_einvoice.py` | Verkauf / E-Rechnung |
+| P1 | Finance-Domäne (journal_entries, financial_reports) | GoBD-Relevanz |
+| P2 | `compat.py` Domain-Gruppen | PurchaseOrderOut → echte Felder |
 
-Bei jeder Welle: Threshold in `check_weak_response_models.py` senken.
+---
+
+## 12. Migrations-Ratchet — Verlauf
+
+**Stand 2026-05-28: Literal dict/list/Any = 0 ✅ | CompatFlexOut = 598 (Basis)**
+
+| Welle | Beschreibung | Threshold | Datum | Ergebnis |
+|---|---|---|---|---|
+| Baseline | Messung | 1451 | 2026-05-28 | CI-Gate eingerichtet |
+| A | admin_mobile.py, compat.py | 1200 | 2026-05-28 | ✅ |
+| B | process_kernel_api.py | 1000 | 2026-05-28 | ✅ |
+| C | 50+ Dateien bulk | 500 | 2026-05-28 | ✅ |
+| D | Restliche 260 Dateien | 0 | 2026-05-28 | ✅ Vollständige Typisierung (strict=0) |
+| **D+** | **CompatFlexOut zentralisiert** | **598 (flex)** | **2026-05-28** | **Basis für Welle E** |
+| E | Erste echte Feld-Schemas | TBD | TBD | Geplant |
+
+**Fortschritt verfolgen:**
+```bash
+python scripts/check_weak_response_models.py            # strict: muss 0 bleiben
+python scripts/check_weak_response_models.py --compat-flex  # flex: Ratchet senken
+```

@@ -7,6 +7,12 @@ import { useEffect } from 'react'
 export const WHISPERBAR_DICTATE_EVENT = 'whisperbar-dictate-start'
 export const WHISPERBAR_SUMMARY_EVENT = 'whisperbar-summary-clipboard'
 export const VOICE_INTENT_EVENT = 'voice-intent'
+export const VOICE_SUMMARY_READY_EVENT = 'voice-summary-ready'
+
+export type VoiceSummaryReadyDetail = {
+  summaryText: string
+  estimatedSeconds?: number
+}
 
 export function useWhisperBarShortcuts(enabled = true): void {
   useEffect(() => {

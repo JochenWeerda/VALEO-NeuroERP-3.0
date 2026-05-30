@@ -11,11 +11,7 @@ from app.core.tenant import get_tenant_id
 from app.services.consent_engine import check_consent, grant_consent, revoke_consent, get_consent_status
 
 from app.api.v1.schemas.base import BaseSchema
-from pydantic import ConfigDict as _ConfigDict
-
-
-class CompatFlexOut(BaseSchema):
-    model_config = _ConfigDict(extra="allow")
+from app.api.v1.schemas.neuro_consent_schemas import NeuroConsentOut
 
 
 router = APIRouter(prefix="/neuro/consent", tags=["neuro-core", "consent", "dsgvo"])
@@ -38,28 +34,28 @@ class ConsentRevokeRequest(BaseModel):
 
 
 @router.post("/check", summary="Check do",
-    response_model=CompatFlexOut
+    response_model=NeuroConsentOut
 )
 async def do_check(req: ConsentCheckRequest, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
     return check_consent(req.entity_id, req.consent_type, tenant_id, db)
 
 
 @router.post("/grant", summary="Grant do",
-    response_model=CompatFlexOut
+    response_model=NeuroConsentOut
 )
 async def do_grant(req: ConsentGrantRequest, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
     return grant_consent(req.entity_id, req.consent_type, req.purpose, tenant_id, db)
 
 
 @router.post("/revoke", summary="Revoke do",
-    response_model=CompatFlexOut
+    response_model=NeuroConsentOut
 )
 async def do_revoke(req: ConsentRevokeRequest, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
     return revoke_consent(req.entity_id, req.consent_type, tenant_id, db)
 
 
 @router.get("/{entity_id}", summary="Status abrufen",
-    response_model=CompatFlexOut
+    response_model=NeuroConsentOut
 )
 async def get_status(entity_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
     return {"entity_id": entity_id, "consents": get_consent_status(entity_id, tenant_id, db)}

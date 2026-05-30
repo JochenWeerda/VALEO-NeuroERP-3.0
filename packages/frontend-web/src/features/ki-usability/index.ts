@@ -15,7 +15,7 @@ export { useGlobalShortcutsWithVoice } from './hooks/useGlobalShortcutsWithVoice
 export { fetchActions, fetchAction } from './api/actions'
 export type { Action, ActionListResponse } from './api/actions'
 export { buildToolbarActionsFromRegistry } from './toolbar-actions'
-export { resolveVoice, polishVoice, summarizeVoice, synthesizeVoice, runVoicePipeline } from './api/voice'
+export { resolveVoice, polishVoice, summarizeVoice, synthesizeVoice, runVoicePipeline, transcribeVoice } from './api/voice'
 export type {
   VoiceResolveRequest,
   VoiceResolveResponse,
@@ -27,7 +27,10 @@ export type {
   VoiceSynthesizeResponse,
   VoicePipelineRequest,
   VoicePipelineResponse,
+  VoiceTranscribeRequest,
+  VoiceTranscribeResponse,
 } from './api/voice'
+export { captureLocalVoiceAudio, isLocalVoiceCaptureSupported, resolveVoiceSttProvider } from './hooks/useLocalVoiceCapture'
 export {
   limitItemsForDensity,
   limitProcessDetails,

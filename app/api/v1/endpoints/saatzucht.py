@@ -14,11 +14,7 @@ from app.core.database import get_db
 from app.core.tenant import get_tenant_id
 
 from app.api.v1.schemas.base import BaseSchema
-from pydantic import ConfigDict as _ConfigDict
-
-
-class CompatFlexOut(BaseSchema):
-    model_config = _ConfigDict(extra="allow")
+from app.api.v1.schemas.saatzucht_schemas import SaatzuchtOut
 
 
 router = APIRouter(prefix="/saatzucht", tags=["saatzucht", "agrar", "saatgut"])
@@ -304,7 +300,7 @@ def etikett(
 
 
 @router.get("/partien/{id}/kontrollprotokoll", summary="Kontrollprotokoll",
-    response_model=CompatFlexOut
+    response_model=SaatzuchtOut
 )
 def kontrollprotokoll(
     id: str,
@@ -326,7 +322,7 @@ def kontrollprotokoll(
 
 
 @router.get("/statistik", summary="Statistik",
-    response_model=CompatFlexOut
+    response_model=SaatzuchtOut
 )
 def statistik(
     db: Session = Depends(get_db),

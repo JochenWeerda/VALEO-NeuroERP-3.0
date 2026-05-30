@@ -16,11 +16,6 @@ from app.auth.jwt import decode_token
 from app.core.config import settings
 
 from app.api.v1.schemas.base import BaseSchema
-from pydantic import ConfigDict as _ConfigDict
-
-
-class CompatFlexOut(BaseSchema):
-    model_config = _ConfigDict(extra="allow")
 
 
 router = APIRouter(tags=["neuro-core", "copilot"])

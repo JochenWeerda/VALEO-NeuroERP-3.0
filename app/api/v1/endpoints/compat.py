@@ -1,4 +1,4 @@
-﻿"""Compatibility endpoints for frontend path alignment and missing modules."""
+"""Compatibility endpoints for frontend path alignment and missing modules."""
 
 from __future__ import annotations
 
@@ -49,6 +49,7 @@ from app.services.portal_compat_service import PortalCompatService
 
 from app.api.v1.schemas.base import BaseSchema, StatusResponse
 from pydantic import ConfigDict as _ConfigDict
+from app.api.v1.schemas.base import CompatBridgeOut
 
 
 # ---------------------------------------------------------------------------
@@ -129,10 +130,6 @@ class NewsletterOut(BaseSchema):
     typ: str = ""
     status: str = ""
     hinweis: str = ""
-
-
-class CompatFlexOut(BaseSchema):
-    model_config = _ConfigDict(extra="allow")
 
 
 
@@ -479,7 +476,7 @@ async def po_cancel(po_id: str, payload: dict[str, Any], tenant_id: str = Depend
     return doc
 
 
-@router.get("/purchase-orders/statistics", response_model=CompatFlexOut, summary="Statistics po")
+@router.get("/purchase-orders/statistics", response_model=CompatBridgeOut, summary="Statistics po")
 async def po_statistics(tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)) -> dict:
     docs = _list_docs(db, "purchase_order", limit=5000, tenant_id=tenant_id)
     by_status: dict[str, int] = {}
@@ -491,7 +488,7 @@ async def po_statistics(tenant_id: str = Depends(get_tenant_id), db: Session = D
     return {"totalOrders": len(docs), "totalValue": round(total_value, 2), "byStatus": by_status}
 
 
-@router.get("/purchase-orders/{po_id}/changelog", response_model=list[CompatFlexOut], summary="Changelog po")
+@router.get("/purchase-orders/{po_id}/changelog", response_model=list[CompatBridgeOut], summary="Changelog po")
 async def po_changelog(po_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)) -> list[dict[str, Any]]:
     doc = await po_get(po_id, tenant_id, db)
     return doc.get("changelog", [])
@@ -500,7 +497,7 @@ async def po_changelog(po_id: str, tenant_id: str = Depends(get_tenant_id), db: 
 # Sales bridge --------------------------------------------------------------
 
 
-@router.get("/sales/{doc_type}", response_model=CompatFlexOut, summary="Bridge sales")
+@router.get("/sales/{doc_type}", response_model=CompatBridgeOut, summary="Bridge sales")
 async def sales_bridge(doc_type: str, db: Session = Depends(get_db)) -> dict:
     mapping = {
         "auftraege": "sales_order",
@@ -521,7 +518,7 @@ async def sales_bridge(doc_type: str, db: Session = Depends(get_db)) -> dict:
 # Einkauf compatibility -----------------------------------------------------
 
 
-@router.get("/einkauf/goods-receipts", response_model=list[CompatFlexOut], summary="Goods receipts einkauf")
+@router.get("/einkauf/goods-receipts", response_model=list[CompatBridgeOut], summary="Goods receipts einkauf")
 async def einkauf_goods_receipts(
     tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
 ) -> list[dict[str, Any]]:
@@ -542,7 +539,7 @@ async def einkauf_goods_receipts_create(
         raise HTTPException(status_code=400, detail=str(exc)) from exc
 
 
-@router.get("/einkauf/bestellvorschlaege", response_model=list[CompatFlexOut], summary="Bestellvorschlaege einkauf")
+@router.get("/einkauf/bestellvorschlaege", response_model=list[CompatBridgeOut], summary="Bestellvorschlaege einkauf")
 async def einkauf_bestellvorschlaege(db: Session = Depends(get_db)) -> list[dict[str, Any]]:
     rows = db.query(Charge).order_by(Charge.eingang.desc()).limit(200).all()
     return [
@@ -562,7 +559,7 @@ async def einkauf_bestellvorschlaege(db: Session = Depends(get_db)) -> list[dict
     ]
 
 
-@router.get("/einkauf/warengruppen", response_model=list[CompatFlexOut], summary="Warengruppen einkauf")
+@router.get("/einkauf/warengruppen", response_model=list[CompatBridgeOut], summary="Warengruppen einkauf")
 async def einkauf_warengruppen(db: Session = Depends(get_db)) -> list[dict[str, Any]]:
     items = db.query(ArticleModel).filter(ArticleModel.is_active == True).limit(500).all()  # noqa: E712
     grouped: dict[str, dict[str, Any]] = {}
@@ -574,7 +571,7 @@ async def einkauf_warengruppen(db: Session = Depends(get_db)) -> list[dict[str, 
     return list(grouped.values())
 
 
-@router.get("/einkauf/anfragen", response_model=list[CompatFlexOut], summary="Anfragen list einkauf")
+@router.get("/einkauf/anfragen", response_model=list[CompatBridgeOut], summary="Anfragen list einkauf")
 async def einkauf_anfragen_list(
     tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
 ) -> list[dict[str, Any]]:
@@ -612,7 +609,7 @@ async def einkauf_anfrage_convert_to_order(
         raise HTTPException(status_code=404, detail=str(exc)) from exc
 
 
-@router.get("/contracts/{contract_id}", response_model=CompatFlexOut, summary="Contract get compat")
+@router.get("/contracts/{contract_id}", response_model=CompatBridgeOut, summary="Contract get compat")
 async def compat_contract_get(
     contract_id: str,
     db: Session = Depends(get_db),
@@ -621,7 +618,7 @@ async def compat_contract_get(
     return await get_contract_via_router(contract_id=contract_id, db=db, tenant_id=tenant_id)
 
 
-@router.get("/einkauf/angebote", response_model=list[CompatFlexOut], summary="Angebote list einkauf")
+@router.get("/einkauf/angebote", response_model=list[CompatBridgeOut], summary="Angebote list einkauf")
 async def einkauf_angebote_list(
     tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
 ) -> list[dict[str, Any]]:
@@ -668,7 +665,7 @@ async def einkauf_angebot_convert_to_order(
         raise HTTPException(status_code=404, detail=str(exc)) from exc
 
 
-@router.get("/einkauf/anlieferavis", response_model=list[CompatFlexOut], summary="Anlieferavis list einkauf")
+@router.get("/einkauf/anlieferavis", response_model=list[CompatBridgeOut], summary="Anlieferavis list einkauf")
 async def einkauf_anlieferavis_list(
     tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
 ) -> list[dict[str, Any]]:
@@ -688,7 +685,7 @@ async def einkauf_anlieferavis_transition(
         raise HTTPException(status_code=404, detail=str(exc)) from exc
 
 
-@router.get("/einkauf/auftragsbestaetigungen", response_model=list[CompatFlexOut], summary="Auftragsbestaetigungen list einkauf")
+@router.get("/einkauf/auftragsbestaetigungen", response_model=list[CompatBridgeOut], summary="Auftragsbestaetigungen list einkauf")
 async def einkauf_auftragsbestaetigungen_list(
     tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
 ) -> list[dict[str, Any]]:
@@ -708,7 +705,7 @@ async def einkauf_auftragsbestaetigung_transition(
         raise HTTPException(status_code=404, detail=str(exc)) from exc
 
 
-@router.get("/einkauf/rechnungseingaenge", response_model=list[CompatFlexOut], summary="Rechnungseingaenge list einkauf")
+@router.get("/einkauf/rechnungseingaenge", response_model=list[CompatBridgeOut], summary="Rechnungseingaenge list einkauf")
 async def einkauf_rechnungseingaenge_list(
     tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
 ) -> list[dict[str, Any]]:
@@ -814,14 +811,14 @@ async def einkauf_reports(tenant_id: str = Depends(get_tenant_id), db: Session =
     return payload
 
 
-@router.get("/einkauf/anfragen/{anfrage_id}/bids", response_model=list[CompatFlexOut], summary="Bids einkauf")
+@router.get("/einkauf/anfragen/{anfrage_id}/bids", response_model=list[CompatBridgeOut], summary="Bids einkauf")
 async def einkauf_bids(
     anfrage_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
 ) -> list[dict[str, Any]]:
     return EinkaufCompatService(db, tenant_id).list_bids(anfrage_id)
 
 
-@router.get("/einkauf/retouren", response_model=list[CompatFlexOut], summary="Retouren einkauf")
+@router.get("/einkauf/retouren", response_model=list[CompatBridgeOut], summary="Retouren einkauf")
 async def einkauf_retouren(
     tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
 ) -> list[dict[str, Any]]:
@@ -856,14 +853,14 @@ class FutterBulkDeleteOut(BaseModel):
     errors: list[FutterBulkDeleteErrorOut] = Field(default_factory=list)
 
 
-@router.get("/futter/einzelfuttermittel", response_model=list[CompatFlexOut], summary="Einzel futter")
+@router.get("/futter/einzelfuttermittel", response_model=list[CompatBridgeOut], summary="Einzel futter")
 async def futter_einzel(
     tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
 ) -> list[dict[str, Any]]:
     return FutterCompatService(db, tenant_id).list_einzelfuttermittel()
 
 
-@router.get("/futter/mischfuttermittel", response_model=list[CompatFlexOut], summary="Misch futter")
+@router.get("/futter/mischfuttermittel", response_model=list[CompatBridgeOut], summary="Misch futter")
 async def futter_misch(
     tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
 ) -> list[dict[str, Any]]:
@@ -906,21 +903,21 @@ async def bulk_delete_futter_misch(
     return FutterBulkDeleteOut(**result)
 
 
-@router.get("/futter/chargen", response_model=list[CompatFlexOut], summary="Chargen futter")
+@router.get("/futter/chargen", response_model=list[CompatBridgeOut], summary="Chargen futter")
 async def futter_chargen(
     tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
 ) -> list[dict[str, Any]]:
     return FutterCompatService(db, tenant_id).list_chargen()
 
 
-@router.get("/futter/qualitaetskontrolle", response_model=list[CompatFlexOut], summary="Qc futter")
+@router.get("/futter/qualitaetskontrolle", response_model=list[CompatBridgeOut], summary="Qc futter")
 async def futter_qc(
     tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
 ) -> list[dict[str, Any]]:
     return FutterCompatService(db, tenant_id).list_qualitaetskontrolle()
 
 
-@router.get("/futter/statistik", response_model=CompatFlexOut, summary="Stats futter")
+@router.get("/futter/statistik", response_model=CompatBridgeOut, summary="Stats futter")
 async def futter_stats(
     tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
 ) -> dict:
@@ -1951,28 +1948,28 @@ async def portal_dashboard(
     return PortalCompatService(db, tenant_id).get_portal_dashboard_full()
 
 
-@router.get("/portal/anfragen", response_model=list[CompatFlexOut], summary="Anfragen portal")
+@router.get("/portal/anfragen", response_model=list[CompatBridgeOut], summary="Anfragen portal")
 async def portal_anfragen(
     tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
 ) -> list[dict[str, Any]]:
     return PortalCompatService(db, tenant_id).list_portal_anfragen()
 
 
-@router.get("/portal/bestellungen", response_model=list[CompatFlexOut], summary="Bestellungen portal")
+@router.get("/portal/bestellungen", response_model=list[CompatBridgeOut], summary="Bestellungen portal")
 async def portal_bestellungen(
     tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
 ) -> list[dict[str, Any]]:
     return PortalCompatService(db, tenant_id).list_portal_bestellungen()
 
 
-@router.get("/portal/dokumente", response_model=list[CompatFlexOut], summary="Dokumente portal")
+@router.get("/portal/dokumente", response_model=list[CompatBridgeOut], summary="Dokumente portal")
 async def portal_dokumente(
     tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
 ) -> list[dict[str, Any]]:
     return PortalCompatService(db, tenant_id).list_portal_dokumente()
 
 
-@router.get("/portal/feldbuch", response_model=list[CompatFlexOut], summary="Feldbuch portal")
+@router.get("/portal/feldbuch", response_model=list[CompatBridgeOut], summary="Feldbuch portal")
 async def portal_feldbuch(
     customer_id: Optional[str] = Query(None),
     tenant_id: Optional[str] = Depends(get_tenant_id),
@@ -1981,21 +1978,21 @@ async def portal_feldbuch(
     return PortalCompatService(db, tenant_id or "").list_portal_feldbuch(customer_id=customer_id)
 
 
-@router.get("/portal/naehrstoffbilanzen", response_model=list[CompatFlexOut], summary="Naehrstoffbilanzen portal")
+@router.get("/portal/naehrstoffbilanzen", response_model=list[CompatBridgeOut], summary="Naehrstoffbilanzen portal")
 async def portal_naehrstoffbilanzen(
     tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
 ) -> list[dict[str, Any]]:
     return PortalCompatService(db, tenant_id).list_portal_naehrstoffbilanzen()
 
 
-@router.get("/portal/rechnungen", response_model=list[CompatFlexOut], summary="Rechnungen portal")
+@router.get("/portal/rechnungen", response_model=list[CompatBridgeOut], summary="Rechnungen portal")
 async def portal_rechnungen(
     tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
 ) -> list[dict[str, Any]]:
     return PortalCompatService(db, tenant_id).list_portal_rechnungen()
 
 
-@router.get("/portal/shop", response_model=list[CompatFlexOut], summary="Shop portal")
+@router.get("/portal/shop", response_model=list[CompatBridgeOut], summary="Shop portal")
 async def portal_shop(
     tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
 ) -> list[dict[str, Any]]:
@@ -2050,28 +2047,28 @@ async def portal_create_order(
     return result
 
 
-@router.get("/portal/contracts", response_model=list[CompatFlexOut], summary="Contracts portal")
+@router.get("/portal/contracts", response_model=list[CompatBridgeOut], summary="Contracts portal")
 async def portal_contracts(
     tenant_id: Optional[str] = Depends(get_tenant_id), db: Session = Depends(get_db)
 ) -> list[dict[str, Any]]:
     return PortalCompatService(db, tenant_id or "").list_portal_contracts()
 
 
-@router.get("/portal/pre-purchases", response_model=list[CompatFlexOut], summary="Pre purchases portal")
+@router.get("/portal/pre-purchases", response_model=list[CompatBridgeOut], summary="Pre purchases portal")
 async def portal_pre_purchases(
     tenant_id: Optional[str] = Depends(get_tenant_id), db: Session = Depends(get_db)
 ) -> list[dict[str, Any]]:
     return PortalCompatService(db, tenant_id or "").list_portal_pre_purchases()
 
 
-@router.get("/portal/vertraege", response_model=list[CompatFlexOut], summary="Vertraege portal")
+@router.get("/portal/vertraege", response_model=list[CompatBridgeOut], summary="Vertraege portal")
 async def portal_vertraege(
     tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
 ) -> list[dict[str, Any]]:
     return PortalCompatService(db, tenant_id).list_portal_vertraege()
 
 
-@router.get("/portal/zertifikate", response_model=list[CompatFlexOut], summary="Zertifikate portal")
+@router.get("/portal/zertifikate", response_model=list[CompatBridgeOut], summary="Zertifikate portal")
 async def portal_zertifikate(
     tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
 ) -> list[dict[str, Any]]:
@@ -2136,7 +2133,7 @@ async def upsert_supplier_rating(
     return EinkaufCompatService(db, tenant_id).upsert_supplier_rating(supplier_id, payload)
 
 
-@router.get("/einkauf/suppliers/{supplier_id}/documents", response_model=list[CompatFlexOut], summary="Documents supplier")
+@router.get("/einkauf/suppliers/{supplier_id}/documents", response_model=list[CompatBridgeOut], summary="Documents supplier")
 async def supplier_documents(supplier_id: str, db: Session = Depends(get_db)) -> list[dict[str, Any]]:
     docs = (
         db.query(Dokument)
@@ -2198,7 +2195,7 @@ def _find_po_by_id(db: Session, po_id: str, tenant_id: Optional[str] = None) -> 
     raise HTTPException(status_code=404, detail="Purchase order not found")
 
 
-@router.get("/purchase-orders/{po_id}/communications", response_model=list[CompatFlexOut], summary="Communications po")
+@router.get("/purchase-orders/{po_id}/communications", response_model=list[CompatBridgeOut], summary="Communications po")
 async def po_communications(po_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)) -> list[dict[str, Any]]:
     po = _find_po_by_id(db, po_id, tenant_id=tenant_id)
     return po.get("communications", [])
@@ -2314,12 +2311,12 @@ async def update_service_entry_sheet(
         raise HTTPException(status_code=404, detail=str(exc)) from exc
 
 
-@router.get("/einkauf/credit-memos", response_model=list[CompatFlexOut], summary="Credit memos auflisten")
+@router.get("/einkauf/credit-memos", response_model=list[CompatBridgeOut], summary="Credit memos auflisten")
 async def list_credit_memos(tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)) -> list[dict[str, Any]]:
     return EinkaufCompatService(db, tenant_id).list_credit_memos()
 
 
-@router.get("/einkauf/debit-memos", response_model=list[CompatFlexOut], summary="Debit memos auflisten")
+@router.get("/einkauf/debit-memos", response_model=list[CompatBridgeOut], summary="Debit memos auflisten")
 async def list_debit_memos(tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)) -> list[dict[str, Any]]:
     return EinkaufCompatService(db, tenant_id).list_debit_memos()
 
@@ -2453,7 +2450,7 @@ async def ack_edi_message(msg_id: str, tenant_id: str = Depends(get_tenant_id), 
 # ---------------------------------------------------------------------------
 
 @router.get("/lager/dashboard", tags=["lager"], summary="Dashboard lager",
-    response_model=None
+    response_model=CompatBridgeOut
 )
 async def lager_dashboard(
     tenant_id: str = Depends(get_tenant_id),
@@ -2711,7 +2708,7 @@ async def create_auslagerung(
 # POS Pausierte VerkÃ¤ufe (Suspended Sales)
 # ---------------------------------------------------------------------------
 
-@router.get("/pos/suspended-sales", response_model=list[CompatFlexOut], tags=["pos"], summary="Suspended sales auflisten")
+@router.get("/pos/suspended-sales", response_model=list[CompatBridgeOut], tags=["pos"], summary="Suspended sales auflisten")
 async def list_suspended_sales(
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
@@ -3020,7 +3017,7 @@ async def save_firma(
 # â”€â”€ Management Dashboard â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 @router.get("/management/dashboard", summary="Dashboard management",
-    response_model=None
+    response_model=CompatBridgeOut
 )
 async def management_dashboard(
     tenant_id: str = Depends(get_tenant_id),
@@ -3086,7 +3083,7 @@ async def management_dashboard(
 # â”€â”€ Benachrichtigungen â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 @router.get("/benachrichtigungen", summary="Benachrichtigungen auflisten",
-    response_model=CompatFlexOut
+    response_model=CompatBridgeOut
 )
 async def list_benachrichtigungen(
     tenant_id: str = Depends(get_tenant_id),
@@ -3373,7 +3370,7 @@ async def cancel_field_service_task(
 # â”€â”€ Globale Suche â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 @router.get("/search", summary="Search global",
-    response_model=CompatFlexOut
+    response_model=CompatBridgeOut
 )
 async def global_search(
     q: str = "",

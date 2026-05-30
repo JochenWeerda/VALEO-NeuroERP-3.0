@@ -9,11 +9,7 @@ from typing import Any, Optional
 from app.services.compensation_engine import compensate, get_compensation_run
 
 from app.api.v1.schemas.base import BaseSchema
-from pydantic import ConfigDict as _ConfigDict
-
-
-class CompatFlexOut(BaseSchema):
-    model_config = _ConfigDict(extra="allow")
+from app.api.v1.schemas.neuro_compensation_schemas import NeuroCompensationOut
 
 
 router = APIRouter(prefix="/neuro/compensate", tags=["neuro-core", "compensation"])
@@ -27,7 +23,7 @@ class CompensateRequest(BaseModel):
 
 
 @router.post("", summary="Compensate do",
-    response_model=CompatFlexOut
+    response_model=NeuroCompensationOut
 )
 async def do_compensate(request: CompensateRequest):
     run = await compensate(
@@ -39,7 +35,7 @@ async def do_compensate(request: CompensateRequest):
 
 
 @router.get("/{run_id}", summary="Run abrufen",
-    response_model=CompatFlexOut
+    response_model=NeuroCompensationOut
 )
 async def get_run(run_id: str):
     run = get_compensation_run(run_id)
@@ -49,7 +45,7 @@ async def get_run(run_id: str):
 
 
 @router.post("/{run_id}/retry", summary="Retry manual",
-    response_model=CompatFlexOut
+    response_model=NeuroCompensationOut
 )
 async def manual_retry(run_id: str):
     run = get_compensation_run(run_id)

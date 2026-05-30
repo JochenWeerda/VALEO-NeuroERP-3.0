@@ -23,12 +23,7 @@ from app.infrastructure.models import AuditLog
 
 logger = logging.getLogger(__name__)
 
-from app.api.v1.schemas.base import BaseSchema
-from pydantic import ConfigDict as _ConfigDict
-
-
-class CompatFlexOut(BaseSchema):
-    model_config = _ConfigDict(extra="allow")
+from app.api.v1.schemas.base import BaseSchema, StatusResponse
 
 
 router = APIRouter(prefix="/ap/approval-workflow", tags=["finance", "ap", "approval"])

@@ -37,11 +37,7 @@ from app.api.v1.schemas.portal import (
 )
 
 from app.api.v1.schemas.base import BaseSchema
-from pydantic import ConfigDict as _ConfigDict
-
-
-class CompatFlexOut(BaseSchema):
-    model_config = _ConfigDict(extra="allow")
+from app.api.v1.schemas.portal_shop_schemas import PortalShopOut
 
 
 router = APIRouter()
@@ -636,7 +632,7 @@ async def get_order(
     )
 
 
-@router.get("/contracts", response_model=list[CompatFlexOut], summary="Contracts auflisten")
+@router.get("/contracts", response_model=list[PortalShopOut], summary="Contracts auflisten")
 async def list_contracts(
     request: Request,
     tenant_id: str = Query(..., description="Mandanten-ID"),
@@ -672,7 +668,7 @@ async def list_contracts(
     ]
 
 
-@router.get("/pre-purchases", response_model=list[CompatFlexOut], summary="Pre purchases auflisten")
+@router.get("/pre-purchases", response_model=list[PortalShopOut], summary="Pre purchases auflisten")
 async def list_pre_purchases(
     request: Request,
     tenant_id: str = Query(..., description="Mandanten-ID"),
@@ -710,7 +706,7 @@ async def list_pre_purchases(
 
 
 @router.patch("/orders/{order_id}/status", summary="Order status aktualisieren",
-    response_model=CompatFlexOut
+    response_model=PortalShopOut
 )
 async def update_order_status(
     request: Request,
@@ -769,7 +765,7 @@ async def update_order_status(
 
 
 @router.get("/orders/reconciliation", summary="Orders reconcile",
-    response_model=CompatFlexOut
+    response_model=PortalShopOut
 )
 async def reconcile_orders(
     tenant_id: str = Query(..., description="Mandanten-ID"),
@@ -830,7 +826,7 @@ async def reconcile_orders(
 
 
 @router.get("/orders/observability", summary="Orders observability abrufen",
-    response_model=CompatFlexOut
+    response_model=PortalShopOut
 )
 async def get_orders_observability(
     tenant_id: str = Query(..., description="Mandanten-ID"),

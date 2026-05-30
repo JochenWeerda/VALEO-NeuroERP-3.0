@@ -89,6 +89,20 @@ export interface VoicePipelineResponse {
   error?: string
 }
 
+export interface VoiceTranscribeRequest {
+  audio_base64: string
+  audio_format?: 'wav' | 'webm' | 'mp3' | 'ogg'
+  language?: string
+}
+
+export interface VoiceTranscribeResponse {
+  text: string
+  confidence: number
+  provider: string
+  language: string
+  error?: string
+}
+
 /** Base URL for ki-usability-api (dev: use Vite proxy /api/ki-usability → localhost:5200) */
 const BASE =
   (import.meta.env as Record<string, string | undefined>).VITE_KI_USABILITY_API_URL ?? '/api/ki-usability'
@@ -145,4 +159,38 @@ export async function runVoicePipeline(body: VoicePipelineRequest): Promise<Voic
   })
   if (!res.ok) return null
   return (await res.json()) as VoicePipelineResponse
+}
+
+export async function transcribeVoice(body: VoiceTranscribeRequest): Promise<VoiceTranscribeResponse | null> {
+  const res = await fetch(`${BASE}/api/v1/voice/transcribe`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      audio_base64: body.audio_base64,
+      audio_format: body.audio_format ?? 'webm',
+      language: body.language ?? 'de-DE',
+    }),
+  })
+  if (!res.ok) return null
+  return (await res.json()) as VoiceTranscribeResponse
+}
+
+export interface VoiceStatusResponse {
+  stt_provider: string
+  stt_ready: boolean
+  tts_provider: string
+  tts_ready: boolean
+  ollama_base_url: string
+  ollama_reachable: boolean
+  voice_polish_enabled: boolean
+  voice_summary_enabled: boolean
+  kokoro_configured: boolean
+  piper_configured: boolean
+  faster_whisper_model: string
+}
+
+export async function fetchVoiceStatus(): Promise<VoiceStatusResponse | null> {
+  const res = await fetch(`${BASE}/api/v1/voice/status`)
+  if (!res.ok) return null
+  return (await res.json()) as VoiceStatusResponse
 }

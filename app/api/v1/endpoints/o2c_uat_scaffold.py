@@ -16,11 +16,7 @@ from app.core.database import get_db
 from app.core.tenant import get_tenant_id
 
 from app.api.v1.schemas.base import BaseSchema
-from pydantic import ConfigDict as _ConfigDict
-
-
-class CompatFlexOut(BaseSchema):
-    model_config = _ConfigDict(extra="allow")
+from app.api.v1.schemas.o2c_uat_scaffold_schemas import O2cUatScaffoldOut
 
 
 router = APIRouter(prefix="/uat/o2c", tags=["uat", "o2c", "testing"])
@@ -158,7 +154,7 @@ def _load_from_db_or_store(id: str, db: Session, tenant_id: str) -> Optional[dic
 # ── Endpoints ─────────────────────────────────────────────────────────────────
 
 @router.get("/readiness", summary="Readiness",
-    response_model=CompatFlexOut
+    response_model=O2cUatScaffoldOut
 )
 def readiness(
     db: Session = Depends(get_db),
@@ -270,7 +266,7 @@ def create_szenario(
 
 
 @router.post("/szenarien/{id}/schritt/{nr}/ausfuehren", summary="Ausfuehren schritt",
-    response_model=CompatFlexOut
+    response_model=O2cUatScaffoldOut
 )
 def schritt_ausfuehren(
     id: str,
@@ -328,7 +324,7 @@ def schritt_ausfuehren(
 
 
 @router.get("/szenarien/{id}/bericht", summary="Bericht",
-    response_model=CompatFlexOut
+    response_model=O2cUatScaffoldOut
 )
 def bericht(
     id: str,
@@ -359,7 +355,7 @@ def bericht(
 
 
 @router.post("/szenarien/{id}/reset", summary="Szenario zurücksetzen",
-    response_model=CompatFlexOut
+    response_model=O2cUatScaffoldOut
 )
 def reset_szenario(
     id: str,

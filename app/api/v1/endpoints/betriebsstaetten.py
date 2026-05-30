@@ -25,11 +25,6 @@ from app.core.dependencies import get_tenant_id
 from app.core.uuid7 import uuid7
 
 from app.api.v1.schemas.base import BaseSchema
-from pydantic import ConfigDict as _ConfigDict
-
-
-class CompatFlexOut(BaseSchema):
-    model_config = _ConfigDict(extra="allow")
 
 
 router = APIRouter(prefix="/stammdaten/betriebsstaetten",
@@ -204,7 +199,7 @@ def update_betriebsstaette(
 
 
 @router.delete("/{filial_nr}", summary="Betriebsstaette löschen",
-    response_model=CompatFlexOut
+    response_model=None
 )
 def delete_betriebsstaette(
     filial_nr: str,

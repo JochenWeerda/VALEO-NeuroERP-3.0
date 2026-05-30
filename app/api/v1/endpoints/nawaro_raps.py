@@ -24,12 +24,7 @@ from app.infrastructure.models import (
     WeighingTicket,
 )
 
-from app.api.v1.schemas.base import BaseSchema
-from pydantic import ConfigDict as _ConfigDict
-
-
-class CompatFlexOut(BaseSchema):
-    model_config = _ConfigDict(extra="allow")
+from app.api.v1.schemas.base import BaseSchema, StatusResponse
 
 
 router = APIRouter()
@@ -449,7 +444,7 @@ async def update_raps_profile(
     return _profile_out(db, item)
 
 
-@router.delete('/raps-profiles/{profile_id}', response_model=CompatFlexOut, summary="Raps profile löschen")
+@router.delete('/raps-profiles/{profile_id}', response_model=StatusResponse, summary="Raps profile löschen")
 async def delete_raps_profile(
     profile_id: str,
     tenant_id: str = Depends(get_tenant_id),

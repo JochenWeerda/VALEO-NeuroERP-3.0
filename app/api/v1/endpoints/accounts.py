@@ -17,11 +17,7 @@ from ..schemas.finance import (
 from ..schemas.base import PaginatedResponse
 
 from app.api.v1.schemas.base import BaseSchema
-from pydantic import ConfigDict as _ConfigDict
-
-
-class CompatFlexOut(BaseSchema):
-    model_config = _ConfigDict(extra="allow")
+from app.api.v1.schemas.accounts_schemas import AccountsOut
 
 
 router = APIRouter()
@@ -181,7 +177,7 @@ async def delete_account(
         raise HTTPException(status_code=500, detail=f"Failed to delete account: {str(e)}")
 
 
-@router.get("/{account_id}/balance", response_model=CompatFlexOut, summary="Account balance abrufen")
+@router.get("/{account_id}/balance", response_model=AccountsOut, summary="Account balance abrufen")
 async def get_account_balance(
     account_id: str,
     tenant_id: str = Depends(get_tenant_id),
