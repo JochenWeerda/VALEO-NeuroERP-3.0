@@ -23,6 +23,7 @@ _BASE_URI = "https://valeo-erp.de/errors"
 
 _TITLES: dict[str, str] = {
     "DOMAIN_ERROR": "Interner Fehler",
+    "BAD_REQUEST": "Ungültige Anfrage",
     "NOT_FOUND": "Nicht gefunden",
     "TENANT_MISMATCH": "Mandanten-Konflikt",
     "VALIDATION_FAILED": "Validierungsfehler",
@@ -76,6 +77,11 @@ class TenantMismatchError(DomainError):
 
     def __init__(self, entity: str, id: str) -> None:
         super().__init__(f"{entity} '{id}' does not belong to this tenant")
+
+
+class BadRequestError(DomainError):
+    http_status = 400
+    error_code = "BAD_REQUEST"
 
 
 class ValidationFailedError(DomainError):

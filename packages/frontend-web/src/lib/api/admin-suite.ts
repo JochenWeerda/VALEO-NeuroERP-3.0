@@ -114,6 +114,36 @@ export type OperationsEvidence = {
   notes: string
 }
 
+export type ComplianceEvidence = {
+  key: string
+  label: string
+  implementation_status: 'available' | 'partial' | 'planned'
+  runtime_status: 'unchecked'
+  external_gate: 'required' | 'not_required' | 'unchecked'
+  source: string
+  target_path?: string | null
+  notes: string
+}
+
+export type SystemStatusEvidence = {
+  key: string
+  label: string
+  probe_status: 'available' | 'partial' | 'planned'
+  runtime_status: 'unchecked'
+  source: string
+  target_path?: string | null
+  notes: string
+}
+
+export type DiagnosticManifestItem = {
+  key: string
+  label: string
+  source: string
+  collection_status: 'not_collected'
+  redaction: 'required' | 'metadata_only'
+  notes: string
+}
+
 export function useAdminSuiteReadiness() {
   return useQuery({
     queryKey: ['admin-suite', 'readiness'],
@@ -162,4 +192,16 @@ export function useAdminSuiteDevices() {
 
 export function useAdminSuiteOperations() {
   return useQuery({ queryKey: ['admin-suite', 'operations'], queryFn: async () => (await apiClient.get<OperationsEvidence[]>('/api/v1/admin-suite/operations')).data })
+}
+
+export function useAdminSuiteCompliance() {
+  return useQuery({ queryKey: ['admin-suite', 'compliance'], queryFn: async () => (await apiClient.get<ComplianceEvidence[]>('/api/v1/admin-suite/compliance')).data })
+}
+
+export function useAdminSuiteSystemStatus() {
+  return useQuery({ queryKey: ['admin-suite', 'system-status'], queryFn: async () => (await apiClient.get<SystemStatusEvidence[]>('/api/v1/admin-suite/system-status')).data })
+}
+
+export function useAdminSuiteDiagnostics() {
+  return useQuery({ queryKey: ['admin-suite', 'diagnostics'], queryFn: async () => (await apiClient.get<DiagnosticManifestItem[]>('/api/v1/admin-suite/diagnostics')).data })
 }

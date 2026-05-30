@@ -4,12 +4,20 @@ import asyncio
 from dataclasses import dataclass
 from datetime import datetime, timezone
 
-from app.api.v1.endpoints import agrar_settlements as module
 from app.api.v1.endpoints.agrar_settlements import (
     SettlementCampaignBackfillRequest,
     backfill_settlement_campaign_reference,
 )
 from app.infrastructure.models import AgrarSettlement
+from app.services.admin_core_service import AdminCoreService
+
+
+def _patch_tenant_settings(monkeypatch, campaigns: list[dict]) -> None:
+    monkeypatch.setattr(
+        AdminCoreService,
+        "load_tenant_settings",
+        lambda self: {"erntefenster_campaigns": campaigns},
+    )
 
 
 class _FakeSettlementQuery:
@@ -54,15 +62,12 @@ def test_backfill_assigns_campaign_id_for_unambiguous_legacy_settlements(monkeyp
             _SettlementStub(id="set-2", created_at=datetime(2026, 8, 5, tzinfo=timezone.utc)),
         ]
     )
-    monkeypatch.setattr(
-        module,
-        "_load_tenant_settings",
-        lambda _db, _tenant_id: {
-            "erntefenster_campaigns": [
-                {"id": "camp-1", "start_date": "2026-07-01", "end_date": "2026-07-31"},
-                {"id": "camp-2", "start_date": "2026-08-01", "end_date": "2026-08-31"},
-            ]
-        },
+    _patch_tenant_settings(
+        monkeypatch,
+        [
+            {"id": "camp-1", "start_date": "2026-07-01", "end_date": "2026-07-31"},
+            {"id": "camp-2", "start_date": "2026-08-01", "end_date": "2026-08-31"},
+        ],
     )
 
     result = asyncio.run(
@@ -87,15 +92,12 @@ def test_backfill_leaves_ambiguous_legacy_settlements_unassigned(monkeypatch):
             _SettlementStub(id="set-ambiguous", created_at=datetime(2026, 7, 20, tzinfo=timezone.utc)),
         ]
     )
-    monkeypatch.setattr(
-        module,
-        "_load_tenant_settings",
-        lambda _db, _tenant_id: {
-            "erntefenster_campaigns": [
-                {"id": "camp-1", "start_date": "2026-07-01", "end_date": "2026-07-31"},
-                {"id": "camp-2", "start_date": "2026-07-15", "end_date": "2026-08-15"},
-            ]
-        },
+    _patch_tenant_settings(
+        monkeypatch,
+        [
+            {"id": "camp-1", "start_date": "2026-07-01", "end_date": "2026-07-31"},
+            {"id": "camp-2", "start_date": "2026-07-15", "end_date": "2026-08-15"},
+        ],
     )
 
     result = asyncio.run(

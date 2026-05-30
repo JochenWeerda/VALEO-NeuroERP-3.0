@@ -13,6 +13,15 @@ scope:
   - tools/voice/whisperbar-summary.ps1
   - services/ki-usability/app/services/voice_pipeline.py
   - packages/frontend-web/src/features/ki-usability/components/VoiceWhisperBarHost.tsx
+file_ownership:
+  - docs/agent-ops/slices/SLICE-013C-VOICE-WHISPERBAR-SHORTCUTS-001.yaml
+  - tools/voice/whisperbar.ahk
+  - tools/voice/whisperbar-summary.ps1
+  - services/ki-usability/app/services/voice_pipeline.py
+  - packages/frontend-web/src/features/ki-usability/components/VoiceWhisperBarHost.tsx
+  - packages/frontend-web/src/features/ki-usability/hooks/useWhisperBarShortcuts.ts
+  - packages/frontend-web/src/app/navigation/ai-shortcuts.tsx
+  - services/ki-usability/tests/test_voice_pipeline.py
 acceptance_criteria:
   - Strg+Shift+1 startet Diktat im Browser
   - Strg+Shift+2 fasst Clipboard per Summary zusammen

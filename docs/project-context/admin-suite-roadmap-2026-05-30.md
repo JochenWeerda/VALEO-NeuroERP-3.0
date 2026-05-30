@@ -171,6 +171,61 @@ Gate:
 - Wiederherstellung in isolierter Umgebung
 - Nachweis mit Zeitstempel, Artefakt und Ergebnis
 
+#### `ADMIN-SUITE-009` - Compliance Evidence Center
+
+Ziel:
+- Read-only Katalog fuer GoBD, DSGVO, POS/TSE, ELSTER, ATLAS, Meldewesen und
+  Sanktionspruefung
+- Implementierungsstatus, Runtime-Nachweis und externe Freigabe getrennt
+  anzeigen
+- Bestehende Fachmasken und API-Vertraege als Sources of Truth verlinken
+
+Risikoanpassung:
+- Vorhandener Code wird nicht als produktiver Betriebsnachweis gewertet.
+- Zertifikate, Behoerdenquittungen, Testate und produktive UATs bleiben
+  explizite externe Gates.
+
+Gate:
+- Kein implizites `ready` fuer ungepruefte Runtime-Evidenz
+- Frontend-Typecheck
+- Backend-Vertragstest
+
+#### `ADMIN-SUITE-010` - System Status Evidence Center
+
+Ziel:
+- Read-only Katalog fuer API-Health, Startup, Release, Alembic, Event-Bus,
+  Worker und Voice
+- Implementierte Probe-Vertraege und beobachtete Runtime-Evidenz getrennt
+  anzeigen
+- Bestehende Monitoring- und Operations-Bereiche verlinken
+
+Risikoanpassung:
+- Ein Cockpit-Aufruf startet keine externen oder zustandsaendernden Probes.
+- Ein vorhandener Probe-Vertrag wird nicht als erfolgreicher Laufzeitstatus
+  gewertet.
+
+Gate:
+- Kein implizites `ready` fuer ungepruefte Runtime-Evidenz
+- Frontend-Typecheck
+- Backend-Vertragstest
+
+#### `ADMIN-SUITE-011` - Diagnosepaket Manifest
+
+Ziel:
+- Read-only Katalog erlaubter Supportdaten fuer Release, Health, Migration,
+  Connectoren, Event-Bus, Worker und Audit
+- Sammelstatus und Redaktionspflicht je Kategorie sichtbar machen
+- Operations Center mit dem Diagnosemanifest verknuepfen
+
+Risikoanpassung:
+- Ein Cockpit-Aufruf sammelt oder exportiert keine Logs und Live-Daten.
+- Secret-, Payload- und personenbezogene Rohdaten bleiben ausgeschlossen.
+
+Gate:
+- Keine Secret-Werte oder Payloads im API-Vertrag
+- Frontend-Typecheck
+- Backend-Vertragstest
+
 ## Abhaengigkeiten
 
 | Slice | Abhaengig von |
@@ -183,10 +238,13 @@ Gate:
 | `ADMIN-SUITE-006` | `ADMIN-SUITE-001` |
 | `ADMIN-SUITE-007` | `ADMIN-SUITE-001`, optional `ADMIN-SUITE-006` |
 | `ADMIN-SUITE-008` | `ADMIN-SUITE-001` |
+| `ADMIN-SUITE-009` | `ADMIN-SUITE-001` |
+| `ADMIN-SUITE-010` | `ADMIN-SUITE-001`, `ADMIN-SUITE-008` |
+| `ADMIN-SUITE-011` | `ADMIN-SUITE-008`, `ADMIN-SUITE-010` |
 
 ## Naechster konkreter Schritt
 
-Die repo-seitige MVP-Kette `ADMIN-SUITE-001` bis `ADMIN-SUITE-008` ist umgesetzt.
+Die repo-seitige MVP-Kette `ADMIN-SUITE-001` bis `ADMIN-SUITE-011` ist umgesetzt.
 Naechste Ausbauschritte sind bewusst evidenz- oder migrationspflichtig:
 
 - verifizierten AMIC-Feldkatalog und Beispieldaten-UAT bereitstellen

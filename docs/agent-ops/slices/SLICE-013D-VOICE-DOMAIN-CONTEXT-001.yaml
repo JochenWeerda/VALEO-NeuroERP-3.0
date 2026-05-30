@@ -11,6 +11,13 @@ goal: >
 scope:
   - services/ki-usability/app/services/intent_resolver.py
   - packages/frontend-web/src/features/ki-usability/hooks/useVoiceIntent.ts
+file_ownership:
+  - docs/agent-ops/slices/SLICE-013D-VOICE-DOMAIN-CONTEXT-001.yaml
+  - services/ki-usability/app/services/intent_resolver.py
+  - packages/frontend-web/src/features/ki-usability/hooks/useVoiceIntent.ts
+  - packages/frontend-web/src/components/navigation/command-palette-model.ts
+  - packages/frontend-web/src/components/navigation/CommandPalette.tsx
+  - services/ki-usability/tests/test_voice_domain_context.py
 acceptance_criteria:
   - resolve mit context.domain bevorzugt Actions der Domain
   - voice-intent CustomEvent mit domain startet Voice mit Kontext
