@@ -22,18 +22,53 @@ from app.core.dependencies import get_tenant_id
 from app.core.uuid7 import uuid7
 
 from app.api.v1.schemas.base import BaseSchema
-from app.api.v1.schemas.vertreterstamm_schemas import (
-    VertreterCreate,
-    VertreterOut,
-    VertretergruppeCreate,
-    VertretergruppeOut,
-)
 
 
 router = APIRouter(prefix="/crm/vertreter", tags=["CRM - Vertreterstamm"])
 
 
 # ── Schemas ───────────────────────────────────────────────────────────────────
+
+class VertreterCreate(BaseModel):
+    vertreter_nr: str = Field(..., max_length=20)
+    name: str
+    vorname: Optional[str] = None
+    kuerzel: Optional[str] = Field(None, max_length=10)
+    telefon: Optional[str] = None
+    email: Optional[str] = None
+    vertretergruppe_nr: Optional[str] = None
+    provisionsgruppe_nr: Optional[str] = None
+    gebiet: Optional[str] = None
+
+
+class VertreterOut(BaseModel):
+    id: str
+    vertreter_nr: str
+    name: str
+    vorname: Optional[str]
+    kuerzel: Optional[str]
+    telefon: Optional[str]
+    email: Optional[str]
+    vertretergruppe_nr: Optional[str]
+    provisionsgruppe_nr: Optional[str]
+    gebiet: Optional[str]
+    aktiv: bool
+    created_at: datetime
+    updated_at: datetime
+
+
+class VertretergruppeCreate(BaseModel):
+    gruppe_nr: str = Field(..., max_length=20)
+    bezeichnung: str
+
+
+class VertretergruppeOut(BaseModel):
+    id: str
+    gruppe_nr: str
+    bezeichnung: str
+    aktiv: bool
+    created_at: datetime
+
 
 # ── Vertretergruppen ──────────────────────────────────────────────────────────
 

@@ -13,26 +13,3 @@ from pydantic import ConfigDict
 class BankAccountsOut(BaseSchema):
     """Response schema for bank accounts endpoints."""
     model_config = ConfigDict(extra="allow")
-
-
-# --- Extracted from endpoint file ---
-class BankAccountCreate(BankAccountBase):
-    pass
-
-
-class BankAccountUpdate(BaseModel):
-    bank_name: Optional[str] = None
-    iban: Optional[str] = None
-    bic: Optional[str] = None
-    currency: Optional[str] = None
-    gl_account_number: Optional[str] = None
-    is_active: Optional[bool] = None
-
-
-class BankAccountResponse(BankAccountBase):
-    model_config = ConfigDict(from_attributes=True)
-
-    id: str
-    tenant_id: Optional[str] = None
-    balance: Optional[Decimal] = None
-

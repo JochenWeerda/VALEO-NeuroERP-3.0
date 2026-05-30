@@ -4,15 +4,17 @@ STT/TTS Adapter mit echten Provider-Anbindungen.
 
 Provider-Hierarchie:
   STT: 1) faster-whisper (lokal)  2) OpenAI Whisper API  3) Azure  4) Browser
-  TTS: 1) piper (lokal)  2) OpenAI TTS  3) Azure Cognitive Speech  4) Web Speech API (Browser)
+  TTS: 1) piper (lokal)  2) kokoro (lokal HTTP)  3) OpenAI TTS  4) Azure  5) Browser
 
 Konfiguration über Umgebungsvariablen:
   VOICE_STT_PROVIDER: faster-whisper | whisper | azure | browser (default: whisper)
   VOICE_FASTER_WHISPER_MODEL: small | medium | large-v3 (default: small)
   VOICE_FASTER_WHISPER_COMPUTE: int8 | float16 (default: int8)
-  VOICE_TTS_PROVIDER: piper | openai | azure | browser (default: openai)
+  VOICE_TTS_PROVIDER: piper | kokoro | openai | azure | browser (default: openai)
   VOICE_PIPER_MODEL: Pfad zur .onnx Piper-Stimme (für piper)
   VOICE_PIPER_EXECUTABLE: piper CLI (default: piper)
+  VOICE_KOKORO_BASE_URL: OpenAI-kompatible Kokoro-API (default: http://localhost:8880)
+  VOICE_KOKORO_VOICE: Kokoro-Stimme (default: af_sky)
   OPENAI_API_KEY: für Whisper STT + OpenAI TTS
   AZURE_SPEECH_KEY + AZURE_SPEECH_REGION: für Azure Cognitive Speech
 """
@@ -38,6 +40,8 @@ _FASTER_WHISPER_COMPUTE = os.getenv("VOICE_FASTER_WHISPER_COMPUTE", "int8")
 _FASTER_WHISPER_DEVICE = os.getenv("VOICE_FASTER_WHISPER_DEVICE", "cpu")
 _PIPER_MODEL = os.getenv("VOICE_PIPER_MODEL", "")
 _PIPER_EXECUTABLE = os.getenv("VOICE_PIPER_EXECUTABLE", "piper")
+_KOKORO_BASE_URL = os.getenv("VOICE_KOKORO_BASE_URL", "http://localhost:8880")
+_KOKORO_VOICE = os.getenv("VOICE_KOKORO_VOICE", "af_sky")
 _OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
 _AZURE_SPEECH_KEY = os.getenv("AZURE_SPEECH_KEY", "")
 _AZURE_SPEECH_REGION = os.getenv("AZURE_SPEECH_REGION", "westeurope")
@@ -100,6 +104,8 @@ def _is_tts_ready() -> bool:
             except ImportError:
                 return bool(shutil.which(_PIPER_EXECUTABLE))
         return False
+    if _TTS_PROVIDER == "kokoro":
+        return bool(_KOKORO_BASE_URL)
     if _TTS_PROVIDER == "openai":
         return bool(_OPENAI_API_KEY)
     if _TTS_PROVIDER == "azure":
@@ -214,6 +220,8 @@ async def synthesize(session_id: str, text: str) -> dict:
     try:
         if _TTS_PROVIDER == "piper":
             audio_b64, content_type = await _piper_tts(text)
+        elif _TTS_PROVIDER == "kokoro":
+            audio_b64, content_type = await _kokoro_tts(text)
         elif _TTS_PROVIDER == "openai":
             audio_b64, content_type = await _openai_tts(text, session.language)
         elif _TTS_PROVIDER == "azure":
@@ -462,6 +470,29 @@ async def _piper_tts(text: str) -> tuple[str, str]:
             return _run_cli()
 
     return await asyncio.to_thread(_run)
+
+
+async def _kokoro_tts(text: str) -> tuple[str, str]:
+    """Kokoro TTS via OpenAI-compatible HTTP API."""
+    import httpx
+
+    if not _KOKORO_BASE_URL:
+        raise RuntimeError("VOICE_KOKORO_BASE_URL not configured")
+
+    base = _KOKORO_BASE_URL.rstrip("/")
+    payload = {
+        "model": "kokoro",
+        "input": text,
+        "voice": _KOKORO_VOICE,
+        "response_format": "mp3",
+    }
+
+    async with httpx.AsyncClient(timeout=60.0) as client:
+        response = await client.post(f"{base}/v1/audio/speech", json=payload)
+        response.raise_for_status()
+        audio_b64 = base64.b64encode(response.content).decode()
+
+    return audio_b64, "audio/mpeg"
 
 
 async def _azure_tts(text: str, language: str) -> tuple[str, str]:

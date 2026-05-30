@@ -21,12 +21,12 @@ from app.core.workflow_runtime import (
 )
 
 from app.api.v1.schemas.base import BaseSchema
-from app.api.v1.schemas.workflow_runtime_schemas import (
-    CheckpointRequest,
-    CreateInstanceRequest,
-    WorkflowRuntimeOut,
-)
 from pydantic import ConfigDict as _ConfigDict
+
+
+class WorkflowRuntimeOut(BaseSchema):
+    model_config = _ConfigDict(extra="allow")
+
 
 router = APIRouter(prefix="/workflow/runtime", tags=["workflow", "runtime"])
 
@@ -40,6 +40,23 @@ _STORE: WorkflowRuntimeStore = WorkflowRuntimeStore()
 # ---------------------------------------------------------------------------
 # Request / Response Schemas
 # ---------------------------------------------------------------------------
+
+
+class CreateInstanceRequest(BaseModel):
+    instance_id: str
+    process_key: str
+    definition_version: str
+    aggregate_type: str
+    aggregate_id: str
+    context: dict[str, Any] = {}
+    schema_version: int = 1
+
+
+class CheckpointRequest(BaseModel):
+    step_name: str
+    state_snapshot: dict[str, Any]
+    schema_version: int = 1
+
 
 # ---------------------------------------------------------------------------
 # Endpoints

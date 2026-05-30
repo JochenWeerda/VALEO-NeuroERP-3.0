@@ -30,6 +30,32 @@ class WarenPosition(BaseModel):
     statistischer_wert_eur: float
     ursprungsland: str
 
+
+class ZollausfuhrAnmeldungCreate(BaseModel):
+    referenz_nr: str
+    ausfuhrland_code: str = "DE"
+    bestimmungsland_code: str
+    anmelder_eori: str
+    waren_positionen: list[WarenPosition]
+    befoerderungsart: int = 30  # 10=See/20=Schiene/30=Strasse/40=Luft/50=Post
+    ausfuehrender_nr: str
+    ausfuhrdatum: str
+    lieferbedingung: str
+
+
+class ZollausfuhrAnmeldungOut(ZollausfuhrAnmeldungCreate):
+    id: str
+    status: str = "ENTWURF"  # ENTWURF/UEBERMITTELT/BEWILLIGT/ABGELEHNT/ERLEDIGT
+    atlas_mrn: Optional[str] = None
+    erstellt_am: str
+
+
+class ZollausfuhrStatusUpdate(BaseModel):
+    mrn: str
+    neuer_status: str
+    atlas_meldung: Optional[str] = None
+
+
 # ── Static HS-tariff seed data ─────────────────────────────────────────────
 
 _HS_SEED = [

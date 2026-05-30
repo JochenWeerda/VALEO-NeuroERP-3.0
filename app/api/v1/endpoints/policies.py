@@ -23,13 +23,6 @@ from app.services.policy_service import (
 logger = logging.getLogger(__name__)
 
 from app.api.v1.schemas.base import BaseSchema
-from app.api.v1.schemas.policies_schemas import (
-    DeleteRequest,
-    RestoreRequest,
-    TestRequest,
-    TestResponse,
-    UpsertRequest,
-)
 
 
 router = APIRouter(tags=["policy"])
@@ -39,6 +32,34 @@ policy_store = PolicyStore()
 
 
 # Request/Response Models
+class UpsertRequest(BaseModel):
+    """Upsert-Request (einzeln oder bulk)"""
+    rules: List[Rule]
+
+
+class DeleteRequest(BaseModel):
+    """Delete-Request"""
+    id: str
+
+
+class TestRequest(BaseModel):
+    """Test-Request (Simulator)"""
+    alert: Alert
+    roles: List[str]
+
+
+class TestResponse(BaseModel):
+    """Test-Response"""
+    ok: bool
+    decision: Decision
+    override_resolution: PolicyOverrideResolution
+    explainability: ExplainabilityView
+
+
+class RestoreRequest(BaseModel):
+    """Restore-Request (JSON-String der wiederherzustellenden Policies)."""
+    json_payload: str = Field(..., alias="json", description="JSON-String der Policy-Daten")
+
 
 def resolve_tenant_policy_override(
     db,

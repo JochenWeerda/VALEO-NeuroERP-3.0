@@ -25,16 +25,36 @@ from app.core.data_quality_rules import (
 )
 
 from app.api.v1.schemas.base import BaseSchema
-from app.api.v1.schemas.data_quality_schemas import (
-    DataQualityOut,
-    RuleOut,
-    ValidateRequest,
-    ValidationResultOut,
-    ViolationOut,
-)
 from pydantic import ConfigDict as _ConfigDict
 
+
+class DataQualityOut(BaseSchema):
+    model_config = _ConfigDict(extra="allow")
+
+
 router = APIRouter(prefix="/data-quality", tags=["admin", "data-quality"])
+
+
+class RuleOut(BaseModel):
+    id: str
+    entity_type: str
+    label: str
+    rule_type: str
+
+
+class ViolationOut(BaseModel):
+    rule_id: str
+    entity_type: str
+    entity_id: str | None
+    detail: str
+    severity: str = "error"
+
+
+class ValidationResultOut(BaseModel):
+    entity_type: str
+    violations: list[ViolationOut]
+    total_count: int
+
 
 @router.get("/rules", response_model=list[RuleOut], summary="Data quality rules auflisten")
 async def list_data_quality_rules(
@@ -201,6 +221,11 @@ def _run_reference_check(db: Session, rule: ReferenceRule, tenant_id: str) -> li
     except Exception:  # noqa: BLE001 — optionale DB-Abfrage; Fallback greift
         pass
     return violations
+
+
+class ValidateRequest(BaseModel):
+    entity_types: list[str] | None = Field(default=None, description="Entity-Typen zu prüfen; leer = alle")
+
 
 @router.post("/validate", response_model=list[ValidationResultOut], summary="Data quality validieren")
 async def validate_data_quality(

@@ -7,12 +7,12 @@ from ....core.database import get_db
 from ....core.config import settings
 
 from app.api.v1.schemas.base import BaseSchema
-from app.api.v1.schemas.pos_retoure_schemas import (
-    PosRetourOut,
-    RetourRequest,
-    RetourResponse,
-)
 from pydantic import ConfigDict as _ConfigDict
+
+
+class PosRetourOut(BaseSchema):
+    model_config = _ConfigDict(extra="allow")
+
 
 router = APIRouter()
 
@@ -26,6 +26,24 @@ class RetourPosition(BaseModel):
     einzelpreis: float
     menge: int
     grund: Optional[str] = None
+
+
+class RetourRequest(BaseModel):
+    original_bon_nr: Optional[str] = None
+    kassierer: str
+    positionen: List[RetourPosition]
+    zahlungsrueckerstattung: str = "bar"  # bar | ec | gift_card
+    gesamt: float
+    tenant_id: Optional[str] = None
+
+
+class RetourResponse(BaseModel):
+    retoure_id: str
+    retoure_bon_nr: str
+    gesamt: float
+    status: str
+    message: str
+
 
 @router.post("/retoure", response_model=RetourResponse, summary="Retoure anlegen")
 async def create_retoure(

@@ -17,6 +17,28 @@ from app.api.v1.schemas.silo_operations_api_schemas import SiloOperationsApiOut
 
 router = APIRouter(prefix="/silo", tags=["silo-operations"])
 
+
+class SiloZelleCreateRequest(BaseModel):
+    tenant_id: str
+    bezeichnung: str
+    kapazitaet_t: float
+
+
+class EinlagerungRequest(BaseModel):
+    tenant_id: str
+    silo_id: str
+    menge_t: float
+    sorte: str
+    beleg_nr: Optional[str] = None
+
+
+class AuslagerungRequest(BaseModel):
+    tenant_id: str
+    silo_id: str
+    menge_t: float
+    beleg_nr: Optional[str] = None
+
+
 def _zelle_to_dict(row: SiloZelleDB) -> dict:
     return {
         "silo_id": row.silo_id,

@@ -26,13 +26,6 @@ from app.infrastructure.models.futtermittel_models import (
 
 
 from app.api.v1.schemas.base import BaseSchema
-from app.api.v1.schemas.produktion_mischfutter_schemas import (
-    ProduktionsauftragIn,
-    ProduktionsauftragOut,
-    ProduktionsauftragStatusIn,
-    RezeptKomponenteOut,
-    RezeptOut,
-)
 
 
 router = APIRouter(prefix="/produktion/mischfutter", tags=["Produktion - Mischfutter"])
@@ -49,6 +42,48 @@ class KomponenteVerfuegbarkeit(BaseModel):
     einheit: str = "t"
     min_bestand_t: Optional[float] = None
     unter_minimum: bool = False
+
+
+class RezeptKomponenteOut(BaseModel):
+    komponente_name: str
+    anteil: float
+    einzelfutter_id: Optional[str] = None
+
+
+class RezeptOut(BaseModel):
+    id: str
+    name: str
+    rezept_code: str
+    tierart: str
+    protein_ziel: Optional[float] = None
+    energie_ziel: Optional[float] = None
+    komponenten: list[RezeptKomponenteOut] = []
+
+
+class ProduktionsauftragIn(BaseModel):
+    rezept_id: str = Field(..., min_length=1)
+    menge_t: float = Field(..., gt=0)
+    chargen_id: str = ""
+    bemerkung: str = ""
+
+
+class ProduktionsauftragOut(BaseModel):
+    id: str
+    chargen_id: str
+    rezept_id: Optional[str]
+    rezept_name: str
+    menge_t: float
+    status: str
+    bestands_abzug_erfolgt: bool
+    created_at: Optional[str] = None
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class ProduktionsauftragStatusIn(BaseModel):
+    status: str = Field(..., pattern="^(freigegeben|in_produktion|fertig|storniert)$")
+    freigegeben_von: Optional[str] = None
+
 
 # ---------------------------------------------------------------------------
 # Endpoints

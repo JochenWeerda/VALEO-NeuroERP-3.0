@@ -22,11 +22,28 @@ from app.api.v1.schemas.customer_extensions_schemas import CustomerExtensionsOut
 router = APIRouter()
 DEFAULT_TENANT = settings.DEFAULT_TENANT_ID
 
+
+class GeoSearchRequest(BaseModel):
+    latitude: float
+    longitude: float
+    radius_km: float = 50.0
+
+
 class CustomerBrief(BaseSchema):
     id: str
     customer_number: str
     company_name: str
     city: Optional[str] = None
+
+
+class ConvertLeadRequest(BaseModel):
+    lead_id: str
+
+
+class OperatorStatusUpdate(BaseModel):
+    contact_id: str
+    status: str  # "gelesen" | "erledigt"
+
 
 def _haversine(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
     """Return distance in km between two lat/lon points."""

@@ -13,20 +13,3 @@ from pydantic import ConfigDict
 class PurchaseInvoiceVerificationOut(BaseSchema):
     """Response schema for purchase invoice verification endpoints."""
     model_config = ConfigDict(extra="allow")
-
-
-# --- Extracted from endpoint file ---
-class MatchRequest(BaseModel):
-    po_id: str
-    gr_id: str
-    invoice_id: str
-    tolerance_percent: float = 2.0
-
-
-class ApproveRequest(BaseModel):
-    comment: Optional[str] = None
-
-
-class BlockRequest(BaseModel):
-    reason: Optional[str] = None
-

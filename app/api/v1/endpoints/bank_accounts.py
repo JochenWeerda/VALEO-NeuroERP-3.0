@@ -71,6 +71,28 @@ class BankAccountBase(BaseModel):
     gl_account_number: Optional[str] = None  # Gegenkonto im Kontenplan (falls abweichend von account_number)
     is_active: bool = True
 
+
+class BankAccountCreate(BankAccountBase):
+    pass
+
+
+class BankAccountUpdate(BaseModel):
+    bank_name: Optional[str] = None
+    iban: Optional[str] = None
+    bic: Optional[str] = None
+    currency: Optional[str] = None
+    gl_account_number: Optional[str] = None
+    is_active: Optional[bool] = None
+
+
+class BankAccountResponse(BankAccountBase):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: str
+    tenant_id: Optional[str] = None
+    balance: Optional[Decimal] = None
+
+
 def _ensure_gl_account(
     db: Session,
     tenant_id: str,

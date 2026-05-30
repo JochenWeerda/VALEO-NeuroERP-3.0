@@ -24,15 +24,6 @@ from app.core.dependencies import get_tenant_id
 from app.core.uuid7 import uuid7
 
 from app.api.v1.schemas.base import BaseSchema
-from app.api.v1.schemas.warengruppen_schemas import (
-    HauptwarengruppeCreate,
-    HauptwarengruppeOut,
-    OberwarengruppeCreate,
-    OberwarengruppeOut,
-    WarengruppeCreate,
-    WarengruppeHierarchieOut,
-    WarengruppeOut,
-)
 
 
 router = APIRouter(prefix="/stammdaten/warengruppen",
@@ -40,6 +31,55 @@ router = APIRouter(prefix="/stammdaten/warengruppen",
 
 
 # ── Schemas ───────────────────────────────────────────────────────────────────
+
+class HauptwarengruppeCreate(BaseModel):
+    gruppe_nr: str = Field(..., max_length=20)
+    bezeichnung: str
+
+
+class HauptwarengruppeOut(BaseModel):
+    id: str
+    gruppe_nr: str
+    bezeichnung: str
+    aktiv: bool
+    created_at: datetime
+
+
+class OberwarengruppeCreate(BaseModel):
+    gruppe_nr: str = Field(..., max_length=20)
+    bezeichnung: str
+    haupt_id: str
+
+
+class OberwarengruppeOut(BaseModel):
+    id: str
+    gruppe_nr: str
+    bezeichnung: str
+    haupt_id: str
+    aktiv: bool
+    created_at: datetime
+
+
+class WarengruppeCreate(BaseModel):
+    gruppe_nr: str = Field(..., max_length=20)
+    bezeichnung: str
+    ober_id: str
+
+
+class WarengruppeOut(BaseModel):
+    id: str
+    gruppe_nr: str
+    bezeichnung: str
+    ober_id: str
+    aktiv: bool
+    created_at: datetime
+
+
+class WarengruppeHierarchieOut(BaseModel):
+    warengruppe: WarengruppeOut
+    oberwarengruppe: OberwarengruppeOut
+    hauptwarengruppe: HauptwarengruppeOut
+
 
 # ── Hauptwarengruppen ─────────────────────────────────────────────────────────
 
