@@ -82,7 +82,7 @@ def create_context(req: AgentContextCreateRequest, db: Session = Depends(get_db)
     db.add(row)
     db.commit()
     db.refresh(row)
-    return _row_to_context(row)
+    return _row_to_context(row).model_dump()
 
 
 @router.delete("/{context_id}", status_code=204, response_class=Response, response_model=None, summary="Widerrufen")
