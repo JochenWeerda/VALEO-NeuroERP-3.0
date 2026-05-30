@@ -201,6 +201,15 @@ export const RAW_NAV_SECTIONS: RawNavItem[] = [
     mcp: { businessDomain: 'admin', scope: 'admin:read' },
     children: [
       {
+        id: 'admin-suite',
+        label: 'Admin Suite',
+        icon: LayoutDashboard,
+        module: '@/pages/admin-suite/index',
+        preferredPath: 'admin-suite',
+        keywords: ['admin suite', 'readiness', 'go-live', 'setup', 'migration'],
+        mcp: { businessDomain: 'admin', scope: 'admin:read' },
+      },
+      {
         id: 'benutzer',
         label: 'Benutzer',
         icon: Users,

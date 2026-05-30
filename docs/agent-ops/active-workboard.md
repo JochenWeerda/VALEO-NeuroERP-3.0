@@ -6,11 +6,23 @@ Stand: `2026-05-26`
 
 **Von:** Codex
 **Owner:** Codex
-**Stand:** reserviert 2026-05-30
+**Stand:** abgeschlossen 2026-05-30
 **Ziel des Slices:** Additive Grundstruktur fuer die VALEO Admin Suite mit zentralem Production-Readiness-Dashboard unter `/admin-suite`, ohne bestehende Health-, Integrations- oder Admin-Pfade zu duplizieren.
 **Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/agent-ops/slices/ADMIN-SUITE-001.yaml`, `docs/project-context/admin-suite-roadmap-2026-05-30.md`, `app/api/v1/endpoints/admin_suite.py`, `app/api/v1/api.py`, `tests/test_admin_suite_readiness.py`, `packages/frontend-web/src/lib/api/admin-suite.ts`, `packages/frontend-web/src/pages/admin-suite/index.tsx`, `packages/frontend-web/src/app/navigation/domains/core.tsx`, fokussierte Frontend-Tests und generierte Route-Dateien falls erforderlich.
 **Abnahmekriterien:** `/api/v1/admin-suite/readiness` liefert nachvollziehbare Evidenz mit `ready`, `warning`, `blocked` oder `unchecked`; unbekannte oder externe Nachweise werden nie als Erfolg gewertet; `/admin-suite` zeigt Score, Evidenz und Links auf bestehende Admin-Bereiche; Navigation, Backend-Test, Frontend-Typecheck und Workboard-Validierung sind gruen.
-**Offene Risiken:** `app/api/v1/api.py` und Navigation sind Integrationsdateien mit moeglicher Parallelbearbeitung; bestehende fremde Worktree-Aenderungen bleiben erhalten. Externe Live-Probes sind explizit nicht Teil dieses Slices.
+**Erledigt:** Read-only Aggregator, konservative Evidenznormalisierung, Top-Level-Route, Navigation, Kachel-Dashboard, Roadmap und fokussierte Tests umgesetzt. Konfigurationsstatus wird nicht als Live-Erfolg bewertet.
+**Checks:** `python -m compileall -q app/api/v1/endpoints/admin_suite.py`; `python -m pytest tests/test_admin_suite_readiness.py tests/test_integration_bootstrap.py -q --no-cov` (`7 passed`); `pnpm --filter @valero-neuroerp/frontend-web test:run -- src/__tests__/pages/admin-suite/index.test.tsx` (`1 passed`); `pnpm --filter @valero-neuroerp/frontend-web type-check`; fokussierter `git diff --check`.
+**Offene Risiken:** Globaler Routing-Integritaetscheck bleibt wegen drei vorbestehenden Analytics-Page-Group-Luecken rot. Globaler Workboard-Supervisor bleibt wegen sechs vorbestehenden Voice-YAMLs ohne `file_ownership` rot. Externe Live-Probes sind explizit nicht Teil dieses Slices.
+
+## ADMIN-SUITE-002
+
+**Von:** Codex
+**Owner:** offen
+**Stand:** offen
+**Ziel des Slices:** Persistierten, tenant-isolierten Setup-Wizard auf Basis der Admin-Suite-Roadmap einfuehren und vorhandene Fachmasken als gefuehrte Schritte verknuepfen.
+**Dateibesitz:** Vor Claim verbindlich festlegen; voraussichtlich neue Admin-Suite-Setup-Dateien, fokussierte Backend-/Frontend-Tests und minimale additive Router-/Navigationsintegration.
+**Abnahmekriterien:** Setup-Session und Schritte sind tenant-isoliert persistiert; `unchecked`, `in_progress`, `warning`, `blocked` und `completed` bleiben unterscheidbar; Navigation allein erzeugt keine Abschlussfreigabe; Resume nach Browser-Neustart ist abgesichert.
+**Offene Risiken:** Persistenzmodell und Evidenzadapter muessen vor Implementierung gegen vorhandene Setup-Endpunkte abgegrenzt werden; keine Uebernahme ohne separaten Claim-Commit.
 
 ## DESIGN-MERIDIAN-HARDCOLORS-014
 

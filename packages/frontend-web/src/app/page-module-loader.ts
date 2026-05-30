@@ -14,6 +14,7 @@ const PAGE_MODULE_GROUP_LOADERS: Record<PageModuleGroupName, () => Promise<PageM
 
 const GROUP_BY_PREFIX: Record<string, PageModuleGroupName> = {
   admin: 'core',
+  'admin-suite': 'core',
   agrar: 'operations',
   agribusiness: 'operations',
   analytics: 'core',
