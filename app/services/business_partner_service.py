@@ -3,13 +3,15 @@
 from __future__ import annotations
 
 import logging
+import re
 from decimal import Decimal
 from typing import Any, List, Optional, Tuple
 
-from sqlalchemy.exc import IntegrityError
+from sqlalchemy import text
+from sqlalchemy.exc import IntegrityError, OperationalError, ProgrammingError
 from sqlalchemy.orm import Session
 
-from app.core.exceptions import ConflictError, EntityNotFoundError
+from app.core.exceptions import ConflictError, EntityNotFoundError, ValidationFailedError
 from app.core.uuid7 import uuid7
 from app.infrastructure.models import (
     BusinessPartner,
@@ -33,6 +35,79 @@ from app.infrastructure.models import (
 from app.repositories.business_partner_repository import BusinessPartnerRepository
 
 logger = logging.getLogger(__name__)
+
+
+def build_customer_match_lookup(db: Session) -> dict[tuple, dict]:
+    """Kanonischer Cross-Source-Kundenlookup für die Stammdaten-Konsolidierung.
+
+    Vereint die **Business-Partner-Identität** (``domain_crm.business_partners``,
+    System of Record) mit dem **operativen ERP-Sitz** (``public.kunden``) zu
+    ``{(tokenset(name), plz): {business_partner_id, partner_number, kunden_nr}}``.
+
+    ``tokenset`` macht den Namensabgleich reihenfolge-unabhängig (GAP „Nachname
+    Vorname" ↔ Stamm „Vorname Nachname"). Einziger Einstieg für GAP/Dairy/Geo-
+    Matching — kein Roh-SQL auf Kundentabellen mehr in den Pipelines.
+    """
+    from app.services.gap_pipeline import tokenset
+
+    lookup: dict[tuple, dict] = {}
+
+    # 1) Business Partner = SoR-Identität (führend)
+    try:
+        bp_rows = db.execute(
+            text(
+                """
+                SELECT partner_id, partner_number, name_1, postal_code
+                FROM domain_crm.business_partners
+                WHERE name_1 IS NOT NULL AND postal_code IS NOT NULL
+                """
+            )
+        ).all()
+    except Exception:  # noqa: BLE001 — BP-Tabelle evtl. nicht vorhanden (Teilumgebung)
+        db.rollback()
+        bp_rows = []
+    for partner_id, partner_number, name, plz in bp_rows:
+        key = (tokenset(name), str(plz).strip())
+        entry = lookup.setdefault(key, {"business_partner_id": None, "partner_number": None, "kunden_nr": None})
+        entry["business_partner_id"] = str(partner_id) if partner_id else entry["business_partner_id"]
+        entry["partner_number"] = str(partner_number) if partner_number else entry["partner_number"]
+
+    # 2) ERP-Kunden = operativer Sitz; ergänzt kunden_nr + Brücke.
+    #    PLZ kommt bevorzugt aus dem Adress-Satelliten (kunden_adressen, haupt),
+    #    Fallback auf die public.kunden-Altspalte (Übergang bis Backfill komplett).
+    try:
+        kunden_rows = db.execute(
+            text(
+                """
+                SELECT k.kunden_nr, k.name1,
+                       coalesce(a.plz, k.plz) AS plz,
+                       k.business_partner_id
+                FROM public.kunden k
+                LEFT JOIN public.kunden_adressen a
+                       ON a.kunden_nr = k.kunden_nr AND a.adress_typ = 'haupt'
+                WHERE k.name1 IS NOT NULL AND coalesce(a.plz, k.plz) IS NOT NULL
+                """
+            )
+        ).all()
+    except Exception:  # noqa: BLE001 — kunden-Tabelle evtl. nicht vorhanden
+        db.rollback()
+        kunden_rows = []
+    for kunden_nr, name, plz, bp_id in kunden_rows:
+        key = (tokenset(name), str(plz).strip())
+        entry = lookup.setdefault(key, {"business_partner_id": None, "partner_number": None, "kunden_nr": None})
+        if entry.get("kunden_nr") is None:
+            entry["kunden_nr"] = str(kunden_nr)
+        if bp_id and not entry.get("business_partner_id"):
+            entry["business_partner_id"] = str(bp_id)
+
+    return lookup
+
+
+def resolve_customer_ref(entry: dict) -> Optional[str]:
+    """Stabiler Kunden-Handle aus einem Lookup-Eintrag (BP-Identität bevorzugt)."""
+    if not entry:
+        return None
+    return entry.get("business_partner_id") or entry.get("partner_number") or entry.get("kunden_nr")
 
 
 class BusinessPartnerService:
@@ -65,6 +140,363 @@ class BusinessPartnerService:
 
     def get_partner(self, partner_id: str) -> BusinessPartner:
         return self.repo.get_by_id(partner_id)
+
+    # ── Cross-Domain-Auflösung (kanonisch; Stammdaten-Konsolidierung) ─────────
+
+    def resolve_partner_sales_flags(self, crm_customer_id: str) -> Optional[dict]:
+        """Löst einen CRM-Kunden (``domain_crm.customers.id``) auf BP-Sperr-/Lieferflags auf.
+
+        Bridge: ``customers.business_partner_id`` → BP; Fallback über
+        ``partner_number`` / ``debtor_account`` = Kundennummer. Kanonischer
+        Einstieg für die Verkaufs-/Lieferfähigkeitsprüfung (statt Roh-SQL im
+        Konsumenten). Returns ``None`` wenn der Kunde nicht existiert, sonst ein
+        Dict (mit ``partner_id=None``, falls (noch) kein BP verknüpft ist).
+        """
+        row = self.db.execute(
+            text(
+                """
+                SELECT c.customer_number, c.business_partner_id,
+                       bp.partner_id AS bp_id, bp.status AS bp_status,
+                       bp.blocked_for_delivery, bp.blocked_for_invoice
+                FROM domain_crm.customers c
+                LEFT JOIN domain_crm.business_partners bp
+                  ON bp.partner_id = c.business_partner_id AND bp.tenant_id = c.tenant_id
+                WHERE c.id = :cid AND c.tenant_id = :tid
+                """
+            ),
+            {"cid": crm_customer_id, "tid": self.tenant_id},
+        ).fetchone()
+        if not row:
+            return None
+        pid, st = row.bp_id, row.bp_status
+        bfd = bool(row.blocked_for_delivery) if row.blocked_for_delivery is not None else False
+        bfi = bool(row.blocked_for_invoice) if row.blocked_for_invoice is not None else False
+        cn = (row.customer_number or "").strip()
+        if not pid and cn:
+            r2 = self.db.execute(
+                text(
+                    """
+                    SELECT partner_id, status, blocked_for_delivery, blocked_for_invoice
+                    FROM domain_crm.business_partners
+                    WHERE tenant_id = :tid AND (partner_number = :cn OR debtor_account = :cn)
+                    LIMIT 1
+                    """
+                ),
+                {"tid": self.tenant_id, "cn": cn},
+            ).fetchone()
+            if r2:
+                pid, st = r2.partner_id, r2.status
+                bfd, bfi = bool(r2.blocked_for_delivery), bool(r2.blocked_for_invoice)
+        return {
+            "partner_id": str(pid) if pid else None,
+            "status": str(st or "active") if pid else None,
+            "blocked_for_delivery": bfd if pid else False,
+            "blocked_for_invoice": bfi if pid else False,
+        }
+
+    def get_customer_credit_limit(self, crm_customer_id: str) -> float:
+        """Kreditlimit eines CRM-Kunden (Fallback-Feld am Kundensatz). 0.0 wenn keins."""
+        row = self.db.execute(
+            text("SELECT credit_limit FROM domain_crm.customers WHERE id = :cid AND tenant_id = :tid"),
+            {"cid": crm_customer_id, "tid": self.tenant_id},
+        ).mappings().first()
+        return float(row["credit_limit"]) if row and row.get("credit_limit") else 0.0
+
+    def list_active_customer_ids(self) -> list[str]:
+        """IDs aller nicht gelöschten CRM-Kunden des Tenants."""
+        rows = self.db.execute(
+            text("SELECT id FROM domain_crm.customers WHERE tenant_id = :tid AND deleted_at IS NULL"),
+            {"tid": self.tenant_id},
+        ).mappings().all()
+        return [str(r["id"]) for r in rows]
+
+    def get_customer_discount(self, crm_customer_id: str) -> Optional[Decimal]:
+        """Effektiver Kundenrabatt (discount_percent bevorzugt, sonst discount). None wenn keiner.
+
+        Hinweis: ``domain_crm.customers`` führt aktuell keine Rabattspalten — fehlt die
+        Spalte/Tabelle, wird sauber ``None`` geliefert (Fallback auf Basispreis) statt
+        zu scheitern. Zielquelle künftig BP-Rabatt-Satelliten (BusinessPartnerDiscountItem
+        /PriceAgreement).
+        """
+        try:
+            row = self.db.execute(
+                text("SELECT discount, discount_percent FROM domain_crm.customers WHERE id = :id AND tenant_id = :tid"),
+                {"id": crm_customer_id, "tid": self.tenant_id},
+            ).mappings().first()
+        except (OperationalError, ProgrammingError):
+            self.db.rollback()
+            return None
+        if not row:
+            return None
+        if row.get("discount_percent"):
+            return Decimal(str(row["discount_percent"]))
+        if row.get("discount"):
+            return Decimal(str(row["discount"]))
+        return None
+
+    def get_customer_party(self, crm_customer_id: str) -> dict:
+        """Rechnungs-Partyadresse (E-Rechnung) für einen CRM-Kunden.
+
+        Bevorzugt die BusinessPartner-Stammadresse (SoR, via business_partner_id)
+        und ergänzt aus dem CRM-Kundensatz. Robust: fehlende Felder/Tabellen →
+        Fallback ``{"name": <id>}``, nie Exception. Behebt nebenbei das frühere
+        Fehl-Mapping (name/street/country_code/vat_id existierten so nicht).
+        """
+        party: dict = {"name": crm_customer_id}
+        try:
+            cust = self.db.execute(
+                text(
+                    "SELECT company_name, postal_code, city, country, tax_id, email, business_partner_id "
+                    "FROM domain_crm.customers WHERE id = :id AND tenant_id = :tid"
+                ),
+                {"id": crm_customer_id, "tid": self.tenant_id},
+            ).mappings().first()
+        except (OperationalError, ProgrammingError):
+            self.db.rollback()
+            return party
+        if not cust:
+            return party
+        bp = None
+        if cust.get("business_partner_id"):
+            try:
+                bp = self.db.execute(
+                    text(
+                        "SELECT name_1, street, house_number, postal_code, city, vat_id "
+                        "FROM domain_crm.business_partners WHERE partner_id = :pid AND tenant_id = :tid"
+                    ),
+                    {"pid": cust["business_partner_id"], "tid": self.tenant_id},
+                ).mappings().first()
+            except (OperationalError, ProgrammingError):
+                self.db.rollback()
+
+        def pick(*vals: Any) -> str:
+            for v in vals:
+                if v:
+                    return str(v)
+            return ""
+
+        street = ""
+        if bp:
+            street = " ".join(p for p in [bp.get("street"), bp.get("house_number")] if p).strip()
+        return {
+            "name": pick(bp.get("name_1") if bp else None, cust.get("company_name"), crm_customer_id),
+            "street": street,
+            "postal_code": pick(bp.get("postal_code") if bp else None, cust.get("postal_code")),
+            "city": pick(bp.get("city") if bp else None, cust.get("city")),
+            "country_code": pick(cust.get("country"), "DE"),
+            "vat_id": pick(bp.get("vat_id") if bp else None, cust.get("tax_id")),
+            "email": cust.get("email") or "",
+        }
+
+    def search_lookup(self, query: str = "", limit: int = 20) -> list[dict]:
+        """Schnelle Kunden-Auswahl/Autocomplete aus der View ``kunden_lookup``.
+
+        Lädt nur such-/listenrelevante Felder (kunden_nr, name, matchcode, plz, ort,
+        aktiv, betreuer, sperrgrund); Detaildaten werden erst beim Öffnen über die
+        Domänen-Methoden nachgeladen (Phase-2D-Trennung). Sucht über Matchcode-Präfix,
+        Name/Kundennummer (enthält) und PLZ-Präfix.
+        """
+        q = (query or "").strip()
+        if not q:
+            rows = self.db.execute(
+                text("SELECT * FROM public.kunden_lookup ORDER BY name LIMIT :lim"),
+                {"lim": limit},
+            ).mappings().all()
+        else:
+            mc = re.sub(r"[^a-z0-9]", "", q.lower())
+            rows = self.db.execute(
+                text(
+                    "SELECT * FROM public.kunden_lookup "
+                    "WHERE matchcode LIKE :mc OR kunden_nr ILIKE :term OR name ILIKE :term OR plz LIKE :plz "
+                    "ORDER BY name LIMIT :lim"
+                ),
+                {"mc": f"{mc}%", "term": f"%{q}%", "plz": f"{q}%", "lim": limit},
+            ).mappings().all()
+        return [
+            {**dict(r), "business_partner_id": str(r["business_partner_id"]) if r.get("business_partner_id") else None}
+            for r in rows
+        ]
+
+    # ── Domänen-Detail aus Satelliten (Phase-2D-Trennung) ─────────────────────
+    # Konsumenten lesen Adresse/Zahlung/Refs über diese Methoden statt direkt aus
+    # public.kunden, damit dessen Altspalten später entfallen können. Jede Methode
+    # bevorzugt den Satelliten und fällt während des Übergangs auf die
+    # public.kunden-Altspalte zurück (solange Backfill nicht für alle Kunden gilt).
+
+    def get_customer_address(self, kunden_nr: str, adress_typ: str = "haupt") -> dict:
+        """Adresse eines Kunden — bevorzugt aus ``kunden_adressen``, Fallback ``public.kunden``."""
+        addr_cols = "strasse, plz, ort, land, postfach, postfach_plz, postfach_ort"
+        try:
+            row = self.db.execute(
+                text(
+                    f"SELECT {addr_cols} FROM public.kunden_adressen "
+                    "WHERE kunden_nr = :k AND adress_typ = :t "
+                    "ORDER BY ist_standard DESC LIMIT 1"
+                ),
+                {"k": kunden_nr, "t": adress_typ},
+            ).mappings().first()
+        except (OperationalError, ProgrammingError):
+            self.db.rollback()
+            row = None
+        if row:
+            return dict(row)
+        try:
+            row = self.db.execute(
+                text(f"SELECT {addr_cols} FROM public.kunden WHERE kunden_nr = :k"),
+                {"k": kunden_nr},
+            ).mappings().first()
+        except (OperationalError, ProgrammingError):
+            self.db.rollback()
+            row = None
+        return dict(row) if row else {}
+
+    def get_customer_payment(self, kunden_nr: str) -> dict:
+        """Zahl-/Abrechnungs-Flags — bevorzugt aus ``kunden_zahlung``, Fallback ``public.kunden``."""
+        pay_cols = (
+            "zahlungsbedingungen_tage, skonto, netto_kasse, mahnwesen, lastschriftverfahren, "
+            "sepa_verfahren, mandat, kontonutzung_rechnung, kontoauszug_gewuenscht"
+        )
+        try:
+            row = self.db.execute(
+                text(f"SELECT {pay_cols} FROM public.kunden_zahlung WHERE kunden_nr = :k"),
+                {"k": kunden_nr},
+            ).mappings().first()
+        except (OperationalError, ProgrammingError):
+            self.db.rollback()
+            row = None
+        if row:
+            return dict(row)
+        try:
+            row = self.db.execute(
+                text(f"SELECT {pay_cols} FROM public.kunden WHERE kunden_nr = :k"),
+                {"k": kunden_nr},
+            ).mappings().first()
+        except (OperationalError, ProgrammingError):
+            self.db.rollback()
+            row = None
+        return dict(row) if row else {}
+
+    def get_customer_external_refs(self, kunden_nr: str) -> dict[str, str]:
+        """Fremdschlüssel/Altnummern als ``{ref_typ: ref_wert}`` aus ``kunden_external_refs``.
+
+        Fallback auf die public.kunden-Altspalten (legacy/webshop/tankkarte/kundenkarte).
+        """
+        try:
+            rows = self.db.execute(
+                text("SELECT ref_typ, ref_wert FROM public.kunden_external_refs WHERE kunden_nr = :k"),
+                {"k": kunden_nr},
+            ).all()
+            if rows:
+                return {rt: rw for rt, rw in rows}
+        except (OperationalError, ProgrammingError):
+            self.db.rollback()
+        try:
+            row = self.db.execute(
+                text(
+                    "SELECT legacy_kunden_nr, webshop_kunden_nr, tankkarte_ean_code, kundenkarten_kennzeichen "
+                    "FROM public.kunden WHERE kunden_nr = :k"
+                ),
+                {"k": kunden_nr},
+            ).mappings().first()
+        except (OperationalError, ProgrammingError):
+            self.db.rollback()
+            return {}
+        if not row:
+            return {}
+        mapping = {
+            "legacy_kunden_nr": row.get("legacy_kunden_nr"),
+            "webshop_kunden_nr": row.get("webshop_kunden_nr"),
+            "tankkarte_ean": row.get("tankkarte_ean_code"),
+            "kundenkarte": row.get("kundenkarten_kennzeichen"),
+        }
+        return {k: str(v) for k, v in mapping.items() if v}
+
+    def get_customer_detail(self, kunden_nr: str) -> dict:
+        """On-demand-Detail eines Kunden aus den Domänensatelliten (Gegenstück zu ``search_lookup``).
+
+        Aggregiert Adresse, Zahlung und External Refs; UI/Endpoints laden dies erst
+        beim Öffnen eines Kunden (Listen-/Suchfelder kommen aus ``search_lookup``).
+        """
+        return {
+            "kunden_nr": kunden_nr,
+            "adresse": self.get_customer_address(kunden_nr),
+            "zahlung": self.get_customer_payment(kunden_nr),
+            "external_refs": self.get_customer_external_refs(kunden_nr),
+        }
+
+    def list_customers_with_coordinates(self) -> list[dict]:
+        """Kunden mit Geo-Koordinaten (für Umkreissuche). Graceful [] wenn Spalten fehlen."""
+        try:
+            rows = self.db.execute(
+                text(
+                    "SELECT kunden_nr, name, adresse, breitengrad, laengengrad FROM domain_crm.customers "
+                    "WHERE tenant_id = :tid AND breitengrad IS NOT NULL AND laengengrad IS NOT NULL"
+                ),
+                {"tid": self.tenant_id},
+            ).mappings().all()
+            return [dict(r) for r in rows]
+        except (OperationalError, ProgrammingError):
+            self.db.rollback()
+            return []
+
+    def create_customer_record(
+        self, customer_id: str, customer_number: str, name: str,
+        email: Optional[str] = None, phone: Optional[str] = None,
+    ) -> bool:
+        """Legt einen Kundensatz mit korrektem Schema an (z.B. Interessenten-Konvertierung).
+
+        Pflichtfelder id/customer_number/company_name/tenant_id werden gesetzt.
+        Returns True bei Erfolg, False (graceful) bei Schema-/Integritätsfehler.
+        Behebt das frühere Fehl-Mapping (kunden_nr/name/telefon/erstellt_am existieren nicht).
+        """
+        try:
+            self.db.execute(
+                text(
+                    "INSERT INTO domain_crm.customers "
+                    "(id, tenant_id, customer_number, company_name, email, phone, is_active, created_at, updated_at) "
+                    "VALUES (:id, :tid, :cnum, :name, :email, :phone, TRUE, NOW(), NOW())"
+                ),
+                {"id": customer_id, "tid": self.tenant_id, "cnum": customer_number,
+                 "name": name, "email": email, "phone": phone},
+            )
+            self.db.commit()
+            return True
+        except (OperationalError, ProgrammingError, IntegrityError):
+            self.db.rollback()
+            return False
+
+    def ensure_partner_belongs_to_tenant(self, partner_id: str) -> None:
+        """Validiert, dass der BusinessPartner im Mandanten existiert (sonst ValidationFailedError).
+
+        Kanonische BP-Tenant-Prüfung — von CustomerService u.a. genutzt, damit die
+        BP-Domänenlogik an EINER Stelle liegt.
+        """
+        ok = self.db.execute(
+            text("SELECT 1 FROM domain_crm.business_partners WHERE partner_id = :pid AND tenant_id = :tid"),
+            {"pid": partner_id, "tid": self.tenant_id},
+        ).scalar()
+        if not ok:
+            raise ValidationFailedError("business_partner_id ungültig oder nicht im Mandanten gefunden.")
+
+    def customer_exists(self, crm_customer_id: str) -> bool:
+        """True, wenn der CRM-Kunde (domain_crm.customers.id) im Tenant existiert."""
+        return self.db.execute(
+            text("SELECT 1 FROM domain_crm.customers WHERE id = :id AND tenant_id = :tid"),
+            {"id": crm_customer_id, "tid": self.tenant_id},
+        ).first() is not None
+
+    def find_customer_id_by_name(self, name: str) -> Optional[str]:
+        """Findet die CRM-Kunden-ID per Firmenname (ILIKE, erster Treffer). None wenn keiner."""
+        if not name or not name.strip():
+            return None
+        row = self.db.execute(
+            text(
+                "SELECT id FROM domain_crm.customers "
+                "WHERE tenant_id = :tid AND company_name ILIKE :name LIMIT 1"
+            ),
+            {"tid": self.tenant_id, "name": f"%{name.strip()}%"},
+        ).fetchone()
+        return str(row[0]) if row else None
 
     def create_partner(self, payload: dict) -> BusinessPartner:
         existing = self.repo.get_by_partner_number(payload.get("partner_number", ""))

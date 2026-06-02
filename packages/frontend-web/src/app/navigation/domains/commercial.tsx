@@ -343,6 +343,15 @@ export const RAW_NAV_SECTIONS: RawNavItem[] = [
         mcp: { businessDomain: 'sales', scope: 'sales:read' },
       },
       {
+        id: 'kunden-schnellauswahl',
+        label: 'Kunden-Schnellauswahl',
+        icon: Search,
+        module: '@/pages/crm/kunden-schnellauswahl',
+        preferredPath: 'crm/kunden-schnellauswahl',
+        keywords: ['kunden', 'suche', 'schnellauswahl', 'lookup', 'auswahl'],
+        mcp: { businessDomain: 'sales', scope: 'sales:read' },
+      },
+      {
         id: 'artikel',
         label: 'Artikel',
         icon: Package,

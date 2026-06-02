@@ -86,6 +86,10 @@ export const entries: AutoGroupRouteEntry[] = [
     "path": "kunden-liste"
   },
   {
+    "module": "@/pages/crm/kunden-schnellauswahl",
+    "path": "kunden-schnellauswahl"
+  },
+  {
     "module": "@/pages/crm/kunden-stamm",
     "path": "kunden-stamm"
   },

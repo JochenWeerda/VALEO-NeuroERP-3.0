@@ -86,12 +86,10 @@ def get_credit_status_data(db: Session, customer_id: str, tenant_id: str) -> Cre
         warn_pct = float(cl_row["warning_threshold_percent"])
         block_pct = float(cl_row["block_threshold_percent"])
     else:
-        # Fallback: customer.credit_limit column
-        cust = db.execute(
-            text("SELECT credit_limit FROM domain_crm.customers WHERE id = :cid AND tenant_id = :tid"),
-            {"cid": customer_id, "tid": tenant_id},
-        ).mappings().first()
-        credit_limit = float(cust["credit_limit"]) if cust and cust.get("credit_limit") else 0.0
+        # Fallback: Kreditlimit am Kundensatz — über die kanonische Schicht (Phase 2C).
+        from app.services.business_partner_service import BusinessPartnerService
+
+        credit_limit = BusinessPartnerService(db, tenant_id).get_customer_credit_limit(customer_id)
         warn_pct = 80.0
         block_pct = 100.0
 
@@ -279,17 +277,16 @@ async def list_blocked_customers(
     db: Session = Depends(get_db),
 ):
     try:
-        cust_rows = db.execute(
-            text("SELECT id FROM domain_crm.customers WHERE tenant_id = :tid AND deleted_at IS NULL"),
-            {"tid": tenant_id},
-        ).mappings().all()
+        from app.services.business_partner_service import BusinessPartnerService
+
+        customer_ids = BusinessPartnerService(db, tenant_id).list_active_customer_ids()
     except Exception:
         raise HTTPException(status_code=503, detail="Datenbankfehler")
 
     blocked = []
-    for row in cust_rows:
+    for customer_id in customer_ids:
         try:
-            cs = get_credit_status_data(db, str(row["id"]), tenant_id)
+            cs = get_credit_status_data(db, customer_id, tenant_id)
             if cs.status == "BLOCKED":
                 blocked.append(
                     BlockedCustomerOut(

@@ -59,32 +59,10 @@ class EInvoiceExportRequest(BaseModel):
 
 
 def _resolve_customer_party(db: Session, tenant_id: str, customer_id: str) -> PartyAddress:
-    """Lädt Kundenstammdaten aus domain_crm.customers (Fallback: leeres Dict)."""
-    party: PartyAddress = {"name": customer_id}
-    try:
-        row = db.execute(
-            text(
-                """
-                SELECT name, street, postal_code, city, country_code, vat_id, email
-                FROM domain_crm.customers
-                WHERE tenant_id = :tenant_id AND id = :customer_id
-                LIMIT 1
-                """
-            ),
-            {"tenant_id": tenant_id, "customer_id": customer_id},
-        ).fetchone()
-        if row:
-            party = {
-                "name": row[0] or customer_id,
-                "street": row[1] or "",
-                "postal_code": row[2] or "",
-                "city": row[3] or "",
-                "country_code": row[4] or "DE",
-                "vat_id": row[5] or "",
-                "email": row[6] or "",
-            }
-    except Exception as e:  # noqa: BLE001 — best-effort enrichment, fallback uses customer_id
-        logger.debug("Customer lookup failed (using fallback): %s", e)
+    """Lädt die Rechnungs-Partyadresse über die kanonische Schicht (BP-Stamm + CRM-Kunde)."""
+    from app.services.business_partner_service import BusinessPartnerService
+
+    party: PartyAddress = BusinessPartnerService(db, tenant_id).get_customer_party(customer_id)  # type: ignore[assignment]
     return party
 
 

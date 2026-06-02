@@ -193,22 +193,13 @@ async def calculate_price(
     
     # 4. Check for customer discount (only if no contract discount)
     if source == "base" and customer_id:
-        customer = db.execute(
-            text("""
-                SELECT discount, discount_percent 
-                FROM domain_crm.customers 
-                WHERE id = :id AND tenant_id = :tenant_id
-            """),
-            {"id": customer_id, "tenant_id": tenant_id}
-        ).mappings().first()
-        
-        if customer:
-            if customer["discount_percent"]:
-                discount = Decimal(str(customer["discount_percent"]))
-                source = "customer_discount"
-            elif customer["discount"]:
-                discount = Decimal(str(customer["discount"]))
-                source = "customer_discount"
+        # Kundenrabatt über die kanonische Schicht (Phase 2C).
+        from app.services.business_partner_service import BusinessPartnerService
+
+        cust_discount = BusinessPartnerService(db, tenant_id).get_customer_discount(customer_id)
+        if cust_discount is not None:
+            discount = cust_discount
+            source = "customer_discount"
     
     # 5. Check for employee role discount (only if no customer discount)
     if source in ("base", "price_list") and user_role:

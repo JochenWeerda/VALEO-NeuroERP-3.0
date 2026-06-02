@@ -612,7 +612,7 @@ class AgrarSettlementService:
 
     def export_pdf(self, settlement_id: str, archive: bool = False) -> tuple[bytes, str]:
         from app.infrastructure.models import Article
-        from app.infrastructure.models.business_partner import BusinessPartner
+        from app.infrastructure.models import BusinessPartner
         from app.services.settlement_pdf_service import SettlementPdfService
 
         settlement, deductions = self.get_settlement(settlement_id)
@@ -683,7 +683,7 @@ class AgrarSettlementService:
         pdf_meta: dict = {}
         try:
             from app.infrastructure.models import Article
-            from app.infrastructure.models.business_partner import BusinessPartner
+            from app.infrastructure.models import BusinessPartner
             supplier = self.db.query(BusinessPartner).filter(
                 BusinessPartner.id == settlement.supplier_id,
                 BusinessPartner.tenant_id == self.tenant_id,
