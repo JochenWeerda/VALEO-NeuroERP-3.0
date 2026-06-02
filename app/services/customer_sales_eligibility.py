@@ -11,7 +11,6 @@ from dataclasses import dataclass
 from typing import Optional
 
 from fastapi import HTTPException, status
-from sqlalchemy import text
 from sqlalchemy.orm import Session
 
 
@@ -24,57 +23,17 @@ class PartnerSalesFlags:
 
 
 def _resolve_partner_flags(db: Session, tenant_id: str, crm_customer_id: str) -> Optional[PartnerSalesFlags]:
-    row = db.execute(
-        text(
-            """
-            SELECT c.customer_number, c.business_partner_id,
-                   bp.partner_id AS bp_id, bp.status AS bp_status,
-                   bp.blocked_for_delivery, bp.blocked_for_invoice
-            FROM domain_crm.customers c
-            LEFT JOIN domain_crm.business_partners bp
-              ON bp.partner_id = c.business_partner_id AND bp.tenant_id = c.tenant_id
-            WHERE c.id = :cid AND c.tenant_id = :tid
-            """
-        ),
-        {"cid": crm_customer_id, "tid": tenant_id},
-    ).fetchone()
-    if not row:
+    # Phase 2B: Auflösung läuft über die kanonische Zugriffsschicht statt Roh-SQL.
+    from app.services.business_partner_service import BusinessPartnerService
+
+    flags = BusinessPartnerService(db, tenant_id).resolve_partner_sales_flags(crm_customer_id)
+    if flags is None:
         return None
-    pid = row.bp_id
-    st = row.bp_status
-    bfd = bool(row.blocked_for_delivery) if row.blocked_for_delivery is not None else False
-    bfi = bool(row.blocked_for_invoice) if row.blocked_for_invoice is not None else False
-    cn = (row.customer_number or "").strip()
-    if not pid and cn:
-        r2 = db.execute(
-            text(
-                """
-                SELECT partner_id, status, blocked_for_delivery, blocked_for_invoice
-                FROM domain_crm.business_partners
-                WHERE tenant_id = :tid
-                  AND (partner_number = :cn OR debtor_account = :cn)
-                LIMIT 1
-                """
-            ),
-            {"tid": tenant_id, "cn": cn},
-        ).fetchone()
-        if r2:
-            pid = r2.partner_id
-            st = r2.status
-            bfd = bool(r2.blocked_for_delivery)
-            bfi = bool(r2.blocked_for_invoice)
-    if not pid:
-        return PartnerSalesFlags(
-            partner_id=None,
-            status=None,
-            blocked_for_delivery=False,
-            blocked_for_invoice=False,
-        )
     return PartnerSalesFlags(
-        partner_id=str(pid),
-        status=str(st or "active"),
-        blocked_for_delivery=bfd,
-        blocked_for_invoice=bfi,
+        partner_id=flags["partner_id"],
+        status=flags["status"],
+        blocked_for_delivery=flags["blocked_for_delivery"],
+        blocked_for_invoice=flags["blocked_for_invoice"],
     )
 
 

@@ -253,15 +253,10 @@ class CustomerService:
         self.db.commit()
 
     def ensure_bp_belongs_to_tenant(self, partner_id: str) -> None:
-        ok = self.db.execute(
-            text(
-                "SELECT 1 FROM domain_crm.business_partners "
-                "WHERE partner_id = :pid AND tenant_id = :tid"
-            ),
-            {"pid": partner_id, "tid": self.tenant_id},
-        ).scalar()
-        if not ok:
-            raise ValidationFailedError("business_partner_id ungültig oder nicht im Mandanten gefunden.")
+        # BP-Tenant-Prüfung über die kanonische Schicht (Phase 2C: BP-Logik an einer Stelle).
+        from app.services.business_partner_service import BusinessPartnerService
+
+        BusinessPartnerService(self.db, self.tenant_id).ensure_partner_belongs_to_tenant(partner_id)
 
     def _create_in_monolith_db(self, customer_data: Any) -> dict[str, Any]:
         """Persist in domain_crm when crm-core is offline (fallback)."""

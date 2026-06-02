@@ -17,6 +17,8 @@ from ....services.customer_service import CustomerService
 from ..schemas.base import PaginatedResponse
 from ..schemas.crm import Customer, CustomerCreate, CustomerUpdate
 
+from pydantic import Field
+
 from app.api.v1.schemas.base import BaseSchema
 from app.api.v1.schemas.customers_schemas import CustomersOut
 
@@ -114,6 +116,66 @@ def recent_customers(
 ) -> list[dict[str, Any]]:
     """Zuletzt aktualisierte Kunden des Mandanten — MVP-Prefetch fuer die Combobox."""
     return _svc(db, tenant_id or DEFAULT_TENANT).recent(limit=limit)
+
+
+class KundenLookupItem(BaseSchema):
+    """Schlanker Datensatz aus der kunden_lookup-View (Phase 2D, schnelle Auswahl)."""
+
+    business_partner_id: Optional[str] = None
+    kunden_nr: str
+    name: Optional[str] = None
+    matchcode: Optional[str] = None
+    aktiv: bool = True
+    plz: Optional[str] = None
+    ort: Optional[str] = None
+    strasse: Optional[str] = None
+    ust_id_nr: Optional[str] = None
+    kundengruppe: Optional[str] = None
+    betreuer: Optional[str] = None
+    sperrgrund: Optional[str] = None
+
+
+@router.get("/lookup", response_model=list[KundenLookupItem], summary="Schnelle Kundenauswahl (kunden_lookup)")
+def customer_lookup(
+    q: str = Query("", description="Suchbegriff (Matchcode/Name/Kundennr./PLZ)"),
+    limit: int = Query(20, ge=1, le=100),
+    db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
+) -> list[dict[str, Any]]:
+    """Schmale Such-/Listen-Auswahl aus der kunden_lookup-View; Detaildaten on-demand."""
+    from ....services.business_partner_service import BusinessPartnerService
+
+    return BusinessPartnerService(db, tenant_id or DEFAULT_TENANT).search_lookup(q, limit)
+
+
+class KundenDetail(BaseSchema):
+    """On-demand-Detail eines Kunden aus den Domänensatelliten (Phase 2D)."""
+
+    kunden_nr: str
+    adresse: dict[str, Any] = Field(default_factory=dict)
+    zahlung: dict[str, Any] = Field(default_factory=dict)
+    external_refs: dict[str, str] = Field(default_factory=dict)
+
+
+@router.get(
+    "/lookup/{kunden_nr}/detail",
+    response_model=KundenDetail,
+    summary="Kunden-Detail aus Domänensatelliten (on-demand)",
+)
+def customer_lookup_detail(
+    kunden_nr: str,
+    db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
+) -> dict[str, Any]:
+    """Lädt Adresse/Zahlung/External-Refs aus den ``kunden_*``-Satelliten.
+
+    Gegenstück zu ``/lookup`` (Listenfelder): das UI ruft dies erst beim Öffnen
+    eines Kunden. Liest über die kanonische Zugriffsschicht (Satellit bevorzugt,
+    Fallback public.kunden während des Übergangs).
+    """
+    from ....services.business_partner_service import BusinessPartnerService
+
+    return BusinessPartnerService(db, tenant_id or DEFAULT_TENANT).get_customer_detail(kunden_nr)
 
 
 @router.get("/{customer_id}/sales-eligibility", summary="Customer sales eligibility abrufen",
@@ -227,17 +289,13 @@ class UmkreissucheErgebnis(_BaseModel):
 def umkreissuche(
     payload: UmkreissucheInput,
     db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
 ) -> dict:
     """Geo-Umkreissuche: Kunden im Umkreis von radius_km um den angegebenen Punkt."""
-    try:
-        rows = db.execute(
-            _text(
-                "SELECT kunden_nr, name, adresse, breitengrad, laengengrad "
-                "FROM domain_crm.customers "
-                "WHERE breitengrad IS NOT NULL AND laengengrad IS NOT NULL"
-            )
-        ).mappings().all()
-    except Exception:
+    from ....services.business_partner_service import BusinessPartnerService
+
+    rows = BusinessPartnerService(db, tenant_id).list_customers_with_coordinates()
+    if not rows:
         return {
             "ergebnisse": [],
             "hinweis": "Geo-Koordinaten noch nicht eingepflegt",
@@ -386,28 +444,16 @@ def konvertieren(
     kunden_nr = f"KD-{_date.today().year}-{new_customer_id[:6].upper()}"
     konvertiert_am = _date.today().isoformat()
 
-    # Try domain_crm.customers first, fallback domain_shared.customers
-    for schema in ("domain_crm", "domain_shared"):
-        try:
-            db.execute(
-                _text(
-                    f"INSERT INTO {schema}.customers "  # noqa: S608
-                    "(id, tenant_id, kunden_nr, name, email, telefon, erstellt_am) "
-                    "VALUES (:id, :tenant_id, :kunden_nr, :name, :email, :telefon, NOW())"
-                ),
-                {
-                    "id": new_customer_id,
-                    "tenant_id": tenant_id,
-                    "kunden_nr": kunden_nr,
-                    "name": interessent.get("name", ""),
-                    "email": interessent.get("email"),
-                    "telefon": interessent.get("telefon"),
-                },
-            )
-            db.commit()
-            break
-        except Exception:
-            db.rollback()
+    # Kundensatz über die kanonische Schicht anlegen (korrektes Schema; Phase 2C).
+    from ....services.business_partner_service import BusinessPartnerService
+
+    BusinessPartnerService(db, tenant_id).create_customer_record(
+        customer_id=new_customer_id,
+        customer_number=kunden_nr,
+        name=interessent.get("name", ""),
+        email=interessent.get("email"),
+        phone=interessent.get("telefon"),
+    )
 
     # Update Interessent status
     try:

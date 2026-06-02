@@ -468,19 +468,10 @@ async def auto_match_payments(
             customer_id = None
             partner_name = creditor_name or debtor_name
             if partner_name:
-                # Try to find customer by name
-                customer_query = text("""
-                    SELECT id FROM domain_crm.customers
-                    WHERE tenant_id = :tenant_id
-                    AND company_name ILIKE :name
-                    LIMIT 1
-                """)
-                customer_row = db.execute(
-                    customer_query,
-                    {"tenant_id": tenant_id, "name": f"%{partner_name}%"}
-                ).fetchone()
-                if customer_row:
-                    customer_id = str(customer_row[0])
+                # Kunde per Name über die kanonische Schicht (Phase 2C).
+                from app.services.business_partner_service import BusinessPartnerService
+
+                customer_id = BusinessPartnerService(db, tenant_id).find_customer_id_by_name(partner_name)
             
             # Find matching open item
             op_query = text("""
@@ -611,18 +602,9 @@ async def get_match_suggestions(
         customer_id = None
         partner_name = creditor_name or debtor_name
         if partner_name:
-            customer_query = text("""
-                SELECT id FROM domain_crm.customers
-                WHERE tenant_id = :tenant_id
-                AND company_name ILIKE :name
-                LIMIT 1
-            """)
-            customer_row = db.execute(
-                customer_query,
-                {"tenant_id": tenant_id, "name": f"%{partner_name}%"}
-            ).fetchone()
-            if customer_row:
-                customer_id = str(customer_row[0])
+            from app.services.business_partner_service import BusinessPartnerService
+
+            customer_id = BusinessPartnerService(db, tenant_id).find_customer_id_by_name(partner_name)
         
         # Extract invoice number from reference/remittance
         import re

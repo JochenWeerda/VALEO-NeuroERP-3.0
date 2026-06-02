@@ -279,16 +279,9 @@ async def create_sales_order(
     if duplicate:
         raise HTTPException(status_code=409, detail="order_number already exists")
 
-    customer_exists = db.execute(
-        text(
-            """
-            SELECT 1
-            FROM domain_crm.customers
-            WHERE id = :customer_id AND tenant_id = :tenant_id
-            """
-        ),
-        {"customer_id": payload.customer_id, "tenant_id": effective_tenant},
-    ).first()
+    from app.services.business_partner_service import BusinessPartnerService
+
+    customer_exists = BusinessPartnerService(db, effective_tenant).customer_exists(payload.customer_id)
     if not customer_exists:
         raise HTTPException(status_code=422, detail="customer_id does not exist")
 
@@ -401,16 +394,9 @@ async def update_sales_order(
             raise HTTPException(status_code=409, detail="order_number already exists")
 
     if "customer_id" in data:
-        customer_exists = db.execute(
-            text(
-                """
-                SELECT 1
-                FROM domain_crm.customers
-                WHERE id = :customer_id AND tenant_id = :tenant_id
-                """
-            ),
-            {"customer_id": data["customer_id"], "tenant_id": effective_tenant},
-        ).first()
+        from app.services.business_partner_service import BusinessPartnerService
+
+        customer_exists = BusinessPartnerService(db, effective_tenant).customer_exists(data["customer_id"])
         if not customer_exists:
             raise HTTPException(status_code=400, detail="customer_id does not exist")
         assert_customer_allowed_for_sales_order(db, effective_tenant, data["customer_id"])
