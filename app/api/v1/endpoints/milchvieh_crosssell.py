@@ -58,3 +58,12 @@ def list_crosssell(
 @router.get("/summary", summary="Cross-Sell-Summen (Potenziale gesamt)")
 def crosssell_summary(db: Session = Depends(get_db)) -> dict[str, Any]:
     return MilchviehCrossSellService(db).summary()
+
+
+@router.get("/map", summary="Betriebe als GeoJSON (Karte + Kennzahlen-Flyover)")
+def crosssell_map(
+    hygiene_bedarf: Optional[str] = Query(None),
+    min_kuehe: Optional[int] = Query(None, ge=0),
+    db: Session = Depends(get_db),
+) -> dict[str, Any]:
+    return MilchviehCrossSellService(db).map_features(hygiene_bedarf=hygiene_bedarf, min_kuehe=min_kuehe)

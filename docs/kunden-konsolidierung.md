@@ -163,13 +163,13 @@ Verifiziert: 4 Tabellen, je 1 FK, 0 Zeilen, `alembic current == head`, re-upgrad
 
 - **Zugriffsschicht satelliten-aware**: `build_customer_match_lookup` liest PLZ jetzt via `LEFT JOIN kunden_adressen (haupt)` mit COALESCE-Fallback auf `public.kunden`.
 - **Neue Domänen-Detail-Leser** in `BusinessPartnerService` (Satellit bevorzugt, Übergangs-Fallback auf public.kunden-Altspalten): `get_customer_address(kunden_nr, typ)`, `get_customer_payment(kunden_nr)`, `get_customer_external_refs(kunden_nr)` und aggregierend `get_customer_detail(kunden_nr)`.
-- **Endpoint**: `GET /api/v1/customers/lookup/{kunden_nr}/detail` (Gegenstück zu `/lookup`) → lädt Adresse/Zahlung/Refs on-demand aus den Satelliten.
+- **Endpoint**: `GET /api/v1/crm/customers/lookup/{kunden_nr}/detail` (Gegenstück zu `/lookup`) → lädt Adresse/Zahlung/Refs on-demand aus den Satelliten.
 - **Dead-Code-Bereinigung**: `lkv_pipeline` — letzte env-konfigurierte Direkt-SQL-Reste auf `public.kunden` (`KUNDEN_TABLE/_KEY/_NAME/_PLZ/_DELETED_COL`, `_table_parts`, `_column_exists`) entfernt; Match läuft ausschließlich über die kanonische Schicht.
 - **Befund**: Das `Kunde`-ORM-Model in `app/verkauf/models.py` (Tabelle `kunden`) wird **nirgends importiert** → kein aktiver Direktkonsument; backendseitig lesen sonst nur Zugriffsschicht/Reconciliation/Backfill `public.kunden`.
 
 ### Schritt 3c — Frontend-Schnellauswahl auf Satelliten (2026-06-02)
 
-- **API-Client** `lib/api/kunden-lookup.ts`: `useKundenLookup(q,limit)` → `/customers/lookup`, `useKundenDetail(kunden_nr)` → `/customers/lookup/{kunden_nr}/detail`.
+- **API-Client** `lib/api/kunden-lookup.ts`: `useKundenLookup(q,limit)` → `/crm/customers/lookup`, `useKundenDetail(kunden_nr)` → `/crm/customers/lookup/{kunden_nr}/detail`.
 - **Maske** `pages/crm/kunden-schnellauswahl.tsx`: zweispaltig (Suche+Trefferliste links, Satelliten-Detail Adresse/Zahlung/Refs rechts, on-demand). Reine Lese-/Auswahlmaske. Nav-Eintrag „Kunden-Schnellauswahl" (commercial.tsx) + Route `/crm/kunden-schnellauswahl` (auto-groups/generated/crm.ts).
 - **Bewusst additiv statt Produktivmaske umgebogen**: `CustomerCombobox`/`kunden-liste` tragen die crm-customer-id-Identität (Aufträge/Rechnungen); Satelliten sind kunden_nr-basiert → hartes Umbiegen würde die Identität brechen. Die neue Maske demonstriert den Satelliten-Pfad end-to-end risikofrei.
 - **Nebenbei behoben**: `components/ui/native-select.tsx` — `NativeSelect` leitete `ref` nicht weiter (RHF `register()` defekt) + `value` war required → auf `forwardRef` + Standard-Select-Props (uncontrolled-fähig) umgestellt. tsc 0 Fehler, ESLint sauber.
@@ -188,7 +188,7 @@ Verifiziert: 4 Tabellen, je 1 FK, 0 Zeilen, `alembic current == head`, re-upgrad
 Brücke ist `public.kunden.business_partner_id` (per `kunden_merge --apply` gefüllt) + `domain_crm.customers`. Plumbing additiv aufgebaut (ohne Produktivmasken zu ändern, ohne FK zu aktivieren):
 
 - **Resolver in `BusinessPartnerService`** (bidirektional, graceful): `partner_id_for_kunden_nr`, `kunden_nr_for_partner`, `kunden_nr_for_crm_customer` (via bp_id, sonst customer_number==kunden_nr), `resolve_customer_identity(*)` → Tripel `{kunden_nr, business_partner_id, partner_number, crm_customer_id}`.
-- **Endpoints**: `GET /customers/lookup/resolve?kunden_nr=|business_partner_id=|crm_customer_id=` (Tripel) und `GET /customers/by-partner/{business_partner_id}/detail` (Brücke → kunden_nr → Satelliten-Detail; 404 wenn unverbrückt) — Enabler für die BP-keyed Kundenstamm-Maske.
+- **Endpoints**: `GET /crm/customers/lookup/resolve?kunden_nr=|business_partner_id=|crm_customer_id=` (Tripel) und `GET /crm/customers/by-partner/{business_partner_id}/detail` (Brücke → kunden_nr → Satelliten-Detail; 404 wenn unverbrückt) — Enabler für die BP-keyed Kundenstamm-Maske.
 - **Frontend-Hooks** (`lib/api/kunden-lookup.ts`): `useKundenIdentity`, `useKundenDetailByPartner`.
 - **Readiness-Diagnostik**: `kunden_merge.bridge_status()` + CLI `python -m app.services.kunden_merge --bridge-status` → Abdeckung (bp_id gesetzt), per Match auflösbar, Orphans, FK-Orphans, `fk_ready`.
 

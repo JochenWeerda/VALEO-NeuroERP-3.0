@@ -6,6 +6,10 @@ export const entries: AutoGroupRouteEntry[] = [
     "path": "milchvieh-crosssell"
   },
   {
+    "module": "@/pages/agrar/milchvieh-karte",
+    "path": "milchvieh-karte"
+  },
+  {
     "module": "@/pages/agrar/aussaat/liste",
     "path": "aussaat/liste"
   },

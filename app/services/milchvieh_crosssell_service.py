@@ -160,6 +160,73 @@ class MilchviehCrossSellService:
             items.sort(key=lambda i: i["kraftfutter_t_jahr_max"], reverse=True)
         return items
 
+    def _coord_resolver(self):
+        """({(name_norm, plz): (lat, lon)} exakt, {plz: (lat, lon)} Zentroid) aus gap_map_points."""
+        exact: dict[tuple, tuple] = {}
+        agg: dict[str, list] = {}
+        try:
+            rows = self.db.execute(
+                text("SELECT name_norm, postal_code, lat, lon FROM gap_map_points WHERE lat IS NOT NULL AND lon IS NOT NULL")
+            ).all()
+        except Exception:  # noqa: BLE001 — Tabelle evtl. nicht vorhanden
+            self.db.rollback()
+            return {}, {}
+        for nn, pc, lat, lon in rows:
+            la, lo = float(lat), float(lon)
+            if nn and pc:
+                exact.setdefault((nn, pc), (la, lo))
+            if pc:
+                agg.setdefault(pc, []).append((la, lo))
+        cent = {pc: (sum(p[0] for p in pts) / len(pts), sum(p[1] for p in pts) / len(pts)) for pc, pts in agg.items()}
+        return exact, cent
+
+    def map_features(self, hygiene_bedarf: Optional[str] = None, min_kuehe: Optional[int] = None) -> dict:
+        """GeoJSON-FeatureCollection der Milchvieh-Kunden mit Koordinaten + Kennzahlen.
+
+        Koordinaten: exakt (Name+PLZ in gap_map_points), sonst PLZ-Zentroid +
+        deterministischer Jitter, damit Betriebe einer PLZ nicht überlappen.
+        """
+        import hashlib
+
+        from app.services.gap_pipeline import normalize_name
+
+        exact, cent = self._coord_resolver()
+        feats = []
+        for r in self._rows():
+            item = self._build(r)
+            if hygiene_bedarf and item["hygiene_bedarf"] != hygiene_bedarf:
+                continue
+            if min_kuehe and item["herd_size_kuehe"] < min_kuehe:
+                continue
+            nn = normalize_name(item["name"] or "")
+            plz = item["plz"]
+            latlon = exact.get((nn, plz)) or cent.get(plz)
+            if not latlon:
+                continue
+            lat, lon = latlon
+            if (nn, plz) not in exact:
+                h = int(hashlib.md5(item["kunden_nr"].encode()).hexdigest(), 16)
+                lat += ((h % 1000) / 1000 - 0.5) * 0.02
+                lon += (((h // 1000) % 1000) / 1000 - 0.5) * 0.03
+            feats.append({
+                "type": "Feature",
+                "geometry": {"type": "Point", "coordinates": [round(lon, 6), round(lat, 6)]},
+                "properties": {
+                    "kunden_nr": item["kunden_nr"], "name": item["name"],
+                    "plz": item["plz"], "ort": item["ort"],
+                    "herd_size_kuehe": item["herd_size_kuehe"],
+                    "milchmenge_l_jahr": item["milchmenge_l_jahr"],
+                    "milch_kg": item["milch_kg"], "ecm_kg": item["ecm_kg"],
+                    "zellzahl_tsd_ml": item["zellzahl_tsd_ml"], "zellzahl_quelle": item["zellzahl_quelle"],
+                    "hygiene_bedarf": item["hygiene_bedarf"],
+                    "hygiene_dipp_l_jahr": item["hygiene_dipp_l_jahr"],
+                    "kraftfutter_t_jahr_min": item["kraftfutter_t_jahr_min"],
+                    "kraftfutter_t_jahr_max": item["kraftfutter_t_jahr_max"],
+                    "crosssell_ziel_eur": item["crosssell_ziel_eur"],
+                },
+            })
+        return {"type": "FeatureCollection", "features": feats}
+
     def summary(self) -> dict:
         items = [self._build(r) for r in self._rows()]
         by_bedarf = {"niedrig": 0, "mittel": 0, "hoch": 0}

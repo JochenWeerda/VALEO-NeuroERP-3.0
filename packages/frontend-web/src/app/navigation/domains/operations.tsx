@@ -157,6 +157,15 @@ export const RAW_NAV_SECTIONS: RawNavItem[] = [
         mcp: { businessDomain: 'agrar', scope: 'agrar:read' },
       },
       {
+        id: 'milchvieh-karte',
+        label: 'Milchvieh-Karte',
+        icon: Sprout,
+        module: '@/pages/agrar/milchvieh-karte',
+        preferredPath: 'agrar/milchvieh-karte',
+        keywords: ['milchvieh', 'karte', 'map', 'betriebe', 'crm', 'poi'],
+        mcp: { businessDomain: 'agrar', scope: 'agrar:read' },
+      },
+      {
         id: 'psm',
         label: 'Pflanzenschutz',
         icon: Leaf,

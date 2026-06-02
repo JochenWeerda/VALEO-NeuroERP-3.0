@@ -94,3 +94,29 @@ export function useMilchviehCrossSellSummary() {
     staleTime: 60_000,
   })
 }
+
+export type GeoJSONFeatureCollection = {
+  type: 'FeatureCollection'
+  features: Array<{
+    type: 'Feature'
+    geometry: { type: 'Point'; coordinates: [number, number] }
+    properties: Record<string, string | number | null>
+  }>
+}
+
+export function useMilchviehMap(filter: CrossSellFilter = {}) {
+  return useQuery({
+    queryKey: ['milchvieh-crosssell', 'map', filter],
+    queryFn: async () => {
+      const params: Record<string, string | number> = {}
+      if (filter.hygiene_bedarf) params.hygiene_bedarf = filter.hygiene_bedarf
+      if (filter.min_kuehe) params.min_kuehe = filter.min_kuehe
+      const res = await apiClient.get<GeoJSONFeatureCollection>(
+        '/api/v1/agrar/milchvieh-crosssell/map',
+        { params },
+      )
+      return res.data
+    },
+    staleTime: 60_000,
+  })
+}
