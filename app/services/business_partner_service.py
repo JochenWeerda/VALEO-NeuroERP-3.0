@@ -442,6 +442,113 @@ class BusinessPartnerService:
             "external_refs": self.get_customer_external_refs(kunden_nr),
         }
 
+    # ── Identitaetsbruecke business_partner_id <-> kunden_nr (Schritt-5-Vorbereitung) ──
+    # Kanonische Aufloesung zwischen den drei Kunden-Identitaeten: fachliche
+    # kunden_nr (public.kunden, Satelliten), technische business_partner_id (SoR)
+    # und CRM-Kundensatz (domain_crm.customers). Bruecke ist public.kunden.
+    # business_partner_id (per kunden_merge gefuellt) + domain_crm.customers.
+
+    def partner_id_for_kunden_nr(self, kunden_nr: str) -> Optional[str]:
+        """business_partner_id zu einer kunden_nr (aus public.kunden.business_partner_id)."""
+        try:
+            bp = self.db.execute(
+                text("SELECT business_partner_id FROM public.kunden WHERE kunden_nr = :k"),
+                {"k": kunden_nr},
+            ).scalar()
+        except (OperationalError, ProgrammingError):
+            self.db.rollback()
+            return None
+        return str(bp) if bp else None
+
+    def kunden_nr_for_partner(self, business_partner_id: str) -> Optional[str]:
+        """kunden_nr zu einer business_partner_id (Rueckrichtung ueber public.kunden)."""
+        try:
+            kn = self.db.execute(
+                text(
+                    "SELECT kunden_nr FROM public.kunden "
+                    "WHERE business_partner_id = :bp AND coalesce(geloescht, FALSE) = FALSE "
+                    "ORDER BY kunden_nr LIMIT 1"
+                ),
+                {"bp": business_partner_id},
+            ).scalar()
+        except (OperationalError, ProgrammingError):
+            self.db.rollback()
+            return None
+        return str(kn) if kn else None
+
+    def kunden_nr_for_crm_customer(self, crm_customer_id: str) -> Optional[str]:
+        """kunden_nr zu einem CRM-Kunden: ueber dessen business_partner_id, sonst
+        ueber den deterministischen Fallback customer_number == kunden_nr."""
+        try:
+            row = self.db.execute(
+                text(
+                    "SELECT business_partner_id, customer_number FROM domain_crm.customers "
+                    "WHERE id = :id AND tenant_id = :tid"
+                ),
+                {"id": crm_customer_id, "tid": self.tenant_id},
+            ).mappings().first()
+        except (OperationalError, ProgrammingError):
+            self.db.rollback()
+            return None
+        if not row:
+            return None
+        if row.get("business_partner_id"):
+            kn = self.kunden_nr_for_partner(str(row["business_partner_id"]))
+            if kn:
+                return kn
+        cn = row.get("customer_number")
+        if cn:
+            try:
+                hit = self.db.execute(
+                    text("SELECT 1 FROM public.kunden WHERE kunden_nr = :k"), {"k": cn}
+                ).scalar()
+            except (OperationalError, ProgrammingError):
+                self.db.rollback()
+                hit = None
+            if hit:
+                return str(cn)
+        return None
+
+    def resolve_customer_identity(
+        self,
+        *,
+        kunden_nr: Optional[str] = None,
+        business_partner_id: Optional[str] = None,
+        crm_customer_id: Optional[str] = None,
+    ) -> dict:
+        """Vereinheitlicht die drei Kunden-Identitaeten zu einem Tripel.
+
+        Erwartet genau einen Eingabeschluessel und loest die uebrigen auf, soweit
+        die Bruecke reicht. Rueckgabe: {kunden_nr, business_partner_id,
+        partner_number, crm_customer_id} (nicht aufloesbare Felder bleiben None).
+        """
+        kn = kunden_nr
+        bp = business_partner_id
+        if kn is None and bp is not None:
+            kn = self.kunden_nr_for_partner(bp)
+        if kn is None and crm_customer_id is not None:
+            kn = self.kunden_nr_for_crm_customer(crm_customer_id)
+        if bp is None and kn is not None:
+            bp = self.partner_id_for_kunden_nr(kn)
+        partner_number = None
+        if bp:
+            try:
+                partner_number = self.db.execute(
+                    text(
+                        "SELECT partner_number FROM domain_crm.business_partners "
+                        "WHERE partner_id = :p AND tenant_id = :t"
+                    ),
+                    {"p": bp, "t": self.tenant_id},
+                ).scalar()
+            except (OperationalError, ProgrammingError):
+                self.db.rollback()
+        return {
+            "kunden_nr": kn,
+            "business_partner_id": str(bp) if bp else None,
+            "partner_number": str(partner_number) if partner_number else None,
+            "crm_customer_id": crm_customer_id,
+        }
+
     def list_customers_with_coordinates(self) -> list[dict]:
         """Kunden mit Geo-Koordinaten (für Umkreissuche). Graceful [] wenn Spalten fehlen."""
         try:

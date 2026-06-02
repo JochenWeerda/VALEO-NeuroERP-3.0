@@ -178,6 +178,71 @@ def customer_lookup_detail(
     return BusinessPartnerService(db, tenant_id or DEFAULT_TENANT).get_customer_detail(kunden_nr)
 
 
+class KundenIdentitaet(BaseSchema):
+    """Vereinheitlichte Kunden-Identität (Identitätsbrücke, Phase 2D Schritt 5)."""
+
+    kunden_nr: Optional[str] = None
+    business_partner_id: Optional[str] = None
+    partner_number: Optional[str] = None
+    crm_customer_id: Optional[str] = None
+
+
+@router.get(
+    "/lookup/resolve",
+    response_model=KundenIdentitaet,
+    summary="Identitätsbrücke: business_partner_id ↔ kunden_nr ↔ crm_customer_id",
+)
+def customer_identity_resolve(
+    kunden_nr: Optional[str] = Query(None),
+    business_partner_id: Optional[str] = Query(None),
+    crm_customer_id: Optional[str] = Query(None),
+    db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
+) -> dict[str, Any]:
+    """Löst genau einen übergebenen Schlüssel zu den übrigen Identitäten auf.
+
+    Brücke ist ``public.kunden.business_partner_id`` (per kunden_merge gefüllt) +
+    ``domain_crm.customers``. Nicht auflösbare Felder bleiben ``null``.
+    """
+    if not any([kunden_nr, business_partner_id, crm_customer_id]):
+        raise HTTPException(status_code=400, detail="Mindestens ein Schlüssel erforderlich.")
+    from ....services.business_partner_service import BusinessPartnerService
+
+    return BusinessPartnerService(db, tenant_id or DEFAULT_TENANT).resolve_customer_identity(
+        kunden_nr=kunden_nr,
+        business_partner_id=business_partner_id,
+        crm_customer_id=crm_customer_id,
+    )
+
+
+@router.get(
+    "/by-partner/{business_partner_id}/detail",
+    response_model=KundenDetail,
+    summary="Kunden-Detail über business_partner_id (Identitätsbrücke)",
+)
+def customer_detail_by_partner(
+    business_partner_id: str,
+    db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
+) -> dict[str, Any]:
+    """Brücken-Endpoint für die BP-keyed Masken (Kundenstamm): löst
+    business_partner_id → kunden_nr auf und liefert das Satelliten-Detail.
+
+    404, wenn die business_partner_id (noch) nicht mit einer kunden_nr verbrückt
+    ist (Brücke unvollständig → erst kunden_merge --apply).
+    """
+    from ....services.business_partner_service import BusinessPartnerService
+
+    svc = BusinessPartnerService(db, tenant_id or DEFAULT_TENANT)
+    kunden_nr = svc.kunden_nr_for_partner(business_partner_id)
+    if not kunden_nr:
+        raise HTTPException(
+            status_code=404,
+            detail=f"Keine kunden_nr für business_partner_id {business_partner_id} verbrückt.",
+        )
+    return svc.get_customer_detail(kunden_nr)
+
+
 @router.get("/{customer_id}/sales-eligibility", summary="Customer sales eligibility abrufen",
     response_model=CustomersOut
 )
