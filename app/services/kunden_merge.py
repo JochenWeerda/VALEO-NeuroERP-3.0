@@ -292,9 +292,27 @@ def reconcile_records(kunden: list[dict], bps: list[dict], crm: Optional[list[di
 # ── DB-Layer ──────────────────────────────────────────────────────────────────
 
 
-def load_kunden(db) -> list[dict]:
+def _plz_clause(plz_prefixes: Optional[list[str]], params: dict, col: str = "plz") -> str:
+    """Baut eine optionale ``AND (col LIKE :p0 OR ...)``-Bedingung für PLZ-Präfixe.
+
+    Ermöglicht das Scopen eines Laufs auf Regionen/Landkreise (z. B. Aurich/Emden/
+    Leer ≈ PLZ 265/266/267/268). Leere/None-Liste → kein Filter (ganzer Stamm).
+    """
+    if not plz_prefixes:
+        return ""
+    terms = []
+    for i, p in enumerate(plz_prefixes):
+        key = f"plzpfx{i}"
+        params[key] = f"{p.strip()}%"
+        terms.append(f"{col} LIKE :{key}")
+    return " AND (" + " OR ".join(terms) + ")"
+
+
+def load_kunden(db, plz_prefixes: Optional[list[str]] = None) -> list[dict]:
     from sqlalchemy import text
 
+    params: dict = {}
+    clause = _plz_clause(plz_prefixes, params)
     rows = db.execute(
         text(
             """
@@ -304,7 +322,9 @@ def load_kunden(db) -> list[dict]:
             FROM public.kunden
             WHERE COALESCE(geloescht, FALSE) = FALSE
             """
-        )
+            + clause
+        ),
+        params,
     ).mappings().all()
     return [dict(r) for r in rows]
 
@@ -361,9 +381,13 @@ def load_crm_silos(db) -> list[dict]:
     return out
 
 
-def reconcile(db) -> dict:
-    """Lädt Records und führt die Reconciliation aus (Dry-Run, keine Mutation)."""
-    return reconcile_records(load_kunden(db), load_business_partners(db), load_crm_silos(db))
+def reconcile(db, plz_prefixes: Optional[list[str]] = None) -> dict:
+    """Lädt Records und führt die Reconciliation aus (Dry-Run, keine Mutation).
+
+    ``plz_prefixes`` scopt die public.kunden-Seite auf Regionen/Landkreise; die
+    Business-Partner-Seite bleibt vollständig (gegen alle BP gematcht).
+    """
+    return reconcile_records(load_kunden(db, plz_prefixes), load_business_partners(db), load_crm_silos(db))
 
 
 def apply_backfill(db, report: dict) -> dict:
@@ -396,39 +420,51 @@ def apply_backfill(db, report: dict) -> dict:
     return {"written": written, "skipped": skipped}
 
 
-def bridge_status(db) -> dict:
+def bridge_status(db, plz_prefixes: Optional[list[str]] = None) -> dict:
     """Readiness-Report für die Identitätsbrücke business_partner_id ↔ kunden_nr.
 
     Misst die Abdeckung von ``public.kunden.business_partner_id``, wie viele der
     noch unverbrückten Kunden per Matching auflösbar wären, und ob die spätere
     FK-Aktivierung (``public.kunden.business_partner_id`` →
     ``business_partners.partner_id``) frei von Orphans ist. Reine Lese-Operation.
+    ``plz_prefixes`` scopt die Kennzahlen auf Regionen/Landkreise.
     """
     from sqlalchemy import text
 
+    p_total: dict = {}
+    c_total = _plz_clause(plz_prefixes, p_total)
     total = db.execute(
-        text("SELECT count(*) FROM public.kunden WHERE coalesce(geloescht, FALSE) = FALSE")
+        text("SELECT count(*) FROM public.kunden WHERE coalesce(geloescht, FALSE) = FALSE" + c_total),
+        p_total,
     ).scalar() or 0
+    p_linked: dict = {}
+    c_linked = _plz_clause(plz_prefixes, p_linked)
     linked = db.execute(
         text(
             "SELECT count(*) FROM public.kunden "
             "WHERE coalesce(geloescht, FALSE) = FALSE AND business_partner_id IS NOT NULL"
-        )
+            + c_linked
+        ),
+        p_linked,
     ).scalar() or 0
     try:
+        p_fk: dict = {}
+        c_fk = _plz_clause(plz_prefixes, p_fk, col="k.plz")
         fk_orphans = db.execute(
             text(
                 "SELECT count(*) FROM public.kunden k "
                 "WHERE k.business_partner_id IS NOT NULL "
                 "AND NOT EXISTS (SELECT 1 FROM domain_crm.business_partners b "
                 "                WHERE b.partner_id = k.business_partner_id)"
-            )
+                + c_fk
+            ),
+            p_fk,
         ).scalar() or 0
     except Exception:  # noqa: BLE001 — BP-Tabelle evtl. nicht vorhanden (Teilumgebung)
         db.rollback()
         fk_orphans = None
 
-    report = reconcile(db)
+    report = reconcile(db, plz_prefixes)
     resolvable = sum(
         1
         for c in report["candidates"]
@@ -540,14 +576,24 @@ if __name__ == "__main__":
     parser.add_argument("--format", choices=["md", "json", "csv"], default="md")
     parser.add_argument("--output", type=str, default=None, help="Datei statt stdout")
     parser.add_argument("--bridge-status", action="store_true", help="Nur Readiness der Identitätsbrücke ausgeben")
+    parser.add_argument(
+        "--plz-prefix",
+        type=str,
+        default=None,
+        help="Lauf auf PLZ-Präfixe scopen (kommagetrennt), z. B. Aurich/Emden/Leer: 265,266,267,268",
+    )
     args = parser.parse_args()
+
+    plz_prefixes = [p for p in (args.plz_prefix or "").split(",") if p.strip()] or None
 
     db = SessionLocal()
     try:
+        if plz_prefixes:
+            print(f"[SCOPE] PLZ-Präfixe: {', '.join(plz_prefixes)}")
         if args.bridge_status:
-            print(render_bridge_status(bridge_status(db)))
+            print(render_bridge_status(bridge_status(db, plz_prefixes)))
             raise SystemExit(0)
-        report = reconcile(db)
+        report = reconcile(db, plz_prefixes)
         rendered = {"md": render_markdown, "json": render_json, "csv": render_csv}[args.format](report)
         if args.output:
             with open(args.output, "w", encoding="utf-8") as fh:
