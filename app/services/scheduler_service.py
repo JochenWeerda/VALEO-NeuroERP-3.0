@@ -87,6 +87,11 @@ class SchedulerService:
         # Compliance checks - every day at 06:00
         schedule.every().day.at("06:00").do(self._execute_compliance_checks_job).tag('compliance')
 
+        # GAP annual beneficiary sync - daily check at 04:00; the worker is idempotent
+        # and only acts once per year, picking up the new EU list as soon as it is
+        # published (by 31 May) for the previous financial year.
+        schedule.every().day.at("04:00").do(self._execute_gap_annual_sync_job).tag('gap-annual-sync')
+
         logger.info("Registered scheduled jobs")
 
     def _run_scheduler(self):
@@ -179,6 +184,12 @@ class SchedulerService:
         from ..workers.compliance_check_worker import execute_compliance_checks
 
         return self._execute_job("compliance", execute_compliance_checks, "compliance checks")
+
+    def _execute_gap_annual_sync_job(self):
+        """Execute GAP annual beneficiary-list sync (download + pipeline; idempotent)."""
+        from ..workers.gap_sync_worker import execute_gap_annual_sync
+
+        return self._execute_job("gap-annual-sync", execute_gap_annual_sync, "GAP annual sync")
 
     def get_job_status(self) -> Dict[str, Any]:
         """Get status of all scheduled jobs"""

@@ -116,6 +116,8 @@ services/inventory/env/
 # ── Laufzeit-Daten (kein Quellcode) ──────────────────────────────────────────
 runtime/
 data/gap/
+data/lkv/
+Futtermittelbetriebe PLZ 26*.csv
 data/paperless-consume/
 data/policies.db
 data/series.json
