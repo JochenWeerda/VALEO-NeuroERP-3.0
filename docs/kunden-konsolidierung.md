@@ -196,6 +196,10 @@ Brücke ist `public.kunden.business_partner_id` (per `kunden_merge --apply` gef�
 
 **Noch offen (Schritt 5 Ausführung, separat mit DB-Backup + Freigabe):** `kunden_merge --apply` auf Prod (Brücke füllen) → `bridge_status` bis `fk_ready=True` → FK `public.kunden.business_partner_id → business_partners.partner_id` aktivieren → Produktivmasken (Combobox/Stamm) auf `resolve`/`by-partner/detail` umstellen → Reader-Fallback entfernen (0 Deprecation-Warnungen) → Altspalten **droppen**.
 
+> **Prod-Ausführung:** vollständiges, phasenweises Runbook (Backup, Dry-Run-Review-Gates, `--apply`, FK-Aktivierung, Masken, Fallback-Entfernung, Drop, Rollback/Abbruch je Phase) in [`docs/runbooks/kunden-konsolidierung-schritt5.md`](runbooks/kunden-konsolidierung-schritt5.md).
+
+**Funktionaler Durchstich (DEV, 2026-06-02):** Pfad `Dry-Run → --apply → --bridge-status` end-to-end fehlerfrei; auf Testdaten 0 geschrieben (kein Overlap), DB unverändert — Mechanik validiert.
+
 ## 7. Offen
 
 - GAP `run_match`/`run_hydrate_customers` zeigen noch auf unqualifiziertes `customers` (skippen via Guard) → in Phase 2 auf die Schicht/`business_partner_id` umstellen.
