@@ -11,10 +11,6 @@ const corsHeaders = {
 const createdAt = '2026-05-30T12:00:00'
 const BASE = '/api/v1/artikel/individuelle-nummern'
 
-const isCollection = (url: URL) => url.pathname === BASE
-const isItem = (url: URL) => new RegExp(`^${BASE.replace(/\//g, '\\/')}/[^/]+$`).test(url.pathname)
-const isLookup = (url: URL) => url.pathname.endsWith('/lookup')
-
 test.beforeEach(async ({ page }) => {
   await page.addInitScript(() => {
     window.localStorage.setItem('dev_bypass_auth', 'true')
@@ -41,77 +37,83 @@ test.describe('Fachliche Vertiefung Gate: Individuelle Artikelnummern (Wave 24)'
     ]
 
     await page.route('**/api/v1/artikel/individuelle-nummern**', async (route) => {
-        const request = route.request()
-        const url = new URL(request.url())
-        const pathname = url.pathname
-        requests.push(`${request.method()} ${pathname}${url.search}`)
+      const request = route.request()
+      const url = new URL(request.url())
+      const pathname = url.pathname
+      requests.push(`${request.method()} ${pathname}${url.search}`)
 
-        if (request.method() === 'OPTIONS') {
-          await route.fulfill({ status: 204, headers: corsHeaders })
-          return
+      if (request.method() === 'OPTIONS') {
+        await route.fulfill({ status: 204, headers: corsHeaders })
+        return
+      }
+
+      if (request.method() === 'DELETE') {
+        await route.fulfill({ status: 204, headers: corsHeaders, body: '' })
+        return
+      }
+
+      if (request.method() === 'GET') {
+        await route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          headers: corsHeaders,
+          body: JSON.stringify(nummern),
+        })
+        return
+      }
+
+      if (request.method() === 'POST') {
+        const payload = request.postDataJSON() as Partial<IndivArtikelNr>
+        const created: IndivArtikelNr = {
+          id: `ian-${Date.now()}`,
+          artikel_nr: payload.artikel_nr ?? '',
+          partner_nr: payload.partner_nr ?? '',
+          partner_typ: payload.partner_typ ?? 'kunden',
+          indiv_artikel_nr: payload.indiv_artikel_nr ?? '',
+          indiv_bezeichnung: payload.indiv_bezeichnung ?? null,
+          gueltig_von: payload.gueltig_von ?? null,
+          gueltig_bis: payload.gueltig_bis ?? null,
+          aktiv: true,
+          created_at: createdAt,
         }
+        nummern = [...nummern, created]
+        await route.fulfill({
+          status: 201,
+          contentType: 'application/json',
+          headers: corsHeaders,
+          body: JSON.stringify(created),
+        })
+        return
+      }
 
-        if (request.method() === 'GET' && isLookup(url)) {
-          const url = new URL(request.url())
-          const indiv = url.searchParams.get('indiv_artikel_nr')
-          if (indiv === 'K-NEU-99') {
-            await route.fulfill({
-              status: 200,
-              contentType: 'application/json',
-              headers: corsHeaders,
-              body: JSON.stringify({
-                interne_artikel_nr: '100999',
-                indiv_bezeichnung: 'Neu angelegt',
-              }),
-            })
-            return
-          }
-          await route.fulfill({ status: 404, headers: corsHeaders, body: '{"detail":"not found"}' })
-          return
-        }
+      await route.fulfill({ status: 405, headers: corsHeaders, body: '{"detail":"method"}' })
+    })
 
-        if (request.method() === 'DELETE') {
-          await route.fulfill({ status: 204, headers: corsHeaders, body: '' })
-          return
-        }
+    await page.route('**/api/v1/artikel/individuelle-nummern/lookup**', async (route) => {
+      const request = route.request()
+      const url = new URL(request.url())
+      requests.push(`${request.method()} ${url.pathname}${url.search}`)
 
-        if (request.method() === 'GET') {
-          await route.fulfill({
-            status: 200,
-            contentType: 'application/json',
-            headers: corsHeaders,
-            body: JSON.stringify(nummern),
-          })
-          return
-        }
+      if (request.method() === 'OPTIONS') {
+        await route.fulfill({ status: 204, headers: corsHeaders })
+        return
+      }
 
-        if (request.method() === 'POST') {
-          const payload = request.postDataJSON() as Partial<IndivArtikelNr>
-          const created: IndivArtikelNr = {
-            id: `ian-${Date.now()}`,
-            artikel_nr: payload.artikel_nr ?? '',
-            partner_nr: payload.partner_nr ?? '',
-            partner_typ: payload.partner_typ ?? 'kunden',
-            indiv_artikel_nr: payload.indiv_artikel_nr ?? '',
-            indiv_bezeichnung: payload.indiv_bezeichnung ?? null,
-            gueltig_von: payload.gueltig_von ?? null,
-            gueltig_bis: payload.gueltig_bis ?? null,
-            aktiv: true,
-            created_at: createdAt,
-          }
-          nummern = [...nummern, created]
-          await route.fulfill({
-            status: 201,
-            contentType: 'application/json',
-            headers: corsHeaders,
-            body: JSON.stringify(created),
-          })
-          return
-        }
-
-        await route.fulfill({ status: 405, headers: corsHeaders, body: '{"detail":"method"}' })
-      },
-    )
+      const indiv = url.searchParams.get('indiv_artikel_nr')
+      if (indiv === 'K-NEU-99') {
+        await route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          headers: corsHeaders,
+          body: JSON.stringify({
+            interne_artikel_nr: '100999',
+            indiv_bezeichnung: 'Neu angelegt',
+          }),
+        })
+        return
+      }
+      await route.fulfill({ status: 404, headers: corsHeaders, body: '{"detail":"not found"}' })
+    })
 
     await page.goto('/stammdaten/individuelle-artikelnummern', { waitUntil: 'domcontentloaded' })
     await waitForDashboardShell(page)
