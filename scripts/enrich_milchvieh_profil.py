@@ -6,11 +6,11 @@ normalisierten Namen + PLZ) und befüllt je Milchvieh haltendem Kunden ein
 
 - **Echt (LKV):** Herdengrößen-Klasse + geschätzte Kuhzahl (Klassen-Mittel),
   milch_kg, fett_%/kg, eiw_%/kg, fett+eiweiss_kg, Erstkalbealter.
-- **DEV-synthetisch:** somatische Zellzahl (x1000/ml) — die LKV-Extraktion erfasst
-  den Zellzahl-/Milchgüte-Abschnitt (noch) nicht. Werte sind deterministisch je
-  Kunde, plausibel verteilt (Mittel ~220, höher bei großen Herden) und über
-  ``zellzahl_quelle='dev_synthetik'`` klar markiert. Daraus ``hygiene_bedarf``
-  (niedrig/mittel/hoch) als Indikator fuer Eutergesundheits-/Hygiene-Mittel.
+- **Zellzahl (x1000/ml):** echt aus den LKV-Ranking-Tabellen, wo der Betrieb dort
+  geführt ist (``extract_zellzahl_index`` über data/lkv/*.pdf, ``zellzahl_quelle='lkv'``);
+  sonst deterministisch DEV-synthetisch (``'dev_synthetik'``, Mittel ~205, höher bei
+  großen Herden). Daraus ``hygiene_bedarf`` (niedrig/mittel/hoch) als Indikator
+  fuer Eutergesundheits-/Hygiene-Mittel.
 
 Idempotent (UPSERT je kunden_nr). CLI:
     python -m scripts.enrich_milchvieh_profil            # Dry-Run (zählt nur)
@@ -29,6 +29,29 @@ from sqlalchemy.orm import Session
 from app.services.gap_pipeline import normalize_name
 
 _HERD_RE = re.compile(r"(\d+(?:,\d+)?)\s*-\s*(\d+(?:,\d+)?)")
+
+_LKV_DIR = "data/lkv"
+
+
+def load_zellzahl_index() -> dict[tuple, int]:
+    """Echte Zellzahlen aus allen LKV-PDFs in data/lkv (falls vorhanden).
+
+    Best-effort: fehlt das Verzeichnis/PDFs oder pdfplumber, wird {} geliefert
+    und die Anreicherung fällt auf synthetische Zellzahlen zurück.
+    """
+    import glob
+
+    idx: dict[tuple, int] = {}
+    try:
+        from app.services.lkv_pipeline import extract_zellzahl_index
+    except Exception:  # noqa: BLE001 — Extraktor/Abhängigkeit nicht verfügbar
+        return idx
+    for pdf in glob.glob(f"{_LKV_DIR}/*.pdf"):
+        try:
+            idx.update(extract_zellzahl_index(pdf))
+        except Exception:  # noqa: BLE001 — einzelnes PDF unlesbar → überspringen
+            continue
+    return idx
 
 
 def parse_herd_size(group: str | None) -> int | None:
@@ -87,21 +110,26 @@ def enrich(db: Session, apply: bool = False) -> dict:
 
     matched = []
     for kn, name1, plz in kunden:
-        d = dairy.get((normalize_name(name1), plz))
+        norm = normalize_name(name1)
+        d = dairy.get((norm, plz))
         if d:
-            matched.append((kn, d))
+            matched.append((kn, norm, plz, d))
 
-    gap_n = sum(1 for kn, _ in matched if kn.startswith("GAP"))
-    mv_n = sum(1 for kn, _ in matched if kn.startswith("MV"))
+    zz_index = load_zellzahl_index()
+    gap_n = sum(1 for kn, *_ in matched if kn.startswith("GAP"))
+    mv_n = sum(1 for kn, *_ in matched if kn.startswith("MV"))
     result = {
         "kunden_betrachtet": len(kunden),
         "milchvieh_match": len(matched),
         "davon_GAP": gap_n,
         "davon_MV": mv_n,
+        "zellzahl_lkv_verfuegbar": len(zz_index),
         "applied": apply,
     }
     if not apply:
-        result["hinweis_zellzahl"] = "dev_synthetik (LKV-Extraktion erfasst Zellzahl nicht)"
+        treffer = sum(1 for _, norm, plz, _ in matched if (norm, plz) in zz_index)
+        result["zellzahl_real_match"] = treffer
+        result["zellzahl_rest_synthetik"] = len(matched) - treffer
         return result
 
     upsert = text(
@@ -112,7 +140,7 @@ def enrich(db: Session, apply: bool = False) -> dict:
              zellzahl_tsd_ml, zellzahl_quelle, hygiene_bedarf, quelle)
         VALUES
             (:kn, :ry, :hg, :hk, :milch, :fp, :fk, :ep, :ek, :fek, :alter,
-             :zz, 'dev_synthetik', :hb, 'gap+lkv')
+             :zz, :zq, :hb, 'gap+lkv')
         ON CONFLICT (kunden_nr) DO UPDATE SET
             ref_year=EXCLUDED.ref_year, herd_size_group=EXCLUDED.herd_size_group,
             herd_size_kuehe=EXCLUDED.herd_size_kuehe, milch_kg=EXCLUDED.milch_kg,
@@ -125,19 +153,26 @@ def enrich(db: Session, apply: bool = False) -> dict:
         """
     )
     hist = {"niedrig": 0, "mittel": 0, "hoch": 0}
-    for kn, d in matched:
+    quellen = {"lkv": 0, "dev_synthetik": 0}
+    for kn, norm, plz, d in matched:
         hk = parse_herd_size(d["herd_size_group"])
-        zz = synth_zellzahl(kn, hk)
+        real = zz_index.get((norm, plz))
+        if real is not None:
+            zz, zq = real, "lkv"
+        else:
+            zz, zq = synth_zellzahl(kn, hk), "dev_synthetik"
+        quellen[zq] += 1
         hb = hygiene_bedarf(zz)
         hist[hb] += 1
         db.execute(upsert, {
             "kn": kn, "ry": d["ref_year"], "hg": d["herd_size_group"], "hk": hk,
             "milch": d["milch_kg"], "fp": d["fett_pct"], "fk": d["fett_kg"],
             "ep": d["eiw_pct"], "ek": d["eiw_kg"], "fek": d["fett_eiweiss_kg"],
-            "alter": d["alter_monate"], "zz": zz, "hb": hb,
+            "alter": d["alter_monate"], "zz": zz, "zq": zq, "hb": hb,
         })
     db.commit()
     result["hygiene_bedarf_verteilung"] = hist
+    result["zellzahl_quelle_verteilung"] = quellen
     result["profile_gesamt"] = db.execute(
         text("SELECT count(*) FROM public.kunden_milchvieh_profil")
     ).scalar()
