@@ -231,6 +231,54 @@ def _de_num(s: str) -> Optional[float]:
         return None
 
 
+# Ranking-Tabellen ("Die höchsten Leistungen" / "Die besten Zellzahlergebnisse"):
+#   Rang Besitzer [PLZ] Ort  Milch Fett% Fkg Eiw% F+E  Zellzahl  Lebenstagsleistung
+# Die abschließende Lebenstagsleistung (xx,x) ist der Anker, der Ranking- von
+# Gruppenzeilen (mit Alter, ohne Zellzahl) sauber trennt.
+_ZZ_ROW_FULL = re.compile(
+    r"(\d{1,3})\.\s+(.+?)\s+(\d{5})\s+(.+?)\s+"
+    r"(?:\d{1,2}\.\d{3}|\d{4,5})\s+\d,\d{2}\s+\d{2,4}\s+\d,\d{2}\s+"
+    r"(?:\d\.\d{3}|\d{3,4})\s+(\d{2,4})\s+\d{1,2},\d"
+)
+_ZZ_ROW_NOPLZ = re.compile(
+    r"(\d{1,3})\.\s+(.+?,\s*.+?)\s+"
+    r"(?:\d{1,2}\.\d{3}|\d{4,5})\s+\d,\d{2}\s+\d{2,4}\s+\d,\d{2}\s+"
+    r"(?:\d\.\d{3}|\d{3,4})\s+(\d{2,4})\s+\d{1,2},\d"
+)
+
+
+def extract_zellzahl_index(pdf_path: str) -> dict[tuple, int]:
+    """Somatische Zellzahlen (x1000/ml) je Betrieb aus den LKV-Ranking-Tabellen.
+
+    Liefert ``{(name_norm, plz): zellzahl}`` (PLZ-Variante) bzw. mit ``plz=None``
+    (Berichte ohne PLZ-Spalte, Name+Wohnort kombiniert). Nur plausible Werte
+    (30–900 tsd/ml). Best-effort: liest die Ranking-Listen, in denen die Zellzahl
+    direkt ausgewiesen ist (die Gruppen-Betriebslisten enthalten keine).
+    """
+    import pdfplumber
+
+    from app.services.gap_pipeline import normalize_name
+
+    idx: dict[tuple, int] = {}
+    with pdfplumber.open(pdf_path) as pdf:
+        for page in pdf.pages:
+            for line in (page.extract_text() or "").split("\n"):
+                s = line.strip()
+                m = _ZZ_ROW_FULL.search(s)
+                if m:
+                    key = (normalize_name(m.group(2)), m.group(3))
+                    zz = int(m.group(5))
+                else:
+                    m = _ZZ_ROW_NOPLZ.search(s)
+                    if not m:
+                        continue
+                    key = (normalize_name(m.group(2)), None)
+                    zz = int(m.group(3))
+                if 30 <= zz <= 900:
+                    idx.setdefault(key, zz)
+    return idx
+
+
 def extract_herd_performance(
     pdf_path: str,
     region: str,
