@@ -183,7 +183,18 @@ Verifiziert: 4 Tabellen, je 1 FK, 0 Zeilen, `alembic current == head`, re-upgrad
   - **Nicht** deprecated: Kern (kunden_nr/name*/gueltig_*/geloescht/sprachschluessel/Zeitstempel), Brücke (`business_partner_id`, `legacy_kunden_nr`), sowie noch nicht migrierte Domänen (Bank/Profil/Versand/Genossenschaft → vorhandene Satelliten, eigener Strang).
 - **Beobachtbarkeit:** `BusinessPartnerService.get_customer_address/_payment/_external_refs` loggen `logger.warning(... deprecated)`, wenn sie auf `public.kunden` zurückfallen (Satellit fehlt) — bewiesen: feuert bei fehlendem Satelliten, schweigt bei vorhandenem.
 
-**Noch offen (Schritt 5, separat mit DB-Backup + Freigabe):** Reader-Fallback entfernen (erst wenn 0 Deprecation-Warnungen in Prod) + Altspalten in `public.kunden` **droppen**; zusätzlich die BP-/crm-identitätsgebundenen Produktivmasken (Combobox/Stamm) über eine Identitätsbrücke (business_partner_id ↔ kunden_nr) auf die Satelliten lesen lassen.
+### Schritt 5 — Vorbereitung: Identitätsbrücke business_partner_id ↔ kunden_nr (2026-06-02)
+
+Brücke ist `public.kunden.business_partner_id` (per `kunden_merge --apply` gefüllt) + `domain_crm.customers`. Plumbing additiv aufgebaut (ohne Produktivmasken zu ändern, ohne FK zu aktivieren):
+
+- **Resolver in `BusinessPartnerService`** (bidirektional, graceful): `partner_id_for_kunden_nr`, `kunden_nr_for_partner`, `kunden_nr_for_crm_customer` (via bp_id, sonst customer_number==kunden_nr), `resolve_customer_identity(*)` → Tripel `{kunden_nr, business_partner_id, partner_number, crm_customer_id}`.
+- **Endpoints**: `GET /customers/lookup/resolve?kunden_nr=|business_partner_id=|crm_customer_id=` (Tripel) und `GET /customers/by-partner/{business_partner_id}/detail` (Brücke → kunden_nr → Satelliten-Detail; 404 wenn unverbrückt) — Enabler für die BP-keyed Kundenstamm-Maske.
+- **Frontend-Hooks** (`lib/api/kunden-lookup.ts`): `useKundenIdentity`, `useKundenDetailByPartner`.
+- **Readiness-Diagnostik**: `kunden_merge.bridge_status()` + CLI `python -m app.services.kunden_merge --bridge-status` → Abdeckung (bp_id gesetzt), per Match auflösbar, Orphans, FK-Orphans, `fk_ready`.
+
+**Befund DEV:** Brücken-Abdeckung 0 % (Testdaten ohne Overlap: kunden_nr `K0000x` vs customer_number `KD-1000x` vs partner_number `BP-1000x`) → in Prod über `kunden_merge --apply` füllen.
+
+**Noch offen (Schritt 5 Ausführung, separat mit DB-Backup + Freigabe):** `kunden_merge --apply` auf Prod (Brücke füllen) → `bridge_status` bis `fk_ready=True` → FK `public.kunden.business_partner_id → business_partners.partner_id` aktivieren → Produktivmasken (Combobox/Stamm) auf `resolve`/`by-partner/detail` umstellen → Reader-Fallback entfernen (0 Deprecation-Warnungen) → Altspalten **droppen**.
 
 ## 7. Offen
 

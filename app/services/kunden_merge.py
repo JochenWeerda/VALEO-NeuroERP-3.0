@@ -396,6 +396,73 @@ def apply_backfill(db, report: dict) -> dict:
     return {"written": written, "skipped": skipped}
 
 
+def bridge_status(db) -> dict:
+    """Readiness-Report für die Identitätsbrücke business_partner_id ↔ kunden_nr.
+
+    Misst die Abdeckung von ``public.kunden.business_partner_id``, wie viele der
+    noch unverbrückten Kunden per Matching auflösbar wären, und ob die spätere
+    FK-Aktivierung (``public.kunden.business_partner_id`` →
+    ``business_partners.partner_id``) frei von Orphans ist. Reine Lese-Operation.
+    """
+    from sqlalchemy import text
+
+    total = db.execute(
+        text("SELECT count(*) FROM public.kunden WHERE coalesce(geloescht, FALSE) = FALSE")
+    ).scalar() or 0
+    linked = db.execute(
+        text(
+            "SELECT count(*) FROM public.kunden "
+            "WHERE coalesce(geloescht, FALSE) = FALSE AND business_partner_id IS NOT NULL"
+        )
+    ).scalar() or 0
+    try:
+        fk_orphans = db.execute(
+            text(
+                "SELECT count(*) FROM public.kunden k "
+                "WHERE k.business_partner_id IS NOT NULL "
+                "AND NOT EXISTS (SELECT 1 FROM domain_crm.business_partners b "
+                "                WHERE b.partner_id = k.business_partner_id)"
+            )
+        ).scalar() or 0
+    except Exception:  # noqa: BLE001 — BP-Tabelle evtl. nicht vorhanden (Teilumgebung)
+        db.rollback()
+        fk_orphans = None
+
+    report = reconcile(db)
+    resolvable = sum(
+        1
+        for c in report["candidates"]
+        if c["recommended_action"] == "backfill_business_partner_id"
+        and not c["existing_business_partner_id"]
+        and c["proposed_business_partner_id"]
+    )
+    unresolved = max(total - linked - resolvable, 0)
+    return {
+        "total_active": total,
+        "linked": linked,
+        "coverage_pct": round(linked / total * 100, 1) if total else 0.0,
+        "resolvable_by_match": resolvable,
+        "unresolved": unresolved,
+        "fk_orphans": fk_orphans,
+        "fk_ready": fk_orphans == 0 and linked == total and total > 0,
+    }
+
+
+def render_bridge_status(status: dict) -> str:
+    # ASCII-sicher (Windows-cp1252-Konsole): keine Sonderzeichen in der Ausgabe.
+    lines = [
+        "# Identitaetsbruecke business_partner_id <-> kunden_nr - Readiness",
+        "",
+        f"- Aktive Kunden:              {status['total_active']:>6}",
+        f"- Verbrueckt (bp_id gesetzt): {status['linked']:>6}  ({status['coverage_pct']}%)",
+        f"- Per Match aufloesbar:       {status['resolvable_by_match']:>6}  (kunden_merge --apply)",
+        f"- Unaufloesbar (Orphan):      {status['unresolved']:>6}",
+        f"- FK-Orphans (bp_id ohne BP): {status['fk_orphans']}",
+        f"- FK-aktivierbar:             {status['fk_ready']}",
+    ]
+    return "\n".join(lines)
+
+
 # ── Report-Rendering ──────────────────────────────────────────────────────────
 
 
@@ -472,10 +539,14 @@ if __name__ == "__main__":
     parser.add_argument("--apply", action="store_true", help="Sichere Fälle (exact/strong) backfillen — sonst nur Report")
     parser.add_argument("--format", choices=["md", "json", "csv"], default="md")
     parser.add_argument("--output", type=str, default=None, help="Datei statt stdout")
+    parser.add_argument("--bridge-status", action="store_true", help="Nur Readiness der Identitätsbrücke ausgeben")
     args = parser.parse_args()
 
     db = SessionLocal()
     try:
+        if args.bridge_status:
+            print(render_bridge_status(bridge_status(db)))
+            raise SystemExit(0)
         report = reconcile(db)
         rendered = {"md": render_markdown, "json": render_json, "csv": render_csv}[args.format](report)
         if args.output:
