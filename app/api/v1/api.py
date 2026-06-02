@@ -39,6 +39,7 @@ from app.api.v1.endpoints import (
     warehouse_wms,
     policies,
     gap,
+    geo,
     prospecting,
     finance_invoices,
     vat_codes,
@@ -828,6 +829,11 @@ api_router.include_router(
 api_router.include_router(
     gap.router,
     tags=["gap", "prospecting"]
+)
+
+api_router.include_router(
+    geo.router,
+    tags=["geo", "prospecting"]
 )
 
 api_router.include_router(

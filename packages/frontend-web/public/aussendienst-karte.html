@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+  <title>Außendienst-Karte – Betriebspotenziale PLZ 26</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <style>
+    :root { --bg:#0f172a; --panel:#fff; }
+    html,body { margin:0; height:100%; font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; }
+    #map { position:absolute; inset:0; }
+    .panel {
+      position:absolute; top:10px; left:10px; z-index:1000; background:var(--panel);
+      padding:12px 14px; border-radius:10px; box-shadow:0 2px 12px rgba(0,0,0,.25);
+      max-width:280px; font-size:13px;
+    }
+    .panel h1 { font-size:15px; margin:0 0 8px; }
+    .panel label { display:block; margin:8px 0 2px; font-weight:600; }
+    .row { display:flex; gap:8px; align-items:center; }
+    button { cursor:pointer; border:0; background:#2563eb; color:#fff; padding:8px 10px; border-radius:8px; font-size:13px; }
+    button.secondary { background:#475569; }
+    .legend { position:absolute; bottom:14px; left:10px; z-index:1000; background:var(--panel);
+      padding:10px 12px; border-radius:10px; box-shadow:0 2px 12px rgba(0,0,0,.25); font-size:12px; }
+    .legend i { width:12px; height:12px; display:inline-block; border-radius:50%; margin-right:6px; vertical-align:-1px; }
+    .pop b { font-size:14px; }
+    .pop .kv { display:flex; justify-content:space-between; gap:14px; }
+    .pop .badge { display:inline-block; padding:1px 7px; border-radius:10px; color:#fff; font-weight:700; }
+    #status { color:#64748b; font-size:12px; margin-top:6px; }
+  </style>
+</head>
+<body>
+  <div id="map"></div>
+  <div class="panel">
+    <h1>🚜 Betriebspotenziale PLZ 26</h1>
+    <label>Mindest-Partner-Score: <span id="scoreVal">0</span></label>
+    <input id="scoreFilter" type="range" min="0" max="100" value="0" style="width:100%" />
+    <label class="row"><input id="dairyOnly" type="checkbox" /> &nbsp;Nur Milchviehbetriebe</label>
+    <label class="row"><input id="gapOnly" type="checkbox" /> &nbsp;Nur mit GAP-Potenzial</label>
+    <label class="row"><input id="growingOnly" type="checkbox" /> &nbsp;Nur wachsende Betriebe 📈</label>
+    <label class="row"><input id="prospectOnly" type="checkbox" /> &nbsp;Nur Prospekte (keine Kunden)</label>
+    <div class="row" style="margin-top:10px">
+      <button id="nearMe">📍 In meiner Nähe</button>
+      <button id="reset" class="secondary">Reset</button>
+    </div>
+    <div id="status">lade…</div>
+  </div>
+  <div class="legend">
+    <div><i style="background:#16a34a"></i>A – Top-Partner (Score ≥ 70)</div>
+    <div><i style="background:#f59e0b"></i>B – Wachstum (40–69)</div>
+    <div><i style="background:#94a3b8"></i>C – Basis (&lt; 40)</div>
+    <div style="margin-top:4px">◯ Ring = Milchviehbetrieb</div>
+  </div>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script>
+    const COLORS = { A:'#16a34a', B:'#f59e0b', C:'#94a3b8' };
+    // Dev-Token (API_DEV_TOKEN). Override via ?token=… in der URL.
+    const params = new URLSearchParams(location.search);
+    const TOKEN = params.get('token') || 'dev-token';
+    const API = params.get('api') || '/api/v1/geo/map-points';
+
+    const map = L.map('map', { preferCanvas: true }).setView([53.35, 7.6], 10);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19, attribution: '© OpenStreetMap'
+    }).addTo(map);
+    const canvas = L.canvas({ padding: 0.5 });
+
+    let allFeatures = [];
+    let layer = L.layerGroup().addTo(map);
+    let meMarker = null;
+
+    function fmtEur(n){ return (n||0).toLocaleString('de-DE') + ' €'; }
+    function radius(score){ return 4 + (score/100)*9; }
+
+    const TREND_LABEL = {
+      wachsend:   ['📈 Wachsend',     '#16a34a'],
+      neueinsteiger: ['✦ Neueinsteiger', '#0ea5e9'],
+      stabil:     ['→ Stabil',       '#64748b'],
+      schrumpfend:['📉 Schrumpfend',  '#ea580c'],
+      weichend:   ['⚠ Weichend',     '#dc2626'],
+    };
+    function trendHtml(p){
+      if (!p.trend) return '';
+      const [lbl, col] = TREND_LABEL[p.trend] || [p.trend, '#64748b'];
+      const pct = (p.trend_rel_pct!=null) ? ` (${p.trend_rel_pct>0?'+':''}${p.trend_rel_pct}% Anteil)` : '';
+      return `<div class="kv"><span>Trend 24→25</span><b style="color:${col}">${lbl}${pct}</b></div>`;
+    }
+    function popup(p){
+      const dairy = p.has_dairy
+        ? `<div class="kv"><span>Milchleistung</span><b>${(p.dairy_milch_kg||0).toLocaleString('de-DE')} kg / ${p.dairy_fe_kg||0} F+E</b></div>
+           <div class="kv"><span>Herdengröße</span><span>${p.herd_size_group||'–'}</span></div>` : '';
+      const cust = p.is_customer
+        ? `<span class="badge" style="background:#0d9488">✓ Kunde ${p.kunden_nr||''}</span>`
+        : `<span class="badge" style="background:#7c3aed">Prospekt</span>`;
+      return `<div class="pop">
+        <b>${p.name}</b> &nbsp;<span class="badge" style="background:${COLORS[p.segment]}">${p.segment} · ${p.score}</span> ${cust}
+        <div class="kv"><span>${p.plz||''} ${p.ort||''}</span></div>
+        <hr style="border:none;border-top:1px solid #e2e8f0;margin:6px 0"/>
+        <div class="kv"><span>GAP-Fläche</span><b>${p.gap_area_ha} ha</b></div>
+        <div class="kv"><span>Potenzial/Jahr</span><b>${fmtEur(p.gap_potential_eur)}</b></div>
+        ${trendHtml(p)}
+        ${dairy}
+      </div>`;
+    }
+
+    function render(){
+      const minScore = +document.getElementById('scoreFilter').value;
+      const dairyOnly = document.getElementById('dairyOnly').checked;
+      const gapOnly = document.getElementById('gapOnly').checked;
+      const growingOnly = document.getElementById('growingOnly').checked;
+      const prospectOnly = document.getElementById('prospectOnly').checked;
+      layer.clearLayers();
+      let shown = 0;
+      for (const f of allFeatures){
+        const p = f.properties;
+        if (p.score < minScore) continue;
+        if (dairyOnly && !p.has_dairy) continue;
+        if (gapOnly && !(p.gap_potential_eur > 0)) continue;
+        if (growingOnly && p.trend !== 'wachsend') continue;
+        if (prospectOnly && p.is_customer) continue;
+        const [lon, lat] = f.geometry.coordinates;
+        const m = L.circleMarker([lat, lon], {
+          renderer: canvas, radius: radius(p.score),
+          color: p.has_dairy ? '#1e293b' : COLORS[p.segment],
+          weight: p.has_dairy ? 2 : 1, fillColor: COLORS[p.segment], fillOpacity: 0.85
+        });
+        m.bindPopup(popup(p));
+        m.addTo(layer);
+        shown++;
+      }
+      document.getElementById('status').textContent =
+        `${shown.toLocaleString('de-DE')} von ${allFeatures.length.toLocaleString('de-DE')} Betrieben`;
+    }
+
+    async function load(){
+      try {
+        const res = await fetch(API, { headers: { 'Authorization': 'Bearer ' + TOKEN, 'X-Tenant-ID': params.get('tenant')||'' } });
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        const fc = await res.json();
+        allFeatures = (fc.features || []).filter(f => f.geometry && f.geometry.coordinates);
+        render();
+      } catch (e) {
+        document.getElementById('status').textContent = 'Fehler beim Laden: ' + e.message;
+      }
+    }
+
+    document.getElementById('scoreFilter').addEventListener('input', e => {
+      document.getElementById('scoreVal').textContent = e.target.value; render();
+    });
+    document.getElementById('dairyOnly').addEventListener('change', render);
+    document.getElementById('gapOnly').addEventListener('change', render);
+    document.getElementById('growingOnly').addEventListener('change', render);
+    document.getElementById('prospectOnly').addEventListener('change', render);
+    document.getElementById('reset').addEventListener('click', () => {
+      document.getElementById('scoreFilter').value = 0; document.getElementById('scoreVal').textContent = '0';
+      document.getElementById('dairyOnly').checked = false; document.getElementById('gapOnly').checked = false;
+      document.getElementById('growingOnly').checked = false; document.getElementById('prospectOnly').checked = false;
+      render(); map.setView([53.35, 7.6], 10);
+    });
+    document.getElementById('nearMe').addEventListener('click', () => {
+      if (!navigator.geolocation) { alert('Geolocation nicht verfügbar'); return; }
+      navigator.geolocation.getCurrentPosition(pos => {
+        const { latitude, longitude } = pos.coords;
+        map.setView([latitude, longitude], 13);
+        if (meMarker) map.removeLayer(meMarker);
+        meMarker = L.marker([latitude, longitude]).addTo(map).bindPopup('Mein Standort').openPopup();
+      }, () => alert('Standort konnte nicht ermittelt werden'));
+    });
+
+    load();
+  </script>
+</body>
+</html>
