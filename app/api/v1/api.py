@@ -836,6 +836,13 @@ api_router.include_router(
     tags=["geo", "prospecting"]
 )
 
+from app.api.v1.endpoints import milchvieh_crosssell  # noqa: E402
+
+api_router.include_router(
+    milchvieh_crosssell.router,
+    tags=["agrar", "crosssell"]
+)
+
 api_router.include_router(
     prospecting.router,
     tags=["prospecting", "leads"]
