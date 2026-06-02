@@ -2,6 +2,10 @@ import type { AutoGroupRouteEntry } from '@/app/route-builders/types'
 
 export const entries: AutoGroupRouteEntry[] = [
   {
+    "module": "@/pages/agrar/milchvieh-crosssell",
+    "path": "milchvieh-crosssell"
+  },
+  {
     "module": "@/pages/agrar/aussaat/liste",
     "path": "aussaat/liste"
   },

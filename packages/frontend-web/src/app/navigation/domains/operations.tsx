@@ -148,6 +148,15 @@ export const RAW_NAV_SECTIONS: RawNavItem[] = [
     mcp: { businessDomain: 'agrar', scope: 'agrar:read' },
     children: [
       {
+        id: 'milchvieh-crosssell',
+        label: 'Milchvieh Cross-Sell',
+        icon: Wheat,
+        module: '@/pages/agrar/milchvieh-crosssell',
+        preferredPath: 'agrar/milchvieh-crosssell',
+        keywords: ['milchvieh', 'cross-sell', 'hygiene', 'kraftfutter', 'zellzahl', 'potenzial'],
+        mcp: { businessDomain: 'agrar', scope: 'agrar:read' },
+      },
+      {
         id: 'psm',
         label: 'Pflanzenschutz',
         icon: Leaf,
