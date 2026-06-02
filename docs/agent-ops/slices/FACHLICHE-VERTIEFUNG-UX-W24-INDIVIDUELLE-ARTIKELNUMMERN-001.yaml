@@ -1,7 +1,8 @@
 id: FACHLICHE-VERTIEFUNG-UX-W24-INDIVIDUELLE-ARTIKELNUMMERN-001
 title: Wave 24 UX — Individuelle Artikelnummern (Artikelstamm)
 owner: Claude Sonnet 4.6
-status: in arbeit
+status: abgeschlossen
+completed_at: 2026-05-30
 claimed_at: 2026-05-30
 depends_on:
   - FACHLICHE-VERTIEFUNG-UX-W21-001

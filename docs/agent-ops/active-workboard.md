@@ -2929,9 +2929,9 @@ Archiv des vorherigen Boards:
 
 **Von:** Claude Sonnet 4.6
 **Owner:** Claude Sonnet 4.6
-**Stand:** in arbeit 2026-05-30
+**Stand:** abgeschlossen 2026-05-30
 **Ziel des Slices:** Individuelle Artikelnummern (Kunde/Lieferant-Mapping) gegen Wave-9-Backend.
 **Dateibesitz:** `individuelleArtikelnummern.ts`, `individuelle-artikelnummern.tsx`, `stammdaten.ts`, `commercial.tsx`, `fachliche-vertiefung-individuelle-artikelnummern.spec.ts`.
-**Gate-Ergebnis:** offen
-**Erledigt:** API-Client; Seite mit Liste/Anlegen/Lookup/Löschen; Route + Navigation.
-**Offene Risiken:** E2E-Gate noch ausstehend.
+**Gate-Ergebnis:** E2E 1/1 ✅ · TypeScript 0 Fehler ✅
+**Erledigt:** API-Client; Seite mit Liste/Anlegen/Lookup/Löschen; Route + Navigation; E2E gemockt.
+**Offene Risiken:** Keine.
