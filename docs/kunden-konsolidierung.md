@@ -174,7 +174,16 @@ Verifiziert: 4 Tabellen, je 1 FK, 0 Zeilen, `alembic current == head`, re-upgrad
 - **Bewusst additiv statt Produktivmaske umgebogen**: `CustomerCombobox`/`kunden-liste` tragen die crm-customer-id-Identität (Aufträge/Rechnungen); Satelliten sind kunden_nr-basiert → hartes Umbiegen würde die Identität brechen. Die neue Maske demonstriert den Satelliten-Pfad end-to-end risikofrei.
 - **Nebenbei behoben**: `components/ui/native-select.tsx` — `NativeSelect` leitete `ref` nicht weiter (RHF `register()` defekt) + `value` war required → auf `forwardRef` + Standard-Select-Props (uncontrolled-fähig) umgestellt. tsc 0 Fehler, ESLint sauber.
 
-**Noch offen (Schritt 4, separat mit DB-Backup + Freigabe):** Altspalten in `public.kunden` (Adresse/Zahl-Flags/Altnummern) deprecaten/droppen — erst wenn der Fallback in den Detail-Lesern nicht mehr greift (Backfill für ALLE Kunden vollständig) und die BP-/crm-identitätsgebundenen Produktivmasken (Combobox/Stamm) über eine Identitätsbrücke (business_partner_id ↔ kunden_nr) ebenfalls auf die Satelliten lesen. Übergang via Shim-View-Spalten, Drop zuletzt.
+### Schritt 4 — Altspalten deprecaten UMGESETZT (2026-06-02)
+
+**Voraussetzung verifiziert:** Backfill vollständig für alle nicht-gelöschten Kunden (0 fehlende Adress-/Zahlungs-/Ref-Satelliten).
+
+- **Migration `kunden_deprecate_legacy_cols_20260602`** (head): `COMMENT ON COLUMN` auf **30 Altspalten** von `public.kunden` (DEPRECATED-Marker + Pointer auf den Satelliten). Rein Metadaten, reversibel (downgrade setzt Kommentare auf NULL). **KEIN Drop** — Spalten bleiben als Fallback funktional.
+  - Adresse (7) → `kunden_adressen`; Zahlung/Abrechnung (20) → `kunden_zahlung`; External Refs (3: webshop_kunden_nr/tankkarte_ean_code/kundenkarten_kennzeichen) → `kunden_external_refs`.
+  - **Nicht** deprecated: Kern (kunden_nr/name*/gueltig_*/geloescht/sprachschluessel/Zeitstempel), Brücke (`business_partner_id`, `legacy_kunden_nr`), sowie noch nicht migrierte Domänen (Bank/Profil/Versand/Genossenschaft → vorhandene Satelliten, eigener Strang).
+- **Beobachtbarkeit:** `BusinessPartnerService.get_customer_address/_payment/_external_refs` loggen `logger.warning(... deprecated)`, wenn sie auf `public.kunden` zurückfallen (Satellit fehlt) — bewiesen: feuert bei fehlendem Satelliten, schweigt bei vorhandenem.
+
+**Noch offen (Schritt 5, separat mit DB-Backup + Freigabe):** Reader-Fallback entfernen (erst wenn 0 Deprecation-Warnungen in Prod) + Altspalten in `public.kunden` **droppen**; zusätzlich die BP-/crm-identitätsgebundenen Produktivmasken (Combobox/Stamm) über eine Identitätsbrücke (business_partner_id ↔ kunden_nr) auf die Satelliten lesen lassen.
 
 ## 7. Offen
 

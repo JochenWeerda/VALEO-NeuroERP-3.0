@@ -348,7 +348,13 @@ class BusinessPartnerService:
         except (OperationalError, ProgrammingError):
             self.db.rollback()
             row = None
-        return dict(row) if row else {}
+        if row:
+            logger.warning(
+                "kunden_adressen-Fallback auf public.kunden fuer %s - Adress-Satellit fehlt (deprecated)",
+                kunden_nr,
+            )
+            return dict(row)
+        return {}
 
     def get_customer_payment(self, kunden_nr: str) -> dict:
         """Zahl-/Abrechnungs-Flags — bevorzugt aus ``kunden_zahlung``, Fallback ``public.kunden``."""
@@ -374,7 +380,13 @@ class BusinessPartnerService:
         except (OperationalError, ProgrammingError):
             self.db.rollback()
             row = None
-        return dict(row) if row else {}
+        if row:
+            logger.warning(
+                "kunden_zahlung-Fallback auf public.kunden fuer %s - Zahlungs-Satellit fehlt (deprecated)",
+                kunden_nr,
+            )
+            return dict(row)
+        return {}
 
     def get_customer_external_refs(self, kunden_nr: str) -> dict[str, str]:
         """Fremdschlüssel/Altnummern als ``{ref_typ: ref_wert}`` aus ``kunden_external_refs``.
@@ -409,7 +421,13 @@ class BusinessPartnerService:
             "tankkarte_ean": row.get("tankkarte_ean_code"),
             "kundenkarte": row.get("kundenkarten_kennzeichen"),
         }
-        return {k: str(v) for k, v in mapping.items() if v}
+        result = {k: str(v) for k, v in mapping.items() if v}
+        if result:
+            logger.warning(
+                "kunden_external_refs-Fallback auf public.kunden fuer %s - Ref-Satellit fehlt (deprecated)",
+                kunden_nr,
+            )
+        return result
 
     def get_customer_detail(self, kunden_nr: str) -> dict:
         """On-demand-Detail eines Kunden aus den Domänensatelliten (Gegenstück zu ``search_lookup``).
