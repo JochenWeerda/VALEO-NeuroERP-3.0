@@ -1,6 +1,18 @@
 # Active Workboard
 
-Stand: `2026-05-30`
+Stand: `2026-06-02`
+
+## KUNDENSTAMM-KONSOLIDIERUNG-001
+
+**Von:** Claude
+**Owner:** Claude
+**Stand:** abgeschlossen 2026-06-02 (Repo-seitig; Prod-Ausfuehrung extern, siehe Runbook)
+**Ziel des Slices:** Parallele Kunden-Wahrheiten auf einen fuehrenden Business Partner (System of Record) konsolidieren — `public.kunden` ueber `business_partner_id` an die BP-Identitaet binden, den 83-Spalten-Monolithen in schlanke Domaenensatelliten zerlegen, Konsumenten ueber die kanonische Zugriffsschicht lesen lassen und die Prod-Ausfuehrung (Bruecke fuellen, FK, Altspalten-Drop) per Runbook vorbereiten.
+**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/agent-ops/slices/KUNDENSTAMM-KONSOLIDIERUNG-001.yaml`, `docs/kunden-konsolidierung.md`, `docs/runbooks/kunden-konsolidierung-schritt5.md`, `alembic/versions/kunden_*.py` + `perf_indexes_apply_20260602.py` + `performance_indexes_20260526.py`, `app/services/kunden_merge.py`, `app/services/kunden_backfill.py`, `app/services/business_partner_service.py`, `app/api/v1/endpoints/customers.py`, `tests/test_kunden_merge.py`, `packages/frontend-web/src/lib/api/kunden-lookup.ts`, `packages/frontend-web/src/pages/crm/kunden-schnellauswahl.tsx`.
+**Abnahmekriterien:** `alembic current == head` (kunden_deprecate_legacy_cols_20260602), idempotent; Satelliten gefuellt (Backfill vollstaendig); Lookup-/Detail-Endpoints liefern Satellitendaten; Reader-Fallback loggt `deprecated`-Warnung; Identitaetsbruecke aufloesbar; `kunden_merge --apply` schreibt nur exact/strong; Prod-Ausfuehrung als phasenweises Runbook mit Backup/Freigabe-Gates dokumentiert.
+**Erledigt:** Phase 2A (kunden_merge Reconciliation), 2D (Satelliten `kunden_adressen/zahlung/external_refs/aggregates` + Backfill + `kunden_lookup`-View + Schnellauswahl-Maske), Schritt 4 (30 Altspalten als DEPRECATED markiert, kein Drop, Fallback-Beobachtbarkeit), Schritt 5 vorbereitet (Resolver + `/customers/lookup/resolve` + `/by-partner/{id}/detail` + FE-Hooks + `bridge_status`), Prod-Runbook, Pilot-Enabler `kunden_merge --plz-prefix` (Aurich/Emden/Leer = 265-268). Funktionaler Durchstich Dry-Run/Apply/bridge-status auf Dev fehlerfrei.
+**Checks:** `python -m pytest tests/test_kunden_merge.py -q --no-cov` (`9 passed`); `python -m pyflakes` (sauber); `python -m alembic upgrade head` (current == head, idempotent); `pnpm --filter @valero-neuroerp/frontend-web type-check` (`0 errors`); `python scripts/agent_workboard_supervisor.py validate`.
+**Offene Risiken:** EXTERN — die eigentliche Prod-Ausfuehrung (`kunden_merge --apply`, FK-Aktivierung, Altspalten-Drop) ist NICHT Teil dieses Slices: benoetigt Prod-`DATABASE_URL`, frisches Backup und Freigabe; Ablauf in `docs/runbooks/kunden-konsolidierung-schritt5.md`. Im Environment ist nur die Dev-DB verbunden (Pilot-Lauf Aurich/Emden/Leer auf Prod ausstehend). Landkreis-Scope ueber PLZ-Praefixe — exakte PLZ-Liste fachlich bestaetigen (Randbereiche 264/269). Identitaetsgebundene Produktivmasken (Combobox/Stamm) lesen erst nach Bruecken-Befuellung ueber resolve/by-partner.
 
 ## ADMIN-SUITE-001
 

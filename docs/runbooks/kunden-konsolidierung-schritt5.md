@@ -78,6 +78,23 @@ python -m app.services.kunden_merge --apply
 # Ausgabe: "[APPLY] business_partner_id geschrieben: N, übersprungen: M"
 ```
 
+**Phasenweiser Rollout (empfohlen) — Lauf auf Landkreise scopen:**
+`--plz-prefix` begrenzt die `public.kunden`-Seite auf PLZ-Präfixe (die BP-Seite
+bleibt vollständig). So lässt sich der erste Prod-Lauf auf eine Region begrenzen
+und kontrolliert ausweiten.
+
+```bash
+# Pilot Ostfriesland — Landkreise Aurich, Emden, Leer (≈ PLZ 265/266/267/268):
+python -m app.services.kunden_merge --plz-prefix 265,266,267,268            # Dry-Run (gescopt)
+python -m app.services.kunden_merge --plz-prefix 265,266,267,268 --bridge-status
+python -m app.services.kunden_merge --plz-prefix 265,266,267,268 --apply    # nach Review
+```
+
+> Hinweis: Es gibt keine Landkreis-Spalte — der Scope läuft über PLZ-Präfixe.
+> Die Präfixe 265–268 decken Aurich/Emden/Leer ab, mit Randunschärfe (264 teils
+> Wittmund, 267 teils Emden+Leer). **Exakte PLZ-Liste fachlich bestätigen** und
+> bei Bedarf um Einzel-PLZ erweitern (`--plz-prefix 265,266,267,26789,...`).
+
 - Schreibt **nur** `exact/strong` (`recommended_action = backfill_business_partner_id`).
 - `WHERE business_partner_id IS NULL` → idempotent, nicht-überschreibend.
 - Bei Unterbrechung gefahrlos erneut ausführbar.
