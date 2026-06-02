@@ -13,7 +13,7 @@ goal: >
 scope:
   - "Phase 2A: kunden_merge Reconciliation (Dry-Run/Apply, Token-Set-Match)."
   - "Phase 2D: Satelliten kunden_adressen/zahlung/external_refs/aggregates + Backfill."
-  - "kunden_lookup-View + /customers/lookup(+/detail) + Frontend-Schnellauswahl."
+  - "kunden_lookup-View + /crm/customers/lookup(+/detail) + Frontend-Schnellauswahl."
   - "Schritt 4: 30 Altspalten via COMMENT als DEPRECATED markiert (kein Drop)."
   - "Schritt 5 vorbereitet: Identitaetsbruecke (Resolver, /resolve, /by-partner/detail, bridge_status)."
   - "Pilot-Enabler: kunden_merge --plz-prefix scopt Lauf auf Landkreise (Aurich/Emden/Leer = 265-268)."

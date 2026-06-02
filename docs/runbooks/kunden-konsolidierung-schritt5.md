@@ -168,10 +168,10 @@ python -m alembic current   # zeigt die neue FK-Revision
 
 Bisher additiv vorhanden (Commit `0a68bdeb7`), jetzt verdrahten:
 
-- **Kundenstamm (BP-keyed):** Detail über `GET /api/v1/customers/by-partner/{business_partner_id}/detail`
+- **Kundenstamm (BP-keyed):** Detail über `GET /api/v1/crm/customers/by-partner/{business_partner_id}/detail`
   bzw. FE-Hook `useKundenDetailByPartner(businessPartnerId)`.
 - **CustomerCombobox / kunden-liste (crm-id-keyed):** Identität über
-  `GET /api/v1/customers/lookup/resolve?...` bzw. `useKundenIdentity({...})`, dann Satelliten-Detail
+  `GET /api/v1/crm/customers/lookup/resolve?...` bzw. `useKundenIdentity({...})`, dann Satelliten-Detail
   via aufgelöster `kunden_nr` (`useKundenDetail`) oder direkt `by-partner`.
 
 **Gate:** Smoke je Maske (Suche → Öffnen → Adresse/Zahlung/Refs sichtbar). Keine direkten Lesezugriffe

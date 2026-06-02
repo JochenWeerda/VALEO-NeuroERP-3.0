@@ -4,9 +4,9 @@ import { apiClient } from '@/lib/api-client'
 /**
  * Satelliten-basierte Kundenauswahl (Stammdaten-Konsolidierung, Phase 2D).
  *
- * - `useKundenLookup`  → GET /api/v1/customers/lookup  (kunden_lookup-View,
+ * - `useKundenLookup`  → GET /api/v1/crm/customers/lookup  (kunden_lookup-View,
  *   schlanke Such-/Listenfelder; schnelle Auswahl)
- * - `useKundenDetail`  → GET /api/v1/customers/lookup/{kunden_nr}/detail
+ * - `useKundenDetail`  → GET /api/v1/crm/customers/lookup/{kunden_nr}/detail
  *   (Adresse/Zahlung/External-Refs on-demand aus den kunden_*-Satelliten)
  *
  * Schlüssel ist die fachliche `kunden_nr`; `business_partner_id` ist die
@@ -44,7 +44,7 @@ export function useKundenLookup(q: string, limit = 20) {
   return useQuery({
     queryKey: keys.lookup(q, limit),
     queryFn: async () => {
-      const res = await apiClient.get<KundenLookupItem[]>('/api/v1/customers/lookup', {
+      const res = await apiClient.get<KundenLookupItem[]>('/api/v1/crm/customers/lookup', {
         params: { q, limit },
       })
       return Array.isArray(res.data) ? res.data : []
@@ -58,7 +58,7 @@ export function useKundenDetail(kundenNr: string | undefined, enabled = true) {
     queryKey: keys.detail(kundenNr ?? ''),
     queryFn: async () => {
       const res = await apiClient.get<KundenDetail>(
-        `/api/v1/customers/lookup/${encodeURIComponent(kundenNr ?? '')}/detail`,
+        `/api/v1/crm/customers/lookup/${encodeURIComponent(kundenNr ?? '')}/detail`,
       )
       return res.data
     },
@@ -93,7 +93,7 @@ export function useKundenIdentity(key: IdentityKey, enabled = true) {
   return useQuery({
     queryKey: ['kunden-lookup', 'resolve', params],
     queryFn: async () => {
-      const res = await apiClient.get<KundenIdentitaet>('/api/v1/customers/lookup/resolve', { params })
+      const res = await apiClient.get<KundenIdentitaet>('/api/v1/crm/customers/lookup/resolve', { params })
       return res.data
     },
     enabled: hasKey && enabled,
@@ -106,7 +106,7 @@ export function useKundenDetailByPartner(businessPartnerId: string | undefined, 
     queryKey: ['kunden-lookup', 'detail-by-partner', businessPartnerId ?? ''],
     queryFn: async () => {
       const res = await apiClient.get<KundenDetail>(
-        `/api/v1/customers/by-partner/${encodeURIComponent(businessPartnerId ?? '')}/detail`,
+        `/api/v1/crm/customers/by-partner/${encodeURIComponent(businessPartnerId ?? '')}/detail`,
       )
       return res.data
     },
