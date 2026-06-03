@@ -138,7 +138,7 @@ class KundenLookupItem(BaseSchema):
 @router.get("/lookup", response_model=list[KundenLookupItem], summary="Schnelle Kundenauswahl (kunden_lookup)")
 def customer_lookup(
     q: str = Query("", description="Suchbegriff (Matchcode/Name/Kundennr./PLZ)"),
-    limit: int = Query(20, ge=1, le=100),
+    limit: int = Query(20, ge=1, le=2000),
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
 ) -> list[dict[str, Any]]:
