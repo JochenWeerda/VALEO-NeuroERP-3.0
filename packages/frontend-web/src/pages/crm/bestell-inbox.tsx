@@ -23,10 +23,24 @@ import { useInbox, useCreateIntake, useBestaetigen, useVerwerfen, type InboxItem
  */
 
 const BELEG_ROUTES: Record<string, string> = {
-  angebot: '/verkauf/angebot/neu',
-  auftrag: '/verkauf/auftrag/neu',
-  lieferschein: '/verkauf/lieferschein/neu',
-  rechnung: '/verkauf/sofortrechnung/neu',
+  angebot: '/sales/angebot-erstellen',
+  auftrag: '/sales/order-editor',
+  lieferschein: '/sales/delivery-editor',
+  rechnung: '/sales/invoice-editor',
+}
+
+// Baut die Beleg-URL mit Vorbelegung: Kunde (kunden_nr + Name) und — sofern die
+// Zielmaske es liest (aktuell der Auftrag/order-editor) — die Bestell-Inbox-ID
+// für die Positionsübernahme.
+function belegUrl(belegTyp: string, item: InboxItem): string {
+  const base = BELEG_ROUTES[belegTyp] ?? BELEG_ROUTES.auftrag
+  const params = new URLSearchParams()
+  if (item.kunden_nr) params.set('kunde', item.kunden_nr)
+  const name = item.parsed?.match_kunde?.name
+  if (name) params.set('kundeName', name)
+  params.set('inbox', item.id)
+  params.set('entryMode', 'whatsapp-bestellung')
+  return `${base}?${params.toString()}`
 }
 
 const STATUS_BADGE: Record<string, { label: string; cls: string }> = {
@@ -122,7 +136,7 @@ function InboxCard({ item, onConfirm, onReject, busy }: {
             <CheckCircle2 className="h-4 w-4" />Bestätigt als {item.beleg_typ}
             {item.kunden_nr && (
               <Button size="sm" variant="outline" className="ml-auto gap-2"
-                onClick={() => navigate(`${BELEG_ROUTES[item.beleg_typ ?? 'auftrag']}?kunde=${encodeURIComponent(item.kunden_nr ?? '')}`)}>
+                onClick={() => navigate(belegUrl(item.beleg_typ ?? 'auftrag', item))}>
                 <FileText className="h-4 w-4" />Beleg öffnen
               </Button>
             )}
@@ -162,7 +176,7 @@ export default function BestellInboxPage(): JSX.Element {
     try {
       const res = await bestaetigen.mutateAsync({ id, beleg_typ: belegTyp })
       toast({ title: 'Bestätigt', description: 'Kontakt angelegt, Beleg wird vorbelegt.' })
-      if (res.kunden_nr) navigate(`${BELEG_ROUTES[belegTyp]}?kunde=${encodeURIComponent(res.kunden_nr)}`)
+      if (res.kunden_nr) navigate(belegUrl(belegTyp, res))
     } catch (e) {
       toast({ title: 'Bestätigung fehlgeschlagen', description: (e as Error).message, variant: 'destructive' })
     }

@@ -12,7 +12,8 @@ import { Textarea } from '@/components/ui/textarea'
 import { NativeSelect } from '@/components/ui/native-select'
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { useToast } from '@/hooks/use-toast'
-import { useKundenLookup, useKundenDetail, type KundenLookupItem } from '@/lib/api/kunden-lookup'
+import { useKundenDetail, type KundenLookupItem } from '@/lib/api/kunden-lookup'
+import { usePartnerSuche, type PartnerTreffer, type PartnerRolle } from '@/lib/api/partner-suche'
 import { useKontakte, useCreateKontakt, useErledigtKontakt, type Kontakt, type KontaktInput } from '@/lib/api/kunden-kontakte'
 
 /**
@@ -54,24 +55,57 @@ type NewKontaktState = Pick<KontaktInput, 'richtung' | 'art' | 'kurzinfo' | 'not
 
 const EMPTY_KONTAKT: NewKontaktState = { richtung: 'aus', art: 'telefon', kurzinfo: '', notiz: '', wiedervorlage: '', weiterleitung_an: '', verweis: '' }
 
+const ROLE_CHIP: Record<PartnerRolle, { label: string; cls: string }> = {
+  kunde: { label: 'Kunde', cls: 'bg-blue-100 text-blue-700' },
+  lieferant: { label: 'Lieferant', cls: 'bg-emerald-100 text-emerald-700' },
+  lead: { label: 'Lead', cls: 'bg-violet-100 text-violet-700' },
+}
+
+function partnerToKunde(p: PartnerTreffer): KundenLookupItem {
+  return {
+    business_partner_id: p.business_partner_id,
+    kunden_nr: p.kunden_nr ?? '',
+    name: p.name,
+    matchcode: null,
+    aktiv: true,
+    plz: p.plz,
+    ort: p.ort,
+    strasse: null,
+    ust_id_nr: null,
+    kundengruppe: null,
+    betreuer: null,
+    sperrgrund: null,
+  }
+}
+
 export default function KundenCockpitPage(): JSX.Element {
   const navigate = useNavigate()
   const { toast } = useToast()
   const [term, setTerm] = useState('')
   const [selected, setSelected] = useState<KundenLookupItem | null>(null)
+  const [selectedRollen, setSelectedRollen] = useState<PartnerRolle[]>([])
   const [dialogOpen, setDialogOpen] = useState(false)
   const [form, setForm] = useState<NewKontaktState>(EMPTY_KONTAKT)
 
-  const lookup = useKundenLookup(term.trim().length >= 2 ? term.trim() : '', 50)
-  const detail = useKundenDetail(selected?.kunden_nr, Boolean(selected))
-  const kontakte = useKontakte(selected?.kunden_nr)
+  const lookup = usePartnerSuche(term.trim(), 50)
+  const hasKunde = Boolean(selected?.kunden_nr)
+  const detail = useKundenDetail(selected?.kunden_nr || undefined, hasKunde)
+  const kontakte = useKontakte(selected?.kunden_nr || undefined)
   const createKontakt = useCreateKontakt()
   const erledigt = useErledigtKontakt()
 
-  const results = useMemo(() => {
-    const list = lookup.data ?? []
-    return [...list].sort((a, b) => (a.name ?? '').localeCompare(b.name ?? '', 'de'))
-  }, [lookup.data])
+  // Server liefert bereits Multi-Rollen zuerst, dann alphabetisch.
+  const results = useMemo(() => lookup.data ?? [], [lookup.data])
+
+  function selectPartner(p: PartnerTreffer) {
+    setSelectedRollen(p.rollen)
+    if (p.kunden_nr) {
+      setSelected(partnerToKunde(p))
+    } else {
+      // Lead/Lieferant ohne Kundenstamm: Kopf zeigen, Kontakte/Detail deaktiviert
+      setSelected(partnerToKunde(p))
+    }
+  }
 
   const adresse = detail.data?.adresse ?? {}
   const telefon = (adresse.telefon ?? adresse.telefon1 ?? selected?.betreuer) as string | undefined
@@ -86,7 +120,8 @@ export default function KundenCockpitPage(): JSX.Element {
       return
     }
     window.open(href, kind === 'whatsapp' ? '_blank' : '_self')
-    // Aktion als ausgehenden Kontakt vorprotokollieren (Kurzinfo, ohne Wiedervorlage)
+    // Aktion als ausgehenden Kontakt vorprotokollieren — nur bei Kundenstamm (FK).
+    if (!hasKunde) return
     setForm({ ...EMPTY_KONTAKT, richtung: 'aus', art: kind, kurzinfo: `${ART_LABEL[kind]} ausgehend` })
     setDialogOpen(true)
   }
@@ -125,9 +160,11 @@ export default function KundenCockpitPage(): JSX.Element {
     if (!selected) return
     // Vorbelegung über Query-Param; der Beleg übernimmt Kunde + Adresse aus kunden_nr.
     const routes: Record<string, string> = {
-      angebot: '/verkauf/angebot/neu', lieferschein: '/verkauf/lieferschein/neu', rechnung: '/verkauf/sofortrechnung/neu',
+      angebot: '/sales/angebot-erstellen', lieferschein: '/sales/delivery-editor', rechnung: '/sales/invoice-editor',
     }
-    navigate(`${routes[typ]}?kunde=${encodeURIComponent(selected.kunden_nr)}`)
+    const params = new URLSearchParams({ kunde: selected.kunden_nr })
+    if (selected.name) params.set('kundeName', selected.name)
+    navigate(`${routes[typ]}?${params.toString()}`)
   }
 
   return (
@@ -156,17 +193,28 @@ export default function KundenCockpitPage(): JSX.Element {
             <p className="px-4 py-6 text-center text-sm text-muted-foreground">Keine Treffer.</p>
           ) : (
             <ul className="divide-y">
-              {results.map((k) => (
-                <li key={k.kunden_nr}>
-                  <button
-                    onClick={() => setSelected(k)}
-                    className={`flex w-full flex-col items-start gap-0.5 px-4 py-2 text-left hover:bg-muted ${selected?.kunden_nr === k.kunden_nr ? 'bg-muted' : ''}`}
-                  >
-                    <span className="font-medium">{k.name || k.kunden_nr}</span>
-                    <span className="text-xs text-muted-foreground">{k.kunden_nr}{k.ort ? ` · ${k.plz ?? ''} ${k.ort}` : ''}</span>
-                  </button>
-                </li>
-              ))}
+              {results.map((k) => {
+                const key = k.kunden_nr || k.lead_id || k.lieferanten_id || k.name
+                const isSel = Boolean(selected && k.name === selected.name && (k.kunden_nr ?? '') === (selected.kunden_nr ?? ''))
+                return (
+                  <li key={key}>
+                    <button
+                      onClick={() => selectPartner(k)}
+                      className={`flex w-full flex-col items-start gap-0.5 px-4 py-2 text-left hover:bg-muted ${isSel ? 'bg-muted' : ''}`}
+                    >
+                      <span className="flex w-full items-center gap-1.5">
+                        <span className="font-medium">{k.name}</span>
+                        <span className="ml-auto flex shrink-0 gap-1">
+                          {k.rollen.map((r) => (
+                            <span key={r} className={`rounded px-1 py-0.5 text-[10px] font-medium ${ROLE_CHIP[r].cls}`}>{ROLE_CHIP[r].label}</span>
+                          ))}
+                        </span>
+                      </span>
+                      <span className="text-xs text-muted-foreground">{k.kunden_nr || k.ort || ''}{k.kunden_nr && k.ort ? ` · ${k.plz ?? ''} ${k.ort}` : ''}</span>
+                    </button>
+                  </li>
+                )
+              })}
             </ul>
           )}
         </CardContent>
@@ -188,16 +236,18 @@ export default function KundenCockpitPage(): JSX.Element {
             <Card>
               <CardContent className="flex flex-wrap items-start justify-between gap-4 p-4">
                 <div>
-                  <div className="flex items-center gap-2">
+                  <div className="flex flex-wrap items-center gap-2">
                     <h2 className="text-xl font-semibold">{selected.name || selected.kunden_nr}</h2>
-                    <Badge variant={selected.aktiv ? 'outline' : 'secondary'}>{selected.aktiv ? 'Aktiv' : 'Inaktiv'}</Badge>
+                    {selectedRollen.map((r) => (
+                      <span key={r} className={`rounded px-1.5 py-0.5 text-[11px] font-medium ${ROLE_CHIP[r].cls}`}>{ROLE_CHIP[r].label}</span>
+                    ))}
                   </div>
                   <p className="mt-1 flex items-center gap-1 text-sm text-muted-foreground">
                     <MapPin className="h-3.5 w-3.5" />
                     {String(adresse.strasse ?? selected.strasse ?? '')} {selected.plz ?? ''} {selected.ort ?? ''}
                   </p>
                   <p className="mt-0.5 text-xs text-muted-foreground">
-                    Kundennr. {selected.kunden_nr}{selected.kundengruppe ? ` · ${selected.kundengruppe}` : ''}{telefon ? ` · ☎ ${telefon}` : ''}
+                    {selected.kunden_nr ? `Kundennr. ${selected.kunden_nr}` : 'noch kein Kundenstamm'}{selected.kundengruppe ? ` · ${selected.kundengruppe}` : ''}{telefon ? ` · ☎ ${telefon}` : ''}
                   </p>
                 </div>
                 <Button variant="ghost" size="sm" onClick={() => navigate(`/crm/kunden-karte`)} className="gap-1">
@@ -218,7 +268,7 @@ export default function KundenCockpitPage(): JSX.Element {
                 <Button variant="outline" size="sm" className="gap-2" onClick={() => openAction('email')}>
                   <Mail className="h-4 w-4 text-violet-600" /> E-Mail
                 </Button>
-                <Button variant="outline" size="sm" className="gap-2" onClick={() => { setForm(EMPTY_KONTAKT); setDialogOpen(true) }}>
+                <Button variant="outline" size="sm" className="gap-2" disabled={!hasKunde} onClick={() => { setForm(EMPTY_KONTAKT); setDialogOpen(true) }}>
                   <Plus className="h-4 w-4" /> Kontakt
                 </Button>
                 <div className="ml-auto flex flex-wrap gap-2">
@@ -235,7 +285,9 @@ export default function KundenCockpitPage(): JSX.Element {
                 <CardTitle className="text-base">Kontakte</CardTitle>
               </CardHeader>
               <CardContent className="p-0">
-                {kontakte.isLoading ? (
+                {!hasKunde ? (
+                  <p className="px-4 py-6 text-center text-sm text-muted-foreground">Kontakte werden am Kundenstamm geführt — diesen Partner zuerst als Kunde anlegen.</p>
+                ) : kontakte.isLoading ? (
                   <div className="flex justify-center py-6"><Loader2 className="h-5 w-5 animate-spin text-muted-foreground" /></div>
                 ) : (kontakte.data ?? []).length === 0 ? (
                   <p className="px-4 py-6 text-center text-sm text-muted-foreground">Noch keine Kontakte erfasst.</p>

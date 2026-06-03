@@ -12,6 +12,10 @@ const CommandPalette = lazy(() =>
   import('./CommandPalette').then((module) => ({ default: module.CommandPalette })),
 )
 
+const IncomingCallPopup = lazy(() =>
+  import('@/components/telefonie/IncomingCallPopup').then((module) => ({ default: module.IncomingCallPopup })),
+)
+
 const Sidebar = lazy(() =>
   import('./Sidebar').then((module) => ({ default: module.Sidebar })),
 )
@@ -222,6 +226,10 @@ export function AppShell({ children, enableCommandPalette = true }: AppShellProp
           <CommandPalette {...commandPaletteProps} />
         </Suspense>
       ) : null}
+
+      <Suspense fallback={null}>
+        <IncomingCallPopup />
+      </Suspense>
     </div>
   )
 

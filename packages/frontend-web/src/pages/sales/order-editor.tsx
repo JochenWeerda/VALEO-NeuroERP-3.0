@@ -265,6 +265,42 @@ function mapResponseItemsToPositionen(items: AuftragResponse['items']): Position
   })
 }
 
+// Baut eine Auftragsposition aus einer extrahierten Bestell-Inbox-Position
+// (WhatsApp/Freitext → AI-Extraktion). Felder werden wie bei der API-Übernahme
+// mit neutralen Defaults aufgefüllt; Preise setzt der Bediener/Artikelstamm.
+type BestellInboxPosition = {
+  artikel?: string | null
+  menge?: number | null
+  einheit?: string | null
+  silo?: string | null
+  match_article_number?: string | null
+  match_name?: string | null
+}
+
+function buildPositionFromBestell(idx: number, p: BestellInboxPosition): Position {
+  return {
+    posNr: (idx + 1) * 10,
+    artikelNr: p.match_article_number || '',
+    artikelId: null,
+    bezeichnung: p.match_name || p.artikel || '',
+    bezeichnung2: '',
+    menge: p.menge ?? 0,
+    einheit: p.einheit || 'Stk',
+    listenpreis: 0,
+    rabatt: 0,
+    art: '',
+    nettoPreis: 0,
+    nettoBetrag: 0,
+    niederlassung: '',
+    lagerhalle: p.silo || '', lagerfach: '', charge: '', serienNr: '', gefPunkt: '',
+    gefahrgutPunkte: 0, gesamtGefahrgutPunkte: 0,
+    naBio: '', musterNr: '', strecke: '', zusBeleg: '', anerken: '', erloskonto: '',
+    mwstProzent: 19,
+    gewicht: 0, gesamtGewicht: 0,
+    kontraktNr: '', skontierf: false, fremdware: false, ekPreis: 0,
+  }
+}
+
 // ── Component ──────────────────────────────────────────────────────────────────
 
 export default function SalesOrderEditorPage(): JSX.Element {
@@ -285,6 +321,10 @@ export default function SalesOrderEditorPage(): JSX.Element {
   const workflowSubject = searchParams.get('subject') || ''
   const workflowEntryMode = searchParams.get('entryMode') || ''
   const isWorkflowEntry = !editId && Boolean(workflowCase || workflowInstanceId || workflowProcess)
+  // Bestell-Inbox (WhatsApp/Freitext) → Beleg-Vorbelegung
+  const bestellInboxId = searchParams.get('inbox') || ''
+  const bestellKundenNr = searchParams.get('kunde') || ''
+  const bestellKundeName = searchParams.get('kundeName') || ''
 
   const buildWorkflowResumeQuery = (orderId?: string | null): string => {
     const params = new URLSearchParams()
@@ -507,6 +547,40 @@ export default function SalesOrderEditorPage(): JSX.Element {
     workflowCustomerName,
     workflowCustomerNumber,
   ])
+
+  // Bestell-Inbox-Vorbelegung: Kunde aus ?kunde=/&kundeName= und Positionen aus
+  // ?inbox= (extrahierte WhatsApp-Bestellung). Best-effort, überschreibt nichts
+  // bereits Erfasstes.
+  useEffect(() => {
+    if (!bestellInboxId && !bestellKundenNr) return
+    let active = true
+    void (async () => {
+      // Kunde direkt aus den Parametern (kunden_nr ist die fachliche Nummer)
+      if (bestellKundenNr) {
+        setState((prev) => prev.customer ? prev : {
+          ...prev,
+          customer: { id: bestellKundenNr, customerNumber: bestellKundenNr, name: bestellKundeName || bestellKundenNr, debitorAccount: bestellKundenNr },
+        })
+      }
+      if (!bestellInboxId) return
+      try {
+        const res = await apiClient.get<any>(`/api/v1/crm/bestell-inbox/${bestellInboxId}`)
+        const data = res.data ?? res
+        const parsed = data?.parsed
+        if (!active || !parsed?.positionen?.length) return
+        const positionen = (parsed.positionen as BestellInboxPosition[]).map((p, i) => buildPositionFromBestell(i, p))
+        setState((prev) => prev.positionen.length > 0 ? prev : {
+          ...prev,
+          positionen,
+          betreff: prev.betreff || 'WhatsApp-Bestellung',
+          notizen: prev.notizen || (typeof data?.raw_text === 'string' ? data.raw_text : ''),
+        })
+      } catch {
+        // Vorbelegung ist optional — Fehler nicht blockierend (Bediener erfasst manuell).
+      }
+    })()
+    return () => { active = false }
+  }, [bestellInboxId, bestellKundenNr, bestellKundeName])
 
   // Preis automatisch berechnen
   useEffect(() => {
