@@ -885,6 +885,13 @@ api_router.include_router(
     tags=["crm", "tapi"]
 )
 
+from app.api.v1.endpoints import bedarfsdeckung  # noqa: E402
+
+api_router.include_router(
+    bedarfsdeckung.router,
+    tags=["crm", "bedarfsdeckung"]
+)
+
 api_router.include_router(
     prospecting.router,
     tags=["prospecting", "leads"]

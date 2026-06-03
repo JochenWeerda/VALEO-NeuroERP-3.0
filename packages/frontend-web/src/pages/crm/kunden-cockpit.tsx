@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
-  Mail, MapPin, MessageCircle, Phone, Plus, Search, User2, FileText, CalendarClock, Forward, CheckCircle2, Loader2,
+  Mail, MapPin, MessageCircle, Phone, Plus, Search, User2, FileText, CalendarClock, Forward, CheckCircle2, Loader2, Target,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -250,9 +250,16 @@ export default function KundenCockpitPage(): JSX.Element {
                     {selected.kunden_nr ? `Kundennr. ${selected.kunden_nr}` : 'noch kein Kundenstamm'}{selected.kundengruppe ? ` · ${selected.kundengruppe}` : ''}{telefon ? ` · ☎ ${telefon}` : ''}
                   </p>
                 </div>
-                <Button variant="ghost" size="sm" onClick={() => navigate(`/crm/kunden-karte`)} className="gap-1">
-                  <MapPin className="h-4 w-4" /> Karte
-                </Button>
+                <div className="flex gap-1">
+                  {hasKunde && (
+                    <Button variant="ghost" size="sm" onClick={() => navigate(`/crm/bedarfsdeckung-cockpit?kunde=${encodeURIComponent(selected.kunden_nr)}`)} className="gap-1">
+                      <Target className="h-4 w-4" /> Bedarfsdeckung
+                    </Button>
+                  )}
+                  <Button variant="ghost" size="sm" onClick={() => navigate(`/crm/kunden-karte`)} className="gap-1">
+                    <MapPin className="h-4 w-4" /> Karte
+                  </Button>
+                </div>
               </CardContent>
             </Card>
 

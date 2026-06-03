@@ -1,0 +1,82 @@
+import { useQuery } from '@tanstack/react-query'
+import { apiClient } from '@/lib/api-client'
+
+/**
+ * Bedarfsdeckungs-Cockpit (Durchdringungs-CRM): objektiver Jahresbedarf je
+ * Produktgruppe vs. Ist-Bezug (12 M) → Deckungsgrad, Lücke, Next-Best-Offer.
+ * „Die Lücke ist das Vertriebsobjekt."
+ */
+
+export type ProduktgruppeDeckung = {
+  key: string
+  label: string
+  bedarf_jahr_eur: number
+  ist_12m_eur: number
+  deckung_pct: number
+  luecke_eur: number
+  score: number
+  aktion: 'Einstieg' | 'Cross-Sell' | 'Ausbauen' | 'Halten'
+  letzter_bezug: string | null
+  quelle: string
+}
+
+export type NextBestOffer = {
+  produktgruppe: string
+  label: string
+  luecke_eur: number
+  score: number
+  empfehlung: string
+}
+
+export type BedarfsdeckungCockpit = {
+  kunden_nr: string
+  name: string
+  plz: string | null
+  ort: string | null
+  herd_size_kuehe: number
+  milchmenge_l_jahr: number
+  ecm_kg: number | null
+  kraftfutter_t_jahr: number
+  bedarf_jahr_eur_gesamt: number
+  ist_12m_eur_gesamt: number
+  luecke_eur_gesamt: number
+  deckung_pct_gesamt: number
+  produktgruppen: ProduktgruppeDeckung[]
+  next_best_offer: NextBestOffer | null
+}
+
+export type PipelineEntry = {
+  kunden_nr: string
+  name: string
+  plz: string | null
+  ort: string | null
+  herd_size_kuehe: number
+  deckung_pct_gesamt: number
+  luecke_eur_gesamt: number
+  top_produktgruppe: string
+  top_luecke_eur: number
+  top_score: number
+  empfehlung: string
+}
+
+export function useBedarfsdeckung(kundenNr: string | undefined) {
+  return useQuery({
+    queryKey: ['bedarfsdeckung', kundenNr],
+    queryFn: async () => {
+      const res = await apiClient.get<BedarfsdeckungCockpit>(`/api/v1/crm/bedarfsdeckung/${encodeURIComponent(kundenNr ?? '')}`)
+      return res.data
+    },
+    enabled: Boolean(kundenNr?.trim()),
+  })
+}
+
+export function usePipeline(limit = 100) {
+  return useQuery({
+    queryKey: ['bedarfsdeckung-pipeline', limit],
+    queryFn: async () => {
+      const res = await apiClient.get<PipelineEntry[]>('/api/v1/crm/bedarfsdeckung/pipeline', { params: { limit } })
+      return Array.isArray(res.data) ? res.data : []
+    },
+    initialDataUpdatedAt: 0,
+  })
+}
