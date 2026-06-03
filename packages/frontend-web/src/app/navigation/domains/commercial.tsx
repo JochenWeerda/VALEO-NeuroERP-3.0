@@ -383,6 +383,15 @@ export const RAW_NAV_SECTIONS: RawNavItem[] = [
         mcp: { businessDomain: 'sales', scope: 'sales:write' },
       },
       {
+        id: 'bedarfsdeckung',
+        label: 'Bedarfsdeckung',
+        icon: Target,
+        module: '@/pages/crm/bedarfsdeckung-cockpit',
+        preferredPath: 'crm/bedarfsdeckung-cockpit',
+        keywords: ['bedarf', 'deckung', 'durchdringung', 'cross-sell', 'luecke', 'share of wallet', 'next best offer', 'potenzial'],
+        mcp: { businessDomain: 'sales', scope: 'sales:read' },
+      },
+      {
         id: 'kunden-schnellauswahl',
         label: 'Kunden-Schnellauswahl',
         icon: Search,

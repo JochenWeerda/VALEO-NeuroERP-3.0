@@ -18,6 +18,10 @@ export const entries: AutoGroupRouteEntry[] = [
     "path": "bestell-inbox"
   },
   {
+    "module": "@/pages/crm/bedarfsdeckung-cockpit",
+    "path": "bedarfsdeckung-cockpit"
+  },
+  {
     "module": "@/pages/crm/aktivitaet-detail",
     "path": "aktivitaet-detail"
   },
