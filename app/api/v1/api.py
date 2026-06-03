@@ -843,6 +843,13 @@ api_router.include_router(
     tags=["agrar", "crosssell"]
 )
 
+from app.api.v1.endpoints import crm_lead_gen  # noqa: E402
+
+api_router.include_router(
+    crm_lead_gen.router,
+    tags=["crm", "prospecting"]
+)
+
 api_router.include_router(
     prospecting.router,
     tags=["prospecting", "leads"]

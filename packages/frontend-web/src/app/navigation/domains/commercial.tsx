@@ -31,6 +31,7 @@ import {
   Users,
   Zap,
   Search,
+  Sparkles,
   BookOpen,
   Users2,
   Layers,
@@ -54,6 +55,15 @@ const CRM_CHILDREN: RawNavItem[] = [
     icon: Target,
     module: '@/pages/crm/leads',
     keywords: ['leads'],
+    mcp: { businessDomain: 'crm', scope: 'crm:read' },
+  },
+  {
+    id: 'lead-generierung',
+    label: 'Lead-Generierung',
+    icon: Sparkles,
+    module: '@/pages/crm/lead-generierung',
+    preferredPath: 'crm/lead-generierung',
+    keywords: ['lead', 'generierung', 'gap', 'lkv', 'potenzial', 'akquise', 'prospecting', 'region'],
     mcp: { businessDomain: 'crm', scope: 'crm:read' },
   },
   {
