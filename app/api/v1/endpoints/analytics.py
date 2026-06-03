@@ -39,31 +39,44 @@ async def get_kpis(
     Returns:
         dict: KPIs including revenue, orders, customers, stock, and agrar-specific metrics
     """
+    # Kundenzahl aus public.kunden (System of Record) — unabhängig vom (evtl.
+    # fehlschlagenden) crm-core-Summary, damit die Startseite die echten Kunden zeigt.
+    real_customers: Optional[int] = None
+    try:
+        from sqlalchemy import text as _sql_text
+
+        _cnt = service._get_session().execute(
+            _sql_text("SELECT count(*) FROM public.kunden WHERE coalesce(geloescht, FALSE) = FALSE")
+        ).scalar()
+        real_customers = int(_cnt) if _cnt is not None else None
+    except Exception as _e:  # noqa: BLE001 — Fallback unten greift
+        logger.warning("Kunden-KPI aus public.kunden übersprungen: %s", _e)
+
     try:
         # Get dashboard summary from reports service
         summary = service.get_dashboard_summary(start_date, end_date)
-        
+
         # Calculate additional metrics based on available data
         kpis = {
             # Revenue (Total paid revenue)
             "revenue": summary.totalRevenue,
-            
+
             # Orders (Total sales orders)
             "orders": summary.totalOrders,
-            
-            # Customers (Active customers)
-            "customers": summary.activeCustomers,
-            
+
+            # Customers: public.kunden (SoR) bevorzugt, sonst crm-core-Summary
+            "customers": real_customers if real_customers is not None else summary.activeCustomers,
+
             # Stock (Placeholder - would need actual inventory data)
             "inventory": 97,  # Percentage
-            
+
             # Agrar-specific KPIs
             "contract_long_tons": 0,
             "contract_short_tons": 0,
             "weighing_today_tons": 0,
             "inventory_lots_blocked": 0
         }
-        
+
         # Calculate agrar-specific metrics from real data if available
         try:
             db = service._get_session()
@@ -108,7 +121,7 @@ async def get_kpis(
         return {
             "revenue": 0,
             "orders": 0,
-            "customers": 0,
+            "customers": real_customers or 0,
             "inventory": 0,
             "contract_long_tons": 0,
             "contract_short_tons": 0,
