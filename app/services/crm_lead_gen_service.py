@@ -97,10 +97,13 @@ def lkv_candidates(db: Session, plz_min: Optional[str], plz_max: Optional[str],
     return [{**dict(r), "quelle": "lkv", "score_label": "Milch kg/Kuh"} for r in rows]
 
 
+_DEFAULT_TENANT = "00000000-0000-0000-0000-000000000001"
+
+
 class CrmLeadGenService:
     def __init__(self, db: Session, tenant_id: Optional[str] = None) -> None:
         self.db = db
-        self.tenant_id = tenant_id
+        self.tenant_id = tenant_id or _DEFAULT_TENANT
 
     def preview(self, *, quelle: str = "gap", plz_min: Optional[str] = None,
                 plz_max: Optional[str] = None, top_pct: float = 0.10,
@@ -121,3 +124,42 @@ class CrmLeadGenService:
             "anzahl": len(cands),
             "kandidaten": cands[:max_leads],
         }
+
+    def leads_count(self) -> int:
+        try:
+            return int(self.db.execute(
+                text("SELECT count(*) FROM public.crm_leads WHERE tenant_id = :t"),
+                {"t": self.tenant_id},
+            ).scalar() or 0)
+        except Exception:  # noqa: BLE001 — Tabelle evtl. nicht vorhanden
+            self.db.rollback()
+            return 0
+
+    def create_leads(self, kandidaten: list[dict]) -> dict:
+        """Übernimmt Kandidaten als CRM-Leads (public.crm_leads). Idempotent je
+        Firma+Mandant (Mehrfach-Übernahme erzeugt keine Dubletten)."""
+        import uuid
+
+        ins = text(
+            """
+            INSERT INTO public.crm_leads (id, company, source, potential, priority, status, notes, tenant_id)
+            SELECT :id, :company, :source, :potential, 'MEDIUM', 'NEW', :notes, :tid
+            WHERE :company IS NOT NULL AND btrim(:company) <> ''
+              AND NOT EXISTS (
+                SELECT 1 FROM public.crm_leads WHERE company = :company AND tenant_id = :tid)
+            """
+        )
+        created = skipped = 0
+        for c in kandidaten:
+            name = (c.get("name") or "").strip()
+            notes = f"{c.get('plz') or ''} {c.get('ort') or ''} — {c.get('score_label') or ''}: {c.get('score') or ''}".strip()
+            res = self.db.execute(ins, {
+                "id": str(uuid.uuid4()), "company": name, "source": c.get("quelle"),
+                "potential": c.get("score"), "notes": notes, "tid": self.tenant_id,
+            })
+            if res.rowcount:
+                created += 1
+            else:
+                skipped += 1
+        self.db.commit()
+        return {"uebernommen": created, "uebersprungen": skipped, "leads_gesamt": self.leads_count()}
