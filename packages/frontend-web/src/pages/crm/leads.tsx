@@ -10,6 +10,8 @@ import { Input } from '@/components/ui/input'
 import { FileDown, Plus, Search, Target, Loader2 } from 'lucide-react'
 import { queryKeys } from '@/lib/query'
 import { apiClient } from '@/lib/api-client'
+import { toast } from '@/hooks/use-toast'
+import { useConvertLead } from '@/lib/api/lead-gen'
 import { type Lead } from '@/lib/services/crm-service'
 import { getEntityTypeLabel, getListTitle, getStatusLabel } from '@/features/crud/utils/i18n-helpers'
 
@@ -25,7 +27,8 @@ export default function LeadsPage(): JSX.Element {
   const entityType = 'lead'
   const entityTypeLabel = getEntityTypeLabel(t, entityType, 'Lead')
 
-  const { data: leadsData, isLoading, error } = useQuery({
+  const convertLead = useConvertLead()
+  const { data: leadsData, isLoading, error, refetch } = useQuery({
     queryKey: queryKeys.crm.leads.listFiltered({ search: searchTerm || undefined }),
     queryFn: async () => {
       // Echte uebernommene Leads aus public.crm_leads (Lead-Generierung-Funnel).
@@ -44,6 +47,16 @@ export default function LeadsPage(): JSX.Element {
   const totalPotential = leads.reduce((sum, lead) => sum + lead.potential, 0)
   const qualifiedLeads = leads.filter(lead => lead.status === 'qualified').length
   const highPriorityLeads = leads.filter(lead => lead.priority === 'high').length
+
+  const handleConvert = (lead: Lead) => {
+    convertLead.mutate(lead.id, {
+      onSuccess: (r) => {
+        toast({ title: 'Lead konvertiert', description: `${lead.company} → Kunde ${r.kunden_nr}.` })
+        void refetch()
+      },
+      onError: (e: unknown) => toast({ variant: 'destructive', title: 'Konversion fehlgeschlagen', description: e instanceof Error ? e.message : 'Fehler' }),
+    })
+  }
 
   const columns = [
     {
@@ -90,6 +103,20 @@ export default function LeadsPage(): JSX.Element {
           </Badge>
         )
       },
+    },
+    {
+      key: 'aktion' as const,
+      label: 'Aktion',
+      render: (lead: Lead) => (
+        <Button
+          size="sm"
+          variant="outline"
+          onClick={() => handleConvert(lead)}
+          disabled={convertLead.isPending}
+        >
+          → Kunde
+        </Button>
+      ),
     },
   ]
 

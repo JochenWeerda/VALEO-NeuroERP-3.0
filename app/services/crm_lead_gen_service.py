@@ -159,6 +159,48 @@ class CrmLeadGenService:
         ]
         return {"data": data, "total": len(data)}
 
+    def convert_lead(self, lead_id: str) -> dict:
+        """Konvertiert einen Lead in einen Kunden (public.kunden) und setzt den
+        Lead auf CONVERTED. Idempotent: erneutes Konvertieren liefert dieselbe
+        kunden_nr und legt keinen Doppel-Kunden an."""
+        from app.core.exceptions import EntityNotFoundError
+
+        row = self.db.execute(
+            text("SELECT id, company, notes FROM public.crm_leads WHERE id = :id AND tenant_id = :t"),
+            {"id": lead_id, "t": self.tenant_id},
+        ).mappings().first()
+        if not row:
+            raise EntityNotFoundError("Lead", lead_id)
+
+        # Geo aus den Notizen rekonstruieren (Format "PLZ ORT — Label: Score").
+        plz = ort = None
+        geo = (row["notes"] or "").split(" — ")[0].strip()
+        if geo:
+            parts = geo.split(" ", 1)
+            if parts[0].isdigit():
+                plz = parts[0]
+                ort = parts[1].strip() if len(parts) > 1 else None
+        kn = ("L" + lead_id.replace("-", ""))[:20].upper()
+
+        self.db.execute(
+            text(
+                "INSERT INTO public.kunden (kunden_nr, name1, plz, ort, land, geloescht, erstellt_am) "
+                "VALUES (:kn, :name, :plz, :ort, 'DE', FALSE, now()) "
+                "ON CONFLICT (kunden_nr) DO NOTHING"
+            ),
+            {"kn": kn, "name": (row["company"] or kn)[:200], "plz": plz, "ort": ort},
+        )
+        self.db.execute(
+            text(
+                "UPDATE public.crm_leads SET status = 'CONVERTED', updated_at = now(), "
+                "notes = coalesce(notes, '') || :tag "
+                "WHERE id = :id AND tenant_id = :t AND status <> 'CONVERTED'"
+            ),
+            {"tag": f" [→ Kunde {kn}]", "id": lead_id, "t": self.tenant_id},
+        )
+        self.db.commit()
+        return {"lead_id": lead_id, "kunden_nr": kn, "status": "CONVERTED"}
+
     def leads_count(self) -> int:
         try:
             return int(self.db.execute(

@@ -7,11 +7,12 @@ from __future__ import annotations
 
 from typing import Any, Optional
 
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
+from app.core.exceptions import EntityNotFoundError
 from app.core.tenant import get_tenant_id
 from app.services.crm_lead_gen_service import CrmLeadGenService
 
@@ -67,3 +68,15 @@ def uebernehmen(
     tenant_id: str = Depends(get_tenant_id),
 ) -> dict[str, Any]:
     return CrmLeadGenService(db, tenant_id).create_leads([k.model_dump() for k in body.kandidaten])
+
+
+@router.post("/leads/{lead_id}/convert", summary="Lead in Kunden konvertieren")
+def convert_lead(
+    lead_id: str,
+    db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
+) -> dict[str, Any]:
+    try:
+        return CrmLeadGenService(db, tenant_id).convert_lead(lead_id)
+    except EntityNotFoundError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
