@@ -871,6 +871,20 @@ api_router.include_router(
     tags=["crm", "bestell-inbox"]
 )
 
+from app.api.v1.endpoints import crm_partner_suche  # noqa: E402
+
+api_router.include_router(
+    crm_partner_suche.router,
+    tags=["crm", "partner"]
+)
+
+from app.api.v1.endpoints import tapi  # noqa: E402
+
+api_router.include_router(
+    tapi.router,
+    tags=["crm", "tapi"]
+)
+
 api_router.include_router(
     prospecting.router,
     tags=["prospecting", "leads"]
