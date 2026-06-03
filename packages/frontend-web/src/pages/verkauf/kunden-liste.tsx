@@ -8,7 +8,7 @@ import { DataTable } from '@/components/ui/data-table'
 import { Input } from '@/components/ui/input'
 import { KeyboardShortcutBar } from '@/components/keyboard/KeyboardShortcutBar'
 import { buildCoreMaskShortcuts, useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts'
-import { FileDown, FileText, Loader2, Plus, Search, Users } from 'lucide-react'
+import { FileDown, FileText, Loader2, MapPin, Plus, Search, Users } from 'lucide-react'
 import { useListActions } from '@/hooks/useListActions'
 import { businessPartnerService, type BusinessPartnerEnvelope } from '@/lib/services/business-partner-service'
 import { apiClient } from '@/lib/api-client'
@@ -159,10 +159,16 @@ export default function KundenListePage(): JSX.Element {
           <h1 className="text-3xl font-bold">Kunden</h1>
           <p className="text-muted-foreground">Konsolidierter Kundenstamm — Business Partner (Rolle Kunde) + operativer Stamm</p>
         </div>
-        <Button onClick={() => navigate('/verkauf/kunde/neu')} className="gap-2">
-          <Plus className="h-4 w-4" />
-          Neuer Kunde
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={() => navigate('/crm/kunden-karte')} className="gap-2">
+            <MapPin className="h-4 w-4" />
+            Karte
+          </Button>
+          <Button onClick={() => navigate('/verkauf/kunde/neu')} className="gap-2">
+            <Plus className="h-4 w-4" />
+            Neuer Kunde
+          </Button>
+        </div>
       </div>
 
       <div className="grid gap-4 md:grid-cols-3">

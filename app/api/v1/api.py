@@ -850,6 +850,13 @@ api_router.include_router(
     tags=["crm", "prospecting"]
 )
 
+from app.api.v1.endpoints import crm_kunden_map  # noqa: E402
+
+api_router.include_router(
+    crm_kunden_map.router,
+    tags=["crm", "map"]
+)
+
 api_router.include_router(
     prospecting.router,
     tags=["prospecting", "leads"]
