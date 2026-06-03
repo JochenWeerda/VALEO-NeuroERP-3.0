@@ -1,12 +1,13 @@
 import { useState } from 'react'
-import { Sparkles, Search } from 'lucide-react'
+import { Sparkles, Search, UserPlus } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { NativeSelect } from '@/components/ui/native-select'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
-import { useLeadPreview, type LeadGenParams } from '@/lib/api/lead-gen'
+import { toast } from '@/hooks/use-toast'
+import { useLeadPreview, useLeadsCount, useUebernehmenLeads, type LeadGenParams } from '@/lib/api/lead-gen'
 
 /**
  * CRM Lead-Generierung: erzeugt Lead-Kandidaten für den Außendienst aus offenen
@@ -21,8 +22,18 @@ export default function LeadGenerierungPage(): JSX.Element {
   const [form, setForm] = useState<LeadGenParams>({ quelle: 'beide', plzMin: '', plzMax: '', topPct: 0.1, maxLeads: 200 })
   const [run, setRun] = useState(false)
   const preview = useLeadPreview(form, run)
+  const leadsCount = useLeadsCount()
+  const uebernehmen = useUebernehmenLeads()
   const set = (patch: Partial<LeadGenParams>) => { setForm((f) => ({ ...f, ...patch })); setRun(false) }
   const items = preview.data?.kandidaten ?? []
+
+  const handleUebernehmen = () => {
+    if (items.length === 0) return
+    uebernehmen.mutate(items, {
+      onSuccess: (r) => toast({ title: 'Leads übernommen', description: `${r.uebernommen} neu, ${r.uebersprungen} bereits vorhanden. Gesamt: ${r.leads_gesamt}.` }),
+      onError: (e: unknown) => toast({ variant: 'destructive', title: 'Übernahme fehlgeschlagen', description: e instanceof Error ? e.message : 'Fehler' }),
+    })
+  }
 
   return (
     <div className="p-6">
@@ -76,9 +87,24 @@ export default function LeadGenerierungPage(): JSX.Element {
       {/* Ergebnisse */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">
-            Kandidaten {preview.data ? `(${nf(preview.data.anzahl)})` : ''}
-          </CardTitle>
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <CardTitle className="text-base">
+              Kandidaten {preview.data ? `(${nf(preview.data.anzahl)})` : ''}
+            </CardTitle>
+            <div className="flex items-center gap-3">
+              {leadsCount.data !== undefined && (
+                <Badge variant="secondary">{nf(leadsCount.data)} Leads im CRM</Badge>
+              )}
+              <Button
+                size="sm"
+                onClick={handleUebernehmen}
+                disabled={items.length === 0 || uebernehmen.isPending}
+              >
+                <UserPlus className="mr-1 h-4 w-4" />
+                {uebernehmen.isPending ? 'Übernehme…' : `Als Leads übernehmen${items.length ? ` (${nf(items.length)})` : ''}`}
+              </Button>
+            </div>
+          </div>
         </CardHeader>
         <CardContent className="overflow-x-auto">
           {!run ? (

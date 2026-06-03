@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { apiClient } from '@/lib/api-client'
 
 /** CRM Lead-Generierung: region-universale Lead-Kandidaten aus GAP/LKV. */
@@ -28,6 +28,31 @@ export type LeadGenParams = {
   plzMax?: string
   topPct: number
   maxLeads: number
+}
+
+export function useLeadsCount() {
+  return useQuery({
+    queryKey: ['lead-gen', 'leads-count'],
+    queryFn: async () => {
+      const res = await apiClient.get<{ count: number }>('/api/v1/crm/lead-generierung/leads-count')
+      return res.data.count
+    },
+    staleTime: 10_000,
+  })
+}
+
+export function useUebernehmenLeads() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: async (kandidaten: LeadKandidat[]) => {
+      const res = await apiClient.post<{ uebernommen: number; uebersprungen: number; leads_gesamt: number }>(
+        '/api/v1/crm/lead-generierung/uebernehmen',
+        { kandidaten },
+      )
+      return res.data
+    },
+    onSuccess: () => { void qc.invalidateQueries({ queryKey: ['lead-gen', 'leads-count'] }) },
+  })
 }
 
 export function useLeadPreview(params: LeadGenParams, enabled: boolean) {
