@@ -46,6 +46,15 @@ def lead_preview(
     )
 
 
+@router.get("/leads", summary="Übernommene CRM-Leads auflisten")
+def list_leads(
+    search: Optional[str] = Query(None),
+    db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
+) -> dict[str, Any]:
+    return CrmLeadGenService(db, tenant_id).list_leads(search)
+
+
 @router.get("/leads-count", summary="Anzahl übernommener CRM-Leads")
 def leads_count(db: Session = Depends(get_db), tenant_id: str = Depends(get_tenant_id)) -> dict[str, Any]:
     return {"count": CrmLeadGenService(db, tenant_id).leads_count()}

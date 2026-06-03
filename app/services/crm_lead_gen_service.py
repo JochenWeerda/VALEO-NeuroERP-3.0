@@ -125,6 +125,40 @@ class CrmLeadGenService:
             "kandidaten": cands[:max_leads],
         }
 
+    def list_leads(self, search: Optional[str] = None) -> dict:
+        """Übernommene CRM-Leads (public.crm_leads) in der Frontend-Lead-Shape."""
+        params: dict = {"t": self.tenant_id}
+        clause = ""
+        if search and search.strip():
+            clause = " AND company ILIKE :q"
+            params["q"] = f"%{search.strip()}%"
+        try:
+            rows = self.db.execute(
+                text(
+                    "SELECT id, company, contact_person, email, phone, source, potential, "
+                    "lower(priority::text) AS priority, lower(status::text) AS status "
+                    "FROM public.crm_leads WHERE tenant_id = :t" + clause +
+                    " ORDER BY potential DESC NULLS LAST LIMIT 1000"
+                ),
+                params,
+            ).mappings().all()
+        except Exception:  # noqa: BLE001
+            self.db.rollback()
+            return {"data": [], "total": 0}
+        _status = {"new": "new", "qualified": "qualified", "converted": "qualified", "lost": "lost"}
+        data = [
+            {
+                "id": r["id"], "company": r["company"] or "",
+                "contact_person": r["contact_person"] or "",
+                "email": r["email"] or "", "phone": r["phone"] or "",
+                "source": r["source"] or "", "potential": float(r["potential"] or 0),
+                "priority": r["priority"] or "medium",
+                "status": _status.get(r["status"] or "new", "new"),
+            }
+            for r in rows
+        ]
+        return {"data": data, "total": len(data)}
+
     def leads_count(self) -> int:
         try:
             return int(self.db.execute(

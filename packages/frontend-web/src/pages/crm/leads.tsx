@@ -9,7 +9,8 @@ import { DataTable } from '@/components/ui/data-table'
 import { Input } from '@/components/ui/input'
 import { FileDown, Plus, Search, Target, Loader2 } from 'lucide-react'
 import { queryKeys } from '@/lib/query'
-import { crmService, type Lead } from '@/lib/services/crm-service'
+import { apiClient } from '@/lib/api-client'
+import { type Lead } from '@/lib/services/crm-service'
 import { getEntityTypeLabel, getListTitle, getStatusLabel } from '@/features/crud/utils/i18n-helpers'
 
 const EMPTY_LEADS_RESPONSE: { data: Lead[]; total: number } = {
@@ -26,8 +27,16 @@ export default function LeadsPage(): JSX.Element {
 
   const { data: leadsData, isLoading, error } = useQuery({
     queryKey: queryKeys.crm.leads.listFiltered({ search: searchTerm || undefined }),
-    queryFn: () => crmService.getLeads({ search: searchTerm || undefined }),
+    queryFn: async () => {
+      // Echte uebernommene Leads aus public.crm_leads (Lead-Generierung-Funnel).
+      const res = await apiClient.get<{ data: Lead[]; total: number }>(
+        '/api/v1/crm/lead-generierung/leads',
+        { params: searchTerm ? { search: searchTerm } : {} },
+      )
+      return res.data ?? EMPTY_LEADS_RESPONSE
+    },
     initialData: EMPTY_LEADS_RESPONSE,
+    initialDataUpdatedAt: 0, // initialData sofort als veraltet -> Fetch beim Mount
   })
 
   const leads = leadsData.data
