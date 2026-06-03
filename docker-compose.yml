@@ -257,6 +257,8 @@ services:
       KEYCLOAK_URL: http://keycloak:8080
       API_DEV_TOKEN: dev-token
       AI_SERVICE_URL: http://ai:5000
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      ANTHROPIC_MODEL: ${ANTHROPIC_MODEL:-claude-opus-4-8}
       DEBUG: "true"
       LOG_LEVEL: INFO
       CRM_CORE_BASE_URL: http://crm-core:5600

@@ -10,6 +10,14 @@ export const entries: AutoGroupRouteEntry[] = [
     "path": "kunden-karte"
   },
   {
+    "module": "@/pages/crm/kunden-cockpit",
+    "path": "kunden-cockpit"
+  },
+  {
+    "module": "@/pages/crm/bestell-inbox",
+    "path": "bestell-inbox"
+  },
+  {
     "module": "@/pages/crm/aktivitaet-detail",
     "path": "aktivitaet-detail"
   },
