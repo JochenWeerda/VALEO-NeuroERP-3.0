@@ -55,6 +55,17 @@ export function useUebernehmenLeads() {
   })
 }
 
+export function useConvertLead() {
+  return useMutation({
+    mutationFn: async (leadId: string) => {
+      const res = await apiClient.post<{ lead_id: string; kunden_nr: string; status: string }>(
+        `/api/v1/crm/lead-generierung/leads/${encodeURIComponent(leadId)}/convert`,
+      )
+      return res.data
+    },
+  })
+}
+
 export function useLeadPreview(params: LeadGenParams, enabled: boolean) {
   return useQuery({
     queryKey: ['lead-gen', 'preview', params],
