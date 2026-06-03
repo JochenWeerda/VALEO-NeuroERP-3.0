@@ -232,16 +232,29 @@ export default function KundenListePage(): JSX.Element {
   }
 
   const { data: queryData, isLoading } = useQuery({
-    queryKey: ['crm', 'kunden'],
+    queryKey: ['crm', 'kunden', 'stamm'],
     queryFn: async () => {
       try {
-        const r = await apiClient.get('/api/v1/crm/customers')
-        if (r.data) {
-          const raw = r.data as any
-          const items = raw.data || (Array.isArray(raw) ? raw : [])
-          const total = raw.total || items.length
-          return { items, total }
-        }
+        // Echter Kundenstamm aus public.kunden (System of Record) über die
+        // kunden_lookup-View — nicht mehr die crm-core-Mockliste.
+        const r = await apiClient.get<Array<Record<string, unknown>>>(
+          '/api/v1/crm/customers/lookup',
+          { params: { q: '', limit: 1000 } },
+        )
+        const arr = Array.isArray(r.data) ? r.data : []
+        const items = arr.map((k) => ({
+          id: (k.business_partner_id as string) || (k.kunden_nr as string),
+          kunden_nr: k.kunden_nr,
+          business_partner_id: k.business_partner_id ?? null,
+          customer_number: k.kunden_nr,
+          firma: k.name,
+          ort: k.ort,
+          plz: k.plz,
+          kundengruppe: k.kundengruppe ?? null,
+          betreuer: k.betreuer ?? null,
+          status: k.aktiv ? 'aktiv' : (k.sperrgrund ? 'gesperrt' : 'inaktiv'),
+        }))
+        return { items, total: items.length }
       } catch { /* API nicht erreichbar */ }
       return { items: [], total: 0 }
     },
@@ -310,20 +323,26 @@ export default function KundenListePage(): JSX.Element {
 
   const handleEdit = (item: any) => {
     void (async () => {
+      // Verbrückte Kunden -> BP-Kundenstamm; sonst Schnellauswahl-Detail (echter Stamm).
+      const bp = item.business_partner_id ?? null
+      if (bp) {
+        navigate(`/verkauf/kunden-stamm/${bp}`)
+        return
+      }
       try {
         const partnerId = await resolveBusinessPartnerIdForCrmCustomer({
           crmCustomerId: item.id,
           customerNumber: item.customer_number ?? item.customerNumber ?? null,
-          businessPartnerIdHint: item.business_partner_id ?? null,
+          businessPartnerIdHint: null,
         })
         if (partnerId) {
           navigate(`/verkauf/kunden-stamm/${partnerId}`)
           return
         }
       } catch {
-        /* CRM-Detail */
+        /* Fallback unten */
       }
-      navigate(`/crm/kunden/${item.id}`)
+      navigate('/crm/kunden-schnellauswahl')
     })()
   }
 
