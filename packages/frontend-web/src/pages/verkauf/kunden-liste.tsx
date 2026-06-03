@@ -11,6 +11,7 @@ import { buildCoreMaskShortcuts, useKeyboardShortcuts } from '@/hooks/useKeyboar
 import { FileDown, FileText, Loader2, Plus, Search, Users } from 'lucide-react'
 import { useListActions } from '@/hooks/useListActions'
 import { businessPartnerService, type BusinessPartnerEnvelope } from '@/lib/services/business-partner-service'
+import { apiClient } from '@/lib/api-client'
 import { ErrorState } from '@/components/ErrorState'
 
 type CustomerRow = {
@@ -36,6 +37,19 @@ function mapToRow(item: BusinessPartnerEnvelope): CustomerRow {
   }
 }
 
+// Operativer Kundenstamm (public.kunden via kunden_lookup) -> CustomerRow.
+function mapLookupToRow(k: Record<string, unknown>): CustomerRow {
+  return {
+    id: String((k.business_partner_id as string) || (k.kunden_nr as string) || ''),
+    customer_number: String(k.kunden_nr ?? ''),
+    name: String(k.name ?? ''),
+    email: '',
+    phone: '',
+    payment_terms: '-',
+    status: k.aktiv ? 'active' : (k.sperrgrund ? 'blocked' : 'inactive'),
+  }
+}
+
 export default function KundenListePage(): JSX.Element {
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
@@ -47,9 +61,31 @@ export default function KundenListePage(): JSX.Element {
     setSearchTerm(searchFromUrl)
   }, [searchFromUrl])
 
+  // Konsolidierter Kundenstamm: Business Partner (Rolle Kunde) + operativer
+  // Kundenstamm (public.kunden via kunden_lookup), dedupliziert über die ID.
   const customersQuery = useQuery({
-    queryKey: ['business-partners', searchTerm],
-    queryFn: async () => businessPartnerService.list({ search: searchTerm || undefined }),
+    queryKey: ['kunden-konsolidiert', searchTerm],
+    queryFn: async (): Promise<CustomerRow[]> => {
+      // BP-Abruf (crm-core) best-effort mit Timeout — der operative Lookup ist
+      // die Hauptquelle und darf nicht durch ein langsames crm-core blockiert werden.
+      const bpPromise = Promise.race<BusinessPartnerEnvelope[]>([
+        businessPartnerService.list({ search: searchTerm || undefined }).catch(() => []),
+        new Promise<BusinessPartnerEnvelope[]>((resolve) => setTimeout(() => resolve([]), 4000)),
+      ])
+      const [bpEnvelopes, lookupRows] = await Promise.all([
+        bpPromise,
+        apiClient
+          .get<Array<Record<string, unknown>>>('/api/v1/crm/customers/lookup', { params: { q: searchTerm || '', limit: 1000 } })
+          .then((r) => r.data ?? [])
+          .catch(() => [] as Array<Record<string, unknown>>),
+      ])
+      const bpRows = (bpEnvelopes ?? [])
+        .filter((item) => item.business_partner.roles.is_customer)
+        .map(mapToRow)
+      const seen = new Set(bpRows.map((r) => r.id))
+      const lookup = (Array.isArray(lookupRows) ? lookupRows : []).map(mapLookupToRow).filter((r) => !seen.has(r.id))
+      return [...bpRows, ...lookup]
+    },
   })
 
   const shortcuts = buildCoreMaskShortcuts({
@@ -59,10 +95,7 @@ export default function KundenListePage(): JSX.Element {
   })
   useKeyboardShortcuts(shortcuts)
 
-  const customers = useMemo(
-    () => (customersQuery.data ?? []).filter((item) => item.business_partner.roles.is_customer).map(mapToRow),
-    [customersQuery.data],
-  )
+  const customers = useMemo(() => customersQuery.data ?? [], [customersQuery.data])
 
   const exportData = customers.map((c) => ({
     Kundennummer: c.customer_number,
@@ -83,7 +116,10 @@ export default function KundenListePage(): JSX.Element {
       key: 'name' as const,
       label: 'Kunde',
       render: (customer: CustomerRow) => (
-        <button onClick={() => navigate(`/verkauf/kunde/${customer.id}`)} className="font-medium text-blue-600 hover:underline">
+        <button
+          onClick={() => navigate(customer.id.includes('-') ? `/verkauf/kunden-stamm/${customer.id}` : '/crm/kunden-schnellauswahl')}
+          className="font-medium text-blue-600 hover:underline"
+        >
           {customer.name}
         </button>
       ),
@@ -121,7 +157,7 @@ export default function KundenListePage(): JSX.Element {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">Kunden</h1>
-          <p className="text-muted-foreground">Business-Partner Stamm (Rolle Kunde)</p>
+          <p className="text-muted-foreground">Konsolidierter Kundenstamm — Business Partner (Rolle Kunde) + operativer Stamm</p>
         </div>
         <Button onClick={() => navigate('/verkauf/kunde/neu')} className="gap-2">
           <Plus className="h-4 w-4" />
