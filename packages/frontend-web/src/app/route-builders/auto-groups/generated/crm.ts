@@ -6,6 +6,10 @@ export const entries: AutoGroupRouteEntry[] = [
     "path": "lead-generierung"
   },
   {
+    "module": "@/pages/crm/kunden-karte",
+    "path": "kunden-karte"
+  },
+  {
     "module": "@/pages/crm/aktivitaet-detail",
     "path": "aktivitaet-detail"
   },

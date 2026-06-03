@@ -30,6 +30,7 @@ import {
   UserCog,
   Users,
   Zap,
+  MapPin,
   Search,
   Sparkles,
   BookOpen,
@@ -350,6 +351,15 @@ export const RAW_NAV_SECTIONS: RawNavItem[] = [
         module: '@/pages/verkauf/kunden-liste',
         preferredPath: 'verkauf/kunden-liste',
         keywords: ['kunden', 'crm', 'customer', 'stamm', 'business partner'],
+        mcp: { businessDomain: 'sales', scope: 'sales:read' },
+      },
+      {
+        id: 'kunden-karte',
+        label: 'Kundenkarte',
+        icon: MapPin,
+        module: '@/pages/crm/kunden-karte',
+        preferredPath: 'crm/kunden-karte',
+        keywords: ['kunden', 'karte', 'map', 'poi', 'crm', 'regional'],
         mcp: { businessDomain: 'sales', scope: 'sales:read' },
       },
       {
