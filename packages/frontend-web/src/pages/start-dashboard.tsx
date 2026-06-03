@@ -77,7 +77,7 @@ const KPI_TILES: KpiTile[] = [
   {
     key: 'customers',
     label: 'Kunden',
-    path: '/verkauf/kunden-liste',
+    path: '/crm/kunden-schnellauswahl',
     format: (v) => NUM_DE.format(v),
     icon: <Users className="h-4 w-4" />,
     accentClass: 'text-primary',
@@ -188,10 +188,11 @@ export default function StartDashboardPage(): JSX.Element {
   const { data: kpis, isPending: kpiLoading } = useQuery({
     queryKey: queryKeys.analytics.kpis,
     queryFn: async () => {
-      const data = await apiClient.get<Record<string, number>>('/api/v1/analytics/kpis')
-      return data ?? {}
+      const res = await apiClient.get<Record<string, number>>('/api/v1/analytics/kpis')
+      return res.data ?? {}
     },
     initialData: EMPTY_START_KPIS,
+    initialDataUpdatedAt: 0, // initialData sofort als veraltet behandeln -> Fetch beim Mount
     staleTime: 30_000,
     refetchInterval: 60_000,
   })

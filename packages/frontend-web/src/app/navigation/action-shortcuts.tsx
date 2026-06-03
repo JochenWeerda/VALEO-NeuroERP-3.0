@@ -1,4 +1,4 @@
-import { Calculator, LayoutDashboard, Plus, Tractor } from 'lucide-react'
+import { Calculator, Euro, LayoutDashboard, MapPin, Plus, Search, Tractor } from 'lucide-react'
 import { resolveRoutePathFromModule } from '@/app/navigation/route-paths'
 
 export type ActionShortcut = {
@@ -52,6 +52,30 @@ const ACTION_SHORTCUTS_CONFIG: Array<{
     preferredPath: 'agrar/ernte-annahme-erfassung',
     keywords: ['ernte', 'annahme'],
     shortcut: 'Ctrl+Alt+E',
+  },
+  {
+    id: 'action-kunden-schnellauswahl',
+    label: 'Kunden-Schnellauswahl',
+    icon: Search,
+    module: '@/pages/crm/kunden-schnellauswahl',
+    preferredPath: 'crm/kunden-schnellauswahl',
+    keywords: ['kunde', 'suche', 'schnellauswahl', 'lookup'],
+  },
+  {
+    id: 'action-milchvieh-crosssell',
+    label: 'Milchvieh Cross-Sell',
+    icon: Euro,
+    module: '@/pages/agrar/milchvieh-crosssell',
+    preferredPath: 'agrar/milchvieh-crosssell',
+    keywords: ['milchvieh', 'cross-sell', 'potenzial', 'kraftfutter'],
+  },
+  {
+    id: 'action-milchvieh-karte',
+    label: 'Milchvieh-Karte',
+    icon: MapPin,
+    module: '@/pages/agrar/milchvieh-karte',
+    preferredPath: 'agrar/milchvieh-karte',
+    keywords: ['milchvieh', 'karte', 'map', 'betriebe', 'crm'],
   },
 ]
 
