@@ -347,9 +347,9 @@ export const RAW_NAV_SECTIONS: RawNavItem[] = [
         id: 'kunden',
         label: 'Kunden',
         icon: Users,
-        module: '@/pages/crm/kunden-liste',
-        preferredPath: 'crm/kunden-liste',
-        keywords: ['kunden', 'crm', 'customer', 'stamm'],
+        module: '@/pages/verkauf/kunden-liste',
+        preferredPath: 'verkauf/kunden-liste',
+        keywords: ['kunden', 'crm', 'customer', 'stamm', 'business partner'],
         mcp: { businessDomain: 'sales', scope: 'sales:read' },
       },
       {

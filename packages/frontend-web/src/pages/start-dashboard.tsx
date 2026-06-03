@@ -77,7 +77,7 @@ const KPI_TILES: KpiTile[] = [
   {
     key: 'customers',
     label: 'Kunden',
-    path: '/crm/kunden-liste',
+    path: '/verkauf/kunden-liste',
     format: (v) => NUM_DE.format(v),
     icon: <Users className="h-4 w-4" />,
     accentClass: 'text-primary',
