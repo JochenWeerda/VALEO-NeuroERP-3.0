@@ -37,6 +37,8 @@ import {
   Users2,
   Layers,
   Box,
+  Headset,
+  MessageCircle,
 } from 'lucide-react'
 import type { RawNavItem } from '@/app/navigation/types'
 import { ENABLE_PROSPECTING_UI } from '@/features/prospecting/feature-flags'
@@ -361,6 +363,24 @@ export const RAW_NAV_SECTIONS: RawNavItem[] = [
         preferredPath: 'crm/kunden-karte',
         keywords: ['kunden', 'karte', 'map', 'poi', 'crm', 'regional'],
         mcp: { businessDomain: 'sales', scope: 'sales:read' },
+      },
+      {
+        id: 'kunden-cockpit',
+        label: 'Kunden-Cockpit',
+        icon: Headset,
+        module: '@/pages/crm/kunden-cockpit',
+        preferredPath: 'crm/kunden-cockpit',
+        keywords: ['kunden', 'cockpit', 'kontakt', 'wiedervorlage', 'telefon', 'whatsapp', 'crm', 'kontakthistorie'],
+        mcp: { businessDomain: 'sales', scope: 'sales:read' },
+      },
+      {
+        id: 'bestell-inbox',
+        label: 'Bestell-Inbox',
+        icon: MessageCircle,
+        module: '@/pages/crm/bestell-inbox',
+        preferredPath: 'crm/bestell-inbox',
+        keywords: ['bestellung', 'whatsapp', 'inbox', 'posteingang', 'ai', 'futterbestellung', 'erfassung'],
+        mcp: { businessDomain: 'sales', scope: 'sales:write' },
       },
       {
         id: 'kunden-schnellauswahl',

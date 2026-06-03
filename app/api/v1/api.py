@@ -857,6 +857,20 @@ api_router.include_router(
     tags=["crm", "map"]
 )
 
+from app.api.v1.endpoints import crm_kontakte  # noqa: E402
+
+api_router.include_router(
+    crm_kontakte.router,
+    tags=["crm", "kontakte"]
+)
+
+from app.api.v1.endpoints import whatsapp_intake  # noqa: E402
+
+api_router.include_router(
+    whatsapp_intake.router,
+    tags=["crm", "bestell-inbox"]
+)
+
 api_router.include_router(
     prospecting.router,
     tags=["prospecting", "leads"]
