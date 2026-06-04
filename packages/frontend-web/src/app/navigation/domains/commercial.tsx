@@ -39,6 +39,7 @@ import {
   Box,
   Headset,
   MessageCircle,
+  ListChecks,
 } from 'lucide-react'
 import type { RawNavItem } from '@/app/navigation/types'
 import { ENABLE_PROSPECTING_UI } from '@/features/prospecting/feature-flags'
@@ -389,6 +390,15 @@ export const RAW_NAV_SECTIONS: RawNavItem[] = [
         module: '@/pages/crm/bedarfsdeckung-cockpit',
         preferredPath: 'crm/bedarfsdeckung-cockpit',
         keywords: ['bedarf', 'deckung', 'durchdringung', 'cross-sell', 'luecke', 'share of wallet', 'next best offer', 'potenzial'],
+        mcp: { businessDomain: 'sales', scope: 'sales:read' },
+      },
+      {
+        id: 'durchdringungs-pipeline',
+        label: 'Durchdringungs-Pipeline',
+        icon: ListChecks,
+        module: '@/pages/crm/durchdringungs-pipeline',
+        preferredPath: 'crm/durchdringungs-pipeline',
+        keywords: ['pipeline', 'durchdringung', 'arbeitsliste', 'chance', 'prioritaet', 'aussendienst', 'luecke', 'next best offer'],
         mcp: { businessDomain: 'sales', scope: 'sales:read' },
       },
       {

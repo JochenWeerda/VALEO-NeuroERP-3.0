@@ -74,10 +74,16 @@ export type PipelineEntry = {
   name: string
   plz: string | null
   ort: string | null
+  sparten: Sparte[]
   herd_size_kuehe: number
+  ackerflaeche_ha: number
   deckung_pct_gesamt: number
   luecke_eur_gesamt: number
+  realistische_luecke_eur_gesamt: number
+  kaeufergruppe: string
+  kaeufergruppe_label: string
   top_produktgruppe: string
+  top_sparte: Sparte
   top_luecke_eur: number
   top_score: number
   empfehlung: string
