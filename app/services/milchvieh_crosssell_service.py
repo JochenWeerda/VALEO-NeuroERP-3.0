@@ -160,37 +160,28 @@ class MilchviehCrossSellService:
             items.sort(key=lambda i: i["kraftfutter_t_jahr_max"], reverse=True)
         return items
 
-    def _coord_resolver(self):
-        """({(name_norm, plz): (lat, lon)} exakt, {plz: (lat, lon)} Zentroid) aus gap_map_points."""
-        exact: dict[tuple, tuple] = {}
-        agg: dict[str, list] = {}
+    def _geo_map(self) -> dict[str, tuple]:
+        """{kunden_nr: (lat, lon, precision)} aus der autoritativen public.kunden_geo."""
         try:
             rows = self.db.execute(
-                text("SELECT name_norm, postal_code, lat, lon FROM gap_map_points WHERE lat IS NOT NULL AND lon IS NOT NULL")
+                text("SELECT kunden_nr, lat, lon, precision FROM public.kunden_geo "
+                     "WHERE lat IS NOT NULL AND lon IS NOT NULL AND precision <> 'none'")
             ).all()
         except Exception:  # noqa: BLE001 — Tabelle evtl. nicht vorhanden
             self.db.rollback()
-            return {}, {}
-        for nn, pc, lat, lon in rows:
-            la, lo = float(lat), float(lon)
-            if nn and pc:
-                exact.setdefault((nn, pc), (la, lo))
-            if pc:
-                agg.setdefault(pc, []).append((la, lo))
-        cent = {pc: (sum(p[0] for p in pts) / len(pts), sum(p[1] for p in pts) / len(pts)) for pc, pts in agg.items()}
-        return exact, cent
+            return {}
+        return {kn: (float(lat), float(lon), prec) for kn, lat, lon, prec in rows}
 
     def map_features(self, hygiene_bedarf: Optional[str] = None, min_kuehe: Optional[int] = None) -> dict:
         """GeoJSON-FeatureCollection der Milchvieh-Kunden mit Koordinaten + Kennzahlen.
 
-        Koordinaten: exakt (Name+PLZ in gap_map_points), sonst PLZ-Zentroid +
-        deterministischer Jitter, damit Betriebe einer PLZ nicht überlappen.
+        Koordinaten ausschließlich aus public.kunden_geo (autoritativ, adress- bzw.
+        ortsgenau geokodiert; kein Zufalls-Jitter). Mehrfachpunkte am selben
+        Ortszentrum werden minimal entzerrt (deoverlap).
         """
-        import hashlib
+        from app.services.crm_kunden_map_service import deoverlap
 
-        from app.services.gap_pipeline import normalize_name
-
-        exact, cent = self._coord_resolver()
+        geo = self._geo_map()
         feats = []
         for r in self._rows():
             item = self._build(r)
@@ -198,22 +189,16 @@ class MilchviehCrossSellService:
                 continue
             if min_kuehe and item["herd_size_kuehe"] < min_kuehe:
                 continue
-            nn = normalize_name(item["name"] or "")
-            plz = item["plz"]
-            latlon = exact.get((nn, plz)) or cent.get(plz)
-            if not latlon:
+            g = geo.get(item["kunden_nr"])
+            if not g:
                 continue
-            lat, lon = latlon
-            if (nn, plz) not in exact:
-                h = int(hashlib.md5(item["kunden_nr"].encode()).hexdigest(), 16)
-                lat += ((h % 1000) / 1000 - 0.5) * 0.02
-                lon += (((h // 1000) % 1000) / 1000 - 0.5) * 0.03
+            lat, lon, prec = g
             feats.append({
                 "type": "Feature",
                 "geometry": {"type": "Point", "coordinates": [round(lon, 6), round(lat, 6)]},
                 "properties": {
                     "kunden_nr": item["kunden_nr"], "name": item["name"],
-                    "plz": item["plz"], "ort": item["ort"],
+                    "plz": item["plz"], "ort": item["ort"], "precision": prec,
                     "herd_size_kuehe": item["herd_size_kuehe"],
                     "milchmenge_l_jahr": item["milchmenge_l_jahr"],
                     "milch_kg": item["milch_kg"], "ecm_kg": item["ecm_kg"],
@@ -225,6 +210,7 @@ class MilchviehCrossSellService:
                     "crosssell_ziel_eur": item["crosssell_ziel_eur"],
                 },
             })
+        deoverlap(feats)
         return {"type": "FeatureCollection", "features": feats}
 
     def summary(self) -> dict:
