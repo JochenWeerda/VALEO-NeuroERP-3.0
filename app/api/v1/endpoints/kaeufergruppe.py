@@ -15,7 +15,10 @@ from sqlalchemy.orm import Session
 
 from app.core.database import get_db
 from app.core.tenant import get_tenant_id
-from app.services.kaeufergruppe import GRUPPEN, BuyingGroup, Verhaltenssignale, klassifiziere, profil
+from app.services.kaeufergruppe import GRUPPEN, BuyingGroup, profil
+from app.services.kaeufer_klassifikator import klassifiziere_mit
+from app.services.kaeufer_signal_service import KaeuferSignalService
+from app.services.bedarfsdeckung_service import BedarfsdeckungService
 
 router = APIRouter(prefix="/crm/kaeufergruppe", tags=["crm", "kaeufergruppe"])
 
@@ -62,28 +65,70 @@ def get_profil(kunden_nr: str, db: Session = Depends(get_db), tenant_id: str = D
     return _row(r)
 
 
-@router.post("/{kunden_nr}/neu-klassifizieren", summary="Regelbasiert neu klassifizieren (aus aktuellen Signalen)")
-def neu_klassifizieren(kunden_nr: str, db: Session = Depends(get_db), tenant_id: str = Depends(get_tenant_id)) -> dict[str, Any]:
-    r = db.execute(
-        text("SELECT * FROM public.kunden_kaeufer_profil WHERE kunden_nr = :k AND tenant_id = :t"),
+def _reklassifiziere(db: Session, tenant_id: str, kunden_nr: str, prefer_ai: bool) -> dict[str, Any]:
+    """Baut echte Signale (aus Belegen/Kontakten/Bezug), klassifiziert (KI oder
+    regelbasiert mit Fallback) und speichert mit Audit. Deckung/Bedarf kommen aus
+    dem Bedarfsdeckungs-Cockpit (autoritativ)."""
+    alt = db.execute(
+        text("SELECT buying_group FROM public.kunden_kaeufer_profil WHERE kunden_nr = :k AND tenant_id = :t"),
         {"k": kunden_nr, "t": tenant_id},
-    ).mappings().first()
-    if not r:
-        raise HTTPException(status_code=404, detail="Kein Käufergruppen-Profil")
-    sig = Verhaltenssignale(
-        angebote_12m=int(r["offer_count_12m"] or 0),
-        preisabfragen_12m=int(r["price_request_count_12m"] or 0),
-        abschlussquote=float(r["offer_win_rate_12m"] or 0),
-        rabatt_schnitt=float(r["average_discount_rate"] or 0),
-        kauffrequenz_12m=int(r["purchase_frequency_12m"] or 0),
-        multi_lieferant_wahrsch=float(r["multi_supplier_prob"] or 0.5),
-        saison_konzentration=float(r["season_concentration"] or 0),
+    ).scalar()
+    cp = BedarfsdeckungService(db, tenant_id).cockpit(kunden_nr)
+    if not cp:
+        raise HTTPException(status_code=404, detail="Kein Bedarfsprofil für diesen Betrieb")
+    sig, signal_source = KaeuferSignalService(db, tenant_id).aggregiere(
+        kunden_nr, float(cp["deckung_pct_gesamt"]), float(cp["bedarf_jahr_eur_gesamt"])
     )
-    kl = klassifiziere(sig)
-    _set_group(db, tenant_id, kunden_nr, r["buying_group"], kl.gruppe.value, "rule_based",
-               kl.confidence, kl.begruendung, None, "automatische Neuklassifikation")
+    kl, source = klassifiziere_mit(sig, prefer_ai=prefer_ai)
+    db.execute(
+        text("UPDATE public.kunden_kaeufer_profil SET signal_source = :s, "
+             "price_request_count_12m = :pa, offer_count_12m = :ang, offer_win_rate_12m = :win, "
+             "purchase_frequency_12m = :freq, multi_supplier_prob = :multi, updated_at = now() "
+             "WHERE kunden_nr = :k AND tenant_id = :t"),
+        {"s": signal_source, "pa": sig.preisabfragen_12m, "ang": sig.angebote_12m,
+         "win": sig.abschlussquote, "freq": sig.kauffrequenz_12m, "multi": sig.multi_lieferant_wahrsch,
+         "k": kunden_nr, "t": tenant_id},
+    )
+    _set_group(db, tenant_id, kunden_nr, alt, kl.gruppe.value, source,
+               kl.confidence, kl.begruendung, None, f"Neuklassifikation ({source}, Signale: {signal_source})")
     db.commit()
     return get_profil(kunden_nr, db, tenant_id)
+
+
+@router.post("/{kunden_nr}/neu-klassifizieren", summary="Regelbasiert neu klassifizieren (aus echten Belegsignalen)")
+def neu_klassifizieren(kunden_nr: str, db: Session = Depends(get_db), tenant_id: str = Depends(get_tenant_id)) -> dict[str, Any]:
+    return _reklassifiziere(db, tenant_id, kunden_nr, prefer_ai=False)
+
+
+@router.post("/{kunden_nr}/ki-klassifizieren", summary="KI-gestützt einschätzen (Claude, Fallback regelbasiert)")
+def ki_klassifizieren(kunden_nr: str, db: Session = Depends(get_db), tenant_id: str = Depends(get_tenant_id)) -> dict[str, Any]:
+    return _reklassifiziere(db, tenant_id, kunden_nr, prefer_ai=True)
+
+
+@router.post("/{kunden_nr}/produktgruppen-klassifizieren", summary="Käufergruppe je Produktgruppe ableiten")
+def produktgruppen_klassifizieren(kunden_nr: str, db: Session = Depends(get_db), tenant_id: str = Depends(get_tenant_id)) -> dict[str, Any]:
+    """Leitet je Produktgruppe eine eigene Käufergruppe aus deren Deckung/Bezug ab
+    (ein Betrieb kann je Gruppe unterschiedlich ticken)."""
+    cp = BedarfsdeckungService(db, tenant_id).cockpit(kunden_nr)
+    if not cp:
+        raise HTTPException(status_code=404, detail="Kein Bedarfsprofil für diesen Betrieb")
+    svc = KaeuferSignalService(db, tenant_id)
+    n = 0
+    for g in cp.get("produktgruppen", []):
+        sig = svc.aggregiere_gruppe(
+            kunden_nr, float(g["deckung_pct"]), float(g["bedarf_jahr_eur"]), bool(g["ist_12m_eur"] > 0)
+        )
+        kl, source = klassifiziere_mit(sig, prefer_ai=False)
+        db.execute(
+            text("UPDATE public.kunden_produktgruppen_bezug SET buying_group = :g, buying_group_reason = :r, "
+                 "buying_group_source = :s, buying_group_confidence = :c, updated_at = now() "
+                 "WHERE kunden_nr = :k AND produktgruppe = :pg AND tenant_id = :t"),
+            {"g": kl.gruppe.value, "r": kl.begruendung, "s": source, "c": kl.confidence,
+             "k": kunden_nr, "pg": g["key"], "t": tenant_id},
+        )
+        n += 1
+    db.commit()
+    return {"kunden_nr": kunden_nr, "klassifiziert": n}
 
 
 @router.post("/{kunden_nr}/setzen", summary="Käufergruppe bestätigen/überschreiben (mit Audit)")
