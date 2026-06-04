@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { Fragment, useMemo, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { Target, TrendingUp, Sparkles, Loader2, ArrowRight, Milk, Search } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -22,6 +22,12 @@ const AKTION_BADGE: Record<string, string> = {
   'Cross-Sell': 'bg-amber-100 text-amber-700',
   Ausbauen: 'bg-blue-100 text-blue-700',
   Halten: 'bg-emerald-100 text-emerald-700',
+}
+
+const SPARTE_LABEL: Record<string, string> = { milchvieh: 'Milchvieh', ackerbau: 'Ackerbau' }
+const SPARTE_BADGE: Record<string, string> = {
+  milchvieh: 'bg-sky-100 text-sky-700',
+  ackerbau: 'bg-lime-100 text-lime-700',
 }
 
 function deckungColor(pct: number): string {
@@ -108,8 +114,17 @@ export default function BedarfsdeckungCockpitPage(): JSX.Element {
           <div className="grid gap-3 md:grid-cols-4">
             <Card>
               <CardContent className="p-4">
-                <p className="text-sm text-muted-foreground">{data.name}</p>
-                <p className="text-xs text-muted-foreground">{data.plz} {data.ort} · {data.herd_size_kuehe} Kühe · {Math.round(data.milchmenge_l_jahr / 1000)} tsd l/J</p>
+                <div className="flex flex-wrap items-center gap-1.5">
+                  <p className="text-sm font-medium">{data.name}</p>
+                  {data.sparten.map((s) => (
+                    <span key={s} className={`rounded px-1.5 py-0.5 text-[10px] font-medium ${SPARTE_BADGE[s]}`}>{SPARTE_LABEL[s]}</span>
+                  ))}
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  {data.plz} {data.ort}
+                  {data.herd_size_kuehe > 0 ? ` · ${data.herd_size_kuehe} Kühe` : ''}
+                  {data.ackerflaeche_ha > 0 ? ` · ${data.ackerflaeche_ha} ha Acker` : ''}
+                </p>
               </CardContent>
             </Card>
             <Card><CardContent className="p-4"><p className="text-xs text-muted-foreground">Bedarf/Jahr</p><p className="text-2xl font-bold">{EUR(data.bedarf_jahr_eur_gesamt)}</p></CardContent></Card>
@@ -151,8 +166,16 @@ export default function BedarfsdeckungCockpitPage(): JSX.Element {
                     </tr>
                   </thead>
                   <tbody>
-                    {data.produktgruppen.map((g: ProduktgruppeDeckung) => (
-                      <tr key={g.key} className="border-b last:border-0 hover:bg-muted/40">
+                    {data.produktgruppen.map((g: ProduktgruppeDeckung, i: number) => (
+                      <Fragment key={g.key}>
+                        {(i === 0 || data.produktgruppen[i - 1].sparte !== g.sparte) && (
+                          <tr className="bg-muted/40">
+                            <td colSpan={7} className="px-4 py-1.5">
+                              <span className={`rounded px-1.5 py-0.5 text-[10px] font-medium ${SPARTE_BADGE[g.sparte]}`}>{SPARTE_LABEL[g.sparte]}</span>
+                            </td>
+                          </tr>
+                        )}
+                      <tr className="border-b last:border-0 hover:bg-muted/40">
                         <td className="px-4 py-2.5"><span className="font-medium">{g.label}</span></td>
                         <td className="px-4 py-2.5 text-right tabular-nums">{EUR(g.bedarf_jahr_eur)}</td>
                         <td className="px-4 py-2.5 text-right tabular-nums text-emerald-700">{EUR(g.ist_12m_eur)}</td>
@@ -167,12 +190,14 @@ export default function BedarfsdeckungCockpitPage(): JSX.Element {
                           )}
                         </td>
                       </tr>
+                      </Fragment>
                     ))}
                   </tbody>
                 </table>
               </div>
               <p className="px-4 py-2 text-[11px] text-muted-foreground">
-                Bedarf = objektives Potenzial aus Herde/Leistung. Ist {data.produktgruppen[0]?.quelle === 'geschaetzt' ? '(modelliert — echte Belegaggregation dockt an)' : '(aus Verkaufsbelegen, 12 M)'}.
+                Bedarf = objektives Potenzial (Milchvieh aus Herde/Leistung €/1.000 l, Ackerbau aus Marktfrucht-Fläche €/ha;
+                Grundfutterfläche ist abgezogen). Ist {data.produktgruppen[0]?.quelle === 'geschaetzt' ? '(modelliert — echte Belegaggregation dockt an)' : '(aus Verkaufsbelegen, 12 M)'}.
               </p>
             </CardContent>
           </Card>

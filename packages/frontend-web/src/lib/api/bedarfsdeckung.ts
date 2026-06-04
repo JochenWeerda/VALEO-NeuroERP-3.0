@@ -7,9 +7,12 @@ import { apiClient } from '@/lib/api-client'
  * „Die Lücke ist das Vertriebsobjekt."
  */
 
+export type Sparte = 'milchvieh' | 'ackerbau'
+
 export type ProduktgruppeDeckung = {
   key: string
   label: string
+  sparte: Sparte
   bedarf_jahr_eur: number
   ist_12m_eur: number
   deckung_pct: number
@@ -23,6 +26,7 @@ export type ProduktgruppeDeckung = {
 export type NextBestOffer = {
   produktgruppe: string
   label: string
+  sparte: Sparte
   luecke_eur: number
   score: number
   empfehlung: string
@@ -33,10 +37,12 @@ export type BedarfsdeckungCockpit = {
   name: string
   plz: string | null
   ort: string | null
+  sparten: Sparte[]
   herd_size_kuehe: number
   milchmenge_l_jahr: number
   ecm_kg: number | null
   kraftfutter_t_jahr: number
+  ackerflaeche_ha: number
   bedarf_jahr_eur_gesamt: number
   ist_12m_eur_gesamt: number
   luecke_eur_gesamt: number
