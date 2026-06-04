@@ -33,12 +33,25 @@ from app.services.gap_pipeline import normalize_name, tokenset
 
 _PLZ = re.compile(r"^\d{5}$")
 
+# WICHTIG: In Google My Maps als Standort-Spalte AUSSCHLIESSLICH "Volladresse"
+# wählen (eine saubere "Straße, PLZ Ort"-Zeile) und als Titel "Name". Sonst baut
+# My Maps die Adresse aus mehreren Spalten (inkl. Name/Zahlen) zusammen → Geocoder
+# scheitert → fehlende POIs.
 OUT_HEADER = [
-    "Name", "Ortsteil", "Adresse", "PLZ", "Ort",
+    "Name", "Volladresse",
+    "Ortsteil", "Adresse", "PLZ", "Ort",
     "Flaeche_ha", "GAP_Direktzahlung_EUR",
     "Milchvieh", "Milch_kg_Kuh", "FettEiweiss_kg", "Herdengruppe", "Zellzahl_tsd_ml", "Hygiene_Bedarf",
     "Kunde", "Kundennr", "CrossSell_Potenzial_EUR_Jahr", "Kraftfutter_t_Jahr", "Kaeufergruppe",
 ]
+
+
+def _volladresse(rec: dict) -> str:
+    """Eine saubere, geokodierbare Adresszeile: 'Straße, PLZ Ort' (ohne Name/Zahlen).
+    Ortsteil nur, wenn keine Straße vorhanden (zur groben Verortung)."""
+    strasse = rec["adresse"] or rec["ortsteil"]
+    ort = f"{rec['plz']} {rec['ort']}".strip()
+    return ", ".join(p for p in [strasse, ort, "Deutschland"] if p)
 
 
 def _read_rows(path: str) -> list[list[str]]:
@@ -124,7 +137,8 @@ def _enrich_row(rec: dict, lk: dict) -> list:
     mvp = lk["mvp"].get(kn) if kn else None
     pot = lk["pot"].get(kn) if kn else None
     return [
-        rec["name"], rec["ortsteil"], rec["adresse"], rec["plz"], rec["ort"],
+        rec["name"], _volladresse(rec),
+        rec["ortsteil"], rec["adresse"], rec["plz"], rec["ort"],
         flaeche, round(direct) if direct else "",
         "Ja" if d else "Nein",
         round(d["milch"]) if d and d["milch"] else "",
