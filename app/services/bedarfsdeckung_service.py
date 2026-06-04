@@ -1,15 +1,18 @@
 """Bedarfsdeckungs-Cockpit (Durchdringungs-CRM) — „Die Lücke ist das Vertriebsobjekt".
 
-Stellt je Betrieb den objektiven Jahresbedarf je Produktgruppe (Potenzial, aus dem
-Milchvieh-Profil abgeleitet) dem tatsächlichen Ist-Bezug (rollierend 12 M,
-public.kunden_produktgruppen_bezug) gegenüber und berechnet:
+Stellt je Betrieb den objektiven Jahresbedarf je Produktgruppe (Potenzial) dem
+tatsächlichen Ist-Bezug (rollierend 12 M, public.kunden_produktgruppen_bezug)
+gegenüber und berechnet Deckungsgrad, Bedarfslücke und Next-Best-Offer.
 
-    Deckungsgrad % = Ist / Bedarf × 100
-    Bedarfslücke € = Bedarf − Ist
+Zwei Sparten, die sich je Betrieb kombinieren (gemischte Betriebe sehen beide):
+- **Milchvieh**: Potenzial aus Herde/Leistung (€/1.000 l Milch), 6 Produktgruppen
+  (Wiederverwendung aus milchvieh_crosssell_service).
+- **Ackerbau**: Potenzial aus der Marktfrucht-Ackerfläche (€/ha), 3 Produktgruppen
+  (Dünger/PSM/Saatgut). Die Grundfutterfläche ist bereits in der Milchvieh-Gruppe
+  `grundfutterbau` erfasst und in der Ackerfläche abgezogen (keine Doppelzählung).
+
+    Deckungsgrad % = Ist / Bedarf,  Bedarfslücke € = Bedarf − Ist,
     Chance-Score   = Lücke € × Marge-Faktor × Einstiegs-/Ausbau-Gewicht
-
-Aus der größten Lücke wird ein konkretes Next-Best-Offer abgeleitet (Produktgruppe,
-Vorschlagsmenge, Begründung) — eine direkt ausführbare Verkäuferaktion.
 """
 
 from __future__ import annotations
@@ -26,17 +29,22 @@ from app.services.milchvieh_crosssell_service import (
     ecm_kg,
 )
 
+# Ackerbau-Produktgruppen: €/ha/Jahr Marktfrucht (regional gemittelt über
+# Winterweizen/-gerste/Raps; transparente, anpassbare Richtwerte).
+ACKERBAU_PRODUKTGRUPPEN = [
+    ("duenger_marktfrucht", "Dünger Marktfrucht (N/P/K, Kalk)", 110, 240),
+    ("pflanzenschutz", "Pflanzenschutz (Herbizid/Fungizid/Insektizid)", 80, 200),
+    ("saatgut_marktfrucht", "Saatgut Marktfrucht (Z-Saat/Hybrid)", 60, 150),
+]
+
 # Grobe Margen-Gewichtung je Produktgruppe (Priorisierung der Lücke nach Ertrag).
 MARGE_FAKTOR = {
-    "kraftfutter": 0.9,           # hohe Menge, niedrige Marge
-    "mineral_spezial": 1.6,       # hohe Marge
-    "kaelber": 1.5,
-    "grundfutterbau": 1.1,
-    "stallbedarf_hygiene": 1.4,
-    "beratung_analyse": 1.2,
+    "kraftfutter": 0.9, "mineral_spezial": 1.6, "kaelber": 1.5,
+    "grundfutterbau": 1.1, "stallbedarf_hygiene": 1.4, "beratung_analyse": 1.2,
+    "duenger_marktfrucht": 1.0, "pflanzenschutz": 1.3, "saatgut_marktfrucht": 1.1,
 }
 
-# Aktions-Label nach Deckungsgrad.
+
 def _aktion(deckung_pct: float, ist: float) -> str:
     if ist <= 0:
         return "Einstieg"
@@ -47,7 +55,7 @@ def _aktion(deckung_pct: float, ist: float) -> str:
     return "Halten"
 
 
-def _empfehlung(key: str, label: str, herd: int, kf_t_jahr: float, luecke: float) -> str:
+def _empfehlung(key: str, label: str, herd: int, kf_t_jahr: float, acker_ha: float, luecke: float) -> str:
     """Konkreter, ausführbarer Vorschlag für die größte Lücke."""
     if key == "kraftfutter" and kf_t_jahr > 0:
         start = max(1.0, round(kf_t_jahr * 0.25, 1))
@@ -65,6 +73,15 @@ def _empfehlung(key: str, label: str, herd: int, kf_t_jahr: float, luecke: float
     if key == "stallbedarf_hygiene":
         return ("Stallbedarf/Hygiene: Einstreu/Dippmittel/Klauenpflege als Abo. "
                 "Vorschlag: Hygiene-Grundausstattung + Nachbezug quartalsweise.")
+    if key == "duenger_marktfrucht":
+        return (f"Dünger Marktfrucht: ~{acker_ha:.0f} ha Ackerfläche. "
+                f"Vorschlag: N-Düngung-Frühbezug + Kalk-Erhaltungsdüngung anbieten.")
+    if key == "pflanzenschutz":
+        return (f"Pflanzenschutz: ~{acker_ha:.0f} ha — Herbizid/Fungizid-Programm. "
+                f"Vorschlag: Spritzplan + Saison-Komplettpaket kalkulieren.")
+    if key == "saatgut_marktfrucht":
+        return (f"Saatgut: ~{acker_ha:.0f} ha — Z-Saatgut/Hybriden. "
+                f"Vorschlag: Sortenberatung + Frühbezugskonditionen.")
     return f"{label}: Lücke ~{luecke:.0f} €/Jahr — Angebot/Beratungstermin vorschlagen."
 
 
@@ -73,18 +90,34 @@ class BedarfsdeckungService:
         self.db = db
         self.tenant_id = tenant_id or "00000000-0000-0000-0000-000000000001"
 
-    # ── Betriebs-Stammdaten + Potenzial ───────────────────────────────────
-    def _profil(self, kunden_nr: str) -> Optional[dict]:
+    # ── Stammdaten / Profile ──────────────────────────────────────────────
+    def _milchvieh(self, kunden_nr: str) -> Optional[dict]:
         r = self.db.execute(
             text(
                 """
-                SELECT k.kunden_nr, k.name1 AS name, k.plz, k.ort,
-                       p.herd_size_kuehe, p.herd_size_group, p.milch_kg,
-                       p.fett_pct, p.eiw_pct, p.hygiene_bedarf
+                SELECT p.herd_size_kuehe, p.milch_kg, p.fett_pct, p.eiw_pct, p.hygiene_bedarf
                 FROM public.kunden_milchvieh_profil p
-                JOIN public.kunden k USING (kunden_nr)
-                WHERE k.kunden_nr = :k AND coalesce(k.geloescht, FALSE) = FALSE
+                WHERE p.kunden_nr = :k
                 """
+            ),
+            {"k": kunden_nr},
+        ).mappings().first()
+        return dict(r) if r else None
+
+    def _ackerbau(self, kunden_nr: str) -> Optional[dict]:
+        r = self.db.execute(
+            text(
+                "SELECT ackerflaeche_ha, gesamtflaeche_ha, quelle FROM public.kunden_ackerbau_profil WHERE kunden_nr = :k"
+            ),
+            {"k": kunden_nr},
+        ).mappings().first()
+        return dict(r) if r else None
+
+    def _stamm(self, kunden_nr: str) -> Optional[dict]:
+        r = self.db.execute(
+            text(
+                "SELECT kunden_nr, name1 AS name, plz, ort FROM public.kunden "
+                "WHERE kunden_nr = :k AND coalesce(geloescht, FALSE) = FALSE"
             ),
             {"k": kunden_nr},
         ).mappings().first()
@@ -100,51 +133,73 @@ class BedarfsdeckungService:
         ).mappings().all()
         return {r["produktgruppe"]: dict(r) for r in rows}
 
+    # ── Gruppen-Aufbau ────────────────────────────────────────────────────
+    def _gruppe(self, key: str, label: str, sparte: str, bedarf: int, ist: dict) -> dict:
+        ist_row = ist.get(key, {})
+        ist_eur = round(float(ist_row.get("umsatz_12m_eur") or 0))
+        luecke = max(0, bedarf - ist_eur)
+        deckung = round(ist_eur / bedarf * 100) if bedarf > 0 else 0
+        score = round(luecke * MARGE_FAKTOR.get(key, 1.0) * (1.3 if ist_eur <= 0 else 1.0))
+        return {
+            "key": key, "label": label, "sparte": sparte,
+            "bedarf_jahr_eur": bedarf, "ist_12m_eur": ist_eur,
+            "deckung_pct": min(deckung, 100), "luecke_eur": luecke,
+            "score": score, "aktion": _aktion(deckung, ist_eur),
+            "letzter_bezug": str(ist_row["letzter_bezug"]) if ist_row.get("letzter_bezug") else None,
+            "quelle": ist_row.get("quelle") or "geschaetzt",
+        }
+
     def cockpit(self, kunden_nr: str) -> dict:
-        prof = self._profil(kunden_nr)
-        if not prof:
+        stamm = self._stamm(kunden_nr)
+        if not stamm:
             return {}
-        herd = int(prof["herd_size_kuehe"] or 0)
-        milch = float(prof["milch_kg"]) if prof["milch_kg"] is not None else None
-        ecm = ecm_kg(milch, prof["fett_pct"] and float(prof["fett_pct"]), prof["eiw_pct"] and float(prof["eiw_pct"]))
-        milchmenge_l = round((milch or 0.0) * herd)
-        kf_t_jahr = round((ecm or 0.0) * ((KF_G_PER_KG_ECM_MIN + KF_G_PER_KG_ECM_MAX) / 2) / 1000.0 * herd / 1000.0, 1)
-        k1000 = milchmenge_l / 1000.0
+        mv = self._milchvieh(kunden_nr)
+        ab = self._ackerbau(kunden_nr)
+        if not mv and not ab:
+            return {}
         ist = self._ist_map(kunden_nr)
+        gruppen: list[dict] = []
 
-        gruppen = []
-        for key, label, lo, hi in PRODUKTGRUPPEN:
-            bedarf = round(k1000 * (lo + hi) / 2)  # Mittel des €/1.000 l-Korridors
-            ist_row = ist.get(key, {})
-            ist_eur = round(float(ist_row.get("umsatz_12m_eur") or 0))
-            luecke = max(0, bedarf - ist_eur)
-            deckung = round(ist_eur / bedarf * 100) if bedarf > 0 else 0
-            score = round(luecke * MARGE_FAKTOR.get(key, 1.0) * (1.3 if ist_eur <= 0 else 1.0))
-            gruppen.append({
-                "key": key, "label": label,
-                "bedarf_jahr_eur": bedarf, "ist_12m_eur": ist_eur,
-                "deckung_pct": min(deckung, 100), "luecke_eur": luecke,
-                "score": score, "aktion": _aktion(deckung, ist_eur),
-                "letzter_bezug": str(ist_row["letzter_bezug"]) if ist_row.get("letzter_bezug") else None,
-                "quelle": ist_row.get("quelle") or "geschaetzt",
-            })
+        # — Milchvieh —
+        herd = 0
+        milchmenge_l = 0
+        kf_t_jahr = 0.0
+        ecm = None
+        if mv:
+            herd = int(mv["herd_size_kuehe"] or 0)
+            milch = float(mv["milch_kg"]) if mv["milch_kg"] is not None else None
+            ecm = ecm_kg(milch, mv["fett_pct"] and float(mv["fett_pct"]), mv["eiw_pct"] and float(mv["eiw_pct"]))
+            milchmenge_l = round((milch or 0.0) * herd)
+            kf_t_jahr = round((ecm or 0.0) * ((KF_G_PER_KG_ECM_MIN + KF_G_PER_KG_ECM_MAX) / 2) / 1000.0 * herd / 1000.0, 1)
+            k1000 = milchmenge_l / 1000.0
+            for key, label, lo, hi in PRODUKTGRUPPEN:
+                gruppen.append(self._gruppe(key, label, "milchvieh", round(k1000 * (lo + hi) / 2), ist))
 
-        # Next-Best-Offer = höchster Score (Lücke × Marge × Einstieg).
+        # — Ackerbau —
+        acker_ha = 0.0
+        if ab:
+            acker_ha = float(ab["ackerflaeche_ha"] or 0)
+            for key, label, lo, hi in ACKERBAU_PRODUKTGRUPPEN:
+                gruppen.append(self._gruppe(key, label, "ackerbau", round(acker_ha * (lo + hi) / 2), ist))
+
         nbo_grp = max(gruppen, key=lambda g: g["score"], default=None)
         next_best_offer = None
         if nbo_grp and nbo_grp["luecke_eur"] > 0:
             next_best_offer = {
-                "produktgruppe": nbo_grp["key"], "label": nbo_grp["label"],
+                "produktgruppe": nbo_grp["key"], "label": nbo_grp["label"], "sparte": nbo_grp["sparte"],
                 "luecke_eur": nbo_grp["luecke_eur"], "score": nbo_grp["score"],
-                "empfehlung": _empfehlung(nbo_grp["key"], nbo_grp["label"], herd, kf_t_jahr, nbo_grp["luecke_eur"]),
+                "empfehlung": _empfehlung(nbo_grp["key"], nbo_grp["label"], herd, kf_t_jahr, acker_ha, nbo_grp["luecke_eur"]),
             }
 
         bedarf_ges = sum(g["bedarf_jahr_eur"] for g in gruppen)
         ist_ges = sum(g["ist_12m_eur"] for g in gruppen)
+        sparten = [s for s, has in (("milchvieh", bool(mv)), ("ackerbau", bool(ab))) if has]
         return {
-            "kunden_nr": kunden_nr, "name": prof["name"], "plz": prof["plz"], "ort": prof["ort"],
+            "kunden_nr": kunden_nr, "name": stamm["name"], "plz": stamm["plz"], "ort": stamm["ort"],
+            "sparten": sparten,
             "herd_size_kuehe": herd, "milchmenge_l_jahr": milchmenge_l,
             "ecm_kg": round(ecm) if ecm else None, "kraftfutter_t_jahr": kf_t_jahr,
+            "ackerflaeche_ha": round(acker_ha, 1),
             "bedarf_jahr_eur_gesamt": bedarf_ges, "ist_12m_eur_gesamt": ist_ges,
             "luecke_eur_gesamt": max(0, bedarf_ges - ist_ges),
             "deckung_pct_gesamt": round(ist_ges / bedarf_ges * 100) if bedarf_ges > 0 else 0,
@@ -157,11 +212,11 @@ class BedarfsdeckungService:
         rows = self.db.execute(
             text(
                 """
-                SELECT k.kunden_nr, k.name1 AS name, k.plz, k.ort, p.herd_size_kuehe,
-                       p.milch_kg, p.fett_pct, p.eiw_pct
-                FROM public.kunden_milchvieh_profil p
-                JOIN public.kunden k USING (kunden_nr)
+                SELECT DISTINCT k.kunden_nr
+                FROM public.kunden k
                 WHERE coalesce(k.geloescht, FALSE) = FALSE
+                  AND (EXISTS (SELECT 1 FROM public.kunden_milchvieh_profil m WHERE m.kunden_nr = k.kunden_nr)
+                    OR EXISTS (SELECT 1 FROM public.kunden_ackerbau_profil a WHERE a.kunden_nr = k.kunden_nr))
                 """
             )
         ).mappings().all()
@@ -173,11 +228,12 @@ class BedarfsdeckungService:
             nbo = cp["next_best_offer"]
             out.append({
                 "kunden_nr": cp["kunden_nr"], "name": cp["name"], "plz": cp["plz"], "ort": cp["ort"],
-                "herd_size_kuehe": cp["herd_size_kuehe"],
+                "sparten": cp["sparten"],
+                "herd_size_kuehe": cp["herd_size_kuehe"], "ackerflaeche_ha": cp["ackerflaeche_ha"],
                 "deckung_pct_gesamt": cp["deckung_pct_gesamt"],
                 "luecke_eur_gesamt": cp["luecke_eur_gesamt"],
-                "top_produktgruppe": nbo["label"], "top_luecke_eur": nbo["luecke_eur"],
-                "top_score": nbo["score"], "empfehlung": nbo["empfehlung"],
+                "top_produktgruppe": nbo["label"], "top_sparte": nbo["sparte"],
+                "top_luecke_eur": nbo["luecke_eur"], "top_score": nbo["score"], "empfehlung": nbo["empfehlung"],
             })
         out.sort(key=lambda x: x["top_score"], reverse=True)
         return out[:limit]

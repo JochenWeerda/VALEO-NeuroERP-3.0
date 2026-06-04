@@ -20,6 +20,7 @@ from datetime import date, timedelta
 from sqlalchemy import create_engine, text
 
 from app.services.milchvieh_crosssell_service import PRODUKTGRUPPEN
+from app.services.bedarfsdeckung_service import ACKERBAU_PRODUKTGRUPPEN
 
 TENANT = "00000000-0000-0000-0000-000000000001"
 
@@ -32,9 +33,15 @@ DECKUNG_KORRIDOR = {
     "grundfutterbau": (10, 70),
     "stallbedarf_hygiene": (0, 40),
     "beratung_analyse": (0, 30),
+    # Ackerbau-Gruppen
+    "duenger_marktfrucht": (20, 75),
+    "pflanzenschutz": (10, 60),
+    "saatgut_marktfrucht": (15, 65),
 }
-# €/1.000 l Mittelwert je Gruppe (aus PRODUKTGRUPPEN-Spanne).
+# €/1.000 l Mittelwert je Milchvieh-Gruppe.
 EUR_PER_1000L = {key: (lo + hi) / 2 for key, _label, lo, hi in PRODUKTGRUPPEN}
+# €/ha Mittelwert je Ackerbau-Gruppe.
+EUR_PER_HA = {key: (lo + hi) / 2 for key, _label, lo, hi in ACKERBAU_PRODUKTGRUPPEN}
 
 
 def _ratio(kunden_nr: str, key: str) -> float:
@@ -46,45 +53,60 @@ def _ratio(kunden_nr: str, key: str) -> float:
     return (lo + (h % (hi - lo + 1))) / 100.0
 
 
+def _upsert(cx, kunden_nr: str, key: str, bedarf: float, today: date) -> None:
+    ratio = _ratio(kunden_nr, key)
+    umsatz = round(bedarf * ratio, 2)
+    menge = round(umsatz / 350.0, 2) if umsatz else 0  # grobe €→t-Heuristik
+    last = (today - timedelta(days=int((int(hashlib.md5(kunden_nr.encode()).hexdigest(), 16) % 300)))) if umsatz else None
+    cx.execute(
+        text(
+            """
+            INSERT INTO public.kunden_produktgruppen_bezug
+              (kunden_nr, produktgruppe, menge_12m, umsatz_12m_eur, db_12m_eur, letzter_bezug, quelle, tenant_id)
+            VALUES (:k, :g, :menge, :umsatz, :db, :last, 'geschaetzt', :t)
+            ON CONFLICT (kunden_nr, produktgruppe, tenant_id) DO UPDATE
+              SET umsatz_12m_eur = EXCLUDED.umsatz_12m_eur, menge_12m = EXCLUDED.menge_12m,
+                  db_12m_eur = EXCLUDED.db_12m_eur, letzter_bezug = EXCLUDED.letzter_bezug,
+                  quelle = 'geschaetzt', updated_at = now()
+            """
+        ),
+        {"k": kunden_nr, "g": key, "menge": menge, "umsatz": umsatz,
+         "db": round(umsatz * 0.18, 2) if umsatz else 0, "last": last, "t": TENANT},
+    )
+
+
 def main() -> None:
     url = os.environ.get("DATABASE_URL") or "postgresql://valeo_dev:valeo_dev_2024@postgres:5432/valeo_neuro_erp"
     eng = create_engine(url)
     today = date.today()
-    inserted = 0
+    mv_rows = 0
+    ab_rows = 0
     with eng.begin() as cx:
-        betriebe = cx.execute(
+        # — Milchvieh-Gruppen (€/1.000 l) —
+        milchvieh = cx.execute(
             text(
                 "SELECT k.kunden_nr, p.milch_kg, p.herd_size_kuehe "
                 "FROM public.kunden_milchvieh_profil p JOIN public.kunden k USING (kunden_nr) "
                 "WHERE coalesce(k.geloescht, FALSE) = FALSE"
             )
         ).mappings().all()
-        for b in betriebe:
-            milchmenge_l = float(b["milch_kg"] or 0) * int(b["herd_size_kuehe"] or 0)
-            k1000 = milchmenge_l / 1000.0
+        for b in milchvieh:
+            k1000 = float(b["milch_kg"] or 0) * int(b["herd_size_kuehe"] or 0) / 1000.0
             for key in EUR_PER_1000L:
-                bedarf = k1000 * EUR_PER_1000L[key]
-                ratio = _ratio(b["kunden_nr"], key)
-                umsatz = round(bedarf * ratio, 2)
-                menge = round(umsatz / 350.0, 2) if umsatz else 0  # grobe €→t-Heuristik
-                last = (today - timedelta(days=int((int(hashlib.md5(b["kunden_nr"].encode()).hexdigest(), 16) % 300)))) if umsatz else None
-                cx.execute(
-                    text(
-                        """
-                        INSERT INTO public.kunden_produktgruppen_bezug
-                          (kunden_nr, produktgruppe, menge_12m, umsatz_12m_eur, db_12m_eur, letzter_bezug, quelle, tenant_id)
-                        VALUES (:k, :g, :menge, :umsatz, :db, :last, 'geschaetzt', :t)
-                        ON CONFLICT (kunden_nr, produktgruppe, tenant_id) DO UPDATE
-                          SET umsatz_12m_eur = EXCLUDED.umsatz_12m_eur, menge_12m = EXCLUDED.menge_12m,
-                              db_12m_eur = EXCLUDED.db_12m_eur, letzter_bezug = EXCLUDED.letzter_bezug,
-                              quelle = 'geschaetzt', updated_at = now()
-                        """
-                    ),
-                    {"k": b["kunden_nr"], "g": key, "menge": menge, "umsatz": umsatz,
-                     "db": round(umsatz * 0.18, 2) if umsatz else 0, "last": last, "t": TENANT},
-                )
-                inserted += 1
-    print(f"seed_produktgruppen_bezug: {len(betriebe)} Betriebe × {len(EUR_PER_1000L)} Gruppen = {inserted} Zeilen")
+                _upsert(cx, b["kunden_nr"], key, k1000 * EUR_PER_1000L[key], today)
+                mv_rows += 1
+
+        # — Ackerbau-Gruppen (€/ha) —
+        ackerbau = cx.execute(
+            text("SELECT kunden_nr, ackerflaeche_ha FROM public.kunden_ackerbau_profil")
+        ).mappings().all()
+        for b in ackerbau:
+            ha = float(b["ackerflaeche_ha"] or 0)
+            for key in EUR_PER_HA:
+                _upsert(cx, b["kunden_nr"], key, ha * EUR_PER_HA[key], today)
+                ab_rows += 1
+    print(f"seed_produktgruppen_bezug: Milchvieh {len(milchvieh)}×{len(EUR_PER_1000L)}={mv_rows} + "
+          f"Ackerbau {len(ackerbau)}×{len(EUR_PER_HA)}={ab_rows} Zeilen")
 
 
 if __name__ == "__main__":
