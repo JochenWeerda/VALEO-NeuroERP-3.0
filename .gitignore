@@ -143,3 +143,8 @@ nul
 service_erp_endpoints.txt
 C*Tempanalyze.py
 packages/frontend-web/config/sync_schedules.json
+
+# Geo-Quelldaten (lokal, nicht versionieren)
+*.kmz
+impdata*_PLZ_*.csv
+Futtermittelbetriebe PLZ*.csv
