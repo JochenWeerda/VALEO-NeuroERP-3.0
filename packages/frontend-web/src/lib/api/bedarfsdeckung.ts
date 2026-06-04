@@ -17,10 +17,24 @@ export type ProduktgruppeDeckung = {
   ist_12m_eur: number
   deckung_pct: number
   luecke_eur: number
+  ziel_anteil: number
+  realistische_luecke_eur: number
+  geschuetzte_luecke_eur: number
   score: number
   aktion: 'Einstieg' | 'Cross-Sell' | 'Ausbauen' | 'Halten'
   letzter_bezug: string | null
   quelle: string
+}
+
+export type Kaeufergruppe = {
+  group: string
+  label: string
+  confidence: number
+  reason: string | null
+  source: string
+  ansatz: string
+  ziel_anteil_min: number
+  ziel_anteil_max: number
 }
 
 export type NextBestOffer = {
@@ -28,6 +42,7 @@ export type NextBestOffer = {
   label: string
   sparte: Sparte
   luecke_eur: number
+  realistische_luecke_eur: number
   score: number
   empfehlung: string
 }
@@ -46,7 +61,10 @@ export type BedarfsdeckungCockpit = {
   bedarf_jahr_eur_gesamt: number
   ist_12m_eur_gesamt: number
   luecke_eur_gesamt: number
+  realistische_luecke_eur_gesamt: number
+  geschuetzte_luecke_eur_gesamt: number
   deckung_pct_gesamt: number
+  kaeufergruppe: Kaeufergruppe
   produktgruppen: ProduktgruppeDeckung[]
   next_best_offer: NextBestOffer | null
 }

@@ -892,6 +892,13 @@ api_router.include_router(
     tags=["crm", "bedarfsdeckung"]
 )
 
+from app.api.v1.endpoints import kaeufergruppe as kaeufergruppe_ep  # noqa: E402
+
+api_router.include_router(
+    kaeufergruppe_ep.router,
+    tags=["crm", "kaeufergruppe"]
+)
+
 api_router.include_router(
     prospecting.router,
     tags=["prospecting", "leads"]

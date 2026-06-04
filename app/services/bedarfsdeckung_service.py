@@ -28,6 +28,7 @@ from app.services.milchvieh_crosssell_service import (
     PRODUKTGRUPPEN,
     ecm_kg,
 )
+from app.services.kaeufergruppe import BuyingGroup, bewerte_luecke, profil as gruppen_profil
 
 # Ackerbau-Produktgruppen: €/ha/Jahr Marktfrucht (regional gemittelt über
 # Winterweizen/-gerste/Raps; transparente, anpassbare Richtwerte).
@@ -133,18 +134,30 @@ class BedarfsdeckungService:
         ).mappings().all()
         return {r["produktgruppe"]: dict(r) for r in rows}
 
+    def _kaeufer(self, kunden_nr: str) -> dict:
+        r = self.db.execute(
+            text(
+                "SELECT buying_group, buying_group_confidence, buying_group_reason, buying_group_source, "
+                "target_share_override, signal_source FROM public.kunden_kaeufer_profil WHERE kunden_nr = :k"
+            ),
+            {"k": kunden_nr},
+        ).mappings().first()
+        return dict(r) if r else {}
+
     # ── Gruppen-Aufbau ────────────────────────────────────────────────────
-    def _gruppe(self, key: str, label: str, sparte: str, bedarf: int, ist: dict) -> dict:
+    def _gruppe(self, key: str, label: str, sparte: str, bedarf: int, ist: dict, group: BuyingGroup) -> dict:
         ist_row = ist.get(key, {})
         ist_eur = round(float(ist_row.get("umsatz_12m_eur") or 0))
-        luecke = max(0, bedarf - ist_eur)
-        deckung = round(ist_eur / bedarf * 100) if bedarf > 0 else 0
-        score = round(luecke * MARGE_FAKTOR.get(key, 1.0) * (1.3 if ist_eur <= 0 else 1.0))
+        bw = bewerte_luecke(bedarf, ist_eur, group, key, MARGE_FAKTOR.get(key, 1.0))
         return {
             "key": key, "label": label, "sparte": sparte,
-            "bedarf_jahr_eur": bedarf, "ist_12m_eur": ist_eur,
-            "deckung_pct": min(deckung, 100), "luecke_eur": luecke,
-            "score": score, "aktion": _aktion(deckung, ist_eur),
+            "bedarf_jahr_eur": bw.bedarf_eur, "ist_12m_eur": bw.ist_eur,
+            "deckung_pct": bw.deckung_pct,
+            "luecke_eur": bw.theoretische_luecke_eur,
+            "ziel_anteil": bw.ziel_anteil,
+            "realistische_luecke_eur": bw.realistische_luecke_eur,
+            "geschuetzte_luecke_eur": bw.geschuetzte_luecke_eur,
+            "score": bw.prioritaet, "aktion": _aktion(bw.deckung_pct, ist_eur),
             "letzter_bezug": str(ist_row["letzter_bezug"]) if ist_row.get("letzter_bezug") else None,
             "quelle": ist_row.get("quelle") or "geschaetzt",
         }
@@ -158,6 +171,8 @@ class BedarfsdeckungService:
         if not mv and not ab:
             return {}
         ist = self._ist_map(kunden_nr)
+        kp = self._kaeufer(kunden_nr)
+        group = BuyingGroup(kp["buying_group"]) if kp.get("buying_group") in {g.value for g in BuyingGroup} else BuyingGroup.UNBEKANNT
         gruppen: list[dict] = []
 
         # — Milchvieh —
@@ -173,27 +188,34 @@ class BedarfsdeckungService:
             kf_t_jahr = round((ecm or 0.0) * ((KF_G_PER_KG_ECM_MIN + KF_G_PER_KG_ECM_MAX) / 2) / 1000.0 * herd / 1000.0, 1)
             k1000 = milchmenge_l / 1000.0
             for key, label, lo, hi in PRODUKTGRUPPEN:
-                gruppen.append(self._gruppe(key, label, "milchvieh", round(k1000 * (lo + hi) / 2), ist))
+                gruppen.append(self._gruppe(key, label, "milchvieh", round(k1000 * (lo + hi) / 2), ist, group))
 
         # — Ackerbau —
         acker_ha = 0.0
         if ab:
             acker_ha = float(ab["ackerflaeche_ha"] or 0)
             for key, label, lo, hi in ACKERBAU_PRODUKTGRUPPEN:
-                gruppen.append(self._gruppe(key, label, "ackerbau", round(acker_ha * (lo + hi) / 2), ist))
+                gruppen.append(self._gruppe(key, label, "ackerbau", round(acker_ha * (lo + hi) / 2), ist, group))
 
-        nbo_grp = max(gruppen, key=lambda g: g["score"], default=None)
+        # Next-Best-Offer = höchste realistische Priorität (nicht größte theoretische Lücke);
+        # nur Gruppen mit echter, noch gewinnbarer Lücke kommen infrage.
+        kandidaten = [g for g in gruppen if g["realistische_luecke_eur"] > 0]
+        nbo_grp = max(kandidaten, key=lambda g: g["score"], default=None)
         next_best_offer = None
-        if nbo_grp and nbo_grp["luecke_eur"] > 0:
+        if nbo_grp:
             next_best_offer = {
                 "produktgruppe": nbo_grp["key"], "label": nbo_grp["label"], "sparte": nbo_grp["sparte"],
-                "luecke_eur": nbo_grp["luecke_eur"], "score": nbo_grp["score"],
-                "empfehlung": _empfehlung(nbo_grp["key"], nbo_grp["label"], herd, kf_t_jahr, acker_ha, nbo_grp["luecke_eur"]),
+                "luecke_eur": nbo_grp["luecke_eur"], "realistische_luecke_eur": nbo_grp["realistische_luecke_eur"],
+                "score": nbo_grp["score"],
+                "empfehlung": _empfehlung(nbo_grp["key"], nbo_grp["label"], herd, kf_t_jahr, acker_ha, nbo_grp["realistische_luecke_eur"]),
             }
 
         bedarf_ges = sum(g["bedarf_jahr_eur"] for g in gruppen)
         ist_ges = sum(g["ist_12m_eur"] for g in gruppen)
+        real_ges = sum(g["realistische_luecke_eur"] for g in gruppen)
+        gesch_ges = sum(g["geschuetzte_luecke_eur"] for g in gruppen)
         sparten = [s for s, has in (("milchvieh", bool(mv)), ("ackerbau", bool(ab))) if has]
+        gp = gruppen_profil(group)
         return {
             "kunden_nr": kunden_nr, "name": stamm["name"], "plz": stamm["plz"], "ort": stamm["ort"],
             "sparten": sparten,
@@ -202,7 +224,17 @@ class BedarfsdeckungService:
             "ackerflaeche_ha": round(acker_ha, 1),
             "bedarf_jahr_eur_gesamt": bedarf_ges, "ist_12m_eur_gesamt": ist_ges,
             "luecke_eur_gesamt": max(0, bedarf_ges - ist_ges),
+            "realistische_luecke_eur_gesamt": real_ges,
+            "geschuetzte_luecke_eur_gesamt": gesch_ges,
             "deckung_pct_gesamt": round(ist_ges / bedarf_ges * 100) if bedarf_ges > 0 else 0,
+            "kaeufergruppe": {
+                "group": group.value, "label": gp.label,
+                "confidence": float(kp.get("buying_group_confidence") or 0),
+                "reason": kp.get("buying_group_reason"),
+                "source": kp.get("buying_group_source") or "rule_based",
+                "ansatz": gp.ansatz,
+                "ziel_anteil_min": gp.ziel_anteil_min, "ziel_anteil_max": gp.ziel_anteil_max,
+            },
             "produktgruppen": gruppen,
             "next_best_offer": next_best_offer,
         }
@@ -232,8 +264,12 @@ class BedarfsdeckungService:
                 "herd_size_kuehe": cp["herd_size_kuehe"], "ackerflaeche_ha": cp["ackerflaeche_ha"],
                 "deckung_pct_gesamt": cp["deckung_pct_gesamt"],
                 "luecke_eur_gesamt": cp["luecke_eur_gesamt"],
+                "realistische_luecke_eur_gesamt": cp["realistische_luecke_eur_gesamt"],
+                "kaeufergruppe": cp["kaeufergruppe"]["group"],
+                "kaeufergruppe_label": cp["kaeufergruppe"]["label"],
                 "top_produktgruppe": nbo["label"], "top_sparte": nbo["sparte"],
-                "top_luecke_eur": nbo["luecke_eur"], "top_score": nbo["score"], "empfehlung": nbo["empfehlung"],
+                "top_luecke_eur": nbo.get("realistische_luecke_eur", nbo["luecke_eur"]),
+                "top_score": nbo["score"], "empfehlung": nbo["empfehlung"],
             })
         out.sort(key=lambda x: x["top_score"], reverse=True)
         return out[:limit]
