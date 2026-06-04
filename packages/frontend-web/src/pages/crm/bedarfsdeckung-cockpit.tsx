@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
 import { useBedarfsdeckung, usePipeline, type ProduktgruppeDeckung } from '@/lib/api/bedarfsdeckung'
-import { useKaeufergruppenKatalog, useSetKaeufergruppe } from '@/lib/api/kaeufergruppe'
+import { useKaeufergruppenKatalog, useSetKaeufergruppe, useReklassifizieren, useProduktgruppenKlassifizieren } from '@/lib/api/kaeufergruppe'
 import { NativeSelect } from '@/components/ui/native-select'
 import { useToast } from '@/hooks/use-toast'
 
@@ -61,6 +61,8 @@ export default function BedarfsdeckungCockpitPage(): JSX.Element {
   const pipeline = usePipeline(100)
   const katalog = useKaeufergruppenKatalog()
   const setGruppe = useSetKaeufergruppe()
+  const reklass = useReklassifizieren()
+  const pgKlass = useProduktgruppenKlassifizieren()
   const { toast } = useToast()
 
   async function changeGruppe(group: string) {
@@ -68,6 +70,27 @@ export default function BedarfsdeckungCockpitPage(): JSX.Element {
     try {
       await setGruppe.mutateAsync({ kunden_nr: data.kunden_nr, group })
       toast({ title: 'Käufergruppe gesetzt', description: 'Prioritäten werden neu berechnet.' })
+    } catch (e) {
+      toast({ title: 'Fehler', description: (e as Error).message, variant: 'destructive' })
+    }
+  }
+
+  async function reklassifizieren(modus: 'belege' | 'ki') {
+    if (!data) return
+    try {
+      const res = await reklass.mutateAsync({ kunden_nr: data.kunden_nr, modus })
+      const src = (res as { buying_group_source?: string })?.buying_group_source
+      toast({ title: modus === 'ki' ? 'KI-Einschätzung' : 'Aus Belegen klassifiziert', description: src === 'ai_suggested' ? 'KI-Vorschlag übernommen.' : 'Regelbasiert (Belegsignale).' })
+    } catch (e) {
+      toast({ title: 'Fehler', description: (e as Error).message, variant: 'destructive' })
+    }
+  }
+
+  async function gruppenAbleiten() {
+    if (!data) return
+    try {
+      await pgKlass.mutateAsync(data.kunden_nr)
+      toast({ title: 'Je Produktgruppe eingestuft' })
     } catch (e) {
       toast({ title: 'Fehler', description: (e as Error).message, variant: 'destructive' })
     }
@@ -163,13 +186,24 @@ export default function BedarfsdeckungCockpitPage(): JSX.Element {
                 {data.kaeufergruppe.reason && <p className="text-sm text-indigo-800">{data.kaeufergruppe.reason}</p>}
                 <p className="mt-0.5 text-sm font-medium text-indigo-900">→ {data.kaeufergruppe.ansatz}</p>
               </div>
-              <div className="flex flex-col gap-1">
+              <div className="flex flex-col gap-1.5">
                 <span className="text-[11px] text-muted-foreground">Korrigieren</span>
                 <NativeSelect value={data.kaeufergruppe.group} onValueChange={changeGruppe} className="w-52">
                   {(katalog.data ?? []).map((k) => (
                     <option key={k.group} value={k.group}>{k.label}</option>
                   ))}
                 </NativeSelect>
+                <div className="flex flex-wrap gap-1">
+                  <Button size="sm" variant="outline" className="h-7 gap-1 text-xs" disabled={reklass.isPending} onClick={() => reklassifizieren('ki')}>
+                    <Sparkles className="h-3 w-3" />KI-Einschätzung
+                  </Button>
+                  <Button size="sm" variant="outline" className="h-7 text-xs" disabled={reklass.isPending} onClick={() => reklassifizieren('belege')}>
+                    Aus Belegen
+                  </Button>
+                  <Button size="sm" variant="ghost" className="h-7 text-xs" disabled={pgKlass.isPending} onClick={gruppenAbleiten}>
+                    je Produktgruppe
+                  </Button>
+                </div>
               </div>
             </CardContent>
           </Card>
@@ -219,7 +253,14 @@ export default function BedarfsdeckungCockpitPage(): JSX.Element {
                           </tr>
                         )}
                       <tr className="border-b last:border-0 hover:bg-muted/40">
-                        <td className="px-4 py-2.5"><span className="font-medium">{g.label}</span></td>
+                        <td className="px-4 py-2.5">
+                          <span className="font-medium">{g.label}</span>
+                          {g.kaeufergruppe_eigen && (
+                            <span className="ml-2 rounded bg-indigo-50 px-1 py-0.5 text-[10px] font-medium text-indigo-600" title="produktgruppenspezifische Käufergruppe">
+                              {g.kaeufergruppe_label}
+                            </span>
+                          )}
+                        </td>
                         <td className="px-4 py-2.5 text-right tabular-nums">{EUR(g.bedarf_jahr_eur)}</td>
                         <td className="px-4 py-2.5 text-right tabular-nums text-emerald-700">{EUR(g.ist_12m_eur)}</td>
                         <td className="px-4 py-2.5"><DeckungBar pct={g.deckung_pct} /></td>

@@ -134,3 +134,44 @@ def test_jede_klassifikation_hat_begruendung():
 
 def test_profil_fallback_bei_unbekanntem_string():
     assert profil("gibt_es_nicht").label == profil(BuyingGroup.UNBEKANNT).label
+
+
+# ── Austauschbarer Klassifikator (#1) ─────────────────────────────────────────
+def test_rule_based_klassifikator_entspricht_pure_funktion():
+    from app.services.kaeufer_klassifikator import RuleBasedKlassifikator
+    s = Verhaltenssignale(preisabfragen_12m=12, abschlussquote=0.1, angebote_12m=10)
+    assert RuleBasedKlassifikator().klassifiziere(s).gruppe == klassifiziere(s).gruppe
+
+
+def test_llm_klassifikator_faellt_ohne_key_auf_regeln_zurueck(monkeypatch):
+    from app.services.kaeufer_klassifikator import LLMKlassifikator
+    monkeypatch.delenv("ANTHROPIC_API_KEY", raising=False)
+    s = Verhaltenssignale(deckung_gesamt_pct=82, kauffrequenz_12m=14, rabatt_schnitt=0.02)
+    kl = LLMKlassifikator().klassifiziere(s)
+    assert kl.gruppe == BuyingGroup.STRATEGISCHER_STAMMKUNDE  # = Regelfall
+
+
+def test_klassifiziere_mit_quelle_ohne_key_ist_rule_based(monkeypatch):
+    from app.services.kaeufer_klassifikator import klassifiziere_mit
+    monkeypatch.delenv("ANTHROPIC_API_KEY", raising=False)
+    _kl, source = klassifiziere_mit(Verhaltenssignale(preisabfragen_12m=12, abschlussquote=0.1, angebote_12m=10), prefer_ai=True)
+    assert source == "rule_based"
+
+
+# ── Echte Signal-Abbildung (#3) ───────────────────────────────────────────────
+def test_signale_aus_werten_abschlussquote_und_multi():
+    from app.services.kaeufer_signal_service import signale_aus_werten
+    s = signale_aus_werten(preisanfragen_12m=4, angebote_12m=6, bestellungen_12m=3,
+                           gruppen_bezogen=5, deckung_pct=20, bedarf_eur=50000)
+    assert s.abschlussquote == pytest.approx(3 / 9, abs=0.01)
+    # niedrige Deckung → hohe Mehrlieferanten-Wahrscheinlichkeit
+    assert s.multi_lieferant_wahrsch > 0.7
+    assert s.kauffrequenz_12m == 5
+
+
+def test_signale_aus_werten_hohe_deckung_senkt_multi():
+    from app.services.kaeufer_signal_service import signale_aus_werten
+    s = signale_aus_werten(preisanfragen_12m=0, angebote_12m=0, bestellungen_12m=0,
+                           gruppen_bezogen=8, deckung_pct=90, bedarf_eur=100000)
+    assert s.multi_lieferant_wahrsch < 0.4
+    assert s.abschlussquote == 0.0  # keine Interaktionen

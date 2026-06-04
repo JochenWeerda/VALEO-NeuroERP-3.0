@@ -127,7 +127,8 @@ class BedarfsdeckungService:
     def _ist_map(self, kunden_nr: str) -> dict[str, dict]:
         rows = self.db.execute(
             text(
-                "SELECT produktgruppe, umsatz_12m_eur, menge_12m, db_12m_eur, letzter_bezug, quelle "
+                "SELECT produktgruppe, umsatz_12m_eur, menge_12m, db_12m_eur, letzter_bezug, quelle, "
+                "buying_group, buying_group_reason, buying_group_source "
                 "FROM public.kunden_produktgruppen_bezug WHERE kunden_nr = :k AND tenant_id = :t"
             ),
             {"k": kunden_nr, "t": self.tenant_id},
@@ -148,7 +149,15 @@ class BedarfsdeckungService:
     def _gruppe(self, key: str, label: str, sparte: str, bedarf: int, ist: dict, group: BuyingGroup) -> dict:
         ist_row = ist.get(key, {})
         ist_eur = round(float(ist_row.get("umsatz_12m_eur") or 0))
-        bw = bewerte_luecke(bedarf, ist_eur, group, key, MARGE_FAKTOR.get(key, 1.0))
+        # Per-Produktgruppe-Käufergruppe übersteuert die globale NUR, wenn sie
+        # spezifisch eingestuft ist (nicht 'unbekannt'); sonst gilt die globale Gruppe
+        # des Betriebs (eine generische Per-Gruppe-Einstufung darf eine spezifische
+        # globale nicht verwässern).
+        pg_raw = ist_row.get("buying_group")
+        pg_group = BuyingGroup(pg_raw) if pg_raw in {g.value for g in BuyingGroup} else None
+        eigen = bool(pg_group and pg_group is not BuyingGroup.UNBEKANNT)
+        eff_group = pg_group if eigen else group
+        bw = bewerte_luecke(bedarf, ist_eur, eff_group, key, MARGE_FAKTOR.get(key, 1.0))
         return {
             "key": key, "label": label, "sparte": sparte,
             "bedarf_jahr_eur": bw.bedarf_eur, "ist_12m_eur": bw.ist_eur,
@@ -158,6 +167,9 @@ class BedarfsdeckungService:
             "realistische_luecke_eur": bw.realistische_luecke_eur,
             "geschuetzte_luecke_eur": bw.geschuetzte_luecke_eur,
             "score": bw.prioritaet, "aktion": _aktion(bw.deckung_pct, ist_eur),
+            "kaeufergruppe": eff_group.value,
+            "kaeufergruppe_label": gruppen_profil(eff_group).label,
+            "kaeufergruppe_eigen": eigen,  # True = produktgruppenspezifisch (überschreibt global)
             "letzter_bezug": str(ist_row["letzter_bezug"]) if ist_row.get("letzter_bezug") else None,
             "quelle": ist_row.get("quelle") or "geschaetzt",
         }

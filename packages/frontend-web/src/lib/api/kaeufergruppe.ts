@@ -27,6 +27,11 @@ export function useKaeufergruppenKatalog() {
   })
 }
 
+function invalidate(qc: ReturnType<typeof useQueryClient>, kundenNr: string) {
+  void qc.invalidateQueries({ queryKey: ['bedarfsdeckung', kundenNr] })
+  void qc.invalidateQueries({ queryKey: ['bedarfsdeckung-pipeline'] })
+}
+
 export function useSetKaeufergruppe() {
   const qc = useQueryClient()
   return useMutation({
@@ -35,9 +40,31 @@ export function useSetKaeufergruppe() {
       const res = await apiClient.post(`/api/v1/crm/kaeufergruppe/${encodeURIComponent(kunden_nr)}/setzen`, { ...body, source: 'manual' })
       return res.data
     },
-    onSuccess: (_d, vars) => {
-      void qc.invalidateQueries({ queryKey: ['bedarfsdeckung', vars.kunden_nr] })
-      void qc.invalidateQueries({ queryKey: ['bedarfsdeckung-pipeline'] })
+    onSuccess: (_d, vars) => invalidate(qc, vars.kunden_nr),
+  })
+}
+
+/** Reklassifizieren: 'belege' = regelbasiert aus echten Signalen, 'ki' = Claude (Fallback regelbasiert). */
+export function useReklassifizieren() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: async (input: { kunden_nr: string; modus: 'belege' | 'ki' }) => {
+      const path = input.modus === 'ki' ? 'ki-klassifizieren' : 'neu-klassifizieren'
+      const res = await apiClient.post(`/api/v1/crm/kaeufergruppe/${encodeURIComponent(input.kunden_nr)}/${path}`, {})
+      return res.data
     },
+    onSuccess: (_d, vars) => invalidate(qc, vars.kunden_nr),
+  })
+}
+
+/** Käufergruppe je Produktgruppe ableiten. */
+export function useProduktgruppenKlassifizieren() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: async (kunden_nr: string) => {
+      const res = await apiClient.post(`/api/v1/crm/kaeufergruppe/${encodeURIComponent(kunden_nr)}/produktgruppen-klassifizieren`, {})
+      return res.data
+    },
+    onSuccess: (_d, kunden_nr) => invalidate(qc, kunden_nr),
   })
 }

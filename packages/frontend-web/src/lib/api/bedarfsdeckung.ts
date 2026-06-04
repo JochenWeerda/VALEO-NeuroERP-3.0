@@ -22,6 +22,9 @@ export type ProduktgruppeDeckung = {
   geschuetzte_luecke_eur: number
   score: number
   aktion: 'Einstieg' | 'Cross-Sell' | 'Ausbauen' | 'Halten'
+  kaeufergruppe: string
+  kaeufergruppe_label: string
+  kaeufergruppe_eigen: boolean
   letzter_bezug: string | null
   quelle: string
 }
