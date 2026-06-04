@@ -22,6 +22,10 @@ export const entries: AutoGroupRouteEntry[] = [
     "path": "bedarfsdeckung-cockpit"
   },
   {
+    "module": "@/pages/crm/durchdringungs-pipeline",
+    "path": "durchdringungs-pipeline"
+  },
+  {
     "module": "@/pages/crm/aktivitaet-detail",
     "path": "aktivitaet-detail"
   },
