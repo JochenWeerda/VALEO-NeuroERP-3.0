@@ -1,11 +1,14 @@
 import { Fragment, useMemo, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
-import { Target, TrendingUp, Sparkles, Loader2, ArrowRight, Milk, Search } from 'lucide-react'
+import { Target, TrendingUp, Sparkles, Loader2, ArrowRight, Milk, Search, UserRound } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
 import { useBedarfsdeckung, usePipeline, type ProduktgruppeDeckung } from '@/lib/api/bedarfsdeckung'
+import { useKaeufergruppenKatalog, useSetKaeufergruppe } from '@/lib/api/kaeufergruppe'
+import { NativeSelect } from '@/components/ui/native-select'
+import { useToast } from '@/hooks/use-toast'
 
 /**
  * Bedarfsdeckungs-Cockpit (Durchdringungs-CRM) — „Die Lücke ist das Vertriebsobjekt".
@@ -56,6 +59,19 @@ export default function BedarfsdeckungCockpitPage(): JSX.Element {
 
   const cockpit = useBedarfsdeckung(kundenNr || undefined)
   const pipeline = usePipeline(100)
+  const katalog = useKaeufergruppenKatalog()
+  const setGruppe = useSetKaeufergruppe()
+  const { toast } = useToast()
+
+  async function changeGruppe(group: string) {
+    if (!data || group === data.kaeufergruppe.group) return
+    try {
+      await setGruppe.mutateAsync({ kunden_nr: data.kunden_nr, group })
+      toast({ title: 'Käufergruppe gesetzt', description: 'Prioritäten werden neu berechnet.' })
+    } catch (e) {
+      toast({ title: 'Fehler', description: (e as Error).message, variant: 'destructive' })
+    }
+  }
 
   const data = cockpit.data
   const quickPicks = useMemo(() => {
@@ -127,10 +143,36 @@ export default function BedarfsdeckungCockpitPage(): JSX.Element {
                 </p>
               </CardContent>
             </Card>
-            <Card><CardContent className="p-4"><p className="text-xs text-muted-foreground">Bedarf/Jahr</p><p className="text-2xl font-bold">{EUR(data.bedarf_jahr_eur_gesamt)}</p></CardContent></Card>
-            <Card><CardContent className="p-4"><p className="text-xs text-muted-foreground">Ist (12 M)</p><p className="text-2xl font-bold text-emerald-600">{EUR(data.ist_12m_eur_gesamt)}</p></CardContent></Card>
-            <Card><CardContent className="p-4"><p className="text-xs text-muted-foreground">Offene Lücke · Deckung</p><p className="text-2xl font-bold text-amber-600">{EUR(data.luecke_eur_gesamt)}</p><DeckungBar pct={data.deckung_pct_gesamt} /></CardContent></Card>
+            <Card><CardContent className="p-4"><p className="text-xs text-muted-foreground">Bedarf/Jahr · Deckung</p><p className="text-2xl font-bold">{EUR(data.bedarf_jahr_eur_gesamt)}</p><DeckungBar pct={data.deckung_pct_gesamt} /></CardContent></Card>
+            <Card><CardContent className="p-4"><p className="text-xs text-muted-foreground">Realistisch gewinnbar</p><p className="text-2xl font-bold text-amber-600">{EUR(data.realistische_luecke_eur_gesamt)}</p><p className="text-[11px] text-muted-foreground">von {EUR(data.luecke_eur_gesamt)} theoret. Lücke</p></CardContent></Card>
+            <Card><CardContent className="p-4"><p className="text-xs text-muted-foreground">Geschützte Restlücke</p><p className="text-2xl font-bold text-slate-400">{EUR(data.geschuetzte_luecke_eur_gesamt)}</p><p className="text-[11px] text-muted-foreground">bewusst woanders — nicht forcieren</p></CardContent></Card>
           </div>
+
+          {/* Käufergruppe */}
+          <Card className="border-indigo-200 bg-indigo-50/40">
+            <CardContent className="flex flex-wrap items-start gap-3 p-4">
+              <UserRound className="mt-0.5 h-5 w-5 shrink-0 text-indigo-600" />
+              <div className="min-w-0 flex-1">
+                <p className="flex flex-wrap items-center gap-2 font-semibold text-indigo-900">
+                  Käufergruppe: {data.kaeufergruppe.label}
+                  <span className="rounded bg-indigo-100 px-1.5 py-0.5 text-[10px] font-medium text-indigo-700">
+                    {Math.round(data.kaeufergruppe.confidence * 100)} % · {data.kaeufergruppe.source === 'manual' ? 'bestätigt' : 'KI-Vorschlag'}
+                  </span>
+                  <span className="text-xs font-normal text-indigo-700">Zielanteil {Math.round(data.kaeufergruppe.ziel_anteil_min * 100)}–{Math.round(data.kaeufergruppe.ziel_anteil_max * 100)} %</span>
+                </p>
+                {data.kaeufergruppe.reason && <p className="text-sm text-indigo-800">{data.kaeufergruppe.reason}</p>}
+                <p className="mt-0.5 text-sm font-medium text-indigo-900">→ {data.kaeufergruppe.ansatz}</p>
+              </div>
+              <div className="flex flex-col gap-1">
+                <span className="text-[11px] text-muted-foreground">Korrigieren</span>
+                <NativeSelect value={data.kaeufergruppe.group} onValueChange={changeGruppe} className="w-52">
+                  {(katalog.data ?? []).map((k) => (
+                    <option key={k.group} value={k.group}>{k.label}</option>
+                  ))}
+                </NativeSelect>
+              </div>
+            </CardContent>
+          </Card>
 
           {/* Next-Best-Offer */}
           {data.next_best_offer && (
@@ -138,7 +180,7 @@ export default function BedarfsdeckungCockpitPage(): JSX.Element {
               <CardContent className="flex flex-wrap items-start gap-3 p-4">
                 <Sparkles className="mt-0.5 h-5 w-5 shrink-0 text-blue-600" />
                 <div className="min-w-0 flex-1">
-                  <p className="font-semibold text-blue-900">Next-Best-Offer · {data.next_best_offer.label} <span className="font-normal text-blue-700">({EUR(data.next_best_offer.luecke_eur)} Lücke)</span></p>
+                  <p className="font-semibold text-blue-900">Next-Best-Offer · {data.next_best_offer.label} <span className="font-normal text-blue-700">({EUR(data.next_best_offer.realistische_luecke_eur)} realistisch gewinnbar)</span></p>
                   <p className="text-sm text-blue-800">{data.next_best_offer.empfehlung}</p>
                 </div>
                 <Button size="sm" className="gap-2" onClick={() => angebot(data.next_best_offer?.produktgruppe)}>
@@ -160,7 +202,8 @@ export default function BedarfsdeckungCockpitPage(): JSX.Element {
                       <th className="px-4 py-2 text-right font-medium">Bedarf/Jahr</th>
                       <th className="px-4 py-2 text-right font-medium">Ist (12 M)</th>
                       <th className="px-4 py-2 font-medium">Deckung</th>
-                      <th className="px-4 py-2 text-right font-medium">Lücke</th>
+                      <th className="px-4 py-2 text-right font-medium">Ziel</th>
+                      <th className="px-4 py-2 text-right font-medium">realist. Lücke</th>
                       <th className="px-4 py-2 font-medium">Aktion</th>
                       <th className="px-4 py-2" />
                     </tr>
@@ -170,7 +213,7 @@ export default function BedarfsdeckungCockpitPage(): JSX.Element {
                       <Fragment key={g.key}>
                         {(i === 0 || data.produktgruppen[i - 1].sparte !== g.sparte) && (
                           <tr className="bg-muted/40">
-                            <td colSpan={7} className="px-4 py-1.5">
+                            <td colSpan={8} className="px-4 py-1.5">
                               <span className={`rounded px-1.5 py-0.5 text-[10px] font-medium ${SPARTE_BADGE[g.sparte]}`}>{SPARTE_LABEL[g.sparte]}</span>
                             </td>
                           </tr>
@@ -180,10 +223,16 @@ export default function BedarfsdeckungCockpitPage(): JSX.Element {
                         <td className="px-4 py-2.5 text-right tabular-nums">{EUR(g.bedarf_jahr_eur)}</td>
                         <td className="px-4 py-2.5 text-right tabular-nums text-emerald-700">{EUR(g.ist_12m_eur)}</td>
                         <td className="px-4 py-2.5"><DeckungBar pct={g.deckung_pct} /></td>
-                        <td className="px-4 py-2.5 text-right font-medium tabular-nums text-amber-700">{EUR(g.luecke_eur)}</td>
+                        <td className="px-4 py-2.5 text-right tabular-nums text-muted-foreground">{Math.round(g.ziel_anteil * 100)} %</td>
+                        <td className="px-4 py-2.5 text-right font-medium tabular-nums text-amber-700">
+                          {EUR(g.realistische_luecke_eur)}
+                          {g.luecke_eur > g.realistische_luecke_eur && (
+                            <span className="block text-[10px] font-normal text-slate-400 line-through">{EUR(g.luecke_eur)}</span>
+                          )}
+                        </td>
                         <td className="px-4 py-2.5"><span className={`rounded px-1.5 py-0.5 text-[11px] font-medium ${AKTION_BADGE[g.aktion] ?? 'bg-slate-100 text-slate-700'}`}>{g.aktion}</span></td>
                         <td className="px-4 py-2.5 text-right">
-                          {g.luecke_eur > 0 && (
+                          {g.realistische_luecke_eur > 0 && (
                             <Button size="sm" variant="ghost" className="h-7 gap-1 text-xs" onClick={() => angebot(g.key)}>
                               Angebot <ArrowRight className="h-3 w-3" />
                             </Button>
