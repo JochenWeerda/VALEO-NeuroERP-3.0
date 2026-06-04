@@ -148,3 +148,4 @@ packages/frontend-web/config/sync_schedules.json
 *.kmz
 impdata*_PLZ_*.csv
 Futtermittelbetriebe PLZ*.csv
+geo_export/
