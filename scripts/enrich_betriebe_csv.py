@@ -80,11 +80,15 @@ def _realign(row: list[str]) -> dict | None:
 
 
 def _load_lookups(db) -> dict:
+    # Direktzahlung ist eine Jahresgröße → nur jüngstes Jahr, je Begünstigtem summieren
+    # (der View hat je Stadt eine Zeile). Über Jahre zu summieren würde verdoppeln.
+    from app.services.gap_pipeline import latest_gap_year
+    gap_year = latest_gap_year(db)
     gap: dict[tuple, float] = {}
     for nn, plz, direct in db.execute(text(
         "SELECT beneficiary_name_norm, postal_code, direct_total_eur FROM gap_payments_direct_agg "
-        "WHERE direct_total_eur > 0")).all():
-        gap[(tokenset(nn), plz)] = max(gap.get((tokenset(nn), plz), 0.0), float(direct or 0))
+        "WHERE direct_total_eur > 0 AND (:y IS NULL OR ref_year = :y)"), {"y": gap_year}).all():
+        gap[(tokenset(nn), plz)] = gap.get((tokenset(nn), plz), 0.0) + float(direct or 0)
 
     dairy: dict[tuple, dict] = {}
     for nn, plz, milch, fe, grp in db.execute(text(

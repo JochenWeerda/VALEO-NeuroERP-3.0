@@ -36,11 +36,16 @@ def main() -> None:
     inserted = 0
     skipped = 0
     with eng.begin() as cx:
-        # Direktzahlung je (name_norm, plz): jüngstes Jahr.
+        # Direktzahlung je (name_norm, plz): nur jüngstes importiertes Jahr, je
+        # Begünstigtem summiert (der View hat je Stadt eine Zeile). Über mehrere
+        # Jahre zu summieren/maximieren verfälscht die Flächenschätzung.
+        latest = cx.execute(text("SELECT MAX(ref_year) FROM public.gap_payments_direct_agg")).scalar()
         agg: dict[tuple, float] = {}
-        for r in cx.execute(text("SELECT ref_year, beneficiary_name_norm, postal_code, direct_total_eur FROM public.gap_payments_direct_agg WHERE direct_total_eur > 0")).mappings():
+        for r in cx.execute(text(
+            "SELECT beneficiary_name_norm, postal_code, direct_total_eur FROM public.gap_payments_direct_agg "
+            "WHERE direct_total_eur > 0 AND (:y IS NULL OR ref_year = :y)"), {"y": latest}).mappings():
             key = (r["beneficiary_name_norm"], r["postal_code"])
-            agg[key] = max(agg.get(key, 0.0), float(r["direct_total_eur"]))
+            agg[key] = agg.get(key, 0.0) + float(r["direct_total_eur"])
 
         kunden = cx.execute(
             text(

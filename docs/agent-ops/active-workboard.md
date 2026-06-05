@@ -1,6 +1,23 @@
 # Active Workboard
 
-Stand: `2026-06-02`
+Stand: `2026-06-05`
+
+## CRM-GEO-ABSCHLUSS-001
+
+**Von:** Claude
+**Owner:** Claude
+**Stand:** abgeschlossen 2026-06-05
+**Ziel des Slices:** Die vier offenen Fäden der CRM-/Geo-Arbeit zu Ende führen — (1) Geo-Hofgenauigkeits-Loop schließen, (2) echte Ist-Belegaggregation statt modellierter Seeds, (3) Durchdringungs-Pipeline-Performance (N+1), (4) TAPI-Bridge-Dienst — plus die jüngste GAP-Datenquelle (impdata2025.csv) korrekt autoritativ machen.
+**Dateibesitz:** `scripts/import_kmz_betriebe.py`, `app/services/ist_aggregation_service.py` (neu), `scripts/aggregate_produktgruppen_bezug.py` (neu), `tests/test_ist_aggregation.py` (neu), `app/services/bedarfsdeckung_service.py`, `app/services/gap_pipeline.py`, `app/services/geo_pipeline.py`, `scripts/enrich_betriebe_csv.py`, `scripts/seed_ackerbau_profil.py`, `tools/tapi-bridge/tapi_bridge.py` (neu), `tools/tapi-bridge/README.md` (neu), `tests/test_tapi_bridge.py` (neu).
+**Abnahmekriterien:** KMZ-Koordinaten-Import hebt Kunden offline auf `precision='address'`; Ist-Aggregator füllt `kunden_produktgruppen_bezug` (`quelle='verkauf'`) aus echten Belegen und löst beide Medienbrüche (UUID→kunden_nr, Artikel→Produktgruppe); Pipeline ohne N+1; TAPI-Bridge meldet Anrufe an `/crm/tapi/incoming`; GAP-Konsumenten filtern auf das jüngste Jahr (keine Doppelzählung).
+**Erledigt:**
+- **Geo-Loop:** `import_kmz_betriebe.py` parst `<Point><coordinates>`, schreibt Koordinaten nach `gap_map_points` (Ausreißer außerhalb der Region verworfen) und ruft `match_address_points()` → Kunde auf `precision='address'` (verifiziert: GAP00001 place→address).
+- **Ist-Aggregation:** `IstAggregationService` unioniert `domain_crm.sales_orders` + `domain_portal.customer_orders`, Resolver mappt customer_id/UUID/webshop/legacy → kunden_nr, reiner Klassifikator `klassifiziere_artikel` → 9 Produktgruppen; rollierend 12 M; Upsert `quelle='verkauf'` ohne Käufergruppen zu überschreiben. Integrationstest (beide Brücken, DB-Marge) grün; Dev hat keine echten Belege → Dry-Run 0, greift automatisch sobald Belege existieren.
+- **Pipeline:** `BedarfsdeckungService.pipeline()` lädt 5 Batch-Queries vor + `_compute()` (eine Quelle der Wahrheit mit `cockpit()`). 4 s → **0,11 s** (~36×), Ergebnis 10/10 identisch zum Einzel-Cockpit.
+- **TAPI:** `tools/tapi-bridge/tapi_bridge.py` (stdlib-only) — FRITZ!Box-Callmonitor (TCP 1012) / generischer TCP-Listener / Simulationsmodus; Reconnect-Backoff, Dedupe je Verbindungs-ID. Live getestet: `+49 551 12345` → Musterfirma GmbH.
+- **GAP 2025:** 2025 war bereits importiert (20.817 Zeilen). Doppelzählung 2024+2025 in `geo_pipeline.get_map_points` (Karte) + `enrich_betriebe_csv` + `seed_ackerbau_profil` behoben via neuem `gap_pipeline.latest_gap_year()`; Ackerbau-/Bezug-Profile aufgefrischt (Ø-Fläche 125,3→112,6 ha).
+**Checks:** `python -m pytest tests/test_ist_aggregation.py` (9 passed, im Container); `tests/test_tapi_bridge.py` (6 passed); reversibler Integrationstest Ist-Aggregation grün; `pipeline(500)` 448 Betriebe/0,11 s, 10/10 == Einzel-Cockpit; `import_kmz` Koordinaten-Loop verifiziert + Cleanup; TAPI live `/incoming`+`/pending` verifiziert + Cleanup; `python -m py_compile` aller geänderten Dateien.
+**Offene Risiken:** Hofgenauigkeit braucht den manuellen My-Maps-Schritt (CSV anreichern → dort geokodieren → KMZ mit Koordinaten zurück) — extern. Echte Ist-Aggregation liefert erst Werte, sobald reale Verkaufsbelege existieren (Dev leer). 16 Ackerbau-Profile bleiben nach 2025-Reseed als Restbestand unter der ha-Schwelle (modelliert, unkritisch). TAPI-Bridge in Prod mit gültigem OIDC-Token statt `dev-token` betreiben. GAP-CSV nicht neu heruntergeladen (Vollimport >1 Mio. Sätze) — 2025 ist bereits regional importiert; Refresh bei Bedarf via `download_gap_csv(2025, force=True)`.
 
 ## KUNDENSTAMM-KONSOLIDIERUNG-001
 

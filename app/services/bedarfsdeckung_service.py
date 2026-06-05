@@ -182,8 +182,12 @@ class BedarfsdeckungService:
         ab = self._ackerbau(kunden_nr)
         if not mv and not ab:
             return {}
-        ist = self._ist_map(kunden_nr)
-        kp = self._kaeufer(kunden_nr)
+        return self._compute(stamm, self._kaeufer(kunden_nr), mv, ab, self._ist_map(kunden_nr))
+
+    def _compute(self, stamm: dict, kp: dict, mv: Optional[dict], ab: Optional[dict], ist: dict) -> dict:
+        """Reine Cockpit-Berechnung aus bereits geladenen Daten (eine Quelle der
+        Wahrheit für Einzel-Cockpit und Batch-Pipeline — kein N+1)."""
+        kunden_nr = stamm["kunden_nr"]
         group = BuyingGroup(kp["buying_group"]) if kp.get("buying_group") in {g.value for g in BuyingGroup} else BuyingGroup.UNBEKANNT
         gruppen: list[dict] = []
 
@@ -253,10 +257,14 @@ class BedarfsdeckungService:
 
     # ── Durchdringungs-Pipeline (aggregiert über alle Betriebe) ───────────
     def pipeline(self, limit: int = 100) -> list[dict]:
-        rows = self.db.execute(
+        """Priorisierte Arbeitsliste über alle Betriebe.
+
+        Lädt alle benötigten Daten in fünf Batch-Queries vor und berechnet jedes
+        Cockpit in Python (kein N+1 — vorher ~5 Queries je Betrieb)."""
+        stamm_rows = self.db.execute(
             text(
                 """
-                SELECT DISTINCT k.kunden_nr
+                SELECT k.kunden_nr, k.name1 AS name, k.plz, k.ort
                 FROM public.kunden k
                 WHERE coalesce(k.geloescht, FALSE) = FALSE
                   AND (EXISTS (SELECT 1 FROM public.kunden_milchvieh_profil m WHERE m.kunden_nr = k.kunden_nr)
@@ -264,9 +272,36 @@ class BedarfsdeckungService:
                 """
             )
         ).mappings().all()
+        mv_map = {r["kunden_nr"]: dict(r) for r in self.db.execute(
+            text("SELECT kunden_nr, herd_size_kuehe, milch_kg, fett_pct, eiw_pct, hygiene_bedarf "
+                 "FROM public.kunden_milchvieh_profil")
+        ).mappings()}
+        ab_map = {r["kunden_nr"]: dict(r) for r in self.db.execute(
+            text("SELECT kunden_nr, ackerflaeche_ha, gesamtflaeche_ha, quelle "
+                 "FROM public.kunden_ackerbau_profil")
+        ).mappings()}
+        kp_map = {r["kunden_nr"]: dict(r) for r in self.db.execute(
+            text("SELECT kunden_nr, buying_group, buying_group_confidence, buying_group_reason, "
+                 "buying_group_source, target_share_override, signal_source "
+                 "FROM public.kunden_kaeufer_profil")
+        ).mappings()}
+        ist_map: dict[str, dict] = {}
+        for r in self.db.execute(
+            text("SELECT kunden_nr, produktgruppe, umsatz_12m_eur, menge_12m, db_12m_eur, "
+                 "letzter_bezug, quelle, buying_group, buying_group_reason, buying_group_source "
+                 "FROM public.kunden_produktgruppen_bezug WHERE tenant_id = :t"),
+            {"t": self.tenant_id},
+        ).mappings():
+            ist_map.setdefault(r["kunden_nr"], {})[r["produktgruppe"]] = dict(r)
+
         out = []
-        for r in rows:
-            cp = self.cockpit(r["kunden_nr"])
+        for s in stamm_rows:
+            kn = s["kunden_nr"]
+            mv = mv_map.get(kn)
+            ab = ab_map.get(kn)
+            if not mv and not ab:
+                continue
+            cp = self._compute(dict(s), kp_map.get(kn, {}), mv, ab, ist_map.get(kn, {}))
             if not cp or not cp.get("next_best_offer"):
                 continue
             nbo = cp["next_best_offer"]

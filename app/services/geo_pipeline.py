@@ -232,9 +232,14 @@ def get_map_points(
     owns = db is None
     db = db or SessionLocal()
     try:
+        from app.services.gap_pipeline import latest_gap_year
+
         trend_lookup = _build_trend_lookup(db, trend_years[0], trend_years[1])
         kunden_lookup = build_kunden_lookup(db)
-        # GAP-Potenzial je (tokenset, plz)
+        # GAP-Potenzial je (tokenset, plz) — nur das jüngste Jahr (Direktzahlung ist
+        # eine Jahresgröße; über mehrere importierte Jahre zu summieren verdoppelt
+        # Fläche/Potenzial).
+        gap_year = latest_gap_year(db)
         gap: dict[tuple, float] = {}
         for nn, plz, direct in db.execute(
             text(
@@ -242,9 +247,11 @@ def get_map_points(
                 SELECT beneficiary_name_norm, postal_code, SUM(direct_total_eur)
                 FROM gap_payments_direct_agg
                 WHERE beneficiary_name_norm IS NOT NULL AND postal_code IS NOT NULL
+                  AND (:y IS NULL OR ref_year = :y)
                 GROUP BY beneficiary_name_norm, postal_code
                 """
-            )
+            ),
+            {"y": gap_year},
         ).all():
             gap[(_tokenset(nn), plz)] = gap.get((_tokenset(nn), plz), 0.0) + float(direct or 0)
 
