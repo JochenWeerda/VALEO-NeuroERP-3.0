@@ -189,6 +189,20 @@ def _table_exists(db: Session, name: str) -> bool:
     return db.execute(text("SELECT to_regclass(:n)"), {"n": name}).scalar() is not None
 
 
+def latest_gap_year(db: Session) -> Optional[int]:
+    """Jüngstes importiertes GAP-Haushaltsjahr (MAX(ref_year) in ``gap_payments``).
+
+    Maßgeblich für alle Potenzial-Konsumenten: Direktzahlungen sind eine
+    **Jahresgröße** — über mehrere importierte Jahre zu summieren verdoppelt
+    Fläche und Potenzial. Konsumenten filtern daher auf dieses Jahr.
+    Returns ``None``, wenn keine Daten/keine Tabelle vorhanden sind.
+    """
+    if not _table_exists(db, "gap_payments"):
+        return None
+    y = db.execute(text("SELECT MAX(ref_year) FROM gap_payments")).scalar()
+    return int(y) if y is not None else None
+
+
 def _exec_sql_file(db: Session, sql_file: str) -> None:
     path = SQL_DIR / sql_file
     if not path.exists():
