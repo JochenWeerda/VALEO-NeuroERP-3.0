@@ -196,6 +196,15 @@ export const RAW_NAV_SECTIONS: RawNavItem[] = [
         mcp: { businessDomain: 'finance', scope: 'finance:read' },
       },
       {
+        id: 'op-skonto-auszifferung',
+        label: 'OP Skonto-Auszifferung',
+        icon: Euro,
+        module: '@/pages/fibu/op-skonto-auszifferung',
+        preferredPath: 'fibu/op-skonto-auszifferung',
+        keywords: ['op', 'skonto', 'auszifferung', 'zahlungseingang', 'ausgleich'],
+        mcp: { businessDomain: 'finance', scope: 'finance:write' },
+      },
+      {
         id: 'offene-posten',
         label: 'Offene Posten',
         icon: Euro,

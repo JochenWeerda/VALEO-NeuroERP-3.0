@@ -79,6 +79,15 @@ export const RAW_NAV_SECTIONS: RawNavItem[] = [
         mcp: { businessDomain: 'inventory', scope: 'inventory:read' },
       },
       {
+        id: 'permanente-inventur',
+        label: 'Permanente Inventur (PIV)',
+        icon: Scale,
+        module: '@/pages/lager/permanente-inventur',
+        preferredPath: 'lager/permanente-inventur',
+        keywords: ['permanente', 'inventur', 'piv', 'zählung', 'differenz', 'bestand'],
+        mcp: { businessDomain: 'inventory', scope: 'inventory:write' },
+      },
+      {
         id: 'bestandskorrektur',
         label: 'Bestandskorrektur',
         icon: RefreshCw,

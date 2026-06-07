@@ -156,5 +156,9 @@ export const entries: AutoGroupRouteEntry[] = [
   {
     "module": "@/pages/fibu/zahlungsmeldungen",
     "path": "zahlungsmeldungen"
+  },
+  {
+    "module": "@/pages/fibu/op-skonto-auszifferung",
+    "path": "op-skonto-auszifferung"
   }
 ]

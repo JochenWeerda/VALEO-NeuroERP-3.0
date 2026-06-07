@@ -215,6 +215,15 @@ export const RAW_NAV_SECTIONS: RawNavItem[] = [
         keywords: ['kontraktklassen', 'fixpreis', 'basis', 'prämie', 'poolpreis'],
         mcp: { businessDomain: 'agrar', scope: 'agrar:read' },
       },
+      {
+        id: 'kontrakt-mengenzeitraeume',
+        label: 'Mengenzeiträume & Zu-/Abschläge',
+        icon: FileText,
+        module: '@/pages/kontrakte/mengenzeitraeume',
+        preferredPath: 'kontrakte/mengenzeitraeume',
+        keywords: ['mengenzeiträume', 'staffel', 'abnahme', 'zuschlag', 'abschlag', 'kontrakt'],
+        mcp: { businessDomain: 'agrar', scope: 'agrar:read' },
+      },
     ],
   },
   {
@@ -790,6 +799,15 @@ export const RAW_NAV_SECTIONS: RawNavItem[] = [
         module: '@/pages/stammdaten/artikelbestandteile',
         preferredPath: 'stammdaten/artikelbestandteile',
         keywords: ['bestandteile', 'inhaltsstoffe', 'qualität', 'analyse'],
+        mcp: { businessDomain: 'admin', scope: 'admin:read' },
+      },
+      {
+        id: 'artikel-stoffstrom',
+        label: 'Stoffstrom & THG',
+        icon: Layers,
+        module: '@/pages/stammdaten/artikel-stoffstrom',
+        preferredPath: 'stammdaten/artikel-stoffstrom',
+        keywords: ['stoffstrom', 'thg', 'co2', 'nachhaltigkeit', 'iscc', 'red', 'anbauland'],
         mcp: { businessDomain: 'admin', scope: 'admin:read' },
       },
       {
