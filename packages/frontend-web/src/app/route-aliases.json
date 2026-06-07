@@ -1,6 +1,14 @@
 {
   "aliases": [
     {
+      "module": "@/pages/crm/kim",
+      "path": "crm"
+    },
+    {
+      "module": "@/pages/crm/kim",
+      "path": "crm/kim"
+    },
+    {
       "module": "@/pages/admin/control-center/index",
       "path": "admin/control-center"
     },
