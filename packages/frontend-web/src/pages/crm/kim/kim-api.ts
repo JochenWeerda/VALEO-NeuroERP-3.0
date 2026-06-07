@@ -62,11 +62,22 @@ export interface NeuroSummary {
   risks: string[]
 }
 
-/** NeuroAI-Dossier (Phase C: LLM-Gateway). Liefert null, solange der Endpoint fehlt. */
+/** NeuroAI-Dossier über das anbieterunabhängige LLM-Gateway (mit Backend-Fallback). */
 export async function fetchNeuroSummary(id: string): Promise<NeuroSummary | null> {
   try {
     return (await apiClient.post<NeuroSummary>(`${BASE}/neuro-summary`, { customerId: id })).data
   } catch {
     return null
   }
+}
+
+export interface DraftEmail {
+  subject: string
+  body: string
+  engine?: string
+}
+
+/** NeuroComms E-Mail-Entwurf (LLM-Gateway + Backend-Fallback). */
+export async function draftEmail(id: string, tone: string): Promise<DraftEmail> {
+  return (await apiClient.post<DraftEmail>(`${BASE}/draft-email`, { customerId: id, tone })).data
 }

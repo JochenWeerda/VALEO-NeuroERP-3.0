@@ -205,3 +205,50 @@ export function useAdminSuiteSystemStatus() {
 export function useAdminSuiteDiagnostics() {
   return useQuery({ queryKey: ['admin-suite', 'diagnostics'], queryFn: async () => (await apiClient.get<DiagnosticManifestItem[]>('/api/v1/admin-suite/diagnostics')).data })
 }
+
+// ── LLM-Gateway (anbieterunabhängige KI-Konfiguration) ───────────────────────
+export type LlmProvider = 'anthropic' | 'openai_compatible' | 'ollama'
+
+export type LlmGatewayConfig = {
+  provider: LlmProvider
+  base_url: string
+  model: string
+  temperature: number
+  enabled: boolean
+  api_key_set: boolean
+  available: boolean
+  providers: LlmProvider[]
+}
+
+export type LlmGatewayUpdate = Partial<{
+  provider: LlmProvider
+  base_url: string
+  model: string
+  api_key: string
+  temperature: number
+  enabled: boolean
+}>
+
+export type LlmTestResult = { ok: boolean; provider: string; model: string; detail: string }
+
+export function useLlmGateway() {
+  return useQuery({
+    queryKey: ['admin-suite', 'llm-gateway'],
+    queryFn: async () => (await apiClient.get<LlmGatewayConfig>('/api/v1/admin-suite/llm-gateway')).data,
+  })
+}
+
+export function useUpdateLlmGateway() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async (patch: LlmGatewayUpdate) =>
+      (await apiClient.put<LlmGatewayConfig>('/api/v1/admin-suite/llm-gateway', patch)).data,
+    onSuccess: () => { void queryClient.invalidateQueries({ queryKey: ['admin-suite', 'llm-gateway'] }) },
+  })
+}
+
+export function useTestLlmGateway() {
+  return useMutation({
+    mutationFn: async () => (await apiClient.post<LlmTestResult>('/api/v1/admin-suite/llm-gateway/test', {})).data,
+  })
+}

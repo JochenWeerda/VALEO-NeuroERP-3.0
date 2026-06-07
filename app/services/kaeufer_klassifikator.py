@@ -10,11 +10,8 @@ from __future__ import annotations
 
 import json
 import logging
-import os
 import re
 from typing import Protocol, Tuple
-
-import httpx
 
 from app.services.kaeufergruppe import (
     GRUPPEN,
@@ -23,11 +20,9 @@ from app.services.kaeufergruppe import (
     Verhaltenssignale,
     klassifiziere,
 )
+from app.services.llm_gateway import LLMGateway
 
 logger = logging.getLogger(__name__)
-
-_ANTHROPIC_URL = "https://api.anthropic.com/v1/messages"
-_MODEL = os.environ.get("ANTHROPIC_MODEL", "claude-opus-4-8")
 
 
 class Klassifikator(Protocol):
@@ -60,40 +55,34 @@ class LLMKlassifikator:
         )
 
     def klassifiziere(self, s: Verhaltenssignale) -> Klassifikation:
-        key = os.environ.get("ANTHROPIC_API_KEY")
-        if not key:
+        # Anbieterunabhängig über das LLM-Gateway (Env-Konfiguration, kein db-Kontext
+        # an dieser Stelle). Fällt bei fehlendem Anbieter/Fehler auf Regeln zurück.
+        prompt = (
+            "Du bist Vertriebsanalyst im Agrarhandel. Ordne den Betrieb anhand seines "
+            "Einkaufsverhaltens EINER Käufergruppe zu. Antworte NUR als JSON "
+            '{"gruppe":"<key>","confidence":0.0-1.0,"begruendung":"kurz, faktenbasiert"}.\n\n'
+            f"Mögliche Gruppen:\n{self._katalog_text()}\n\n"
+            f"Signale (rollierend 12 M):\n"
+            f"- Angebote: {s.angebote_12m}\n- Preisabfragen: {s.preisabfragen_12m}\n"
+            f"- Abschlussquote: {s.abschlussquote:.2f}\n- Ø Rabatt: {s.rabatt_schnitt:.3f}\n"
+            f"- Kauffrequenz: {s.kauffrequenz_12m}\n- Gesamt-Deckungsgrad: {s.deckung_gesamt_pct:.0f} %\n"
+            f"- Mehrlieferanten-Wahrscheinlichkeit: {s.multi_lieferant_wahrsch:.2f}\n"
+            f"- Saisonkonzentration: {s.saison_konzentration:.2f}\n- Jahresbedarf: {s.bedarf_gesamt_eur:.0f} €\n\n"
+            "Beachte: bewusste Lieferantenstreuung ist ein legitimes Kundenmerkmal; "
+            "100 % Deckung ist kein Standardziel."
+        )
+        out = LLMGateway().complete_or_none(prompt, max_tokens=400)
+        if not out:
             return self._fallback.klassifiziere(s)
         try:
-            prompt = (
-                "Du bist Vertriebsanalyst im Agrarhandel. Ordne den Betrieb anhand seines "
-                "Einkaufsverhaltens EINER Käufergruppe zu. Antworte NUR als JSON "
-                '{"gruppe":"<key>","confidence":0.0-1.0,"begruendung":"kurz, faktenbasiert"}.\n\n'
-                f"Mögliche Gruppen:\n{self._katalog_text()}\n\n"
-                f"Signale (rollierend 12 M):\n"
-                f"- Angebote: {s.angebote_12m}\n- Preisabfragen: {s.preisabfragen_12m}\n"
-                f"- Abschlussquote: {s.abschlussquote:.2f}\n- Ø Rabatt: {s.rabatt_schnitt:.3f}\n"
-                f"- Kauffrequenz: {s.kauffrequenz_12m}\n- Gesamt-Deckungsgrad: {s.deckung_gesamt_pct:.0f} %\n"
-                f"- Mehrlieferanten-Wahrscheinlichkeit: {s.multi_lieferant_wahrsch:.2f}\n"
-                f"- Saisonkonzentration: {s.saison_konzentration:.2f}\n- Jahresbedarf: {s.bedarf_gesamt_eur:.0f} €\n\n"
-                "Beachte: bewusste Lieferantenstreuung ist ein legitimes Kundenmerkmal; "
-                "100 % Deckung ist kein Standardziel."
-            )
-            resp = httpx.post(
-                _ANTHROPIC_URL,
-                headers={"x-api-key": key, "anthropic-version": "2023-06-01", "content-type": "application/json"},
-                json={"model": _MODEL, "max_tokens": 400, "messages": [{"role": "user", "content": prompt}]},
-                timeout=30.0,
-            )
-            resp.raise_for_status()
-            out = resp.json()["content"][0]["text"].strip()
-            out = re.sub(r"^```(?:json)?|```$", "", out.strip()).strip()
-            data = json.loads(out)
+            cleaned = re.sub(r"^```(?:json)?|```$", "", out.strip()).strip()
+            data = json.loads(cleaned)
             gruppe = BuyingGroup(data["gruppe"]) if data.get("gruppe") in {g.value for g in BuyingGroup} else BuyingGroup.UNBEKANNT
             conf = max(0.0, min(1.0, float(data.get("confidence", 0.6))))
             reason = str(data.get("begruendung") or "").strip() or "KI-Einschätzung ohne Begründung."
             return Klassifikation(gruppe, conf, f"KI: {reason}")
-        except Exception as exc:  # pragma: no cover - Netzwerk/Key/Guthaben
-            logger.warning("llm_klassifikation_fehlgeschlagen: %s — fallback rule_based", exc)
+        except Exception as exc:  # pragma: no cover - Parsing
+            logger.warning("llm_klassifikation_parse_fehler: %s — fallback rule_based", exc)
             return self._fallback.klassifiziere(s)
 
 
@@ -107,7 +96,7 @@ def klassifiziere_mit(s: Verhaltenssignale, prefer_ai: bool = False) -> Tuple[Kl
     Bei prefer_ai aber fehlendem Key/Fehler ist die Quelle 'rule_based' (Fallback),
     sonst 'ai_suggested'. So bildet die gespeicherte Quelle die Realität ab.
     """
-    if prefer_ai and os.environ.get("ANTHROPIC_API_KEY"):
+    if prefer_ai and LLMGateway().available():
         kl = LLMKlassifikator().klassifiziere(s)
         source = "ai_suggested" if kl.begruendung.startswith("KI:") else "rule_based"
         return kl, source
