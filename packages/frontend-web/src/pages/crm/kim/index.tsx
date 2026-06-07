@@ -6,6 +6,7 @@
 import React, { useState, useEffect, Suspense, lazy } from 'react';
 import { Customer, ContactPerson, ContactLog, OpenItem, BusinessDocument } from './types';
 import * as kimApi from './kim-api';
+import { useToast } from '@/hooks/use-toast';
 
 // Bestehende Fachseiten als Tabs einbetten (Wiederverwendung; Konsolidierung folgt).
 const LeadsPage = lazy(() => import('../leads'));
@@ -43,6 +44,7 @@ import {
 type KimTab = 'allgemein' | 'belege' | 'kontrakte' | 'finanzen' | 'audit' | 'tasks' | 'chef' | 'leads' | 'geo';
 
 export default function KimCockpitPage() {
+  const { toast } = useToast();
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [selectedCustomerId, setSelectedCustomerId] = useState<string>('c1');
 
@@ -192,21 +194,17 @@ export default function KimCockpitPage() {
     }
   };
 
-  // Post invoice Dispatcher
-  const handleAddNewInvoice = async (newOP: Partial<OpenItem>) => {
-    if (!activeCustomer) return;
-    // Belege/OP entstehen aus den Fachprozessen; das KIM-Cockpit liest sie nur.
-    // (Direktes Anlegen über das Cockpit ist Phase-B-Folgescope.)
-    console.warn("KIM: direktes Anlegen von OP noch nicht angebunden", newOP);
+  // KIM ist für OP/Belege/Kontrakte lesend — die Anlage erfolgt im jeweiligen
+  // Fachprozess (Faktura bzw. Verkaufs-/Belegerfassung). Ehrliche Rückmeldung
+  // statt einer scheinbar speichernden Maske.
+  const infoFachprozess = (was: string, ziel: string) => {
+    toast({
+      title: `${was} im Fachprozess anlegen`,
+      description: `Bitte ${ziel} verwenden. Das Kunden-Cockpit zeigt ${was} lesend an.`,
+    });
   };
-
-  // Create Business Document Dispatcher
-  const handleAddNewDocument = async (newDoc: Partial<BusinessDocument>) => {
-    if (!activeCustomer) return;
-    // Belege entstehen in den Verkaufs-/Beleg-Prozessen; KIM liest sie nur.
-    // (Direktanlage über das Cockpit ist Folgescope.)
-    console.warn("KIM: direktes Anlegen von Belegen noch nicht angebunden", newDoc);
-  };
+  const handleAddNewInvoice = async () => infoFachprozess('Offene Posten', 'die Faktura/Finanzbuchhaltung');
+  const handleAddNewDocument = async () => infoFachprozess('Belege', 'die Beleg-/Auftragserfassung');
 
   // Resolve Follow-up Wiedervorlage
   const handleResolveTask = async (logId: string) => {

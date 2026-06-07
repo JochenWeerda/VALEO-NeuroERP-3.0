@@ -401,28 +401,43 @@ def list_financials(
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
 ) -> list[OpenItem]:
-    # business_partner_id für die UUID-basierten Finanztabellen auflösen.
+    # Kanonische Debitoren-OP-Quelle: domain_shared.open_items (wie finance_followup).
+    # partner_id ist die business_partner_id (UUID). Tolerant, falls Tabelle fehlt.
+    if db.execute(text("SELECT to_regclass('domain_shared.open_items')")).scalar() is None:
+        return []
     bp = _safe(db, "SELECT business_partner_id FROM public.kunden WHERE kunden_nr = :k", {"k": kunden_nr}, many=False)
-    cid = str(bp["business_partner_id"]) if bp and bp.get("business_partner_id") else kunden_nr
+    pid = str(bp["business_partner_id"]) if bp and bp.get("business_partner_id") else kunden_nr
+    from datetime import date as _date
     rows = _safe(
         db,
         """
-        SELECT id, invoice_number, created_at, due_date, amount, status, dunning_level
-        FROM open_items
-        WHERE customer_id = :cid AND status NOT IN ('PAID','CANCELLED')
+        SELECT id, document_number, document_date, due_date, amount, status
+        FROM domain_shared.open_items
+        WHERE tenant_id = :t AND type = 'debitor'
+          AND lower(coalesce(status,'')) <> 'paid'
+          AND partner_id = :pid
         ORDER BY due_date LIMIT 50
         """,
-        {"cid": cid},
+        {"t": tenant_id, "pid": pid},
     )
+    today = _date.today()
     out = []
     for r in rows:
         d = dict(r)
+        due = d.get("due_date")
+        due_d = due.date() if hasattr(due, "date") else due
+        if str(d.get("status") or "").lower() == "paid":
+            status = "PAID"
+        elif due_d is not None and due_d < today:
+            status = "OVERDUE"
+        else:
+            status = "PENDING"
         out.append(OpenItem(
             id=str(d.get("id")), customerId=kunden_nr,
-            invoiceNo=d.get("invoice_number") or "",
-            date=str(d.get("created_at") or ""), dueDate=str(d.get("due_date") or ""),
-            amount=float(d.get("amount") or 0), dunningLevel=int(d.get("dunning_level") or 0),
-            status=d.get("status") or "PENDING",
+            invoiceNo=d.get("document_number") or "",
+            date=str(d.get("document_date") or ""), dueDate=str(d.get("due_date") or ""),
+            amount=float(d.get("amount") or 0), dunningLevel=0,
+            status=status,
         ))
     return out
 
