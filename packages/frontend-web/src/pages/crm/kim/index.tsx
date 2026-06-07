@@ -3,9 +3,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense, lazy } from 'react';
 import { Customer, ContactPerson, ContactLog, OpenItem, BusinessDocument } from './types';
 import * as kimApi from './kim-api';
+
+// Bestehende Fachseiten als Tabs einbetten (Wiederverwendung; Konsolidierung folgt).
+const LeadsPage = lazy(() => import('../leads'));
+const KundenKartePage = lazy(() => import('../kunden-karte'));
 
 // Importing Custom High-Density CRM Modules
 import CustomerListSidebar from './components/CustomerListSidebar';
@@ -36,7 +40,7 @@ import {
   Plus
 } from 'lucide-react';
 
-type KimTab = 'allgemein' | 'belege' | 'kontrakte' | 'finanzen' | 'audit' | 'tasks' | 'chef';
+type KimTab = 'allgemein' | 'belege' | 'kontrakte' | 'finanzen' | 'audit' | 'tasks' | 'chef' | 'leads' | 'geo';
 
 export default function KimCockpitPage() {
   const [customers, setCustomers] = useState<Customer[]>([]);
@@ -332,7 +336,9 @@ export default function KimCockpitPage() {
                   { key: 'finanzen', label: 'Finanzwesen (Offene Posten)' },
                   { key: 'audit', label: 'Unterlagen (Dateien)' },
                   { key: 'tasks', label: `Wiedervorlage (${logs.filter(l=>l.reSubmissionDate && !l.completed).length})` },
-                  { key: 'chef', label: 'Chef-Anweisungen' }
+                  { key: 'chef', label: 'Chef-Anweisungen' },
+                  { key: 'leads', label: 'Lead-Management' },
+                  { key: 'geo', label: 'CRM-Geo / Karte' }
                 ].map(nav => (
                   <button
                     key={nav.key}
@@ -436,6 +442,18 @@ export default function KimCockpitPage() {
                       </div>
                     </div>
                   </div>
+                )}
+
+                {activeTab === 'leads' && (
+                  <Suspense fallback={<div className="p-6 text-xs text-gray-400 font-sans">Lead-Management wird geladen…</div>}>
+                    <LeadsPage />
+                  </Suspense>
+                )}
+
+                {activeTab === 'geo' && (
+                  <Suspense fallback={<div className="p-6 text-xs text-gray-400 font-sans">Karte wird geladen…</div>}>
+                    <KundenKartePage />
+                  </Suspense>
                 )}
 
               </div>
