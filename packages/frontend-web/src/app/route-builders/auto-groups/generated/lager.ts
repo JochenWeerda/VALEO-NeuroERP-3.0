@@ -36,4 +36,5 @@ export const entries: AutoGroupRouteEntry[] = [
   { "module": "@/pages/lager/bestandskorrektur", "path": "bestandskorrektur" },
   { "module": "@/pages/lager/gs1-scanner", "path": "gs1-scanner" },
   { "module": "@/pages/lager/massebilanz", "path": "massebilanz" },
+  { "module": "@/pages/lager/permanente-inventur", "path": "permanente-inventur" },
 ]

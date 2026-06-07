@@ -1,6 +1,18 @@
 {
   "aliases": [
     {
+      "module": "@/pages/stammdaten/artikel-stoffstrom",
+      "path": "stammdaten/artikel-stoffstrom"
+    },
+    {
+      "module": "@/pages/fibu/op-skonto-auszifferung",
+      "path": "fibu/op-skonto-auszifferung"
+    },
+    {
+      "module": "@/pages/lager/permanente-inventur",
+      "path": "lager/permanente-inventur"
+    },
+    {
       "module": "@/pages/crm/kim",
       "path": "crm"
     },
@@ -2199,6 +2211,10 @@
     {
       "module": "@/pages/kontrakte/kontraktklassen",
       "path": "kontrakte/kontraktklassen"
+    },
+    {
+      "module": "@/pages/kontrakte/mengenzeitraeume",
+      "path": "kontrakte/mengenzeitraeume"
     },
     {
       "module": "@/pages/pos/promotionen",
