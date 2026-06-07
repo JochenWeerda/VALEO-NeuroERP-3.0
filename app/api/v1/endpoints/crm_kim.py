@@ -23,6 +23,7 @@ from sqlalchemy.orm import Session
 from app.core.database import get_db
 from app.core.tenant import get_tenant_id
 from app.services.crm_kontakt_service import CrmKontaktService
+from app.services.llm_gateway import LLMGateway
 
 router = APIRouter(prefix="/crm/kim", tags=["crm", "kim", "360"])
 
@@ -116,6 +117,30 @@ class BusinessDocument(BaseModel):
 
 class StatusOut(BaseModel):
     status: str = "success"
+
+
+class NeuroSummary(BaseModel):
+    healthScore: int = 0
+    statusLabel: str = ""
+    summary: str = ""
+    opportunities: list[str] = Field(default_factory=list)
+    risks: list[str] = Field(default_factory=list)
+    engine: str = "fallback"
+
+
+class NeuroSummaryIn(BaseModel):
+    customerId: str
+
+
+class DraftEmailIn(BaseModel):
+    customerId: str
+    tone: str = "friendly"
+
+
+class DraftEmailOut(BaseModel):
+    subject: str = ""
+    body: str = ""
+    engine: str = "fallback"
 
 
 class CustomerUpdateIn(BaseModel):
@@ -433,3 +458,126 @@ def list_documents(
             completed=str(d.get("status") or "").lower() in ("abgeschlossen", "completed", "geliefert"),
         ))
     return out
+
+
+# ── NeuroAI-Dossier (anbieterunabhängiges LLM-Gateway + Fallback) ─────────────
+def _fallback_summary(cust: Customer, outstanding: float, log_count: int, doc_count: int) -> NeuroSummary:
+    """Deterministisches, regelbasiertes Dossier ohne LLM (immer verfügbar)."""
+    util = (outstanding / cust.creditLimit * 100) if cust.creditLimit > 0 else 0
+    gesperrt = any("gesperrt" in m.lower() for m in cust.alertMessages)
+    score = 90
+    if util > 90 or gesperrt:
+        score = 35
+    elif util > 60:
+        score = 60
+    elif util > 30:
+        score = 78
+    label = "Stabil" if score >= 85 else ("Beobachten" if score >= 60 else "Risiko")
+    opportunities, risks = [], []
+    if doc_count == 0:
+        opportunities.append("Noch keine Belege erfasst — Erstgeschäft/Sortimentseinstieg anbahnen.")
+    if cust.revenueStatus in ("A", "B"):
+        opportunities.append(f"Umsatzklasse {cust.revenueStatus}: Cross-/Up-Sell im Vollsortiment prüfen.")
+    if outstanding > 0:
+        risks.append(f"Offener Saldo EUR {outstanding:,.2f}" + (f" (~{util:.0f}% des KV-Limits)" if cust.creditLimit else "") + ".")
+    if gesperrt:
+        risks.append("Konto gesperrt — keine Lieferungen ohne Freigabe.")
+    if cust.chefAnweisung:
+        risks.append(f"Chef-Anweisung beachten: {cust.chefAnweisung}")
+    summary = (f"**{cust.name}** ({cust.city}) — Umsatzklasse {cust.revenueStatus}, ABC {cust.abcStatus}. "
+               f"Offener Saldo EUR {outstanding:,.2f} bei KV-Limit EUR {cust.creditLimit:,.0f}. "
+               f"{log_count} Kontakte, {doc_count} Belege in der Historie.")
+    return NeuroSummary(healthScore=score, statusLabel=label, summary=summary,
+                        opportunities=opportunities or ["Beziehung stabil halten."],
+                        risks=risks or ["Keine akuten Risiken erkennbar."], engine="fallback")
+
+
+@router.post("/neuro-summary", response_model=NeuroSummary, summary="NeuroAI-Kundendossier")
+def neuro_summary(
+    body: NeuroSummaryIn,
+    db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
+) -> NeuroSummary:
+    import json
+    import re
+
+    cust = get_customer(body.customerId, db, tenant_id)
+    if not cust:
+        return NeuroSummary(healthScore=0, statusLabel="Unbekannt", summary="Kunde nicht gefunden.")
+    ops = list_financials(body.customerId, db, tenant_id)
+    outstanding = sum(o.amount for o in ops if o.status != "PAID")
+    logs = CrmKontaktService(db, tenant_id).list_by_kunde(body.customerId)
+    docs = list_documents(body.customerId, db, tenant_id)
+    fallback = _fallback_summary(cust, outstanding, len(logs), len(docs))
+
+    prompt = (
+        "Du bist Vertriebsanalyst im Agrarhandel. Erstelle ein knappes 360°-Kundendossier. "
+        'Antworte NUR als JSON: {"healthScore":0-100,"statusLabel":"Stabil|Beobachten|Risiko",'
+        '"summary":"2-3 Saetze Markdown","opportunities":["..."],"risks":["..."]}.\n\n'
+        f"Kunde: {cust.name}, {cust.city}\n"
+        f"Umsatzklasse: {cust.revenueStatus}, ABC: {cust.abcStatus}\n"
+        f"KV-Limit: {cust.creditLimit:.0f} EUR, offener Saldo: {outstanding:.2f} EUR\n"
+        f"Kontakte (Historie): {len(logs)}, Belege: {len(docs)}\n"
+        f"Alarme: {', '.join(cust.alertMessages) or 'keine'}\n"
+        f"Chef-Anweisung: {cust.chefAnweisung or 'keine'}\n"
+    )
+    out = LLMGateway(db, tenant_id).complete_or_none(prompt, max_tokens=600)
+    if not out:
+        return fallback
+    try:
+        cleaned = re.sub(r"^```(?:json)?|```$", "", out.strip()).strip()
+        data = json.loads(cleaned)
+        return NeuroSummary(
+            healthScore=int(max(0, min(100, data.get("healthScore", fallback.healthScore)))),
+            statusLabel=str(data.get("statusLabel") or fallback.statusLabel),
+            summary=str(data.get("summary") or fallback.summary),
+            opportunities=[str(x) for x in (data.get("opportunities") or [])][:5] or fallback.opportunities,
+            risks=[str(x) for x in (data.get("risks") or [])][:5] or fallback.risks,
+            engine="llm",
+        )
+    except Exception:
+        return fallback
+
+
+_TONE_LABEL = {
+    "friendly": "freundlich-persönlich", "formal": "professionell-sachlich",
+    "mahnend": "höflich-mahnend (Zahlungserinnerung)", "kontraktverhandlung": "kontraktbezogen-verhandelnd",
+}
+
+
+@router.post("/draft-email", response_model=DraftEmailOut, summary="NeuroComms E-Mail-Entwurf")
+def draft_email(
+    body: DraftEmailIn,
+    db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
+) -> DraftEmailOut:
+    cust = get_customer(body.customerId, db, tenant_id)
+    if not cust:
+        return DraftEmailOut(subject="Kunde nicht gefunden", body="")
+    tone = _TONE_LABEL.get(body.tone, "freundlich-persönlich")
+    chef = f"\nBeachte verbindlich die Chef-Anweisung: {cust.chefAnweisung}" if cust.chefAnweisung else ""
+    prompt = (
+        f"Schreibe eine {tone}e Geschäfts-E-Mail auf Deutsch an den Agrarkunden "
+        f"{cust.name} ({cust.city}). Antworte NUR als JSON "
+        '{"subject":"...","body":"..."} ohne Markdown.' + chef
+    )
+    out = LLMGateway(db, tenant_id).complete_or_none(prompt, max_tokens=700)
+    if out:
+        import json
+        import re
+        try:
+            data = json.loads(re.sub(r"^```(?:json)?|```$", "", out.strip()).strip())
+            return DraftEmailOut(subject=str(data.get("subject") or ""), body=str(data.get("body") or ""), engine="llm")
+        except Exception:
+            pass
+    # Deterministischer Fallback-Entwurf
+    subject = f"Ihre Geschäftsbeziehung mit der Hinrich Folkerts Landhandel GmbH"
+    anrede = "Sehr geehrte Damen und Herren,"
+    body_txt = (
+        f"{anrede}\n\nwir möchten uns für die gute Zusammenarbeit bedanken und stehen Ihnen "
+        f"für Ihren Bedarf an Futtermitteln, Saatgut, Dünger und Pflanzenschutz gern zur Verfügung. "
+        f"Sprechen Sie uns für ein Angebot an.\n\nMit freundlichen Grüßen\nIhr Außendienst-Team"
+    )
+    if cust.chefAnweisung:
+        body_txt += f"\n\n[Intern beachtet: {cust.chefAnweisung}]"
+    return DraftEmailOut(subject=subject, body=body_txt, engine="fallback")

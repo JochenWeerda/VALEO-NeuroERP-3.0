@@ -42,7 +42,7 @@ export default function CustomerListSidebar({
       c.name.toLowerCase().includes(term) || 
       c.debtorNo.includes(term) ||
       c.city.toLowerCase().includes(term) ||
-      (c.custGroup && c.custGroup.toLowerCase().includes(term));
+      (c.custGroup?.toLowerCase().includes(term));
     
     if (!matchesSearch) return false;
 

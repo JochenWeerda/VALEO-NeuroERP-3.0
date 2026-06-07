@@ -13,20 +13,16 @@ from __future__ import annotations
 
 import json
 import logging
-import os
 import re
 import uuid
 from typing import Any, Optional
 
-import httpx
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
 logger = logging.getLogger(__name__)
 
 _DEFAULT_TENANT = "00000000-0000-0000-0000-000000000001"
-_ANTHROPIC_URL = "https://api.anthropic.com/v1/messages"
-_MODEL = os.environ.get("ANTHROPIC_MODEL", "claude-opus-4-8")
 
 _SCHEMA_HINT = (
     "Extrahiere die Bestellung als JSON (NUR JSON, keine Markdown-Blöcke, kein Text drumherum). "
@@ -61,37 +57,23 @@ class WhatsAppIntakeService:
 
     # ── Extraktion ────────────────────────────────────────────────────────
     def extract(self, raw_text: str) -> tuple[dict, str, float]:
-        """Gibt (parsed, engine, confidence) zurück."""
-        key = os.environ.get("ANTHROPIC_API_KEY")
-        if key:
-            try:
-                parsed = self._extract_llm(raw_text, key)
-                return parsed, "claude", 0.9
-            except Exception as exc:  # pragma: no cover - Netzwerk/Key-Fehler
-                logger.warning("whatsapp_llm_extract_fehlgeschlagen: %s — fallback heuristik", exc)
-        return self._extract_heuristik(raw_text), "heuristik", 0.45
+        """Gibt (parsed, engine, confidence) zurück.
 
-    def _extract_llm(self, raw_text: str, key: str) -> dict:
-        resp = httpx.post(
-            _ANTHROPIC_URL,
-            headers={
-                "x-api-key": key,
-                "anthropic-version": "2023-06-01",
-                "content-type": "application/json",
-            },
-            json={
-                "model": _MODEL,
-                "max_tokens": 1024,
-                "messages": [{"role": "user", "content": f"{_SCHEMA_HINT}\n\nNachricht:\n{raw_text}"}],
-            },
-            timeout=30.0,
+        Nutzt das anbieterunabhängige LLM-Gateway (Anbieterwahl des Admins, inkl.
+        Tenant-Konfiguration). Fällt bei fehlendem Anbieter/Fehler deterministisch
+        auf die Heuristik zurück."""
+        from app.services.llm_gateway import LLMGateway
+
+        out = LLMGateway(self.db, self.tenant_id).complete_or_none(
+            f"{_SCHEMA_HINT}\n\nNachricht:\n{raw_text}", max_tokens=1024
         )
-        resp.raise_for_status()
-        body = resp.json()
-        out = body["content"][0]["text"].strip()
-        # robustes JSON-Parsing (evtl. mit Fences)
-        out = re.sub(r"^```(?:json)?|```$", "", out.strip()).strip()
-        return json.loads(out)
+        if out:
+            try:
+                cleaned = re.sub(r"^```(?:json)?|```$", "", out.strip()).strip()
+                return json.loads(cleaned), "claude", 0.9
+            except Exception as exc:  # pragma: no cover - Parsing
+                logger.warning("whatsapp_llm_parse_fehlgeschlagen: %s — fallback heuristik", exc)
+        return self._extract_heuristik(raw_text), "heuristik", 0.45
 
     def _extract_heuristik(self, raw_text: str) -> dict:
         """Deterministischer Fallback: erste Zeile/Anfang = Kunde, Mengen+Einheiten je Zeile."""

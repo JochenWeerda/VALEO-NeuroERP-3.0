@@ -270,7 +270,7 @@ export default function ContactPersonsTable({ contactPersons, onAddContactPerson
                   
                   {/* Output W1-W10 exact flags */}
                   {Array(10).fill(0).map((_, idx) => {
-                    const isWeekActive = person.weeklySchedule && person.weeklySchedule[idx];
+                    const isWeekActive = person.weeklySchedule?.[idx];
                     return (
                       <td
                         key={idx}

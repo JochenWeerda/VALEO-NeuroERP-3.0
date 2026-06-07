@@ -17,6 +17,7 @@ import {
   RefreshCw 
 } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
+import { draftEmail } from '../kim-api';
 
 interface NeuroAISidePanelProps {
   customer: Customer;
@@ -50,12 +51,7 @@ export default function NeuroAISidePanel({
     setDraftResult(null);
     setCopied(false);
     try {
-      const res = await fetch('/api/draft-email', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ customerId: customer.id, tone: activeTone }),
-      });
-      const data = await res.json();
+      const data = await draftEmail(customer.id, activeTone);
       setDraftResult(data);
     } catch (err) {
       console.error(err);

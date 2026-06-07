@@ -780,3 +780,95 @@ async def get_system_status_center() -> list[SystemStatusEvidenceOut]:
 async def get_diagnostic_manifest() -> list[DiagnosticManifestItemOut]:
     """Liefert erlaubte Diagnosekategorien ohne Daten zu sammeln oder zu exportieren."""
     return _diagnostic_manifest()
+
+
+# ── LLM-Gateway (anbieterunabhängige KI-Konfiguration) ────────────────────────
+from app.services.llm_gateway import (  # noqa: E402
+    PROVIDERS as LLM_PROVIDERS,
+    SETTINGS_KEY as LLM_SETTINGS_KEY,
+    LLMConfig,
+    LLMGateway,
+    load_config as load_llm_config,
+)
+
+
+class LlmGatewayConfigOut(BaseModel):
+    provider: str
+    base_url: str
+    model: str
+    temperature: float
+    enabled: bool
+    api_key_set: bool  # Secret-Wert wird NIE ausgegeben
+    available: bool
+    providers: list[str] = Field(default_factory=lambda: list(LLM_PROVIDERS))
+
+
+class LlmGatewayUpdateIn(BaseModel):
+    provider: str | None = None
+    base_url: str | None = None
+    model: str | None = None
+    api_key: str | None = None  # leer/none = bestehenden Key behalten
+    temperature: float | None = None
+    enabled: bool | None = None
+
+
+class LlmTestOut(BaseModel):
+    ok: bool
+    provider: str
+    model: str
+    detail: str
+
+
+def _llm_config_out(cfg: LLMConfig) -> LlmGatewayConfigOut:
+    return LlmGatewayConfigOut(
+        provider=cfg.provider,
+        base_url=cfg.resolved_base_url(),
+        model=cfg.resolved_model(),
+        temperature=cfg.temperature,
+        enabled=cfg.enabled,
+        api_key_set=bool(cfg.api_key),
+        available=LLMGateway(config=cfg).available(),
+    )
+
+
+@router.get("/llm-gateway", response_model=LlmGatewayConfigOut, summary="LLM-Anbieter-Konfiguration abrufen")
+async def get_llm_gateway(
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+) -> LlmGatewayConfigOut:
+    """Aktuelle KI-Anbieter-Konfiguration (Key redigiert, nie im Klartext)."""
+    return _llm_config_out(load_llm_config(db, tenant_id))
+
+
+@router.put("/llm-gateway", response_model=LlmGatewayConfigOut, summary="LLM-Anbieter-Konfiguration speichern")
+async def update_llm_gateway(
+    payload: LlmGatewayUpdateIn,
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+) -> LlmGatewayConfigOut:
+    """Speichert die KI-Anbieter-Wahl des Administrators (Key nur bei Angabe ersetzt)."""
+    if payload.provider is not None and payload.provider not in LLM_PROVIDERS:
+        raise HTTPException(status_code=422, detail=f"Unbekannter Anbieter: {payload.provider}")
+    settings = _load_tenant_settings(db, tenant_id)
+    store = settings.get(LLM_SETTINGS_KEY)
+    if not isinstance(store, dict):
+        store = {}
+    for field in ("provider", "base_url", "model", "temperature", "enabled"):
+        val = getattr(payload, field)
+        if val is not None:
+            store[field] = val
+    # API-Key nur überschreiben, wenn ein nicht-leerer Wert geliefert wird.
+    if payload.api_key:
+        store["api_key"] = payload.api_key
+    settings[LLM_SETTINGS_KEY] = store
+    _save_tenant_settings(db, tenant_id, settings)
+    return _llm_config_out(load_llm_config(db, tenant_id))
+
+
+@router.post("/llm-gateway/test", response_model=LlmTestOut, summary="LLM-Anbieter testen")
+async def test_llm_gateway(
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+) -> LlmTestOut:
+    """Konfigurations-/Erreichbarkeitsprobe des aktuell gewählten Anbieters."""
+    return LlmTestOut(**LLMGateway(db, tenant_id).test())

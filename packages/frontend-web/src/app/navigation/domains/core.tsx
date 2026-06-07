@@ -210,6 +210,15 @@ export const RAW_NAV_SECTIONS: RawNavItem[] = [
         mcp: { businessDomain: 'admin', scope: 'admin:read' },
       },
       {
+        id: 'admin-suite-ki-anbieter',
+        label: 'KI-Anbieter (NeuroAI)',
+        icon: LayoutDashboard,
+        module: '@/pages/admin-suite/ki-anbieter',
+        preferredPath: 'admin-suite/ki-anbieter',
+        keywords: ['ki', 'llm', 'neuroai', 'anbieter', 'anthropic', 'openrouter', 'ollama', 'modell', 'provider'],
+        mcp: { businessDomain: 'admin', scope: 'admin:read' },
+      },
+      {
         id: 'benutzer',
         label: 'Benutzer',
         icon: Users,
