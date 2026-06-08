@@ -1,5 +1,5 @@
 import { useMemo, useRef, useState } from 'react'
-import { useNavigate } from '@/app/routing/react-router-compat'
+import { useNavigate } from '@/app/routing/typed-router'
 import { KeyboardShortcutBar } from '@/components/keyboard/KeyboardShortcutBar'
 import { OperationalCaseHeader } from '@/components/workflow/OperationalCaseHeader'
 import { OperationalContextPanel } from '@/components/workflow/OperationalContextPanel'

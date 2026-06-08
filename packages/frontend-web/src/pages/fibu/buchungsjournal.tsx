@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
-import { useNavigate } from '@/app/routing/react-router-compat'
+import { useNavigate } from '@/app/routing/typed-router'
 import { OperationalCaseHeader } from '@/components/workflow/OperationalCaseHeader'
 import { OperationalContextPanel } from '@/components/workflow/OperationalContextPanel'
 import { OperationalTimeline } from '@/components/workflow/OperationalTimeline'

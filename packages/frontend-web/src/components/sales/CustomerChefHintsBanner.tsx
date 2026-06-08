@@ -1,4 +1,4 @@
-import { Link } from '@/app/routing/react-router-compat'
+import { Link } from '@/app/routing/typed-router'
 import { AlertCircle } from 'lucide-react'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Badge } from '@/components/ui/badge'

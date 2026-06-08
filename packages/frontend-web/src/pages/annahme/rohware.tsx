@@ -4,7 +4,7 @@
  * Keyboard-Shortcuts für Desktop
  */
 import { useMemo, useState } from 'react'
-import { useNavigate } from '@/app/routing/react-router-compat'
+import { useNavigate } from '@/app/routing/typed-router'
 import { useMutation } from '@tanstack/react-query'
 import { Wizard } from '@/components/patterns/Wizard'
 import { Button } from '@/components/ui/button'

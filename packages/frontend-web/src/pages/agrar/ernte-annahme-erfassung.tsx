@@ -5,7 +5,7 @@
  */
 
 import { lazy, Suspense, useState, useEffect, useMemo, useRef } from 'react'
-import { useLocation, useNavigate, useParams, useSearchParams } from '@/app/routing/react-router-compat'
+import { useLocation, useNavigate, useParams, useSearchParams } from '@/app/routing/typed-router'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'

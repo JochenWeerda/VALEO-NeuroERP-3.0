@@ -4,7 +4,7 @@
  */
 
 import { useMemo, useState, useEffect } from 'react'
-import { useNavigate } from '@/app/routing/react-router-compat'
+import { useNavigate } from '@/app/routing/typed-router'
 import {
   CommandDialog,
   CommandEmpty,

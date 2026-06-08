@@ -1,4 +1,4 @@
-import { useParams } from '@/app/routing/react-router-compat'
+import { useParams } from '@/app/routing/typed-router'
 import { useQuery } from '@tanstack/react-query'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'

@@ -5,7 +5,7 @@
  */
 
 import { useState } from 'react'
-import { useNavigate, useSearchParams } from '@/app/routing/react-router-compat'
+import { useNavigate, useSearchParams } from '@/app/routing/typed-router'
 import { useMutation } from '@tanstack/react-query'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'

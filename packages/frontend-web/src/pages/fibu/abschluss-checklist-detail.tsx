@@ -1,4 +1,4 @@
-import { useParams, useNavigate, useSearchParams } from '@/app/routing/react-router-compat'
+import { useParams, useNavigate, useSearchParams } from '@/app/routing/typed-router'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { OperationalCaseHeader } from '@/components/workflow/OperationalCaseHeader'
 import { OperationalContextPanel } from '@/components/workflow/OperationalContextPanel'

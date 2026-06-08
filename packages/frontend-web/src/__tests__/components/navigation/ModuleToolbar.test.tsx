@@ -4,13 +4,13 @@
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, fireEvent } from '@testing-library/react'
-import { MemoryRouter } from '@/app/routing/react-router-compat'
+import { MemoryRouter } from '@/app/routing/test-router'
 import { ModuleToolbar } from '@/components/navigation/ModuleToolbar'
 
 const mockNavigate = vi.fn()
 
-vi.mock('@/app/routing/react-router-compat', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('@/app/routing/react-router-compat')>()
+vi.mock('@/app/routing/typed-router', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@/app/routing/typed-router')>()
   return {
     ...actual,
     useNavigate: () => mockNavigate,

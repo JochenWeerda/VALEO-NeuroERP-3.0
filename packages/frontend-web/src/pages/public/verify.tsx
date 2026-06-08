@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { useParams } from '@/app/routing/react-router-compat'
+import { useParams } from '@/app/routing/typed-router'
 import { useTranslation } from 'react-i18next'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'

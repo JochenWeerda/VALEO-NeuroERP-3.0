@@ -4,6 +4,7 @@ import { prepareE2EAuth } from './helpers/auth-from-env'
 const APP_ROUTES = [
   { path: '/crm', breadcrumb: /Crm/i },
   { path: '/crm/lead/router-smoke', breadcrumb: /Detail/i },
+  { path: '/einkauf/rechnung-abgleich/router-smoke', breadcrumb: /Detail/i },
 ] as const
 
 test.describe('TanStack router infrastructure', () => {
@@ -30,6 +31,12 @@ test.describe('TanStack router infrastructure', () => {
 
   test('renders public login outside the dashboard shell', async ({ page }) => {
     await page.goto('/login', { waitUntil: 'domcontentloaded' })
+    await expect(page.getByTestId('page-root')).toHaveCount(0)
+    await expect(page.locator('body')).not.toContainText(/Unexpected Application Error/i)
+  })
+
+  test('renders public verification outside the dashboard shell', async ({ page }) => {
+    await page.goto('/verify/invoice/R-42/router-smoke', { waitUntil: 'domcontentloaded' })
     await expect(page.getByTestId('page-root')).toHaveCount(0)
     await expect(page.locator('body')).not.toContainText(/Unexpected Application Error/i)
   })

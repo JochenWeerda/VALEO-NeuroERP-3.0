@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { useNavigate, useSearchParams } from '@/app/routing/react-router-compat'
+import { useNavigate, useSearchParams } from '@/app/routing/typed-router'
 import { useQuery } from '@tanstack/react-query'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'

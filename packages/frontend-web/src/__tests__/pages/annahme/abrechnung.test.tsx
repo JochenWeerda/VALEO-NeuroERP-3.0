@@ -1,6 +1,6 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { MemoryRouter } from '@/app/routing/react-router-compat'
+import { MemoryRouter } from '@/app/routing/test-router'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import AnnahmeAbrechnungPage from '@/pages/annahme/abrechnung'
 

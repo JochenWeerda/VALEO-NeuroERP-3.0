@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { useNavigate, useParams, useSearchParams } from '@/app/routing/react-router-compat'
+import { useNavigate, useParams, useSearchParams } from '@/app/routing/typed-router'
 import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'

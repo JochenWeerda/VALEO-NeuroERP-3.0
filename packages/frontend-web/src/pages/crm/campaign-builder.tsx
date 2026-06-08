@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { useNavigate } from '@/app/routing/react-router-compat'
+import { useNavigate } from '@/app/routing/typed-router'
 import { useTranslation } from 'react-i18next'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'

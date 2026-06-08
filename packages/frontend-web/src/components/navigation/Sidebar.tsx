@@ -1,6 +1,6 @@
 import { Suspense, lazy, useEffect, useMemo, useRef, useState } from 'react'
 import { clsx } from 'clsx'
-import { Link, NavLink } from '@/app/routing/react-router-compat'
+import { Link, NavLink } from '@/app/routing/typed-router'
 import { Button } from '@/components/ui/button'
 import { ChevronDown, ChevronLeft, ChevronRight, ChevronUp } from 'lucide-react'
 import { useFeature } from '@/hooks/useFeature'

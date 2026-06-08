@@ -1,7 +1,7 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { render, screen } from '@testing-library/react'
 import { describe, expect, it, vi } from 'vitest'
-import { MemoryRouter } from '@/app/routing/react-router-compat'
+import { MemoryRouter } from '@/app/routing/test-router'
 import FlowSpineComplianceToReportPage from '@/pages/workflow/flow-spine-compliance-to-report'
 
 const getMock = vi.hoisted(() => vi.fn())

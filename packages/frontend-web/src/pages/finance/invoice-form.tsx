@@ -7,7 +7,7 @@
  */
 
 import { useState, useEffect, useCallback } from "react";
-import { useNavigate } from '@/app/routing/react-router-compat';
+import { useNavigate } from '@/app/routing/typed-router';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";

@@ -6,7 +6,7 @@
  */
 
 import { ReactNode } from 'react'
-import { Link } from '@/app/routing/react-router-compat'
+import { Link } from '@/app/routing/typed-router'
 import { cn } from '@/lib/utils'
 import {
   AlertTriangle,

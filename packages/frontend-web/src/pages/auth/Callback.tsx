@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { useSearchParams } from '@/app/routing/react-router-compat'
+import { useSearchParams } from '@/app/routing/typed-router'
 import { useAuth } from '@/hooks/useAuth'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Loader2, XCircle } from 'lucide-react'

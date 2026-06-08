@@ -1,5 +1,6 @@
 import {
   generatedRouteInventory,
+  generatedParamKeys,
   generatedSearchKeys,
 } from '@/app/routing/route-tree.gen'
 
@@ -22,6 +23,9 @@ type PathParamNames<TPath extends string> =
 export type AppRouteParams<TPath extends AppRoutePath> = {
   [TParam in PathParamNames<TPath>]: string | number
 }
+
+export type AppRouteParamKey = (typeof generatedParamKeys)[number]
+export type AppRouteHref = string
 
 export type AppSearchKey = (typeof generatedSearchKeys)[number]
 export type AppSearchValue = string | number | boolean | null | undefined

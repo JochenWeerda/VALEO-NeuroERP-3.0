@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo, useRef, type ChangeEvent } from 'react'
-import { useNavigate } from '@/app/routing/react-router-compat'
+import { useNavigate } from '@/app/routing/typed-router'
 import { useTranslation } from 'react-i18next'
 import { ListReport } from '@/components/mask-builder'
 import { useMaskActions } from '@/components/mask-builder/hooks'

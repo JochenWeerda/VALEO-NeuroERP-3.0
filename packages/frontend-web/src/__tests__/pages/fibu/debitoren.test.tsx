@@ -1,7 +1,7 @@
 import { describe, it, expect, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { MemoryRouter } from '@/app/routing/react-router-compat'
+import { MemoryRouter } from '@/app/routing/test-router'
 import DebitorenPage from '@/pages/fibu/debitoren'
 
 vi.mock('@/lib/api/fibu', () => ({
@@ -28,8 +28,8 @@ vi.mock('@/lib/api/fibu', () => ({
 }))
 
 // Mock useNavigate
-vi.mock('@/app/routing/react-router-compat', async () => {
-  const actual = await vi.importActual('@/app/routing/react-router-compat')
+vi.mock('@/app/routing/typed-router', async () => {
+  const actual = await vi.importActual('@/app/routing/typed-router')
   return {
     ...actual,
     useNavigate: () => vi.fn(),

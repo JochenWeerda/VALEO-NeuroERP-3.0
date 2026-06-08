@@ -24,4 +24,13 @@
   "workflows/history": "workflow/workflow-monitoring",
   "kontrakte/kontrakt-alarm-dashboard": "kontrakte/alarme",
   "kontrakte/kontrakt-positionsmonitor": "kontrakte/positionen"
+  ,"lager": "lager/bestandsuebersicht"
+  ,"einstellungen": "einstellungen/system"
+  ,"agrar": "agrar/aussaat"
+  ,"crm/campaigns/new": "crm/campaign/new"
+  ,"crm/kontakte/new": "crm/kontakt/new"
+  ,"crm/lieferanten/stamm/new": "crm/lieferanten/new"
+  ,"crm/leads/new": "crm/lead/new"
+  ,"futter/einzel/stamm/neu": "futter/einzel/neu"
+  ,"futter/misch/stamm/neu": "futter/misch/neu"
 }

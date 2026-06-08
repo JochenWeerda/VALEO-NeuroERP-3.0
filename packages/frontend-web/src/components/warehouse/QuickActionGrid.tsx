@@ -7,7 +7,7 @@
 
 import { ReactNode } from 'react'
 import { clsx } from 'clsx'
-import { Link } from '@/app/routing/react-router-compat'
+import { Link } from '@/app/routing/typed-router'
 import {
   PackagePlus,
   PackageMinus,

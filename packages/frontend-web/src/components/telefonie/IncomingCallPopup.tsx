@@ -1,4 +1,4 @@
-import { useNavigate } from '@/app/routing/react-router-compat'
+import { useNavigate } from '@/app/routing/typed-router'
 import { Phone, PhoneOff, User2, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { usePendingCalls, useAckCall, type TapiCall } from '@/lib/api/tapi'

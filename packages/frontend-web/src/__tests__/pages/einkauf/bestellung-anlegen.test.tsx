@@ -1,6 +1,6 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { describe, expect, it, beforeEach, vi } from 'vitest'
-import { MemoryRouter } from '@/app/routing/react-router-compat'
+import { MemoryRouter } from '@/app/routing/test-router'
 import BestellungAnlegenPage from '@/pages/einkauf/bestellung-anlegen'
 
 const postMock = vi.hoisted(() => vi.fn())

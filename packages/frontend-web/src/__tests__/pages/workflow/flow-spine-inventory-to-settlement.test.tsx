@@ -1,7 +1,7 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { render, screen } from '@testing-library/react'
 import { describe, expect, it, vi } from 'vitest'
-import { MemoryRouter } from '@/app/routing/react-router-compat'
+import { MemoryRouter } from '@/app/routing/test-router'
 import FlowSpineInventoryToSettlementPage from '@/pages/workflow/flow-spine-inventory-to-settlement'
 
 const getMock = vi.hoisted(() => vi.fn())

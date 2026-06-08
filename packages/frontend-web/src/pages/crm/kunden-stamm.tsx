@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react'
-import { useNavigate, useParams, useLocation } from '@/app/routing/react-router-compat'
+import { useNavigate, useParams, useLocation } from '@/app/routing/typed-router'
 import { useTranslation } from 'react-i18next'
 import { toast } from '@/hooks/use-toast'
 import { useQuery } from '@tanstack/react-query'

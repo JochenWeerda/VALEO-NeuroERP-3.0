@@ -1,4 +1,4 @@
-import { useSearchParams } from '@/app/routing/react-router-compat'
+import { useSearchParams } from '@/app/routing/typed-router'
 import { useState } from 'react'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'

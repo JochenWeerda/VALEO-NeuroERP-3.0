@@ -1,5 +1,5 @@
 import { type JSX, useMemo, useState } from 'react'
-import { useNavigate } from '@/app/routing/react-router-compat'
+import { useNavigate } from '@/app/routing/typed-router'
 import { useQuery } from '@tanstack/react-query'
 import { type ColumnDef } from '@/components/ui/data-table'
 import { Badge } from '@/components/ui/badge'

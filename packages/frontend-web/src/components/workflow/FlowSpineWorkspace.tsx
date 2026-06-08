@@ -30,7 +30,7 @@ import {
   Warehouse,
   XCircle,
 } from 'lucide-react'
-import { useLocation, useNavigate, useSearchParams } from '@/app/routing/react-router-compat'
+import { useLocation, useNavigate, useSearchParams } from '@/app/routing/typed-router'
 import { PageSection, PageSurface } from '@/components/patterns/PageSurface'
 
 import type { CustomerLite } from '@/components/crm/CustomerCombobox'

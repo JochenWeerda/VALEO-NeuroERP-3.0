@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Link } from '@/app/routing/react-router-compat'
+import { Link } from '@/app/routing/typed-router'
 import { ArrowLeft, BrainCircuit, CheckCircle2, XCircle, Loader2 } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'

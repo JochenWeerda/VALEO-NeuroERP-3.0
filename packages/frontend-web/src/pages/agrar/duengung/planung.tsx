@@ -1,4 +1,4 @@
-import { useLocation } from '@/app/routing/react-router-compat'
+import { useLocation } from '@/app/routing/typed-router'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'

@@ -1,6 +1,6 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { MemoryRouter } from '@/app/routing/react-router-compat'
+import { MemoryRouter } from '@/app/routing/test-router'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import QualitaetsCheckPage from '@/pages/annahme/qualitaets-check'
 
@@ -9,8 +9,8 @@ const toastMock = vi.hoisted(() => vi.fn())
 const apiPostMock = vi.hoisted(() => vi.fn())
 const patchStatusMutateMock = vi.hoisted(() => vi.fn())
 
-vi.mock('@/app/routing/react-router-compat', async () => {
-  const actual = await vi.importActual('@/app/routing/react-router-compat')
+vi.mock('@/app/routing/typed-router', async () => {
+  const actual = await vi.importActual('@/app/routing/typed-router')
   return {
     ...actual,
     useNavigate: () => navigateMock,

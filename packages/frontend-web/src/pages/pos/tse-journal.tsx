@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useNavigate } from '@/app/routing/react-router-compat'
+import { useNavigate } from '@/app/routing/typed-router'
 import { useTSEJournal, type TSEEintrag } from '@/lib/api/pos'
 import { useToast } from '@/hooks/use-toast'
 import { api } from '@/lib/axios'

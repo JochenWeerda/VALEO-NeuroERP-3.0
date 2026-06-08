@@ -4,7 +4,7 @@
  */
 
 import { ReactNode } from 'react'
-import { Navigate } from '@/app/routing/react-router-compat'
+import { Navigate } from '@/app/routing/typed-router'
 import { Loader2 } from 'lucide-react'
 import { useAuth } from '@/hooks/useAuth'
 

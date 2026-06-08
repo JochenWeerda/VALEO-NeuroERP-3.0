@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { useNavigate } from '@/app/routing/react-router-compat'
+import { useNavigate } from '@/app/routing/typed-router'
 import { LeaveConfirmDialog } from '@/components/LeaveConfirmDialog'
 import { ObjectPage } from '@/components/mask-builder'
 import { useMaskActions, useMaskData } from '@/components/mask-builder/hooks'

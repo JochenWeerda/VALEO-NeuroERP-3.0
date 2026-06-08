@@ -15,8 +15,10 @@ zu expliziten TanStack-Routen zusammen.
 
 - `src/app/route-aliases.json`: fachlich gepflegte Route-zu-Modul-Zuordnung
 - `src/app/route-builders/auto-groups/generated/`: automatisch geerntete Seiten
+- `src/app/routing/navigation-routes.json`: explizite Ziele produktiver Deep Links
 - `src/app/routing/legacy-redirects.json`: explizit freigegebene alte URLs
 - `src/app/routing/route-tree.gen.tsx`: generiertes Ergebnis, nicht manuell editieren
+- `src/app/routing/route-inventory.gen.json`: maschinenlesbarer Route-Katalog
 - `src/app/routing/route-contract.ts`: typisierte Deep-Link- und Search-API
 
 Vor `dev`, `build` und `type-check` laeuft automatisch `pnpm routes:generate`.
@@ -30,10 +32,16 @@ exakt ihre benannten Parameter und URL-kodieren deren Werte.
 produktiven `searchParams.get(...)`-Zugriffen ermittelt. Werte sind auf
 URL-serialisierbare Primitive und Arrays davon begrenzt.
 
-Neue Navigationen sollen diese API oder die registrierten TanStack-APIs
-verwenden. Der Adapter `react-router-compat.tsx` erhaelt bestehende
-Komponenten waehrend der schrittweisen Aufrufermigration, erzeugt aber keinen
-zweiten Browser-Router.
+Produktive Aufrufer verwenden `typed-router.tsx`, eine auf TanStack Router
+aufsetzende VALEO-Fassade mit generierten Parameter- und Search-Key-Typen,
+oder direkt `route-contract.ts`. Der fruehere React-Router-Adapter ist
+entfernt. `test-router.tsx` stellt ausschliesslich eine TanStack-basierte
+Memory-Router-Testinfrastruktur bereit.
+
+`check:navigation-targets` prueft statische und template-basierte
+Navigationen gegen den generierten Route-Katalog. Ein nicht registrierter
+Deep Link bricht damit das Qualitaetsgate, statt erst als 404 im Browser
+aufzufallen.
 
 ## Metadaten und Layouts
 
@@ -51,6 +59,7 @@ Neu- und Detail-URLs bedienen.
 ```text
 pnpm --filter @valero-neuroerp/frontend-web type-check
 pnpm --filter @valero-neuroerp/frontend-web check:routing-integrity
+pnpm --filter @valero-neuroerp/frontend-web check:navigation-targets
 pnpm --filter @valero-neuroerp/frontend-web test:run
 pnpm --filter @valero-neuroerp/frontend-web build
 pnpm --filter @valero-neuroerp/frontend-web exec playwright test tests/e2e/tanstack-router-smoke.spec.ts

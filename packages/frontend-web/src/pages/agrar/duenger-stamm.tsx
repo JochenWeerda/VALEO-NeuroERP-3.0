@@ -4,7 +4,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from '@/app/routing/react-router-compat';
+import { useParams, useNavigate } from '@/app/routing/typed-router';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
