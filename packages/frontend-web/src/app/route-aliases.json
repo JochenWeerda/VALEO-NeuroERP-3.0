@@ -13,11 +13,11 @@
       "path": "lager/permanente-inventur"
     },
     {
-      "module": "@/pages/crm/kim",
+      "module": "@/pages/crm/kim/index",
       "path": "crm"
     },
     {
-      "module": "@/pages/crm/kim",
+      "module": "@/pages/crm/kim/index",
       "path": "crm/kim"
     },
     {

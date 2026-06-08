@@ -378,7 +378,7 @@ export const RAW_NAV_SECTIONS: RawNavItem[] = [
         id: 'kim-cockpit',
         label: 'KIM – Kunde im Mittelpunkt',
         icon: Headset,
-        module: '@/pages/crm/kim',
+        module: '@/pages/crm/kim/index',
         preferredPath: 'crm',
         keywords: ['kim', 'kunde', '360', 'cockpit', 'kundenstamm', 'crm', 'dossier', 'neuroai', 'kontakthistorie'],
         mcp: { businessDomain: 'sales', scope: 'sales:read' },

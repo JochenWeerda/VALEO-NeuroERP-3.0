@@ -149,3 +149,6 @@ packages/frontend-web/config/sync_schedules.json
 impdata*_PLZ_*.csv
 Futtermittelbetriebe PLZ*.csv
 geo_export/
+
+# Playwright Verifikations-Screenshots
+packages/frontend-web/tests/e2e/__verify__/

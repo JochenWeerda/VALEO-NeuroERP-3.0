@@ -16,8 +16,35 @@ import {
   Check, 
   RefreshCw 
 } from 'lucide-react';
-import ReactMarkdown from 'react-markdown';
 import { draftEmail } from '../kim-api';
+
+/**
+ * Winziger, sicherer Markdown-Renderer für das kurze NeuroAI-Dossier
+ * (**fett** + Zeilen/Aufzählungen). Bewusst ohne react-markdown, da dessen
+ * ESM-Dep-Graph im Vite-Dev eine zweite React-Instanz erzwang ("Invalid hook call").
+ */
+function renderInline(text: string): React.ReactNode[] {
+  return text.split(/(\*\*[^*]+\*\*)/g).filter(Boolean).map((part, i) =>
+    part.startsWith('**') && part.endsWith('**')
+      ? <strong key={i}>{part.slice(2, -2)}</strong>
+      : <span key={i}>{part}</span>
+  );
+}
+
+function MiniMarkdown({ text }: { text: string }): JSX.Element {
+  const lines = (text || '').split('\n').filter((l) => l.trim().length > 0);
+  return (
+    <>
+      {lines.map((line, i) => {
+        const trimmed = line.trim();
+        if (/^[-*•]\s+/.test(trimmed)) {
+          return <div key={i} className="flex gap-1"><span>•</span><span>{renderInline(trimmed.replace(/^[-*•]\s+/, ''))}</span></div>;
+        }
+        return <p key={i}>{renderInline(trimmed)}</p>;
+      })}
+    </>
+  );
+}
 
 interface NeuroAISidePanelProps {
   customer: Customer;
@@ -162,7 +189,7 @@ export default function NeuroAISidePanel({
               </div>
 
               <div className="text-[11px] text-gray-700 leading-relaxed font-sans space-y-1.5 markdown-body" id="slide-ai-markdown">
-                <ReactMarkdown>{summaryData.summary}</ReactMarkdown>
+                <MiniMarkdown text={summaryData.summary} />
               </div>
             </div>
 
