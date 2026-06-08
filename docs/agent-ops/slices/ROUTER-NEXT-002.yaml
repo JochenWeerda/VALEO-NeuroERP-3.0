@@ -1,0 +1,23 @@
+slice_id: ROUTER-NEXT-002
+title: Native TanStack Router Call-Site Migration
+owner: Codex
+status: reserved
+goal: >-
+  Die nach dem Browser-Router-Cutover verbliebenen produktiven Aufrufe des
+  React-Router-Kompatibilitaetsadapters auf native TanStack-Hooks und streng
+  typisierte VALEO-Route-Contracts migrieren.
+file_ownership:
+  - docs/agent-ops/active-workboard.md
+  - docs/agent-ops/slices/ROUTER-NEXT-002.yaml
+  - docs/architecture/frontend-routing/**
+  - packages/frontend-web/src/**
+  - packages/frontend-web/scripts/**
+  - packages/frontend-web/tests/e2e/**
+acceptance_criteria:
+  - Produktiver Code importiert nicht mehr aus react-router-compat.tsx.
+  - Navigationen, Links, Parameter und Search-Werte verwenden TanStack Router oder den typisierten Route-Contract.
+  - react-router-compat.tsx ist auf Unit-Test-Infrastruktur reduziert oder entfernt.
+  - Typecheck, Routing-Integritaet, Frontend-Tests, Build und Browser-Smokes sind gruen.
+risks:
+  - Mehr als 300 produktive Dateien verwenden noch die bisherige ergonomische API.
+  - Dynamisch zusammengesetzte Pfade muessen explizit typisiert oder durch Route-Builder ersetzt werden.

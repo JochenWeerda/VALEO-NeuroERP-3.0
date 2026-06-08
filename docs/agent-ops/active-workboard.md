@@ -2,6 +2,16 @@
 
 Stand: `2026-06-07`
 
+## ROUTER-NEXT-002
+
+**Von:** Codex
+**Owner:** Codex
+**Stand:** reserviert 2026-06-08
+**Ziel des Slices:** Nach dem erfolgreichen TanStack-Browser-Router-Cutover werden die verbliebenen produktiven Aufrufe des React-Router-Kompatibilitaetsadapters auf native TanStack-Hooks und streng typisierte VALEO-Route-Contracts migriert.
+**Dateibesitz:** `packages/frontend-web/src/**`, Routing-Scripts, Routing-Dokumentation und fokussierte Tests.
+**Abnahmekriterien:** Keine produktiven Imports aus `react-router-compat.tsx`; Navigation, Links, Parameter und Search verwenden TanStack Router beziehungsweise den typisierten Route-Contract; Adapter nur noch als Testinfrastruktur oder entfernt; alle Routing-Gates gruen.
+**Offene Risiken:** Mehr als 300 produktive Dateien verwenden die alte ergonomische Aufrufsignatur. Dynamische Pfade werden explizit klassifiziert und nicht durch untypisierte Casts verdeckt.
+
 ## ROUTER-NEXT-001
 
 **Von:** Codex
