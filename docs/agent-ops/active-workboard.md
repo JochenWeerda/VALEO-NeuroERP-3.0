@@ -2,6 +2,16 @@
 
 Stand: `2026-06-07`
 
+## ROUTER-NEXT-001
+
+**Von:** Codex
+**Owner:** Codex
+**Stand:** reserviert 2026-06-08
+**Ziel des Slices:** Die Frontend-Routing-Infrastruktur vollstaendig von zentraler React-Router-Splat-/Alias-Aufloesung auf einen automatisch generierten, typisierten TanStack-Route-Tree migrieren. Kanonische Route-Contracts, typisierte Parameter/Search-Werte, Breadcrumb-Metadaten, Auth, Deep Links und Legacy-Redirects werden in einer Source of Truth zusammengefuehrt; es gibt zu keinem Zeitpunkt zwei Browser-Router auf derselben History.
+**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/agent-ops/slices/ROUTER-NEXT-001.yaml`, neue Routing-ADR/Projektkontext-Doku, `packages/frontend-web/package.json`, `packages/frontend-web/vite.config.ts`, `packages/frontend-web/src/app/**` (Routing und Navigation), `packages/frontend-web/src/routes/**`, `packages/frontend-web/src/routeTree.gen.ts`, routergekoppelte Layouts/Komponenten/Seiten, Routing-Scripts sowie fokussierte Unit-/E2E-Tests.
+**Abnahmekriterien:** TanStack Router ist der einzige Browser-Router; Route Tree wird reproduzierbar generiert; dynamische Parameter und Search-Werte sind typisiert; Breadcrumbs und Auth laufen ueber Route-Metadaten/Context; bekannte Legacy-Links redirecten auf kanonische URLs; unbekannte Pfade liefern 404; `AppRouteRuntime` und React-Router-Splat entfallen; Typecheck, Build, Routing-Tests und E2E-Smokes sind gruen.
+**Offene Risiken / Integrationsreihenfolge:** Sehr hoher Blast Radius durch 569 Aliase und hunderte React-Router-Imports. Root-Router, Vite-Konfiguration und gemeinsame Navigation bleiben exklusiver Besitz dieses Slices. Migration erfolgt contract-first mit automatisierten Import-/API-Umstellungen und fokussierter manueller Nacharbeit; fremde parallele Aenderungen werden nicht reverted.
+
 ## KIM-CRM-360-001
 
 **Von:** Claude
