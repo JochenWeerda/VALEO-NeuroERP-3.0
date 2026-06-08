@@ -1,12 +1,12 @@
 import { useEffect, useMemo, useState } from 'react'
-import { useParams } from 'react-router-dom'
+import { Route, Routes, useParams } from 'react-router-dom'
 import routeAliases from '@/app/route-aliases.json'
 import { ErrorState } from '@/components/ErrorState'
 import { PageLoader } from '@/app/PageLoader'
 import { createRouteElementByModule } from '@/app/page-module-loader'
 import {
-  findMatchingAliasModule,
-  findMatchingAliasModuleFromRouteAliases,
+  findMatchingAliasEntry,
+  findMatchingAliasEntryFromRouteAliases,
   normalizeRelativePath,
 } from '@/app/route-builders/alias-matching'
 import {
@@ -99,9 +99,15 @@ export default function AppRouteRuntime({ prospectingEnabled }: AppRouteRuntimeP
   // createRouteElementByModule() caches the JSX element via WeakMap, so calling it
   // with the same module path always returns the exact same object reference —
   // preventing Suspense from resetting on every parent re-render.
-  const routeElement = useMemo(() => {
+  // Liefert das zu rendernde Element UND das gematchte Routen-Pattern (relativ zur
+  // Splat-Wurzel, z. B. "crm/lead/:id"). Das Pattern wird unten in eine verschachtelte
+  // <Route> gegeben, damit React Routers useParams() die dynamischen Segmente (:id)
+  // an die Seite liefert — sonst sieht jede Detailseite einen leeren Param und
+  // faellt auf die "Neu anlegen"-Maske zurueck.
+  const { element: routeElement, pattern: routePattern } = useMemo(() => {
+    const join = (...parts: string[]) => parts.filter(Boolean).join('/')
     if (!prefix || !autoEntries || !aliasEntries) {
-      return createRouteElementByModule('@/pages/errors/NotFound')
+      return { element: createRouteElementByModule('@/pages/errors/NotFound'), pattern: '*' }
     }
 
     const filteredAutoEntries = prospectingEnabled
@@ -113,20 +119,26 @@ export default function AppRouteRuntime({ prospectingEnabled }: AppRouteRuntimeP
 
     const autoMatch = filteredAutoEntries.find((entry) => entry.path === relativePath)
     if (autoMatch) {
-      return createRouteElementByModule(autoMatch.module)
+      return { element: createRouteElementByModule(autoMatch.module), pattern: join(prefix, autoMatch.path) }
     }
 
-    const aliasMatch = findMatchingAliasModule(filteredAliasEntries, relativePath || '/')
-    if (aliasMatch) {
-      return createRouteElementByModule(aliasMatch)
+    const aliasEntry = findMatchingAliasEntry(filteredAliasEntries, relativePath || '/')
+    if (aliasEntry) {
+      return { element: createRouteElementByModule(aliasEntry.module), pattern: join(prefix, aliasEntry.path) }
     }
 
-    const globalAliasMatch = findMatchingAliasModuleFromRouteAliases(
+    const globalAliasEntry = findMatchingAliasEntryFromRouteAliases(
       (routeAliases.aliases ?? []) as Array<{ module: string; path?: string; index?: boolean }>,
       prefix,
       relativePath || '/',
     )
-    return createRouteElementByModule(globalAliasMatch ?? '@/pages/errors/NotFound')
+    if (globalAliasEntry) {
+      return {
+        element: createRouteElementByModule(globalAliasEntry.module),
+        pattern: normalizeRelativePath(globalAliasEntry.path),
+      }
+    }
+    return { element: createRouteElementByModule('@/pages/errors/NotFound'), pattern: '*' }
   }, [aliasEntries, autoEntries, prefix, prospectingEnabled, relativePath])
 
   if (loadError) {
@@ -150,6 +162,14 @@ export default function AppRouteRuntime({ prospectingEnabled }: AppRouteRuntimeP
     return <PageLoader />
   }
 
-  return routeElement
+  // Verschachtelte Route mit dem gematchten Pattern → React Router befuellt useParams()
+  // mit den dynamischen Segmenten (z. B. :id). Der "*"-Fallback rendert dasselbe
+  // Element defensiv, falls das Pattern nicht exakt greift.
+  return (
+    <Routes>
+      <Route path={routePattern} element={routeElement} />
+      <Route path="*" element={routeElement} />
+    </Routes>
+  )
 }
 

@@ -165,6 +165,14 @@ export const crmService = {
     return unwrapItem<Lead>(response.data)
   },
 
+  // Übernommene CRM-Leads stammen aus dem Lead-Generierung-Funnel (public.crm_leads).
+  // Liste (/crm/lead-generierung/leads) und Detail müssen DIESELBE Quelle nutzen,
+  // sonst läuft das Detail ins Leere (404 auf /crm/leads/{id}).
+  async getFunnelLead(id: string) {
+    const response = await apiClient.get<any>(`/api/v1/crm/lead-generierung/leads/${id}`)
+    return unwrapItem<Lead>(response.data)
+  },
+
   async createLead(data: Omit<Lead, 'id' | 'createdAt' | 'updatedAt'>) {
     const response = await apiClient.post<any>('/api/v1/crm/leads', data)
     return unwrapItem<Lead>(response.data)

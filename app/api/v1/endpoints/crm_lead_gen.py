@@ -56,6 +56,18 @@ def list_leads(
     return CrmLeadGenService(db, tenant_id).list_leads(search)
 
 
+@router.get("/leads/{lead_id}", summary="Übernommenen CRM-Lead abrufen")
+def get_lead(
+    lead_id: str,
+    db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
+) -> dict[str, Any]:
+    lead = CrmLeadGenService(db, tenant_id).get_lead(lead_id)
+    if not lead:
+        raise HTTPException(status_code=404, detail="Lead nicht gefunden")
+    return lead
+
+
 @router.get("/leads-count", summary="Anzahl übernommener CRM-Leads")
 def leads_count(db: Session = Depends(get_db), tenant_id: str = Depends(get_tenant_id)) -> dict[str, Any]:
     return {"count": CrmLeadGenService(db, tenant_id).leads_count()}

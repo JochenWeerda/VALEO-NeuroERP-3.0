@@ -41,7 +41,7 @@ function LegacyLeadDetailPage(): JSX.Element {
 
   const { data: existingLead, isLoading } = useQuery({
     queryKey: queryKeys.crm.leads.detail(id ?? ''),
-    queryFn: () => crmService.getLead(id ?? ''),
+    queryFn: () => crmService.getFunnelLead(id ?? ''),
     enabled: !isNew && !!id,
   })
 
