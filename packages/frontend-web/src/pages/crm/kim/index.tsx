@@ -46,7 +46,9 @@ type KimTab = 'allgemein' | 'belege' | 'kontrakte' | 'finanzen' | 'audit' | 'tas
 export default function KimCockpitPage() {
   const { toast } = useToast();
   const [customers, setCustomers] = useState<Customer[]>([]);
-  const [selectedCustomerId, setSelectedCustomerId] = useState<string>('c1');
+  // Leer starten, damit fetchCustomers den ERSTEN echten Kunden auto-selektiert
+  // (frueherer Mock-Default 'c1' liess den Workspace im Standby haengen).
+  const [selectedCustomerId, setSelectedCustomerId] = useState<string>('');
 
   // High-Density Workstation Tab Selection
   const [activeTab, setActiveTab] = useState<KimTab>('allgemein');
