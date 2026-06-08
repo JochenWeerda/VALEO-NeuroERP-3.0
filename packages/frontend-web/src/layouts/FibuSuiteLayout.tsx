@@ -5,7 +5,7 @@
 
 import { useState, useEffect, type ReactNode } from 'react'
 import { clsx } from 'clsx'
-import { Link, Outlet, useLocation } from '@/app/routing/react-router-compat'
+import { Link, Outlet, useLocation } from '@/app/routing/typed-router'
 import { Button } from '@/components/ui/button'
 import {
   Euro,

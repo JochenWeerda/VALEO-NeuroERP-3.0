@@ -4,7 +4,7 @@
  * Übersichtsseite für Kunden mit wichtigen KPIs und Schnellzugriffen
  */
 
-import { Link } from '@/app/routing/react-router-compat'
+import { Link } from '@/app/routing/typed-router'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'

@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react'
-import { useNavigate, useSearchParams } from '@/app/routing/react-router-compat'
+import { useNavigate, useSearchParams } from '@/app/routing/typed-router'
 import { useTranslation } from 'react-i18next'
 import { toast } from '@/hooks/use-toast'
 import { Wizard } from '@/components/patterns/Wizard'

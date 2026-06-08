@@ -3,7 +3,7 @@
  * Automatische Navigation zurück zur vorherigen Seite oder explizite Route
  */
 
-import { useNavigate } from '@/app/routing/react-router-compat'
+import { useNavigate } from '@/app/routing/typed-router'
 import { ArrowLeft } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 

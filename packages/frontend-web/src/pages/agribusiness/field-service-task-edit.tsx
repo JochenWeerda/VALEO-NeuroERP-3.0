@@ -3,7 +3,7 @@
  */
 
 import React, { useEffect, useMemo } from 'react';
-import { useNavigate, useParams, useSearchParams } from '@/app/routing/react-router-compat';
+import { useNavigate, useParams, useSearchParams } from '@/app/routing/typed-router';
 import { useTranslation } from 'react-i18next';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { apiClient, getAxiosErrorMessage } from '@/lib/api-client';

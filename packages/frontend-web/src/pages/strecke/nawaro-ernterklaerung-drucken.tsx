@@ -1,4 +1,4 @@
-﻿import { useNavigate } from '@/app/routing/react-router-compat'
+﻿import { useNavigate } from '@/app/routing/typed-router'
 
 export default function NawaroErnterklaerungDruckenPage(): JSX.Element {
   const navigate = useNavigate()

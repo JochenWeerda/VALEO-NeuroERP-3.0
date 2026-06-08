@@ -1,7 +1,7 @@
 slice_id: ROUTER-NEXT-002
 title: Native TanStack Router Call-Site Migration
 owner: Codex
-status: reserved
+status: completed
 goal: >-
   Die nach dem Browser-Router-Cutover verbliebenen produktiven Aufrufe des
   React-Router-Kompatibilitaetsadapters auf native TanStack-Hooks und streng
@@ -21,3 +21,11 @@ acceptance_criteria:
 risks:
   - Mehr als 300 produktive Dateien verwenden noch die bisherige ergonomische API.
   - Dynamisch zusammengesetzte Pfade muessen explizit typisiert oder durch Route-Builder ersetzt werden.
+result: >-
+  Der React-Router-Kompatibilitaetsadapter ist entfernt. 338 produktive
+  Aufrufer verwenden die TanStack-basierte typed-router-Fassade; Tests nutzen
+  eine getrennte TanStack-Memory-Router-Infrastruktur. Der Generator erzeugt
+  851 Routen sowie Parameter-, Search-Key- und Inventory-Contracts. 94
+  explizite Navigationsziele und 34 Legacy-Redirects sind registriert.
+  Typecheck, Routing-Integritaet, Navigation-Audit, 127 Vitest-Tests,
+  Produktions-Build und acht Playwright-Smokes sind gruen.

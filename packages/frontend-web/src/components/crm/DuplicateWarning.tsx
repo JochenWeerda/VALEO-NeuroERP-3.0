@@ -1,5 +1,5 @@
 import { AlertTriangle, ExternalLink, Loader2, Users } from 'lucide-react'
-import { Link } from '@/app/routing/react-router-compat'
+import { Link } from '@/app/routing/typed-router'
 import { type DuplicateCandidate } from '@/hooks/useDuplicateDetection'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'

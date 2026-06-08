@@ -10,7 +10,7 @@
 
 import { ReactNode } from 'react'
 import { clsx } from 'clsx'
-import { Link, useLocation, useNavigate } from '@/app/routing/react-router-compat'
+import { Link, useLocation, useNavigate } from '@/app/routing/typed-router'
 import {
   ArrowLeft,
   Home,
@@ -23,6 +23,7 @@ import {
   ScanLine,
 } from 'lucide-react'
 import { useForceWarehouseTheme } from '@/hooks/useWarehouseTheme'
+import { useAuth } from '@/hooks/useAuth'
 
 interface WarehouseLayoutProps {
   children: ReactNode
@@ -81,6 +82,7 @@ export function WarehouseLayout({
   showScanner = false,
   onScan,
 }: WarehouseLayoutProps) {
+  const { logout } = useAuth()
   const navigate = useNavigate()
   const location = useLocation()
 
@@ -139,7 +141,7 @@ export function WarehouseLayout({
           </Link>
 
           <button
-            onClick={() => navigate('/logout')}
+            onClick={logout}
             className="flex items-center justify-center h-14 w-14 rounded-lg bg-red-700 text-white active:bg-red-600"
             aria-label="Abmelden"
           >

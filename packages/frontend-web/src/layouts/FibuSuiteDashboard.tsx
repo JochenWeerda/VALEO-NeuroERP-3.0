@@ -3,7 +3,7 @@
  * Wird als Index-Route unter /fibu-suite angezeigt.
  */
 
-import { Link } from '@/app/routing/react-router-compat'
+import { Link } from '@/app/routing/typed-router'
 import { FIBU_SUITE_ITEMS } from '@/app/navigation/fibu-suite'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Euro } from 'lucide-react'

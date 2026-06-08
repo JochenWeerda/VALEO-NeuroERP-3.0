@@ -6,11 +6,12 @@ Stand: `2026-06-07`
 
 **Von:** Codex
 **Owner:** Codex
-**Stand:** reserviert 2026-06-08
+**Stand:** abgeschlossen 2026-06-08
 **Ziel des Slices:** Nach dem erfolgreichen TanStack-Browser-Router-Cutover werden die verbliebenen produktiven Aufrufe des React-Router-Kompatibilitaetsadapters auf native TanStack-Hooks und streng typisierte VALEO-Route-Contracts migriert.
 **Dateibesitz:** `packages/frontend-web/src/**`, Routing-Scripts, Routing-Dokumentation und fokussierte Tests.
 **Abnahmekriterien:** Keine produktiven Imports aus `react-router-compat.tsx`; Navigation, Links, Parameter und Search verwenden TanStack Router beziehungsweise den typisierten Route-Contract; Adapter nur noch als Testinfrastruktur oder entfernt; alle Routing-Gates gruen.
 **Offene Risiken:** Mehr als 300 produktive Dateien verwenden die alte ergonomische Aufrufsignatur. Dynamische Pfade werden explizit klassifiziert und nicht durch untypisierte Casts verdeckt.
+**Ergebnis:** Der React-Router-Kompatibilitaetsadapter ist entfernt. 338 produktive Aufrufer verwenden die TanStack-basierte `typed-router.tsx`-Fassade; Unit-Tests verwenden getrennt `test-router.tsx` mit TanStack Memory History. Der Generator erzeugt 851 explizite Routen, einen maschinenlesbaren Route-Katalog sowie geschlossene Parameter- und Search-Key-Contracts. 94 produktive Navigationsziele und 34 Legacy-Redirects sind explizit registriert. Das neue Gate `check:navigation-targets` validiert statische und template-basierte Deep Links. Vollstaendiger Typecheck, Routing-Integritaet, Navigation-Audit, 127 Vitest-Tests, Produktions-Build und acht Playwright-Smokes sind gruen.
 
 ## ROUTER-NEXT-001
 

@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { useLocation, useNavigate } from '@/app/routing/react-router-compat'
+import { useLocation, useNavigate } from '@/app/routing/typed-router'
 import { ObjectPage } from '@/components/mask-builder'
 import { ModuleToolbar } from '@/components/navigation/ModuleToolbar'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'

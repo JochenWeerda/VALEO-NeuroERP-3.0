@@ -1,4 +1,4 @@
-import { NavLink } from '@/app/routing/react-router-compat'
+import { NavLink } from '@/app/routing/typed-router'
 import { clsx } from 'clsx'
 import type { NavItem } from '@/app/navigation/types'
 

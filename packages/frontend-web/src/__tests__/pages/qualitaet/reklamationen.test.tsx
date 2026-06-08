@@ -1,12 +1,12 @@
 import { fireEvent, render, screen } from '@testing-library/react'
 import { describe, expect, it, vi } from 'vitest'
-import { MemoryRouter } from '@/app/routing/react-router-compat'
+import { MemoryRouter } from '@/app/routing/test-router'
 import ReklamationenPage from '@/pages/qualitaet/reklamationen'
 
 const navigateMock = vi.fn()
 
-vi.mock('@/app/routing/react-router-compat', async () => {
-  const actual = await vi.importActual('@/app/routing/react-router-compat')
+vi.mock('@/app/routing/typed-router', async () => {
+  const actual = await vi.importActual('@/app/routing/typed-router')
   return {
     ...actual,
     useNavigate: () => navigateMock,

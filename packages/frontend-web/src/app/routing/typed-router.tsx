@@ -2,20 +2,14 @@ import {
   Link as TanStackLink,
   Navigate as TanStackNavigate,
   Outlet,
-  RouterContextProvider,
-  createMemoryHistory,
-  createRootRoute,
-  createRouter,
-  useLocation as useTanStackLocation,
   useBlocker as useTanStackBlocker,
+  useLocation as useTanStackLocation,
   useNavigate as useTanStackNavigate,
   useRouter,
   useRouterState,
 } from '@tanstack/react-router'
 import {
-  Children,
   createContext,
-  isValidElement,
   useCallback,
   useContext,
   useMemo,
@@ -23,32 +17,43 @@ import {
   type ComponentProps,
   type ReactNode,
 } from 'react'
+import type {
+  AppRouteHref,
+  AppRouteParamKey,
+  AppSearchKey,
+} from '@/app/routing/route-contract'
 
 type NavigateOptions = {
   replace?: boolean
   state?: unknown
 }
 
-const CompatParamsContext = createContext<Record<string, string | undefined> | null>(null)
+export const TypedParamsContext = createContext<Record<string, string | undefined> | null>(null)
 
-type To = string | { pathname?: string; search?: string; hash?: string }
+export type RouteTarget =
+  | AppRouteHref
+  | {
+      pathname?: AppRouteHref
+      search?: string
+      hash?: string
+    }
 
-function stringifyTo(to: To): string {
+function stringifyTarget(to: RouteTarget): string {
   if (typeof to === 'string') return to
   return `${to.pathname ?? ''}${to.search ?? ''}${to.hash ?? ''}` || '/'
 }
 
-export function useNavigate(): (to: To | number, options?: NavigateOptions) => void {
+export function useNavigate(): (to: RouteTarget | number, options?: NavigateOptions) => void {
   const navigate = useTanStackNavigate()
   const router = useRouter()
   return useCallback(
-    (to: To | number, options?: NavigateOptions) => {
+    (to: RouteTarget | number, options?: NavigateOptions) => {
       if (typeof to === 'number') {
         router.history.go(to)
         return
       }
       void navigate({
-        to: stringifyTo(to) as never,
+        to: stringifyTarget(to) as never,
         replace: options?.replace,
         state: options?.state as never,
       })
@@ -57,10 +62,13 @@ export function useNavigate(): (to: To | number, options?: NavigateOptions) => v
   )
 }
 
-export function useParams<T extends Record<string, string | undefined> = Record<string, string | undefined>>(): T {
-  const compatParams = useContext(CompatParamsContext)
+export function useParams<
+  TParams extends Partial<Record<AppRouteParamKey, string | undefined>> =
+    Partial<Record<AppRouteParamKey, string | undefined>>,
+>(): TParams {
+  const contextParams = useContext(TypedParamsContext)
   const matches = useRouterState({ select: (state) => state.matches })
-  return (compatParams ?? Object.assign({}, ...matches.map((match) => match.params))) as T
+  return (contextParams ?? Object.assign({}, ...matches.map((match) => match.params))) as TParams
 }
 
 export function useLocation(): {
@@ -75,23 +83,44 @@ export function useLocation(): {
     pathname: location.pathname,
     search: location.searchStr,
     hash: location.hash,
-    state: location.state as unknown,
+    state: location.state,
     key: String((location.state as { key?: string } | undefined)?.key ?? location.href),
   }
 }
 
+export type TypedSearchParams = Omit<URLSearchParams, 'get' | 'getAll' | 'has'> & {
+  get(name: AppSearchKey): string | null
+  getAll(name: AppSearchKey): string[]
+  has(name: AppSearchKey, value?: string): boolean
+}
+
+type SearchUpdate =
+  | URLSearchParams
+  | Partial<Record<AppSearchKey, string>>
+  | ((previous: TypedSearchParams) => URLSearchParams)
+
 export function useSearchParams(): [
-  URLSearchParams,
-  (next: URLSearchParams | Record<string, string> | ((previous: URLSearchParams) => URLSearchParams)) => void,
+  TypedSearchParams,
+  (next: SearchUpdate, options?: NavigateOptions) => void,
 ] {
   const location = useTanStackLocation()
   const navigate = useTanStackNavigate()
-  const params = useMemo(() => new URLSearchParams(location.searchStr), [location.searchStr])
+  const params = useMemo(
+    () => new URLSearchParams(location.searchStr) as TypedSearchParams,
+    [location.searchStr],
+  )
   const setParams = useCallback(
-    (next: URLSearchParams | Record<string, string> | ((previous: URLSearchParams) => URLSearchParams)) => {
-      const resolved = typeof next === 'function' ? next(new URLSearchParams(params)) : next
-      const search = resolved instanceof URLSearchParams ? resolved.toString() : new URLSearchParams(resolved).toString()
-      void navigate({ to: `${location.pathname}${search ? `?${search}` : ''}` as never })
+    (next: SearchUpdate, options?: NavigateOptions) => {
+      const resolved = typeof next === 'function' ? next(params) : next
+      const search =
+        resolved instanceof URLSearchParams
+          ? resolved.toString()
+          : new URLSearchParams(resolved as Record<string, string>).toString()
+      void navigate({
+        to: `${location.pathname}${search ? `?${search}` : ''}` as never,
+        replace: options?.replace,
+        state: options?.state as never,
+      })
     },
     [location.pathname, navigate, params],
   )
@@ -99,13 +128,20 @@ export function useSearchParams(): [
 }
 
 type LinkProps = Omit<AnchorHTMLAttributes<HTMLAnchorElement>, 'href'> & {
-  to: To
+  to: RouteTarget
   replace?: boolean
   state?: unknown
 }
 
 export function Link({ to, replace, state, ...props }: LinkProps): JSX.Element {
-  return <TanStackLink {...(props as ComponentProps<typeof TanStackLink>)} to={stringifyTo(to) as never} replace={replace} state={state as never} />
+  return (
+    <TanStackLink
+      {...(props as ComponentProps<typeof TanStackLink>)}
+      to={stringifyTarget(to) as never}
+      replace={replace}
+      state={state as never}
+    />
+  )
 }
 
 type NavLinkProps = Omit<LinkProps, 'className' | 'children'> & {
@@ -116,7 +152,7 @@ type NavLinkProps = Omit<LinkProps, 'className' | 'children'> & {
 
 export function NavLink({ className, children, end = false, ...props }: NavLinkProps): JSX.Element {
   const location = useTanStackLocation()
-  const target = stringifyTo(props.to).split(/[?#]/, 1)[0] || '/'
+  const target = stringifyTarget(props.to).split(/[?#]/, 1)[0] || '/'
   const isActive = end
     ? location.pathname === target
     : target === '/'
@@ -126,7 +162,7 @@ export function NavLink({ className, children, end = false, ...props }: NavLinkP
   return (
     <TanStackLink
       {...(props as ComponentProps<typeof TanStackLink>)}
-      to={stringifyTo(props.to) as never}
+      to={stringifyTarget(props.to) as never}
       activeOptions={{ exact: false }}
       className={typeof className === 'function' ? className(state) : className}
     >
@@ -135,28 +171,36 @@ export function NavLink({ className, children, end = false, ...props }: NavLinkP
   )
 }
 
-export function Navigate({ to, replace, state }: { to: To; replace?: boolean; state?: unknown }): JSX.Element {
-  return <TanStackNavigate to={stringifyTo(to) as never} replace={replace} state={state as never} />
+export function Navigate({
+  to,
+  replace,
+  state,
+}: {
+  to: RouteTarget
+  replace?: boolean
+  state?: unknown
+}): JSX.Element {
+  return <TanStackNavigate to={stringifyTarget(to) as never} replace={replace} state={state as never} />
 }
 
 export { Outlet }
 
-type CompatBlockerLocation = {
+type BlockerLocation = {
   pathname: string
 }
 
-type CompatShouldBlock = (args: {
-  currentLocation: CompatBlockerLocation
-  nextLocation: CompatBlockerLocation
+type ShouldBlock = (args: {
+  currentLocation: BlockerLocation
+  nextLocation: BlockerLocation
 }) => boolean | Promise<boolean>
 
-type CompatBlocker = {
+type Blocker = {
   state: 'blocked' | 'unblocked'
   proceed?: () => void
   reset?: () => void
 }
 
-export function useBlocker(shouldBlock: CompatShouldBlock): CompatBlocker {
+export function useBlocker(shouldBlock: ShouldBlock): Blocker {
   const blocker = useTanStackBlocker({
     shouldBlockFn: ({ current, next }) =>
       shouldBlock({
@@ -168,11 +212,7 @@ export function useBlocker(shouldBlock: CompatShouldBlock): CompatBlocker {
   })
 
   return blocker.status === 'blocked'
-    ? {
-        state: 'blocked',
-        proceed: blocker.proceed,
-        reset: blocker.reset,
-      }
+    ? { state: 'blocked', proceed: blocker.proceed, reset: blocker.reset }
     : { state: 'unblocked' }
 }
 
@@ -200,47 +240,4 @@ export function matchPath(
     pathnameBase: match[0].replace(/\/$/, '') || '/',
     pattern: config,
   }
-}
-
-type RouteProps = {
-  path?: string
-  element?: ReactNode
-  children?: ReactNode
-}
-
-export function Route(_props: RouteProps): null {
-  return null
-}
-
-export function MemoryRouter({
-  children,
-  initialEntries = ['/'],
-}: {
-  children: ReactNode
-  initialEntries?: string[]
-  future?: unknown
-}): JSX.Element {
-  const root = createRootRoute({ component: () => null })
-  const memoryRouter = createRouter({
-    routeTree: root,
-    history: createMemoryHistory({ initialEntries }),
-    scrollRestoration: false,
-  })
-  return <RouterContextProvider router={memoryRouter}>{children}</RouterContextProvider>
-}
-
-export function Routes({ children }: { children: ReactNode }): JSX.Element {
-  const location = useLocation()
-  for (const child of Children.toArray(children)) {
-    if (!isValidElement<RouteProps>(child)) continue
-    const match = matchPath({ path: child.props.path ?? '/', end: true }, location.pathname)
-    if (match) {
-      return (
-        <CompatParamsContext.Provider value={match.params}>
-          <>{child.props.element ?? child.props.children}</>
-        </CompatParamsContext.Provider>
-      )
-    }
-  }
-  return <></>
 }

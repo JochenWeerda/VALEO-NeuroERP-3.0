@@ -1,5 +1,5 @@
 import { type ReactNode, Suspense, lazy } from 'react'
-import { Link, NavLink } from '@/app/routing/react-router-compat'
+import { Link, NavLink } from '@/app/routing/typed-router'
 import { Home, Package, ClipboardList, BarChart2, LogOut } from 'lucide-react'
 import { clsx } from 'clsx'
 

@@ -1,5 +1,5 @@
 ﻿import { useState, useMemo, useRef } from 'react'
-import { useNavigate, useSearchParams } from '@/app/routing/react-router-compat'
+import { useNavigate, useSearchParams } from '@/app/routing/typed-router'
 import { useVerladungen, type VerladungItem } from '@/lib/api/betrieb'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'

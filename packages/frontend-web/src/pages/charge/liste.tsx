@@ -1,5 +1,5 @@
 ﻿import { useState, useMemo } from 'react'
-import { useNavigate } from '@/app/routing/react-router-compat'
+import { useNavigate } from '@/app/routing/typed-router'
 import { useCharges, type Charge } from '@/lib/api/charges'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'

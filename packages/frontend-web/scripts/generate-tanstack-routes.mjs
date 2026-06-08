@@ -7,8 +7,10 @@ const __dirname = fileURLToPath(new URL('.', import.meta.url))
 const root = join(__dirname, '..')
 const aliasesFile = join(root, 'src', 'app', 'route-aliases.json')
 const legacyRedirectsFile = join(root, 'src', 'app', 'routing', 'legacy-redirects.json')
+const navigationRoutesFile = join(root, 'src', 'app', 'routing', 'navigation-routes.json')
 const autoGroupsDir = join(root, 'src', 'app', 'route-builders', 'auto-groups', 'generated')
 const outputFile = join(root, 'src', 'app', 'routing', 'route-tree.gen.tsx')
+const inventoryFile = join(root, 'src', 'app', 'routing', 'route-inventory.gen.json')
 const sourceDir = join(root, 'src')
 
 function normalizePath(value) {
@@ -66,17 +68,26 @@ function routeLabel(path) {
 
 const aliases = JSON.parse(readFileSync(aliasesFile, 'utf8')).aliases ?? []
 const legacyRedirects = JSON.parse(readFileSync(legacyRedirectsFile, 'utf8'))
+const navigationRoutes = JSON.parse(readFileSync(navigationRoutesFile, 'utf8'))
 const candidates = [
   ...aliases
     .filter((entry) => typeof entry.path === 'string')
     .map((entry) => ({ module: entry.module, path: normalizePath(entry.path), source: 'alias' })),
   ...parseAutoEntries(),
+  ...navigationRoutes.map((entry) => ({
+    module: entry.module,
+    path: normalizePath(entry.path),
+    source: 'navigation',
+  })),
 ]
 
 // The current runtime resolves exact auto routes before aliases. Preserve that
 // behavior while emitting one deterministic route per URL.
 const byPath = new Map()
-for (const entry of candidates.sort((a, b) => (a.source === b.source ? 0 : a.source === 'auto' ? -1 : 1))) {
+const sourcePriority = { auto: 0, alias: 1, navigation: 2 }
+for (const entry of candidates.sort(
+  (a, b) => sourcePriority[a.source] - sourcePriority[b.source],
+)) {
   if (entry.path && !byPath.has(entry.path)) byPath.set(entry.path, entry)
 }
 
@@ -89,15 +100,24 @@ byPath.set('fibu-suite/$', { module: '@runtime/fibu-suite', path: 'fibu-suite/$'
 
 const entries = [...byPath.values()].sort((a, b) => a.path.localeCompare(b.path))
 const searchKeys = [...collectSearchKeys(sourceDir)].sort()
+const paramKeys = [
+  ...new Set(
+    entries.flatMap((entry) =>
+      [...entry.path.matchAll(/:([A-Za-z0-9_]+)/g)].map((match) => match[1]),
+    ),
+  ),
+].sort()
 const publicPaths = new Set(['login', 'auth/login', 'auth/callback'])
 const publicEntries = entries.filter((entry) => publicPaths.has(entry.path))
 const appEntries = entries.filter(
   (entry) =>
     !publicPaths.has(entry.path) &&
+    !entry.path.startsWith('verify/') &&
     !entry.path.startsWith('portal/') &&
     entry.path !== 'portal',
 )
 const portalEntries = entries.filter((entry) => entry.path.startsWith('portal/') || entry.path === 'portal')
+publicEntries.push(...entries.filter((entry) => entry.path.startsWith('verify/')))
 
 function identifier(index, prefix) {
   return `${prefix}Route${String(index).padStart(4, '0')}`
@@ -178,7 +198,12 @@ export const routeTree = rootRoute.addChildren([
 
 export const generatedRouteInventory = ${JSON.stringify(entries, null, 2)} as const
 export const generatedSearchKeys = ${JSON.stringify(searchKeys, null, 2)} as const
+export const generatedParamKeys = ${JSON.stringify(paramKeys, null, 2)} as const
 `
 
 writeFileSync(outputFile, content)
+writeFileSync(
+  inventoryFile,
+  `${JSON.stringify({ routes: entries, searchKeys, paramKeys }, null, 2)}\n`,
+)
 console.log(`Generated ${entries.length} TanStack routes in ${outputFile}`)

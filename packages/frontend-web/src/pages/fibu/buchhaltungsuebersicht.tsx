@@ -30,7 +30,7 @@ import {
   Calculator,
   ArrowLeftRight,
 } from 'lucide-react'
-import { Link, useNavigate } from '@/app/routing/react-router-compat'
+import { Link, useNavigate } from '@/app/routing/typed-router'
 import { financeService, type BalanceSheetItem } from '@/lib/services/finance-service'
 import { useToast } from '@/hooks/use-toast'
 import { exportToCSV } from '@/lib/export-utils'

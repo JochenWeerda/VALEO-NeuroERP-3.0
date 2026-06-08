@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react'
-import { useNavigate } from '@/app/routing/react-router-compat'
+import { useNavigate } from '@/app/routing/typed-router'
 import { useTranslation } from 'react-i18next'
 import { apiClient } from '@/lib/api-client'
 import { formatDate, formatCurrency } from '@/components/mask-builder/utils/formatting'

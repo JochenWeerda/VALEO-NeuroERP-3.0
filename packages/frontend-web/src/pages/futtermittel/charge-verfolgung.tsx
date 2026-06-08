@@ -1,5 +1,5 @@
 ﻿import { useMemo, useRef } from 'react'
-import { useNavigate } from '@/app/routing/react-router-compat'
+import { useNavigate } from '@/app/routing/typed-router'
 import { useQueryClient } from '@tanstack/react-query'
 import { ListReport } from '@/components/mask-builder'
 import { useFutterChargen, type FutterCharge } from '@/lib/api/futter'

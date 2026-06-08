@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { Link } from '@/app/routing/react-router-compat'
+import { Link } from '@/app/routing/typed-router'
 import { useBenchmark, useBenchmarkReadModel } from '@/lib/api/controlling'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { NativeSelect } from '@/components/ui/native-select'

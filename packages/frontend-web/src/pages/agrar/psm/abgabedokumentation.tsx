@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { useNavigate, useParams } from '@/app/routing/react-router-compat'
+import { useNavigate, useParams } from '@/app/routing/typed-router'
 import { useQuery, useMutation } from '@tanstack/react-query'
 import { apiClient } from '@/lib/api-client'
 import { Badge } from '@/components/ui/badge'

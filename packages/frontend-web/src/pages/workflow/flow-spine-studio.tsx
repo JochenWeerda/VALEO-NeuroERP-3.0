@@ -1,5 +1,5 @@
 import { useEffect } from 'react'
-import { useNavigate } from '@/app/routing/react-router-compat'
+import { useNavigate } from '@/app/routing/typed-router'
 import { ChevronRight, Layers } from 'lucide-react'
 import { useQueryClient } from '@tanstack/react-query'
 import { PageSection, PageSurface } from '@/components/patterns/PageSurface'

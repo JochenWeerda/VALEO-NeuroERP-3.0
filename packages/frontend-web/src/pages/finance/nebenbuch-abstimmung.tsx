@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { useSearchParams } from '@/app/routing/react-router-compat'
+import { useSearchParams } from '@/app/routing/typed-router'
 import { useTranslation } from 'react-i18next'
 import { apiClient } from '@/lib/api-client'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'

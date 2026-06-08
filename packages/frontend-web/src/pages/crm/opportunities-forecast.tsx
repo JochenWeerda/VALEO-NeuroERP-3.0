@@ -11,7 +11,7 @@ import { Label } from '@/components/ui/label'
 import { getEntityTypeLabel, getStatusLabel } from '@/features/crud/utils/i18n-helpers'
 import { toast } from '@/hooks/use-toast'
 import { ArrowLeft, RefreshCw, TrendingUp, DollarSign, Download, Filter } from 'lucide-react'
-import { useNavigate } from '@/app/routing/react-router-compat'
+import { useNavigate } from '@/app/routing/typed-router'
 
 const OpportunitiesForecastCharts = lazy(() =>
   import('@/pages/crm/charts/OpportunitiesForecastCharts').then((module) => ({ default: module.default })),

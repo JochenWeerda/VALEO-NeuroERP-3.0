@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { useNavigate, useSearchParams } from '@/app/routing/react-router-compat'
+import { useNavigate, useSearchParams } from '@/app/routing/typed-router'
 import { FileDown, HeadphonesIcon, Plus, Search, Wrench } from 'lucide-react'
 import { useServiceAnfragen, type ServiceAnfrage } from '@/lib/api/betrieb'
 import { ErrorState } from '@/components/ErrorState'

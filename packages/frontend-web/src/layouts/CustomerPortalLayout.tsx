@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { clsx } from 'clsx'
-import { Outlet, Link, useLocation, useNavigate } from '@/app/routing/react-router-compat'
+import { Outlet, Link, useLocation, useNavigate } from '@/app/routing/typed-router'
 import { Button } from '@/components/ui/button'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'

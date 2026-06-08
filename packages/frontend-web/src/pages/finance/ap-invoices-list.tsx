@@ -4,7 +4,7 @@
  */
 
 import { useMemo, useState } from 'react'
-import { useNavigate, Link } from '@/app/routing/react-router-compat'
+import { useNavigate, Link } from '@/app/routing/typed-router'
 import { useTranslation } from 'react-i18next'
 import { useQuery } from '@tanstack/react-query'
 import { OperationalCaseHeader } from '@/components/workflow/OperationalCaseHeader'
