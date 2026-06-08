@@ -1,10 +1,12 @@
-﻿import { spawn } from "child_process";
+import { spawn } from "child_process";
+import { mkdirSync, writeFileSync } from "fs";
 import { fileURLToPath } from "url";
 import path from "path";
 
 const rootDir = path.resolve(fileURLToPath(new URL("./", import.meta.url)));
 const processes = [];
 const isWindows = process.platform === "win32";
+const pidFile = path.join(rootDir, "playwright-tests", "artifacts", "server-pids.json");
 
 function toSpawn(command, args) {
   if (isWindows) {
@@ -68,7 +70,7 @@ async function waitForHttp(url, timeoutMs = 15000) {
 }
 
 export default async function globalSetup() {
-  const pnpmCmd = isWindows ? "pnpm" : "pnpm";
+  const pnpmCmd = "pnpm";
 
   await runCommand(pnpmCmd, ["--filter", "frontend-web", "build"]);
 
@@ -79,5 +81,6 @@ export default async function globalSetup() {
   startProcess(pnpmCmd, ["--filter", "frontend-web", "preview", "--", "--host", "127.0.0.1", "--port", "4173"]);
   await waitForHttp("http://localhost:4173");
 
-  globalThis.__PLAYWRIGHT_SERVERS__ = processes;
+  mkdirSync(path.dirname(pidFile), { recursive: true });
+  writeFileSync(pidFile, JSON.stringify(processes.map((proc) => proc.pid).filter(Boolean)));
 }

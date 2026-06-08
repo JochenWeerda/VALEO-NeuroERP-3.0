@@ -25,9 +25,7 @@ test.describe('Agrar - PSM @smoke', () => {
   test('Export-Button funktioniert', async ({ adminPage, fallbackDetector }) => {
     const exportButton = adminPage.locator('button:has-text("Export"), button:has-text("export")').first();
     
-    if (await exportButton.count() === 0) {
-      test.skip('Kein Export-Button gefunden');
-    }
+    test.skip(await exportButton.count() === 0, 'Kein Export-Button gefunden');
 
     const downloadPromise = adminPage.waitForEvent('download', { timeout: 5000 }).catch(() => null);
     await exportButton.click();

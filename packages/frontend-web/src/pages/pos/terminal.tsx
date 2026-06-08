@@ -22,7 +22,7 @@ import { ArticleSearch } from '@/components/pos/ArticleSearch'
 import { TouchBedienfeld, type TouchBedienfeldAction } from '@/components/pos/TouchBedienfeld'
 import { ArticleImageLarge, ArticleImageSmall } from '@/components/pos/ArticleImage'
 import { MultiTenderPayment, type PaymentEntry } from '@/components/pos/MultiTenderPayment'
-import { usePosOfflineQueue } from '@/lib/services/pos-offline-queue'
+import { posOfflineQueue, usePosOfflineQueue } from '@/lib/services/pos-offline-queue'
 import { bonDruck, type BonData } from '@/lib/services/bon-druck'
 import { toast } from '@/hooks/use-toast'
 import { apiClient } from '@/lib/api-client'
@@ -382,7 +382,6 @@ export default function POSTerminalPage(): JSX.Element {
       // Offline-Queue
       const offlineId = `offline-${Date.now()}`
       void (async () => {
-        const { posOfflineQueue } = await import('@/lib/services/pos-offline-queue')
         await posOfflineQueue.enqueue({
           id: offlineId,
           timestamp: new Date().toISOString(),

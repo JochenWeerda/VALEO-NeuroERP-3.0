@@ -43,12 +43,15 @@ Stand: `2026-06-07`
 
 **Von:** Codex
 **Owner:** Codex
-**Stand:** reserviert 2026-06-08
+**Stand:** abgeschlossen 2026-06-08
 **Ziel des Slices:** Fuer das KIM-CRM-360-Cockpit einen semantischen, modellbasierten Klickvertrag einfuehren. Alle Buttons, Tabs, Links und CRUD-Aktionen werden gegen erwartete Zielmaske, Entity-Kontext, Persistenz, Ruecksprung und fachlichen CRM-to-Revenue-Workflow geprueft; die bestehende Visual-Tour bleibt reiner Smoke-Test.
 **Dateibesitz:** `docs/agent-ops/active-workboard.md`, neuer Slice-Vertrag unter `docs/agent-ops/slices/CRM360-MBT-001.yaml`, CRM-360-Testdokumentation/Report unter `docs/quality-assurance/`, neue CRM-360-Tests und Hilfen unter `playwright-tests/`, notwendige stabile Action-IDs und nachgewiesene Verdrahtungsfixes unter `packages/frontend-web/src/pages/crm/kim/**`.
 **Abnahmekriterien:** Maschinenlesbare Action-Matrix deckt alle interaktiven CRM-360-Elemente ab; Playwright prueft Sichtbarkeit, Klickbarkeit, Zielinhalt, URL/Entity-Kontext, 404/Console/Request-Fehler und Ruecksprung; echte KIM-CRUD-Pfade pruefen Persistenz, delegierte Fachprozesse werden explizit als solche validiert; CRM-to-Revenue-Modellpfad ist als ausfuehrbarer Testvertrag vorhanden; Markdown-Report klassifiziert OK, fehlende Verknuepfung, falsches Ziel, fehlendes CRUD, Back/404 und fachlich fragwuerdig.
 **Bekannte Risiken:** Testdaten und laufende Backend-Dienste koennen vollstaendige Live-CRUD-Ausfuehrung lokal begrenzen; destructive Aktionen benoetigen isolierte Fixtures oder API-Cleanup. Bestehende fachlich unvollstaendige Buttons werden nicht durch nachsichtige Assertions kaschiert.
 **Pflichtchecks:** CRM-360-Playwright-Suite, TypeScript-Typecheck der Testvertraege, Frontend-Typecheck bei UI-Aenderungen, Doku-Governance.
+**Ergebnis:** 23 typisierte Action-Contracts und ein CRM-to-Revenue-Zustandsmodell eingefuehrt. Die zehnteilige Playwright-Suite prueft Kopfaktionen, echte KIM-Updates/Creates, NeuroAI-Kontext, delegierte Fachprozesse, URL-/Entity-Kontext und Browser-Ruecksprung ohne 404. Behoben wurden tote CRM360-Handler, falsche Zielnavigation, unsichtbare Toasts, Label-Zuordnungen, der haengende Playwright-Teardown, alle gefundenen Playwright-Typfehler sowie zwei Buildfehler ausserhalb CRM360 (POS-Doppelimport und ungueltige Tailwind-Regel).
+**Checks:** CRM360 Playwright `10 passed`; Playwright-Typecheck gruen; Frontend-Typecheck gruen; Produktions-Build gruen; Workboard-Governance wird im Abschlusslauf validiert.
+**Offene Risiken:** `mailto:` bleibt ein externer OS-Workflow. Der Unterlagen-Tab ist weiterhin lokal und kein persistentes DMS. Der fachliche Durchstich Angebot -> Auftrag -> Lieferschein -> Rechnung -> OP ist modelliert, benoetigt fuer einen echten Live-Nachweis aber isolierte, aufraeumbare Daten in allen beteiligten Fachmodulen.
 
 ## CRM-GEO-ABSCHLUSS-001
 

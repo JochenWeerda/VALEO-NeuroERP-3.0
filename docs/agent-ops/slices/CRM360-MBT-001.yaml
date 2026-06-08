@@ -1,0 +1,36 @@
+slice_id: CRM360-MBT-001
+title: CRM360 Semantic Model-Based Click Tests
+owner: Codex
+status: completed
+goal: >-
+  Fuer das KIM-CRM-360-Cockpit einen semantischen Klickvertrag einfuehren,
+  der Navigation, Entity-Kontext, CRUD, Ruecksprung und fachliche
+  CRM-to-Revenue-Uebergaenge mit Playwright prueft.
+file_ownership:
+  - docs/agent-ops/active-workboard.md
+  - docs/agent-ops/slices/CRM360-MBT-001.yaml
+  - docs/quality-assurance/crm360-model-based-click-test-2026-06-08.md
+  - playwright-tests/**
+  - playwright.global-setup.mjs
+  - playwright.global-teardown.mjs
+  - packages/frontend-web/src/pages/crm/kim/**
+  - packages/frontend-web/src/pages/pos/terminal.tsx
+  - packages/frontend-web/src/pages/charge/wareneingang.tsx
+acceptance_criteria:
+  - Eine typisierte Action-Matrix klassifiziert alle primaeren CRM360-Aktionen und Tabs.
+  - Playwright prueft Zielinhalt, URL, Entity-Kontext, CRUD-Requests, 404, Browserfehler und Ruecksprung.
+  - Der CRM-to-Revenue-Pfad ist als deterministisches Zustandsmodell erfasst.
+  - Delegierte und lokale Funktionen werden nicht faelschlich als persistentes CRUD bewertet.
+  - Frontend- und Playwright-Typecheck, Produktions-Build und CRM360-Suite sind gruen.
+risks:
+  - Mailto wird vom Betriebssystem ausgefuehrt und ist im Browser nur als externer Vertrag pruefbar.
+  - Der Unterlagen-Tab hat weiterhin kein persistentes DMS-Backend.
+  - Der End-to-End-Fachpfad nach der Angebotserstellung benoetigt isolierte Testdaten in den Folgesystemen.
+result: >-
+  23 Action-Contracts und ein CRM-to-Revenue-Modell wurden eingefuehrt.
+  Zehn Playwright-Tests pruefen die CRM360-Kernaktionen, echte KIM-Updates,
+  Aktivitaetsanlage, NeuroAI-Kontext, Fachprozess-Delegation sowie
+  Angebot-/OP-Navigation mit Browser-Ruecksprung. Dabei wurden tote Handler,
+  fehlende Zielnavigation, unsichtbare Toasts, Label-Probleme, der haengende
+  Playwright-Teardown, alle gefundenen Playwright-Typfehler, ein gemischter
+  POS-Modulimport und eine ungueltige generierte CSS-Regel behoben.

@@ -27,9 +27,7 @@ test.describe('CRM - Kontakte @smoke', () => {
   test('Export-Button funktioniert', async ({ adminPage, fallbackDetector }) => {
     const exportButton = adminPage.locator('button:has-text("Export"), button:has-text("export")').first();
 
-    if ((await exportButton.count()) === 0) {
-      test.skip('Kein Export-Button gefunden');
-    }
+    test.skip((await exportButton.count()) === 0, 'Kein Export-Button gefunden');
 
     await exportButton.click();
     await adminPage.waitForTimeout(1000);
@@ -41,9 +39,7 @@ test.describe('CRM - Kontakte @smoke', () => {
   test('Drucken-Button funktioniert', async ({ adminPage }) => {
     const printButton = adminPage.locator('button:has-text("Drucken"), button:has-text("drucken")').first();
 
-    if ((await printButton.count()) === 0) {
-      test.skip('Kein Drucken-Button gefunden');
-    }
+    test.skip((await printButton.count()) === 0, 'Kein Drucken-Button gefunden');
 
     await printButton.click();
     await adminPage.waitForTimeout(1000);
