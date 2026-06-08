@@ -131,7 +131,15 @@ async def test_create_delivery_from_order_scopes_final_update_by_tenant():
     )
 
     update_statement, update_params = db.calls[-1]
+    insert_header_statement, insert_header_params = db.calls[3]
+    insert_position_statement, insert_position_params = db.calls[5]
     assert result["order_id"] == "so-1"
+    assert "delivery_note_number" in insert_header_statement
+    assert "customer_id" in insert_header_statement
+    assert "ls_nummer" not in insert_header_statement
+    assert insert_header_params["kid"] == "cust-1"
+    assert insert_position_params["rabatt"] == 0
+    assert "mwst_prozent" in insert_position_statement
     assert "WHERE id = :id AND tenant_id = :tenant_id" in update_statement
     assert update_params["tenant_id"] == "tenant-a"
     assert db.committed is True

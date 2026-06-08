@@ -117,6 +117,38 @@ class DocflowService:
         ).mappings().all()
         return [str(r["id"]) for r in rows]
 
+    def delete_draft_document(self, doc_id: str) -> None:
+        header = self.fetch_header(doc_id)
+        if not header:
+            raise EntityNotFoundError("DocflowDocument", doc_id)
+        if str(header.get("status") or "").lower() not in {"draft", "open"}:
+            raise ValidationFailedError("Only draft/open documents can be deleted")
+        posting = self.db.execute(
+            text("""
+                SELECT 1 FROM domain_docflow.document_postings
+                WHERE tenant_id = :tenant_id AND header_id = :header_id
+                LIMIT 1
+            """),
+            {"tenant_id": self.tenant_id, "header_id": doc_id},
+        ).first()
+        if posting:
+            raise ValidationFailedError("Posted documents cannot be deleted")
+        self.db.execute(
+            text("""
+                UPDATE domain_docflow.document_headers
+                SET deleted_at = NOW(), updated_at = NOW()
+                WHERE tenant_id = :tenant_id AND id = :id AND deleted_at IS NULL
+            """),
+            {"tenant_id": self.tenant_id, "id": doc_id},
+        )
+        self.best_effort_audit(
+            "docflow_delete_draft",
+            "docflow_document",
+            doc_id,
+            {"status": header.get("status")},
+        )
+        self.db.commit()
+
     # ── bootstrap ─────────────────────────────────────────────────────────────
 
     def _bootstrap_sales_order(self, doc_id: str) -> Optional[dict[str, Any]]:
@@ -377,18 +409,19 @@ class DocflowService:
 
     def best_effort_audit(self, action: str, resource_type: str, resource_id: str, payload: dict[str, Any]) -> None:
         try:
-            self.db.execute(
-                text("""
-                    INSERT INTO infrastructure.audit_log
-                    (id, user_id, action, resource_type, resource_id, old_values, new_values, ip_address, user_agent, timestamp)
-                    VALUES (CAST(:id AS uuid), NULL, :action, :resource_type, CAST(:resource_id AS uuid), '{}'::jsonb, CAST(:new_values AS jsonb), NULL, NULL, NOW())
-                """),
-                {
-                    "id": str(uuid4()), "action": action, "resource_type": resource_type,
-                    "resource_id": str(uuid5(NAMESPACE_URL, f"{resource_type}:{resource_id}")),
-                    "new_values": json.dumps({"tenant_id": self.tenant_id, **payload}),
-                },
-            )
+            with self.db.begin_nested():
+                self.db.execute(
+                    text("""
+                        INSERT INTO infrastructure.audit_log
+                        (id, user_id, action, resource_type, resource_id, old_values, new_values, ip_address, user_agent, timestamp)
+                        VALUES (CAST(:id AS uuid), NULL, :action, :resource_type, CAST(:resource_id AS uuid), '{}'::jsonb, CAST(:new_values AS jsonb), NULL, NULL, NOW())
+                    """),
+                    {
+                        "id": str(uuid4()), "action": action, "resource_type": resource_type,
+                        "resource_id": str(uuid5(NAMESPACE_URL, f"{resource_type}:{resource_id}")),
+                        "new_values": json.dumps({"tenant_id": self.tenant_id, **payload}),
+                    },
+                )
         except Exception:  # noqa: BLE001 — Audit-Log-Eintrag fehlgeschlagen; Hauptoperation wird fortgesetzt
             pass
 
@@ -710,14 +743,6 @@ class DocflowService:
         target_number = self.allocate_doc_number(payload.target_doc_type, now)
         self.db.execute(
             text("""
-                INSERT INTO domain_docflow.document_header_links
-                (id, tenant_id, from_header_id, to_header_id, relation_type, created_at)
-                VALUES (:id, :tenant_id, :from_header_id, :to_header_id, :relation_type, NOW())
-            """),
-            {"id": str(uuid4()), "tenant_id": self.tenant_id, "from_header_id": doc_id, "to_header_id": target_id, "relation_type": relation_type},
-        )
-        self.db.execute(
-            text("""
                 INSERT INTO domain_docflow.document_headers
                 (id, tenant_id, doc_type, doc_number, status, source_system, source_ref, customer_id, supplier_id,
                  currency, total_net, total_tax, total_gross, document_date, version, created_by, updated_by, created_at, updated_at)
@@ -732,6 +757,14 @@ class DocflowService:
                 "total_net": _money(total_net), "total_tax": _money(total_tax), "total_gross": _money(total_gross),
                 "document_date": now, "created_by": payload.created_by, "updated_by": payload.created_by,
             },
+        )
+        self.db.execute(
+            text("""
+                INSERT INTO domain_docflow.document_header_links
+                (id, tenant_id, from_header_id, to_header_id, relation_type, created_at)
+                VALUES (:id, :tenant_id, :from_header_id, :to_header_id, :relation_type, NOW())
+            """),
+            {"id": str(uuid4()), "tenant_id": self.tenant_id, "from_header_id": doc_id, "to_header_id": target_id, "relation_type": relation_type},
         )
         for line_no, entry in enumerate(selected_items, start=1):
             src = entry["item"]
