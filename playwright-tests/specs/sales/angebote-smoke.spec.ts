@@ -27,9 +27,7 @@ test.describe('Sales - Angebote @smoke', () => {
   test('Export-Button funktioniert (Level 2/3 Fallback)', async ({ adminPage, fallbackDetector }) => {
     const exportButton = adminPage.locator('button:has-text("Export"), button:has-text("export")').first();
 
-    if ((await exportButton.count()) === 0) {
-      test.skip('Kein Export-Button gefunden');
-    }
+    test.skip((await exportButton.count()) === 0, 'Kein Export-Button gefunden');
 
     const downloadPromise = adminPage.waitForEvent('download', { timeout: 5000 }).catch(() => null);
     await exportButton.click();
@@ -53,9 +51,7 @@ test.describe('Sales - Angebote @smoke', () => {
   test('Drucken-Button funktioniert (Level 2/3 Fallback)', async ({ adminPage, fallbackDetector }) => {
     const printButton = adminPage.locator('button:has-text("Drucken"), button:has-text("drucken")').first();
 
-    if ((await printButton.count()) === 0) {
-      test.skip('Kein Drucken-Button gefunden');
-    }
+    test.skip((await printButton.count()) === 0, 'Kein Drucken-Button gefunden');
 
     await adminPage.evaluate(() => {
       (window as any).__printCalled = false;
@@ -86,9 +82,7 @@ test.describe('Sales - Angebote @smoke', () => {
   test('Navigation zu Angebot erstellen', async ({ adminPage }) => {
     const neuButton = adminPage.locator('button:has-text("Neu"), button:has-text("Erstellen"), a:has-text("Neu")').first();
 
-    if ((await neuButton.count()) === 0) {
-      test.skip('Kein Neu-Button gefunden');
-    }
+    test.skip((await neuButton.count()) === 0, 'Kein Neu-Button gefunden');
 
     await neuButton.click();
     await adminPage.waitForLoadState('networkidle');

@@ -1,12 +1,28 @@
-﻿export default async function globalTeardown() {
-  const procs = globalThis.__PLAYWRIGHT_SERVERS__ ?? [];
-  for (const proc of procs) {
+import { spawnSync } from "child_process";
+import { existsSync, readFileSync, rmSync } from "fs";
+import { fileURLToPath } from "url";
+import path from "path";
+
+const rootDir = path.resolve(fileURLToPath(new URL("./", import.meta.url)));
+const pidFile = path.join(rootDir, "playwright-tests", "artifacts", "server-pids.json");
+
+export default async function globalTeardown() {
+  const pids = existsSync(pidFile) ? JSON.parse(readFileSync(pidFile, "utf8")) : [];
+
+  for (const pid of pids) {
     try {
-      if (!proc.killed) {
-        proc.kill("SIGINT");
+      if (process.platform === "win32") {
+        spawnSync("taskkill", ["/PID", String(pid), "/T", "/F"], {
+          stdio: "ignore",
+          timeout: 10000,
+        });
+      } else {
+        process.kill(pid, "SIGINT");
       }
     } catch {
-      // ignore errors during shutdown
+      // Teardown remains best-effort; stale PIDs may already be gone.
     }
   }
+
+  rmSync(pidFile, { force: true });
 }

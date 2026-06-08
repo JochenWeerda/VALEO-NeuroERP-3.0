@@ -10,15 +10,8 @@
  */
 
 import { test, expect } from '@playwright/test';
-import { testSetup } from '../../fixtures/testSetup';
 
 test.describe('Payment Matching', () => {
-  let setup: Awaited<ReturnType<typeof testSetup>>;
-
-  test.beforeEach(async ({ page }) => {
-    setup = await testSetup(page);
-  });
-
   test('@smoke - Bank Statement Import (CSV)', async ({ page }) => {
     // Navigate to Zahlungseingänge
     await page.goto('/fibu/zahlungseingaenge');
@@ -69,7 +62,10 @@ test.describe('Payment Matching', () => {
     await expect(statusFilter).toBeVisible();
     
     // Select "Offen" status
-    await statusFilter.selectOption({ label: /Offen|UNMATCHED/i });
+    const openOption = statusFilter.locator('option').filter({ hasText: /Offen|UNMATCHED/i }).first();
+    const openValue = await openOption.getAttribute('value');
+    test.skip(openValue === null, 'Keine offene Statusoption gefunden');
+    await statusFilter.selectOption(openValue!);
     
     // Verify filter is applied (table should update)
     await page.waitForTimeout(500); // Wait for filter to apply

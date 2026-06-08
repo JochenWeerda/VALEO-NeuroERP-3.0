@@ -19,6 +19,7 @@
     "packages/**/*.tsx",
     "packages/**/*.cts",
     "packages/**/*.mts",
+    "playwright-tests/**/*.ts",
     "scripts/**/*.ts",
     "scripts/**/*.tsx",
     "specs/**/*.ts",

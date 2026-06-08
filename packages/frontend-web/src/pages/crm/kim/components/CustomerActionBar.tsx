@@ -70,6 +70,7 @@ export default function CustomerActionBar({ onActionClick, isLoadingAI }: Custom
       <div className="flex flex-wrap items-center gap-1">
         <button
           onClick={() => onActionClick('openMaster')}
+          data-action-id="crm360.master.open"
           className="flex items-center gap-1.5 px-3 py-1 bg-[#f1f5f9] hover:bg-white text-gray-800 border border-[#94a3b8] rounded-sm font-mono text-[10px] font-bold shadow-sm active:bg-gray-100 cursor-pointer"
           title="Adress-Stammdaten öffnen [Alt + O]"
         >
@@ -79,6 +80,7 @@ export default function CustomerActionBar({ onActionClick, isLoadingAI }: Custom
 
         <button
           onClick={() => onActionClick('newContact')}
+          data-action-id="crm360.activity.create"
           className="flex items-center gap-1.5 px-3 py-1 bg-[#f1f5f9] hover:bg-white text-gray-800 border border-[#94a3b8] rounded-sm font-mono text-[10px] font-bold shadow-sm active:bg-gray-100 cursor-pointer"
           title="Neuen Korrespondenzantrag anlegen [Alt + N]"
         >
@@ -88,6 +90,7 @@ export default function CustomerActionBar({ onActionClick, isLoadingAI }: Custom
 
         <button
           onClick={() => onActionClick('infoPopup')}
+          data-action-id="crm360.customer.info"
           className="flex items-center gap-1.5 px-3 py-1 bg-[#f1f5f9] hover:bg-white text-gray-800 border border-[#94a3b8] rounded-sm font-mono text-[10px] font-bold shadow-sm active:bg-gray-100 cursor-pointer"
           title="Mandanten Details aufrufen"
         >
@@ -97,6 +100,7 @@ export default function CustomerActionBar({ onActionClick, isLoadingAI }: Custom
 
         <button
           onClick={() => onActionClick('presents')}
+          data-action-id="crm360.presents.open"
           className="flex items-center gap-1.5 px-3 py-1 bg-[#f1f5f9] hover:bg-white text-gray-800 border border-[#94a3b8] rounded-sm font-mono text-[10px] font-bold shadow-sm active:bg-gray-100 cursor-pointer"
           title="Werbung / Geschenke-PR an Kunden [Alt + P]"
         >
@@ -108,6 +112,7 @@ export default function CustomerActionBar({ onActionClick, isLoadingAI }: Custom
 
         <button
           onClick={() => onActionClick('logCall')}
+          data-action-id="crm360.call.create"
           className="flex items-center gap-1.5 px-3 py-1 bg-[#f1f5f9] hover:bg-white text-gray-800 border border-[#94a3b8] rounded-sm font-mono text-[10px] font-bold shadow-sm active:bg-gray-100 cursor-pointer"
           title="Telefon-Gespräch sofort protokollieren [Alt + T]"
         >
@@ -117,8 +122,9 @@ export default function CustomerActionBar({ onActionClick, isLoadingAI }: Custom
 
         <button
           onClick={() => onActionClick('sendEmail')}
+          data-action-id="crm360.email.open"
           className="flex items-center gap-1.5 px-3 py-1 bg-[#f1f5f9] hover:bg-white text-gray-800 border border-[#94a3b8] rounded-sm font-mono text-[10px] font-bold shadow-sm active:bg-gray-100 cursor-pointer"
-          title="E-Mail Entwurf schreiben"
+          title="E-Mail-Programm mit Kundenadresse öffnen"
         >
           <Mail size={11} className="text-teal-600" />
           <span>E-Mail</span>
@@ -128,6 +134,7 @@ export default function CustomerActionBar({ onActionClick, isLoadingAI }: Custom
 
         <button
           onClick={() => onActionClick('newOrder')}
+          data-action-id="crm360.offer.create"
           className="flex items-center gap-1.5 px-3 py-1 bg-[#f1f5f9] hover:bg-white text-gray-800 border border-[#94a3b8] rounded-sm font-mono text-[10px] font-bold shadow-sm active:bg-gray-100 cursor-pointer"
           title="Neues Agrarangebot/Auftrag initiieren [Alt + A]"
         >
@@ -137,6 +144,7 @@ export default function CustomerActionBar({ onActionClick, isLoadingAI }: Custom
 
         <button
           onClick={() => onActionClick('billingCheck')}
+          data-action-id="crm360.receivables.open"
           className="flex items-center gap-1.5 px-3 py-1 bg-[#f1f5f9] hover:bg-white text-gray-800 border border-[#94a3b8] rounded-sm font-mono text-[10px] font-bold shadow-sm active:bg-gray-100 cursor-pointer"
           title="Finanzposten und Debitorenabrechnung checken [Alt + F]"
         >
@@ -148,6 +156,7 @@ export default function CustomerActionBar({ onActionClick, isLoadingAI }: Custom
 
         <button
           onClick={() => onActionClick('cleanupFilters')}
+          data-action-id="crm360.filters.reset"
           className="flex items-center gap-1.5 px-2.5 py-1 bg-[#f1f5f9] hover:bg-white text-gray-700 border border-[#94a3b8] rounded-sm font-mono text-[10px] font-bold shadow-sm active:bg-gray-100 cursor-pointer"
           title="Subtabellen Filter zurücksetzen"
         >
@@ -160,6 +169,7 @@ export default function CustomerActionBar({ onActionClick, isLoadingAI }: Custom
       <div>
         <button
           onClick={() => onActionClick('neuroIntelligence')}
+          data-action-id="crm360.ai.summary"
           disabled={isLoadingAI}
           className={`flex items-center gap-1.5 px-3 py-1 bg-gradient-to-r from-emerald-800 to-teal-800 text-white rounded-sm font-mono text-[10px] font-extrabold shadow-sm active:opacity-90 cursor-pointer border border-[#064e3b] ${
             isLoadingAI ? 'animate-pulse opacity-70' : 'hover:from-emerald-950 hover:to-teal-950'

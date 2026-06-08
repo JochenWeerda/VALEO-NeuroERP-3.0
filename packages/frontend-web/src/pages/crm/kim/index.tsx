@@ -4,9 +4,11 @@
  */
 
 import React, { useState, useEffect, Suspense, lazy } from 'react';
+import { useNavigate } from '@/app/routing/typed-router';
 import { Customer, ContactPerson, ContactLog, OpenItem, BusinessDocument } from './types';
 import * as kimApi from './kim-api';
 import { useToast } from '@/hooks/use-toast';
+import { Toaster } from '@/components/ui/toaster';
 
 // Bestehende Fachseiten als Tabs einbetten (Wiederverwendung; Konsolidierung folgt).
 const LeadsPage = lazy(() => import('../leads'));
@@ -44,6 +46,7 @@ import {
 type KimTab = 'allgemein' | 'belege' | 'kontrakte' | 'finanzen' | 'audit' | 'tasks' | 'chef' | 'leads' | 'geo';
 
 export default function KimCockpitPage() {
+  const navigate = useNavigate();
   const { toast } = useToast();
   const [customers, setCustomers] = useState<Customer[]>([]);
   // Leer starten, damit fetchCustomers den ERSTEN echten Kunden auto-selektiert
@@ -69,6 +72,8 @@ export default function KimCockpitPage() {
   const [showCallLogModal, setShowCallLogModal] = useState(false);
   const [showCorporateModal, setShowCorporateModal] = useState(false);
   const [showDocumentsModal, setShowDocumentsModal] = useState(false);
+  const [showCustomerInfoModal, setShowCustomerInfoModal] = useState(false);
+  const [workspaceResetKey, setWorkspaceResetKey] = useState(0);
 
   // In-Edit master data fields state
   const [editStreet, setEditStreet] = useState('');
@@ -258,13 +263,27 @@ export default function KimCockpitPage() {
         break;
       case 'newContact': {
         // Trigger quick log input inside the bottom ContactHistoryTable
-        const formBtn = document.getElementById('btn-add-interaction-log');
+        const formBtn = document.getElementById('btn-trigger-history-form');
         if (formBtn) {
           formBtn.click();
           formBtn.scrollIntoView({ behavior: 'smooth' });
         }
         break;
       }
+      case 'infoPopup':
+        setShowCustomerInfoModal(true);
+        break;
+      case 'sendEmail':
+        if (activeCustomer?.email) {
+          window.location.href = `mailto:${activeCustomer.email}`;
+        } else {
+          toast({
+            title: 'Keine E-Mail-Adresse',
+            description: 'Im Kundenstamm ist keine E-Mail-Adresse hinterlegt.',
+            variant: 'destructive',
+          });
+        }
+        break;
       case 'neuroIntelligence':
         handleFetchNeuroSummary();
         break;
@@ -275,10 +294,27 @@ export default function KimCockpitPage() {
         setShowCallLogModal(true);
         break;
       case 'newOrder':
-        setActiveTab('belege');
+        if (activeCustomer) {
+          const params = new URLSearchParams({
+            kunde: activeCustomer.debtorNo,
+            kundeName: activeCustomer.name,
+            entryMode: 'crm360',
+          });
+          navigate(`/sales/angebot-erstellen?${params.toString()}`);
+        }
         break;
       case 'billingCheck':
-        setActiveTab('finanzen');
+        if (activeCustomer) {
+          navigate(`/finance/op-debitoren?kunden_nr=${encodeURIComponent(activeCustomer.debtorNo)}`);
+        }
+        break;
+      case 'cleanupFilters':
+        setActiveTab('allgemein');
+        setWorkspaceResetKey((key) => key + 1);
+        toast({
+          title: 'Filter zurückgesetzt',
+          description: 'Cockpit-Tabellen und Arbeitsbereich wurden auf den Ausgangszustand gesetzt.',
+        });
         break;
       default:
         break;
@@ -343,6 +379,7 @@ export default function KimCockpitPage() {
                   <button
                     key={nav.key}
                     onClick={() => setActiveTab(nav.key as KimTab)}
+                    data-action-id={`crm360.tab.${nav.key}`}
                     className={`px-3 py-2 uppercase transition-all duration-150 rounded-t-sm border-t border-x cursor-pointer ${
                       activeTab === nav.key 
                         ? 'bg-white text-[#111827] border-[#cbd5e1] font-black translate-y-[1px] z-10' 
@@ -361,6 +398,7 @@ export default function KimCockpitPage() {
                 {activeTab === 'allgemein' && (
                   <div className="space-y-4 font-sans text-xs">
                     <ContactPersonsTable
+                      key={`contacts-${workspaceResetKey}`}
                       contactPersons={contacts}
                       onAddContactPerson={handleAddNewContactPerson}
                     />
@@ -369,6 +407,7 @@ export default function KimCockpitPage() {
 
                 {activeTab === 'belege' && (
                   <SalesDocumentsPanel
+                    key={`documents-${workspaceResetKey}`}
                     customer={activeCustomer}
                     documents={documents}
                     onAddDocument={handleAddNewDocument}
@@ -377,6 +416,7 @@ export default function KimCockpitPage() {
 
                 {activeTab === 'kontrakte' && (
                   <ContractsPanel
+                    key={`contracts-${workspaceResetKey}`}
                     customer={activeCustomer}
                     documents={documents}
                     onAddContract={handleAddNewDocument}
@@ -385,6 +425,7 @@ export default function KimCockpitPage() {
 
                 {activeTab === 'finanzen' && (
                   <FinancialOpenItemsPanel
+                    key={`financials-${workspaceResetKey}`}
                     customer={activeCustomer}
                     openItems={openItems}
                     onAddOpenItem={handleAddNewInvoice}
@@ -461,6 +502,7 @@ export default function KimCockpitPage() {
               {/* BOTTOM CRM HISTORY TIMELINE (Unten Historie/Belege) */}
               <div className="h-68 border-t border-[#cbd5e1] bg-white flex flex-col overflow-hidden" id="bottom-history-panel">
                 <ContactHistoryTable
+                  key={`history-${workspaceResetKey}`}
                   logs={logs}
                   customer={activeCustomer}
                   onAddLog={handleAddNewContactLog}
@@ -493,12 +535,12 @@ export default function KimCockpitPage() {
       {/* OVERLAY MODAL 1: Stammdaten Edit */}
       {/* ======================================= */}
       {showMasterEditModal && activeCustomer && (
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-labelledby="crm360-master-title">
           <form onSubmit={saveMasterEdit} className="bg-white rounded border border-[#cbd5e1] shadow-2xl max-w-xl w-full p-4 space-y-3 font-sans text-xs">
             <div className="flex justify-between items-center border-b border-gray-100 pb-2">
               <div className="flex items-center gap-1.5 text-gray-900 font-bold">
                 <Settings size={14} className="text-[#006633]" />
-                <span className="text-xs font-extrabold uppercase font-mono">Stammdaten & Kreditversicherung bearbeiten</span>
+                <span id="crm360-master-title" className="text-xs font-extrabold uppercase font-mono">Stammdaten & Kreditversicherung bearbeiten</span>
               </div>
               <button 
                 type="button" 
@@ -521,8 +563,9 @@ export default function KimCockpitPage() {
                 />
               </div>
               <div>
-                <label className="block text-gray-500 font-bold uppercase mb-0.5">PLZ & Ort</label>
+                <label htmlFor="crm360-edit-city" className="block text-gray-500 font-bold uppercase mb-0.5">PLZ & Ort</label>
                 <input
+                  id="crm360-edit-city"
                   type="text"
                   required
                   value={editCity}
@@ -598,6 +641,42 @@ export default function KimCockpitPage() {
               </button>
             </div>
           </form>
+        </div>
+      )}
+
+      {showCustomerInfoModal && activeCustomer && (
+        <div
+          className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="crm360-customer-info-title"
+          data-testid="crm360-customer-info-dialog"
+        >
+          <div className="bg-white rounded border border-[#cbd5e1] shadow-2xl max-w-md w-full p-5 space-y-3 font-sans text-xs">
+            <div className="flex justify-between items-center border-b border-gray-100 pb-2">
+              <div>
+                <h2 id="crm360-customer-info-title" className="font-black uppercase font-mono">Kundeninformation</h2>
+                <p className="text-gray-500">{activeCustomer.name}</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowCustomerInfoModal(false)}
+                data-action-id="crm360.customer.info.close"
+                aria-label="Kundeninformation schließen"
+                className="text-gray-400 hover:text-gray-600 transition"
+              >
+                <X size={15} />
+              </button>
+            </div>
+            <dl className="grid grid-cols-[9rem_1fr] gap-2">
+              <dt className="font-bold text-gray-500">Debitor</dt><dd>{activeCustomer.debtorNo}</dd>
+              <dt className="font-bold text-gray-500">Adresse</dt><dd>{activeCustomer.street}, {activeCustomer.zipCode} {activeCustomer.city}</dd>
+              <dt className="font-bold text-gray-500">Telefon</dt><dd>{activeCustomer.phone1}</dd>
+              <dt className="font-bold text-gray-500">E-Mail</dt><dd>{activeCustomer.email}</dd>
+              <dt className="font-bold text-gray-500">Vertreter</dt><dd>{activeCustomer.salesRepresentative}</dd>
+              <dt className="font-bold text-gray-500">Kreditlimit</dt><dd>EUR {activeCustomer.creditLimit.toLocaleString('de-DE')}</dd>
+            </dl>
+          </div>
         </div>
       )}
 
@@ -693,8 +772,9 @@ export default function KimCockpitPage() {
               </div>
 
               <div>
-                <label className="block text-[9px] text-gray-400 uppercase font-bold mb-0.5">Gesprächs-Kurzbericht</label>
+                <label htmlFor="crm360-quick-call-description" className="block text-[9px] text-gray-400 uppercase font-bold mb-0.5">Gesprächs-Kurzbericht</label>
                 <input
+                  id="crm360-quick-call-description"
                   type="text"
                   required
                   value={quickCallDesc}
@@ -821,6 +901,7 @@ export default function KimCockpitPage() {
         </div>
       )}
 
+      <Toaster />
     </div>
   );
 }

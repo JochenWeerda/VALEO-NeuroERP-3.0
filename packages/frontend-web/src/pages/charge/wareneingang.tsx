@@ -89,7 +89,7 @@ export default function WareneingangPage(): JSX.Element {
   ].filter((item): item is { label: string; detail: string } => item !== null)
 
   function handleOcrAssist(): void {
-    const stamp = new Date().toISOString().slice(0, 16).replace(/[-:T]/g, '')
+    const stamp = new Date().toISOString().slice(0, 16).replaceAll('-', '').replaceAll(':', '').replace('T', '')
     setWareneingang((current) => ({
       ...current,
       lieferscheinNr: current.lieferscheinNr || `SCAN-${stamp}`,
