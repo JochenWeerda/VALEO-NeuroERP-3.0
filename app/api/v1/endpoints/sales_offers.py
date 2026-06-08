@@ -17,10 +17,6 @@ from ....core.tenant import get_tenant_id
 from ....services.customer_sales_eligibility import assert_customer_allowed_for_sales_order
 from ..schemas.base import PaginatedResponse
 
-from app.api.v1.schemas.base import BaseSchema
-from app.api.v1.schemas.sales_offers_schemas import SalesOffersOut
-
-
 router = APIRouter()
 
 
@@ -84,6 +80,12 @@ class SalesOffer(SalesOfferBase):
     deleted_at: Optional[datetime] = None
     version: int = 1
     items: list[SalesOfferItemOut] = Field(default_factory=list)
+
+
+class SalesOfferConversionOut(BaseModel):
+    offer: SalesOffer
+    created_order_id: str
+    created_order_number: str
 
 
 def _line_total(quantity: float, unit_price: float, discount_percent: float) -> Decimal:
@@ -481,7 +483,7 @@ async def delete_sales_offer(
 
 
 @router.post("/{offer_id}/convert-to-order", status_code=status.HTTP_200_OK, summary="Offer to order umwandeln",
-    response_model=SalesOffersOut
+    response_model=SalesOfferConversionOut
 )
 async def convert_offer_to_order(
     offer_id: str,

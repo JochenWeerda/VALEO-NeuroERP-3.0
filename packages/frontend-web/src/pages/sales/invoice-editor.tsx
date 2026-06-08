@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { useNavigate, useSearchParams } from '@/app/routing/typed-router'
 import { Card } from "@/components/ui/card"
@@ -13,6 +13,7 @@ import { apiClient } from "@/lib/api-client"
 import { downloadXRechnung, downloadZugferd } from "@/lib/api/einvoice"
 import { CustomerSalesEligibilityBanner } from "@/components/sales/CustomerSalesEligibilityBanner"
 import { useCustomerSalesEligibility } from "@/hooks/useCustomerSalesEligibility"
+import { buildSalesHandoverPath, parseSalesHandover } from "@/lib/workflow/sales-handover"
 import {
   CrudCapabilityChecklist,
   EvidenceTemplateLink,
@@ -87,10 +88,11 @@ export default function SalesInvoiceEditorPage(): JSX.Element {
   const { push } = useToast()
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
-  const editId = searchParams.get("id")
+  const salesHandover = useMemo(() => parseSalesHandover(searchParams), [searchParams])
+  const editId = salesHandover.invoiceId
   const entityType = 'invoice'
   const entityTypeLabel = getEntityTypeLabel(t, entityType, 'Rechnung')
-  const [docId, setDocId] = useState<string | null>(editId)
+  const [docId, setDocId] = useState<string | null>(editId ?? null)
   const [roleFocus, setRoleFocus] = useState<InvoiceRoleFocus>("all")
   const [invoice, setInvoice] = useState<SalesInvoice>({
     number: "",
@@ -108,6 +110,24 @@ export default function SalesInvoiceEditorPage(): JSX.Element {
     totalGross: 0,
   })
   const { data: salesEligibility } = useCustomerSalesEligibility(invoice.customerId || undefined)
+
+  useEffect(() => {
+    if (editId) return
+    setInvoice((prev) => ({
+      ...prev,
+      customerId: prev.customerId || salesHandover.customerId || salesHandover.customerNumber || "",
+      sourceOrder: prev.sourceOrder || salesHandover.sourceOrderId,
+      sourceDelivery: prev.sourceDelivery || salesHandover.sourceDeliveryId,
+      number: prev.number || salesHandover.invoiceNumber || "",
+    }))
+  }, [
+    editId,
+    salesHandover.customerId,
+    salesHandover.customerNumber,
+    salesHandover.invoiceNumber,
+    salesHandover.sourceDeliveryId,
+    salesHandover.sourceOrderId,
+  ])
 
   useEffect(() => {
     if (!editId) {
@@ -419,9 +439,18 @@ export default function SalesInvoiceEditorPage(): JSX.Element {
                 type="button"
                 variant="secondary"
                 size="sm"
-                onClick={() =>
-                  navigate(`/finance/op-debitoren?rechnungsnr=${encodeURIComponent(invoice.number.trim())}`)
-                }
+                onClick={() => navigate(buildSalesHandoverPath('/finance/op-debitoren', {
+                  customerId: salesHandover.customerId || invoice.customerId,
+                  customerNumber: salesHandover.customerNumber,
+                  customerName: salesHandover.customerName,
+                  entryMode: salesHandover.entryMode ?? 'invoice-receivables',
+                  sourceOfferId: salesHandover.sourceOfferId,
+                  sourceOrderId: salesHandover.sourceOrderId,
+                  sourceDeliveryId: salesHandover.sourceDeliveryId,
+                  invoiceId: docId ?? undefined,
+                  invoiceNumber: invoice.number.trim(),
+                }))}
+                data-action-id="sales.invoice.open-receivables"
               >
                 OP / Zahlungseingang (OTC-011)
               </Button>

@@ -4,7 +4,7 @@
  */
 
 import { useState, useEffect, useMemo, useCallback } from 'react'
-import { useNavigate } from '@/app/routing/typed-router'
+import { useNavigate, useSearchParams } from '@/app/routing/typed-router'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -84,6 +84,7 @@ type CurrentPositionDetails = {
 import { fetchDocumentNumber } from '@/hooks/useDocumentNumber'
 import { CustomerSalesEligibilityBanner } from '@/components/sales/CustomerSalesEligibilityBanner'
 import { useCustomerSalesEligibility } from '@/hooks/useCustomerSalesEligibility'
+import { buildSalesHandoverPath, parseSalesHandover } from '@/lib/workflow/sales-handover'
 
 type OfferAssistantRole = 'vertrieb' | 'innendienst' | 'auftragsabwicklung' | 'finance' | 'leitung'
 
@@ -162,6 +163,8 @@ function getErrorMessage(error: unknown): string {
 export default function AngebotErstellenPage(): JSX.Element {
   const { push } = useToast()
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
+  const handover = useMemo(() => parseSalesHandover(searchParams), [searchParams])
   const [isDirty, setIsDirty] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
   const [roleFocus, setRoleFocus] = useState<OfferAssistantRole>('vertrieb')
@@ -175,6 +178,18 @@ export default function AngebotErstellenPage(): JSX.Element {
   const [kontakt, setKontakt] = useState('')
   const [customer, setCustomer] = useState<Customer | null>(null)
   const { data: salesEligibility } = useCustomerSalesEligibility(customer?.id)
+
+  useEffect(() => {
+    const customerNumber = handover.customerNumber
+    const customerId = handover.customerId ?? customerNumber
+    if (!customerId || customer) return
+    setCustomer({
+      id: customerId,
+      customerNumber: customerNumber ?? customerId,
+      name: handover.customerName ?? customerNumber ?? customerId,
+      debitorAccount: customerNumber ?? customerId,
+    })
+  }, [customer, handover.customerId, handover.customerName, handover.customerNumber])
 
   // ── Dialoge ───────────────────────────────────────────────────────────────
   const [showAngebotAuswahl, setShowAngebotAuswahl] = useState(false) // öffnet nur per Button
@@ -435,13 +450,23 @@ export default function AngebotErstellenPage(): JSX.Element {
       return
     }
     try {
-      await apiClient.post(`/api/v1/sales/offers/${id}/convert-to-order`)
+      const converted = await apiClient.post<{
+        created_order_id: string
+        created_order_number: string
+      }>(`/api/v1/sales/offers/${id}/convert-to-order`)
       push('Angebot in Auftrag übernommen')
-      navigate(`/sales/order?fromOffer=${id}`)
+      navigate(buildSalesHandoverPath(`/sales/order-editor/${converted.created_order_id}`, {
+        customerId: customer?.id,
+        customerNumber: customer?.customerNumber || customer?.debitorAccount,
+        customerName: customer?.name,
+        entryMode: handover.entryMode ?? 'offer-conversion',
+        sourceOfferId: id,
+        sourceOrderId: converted.created_order_id,
+      }))
     } catch (err: unknown) {
       push(`Fehler: ${getErrorMessage(err)}`)
     }
-  }, [angebotId, push, navigate, customer, salesEligibility])
+  }, [angebotId, push, navigate, customer, salesEligibility, handover.entryMode])
 
   const handleDelete = useCallback(async () => {
     const id = angebotId
@@ -1021,7 +1046,13 @@ export default function AngebotErstellenPage(): JSX.Element {
           <Button variant="outline" size="sm" className="h-7 text-xs gap-1" onClick={() => setShowAttachmentDialog(true)}>
             <FileText className="h-3 w-3" /> Unterlagen
           </Button>
-          <Button variant="outline" size="sm" className="h-7 text-xs gap-1" onClick={handleConvertToOrder}>
+          <Button
+            variant="outline"
+            size="sm"
+            className="h-7 text-xs gap-1"
+            onClick={handleConvertToOrder}
+            data-action-id="sales.offer.convert-to-order"
+          >
             <FileText className="h-3 w-3" /> In Auftrag wandeln
           </Button>
           <Button

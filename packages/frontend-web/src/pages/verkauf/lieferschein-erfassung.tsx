@@ -29,6 +29,7 @@ import { ModuleToolbar } from '@/components/navigation/ModuleToolbar'
 import { CustomerChefHintsBanner } from '@/components/sales/CustomerChefHintsBanner'
 import { CustomerSalesEligibilityBanner } from '@/components/sales/CustomerSalesEligibilityBanner'
 import { useCustomerSalesEligibility } from '@/hooks/useCustomerSalesEligibility'
+import { buildSalesHandoverPath, parseSalesHandover } from '@/lib/workflow/sales-handover'
 import { NativeSelect } from '@/components/ui/native-select'
 import { ChevronLeft, ChevronRight, ChevronUp, ChevronDown, MoreHorizontal, Check, Printer, Save, X, FileText, Folder, FileCheck, Link as LinkIcon, Receipt, Trash2, Search } from 'lucide-react'
 
@@ -274,7 +275,8 @@ export default function LieferscheinErfassungPage(): JSX.Element {
   const { user } = useAuth()
   const { id: deliveryNoteId } = useParams<{ id?: string }>() // URL-Parameter für bestehenden Lieferschein
   const [searchParams] = useSearchParams()
-  const sourceOrderId = searchParams.get('auftrag') // Handover aus order-editor: ?auftrag=<id>
+  const salesHandover = useMemo(() => parseSalesHandover(searchParams), [searchParams])
+  const sourceOrderId = salesHandover.sourceOrderId
 
   const generateLieferscheinNr = (): string => {
     const year = new Date().getFullYear()
@@ -481,6 +483,47 @@ export default function LieferscheinErfassungPage(): JSX.Element {
           customer_id: string | null
           items: Array<{ article_number: string; description: string; quantity: number; unit_price: number; discount_percent: number }>
         }>(`/api/v1/sales/orders/${sourceOrderId}`)
+        const positionen: Position[] = order.items.map((item, index) => {
+          const nettoPreis = item.unit_price * (1 - item.discount_percent / 100)
+          return {
+            posNr: (index + 1) * 10,
+            artikelNr: item.article_number,
+            artikelId: null,
+            bezeichnung: item.description,
+            bezeichnung2: '',
+            menge: item.quantity,
+            einheit: 'Stk',
+            listenpreis: item.unit_price,
+            rabatt: item.discount_percent,
+            art: '',
+            nettoPreis,
+            nettoBetrag: nettoPreis * item.quantity,
+            niederlassung: '',
+            lagerhalle: '',
+            lagerfach: '',
+            charge: '',
+            serienNr: '',
+            gefPunkt: '',
+            gefahrgutPunkte: 0,
+            gesamtGefahrgutPunkte: 0,
+            naBio: '',
+            musterNr: '',
+            strecke: '',
+            zusBeleg: '',
+            anerken: '',
+            erloskonto: '',
+            mwstProzent: 19,
+            gewicht: 0,
+            gesamtGewicht: 0,
+            kontraktNr: '',
+            skontierf: false,
+            fremdware: false,
+          }
+        })
+        setState((prev) => ({
+          ...prev,
+          positionen: prev.positionen.length > 0 ? prev.positionen : positionen,
+        }))
         if (order.customer_id) {
           try {
             const cd = await apiClient.get<any>(`/api/v1/crm/customers/${order.customer_id}`)
@@ -1135,7 +1178,17 @@ export default function LieferscheinErfassungPage(): JSX.Element {
         setState((prev) => ({ ...prev, fakturiertRechnNr: docNumber }))
         const targetId = res.target_doc_id
         if (targetId && typeof navigate === 'function') {
-          navigate(`/verkauf/rechnungen/${targetId}`, { replace: false })
+          navigate(buildSalesHandoverPath('/sales/invoice-editor', {
+            customerId: state.customer?.id,
+            customerNumber: state.customer?.customerNumber || state.customer?.debitorAccount,
+            customerName: state.customer?.name,
+            entryMode: salesHandover.entryMode ?? 'delivery-conversion',
+            sourceOfferId: salesHandover.sourceOfferId,
+            sourceOrderId,
+            sourceDeliveryId: lsId,
+            invoiceId: targetId,
+            invoiceNumber: docNumber,
+          }), { replace: false })
         }
       } else {
         push('Rechnung erstellt')
@@ -2625,7 +2678,13 @@ export default function LieferscheinErfassungPage(): JSX.Element {
             <LinkIcon className="h-4 w-4" />
             Connect Anwendungen (Schnittstelle zB zum Waagenmodul)
           </Button>
-          <Button variant="outline" size="sm" className="gap-2" onClick={() => void handleCreateInvoice()}>
+          <Button
+            variant="outline"
+            size="sm"
+            className="gap-2"
+            onClick={() => void handleCreateInvoice()}
+            data-action-id="sales.delivery.create-invoice"
+          >
             <Receipt className="h-4 w-4" />
             Sofort-Rechnung
           </Button>
@@ -2927,4 +2986,3 @@ export default function LieferscheinErfassungPage(): JSX.Element {
     </div>
   )
 }
-

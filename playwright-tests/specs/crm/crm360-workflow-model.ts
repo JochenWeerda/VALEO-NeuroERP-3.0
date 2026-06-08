@@ -33,7 +33,7 @@ export const CRM_REVENUE_MODEL: readonly CrmRevenueTransition[] = [
     from: 'order',
     action: 'createDelivery',
     to: 'delivery',
-    route: '/sales/delivery-editor',
+    route: '/verkauf/lieferschein-erfassung',
     requiredContext: ['kunde'],
   },
   {

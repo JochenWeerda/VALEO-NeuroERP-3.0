@@ -20,6 +20,7 @@ import type { BelegfolgePosition } from '@/components/sales/BelegfolgePositionen
 import { useAuftraege, type Auftrag } from '@/lib/api/sales'
 import { apiClient } from '@/lib/api-client'
 import { saveFlowSpineResumeCheckpoint } from '@/lib/api/flow-spines'
+import { buildSalesHandoverPath, parseSalesHandover } from '@/lib/workflow/sales-handover'
 import { useKontraktLookup } from '@/hooks/useKontraktLookup'
 import { useAuth } from '@/hooks/useAuth'
 import { globalShortcutManager } from '@/lib/shortcuts/global-shortcuts'
@@ -307,6 +308,7 @@ export default function SalesOrderEditorPage(): JSX.Element {
   const navigate = useNavigate()
   const { id: routeId } = useParams<{ id?: string }>()
   const [searchParams] = useSearchParams()
+  const salesHandover = useMemo(() => parseSalesHandover(searchParams), [searchParams])
   const { push } = useToast()
   const { user } = useAuth()
   const queryId = searchParams.get('id') || undefined
@@ -1113,7 +1115,14 @@ export default function SalesOrderEditorPage(): JSX.Element {
     try {
       const id = state.id || (await persistOrder())
       if (!id) return
-      navigate(`/verkauf/lieferschein-erfassung?auftrag=${id}`)
+      navigate(buildSalesHandoverPath('/verkauf/lieferschein-erfassung', {
+        customerId: state.customer?.id,
+        customerNumber: state.customer?.customerNumber || state.customer?.debitorAccount,
+        customerName: state.customer?.name,
+        entryMode: salesHandover.entryMode ?? 'order-conversion',
+        sourceOfferId: salesHandover.sourceOfferId,
+        sourceOrderId: id,
+      }))
     } catch (error: any) {
       push(`Fehler beim Erstellen des Lieferscheins: ${error.response?.data?.detail || error.message}`)
     } finally {
@@ -2041,7 +2050,9 @@ export default function SalesOrderEditorPage(): JSX.Element {
             Kontrakte
           </Button>
           <Button variant="outline" size="sm" className="gap-2"
-            onClick={() => void handleCreateLieferschein()} disabled={isSaving}>
+            onClick={() => void handleCreateLieferschein()}
+            disabled={isSaving}
+            data-action-id="sales.order.create-delivery">
             <LinkIcon className="h-4 w-4" />
             In Lieferschein wandeln
           </Button>

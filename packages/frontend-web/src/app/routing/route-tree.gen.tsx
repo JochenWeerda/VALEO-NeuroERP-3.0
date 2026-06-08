@@ -11200,6 +11200,7 @@ export const generatedRouteInventory = [
 ] as const
 export const generatedSearchKeys = [
   "anfrage_id",
+  "angebot",
   "articleId",
   "articleName",
   "article_id",
@@ -11222,6 +11223,7 @@ export const generatedSearchKeys = [
   "error",
   "flaeche",
   "flik",
+  "fromOffer",
   "id",
   "inbox",
   "initialName",
@@ -11229,6 +11231,7 @@ export const generatedSearchKeys = [
   "invoiceId",
   "kunde",
   "kundeName",
+  "lieferschein",
   "lieferscheinNr",
   "mode",
   "op",
@@ -11240,6 +11243,7 @@ export const generatedSearchKeys = [
   "qualityProtocolId",
   "queueEntryId",
   "rechnung",
+  "rechnungId",
   "rechnungsnr",
   "requisitionId",
   "returnTo",

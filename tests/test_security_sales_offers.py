@@ -232,5 +232,6 @@ async def test_convert_offer_to_order_scopes_status_update_by_tenant():
     assert "WHERE id = :id AND tenant_id = :tenant_id" in update_statement
     assert update_params["id"] == "offer-1"
     assert update_params["tenant_id"] == "tenant-a"
+    assert sales_offers.SalesOfferConversionOut.model_validate(result).created_order_id
     assert result["created_order_number"] == "SO-ANG-1"
     assert db.committed is True
