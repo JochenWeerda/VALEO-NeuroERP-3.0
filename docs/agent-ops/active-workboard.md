@@ -39,6 +39,17 @@ Stand: `2026-06-07`
 **Checks:** `pytest tests/test_llm_gateway.py` (9), `test_crm_kim.py` (6), Smoke `test_admin_suite_readiness+test_kaeufergruppe` (35 gesamt) — alle grün (Container via `docker cp`+`MSYS_NO_PATHCONV=1`); `alembic upgrade head` (kunden_crm360_20260607); `tsc --noEmit` 0, `eslint src/pages/crm/kim` 0, `npm run build` grün; alle `/crm/kim/*`-Endpoints HTTP 200; Dev-Server `/crm` 200 inkl. API-Proxy.
 **Offene Risiken / Folgescope:** Konsolidierung KIM ↔ `kunden-cockpit` (klassisch belassen, nicht entfernt — Deep-Links/Tests). Belege/OP in DEV leer → reale Leerzustände bis Verkaufsdaten existieren (Mapping verifiziert). `ANTHROPIC_API_KEY` ohne Guthaben → NeuroAI engine='fallback'; Admin kann auf Ollama/OpenRouter wechseln. Direktanlage OP/Beleg aus dem Cockpit ist bewusst Folgescope: Add-Aktionen geben ehrliche „im Fachprozess anlegen"-Rückmeldung (Lesen produktionsecht, financials aus domain_shared.open_items verifiziert). Vorbestehende, nicht-KIM CSS-Build-Warnung (font-stack) + 3 Analytics-Routing-Lücken bleiben rot (Repo-Altschuld, im Workboard akzeptiert). Auf `main` gemergt + gepusht.
 
+## CRM360-MBT-001
+
+**Von:** Codex
+**Owner:** Codex
+**Stand:** reserviert 2026-06-08
+**Ziel des Slices:** Fuer das KIM-CRM-360-Cockpit einen semantischen, modellbasierten Klickvertrag einfuehren. Alle Buttons, Tabs, Links und CRUD-Aktionen werden gegen erwartete Zielmaske, Entity-Kontext, Persistenz, Ruecksprung und fachlichen CRM-to-Revenue-Workflow geprueft; die bestehende Visual-Tour bleibt reiner Smoke-Test.
+**Dateibesitz:** `docs/agent-ops/active-workboard.md`, neuer Slice-Vertrag unter `docs/agent-ops/slices/CRM360-MBT-001.yaml`, CRM-360-Testdokumentation/Report unter `docs/quality-assurance/`, neue CRM-360-Tests und Hilfen unter `playwright-tests/`, notwendige stabile Action-IDs und nachgewiesene Verdrahtungsfixes unter `packages/frontend-web/src/pages/crm/kim/**`.
+**Abnahmekriterien:** Maschinenlesbare Action-Matrix deckt alle interaktiven CRM-360-Elemente ab; Playwright prueft Sichtbarkeit, Klickbarkeit, Zielinhalt, URL/Entity-Kontext, 404/Console/Request-Fehler und Ruecksprung; echte KIM-CRUD-Pfade pruefen Persistenz, delegierte Fachprozesse werden explizit als solche validiert; CRM-to-Revenue-Modellpfad ist als ausfuehrbarer Testvertrag vorhanden; Markdown-Report klassifiziert OK, fehlende Verknuepfung, falsches Ziel, fehlendes CRUD, Back/404 und fachlich fragwuerdig.
+**Bekannte Risiken:** Testdaten und laufende Backend-Dienste koennen vollstaendige Live-CRUD-Ausfuehrung lokal begrenzen; destructive Aktionen benoetigen isolierte Fixtures oder API-Cleanup. Bestehende fachlich unvollstaendige Buttons werden nicht durch nachsichtige Assertions kaschiert.
+**Pflichtchecks:** CRM-360-Playwright-Suite, TypeScript-Typecheck der Testvertraege, Frontend-Typecheck bei UI-Aenderungen, Doku-Governance.
+
 ## CRM-GEO-ABSCHLUSS-001
 
 **Von:** Claude
