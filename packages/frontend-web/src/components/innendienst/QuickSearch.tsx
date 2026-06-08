@@ -7,7 +7,7 @@
 
 import { useState, useCallback, useRef, useEffect } from 'react'
 import { clsx } from 'clsx'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate } from '@/app/routing/react-router-compat'
 import { useQuery } from '@tanstack/react-query'
 import {
   Search,

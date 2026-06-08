@@ -1,5 +1,5 @@
 ﻿import { useMemo, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate } from '@/app/routing/react-router-compat'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import {
   createFuhrparkAusgehendesDokument,

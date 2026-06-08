@@ -10,7 +10,7 @@
 
 import { ReactNode } from 'react'
 import { clsx } from 'clsx'
-import { Link, useLocation, useNavigate } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from '@/app/routing/react-router-compat'
 import {
   ArrowLeft,
   Home,

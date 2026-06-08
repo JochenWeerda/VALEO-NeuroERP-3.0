@@ -4,7 +4,7 @@
  */
 
 import { useMemo } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useNavigate, useParams } from '@/app/routing/react-router-compat'
 import { useQuery } from '@tanstack/react-query'
 import { apiClient } from '@/lib/api-client'
 import { Badge } from '@/components/ui/badge'

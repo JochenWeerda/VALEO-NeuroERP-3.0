@@ -1,7 +1,7 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { render, screen } from '@testing-library/react'
 import { describe, expect, it, vi } from 'vitest'
-import { MemoryRouter } from 'react-router-dom'
+import { MemoryRouter } from '@/app/routing/react-router-compat'
 import FlowSpineStudioPage from '@/pages/workflow/flow-spine-studio'
 import i18n from '@/i18n/config'
 

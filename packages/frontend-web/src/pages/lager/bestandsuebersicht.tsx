@@ -7,7 +7,7 @@ import { BarChart3, TrendingDown, TrendingUp, Warehouse, Package, AlertCircle, A
 import { useMemo } from 'react'
 import { useInventoryDashboard } from '@/lib/api/dashboard'
 import { useMhdItems, useRennerItems, usePennerItems } from '@/lib/api/inventory'
-import { useNavigate, useSearchParams } from 'react-router-dom'
+import { useNavigate, useSearchParams } from '@/app/routing/react-router-compat'
 import { saveFlowSpineResumeCheckpoint } from '@/lib/api/flow-spines'
 import { WorkflowEntryBanner, readWorkflowEntryContext } from '@/components/workflow/WorkflowEntryBanner'
 

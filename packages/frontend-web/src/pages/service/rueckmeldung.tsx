@@ -4,7 +4,7 @@
  */
 
 import { useState } from 'react'
-import { useNavigate, useSearchParams } from 'react-router-dom'
+import { useNavigate, useSearchParams } from '@/app/routing/react-router-compat'
 import { useMutation } from '@tanstack/react-query'
 import { apiClient } from '@/lib/api-client'
 import { Button } from '@/components/ui/button'

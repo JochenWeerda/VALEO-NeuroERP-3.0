@@ -4,7 +4,7 @@
  */
 
 import React, { useState, useEffect, useRef } from 'react'
-import { useLocation } from 'react-router-dom'
+import { useLocation } from '@/app/routing/react-router-compat'
 import {
   Dialog,
   DialogContent,

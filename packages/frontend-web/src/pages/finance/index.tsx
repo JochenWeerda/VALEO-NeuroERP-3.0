@@ -3,7 +3,7 @@
  * Hauptübersicht für das Finance-Modul
  */
 
-import { Link } from "react-router-dom";
+import { Link } from '@/app/routing/react-router-compat';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { 
   Receipt, 

@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from '@/app/routing/react-router-compat'
 import { useQuery } from '@tanstack/react-query'
 import {
   ArrowRight,

@@ -8,7 +8,7 @@
 
 import { useState, useEffect, useCallback, useMemo, useRef, type ReactNode } from 'react'
 import { clsx } from 'clsx'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate } from '@/app/routing/react-router-compat'
 import {
   Search,
   ArrowRight,

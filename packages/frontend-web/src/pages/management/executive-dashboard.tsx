@@ -6,7 +6,7 @@
  */
 
 import { useState, useMemo } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate } from '@/app/routing/react-router-compat'
 import { useManagementDashboard, type ManagementDashboard } from '@/lib/api/betrieb'
 import { cn } from '@/lib/utils'
 import {

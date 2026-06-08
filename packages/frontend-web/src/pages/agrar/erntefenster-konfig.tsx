@@ -4,7 +4,7 @@
  */
 
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate } from '@/app/routing/react-router-compat'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { Calendar, Check, FlaskConical, Loader2, Sprout } from 'lucide-react'
 import { Button } from '@/components/ui/button'

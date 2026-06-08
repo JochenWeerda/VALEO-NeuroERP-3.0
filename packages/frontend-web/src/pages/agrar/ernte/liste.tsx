@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate } from '@/app/routing/react-router-compat'
 import { useErnten, type Ernte } from '@/lib/api/agrar'
 import { useToast } from '@/hooks/use-toast'
 import { Badge } from '@/components/ui/badge'

@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom'
+import { Link } from '@/app/routing/react-router-compat'
 import { OperationalCaseHeader } from '@/components/workflow/OperationalCaseHeader'
 import { OperationalContextPanel } from '@/components/workflow/OperationalContextPanel'
 import { OperationalTimeline } from '@/components/workflow/OperationalTimeline'

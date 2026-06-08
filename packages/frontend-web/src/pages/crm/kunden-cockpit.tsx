@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate } from '@/app/routing/react-router-compat'
 import {
   Mail, MapPin, MessageCircle, Phone, Plus, Search, User2, FileText, CalendarClock, Forward, CheckCircle2, Loader2, Target,
 } from 'lucide-react'

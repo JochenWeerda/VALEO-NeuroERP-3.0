@@ -1,4 +1,4 @@
-import { useParams } from 'react-router-dom'
+import { useParams } from '@/app/routing/react-router-compat'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'

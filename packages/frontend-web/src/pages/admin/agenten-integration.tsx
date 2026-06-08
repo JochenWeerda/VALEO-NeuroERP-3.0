@@ -4,7 +4,7 @@
  */
 
 import { useQuery } from '@tanstack/react-query'
-import { Link } from 'react-router-dom'
+import { Link } from '@/app/routing/react-router-compat'
 import {
   BookOpen,
   Bot,

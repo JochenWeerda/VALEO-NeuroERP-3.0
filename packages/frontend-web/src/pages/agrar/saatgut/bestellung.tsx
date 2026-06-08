@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate } from '@/app/routing/react-router-compat'
 import { useMutation } from '@tanstack/react-query'
 import { apiClient } from '@/lib/api-client'
 import { useKulturen, useSorten, useKunden, useSchlaege } from '@/lib/api/agrar'

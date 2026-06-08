@@ -3,7 +3,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Phone, PhoneCall, PhoneForwarded, PhoneOff, Pause } from 'lucide-react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate } from '@/app/routing/react-router-compat'
 
 export function CallWidget(): JSX.Element | null {
   const navigate = useNavigate()

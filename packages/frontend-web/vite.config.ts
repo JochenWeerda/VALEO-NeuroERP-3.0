@@ -24,7 +24,7 @@ function getVendorChunk(id: string): string | undefined {
   const pkg = getPackageName(id)
   if (!pkg) return 'vendor-misc'
 
-  if (['react', 'react-dom', 'react-router-dom'].includes(pkg)) return 'vendor-react'
+  if (['react', 'react-dom', '@tanstack/react-router'].includes(pkg)) return 'vendor-react'
   if (pkg.startsWith('@radix-ui/')) return 'vendor-radix'
   if (['lucide-react', '@radix-ui/react-icons'].includes(pkg)) return 'vendor-icons'
   if (['@tanstack/react-query', 'axios'].includes(pkg)) return 'vendor-data'
@@ -98,7 +98,7 @@ export default defineConfig(({ mode }) => {
     entries: ['index.html'],
     include: [
       'react', 'react-dom', 'react/jsx-runtime',
-      'react-router-dom',
+      '@tanstack/react-router',
       '@tanstack/react-query',
       'axios',
       'i18next', 'react-i18next',
@@ -127,7 +127,7 @@ export default defineConfig(({ mode }) => {
       clientFiles: [
         'index.html',
         './src/main.tsx',
-        './src/app/routes.tsx',
+        './src/app/routing/router.tsx',
         './src/layouts/DashboardLayout.tsx',
       ],
     },

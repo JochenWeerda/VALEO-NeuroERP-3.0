@@ -1,4 +1,4 @@
-import { matchPath } from 'react-router-dom'
+import { matchPath } from '@/app/routing/react-router-compat'
 import type { AliasGroupRouteEntry, RouteAliasEntry } from '@/app/route-builders/types'
 
 export function normalizeRelativePath(value: string | undefined): string {

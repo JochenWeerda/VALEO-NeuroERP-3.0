@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
-import { useNavigate, useLocation } from 'react-router-dom'
+import { useNavigate, useLocation } from '@/app/routing/react-router-compat'
 import { useMutation } from '@tanstack/react-query'
 import { Wizard } from '@/components/patterns/Wizard'
 import { Textarea } from '@/components/ui/textarea'

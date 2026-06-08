@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom'
+import { Link } from '@/app/routing/react-router-compat'
 import { Button } from '@/components/ui/button'
 
 export default function NotFoundPage(): JSX.Element {

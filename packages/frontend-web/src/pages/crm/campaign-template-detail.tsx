@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useNavigate, useParams } from '@/app/routing/react-router-compat'
 import { useTranslation } from 'react-i18next'
 import { z } from 'zod'
 import { ObjectPage } from '@/components/mask-builder'

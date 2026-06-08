@@ -1,5 +1,5 @@
 import { useMemo } from 'react'
-import { useNavigate, useSearchParams } from 'react-router-dom'
+import { useNavigate, useSearchParams } from '@/app/routing/react-router-compat'
 import { ObjectPage, type ObjectPageSection } from '@/components/patterns/ObjectPage'
 import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'

@@ -1,5 +1,5 @@
 ﻿import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate } from '@/app/routing/react-router-compat'
 import { useMischfutter, type Mischfutter as ApiMischfutter } from '@/lib/api/futter'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'

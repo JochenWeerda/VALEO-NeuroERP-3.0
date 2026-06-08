@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate } from '@/app/routing/react-router-compat'
 import { Archive, Download, Filter, Plus, Search, Sparkles, Upload } from 'lucide-react'
 import { PageToolbar, type ToolbarAction } from '@/components/navigation/PageToolbar'
 import { PageSection, PageSurface } from '@/components/patterns/PageSurface'

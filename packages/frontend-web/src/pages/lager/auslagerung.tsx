@@ -3,7 +3,7 @@
  * TouchCards für Artikel- und Strategieauswahl, Keyboard-Shortcuts für Desktop
  */
 import { useMemo, useState } from 'react'
-import { useNavigate, useSearchParams } from 'react-router-dom'
+import { useNavigate, useSearchParams } from '@/app/routing/react-router-compat'
 import { useQuery } from '@tanstack/react-query'
 import { Wizard } from '@/components/patterns/Wizard'
 import { ModuleToolbar } from '@/components/navigation/ModuleToolbar'

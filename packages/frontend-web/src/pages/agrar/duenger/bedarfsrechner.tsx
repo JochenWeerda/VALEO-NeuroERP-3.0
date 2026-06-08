@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate } from '@/app/routing/react-router-compat'
 import { Wizard } from '@/components/patterns/Wizard'
 import { useKulturen } from '@/lib/api/agrar'
 import { useToast } from '@/components/ui/toast-provider'

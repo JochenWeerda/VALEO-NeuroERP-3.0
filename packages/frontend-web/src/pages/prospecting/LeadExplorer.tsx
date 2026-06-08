@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState, useRef } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate } from '@/app/routing/react-router-compat'
 import { toast } from '@/hooks/use-toast'
 import { LeadCandidate, LeadSegment } from '@/types/prospecting'
 import { fetchLeadCandidates } from '@/api/prospecting'

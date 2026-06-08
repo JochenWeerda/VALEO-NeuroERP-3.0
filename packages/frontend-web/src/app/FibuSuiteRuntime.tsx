@@ -1,5 +1,5 @@
 import { useMemo } from 'react'
-import { useLocation } from 'react-router-dom'
+import { useLocation } from '@/app/routing/react-router-compat'
 import { FIBU_SUITE_ITEMS } from '@/app/navigation/fibu-suite'
 import { createRouteElementByModule } from '@/app/page-module-loader'
 import FibuSuiteDashboard from '@/layouts/FibuSuiteDashboard'

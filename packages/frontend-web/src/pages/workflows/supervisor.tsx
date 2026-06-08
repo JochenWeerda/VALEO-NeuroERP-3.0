@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate } from '@/app/routing/react-router-compat'
 import { KeyboardShortcutBar } from '@/components/keyboard/KeyboardShortcutBar'
 import { AgentProcessPanel, AgentUxPanel } from '@/components/agent'
 import { buildCoreMaskShortcuts, useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts'

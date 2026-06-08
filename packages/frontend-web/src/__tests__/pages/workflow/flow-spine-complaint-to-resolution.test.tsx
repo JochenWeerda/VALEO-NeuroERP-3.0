@@ -1,7 +1,7 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { render, screen } from '@testing-library/react'
 import { describe, expect, it, vi } from 'vitest'
-import { MemoryRouter } from 'react-router-dom'
+import { MemoryRouter } from '@/app/routing/react-router-compat'
 import FlowSpineComplaintToResolutionPage from '@/pages/workflow/flow-spine-complaint-to-resolution'
 
 const getMock = vi.hoisted(() => vi.fn())
