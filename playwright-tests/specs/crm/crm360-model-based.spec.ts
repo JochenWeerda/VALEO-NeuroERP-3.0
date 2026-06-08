@@ -76,6 +76,21 @@ async function installKimApi(page: Page): Promise<void> {
     contentType: 'text/event-stream',
     body: 'event: connected\ndata: {"status":"connected"}\n\n',
   }))
+  await page.route('**/api/v1/crm/customers/*/sales-eligibility', (route) => json(route, {
+    allowed_order: true,
+    allowed_delivery: true,
+    allowed_invoice: true,
+    reasons: [],
+  }))
+  await page.route('**/api/v1/sales/offers/?**', (route) => json(route, {
+    items: [],
+    total: 0,
+    page: 1,
+    size: 100,
+    pages: 0,
+    has_next: false,
+    has_prev: false,
+  }))
   await page.route('**/api/v1/crm/kim/**', async (route) => {
     const request = route.request()
     const url = new URL(request.url())
@@ -222,6 +237,7 @@ test.describe('CRM 360 semantic action contracts', () => {
     expect(target.searchParams.get('kunde')).toBe(customer.debtorNo)
     expect(target.searchParams.get('kundeName')).toBe(customer.name)
     expect(target.searchParams.get('entryMode')).toBe('crm360')
+    await expect(page.getByPlaceholder(/Kein Kunde/)).toHaveValue(customer.name)
     await expectCrm360RoundTrip(page)
   })
 

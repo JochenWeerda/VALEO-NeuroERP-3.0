@@ -6,11 +6,13 @@ Stand: `2026-06-07`
 
 **Von:** Codex
 **Owner:** Codex
-**Stand:** reserviert 2026-06-08
+**Stand:** abgeschlossen 2026-06-08
 **Ziel des Slices:** Den bisher nur modellierten CRM360-Folgeprozess Kunde -> Angebot -> Auftrag -> Lieferschein -> Rechnung -> OP als echten, typisierten Browser-Handover umsetzen und mit Playwright gegen Zielmaske, Kunden-/Belegkontext, Ruecksprung und 404-/Console-Fehler pruefen.
 **Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/agent-ops/slices/CRM360-MBT-002.yaml`, relevante QA-/Workflow-Doku, `app/api/v1/endpoints/sales_offers.py`, `tests/test_security_sales_offers.py`, neuer gemeinsamer Handover-Vertrag unter `packages/frontend-web/src/lib/workflow/`, `packages/frontend-web/src/pages/sales/angebot-erstellen.tsx`, `order-editor.tsx`, `delivery-editor.tsx`, `invoice-editor.tsx`, `packages/frontend-web/src/pages/verkauf/lieferschein-erfassung.tsx`, `packages/frontend-web/src/pages/finance/op-debitoren.tsx` sowie fokussierte Tests unter `playwright-tests/specs/crm/`.
 **Abnahmekriterien:** Jede Belegstufe liest und reicht einen einheitlichen Kunden-/Quellbelegkontext weiter; sichtbare Folgeprozess-Aktionen oeffnen die fachlich erwartete Maske; Browser-Zurueck endet nicht auf 404; Playwright fuehrt den gesamten Handover mit deterministischen Fixtures aus; Typecheck, Build, fokussierte Tests und Governance sind gruen.
 **Offene Risiken:** Die Fachmasken verwenden teils unterschiedliche API- und Query-Vertraege. Persistenter Live-CRUD ueber alle Stufen kann isolierte Backend-Fixtures erfordern; ein Browser-Handover darf nicht als Buchungsnachweis ausgegeben werden.
+**Ergebnis:** Einheitlicher typisierter Sales-Handover eingefuehrt; Angebot, Auftrag, kanonischer Lieferschein, Rechnung und OP transportieren Kunden- und Quellbelegkontext. Auftragspositionen werden in den Lieferschein uebernommen, die Angebot-zu-Auftrag-API besitzt ein korrektes Response-Modell, und elf kombinierte CRM360-Browsertests sind gruen.
+**Checks:** Frontend- und Playwright-Typecheck, Produktions-Build, Routing-Integritaet, Navigation-Targets, drei Backendtests und elf Playwright-Tests bestanden.
 
 ## ROUTER-NEXT-002
 

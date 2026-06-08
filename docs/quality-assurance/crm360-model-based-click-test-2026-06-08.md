@@ -56,15 +56,15 @@ Browser-CRUD. Der Unterlagen-Tab arbeitet weiterhin nur lokal und ist kein
 persistenter DMS-Nachweis. Beleg-, OP- und Kontrakt-Neuanlagen bleiben
 delegierte Fachprozesse; KIM behauptet dort keine lokale Persistenz.
 
-Der komplette Folgeprozess ab Angebot ist als ausfuehrbarer Vertrag
-modelliert. Ein produktiver Durchstich durch Auftrag, Lieferschein und
-Rechnung benoetigt jedoch isolierte, aufraeumbare Testdaten in diesen
-Fachmodulen und ist nicht durch gemockte CRM-Daten als fachlich bestanden zu
-werten.
+Der komplette Folgeprozess ab Angebot wird inzwischen mit deterministischen
+API-Fixtures im echten Browser ausgefuehrt. Ein produktiver, persistenter
+Durchstich durch Auftrag, Lieferschein, Rechnung und Finanzbuchhaltung
+benoetigt weiterhin isolierte, aufraeumbare Backend-Testdaten und ist durch
+diesen Browser-Handover nicht als Buchungsnachweis zu werten.
 
 ## Verifikation
 
-- `pnpm exec playwright test playwright-tests/specs/crm/crm360-model-based.spec.ts --project=full --reporter=line`: 10 bestanden
+- Kombinierter CRM360- und Revenue-Handover-Lauf: 11 bestanden
 - `pnpm exec tsc -p playwright-tests/tsconfig.json --noEmit --pretty false`: bestanden
 - `pnpm --dir packages/frontend-web exec tsc --noEmit --pretty false`: bestanden
 - Produktions-Build: bestanden; verbleibend ist nur der bekannte
