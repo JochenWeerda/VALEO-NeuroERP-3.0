@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate } from '@/app/routing/react-router-compat'
 import { Wizard } from '@/components/mask-builder'
 import { useMaskData } from '@/components/mask-builder/hooks'
 import { WizardConfig } from '@/components/mask-builder/types'

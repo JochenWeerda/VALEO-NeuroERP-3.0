@@ -4,7 +4,7 @@
  */
 
 import React, { useMemo } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate, useSearchParams } from '@/app/routing/react-router-compat';
 import { useTranslation } from 'react-i18next';
 import { useMutation } from '@tanstack/react-query';
 import { apiClient, getAxiosErrorMessage } from '@/lib/api-client';

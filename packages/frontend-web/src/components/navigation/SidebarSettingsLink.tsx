@@ -1,4 +1,4 @@
-import { NavLink } from 'react-router-dom'
+import { NavLink } from '@/app/routing/react-router-compat'
 import { clsx } from 'clsx'
 import { Settings } from 'lucide-react'
 

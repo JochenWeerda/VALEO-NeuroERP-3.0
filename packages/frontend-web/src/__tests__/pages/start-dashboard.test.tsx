@@ -1,7 +1,7 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { render, screen } from '@testing-library/react'
 import { Truck } from 'lucide-react'
-import { MemoryRouter } from 'react-router-dom'
+import { MemoryRouter } from '@/app/routing/react-router-compat'
 import { describe, expect, it, vi } from 'vitest'
 import type { NavItem } from '@/app/navigation/types'
 import i18n from '@/i18n/config'

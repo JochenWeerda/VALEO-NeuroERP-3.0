@@ -1,7 +1,7 @@
 slice_id: ROUTER-NEXT-001
 title: Typed TanStack Router Migration
 owner: Codex
-status: reserved
+status: completed
 goal: >-
   Die zentrale React-Router-Splat-/Alias-Runtime durch einen automatisch
   generierten, typisierten TanStack-Route-Tree ersetzen, ohne zwei
@@ -39,3 +39,11 @@ risks:
   - Hoher Blast Radius durch 569 Aliase und hunderte React-Router-Imports.
   - TypeScript-Inferenz und Bundle-Groesse muessen als Ratchet gemessen werden.
   - Parallele Frontend-Arbeit kann routergekoppelte Dateien beruehren.
+result:
+  completed_at: 2026-06-08
+  generated_routes: 757
+  legacy_redirects: 25
+  notes:
+    - React Router ist aus Dependencies und produktiven Imports entfernt.
+    - Der Kompatibilitaetsadapter nutzt TanStack Context und dient nur der schrittweisen Aufrufermigration sowie Unit-Tests.
+    - Die drei vorbestehenden Analytics-Luecken im Page-Module-Loader wurden geschlossen.

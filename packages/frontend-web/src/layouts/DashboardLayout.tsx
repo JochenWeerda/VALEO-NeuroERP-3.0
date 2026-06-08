@@ -1,5 +1,5 @@
 import { Suspense, lazy, useCallback, useEffect, useMemo, useState } from "react"
-import { Outlet } from "react-router-dom"
+import { Outlet } from '@/app/routing/react-router-compat'
 import { ActionDispatchProvider, VoiceWhisperBarHost } from "@/features/ki-usability"
 import { AppShell } from "@/components/navigation/AppShell"
 import { AdvisorDock } from "@/features/copilot/AdvisorDock"

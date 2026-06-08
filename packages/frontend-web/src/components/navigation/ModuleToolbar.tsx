@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from 'react'
 import { clsx } from 'clsx'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from '@/app/routing/react-router-compat'
 import { ArrowLeft, ChevronLeft, ChevronRight, Home, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 

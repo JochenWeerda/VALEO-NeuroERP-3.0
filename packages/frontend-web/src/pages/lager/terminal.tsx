@@ -3,7 +3,7 @@
  */
 
 import { useState, useCallback, useMemo } from 'react'
-import { useNavigate, useSearchParams } from 'react-router-dom'
+import { useNavigate, useSearchParams } from '@/app/routing/react-router-compat'
 import {
   WarehouseLayout,
   ScannerInput,

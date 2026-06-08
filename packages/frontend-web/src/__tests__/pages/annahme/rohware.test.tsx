@@ -4,14 +4,14 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { MemoryRouter } from 'react-router-dom'
+import { MemoryRouter } from '@/app/routing/react-router-compat'
 import RohwareAnnahmePage from '@/pages/annahme/rohware'
 
 const toastMock = vi.fn()
 const postMock = vi.fn()
 
-vi.mock('react-router-dom', async () => {
-  const actual = await vi.importActual('react-router-dom')
+vi.mock('@/app/routing/react-router-compat', async () => {
+  const actual = await vi.importActual('@/app/routing/react-router-compat')
   return {
     ...actual,
     useNavigate: () => vi.fn(),

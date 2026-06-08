@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { Download, FlaskConical, Play, ShieldAlert } from 'lucide-react'
-import { useSearchParams } from 'react-router-dom'
+import { useSearchParams } from '@/app/routing/react-router-compat'
 import { ErrorState, LoadingState } from '@/components/ErrorState'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'

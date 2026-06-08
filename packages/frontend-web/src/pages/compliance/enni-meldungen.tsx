@@ -6,7 +6,7 @@ import { DataTable } from '@/components/ui/data-table'
 import { KeyboardShortcutBar } from '@/components/keyboard/KeyboardShortcutBar'
 import { buildCoreMaskShortcuts, useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts'
 import { AlertTriangle, Plus } from 'lucide-react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate } from '@/app/routing/react-router-compat'
 import { useENNIMeldungen, type ENNIMeldung } from '@/lib/api/betrieb'
 import { ErrorState } from '@/components/ErrorState'
 

@@ -5,7 +5,7 @@
  * Falls back to capitalised path segments when no manifest match is found.
  */
 
-import { Link, useLocation } from 'react-router-dom'
+import { Link, useRouterState } from '@tanstack/react-router'
 import { ChevronRight, Home } from 'lucide-react'
 import { useNavSections } from '@/app/navigation/nav-runtime'
 import type { NavItem } from '@/app/navigation/types'
@@ -57,9 +57,11 @@ function findLabelInManifest(
 }
 
 export function Breadcrumbs() {
-  const location = useLocation()
+  const matches = useRouterState({ select: (state) => state.matches })
   const navSections = useNavSections()
-  const pathname = location.pathname.replace(/^\//, '')
+  const leafMatch = matches.at(-1)
+  const pathname = leafMatch?.pathname.replace(/^\//, '') ?? ''
+  const routeLabel = (leafMatch?.staticData as { breadcrumb?: string } | undefined)?.breadcrumb
 
   // Don't render on root/dashboard
   if (!pathname || pathname === '/') {
@@ -77,8 +79,8 @@ export function Breadcrumbs() {
     crumbs.push({ label: sectionLabel, path: `/${segments[0]}` })
   }
 
-  if (itemLabel) {
-    crumbs.push({ label: itemLabel })
+  if (routeLabel || itemLabel) {
+    crumbs.push({ label: routeLabel ?? itemLabel ?? humanise(segments.at(-1) ?? '') })
   } else {
     // Fallback: build from URL segments
     let currentPath = ''

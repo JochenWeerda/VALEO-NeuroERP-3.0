@@ -1,5 +1,5 @@
 import { lazy, Suspense } from 'react'
-import { Navigate, useLocation } from 'react-router-dom'
+import { Navigate, useLocation } from '@/app/routing/react-router-compat'
 import { ENABLE_CUSTOMER_MASK_BUILDER_FORM } from '@/features/crm-masks/customer-mask-support'
 
 const KundeNeuMaskBuilderPage = lazy(() => import('./kunde-neu/KundeNeuMaskBuilderPage'))

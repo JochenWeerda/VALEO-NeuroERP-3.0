@@ -1,7 +1,7 @@
 import { type ComponentType, type FormEvent, type ReactNode, type SVGProps, useState } from 'react'
 import { clsx } from 'clsx'
 import { useMutation } from '@tanstack/react-query'
-import { NavLink } from 'react-router-dom'
+import { NavLink } from '@/app/routing/react-router-compat'
 import {
   BarChart3,
   FileText,

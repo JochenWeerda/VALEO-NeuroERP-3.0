@@ -39,6 +39,7 @@ Sie richtet sich an:
 - `docs/quality-assurance/`: Browser-Use-, CRUD- und Soll-Ist-Pruefung
 - `docs/agent-ops/`: restart-sichere Parallelarbeit fuer mehrere Agenten
 - `docs/adr/`: verbindliche Architektur- und Entscheidungsregeln
+- [Frontend Routing](c:/Users/Jochen/VALEO-NeuroERP-3.0/docs/architecture/frontend-routing/README.md): TanStack-Route-Tree, typisierte Deep Links und Legacy-Redirects
 
 ## Parallele Agentenarbeit
 

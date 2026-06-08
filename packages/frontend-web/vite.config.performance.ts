@@ -43,7 +43,7 @@ export default defineConfig({
       output: {
         manualChunks: {
           // Vendor-Chunks
-          'vendor-react': ['react', 'react-dom', 'react-router-dom'],
+          'vendor-react': ['react', 'react-dom', '@tanstack/react-router'],
           'vendor-ui': ['@radix-ui/react-dialog', '@radix-ui/react-dropdown-menu', '@radix-ui/react-select'],
           'vendor-state': ['zustand'],
           'vendor-forms': ['react-hook-form', 'zod'],

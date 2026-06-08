@@ -5,7 +5,7 @@
 
 import { useMemo, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate } from '@/app/routing/react-router-compat'
 import { Command as CommandIcon, HelpCircle, Search, Zap } from 'lucide-react'
 import { globalSearch, QUICK_ACTIONS } from '@/lib/api/global-search'
 import {

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useNavigate, useParams } from '@/app/routing/react-router-compat'
 import { useTranslation } from 'react-i18next'
 import { ObjectPage } from '@/components/mask-builder'
 import { useMaskData } from '@/components/mask-builder/hooks'

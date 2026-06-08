@@ -126,8 +126,8 @@ vi.mock('@/lib/axios', () => ({
 vi.mock('@/hooks/use-toast', () => ({
   useToast: () => ({ toast: vi.fn() }),
 }))
-vi.mock('react-router-dom', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('react-router-dom')>()
+vi.mock('@/app/routing/react-router-compat', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@/app/routing/react-router-compat')>()
   return {
     ...actual,
     useNavigate: () => vi.fn(),

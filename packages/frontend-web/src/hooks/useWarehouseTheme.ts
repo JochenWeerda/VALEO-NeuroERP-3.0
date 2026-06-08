@@ -6,7 +6,7 @@
  */
 
 import { useEffect, useCallback, useState } from 'react'
-import { useLocation } from 'react-router-dom'
+import { useLocation } from '@/app/routing/react-router-compat'
 
 interface UseWarehouseThemeOptions {
   /** Automatisch aktivieren auf Lager-Routen */

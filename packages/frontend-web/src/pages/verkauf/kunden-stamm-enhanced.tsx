@@ -1,4 +1,4 @@
-import { Navigate, useParams } from 'react-router-dom'
+import { Navigate, useParams } from '@/app/routing/react-router-compat'
 
 /**
  * Kanonische Kundenpflege: /verkauf/kunden-stamm (bzw. kunde/neu).

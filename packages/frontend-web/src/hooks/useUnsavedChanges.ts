@@ -1,4 +1,4 @@
-import { useBlocker } from 'react-router-dom'
+import { useBlocker } from '@/app/routing/react-router-compat'
 
 /**
  * Blockiert die Navigation, wenn hasDirtyState true ist (ungespeicherte Änderungen).

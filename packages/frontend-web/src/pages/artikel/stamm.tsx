@@ -15,7 +15,7 @@
  */
 
 import { useEffect, useMemo, useState } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useNavigate, useParams } from '@/app/routing/react-router-compat'
 import { useMutation, useQuery } from '@tanstack/react-query'
 import {
   Package,

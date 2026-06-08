@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate } from '@/app/routing/react-router-compat'
 import { useTranslation } from 'react-i18next'
 import { ObjectPage } from '@/components/mask-builder'
 import { OperationalCaseHeader } from '@/components/workflow/OperationalCaseHeader'

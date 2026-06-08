@@ -3,7 +3,7 @@
  * Prioritaet via TouchCards statt <select>, alle Touch-Targets >= 44px
  */
 import { useState, useCallback, useEffect } from 'react'
-import { useNavigate, useSearchParams } from 'react-router-dom'
+import { useNavigate, useSearchParams } from '@/app/routing/react-router-compat'
 import { useDropzone } from 'react-dropzone'
 import { useToast } from '@/hooks/use-toast'
 import { Wizard } from '@/components/patterns/Wizard'

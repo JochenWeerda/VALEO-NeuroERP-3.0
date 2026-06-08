@@ -3,7 +3,7 @@
  * Wave 4: Schwund, Bruch, MHD-Verfall, Messdifferenz, etc.
  */
 import { useMemo, useState } from 'react'
-import { useNavigate, useSearchParams } from 'react-router-dom'
+import { useNavigate, useSearchParams } from '@/app/routing/react-router-compat'
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { Card, CardContent } from '@/components/ui/card'
 import { Wizard } from '@/components/patterns/Wizard'

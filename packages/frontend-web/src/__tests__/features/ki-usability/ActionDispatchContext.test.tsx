@@ -1,5 +1,5 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react'
-import { MemoryRouter, useLocation } from 'react-router-dom'
+import { MemoryRouter, useLocation } from '@/app/routing/react-router-compat'
 import { describe, expect, it, vi } from 'vitest'
 import { ActionDispatchProvider } from '@/features/ki-usability/context/ActionDispatchContext'
 import { useActionDispatch } from '@/features/ki-usability/context/ActionDispatchHooks'
