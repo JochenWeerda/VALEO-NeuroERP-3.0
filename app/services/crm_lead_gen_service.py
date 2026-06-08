@@ -159,6 +159,44 @@ class CrmLeadGenService:
         ]
         return {"data": data, "total": len(data)}
 
+    def get_lead(self, lead_id: str) -> Optional[dict]:
+        """Einzelnen übernommenen CRM-Lead (public.crm_leads) in Frontend-Lead-Shape."""
+        try:
+            r = self.db.execute(
+                text(
+                    "SELECT id, company, contact_person, email, phone, source, potential, "
+                    "lower(priority::text) AS priority, lower(status::text) AS status, "
+                    "notes, address, expected_close_date, assigned_to "
+                    "FROM public.crm_leads WHERE id = :id AND tenant_id = :t"
+                ),
+                {"id": lead_id, "t": self.tenant_id},
+            ).mappings().first()
+        except Exception:  # noqa: BLE001 — tolerant: fehlende Spalten/Tabelle
+            self.db.rollback()
+            r = self.db.execute(
+                text(
+                    "SELECT id, company, contact_person, email, phone, source, potential, "
+                    "lower(priority::text) AS priority, lower(status::text) AS status "
+                    "FROM public.crm_leads WHERE id = :id AND tenant_id = :t"
+                ),
+                {"id": lead_id, "t": self.tenant_id},
+            ).mappings().first()
+        if not r:
+            return None
+        _status = {"new": "new", "qualified": "qualified", "converted": "qualified", "lost": "lost"}
+        d = dict(r)
+        return {
+            "id": d["id"], "company": d.get("company") or "",
+            "contactPerson": d.get("contact_person") or "",
+            "email": d.get("email") or "", "phone": d.get("phone") or "",
+            "source": d.get("source") or "", "potential": float(d.get("potential") or 0),
+            "priority": d.get("priority") or "medium",
+            "status": _status.get(d.get("status") or "new", "new"),
+            "notes": d.get("notes") or "", "address": d.get("address") or "",
+            "expectedCloseDate": str(d["expected_close_date"]) if d.get("expected_close_date") else "",
+            "assignedTo": d.get("assigned_to") or "",
+        }
+
     def convert_lead(self, lead_id: str) -> dict:
         """Konvertiert einen Lead in einen Kunden (public.kunden) und setzt den
         Lead auf CONVERTED. Idempotent: erneutes Konvertieren liefert dieselbe

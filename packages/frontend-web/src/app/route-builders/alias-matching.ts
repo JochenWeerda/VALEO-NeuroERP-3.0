@@ -49,10 +49,10 @@ export function stripAliasPrefix(path: string, prefix: string): string {
   return normalizedPath
 }
 
-export function findMatchingAliasModule(
+export function findMatchingAliasEntry(
   entries: AliasGroupRouteEntry[],
   candidatePath: string,
-): string | null {
+): AliasGroupRouteEntry | null {
   // matchPath erwartet eine URL-Pathname mit führendem "/" (RR 6.30); relativePath aus dem
   // Splat ist ohne Slash — sonst schlagen dynamische Aliase (z. B. lead/:id) fehl.
   const pathname =
@@ -62,11 +62,42 @@ export function findMatchingAliasModule(
         ? candidatePath
         : `/${candidatePath}`
 
-  const match = [...entries]
-    .sort(compareAliasEntries)
-    .find((entry) => matchPath({ path: entry.path || '/', end: true }, pathname))
+  return (
+    [...entries]
+      .sort(compareAliasEntries)
+      .find((entry) => matchPath({ path: entry.path || '/', end: true }, pathname)) ?? null
+  )
+}
 
-  return match?.module ?? null
+export function findMatchingAliasModule(
+  entries: AliasGroupRouteEntry[],
+  candidatePath: string,
+): string | null {
+  return findMatchingAliasEntry(entries, candidatePath)?.module ?? null
+}
+
+export function findMatchingAliasEntryFromRouteAliases(
+  aliases: RouteAliasEntry[],
+  prefix: string,
+  candidatePath: string,
+): RouteAliasEntry | null {
+  const normalizedPrefix = normalizeRelativePath(prefix)
+  const normalizedCandidatePath = normalizeRelativePath(candidatePath)
+  const fullPath = normalizedCandidatePath
+    ? `${normalizedPrefix}/${normalizedCandidatePath}`
+    : normalizedPrefix
+
+  const pathname = `/${fullPath}`
+  // Erst exakte Treffer (statische Pfade), dann dynamische Pattern (matchPath) —
+  // sortiert nach Spezifität, damit z. B. crm/lead/:id den Param liefert.
+  const ranked = aliases
+    .filter((entry): entry is RouteAliasEntry & { path: string } => typeof entry.path === 'string')
+    .sort((a, b) => compareAliasEntries({ path: a.path, module: a.module }, { path: b.path, module: b.module }))
+  return (
+    ranked.find((entry) => normalizeRelativePath(entry.path) === fullPath) ??
+    ranked.find((entry) => matchPath({ path: `/${normalizeRelativePath(entry.path)}`, end: true }, pathname)) ??
+    null
+  )
 }
 
 export function findMatchingAliasModuleFromRouteAliases(
@@ -74,15 +105,5 @@ export function findMatchingAliasModuleFromRouteAliases(
   prefix: string,
   candidatePath: string,
 ): string | null {
-  const normalizedPrefix = normalizeRelativePath(prefix)
-  const normalizedCandidatePath = normalizeRelativePath(candidatePath)
-  const fullPath = normalizedCandidatePath
-    ? `${normalizedPrefix}/${normalizedCandidatePath}`
-    : normalizedPrefix
-
-  const match = aliases.find(
-    (entry) => typeof entry.path === 'string' && normalizeRelativePath(entry.path) === fullPath,
-  )
-
-  return match?.module ?? null
+  return findMatchingAliasEntryFromRouteAliases(aliases, prefix, candidatePath)?.module ?? null
 }

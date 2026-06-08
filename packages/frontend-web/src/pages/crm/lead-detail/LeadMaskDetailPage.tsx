@@ -29,7 +29,7 @@ function LeadMaskDetailPage(): JSX.Element {
 
   const { data: existingLead, isLoading, error } = useQuery({
     queryKey: queryKeys.crm.leads.detail(leadId),
-    queryFn: () => crmService.getLead(leadId),
+    queryFn: () => crmService.getFunnelLead(leadId),
     enabled: Boolean(leadId),
   })
 
