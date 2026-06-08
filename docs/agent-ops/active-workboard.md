@@ -6,11 +6,13 @@ Stand: `2026-06-07`
 
 **Von:** Codex
 **Owner:** Codex
-**Stand:** reserviert 2026-06-08
+**Stand:** abgeschlossen 2026-06-08
 **Ziel des Slices:** Fuer den CRM360-Revenue-Handover einen persistenten, wiederholbaren und aufraeumbaren UAT-Durchstich gegen reale Backend-Vertraege bereitstellen. Testdaten muessen eindeutig markiert, tenant-isoliert und nach dem Lauf entfernt werden; fehlende produktive Infrastruktur wird als explizites Gate statt als Scheinerfolg ausgewiesen.
 **Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/agent-ops/slices/CRM360-MBT-003.yaml`, relevante CRM360-UAT-/QA-Dokumentation, neue fokussierte UAT-Hilfen und Tests unter `playwright-tests/specs/crm/`, `scripts/uat/`, `tests/`, eine idempotente O2C-Repair-Migration unter `alembic/versions/` sowie nur die fuer Cleanup oder konsistente O2C-Vertraege zwingend erforderlichen Sales-/Delivery-/Invoice-Backenddateien.
 **Abnahmekriterien:** Der Lauf erzeugt oder verwendet isolierte Kunden-/Belegdaten, prueft persistente Folgeobjekte und ihren Zusammenhang, beseitigt erzeugte Daten idempotent und unterscheidet sauber zwischen bestanden, nicht konfiguriert und fachlich fehlgeschlagen; Typechecks, fokussierte Backendtests, Browser-UAT und Governance sind gruen.
 **Offene Risiken:** Eine lokal erreichbare, migrationsaktuelle Datenbank und gestartete Backenddienste koennen fehlen. Finanzbuchungen duerfen nicht destruktiv geloescht werden; gegebenenfalls endet der automatisierte Lauf vor finaler Buchung und weist diese als externes Freigabe-Gate aus.
+**Ergebnis:** Guarded UAT-Skript erzeugt einen markierten Kunden und fuehrt die realen API-Vertraege Angebot -> Auftrag -> Lieferschein -> Docflow-Rechnung aus. Persistenz, Positionen, Kunden-/Quellbelegbezug und API-Soft-Delete werden gegen eine frische DB-Session validiert; ein abschliessender ID-basierter Cleanup entfernt alle UAT-Artefakte. Behoben wurden das veraltete Lieferschein-SQL, eine fehlende Dev-Tabellenstruktur, die falsche FK-Einfuegereihenfolge der Docflow-Konvertierung und ein Best-Effort-Audit, dessen geschluckter SQL-Fehler zuvor die gesamte Fachtransaktion implizit zurueckrollte.
+**Checks:** Live-UAT `status=passed`; sieben fokussierte Backendtests bestanden; Python-Compile bestanden; Alembic steht auf `crm360_o2c_delivery_20260608 (head)`; Residuenpruefung fuer Kunden, Angebote, Lieferscheine, Docflow und Outbox jeweils `0`.
 
 ## CRM360-MBT-002
 

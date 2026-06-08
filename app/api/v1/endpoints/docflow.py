@@ -5,7 +5,7 @@ from __future__ import annotations
 from datetime import date, datetime, timezone
 from typing import Any, Optional
 
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, Response, status
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
@@ -279,6 +279,30 @@ async def get_document(
         raise HTTPException(status_code=404, detail="Document not found")
     db.commit()
     return _row_to_header_out(svc, doc_id)
+
+
+@router.delete(
+    "/{doc_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+    response_class=Response,
+    response_model=None,
+    summary="Ungebuchten Docflow-Entwurf loeschen",
+)
+async def delete_draft_document(
+    doc_id: str,
+    tenant_id: Optional[str] = Query(None),
+    db: Session = Depends(get_db),
+) -> Response:
+    effective_tenant = tenant_id or DEFAULT_TENANT
+    try:
+        _svc(db, effective_tenant).delete_draft_document(doc_id)
+    except EntityNotFoundError as exc:
+        db.rollback()
+        raise HTTPException(status_code=404, detail=exc.detail)
+    except ValidationFailedError as exc:
+        db.rollback()
+        raise HTTPException(status_code=409, detail=exc.detail)
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 
 @router.get("/{doc_id}/pos-compliance", response_model=DocflowOut, summary="Pos compliance abrufen")

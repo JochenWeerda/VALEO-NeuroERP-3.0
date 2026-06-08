@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from datetime import datetime, timezone
 from decimal import Decimal
+import json
 from typing import Optional
 from uuid import uuid4
 
@@ -497,17 +498,19 @@ async def create_delivery_from_order(
     db.execute(
         text("""
             INSERT INTO domain_sales.delivery_notes
-            (id, tenant_id, ls_nummer, status, lieferdatum, kunde_nr, kunde_name,
-             auftrags_nr, notizen, versandart, created_at, updated_at)
-            VALUES (:id, :tid, :ls, 'offen', NOW()::date, :kid, :kname,
-                    :anr, :notizen, :versand, NOW(), NOW())
+            (id, tenant_id, delivery_note_number, customer_id, delivery_date,
+             status, is_printed, is_delivered, totals, created_at, updated_at)
+            VALUES (:id, :tid, :ls, :kid, NOW()::date,
+                    'draft', FALSE, FALSE, CAST(:totals AS jsonb), NOW(), NOW())
         """),
         {
             "id": dn_id, "tid": effective_tenant, "ls": dn_nr,
-            "kid": order_row["customer_id"], "kname": order_row.get("subject", ""),
-            "anr": order_row["order_number"],
-            "notizen": order_row.get("notes", ""),
-            "versand": order_row.get("shipping_method", ""),
+            "kid": order_row["customer_id"],
+            "totals": json.dumps({
+                "netto": float(order_row.get("total_amount") or 0),
+                "mwst": 0,
+                "brutto": float(order_row.get("total_amount") or 0),
+            }),
         },
     )
 
@@ -518,15 +521,19 @@ async def create_delivery_from_order(
             text("""
                 INSERT INTO domain_sales.delivery_note_positions
                 (id, delivery_note_id, pos_nr, artikel_nr, bezeichnung,
-                 menge, einheit, listenpreis, netto_preis, netto_betrag, created_at, updated_at)
+                 menge, einheit, listenpreis, rabatt, netto_preis, netto_betrag,
+                 mwst_prozent, skontierf, fremdware, created_at, updated_at)
                 VALUES (:id, :dnid, :pos, :anr, :desc,
-                        :menge, 'Stk', :lp, :np, :nb, NOW(), NOW())
+                        :menge, 'Stk', :lp, :rabatt, :np, :nb,
+                        0, FALSE, FALSE, NOW(), NOW())
             """),
             {
                 "id": pos_id, "dnid": dn_id, "pos": i,
                 "anr": item.article_number, "desc": item.description or "",
                 "menge": item.quantity, "lp": item.unit_price,
-                "np": item.unit_price, "nb": item.line_total,
+                "rabatt": item.discount_percent,
+                "np": float(item.unit_price) * (1 - float(item.discount_percent) / 100),
+                "nb": item.line_total,
             },
         )
 

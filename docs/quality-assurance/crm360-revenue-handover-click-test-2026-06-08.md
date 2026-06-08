@@ -44,8 +44,40 @@ Quellbelege, Belegpositionen, Zielmasken sowie Console-, Page-, HTTP- und
 
 ## Grenze
 
-Die Browserausfuehrung verwendet deterministische API-Fixtures. Sie beweist
-die Verdrahtung, den Kontexttransport und die Zielmasken, aber keine
-produktive Buchung oder persistente Finanzverarbeitung. Dieser Nachweis
-erfordert einen separaten UAT-Durchstich mit isolierten, aufraeumbaren
-Backend-Testdaten.
+Die Browserausfuehrung verwendet deterministische API-Fixtures. Ergaenzend
+steht mit `scripts/uat/crm360_revenue_handover_uat.py` nun ein persistenter
+Dev-UAT gegen die realen Backend-Vertraege bereit.
+
+## Persistenter UAT
+
+Ausfuehrung:
+
+```powershell
+python scripts/uat/crm360_revenue_handover_uat.py --execute
+```
+
+Der Lauf:
+
+- verweigert Produktionsumgebungen und ist ohne `--execute` wirkungslos
+- erzeugt einen eindeutig markierten, tenant-isolierten Kunden
+- persistiert Angebot, Auftrag, Lieferschein und Docflow-Rechnung
+- validiert Positionen, Kundenkontext und Quellbelegbeziehungen
+- loescht den offenen Rechnungsentwurf ueber den oeffentlichen API-Vertrag
+- entfernt im `finally` alle erzeugten Artefakte exakt nach ihren IDs
+
+Live-Ergebnis am 2026-06-08: `status=passed`. Die anschliessende
+Residuenpruefung ergab fuer Kunden, Angebote, Lieferscheine, Docflow-Belege
+und Outbox-Ereignisse jeweils `0`.
+
+## Zusaetzlich behobene Backendfehler
+
+| Befund | Korrektur |
+| --- | --- |
+| Lieferscheinerzeugung schrieb in veraltete Spalten | SQL auf kanonisches Delivery-Schema umgestellt |
+| Dev-Datenbank enthielt trotz Alembic-Stand keine nutzbare Delivery-Struktur | idempotente Repair-Migration ergaenzt |
+| Docflow-Link wurde vor dem Ziel-Header geschrieben | FK-konforme Einfuegereihenfolge hergestellt |
+| Fehler im optionalen Audit wurde geschluckt, markierte aber die Fachtransaktion als abgebrochen | Audit in SQL-Savepoint isoliert |
+| Offene Docflow-Entwuerfe hatten keinen kontrollierten Cleanup-Vertrag | tenant-isoliertes Soft-Delete fuer `draft` und `open` ergaenzt |
+
+Eine finale Finanzbuchung oder OP-Erzeugung wird bewusst nicht automatisch
+zurueckgeloescht und bleibt ein separat freizugebender UAT-Schritt.
