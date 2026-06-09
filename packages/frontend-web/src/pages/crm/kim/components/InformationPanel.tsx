@@ -87,33 +87,39 @@ function DataCard({ title, rows }: { title: string; rows: [string, React.ReactNo
 export default function InformationPanel({ customer, section }: InformationPanelProps) {
   if (section === 'profil') {
     return (
-      <DataCard title="Profil" rows={[
-        ['Name', customer.name],
-        ['Kundengruppe', customer.custGroup || '—'],
-        ['Umsatzstatus', <Badge key="u" variant={customer.revenueStatus === 'A' ? 'success' : 'warning'}>{customer.revenueStatus}</Badge>],
-        ['ABC-Status', <Badge key="abc" variant="secondary">{customer.abcStatus}</Badge>],
-        ['Profil-Zusammenfassung', customer.profileSummary || 'Keine Zusammenfassung hinterlegt.'],
-      ]} />
+      <div data-info-section={section}>
+        <DataCard title="Profil" rows={[
+          ['Name', customer.name],
+          ['Kundengruppe', customer.custGroup || '—'],
+          ['Umsatzstatus', <Badge key="u" variant={customer.revenueStatus === 'A' ? 'success' : 'warning'}>{customer.revenueStatus}</Badge>],
+          ['ABC-Status', <Badge key="abc" variant="secondary">{customer.abcStatus}</Badge>],
+          ['Profil-Zusammenfassung', customer.profileSummary || 'Keine Zusammenfassung hinterlegt.'],
+        ]} />
+      </div>
     );
   }
   if (section === 'kreditsicherheit') {
     return (
-      <DataCard title="Kreditsicherheit" rows={[
-        ['KV-Limit', `EUR ${customer.creditLimit.toLocaleString('de-DE')}`],
-        ['Umsatzstatus', customer.revenueStatus],
-        ['ABC-Einstufung', customer.abcStatus],
-        ['Warnhinweise', customer.alertMessages.length ? customer.alertMessages.join(' · ') : 'Keine'],
-      ]} />
+      <div data-info-section={section}>
+        <DataCard title="Kreditsicherheit" rows={[
+          ['KV-Limit', `EUR ${customer.creditLimit.toLocaleString('de-DE')}`],
+          ['Umsatzstatus', customer.revenueStatus],
+          ['ABC-Einstufung', customer.abcStatus],
+          ['Warnhinweise', customer.alertMessages.length ? customer.alertMessages.join(' · ') : 'Keine'],
+        ]} />
+      </div>
     );
   }
   if (section === 'konzern') {
     return (
-      <DataCard title="Konzernzugehörigkeit" rows={[
-        ['Hauptkunde', customer.mainCust || '—'],
-        ['Konzern/Verbund', customer.coAffiliation || 'Kein Verbund hinterlegt.'],
-        ['Debitor-Nr.', customer.debtorNo],
-      ]} />
+      <div data-info-section={section}>
+        <DataCard title="Konzernzugehörigkeit" rows={[
+          ['Hauptkunde', customer.mainCust || '—'],
+          ['Konzern/Verbund', customer.coAffiliation || 'Kein Verbund hinterlegt.'],
+          ['Debitor-Nr.', customer.debtorNo],
+        ]} />
+      </div>
     );
   }
-  return <Placeholder section={section} />;
+  return <div data-info-section={section}><Placeholder section={section} /></div>;
 }

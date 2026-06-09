@@ -6,12 +6,14 @@ Stand: `2026-06-09`
 
 **Von:** Codex
 **Owner:** Codex
-**Stand:** reserviert 2026-06-09
+**Stand:** abgeschlossen 2026-06-09
 **Abstimmung:** Eng begrenzter Review-Fix fuer S2-Commit `ca39b1b06`. Claude pausiert bis zum Handoff Aenderungen an `CustomerActionBar.tsx`, `SalesDocumentsPanel.tsx` und der S2-Dispatch-Stelle in `kim/index.tsx`; S3/S4-Backend bleibt unberuehrt.
 **Ziel des Slices:** Information- und Ang./Auf.-Dropdown gegen Bauplan, Routenvertraege und modellbasierte Klicktests pruefen und nachgewiesene fachliche, logische sowie testseitige Fehler beheben.
 **Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/agent-ops/slices/KIM-L3-S2-REVIEW-001.yaml`, fokussierte QA-Doku, S2-Komponenten unter `packages/frontend-web/src/pages/crm/kim/` sowie CRM360-Action-Contracts und -Playwright-Spec.
 **Abnahmekriterien:** Ang./Auf.-Menue entspricht dem Bauplan; Uebersicht zeigt alle Belege ohne klebende Altselektion; alle Informationsmodule sind ohne 404 erreichbar; Dropdown-Aktionen sind automatisiert; TypeScript, ESLint und CRM360-Playwright sind gruen.
 **Offene Risiken:** Dateieueberschneidung mit Claudes geplantem S3-S5-Frontend; Backend-Belegtypen muessen mit dem Bauplan abgeglichen werden.
+**Ergebnis:** Ang./Auf.-Menue auf den dokumentierten Sollvertrag Angebote/Auftraege/Lieferschein/Anfrage/Bestellung/Uebersicht korrigiert. Das Belegpanel ist kontrolliert; Uebersicht zeigt wirklich alle Belege und deaktiviert die unklare Sammel-Neuanlage. Informations-Shortcuts und stabile Zielselektoren ergaenzt. Alle elf Informationsmodule und sechs Belegmenuepunkte sind modellbasiert geklickt.
+**Checks:** Frontend- und Playwright-TypeScript gruen; fokussierter ESLint gruen; CRM360-Playwright 17 Tests bestanden; Workboard und `git diff --check` gruen.
 
 ## KIM-L3-S3-S5 (CRM-Customer-360 Ausbau)
 

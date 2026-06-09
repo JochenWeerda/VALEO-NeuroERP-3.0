@@ -3,16 +3,19 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Customer, BusinessDocument } from '../types';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Plus, Calendar, FileCheck, FolderOpen } from 'lucide-react';
 
 export type DocCategory =
+  | 'ALL'
   | 'OFFER'
   | 'ORDER'
   | 'DELIVERY_NOTE'
+  | 'INQUIRY'
+  | 'PURCHASE_ORDER'
   | 'PURCHASE_OFFER'
   | 'PURCHASE_SETTLEMENT'
   | 'THIRD_PARTY_STOCK';
@@ -22,14 +25,17 @@ interface SalesDocumentsPanelProps {
   documents: BusinessDocument[];
   onOpenDocument: (document: BusinessDocument) => void;
   onCreateDocument: (category: DocCategory) => void;
-  /** Von der „Ang./Auf."-Toolbar vorgewaehlte Kategorie (steuert den aktiven Tab). */
-  categoryOverride?: DocCategory | null;
+  activeCategory: DocCategory;
+  onCategoryChange: (category: DocCategory) => void;
 }
 
 const categories: Array<{ key: DocCategory; label: string; desc: string }> = [
+  { key: 'ALL', label: 'Übersicht', desc: 'Alle kundenbezogenen Belege' },
   { key: 'OFFER', label: 'Angebote', desc: 'Vertriebs-Angebote' },
   { key: 'ORDER', label: 'Aufträge', desc: 'Silo-Abnahmen & feste Verkäufe' },
   { key: 'DELIVERY_NOTE', label: 'Lieferscheine', desc: 'Fracht- und Wiegezettel' },
+  { key: 'INQUIRY', label: 'Anfragen', desc: 'Kundenbezogene Anfragen' },
+  { key: 'PURCHASE_ORDER', label: 'Bestellungen', desc: 'Kundenbezogene Bestellungen' },
   { key: 'PURCHASE_OFFER', label: 'Kaufangebote', desc: 'Preisanfrage Erzeugnisse (KA)' },
   { key: 'PURCHASE_SETTLEMENT', label: 'Kaufabrechnungen', desc: 'Gutschriften Erzeuger (KB)' },
   { key: 'THIRD_PARTY_STOCK', label: 'Fremdbestände', desc: 'Silo-Einkellerungen Partner' },
@@ -40,16 +46,13 @@ export default function SalesDocumentsPanel({
   documents,
   onOpenDocument,
   onCreateDocument,
-  categoryOverride,
+  activeCategory,
+  onCategoryChange,
 }: SalesDocumentsPanelProps) {
-  const [activeCategory, setActiveCategory] = useState<DocCategory>('ORDER');
   const [selectedDocumentId, setSelectedDocumentId] = useState('');
-
-  // „Ang./Auf."-Dropdown der Toolbar kann die Kategorie von aussen vorwaehlen.
-  useEffect(() => {
-    if (categoryOverride) setActiveCategory(categoryOverride);
-  }, [categoryOverride]);
-  const filteredDocs = documents.filter((doc) => doc.type === activeCategory);
+  const filteredDocs = activeCategory === 'ALL'
+    ? documents
+    : documents.filter((doc) => doc.type === activeCategory);
   const selectedDocument = filteredDocs.find((doc) => doc.id === selectedDocumentId) ?? null;
 
   return (
@@ -59,7 +62,7 @@ export default function SalesDocumentsPanel({
           <button
             key={category.key}
             onClick={() => {
-              setActiveCategory(category.key);
+              onCategoryChange(category.key);
               setSelectedDocumentId('');
             }}
             className={`px-3 py-1.5 text-xs font-medium transition rounded-t-md border-b-2 ${
@@ -85,6 +88,7 @@ export default function SalesDocumentsPanel({
         </Button>
         <Button
           size="sm"
+          disabled={activeCategory === 'ALL'}
           onClick={() => onCreateDocument(activeCategory)}
           className="gap-1 mb-1"
           data-action-id="crm360.document.create"
@@ -113,7 +117,9 @@ export default function SalesDocumentsPanel({
               {filteredDocs.length === 0 ? (
                 <tr>
                   <td colSpan={9} className="p-6 text-center text-muted-foreground italic">
-                    Keine {categories.find((category) => category.key === activeCategory)?.label} für diesen Kunden registriert.
+                    {activeCategory === 'ALL'
+                      ? 'Keine Belege für diesen Kunden registriert.'
+                      : `Keine ${categories.find((category) => category.key === activeCategory)?.label} für diesen Kunden registriert.`}
                   </td>
                 </tr>
               ) : (

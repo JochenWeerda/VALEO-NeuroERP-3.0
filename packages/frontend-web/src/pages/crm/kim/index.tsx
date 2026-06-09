@@ -70,7 +70,7 @@ export default function KimCockpitPage() {
   // High-Density Workstation Tab Selection
   const [activeTab, setActiveTab] = useState<KimTab>('allgemein');
   const [activeInfoSection, setActiveInfoSection] = useState<InfoSection>('profil');
-  const [docCategory, setDocCategory] = useState<DocCategory | null>(null);
+  const [docCategory, setDocCategory] = useState<DocCategory>('ORDER');
 
   // Relational client lists synced with database
   const [contacts, setContacts] = useState<ContactPerson[]>([]);
@@ -267,6 +267,8 @@ export default function KimCockpitPage() {
       OFFER: '/sales/angebot-erstellen',
       ORDER: '/sales/order-editor',
       DELIVERY_NOTE: '/verkauf/lieferschein-erfassung',
+      INQUIRY: '/einkauf/anfrage-erfassung',
+      PURCHASE_ORDER: '/einkauf/bestellung-anlegen',
     };
     const path = paths[category];
     if (path) {
@@ -407,8 +409,8 @@ export default function KimCockpitPage() {
     }
     // Ang./Auf.-Dropdown → Belegwesen-Tab, optional mit vorgewaehlter Kategorie.
     if (action.startsWith('doc:')) {
-      const cat = action.slice('doc:'.length);
-      setDocCategory(cat === 'ALL' ? null : (cat as DocCategory));
+      const cat = action.slice('doc:'.length) as DocCategory;
+      setDocCategory(cat);
       setActiveTab('belege');
       return;
     }
@@ -578,7 +580,8 @@ export default function KimCockpitPage() {
                     documents={documents}
                     onOpenDocument={handleOpenDocument}
                     onCreateDocument={handleCreateDocument}
-                    categoryOverride={docCategory}
+                    activeCategory={docCategory}
+                    onCategoryChange={setDocCategory}
                   />
                 )}
 

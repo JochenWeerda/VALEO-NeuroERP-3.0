@@ -252,6 +252,66 @@ test.describe('CRM 360 semantic action contracts', () => {
     await guard.expectNoNewErrors(checkpoint)
   })
 
+  test('@full information dropdown opens every module in customer context without errors', async ({ page }) => {
+    await openCrm360(page)
+    const guard = new InteractionGuard(page)
+    const checkpoint = guard.checkpoint()
+    const sections = [
+      'selektion',
+      'profil',
+      'mitbewerber',
+      'kreditsicherheit',
+      'kunden-artikel',
+      'lieferanten-artikel',
+      'preisvereinbarung',
+      'konzern',
+      'zusatzfelder',
+    ]
+
+    for (const section of sections) {
+      await page.locator('[data-action-id="crm360.customer.info"]').click()
+      await page.locator(`[data-action-id="crm360.info:${section}"]`).click()
+      await expect(page.locator(`[data-info-section="${section}"]`)).toBeVisible()
+      await expect(page).toHaveURL(/\/crm(?:\?|$)/)
+    }
+
+    await page.locator('[data-action-id="crm360.customer.info"]').click()
+    await page.locator('[data-action-id="crm360.info:fibu-op"]').click()
+    await expect(page.locator('#sub-workspace-tab-finanzen')).toHaveClass(/bg-background/)
+
+    await page.locator('[data-action-id="crm360.customer.info"]').click()
+    await page.locator('[data-action-id="crm360.info:kontrakt-uebersicht"]').click()
+    await expect(page.locator('#sub-workspace-tab-kontrakte')).toHaveClass(/bg-background/)
+    await guard.expectNoNewErrors(checkpoint)
+  })
+
+  test('@full document dropdown matches the L3 categories and overview clears prior filtering', async ({ page }) => {
+    await openCrm360(page)
+    const guard = new InteractionGuard(page)
+    const checkpoint = guard.checkpoint()
+    const categories = ['OFFER', 'ORDER', 'DELIVERY_NOTE', 'INQUIRY', 'PURCHASE_ORDER', 'ALL']
+
+    for (const category of categories) {
+      await page.locator('[data-action-id="crm360.offer.create"]').click()
+      await page.locator(`[data-action-id="crm360.doc:${category}"]`).click()
+      await expect(page.locator('#sub-workspace-tab-belege')).toHaveClass(/bg-background/)
+      await expect(page.locator(`#tab-doc-sel-${category}`)).toHaveClass(/border-primary/)
+      await expect(page).toHaveURL(/\/crm(?:\?|$)/)
+    }
+
+    await page.locator('#tab-doc-sel-ORDER').click()
+    await page.locator('[data-action-id="crm360.offer.create"]').click()
+    await page.locator('[data-action-id="crm360.doc:OFFER"]').click()
+    await expect(page.locator('#tab-doc-sel-OFFER')).toHaveClass(/border-primary/)
+
+    await page.locator('[data-action-id="crm360.offer.create"]').click()
+    await page.locator('[data-action-id="crm360.doc:ALL"]').click()
+    await expect(page.locator('#tab-doc-sel-ALL')).toHaveClass(/border-primary/)
+    await expect(page.locator('[id^="doc-row-entry-"]')).toHaveCount(1)
+    await expect(page.locator('[data-action-id="crm360.document.create"]')).toBeDisabled()
+    await guard.expectNoNewErrors(checkpoint)
+  })
+
   test('@full customer master update sends the correct entity context', async ({ page }) => {
     await openCrm360(page)
 
