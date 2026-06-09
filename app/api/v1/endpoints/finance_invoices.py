@@ -112,6 +112,8 @@ def _resolve_customer_name(db: Session, customer_id: str) -> str:
     return customer_name
 
 
+# Kept temporarily for compatibility with external imports. Productive call
+# sites below use _post_sales_invoice_financials and the shared posting service.
 async def _create_gl_booking_and_op(db: Session, invoice: SalesInvoice, tenant_id: str) -> None:
     """FIBU-AR-02: Erzeugt GL-Buchung + offenen Posten für Debitoren."""
     period = invoice.date[:7]
@@ -301,6 +303,22 @@ async def _create_gl_booking_and_op(db: Session, invoice: SalesInvoice, tenant_i
     logger.info("Created/updated GL booking and OP for invoice %s", invoice.number)
 
 
+def _post_sales_invoice_financials(
+    db: Session,
+    invoice: SalesInvoice,
+    tenant_id: str,
+) -> dict[str, str]:
+    return SalesPostingService(db, tenant_id).post_ausgangsrechnung_with_op(
+        invoice_number=invoice.number,
+        invoice_date=invoice.date,
+        customer_id=invoice.customerId,
+        net_amount=invoice.subtotalNet,
+        tax_amount=invoice.totalTax,
+        gross_amount=invoice.totalGross,
+        due_date=invoice.dueDate,
+    )
+
+
 @router.post("", response_model=FinanceInvoicesOut, summary="Invoice anlegen")
 async def create_invoice(
     invoice: SalesInvoice,
@@ -339,7 +357,7 @@ async def create_invoice(
         result = save_to_store("sales_invoice", invoice.number, doc_data, repo)
 
         if invoice.status != "ENTWURF":
-            await _create_gl_booking_and_op(db, invoice, tenant_id)
+            _post_sales_invoice_financials(db, invoice, tenant_id)
             canonical = f"{invoice.number}|{invoice.date}|{invoice.totalGross}|{invoice.customerId}"
             content_hash = sha256_hex(canonical.encode("utf-8"))
             register_artifact(
@@ -417,7 +435,7 @@ async def update_invoice(
 
         old_status = existing.get("status", "ENTWURF")
         if old_status == "ENTWURF" and invoice.status != "ENTWURF":
-            await _create_gl_booking_and_op(db, invoice, tenant_id)
+            _post_sales_invoice_financials(db, invoice, tenant_id)
 
         logger.info("Invoice updated: %s", invoice_number)
         return {

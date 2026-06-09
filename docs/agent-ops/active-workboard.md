@@ -18,11 +18,13 @@ Stand: `2026-06-09`
 
 **Von:** Codex
 **Owner:** Codex
-**Stand:** reserviert 2026-06-09
+**Stand:** abgeschlossen 2026-06-09
 **Ziel des Slices:** Den CRM360-Revenue-Handover um den fachlichen Abschluss Rechnung -> Buchung -> offener Posten erweitern und gegen reale Backend-Vertraege validieren. Der Nachweis muss tenant-isoliert, revisionssicher und ohne hartes Loeschen gebuchter Finanzdaten auskommen.
 **Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/agent-ops/slices/CRM360-MBT-004.yaml`, relevante CRM360-/OTC-QA-Dokumentation, `scripts/uat/crm360_revenue_handover_uat.py`, fokussierte Tests unter `tests/`, `app/services/docflow_service.py`, `app/services/sales_posting_service.py`, `app/services/finance_transaction_service.py`, `app/infrastructure/models/journal.py` und `app/api/v1/endpoints/finance_invoices.py`.
 **Abnahmekriterien:** Ein realer oder explizit gegateter UAT weist Rechnung, Posting und Debitoren-OP samt Kunden-, Betrag-, Beleg- und Tenant-Bezug nach; Wiederholung ist idempotent; gebuchte Daten werden nur ueber fachliche Kompensation/Storno behandelt; fehlende Kontierung oder Finanzkonfiguration wird als klarer Blocker ausgewiesen; Backendtests, Live-UAT und Governance sind gruen.
 **Offene Risiken:** Posting kann Kontenplan, Geschaeftsjahr, Steuerlogik und Debitorenkonto voraussetzen. Falls kein revisionssicherer Kompensationsvertrag existiert, darf der persistente Lauf nicht buchen und muss stattdessen das fehlende Gate belastbar dokumentieren.
+**Ergebnis:** Docflow-Ausgangsrechnungen erzeugen nun ueber den gemeinsamen Sales-Posting-Service eine gebuchte, ausgeglichene JournalEntry und einen Debitoren-OP. Wiederholung mit gleichem Idempotenzschluessel ist stabil; Storno erzeugt eine GoBD-Gegenbuchung, setzt Original und Docflow-Beleg auf `reversed` und schliesst den OP als `storniert` mit Rest `0`. Auch die produktiven Finance-Invoice-Call-Sites delegieren an denselben Kern. Behoben wurden fehlende Journal-Zeilennummern und kanonische Betragsfelder, Kontonummer-zu-Konto-ID-Aufloesung, der Konflikt zwischen global eindeutigen Kontonummern und tenant-spezifischer Suche sowie freie technische Akteure in einem User-FK-Feld.
+**Checks:** Finanz-Live-UAT `status=passed` mit erhaltener reversierter Evidenzkette; Original- und Gegenbuchung jeweils Soll=Haben `20,00 EUR`, Hashwerte vorhanden, OP `storniert/offen=0`, keine verwaisten Sales-Invoice-Drafts; 91 fokussierte Backendtests, Python-Compile und Governance bestanden.
 
 ## CRM360-MBT-003
 
