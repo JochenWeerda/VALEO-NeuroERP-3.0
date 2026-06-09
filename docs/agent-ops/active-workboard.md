@@ -17,7 +17,7 @@ Stand: `2026-06-09`
 
 **Von:** Claude
 **Owner:** Claude
-**Stand:** in Arbeit 2026-06-09
+**Stand:** ABGESCHLOSSEN 2026-06-09 (Commit `3e62f00e5`) — Page→Redirect auf /crm, Nav relabelt; tsc 0, eslint clean. Folge-Lücke: WhatsApp-Deep-Link in KIM.
 **Ziel des Slices:** Das klassische „Verkauf Kunden-Cockpit" (`pages/crm/kunden-cockpit.tsx`) ablösen — durch KIM (`/crm`) funktional ersetzt. Seite wird Redirect→/crm (keine 404 für Altlinks), Nav-Eintrag als abgelöst markiert. KEINE Route-Regenerierung (route-tree.gen/navigation-routes.json sind generiert + aktuell fremd-dirty → nicht anfassen).
 **Dateibesitz:** `docs/agent-ops/active-workboard.md` (eigener Block), `packages/frontend-web/src/pages/crm/kunden-cockpit.tsx`, `packages/frontend-web/src/app/navigation/domains/commercial.tsx` (nur kunden-cockpit-Eintrag). **NICHT:** generierte Routing-Dateien, core.tsx, Fiskaly.
 **Abnahmekriterien:** `/crm/kunden-cockpit` leitet auf `/crm` um (kein 404); Nav-Eintrag kennzeichnet die Ablösung; tsc/eslint grün. Parität: WhatsApp-Deep-Link (wa.me) ist Rest-Lücke in KIM (notieren, Folge-Slice).
