@@ -117,6 +117,7 @@ export default function CustomerActionBar({ onActionClick, isLoadingAI }: Custom
       size="sm"
       onClick={() => onActionClick(a.action)}
       data-action-id={a.actionId}
+      data-global-button-handler={a.action === 'printCustomer' ? 'ignore' : undefined}
       title={a.title}
       className="gap-1.5"
     >

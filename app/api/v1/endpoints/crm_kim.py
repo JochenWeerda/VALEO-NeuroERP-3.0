@@ -67,6 +67,21 @@ class ContactPerson(BaseModel):
     priority: int = 3
     phone1: str = ""
     phone2: Optional[str] = None
+    email: Optional[str] = None
+    fax: Optional[str] = None
+    weeklySchedule: list[bool] = Field(default_factory=list)
+
+
+class ContactPersonCreate(BaseModel):
+    salutation: str = ""
+    name: str
+    firstName: str = ""
+    position: str = ""
+    birthdate: Optional[str] = None
+    priority: int = 3
+    phone1: str = ""
+    phone2: Optional[str] = None
+    email: Optional[str] = None
     fax: Optional[str] = None
     weeklySchedule: list[bool] = Field(default_factory=list)
 
@@ -288,11 +303,19 @@ def list_contacts(
     # Nutzt die vorhandene L3-Tabelle (vorname/nachname/telefon1/anrede/…, kein tenant_id).
     rows = _safe(
         db,
-        "SELECT id, anrede, nachname, vorname, position, prioritaet, telefon1, telefon2, mobil, "
+        "SELECT id, anrede, nachname, vorname, position, prioritaet, telefon1, telefon2, mobil, email, "
         "geburtsdatum FROM public.kunden_ansprechpartner "
         "WHERE kunden_nr = :k ORDER BY prioritaet NULLS LAST, nachname",
         {"k": kunden_nr},
     )
+    if not rows:
+        rows = _safe(
+            db,
+            "SELECT id, anrede, nachname, vorname, position, prioritaet, telefon1, telefon2, mobil, "
+            "geburtsdatum FROM public.kunden_ansprechpartner "
+            "WHERE kunden_nr = :k ORDER BY prioritaet NULLS LAST, nachname",
+            {"k": kunden_nr},
+        )
     out = []
     for r in rows:
         d = dict(r)
@@ -302,7 +325,8 @@ def list_contacts(
             firstName=d.get("vorname") or "", position=d.get("position") or "",
             birthdate=str(d["geburtsdatum"]) if d.get("geburtsdatum") else None,
             priority=int(d.get("prioritaet") or 3),
-            phone1=d.get("telefon1") or "", phone2=d.get("telefon2"), fax=d.get("mobil"),
+            phone1=d.get("telefon1") or "", phone2=d.get("telefon2"),
+            email=d.get("email"), fax=d.get("mobil"),
             weeklySchedule=[],
         ))
     return out
@@ -311,7 +335,7 @@ def list_contacts(
 @router.post("/customers/{kunden_nr}/contacts", response_model=StatusOut, summary="Ansprechpartner anlegen")
 def create_contact(
     kunden_nr: str,
-    body: ContactPerson,
+    body: ContactPersonCreate,
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
 ) -> StatusOut:
@@ -320,14 +344,14 @@ def create_contact(
         text(
             """
             INSERT INTO public.kunden_ansprechpartner
-                (kunden_nr, anrede, nachname, vorname, position, prioritaet, telefon1, telefon2, mobil)
-            VALUES (:k, :anrede, :name, :vorname, :pos, :prio, :t1, :t2, :fax)
+                (kunden_nr, anrede, nachname, vorname, position, prioritaet, telefon1, telefon2, mobil, email)
+            VALUES (:k, :anrede, :name, :vorname, :pos, :prio, :t1, :t2, :fax, :email)
             """
         ),
         {
             "k": kunden_nr, "anrede": body.salutation, "name": body.name,
             "vorname": body.firstName, "pos": body.position, "prio": body.priority,
-            "t1": body.phone1, "t2": body.phone2, "fax": body.fax,
+            "t1": body.phone1, "t2": body.phone2, "fax": body.fax, "email": body.email,
         },
     )
     db.commit()

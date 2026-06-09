@@ -16,6 +16,7 @@ export function GlobalButtonHandler(): null {
       const button = target.closest('button')
       
       if (!button) return
+      if (button.dataset.globalButtonHandler === 'ignore') return
 
       const buttonText = button.textContent?.trim().toLowerCase() || ''
       const hasIcon = button.querySelector('svg')
@@ -133,7 +134,7 @@ export function GlobalButtonHandler(): null {
       printTable(data, title)
     }
 
-    const extractTableData = (table: HTMLTableElement): Record<string, any>[] => {
+    const extractTableData = (table: HTMLTableElement): Record<string, string>[] => {
       const rows = Array.from(table.querySelectorAll('tbody tr'))
       if (rows.length === 0) return []
 
@@ -145,7 +146,7 @@ export function GlobalButtonHandler(): null {
       // Daten extrahieren
       return rows.map(row => {
         const cells = Array.from(row.querySelectorAll('td'))
-        const rowData: Record<string, any> = {}
+        const rowData: Record<string, string> = {}
         
         cells.forEach((cell, index) => {
           if (index < headers.length) {

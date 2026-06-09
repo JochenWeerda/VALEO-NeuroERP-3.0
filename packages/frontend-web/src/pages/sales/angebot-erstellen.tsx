@@ -4,7 +4,7 @@
  */
 
 import { useState, useEffect, useMemo, useCallback } from 'react'
-import { useNavigate, useSearchParams } from '@/app/routing/typed-router'
+import { useNavigate, useParams, useSearchParams } from '@/app/routing/typed-router'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -13,7 +13,7 @@ import { Card } from '@/components/ui/card'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
 import { CustomerSelectionDialog, type Customer } from '@/components/sales/CustomerSelectionDialog'
-import { ArtikelSuchDialog } from '@/components/sales/ArtikelSuchDialog'
+import { ArtikelSuchDialog, type Article } from '@/components/sales/ArtikelSuchDialog'
 import { LieferscheinDruckDialog, type PrintOptions } from '@/components/sales/LieferscheinDruckDialog'
 import { DmsAnhangDialog } from '@/components/dms/DmsAnhangDialog'
 import {
@@ -24,7 +24,7 @@ import {
   OperationalTaskPlan,
   RoleFocusBar,
 } from '@/components/workflow'
-import { useAngebote, type Angebot } from '@/lib/api/sales'
+import { useAngebote, type Angebot, type SalesOffer } from '@/lib/api/sales'
 import { apiClient } from '@/lib/api-client'
 import { useToast } from '@/components/ui/toast-provider'
 import {
@@ -163,10 +163,12 @@ function getErrorMessage(error: unknown): string {
 export default function AngebotErstellenPage(): JSX.Element {
   const { push } = useToast()
   const navigate = useNavigate()
+  const { id: routeOfferId } = useParams<{ id?: string }>()
   const [searchParams] = useSearchParams()
   const handover = useMemo(() => parseSalesHandover(searchParams), [searchParams])
   const [isDirty, setIsDirty] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
+  const [isLoadingOffer, setIsLoadingOffer] = useState(false)
   const [roleFocus, setRoleFocus] = useState<OfferAssistantRole>('vertrieb')
 
   // ── Angebot-Kopf ──────────────────────────────────────────────────────────
@@ -199,6 +201,58 @@ export default function AngebotErstellenPage(): JSX.Element {
   const [showAttachmentDialog, setShowAttachmentDialog] = useState(false)
   const [angebotId, setAngebotId] = useState<string | null>(null)
   const [sucheText, setSucheText] = useState('')
+
+  useEffect(() => {
+    if (!routeOfferId || routeOfferId === 'neu') return
+
+    let cancelled = false
+    setIsLoadingOffer(true)
+    apiClient.get<SalesOffer>(`/api/v1/sales/offers/${encodeURIComponent(routeOfferId)}`)
+      .then((offer) => {
+        if (cancelled) return
+        setAngebotId(offer.id)
+        setAngebotNr(offer.offer_number)
+        setDatum((offer.created_at || new Date().toISOString()).slice(0, 10))
+        setGueltigBis(offer.valid_until?.slice(0, 10) || '')
+        setStatus(offer.status)
+        setIsPauschale(offer.is_pauschale)
+        setKontakt(offer.contact_person || '')
+        setCustomer(offer.customer_id ? {
+          id: offer.customer_id,
+          customerNumber: offer.customer_id,
+          name: offer.customer_name || offer.customer_id,
+          debitorAccount: offer.customer_id,
+        } : null)
+        setPositionen(offer.items.map((item) => ({
+          posNr: item.line_number,
+          artikelNr: item.article_number,
+          artikelId: null,
+          bezeichnung: item.description || '',
+          bezeichnung2: '',
+          menge: item.quantity,
+          einheit: item.unit,
+          listenpreis: item.unit_price,
+          rabatt: item.discount_percent,
+          nettoPreis: item.quantity > 0 ? item.line_total / item.quantity : item.unit_price,
+          nettoBetrag: item.line_total,
+          ekPreis: item.ek_price || 0,
+          mwstProzent: 19,
+          gewicht: 0,
+          gesamtGewicht: 0,
+        })))
+        setIsDirty(false)
+      })
+      .catch((error: unknown) => {
+        if (!cancelled) push(`Angebot konnte nicht geladen werden: ${getErrorMessage(error)}`)
+      })
+      .finally(() => {
+        if (!cancelled) setIsLoadingOffer(false)
+      })
+
+    return () => {
+      cancelled = true
+    }
+  }, [push, routeOfferId])
 
   // ── Positionen ────────────────────────────────────────────────────────────
   const [positionen, setPositionen] = useState<AngebotPosition[]>([])
@@ -266,11 +320,21 @@ export default function AngebotErstellenPage(): JSX.Element {
     setIsDirty(true)
   }
 
-  function handleArticleSelect(article: any) {
-    const listenpreis = article.sales_price || article.salesPrice || 0
-    const ekPreis = article.purchase_price || article.purchasePrice || 0
-    const gewicht = article.weight || article.gewicht || 0
-    const mwstProzent = Number(article.mehrwertsteuer_prozent || article.mwstProzent || 19)
+  function handleArticleSelect(article: Article) {
+    const pricing = article as Article & {
+      sales_price?: number
+      salesPrice?: number
+      purchase_price?: number
+      purchasePrice?: number
+      weight?: number
+      gewicht?: number
+      mehrwertsteuer_prozent?: number
+      mwstProzent?: number
+    }
+    const listenpreis = pricing.sales_price || pricing.salesPrice || 0
+    const ekPreis = pricing.purchase_price || pricing.purchasePrice || 0
+    const gewicht = pricing.weight || pricing.gewicht || 0
+    const mwstProzent = Number(pricing.mehrwertsteuer_prozent || pricing.mwstProzent || 19)
     setCurrentPosition((prev) => ({
       ...prev,
       artikelNr: article.article_number || article.articleNumber || '',
@@ -567,15 +631,15 @@ export default function AngebotErstellenPage(): JSX.Element {
       setAktivePositionIndex(null)
       setCurrentPosition(emptyPosition(10))
       setAngebotId(null)
-    } catch (error: any) {
-      push(`Fehler beim Drucken: ${error.response?.data?.detail || error.message}`)
+    } catch (error: unknown) {
+      push(`Fehler beim Drucken: ${getErrorMessage(error)}`)
     }
   }
 
   // ── JSX ──────────────────────────────────────────────────────────────────
 
   return (
-    <div className="h-screen flex flex-col bg-gray-50">
+    <div className="h-screen flex flex-col bg-gray-50" data-offer-id={angebotId ?? undefined} aria-busy={isLoadingOffer}>
       {/* Header */}
       <div className="bg-amber-500 text-white px-4 py-2">
         <h1 className="text-lg font-bold">ANGEBOT-ERFASSUNG</h1>
