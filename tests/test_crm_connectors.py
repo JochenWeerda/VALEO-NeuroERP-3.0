@@ -1,0 +1,56 @@
+"""Reine Logik-Tests der KIM-Connectoren (ohne DB/Netz).
+
+Deckt E-Mail-Parsing/Richtungserkennung und die STT-Client-Konfiguration ab.
+"""
+
+from __future__ import annotations
+
+import pytest
+
+from app.api.v1.endpoints.crm_mail_capture import _parse_raw, _resolve_direction
+from app.services.stt_client import SttClient
+
+pytestmark = pytest.mark.unit
+
+
+RAW_MAIL = (
+    "From: Kunde Mueller <mueller@hof-mueller.de>\r\n"
+    "To: crm@valeo.de\r\n"
+    "Subject: Futterbestellung KW 24\r\n"
+    "Message-ID: <abc-123@hof-mueller.de>\r\n"
+    "Content-Type: text/plain; charset=utf-8\r\n"
+    "\r\n"
+    "Bitte 5t Schweinemastfutter liefern.\r\n"
+)
+
+
+def test_parse_raw_extracts_fields():
+    p = _parse_raw(RAW_MAIL)
+    assert p["from"] == "mueller@hof-mueller.de"
+    assert p["to"] == ["crm@valeo.de"]
+    assert p["subject"] == "Futterbestellung KW 24"
+    assert "Schweinemastfutter" in p["text"]
+    assert p["message_id"] == "abc-123@hof-mueller.de"
+
+
+def test_resolve_direction_incoming_default():
+    direction, peer = _resolve_direction(None, "mueller@hof-mueller.de", ["crm@valeo.de"])
+    assert direction == "incoming"
+    assert peer == "mueller@hof-mueller.de"
+
+
+def test_resolve_direction_outgoing_when_own_is_sender():
+    direction, _ = _resolve_direction(None, "crm@valeo.de", ["crm@valeo.de"])
+    assert direction == "outgoing"
+
+
+def test_resolve_direction_declared_wins():
+    direction, _ = _resolve_direction("outgoing", "mueller@hof-mueller.de", [])
+    assert direction == "outgoing"
+
+
+def test_stt_unconfigured_returns_none(monkeypatch):
+    monkeypatch.delenv("STT_BASE_URL", raising=False)
+    stt = SttClient(base_url="")
+    assert stt.configured is False
+    assert stt.transcribe(b"\x00\x01") is None

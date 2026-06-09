@@ -40,6 +40,7 @@ import {
   Headset,
   MessageCircle,
   ListChecks,
+  Inbox,
 } from 'lucide-react'
 import type { RawNavItem } from '@/app/navigation/types'
 import { ENABLE_PROSPECTING_UI } from '@/features/prospecting/feature-flags'
@@ -401,6 +402,15 @@ export const RAW_NAV_SECTIONS: RawNavItem[] = [
         module: '@/pages/crm/bestell-inbox',
         preferredPath: 'crm/bestell-inbox',
         keywords: ['bestellung', 'whatsapp', 'inbox', 'posteingang', 'ai', 'futterbestellung', 'erfassung'],
+        mcp: { businessDomain: 'sales', scope: 'sales:write' },
+      },
+      {
+        id: 'klaerfall-inbox',
+        label: 'Klärfall-Inbox',
+        icon: Inbox,
+        module: '@/pages/crm/klaerfall-inbox',
+        preferredPath: 'crm/klaerfall-inbox',
+        keywords: ['klärfall', 'klaerfall', 'inbox', 'auto-capture', 'unzugeordnet', 'telefon', 'email', 'whatsapp', 'transkript', 'kontakt', 'zuordnen', 'kim'],
         mcp: { businessDomain: 'sales', scope: 'sales:write' },
       },
       {

@@ -142,14 +142,31 @@ class CrmAutoCaptureService:
         betreff: Optional[str] = None,
         verweis: Optional[str] = None,
         bediener: str = "AUTO",
+        to_inbox: bool = True,
     ) -> dict:
         art = _ART_BY_CHANNEL.get((channel or "").lower(), "telefon")
         richtung = "ein" if (direction or "").lower().startswith(("in", "ein")) else "aus"
 
         resolved = self.resolve_customer(art, peer, kunden_nr)
         if not resolved:
-            # Nicht auflösbar -> nicht still verlieren: Status zurückmelden (Caller/Inbox).
-            return {"status": "unresolved", "channel": art, "peer": peer}
+            # Nicht auflösbar -> nicht still verlieren: in die Klärfall-Inbox legen,
+            # damit Innen-/Aussendienst den Kontakt manuell einem Kunden zuordnen kann.
+            auto_betreff, notiz = self._summarize(art, content)
+            inbox = None
+            if to_inbox:
+                from app.services.crm_capture_inbox_service import CrmCaptureInboxService
+
+                inbox = CrmCaptureInboxService(self.db, self.tenant_id).add(
+                    channel=art,
+                    direction=richtung,
+                    peer=peer,
+                    betreff=(betreff or auto_betreff),
+                    zusammenfassung=notiz,
+                    content=content,
+                    verweis=verweis,
+                )
+            return {"status": "unresolved", "channel": art, "peer": peer,
+                    "inbox_id": (inbox or {}).get("id")}
 
         if verweis:
             existing = self._existing_by_verweis(resolved, verweis)
