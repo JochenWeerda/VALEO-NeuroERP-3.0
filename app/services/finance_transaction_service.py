@@ -112,6 +112,41 @@ class FinanceTransactionService:
         except Exception as exc:
             logger.warning("GoBD stamp failed for %s: %s", obj.id, exc)
 
+    def _resolve_account_id(self, account_ref: str) -> str:
+        row = self.db.execute(
+            text(
+                """
+                SELECT id
+                FROM domain_erp.chart_of_accounts
+                WHERE is_active = TRUE
+                  AND (id = :account_ref OR account_number = :account_ref)
+                LIMIT 1
+                """
+            ),
+            {"account_ref": account_ref},
+        ).first()
+        if not row:
+            raise ValidationFailedError(
+                f"Active chart-of-accounts entry not found: {account_ref}"
+            )
+        return str(row[0])
+
+    def _resolve_user_id(self, user_id: Optional[str]) -> Optional[str]:
+        if not user_id:
+            return None
+        row = self.db.execute(
+            text(
+                """
+                SELECT id
+                FROM domain_shared.users
+                WHERE id = :user_id
+                LIMIT 1
+                """
+            ),
+            {"user_id": user_id},
+        ).first()
+        return str(row[0]) if row and str(row[0]) == user_id else None
+
     # ── queries ───────────────────────────────────────────────────────────────
 
     def get_by_id(self, entry_id: str) -> JournalEntry:
@@ -188,14 +223,21 @@ class FinanceTransactionService:
         self.db.add(obj)
         self.db.flush()  # get obj.id before inserting lines
 
-        for ln in lines:
+        for line_number, ln in enumerate(lines, start=1):
+            debit = Decimal(str(ln.get("debit_amount", 0)))
+            credit = Decimal(str(ln.get("credit_amount", 0)))
             line = JournalEntryLine(
                 id=uuid7(),
                 journal_entry_id=obj.id,
                 tenant_id=self.tenant_id,
-                account_id=ln.get("account_id") or ln.get("accountId") or "",
-                debit=Decimal(str(ln.get("debit_amount", 0))),
-                credit=Decimal(str(ln.get("credit_amount", 0))),
+                account_id=self._resolve_account_id(
+                    str(ln.get("account_id") or ln.get("accountId") or "")
+                ),
+                debit=debit,
+                credit=credit,
+                debit_amount=debit,
+                credit_amount=credit,
+                line_number=line_number,
                 description=ln.get("description") or "",
             )
             self.db.add(line)
@@ -231,8 +273,9 @@ class FinanceTransactionService:
         self.validate_status_transition(obj.status, "posted")
         obj.status = "posted"
         obj.posted_at = datetime.utcnow()
-        if posted_by:
-            obj.posted_by = posted_by
+        resolved_posted_by = self._resolve_user_id(posted_by)
+        if resolved_posted_by:
+            obj.posted_by = resolved_posted_by
         self.db.commit()
         self.db.refresh(obj)
         logger.info("Posted JournalEntry %s", entry_id)
@@ -286,7 +329,7 @@ class FinanceTransactionService:
         self.db.flush()
 
         # Mirror lines with debit/credit swapped
-        for ln in orig_lines:
+        for line_number, ln in enumerate(orig_lines, start=1):
             self.db.add(
                 JournalEntryLine(
                     id=uuid7(),
@@ -295,6 +338,9 @@ class FinanceTransactionService:
                     account_id=ln.account_id,
                     debit=ln.credit,
                     credit=ln.debit,
+                    debit_amount=ln.credit,
+                    credit_amount=ln.debit,
+                    line_number=line_number,
                     description=ln.description,
                 )
             )

@@ -22,6 +22,9 @@ class JournalEntryLine(Base):
     tenant_id = Column(String, ForeignKey("domain_shared.tenants.id"), nullable=True)
     debit = Column(DECIMAL(15, 2), default=0)
     credit = Column(DECIMAL(15, 2), default=0)
+    debit_amount = Column(DECIMAL(15, 2), default=0)
+    credit_amount = Column(DECIMAL(15, 2), default=0)
+    line_number = Column(Integer, nullable=False)
     description = Column(String(200), nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
