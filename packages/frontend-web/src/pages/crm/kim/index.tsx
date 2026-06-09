@@ -39,6 +39,7 @@ import FinancialOpenItemsPanel from './components/FinancialOpenItemsPanel';
 import SalesDocumentsPanel, { type DocCategory } from './components/SalesDocumentsPanel';
 import ContractsPanel from './components/ContractsPanel';
 import DocumentPanel from './components/DocumentPanel';
+import InformationPanel, { type InfoSection } from './components/InformationPanel';
 import FollowUpTaskPanel from './components/FollowUpTaskPanel';
 import NeuroAISidePanel from './components/NeuroAISidePanel';
 import ContactHistoryTable from './components/ContactHistoryTable';
@@ -54,7 +55,7 @@ import {
   Phone,
 } from 'lucide-react';
 
-type KimTab = 'allgemein' | 'belege' | 'kontrakte' | 'finanzen' | 'audit' | 'tasks' | 'chef' | 'leads' | 'geo';
+type KimTab = 'allgemein' | 'belege' | 'kontrakte' | 'finanzen' | 'audit' | 'tasks' | 'chef' | 'leads' | 'geo' | 'information';
 
 export default function KimCockpitPage() {
   const navigate = useNavigate();
@@ -67,6 +68,8 @@ export default function KimCockpitPage() {
 
   // High-Density Workstation Tab Selection
   const [activeTab, setActiveTab] = useState<KimTab>('allgemein');
+  const [activeInfoSection, setActiveInfoSection] = useState<InfoSection>('profil');
+  const [docCategory, setDocCategory] = useState<DocCategory | null>(null);
 
   // Relational client lists synced with database
   const [contacts, setContacts] = useState<ContactPerson[]>([]);
@@ -375,6 +378,22 @@ export default function KimCockpitPage() {
 
   // Handle Action click events dispatched from CustomerActionBar
   const handleHeaderAction = (action: string) => {
+    // Information-Dropdown → Subtab; Module mit echter Datenquelle nutzen vorhandene Tabs.
+    if (action.startsWith('info:')) {
+      const key = action.slice('info:'.length);
+      if (key === 'fibu-op') { setActiveTab('finanzen'); return; }
+      if (key === 'kontrakt-uebersicht') { setActiveTab('kontrakte'); return; }
+      setActiveInfoSection(key as InfoSection);
+      setActiveTab('information');
+      return;
+    }
+    // Ang./Auf.-Dropdown → Belegwesen-Tab, optional mit vorgewaehlter Kategorie.
+    if (action.startsWith('doc:')) {
+      const cat = action.slice('doc:'.length);
+      setDocCategory(cat === 'ALL' ? null : (cat as DocCategory));
+      setActiveTab('belege');
+      return;
+    }
     switch (action) {
       case 'openMaster':
         openMasterEdit();
@@ -440,6 +459,7 @@ export default function KimCockpitPage() {
   const openTasksCount = logs.filter(l => l.reSubmissionDate && !l.completed).length;
   const tabs: { key: KimTab; label: string }[] = [
     { key: 'allgemein', label: 'Allgemein / Ansprechpartner' },
+    { key: 'information', label: 'Information' },
     { key: 'belege', label: 'Belegwesen' },
     { key: 'kontrakte', label: 'Silokontrakte' },
     { key: 'finanzen', label: 'Finanzwesen (Offene Posten)' },
@@ -526,6 +546,10 @@ export default function KimCockpitPage() {
                   </div>
                 )}
 
+                {activeTab === 'information' && (
+                  <InformationPanel customer={activeCustomer} section={activeInfoSection} />
+                )}
+
                 {activeTab === 'belege' && (
                   <SalesDocumentsPanel
                     key={`documents-${workspaceResetKey}`}
@@ -533,6 +557,7 @@ export default function KimCockpitPage() {
                     documents={documents}
                     onOpenDocument={handleOpenDocument}
                     onCreateDocument={handleCreateDocument}
+                    categoryOverride={docCategory}
                   />
                 )}
 

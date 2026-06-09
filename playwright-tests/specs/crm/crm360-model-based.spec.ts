@@ -174,7 +174,9 @@ test.describe('CRM 360 semantic action contracts', () => {
     const guard = new InteractionGuard(page)
     const checkpoint = guard.checkpoint()
 
+    // „Information" ist seit S2 ein Dropdown; „Kundeninformation" öffnet den Dialog.
     await page.locator('[data-action-id="crm360.customer.info"]').click()
+    await page.locator('[data-action-id="crm360.info.dialog"]').click()
     await expect(page.getByRole('dialog', { name: 'Kundeninformation' })).toContainText(customer.debtorNo)
     await page.locator('[data-action-id="crm360.customer.info.close"]').click()
 
@@ -239,7 +241,9 @@ test.describe('CRM 360 semantic action contracts', () => {
 
   test('@full offer navigation transfers customer context and browser back returns to CRM 360', async ({ page }) => {
     await openCrm360(page)
+    // „Ang./Auf." ist seit S2 ein Dropdown; „Neues Angebot / Auftrag" navigiert.
     await page.locator('[data-action-id="crm360.offer.create"]').click()
+    await page.locator('[data-action-id="crm360.offer.new"]').click()
     await expect(page).toHaveURL(/\/sales\/angebot-erstellen\?/)
     const target = new URL(page.url())
     expect(target.searchParams.get('kunde')).toBe(customer.debtorNo)
