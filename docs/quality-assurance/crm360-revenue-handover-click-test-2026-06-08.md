@@ -1,6 +1,6 @@
 # CRM360 Revenue-Handover-Klicktest
 
-Stand: 2026-06-08
+Stand: 2026-06-09
 
 ## Ziel
 
@@ -80,4 +80,43 @@ und Outbox-Ereignisse jeweils `0`.
 | Offene Docflow-Entwuerfe hatten keinen kontrollierten Cleanup-Vertrag | tenant-isoliertes Soft-Delete fuer `draft` und `open` ergaenzt |
 
 Eine finale Finanzbuchung oder OP-Erzeugung wird bewusst nicht automatisch
-zurueckgeloescht und bleibt ein separat freizugebender UAT-Schritt.
+zurueckgeloescht.
+
+## Finanz-UAT mit Storno
+
+Der vollstaendige, revisionssichere Durchstich wird explizit aktiviert:
+
+```powershell
+python scripts/uat/crm360_revenue_handover_uat.py --execute --include-posting
+```
+
+Dieser Modus prueft zusaetzlich:
+
+- Docflow-Posting ist bei Wiederholung idempotent
+- JournalEntry besitzt Status `posted` und ist in Soll/Haben ausgeglichen
+- Debitoren-OP enthaelt Rechnungsnummer, Kunde und Bruttobetrag
+- Storno erzeugt eine separate GoBD-Gegenbuchung
+- Originalrechnung und Docflow-Beleg wechseln auf `reversed`
+- OP wechselt auf `storniert` und Restbetrag `0`
+
+Gebuchte Daten werden in diesem Modus nicht hart geloescht. Die vollstaendig
+reversierte Kette bleibt als Auditnachweis in der Dev-Datenbank erhalten.
+
+Live-Nachweis vom 2026-06-09:
+
+- Rechnung `SIV-2026-000005`
+- Original-Journal `019eaa9c-468a-77fa-adb1-15beb2e28ed9`
+- Gegenbuchung `019eaa9c-4729-77b4-bf91-08aae841f1ee`
+- OP `019eaa9c-46c9-7870-91b0-ff35e4318b6f`
+- Original und Gegenbuchung jeweils Soll/Haben `20,00 EUR`
+- OP `storniert`, `open_amount=0`, `offen=0`
+- keine verwaisten Sales-Invoice-Journalentwuerfe
+
+Zusaetzlich behoben:
+
+- verpflichtendes `journal_entry_lines.line_number` wurde nicht geschrieben
+- ORM kannte kanonische `debit_amount`/`credit_amount`-Spalten nicht
+- Kontonummern wurden faelschlich als Konto-IDs in den FK geschrieben
+- global eindeutige Kontonummern wurden tenant-spezifisch gesucht und doppelt angelegt
+- freie technische `posted_by`-Werte kollidierten mit dem User-FK
+- Finance-Invoice und Docflow verwendeten unterschiedliche Postinglogik
