@@ -12,6 +12,17 @@ Stand: `2026-06-09`
 **Abnahmekriterien:** Jede neue Aktion besitzt eine stabile semantische Action-ID; Neukunde oeffnet eine leere kanonische Kundenmaske; Print erzeugt eine druckbare Cockpit-Sicht; Ansprechpartner sind selektier- und filterbar und Oeffnen/E-Mail/Praesente arbeiten im gewaehlten Kontext; unterstuetzte Verkaufsbelege oeffnen die richtige Detail- beziehungsweise Neuanlagemaske mit Kunden-/Belegkontext; unbekannte oder noch nicht kanonisch routbare Belegarten behaupten keinen erfolgreichen Fachprozess; Typecheck, Build, Playwright und Governance sind gruen.
 **Offene Risiken:** TAPI-Wahl, CC/Benachrichtigung und neue Kontaktlog-Persistenz sind explizit nicht Teil dieses Slices. Kaufangebote, Kaufabrechnungen und Fremdbestaende duerfen nur verdrahtet werden, wenn eine kanonische Zielroute eindeutig nachweisbar ist.
 
+## KIM-L3-BACKEND-001
+
+**Von:** Claude
+**Owner:** Claude
+**Stand:** reserviert 2026-06-09
+**Abstimmung:** Komplementaer zu `KIM-L3-QUICK-001` (Codex/Claude Code). Claude Code macht die rein frontend-/routenseitigen Bedienluecken (`packages/frontend-web/src/pages/crm/kim/**` + CRM-Playwright-Vertraege). Ich (Claude) baue die von KIM-L3-QUICK-001 **ausdruecklich ausgeklammerten** Backend-Fundamente: Kontaktlog-Persistenz (Art/Betreff/Kommentar/CC), TAPI-Wahl-Trigger, internes Benachrichtigungssystem sowie kanonische Kontakte-Belegquellen. **Ich fasse KEINE Datei unter `packages/frontend-web/src/pages/crm/kim/**` und KEINE `playwright-tests/specs/crm/**` an** — Frontend-Verdrahtung dieser Backends erfolgt als Folge-Slice, nachdem KIM-L3-QUICK-001 gelandet ist.
+**Ziel des Slices:** Backend-Vertraege bereitstellen, damit die L3-Funktionen Kontaktdokumentation (Art/Betreff/Kommentar/CC), TAPI-Wahl, interne/externe Benachrichtigung und kontaktbezogene Belegtabs (Rechnungen/Mahnungen/Kontrakte/Strecken) im KIM-Cockpit fachlich hinterlegt sind.
+**Dateibesitz:** `docs/agent-ops/active-workboard.md` (nur eigener Block), `docs/agent-ops/slices/KIM-L3-BACKEND-001.yaml`, `app/api/v1/endpoints/crm_kim.py`, neue `app/services/*`-Dateien fuer Benachrichtigung/Belegquellen, neue `alembic/versions/*` Migration(en), TAPI-Anbindung via `tools/tapi-bridge`, sowie `tests/test_*`-Backendtests. **NICHT:** `packages/frontend-web/**`, `playwright-tests/specs/crm/**`.
+**Abnahmekriterien:** `create_log` persistiert Art/Betreff(kurzinfo)/Kommentar(notiz)/CC(weiterleitung_an) und `list_logs` gibt sie zurueck; TAPI-Wahl-Endpoint loest einen ausgehenden Call ueber die Bridge aus (mit Fallback/Gate ohne Bridge); internes Benachrichtigungsmodell + Endpoints (an Mitarbeiter/Abteilung) und externer Fachberater-Mail-Hook; kontaktbezogene Belegquellen-Endpoints liefern Rechnungen/Mahnungen/Kontrakte/Strecken aus kanonischen Quellen tolerant; `pytest` der neuen Tests gruen; `alembic upgrade head` idempotent.
+**Offene Risiken:** Schnittstelle zwischen meinen Backend-Endpoints und der spaeteren Frontend-Verdrahtung muss stabil benannt sein. Bei gleichzeitigem Edit von `active-workboard.md` nur den eigenen Block pflegen.
+
 ## CRM360-MBT-005
 
 **Von:** Codex
