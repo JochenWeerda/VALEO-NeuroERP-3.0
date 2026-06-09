@@ -69,7 +69,9 @@ async function installOtcApi(page: Page): Promise<void> {
     if (path === '/api/v1/sales/orders/' && method === 'GET') {
       return json(route, { items: [order], total: 1, page: 1, size: 100, pages: 1, has_next: false, has_prev: false })
     }
-    if (path === `/api/v1/crm/customers/${customer.id}` && method === 'GET') return json(route, customer)
+    // The specialist screen must retain the typed CRM handover context even
+    // when the optional customer-detail lookup has no usable payload.
+    if (path === `/api/v1/crm/customers/${customer.id}` && method === 'GET') return json(route, null)
     if (path.endsWith('/sales-eligibility') && method === 'GET') {
       return json(route, {
         allowed_order: true,
@@ -151,6 +153,7 @@ test('@full CRM360 revenue handover opens every expected specialist screen', asy
   expect(target.searchParams.get('lieferschein')).toBe('delivery-360-1')
   expect(target.searchParams.get('rechnungId')).toBe('invoice-360-1')
   expect(target.searchParams.get('rechnungsnr')).toBe('RE-360-1')
+  expect(target.searchParams.get('kunde')).toBe(customer.customer_number)
   await expect(page.locator('input[value="RE-360-1"]')).toBeVisible()
   await guard.expectNoNewErrors(checkpoint)
 

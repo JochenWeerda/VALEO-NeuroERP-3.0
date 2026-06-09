@@ -1,0 +1,42 @@
+slice_id: CRM360-MBT-005
+title: CRM360 Design-System Click Regression
+owner: Codex
+status: completed
+goal: >-
+  Den modellbasierten CRM360-Klickvertrag nach dem KIM-Designsystem-Umbau
+  erneut ausfuehren und alle Regressionen in Aktionen, CRUD, Zielmasken,
+  Kontextuebergaben und Ruecknavigation beheben.
+file_ownership:
+  - docs/agent-ops/active-workboard.md
+  - docs/agent-ops/slices/CRM360-MBT-005.yaml
+  - docs/quality-assurance/crm360-model-based-click-test-2026-06-08.md
+  - playwright-tests/specs/crm/crm360-model-based.spec.ts
+  - playwright-tests/specs/crm/crm360-revenue-handover.spec.ts
+  - playwright.config.ts
+  - playwright.global-setup.mjs
+  - playwright.global-teardown.mjs
+  - packages/frontend-web/src/pages/crm/kim
+  - packages/frontend-web/src/pages/sales/order-editor.tsx
+  - packages/frontend-web/src/pages/sales/invoice-editor.tsx
+  - packages/frontend-web/src/pages/verkauf/lieferschein-erfassung.tsx
+acceptance_criteria:
+  - Alle CRM360-Kopfaktionen und Tabs bleiben im semantischen Vertrag erfasst.
+  - Kundenstamm-Update und Telefonprotokoll pruefen echte CRUD-Requests.
+  - Angebot, OP und Revenue-Folgebelege erhalten den erwarteten Entity-Kontext.
+  - Browser-Zurueck endet auf CRM360 und nicht auf einer 404-Seite.
+  - Der Auftragseditor behaelt CRM-Handover-Kontext bei optionalem Lookup-Ausfall.
+  - Der Lieferschein reicht Kundennummer und Namen bis Rechnung und Debitoren-OP durch.
+  - Playwright startet konfliktfrei oder verwendet vorhandene Server und beendet eigene Prozesse.
+  - Typechecks, Build, CRM360-Suite und Governance sind gruen.
+risks:
+  - Externe Mailprogramme bleiben ausserhalb des Browser-Automatisierungsvertrags.
+  - Lokaler Unterlagen-Upload ist weiterhin kein persistenter DMS-Nachweis.
+result: >-
+  Der Designsystem-Umbau ist gegen elf modellbasierte CRM360- und
+  Revenue-Handover-Tests regressionsgeprueft. Veraltete DOM-Annahmen wurden
+  durch stabile Formularvertraege ersetzt, Playwright-Server werden
+  konfliktfrei wiederverwendet oder entkoppelt gestartet, und der
+  Auftragseditor und Lieferschein-Erfassung verlieren den typisierten
+  Kundenkontext nicht mehr durch einen spaeten optionalen Detail-Lookup.
+  Kundennummer und Belegreferenzen erreichen dadurch auch Rechnung und
+  Debitoren-OP.

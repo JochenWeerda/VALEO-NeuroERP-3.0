@@ -447,15 +447,26 @@ export default function SalesOrderEditorPage(): JSX.Element {
     const load = async (): Promise<void> => {
       try {
         const response = await apiClient.get<AuftragResponse>(`/api/v1/sales/orders/${editId}`)
-        let customer: Customer | null = null
+        const handoverCustomer: Customer | null =
+          salesHandover.customerNumber || salesHandover.customerName
+            ? {
+                id: response.customer_id ?? salesHandover.customerNumber ?? '',
+                customerNumber: salesHandover.customerNumber ?? '',
+                name: salesHandover.customerName ?? salesHandover.customerNumber ?? '',
+                debitorAccount: salesHandover.customerNumber ?? '',
+              }
+            : null
+        let customer: Customer | null = handoverCustomer
         if (response.customer_id) {
           try {
-            const cd = await apiClient.get<any>(`/api/v1/crm/customers/${response.customer_id}`)
+            const customerResponse = await apiClient.get<any>(`/api/v1/crm/customers/${response.customer_id}`)
+            const cd = customerResponse?.data ?? customerResponse
+            if (!cd) throw new Error('Customer detail response is empty')
             customer = {
-              id: cd.id,
-              customerNumber: cd.customer_number ?? cd.customerNumber ?? '',
-              name: cd.company_name ?? cd.name ?? '',
-              debitorAccount: cd.customer_number ?? cd.customerNumber ?? '',
+              id: cd.id ?? response.customer_id,
+              customerNumber: cd.customer_number ?? cd.customerNumber ?? handoverCustomer?.customerNumber ?? '',
+              name: cd.company_name ?? cd.name ?? handoverCustomer?.name ?? '',
+              debitorAccount: cd.customer_number ?? cd.customerNumber ?? handoverCustomer?.debitorAccount ?? '',
               representative: cd.contact_person ?? cd.representative,
               postalCode: cd.postal_code ?? cd.postalCode,
               city: cd.city,
@@ -478,7 +489,9 @@ export default function SalesOrderEditorPage(): JSX.Element {
           betreff: response.subject ?? '',
           notizen: response.description ?? '',
           vertreter: response.contact_person ?? '',
-          customer,
+          // The CRM handover may already have populated the customer from the
+          // typed query contract. An optional detail lookup must not erase it.
+          customer: customer ?? prev.customer,
           positionen: mapResponseItemsToPositionen(response.items ?? []),
         }))
       } catch (error: any) {
@@ -486,7 +499,7 @@ export default function SalesOrderEditorPage(): JSX.Element {
       }
     }
     void load()
-  }, [editId])
+  }, [editId, salesHandover.customerName, salesHandover.customerNumber])
 
   useEffect(() => {
     if (!isWorkflowEntry) return

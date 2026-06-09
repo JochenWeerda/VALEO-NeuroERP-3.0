@@ -477,6 +477,16 @@ export default function LieferscheinErfassungPage(): JSX.Element {
     if (!sourceOrderId || deliveryNoteId) return
     const loadOrderContext = async (): Promise<void> => {
       try {
+        const handoverCustomer: Customer | null = (
+          salesHandover.customerNumber || salesHandover.customerName
+        )
+          ? {
+              id: salesHandover.customerId ?? salesHandover.customerNumber ?? '',
+              customerNumber: salesHandover.customerNumber ?? '',
+              name: salesHandover.customerName ?? salesHandover.customerNumber ?? '',
+              debitorAccount: salesHandover.customerNumber ?? '',
+            }
+          : null
         const order = await apiClient.get<{
           id: string
           order_number: string
@@ -522,18 +532,21 @@ export default function LieferscheinErfassungPage(): JSX.Element {
         })
         setState((prev) => ({
           ...prev,
+          customer: prev.customer ?? handoverCustomer,
           positionen: prev.positionen.length > 0 ? prev.positionen : positionen,
         }))
         if (order.customer_id) {
           try {
-            const cd = await apiClient.get<any>(`/api/v1/crm/customers/${order.customer_id}`)
+            const customerResponse = await apiClient.get<any>(`/api/v1/crm/customers/${order.customer_id}`)
+            const cd = customerResponse?.data ?? customerResponse
+            if (!cd) throw new Error('Empty customer detail response')
             setState((prev) => ({
               ...prev,
               customer: {
-                id: cd.id,
-                customerNumber: cd.customer_number ?? cd.customerNumber ?? '',
-                name: cd.company_name ?? cd.name ?? '',
-                debitorAccount: cd.customer_number ?? cd.customerNumber ?? '',
+                id: cd.id ?? handoverCustomer?.id ?? order.customer_id,
+                customerNumber: cd.customer_number ?? cd.customerNumber ?? handoverCustomer?.customerNumber ?? '',
+                name: cd.company_name ?? cd.name ?? handoverCustomer?.name ?? '',
+                debitorAccount: cd.customer_number ?? cd.customerNumber ?? handoverCustomer?.debitorAccount ?? '',
                 representative: cd.contact_person ?? cd.representative,
                 postalCode: cd.postal_code ?? cd.postalCode,
                 city: cd.city,
@@ -552,7 +565,14 @@ export default function LieferscheinErfassungPage(): JSX.Element {
       } catch { /* Auftrag nicht geladen — kein Fehler, leerer LS */ }
     }
     void loadOrderContext()
-  }, [sourceOrderId, deliveryNoteId, push])
+  }, [
+    sourceOrderId,
+    deliveryNoteId,
+    push,
+    salesHandover.customerId,
+    salesHandover.customerName,
+    salesHandover.customerNumber,
+  ])
 
   const [currentPosition, setCurrentPosition] = useState<CurrentPositionDetails>({
     posNr: 10,
