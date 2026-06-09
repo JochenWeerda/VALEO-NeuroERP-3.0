@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useEffect } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import {
@@ -13,6 +13,7 @@ import {
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
+  DropdownMenuCheckboxItem,
 } from '@/components/ui/dropdown-menu';
 import {
   FolderOpen,
@@ -27,6 +28,7 @@ import {
   RefreshCw,
   FilterX,
   ChevronDown,
+  Settings2,
 } from 'lucide-react';
 
 interface CustomerActionBarProps {
@@ -62,7 +64,6 @@ const ACTION_GROUPS: ActionDef[][] = [
   ],
 ];
 
-// L3 „Information"-Menü → Information-Subtabs der Kundenakte.
 const INFO_ITEMS: { action: string; label: string }[] = [
   { action: 'info:selektion', label: 'Selektion' },
   { action: 'info:profil', label: 'Profil' },
@@ -77,7 +78,6 @@ const INFO_ITEMS: { action: string; label: string }[] = [
   { action: 'info:zusatzfelder', label: 'Zusätzliche Felder/Angaben' },
 ];
 
-// L3 „Ang./Auf."-Menü → kundenbezogene Belegkategorien (Belegwesen-Tab).
 const DOC_ITEMS: { action: string; label: string }[] = [
   { action: 'doc:OFFER', label: 'Angebote' },
   { action: 'doc:ORDER', label: 'Aufträge' },
@@ -87,9 +87,50 @@ const DOC_ITEMS: { action: string; label: string }[] = [
   { action: 'doc:ALL', label: 'Übersicht' },
 ];
 
-export default function CustomerActionBar({ onActionClick, isLoadingAI }: CustomerActionBarProps) {
+// S5: benutzerbezogen konfigurierbare Sichtbarkeit (Schlüssel = actionId).
+const CONFIGURABLE: { actionId: string; label: string }[] = [
+  { actionId: 'crm360.master.open', label: 'Öffnen' },
+  { actionId: 'crm360.customer.create', label: 'Neukunde' },
+  { actionId: 'crm360.presents.open', label: 'Präsente' },
+  { actionId: 'crm360.customer.info', label: 'Information' },
+  { actionId: 'crm360.call.create', label: 'Telefon' },
+  { actionId: 'crm360.email.open', label: 'E-Mail' },
+  { actionId: 'crm360.offer.create', label: 'Ang./Auf.' },
+  { actionId: 'crm360.receivables.open', label: 'Faktur' },
+  { actionId: 'crm360.customer.print', label: 'Drucken' },
+  { actionId: 'crm360.filters.reset', label: 'Filter rstd.' },
+];
 
-  // Globale Power-User-Tastenkürzel (Direktaktionen; Dropdowns sind per Klick erreichbar).
+const STORAGE_KEY = 'kim.toolbar.hidden';
+
+function loadHidden(): Set<string> {
+  try {
+    const raw = typeof window !== 'undefined' ? window.localStorage.getItem(STORAGE_KEY) : null;
+    return new Set(raw ? (JSON.parse(raw) as string[]) : []);
+  } catch {
+    return new Set();
+  }
+}
+
+export default function CustomerActionBar({ onActionClick, isLoadingAI }: CustomerActionBarProps) {
+  const [hidden, setHidden] = useState<Set<string>>(loadHidden);
+
+  const persist = useCallback((next: Set<string>) => {
+    setHidden(next);
+    try { window.localStorage.setItem(STORAGE_KEY, JSON.stringify([...next])); } catch { /* localStorage optional */ }
+  }, []);
+
+  const isVisible = useCallback((actionId: string) => !hidden.has(actionId), [hidden]);
+
+  const toggle = (actionId: string) => {
+    const next = new Set(hidden);
+    if (next.has(actionId)) next.delete(actionId); else next.add(actionId);
+    persist(next);
+  };
+
+  const resetToDefault = () => persist(new Set());
+
+  // Globale Power-User-Tastenkürzel (Direktaktionen).
   useEffect(() => {
     const handleShortcuts = (e: KeyboardEvent) => {
       const node = e.target as HTMLElement;
@@ -100,28 +141,16 @@ export default function CustomerActionBar({ onActionClick, isLoadingAI }: Custom
         o: 'openMaster', n: 'newCustomer', p: 'presents', t: 'logCall',
         a: 'newOrder', f: 'billingCheck', d: 'printCustomer', k: 'neuroIntelligence',
       };
-      if (e.altKey && map[e.key]) {
-        e.preventDefault();
-        onActionClick(map[e.key]);
-      }
-      if (e.key === 'F11') {
-        e.preventDefault();
-        onActionClick('info:kunden-artikel');
-      }
-      if (e.ctrlKey && e.key.toLowerCase() === 'b') {
-        e.preventDefault();
-        onActionClick('info:preisvereinbarung');
-      }
-      if (e.ctrlKey && e.key.toLowerCase() === 'z') {
-        e.preventDefault();
-        onActionClick('info:konzern');
-      }
+      if (e.altKey && map[e.key]) { e.preventDefault(); onActionClick(map[e.key]); }
+      if (e.key === 'F11') { e.preventDefault(); onActionClick('info:kunden-artikel'); }
+      if (e.ctrlKey && e.key.toLowerCase() === 'b') { e.preventDefault(); onActionClick('info:preisvereinbarung'); }
+      if (e.ctrlKey && e.key.toLowerCase() === 'z') { e.preventDefault(); onActionClick('info:konzern'); }
     };
     window.addEventListener('keydown', handleShortcuts);
     return () => window.removeEventListener('keydown', handleShortcuts);
   }, [onActionClick]);
 
-  const renderButton = (a: ActionDef) => (
+  const renderButton = (a: ActionDef) => isVisible(a.actionId) ? (
     <Button
       key={a.action}
       variant="outline"
@@ -135,7 +164,7 @@ export default function CustomerActionBar({ onActionClick, isLoadingAI }: Custom
       <span className="text-primary">{a.icon}</span>
       {a.label}
     </Button>
-  );
+  ) : null;
 
   return (
     <div className="flex items-center justify-between gap-2 flex-wrap rounded-md border border-border bg-muted/40 px-2 py-1.5" id="customer-action-bar">
@@ -145,27 +174,29 @@ export default function CustomerActionBar({ onActionClick, isLoadingAI }: Custom
         {ACTION_GROUPS[0].map(renderButton)}
 
         {/* Information-Dropdown */}
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="outline" size="sm" data-action-id="crm360.customer.info" title="Kunden-Informationsmodule" className="gap-1.5">
-              <span className="text-primary"><Info size={14} /></span>
-              Information
-              <ChevronDown size={13} className="opacity-60" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="start" className="w-56">
-            <DropdownMenuItem data-action-id="crm360.info.dialog" onSelect={() => onActionClick('infoPopup')}>
-              Kundeninformation
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuLabel>Informationsmodule</DropdownMenuLabel>
-            {INFO_ITEMS.map((it) => (
-              <DropdownMenuItem key={it.action} data-action-id={`crm360.${it.action}`} onSelect={() => onActionClick(it.action)}>
-                {it.label}
+        {isVisible('crm360.customer.info') && (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" size="sm" data-action-id="crm360.customer.info" title="Kunden-Informationsmodule" className="gap-1.5">
+                <span className="text-primary"><Info size={14} /></span>
+                Information
+                <ChevronDown size={13} className="opacity-60" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="start" className="w-56 max-h-[70vh] overflow-y-auto">
+              <DropdownMenuItem data-action-id="crm360.info.dialog" onSelect={() => onActionClick('infoPopup')}>
+                Kundeninformation
               </DropdownMenuItem>
-            ))}
-          </DropdownMenuContent>
-        </DropdownMenu>
+              <DropdownMenuSeparator />
+              <DropdownMenuLabel>Informationsmodule</DropdownMenuLabel>
+              {INFO_ITEMS.map((it) => (
+                <DropdownMenuItem key={it.action} data-action-id={`crm360.${it.action}`} onSelect={() => onActionClick(it.action)}>
+                  {it.label}
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        )}
 
         <Separator orientation="vertical" className="h-5 mx-1" />
         {/* Gruppe 2: Telefon / E-Mail */}
@@ -173,27 +204,29 @@ export default function CustomerActionBar({ onActionClick, isLoadingAI }: Custom
 
         <Separator orientation="vertical" className="h-5 mx-1" />
         {/* Ang./Auf.-Dropdown */}
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="outline" size="sm" data-action-id="crm360.offer.create" title="Angebote / Aufträge / Belege [Alt + A]" className="gap-1.5">
-              <span className="text-primary"><FileSignature size={14} /></span>
-              Ang./Auf.
-              <ChevronDown size={13} className="opacity-60" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="start" className="w-52">
-            <DropdownMenuItem data-action-id="crm360.offer.new" onSelect={() => onActionClick('newOrder')}>
-              Neues Angebot / Auftrag
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuLabel>Belegkategorien</DropdownMenuLabel>
-            {DOC_ITEMS.map((it) => (
-              <DropdownMenuItem key={it.action} data-action-id={`crm360.${it.action}`} onSelect={() => onActionClick(it.action)}>
-                {it.label}
+        {isVisible('crm360.offer.create') && (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" size="sm" data-action-id="crm360.offer.create" title="Angebote / Aufträge / Belege [Alt + A]" className="gap-1.5">
+                <span className="text-primary"><FileSignature size={14} /></span>
+                Ang./Auf.
+                <ChevronDown size={13} className="opacity-60" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="start" className="w-52 max-h-[70vh] overflow-y-auto">
+              <DropdownMenuItem data-action-id="crm360.offer.new" onSelect={() => onActionClick('newOrder')}>
+                Neues Angebot / Auftrag
               </DropdownMenuItem>
-            ))}
-          </DropdownMenuContent>
-        </DropdownMenu>
+              <DropdownMenuSeparator />
+              <DropdownMenuLabel>Belegkategorien</DropdownMenuLabel>
+              {DOC_ITEMS.map((it) => (
+                <DropdownMenuItem key={it.action} data-action-id={`crm360.${it.action}`} onSelect={() => onActionClick(it.action)}>
+                  {it.label}
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        )}
 
         {/* Gruppe 3: Faktur / Drucken */}
         {ACTION_GROUPS[2].map(renderButton)}
@@ -203,17 +236,45 @@ export default function CustomerActionBar({ onActionClick, isLoadingAI }: Custom
         {ACTION_GROUPS[3].map(renderButton)}
       </div>
 
-      <Button
-        size="sm"
-        onClick={() => onActionClick('neuroIntelligence')}
-        data-action-id="crm360.ai.summary"
-        disabled={isLoadingAI}
-        title="Intelligente Empfehlung & KI-Dossier generieren [Alt + K]"
-        className="gap-1.5"
-      >
-        <RefreshCw size={14} className={isLoadingAI ? 'animate-spin' : ''} />
-        NeuroAI [Alt+K]
-      </Button>
+      <div className="flex items-center gap-1">
+        {/* S5: Toolbar-Konfiguration (Sichtbarkeit, benutzerbezogen) — kein data-action-id (Zähl-neutral) */}
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" size="icon" className="h-8 w-8" title="Toolbar anpassen" id="btn-toolbar-config">
+              <Settings2 size={15} />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-56">
+            <DropdownMenuLabel>Sichtbare Aktionen</DropdownMenuLabel>
+            {CONFIGURABLE.map((c) => (
+              <DropdownMenuCheckboxItem
+                key={c.actionId}
+                checked={isVisible(c.actionId)}
+                onCheckedChange={() => toggle(c.actionId)}
+                onSelect={(e) => e.preventDefault()}
+              >
+                {c.label}
+              </DropdownMenuCheckboxItem>
+            ))}
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onSelect={resetToDefault} id="btn-toolbar-reset">
+              Auf Standard zurücksetzen
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+
+        <Button
+          size="sm"
+          onClick={() => onActionClick('neuroIntelligence')}
+          data-action-id="crm360.ai.summary"
+          disabled={isLoadingAI}
+          title="Intelligente Empfehlung & KI-Dossier generieren [Alt + K]"
+          className="gap-1.5"
+        >
+          <RefreshCw size={14} className={isLoadingAI ? 'animate-spin' : ''} />
+          NeuroAI [Alt+K]
+        </Button>
+      </div>
 
     </div>
   );
