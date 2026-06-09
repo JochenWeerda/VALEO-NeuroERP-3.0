@@ -5,8 +5,8 @@ Stand: `2026-06-09`
 ## KIM-L3-QUICK-001
 
 **Von:** Codex
-**Owner:** Codex
-**Stand:** in arbeit
+**Owner:** Claude (Uebernahme 2026-06-09 — Codex pausiert 3h wg. Token-Kontingent; Nutzer beauftragt Fortfuehrung)
+**Stand:** in arbeit (Claude fuehrt fort + erweitert um CRM360-Frontend-Verdrahtung der Backends aus KIM-L3-BACKEND-001 sowie die Nutzer-Spec CRM-Customer-360, siehe `docs/crm-customer-360-bauplan-2026-06-09.md`)
 **Abstimmung:** Komplementaer zu `KIM-L3-BACKEND-001` (Claude). Codex bearbeitet ausschliesslich `packages/frontend-web/src/pages/crm/kim/**`, CRM-Playwright-Vertraege und den eigenen QA-/Slice-Nachweis. Keine Aenderung an `app/**`, `alembic/**`, `tools/tapi-bridge/**` oder Backendtests. Neue Backend-Endpunkte werden in diesem Slice nicht vorausgesetzt; ihre Frontend-Integration erfolgt nach Claudes stabiler Handoff-Schnittstelle.
 **Ziel des Slices:** Die im L3-Funktionsabgleich nachgewiesenen, rein frontendseitigen KIM-Bedienluecken schliessen: separate Kunden-Neuanlage, druckbare Cockpit-Ansicht, auswählbare Ansprechpartner mit Oeffnen/E-Mail/Praesente/Filter sowie fachlich korrekte Oeffnen-/Neu-Navigationen fuer vorhandene Verkaufsbelege.
 **Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/agent-ops/slices/KIM-L3-QUICK-001.yaml`, `docs/quality-assurance/` fuer den KIM-L3-Klicknachweis, `packages/frontend-web/src/pages/crm/kim/**` sowie fokussierte CRM-Playwright-Vertraege unter `playwright-tests/specs/crm/`.

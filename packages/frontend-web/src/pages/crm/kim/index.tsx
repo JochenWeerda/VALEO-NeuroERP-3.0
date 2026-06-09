@@ -5,6 +5,7 @@
 
 import React, { useState, useEffect, Suspense, lazy } from 'react';
 import { useNavigate } from '@/app/routing/typed-router';
+import { buildSalesHandoverPath } from '@/lib/workflow/sales-handover';
 import { Customer, ContactPerson, ContactLog, OpenItem, BusinessDocument } from './types';
 import * as kimApi from './kim-api';
 import { useToast } from '@/hooks/use-toast';
@@ -35,7 +36,7 @@ import CustomerStatusBanner from './components/CustomerStatusBanner';
 
 import ContactPersonsTable from './components/ContactPersonsTable';
 import FinancialOpenItemsPanel from './components/FinancialOpenItemsPanel';
-import SalesDocumentsPanel from './components/SalesDocumentsPanel';
+import SalesDocumentsPanel, { type DocCategory } from './components/SalesDocumentsPanel';
 import ContractsPanel from './components/ContractsPanel';
 import DocumentPanel from './components/DocumentPanel';
 import FollowUpTaskPanel from './components/FollowUpTaskPanel';
@@ -81,11 +82,15 @@ export default function KimCockpitPage() {
   const [showMasterEditModal, setShowMasterEditModal] = useState(false);
   const [savingMaster, setSavingMaster] = useState(false);
   const [showPresentsModal, setShowPresentsModal] = useState(false);
+  const [presentsContact, setPresentsContact] = useState<ContactPerson | null>(null);
   const [showCallLogModal, setShowCallLogModal] = useState(false);
   const [savingCall, setSavingCall] = useState(false);
   const [showCorporateModal, setShowCorporateModal] = useState(false);
   const [showDocumentsModal, setShowDocumentsModal] = useState(false);
   const [showCustomerInfoModal, setShowCustomerInfoModal] = useState(false);
+  const [showPhoneDialog, setShowPhoneDialog] = useState(false);
+  const [phoneChoice, setPhoneChoice] = useState<'1' | '2'>('1');
+  const [dialing, setDialing] = useState(false);
   const [workspaceResetKey, setWorkspaceResetKey] = useState(0);
 
   // In-Edit master data fields state
@@ -236,7 +241,60 @@ export default function KimCockpitPage() {
     });
   };
   const handleAddNewInvoice = async () => infoFachprozess('Offene Posten', 'die Faktura/Finanzbuchhaltung');
-  const handleAddNewDocument = async () => infoFachprozess('Belege', 'die Beleg-/Auftragserfassung');
+  const handleAddNewDocument = async () => infoFachprozess('Kontrakte', 'die Kontrakterfassung');
+
+  const salesHandoverContext = {
+    customerId: activeCustomer?.id,
+    customerNumber: activeCustomer?.debtorNo,
+    customerName: activeCustomer?.name,
+    entryMode: 'crm360',
+  };
+
+  const handleCreateDocument = (category: DocCategory) => {
+    const paths: Partial<Record<DocCategory, string>> = {
+      OFFER: '/sales/angebot-erstellen',
+      ORDER: '/sales/order-editor',
+      DELIVERY_NOTE: '/verkauf/lieferschein-erfassung',
+    };
+    const path = paths[category];
+    if (path) {
+      navigate(buildSalesHandoverPath(path, salesHandoverContext));
+      return;
+    }
+    infoFachprozess('Belege', 'den zugeordneten Einkaufs- oder Bestandsprozess');
+  };
+
+  const handleOpenDocument = (document: BusinessDocument) => {
+    const paths: Partial<Record<DocCategory, string>> = {
+      OFFER: `/sales/angebot/${document.id}`,
+      ORDER: `/sales/order-editor/${document.id}`,
+      DELIVERY_NOTE: `/verkauf/lieferschein-erfassung/${document.id}`,
+    };
+    const path = paths[document.type];
+    if (path) {
+      navigate(buildSalesHandoverPath(path, salesHandoverContext));
+      return;
+    }
+    infoFachprozess('Belege', 'den zugeordneten Einkaufs- oder Bestandsprozess');
+  };
+
+  const handleEmailContact = (contact: ContactPerson) => {
+    const email = contact.email || activeCustomer?.email;
+    if (!email) {
+      toast({
+        title: 'Keine E-Mail-Adresse',
+        description: 'Weder beim Ansprechpartner noch beim Kunden ist eine E-Mail-Adresse hinterlegt.',
+        variant: 'destructive',
+      });
+      return;
+    }
+    window.location.href = `mailto:${email}`;
+  };
+
+  const handleOpenContactPresents = (contact: ContactPerson) => {
+    setPresentsContact(contact);
+    setShowPresentsModal(true);
+  };
 
   // Resolve Follow-up Wiedervorlage
   const handleResolveTask = async (logId: string) => {
@@ -285,21 +343,45 @@ export default function KimCockpitPage() {
     }
   };
 
+  // Telefon: bei mehreren Nummern Auswahl-Dialog, sonst direkt waehlen.
+  const startPhoneFlow = () => {
+    if (!activeCustomer) return;
+    const hasTwo = !!(activeCustomer.phone1 && activeCustomer.phone2 && activeCustomer.phone1 !== activeCustomer.phone2);
+    if (hasTwo) {
+      setShowPhoneDialog(true);
+    } else if (activeCustomer.phone1) {
+      void dialNumber(activeCustomer.phone1);
+    } else {
+      toast({ title: 'Keine Telefonnummer', description: 'Im Kundenstamm ist keine Telefonnummer hinterlegt.', variant: 'destructive' });
+    }
+  };
+
+  // Ausgehende Wahl ueber die TAPI-Bridge anfordern, danach Gespraechs-Log oeffnen.
+  const dialNumber = async (number: string) => {
+    if (!activeCustomer || dialing) return;
+    setDialing(true);
+    try {
+      await kimApi.dial(number, activeCustomer.debtorNo);
+      setShowPhoneDialog(false);
+      toast({ title: 'Wahl angefordert', description: `${activeCustomer.name} · ${number}` });
+      setShowCallLogModal(true); // Gespraech direkt protokollieren
+    } catch (err) {
+      console.error('Dial fehlgeschlagen:', err);
+      toast({ title: 'Wahl fehlgeschlagen', description: 'TAPI-Bridge nicht erreichbar.', variant: 'destructive' });
+    } finally {
+      setDialing(false);
+    }
+  };
+
   // Handle Action click events dispatched from CustomerActionBar
   const handleHeaderAction = (action: string) => {
     switch (action) {
       case 'openMaster':
         openMasterEdit();
         break;
-      case 'newContact': {
-        // Trigger quick log input inside the bottom ContactHistoryTable
-        const formBtn = document.getElementById('btn-trigger-history-form');
-        if (formBtn) {
-          formBtn.click();
-          formBtn.scrollIntoView({ behavior: 'smooth' });
-        }
+      case 'newCustomer':
+        navigate('/verkauf/kunde/neu');
         break;
-      }
       case 'infoPopup':
         setShowCustomerInfoModal(true);
         break;
@@ -318,10 +400,11 @@ export default function KimCockpitPage() {
         handleFetchNeuroSummary();
         break;
       case 'presents':
+        setPresentsContact(null);
         setShowPresentsModal(true);
         break;
       case 'logCall':
-        setShowCallLogModal(true);
+        startPhoneFlow();
         break;
       case 'newOrder':
         if (activeCustomer) {
@@ -337,6 +420,9 @@ export default function KimCockpitPage() {
         if (activeCustomer) {
           navigate(`/finance/op-debitoren?kunden_nr=${encodeURIComponent(activeCustomer.debtorNo)}`);
         }
+        break;
+      case 'printCustomer':
+        window.print();
         break;
       case 'cleanupFilters':
         setActiveTab('allgemein');
@@ -434,6 +520,8 @@ export default function KimCockpitPage() {
                       key={`contacts-${workspaceResetKey}`}
                       contactPersons={contacts}
                       onAddContactPerson={handleAddNewContactPerson}
+                      onEmailContact={handleEmailContact}
+                      onOpenPresents={handleOpenContactPresents}
                     />
                   </div>
                 )}
@@ -443,7 +531,8 @@ export default function KimCockpitPage() {
                     key={`documents-${workspaceResetKey}`}
                     customer={activeCustomer}
                     documents={documents}
-                    onAddDocument={handleAddNewDocument}
+                    onOpenDocument={handleOpenDocument}
+                    onCreateDocument={handleCreateDocument}
                   />
                 )}
 
@@ -679,7 +768,12 @@ export default function KimCockpitPage() {
           {activeCustomer && (
             <div className="space-y-3 text-sm">
               <p className="text-muted-foreground leading-relaxed">
-                Im Agrarsektor ist die Geschenke-PR zur Ernteeinbindung von hoher Relevanz. Verteilte Incentives für Mitarbeiter von <strong>{activeCustomer.name}</strong>:
+                Im Agrarsektor ist die Geschenke-PR zur Ernteeinbindung von hoher Relevanz. Verteilte Incentives für{' '}
+                <strong>
+                  {presentsContact
+                    ? `${presentsContact.firstName} ${presentsContact.name} (${activeCustomer.name})`
+                    : activeCustomer.name}
+                </strong>:
               </p>
               <div className="space-y-2">
                 <div className="p-2.5 rounded-md border border-border bg-muted/40 flex justify-between items-center gap-2">
@@ -708,6 +802,55 @@ export default function KimCockpitPage() {
           )}
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowPresentsModal(false)}>Protokoll schließen</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* OVERLAY: Telefonnummer-Auswahl (mehrere Nummern) */}
+      <Dialog open={showPhoneDialog} onOpenChange={(o) => !o && setShowPhoneDialog(false)}>
+        <DialogContent className="max-w-xs">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Phone size={16} className="text-primary" />
+              Auswahl der Telefonnummer
+            </DialogTitle>
+          </DialogHeader>
+          {activeCustomer && (
+            <div className="space-y-2 text-sm">
+              {[
+                { key: '1' as const, label: 'Telefon 1', number: activeCustomer.phone1 },
+                { key: '2' as const, label: 'Telefon 2', number: activeCustomer.phone2 || '' },
+              ].map(opt => (
+                <label
+                  key={opt.key}
+                  className={`flex items-center gap-2 rounded-md border p-2 ${opt.number ? 'cursor-pointer border-border hover:bg-muted' : 'cursor-not-allowed border-border/50 opacity-50'}`}
+                >
+                  <input
+                    type="radio"
+                    name="phoneChoice"
+                    className="accent-primary"
+                    disabled={!opt.number}
+                    checked={phoneChoice === opt.key}
+                    onChange={() => setPhoneChoice(opt.key)}
+                  />
+                  <span className="font-medium">{opt.label}:</span>
+                  <span className="text-muted-foreground">{opt.number || '—'}</span>
+                </label>
+              ))}
+            </div>
+          )}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowPhoneDialog(false)}>Abbrechen</Button>
+            <Button
+              disabled={dialing}
+              onClick={() => {
+                const num = phoneChoice === '2' ? activeCustomer?.phone2 : activeCustomer?.phone1;
+                if (num) void dialNumber(num);
+              }}
+            >
+              {dialing && <Loader2 className="h-4 w-4 animate-spin" />}
+              OK
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

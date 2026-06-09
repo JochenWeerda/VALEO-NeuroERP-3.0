@@ -54,6 +54,64 @@ export async function fetchDocuments(id: string): Promise<BusinessDocument[]> {
   return (await apiClient.get<BusinessDocument[]>(`${BASE}/customers/${encodeURIComponent(id)}/documents`)).data
 }
 
+// ── TAPI Click-to-Dial (KIM-L3-BACKEND-001) ──────────────────────────────────
+export interface DialResult {
+  id: string
+  caller: string
+  called: string
+  kunden_nr?: string | null
+  kunde_name?: string | null
+  status: string
+}
+
+/** Ausgehende Wahl anfordern; die lokale TAPI-Bridge fuehrt sie aus. */
+export async function dial(called: string, kundenNr?: string): Promise<DialResult> {
+  return (await apiClient.post<DialResult>('/api/v1/crm/tapi/dial', { called, kunden_nr: kundenNr })).data
+}
+
+// ── Kontaktbezogene Belegtabs (Rechnungen/Mahnungen/Kontrakte/Strecken) ───────
+export interface ContactDoc {
+  id: string
+  kind: string
+  docNo: string
+  date: string
+  dueDate?: string | null
+  amount: number
+  status: string
+  info?: string | null
+}
+
+export type ContactDocKind = 'invoices' | 'dunning' | 'contracts' | 'drop_shipments'
+
+export async function fetchContactDocs(id: string, kind: ContactDocKind): Promise<ContactDoc[]> {
+  return (await apiClient.get<ContactDoc[]>(
+    `${BASE}/customers/${encodeURIComponent(id)}/contact-docs`, { params: { kind } },
+  )).data
+}
+
+// ── Benachrichtigungen (internes Postfach + externe Fachberater-Mail) ─────────
+export interface CrmNotification {
+  id: string
+  kunden_nr?: string | null
+  sender?: string | null
+  recipient: string
+  channel: string
+  betreff?: string | null
+  kommentar?: string | null
+  status: string
+  created_at?: string | null
+}
+
+export async function fetchNotifications(recipient: string, unread = false): Promise<CrmNotification[]> {
+  return (await apiClient.get<CrmNotification[]>(
+    `${BASE}/notifications`, { params: { recipient, unread } },
+  )).data
+}
+
+export async function markNotificationRead(id: string): Promise<CrmNotification> {
+  return (await apiClient.post<CrmNotification>(`${BASE}/notifications/${encodeURIComponent(id)}/read`, {})).data
+}
+
 export interface NeuroSummary {
   healthScore: number
   statusLabel: string

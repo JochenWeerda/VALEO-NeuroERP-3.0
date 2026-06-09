@@ -9,6 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { NativeSelect } from '@/components/ui/native-select';
+import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Paperclip, Mail, Check, Clock, Plus, X } from 'lucide-react';
 
@@ -25,15 +26,17 @@ export default function ContactHistoryTable({ logs, customer, onAddLog }: Contac
   const [showAddLog, setShowAddLog] = useState(false);
 
   const [logDirection, setLogDirection] = useState<'INCOMING' | 'OUTGOING'>('INCOMING');
+  const [logArt, setLogArt] = useState<'persoenlich' | 'telefon' | 'email' | 'whatsapp'>('telefon');
   const [logDate, setLogDate] = useState(new Date().toISOString().split('T')[0]);
-  const [logDesc, setLogDesc] = useState('');
+  const [logDesc, setLogDesc] = useState('');        // Betreff
+  const [logKommentar, setLogKommentar] = useState('');
+  const [logCc, setLogCc] = useState('');            // CC: interner Empfaenger oder E-Mail
   const [logOp, setLogOp] = useState('JW');
   const [logResubmit, setLogResubmit] = useState('');
   const [logHasScan, setLogHasScan] = useState(false);
   const [logEmailSent, setLogEmailSent] = useState(false);
   const [logRefType, setLogRefType] = useState<'NONE' | 'OFFER' | 'ORDER' | 'CONTRACT' | 'INVOICE'>('NONE');
   const [logRefNo, setLogRefNo] = useState('');
-  const [formPrefix, setFormPrefix] = useState('');
 
   const filteredLogs = logs.filter(log => {
     switch (activeTab) {
@@ -59,8 +62,12 @@ export default function ContactHistoryTable({ logs, customer, onAddLog }: Contac
 
     onAddLog({
       direction: logDirection,
+      art: logArt,
       date: logDate,
       artKurzinfo: logDesc,
+      betreff: logDesc,
+      kommentar: logKommentar || undefined,
+      ccIntern: logCc || undefined,
       operator: logOp,
       reSubmissionDate: logResubmit || undefined,
       hasScan: logHasScan,
@@ -71,7 +78,8 @@ export default function ContactHistoryTable({ logs, customer, onAddLog }: Contac
       completed: !logResubmit,
     });
 
-    setLogDesc(''); setLogResubmit(''); setLogHasScan(false); setLogEmailSent(false);
+    setLogDesc(''); setLogKommentar(''); setLogCc(''); setLogResubmit('');
+    setLogHasScan(false); setLogEmailSent(false);
     setLogRefType('NONE'); setLogRefNo(''); setShowAddLog(false);
   };
 
@@ -83,11 +91,6 @@ export default function ContactHistoryTable({ logs, customer, onAddLog }: Contac
     { key: 'CONTRACTS', label: 'Kontrakte', tooltip: 'Agrar-Ernteabkommen & Silobestellungen' },
     { key: 'DROP_SHIPMENT', label: 'Strecken-Geschäfte', tooltip: 'Sonderabfuhren direkt frei Hof' },
   ];
-
-  const handlePrefixClick = (prefix: string) => {
-    setFormPrefix(prefix);
-    setLogDesc(prev => `${prefix} ${prev.replace(/^[A-Z]{1,2}\s/, '')}`);
-  };
 
   return (
     <div className="bg-card border-0 overflow-hidden flex flex-col h-full" id="contact-history-workspace">
@@ -135,25 +138,23 @@ export default function ContactHistoryTable({ logs, customer, onAddLog }: Contac
             <Input type="date" required value={logDate} onChange={e => setLogDate(e.target.value)} />
           </div>
 
-          <div className="col-span-12 md:col-span-4 space-y-1">
-            <Label className="text-xs">Art / Kurzinfo <span className="text-destructive">*</span></Label>
-            <div className="flex gap-1">
-              <div className="flex gap-0.5" title="Schnellschlüssel-Präfix">
-                {[
-                  { code: 'P' }, { code: 'AU' }, { code: 'FB' }, { code: 'KA' }, { code: 'KB' },
-                ].map(p => (
-                  <button
-                    key={p.code}
-                    type="button"
-                    onClick={() => handlePrefixClick(p.code)}
-                    className={`px-1.5 rounded-md border text-xs font-medium transition ${formPrefix === p.code ? 'bg-primary text-primary-foreground border-transparent' : 'bg-card border-border text-muted-foreground hover:bg-muted'}`}
-                  >
-                    {p.code}
-                  </button>
-                ))}
-              </div>
-              <Input required value={logDesc} onChange={e => setLogDesc(e.target.value)} placeholder="Konkreten Betreff eintragen…" className="flex-1" />
-            </div>
+          <div className="col-span-6 md:col-span-2 space-y-1">
+            <Label className="text-xs">Art</Label>
+            <NativeSelect
+              value={logArt}
+              onChange={e => setLogArt(e.target.value as typeof logArt)}
+              options={[
+                { value: 'persoenlich', label: 'Persönlich' },
+                { value: 'telefon', label: 'Telefon' },
+                { value: 'email', label: 'E-Mail' },
+                { value: 'whatsapp', label: 'WhatsApp' },
+              ]}
+            />
+          </div>
+
+          <div className="col-span-12 md:col-span-3 space-y-1">
+            <Label className="text-xs">Betreff <span className="text-destructive">*</span></Label>
+            <Input required value={logDesc} onChange={e => setLogDesc(e.target.value)} placeholder="Betreffzeile…" />
           </div>
 
           <div className="col-span-6 md:col-span-1 space-y-1">
@@ -183,6 +184,16 @@ export default function ContactHistoryTable({ logs, customer, onAddLog }: Contac
           <div className="col-span-6 md:col-span-2 space-y-1">
             <Label className="text-xs">Wiedervorlage (WV)</Label>
             <Input type="date" value={logResubmit} onChange={e => setLogResubmit(e.target.value)} />
+          </div>
+
+          <div className="col-span-12 md:col-span-8 space-y-1">
+            <Label className="text-xs">Kommentar</Label>
+            <Textarea value={logKommentar} onChange={e => setLogKommentar(e.target.value)} className="h-16" placeholder="Freitext / Gesprächsnotiz…" />
+          </div>
+
+          <div className="col-span-12 md:col-span-4 space-y-1">
+            <Label className="text-xs">CC (intern Mitarbeiter/Abteilung oder externe E-Mail)</Label>
+            <Input value={logCc} onChange={e => setLogCc(e.target.value)} placeholder="z.B. AO  ·  oder berater@extern.de" />
           </div>
 
           <div className="col-span-12 border-t border-dashed border-border pt-2 flex flex-col md:flex-row justify-between items-center gap-2">
