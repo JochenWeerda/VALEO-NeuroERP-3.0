@@ -1,7 +1,7 @@
 slice_id: POS-FISCAL-PROVIDERS-001
 title: POS Fiskalisierung mit fiskaly und Swissbit
 owner: Codex
-status: reserved
+status: completed
 coordination: >-
   Konfliktfreier POS-/Compliance-Slice parallel zu Claudes KIM-L3-S3-S5.
   Keine Aenderungen unter packages/frontend-web/src/pages/crm/kim oder an
@@ -43,3 +43,17 @@ risks:
   - Swissbit Detail-API und SDK sind partner-/loginpflichtig.
   - Produktive Provider-Credentials und externe Pruefwerkzeugabnahme bleiben
     externe Betriebs-Gates.
+result: >-
+  Typisierte Provider-Abstraktion fuer fiskaly, Swissbit Cloud, Swissbit
+  Hardware-Gateway und explizite Simulation umgesetzt. Browser-Secrets und
+  stille Mock-Signaturen entfernt. Transaktionen, Closings und Exporte werden
+  tenantbezogen und idempotent persistiert. TSE- und DSFinV-K-Export sind
+  getrennt; Tagesabschluss blockiert bei offenen Vorgangen, Summendifferenzen,
+  Providerfehlern oder Simulation. Festdaten-DSFinV-K wurde entfernt.
+checks:
+  - 15 fokussierte Backendtests bestanden
+  - Frontend TypeScript gruen
+  - fokussierter ESLint gruen
+  - Python Compile und Router-Import gruen
+  - Alembic Migration angewandt; ein Head
+  - Workboard, Doku-Governance und git diff check gruen

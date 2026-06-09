@@ -2803,6 +2803,45 @@ async def create_tagesabschluss(
     db: Session = Depends(get_db),
 ) -> TagesabschlussOut:
     """POS Tagesabschluss buchen â€” schreibt in abschluss_checklisten UND erzeugt FiBu-Journal-EintrÃ¤ge."""
+    from decimal import Decimal
+    from app.services.fiscalization.contracts import CashPointClosingCommand, PaymentLine
+    from app.services.fiscalization.providers import FiscalProviderError
+    from app.services.fiscalization.service import FiscalizationService
+
+    fiscal = FiscalizationService(db, tenant_id)
+    config = fiscal.get_config()
+    if not config.get("configured"):
+        raise HTTPException(status_code=409, detail="Fiskalisierungsprovider ist nicht konfiguriert")
+    summary = fiscal.daily_summary(payload.datum)
+    if int(summary["incomplete_count"]) > 0:
+        raise HTTPException(status_code=409, detail="Tagesabschluss blockiert: unvollstaendige TSE-Transaktionen")
+    expected_total = float(summary["gross_total"])
+    if abs(float(payload.umsatz_gesamt or 0) - expected_total) > 0.01:
+        raise HTTPException(status_code=422, detail="Gemeldeter Umsatz stimmt nicht mit dem Fiskaljournal ueberein")
+    try:
+        closing = fiscal.close_cash_point(
+            CashPointClosingCommand(
+                closing_id=f"KA-{payload.datum.isoformat()}",
+                cash_register_id=config["cash_register_id"],
+                terminal_id=str(config.get("settings", {}).get("terminal_id") or config["client_id"]),
+                business_date=payload.datum,
+                transaction_count=int(summary["transaction_count"]),
+                gross_total=Decimal(str(summary["gross_total"])),
+                payments=[
+                    PaymentLine(method="BAR", amount=Decimal(str(summary["cash_total"]))),
+                    PaymentLine(method="KARTE", amount=Decimal(str(summary["card_total"]))),
+                ],
+                payload={
+                    "counted_cash": str(payload.bargeld_gezaehlt),
+                    "cash_difference": str(payload.differenz_bar),
+                },
+            )
+        )
+    except (FiscalProviderError, RuntimeError, ValueError) as exc:
+        raise HTTPException(status_code=503, detail=f"Fiskalischer Tagesabschluss fehlgeschlagen: {exc}") from exc
+    if closing.simulated:
+        raise HTTPException(status_code=409, detail="Simulierter Tagesabschluss darf nicht in die Fibu gebucht werden")
+
     abschluss_id = str(uuid4())
     belegnummer = f"KA-{payload.datum.isoformat()}"
 

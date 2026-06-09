@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate } from '@/app/routing/typed-router'
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { Wizard } from '@/components/patterns/Wizard'
@@ -45,6 +45,14 @@ type TagesabschlussData = {
   fibuStatus: 'offen' | 'gebucht'
   fibuBelegnr?: string
   fibuDatum?: string
+}
+
+type FiscalDailySummary = {
+  transaction_count: number
+  gross_total: number
+  cash_total: number
+  card_total: number
+  incomplete_count: number
 }
 
 export default function TagesabschlussEnhancedPage(): JSX.Element {
@@ -112,6 +120,28 @@ export default function TagesabschlussEnhancedPage(): JSX.Element {
     staleTime: 60_000,
   })
 
+  const fiscalSummaryQuery = useQuery<FiscalDailySummary>({
+    queryKey: ['pos-fiscal-summary', abschluss.datum],
+    queryFn: async () => {
+      const response = await apiClient.get<FiscalDailySummary>('/api/v1/pos/fiscalization/daily-summary', {
+        params: { business_date: abschluss.datum },
+      })
+      return response.data
+    },
+  })
+
+  useEffect(() => {
+    const summary = fiscalSummaryQuery.data
+    if (!summary) return
+    setAbschluss((current) => ({
+      ...current,
+      tseTransaktionen: summary.transaction_count,
+      tseUmsatzBar: Number(summary.cash_total),
+      tseUmsatzEC: Number(summary.card_total),
+      tseGesamt: Number(summary.gross_total),
+    }))
+  }, [fiscalSummaryQuery.data])
+
   function handleDsfinvkExport(): void {
     window.open('/api/v1/pos/dsfinvk/export', '_blank')
   }
@@ -132,8 +162,13 @@ export default function TagesabschlussEnhancedPage(): JSX.Element {
       content: (
         <div className="space-y-4">
           <div className="rounded-lg bg-blue-50 p-4 text-sm text-blue-900">
-            <p className="font-semibold">📊 Daten aus TSE-Journal (automatisch geladen)</p>
+            <p className="font-semibold">Daten aus dem signierten Fiskaljournal</p>
             <p className="mt-1">Datum: {new Date(abschluss.datum).toLocaleDateString('de-DE')}</p>
+            {fiscalSummaryQuery.data && fiscalSummaryQuery.data.incomplete_count > 0 && (
+              <p className="mt-2 font-semibold text-red-700">
+                Abschluss blockiert: {fiscalSummaryQuery.data.incomplete_count} unvollständige TSE-Transaktion(en).
+              </p>
+            )}
           </div>
 
           <Card>
@@ -359,7 +394,7 @@ export default function TagesabschlussEnhancedPage(): JSX.Element {
               className="w-full"
               size="lg"
               onClick={() => buchungMutation.mutate()}
-              disabled={buchungMutation.isPending}
+              disabled={buchungMutation.isPending || fiscalSummaryQuery.isLoading || Boolean(fiscalSummaryQuery.data?.incomplete_count)}
             >
               {buchungMutation.isPending ? 'Wird gebucht…' : 'In Fibu buchen & TSE-Journal als gebucht markieren'}
             </Button>
