@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Customer, BusinessDocument } from '../types';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -22,6 +22,8 @@ interface SalesDocumentsPanelProps {
   documents: BusinessDocument[];
   onOpenDocument: (document: BusinessDocument) => void;
   onCreateDocument: (category: DocCategory) => void;
+  /** Von der „Ang./Auf."-Toolbar vorgewaehlte Kategorie (steuert den aktiven Tab). */
+  categoryOverride?: DocCategory | null;
 }
 
 const categories: Array<{ key: DocCategory; label: string; desc: string }> = [
@@ -38,9 +40,15 @@ export default function SalesDocumentsPanel({
   documents,
   onOpenDocument,
   onCreateDocument,
+  categoryOverride,
 }: SalesDocumentsPanelProps) {
   const [activeCategory, setActiveCategory] = useState<DocCategory>('ORDER');
   const [selectedDocumentId, setSelectedDocumentId] = useState('');
+
+  // „Ang./Auf."-Dropdown der Toolbar kann die Kategorie von aussen vorwaehlen.
+  useEffect(() => {
+    if (categoryOverride) setActiveCategory(categoryOverride);
+  }, [categoryOverride]);
   const filteredDocs = documents.filter((doc) => doc.type === activeCategory);
   const selectedDocument = filteredDocs.find((doc) => doc.id === selectedDocumentId) ?? null;
 
