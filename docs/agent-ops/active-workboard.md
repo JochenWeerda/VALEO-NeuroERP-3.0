@@ -2,6 +2,17 @@
 
 Stand: `2026-06-09`
 
+## KIM-L3-S1-GAP-CLOSURE-001
+
+**Von:** Codex
+**Owner:** Codex
+**Stand:** reserviert 2026-06-09
+**Abstimmung:** Review-Fix zu Commit `cb8e7af10`, parallel zu Claudes S2-Arbeit. Codex bearbeitet zunaechst nur konfliktfreie Dateien. Claude besitzt waehrend S2 die aktuell uncommittierten Dateien `packages/frontend-web/src/pages/crm/kim/index.tsx`, `components/SalesDocumentsPanel.tsx`, `components/CustomerActionBar.tsx` und `components/InformationPanel.tsx`. Aenderungen an `index.tsx` und `SalesDocumentsPanel.tsx` werden erst nach Claudes S2-Commit auf dessen Stand integriert; fremder WIP wird nicht ueberschrieben.
+**Ziel des Slices:** Alle im S1-Review gefundenen funktionalen und testseitigen Luecken schliessen: bestehende Angebote mit korrekter ID laden, Kontaktlogs fehlertolerant speichern, Ansprechpartner-Telefonie ueber TAPI und Logfuehrung abwickeln, Ansprechpartner-E-Mail fachlich korrekt liefern, eine belastbare Druckansicht bereitstellen und alle neuen Aktionen samt Ruecknavigation modellbasiert pruefen.
+**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/agent-ops/slices/KIM-L3-S1-GAP-CLOSURE-001.yaml`, fokussierte QA-Doku, `packages/frontend-web/src/pages/crm/kim/components/ContactHistoryTable.tsx`, `ContactPersonsTable.tsx`, nach S2-Handoff abgestimmte Aenderungen in `kim/index.tsx` und `SalesDocumentsPanel.tsx`, `packages/frontend-web/src/pages/sales/angebot-erstellen.tsx`, `app/api/v1/endpoints/crm_kim.py`, fokussierte Backendtests sowie CRM360-Playwright-Vertraege und -Specs.
+**Abnahmekriterien:** Vorhandene Belege laden die uebergebene Beleg-ID; fehlgeschlagene Logspeicherung behaelt Formulardaten und zeigt einen Fehler; Ansprechpartner-Telefonie nutzt Nummernauswahl, TAPI und anschliessendes Log; Ansprechpartner-E-Mail nutzt die Ansprechpartneradresse oder weist transparent auf fehlende Daten hin; Print rendert eine vollstaendige druckbare Cockpit-Sicht; Neukunde, Beleg-Oeffnen, Kontaktlog, Ansprechpartneraktionen, Print und Browser-Zurueck sind automatisiert; Typecheck, Lint, fokussierte Backendtests, Playwright, Build und Governance sind gruen.
+**Offene Risiken:** Die Ansprechpartner-Tabelle kann produktiv noch keine E-Mail-Spalte besitzen; Schema und Query muessen tolerant erweitert werden. Die drei S2-Dateien duerfen erst nach Claudes Handoff integriert werden.
+
 ## KIM-L3-QUICK-001
 
 **Von:** Codex
