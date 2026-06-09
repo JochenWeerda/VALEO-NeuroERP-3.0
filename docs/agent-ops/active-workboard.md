@@ -2,6 +2,17 @@
 
 Stand: `2026-06-09`
 
+## POS-FISCAL-OPS-002
+
+**Von:** Codex
+**Owner:** Codex
+**Stand:** reserviert 2026-06-09
+**Abstimmung:** Folge-Slice zu `POS-FISCAL-PROVIDERS-001`, konfliktfrei zu den laufenden KIM-/CRM-Arbeiten. Keine Aenderung unter `packages/frontend-web/src/pages/crm/kim/**` oder an CRM-Playwright-Specs.
+**Ziel des Slices:** Die Fiskalisierungsprovider betrieblich nutzbar machen: tenantbezogene Admin-Konfiguration und Readiness, explizite Produkt-Gates fuer fiskaly SUBMIT DE/RECEIPT/SAFE sowie durchgaengige POS-/Tagesabschluss-Browsertests fuer fiskaly und Swissbit.
+**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/agent-ops/slices/POS-FISCAL-OPS-002.yaml`, Fiskalisierungsdoku und QA, `app/services/fiscalization/**`, `app/api/v1/endpoints/pos_fiscalization.py`, fokussierte POS-Migrationen/-Tests, `packages/frontend-web/src/pages/admin-suite/**` fuer eine neue Fiskalisierungsseite, providerneutraler Fiskalisierungsclient, generierte Route-/Navigationsartefakte und fokussierte POS-Playwright-Specs.
+**Abnahmekriterien:** Provider und Kassenkontext sind ohne Browser-Secrets administrierbar; Readiness zeigt konkrete Blocker und optionale fiskaly-Produkte getrennt; undokumentierte externe Vertraege bleiben fail-closed; POS-Signatur, Browser-Zurueck, Tagesabschluss-Gates und beide Provideralternativen sind automatisiert; Typecheck, Lint, Backendtests, Playwright und Governance sind gruen.
+**Offene Risiken:** fiskaly Produktlizenzen/Credentials und Swissbit Partnervertraege sind externe Live-Gates; partnergeschuetzte URLs oder Payloads duerfen nicht geraten werden.
+
 ## POS-FISCAL-PROVIDERS-001
 
 **Von:** Codex
