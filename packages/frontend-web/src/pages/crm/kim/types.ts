@@ -88,7 +88,7 @@ export interface OpenItem {
 export interface BusinessDocument {
   id: string;
   customerId: string;
-  type: 'OFFER' | 'ORDER' | 'DELIVERY_NOTE' | 'PURCHASE_OFFER' | 'PURCHASE_SETTLEMENT' | 'THIRD_PARTY_STOCK'; 
+  type: 'OFFER' | 'ORDER' | 'DELIVERY_NOTE' | 'INQUIRY' | 'PURCHASE_ORDER' | 'PURCHASE_OFFER' | 'PURCHASE_SETTLEMENT' | 'THIRD_PARTY_STOCK';
   docNo: string;
   date: string;
   operator: string;

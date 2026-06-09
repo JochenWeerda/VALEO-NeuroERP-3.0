@@ -1,7 +1,7 @@
 slice_id: KIM-L3-S2-REVIEW-001
 title: KIM L3 S2 Review und Gap-Closure
 owner: Codex
-status: reserved
+status: completed
 coordination: >-
   Review-Fix fuer Commit ca39b1b06. Claude arbeitet an KIM-L3-S3-S5 und
   pausiert waehrend dieses kurzen Slices Aenderungen an CustomerActionBar.tsx,
@@ -30,3 +30,13 @@ acceptance_criteria:
 risks:
   - Die S2-Dateien ueberlappen mit Claudes geplantem S3-S5-Frontend.
   - Backend-Belegtypen koennen von den im Bauplan genannten Kategorien abweichen.
+result: >-
+  Ang./Auf. auf Angebote, Auftraege, Lieferschein, Anfrage, Bestellung und
+  Uebersicht korrigiert. Belegpanel kontrolliert; ALL zeigt alle Belege.
+  Informations-Shortcuts und vollstaendige Dropdown-Klicktests ergaenzt.
+checks:
+  - Frontend TypeScript gruen
+  - Playwright TypeScript gruen
+  - fokussierter ESLint gruen
+  - CRM360 Playwright 17 Tests bestanden
+  - Workboard und git diff check gruen

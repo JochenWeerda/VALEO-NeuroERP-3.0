@@ -81,10 +81,9 @@ const INFO_ITEMS: { action: string; label: string }[] = [
 const DOC_ITEMS: { action: string; label: string }[] = [
   { action: 'doc:OFFER', label: 'Angebote' },
   { action: 'doc:ORDER', label: 'Aufträge' },
-  { action: 'doc:DELIVERY_NOTE', label: 'Lieferscheine' },
-  { action: 'doc:PURCHASE_OFFER', label: 'Kaufangebote' },
-  { action: 'doc:PURCHASE_SETTLEMENT', label: 'Kaufabrechnungen' },
-  { action: 'doc:THIRD_PARTY_STOCK', label: 'Fremdbestände' },
+  { action: 'doc:DELIVERY_NOTE', label: 'Lieferschein' },
+  { action: 'doc:INQUIRY', label: 'Anfrage' },
+  { action: 'doc:PURCHASE_ORDER', label: 'Bestellung' },
   { action: 'doc:ALL', label: 'Übersicht' },
 ];
 
@@ -104,6 +103,18 @@ export default function CustomerActionBar({ onActionClick, isLoadingAI }: Custom
       if (e.altKey && map[e.key]) {
         e.preventDefault();
         onActionClick(map[e.key]);
+      }
+      if (e.key === 'F11') {
+        e.preventDefault();
+        onActionClick('info:kunden-artikel');
+      }
+      if (e.ctrlKey && e.key.toLowerCase() === 'b') {
+        e.preventDefault();
+        onActionClick('info:preisvereinbarung');
+      }
+      if (e.ctrlKey && e.key.toLowerCase() === 'z') {
+        e.preventDefault();
+        onActionClick('info:konzern');
       }
     };
     window.addEventListener('keydown', handleShortcuts);
