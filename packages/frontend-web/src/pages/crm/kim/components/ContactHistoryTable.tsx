@@ -16,7 +16,7 @@ import { Paperclip, Mail, Check, Clock, Plus, X } from 'lucide-react';
 interface ContactHistoryTableProps {
   logs: ContactLog[];
   customer: Customer;
-  onAddLog: (vals: Partial<ContactLog>) => void;
+  onAddLog: (vals: Partial<ContactLog>) => void | Promise<unknown>;
 }
 
 type L3HistorySubtab = 'OVERVIEW' | 'HISTORY' | 'INVOICES' | 'DUNNING' | 'CONTRACTS' | 'DROP_SHIPMENT';
@@ -37,6 +37,8 @@ export default function ContactHistoryTable({ logs, customer, onAddLog }: Contac
   const [logEmailSent, setLogEmailSent] = useState(false);
   const [logRefType, setLogRefType] = useState<'NONE' | 'OFFER' | 'ORDER' | 'CONTRACT' | 'INVOICE'>('NONE');
   const [logRefNo, setLogRefNo] = useState('');
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveError, setSaveError] = useState('');
 
   const filteredLogs = logs.filter(log => {
     switch (activeTab) {
@@ -56,31 +58,38 @@ export default function ContactHistoryTable({ logs, customer, onAddLog }: Contac
     }
   });
 
-  const handleSubmitLog = (e: React.FormEvent) => {
+  const handleSubmitLog = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!logDesc) return;
+    if (!logDesc || isSaving) return;
 
-    onAddLog({
-      direction: logDirection,
-      art: logArt,
-      date: logDate,
-      artKurzinfo: logDesc,
-      betreff: logDesc,
-      kommentar: logKommentar || undefined,
-      ccIntern: logCc || undefined,
-      operator: logOp,
-      reSubmissionDate: logResubmit || undefined,
-      hasScan: logHasScan,
-      emailSent: logEmailSent,
-      emailDirection: logEmailSent ? 'OUT' : undefined,
-      referenceType: logRefType,
-      referenceNo: logRefNo || undefined,
-      completed: !logResubmit,
-    });
-
-    setLogDesc(''); setLogKommentar(''); setLogCc(''); setLogResubmit('');
-    setLogHasScan(false); setLogEmailSent(false);
-    setLogRefType('NONE'); setLogRefNo(''); setShowAddLog(false);
+    setIsSaving(true);
+    setSaveError('');
+    try {
+      await onAddLog({
+        direction: logDirection,
+        art: logArt,
+        date: logDate,
+        artKurzinfo: logDesc,
+        betreff: logDesc,
+        kommentar: logKommentar || undefined,
+        ccIntern: logCc || undefined,
+        operator: logOp,
+        reSubmissionDate: logResubmit || undefined,
+        hasScan: logHasScan,
+        emailSent: logEmailSent,
+        emailDirection: logEmailSent ? 'OUT' : undefined,
+        referenceType: logRefType,
+        referenceNo: logRefNo || undefined,
+        completed: !logResubmit,
+      });
+      setLogDesc(''); setLogKommentar(''); setLogCc(''); setLogResubmit('');
+      setLogHasScan(false); setLogEmailSent(false);
+      setLogRefType('NONE'); setLogRefNo(''); setShowAddLog(false);
+    } catch (error) {
+      setSaveError(error instanceof Error ? error.message : 'Aktivitaet konnte nicht gespeichert werden.');
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const tabs: { key: L3HistorySubtab; label: string; tooltip: string }[] = [
@@ -139,8 +148,9 @@ export default function ContactHistoryTable({ logs, customer, onAddLog }: Contac
           </div>
 
           <div className="col-span-6 md:col-span-2 space-y-1">
-            <Label className="text-xs">Art</Label>
+            <Label htmlFor="crm360-log-art" className="text-xs">Art</Label>
             <NativeSelect
+              id="crm360-log-art"
               value={logArt}
               onChange={e => setLogArt(e.target.value as typeof logArt)}
               options={[
@@ -153,8 +163,8 @@ export default function ContactHistoryTable({ logs, customer, onAddLog }: Contac
           </div>
 
           <div className="col-span-12 md:col-span-3 space-y-1">
-            <Label className="text-xs">Betreff <span className="text-destructive">*</span></Label>
-            <Input required value={logDesc} onChange={e => setLogDesc(e.target.value)} placeholder="Betreffzeile…" />
+            <Label htmlFor="crm360-log-subject" className="text-xs">Betreff <span className="text-destructive">*</span></Label>
+            <Input id="crm360-log-subject" required value={logDesc} onChange={e => setLogDesc(e.target.value)} placeholder="Betreffzeile…" />
           </div>
 
           <div className="col-span-6 md:col-span-1 space-y-1">
@@ -187,13 +197,13 @@ export default function ContactHistoryTable({ logs, customer, onAddLog }: Contac
           </div>
 
           <div className="col-span-12 md:col-span-8 space-y-1">
-            <Label className="text-xs">Kommentar</Label>
-            <Textarea value={logKommentar} onChange={e => setLogKommentar(e.target.value)} className="h-16" placeholder="Freitext / Gesprächsnotiz…" />
+            <Label htmlFor="crm360-log-comment" className="text-xs">Kommentar</Label>
+            <Textarea id="crm360-log-comment" value={logKommentar} onChange={e => setLogKommentar(e.target.value)} className="h-16" placeholder="Freitext / Gesprächsnotiz…" />
           </div>
 
           <div className="col-span-12 md:col-span-4 space-y-1">
-            <Label className="text-xs">CC (intern Mitarbeiter/Abteilung oder externe E-Mail)</Label>
-            <Input value={logCc} onChange={e => setLogCc(e.target.value)} placeholder="z.B. AO  ·  oder berater@extern.de" />
+            <Label htmlFor="crm360-log-cc" className="text-xs">CC (intern Mitarbeiter/Abteilung oder externe E-Mail)</Label>
+            <Input id="crm360-log-cc" value={logCc} onChange={e => setLogCc(e.target.value)} placeholder="z.B. AO  ·  oder berater@extern.de" />
           </div>
 
           <div className="col-span-12 border-t border-dashed border-border pt-2 flex flex-col md:flex-row justify-between items-center gap-2">
@@ -208,10 +218,11 @@ export default function ContactHistoryTable({ logs, customer, onAddLog }: Contac
               </label>
             </div>
 
-            <Button type="submit" size="sm" className="gap-1.5" id="btn-save-activity-vorgang">
+            <Button type="submit" size="sm" className="gap-1.5" id="btn-save-activity-vorgang" disabled={isSaving || !logDesc.trim()}>
               <Check size={13} />
               Aktivität speichern
             </Button>
+            {saveError && <p className="w-full text-right text-xs text-destructive" role="alert">{saveError}</p>}
           </div>
         </form>
       )}

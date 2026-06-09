@@ -15,7 +15,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 
 interface ContactPersonsTableProps {
   contactPersons: ContactPerson[];
-  onAddContactPerson: (vals: Partial<ContactPerson>) => void;
+  onAddContactPerson: (vals: Partial<ContactPerson>) => void | Promise<unknown>;
+  onCallContact?: (contact: ContactPerson) => void;
   onEmailContact: (contact: ContactPerson) => void;
   onOpenPresents: (contact: ContactPerson) => void;
 }
@@ -23,6 +24,7 @@ interface ContactPersonsTableProps {
 export default function ContactPersonsTable({
   contactPersons,
   onAddContactPerson,
+  onCallContact,
   onEmailContact,
   onOpenPresents,
 }: ContactPersonsTableProps) {
@@ -36,10 +38,13 @@ export default function ContactPersonsTable({
   const [position, setPosition] = useState('');
   const [phone1, setPhone1] = useState('');
   const [phone2, setPhone2] = useState('');
+  const [email, setEmail] = useState('');
   const [fax, setFax] = useState('');
   const [priority, setPriority] = useState(2);
   const [birthdate, setBirthdate] = useState('');
   const [schedule, setSchedule] = useState<boolean[]>(Array(10).fill(false));
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveError, setSaveError] = useState('');
   const selectedContact = contactPersons.find((person) => person.id === selectedContactId) ?? null;
   const normalizedFilter = filter.trim().toLocaleLowerCase('de-DE');
   const filteredContacts = normalizedFilter
@@ -53,19 +58,26 @@ export default function ContactPersonsTable({
     setSchedule(prev => prev.map((v, i) => (i === idx ? !v : v)));
   };
 
-  const handleFormSubmit = (e: React.FormEvent) => {
+  const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!lastName) return;
+    if (!lastName || isSaving) return;
 
-    onAddContactPerson({
-      salutation, name: lastName, firstName, position, phone1,
-      phone2: phone2 || undefined, fax: fax || undefined, priority,
-      birthdate: birthdate || undefined, weeklySchedule: schedule,
-    });
-
-    setFirstName(''); setLastName(''); setPosition(''); setPhone1(''); setPhone2('');
-    setFax(''); setPriority(2); setBirthdate(''); setSchedule(Array(10).fill(false));
-    setShowAddForm(false);
+    setIsSaving(true);
+    setSaveError('');
+    try {
+      await onAddContactPerson({
+        salutation, name: lastName, firstName, position, phone1,
+        phone2: phone2 || undefined, email: email || undefined, fax: fax || undefined, priority,
+        birthdate: birthdate || undefined, weeklySchedule: schedule,
+      });
+      setFirstName(''); setLastName(''); setPosition(''); setPhone1(''); setPhone2('');
+      setEmail(''); setFax(''); setPriority(2); setBirthdate(''); setSchedule(Array(10).fill(false));
+      setShowAddForm(false);
+    } catch (error) {
+      setSaveError(error instanceof Error ? error.message : 'Ansprechpartner konnte nicht gespeichert werden.');
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   return (
@@ -107,10 +119,8 @@ export default function ContactPersonsTable({
         <Button
           variant="outline"
           size="sm"
-          disabled={!selectedContact?.phone1}
-          onClick={() => {
-            if (selectedContact?.phone1) window.location.href = `tel:${selectedContact.phone1}`;
-          }}
+          disabled={!selectedContact?.phone1 || !onCallContact}
+          onClick={() => selectedContact && onCallContact?.(selectedContact)}
           data-action-id="crm360.contact.call"
           className="gap-1"
         >
@@ -165,6 +175,10 @@ export default function ContactPersonsTable({
             <Label className="text-xs">Telefon 1</Label>
             <Input required value={phone1} onChange={e => setPhone1(e.target.value)} placeholder="Durchwahl" />
           </div>
+          <div className="col-span-6 md:col-span-2 space-y-1">
+            <Label className="text-xs">E-Mail</Label>
+            <Input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="kontakt@kunde.de" />
+          </div>
           <div className="col-span-6 md:col-span-1 space-y-1">
             <Label className="text-xs">Prio</Label>
             <Input type="number" min={1} max={9999} value={priority} onChange={e => setPriority(Number(e.target.value))} />
@@ -190,10 +204,11 @@ export default function ContactPersonsTable({
                 ))}
               </div>
             </div>
-            <Button type="submit" size="sm" className="gap-1 self-end">
+            <Button type="submit" size="sm" className="gap-1 self-end" disabled={isSaving || !lastName.trim()}>
               <Check size={13} />
               Sichern
             </Button>
+            {saveError && <p className="w-full text-right text-xs text-destructive" role="alert">{saveError}</p>}
           </div>
         </form>
       )}
@@ -304,6 +319,8 @@ export default function ContactPersonsTable({
               <dd>{selectedContact.phone1 || 'Nicht hinterlegt'}</dd>
               <dt className="text-muted-foreground">Mobil</dt>
               <dd>{selectedContact.phone2 || 'Nicht hinterlegt'}</dd>
+              <dt className="text-muted-foreground">E-Mail</dt>
+              <dd>{selectedContact.email || 'Nicht hinterlegt'}</dd>
               <dt className="text-muted-foreground">Priorität</dt>
               <dd>{selectedContact.priority}</dd>
             </dl>

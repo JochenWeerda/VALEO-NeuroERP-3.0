@@ -6,6 +6,7 @@
 import React, { useState, useEffect, Suspense, lazy } from 'react';
 import { useNavigate } from '@/app/routing/typed-router';
 import { buildSalesHandoverPath } from '@/lib/workflow/sales-handover';
+import { getAxiosErrorMessage } from '@/lib/api-client';
 import { Customer, ContactPerson, ContactLog, OpenItem, BusinessDocument } from './types';
 import * as kimApi from './kim-api';
 import { useToast } from '@/hooks/use-toast';
@@ -93,6 +94,8 @@ export default function KimCockpitPage() {
   const [showCustomerInfoModal, setShowCustomerInfoModal] = useState(false);
   const [showPhoneDialog, setShowPhoneDialog] = useState(false);
   const [phoneChoice, setPhoneChoice] = useState<'1' | '2'>('1');
+  const [phoneContact, setPhoneContact] = useState<ContactPerson | null>(null);
+  const [callContact, setCallContact] = useState<ContactPerson | null>(null);
   const [dialing, setDialing] = useState(false);
   const [workspaceResetKey, setWorkspaceResetKey] = useState(0);
 
@@ -210,27 +213,33 @@ export default function KimCockpitPage() {
 
   // Add Contact Person Dispatcher
   const handleAddNewContactPerson = async (newCP: Partial<ContactPerson>) => {
-    if (!activeCustomer) return;
+    if (!activeCustomer) throw new Error('Kein Kunde ausgewaehlt.');
     try {
       const data = await kimApi.createContact(activeCustomer.id, newCP);
-      if (data.status === "success") {
-        await fetchCustomerDataStreams(activeCustomer.id);
-      }
+      if (data.status !== "success") throw new Error('Ansprechpartner wurde nicht gespeichert.');
+      await fetchCustomerDataStreams(activeCustomer.id);
+      toast({ title: 'Ansprechpartner gespeichert' });
     } catch (err) {
       console.error("Failed to add contact person:", err);
+      const message = getAxiosErrorMessage(err);
+      toast({ title: 'Ansprechpartner konnte nicht gespeichert werden', description: message, variant: 'destructive' });
+      throw new Error(message);
     }
   };
 
   // Add Contact Log Dispatcher
   const handleAddNewContactLog = async (newLog: Partial<ContactLog>) => {
-    if (!activeCustomer) return;
+    if (!activeCustomer) throw new Error('Kein Kunde ausgewaehlt.');
     try {
       const data = await kimApi.createLog(activeCustomer.id, newLog);
-      if (data.status === "success") {
-        await fetchCustomerDataStreams(activeCustomer.id);
-      }
+      if (data.status !== "success") throw new Error('Aktivitaet wurde nicht gespeichert.');
+      await fetchCustomerDataStreams(activeCustomer.id);
+      toast({ title: 'Aktivitaet gespeichert' });
     } catch (err) {
       console.error("Failed to submit interaction log:", err);
+      const message = getAxiosErrorMessage(err);
+      toast({ title: 'Aktivitaet konnte nicht gespeichert werden', description: message, variant: 'destructive' });
+      throw new Error(message);
     }
   };
 
@@ -282,16 +291,15 @@ export default function KimCockpitPage() {
   };
 
   const handleEmailContact = (contact: ContactPerson) => {
-    const email = contact.email || activeCustomer?.email;
-    if (!email) {
+    if (!contact.email) {
       toast({
-        title: 'Keine E-Mail-Adresse',
-        description: 'Weder beim Ansprechpartner noch beim Kunden ist eine E-Mail-Adresse hinterlegt.',
+        title: 'Keine Ansprechpartner-E-Mail',
+        description: 'Beim gewaehlten Ansprechpartner ist keine E-Mail-Adresse hinterlegt.',
         variant: 'destructive',
       });
       return;
     }
-    window.location.href = `mailto:${email}`;
+    window.location.href = `mailto:${contact.email}`;
   };
 
   const handleOpenContactPresents = (contact: ContactPerson) => {
@@ -320,12 +328,16 @@ export default function KimCockpitPage() {
     try {
       await handleAddNewContactLog({
         direction: quickCallDirection,
+        art: 'telefon',
+        betreff: `Telefonat${callContact ? ` mit ${callContact.firstName} ${callContact.name}` : ''}`,
+        kommentar: quickCallDesc,
         artKurzinfo: `Telefonat: ${quickCallDesc}`,
         completed: true,
         operator: "JW",
         referenceType: "NONE"
       });
       setQuickCallDesc('');
+      setCallContact(null);
       setShowCallLogModal(false);
     } finally {
       setSavingCall(false);
@@ -347,26 +359,32 @@ export default function KimCockpitPage() {
   };
 
   // Telefon: bei mehreren Nummern Auswahl-Dialog, sonst direkt waehlen.
-  const startPhoneFlow = () => {
+  const startPhoneFlow = (contact?: ContactPerson) => {
     if (!activeCustomer) return;
-    const hasTwo = !!(activeCustomer.phone1 && activeCustomer.phone2 && activeCustomer.phone1 !== activeCustomer.phone2);
+    const target = contact ?? activeCustomer;
+    setPhoneContact(contact ?? null);
+    setPhoneChoice('1');
+    const hasTwo = !!(target.phone1 && target.phone2 && target.phone1 !== target.phone2);
     if (hasTwo) {
       setShowPhoneDialog(true);
-    } else if (activeCustomer.phone1) {
-      void dialNumber(activeCustomer.phone1);
+    } else if (target.phone1) {
+      void dialNumber(target.phone1, contact ?? null);
     } else {
-      toast({ title: 'Keine Telefonnummer', description: 'Im Kundenstamm ist keine Telefonnummer hinterlegt.', variant: 'destructive' });
+      toast({ title: 'Keine Telefonnummer', description: 'Im gewaehlten Kontext ist keine Telefonnummer hinterlegt.', variant: 'destructive' });
     }
   };
 
   // Ausgehende Wahl ueber die TAPI-Bridge anfordern, danach Gespraechs-Log oeffnen.
-  const dialNumber = async (number: string) => {
+  const dialNumber = async (number: string, contact: ContactPerson | null = phoneContact) => {
     if (!activeCustomer || dialing) return;
     setDialing(true);
     try {
       await kimApi.dial(number, activeCustomer.debtorNo);
       setShowPhoneDialog(false);
-      toast({ title: 'Wahl angefordert', description: `${activeCustomer.name} · ${number}` });
+      setPhoneContact(null);
+      setCallContact(contact);
+      const targetName = contact ? `${contact.firstName} ${contact.name}`.trim() : activeCustomer.name;
+      toast({ title: 'Wahl angefordert', description: `${targetName} · ${number}` });
       setShowCallLogModal(true); // Gespraech direkt protokollieren
     } catch (err) {
       console.error('Dial fehlgeschlagen:', err);
@@ -469,9 +487,11 @@ export default function KimCockpitPage() {
     { key: 'leads', label: 'Lead-Management' },
     { key: 'geo', label: 'CRM-Geo / Karte' },
   ];
+  const phoneTarget = phoneContact ?? activeCustomer;
 
   return (
-    <div className="flex w-full h-full min-h-[calc(100vh-3.5rem)] bg-muted overflow-hidden" id="app-root-frame">
+    <>
+    <div className="flex w-full h-full min-h-[calc(100vh-3.5rem)] bg-muted overflow-hidden print:hidden" id="app-root-frame">
 
       {/* COLUMN 1: LEFT SIDEBAR kundenliste & alphabetic selectors */}
       <CustomerListSidebar
@@ -540,6 +560,7 @@ export default function KimCockpitPage() {
                       key={`contacts-${workspaceResetKey}`}
                       contactPersons={contacts}
                       onAddContactPerson={handleAddNewContactPerson}
+                      onCallContact={startPhoneFlow}
                       onEmailContact={handleEmailContact}
                       onOpenPresents={handleOpenContactPresents}
                     />
@@ -832,7 +853,12 @@ export default function KimCockpitPage() {
       </Dialog>
 
       {/* OVERLAY: Telefonnummer-Auswahl (mehrere Nummern) */}
-      <Dialog open={showPhoneDialog} onOpenChange={(o) => !o && setShowPhoneDialog(false)}>
+      <Dialog open={showPhoneDialog} onOpenChange={(o) => {
+        if (!o) {
+          setShowPhoneDialog(false);
+          setPhoneContact(null);
+        }
+      }}>
         <DialogContent className="max-w-xs">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
@@ -840,11 +866,11 @@ export default function KimCockpitPage() {
               Auswahl der Telefonnummer
             </DialogTitle>
           </DialogHeader>
-          {activeCustomer && (
+          {phoneTarget && (
             <div className="space-y-2 text-sm">
               {[
-                { key: '1' as const, label: 'Telefon 1', number: activeCustomer.phone1 },
-                { key: '2' as const, label: 'Telefon 2', number: activeCustomer.phone2 || '' },
+                { key: '1' as const, label: 'Telefon 1', number: phoneTarget.phone1 },
+                { key: '2' as const, label: 'Telefon 2', number: phoneTarget.phone2 || '' },
               ].map(opt => (
                 <label
                   key={opt.key}
@@ -865,12 +891,15 @@ export default function KimCockpitPage() {
             </div>
           )}
           <DialogFooter>
-            <Button variant="outline" onClick={() => setShowPhoneDialog(false)}>Abbrechen</Button>
+            <Button variant="outline" onClick={() => {
+              setShowPhoneDialog(false);
+              setPhoneContact(null);
+            }}>Abbrechen</Button>
             <Button
               disabled={dialing}
               onClick={() => {
-                const num = phoneChoice === '2' ? activeCustomer?.phone2 : activeCustomer?.phone1;
-                if (num) void dialNumber(num);
+                const num = phoneChoice === '2' ? phoneTarget?.phone2 : phoneTarget?.phone1;
+                if (num) void dialNumber(num, phoneContact);
               }}
             >
               {dialing && <Loader2 className="h-4 w-4 animate-spin" />}
@@ -990,5 +1019,45 @@ export default function KimCockpitPage() {
 
       <Toaster />
     </div>
+    {activeCustomer && (
+      <section className="hidden print:block bg-white p-8 text-black" data-testid="crm360-print-view">
+        <header className="mb-6 border-b-2 border-black pb-3">
+          <h1 className="text-2xl font-bold">CRM 360 Kundenakte</h1>
+          <p className="text-sm">Stand: {new Date().toLocaleString('de-DE')}</p>
+        </header>
+        <div className="grid grid-cols-2 gap-x-8 gap-y-1 text-sm">
+          <strong>Kunde</strong><span>{activeCustomer.name}</span>
+          <strong>Debitor</strong><span>{activeCustomer.debtorNo}</span>
+          <strong>Adresse</strong><span>{activeCustomer.street}, {activeCustomer.zipCode} {activeCustomer.city}</span>
+          <strong>Telefon</strong><span>{activeCustomer.phone1 || '-'}</span>
+          <strong>E-Mail</strong><span>{activeCustomer.email || '-'}</span>
+          <strong>Vertreter / Disposition</strong><span>{activeCustomer.salesRepresentative} / {activeCustomer.dispatcher}</span>
+          <strong>Kreditlimit</strong><span>EUR {activeCustomer.creditLimit.toLocaleString('de-DE')}</span>
+          <strong>Offene Posten</strong><span>EUR {totalOutstanding.toLocaleString('de-DE', { minimumFractionDigits: 2 })}</span>
+        </div>
+        <h2 className="mt-6 mb-2 text-lg font-bold">Ansprechpartner ({contacts.length})</h2>
+        <table className="w-full border-collapse text-xs">
+          <thead><tr><th className="border p-1 text-left">Name</th><th className="border p-1 text-left">Position</th><th className="border p-1 text-left">Telefon</th><th className="border p-1 text-left">E-Mail</th></tr></thead>
+          <tbody>{contacts.map((contact) => (
+            <tr key={contact.id}><td className="border p-1">{contact.firstName} {contact.name}</td><td className="border p-1">{contact.position}</td><td className="border p-1">{contact.phone1}</td><td className="border p-1">{contact.email || '-'}</td></tr>
+          ))}</tbody>
+        </table>
+        <h2 className="mt-6 mb-2 text-lg font-bold">Belege ({documents.length})</h2>
+        <table className="w-full border-collapse text-xs">
+          <thead><tr><th className="border p-1 text-left">Typ</th><th className="border p-1 text-left">Nummer</th><th className="border p-1 text-left">Datum</th><th className="border p-1 text-right">Brutto</th><th className="border p-1 text-left">Status</th></tr></thead>
+          <tbody>{documents.map((document) => (
+            <tr key={document.id}><td className="border p-1">{document.type}</td><td className="border p-1">{document.docNo}</td><td className="border p-1">{document.date}</td><td className="border p-1 text-right">EUR {document.grossAmount.toLocaleString('de-DE', { minimumFractionDigits: 2 })}</td><td className="border p-1">{document.completed ? 'Erledigt' : 'Offen'}</td></tr>
+          ))}</tbody>
+        </table>
+        <h2 className="mt-6 mb-2 text-lg font-bold">Kontakthistorie ({logs.length})</h2>
+        <table className="w-full border-collapse text-xs">
+          <thead><tr><th className="border p-1 text-left">Datum</th><th className="border p-1 text-left">Richtung</th><th className="border p-1 text-left">Betreff</th><th className="border p-1 text-left">Bediener</th></tr></thead>
+          <tbody>{logs.map((log) => (
+            <tr key={log.id}><td className="border p-1">{log.date}</td><td className="border p-1">{log.direction}</td><td className="border p-1">{log.betreff || log.artKurzinfo}</td><td className="border p-1">{log.operator}</td></tr>
+          ))}</tbody>
+        </table>
+      </section>
+    )}
+    </>
   );
 }
