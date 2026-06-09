@@ -25,6 +25,7 @@ Stand: `2026-06-09`
 **Offene Risiken:** fiskaly Produktlizenzen/Credentials und Swissbit Partnervertraege sind externe Live-Gates; partnergeschuetzte URLs oder Payloads duerfen nicht geraten werden.
 **Ergebnis:** Tenantbezogene Admin-Seite mit Typed Route, Provider-/DSFinV-K-Auswahl, Kassen-, Client- und Terminalkontext sowie expliziter Simulationsfreigabe umgesetzt. Readiness prueft Konfiguration und Kassenkontext. Secret-artige Settings werden vor DB-Zugriff abgewiesen und beim Lesen redigiert. SUBMIT DE, RECEIPT und SAFE besitzen getrennte, fail-closed Vertrags-Gates ohne geratenen Live-Call. Der POS-Browsertest belegt Swissbit als TSE bei separatem fiskaly DSFinV-K sowie den blockierten Tagesabschluss bei offenen Fiskaltransaktionen.
 **Checks:** 11 fokussierte Backendtests; Frontend- und Playwright-TypeScript gruen; fokussierter ESLint gruen; POS-Playwright 2 Tests bestanden; Produktions-Build und Typed-Route-Generierung gruen.
+**Handoff:** Ergebnisdateien wurden wegen eines parallelen Shared-Worktree-Commits zusammen mit Claim `e12b261a6` publiziert; dieser Nachtrag ordnet sie verbindlich `POS-FISCAL-OPS-002` zu.
 
 ## POS-FISCAL-PROVIDERS-001
 
