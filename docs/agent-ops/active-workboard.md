@@ -6,7 +6,8 @@ Stand: `2026-06-09`
 
 **Von:** Codex
 **Owner:** Codex
-**Stand:** reserviert
+**Stand:** in arbeit
+**Abstimmung:** Komplementaer zu `KIM-L3-BACKEND-001` (Claude). Codex bearbeitet ausschliesslich `packages/frontend-web/src/pages/crm/kim/**`, CRM-Playwright-Vertraege und den eigenen QA-/Slice-Nachweis. Keine Aenderung an `app/**`, `alembic/**`, `tools/tapi-bridge/**` oder Backendtests. Neue Backend-Endpunkte werden in diesem Slice nicht vorausgesetzt; ihre Frontend-Integration erfolgt nach Claudes stabiler Handoff-Schnittstelle.
 **Ziel des Slices:** Die im L3-Funktionsabgleich nachgewiesenen, rein frontendseitigen KIM-Bedienluecken schliessen: separate Kunden-Neuanlage, druckbare Cockpit-Ansicht, auswählbare Ansprechpartner mit Oeffnen/E-Mail/Praesente/Filter sowie fachlich korrekte Oeffnen-/Neu-Navigationen fuer vorhandene Verkaufsbelege.
 **Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/agent-ops/slices/KIM-L3-QUICK-001.yaml`, `docs/quality-assurance/` fuer den KIM-L3-Klicknachweis, `packages/frontend-web/src/pages/crm/kim/**` sowie fokussierte CRM-Playwright-Vertraege unter `playwright-tests/specs/crm/`.
 **Abnahmekriterien:** Jede neue Aktion besitzt eine stabile semantische Action-ID; Neukunde oeffnet eine leere kanonische Kundenmaske; Print erzeugt eine druckbare Cockpit-Sicht; Ansprechpartner sind selektier- und filterbar und Oeffnen/E-Mail/Praesente arbeiten im gewaehlten Kontext; unterstuetzte Verkaufsbelege oeffnen die richtige Detail- beziehungsweise Neuanlagemaske mit Kunden-/Belegkontext; unbekannte oder noch nicht kanonisch routbare Belegarten behaupten keinen erfolgreichen Fachprozess; Typecheck, Build, Playwright und Governance sind gruen.

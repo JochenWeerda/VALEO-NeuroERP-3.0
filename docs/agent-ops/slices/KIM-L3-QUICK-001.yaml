@@ -1,0 +1,38 @@
+slice_id: KIM-L3-QUICK-001
+title: KIM L3 Frontend Quick Wins
+owner: Codex
+status: in_progress
+coordination: >-
+  Komplementaer zu KIM-L3-BACKEND-001 (Claude). Dieser Slice besitzt nur
+  KIM-Frontend, CRM-Playwright und den eigenen QA-Nachweis. Keine Aenderung
+  an app/**, alembic/**, tools/tapi-bridge/** oder Backendtests. Die von
+  Claude neu bereitgestellten Backend-Vertraege werden erst nach einem
+  stabilen Handoff in einem Folgeslice verdrahtet.
+goal: >-
+  Die rein frontendseitigen L3-Bedienluecken im KIM-Cockpit schliessen:
+  Kunden-Neuanlage, Druck, Ansprechpartner-Auswahl und -Aktionen sowie
+  fachlich korrekte Oeffnen-/Neu-Navigationen fuer Verkaufsbelege.
+file_ownership:
+  - docs/agent-ops/active-workboard.md
+  - docs/agent-ops/slices/KIM-L3-QUICK-001.yaml
+  - docs/quality-assurance/kim-l3-quick-click-test-2026-06-09.md
+  - packages/frontend-web/src/pages/crm/kim
+  - playwright-tests/specs/crm/crm360-action-contracts.ts
+  - playwright-tests/specs/crm/crm360-model-based.spec.ts
+not_owned:
+  - app
+  - alembic
+  - tools/tapi-bridge
+  - tests
+acceptance_criteria:
+  - Jede neue Aktion besitzt eine stabile semantische Action-ID.
+  - Neukunde oeffnet die kanonische leere Kundenmaske.
+  - Print ruft die Browser-Druckfunktion aus dem Kundenkontext auf.
+  - Ansprechpartner sind selektier- und filterbar.
+  - Ansprechpartner-Oeffnen, E-Mail und Praesente nutzen den gewaehlten Kontext.
+  - Angebot, Auftrag und Lieferschein oeffnen kanonische Fachrouten.
+  - Nicht eindeutig routbare Einkaufs- und Bestandsarten melden ehrlich den Fachprozess.
+  - Frontend-Typecheck, Build, CRM-Playwright und Governance sind gruen.
+risks:
+  - TAPI, CC und erweiterte Kontaktlog-Persistenz liegen bei KIM-L3-BACKEND-001.
+  - Ansprechpartner-E-Mail kann bis zum Backend-Handoff auf die Kundenadresse zurueckfallen.
