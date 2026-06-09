@@ -2,6 +2,17 @@
 
 Stand: `2026-06-09`
 
+## PROD-READINESS-001
+
+**Von:** Codex
+**Owner:** Codex
+**Stand:** reserviert 2026-06-09
+**Abstimmung:** Repo-weiter CI-/Deployment-/Security-/Dokumentations-Slice. Parallel laufender Slice `KIM-DEPRECATE-COCKPIT-001` besitzt ausschliesslich `packages/frontend-web/src/pages/crm/kunden-cockpit.tsx` und den Kunden-Cockpit-Eintrag in `packages/frontend-web/src/app/navigation/domains/commercial.tsx`; diese Dateien werden nicht beruehrt.
+**Ziel des Slices:** Alle repo-seitig schliessbaren P0-Gaps der Produktionsreife beseitigen: keine tolerierten Kernfehler in Release-CI, blockierende High/Critical-Security-Gates, SBOM, produktionssichere Runtime-/Secret-Preflights, belastbarer Staging-/Production-Deploymentvertrag mit Migration, Smoke und Rollback sowie eine aktuelle, ehrliche Go-live-Matrix.
+**Dateibesitz:** `.github/workflows/quality-gate.yml`, `.github/workflows/security-scan.yml`, `.github/workflows/deploy-staging.yml`, `.github/workflows/valeo-erp-deployment.yml`, neue fokussierte Release-/Security-Workflows, produktionsbezogene Dateien unter `scripts/deployment/**`, neue Preflight-Skripte und Tests, fokussierte Helm-/Kubernetes-Werte soweit zwingend, `docs/project-context/open-gaps-and-known-issues.md`, neue Production-Readiness-/Runbook-Doku und relevante Status-/README-Verweise.
+**Abnahmekriterien:** Release-CI kann Typecheck/Lint/Tests oder High/Critical-Befunde nicht uebergehen; SBOM wird erzeugt; produktive Konfiguration scheitert bei Dev-Tokens, Default-Secrets, Debug/Reload, Wildcard-Hosts oder fehlenden Pflichtwerten; Deployments sind environment-geschuetzt und besitzen Migration-Preflight, Smoke und Rollback; externe UAT-, Steuer-, DMS-, TSE- und Hardwareabnahmen bleiben explizit blockierend; YAML-, Skript-, Doku- und fokussierte Vertragstests sind gruen.
+**Offene Risiken:** Echte Cloud-/Kubernetes-Zugangsdaten, Branch-Protection-Regeln, GitHub-Environment-Approvals und fachliche Unterschriften koennen nur als externe GitHub-/Betriebs-Gates konfiguriert, nicht im Repository erfunden werden.
+
 ## KIM-DEPRECATE-COCKPIT-001
 
 **Von:** Claude
