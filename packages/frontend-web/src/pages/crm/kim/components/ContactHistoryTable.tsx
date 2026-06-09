@@ -269,7 +269,11 @@ export default function ContactHistoryTable({ logs, customer, onAddLog }: Contac
                         <span className="truncate max-w-[480px]">{log.artKurzinfo}</span>
                       </div>
                     </td>
-                    <td className="p-2 text-center text-muted-foreground">{log.operator}</td>
+                    <td className="p-2 text-center text-muted-foreground">
+                      {log.operator === 'AUTO'
+                        ? <Badge variant="info" title="Automatisch erfasst (Telefon/E-Mail/WhatsApp)">Auto</Badge>
+                        : log.operator}
+                    </td>
                     <td className={`p-2 text-center ${isOverdueWV ? 'text-destructive font-semibold' : 'text-muted-foreground'}`}>
                       {log.reSubmissionDate ? (
                         <span className="flex items-center justify-center gap-1 whitespace-nowrap text-xs">
