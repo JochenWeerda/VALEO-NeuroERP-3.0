@@ -2,6 +2,17 @@
 
 Stand: `2026-06-09`
 
+## POS-FISCAL-PROVIDERS-001
+
+**Von:** Codex
+**Owner:** Codex
+**Stand:** reserviert 2026-06-09
+**Abstimmung:** Konfliktfreier POS-/Compliance-Slice parallel zu Claudes KIM-L3-S3-S5. Keine Aenderung unter `packages/frontend-web/src/pages/crm/kim/**` oder an CRM-Backenddateien.
+**Ziel des Slices:** Demo- und Pseudo-TSE-/DSFinV-K-Pfade durch eine typisierte Provider-Abstraktion fuer fiskaly SIGN DE/DSFINVK DE sowie Swissbit Cloud-/Hardware-TSE ersetzen; Tagesabschluss, Export, Status und Readiness fail-closed, tenantbezogen und idempotent integrieren.
+**Dateibesitz:** Neue Fiskalisierungsservices unter `app/services/fiscalization/**`, POS-Fiskalisierungsendpoint, `tse_fiskaly_service.py`, fokussierte Edits in `admin_pos.py`, `pos_dsfinvk.py`, `kasse_tagesabschluss.py`, `app/api/v1/api.py`, neue POS-Migration, fokussierte Tests und Doku.
+**Abnahmekriterien:** Providerwahl fiskaly/Swissbit; korrekte fiskaly Token-Authentifizierung; konfigurierbarer Swissbit REST-/Gateway-Vertrag; persistente idempotente Signierung; getrennte TSE-/DSFinV-K-Exporte; providergebundener Tagesabschluss; kein produktiver Scheinerfolg bei Simulator oder fehlender Vertragsfreigabe.
+**Offene Risiken:** Swissbit Detail-API/SDK ist partner-/loginpflichtig; Live-Credentials und externe Pruefwerkzeugabnahme bleiben Betriebs-Gates.
+
 ## KIM-L3-S2-REVIEW-001
 
 **Von:** Codex
