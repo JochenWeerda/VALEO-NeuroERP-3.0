@@ -65,6 +65,23 @@ diesen Browser-Handover nicht als Buchungsnachweis zu werten.
 ## Verifikation
 
 - Kombinierter CRM360- und Revenue-Handover-Lauf: 11 bestanden
+
+## Regression nach KIM-Designsystem-Umbau 2026-06-09
+
+Der vollstaendige modellbasierte Lauf wurde nach `KIM-DS-001` erneut gegen
+den gebauten Produktionsstand ausgefuehrt:
+
+- 11 von 11 CRM360- und Revenue-Handover-Tests bestanden
+- Kopfaktionen, Tabs, Kundenstamm-Update, Telefonprotokoll und NeuroAI geprueft
+- Angebot und Debitoren-OP mit Kundenkontext und Browser-Zurueck geprueft
+- Auftrag, Lieferschein, Rechnung und OP mit Belegkontext geprueft
+- delegierte Beleg- und OP-Formulare verwenden stabile semantische Feld-IDs
+- optionaler Kunden-Detail-Lookup darf den typisierten CRM-Handover-Kontext
+  im Auftragseditor nicht mehr loeschen
+- die Lieferschein-Erfassung nutzt denselben Handover-Fallback und reicht
+  die Kundennummer nachweislich bis Rechnung und Debitoren-OP durch
+- Playwright verwendet vorhandene Server konfliktfrei oder startet eigene
+  entkoppelte Prozesse, die im Teardown beendet werden
 - `pnpm exec tsc -p playwright-tests/tsconfig.json --noEmit --pretty false`: bestanden
 - `pnpm --dir packages/frontend-web exec tsc --noEmit --pretty false`: bestanden
 - Produktions-Build: bestanden; verbleibend ist nur der bekannte
