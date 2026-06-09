@@ -1,7 +1,7 @@
 slice_id: KIM-L3-BACKEND-001
 title: KIM L3 — Backend-Fundamente (Kontaktlog-Persistenz, TAPI, Benachrichtigung, Belegquellen)
 owner: Claude
-status: reserved
+status: backend-complete
 coordination: >-
   Komplementaer zu KIM-L3-QUICK-001 (Codex/Claude Code, Frontend/Routen).
   Dieser Slice baut ausschliesslich die von KIM-L3-QUICK-001 ausdruecklich
