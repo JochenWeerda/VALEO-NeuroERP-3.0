@@ -1,0 +1,55 @@
+slice_id: KIM-DS-001
+title: KIM 360°-Cockpit auf VALEO-Designsystem + Listen-Performance
+owner: Claude
+status: completed
+goal: >-
+  Das unter /crm fuehrende KIM-360-Cockpit von der portierten systemERP-L3-
+  Terminal-Optik vollstaendig auf das VALEO-Designsystem umbauen (DS-Komponenten,
+  Semantik-Farbtokens, Dark-Mode, PageToolbar-/Dialog-Muster) und die wahrgenommene
+  Ladeperformance der grossen Debitorenliste reduzieren.
+file_ownership:
+  - docs/agent-ops/active-workboard.md
+  - docs/agent-ops/slices/KIM-DS-001.yaml
+  - packages/frontend-web/package.json
+  - packages/frontend-web/src/pages/crm/kim/index.tsx
+  - packages/frontend-web/src/pages/crm/kim/components/CustomerListSidebar.tsx
+  - packages/frontend-web/src/pages/crm/kim/components/CustomerHeader.tsx
+  - packages/frontend-web/src/pages/crm/kim/components/CustomerActionBar.tsx
+  - packages/frontend-web/src/pages/crm/kim/components/CustomerStatusBanner.tsx
+  - packages/frontend-web/src/pages/crm/kim/components/ContactPersonsTable.tsx
+  - packages/frontend-web/src/pages/crm/kim/components/ContactHistoryTable.tsx
+  - packages/frontend-web/src/pages/crm/kim/components/SalesDocumentsPanel.tsx
+  - packages/frontend-web/src/pages/crm/kim/components/ContractsPanel.tsx
+  - packages/frontend-web/src/pages/crm/kim/components/FinancialOpenItemsPanel.tsx
+  - packages/frontend-web/src/pages/crm/kim/components/DocumentPanel.tsx
+  - packages/frontend-web/src/pages/crm/kim/components/FollowUpTaskPanel.tsx
+  - packages/frontend-web/src/pages/crm/kim/components/NeuroAISidePanel.tsx
+acceptance_criteria:
+  - Keine font-mono/uppercase-Terminal-Optik und keine hartkodierten Hex-Farben mehr in den KIM-Komponenten.
+  - Alle Flaechen nutzen DS-Semantik-Tokens; Dark-Mode rendert korrekt.
+  - Raw-Buttons/Inputs/Selects/Textareas/Modals durch Button/Input/NativeSelect/Textarea/Dialog ersetzt.
+  - Mutierende Aktionen (Stammdaten-Edit, Telefon-Log) mit Submit-Guard + Disabled + Toast.
+  - Alle data-action-id und Test-Selektoren bleiben identisch zu HEAD (model-based Test anschlussfaehig).
+  - Debitorenliste rendert nur ein begrenztes Fenster ins DOM statt aller hunderter Zeilen.
+  - eslint clean, tsc --noEmit 0 Fehler projektweit, Screenshot hell+dunkel ok.
+risks:
+  - Praesentations-Refactor ueber 14 Dateien; Test-Selektoren duerfen nicht brechen.
+  - Cold-Start-Langsamkeit ist Vite-Dev-Erstaufbau (in Prod-Build irrelevant), kein App-Bug.
+result: >-
+  Alle 14 KIM-Komponenten auf das VALEO-Designsystem umgebaut: ~250x
+  font-mono/uppercase entfernt, hunderte Hex-Farben durch DS-Tokens ersetzt
+  (Dark-Mode funktioniert nun), DS-Primitive (Button/Input/NativeSelect/Textarea/
+  Badge/Progress/Skeleton/Dialog) durchgaengig, Submit-Guards an Master-Edit und
+  Quick-Call ergaenzt. Alle 12 data-action-id und Schluessel-IDs bleiben identisch
+  zu HEAD. Die Debitorenliste rendert ein 80er-Fenster (462 total -> 80 im DOM,
+  "weitere anzeigen") bei voll erhaltener Suche/Filter/Tastatur-Navigation.
+  package.json predev/prebuild/pretype-check auf "npm run routes:generate"
+  korrigiert (Container hat kein pnpm -> Exit 127). eslint clean, tsc 0 Fehler,
+  Screenshots hell+dunkel verifiziert.
+checks: >-
+  eslint (--max-warnings 0) clean; tsc --noEmit 0 Fehler projektweit;
+  Render-Fenster verifiziert (total=462, rendered=80, load-more=1);
+  Dark-Mode-Screenshot ok. Offen/Follow-up: model-based Suite
+  playwright-tests/specs/crm/crm360-model-based.spec.ts (Global-Setup spawnt
+  eigene Server -> hier Port-Konflikt) sowie optionale Server-seitige
+  Kundensuche bei stark wachsendem Kundenstamm.
