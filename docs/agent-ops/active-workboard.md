@@ -2,6 +2,16 @@
 
 Stand: `2026-06-09`
 
+## CRM360-MBT-005
+
+**Von:** Codex
+**Owner:** Codex
+**Stand:** reserviert 2026-06-09
+**Ziel des Slices:** Den modellbasierten CRM360-Klickvertrag nach dem KIM-Designsystem-Umbau vollstaendig erneut ausfuehren und alle Regressionen bei Buttons, Tabs, CRUD, fachlichen Zielmasken, Entity-Kontext, 404-/Console-Fehlern und Browser-Zurueck beheben.
+**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/agent-ops/slices/CRM360-MBT-005.yaml`, CRM360-QA-Dokumentation unter `docs/quality-assurance/`, CRM360-Spezifikationen und Hilfen unter `playwright-tests/specs/crm/` und `playwright-tests/helpers/` sowie nur nachgewiesene Verdrahtungs- oder Selektorfixes unter `packages/frontend-web/src/pages/crm/kim/**`.
+**Abnahmekriterien:** Die vollstaendige CRM360- und Revenue-Handover-Playwright-Suite laeuft gegen den aktuellen KIM-Stand; alle vertraglich erfassten Aktionen sind sichtbar und klickbar; CRUD-Requests, Zielroute, Hauptinhalt und Kunden-/Belegkontext stimmen; Browser-Zurueck liefert CRM360 ohne 404; keine neuen Console- oder Request-Fehler; Typechecks, fokussierter Lint, Build und Governance sind gruen.
+**Offene Risiken:** Der Playwright-Global-Setup kann mit bereits laufenden lokalen Servern kollidieren. Selektoren duerfen nur stabilisiert werden, wenn die fachliche Aktion unveraendert bleibt; echte Verdrahtungsfehler werden im KIM-Code behoben und nicht durch nachsichtige Tests verdeckt.
+
 ## KIM-DS-001
 
 **Von:** Claude
