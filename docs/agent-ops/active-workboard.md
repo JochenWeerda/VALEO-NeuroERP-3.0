@@ -43,7 +43,7 @@ Stand: `2026-06-09`
 
 **Von:** Claude
 **Owner:** Claude
-**Stand:** S3-Backend umgesetzt 2026-06-09; S4-Backend in Arbeit; Frontend (S3-FE/S4-FE/S5) wartet auf Handoff
+**Stand:** ABGESCHLOSSEN 2026-06-09 — S3 (Präsente BE+FE), S4 (Ansprechpartner Werbe-Matrix + DSGVO-Pseudonymisierung BE+FE), S5 (konfigurierbare Action-Bar). model-based Suite 17/17 grün; tsc 0, eslint clean. Backend-Migrationen idempotent.
 **Abstimmung:** Codex bearbeitet aktiv `KIM-L3-S1-GAP-CLOSURE-001` (uncommittete WIP in `index.tsx`, `ContactPersonsTable.tsx`, `ContactHistoryTable.tsx`, `CustomerActionBar.tsx`, `crm_kim.py`, CRM360-Playwright). **Ich fasse diese Dateien NICHT an, solange sie Codex' uncommittete WIP tragen.** Mein Frontend (S3-Präsente-Tab, S4-Ansprechpartner-Vollformular, S5-konfigurierbare Action-Bar) startet erst nach Codex' Commit (Baum sauber). Bis dahin nur **neue, nicht-kollidierende Backend-Dateien**.
 **Ziel des Slices:** S3 Präsente (Tab+Backend), S4 Ansprechpartner-Vollformular (~40 Felder + Werbe-Matrix + Pseudonymisieren, Backend), S5 benutzerbezogen konfigurierbare Action-Bar — gemäß `docs/crm-customer-360-bauplan-2026-06-09.md`.
 **Dateibesitz (Backend, jetzt):** `alembic/versions/crm_gifts_*`, `alembic/versions/crm_contacts_ext_*`, `app/services/crm_gift_service.py`, `app/services/crm_contact_ext_service.py`, `app/api/v1/endpoints/crm_gifts.py`, `app/api/v1/endpoints/crm_contacts_ext.py`, `app/api/v1/api.py` (nur eigene include_router-Zeilen), Backendtests. **Frontend (nach Handoff):** neue `kim/components/CustomerGiftsTab.tsx`, `CustomerContactsForm.tsx`; abgestimmte Edits in `kim/index.tsx`, `ContactPersonsTable.tsx`, `CustomerActionBar.tsx`.
