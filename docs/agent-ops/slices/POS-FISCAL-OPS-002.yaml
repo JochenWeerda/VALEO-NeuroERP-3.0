@@ -1,0 +1,40 @@
+slice_id: POS-FISCAL-OPS-002
+title: POS Fiskalisierung Admin, Produkt-Gates und E2E
+owner: Codex
+status: reserved
+coordination: >-
+  Folge-Slice zu POS-FISCAL-PROVIDERS-001 und konfliktfrei zu laufenden
+  KIM-/CRM-Arbeiten. Keine Aenderungen unter
+  packages/frontend-web/src/pages/crm/kim oder an CRM-Playwright-Specs.
+goal: >-
+  Fiskalisierungsprovider betrieblich nutzbar machen: tenantbezogene
+  Admin-Konfiguration und Readiness, explizite Produkt-Gates fuer fiskaly
+  SUBMIT DE, RECEIPT und SAFE sowie POS-/Tagesabschluss-Browsertests fuer
+  fiskaly und Swissbit.
+file_ownership:
+  - docs/agent-ops/active-workboard.md
+  - docs/agent-ops/slices/POS-FISCAL-OPS-002.yaml
+  - docs/architecture/pos-fiscalization-providers.md
+  - docs/quality-assurance/*pos*fiscal*
+  - app/services/fiscalization/**
+  - app/api/v1/endpoints/pos_fiscalization.py
+  - alembic/versions/*pos_fiscal*
+  - tests/test_pos_fiscalization_*.py
+  - packages/frontend-web/src/pages/admin-suite/**
+  - packages/frontend-web/src/lib/services/fiskaly-tse.ts
+  - packages/frontend-web/src/app/routing/route-tree.gen.tsx
+  - packages/frontend-web/src/app/route-builders/auto-groups/generated/admin-suite.ts
+  - packages/frontend-web/src/app/navigation/domains/core.tsx
+  - playwright-tests/specs/pos/**
+  - .env.example
+acceptance_criteria:
+  - Provider, DSFinV-K-Provider und Kassenkontext sind administrierbar.
+  - Provider-Secrets werden niemals an den Browser ausgeliefert.
+  - Readiness benennt konkrete Provider-, Kassen- und Produktblocker.
+  - SUBMIT DE, RECEIPT und SAFE sind getrennt gegatet und fail-closed.
+  - Keine partnergeschuetzten URLs oder Payloads werden geraten.
+  - POS-Signatur, Tagesabschluss-Gates und Provideralternativen sind per E2E belegt.
+  - Backendtests, TypeScript, ESLint, Playwright und Governance sind gruen.
+risks:
+  - Live-Credentials und Produktlizenzen sind externe Betriebs-Gates.
+  - Swissbit Detailvertraege bleiben partnergeschuetzt.
