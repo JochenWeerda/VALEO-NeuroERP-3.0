@@ -23,6 +23,7 @@ from sqlalchemy.orm import Session
 from app.core.database import get_db
 from app.core.tenant import get_tenant_id
 from app.services.crm_kontakt_service import CrmKontaktService
+from app.services.crm_notification_service import CrmNotificationService
 from app.services.llm_gateway import LLMGateway
 
 router = APIRouter(prefix="/crm/kim", tags=["crm", "kim", "360"])
@@ -393,7 +394,7 @@ def create_log(
     art = (body.art or "").strip().lower()
     if art not in _ALLOWED_ARTEN:
         art = "telefon"
-    svc.create({
+    created = svc.create({
         "kunden_nr": kunden_nr,
         "richtung": "ein" if (body.direction or "").upper() == "INCOMING" else "aus",
         "art": art,
@@ -404,6 +405,19 @@ def create_log(
         "weiterleitung_an": body.ccIntern,
         "verweis": body.referenceNo,
     })
+    # CC: interne Mitarbeiter/Abteilung (In-App-Postfach) bzw. externer Fachberater (Mail).
+    if body.ccIntern:
+        try:
+            CrmNotificationService(db, tenant_id).dispatch_cc(
+                cc=body.ccIntern,
+                betreff=body.betreff or body.artKurzinfo,
+                kommentar=body.kommentar,
+                sender=body.operator,
+                kunden_nr=kunden_nr,
+                kontakt_id=created.get("id"),
+            )
+        except Exception:  # Benachrichtigung ist Folgeaktion; Kontakt bleibt gespeichert.
+            db.rollback()
     return StatusOut()
 
 
@@ -415,6 +429,128 @@ def complete_log(
 ) -> StatusOut:
     CrmKontaktService(db, tenant_id).set_erledigt(log_id, True)
     return StatusOut()
+
+
+# ── Benachrichtigungen (internes Postfach + externe Fachberater-Mail) ──────────
+class NotificationIn(BaseModel):
+    recipient: str                       # interner Empfaenger (Code/Abteilung) oder E-Mail
+    betreff: Optional[str] = None
+    kommentar: Optional[str] = None
+    sender: Optional[str] = None
+    kunden_nr: Optional[str] = None
+    kontaktId: Optional[str] = None
+    channel: Optional[str] = None        # 'internal' | 'email'; None -> Auto (@ => email)
+
+
+@router.post("/notifications", summary="Benachrichtigung senden (intern/extern)")
+def create_notification(
+    body: NotificationIn,
+    db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
+) -> dict[str, Any]:
+    svc = CrmNotificationService(db, tenant_id)
+    ch = (body.channel or "").strip().lower()
+    if ch == "internal":
+        return svc.notify_internal(
+            recipient=body.recipient, betreff=body.betreff, kommentar=body.kommentar,
+            sender=body.sender, kunden_nr=body.kunden_nr, kontakt_id=body.kontaktId,
+        )
+    if ch == "email":
+        return svc.notify_external(
+            email=body.recipient, betreff=body.betreff, kommentar=body.kommentar,
+            sender=body.sender, kunden_nr=body.kunden_nr, kontakt_id=body.kontaktId,
+        )
+    return svc.dispatch_cc(
+        cc=body.recipient, betreff=body.betreff, kommentar=body.kommentar,
+        sender=body.sender, kunden_nr=body.kunden_nr, kontakt_id=body.kontaktId,
+    )
+
+
+@router.get("/notifications", summary="Postfach (interne Benachrichtigungen)")
+def list_notifications(
+    recipient: str,
+    unread: bool = False,
+    db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
+) -> list[dict[str, Any]]:
+    return CrmNotificationService(db, tenant_id).inbox(recipient, only_unread=unread)
+
+
+@router.post("/notifications/{notification_id}/read", summary="Benachrichtigung als gelesen markieren")
+def read_notification(
+    notification_id: str,
+    db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
+) -> dict[str, Any]:
+    return CrmNotificationService(db, tenant_id).mark_read(notification_id)
+
+
+# ── Kontaktbezogene Belegtabs (Rechnungen/Mahnungen/Kontrakte/Strecken) ────────
+class ContactDoc(BaseModel):
+    id: str
+    kind: str
+    docNo: str = ""
+    date: str = ""
+    dueDate: Optional[str] = None
+    amount: float = 0.0
+    status: str = ""
+    info: Optional[str] = None
+
+
+_CONTACT_DOC_KINDS = {"invoices", "dunning", "contracts", "drop_shipments"}
+
+
+def _resolve_partner_id(db: Session, kunden_nr: str) -> str:
+    bp = _safe(db, "SELECT business_partner_id FROM public.kunden WHERE kunden_nr = :k", {"k": kunden_nr}, many=False)
+    return str(bp["business_partner_id"]) if bp and bp.get("business_partner_id") else kunden_nr
+
+
+@router.get("/customers/{kunden_nr}/contact-docs", response_model=list[ContactDoc],
+            summary="Kontaktbezogene Belege (Rechnungen/Mahnungen/Kontrakte/Strecken)")
+def list_contact_docs(
+    kunden_nr: str,
+    kind: str = "invoices",
+    db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
+) -> list[ContactDoc]:
+    kind = (kind or "").strip().lower()
+    if kind not in _CONTACT_DOC_KINDS:
+        kind = "invoices"
+
+    # Rechnungen + Mahnungen aus der kanonischen Debitoren-OP-Quelle.
+    if kind in {"invoices", "dunning"}:
+        if db.execute(text("SELECT to_regclass('domain_shared.open_items')")).scalar() is None:
+            return []
+        pid = _resolve_partner_id(db, kunden_nr)
+        overdue = " AND due_date < current_date" if kind == "dunning" else ""
+        rows = _safe(
+            db,
+            f"""
+            SELECT id, document_number, document_date, due_date, amount, status
+            FROM domain_shared.open_items
+            WHERE tenant_id = :t AND type = 'debitor'
+              AND lower(coalesce(status,'')) <> 'paid'{overdue}
+              AND partner_id = :pid
+            ORDER BY due_date DESC LIMIT 100
+            """,
+            {"t": tenant_id, "pid": pid},
+        )
+        out: list[ContactDoc] = []
+        for r in rows:
+            d = dict(r)
+            out.append(ContactDoc(
+                id=str(d.get("id")), kind=kind,
+                docNo=str(d.get("document_number") or ""),
+                date=str(d.get("document_date") or ""),
+                dueDate=str(d["due_date"]) if d.get("due_date") else None,
+                amount=float(d.get("amount") or 0),
+                status=str(d.get("status") or "").upper() or "OPEN",
+            ))
+        return out
+
+    # Kontrakte / Strecken-Geschaefte: kanonische Quelle wird verdrahtet, sobald
+    # eindeutig verfuegbar; bis dahin tolerant leer (kein Scheinerfolg).
+    return []
 
 
 # ── Offene Posten (tolerant) ──────────────────────────────────────────────────
