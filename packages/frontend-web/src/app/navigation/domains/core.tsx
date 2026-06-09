@@ -34,6 +34,7 @@ import {
   Search,
   BookOpen,
   ReceiptText,
+  Cable,
 } from 'lucide-react'
 import type { RawNavItem } from '@/app/navigation/types'
 import { ENABLE_PROSPECTING_UI } from '@/features/prospecting/feature-flags'
@@ -216,6 +217,15 @@ export const RAW_NAV_SECTIONS: RawNavItem[] = [
         module: '@/pages/admin-suite/ki-anbieter',
         preferredPath: 'admin-suite/ki-anbieter',
         keywords: ['ki', 'llm', 'neuroai', 'anbieter', 'anthropic', 'openrouter', 'ollama', 'modell', 'provider'],
+        mcp: { businessDomain: 'admin', scope: 'admin:read' },
+      },
+      {
+        id: 'admin-suite-connectoren',
+        label: 'Auto-Capture-Connectoren',
+        icon: Cable,
+        module: '@/pages/admin-suite/connectoren',
+        preferredPath: 'admin-suite/connectoren',
+        keywords: ['connector', 'connectoren', 'imap', 'email', 'stt', 'whisper', 'transkript', 'auto-capture', 'postfach', 'telefon', 'mandant'],
         mcp: { businessDomain: 'admin', scope: 'admin:read' },
       },
       {

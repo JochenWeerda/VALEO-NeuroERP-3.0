@@ -51,7 +51,7 @@ def call_transcript(
 
     # Audio → STT, falls kein fertiger Text vorliegt.
     if not transcript and (body.audioUrl or body.audioBase64):
-        stt = SttClient()
+        stt = SttClient.for_tenant(db, tenant_id)
         if not stt.configured:
             return {"status": "stt_unconfigured",
                     "detail": "Kein STT-Server konfiguriert (STT_BASE_URL). "
