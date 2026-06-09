@@ -41,6 +41,7 @@ import SalesDocumentsPanel, { type DocCategory } from './components/SalesDocumen
 import ContractsPanel from './components/ContractsPanel';
 import DocumentPanel from './components/DocumentPanel';
 import InformationPanel, { type InfoSection } from './components/InformationPanel';
+import CustomerGiftsTab from './components/CustomerGiftsTab';
 import FollowUpTaskPanel from './components/FollowUpTaskPanel';
 import NeuroAISidePanel from './components/NeuroAISidePanel';
 import ContactHistoryTable from './components/ContactHistoryTable';
@@ -56,7 +57,7 @@ import {
   Phone,
 } from 'lucide-react';
 
-type KimTab = 'allgemein' | 'belege' | 'kontrakte' | 'finanzen' | 'audit' | 'tasks' | 'chef' | 'leads' | 'geo' | 'information';
+type KimTab = 'allgemein' | 'belege' | 'kontrakte' | 'finanzen' | 'audit' | 'tasks' | 'chef' | 'leads' | 'geo' | 'information' | 'praesente';
 
 export default function KimCockpitPage() {
   const navigate = useNavigate();
@@ -70,6 +71,7 @@ export default function KimCockpitPage() {
   // High-Density Workstation Tab Selection
   const [activeTab, setActiveTab] = useState<KimTab>('allgemein');
   const [activeInfoSection, setActiveInfoSection] = useState<InfoSection>('profil');
+  const [giftsContact, setGiftsContact] = useState<string>('');
   const [docCategory, setDocCategory] = useState<DocCategory>('ORDER');
 
   // Relational client lists synced with database
@@ -439,8 +441,8 @@ export default function KimCockpitPage() {
         handleFetchNeuroSummary();
         break;
       case 'presents':
-        setPresentsContact(null);
-        setShowPresentsModal(true);
+        setGiftsContact('');
+        setActiveTab('praesente');
         break;
       case 'logCall':
         startPhoneFlow();
@@ -480,6 +482,7 @@ export default function KimCockpitPage() {
   const tabs: { key: KimTab; label: string }[] = [
     { key: 'allgemein', label: 'Allgemein / Ansprechpartner' },
     { key: 'information', label: 'Information' },
+    { key: 'praesente', label: 'Präsente' },
     { key: 'belege', label: 'Belegwesen' },
     { key: 'kontrakte', label: 'Silokontrakte' },
     { key: 'finanzen', label: 'Finanzwesen (Offene Posten)' },
@@ -571,6 +574,10 @@ export default function KimCockpitPage() {
 
                 {activeTab === 'information' && (
                   <InformationPanel customer={activeCustomer} section={activeInfoSection} />
+                )}
+
+                {activeTab === 'praesente' && (
+                  <CustomerGiftsTab customer={activeCustomer} contacts={contacts} initialContactId={giftsContact} />
                 )}
 
                 {activeTab === 'belege' && (
