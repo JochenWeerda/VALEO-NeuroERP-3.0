@@ -921,6 +921,27 @@ api_router.include_router(
     tags=["crm", "kim", "360"]
 )
 
+from app.api.v1.endpoints import crm_capture_inbox  # noqa: E402
+
+api_router.include_router(
+    crm_capture_inbox.router,
+    tags=["crm", "kim", "360"]
+)
+
+from app.api.v1.endpoints import crm_mail_capture  # noqa: E402
+
+api_router.include_router(
+    crm_mail_capture.router,
+    tags=["crm", "kim", "360"]
+)
+
+from app.api.v1.endpoints import crm_call_transcript  # noqa: E402
+
+api_router.include_router(
+    crm_call_transcript.router,
+    tags=["crm", "kim", "360"]
+)
+
 from app.api.v1.endpoints import kaeufergruppe as kaeufergruppe_ep  # noqa: E402
 
 api_router.include_router(

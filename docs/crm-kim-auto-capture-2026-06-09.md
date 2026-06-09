@@ -41,7 +41,8 @@ Service: `app/services/crm_auto_capture_service.py` · Endpoint: `app/api/v1/end
 Auto-erfasste Kontakte erscheinen **ohne weitere Arbeit** im KIM-Journal (`ContactHistoryTable`,
 Tab „Übersicht/Historie") — Quelle ist dieselbe `kunden_kontakte`-Tabelle. Operator `AUTO` → „Auto"-Badge.
 
-## Offen / Folge-Slices
-- TAPI-Transkript-Posting (benötigt Recording+STT in der Telefonie-Schicht).
-- Mail-Connector (IMAP/Graph) als eigener Worker.
-- Optionaler Klärfall-Inbox für `unresolved` (analog WhatsApp-Intake-Inbox).
+## Connectoren (fertig — 2026-06-09)
+Alle drei Connectoren sind gebaut, siehe [crm-kim-connectors-2026-06-09.md](./crm-kim-connectors-2026-06-09.md):
+- **Klärfall-Inbox** für `unresolved` — `crm_capture_inbox` + `/crm/kim/capture-inbox*` + `pages/crm/klaerfall-inbox.tsx`.
+- **Mail-Connector** — `/crm/kim/mail-capture` (geparst/roh) + `tools/mail-connector/` (stdlib IMAP-Poller).
+- **TAPI-Transkript** — `/crm/kim/call-transcript` + `app/services/stt_client.py` (OpenAI-kompatibler faster-whisper) + `tapi_bridge.py --source transcript`.
