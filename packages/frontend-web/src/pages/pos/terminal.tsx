@@ -39,6 +39,7 @@ type CartItem = {
   image_url?: string | null
   category?: string
   rabatt_pct?: number
+  vat_rate?: number
 }
 
 type PaymentMethod = 'bar' | 'ec' | 'paypal' | 'b2b'
@@ -51,6 +52,7 @@ type ApiArticle = {
   sales_price: string | number
   category?: string | null
   image_url?: string | null
+  tax_rate?: string | number | null
 }
 
 // ── Live-Uhr ──────────────────────────────────────────────────────────────────
@@ -73,9 +75,9 @@ function TseStatusLight({ isInitialized }: { isInitialized: boolean }) {
     <div className="flex items-center gap-1.5 text-xs text-primary-foreground/80">
       <span
         className={`h-2.5 w-2.5 rounded-full ${isInitialized ? 'bg-green-400' : 'bg-yellow-400 animate-pulse'}`}
-        title={isInitialized ? 'TSE Online' : 'TSE Mock/Offline'}
+        title={isInitialized ? 'Fiskalisierungsprovider online' : 'Fiskalisierung blockiert/offline'}
       />
-      <span>TSE {isInitialized ? 'Online' : 'Mock'}</span>
+      <span>TSE {isInitialized ? 'Online' : 'Blockiert'}</span>
     </div>
   )
 }
@@ -222,6 +224,7 @@ export default function POSTerminalPage(): JSX.Element {
         preis: Number(a.sales_price) || 0,
         image_url: a.image_url ?? null,
         category: a.category ?? undefined,
+        vat_rate: Number(a.tax_rate ?? 19),
       }))
     },
     staleTime: 5 * 60 * 1000,
@@ -344,10 +347,29 @@ export default function POSTerminalPage(): JSX.Element {
     try {
       let tx = activeTx
       if (!tx) { tx = await startTransaction('Verkauf', 'Kassenbeleg-V1'); setActiveTx(tx) }
-      await updateTransaction(tx.txId, cart.map((i) => ({ bezeichnung: i.bezeichnung, preis: i.preis, menge: i.menge })))
-      const payMap: Record<string, PaymentType> = { bar: 'CASH', ec: 'NON_CASH', paypal: 'NON_CASH', b2b: 'INTERNAL' }
+      await updateTransaction(tx.txId, cart.map((i) => ({
+        bezeichnung: i.bezeichnung,
+        preis: i.preis * (1 - (i.rabatt_pct ?? 0) / 100),
+        menge: i.menge,
+        vatRate: i.vat_rate,
+      })))
+      const payMap: Record<string, PaymentType> = {
+        bar: 'CASH',
+        ec: 'NON_CASH',
+        paypal: 'NON_CASH',
+        b2b: 'INTERNAL',
+        gift_card: 'INTERNAL',
+      }
       const tsePayType: PaymentType = splitEntries ? 'NON_CASH' : payMap[selectedMethod ?? 'bar'] ?? 'CASH'
-      const signed = await finishTransaction(tx.txId, tsePayType, currentTotal)
+      const signed = await finishTransaction(
+        tx.txId,
+        tsePayType,
+        currentTotal,
+        splitEntries?.map((entry) => ({
+          method: payMap[entry.type] ?? 'NON_CASH',
+          amount: entry.amount,
+        })),
+      )
       const change = selectedMethod === 'bar' ? tendered - currentTotal : 0
 
       // Bon drucken

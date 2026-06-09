@@ -162,6 +162,7 @@ from app.api.v1.endpoints import (
     agents,
     pos_retoure,
     pos_dsfinvk,
+    pos_fiscalization,
     service_anfragen,
     neuro_prompt_packs,
     schaeden,
@@ -1249,6 +1250,8 @@ api_router.include_router(
     prefix="/pos",
     tags=["pos", "dsfinvk"],
 )
+
+api_router.include_router(pos_fiscalization.router)
 
 # Disposition API
 api_router.include_router(

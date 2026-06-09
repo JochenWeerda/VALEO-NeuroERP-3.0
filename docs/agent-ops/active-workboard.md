@@ -6,12 +6,14 @@ Stand: `2026-06-09`
 
 **Von:** Codex
 **Owner:** Codex
-**Stand:** reserviert 2026-06-09
+**Stand:** abgeschlossen 2026-06-09
 **Abstimmung:** Konfliktfreier POS-/Compliance-Slice parallel zu Claudes KIM-L3-S3-S5. Keine Aenderung unter `packages/frontend-web/src/pages/crm/kim/**` oder an CRM-Backenddateien.
 **Ziel des Slices:** Demo- und Pseudo-TSE-/DSFinV-K-Pfade durch eine typisierte Provider-Abstraktion fuer fiskaly SIGN DE/DSFINVK DE sowie Swissbit Cloud-/Hardware-TSE ersetzen; Tagesabschluss, Export, Status und Readiness fail-closed, tenantbezogen und idempotent integrieren.
 **Dateibesitz:** Neue Fiskalisierungsservices unter `app/services/fiscalization/**`, POS-Fiskalisierungsendpoint, `tse_fiskaly_service.py`, fokussierte Edits in `admin_pos.py`, `pos_dsfinvk.py`, `kasse_tagesabschluss.py`, `app/api/v1/api.py`, neue POS-Migration, fokussierte Tests und Doku.
 **Abnahmekriterien:** Providerwahl fiskaly/Swissbit; korrekte fiskaly Token-Authentifizierung; konfigurierbarer Swissbit REST-/Gateway-Vertrag; persistente idempotente Signierung; getrennte TSE-/DSFinV-K-Exporte; providergebundener Tagesabschluss; kein produktiver Scheinerfolg bei Simulator oder fehlender Vertragsfreigabe.
 **Offene Risiken:** Swissbit Detail-API/SDK ist partner-/loginpflichtig; Live-Credentials und externe Pruefwerkzeugabnahme bleiben Betriebs-Gates.
+**Ergebnis:** Provider-Abstraktion fuer fiskaly, Swissbit Cloud, Swissbit Hardware-Gateway und explizite Simulation umgesetzt. Providerwahl und DSFinV-K-Provider sind tenantbezogen getrennt. Browser-Secrets, stille Mock-Signaturen und der Festdaten-DSFinV-K-Export wurden entfernt. Transaktionen, Cash Point Closings und Exporte werden idempotent persistiert. POS uebergibt MwSt., Rabatte und Split Payments; Tagesabschluss laedt das Fiskaljournal und blockiert bei offenen Vorgaengen, Summendifferenzen, Providerfehlern oder Simulation.
+**Checks:** 15 fokussierte Backendtests bestanden; Frontend-TypeScript und fokussierter ESLint gruen; Python-Compile und Router-Import gruen; Migration `pos_fiscal_providers_20260609` angewandt und einziger Head; Workboard, Doku-Governance und `git diff --check` gruen. Bestehender Wave-1-Sammeltest hat einen unabhaengigen Collection-Fehler in `admin_core.WorkflowSandboxCampaignMatchOut`.
 
 ## KIM-L3-S2-REVIEW-001
 

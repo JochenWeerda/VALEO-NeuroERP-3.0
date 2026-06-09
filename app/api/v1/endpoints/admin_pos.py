@@ -756,7 +756,7 @@ async def tse_finish_transaction(body: TseFinishRequest, tenant_id: str = Depend
         raise HTTPException(status_code=502, detail=str(exc)) from exc
 
 
-@router.post("/pos/tse/export", summary="DSFinV-K Export bei Fiskaly anfordern",
+@router.post("/pos/tse/export", summary="TSE-Export bei fiskaly anfordern",
     response_model=AdminPosOut
 )
 async def tse_export(

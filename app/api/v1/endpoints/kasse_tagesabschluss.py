@@ -4,6 +4,7 @@ Light endpoint for the simple kasse/tagesabschluss page (not the enhanced POS ve
 """
 
 from datetime import date
+from decimal import Decimal
 from typing import Optional
 from uuid import uuid4
 
@@ -97,15 +98,16 @@ async def get_aktuell(
     except Exception:  # noqa: BLE001 — optionale DB-Abfrage; Fallback greift
         pass
 
-    # Fallback: return demo data matching previous hardcoded values
+    from app.services.fiscalization.service import FiscalizationService
+    summary = FiscalizationService(db, tenant_id).daily_summary(date.fromisoformat(target_date))
     return TagesabschlussAktuell(
         datum=target_date,
-        barverkauf=2450.00,
-        kartenzahlung=3200.00,
-        umsatz_gesamt=5650.00,
-        transaktionen=47,
-        stornos=2,
-        retouren=1,
+        barverkauf=float(summary["cash_total"]),
+        kartenzahlung=float(summary["card_total"]),
+        umsatz_gesamt=float(summary["gross_total"]),
+        transaktionen=int(summary["transaction_count"]),
+        stornos=0,
+        retouren=0,
     )
 
 
@@ -116,8 +118,49 @@ async def submit_tagesabschluss(
     db: Session = Depends(get_db),
 ):
     """Einfachen Kassen-Tagesabschluss buchen."""
+    from app.services.fiscalization.contracts import CashPointClosingCommand, PaymentLine
+    from app.services.fiscalization.providers import FiscalProviderError
+    from app.services.fiscalization.service import FiscalizationService
+
+    fiscal = FiscalizationService(db, tenant_id)
+    config = fiscal.get_config()
+    if not config.get("configured"):
+        from fastapi import HTTPException
+        raise HTTPException(status_code=409, detail="Fiskalisierungsprovider ist nicht konfiguriert")
+    summary = fiscal.daily_summary(date.fromisoformat(payload.datum))
+    if int(summary["incomplete_count"]) > 0:
+        from fastapi import HTTPException
+        raise HTTPException(status_code=409, detail="Tagesabschluss blockiert: unvollstaendige TSE-Transaktionen")
+    if abs(payload.barverkauf - float(summary["cash_total"])) > 0.01 or abs(
+        payload.kartenzahlung - float(summary["card_total"])
+    ) > 0.01:
+        from fastapi import HTTPException
+        raise HTTPException(status_code=422, detail="Gemeldete Zahlarten stimmen nicht mit dem Fiskaljournal ueberein")
+
     abschluss_id = str(uuid4())
     belegnummer = f"KA-{payload.datum}"
+    try:
+        closing = fiscal.close_cash_point(
+            CashPointClosingCommand(
+                closing_id=belegnummer,
+                cash_register_id=config["cash_register_id"],
+                terminal_id=str(config.get("settings", {}).get("terminal_id") or config["client_id"]),
+                business_date=date.fromisoformat(payload.datum),
+                transaction_count=int(summary["transaction_count"]),
+                gross_total=Decimal(str(summary["gross_total"])),
+                payments=[
+                    PaymentLine(method="BAR", amount=Decimal(str(summary["cash_total"]))),
+                    PaymentLine(method="KARTE", amount=Decimal(str(summary["card_total"]))),
+                ],
+                payload={"counted_cash": str(payload.kassenstand), "cash_difference": str(payload.differenz)},
+            )
+        )
+    except (FiscalProviderError, RuntimeError, ValueError) as exc:
+        from fastapi import HTTPException
+        raise HTTPException(status_code=503, detail=f"Fiskalischer Tagesabschluss fehlgeschlagen: {exc}") from exc
+    if closing.simulated:
+        from fastapi import HTTPException
+        raise HTTPException(status_code=409, detail="Simulierter Tagesabschluss darf nicht als gebucht abgeschlossen werden")
 
     # Delegate to the existing compat POS tagesabschluss logic if needed,
     # or insert lightweight record
@@ -150,6 +193,8 @@ async def submit_tagesabschluss(
         db.commit()
     except Exception:
         db.rollback()
+        from fastapi import HTTPException
+        raise HTTPException(status_code=500, detail="Tagesabschluss konnte nicht persistiert werden")
 
     return TagesabschlussSubmitOut(
         id=abschluss_id,
