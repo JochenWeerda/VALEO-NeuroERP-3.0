@@ -1,6 +1,18 @@
 # Active Workboard
 
-Stand: `2026-06-07`
+Stand: `2026-06-09`
+
+## KIM-DS-001
+
+**Von:** Claude
+**Owner:** Claude
+**Stand:** abgeschlossen 2026-06-09
+**Ziel des Slices:** Das unter `/crm` fuehrende KIM-360-Cockpit von der portierten systemERP-L3-Terminal-Optik vollstaendig auf das VALEO-Designsystem umbauen (DS-Komponenten, Semantik-Farbtokens, Dark-Mode, Dialog-/Toolbar-Muster) und die wahrgenommene Ladeperformance der grossen Debitorenliste reduzieren.
+**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/agent-ops/slices/KIM-DS-001.yaml`, `packages/frontend-web/package.json`, `packages/frontend-web/src/pages/crm/kim/index.tsx` und alle `packages/frontend-web/src/pages/crm/kim/components/*.tsx`.
+**Abnahmekriterien:** Keine `font-mono`/`uppercase`-Terminal-Optik und keine hartkodierten Hex-Farben mehr; alle Flaechen nutzen DS-Semantik-Tokens und Dark-Mode rendert korrekt; Raw-Buttons/Inputs/Selects/Textareas/Modals durch `Button`/`Input`/`NativeSelect`/`Textarea`/`Dialog` ersetzt; mutierende Aktionen mit Submit-Guard + Disabled + Toast; alle `data-action-id` und Test-Selektoren identisch zu HEAD; Debitorenliste rendert nur ein begrenztes DOM-Fenster; eslint clean, tsc 0 Fehler, Screenshot hell+dunkel ok.
+**Offene Risiken:** Praesentations-Refactor ueber 14 Dateien — Test-Selektoren des model-based CRM360-Tests duerfen nicht brechen. Die Cold-Start-Langsamkeit ist Vite-Dev-Erstaufbau (im Prod-Build irrelevant), kein App-Bug.
+**Ergebnis:** Alle 14 KIM-Komponenten auf das VALEO-Designsystem umgebaut (~250x `font-mono`/`uppercase` entfernt, hunderte Hex-Farben → DS-Tokens, Dark-Mode funktioniert, DS-Primitive durchgaengig inkl. `Dialog`/`Progress`/`Skeleton`/`Badge`, Submit-Guards an Master-Edit + Quick-Call). Alle 12 `data-action-id` und Schluessel-IDs identisch zu HEAD. Debitorenliste rendert ein 80er-Fenster (462 total → 80 im DOM, „weitere anzeigen") bei voll erhaltener Suche/Filter/Tastatur-Navigation. `package.json` `predev`/`prebuild`/`pretype-check`/`check:navigation-targets` von `pnpm` auf `npm run routes:generate` korrigiert (Container hat kein pnpm → Exit 127).
+**Checks:** `eslint` (`--max-warnings 0`) clean; `tsc --noEmit` 0 Fehler projektweit; Render-Fenster verifiziert (total=462, rendered=80, load-more=1); Dark-Mode-Screenshot ok. **Follow-up:** model-based Suite `playwright-tests/specs/crm/crm360-model-based.spec.ts` (Global-Setup spawnt eigene Server → lokaler Port-Konflikt mit dem laufenden Container) sowie optionale Server-seitige Kundensuche bei stark wachsendem Kundenstamm.
 
 ## CRM360-MBT-004
 

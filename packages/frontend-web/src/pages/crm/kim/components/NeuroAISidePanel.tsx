@@ -5,18 +5,22 @@
 
 import React, { useState } from 'react';
 import { Customer } from '../types';
-import { 
-  Sparkles, 
-  Brain, 
-  Activity, 
-  Lightbulb, 
-  AlertOctagon, 
-  Send, 
-  Copy, 
-  Check, 
-  RefreshCw 
+import {
+  Sparkles,
+  Brain,
+  Activity,
+  Lightbulb,
+  AlertOctagon,
+  Send,
+  Copy,
+  Check,
+  RefreshCw,
 } from 'lucide-react';
 import { draftEmail } from '../kim-api';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Textarea } from '@/components/ui/textarea';
+import { Skeleton } from '@/components/ui/skeleton';
 
 /**
  * Winziger, sicherer Markdown-Renderer für das kurze NeuroAI-Dossier
@@ -61,18 +65,24 @@ interface NeuroAISidePanelProps {
 
 type DraftTone = 'friendly' | 'formal' | 'mahnend' | 'kontraktverhandlung';
 
+const TONE_LABELS: Record<DraftTone, string> = {
+  friendly: 'Freundlich',
+  formal: 'Professionell',
+  mahnend: 'Mahnung',
+  kontraktverhandlung: 'Kontrakt',
+};
+
 export default function NeuroAISidePanel({
   customer,
   onRefreshSummary,
   summaryData,
-  loading
+  loading,
 }: NeuroAISidePanelProps) {
   const [activeTone, setActiveTone] = useState<DraftTone>('friendly');
   const [drafting, setDrafting] = useState(false);
   const [draftResult, setDraftResult] = useState<{ subject: string; body: string } | null>(null);
   const [copied, setCopied] = useState(false);
 
-  // Trigger loading email draft matching active tone from server
   const handleDraftEmail = async () => {
     setDrafting(true);
     setDraftResult(null);
@@ -95,204 +105,158 @@ export default function NeuroAISidePanel({
     setTimeout(() => setCopied(false), 2000);
   };
 
+  const scoreColor = (s: number) => (s > 85 ? 'hsl(var(--color-semantic-success-500-hsl))' : s > 70 ? 'hsl(var(--color-semantic-warning-500-hsl))' : 'hsl(var(--destructive))');
+
   return (
-    <div className="w-[340px] border-l border-[#cbd5e1] bg-slate-50 flex flex-col h-full select-none" id="neuro-ai-copilot-sidepanel">
-      
-      {/* Brand Header */}
-      <div className="p-3 bg-gradient-to-r from-emerald-800 via-teal-900 to-[#006633] text-white border-b border-[#064e3b] flex flex-col gap-1 leading-none">
-        <div className="flex justify-between items-center select-none">
-          <span className="flex items-center gap-1.5 text-[10px] font-mono tracking-widest text-[#a9d18e] font-bold animate-pulse">
-            <Sparkles size={11} className="text-yellow-400 fill-yellow-400" />
-            NEUROAI® CO-PILOT
+    <div className="w-[340px] border-l border-border bg-muted/30 flex flex-col h-full" id="neuro-ai-copilot-sidepanel">
+
+      {/* Header */}
+      <div className="p-3 bg-primary text-primary-foreground border-b border-border flex flex-col gap-1">
+        <div className="flex justify-between items-center">
+          <span className="flex items-center gap-1.5 text-xs font-semibold">
+            <Sparkles size={13} />
+            NeuroAI Co-Pilot
           </span>
-          <span className="bg-[#111827] text-yellow-400 px-1 rounded-sm text-[8px] font-mono font-bold leading-none">ACTIVE V3</span>
+          <Badge variant="outline" className="border-primary-foreground/40 text-primary-foreground">Aktiv</Badge>
         </div>
-        <h3 className="font-sans font-black text-xs">VALEO Beziehungs-Dossier</h3>
+        <h3 className="font-bold text-sm">VALEO Beziehungs-Dossier</h3>
       </div>
 
-      <div className="flex-1 overflow-y-auto p-3 space-y-3.5 custom-scrollbar" id="neuro-sidepanel-scrollable">
-        
-        {/* Quick dossier execution trigger button */}
+      <div className="flex-1 overflow-y-auto p-3 space-y-3" id="neuro-sidepanel-scrollable">
+
         {!summaryData && !loading ? (
-          <div className="bg-white p-4 border border-[#cbd5e1] rounded-sm text-center space-y-3 shadow-sm" id="ai-trigger-card-side">
-            <Brain size={30} className="mx-auto text-gray-300" />
-            <div className="leading-tight font-sans">
-              <strong className="text-xs font-bold block text-gray-700">Dossier-Berechnung ausstehend</strong>
-              <p className="text-[10px] text-gray-400 mt-1">Verknüpfen Sie Siloprodukte, OPs und Lieferfrequenzen kognitiv.</p>
+          <div className="bg-card p-4 border border-border rounded-lg text-center space-y-3 shadow-sm" id="ai-trigger-card-side">
+            <Brain size={30} className="mx-auto text-muted-foreground/40" />
+            <div>
+              <strong className="text-sm block text-foreground">Dossier-Berechnung ausstehend</strong>
+              <p className="text-xs text-muted-foreground mt-1">Siloprodukte, offene Posten und Lieferfrequenzen kognitiv verknüpfen.</p>
             </div>
-            <button
-              onClick={onRefreshSummary}
-              className="w-full flex items-center justify-center gap-1.5 py-1.5 bg-[#006633] text-white font-mono font-bold text-[10px] tracking-wider rounded-sm uppercase cursor-pointer hover:bg-emerald-800 transition shadow-sm leading-none"
-              id="btn-side-generate-ai"
-            >
-              <RefreshCw size={11} />
-              <span>Dossier berechnen</span>
-            </button>
+            <Button onClick={onRefreshSummary} className="w-full gap-1.5" id="btn-side-generate-ai">
+              <RefreshCw size={14} />
+              Dossier berechnen
+            </Button>
           </div>
         ) : loading ? (
-          <div className="space-y-3 animate-pulse" id="ai-side-loading-pulse">
-            <div className="h-28 bg-white border border-gray-200 rounded p-3 space-y-2">
-              <div className="h-3 bg-gray-200 rounded w-1/3"></div>
-              <div className="h-14 bg-gray-100 rounded"></div>
-            </div>
-            <div className="h-36 bg-gray-200 rounded"></div>
+          <div className="space-y-3" id="ai-side-loading-pulse">
+            <Skeleton className="h-28 w-full" />
+            <Skeleton className="h-36 w-full" />
           </div>
         ) : summaryData ? (
           <>
-            {/* 1. Client Health index circular indicator */}
-            <div className="bg-white p-3 border border-[#cbd5e1] rounded-sm shadow-sm flex flex-col items-center text-center gap-2">
-              <div className="flex items-center gap-1.5 border-b border-gray-100 w-full pb-1 mb-0.5 justify-center">
-                <Activity size={12} className="text-[#006633]" />
-                <span className="font-bold text-[9px] text-gray-400 uppercase tracking-widest font-mono">Client Health Index</span>
+            {/* Health index */}
+            <div className="bg-card p-3 border border-border rounded-lg shadow-sm flex flex-col items-center text-center gap-2">
+              <div className="flex items-center gap-1.5 border-b border-border w-full pb-1.5 justify-center">
+                <Activity size={13} className="text-primary" />
+                <span className="font-medium text-xs text-muted-foreground">Client Health Index</span>
               </div>
-
-              <div className="relative w-20 h-20 flex items-center justify-center font-sans">
+              <div className="relative w-20 h-20 flex items-center justify-center">
                 <svg className="w-full h-full transform -rotate-90">
-                  <circle cx="40" cy="40" r="32" stroke="#f1f5f9" strokeWidth="5.5" fill="transparent" />
+                  <circle cx="40" cy="40" r="32" stroke="hsl(var(--muted))" strokeWidth="5.5" fill="transparent" />
                   <circle
-                    cx="40"
-                    cy="40"
-                    r="32"
-                    stroke={summaryData.healthScore > 85 ? '#059669' : (summaryData.healthScore > 70 ? '#d97706' : '#dc2626')}
-                    strokeWidth="5.5"
-                    fill="transparent"
+                    cx="40" cy="40" r="32"
+                    stroke={scoreColor(summaryData.healthScore)}
+                    strokeWidth="5.5" fill="transparent"
                     strokeDasharray={`${2 * Math.PI * 32}`}
                     strokeDashoffset={`${2 * Math.PI * 32 * (1 - summaryData.healthScore / 100)}`}
                     strokeLinecap="round"
                     className="transition-all duration-1000 ease-out"
                   />
                 </svg>
-                <div className="absolute flex flex-col items-center justify-center font-sans">
-                  <span className="text-lg font-black text-gray-950 font-mono leading-none">{summaryData.healthScore}</span>
-                  <span className="text-[8px] uppercase tracking-wider font-extrabold text-[#94a3b8] mt-0.5">SCORE</span>
+                <div className="absolute flex flex-col items-center justify-center">
+                  <span className="text-xl font-bold text-foreground leading-none">{summaryData.healthScore}</span>
+                  <span className="text-[9px] uppercase font-semibold text-muted-foreground mt-0.5">Score</span>
                 </div>
               </div>
-
-              <div>
-                <span className={`px-2 py-0.5 text-[10px] font-black rounded-full uppercase leading-none border inline-block ${
-                  summaryData.healthScore > 85 ? 'bg-emerald-50 text-emerald-800 border-emerald-200' : 
-                  (summaryData.healthScore > 70 ? 'bg-amber-50 text-amber-800 border-amber-200' : 'bg-red-50 text-red-800 border-red-200')
-                }`}>
-                  {summaryData.statusLabel}
-                </span>
-              </div>
+              <Badge variant={summaryData.healthScore > 85 ? 'success' : summaryData.healthScore > 70 ? 'warning' : 'destructive'}>
+                {summaryData.statusLabel}
+              </Badge>
             </div>
 
-            {/* 2. Intelligent summary text (ReactMarkdown verified compatible) */}
-            <div className="bg-white p-3 border border-[#cbd5e1] rounded-sm shadow-sm space-y-2">
-              <div className="flex items-center gap-1.5 border-b border-gray-100 pb-1 font-bold text-[9.5px] uppercase font-mono text-gray-500 tracking-wider">
-                <Brain className="text-[#006633]" size={12} />
+            {/* Summary */}
+            <div className="bg-card p-3 border border-border rounded-lg shadow-sm space-y-2">
+              <div className="flex items-center gap-1.5 border-b border-border pb-1.5 font-medium text-xs text-muted-foreground">
+                <Brain className="text-primary" size={13} />
                 <span>Echtzeit-Dossier-Analyse</span>
-                <button onClick={onRefreshSummary} className="ml-auto text-emerald-800 cursor-pointer" title="Dokument neu berechnen">
-                  <RefreshCw size={11} />
+                <button onClick={onRefreshSummary} className="ml-auto text-primary hover:opacity-80" title="Neu berechnen">
+                  <RefreshCw size={12} />
                 </button>
               </div>
-
-              <div className="text-[11px] text-gray-700 leading-relaxed font-sans space-y-1.5 markdown-body" id="slide-ai-markdown">
+              <div className="text-sm text-foreground leading-relaxed space-y-1.5" id="slide-ai-markdown">
                 <MiniMarkdown text={summaryData.summary} />
               </div>
             </div>
 
-            {/* 3. Potential & Risks collapsible details */}
+            {/* Opportunities & Risks */}
             <div className="space-y-2">
-              <div className="bg-[#eefcf2] border border-emerald-100 rounded-sm p-2.5 space-y-1">
-                <div className="flex items-center gap-1 text-emerald-800 font-extrabold text-[10px] uppercase font-mono leading-none pb-1 border-b border-emerald-50">
-                  <Lightbulb size={11} className="text-emerald-500 font-extrabold" />
+              <div className="rounded-lg border border-[hsl(var(--color-semantic-success-500-hsl)/0.25)] bg-[hsl(var(--color-semantic-success-50-hsl))] p-2.5 space-y-1 dark:bg-[hsl(var(--color-semantic-success-500-hsl)/0.12)]">
+                <div className="flex items-center gap-1 text-[hsl(var(--color-semantic-success-700-hsl))] font-semibold text-xs pb-1 border-b border-[hsl(var(--color-semantic-success-500-hsl)/0.2)] dark:text-[hsl(var(--color-semantic-success-50-hsl))]">
+                  <Lightbulb size={12} />
                   <span>Getreide-Kaufchancen</span>
                 </div>
-                <ul className="space-y-1 text-[10.5px] font-sans text-emerald-950 font-medium">
+                <ul className="space-y-1 text-sm text-[hsl(var(--color-semantic-success-700-hsl))] dark:text-[hsl(var(--color-semantic-success-50-hsl))]">
                   {summaryData.opportunities.slice(0, 2).map((opp, i) => (
-                    <li key={i} className="flex gap-1 items-start leading-tight">
-                      <span className="text-emerald-600 font-bold">•</span>
-                      <span>{opp}</span>
-                    </li>
+                    <li key={i} className="flex gap-1 items-start"><span>•</span><span>{opp}</span></li>
                   ))}
                 </ul>
               </div>
 
-              <div className="bg-[#fdf2f2] border border-red-100 rounded-sm p-2.5 space-y-1">
-                <div className="flex items-center gap-1 text-red-800 font-extrabold text-[10px] uppercase font-mono leading-none pb-1 border-b border-red-50">
-                  <AlertOctagon size={11} className="text-red-500 font-extrabold" />
-                  <span>Kredit- und ErnteRisiken</span>
+              <div className="rounded-lg border border-destructive/30 bg-destructive/5 p-2.5 space-y-1">
+                <div className="flex items-center gap-1 text-destructive font-semibold text-xs pb-1 border-b border-destructive/20">
+                  <AlertOctagon size={12} />
+                  <span>Kredit- und Ernterisiken</span>
                 </div>
-                <ul className="space-y-1 text-[10.5px] font-sans text-red-950 font-medium">
+                <ul className="space-y-1 text-sm text-foreground">
                   {summaryData.risks.slice(0, 2).map((risk, i) => (
-                    <li key={i} className="flex gap-1 items-start leading-tight">
-                      <span className="text-red-500 font-bold">•</span>
-                      <span>{risk}</span>
-                    </li>
+                    <li key={i} className="flex gap-1 items-start"><span className="text-destructive">•</span><span>{risk}</span></li>
                   ))}
                 </ul>
               </div>
             </div>
 
-            {/* 4. NeuroComms email generator co-pilot */}
-            <div className="bg-white p-3 border border-[#cbd5e1] rounded-sm shadow-sm space-y-2">
-              <div className="flex items-center gap-1.5 border-b border-gray-100 pb-1 font-bold text-[9.5px] uppercase font-mono text-gray-500 tracking-wider">
-                <Sparkles size={11} className="text-emerald-700 font-extrabold animate-pulse" />
+            {/* Email generator */}
+            <div className="bg-card p-3 border border-border rounded-lg shadow-sm space-y-2">
+              <div className="flex items-center gap-1.5 border-b border-border pb-1.5 font-medium text-xs text-muted-foreground">
+                <Sparkles size={12} className="text-primary" />
                 <span>Text-Assistent (E-Mail)</span>
               </div>
-              <p className="text-[10px] text-gray-400 font-sans leading-normal">
-                Verfassen Sie eine stilsichere, personalisierte E-Mail auf Deutsch aus der Kundenhistorie.
+              <p className="text-xs text-muted-foreground">
+                Stilsichere, personalisierte E-Mail auf Deutsch aus der Kundenhistorie verfassen.
               </p>
 
-              {/* Tones selection panel Grid */}
-              <div className="grid grid-cols-2 gap-1 font-mono text-[9px]">
-                {(['friendly', 'formal', 'mahnend', 'kontraktverhandlung'] as DraftTone[]).map(tone => (
+              <div className="grid grid-cols-2 gap-1">
+                {(Object.keys(TONE_LABELS) as DraftTone[]).map(tone => (
                   <button
                     key={tone}
                     type="button"
                     onClick={() => setActiveTone(tone)}
-                    className={`py-1 rounded-sm text-center font-bold border transition cursor-pointer select-none leading-none ${
-                      activeTone === tone 
-                        ? 'bg-[#006633] text-white border-transparent' 
-                        : 'bg-white border-gray-200 text-[#475569] hover:bg-slate-50'
-                    }`}
+                    className={`py-1.5 rounded-md text-xs text-center border transition ${activeTone === tone ? 'bg-primary text-primary-foreground border-transparent' : 'bg-card border-border text-muted-foreground hover:bg-muted'}`}
                   >
-                    {tone === 'friendly' ? 'Freundlich' : 
-                     tone === 'formal' ? 'Professionell' : 
-                     tone === 'mahnend' ? 'Mahnung' : 'Kontrakt'}
+                    {TONE_LABELS[tone]}
                   </button>
                 ))}
               </div>
 
-              <button
-                onClick={handleDraftEmail}
-                disabled={drafting}
-                className={`w-full py-1.5 rounded-sm text-[10px] font-mono font-bold text-white transition flex justify-center items-center gap-1 truncate cursor-pointer leading-none uppercase ${
-                  drafting ? 'bg-emerald-400 cursor-not-allowed' : 'bg-slate-800 hover:bg-slate-900 shadow-sm'
-                }`}
-                id="btn-side-email-draft"
-              >
-                {drafting ? <RefreshCw size={11} className="animate-spin" /> : <Send size={11} />}
-                <span>{drafting ? 'Entwerfe E-Mail...' : 'Entwurf generieren'}</span>
-              </button>
+              <Button onClick={handleDraftEmail} disabled={drafting} variant="secondary" className="w-full gap-1" id="btn-side-email-draft">
+                {drafting ? <RefreshCw size={13} className="animate-spin" /> : <Send size={13} />}
+                {drafting ? 'Entwerfe E-Mail…' : 'Entwurf generieren'}
+              </Button>
 
               {draftResult && (
-                <div className="bg-slate-50 border border-slate-200 p-2 rounded-sm flex flex-col gap-1.5 pt-2 text-[11px]" id="side-draft-workspace">
-                  <div className="flex justify-between items-center bg-white px-2 py-0.5 rounded border border-gray-200 select-none">
-                    <span className="font-mono font-bold text-[9px] text-gray-400 uppercase">Vorschau</span>
-                    <button
-                      onClick={handleCopyClipboard}
-                      className="flex items-center gap-1 text-[9px] text-blue-700 font-bold hover:underline cursor-pointer select-none"
-                    >
-                      {copied ? <Check size={10} className="text-green-600 stroke-[3]" /> : <Copy size={10} />}
-                      <span>{copied ? 'Kopiert!' : 'Kopieren'}</span>
+                <div className="bg-muted/40 border border-border p-2 rounded-md flex flex-col gap-1.5 text-sm" id="side-draft-workspace">
+                  <div className="flex justify-between items-center bg-card px-2 py-1 rounded border border-border">
+                    <span className="font-medium text-xs text-muted-foreground">Vorschau</span>
+                    <button onClick={handleCopyClipboard} className="flex items-center gap-1 text-xs text-primary font-medium hover:underline">
+                      {copied ? <Check size={11} className="text-[hsl(var(--color-semantic-success-500-hsl))]" /> : <Copy size={11} />}
+                      {copied ? 'Kopiert!' : 'Kopieren'}
                     </button>
                   </div>
-                  <div className="font-mono text-[9px] font-bold text-slate-400 uppercase mt-1 px-1">Betreff:</div>
-                  <div className="font-mono text-[10.5px] bg-white border border-gray-200 rounded p-1.5 text-gray-800 font-semibold select-all truncate">
+                  <div className="text-xs font-medium text-muted-foreground mt-1">Betreff:</div>
+                  <div className="text-sm bg-card border border-border rounded p-1.5 text-foreground font-medium select-all truncate">
                     {draftResult.subject}
                   </div>
-                  <div className="font-mono text-[9px] font-bold text-slate-400 uppercase mt-0.5 px-1">Korpus:</div>
-                  <textarea
-                    readOnly
-                    className="w-full h-28 bg-white border border-gray-200 rounded p-1.5 font-mono text-[10px] text-gray-700 leading-relaxed outline-none resize-none select-all font-semibold"
-                    value={draftResult.body}
-                  />
-                  <p className="text-[8.5px] text-[#006633] font-sans font-bold text-center italic leading-none mt-1">
-                    ✓ E-Mail entspricht den Chef-Anweisungen.
-                  </p>
+                  <div className="text-xs font-medium text-muted-foreground">Korpus:</div>
+                  <Textarea readOnly className="h-28 resize-none select-all" value={draftResult.body} />
+                  <p className="text-xs text-primary text-center mt-1">✓ E-Mail entspricht den Chef-Anweisungen.</p>
                 </div>
               )}
             </div>
