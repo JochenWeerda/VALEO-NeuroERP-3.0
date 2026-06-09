@@ -42,9 +42,43 @@ class SttClient:
         self.language = language or os.getenv("STT_LANGUAGE", "de")
         self.timeout = timeout
 
+    @classmethod
+    def for_tenant(cls, db=None, tenant_id=None) -> "SttClient":
+        """Baut den Client aus der per-Tenant-Konfiguration (Admin-Suite) mit
+        ENV-Fallback. Siehe app/services/connector_config.py."""
+        from app.services.connector_config import load_stt_config
+
+        cfg = load_stt_config(db, tenant_id)
+        if not cfg.enabled:
+            return cls(base_url="")  # deaktiviert => not configured
+        return cls(
+            base_url=cfg.resolved_base_url(),
+            model=cfg.resolved_model(),
+            api_key=cfg.resolved_api_key(),
+            language=cfg.resolved_language(),
+        )
+
     @property
     def configured(self) -> bool:
         return bool(self.base_url)
+
+    def test(self) -> dict:
+        """Erreichbarkeits-/Konfigurationsprobe (für die Admin-Suite). Fragt die
+        OpenAI-kompatible Modell-Liste ab; kein Audio nötig."""
+        if not self.configured:
+            return {"ok": False, "base_url": self.base_url, "model": self.model,
+                    "detail": "Kein STT-Server konfiguriert (Base-URL fehlt)."}
+        headers = {"Authorization": f"Bearer {self.api_key}"} if self.api_key else {}
+        try:
+            resp = httpx.get(f"{self.base_url}/models", headers=headers, timeout=15.0)
+            if resp.status_code < 400:
+                return {"ok": True, "base_url": self.base_url, "model": self.model,
+                        "detail": f"Server erreichbar (HTTP {resp.status_code})."}
+            return {"ok": False, "base_url": self.base_url, "model": self.model,
+                    "detail": f"HTTP {resp.status_code} bei /models."}
+        except Exception as exc:  # noqa: BLE001
+            return {"ok": False, "base_url": self.base_url, "model": self.model,
+                    "detail": f"Nicht erreichbar: {exc}"}
 
     def transcribe(
         self, audio: bytes, filename: str = "call.wav", content_type: str = "audio/wav"

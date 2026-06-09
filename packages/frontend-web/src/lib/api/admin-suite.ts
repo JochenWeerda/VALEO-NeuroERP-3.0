@@ -252,3 +252,75 @@ export function useTestLlmGateway() {
     mutationFn: async () => (await apiClient.post<LlmTestResult>('/api/v1/admin-suite/llm-gateway/test', {})).data,
   })
 }
+
+// ── Auto-Capture-Connectoren (STT + IMAP, per Tenant) ────────────────────────
+export type ConnectorSttConfig = {
+  enabled: boolean
+  base_url: string
+  model: string
+  language: string
+  api_key_set: boolean
+  configured: boolean
+}
+
+export type ConnectorImapConfig = {
+  enabled: boolean
+  host: string
+  port: number
+  ssl: boolean
+  user: string
+  inbox: string
+  sent: string
+  own_addresses: string
+  poll_seconds: number
+  password_set: boolean
+  configured: boolean
+}
+
+export type ConnectorsConfig = { stt: ConnectorSttConfig; imap: ConnectorImapConfig }
+
+export type ConnectorsUpdate = Partial<{
+  stt: Partial<{ enabled: boolean; base_url: string; model: string; language: string; api_key: string }>
+  imap: Partial<{
+    enabled: boolean; host: string; port: number; ssl: boolean; user: string; password: string
+    inbox: string; sent: string; own_addresses: string; poll_seconds: number
+  }>
+}>
+
+export type ConnectorTestResult = { ok: boolean; detail: string }
+export type ConnectorPollResult = { ok: boolean; detail: string; processed: number; created: number }
+
+const CB = '/api/v1/admin-suite/capture-connectors'
+
+export function useConnectors() {
+  return useQuery({
+    queryKey: ['admin-suite', 'capture-connectors'],
+    queryFn: async () => (await apiClient.get<ConnectorsConfig>(CB)).data,
+  })
+}
+
+export function useUpdateConnectors() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async (patch: ConnectorsUpdate) => (await apiClient.put<ConnectorsConfig>(CB, patch)).data,
+    onSuccess: () => { void queryClient.invalidateQueries({ queryKey: ['admin-suite', 'capture-connectors'] }) },
+  })
+}
+
+export function useTestConnectorStt() {
+  return useMutation({
+    mutationFn: async () => (await apiClient.post<ConnectorTestResult>(`${CB}/stt/test`, {})).data,
+  })
+}
+
+export function useTestConnectorImap() {
+  return useMutation({
+    mutationFn: async () => (await apiClient.post<ConnectorTestResult>(`${CB}/imap/test`, {})).data,
+  })
+}
+
+export function usePollConnectorImap() {
+  return useMutation({
+    mutationFn: async () => (await apiClient.post<ConnectorPollResult>(`${CB}/imap/poll`, {})).data,
+  })
+}

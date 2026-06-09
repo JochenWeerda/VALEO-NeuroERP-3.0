@@ -872,3 +872,167 @@ async def test_llm_gateway(
 ) -> LlmTestOut:
     """Konfigurations-/Erreichbarkeitsprobe des aktuell gewählten Anbieters."""
     return LlmTestOut(**LLMGateway(db, tenant_id).test())
+
+
+# ── Connector-Konfiguration (Auto-Capture: STT + IMAP) ──────────────────────────
+from app.services.connector_config import (  # noqa: E402
+    load_imap_config,
+    load_stt_config,
+    save_connectors,
+)
+from app.services.mail_ingest_service import MailIngestService  # noqa: E402
+from app.services.stt_client import SttClient  # noqa: E402
+
+
+class ConnectorSttOut(BaseModel):
+    enabled: bool
+    base_url: str
+    model: str
+    language: str
+    api_key_set: bool
+    configured: bool
+
+
+class ConnectorImapOut(BaseModel):
+    enabled: bool
+    host: str
+    port: int
+    ssl: bool
+    user: str
+    inbox: str
+    sent: str
+    own_addresses: str  # kommagetrennt für die UI
+    poll_seconds: int
+    password_set: bool
+    configured: bool
+
+
+class ConnectorsConfigOut(BaseModel):
+    stt: ConnectorSttOut
+    imap: ConnectorImapOut
+
+
+class ConnectorSttUpdate(BaseModel):
+    enabled: bool | None = None
+    base_url: str | None = None
+    model: str | None = None
+    language: str | None = None
+    api_key: str | None = None  # leer = behalten
+
+
+class ConnectorImapUpdate(BaseModel):
+    enabled: bool | None = None
+    host: str | None = None
+    port: int | None = None
+    ssl: bool | None = None
+    user: str | None = None
+    password: str | None = None  # leer = behalten
+    inbox: str | None = None
+    sent: str | None = None
+    own_addresses: str | None = None  # kommagetrennt
+    poll_seconds: int | None = None
+
+
+class ConnectorsUpdateIn(BaseModel):
+    stt: ConnectorSttUpdate | None = None
+    imap: ConnectorImapUpdate | None = None
+
+
+class ConnectorTestOut(BaseModel):
+    ok: bool
+    detail: str
+
+
+class ConnectorPollOut(BaseModel):
+    ok: bool
+    detail: str
+    processed: int = 0
+    created: int = 0
+
+
+def _connectors_out(db: Session, tenant_id: str) -> ConnectorsConfigOut:
+    stt = load_stt_config(db, tenant_id)
+    imap = load_imap_config(db, tenant_id)
+    return ConnectorsConfigOut(
+        stt=ConnectorSttOut(
+            enabled=stt.enabled,
+            base_url=stt.resolved_base_url(),
+            model=stt.resolved_model(),
+            language=stt.resolved_language(),
+            api_key_set=bool(stt.resolved_api_key()),
+            configured=stt.configured,
+        ),
+        imap=ConnectorImapOut(
+            enabled=imap.enabled,
+            host=imap.resolved_host(),
+            port=imap.port,
+            ssl=imap.ssl,
+            user=imap.resolved_user(),
+            inbox=imap.inbox,
+            sent=imap.sent,
+            own_addresses=", ".join(imap.own_addresses),
+            poll_seconds=imap.poll_seconds,
+            password_set=bool(imap.resolved_password()),
+            configured=imap.configured,
+        ),
+    )
+
+
+@router.get("/capture-connectors", response_model=ConnectorsConfigOut, summary="Connector-Konfiguration abrufen")
+async def get_connectors(
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+) -> ConnectorsConfigOut:
+    """STT- und IMAP-Einstellungen der Auto-Capture-Connectoren (Secrets redigiert)."""
+    return _connectors_out(db, tenant_id)
+
+
+@router.put("/capture-connectors", response_model=ConnectorsConfigOut, summary="Connector-Konfiguration speichern")
+async def update_connectors(
+    payload: ConnectorsUpdateIn,
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+) -> ConnectorsConfigOut:
+    """Speichert STT-/IMAP-Konfiguration (Key/Passwort nur bei Angabe ersetzt)."""
+    save_connectors(
+        db,
+        tenant_id,
+        stt=payload.stt.model_dump(exclude_none=True) if payload.stt else None,
+        imap=payload.imap.model_dump(exclude_none=True) if payload.imap else None,
+    )
+    return _connectors_out(db, tenant_id)
+
+
+@router.post("/capture-connectors/stt/test", response_model=ConnectorTestOut, summary="STT-Server testen")
+async def test_connector_stt(
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+) -> ConnectorTestOut:
+    """Erreichbarkeitsprobe des STT-Servers (OpenAI-kompatibel, /models)."""
+    res = SttClient.for_tenant(db, tenant_id).test()
+    return ConnectorTestOut(ok=bool(res.get("ok")), detail=str(res.get("detail", "")))
+
+
+@router.post("/capture-connectors/imap/test", response_model=ConnectorTestOut, summary="IMAP-Postfach testen")
+async def test_connector_imap(
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+) -> ConnectorTestOut:
+    """Verbindungs-/Login-Probe des IMAP-Postfachs (kein Abruf)."""
+    res = MailIngestService(db, tenant_id).test()
+    return ConnectorTestOut(ok=bool(res.get("ok")), detail=str(res.get("detail", "")))
+
+
+@router.post("/capture-connectors/imap/poll", response_model=ConnectorPollOut, summary="IMAP jetzt abrufen")
+async def poll_connector_imap(
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+) -> ConnectorPollOut:
+    """Holt neue Mails und erfasst sie als Kontakte (manueller Abruf)."""
+    res = MailIngestService(db, tenant_id).poll_once()
+    return ConnectorPollOut(
+        ok=bool(res.get("ok")),
+        detail=str(res.get("detail", "")),
+        processed=int(res.get("processed", 0)),
+        created=int(res.get("created", 0)),
+    )

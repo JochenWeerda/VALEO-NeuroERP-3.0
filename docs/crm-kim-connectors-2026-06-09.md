@@ -58,7 +58,27 @@ Klärfall-Inbox statt verloren zu gehen.
   Nachrichten zusätzlich über `auto-capture`/`mail-capture`-Muster.
 - Freie Gateways: **[WAHA](https://waha.devlike.pro/)**, **[WhiskeySockets/Baileys](https://github.com/whiskeysockets/Baileys)**, **[Evolution API](https://github.com/EvolutionAPI/evolution-api)** — Webhook → `/crm/kim/auto-capture` (`channel:'whatsapp'`).
 
-## Konfiguration (ENV) — Übersicht
+## Admin-Maske — Connector-Konfiguration per Tenant (statt ENV)
+
+Analog zur KI-Anbieter-Wahl konfiguriert der Administrator STT und IMAP pro
+Mandant in der UI (`pages/admin-suite/connectoren.tsx`, Nav „Auto-Capture-Connectoren").
+Gespeichert im JSONB `domain_shared.tenants.settings` unter `connectors` (Laufzeit-
+Abruf-State unter `connectors_state`). Precedence: **Tenant-Settings > ENV** — ENV
+bleibt als globaler Default/Bootstrap gültig.
+
+- Service: `app/services/connector_config.py` (`SttConfig`/`ImapConfig`, load/save,
+  `SttClient.for_tenant`), `app/services/mail_ingest_service.py` (server-seitiger IMAP-Abruf).
+- API (`admin_suite.py`):
+  - `GET /admin-suite/capture-connectors` — STT+IMAP, Secrets redigiert (`*_set`-Flags).
+  - `PUT /admin-suite/capture-connectors` — Key/Passwort nur bei Angabe ersetzt.
+  - `POST /admin-suite/capture-connectors/stt/test` — STT-Erreichbarkeit (`/models`).
+  - `POST /admin-suite/capture-connectors/imap/test` — IMAP-Login-Probe.
+  - `POST /admin-suite/capture-connectors/imap/poll` — „Jetzt abrufen" (server-seitig).
+- Hooks: `lib/api/admin-suite.ts` (`useConnectors`/`useUpdateConnectors`/`useTestConnectorStt`/`useTestConnectorImap`/`usePollConnectorImap`).
+- Der `call-transcript`-Endpoint nutzt jetzt `SttClient.for_tenant(db, tenant_id)`.
+- Hinweis: Route `/admin-suite/capture-connectors` (nicht `/connectors` — letztere ist der bestehende Connector-Hub/Integrationen).
+
+## Konfiguration (ENV) — Übersicht (Default/Fallback; UI hat Vorrang)
 
 | Connector | Schlüssel |
 |---|---|
