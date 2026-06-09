@@ -673,7 +673,7 @@ export default function KimCockpitPage() {
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Gift size={16} className="text-primary" />
-              Präsente &amp; Geschenke-PR-Protokoll
+              Präsente &amp; Geschenke-PR Protokoll
             </DialogTitle>
           </DialogHeader>
           {activeCustomer && (

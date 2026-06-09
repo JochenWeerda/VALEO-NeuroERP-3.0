@@ -91,16 +91,16 @@ export default function SalesDocumentsPanel({ customer, documents, onAddDocument
             <NativeSelect value={docType} onChange={e => setDocType(e.target.value as DocCategory)} options={categories.map(c => ({ value: c.key, label: c.label }))} />
           </div>
           <div className="col-span-6 md:col-span-2 space-y-1">
-            <Label className="text-xs">Belegnummer</Label>
-            <Input required value={docNo} onChange={e => setDocNo(e.target.value)} placeholder="z.B. AU-2610… / CO-881…" />
+            <Label htmlFor="crm360-document-number" className="text-xs">Belegnummer</Label>
+            <Input id="crm360-document-number" type="text" required value={docNo} onChange={e => setDocNo(e.target.value)} placeholder="z.B. AU-2610… / CO-881…" />
           </div>
           <div className="col-span-6 md:col-span-2 space-y-1">
             <Label className="text-xs">Belegdatum</Label>
             <Input type="date" required value={docDate} onChange={e => setDocDate(e.target.value)} />
           </div>
           <div className="col-span-6 md:col-span-2 space-y-1">
-            <Label className="text-xs">Warenwert Netto (EUR)</Label>
-            <Input type="number" required value={docNet} onChange={e => setDocNet(e.target.value)} placeholder="EUR-Wert" />
+            <Label htmlFor="crm360-document-net" className="text-xs">Warenwert Netto (EUR)</Label>
+            <Input id="crm360-document-net" type="number" required value={docNet} onChange={e => setDocNet(e.target.value)} placeholder="EUR-Wert" />
           </div>
           <div className="col-span-6 md:col-span-2 space-y-1">
             <Label className="text-xs">USt-Satz</Label>

@@ -181,7 +181,9 @@ test.describe('CRM 360 semantic action contracts', () => {
     await expect(page.locator('#add-history-vorgang-form')).toBeVisible()
 
     await page.locator('[data-action-id="crm360.filters.reset"]').click()
-    await expect(page.locator('#sub-workspace-tab-allgemein')).toHaveClass(/bg-white/)
+    // Aktiver Tab nutzt seit dem DS-Umbau (KIM-DS-001) das theme-faehige Token
+    // `bg-background` statt des hartkodierten `bg-white` (Dark-Mode-Konformitaet).
+    await expect(page.locator('#sub-workspace-tab-allgemein')).toHaveClass(/bg-background/)
     await guard.expectNoNewErrors(checkpoint)
   })
 
@@ -254,17 +256,17 @@ test.describe('CRM 360 semantic action contracts', () => {
 
     await page.locator('#sub-workspace-tab-belege').click()
     await page.locator('#btn-trigger-add-doc').click()
-    await page.locator('#add-beleg-transaction-form input[type="text"]').first().fill('AN-TEST-1')
-    await page.locator('#add-beleg-transaction-form input[type="number"]').fill('1000')
+    await page.locator('#crm360-document-number').fill('AN-TEST-1')
+    await page.locator('#crm360-document-net').fill('1000')
     await page.locator('#btn-save-doc-recept').click()
     await expect(page.getByText(/Belege im Fachprozess anlegen/i).first()).toBeVisible()
 
     await page.locator('#sub-workspace-tab-finanzen').click()
     await page.locator('#financial-ledger-table-block button').first().click()
     const opForm = page.locator('#inline-op-insert-form')
-    await opForm.locator('input[type="text"]').first().fill('RE-TEST-1')
-    await opForm.locator('input[type="number"]').first().fill('2500')
-    await opForm.locator('input[type="text"]').last().fill('Testlieferung')
+    await opForm.locator('#crm360-open-item-number').fill('RE-TEST-1')
+    await opForm.locator('#crm360-open-item-net').fill('2500')
+    await opForm.locator('#crm360-open-item-description').fill('Testlieferung')
     await opForm.getByRole('button', { name: /OP verbuchen/i }).click()
     await expect(page.getByText(/Offene Posten im Fachprozess anlegen/i).first()).toBeVisible()
   })

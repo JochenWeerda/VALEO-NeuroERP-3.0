@@ -167,12 +167,12 @@ export default function FinancialOpenItemsPanel({ customer, openItems, onAddOpen
         {showAddForm && (
           <form onSubmit={handleSubmit} className="p-3 bg-muted/30 border-b border-border grid grid-cols-12 gap-2 text-sm" id="inline-op-insert-form">
             <div className="col-span-6 md:col-span-2 space-y-1">
-              <Label className="text-xs">Rechnungsnummer</Label>
-              <Input required value={invNo} onChange={e => setInvNo(e.target.value)} placeholder="RE-260…" />
+              <Label htmlFor="crm360-open-item-number" className="text-xs">Rechnungsnummer</Label>
+              <Input id="crm360-open-item-number" type="text" required value={invNo} onChange={e => setInvNo(e.target.value)} placeholder="RE-260…" />
             </div>
             <div className="col-span-6 md:col-span-2 space-y-1">
-              <Label className="text-xs">Nettobetrag (EUR)</Label>
-              <Input type="number" required value={invAmount} onChange={e => setInvAmount(e.target.value)} placeholder="z.B. 14500" />
+              <Label htmlFor="crm360-open-item-net" className="text-xs">Nettobetrag (EUR)</Label>
+              <Input id="crm360-open-item-net" type="number" required value={invAmount} onChange={e => setInvAmount(e.target.value)} placeholder="z.B. 14500" />
             </div>
             <div className="col-span-6 md:col-span-2 space-y-1">
               <Label className="text-xs">Rechnungsdatum</Label>
@@ -202,7 +202,7 @@ export default function FinancialOpenItemsPanel({ customer, openItems, onAddOpen
             </div>
             <div className="col-span-12 border-t border-dashed border-border pt-2 flex flex-col md:flex-row items-center gap-4 justify-between">
               <div className="flex items-center gap-4 flex-wrap">
-                <Input required value={invDesc} onChange={e => setInvDesc(e.target.value)} placeholder="Produktinfo (z.B. Weizensaatgut)" className="w-80" />
+                <Input id="crm360-open-item-description" type="text" required value={invDesc} onChange={e => setInvDesc(e.target.value)} placeholder="Produktinfo (z.B. Weizensaatgut)" className="w-80" />
                 <label className="flex items-center gap-1.5 text-sm text-muted-foreground cursor-pointer select-none">
                   <input type="checkbox" checked={isDrop} onChange={e => setIsDrop(e.target.checked)} className="accent-primary" />
                   <span>Direktgeschäft / Streckenbezug?</span>

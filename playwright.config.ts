@@ -16,7 +16,7 @@ export default defineConfig({
 
   // Artefakt-Sammlung
   use: {
-    baseURL: process.env.VALEO_BASE_URL ?? process.env.FRONTEND_URL ?? "http://localhost:3000",
+    baseURL: process.env.VALEO_BASE_URL ?? process.env.FRONTEND_URL ?? "http://127.0.0.1:4173",
     actionTimeout: 10000,
     navigationTimeout: 15000,
     
