@@ -133,10 +133,12 @@ def dial(body: DialIn, db: Session = Depends(get_db), tenant_id: str = Depends(g
     db.execute(
         text(
             "INSERT INTO public.tapi_calls (id, caller, called, richtung, kunden_nr, kunde_name, status, acked, tenant_id) "
-            "VALUES (:id, :caller, :called, 'aus', :knr, :kname, 'dial_requested', TRUE, :tid)"
+            "VALUES (:id, :caller, :called, 'aus', :knr, :kname, 'dial_req', TRUE, :tid)"
         ),
         {
-            "id": new_id, "caller": body.caller, "called": body.called,
+            # caller ist NOT NULL; bei ausgehender Wahl ist die eigene Nebenstelle
+            # optional -> Sentinel 'KIM', bis die Bridge die reale Quelle setzt.
+            "id": new_id, "caller": body.caller or "KIM", "called": body.called,
             "knr": body.kunden_nr, "kname": kunde_name, "tid": tenant_id,
         },
     )
@@ -150,7 +152,7 @@ def dial_pending(db: Session = Depends(get_db), tenant_id: str = Depends(get_ten
     rows = db.execute(
         text(
             f"SELECT {_COLS} FROM public.tapi_calls "
-            "WHERE tenant_id = :t AND richtung = 'aus' AND status = 'dial_requested' "
+            "WHERE tenant_id = :t AND richtung = 'aus' AND status = 'dial_req' "
             "ORDER BY created_at LIMIT 20"
         ),
         {"t": tenant_id},
