@@ -2,6 +2,16 @@
 
 Stand: `2026-06-09`
 
+## KIM-L3-QUICK-001
+
+**Von:** Codex
+**Owner:** Codex
+**Stand:** reserviert
+**Ziel des Slices:** Die im L3-Funktionsabgleich nachgewiesenen, rein frontendseitigen KIM-Bedienluecken schliessen: separate Kunden-Neuanlage, druckbare Cockpit-Ansicht, auswählbare Ansprechpartner mit Oeffnen/E-Mail/Praesente/Filter sowie fachlich korrekte Oeffnen-/Neu-Navigationen fuer vorhandene Verkaufsbelege.
+**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/agent-ops/slices/KIM-L3-QUICK-001.yaml`, `docs/quality-assurance/` fuer den KIM-L3-Klicknachweis, `packages/frontend-web/src/pages/crm/kim/**` sowie fokussierte CRM-Playwright-Vertraege unter `playwright-tests/specs/crm/`.
+**Abnahmekriterien:** Jede neue Aktion besitzt eine stabile semantische Action-ID; Neukunde oeffnet eine leere kanonische Kundenmaske; Print erzeugt eine druckbare Cockpit-Sicht; Ansprechpartner sind selektier- und filterbar und Oeffnen/E-Mail/Praesente arbeiten im gewaehlten Kontext; unterstuetzte Verkaufsbelege oeffnen die richtige Detail- beziehungsweise Neuanlagemaske mit Kunden-/Belegkontext; unbekannte oder noch nicht kanonisch routbare Belegarten behaupten keinen erfolgreichen Fachprozess; Typecheck, Build, Playwright und Governance sind gruen.
+**Offene Risiken:** TAPI-Wahl, CC/Benachrichtigung und neue Kontaktlog-Persistenz sind explizit nicht Teil dieses Slices. Kaufangebote, Kaufabrechnungen und Fremdbestaende duerfen nur verdrahtet werden, wenn eine kanonische Zielroute eindeutig nachweisbar ist.
+
 ## CRM360-MBT-005
 
 **Von:** Codex
