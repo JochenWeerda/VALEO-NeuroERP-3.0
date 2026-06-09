@@ -2,6 +2,16 @@
 
 Stand: `2026-06-07`
 
+## CRM360-MBT-004
+
+**Von:** Codex
+**Owner:** Codex
+**Stand:** reserviert 2026-06-09
+**Ziel des Slices:** Den CRM360-Revenue-Handover um den fachlichen Abschluss Rechnung -> Buchung -> offener Posten erweitern und gegen reale Backend-Vertraege validieren. Der Nachweis muss tenant-isoliert, revisionssicher und ohne hartes Loeschen gebuchter Finanzdaten auskommen.
+**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/agent-ops/slices/CRM360-MBT-004.yaml`, relevante CRM360-/OTC-QA-Dokumentation, neue fokussierte UAT-Hilfen und Tests unter `scripts/uat/` und `tests/` sowie nur die fuer Docflow-Posting, Debitoren-OP, Storno und tenant-isolierte Finanzvertraege zwingend erforderlichen Backenddateien.
+**Abnahmekriterien:** Ein realer oder explizit gegateter UAT weist Rechnung, Posting und Debitoren-OP samt Kunden-, Betrag-, Beleg- und Tenant-Bezug nach; Wiederholung ist idempotent; gebuchte Daten werden nur ueber fachliche Kompensation/Storno behandelt; fehlende Kontierung oder Finanzkonfiguration wird als klarer Blocker ausgewiesen; Backendtests, Live-UAT und Governance sind gruen.
+**Offene Risiken:** Posting kann Kontenplan, Geschaeftsjahr, Steuerlogik und Debitorenkonto voraussetzen. Falls kein revisionssicherer Kompensationsvertrag existiert, darf der persistente Lauf nicht buchen und muss stattdessen das fehlende Gate belastbar dokumentieren.
+
 ## CRM360-MBT-003
 
 **Von:** Codex
