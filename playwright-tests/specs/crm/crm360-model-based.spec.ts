@@ -191,8 +191,24 @@ async function installKimApi(page: Page): Promise<void> {
     if (path.endsWith('/draft-email')) {
       return json(route, { subject: 'Angebot', body: 'Guten Tag, anbei unser Angebot.', engine: 'test' })
     }
+    // KIM-S3/S4: Präsente, Werbe-Matrix, Pseudonymisierung, Kontakt-Belege.
+    if (path.includes('/gifts')) return json(route, request.method() === 'GET' ? [] : { id: 'gift-1', status: 'success' })
+    if (path.includes('/marketing-prefs')) return json(route, request.method() === 'GET' ? [] : { status: 'success' })
+    if (path.endsWith('/pseudonymize')) return json(route, { status: 'success' })
+    if (path.includes('/contact-docs')) return json(route, [])
     return json(route, { detail: `Unmocked KIM route: ${request.method()} ${path}` }, 501)
   })
+}
+
+async function clickMenuItem(page: Page, triggerSelector: string, itemSelector: string): Promise<void> {
+  // Robust gegen die Schliess-Animation der Vorgaenger-Iteration: erst warten, bis
+  // kein Menue mehr offen ist, dann oeffnen und den Eintrag anklicken.
+  await page.locator('[role="menu"]').first().waitFor({ state: 'detached', timeout: 2000 }).catch(() => {})
+  await page.locator(triggerSelector).click()
+  const item = page.locator(itemSelector)
+  await item.waitFor({ state: 'visible', timeout: 5000 })
+  await item.scrollIntoViewIfNeeded().catch(() => {})
+  await item.click({ force: true })
 }
 
 async function openCrm360(page: Page): Promise<void> {
@@ -232,14 +248,12 @@ test.describe('CRM 360 semantic action contracts', () => {
     const checkpoint = guard.checkpoint()
 
     // „Information" ist seit S2 ein Dropdown; „Kundeninformation" öffnet den Dialog.
-    await page.locator('[data-action-id="crm360.customer.info"]').click()
-    await page.locator('[data-action-id="crm360.info.dialog"]').click()
+    await clickMenuItem(page, '[data-action-id="crm360.customer.info"]', '[data-action-id="crm360.info.dialog"]')
     await expect(page.getByRole('dialog', { name: 'Kundeninformation' })).toContainText(customer.debtorNo)
     await page.locator('[data-action-id="crm360.customer.info.close"]').click()
 
     await page.locator('[data-action-id="crm360.presents.open"]').click()
-    await expect(page.getByText(/Präsente & Geschenke-PR Protokoll/i)).toBeVisible()
-    await page.getByRole('button', { name: /Protokoll schließen/i }).click()
+    await expect(page.locator('#customer-gifts-tab')).toBeVisible()
 
     // „Neu"=Aktivität wandert in die Kontakt-Historie (QUICK-001: Toolbar-„Neu" ist nun Neukunde).
     await page.locator('#btn-trigger-history-form').click()
@@ -269,18 +283,15 @@ test.describe('CRM 360 semantic action contracts', () => {
     ]
 
     for (const section of sections) {
-      await page.locator('[data-action-id="crm360.customer.info"]').click()
-      await page.locator(`[data-action-id="crm360.info:${section}"]`).click()
+      await clickMenuItem(page, '[data-action-id="crm360.customer.info"]', `[data-action-id="crm360.info:${section}"]`)
       await expect(page.locator(`[data-info-section="${section}"]`)).toBeVisible()
       await expect(page).toHaveURL(/\/crm(?:\?|$)/)
     }
 
-    await page.locator('[data-action-id="crm360.customer.info"]').click()
-    await page.locator('[data-action-id="crm360.info:fibu-op"]').click()
+    await clickMenuItem(page, '[data-action-id="crm360.customer.info"]', '[data-action-id="crm360.info:fibu-op"]')
     await expect(page.locator('#sub-workspace-tab-finanzen')).toHaveClass(/bg-background/)
 
-    await page.locator('[data-action-id="crm360.customer.info"]').click()
-    await page.locator('[data-action-id="crm360.info:kontrakt-uebersicht"]').click()
+    await clickMenuItem(page, '[data-action-id="crm360.customer.info"]', '[data-action-id="crm360.info:kontrakt-uebersicht"]')
     await expect(page.locator('#sub-workspace-tab-kontrakte')).toHaveClass(/bg-background/)
     await guard.expectNoNewErrors(checkpoint)
   })
@@ -292,20 +303,17 @@ test.describe('CRM 360 semantic action contracts', () => {
     const categories = ['OFFER', 'ORDER', 'DELIVERY_NOTE', 'INQUIRY', 'PURCHASE_ORDER', 'ALL']
 
     for (const category of categories) {
-      await page.locator('[data-action-id="crm360.offer.create"]').click()
-      await page.locator(`[data-action-id="crm360.doc:${category}"]`).click()
+      await clickMenuItem(page, '[data-action-id="crm360.offer.create"]', `[data-action-id="crm360.doc:${category}"]`)
       await expect(page.locator('#sub-workspace-tab-belege')).toHaveClass(/bg-background/)
       await expect(page.locator(`#tab-doc-sel-${category}`)).toHaveClass(/border-primary/)
       await expect(page).toHaveURL(/\/crm(?:\?|$)/)
     }
 
     await page.locator('#tab-doc-sel-ORDER').click()
-    await page.locator('[data-action-id="crm360.offer.create"]').click()
-    await page.locator('[data-action-id="crm360.doc:OFFER"]').click()
+    await clickMenuItem(page, '[data-action-id="crm360.offer.create"]', '[data-action-id="crm360.doc:OFFER"]')
     await expect(page.locator('#tab-doc-sel-OFFER')).toHaveClass(/border-primary/)
 
-    await page.locator('[data-action-id="crm360.offer.create"]').click()
-    await page.locator('[data-action-id="crm360.doc:ALL"]').click()
+    await clickMenuItem(page, '[data-action-id="crm360.offer.create"]', '[data-action-id="crm360.doc:ALL"]')
     await expect(page.locator('#tab-doc-sel-ALL')).toHaveClass(/border-primary/)
     await expect(page.locator('[id^="doc-row-entry-"]')).toHaveCount(1)
     await expect(page.locator('[data-action-id="crm360.document.create"]')).toBeDisabled()
@@ -449,8 +457,7 @@ test.describe('CRM 360 semantic action contracts', () => {
   test('@full offer navigation transfers customer context and browser back returns to CRM 360', async ({ page }) => {
     await openCrm360(page)
     // „Ang./Auf." ist seit S2 ein Dropdown; „Neues Angebot / Auftrag" navigiert.
-    await page.locator('[data-action-id="crm360.offer.create"]').click()
-    await page.locator('[data-action-id="crm360.offer.new"]').click()
+    await clickMenuItem(page, '[data-action-id="crm360.offer.create"]', '[data-action-id="crm360.offer.new"]')
     await expect(page).toHaveURL(/\/sales\/angebot-erstellen\?/)
     const target = new URL(page.url())
     expect(target.searchParams.get('kunde')).toBe(customer.debtorNo)

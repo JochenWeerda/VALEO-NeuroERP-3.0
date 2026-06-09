@@ -183,7 +183,7 @@ export default function CustomerActionBar({ onActionClick, isLoadingAI }: Custom
                 <ChevronDown size={13} className="opacity-60" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="start" className="w-56 max-h-[70vh] overflow-y-auto">
+            <DropdownMenuContent align="start" className="w-56 max-h-72 overflow-y-auto">
               <DropdownMenuItem data-action-id="crm360.info.dialog" onSelect={() => onActionClick('infoPopup')}>
                 Kundeninformation
               </DropdownMenuItem>
@@ -213,7 +213,7 @@ export default function CustomerActionBar({ onActionClick, isLoadingAI }: Custom
                 <ChevronDown size={13} className="opacity-60" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="start" className="w-52 max-h-[70vh] overflow-y-auto">
+            <DropdownMenuContent align="start" className="w-52 max-h-72 overflow-y-auto">
               <DropdownMenuItem data-action-id="crm360.offer.new" onSelect={() => onActionClick('newOrder')}>
                 Neues Angebot / Auftrag
               </DropdownMenuItem>
