@@ -130,6 +130,8 @@ export default function ContactHistoryTable({ logs, customer, onAddLog }: Contac
         </Button>
       </div>
 
+      {/* Scrollbarer Bereich: Formular (inkl. Speichern-Button) + Liste bleiben im kurzen Panel erreichbar */}
+      <div className="flex-1 min-h-0 overflow-y-auto">
       {/* Inline entry form */}
       {showAddLog && (
         <form onSubmit={handleSubmitLog} className="p-3 bg-muted/30 border-b border-border text-sm grid grid-cols-12 gap-2" id="add-history-vorgang-form">
@@ -228,7 +230,7 @@ export default function ContactHistoryTable({ logs, customer, onAddLog }: Contac
       )}
 
       {/* Listing */}
-      <div className="overflow-auto flex-1">
+      <div className="overflow-x-auto">
         <table className="w-full text-left text-sm border-collapse">
           <thead className="sticky top-0">
             <tr className="bg-muted/60 border-b border-border text-muted-foreground text-xs">
@@ -296,6 +298,7 @@ export default function ContactHistoryTable({ logs, customer, onAddLog }: Contac
             )}
           </tbody>
         </table>
+      </div>
       </div>
 
     </div>
