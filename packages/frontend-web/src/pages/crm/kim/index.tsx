@@ -438,6 +438,20 @@ export default function KimCockpitPage() {
           });
         }
         break;
+      case 'whatsapp': {
+        // wa.me erwartet internationale Ziffern ohne '+'/Sonderzeichen; DE: führende 0 -> 49.
+        const digits = (activeCustomer?.phone1 || '').replace(/[^\d]/g, '').replace(/^0/, '49');
+        if (digits.length >= 6) {
+          window.open(`https://wa.me/${digits}`, '_blank', 'noopener,noreferrer');
+        } else {
+          toast({
+            title: 'Keine Telefonnummer für WhatsApp',
+            description: 'Im Kundenstamm ist keine geeignete Telefonnummer hinterlegt.',
+            variant: 'destructive',
+          });
+        }
+        break;
+      }
       case 'neuroIntelligence':
         handleFetchNeuroSummary();
         break;

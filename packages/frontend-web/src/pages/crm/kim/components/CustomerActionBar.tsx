@@ -22,6 +22,7 @@ import {
   Gift,
   PhoneCall,
   Mail,
+  MessageCircle,
   FileSignature,
   Receipt,
   Printer,
@@ -54,6 +55,7 @@ const ACTION_GROUPS: ActionDef[][] = [
   [
     { action: 'logCall', actionId: 'crm360.call.create', icon: <PhoneCall size={14} />, label: 'Telefon', title: 'Telefon-Gespräch sofort protokollieren [Alt + T]' },
     { action: 'sendEmail', actionId: 'crm360.email.open', icon: <Mail size={14} />, label: 'E-Mail', title: 'E-Mail-Programm mit Kundenadresse öffnen' },
+    { action: 'whatsapp', actionId: 'crm360.whatsapp.open', icon: <MessageCircle size={14} />, label: 'WhatsApp', title: 'WhatsApp-Chat mit dem Kunden öffnen (wa.me)' },
   ],
   [
     { action: 'billingCheck', actionId: 'crm360.receivables.open', icon: <Receipt size={14} />, label: 'Faktur', title: 'Finanzposten und Debitorenabrechnung prüfen [Alt + F]' },
@@ -95,6 +97,7 @@ const CONFIGURABLE: { actionId: string; label: string }[] = [
   { actionId: 'crm360.customer.info', label: 'Information' },
   { actionId: 'crm360.call.create', label: 'Telefon' },
   { actionId: 'crm360.email.open', label: 'E-Mail' },
+  { actionId: 'crm360.whatsapp.open', label: 'WhatsApp' },
   { actionId: 'crm360.offer.create', label: 'Ang./Auf.' },
   { actionId: 'crm360.receivables.open', label: 'Faktur' },
   { actionId: 'crm360.customer.print', label: 'Drucken' },

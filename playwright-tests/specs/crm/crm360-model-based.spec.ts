@@ -237,8 +237,8 @@ test.describe('CRM 360 semantic action contracts', () => {
       nodes.map((node) => node.getAttribute('data-action-id')).filter(Boolean),
     )
     const contracted = new Set(CRM360_ACTION_CONTRACTS.map((action) => action.id))
-    // 11 Toolbar-Aktionen seit QUICK-001 (Neukunde + Drucken ersetzen das alte „Neu"=Aktivität).
-    expect(rendered.length).toBe(11)
+    // 12 Toolbar-Aktionen: QUICK-001 (Neukunde/Drucken) + WhatsApp (Cockpit-Paritaet).
+    expect(rendered.length).toBe(12)
     expect(rendered.filter((id) => !contracted.has(id!))).toEqual([])
   })
 
