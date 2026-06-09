@@ -108,6 +108,34 @@ export async function fetchNotifications(recipient: string, unread = false): Pro
   )).data
 }
 
+// ── Ansprechpartner-Erweiterung (KIM-S4): Werbe-Matrix + Pseudonymisierung ─────
+export type MarketingPreference = 'none' | 'company' | 'private'
+
+export interface ContactMarketingPref {
+  id: string
+  contact_id: string
+  category_code: string
+  category_label?: string | null
+  preference: MarketingPreference
+}
+
+export async function fetchMarketingPrefs(contactId: string): Promise<ContactMarketingPref[]> {
+  return (await apiClient.get<ContactMarketingPref[]>(`${BASE}/contacts/${encodeURIComponent(contactId)}/marketing-prefs`)).data
+}
+
+export async function setMarketingPref(
+  contactId: string, categoryCode: string, preference: MarketingPreference, categoryLabel?: string, kundenNr?: string,
+): Promise<{ status: string }> {
+  return (await apiClient.put<{ status: string }>(
+    `${BASE}/contacts/${encodeURIComponent(contactId)}/marketing-prefs`,
+    { categoryCode, preference, categoryLabel, kundenNr },
+  )).data
+}
+
+export async function pseudonymizeContact(contactId: string): Promise<{ status: string }> {
+  return (await apiClient.post<{ status: string }>(`${BASE}/contacts/${encodeURIComponent(contactId)}/pseudonymize`, {})).data
+}
+
 export async function markNotificationRead(id: string): Promise<CrmNotification> {
   return (await apiClient.post<CrmNotification>(`${BASE}/notifications/${encodeURIComponent(id)}/read`, {})).data
 }

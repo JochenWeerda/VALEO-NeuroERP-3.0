@@ -36,6 +36,7 @@ import CustomerActionBar from './components/CustomerActionBar';
 import CustomerStatusBanner from './components/CustomerStatusBanner';
 
 import ContactPersonsTable from './components/ContactPersonsTable';
+import CustomerContactMarketing from './components/CustomerContactMarketing';
 import FinancialOpenItemsPanel from './components/FinancialOpenItemsPanel';
 import SalesDocumentsPanel, { type DocCategory } from './components/SalesDocumentsPanel';
 import ContractsPanel from './components/ContractsPanel';
@@ -569,6 +570,7 @@ export default function KimCockpitPage() {
                       onEmailContact={handleEmailContact}
                       onOpenPresents={handleOpenContactPresents}
                     />
+                    <CustomerContactMarketing customer={activeCustomer} contacts={contacts} />
                   </div>
                 )}
 
