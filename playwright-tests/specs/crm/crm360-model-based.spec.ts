@@ -76,6 +76,10 @@ async function installKimApi(page: Page): Promise<void> {
     contentType: 'text/event-stream',
     body: 'event: connected\ndata: {"status":"connected"}\n\n',
   }))
+  await page.route('**/api/v1/crm/tapi/dial', (route) => json(route, {
+    id: 'dial-1', caller: 'KIM', called: customer.phone1, kunden_nr: customer.debtorNo,
+    kunde_name: customer.name, status: 'dial_req',
+  }))
   await page.route('**/api/v1/crm/customers/*/sales-eligibility', (route) => json(route, {
     allowed_order: true,
     allowed_delivery: true,
@@ -160,7 +164,8 @@ test.describe('CRM 360 semantic action contracts', () => {
       nodes.map((node) => node.getAttribute('data-action-id')).filter(Boolean),
     )
     const contracted = new Set(CRM360_ACTION_CONTRACTS.map((action) => action.id))
-    expect(rendered.length).toBe(10)
+    // 11 Toolbar-Aktionen seit QUICK-001 (Neukunde + Drucken ersetzen das alte „Neu"=Aktivität).
+    expect(rendered.length).toBe(11)
     expect(rendered.filter((id) => !contracted.has(id!))).toEqual([])
   })
 
@@ -177,7 +182,8 @@ test.describe('CRM 360 semantic action contracts', () => {
     await expect(page.getByText(/Präsente & Geschenke-PR Protokoll/i)).toBeVisible()
     await page.getByRole('button', { name: /Protokoll schließen/i }).click()
 
-    await page.locator('[data-action-id="crm360.activity.create"]').click()
+    // „Neu"=Aktivität wandert in die Kontakt-Historie (QUICK-001: Toolbar-„Neu" ist nun Neukunde).
+    await page.locator('#btn-trigger-history-form').click()
     await expect(page.locator('#add-history-vorgang-form')).toBeVisible()
 
     await page.locator('[data-action-id="crm360.filters.reset"]').click()
@@ -254,11 +260,12 @@ test.describe('CRM 360 semantic action contracts', () => {
   test('@full delegated document and receivables creates disclose their specialist process', async ({ page }) => {
     await openCrm360(page)
 
+    // QUICK-001: routbare Belege (Angebot/Auftrag/Lieferschein) navigieren in die
+    // Fachmaske; nicht kanonisch routbare Kategorien (Kaufangebote) legen ehrlich
+    // im Fachprozess an statt einen Scheinerfolg zu behaupten.
     await page.locator('#sub-workspace-tab-belege').click()
-    await page.locator('#btn-trigger-add-doc').click()
-    await page.locator('#crm360-document-number').fill('AN-TEST-1')
-    await page.locator('#crm360-document-net').fill('1000')
-    await page.locator('#btn-save-doc-recept').click()
+    await page.locator('#tab-doc-sel-PURCHASE_OFFER').click()
+    await page.locator('[data-action-id="crm360.document.create"]').click()
     await expect(page.getByText(/Belege im Fachprozess anlegen/i).first()).toBeVisible()
 
     await page.locator('#sub-workspace-tab-finanzen').click()

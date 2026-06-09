@@ -43,6 +43,7 @@ export interface ContactPerson {
   priority: number;
   phone1: string;
   phone2?: string;
+  email?: string;
   fax?: string;
   weeklySchedule: boolean[]; // W1 to W10 status flags for schedule planning
 }
@@ -53,7 +54,11 @@ export interface ContactLog {
   direction: 'INCOMING' | 'OUTGOING'; // Richtung
   date: string;
   completed: boolean; // erl.
-  artKurzinfo: string; // Art/Kurzinfo
+  artKurzinfo: string; // Art/Kurzinfo (Anzeige; == betreff)
+  art?: string;        // Kontaktart: persoenlich/telefon/email/whatsapp
+  betreff?: string;    // Betreffzeile
+  kommentar?: string;  // Freitext-Kommentar (blob)
+  ccIntern?: string;   // CC: interner Empfaenger (Mitarbeiter/Abteilung) oder E-Mail
   operator: string;    // Bediener
   reSubmissionDate?: string; // Wiedervorlage
   dispatcher?: string; // Disponent

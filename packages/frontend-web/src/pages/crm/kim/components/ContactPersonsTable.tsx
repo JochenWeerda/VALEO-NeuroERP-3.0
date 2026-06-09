@@ -10,15 +10,26 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { NativeSelect } from '@/components/ui/native-select';
 import { Label } from '@/components/ui/label';
-import { Phone, Calendar, UserCheck, Plus, X, Check } from 'lucide-react';
+import { Phone, Calendar, UserCheck, Plus, X, Check, FolderOpen, Mail, Gift, Search } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 
 interface ContactPersonsTableProps {
   contactPersons: ContactPerson[];
   onAddContactPerson: (vals: Partial<ContactPerson>) => void;
+  onEmailContact: (contact: ContactPerson) => void;
+  onOpenPresents: (contact: ContactPerson) => void;
 }
 
-export default function ContactPersonsTable({ contactPersons, onAddContactPerson }: ContactPersonsTableProps) {
+export default function ContactPersonsTable({
+  contactPersons,
+  onAddContactPerson,
+  onEmailContact,
+  onOpenPresents,
+}: ContactPersonsTableProps) {
   const [showAddForm, setShowAddForm] = useState(false);
+  const [selectedContactId, setSelectedContactId] = useState('');
+  const [filter, setFilter] = useState('');
+  const [showDetails, setShowDetails] = useState(false);
   const [salutation, setSalutation] = useState('Herr');
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
@@ -29,6 +40,14 @@ export default function ContactPersonsTable({ contactPersons, onAddContactPerson
   const [priority, setPriority] = useState(2);
   const [birthdate, setBirthdate] = useState('');
   const [schedule, setSchedule] = useState<boolean[]>(Array(10).fill(false));
+  const selectedContact = contactPersons.find((person) => person.id === selectedContactId) ?? null;
+  const normalizedFilter = filter.trim().toLocaleLowerCase('de-DE');
+  const filteredContacts = normalizedFilter
+    ? contactPersons.filter((person) =>
+        [person.name, person.firstName, person.position, person.phone1, person.phone2]
+          .some((value) => value?.toLocaleLowerCase('de-DE').includes(normalizedFilter)),
+      )
+    : contactPersons;
 
   const handleToggleSchedule = (idx: number) => {
     setSchedule(prev => prev.map((v, i) => (i === idx ? !v : v)));
@@ -61,6 +80,61 @@ export default function ContactPersonsTable({ contactPersons, onAddContactPerson
         <Button variant="outline" size="sm" onClick={() => setShowAddForm(!showAddForm)} className="gap-1">
           {showAddForm ? <X size={13} /> : <Plus size={13} />}
           {showAddForm ? 'Schließen' : 'Neuer Kontakt'}
+        </Button>
+      </div>
+
+      <div className="flex flex-wrap items-center gap-2 border-b border-border bg-card px-3 py-2">
+        <div className="relative min-w-56 flex-1">
+          <Search size={14} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground" />
+          <Input
+            value={filter}
+            onChange={(event) => setFilter(event.target.value)}
+            placeholder="Ansprechpartner filtern"
+            className="pl-8"
+            data-action-id="crm360.contact.filter"
+          />
+        </div>
+        <Button
+          variant="outline"
+          size="sm"
+          disabled={!selectedContact}
+          onClick={() => setShowDetails(true)}
+          data-action-id="crm360.contact.open"
+          className="gap-1"
+        >
+          <FolderOpen size={13} /> Öffnen
+        </Button>
+        <Button
+          variant="outline"
+          size="sm"
+          disabled={!selectedContact?.phone1}
+          onClick={() => {
+            if (selectedContact?.phone1) window.location.href = `tel:${selectedContact.phone1}`;
+          }}
+          data-action-id="crm360.contact.call"
+          className="gap-1"
+        >
+          <Phone size={13} /> Telefon
+        </Button>
+        <Button
+          variant="outline"
+          size="sm"
+          disabled={!selectedContact}
+          onClick={() => selectedContact && onEmailContact(selectedContact)}
+          data-action-id="crm360.contact.email"
+          className="gap-1"
+        >
+          <Mail size={13} /> E-Mail
+        </Button>
+        <Button
+          variant="outline"
+          size="sm"
+          disabled={!selectedContact}
+          onClick={() => selectedContact && onOpenPresents(selectedContact)}
+          data-action-id="crm360.contact.presents"
+          className="gap-1"
+        >
+          <Gift size={13} /> Präsente
         </Button>
       </div>
 
@@ -142,15 +216,28 @@ export default function ContactPersonsTable({ contactPersons, onAddContactPerson
             </tr>
           </thead>
           <tbody>
-            {contactPersons.length === 0 ? (
+            {filteredContacts.length === 0 ? (
               <tr>
                 <td colSpan={19} className="p-6 text-center text-muted-foreground italic">
                   Keine zugeordneten Kontakt-Partner im System hinterlegt.
                 </td>
               </tr>
             ) : (
-              contactPersons.map((person) => (
-                <tr key={person.id} className="border-b border-border hover:bg-muted/40 transition" id={`cp-row-${person.id}`}>
+              filteredContacts.map((person) => (
+                <tr
+                  key={person.id}
+                  className={`border-b border-border transition cursor-pointer ${
+                    selectedContactId === person.id ? 'bg-primary/10' : 'hover:bg-muted/40'
+                  }`}
+                  id={`cp-row-${person.id}`}
+                  data-action-id="crm360.contact.select"
+                  aria-selected={selectedContactId === person.id}
+                  onClick={() => setSelectedContactId(person.id)}
+                  onDoubleClick={() => {
+                    setSelectedContactId(person.id);
+                    setShowDetails(true);
+                  }}
+                >
                   <td className="p-2 text-muted-foreground">{person.salutation}</td>
                   <td className="p-2 font-semibold text-foreground">{person.name}</td>
                   <td className="p-2 text-foreground">{person.firstName}</td>
@@ -201,6 +288,28 @@ export default function ContactPersonsTable({ contactPersons, onAddContactPerson
           </tbody>
         </table>
       </div>
+
+      <Dialog open={showDetails} onOpenChange={setShowDetails}>
+        <DialogContent className="max-w-md" data-testid="crm360-contact-details-dialog">
+          <DialogHeader>
+            <DialogTitle>Ansprechpartner</DialogTitle>
+          </DialogHeader>
+          {selectedContact && (
+            <dl className="grid grid-cols-[8rem_1fr] gap-2 text-sm">
+              <dt className="text-muted-foreground">Name</dt>
+              <dd>{selectedContact.salutation} {selectedContact.firstName} {selectedContact.name}</dd>
+              <dt className="text-muted-foreground">Position</dt>
+              <dd>{selectedContact.position || 'Nicht hinterlegt'}</dd>
+              <dt className="text-muted-foreground">Telefon</dt>
+              <dd>{selectedContact.phone1 || 'Nicht hinterlegt'}</dd>
+              <dt className="text-muted-foreground">Mobil</dt>
+              <dd>{selectedContact.phone2 || 'Nicht hinterlegt'}</dd>
+              <dt className="text-muted-foreground">Priorität</dt>
+              <dd>{selectedContact.priority}</dd>
+            </dl>
+          )}
+        </DialogContent>
+      </Dialog>
 
     </div>
   );

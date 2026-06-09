@@ -15,6 +15,7 @@ import {
   Mail,
   FileSignature,
   Receipt,
+  Printer,
   RefreshCw,
   FilterX,
 } from 'lucide-react';
@@ -35,7 +36,7 @@ interface ActionDef {
 const ACTION_GROUPS: ActionDef[][] = [
   [
     { action: 'openMaster', actionId: 'crm360.master.open', icon: <FolderOpen size={14} />, label: 'Öffnen', title: 'Adress-Stammdaten öffnen [Alt + O]' },
-    { action: 'newContact', actionId: 'crm360.activity.create', icon: <FilePlus size={14} />, label: 'Neu', title: 'Neuen Korrespondenzantrag anlegen [Alt + N]' },
+    { action: 'newCustomer', actionId: 'crm360.customer.create', icon: <FilePlus size={14} />, label: 'Neukunde', title: 'Leere Kunden-Neuanlage öffnen [Alt + N]' },
     { action: 'infoPopup', actionId: 'crm360.customer.info', icon: <Info size={14} />, label: 'Information', title: 'Mandanten-Details aufrufen' },
     { action: 'presents', actionId: 'crm360.presents.open', icon: <Gift size={14} />, label: 'Präsente', title: 'Werbung / Geschenke-PR an Kunden [Alt + P]' },
   ],
@@ -46,6 +47,7 @@ const ACTION_GROUPS: ActionDef[][] = [
   [
     { action: 'newOrder', actionId: 'crm360.offer.create', icon: <FileSignature size={14} />, label: 'Ang./Auf.', title: 'Neues Agrarangebot/Auftrag initiieren [Alt + A]' },
     { action: 'billingCheck', actionId: 'crm360.receivables.open', icon: <Receipt size={14} />, label: 'Faktur', title: 'Finanzposten und Debitorenabrechnung prüfen [Alt + F]' },
+    { action: 'printCustomer', actionId: 'crm360.customer.print', icon: <Printer size={14} />, label: 'Drucken', title: 'Kunden-Cockpit drucken [Alt + D]' },
   ],
   [
     { action: 'cleanupFilters', actionId: 'crm360.filters.reset', icon: <FilterX size={14} />, label: 'Filter rstd.', title: 'Subtabellen-Filter zurücksetzen' },
@@ -62,8 +64,8 @@ export default function CustomerActionBar({ onActionClick, isLoadingAI }: Custom
         return;
       }
       const map: Record<string, string> = {
-        o: 'openMaster', n: 'newContact', p: 'presents', t: 'logCall',
-        a: 'newOrder', f: 'billingCheck', k: 'neuroIntelligence',
+        o: 'openMaster', n: 'newCustomer', p: 'presents', t: 'logCall',
+        a: 'newOrder', f: 'billingCheck', d: 'printCustomer', k: 'neuroIntelligence',
       };
       if (e.altKey && map[e.key]) {
         e.preventDefault();
