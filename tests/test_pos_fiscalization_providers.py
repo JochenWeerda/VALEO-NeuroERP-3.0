@@ -93,6 +93,22 @@ def test_fiskaly_keeps_tse_and_dsfinvk_exports_separate(monkeypatch):
     assert any("/cash_registers/REGISTER-1/exports/EXP-dsfinvk" in path for path in paths)
 
 
+def test_fiskaly_optional_products_require_explicit_contracts(monkeypatch):
+    monkeypatch.setenv("FISKALY_API_KEY", "key")
+    monkeypatch.setenv("FISKALY_API_SECRET", "secret")
+    monkeypatch.setenv("FISKALY_SUBMIT_DE_CONTRACT_VERSION", "submission-v1")
+    monkeypatch.delenv("FISKALY_RECEIPT_CONTRACT_VERSION", raising=False)
+    monkeypatch.delenv("FISKALY_SAFE_CONTRACT_VERSION", raising=False)
+
+    products = {item.product: item for item in FiskalyProvider().product_readiness()}
+
+    assert products["submit_de"].ready is True
+    assert products["submit_de"].details["execution_enabled"] is False
+    assert products["receipt"].ready is False
+    assert any("Produktvertrag/Lizenz" in blocker for blocker in products["receipt"].blockers)
+    assert products["safe"].ready is False
+
+
 def test_swissbit_is_blocked_without_partner_contract(monkeypatch):
     monkeypatch.setenv("SWISSBIT_CLOUD_BASE_URL", "https://swissbit.example/api")
     monkeypatch.setenv("SWISSBIT_CLOUD_API_TOKEN", "token")

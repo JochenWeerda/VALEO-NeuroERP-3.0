@@ -14,6 +14,7 @@ from .contracts import (
     ExportCommand,
     FinishTransactionCommand,
     FiscalTransactionResult,
+    FiscalProductReadiness,
     ProviderReadiness,
     ProviderResult,
     StartTransactionCommand,
@@ -85,6 +86,57 @@ class FiskalyProvider(_HttpProvider):
             capabilities=["sign", "tse_export", "dsfinvk_closing", "dsfinvk_export"],
             details={"sign_base_url": self.sign_base, "dsfinvk_base_url": self.dsfinvk_base},
         )
+
+    def product_readiness(self) -> list[FiscalProductReadiness]:
+        common_blockers = []
+        if not self.api_key:
+            common_blockers.append("FISKALY_API_KEY fehlt")
+        if not self.api_secret:
+            common_blockers.append("FISKALY_API_SECRET fehlt")
+        products = (
+            (
+                "submit_de",
+                "SUBMIT DE",
+                "FISKALY_SUBMIT_DE_CONTRACT_VERSION",
+                "https://developer.fiskaly.com/api/sign-de/submission/v1",
+            ),
+            (
+                "receipt",
+                "RECEIPT",
+                "FISKALY_RECEIPT_CONTRACT_VERSION",
+                "https://developer.fiskaly.com/api/receipt/v1",
+            ),
+            (
+                "safe",
+                "SAFE",
+                "FISKALY_SAFE_CONTRACT_VERSION",
+                "https://developer.fiskaly.com/api/safe/v1",
+            ),
+        )
+        result: list[FiscalProductReadiness] = []
+        for product, label, contract_env, documentation_url in products:
+            contract_version = os.getenv(contract_env, "")
+            blockers = list(common_blockers)
+            if not contract_version:
+                blockers.append(f"{contract_env} fehlt; Produktvertrag/Lizenz nicht freigegeben")
+            result.append(
+                FiscalProductReadiness(
+                    product=product,  # type: ignore[arg-type]
+                    label=label,
+                    ready=not blockers,
+                    blockers=blockers,
+                    details={
+                        "contract_version": contract_version or None,
+                        "documentation_url": documentation_url,
+                        "execution_enabled": False,
+                        "execution_note": (
+                            "Live-Ausfuehrung benoetigt einen separat abgenommenen "
+                            "OpenAPI-Vertrag und wird nicht aus geratenen Payloads erzeugt."
+                        ),
+                    },
+                )
+            )
+        return result
 
     def _headers(self) -> dict[str, str]:
         if not self.readiness().ready:

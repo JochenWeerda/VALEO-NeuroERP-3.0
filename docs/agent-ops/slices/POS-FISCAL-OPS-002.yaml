@@ -1,7 +1,7 @@
 slice_id: POS-FISCAL-OPS-002
 title: POS Fiskalisierung Admin, Produkt-Gates und E2E
 owner: Codex
-status: reserved
+status: completed
 coordination: >-
   Folge-Slice zu POS-FISCAL-PROVIDERS-001 und konfliktfrei zu laufenden
   KIM-/CRM-Arbeiten. Keine Aenderungen unter
@@ -38,3 +38,18 @@ acceptance_criteria:
 risks:
   - Live-Credentials und Produktlizenzen sind externe Betriebs-Gates.
   - Swissbit Detailvertraege bleiben partnergeschuetzt.
+result: >-
+  Tenantbezogene Admin-Seite mit Typed Route, Provider-/DSFinV-K-Auswahl,
+  Kassen-, Client- und Terminalkontext sowie expliziter Simulationsfreigabe
+  umgesetzt. Readiness prueft nun auch Konfiguration und Kassenkontext.
+  Secret-artige Settings werden vor dem DB-Zugriff abgewiesen und beim Lesen
+  redigiert. SUBMIT DE, RECEIPT und SAFE besitzen getrennte, fail-closed
+  Vertrags-Gates ohne geratenen Live-Call. POS-Browsertests belegen Swissbit-
+  Auswahl bei separatem fiskaly DSFinV-K und den blockierten Tagesabschluss.
+checks:
+  - 11 fokussierte Backendtests bestanden
+  - Frontend TypeScript und ESLint gruen
+  - Playwright TypeScript gruen
+  - POS Playwright 2 Tests bestanden
+  - Produktions-Build gruen
+  - Typed Route generiert

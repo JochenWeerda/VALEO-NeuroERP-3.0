@@ -219,6 +219,15 @@ export const RAW_NAV_SECTIONS: RawNavItem[] = [
         mcp: { businessDomain: 'admin', scope: 'admin:read' },
       },
       {
+        id: 'admin-suite-pos-fiscalization',
+        label: 'POS-Fiskalisierung',
+        icon: ShieldCheck,
+        module: '@/pages/admin-suite/pos-fiscalization',
+        preferredPath: 'admin-suite/pos-fiscalization',
+        keywords: ['pos', 'kasse', 'tse', 'fiskaly', 'swissbit', 'dsfinv-k'],
+        mcp: { businessDomain: 'admin', scope: 'admin:read' },
+      },
+      {
         id: 'benutzer',
         label: 'Benutzer',
         icon: Users,

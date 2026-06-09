@@ -88,3 +88,11 @@ class ProviderReadiness(BaseModel):
     blockers: list[str] = Field(default_factory=list)
     capabilities: list[str] = Field(default_factory=list)
     details: dict[str, Any] = Field(default_factory=dict)
+
+
+class FiscalProductReadiness(BaseModel):
+    product: Literal["submit_de", "receipt", "safe"]
+    label: str
+    ready: bool
+    blockers: list[str] = Field(default_factory=list)
+    details: dict[str, Any] = Field(default_factory=dict)

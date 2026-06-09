@@ -54,7 +54,10 @@ async def put_config(
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
-    return _service(db, tenant_id).save_config(**payload.model_dump())
+    try:
+        return _service(db, tenant_id).save_config(**payload.model_dump())
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
 
 
 @router.get("/readiness", summary="Provider-Readiness pruefen")

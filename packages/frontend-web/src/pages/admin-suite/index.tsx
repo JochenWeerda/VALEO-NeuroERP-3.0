@@ -25,6 +25,7 @@ const CARD_LINKS: Record<string, string | null> = {
   migration: '/admin-suite/migration',
   security: '/admin-suite/security',
   connectors: '/admin-suite/connectors',
+  pos_fiscalization: '/admin-suite/pos-fiscalization',
   devices: '/admin-suite/devices',
   compliance: '/admin-suite/compliance',
   backup_restore: '/admin-suite/operations',

@@ -46,6 +46,11 @@
       "source": "auto"
     },
     {
+      "module": "@/pages/admin-suite/pos-fiscalization",
+      "path": "admin-suite/pos-fiscalization",
+      "source": "auto"
+    },
+    {
       "module": "@/pages/admin-suite/security",
       "path": "admin-suite/security",
       "source": "auto"
