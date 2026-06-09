@@ -1,16 +1,40 @@
 # Active Workboard
 
-Stand: `2026-06-07`
+Stand: `2026-06-09`
+
+## CRM360-MBT-005
+
+**Von:** Codex
+**Owner:** Codex
+**Stand:** reserviert 2026-06-09
+**Ziel des Slices:** Den modellbasierten CRM360-Klickvertrag nach dem KIM-Designsystem-Umbau vollstaendig erneut ausfuehren und alle Regressionen bei Buttons, Tabs, CRUD, fachlichen Zielmasken, Entity-Kontext, 404-/Console-Fehlern und Browser-Zurueck beheben.
+**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/agent-ops/slices/CRM360-MBT-005.yaml`, CRM360-QA-Dokumentation unter `docs/quality-assurance/`, CRM360-Spezifikationen und Hilfen unter `playwright-tests/specs/crm/` und `playwright-tests/helpers/` sowie nur nachgewiesene Verdrahtungs- oder Selektorfixes unter `packages/frontend-web/src/pages/crm/kim/**`.
+**Abnahmekriterien:** Die vollstaendige CRM360- und Revenue-Handover-Playwright-Suite laeuft gegen den aktuellen KIM-Stand; alle vertraglich erfassten Aktionen sind sichtbar und klickbar; CRUD-Requests, Zielroute, Hauptinhalt und Kunden-/Belegkontext stimmen; Browser-Zurueck liefert CRM360 ohne 404; keine neuen Console- oder Request-Fehler; Typechecks, fokussierter Lint, Build und Governance sind gruen.
+**Offene Risiken:** Der Playwright-Global-Setup kann mit bereits laufenden lokalen Servern kollidieren. Selektoren duerfen nur stabilisiert werden, wenn die fachliche Aktion unveraendert bleibt; echte Verdrahtungsfehler werden im KIM-Code behoben und nicht durch nachsichtige Tests verdeckt.
+
+## KIM-DS-001
+
+**Von:** Claude
+**Owner:** Claude
+**Stand:** abgeschlossen 2026-06-09
+**Ziel des Slices:** Das unter `/crm` fuehrende KIM-360-Cockpit von der portierten systemERP-L3-Terminal-Optik vollstaendig auf das VALEO-Designsystem umbauen (DS-Komponenten, Semantik-Farbtokens, Dark-Mode, Dialog-/Toolbar-Muster) und die wahrgenommene Ladeperformance der grossen Debitorenliste reduzieren.
+**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/agent-ops/slices/KIM-DS-001.yaml`, `packages/frontend-web/package.json`, `packages/frontend-web/src/pages/crm/kim/index.tsx` und alle `packages/frontend-web/src/pages/crm/kim/components/*.tsx`.
+**Abnahmekriterien:** Keine `font-mono`/`uppercase`-Terminal-Optik und keine hartkodierten Hex-Farben mehr; alle Flaechen nutzen DS-Semantik-Tokens und Dark-Mode rendert korrekt; Raw-Buttons/Inputs/Selects/Textareas/Modals durch `Button`/`Input`/`NativeSelect`/`Textarea`/`Dialog` ersetzt; mutierende Aktionen mit Submit-Guard + Disabled + Toast; alle `data-action-id` und Test-Selektoren identisch zu HEAD; Debitorenliste rendert nur ein begrenztes DOM-Fenster; eslint clean, tsc 0 Fehler, Screenshot hell+dunkel ok.
+**Offene Risiken:** Praesentations-Refactor ueber 14 Dateien — Test-Selektoren des model-based CRM360-Tests duerfen nicht brechen. Die Cold-Start-Langsamkeit ist Vite-Dev-Erstaufbau (im Prod-Build irrelevant), kein App-Bug.
+**Ergebnis:** Alle 14 KIM-Komponenten auf das VALEO-Designsystem umgebaut (~250x `font-mono`/`uppercase` entfernt, hunderte Hex-Farben → DS-Tokens, Dark-Mode funktioniert, DS-Primitive durchgaengig inkl. `Dialog`/`Progress`/`Skeleton`/`Badge`, Submit-Guards an Master-Edit + Quick-Call). Alle 12 `data-action-id` und Schluessel-IDs identisch zu HEAD. Debitorenliste rendert ein 80er-Fenster (462 total → 80 im DOM, „weitere anzeigen") bei voll erhaltener Suche/Filter/Tastatur-Navigation. `package.json` `predev`/`prebuild`/`pretype-check`/`check:navigation-targets` von `pnpm` auf `npm run routes:generate` korrigiert (Container hat kein pnpm → Exit 127).
+**Checks:** `eslint` (`--max-warnings 0`) clean; `tsc --noEmit` 0 Fehler projektweit; Render-Fenster verifiziert (total=462, rendered=80, load-more=1); Dark-Mode-Screenshot ok. **Follow-up:** model-based Suite `playwright-tests/specs/crm/crm360-model-based.spec.ts` (Global-Setup spawnt eigene Server → lokaler Port-Konflikt mit dem laufenden Container) sowie optionale Server-seitige Kundensuche bei stark wachsendem Kundenstamm.
 
 ## CRM360-MBT-004
 
 **Von:** Codex
 **Owner:** Codex
-**Stand:** reserviert 2026-06-09
+**Stand:** abgeschlossen 2026-06-09
 **Ziel des Slices:** Den CRM360-Revenue-Handover um den fachlichen Abschluss Rechnung -> Buchung -> offener Posten erweitern und gegen reale Backend-Vertraege validieren. Der Nachweis muss tenant-isoliert, revisionssicher und ohne hartes Loeschen gebuchter Finanzdaten auskommen.
-**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/agent-ops/slices/CRM360-MBT-004.yaml`, relevante CRM360-/OTC-QA-Dokumentation, neue fokussierte UAT-Hilfen und Tests unter `scripts/uat/` und `tests/` sowie nur die fuer Docflow-Posting, Debitoren-OP, Storno und tenant-isolierte Finanzvertraege zwingend erforderlichen Backenddateien.
+**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/agent-ops/slices/CRM360-MBT-004.yaml`, relevante CRM360-/OTC-QA-Dokumentation, `scripts/uat/crm360_revenue_handover_uat.py`, fokussierte Tests unter `tests/`, `app/services/docflow_service.py`, `app/services/sales_posting_service.py`, `app/services/finance_transaction_service.py`, `app/infrastructure/models/journal.py` und `app/api/v1/endpoints/finance_invoices.py`.
 **Abnahmekriterien:** Ein realer oder explizit gegateter UAT weist Rechnung, Posting und Debitoren-OP samt Kunden-, Betrag-, Beleg- und Tenant-Bezug nach; Wiederholung ist idempotent; gebuchte Daten werden nur ueber fachliche Kompensation/Storno behandelt; fehlende Kontierung oder Finanzkonfiguration wird als klarer Blocker ausgewiesen; Backendtests, Live-UAT und Governance sind gruen.
 **Offene Risiken:** Posting kann Kontenplan, Geschaeftsjahr, Steuerlogik und Debitorenkonto voraussetzen. Falls kein revisionssicherer Kompensationsvertrag existiert, darf der persistente Lauf nicht buchen und muss stattdessen das fehlende Gate belastbar dokumentieren.
+**Ergebnis:** Docflow-Ausgangsrechnungen erzeugen nun ueber den gemeinsamen Sales-Posting-Service eine gebuchte, ausgeglichene JournalEntry und einen Debitoren-OP. Wiederholung mit gleichem Idempotenzschluessel ist stabil; Storno erzeugt eine GoBD-Gegenbuchung, setzt Original und Docflow-Beleg auf `reversed` und schliesst den OP als `storniert` mit Rest `0`. Auch die produktiven Finance-Invoice-Call-Sites delegieren an denselben Kern. Behoben wurden fehlende Journal-Zeilennummern und kanonische Betragsfelder, Kontonummer-zu-Konto-ID-Aufloesung, der Konflikt zwischen global eindeutigen Kontonummern und tenant-spezifischer Suche sowie freie technische Akteure in einem User-FK-Feld.
+**Checks:** Finanz-Live-UAT `status=passed` mit erhaltener reversierter Evidenzkette; Original- und Gegenbuchung jeweils Soll=Haben `20,00 EUR`, Hashwerte vorhanden, OP `storniert/offen=0`, keine verwaisten Sales-Invoice-Drafts; 91 fokussierte Backendtests, Python-Compile und Governance bestanden.
 
 ## CRM360-MBT-003
 

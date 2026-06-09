@@ -1,0 +1,34 @@
+slice_id: CRM360-MBT-004
+title: CRM360 Invoice Posting and Open Item UAT
+owner: Codex
+status: completed
+goal: >-
+  Den CRM360-Revenue-Handover um Rechnung, Hauptbuchbuchung, Debitoren-OP
+  und revisionssichere Gegenbuchung erweitern.
+file_ownership:
+  - docs/agent-ops/active-workboard.md
+  - docs/agent-ops/slices/CRM360-MBT-004.yaml
+  - docs/quality-assurance/crm360-revenue-handover-click-test-2026-06-08.md
+  - app/api/v1/endpoints/finance_invoices.py
+  - app/infrastructure/models/journal.py
+  - app/services/docflow_service.py
+  - app/services/finance_transaction_service.py
+  - app/services/sales_posting_service.py
+  - scripts/uat/crm360_revenue_handover_uat.py
+  - tests/test_crm360_finance_handover.py
+  - tests/test_finance_transaction_service.py
+acceptance_criteria:
+  - Docflow-Rechnungsposting erzeugt eine gebuchte und ausgeglichene JournalEntry.
+  - Ein tenant-bezogener Debitoren-OP wird idempotent erzeugt oder aktualisiert.
+  - Wiederholung mit demselben Idempotenzschluessel erzeugt keine Dubletten.
+  - Storno erzeugt eine Gegenbuchung und schliesst den OP ohne Hard-Delete.
+  - Der Finanz-UAT bewahrt die reversierte Evidenzkette.
+  - Backendtests, Compile, Live-UAT und Governance sind gruen.
+risks:
+  - Produktive Konten- und Steuermappings benoetigen weiterhin fachliche Freigabe.
+  - Reversierte UAT-Buchungen bleiben absichtlich als Auditnachweis in der Dev-Datenbank.
+result: >-
+  Rechnung, Journal und Debitoren-OP sind ueber einen gemeinsamen
+  Sales-Posting-Service verbunden. Der Live-UAT erzeugte und stornierte eine
+  Ausgangsrechnung fachlich korrekt; Soll/Haben, GoBD-Hashkette, Kundenbezug,
+  Idempotenz und OP-Restbetrag wurden direkt in der Datenbank validiert.

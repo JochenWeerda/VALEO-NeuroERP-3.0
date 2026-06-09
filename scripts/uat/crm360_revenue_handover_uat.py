@@ -164,7 +164,55 @@ def fetch_docflow_header(doc_id: str) -> dict[str, Any] | None:
         return dict(row) if row else None
 
 
-def run() -> dict[str, Any]:
+def fetch_finance_evidence(invoice_number: str) -> dict[str, Any]:
+    with SessionLocal() as verification_db:
+        journal = verification_db.execute(
+            text(
+                """
+                SELECT id, status, total_debit, total_credit, reversed_entry_id
+                FROM domain_erp.journal_entries
+                WHERE tenant_id = :tenant_id
+                  AND source = 'sales_invoice'
+                  AND (document_number = :invoice_number OR reference = :invoice_number)
+                ORDER BY created_at ASC
+                LIMIT 1
+                """
+            ),
+            {"tenant_id": TENANT_ID, "invoice_number": invoice_number},
+        ).mappings().first()
+        open_item = verification_db.execute(
+            text(
+                """
+                SELECT id, op_status, betrag, open_amount, offen, kunde_id
+                FROM domain_erp.offene_posten
+                WHERE tenant_id = :tenant_id
+                  AND rechnungsnr = :invoice_number
+                  AND konto_typ = 'debitoren'
+                LIMIT 1
+                """
+            ),
+            {"tenant_id": TENANT_ID, "invoice_number": invoice_number},
+        ).mappings().first()
+        reversal = None
+        if journal and journal.get("reversed_entry_id"):
+            reversal = verification_db.execute(
+                text(
+                    """
+                    SELECT id, status, total_debit, total_credit, reversed_entry_id
+                    FROM domain_erp.journal_entries
+                    WHERE tenant_id = :tenant_id AND id = :id
+                    """
+                ),
+                {"tenant_id": TENANT_ID, "id": journal["reversed_entry_id"]},
+            ).mappings().first()
+        return {
+            "journal": dict(journal) if journal else None,
+            "open_item": dict(open_item) if open_item else None,
+            "reversal": dict(reversal) if reversal else None,
+        }
+
+
+def run(include_posting: bool = False) -> dict[str, Any]:
     marker = datetime.now(timezone.utc).strftime("%Y%m%d%H%M%S")
     ids: dict[str, str] = {
         "customer_id": f"crm360-uat-customer-{marker}",
@@ -174,6 +222,7 @@ def run() -> dict[str, Any]:
     offer_number = f"UAT-ANG-{marker}"
 
     db = SessionLocal()
+    preserve_financial_evidence = False
     try:
         seed_customer(db, ids["customer_id"], customer_number, customer_name)
         offer = request_json(
@@ -238,7 +287,7 @@ def run() -> dict[str, Any]:
         assert_equal(invoice["customer_id"], ids["customer_id"], "invoice customer")
         assert_equal(invoice["items"][0]["article_number"], "UAT-SAAT-360", "invoice item article")
 
-        result = {
+        result: dict[str, Any] = {
             "status": "passed",
             "tenant_id": TENANT_ID,
             "offer_id": ids["offer_id"],
@@ -247,6 +296,64 @@ def run() -> dict[str, Any]:
             "invoice_doc_id": ids["invoice_doc_id"],
             "invoice_number": invoice["doc_number"],
         }
+        if include_posting:
+            post_key = f"crm360-uat-post-{marker}"
+            post_result = request_json(
+                "POST",
+                f"/api/v1/docflow/{ids['invoice_doc_id']}/post?tenant_id={TENANT_ID}",
+                {
+                    "idempotency_key": post_key,
+                    "posted_by": "crm360-uat",
+                },
+            )
+            preserve_financial_evidence = True
+            post_retry = request_json(
+                "POST",
+                f"/api/v1/docflow/{ids['invoice_doc_id']}/post?tenant_id={TENANT_ID}",
+                {
+                    "idempotency_key": post_key,
+                    "posted_by": "crm360-uat",
+                },
+            )
+            assert_equal(post_retry["idempotent_hit"], True, "posting idempotency")
+            posted = fetch_finance_evidence(invoice["doc_number"])
+            if not posted["journal"] or not posted["open_item"]:
+                raise UatFailure("posting did not persist journal entry and debtor open item")
+            assert_equal(posted["journal"]["status"], "posted", "journal status after posting")
+            assert_equal(posted["journal"]["total_debit"], posted["journal"]["total_credit"], "journal balance")
+            assert_equal(posted["open_item"]["op_status"], "offen", "open item status after posting")
+            assert_equal(posted["open_item"]["kunde_id"], ids["customer_id"], "open item customer")
+            assert_equal(float(posted["open_item"]["offen"]), 20.0, "open item amount")
+
+            reverse_result = request_json(
+                "POST",
+                f"/api/v1/docflow/{ids['invoice_doc_id']}/reverse?tenant_id={TENANT_ID}",
+                {
+                    "idempotency_key": f"crm360-uat-reverse-{marker}",
+                    "reason": "CRM360 UAT fachliche Kompensation",
+                    "reversed_by": "crm360-uat",
+                },
+            )
+            reversed_evidence = fetch_finance_evidence(invoice["doc_number"])
+            assert_equal(reversed_evidence["journal"]["status"], "reversed", "journal status after reversal")
+            assert_equal(reversed_evidence["reversal"]["status"], "posted", "reversal journal status")
+            assert_equal(reversed_evidence["open_item"]["op_status"], "storniert", "open item status after reversal")
+            assert_equal(float(reversed_evidence["open_item"]["offen"]), 0.0, "open item residual amount")
+            reversed_invoice = request_json(
+                "GET",
+                f"/api/v1/docflow/{ids['invoice_doc_id']}?tenant_id={TENANT_ID}",
+            )
+            assert_equal(reversed_invoice["status"], "reversed", "docflow invoice status after reversal")
+            result["posting"] = {
+                "posting_id": post_result["posting_id"],
+                "journal_entry_id": post_result["payload"]["journal_entry_id"],
+                "open_item_id": post_result["payload"]["open_item_id"],
+                "reversal_posting_id": reverse_result["posting_id"],
+                "reversal_entry_id": reverse_result["payload"]["reversal_entry_id"],
+                "evidence": "preserved_reversed_financial_chain",
+            }
+            return result
+
         request_json(
             "DELETE",
             f"/api/v1/docflow/{ids['invoice_doc_id']}?tenant_id={TENANT_ID}",
@@ -258,13 +365,19 @@ def run() -> dict[str, Any]:
             raise UatFailure("invoice draft cleanup did not set deleted_at")
         return result
     finally:
-        cleanup(db, ids)
+        if not preserve_financial_evidence:
+            cleanup(db, ids)
         db.close()
 
 
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--execute", action="store_true", help="Run against the configured API and database.")
+    parser.add_argument(
+        "--include-posting",
+        action="store_true",
+        help="Post and reverse the invoice; preserves the reversed financial evidence chain.",
+    )
     args = parser.parse_args()
     if not args.execute:
         print("SKIPPED: pass --execute to run the persistent CRM360 revenue UAT.")
@@ -272,7 +385,7 @@ def main() -> int:
     if settings.APP_ENV.lower() in {"prod", "production"}:
         print("REFUSED: persistent UAT must not run in production.", file=sys.stderr)
         return 2
-    result = run()
+    result = run(include_posting=args.include_posting)
     print(json.dumps(result, indent=2, sort_keys=True))
     return 0
 

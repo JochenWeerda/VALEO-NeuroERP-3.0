@@ -4,19 +4,19 @@
  */
 
 import React, { useEffect } from 'react';
-import { 
-  FolderOpen, 
-  FilePlus, 
-  Info, 
-  Gift, 
-  PhoneCall, 
-  Mail, 
-  FileSignature, 
-  Receipt, 
-  RefreshCw, 
-  FilterX, 
-  Trash2, 
-  ArrowUpRight 
+import { Button } from '@/components/ui/button';
+import { Separator } from '@/components/ui/separator';
+import {
+  FolderOpen,
+  FilePlus,
+  Info,
+  Gift,
+  PhoneCall,
+  Mail,
+  FileSignature,
+  Receipt,
+  RefreshCw,
+  FilterX,
 } from 'lucide-react';
 
 interface CustomerActionBarProps {
@@ -24,162 +24,92 @@ interface CustomerActionBarProps {
   isLoadingAI?: boolean;
 }
 
+interface ActionDef {
+  action: string;
+  actionId: string;
+  icon: React.ReactNode;
+  label: string;
+  title: string;
+}
+
+const ACTION_GROUPS: ActionDef[][] = [
+  [
+    { action: 'openMaster', actionId: 'crm360.master.open', icon: <FolderOpen size={14} />, label: 'Öffnen', title: 'Adress-Stammdaten öffnen [Alt + O]' },
+    { action: 'newContact', actionId: 'crm360.activity.create', icon: <FilePlus size={14} />, label: 'Neu', title: 'Neuen Korrespondenzantrag anlegen [Alt + N]' },
+    { action: 'infoPopup', actionId: 'crm360.customer.info', icon: <Info size={14} />, label: 'Information', title: 'Mandanten-Details aufrufen' },
+    { action: 'presents', actionId: 'crm360.presents.open', icon: <Gift size={14} />, label: 'Präsente', title: 'Werbung / Geschenke-PR an Kunden [Alt + P]' },
+  ],
+  [
+    { action: 'logCall', actionId: 'crm360.call.create', icon: <PhoneCall size={14} />, label: 'Telefon', title: 'Telefon-Gespräch sofort protokollieren [Alt + T]' },
+    { action: 'sendEmail', actionId: 'crm360.email.open', icon: <Mail size={14} />, label: 'E-Mail', title: 'E-Mail-Programm mit Kundenadresse öffnen' },
+  ],
+  [
+    { action: 'newOrder', actionId: 'crm360.offer.create', icon: <FileSignature size={14} />, label: 'Ang./Auf.', title: 'Neues Agrarangebot/Auftrag initiieren [Alt + A]' },
+    { action: 'billingCheck', actionId: 'crm360.receivables.open', icon: <Receipt size={14} />, label: 'Faktur', title: 'Finanzposten und Debitorenabrechnung prüfen [Alt + F]' },
+  ],
+  [
+    { action: 'cleanupFilters', actionId: 'crm360.filters.reset', icon: <FilterX size={14} />, label: 'Filter rstd.', title: 'Subtabellen-Filter zurücksetzen' },
+  ],
+];
+
 export default function CustomerActionBar({ onActionClick, isLoadingAI }: CustomerActionBarProps) {
-  
+
   // Attach global keyboard shortcuts matching classic ERP controls for power-users
   useEffect(() => {
     const handleShortcuts = (e: KeyboardEvent) => {
-      // Avoid firing when typing inside forms
       const node = e.target as HTMLElement;
       if (node?.tagName === 'INPUT' || node?.tagName === 'TEXTAREA' || node?.contentEditable === 'true') {
         return;
       }
-
-      if (e.altKey && e.key === 'o') {
+      const map: Record<string, string> = {
+        o: 'openMaster', n: 'newContact', p: 'presents', t: 'logCall',
+        a: 'newOrder', f: 'billingCheck', k: 'neuroIntelligence',
+      };
+      if (e.altKey && map[e.key]) {
         e.preventDefault();
-        onActionClick('openMaster');
-      } else if (e.altKey && e.key === 'n') {
-        e.preventDefault();
-        onActionClick('newContact');
-      } else if (e.altKey && e.key === 'p') {
-        e.preventDefault();
-        onActionClick('presents');
-      } else if (e.altKey && e.key === 't') {
-        e.preventDefault();
-        onActionClick('logCall');
-      } else if (e.altKey && e.key === 'a') {
-        e.preventDefault();
-        onActionClick('newOrder');
-      } else if (e.altKey && e.key === 'f') {
-        e.preventDefault();
-        onActionClick('billingCheck');
-      } else if (e.altKey && e.key === 'k') {
-        e.preventDefault();
-        onActionClick('neuroIntelligence');
+        onActionClick(map[e.key]);
       }
     };
-
     window.addEventListener('keydown', handleShortcuts);
     return () => window.removeEventListener('keydown', handleShortcuts);
   }, [onActionClick]);
 
   return (
-    <div className="bg-[#cbd5e1] border-b border-[#94a3b8] px-3.5 py-1 flex items-center justify-between select-none" id="customer-action-bar">
-      
-      {/* Group left - main operations */}
+    <div className="flex items-center justify-between gap-2 flex-wrap rounded-md border border-border bg-muted/40 px-2 py-1.5" id="customer-action-bar">
+
       <div className="flex flex-wrap items-center gap-1">
-        <button
-          onClick={() => onActionClick('openMaster')}
-          data-action-id="crm360.master.open"
-          className="flex items-center gap-1.5 px-3 py-1 bg-[#f1f5f9] hover:bg-white text-gray-800 border border-[#94a3b8] rounded-sm font-mono text-[10px] font-bold shadow-sm active:bg-gray-100 cursor-pointer"
-          title="Adress-Stammdaten öffnen [Alt + O]"
-        >
-          <FolderOpen size={11} className="text-[#006633]" />
-          <span>Öffnen</span>
-        </button>
-
-        <button
-          onClick={() => onActionClick('newContact')}
-          data-action-id="crm360.activity.create"
-          className="flex items-center gap-1.5 px-3 py-1 bg-[#f1f5f9] hover:bg-white text-gray-800 border border-[#94a3b8] rounded-sm font-mono text-[10px] font-bold shadow-sm active:bg-gray-100 cursor-pointer"
-          title="Neuen Korrespondenzantrag anlegen [Alt + N]"
-        >
-          <FilePlus size={11} className="text-blue-600" />
-          <span>Neu</span>
-        </button>
-
-        <button
-          onClick={() => onActionClick('infoPopup')}
-          data-action-id="crm360.customer.info"
-          className="flex items-center gap-1.5 px-3 py-1 bg-[#f1f5f9] hover:bg-white text-gray-800 border border-[#94a3b8] rounded-sm font-mono text-[10px] font-bold shadow-sm active:bg-gray-100 cursor-pointer"
-          title="Mandanten Details aufrufen"
-        >
-          <Info size={11} className="text-sky-700" />
-          <span>Information</span>
-        </button>
-
-        <button
-          onClick={() => onActionClick('presents')}
-          data-action-id="crm360.presents.open"
-          className="flex items-center gap-1.5 px-3 py-1 bg-[#f1f5f9] hover:bg-white text-gray-800 border border-[#94a3b8] rounded-sm font-mono text-[10px] font-bold shadow-sm active:bg-gray-100 cursor-pointer"
-          title="Werbung / Geschenke-PR an Kunden [Alt + P]"
-        >
-          <Gift size={11} className="text-purple-600" />
-          <span>Präsente</span>
-        </button>
-
-        <span className="h-4 w-[1px] bg-[#94a3b8] mx-1"></span>
-
-        <button
-          onClick={() => onActionClick('logCall')}
-          data-action-id="crm360.call.create"
-          className="flex items-center gap-1.5 px-3 py-1 bg-[#f1f5f9] hover:bg-white text-gray-800 border border-[#94a3b8] rounded-sm font-mono text-[10px] font-bold shadow-sm active:bg-gray-100 cursor-pointer"
-          title="Telefon-Gespräch sofort protokollieren [Alt + T]"
-        >
-          <PhoneCall size={11} className="text-amber-600" />
-          <span>Telefon</span>
-        </button>
-
-        <button
-          onClick={() => onActionClick('sendEmail')}
-          data-action-id="crm360.email.open"
-          className="flex items-center gap-1.5 px-3 py-1 bg-[#f1f5f9] hover:bg-white text-gray-800 border border-[#94a3b8] rounded-sm font-mono text-[10px] font-bold shadow-sm active:bg-gray-100 cursor-pointer"
-          title="E-Mail-Programm mit Kundenadresse öffnen"
-        >
-          <Mail size={11} className="text-teal-600" />
-          <span>E-Mail</span>
-        </button>
-
-        <span className="h-4 w-[1px] bg-[#94a3b8] mx-1"></span>
-
-        <button
-          onClick={() => onActionClick('newOrder')}
-          data-action-id="crm360.offer.create"
-          className="flex items-center gap-1.5 px-3 py-1 bg-[#f1f5f9] hover:bg-white text-gray-800 border border-[#94a3b8] rounded-sm font-mono text-[10px] font-bold shadow-sm active:bg-gray-100 cursor-pointer"
-          title="Neues Agrarangebot/Auftrag initiieren [Alt + A]"
-        >
-          <FileSignature size={11} className="text-emerald-700" />
-          <span>Ang./Auf.</span>
-        </button>
-
-        <button
-          onClick={() => onActionClick('billingCheck')}
-          data-action-id="crm360.receivables.open"
-          className="flex items-center gap-1.5 px-3 py-1 bg-[#f1f5f9] hover:bg-white text-gray-800 border border-[#94a3b8] rounded-sm font-mono text-[10px] font-bold shadow-sm active:bg-gray-100 cursor-pointer"
-          title="Finanzposten und Debitorenabrechnung checken [Alt + F]"
-        >
-          <Receipt size={11} className="text-red-600" />
-          <span>Faktur</span>
-        </button>
-
-        <span className="h-4 w-[1px] bg-[#94a3b8] mx-1"></span>
-
-        <button
-          onClick={() => onActionClick('cleanupFilters')}
-          data-action-id="crm360.filters.reset"
-          className="flex items-center gap-1.5 px-2.5 py-1 bg-[#f1f5f9] hover:bg-white text-gray-700 border border-[#94a3b8] rounded-sm font-mono text-[10px] font-bold shadow-sm active:bg-gray-100 cursor-pointer"
-          title="Subtabellen Filter zurücksetzen"
-        >
-          <FilterX size={11} className="text-gray-500" />
-          <span>Filter rstd.</span>
-        </button>
+        {ACTION_GROUPS.map((group, gi) => (
+          <React.Fragment key={gi}>
+            {gi > 0 && <Separator orientation="vertical" className="h-5 mx-1" />}
+            {group.map((a) => (
+              <Button
+                key={a.action}
+                variant="outline"
+                size="sm"
+                onClick={() => onActionClick(a.action)}
+                data-action-id={a.actionId}
+                title={a.title}
+                className="gap-1.5"
+              >
+                <span className="text-primary">{a.icon}</span>
+                {a.label}
+              </Button>
+            ))}
+          </React.Fragment>
+        ))}
       </div>
 
-      {/* Group right - neuroAI prompt calling shortcut */}
-      <div>
-        <button
-          onClick={() => onActionClick('neuroIntelligence')}
-          data-action-id="crm360.ai.summary"
-          disabled={isLoadingAI}
-          className={`flex items-center gap-1.5 px-3 py-1 bg-gradient-to-r from-emerald-800 to-teal-800 text-white rounded-sm font-mono text-[10px] font-extrabold shadow-sm active:opacity-90 cursor-pointer border border-[#064e3b] ${
-            isLoadingAI ? 'animate-pulse opacity-70' : 'hover:from-emerald-950 hover:to-teal-950'
-          }`}
-          title="Intelligente Empfehlung & KI Dossier generieren [Alt + K]"
-        >
-          <RefreshCw size={11} className={isLoadingAI ? 'animate-spin' : ''} />
-          <span>NeuroAI® [Alt+K]</span>
-        </button>
-      </div>
+      <Button
+        size="sm"
+        onClick={() => onActionClick('neuroIntelligence')}
+        data-action-id="crm360.ai.summary"
+        disabled={isLoadingAI}
+        title="Intelligente Empfehlung & KI-Dossier generieren [Alt + K]"
+        className="gap-1.5"
+      >
+        <RefreshCw size={14} className={isLoadingAI ? 'animate-spin' : ''} />
+        NeuroAI [Alt+K]
+      </Button>
 
     </div>
   );

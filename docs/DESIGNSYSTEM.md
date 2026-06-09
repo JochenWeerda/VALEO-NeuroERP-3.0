@@ -60,6 +60,7 @@ Diese Seiten bzw. Seitenfamilien sind jetzt bereits an den neuen DS-Rahmen anges
 - alle Seiten, die `OverviewPage`, `ObjectPage`, `ListReport` oder `Wizard` verwenden
 - `packages/frontend-web/src/pages/sales/orders-modern.tsx`
 - `packages/frontend-web/src/pages/controlling/benchmark-cockpit.tsx`
+- `packages/frontend-web/src/pages/crm/kim/**` — KIM 360°-Cockpit (`/crm`): von portierter systemERP-L3-Terminal-Optik vollstaendig auf DS-Tokens + DS-Primitive (`Button`/`Input`/`NativeSelect`/`Textarea`/`Badge`/`Progress`/`Skeleton`/`Dialog`) umgebaut, Dark-Mode-faehig (Slice `KIM-DS-001`)
 
 ## Designsystem-Status
 

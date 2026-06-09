@@ -13,6 +13,7 @@ from sqlalchemy.orm import Session
 
 from app.core.exceptions import ConflictError, EntityNotFoundError, ValidationFailedError
 from app.services.customer_sales_eligibility import assert_customer_allowed_for_invoice
+from app.services.sales_posting_service import SalesPostingService
 
 # ── document-type constants ───────────────────────────────────────────────────
 
@@ -844,11 +845,29 @@ class DocflowService:
             raise EntityNotFoundError("DocflowDocument", doc_id)
         if payload.expected_version and int(header.get("version") or 1) != payload.expected_version:
             raise ConflictError("Version conflict")
+        if str(header.get("status")) == "posted":
+            raise ConflictError("Document already posted")
         if str(header.get("status")) in {"reversed", "cancelled"}:
             raise ValidationFailedError("Document cannot be posted in current status")
         if str(header.get("doc_type") or "") in POS_TYPES:
             if not self.fetch_pos_compliance(doc_id):
                 raise ValidationFailedError("POS posting requires POS/TSE compliance payload")
+        finance_result: dict[str, str] = {}
+        if str(header.get("doc_type") or "") == "sales_invoice":
+            customer_id = str(header.get("customer_id") or "")
+            if not customer_id:
+                raise ValidationFailedError("Sales invoice posting requires customer_id")
+            finance_result = SalesPostingService(
+                self.db, self.tenant_id
+            ).post_ausgangsrechnung_with_op(
+                invoice_number=str(header["doc_number"]),
+                invoice_date=header.get("document_date"),
+                customer_id=customer_id,
+                net_amount=Decimal(str(header.get("total_net") or 0)),
+                tax_amount=Decimal(str(header.get("total_tax") or 0)),
+                gross_amount=Decimal(str(header.get("total_gross") or 0)),
+                posted_by=payload.posted_by,
+            )
         posting_id = str(uuid4())
         outbox_event_id = self.upsert_outbox_event("docflow.document.posted", doc_id, {
             "doc_id": doc_id, "doc_type": header.get("doc_type"), "idempotency_key": payload.idempotency_key,
@@ -857,12 +876,13 @@ class DocflowService:
             text("""
                 INSERT INTO domain_docflow.document_postings
                 (id, tenant_id, header_id, posting_type, journal_entry_id, amount, currency, idempotency_key, outbox_event_id, posted_by, posted_at)
-                VALUES (:id, :tenant_id, :header_id, 'post', NULL, :amount, :currency, :idempotency_key, :outbox_event_id, :posted_by, NOW())
+                VALUES (:id, :tenant_id, :header_id, 'post', :journal_entry_id, :amount, :currency, :idempotency_key, :outbox_event_id, :posted_by, NOW())
             """),
             {
                 "id": posting_id, "tenant_id": self.tenant_id, "header_id": doc_id,
                 "amount": Decimal(str(header.get("total_gross") or 0)),
                 "currency": header.get("currency") or "EUR",
+                "journal_entry_id": finance_result.get("journal_entry_id"),
                 "idempotency_key": payload.idempotency_key, "outbox_event_id": outbox_event_id,
                 "posted_by": payload.posted_by,
             },
@@ -872,7 +892,8 @@ class DocflowService:
             {"id": doc_id, "tenant_id": self.tenant_id, "posting_date": payload.posting_date or date.today(), "updated_by": payload.posted_by},
         )
         response = {"command": "post", "source_doc_id": doc_id, "posting_id": posting_id, "status": "ok",
-                    "payload": {"outbox_event_id": outbox_event_id, "posting_date": str(payload.posting_date or date.today())}}
+                    "payload": {"outbox_event_id": outbox_event_id, "posting_date": str(payload.posting_date or date.today()),
+                                **finance_result}}
         self.store_idempotent_response("post", doc_id, payload.idempotency_key, response)
         self.best_effort_audit("docflow_post", "docflow_document", doc_id, response)
         self.db.commit()
@@ -889,6 +910,16 @@ class DocflowService:
             raise ConflictError("Version conflict")
         if str(header.get("status")) == "reversed":
             raise ConflictError("Document already reversed")
+        finance_result: dict[str, str] = {}
+        if str(header.get("doc_type") or "") == "sales_invoice":
+            if str(header.get("status")) != "posted":
+                raise ValidationFailedError("Only posted sales invoices can be reversed")
+            finance_result = SalesPostingService(
+                self.db, self.tenant_id
+            ).reverse_ausgangsrechnung(
+                invoice_number=str(header["doc_number"]),
+                reason=payload.reason,
+            )
         posting_id = str(uuid4())
         outbox_event_id = self.upsert_outbox_event("docflow.document.reversed", doc_id, {
             "doc_id": doc_id, "doc_type": header.get("doc_type"), "reason": payload.reason, "idempotency_key": payload.idempotency_key,
@@ -897,12 +928,13 @@ class DocflowService:
             text("""
                 INSERT INTO domain_docflow.document_postings
                 (id, tenant_id, header_id, posting_type, journal_entry_id, amount, currency, idempotency_key, outbox_event_id, posted_by, posted_at)
-                VALUES (:id, :tenant_id, :header_id, 'reverse', NULL, :amount, :currency, :idempotency_key, :outbox_event_id, :posted_by, NOW())
+                VALUES (:id, :tenant_id, :header_id, 'reverse', :journal_entry_id, :amount, :currency, :idempotency_key, :outbox_event_id, :posted_by, NOW())
             """),
             {
                 "id": posting_id, "tenant_id": self.tenant_id, "header_id": doc_id,
                 "amount": Decimal(str(header.get("total_gross") or 0)),
                 "currency": header.get("currency") or "EUR",
+                "journal_entry_id": finance_result.get("reversal_entry_id"),
                 "idempotency_key": payload.idempotency_key, "outbox_event_id": outbox_event_id,
                 "posted_by": payload.reversed_by,
             },
@@ -912,7 +944,8 @@ class DocflowService:
             {"id": doc_id, "tenant_id": self.tenant_id, "updated_by": payload.reversed_by},
         )
         response = {"command": "reverse", "source_doc_id": doc_id, "posting_id": posting_id, "status": "ok",
-                    "payload": {"reason": payload.reason, "outbox_event_id": outbox_event_id}}
+                    "payload": {"reason": payload.reason, "outbox_event_id": outbox_event_id,
+                                **finance_result}}
         self.store_idempotent_response("reverse", doc_id, payload.idempotency_key, response)
         self.best_effort_audit("docflow_reverse", "docflow_document", doc_id, response)
         self.db.commit()

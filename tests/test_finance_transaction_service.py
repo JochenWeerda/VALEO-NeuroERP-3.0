@@ -189,6 +189,12 @@ def test_create_persists_entry_and_lines():
 
     # entry + 2 lines added
     assert db.add.call_count == 3
+    first_line_kwargs = MockLine.call_args_list[0].kwargs
+    second_line_kwargs = MockLine.call_args_list[1].kwargs
+    assert first_line_kwargs["line_number"] == 1
+    assert first_line_kwargs["debit_amount"] == Decimal("100")
+    assert second_line_kwargs["line_number"] == 2
+    assert second_line_kwargs["credit_amount"] == Decimal("100")
     db.flush.assert_called_once()
     db.commit.assert_called_once()
 
@@ -242,11 +248,26 @@ def test_post_draft_entry():
     entry = _make_entry(status="draft")
     db = MagicMock()
     db.query.return_value.filter.return_value.first.return_value = entry
+    db.execute.return_value.first.return_value = ("user-1",)
     svc = FinanceTransactionService(db, TENANT)
     svc.post("e-001", posted_by="user-1")
     assert entry.status == "posted"
     assert entry.posted_by == "user-1"
     db.commit.assert_called_once()
+
+
+def test_post_ignores_unknown_user_fk():
+    entry = _make_entry(status="draft")
+    entry.posted_by = None
+    db = MagicMock()
+    db.query.return_value.filter.return_value.first.return_value = entry
+    db.execute.return_value.first.return_value = None
+    svc = FinanceTransactionService(db, TENANT)
+
+    svc.post("e-001", posted_by="technical-actor")
+
+    assert entry.status == "posted"
+    assert entry.posted_by is None
 
 
 def test_post_already_posted_raises():
