@@ -112,6 +112,54 @@ export async function markNotificationRead(id: string): Promise<CrmNotification>
   return (await apiClient.post<CrmNotification>(`${BASE}/notifications/${encodeURIComponent(id)}/read`, {})).data
 }
 
+// ── Kunden-Präsente (KIM-S3) ──────────────────────────────────────────────────
+export interface CustomerGift {
+  id: string
+  kunden_nr: string
+  contact_id?: string | null
+  year: number
+  gift_date?: string | null
+  occasion?: string | null
+  gift_name?: string | null
+  quantity: number
+  sales_rep?: string | null
+  operator?: string | null
+  representative_officer?: string | null
+  sequence_number?: number | null
+}
+
+export interface GiftInput {
+  year: number
+  date?: string
+  occasion?: string
+  contactId?: string
+  giftName?: string
+  quantity?: number
+  salesRepId?: string
+  operatorId?: string
+  representativeOfficerId?: string
+  sequenceNumber?: number
+}
+
+export async function fetchGifts(id: string, year?: number, contactId?: string): Promise<CustomerGift[]> {
+  const params: Record<string, unknown> = {}
+  if (year != null) params.year = year
+  if (contactId) params.contactId = contactId
+  return (await apiClient.get<CustomerGift[]>(`${BASE}/customers/${encodeURIComponent(id)}/gifts`, { params })).data
+}
+
+export async function createGift(id: string, gift: GiftInput): Promise<CustomerGift> {
+  return (await apiClient.post<CustomerGift>(`${BASE}/customers/${encodeURIComponent(id)}/gifts`, gift)).data
+}
+
+export async function updateGift(giftId: string, gift: GiftInput): Promise<CustomerGift> {
+  return (await apiClient.put<CustomerGift>(`${BASE}/gifts/${encodeURIComponent(giftId)}`, gift)).data
+}
+
+export async function deleteGift(giftId: string): Promise<void> {
+  await apiClient.delete(`${BASE}/gifts/${encodeURIComponent(giftId)}`)
+}
+
 export interface NeuroSummary {
   healthScore: number
   statusLabel: string
