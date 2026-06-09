@@ -11,7 +11,7 @@ import re
 import uuid
 from typing import Any, Optional
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 from sqlalchemy import text
 from sqlalchemy.orm import Session
@@ -103,6 +103,66 @@ def ack(call_id: str, db: Session = Depends(get_db), tenant_id: str = Depends(ge
     db.execute(
         text("UPDATE public.tapi_calls SET acked = TRUE, status = 'erledigt', updated_at = now() WHERE id = :id AND tenant_id = :t"),
         {"id": call_id, "t": tenant_id},
+    )
+    db.commit()
+    return {"ok": True}
+
+
+# ── Ausgehende Wahl (Click-to-Dial) ───────────────────────────────────────────
+# Das Cockpit fordert eine Wahl an; die lokale TAPI-Bridge pollt /dial/pending und
+# loest den realen Call aus. Ohne Bridge bleibt die Anforderung eine protokollierte
+# Absicht (graceful) — keine harte Hardware-Abhaengigkeit.
+class DialIn(BaseModel):
+    called: str
+    kunden_nr: Optional[str] = None
+    caller: Optional[str] = None
+
+
+@router.post("/dial", summary="Ausgehende Wahl anfordern (Click-to-Dial)")
+def dial(body: DialIn, db: Session = Depends(get_db), tenant_id: str = Depends(get_tenant_id)) -> dict[str, Any]:
+    if len(_norm_phone(body.called)) < 3:
+        raise HTTPException(status_code=422, detail="Ungueltige Zielrufnummer")
+    kunde_name: Optional[str] = None
+    if body.kunden_nr:
+        r = db.execute(
+            text("SELECT name1 FROM public.kunden WHERE kunden_nr = :k"), {"k": body.kunden_nr}
+        ).mappings().first()
+        kunde_name = r["name1"] if r else None
+    new_id = str(uuid.uuid4())
+    # acked=TRUE -> erscheint NICHT im Eingangs-Popup (/pending); richtung='aus'.
+    db.execute(
+        text(
+            "INSERT INTO public.tapi_calls (id, caller, called, richtung, kunden_nr, kunde_name, status, acked, tenant_id) "
+            "VALUES (:id, :caller, :called, 'aus', :knr, :kname, 'dial_requested', TRUE, :tid)"
+        ),
+        {
+            "id": new_id, "caller": body.caller, "called": body.called,
+            "knr": body.kunden_nr, "kname": kunde_name, "tid": tenant_id,
+        },
+    )
+    db.commit()
+    r = db.execute(text(f"SELECT {_COLS} FROM public.tapi_calls WHERE id = :id"), {"id": new_id}).mappings().first()
+    return _row(r)
+
+
+@router.get("/dial/pending", summary="Offene Wahl-Anforderungen (lokale Bridge)")
+def dial_pending(db: Session = Depends(get_db), tenant_id: str = Depends(get_tenant_id)) -> list[dict[str, Any]]:
+    rows = db.execute(
+        text(
+            f"SELECT {_COLS} FROM public.tapi_calls "
+            "WHERE tenant_id = :t AND richtung = 'aus' AND status = 'dial_requested' "
+            "ORDER BY created_at LIMIT 20"
+        ),
+        {"t": tenant_id},
+    ).mappings().all()
+    return [_row(r) for r in rows]
+
+
+@router.post("/dial/{call_id}/done", summary="Wahl ausgefuehrt quittieren")
+def dial_done(call_id: str, status: str = "dialed", db: Session = Depends(get_db), tenant_id: str = Depends(get_tenant_id)) -> dict[str, Any]:
+    db.execute(
+        text("UPDATE public.tapi_calls SET status = :s, acked = TRUE, updated_at = now() WHERE id = :id AND tenant_id = :t"),
+        {"s": status if status in {"dialed", "failed", "cancelled"} else "dialed", "id": call_id, "t": tenant_id},
     )
     db.commit()
     return {"ok": True}

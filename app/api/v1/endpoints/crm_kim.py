@@ -77,6 +77,10 @@ class ContactLog(BaseModel):
     date: str = ""
     completed: bool = False
     artKurzinfo: str = ""
+    art: Optional[str] = None          # Kontaktart: persoenlich/telefon/email/whatsapp
+    betreff: Optional[str] = None      # Betreffzeile (== kurzinfo)
+    kommentar: Optional[str] = None    # Freitext-Kommentar (== notiz)
+    ccIntern: Optional[str] = None     # interne Weiterleitung (Mitarbeiter/Abteilung)
     operator: str = ""
     reSubmissionDate: Optional[str] = None
     dispatcher: Optional[str] = None
@@ -338,7 +342,12 @@ def _log_from_row(r: dict, kunden_nr: str) -> ContactLog:
         direction=_direction(r.get("richtung")),
         date=str(r.get("created_at") or ""),
         completed=bool(r.get("erledigt")),
-        artKurzinfo=(f"{art}: {kurz}".strip(": ") if art or kurz else ""),
+        # Betreff/Kurzinfo bleibt die Haupt-Anzeige; die Kontaktart wird separat geführt.
+        artKurzinfo=kurz or (art if art else ""),
+        art=art or None,
+        betreff=kurz or None,
+        kommentar=r.get("notiz") or None,
+        ccIntern=r.get("weiterleitung_an"),
         operator=r.get("bediener") or "",
         reSubmissionDate=str(r["wiedervorlage"]) if r.get("wiedervorlage") else None,
         dispatcher=r.get("weiterleitung_an"),
@@ -356,13 +365,21 @@ def list_logs(
     return [_log_from_row(r, kunden_nr) for r in svc.list_by_kunde(kunden_nr)]
 
 
+_ALLOWED_ARTEN = {"persoenlich", "telefon", "email", "whatsapp", "brief", "fax"}
+
+
 class LogCreateIn(BaseModel):
     direction: Optional[str] = "OUTGOING"
-    artKurzinfo: Optional[str] = None
+    art: Optional[str] = None          # persoenlich/telefon/email/whatsapp
+    betreff: Optional[str] = None      # Betreffzeile
+    kommentar: Optional[str] = None    # Freitext/Kommentar (blob)
+    artKurzinfo: Optional[str] = None  # Rueckwaertskompatibel: Kurzinfo, falls kein Betreff
+    ccIntern: Optional[str] = None     # interne Weiterleitung (Mitarbeiter/Abteilung)
     operator: Optional[str] = None
     completed: Optional[bool] = None
     reSubmissionDate: Optional[str] = None
     referenceType: Optional[str] = "NONE"
+    referenceNo: Optional[str] = None
 
 
 @router.post("/customers/{kunden_nr}/logs", response_model=StatusOut, summary="Kontakt protokollieren")
@@ -373,13 +390,19 @@ def create_log(
     tenant_id: str = Depends(get_tenant_id),
 ) -> StatusOut:
     svc = CrmKontaktService(db, tenant_id)
+    art = (body.art or "").strip().lower()
+    if art not in _ALLOWED_ARTEN:
+        art = "telefon"
     svc.create({
         "kunden_nr": kunden_nr,
         "richtung": "ein" if (body.direction or "").upper() == "INCOMING" else "aus",
-        "art": "telefon",
-        "kurzinfo": body.artKurzinfo,
+        "art": art,
+        "kurzinfo": body.betreff or body.artKurzinfo,
+        "notiz": body.kommentar,
         "bediener": body.operator,
         "wiedervorlage": body.reSubmissionDate or None,
+        "weiterleitung_an": body.ccIntern,
+        "verweis": body.referenceNo,
     })
     return StatusOut()
 
