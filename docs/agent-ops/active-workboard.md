@@ -2,16 +2,29 @@
 
 Stand: `2026-06-09`
 
+## KIM-DEPRECATE-COCKPIT-001
+
+**Von:** Claude
+**Owner:** Claude
+**Stand:** in Arbeit 2026-06-09
+**Ziel des Slices:** Das klassische „Verkauf Kunden-Cockpit" (`pages/crm/kunden-cockpit.tsx`) ablösen — durch KIM (`/crm`) funktional ersetzt. Seite wird Redirect→/crm (keine 404 für Altlinks), Nav-Eintrag als abgelöst markiert. KEINE Route-Regenerierung (route-tree.gen/navigation-routes.json sind generiert + aktuell fremd-dirty → nicht anfassen).
+**Dateibesitz:** `docs/agent-ops/active-workboard.md` (eigener Block), `packages/frontend-web/src/pages/crm/kunden-cockpit.tsx`, `packages/frontend-web/src/app/navigation/domains/commercial.tsx` (nur kunden-cockpit-Eintrag). **NICHT:** generierte Routing-Dateien, core.tsx, Fiskaly.
+**Abnahmekriterien:** `/crm/kunden-cockpit` leitet auf `/crm` um (kein 404); Nav-Eintrag kennzeichnet die Ablösung; tsc/eslint grün. Parität: WhatsApp-Deep-Link (wa.me) ist Rest-Lücke in KIM (notieren, Folge-Slice).
+**Offene Risiken:** Generierte Routing-Dateien sind fremd-dirty — Redirect über die Page-Komponente lösen, nicht über Routen-Regenerierung.
+
+
 ## POS-FISCAL-OPS-002
 
 **Von:** Codex
 **Owner:** Codex
-**Stand:** reserviert 2026-06-09
+**Stand:** abgeschlossen 2026-06-09
 **Abstimmung:** Folge-Slice zu `POS-FISCAL-PROVIDERS-001`, konfliktfrei zu den laufenden KIM-/CRM-Arbeiten. Keine Aenderung unter `packages/frontend-web/src/pages/crm/kim/**` oder an CRM-Playwright-Specs.
 **Ziel des Slices:** Die Fiskalisierungsprovider betrieblich nutzbar machen: tenantbezogene Admin-Konfiguration und Readiness, explizite Produkt-Gates fuer fiskaly SUBMIT DE/RECEIPT/SAFE sowie durchgaengige POS-/Tagesabschluss-Browsertests fuer fiskaly und Swissbit.
 **Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/agent-ops/slices/POS-FISCAL-OPS-002.yaml`, Fiskalisierungsdoku und QA, `app/services/fiscalization/**`, `app/api/v1/endpoints/pos_fiscalization.py`, fokussierte POS-Migrationen/-Tests, `packages/frontend-web/src/pages/admin-suite/**` fuer eine neue Fiskalisierungsseite, providerneutraler Fiskalisierungsclient, generierte Route-/Navigationsartefakte und fokussierte POS-Playwright-Specs.
 **Abnahmekriterien:** Provider und Kassenkontext sind ohne Browser-Secrets administrierbar; Readiness zeigt konkrete Blocker und optionale fiskaly-Produkte getrennt; undokumentierte externe Vertraege bleiben fail-closed; POS-Signatur, Browser-Zurueck, Tagesabschluss-Gates und beide Provideralternativen sind automatisiert; Typecheck, Lint, Backendtests, Playwright und Governance sind gruen.
 **Offene Risiken:** fiskaly Produktlizenzen/Credentials und Swissbit Partnervertraege sind externe Live-Gates; partnergeschuetzte URLs oder Payloads duerfen nicht geraten werden.
+**Ergebnis:** Tenantbezogene Admin-Seite mit Typed Route, Provider-/DSFinV-K-Auswahl, Kassen-, Client- und Terminalkontext sowie expliziter Simulationsfreigabe umgesetzt. Readiness prueft Konfiguration und Kassenkontext. Secret-artige Settings werden vor DB-Zugriff abgewiesen und beim Lesen redigiert. SUBMIT DE, RECEIPT und SAFE besitzen getrennte, fail-closed Vertrags-Gates ohne geratenen Live-Call. Der POS-Browsertest belegt Swissbit als TSE bei separatem fiskaly DSFinV-K sowie den blockierten Tagesabschluss bei offenen Fiskaltransaktionen.
+**Checks:** 11 fokussierte Backendtests; Frontend- und Playwright-TypeScript gruen; fokussierter ESLint gruen; POS-Playwright 2 Tests bestanden; Produktions-Build und Typed-Route-Generierung gruen.
 
 ## POS-FISCAL-PROVIDERS-001
 

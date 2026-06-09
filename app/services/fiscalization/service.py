@@ -26,6 +26,8 @@ from .providers import (
     SwissbitProvider,
 )
 
+_SECRET_SETTING_TOKENS = ("secret", "token", "password", "credential", "api_key", "apikey")
+
 
 class FiscalizationService:
     def __init__(self, db: Session, tenant_id: str):
@@ -56,7 +58,7 @@ class FiscalizationService:
             }
         result = dict(row)
         result["configured"] = True
-        result["settings"] = result.get("settings") or {}
+        result["settings"] = self._public_settings(result.get("settings") or {})
         return result
 
     def save_config(
@@ -69,6 +71,12 @@ class FiscalizationService:
         simulation_allowed: bool,
         settings: dict[str, Any],
     ) -> dict[str, Any]:
+        forbidden = self._secret_paths(settings)
+        if forbidden:
+            raise ValueError(
+                "Provider-Secrets duerfen nicht in tenantbezogenen POS-Einstellungen "
+                f"gespeichert werden: {', '.join(forbidden)}"
+            )
         self.db.execute(
             text(
                 """
@@ -124,17 +132,52 @@ class FiscalizationService:
         config = self.get_config()
         sign = self._provider(config["provider"]).readiness()
         dsfinvk = self._provider(config["dsfinvk_provider"]).readiness()
+        config_blockers = []
+        if not config["configured"]:
+            config_blockers.append("Mandant hat noch keine Fiskalisierungskonfiguration")
+        if not config.get("cash_register_id"):
+            config_blockers.append("Kassen-/TSS-ID fehlt")
+        if not config.get("client_id"):
+            config_blockers.append("Client-ID fehlt")
         if config["provider"] == "simulation" and not config.get("simulation_allowed"):
             sign.ready = False
             sign.blockers.append("Mandantenkonfiguration erlaubt keine Simulation")
         if config["dsfinvk_provider"] == "simulation" and not config.get("simulation_allowed"):
             dsfinvk.ready = False
             dsfinvk.blockers.append("Mandantenkonfiguration erlaubt keine Simulation")
+        products = FiskalyProvider().product_readiness()
         return {
             "configured": config["configured"],
+            "config_blockers": config_blockers,
             "sign": sign.model_dump(mode="json"),
             "dsfinvk": dsfinvk.model_dump(mode="json"),
-            "ready": sign.ready and dsfinvk.ready,
+            "products": [product.model_dump(mode="json") for product in products],
+            "ready": not config_blockers and sign.ready and dsfinvk.ready,
+        }
+
+    @classmethod
+    def _secret_paths(cls, value: Any, prefix: str = "settings") -> list[str]:
+        if isinstance(value, dict):
+            paths: list[str] = []
+            for key, nested in value.items():
+                path = f"{prefix}.{key}"
+                if any(token in str(key).lower() for token in _SECRET_SETTING_TOKENS):
+                    paths.append(path)
+                paths.extend(cls._secret_paths(nested, path))
+            return paths
+        if isinstance(value, list):
+            paths = []
+            for index, nested in enumerate(value):
+                paths.extend(cls._secret_paths(nested, f"{prefix}[{index}]"))
+            return paths
+        return []
+
+    @classmethod
+    def _public_settings(cls, settings: dict[str, Any]) -> dict[str, Any]:
+        return {
+            key: value
+            for key, value in settings.items()
+            if not cls._secret_paths({key: value}, prefix="settings")
         }
 
     def start(self, command: StartTransactionCommand) -> FiscalTransactionResult:

@@ -31,10 +31,14 @@ export interface TSETransaction {
 }
 
 type CartLine = { bezeichnung: string; preis: number; menge: number; vatRate?: number }
-type FiscalConfig = {
+export type FiscalProviderName = 'fiskaly' | 'swissbit_cloud' | 'swissbit_gateway' | 'simulation'
+export type FiscalConfig = {
   configured: boolean
+  provider: FiscalProviderName
+  dsfinvk_provider: 'fiskaly' | 'simulation'
   cash_register_id?: string
   client_id?: string
+  simulation_allowed: boolean
   settings?: { terminal_id?: string }
 }
 type FiscalResult = {
@@ -48,12 +52,47 @@ type FiscalResult = {
   finished_at?: string
   simulated?: boolean
 }
-type FiscalReadiness = { ready: boolean; sign: { ready: boolean; live: boolean; blockers: string[] } }
+export type FiscalProviderReadiness = {
+  provider: FiscalProviderName
+  ready: boolean
+  live: boolean
+  blockers: string[]
+  capabilities: string[]
+  details: Record<string, unknown>
+}
+export type FiscalProductReadiness = {
+  product: 'submit_de' | 'receipt' | 'safe'
+  label: string
+  ready: boolean
+  blockers: string[]
+  details: {
+    contract_version?: string | null
+    documentation_url?: string
+    execution_enabled?: boolean
+    execution_note?: string
+  }
+}
+export type FiscalReadiness = {
+  configured: boolean
+  ready: boolean
+  config_blockers: string[]
+  sign: FiscalProviderReadiness
+  dsfinvk: FiscalProviderReadiness
+  products: FiscalProductReadiness[]
+}
 
 const drafts = new Map<string, CartLine[]>()
 
-async function getConfig(): Promise<FiscalConfig> {
+export async function getFiscalConfig(): Promise<FiscalConfig> {
   return (await apiClient.get<FiscalConfig>('/api/v1/pos/fiscalization/config')).data
+}
+
+export async function saveFiscalConfig(config: Omit<FiscalConfig, 'configured'>): Promise<FiscalConfig> {
+  return (await apiClient.put<FiscalConfig>('/api/v1/pos/fiscalization/config', config)).data
+}
+
+export async function getFiscalReadiness(): Promise<FiscalReadiness> {
+  return (await apiClient.get<FiscalReadiness>('/api/v1/pos/fiscalization/readiness')).data
 }
 
 function toTransaction(result: FiscalResult): TSETransaction {
@@ -99,7 +138,7 @@ export function useFiskalyTSE() {
     isInitialized: Boolean(readiness?.ready && readiness.sign.live),
     readiness,
     startTransaction: async (_processData: string, _processType = 'Kassenbeleg-V1'): Promise<TSETransaction> => {
-      const config = await getConfig()
+      const config = await getFiscalConfig()
       if (!config.configured || !config.cash_register_id || !config.client_id) {
         throw new Error('Fiskalisierungsprovider ist nicht konfiguriert')
       }
@@ -125,7 +164,7 @@ export function useFiskalyTSE() {
       amount: number,
       paymentLines?: Array<{ method: string; amount: number }>,
     ): Promise<TSETransaction> => {
-      const config = await getConfig()
+      const config = await getFiscalConfig()
       if (!config.cash_register_id || !config.client_id) {
         throw new Error('Fiskalisierungsprovider ist nicht konfiguriert')
       }

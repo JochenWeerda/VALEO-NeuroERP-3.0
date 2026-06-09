@@ -44,5 +44,9 @@ export const entries: AutoGroupRouteEntry[] = [
   {
     "module": "@/pages/admin-suite/ki-anbieter",
     "path": "ki-anbieter"
+  },
+  {
+    "module": "@/pages/admin-suite/pos-fiscalization",
+    "path": "pos-fiscalization"
   }
 ]
