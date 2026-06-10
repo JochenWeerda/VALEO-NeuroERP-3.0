@@ -539,7 +539,7 @@ class CustomerService:
             SELECT id, customer_number, company_name, address, is_active, updated_at
             FROM domain_crm.customers
             WHERE tenant_id = :tid AND COALESCE(is_active, TRUE) = TRUE
-            ORDER BY updated_at DESC NULLS LAST
+            ORDER BY updated_at DESC NULLS LAST, id DESC
             LIMIT :lim
             """
         )

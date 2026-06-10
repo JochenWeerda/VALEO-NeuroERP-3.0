@@ -106,22 +106,14 @@ def test_customer_recent_returns_most_recent_active_customers(db):
     db.commit()
 
     db.execute(
-        text(
-            """
-            UPDATE domain_crm.customers
-            SET updated_at = CASE id
-                WHEN :old_id THEN :old_updated_at
-                WHEN :new_id THEN :new_updated_at
-            END
-            WHERE id IN (:old_id, :new_id)
-            """
-        ),
-        {
-            "old_id": old_customer.id,
-            "new_id": new_customer.id,
-            "old_updated_at": datetime(2026, 4, 14, 8, 0, tzinfo=UTC),
-            "new_updated_at": datetime(2026, 4, 15, 9, 30, tzinfo=UTC),
-        },
+        text("UPDATE domain_crm.customers SET updated_at = :ts WHERE id = :id"),
+        {"id": old_customer.id, "ts": datetime(2026, 4, 14, 8, 0, tzinfo=UTC)},
+    )
+    db.commit()
+    db.execute(text("SELECT pg_sleep(0.02)"))
+    db.execute(
+        text("UPDATE domain_crm.customers SET updated_at = :ts WHERE id = :id"),
+        {"id": new_customer.id, "ts": datetime(2026, 4, 15, 9, 30, tzinfo=UTC)},
     )
     db.commit()
 
