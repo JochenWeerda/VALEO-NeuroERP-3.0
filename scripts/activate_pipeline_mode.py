@@ -19,12 +19,14 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")
 from scripts.json_state_contract import load_json_state
 
 
+LOG_DIRECTORY = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "logs"))
+os.makedirs(LOG_DIRECTORY, exist_ok=True)
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
     handlers=[
         logging.StreamHandler(),
-        logging.FileHandler("logs/pipeline_execution.log"),
+        logging.FileHandler(os.path.join(LOG_DIRECTORY, "pipeline_execution.log")),
     ],
 )
 

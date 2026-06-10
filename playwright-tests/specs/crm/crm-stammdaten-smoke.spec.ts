@@ -28,7 +28,7 @@ test.describe('CRM - Kundenstamm-Tiefe @smoke', () => {
 
   test('Kunden-Dubletten lädt', async ({ adminPage }) => {
     await open(adminPage, '/crm/dubletten', 'Kunden-Dubletten');
-    await expect(adminPage.getByText('Aktualisieren').first()).toBeVisible({ timeout: 30000 });
+    await expect(adminPage.getByRole('button', { name: 'Neu prüfen' })).toBeVisible({ timeout: 30000 });
   });
 
   test('Kunden-Zuordnung lädt', async ({ adminPage }) => {

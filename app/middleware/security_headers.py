@@ -34,6 +34,7 @@ _STATIC_HEADERS: dict[str, str] = {
     "Referrer-Policy": "strict-origin-when-cross-origin",
     # Browser-APIs deaktivieren (ERP benötigt keine Kamera, Mikrofon, Geolocation)
     "Permissions-Policy": "geolocation=(), microphone=(), camera=(), payment=()",
+    "Cross-Origin-Resource-Policy": "same-site",
     # Legacy-XSS-Filter deaktivieren — Browsers sollen CSP verwenden
     "X-XSS-Protection": "0",
 }

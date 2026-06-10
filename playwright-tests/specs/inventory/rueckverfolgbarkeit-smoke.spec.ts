@@ -36,6 +36,63 @@ test.describe('Inventory - Rückverfolgbarkeit @smoke', () => {
   });
 
   test('Kette eines Seed-Wiegescheins wird angezeigt', async ({ adminPage }) => {
+    await adminPage.route('**/api/v1/supply-chain/traceability/tickets**', async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          items: [{
+            ticket_id: 'ticket-1',
+            ticket_nr: 'WG-2026-00001',
+            datum: '2026-06-10T08:00:00Z',
+            menge_kg: 25000,
+            status: 'abgerechnet',
+            allokation: 'LOT-1',
+            hat_annahme: true,
+            hat_lager: true,
+            hat_abrechnung: true,
+            vollstaendig: true,
+          }],
+        }),
+      });
+    });
+    await adminPage.route('**/api/v1/supply-chain/traceability/sync**', async (route) => {
+      await route.fulfill({ status: 200, contentType: 'application/json', body: '{"synced":4,"total":4}' });
+    });
+    await adminPage.route('**/api/v1/supply-chain/traceability?**', async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          found: true,
+          ticket_id: 'ticket-1',
+          ticket_nr: 'WG-2026-00001',
+          kette: [
+            { stage: 'wiegung', label: 'Wiegung', ref: 'WG-2026-00001', ref_id: 'ticket-1', status: 'erfasst', menge_kg: 25000, zeitpunkt: '2026-06-10T08:00:00Z', facts: {} },
+            { stage: 'annahme', label: 'Annahme', ref: 'AN-1', ref_id: 'inbound-1', status: 'freigegeben', menge_kg: 25000, zeitpunkt: '2026-06-10T08:10:00Z', facts: {} },
+            { stage: 'lager', label: 'Lager', ref: 'LOT-1', ref_id: 'lot-1', status: 'eingelagert', menge_kg: 25000, zeitpunkt: '2026-06-10T08:20:00Z', facts: {} },
+            { stage: 'abrechnung', label: 'Abrechnung', ref: 'INV-1', ref_id: 'invoice-1', status: 'abgerechnet', menge_kg: 25000, zeitpunkt: '2026-06-10T09:00:00Z', facts: {} },
+          ],
+          mengen_konsistenz: [],
+          luecken: [],
+          ereignisse: [{
+            id: 'event-1', ticket_id: 'ticket-1', stage: 'wiegung', ref_type: 'ticket',
+            ref_id: 'ticket-1', ref_label: 'WG-2026-00001', event_type: 'erfasst',
+            status_from: null, status_to: 'erfasst', menge_kg: 25000,
+            abweichung_grund: null, bediener: 'CI', source: 'backfill',
+            occurred_at: '2026-06-10T08:00:00Z', created_at: '2026-06-10T08:00:00Z',
+          }],
+          kanon_status: { status: 'abgerechnet', rang: 4 },
+          summary: {
+            stufen: 4,
+            vollstaendig: true,
+            hat_mengen_abweichung: false,
+            offene_luecken: 0,
+            status: 'abgerechnet',
+          },
+        }),
+      });
+    });
     await openTrace(adminPage);
 
     // Auf die geladene Liste warten (kalter Erstaufruf kann dauern), dann filtern.

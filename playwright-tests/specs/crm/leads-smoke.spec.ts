@@ -13,13 +13,11 @@ test.describe('CRM - Leads @smoke', () => {
     await expect(adminPage.locator('h1, h2').first()).toBeVisible();
   });
 
-  test('Lead-Detail lädt', async ({ adminPage }) => {
-    await adminPage.goto('/crm/lead/test-1');
+  test('Lead-Neuanlage lädt', async ({ adminPage }) => {
+    await adminPage.goto('/crm/lead/new');
     await adminPage.waitForLoadState('networkidle');
-    
-    // Entweder Detail oder 404/Leer-State
-    const hasContent = await adminPage.locator('h1, h2, [data-testid="empty-state"]').count() > 0;
-    expect(hasContent).toBeTruthy();
+
+    await expect(adminPage.getByText(/Neuen Lead anlegen|Lead bearbeiten/).first()).toBeVisible();
   });
 });
 

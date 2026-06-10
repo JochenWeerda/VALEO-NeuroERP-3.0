@@ -10,7 +10,7 @@ test.describe('Agrar - Saatgut @smoke', () => {
     await adminPage.goto('/agrar/saatgut-liste');
     await adminPage.waitForLoadState('networkidle');
     
-    await expect(adminPage.locator('h1, h2').first()).toBeVisible();
+    await expect(adminPage.getByText('Saatgut-Verwaltung', { exact: true })).toBeVisible();
   });
 
   test('Saatgut-Stamm lädt', async ({ adminPage }) => {

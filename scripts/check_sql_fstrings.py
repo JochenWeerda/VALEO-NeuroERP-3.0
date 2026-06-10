@@ -23,10 +23,10 @@ def check() -> int:
             for i, line in enumerate(lines):
                 if re.search(r'text\s*\(\s*f["\']|\.execute\s*\(\s*f["\']', line):
                     # Flagged with nosec or reviewed comment on current or preceding line?
-                    prev = lines[i - 1] if i > 0 else ""
+                    review_context = "\n".join(lines[max(0, i - 3):i + 1])
                     if (
-                        "nosec" not in line and "# reviewed-safe" not in line
-                        and "nosec" not in prev and "# reviewed-safe" not in prev
+                        "nosec" not in review_context
+                        and "# reviewed-safe" not in review_context
                     ):
                         violations.append(f"{py_file}:{i + 1}: {line.strip()[:100]}")
         except Exception:

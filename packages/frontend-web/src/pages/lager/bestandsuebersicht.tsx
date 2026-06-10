@@ -245,7 +245,7 @@ export default function BestandsuebersichtPage(): JSX.Element {
                 <span className="text-2xl font-bold text-yellow-600">
                   {hasData ? Math.round(bestand.lowStockCount * 1.5) : 0}
                 </span>
-                <span className="text-sm text-yellow-600">Artikel in 7 Tagen kritisch</span>
+                <span className="text-sm text-yellow-800">Artikel in 7 Tagen kritisch</span>
               </div>
             )}
           </CardContent>
@@ -265,7 +265,7 @@ export default function BestandsuebersichtPage(): JSX.Element {
                 <span className="text-2xl font-bold text-green-600">
                   {hasData ? bestand.totalArticles - bestand.lowStockCount : 0}
                 </span>
-                <span className="text-sm text-green-600">Artikel im Sollbereich</span>
+                <span className="text-sm text-green-800">Artikel im Sollbereich</span>
               </div>
             )}
           </CardContent>

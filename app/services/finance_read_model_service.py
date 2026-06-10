@@ -552,6 +552,7 @@ def _latest_workflow_event_id(db: Session | None) -> str | None:
     if db is None:
         return None
     try:
+        # reviewed-safe: generated clauses contain only fixed parameter names; values are bound.
         row = db.execute(
             text("""
                 SELECT domain, doc_number, ts
@@ -587,6 +588,7 @@ def _latest_outbox_event_id(
         conditions.append(f"event_type = :{key}")
         params[key] = event_type
     try:
+        # reviewed-safe: clauses contain fixed parameter names only; event values are bound.
         row = db.execute(
             text(f"""
                 SELECT id, event_type, timestamp

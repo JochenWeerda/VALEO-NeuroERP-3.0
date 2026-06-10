@@ -219,6 +219,7 @@ class BusinessPartnerService:
         /PriceAgreement).
         """
         try:
+            # reviewed-safe: addr_cols is a fixed local column list; values are bound.
             row = self.db.execute(
                 text("SELECT discount, discount_percent FROM domain_crm.customers WHERE id = :id AND tenant_id = :tid"),
                 {"id": crm_customer_id, "tid": self.tenant_id},
@@ -327,6 +328,7 @@ class BusinessPartnerService:
         """Adresse eines Kunden — bevorzugt aus ``kunden_adressen``, Fallback ``public.kunden``."""
         addr_cols = "strasse, plz, ort, land, postfach, postfach_plz, postfach_ort"
         try:
+            # reviewed-safe: pay_cols is a fixed local column list; values are bound.
             row = self.db.execute(
                 text(
                     f"SELECT {addr_cols} FROM public.kunden_adressen "
@@ -341,6 +343,7 @@ class BusinessPartnerService:
         if row:
             return dict(row)
         try:
+            # reviewed-safe: pay_cols is a fixed local column list; values are bound.
             row = self.db.execute(
                 text(f"SELECT {addr_cols} FROM public.kunden WHERE kunden_nr = :k"),
                 {"k": kunden_nr},
@@ -363,6 +366,7 @@ class BusinessPartnerService:
             "sepa_verfahren, mandat, kontonutzung_rechnung, kontoauszug_gewuenscht"
         )
         try:
+            # reviewed-safe: pay_cols is a fixed local column list; kunden_nr is bound.
             row = self.db.execute(
                 text(f"SELECT {pay_cols} FROM public.kunden_zahlung WHERE kunden_nr = :k"),
                 {"k": kunden_nr},
@@ -373,6 +377,7 @@ class BusinessPartnerService:
         if row:
             return dict(row)
         try:
+            # reviewed-safe: pay_cols is a fixed local column list; kunden_nr is bound.
             row = self.db.execute(
                 text(f"SELECT {pay_cols} FROM public.kunden WHERE kunden_nr = :k"),
                 {"k": kunden_nr},

@@ -64,6 +64,7 @@ class CrmNotificationService:
             },
         )
         self.db.commit()
+        # reviewed-safe: _COLS is a module-owned constant; the identifier is bound.
         r = self.db.execute(
             text(f"SELECT {_COLS} FROM public.crm_notifications WHERE id = :id"), {"id": new_id}
         ).mappings().first()
@@ -132,6 +133,7 @@ class CrmNotificationService:
             {"id": notification_id, "t": self.tenant_id},
         )
         self.db.commit()
+        # reviewed-safe: _COLS is a module-owned constant; the identifier is bound.
         r = self.db.execute(
             text(f"SELECT {_COLS} FROM public.crm_notifications WHERE id = :id"), {"id": notification_id}
         ).mappings().first()

@@ -74,6 +74,7 @@ class CrmGiftService:
             },
         )
         self.db.commit()
+        # reviewed-safe: _COLS is a module-owned constant; the gift id is bound.
         r = self.db.execute(text(f"SELECT {_COLS} FROM public.crm_gifts WHERE id = :id"), {"id": new_id}).mappings().first()
         return self._row(r)
 
@@ -103,6 +104,7 @@ class CrmGiftService:
             },
         )
         self.db.commit()
+        # reviewed-safe: _COLS is a module-owned constant; the gift id is bound.
         r = self.db.execute(text(f"SELECT {_COLS} FROM public.crm_gifts WHERE id = :id"), {"id": gift_id}).mappings().first()
         return self._row(r) if r else {}
 

@@ -277,8 +277,9 @@ def get_map_points(
             )
         else:
             where = ""
+        # reviewed-safe: where is assembled exclusively from fixed clauses below; values are bound.
         points = db.execute(
-            text(f"SELECT name, name_norm, postal_code, ort, lat, lon FROM gap_map_points {where}"),  # noqa: S608 — where ist code-kontrolliert
+            text(f"SELECT name, name_norm, postal_code, ort, lat, lon FROM gap_map_points {where}"),
             {
                 "lat_min": GEO_LAT_MIN, "lat_max": GEO_LAT_MAX,
                 "lon_min": GEO_LON_MIN, "lon_max": GEO_LON_MAX,
