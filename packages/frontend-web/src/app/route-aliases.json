@@ -1381,6 +1381,10 @@
       "path": "crm/wiedervorlagen"
     },
     {
+      "module": "@/pages/docflow/nachweisraum",
+      "path": "docflow/nachweisraum"
+    },
+    {
       "module": "@/pages/lager/lagerplaetze",
       "path": "lager/lagerplaetze"
     },
