@@ -970,6 +970,13 @@ api_router.include_router(
     tags=["crm", "ownership"]
 )
 
+from app.api.v1.endpoints import docflow_evidence  # noqa: E402
+
+api_router.include_router(
+    docflow_evidence.router,
+    tags=["docflow", "dms", "gobd"]
+)
+
 from app.api.v1.endpoints import kaeufergruppe as kaeufergruppe_ep  # noqa: E402
 
 api_router.include_router(

@@ -309,6 +309,15 @@ export const RAW_NAV_SECTIONS: RawNavItem[] = [
         mcp: { businessDomain: 'finance', scope: 'finance:read' },
       },
       {
+        id: 'docflow-nachweisraum',
+        label: 'Nachweisraum (DMS/GoBD)',
+        icon: ShieldCheck,
+        module: '@/pages/docflow/nachweisraum',
+        preferredPath: 'docflow/nachweisraum',
+        keywords: ['nachweis', 'nachweisraum', 'dms', 'gobd', 'dokument', 'artefakt', 'hash', 'revisionssicher', 'vorgangskette', 'beleg', 'archiv'],
+        mcp: { businessDomain: 'finance', scope: 'finance:read' },
+      },
+      {
         id: 'periodensteuerung',
         label: 'Periodensteuerung',
         icon: Calendar,
