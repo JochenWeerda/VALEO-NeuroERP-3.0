@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { apiClient } from '@/lib/api-client'
 
 export type SupplyChainOverview = {
@@ -106,6 +106,24 @@ export type MengenCheck = {
 
 export type Luecke = { stufe: string; schwere: 'info' | 'warnung' | string; text: string }
 
+export type ChainEvent = {
+  id: string
+  ticket_id: string
+  stage: string
+  ref_type: string | null
+  ref_id: string | null
+  ref_label: string | null
+  event_type: string
+  status_from: string | null
+  status_to: string | null
+  menge_kg: number | null
+  abweichung_grund: string | null
+  bediener: string | null
+  source: 'backfill' | 'auto' | 'manual' | string
+  occurred_at: string | null
+  created_at: string | null
+}
+
 export type TraceResult = {
   found: boolean
   detail?: string
@@ -114,11 +132,14 @@ export type TraceResult = {
   kette?: TraceNode[]
   mengen_konsistenz?: MengenCheck[]
   luecken?: Luecke[]
+  ereignisse?: ChainEvent[]
+  kanon_status?: { status: string; rang: number }
   summary?: {
     stufen: number
     vollstaendig: boolean
     hat_mengen_abweichung: boolean
     offene_luecken: number
+    status?: string
   }
 }
 
@@ -142,5 +163,35 @@ export function useTrace(ticket: string | null) {
       const res = await apiClient.get<TraceResult>(TRACE_BASE, { params: { ticket } })
       return res.data
     },
+  })
+}
+
+export function useSyncChain() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: async (ticket: string) =>
+      (await apiClient.post<{ synced: number; total: number }>(`${TRACE_BASE}/sync`, {}, { params: { ticket } })).data,
+    onSuccess: () => { void qc.invalidateQueries({ queryKey: ['supply-chain', 'trace'] }) },
+  })
+}
+
+export type ChainEventInput = {
+  ticketId: string
+  stage?: string
+  eventType?: string
+  refLabel?: string
+  statusFrom?: string
+  statusTo?: string
+  mengeKg?: number
+  abweichungGrund?: string
+  bediener?: string
+}
+
+export function useAddChainEvent() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: async (input: ChainEventInput) =>
+      (await apiClient.post<{ ok: boolean; event?: ChainEvent; detail?: string }>('/api/v1/supply-chain/events', input)).data,
+    onSuccess: () => { void qc.invalidateQueries({ queryKey: ['supply-chain', 'trace'] }) },
   })
 }
