@@ -193,6 +193,15 @@ export const RAW_NAV_SECTIONS: RawNavItem[] = [
         mcp: { businessDomain: 'agrar', scope: 'agrar:read' },
       },
       {
+        id: 'kontrakt-erfuellung',
+        label: 'Kontrakt-Erfüllung',
+        icon: ListChecks,
+        module: '@/pages/agrar/kontrakt-erfuellung',
+        preferredPath: 'agrar/kontrakt-erfuellung',
+        keywords: ['kontrakt', 'erfüllung', 'abruf', 'abgerufen', 'offen', 'engagement', 'überfällig', 'fixierung', 'matif', 'einkauf', 'verkauf'],
+        mcp: { businessDomain: 'agrar', scope: 'agrar:read' },
+      },
+      {
         id: 'kontrakt-alarm',
         label: 'Alarm-Dashboard',
         icon: FileText,

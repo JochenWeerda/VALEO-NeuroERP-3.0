@@ -1397,6 +1397,10 @@
       "path": "finance/offene-posten-cockpit"
     },
     {
+      "module": "@/pages/agrar/kontrakt-erfuellung",
+      "path": "agrar/kontrakt-erfuellung"
+    },
+    {
       "module": "@/pages/lager/lagerplaetze",
       "path": "lager/lagerplaetze"
     },
