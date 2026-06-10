@@ -112,11 +112,13 @@ kanon_status=storniert; erneuter Storno → 422. Seed restauriert.
 3. Storno/Korrektur — ✅ als Ereignis erfassbar (004.2); durchgängige Wirkung ⏳ 004.4
 4. Folgeobjekte nachweisbar ✅ (Annahme/Lager/Abrechnung je Wiegeschein)
 5. Rechte/Tenant/Audit — Tenant ✅; **append-only Audit-Event-Log ✅ (004.2)**
-6. Tests (BE-Logik) ✅; Browser-E2E ⏳
-7. Externe/betriebliche Abnahme — ⏳ (UAT-Paket)
+6. Tests (BE-Logik) ✅; **Browser-E2E ✅ (004.5, @smoke)**
+7. Externe/betriebliche Abnahme — UAT-Paket ✅ erstellt; Unterschrift ⏳
 
 ## Geplante Folge-Slices
 - **004.2** Einheitlicher Übergabestatus + append-only Ketten-Event-Log ✅ **fertig**
 - **004.3** Schwund/Sperrbestand/QS-Freigabe als Folgeaktionen mit Abweichungsgründen ✅ **fertig**
 - **004.4** Storno/Korrektur durchgängig über die Kette (Wirkung auf Status/Bestand) ✅ **fertig**
-- **004.5** Browser-/E2E-Abnahme + UAT-Nachweispaket.
+- **004.5** Browser-/E2E-Abnahme + UAT-Nachweispaket ✅ **fertig** —
+  `playwright-tests/specs/inventory/rueckverfolgbarkeit-smoke.spec.ts` + Nachweispaket
+  `docs/dom-supply-004-uat-2026-06-10.md` (offen nur die externe/betriebliche Unterschrift).
