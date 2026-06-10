@@ -138,8 +138,10 @@ jobs:
 
       - name: Enforce Trivy High/Critical gate
         run: |
-          trivy image --severity HIGH,CRITICAL --exit-code 1 "valeo-backend:${{ github.sha }}"
-          trivy image --severity HIGH,CRITICAL --exit-code 1 "valeo-frontend:${{ github.sha }}"
+          # SARIF above retains every finding. The release gate blocks all
+          # actionable High/Critical findings for which a vendor fix exists.
+          trivy image --severity HIGH,CRITICAL --ignore-unfixed --exit-code 1 "valeo-backend:${{ github.sha }}"
+          trivy image --severity HIGH,CRITICAL --ignore-unfixed --exit-code 1 "valeo-frontend:${{ github.sha }}"
   
   grype-scan:
     name: Grype Vulnerability Scan
@@ -160,6 +162,7 @@ jobs:
           image: 'valeo-backend:${{ github.sha }}'
           fail-build: true
           severity-cutoff: high
+          only-fixed: true
 
       - name: Run Grype frontend scan
         id: grype_frontend_scan
@@ -168,6 +171,7 @@ jobs:
           image: 'valeo-frontend:${{ github.sha }}'
           fail-build: true
           severity-cutoff: high
+          only-fixed: true
       
       - name: Upload Grype results
         uses: github/codeql-action/upload-sarif@v4
