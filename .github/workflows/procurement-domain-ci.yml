@@ -16,6 +16,10 @@ env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}/procurement-domain
 
+permissions:
+  contents: read
+  packages: write
+
 jobs:
   test:
     name: Test Procurement Domain

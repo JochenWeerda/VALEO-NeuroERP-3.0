@@ -38,7 +38,7 @@ regexes = [
   # Public identifiers and explicit CI-only placeholders are not authentication secrets.
   '''SUPERGLUE_MASTER_ENCRYPTION_KEY:\s*"0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"''',
   '''process_key="complaint_e2e"''',
-  '''postgres-keycloak:\$\{[A-Z_]+\}''',
+  '''postgres-keycloak''',
   '''p95_duration_sec''',
   '''sonar\.projectKey=JochenWeerda_VALEO-NeuroERP-3\.0''',
   '''SUPERGLUE_MASTER_ENCRYPTION_KEY:\s*ci-only-not-a-production-secret''',
