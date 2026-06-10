@@ -1373,6 +1373,10 @@
       "path": "crm/dubletten"
     },
     {
+      "module": "@/pages/crm/kunden-zuordnung",
+      "path": "crm/kunden-zuordnung"
+    },
+    {
       "module": "@/pages/lager/lagerplaetze",
       "path": "lager/lagerplaetze"
     },

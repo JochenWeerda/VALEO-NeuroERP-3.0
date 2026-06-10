@@ -42,6 +42,7 @@ import {
   ListChecks,
   Inbox,
   CopyCheck,
+  UserCheck,
 } from 'lucide-react'
 import type { RawNavItem } from '@/app/navigation/types'
 import { ENABLE_PROSPECTING_UI } from '@/features/prospecting/feature-flags'
@@ -422,6 +423,15 @@ export const RAW_NAV_SECTIONS: RawNavItem[] = [
         preferredPath: 'crm/dubletten',
         keywords: ['dubletten', 'duplikate', 'doppelanlage', 'zusammenführen', 'merge', 'kunden', 'datenqualität', 'crm'],
         mcp: { businessDomain: 'sales', scope: 'sales:read' },
+      },
+      {
+        id: 'crm-kunden-zuordnung',
+        label: 'Kunden-Zuordnung',
+        icon: UserCheck,
+        module: '@/pages/crm/kunden-zuordnung',
+        preferredPath: 'crm/kunden-zuordnung',
+        keywords: ['ownership', 'zuordnung', 'außendienst', 'aussendienst', 'innendienst', 'vertreter', 'übergabe', 'betreuer', 'kunden', 'crm'],
+        mcp: { businessDomain: 'sales', scope: 'sales:write' },
       },
       {
         id: 'bedarfsdeckung',
