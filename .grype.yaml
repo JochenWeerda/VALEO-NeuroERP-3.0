@@ -1,0 +1,9 @@
+ignore:
+  # Grype treats Python 3.15.0b2 as the only fixed release for this binary
+  # finding. That is not an actionable upgrade for the supported 3.13 line.
+  # Trivy does not reproduce the finding. Keep the exception package-scoped
+  # and remove it as soon as CPython publishes a supported-branch fix.
+  - vulnerability: CVE-2026-7210
+    package:
+      name: python
+      type: binary
