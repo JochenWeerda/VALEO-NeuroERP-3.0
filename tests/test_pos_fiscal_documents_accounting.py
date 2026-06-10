@@ -10,8 +10,7 @@ from app.services.pos_fiscal_document_service import (
     FiscalClosingDocument,
     FiscalReceiptDocument,
     MockTseCertificate,
-    print_fiscal_closing_pdf,
-    print_fiscal_receipt_pdf,
+    VirtualPdfPrinter,
 )
 
 
@@ -48,8 +47,7 @@ def test_fiscal_receipt_is_printed_as_complete_pdf_with_mock_certificate(tmp_pat
         certificate=_mock_certificate(),
     )
 
-    output = tmp_path / "kassenbon.pdf"
-    output.write_bytes(print_fiscal_receipt_pdf(receipt))
+    output = VirtualPdfPrinter(tmp_path).print_receipt(receipt, "kassenbon.pdf")
 
     assert output.read_bytes().startswith(b"%PDF-")
     text = _pdf_text(output)
@@ -110,8 +108,7 @@ def test_closing_pdf_and_accounting_cover_all_requested_pos_transactions(tmp_pat
         certificate=_mock_certificate(),
     )
 
-    output = tmp_path / "tagesabschluss.pdf"
-    output.write_bytes(print_fiscal_closing_pdf(closing))
+    output = VirtualPdfPrinter(tmp_path).print_closing(closing, "tagesabschluss.pdf")
 
     assert output.read_bytes().startswith(b"%PDF-")
     text = _pdf_text(output)
@@ -129,3 +126,14 @@ def test_closing_pdf_and_accounting_cover_all_requested_pos_transactions(tmp_pat
         "MOCK-TSE-DE-0004711",
     ):
         assert expected in text
+
+
+def test_virtual_pdf_printer_rejects_non_pdf_jobs(tmp_path):
+    printer = VirtualPdfPrinter(tmp_path)
+
+    try:
+        printer._print("kassenbon.txt", b"not-a-pdf")
+    except ValueError as exc:
+        assert "nur .pdf" in str(exc)
+    else:
+        raise AssertionError("Nicht-PDF-Druckauftrag wurde akzeptiert")

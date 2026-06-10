@@ -55,6 +55,7 @@ jobs:
           SUPERGLUE_AUTH_TOKEN: test-token
           SUPERGLUE_MINIO_ROOT_PASSWORD: test-minio-password
           SUPERGLUE_MASTER_ENCRYPTION_KEY: ci-only-not-a-production-secret
+          SUPERGLUE_OPENAI_API_KEY: ci-only-not-a-production-api-key
           SUPERGLUE_TLS_DOMAIN: superglue.example.test
           SUPERGLUE_MINIO_TLS_DOMAIN: superglue-minio.example.test
           SUPERGLUE_EDGE_BASICAUTH_HASH: test-hash

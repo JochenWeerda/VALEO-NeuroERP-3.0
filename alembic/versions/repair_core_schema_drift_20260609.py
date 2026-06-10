@@ -58,6 +58,8 @@ def upgrade() -> None:
               version INTEGER NOT NULL DEFAULT 1,
               CONSTRAINT time_entries_hours_positive_ck CHECK (hours >= 0)
             );
+            ALTER TABLE domain_hr.time_entries
+              ADD COLUMN IF NOT EXISTS status VARCHAR(20) NOT NULL DEFAULT 'Draft';
             CREATE INDEX IF NOT EXISTS time_entries_tenant_employee_date_idx
               ON domain_hr.time_entries (tenant_id, employee_ref, entry_date);
             CREATE INDEX IF NOT EXISTS time_entries_tenant_status_idx
