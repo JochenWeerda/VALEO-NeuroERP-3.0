@@ -96,7 +96,7 @@ async def get_aktuell(
                 retouren=0,
             )
     except Exception:  # noqa: BLE001 — optionale DB-Abfrage; Fallback greift
-        pass
+        db.rollback()
 
     from app.services.fiscalization.service import FiscalizationService
     summary = FiscalizationService(db, tenant_id).daily_summary(date.fromisoformat(target_date))
