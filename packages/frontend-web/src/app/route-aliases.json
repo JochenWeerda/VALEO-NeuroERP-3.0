@@ -1365,6 +1365,10 @@
       "path": "lager/partiestamm"
     },
     {
+      "module": "@/pages/lager/rueckverfolgbarkeit",
+      "path": "lager/rueckverfolgbarkeit"
+    },
+    {
       "module": "@/pages/lager/lagerplaetze",
       "path": "lager/lagerplaetze"
     },
