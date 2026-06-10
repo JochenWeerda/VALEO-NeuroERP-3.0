@@ -12,7 +12,8 @@ import { ErrorState } from '@/components/ErrorState'
 import type { TFunction } from 'i18next'
 
 // Konfiguration für Campaigns ListReport
-interface Campaign {
+interface Campaign extends Record<string, unknown> {
+  id?: string
   name?: string
   type?: string
   status?: string

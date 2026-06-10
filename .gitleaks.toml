@@ -35,4 +35,11 @@ regexes = [
   '''templateKey\"\s*:\s*\"purchase_order_v1_de\"''',
   # Keycloak local service URL contains a host:port and can look like credentials to generic detectors.
   '''jdbc:postgresql://postgres-keycloak:5432/keycloak''',
+  # Public identifiers and explicit CI-only placeholders are not authentication secrets.
+  '''SUPERGLUE_MASTER_ENCRYPTION_KEY:\s*"0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"''',
+  '''process_key="complaint_e2e"''',
+  '''postgres-keycloak:\$\{KEYCLOAK_DB_PASSWORD\}''',
+  '''key:\s*'p95_duration_sec' ''',
+  '''sonar\.projectKey=JochenWeerda_VALEO-NeuroERP-3\.0''',
+  '''SUPERGLUE_MASTER_ENCRYPTION_KEY:\s*ci-only-not-a-production-secret''',
 ]

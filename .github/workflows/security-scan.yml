@@ -218,9 +218,7 @@ jobs:
         with:
           node-version: '20'
 
-      - uses: pnpm/action-setup@v3
-        with:
-          version: 9.12.0
+      - uses: pnpm/action-setup@v4
 
       - name: Run Node dependency audit
         run: |
@@ -258,42 +256,49 @@ jobs:
         uses: actions/download-artifact@v4
       
       - name: Generate summary
+        env:
+          ZAP_RESULT: ${{ needs.owasp-zap-full-scan.result }}
+          TRIVY_RESULT: ${{ needs.trivy-scan.result }}
+          GRYPE_RESULT: ${{ needs.grype-scan.result }}
+          BANDIT_RESULT: ${{ needs.bandit-scan.result }}
+          AUDIT_RESULT: ${{ needs.dependency-audit.result }}
         run: |
-          echo "# Security Scan Summary" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "## Scan Results" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
+          # shellcheck disable=SC2086,SC2129
+          echo "# Security Scan Summary" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "## Scan Results" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
           
-          if [ "${{ needs.owasp-zap-full-scan.result }}" == "success" ]; then
-            echo "✅ OWASP ZAP Full Scan: PASSED" >> $GITHUB_STEP_SUMMARY
+          if [ "$ZAP_RESULT" = "success" ]; then
+            echo "✅ OWASP ZAP Full Scan: PASSED" >> "$GITHUB_STEP_SUMMARY"
           else
-            echo "❌ OWASP ZAP Full Scan: FAILED" >> $GITHUB_STEP_SUMMARY
+            echo "❌ OWASP ZAP Full Scan: FAILED" >> "$GITHUB_STEP_SUMMARY"
           fi
           
-          if [ "${{ needs.trivy-scan.result }}" == "success" ]; then
-            echo "✅ Trivy Container Scan: PASSED" >> $GITHUB_STEP_SUMMARY
+          if [ "$TRIVY_RESULT" = "success" ]; then
+            echo "✅ Trivy Container Scan: PASSED" >> "$GITHUB_STEP_SUMMARY"
           else
-            echo "❌ Trivy Container Scan: FAILED" >> $GITHUB_STEP_SUMMARY
+            echo "❌ Trivy Container Scan: FAILED" >> "$GITHUB_STEP_SUMMARY"
           fi
           
-          if [ "${{ needs.grype-scan.result }}" == "success" ]; then
-            echo "✅ Grype Vulnerability Scan: PASSED" >> $GITHUB_STEP_SUMMARY
+          if [ "$GRYPE_RESULT" = "success" ]; then
+            echo "✅ Grype Vulnerability Scan: PASSED" >> "$GITHUB_STEP_SUMMARY"
           else
-            echo "❌ Grype Vulnerability Scan: FAILED" >> $GITHUB_STEP_SUMMARY
+            echo "❌ Grype Vulnerability Scan: FAILED" >> "$GITHUB_STEP_SUMMARY"
           fi
           
-          if [ "${{ needs.bandit-scan.result }}" == "success" ]; then
-            echo "✅ Bandit Python Security: PASSED" >> $GITHUB_STEP_SUMMARY
+          if [ "$BANDIT_RESULT" = "success" ]; then
+            echo "✅ Bandit Python Security: PASSED" >> "$GITHUB_STEP_SUMMARY"
           else
-            echo "❌ Bandit Python Security: FAILED" >> $GITHUB_STEP_SUMMARY
+            echo "❌ Bandit Python Security: FAILED" >> "$GITHUB_STEP_SUMMARY"
           fi
           
-          if [ "${{ needs.dependency-audit.result }}" == "success" ]; then
-            echo "Dependency Audit: PASSED" >> $GITHUB_STEP_SUMMARY
+          if [ "$AUDIT_RESULT" = "success" ]; then
+            echo "Dependency Audit: PASSED" >> "$GITHUB_STEP_SUMMARY"
           else
-            echo "Dependency Audit: FAILED" >> $GITHUB_STEP_SUMMARY
+            echo "Dependency Audit: FAILED" >> "$GITHUB_STEP_SUMMARY"
             exit 1
           fi
           
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "Detailed reports available in artifacts." >> $GITHUB_STEP_SUMMARY
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "Detailed reports available in artifacts." >> "$GITHUB_STEP_SUMMARY"

@@ -142,8 +142,6 @@ jobs:
             -q --no-cov
 
       - uses: pnpm/action-setup@v4
-        with:
-          version: 9.12.0
 
       - uses: actions/setup-node@v4
         with:
@@ -287,8 +285,7 @@ jobs:
 
       - name: Generate GitHub Summary
         if: always()
-        run: |
-          cat report/summary.md >> $GITHUB_STEP_SUMMARY
+        run: cat report/summary.md >> "$GITHUB_STEP_SUMMARY"
 
       - name: Check for Critical findings
         run: |
