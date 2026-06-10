@@ -70,8 +70,9 @@ class TestDashboardSnapshot:
     def test_ist_veraltet_grenzwert_exakt(self):
         # Genau am Grenzwert ist noch nicht veraltet (> not >=)
         s = self._make_snapshot(max_alter=300)
-        s.letzte_aktualisierung = datetime.now(timezone.utc) - timedelta(seconds=300)
-        assert s.ist_veraltet() is False
+        jetzt = datetime.now(timezone.utc)
+        s.letzte_aktualisierung = jetzt - timedelta(seconds=300)
+        assert s.ist_veraltet(jetzt) is False
 
     def test_pflicht_felder_gefiltert(self):
         s = self._make_snapshot()
