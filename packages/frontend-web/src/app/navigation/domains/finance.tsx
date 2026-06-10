@@ -213,6 +213,15 @@ export const RAW_NAV_SECTIONS: RawNavItem[] = [
         mcp: { businessDomain: 'finance', scope: 'finance:read' },
       },
       {
+        id: 'op-cockpit-aging',
+        label: 'OP-Cockpit (Aging)',
+        icon: Euro,
+        module: '@/pages/finance/offene-posten-cockpit',
+        preferredPath: 'finance/offene-posten-cockpit',
+        keywords: ['op', 'offene posten', 'aging', 'fälligkeit', 'überfällig', 'mahnstufe', 'mahnwesen', 'skonto', 'debitoren', 'kreditoren'],
+        mcp: { businessDomain: 'finance', scope: 'finance:read' },
+      },
+      {
         id: 'abschluss-cockpit',
         label: 'Abschluss-Cockpit',
         icon: ShieldCheck,

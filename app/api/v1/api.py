@@ -984,6 +984,13 @@ api_router.include_router(
     tags=["sales", "o2c"]
 )
 
+from app.api.v1.endpoints import finance_op  # noqa: E402
+
+api_router.include_router(
+    finance_op.router,
+    tags=["finance", "fibu", "op"]
+)
+
 from app.api.v1.endpoints import kaeufergruppe as kaeufergruppe_ep  # noqa: E402
 
 api_router.include_router(
