@@ -1377,6 +1377,10 @@
       "path": "crm/kunden-zuordnung"
     },
     {
+      "module": "@/pages/crm/wiedervorlagen",
+      "path": "crm/wiedervorlagen"
+    },
+    {
       "module": "@/pages/lager/lagerplaetze",
       "path": "lager/lagerplaetze"
     },

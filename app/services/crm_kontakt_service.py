@@ -69,11 +69,22 @@ class CrmKontaktService:
         ).mappings().first()
         return self._row(r)
 
-    def set_erledigt(self, kontakt_id: str, erledigt: bool = True) -> dict:
-        self.db.execute(
-            text("UPDATE public.kunden_kontakte SET erledigt = :e, updated_at = now() WHERE id = :id AND tenant_id = :t"),
-            {"e": erledigt, "id": kontakt_id, "t": self.tenant_id},
-        )
+    def set_erledigt(self, kontakt_id: str, erledigt: bool = True, ergebnis: Optional[str] = None) -> dict:
+        # Serviceabschluss: optionales Ergebnis revisionsfest an die Notiz anhängen.
+        if ergebnis:
+            self.db.execute(
+                text(
+                    "UPDATE public.kunden_kontakte SET erledigt = :e, "
+                    "notiz = COALESCE(notiz || E'\\n', '') || :erg, updated_at = now() "
+                    "WHERE id = :id AND tenant_id = :t"
+                ),
+                {"e": erledigt, "erg": f"[Erledigt] {ergebnis}", "id": kontakt_id, "t": self.tenant_id},
+            )
+        else:
+            self.db.execute(
+                text("UPDATE public.kunden_kontakte SET erledigt = :e, updated_at = now() WHERE id = :id AND tenant_id = :t"),
+                {"e": erledigt, "id": kontakt_id, "t": self.tenant_id},
+            )
         self.db.commit()
         r = self.db.execute(text(f"SELECT {_COLS} FROM public.kunden_kontakte WHERE id = :id"), {"id": kontakt_id}).mappings().first()
         return self._row(r) if r else {}
@@ -88,9 +99,18 @@ class CrmKontaktService:
             ),
             {"t": self.tenant_id, "d": tage},
         ).mappings().all()
+        from datetime import date
+
         out = []
+        today = date.today()
         for r in rows:
             d = self._row(r)
             d["kunde"] = r.get("kunde")
+            wv = r.get("wiedervorlage")
+            wvd = wv.date() if hasattr(wv, "date") else wv
+            try:
+                d["ueberfaellig"] = bool(wvd is not None and wvd < today)
+            except TypeError:
+                d["ueberfaellig"] = False
             out.append(d)
         return out
