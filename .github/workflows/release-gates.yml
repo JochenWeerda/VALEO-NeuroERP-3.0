@@ -1,0 +1,95 @@
+name: Reusable Release Gates
+
+on:
+  workflow_call:
+    inputs:
+      release_sha:
+        required: false
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  release-gates:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_DB: valeo_test
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d valeo_test"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/valeo_test
+      APP_ENV: test
+      PYTHONHASHSEED: "0"
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.release_sha || github.sha }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - uses: pnpm/action-setup@v3
+        with:
+          version: 9.12.0
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pnpm install --frozen-lockfile
+
+      - name: Production contract
+        run: |
+          python scripts/check_production_readiness.py \
+            --environment production \
+            --compose-file docker-compose.production.yml \
+            --helm-values k8s/helm/valeo-erp/values-production.yaml \
+            --contract-only
+
+      - name: Build immutable release candidates
+        run: |
+          docker build -f Dockerfile.backend -t valeo-backend:release-gate .
+          docker build -f Dockerfile.frontend -t valeo-frontend:release-gate .
+
+      - name: Repository guardrails
+        run: |
+          python scripts/check_alembic_single_head.py
+          python scripts/check_sql_fstrings.py
+          python scripts/check_tenant_isolation.py
+          python scripts/init_db.py
+          python scripts/check_required_domain_schemas.py
+
+      - name: Backend tests
+        run: pytest -q
+
+      - name: Frontend typecheck, lint and build
+        run: |
+          pnpm --filter @valero-neuroerp/frontend-web typecheck
+          pnpm --filter @valero-neuroerp/frontend-web exec eslint "src/**/*.{ts,tsx}" --report-unused-disable-directives --quiet
+          pnpm --filter @valero-neuroerp/frontend-web build
+
+      - name: Simulated external assessors
+        run: |
+          python scripts/simulate_external_assessors.py \
+            --output-json artifacts/production-readiness-assessment.json \
+            --output-markdown artifacts/production-readiness-assessment.md
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: release-gate-evidence
+          path: artifacts/production-readiness-assessment.*
+          retention-days: 90

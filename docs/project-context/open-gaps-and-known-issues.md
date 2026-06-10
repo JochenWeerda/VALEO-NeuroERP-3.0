@@ -3,6 +3,8 @@
 ## Zweck
 
 Ehrliche, aktuelle Bestandsaufnahme aller offenen Restthemen, fachlichen Duennstellen und bekannten Risiken.
+Production-Readiness-Nachaudit: **2026-06-09** (CI/Security, Deployment,
+simulierte externe Pruefer, POS-Fiskalisierung und CRM360/KIM).
 Zuletzt vollstaendig auditiert: **2026-05-27** (Integrations-Gate Wave 18–22, Backend-Security, OpenAPI-Coverage).
 Aggregierte Gesamtsicht: [PROJEKT-GESAMTSTAND-2026-05-27.md](../PROJEKT-GESAMTSTAND-2026-05-27.md).
 
@@ -24,6 +26,33 @@ Aggregierte Gesamtsicht: [PROJEKT-GESAMTSTAND-2026-05-27.md](../PROJEKT-GESAMTST
 ---
 
 ## P1 - Verbleibende offene Punkte
+
+### PROD-READINESS-001: Repo-seitige P0-Haertung abgeschlossen, Live-Gates offen
+
+- Kanonische Release-Gates tolerieren keine Fehler bei TypeScript, ESLint,
+  Backendtests, Doku oder High/Critical Dependency-/Security-Befunden.
+- CycloneDX-SBOM, produktiver Runtime-/Secret-Preflight und simulierte
+  Prueferprofile sind Teil der Release-Evidenz.
+- Staging und Produktion nutzen unveraenderliche SHA-Images,
+  GitHub-Environments, separaten Migrationsjob, atomaren Helm-Rollout,
+  `/healthz`-/`/readyz`-Smoke und Rollback.
+- Die Simulation ist strenger als eine reine Dokumentenpruefung: fehlende
+  technische Evidenz ist `fail`; fehlende Live-Evidenz bleibt
+  `external_gate` und blockiert den Go-live.
+- Extern offen bleiben GitHub-Environment-Reviewer/Branch-Protection,
+  produktive Cluster-Secrets, beobachtete Backup-/Restore- und Incident-Drills,
+  UAT-Unterschriften, Steuerberater-/DSB-Freigaben sowie reale
+  TSE-/DSFinV-K-Pruefwerkzeug- und Hardwareabnahmen.
+- Runbook:
+  [production-readiness-runbook.md](../operations/production-readiness-runbook.md)
+
+- **Lagerbewegungs-Altpfade:** `articles.py` und `pos_retoure.py` enthalten
+  noch tolerante SQL-Pfade auf die historische Tabelle `stock_movements`.
+  Kanonisch ist `domain_inventory.inventory_stock_movements`. Die fachliche
+  Umstellung braucht einen eigenen Inventory/POS-Slice, weil Pflichtfelder,
+  Chargenmodell und Bestandsfortschreibung nicht durch reines Umbenennen
+  kompatibel sind. Bis dahin darf ein fehlgeschlagener Altpfad nicht als
+  Nachweis einer Lagerbuchung gewertet werden.
 
 ### COVERAGE-001: Backend-Testabdeckung repo-weit weiter zu niedrig
 
@@ -146,7 +175,7 @@ Stand Wave 2026-05-17 (P0/P1 Gaps implementiert):
 | CTS-H2S-UAT-001 | Rohware-UAT Schemata, Varianten, Nachtraege | P0 | offen (UAT extern) |
 | FIBU-CUTOVER-002 | SKR03/SKR04-Mapping + Steuerberaterabnahme | P0 | offen (extern) |
 | DMS-DOC-002 | DMS-Live-Probe, Redirect-Failure, Audit-Paket | P1 | repo-seitig vorbereitet; Live-Probe extern |
-| POS-DSFINVK-001 | TSE-/DSFinV-K-Abnahme | P1 | repo-seitig implementiert; Pruefwerkzeug-Abnahme extern |
+| POS-DSFINVK-001 | TSE-/DSFinV-K-Abnahme | P1 | Provider, Admin, Tagesabschluss und simuliertes Prueferprofil repo-seitig implementiert; reale TSE-/DSFinV-K-2.4-Pruefwerkzeug-Abnahme extern |
 | REPORT-PRINT-001 | Partie-Genealogie, Wiegschein-PDF, Etikett | P1 | repo-seitig implementiert; Drucker-/UAT-Abnahme extern |
 | VALEO-FIBU-006 | eBilanz/ELSTER-Direktschnittstelle | P1 | repo-seitig implementiert; ERiC-/Steuerberater-Gate extern |
 | VALEO-FIBU-003 | ATLAS Zollausfuhr | P2 | implementiert; ATLAS-Zertifikat extern |

@@ -1,8 +1,8 @@
 """Verify that a freshly migrated DB exposes the required ERP domain structure.
 
-This is intentionally lightweight: it does not assert every table, only the
-core schemas and representative anchor tables that prove the multi-domain ERP
-layout is present after `alembic upgrade head`.
+This is intentionally focused: it asserts representative anchor tables plus
+columns whose absence previously caused production/test drift after a database
+had been stamped beyond an older migration.
 """
 
 from __future__ import annotations
@@ -31,7 +31,12 @@ REQUIRED_STRUCTURE: dict[str, tuple[str, ...]] = {
         "payment_run_items",
         "exchange_rates",
     ),
-    "domain_inventory": ("articles", "stock_movements", "inventory_counts", "lkw_annahme_queue"),
+    "domain_inventory": (
+        "articles",
+        "inventory_stock_movements",
+        "inventory_counts",
+        "lkw_annahme_queue",
+    ),
     "domain_einkauf": ("bestellungen", "lieferanten", "kontrakte"),
     "domain_ops": ("ops_wiegungen", "ops_chargen", "ops_labor_proben"),
     "domain_finance": ("aufbewahrungsfristen", "self_billing_invoices", "dispute_records"),
@@ -39,6 +44,59 @@ REQUIRED_STRUCTURE: dict[str, tuple[str, ...]] = {
     "domain_docflow": ("document_headers", "document_items", "document_artifacts"),
     "domain_agrar": ("agrar_saatgut", "agrar_duenger", "nutrient_compositions"),
     "domain_controlling": ("kpi_definitions", "kpi_timeseries", "dashboard_configs"),
+}
+
+REQUIRED_COLUMNS: dict[tuple[str, str], tuple[str, ...]] = {
+    ("domain_inventory", "agrar_settlements"): ("campaign_id",),
+    (
+        "domain_erp",
+        "chart_of_accounts",
+    ): (
+        "account_type",
+        "category",
+        "subcategory",
+        "description",
+        "is_summary",
+        "balance",
+        "last_transaction_date",
+        "parent_account_id",
+        "deleted_at",
+    ),
+    (
+        "domain_hr",
+        "time_entries",
+    ): (
+        "tenant_id",
+        "employee_ref",
+        "entry_date",
+        "hours",
+        "entry_type",
+        "source",
+        "status",
+        "version",
+    ),
+    (
+        "domain_hr",
+        "shifts",
+    ): (
+        "tenant_id",
+        "shift_date",
+        "required_headcount",
+        "starts_at",
+        "ends_at",
+        "status",
+    ),
+    (
+        "domain_inventory",
+        "drying_rule_sets",
+    ): (
+        "tenant_id",
+        "crop_code",
+        "version",
+        "method",
+        "base_moisture_pct",
+        "fee_basis",
+    ),
 }
 
 
@@ -68,6 +126,27 @@ def main() -> None:
             missing = [table for table in tables if table not in present]
             if missing:
                 failures.append(f"{schema}: missing {', '.join(missing)}")
+
+        for (schema, table), columns in REQUIRED_COLUMNS.items():
+            present = {
+                row[0]
+                for row in conn.execute(
+                    text(
+                        """
+                        SELECT column_name
+                        FROM information_schema.columns
+                        WHERE table_schema = :schema
+                          AND table_name = :table
+                        """
+                    ),
+                    {"schema": schema, "table": table},
+                ).fetchall()
+            }
+            missing = [column for column in columns if column not in present]
+            if missing:
+                failures.append(
+                    f"{schema}.{table}: missing columns {', '.join(missing)}"
+                )
 
     engine.dispose()
 

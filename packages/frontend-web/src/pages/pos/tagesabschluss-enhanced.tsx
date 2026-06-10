@@ -343,7 +343,7 @@ export default function TagesabschlussEnhancedPage(): JSX.Element {
                       </span>
                     </div>
                     <p className="text-xs text-blue-800 mb-2">
-                      Kassendaten-Export nach DSFinV-K v2.3 gemäß §4 Abs. 3 AEAO.
+                      Kassendaten-Export nach DSFinV-K v2.4 gemäß §4 Abs. 3 AEAO.
                       GoBD-konform archivieren.
                     </p>
                     {dsfinvkStatusQuery.data?.letzter_export && (

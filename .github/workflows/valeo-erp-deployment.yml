@@ -1,181 +1,121 @@
-name: VALEO-NeuroERP CI/CD Pipeline
-# Week 3 - Reverse Execution Implementation
-# Original Week 14: CI/CD Pipelines Automation
+name: Deploy Production
 
 on:
-  push:
-    branches: [main, develop, feature/*]
-  pull_request:
-    branches: [main]
-  schedule:
-    - cron: '0 6 * * 1' # Weekly Monday at 6 AM
+  workflow_dispatch:
+    inputs:
+      release_sha:
+        description: Full commit SHA already validated on staging
+        required: true
+        type: string
+
+permissions:
+  contents: read
+  packages: read
+
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+env:
+  REGISTRY: ghcr.io
+  BACKEND_IMAGE_NAME: jochenweerda/valeo-neuroerp-3.0/backend
+  FRONTEND_IMAGE_NAME: jochenweerda/valeo-neuroerp-3.0/frontend
+  NAMESPACE: valeo-production
+  RELEASE_NAME: valeo-production
 
 jobs:
-  # Linting and Code Quality
-  lint-and-quality:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout VALEO-NeuroERP-3.0
-        uses: actions/checkout@v4
-        
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '18'
-          cache: 'npm'
-          
-      - name: Install dependencies
-        run: npm ci
-        
-      - name: ESLint validation
-        run: npm run lint
-        
-      - name: TypeScript check
-        run: npm run type-check
+  verify:
+    name: Repeat hard release gates
+    uses: ./.github/workflows/release-gates.yml
+    with:
+      release_sha: ${{ inputs.release_sha }}
 
-  # Security Audit & Dependencies
-  security-scan:
+  deploy:
+    name: Production deployment
     runs-on: ubuntu-latest
+    needs: verify
+    environment:
+      name: production
+      url: ${{ secrets.PRODUCTION_URL }}
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-        
-      - name: Run security audit
-        run: npm audit --audit-level moderate
-        
-      - name: Snyk security scan
-        uses: snyk/actions/node@master
+      - uses: actions/checkout@v4
         with:
-          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+          ref: ${{ inputs.release_sha }}
+      - uses: azure/setup-kubectl@v4
+      - uses: azure/setup-helm@v4
 
-  # Unit and Integration Testing
-  test-suite:
-    runs-on: ubuntu-latest
-    needs: [lint-and-quality, security-scan]
-    steps:
-      - name: Checkout VALEO-NeuroERP-3.0
-        uses: actions/checkout@v4
-        
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '18'
-          cache: 'npm'
-          
-      - name: Install dependencies  
-        run: npm ci
-        
-      - name: Start test database
-        run: docker run -d --name test-db postgres:14
-        
-      - name: Run unit tests
-        run: npm run test:unit
-        
-      - name: Run integration tests
-        run: npm run test:integration
-        env:
-          DATABASE_URL: localhost:5432/test_db
-          
-      - name: Upload coverage reports
-        uses: codecov/codecov-action@v3
-        with:
-          files: ./coverage/lcov.info
-
-  # End-to-End Testing
-  e2e-tests:
-    runs-on: ubuntu-latest
-    needs: test-suite
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-        
-      - name: Install Playwright
-        run: npx playwright install --with-deps
-        
-      - name: Run E2E tests
-        run: npm run test:e2e:ci
-        env:
-          HEADLESS: true
-
-  # Build and Deploy to Staging
-  deploy-staging:
-    runs-on: ubuntu-latest
-    needs: [test-suite, e2e-tests]
-    environment: staging
-    steps:
-      - name: Checkout VALEO-NeuroERP-3.0
-        uses: actions/checkout@v4
-        
-      - name: Build applications
-        run: npm run build
-        env:
-          NODE_ENV: staging
-          
-      - name: Deploy to Kubernetes staging
-        uses: azure/k8s-deploy@v1.4
-        with:
-          manifests: k8s/*.yaml
-          images: ghcr.io/valeo/neuroerp-3.0
-
-  # Performance Testing
-  performance-tests:
-    runs-on: ubuntu-latest  
-    needs: deploy-staging
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-        
-      - name: Install k6
+      - name: Resolve Helm dependencies
         run: |
-          sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys C5AD17C747E3415A3642D57D77C6C491D6AC1D69
-          echo 'deb https://dl.k6.io/deb stable main' | sudo tee /etc/apt/sources.list.d/k6.list
-          sudo apt-get update
-          sudo apt-get install k6
-          
-      - name: Run performance tests
-        run: |
-          k6 run load-testing/api-load-test.js
-          k6 run load-testing/database-load-test.js
+          helm repo add bitnami https://charts.bitnami.com/bitnami
+          helm dependency build k8s/helm/valeo-erp
 
-  # Deploy to Production  
-  deploy-production:
-    runs-on: ubuntu-latest
-    needs: [deploy-staging, performance-tests]
-    if: github.ref == 'refs/heads/main'
-    environment: production
-    steps:
-      - name: Checkout VALEO-NeuroERP-3.0
-        uses: actions/checkout@v4
-        
-      - name: Final production build
-        run: npm run build
-        env:
-          NODE_ENV: production
-          
-      - name: Deploy to production Kubernetes
-        uses: azure/k8s-deploy@v1.4
-        with:
-          manifests: k8s/
-          images: ghcr.io/valeo/neuroerp-3.0:v${{ github.sha }}
-          
-      - name: Health check
+      - name: Validate immutable release
+        shell: bash
         run: |
-          curl -f ${{ secrets.PRODUCTION_URL }}/health || exit 1
-          
-      - name: Rollback on failure
+          [[ "${{ inputs.release_sha }}" =~ ^[0-9a-f]{40}$ ]] || {
+            echo "release_sha muss ein voller 40-stelliger Git-SHA sein"
+            exit 1
+          }
+          test "$(git rev-parse HEAD)" = "${{ inputs.release_sha }}"
+
+      - name: Configure cluster
+        run: |
+          test -n "${{ secrets.KUBE_CONFIG }}" || { echo "KUBE_CONFIG fehlt"; exit 1; }
+          mkdir -p "$HOME/.kube"
+          printf '%s' "${{ secrets.KUBE_CONFIG }}" | base64 --decode > "$HOME/.kube/config"
+          chmod 600 "$HOME/.kube/config"
+          kubectl cluster-info
+
+      - name: Validate production secrets
+        run: |
+          kubectl get namespace "$NAMESPACE"
+          kubectl get secret valeo-erp-runtime -n "$NAMESPACE"
+          kubectl get secret valeo-erp-database -n "$NAMESPACE"
+
+      - name: Run database migration
+        env:
+          IMAGE: ${{ env.REGISTRY }}/${{ env.BACKEND_IMAGE_NAME }}:sha-${{ inputs.release_sha }}
+        run: |
+          JOB="valeo-migrate-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          cat <<EOF | kubectl apply -f -
+          apiVersion: batch/v1
+          kind: Job
+          metadata:
+            name: ${JOB}
+            namespace: ${NAMESPACE}
+          spec:
+            backoffLimit: 1
+            ttlSecondsAfterFinished: 3600
+            template:
+              spec:
+                restartPolicy: Never
+                containers:
+                  - name: migrate
+                    image: ${IMAGE}
+                    command: ["python", "scripts/init_db.py"]
+                    envFrom:
+                      - secretRef:
+                          name: valeo-erp-runtime
+          EOF
+          kubectl wait --for=condition=complete "job/${JOB}" -n "$NAMESPACE" --timeout=10m
+
+      - name: Atomic Helm deployment
+        run: |
+          helm upgrade --install "$RELEASE_NAME" k8s/helm/valeo-erp \
+            --namespace "$NAMESPACE" \
+            --values k8s/helm/valeo-erp/values-production.yaml \
+            --set image.tag="sha-${{ inputs.release_sha }}" \
+            --set frontend.image.tag="sha-${{ inputs.release_sha }}" \
+            --atomic --wait --timeout 15m
+
+      - name: Production smoke
+        run: |
+          test -n "${{ secrets.PRODUCTION_URL }}" || { echo "PRODUCTION_URL fehlt"; exit 1; }
+          curl --fail --show-error --silent --retry 12 --retry-all-errors \
+            --retry-delay 5 "${{ secrets.PRODUCTION_URL }}/healthz"
+          curl --fail --show-error --silent --retry 12 --retry-all-errors \
+            --retry-delay 5 "${{ secrets.PRODUCTION_URL }}/readyz"
+
+      - name: Roll back failed deployment
         if: failure()
-        run: kubectl rollout undo deployment/neuroerp-app
-
-  # Notification on completion
-  notify:
-    runs-on: ubuntu-latest  
-    needs: [deploy-production]
-    if: always()
-    steps:
-      - name: Notify deployment status
-        uses: 8398a7/action-slack@v3
-        with:
-          status: ${{ job.status }}
-          channel: '#valeo-kernelchannel'
-          webhook_url: ${{ secrets.SLACK_WEBHOOK }}
-
+        run: helm rollback "$RELEASE_NAME" -n "$NAMESPACE" --wait

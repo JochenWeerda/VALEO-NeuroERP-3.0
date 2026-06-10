@@ -31,7 +31,7 @@ from app.core.database import get_db
 # ---------------------------------------------------------------------------
 
 NOW = datetime(2026, 4, 24, 10, 0, tzinfo=timezone.utc)
-TODAY = date(2026, 4, 24)
+TODAY = date.today()
 
 
 def _rule_row(

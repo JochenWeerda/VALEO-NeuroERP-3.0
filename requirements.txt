@@ -2,10 +2,10 @@
 # Adapted from VALEO-NeuroERP-2.0 backend requirements for clean architecture
 
 # Core FastAPI and async support
-fastapi==0.115.14
+fastapi==0.136.3
 uvicorn[standard]==0.24.0
-starlette==0.46.2
-python-multipart==0.0.9
+starlette==1.0.1
+python-multipart==0.0.27
 
 # Database and ORM
 SQLAlchemy==2.0.41
@@ -21,22 +21,21 @@ pydantic_core==2.33.2
 email-validator==2.2.0
 
 # Authentication and security
-python-jose==3.3.0
-PyJWT==2.10.1
+PyJWT[crypto]==2.13.0
 passlib==1.7.4
 bcrypt==4.1.2
 
 # HTTP client for external APIs
 httpx==0.28.1
-aiohttp==3.12.13
-requests==2.32.3
+aiohttp==3.14.0
+requests==2.33.0
 boto3>=1.34.0
 
 # Logging and monitoring
 python-json-logger==2.0.7
 structlog==24.4.0
 prometheus-client==0.19.0
-prometheus-fastapi-instrumentator==7.0.0
+prometheus-fastapi-instrumentator==8.0.0
 psutil==6.1.1
 
 # OpenTelemetry (optional, Gap 039 — nur bei ENABLE_TRACING / OTEL_EXPORTER_OTLP_ENDPOINT aktiv)
@@ -47,10 +46,11 @@ opentelemetry-instrumentation-fastapi==0.50b0
 opentelemetry-instrumentation-sqlalchemy==0.50b0
 
 # Development and testing
-pytest==8.1.1
-pytest-asyncio==0.23.5
-coverage==7.9.2
-black==24.10.0
+pytest==9.0.3
+pytest-asyncio==1.3.0
+coverage==7.14.1
+pytest-cov==7.1.0
+black==26.3.1
 isort==5.13.2
 flake8==7.3.0
 mypy==1.16.1
@@ -61,13 +61,13 @@ nats-py==2.6.0
 # Code quality and utilities
 click==8.2.1
 colorama==0.4.6
-GitPython==3.1.44
+GitPython==3.1.50
 
 # Data processing
 pandas==2.3.0
 numpy==2.3.1
 scipy>=1.13,<2
-pyarrow==20.0.0
+pyarrow==23.0.1
 openpyxl==3.1.5
 reportlab==4.2.5
 factur-x>=2.5,<4
@@ -75,8 +75,8 @@ drafthorse>=2.3.0
 beautifulsoup4==4.12.3
 pdfplumber>=0.11.0
 PyYAML==6.0.1
-langgraph==0.2.59
-langgraph-checkpoint-sqlite==2.0.11
+langgraph==1.2.4
+langgraph-checkpoint-sqlite==3.1.0
 
 # Rate limiting
 slowapi==0.1.9
@@ -90,4 +90,4 @@ redis==6.2.0
 
 # Documentation
 Markdown==3.8.2
-Pygments==2.19.2
+Pygments==2.20.0

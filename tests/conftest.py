@@ -9,11 +9,17 @@ Zentrale Test-Fixtures für VALEO NeuroERP 3.0.
 """
 
 import os
+import sys
 
 import pytest
 
 from app.core.config import settings
 from app.core import security
+
+# Coverage tracing adds frames to the large FastAPI startup graph. Python
+# 3.11.0 on Windows can otherwise hit the interpreter default during
+# TestClient lifespan startup even though the same tests pass without tracing.
+sys.setrecursionlimit(max(sys.getrecursionlimit(), 4000))
 
 
 def pytest_collection_modifyitems(config: pytest.Config, items: list) -> None:

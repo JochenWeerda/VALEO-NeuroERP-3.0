@@ -71,7 +71,12 @@ def _ensure_system_tenant_and_accounts(db_session):
                 text("""
                     INSERT INTO domain_erp.chart_of_accounts
                     (id, tenant_id, account_number, account_name, account_type, category, is_active)
-                    VALUES (:id, 'system', :num, :name, 'balance_sheet', 'Forderungen/Erlöse', true)
+                    VALUES (
+                      :id, 'system', :num, :name,
+                      CASE WHEN :num LIKE '8%%' THEN 'revenue' ELSE 'asset' END,
+                      CASE WHEN :num LIKE '8%%' THEN 'revenue' ELSE 'current_assets' END,
+                      true
+                    )
                 """),
                 {"id": uuid7(), "num": account_number, "name": account_name},
             )

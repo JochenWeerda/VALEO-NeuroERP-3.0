@@ -3,13 +3,13 @@ const { execFileSync } = require('node:child_process')
 const path = require('node:path')
 
 const repoRoot = process.cwd()
+const eslintBin = path.join(path.dirname(require.resolve('eslint/package.json')), 'bin', 'eslint.js')
 
 function run(command, args) {
-  const executable = process.platform === 'win32' && command === 'npx' ? 'npx.cmd' : command
-  execFileSync(executable, args, {
+  execFileSync(command, args, {
     cwd: repoRoot,
     stdio: 'inherit',
-    shell: process.platform === 'win32',
+    shell: false,
   })
 }
 
@@ -33,12 +33,16 @@ if (stagedFiles.length === 0) {
   process.exit(0)
 }
 
-const scriptLikeFiles = stagedFiles.filter((file) => /\.(ts|tsx|js|jsx)$/i.test(file))
+const scriptLikeFiles = stagedFiles.filter(
+  (file) =>
+    /\.(ts|tsx|js|jsx)$/i.test(file) &&
+    !/\.(spec|test)\.(ts|tsx|js|jsx)$/i.test(file),
+)
 const markdownFiles = stagedFiles.filter((file) => /\.md$/i.test(file))
 
 if (scriptLikeFiles.length > 0) {
-  run('npx', ['eslint', '--fix', ...scriptLikeFiles])
-  run('npx', ['eslint', ...scriptLikeFiles])
+  run(process.execPath, [eslintBin, '--fix', ...scriptLikeFiles])
+  run(process.execPath, [eslintBin, ...scriptLikeFiles])
 }
 
 if (markdownFiles.length > 0) {

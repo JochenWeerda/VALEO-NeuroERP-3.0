@@ -368,8 +368,16 @@ def build_system_optimizer_workflow():
     workflow.add_edge("generate_plan", END)
 
     # Compile with checkpointer
+    import sqlite3
+    from pathlib import Path
+
     from langgraph.checkpoint.sqlite import SqliteSaver
-    checkpointer = SqliteSaver.from_conn_string("data/system_optimizer.db")
+
+    database_path = Path("data/system_optimizer.db")
+    database_path.parent.mkdir(parents=True, exist_ok=True)
+    checkpointer = SqliteSaver(
+        sqlite3.connect(database_path, check_same_thread=False)
+    )
 
     app = workflow.compile(checkpointer=checkpointer)
 

@@ -12,6 +12,7 @@ from fastapi import APIRouter, Depends, Query, Response
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
+from app.core.workflow_definitions import merge_workflow_variants
 from app.core.tenant import get_tenant_id
 
 from app.api.v1.schemas.admin_core_schemas import (
@@ -32,6 +33,7 @@ from app.api.v1.schemas.admin_core_schemas import (
     ErntefensterTemplateOut,
     PolicyOverridesOut,
     ProcessVariantsOut,
+    WorkflowSandboxCampaignMatchOut,
     WorkflowSandboxPreviewIn,
     WorkflowSandboxPreviewOut,
 )
@@ -43,6 +45,11 @@ router = APIRouter()
 
 def _service(tenant_id: str, db: Session) -> AdminCoreService:
     return AdminCoreService(db, tenant_id)
+
+
+def _load_tenant_settings(db: Session, tenant_id: str):
+    """Compatibility hook for sandbox contract tests and adapter injection."""
+    return _service(tenant_id, db)._load_tenant_settings()
 
 
 # ── Users ────────────────────────────────────────────────────────────────────
@@ -275,4 +282,8 @@ async def preview_workflow_sandbox(
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
-    return _service(tenant_id, db).preview_workflow_sandbox(payload)
+    return _service(tenant_id, db).preview_workflow_sandbox(
+        payload,
+        settings_loader=lambda: _load_tenant_settings(db, tenant_id),
+        variant_merger=merge_workflow_variants,
+    )

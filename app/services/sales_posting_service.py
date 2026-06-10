@@ -241,7 +241,7 @@ class SalesPostingService:
                 self.ACCOUNT_RECEIVABLES,
                 "Forderungen aus Lieferungen und Leistungen",
                 "asset",
-                "receivables",
+                "current_assets",
             )
             self._ensure_account(
                 self.ACCOUNT_REVENUE,

@@ -20,13 +20,14 @@ VALEO NeuroERP 3.0 ist ein mehrdomäniges ERP-System für Agrargenossenschaften 
 
 | Kennzahl | Stand |
 |----------|-------|
-| Doku-Stand | `2026-05-21` |
+| Doku-Stand | `2026-06-09` |
 | Produktreife | aktive Entwicklung, nicht allgemein produktionsreif |
 | Frontend TypeScript | 0 Fehler |
 | Backend-Testabdeckung | 64,85 % gesamt; 18/18 kritische Ratchet-Pfade grün |
 | Alembic | 1 Head |
 | Service-Layer | Bekannte große Legacy-Endpunkte repo-seitig auf dedizierte Services nachgezogen |
 | Docker/Container | Erstinstallation, Keycloak-DB-Bootstrap und mehrere Healthcheck-/CRM-/Inventory-Fixes nachgezogen |
+| Production Release | Harte CI-/Security-Gates, SBOM, getrennte immutable Backend-/Frontend-Images, atomarer Helm-Rollout |
 | UAT | Abgenommen mit dokumentierten externen Gates; repo-seitige UAT-Auflagen nachgeliefert |
 
 Der belastbare Ist-Zustand liegt in:
@@ -35,6 +36,7 @@ Der belastbare Ist-Zustand liegt in:
 - [Open Gaps and Known Issues](docs/project-context/open-gaps-and-known-issues.md)
 - [Active Workboard](docs/agent-ops/active-workboard.md)
 - [UAT Master Plan](docs/uat/UAT-MASTER-PLAN.md)
+- [Production Readiness Runbook](docs/operations/production-readiness-runbook.md)
 - [Meridian Design Concept](docs/design/DESIGN-KONZEPT-1-MERIDIAN.md)
 
 ### Was das System heute abdeckt
@@ -170,13 +172,14 @@ VALEO NeuroERP 3.0 is a multi-domain ERP system for agricultural cooperatives an
 
 | Metric | As of |
 |--------|-------|
-| Docs date | `2026-05-21` |
+| Docs date | `2026-06-09` |
 | Maturity | active development, not generally production-ready |
 | Frontend TypeScript | 0 errors |
 | Backend test coverage | 64.85 % overall; 18/18 critical ratchet paths green |
 | Alembic | 1 head |
 | Service layer | known large legacy endpoints have repo-side dedicated services |
 | Docker/containers | first install, Keycloak DB bootstrap and several healthcheck/CRM/Inventory fixes delivered |
+| Production release | hard CI/security gates, SBOM, separate immutable backend/frontend images, atomic Helm rollout |
 | UAT | accepted with documented external gates; repo-side UAT conditions delivered |
 
 Authoritative status documents:
@@ -185,6 +188,7 @@ Authoritative status documents:
 - [Open Gaps and Known Issues](docs/project-context/open-gaps-and-known-issues.md)
 - [Active Workboard](docs/agent-ops/active-workboard.md)
 - [UAT Master Plan](docs/uat/UAT-MASTER-PLAN.md)
+- [Production Readiness Runbook](docs/operations/production-readiness-runbook.md)
 - [Meridian Design Concept](docs/design/DESIGN-KONZEPT-1-MERIDIAN.md)
 
 ### What the System Covers Today

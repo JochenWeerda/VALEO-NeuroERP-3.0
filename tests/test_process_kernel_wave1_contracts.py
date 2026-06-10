@@ -830,6 +830,7 @@ def test_payment_return_amount_accepts_current_and_legacy_row_shapes():
 
 def test_pos_tagesabschluss_enqueues_cash_closing_outbox_event(monkeypatch):
     captured: dict[str, Any] = {}
+    from app.services.fiscalization import service as fiscal_service_module
 
     async def fake_enqueue(db, *, event_type, aggregate_id, payload, tenant_id=None):
         captured["event_type"] = event_type
@@ -848,31 +849,83 @@ def test_pos_tagesabschluss_enqueues_cash_closing_outbox_event(monkeypatch):
         def commit(self):
             self.commands.append(("COMMIT", None))
 
+    class FakeFiscalizationService:
+        def __init__(self, db, tenant_id):
+            self.db = db
+            self.tenant_id = tenant_id
+
+        def get_config(self):
+            return {
+                "configured": True,
+                "cash_register_id": "register-1",
+                "client_id": "client-1",
+                "settings": {"terminal_id": "terminal-1"},
+            }
+
+        def daily_summary(self, business_date):
+            return {
+                "incomplete_count": 0,
+                "gross_total": 407.0,
+                "cash_total": 119.0,
+                "card_total": 238.0,
+                "transaction_count": 5,
+            }
+
+        def close_cash_point(self, command):
+            return fiscal_service_module.ProviderResult(
+                provider="fiskaly",
+                operation="cash_point_closing",
+                provider_reference="closing-1",
+                status="completed",
+                simulated=False,
+            )
+
     monkeypatch.setattr(compat, "_enqueue_event", fake_enqueue)
     monkeypatch.setattr(compat, "_ensure_chart_account", lambda db, tenant_id, account_number, account_name: account_number)
+    monkeypatch.setattr(fiscal_service_module, "FiscalizationService", FakeFiscalizationService)
 
     payload = compat.TagesabschlussIn(
         datum=date(2026, 3, 11),
         kassierer="Kasse 1",
         tse_transaktionen=5,
-        umsatz_bar=100.0,
-        umsatz_ec=20.0,
-        umsatz_paypal=10.0,
+        umsatz_bar=119.0,
+        umsatz_ec=238.0,
+        umsatz_paypal=0.0,
         umsatz_b2b=0.0,
-        umsatz_gesamt=130.0,
-        bargeld_gezaehlt=100.0,
-        ec_abrechnung=20.0,
-        paypal_abrechnung=10.0,
+        umsatz_gutschein=50.0,
+        gutschein_ausgabe=100.0,
+        barentnahme=80.0,
+        umsatz_gesamt=407.0,
+        bargeld_gezaehlt=139.0,
+        ec_abrechnung=238.0,
+        paypal_abrechnung=0.0,
         differenz_bar=0.0,
     )
 
-    response = asyncio.run(compat.create_tagesabschluss(payload, tenant_id="tenant-wave1", db=FakeDb()))
+    db = FakeDb()
+    response = asyncio.run(compat.create_tagesabschluss(payload, tenant_id="tenant-wave1", db=db))
 
     assert response.status == "gebucht"
     assert captured["event_type"] == "cash_closing.posted"
     assert captured["tenant_id"] == "tenant-wave1"
     assert captured["payload"]["cash_closing_id"] == response.id
     assert captured["payload"]["belegnummer"] == response.belegnummer
+    journal_lines = [
+        params
+        for statement, params in db.commands
+        if "INSERT INTO domain_erp.journal_entry_lines" in statement
+    ]
+    assert {
+        (line["acc_id"], line["debit"], line["credit"]) for line in journal_lines
+    } == {
+        ("1000", Decimal("219.00"), Decimal("0.00")),
+        ("1200", Decimal("238.00"), Decimal("0.00")),
+        ("1600", Decimal("50.00"), Decimal("0.00")),
+        ("8400", Decimal("0.00"), Decimal("407.00")),
+        ("1600", Decimal("0.00"), Decimal("100.00")),
+        ("1800", Decimal("80.00"), Decimal("0.00")),
+        ("1000", Decimal("0.00"), Decimal("80.00")),
+    }
 
 
 def test_closing_checklist_response_returns_structured_approval_snapshot():

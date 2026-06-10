@@ -157,7 +157,6 @@ export default function RueckverfolgbarkeitPage() {
   // Bei Auswahl: Ereignis-Log idempotent aus Ist-Zustand befüllen (Backfill).
   useEffect(() => {
     if (selected) syncChain.mutate(selected)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selected])
 
   const tickets = (ticketsQuery.data ?? []).filter(

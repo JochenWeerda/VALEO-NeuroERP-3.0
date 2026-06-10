@@ -2757,6 +2757,9 @@ class TagesabschlussIn(BaseModel):
     umsatz_ec: float = 0.0
     umsatz_paypal: float = 0.0
     umsatz_b2b: float = 0.0
+    umsatz_gutschein: float = 0.0
+    gutschein_ausgabe: float = 0.0
+    barentnahme: float = 0.0
     umsatz_gesamt: float = 0.0
     bargeld_gezaehlt: float = 0.0
     ec_abrechnung: float = 0.0
@@ -2773,8 +2776,16 @@ class TagesabschlussOut(BaseModel):
     belegnummer: str
 
 
-def _ensure_chart_account(db: Session, tenant_id: str, account_number: str, account_name: str) -> str:
+def _ensure_chart_account(
+    db: Session,
+    tenant_id: str,
+    account_number: str,
+    _legacy_account_name: str | None = None,
+) -> str:
     """Hole oder erstelle Kontenplan-Eintrag, return chart_of_accounts.id."""
+    from app.services.pos_accounting_service import ACCOUNT_DEFINITIONS
+
+    definition = ACCOUNT_DEFINITIONS[account_number]
     row = db.execute(
         text("""
             SELECT id FROM domain_erp.chart_of_accounts
@@ -2789,9 +2800,16 @@ def _ensure_chart_account(db: Session, tenant_id: str, account_number: str, acco
         text("""
             INSERT INTO domain_erp.chart_of_accounts
             (id, tenant_id, account_number, account_name, account_type, category, is_active, created_at, updated_at)
-            VALUES (:id, :tid, :num, :name, 'ASSET', 'general', TRUE, NOW(), NOW())
+            VALUES (:id, :tid, :num, :name, :account_type, :category, TRUE, NOW(), NOW())
         """),
-        {"id": acc_id, "tid": tenant_id, "num": account_number, "name": account_name},
+        {
+            "id": acc_id,
+            "tid": tenant_id,
+            "num": account_number,
+            "name": definition.name,
+            "account_type": definition.account_type,
+            "category": definition.category,
+        },
     )
     return acc_id
 
@@ -2807,6 +2825,24 @@ async def create_tagesabschluss(
     from app.services.fiscalization.contracts import CashPointClosingCommand, PaymentLine
     from app.services.fiscalization.providers import FiscalProviderError
     from app.services.fiscalization.service import FiscalizationService
+    from app.services.pos_accounting_service import PosClosingAmounts, build_pos_closing_lines
+
+    amounts = PosClosingAmounts(
+        cash_sales=Decimal(str(payload.umsatz_bar or 0)),
+        card_sales=Decimal(str(payload.umsatz_ec or 0)),
+        paypal_sales=Decimal(str(payload.umsatz_paypal or 0)),
+        b2b_sales=Decimal(str(payload.umsatz_b2b or 0)),
+        voucher_redemptions=Decimal(str(payload.umsatz_gutschein or 0)),
+        voucher_issues=Decimal(str(payload.gutschein_ausgabe or 0)),
+        cash_withdrawals=Decimal(str(payload.barentnahme or 0)),
+        cash_difference=Decimal(str(payload.differenz_bar or 0)),
+    )
+    accounting_lines = build_pos_closing_lines(amounts)
+    if abs(Decimal(str(payload.umsatz_gesamt or 0)) - amounts.sales_total) > Decimal("0.01"):
+        raise HTTPException(
+            status_code=422,
+            detail="Gemeldeter Umsatz stimmt nicht mit den Zahlungsarten ueberein",
+        )
 
     fiscal = FiscalizationService(db, tenant_id)
     config = fiscal.get_config()
@@ -2851,6 +2887,9 @@ async def create_tagesabschluss(
         "umsatz_ec": payload.umsatz_ec,
         "umsatz_paypal": payload.umsatz_paypal,
         "umsatz_b2b": payload.umsatz_b2b,
+        "umsatz_gutschein": payload.umsatz_gutschein,
+        "gutschein_ausgabe": payload.gutschein_ausgabe,
+        "barentnahme": payload.barentnahme,
         "umsatz_gesamt": payload.umsatz_gesamt,
         "bargeld_gezaehlt": payload.bargeld_gezaehlt,
         "ec_abrechnung": payload.ec_abrechnung,
@@ -2880,22 +2919,10 @@ async def create_tagesabschluss(
 
     # Verdrahtung zur FiBu: Journal-Eintrag erstellen (SKR03)
     period = payload.datum.strftime("%Y-%m")
-    umsatz_bar = float(payload.umsatz_bar or 0)
-    umsatz_ec = float(payload.umsatz_ec or 0)
-    umsatz_paypal = float(payload.umsatz_paypal or 0)
-    umsatz_b2b = float(payload.umsatz_b2b or 0)
-    umsatz_gesamt = float(payload.umsatz_gesamt or 0)
-    differenz_bar = float(payload.differenz_bar or 0)
 
-    if umsatz_gesamt > 0:
+    if accounting_lines:
         entry_id = uuid7()
         desc = f"Tagesabschluss POS {payload.datum.isoformat()} ({payload.kassierer or 'Kassierer'})"
-
-        acc_1000 = _ensure_chart_account(db, tenant_id, "1000", "Kasse")
-        acc_1200 = _ensure_chart_account(db, tenant_id, "1200", "Bank")
-        acc_1210 = _ensure_chart_account(db, tenant_id, "1210", "PayPal / Verrechnung")
-        acc_8400 = _ensure_chart_account(db, tenant_id, "8400", "UmsatzerlÃ¶se")
-        acc_2150 = _ensure_chart_account(db, tenant_id, "2150", "KassenfehlbetrÃ¤ge")
 
         db.execute(
             text("""
@@ -2914,29 +2941,18 @@ async def create_tagesabschluss(
                 "desc": desc,
                 "ref": belegnummer,
                 "period": period,
-                "total_d": umsatz_gesamt + abs(differenz_bar),
-                "total_c": umsatz_gesamt + abs(differenz_bar),
+                "total_d": sum((line.debit for line in accounting_lines), Decimal("0.00")),
+                "total_c": sum((line.credit for line in accounting_lines), Decimal("0.00")),
             },
         )
 
-        lines: list[tuple[str, float, float, str]] = []
-        if umsatz_bar > 0:
-            lines.append((acc_1000, umsatz_bar, 0.0, "Kasseneinnahmen Bar"))
-        if umsatz_ec > 0:
-            lines.append((acc_1200, umsatz_ec, 0.0, "EC-Zahlungen"))
-        if umsatz_paypal > 0:
-            lines.append((acc_1210, umsatz_paypal, 0.0, "PayPal"))
-        if umsatz_b2b > 0:
-            lines.append((acc_1200, umsatz_b2b, 0.0, "B2B-Verbuchung"))
-        if differenz_bar > 0:
-            lines.append((acc_2150, differenz_bar, 0.0, "Kassenfehlbetrag"))
-        lines.append((acc_8400, 0.0, umsatz_gesamt, "UmsatzerlÃ¶se POS"))
-        if differenz_bar < 0:
-            lines.append((acc_2150, 0.0, abs(differenz_bar), "KassenÃ¼berbetrag"))
-        if differenz_bar > 0:
-            lines.append((acc_1000, 0.0, differenz_bar, "Kassenfehlbetrag Abgang"))
-
-        for ln, (acc_id, debit, credit, line_desc) in enumerate(lines, start=1):
+        account_ids = {
+            line.account_number: _ensure_chart_account(
+                db, tenant_id, line.account_number, line.description
+            )
+            for line in accounting_lines
+        }
+        for ln, line in enumerate(accounting_lines, start=1):
             line_id = f"{entry_id}-L{ln}"
             db.execute(
                 text("""
@@ -2948,11 +2964,11 @@ async def create_tagesabschluss(
                     "id": line_id,
                     "tid": tenant_id,
                     "je_id": entry_id,
-                    "acc_id": acc_id,
-                    "debit": debit,
-                    "credit": credit,
+                    "acc_id": account_ids[line.account_number],
+                    "debit": line.debit,
+                    "credit": line.credit,
                     "ln": ln,
-                    "desc": line_desc,
+                    "desc": line.description,
                 },
             )
 

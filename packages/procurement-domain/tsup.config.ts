@@ -54,7 +54,6 @@ export default defineConfig({
     'tesseract.js',
     'pdf-parse',
     'csv-parser',
-    'xlsx',
     'node-ical',
     'ical-generator',
     'qrcode',

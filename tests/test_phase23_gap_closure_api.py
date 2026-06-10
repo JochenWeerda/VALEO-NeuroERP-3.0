@@ -1,15 +1,12 @@
 from __future__ import annotations
 
-import io
-import zipfile
-
 import pytest
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
 
 @pytest.mark.unit
-def test_pos_dsfinvk_export_zip_contains_required_files():
+def test_pos_dsfinvk_export_fails_closed_without_provider_configuration():
     from app.api.v1.endpoints import pos_dsfinvk
 
     app = FastAPI()
@@ -18,21 +15,8 @@ def test_pos_dsfinvk_export_zip_contains_required_files():
 
     response = client.get("/dsfinvk/export")
 
-    assert response.status_code == 200
-    assert response.headers["content-type"] == "application/zip"
-    with zipfile.ZipFile(io.BytesIO(response.content)) as archive:
-        names = set(archive.namelist())
-        assert {
-            "cashpointclosing.csv",
-            "transactions.csv",
-            "lines.csv",
-            "datapayment.csv",
-            "vat.csv",
-            "index.xml",
-        }.issubset(names)
-        index_xml = archive.read("index.xml").decode("utf-8")
-        assert 'version="2.3"' in index_xml
-        assert "KASSE-001" in index_xml
+    assert response.status_code == 409
+    assert "nicht konfiguriert" in response.json()["detail"]
 
 
 @pytest.mark.unit

@@ -9,9 +9,24 @@ import { apiClient } from '@/lib/api-client'
 import { getEntityTypeLabel, getStatusLabel, getSuccessMessage, getErrorMessage } from '@/features/crud/utils/i18n-helpers'
 import { toast } from '@/hooks/use-toast'
 import { ErrorState } from '@/components/ErrorState'
+import type { TFunction } from 'i18next'
 
 // Konfiguration für Campaigns ListReport
-const createCampaignsConfig = (t: any, entityTypeLabel: string): ListConfig => ({
+interface Campaign {
+  name?: string
+  type?: string
+  status?: string
+  sent_count?: number
+  open_count?: number
+  click_count?: number
+  created_at?: string
+}
+
+interface CampaignListResponse {
+  data?: Campaign[]
+}
+
+const createCampaignsConfig = (t: TFunction, entityTypeLabel: string): ListConfig => ({
   title: entityTypeLabel,
   titleKey: 'crud.list.title',
   subtitle: t('crud.subtitles.manageCampaigns'),
@@ -142,7 +157,8 @@ export default function CampaignsPage(): JSX.Element {
     queryKey: ['crm', 'campaigns'],
     queryFn: async () => {
       const r = await apiClient.get('/api/v1/crm/campaigns')
-      const items = Array.isArray(r.data) ? r.data : ((r.data as any).data || [])
+      const payload = r.data as Campaign[] | CampaignListResponse
+      const items = Array.isArray(payload) ? payload : (payload.data ?? [])
       return { items, total: items.length }
     },
     staleTime: 2 * 60 * 1000,
@@ -164,7 +180,7 @@ export default function CampaignsPage(): JSX.Element {
   const handleExport = () => {
     try {
       const csvHeader = `${t('crud.fields.name')};${t('crud.fields.type')};${t('crud.fields.status')};${t('crud.fields.sentCount')};${t('crud.fields.openCount')};${t('crud.fields.clickCount')};${t('crud.fields.createdAt')}\n`
-      const csvContent = data.map((item: any) =>
+      const csvContent = data.map((item: Campaign) =>
         `"${item.name || ''}";"${item.type || ''}";"${item.status || ''}";"${item.sent_count || 0}";"${item.open_count || 0}";"${item.click_count || 0}";"${item.created_at || ''}"`
       ).join('\n')
 
@@ -197,11 +213,11 @@ export default function CampaignsPage(): JSX.Element {
       data={data}
       total={total}
       isLoading={isLoading}
-      onEdit={(item) => navigate(`/crm/campaign/${item.id}`)}
+      onEdit={(item) => navigate(`/crm/campaign/${String(item.id)}`)}
       onDelete={async (item) => {
         if (confirm(t('crud.dialogs.delete.descriptionGeneric', { entityType: entityTypeLabel }))) {
           try {
-            await apiClient.delete(`/api/v1/crm/campaigns/${item.id}`)
+            await apiClient.delete(`/api/v1/crm/campaigns/${String(item.id)}`)
             toast({
               title: getSuccessMessage(t, 'delete', entityType),
             })
