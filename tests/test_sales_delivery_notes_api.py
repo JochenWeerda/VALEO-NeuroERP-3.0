@@ -73,11 +73,43 @@ def test_create_delivery_note_missing_fields_returns_422():
 
 def test_create_delivery_note_valid_payload():
     import uuid
+    from sqlalchemy import text
+
+    from app.core.database import SessionLocal
+
+    delivery_note_number = f"LS-{uuid.uuid4().hex[:8].upper()}"
+    session = SessionLocal()
+    session.execute(
+        text(
+            """
+            INSERT INTO domain_crm.customers
+                (id, customer_number, company_name, tenant_id, is_active)
+            VALUES
+                ('C-001', 'C-001', 'Integration Test Customer', 'test-tenant', TRUE)
+            ON CONFLICT (id) DO NOTHING
+            """
+        )
+    )
+    session.commit()
     payload = {
         "customer_id": "C-001",
         "delivery_date": "2026-05-08",
-        "delivery_note_number": f"LS-{uuid.uuid4().hex[:8].upper()}",
+        "delivery_note_number": delivery_note_number,
     }
-    resp = _client.post("/api/v1/sales/delivery-notes", json=payload, headers=_HEADERS)
-    skip_if_db_unavailable(resp)
-    assert resp.status_code in (200, 201, 422)
+    try:
+        resp = _client.post("/api/v1/sales/delivery-notes", json=payload, headers=_HEADERS)
+        skip_if_db_unavailable(resp)
+        assert resp.status_code in (200, 201, 422)
+    finally:
+        session.execute(
+            text(
+                """
+                DELETE FROM domain_sales.delivery_notes
+                WHERE tenant_id = 'test-tenant' AND delivery_note_number = :number
+                """
+            ),
+            {"number": delivery_note_number},
+        )
+        session.execute(text("DELETE FROM domain_crm.customers WHERE id = 'C-001'"))
+        session.commit()
+        session.close()
