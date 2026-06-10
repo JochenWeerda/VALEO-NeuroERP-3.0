@@ -100,17 +100,6 @@ def _seed_contract_test_tenants():
                 ),
                 {"id": tenant_id, "name": name, "domain": f"{tenant_id}.test.local"},
             )
-        session.execute(
-            text(
-                """
-                INSERT INTO domain_crm.customers
-                    (id, customer_number, company_name, tenant_id, is_active)
-                VALUES
-                    ('C-001', 'C-001', 'Integration Test Customer', 'test-tenant', TRUE)
-                ON CONFLICT (id) DO NOTHING
-                """
-            )
-        )
         session.commit()
     finally:
         session.close()
