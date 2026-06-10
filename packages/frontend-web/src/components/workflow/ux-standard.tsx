@@ -58,7 +58,7 @@ export function RoleFocusBar<T extends string = string>({
           <p className="text-[12px] text-gray-500">{selected?.description}</p>
         </div>
         {typeof visibleCount === 'number' && typeof totalCount === 'number' ? (
-          <span className="text-[11px] font-bold uppercase tracking-wide text-gray-400">
+          <span className="text-[11px] font-bold uppercase tracking-wide text-gray-600">
             {visibleCount} von {totalCount} sichtbar
           </span>
         ) : null}
@@ -203,7 +203,7 @@ export function ManagementDecisionPanel({ decision }: { decision: ManagementDeci
           {decision.allowed ? <CheckCircle2 className="h-5 w-5 text-emerald-700" /> : <ShieldAlert className="h-5 w-5 text-red-700" />}
           <h2 className="text-base font-bold text-gray-900">Darf der Prozess abgeschlossen werden?</h2>
         </div>
-        <span className="text-[10px] font-bold uppercase tracking-widest text-gray-400">Entscheidung</span>
+        <span className="text-[10px] font-bold uppercase tracking-widest text-gray-600">Entscheidung</span>
       </div>
       <div className="flex flex-wrap items-start gap-8 p-6 lg:flex-nowrap lg:gap-12">
         <div className="flex-1 space-y-4">
@@ -222,18 +222,18 @@ export function ManagementDecisionPanel({ decision }: { decision: ManagementDeci
           <h4 className={`text-xl font-black uppercase tracking-tight ${classes.text}`}>
             {decision.allowed ? decision.allowedLabel ?? 'Freigabe erteilt' : decision.blockedLabel ?? 'Keine Freigabe'}
           </h4>
-          <p className="text-xs font-medium text-gray-500">
+          <p className="text-xs font-medium text-gray-600">
             {decision.allowed ? 'Alle kritischen Anforderungen wurden erfuellt.' : `${decision.blockerCount ?? 0} kritische Punkte verhindern aktuell den Abschluss.`}
           </p>
         </div>
       </div>
       <div className="grid border-t border-gray-100 bg-gray-50/60 md:grid-cols-2">
         <div className="border-b border-gray-100 p-4 md:border-b-0 md:border-r">
-          <p className="text-[10px] font-bold uppercase tracking-wide text-gray-400">Naechster Fokus</p>
+          <p className="text-[10px] font-bold uppercase tracking-wide text-gray-600">Naechster Fokus</p>
           <p className="mt-1 text-sm font-bold text-gray-800">{decision.nextFocus ?? 'Regelpruefung terminieren'}</p>
         </div>
         <div className="p-4">
-          <p className="text-[10px] font-bold uppercase tracking-wide text-gray-400">Vorlage Entscheidung</p>
+          <p className="text-[10px] font-bold uppercase tracking-wide text-gray-600">Vorlage Entscheidung</p>
           {decision.template ? (
             <a href={decision.template.href} target="_blank" rel="noreferrer" className="mt-1 inline-flex items-center gap-1 text-sm font-bold text-[#005ca5] hover:underline">
               {decision.template.label}

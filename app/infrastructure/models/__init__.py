@@ -49,7 +49,7 @@ class User(Base):
     __table_args__ = {"schema": "domain_shared", "extend_existing": True}
 
     id = Column(String, primary_key=True, default=uuid7)
-    keycloak_id = Column(String, nullable=True)
+    keycloak_id = Column(String, nullable=False)
     username = Column(String(50), nullable=False, unique=True)
     email = Column(String(100), nullable=False, unique=True)
     first_name = Column(String(50), nullable=False)

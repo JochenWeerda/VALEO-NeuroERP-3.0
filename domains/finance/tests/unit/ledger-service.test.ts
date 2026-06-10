@@ -5,7 +5,7 @@
  * Following testing best practices and 85%+ coverage requirement
  */
 
-import { LedgerApplicationService, LedgerServiceDependencies } from '../../src/application/services/ledger-service';
+import { LedgerApplicationService } from '../../src/application/services/ledger-service';
 import {
   Journal,
   JournalEntry,
@@ -52,7 +52,10 @@ class MockJournalRepository implements JournalRepository {
 
   async findUnbalancedJournals(tenantId: string): Promise<Journal[]> {
     return Array.from(this.journals.values()).filter(
-      j => j.tenantId === tenantId && j.status === 'DRAFT'
+      j =>
+        j.tenantId === tenantId &&
+        j.status === 'DRAFT' &&
+        Math.abs(j.totalDebit - j.totalCredit) > 0.01
     );
   }
 
@@ -154,6 +157,46 @@ class MockEventPublisher implements EventPublisher {
 
 // ===== TEST SETUP =====
 
+function createLedgerTestContext() {
+  const journalRepo = new MockJournalRepository();
+  const accountRepo = new MockAccountRepository();
+  const periodRepo = new MockPeriodRepository();
+  const eventPublisher = new MockEventPublisher();
+
+  accountRepo.addTestAccount({
+    id: 'acc-1000',
+    tenantId: 'TEST_TENANT',
+    accountNumber: '1000',
+    name: 'Cash',
+    type: 'ASSET',
+    isActive: true,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    metadata: {}
+  });
+  accountRepo.addTestAccount({
+    id: 'acc-4000',
+    tenantId: 'TEST_TENANT',
+    accountNumber: '4000',
+    name: 'Revenue',
+    type: 'REVENUE',
+    isActive: true,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    metadata: {}
+  });
+  periodRepo.addTestPeriod(AccountingPeriodEntity.create('TEST_TENANT', '2025-09'));
+
+  const service = new LedgerApplicationService({
+    journalRepository: journalRepo,
+    accountRepository: accountRepo,
+    periodRepository: periodRepo,
+    eventPublisher
+  });
+
+  return { service, journalRepo, accountRepo, periodRepo, eventPublisher };
+}
+
 describe('LedgerApplicationService', () => {
   let service: LedgerApplicationService;
   let journalRepo: MockJournalRepository;
@@ -162,22 +205,7 @@ describe('LedgerApplicationService', () => {
   let eventPublisher: MockEventPublisher;
 
   beforeEach(() => {
-    journalRepo = new MockJournalRepository();
-    accountRepo = new MockAccountRepository();
-    periodRepo = new MockPeriodRepository();
-    eventPublisher = new MockEventPublisher();
-
-    const dependencies: LedgerServiceDependencies = {
-      journalRepository: journalRepo,
-      accountRepository: accountRepo,
-      periodRepository: periodRepo,
-      eventPublisher
-    };
-
-    service = new LedgerApplicationService(dependencies);
-
-    // Setup test data
-    setupTestData();
+    ({ service, journalRepo, accountRepo, periodRepo, eventPublisher } = createLedgerTestContext());
   });
 
   afterEach(() => {
@@ -186,37 +214,6 @@ describe('LedgerApplicationService', () => {
     periodRepo.clear();
     eventPublisher.clear();
   });
-
-  function setupTestData(): void {
-    // Add test accounts
-    accountRepo.addTestAccount({
-      id: 'acc-1000',
-      tenantId: 'TEST_TENANT',
-      accountNumber: '1000',
-      name: 'Cash',
-      type: 'ASSET',
-      isActive: true,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-      metadata: {}
-    });
-
-    accountRepo.addTestAccount({
-      id: 'acc-4000',
-      tenantId: 'TEST_TENANT',
-      accountNumber: '4000',
-      name: 'Revenue',
-      type: 'REVENUE',
-      isActive: true,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-      metadata: {}
-    });
-
-    // Add test period
-    const period = AccountingPeriodEntity.create('TEST_TENANT', '2025-09');
-    periodRepo.addTestPeriod(period);
-  }
 
   // ===== TEST CASES =====
 
@@ -702,6 +699,13 @@ describe('LedgerApplicationService', () => {
 // ===== INTEGRATION TESTS =====
 
 describe('Ledger Domain Integration', () => {
+  let service: LedgerApplicationService;
+  let journalRepo: MockJournalRepository;
+
+  beforeEach(() => {
+    ({ service, journalRepo } = createLedgerTestContext());
+  });
+
   it('should maintain referential integrity', async () => {
     // Test that journal entries reference valid accounts
     const command: CreateJournalCommand = {
@@ -714,6 +718,13 @@ describe('Ledger Domain Integration', () => {
           debit: 1000,
           credit: 0,
           description: 'Valid account reference',
+          metadata: {}
+        },
+        {
+          accountId: 'acc-4000',
+          debit: 0,
+          credit: 1000,
+          description: 'Balancing account reference',
           metadata: {}
         }
       ],
@@ -774,6 +785,12 @@ describe('Ledger Domain Integration', () => {
 // ===== PERFORMANCE TESTS =====
 
 describe('Ledger Performance', () => {
+  let service: LedgerApplicationService;
+
+  beforeEach(() => {
+    ({ service } = createLedgerTestContext());
+  });
+
   it('should handle large journals efficiently', async () => {
     // Create journal with many entries
     const entries = Array.from({ length: 1000 }, (_, i) => ({

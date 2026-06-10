@@ -1,10 +1,14 @@
 import { NodeSDK } from '@opentelemetry/sdk-node';
 import { getNodeAutoInstrumentations } from '@opentelemetry/auto-instrumentations-node';
-import { JaegerExporter } from '@opentelemetry/exporter-jaeger';
+import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http';
 import { PrometheusExporter } from '@opentelemetry/exporter-prometheus';
-import { Resource } from '@opentelemetry/resources';
-import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions';
-import { diag, DiagConsoleLogger, DiagLogLevel } from '@opentelemetry/api';
+import { resourceFromAttributes } from '@opentelemetry/resources';
+import {
+  ATTR_SERVICE_NAME,
+  ATTR_SERVICE_NAMESPACE,
+  ATTR_SERVICE_VERSION,
+} from '@opentelemetry/semantic-conventions';
+import { DiagConsoleLogger, DiagLogLevel, diag } from '@opentelemetry/api';
 
 // Configure OpenTelemetry logging
 diag.setLogger(new DiagConsoleLogger(), DiagLogLevel.INFO);
@@ -17,15 +21,14 @@ export class OpenTelemetryConfig {
       return;
     }
 
-    const resource = new Resource({
-      [SemanticResourceAttributes.SERVICE_NAME]: 'valero-neuroerp-finance',
-      [SemanticResourceAttributes.SERVICE_VERSION]: '3.0.0',
-      [SemanticResourceAttributes.SERVICE_NAMESPACE]: 'finance-domain',
+    const resource = resourceFromAttributes({
+      [ATTR_SERVICE_NAME]: 'valero-neuroerp-finance',
+      [ATTR_SERVICE_VERSION]: '3.0.0',
+      [ATTR_SERVICE_NAMESPACE]: 'finance-domain',
     });
 
-    // Jaeger exporter for distributed tracing
-    const jaegerExporter = new JaegerExporter({
-      endpoint: process.env.JAEGER_ENDPOINT || 'http://localhost:14268/api/traces',
+    const traceExporter = new OTLPTraceExporter({
+      url: process.env.OTEL_EXPORTER_OTLP_TRACES_ENDPOINT || 'http://localhost:4318/v1/traces',
     });
 
     // Prometheus exporter for metrics
@@ -35,8 +38,8 @@ export class OpenTelemetryConfig {
 
     this.instance = new NodeSDK({
       resource,
-      traceExporter: jaegerExporter,
-      // metricReader: prometheusExporter, // Temporarily disabled due to type incompatibility
+      traceExporter,
+      metricReader: prometheusExporter,
       instrumentations: [
         getNodeAutoInstrumentations({
           '@opentelemetry/instrumentation-express': {

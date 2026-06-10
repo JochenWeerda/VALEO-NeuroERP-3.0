@@ -137,7 +137,7 @@ export class ZUGFeRDAdapterApplicationService {
     file: Buffer,
     filename: string,
     tenantId: string,
-    options: { detectProfile?: boolean } = {}
+    options: { detectProfile?: boolean } = { detectProfile: true }
   ): Promise<{
     document: EInvoiceDocument;
     normalized: EInvoiceNormalizedDTO | undefined;
@@ -162,10 +162,7 @@ export class ZUGFeRDAdapterApplicationService {
       }
 
       // Use detected or extracted profile
-      const profile = detectedProfile || extractedProfile;
-      if (!profile) {
-        throw new Error('Could not detect e-invoice profile');
-      }
+      const profile = detectedProfile || extractedProfile || 'UNKNOWN';
 
       // Validate document
       const validation = await this.dependencies.adapter.validateDocument(file, profile);

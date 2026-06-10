@@ -4,9 +4,7 @@
  * Domain events for the Finance domain following Domain-Driven Design principles.
  */
 
-import { DomainEvent } from '@valero-neuroerp/data-models/domain-events';
-
-export interface FinanceDomainEvent extends DomainEvent {
+export interface FinanceDomainEvent {
   aggregateId: string;
   aggregateVersion: number;
   tenantId: string;

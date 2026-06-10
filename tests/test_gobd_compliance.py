@@ -51,6 +51,7 @@ def _ensure_system_tenant_and_accounts(db_session):
     if not user:
         user = User(
             id=SYSTEM_USER_ID,
+            keycloak_id="system",
             username="system",
             email="system@internal",
             first_name="System",
