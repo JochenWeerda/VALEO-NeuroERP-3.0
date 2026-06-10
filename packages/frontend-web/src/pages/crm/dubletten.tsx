@@ -1,9 +1,10 @@
 import { useState } from 'react'
-import { CopyCheck, Loader2, RefreshCw, Mail, Phone, MapPin, AlertTriangle } from 'lucide-react'
+import { CopyCheck, Loader2, RefreshCw, Mail, Phone, MapPin, AlertTriangle, Merge } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { useDuplicates, type DuplicateGroup } from '@/lib/api/crm-duplicates'
+import { useToast } from '@/hooks/use-toast'
+import { useDuplicates, useMergeCustomers, type DuplicateGroup } from '@/lib/api/crm-duplicates'
 
 /**
  * Kunden-Dubletten (DOM-CRM-004) — erkennt wahrscheinliche Doppelanlagen
@@ -19,6 +20,26 @@ const REASON_ICON: Record<string, JSX.Element> = {
 }
 
 function GroupCard({ g }: { g: DuplicateGroup }) {
+  const { toast } = useToast()
+  const mergeMut = useMergeCustomers()
+  const [master, setMaster] = useState(g.mitglieder[0]?.kunden_nr ?? '')
+
+  const handleMerge = async () => {
+    const others = g.mitglieder.filter((m) => m.kunden_nr !== master)
+    if (!master || others.length === 0) return
+    try {
+      let moved = 0
+      for (const o of others) {
+        const res = await mergeMut.mutateAsync({ masterNr: master, duplicateNr: o.kunden_nr })
+        moved += res.summe_datensaetze ?? 0
+      }
+      toast({ title: 'Zusammengeführt', description: `${others.length} Kunde(n) in ${master} überführt · ${moved} Datensätze umgehängt.` })
+    } catch (e) {
+      const d = (e as { response?: { data?: { detail?: string } } })?.response?.data?.detail
+      toast({ title: 'Merge fehlgeschlagen', description: typeof d === 'string' ? d : 'Bitte prüfen.', variant: 'destructive' })
+    }
+  }
+
   return (
     <Card>
       <CardHeader className="py-3">
@@ -39,6 +60,7 @@ function GroupCard({ g }: { g: DuplicateGroup }) {
           <table className="w-full text-sm">
             <thead className="text-xs text-muted-foreground border-b">
               <tr>
+                <th className="text-left font-medium px-3 py-1.5">Master</th>
                 <th className="text-left font-medium px-3 py-1.5">Kundennr.</th>
                 <th className="text-left font-medium px-3 py-1.5">Name</th>
                 <th className="text-left font-medium px-3 py-1.5">PLZ / Ort</th>
@@ -49,6 +71,10 @@ function GroupCard({ g }: { g: DuplicateGroup }) {
             <tbody>
               {g.mitglieder.map((m) => (
                 <tr key={m.kunden_nr} className="border-b last:border-0">
+                  <td className="px-3 py-1.5">
+                    <input type="radio" name={`master-${g.id}`} checked={master === m.kunden_nr}
+                      onChange={() => setMaster(m.kunden_nr)} disabled={mergeMut.isPending} aria-label={`Master ${m.kunden_nr}`} />
+                  </td>
                   <td className="px-3 py-1.5 font-mono text-xs">{m.kunden_nr}</td>
                   <td className="px-3 py-1.5">{m.name1 || '—'}</td>
                   <td className="px-3 py-1.5">{[m.plz, m.ort].filter(Boolean).join(' ') || '—'}</td>
@@ -59,8 +85,14 @@ function GroupCard({ g }: { g: DuplicateGroup }) {
             </tbody>
           </table>
         </div>
-        <div className="px-3 py-2 text-xs text-muted-foreground border-t">
-          Prüfen und ggf. zusammenführen (Zusammenführung folgt als eigener Slice).
+        <div className="flex items-center justify-between gap-2 px-3 py-2 border-t">
+          <span className="text-xs text-muted-foreground">
+            Master wählen — die übrigen werden in den Master überführt (Historie umgehängt, revisionssicher protokolliert).
+          </span>
+          <Button size="sm" onClick={handleMerge} disabled={mergeMut.isPending || !master}>
+            {mergeMut.isPending ? <Loader2 size={14} className="animate-spin mr-1" /> : <Merge size={14} className="mr-1" />}
+            Zusammenführen
+          </Button>
         </div>
       </CardContent>
     </Card>

@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { apiClient } from '@/lib/api-client'
 
 /**
@@ -38,5 +38,16 @@ export function useDuplicates(limit = 100) {
       return res.data ?? { groups: [], total: 0, geprueft: 0 }
     },
     staleTime: 60_000,
+  })
+}
+
+export type MergeResult = { ok: boolean; verschoben?: Record<string, number>; summe_datensaetze?: number }
+
+export function useMergeCustomers() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: async (input: { masterNr: string; duplicateNr: string }) =>
+      (await apiClient.post<MergeResult>('/api/v1/crm/duplicates/merge', input)).data,
+    onSuccess: () => { void qc.invalidateQueries({ queryKey: ['crm-duplicates'] }) },
   })
 }

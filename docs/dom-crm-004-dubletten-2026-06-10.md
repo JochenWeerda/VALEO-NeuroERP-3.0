@@ -25,9 +25,22 @@ Dubletten-Erkennung.
 Neue manifest-Seite: Eintrag in `src/app/route-aliases.json` + `npm run routes:generate`
 (sonst weiße Seite). Siehe DOM-SUPPLY-Erfahrung.
 
+## Slice 004.2 — Zusammenführung (Merge, umgesetzt)
+- Migration `crm_merge_20260610`: `public.kunden.merged_into` + append-only `public.crm_merge_log`.
+- Service: `app/services/crm_merge_service.py` — `preview()` (read-only: zeigt umzuhängende
+  1:n-Historie + Guards) und `merge()` (atomar: kunden_kontakte/ansprechpartner/crm_gifts/
+  capture_inbox/notifications/marketing_prefs/tapi_calls/whatsapp_bestellungen/adressen/
+  email_verteiler/freitext auf Master umhängen; Verlierer `geloescht=true`+`merged_into`;
+  `crm_merge_log`-Eintrag). Finanz-/Belegdaten (business_partner_id) bleiben unberührt.
+- API: `POST /crm/duplicates/merge-preview` + `/merge` (422 bei Fachfehler).
+- Frontend: Master-Radio + „Zusammenführen" je Cluster in `dubletten.tsx`.
+- Tests: identitäts-Guard (test_crm_duplicates.py, 7 grün).
+
+### Verifiziert (Temp-Paar, Seed unberührt)
+preview zeigt umzuhängende Kontakte; merge hängt Kontakt Verlierer→Master, setzt
+Verlierer geloescht+merged_into; erneuter Merge → 422; Cleanup ok.
+
 ## Folge-Slices
-- **004.2** Zusammenführen (Merge) zweier Kunden — Master wählen, Referenzen umhängen,
-  append-only Audit-Eintrag; Guard gegen Belegkonflikte.
 - **004.3** Ownership (Außendienst/Innendienst je Kunde) + Zuordnung/Übergabe.
 - **004.4** Folgeobjektkette/Serviceabschluss + Aufgaben/Wiedervorlagen-Vollständigkeit.
 - **004.5** Browser-E2E + UAT-Nachweispaket.
