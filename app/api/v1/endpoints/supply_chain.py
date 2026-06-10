@@ -142,3 +142,16 @@ def shrinkage_lot(
         return SupplyChainLotService(db, tenant_id).shrinkage(lot_id, body.mengeKg, body.grund, body.bediener or "KIM")
     except LotActionError as exc:
         raise HTTPException(status_code=422, detail=str(exc))
+
+
+@router.post("/traceability/cancel", summary="Lieferkette stornieren (durchgängig)")
+def cancel_chain(
+    ticket: str = Query(..., description="Wiegeschein-Nr oder -ID"),
+    body: LotReasonIn = ...,
+    db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
+) -> dict[str, Any]:
+    try:
+        return SupplyChainLotService(db, tenant_id).cancel_chain(ticket, body.grund, body.bediener or "KIM")
+    except LotActionError as exc:
+        raise HTTPException(status_code=422, detail=str(exc))

@@ -91,7 +91,21 @@ Lager-Bewegung (`silo_lot_movements`) und einem Eintrag im Event-Log:
 block → 422 bei erneutem block; release nur aus „gesperrt"; shrinkage 200 kg
 reduziert Lot 25.000→24.800 kg + Event; Übermenge → 422. Seed danach restauriert.
 
-## Definition „fachliche Tiefe erreicht" (Sprint-Maßstab) — Status 004.1–004.3
+## Slice 004.4 — Ketten-Storno durchgängig (umgesetzt)
+
+- Service: `SupplyChainLotService.cancel_chain(ticket, grund)` — storniert die Kette
+  durchgängig: kaskadiert auf aktive Lager-Lots (`status='storniert'`, Restbestand
+  via `storno`-Bewegung auf 0) und schreibt ein Ketten-Storno-Ereignis → kanonischer
+  Status `storniert`. Guard: gebuchte Abrechnung blockiert den Storno; Doppel-Storno → 422.
+- API: `POST /supply-chain/traceability/cancel?ticket=…` (Grund Pflicht).
+- Frontend: „Kette stornieren" mit Pflicht-Grund in der Statuszeile.
+- Tests: Grund-Guard (test_supply_chain_lot.py).
+
+### Verifiziert
+`WG-2026-00001` Storno → Lot `LOT-2026-S001-001` status=storniert, Bestand 0,
+kanon_status=storniert; erneuter Storno → 422. Seed restauriert.
+
+## Definition „fachliche Tiefe erreicht" (Sprint-Maßstab) — Status 004.1–004.4
 
 1. Kernfall läuft (Kette sichtbar/prüfbar) ✅
 2. Sonderfälle (Lücken/Abweichung/Mehrfach-Folgeobjekte) ✅ erkannt
@@ -104,5 +118,5 @@ reduziert Lot 25.000→24.800 kg + Event; Übermenge → 422. Seed danach restau
 ## Geplante Folge-Slices
 - **004.2** Einheitlicher Übergabestatus + append-only Ketten-Event-Log ✅ **fertig**
 - **004.3** Schwund/Sperrbestand/QS-Freigabe als Folgeaktionen mit Abweichungsgründen ✅ **fertig**
-- **004.4** Storno/Korrektur durchgängig über die Kette (Wirkung auf Status/Bestand).
+- **004.4** Storno/Korrektur durchgängig über die Kette (Wirkung auf Status/Bestand) ✅ **fertig**
 - **004.5** Browser-/E2E-Abnahme + UAT-Nachweispaket.

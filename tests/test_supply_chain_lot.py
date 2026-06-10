@@ -36,3 +36,8 @@ def test_shrinkage_requires_positive_menge():
         _svc().shrinkage("LOT-1", 0, "Grund")
     with pytest.raises(LotActionError):
         _svc().shrinkage("LOT-1", -5, "Grund")
+
+
+def test_cancel_chain_requires_grund():
+    with pytest.raises(LotActionError):
+        _svc().cancel_chain("WG-1", "  ")

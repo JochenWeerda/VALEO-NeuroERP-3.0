@@ -135,3 +135,57 @@ class SupplyChainLotService:
         self.db.commit()
         return {"ok": True, "lot": lot["virtual_lot_number"],
                 "bestand_kg": float(neu) * 1000, "event": ev}
+
+    # ── Ketten-Storno (durchgängig, 004.4) ──────────────────────────────────────
+    def cancel_chain(self, ticket: str, grund: str, bediener: str = "KIM") -> dict:
+        """Storniert die gesamte Lieferkette: kaskadiert auf aktive Lager-Lots
+        (Status 'storniert', Restbestand via 'storno'-Bewegung auf 0) und schreibt
+        ein Ketten-Storno-Ereignis (→ kanonischer Status 'storniert').
+
+        Guard: bereits gebuchte Abrechnungen blockieren den Storno."""
+        if not grund.strip():
+            raise LotActionError("Storno-Grund ist erforderlich.")
+
+        from app.services.supply_chain_event_service import SupplyChainEventService
+        from app.services.supply_chain_trace_service import SupplyChainTraceService
+
+        chain = SupplyChainTraceService(self.db, self.tenant_id).trace(ticket=ticket)
+        if not chain.get("found"):
+            raise LotActionError("Kein Wiegeschein zur Eingabe auflösbar.")
+        ticket_id = chain["ticket_id"]
+
+        evt = SupplyChainEventService(self.db, self.tenant_id)
+        if evt.derive_status(ticket_id).get("status") == "storniert":
+            raise LotActionError("Kette ist bereits storniert.")
+        for node in chain.get("kette", []):
+            if node["stage"] == "abrechnung" and node.get("status") in ("posted", "gebucht"):
+                raise LotActionError(
+                    f"Abrechnung {node.get('ref')} ist gebucht — bitte zuerst die Abrechnung stornieren."
+                )
+
+        stornierte_lots: list[str] = []
+        for node in chain.get("kette", []):
+            if node["stage"] != "lager" or node.get("status") == "storniert":
+                continue
+            lot = self._lot(node["ref_id"])
+            rest = Decimal(str(lot["quantity_tons"] or 0))
+            if rest > 0:
+                self._add_movement(lot["id"], "storno", -rest, grund)
+            self.db.execute(
+                text("UPDATE domain_inventory.silo_lots SET status='storniert', quantity_tons=0, "
+                     "updated_at=now() WHERE id = :id AND tenant_id = :t"),
+                {"id": lot["id"], "t": self.tenant_id},
+            )
+            self._event(lot, "storniert", grund=grund, status_from=lot["status"],
+                        status_to="storniert", menge_kg=-float(rest) * 1000 if rest > 0 else None,
+                        bediener=bediener)
+            stornierte_lots.append(lot["virtual_lot_number"])
+
+        ev = evt.record(
+            ticket_id=ticket_id, stage="kette", event_type="storniert",
+            ref_type="weighing_ticket", ref_id=ticket_id, ref_label=chain.get("ticket_nr"),
+            status_to="storniert", abweichung_grund=grund, bediener=bediener, source="manual",
+        )
+        self.db.commit()
+        return {"ok": True, "ticket_id": ticket_id, "ticket_nr": chain.get("ticket_nr"),
+                "stornierte_lots": stornierte_lots, "status": "storniert", "event": ev}

@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import {
   GitBranch, Scale, ClipboardCheck, Warehouse, Receipt, Loader2, RefreshCw,
   CheckCircle2, AlertTriangle, Info, ArrowDown, Search, History, Plus, Bot,
-  Lock, Unlock, Droplets,
+  Lock, Unlock, Droplets, Ban,
 } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -11,7 +11,7 @@ import { Input } from '@/components/ui/input'
 import { NativeSelect } from '@/components/ui/native-select'
 import { useToast } from '@/hooks/use-toast'
 import {
-  useTraceTickets, useTrace, useSyncChain, useAddChainEvent, useLotAction,
+  useTraceTickets, useTrace, useSyncChain, useAddChainEvent, useLotAction, useCancelChain,
   type TraceNode, type TraceTicket, type ChainEvent,
 } from '@/lib/api/supply-chain'
 
@@ -143,11 +143,16 @@ export default function RueckverfolgbarkeitPage() {
   const trace = useTrace(selected)
   const syncChain = useSyncChain()
   const addEvent = useAddChainEvent()
+  const cancelChain = useCancelChain()
 
   // Ereignis-Erfassung (Korrektur/Abweichung/Notiz)
   const [evType, setEvType] = useState('korrektur')
   const [evGrund, setEvGrund] = useState('')
   const [evMenge, setEvMenge] = useState('')
+
+  // Ketten-Storno
+  const [stornoOpen, setStornoOpen] = useState(false)
+  const [stornoGrund, setStornoGrund] = useState('')
 
   // Bei Auswahl: Ereignis-Log idempotent aus Ist-Zustand befüllen (Backfill).
   useEffect(() => {
@@ -180,6 +185,23 @@ export default function RueckverfolgbarkeitPage() {
       }
     } catch {
       toast({ title: 'Fehler', description: 'Ereignis konnte nicht erfasst werden.', variant: 'destructive' })
+    }
+  }
+
+  const submitStorno = async () => {
+    if (!selected) return
+    if (!stornoGrund.trim()) {
+      toast({ title: 'Grund fehlt', description: 'Bitte einen Storno-Grund angeben.', variant: 'destructive' })
+      return
+    }
+    try {
+      const res = await cancelChain.mutateAsync({ ticket: selected, grund: stornoGrund.trim() })
+      if (res.ok) {
+        setStornoOpen(false); setStornoGrund('')
+        toast({ title: 'Kette storniert', description: `Lots zurückgesetzt: ${(res.stornierte_lots ?? []).join(', ') || '—'}` })
+      }
+    } catch (e) {
+      toast({ title: 'Storno nicht möglich', description: errDetail(e, 'Storno fehlgeschlagen.'), variant: 'destructive' })
     }
   }
 
@@ -274,7 +296,27 @@ export default function RueckverfolgbarkeitPage() {
                 {!!trace.data.summary?.offene_luecken && (
                   <Badge variant="outline">{trace.data.summary.offene_luecken} Lücke(n)</Badge>
                 )}
+                {trace.data.kanon_status?.status !== 'storniert' && (
+                  <Button size="sm" variant="outline" className="ml-auto text-red-700 hover:text-red-800"
+                    onClick={() => setStornoOpen((v) => !v)}>
+                    <Ban size={14} className="mr-1" />Kette stornieren
+                  </Button>
+                )}
               </div>
+
+              {stornoOpen && trace.data.kanon_status?.status !== 'storniert' && (
+                <div className="flex flex-col gap-2 rounded-md border border-red-200 bg-red-50 p-2 sm:flex-row sm:items-center">
+                  <Input value={stornoGrund} onChange={(e) => setStornoGrund(e.target.value)}
+                    placeholder="Storno-Grund (Pflicht)…" className="h-9 flex-1" disabled={cancelChain.isPending} />
+                  <Button size="sm" variant="destructive" onClick={submitStorno} disabled={cancelChain.isPending}>
+                    {cancelChain.isPending ? <Loader2 size={14} className="animate-spin mr-1" /> : <Ban size={14} className="mr-1" />}
+                    Storno bestätigen
+                  </Button>
+                  <Button size="sm" variant="ghost" onClick={() => setStornoOpen(false)} disabled={cancelChain.isPending}>
+                    Abbrechen
+                  </Button>
+                </div>
+              )}
 
               {/* Genealogie-Timeline */}
               <div className="space-y-1">
