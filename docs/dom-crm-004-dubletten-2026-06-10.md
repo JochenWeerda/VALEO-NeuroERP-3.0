@@ -54,6 +54,20 @@ Verlierer geloescht+merged_into; erneuter Merge → 422; Cleanup ok.
 unassigned = 461 (nur 1 Kunde hatte Owner); Zuweisung GAP00001→AD+ID schreibt
 beide Felder + 2 Audit-Einträge; by-owner findet den Kunden. Testdaten revertiert.
 
+## Slice 004.4 — Wiedervorlagen/Aufgaben + Serviceabschluss (umgesetzt)
+- Erweiterung `crm_kontakt_service.py`: `wiedervorlagen_offen()` liefert jetzt
+  `ueberfaellig`-Flag; `set_erledigt(..., ergebnis)` hängt Serviceabschluss-Ergebnis
+  revisionssicher an die Kontaktnotiz an.
+- API (vorhandenes `crm_kontakte.py`): `GET /crm/kunden-kontakte/wiedervorlagen?tage=`
+  (überfällig markiert), `POST /crm/kunden-kontakte/{id}/erledigt` mit optionalem
+  `{ergebnis}`.
+- Frontend: `pages/crm/wiedervorlagen.tsx` (Worklist über alle Kunden, überfällige
+  rot, Erledigen mit Ergebnis) + Hooks `lib/api/crm-wiedervorlagen.ts` + Nav
+  „Wiedervorlagen" + Route-Alias.
+
+### Verifiziert (echte Daten)
+1 offene Wiedervorlage („A. & H. Lindena GbR", fällig heute, ueberfaellig=False korrekt).
+
 ## Folge-Slices
-- **004.4** Folgeobjektkette/Serviceabschluss + Aufgaben/Wiedervorlagen-Vollständigkeit.
+- **004.5** Browser-E2E (dubletten/zuordnung/wiedervorlagen) + UAT-Nachweispaket.
 - **004.5** Browser-E2E + UAT-Nachweispaket.

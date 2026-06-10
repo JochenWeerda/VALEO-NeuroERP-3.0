@@ -54,10 +54,17 @@ def create_kontakt(
     return CrmKontaktService(db, tenant_id).create(body.model_dump())
 
 
-@router.post("/{kontakt_id}/erledigt", summary="Wiedervorlage erledigen")
+class ErledigtIn(BaseModel):
+    ergebnis: Optional[str] = None  # Serviceabschluss-Ergebnis (optional)
+
+
+@router.post("/{kontakt_id}/erledigt", summary="Wiedervorlage erledigen (mit optionalem Ergebnis)")
 def erledigt(
     kontakt_id: str,
+    body: ErledigtIn | None = None,
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
 ) -> dict[str, Any]:
-    return CrmKontaktService(db, tenant_id).set_erledigt(kontakt_id, True)
+    return CrmKontaktService(db, tenant_id).set_erledigt(
+        kontakt_id, True, ergebnis=(body.ergebnis if body else None)
+    )
