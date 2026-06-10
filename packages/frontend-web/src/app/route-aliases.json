@@ -1369,6 +1369,10 @@
       "path": "lager/rueckverfolgbarkeit"
     },
     {
+      "module": "@/pages/crm/dubletten",
+      "path": "crm/dubletten"
+    },
+    {
       "module": "@/pages/lager/lagerplaetze",
       "path": "lager/lagerplaetze"
     },

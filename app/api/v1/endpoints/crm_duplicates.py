@@ -1,0 +1,27 @@
+"""Kunden-Dubletten (DOM-CRM-004) — Erkennung wahrscheinlicher Doppelanlagen.
+
+Read-only: gruppiert Kunden über E-Mail/Telefon/Name+PLZ zu Dubletten-Clustern.
+Basis für die Zusammenführung (Folge-Slice).
+"""
+
+from __future__ import annotations
+
+from typing import Any
+
+from fastapi import APIRouter, Depends, Query
+from sqlalchemy.orm import Session
+
+from app.core.database import get_db
+from app.core.tenant import get_tenant_id
+from app.services.crm_duplicate_service import CrmDuplicateService
+
+router = APIRouter(prefix="/crm", tags=["crm", "dubletten"])
+
+
+@router.get("/duplicates", summary="Kunden-Dubletten-Cluster erkennen")
+def duplicates(
+    limit: int = Query(100, ge=1, le=500),
+    db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
+) -> dict[str, Any]:
+    return CrmDuplicateService(db, tenant_id).find_duplicates(limit_groups=limit)
