@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import {
   GitBranch, Scale, ClipboardCheck, Warehouse, Receipt, Loader2, RefreshCw,
   CheckCircle2, AlertTriangle, Info, ArrowDown, Search, History, Plus, Bot,
+  Lock, Unlock, Droplets,
 } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -10,9 +11,14 @@ import { Input } from '@/components/ui/input'
 import { NativeSelect } from '@/components/ui/native-select'
 import { useToast } from '@/hooks/use-toast'
 import {
-  useTraceTickets, useTrace, useSyncChain, useAddChainEvent,
+  useTraceTickets, useTrace, useSyncChain, useAddChainEvent, useLotAction,
   type TraceNode, type TraceTicket, type ChainEvent,
 } from '@/lib/api/supply-chain'
+
+function errDetail(e: unknown, fallback: string): string {
+  const d = (e as { response?: { data?: { detail?: string } } })?.response?.data?.detail
+  return typeof d === 'string' ? d : fallback
+}
 
 const STATUS_LABEL: Record<string, string> = {
   offen: 'offen', erfasst: 'erfasst', freigegeben: 'freigegeben',
@@ -58,6 +64,59 @@ function StageNode({ node }: { node: TraceNode }) {
             <div key={k} className="truncate"><span className="opacity-70">{k}:</span> {String(v)}</div>
           ))}
       </div>
+    </div>
+  )
+}
+
+function LotActions({ node }: { node: TraceNode }) {
+  const { toast } = useToast()
+  const action = useLotAction()
+  const [grund, setGrund] = useState('')
+  const [menge, setMenge] = useState('')
+  const gesperrt = node.status === 'gesperrt'
+
+  const run = async (kind: 'block' | 'release' | 'shrinkage') => {
+    if (!grund.trim()) {
+      toast({ title: 'Grund fehlt', description: 'Bitte einen Grund angeben.', variant: 'destructive' })
+      return
+    }
+    if (kind === 'shrinkage' && !menge) {
+      toast({ title: 'Menge fehlt', description: 'Bitte Schwundmenge (kg) angeben.', variant: 'destructive' })
+      return
+    }
+    try {
+      await action.mutateAsync(
+        kind === 'shrinkage'
+          ? { kind, lotId: node.ref_id, grund: grund.trim(), mengeKg: Number(menge) }
+          : { kind, lotId: node.ref_id, grund: grund.trim() },
+      )
+      setGrund(''); setMenge('')
+      toast({ title: 'Erledigt', description: 'Lager-Aktion protokolliert.' })
+    } catch (e) {
+      toast({ title: 'Fehler', description: errDetail(e, 'Aktion fehlgeschlagen.'), variant: 'destructive' })
+    }
+  }
+
+  return (
+    <div className="ml-9 mt-1 flex flex-col gap-2 rounded-md border bg-muted/20 p-2 sm:flex-row sm:items-center">
+      <Input value={grund} onChange={(e) => setGrund(e.target.value)} placeholder="Grund…" className="h-8 flex-1" disabled={action.isPending} />
+      {!gesperrt && (
+        <div className="flex items-center gap-1">
+          <Input value={menge} onChange={(e) => setMenge(e.target.value)} type="number" placeholder="Schwund kg" className="h-8 w-28" disabled={action.isPending} />
+          <Button size="sm" variant="outline" onClick={() => run('shrinkage')} disabled={action.isPending}>
+            <Droplets size={14} className="mr-1" />Schwund
+          </Button>
+        </div>
+      )}
+      {gesperrt ? (
+        <Button size="sm" variant="outline" onClick={() => run('release')} disabled={action.isPending}>
+          {action.isPending ? <Loader2 size={14} className="animate-spin mr-1" /> : <Unlock size={14} className="mr-1" />}QS-Freigabe
+        </Button>
+      ) : (
+        <Button size="sm" variant="outline" onClick={() => run('block')} disabled={action.isPending}>
+          {action.isPending ? <Loader2 size={14} className="animate-spin mr-1" /> : <Lock size={14} className="mr-1" />}Sperren
+        </Button>
+      )}
     </div>
   )
 }
@@ -222,6 +281,7 @@ export default function RueckverfolgbarkeitPage() {
                 {((kette) => kette.map((node, i) => (
                   <div key={node.ref_id}>
                     <StageNode node={node} />
+                    {node.stage === 'lager' && <LotActions node={node} />}
                     {i < kette.length - 1 && (
                       <div className="flex justify-center py-0.5 text-muted-foreground"><ArrowDown size={14} /></div>
                     )}

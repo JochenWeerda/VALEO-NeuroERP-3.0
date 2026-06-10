@@ -9,13 +9,14 @@ from __future__ import annotations
 
 from typing import Any, Optional
 
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
 from app.core.tenant import get_tenant_id
 from app.services.supply_chain_event_service import SupplyChainEventService
+from app.services.supply_chain_lot_service import LotActionError, SupplyChainLotService
 from app.services.supply_chain_trace_service import SupplyChainTraceService
 
 router = APIRouter(prefix="/supply-chain", tags=["supply-chain", "agrar", "lager"])
@@ -90,3 +91,54 @@ def add_event(
         source="manual",
     )
     return {"ok": True, "event": event}
+
+
+# ── Lager-Lot-Folgeaktionen (Sperre / QS-Freigabe / Schwund) ────────────────────
+class LotReasonIn(BaseModel):
+    grund: str
+    bediener: Optional[str] = None
+
+
+class LotShrinkageIn(BaseModel):
+    mengeKg: float
+    grund: str
+    bediener: Optional[str] = None
+
+
+@router.post("/lots/{lot_id}/block", summary="Silo-Lot sperren (Sperrbestand)")
+def block_lot(
+    lot_id: str,
+    body: LotReasonIn,
+    db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
+) -> dict[str, Any]:
+    try:
+        return SupplyChainLotService(db, tenant_id).block(lot_id, body.grund, body.bediener or "KIM")
+    except LotActionError as exc:
+        raise HTTPException(status_code=422, detail=str(exc))
+
+
+@router.post("/lots/{lot_id}/release", summary="Silo-Lot QS-freigeben")
+def release_lot(
+    lot_id: str,
+    body: LotReasonIn,
+    db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
+) -> dict[str, Any]:
+    try:
+        return SupplyChainLotService(db, tenant_id).release(lot_id, body.grund, body.bediener or "KIM")
+    except LotActionError as exc:
+        raise HTTPException(status_code=422, detail=str(exc))
+
+
+@router.post("/lots/{lot_id}/shrinkage", summary="Schwund auf Silo-Lot buchen")
+def shrinkage_lot(
+    lot_id: str,
+    body: LotShrinkageIn,
+    db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
+) -> dict[str, Any]:
+    try:
+        return SupplyChainLotService(db, tenant_id).shrinkage(lot_id, body.mengeKg, body.grund, body.bediener or "KIM")
+    except LotActionError as exc:
+        raise HTTPException(status_code=422, detail=str(exc))
