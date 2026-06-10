@@ -54,7 +54,7 @@ class User(Base):
     email = Column(String(100), nullable=False, unique=True)
     first_name = Column(String(50), nullable=False)
     last_name = Column(String(50), nullable=False)
-    roles = Column(Text, default="[]")  # JSON array of roles
+    roles = Column(postgresql.ARRAY(String), default=list)
     tenant_id = Column(String, ForeignKey("domain_shared.tenants.id"), nullable=False)
     is_active = Column(Boolean, default=True)
     last_login = Column(DateTime(timezone=True), nullable=True)
