@@ -956,6 +956,13 @@ api_router.include_router(
     tags=["procurement", "einkauf"]
 )
 
+from app.api.v1.endpoints import crm_duplicates  # noqa: E402
+
+api_router.include_router(
+    crm_duplicates.router,
+    tags=["crm", "dubletten"]
+)
+
 from app.api.v1.endpoints import kaeufergruppe as kaeufergruppe_ep  # noqa: E402
 
 api_router.include_router(

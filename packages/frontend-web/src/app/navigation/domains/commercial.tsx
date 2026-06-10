@@ -41,6 +41,7 @@ import {
   MessageCircle,
   ListChecks,
   Inbox,
+  CopyCheck,
 } from 'lucide-react'
 import type { RawNavItem } from '@/app/navigation/types'
 import { ENABLE_PROSPECTING_UI } from '@/features/prospecting/feature-flags'
@@ -412,6 +413,15 @@ export const RAW_NAV_SECTIONS: RawNavItem[] = [
         preferredPath: 'crm/klaerfall-inbox',
         keywords: ['klärfall', 'klaerfall', 'inbox', 'auto-capture', 'unzugeordnet', 'telefon', 'email', 'whatsapp', 'transkript', 'kontakt', 'zuordnen', 'kim'],
         mcp: { businessDomain: 'sales', scope: 'sales:write' },
+      },
+      {
+        id: 'crm-dubletten',
+        label: 'Kunden-Dubletten',
+        icon: CopyCheck,
+        module: '@/pages/crm/dubletten',
+        preferredPath: 'crm/dubletten',
+        keywords: ['dubletten', 'duplikate', 'doppelanlage', 'zusammenführen', 'merge', 'kunden', 'datenqualität', 'crm'],
+        mcp: { businessDomain: 'sales', scope: 'sales:read' },
       },
       {
         id: 'bedarfsdeckung',
