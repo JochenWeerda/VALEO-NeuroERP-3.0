@@ -45,3 +45,13 @@ def test_unionfind_clusters():
     assert uf.find("a") == uf.find("c")
     assert uf.find("a") != uf.find("x")
     assert uf.find("x") == uf.find("y")
+
+
+def test_merge_rejects_identical():
+    from app.services.crm_merge_service import CrmMergeService, MergeError
+
+    svc = CrmMergeService(db=None, tenant_id="t")  # type: ignore[arg-type]
+    with pytest.raises(MergeError):
+        svc.preview("K1", "K1")
+    with pytest.raises(MergeError):
+        svc.merge("K1", "K1")
