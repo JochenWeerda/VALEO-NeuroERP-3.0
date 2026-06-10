@@ -40,7 +40,20 @@ Neue manifest-Seite: Eintrag in `src/app/route-aliases.json` + `npm run routes:g
 preview zeigt umzuhängende Kontakte; merge hängt Kontakt Verlierer→Master, setzt
 Verlierer geloescht+merged_into; erneuter Merge → 422; Cleanup ok.
 
+## Slice 004.3 — Ownership / Zuordnung & Übergabe (umgesetzt)
+- Migration `crm_ownership_log_20260610` (append-only Übergabe-Audit).
+- Service: `app/services/crm_ownership_service.py` — get/set (Upsert kunden_crm360
+  sales_rep_vb/dispatcher_disp + Log je geänderten Feld), history, `unassigned()`
+  (Kunden ohne Außendienst), `by_owner()` (Workload).
+- API: `GET/PUT /crm/{nr}/ownership`, `GET /crm/{nr}/ownership/history`,
+  `GET /crm/ownership/unassigned`, `GET /crm/ownership/by-owner`.
+- Frontend: `pages/crm/kunden-zuordnung.tsx` (Worklist „ohne Zuordnung" + Inline-
+  Zuweisung) + Hooks `lib/api/crm-ownership.ts` + Nav „Kunden-Zuordnung" + Route-Alias.
+
+### Verifiziert (echte Daten)
+unassigned = 461 (nur 1 Kunde hatte Owner); Zuweisung GAP00001→AD+ID schreibt
+beide Felder + 2 Audit-Einträge; by-owner findet den Kunden. Testdaten revertiert.
+
 ## Folge-Slices
-- **004.3** Ownership (Außendienst/Innendienst je Kunde) + Zuordnung/Übergabe.
 - **004.4** Folgeobjektkette/Serviceabschluss + Aufgaben/Wiedervorlagen-Vollständigkeit.
 - **004.5** Browser-E2E + UAT-Nachweispaket.
