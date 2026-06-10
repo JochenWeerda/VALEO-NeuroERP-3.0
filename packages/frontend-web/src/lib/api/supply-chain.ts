@@ -195,3 +195,26 @@ export function useAddChainEvent() {
     onSuccess: () => { void qc.invalidateQueries({ queryKey: ['supply-chain', 'trace'] }) },
   })
 }
+
+// ── Lot-Folgeaktionen (Sperre/QS-Freigabe/Schwund) — DOM-SUPPLY-004.3 ─────────
+export type LotAction =
+  | { kind: 'block'; lotId: string; grund: string }
+  | { kind: 'release'; lotId: string; grund: string }
+  | { kind: 'shrinkage'; lotId: string; grund: string; mengeKg: number }
+
+export function useLotAction() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: async (a: LotAction) => {
+      const base = `/api/v1/supply-chain/lots/${encodeURIComponent(a.lotId)}`
+      if (a.kind === 'shrinkage') {
+        return (await apiClient.post(`${base}/shrinkage`, { mengeKg: a.mengeKg, grund: a.grund })).data
+      }
+      return (await apiClient.post(`${base}/${a.kind}`, { grund: a.grund })).data
+    },
+    onSuccess: () => {
+      void qc.invalidateQueries({ queryKey: ['supply-chain', 'trace'] })
+      void qc.invalidateQueries({ queryKey: ['supply-chain', 'tickets'] })
+    },
+  })
+}

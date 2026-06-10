@@ -72,7 +72,26 @@ Revisionsfestes, **append-only** Ereignis-Protokoll der Kette + einheitlicher
 eingelagert), zweiter Sync = 0 (idempotent), kanon_status = „eingelagert"; manuelles
 Korrektur-Ereignis wird angehängt und erscheint im Log.
 
-## Definition „fachliche Tiefe erreicht" (Sprint-Maßstab) — Status 004.1/004.2
+## Slice 004.3 — Lager-Lot-Folgeaktionen mit Abweichungsgrund (umgesetzt)
+
+Operative Folgeaktionen auf Silo-Lots, jeweils mit **Pflicht-Grund**, einer
+Lager-Bewegung (`silo_lot_movements`) und einem Eintrag im Event-Log:
+
+- Service: `app/services/supply_chain_lot_service.py`
+  - `block` → Sperrbestand (`status='gesperrt'`, Bewegung `sperre`, Event `gesperrt`)
+  - `release` → QS-Freigabe (`status='active'`, Bewegung `freigabe`, Event `qs_freigabe`)
+  - `shrinkage` → Schwund (Menge reduzieren, Bewegung `schwund`, Event `schwund`);
+    Guard: Menge > 0 und ≤ Lot-Bestand.
+- API: `POST /supply-chain/lots/{lot}/block|release|shrinkage` (422 bei Fachfehler).
+- Frontend: Aktionsleiste unter Lager-Knoten (Sperren/QS-Freigabe/Schwund mit
+  Grund/Menge) in `pages/lager/rueckverfolgbarkeit.tsx`.
+- Tests: `tests/test_supply_chain_lot.py` (Guards, 4 grün).
+
+### Verifiziert
+block → 422 bei erneutem block; release nur aus „gesperrt"; shrinkage 200 kg
+reduziert Lot 25.000→24.800 kg + Event; Übermenge → 422. Seed danach restauriert.
+
+## Definition „fachliche Tiefe erreicht" (Sprint-Maßstab) — Status 004.1–004.3
 
 1. Kernfall läuft (Kette sichtbar/prüfbar) ✅
 2. Sonderfälle (Lücken/Abweichung/Mehrfach-Folgeobjekte) ✅ erkannt
@@ -84,6 +103,6 @@ Korrektur-Ereignis wird angehängt und erscheint im Log.
 
 ## Geplante Folge-Slices
 - **004.2** Einheitlicher Übergabestatus + append-only Ketten-Event-Log ✅ **fertig**
-- **004.3** Schwund/Sperrbestand/QS-Freigabe als Folgeaktionen mit Abweichungsgründen.
+- **004.3** Schwund/Sperrbestand/QS-Freigabe als Folgeaktionen mit Abweichungsgründen ✅ **fertig**
 - **004.4** Storno/Korrektur durchgängig über die Kette (Wirkung auf Status/Bestand).
 - **004.5** Browser-/E2E-Abnahme + UAT-Nachweispaket.
