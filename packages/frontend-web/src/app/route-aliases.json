@@ -1389,6 +1389,10 @@
       "path": "einkauf/wareneingangsabgleich"
     },
     {
+      "module": "@/pages/sales/auftragskette",
+      "path": "sales/auftragskette"
+    },
+    {
       "module": "@/pages/lager/lagerplaetze",
       "path": "lager/lagerplaetze"
     },
