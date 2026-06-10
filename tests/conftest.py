@@ -12,6 +12,7 @@ import os
 import sys
 
 import pytest
+from sqlalchemy import text
 
 from app.core.config import settings
 from app.core import security
@@ -72,6 +73,37 @@ def _is_db_reachable() -> bool:
         return True
     except Exception:
         return False
+
+
+@pytest.fixture(scope="session", autouse=True)
+def _seed_contract_test_tenants():
+    """Ensure tenant fixtures referenced by DB integration tests exist."""
+    if not _is_db_reachable():
+        yield
+        return
+
+    from app.core.database import SessionLocal
+
+    session = SessionLocal()
+    try:
+        for tenant_id, name in (
+            ("test-tenant", "Integration Test Tenant"),
+            ("default", "Default Test Tenant"),
+        ):
+            session.execute(
+                text(
+                    """
+                    INSERT INTO domain_shared.tenants (id, name, domain, is_active)
+                    VALUES (:id, :name, :domain, TRUE)
+                    ON CONFLICT (id) DO NOTHING
+                    """
+                ),
+                {"id": tenant_id, "name": name, "domain": f"{tenant_id}.test.local"},
+            )
+        session.commit()
+    finally:
+        session.close()
+    yield
 
 
 @pytest.fixture

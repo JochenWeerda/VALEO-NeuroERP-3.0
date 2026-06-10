@@ -160,6 +160,7 @@ jobs:
         uses: anchore/scan-action@v7
         with:
           image: 'valeo-backend:${{ github.sha }}'
+          config: .grype.yaml
           fail-build: true
           severity-cutoff: high
           only-fixed: true
@@ -169,6 +170,7 @@ jobs:
         uses: anchore/scan-action@v7
         with:
           image: 'valeo-frontend:${{ github.sha }}'
+          config: .grype.yaml
           fail-build: true
           severity-cutoff: high
           only-fixed: true
