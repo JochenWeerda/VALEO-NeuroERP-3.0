@@ -256,20 +256,42 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Resolve performance target
+        id: target
+        env:
+          PROCUREMENT_BASE_URL: ${{ secrets.PROCUREMENT_BASE_URL }}
+        run: |
+          if [ -z "$PROCUREMENT_BASE_URL" ]; then
+            echo "enabled=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::Procurement performance test remains an external gate: PROCUREMENT_BASE_URL is not configured."
+          else
+            echo "enabled=true" >> "$GITHUB_OUTPUT"
+            echo "base_url=$PROCUREMENT_BASE_URL" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Run k6 performance tests
+        if: steps.target.outputs.enabled == 'true'
+        env:
+          BASE_URL: ${{ steps.target.outputs.base_url }}
         run: |
           docker run --rm \
             -v "${{ github.workspace }}:/work" \
             -w /work \
+            -e BASE_URL \
             grafana/k6:latest run \
             /work/packages/procurement-domain/tests/performance/procurement-domain-test.js \
             --out json=/work/results.json
 
       - name: Upload performance results
+        if: steps.target.outputs.enabled == 'true'
         uses: actions/upload-artifact@v4
         with:
           name: k6-results-procurement
           path: results.json
+
+      - name: Document external performance gate
+        if: steps.target.outputs.enabled != 'true'
+        run: echo "Procurement performance test was not executed because no target URL is configured." >> "$GITHUB_STEP_SUMMARY"
 
   integration-test:
     name: Integration Testing

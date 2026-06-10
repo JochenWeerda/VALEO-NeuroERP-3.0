@@ -10,6 +10,7 @@ from sqlalchemy import text
 from app.api.v1.endpoints import workflow_template_marketplace
 
 pytestmark = pytest.mark.usefixtures("require_db")
+TEST_TENANT_ID = "system"
 from app.core.database import SessionLocal
 from app.core.workflow_template_marketplace import (
     build_workflow_template_marketplace_catalog,
@@ -22,7 +23,7 @@ from app.core.workflow_template_marketplace import (
 def _client() -> TestClient:
     app = FastAPI()
     app.include_router(workflow_template_marketplace.router)
-    app.dependency_overrides[workflow_template_marketplace.get_tenant_id] = lambda: "test-tenant"
+    app.dependency_overrides[workflow_template_marketplace.get_tenant_id] = lambda: TEST_TENANT_ID
 
     def _override_db():
         db = SessionLocal()
@@ -35,7 +36,7 @@ def _client() -> TestClient:
     return TestClient(app)
 
 
-def _tenant_settings(tenant_id: str = "test-tenant") -> dict:
+def _tenant_settings(tenant_id: str = TEST_TENANT_ID) -> dict:
     with SessionLocal() as db:
         row = db.execute(
             text("SELECT settings FROM domain_shared.tenants WHERE id = :tenant_id"),
@@ -49,11 +50,11 @@ def _tenant_settings(tenant_id: str = "test-tenant") -> dict:
         return json.loads(raw)
 
 
-def _snapshot_tenant_settings(tenant_id: str = "test-tenant") -> dict:
+def _snapshot_tenant_settings(tenant_id: str = TEST_TENANT_ID) -> dict:
     return json.loads(json.dumps(_tenant_settings(tenant_id)))
 
 
-def _restore_tenant_settings(snapshot: dict, tenant_id: str = "test-tenant") -> None:
+def _restore_tenant_settings(snapshot: dict, tenant_id: str = TEST_TENANT_ID) -> None:
     with SessionLocal() as db:
         db.execute(
             text(
@@ -112,7 +113,7 @@ def test_marketplace_endpoints_cover_list_preview_clone_and_install():
 
         publish_preview = client.post(
             "/workflow/templates/marketplace/tpl-ap-approval/publish-preview",
-            json={"tenant_id": "test-tenant", "requested_by_role": "tenant_admin"},
+            json={"tenant_id": TEST_TENANT_ID, "requested_by_role": "tenant_admin"},
         )
         assert publish_preview.status_code == 200
         assert publish_preview.json()["recommended_next_action"]
@@ -120,7 +121,7 @@ def test_marketplace_endpoints_cover_list_preview_clone_and_install():
         clone = client.post(
             "/workflow/templates/marketplace/tpl-harvest-campaign/clone",
             json={
-                "tenant_id": "test-tenant",
+                "tenant_id": TEST_TENANT_ID,
                 "clone_name": "Erntekampagne Pilot",
                 "installed_by": "ops-admin",
                 "target_scope": "tenant",
@@ -132,7 +133,7 @@ def test_marketplace_endpoints_cover_list_preview_clone_and_install():
         install = client.post(
             "/workflow/templates/marketplace/tpl-harvest-campaign/install",
             json={
-                "tenant_id": "test-tenant",
+                "tenant_id": TEST_TENANT_ID,
                 "installed_by": "ops-admin",
                 "clone_name": "Erntekampagne Pilot",
                 "target_scope": "tenant",
@@ -144,7 +145,7 @@ def test_marketplace_endpoints_cover_list_preview_clone_and_install():
         assert install_body["lifecycle_status"] == "installed_pending_review"
         assert "/api/v1/workflow/simulation/preview" in install_body["monitoring_hooks"]
 
-        settings = _tenant_settings("test-tenant")
+        settings = _tenant_settings(TEST_TENANT_ID)
         assert settings["workflow_template_marketplace_installs"]
         assert settings["workflow_template_library"]["tpl-harvest-campaign"]["clone_name"] == "Erntekampagne Pilot"
     finally:
