@@ -33,6 +33,8 @@ docs/
 ***REMOVED*** Node (if any)
 node_modules/
 packages/*/node_modules/
+domains/*/node_modules/
+domains/*/dist/
 
 ***REMOVED*** Data
 data/

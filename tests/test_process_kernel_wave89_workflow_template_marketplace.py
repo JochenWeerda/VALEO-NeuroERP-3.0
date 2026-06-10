@@ -50,6 +50,23 @@ def _tenant_settings(tenant_id: str = TEST_TENANT_ID) -> dict:
         return json.loads(raw)
 
 
+def _ensure_test_tenant(tenant_id: str = TEST_TENANT_ID) -> None:
+    with SessionLocal() as db:
+        db.execute(
+            text(
+                """
+                INSERT INTO domain_shared.tenants
+                  (id, name, domain, is_active, settings, created_at, updated_at)
+                VALUES
+                  (:tenant_id, 'Workflow Marketplace Test', :domain, true, '{}'::jsonb, NOW(), NOW())
+                ON CONFLICT (id) DO NOTHING
+                """
+            ),
+            {"tenant_id": tenant_id, "domain": f"{tenant_id}.marketplace.test"},
+        )
+        db.commit()
+
+
 def _snapshot_tenant_settings(tenant_id: str = TEST_TENANT_ID) -> dict:
     return json.loads(json.dumps(_tenant_settings(tenant_id)))
 
@@ -97,6 +114,7 @@ def test_workflow_template_preview_builds_rollout_steps_and_warnings():
 
 
 def test_marketplace_endpoints_cover_list_preview_clone_and_install():
+    _ensure_test_tenant()
     snapshot = _snapshot_tenant_settings()
     client = _client()
 

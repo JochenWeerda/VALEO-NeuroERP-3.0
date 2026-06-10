@@ -61,6 +61,8 @@ jobs:
           timeout 30 bash -c 'until curl -f http://localhost:8000/healthz; do sleep 2; done'
       
       - name: OWASP ZAP Full Scan
+        id: zap_full
+        continue-on-error: true
         uses: zaproxy/action-full-scan@v0.10.0
         with:
           target: 'http://localhost:8000'
@@ -72,6 +74,10 @@ jobs:
 
       - name: Enforce ZAP medium/high gate
         run: |
+          test -f report_json.json || {
+            echo "::error::ZAP did not produce report_json.json"
+            exit 1
+          }
           count=$(jq '[.site[]?.alerts[]? | select((.riskcode | tonumber) >= 2)] | length' report_json.json)
           echo "ZAP medium/high findings: $count"
           test "$count" -eq 0

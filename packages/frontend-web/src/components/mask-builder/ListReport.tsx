@@ -301,10 +301,11 @@ const ListReport: React.FC<ListReportProps> = ({
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
             {/* Search */}
             <div>
-              <Label>{t('common.search')}</Label>
+              <Label htmlFor="list-report-search">{t('common.search')}</Label>
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                 <Input
+                  id="list-report-search"
                   ref={searchRef}
                   placeholder={t('crud.list.searchPlaceholder')}
                   value={searchTerm}
@@ -317,11 +318,13 @@ const ListReport: React.FC<ListReportProps> = ({
             {/* Dynamic filters */}
             {config.filters?.map(filter => {
               const filterName = filter.name || filter.key || ''
+              const filterId = `list-report-filter-${filterName}`
               return (
               <div key={filterName}>
-                <Label>{getFilterLabel(filter)}</Label>
+                <Label htmlFor={filterId}>{getFilterLabel(filter)}</Label>
                 {filter.type === 'select' ? (
                   <NativeSelect
+                    id={filterId}
                     value={filters[filterName] || ''}
                     onValueChange={(value) => handleFilterChange(filterName, value)}
                     options={((filter['options'] as Array<{ value: string | number; label: string; labelKey?: string }>) ?? []).map((option) => ({
@@ -333,6 +336,7 @@ const ListReport: React.FC<ListReportProps> = ({
                 ) : filter.type === 'number' ? (
                   <div className="relative">
                     <Input
+                      id={filterId}
                       type="number"
                       placeholder={getFilterPlaceholder(filter) || t('crud.placeholders.enterAmount')}
                       value={filters[filterName] || ''}
@@ -346,6 +350,7 @@ const ListReport: React.FC<ListReportProps> = ({
                   </div>
                 ) : filter.type === 'date' ? (
                   <Input
+                    id={filterId}
                     type="date"
                     placeholder={getFilterPlaceholder(filter)}
                     value={filters[filterName] || ''}
@@ -356,6 +361,7 @@ const ListReport: React.FC<ListReportProps> = ({
                   />
                 ) : (
                   <Input
+                    id={filterId}
                     placeholder={getFilterPlaceholder(filter)}
                     value={filters[filterName] || ''}
                     onChange={(e) => handleFilterChange(filterName, e.target.value)}
@@ -408,6 +414,7 @@ const ListReport: React.FC<ListReportProps> = ({
                   <TableHead className="w-12">
                     <input
                       type="checkbox"
+                      aria-label={t('crud.list.selectAll')}
                       checked={selectedItems.length === paginatedData.length && paginatedData.length > 0}
                       onChange={(e) => {
                         if (e.target.checked) {
@@ -472,6 +479,9 @@ const ListReport: React.FC<ListReportProps> = ({
                       <TableCell>
                         <input
                           type="checkbox"
+                          aria-label={t('crud.list.selectItem', {
+                            item: String(item.purchaseOrderNumber ?? item.name ?? item.id ?? index + 1),
+                          })}
                           checked={selectedItems.includes(item)}
                           onChange={(e) => {
                             if (e.target.checked) {

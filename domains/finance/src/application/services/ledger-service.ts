@@ -197,6 +197,13 @@ export class LedgerApplicationService implements LedgerService {
       throw new Error(`Period ${command.period} is not open`);
     }
 
+    const unbalancedJournals = await this.dependencies.journalRepository.findUnbalancedJournals(
+      command.tenantId
+    );
+    if (unbalancedJournals.some((journal) => journal.period === command.period)) {
+      throw new Error(`Period ${command.period} is not balanced. Cannot close unbalanced period.`);
+    }
+
     // Get trial balance to ensure it's balanced
     const trialBalance = await this.getTrialBalance(command.tenantId, command.period);
 
@@ -268,6 +275,12 @@ export class LedgerApplicationService implements LedgerService {
     // Validate entries
     if (command.entries.length === 0) {
       throw new Error('Journal must have at least one entry');
+    }
+
+    const hasDebit = command.entries.some((entry) => entry.debit > 0);
+    const hasCredit = command.entries.some((entry) => entry.credit > 0);
+    if (!hasDebit || !hasCredit) {
+      throw new Error('Journal must have both debit and credit entries');
     }
 
     // Check if entries balance

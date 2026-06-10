@@ -300,11 +300,25 @@ jobs:
           timeout 30 bash -c 'until curl -f http://localhost:8000/healthz; do sleep 2; done'
       
       - name: OWASP ZAP Baseline Scan
+        id: zap_baseline
+        continue-on-error: true
         uses: zaproxy/action-baseline@v0.10.0
         with:
           target: 'http://localhost:8000'
           rules_file_name: '.zap/rules.tsv'
           cmd_options: '-a'
+          allow_issue_writing: false
+          fail_action: false
+
+      - name: Enforce ZAP medium/high gate
+        run: |
+          test -f report_json.json || {
+            echo "::error::ZAP did not produce report_json.json"
+            exit 1
+          }
+          count=$(jq '[.site[]?.alerts[]? | select((.riskcode | tonumber) >= 2)] | length' report_json.json)
+          echo "ZAP medium/high findings: $count"
+          test "$count" -eq 0
 
   infrastat-integration:
     name: InfraStat Integration Tests

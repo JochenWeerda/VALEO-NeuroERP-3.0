@@ -81,11 +81,11 @@ import {
 // ---------------------------------------------------------------------------
 const C = {
   dark: '#1B3022',
-  accent: '#88B04B',
+  accent: '#557A20',
   bg: '#F0F2F5',
   card: '#FFFFFF',
   border: '#D1D5DB',
-  muted: '#6B7280',
+  muted: '#59616D',
   aiBg: '#E0F2FE',
   aiBorder: '#BAE6FD',
   aiText: '#0369A1',

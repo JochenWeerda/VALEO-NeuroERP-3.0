@@ -2,7 +2,7 @@
 # Multi-stage build for optimal production image
 
 # ===== BUILD STAGE =====
-FROM node:18-alpine AS builder
+FROM node:22-alpine AS builder
 
 # Install system dependencies
 RUN apk add --no-cache \
@@ -16,23 +16,23 @@ RUN apk add --no-cache \
 # Set working directory
 WORKDIR /app
 
-# Copy package files
-COPY package*.json ./
-COPY domains/finance/package*.json ./domains/finance/
+# Copy the standalone domain dependency contract.
+COPY domains/finance/package*.json /app/domains/finance/
 
-# Install dependencies
-RUN npm ci --only=production && npm cache clean --force
+# Install build dependencies from the committed lockfile.
+WORKDIR /app/domains/finance
+RUN npm ci
 
 # Copy source code
-COPY domains/finance/ ./domains/finance/
-COPY packages/ ./packages/
-COPY migrations/sql/finance/ ./migrations/sql/finance/
+COPY tsconfig.json /app/tsconfig.json
+COPY domains/finance/ /app/domains/finance/
+COPY packages/ /app/packages/
 
 # Build TypeScript
-RUN npm run build --workspace=domains/finance
+RUN npm run build && npm prune --omit=dev && npm cache clean --force
 
 # ===== PRODUCTION STAGE =====
-FROM node:18-alpine AS production
+FROM node:22-alpine AS production
 
 # Install system dependencies for production
 RUN apk add --no-cache \
@@ -49,10 +49,9 @@ RUN addgroup -g 1001 -S nodejs && \
 WORKDIR /app
 
 # Copy built application from builder stage
-COPY --from=builder --chown=finance:nodejs /app/dist ./dist
 COPY --from=builder --chown=finance:nodejs /app/domains/finance/dist ./domains/finance/dist
-COPY --from=builder --chown=finance:nodejs /app/packages/utilities/dist ./packages/utilities/dist
-COPY --from=builder --chown=finance:nodejs /app/node_modules ./node_modules
+COPY --from=builder --chown=finance:nodejs /app/domains/finance/node_modules ./domains/finance/node_modules
+COPY --from=builder --chown=finance:nodejs /app/domains/finance/package.json ./domains/finance/package.json
 
 # Create necessary directories
 RUN mkdir -p /app/data /app/logs && \
