@@ -78,6 +78,31 @@ bleibt als globaler Default/Bootstrap gültig.
 - Der `call-transcript`-Endpoint nutzt jetzt `SttClient.for_tenant(db, tenant_id)`.
 - Hinweis: Route `/admin-suite/capture-connectors` (nicht `/connectors` — letztere ist der bestehende Connector-Hub/Integrationen).
 
+## Automatischer Abruf — Mail-Poll-Worker (Scheduler)
+
+Der App-Core hat bewusst keinen In-Process-Scheduler; der Abruf läuft als
+eigenständiger Worker (Muster wie `gap_sync_worker`). Er iteriert alle Mandanten
+mit aktiviertem IMAP-Connector und ruft je Tenant `MailIngestService.poll_once()`
+auf — idempotent (Message-ID + UID-State), daher gefahrlos häufig.
+
+- Worker: `app/workers/mail_poll_worker.py`
+- Manueller Einzel-Abruf je Tenant zusätzlich über die Admin-Maske („Jetzt abrufen").
+
+```bash
+# Einzel-Sweep (für OS-Cron / Windows-Aufgabenplanung, z. B. alle 5 Min):
+python -m app.workers.mail_poll_worker
+
+# Dauerbetrieb als eigener Prozess (Intervall in Sekunden):
+python -m app.workers.mail_poll_worker --loop --interval 120
+
+# Nur ein Mandant:
+python -m app.workers.mail_poll_worker --tenant <tenant-uuid>
+```
+
+Betriebsvarianten:
+- **Cron / Aufgabenplanung:** `*/5 * * * * docker exec valeo-neuro-erp-backend python -m app.workers.mail_poll_worker`
+- **docker-compose:** zusätzlicher Service mit `command: python -m app.workers.mail_poll_worker --loop --interval 120` (gleiches Image/Env wie Backend).
+
 ## Konfiguration (ENV) — Übersicht (Default/Fallback; UI hat Vorrang)
 
 | Connector | Schlüssel |
