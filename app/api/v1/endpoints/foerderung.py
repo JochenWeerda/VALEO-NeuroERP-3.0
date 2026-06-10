@@ -139,7 +139,7 @@ async def create_antrag(
 
 
 @router.get("/antraege/{antrag_id}", response_model=FoerderungOut, summary="Antrag abrufen")
-async def get_antrag(antrag_id: int, db: Session = Depends(get_db)) -> dict:
+async def get_antrag(antrag_id: str, db: Session = Depends(get_db)) -> dict:
     """Einzelnen Förderantrag abrufen."""
     antrag = db.query(FoerderAntrag).filter(FoerderAntrag.id == antrag_id).first()
     if not antrag:
@@ -156,7 +156,7 @@ async def get_antrag(antrag_id: int, db: Session = Depends(get_db)) -> dict:
 
 
 @router.delete("/antraege/{antrag_id}", status_code=204, response_class=Response, response_model=None, summary="Antrag löschen")
-async def delete_antrag(antrag_id: int, db: Session = Depends(get_db)) -> None:
+async def delete_antrag(antrag_id: str, db: Session = Depends(get_db)) -> None:
     """Förderantrag löschen (nur im Entwurfsstatus)."""
     antrag = db.query(FoerderAntrag).filter(FoerderAntrag.id == antrag_id).first()
     if not antrag:

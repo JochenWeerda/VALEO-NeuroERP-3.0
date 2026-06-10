@@ -11,6 +11,7 @@ from app.core.database import get_db
 
 router_helpers = importlib.import_module("app.documents.router_helpers")
 settlement_service_module = importlib.import_module("app.services.agrar_settlement_service")
+finance_transaction_service_module = importlib.import_module("app.services.finance_transaction_service")
 
 
 def _build_repo():
@@ -170,6 +171,11 @@ def _app_with_repo_and_settlement(monkeypatch, settlement: _FakeSettlement):
     monkeypatch.setattr(credit_debit_memos, "list_from_store", _repo_list)
     monkeypatch.setattr(agrar_settlements, "get_repository", lambda db: repo)
     monkeypatch.setattr(agrar_settlements, "save_to_store", _repo_save)
+    monkeypatch.setattr(
+        finance_transaction_service_module.FinanceTransactionService,
+        "create",
+        lambda self, **kwargs: type("JournalEntry", (), {"entry_number": kwargs["entry_number"]})(),
+    )
 
     app = FastAPI()
     app.include_router(credit_debit_memos.router)

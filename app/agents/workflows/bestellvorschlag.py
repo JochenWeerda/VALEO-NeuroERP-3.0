@@ -583,9 +583,16 @@ def build_bestellvorschlag_workflow():
     )
     workflow.add_edge("create_order", END)
 
+    import sqlite3
+    from pathlib import Path
+
     from langgraph.checkpoint.sqlite import SqliteSaver
 
-    checkpointer = SqliteSaver.from_conn_string("data/bestellvorschlag_workflows.db")
+    database_path = Path("data/bestellvorschlag_workflows.db")
+    database_path.parent.mkdir(parents=True, exist_ok=True)
+    checkpointer = SqliteSaver(
+        sqlite3.connect(database_path, check_same_thread=False)
+    )
     return workflow.compile(
         checkpointer=checkpointer,
         interrupt_before=["wait_approval"],

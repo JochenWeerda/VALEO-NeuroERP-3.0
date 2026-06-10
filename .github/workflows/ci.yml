@@ -449,6 +449,7 @@ jobs:
           version: v3.13.3
       - name: Helm Dependency Build
         run: |
+          helm repo add bitnami https://charts.bitnami.com/bitnami
           helm dependency build k8s/helm/valeo-erp
       - name: Helm Lint
         run: |

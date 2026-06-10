@@ -36,6 +36,7 @@ jobs:
 
       - name: Render Superglue manifests
         run: |
+          helm repo add bitnami https://charts.bitnami.com/bitnami
           helm dependency build k8s/helm/valeo-erp
           helm template valeo-superglue k8s/helm/valeo-erp \
             --set superglue.enabled=true \

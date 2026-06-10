@@ -7,8 +7,8 @@ from __future__ import annotations
 import os
 import time
 import httpx
+import jwt
 from typing import Any, Dict, List
-from jose import jwt
 import logging
 
 logger = logging.getLogger(__name__)
@@ -87,7 +87,7 @@ class OIDC:
 
         Raises:
             ValueError: Token ungültig oder Key nicht gefunden
-            jwt.JWTError: Token-Validierung fehlgeschlagen
+            jwt.InvalidTokenError: Token-Validierung fehlgeschlagen
         """
         await self._ensure_keys()
 
@@ -117,7 +117,7 @@ class OIDC:
         # Token validieren
         claims = jwt.decode(
             token,
-            key,
+            jwt.PyJWK.from_dict(key).key,
             algorithms=[key.get("alg", "RS256")],
             audience=OIDC_AUDIENCE,
             issuer=OIDC_ISSUER,

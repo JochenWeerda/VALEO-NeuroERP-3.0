@@ -1,6 +1,6 @@
 import { FastifyInstance } from 'fastify';
 import { SeasonalPricingService } from '../../domain/services/seasonal-pricing-service';
-import { CreateSeasonalPricingRule, Season, SeasonalPricingRule } from '../../domain/entities/seasonal-pricing-rule';
+import { Season, SeasonalPricingRule } from '../../domain/entities/seasonal-pricing-rule';
 
 // Initialize service
 const seasonalPricingService = new SeasonalPricingService({});
@@ -34,6 +34,7 @@ export async function registerSeasonalPricingRoutes(fastify: FastifyInstance) {
         },
         response: {
           200: { type: 'array' },
+          500: { type: 'object' },
         },
       },
     }, async (request, reply) => {
@@ -87,6 +88,7 @@ export async function registerSeasonalPricingRoutes(fastify: FastifyInstance) {
         },
         response: {
           201: { type: 'object' },
+          400: { type: 'object' },
         },
       },
     }, async (request, reply) => {
@@ -135,6 +137,7 @@ export async function registerSeasonalPricingRoutes(fastify: FastifyInstance) {
         response: {
           200: { type: 'object' },
           404: { type: 'object' },
+          500: { type: 'object' },
         },
       },
     }, async (request, reply) => {
@@ -191,6 +194,7 @@ export async function registerSeasonalPricingRoutes(fastify: FastifyInstance) {
         },
         response: {
           200: { type: 'object' },
+          400: { type: 'object' },
         },
       },
     }, async (request, reply) => {
@@ -240,6 +244,7 @@ export async function registerSeasonalPricingRoutes(fastify: FastifyInstance) {
         response: {
           204: { type: 'null' },
           404: { type: 'object' },
+          400: { type: 'object' },
         },
       },
     }, async (request, reply) => {
@@ -275,6 +280,7 @@ export async function registerSeasonalPricingRoutes(fastify: FastifyInstance) {
         },
         response: {
           200: { type: 'object' },
+          400: { type: 'object' },
         },
       },
     }, async (request, reply) => {

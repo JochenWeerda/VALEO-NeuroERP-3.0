@@ -1,11 +1,115 @@
-import { Parser } from 'expr-eval';
-import { FormulaInput } from '../entities/dynamic-formula';
-import { RoundingConfig, PriceCaps } from '../entities/dynamic-formula';
+import { FormulaInput, PriceCaps, RoundingConfig } from '../entities/dynamic-formula';
 import pino from 'pino';
 
 const logger = pino({ name: 'formula-engine' });
 
-const parser = new Parser();
+type Token = number | string;
+
+const OPERATORS: Record<string, { precedence: number; apply: (_left: number, _right: number) => number }> = {
+  '+': { precedence: 1, apply: (left, right) => left + right },
+  '-': { precedence: 1, apply: (left, right) => left - right },
+  '*': { precedence: 2, apply: (left, right) => left * right },
+  '/': {
+    precedence: 2,
+    apply: (left, right) => {
+      if (right === 0) throw new Error('Division by zero');
+      return left / right;
+    },
+  },
+};
+
+function tokenize(expression: string): Token[] {
+  const tokens: Token[] = [];
+  const matcher = /\s*(?:(\d+(?:\.\d+)?)|([A-Za-z_][A-Za-z0-9_]*)|([()+\-*/]))/gy;
+  let offset = 0;
+
+  while (offset < expression.length) {
+    matcher.lastIndex = offset;
+    const match = matcher.exec(expression);
+    if (!match) throw new Error(`Invalid token at position ${offset}`);
+    if (match[1]) tokens.push(Number(match[1]));
+    else if (match[2]) tokens.push(match[2]);
+    else if (match[3]) tokens.push(match[3]);
+    offset = matcher.lastIndex;
+  }
+
+  return tokens;
+}
+
+function evaluateExpression(expression: string, values: Record<string, number>): number {
+  const output: Token[] = [];
+  const operators: string[] = [];
+  let expectsValue = true;
+
+  for (const token of tokenize(expression)) {
+    if (typeof token === 'number' || /^[A-Za-z_]/.test(token)) {
+      if (!expectsValue) throw new Error('Missing operator');
+      output.push(token);
+      expectsValue = false;
+      continue;
+    }
+    if (token === '(') {
+      operators.push(token);
+      expectsValue = true;
+      continue;
+    }
+    if (token === ')') {
+      while (operators.length && operators.at(-1) !== '(') {
+        const operator = operators.pop();
+        if (operator !== undefined) output.push(operator);
+      }
+      if (operators.pop() !== '(') throw new Error('Unbalanced parentheses');
+      expectsValue = false;
+      continue;
+    }
+    if (expectsValue && token === '-') output.push(0);
+    else if (expectsValue) throw new Error('Operator without left operand');
+    const currentOperator = OPERATORS[token];
+    if (!currentOperator) throw new Error(`Unsupported operator: ${token}`);
+    while (operators.length) {
+      const candidate = operators.at(-1);
+      if (candidate === undefined || candidate === '(') break;
+      const candidateOperator = OPERATORS[candidate];
+      if (!candidateOperator || candidateOperator.precedence < currentOperator.precedence) break;
+      const operator = operators.pop();
+      if (operator !== undefined) output.push(operator);
+    }
+    operators.push(token);
+    expectsValue = true;
+  }
+
+  if (expectsValue) throw new Error('Incomplete expression');
+  while (operators.length) {
+    const operator = operators.pop();
+    if (operator === undefined) break;
+    if (operator === '(') throw new Error('Unbalanced parentheses');
+    output.push(operator);
+  }
+
+  const stack: number[] = [];
+  for (const token of output) {
+    if (typeof token === 'number') stack.push(token);
+    else {
+      const operator = OPERATORS[token];
+      if (!operator) {
+        const value = values[token];
+        if (value === undefined || !Number.isFinite(value)) {
+          throw new Error(`Unknown or invalid variable: ${token}`);
+        }
+        stack.push(value);
+        continue;
+      }
+      const right = stack.pop();
+      const left = stack.pop();
+      if (left === undefined || right === undefined) throw new Error('Invalid expression');
+      stack.push(operator.apply(left, right));
+    }
+  }
+  if (stack.length !== 1 || !Number.isFinite(stack[0])) throw new Error('Invalid result');
+  const result = stack[0];
+  if (result === undefined) throw new Error('Invalid result');
+  return result;
+}
 
 /**
  * Evaluate Dynamic Formula
@@ -37,11 +141,11 @@ export async function evaluateFormula(
   // Evaluate expression
   let result: number;
   try {
-    const expr = parser.parse(formula.expression);
-    result = expr.evaluate(resolvedInputs);
+    result = evaluateExpression(formula.expression, resolvedInputs);
   } catch (error) {
     logger.error({ error, expression: formula.expression }, 'Formula evaluation failed');
-    throw new Error(`Formula evaluation error: ${error}`);
+    const message = error instanceof Error ? error.message : String(error);
+    throw new Error(`Formula evaluation error: ${message}`);
   }
 
   // Apply caps

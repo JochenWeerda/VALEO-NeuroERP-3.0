@@ -10,10 +10,10 @@ import time
 from typing import Any, Dict, List, Optional
 
 import httpx
+import jwt
 from fastapi import Depends, HTTPException, Request, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
-from jose import jwt
-from jose.exceptions import JWTError
+from jwt import InvalidTokenError
 
 from .config import settings
 
@@ -92,13 +92,13 @@ def _validate_jwt(token: str) -> Dict[str, Any]:
     try:
         claims = jwt.decode(
             token,
-            key_data,
+            jwt.PyJWK.from_dict(key_data).key,
             algorithms=[algorithm],
             audience=audience,
             issuer=issuer,
             options=options,
         )
-    except JWTError as exc:
+    except InvalidTokenError as exc:
         logger.warning("JWT validation failed: %s", exc)
         raise HTTPException(
             status.HTTP_401_UNAUTHORIZED,

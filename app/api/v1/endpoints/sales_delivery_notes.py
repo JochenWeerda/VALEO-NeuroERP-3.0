@@ -256,7 +256,7 @@ async def create_delivery_note(
                 :id, :tenant_id, :delivery_note_number, :customer_id, :branch_id, :sales_rep_id, :operator_id,
                 :delivery_date, :delivery_time, :cost_center_id, :truck_number,
                 :is_credit_note, :is_self_pickup, :is_early_payment, :reference_invoice_number,
-                :status, :is_printed, :is_delivered, :invoice_number, :totals::jsonb,
+                :status, :is_printed, :is_delivered, :invoice_number, CAST(:totals AS jsonb),
                 NOW(), NOW()
             )
         """),
@@ -406,7 +406,7 @@ async def update_delivery_note(
         db.execute(
             text("""
                 UPDATE domain_sales.delivery_notes
-                SET totals = :totals::jsonb, updated_at = NOW()
+                SET totals = CAST(:totals AS jsonb), updated_at = NOW()
                 WHERE id = :id AND tenant_id = :tenant_id
             """),
             {"id": ls_id, "tenant_id": tenant_id, "totals": json.dumps(totals)},

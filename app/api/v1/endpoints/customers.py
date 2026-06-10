@@ -359,7 +359,10 @@ def umkreissuche(
     """Geo-Umkreissuche: Kunden im Umkreis von radius_km um den angegebenen Punkt."""
     from ....services.business_partner_service import BusinessPartnerService
 
-    rows = BusinessPartnerService(db, tenant_id).list_customers_with_coordinates()
+    try:
+        rows = BusinessPartnerService(db, tenant_id).list_customers_with_coordinates()
+    except Exception:
+        rows = []
     if not rows:
         return {
             "ergebnisse": [],

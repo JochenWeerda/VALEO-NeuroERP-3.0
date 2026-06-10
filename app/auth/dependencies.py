@@ -5,9 +5,10 @@ FastAPI dependencies for JWT-based authentication and authorization
 
 import logging
 from typing import Optional, Dict, Any
+import jwt
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
-from jose import jwt, JWTError
+from jwt import InvalidTokenError
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
@@ -93,7 +94,7 @@ async def require_authenticated_user(
             "user": user
         }
         
-    except JWTError as e:
+    except InvalidTokenError as e:
         logger.warning(f"JWT validation failed: {str(e)}")
         raise AuthenticationError("Invalid token")
     except Exception as e:

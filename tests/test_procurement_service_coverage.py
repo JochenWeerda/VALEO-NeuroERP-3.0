@@ -20,6 +20,7 @@ def _make_db() -> MagicMock:
     """Erzeugt eine Mock-DB-Session."""
     db = MagicMock()
     db.query.return_value = db
+    db.options.return_value = db
     db.filter.return_value = db
     db.order_by.return_value = db
     db.first.return_value = None

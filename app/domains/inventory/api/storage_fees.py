@@ -265,7 +265,7 @@ def _post_storage_fee_journal(
         return account_id
 
     line_number = 1
-    ar_account_id = _ensure_account("1200", "Forderungen aus Lieferungen und Leistungen", "asset", "receivables")
+    ar_account_id = _ensure_account("1200", "Forderungen aus Lieferungen und Leistungen", "asset", "current_assets")
     revenue_account_id = _ensure_account("8400", "Lagergelderloese Fremdbestand", "revenue", "storage_fee")
     owner_totals: dict[str, Decimal] = {}
     for item in charges:

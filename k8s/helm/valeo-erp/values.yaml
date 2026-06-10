@@ -8,8 +8,28 @@ image:
   pullPolicy: Always
   tag: "latest"
 
+frontend:
+  enabled: true
+  replicaCount: 2
+  image:
+    repository: ghcr.io/jochenweerda/valeo-neuroerp-3.0/frontend
+    pullPolicy: Always
+    tag: "latest"
+  service:
+    port: 80
+  resources:
+    limits:
+      cpu: 500m
+      memory: 256Mi
+    requests:
+      cpu: 100m
+      memory: 64Mi
+
 imagePullSecrets:
   - name: ghcr-secret
+
+externalSecret:
+  name: ""
 
 nameOverride: ""
 fullnameOverride: "valeo-app"
@@ -53,8 +73,18 @@ ingress:
   hosts:
     - host: erp.valeo-landhandel.de
       paths:
+        - path: /api
+          pathType: Prefix
+          service: backend
+        - path: /healthz
+          pathType: Exact
+          service: backend
+        - path: /readyz
+          pathType: Exact
+          service: backend
         - path: /
           pathType: Prefix
+          service: frontend
   tls:
     - secretName: valeo-erp-tls
       hosts:

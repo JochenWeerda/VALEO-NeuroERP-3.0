@@ -8,8 +8,8 @@ import time
 from typing import Any
 
 import httpx
-from jose import jwt
-from jose.exceptions import JWTError
+import jwt
+from jwt import InvalidTokenError
 
 from app.config.settings import settings
 
@@ -76,7 +76,7 @@ def claims_from_bearer_token(token: str) -> dict[str, Any] | None:
     if secret:
         try:
             return jwt.decode(token, secret, algorithms=["HS256"], options={"verify_aud": False})
-        except JWTError:
+        except InvalidTokenError:
             pass
 
     jwks_url = _resolve_jwks_url()
@@ -105,8 +105,8 @@ def claims_from_bearer_token(token: str) -> dict[str, Any] | None:
             decode_kw["audience"] = audience
         if issuer:
             decode_kw["issuer"] = issuer
-        return jwt.decode(token, key_data, **decode_kw)
-    except (JWTError, httpx.HTTPError, json.JSONDecodeError) as exc:
+        return jwt.decode(token, jwt.PyJWK.from_dict(key_data).key, **decode_kw)
+    except (InvalidTokenError, httpx.HTTPError, json.JSONDecodeError) as exc:
         logger.warning("JWT validation failed: %s", exc)
         return None
 

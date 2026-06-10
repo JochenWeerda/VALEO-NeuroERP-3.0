@@ -17,7 +17,7 @@ import json
 import re
 import secrets
 from datetime import date, datetime
-from typing import Any
+from typing import Any, Callable
 from uuid import NAMESPACE_URL, UUID, uuid4, uuid5
 
 from sqlalchemy import text
@@ -989,10 +989,16 @@ class AdminCoreService:
             product_group_match=product_group_match,
         )
 
-    def preview_workflow_sandbox(self, payload: WorkflowSandboxPreviewIn) -> WorkflowSandboxPreviewOut:
-        settings = self._load_tenant_settings()
+    def preview_workflow_sandbox(
+        self,
+        payload: WorkflowSandboxPreviewIn,
+        *,
+        settings_loader: Callable[[], dict[str, Any]] | None = None,
+        variant_merger: Callable[..., dict[str, Any]] = merge_workflow_variants,
+    ) -> WorkflowSandboxPreviewOut:
+        settings = settings_loader() if settings_loader else self._load_tenant_settings()
         variants = settings.get("process_variants")
-        merged_variants = merge_workflow_variants(
+        merged_variants = variant_merger(
             DEFAULT_PROCESS_VARIANTS,
             variants,
             tenant_id=self.tenant_id,

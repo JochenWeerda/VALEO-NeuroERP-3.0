@@ -1,238 +1,147 @@
-name: Staging CI/CD
+name: Deploy Staging
 
 on:
   push:
-    branches:
-      - develop
+    branches: [develop]
   workflow_dispatch:
-    inputs:
-      skip_tests:
-        description: 'Skip tests (use with caution)'
-        required: false
-        default: 'false'
-        type: choice
-        options:
-          - 'false'
-          - 'true'
-
-env:
-  DOCKER_BUILDKIT: 1
-  COMPOSE_DOCKER_CLI_BUILD: 1
 
 permissions:
   contents: read
-  security-events: write
+  packages: write
+
+concurrency:
+  group: deploy-staging
+  cancel-in-progress: false
+
+env:
+  REGISTRY: ghcr.io
+  BACKEND_IMAGE_NAME: jochenweerda/valeo-neuroerp-3.0/backend
+  FRONTEND_IMAGE_NAME: jochenweerda/valeo-neuroerp-3.0/frontend
+  NAMESPACE: valeo-staging
+  RELEASE_NAME: valeo-staging
 
 jobs:
-  # ================================
-  # Job 1: Build & Test
-  # ================================
+  verify:
+    name: Hard release gates
+    uses: ./.github/workflows/release-gates.yml
+
   build:
-    name: Build & Test
+    name: Build immutable images
     runs-on: ubuntu-latest
-    timeout-minutes: 30
-
+    needs: verify
+    outputs:
+      backend_image: ${{ steps.image.outputs.backend_ref }}
+      frontend_image: ${{ steps.image.outputs.frontend_ref }}
     steps:
-      - name: Checkout Code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+      - uses: docker/login-action@v3
         with:
-          fetch-depth: 0
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@v3
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Define image reference
+        id: image
+        run: |
+          echo "backend_ref=${REGISTRY}/${BACKEND_IMAGE_NAME}:sha-${GITHUB_SHA}" >> "$GITHUB_OUTPUT"
+          echo "frontend_ref=${REGISTRY}/${FRONTEND_IMAGE_NAME}:sha-${GITHUB_SHA}" >> "$GITHUB_OUTPUT"
+      - name: Build and push backend
+        uses: docker/build-push-action@v6
         with:
-          version: 9.12.0
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
+          context: .
+          file: Dockerfile.backend
+          push: true
+          tags: ${{ steps.image.outputs.backend_ref }}
+      - name: Build and push frontend
+        uses: docker/build-push-action@v6
         with:
-          node-version: '20'
-          cache: 'pnpm'
+          context: .
+          file: Dockerfile.frontend
+          push: true
+          tags: ${{ steps.image.outputs.frontend_ref }}
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.11'
-          cache: 'pip'
-
-      - name: Install Dependencies (Frontend)
-        run: |
-          pnpm install --frozen-lockfile
-          pnpm --filter frontend-web install
-
-      - name: Install Dependencies (Backend)
-        run: |
-          pip install -r requirements.txt
-
-      - name: TypeScript Compile Check
-        run: |
-          pnpm --filter frontend-web run type-check || true
-
-      - name: Lint Check (Frontend)
-        run: |
-          pnpm --filter frontend-web run lint --max-warnings 10 || true
-
-      - name: Lint Check (Backend)
-        run: |
-          pip install pylint
-          pylint app/ --exit-zero || true
-
-      - name: Run Unit Tests
-        if: ${{ github.event.inputs.skip_tests != 'true' }}
-        run: |
-          # Frontend Tests
-          pnpm --filter frontend-web run test:unit || true
-          
-          # Backend Tests
-          pytest tests/ --maxfail=5 || true
-
-      - name: Build Success
-        run: |
-          echo "✅ Build & Test completed successfully!"
-          echo "📦 All dependencies installed"
-          echo "🧪 All tests passed"
-          echo "🔍 Lint checks completed"
-          echo ""
-          echo "ℹ️  Note: Docker images are built locally on Windows/Docker Desktop"
-          echo "ℹ️  To deploy staging locally, run: .\scripts\staging-deploy.ps1"
-
-  # ================================
-  # Job 2: Security Scan
-  # ================================
-  security:
-    name: Security Scan
+  deploy:
+    name: Deploy and smoke staging
     runs-on: ubuntu-latest
     needs: build
-    timeout-minutes: 15
-
+    environment:
+      name: staging
+      url: ${{ secrets.STAGING_URL }}
     steps:
-      - name: Checkout Code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+      - uses: azure/setup-kubectl@v4
+      - uses: azure/setup-helm@v4
 
-      - name: Run Trivy Vulnerability Scanner
-        uses: aquasecurity/trivy-action@master
-        with:
-          scan-type: 'fs'
-          scan-ref: '.'
-          format: 'sarif'
-          output: 'trivy-results.sarif'
-          severity: 'CRITICAL,HIGH'
-          exit-code: '0'
-
-      - name: Upload Trivy Results to GitHub Security
-        uses: github/codeql-action/upload-sarif@v3
-        if: always()
-        with:
-          sarif_file: 'trivy-results.sarif'
-
-      - name: Check for Secrets
-        uses: trufflesecurity/trufflehog@main
-        with:
-          path: ./
-          base: ${{ github.event.repository.default_branch }}
-          head: HEAD
-
-      - name: AI Contribution Analysis
+      - name: Resolve Helm dependencies
         run: |
-          echo "🤖 Analyzing AI contributions in commits..."
-          # Check for AI-related commit messages
-          AI_COMMITS=$(git log --oneline ${{ github.event.repository.default_branch }}..HEAD | grep -i "\[AI\]" | wc -l)
-          if [ "$AI_COMMITS" -gt 0 ]; then
-            echo "✅ Found $AI_COMMITS AI-assisted commits"
-            echo "AI contributions detected and logged for transparency"
-          else
-            echo "ℹ️  No AI-assisted commits detected in this push"
-          fi
+          helm repo add bitnami https://charts.bitnami.com/bitnami
+          helm dependency build k8s/helm/valeo-erp
 
-  # ================================
-  # Job 3: Deployment Instructions
-  # ================================
-  deployment-info:
-    name: Deployment Instructions
-    runs-on: ubuntu-latest
-    needs: [build, security]
-    timeout-minutes: 5
-
-    steps:
-      - name: Display Deployment Instructions
+      - name: Configure cluster
+        shell: bash
         run: |
-          echo "╔════════════════════════════════════════════╗"
-          echo "║  ℹ️  Staging Deployment Instructions      ║"
-          echo "╚════════════════════════════════════════════╝"
-          echo ""
-          echo "✅ CI/CD Pipeline completed successfully!"
-          echo ""
-          echo "📦 Build & Test: PASSED"
-          echo "🔐 Security Scan: PASSED"
-          echo ""
-          echo "🚀 To deploy staging locally on Windows:"
-          echo ""
-          echo "   1. Open PowerShell in project directory"
-          echo "   2. Run: .\scripts\staging-deploy.ps1"
-          echo "   3. Wait ~10 minutes for deployment"
-          echo "   4. Access: http://localhost:3001"
-          echo "   5. Login: test-admin / Test123!"
-          echo ""
-          echo "📖 Documentation:"
-          echo "   - STAGING-DEPLOYMENT.md"
-          echo "   - STAGING-DEPLOYMENT-QUICKSTART.md"
-          echo ""
-          echo "💡 Staging runs on your local Windows/Docker Desktop"
-          echo ""
+          test -n "${{ secrets.KUBE_CONFIG }}" || { echo "KUBE_CONFIG fehlt"; exit 1; }
+          mkdir -p "$HOME/.kube"
+          printf '%s' "${{ secrets.KUBE_CONFIG }}" | base64 --decode > "$HOME/.kube/config"
+          chmod 600 "$HOME/.kube/config"
+          kubectl cluster-info
 
-  # ================================
-  # Job 4: Notify
-  # ================================
-  notify:
-    name: Notify Team
-    runs-on: ubuntu-latest
-    needs: [build, security, deployment-info]
-    if: always()
-
-    steps:
-      - name: CI Success Notification
-        if: ${{ needs.build.result == 'success' && needs.security.result == 'success' }}
+      - name: Validate target secrets
         run: |
-          echo "✅ CI/CD Pipeline Successful!"
-          echo ""
-          echo "✅ Build & Test: PASSED"
-          echo "✅ Security Scan: PASSED"
-          echo "🤖 AI Contribution Analysis: COMPLETED"
-          echo ""
-          echo "🚀 Ready for local staging deployment"
-          echo "   Run: .\scripts\staging-deploy.ps1"
+          kubectl get namespace "$NAMESPACE"
+          kubectl get secret valeo-erp-runtime -n "$NAMESPACE"
+          kubectl get secret valeo-erp-database -n "$NAMESPACE"
 
-      - name: CI Failure Notification
-        if: ${{ needs.build.result == 'failure' || needs.security.result == 'failure' }}
+      - name: Run database migration
+        env:
+          IMAGE: ${{ needs.build.outputs.backend_image }}
         run: |
-          echo "❌ CI/CD Pipeline Failed!"
-          echo ""
-          if [ "${{ needs.build.result }}" == "failure" ]; then
-            echo "❌ Build & Test: FAILED"
-          fi
-          if [ "${{ needs.security.result }}" == "failure" ]; then
-            echo "❌ Security Scan: FAILED"
-          fi
-          echo ""
-          echo "Please check logs and fix issues before deploying."
+          JOB="valeo-migrate-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          cat <<EOF | kubectl apply -f -
+          apiVersion: batch/v1
+          kind: Job
+          metadata:
+            name: ${JOB}
+            namespace: ${NAMESPACE}
+          spec:
+            backoffLimit: 1
+            ttlSecondsAfterFinished: 3600
+            template:
+              spec:
+                restartPolicy: Never
+                containers:
+                  - name: migrate
+                    image: ${IMAGE}
+                    command: ["python", "scripts/init_db.py"]
+                    envFrom:
+                      - secretRef:
+                          name: valeo-erp-runtime
+          EOF
+          kubectl wait --for=condition=complete "job/${JOB}" -n "$NAMESPACE" --timeout=10m
 
-      # Optional: Slack Notification
-      # - name: Slack Notification
-      #   uses: slackapi/slack-github-action@v1
-      #   if: always()
-      #   with:
-      #     webhook-url: ${{ secrets.SLACK_WEBHOOK_URL }}
-      #     payload: |
-      #       {
-      #         "text": "CI/CD Pipeline: ${{ needs.build.result == 'success' && needs.security.result == 'success' && '✅ SUCCESS' || '❌ FAILURE' }}",
-      #         "blocks": [
-      #           {
-      #             "type": "section",
-      #             "text": {
-      #               "type": "mrkdwn",
-      #               "text": "*Staging CI/CD*\nBuild: ${{ needs.build.result }}\nSecurity: ${{ needs.security.result }}\nBranch: ${{ github.ref_name }}"
-      #             }
-      #           }
-      #         ]
-      #       }
+      - name: Helm upgrade
+        env:
+          BACKEND_IMAGE: ${{ needs.build.outputs.backend_image }}
+          FRONTEND_IMAGE: ${{ needs.build.outputs.frontend_image }}
+        run: |
+          BACKEND_TAG="${BACKEND_IMAGE##*:}"
+          FRONTEND_TAG="${FRONTEND_IMAGE##*:}"
+          helm upgrade --install "$RELEASE_NAME" k8s/helm/valeo-erp \
+            --namespace "$NAMESPACE" \
+            --values k8s/helm/valeo-erp/values-production.yaml \
+            --set image.tag="$BACKEND_TAG" \
+            --set frontend.image.tag="$FRONTEND_TAG" \
+            --set ingress.hosts[0].host="${{ secrets.STAGING_HOST }}" \
+            --set ingress.tls[0].hosts[0]="${{ secrets.STAGING_HOST }}" \
+            --atomic --wait --timeout 15m
 
+      - name: Smoke target
+        run: |
+          test -n "${{ secrets.STAGING_URL }}" || { echo "STAGING_URL fehlt"; exit 1; }
+          curl --fail --show-error --silent --retry 12 --retry-all-errors \
+            --retry-delay 5 "${{ secrets.STAGING_URL }}/healthz"
+          curl --fail --show-error --silent --retry 12 --retry-all-errors \
+            --retry-delay 5 "${{ secrets.STAGING_URL }}/readyz"
+
+      - name: Roll back failed deployment
+        if: failure()
+        run: helm rollback "$RELEASE_NAME" -n "$NAMESPACE" --wait

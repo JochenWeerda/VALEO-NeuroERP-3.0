@@ -71,6 +71,11 @@ def cached_read_model(prefix: str, ttl: int = 30):
         if inspect.iscoroutinefunction(fn):
             @wraps(fn)
             async def async_wrapper(*args, **kwargs):
+                db = kwargs.get("db")
+                if db is not None:
+                    from sqlalchemy.orm import Session
+                    if not isinstance(db, Session):
+                        return await fn(*args, **kwargs)
                 tenant_id = kwargs.get("tenant_id", "unknown")
                 cache_kwargs = {k: v for k, v in kwargs.items() if k not in ("db", "tenant_id")}
                 key = _cache_key(prefix, tenant_id, **cache_kwargs)

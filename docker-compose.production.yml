@@ -1,9 +1,26 @@
-version: "3.8"
-
 # Production Stack für VALEO-NeuroERP
 # Alle Services zusammen: App, Auth, Event-Bus, Observability
 
 services:
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+    container_name: valeo-frontend
+    ports:
+      - "127.0.0.1:8080:8080"
+    depends_on:
+      valeo-app:
+        condition: service_healthy
+    networks:
+      - valeo-network
+    restart: unless-stopped
+    read_only: true
+    tmpfs:
+      - /var/cache/nginx
+      - /var/run
+      - /tmp
+
   # Main Application
   valeo-app:
     build:
@@ -17,10 +34,14 @@ services:
       - OIDC_ISSUER_URL=http://keycloak:8080/realms/valeo-neuro-erp
       - OIDC_CLIENT_ID=valeo-neuro-erp-backend
       - OIDC_CLIENT_SECRET=${OIDC_CLIENT_SECRET}
+      - APP_ENV=production
+      - DEBUG=false
+      - ALLOWED_HOSTS=${ALLOWED_HOSTS}
+      - CORS_ORIGINS=${CORS_ORIGINS}
       - LOG_LEVEL=INFO
       - ENABLE_METRICS=true
-    ports:
-      - "8000:8000"
+    expose:
+      - "8000"
     depends_on:
       postgres:
         condition: service_healthy
@@ -56,8 +77,8 @@ services:
       INVENTORY_RATE_LIMIT_PER_MINUTE: "600"
       INVENTORY_NATS_FAILURE_THRESHOLD: "5"
       INVENTORY_NATS_CIRCUIT_BREAKER_OPEN_SECONDS: "60"
-    ports:
-      - "5400:5400"
+    expose:
+      - "5400"
     depends_on:
       postgres:
         condition: service_healthy
@@ -81,8 +102,6 @@ services:
       POSTGRES_DB: valeo_neuro_erp
       POSTGRES_USER: valeo
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-    ports:
-      - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql
@@ -100,8 +119,6 @@ services:
     image: redis:7-alpine
     container_name: valeo-redis
     command: redis-server --appendonly yes --maxmemory 1gb --maxmemory-policy allkeys-lru
-    ports:
-      - "6379:6379"
     volumes:
       - redis_data:/data
     networks:
@@ -121,9 +138,6 @@ services:
       - "--jetstream"
       - "--store_dir=/data"
       - "--http_port=8222"
-    ports:
-      - "4222:4222"
-      - "8222:8222"
     volumes:
       - nats_data:/data
     networks:
@@ -165,7 +179,7 @@ services:
       KC_DB_HOST: postgres-keycloak
       KC_DB_PORT: "5432"
       KC_DB_NAME: keycloak
-      KC_DB_URL: jdbc:postgresql://${KC_DB_HOST}:${KC_DB_PORT}/${KC_DB_NAME}
+      KC_DB_URL: jdbc:postgresql://postgres-keycloak:5432/keycloak
       KC_DB_USERNAME: keycloak
       KC_DB_PASSWORD: ${KEYCLOAK_DB_PASSWORD}
       KEYCLOAK_ADMIN: ${KEYCLOAK_ADMIN}
@@ -175,8 +189,8 @@ services:
       KC_HTTP_ENABLED: true
       KC_HEALTH_ENABLED: true
       KC_METRICS_ENABLED: true
-    ports:
-      - "8080:8080"
+    expose:
+      - "8080"
     volumes:
       - ./config/keycloak/realm-export.json:/opt/keycloak/data/import/realm-valeo.json
     networks:
@@ -201,7 +215,7 @@ services:
       - '--storage.tsdb.path=/prometheus'
       - '--storage.tsdb.retention.time=30d'
     ports:
-      - "9090:9090"
+      - "127.0.0.1:9090:9090"
     volumes:
       - ./monitoring/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
       - ./monitoring/prometheus/alerts.yml:/etc/prometheus/alerts.yml
@@ -219,7 +233,7 @@ services:
       - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD}
       - GF_INSTALL_PLUGINS=grafana-piechart-panel
     ports:
-      - "3000:3000"
+      - "127.0.0.1:3000:3000"
     volumes:
       - ./monitoring/grafana/dashboards:/etc/grafana/provisioning/dashboards
       - grafana_data:/var/lib/grafana
@@ -233,7 +247,7 @@ services:
     container_name: valeo-loki
     command: -config.file=/etc/loki/local-config.yaml
     ports:
-      - "3100:3100"
+      - "127.0.0.1:3100:3100"
     volumes:
       - ./monitoring/loki/loki-config.yaml:/etc/loki/local-config.yaml
       - loki_data:/loki

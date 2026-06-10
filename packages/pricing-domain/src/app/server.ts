@@ -3,13 +3,12 @@ import swagger from '@fastify/swagger';
 import swaggerUi from '@fastify/swagger-ui';
 import dotenv from 'dotenv';
 import { registerQuoteRoutes } from './routes/quotes';
-import { initEventPublisher, closeEventPublisher } from '../infra/messaging/publisher';
-import pino from 'pino';
+import { closeEventPublisher, initEventPublisher } from '../infra/messaging/publisher';
 
 dotenv.config();
 
 const server = fastify({
-  logger: pino({ level: process.env.LOG_LEVEL ?? 'info' }),
+  logger: { level: process.env.LOG_LEVEL ?? 'info' },
   disableRequestLogging: false,
   requestIdLogLabel: 'requestId',
 });

@@ -43,13 +43,14 @@ def test_customer_from_row_satellit_und_alerts_json():
     assert c.alertMessages == ["gesperrt"]
 
 
-def test_log_from_row_komponiert_artkurzinfo():
+def test_log_from_row_fuehrt_art_und_kurzinfo_separat():
     log = _log_from_row({"id": "x1", "richtung": "ein", "art": "telefon",
                          "kurzinfo": "Rueckruf", "erledigt": False, "bediener": "JW",
                          "wiedervorlage": None, "weiterleitung_an": None, "verweis": None,
                          "created_at": "2026-06-07"}, "GAP1")
     assert log.direction == "INCOMING"
-    assert log.artKurzinfo == "telefon: Rueckruf"
+    assert log.art == "telefon"
+    assert log.artKurzinfo == "Rueckruf"
     assert log.operator == "JW" and log.completed is False
 
 

@@ -46,6 +46,8 @@ Diese Statusdatei verdichtet den aktuellen Gesamtstand, ohne die Detailnachweise
   - `Service-Layer-Refaktorierung`: `business_partners.py`, `customers.py`, `personal.py`, `controlling.py`, `agrar_contracts.py`, `einkauf_bestellvorschlag.py` auf thin-router + Service-Klassen umgestellt
   - `Gap-Closure`: EXT-003 (Event-Bus-Monitoring Grafana/Prometheus), HR-TIME-001 Pilot-Slice (driver_time_events, CRUD, Kollisions-Check), UX-GAP-CLOSURE-001, HRM-GERMANY-GAP-001
   - `Test-Fixes`: 6 vormals fehlschlagende Tests behoben (agrar_settlement_service, customer_service Monkeypatching)
+- Querschnittslieferung (2026-06-09, ausserhalb der Kernel-Waves):
+  - `Production Readiness`: blockierende Release-/Security-Gates, CycloneDX-SBOM, produktiver Konfigurations-Preflight, getrennte immutable Backend-/Frontend-Images, atomare Staging-/Production-Deployments und simulierte externe Prueferprofile. Reale Fach-, Provider- und Betriebsfreigaben bleiben harte externe Gates.
 - Letzte abgeschlossene Waves (2026-03):
   - `Wave 104`: Flow Spine DB-Persistenz, PCN DB, Tenant-Isolation, Outbox-Events, Agent-Action+RAG, Voice-Kanal
   - `Wave 103`: Touch-optimierte Feldworkflows (WCAG), Keyboard-first Kernmasken (~85%)

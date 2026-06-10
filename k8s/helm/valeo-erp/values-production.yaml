@@ -1,0 +1,83 @@
+replicaCount: 3
+
+image:
+  repository: ghcr.io/jochenweerda/valeo-neuroerp-3.0/backend
+  pullPolicy: IfNotPresent
+  tag: "sha-required-by-release-workflow"
+
+frontend:
+  enabled: true
+  replicaCount: 3
+  image:
+    repository: ghcr.io/jochenweerda/valeo-neuroerp-3.0/frontend
+    pullPolicy: IfNotPresent
+    tag: "sha-required-by-release-workflow"
+  service:
+    port: 80
+  resources:
+    limits:
+      cpu: 500m
+      memory: 256Mi
+    requests:
+      cpu: 100m
+      memory: 64Mi
+
+externalSecret:
+  name: valeo-erp-runtime
+
+env:
+  - name: APP_ENV
+    value: production
+  - name: DEBUG
+    value: "false"
+  - name: ENABLE_METRICS
+    value: "true"
+  - name: ENABLE_TRACING
+    value: "true"
+
+postgresql:
+  enabled: false
+  host: postgresql.database.svc.cluster.local
+  port: "5432"
+  user: valeo
+  database: valeo_neuro_erp
+  existingSecret: valeo-erp-database
+
+redis:
+  enabled: false
+
+keycloak:
+  enabled: false
+
+backup:
+  enabled: true
+  schedule: "30 1 * * *"
+  retentionDays: 30
+  retentionMonths: 12
+  restoreTest:
+    enabled: true
+    schedule: "0 4 * * 0"
+    notify: false
+
+ingress:
+  enabled: true
+  className: nginx
+  hosts:
+    - host: erp.valeo-landhandel.de
+      paths:
+        - path: /api
+          pathType: Prefix
+          service: backend
+        - path: /healthz
+          pathType: Exact
+          service: backend
+        - path: /readyz
+          pathType: Exact
+          service: backend
+        - path: /
+          pathType: Prefix
+          service: frontend
+  tls:
+    - secretName: valeo-erp-tls
+      hosts:
+        - erp.valeo-landhandel.de

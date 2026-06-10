@@ -191,7 +191,7 @@ def create_eintrag(
 
 
 @router.post("/pruefen", summary="Name gegen Sanktionsliste prüfen",
-    response_model=SanctionsComplianceOut
+    response_model=SanktionsPruefungResult
 )
 def pruefen(
     payload: SanktionsPruefungInput,

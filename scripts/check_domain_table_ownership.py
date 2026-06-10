@@ -22,7 +22,7 @@ EXACT_TABLE_OWNERSHIP: dict[str, tuple[str, ...]] = {
     "domain_shared": ("tenants", "users", "audit_logs"),
     "domain_crm": ("business_partners", "customers"),
     "domain_erp": ("journal_entries", "journal_entry_lines", "chart_of_accounts"),
-    "domain_inventory": ("articles", "stock_movements", "inventory_counts"),
+    "domain_inventory": ("articles", "inventory_stock_movements", "inventory_counts"),
     "domain_einkauf": ("bestellungen", "lieferanten"),
     "domain_sales": ("delivery_notes", "sales_credit_notes", "sales_returns"),
     "domain_ops": ("ops_wiegungen", "ops_chargen", "ops_labor_proben"),

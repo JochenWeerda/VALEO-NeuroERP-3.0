@@ -190,7 +190,7 @@ async def _create_gl_booking_and_op(db: Session, invoice: SalesInvoice, tenant_i
             reverse_charge = bool(tax_key_cfg.get("reverse_charge"))
             _ensure_account(db, tenant_id, tax_account_no, "Umsatzsteuer", "liability", "tax")
 
-        _ensure_account(db, tenant_id, "1200", "Forderungen aus Lieferungen und Leistungen", "asset", "receivables")
+        _ensure_account(db, tenant_id, "1200", "Forderungen aus Lieferungen und Leistungen", "asset", "current_assets")
         _ensure_account(db, tenant_id, "8400", "Umsatzerlöse", "revenue", "sales")
 
         lines: list[dict] = [
