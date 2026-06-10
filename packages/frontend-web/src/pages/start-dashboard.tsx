@@ -257,9 +257,9 @@ export default function StartDashboardPage(): JSX.Element {
             ? Array.from({ length: 6 }).map((_, i) => <Skeleton key={i} className="h-20 w-full rounded-2xl" />)
             : null}
           {flowCatalogError ? (
-            <div className="sm:col-span-2 xl:col-span-3 rounded-2xl border border-destructive/25 bg-destructive/10 px-4 py-3 text-sm text-destructive">
+            <div className="sm:col-span-2 xl:col-span-3 rounded-2xl border border-red-300 bg-red-50 px-4 py-3 text-sm text-red-800 dark:border-red-700 dark:bg-red-950 dark:text-red-200">
               Flow-Spine-Katalog konnte nicht geladen werden: {getFlowSpineFetchErrorMessage(flowCatalogErr)}. Lokal FastAPI starten und Vite{' '}
-              <code className="rounded bg-muted px-1 text-xs">/api/v1</code> auf Port 8000 proxien.
+              <code className="rounded bg-white/80 px-1 text-xs text-red-900 dark:bg-black/20 dark:text-red-100">/api/v1</code> auf Port 8000 proxien.
             </div>
           ) : null}
           {!flowCatalogPending &&

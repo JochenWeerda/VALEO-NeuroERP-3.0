@@ -82,6 +82,7 @@ import {
 const C = {
   dark: '#1B3022',
   accent: '#557A20',
+  accentOnDark: '#9CCB5B',
   bg: '#F0F2F5',
   card: '#FFFFFF',
   border: '#D1D5DB',
@@ -1269,7 +1270,7 @@ function TourTooltip({ step, onNext, onClose }: { step: typeof TOUR_STEPS[0]; on
     >
       <div className="flex items-start justify-between gap-3">
         <div>
-          <div className="font-bold text-[13px] mb-1" style={{ color: C.accent }}>{step.title}</div>
+          <div className="font-bold text-[13px] mb-1" style={{ color: C.accentOnDark }}>{step.title}</div>
           <p className="text-[12px] opacity-80 leading-relaxed">{step.body}</p>
         </div>
         <button onClick={onClose} className="opacity-50 hover:opacity-100 mt-0.5"><XIcon size={14} /></button>
@@ -1323,7 +1324,7 @@ function Dashboard({ onStart, onDemo }: { onStart: () => void; onDemo: () => voi
           <button
             onClick={onDemo}
             className="px-8 py-3 text-base font-semibold rounded-lg border transition-all hover:shadow-md flex items-center gap-2"
-            style={{ borderColor: '#B8860B', color: '#B8860B', background: '#FFFBEB' }}
+            style={{ borderColor: '#7A5600', color: '#7A5600', background: '#FFFBEB' }}
           >
             <Play size={16} /> Demo starten
           </button>
@@ -4237,7 +4238,7 @@ export default function Rationsoptimierung() {
           className="flex items-center gap-1 cursor-pointer font-bold text-lg leading-none tracking-widest uppercase"
           onClick={() => setView('dashboard')}
         >
-          KLAR<span style={{ color: C.accent }}>AGRI</span>
+          KLAR<span style={{ color: C.accentOnDark }}>AGRI</span>
           <span className="ml-3 text-[11px] font-normal opacity-60 normal-case tracking-normal">· VALEO NeuroERP</span>
         </div>
         <div className="flex items-center gap-5 text-[13px] opacity-90 font-medium">

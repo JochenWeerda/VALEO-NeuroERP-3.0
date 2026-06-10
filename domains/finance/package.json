@@ -12,8 +12,8 @@
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
-    "lint": "eslint src/**/*.ts",
-    "lint:fix": "eslint src/**/*.ts --fix",
+    "lint": "eslint src --ext .ts",
+    "lint:fix": "eslint src --ext .ts --fix",
     "db:migrate": "ts-node scripts/migrate.ts",
     "db:seed": "ts-node scripts/seed.ts",
     "docker:build": "docker build -t valero-neuroerp-finance .",
@@ -98,6 +98,9 @@
   },
   "overrides": {
     "minimatch": "^9.0.7",
+    "test-exclude": {
+      "minimatch": "^3.1.2"
+    },
     "tar": "^7.5.11",
     "uuid": "^11.1.1"
   },

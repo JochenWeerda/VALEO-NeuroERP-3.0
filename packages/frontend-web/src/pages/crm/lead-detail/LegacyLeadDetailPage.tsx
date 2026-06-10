@@ -245,6 +245,7 @@ function LegacyLeadDetailPage(): JSX.Element {
             <div>
               <Label htmlFor="source">{t('crud.fields.source')} *</Label>
               <NativeSelect
+                id="source"
                 value={lead.source || ''}
                 onValueChange={(value) => updateField('source', value)}
                 options={[
