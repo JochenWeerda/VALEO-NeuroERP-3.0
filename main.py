@@ -222,7 +222,6 @@ if settings.DEBUG:
 elif settings.BACKEND_CORS_ORIGINS:
     cors_kwargs.update(
         allow_origins=[str(origin) for origin in settings.BACKEND_CORS_ORIGINS],
-        allow_origin_regex=".*",
     )
 else:
     cors_kwargs.update(allow_origins=["*"], allow_origin_regex=".*")

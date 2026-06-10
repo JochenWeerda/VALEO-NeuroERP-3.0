@@ -1,13 +1,6 @@
-***REMOVED*** OWASP ZAP Rules Configuration
-***REMOVED*** Format: RULE_ID	ACTION	REASON
-
-***REMOVED*** Ignore these checks (already configured correctly)
-10020	IGNORE	X-Frame-Options header configured correctly
-10021	IGNORE	Strict-Transport-Security present
-10038	IGNORE	Content-Security-Policy configured
-10096	IGNORE	X-Content-Type-Options configured
-
-***REMOVED*** Warn on these
-10063	WARN	Feature/Permissions-Policy check
-10109	WARN	Modern Web Application check
-
+10020	IGNORE	X-Frame-Options wird durch die Anwendung gesetzt
+10021	IGNORE	HSTS wird im produktiven HTTPS-Betrieb erzwungen
+10038	IGNORE	Content-Security-Policy wird durch die Anwendung gesetzt
+10096	IGNORE	X-Content-Type-Options wird durch die Anwendung gesetzt
+10106	IGNORE	Der CI-Scanner verwendet absichtlich einen lokalen HTTP-Endpunkt
+90005	IGNORE	Fetch-Metadata-Header ist ein Client-Request-Header

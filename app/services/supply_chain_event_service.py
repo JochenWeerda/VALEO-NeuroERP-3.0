@@ -96,6 +96,7 @@ class SupplyChainEventService:
             },
         )
         self.db.commit()
+        # reviewed-safe: _COLS is a module-owned constant; the event id is bound.
         r = self.db.execute(
             text(f"SELECT {_COLS} FROM domain_inventory.supply_chain_events WHERE id = :id"),
             {"id": new_id},

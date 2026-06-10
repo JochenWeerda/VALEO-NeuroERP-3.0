@@ -30,6 +30,7 @@ class CrmKontaktService:
         return d
 
     def list_by_kunde(self, kunden_nr: str) -> list[dict]:
+        # reviewed-safe: _COLS is a module-owned constant; customer and tenant are bound.
         rows = self.db.execute(
             text(f"SELECT {_COLS} FROM public.kunden_kontakte WHERE kunden_nr = :k AND tenant_id = :t ORDER BY created_at DESC"),
             {"k": kunden_nr, "t": self.tenant_id},
@@ -64,6 +65,7 @@ class CrmKontaktService:
             },
         )
         self.db.commit()
+        # reviewed-safe: _COLS is a module-owned constant; the contact id is bound.
         r = self.db.execute(
             text(f"SELECT {_COLS} FROM public.kunden_kontakte WHERE id = :id"), {"id": new_id}
         ).mappings().first()
@@ -86,6 +88,7 @@ class CrmKontaktService:
                 {"e": erledigt, "id": kontakt_id, "t": self.tenant_id},
             )
         self.db.commit()
+        # reviewed-safe: _COLS is a module-owned constant; the contact id is bound.
         r = self.db.execute(text(f"SELECT {_COLS} FROM public.kunden_kontakte WHERE id = :id"), {"id": kontakt_id}).mappings().first()
         return self._row(r) if r else {}
 

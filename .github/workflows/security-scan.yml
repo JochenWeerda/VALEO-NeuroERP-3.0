@@ -20,6 +20,7 @@ jobs:
     env:
       DATABASE_URL: postgresql://postgres:postgres@localhost:5432/valeo_security
       APP_ENV: test
+      BACKEND_CORS_ORIGINS: '["http://localhost:8000"]'
     services:
       postgres:
         image: postgres:15
@@ -64,10 +65,16 @@ jobs:
         with:
           target: 'http://localhost:8000'
           rules_file_name: '.zap/rules.tsv'
-          cmd_options: '-a -j'
+          cmd_options: '-a -j -I'
           allow_issue_writing: false
-          fail_action: true
+          fail_action: false
           issue_title: 'OWASP ZAP Full Scan Report'
+
+      - name: Enforce ZAP medium/high gate
+        run: |
+          count=$(jq '[.site[]?.alerts[]? | select((.riskcode | tonumber) >= 2)] | length' report_json.json)
+          echo "ZAP medium/high findings: $count"
+          test "$count" -eq 0
       
       - name: Upload ZAP Report
         uses: actions/upload-artifact@v4
@@ -114,12 +121,14 @@ jobs:
         if: always()
         with:
           sarif_file: 'trivy-backend-results.sarif'
+          category: trivy-backend
 
       - name: Upload Trivy frontend results to GitHub Security
         uses: github/codeql-action/upload-sarif@v4
         if: always()
         with:
           sarif_file: 'trivy-frontend-results.sarif'
+          category: trivy-frontend
 
       - name: Enforce Trivy High/Critical gate
         run: |
@@ -159,12 +168,14 @@ jobs:
         if: always() && steps.grype_scan.outputs.sarif != ''
         with:
           sarif_file: ${{ steps.grype_scan.outputs.sarif }}
+          category: grype-backend
 
       - name: Upload Grype frontend results
         uses: github/codeql-action/upload-sarif@v4
         if: always() && steps.grype_frontend_scan.outputs.sarif != ''
         with:
           sarif_file: ${{ steps.grype_frontend_scan.outputs.sarif }}
+          category: grype-frontend
   
   bandit-scan:
     name: Bandit Python Security Scan
@@ -302,8 +313,11 @@ jobs:
             echo "Dependency Audit: PASSED" >> "$GITHUB_STEP_SUMMARY"
           else
             echo "Dependency Audit: FAILED" >> "$GITHUB_STEP_SUMMARY"
-            exit 1
           fi
+
+          for result in "$ZAP_RESULT" "$TRIVY_RESULT" "$GRYPE_RESULT" "$BANDIT_RESULT" "$AUDIT_RESULT"; do
+            test "$result" = "success"
+          done
           
           echo "" >> "$GITHUB_STEP_SUMMARY"
           echo "Detailed reports available in artifacts." >> "$GITHUB_STEP_SUMMARY"

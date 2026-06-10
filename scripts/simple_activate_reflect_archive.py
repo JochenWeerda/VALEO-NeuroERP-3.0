@@ -11,10 +11,6 @@ import sys
 from dataclasses import dataclass
 from pathlib import Path
 
-import pymongo
-from pymongo.errors import ConnectionFailure, ServerSelectionTimeoutError
-
-
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
@@ -39,6 +35,17 @@ class ArchiveTextFileSpec:
 
 class ReflectArchiveSourceError(RuntimeError):
     pass
+
+
+def _mongo_dependencies():
+    try:
+        import pymongo
+        from pymongo.errors import ConnectionFailure, ServerSelectionTimeoutError
+    except ImportError as exc:
+        raise RuntimeError(
+            "MongoDB-Funktionen benoetigen das optionale Paket 'pymongo'."
+        ) from exc
+    return pymongo, ConnectionFailure, ServerSelectionTimeoutError
 
 
 def read_archive_text_file(file_path: Path) -> str:
@@ -96,6 +103,7 @@ def check_mongodb_connection():
     Returns:
         bool: True, wenn die Verbindung erfolgreich hergestellt wurde, sonst False
     """
+    pymongo, connection_failure, selection_timeout = _mongo_dependencies()
     try:
         logger.info("Verbindung zu MongoDB wird hergestellt...")
         client = pymongo.MongoClient(
@@ -106,7 +114,7 @@ def check_mongodb_connection():
         logger.info("Verbindung zu MongoDB erfolgreich hergestellt.")
         client.close()
         return True
-    except (ConnectionFailure, ServerSelectionTimeoutError) as exc:
+    except (connection_failure, selection_timeout) as exc:
         logger.error("Verbindung zu MongoDB fehlgeschlagen: %s", str(exc))
         return False
 
@@ -178,6 +186,7 @@ def load_project_structure():
     logger.info("Lade Projektstruktur in MongoDB...")
 
     try:
+        pymongo, _, _ = _mongo_dependencies()
         client = pymongo.MongoClient(MONGODB_CONNECTION_STRING)
         db = client[MONGODB_DATABASE_NAME]
         collection = db["project_structure"]
@@ -233,6 +242,7 @@ def load_tasks():
     logger.info("Lade Aufgaben in MongoDB...")
 
     try:
+        pymongo, _, _ = _mongo_dependencies()
         client = pymongo.MongoClient(MONGODB_CONNECTION_STRING)
         db = client[MONGODB_DATABASE_NAME]
         collection = db["tasks"]
@@ -257,6 +267,7 @@ def load_context():
     logger.info("Lade Kontext in MongoDB...")
 
     try:
+        pymongo, _, _ = _mongo_dependencies()
         client = pymongo.MongoClient(MONGODB_CONNECTION_STRING)
         db = client[MONGODB_DATABASE_NAME]
         collection = db["context"]
@@ -281,6 +292,7 @@ def load_readme():
     logger.info("Lade README.md in MongoDB...")
 
     try:
+        pymongo, _, _ = _mongo_dependencies()
         client = pymongo.MongoClient(MONGODB_CONNECTION_STRING)
         db = client[MONGODB_DATABASE_NAME]
         collection = db["documentation"]

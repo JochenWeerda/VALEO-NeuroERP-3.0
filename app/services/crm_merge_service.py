@@ -49,6 +49,7 @@ class CrmMergeService:
 
     def _count(self, table: str, nr: str) -> int:
         try:
+            # reviewed-safe: table comes exclusively from the module-owned _MOVABLE allowlist.
             return int(self.db.execute(
                 text(f"SELECT count(*) FROM public.{table} WHERE kunden_nr = :nr"), {"nr": nr}
             ).scalar() or 0)
@@ -86,6 +87,7 @@ class CrmMergeService:
         moved: dict[str, int] = {}
         try:
             for table in _MOVABLE:
+                # reviewed-safe: table comes exclusively from the module-owned _MOVABLE allowlist.
                 res = self.db.execute(
                     text(f"UPDATE public.{table} SET kunden_nr = :m WHERE kunden_nr = :d"),
                     {"m": master_nr, "d": duplicate_nr},

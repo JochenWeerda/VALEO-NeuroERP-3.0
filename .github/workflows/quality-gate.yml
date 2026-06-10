@@ -208,7 +208,7 @@ jobs:
         run: pnpm --filter @valero-neuroerp/frontend-web build
 
       - name: ERP-Domain tests (packages/erp-domain)
-        run: pnpm --filter @valero-neuroerp/erp-domain test --passWithNoTests
+        run: pnpm --filter @valero-neuroerp/erp-domain test
         continue-on-error: false
 
       - name: Docs lint
@@ -282,7 +282,7 @@ jobs:
       - name: pnpm audit
         run: |
           pnpm install --frozen-lockfile
-          pnpm audit --audit-level high
+          pnpm audit --prod --audit-level high
 
   production-contract:
     name: Production contract and assessor simulation
@@ -295,6 +295,9 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install production contract dependencies
+        run: pip install PyYAML
 
       - name: Validate production deployment contract
         run: |

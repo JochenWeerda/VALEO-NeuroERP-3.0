@@ -257,10 +257,13 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Run k6 performance tests
-        uses: grafana/k6-action@v0.3.0
-        with:
-          filename: packages/procurement-domain/tests/performance/procurement-domain-test.js
-          flags: --out json=results.json
+        run: |
+          docker run --rm \
+            -v "${{ github.workspace }}:/work" \
+            -w /work \
+            grafana/k6:latest run \
+            packages/procurement-domain/tests/performance/procurement-domain-test.js \
+            --out json=results.json
 
       - name: Upload performance results
         uses: actions/upload-artifact@v4

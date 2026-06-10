@@ -85,12 +85,14 @@ def incoming(body: IncomingIn, db: Session = Depends(get_db), tenant_id: str = D
         },
     )
     db.commit()
+    # reviewed-safe: _COLS is a module-owned constant; all values remain bound parameters.
     r = db.execute(text(f"SELECT {_COLS} FROM public.tapi_calls WHERE id = :id"), {"id": new_id}).mappings().first()
     return _row(r)
 
 
 @router.get("/pending", summary="Offene (nicht quittierte) Anrufe")
 def pending(db: Session = Depends(get_db), tenant_id: str = Depends(get_tenant_id)) -> list[dict[str, Any]]:
+    # reviewed-safe: _COLS is a module-owned constant; tenant data is bound.
     rows = db.execute(
         text(f"SELECT {_COLS} FROM public.tapi_calls WHERE tenant_id = :t AND acked = FALSE ORDER BY created_at DESC LIMIT 20"),
         {"t": tenant_id},
@@ -143,6 +145,7 @@ def dial(body: DialIn, db: Session = Depends(get_db), tenant_id: str = Depends(g
         },
     )
     db.commit()
+    # reviewed-safe: _COLS is a module-owned constant; all values remain bound parameters.
     r = db.execute(text(f"SELECT {_COLS} FROM public.tapi_calls WHERE id = :id"), {"id": new_id}).mappings().first()
     return _row(r)
 

@@ -87,6 +87,7 @@ class CrmCaptureInboxService:
             },
         )
         self.db.commit()
+        # reviewed-safe: _COLS is a module-owned constant; the inbox id is bound.
         r = self.db.execute(
             text(f"SELECT {_COLS} FROM public.crm_capture_inbox WHERE id = :id"), {"id": new_id}
         ).mappings().first()
@@ -105,6 +106,7 @@ class CrmCaptureInboxService:
         return [self._row(r) for r in rows]
 
     def count_open(self) -> int:
+        # reviewed-safe: _COLS is a module-owned constant; identifiers are bound.
         r = self.db.execute(
             text("SELECT count(*) AS n FROM public.crm_capture_inbox WHERE tenant_id = :t AND status = 'offen'"),
             {"t": self.tenant_id},
@@ -112,6 +114,7 @@ class CrmCaptureInboxService:
         return int(r["n"]) if r else 0
 
     def _get(self, inbox_id: str) -> Optional[dict]:
+        # reviewed-safe: _COLS is a module-owned constant; identifiers are bound.
         r = self.db.execute(
             text(f"SELECT {_COLS} FROM public.crm_capture_inbox WHERE id = :id AND tenant_id = :t"),
             {"id": inbox_id, "t": self.tenant_id},
