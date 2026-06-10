@@ -46,18 +46,44 @@ Read-only, nicht-invasiv (keine Änderung an den heißen Stufen-Tabellen).
 `LOT-2026-S001-001` (25,0 t). Mengen-Konsistenz 0 % (innerhalb Toleranz); Lücken:
 Wiegeschein unallocated, keine Abrechnung. Kette korrekt als unvollständig markiert.
 
-## Definition „fachliche Tiefe erreicht" (Sprint-Maßstab) — Status 004.1
+## Slice 004.2 — Ketten-Event-Log + kanonischer Übergabestatus (umgesetzt)
+
+Revisionsfestes, **append-only** Ereignis-Protokoll der Kette + einheitlicher
+Übergabestatus, abgeleitet aus den Ereignissen.
+
+- Migration: `supply_chain_events_20260610` — `domain_inventory.supply_chain_events`
+  (append-only; partieller Unique-Index für idempotenten Backfill).
+- Service: `app/services/supply_chain_event_service.py`
+  - `record(...)` — append (kein UPDATE/DELETE) für Korrektur/Abweichung/Storno/Notiz.
+  - `sync_from_state(ticket)` — erzeugt idempotent (source='backfill') die Lifecycle-
+    Ereignisse aus dem Ist-Zustand; Mengen-Abweichung wird als Ereignis festgehalten.
+  - `derive_status(ticket)` — kanonischer Status: **erfasst → freigegeben →
+    eingelagert → abgerechnet** (storniert überschreibt).
+  - `timeline(ticket)` — Stufen-/Zeit-sortierter Verlauf.
+- Integration: `trace()` liefert zusätzlich `ereignisse` + `kanon_status` (read-only).
+- API: `POST /supply-chain/traceability/sync?ticket=…` (Backfill, idempotent),
+  `POST /supply-chain/events` (manuelles Ereignis mit Grund/Menge).
+- Frontend: Status-Badge, Ereignis-Log-Timeline (abgeleitet/manuell gekennzeichnet)
+  und „Ereignis erfassen" (Korrektur/Abweichung/Storno/Notiz) in
+  `pages/lager/rueckverfolgbarkeit.tsx`; Auto-Backfill bei Auswahl.
+
+### Verifiziert
+`WG-2026-00001` → sync legt 3 Lifecycle-Ereignisse an (erfasst/freigegeben/
+eingelagert), zweiter Sync = 0 (idempotent), kanon_status = „eingelagert"; manuelles
+Korrektur-Ereignis wird angehängt und erscheint im Log.
+
+## Definition „fachliche Tiefe erreicht" (Sprint-Maßstab) — Status 004.1/004.2
 
 1. Kernfall läuft (Kette sichtbar/prüfbar) ✅
 2. Sonderfälle (Lücken/Abweichung/Mehrfach-Folgeobjekte) ✅ erkannt
-3. Storno/Korrektur — ⏳ Folge-Slice
+3. Storno/Korrektur — ✅ als Ereignis erfassbar (004.2); durchgängige Wirkung ⏳ 004.4
 4. Folgeobjekte nachweisbar ✅ (Annahme/Lager/Abrechnung je Wiegeschein)
-5. Rechte/Tenant/Audit — Tenant ✅; Audit-Event-Log ⏳ Folge-Slice
+5. Rechte/Tenant/Audit — Tenant ✅; **append-only Audit-Event-Log ✅ (004.2)**
 6. Tests (BE-Logik) ✅; Browser-E2E ⏳
 7. Externe/betriebliche Abnahme — ⏳ (UAT-Paket)
 
 ## Geplante Folge-Slices
-- **004.2** Einheitlicher Übergabestatus + append-only Ketten-Event-Log (Audit/Revision).
+- **004.2** Einheitlicher Übergabestatus + append-only Ketten-Event-Log ✅ **fertig**
 - **004.3** Schwund/Sperrbestand/QS-Freigabe als Folgeaktionen mit Abweichungsgründen.
-- **004.4** Storno/Korrektur durchgängig über die Kette.
+- **004.4** Storno/Korrektur durchgängig über die Kette (Wirkung auf Status/Bestand).
 - **004.5** Browser-/E2E-Abnahme + UAT-Nachweispaket.

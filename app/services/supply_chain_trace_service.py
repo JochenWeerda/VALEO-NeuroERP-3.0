@@ -306,6 +306,19 @@ class SupplyChainTraceService:
         vollstaendig = bool(wiegung and annahmen and lager and abrechnungen)
         hat_abweichung = any(c["abweichung"] for c in mengen)
 
+        # Ereignis-Log + kanonischer Übergabestatus (read-only; Befüllung via sync).
+        ereignisse: list[dict] = []
+        kanon_status = {"status": "offen", "rang": 0}
+        try:
+            from app.services.supply_chain_event_service import SupplyChainEventService
+
+            evt = SupplyChainEventService(self.db, self.tenant_id)
+            ereignisse = evt.timeline(ticket_id)
+            kanon_status = evt.derive_status(ticket_id)
+        except Exception:
+            # Ereignis-Log ist additiv; Fehler hier darf die Kettensicht nicht brechen.
+            self.db.rollback()
+
         return {
             "found": True,
             "ticket_id": ticket_id,
@@ -313,11 +326,14 @@ class SupplyChainTraceService:
             "kette": nodes,
             "mengen_konsistenz": mengen,
             "luecken": luecken,
+            "ereignisse": ereignisse,
+            "kanon_status": kanon_status,
             "summary": {
                 "stufen": len(nodes),
                 "vollstaendig": vollstaendig,
                 "hat_mengen_abweichung": hat_abweichung,
                 "offene_luecken": len(luecken),
+                "status": kanon_status.get("status"),
             },
         }
 
