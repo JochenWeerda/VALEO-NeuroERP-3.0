@@ -1,29 +1,48 @@
-FROM python:3.11.15-slim-bookworm
+ARG PYTHON_IMAGE=python:3.14.5-slim-trixie
+FROM ${PYTHON_IMAGE} AS builder
 
-WORKDIR /app
+WORKDIR /build
 
-# System dependencies
-RUN apt-get update && apt-get install -y \
+# Build dependencies stay out of the runtime image.
+RUN apt-get update && apt-get install -y --no-install-recommends \
     gcc \
+    g++ \
     libpq-dev \
     && rm -rf /var/lib/apt/lists/*
 
-# Python dependencies
 COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+RUN python -m venv /opt/venv \
+    && /opt/venv/bin/pip install --no-cache-dir --upgrade pip \
+    && /opt/venv/bin/pip install --no-cache-dir -r requirements.txt
 
-# Application code
-COPY app/ ./app/
-COPY modules/ ./modules/
-COPY scripts/ ./scripts/
-COPY main.py ./
-COPY alembic/ ./alembic/
-COPY alembic.ini ./
+FROM ${PYTHON_IMAGE} AS runtime
 
-# Environment
-ENV PYTHONUNBUFFERED=1
+RUN apt-get update \
+    && apt-get upgrade -y --no-install-recommends \
+    && rm -rf /var/lib/apt/lists/* \
+    && groupadd --system --gid 1000 appuser \
+    && useradd --system --uid 1000 --gid appuser --create-home appuser
 
-# Run
+WORKDIR /app
+
+COPY --from=builder /opt/venv /opt/venv
+
+COPY --chown=appuser:appuser app/ ./app/
+COPY --chown=appuser:appuser modules/ ./modules/
+COPY --chown=appuser:appuser scripts/ ./scripts/
+COPY --chown=appuser:appuser main.py ./
+COPY --chown=appuser:appuser alembic/ ./alembic/
+COPY --chown=appuser:appuser alembic.ini ./
+
+RUN mkdir -p /app/config /app/data /app/logs \
+    && chown -R appuser:appuser /app/config /app/data /app/logs
+
+ENV PATH=/opt/venv/bin:$PATH \
+    PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1
+
+USER 1000:1000
+
 CMD ["sh", "-lc", "python scripts/init_db.py && uvicorn main:app --host 0.0.0.0 --port 8000"]
 
 

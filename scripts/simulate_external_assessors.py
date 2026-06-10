@@ -80,9 +80,9 @@ PROFILES = (
                 "Blockierende High/Critical-Scans und SBOM",
                 (".github/workflows/security-scan.yml", ".github/workflows/quality-gate.yml"),
                 required_content=(
-                    (".github/workflows/security-scan.yml", "exit-code: '1'"),
+                    (".github/workflows/security-scan.yml", "trivy image --severity HIGH,CRITICAL --exit-code 1"),
                     (".github/workflows/security-scan.yml", "fail-build: true"),
-                    (".github/workflows/security-scan.yml", "fail_action: true"),
+                    (".github/workflows/security-scan.yml", "Enforce ZAP medium/high gate"),
                     (".github/workflows/quality-gate.yml", "SBOM (CycloneDX)"),
                 ),
             ),
