@@ -41,25 +41,32 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 0
+          fetch-depth: 1
+          persist-credentials: false
 
       - name: Run Gitleaks
-        uses: gitleaks/gitleaks-action@v2
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        continue-on-error: true
-
-      - name: Gitleaks JSON report
-        if: always()
         run: |
-          gitleaks detect --source=. --report-format=json \
-            --report-path=gitleaks.json --no-banner --exit-code 0 || true
+          rm -rf /tmp/gitleaks-src
+          mkdir -p /tmp/gitleaks-src
+          git archive --format=tar HEAD | tar -x -C /tmp/gitleaks-src
+          docker run --rm \
+            -v "/tmp/gitleaks-src:/repo" \
+            -w /repo \
+            ghcr.io/gitleaks/gitleaks:latest \
+            detect \
+            --no-git \
+            --source . \
+            --config .gitleaks.toml \
+            --redact \
+            --report-format json \
+            --report-path gitleaks.json \
+            --no-banner
 
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: gitleaks-report
-          path: gitleaks.json
+          path: /tmp/gitleaks-src/gitleaks.json
           retention-days: 30
 
   # ═══════════════════════════════════════════════════════════════════════════

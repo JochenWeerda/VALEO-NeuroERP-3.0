@@ -1,60 +1,26 @@
-# VALEO NeuroERP 3.0 - Procurement Domain Dockerfile
-FROM node:18-alpine AS base
+FROM node:20-alpine
 
-# Install system dependencies for AI/ML processing
-RUN apk add --no-cache \
-    python3 \
-    py3-pip \
-    py3-numpy \
-    py3-scipy \
-    py3-pandas \
-    py3-scikit-learn \
-    tesseract-ocr \
-    tesseract-ocr-data-deu \
-    tesseract-ocr-data-eng \
-    poppler-utils \
-    imagemagick \
-    redis \
-    postgresql-client \
-    curl \
-    && rm -rf /var/cache/apk/*
+RUN corepack enable && corepack prepare pnpm@9.12.0 --activate
 
-# Set Python path
-ENV PYTHONPATH=/usr/lib/python3/dist-packages:$PYTHONPATH
+WORKDIR /workspace
 
-# Create app directory
-WORKDIR /app
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml tsconfig.base.json ./
+COPY packages/procurement-domain/package.json packages/procurement-domain/package.json
 
-# Copy package files
-COPY package*.json ./
-COPY tsconfig.json ./
+RUN pnpm install --frozen-lockfile \
+    --filter @valero-neuroerp/procurement-domain...
 
-# Install dependencies
-RUN npm ci --only=production && npm cache clean --force
+COPY packages/procurement-domain packages/procurement-domain
 
-# Copy source code
-COPY src/ ./src/
-COPY migrations/ ./migrations/
-COPY scripts/ ./scripts/
-COPY models/ ./models/
+RUN pnpm --filter @valero-neuroerp/procurement-domain build && \
+    chown -R node:node /workspace
 
-# Build TypeScript
-RUN npm run build
+WORKDIR /workspace/packages/procurement-domain
+USER node
 
-# Create non-root user
-RUN addgroup -g 1001 -S nodejs && \
-    adduser -S procurement -u 1001
-
-# Change ownership
-RUN chown -R procurement:nodejs /app
-USER procurement
-
-# Expose port
 EXPOSE 3002
 
-# Health check
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-    CMD curl -f http://localhost:3002/health || exit 1
+    CMD wget -qO- http://localhost:3002/health >/dev/null || exit 1
 
-# Start application
-CMD ["npm", "start"]
+CMD ["node", "dist/index.js"]

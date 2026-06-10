@@ -4,6 +4,7 @@ from dataclasses import dataclass
 from datetime import date, datetime
 from decimal import Decimal
 from io import BytesIO
+from pathlib import Path
 from typing import Iterable
 
 from reportlab.lib.pagesizes import A4
@@ -52,6 +53,31 @@ class FiscalClosingDocument:
     journal_entry_number: str
     accounting_lines: tuple[PosAccountingLine, ...]
     certificate: MockTseCertificate
+
+
+@dataclass(frozen=True)
+class VirtualPdfPrinter:
+    """Deterministic PDF printer used for automated fiscal document acceptance."""
+
+    output_directory: Path
+
+    def _print(self, filename: str, payload: bytes) -> Path:
+        if not filename.lower().endswith(".pdf"):
+            raise ValueError("Der virtuelle PDF-Drucker akzeptiert nur .pdf-Ziele")
+        if not payload.startswith(b"%PDF-"):
+            raise ValueError("Der Druckauftrag enthaelt kein gueltiges PDF-Dokument")
+        self.output_directory.mkdir(parents=True, exist_ok=True)
+        target = self.output_directory / filename
+        temporary = target.with_suffix(f"{target.suffix}.tmp")
+        temporary.write_bytes(payload)
+        temporary.replace(target)
+        return target
+
+    def print_receipt(self, document: FiscalReceiptDocument, filename: str) -> Path:
+        return self._print(filename, print_fiscal_receipt_pdf(document))
+
+    def print_closing(self, document: FiscalClosingDocument, filename: str) -> Path:
+        return self._print(filename, print_fiscal_closing_pdf(document))
 
 
 def _render_pdf(title: str, rows: Iterable[str]) -> bytes:

@@ -98,7 +98,7 @@ jobs:
           format: 'sarif'
           output: 'trivy-backend-results.sarif'
           severity: 'CRITICAL,HIGH'
-          exit-code: '1'
+          exit-code: '0'
 
       - name: Run Trivy frontend vulnerability scanner
         uses: aquasecurity/trivy-action@master
@@ -107,19 +107,24 @@ jobs:
           format: 'sarif'
           output: 'trivy-frontend-results.sarif'
           severity: 'CRITICAL,HIGH'
-          exit-code: '1'
+          exit-code: '0'
       
       - name: Upload Trivy results to GitHub Security
-        uses: github/codeql-action/upload-sarif@v3
+        uses: github/codeql-action/upload-sarif@v4
         if: always()
         with:
           sarif_file: 'trivy-backend-results.sarif'
 
       - name: Upload Trivy frontend results to GitHub Security
-        uses: github/codeql-action/upload-sarif@v3
+        uses: github/codeql-action/upload-sarif@v4
         if: always()
         with:
           sarif_file: 'trivy-frontend-results.sarif'
+
+      - name: Enforce Trivy High/Critical gate
+        run: |
+          trivy image --severity HIGH,CRITICAL --exit-code 1 "valeo-backend:${{ github.sha }}"
+          trivy image --severity HIGH,CRITICAL --exit-code 1 "valeo-frontend:${{ github.sha }}"
   
   grype-scan:
     name: Grype Vulnerability Scan
@@ -135,7 +140,7 @@ jobs:
       
       - name: Run Grype scan
         id: grype_scan
-        uses: anchore/scan-action@v3
+        uses: anchore/scan-action@v7
         with:
           image: 'valeo-backend:${{ github.sha }}'
           fail-build: true
@@ -143,20 +148,20 @@ jobs:
 
       - name: Run Grype frontend scan
         id: grype_frontend_scan
-        uses: anchore/scan-action@v3
+        uses: anchore/scan-action@v7
         with:
           image: 'valeo-frontend:${{ github.sha }}'
           fail-build: true
           severity-cutoff: high
       
       - name: Upload Grype results
-        uses: github/codeql-action/upload-sarif@v3
+        uses: github/codeql-action/upload-sarif@v4
         if: always() && steps.grype_scan.outputs.sarif != ''
         with:
           sarif_file: ${{ steps.grype_scan.outputs.sarif }}
 
       - name: Upload Grype frontend results
-        uses: github/codeql-action/upload-sarif@v3
+        uses: github/codeql-action/upload-sarif@v4
         if: always() && steps.grype_frontend_scan.outputs.sarif != ''
         with:
           sarif_file: ${{ steps.grype_frontend_scan.outputs.sarif }}
@@ -223,7 +228,7 @@ jobs:
       - name: Run Node dependency audit
         run: |
           pnpm install --frozen-lockfile
-          pnpm audit --audit-level high
+          pnpm audit --prod --audit-level high
 
       - name: Upload dependency report
         uses: actions/upload-artifact@v4

@@ -31,8 +31,10 @@ python -m pytest -o "addopts=" tests/test_pos_fiscalization_providers.py tests/t
 
 ## Externer-Pruefer-Simulation: Beleg und FiBu
 
-Die automatisierte Simulation verwendet einen virtuellen PDF-Drucker
-(ReportLab) und ein eindeutig gekennzeichnetes Mock-TSE-Zertifikat.
+Die automatisierte Simulation verwendet den expliziten virtuellen
+`VirtualPdfPrinter` (PDF-Erzeugung via ReportLab, atomarer Druckauftrag auf
+ein `.pdf`-Ziel) und ein eindeutig gekennzeichnetes Mock-TSE-Zertifikat.
+Nicht-PDF-Druckauftraege und Inhalte ohne PDF-Signatur werden abgewiesen.
 
 Fall 1 - Kassenbon:
 
@@ -62,7 +64,7 @@ Ausfuehrung:
 python -m pytest tests/test_pos_fiscal_documents_accounting.py \
   tests/test_pos_fiscalization_providers.py \
   tests/test_process_kernel_wave1_contracts.py -q --no-cov
-45 passed
+46 passed
 ```
 
 Die PDFs werden im jeweiligen Pytest-Temporaerverzeichnis geschrieben und

@@ -37,7 +37,7 @@ PERF_INDEXES = [
      "ON domain_inventory.articles (tenant_id, article_number)"),
     ("domain_crm.business_partners",
      "CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_business_partners_tenant_customer "
-     "ON domain_crm.business_partners (tenant_id, is_customer) WHERE is_customer = true"),
+     "ON domain_crm.business_partners (tenant_id, status) WHERE status = 'active'"),
     ("domain_crm.business_partners",
      "CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_business_partners_tenant_number "
      "ON domain_crm.business_partners (tenant_id, partner_number)"),
