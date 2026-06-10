@@ -334,6 +334,15 @@ export const RAW_NAV_SECTIONS: RawNavItem[] = [
         mcp: { businessDomain: 'sales', scope: 'sales:read' },
       },
       {
+        id: 'auftragskette',
+        label: 'Auftragskette (O2C)',
+        icon: ArrowUpDown,
+        module: '@/pages/sales/auftragskette',
+        preferredPath: 'sales/auftragskette',
+        keywords: ['o2c', 'order-to-cash', 'auftragskette', 'angebot', 'auftrag', 'lieferschein', 'rechnung', 'kette', 'durchgängig', 'sales'],
+        mcp: { businessDomain: 'sales', scope: 'sales:read' },
+      },
+      {
         id: 'auftrag',
         label: 'Aufträge',
         icon: FileText,
