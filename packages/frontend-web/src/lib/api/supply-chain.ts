@@ -64,3 +64,83 @@ export function useSupplyChainOverview() {
     staleTime: 30_000,
   })
 }
+
+// ── Traceability (DOM-SUPPLY-004): durchgängige Kette je Lieferung ────────────
+// Wiegung → Annahme → Lager → Abrechnung (Rückgrat: Wiegeschein).
+// Backend: app/api/v1/endpoints/supply_chain.py
+
+export type TraceTicket = {
+  ticket_id: string
+  ticket_nr: string
+  datum: string | null
+  menge_kg: number | null
+  status: string
+  allokation: string
+  hat_annahme: boolean
+  hat_lager: boolean
+  hat_abrechnung: boolean
+  vollstaendig: boolean
+}
+
+export type TraceNode = {
+  stage: 'wiegung' | 'annahme' | 'lager' | 'abrechnung'
+  label: string
+  ref: string | null
+  ref_id: string
+  status: string | null
+  menge_kg: number | null
+  zeitpunkt: string | null
+  facts: Record<string, unknown>
+}
+
+export type MengenCheck = {
+  von: string
+  nach: string
+  menge_von_kg: number | null
+  menge_nach_kg: number | null
+  differenz_kg: number | null
+  differenz_pct: number | null
+  abweichung: boolean
+  hinweis: string
+}
+
+export type Luecke = { stufe: string; schwere: 'info' | 'warnung' | string; text: string }
+
+export type TraceResult = {
+  found: boolean
+  detail?: string
+  ticket_id?: string
+  ticket_nr?: string | null
+  kette?: TraceNode[]
+  mengen_konsistenz?: MengenCheck[]
+  luecken?: Luecke[]
+  summary?: {
+    stufen: number
+    vollstaendig: boolean
+    hat_mengen_abweichung: boolean
+    offene_luecken: number
+  }
+}
+
+const TRACE_BASE = '/api/v1/supply-chain/traceability'
+
+export function useTraceTickets(limit = 50) {
+  return useQuery({
+    queryKey: ['supply-chain', 'tickets', limit],
+    queryFn: async () => {
+      const res = await apiClient.get<{ items: TraceTicket[] }>(`${TRACE_BASE}/tickets`, { params: { limit } })
+      return res.data?.items ?? []
+    },
+  })
+}
+
+export function useTrace(ticket: string | null) {
+  return useQuery({
+    queryKey: ['supply-chain', 'trace', ticket],
+    enabled: !!ticket,
+    queryFn: async () => {
+      const res = await apiClient.get<TraceResult>(TRACE_BASE, { params: { ticket } })
+      return res.data
+    },
+  })
+}

@@ -36,6 +36,7 @@ import {
   Zap,
   Search,
   Microscope,
+  GitBranch,
 } from 'lucide-react'
 import type { RawNavItem } from '@/app/navigation/types'
 
@@ -110,6 +111,15 @@ export const RAW_NAV_SECTIONS: RawNavItem[] = [
         module: '@/pages/lager/partiestamm',
         preferredPath: 'lager/partiestamm',
         keywords: ['partie', 'partiestamm', 'charge', 'lot', 'pgr'],
+        mcp: { businessDomain: 'inventory', scope: 'inventory:read' },
+      },
+      {
+        id: 'rueckverfolgbarkeit',
+        label: 'Rückverfolgbarkeit',
+        icon: GitBranch,
+        module: '@/pages/lager/rueckverfolgbarkeit',
+        preferredPath: 'lager/rueckverfolgbarkeit',
+        keywords: ['rückverfolgbarkeit', 'rueckverfolgbarkeit', 'traceability', 'genealogie', 'kette', 'wiegung', 'annahme', 'lager', 'abrechnung', 'wiegeschein', 'schwund', 'partie', 'charge'],
         mcp: { businessDomain: 'inventory', scope: 'inventory:read' },
       },
       {

@@ -942,6 +942,13 @@ api_router.include_router(
     tags=["crm", "kim", "360"]
 )
 
+from app.api.v1.endpoints import supply_chain  # noqa: E402
+
+api_router.include_router(
+    supply_chain.router,
+    tags=["supply-chain", "agrar", "lager"]
+)
+
 from app.api.v1.endpoints import kaeufergruppe as kaeufergruppe_ep  # noqa: E402
 
 api_router.include_router(
