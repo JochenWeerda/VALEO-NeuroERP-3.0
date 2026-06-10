@@ -589,6 +589,15 @@ export const RAW_NAV_SECTIONS: RawNavItem[] = [
         mcp: { businessDomain: 'procurement', scope: 'procurement:read' },
       },
       {
+        id: 'wareneingangsabgleich',
+        label: 'Wareneingangs-Abgleich',
+        icon: ListChecks,
+        module: '@/pages/einkauf/wareneingangsabgleich',
+        preferredPath: 'einkauf/wareneingangsabgleich',
+        keywords: ['3-wege-match', 'wareneingang', 'abgleich', 'bestellung', 'matching', 'abweichung', 'teillieferung', 'überlieferung', 'einkauf', 'procurement'],
+        mcp: { businessDomain: 'procurement', scope: 'procurement:read' },
+      },
+      {
         id: 'bestellvorschlag-lager',
         label: 'Bestellvorschlag Lager',
         icon: Package,
