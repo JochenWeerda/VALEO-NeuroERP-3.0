@@ -160,12 +160,15 @@ class SystemOptimizerAgent:
         if k8s_host:
             try:
                 token_path = Path("/var/run/secrets/kubernetes.io/serviceaccount/token")
+                ca_path = Path("/var/run/secrets/kubernetes.io/serviceaccount/ca.crt")
                 token = token_path.read_text() if token_path.exists() else ""
+                if not token or not ca_path.exists():
+                    raise RuntimeError("Kubernetes service-account token or CA certificate is missing")
                 hpa_name = os.environ.get("K8S_HPA_NAME", "valeo-backend")
                 namespace = os.environ.get("K8S_NAMESPACE", "default")
                 target_replicas = signal.get("target_replicas", 2)
 
-                async with httpx.AsyncClient(verify=False) as client:
+                async with httpx.AsyncClient(verify=str(ca_path)) as client:
                     resp = await client.patch(
                         f"https://{k8s_host}/apis/autoscaling/v2/namespaces/{namespace}"
                         f"/horizontalpodautoscalers/{hpa_name}",

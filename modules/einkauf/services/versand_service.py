@@ -381,7 +381,7 @@ def versende_edi(
     try:
         import paramiko  # type: ignore[import]
         ssh = paramiko.SSHClient()
-        ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+        ssh.load_system_host_keys()
         ssh.connect(
             _EDI_SFTP_HOST,
             username=_EDI_SFTP_USER,

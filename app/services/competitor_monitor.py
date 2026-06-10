@@ -326,15 +326,15 @@ class CompetitorMonitor:
                     return str(phash)
                 except ImportError:
                     # Fallback to content hash
-                    return hashlib.md5(response.content).hexdigest()[:16]
+                    return hashlib.sha256(response.content).hexdigest()[:16]
                 except Exception:
                     # Fallback to URL hash
-                    return hashlib.md5(image_url.encode()).hexdigest()[:16]
+                    return hashlib.sha256(image_url.encode()).hexdigest()[:16]
             else:
-                return hashlib.md5(image_url.encode()).hexdigest()[:16]
+                return hashlib.sha256(image_url.encode()).hexdigest()[:16]
         except Exception:
             # Fallback to URL hash
-            return hashlib.md5(image_url.encode()).hexdigest()[:16]
+            return hashlib.sha256(image_url.encode()).hexdigest()[:16]
 
     async def _google_custom_search(self, query: str, max_results: int = 10) -> List[str]:
         """Use Google Custom Search API for product discovery"""

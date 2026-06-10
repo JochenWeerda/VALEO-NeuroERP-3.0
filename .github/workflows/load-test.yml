@@ -33,7 +33,23 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Zielsystem aufloesen
+        id: target
+        env:
+          REQUESTED_BASE_URL: ${{ github.event.inputs.base_url }}
+          STAGING_BASE_URL: ${{ secrets.STAGING_URL }}
+        run: |
+          BASE_URL="${REQUESTED_BASE_URL:-$STAGING_BASE_URL}"
+          if [ -z "$BASE_URL" ]; then
+            echo "enabled=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::Health-Check als externes Gate uebersprungen: STAGING_URL fehlt."
+          else
+            echo "enabled=true" >> "$GITHUB_OUTPUT"
+            echo "base_url=$BASE_URL" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: k6 installieren
+        if: steps.target.outputs.enabled == 'true'
         run: |
           sudo gpg -k
           sudo gpg --no-default-keyring --keyring /usr/share/keyrings/k6-archive-keyring.gpg \
@@ -44,16 +60,21 @@ jobs:
           sudo apt-get install k6
 
       - name: Health-Check ausführen
+        if: steps.target.outputs.enabled == 'true'
         env:
-          BASE_URL: ${{ github.event.inputs.base_url || 'http://localhost:8000' }}
+          BASE_URL: ${{ steps.target.outputs.base_url }}
           API_DEV_TOKEN: ${{ secrets.API_DEV_TOKEN }}
           TENANT_ID: ${{ secrets.TENANT_ID || 'tenant-staging' }}
         run: |
           k6 run \
-            --env BASE_URL=$BASE_URL \
-            --env API_DEV_TOKEN=$API_DEV_TOKEN \
-            --env TENANT_ID=$TENANT_ID \
+            --env "BASE_URL=$BASE_URL" \
+            --env "API_DEV_TOKEN=$API_DEV_TOKEN" \
+            --env "TENANT_ID=$TENANT_ID" \
             tests/load/health-check.js
+
+      - name: Externes Gate dokumentieren
+        if: steps.target.outputs.enabled != 'true'
+        run: echo "Health-Check nicht ausgefuehrt, weil kein Staging-Ziel konfiguriert ist." >> "$GITHUB_STEP_SUMMARY"
 
   harvest-peak:
     name: Erntepeak-Lasttest (500 VU)
@@ -81,9 +102,9 @@ jobs:
         run: |
           mkdir -p results
           k6 run \
-            --env BASE_URL=$BASE_URL \
-            --env API_DEV_TOKEN=$API_DEV_TOKEN \
-            --env TENANT_ID=$TENANT_ID \
+            --env "BASE_URL=$BASE_URL" \
+            --env "API_DEV_TOKEN=$API_DEV_TOKEN" \
+            --env "TENANT_ID=$TENANT_ID" \
             --out json=results/harvest-peak-${{ github.run_id }}.json \
             tests/load/harvest-peak.js
 
@@ -98,10 +119,12 @@ jobs:
       - name: Ergebnis-Zusammenfassung
         if: always()
         run: |
-          echo "## Lasttest-Ergebnis" >> $GITHUB_STEP_SUMMARY
-          echo "| Metrik | Ziel |" >> $GITHUB_STEP_SUMMARY
-          echo "|--------|------|" >> $GITHUB_STEP_SUMMARY
-          echo "| P95 Antwortzeit | < 800ms |" >> $GITHUB_STEP_SUMMARY
-          echo "| Fehlerrate | < 2% |" >> $GITHUB_STEP_SUMMARY
-          echo "| Max. VU | 500 (Erntepeak) / 800 (Spike) |" >> $GITHUB_STEP_SUMMARY
-          echo "| Kernprozesse | Annahme, Qualitätsprüfung, Einlagerung |" >> $GITHUB_STEP_SUMMARY
+          {
+            echo "## Lasttest-Ergebnis"
+            echo "| Metrik | Ziel |"
+            echo "|--------|------|"
+            echo "| P95 Antwortzeit | < 800ms |"
+            echo "| Fehlerrate | < 2% |"
+            echo "| Max. VU | 500 (Erntepeak) / 800 (Spike) |"
+            echo "| Kernprozesse | Annahme, Qualitätsprüfung, Einlagerung |"
+          } >> "$GITHUB_STEP_SUMMARY"

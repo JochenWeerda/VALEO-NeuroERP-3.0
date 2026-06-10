@@ -24,7 +24,7 @@ CACHE_TTL_HOURS = 24  # Cache for 24 hours
 def _get_cache_key(iban: str) -> str:
     """Generate cache key from normalized IBAN"""
     normalized = iban.replace(" ", "").replace("-", "").upper()
-    return hashlib.md5(normalized.encode()).hexdigest()
+    return hashlib.sha256(normalized.encode()).hexdigest()
 
 
 def _get_cached(iban: str) -> Optional[dict]:

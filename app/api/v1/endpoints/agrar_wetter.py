@@ -74,7 +74,7 @@ async def _cached_get(url: str, params: dict, cache_ttl: int = _WEATHER_CACHE_TT
     import hashlib
     import json
     import time
-    cache_key = hashlib.md5(f"{url}:{json.dumps(params, sort_keys=True)}".encode()).hexdigest()
+    cache_key = hashlib.sha256(f"{url}:{json.dumps(params, sort_keys=True)}".encode()).hexdigest()
     now = time.time()
     if cache_key in _weather_cache and (now - _weather_cache[cache_key]["ts"]) < cache_ttl:
         return _weather_cache[cache_key]["data"]
