@@ -218,3 +218,18 @@ export function useLotAction() {
     },
   })
 }
+
+export function useCancelChain() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: async (input: { ticket: string; grund: string }) =>
+      (await apiClient.post<{ ok: boolean; status?: string; stornierte_lots?: string[] }>(
+        '/api/v1/supply-chain/traceability/cancel', { grund: input.grund },
+        { params: { ticket: input.ticket } },
+      )).data,
+    onSuccess: () => {
+      void qc.invalidateQueries({ queryKey: ['supply-chain', 'trace'] })
+      void qc.invalidateQueries({ queryKey: ['supply-chain', 'tickets'] })
+    },
+  })
+}
