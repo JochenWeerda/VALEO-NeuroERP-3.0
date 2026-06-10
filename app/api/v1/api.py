@@ -949,6 +949,13 @@ api_router.include_router(
     tags=["supply-chain", "agrar", "lager"]
 )
 
+from app.api.v1.endpoints import procurement_match  # noqa: E402
+
+api_router.include_router(
+    procurement_match.router,
+    tags=["procurement", "einkauf"]
+)
+
 from app.api.v1.endpoints import kaeufergruppe as kaeufergruppe_ep  # noqa: E402
 
 api_router.include_router(
