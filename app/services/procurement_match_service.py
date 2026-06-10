@@ -75,7 +75,7 @@ class ProcurementMatchService:
                 "WHERE gr.tenant_id = :t AND (gr.po_id::text = :pid OR gr.po_number = :pnum) "
                 "GROUP BY l.po_line_number"
             ),
-            {"t": self.tenant_id, "pid": po_id or "", "pnum": po_number or ""},
+            {"t": self.tenant_id, "pid": str(po_id) if po_id else "", "pnum": po_number or ""},
         ).mappings().all()
         return {str(r["posnr"]): Decimal(str(r["menge"] or 0)) for r in rows}
 
@@ -87,7 +87,7 @@ class ProcurementMatchService:
                 "WHERE tenant_id = :t AND (po_id::text = :pid OR po_number = :pnum) "
                 "ORDER BY receipt_date"
             ),
-            {"t": self.tenant_id, "pid": po_id or "", "pnum": po_number or ""},
+            {"t": self.tenant_id, "pid": str(po_id) if po_id else "", "pnum": po_number or ""},
         ).mappings().all()
         return [{"id": str(r["id"]), "gr_number": r["gr_number"],
                  "datum": r["receipt_date"].isoformat() if r["receipt_date"] else None,
