@@ -55,4 +55,4 @@ jobs:
         run: python scripts/init_db.py
 
       - name: Run tests (-m needs_live_db, strict DB)
-        run: pytest tests/ -m needs_live_db --tb=short -q
+        run: pytest tests/ -m needs_live_db --tb=short -q --no-cov

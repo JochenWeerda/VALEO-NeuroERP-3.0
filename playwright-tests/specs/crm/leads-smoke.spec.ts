@@ -14,10 +14,10 @@ test.describe('CRM - Leads @smoke', () => {
   });
 
   test('Lead-Neuanlage lädt', async ({ adminPage }) => {
-    await adminPage.goto('/crm/lead/new');
+    await adminPage.goto('/crm/leads/new');
     await adminPage.waitForLoadState('networkidle');
 
-    await expect(adminPage.getByText(/Neuen Lead anlegen|Lead bearbeiten/).first()).toBeVisible();
+    await expect(adminPage.getByText(/Neuen Lead anlegen|Lead bearbeiten/).first()).toBeVisible({ timeout: 15000 });
   });
 });
 

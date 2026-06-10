@@ -13,8 +13,6 @@ import { PurchaseOrderController } from '../../presentation/controllers/purchase
 import { PurchaseOrderRouter } from '../../presentation/controllers/purchaseOrder.router'
 
 /** Minimaler Kontext-Typ für toDynamicValue (ohne internals von Inversify). */
-type ResolverContext = { get<T>(serviceIdentifier: unknown): T }
-
 export interface PurchaseOrderInfrastructureDeps {
   pool: Pool
   prisma: PrismaClient
@@ -42,25 +40,25 @@ export function bindPurchaseOrderModule(container: Container, deps: PurchaseOrde
 
   container
     .bind<NumberRangeService>('NumberRangeService')
-    .toDynamicValue((ctx: ResolverContext) => ctx.get(NumberRangeService))
+    .toDynamicValue((ctx) => ctx.container.get(NumberRangeService))
     .inSingletonScope()
 
   container.bind(AuditService).toSelf().inSingletonScope()
   container
     .bind<AuditService>('AuditService')
-    .toDynamicValue((ctx: ResolverContext) => ctx.get(AuditService))
+    .toDynamicValue((ctx) => ctx.container.get(AuditService))
     .inSingletonScope()
 
   container.bind(PurchaseOrderService).toSelf().inSingletonScope()
   container
     .bind<PurchaseOrderService>('PurchaseOrderService')
-    .toDynamicValue((ctx: ResolverContext) => ctx.get(PurchaseOrderService))
+    .toDynamicValue((ctx) => ctx.container.get(PurchaseOrderService))
     .inSingletonScope()
 
   container.bind(PurchaseOrderController).toSelf().inSingletonScope()
   container
     .bind<PurchaseOrderController>('PurchaseOrderController')
-    .toDynamicValue((ctx: ResolverContext) => ctx.get(PurchaseOrderController))
+    .toDynamicValue((ctx) => ctx.container.get(PurchaseOrderController))
     .inSingletonScope()
 
   container.bind(PurchaseOrderRouter).toSelf().inSingletonScope()

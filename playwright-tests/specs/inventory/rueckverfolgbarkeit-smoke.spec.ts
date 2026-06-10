@@ -36,29 +36,6 @@ test.describe('Inventory - Rückverfolgbarkeit @smoke', () => {
   });
 
   test('Kette eines Seed-Wiegescheins wird angezeigt', async ({ adminPage }) => {
-    await adminPage.route('**/api/v1/supply-chain/traceability/tickets**', async (route) => {
-      await route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify({
-          items: [{
-            ticket_id: 'ticket-1',
-            ticket_nr: 'WG-2026-00001',
-            datum: '2026-06-10T08:00:00Z',
-            menge_kg: 25000,
-            status: 'abgerechnet',
-            allokation: 'LOT-1',
-            hat_annahme: true,
-            hat_lager: true,
-            hat_abrechnung: true,
-            vollstaendig: true,
-          }],
-        }),
-      });
-    });
-    await adminPage.route('**/api/v1/supply-chain/traceability/sync**', async (route) => {
-      await route.fulfill({ status: 200, contentType: 'application/json', body: '{"synced":4,"total":4}' });
-    });
     await adminPage.route('**/api/v1/supply-chain/traceability?**', async (route) => {
       await route.fulfill({
         status: 200,
@@ -83,15 +60,32 @@ test.describe('Inventory - Rückverfolgbarkeit @smoke', () => {
             occurred_at: '2026-06-10T08:00:00Z', created_at: '2026-06-10T08:00:00Z',
           }],
           kanon_status: { status: 'abgerechnet', rang: 4 },
-          summary: {
-            stufen: 4,
-            vollstaendig: true,
-            hat_mengen_abweichung: false,
-            offene_luecken: 0,
-            status: 'abgerechnet',
-          },
+          summary: { stufen: 4, vollstaendig: true, hat_mengen_abweichung: false, offene_luecken: 0, status: 'abgerechnet' },
         }),
       });
+    });
+    await adminPage.route('**/api/v1/supply-chain/traceability/tickets**', async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          items: [{
+            ticket_id: 'ticket-1',
+            ticket_nr: 'WG-2026-00001',
+            datum: '2026-06-10T08:00:00Z',
+            menge_kg: 25000,
+            status: 'abgerechnet',
+            allokation: 'LOT-1',
+            hat_annahme: true,
+            hat_lager: true,
+            hat_abrechnung: true,
+            vollstaendig: true,
+          }],
+        }),
+      });
+    });
+    await adminPage.route('**/api/v1/supply-chain/traceability/sync**', async (route) => {
+      await route.fulfill({ status: 200, contentType: 'application/json', body: '{"synced":4,"total":4}' });
     });
     await openTrace(adminPage);
 

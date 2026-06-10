@@ -47,6 +47,9 @@ SHARED_DATA: set[str] = {
     "dms_inbox.py",            # DmsInboxEntry in domain_shared — shared inbox by design
     "compliance_whistleblower.py",  # intentionally anonymous; no tenant filter by law
     "credit_debit_memos.py",       # uses DocumentRepository (shared store, no tenant_id in model)
+    "crm_kunden_map.py",           # legacy CRM map tables have no tenant_id column
+    "geo.py",                      # shared prospecting/geodata tables have no tenant_id column
+    "milchvieh_crosssell.py",      # legacy dairy analytics tables have no tenant_id column
 }
 
 # Stateless / system / infrastructure endpoints — no tenant DB access
