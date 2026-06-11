@@ -69,6 +69,17 @@ Stand: `2026-06-11`
 **Abnahmekriterien:** Keine Schreibpfade mehr auf `stock_movements`; Regression für Artikel-Bestand und POS-Retoure grün; Schema-Vertrag unverändert grün.
 **Offene Risiken:** POS-Retoure aktualisiert `articles.current_stock` noch nicht; MHD/Expiry weiterhin ohne Chargenstamm.
 
+## DOC-004.3 — Bescheid/Rückmeldung + Wiedervorlage
+
+**Von:** Claude
+**Owner:** Claude
+**Stand:** ABGESCHLOSSEN 2026-06-11 — Migration `doc_followup_20260611` (`document_followups`), Service `docflow_followup_service.py` (reine `followup_overdue` + `create_followup`/`complete_followup`/`list_followups`/`open_wiedervorlagen`), Endpoints `/docflow/evidence/{followups,wiedervorlagen}`, Frontend `pages/docflow/wiedervorlagen.tsx` + Hooks + Nav + Route. 9 Backendtests grün (5 Followup + 4 Artefakt-Regression), tsc 0, eslint clean; Live verifiziert (Wiedervorlage überfällig in Worklist, Bescheid, Erledigen + 422).
+**⚠️ Alembic:** chained auf `doc_artifact_version_20260611`, gezielt angewandt; paralleler PROC-Head (Cursor) → Merge nötig sobald beide committet.
+**Ziel des Slices:** Bescheide/Rückmeldungen + Wiedervorlagen je Vorgang mit Fälligkeit + Worklist offener (überfälliger) Wiedervorlagen. DOM-DOC-004.3.
+**Dateibesitz:** `alembic/versions/doc_followup_20260611.py`, `app/services/docflow_followup_service.py`, `app/api/v1/endpoints/docflow_followup.py`, `app/api/v1/api.py` (nur eigene include-Zeilen), `tests/test_docflow_followup.py`, `packages/frontend-web/src/lib/api/docflow-followup.ts`, `packages/frontend-web/src/pages/docflow/wiedervorlagen.tsx`, `finance.tsx` (nur eigener Nav-Eintrag), `route-aliases.json` (+ generierte Route-Artefakte), DOC-Doku.
+**Abnahmekriterien:** Followup-Erfassung (Wiedervorlage mit Pflicht-Fälligkeit); Worklist markiert überfällig; Erledigen idempotent-gesperrt (422); Backendtests + tsc + eslint grün.
+**Offene Risiken:** Automatische Benachrichtigung/Eskalation der Wiedervorlagen nicht Teil des Slices. GoBD-Exportpaket + Paperless-Liveprobe in 004.4.
+
 ## DOC-004.2 — Artefakt-Upload + Versionierung + Freigabe
 
 **Von:** Claude

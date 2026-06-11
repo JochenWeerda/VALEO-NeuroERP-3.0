@@ -984,6 +984,13 @@ api_router.include_router(
     tags=["docflow", "dms", "gobd"]
 )
 
+from app.api.v1.endpoints import docflow_followup  # noqa: E402
+
+api_router.include_router(
+    docflow_followup.router,
+    tags=["docflow", "dms", "gobd"]
+)
+
 from app.api.v1.endpoints import o2c_chain  # noqa: E402
 
 api_router.include_router(

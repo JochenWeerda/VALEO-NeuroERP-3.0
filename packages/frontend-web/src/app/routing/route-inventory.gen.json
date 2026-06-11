@@ -1566,6 +1566,11 @@
       "source": "alias"
     },
     {
+      "module": "@/pages/docflow/wiedervorlagen",
+      "path": "docflow/wiedervorlagen",
+      "source": "alias"
+    },
+    {
       "module": "@/pages/document",
       "path": "document",
       "source": "auto"
