@@ -77,7 +77,8 @@ class ContractFulfillmentService:
         rows = self.db.execute(
             text("SELECT line_id, COALESCE(SUM(quantity),0) AS menge "
                  "FROM domain_ops.kon_contract_movement "
-                 "WHERE contract_id::text = :cid AND tenant_id = :t GROUP BY line_id"),
+                 "WHERE contract_id::text = :cid AND tenant_id = :t "
+                 "AND COALESCE(is_storniert,false) = false GROUP BY line_id"),
             {"cid": contract_id, "t": self.tenant_id},
         ).mappings().all()
         return {str(r["line_id"]): Decimal(str(r["menge"] or 0)) for r in rows}
@@ -157,7 +158,8 @@ class ContractFulfillmentService:
                        COALESCE((SELECT SUM(l.qty_contract) FROM domain_ops.kon_contract_line l
                                  WHERE l.contract_id = c.contract_id AND l.tenant_id = c.tenant_id),0) AS qty,
                        COALESCE((SELECT SUM(m.quantity) FROM domain_ops.kon_contract_movement m
-                                 WHERE m.contract_id = c.contract_id AND m.tenant_id = c.tenant_id),0) AS ab
+                                 WHERE m.contract_id = c.contract_id AND m.tenant_id = c.tenant_id
+                                 AND COALESCE(m.is_storniert,false) = false),0) AS ab
                 FROM domain_ops.kon_contract c
                 WHERE c.tenant_id = :t AND (:ct IS NULL OR c.contract_type = :ct)
                 ORDER BY c.valid_to NULLS LAST, c.contract_no LIMIT :lim

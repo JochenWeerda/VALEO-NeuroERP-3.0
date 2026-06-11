@@ -46,6 +46,7 @@ import {
   CalendarClock,
   LineChart,
   Boxes,
+  Receipt,
 } from 'lucide-react'
 import type { RawNavItem } from '@/app/navigation/types'
 import { ENABLE_PROSPECTING_UI } from '@/features/prospecting/feature-flags'
@@ -219,6 +220,15 @@ export const RAW_NAV_SECTIONS: RawNavItem[] = [
         module: '@/pages/agrar/kontrakt-engagement',
         preferredPath: 'agrar/kontrakt-engagement',
         keywords: ['kontrakt', 'engagement', 'offen', 'netto', 'position', 'artikel', 'partei', 'mahnung', 'kontraktmahnung', 'überfällig', 'einkauf', 'verkauf'],
+        mcp: { businessDomain: 'agrar', scope: 'agrar:write' },
+      },
+      {
+        id: 'kontrakt-settlement',
+        label: 'Kontrakt-Settlement',
+        icon: Receipt,
+        module: '@/pages/agrar/kontrakt-settlement',
+        preferredPath: 'agrar/kontrakt-settlement',
+        keywords: ['kontrakt', 'settlement', 'abrechnung', 'übergabe', 'storno', 'stornieren', 'bewegung', 'abruf', 'fixierung', 'gutschrift'],
         mcp: { businessDomain: 'agrar', scope: 'agrar:write' },
       },
       {

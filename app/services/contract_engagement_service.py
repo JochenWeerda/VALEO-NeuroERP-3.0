@@ -137,7 +137,8 @@ class ContractEngagementService:
                 """
                 SELECT l.qty_contract,
                        COALESCE((SELECT SUM(m.quantity) FROM domain_ops.kon_contract_movement m
-                                 WHERE m.line_id = l.line_id AND m.tenant_id = :t),0) AS abgerufen
+                                 WHERE m.line_id = l.line_id AND m.tenant_id = :t
+                                 AND COALESCE(m.is_storniert,false) = false),0) AS abgerufen
                 FROM domain_ops.kon_contract_line l
                 WHERE l.contract_id::text = :cid AND l.tenant_id = :t
                 """

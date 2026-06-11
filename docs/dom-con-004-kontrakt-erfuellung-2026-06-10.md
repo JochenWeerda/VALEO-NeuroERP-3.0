@@ -80,6 +80,26 @@ DEMO-KT-004: 60 % fixiert, Bewertung +99,99 €, offener Marktwert 44.000 €.
 Engagement: Raps 00 EK +80, Weizen A VK −60, Weizen B MATIF VK −500 → Netto −480.
 Mahnkandidat DEMO-KT-002 (11 Tage überfällig, 60 offen). 15 Unit-Tests grün.
 
+## Slice 004.4 — Settlement-Übergabe + Storno (umgesetzt, 2026-06-11)
+- Migration `con_settlement_storno_20260611` — `kon_contract_movement` +`settled_at`,
+  +`is_storniert`, +`storno_grund` (idempotent ADD COLUMN IF NOT EXISTS).
+- Service `app/services/contract_settlement_service.py`:
+  - reine `movement_state(is_storniert, is_invoiced)` → storniert/abgerechnet/offen.
+  - `handover` (Bewegung→Abrechnung: is_invoiced/invoice_no/settled_at; einzeln oder
+    alle offenen), `storno_movement` (fail-closed: abgerechnet blockiert),
+    `storno_fixing` (is_storniert), `settlement_status` (Bewegungen+Fixierungen+Summary).
+  - Stornierte Bewegungen zählen nicht mehr als abgerufen → `contract_fulfillment_service`
+    und `contract_engagement_service` filtern `is_storniert=false`.
+- API: `GET /contracts/settlement/status`, `POST /contracts/settlement`,
+  `POST /contracts/movements/{id}/storno`, `POST /contracts/fixings/{id}/storno`.
+- Frontend: `pages/agrar/kontrakt-settlement.tsx` (Picker + Settlement-Kacheln +
+  Bewegungstabelle mit Abrechnen/Storno + Fixierungs-Storno, Storno-Dialog mit
+  Pflicht-Grund) + Hooks `lib/api/contract-settlement.ts` + Nav + Route.
+- Tests: `tests/test_contract_settlement.py` (3 grün); Live verifiziert (Handover 120 t
+  abgerechnet, Storno gebuchter Bewegung → 422, Fixing-Storno gibt 200 t frei → 60 %→20 %).
+
+### Verifiziert
+18 Unit-Tests grün (kumuliert), tsc 0, eslint clean.
+
 ## Folge-Slices
-- **004.4** Settlement-Übergabe (Bewegung→Abrechnung) + Storno (inkl. Fixierungs-Storno).
 - **004.5** Browser-E2E + UAT.

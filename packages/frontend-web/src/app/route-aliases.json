@@ -1409,6 +1409,10 @@
       "path": "agrar/kontrakt-engagement"
     },
     {
+      "module": "@/pages/agrar/kontrakt-settlement",
+      "path": "agrar/kontrakt-settlement"
+    },
+    {
       "module": "@/pages/lager/lagerplaetze",
       "path": "lager/lagerplaetze"
     },
