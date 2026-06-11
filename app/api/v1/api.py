@@ -991,6 +991,13 @@ api_router.include_router(
     tags=["sales", "o2c"]
 )
 
+from app.api.v1.endpoints import sales_credit  # noqa: E402
+
+api_router.include_router(
+    sales_credit.router,
+    tags=["sales", "o2c", "credit"]
+)
+
 from app.api.v1.endpoints import finance_op  # noqa: E402
 
 api_router.include_router(

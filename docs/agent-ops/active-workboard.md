@@ -2,6 +2,16 @@
 
 Stand: `2026-06-11`
 
+## PROC-004.2 — 3-Wege-Match Rechnungsstufe
+
+**Von:** Cursor
+**Owner:** Cursor
+**Stand:** abgeschlossen 2026-06-11 — Rechnungsstufe: `match_three_way` + API `/procurement/match/three-way`, Migration `proc_three_way_inv_20260611`, Seed `DEMO-RE-001`, UI Wareneingangsabgleich; 10 Procurement-Tests grün; 1 Alembic-Head.
+**Ziel des Slices:** Echter 3-Wege-Match Bestellung ↔ Wareneingang ↔ Eingangsrechnung mit Ausnahmen (keine Rechnung, Wertabweichung).
+**Dateibesitz:** `procurement_match_service.py`, `procurement_match.py`, `proc_three_way_invoice_20260611.py`, `seed_demo_procurement.py`, `test_procurement_three_way_match.py`, `procurement-match.ts`, `wareneingangsabgleich.tsx`, DOM-PROC-Doku.
+**Abnahmekriterien:** API + Unit-Tests + Seed + UI; keine Überschneidung mit CON/SALES-Slices.
+**Abstimmung:** Claude — CON/SALES abgeschlossen; keine `contract_*` / `sales_match_*` Dateien.
+
 ## COMPAT-GOV-001
 
 **Von:** Cursor
@@ -21,6 +31,16 @@ Stand: `2026-06-11`
 **Dateibesitz:** `app/api/v1/endpoints/articles.py`, `app/api/v1/endpoints/pos_retoure.py`, fokussierte Tests, Doku in `open-gaps-and-known-issues.md`.
 **Abnahmekriterien:** Keine Schreibpfade mehr auf `stock_movements`; Regression für Artikel-Bestand und POS-Retoure grün; Schema-Vertrag unverändert grün.
 **Offene Risiken:** POS-Retoure aktualisiert `articles.current_stock` noch nicht; MHD/Expiry weiterhin ohne Chargenstamm.
+
+## SALES-004.3 — Kreditlimit-Prüfung + Billing-Status
+
+**Von:** Claude
+**Owner:** Claude
+**Stand:** ABGESCHLOSSEN 2026-06-11 — Service `sales_credit_service.py` (reine `credit_check`-Ampel + `order_credit` + `list_customers`), Endpoints `/sales/credit-check[/customers]`, Seed (DEMO-CUST-001 Limit 20.000 € in `domain_crm.customers`), Frontend `pages/sales/kreditlimit-pruefung.tsx` + Hooks + Nav + Route. 10 Backendtests grün (5 Credit + 5 Match-Regression), tsc 0, eslint clean; Live verifiziert (Auslastung 86,5 % → Ampel warnung). Keine Migration.
+**Ziel des Slices:** Kreditlimit-Prüfung (Limit vs. offene Exposure, Ampel, Wirkung des Auftrags) + Billing-Status je Lieferschein im O2C-Kontext. DOM-SALES-004.3.
+**Dateibesitz:** `app/services/sales_credit_service.py`, `app/api/v1/endpoints/sales_credit.py`, `app/api/v1/api.py` (nur eigene include-Zeilen), `scripts/seed_demo_sales.py` (Kundensatz), `tests/test_sales_credit.py`, `packages/frontend-web/src/lib/api/sales-credit.ts`, `packages/frontend-web/src/pages/sales/kreditlimit-pruefung.tsx`, `commercial.tsx` (nur eigener Nav-Eintrag), `route-aliases.json` (+ generierte Route-Artefakte), SALES-Doku.
+**Abnahmekriterien:** Ampel ok/warnung/blockiert/kein_limit korrekt; verfügbarer Rahmen + Auslastung mit/ohne Auftrag; Kunden-Ampel-Liste; Backendtests + tsc + eslint grün.
+**Offene Risiken / ehrlich:** Vorhandene `credit_management.py`-Infra braucht `domain_finance.finance_invoices` + `domain_crm.credit_limits` — **in DEV nicht vorhanden** (`/credit-status` 404). Daher tolerant self-contained (Limit am Kundensatz, Exposure aus offenen Aufträgen). Tiefe FIBU-Journal-/Debitoren-OP-Verknüpfung = Folgeschritt. Storno/Gutschrift in 004.4.
 
 ## SALES-004.2 — Positions-Match Auftrag↔Lieferschein
 

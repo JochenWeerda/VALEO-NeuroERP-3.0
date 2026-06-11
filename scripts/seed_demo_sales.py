@@ -102,6 +102,25 @@ def _ensure_ls_positions(db) -> bool:
     return True
 
 
+def _ensure_customer_credit(db) -> bool:
+    """Kundensatz DEMO-CUST-001 mit Kreditlimit (DOM-SALES-004.3). Exposure aus
+    offenen Aufträgen = 17.300 € bei Limit 20.000 € → Ampel „warnung". Idempotent."""
+    exists = db.execute(text("SELECT credit_limit FROM domain_crm.customers WHERE id = :id AND tenant_id = :t"),
+                        {"id": CUST, "t": TENANT}).mappings().first()
+    if exists is None:
+        db.execute(
+            text("INSERT INTO domain_crm.customers (id, tenant_id, customer_number, company_name, credit_limit) "
+                 "VALUES (:id, :t, :nr, :name, 20000)"),
+            {"id": CUST, "t": TENANT, "nr": CUST, "name": CUST_NAME},
+        )
+        return True
+    if not exists.get("credit_limit"):
+        db.execute(text("UPDATE domain_crm.customers SET credit_limit = 20000 WHERE id = :id AND tenant_id = :t"),
+                   {"id": CUST, "t": TENANT})
+        return True
+    return False
+
+
 def seed() -> dict:
     db = SessionLocal()
     created = []
@@ -124,6 +143,9 @@ def seed() -> dict:
 
         if _ensure_ls_positions(db):
             created.append("DEMO-LS-001-Positionen")
+
+        if _ensure_customer_credit(db):
+            created.append("DEMO-CUST-001-Kreditlimit")
 
         db.commit()
         return {"created": created, "skipped": not created}

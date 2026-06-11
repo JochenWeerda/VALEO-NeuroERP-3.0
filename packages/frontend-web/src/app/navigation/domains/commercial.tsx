@@ -392,6 +392,15 @@ export const RAW_NAV_SECTIONS: RawNavItem[] = [
         mcp: { businessDomain: 'sales', scope: 'sales:read' },
       },
       {
+        id: 'kreditlimit-pruefung',
+        label: 'Kreditlimit-Prüfung',
+        icon: ShieldCheck,
+        module: '@/pages/sales/kreditlimit-pruefung',
+        preferredPath: 'sales/kreditlimit-pruefung',
+        keywords: ['kreditlimit', 'kredit', 'limit', 'bonität', 'exposure', 'ampel', 'sperre', 'auftrag', 'o2c', 'sales', 'debitor'],
+        mcp: { businessDomain: 'sales', scope: 'sales:read' },
+      },
+      {
         id: 'auftrag',
         label: 'Aufträge',
         icon: FileText,
