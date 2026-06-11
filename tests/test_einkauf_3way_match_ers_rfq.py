@@ -162,67 +162,7 @@ class TestErs:
         assert "nicht ERS-qualifiziert" in result["reason"]
 
 
-# ─────────────────────────────────────────────────────────────────────────────
-# RFQ — Unit Tests
-# ─────────────────────────────────────────────────────────────────────────────
-
-class TestRfq:
-    def _make_mock_db(self):
-        db = MagicMock()
-        db.execute.return_value.fetchone.return_value = None
-        db.execute.return_value.fetchall.return_value = []
-        return db
-
-    def test_rfq_comparison_sorts_by_price(self):
-        """Angebotsvergleich liefert günstigstes Angebot zuerst."""
-        quotes_raw = [
-            (1, "sup-A", 10.50, 7, None, "OFFEN", 1),
-            (2, "sup-B", 9.90, 5, None, "OFFEN", 2),   # günstigstes
-            (3, "sup-C", 11.00, 10, None, "OFFEN", 3),
-        ]
-
-        # Simuliere sort-Logik direkt
-        sorted_quotes = sorted(quotes_raw, key=lambda q: q[2])
-        prices = [q[2] for q in sorted_quotes]
-        assert prices == sorted(prices)
-        assert sorted_quotes[0][1] == "sup-B"
-
-    def test_rfq_accept_creates_purchase_order(self):
-        """Zuschlag akzeptieren → Bestellung wird angelegt."""
-        from app.api.v1.endpoints.rfq import accept_quote
-
-        db = self._make_mock_db()
-
-        rfq_data = (1, "art-001", 100.0, None, None, "BEWERTET", None)
-        quote_data = (5, "sup-B", 9.90, 5)
-        po_data = (99,)
-
-        call_count = [0]
-
-        def side_effect(query, params=None):
-            result = MagicMock()
-            sql = str(query)
-            call_count[0] += 1
-            if "rfq_requests" in sql and "UPDATE" not in sql:
-                result.fetchone.return_value = rfq_data
-            elif "rfq_quotes" in sql and "UPDATE" not in sql:
-                result.fetchone.return_value = quote_data
-            elif "bestellungen" in sql and "INSERT" in sql:
-                result.fetchone.return_value = po_data
-            else:
-                result.fetchone.return_value = None
-            return result
-
-        db.execute.side_effect = side_effect
-
-        with patch("app.api.v1.endpoints.rfq._ensure_schema"), \
-             patch("app.api.v1.endpoints.rfq._get_rfq", return_value=rfq_data):
-            result = accept_quote(rfq_id=1, quote_id=5, db=db, tenant_id="tenant-1")
-
-        assert result["status"] == "ABGESCHLOSSEN"
-        assert result["supplier_id"] == "sup-B"
-        assert result["total_amount"] == pytest.approx(100.0 * 9.90)
-
+# RFQ-Persistenz: tests/test_rfq_integration.py (echte DB, keine Mocks)
 
 # ─────────────────────────────────────────────────────────────────────────────
 # KPIs — Unit Tests
