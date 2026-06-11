@@ -47,6 +47,7 @@ import {
   LineChart,
   Boxes,
   Receipt,
+  PackageCheck,
 } from 'lucide-react'
 import type { RawNavItem } from '@/app/navigation/types'
 import { ENABLE_PROSPECTING_UI } from '@/features/prospecting/feature-flags'
@@ -379,6 +380,15 @@ export const RAW_NAV_SECTIONS: RawNavItem[] = [
         module: '@/pages/sales/auftragskette',
         preferredPath: 'sales/auftragskette',
         keywords: ['o2c', 'order-to-cash', 'auftragskette', 'angebot', 'auftrag', 'lieferschein', 'rechnung', 'kette', 'durchgängig', 'sales'],
+        mcp: { businessDomain: 'sales', scope: 'sales:read' },
+      },
+      {
+        id: 'auftrag-lieferschein-abgleich',
+        label: 'Auftrag-Lieferschein-Abgleich',
+        icon: PackageCheck,
+        module: '@/pages/sales/auftrag-lieferschein-abgleich',
+        preferredPath: 'sales/auftrag-lieferschein-abgleich',
+        keywords: ['o2c', 'abgleich', 'match', 'positionen', 'auftrag', 'lieferschein', 'teillieferung', 'überlieferung', 'offen', 'sales'],
         mcp: { businessDomain: 'sales', scope: 'sales:read' },
       },
       {

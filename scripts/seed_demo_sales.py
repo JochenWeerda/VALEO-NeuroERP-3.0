@@ -76,6 +76,32 @@ def _delivery(db, order_id: str, nummer: str, invoice_number: str | None) -> Non
     )
 
 
+def _ensure_ls_positions(db) -> bool:
+    """Lieferschein-Positionen für DEMO-LS-001 (DOM-SALES-004.2): MILCHLEISTUNG-18
+    25/25 (vollständig), MINERAL-RIND 3/5 (teilgeliefert). Idempotent."""
+    dn = db.execute(
+        text("SELECT id FROM domain_sales.delivery_notes WHERE delivery_note_number = 'DEMO-LS-001' "
+             "AND tenant_id = :t"), {"t": TENANT},
+    ).scalar()
+    if not dn:
+        return False
+    if db.execute(text("SELECT 1 FROM domain_sales.delivery_note_positions WHERE delivery_note_id = :d LIMIT 1"),
+                  {"d": dn}).first():
+        return False
+    for pos, anr, bez, menge, preis in [
+        (1, "MILCHLEISTUNG-18", "Milchleistungsfutter 18/3", 25, 320.0),
+        (2, "MINERAL-RIND", "Mineralfutter Rind", 3, 900.0),
+    ]:
+        db.execute(
+            text("INSERT INTO domain_sales.delivery_note_positions "
+                 "(id, delivery_note_id, pos_nr, artikel_nr, bezeichnung, menge, einheit, netto_preis, netto_betrag) "
+                 "VALUES (:id, :d, :p, :a, :b, :m, 't', :pr, :nb)"),
+            {"id": str(uuid.uuid4()), "d": dn, "p": pos, "a": anr, "b": bez, "m": menge,
+             "pr": preis, "nb": round(menge * preis, 2)},
+        )
+    return True
+
+
 def seed() -> dict:
     db = SessionLocal()
     created = []
@@ -95,6 +121,9 @@ def seed() -> dict:
                 {"ln": 1, "artikel_nr": "SCHWEIN-MAST", "bezeichnung": "Schweinemastfutter", "menge": 15, "einheit": "t", "preis": 320.0},
             ])  # kein Lieferschein → Lücke
             created.append("DEMO-AUF-002")
+
+        if _ensure_ls_positions(db):
+            created.append("DEMO-LS-001-Positionen")
 
         db.commit()
         return {"created": created, "skipped": not created}

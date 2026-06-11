@@ -1393,6 +1393,10 @@
       "path": "sales/auftragskette"
     },
     {
+      "module": "@/pages/sales/auftrag-lieferschein-abgleich",
+      "path": "sales/auftrag-lieferschein-abgleich"
+    },
+    {
       "module": "@/pages/finance/offene-posten-cockpit",
       "path": "finance/offene-posten-cockpit"
     },
