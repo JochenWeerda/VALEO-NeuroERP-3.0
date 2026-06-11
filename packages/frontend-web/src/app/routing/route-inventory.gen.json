@@ -3601,6 +3601,11 @@
       "source": "navigation"
     },
     {
+      "module": "@/pages/sales/auftrag-lieferschein-abgleich",
+      "path": "sales/auftrag-lieferschein-abgleich",
+      "source": "alias"
+    },
+    {
       "module": "@/pages/sales/auftragskette",
       "path": "sales/auftragskette",
       "source": "alias"

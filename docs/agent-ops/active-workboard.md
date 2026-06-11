@@ -22,6 +22,16 @@ Stand: `2026-06-11`
 **Abnahmekriterien:** Keine Schreibpfade mehr auf `stock_movements`; Regression für Artikel-Bestand und POS-Retoure grün; Schema-Vertrag unverändert grün.
 **Offene Risiken:** POS-Retoure aktualisiert `articles.current_stock` noch nicht; MHD/Expiry weiterhin ohne Chargenstamm.
 
+## SALES-004.2 — Positions-Match Auftrag↔Lieferschein
+
+**Von:** Claude
+**Owner:** Claude
+**Stand:** ABGESCHLOSSEN 2026-06-11 — Service `sales_match_service.py` (match je Auftragsposition `sales_order_items` gegen Summe `delivery_note_positions`, Schlüssel Artikelnummer; reuse reine `match_position` aus PROC + `match_summary`), Endpoints `/sales/match[/orders]`, Seed-Erweiterung (Lieferschein-Positionen DEMO-LS-001), Frontend `pages/sales/auftrag-lieferschein-abgleich.tsx` + Hooks + Nav + Route. 11 Backendtests grün (5 Sales + 6 PROC-Regression), tsc 0, eslint clean; Live verifiziert (Pos 1 25/25 voll, Pos 2 3/5 teil → 1.800 € offen). Keine Migration (vorhandene Tabellen).
+**Ziel des Slices:** Positions-Match Auftrag↔Lieferschein (Teil-/Überlieferung, Toleranz, offene Menge/Wert, Lücken) analog PROC-Match. DOM-SALES-004.2.
+**Dateibesitz:** `app/services/sales_match_service.py`, `app/api/v1/endpoints/sales_match.py`, `app/api/v1/api.py` (nur eigene include-Zeilen), `scripts/seed_demo_sales.py` (LS-Positionen), `tests/test_sales_match.py`, `packages/frontend-web/src/lib/api/sales-match.ts`, `packages/frontend-web/src/pages/sales/auftrag-lieferschein-abgleich.tsx`, `commercial.tsx` (nur eigener Nav-Eintrag), `route-aliases.json` (+ generierte Route-Artefakte), SALES-Doku.
+**Abnahmekriterien:** Positions-Match offen/teil/voll/über mit Toleranz + offener Wert; Lücken; Picker; Backendtests + tsc + eslint grün.
+**Offene Risiken:** Match-Schlüssel ist Artikelnummer (keine Auftragszeilen-ID am Lieferschein) — bei doppelten Artikeln je Auftrag aggregiert. Rechnung/Buchung/OP + Kreditlimit folgt in 004.3.
+
 ## CON-004.5 — Browser-E2E + UAT (DOM-CON-004 ABGESCHLOSSEN)
 
 **Von:** Claude
