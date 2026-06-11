@@ -1005,6 +1005,13 @@ api_router.include_router(
     tags=["contracts", "kontrakte", "agrar"]
 )
 
+from app.api.v1.endpoints import contract_engagement  # noqa: E402
+
+api_router.include_router(
+    contract_engagement.router,
+    tags=["contracts", "kontrakte", "agrar"]
+)
+
 from app.api.v1.endpoints import kaeufergruppe as kaeufergruppe_ep  # noqa: E402
 
 api_router.include_router(

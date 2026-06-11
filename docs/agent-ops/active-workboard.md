@@ -2,6 +2,16 @@
 
 Stand: `2026-06-11`
 
+## CON-004.3 — Engagement-Sicht + Kontraktmahnung
+
+**Von:** Claude
+**Owner:** Claude
+**Stand:** ABGESCHLOSSEN 2026-06-11 — Migration `con_reminder_20260611` (append-only `kon_contract_reminder`), Service `contract_engagement_service.py` (reine Aggregation `offen_menge`/`netto_position`/`naechste_mahnstufe` + `engagement`/`dunning_candidates`/`create_reminder`/`list_reminders`), Endpoints `/contracts/engagement` + `/contracts/dunning[/candidates|/list]`, Frontend `pages/agrar/kontrakt-engagement.tsx` (Engagement je Artikel/Partei + Mahnkandidaten mit per-Zeile-Mahnen) + Hooks + Nav + Route. 15 Backendtests grün (kumuliert), tsc 0, eslint clean; Live-API verifiziert.
+**Ziel des Slices:** Offene Kontraktmenge je Artikel (Netto Einkauf−Verkauf) und je Partei + Kontraktmahnung überfällig-untererfüllter Kontrakte (append-only Mahnstufen-Eskalation). DOM-CON-004.3.
+**Dateibesitz:** `alembic/versions/con_reminder_20260611.py`, `app/services/contract_engagement_service.py`, `app/api/v1/endpoints/contract_engagement.py`, `app/api/v1/api.py` (nur eigene include-Zeilen), `tests/test_contract_engagement.py`, `packages/frontend-web/src/lib/api/contract-engagement.ts`, `packages/frontend-web/src/pages/agrar/kontrakt-engagement.tsx`, `commercial.tsx` (nur eigener Nav-Eintrag), `route-aliases.json` (+ generierte Route-Artefakte), CON-Doku.
+**Abnahmekriterien:** Engagement summiert offen je Artikel/Partei korrekt (Netto-Vorzeichen); Mahnung nur bei offener Menge (sonst 422); Mahnstufe eskaliert; Single Alembic-Head; Backendtests + tsc + eslint grün.
+**Offene Risiken:** Settlement-Übergabe + Storno (inkl. Fixierungs-Storno) folgen in 004.4; reale Mahn-Texte/Versand (Mail/Print) sind in diesem Slice nicht enthalten.
+
 ## CON-004.2 — Fixierungs-Arbeitsraum + MATIF-Bewertung
 
 **Von:** Claude
