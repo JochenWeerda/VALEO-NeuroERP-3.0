@@ -2,6 +2,35 @@
 
 Stand: `2026-06-11`
 
+## COMPAT-GOV-001
+
+**Von:** Cursor
+**Owner:** Cursor
+**Stand:** abgeschlossen 2026-06-11 — Release-Kompatibilitätsmatrix als generiertes Artefakt (`scripts/generate_release_compatibility_matrix.py` → `artifacts/release-compatibility-matrix.{json,md}`), kanonische Toolchain-Pins (`config/release-toolchain-pins.json`), Drift-Check (`scripts/check_toolchain_pins.py`), unpinned `pytest-cov` aus `quality-gate.yml`/`sonarcloud.yml`/`ci.yml` entfernt, Finance-Subservices auf `pytest-cov==7.1.0`/`coverage==7.14.1` angeglichen. 5 Governance-Tests grün.
+**Ziel des Slices:** Nach PROD-READINESS-001 Kompatibilitätsmatrix und einheitliche Test-Toolchain-Pins repo-weit verbindlich machen.
+**Dateibesitz:** `config/release-toolchain-pins.json`, `scripts/generate_release_compatibility_matrix.py`, `scripts/check_toolchain_pins.py`, `tests/test_release_compatibility_governance.py`, `.github/workflows/quality-gate.yml`, `release-gates.yml`, `sonarcloud.yml`, `ci.yml`, Finance-`requirements.txt`, `docs/operations/dependency-and-compatibility-maintenance.md`, Handshake/Slices.
+**Abnahmekriterien:** Matrix-Generator in Quality-/Release-Gate; Toolchain-Drift blockiert CI; keine losen `pip install pytest-cov`; Finance-Subservices aligned; Tests grün.
+**Offene Risiken:** `recursionlimit` in `conftest.py` bleibt Coverage-Workaround; `stock_movements`-Altpfade → Folge-Slice `INV-STOCK-MOVEMENTS-001`.
+
+## INV-STOCK-MOVEMENTS-001
+
+**Von:** Cursor
+**Owner:** offen
+**Stand:** offen
+**Ziel des Slices:** Legacy-SQL-Pfade `domain_inventory.stock_movements` in `articles.py` und `pos_retoure.py` auf kanonische Tabelle `inventory_stock_movements` umstellen inkl. Chargen-/Bestandsvertrag.
+**Dateibesitz:** `app/api/v1/endpoints/articles.py`, `app/api/v1/endpoints/pos_retoure.py`, fokussierte Tests, Doku in `open-gaps-and-known-issues.md`.
+**Abnahmekriterien:** Keine Schreibpfade mehr auf `stock_movements`; Regression für Artikel-Bestand und POS-Retoure grün; Schema-Vertrag unverändert grün.
+
+## CON-004.4 — Settlement-Übergabe + Storno
+
+**Von:** Claude
+**Owner:** Claude
+**Stand:** ABGESCHLOSSEN 2026-06-11 — Migration `con_settlement_storno_20260611` (`kon_contract_movement` +settled_at/+is_storniert/+storno_grund), Service `contract_settlement_service.py` (`movement_state` + `handover`/`storno_movement`/`storno_fixing`/`settlement_status`), Endpoints `/contracts/settlement[/status]` + `/contracts/movements/{id}/storno` + `/contracts/fixings/{id}/storno`, Frontend `pages/agrar/kontrakt-settlement.tsx` (Abrechnen + Storno-Dialog mit Pflicht-Grund) + Hooks + Nav + Route. Fulfillment-/Engagement-Sichten filtern jetzt stornierte Bewegungen. 18 Backendtests grün (kumuliert), tsc 0, eslint clean; Live verifiziert (Handover, Storno-Guard 422, Fixing-Storno gibt Menge frei).
+**Ziel des Slices:** Abruf-Bewegungen an die Abrechnung übergeben + revisionssicherer Storno von Bewegungen/Fixierungen (frei werdende Mengen); fail-closed: abgerechnete Bewegungen sind storno-gesperrt. DOM-CON-004.4.
+**Dateibesitz:** `alembic/versions/con_settlement_storno_20260611.py`, `app/services/contract_settlement_service.py`, `app/services/contract_fulfillment_service.py` + `contract_engagement_service.py` (nur is_storniert-Filter), `app/api/v1/endpoints/contract_settlement.py`, `app/api/v1/api.py` (nur eigene include-Zeilen), `tests/test_contract_settlement.py`, `packages/frontend-web/src/lib/api/contract-settlement.ts`, `packages/frontend-web/src/pages/agrar/kontrakt-settlement.tsx`, `commercial.tsx` (nur eigener Nav-Eintrag), `route-aliases.json` (+ generierte Route-Artefakte), CON-Doku.
+**Abnahmekriterien:** Übergabe markiert Bewegung(en) abgerechnet; Storno gebuchter Bewegung blockiert (422); Fixing-/Bewegungs-Storno gibt Menge frei und fließt in Erfüllung/Engagement zurück; Single Alembic-Head; Backendtests + tsc + eslint grün.
+**Offene Risiken:** Echte Abrechnungs-Buchung (Integration `agrar_settlements`/Posting) ist tiefergehender Folgeschritt — hier nur Settlement-Übergabe-Vertrag (Beleg-Referenz), keine Finanzbuchung. Browser-E2E + UAT in 004.5.
+
 ## CON-004.3 — Engagement-Sicht + Kontraktmahnung
 
 **Von:** Claude
@@ -27,7 +56,7 @@ Stand: `2026-06-11`
 
 **Von:** Codex
 **Owner:** Codex
-**Stand:** reserviert 2026-06-09
+**Stand:** abgeschlossen 2026-06-09 (repo-seitig); externe Live-Gates offen — Nachzug COMPAT-GOV-001 2026-06-11
 **Abstimmung:** Repo-weiter CI-/Deployment-/Security-/Dokumentations-Slice. Parallel laufender Slice `KIM-DEPRECATE-COCKPIT-001` besitzt ausschliesslich `packages/frontend-web/src/pages/crm/kunden-cockpit.tsx` und den Kunden-Cockpit-Eintrag in `packages/frontend-web/src/app/navigation/domains/commercial.tsx`; diese Dateien werden nicht beruehrt.
 **Ziel des Slices:** Alle repo-seitig schliessbaren P0-Gaps der Produktionsreife beseitigen: keine tolerierten Kernfehler in Release-CI, blockierende High/Critical-Security-Gates, SBOM, produktionssichere Runtime-/Secret-Preflights, belastbarer Staging-/Production-Deploymentvertrag mit Migration, Smoke und Rollback sowie eine aktuelle, ehrliche Go-live-Matrix.
 **Dateibesitz:** `.github/workflows/quality-gate.yml`, `.github/workflows/security-scan.yml`, `.github/workflows/deploy-staging.yml`, `.github/workflows/valeo-erp-deployment.yml`, neue fokussierte Release-/Security-Workflows, produktionsbezogene Dateien unter `scripts/deployment/**`, neue Preflight-Skripte und Tests, fokussierte Helm-/Kubernetes-Werte soweit zwingend, `docs/project-context/open-gaps-and-known-issues.md`, neue Production-Readiness-/Runbook-Doku und relevante Status-/README-Verweise.

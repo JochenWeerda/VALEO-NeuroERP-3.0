@@ -416,6 +416,11 @@
       "source": "alias"
     },
     {
+      "module": "@/pages/agrar/kontrakt-settlement",
+      "path": "agrar/kontrakt-settlement",
+      "source": "alias"
+    },
+    {
       "module": "@/pages/agrar/kulturpflanzen/liste",
       "path": "agrar/kulturpflanzen",
       "source": "alias"
