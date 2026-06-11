@@ -69,6 +69,16 @@ Stand: `2026-06-11`
 **Abnahmekriterien:** Keine Schreibpfade mehr auf `stock_movements`; Regression für Artikel-Bestand und POS-Retoure grün; Schema-Vertrag unverändert grün.
 **Offene Risiken:** POS-Retoure aktualisiert `articles.current_stock` noch nicht; MHD/Expiry weiterhin ohne Chargenstamm.
 
+## SALES-004.5 — Browser-E2E + UAT (DOM-SALES-004 ABGESCHLOSSEN)
+
+**Von:** Claude
+**Owner:** Claude
+**Stand:** ABGESCHLOSSEN 2026-06-11 — Playwright-@smoke `playwright-tests/specs/sales/o2c-lifecycle-smoke.spec.ts` (3 O2C-Seiten) + Live-UAT `scripts/uat/sales_o2c_lifecycle_uat.py` (`--execute`: Match→Kreditampel→Storno-Rückfluss, Status `passed`, DB-Restore) + Nachweis-Doku `docs/dom-sales-004-uat-2026-06-11.md`. Damit ist die SALES-Tiefe 004.1–004.5 komplett.
+**Ziel des Slices:** End-to-End-Abnahme der O2C-Kette + Browser-Smoke. DOM-SALES-004.5.
+**Dateibesitz:** `playwright-tests/specs/sales/o2c-lifecycle-smoke.spec.ts`, `scripts/uat/sales_o2c_lifecycle_uat.py`, `docs/dom-sales-004-uat-2026-06-11.md`, SALES-Doku, Workboard-Block.
+**Abnahmekriterien:** Live-UAT grün mit DB-Restore; Smoke-Spec suite-konsistent.
+**Offene Risiken / ehrlich:** Smoke-Login-Fixture lokal nur gegen CI-Preview (:4173), nicht Dev :3000 (wie CON-004.5). 14 Sales-Backendtests kumuliert grün.
+
 ## SALES-004.4 — Storno/Gutschrift durchgängig
 
 **Von:** Claude
