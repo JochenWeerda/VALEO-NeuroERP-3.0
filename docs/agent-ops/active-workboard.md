@@ -69,6 +69,16 @@ Stand: `2026-06-11`
 **Abnahmekriterien:** Keine Schreibpfade mehr auf `stock_movements`; Regression für Artikel-Bestand und POS-Retoure grün; Schema-Vertrag unverändert grün.
 **Offene Risiken:** POS-Retoure aktualisiert `articles.current_stock` noch nicht; MHD/Expiry weiterhin ohne Chargenstamm.
 
+## FIN-004.2 — Mahnlauf + Mahnstufen-Eskalation
+
+**Von:** Claude
+**Owner:** Claude
+**Stand:** ABGESCHLOSSEN 2026-06-11 — Service `finance_dunning_service.py` (reine `days_based_level`/`next_dunning_level`/`compute_dunning` + `candidates`/`run_dunning`/`list_notices`), Endpoints `/finance/mahnlauf/{candidates,notices,run}`, Frontend `pages/finance/mahnlauf.tsx` + Hooks + Nav + Route. Default-Mahnregeln (da `dunning_rules` in DEV leer). 11 Backendtests grün (5 Mahnlauf + 6 OP-Regression), tsc 0, eslint clean; Live verifiziert (RE-103 Stufe 2→3 Zins 13,33; RE-100 1→2 Zins 10,27; Restore). Keine Migration (vorhandene Tabellen).
+**Ziel des Slices:** Mahnlauf aus überfälligen Debitoren-OP (`offene_posten`) erzeugen (`dunning_notices`) + Mahnstufen-Eskalation. DOM-FIN-004.2.
+**Dateibesitz:** `app/services/finance_dunning_service.py`, `app/api/v1/endpoints/finance_dunning.py`, `app/api/v1/api.py` (nur eigene include-Zeilen), `tests/test_finance_dunning.py`, `packages/frontend-web/src/lib/api/finance-dunning.ts`, `packages/frontend-web/src/pages/finance/mahnlauf.tsx`, `finance.tsx` (nur eigener Nav-Eintrag), `route-aliases.json` (+ generierte Route-Artefakte), FIN-Doku.
+**Abnahmekriterien:** Kandidaten zeigen nächste Stufe + Gebühr/Zinsen/Gesamt; Mahnlauf erzeugt Mahnungen + eskaliert `dunning_level`; Default-Regeln greifen bei leerer Regeltabelle; Backendtests + tsc + eslint grün.
+**Offene Risiken:** `dunning_rules` in DEV leer → Default-Regeln (in Prod Regeln pflegen). Mahnungs-Versand (Druck/Mail) nicht Teil des Slices. OP-Auszifferung/Zahlungslauf folgt in 004.3.
+
 ## SALES-004.5 — Browser-E2E + UAT (DOM-SALES-004 ABGESCHLOSSEN)
 
 **Von:** Claude

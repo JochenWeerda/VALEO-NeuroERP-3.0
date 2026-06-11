@@ -24,8 +24,28 @@ Zahlungsdisposition); Abschluss/DATEV bleiben extern gegated.
 4 OP, Summe offen 10.400 €, überfällig 5.800 €; Buckets nicht_faellig (2/4.600),
 1-30 (1/5.000), 60+ (1/800); Mahnstufen + Skonto korrekt erkannt.
 
+## Slice 004.2 — Mahnlauf + Mahnstufen-Eskalation (umgesetzt, 2026-06-11)
+- Service: `app/services/finance_dunning_service.py` — reine Logik
+  `days_based_level`/`next_dunning_level` (Eskalation gedeckelt bei 3) +
+  `compute_dunning` (Gebühr + anteilige Zinsen p.a. + Gesamt). `candidates()`
+  (überfällige Debitoren-OP aus `domain_erp.offene_posten` + nächste Stufe/Beträge),
+  `run_dunning()` (erzeugt `dunning_notices` + eskaliert `dunning_level`),
+  `list_notices()`. Regeln aus `domain_erp.dunning_rules`; ist die Tabelle leer
+  (DEV-Stand), greifen konservative Default-Regeln (Stufe 1/2/3: 5/10/20 € Gebühr,
+  0/5/8 % p.a., Frist 14/10/7 Tage).
+- API: `GET /finance/mahnlauf/candidates`, `GET /finance/mahnlauf/notices`,
+  `POST /finance/mahnlauf/run`.
+- Frontend: `pages/finance/mahnlauf.tsx` (Kandidaten + „Mahnlauf ausführen" mit
+  Mutation-Guard + Mahnungs-Liste) + Hooks `lib/api/finance-dunning.ts` + Nav
+  „Mahnlauf" + Route-Alias.
+- Tests: `tests/test_finance_dunning.py` (5 grün, reine Mahnlogik).
+
+### Verifiziert (Live, mit Restore)
+DEMO-RE-103 (76 Tage, Stufe 2→3, Zins 13,33 €, Gesamt 833,33 €); DEMO-RE-100
+(15 Tage, Stufe 1→2, Zins 10,27 €, Gesamt 5.020,27 €). Mahnlauf erzeugt 2 Mahnungen
++ eskaliert Stufen; Restore ok.
+
 ## Folge-Slices (teils extern gegated)
-- **004.2** Mahnlauf (dunning_notices/-rules) erzeugen + Mahnstufen-Eskalation.
 - **004.3** OP-Auszifferung/Zahlungseingang (op_auszifferungen) + Zahlungslauf.
 - **004.4** Abschluss/Periodensteuerung, Storno-Konsistenz.
 - **004.5** DATEV-Export + Steuerberater-Cutover (extern) + UAT.
