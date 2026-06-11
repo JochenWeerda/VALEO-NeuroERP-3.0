@@ -44,6 +44,7 @@ import {
   CopyCheck,
   UserCheck,
   CalendarClock,
+  LineChart,
 } from 'lucide-react'
 import type { RawNavItem } from '@/app/navigation/types'
 import { ENABLE_PROSPECTING_UI } from '@/features/prospecting/feature-flags'
@@ -200,6 +201,15 @@ export const RAW_NAV_SECTIONS: RawNavItem[] = [
         preferredPath: 'agrar/kontrakt-erfuellung',
         keywords: ['kontrakt', 'erfüllung', 'abruf', 'abgerufen', 'offen', 'engagement', 'überfällig', 'fixierung', 'matif', 'einkauf', 'verkauf'],
         mcp: { businessDomain: 'agrar', scope: 'agrar:read' },
+      },
+      {
+        id: 'kontrakt-fixierung',
+        label: 'Kontrakt-Fixierung',
+        icon: LineChart,
+        module: '@/pages/agrar/kontrakt-fixierung',
+        preferredPath: 'agrar/kontrakt-fixierung',
+        keywords: ['kontrakt', 'fixierung', 'teilfixierung', 'matif', 'marktwert', 'bewertung', 'prämie', 'basis', 'preisabsicherung', 'mark-to-market'],
+        mcp: { businessDomain: 'agrar', scope: 'agrar:write' },
       },
       {
         id: 'kontrakt-alarm',

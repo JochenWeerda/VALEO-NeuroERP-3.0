@@ -57,6 +57,49 @@ def _contract(db, no: str, typ: str, total: float, unit: str, valid_to, article:
         )
 
 
+def _matif_contract(db, no: str, typ: str, total: float, unit: str, valid_to, article: str,
+                    symbol: str, premium: float, fixings: list[tuple[float, float]],
+                    quote_price: float) -> None:
+    """MATIF-Kontrakt (DOM-CON-004.2): Position is_matif=True + Prämie/Basis-Symbol,
+    bestehende Teilfixierungen und eine aktuelle Marktnotierung."""
+    now = datetime.now(timezone.utc)
+    cid = str(uuid.uuid4())
+    lid = str(uuid.uuid4())
+    db.execute(
+        text("INSERT INTO domain_ops.kon_contract "
+             "(contract_id, contract_no, contract_type, party_id, quantity_type, total_quantity, "
+             "unit, allow_overdelivery, status, tenant_id, contract_date, valid_from, valid_to, created_at, "
+             "pricing_model, premium_type, premium_value, basis_reference) "
+             "VALUES (:cid, :no, :typ, 'DEMO-P1', 'GESAMTKONTRAKT', :total, :unit, false, 'aktiv', :t, "
+             ":cdat, :vfrom, :vto, :ts, 'MATIF', 'AUFSCHLAG', :prem, :sym)"),
+        {"cid": cid, "no": no, "typ": typ, "total": total, "unit": unit, "t": TENANT,
+         "cdat": now - timedelta(days=40), "vfrom": now - timedelta(days=40), "vto": valid_to, "ts": now,
+         "prem": premium, "sym": symbol},
+    )
+    db.execute(
+        text("INSERT INTO domain_ops.kon_contract_line "
+             "(line_id, contract_id, position_no, article_id, description1, qty_contract, is_bio, is_matif, tenant_id, created_at) "
+             "VALUES (:lid, :cid, 1, :art, :art, :qty, false, true, :t, :ts)"),
+        {"lid": lid, "cid": cid, "art": article, "qty": total, "t": TENANT, "ts": now},
+    )
+    for i, (menge, preis) in enumerate(fixings, start=1):
+        db.execute(
+            text("INSERT INTO domain_ops.kon_contract_fixing "
+                 "(fixing_id, contract_id, line_id, fixing_no, quantity, matif_price, premium, "
+                 "effective_price, matif_reference, bediener, tenant_id, fixing_date, created_at) "
+                 "VALUES (:fid, :cid, :lid, :no, :q, :mp, :pr, :eff, :sym, 'SEED', :t, :fd, :ts)"),
+            {"fid": str(uuid.uuid4()), "cid": cid, "lid": lid, "no": i, "q": menge, "mp": preis,
+             "pr": premium, "eff": preis + premium, "sym": symbol, "t": TENANT,
+             "fd": now - timedelta(days=20 - i * 5), "ts": now},
+        )
+    db.execute(
+        text("INSERT INTO domain_ops.matif_quote (quote_id, symbol, quote_date, price, unit, source, tenant_id) "
+             "VALUES (:qid, :sym, :d, :p, :u, 'SEED', :t) "
+             "ON CONFLICT (tenant_id, symbol, quote_date) DO UPDATE SET price = EXCLUDED.price"),
+        {"qid": str(uuid.uuid4()), "sym": symbol, "d": now.date(), "p": quote_price, "u": unit, "t": TENANT},
+    )
+
+
 def seed() -> dict:
     db = SessionLocal()
     now = datetime.now(timezone.utc)
@@ -74,6 +117,12 @@ def seed() -> dict:
             _contract(db, "DEMO-KT-003", "EINKAUF", 50, "t", now + timedelta(days=20),
                       "Futtergerste", 50, [25, 25])  # 50/50 erfüllt
             created.append("DEMO-KT-003")
+        if not _exists(db, "DEMO-KT-004"):
+            # MATIF-Verkaufskontrakt: 300/500 t fixiert (Ø effektiv 220,33), Markt 208 + Prämie 12.
+            _matif_contract(db, "DEMO-KT-004", "VERKAUF", 500, "t", now + timedelta(days=60),
+                            "Weizen B MATIF", "MATIF-WEIZEN-DEZ26", 12.0,
+                            [(200, 210.0), (100, 205.0)], 208.0)
+            created.append("DEMO-KT-004")
         db.commit()
         return {"created": created, "skipped": not created}
     except Exception:
