@@ -94,6 +94,38 @@ def _po(db, lieferant_id: str, nummer: str, positionen: list[dict]) -> str:
     return pid
 
 
+def _invoice(db, po_number: str, rechnungsnummer: str, netto: float) -> None:
+    exists = db.execute(
+        text("SELECT 1 FROM public.finance_erechnungen WHERE rechnungsnummer = :nr AND tenant_id = :t"),
+        {"nr": rechnungsnummer, "t": TENANT},
+    ).first()
+    if exists:
+        return
+    mwst = round(netto * 0.19, 2)
+    db.execute(
+        text(
+            "INSERT INTO public.finance_erechnungen "
+            "(id, tenant_id, rechnungsnummer, rechnungsdatum, faelligkeitsdatum, "
+            "lieferant_name, rechnungssteller_name, gesamt_netto, gesamt_mwst, gesamt_brutto, "
+            "zugeordneter_auftrag, status, created_at) "
+            "VALUES (:id, :t, :nr, :rd, :fd, :ln, :rn, :netto, :mwst, :brutto, :po, 'ERSTELLT', NOW())"
+        ),
+        {
+            "id": str(uuid.uuid4()),
+            "t": TENANT,
+            "nr": rechnungsnummer,
+            "rd": date.today(),
+            "fd": date.today(),
+            "ln": "Demo Agrar-Lieferant GmbH",
+            "rn": "VALEO Demo GmbH",
+            "netto": netto,
+            "mwst": mwst,
+            "brutto": round(netto + mwst, 2),
+            "po": po_number,
+        },
+    )
+
+
 def _gr(db, po_id: str, po_number: str, lieferant_id: str, gr_number: str, zeilen: list[dict],
         wh_id: str, loc_id: str) -> None:
     gid = str(uuid.uuid4())
@@ -134,6 +166,8 @@ def seed() -> dict:
                 {"pos": 1, "sku": "WEIZEN-A", "bezeichnung": "Weizen A-Qualität", "bestellt": 100, "geliefert": 100, "einheit": "t"},  # vollständig
                 {"pos": 2, "sku": "GERSTE-B", "bezeichnung": "Futtergerste", "bestellt": 50, "geliefert": 30, "einheit": "t"},        # teilgeliefert
             ], wh_id, loc_id)
+            # Gelieferter Wert: 100*220 + 30*190 = 27.700 €
+            _invoice(db, "DEMO-PO-001", "DEMO-RE-001", 27700.0)
             created.append("DEMO-PO-001")
 
         if not _exists(db, "DEMO-PO-002"):
