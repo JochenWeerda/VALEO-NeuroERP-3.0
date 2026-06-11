@@ -197,7 +197,7 @@ Repo-seitig ergaenzt und registriert:
 - CRM: Opportunity-Pipeline, Forecast, 360-Grad-Kundensicht, Account-Hierarchie und Service-Case-SLA.
 - Finance: Anlagenbuchhaltung, Budgetierung und Liquiditaetsplanung.
 - Logistik: Tourenplanung, Frachtkosten, Track & Trace, ePOD und Transportstatistik.
-- Einkauf: DOM-PROC-004 abgeschlossen (004.1–004.5, 2026-06-11): 3-Wege-Match, Folgeaktionen, ERS, UAT; RFQ offen.
+- Einkauf: DOM-PROC-004 + RFQ (PROC-RFQ-001, 2026-06-11) abgeschlossen: Match-Spine, Folgeaktionen, ERS, RFQ→PO mit Alembic + Integrationstests.
 - Verkauf/Kontrakte: Rahmenauftraege, Kreditlimit, Sammelbelege und zentrale Contract-/Obligation-Engine.
 - Futtermittel: Rohwaren-API, Rezepturverwaltung, Naehrstoffanalyse, Deklaration und Etikett-Vertrag.
 - HRM: Org-Chart, Bewerberpipeline, Arbeitszeitkonto, Whistleblower (anonym), DSGVO-Loeschkonzept.

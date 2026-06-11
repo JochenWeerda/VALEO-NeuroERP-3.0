@@ -1,0 +1,18 @@
+id: PROC-RFQ-001
+title: RFQ production-ready (Migration + Service + Integration)
+owner: Cursor
+status: abgeschlossen
+updated: 2026-06-11
+depends_on:
+  - PROC-PROD-001
+files:
+  - alembic/versions/proc_rfq_20260611.py
+  - app/services/rfq_service.py
+  - app/api/v1/endpoints/rfq.py
+  - scripts/seed_demo_rfq.py
+  - scripts/seed_demo_procurement.py
+  - tests/test_rfq_integration.py
+acceptance:
+  - Kein Runtime _ensure_schema DDL
+  - Zuschlag erzeugt bestellungen + bestellung_positionen
+  - 2 Integrationstests grün gegen echte DB

@@ -33,7 +33,10 @@ def _exists(db, bestellnummer: str) -> bool:
 
 
 def _lieferant(db) -> str:
-    r = db.execute(text("SELECT id FROM domain_einkauf.lieferanten LIMIT 1")).first()
+    r = db.execute(
+        text("SELECT id FROM domain_einkauf.lieferanten WHERE tenant_id = :t LIMIT 1"),
+        {"t": TENANT},
+    ).first()
     if r:
         return str(r[0])
     lid = str(uuid.uuid4())
