@@ -1393,6 +1393,10 @@
       "path": "docflow/wiedervorlagen"
     },
     {
+      "module": "@/pages/docflow/gobd-export",
+      "path": "docflow/gobd-export"
+    },
+    {
       "module": "@/pages/einkauf/wareneingangsabgleich",
       "path": "einkauf/wareneingangsabgleich"
     },

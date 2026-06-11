@@ -69,6 +69,16 @@ Stand: `2026-06-11`
 **Abnahmekriterien:** Keine Schreibpfade mehr auf `stock_movements`; Regression für Artikel-Bestand und POS-Retoure grün; Schema-Vertrag unverändert grün.
 **Offene Risiken:** POS-Retoure aktualisiert `articles.current_stock` noch nicht; MHD/Expiry weiterhin ohne Chargenstamm.
 
+## DOC-004.4 — GoBD-Exportpaket + Paperless-Liveprobe
+
+**Von:** Claude
+**Owner:** Claude
+**Stand:** ABGESCHLOSSEN 2026-06-11 — Service `docflow_gobd_service.py` (reine `build_gobd_manifest` mit Prüfsumme + `export_package` (reuse Evidence, vermerkt exported_at) + `paperless_probe` ehrlich gegated), Endpoints `/docflow/evidence/{gobd-export,paperless-probe}`, Frontend `pages/docflow/gobd-export.tsx` + Hooks + Nav + Route. 18 docflow-Backendtests kumuliert grün, tsc 0, eslint clean; Live verifiziert (PYTEST-Vorgang revisionssicher + Prüfsumme; Paperless „nicht konfiguriert"). Keine Migration.
+**Ziel des Slices:** GoBD-Exportpaket je Vorgang (Manifest + Prüfsumme + Export-Vermerk) + DMS/Paperless-Liveprobe. DOM-DOC-004.4.
+**Dateibesitz:** `app/services/docflow_gobd_service.py`, `app/api/v1/endpoints/docflow_gobd.py`, `app/api/v1/api.py` (nur eigene include-Zeilen), `tests/test_docflow_gobd.py`, `packages/frontend-web/src/lib/api/docflow-gobd.ts`, `packages/frontend-web/src/pages/docflow/gobd-export.tsx`, `finance.tsx` (nur eigener Nav-Eintrag), `route-aliases.json` (+ generierte Route-Artefakte), DOC-Doku.
+**Abnahmekriterien:** Manifest mit Artefakt-Hashes + deterministischer Prüfsumme; Revisionssicherheit korrekt; Export vermerkt exported_at; Paperless-Probe ehrlich (konfiguriert/erreichbar); Backendtests + tsc + eslint grün.
+**Offene Risiken / ehrlich:** PAPERLESS_URL in DEV nicht gesetzt → Probe meldet „nicht konfiguriert" (kein Schein-OK). Realer Binär-Paketdownload (ZIP mit Dateien) hier als JSON-Manifest-Vertrag. Browser-E2E + UAT in 004.5.
+
 ## DOC-004.3 — Bescheid/Rückmeldung + Wiedervorlage
 
 **Von:** Claude
