@@ -69,6 +69,16 @@ Stand: `2026-06-11`
 **Abnahmekriterien:** Keine Schreibpfade mehr auf `stock_movements`; Regression für Artikel-Bestand und POS-Retoure grün; Schema-Vertrag unverändert grün.
 **Offene Risiken:** POS-Retoure aktualisiert `articles.current_stock` noch nicht; MHD/Expiry weiterhin ohne Chargenstamm.
 
+## FIN-004.3 — Zahlungseingang / OP-Auszifferung
+
+**Von:** Claude
+**Owner:** Claude
+**Stand:** ABGESCHLOSSEN 2026-06-11 — Service `finance_clearing_service.py` (reine `clearing_result` + `record_payment` ziffert `domain_erp.offene_posten` aus, protokolliert `op_auszifferungen` + `clearings`), Endpoints `/finance/zahlungseingang[/clearings]`, Frontend `pages/finance/zahlungseingang.tsx` + Hooks + Nav + Route. Schließt Lücke der isolierten `op_skonto_auszifferung` (reduzierte OP-Saldo nicht). 10 Backendtests grün (5 Auszifferung + 5 Mahnlauf-Regression), tsc 0, eslint clean; Live verifiziert (Teil→Voll+Skonto→422, Restore). Keine Migration.
+**Ziel des Slices:** Zahlungseingang gegen offenen Debitoren-Posten ausziffern (offen reduzieren, Skonto, op_status). Kreditoren-Zahlungslauf = vorhandenes `payment_runs.py`. DOM-FIN-004.3.
+**Dateibesitz:** `app/services/finance_clearing_service.py`, `app/api/v1/endpoints/finance_clearing.py`, `app/api/v1/api.py` (nur eigene include-Zeilen), `tests/test_finance_clearing.py`, `packages/frontend-web/src/lib/api/finance-clearing.ts`, `packages/frontend-web/src/pages/finance/zahlungseingang.tsx`, `finance.tsx` (nur eigener Nav-Eintrag), `route-aliases.json` (+ generierte Route-Artefakte), FIN-Doku.
+**Abnahmekriterien:** Teil-/Vollausgleich reduziert `offen`; Vollausgleich setzt `op_status='ausgeziffert'`; Skonto berücksichtigt; Überzahlung 422; Backendtests + tsc + eslint grün.
+**Offene Risiken:** FIBU-Gegenbuchung (Journal) der Auszifferung nicht Teil des Slices (op_auszifferungen führt fibu_konto/skonto_konto als Vertrag). Abschluss/Periodensteuerung in 004.4.
+
 ## FIN-004.2 — Mahnlauf + Mahnstufen-Eskalation
 
 **Von:** Claude

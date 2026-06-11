@@ -33,6 +33,7 @@ import {
   Users,
   Zap,
   Search,
+  Banknote,
 } from 'lucide-react'
 import type { RawNavItem } from '@/app/navigation/types'
 
@@ -228,6 +229,15 @@ export const RAW_NAV_SECTIONS: RawNavItem[] = [
         module: '@/pages/finance/mahnlauf',
         preferredPath: 'finance/mahnlauf',
         keywords: ['mahnlauf', 'mahnung', 'mahnwesen', 'mahnstufe', 'eskalation', 'überfällig', 'debitoren', 'mahngebühr', 'verzugszinsen'],
+        mcp: { businessDomain: 'finance', scope: 'finance:write' },
+      },
+      {
+        id: 'zahlungseingang',
+        label: 'Zahlungseingang / Auszifferung',
+        icon: Banknote,
+        module: '@/pages/finance/zahlungseingang',
+        preferredPath: 'finance/zahlungseingang',
+        keywords: ['zahlungseingang', 'auszifferung', 'ausziffern', 'zahlung', 'skonto', 'op', 'offene posten', 'teilzahlung', 'debitoren'],
         mcp: { businessDomain: 'finance', scope: 'finance:write' },
       },
       {

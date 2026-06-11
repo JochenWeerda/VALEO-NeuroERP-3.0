@@ -45,7 +45,26 @@ DEMO-RE-103 (76 Tage, Stufe 2→3, Zins 13,33 €, Gesamt 833,33 €); DEMO-RE-1
 (15 Tage, Stufe 1→2, Zins 10,27 €, Gesamt 5.020,27 €). Mahnlauf erzeugt 2 Mahnungen
 + eskaliert Stufen; Restore ok.
 
+## Slice 004.3 — Zahlungseingang / OP-Auszifferung (umgesetzt, 2026-06-11)
+- Service: `app/services/finance_clearing_service.py` — reine `clearing_result`
+  (Ausgleich = Zahlung + Skonto, Restsaldo, voll/teil, Überzahlung) +
+  `record_payment` (zifferung gegen `domain_erp.offene_posten`: reduziert `offen`,
+  setzt `op_status='ausgeziffert'` bei Vollausgleich; protokolliert
+  `domain_shared.op_auszifferungen`) + `clearings`. Guard: Überzahlung → 422.
+- **Schließt Lücke**: die vorhandene `op_skonto_auszifferung.py` schrieb nur
+  `op_auszifferungen`, reduzierte aber den OP-Saldo im Aging-Cockpit nicht.
+- Kreditoren-Zahlungslauf (SEPA) ist bereits via `payment_runs.py` abgedeckt
+  (nicht dupliziert).
+- API: `POST /finance/zahlungseingang`, `GET /finance/zahlungseingang/clearings`.
+- Frontend: `pages/finance/zahlungseingang.tsx` (offene Debitoren-OP-Picker +
+  Zahlungs-/Skonto-Formular + Auszifferungs-Historie) + Hooks
+  `lib/api/finance-clearing.ts` + Nav „Zahlungseingang / Auszifferung" + Route.
+- Tests: `tests/test_finance_clearing.py` (5 grün).
+
+### Verifiziert (Live, mit Restore)
+DEMO-RE-100 (5.000): Teilzahlung 2.000 → offen 3.000 (teilausgleich); Rest 2.900 +
+100 Skonto → offen 0, op_status „ausgeziffert"; erneute Zahlung → 422.
+
 ## Folge-Slices (teils extern gegated)
-- **004.3** OP-Auszifferung/Zahlungseingang (op_auszifferungen) + Zahlungslauf.
 - **004.4** Abschluss/Periodensteuerung, Storno-Konsistenz.
 - **004.5** DATEV-Export + Steuerberater-Cutover (extern) + UAT.

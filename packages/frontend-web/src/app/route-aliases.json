@@ -1413,6 +1413,10 @@
       "path": "finance/mahnlauf"
     },
     {
+      "module": "@/pages/finance/zahlungseingang",
+      "path": "finance/zahlungseingang"
+    },
+    {
       "module": "@/pages/agrar/kontrakt-erfuellung",
       "path": "agrar/kontrakt-erfuellung"
     },
