@@ -2,11 +2,30 @@
 
 Stand: `2026-06-11`
 
+## PROC-004.5 — ERS + UAT (DOM-PROC-004 abgeschlossen)
+
+**Von:** Cursor
+**Owner:** Cursor
+**Stand:** abgeschlossen 2026-06-11 — `calculate_ers_credit` + `procurement_ers_credits`, API `/match/ers`, UI ERS-Karte, UAT `proc_match_lifecycle_uat.py`, Playwright-Smoke; 18 Procurement-Unit-Tests grün; Alembic-Head `proc_ers_credit_20260611`.
+**Ziel des Slices:** ERS-Gutschriftsverfahren aus Match-Abweichungen + UAT-Nachweispaket für DOM-PROC-004.
+**Dateibesitz:** `proc_ers_credit_20260611.py`, Match-Service/Endpoints, Frontend, UAT/Smoke, DOM-PROC-UAT-Doku.
+**Abnahmekriterien:** DEMO-PO-002 → 960 € Vorschau; UAT `--execute` mit Cleanup; keine SALES/CON-Dateien.
+
+## PROC-004.4 — Folgeaktionen Match-Ausnahmen
+
+**Von:** Cursor
+**Owner:** Cursor
+**Stand:** abgeschlossen 2026-06-11 — append-only `procurement_follow_up`, API `GET/POST /procurement/match/follow-up`, Eskalationsstufe, UI Folgeaktionen + Protokoll in Wareneingangsabgleich; 4 Unit-Tests grün; Alembic-Head `proc_follow_up_20260611`.
+**Ziel des Slices:** Nachforderung/Reklamation/Eskalation/Freigabe bei Match-Ausnahmen mit Pflicht-Grund (Event-Log).
+**Dateibesitz:** `proc_follow_up_20260611.py`, `procurement_match_service.py`, `procurement_match.py`, `procurement-match.ts`, `wareneingangsabgleich.tsx`, `test_procurement_follow_up.py`, DOM-PROC-Doku.
+**Abnahmekriterien:** Append-only; keine UPDATE/DELETE-API; UI nur bei Ausnahmen; Tests grün.
+**Abstimmung:** Keine SALES/CON-Dateien.
+
 ## PROC-004.2 — 3-Wege-Match Rechnungsstufe
 
 **Von:** Cursor
 **Owner:** Cursor
-**Stand:** abgeschlossen 2026-06-11 — Rechnungsstufe: `match_three_way` + API `/procurement/match/three-way`, Migration `proc_three_way_inv_20260611`, Seed `DEMO-RE-001`, UI Wareneingangsabgleich; 10 Procurement-Tests grün; 1 Alembic-Head.
+**Stand:** abgeschlossen 2026-06-11 — Rechnungsstufe: `match_three_way` + API `/procurement/match/three-way`, Migration `proc_three_way_inv_20260611`, Seed `DEMO-RE-001`, UI Wareneingangsabgleich; 10 Procurement-Tests grün; Folge-Slice 004.4 erledigt.
 **Ziel des Slices:** Echter 3-Wege-Match Bestellung ↔ Wareneingang ↔ Eingangsrechnung mit Ausnahmen (keine Rechnung, Wertabweichung).
 **Dateibesitz:** `procurement_match_service.py`, `procurement_match.py`, `proc_three_way_invoice_20260611.py`, `seed_demo_procurement.py`, `test_procurement_three_way_match.py`, `procurement-match.ts`, `wareneingangsabgleich.tsx`, DOM-PROC-Doku.
 **Abnahmekriterien:** API + Unit-Tests + Seed + UI; keine Überschneidung mit CON/SALES-Slices.

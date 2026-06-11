@@ -15,7 +15,7 @@ Aggregierte Gesamtsicht: [PROJEKT-GESAMTSTAND-2026-05-27.md](../PROJEKT-GESAMTST
 ## Build-Health (Stand 2026-06-11)
 
 - **TypeScript**: 0 Fehler (`tsc --noEmit`) — Wave-22-Gate (letzter Nachweis 2026-05-27)
-- **Backend-Tests**: 9228 passed, 0 failed (2026-05-26, Commit `271bc5e12`) — Vollsuite in dieser Session nicht neu gemessen; massgeblich naechster `quality-gate`-Lauf
+- **Backend-Tests**: 9527 collected (2026-06-11, `pytest --collect-only`); letzter Voll-Lauf mit Pass-Count: 9228 passed (2026-05-26, Commit `271bc5e12`) — massgeblich naechster gruener `quality-gate`-Lauf
 - **Governance-Vertragstests (2026-06-11, lokal)**: 8/8 gruen (`test_release_compatibility_governance`, `test_inventory_stock_movements_canonical`)
 - **Toolchain-Pins**: `scripts/check_toolchain_pins.py` gruen (pytest-cov/coverage repo-weit fixiert)
 - **Release-Matrix**: Generator + CI-Upload in `quality-gate.yml` / `release-gates.yml`
@@ -197,7 +197,7 @@ Repo-seitig ergaenzt und registriert:
 - CRM: Opportunity-Pipeline, Forecast, 360-Grad-Kundensicht, Account-Hierarchie und Service-Case-SLA.
 - Finance: Anlagenbuchhaltung, Budgetierung und Liquiditaetsplanung.
 - Logistik: Tourenplanung, Frachtkosten, Track & Trace, ePOD und Transportstatistik.
-- Einkauf: 3-Wege-Match, ERS, RFQ und Einkaufs-KPIs.
+- Einkauf: DOM-PROC-004 abgeschlossen (004.1–004.5, 2026-06-11): 3-Wege-Match, Folgeaktionen, ERS, UAT; RFQ offen.
 - Verkauf/Kontrakte: Rahmenauftraege, Kreditlimit, Sammelbelege und zentrale Contract-/Obligation-Engine.
 - Futtermittel: Rohwaren-API, Rezepturverwaltung, Naehrstoffanalyse, Deklaration und Etikett-Vertrag.
 - HRM: Org-Chart, Bewerberpipeline, Arbeitszeitkonto, Whistleblower (anonym), DSGVO-Loeschkonzept.

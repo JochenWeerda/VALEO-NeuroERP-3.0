@@ -1,0 +1,21 @@
+id: PROC-004.4
+title: Nachforderung/Reklamation/Eskalation (Event-Log)
+owner: Cursor
+status: abgeschlossen
+updated: 2026-06-11
+depends_on:
+  - PROC-004.2
+files:
+  - alembic/versions/proc_follow_up_20260611.py
+  - app/services/procurement_match_service.py
+  - app/api/v1/endpoints/procurement_match.py
+  - packages/frontend-web/src/lib/api/procurement-match.ts
+  - packages/frontend-web/src/pages/einkauf/wareneingangsabgleich.tsx
+  - tests/test_procurement_follow_up.py
+  - docs/dom-proc-004-match-2026-06-10.md
+acceptance:
+  - Append-only Tabelle domain_einkauf.procurement_follow_up
+  - POST/GET /api/v1/procurement/match/follow-up
+  - Eskalationsstufe inkrementiert bei wiederholter Eskalation
+  - UI Folgeaktionen bei Ausnahmen + Protokoll
+  - Unit-Tests grün
