@@ -2,6 +2,15 @@
 
 Stand: `2026-06-11`
 
+## PROC-PROD-001 — Production-Härtung Match-Spine
+
+**Von:** Cursor
+**Owner:** Cursor
+**Stand:** abgeschlossen 2026-06-11 — Silent-DB-Fallbacks entfernt; 6 echte API/DB-Integrationstests (`test_procurement_match_integration.py`, auto-`alembic upgrade`); Seed zieht `DEMO-RE-001` idempotent nach; `drei_wege_abgeglichen` nur Rechnungswert-Toleranz; 21 Tests grün (15 Unit + 6 Integration).
+**Ziel des Slices:** DOM-PROC-004 production-ready ohne Mocks auf Persistenz-Pfaden.
+**Dateibesitz:** `procurement_match_service.py`, `seed_demo_procurement.py`, Integrationstests, DOM-PROC-Doku.
+**Abnahmekriterien:** Keine `except: return []` auf Schreib-/Lesepfaden; Integration grün gegen echte DB.
+
 ## PROC-004.5 — ERS + UAT (DOM-PROC-004 abgeschlossen)
 
 **Von:** Cursor

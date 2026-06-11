@@ -179,6 +179,10 @@ def seed() -> dict:
             ], wh_id, loc_id)
             created.append("DEMO-PO-002")
 
+        # Rechnungsstufe idempotent nachziehen (auch wenn PO schon vor 004.2 angelegt wurde).
+        if _exists(db, "DEMO-PO-001"):
+            _invoice(db, "DEMO-PO-001", "DEMO-RE-001", 27700.0)
+
         db.commit()
         return {"created": created, "skipped": not created}
     except Exception:
