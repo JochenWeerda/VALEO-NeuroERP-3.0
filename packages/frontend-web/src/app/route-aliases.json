@@ -1417,6 +1417,10 @@
       "path": "finance/zahlungseingang"
     },
     {
+      "module": "@/pages/finance/periodenabschluss",
+      "path": "finance/periodenabschluss"
+    },
+    {
       "module": "@/pages/agrar/kontrakt-erfuellung",
       "path": "agrar/kontrakt-erfuellung"
     },

@@ -2446,6 +2446,11 @@
       "source": "alias"
     },
     {
+      "module": "@/pages/finance/periodenabschluss",
+      "path": "finance/periodenabschluss",
+      "source": "alias"
+    },
+    {
       "module": "@/pages/finance/periods",
       "path": "finance/periods",
       "source": "auto"

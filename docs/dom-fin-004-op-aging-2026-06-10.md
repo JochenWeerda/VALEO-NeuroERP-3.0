@@ -65,6 +65,24 @@ DEMO-RE-103 (76 Tage, Stufe 2→3, Zins 13,33 €, Gesamt 833,33 €); DEMO-RE-1
 DEMO-RE-100 (5.000): Teilzahlung 2.000 → offen 3.000 (teilausgleich); Rest 2.900 +
 100 Skonto → offen 0, op_status „ausgeziffert"; erneute Zahlung → 422.
 
+## Slice 004.4 — Periodenabschluss + Storno-Konsistenz (umgesetzt, 2026-06-11)
+- Service: `app/services/finance_period_service.py` — reine `period_bounds`
+  ('YYYY-MM'→Monatsgrenzen) + `close_readiness` (offene + Storno-inkonsistente
+  Posten blockieren). `list_periods` (aus `finance_accounting_periods`, leer →
+  aus OP-Rechnungsmonaten abgeleitet, self-contained), `readiness`, `close_period`
+  (Guard: nur abschlussreif, `force` erzwingt), `reopen_period` (Pflicht-Grund,
+  in `metadata` protokolliert).
+- Storno-Konsistenz: OP mit `op_status='storniert'` aber `offen > 0` blockieren
+  den Abschluss.
+- API: `GET /finance/perioden`, `GET /finance/perioden/{p}/readiness`,
+  `POST /finance/perioden/{p}/close`, `POST /finance/perioden/{p}/reopen`.
+- Frontend: `pages/finance/periodenabschluss.tsx` (Perioden + Reife + Abschließen/
+  Erzwingen/Öffnen, Reopen-Dialog) + Hooks `lib/api/finance-period.ts` + Nav + Route.
+- Tests: `tests/test_finance_period.py` (5 grün).
+
+### Verifiziert (Live, mit Restore)
+2026-06 (2 offene OP) → Abschluss 422 „nicht abschlussreif"; Force-Abschluss ok;
+erneut → 422 „bereits abgeschlossen"; Reopen ok.
+
 ## Folge-Slices (teils extern gegated)
-- **004.4** Abschluss/Periodensteuerung, Storno-Konsistenz.
 - **004.5** DATEV-Export + Steuerberater-Cutover (extern) + UAT.
