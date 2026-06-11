@@ -69,6 +69,16 @@ Stand: `2026-06-11`
 **Abnahmekriterien:** Keine Schreibpfade mehr auf `stock_movements`; Regression für Artikel-Bestand und POS-Retoure grün; Schema-Vertrag unverändert grün.
 **Offene Risiken:** POS-Retoure aktualisiert `articles.current_stock` noch nicht; MHD/Expiry weiterhin ohne Chargenstamm.
 
+## FIN-004.4 — Periodenabschluss + Storno-Konsistenz
+
+**Von:** Claude
+**Owner:** Claude
+**Stand:** ABGESCHLOSSEN 2026-06-11 — Service `finance_period_service.py` (reine `period_bounds` + `close_readiness` + `list_periods`/`readiness`/`close_period`/`reopen_period`), Endpoints `/finance/perioden[/{p}/readiness|/close|/reopen]`, Frontend `pages/finance/periodenabschluss.tsx` + Hooks + Nav + Route. Perioden self-contained aus OP abgeleitet (Tabelle leer). 5 Backendtests grün, tsc 0, eslint clean; Live verifiziert (Abschluss-Guard 422, Force, Reopen). Keine Migration.
+**Ziel des Slices:** Buchungsperioden abschließen/sperren mit Abschlussreife-Prüfung (offene + Storno-inkonsistente Posten blockieren) + Wiedereröffnung mit Grund. DOM-FIN-004.4.
+**Dateibesitz:** `app/services/finance_period_service.py`, `app/api/v1/endpoints/finance_period.py`, `app/api/v1/api.py` (nur eigene include-Zeilen), `tests/test_finance_period.py`, `packages/frontend-web/src/lib/api/finance-period.ts`, `packages/frontend-web/src/pages/finance/periodenabschluss.tsx`, `finance.tsx` (nur eigener Nav-Eintrag), `route-aliases.json` (+ generierte Route-Artefakte), FIN-Doku.
+**Abnahmekriterien:** Reife blockiert bei offenen/Storno-inkonsistenten OP; Abschluss setzt status=closed; Force erzwingt mit Hinweis; Reopen mit Pflicht-Grund; Backendtests + tsc + eslint grün.
+**Offene Risiken:** Echte Buchungssperre (Verhindern neuer Journalbuchungen in geschlossener Periode) setzt Journal-Integration voraus — hier Periodenstatus-Vertrag. DATEV/Steuerberater-Cutover (extern) + UAT in 004.5.
+
 ## FIN-004.3 — Zahlungseingang / OP-Auszifferung
 
 **Von:** Claude

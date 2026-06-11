@@ -34,6 +34,7 @@ import {
   Zap,
   Search,
   Banknote,
+  CalendarCheck,
 } from 'lucide-react'
 import type { RawNavItem } from '@/app/navigation/types'
 
@@ -238,6 +239,15 @@ export const RAW_NAV_SECTIONS: RawNavItem[] = [
         module: '@/pages/finance/zahlungseingang',
         preferredPath: 'finance/zahlungseingang',
         keywords: ['zahlungseingang', 'auszifferung', 'ausziffern', 'zahlung', 'skonto', 'op', 'offene posten', 'teilzahlung', 'debitoren'],
+        mcp: { businessDomain: 'finance', scope: 'finance:write' },
+      },
+      {
+        id: 'periodenabschluss',
+        label: 'Periodenabschluss',
+        icon: CalendarCheck,
+        module: '@/pages/finance/periodenabschluss',
+        preferredPath: 'finance/periodenabschluss',
+        keywords: ['periode', 'periodenabschluss', 'abschluss', 'monatsabschluss', 'sperre', 'buchungsperiode', 'storno-konsistenz', 'fibu'],
         mcp: { businessDomain: 'finance', scope: 'finance:write' },
       },
       {
