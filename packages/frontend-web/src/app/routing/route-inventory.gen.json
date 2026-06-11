@@ -2316,6 +2316,11 @@
       "source": "auto"
     },
     {
+      "module": "@/pages/finance/datev-export",
+      "path": "finance/datev-export",
+      "source": "alias"
+    },
+    {
       "module": "@/pages/finance/debitoren-stamm",
       "path": "finance/debitoren",
       "source": "alias"

@@ -69,6 +69,16 @@ Stand: `2026-06-11`
 **Abnahmekriterien:** Keine Schreibpfade mehr auf `stock_movements`; Regression für Artikel-Bestand und POS-Retoure grün; Schema-Vertrag unverändert grün.
 **Offene Risiken:** POS-Retoure aktualisiert `articles.current_stock` noch nicht; MHD/Expiry weiterhin ohne Chargenstamm.
 
+## FIN-004.5 — DATEV-Export + E2E/UAT (DOM-FIN-004 ABGESCHLOSSEN)
+
+**Von:** Claude
+**Owner:** Claude
+**Stand:** ABGESCHLOSSEN 2026-06-11 — Service `finance_datev_service.py` (reine `datev_row`/`datev_csv` + `export_open_items`), Endpoint `/finance/datev-export`, Frontend `pages/finance/datev-export.tsx` + Hooks + Nav + Route, Playwright-@smoke `finance/op-lifecycle-smoke.spec.ts`, Live-UAT `scripts/uat/fin_op_lifecycle_uat.py` (`--execute`: passed, DB-Restore), Nachweis `docs/dom-fin-004-uat-2026-06-11.md`. Damit FIN-Tiefe 004.1–004.5 komplett. 25 Finance-Backendtests kumuliert grün, tsc 0, eslint clean.
+**Ziel des Slices:** DATEV-Buchungsstapel-Export (in-repo) + End-to-End-Abnahme der FIBU-Kette. DOM-FIN-004.5.
+**Dateibesitz:** `app/services/finance_datev_service.py`, `app/api/v1/endpoints/finance_datev.py`, `app/api/v1/api.py` (nur eigene include-Zeilen), `tests/test_finance_datev.py`, `packages/frontend-web/src/lib/api/finance-datev.ts`, `packages/frontend-web/src/pages/finance/datev-export.tsx`, `finance.tsx` (nur eigener Nav-Eintrag), `route-aliases.json` (+ generierte Route-Artefakte), `playwright-tests/specs/finance/op-lifecycle-smoke.spec.ts`, `scripts/uat/fin_op_lifecycle_uat.py`, FIN-Doku.
+**Abnahmekriterien:** DATEV-CSV mit korrekten Spalten/Konten; Live-UAT grün mit Restore; Smoke-Spec suite-konsistent.
+**Offene Risiken / ehrlich:** Kein zertifizierter DATEV-EXTF; Steuerberater-Cutover bleibt externes Gate. Smoke-Login-Fixture lokal nur CI-Preview (:4173).
+
 ## FIN-004.4 — Periodenabschluss + Storno-Konsistenz
 
 **Von:** Claude

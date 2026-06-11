@@ -1033,6 +1033,13 @@ api_router.include_router(
     tags=["finance", "fibu", "abschluss"]
 )
 
+from app.api.v1.endpoints import finance_datev  # noqa: E402
+
+api_router.include_router(
+    finance_datev.router,
+    tags=["finance", "fibu", "datev"]
+)
+
 from app.api.v1.endpoints import contract_fulfillment  # noqa: E402
 
 api_router.include_router(

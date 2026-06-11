@@ -251,6 +251,15 @@ export const RAW_NAV_SECTIONS: RawNavItem[] = [
         mcp: { businessDomain: 'finance', scope: 'finance:write' },
       },
       {
+        id: 'datev-export',
+        label: 'DATEV-Export',
+        icon: FileDown,
+        module: '@/pages/finance/datev-export',
+        preferredPath: 'finance/datev-export',
+        keywords: ['datev', 'export', 'buchungsstapel', 'csv', 'steuerberater', 'fibu', 'offene posten', 'extf'],
+        mcp: { businessDomain: 'finance', scope: 'finance:read' },
+      },
+      {
         id: 'abschluss-cockpit',
         label: 'Abschluss-Cockpit',
         icon: ShieldCheck,
