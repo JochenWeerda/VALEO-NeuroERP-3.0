@@ -87,5 +87,13 @@ Worklist; Bescheid erfasst; Erledigen ok; erneut → 422.
 PYTEST-6c3b9239: 2 Artefakte, revisionssicher, Prüfsumme + Export-Vermerk; Paperless-
 Probe meldet ehrlich „nicht konfiguriert" (keine PAPERLESS_URL in DEV).
 
-## Folge-Slices
-- **004.5** Browser-E2E + UAT-Nachweispaket.
+## Slice 004.5 — Browser-E2E + UAT (umgesetzt, 2026-06-11)
+- Playwright-@smoke `playwright-tests/specs/docflow/nachweisraum-lifecycle-smoke.spec.ts`
+  (Artefakt-Freigabe/Wiedervorlagen/GoBD-Export). Login-Fixture-Grenze lokal wie übrige .5.
+- Live-UAT `scripts/uat/doc_nachweisraum_lifecycle_uat.py --execute`: Evidence→Probe→
+  Artefakt-Upload→Freigabe→Wiedervorlage→GoBD-Manifest, Status `passed`, DB-Cleanup.
+- **Robustheits-Fund (UAT):** Fremder `artifactType` → DB-CHECK-Verletzung 500;
+  `upload_artifact` validiert jetzt vorab (pdf/xml/html/other) → 422. Test ergänzt.
+- Nachweis: `docs/dom-doc-004-uat-2026-06-11.md`.
+
+**DOM-DOC-004 ist damit vollständig (004.1–004.5).**

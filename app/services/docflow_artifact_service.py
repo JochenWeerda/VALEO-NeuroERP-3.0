@@ -18,6 +18,9 @@ from sqlalchemy.orm import Session
 
 _DEFAULT_TENANT = "00000000-0000-0000-0000-000000000001"
 
+# Erlaubte Artefakttypen (DB-CHECK chk_doc_artifact_type).
+_ALLOWED_TYPES = {"pdf", "xml", "html", "other"}
+
 # Erlaubte Freigabe-Übergänge.
 _TRANSITIONS = {
     "entwurf": {"freigegeben"},
@@ -66,6 +69,8 @@ class DocflowArtifactService:
             raise ArtifactError("Dateiname ist erforderlich.")
         if content is None or content == "":
             raise ArtifactError("Artefakt-Inhalt ist erforderlich (für SHA-256).")
+        if (artifact_type or "").lower() not in _ALLOWED_TYPES:
+            raise ArtifactError(f"Artefakttyp muss eines von {sorted(_ALLOWED_TYPES)} sein.")
         existing = self.db.execute(
             text("SELECT COALESCE(version,1) AS v FROM domain_docflow.document_artifacts "
                  "WHERE header_id = :h AND tenant_id = :t AND artifact_type = :at"),
