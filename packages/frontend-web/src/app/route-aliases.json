@@ -1409,6 +1409,10 @@
       "path": "finance/offene-posten-cockpit"
     },
     {
+      "module": "@/pages/finance/mahnlauf",
+      "path": "finance/mahnlauf"
+    },
+    {
       "module": "@/pages/agrar/kontrakt-erfuellung",
       "path": "agrar/kontrakt-erfuellung"
     },

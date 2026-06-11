@@ -222,6 +222,15 @@ export const RAW_NAV_SECTIONS: RawNavItem[] = [
         mcp: { businessDomain: 'finance', scope: 'finance:read' },
       },
       {
+        id: 'mahnlauf',
+        label: 'Mahnlauf',
+        icon: Euro,
+        module: '@/pages/finance/mahnlauf',
+        preferredPath: 'finance/mahnlauf',
+        keywords: ['mahnlauf', 'mahnung', 'mahnwesen', 'mahnstufe', 'eskalation', 'überfällig', 'debitoren', 'mahngebühr', 'verzugszinsen'],
+        mcp: { businessDomain: 'finance', scope: 'finance:write' },
+      },
+      {
         id: 'abschluss-cockpit',
         label: 'Abschluss-Cockpit',
         icon: ShieldCheck,
