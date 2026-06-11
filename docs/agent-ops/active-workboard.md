@@ -22,6 +22,16 @@ Stand: `2026-06-11`
 **Abnahmekriterien:** Keine Schreibpfade mehr auf `stock_movements`; Regression für Artikel-Bestand und POS-Retoure grün; Schema-Vertrag unverändert grün.
 **Offene Risiken:** POS-Retoure aktualisiert `articles.current_stock` noch nicht; MHD/Expiry weiterhin ohne Chargenstamm.
 
+## CON-004.5 — Browser-E2E + UAT (DOM-CON-004 ABGESCHLOSSEN)
+
+**Von:** Claude
+**Owner:** Claude
+**Stand:** ABGESCHLOSSEN 2026-06-11 — Playwright-@smoke-Spec `playwright-tests/specs/agrar/kontrakt-lifecycle-smoke.spec.ts` (3 Arbeitsräume) + Live-UAT `scripts/uat/con_contract_lifecycle_uat.py` (`--execute`: 11/11 ✓, Status `passed`, DB-Cleanup) + Nachweis-Doku `docs/dom-con-004-uat-2026-06-11.md`. Damit ist die CON-Tiefe 004.1–004.5 komplett.
+**Ziel des Slices:** End-to-End-Abnahme der Kontrakt-Kette (Fixierung→Engagement→Settlement→Storno) + Browser-Smoke der Arbeitsräume.
+**Dateibesitz:** `playwright-tests/specs/agrar/kontrakt-lifecycle-smoke.spec.ts`, `scripts/uat/con_contract_lifecycle_uat.py`, `docs/dom-con-004-uat-2026-06-11.md`, CON-Doku, Workboard-Block.
+**Abnahmekriterien:** Live-UAT grün mit DB-Cleanup; Smoke-Spec geschrieben und suite-konsistent.
+**Offene Risiken / ehrlich:** Die `@smoke`-Login-Fixture authentifiziert lokal nicht gegen den Vite-Dev-Server :3000 — **identischer Fehlschlag bei allen bestehenden Specs** (gegengeprüft `duenger-smoke`: 3/3 „browser closed"). Browser-Abnahme läuft in CI (Preview-Build :4173); fachlicher Nachweis hier via grünem Live-UAT. Reale Abrechnungs-Buchung (agrar_settlements-Integration) bleibt tiefergehender Folgeschritt außerhalb DOM-CON-004.
+
 ## CON-004.4 — Settlement-Übergabe + Storno
 
 **Von:** Claude
