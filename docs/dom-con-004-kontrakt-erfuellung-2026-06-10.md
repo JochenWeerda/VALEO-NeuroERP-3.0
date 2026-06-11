@@ -101,5 +101,11 @@ Mahnkandidat DEMO-KT-002 (11 Tage überfällig, 60 offen). 15 Unit-Tests grün.
 ### Verifiziert
 18 Unit-Tests grün (kumuliert), tsc 0, eslint clean.
 
-## Folge-Slices
-- **004.5** Browser-E2E + UAT.
+## Slice 004.5 — Browser-E2E + UAT (umgesetzt, 2026-06-11)
+- Playwright-@smoke `playwright-tests/specs/agrar/kontrakt-lifecycle-smoke.spec.ts`
+  (Fixierung/Engagement/Settlement laden). Lokale Login-Fixture-Limitation siehe
+  `docs/dom-con-004-uat-2026-06-11.md` (suite-konsistent, CI-Abnahme).
+- Live-UAT `scripts/uat/con_contract_lifecycle_uat.py --execute`: 11/11 ✓,
+  Status `passed`, mit DB-Cleanup. Nachweispaket: `docs/dom-con-004-uat-2026-06-11.md`.
+
+**DOM-CON-004 ist damit vollständig (004.1–004.5).**
