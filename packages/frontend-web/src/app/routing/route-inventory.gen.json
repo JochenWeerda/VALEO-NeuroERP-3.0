@@ -3666,6 +3666,11 @@
       "source": "alias"
     },
     {
+      "module": "@/pages/sales/kreditlimit-pruefung",
+      "path": "sales/kreditlimit-pruefung",
+      "source": "alias"
+    },
+    {
       "module": "@/pages/sales/lieferungen-liste",
       "path": "sales/lieferungen",
       "source": "alias"

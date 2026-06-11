@@ -1397,6 +1397,10 @@
       "path": "sales/auftrag-lieferschein-abgleich"
     },
     {
+      "module": "@/pages/sales/kreditlimit-pruefung",
+      "path": "sales/kreditlimit-pruefung"
+    },
+    {
       "module": "@/pages/finance/offene-posten-cockpit",
       "path": "finance/offene-posten-cockpit"
     },
