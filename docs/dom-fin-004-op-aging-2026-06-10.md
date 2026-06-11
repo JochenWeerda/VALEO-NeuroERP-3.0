@@ -84,5 +84,15 @@ DEMO-RE-100 (5.000): Teilzahlung 2.000 → offen 3.000 (teilausgleich); Rest 2.9
 2026-06 (2 offene OP) → Abschluss 422 „nicht abschlussreif"; Force-Abschluss ok;
 erneut → 422 „bereits abgeschlossen"; Reopen ok.
 
-## Folge-Slices (teils extern gegated)
-- **004.5** DATEV-Export + Steuerberater-Cutover (extern) + UAT.
+## Slice 004.5 — DATEV-Export + E2E/UAT (umgesetzt, 2026-06-11)
+- Service `app/services/finance_datev_service.py` — reine `datev_row`/`datev_csv`
+  (DATEV-Buchungsstapel: Dezimalkomma, Soll/Haben, Konto/Gegenkonto SKR03, Belegdatum
+  ddmmyyyy) + `export_open_items(typ)`. Endpoint `GET /finance/datev-export?typ=`.
+- Frontend `pages/finance/datev-export.tsx` (Typ-Auswahl + CSV-Download + Hinweis).
+- Playwright-@smoke `playwright-tests/specs/finance/op-lifecycle-smoke.spec.ts`.
+- Live-UAT `scripts/uat/fin_op_lifecycle_uat.py --execute`: Aging→Mahnlauf→DATEV→
+  Periodenreife→Zahlungseingang(voll)→422, Status `passed`, DB-Restore.
+- Tests `tests/test_finance_datev.py` (4 grün). Nachweis: `docs/dom-fin-004-uat-2026-06-11.md`.
+- **Ehrlich extern gegated:** zertifizierter DATEV-EXTF + Steuerberater-Cutover.
+
+**DOM-FIN-004 ist damit vollständig (004.1–004.5).**
