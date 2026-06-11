@@ -1401,6 +1401,10 @@
       "path": "sales/kreditlimit-pruefung"
     },
     {
+      "module": "@/pages/sales/lieferung-storno",
+      "path": "sales/lieferung-storno"
+    },
+    {
       "module": "@/pages/finance/offene-posten-cockpit",
       "path": "finance/offene-posten-cockpit"
     },

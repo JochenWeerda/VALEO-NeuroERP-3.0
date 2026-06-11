@@ -2,6 +2,15 @@
 
 Stand: `2026-06-11`
 
+## PROC-RFQ-001 — RFQ production-ready
+
+**Von:** Cursor
+**Owner:** Cursor
+**Stand:** abgeschlossen 2026-06-11 — Alembic `proc_rfq_20260611`, Service `rfq_service.py`, Lazy-DDL entfernt, Zuschlag erzeugt echte `bestellungen`+Position, Seed `seed_demo_rfq.py`, 2 Integrationstests grün.
+**Ziel des Slices:** Anfrageprozess RFQ ohne Mocks und ohne Runtime-Schema-DDL production-ready.
+**Dateibesitz:** `proc_rfq_20260611.py`, `rfq_service.py`, `rfq.py`, `seed_demo_rfq.py`, `test_rfq_integration.py`, Open-Gaps.
+**Abnahmekriterien:** Migration statt `_ensure_schema`; Accept legt PO an; Integration grün.
+
 ## PROC-PROD-001 — Production-Härtung Match-Spine
 
 **Von:** Cursor
@@ -59,6 +68,17 @@ Stand: `2026-06-11`
 **Dateibesitz:** `app/api/v1/endpoints/articles.py`, `app/api/v1/endpoints/pos_retoure.py`, fokussierte Tests, Doku in `open-gaps-and-known-issues.md`.
 **Abnahmekriterien:** Keine Schreibpfade mehr auf `stock_movements`; Regression für Artikel-Bestand und POS-Retoure grün; Schema-Vertrag unverändert grün.
 **Offene Risiken:** POS-Retoure aktualisiert `articles.current_stock` noch nicht; MHD/Expiry weiterhin ohne Chargenstamm.
+
+## SALES-004.4 — Storno/Gutschrift durchgängig
+
+**Von:** Claude
+**Owner:** Claude
+**Stand:** ABGESCHLOSSEN 2026-06-11 — Migration `sales_delivery_storno_20260611` (`delivery_notes` +`storno_grund`), Service `sales_storno_service.py` (reine `can_storno` + `storno_delivery` + `order_storno_status` mit toleranter Gutschrift-Übersicht), Endpoints `/sales/deliveries/{nr}/storno` + `/sales/storno/status`, Frontend `pages/sales/lieferung-storno.tsx` (Storno-Dialog + Gutschriften) + Hooks + Nav + Route. Stornierte Lieferscheine zählen nicht mehr als geliefert (Match filtert `status<>'storniert'` → durchgängig). 9 Backendtests grün (4 Storno + 5 Match), tsc 0, eslint clean; Live verifiziert (Guard 422, Match-Rückfluss, Restore).
+**⚠️ Alembic-Koordination:** Beim Anwenden tauchte ein **paralleler PROC-Head** (`proc_three_way_inv_20260611`→`proc_follow_up_20260611`, untracked/fremd) auf. Ich habe meine Migration NICHT in fremde uncommittete Revisionen gekettet, sondern gezielt angewandt (`alembic upgrade sales_delivery_storno_20260611`, down_revision=`con_settlement_storno_20260611`, committet/stabil). **Sobald die PROC-Migrationen committet sind, ist ein Merge-Head `sales_delivery_storno` + `proc_follow_up` nötig** (Single-Head-Gate). Wer PROC committet, sollte den Merge mitliefern.
+**Ziel des Slices:** Lieferschein-Storno, der durchgängig in den Auftrag-Lieferschein-Match zurückfließt + Gutschrift-Übersicht; fail-closed bei berechneten Lieferungen. DOM-SALES-004.4.
+**Dateibesitz:** `alembic/versions/sales_delivery_storno_20260611.py`, `app/services/sales_storno_service.py`, `app/services/sales_match_service.py` (nur Storno-Filter), `app/api/v1/endpoints/sales_storno.py`, `app/api/v1/api.py` (nur eigene include-Zeilen), `tests/test_sales_storno.py`, `packages/frontend-web/src/lib/api/sales-storno.ts`, `packages/frontend-web/src/pages/sales/lieferung-storno.tsx`, `commercial.tsx` (nur eigener Nav-Eintrag), `route-aliases.json` (+ generierte Route-Artefakte), SALES-Doku.
+**Abnahmekriterien:** Storno setzt Lieferschein 'storniert' (Grund pflicht); berechnete Lieferung blockiert (422); stornierte Lieferung zählt nicht mehr im Match; Backendtests + tsc + eslint grün.
+**Offene Risiken:** Gutschrift-Erstellung erfolgt über das bestehende `sales_credit_notes`-Modul (hier nur Übersicht); echte Gutschrift→FIBU-Buchung bleibt außerhalb. Browser-E2E + UAT in 004.5.
 
 ## SALES-004.3 — Kreditlimit-Prüfung + Billing-Status
 

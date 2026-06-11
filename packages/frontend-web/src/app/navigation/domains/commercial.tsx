@@ -48,6 +48,7 @@ import {
   Boxes,
   Receipt,
   PackageCheck,
+  Undo2,
 } from 'lucide-react'
 import type { RawNavItem } from '@/app/navigation/types'
 import { ENABLE_PROSPECTING_UI } from '@/features/prospecting/feature-flags'
@@ -399,6 +400,15 @@ export const RAW_NAV_SECTIONS: RawNavItem[] = [
         preferredPath: 'sales/kreditlimit-pruefung',
         keywords: ['kreditlimit', 'kredit', 'limit', 'bonität', 'exposure', 'ampel', 'sperre', 'auftrag', 'o2c', 'sales', 'debitor'],
         mcp: { businessDomain: 'sales', scope: 'sales:read' },
+      },
+      {
+        id: 'lieferung-storno',
+        label: 'Lieferung-Storno / Gutschrift',
+        icon: Undo2,
+        module: '@/pages/sales/lieferung-storno',
+        preferredPath: 'sales/lieferung-storno',
+        keywords: ['storno', 'stornieren', 'gutschrift', 'lieferschein', 'rücknahme', 'auftrag', 'o2c', 'sales'],
+        mcp: { businessDomain: 'sales', scope: 'sales:write' },
       },
       {
         id: 'auftrag',
