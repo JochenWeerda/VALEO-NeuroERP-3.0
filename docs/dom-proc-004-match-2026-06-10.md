@@ -48,6 +48,7 @@ DEMO-PO-001: Weizen vollständig (100/100), Gerste teilgeliefert (30/50, 3.800 �
 - Service: `match_three_way_value()` + `ProcurementMatchService.match_three_way()`.
 - API: `GET /api/v1/procurement/match/three-way`.
 - Verknüpfung: `zugeordneter_auftrag` = Bestellnummer; Kopfvergleich gelieferter Wert vs. fakturiert.
+- `drei_wege_abgeglichen` = Rechnung vorhanden + Wert innerhalb Toleranz (PO-Mengenabweichung bleibt in `summary.hat_abweichung`).
 - Seed: `DEMO-RE-001` für `DEMO-PO-001` (27.700 € netto = gelieferter Wert).
 - UI: `wareneingangsabgleich.tsx` zeigt Rechnungsstufe, Rechnungen und Ausnahmen.
 - Tests: `tests/test_procurement_three_way_match.py` (4 Unit-Tests).
@@ -81,7 +82,7 @@ DEMO-PO-001: Weizen vollständig (100/100), Gerste teilgeliefert (30/50, 3.800 �
 ### Verifiziert
 - DEMO-PO-002 (2 t Überlieferung × 480 €) → 960 € Gutschrift-Vorschau.
 - Keine Berechtigung ohne Abweichung → 422.
-- 18 kumulierte Procurement-Unit-Tests grün.
+- 15 Unit-Tests (reine Logik) + 6 Integrationstests (echte DB/API, keine Mocks) grün.
 
 ## Status
 **DOM-PROC-004 abgeschlossen** (004.1–004.5).

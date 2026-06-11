@@ -278,19 +278,16 @@ class ProcurementMatchService:
                  "positionen": int(r["pos"]), "hat_wareneingang": bool(r["hat_we"])} for r in rows]
 
     def _invoices_for_po(self, bestellnummer: str) -> list[dict]:
-        try:
-            rows = self.db.execute(
-                text(
-                    "SELECT id, rechnungsnummer, rechnungsdatum, gesamt_netto, gesamt_brutto, "
-                    "zugeordneter_auftrag, zugeordneter_lieferschein, status "
-                    "FROM public.finance_erechnungen "
-                    "WHERE tenant_id = :t AND zugeordneter_auftrag = :po "
-                    "ORDER BY rechnungsdatum DESC NULLS LAST, created_at DESC"
-                ),
-                {"t": self.tenant_id, "po": bestellnummer},
-            ).mappings().all()
-        except Exception:
-            return []
+        rows = self.db.execute(
+            text(
+                "SELECT id, rechnungsnummer, rechnungsdatum, gesamt_netto, gesamt_brutto, "
+                "zugeordneter_auftrag, zugeordneter_lieferschein, status "
+                "FROM public.finance_erechnungen "
+                "WHERE tenant_id = :t AND zugeordneter_auftrag = :po "
+                "ORDER BY rechnungsdatum DESC NULLS LAST, created_at DESC"
+            ),
+            {"t": self.tenant_id, "po": bestellnummer},
+        ).mappings().all()
         return [
             {
                 "id": str(r["id"]),
@@ -340,11 +337,8 @@ class ProcurementMatchService:
             })
 
         po_netto = Decimal(str(base.get("netto_summe") or 0))
-        drei_wege_ok = (
-            bool(rechnungen)
-            and not wert_match["abweichung"]
-            and not base["summary"]["hat_abweichung"]
-        )
+        # Rechnungsstufe: gelieferter Wert vs. fakturiert (PO-Mengenabweichung bleibt in base.summary).
+        drei_wege_ok = bool(rechnungen) and not wert_match["abweichung"]
 
         return {
             **base,
@@ -372,18 +366,15 @@ class ProcurementMatchService:
         }
 
     def list_follow_ups(self, bestellnummer: str, limit: int = 50) -> list[dict]:
-        try:
-            rows = self.db.execute(
-                text(
-                    "SELECT id, action_type, ausnahme_code, grund, eskalationsstufe, created_at, created_by "
-                    "FROM domain_einkauf.procurement_follow_up "
-                    "WHERE tenant_id = :t AND bestellnummer = :po "
-                    "ORDER BY created_at DESC LIMIT :lim"
-                ),
-                {"t": self.tenant_id, "po": bestellnummer, "lim": max(1, min(limit, 200))},
-            ).mappings().all()
-        except Exception:
-            return []
+        rows = self.db.execute(
+            text(
+                "SELECT id, action_type, ausnahme_code, grund, eskalationsstufe, created_at, created_by "
+                "FROM domain_einkauf.procurement_follow_up "
+                "WHERE tenant_id = :t AND bestellnummer = :po "
+                "ORDER BY created_at DESC LIMIT :lim"
+            ),
+            {"t": self.tenant_id, "po": bestellnummer, "lim": max(1, min(limit, 200))},
+        ).mappings().all()
         return [
             {
                 "id": str(r["id"]),
@@ -415,18 +406,15 @@ class ProcurementMatchService:
 
         eskalationsstufe = 1
         if action == "eskalation":
-            try:
-                row = self.db.execute(
-                    text(
-                        "SELECT COALESCE(MAX(eskalationsstufe), 0) AS max_stufe "
-                        "FROM domain_einkauf.procurement_follow_up "
-                        "WHERE tenant_id = :t AND bestellnummer = :po AND action_type = 'eskalation'"
-                    ),
-                    {"t": self.tenant_id, "po": bestellnummer},
-                ).mappings().first()
-                eskalationsstufe = int((row or {}).get("max_stufe") or 0) + 1
-            except Exception:
-                eskalationsstufe = 1
+            row = self.db.execute(
+                text(
+                    "SELECT COALESCE(MAX(eskalationsstufe), 0) AS max_stufe "
+                    "FROM domain_einkauf.procurement_follow_up "
+                    "WHERE tenant_id = :t AND bestellnummer = :po AND action_type = 'eskalation'"
+                ),
+                {"t": self.tenant_id, "po": bestellnummer},
+            ).mappings().first()
+            eskalationsstufe = int((row or {}).get("max_stufe") or 0) + 1
 
         entry_id = str(uuid.uuid4())
         self.db.execute(
@@ -458,19 +446,16 @@ class ProcurementMatchService:
         }
 
     def list_ers_credits(self, bestellnummer: str, limit: int = 20) -> list[dict]:
-        try:
-            rows = self.db.execute(
-                text(
-                    "SELECT id, gutschrift_nummer, betrag_netto, grund, ausnahme_code, status, "
-                    "positionen_json, created_at, created_by "
-                    "FROM domain_einkauf.procurement_ers_credits "
-                    "WHERE tenant_id = :t AND bestellnummer = :po "
-                    "ORDER BY created_at DESC LIMIT :lim"
-                ),
-                {"t": self.tenant_id, "po": bestellnummer, "lim": max(1, min(limit, 100))},
-            ).mappings().all()
-        except Exception:
-            return []
+        rows = self.db.execute(
+            text(
+                "SELECT id, gutschrift_nummer, betrag_netto, grund, ausnahme_code, status, "
+                "positionen_json, created_at, created_by "
+                "FROM domain_einkauf.procurement_ers_credits "
+                "WHERE tenant_id = :t AND bestellnummer = :po "
+                "ORDER BY created_at DESC LIMIT :lim"
+            ),
+            {"t": self.tenant_id, "po": bestellnummer, "lim": max(1, min(limit, 100))},
+        ).mappings().all()
         out = []
         for r in rows:
             pos_json = r["positionen_json"]
@@ -528,18 +513,14 @@ class ProcurementMatchService:
                 ausnahme_code = a["code"]
                 break
 
-        count = 0
-        try:
-            row = self.db.execute(
-                text(
-                    "SELECT count(*) AS c FROM domain_einkauf.procurement_ers_credits "
-                    "WHERE tenant_id = :t AND bestellnummer = :po"
-                ),
-                {"t": self.tenant_id, "po": bestellnummer},
-            ).mappings().first()
-            count = int((row or {}).get("c") or 0)
-        except Exception:
-            count = 0
+        row = self.db.execute(
+            text(
+                "SELECT count(*) AS c FROM domain_einkauf.procurement_ers_credits "
+                "WHERE tenant_id = :t AND bestellnummer = :po"
+            ),
+            {"t": self.tenant_id, "po": bestellnummer},
+        ).mappings().first()
+        count = int((row or {}).get("c") or 0)
 
         entry_id = str(uuid.uuid4())
         gs_nr = f"ERS-{bestellnummer}-{count + 1:03d}"

@@ -1,16 +1,13 @@
-"""Unit-Tests ERS-Gutschriftsverfahren (DOM-PROC-004.5)."""
+"""Reine Logik-Tests ERS-Gutschriftsverfahren (DOM-PROC-004.5) — ohne DB/Mocks.
+
+Persistenz und API werden in tests/test_procurement_match_integration.py abgedeckt.
+"""
 
 from __future__ import annotations
 
-from decimal import Decimal
-from unittest.mock import MagicMock
-
 import pytest
 
-from app.services.procurement_match_service import (
-    ProcurementMatchService,
-    calculate_ers_credit,
-)
+from app.services.procurement_match_service import calculate_ers_credit
 
 pytestmark = pytest.mark.unit
 
@@ -45,16 +42,3 @@ def test_ers_nicht_berechtigt():
     ])
     assert preview["berechtigt"] is False
     assert preview["betrag_netto"] == 0.0
-
-
-def test_create_ers_rejects_without_basis():
-    svc = ProcurementMatchService(MagicMock(), "tenant-demo")
-    svc.match_three_way = MagicMock(return_value={
-        "found": True,
-        "bestellnummer": "DEMO-PO-001",
-        "positionen": [{"status": "vollstaendig", "offen": 0}],
-        "three_way": {"status": "abgeglichen", "abweichung": False},
-        "ausnahmen": [],
-    })
-    with pytest.raises(ValueError, match="Keine ERS-Gutschrift berechtigt"):
-        svc.create_ers_credit(bestellnummer="DEMO-PO-001")
