@@ -1019,6 +1019,13 @@ api_router.include_router(
     tags=["finance", "fibu", "mahnwesen"]
 )
 
+from app.api.v1.endpoints import finance_clearing  # noqa: E402
+
+api_router.include_router(
+    finance_clearing.router,
+    tags=["finance", "fibu", "op"]
+)
+
 from app.api.v1.endpoints import contract_fulfillment  # noqa: E402
 
 api_router.include_router(

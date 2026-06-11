@@ -2501,6 +2501,11 @@
       "source": "auto"
     },
     {
+      "module": "@/pages/finance/zahlungseingang",
+      "path": "finance/zahlungseingang",
+      "source": "alias"
+    },
+    {
       "module": "@/pages/finance/zahlungslauf-kreditoren",
       "path": "finance/zahlungslauf-kreditoren",
       "source": "auto"
