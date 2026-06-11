@@ -69,6 +69,16 @@ Stand: `2026-06-11`
 **Abnahmekriterien:** Keine Schreibpfade mehr auf `stock_movements`; Regression für Artikel-Bestand und POS-Retoure grün; Schema-Vertrag unverändert grün.
 **Offene Risiken:** POS-Retoure aktualisiert `articles.current_stock` noch nicht; MHD/Expiry weiterhin ohne Chargenstamm.
 
+## DOC-004.5 — Browser-E2E + UAT (DOM-DOC-004 ABGESCHLOSSEN)
+
+**Von:** Claude
+**Owner:** Claude
+**Stand:** ABGESCHLOSSEN 2026-06-11 — Playwright-@smoke `docflow/nachweisraum-lifecycle-smoke.spec.ts` (3 Seiten) + Live-UAT `scripts/uat/doc_nachweisraum_lifecycle_uat.py` (`--execute`: Evidence→Probe→Upload→Freigabe→Wiedervorlage→GoBD-Manifest, Status `passed`, DB-Cleanup) + Nachweis `docs/dom-doc-004-uat-2026-06-11.md`. **Robustheits-Fund (UAT):** Fremd-`artifactType` → 500 (DB-CHECK); `upload_artifact` validiert jetzt vorab → 422 (Test ergänzt). Damit DOC-Tiefe 004.1–004.5 komplett. 18 docflow-Backendtests kumuliert grün.
+**Ziel des Slices:** End-to-End-Abnahme des GoBD-Nachweisraums + Browser-Smoke. DOM-DOC-004.5.
+**Dateibesitz:** `playwright-tests/specs/docflow/nachweisraum-lifecycle-smoke.spec.ts`, `scripts/uat/doc_nachweisraum_lifecycle_uat.py`, `app/services/docflow_artifact_service.py` (nur Typ-Guard), `tests/test_docflow_artifact.py` (nur Guard-Test), `docs/dom-doc-004-uat-2026-06-11.md`, DOC-Doku, Workboard-Block.
+**Abnahmekriterien:** Live-UAT grün mit DB-Cleanup; Smoke-Spec suite-konsistent; Fremd-Artefakttyp liefert 422 statt 500.
+**Offene Risiken / ehrlich:** Paperless-Liveprobe in DEV „nicht konfiguriert"; reales ZIP-Paket als JSON-Manifest-Vertrag. Smoke-Login-Fixture lokal nur CI-Preview (:4173).
+
 ## DOC-004.4 — GoBD-Exportpaket + Paperless-Liveprobe
 
 **Von:** Claude

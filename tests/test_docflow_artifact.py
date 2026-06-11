@@ -4,9 +4,19 @@ from __future__ import annotations
 
 import pytest
 
-from app.services.docflow_artifact_service import next_version, sha256_hex, valid_transition
+from app.services.docflow_artifact_service import (
+    _ALLOWED_TYPES,
+    next_version,
+    sha256_hex,
+    valid_transition,
+)
 
 pytestmark = pytest.mark.unit
+
+
+def test_allowed_artifact_types():
+    # Deckungsgleich mit DB-CHECK chk_doc_artifact_type (kein 500 bei Fremdtyp).
+    assert _ALLOWED_TYPES == {"pdf", "xml", "html", "other"}
 
 
 def test_next_version():
