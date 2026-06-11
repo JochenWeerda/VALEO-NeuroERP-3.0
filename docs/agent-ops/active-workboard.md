@@ -1,6 +1,17 @@
 # Active Workboard
 
-Stand: `2026-06-09`
+Stand: `2026-06-11`
+
+## CON-004.2 — Fixierungs-Arbeitsraum + MATIF-Bewertung
+
+**Von:** Claude
+**Owner:** Claude
+**Stand:** ABGESCHLOSSEN 2026-06-11 — Migration `con_fixing_matif_20260611` (Tabellen `kon_contract_fixing` + `matif_quote`), Service `contract_fixing_service.py` (reine Bewertungslogik + Teilfixierung mit Guards + Workspace + Notierung), Endpoints `/contracts/fixing[/workspace|/list]` + `/contracts/matif-quote`, Seed DEMO-KT-004 (MATIF-Verkauf), Frontend `pages/agrar/kontrakt-fixierung.tsx` + Hooks + Nav + Route. 12 Backendtests grün, tsc 0, eslint clean; Live-API verifiziert.
+**Nebenbefund/Fix (kritisch):** Der Abend-Stand 2026-06-10 hinterließ **zwei offene Alembic-Heads** (`repair_customer_contract_20260610` + `sales_o2c_link_20260610`), die nie zusammengeführt wurden → `scripts/init_db.py` (`upgrade head`, Singular) scheiterte mit `Multiple head revisions` → **Backend-Container im Crash-Loop** (seit Reboot 06:32). Behoben, indem die neue Migration **beide Heads revidiert** (Merge + Tabellen in einem) → wieder genau 1 Head, Backend `healthy`.
+**Ziel des Slices:** Teilfixierung MATIF-bepreister Kontrakte (Menge zu MATIF-Preis + Prämie) und Mark-to-Market gegen die jüngste Marktnotierung: fixierter/offener Anteil, Ø-Fixpreis, Bewertungsergebnis. DOM-CON-004.2 gemäß `docs/dom-con-004-kontrakt-erfuellung-2026-06-10.md`.
+**Dateibesitz:** `alembic/versions/con_fixing_matif_20260611.py`, `app/services/contract_fixing_service.py`, `app/api/v1/endpoints/contract_fixing.py`, `app/api/v1/api.py` (nur eigene include-Zeilen), `scripts/seed_demo_contracts.py` (DEMO-KT-004), `tests/test_contract_fixing.py`, `packages/frontend-web/src/lib/api/contract-fixing.ts`, `packages/frontend-web/src/pages/agrar/kontrakt-fixierung.tsx`, `commercial.tsx` (nur eigener Nav-Eintrag), `route-aliases.json` (+ generierte Route-Artefakte), CON-Doku.
+**Abnahmekriterien:** Fixierung nur auf MATIF-Positionen, Menge>0 und ≤ offen, Preis>0 (sonst 422); Workspace zeigt fixiert/offen/Ø-Fixpreis/Bewertung; ohne Notierung keine erfundene Bewertung (fail-closed); Backendtests + tsc + eslint grün; Backend wieder startfähig (1 Head).
+**Offene Risiken:** Fixierungs-Storno und Settlement-Übergabe folgen in 004.4. Symbol-Auflösung nutzt `basis_reference` (Fallback Artikel) — bei produktiven Kontrakten Symbol-Pflege nötig.
 
 ## PROD-READINESS-001
 

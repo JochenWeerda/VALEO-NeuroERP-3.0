@@ -401,6 +401,16 @@
       "source": "auto"
     },
     {
+      "module": "@/pages/agrar/kontrakt-erfuellung",
+      "path": "agrar/kontrakt-erfuellung",
+      "source": "alias"
+    },
+    {
+      "module": "@/pages/agrar/kontrakt-fixierung",
+      "path": "agrar/kontrakt-fixierung",
+      "source": "alias"
+    },
+    {
       "module": "@/pages/agrar/kulturpflanzen/liste",
       "path": "agrar/kulturpflanzen",
       "source": "alias"
@@ -1196,6 +1206,11 @@
       "source": "navigation"
     },
     {
+      "module": "@/pages/crm/dubletten",
+      "path": "crm/dubletten",
+      "source": "alias"
+    },
+    {
       "module": "@/pages/crm/durchdringungs-pipeline",
       "path": "crm/durchdringungs-pipeline",
       "source": "auto"
@@ -1309,6 +1324,11 @@
       "module": "@/pages/crm/kunden-stamm-modern/legacykundenstammmodern",
       "path": "crm/kunden-stamm-modern/legacykundenstammmodern",
       "source": "auto"
+    },
+    {
+      "module": "@/pages/crm/kunden-zuordnung",
+      "path": "crm/kunden-zuordnung",
+      "source": "alias"
     },
     {
       "module": "@/pages/crm/kunden-stamm",
@@ -1451,6 +1471,11 @@
       "source": "auto"
     },
     {
+      "module": "@/pages/crm/wiedervorlagen",
+      "path": "crm/wiedervorlagen",
+      "source": "alias"
+    },
+    {
       "module": "@/pages/dashboard/customizable",
       "path": "dashboard/customizable",
       "source": "auto"
@@ -1518,6 +1543,11 @@
     {
       "module": "@/pages/disposition/FrmPositionRules",
       "path": "disposition/regeln",
+      "source": "alias"
+    },
+    {
+      "module": "@/pages/docflow/nachweisraum",
+      "path": "docflow/nachweisraum",
       "source": "alias"
     },
     {
@@ -1859,6 +1889,11 @@
       "module": "@/pages/einkauf/wareneingang",
       "path": "einkauf/wareneingang/:poId",
       "source": "navigation"
+    },
+    {
+      "module": "@/pages/einkauf/wareneingangsabgleich",
+      "path": "einkauf/wareneingangsabgleich",
+      "source": "alias"
     },
     {
       "module": "@/pages/einkauf/warengruppen",
@@ -2368,6 +2403,11 @@
     {
       "module": "@/pages/fibu/offene-posten",
       "path": "finance/offene-posten",
+      "source": "alias"
+    },
+    {
+      "module": "@/pages/finance/offene-posten-cockpit",
+      "path": "finance/offene-posten-cockpit",
       "source": "alias"
     },
     {
@@ -2939,6 +2979,11 @@
       "module": "@/pages/lager/permanente-inventur",
       "path": "lager/permanente-inventur",
       "source": "auto"
+    },
+    {
+      "module": "@/pages/lager/rueckverfolgbarkeit",
+      "path": "lager/rueckverfolgbarkeit",
+      "source": "alias"
     },
     {
       "module": "@/pages/lager/terminal",
@@ -3544,6 +3589,11 @@
       "module": "@/pages/sales/order-editor",
       "path": "sales/auftraege/neu",
       "source": "navigation"
+    },
+    {
+      "module": "@/pages/sales/auftragskette",
+      "path": "sales/auftragskette",
+      "source": "alias"
     },
     {
       "module": "@/pages/sales/credit-note-editor",
