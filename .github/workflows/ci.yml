@@ -45,7 +45,7 @@ jobs:
       - name: Install dependencies
         run: |
           pip install -r requirements.txt
-          pip install pytest pytest-cov pytest-asyncio bandit safety
+          pip install bandit safety
 
       - name: Validate L3 mapping definitions
         run: |
@@ -164,7 +164,6 @@ jobs:
         working-directory: services/workflow
         run: |
           pip install -r requirements.txt
-          pip install pytest pytest-asyncio pytest-cov
 
       - name: Static analysis
         working-directory: services/workflow
@@ -196,7 +195,6 @@ jobs:
         working-directory: services/compliance/infrastat
         run: |
           pip install -r requirements.txt
-          pip install pytest pytest-asyncio pytest-cov
 
       - name: Run InfraStat tests
         env:
@@ -221,7 +219,6 @@ jobs:
         working-directory: services/compliance/zoll
         run: |
           pip install -r requirements.txt
-          pip install pytest pytest-asyncio pytest-cov
 
       - name: Run Zoll tests
         env:
@@ -336,7 +333,6 @@ jobs:
       - name: Install dependencies
         run: |
           pip install -r services/compliance/infrastat/requirements.txt
-          pip install pytest pytest-asyncio pytest-cov
 
       - name: Start integration stack
         env:
@@ -381,7 +377,6 @@ jobs:
         working-directory: services/finance
         run: |
           pip install -r requirements.txt
-          pip install pytest pytest-asyncio pytest-cov
       - name: Run GoBD tests
         env:
           PYTHONPATH: packages/finance-shared/src
@@ -423,7 +418,6 @@ jobs:
         working-directory: services/inventory
         run: |
           pip install -r requirements.txt
-          pip install pytest pytest-asyncio pytest-cov
 
       - name: Run EPCIS API tests
         env:

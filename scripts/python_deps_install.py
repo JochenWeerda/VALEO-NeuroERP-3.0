@@ -52,8 +52,9 @@ PACKAGES = {
         "black>=23.3.0",
         "isort>=5.12.0",
         "mypy>=1.3.0",
-        "pytest>=7.3.0",
-        "pytest-cov>=4.1.0",
+        "pytest==9.0.3",
+        "pytest-cov==7.1.0",
+        "coverage==7.14.1",
     ],
 }
 

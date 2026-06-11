@@ -50,6 +50,9 @@ jobs:
           pip install -r requirements.txt
           pnpm install --frozen-lockfile
 
+      - name: Check toolchain pins
+        run: python scripts/check_toolchain_pins.py
+
       - name: Production contract
         run: |
           python scripts/check_production_readiness.py \
@@ -59,9 +62,12 @@ jobs:
             --contract-only
 
       - name: Build immutable release candidates
+        id: images
         run: |
           docker build -f Dockerfile.backend -t valeo-backend:release-gate .
           docker build -f Dockerfile.frontend -t valeo-frontend:release-gate .
+          echo "backend_digest=$(docker image inspect --format='{{index .RepoDigests 0}}' valeo-backend:release-gate 2>/dev/null || echo not-published)" >> "$GITHUB_OUTPUT"
+          echo "frontend_digest=$(docker image inspect --format='{{index .RepoDigests 0}}' valeo-frontend:release-gate 2>/dev/null || echo not-published)" >> "$GITHUB_OUTPUT"
 
       - name: Repository guardrails
         run: |
@@ -86,8 +92,18 @@ jobs:
             --output-json artifacts/production-readiness-assessment.json \
             --output-markdown artifacts/production-readiness-assessment.md
 
+      - name: Generate release compatibility matrix
+        run: |
+          python scripts/generate_release_compatibility_matrix.py \
+            --git-sha "${{ inputs.release_sha || github.sha }}" \
+            --backend-image-digest "${{ steps.images.outputs.backend_digest }}" \
+            --frontend-image-digest "${{ steps.images.outputs.frontend_digest }}"
+
       - uses: actions/upload-artifact@v4
         with:
           name: release-gate-evidence
-          path: artifacts/production-readiness-assessment.*
+          path: |
+            artifacts/production-readiness-assessment.*
+            artifacts/release-compatibility-matrix.json
+            artifacts/release-compatibility-matrix.md
           retention-days: 90

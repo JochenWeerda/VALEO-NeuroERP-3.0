@@ -65,17 +65,32 @@ async def create_retoure(
         for pos in data.positionen:
             db.execute(
                 text("""
-                    INSERT INTO domain_inventory.stock_movements
-                        (id, tenant_id, article_id, movement_type, quantity, reference_type, reference_id, notes, created_at)
+                    INSERT INTO domain_inventory.inventory_stock_movements
+                        (id, tenant_id, article_id, warehouse_id, movement_type, quantity, unit,
+                         reference_number, source_document_id, source_document_type, notes,
+                         previous_stock, new_stock, auto_created, ownership_type, created_at)
                     SELECT
                         gen_random_uuid()::text,
                         :tenant_id,
                         a.id,
-                        'return',
+                        (
+                            SELECT w.id
+                            FROM domain_inventory.warehouses w
+                            WHERE w.tenant_id = :tenant_id
+                            ORDER BY w.warehouse_code
+                            LIMIT 1
+                        ),
+                        'in',
                         :qty,
-                        'pos_retoure',
+                        COALESCE(a.unit, 'ST'),
+                        :bon_nr,
                         :retoure_id,
+                        'pos_retoure',
                         :notes,
+                        COALESCE(a.current_stock, 0),
+                        COALESCE(a.current_stock, 0) + :qty,
+                        false,
+                        'owned',
                         NOW()
                     FROM domain_inventory.articles a
                     WHERE a.article_number = :artikelnr
@@ -86,6 +101,7 @@ async def create_retoure(
                     "tenant_id": tenant_id,
                     "qty": pos.menge,
                     "retoure_id": retoure_id,
+                    "bon_nr": bon_nr,
                     "notes": f"POS Retoure {bon_nr}: {pos.grund or 'Rückgabe'}",
                     "artikelnr": pos.artikelnr,
                 }

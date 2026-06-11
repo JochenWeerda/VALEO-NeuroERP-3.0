@@ -1,0 +1,25 @@
+slice_id: INV-STOCK-MOVEMENTS-001
+title: Canonical inventory_stock_movements in articles and POS retoure
+owner: Cursor
+status: abgeschlossen
+coordination: >-
+  Folge-Slice zu COMPAT-GOV-001. Parallele fachliche Vertiefung durch Claude Code
+  an anderen Domain-Slices.
+goal: >-
+  Legacy-SQL-Pfade auf domain_inventory.stock_movements in articles.py und
+  pos_retoure.py auf inventory_stock_movements umstellen.
+file_ownership:
+  - app/api/v1/endpoints/articles.py
+  - app/api/v1/endpoints/pos_retoure.py
+  - tests/test_inventory_stock_movements_canonical.py
+  - docs/project-context/open-gaps-and-known-issues.md
+  - docs/agent-ops/active-workboard.md
+acceptance_criteria:
+  - Kein domain_inventory.stock_movements mehr unter app/api/v1/endpoints/.
+  - articles position-context nutzt charge auf inventory_stock_movements.
+  - pos_retoure schreibt kanonische Pflichtfelder inkl. warehouse_id.
+  - Vertragstests in test_inventory_stock_movements_canonical.py gruen.
+  - open-gaps und Workboard aktualisiert.
+risks:
+  - POS-Retoure aktualisiert articles.current_stock noch nicht.
+  - MHD/Expiry ohne Chargenstamm weiterhin unvollstaendig.

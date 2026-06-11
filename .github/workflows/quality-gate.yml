@@ -137,7 +137,9 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
-          pip install pytest-cov
+
+      - name: Check toolchain pins
+        run: python scripts/check_toolchain_pins.py
 
       - name: Check migrations (single head)
         run: python scripts/check_alembic_single_head.py
@@ -177,6 +179,18 @@ jobs:
 
       - name: Check critical backend coverage
         run: python scripts/check_critical_backend_coverage.py
+
+      - name: Generate release compatibility matrix
+        run: python scripts/generate_release_compatibility_matrix.py
+
+      - name: Upload release compatibility matrix
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-compatibility-matrix
+          path: |
+            artifacts/release-compatibility-matrix.json
+            artifacts/release-compatibility-matrix.md
+          retention-days: 90
 
   frontend:
     name: Frontend (lint + typecheck + build)

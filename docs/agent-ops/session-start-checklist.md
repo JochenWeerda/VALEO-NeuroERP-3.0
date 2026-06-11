@@ -24,6 +24,16 @@ Diese Checkliste minimiert Kontextverlust bei Neustarts oder Agentenwechseln.
 
 ## Vor dem ersten Edit
 
+- **Ist-Stand pruefen:** Code, Tests, Workboard, `open-gaps-and-known-issues.md` und
+  betroffene Slice-/Handshake-Doku lesen — nicht erneut implementieren, was bereits
+  erledigt oder parallel in Arbeit ist
 - eigenen Slice im Workboard aktualisieren
 - klaren Dateibesitz oder Themenbesitz festhalten
 - bei Ueberschneidung mit anderem Agenten Integrationspunkt dokumentieren
+
+## Nach jeder relevanten Aenderung (Pflicht)
+
+- Workboard-Stand und Slice-YAML (`status`, Ergebnis, offene Risiken)
+- betroffene Fach-/Operations-Doku (`open-gaps`, Runbooks, Handshakes)
+- README-/Index-Verweise, wenn neue Artefakte oder Gates entstehen
+- **nicht** nur Code committen und Doku offen lassen

@@ -10,16 +10,17 @@ Stand: `2026-06-11`
 **Ziel des Slices:** Nach PROD-READINESS-001 Kompatibilitätsmatrix und einheitliche Test-Toolchain-Pins repo-weit verbindlich machen.
 **Dateibesitz:** `config/release-toolchain-pins.json`, `scripts/generate_release_compatibility_matrix.py`, `scripts/check_toolchain_pins.py`, `tests/test_release_compatibility_governance.py`, `.github/workflows/quality-gate.yml`, `release-gates.yml`, `sonarcloud.yml`, `ci.yml`, Finance-`requirements.txt`, `docs/operations/dependency-and-compatibility-maintenance.md`, Handshake/Slices.
 **Abnahmekriterien:** Matrix-Generator in Quality-/Release-Gate; Toolchain-Drift blockiert CI; keine losen `pip install pytest-cov`; Finance-Subservices aligned; Tests grün.
-**Offene Risiken:** `recursionlimit` in `conftest.py` bleibt Coverage-Workaround; `stock_movements`-Altpfade → Folge-Slice `INV-STOCK-MOVEMENTS-001`.
+**Offene Risiken:** `recursionlimit` in `conftest.py` bleibt Coverage-Workaround; Vollsuite-Zahlen erst nach naechstem gruenen `quality-gate`-Lauf aktualisieren.
 
 ## INV-STOCK-MOVEMENTS-001
 
 **Von:** Cursor
-**Owner:** offen
-**Stand:** offen
+**Owner:** Cursor
+**Stand:** abgeschlossen 2026-06-11 — `articles.py` Chargenabfrage auf `inventory_stock_movements.charge`; `pos_retoure.py` INSERT auf kanonische Tabelle mit Pflichtfeldern/Warehouse-Subselect; kein `stock_movements` mehr unter `app/api/v1/endpoints/`; 3 Vertragstests grün.
 **Ziel des Slices:** Legacy-SQL-Pfade `domain_inventory.stock_movements` in `articles.py` und `pos_retoure.py` auf kanonische Tabelle `inventory_stock_movements` umstellen inkl. Chargen-/Bestandsvertrag.
 **Dateibesitz:** `app/api/v1/endpoints/articles.py`, `app/api/v1/endpoints/pos_retoure.py`, fokussierte Tests, Doku in `open-gaps-and-known-issues.md`.
 **Abnahmekriterien:** Keine Schreibpfade mehr auf `stock_movements`; Regression für Artikel-Bestand und POS-Retoure grün; Schema-Vertrag unverändert grün.
+**Offene Risiken:** POS-Retoure aktualisiert `articles.current_stock` noch nicht; MHD/Expiry weiterhin ohne Chargenstamm.
 
 ## CON-004.4 — Settlement-Übergabe + Storno
 

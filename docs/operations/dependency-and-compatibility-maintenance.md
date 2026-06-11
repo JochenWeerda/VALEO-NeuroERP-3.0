@@ -1,6 +1,19 @@
 # Dependency and Compatibility Maintenance
 
-Stand: 2026-06-10
+Stand: 2026-06-11
+
+## Release-Kompatibilitaetsmatrix
+
+Jede Release- oder Quality-Gate-Pruefung erzeugt ein gebundenes Artefakt:
+
+- Generator: `scripts/generate_release_compatibility_matrix.py`
+- Ausgabe: `artifacts/release-compatibility-matrix.json` und `.md`
+- Kanonische Toolchain-Pins: `config/release-toolchain-pins.json`
+- Drift-Check: `scripts/check_toolchain_pins.py`
+
+Die Matrix enthaelt mindestens Git-SHA, App-Version, Alembic-Head,
+API-Vertrag (`/api/v1`), Python/Node/pnpm-Versionen, Test-Toolchain-Pins
+und optionale Backend-/Frontend-Image-Digests aus dem Release-Gate.
 
 ## Grundsatz
 
