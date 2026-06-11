@@ -59,7 +59,27 @@ Marktnotierung.
 12 Unit-Tests grün (6 Fixing + 6 Fulfillment-Regression); tsc 0, eslint clean.
 DEMO-KT-004: 60 % fixiert, Bewertung +99,99 €, offener Marktwert 44.000 €.
 
+## Slice 004.3 — Engagement-Sicht + Kontraktmahnung (umgesetzt, 2026-06-11)
+- Migration `con_reminder_20260611` — append-only `domain_ops.kon_contract_reminder`
+  (Mahnstufe/offen/Text/Bediener). Engagement selbst ist read-only.
+- Service `app/services/contract_engagement_service.py`:
+  - reine, testbare Logik: `offen_menge` (nie negativ), `netto_position`
+    (Einkauf offen − Verkauf offen), `naechste_mahnstufe` (eskaliert 1,2,3…).
+  - `engagement()` — offene Menge je Artikel (mit Netto) und je Partei + Summary;
+    `dunning_candidates()` (überfällig + offen>0, mit letzter/nächster Mahnstufe);
+    `create_reminder` (Guard: nur bei offener Menge), `list_reminders`.
+- API: `GET /contracts/engagement`, `GET /contracts/dunning/candidates`,
+  `GET /contracts/dunning/list`, `POST /contracts/dunning`.
+- Frontend: `pages/agrar/kontrakt-engagement.tsx` (Summen-Kacheln, Engagement je
+  Artikel/Partei, Mahnkandidaten-Tabelle mit per-Zeile-Mahnen-Button + Toast) +
+  Hooks `lib/api/contract-engagement.ts` + Nav „Kontrakt-Engagement" + Route-Alias.
+- Tests: `tests/test_contract_engagement.py` (3 grün); Live-API verifiziert
+  (Engagement-Netto, Mahnung 200, erfüllter Kontrakt → 422).
+
+### Verifiziert (Seed)
+Engagement: Raps 00 EK +80, Weizen A VK −60, Weizen B MATIF VK −500 → Netto −480.
+Mahnkandidat DEMO-KT-002 (11 Tage überfällig, 60 offen). 15 Unit-Tests grün.
+
 ## Folge-Slices
-- **004.3** Engagement-Sicht (Summe offen je Artikel/Partei) + Kontraktmahnung.
 - **004.4** Settlement-Übergabe (Bewegung→Abrechnung) + Storno (inkl. Fixierungs-Storno).
 - **004.5** Browser-E2E + UAT.

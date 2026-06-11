@@ -401,6 +401,11 @@
       "source": "auto"
     },
     {
+      "module": "@/pages/agrar/kontrakt-engagement",
+      "path": "agrar/kontrakt-engagement",
+      "source": "alias"
+    },
+    {
       "module": "@/pages/agrar/kontrakt-erfuellung",
       "path": "agrar/kontrakt-erfuellung",
       "source": "alias"
