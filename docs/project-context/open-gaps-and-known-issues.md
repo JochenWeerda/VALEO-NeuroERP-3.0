@@ -5,18 +5,23 @@
 Ehrliche, aktuelle Bestandsaufnahme aller offenen Restthemen, fachlichen Duennstellen und bekannten Risiken.
 Production-Readiness-Nachaudit: **2026-06-09** (CI/Security, Deployment,
 simulierte externe Pruefer, POS-Fiskalisierung und CRM360/KIM).
+Governance-Nachzug: **2026-06-11** (`COMPAT-GOV-001`, `INV-STOCK-MOVEMENTS-001`,
+Release-Kompatibilitaetsmatrix, Toolchain-Pins, Lager-Altpfade bereinigt).
 Zuletzt vollstaendig auditiert: **2026-05-27** (Integrations-Gate Wave 18–22, Backend-Security, OpenAPI-Coverage).
 Aggregierte Gesamtsicht: [PROJEKT-GESAMTSTAND-2026-05-27.md](../PROJEKT-GESAMTSTAND-2026-05-27.md).
 
 ---
 
-## Build-Health (Stand 2026-05-27)
+## Build-Health (Stand 2026-06-11)
 
-- **TypeScript**: 0 Fehler (`tsc --noEmit`) — Wave-22-Gate
-- **Backend-Tests**: 9228 passed, 0 failed (2026-05-26, Commit `271bc5e12`) — alle 18 Ratchet-Pfade gruen; Gesamtabdeckung 64,85%
+- **TypeScript**: 0 Fehler (`tsc --noEmit`) — Wave-22-Gate (letzter Nachweis 2026-05-27)
+- **Backend-Tests**: 9228 passed, 0 failed (2026-05-26, Commit `271bc5e12`) — Vollsuite in dieser Session nicht neu gemessen; massgeblich naechster `quality-gate`-Lauf
+- **Governance-Vertragstests (2026-06-11, lokal)**: 8/8 gruen (`test_release_compatibility_governance`, `test_inventory_stock_movements_canonical`)
+- **Toolchain-Pins**: `scripts/check_toolchain_pins.py` gruen (pytest-cov/coverage repo-weit fixiert)
+- **Release-Matrix**: Generator + CI-Upload in `quality-gate.yml` / `release-gates.yml`
 - **OpenAPI-Routen mit `summary=`**: 2663 (100%, Wave-D2 Commit `554625ae7`)
-- **Frontend-Imports**: 0 gebrochene Importe
-- **Alembic**: 1 Head
+- **Frontend-Imports**: 0 gebrochene Importe (letzter Nachweis 2026-05-27)
+- **Alembic**: 1 Head (`con_settlement_storno_20260611`, 2026-06-11)
 - **Docker-Erstinstallation**: Alembic-Bootstrap und Mehr-Domaenen-Struktur auf leerer DB abgesichert
 - **Service-Layer**: Hauptwellen refaktoriert; Legacy-Endpunkte `harvest_acceptance.py`, `agrar_settlements.py` und `docflow.py` repo-seitig mit dedizierten Services nachgezogen (Stand 2026-05-21)
 - **Backend-Security**: Globale Bearer-Token-Auth, RFC-7807 Problem-Details, 62 Endpoints mit nosec-S608-Annotierungen (Wave 22 Backend-Security, Commits `4ab228f92` + `732d84376`); CI-Gate `scripts/check_sql_fstrings.py` aktiv
@@ -46,13 +51,11 @@ Aggregierte Gesamtsicht: [PROJEKT-GESAMTSTAND-2026-05-27.md](../PROJEKT-GESAMTST
 - Runbook:
   [production-readiness-runbook.md](../operations/production-readiness-runbook.md)
 
-- **Lagerbewegungs-Altpfade:** `articles.py` und `pos_retoure.py` enthalten
-  noch tolerante SQL-Pfade auf die historische Tabelle `stock_movements`.
-  Kanonisch ist `domain_inventory.inventory_stock_movements`. Die fachliche
-  Umstellung braucht einen eigenen Inventory/POS-Slice, weil Pflichtfelder,
-  Chargenmodell und Bestandsfortschreibung nicht durch reines Umbenennen
-  kompatibel sind. Bis dahin darf ein fehlgeschlagener Altpfad nicht als
-  Nachweis einer Lagerbuchung gewertet werden.
+- **Lagerbewegungs-Altpfade:** `INV-STOCK-MOVEMENTS-001` (2026-06-11) hat
+  `articles.py` und `pos_retoure.py` auf `inventory_stock_movements` umgestellt.
+  Offen bleibt die vollständige Bestandsfortschreibung bei POS-Retoure
+  (`articles.current_stock`-Update) und tieferes Chargen-/MHD-Modell jenseits
+  von `charge`.
 
 ### COVERAGE-001: Backend-Testabdeckung repo-weit weiter zu niedrig
 

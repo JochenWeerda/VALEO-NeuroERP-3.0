@@ -48,6 +48,12 @@ Diese Statusdatei verdichtet den aktuellen Gesamtstand, ohne die Detailnachweise
   - `Test-Fixes`: 6 vormals fehlschlagende Tests behoben (agrar_settlement_service, customer_service Monkeypatching)
 - Querschnittslieferung (2026-06-09, ausserhalb der Kernel-Waves):
   - `Production Readiness`: blockierende Release-/Security-Gates, CycloneDX-SBOM, produktiver Konfigurations-Preflight, getrennte immutable Backend-/Frontend-Images, atomare Staging-/Production-Deployments und simulierte externe Prueferprofile. Reale Fach-, Provider- und Betriebsfreigaben bleiben harte externe Gates.
+- Querschnittslieferung (2026-06-11, ausserhalb der Kernel-Waves):
+  - `COMPAT-GOV-001`: Release-Kompatibilitaetsmatrix (`scripts/generate_release_compatibility_matrix.py` → CI-Artefakt), kanonische Toolchain-Pins (`config/release-toolchain-pins.json`), Drift-Gate `scripts/check_toolchain_pins.py`, unpinned `pytest-cov` aus Quality-/Release-Gates entfernt.
+  - `INV-STOCK-MOVEMENTS-001`: `articles.py` und `pos_retoure.py` auf `domain_inventory.inventory_stock_movements` umgestellt; Vertragstests `tests/test_inventory_stock_movements_canonical.py`.
+  - Alembic-Head (repo-seitig verifiziert): `con_settlement_storno_20260611`.
+  - Governance-Vertragstests (lokal verifiziert): `test_release_compatibility_governance.py` (5) + `test_inventory_stock_movements_canonical.py` (3) gruen.
+  - Gesamtsuite-/Coverage-Zahlen: nicht in dieser Session neu gemessen — massgeblich ist der naechste gruene `quality-gate`-Lauf.
 - Letzte abgeschlossene Waves (2026-03):
   - `Wave 104`: Flow Spine DB-Persistenz, PCN DB, Tenant-Isolation, Outbox-Events, Agent-Action+RAG, Voice-Kanal
   - `Wave 103`: Touch-optimierte Feldworkflows (WCAG), Keyboard-first Kernmasken (~85%)

@@ -19,6 +19,11 @@ Sie ersetzt nicht die fachliche Dokumentation, sondern legt die verbindliche Sta
 
 - Source of Truth fuer Lieferstand ist `docs/architecture/process-kernel/STATUS.md` plus relevante `wave-*/STATUS.md`.
 - Vor jeder Umsetzung zuerst Doku und bestehende Entscheidungen lesen.
+- **Vor jedem Edit:** pruefen, ob die Umsetzung im Code, Workboard, Slice-YAML oder
+  `docs/project-context/open-gaps-and-known-issues.md` bereits existiert — keine
+  Doppelarbeit.
+- **Nach jeder relevanten Aenderung:** Doku nachziehen (Workboard, Slices, Handshakes,
+  Open-Gaps, Runbooks); Code ohne Doku-Update gilt nicht als abgeschlossen.
 - Keine stillen Annahmen: Annahmen explizit machen und dokumentieren.
 - Keine blinden Reverts fremder Aenderungen.
 - Bei paralleler Arbeit immer einen klaren Dateibesitz oder Themenbesitz definieren.

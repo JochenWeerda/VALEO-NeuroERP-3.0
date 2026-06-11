@@ -139,6 +139,10 @@ nul
 !.aider.conf.yml
 !.aiderignore
 
+# CI-generated release evidence (regenerate via quality-gate / release-gates)
+artifacts/*
+!artifacts/.gitkeep
+
 # Local analysis artifacts
 service_erp_endpoints.txt
 C*Tempanalyze.py

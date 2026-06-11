@@ -621,21 +621,28 @@ async def get_article_position_context(
         rows = db.execute(
             text(
                 """
-                SELECT batch_number,
-                       SUM(CASE WHEN movement_type IN ('in','adjustment_in') THEN quantity
-                                WHEN movement_type IN ('out','adjustment_out') THEN -quantity
-                                ELSE 0 END) AS qty,
-                       MAX(expiry_date) AS expiry_date,
+                SELECT charge AS batch_number,
+                       SUM(CASE
+                             WHEN movement_type IN ('in', 'return') THEN quantity
+                             WHEN movement_type = 'out' THEN -ABS(quantity)
+                             WHEN movement_type = 'adjustment' THEN quantity
+                             ELSE 0
+                           END) AS qty,
+                       NULL::date AS expiry_date,
                        warehouse_id
-                FROM domain_inventory.stock_movements
+                FROM domain_inventory.inventory_stock_movements
                 WHERE article_id = :article_id
                   AND tenant_id = :tenant_id
-                  AND batch_number IS NOT NULL
-                GROUP BY batch_number, warehouse_id
-                HAVING SUM(CASE WHEN movement_type IN ('in','adjustment_in') THEN quantity
-                                WHEN movement_type IN ('out','adjustment_out') THEN -quantity
-                                ELSE 0 END) > 0
-                ORDER BY batch_number
+                  AND charge IS NOT NULL
+                  AND charge <> ''
+                GROUP BY charge, warehouse_id
+                HAVING SUM(CASE
+                             WHEN movement_type IN ('in', 'return') THEN quantity
+                             WHEN movement_type = 'out' THEN -ABS(quantity)
+                             WHEN movement_type = 'adjustment' THEN quantity
+                             ELSE 0
+                           END) > 0
+                ORDER BY charge
                 """
             ),
             {"article_id": article_id, "tenant_id": effective_tenant},

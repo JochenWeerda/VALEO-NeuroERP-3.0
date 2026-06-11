@@ -1,0 +1,36 @@
+slice_id: COMPAT-GOV-001
+title: Compatibility Governance and Toolchain Hygiene
+owner: Cursor
+status: abgeschlossen
+coordination: >-
+  Parallele fachliche Vertiefung durch Claude Code (DOM-/CRM-/KIM-Slices).
+  Claude berührt keine Dateien aus file_ownership, bis dieser Slice abgeschlossen
+  ist. Handshake: docs/agent-ops/handshakes/claude-parallel-compat-gov-2026-06-11.md
+goal: >-
+  Nach PROD-READINESS-001 die verbleibende Governance-Schuld schließen:
+  einheitliche Toolchain-Pins, Workboard-Abschluss PROD-READINESS-001,
+  Vorbereitung INV-STOCK-MOVEMENTS-001, kein ungepinntes pytest-cov in CI.
+file_ownership:
+  - docs/agent-ops/active-workboard.md
+  - docs/agent-ops/slices/COMPAT-GOV-001.yaml
+  - docs/agent-ops/handshakes/claude-parallel-compat-gov-2026-06-11.md
+  - .github/workflows/quality-gate.yml
+  - .github/workflows/ci.yml
+  - requirements.txt
+  - scripts/python_deps_install.py
+  - services/finance/fibu-core/requirements.txt
+  - services/finance/fibu-gateway/requirements.txt
+  - services/finance/requirements.txt
+  - tests/conftest.py
+  - docs/architecture/process-kernel/STATUS.md
+acceptance_criteria:
+  - quality-gate.yml installiert pytest-cov nur über requirements.txt-Pin, kein loses pip install pytest-cov.
+  - Alle Python-Test-Requirements im Repo referenzieren konsistente pytest-cov/coverage-Versionen.
+  - PROD-READINESS-001 im Workboard und Slice-YAML auf abgeschlossen mit Handoff-Ergebnis.
+  - Process-Kernel STATUS.md Test-/Coverage-Stand auf aktuellen Nachweis aktualisiert.
+  - INV-STOCK-MOVEMENTS-001 als Folge-Slice vorbereitet (separat abgeschlossen 2026-06-11).
+  - Vollständiger pytest-Lauf und quality-gate-relevante Checks dokumentiert grün.
+risks:
+  - Parallele Claude-Migrationen können erneut Multi-Head erzeugen — vor Merge prüfen.
+  - recursionlimit in conftest bleibt Workaround; struktureller App-Startup-Slimming ist Folgescope.
+  - Vollsuite-/Coverage-Zahlen nur über naechsten gruenen quality-gate-Lauf verifizierbar.

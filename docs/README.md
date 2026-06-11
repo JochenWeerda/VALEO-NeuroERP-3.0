@@ -41,7 +41,7 @@ Sie richtet sich an:
 - `docs/adr/`: verbindliche Architektur- und Entscheidungsregeln
 - [Frontend Routing](c:/Users/Jochen/VALEO-NeuroERP-3.0/docs/architecture/frontend-routing/README.md): TanStack-Route-Tree, typisierte Deep Links und Legacy-Redirects
 - [Production Readiness Runbook](c:/Users/Jochen/VALEO-NeuroERP-3.0/docs/operations/production-readiness-runbook.md): harte Release-Gates, Auditor-Simulation, Deployment und externe Freigaben
-- [Dependency and Compatibility Maintenance](c:/Users/Jochen/VALEO-NeuroERP-3.0/docs/operations/dependency-and-compatibility-maintenance.md): Vertragsversionierung, Schema-Kompatibilitaet, Security-Patches und Major-Upgrades
+- [Dependency and Compatibility Maintenance](c:/Users/Jochen/VALEO-NeuroERP-3.0/docs/operations/dependency-and-compatibility-maintenance.md): Vertragsversionierung, Schema-Kompatibilitaet, Security-Patches, Major-Upgrades und Release-Kompatibilitaetsmatrix (`artifacts/release-compatibility-matrix.json`)
 
 ## Parallele Agentenarbeit
 

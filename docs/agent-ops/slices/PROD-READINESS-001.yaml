@@ -1,7 +1,7 @@
 slice_id: PROD-READINESS-001
 title: Production Readiness P0 Hardening
 owner: Codex
-status: reserved
+status: abgeschlossen
 coordination: >-
   Repo-weiter CI-, Deployment-, Security- und Dokumentations-Slice.
   KIM-DEPRECATE-COCKPIT-001 besitzt parallel nur kunden-cockpit.tsx und den
