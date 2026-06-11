@@ -70,6 +70,22 @@ SIV-2026-000005: Upload v1 + v2 (gleicher Typ, Versionierung), v2 entwurf→frei
 SIV-2026-000005: Wiedervorlage (fällig 2026-06-01) erscheint überfällig in der
 Worklist; Bescheid erfasst; Erledigen ok; erneut → 422.
 
+## Slice 004.4 — GoBD-Exportpaket + Paperless-Liveprobe (umgesetzt, 2026-06-11)
+- Service: `app/services/docflow_gobd_service.py` — reine `build_gobd_manifest`
+  (Artefakt-Hashes + Vorgangskette/Buchungen/Lücken + Prüfsumme SHA-256 über die
+  sortierten Artefakt-Hashes + Revisionssicherheit). `export_package(doc)` (reuse
+  `DocflowEvidenceService.evidence`, vermerkt `exported_at`/`exported_by` am Header →
+  schließt die „kein GoBD-Export"-Lücke); `paperless_probe` (tolerant: konfiguriert/
+  erreichbar/url/detail — **ehrlich gegated**, kein Schein-OK).
+- API (unter `/docflow/evidence`): `POST .../gobd-export`, `GET .../paperless-probe`.
+- Frontend: `pages/docflow/gobd-export.tsx` (Vorgang-Picker + Paperless-Status +
+  „GoBD-Paket erzeugen" + Manifest-Anzeige/Download) + Hooks `lib/api/docflow-gobd.ts`
+  + Nav „GoBD-Export" + Route. Keine Migration.
+- Tests: `tests/test_docflow_gobd.py` (4 grün).
+
+### Verifiziert (Live, mit Restore)
+PYTEST-6c3b9239: 2 Artefakte, revisionssicher, Prüfsumme + Export-Vermerk; Paperless-
+Probe meldet ehrlich „nicht konfiguriert" (keine PAPERLESS_URL in DEV).
+
 ## Folge-Slices
-- **004.4** GoBD-Exportpaket je Vorgang + DMS-/Paperless-Liveprobe.
 - **004.5** Browser-E2E + UAT-Nachweispaket.

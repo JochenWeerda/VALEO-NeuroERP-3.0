@@ -36,6 +36,7 @@ import {
   Banknote,
   CalendarCheck,
   CalendarClock,
+  PackageOpen,
 } from 'lucide-react'
 import type { RawNavItem } from '@/app/navigation/types'
 
@@ -382,6 +383,15 @@ export const RAW_NAV_SECTIONS: RawNavItem[] = [
         preferredPath: 'docflow/wiedervorlagen',
         keywords: ['wiedervorlage', 'bescheid', 'rückmeldung', 'frist', 'vorgang', 'dms', 'gobd', 'worklist', 'überfällig', 'dokument'],
         mcp: { businessDomain: 'finance', scope: 'finance:write' },
+      },
+      {
+        id: 'docflow-gobd-export',
+        label: 'GoBD-Export',
+        icon: PackageOpen,
+        module: '@/pages/docflow/gobd-export',
+        preferredPath: 'docflow/gobd-export',
+        keywords: ['gobd', 'export', 'exportpaket', 'manifest', 'prüfsumme', 'revisionssicher', 'paperless', 'dms', 'archiv', 'dokument'],
+        mcp: { businessDomain: 'finance', scope: 'finance:read' },
       },
       {
         id: 'periodensteuerung',

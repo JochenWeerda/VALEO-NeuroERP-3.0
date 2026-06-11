@@ -1561,6 +1561,11 @@
       "source": "alias"
     },
     {
+      "module": "@/pages/docflow/gobd-export",
+      "path": "docflow/gobd-export",
+      "source": "alias"
+    },
+    {
       "module": "@/pages/docflow/nachweisraum",
       "path": "docflow/nachweisraum",
       "source": "alias"
