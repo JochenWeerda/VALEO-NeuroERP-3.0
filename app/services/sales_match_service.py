@@ -66,6 +66,7 @@ class SalesMatchService:
                 "FROM domain_sales.delivery_notes dn "
                 "JOIN domain_sales.delivery_note_positions p ON p.delivery_note_id = dn.id "
                 "WHERE dn.sales_order_id::text = :oid AND dn.tenant_id = :t "
+                "AND COALESCE(dn.status,'') <> 'storniert' "
                 "GROUP BY p.artikel_nr"
             ),
             {"oid": order_id, "t": self.tenant_id},

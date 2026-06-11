@@ -3671,6 +3671,11 @@
       "source": "alias"
     },
     {
+      "module": "@/pages/sales/lieferung-storno",
+      "path": "sales/lieferung-storno",
+      "source": "alias"
+    },
+    {
       "module": "@/pages/sales/lieferungen-liste",
       "path": "sales/lieferungen",
       "source": "alias"
