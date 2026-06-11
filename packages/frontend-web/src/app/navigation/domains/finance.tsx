@@ -35,6 +35,7 @@ import {
   Search,
   Banknote,
   CalendarCheck,
+  CalendarClock,
 } from 'lucide-react'
 import type { RawNavItem } from '@/app/navigation/types'
 
@@ -371,6 +372,15 @@ export const RAW_NAV_SECTIONS: RawNavItem[] = [
         module: '@/pages/docflow/artefakt-freigabe',
         preferredPath: 'docflow/artefakt-freigabe',
         keywords: ['artefakt', 'upload', 'freigabe', 'versionierung', 'dms', 'gobd', 'sha-256', 'revisionssicher', 'archivieren', 'dokument'],
+        mcp: { businessDomain: 'finance', scope: 'finance:write' },
+      },
+      {
+        id: 'docflow-wiedervorlagen',
+        label: 'Wiedervorlagen & Bescheide',
+        icon: CalendarClock,
+        module: '@/pages/docflow/wiedervorlagen',
+        preferredPath: 'docflow/wiedervorlagen',
+        keywords: ['wiedervorlage', 'bescheid', 'rückmeldung', 'frist', 'vorgang', 'dms', 'gobd', 'worklist', 'überfällig', 'dokument'],
         mcp: { businessDomain: 'finance', scope: 'finance:write' },
       },
       {

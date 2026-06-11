@@ -1389,6 +1389,10 @@
       "path": "docflow/artefakt-freigabe"
     },
     {
+      "module": "@/pages/docflow/wiedervorlagen",
+      "path": "docflow/wiedervorlagen"
+    },
+    {
       "module": "@/pages/einkauf/wareneingangsabgleich",
       "path": "einkauf/wareneingangsabgleich"
     },

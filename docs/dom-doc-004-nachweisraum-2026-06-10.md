@@ -51,7 +51,25 @@ Docflow.
 SIV-2026-000005: Upload v1 + v2 (gleicher Typ, Versionierung), v2 entwurf→freigegeben
 →archiviert; archiviert→freigegeben → 422; Liste zeigt v2 „aktuell".
 
+## Slice 004.3 — Bescheid/Rückmeldung + Wiedervorlage (umgesetzt, 2026-06-11)
+- Migration `doc_followup_20260611` — `domain_docflow.document_followups` (Art
+  bescheid/rueckmeldung/wiedervorlage, Betreff/Text, faellig_am, status, Erledigt-
+  Audit). Idempotent.
+- Service: `app/services/docflow_followup_service.py` — reine `followup_overdue`
+  (offen + überfällig). `create_followup` (Wiedervorlage benötigt Fälligkeit),
+  `complete_followup` (Guard bereits erledigt), `list_followups`,
+  `open_wiedervorlagen` (domänenweite Worklist, überfällig markiert).
+- API (unter `/docflow/evidence`): `GET .../followups`, `POST .../followups`,
+  `POST .../followups/{id}/complete`, `GET .../wiedervorlagen`.
+- Frontend: `pages/docflow/wiedervorlagen.tsx` (Worklist offener Wiedervorlagen +
+  Vorgang-Picker + Followup-Erfassung/Erledigung) + Hooks `lib/api/docflow-followup.ts`
+  + Nav „Wiedervorlagen & Bescheide" + Route.
+- Tests: `tests/test_docflow_followup.py` (5 grün).
+
+### Verifiziert (Live, mit Restore)
+SIV-2026-000005: Wiedervorlage (fällig 2026-06-01) erscheint überfällig in der
+Worklist; Bescheid erfasst; Erledigen ok; erneut → 422.
+
 ## Folge-Slices
-- **004.3** Bescheid-/Rückmeldungspfad + Wiedervorlage am Vorgang.
 - **004.4** GoBD-Exportpaket je Vorgang + DMS-/Paperless-Liveprobe.
 - **004.5** Browser-E2E + UAT-Nachweispaket.
