@@ -1556,6 +1556,11 @@
       "source": "alias"
     },
     {
+      "module": "@/pages/docflow/artefakt-freigabe",
+      "path": "docflow/artefakt-freigabe",
+      "source": "alias"
+    },
+    {
       "module": "@/pages/docflow/nachweisraum",
       "path": "docflow/nachweisraum",
       "source": "alias"

@@ -365,6 +365,15 @@ export const RAW_NAV_SECTIONS: RawNavItem[] = [
         mcp: { businessDomain: 'finance', scope: 'finance:read' },
       },
       {
+        id: 'docflow-artefakt-freigabe',
+        label: 'Artefakt-Upload & Freigabe',
+        icon: ShieldCheck,
+        module: '@/pages/docflow/artefakt-freigabe',
+        preferredPath: 'docflow/artefakt-freigabe',
+        keywords: ['artefakt', 'upload', 'freigabe', 'versionierung', 'dms', 'gobd', 'sha-256', 'revisionssicher', 'archivieren', 'dokument'],
+        mcp: { businessDomain: 'finance', scope: 'finance:write' },
+      },
+      {
         id: 'periodensteuerung',
         label: 'Periodensteuerung',
         icon: Calendar,

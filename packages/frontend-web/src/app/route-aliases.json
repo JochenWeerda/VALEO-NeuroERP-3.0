@@ -1385,6 +1385,10 @@
       "path": "docflow/nachweisraum"
     },
     {
+      "module": "@/pages/docflow/artefakt-freigabe",
+      "path": "docflow/artefakt-freigabe"
+    },
+    {
       "module": "@/pages/einkauf/wareneingangsabgleich",
       "path": "einkauf/wareneingangsabgleich"
     },
