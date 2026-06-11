@@ -69,6 +69,17 @@ Stand: `2026-06-11`
 **Abnahmekriterien:** Keine Schreibpfade mehr auf `stock_movements`; Regression für Artikel-Bestand und POS-Retoure grün; Schema-Vertrag unverändert grün.
 **Offene Risiken:** POS-Retoure aktualisiert `articles.current_stock` noch nicht; MHD/Expiry weiterhin ohne Chargenstamm.
 
+## DOC-004.2 — Artefakt-Upload + Versionierung + Freigabe
+
+**Von:** Claude
+**Owner:** Claude
+**Stand:** ABGESCHLOSSEN 2026-06-11 — Migration `doc_artifact_version_20260611` (`document_artifacts` +version/+freigabe_status/+Audit), Service `docflow_artifact_service.py` (reine `next_version`/`valid_transition`/`sha256_hex` + `upload_artifact`/`set_freigabe`/`list_artifacts`), Endpoints `/docflow/evidence/artifacts[/{id}/freigabe]`, Frontend `pages/docflow/artefakt-freigabe.tsx` + Hooks + Nav + Route. 9 Backendtests grün (4 Artefakt + 5 Evidence-Regression), tsc 0, eslint clean; Live verifiziert (Upload v1/v2, Transitions, 422).
+**⚠️ Alembic-Koordination:** Paralleler PROC-Head (`proc_rfq_20260611`, Cursor). Meine Migration an meinem committeten Head (`sales_delivery_storno_20260611`) gekettet und gezielt angewandt. Merge-Head `doc_artifact_version` + PROC-Tip nötig, sobald beide committet (Single-Head-Gate).
+**Ziel des Slices:** Artefakt-Upload (SHA-256) + Versionierung je Header/Typ + Freigabe-Status-Transitions (entwurf→freigegeben→archiviert). DOM-DOC-004.2.
+**Dateibesitz:** `alembic/versions/doc_artifact_version_20260611.py`, `app/services/docflow_artifact_service.py`, `app/api/v1/endpoints/docflow_artifact.py`, `app/api/v1/api.py` (nur eigene include-Zeilen), `tests/test_docflow_artifact.py`, `packages/frontend-web/src/lib/api/docflow-artifact.ts`, `packages/frontend-web/src/pages/docflow/artefakt-freigabe.tsx`, `finance.tsx` (nur eigener Nav-Eintrag), `route-aliases.json` (+ generierte Route-Artefakte), DOC-Doku.
+**Abnahmekriterien:** Upload erzeugt SHA-256 + fortlaufende Version; Freigabe nur über zulässige Transitions (sonst 422); Liste markiert aktuelle Version; Backendtests + tsc + eslint grün.
+**Offene Risiken:** Realer Datei-Binärupload/Storage-Anbindung (S3/Paperless) hier als Inhalt→Hash-Vertrag; DMS-Liveprobe in 004.4. Bescheid/Wiedervorlage in 004.3.
+
 ## FIN-004.5 — DATEV-Export + E2E/UAT (DOM-FIN-004 ABGESCHLOSSEN)
 
 **Von:** Claude
