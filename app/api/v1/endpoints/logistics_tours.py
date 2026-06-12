@@ -107,6 +107,7 @@ class TourStopPatch(BaseModel):
     address: Optional[str] = None
     lat: Optional[float] = None
     lng: Optional[float] = None
+    delivery_note_ref: Optional[str] = None
 
 
 class TourIn(BaseModel):
@@ -200,7 +201,25 @@ def list_tours(
             text(f"SELECT * FROM domain_logistics.tours WHERE {where} ORDER BY created_at DESC"),  # nosec S608 — reviewed-safe: column names code-controlled, values parameterized
             params,
         ).mappings().all()
-        return [dict(r) for r in rows]
+        tour_rows = [dict(r) for r in rows]
+        ids = [str(r["id"]) for r in tour_rows if r.get("id")]
+        if ids:
+            bind = {f"id{i}": tid for i, tid in enumerate(ids)}
+            placeholders = ", ".join(f":id{i}" for i in range(len(ids)))
+            counts = db.execute(
+                text(
+                    f"SELECT tour_id, COUNT(*)::int AS stop_count FROM domain_logistics.tour_stops "  # nosec S608
+                    f"WHERE tour_id IN ({placeholders}) GROUP BY tour_id"
+                ),
+                bind,
+            ).mappings().all()
+            cmap = {str(c["tour_id"]): int(c["stop_count"] or 0) for c in counts}
+            for r in tour_rows:
+                r["stop_count"] = cmap.get(str(r["id"]), 0)
+        else:
+            for r in tour_rows:
+                r["stop_count"] = 0
+        return tour_rows
     except HTTPException:
         raise
     except Exception as exc:
@@ -400,6 +419,9 @@ def patch_stop(
         if body.lng is not None:
             updates.append("lng = :lng")
             params["lng"] = body.lng
+        if body.delivery_note_ref is not None:
+            updates.append("delivery_note_ref = :delivery_note_ref")
+            params["delivery_note_ref"] = body.delivery_note_ref
         if not updates:
             raise HTTPException(status_code=422, detail="Keine Felder zum Aktualisieren")
         db.execute(

@@ -117,7 +117,14 @@ export function usePlanIst(periode?: string) {
   })
 }
 
-export type Tour = { id: string; fahrer: string; stopps: number; km: number; status: 'geplant' | 'unterwegs' | 'abgeschlossen' }
+export type Tour = {
+  id: string
+  vehicleLabel: string | null
+  fahrer: string
+  stopps: number
+  km: number
+  status: 'geplant' | 'unterwegs' | 'abgeschlossen'
+}
 export type TourenData = {
   heute: number
   offen: number
@@ -134,10 +141,57 @@ const EMPTY_TOUREN: TourenData = {
   tourenListe: [],
 }
 
+/** Zeile aus ``GET /api/v1/logistik/tours`` (domain_logistics.tours + stop_count). */
+export type TourApiRow = {
+  id: string
+  date?: string | null
+  vehicle_id?: string | null
+  driver_id?: string | null
+  status?: string | null
+  stop_count?: number
+}
+
+function mapToursApiToTourenData(rows: TourApiRow[]): TourenData {
+  const todayIso = new Date().toISOString().slice(0, 10)
+  let heute = 0
+  let offen = 0
+  let unterwegs = 0
+  let abgeschlossen = 0
+  const tourenListe: Tour[] = []
+  for (const r of rows) {
+    const raw = (r.status || 'GEPLANT').toUpperCase()
+    const d = r.date ? String(r.date).slice(0, 10) : ''
+    if (d === todayIso) heute += 1
+    if (raw === 'ABGESCHLOSSEN' || raw === 'ERLEDIGT') {
+      abgeschlossen += 1
+    } else if (raw === 'UNTERWEGS' || raw === 'FAHRT' || raw === 'START') {
+      unterwegs += 1
+    } else {
+      offen += 1
+    }
+    let st: Tour['status'] = 'geplant'
+    if (raw === 'ABGESCHLOSSEN' || raw === 'ERLEDIGT') st = 'abgeschlossen'
+    else if (raw === 'UNTERWEGS' || raw === 'FAHRT' || raw === 'START') st = 'unterwegs'
+    tourenListe.push({
+      id: r.id,
+      vehicleLabel: r.vehicle_id ?? null,
+      fahrer: r.driver_id || '—',
+      stopps: Number(r.stop_count) || 0,
+      km: 0,
+      status: st,
+    })
+  }
+  return { heute, offen, unterwegs, abgeschlossen, tourenListe }
+}
+
 export function useTouren() {
   return useQuery({
     queryKey: ['logistik', 'touren'],
-    queryFn: async () => (await apiClient.get<TourenData>('/api/v1/logistik/touren')).data,
+    queryFn: async () => {
+      const { data } = await apiClient.get<TourApiRow[]>('/api/v1/logistik/tours')
+      const rows = Array.isArray(data) ? data : []
+      return mapToursApiToTourenData(rows)
+    },
     initialData: EMPTY_TOUREN,
     staleTime: 30 * 1000,
   })

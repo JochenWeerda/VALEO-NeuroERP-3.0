@@ -7,6 +7,9 @@ echten Daten verifizierbar ist. Tenant = Dev-Standardtenant.
 
 Lauf:
     docker exec valeo-neuro-erp-backend python scripts/seed_demo_sales.py
+
+Optional danach (Tour-Stopp mit Referenz DEMO-LS-001, LOG-SPINE-001):
+    python scripts/seed_demo_logistics_spine.py
 """
 
 from __future__ import annotations
