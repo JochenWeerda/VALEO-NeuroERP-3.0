@@ -15,6 +15,9 @@ interface CustomerListSidebarProps {
   onSelectCustomer: (id: string) => void;
   onOpenEnterprise: () => void;
   onOpenGlobalDocs: () => void;
+  /** Serverseitige Suche: debounced Suchbegriff (findet auch Kunden jenseits der
+   *  initial geladenen Seite). Optional — ohne Handler bleibt es reine Client-Suche. */
+  onSearchChange?: (term: string) => void;
 }
 
 // Filter: In. (inaktiv), Ku. (Kunde), Eh. (Sonder), Alle, Li. (Lieferant), Gesp. (gesperrt)
@@ -35,8 +38,17 @@ export default function CustomerListSidebar({
   onSelectCustomer,
   onOpenEnterprise,
   onOpenGlobalDocs,
+  onSearchChange,
 }: CustomerListSidebarProps) {
   const [searchTerm, setSearchTerm] = useState('');
+  // Serverseitige Suche debounced melden — ref-stabil, damit der Timer nicht bei
+  // jedem Render (neue Handler-Identität) zurückgesetzt wird.
+  const onSearchChangeRef = useRef(onSearchChange);
+  onSearchChangeRef.current = onSearchChange;
+  useEffect(() => {
+    const t = setTimeout(() => onSearchChangeRef.current?.(searchTerm.trim()), 300);
+    return () => clearTimeout(t);
+  }, [searchTerm]);
   const [activeFilter, setActiveFilter] = useState<L3FilterType>('KUNDE');
   const [selectedAlphabet, setSelectedAlphabet] = useState<string | null>(null);
   const [focusedIndex, setFocusedIndex] = useState<number>(-1);
