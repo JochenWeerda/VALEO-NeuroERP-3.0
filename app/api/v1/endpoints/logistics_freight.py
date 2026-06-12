@@ -1,6 +1,7 @@
 """
 Logistik – Frachtkostenberechnung (Feature 2)
 Thin-router pattern: sqlalchemy.text() SQL, domain_logistics schema.
+Schema/Tabelle ``freight_tariffs``: Alembic ``log_logistics_core_20260612``.
 """
 
 from __future__ import annotations
@@ -25,28 +26,6 @@ router = APIRouter(prefix="/logistik", tags=["logistik", "frachtkosten"])
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
-
-def _ensure_freight_table(db: Session) -> None:
-    try:
-        db.execute(text("CREATE SCHEMA IF NOT EXISTS domain_logistics"))
-        db.execute(text("""
-            CREATE TABLE IF NOT EXISTS domain_logistics.freight_tariffs (
-                id              TEXT PRIMARY KEY,
-                carrier_id      TEXT NOT NULL,
-                zone_from       TEXT,
-                zone_to         TEXT,
-                weight_from_kg  DOUBLE PRECISION NOT NULL DEFAULT 0,
-                weight_to_kg    DOUBLE PRECISION NOT NULL DEFAULT 999999,
-                price_per_100kg DOUBLE PRECISION NOT NULL,
-                min_charge      DOUBLE PRECISION NOT NULL DEFAULT 0,
-                tenant_id       TEXT,
-                created_at      TIMESTAMPTZ DEFAULT NOW()
-            )
-        """))
-        db.commit()
-    except Exception as exc:
-        raise HTTPException(status_code=503, detail=f"Datenbank nicht erreichbar: {exc}") from exc
-
 
 def _postal_to_zone(plz: str) -> str:
     """Einfache Zone aus den ersten 2 Ziffern der PLZ."""
@@ -144,7 +123,6 @@ def list_tariffs(
     db: Session = Depends(get_db),
 ) -> List[Dict[str, Any]]:
     """Tarif-Liste, optional nach Spediteur gefiltert."""
-    _ensure_freight_table(db)
     try:
         conditions = ["1=1"]
         params: Dict[str, Any] = {}
@@ -175,7 +153,6 @@ def create_tariff(
     db: Session = Depends(get_db),
 ) -> Dict[str, Any]:
     """Neuen Frachttarif anlegen."""
-    _ensure_freight_table(db)
     try:
         tariff_id = str(uuid.uuid4())
         db.execute(
@@ -204,7 +181,6 @@ def calculate_freight(
     db: Session = Depends(get_db),
 ) -> Dict[str, Any]:
     """Frachtkosten berechnen (mit Buchung / Logging)."""
-    _ensure_freight_table(db)
     return _calculate(db, body.carrier_id, body.weight_kg, body.postal_code_from, body.postal_code_to, body.distance_km)
 
 
@@ -220,5 +196,4 @@ def simulate_freight(
     db: Session = Depends(get_db),
 ) -> Dict[str, Any]:
     """Frachtkosten simulieren (kein Buchungs-Seiteneffekt)."""
-    _ensure_freight_table(db)
     return _calculate(db, carrier_id, weight_kg, postal_code_from, postal_code_to, distance_km)

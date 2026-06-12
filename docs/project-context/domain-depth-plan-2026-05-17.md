@@ -35,8 +35,11 @@ Fokussierter Teststand: 70 Tests gruen fuer CRM, Einkauf, Finance, Logistik, Rou
   `X-Tenant-ID`-Default auf Dev-Tenant-UUID (`playwright-tests/helpers/api.ts`,
   `playwright-tests/fixtures/testSetup.ts`). Doku: `docs/quality-assurance/playwright-smoke-auth.md`.
 - **Logistik Tiefen-Audit:** Ist-Inventar, Bruchstellen, empfohlene Slice-Reihenfolge
-  (`docs/workflows/wave-physical-chain-logistics-audit-2026-06-12.md`). Nächster technischer
-  Schritt: LOG-PROD-001 (Alembic statt Runtime-DDL in `logistics_tours` / `logistics_freight`).
+  (`docs/workflows/wave-physical-chain-logistics-audit-2026-06-12.md`).
+- **LOG-PROD-001 (2026-06-12):** Alembic `log_logistics_core_20260612` für
+  `domain_logistics` (Touren, Stopps, Events, Frachttarife); Runtime-DDL in
+  `logistics_tours.py` / `logistics_freight.py` entfernt; Integrationstests
+  `tests/test_logistics_integration.py`. Nächster Schritt laut Audit: **LOG-SPINE-001**.
 
 ---
 
