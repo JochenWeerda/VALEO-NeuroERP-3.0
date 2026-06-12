@@ -20,11 +20,12 @@ VALEO NeuroERP 3.0 ist ein mehrdomäniges ERP-System für Agrargenossenschaften 
 
 | Kennzahl | Stand |
 |----------|-------|
-| Doku-Stand | `2026-06-09` |
+| Doku-Stand | `2026-06-12` |
 | Produktreife | aktive Entwicklung, nicht allgemein produktionsreif |
 | Frontend TypeScript | 0 Fehler |
 | Backend-Testabdeckung | 64,85 % gesamt; 18/18 kritische Ratchet-Pfade grün |
-| Alembic | 1 Head |
+| Domänentiefe | `DOM-*-004`-Welle abgeschlossen: Kontrakte, O2C, FIBU, Beschaffung, Nachweisraum, Lieferkette je auf voller Tiefe ([Übersicht](docs/dom-004-spine-buildout-2026-06-12.md)) |
+| Alembic | 1 Head (`merge_doc_proc_20260612`) |
 | Service-Layer | Bekannte große Legacy-Endpunkte repo-seitig auf dedizierte Services nachgezogen |
 | Docker/Container | Erstinstallation, Keycloak-DB-Bootstrap und mehrere Healthcheck-/CRM-/Inventory-Fixes nachgezogen |
 | Production Release | Harte CI-/Security-Gates, SBOM, getrennte immutable Backend-/Frontend-Images, atomarer Helm-Rollout |
@@ -42,6 +43,7 @@ Der belastbare Ist-Zustand liegt in:
 ### Was das System heute abdeckt
 
 - **12+ Fachdomänen**: Agrar (Ernteannahme, Kontrakte, Trocknungsregeln), Verkauf, Einkauf, Lager, Finanzen/FIBU, CRM, Logistik, Compliance, HRM, POS, Futtermittel/Rationsoptimierung
+- **Prozessdurchgängige Domänentiefe (`DOM-*-004`)** — operative Endlogik nachgezogen: Kontrakt-Fixierung/MATIF/Settlement, O2C Match→Kreditlimit→Storno/Gutschrift, FIBU Mahnlauf→Auszifferung→Periodenabschluss→DATEV, GoBD-Nachweisraum (Upload/Freigabe/Wiedervorlage/Export), P2P 3-Wege-Match/ERS/RFQ, Lieferketten-Rückverfolgbarkeit — je mit Live-UAT verifiziert ([Übersicht](docs/dom-004-spine-buildout-2026-06-12.md))
 - **Multi-Tenancy** via `X-Tenant-ID` Header, OIDC-Authentifizierung (Keycloak/Azure AD/Auth0)
 - **Prozesskernel** — Waves 1–104 abgeschlossen, 8564 Tests grün
 - **Service-Layer** — zentrale Refaktorierungswellen abgeschlossen; `harvest_acceptance.py`, `agrar_settlements.py` und `docflow.py` sind auf dedizierte Services nachgezogen
@@ -136,6 +138,7 @@ powershell -ExecutionPolicy Bypass -File scripts/smoke_first_install_docker.ps1 
 
 **Belastbar vorhanden:**
 - Breiter Domänenschnitt über 12+ ERP-Bereiche
+- `DOM-*-004`-Tiefenwelle (Kontrakte, O2C, FIBU, Beschaffung, Nachweisraum, Lieferkette) auf voller Tiefe `.2`–`.5`, je mit reinen Logik-Unit-Tests und Live-UAT (mit DB-Restore) verifiziert
 - Prozesskernel mit Waves 1–104 abgeschlossen, 8564 Tests im letzten formalen Kernel-Status
 - Backend-Abdeckung 64,85 % im letzten formalen Kernel-Status; kritische Ratchet-Pfade grün
 - Service-Layer-Hauptwellen, Base-Worker/-Repository, Domain-Error-Konzept und dedizierte Services fuer die bekannten grossen Legacy-Endpunkte
@@ -172,11 +175,12 @@ VALEO NeuroERP 3.0 is a multi-domain ERP system for agricultural cooperatives an
 
 | Metric | As of |
 |--------|-------|
-| Docs date | `2026-06-09` |
+| Docs date | `2026-06-12` |
 | Maturity | active development, not generally production-ready |
 | Frontend TypeScript | 0 errors |
 | Backend test coverage | 64.85 % overall; 18/18 critical ratchet paths green |
-| Alembic | 1 head |
+| Domain depth | `DOM-*-004` wave completed: contracts, O2C, accounting, procurement, evidence room, supply chain at full depth ([overview](docs/dom-004-spine-buildout-2026-06-12.md)) |
+| Alembic | 1 head (`merge_doc_proc_20260612`) |
 | Service layer | known large legacy endpoints have repo-side dedicated services |
 | Docker/containers | first install, Keycloak DB bootstrap and several healthcheck/CRM/Inventory fixes delivered |
 | Production release | hard CI/security gates, SBOM, separate immutable backend/frontend images, atomic Helm rollout |
@@ -194,6 +198,7 @@ Authoritative status documents:
 ### What the System Covers Today
 
 - **12+ business domains**: Agrar (harvest acceptance, contracts, drying rules), Sales, Procurement, Inventory, Finance/Accounting, CRM, Logistics, Compliance, HRM, POS, Feed/Ration Optimization
+- **End-to-end domain depth (`DOM-*-004`)** — operational endgame logic delivered: contract fixing/MATIF/settlement, O2C match→credit limit→cancellation/credit note, accounting dunning→clearing→period close→DATEV, GoBD evidence room (upload/release/follow-up/export), P2P three-way match/ERS/RFQ, supply-chain traceability — each verified by live UAT ([overview](docs/dom-004-spine-buildout-2026-06-12.md))
 - **Multi-tenancy** via `X-Tenant-ID` header, OIDC authentication (Keycloak/Azure AD/Auth0)
 - **Process kernel** — Waves 1–104 completed, 8564 tests green
 - **Service layer** — central refactoring waves completed; `harvest_acceptance.py`, `agrar_settlements.py` and `docflow.py` are backed by dedicated services
@@ -288,6 +293,7 @@ powershell -ExecutionPolicy Bypass -File scripts/smoke_first_install_docker.ps1 
 
 **Solid and working:**
 - Broad domain coverage across 12+ ERP areas
+- `DOM-*-004` depth wave (contracts, O2C, accounting, procurement, evidence room, supply chain) at full depth `.2`–`.5`, each verified with pure-logic unit tests and live UAT (with DB restore)
 - Process kernel with Waves 1–104 completed, 8564 tests in the latest formal kernel status
 - Backend coverage 64.85 % in the latest formal kernel status; critical ratchet paths green
 - Main service-layer waves, BaseWorker/BaseRepository, domain error model and dedicated services for the known large legacy endpoints

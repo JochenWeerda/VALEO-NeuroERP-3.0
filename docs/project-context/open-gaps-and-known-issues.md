@@ -7,6 +7,9 @@ Production-Readiness-Nachaudit: **2026-06-09** (CI/Security, Deployment,
 simulierte externe Pruefer, POS-Fiskalisierung und CRM360/KIM).
 Governance-Nachzug: **2026-06-11** (`COMPAT-GOV-001`, `INV-STOCK-MOVEMENTS-001`,
 Release-Kompatibilitaetsmatrix, Toolchain-Pins, Lager-Altpfade bereinigt).
+Domaenentiefe-Nachzug: **2026-06-12** (`DOM-*-004`-Welle: CON, SALES, FIN, DOC, PROC,
+SUPPLY je auf voller Tiefe `.2`–`.5`). Uebersicht:
+[dom-004-spine-buildout-2026-06-12.md](../dom-004-spine-buildout-2026-06-12.md).
 Zuletzt vollstaendig auditiert: **2026-05-27** (Integrations-Gate Wave 18–22, Backend-Security, OpenAPI-Coverage).
 Aggregierte Gesamtsicht: [PROJEKT-GESAMTSTAND-2026-05-27.md](../PROJEKT-GESAMTSTAND-2026-05-27.md).
 
@@ -21,7 +24,8 @@ Aggregierte Gesamtsicht: [PROJEKT-GESAMTSTAND-2026-05-27.md](../PROJEKT-GESAMTST
 - **Release-Matrix**: Generator + CI-Upload in `quality-gate.yml` / `release-gates.yml`
 - **OpenAPI-Routen mit `summary=`**: 2663 (100%, Wave-D2 Commit `554625ae7`)
 - **Frontend-Imports**: 0 gebrochene Importe (letzter Nachweis 2026-05-27)
-- **Alembic**: 1 Head (`con_settlement_storno_20260611`, 2026-06-11)
+- **Alembic**: 1 Head (`merge_doc_proc_20260612`, 2026-06-12) — DOC-Branch (`doc_followup_20260611`) und PROC-Branch (`proc_rfq_20260611`) der DOM-*-004-Welle zusammengefuehrt; `init_db.py upgrade head` per Backend-Neustart verifiziert
+- **DOM-*-004-Tiefenwelle (2026-06-11/12)**: ~90 neue reine Logik-Unit-Tests gruen; 5 Live-UAT-Skripte (`scripts/uat/{con_contract,sales_o2c,fin_op,doc_nachweisraum,proc_match}_lifecycle_uat.py`, `--execute` mit DB-Restore); Frontend `tsc 0` + ESLint clean je Slice
 - **Docker-Erstinstallation**: Alembic-Bootstrap und Mehr-Domaenen-Struktur auf leerer DB abgesichert
 - **Service-Layer**: Hauptwellen refaktoriert; Legacy-Endpunkte `harvest_acceptance.py`, `agrar_settlements.py` und `docflow.py` repo-seitig mit dedizierten Services nachgezogen (Stand 2026-05-21)
 - **Backend-Security**: Globale Bearer-Token-Auth, RFC-7807 Problem-Details, 62 Endpoints mit nosec-S608-Annotierungen (Wave 22 Backend-Security, Commits `4ab228f92` + `732d84376`); CI-Gate `scripts/check_sql_fstrings.py` aktiv
@@ -75,6 +79,14 @@ Aggregierte Gesamtsicht: [PROJEKT-GESAMTSTAND-2026-05-27.md](../PROJEKT-GESAMTST
 - Das ist ein laufendes Ausbauprogramm, kein einzelner Bugfix.
 - Service-Layer-Refaktorierung: Haupt-Endpunkt-Welle 2026-05-16 abgeschlossen; bekannte grosse Legacy-Endpunkte 2026-05-21 nachgezogen.
 - Die naechste programmatische Vertiefung ist konkretisiert in [erp-reference-matrix-2026-04-12.md](c:/Users/Jochen/VALEO-NeuroERP-3.0/docs/project-context/erp-reference-matrix-2026-04-12.md) und den daraus abgeleiteten Slices `DOM-FIN-003`, `DOM-SUPPLY-003`, `DOM-PROC-003`, `DOM-CON-003`, `DOM-CRM-003`, `DOM-DOC-003`.
+- **`.004`-Tiefenwelle abgeschlossen (2026-06-11/12)** — die operative Endlogik dieser Domaenen ist nachgezogen (Detail: [dom-004-spine-buildout-2026-06-12.md](c:/Users/Jochen/VALEO-NeuroERP-3.0/docs/dom-004-spine-buildout-2026-06-12.md)):
+  - **DOM-CON-004** (Kontrakte): Fixierungs-Arbeitsraum + MATIF-Marktwert, Engagement-Sicht, Kontraktmahnung, Settlement-Uebergabe + Storno (`contract_{fixing,engagement,settlement}_service.py`).
+  - **DOM-SALES-004** (O2C): Positions-Match Auftrag↔Lieferschein, Kreditlimit-Pruefung, durchgaengiges Storno/Gutschrift (`sales_{match,credit,storno}_service.py`).
+  - **DOM-FIN-004** (FIBU): Mahnlauf + Stufen-Eskalation, Zahlungseingang/OP-Auszifferung, Periodenabschluss + Storno-Konsistenz, DATEV-Buchungsstapel-Export (`finance_{dunning,clearing,period,datev}_service.py`).
+  - **DOM-DOC-004** (Nachweisraum): Artefakt-Upload/Versionierung/Freigabe, Bescheid/Rueckmeldung/Wiedervorlage, GoBD-Exportpaket + Paperless-Liveprobe (`docflow_{artifact,followup,gobd}_service.py`).
+  - **DOM-PROC-004** (P2P): 3-Wege-Match (Rechnungsstufe), Folgeaktionen/Reklamation, ERS, RFQ→PO (`procurement_match_service.py`, `rfq_service.py`).
+  - **DOM-SUPPLY-004** (Lieferkette): durchgaengige Rueckverfolgbarkeit, Ketten-Event-Log, Lot-Folgeaktionen (Sperre/QS-Freigabe/Schwund), Ketten-Storno.
+  - **Extern gegated (ehrlich, kein Schein-OK):** zertifizierter DATEV-EXTF + Steuerberater-Cutover, DMS-/Paperless-Liveprobe (`PAPERLESS_URL`), reale Rohware-/Waage-/Druck-UAT-Unterschriften.
 - Erste Codewelle aktiv: FIBU-Abschluss, Rechnungsabgleich, Kontraktsteuerung, moderner CRM-Stamm, Servicefall, Dokumentenablage, Meldewesen sowie Waage/Tourenplanung nutzen bereits gemeinsame Domain-Zusammenfassungen fuer Operator-, Uebergabe- und Nachweisdruck.
 - Zweite Codewelle eingezogen: `fibu/schnittstellen-center.tsx`, `charge/wareneingang.tsx`, `einkauf/rechnungseingang.tsx`, `kontrakte/KontraktPositionsmonitor.tsx`, `crm/opportunity-detail.tsx` und `fibu/atlas.tsx`.
 - Dritte Codewelle aktiv: `finance/mahnwesen.tsx`, `fibu/zahlungslaeufe.tsx`, `waage/wiegeschein-detail.tsx`, `annahme/rohware.tsx`, `logistik/frachtbriefe.tsx`, `einkauf/lieferanten-dokumente.tsx`, `einkauf/anlieferavis.tsx`, `einkauf/auftragsbestaetigung.tsx`, `kontrakte/FrmKontraktDetail.tsx`, `kontrakte/KontraktAlarmDashboard.tsx`, `crm/kontakt-management.tsx` und `dokumente/ablage.tsx`.
