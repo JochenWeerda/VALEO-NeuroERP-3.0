@@ -2,6 +2,20 @@
 
 Stand: `2026-06-11`
 
+## WAVE-PHYS-CHAIN-001 — Task 0 Verifikation + Logistik-Audit
+
+**Von:** Cursor
+**Owner:** Cursor
+**Stand:** abgeschlossen 2026-06-12 — Playwright Dev-Session ohne Fake-Login; Audit-Dokument physische Kette / Logistik.
+**Ziel:** Blindfläche aus Advisor-Feedback schließen, bevor LOG-*-Slices gebaut werden.
+**Dateibesitz:** `playwright-tests/helpers/api.ts`, `playwright-tests/fixtures/testSetup.ts`, `docs/quality-assurance/playwright-smoke-auth.md`, `docs/workflows/wave-physical-chain-logistics-audit-2026-06-12.md`, `domain-depth-plan`.
+**Abnahmekriterien:** Doku + funktionierender Dev-Pfad für @smoke; keine parallelen DOM-005-Spines.
+
+## WAVE-PHYS-CHAIN-000 — (reserviert / Lead)
+
+**Von:** —
+**Stand:** offen — nächster Umsetzungsschritt: **LOG-PROD-001** laut Audit.
+
 ## PROC-RFQ-001 — RFQ production-ready
 
 **Von:** Cursor

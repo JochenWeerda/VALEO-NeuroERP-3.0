@@ -5,8 +5,8 @@
  * - Seed-Daten
  */
 
-import { test as base, Page } from '@playwright/test';
-import { ApiHelper, loginToPage, TEST_USERS, AuthCredentials } from '../helpers/api';
+import { Page, test as base } from '@playwright/test';
+import { ApiHelper, TEST_USERS, loginToPage } from '../helpers/api';
 import { FallbackDetector } from '../helpers/fallbackDetector';
 
 export interface UATFixtures {
@@ -19,9 +19,12 @@ export interface UATFixtures {
 }
 
 export const test = base.extend<UATFixtures>({
-  // Tenant-Isolation
-  tenant: async ({}, use) => {
-    const tenant = process.env.VALEO_TENANT || 'QA-UAT-01';
+  // Tenant-Isolation (Backend erwartet üblicherweise UUID; QA-UAT-01 bricht API-Calls)
+  tenant: async (_deps, use) => {
+    const tenant =
+      process.env.VALEO_TENANT ||
+      process.env.X_TENANT_ID ||
+      '00000000-0000-0000-0000-000000000001';
     await use(tenant);
   },
 
@@ -36,7 +39,7 @@ export const test = base.extend<UATFixtures>({
   adminPage: async ({ browser, tenant }, use) => {
     const context = await browser.newContext({
       extraHTTPHeaders: {
-        'X-Tenant': tenant,
+        'X-Tenant-ID': tenant,
       },
     });
     const page = await context.newPage();
@@ -57,7 +60,7 @@ export const test = base.extend<UATFixtures>({
   powerUserPage: async ({ browser, tenant }, use) => {
     const context = await browser.newContext({
       extraHTTPHeaders: {
-        'X-Tenant': tenant,
+        'X-Tenant-ID': tenant,
       },
     });
     const page = await context.newPage();
@@ -78,7 +81,7 @@ export const test = base.extend<UATFixtures>({
   readonlyPage: async ({ browser, tenant }, use) => {
     const context = await browser.newContext({
       extraHTTPHeaders: {
-        'X-Tenant': tenant,
+        'X-Tenant-ID': tenant,
       },
     });
     const page = await context.newPage();

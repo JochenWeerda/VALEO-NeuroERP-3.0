@@ -3,7 +3,7 @@
  * Auth, CRUD-Wrapper, Seed-Daten
  */
 
-import { Page, APIRequestContext } from '@playwright/test';
+import { APIRequestContext, Page } from '@playwright/test';
 
 export interface AuthCredentials {
   email: string;
@@ -164,21 +164,47 @@ export class ApiHelper {
 }
 
 /**
- * Login-Helper für Page-basierte Tests
+ * Session für Page-basierte Tests.
+ *
+ * Die Produkt-Login-Seite ist SSO-only (`Mit SSO anmelden`) — es gibt keine
+ * E-Mail/Passwort-Felder. Gegen **Vite-Dev** oder **Preview ohne OIDC** setzen
+ * wir den Dev-Token in `localStorage` (analog `AuthService` in der SPA).
+ *
+ * Gegen **reales OIDC** (Preview mit gesetzter `VITE_OIDC_DISCOVERY_URL`):
+ * `VALEO_PLAYWRIGHT_USE_SSO=1` setzen und gültige `VALEO_USER_*` / `VALEO_PASS_*`
+ * oder ein vorgefertigtes `storageState` verwenden (CI-Empfehlung).
  */
 export async function loginToPage(
   page: Page,
   credentials: AuthCredentials,
   baseURL: string
 ): Promise<void> {
-  await page.goto(`${baseURL}/auth/login`);
-  
-  await page.fill('input[name="email"], input[type="email"]', credentials.email);
-  await page.fill('input[name="password"], input[type="password"]', credentials.password);
-  await page.click('button[type="submit"]');
-  
-  // Warte auf erfolgreiche Navigation
-  await page.waitForURL(/dashboard|home/i, { timeout: 10000 });
+  const root = baseURL.replace(/\/$/, '');
+
+  if (process.env.VALEO_PLAYWRIGHT_USE_SSO === '1') {
+    await page.goto(`${root}/auth/login`);
+    await page.fill('input[name="email"], input[type="email"]', credentials.email);
+    await page.fill('input[name="password"], input[type="password"]', credentials.password);
+    await page.click('button[type="submit"]');
+    await page.waitForURL(/dashboard|home/i, { timeout: 15000 });
+    return;
+  }
+
+  const token =
+    process.env.VALEO_API_DEV_TOKEN ||
+    process.env.VITE_API_DEV_TOKEN ||
+    'dev-token';
+
+  await page.addInitScript((tok: string) => {
+    try {
+      localStorage.setItem('access_token', tok);
+    } catch {
+      /* ignore */
+    }
+  }, token);
+
+  await page.goto(`${root}/`, { waitUntil: 'domcontentloaded' });
+  await page.waitForLoadState('networkidle').catch(() => undefined);
 }
 
 /**
