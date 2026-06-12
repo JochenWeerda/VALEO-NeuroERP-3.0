@@ -1,0 +1,19 @@
+id: LOG-SPINE-001
+title: Lieferschein-Tour Read-Spine UI + Seed
+owner: Cursor
+status: abgeschlossen
+updated: 2026-06-12
+files:
+  - app/api/v1/endpoints/logistics_tours.py
+  - scripts/seed_demo_logistics_spine.py
+  - packages/frontend-web/src/lib/api/misc-modules.ts
+  - packages/frontend-web/src/lib/api/logistics-tours.ts
+  - packages/frontend-web/src/pages/logistik/tourenplanung.tsx
+  - docs/workflows/wave-physical-chain-logistics-audit-2026-06-12.md
+  - docs/agent-ops/active-workboard.md
+acceptance:
+  - GET /logistik/tours liefert stop_count; PATCH Stopp delivery_note_ref erlaubt
+  - Frontend ruft /logistik/tours korrekt auf; Tourenplanung mit Resolve + Tour-Hints
+  - seed_demo_logistics_spine.py idempotent nach seed_demo_sales
+abgrenzung_nicht:
+  - Kein Playwright-E2E in diesem Commit; kein globales Tour-Storno

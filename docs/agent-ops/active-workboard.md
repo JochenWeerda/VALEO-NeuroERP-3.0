@@ -32,7 +32,16 @@ Stand: `2026-06-11`
 ## WAVE-PHYS-CHAIN-000 — (reserviert / Lead)
 
 **Von:** —
-**Stand:** offen — nächster Umsetzungsschritt: **LOG-SPINE-001** laut Audit (`wave-physical-chain-logistics-audit-2026-06-12.md`).
+**Stand:** offen — nächster Umsetzungsschritt: **LOG-LIFE-001** laut Audit (`wave-physical-chain-logistics-audit-2026-06-12.md`).
+
+## LOG-SPINE-001 — Lieferschein ↔ Tour UI + Seed
+
+**Von:** Cursor
+**Owner:** Cursor
+**Stand:** abgeschlossen 2026-06-12 — `useTouren` → `/logistik/tours` + `stop_count`; Tourenplanung: Auflösen + Tour-Hints; `seed_demo_logistics_spine.py`; PATCH `delivery_note_ref`.
+**Ziel:** LOG-SPINE-RAND-001 im UI sichtbar machen; Demo-Daten idempotent.
+**Dateibesitz:** `misc-modules.ts`, `logistics-tours.ts`, `tourenplanung.tsx`, `logistics_tours.py`, Seed-Skript, Audit.
+**Abnahmekriterien:** `pnpm --filter @valero-neuroerp/frontend-web type-check` grün; Logistics-Unit-Tests grün.
 
 ## PROC-RFQ-001 — RFQ production-ready
 
