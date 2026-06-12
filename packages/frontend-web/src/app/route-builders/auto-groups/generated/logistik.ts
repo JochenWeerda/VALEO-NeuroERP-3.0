@@ -10,6 +10,10 @@ export const entries: AutoGroupRouteEntry[] = [
     "path": "frachttabellen"
   },
   {
+    "module": "@/pages/logistik/tour-fracht-arbeitsraum",
+    "path": "tour-fracht-arbeitsraum"
+  },
+  {
     "module": "@/pages/logistik/tourenplanung",
     "path": "tourenplanung"
   },

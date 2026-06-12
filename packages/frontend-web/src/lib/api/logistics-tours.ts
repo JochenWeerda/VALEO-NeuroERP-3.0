@@ -38,3 +38,23 @@ export async function resolveSalesDeliveryNoteByRef(ref: string): Promise<Delive
   })
   return res.data as DeliveryNoteHint
 }
+
+/** Fail-closed: nur GEPLANT, keine gelieferten Stopps (sonst 409). */
+export async function cancelLogisticsTour(tourId: string, body?: { grund?: string }): Promise<void> {
+  await apiClient.post(
+    `/api/v1/logistik/tours/${encodeURIComponent(tourId)}/cancel`,
+    body ?? {},
+  )
+}
+
+/** Fail-closed: Stopp nur GEPLANT/ANGEFAHREN (sonst 409). */
+export async function cancelLogisticsTourStop(
+  tourId: string,
+  stopId: string,
+  body?: { grund?: string },
+): Promise<void> {
+  await apiClient.post(
+    `/api/v1/logistik/tours/${encodeURIComponent(tourId)}/stops/${encodeURIComponent(stopId)}/cancel`,
+    body ?? {},
+  )
+}

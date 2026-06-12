@@ -123,7 +123,7 @@ export type Tour = {
   fahrer: string
   stopps: number
   km: number
-  status: 'geplant' | 'unterwegs' | 'abgeschlossen'
+  status: 'geplant' | 'unterwegs' | 'abgeschlossen' | 'storniert'
 }
 export type TourenData = {
   heute: number
@@ -166,12 +166,15 @@ function mapToursApiToTourenData(rows: TourApiRow[]): TourenData {
       abgeschlossen += 1
     } else if (raw === 'UNTERWEGS' || raw === 'FAHRT' || raw === 'START') {
       unterwegs += 1
+    } else if (raw === 'STORNIERT') {
+      /* weder offen noch „abgeschlossen“ im operativen Sinne */
     } else {
       offen += 1
     }
     let st: Tour['status'] = 'geplant'
     if (raw === 'ABGESCHLOSSEN' || raw === 'ERLEDIGT') st = 'abgeschlossen'
     else if (raw === 'UNTERWEGS' || raw === 'FAHRT' || raw === 'START') st = 'unterwegs'
+    else if (raw === 'STORNIERT') st = 'storniert'
     tourenListe.push({
       id: r.id,
       vehicleLabel: r.vehicle_id ?? null,

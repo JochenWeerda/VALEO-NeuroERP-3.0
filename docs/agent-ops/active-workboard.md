@@ -1,6 +1,6 @@
 # Active Workboard
 
-Stand: `2026-06-11`
+Stand: `2026-06-12`
 
 ## WAVE-PHYS-CHAIN-001 — Task 0 Verifikation + Logistik-Audit
 
@@ -19,6 +19,7 @@ Stand: `2026-06-11`
 **Ziel:** Production-gleiche Persistenz für Touren/ePOD/Statistik und Frachttarife (analog PROC-RFQ-001).
 **Dateibesitz:** `alembic/versions/log_logistics_core_20260612.py`, Logistik-Endpunkte, genannte Tests, Audit-Dokument.
 **Abnahmekriterien:** `alembic upgrade head` erzeugt Tabellen; keine `_ensure_schema` / `_ensure_freight_table` in den Routern; bestehende Unit-Tests mit Mocks angepasst.
+**2026-06-12:** Frachtkosten simulate/calculate mit **X-Tenant-ID-Pflicht** und SQL-Filter auf Tarifzeilen (kein Fremd-Tenant); Tests in `test_logistics_integration.py` / `test_logistics_tour_freight.py`. Anschliessend: **GET freight-tariffs** ohne Header nur `tenant_id IS NULL`; **POST freight-tariffs** verlangt Header (422) — weitere Integrationstests.
 
 ## LOG-SPINE-RAND-001 — Lieferschein-Referenz Read-Spine (Logistik)
 
@@ -29,10 +30,99 @@ Stand: `2026-06-11`
 **Dateibesitz:** `logistics_tours.py`, `tests/test_logistics_delivery_hint.py`, Wave-Audit, Slice-YAML.
 **Abnahmekriterien:** Neuer GET-Resolve + optional `include_delivery_hints` auf Tour-Detail; Tests gruen.
 
+## LOG-LIFE-001 — Tour-/Stopp-Storno (fail-closed) + UAT
+
+**Von:** Cursor
+**Owner:** Cursor
+**Stand:** abgeschlossen 2026-06-12 — API-Storno in `logistics_tours.py`, Frontend
+`misc-modules.ts` / `tourenplanung.tsx`, Integrationstest
+`test_tour_cancel_fail_closed_and_stop_cancel`, UAT
+`scripts/uat/logistics_tour_lifecycle_uat.py`; Decorator-Fix `add_event`.
+**Ziel:** Storno ohne Medienbruch; 409/422/403 fail-closed; reproduzierbares UAT.
+**Dateibesitz:** genannte Dateien + Wave-Audit.
+**Abnahmekriterien:** Storno-POSTs + Tests + UAT-Skript (dry-run/execute) dokumentiert.
+**Review (Claude, 2026-06-12):** zwei Fixes direkt eingespielt — (1) `test_freight_tariff_create_and_simulate`
+war versehentlich in den neuen Storno-Test hineingemergt (Methodenzeile ersetzt statt eingefügt);
+wieder als eigene Testmethode ausgegliedert. (2) `add_event`: `status_code=201` wiederhergestellt
+(der Decorator-Umbau hatte den Create-Statuscode stillschweigend auf 200 geändert; kein Konsument
+hängt daran, aber Vertrag bleibt so stabil). Verifiziert: `pytest tests/test_logistics_integration.py
+tests/test_logistics_delivery_hint.py` → 6/6 grün; ESLint + `type-check:focused` grün.
+
+## LOG-CHAIN-001 — Ketten-Lifecycle (Audit Bruchstelle 2)
+
+**Von:** Cursor
+**Owner:** Cursor
+**Stand:** abgeschlossen 2026-06-12 — Integrationstest
+`test_chain_lifecycle_ls_tour_hints_freight_supply_read` in `tests/test_logistics_integration.py`
+(ohne `DEMO-LS-001` aus `seed_demo_sales.py`: Skip), UAT
+`scripts/uat/logistics_chain_lifecycle_uat.py`; Wave-Audit Abschnitt 2 Punkt 2 geschlossen.
+**Ziel:** Reproduzierbare Kette **Lieferschein-Ref → Tour mit Hints → Fracht simulate →
+`GET /supply-chain/traceability/tickets` (Settlement-Seite read-only) → Tour-Storno**.
+**Dateibesitz:** genannte Test-/UAT-Dateien, Audit-Dokument.
+**Abnahmekriterien:** Test + UAT (dry-run/execute) dokumentiert; keine Abrechnungs-Mutation im Slice.
+
+## LOG-LIFE-UI — Tour-Storno in der Tourenplanung (Frontend)
+
+**Von:** Cursor
+**Owner:** Cursor
+**Stand:** abgeschlossen 2026-06-12 — `cancelLogisticsTour` / optional `cancelLogisticsTourStop`
+in `logistics-tours.ts`; Tourenplanung: Bestätigungsdialog, `invalidateQueries(['logistik','touren'])`,
+Toasts, Pending-State.
+**Ziel:** LOG-LIFE-001 vom Schreibtisch aus bedienbar ohne REST-Client.
+**Dateibesitz:** `tourenplanung.tsx`, `logistics-tours.ts`, Wave-Audit, Workboard.
+
+## LOG-TF-WS-001 — Tour & Fracht Dispo-Arbeitsraum (gemeinsame Route)
+
+**Von:** Cursor
+**Owner:** Cursor
+**Stand:** abgeschlossen 2026-06-12 — Seite `tour-fracht-arbeitsraum.tsx`, Nav-Eintrag, Auto-Route
+`logistik/tour-fracht-arbeitsraum`, Domain-Landing `tour-fracht-arbeitsraum`; `routes:generate` + Navigation-Check gruen;
+Erweiterung: **RoleFocusBar**, **Frachtkosten-Kurzcard** (`logistics-freight.ts` → Tarife + GET simulate).
+**Ziel:** Wave-Audit Punkt 5 — eine operative Einstiegssicht fuer Tour + Frachtbrief.
+**Dateibesitz:** genannte Dateien, `operations.tsx`, `dashboard-catalog.ts`, `auto-groups/generated/logistik.ts`.
+**Review (Claude, 2026-06-12):** keine Befunde — `useSupplyChainOverview` liefert `initialData`
+(kein Undefined-Zugriff auf `chain` vor dem Load), Frachtkosten-Probe mit Pending-Guard/finally/Toast,
+ESLint auf beiden neuen Dateien grün.
+**E2E:** Route in `main-routes-smoke.spec.ts` (expectedText) und `visual-tour.spec.ts` ergänzt.
+
+## FEED-CHAIN-001 — Produktion→Charge-Durchstich (Mischfutter)
+
+**Von:** Claude
+**Owner:** Claude
+**Stand:** abgeschlossen 2026-06-12 — Migration `feed_chain_verbrauch_20260612` (Single-Head),
+Service + Endpoint-Umbau, Seed `seed_demo_feed_chain.py` (DEMO-MLF-18), 7 neue Tests grün,
+20 Bestands-Regressionstests grün, UAT dry-run + `--execute` gegen Live-Backend grün.
+**Ziel:** Belegbruch schließen: Produktionsauftrag ``fertig`` erzeugt die Fertigwaren-Charge
+(``domain_ops.ops_chargen``) mit Mischprotokoll (``rohstoffe``/``produktionsprozess``) statt
+nur ``fertig_am``; Verbrauchs-Snapshot bei Freigabe (fixt auch Bestandsdrift beim Storno nach
+Rezeptänderung); Trace Auftrag/Charge → Komponenten.
+**Dateibesitz:** `app/api/v1/endpoints/produktion_mischfutter.py`,
+`app/services/feed_production_chain_service.py` (neu), `app/infrastructure/models/futtermittel_models.py`,
+Alembic `feed_chain_verbrauch_20260612`, `tests/test_feed_production_chain.py` (neu),
+`scripts/uat/feed_production_chain_uat.py` (neu), Audit-Doc Futtermittel-Kette.
+**Abnahmekriterien:** fertig → Charge idempotent + fail-closed (409 bei fremder chargen_id);
+Storno restauriert exakt den Freigabe-Verbrauch; Trace-GET; Tests + UAT grün.
+
+## FEED-CHAIN-002 — Produktions-Lifecycle im Frontend (Mischfutter)
+
+**Von:** Claude
+**Owner:** Claude
+**Stand:** in Arbeit 2026-06-12.
+**Ziel:** Kette vom Schreibtisch aus bedienbar. Befund: Wizard postet ``{rezeptur, menge}``,
+Backend erwartet ``{rezept_id, menge_t}`` (→ 422, Create war tot); Komponenten-Map nutzt
+``k.name`` statt ``komponente_name`` (Bedarfsprüfung leer). Fix der Hooks/Payloads +
+Auftragsliste mit Statusübergängen (freigeben → in_produktion → fertig → storniert),
+Charge-Link nach ``fertig`` und Trace-Ansicht; Per-Entity-Pending laut Invariante.
+**Dateibesitz:** `packages/frontend-web/src/lib/api/produktion.ts`,
+`packages/frontend-web/src/pages/produktion/mischfutter-produktion.tsx`, Audit-Doc Futtermittel-Kette.
+**Abnahmekriterien:** Create gegen echtes Backend (201), Statusaktionen mit keyed Pending +
+Toast, fertige Aufträge zeigen Charge/Trace; ESLint + type-check grün.
+
 ## WAVE-PHYS-CHAIN-000 — (reserviert / Lead)
 
 **Von:** —
-**Stand:** offen — nächster Umsetzungsschritt: **LOG-LIFE-001** laut Audit (`wave-physical-chain-logistics-audit-2026-06-12.md`).
+**Stand:** offen — optional: Fracht-Storno-API/UI; segmentierte Route-Blocks (z. B. block-038)
+bei Bedarf per Harvest neu erzeugen. Logistik-Dispo-Route ist in **main-routes-smoke** + **visual-tour** verankert.
 
 ## LOG-SPINE-001 — Lieferschein ↔ Tour UI + Seed
 

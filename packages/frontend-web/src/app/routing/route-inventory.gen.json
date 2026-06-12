@@ -3066,6 +3066,11 @@
       "source": "auto"
     },
     {
+      "module": "@/pages/logistik/tour-fracht-arbeitsraum",
+      "path": "logistik/tour-fracht-arbeitsraum",
+      "source": "auto"
+    },
+    {
       "module": "@/pages/logistik/tourenplanung",
       "path": "logistik/tourenplanung",
       "source": "auto"

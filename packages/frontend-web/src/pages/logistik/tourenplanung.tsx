@@ -1,14 +1,30 @@
 import { useCallback, useState } from 'react'
+import { useQueryClient } from '@tanstack/react-query'
+import {
+  AlertDialog,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Calendar, MapPin, Truck } from 'lucide-react'
-import { useTouren } from '@/lib/api/misc-modules'
+import { useTouren, type Tour } from '@/lib/api/misc-modules'
 import { useSupplyChainOverview } from '@/lib/api/supply-chain'
 import { getAxiosErrorMessage } from '@/lib/api-client'
-import { fetchTourWithDeliveryHints, resolveSalesDeliveryNoteByRef, type DeliveryNoteHint } from '@/lib/api/logistics-tours'
+import {
+  cancelLogisticsTour,
+  fetchTourWithDeliveryHints,
+  resolveSalesDeliveryNoteByRef,
+  type DeliveryNoteHint,
+} from '@/lib/api/logistics-tours'
 import { useToast } from '@/hooks/use-toast'
 import { OperationalCaseHeader } from '@/components/workflow/OperationalCaseHeader'
 import { OperationalContextPanel } from '@/components/workflow/OperationalContextPanel'
@@ -25,6 +41,28 @@ import { normalizeOperationalStatus } from '@/lib/operational-status'
 import { summarizeSupplyTransfer } from '@/lib/domain-depth'
 
 type LogisticsRoleFocus = 'all' | 'dispatch' | 'driver' | 'warehouse-scale' | 'quality' | 'management'
+
+function tourStatusLabel(status: Tour['status']): string {
+  switch (status) {
+    case 'unterwegs':
+      return 'Unterwegs'
+    case 'geplant':
+      return 'Geplant'
+    case 'abgeschlossen':
+      return 'Abgeschlossen'
+    case 'storniert':
+      return 'Storniert'
+    default:
+      return status
+  }
+}
+
+function tourStatusBadgeVariant(status: Tour['status']): 'default' | 'secondary' | 'outline' | 'destructive' {
+  if (status === 'unterwegs') return 'secondary'
+  if (status === 'abgeschlossen') return 'outline'
+  if (status === 'storniert') return 'destructive'
+  return 'default'
+}
 
 const logisticsRoleProfiles: Array<{ id: LogisticsRoleFocus; label: string; description: string }> = [
   {
@@ -61,6 +99,7 @@ const logisticsRoleProfiles: Array<{ id: LogisticsRoleFocus; label: string; desc
 
 export default function TourenplanungPage(): JSX.Element {
   const { toast } = useToast()
+  const queryClient = useQueryClient()
   const [roleFocus, setRoleFocus] = useState<LogisticsRoleFocus>('all')
   const [lsRef, setLsRef] = useState('DEMO-LS-001')
   const [lsBusy, setLsBusy] = useState(false)
@@ -68,6 +107,9 @@ export default function TourenplanungPage(): JSX.Element {
   const [hintTourId, setHintTourId] = useState<string | null>(null)
   const [hintText, setHintText] = useState('')
   const [hintBusy, setHintBusy] = useState(false)
+  const [tourCancelTarget, setTourCancelTarget] = useState<Tour | null>(null)
+  const [tourCancelGrund, setTourCancelGrund] = useState('')
+  const [tourCancelSubmitting, setTourCancelSubmitting] = useState(false)
   const { data: touren, isLoading } = useTouren()
   const { data: chain } = useSupplyChainOverview()
   const transferSummary = summarizeSupplyTransfer(chain)
@@ -118,6 +160,23 @@ export default function TourenplanungPage(): JSX.Element {
     },
     [toast],
   )
+
+  const handleConfirmTourCancel = useCallback(async () => {
+    if (!tourCancelTarget) return
+    setTourCancelSubmitting(true)
+    try {
+      const grund = tourCancelGrund.trim()
+      await cancelLogisticsTour(tourCancelTarget.id, grund ? { grund } : {})
+      await queryClient.invalidateQueries({ queryKey: ['logistik', 'touren'] })
+      toast({ title: 'Tour storniert', description: tourCancelTarget.vehicleLabel || tourCancelTarget.id.slice(0, 8) })
+      setTourCancelTarget(null)
+      setTourCancelGrund('')
+    } catch (e) {
+      toast({ title: 'Storno fehlgeschlagen', description: getAxiosErrorMessage(e), variant: 'destructive' })
+    } finally {
+      setTourCancelSubmitting(false)
+    }
+  }, [queryClient, toast, tourCancelGrund, tourCancelTarget])
 
   if (isLoading || !touren) {
     return (
@@ -235,12 +294,55 @@ export default function TourenplanungPage(): JSX.Element {
     },
   ]
   const timelineItems = touren.tourenListe.slice(0, 4).map((tour) => ({
-    label: `${tour.vehicleLabel || tour.id.slice(0, 8)} - ${tour.status === 'unterwegs' ? 'Unterwegs' : tour.status === 'geplant' ? 'Geplant' : 'Abgeschlossen'}`,
+    label: `${tour.vehicleLabel || tour.id.slice(0, 8)} - ${tourStatusLabel(tour.status)}`,
     detail: `${tour.fahrer}, ${tour.stopps} Stopps, ${tour.km} km`,
   }))
 
   return (
     <div className="space-y-6 p-3 md:p-6">
+      <AlertDialog
+        open={tourCancelTarget !== null}
+        onOpenChange={(open) => {
+          if (!open && !tourCancelSubmitting) {
+            setTourCancelTarget(null)
+            setTourCancelGrund('')
+          }
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Tour stornieren?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Die API erlaubt Storno nur fuer Touren im Status <strong>GEPLANT</strong> ohne gelieferte Stopps.
+              Andernfalls erhalten Sie eine fachliche Ablehnung (409).
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <div className="space-y-2 py-2">
+            <Label htmlFor="tour-storno-grund">Grund (optional)</Label>
+            <Input
+              id="tour-storno-grund"
+              value={tourCancelGrund}
+              onChange={(e) => setTourCancelGrund(e.target.value)}
+              placeholder="z. B. Umdisposition, Kundenabsage"
+              disabled={tourCancelSubmitting}
+            />
+          </div>
+          <AlertDialogFooter>
+            <AlertDialogCancel type="button" disabled={tourCancelSubmitting}>
+              Abbrechen
+            </AlertDialogCancel>
+            <Button
+              type="button"
+              variant="destructive"
+              disabled={tourCancelSubmitting}
+              onClick={() => void handleConfirmTourCancel()}
+            >
+              {tourCancelSubmitting ? 'Wird storniert…' : 'Stornieren'}
+            </Button>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
       <OperationalCaseHeader
         title="Tourenplanung"
         description="Disposition, Fahrzeugbelegung und Status laufender Liefertouren."
@@ -435,9 +537,22 @@ export default function TourenplanungPage(): JSX.Element {
                   >
                     Lieferschein-Hints
                   </Button>
-                  <Badge variant={tour.status === 'unterwegs' ? 'secondary' : tour.status === 'abgeschlossen' ? 'outline' : 'default'}>
-                    {tour.status === 'unterwegs' ? 'Unterwegs' : tour.status === 'geplant' ? 'Geplant' : 'Abgeschlossen'}
-                  </Badge>
+                  {tour.status === 'geplant' ? (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      className="border-destructive/40 text-destructive hover:bg-destructive/10"
+                      disabled={tourCancelSubmitting}
+                      onClick={() => {
+                        setTourCancelGrund('')
+                        setTourCancelTarget(tour)
+                      }}
+                    >
+                      Tour stornieren
+                    </Button>
+                  ) : null}
+                  <Badge variant={tourStatusBadgeVariant(tour.status)}>{tourStatusLabel(tour.status)}</Badge>
                 </div>
               </div>
             ))}
