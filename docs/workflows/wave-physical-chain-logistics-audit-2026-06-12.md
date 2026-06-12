@@ -51,6 +51,8 @@
    **Stand 2026-06-12:** Route ``/logistik/tour-fracht-arbeitsraum`` („Tour & Fracht (Dispo)“) mit
    gemeinsamer Lage, Tasks, Entscheidungspanel und Sprung zu Tourenplanung/Frachtbriefen;
    Logistik-Domain-Landing zeigt diese Seite zuerst.
+7. **Fracht-Tarif-Storno (soft):** **LOG-FREIGHT-STORNO-001** (2026-06-13) — ``POST …/freight-tariffs/{id}/cancel``,
+   Alembic ``log_freight_tariff_storno_20260613``, UI im Dispo-Arbeitsraum; schließt optionalen Punkt aus **WAVE-PHYS-CHAIN-000**.
 
 ## 4. Bewusst nicht in dieser Welle
 

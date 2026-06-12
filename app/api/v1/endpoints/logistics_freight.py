@@ -9,11 +9,16 @@ Tenant: ``GET /freight-cost/simulate``, ``POST /freight-cost/calculate`` und ``P
 
 ``GET /freight-tariffs``: ohne ``X-Tenant-ID`` nur Zeilen mit ``tenant_id IS NULL`` (kein
 Mandanten-Leak). Mit Header: eigener Mandant plus globale Tarife.
+
+Storno: ``POST /freight-tariffs/{id}/cancel`` (``X-Tenant-ID``) setzt ``status=STORNIERT``;
+nur Mandanten-Tarife (nicht ``tenant_id IS NULL``). Simulate/Calculate ignorieren stornierte Zeilen.
+Alembic: ``log_freight_tariff_storno_20260613``.
 """
 
 from __future__ import annotations
 
 import uuid
+from datetime import datetime, timezone
 from typing import Optional, List, Any, Dict
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Header
@@ -23,7 +28,7 @@ from sqlalchemy.orm import Session
 
 from app.core.database import get_db
 
-from app.api.v1.schemas.base import BaseSchema, IDResponse
+from app.api.v1.schemas.base import IDResponse
 from app.api.v1.schemas.logistics_freight_schemas import LogisticsFreightOut
 
 
@@ -57,6 +62,7 @@ def _calculate(
             SELECT * FROM domain_logistics.freight_tariffs
             WHERE carrier_id = :carrier_id
               AND (tenant_id IS NULL OR tenant_id = :tenant_id)
+              AND COALESCE(status, 'AKTIV') = 'AKTIV'
               AND (zone_from IS NULL OR zone_from = :zone_from)
               AND (zone_to   IS NULL OR zone_to   = :zone_to)
               AND weight_from_kg <= :weight_kg
@@ -119,6 +125,10 @@ class FreightCalcIn(BaseModel):
     weight_kg: float
     postal_code_from: str
     postal_code_to: str
+
+
+class FreightTariffCancelIn(BaseModel):
+    grund: str = ""
 
 
 # ---------------------------------------------------------------------------
@@ -186,6 +196,68 @@ def create_tariff(
         )
         db.commit()
         return {"id": tariff_id, **body.model_dump(), "tenant_id": x_tenant_id}
+    except HTTPException:
+        raise
+    except Exception as exc:
+        raise HTTPException(status_code=503, detail=str(exc)) from exc
+
+
+@router.post(
+    "/freight-tariffs/{tariff_id}/cancel",
+    summary="Fracht-Tarif stornieren (soft, Mandanten-Tarife)",
+    response_model=LogisticsFreightOut,
+)
+def cancel_tariff(
+    tariff_id: str,
+    body: FreightTariffCancelIn,
+    x_tenant_id: Optional[str] = Header(None),
+    db: Session = Depends(get_db),
+) -> Dict[str, Any]:
+    """Tarifzeile auf STORNIERT setzen; globale Tarife (``tenant_id IS NULL``) sind geschuetzt."""
+    if not x_tenant_id:
+        raise HTTPException(status_code=422, detail="X-Tenant-ID erforderlich.")
+    try:
+        row = db.execute(
+            text("SELECT * FROM domain_logistics.freight_tariffs WHERE id = :id"),
+            {"id": tariff_id},
+        ).mappings().first()
+        if not row:
+            raise HTTPException(status_code=404, detail=f"Tarif {tariff_id} nicht gefunden.")
+        t = dict(row)
+        tid = t.get("tenant_id")
+        if tid is None:
+            raise HTTPException(
+                status_code=403,
+                detail="Globale Tarife (tenant_id IS NULL) koennen per API nicht storniert werden.",
+            )
+        if tid != x_tenant_id:
+            raise HTTPException(status_code=403, detail="Tarif gehoert zu einem anderen Mandanten.")
+        st = (t.get("status") or "AKTIV").upper()
+        if st == "STORNIERT":
+            raise HTTPException(status_code=409, detail="Tarif ist bereits storniert.")
+        grund = (body.grund or "").strip() or "STORNO"
+        db.execute(
+            text(
+                """
+                UPDATE domain_logistics.freight_tariffs
+                SET status = 'STORNIERT',
+                    storno_ts = :ts,
+                    storno_grund = :grund
+                WHERE id = :id
+                """
+            ),
+            {
+                "id": tariff_id,
+                "ts": datetime.now(timezone.utc),
+                "grund": grund[:2000],
+            },
+        )
+        db.commit()
+        out = db.execute(
+            text("SELECT * FROM domain_logistics.freight_tariffs WHERE id = :id"),
+            {"id": tariff_id},
+        ).mappings().first()
+        return dict(out) if out else {}
     except HTTPException:
         raise
     except Exception as exc:
