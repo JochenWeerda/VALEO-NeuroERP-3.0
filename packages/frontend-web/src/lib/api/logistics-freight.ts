@@ -10,6 +10,10 @@ export type FreightTariffRow = Record<string, unknown> & {
   zone_to?: string | null
   price_per_100kg?: number
   min_charge?: number
+  tenant_id?: string | null
+  status?: string | null
+  storno_ts?: string | null
+  storno_grund?: string | null
 }
 
 export type FreightSimulateResult = {
@@ -23,6 +27,18 @@ export type FreightSimulateResult = {
 export async function listFreightTariffs(): Promise<FreightTariffRow[]> {
   const { data } = await apiClient.get<FreightTariffRow[]>('/api/v1/logistik/freight-tariffs')
   return Array.isArray(data) ? data : []
+}
+
+/** Mandanten-Tarif stornieren (soft); globale Tarife → 403. */
+export async function cancelFreightTariff(
+  tariffId: string,
+  body?: { grund?: string },
+): Promise<FreightTariffRow> {
+  const { data } = await apiClient.post<FreightTariffRow>(
+    `/api/v1/logistik/freight-tariffs/${encodeURIComponent(tariffId)}/cancel`,
+    body ?? {},
+  )
+  return data as FreightTariffRow
 }
 
 /** GET simulate — keine Buchung (siehe Backend ``simulate_freight``). */

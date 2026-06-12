@@ -3,10 +3,19 @@
  * Kompakte Lage; Detailarbeit in Tourenplanung bzw. Frachtbriefe.
  */
 import { useCallback, useMemo, useState } from 'react'
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useNavigate } from '@/app/routing/typed-router'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+import {
+  AlertDialog,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
 import {
@@ -21,8 +30,9 @@ import { OperationalCaseHeader } from '@/components/workflow/OperationalCaseHead
 import { OperationalContextPanel } from '@/components/workflow/OperationalContextPanel'
 import { OperationalTimeline } from '@/components/workflow/OperationalTimeline'
 import { useToast } from '@/hooks/use-toast'
+import { useTenant } from '@/hooks/useTenant'
 import { getAxiosErrorMessage } from '@/lib/api-client'
-import { listFreightTariffs, simulateFreightCost } from '@/lib/api/logistics-freight'
+import { cancelFreightTariff, listFreightTariffs, simulateFreightCost, type FreightTariffRow } from '@/lib/api/logistics-freight'
 import { useFrachtbriefe, useTouren, type Frachtbrief, type Tour } from '@/lib/api/misc-modules'
 import { useSupplyChainOverview } from '@/lib/api/supply-chain'
 import { summarizeSupplyTransfer } from '@/lib/domain-depth'
@@ -61,12 +71,28 @@ function tourStatusShort(t: Tour): string {
   return 'Geplant'
 }
 
+function isTariffActive(row: FreightTariffRow): boolean {
+  const s = (row.status ?? 'AKTIV').toString().toUpperCase()
+  return s === 'AKTIV'
+}
+
+function canCancelOwnTariff(row: FreightTariffRow, tenant: string): boolean {
+  if (!isTariffActive(row)) return false
+  const tid = row.tenant_id
+  if (tid == null || tid === '') return false
+  return tid === tenant
+}
+
 export default function TourFrachtArbeitsraumPage(): JSX.Element {
   const navigate = useNavigate()
   const { toast } = useToast()
+  const queryClient = useQueryClient()
+  const { tenantId } = useTenant()
   const [roleFocus, setRoleFocus] = useState<CombinedRoleFocus>('all')
   const [probeBusy, setProbeBusy] = useState(false)
   const [probeResult, setProbeResult] = useState<{ eur: number; carrier: string; zone?: string } | null>(null)
+  const [cancelTarget, setCancelTarget] = useState<FreightTariffRow | null>(null)
+  const [cancelBusy, setCancelBusy] = useState(false)
 
   const { data: touren, isLoading: tourenLoading } = useTouren()
   const { data: frachtRaw, isLoading: frachtLoading } = useFrachtbriefe()
@@ -84,10 +110,12 @@ export default function TourFrachtArbeitsraumPage(): JSX.Element {
   const frachtTransit = useMemo(() => list.filter((f) => f.status === 'unterwegs').length, [list])
   const frachtZugestellt = useMemo(() => list.filter((f) => f.status === 'zugestellt').length, [list])
 
+  const activeTariffs = useMemo(() => tariffRows.filter((r) => isTariffActive(r)), [tariffRows])
+
   const firstCarrierId = useMemo(() => {
-    const c = tariffRows[0]?.carrier_id
+    const c = activeTariffs[0]?.carrier_id
     return typeof c === 'string' && c.length > 0 ? c : null
-  }, [tariffRows])
+  }, [activeTariffs])
 
   const handleFreightProbe = useCallback(async () => {
     if (!firstCarrierId) {
@@ -116,6 +144,34 @@ export default function TourFrachtArbeitsraumPage(): JSX.Element {
       setProbeBusy(false)
     }
   }, [firstCarrierId, toast])
+
+  const handleConfirmTariffCancel = useCallback(async () => {
+    const id = typeof cancelTarget?.id === 'string' ? cancelTarget.id : ''
+    if (!id) return
+    setCancelBusy(true)
+    try {
+      await cancelFreightTariff(id, { grund: 'Dispo-Arbeitsraum' })
+      toast({
+        title: 'Tarif storniert',
+        description: 'Die Zeile wird nicht mehr fuer Kostenberechnungen verwendet.',
+      })
+      await queryClient.invalidateQueries({ queryKey: ['logistik', 'freight-tariffs'] })
+      setCancelTarget(null)
+    } catch (e) {
+      toast({
+        title: 'Storno fehlgeschlagen',
+        description: getAxiosErrorMessage(e),
+        variant: 'destructive',
+      })
+    } finally {
+      setCancelBusy(false)
+    }
+  }, [cancelTarget?.id, queryClient, toast])
+
+  const hasCancellableTariff = useMemo(
+    () => tariffRows.some((r) => canCancelOwnTariff(r, tenantId)),
+    [tariffRows, tenantId],
+  )
 
   if (tourenLoading || frachtLoading || !touren) {
     return (
@@ -260,8 +316,14 @@ export default function TourFrachtArbeitsraumPage(): JSX.Element {
     {
       key: 'freight-sim',
       label: 'Frachtkosten simulieren',
-      available: tariffRows.length > 0,
-      hint: 'domain_logistics.freight_tariffs; GET /freight-cost/simulate.',
+      available: activeTariffs.length > 0,
+      hint: 'domain_logistics.freight_tariffs (aktiv); GET /freight-cost/simulate.',
+    },
+    {
+      key: 'freight-tariff-storno',
+      label: 'Fracht-Tarif stornieren',
+      available: hasCancellableTariff,
+      hint: 'POST /freight-tariffs/{id}/cancel — nur Mandanten-Tarife.',
     },
   ]
 
@@ -342,8 +404,41 @@ export default function TourFrachtArbeitsraumPage(): JSX.Element {
           <CardContent className="space-y-3 text-sm">
             <p className="text-muted-foreground">
               Tarife in <code className="rounded bg-muted px-1 text-xs">domain_logistics</code>
-              {tariffsLoading ? ' — wird geladen…' : `: ${tariffRows.length} Zeile(n).`}
+              {tariffsLoading ? ' — wird geladen…' : `: ${tariffRows.length} Zeile(n), ${activeTariffs.length} aktiv.`}
             </p>
+            {tariffRows.length > 0 ? (
+              <div className="max-h-36 space-y-1 overflow-y-auto rounded border p-2 text-xs">
+                {tariffRows.slice(0, 14).map((row) => {
+                  const cid = typeof row.carrier_id === 'string' ? row.carrier_id : '?'
+                  const rid = typeof row.id === 'string' ? row.id : cid
+                  const active = isTariffActive(row)
+                  return (
+                    <div
+                      key={rid}
+                      className="flex items-center justify-between gap-2 border-b border-border/60 py-1 last:border-0"
+                    >
+                      <span className="truncate font-mono" title={cid}>
+                        {cid}
+                      </span>
+                      <div className="flex shrink-0 items-center gap-1">
+                        <Badge variant={active ? 'outline' : 'destructive'}>{active ? 'AKTIV' : 'STORNIERT'}</Badge>
+                        {canCancelOwnTariff(row, tenantId) ? (
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            className="h-7 px-2 text-destructive hover:text-destructive"
+                            onClick={() => setCancelTarget(row)}
+                          >
+                            Storno
+                          </Button>
+                        ) : null}
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+            ) : null}
             {firstCarrierId ? (
               <p className="text-xs text-muted-foreground">
                 Probe mit erstem Spediteur <span className="font-mono">{firstCarrierId}</span>, 100 kg, 100 km,
@@ -414,6 +509,37 @@ export default function TourFrachtArbeitsraumPage(): JSX.Element {
           </CardContent>
         </Card>
       </div>
+
+      <AlertDialog
+        open={cancelTarget != null}
+        onOpenChange={(open) => {
+          if (!open && !cancelBusy) setCancelTarget(null)
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Fracht-Tarif stornieren?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Spediteur{' '}
+              <span className="font-mono">
+                {typeof cancelTarget?.carrier_id === 'string' ? cancelTarget.carrier_id : ''}
+              </span>{' '}
+              — stornierte Zeilen werden nicht mehr fuer Simulate/Calculate genutzt (soft).
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={cancelBusy}>Abbrechen</AlertDialogCancel>
+            <Button
+              type="button"
+              variant="destructive"
+              disabled={cancelBusy}
+              onClick={() => void handleConfirmTariffCancel()}
+            >
+              {cancelBusy ? 'Wird ausgefuehrt…' : 'Stornieren'}
+            </Button>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
         <LayoutGrid className="h-4 w-4" />

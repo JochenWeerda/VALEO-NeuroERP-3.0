@@ -1,6 +1,6 @@
 # Active Workboard
 
-Stand: `2026-06-12`
+Stand: `2026-06-13`
 
 ## WAVE-PHYS-CHAIN-001 — Task 0 Verifikation + Logistik-Audit
 
@@ -107,7 +107,12 @@ Storno restauriert exakt den Freigabe-Verbrauch; Trace-GET; Tests + UAT grün.
 
 **Von:** Claude
 **Owner:** Claude
-**Stand:** in Arbeit 2026-06-12.
+**Stand:** abgeschlossen 2026-06-12 — Browser-verifiziert (Dev :3000): Wizard → Auftrag (201) →
+Freigeben → Produktion starten → Fertig (Charge `CH-…` erscheint mit Link in der Zeile) →
+„Kette anzeigen“ (Trace-Panel „Kette geschlossen“, Mischprotokoll 1.240/0.680/0.080 t bei 2 t).
+Zusatzbefund behoben: ``initialData: []`` + ``staleTime`` unterdrückte den ersten Fetch
+(Rezept-Select war deshalb schon immer leer) → Hooks ohne ``initialData``, Fallback `?? []`.
+ESLint + `type-check:focused` grün.
 **Ziel:** Kette vom Schreibtisch aus bedienbar. Befund: Wizard postet ``{rezeptur, menge}``,
 Backend erwartet ``{rezept_id, menge_t}`` (→ 422, Create war tot); Komponenten-Map nutzt
 ``k.name`` statt ``komponente_name`` (Bedarfsprüfung leer). Fix der Hooks/Payloads +
@@ -120,9 +125,23 @@ Toast, fertige Aufträge zeigen Charge/Trace; ESLint + type-check grün.
 
 ## WAVE-PHYS-CHAIN-000 — (reserviert / Lead)
 
-**Von:** —
-**Stand:** offen — optional: Fracht-Storno-API/UI; segmentierte Route-Blocks (z. B. block-038)
-bei Bedarf per Harvest neu erzeugen. Logistik-Dispo-Route ist in **main-routes-smoke** + **visual-tour** verankert.
+**Von:** Cursor
+**Owner:** Cursor
+**Stand:** abgeschlossen 2026-06-13 — optionaler Bucket geschlossen durch **LOG-FREIGHT-STORNO-001**
+(Fracht-Tarif-Storno API + UI); segmentierte Route-Blocks weiterhin optional per Harvest.
+**Ziel:** Rest-Medienbruch Fracht ohne neue DOM-Insel.
+**Dateibesitz:** `logistics_freight.py`, `tour-fracht-arbeitsraum.tsx`, `logistics-freight.ts`, Alembic `log_freight_tariff_storno_20260613`, Integrationstests.
+**Abnahmekriterien:** Soft-Storno sichtbar; Kostenpfade ignorieren stornierte Zeilen.
+
+## LOG-FREIGHT-STORNO-001 — Fracht-Tarif Storno (soft)
+
+**Von:** Cursor
+**Owner:** Cursor
+**Stand:** abgeschlossen 2026-06-13 — `POST /logistik/freight-tariffs/{id}/cancel`, Migration Storno-Spalten,
+Dispo-Arbeitsraum: Tarifliste + Bestätigung + `cancelFreightTariff`; Tests in `test_logistics_integration.py`.
+**Ziel:** WAVE-PHYS-CHAIN-000 Fracht-Storno-API/UI — fail-closed wie Touren-Storno.
+**Dateibesitz:** genannte Dateien, `docs/agent-ops/slices/LOG-FREIGHT-STORNO-001.yaml`.
+**Abnahmekriterien:** 422 ohne Tenant; 403 global/fremd; 409 doppelt; simulate nach Storno ohne Treffer.
 
 ## LOG-SPINE-001 — Lieferschein ↔ Tour UI + Seed
 
