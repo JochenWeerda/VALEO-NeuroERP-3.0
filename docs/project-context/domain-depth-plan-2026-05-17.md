@@ -29,6 +29,17 @@ Fokussierter Teststand: 70 Tests gruen fuer CRM, Einkauf, Finance, Logistik, Rou
 
 ---
 
+## Aktualisierung 2026-06-12: Welle „Physische Kette“ — Task 0 + Logistik-Audit
+
+- **Playwright @smoke / Dev:** SSO-only-Login ersetzt durch Dev-`localStorage`-Session und
+  `X-Tenant-ID`-Default auf Dev-Tenant-UUID (`playwright-tests/helpers/api.ts`,
+  `playwright-tests/fixtures/testSetup.ts`). Doku: `docs/quality-assurance/playwright-smoke-auth.md`.
+- **Logistik Tiefen-Audit:** Ist-Inventar, Bruchstellen, empfohlene Slice-Reihenfolge
+  (`docs/workflows/wave-physical-chain-logistics-audit-2026-06-12.md`). Nächster technischer
+  Schritt: LOG-PROD-001 (Alembic statt Runtime-DDL in `logistics_tours` / `logistics_freight`).
+
+---
+
 ## Aktualisierung 2026-05-18: Einordnung der urspruenglichen Gap-Zusammenfassung
 
 Die urspruengliche Management-Zusammenfassung mit den Klassen `Vollstaendig`, `Teilweise` und `Basis` sowie dem 3-Phasen-Plan ueber ca. 183 Entwicklungstage ist als **Ausgangsbefund vom 2026-05-17** zu lesen. Sie beschreibt die damals identifizierte Ziel-Luecke gegen marktfuehrende ERP-Systeme, nicht mehr den aktuellen offenen Repo-Backlog.
