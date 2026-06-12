@@ -23,6 +23,12 @@ from app.infrastructure.models.futtermittel_models import (
     FuttermittelRezept,
     ProduktionsAuftrag,
 )
+from app.services.feed_production_chain_service import (
+    FeedChainError,
+    FeedProductionChainService,
+    compute_verbrauch,
+    fehlende_komponenten,
+)
 
 
 from app.api.v1.schemas.base import BaseSchema
@@ -75,9 +81,26 @@ class ProduktionsauftragOut(BaseModel):
     menge_t: float
     status: str
     bestands_abzug_erfolgt: bool
+    charge_id: Optional[str] = None
+    verbrauch: Optional[list[dict]] = None
     created_at: Optional[str] = None
 
     model_config = ConfigDict(from_attributes=True)
+
+
+def _to_out(auftrag: ProduktionsAuftrag) -> ProduktionsauftragOut:
+    return ProduktionsauftragOut(
+        id=auftrag.id,
+        chargen_id=auftrag.chargen_id,
+        rezept_id=auftrag.rezept_id,
+        rezept_name=auftrag.rezept_name,
+        menge_t=float(auftrag.menge_t),
+        status=auftrag.status,
+        bestands_abzug_erfolgt=auftrag.bestands_abzug_erfolgt,
+        charge_id=auftrag.charge_id,
+        verbrauch=auftrag.verbrauch,
+        created_at=auftrag.created_at.isoformat() if auftrag.created_at else None,
+    )
 
 
 class ProduktionsauftragStatusIn(BaseModel):
@@ -213,17 +236,7 @@ async def create_produktionsauftrag(
     db.add(auftrag)
     db.commit()
     db.refresh(auftrag)
-
-    return ProduktionsauftragOut(
-        id=auftrag.id,
-        chargen_id=auftrag.chargen_id,
-        rezept_id=auftrag.rezept_id,
-        rezept_name=auftrag.rezept_name,
-        menge_t=float(auftrag.menge_t),
-        status=auftrag.status,
-        bestands_abzug_erfolgt=auftrag.bestands_abzug_erfolgt,
-        created_at=auftrag.created_at.isoformat() if auftrag.created_at else None,
-    )
+    return _to_out(auftrag)
 
 
 @router.patch("/auftrag/{auftrag_id}/status", response_model=ProduktionsauftragOut, summary="Auftrag status aktualisieren")
@@ -252,57 +265,45 @@ async def update_auftrag_status(
             detail=f"Ungültiger Statusübergang: {auftrag.status} → {payload.status}",
         )
 
-    # Deduct inventory on 'freigegeben'
+    chain = FeedProductionChainService(db, tenant_id)
+
+    # Deduct inventory on 'freigegeben' — Snapshot persistieren (FEED-CHAIN-001)
     if payload.status == "freigegeben" and not auftrag.bestands_abzug_erfolgt and auftrag.rezept_id:
         rezept = db.query(FuttermittelRezept).options(
             joinedload(FuttermittelRezept.komponenten)
         ).filter(FuttermittelRezept.id == auftrag.rezept_id).first()
         if rezept:
-            menge = auftrag.menge_t
-            for komp in rezept.komponenten:
-                if komp.einzelfutter_id:
-                    ef = db.query(Einzelfuttermittel).filter(
-                        Einzelfuttermittel.id == komp.einzelfutter_id
-                    ).with_for_update().first()
-                    if ef:
-                        ef.verfuegbar_t = (ef.verfuegbar_t or 0) - (menge * komp.anteil)
+            snapshot = compute_verbrauch(auftrag.menge_t, rezept.komponenten)
+            fehlend = fehlende_komponenten(snapshot, chain.bestaende_fuer(snapshot))
+            if fehlend:
+                raise HTTPException(
+                    status_code=409,
+                    detail={"message": "Unzureichende Komponentenbestände bei Freigabe", "fehlend": fehlend},
+                )
+            chain.apply_verbrauch(snapshot, richtung=-1)
+            auftrag.verbrauch = snapshot
             auftrag.bestands_abzug_erfolgt = True
         auftrag.freigegeben_von = payload.freigegeben_von
         auftrag.freigegeben_am = datetime.now()
 
-    # Return inventory on 'storniert' if already deducted
-    if payload.status == "storniert" and auftrag.bestands_abzug_erfolgt and auftrag.rezept_id:
-        rezept = db.query(FuttermittelRezept).options(
-            joinedload(FuttermittelRezept.komponenten)
-        ).filter(FuttermittelRezept.id == auftrag.rezept_id).first()
-        if rezept:
-            menge = auftrag.menge_t
-            for komp in rezept.komponenten:
-                if komp.einzelfutter_id:
-                    ef = db.query(Einzelfuttermittel).filter(
-                        Einzelfuttermittel.id == komp.einzelfutter_id
-                    ).with_for_update().first()
-                    if ef:
-                        ef.verfuegbar_t = (ef.verfuegbar_t or 0) + (menge * komp.anteil)
-            auftrag.bestands_abzug_erfolgt = False
+    # Return inventory on 'storniert' — exakt den Freigabe-Snapshot restaurieren
+    if payload.status == "storniert" and auftrag.bestands_abzug_erfolgt:
+        chain.apply_verbrauch(chain.snapshot_or_recipe(auftrag), richtung=+1)
+        auftrag.bestands_abzug_erfolgt = False
 
+    # 'fertig' schließt die Belegkette: Fertigwaren-Charge entsteht (fail-closed)
     if payload.status == "fertig":
+        try:
+            chain.complete_to_charge(auftrag)
+        except FeedChainError as exc:
+            db.rollback()
+            raise HTTPException(status_code=409, detail=str(exc)) from exc
         auftrag.fertig_am = datetime.now()
 
     auftrag.status = payload.status
     db.commit()
     db.refresh(auftrag)
-
-    return ProduktionsauftragOut(
-        id=auftrag.id,
-        chargen_id=auftrag.chargen_id,
-        rezept_id=auftrag.rezept_id,
-        rezept_name=auftrag.rezept_name,
-        menge_t=float(auftrag.menge_t),
-        status=auftrag.status,
-        bestands_abzug_erfolgt=auftrag.bestands_abzug_erfolgt,
-        created_at=auftrag.created_at.isoformat() if auftrag.created_at else None,
-    )
+    return _to_out(auftrag)
 
 
 @router.get("/auftraege", response_model=list[ProduktionsauftragOut], summary="Auftraege auflisten")
@@ -316,16 +317,17 @@ async def list_auftraege(
     if status:
         q = q.filter(ProduktionsAuftrag.status == status)
     auftraege = q.order_by(ProduktionsAuftrag.created_at.desc()).all()
-    return [
-        ProduktionsauftragOut(
-            id=a.id,
-            chargen_id=a.chargen_id,
-            rezept_id=a.rezept_id,
-            rezept_name=a.rezept_name,
-            menge_t=float(a.menge_t),
-            status=a.status,
-            bestands_abzug_erfolgt=a.bestands_abzug_erfolgt,
-            created_at=a.created_at.isoformat() if a.created_at else None,
-        )
-        for a in auftraege
-    ]
+    return [_to_out(a) for a in auftraege]
+
+
+@router.get("/auftraege/{ref}/trace", summary="Belegkette Auftrag ↔ Charge ↔ Komponenten")
+async def trace_auftrag(
+    ref: str,
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+) -> dict:
+    """Rückverfolgung zu Auftrag-ID oder chargen_id (FEED-CHAIN-001)."""
+    result = FeedProductionChainService(db, tenant_id).trace(ref)
+    if result is None:
+        raise HTTPException(status_code=404, detail=f"Auftrag '{ref}' nicht gefunden")
+    return result
