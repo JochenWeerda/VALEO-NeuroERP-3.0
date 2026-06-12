@@ -87,28 +87,32 @@ export type FeedChainTrace = {
 
 // ── Hooks ──────────────────────────────────────────────────────────────────
 
+// Achtung: kein ``initialData: []`` — das zählt als frischer Fetch und unterdrückt
+// zusammen mit ``staleTime`` den ersten echten Request (Select blieb dauerhaft leer).
+const EMPTY: never[] = []
+
 export function useMischfutterVerfuegbarkeit() {
-  return useQuery({
+  const query = useQuery({
     queryKey: ['produktion', 'mischfutter', 'verfuegbarkeit'],
     queryFn: async () =>
       (await apiClient.get<KomponenteVerfuegbarkeit[]>('/api/v1/produktion/mischfutter/verfuegbarkeit')).data,
-    initialData: [],
     staleTime: 60 * 1000,
   })
+  return { ...query, data: query.data ?? (EMPTY as KomponenteVerfuegbarkeit[]) }
 }
 
 export function useMischfutterRezepte() {
-  return useQuery({
+  const query = useQuery({
     queryKey: ['produktion', 'mischfutter', 'rezepte'],
     queryFn: async () =>
       (await apiClient.get<Rezept[]>('/api/v1/produktion/mischfutter/rezepte')).data,
-    initialData: [],
     staleTime: 5 * 60 * 1000,
   })
+  return { ...query, data: query.data ?? (EMPTY as Rezept[]) }
 }
 
 export function useProduktionsauftraege(status?: ProduktionsauftragStatus) {
-  return useQuery({
+  const query = useQuery({
     queryKey: ['produktion', 'mischfutter', 'auftraege', status ?? 'alle'],
     queryFn: async () =>
       (
@@ -116,9 +120,10 @@ export function useProduktionsauftraege(status?: ProduktionsauftragStatus) {
           params: status ? { status } : undefined,
         })
       ).data,
-    initialData: [],
     staleTime: 15 * 1000,
+    refetchOnWindowFocus: false,
   })
+  return { ...query, data: query.data ?? (EMPTY as Produktionsauftrag[]) }
 }
 
 export function useCreateProduktionsauftrag() {

@@ -43,8 +43,12 @@
    Seed `seed_demo_feed_chain.py` (DEMO-MLF-18); Tests `test_feed_production_chain.py`
    (7 grün, inkl. Snapshot-Restore nach Rezeptänderung und fremde-chargen_id-409);
    UAT `scripts/uat/feed_production_chain_uat.py` (dry-run + `--execute` live grün).
-2. **FEED-CHAIN-002:** Frontend-Arbeitsraum Produktion (Auftrag→Charge-Link, Mischprotokoll,
-   QS-Readiness-Anzeige) im DOM-SUPPLY-004-Stil.
+2. **FEED-CHAIN-002 (erledigt 2026-06-12):** `produktion/mischfutter`-Seite operativ:
+   Wizard-Create gegen echtes Backend gefixt (postete ``{rezeptur, menge}`` statt
+   ``{rezept_id, menge_t}`` → war tot; Komponenten-Map ``komponente_name``;
+   ``initialData``+``staleTime``-Falle unterdrückte den ersten Fetch). Auftragsliste mit
+   Statusübergängen (Per-Entity-Pending), Charge-Link nach ``fertig``, Trace-Panel
+   („Kette geschlossen“ + Mischprotokoll). Browser-verifiziert gegen Dev-Stack.
 3. **FEED-CHAIN-003:** `quality_lot_binding` persistent (Alembic statt in-memory) und an
    `ops_chargen.qualitaetsstatus`/Freigabe gebunden.
 4. **FEED-CHAIN-004:** Artikel-Mapping Einzelfutter ↔ `domain_inventory.articles` und
