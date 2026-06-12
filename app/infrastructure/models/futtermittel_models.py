@@ -14,6 +14,7 @@ from sqlalchemy import (
     Column, String, Integer, Boolean, DateTime, Date, Text,
     ForeignKey, DECIMAL, Index, UniqueConstraint,
 )
+from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 
@@ -258,6 +259,10 @@ class ProduktionsAuftrag(Base):
     status = Column(String(30), nullable=False, default="erstellt",
                     comment="erstellt, freigegeben, in_produktion, fertig, storniert")
     bestands_abzug_erfolgt = Column(Boolean, default=False)
+    verbrauch = Column(JSONB, nullable=True,
+                       comment="Snapshot des Komponentenverbrauchs bei Freigabe (Mischprotokoll)")
+    charge_id = Column(String(64), nullable=True,
+                       comment="Referenz auf domain_ops.ops_chargen.id der Fertigwaren-Charge")
     erstellt_von = Column(String(255), nullable=True)
     freigegeben_von = Column(String(255), nullable=True)
     freigegeben_am = Column(DateTime(timezone=True), nullable=True)
