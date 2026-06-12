@@ -53,7 +53,7 @@ Diese Statusdatei verdichtet den aktuellen Gesamtstand, ohne die Detailnachweise
   - `INV-STOCK-MOVEMENTS-001`: `articles.py` und `pos_retoure.py` auf `domain_inventory.inventory_stock_movements` umgestellt; Vertragstests `tests/test_inventory_stock_movements_canonical.py`.
   - Alembic-Head (repo-seitig verifiziert): `con_settlement_storno_20260611`.
   - Governance-Vertragstests (lokal verifiziert): `test_release_compatibility_governance.py` (5) + `test_inventory_stock_movements_canonical.py` (3) gruen.
-  - Gesamtsuite-/Coverage-Zahlen: nicht in dieser Session neu gemessen — massgeblich ist der naechste gruene `quality-gate`-Lauf.
+  - Gesamtsuite (collect-only, 2026-06-11): `9527` Tests erfasst; Pass-/Coverage-Nachweis massgeblich naechster gruener `quality-gate`-Lauf.
 - Letzte abgeschlossene Waves (2026-03):
   - `Wave 104`: Flow Spine DB-Persistenz, PCN DB, Tenant-Isolation, Outbox-Events, Agent-Action+RAG, Voice-Kanal
   - `Wave 103`: Touch-optimierte Feldworkflows (WCAG), Keyboard-first Kernmasken (~85%)
