@@ -11,10 +11,28 @@ Stand: `2026-06-11`
 **Dateibesitz:** `playwright-tests/helpers/api.ts`, `playwright-tests/fixtures/testSetup.ts`, `docs/quality-assurance/playwright-smoke-auth.md`, `docs/workflows/wave-physical-chain-logistics-audit-2026-06-12.md`, `domain-depth-plan`.
 **Abnahmekriterien:** Doku + funktionierender Dev-Pfad für @smoke; keine parallelen DOM-005-Spines.
 
+## LOG-PROD-001 — Logistik `domain_logistics` per Alembic
+
+**Von:** Cursor
+**Owner:** Cursor
+**Stand:** abgeschlossen 2026-06-12 — Alembic `log_logistics_core_20260612`; Runtime-DDL aus `logistics_tours.py` und `logistics_freight.py` entfernt; Integrationstests `tests/test_logistics_integration.py`.
+**Ziel:** Production-gleiche Persistenz für Touren/ePOD/Statistik und Frachttarife (analog PROC-RFQ-001).
+**Dateibesitz:** `alembic/versions/log_logistics_core_20260612.py`, Logistik-Endpunkte, genannte Tests, Audit-Dokument.
+**Abnahmekriterien:** `alembic upgrade head` erzeugt Tabellen; keine `_ensure_schema` / `_ensure_freight_table` in den Routern; bestehende Unit-Tests mit Mocks angepasst.
+
+## LOG-SPINE-RAND-001 — Lieferschein-Referenz Read-Spine (Logistik)
+
+**Von:** Cursor
+**Owner:** Cursor
+**Stand:** reserviert 2026-06-12 — Vorbereitung LOG-SPINE-001; Read-only Aufloesung `delivery_note_ref` → `domain_sales.delivery_notes`.
+**Ziel:** Medienbruch reduzieren ohne Schema-FK; Muster wie `sales_storno_service` (id oder Nummer).
+**Dateibesitz:** `logistics_tours.py`, `tests/test_logistics_delivery_hint.py`, Wave-Audit, Slice-YAML.
+**Abnahmekriterien:** Neuer GET-Resolve + optional `include_delivery_hints` auf Tour-Detail; Tests gruen.
+
 ## WAVE-PHYS-CHAIN-000 — (reserviert / Lead)
 
 **Von:** —
-**Stand:** offen — nächster Umsetzungsschritt: **LOG-PROD-001** laut Audit.
+**Stand:** offen — nächster Umsetzungsschritt: **LOG-SPINE-001** laut Audit (`wave-physical-chain-logistics-audit-2026-06-12.md`).
 
 ## PROC-RFQ-001 — RFQ production-ready
 

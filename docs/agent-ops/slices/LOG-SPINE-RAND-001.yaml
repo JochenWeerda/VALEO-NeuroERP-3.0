@@ -1,0 +1,23 @@
+id: LOG-SPINE-RAND-001
+title: Read-Spine Lieferschein-Referenz fuer Tour-Stopps (Rand)
+owner: Cursor
+status: in_arbeit
+updated: 2026-06-12
+fachlicher_zweck: >
+  tour_stops.delivery_note_ref ohne FK aufloesbar machen: Read-only Zugriff auf
+  domain_sales.delivery_notes (UUID oder delivery_note_number), gleiche Logik wie
+  Storno-Pfad. Optional Hint-Block in GET Tour fuer einen API-Roundtrip.
+betroffene_dateien:
+  - app/api/v1/endpoints/logistics_tours.py
+  - tests/test_logistics_delivery_hint.py
+  - docs/workflows/wave-physical-chain-logistics-audit-2026-06-12.md
+  - docs/agent-ops/active-workboard.md
+akzeptanzkriterien:
+  - GET /api/v1/logistik/sales-delivery-note-by-ref mit Query ref + Header X-Tenant-ID liefert Kompaktobjekt oder 404
+  - GET /api/v1/logistik/tours/{id}?include_delivery_hints=true setzt pro Stopp delivery_note_hint (null wenn keine Referenz / kein Treffer)
+  - Keine Felder entfernt; keine Mock-Daten als Persistenz
+  - Unit-Tests fuer Lookup + 422 ohne Tenant
+abgrenzung_nicht:
+  - Kein UI-Picker, kein Seed-DEMO, keine FK-Migration
+  - Kein Schreiben auf delivery_notes
+  - Kein LOG-SPINE-001 vollstaendig (Batch-Picker, weitere Domains)
