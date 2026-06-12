@@ -121,6 +121,90 @@ def test_create_bin_with_invalid_aisle_raises():
     svc.db.commit.assert_not_called()
 
 
+@pytest.mark.unit
+def test_get_bin_returns_mapping():
+    svc = make_service()
+    r = MagicMock()
+    r._mapping = {"id": "b1", "bin_code": "A-1", "tenant_id": "tenant-test"}
+    svc.db.execute.return_value.fetchone.return_value = r
+    out = svc.get_bin("b1")
+    assert out is not None
+    assert out["bin_code"] == "A-1"
+
+
+@pytest.mark.unit
+def test_get_bin_missing_returns_none():
+    svc = make_service()
+    svc.db.execute.return_value.fetchone.return_value = None
+    assert svc.get_bin("x") is None
+
+
+@pytest.mark.unit
+def test_update_bin_empty_patch_returns_existing():
+    svc = make_service()
+    r = MagicMock()
+    r._mapping = {"id": "b1", "zone_id": "z1", "warehouse_id": "w1", "bin_code": "X"}
+    svc.db.execute.return_value.fetchone.return_value = r
+    out = svc.update_bin("b1", {})
+    assert out["bin_code"] == "X"
+    svc.db.commit.assert_not_called()
+
+
+@pytest.mark.unit
+def test_update_bin_sets_blocked():
+    svc = make_service()
+    before = MagicMock()
+    before._mapping = {"id": "b1", "zone_id": "z1", "warehouse_id": "w1", "bin_code": "X", "is_blocked": False}
+    after = MagicMock()
+    after._mapping = {**before._mapping, "is_blocked": True}
+    svc.db.execute.return_value.fetchone.side_effect = [before, after]
+    out = svc.update_bin("b1", {"is_blocked": True})
+    assert out["is_blocked"] is True
+    svc.db.commit.assert_called_once()
+
+
+@pytest.mark.unit
+def test_assert_bin_total_within_capacity_raises():
+    svc = make_service()
+    cap = MagicMock()
+    cap.capacity_kg = Decimal("100")
+    tot = MagicMock()
+    tot.t = Decimal("101")
+    svc.db.execute.return_value.fetchone.side_effect = [cap, tot]
+    with pytest.raises(ValueError, match="Kapazitaet"):
+        svc._assert_bin_total_within_capacity("bin-1")
+    svc.db.rollback.assert_called_once()
+
+
+@pytest.mark.unit
+def test_set_bin_stock_line_quantity_updates_and_checks_capacity():
+    svc = make_service()
+    sel = MagicMock()
+    sel.fetchone.return_value = MagicMock()  # line exists
+    upd = MagicMock()
+    cap = MagicMock()
+    cap.capacity_kg = Decimal("1000")
+    tot = MagicMock()
+    tot.t = Decimal("500")
+    out_row = MagicMock()
+    out_row._mapping = {"id": "sl1", "quantity_kg": Decimal("500")}
+    svc.db.execute.side_effect = [sel, upd, MagicMock(fetchone=MagicMock(return_value=cap)), MagicMock(fetchone=MagicMock(return_value=tot)), MagicMock(fetchone=MagicMock(return_value=out_row))]
+    result = svc.set_bin_stock_line_quantity("bin-1", "sl1", Decimal("500"))
+    assert result["id"] == "sl1"
+    svc.db.commit.assert_called_once()
+
+
+@pytest.mark.unit
+def test_set_bin_stock_line_unknown_raises():
+    svc = make_service()
+    sel = MagicMock()
+    sel.fetchone.return_value = None
+    svc.db.execute.side_effect = [sel]
+    with pytest.raises(ValueError, match="Bestandszeile"):
+        svc.set_bin_stock_line_quantity("bin-1", "missing", Decimal("1"))
+    svc.db.commit.assert_not_called()
+
+
 # ── FEFO-Picking ───────────────────────────────────────────────────────────
 
 @pytest.mark.unit

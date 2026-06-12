@@ -27,6 +27,13 @@ test.describe('Lager / WMS', () => {
     await expect(page.locator('h1, h2, main').first()).toBeVisible()
   })
 
+  test('Lagerplätze: WMS-Strukturpanel sichtbar', async ({ page }) => {
+    await page.goto('/lager/lagerplaetze')
+    await page.waitForLoadState('networkidle')
+    await expect(page.getByRole('heading', { name: 'Lagerplätze' })).toBeVisible()
+    await expect(page.getByText('WMS-Lagerstruktur (Zone → Gang → Fach)')).toBeVisible()
+  })
+
   test('Inventur lädt', async ({ page }) => {
     await page.goto('/lager/inventur')
     await page.waitForLoadState('networkidle')

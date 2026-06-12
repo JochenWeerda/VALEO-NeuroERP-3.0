@@ -128,6 +128,84 @@ class WarehouseService:
         self.db.commit()
         return {"id": bin_id, "zone_id": zone_id, "warehouse_id": warehouse_id, **payload}
 
+    def get_bin(self, bin_id: str) -> dict | None:
+        """Einzelnen Lagerplatz inkl. Tenant-Scope."""
+        row = self.db.execute(text("""
+            SELECT * FROM domain_inventory.warehouse_bins
+            WHERE id = :id AND tenant_id = :tid
+        """), {"id": bin_id, "tid": self.tenant_id}).fetchone()
+        return dict(row._mapping) if row else None
+
+    def update_bin(self, bin_id: str, payload: dict) -> dict:
+        """Teilupdate (Kapazität, Typ, Sperre, Gang). Nur übergebene Keys aus exclude_unset."""
+        allowed = frozenset({"bin_type", "capacity_kg", "is_blocked", "block_reason", "aisle_id"})
+        patch = {k: v for k, v in payload.items() if k in allowed}
+        existing = self.get_bin(bin_id)
+        if not existing:
+            raise ValueError("Bin nicht gefunden")
+        zone_id = str(existing["zone_id"])
+        wh_id = str(existing["warehouse_id"])
+        if "aisle_id" in patch:
+            aid = patch["aisle_id"]
+            if aid is not None:
+                row = self.db.execute(text("""
+                    SELECT id FROM domain_inventory.warehouse_aisles
+                    WHERE id = :aid AND zone_id = :zid AND warehouse_id = :wid
+                      AND tenant_id = :tid AND is_active = true
+                """), {
+                    "aid": aid, "zid": zone_id, "wid": wh_id, "tid": self.tenant_id,
+                }).fetchone()
+                if not row:
+                    raise ValueError(
+                        "Gang (aisle_id) nicht gefunden, passt nicht zur Zone/Lager oder ist inaktiv"
+                    )
+        set_parts: list[str] = []
+        params: dict = {"bid": bin_id, "tid": self.tenant_id}
+        for k in ("bin_type", "capacity_kg", "is_blocked", "block_reason", "aisle_id"):
+            if k not in patch:
+                continue
+            set_parts.append(f"{k} = :{k}")
+            params[k] = patch[k]
+        if not set_parts:
+            return existing
+        sql = (
+            "UPDATE domain_inventory.warehouse_bins SET "
+            + ", ".join(set_parts)
+            + " WHERE id = :bid AND tenant_id = :tid"
+        )
+        self.db.execute(text(sql), params)
+        self.db.commit()
+        refreshed = self.get_bin(bin_id)
+        return refreshed or {}
+
+    def _assert_bin_total_within_capacity(self, bin_id: str) -> None:
+        """Nach Buchung auf bin_stock: Summe kg vs. warehouse_bins.capacity_kg."""
+        cap_row = self.db.execute(text("""
+            SELECT capacity_kg FROM domain_inventory.warehouse_bins
+            WHERE id = :bid AND tenant_id = :tid
+        """), {"bid": bin_id, "tid": self.tenant_id}).fetchone()
+        if not cap_row or cap_row.capacity_kg is None:
+            return
+        ck = cap_row.capacity_kg
+        if not isinstance(ck, (Decimal, int, float, str)):
+            return
+        if isinstance(ck, str) and ck.strip() == "":
+            return
+        try:
+            cap = Decimal(str(ck))
+        except Exception:
+            return
+        total_row = self.db.execute(text("""
+            SELECT COALESCE(SUM(quantity_kg), 0) AS t FROM domain_inventory.bin_stock
+            WHERE bin_id = :bid AND tenant_id = :tid
+        """), {"bid": bin_id, "tid": self.tenant_id}).fetchone()
+        tot = Decimal(str(total_row.t))
+        if tot > cap:
+            self.db.rollback()
+            raise ValueError(
+                f"Lagerplatz-Kapazitaet ueberschritten ({tot} kg > {cap} kg)"
+            )
+
     def get_bin_stock(self, bin_id: str) -> list[dict]:
         """Alle Artikel/Chargen auf einem Lagerplatz."""
         rows = self.db.execute(text("""
@@ -138,6 +216,28 @@ class WarehouseService:
             ORDER BY bs.best_before_date NULLS LAST, bs.batch_number
         """), {"bid": bin_id, "tid": self.tenant_id}).fetchall()
         return [dict(r._mapping) for r in rows]
+
+    def set_bin_stock_line_quantity(self, bin_id: str, stock_line_id: str, quantity_kg: Decimal) -> dict:
+        """Absolute Menge einer bin_stock-Zeile setzen (Korrektur/Inventur)."""
+        if quantity_kg < 0:
+            raise ValueError("Menge darf nicht negativ sein")
+        row = self.db.execute(text("""
+            SELECT bs.id FROM domain_inventory.bin_stock bs
+            WHERE bs.id = :sid AND bs.bin_id = :bid AND bs.tenant_id = :tid
+        """), {"sid": stock_line_id, "bid": bin_id, "tid": self.tenant_id}).fetchone()
+        if not row:
+            raise ValueError("Bestandszeile nicht gefunden oder gehoert nicht zu diesem Lagerplatz")
+        self.db.execute(text("""
+            UPDATE domain_inventory.bin_stock
+            SET quantity_kg = :qty, last_movement_at = :now
+            WHERE id = :sid AND tenant_id = :tid
+        """), {"qty": quantity_kg, "now": datetime.now(timezone.utc), "sid": stock_line_id, "tid": self.tenant_id})
+        self._assert_bin_total_within_capacity(bin_id)
+        self.db.commit()
+        out = self.db.execute(text("""
+            SELECT * FROM domain_inventory.bin_stock WHERE id = :sid AND tenant_id = :tid
+        """), {"sid": stock_line_id, "tid": self.tenant_id}).fetchone()
+        return dict(out._mapping) if out else {}
 
     # ── Bestandsbuchung ────────────────────────────────────────
 
@@ -174,6 +274,8 @@ class WarehouseService:
             """), {"id": stock_id, "bid": bin_id, "aid": article_id, "batch": batch_number,
                    "bbd": best_before_date, "qty": quantity_kg, "cost": unit_cost,
                    "now": datetime.now(timezone.utc), "tid": self.tenant_id})
+
+        self._assert_bin_total_within_capacity(bin_id)
 
         # StockMovement-Protokoll
         mv_id = str(uuid4())

@@ -47,6 +47,18 @@ class AisleIn(BaseModel):
     description: Optional[str] = None
 
 
+class BinPatch(BaseModel):
+    bin_type: Optional[str] = None
+    capacity_kg: Optional[Decimal] = None
+    is_blocked: Optional[bool] = None
+    block_reason: Optional[str] = None
+    aisle_id: Optional[str] = None
+
+
+class BinStockLineQuantityIn(BaseModel):
+    quantity_kg: Decimal
+
+
 class StockMovementIn(BaseModel):
     bin_id: str
     article_id: str
@@ -176,11 +188,58 @@ def create_bin(
         raise HTTPException(status_code=422, detail=str(e))
 
 
+@router.get("/bins/{bin_id}", summary="Bin abrufen",
+    response_model=WarehouseWmsOut
+)
+def get_bin_detail(bin_id: str, svc: WarehouseService = Depends(_svc)):
+    row = svc.get_bin(bin_id)
+    if not row:
+        raise HTTPException(status_code=404, detail="Bin nicht gefunden")
+    return row
+
+
+@router.patch("/bins/{bin_id}", summary="Bin aktualisieren",
+    response_model=WarehouseWmsOut
+)
+def patch_bin(
+    bin_id: str,
+    payload: BinPatch = ...,
+    svc: WarehouseService = Depends(_svc),
+):
+    try:
+        return svc.update_bin(bin_id, payload.model_dump(exclude_unset=True))
+    except ValueError as e:
+        msg = str(e)
+        if msg.startswith("Bin nicht gefunden"):
+            raise HTTPException(status_code=404, detail=msg)
+        raise HTTPException(status_code=422, detail=msg)
+
+
 @router.get("/bins/{bin_id}/stock", summary="Bin stock abrufen",
     response_model=WarehouseWmsOut
 )
 def get_bin_stock(bin_id: str, svc: WarehouseService = Depends(_svc)):
     return svc.get_bin_stock(bin_id)
+
+
+@router.patch(
+    "/bins/{bin_id}/stock-lines/{stock_line_id}",
+    summary="Bestandszeile (bin_stock) absolute Menge setzen",
+    response_model=WarehouseWmsOut,
+)
+def patch_bin_stock_line(
+    bin_id: str,
+    stock_line_id: str,
+    payload: BinStockLineQuantityIn = ...,
+    svc: WarehouseService = Depends(_svc),
+):
+    try:
+        return svc.set_bin_stock_line_quantity(bin_id, stock_line_id, payload.quantity_kg)
+    except ValueError as e:
+        msg = str(e)
+        if "nicht gefunden" in msg:
+            raise HTTPException(status_code=404, detail=msg)
+        raise HTTPException(status_code=422, detail=msg)
 
 
 # ── Stock Movements ────────────────────────────────────────────────────────
