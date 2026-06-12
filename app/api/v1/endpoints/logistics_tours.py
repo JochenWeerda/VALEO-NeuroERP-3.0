@@ -135,6 +135,10 @@ class PodIn(BaseModel):
     photo_base64: Optional[str] = None
 
 
+class TourCancelIn(BaseModel):
+    grund: Optional[str] = None
+
+
 # ---------------------------------------------------------------------------
 # Read-Spine: Lieferschein-Referenz (LOG-SPINE-RAND-001)
 # ---------------------------------------------------------------------------
@@ -442,12 +446,138 @@ def patch_stop(
         raise HTTPException(status_code=503, detail=str(exc)) from exc
 
 
+@router.post(
+    "/tours/{tour_id}/cancel",
+    summary="Tour stornieren (fail-closed)",
+    response_model=LogisticsTourOut,
+)
+def cancel_tour(
+    tour_id: str,
+    body: TourCancelIn,
+    x_tenant_id: Optional[str] = Header(None),
+    db: Session = Depends(get_db),
+) -> Dict[str, Any]:
+    """Tour nur im Status GEPLANT stornieren; keine gelieferten Stopps (ABGELIEFERT)."""
+    if not x_tenant_id:
+        raise HTTPException(status_code=422, detail="X-Tenant-ID erforderlich.")
+    try:
+        row = db.execute(
+            text("SELECT * FROM domain_logistics.tours WHERE id = :id"),
+            {"id": tour_id},
+        ).mappings().first()
+        if not row:
+            raise HTTPException(status_code=404, detail=f"Tour {tour_id} nicht gefunden")
+        t = dict(row)
+        if t.get("tenant_id") and t["tenant_id"] != x_tenant_id:
+            raise HTTPException(status_code=403, detail="Tenant passt nicht zur Tour.")
+        st = (t.get("status") or "").upper()
+        if st == "STORNIERT":
+            raise HTTPException(status_code=409, detail="Tour ist bereits storniert.")
+        if st != "GEPLANT":
+            raise HTTPException(
+                status_code=409,
+                detail=f"Tour nicht stornierbar im Status {t.get('status')!r} (nur GEPLANT).",
+            )
+        delivered = db.execute(
+            text(
+                "SELECT COUNT(*)::int FROM domain_logistics.tour_stops "
+                "WHERE tour_id = :tid AND status = 'ABGELIEFERT'"
+            ),
+            {"tid": tour_id},
+        ).scalar()
+        if int(delivered or 0) > 0:
+            raise HTTPException(
+                status_code=409,
+                detail="Tour hat bereits gelieferte Stopps (ABGELIEFERT) — Storno nicht erlaubt.",
+            )
+        grund = (body.grund or "").strip() or "STORNO"
+        note_append = f" [STORNO: {grund}]"
+        new_notes = (t.get("notes") or "") + note_append
+        db.execute(
+            text(
+                "UPDATE domain_logistics.tours SET status = 'STORNIERT', notes = :notes WHERE id = :id"
+            ),
+            {"id": tour_id, "notes": new_notes[:8000]},
+        )
+        db.commit()
+        out = db.execute(
+            text("SELECT * FROM domain_logistics.tours WHERE id = :id"),
+            {"id": tour_id},
+        ).mappings().first()
+        return dict(out) if out else {}
+    except HTTPException:
+        raise
+    except Exception as exc:
+        raise HTTPException(status_code=503, detail=str(exc)) from exc
+
+
+@router.post(
+    "/tours/{tour_id}/stops/{stop_id}/cancel",
+    summary="Tour-Stopp stornieren (fail-closed)",
+    response_model=LogisticsTourOut,
+)
+def cancel_stop(
+    tour_id: str,
+    stop_id: str,
+    body: TourCancelIn,
+    x_tenant_id: Optional[str] = Header(None),
+    db: Session = Depends(get_db),
+) -> Dict[str, Any]:
+    """Stopp nur in frühen Status stornieren (GEPLANT, ANGEFAHREN)."""
+    if not x_tenant_id:
+        raise HTTPException(status_code=422, detail="X-Tenant-ID erforderlich.")
+    try:
+        srow = db.execute(
+            text(
+                "SELECT * FROM domain_logistics.tour_stops WHERE id = :sid AND tour_id = :tid"
+            ),
+            {"sid": stop_id, "tid": tour_id},
+        ).mappings().first()
+        if not srow:
+            raise HTTPException(status_code=404, detail="Stopp nicht gefunden")
+        s = dict(srow)
+        if s.get("tenant_id") and s["tenant_id"] != x_tenant_id:
+            raise HTTPException(status_code=403, detail="Tenant passt nicht zum Stopp.")
+        st = (s.get("status") or "").upper()
+        if st == "STORNIERT":
+            raise HTTPException(status_code=409, detail="Stopp ist bereits storniert.")
+        if st == "ABGELIEFERT":
+            raise HTTPException(status_code=409, detail="Gelieferter Stopp kann nicht storniert werden.")
+        if st not in ("GEPLANT", "ANGEFAHREN"):
+            raise HTTPException(
+                status_code=409,
+                detail=f"Stopp nicht stornierbar im Status {s.get('status')!r}.",
+            )
+        grund = (body.grund or "").strip() or "STORNO"
+        db.execute(
+            text(
+                "UPDATE domain_logistics.tour_stops SET status = 'STORNIERT', "
+                "address = COALESCE(address,'') || :tag WHERE id = :sid"
+            ),
+            {"sid": stop_id, "tag": f" [STORNO:{grund}]"[:200]},
+        )
+        db.commit()
+        row = db.execute(
+            text("SELECT * FROM domain_logistics.tour_stops WHERE id = :sid"),
+            {"sid": stop_id},
+        ).mappings().first()
+        return dict(row) if row else {}
+    except HTTPException:
+        raise
+    except Exception as exc:
+        raise HTTPException(status_code=503, detail=str(exc)) from exc
+
+
 # ---------------------------------------------------------------------------
 # Events
 # ---------------------------------------------------------------------------
 
-@router.post("/tours/{tour_id}/events", status_code=201, summary="Event hinzufügen",
-    response_model=LogisticsTourOut
+
+@router.post(
+    "/tours/{tour_id}/events",
+    status_code=201,
+    summary="Tour-Ereignis erfassen",
+    response_model=LogisticsTourOut,
 )
 def add_event(
     tour_id: str,

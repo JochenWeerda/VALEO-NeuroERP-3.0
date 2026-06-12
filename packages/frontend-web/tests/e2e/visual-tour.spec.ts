@@ -310,6 +310,7 @@ const ROUTES: Array<{ path: string; label: string; group: string }> = [
 
   // Logistik / Fuhrpark
   { path: '/logistik/frachtbriefe',               label: 'Frachtbriefe',                        group: 'logistik' },
+  { path: '/logistik/tour-fracht-arbeitsraum',    label: 'Tour & Fracht Dispo',                 group: 'logistik' },
   { path: '/logistik/tourenplanung',              label: 'Tourenplanung',                       group: 'logistik' },
   { path: '/strecke/streckengeschaeft',           label: 'Streckengeschäft',                    group: 'logistik' },
   { path: '/strecke/vorlaeufige-streckengeschaefte', label: 'Vorläufige Streckengeschäfte',     group: 'logistik' },

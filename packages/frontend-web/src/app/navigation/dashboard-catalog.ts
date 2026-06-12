@@ -195,10 +195,10 @@ const SECTION_PRESETS: Record<string, SectionPreset> = {
     },
   },
   logistik: {
-    landingItemId: 'tourenplanung',
+    landingItemId: 'tour-fracht-arbeitsraum',
     description: {
-      de: 'Touren, Fuhrpark und Streckengeschäft für Disposition und Versand.',
-      en: 'Tours, fleet, and direct-route logistics for dispatch and shipping.',
+      de: 'Kombinierte Dispo-Sicht Tour + Fracht; Touren, Fuhrpark und Streckengeschaeft.',
+      en: 'Combined dispatch view for tours and freight; fleet and line-haul logistics.',
     },
   },
   versand: {

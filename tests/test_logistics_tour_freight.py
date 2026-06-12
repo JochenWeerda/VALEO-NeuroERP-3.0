@@ -109,7 +109,7 @@ class TestFreightCostCalculation:
         tariff = self._make_tariff_row(price_per_100kg=10.0, min_charge=0.0)
         db.execute.return_value.mappings.return_value.first.return_value = tariff
 
-        result = _calculate(db, "DHL", 100.0, "10115", "20095", 300.0)
+        result = _calculate(db, "DHL", 100.0, "10115", "20095", 300.0, tenant_id="00000000-0000-0000-0000-000000000001")
 
         assert result["freight_cost_eur"] == pytest.approx(10.0)
         assert result["carrier_id"] == "DHL"
@@ -123,7 +123,7 @@ class TestFreightCostCalculation:
         tariff = self._make_tariff_row(price_per_100kg=10.0, min_charge=15.0)
         db.execute.return_value.mappings.return_value.first.return_value = tariff
 
-        result = _calculate(db, "DHL", 5.0, "10115", "20095", 10.0)
+        result = _calculate(db, "DHL", 5.0, "10115", "20095", 10.0, tenant_id="00000000-0000-0000-0000-000000000001")
 
         assert result["freight_cost_eur"] == pytest.approx(15.0)
         assert result["calculation_details"]["applied_minimum"] is True

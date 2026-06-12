@@ -19,7 +19,12 @@
 1. **Runtime-Schema (`CREATE TABLE IF NOT EXISTS`)** in Logistik-Routern — **geschlossen**
    am 2026-06-12 durch **LOG-PROD-001** (Alembic `log_logistics_core_20260612`, Router ohne
    Lazy-DDL). Gleiches Muster wie RFQ (PROC-RFQ-001).
-2. **Kein gemeinsamer Lifecycle-Test** (Spine → Mutation → Storno → UAT) für Tour/Fracht ↔ Lieferschein ↔ Settlement.
+2. **Kein gemeinsamer Lifecycle-Test** (Spine → Mutation → Storno → UAT) für Tour/Fracht ↔ Lieferschein ↔ Settlement — **geschlossen** am 2026-06-12 durch **LOG-CHAIN-001**: Integrationstest
+   ``test_chain_lifecycle_ls_tour_hints_freight_supply_read`` in ``tests/test_logistics_integration.py``
+   (Voraussetzung ``DEMO-LS-001`` aus ``seed_demo_sales.py``; sonst Skip), UAT
+   ``scripts/uat/logistics_chain_lifecycle_uat.py`` (Read-Spine inkl.
+   ``GET /api/v1/supply-chain/traceability/tickets``; volle Mutation nur mit LS-Seed).
+   Settlement-Ende der Kette bleibt bewusst **read-only** (Traceability-Übersicht), keine Abrechnungs-Mutation in diesem Slice.
 3. **Playwright @smoke** war lokal gegen Dev unzuverlässig — **behoben** durch Dev-Token-Session (`docs/quality-assurance/playwright-smoke-auth.md`).
 4. **`delivery_note_ref`** — Read-Auflösung und UI: **LOG-SPINE-RAND-001** (API) +
    **LOG-SPINE-001** (Tourenplanung, `seed_demo_logistics_spine.py`). Keine DB-FK-Pflicht.
@@ -35,8 +40,17 @@
 3. **LOG-SPINE-001 (erledigt 2026-06-12):** Frontend Tourenplanung (Resolve + Tour-Hints),
    `GET /logistik/tours` mit `stop_count`, PATCH `delivery_note_ref`, Seed `seed_demo_logistics_spine.py`
    (nach `seed_demo_sales.py`).
-4. **LOG-LIFE-001:** Mutationen (Stop bestätigen, POD) + **Storno/Fail-closed** + UAT-Skript (analog `proc_match_lifecycle_uat.py`).
-5. **UI:** ein Arbeitsraum „Tour / Frachtbrief“ mit OperationalCaseHeader (DOM-SUPPLY-004-Stil).
+4. **LOG-CHAIN-001 (erledigt 2026-06-12):** Ketten-Lifecycle-Test + UAT (Audit Bruchstelle 2) —
+   LS-Ref → Tour-Hints → Fracht simulate → Traceability-Tickets (Read) → Tour-Storno;
+   Artefakte siehe Punkt 2 oben.
+5. **LOG-LIFE-001 (erledigt 2026-06-12):** Storno-Endpunkte fail-closed
+   (`POST …/tours/{id}/cancel`, `POST …/tours/{id}/stops/{sid}/cancel`), Frontend
+   Status ``STORNIERT`` (KPI + Badges), Integrationstest + UAT-Skript
+   ``scripts/uat/logistics_tour_lifecycle_uat.py`` (analog Match-UAT).
+6. **UI:** ein Arbeitsraum „Tour / Frachtbrief“ mit OperationalCaseHeader (DOM-SUPPLY-004-Stil).
+   **Stand 2026-06-12:** Route ``/logistik/tour-fracht-arbeitsraum`` („Tour & Fracht (Dispo)“) mit
+   gemeinsamer Lage, Tasks, Entscheidungspanel und Sprung zu Tourenplanung/Frachtbriefen;
+   Logistik-Domain-Landing zeigt diese Seite zuerst.
 
 ## 4. Bewusst nicht in dieser Welle
 

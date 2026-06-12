@@ -2,6 +2,13 @@
 Logistik – Frachtkostenberechnung (Feature 2)
 Thin-router pattern: sqlalchemy.text() SQL, domain_logistics schema.
 Schema/Tabelle ``freight_tariffs``: Alembic ``log_logistics_core_20260612``.
+
+Tenant: ``GET /freight-cost/simulate``, ``POST /freight-cost/calculate`` und ``POST /freight-tariffs`` verlangen
+``X-Tenant-ID`` (422). Tarifauswahl wie bei ``GET /freight-tariffs``:
+``tenant_id IS NULL`` (global) oder passende ``tenant_id``.
+
+``GET /freight-tariffs``: ohne ``X-Tenant-ID`` nur Zeilen mit ``tenant_id IS NULL`` (kein
+Mandanten-Leak). Mit Header: eigener Mandant plus globale Tarife.
 """
 
 from __future__ import annotations
@@ -39,6 +46,8 @@ def _calculate(
     postal_code_from: str,
     postal_code_to: str,
     distance_km: float,
+    *,
+    tenant_id: str,
 ) -> Dict[str, Any]:
     zone_from = _postal_to_zone(postal_code_from)
     zone_to = _postal_to_zone(postal_code_to)
@@ -47,6 +56,7 @@ def _calculate(
         text("""
             SELECT * FROM domain_logistics.freight_tariffs
             WHERE carrier_id = :carrier_id
+              AND (tenant_id IS NULL OR tenant_id = :tenant_id)
               AND (zone_from IS NULL OR zone_from = :zone_from)
               AND (zone_to   IS NULL OR zone_to   = :zone_to)
               AND weight_from_kg <= :weight_kg
@@ -56,6 +66,7 @@ def _calculate(
         """),
         {
             "carrier_id": carrier_id,
+            "tenant_id": tenant_id,
             "zone_from": zone_from,
             "zone_to": zone_to,
             "weight_kg": weight_kg,
@@ -122,7 +133,11 @@ def list_tariffs(
     x_tenant_id: Optional[str] = Header(None),
     db: Session = Depends(get_db),
 ) -> List[Dict[str, Any]]:
-    """Tarif-Liste, optional nach Spediteur gefiltert."""
+    """Tarif-Liste, optional nach Spediteur gefiltert.
+
+    Ohne ``X-Tenant-ID``: nur globale Tarife (``tenant_id IS NULL``).
+    Mit Header: eigener Mandant plus globale Tarife.
+    """
     try:
         conditions = ["1=1"]
         params: Dict[str, Any] = {}
@@ -132,6 +147,8 @@ def list_tariffs(
         if x_tenant_id:
             conditions.append("(tenant_id = :tenant_id OR tenant_id IS NULL)")
             params["tenant_id"] = x_tenant_id
+        else:
+            conditions.append("tenant_id IS NULL")
         where = " AND ".join(conditions)
         rows = db.execute(
             text(f"SELECT * FROM domain_logistics.freight_tariffs WHERE {where} ORDER BY carrier_id, weight_from_kg"),  # nosec S608 — reviewed-safe: column names code-controlled, values parameterized
@@ -153,6 +170,8 @@ def create_tariff(
     db: Session = Depends(get_db),
 ) -> Dict[str, Any]:
     """Neuen Frachttarif anlegen."""
+    if not x_tenant_id:
+        raise HTTPException(status_code=422, detail="X-Tenant-ID erforderlich.")
     try:
         tariff_id = str(uuid.uuid4())
         db.execute(
@@ -178,10 +197,26 @@ def create_tariff(
 )
 def calculate_freight(
     body: FreightCalcIn,
+    x_tenant_id: Optional[str] = Header(None),
     db: Session = Depends(get_db),
 ) -> Dict[str, Any]:
     """Frachtkosten berechnen (mit Buchung / Logging)."""
-    return _calculate(db, body.carrier_id, body.weight_kg, body.postal_code_from, body.postal_code_to, body.distance_km)
+    if not x_tenant_id:
+        raise HTTPException(status_code=422, detail="X-Tenant-ID erforderlich.")
+    try:
+        return _calculate(
+            db,
+            body.carrier_id,
+            body.weight_kg,
+            body.postal_code_from,
+            body.postal_code_to,
+            body.distance_km,
+            tenant_id=x_tenant_id,
+        )
+    except HTTPException:
+        raise
+    except Exception as exc:
+        raise HTTPException(status_code=503, detail=str(exc)) from exc
 
 
 @router.get("/freight-cost/simulate", summary="Freight simulate",
@@ -193,7 +228,23 @@ def simulate_freight(
     weight_kg: float = Query(...),
     postal_code_from: str = Query(...),
     postal_code_to: str = Query(...),
+    x_tenant_id: Optional[str] = Header(None),
     db: Session = Depends(get_db),
 ) -> Dict[str, Any]:
     """Frachtkosten simulieren (kein Buchungs-Seiteneffekt)."""
-    return _calculate(db, carrier_id, weight_kg, postal_code_from, postal_code_to, distance_km)
+    if not x_tenant_id:
+        raise HTTPException(status_code=422, detail="X-Tenant-ID erforderlich.")
+    try:
+        return _calculate(
+            db,
+            carrier_id,
+            weight_kg,
+            postal_code_from,
+            postal_code_to,
+            distance_km,
+            tenant_id=x_tenant_id,
+        )
+    except HTTPException:
+        raise
+    except Exception as exc:
+        raise HTTPException(status_code=503, detail=str(exc)) from exc

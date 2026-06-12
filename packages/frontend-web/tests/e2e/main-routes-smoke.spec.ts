@@ -24,6 +24,7 @@ const MAIN_ROUTES: RouteCheck[] = [
   { path: '/admin/report-berechtigungen' },
   { path: '/einstellungen/system' },
   { path: '/nawaro/vertraege' },
+  { path: '/logistik/tour-fracht-arbeitsraum', expectedText: /Tour & Fracht|Dispo-Arbeitsraum/i },
 ]
 
 test.describe('Main Routes Smoke (no dashboard fallback)', () => {

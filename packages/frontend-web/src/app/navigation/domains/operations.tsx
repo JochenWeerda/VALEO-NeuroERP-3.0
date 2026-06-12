@@ -941,6 +941,15 @@ export const RAW_NAV_SECTIONS: RawNavItem[] = [
     mcp: { businessDomain: 'logistics', scope: 'logistics:read' },
     children: [
       {
+        id: 'tour-fracht-arbeitsraum',
+        label: 'Tour & Fracht (Dispo)',
+        icon: LayoutGrid,
+        module: '@/pages/logistik/tour-fracht-arbeitsraum',
+        preferredPath: 'logistik/tour-fracht-arbeitsraum',
+        keywords: ['dispo', 'arbeitsraum', 'kombiniert', 'fracht', 'tour'],
+        mcp: { businessDomain: 'logistics', scope: 'logistics:read' },
+      },
+      {
         id: 'tourenplanung',
         label: 'Tourenplanung',
         icon: Truck,
