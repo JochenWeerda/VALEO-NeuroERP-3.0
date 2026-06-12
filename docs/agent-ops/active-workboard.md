@@ -147,10 +147,19 @@ Dispo-Arbeitsraum: Tarifliste + Bestätigung + `cancelFreightTariff`; Tests in `
 
 **Von:** Cursor
 **Owner:** Cursor
-**Stand:** abgeschlossen 2026-06-12 — Alembic `wms_warehouse_aisles_20260612` (`domain_inventory.warehouse_aisles`, `warehouse_bins.aisle_id`); ORM `WarehouseAisle`; `WarehouseService` + `GET/POST /lager/wms/aisles`, `GET /bins?aisle_id=`, `POST /bins` mit optionalem `aisle_id`; Unit-Tests in `test_warehouse_wms_fefo.py`.
+**Stand:** abgeschlossen 2026-06-12 — Alembic `wms_warehouse_aisles_20260612` (`domain_inventory.warehouse_aisles`, `warehouse_bins.aisle_id`); ORM `WarehouseAisle`; `WarehouseService` + `GET/POST /lager/wms/aisles`, `GET /bins?aisle_id=`, `POST /bins` mit optionalem `aisle_id`; Unit-Tests in `test_warehouse_wms_fefo.py`; UI: `lagerplaetze.tsx` + `warehouse-wms.ts`, E2E in `lager-wms.spec.ts`.
 **Ziel:** ERP-Lücke Lager/Zone/**Gang**/Fach — Gang-Ebene zwischen Zone und Lagerplatz abbilden (Depth-Plan §3 Schritt 1).
 **Dateibesitz:** genannte Dateien, `docs/agent-ops/slices/WM-STRUCT-001.yaml`, `docs/project-context/domain-depth-plan-2026-05-17.md`.
 **Abnahmekriterien:** `alembic upgrade head` legt Tabelle/Spalte an; API tenant-isoliert wie bestehende WMS-Routen; 422 wenn `aisle_id` nicht zur Zone passt.
+
+## WM-WMS-BIN-001 — Bin-PATCH + Kapazität bei Stock-Buchung
+
+**Von:** Cursor
+**Owner:** Cursor
+**Stand:** abgeschlossen 2026-06-12 — `WarehouseService.get_bin` / `update_bin` / `set_bin_stock_line_quantity`; `book_stock_movement` prüft Summe `bin_stock` vs. `capacity_kg`; API `GET`/`PATCH /lager/wms/bins/{bin_id}`, `PATCH …/stock-lines/{id}`; Lagerplätze-Dialog; `scripts/seed_demo_wms_structure.py`; Slice-YAML `WM-WMS-BIN-001.yaml`.
+**Ziel:** Depth-Plan §3 Schritt 2 teilweise — Lagerplatz-Stammdaten pflegen und Einlagerung gegen Platzhöchstmenge absichern.
+**Dateibesitz:** genannte Dateien, `docs/agent-ops/slices/WM-WMS-BIN-001.yaml`, `docs/project-context/domain-depth-plan-2026-05-17.md`.
+**Abnahmekriterien:** PATCH Bin + Stock-Line; Kapazitätsüberschreitung 422; UI mit Pending/Toast; Demo-Seed; `pytest tests/test_warehouse_wms_fefo.py` grün.
 
 ## LOG-SPINE-001 — Lieferschein ↔ Tour UI + Seed
 

@@ -187,7 +187,7 @@ Fokussierte Nachweise:
 ### Soll (Marktführende ERP-Systeme: Warehouse Management)
 | Funktion | Ist | Gap |
 |----------|-----|-----|
-| Lagerstruktur (Lager/Zone/Gang/Fach) | Teilweise | Gang-Ebene + Zuordnung Fach→Gang (**WM-STRUCT-001**); Kapazität/Sequenz/RF weiterhin Lücken |
+| Lagerstruktur (Lager/Zone/Gang/Fach) | Teilweise | Gang-Ebene + Zuordnung Fach→Gang (**WM-STRUCT-001**); Lese-UI auf Lagerplätze; Kapazität/Sequenz/RF weiterhin Lücken |
 | Einlagerungs-/Auslagerungsstrategien | ❌ | **Kritisch** |
 | Transferauftraege (Umlagerung intern) | ❌ | Wichtig |
 | FEFO/FIFO-Steuerung | ❌ | **Kritisch** fuer Agrar |
@@ -197,7 +197,7 @@ Fokussierte Nachweise:
 | Packliste / Versandvorbereitung | ❌ | Wichtig |
 | Silo-Management (Schuettgut) | Teilweise | Vertiefen |
 | Gefahrstoff-Lager (TRGS 510) | ❌ | Compliance-relevant |
-| Lagerplatzbelegung / Kapazitaet | ❌ | Wichtig |
+| Lagerplatzbelegung / Kapazitaet | Teilweise | `capacity_kg` + Summenprüfung bei Buchung (**WM-WMS-BIN-001**); Belegungs-Visualisierung/Optimierung offen |
 | RF-/Barcode-Unterstuetzung (Schnittstelle) | ❌ | Wichtig |
 | Jahresinventur (Stichtagsinventur) | Teilweise | Vollstaendig |
 | Permanente Inventur | ❌ | Wichtig |
@@ -207,7 +207,7 @@ Fokussierte Nachweise:
 
 ### Umsetzungsschritte
 1. **Lagerstruktur-Datenmodell** — Tabellen `warehouses`, `warehouse_zones`, `warehouse_bins` (bestehend); **`warehouse_aisles`** + optional **`warehouse_bins.aisle_id`** (Alembic `wms_warehouse_aisles_20260612`, Slice **WM-STRUCT-001**); Service/API unter `/lager/wms` (`WarehouseService`). *(Benennung „WarehousingService“ im Plan = fachliche Rolle; Implementierung: `warehouse_service`.)*
-2. **Bin-Location-Management** — `GET/POST /lager/bins`, `PATCH /lager/bins/{id}/stock`; Kapazitaetspruefung
+2. **Bin-Location-Management** — `GET/POST /lager/wms/bins`, `GET/PATCH /lager/wms/bins/{id}`, `PATCH /lager/wms/bins/{id}/stock-lines/{line_id}` (**WM-WMS-BIN-001**); Kapazitätsprüfung bei Buchungen und Zeilenkorrektur; Demo-Seed `scripts/seed_demo_wms_structure.py`
 3. **FEFO-Steuerung** — Charge-Attribut `best_before_date`; `pick_fefo()` in `InventoryService`; automatische Empfehlung in Pick-Listen
 4. **Einlagerungs-/Auslagerungsstrategien** — konfigurierbare Regeln (FEFO, FIFO, fester Platz, near-item, Kapazitaet) in `PutawayStrategy` + `PickStrategy`
 5. **Pick-Listen** — `POST /lager/pick-lists` aus Lieferschein; Optimierung nach Lagerplatz-Sequenz

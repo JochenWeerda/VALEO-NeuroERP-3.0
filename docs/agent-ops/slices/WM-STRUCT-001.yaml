@@ -10,9 +10,13 @@ files:
   - app/services/warehouse_service.py
   - app/api/v1/endpoints/warehouse_wms.py
   - tests/test_warehouse_wms_fefo.py
+  - packages/frontend-web/src/lib/api/warehouse-wms.ts
+  - packages/frontend-web/src/pages/lager/lagerplaetze.tsx
+  - packages/frontend-web/tests/e2e/lager-wms.spec.ts
   - docs/project-context/domain-depth-plan-2026-05-17.md
   - docs/agent-ops/active-workboard.md
 acceptance:
   - Migration an Head gekettet; `warehouse_aisles` + nullable `warehouse_bins.aisle_id`
   - GET/POST `/lager/wms/aisles`; `POST /bins` mit optionalem `aisle_id` (422 bei Mismatch)
   - `GET /bins` Query `aisle_id`; Unit-Tests fuer Service-Pfade gruen
+  - Lagerplätze-Seite zeigt Zone→Gang→Fach read-only; E2E prüft Panel-Sichtbarkeit

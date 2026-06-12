@@ -1,9 +1,32 @@
 import { useSearchParams } from '@/app/routing/typed-router'
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Checkbox } from '@/components/ui/checkbox'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
 import { AlertTriangle, MapPin, Package, Warehouse } from 'lucide-react'
 import { useWarehouses } from '@/lib/api/inventory'
+import { getAxiosErrorMessage } from '@/lib/api-client'
+import {
+  usePatchWmsBin,
+  useWmsAislesForZones,
+  useWmsBins,
+  useWmsZones,
+  wmsStr,
+  type WmsBinPatch,
+  type WmsRow,
+} from '@/lib/api/warehouse-wms'
+import { useToast } from '@/hooks/use-toast'
 import { Skeleton } from '@/components/ui/skeleton'
 import {
   CrudCapabilityChecklist,
@@ -22,6 +45,228 @@ const warehouseRoles = [
   { id: 'einkauf', label: 'Einkauf', description: 'Sieht, ob bestellte Ware noch Lagerkapazitaet hat.' },
   { id: 'leitung', label: 'Leitung', description: 'Sieht Engpaesse, Kapazitaetsdruck und naechste Entscheidung.' },
 ] satisfies Array<{ id: WarehouseRole; label: string; description: string }>
+
+function LagerstrukturWmsPanel(props: {
+  warehouses: Array<{ id: string; name: string; code: string }>
+}): JSX.Element {
+  const { warehouses } = props
+  const { toast } = useToast()
+  const patchBin = usePatchWmsBin()
+  const [warehouseId, setWarehouseId] = useState('')
+  const [editBin, setEditBin] = useState<WmsRow | null>(null)
+  const [capInput, setCapInput] = useState('')
+  const [blocked, setBlocked] = useState(false)
+  const [blockReason, setBlockReason] = useState('')
+
+  const zonesQ = useWmsZones(warehouseId || undefined, { enabled: Boolean(warehouseId) })
+  const binsQ = useWmsBins({ warehouse_id: warehouseId || undefined }, { enabled: Boolean(warehouseId) })
+  const zones = zonesQ.data ?? []
+  const zoneIds = useMemo(() => zones.map((z) => wmsStr(z, 'id')).filter(Boolean), [zones])
+  const aislesQueries = useWmsAislesForZones(zoneIds, Boolean(warehouseId))
+
+  function openBinEditor(bin: WmsRow): void {
+    setEditBin(bin)
+    setCapInput(wmsStr(bin, 'capacity_kg'))
+    const ib = bin.is_blocked
+    setBlocked(ib === true || String(ib) === 'true')
+    setBlockReason(wmsStr(bin, 'block_reason'))
+  }
+
+  async function handleSaveBin(): Promise<void> {
+    if (!editBin) return
+    const id = wmsStr(editBin, 'id')
+    const patch: WmsBinPatch = { is_blocked: blocked }
+    const trimmed = capInput.trim()
+    if (trimmed !== '') {
+      const n = Number(trimmed.replace(',', '.'))
+      if (!Number.isFinite(n) || n < 0) {
+        toast({ title: 'Ungültige Kapazität', description: 'Bitte eine nicht-negative Zahl (kg) eingeben.', variant: 'destructive' })
+        return
+      }
+      patch.capacity_kg = n
+    }
+    if (!blocked) {
+      patch.block_reason = null
+    } else if (blockReason.trim() !== '') {
+      patch.block_reason = blockReason.trim()
+    }
+    try {
+      await patchBin.mutateAsync({ binId: id, body: patch })
+      toast({ title: 'Lagerplatz aktualisiert' })
+      setEditBin(null)
+    } catch (e) {
+      toast({ title: 'Speichern fehlgeschlagen', description: getAxiosErrorMessage(e), variant: 'destructive' })
+    }
+  }
+
+  function renderBinLine(bin: WmsRow): JSX.Element {
+    const cap = wmsStr(bin, 'capacity_kg')
+    return (
+      <li key={wmsStr(bin, 'id')} className="flex flex-wrap items-center justify-between gap-2 border-b border-border/50 py-1 last:border-0">
+        <span className="font-mono text-sm">{wmsStr(bin, 'bin_code')}</span>
+        <span className="text-xs text-muted-foreground">{cap ? `max. ${cap} kg` : 'keine Kap.-Angabe'}</span>
+        <Button type="button" variant="outline" size="sm" onClick={() => openBinEditor(bin)}>
+          Bearbeiten
+        </Button>
+      </li>
+    )
+  }
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="text-base">WMS-Lagerstruktur (Zone → Gang → Fach)</CardTitle>
+        <p className="text-sm text-muted-foreground">
+          Daten aus <code className="rounded bg-muted px-1">/api/v1/lager/wms</code> — nach Migration WM-STRUCT-001
+          inkl. Gänge; Lagerplatz-Metadaten per PATCH (Kapazität, Sperre).
+        </p>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <div className="max-w-md space-y-2">
+          <label htmlFor="wms-warehouse-select" className="text-sm font-medium">
+            Lager
+          </label>
+          <select
+            id="wms-warehouse-select"
+            className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+            value={warehouseId}
+            onChange={(e) => setWarehouseId(e.target.value)}
+          >
+            <option value="">— Lager wählen —</option>
+            {warehouses.map((w) => (
+              <option key={w.id} value={w.id}>
+                {w.name || w.code || w.id}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        {warehouseId && zonesQ.isError && (
+          <p className="text-sm text-destructive">Zonen konnten nicht geladen werden.</p>
+        )}
+        {warehouseId && binsQ.isError && (
+          <p className="text-sm text-destructive">Lagerplätze konnten nicht geladen werden.</p>
+        )}
+
+        {warehouseId && zonesQ.isLoading && (
+          <p className="text-sm text-muted-foreground">Lade Zonen …</p>
+        )}
+
+        {warehouseId && !zonesQ.isLoading && zones.length === 0 && !zonesQ.isError && (
+          <p className="text-sm text-muted-foreground">Keine Zonen in diesem Lager erfasst.</p>
+        )}
+
+        {warehouseId && zones.length > 0 && (
+          <div className="space-y-2">
+            {zones.map((zone, i) => {
+              const zid = wmsStr(zone, 'id')
+              const aisles = aislesQueries[i]?.data ?? []
+              const aislesLoading = aislesQueries[i]?.isLoading
+              const bins = (binsQ.data ?? []).filter((b) => wmsStr(b, 'zone_id') === zid)
+              return (
+                <details key={zid} className="rounded-lg border p-3">
+                  <summary className="cursor-pointer font-medium">
+                    {wmsStr(zone, 'zone_code')} — {wmsStr(zone, 'name')}
+                    <span className="ml-2 text-sm font-normal text-muted-foreground">
+                      {aislesLoading ? '…' : `${aisles.length} Gänge`}, {bins.length} Fächer
+                    </span>
+                  </summary>
+                  <div className="mt-3 space-y-3 border-t pt-3">
+                    {aisles.map((a) => {
+                      const aid = wmsStr(a, 'id')
+                      const binsHere = bins.filter((b) => wmsStr(b, 'aisle_id') === aid)
+                      return (
+                        <div key={aid} className="ml-2">
+                          <div className="text-sm font-semibold">
+                            Gang {wmsStr(a, 'aisle_code')}
+                            {wmsStr(a, 'name') ? ` (${wmsStr(a, 'name')})` : ''}
+                          </div>
+                          {binsHere.length === 0 ? (
+                            <p className="text-xs text-muted-foreground">Keine Fächer zugeordnet.</p>
+                          ) : (
+                            <ul className="mt-1 space-y-0">{binsHere.map((bin) => renderBinLine(bin))}</ul>
+                          )}
+                        </div>
+                      )
+                    })}
+                    {(() => {
+                      const orphan = bins.filter((b) => !wmsStr(b, 'aisle_id'))
+                      if (orphan.length === 0) return null
+                      return (
+                        <div className="ml-2">
+                          <div className="text-sm font-semibold">Ohne Gang</div>
+                          <ul className="mt-1 space-y-0">{orphan.map((bin) => renderBinLine(bin))}</ul>
+                        </div>
+                      )
+                    })()}
+                  </div>
+                </details>
+              )
+            })}
+          </div>
+        )}
+
+        <Dialog
+          open={editBin !== null}
+          onOpenChange={(open) => {
+            if (!open) setEditBin(null)
+          }}
+        >
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle>Lagerplatz bearbeiten</DialogTitle>
+              <DialogDescription>
+                {editBin ? `${wmsStr(editBin, 'bin_code')} (${wmsStr(editBin, 'id').slice(0, 8)}…)` : ''}
+              </DialogDescription>
+            </DialogHeader>
+            {editBin && (
+              <div className="grid gap-4 py-2">
+                <div className="grid gap-2">
+                  <Label htmlFor="wms-bin-cap">Kapazität (kg, optional)</Label>
+                  <Input
+                    id="wms-bin-cap"
+                    inputMode="decimal"
+                    value={capInput}
+                    onChange={(e) => setCapInput(e.target.value)}
+                    placeholder="z. B. 25000"
+                  />
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="wms-bin-blocked"
+                    checked={blocked}
+                    onCheckedChange={(c) => setBlocked(c === true)}
+                  />
+                  <Label htmlFor="wms-bin-blocked" className="text-sm font-normal leading-none">
+                    Lagerplatz gesperrt
+                  </Label>
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="wms-bin-block-reason">Sperrgrund (optional)</Label>
+                  <Input
+                    id="wms-bin-block-reason"
+                    value={blockReason}
+                    onChange={(e) => setBlockReason(e.target.value)}
+                    disabled={!blocked}
+                    placeholder="Kurztext bei Sperre"
+                  />
+                </div>
+              </div>
+            )}
+            <DialogFooter>
+              <Button type="button" variant="outline" onClick={() => setEditBin(null)} disabled={patchBin.isPending}>
+                Abbrechen
+              </Button>
+              <Button type="button" onClick={() => void handleSaveBin()} disabled={patchBin.isPending || !editBin}>
+                {patchBin.isPending ? 'Speichern…' : 'Speichern'}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      </CardContent>
+    </Card>
+  )
+}
 
 export default function LagerplaetzePage(): JSX.Element {
   const [searchParams] = useSearchParams()
@@ -79,6 +324,9 @@ export default function LagerplaetzePage(): JSX.Element {
       {!isLoading && (
         <>
           <RoleFocusBar roles={warehouseRoles} value={roleFocus} onChange={setRoleFocus} visibleCount={lager.bereiche.length} totalCount={lager.bereiche.length} title="Wer klaert die Lagerkapazitaet?" />
+          <LagerstrukturWmsPanel
+            warehouses={items.map((w) => ({ id: w.id, name: w.name, code: w.code }))}
+          />
           <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_360px]">
             <ManagementDecisionPanel
               decision={{
