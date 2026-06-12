@@ -14,8 +14,49 @@ import type {
 
 const BASE = '/api/v1/crm/kim'
 
-export async function fetchCustomers(limit = 500): Promise<Customer[]> {
-  return (await apiClient.get<Customer[]>(`${BASE}/customers`, { params: { limit } })).data
+export interface CustomerQuery {
+  q?: string
+  limit?: number
+  offset?: number
+}
+
+/** Kundenliste seitenweise + serverseitige Suche (kein Voll-Laden des Stammes). */
+export async function fetchCustomers(opts: CustomerQuery = {}): Promise<Customer[]> {
+  const { q, limit = 100, offset = 0 } = opts
+  const params: Record<string, unknown> = { limit, offset }
+  if (q?.trim()) params.q = q.trim()
+  return (await apiClient.get<Customer[]>(`${BASE}/customers`, { params })).data
+}
+
+export interface CustomerDashboard {
+  customer: Customer | null
+  contacts: ContactPerson[]
+  logs: ContactLog[]
+  financials: OpenItem[]
+  documents: BusinessDocument[]
+  meta: { timings: Record<string, number>; sourceStatus: Record<string, string> }
+}
+
+/**
+ * Bündelt Stammdaten + Ansprechpartner + Historie + OP + Belege in EINEM Request
+ * (statt vier Roundtrips). Fallback: ist der Bündelendpoint nicht verfügbar (ältere
+ * Backend-Version, 404 o. Ä.), werden die vier Einzelrequests wie bisher parallel
+ * geholt — das Cockpit lädt immer.
+ */
+export async function fetchDashboard(id: string): Promise<CustomerDashboard> {
+  const enc = encodeURIComponent(id)
+  try {
+    return (await apiClient.get<CustomerDashboard>(`${BASE}/customers/${enc}/dashboard`)).data
+  } catch {
+    const [customer, contacts, logs, financials, documents] = await Promise.all([
+      fetchCustomer(id).catch(() => null),
+      fetchContacts(id).catch(() => [] as ContactPerson[]),
+      fetchLogs(id).catch(() => [] as ContactLog[]),
+      fetchFinancials(id).catch(() => [] as OpenItem[]),
+      fetchDocuments(id).catch(() => [] as BusinessDocument[]),
+    ])
+    return { customer, contacts, logs, financials, documents, meta: { timings: {}, sourceStatus: { mode: 'fallback' } } }
+  }
 }
 
 export async function fetchCustomer(id: string): Promise<Customer | null> {

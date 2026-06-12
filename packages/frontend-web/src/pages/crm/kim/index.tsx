@@ -128,10 +128,19 @@ export default function KimCockpitPage() {
     }
   }, [selectedCustomerId]);
 
-  const fetchCustomers = async () => {
+  // Konfigurierbare Seitengröße: kein Voll-Laden des Debitorenstammes (462+).
+  // Suche jenseits der Seite läuft serverseitig (handleCustomerSearch).
+  const CUSTOMER_PAGE_LIMIT = 100;
+
+  const fetchCustomers = async (q?: string) => {
     try {
-      const data = await kimApi.fetchCustomers();
-      setCustomers(data);
+      const data = await kimApi.fetchCustomers({ q, limit: CUSTOMER_PAGE_LIMIT });
+      setCustomers((prev) => {
+        // Aktiven Kunden erhalten, falls er nicht in Seite/Treffern liegt — sonst
+        // würde das Detailpane (activeCustomer = find(selectedId)) leer laufen.
+        const active = prev.find((c) => c.id === selectedCustomerId);
+        return active && !data.some((c) => c.id === active.id) ? [active, ...data] : data;
+      });
       if (data.length > 0 && !selectedCustomerId) {
         setSelectedCustomerId(data[0].id);
       }
@@ -147,20 +156,21 @@ export default function KimCockpitPage() {
     }
   };
 
+  // Serverseitige Suche (debounced aus der Sidebar): leerer Begriff → erste Seite.
+  const handleCustomerSearch = (term: string) => {
+    void fetchCustomers(term || undefined);
+  };
+
   const fetchCustomerDataStreams = async (id: string) => {
     try {
-      const [contactsData, logsData, financialsData, docsData] = await Promise.all([
-        kimApi.fetchContacts(id),
-        kimApi.fetchLogs(id),
-        kimApi.fetchFinancials(id),
-        kimApi.fetchDocuments(id),
-      ]);
-      setContacts(contactsData || []);
-      setLogs(logsData || []);
-      setOpenItems(financialsData || []);
-      setDocuments(docsData || []);
+      // Ein Bündelrequest statt vier Roundtrips (mit Fallback in kimApi.fetchDashboard).
+      const dash = await kimApi.fetchDashboard(id);
+      setContacts(dash.contacts || []);
+      setLogs(dash.logs || []);
+      setOpenItems(dash.financials || []);
+      setDocuments(dash.documents || []);
     } catch (err) {
-      console.error("Failed to load customer relational datastreams:", err);
+      console.error("Failed to load customer dashboard:", err);
     }
   };
 
@@ -202,7 +212,12 @@ export default function KimCockpitPage() {
         alertMessages: alertMsgs,
       });
       if (data.status === "success") {
-        await fetchCustomers();
+        // Optimistisch im geladenen Stamm patchen statt Voll-Reload (Pagination-sicher).
+        setCustomers((prev) => prev.map((c) => c.id === activeCustomer.id ? {
+          ...c, street: editStreet, city: editCity, creditLimit: Number(editLimit),
+          salesRepresentative: editRep, dispatcher: editDisp, chefAnweisung: editChefNote,
+          alertMessages: alertMsgs,
+        } : c));
         setShowMasterEditModal(false);
         toast({ title: 'Stammdaten gespeichert', description: activeCustomer.name });
       }
@@ -520,6 +535,7 @@ export default function KimCockpitPage() {
         onSelectCustomer={setSelectedCustomerId}
         onOpenEnterprise={() => setShowCorporateModal(true)}
         onOpenGlobalDocs={() => setShowDocumentsModal(true)}
+        onSearchChange={handleCustomerSearch}
       />
 
       {/* WORKSPACE AREA */}
@@ -661,7 +677,8 @@ export default function KimCockpitPage() {
                           try {
                             const ret = await kimApi.updateCustomer(activeCustomer.id, { chefAnweisung: e.target.value });
                             if (ret.status === "success") {
-                              await fetchCustomers();
+                              const note = e.target.value;
+                              setCustomers((prev) => prev.map((c) => c.id === activeCustomer.id ? { ...c, chefAnweisung: note } : c));
                             }
                           } catch (err) {
                             console.error(err);

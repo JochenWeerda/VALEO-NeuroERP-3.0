@@ -13,6 +13,7 @@ Tabellen/Daten liefern leere Listen statt 500).
 
 from __future__ import annotations
 
+import time
 from typing import Any, Optional
 
 from fastapi import APIRouter, Depends
@@ -232,11 +233,24 @@ _CUST_SELECT = """
 # ── Kundenliste / Stammdaten ──────────────────────────────────────────────────
 @router.get("/customers", response_model=list[Customer], summary="Kundenliste (KIM)")
 def list_customers(
-    limit: int = 500,
+    q: Optional[str] = None,
+    limit: int = 50,
+    offset: int = 0,
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
 ) -> list[Customer]:
-    rows = _safe(db, _CUST_SELECT + " ORDER BY k.name1 LIMIT :lim", {"lim": limit})
+    """Kundenliste mit serverseitiger Suche (`q` über Name/Nr/Ort) und Pagination
+    (`limit`/`offset`). Default-Limit bewusst klein (kein Voll-Laden des Stammes);
+    das Cockpit holt die Liste seitenweise und sucht serverseitig."""
+    limit = max(1, min(limit, 1000))
+    offset = max(0, offset)
+    sql = _CUST_SELECT
+    params: dict[str, Any] = {"lim": limit, "off": offset}
+    if q and q.strip():
+        sql += " AND (k.name1 ILIKE :q OR k.kunden_nr ILIKE :q OR coalesce(k.ort,'') ILIKE :q)"
+        params["q"] = f"%{q.strip()}%"
+    sql += " ORDER BY k.name1 LIMIT :lim OFFSET :off"
+    rows = _safe(db, sql, params)
     return [_customer_from_row(dict(r)) for r in rows]
 
 
@@ -656,6 +670,62 @@ def list_documents(
             completed=str(d.get("status") or "").lower() in ("abgeschlossen", "completed", "geliefert"),
         ))
     return out
+
+
+# ── 360°-Dashboard (gebündelt) ────────────────────────────────────────────────
+class DashboardMeta(BaseModel):
+    timings: dict[str, float]          # ms je Quelle + total
+    sourceStatus: dict[str, str]       # ok | error:<Typ> je Quelle
+
+
+class CustomerDashboard(BaseModel):
+    customer: Optional[Customer]
+    contacts: list[ContactPerson]
+    logs: list[ContactLog]
+    financials: list[OpenItem]
+    documents: list[BusinessDocument]
+    meta: DashboardMeta
+
+
+@router.get("/customers/{kunden_nr}/dashboard", response_model=CustomerDashboard,
+            summary="360°-Dashboard gebündelt (Stammdaten + Ansprechpartner + Historie + OP + Belege)")
+def customer_dashboard(
+    kunden_nr: str,
+    db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
+) -> CustomerDashboard:
+    """Bündelt die fünf Einzelströme in EINEN Request (statt vier Roundtrips beim
+    Kundenwechsel). Reine Wiederverwendung der bestehenden Endpoint-Funktionen über
+    dieselbe DB-Session; jede Quelle ist tolerant (ein Fehlschlag liefert leer +
+    Status, kein 500 fürs ganze Dashboard) und liefert ihre Laufzeit in `meta`."""
+    timings: dict[str, float] = {}
+    status: dict[str, str] = {}
+
+    def _timed(name: str, fn, default):
+        t0 = time.perf_counter()
+        try:
+            value = fn()
+            status[name] = "ok"
+            return value
+        except Exception as exc:  # noqa: BLE001 - tolerant je Quelle (kein Schein-500)
+            status[name] = f"error:{type(exc).__name__}"
+            return default
+        finally:
+            timings[name] = round((time.perf_counter() - t0) * 1000, 1)
+
+    t_all = time.perf_counter()
+    customer = _timed("customer", lambda: get_customer(kunden_nr, db, tenant_id), None)
+    contacts = _timed("contacts", lambda: list_contacts(kunden_nr, db, tenant_id), [])
+    logs = _timed("logs", lambda: list_logs(kunden_nr, db, tenant_id), [])
+    financials = _timed("financials", lambda: list_financials(kunden_nr, db, tenant_id), [])
+    documents = _timed("documents", lambda: list_documents(kunden_nr, db, tenant_id), [])
+    timings["total"] = round((time.perf_counter() - t_all) * 1000, 1)
+
+    return CustomerDashboard(
+        customer=customer, contacts=contacts, logs=logs,
+        financials=financials, documents=documents,
+        meta=DashboardMeta(timings=timings, sourceStatus=status),
+    )
 
 
 # ── NeuroAI-Dossier (anbieterunabhängiges LLM-Gateway + Fallback) ─────────────
