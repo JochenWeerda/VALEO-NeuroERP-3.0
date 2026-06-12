@@ -1,7 +1,7 @@
 id: LOG-SPINE-RAND-001
 title: Read-Spine Lieferschein-Referenz fuer Tour-Stopps (Rand)
 owner: Cursor
-status: in_arbeit
+status: abgeschlossen
 updated: 2026-06-12
 fachlicher_zweck: >
   tour_stops.delivery_note_ref ohne FK aufloesbar machen: Read-only Zugriff auf

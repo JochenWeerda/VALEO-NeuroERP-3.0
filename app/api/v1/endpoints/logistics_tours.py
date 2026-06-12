@@ -1,6 +1,7 @@
 """
 Logistik – Tourenplanung-Engine (Feature 1 + Track & Trace / ePOD Feature 3)
 Thin-router pattern: sqlalchemy.text() SQL, domain_logistics schema.
+Schema/Tabellen: Alembic-Revision ``log_logistics_core_20260612`` (kein Runtime-DDL).
 """
 
 from __future__ import annotations
@@ -32,46 +33,6 @@ router = APIRouter(prefix="/logistik", tags=["logistik", "tourenplanung"])
 # Helpers
 # ---------------------------------------------------------------------------
 
-def _ensure_schema(db: Session) -> None:
-    """Create schema and tables if not present. Raises 503 on DB failure."""
-    try:
-        db.execute(text("CREATE SCHEMA IF NOT EXISTS domain_logistics"))
-        db.execute(text("""
-            CREATE TABLE IF NOT EXISTS domain_logistics.tour_stops (
-                id              TEXT PRIMARY KEY,
-                tour_id         TEXT NOT NULL,
-                stop_order      INTEGER NOT NULL DEFAULT 0,
-                address         TEXT,
-                lat             DOUBLE PRECISION,
-                lng             DOUBLE PRECISION,
-                customer_id     TEXT,
-                delivery_note_ref TEXT,
-                planned_arrival TIMESTAMPTZ,
-                actual_arrival  TIMESTAMPTZ,
-                status          TEXT NOT NULL DEFAULT 'GEPLANT',
-                pod_data        JSONB,
-                tenant_id       TEXT,
-                created_at      TIMESTAMPTZ DEFAULT NOW()
-            )
-        """))
-        db.execute(text("""
-            CREATE TABLE IF NOT EXISTS domain_logistics.tour_events (
-                id          TEXT PRIMARY KEY,
-                tour_id     TEXT NOT NULL,
-                event_type  TEXT NOT NULL,
-                event_ts    TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-                lat         DOUBLE PRECISION,
-                lng         DOUBLE PRECISION,
-                notes       TEXT,
-                driver_ref  TEXT,
-                tenant_id   TEXT
-            )
-        """))
-        db.commit()
-    except Exception as exc:
-        raise HTTPException(status_code=503, detail=f"Datenbank nicht erreichbar: {exc}") from exc
-
-
 def _haversine(lat1: float, lng1: float, lat2: float, lng2: float) -> float:
     """Haversine-Distanz in km."""
     R = 6371.0
@@ -92,6 +53,38 @@ def _safe_number(value: Any, default: float = 0.0) -> float:
         return float(value)
     except (TypeError, ValueError):
         return default
+
+
+def _lookup_sales_delivery_note(db: Session, ref: str, tenant_id: str) -> Optional[Dict[str, Any]]:
+    """Lieferschein zu tour_stops.delivery_note_ref (UUID oder delivery_note_number), tenant-isoliert."""
+    r = ref.strip()
+    if not r:
+        return None
+    row = db.execute(
+        text(
+            """
+            SELECT id, delivery_note_number, status, delivery_date, customer_id, sales_order_id
+            FROM domain_sales.delivery_notes
+            WHERE tenant_id = :tenant_id
+              AND (id::text = :ref OR delivery_note_number = :ref)
+            LIMIT 1
+            """
+        ),
+        {"tenant_id": tenant_id, "ref": r},
+    ).mappings().first()
+    if not row:
+        return None
+    d = dict(row)
+    dd = d.get("delivery_date")
+    so = d.get("sales_order_id")
+    return {
+        "id": str(d["id"]),
+        "delivery_note_number": d.get("delivery_note_number"),
+        "status": d.get("status"),
+        "delivery_date": dd.isoformat() if dd is not None and hasattr(dd, "isoformat") else (str(dd) if dd else None),
+        "customer_id": d.get("customer_id"),
+        "sales_order_id": str(so) if so is not None else None,
+    }
 
 
 # ---------------------------------------------------------------------------
@@ -142,12 +135,39 @@ class PodIn(BaseModel):
 
 
 # ---------------------------------------------------------------------------
-# Tours — LIST + CREATE
+# Read-Spine: Lieferschein-Referenz (LOG-SPINE-RAND-001)
 # ---------------------------------------------------------------------------
 
-def _tours_table_check(db: Session) -> None:
-    _ensure_schema(db)
+@router.get(
+    "/sales-delivery-note-by-ref",
+    summary="Lieferschein zu Referenz (Read)",
+    response_model=LogisticsTourOut,
+)
+def resolve_sales_delivery_note_by_ref(
+    ref: str = Query(..., min_length=1, description="Lieferschein-ID oder delivery_note_number"),
+    x_tenant_id: Optional[str] = Header(None),
+    db: Session = Depends(get_db),
+) -> Dict[str, Any]:
+    """Read-only: Auflösung von ``delivery_note_ref`` gegen ``domain_sales.delivery_notes``."""
+    if not x_tenant_id:
+        raise HTTPException(
+            status_code=422,
+            detail="X-Tenant-ID erforderlich zur tenant-sicheren Auflösung.",
+        )
+    try:
+        summary = _lookup_sales_delivery_note(db, ref, x_tenant_id)
+        if not summary:
+            raise HTTPException(status_code=404, detail="Kein Lieferschein für diese Referenz")
+        return summary
+    except HTTPException:
+        raise
+    except Exception as exc:
+        raise HTTPException(status_code=503, detail=str(exc)) from exc
 
+
+# ---------------------------------------------------------------------------
+# Tours — LIST + CREATE
+# ---------------------------------------------------------------------------
 
 @router.get("/tours", summary="Tours auflisten",
     response_model=list[LogisticsTourOut]
@@ -160,7 +180,6 @@ def list_tours(
     db: Session = Depends(get_db),
 ) -> List[Dict[str, Any]]:
     """Liste aller Touren mit optionalen Filtern."""
-    _tours_table_check(db)
     try:
         conditions = ["1=1"]
         params: Dict[str, Any] = {}
@@ -177,20 +196,6 @@ def list_tours(
             conditions.append("status = :status")
             params["status"] = status
         where = " AND ".join(conditions)
-        # tours table is in domain_logistics but may not exist yet → create it inline
-        db.execute(text("""
-            CREATE TABLE IF NOT EXISTS domain_logistics.tours (
-                id          TEXT PRIMARY KEY,
-                date        TIMESTAMPTZ,
-                vehicle_id  TEXT,
-                driver_id   TEXT,
-                status      TEXT NOT NULL DEFAULT 'GEPLANT',
-                notes       TEXT,
-                tenant_id   TEXT,
-                created_at  TIMESTAMPTZ DEFAULT NOW()
-            )
-        """))
-        db.commit()
         rows = db.execute(
             text(f"SELECT * FROM domain_logistics.tours WHERE {where} ORDER BY created_at DESC"),  # nosec S608 — reviewed-safe: column names code-controlled, values parameterized
             params,
@@ -211,20 +216,7 @@ def create_tour(
     db: Session = Depends(get_db),
 ) -> Dict[str, Any]:
     """Tour anlegen inkl. Stopps."""
-    _tours_table_check(db)
     try:
-        db.execute(text("""
-            CREATE TABLE IF NOT EXISTS domain_logistics.tours (
-                id          TEXT PRIMARY KEY,
-                date        TIMESTAMPTZ,
-                vehicle_id  TEXT,
-                driver_id   TEXT,
-                status      TEXT NOT NULL DEFAULT 'GEPLANT',
-                notes       TEXT,
-                tenant_id   TEXT,
-                created_at  TIMESTAMPTZ DEFAULT NOW()
-            )
-        """))
         tour_id = str(uuid.uuid4())
         db.execute(
             text("""
@@ -284,11 +276,14 @@ def create_tour(
 )
 def get_tour(
     tour_id: str,
+    include_delivery_hints: bool = Query(
+        False,
+        description="Wenn true und X-Tenant-ID: pro Stopp ``delivery_note_hint`` aus domain_sales",
+    ),
     x_tenant_id: Optional[str] = Header(None),
     db: Session = Depends(get_db),
 ) -> Dict[str, Any]:
     """Tour-Detail mit Stopps und Ereignissen."""
-    _tours_table_check(db)
     try:
         row = db.execute(
             text("SELECT * FROM domain_logistics.tours WHERE id = :id"),
@@ -304,7 +299,18 @@ def get_tour(
             text("SELECT * FROM domain_logistics.tour_events WHERE tour_id = :tid ORDER BY event_ts"),
             {"tid": tour_id},
         ).mappings().all()
-        return {**dict(row), "stops": [dict(s) for s in stops], "events": [dict(e) for e in events]}
+        stops_list: List[Dict[str, Any]] = [dict(s) for s in stops]
+        if include_delivery_hints and x_tenant_id:
+            cache: Dict[str, Optional[Dict[str, Any]]] = {}
+            for s in stops_list:
+                rfn = (s.get("delivery_note_ref") or "").strip()
+                if not rfn:
+                    s["delivery_note_hint"] = None
+                    continue
+                if rfn not in cache:
+                    cache[rfn] = _lookup_sales_delivery_note(db, rfn, x_tenant_id)
+                s["delivery_note_hint"] = cache[rfn]
+        return {**dict(row), "stops": stops_list, "events": [dict(e) for e in events]}
     except HTTPException:
         raise
     except Exception as exc:
@@ -325,7 +331,6 @@ def add_stop(
     db: Session = Depends(get_db),
 ) -> Dict[str, Any]:
     """Stopp zur Tour hinzufügen."""
-    _tours_table_check(db)
     try:
         stop_id = str(uuid.uuid4())
         # auto-assign next stop_order
@@ -377,7 +382,6 @@ def patch_stop(
     db: Session = Depends(get_db),
 ) -> Dict[str, Any]:
     """Stopp-Status oder Ankunftszeit aktualisieren."""
-    _tours_table_check(db)
     try:
         updates = []
         params: Dict[str, Any] = {"stop_id": stop_id}
@@ -430,7 +434,6 @@ def add_event(
     db: Session = Depends(get_db),
 ) -> Dict[str, Any]:
     """GPS-Event oder Fahrerereignis speichern."""
-    _tours_table_check(db)
     try:
         event_id = str(uuid.uuid4())
         now = datetime.utcnow()
@@ -472,7 +475,6 @@ def live_status(
     db: Session = Depends(get_db),
 ) -> Dict[str, Any]:
     """Letzte GPS-Position, nächster Stopp, ETA."""
-    _tours_table_check(db)
     try:
         last_gps = db.execute(
             text("""
@@ -516,7 +518,6 @@ def optimize_stops(
     db: Session = Depends(get_db),
 ) -> Dict[str, Any]:
     """Nearest-Neighbor-Optimierung der Stopp-Reihenfolge."""
-    _tours_table_check(db)
     try:
         rows = db.execute(
             text("SELECT * FROM domain_logistics.tour_stops WHERE tour_id = :tid ORDER BY stop_order"),
@@ -567,7 +568,6 @@ def public_tracking(
     db: Session = Depends(get_db),
 ) -> Dict[str, Any]:
     """Öffentlicher Tracking-Link – letzte GPS-Position, aktueller Stopp, ETA."""
-    _tours_table_check(db)
     try:
         last_gps = db.execute(
             text("""
@@ -623,7 +623,6 @@ def save_pod(
     db: Session = Depends(get_db),
 ) -> Dict[str, Any]:
     """Proof of Delivery speichern – setzt Stopp-Status auf ABGELIEFERT."""
-    _tours_table_check(db)
     try:
         import json
         pod_json = json.dumps(body.model_dump())
@@ -658,7 +657,6 @@ def get_pod(
     db: Session = Depends(get_db),
 ) -> Dict[str, Any]:
     """ePOD abrufen."""
-    _tours_table_check(db)
     try:
         row = db.execute(
             text("SELECT pod_data FROM domain_logistics.tour_stops WHERE id = :stop_id AND tour_id = :tour_id"),
@@ -690,17 +688,7 @@ def get_statistics(
     db: Session = Depends(get_db),
 ) -> Dict[str, Any]:
     """Transportstatistik: Touren, Stopps, km, Pünktlichkeit."""
-    _tours_table_check(db)
     try:
-        db.execute(text("""
-            CREATE TABLE IF NOT EXISTS domain_logistics.tours (
-                id TEXT PRIMARY KEY, date TIMESTAMPTZ, vehicle_id TEXT, driver_id TEXT,
-                status TEXT NOT NULL DEFAULT 'GEPLANT', notes TEXT, tenant_id TEXT,
-                created_at TIMESTAMPTZ DEFAULT NOW()
-            )
-        """))
-        db.commit()
-
         tour_conds = ["1=1"]
         params: Dict[str, Any] = {}
         if x_tenant_id:

@@ -24,7 +24,7 @@ Stand: `2026-06-11`
 
 **Von:** Cursor
 **Owner:** Cursor
-**Stand:** reserviert 2026-06-12 — Vorbereitung LOG-SPINE-001; Read-only Aufloesung `delivery_note_ref` → `domain_sales.delivery_notes`.
+**Stand:** abgeschlossen 2026-06-12 — GET ``sales-delivery-note-by-ref`` + optional ``include_delivery_hints`` auf Tour-Detail; Tests ``test_logistics_delivery_hint.py``.
 **Ziel:** Medienbruch reduzieren ohne Schema-FK; Muster wie `sales_storno_service` (id oder Nummer).
 **Dateibesitz:** `logistics_tours.py`, `tests/test_logistics_delivery_hint.py`, Wave-Audit, Slice-YAML.
 **Abnahmekriterien:** Neuer GET-Resolve + optional `include_delivery_hints` auf Tour-Detail; Tests gruen.
