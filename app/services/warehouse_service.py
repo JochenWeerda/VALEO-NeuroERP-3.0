@@ -34,10 +34,45 @@ class WarehouseService:
         self.db.commit()
         return {"id": zone_id, **payload}
 
+    # ── Gänge (Aisles) ─────────────────────────────────────────
+
+    def list_aisles(self, zone_id: str) -> list[dict]:
+        """Alle aktiven Gänge einer Zone."""
+        rows = self.db.execute(text("""
+            SELECT * FROM domain_inventory.warehouse_aisles
+            WHERE zone_id = :zid AND tenant_id = :tid AND is_active = true
+            ORDER BY aisle_code
+        """), {"zid": zone_id, "tid": self.tenant_id}).fetchall()
+        return [dict(r._mapping) for r in rows]
+
+    def create_aisle(self, zone_id: str, payload: dict) -> dict:
+        """Gang in einer Zone anlegen (warehouse_id aus Zone)."""
+        z = self.db.execute(text("""
+            SELECT id, warehouse_id FROM domain_inventory.warehouse_zones
+            WHERE id = :zid AND tenant_id = :tid AND is_active = true
+        """), {"zid": zone_id, "tid": self.tenant_id}).fetchone()
+        if not z:
+            raise ValueError("Zone nicht gefunden oder inaktiv")
+        wid = str(z.warehouse_id)
+        aisle_id = str(uuid4())
+        self.db.execute(text("""
+            INSERT INTO domain_inventory.warehouse_aisles
+              (id, zone_id, warehouse_id, aisle_code, name, description, tenant_id, is_active)
+            VALUES (:id, :zid, :wid, :aisle_code, :name, :desc, :tid, true)
+        """), {
+            "id": aisle_id, "zid": zone_id, "wid": wid,
+            "aisle_code": payload["aisle_code"],
+            "name": payload.get("name"),
+            "desc": payload.get("description"),
+            "tid": self.tenant_id,
+        })
+        self.db.commit()
+        return {"id": aisle_id, "zone_id": zone_id, "warehouse_id": wid, **payload}
+
     # ── Bins ───────────────────────────────────────────────────
 
     def list_bins(self, warehouse_id: str | None = None, zone_id: str | None = None,
-                  only_active: bool = True) -> list[dict]:
+                  aisle_id: str | None = None, only_active: bool = True) -> list[dict]:
         filters = ["tenant_id = :tid"]
         params: dict = {"tid": self.tenant_id}
         if warehouse_id:
@@ -46,6 +81,9 @@ class WarehouseService:
         if zone_id:
             filters.append("zone_id = :zid")
             params["zid"] = zone_id
+        if aisle_id:
+            filters.append("aisle_id = :aid")
+            params["aid"] = aisle_id
         if only_active:
             filters.append("is_active = true")
         where = " AND ".join(filters)
@@ -56,13 +94,37 @@ class WarehouseService:
 
     def create_bin(self, zone_id: str, warehouse_id: str, payload: dict) -> dict:
         bin_id = str(uuid4())
-        self.db.execute(text("""
-            INSERT INTO domain_inventory.warehouse_bins
-              (id, zone_id, warehouse_id, bin_code, bin_type, capacity_kg, tenant_id, is_active, is_blocked)
-            VALUES (:id, :zid, :wid, :bin_code, :bin_type, :cap, :tid, true, false)
-        """), {"id": bin_id, "zid": zone_id, "wid": warehouse_id,
-               "bin_code": payload["bin_code"], "bin_type": payload.get("bin_type", "standard"),
-               "cap": payload.get("capacity_kg"), "tid": self.tenant_id})
+        aisle_id = payload.get("aisle_id")
+        if aisle_id:
+            row = self.db.execute(text("""
+                SELECT id FROM domain_inventory.warehouse_aisles
+                WHERE id = :aid AND zone_id = :zid AND warehouse_id = :wid
+                  AND tenant_id = :tid AND is_active = true
+            """), {
+                "aid": aisle_id, "zid": zone_id, "wid": warehouse_id, "tid": self.tenant_id,
+            }).fetchone()
+            if not row:
+                raise ValueError(
+                    "Gang (aisle_id) nicht gefunden, passt nicht zur Zone/Lager oder ist inaktiv"
+                )
+            self.db.execute(text("""
+                INSERT INTO domain_inventory.warehouse_bins
+                  (id, zone_id, warehouse_id, aisle_id, bin_code, bin_type, capacity_kg,
+                   tenant_id, is_active, is_blocked)
+                VALUES (:id, :zid, :wid, :aisle_id, :bin_code, :bin_type, :cap, :tid, true, false)
+            """), {
+                "id": bin_id, "zid": zone_id, "wid": warehouse_id, "aisle_id": aisle_id,
+                "bin_code": payload["bin_code"], "bin_type": payload.get("bin_type", "standard"),
+                "cap": payload.get("capacity_kg"), "tid": self.tenant_id,
+            })
+        else:
+            self.db.execute(text("""
+                INSERT INTO domain_inventory.warehouse_bins
+                  (id, zone_id, warehouse_id, bin_code, bin_type, capacity_kg, tenant_id, is_active, is_blocked)
+                VALUES (:id, :zid, :wid, :bin_code, :bin_type, :cap, :tid, true, false)
+            """), {"id": bin_id, "zid": zone_id, "wid": warehouse_id,
+                   "bin_code": payload["bin_code"], "bin_type": payload.get("bin_type", "standard"),
+                   "cap": payload.get("capacity_kg"), "tid": self.tenant_id})
         self.db.commit()
         return {"id": bin_id, "zone_id": zone_id, "warehouse_id": warehouse_id, **payload}
 

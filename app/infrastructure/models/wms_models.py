@@ -50,6 +50,37 @@ class WarehouseZone(Base):
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
 
+class WarehouseAisle(Base):
+    """Gang/Reihe innerhalb einer Zone (optional zwischen Zone und Lagerplatz)."""
+
+    __tablename__ = "warehouse_aisles"
+    __table_args__ = (
+        UniqueConstraint("zone_id", "aisle_code", name="uq_wa_zone_aisle_code"),
+        Index("idx_wa_zone", "zone_id"),
+        Index("idx_wa_warehouse", "warehouse_id"),
+        Index("idx_wa_tenant", "tenant_id"),
+        {"schema": "domain_inventory", "extend_existing": True},
+    )
+
+    id = Column(String(36), primary_key=True, default=uuid7)
+    zone_id = Column(
+        String(36),
+        ForeignKey("domain_inventory.warehouse_zones.id"),
+        nullable=False,
+    )
+    warehouse_id = Column(
+        String(36),
+        ForeignKey("domain_inventory.warehouses.id"),
+        nullable=False,
+    )
+    aisle_code = Column(String(30), nullable=False)
+    name = Column(String(100), nullable=True)
+    description = Column(Text, nullable=True)
+    tenant_id = Column(String(64), nullable=False)
+    is_active = Column(Boolean, server_default="true")
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+
 class WarehouseBin(Base):
     """An individual storage location (bin/slot) within a warehouse zone."""
 
@@ -57,6 +88,7 @@ class WarehouseBin(Base):
     __table_args__ = (
         UniqueConstraint("warehouse_id", "bin_code", name="uq_wb_warehouse_bin_code"),
         Index("idx_wb_zone", "zone_id"),
+        Index("idx_wb_aisle", "aisle_id"),
         Index("idx_wb_warehouse", "warehouse_id"),
         Index("idx_wb_tenant", "tenant_id"),
         {"schema": "domain_inventory", "extend_existing": True},
@@ -73,6 +105,11 @@ class WarehouseBin(Base):
         String(36),
         ForeignKey("domain_inventory.warehouses.id"),
         nullable=False,
+    )
+    aisle_id = Column(
+        String(36),
+        ForeignKey("domain_inventory.warehouse_aisles.id"),
+        nullable=True,
     )
     bin_code = Column(String(30), nullable=False)
     # standard / silo / regal / boden / extern
