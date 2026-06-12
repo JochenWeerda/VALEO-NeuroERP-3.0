@@ -143,6 +143,15 @@ Dispo-Arbeitsraum: Tarifliste + Bestätigung + `cancelFreightTariff`; Tests in `
 **Dateibesitz:** genannte Dateien, `docs/agent-ops/slices/LOG-FREIGHT-STORNO-001.yaml`.
 **Abnahmekriterien:** 422 ohne Tenant; 403 global/fremd; 409 doppelt; simulate nach Storno ohne Treffer.
 
+## WM-STRUCT-001 — Lagerstruktur Gang (Depth-Plan §3 Schritt 1)
+
+**Von:** Cursor
+**Owner:** Cursor
+**Stand:** abgeschlossen 2026-06-12 — Alembic `wms_warehouse_aisles_20260612` (`domain_inventory.warehouse_aisles`, `warehouse_bins.aisle_id`); ORM `WarehouseAisle`; `WarehouseService` + `GET/POST /lager/wms/aisles`, `GET /bins?aisle_id=`, `POST /bins` mit optionalem `aisle_id`; Unit-Tests in `test_warehouse_wms_fefo.py`.
+**Ziel:** ERP-Lücke Lager/Zone/**Gang**/Fach — Gang-Ebene zwischen Zone und Lagerplatz abbilden (Depth-Plan §3 Schritt 1).
+**Dateibesitz:** genannte Dateien, `docs/agent-ops/slices/WM-STRUCT-001.yaml`, `docs/project-context/domain-depth-plan-2026-05-17.md`.
+**Abnahmekriterien:** `alembic upgrade head` legt Tabelle/Spalte an; API tenant-isoliert wie bestehende WMS-Routen; 422 wenn `aisle_id` nicht zur Zone passt.
+
 ## LOG-SPINE-001 — Lieferschein ↔ Tour UI + Seed
 
 **Von:** Cursor

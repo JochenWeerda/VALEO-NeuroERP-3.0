@@ -56,6 +56,71 @@ def test_create_bin_returns_id():
     assert result["warehouse_id"] == "wh-1"
 
 
+@pytest.mark.unit
+def test_list_aisles_filters_by_zone_and_tenant():
+    svc = make_service()
+    svc.db.execute.return_value.fetchall.return_value = []
+    assert svc.list_aisles("zone-1") == []
+    params = svc.db.execute.call_args[0][1]
+    assert params["zid"] == "zone-1"
+    assert params["tid"] == "tenant-test"
+
+
+@pytest.mark.unit
+def test_create_aisle_requires_active_zone():
+    svc = make_service()
+    svc.db.execute.return_value.fetchone.return_value = None
+    with pytest.raises(ValueError, match="Zone"):
+        svc.create_aisle("missing-zone", {"aisle_code": "G1"})
+    svc.db.commit.assert_not_called()
+
+
+@pytest.mark.unit
+def test_create_aisle_inserts_row():
+    svc = make_service()
+    zone_row = MagicMock()
+    zone_row.warehouse_id = "wh-99"
+    svc.db.execute.return_value.fetchone.return_value = zone_row
+    out = svc.create_aisle("zone-1", {"aisle_code": "G1", "name": "Gang 1"})
+    assert out["aisle_code"] == "G1"
+    assert out["warehouse_id"] == "wh-99"
+    svc.db.commit.assert_called_once()
+
+
+@pytest.mark.unit
+def test_list_bins_filters_by_aisle_id():
+    svc = make_service()
+    svc.db.execute.return_value.fetchall.return_value = []
+    svc.list_bins(aisle_id="aisle-1")
+    params = svc.db.execute.call_args[0][1]
+    assert params["aid"] == "aisle-1"
+
+
+@pytest.mark.unit
+def test_create_bin_with_valid_aisle_runs_validation_then_insert():
+    svc = make_service()
+    val_result = MagicMock()
+    val_result.fetchone.return_value = MagicMock()
+    ins_result = MagicMock()
+    svc.db.execute.side_effect = [val_result, ins_result]
+    out = svc.create_bin("zone-1", "wh-1", {"bin_code": "R1-01", "aisle_id": "aisle-x"})
+    assert out["bin_code"] == "R1-01"
+    assert out["aisle_id"] == "aisle-x"
+    assert svc.db.execute.call_count == 2
+    svc.db.commit.assert_called_once()
+
+
+@pytest.mark.unit
+def test_create_bin_with_invalid_aisle_raises():
+    svc = make_service()
+    val_result = MagicMock()
+    val_result.fetchone.return_value = None
+    svc.db.execute.side_effect = [val_result]
+    with pytest.raises(ValueError, match="Gang"):
+        svc.create_bin("zone-1", "wh-1", {"bin_code": "R1-01", "aisle_id": "bad"})
+    svc.db.commit.assert_not_called()
+
+
 # ── FEFO-Picking ───────────────────────────────────────────────────────────
 
 @pytest.mark.unit

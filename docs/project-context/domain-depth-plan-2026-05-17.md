@@ -187,7 +187,7 @@ Fokussierte Nachweise:
 ### Soll (Marktführende ERP-Systeme: Warehouse Management)
 | Funktion | Ist | Gap |
 |----------|-----|-----|
-| Lagerstruktur (Lager/Zone/Gang/Fach) | ❌ | **Kritisch** |
+| Lagerstruktur (Lager/Zone/Gang/Fach) | Teilweise | Gang-Ebene + Zuordnung Fach→Gang (**WM-STRUCT-001**); Kapazität/Sequenz/RF weiterhin Lücken |
 | Einlagerungs-/Auslagerungsstrategien | ❌ | **Kritisch** |
 | Transferauftraege (Umlagerung intern) | ❌ | Wichtig |
 | FEFO/FIFO-Steuerung | ❌ | **Kritisch** fuer Agrar |
@@ -206,7 +206,7 @@ Fokussierte Nachweise:
 | Multi-Lager-Konsolidierung | ❌ | Wichtig |
 
 ### Umsetzungsschritte
-1. **Lagerstruktur-Datenmodell** — Migration `warehouse_structure_*`: Tabellen `warehouses`, `warehouse_zones`, `warehouse_aisles`, `warehouse_bins`; Alembic; `WarehousingService`
+1. **Lagerstruktur-Datenmodell** — Tabellen `warehouses`, `warehouse_zones`, `warehouse_bins` (bestehend); **`warehouse_aisles`** + optional **`warehouse_bins.aisle_id`** (Alembic `wms_warehouse_aisles_20260612`, Slice **WM-STRUCT-001**); Service/API unter `/lager/wms` (`WarehouseService`). *(Benennung „WarehousingService“ im Plan = fachliche Rolle; Implementierung: `warehouse_service`.)*
 2. **Bin-Location-Management** — `GET/POST /lager/bins`, `PATCH /lager/bins/{id}/stock`; Kapazitaetspruefung
 3. **FEFO-Steuerung** — Charge-Attribut `best_before_date`; `pick_fefo()` in `InventoryService`; automatische Empfehlung in Pick-Listen
 4. **Einlagerungs-/Auslagerungsstrategien** — konfigurierbare Regeln (FEFO, FIFO, fester Platz, near-item, Kapazitaet) in `PutawayStrategy` + `PickStrategy`

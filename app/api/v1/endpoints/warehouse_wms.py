@@ -38,6 +38,13 @@ class BinIn(BaseModel):
     bin_code: str
     bin_type: str = "standard"
     capacity_kg: Optional[Decimal] = None
+    aisle_id: Optional[str] = None
+
+
+class AisleIn(BaseModel):
+    aisle_code: str
+    name: Optional[str] = None
+    description: Optional[str] = None
 
 
 class StockMovementIn(BaseModel):
@@ -113,6 +120,32 @@ def create_zone(
     return svc.create_zone(warehouse_id, payload.model_dump())
 
 
+# ── Gänge (Aisles) ───────────────────────────────────────────────────────
+
+@router.get("/aisles", summary="Gänge einer Zone auflisten",
+    response_model=WarehouseWmsOut
+)
+def list_aisles(
+    zone_id: str = Query(...),
+    svc: WarehouseService = Depends(_svc),
+):
+    return svc.list_aisles(zone_id)
+
+
+@router.post("/aisles", status_code=status.HTTP_201_CREATED, summary="Gang in Zone anlegen",
+    response_model=WarehouseWmsOut
+)
+def create_aisle(
+    zone_id: str = Query(...),
+    payload: AisleIn = ...,
+    svc: WarehouseService = Depends(_svc),
+):
+    try:
+        return svc.create_aisle(zone_id, payload.model_dump())
+    except ValueError as e:
+        raise HTTPException(status_code=422, detail=str(e))
+
+
 # ── Bins ───────────────────────────────────────────────────────────────────
 
 @router.get("/bins", summary="Bins auflisten",
@@ -121,10 +154,11 @@ def create_zone(
 def list_bins(
     warehouse_id: Optional[str] = Query(None),
     zone_id: Optional[str] = Query(None),
+    aisle_id: Optional[str] = Query(None),
     only_active: bool = Query(True),
     svc: WarehouseService = Depends(_svc),
 ):
-    return svc.list_bins(warehouse_id, zone_id, only_active)
+    return svc.list_bins(warehouse_id, zone_id, aisle_id, only_active)
 
 
 @router.post("/bins", status_code=status.HTTP_201_CREATED, summary="Bin anlegen",
@@ -136,7 +170,10 @@ def create_bin(
     payload: BinIn = ...,
     svc: WarehouseService = Depends(_svc),
 ):
-    return svc.create_bin(zone_id, warehouse_id, payload.model_dump())
+    try:
+        return svc.create_bin(zone_id, warehouse_id, payload.model_dump())
+    except ValueError as e:
+        raise HTTPException(status_code=422, detail=str(e))
 
 
 @router.get("/bins/{bin_id}/stock", summary="Bin stock abrufen",
