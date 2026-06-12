@@ -173,7 +173,7 @@ class TestPodSetsStopDelivered:
 
         result = save_pod(tour_id=tour_id, stop_id=stop_id, body=pod_body, x_tenant_id="T1", db=db)
 
-        # DB should have been called (ensure_schema + UPDATE + SELECT)
+        # DB should have been called (UPDATE + SELECT)
         assert db.execute.called
         assert db.commit.called
         assert result["status"] == "ABGELIEFERT"
@@ -189,7 +189,7 @@ class TestLiveStatus:
     def test_live_status_returns_last_gps_event(self):
         """live_status gibt last_gps_event und next_stop zurück."""
         # Test the pure logic without hitting the DB by inspecting return structure.
-        # We patch _ensure_schema to be a no-op and inject controlled execute results.
+        # We inject controlled execute results (GPS query, then next_stop query).
         from app.api.v1.endpoints import logistics_tours
 
         tour_id = str(uuid.uuid4())
@@ -214,10 +214,6 @@ class TestLiveStatus:
         db = MagicMock()
         db.commit.return_value = None
 
-        # _ensure_schema calls execute twice (schema + 2 tables), then live_status
-        # calls execute twice more (GPS query + next_stop query).
-        # Use a list-based side_effect: first N calls are schema DDL (return plain mock),
-        # then GPS result, then next_stop result.
         results_queue = [gps_event, next_stop_row]
         call_count = {"n": 0}
 
@@ -225,11 +221,8 @@ class TestLiveStatus:
             mock = MagicMock()
             idx = call_count["n"]
             call_count["n"] += 1
-            # Schema-creation DDL calls (3 per _ensure_schema): just return plain mock
-            # After that, alternate between GPS and next_stop
-            data_idx = idx - 3  # first 3 calls are DDL
-            if 0 <= data_idx < len(results_queue):
-                mock.mappings.return_value.first.return_value = results_queue[data_idx]
+            if 0 <= idx < len(results_queue):
+                mock.mappings.return_value.first.return_value = results_queue[idx]
             else:
                 mock.mappings.return_value.first.return_value = None
             return mock
@@ -286,14 +279,11 @@ class TestStatisticsOnTimeRate:
             mock = MagicMock()
             idx = call_count["n"]
             call_count["n"] += 1
-            # First 2 calls: schema DDL (CREATE SCHEMA + CREATE TABLE tours)
-            if idx < 2:
-                return mock
-            # idx==2: stats aggregate query
-            if idx == 2:
+            # idx==0: stats aggregate query
+            if idx == 0:
                 mock.mappings.return_value.first.return_value = stats_row
                 return mock
-            # idx==3: GPS events query
+            # idx==1: GPS events query
             mock.mappings.return_value.all.return_value = []
             return mock
 
