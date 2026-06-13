@@ -433,3 +433,35 @@ def stock_valuation(
     svc: WarehouseService = Depends(_svc),
 ):
     return svc.get_stock_valuation(warehouse_id)
+
+
+# ── Einlagerungsstrategie (Putaway) ─────────────────────────────────────────
+
+class PutawayRequest(BaseModel):
+    article_id: str
+    quantity_kg: float
+    best_before_date: Optional[str] = None
+    strategy: str = "CAPACITY"
+
+
+@router.post("/warehouses/{warehouse_id}/suggest-putaway", summary="Einlagerungsvorschlag (Putaway)")
+def suggest_putaway(
+    warehouse_id: str,
+    payload: PutawayRequest,
+    svc: WarehouseService = Depends(_svc),
+):
+    from decimal import Decimal as _D
+    from datetime import date as _date
+    bbd = None
+    if payload.best_before_date:
+        try:
+            bbd = _date.fromisoformat(payload.best_before_date)
+        except ValueError:
+            pass
+    return svc.suggest_putaway_bin(
+        warehouse_id=warehouse_id,
+        article_id=payload.article_id,
+        quantity_kg=_D(str(payload.quantity_kg)),
+        best_before_date=bbd,
+        strategy=payload.strategy,
+    )

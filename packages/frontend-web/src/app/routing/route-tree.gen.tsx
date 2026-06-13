@@ -4254,152 +4254,166 @@ const appRoute0592 = createRoute({
 
 const appRoute0593 = createRoute({
   getParentRoute: () => appLayoutRoute,
+  path: "lager/bestandsbewertung",
+  component: () => renderPage("@/pages/lager/bestandsbewertung"),
+  staticData: {"breadcrumb":"Bestandsbewertung","module":"@/pages/lager/bestandsbewertung","legacyPath":"/lager/bestandsbewertung"},
+})
+
+const appRoute0594 = createRoute({
+  getParentRoute: () => appLayoutRoute,
   path: "lager/bestandskorrektur",
   component: () => renderPage("@/pages/lager/bestandskorrektur"),
   staticData: {"breadcrumb":"Bestandskorrektur","module":"@/pages/lager/bestandskorrektur","legacyPath":"/lager/bestandskorrektur"},
 })
 
-const appRoute0594 = createRoute({
+const appRoute0595 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "lager/bestandsuebersicht",
   component: () => renderPage("@/pages/lager/bestandsuebersicht"),
   staticData: {"breadcrumb":"Bestandsuebersicht","module":"@/pages/lager/bestandsuebersicht","legacyPath":"/lager/bestandsuebersicht"},
 })
 
-const appRoute0595 = createRoute({
+const appRoute0596 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "lager/einlagerung",
   component: () => renderPage("@/pages/lager/einlagerung"),
   staticData: {"breadcrumb":"Einlagerung","module":"@/pages/lager/einlagerung","legacyPath":"/lager/einlagerung"},
 })
 
-const appRoute0596 = createRoute({
+const appRoute0597 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "lager/gs1-scanner",
   component: () => renderPage("@/pages/lager/gs1-scanner"),
   staticData: {"breadcrumb":"Gs1 Scanner","module":"@/pages/lager/gs1-scanner","legacyPath":"/lager/gs1-scanner"},
 })
 
-const appRoute0597 = createRoute({
+const appRoute0598 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "lager/inventur",
   component: () => renderPage("@/pages/lager/inventur"),
   staticData: {"breadcrumb":"Inventur","module":"@/pages/lager/inventur","legacyPath":"/lager/inventur"},
 })
 
-const appRoute0598 = createRoute({
+const appRoute0599 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "lager/kommissionierung",
   component: () => renderPage("@/pages/lager/kommissionierung"),
   staticData: {"breadcrumb":"Kommissionierung","module":"@/pages/lager/kommissionierung","legacyPath":"/lager/kommissionierung"},
 })
 
-const appRoute0599 = createRoute({
+const appRoute0600 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "lager/lagerbewegungen",
   component: () => renderPage("@/pages/lager/lagerbewegungen"),
   staticData: {"breadcrumb":"Lagerbewegungen","module":"@/pages/lager/lagerbewegungen","legacyPath":"/lager/lagerbewegungen"},
 })
 
-const appRoute0600 = createRoute({
+const appRoute0601 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "lager/lagerplaetze",
   component: () => renderPage("@/pages/lager/lagerplaetze"),
   staticData: {"breadcrumb":"Lagerplaetze","module":"@/pages/lager/lagerplaetze","legacyPath":"/lager/lagerplaetze"},
 })
 
-const appRoute0601 = createRoute({
+const appRoute0602 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "lager/massebilanz",
   component: () => renderPage("@/pages/lager/massebilanz"),
   staticData: {"breadcrumb":"Massebilanz","module":"@/pages/lager/massebilanz","legacyPath":"/lager/massebilanz"},
 })
 
-const appRoute0602 = createRoute({
+const appRoute0603 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "lager/materialfluss",
   component: () => renderPage("@/pages/lager/materialfluss"),
   staticData: {"breadcrumb":"Materialfluss","module":"@/pages/lager/materialfluss","legacyPath":"/lager/materialfluss"},
 })
 
-const appRoute0603 = createRoute({
+const appRoute0604 = createRoute({
+  getParentRoute: () => appLayoutRoute,
+  path: "lager/materialfluss-visualisierung",
+  component: () => renderPage("@/pages/lager/materialfluss-visualisierung"),
+  staticData: {"breadcrumb":"Materialfluss Visualisierung","module":"@/pages/lager/materialfluss-visualisierung","legacyPath":"/lager/materialfluss-visualisierung"},
+})
+
+const appRoute0605 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "lager/partiestamm",
   component: () => renderPage("@/pages/lager/partiestamm"),
   staticData: {"breadcrumb":"Partiestamm","module":"@/pages/lager/partiestamm","legacyPath":"/lager/partiestamm"},
 })
 
-const appRoute0604 = createRoute({
+const appRoute0606 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "lager/permanente-inventur",
   component: () => renderPage("@/pages/lager/permanente-inventur"),
   staticData: {"breadcrumb":"Permanente Inventur","module":"@/pages/lager/permanente-inventur","legacyPath":"/lager/permanente-inventur"},
 })
 
-const appRoute0605 = createRoute({
+const appRoute0607 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "lager/rueckverfolgbarkeit",
   component: () => renderPage("@/pages/lager/rueckverfolgbarkeit"),
   staticData: {"breadcrumb":"Rueckverfolgbarkeit","module":"@/pages/lager/rueckverfolgbarkeit","legacyPath":"/lager/rueckverfolgbarkeit"},
 })
 
-const appRoute0606 = createRoute({
+const appRoute0608 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "lager/terminal",
   component: () => renderPage("@/pages/lager/terminal"),
   staticData: {"breadcrumb":"Terminal","module":"@/pages/lager/terminal","legacyPath":"/lager/terminal"},
 })
 
-const appRoute0607 = createRoute({
+const appRoute0609 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "lager/umlagerung",
   component: () => renderPage("@/pages/lager/lagerbewegungen"),
   staticData: {"breadcrumb":"Umlagerung","module":"@/pages/lager/lagerbewegungen","legacyPath":"/lager/umlagerung"},
 })
 
-const appRoute0608 = createRoute({
+const appRoute0610 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "logistik/frachtbrief/$id",
   component: () => renderPage("@/pages/logistik/frachtbriefe"),
   staticData: {"breadcrumb":"Detail","module":"@/pages/logistik/frachtbriefe","legacyPath":"/logistik/frachtbrief/:id"},
 })
 
-const appRoute0609 = createRoute({
+const appRoute0611 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "logistik/frachtbrief/neu",
   component: () => renderPage("@/pages/logistik/frachtbriefe"),
   staticData: {"breadcrumb":"Neu","module":"@/pages/logistik/frachtbriefe","legacyPath":"/logistik/frachtbrief/neu"},
 })
 
-const appRoute0610 = createRoute({
+const appRoute0612 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "logistik/frachtbriefe",
   component: () => renderPage("@/pages/logistik/frachtbriefe"),
   staticData: {"breadcrumb":"Frachtbriefe","module":"@/pages/logistik/frachtbriefe","legacyPath":"/logistik/frachtbriefe"},
 })
 
-const appRoute0611 = createRoute({
+const appRoute0613 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "logistik/frachttabellen",
   component: () => renderPage("@/pages/logistik/frachttabellen"),
   staticData: {"breadcrumb":"Frachttabellen","module":"@/pages/logistik/frachttabellen","legacyPath":"/logistik/frachttabellen"},
 })
 
-const appRoute0612 = createRoute({
+const appRoute0614 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "logistik/tour-fracht-arbeitsraum",
   component: () => renderPage("@/pages/logistik/tour-fracht-arbeitsraum"),
   staticData: {"breadcrumb":"Tour Fracht Arbeitsraum","module":"@/pages/logistik/tour-fracht-arbeitsraum","legacyPath":"/logistik/tour-fracht-arbeitsraum"},
 })
 
-const appRoute0613 = createRoute({
+const appRoute0615 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "logistik/tourenplanung",
   component: () => renderPage("@/pages/logistik/tourenplanung"),
   staticData: {"breadcrumb":"Tourenplanung","module":"@/pages/logistik/tourenplanung","legacyPath":"/logistik/tourenplanung"},
 })
 
-const appRoute0614 = createRoute({
+const appRoute0616 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "logistik/verladungen",
   beforeLoad: ({ params }) => {
@@ -4409,147 +4423,147 @@ const appRoute0614 = createRoute({
   staticData: {"breadcrumb":"Verladungen","module":"@/pages/verladung/liste","legacyPath":"/logistik/verladungen"},
 })
 
-const appRoute0615 = createRoute({
+const appRoute0617 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "logistik/versandprofile",
   component: () => renderPage("@/pages/logistik/versandprofile"),
   staticData: {"breadcrumb":"Versandprofile","module":"@/pages/logistik/versandprofile","legacyPath":"/logistik/versandprofile"},
 })
 
-const appRoute0616 = createRoute({
+const appRoute0618 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "mahnwesen/mahnlauf",
   component: () => renderPage("@/pages/mahnwesen/mahnlauf"),
   staticData: {"breadcrumb":"Mahnlauf","module":"@/pages/mahnwesen/mahnlauf","legacyPath":"/mahnwesen/mahnlauf"},
 })
 
-const appRoute0617 = createRoute({
+const appRoute0619 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "management/executive-dashboard",
   component: () => renderPage("@/pages/management/executive-dashboard"),
   staticData: {"breadcrumb":"Executive Dashboard","module":"@/pages/management/executive-dashboard","legacyPath":"/management/executive-dashboard"},
 })
 
-const appRoute0618 = createRoute({
+const appRoute0620 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "marketing/kampagne/$id",
   component: () => renderPage("@/pages/marketing/kampagnen"),
   staticData: {"breadcrumb":"Detail","module":"@/pages/marketing/kampagnen","legacyPath":"/marketing/kampagne/:id"},
 })
 
-const appRoute0619 = createRoute({
+const appRoute0621 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "marketing/kampagne/neu",
   component: () => renderPage("@/pages/marketing/kampagnen"),
   staticData: {"breadcrumb":"Neu","module":"@/pages/marketing/kampagnen","legacyPath":"/marketing/kampagne/neu"},
 })
 
-const appRoute0620 = createRoute({
+const appRoute0622 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "marketing/kampagnen",
   component: () => renderPage("@/pages/marketing/kampagnen"),
   staticData: {"breadcrumb":"Kampagnen","module":"@/pages/marketing/kampagnen","legacyPath":"/marketing/kampagnen"},
 })
 
-const appRoute0621 = createRoute({
+const appRoute0623 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "mobile/scanner",
   component: () => renderPage("@/pages/mobile/scanner"),
   staticData: {"breadcrumb":"Scanner","module":"@/pages/mobile/scanner","legacyPath":"/mobile/scanner"},
 })
 
-const appRoute0622 = createRoute({
+const appRoute0624 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "monitoring/alerts",
   component: () => renderPage("@/pages/admin/monitoring/alerts"),
   staticData: {"breadcrumb":"Alerts","module":"@/pages/admin/monitoring/alerts","legacyPath":"/monitoring/alerts"},
 })
 
-const appRoute0623 = createRoute({
+const appRoute0625 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "monitoring/regeln",
   component: () => renderPage("@/pages/admin/monitoring/regeln"),
   staticData: {"breadcrumb":"Regeln","module":"@/pages/admin/monitoring/regeln","legacyPath":"/monitoring/regeln"},
 })
 
-const appRoute0624 = createRoute({
+const appRoute0626 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "nachhaltigkeit/biodiversitaet",
   component: () => renderPage("@/pages/nachhaltigkeit/biodiversitaet"),
   staticData: {"breadcrumb":"Biodiversitaet","module":"@/pages/nachhaltigkeit/biodiversitaet","legacyPath":"/nachhaltigkeit/biodiversitaet"},
 })
 
-const appRoute0625 = createRoute({
+const appRoute0627 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "nachhaltigkeit/co2-bilanz",
   component: () => renderPage("@/pages/nachhaltigkeit/co2-bilanz"),
   staticData: {"breadcrumb":"Co2 Bilanz","module":"@/pages/nachhaltigkeit/co2-bilanz","legacyPath":"/nachhaltigkeit/co2-bilanz"},
 })
 
-const appRoute0626 = createRoute({
+const appRoute0628 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "nachhaltigkeit/esg-report",
   component: () => renderPage("@/pages/nachhaltigkeit/esg-report"),
   staticData: {"breadcrumb":"Esg Report","module":"@/pages/nachhaltigkeit/esg-report","legacyPath":"/nachhaltigkeit/esg-report"},
 })
 
-const appRoute0627 = createRoute({
+const appRoute0629 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "nachhaltigkeit/eudr-compliance",
   component: () => renderPage("@/pages/nachhaltigkeit/eudr-compliance"),
   staticData: {"breadcrumb":"Eudr Compliance","module":"@/pages/nachhaltigkeit/eudr-compliance","legacyPath":"/nachhaltigkeit/eudr-compliance"},
 })
 
-const appRoute0628 = createRoute({
+const appRoute0630 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "nawaro/anbauflaechen",
   component: () => renderPage("@/pages/nawaro/anbauflaechen"),
   staticData: {"breadcrumb":"Anbauflaechen","module":"@/pages/nawaro/anbauflaechen","legacyPath":"/nawaro/anbauflaechen"},
 })
 
-const appRoute0629 = createRoute({
+const appRoute0631 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "nawaro/mitteilung-drucken",
   component: () => renderPage("@/pages/nawaro/mitteilung-drucken"),
   staticData: {"breadcrumb":"Mitteilung Drucken","module":"@/pages/nawaro/mitteilung-drucken","legacyPath":"/nawaro/mitteilung-drucken"},
 })
 
-const appRoute0630 = createRoute({
+const appRoute0632 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "nawaro/raps-profil",
   component: () => renderPage("@/pages/nawaro/raps-profil"),
   staticData: {"breadcrumb":"Raps Profil","module":"@/pages/nawaro/raps-profil","legacyPath":"/nawaro/raps-profil"},
 })
 
-const appRoute0631 = createRoute({
+const appRoute0633 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "nawaro/vertraege",
   component: () => renderPage("@/pages/nawaro/vertraege"),
   staticData: {"breadcrumb":"Vertraege","module":"@/pages/nawaro/vertraege","legacyPath":"/nawaro/vertraege"},
 })
 
-const appRoute0632 = createRoute({
+const appRoute0634 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "personal/bewerbungen",
   component: () => renderPage("@/pages/personal/bewerbungen"),
   staticData: {"breadcrumb":"Bewerbungen","module":"@/pages/personal/bewerbungen","legacyPath":"/personal/bewerbungen"},
 })
 
-const appRoute0633 = createRoute({
+const appRoute0635 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "personal/hrm-operations-gates",
   component: () => renderPage("@/pages/personal/hrm-operations-gates"),
   staticData: {"breadcrumb":"Hrm Operations Gates","module":"@/pages/personal/hrm-operations-gates","legacyPath":"/personal/hrm-operations-gates"},
 })
 
-const appRoute0634 = createRoute({
+const appRoute0636 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "personal/mitarbeiter",
   component: () => renderPage("@/pages/personal/mitarbeiter-liste"),
   staticData: {"breadcrumb":"Mitarbeiter","module":"@/pages/personal/mitarbeiter-liste","legacyPath":"/personal/mitarbeiter"},
 })
 
-const appRoute0635 = createRoute({
+const appRoute0637 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "personal/mitarbeiter-liste",
   beforeLoad: ({ params }) => {
@@ -4559,70 +4573,70 @@ const appRoute0635 = createRoute({
   staticData: {"breadcrumb":"Mitarbeiter Liste","module":"@/pages/personal/mitarbeiter-liste","legacyPath":"/personal/mitarbeiter-liste"},
 })
 
-const appRoute0636 = createRoute({
+const appRoute0638 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "personal/mitarbeiter-stamm",
   component: () => renderPage("@/pages/personal/mitarbeiter-stamm"),
   staticData: {"breadcrumb":"Mitarbeiter Stamm","module":"@/pages/personal/mitarbeiter-stamm","legacyPath":"/personal/mitarbeiter-stamm"},
 })
 
-const appRoute0637 = createRoute({
+const appRoute0639 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "personal/mitarbeiter/$id",
   component: () => renderPage("@/pages/personal/mitarbeiter-stamm"),
   staticData: {"breadcrumb":"Detail","module":"@/pages/personal/mitarbeiter-stamm","legacyPath":"/personal/mitarbeiter/:id"},
 })
 
-const appRoute0638 = createRoute({
+const appRoute0640 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "personal/mitarbeiter/neu",
   component: () => renderPage("@/pages/personal/mitarbeiter-stamm"),
   staticData: {"breadcrumb":"Neu","module":"@/pages/personal/mitarbeiter-stamm","legacyPath":"/personal/mitarbeiter/neu"},
 })
 
-const appRoute0639 = createRoute({
+const appRoute0641 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "personal/onboarding",
   component: () => renderPage("@/pages/personal/onboarding"),
   staticData: {"breadcrumb":"Onboarding","module":"@/pages/personal/onboarding","legacyPath":"/personal/onboarding"},
 })
 
-const appRoute0640 = createRoute({
+const appRoute0642 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "personal/organigramm",
   component: () => renderPage("@/pages/personal/organigramm"),
   staticData: {"breadcrumb":"Organigramm","module":"@/pages/personal/organigramm","legacyPath":"/personal/organigramm"},
 })
 
-const appRoute0641 = createRoute({
+const appRoute0643 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "personal/qualifikationen",
   component: () => renderPage("@/pages/personal/qualifikationen"),
   staticData: {"breadcrumb":"Qualifikationen","module":"@/pages/personal/qualifikationen","legacyPath":"/personal/qualifikationen"},
 })
 
-const appRoute0642 = createRoute({
+const appRoute0644 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "personal/schulung-neu",
   component: () => renderPage("@/pages/personal/schulung-neu"),
   staticData: {"breadcrumb":"Schulung Neu","module":"@/pages/personal/schulung-neu","legacyPath":"/personal/schulung-neu"},
 })
 
-const appRoute0643 = createRoute({
+const appRoute0645 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "personal/schulungen",
   component: () => renderPage("@/pages/personal/schulungen"),
   staticData: {"breadcrumb":"Schulungen","module":"@/pages/personal/schulungen","legacyPath":"/personal/schulungen"},
 })
 
-const appRoute0644 = createRoute({
+const appRoute0646 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "personal/stundenzettel",
   component: () => renderPage("@/pages/personal/stundenzettel"),
   staticData: {"breadcrumb":"Stundenzettel","module":"@/pages/personal/stundenzettel","legacyPath":"/personal/stundenzettel"},
 })
 
-const appRoute0645 = createRoute({
+const appRoute0647 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "personal/stundenzettel-liste",
   beforeLoad: ({ params }) => {
@@ -4632,469 +4646,469 @@ const appRoute0645 = createRoute({
   staticData: {"breadcrumb":"Stundenzettel Liste","module":"@/pages/personal/stundenzettel-liste","legacyPath":"/personal/stundenzettel-liste"},
 })
 
-const appRoute0646 = createRoute({
+const appRoute0648 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "personal/stundenzettel/$id",
   component: () => renderPage("@/pages/personal/stundenzettel"),
   staticData: {"breadcrumb":"Detail","module":"@/pages/personal/stundenzettel","legacyPath":"/personal/stundenzettel/:id"},
 })
 
-const appRoute0647 = createRoute({
+const appRoute0649 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "personal/zeiterfassung",
   component: () => renderPage("@/pages/personal/zeiterfassung"),
   staticData: {"breadcrumb":"Zeiterfassung","module":"@/pages/personal/zeiterfassung","legacyPath":"/personal/zeiterfassung"},
 })
 
-const appRoute0648 = createRoute({
+const appRoute0650 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "policies",
   component: () => renderPage("@/pages/policy-manager"),
   staticData: {"breadcrumb":"Policies","module":"@/pages/policy-manager","legacyPath":"/policies"},
 })
 
-const appRoute0649 = createRoute({
+const appRoute0651 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "policy-manager",
   component: () => renderPage("@/pages/policy-manager"),
   staticData: {"breadcrumb":"Policy Manager","module":"@/pages/policy-manager","legacyPath":"/policy-manager"},
 })
 
-const appRoute0650 = createRoute({
+const appRoute0652 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "pos/customer-display",
   component: () => renderPage("@/pages/pos/customer-display"),
   staticData: {"breadcrumb":"Customer Display","module":"@/pages/pos/customer-display","legacyPath":"/pos/customer-display"},
 })
 
-const appRoute0651 = createRoute({
+const appRoute0653 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "pos/gift-card-neu",
   component: () => renderPage("@/pages/pos/gift-cards"),
   staticData: {"breadcrumb":"Gift Card Neu","module":"@/pages/pos/gift-cards","legacyPath":"/pos/gift-card-neu"},
 })
 
-const appRoute0652 = createRoute({
+const appRoute0654 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "pos/gift-card/$id",
   component: () => renderPage("@/pages/pos/gift-cards"),
   staticData: {"breadcrumb":"Detail","module":"@/pages/pos/gift-cards","legacyPath":"/pos/gift-card/:id"},
 })
 
-const appRoute0653 = createRoute({
+const appRoute0655 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "pos/gift-cards",
   component: () => renderPage("@/pages/pos/gift-cards"),
   staticData: {"breadcrumb":"Gift Cards","module":"@/pages/pos/gift-cards","legacyPath":"/pos/gift-cards"},
 })
 
-const appRoute0654 = createRoute({
+const appRoute0656 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "pos/promotionen",
   component: () => renderPage("@/pages/pos/promotionen"),
   staticData: {"breadcrumb":"Promotionen","module":"@/pages/pos/promotionen","legacyPath":"/pos/promotionen"},
 })
 
-const appRoute0655 = createRoute({
+const appRoute0657 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "pos/rabatt-neu",
   component: () => renderPage("@/pages/pos/rabatte"),
   staticData: {"breadcrumb":"Rabatt Neu","module":"@/pages/pos/rabatte","legacyPath":"/pos/rabatt-neu"},
 })
 
-const appRoute0656 = createRoute({
+const appRoute0658 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "pos/rabatt/$id",
   component: () => renderPage("@/pages/pos/rabatte"),
   staticData: {"breadcrumb":"Detail","module":"@/pages/pos/rabatte","legacyPath":"/pos/rabatt/:id"},
 })
 
-const appRoute0657 = createRoute({
+const appRoute0659 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "pos/rabatte",
   component: () => renderPage("@/pages/pos/rabatte"),
   staticData: {"breadcrumb":"Rabatte","module":"@/pages/pos/rabatte","legacyPath":"/pos/rabatte"},
 })
 
-const appRoute0658 = createRoute({
+const appRoute0660 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "pos/retoure",
   component: () => renderPage("@/pages/pos/retoure"),
   staticData: {"breadcrumb":"Retoure","module":"@/pages/pos/retoure","legacyPath":"/pos/retoure"},
 })
 
-const appRoute0659 = createRoute({
+const appRoute0661 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "pos/suspended-sales",
   component: () => renderPage("@/pages/pos/suspended-sales"),
   staticData: {"breadcrumb":"Suspended Sales","module":"@/pages/pos/suspended-sales","legacyPath":"/pos/suspended-sales"},
 })
 
-const appRoute0660 = createRoute({
+const appRoute0662 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "pos/tagesabschluss",
   component: () => renderPage("@/pages/pos/tagesabschluss-enhanced"),
   staticData: {"breadcrumb":"Tagesabschluss","module":"@/pages/pos/tagesabschluss-enhanced","legacyPath":"/pos/tagesabschluss"},
 })
 
-const appRoute0661 = createRoute({
+const appRoute0663 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "pos/tagesabschluss-enhanced",
   component: () => renderPage("@/pages/pos/tagesabschluss-enhanced"),
   staticData: {"breadcrumb":"Tagesabschluss Enhanced","module":"@/pages/pos/tagesabschluss-enhanced","legacyPath":"/pos/tagesabschluss-enhanced"},
 })
 
-const appRoute0662 = createRoute({
+const appRoute0664 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "pos/terminal",
   component: () => renderPage("@/pages/pos/terminal"),
   staticData: {"breadcrumb":"Terminal","module":"@/pages/pos/terminal","legacyPath":"/pos/terminal"},
 })
 
-const appRoute0663 = createRoute({
+const appRoute0665 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "pos/tse-journal",
   component: () => renderPage("@/pages/pos/tse-journal"),
   staticData: {"breadcrumb":"Tse Journal","module":"@/pages/pos/tse-journal","legacyPath":"/pos/tse-journal"},
 })
 
-const appRoute0664 = createRoute({
+const appRoute0666 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "pos/uebernahme-kasse",
   component: () => renderPage("@/pages/pos/uebernahme-kasse"),
   staticData: {"breadcrumb":"Uebernahme Kasse","module":"@/pages/pos/uebernahme-kasse","legacyPath":"/pos/uebernahme-kasse"},
 })
 
-const appRoute0665 = createRoute({
+const appRoute0667 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "preise/historie",
   component: () => renderPage("@/pages/preise/historie"),
   staticData: {"breadcrumb":"Historie","module":"@/pages/preise/historie","legacyPath":"/preise/historie"},
 })
 
-const appRoute0666 = createRoute({
+const appRoute0668 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "preise/individualpreise",
   component: () => renderPage("@/pages/preise/individualpreise"),
   staticData: {"breadcrumb":"Individualpreise","module":"@/pages/preise/individualpreise","legacyPath":"/preise/individualpreise"},
 })
 
-const appRoute0667 = createRoute({
+const appRoute0669 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "preise/kalkulation",
   component: () => renderPage("@/pages/preise/kalkulation"),
   staticData: {"breadcrumb":"Kalkulation","module":"@/pages/preise/kalkulation","legacyPath":"/preise/kalkulation"},
 })
 
-const appRoute0668 = createRoute({
+const appRoute0670 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "preise/konditionen",
   component: () => renderPage("@/pages/preise/konditionen"),
   staticData: {"breadcrumb":"Konditionen","module":"@/pages/preise/konditionen","legacyPath":"/preise/konditionen"},
 })
 
-const appRoute0669 = createRoute({
+const appRoute0671 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "preise/rabattgruppen",
   component: () => renderPage("@/pages/preise/rabattgruppen"),
   staticData: {"breadcrumb":"Rabattgruppen","module":"@/pages/preise/rabattgruppen","legacyPath":"/preise/rabattgruppen"},
 })
 
-const appRoute0670 = createRoute({
+const appRoute0672 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "preise/zu-abschlaggruppen",
   component: () => renderPage("@/pages/preise/zu-abschlaggruppen"),
   staticData: {"breadcrumb":"Zu Abschlaggruppen","module":"@/pages/preise/zu-abschlaggruppen","legacyPath":"/preise/zu-abschlaggruppen"},
 })
 
-const appRoute0671 = createRoute({
+const appRoute0673 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "pricing",
   component: () => renderPage("@/pages/pricing"),
   staticData: {"breadcrumb":"Pricing","module":"@/pages/pricing","legacyPath":"/pricing"},
 })
 
-const appRoute0672 = createRoute({
+const appRoute0674 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "produktion",
   component: () => renderPage("@/pages/produktion/mischfutter-produktion"),
   staticData: {"breadcrumb":"Produktion","module":"@/pages/produktion/mischfutter-produktion","legacyPath":"/produktion"},
 })
 
-const appRoute0673 = createRoute({
+const appRoute0675 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "produktion/dokumente",
   component: () => renderPage("@/pages/produktion/produktions-dokumente-drucken"),
   staticData: {"breadcrumb":"Dokumente","module":"@/pages/produktion/produktions-dokumente-drucken","legacyPath":"/produktion/dokumente"},
 })
 
-const appRoute0674 = createRoute({
+const appRoute0676 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "produktion/mischfutter",
   component: () => renderPage("@/pages/produktion/mischfutter-produktion"),
   staticData: {"breadcrumb":"Mischfutter","module":"@/pages/produktion/mischfutter-produktion","legacyPath":"/produktion/mischfutter"},
 })
 
-const appRoute0675 = createRoute({
+const appRoute0677 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "produktion/mischfutter-produktion",
   component: () => renderPage("@/pages/produktion/mischfutter-produktion"),
   staticData: {"breadcrumb":"Mischfutter Produktion","module":"@/pages/produktion/mischfutter-produktion","legacyPath":"/produktion/mischfutter-produktion"},
 })
 
-const appRoute0676 = createRoute({
+const appRoute0678 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "produktion/produktions-dokumente-drucken",
   component: () => renderPage("@/pages/produktion/produktions-dokumente-drucken"),
   staticData: {"breadcrumb":"Produktions Dokumente Drucken","module":"@/pages/produktion/produktions-dokumente-drucken","legacyPath":"/produktion/produktions-dokumente-drucken"},
 })
 
-const appRoute0677 = createRoute({
+const appRoute0679 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "projekte",
   component: () => renderPage("@/pages/projekte/liste"),
   staticData: {"breadcrumb":"Projekte","module":"@/pages/projekte/liste","legacyPath":"/projekte"},
 })
 
-const appRoute0678 = createRoute({
+const appRoute0680 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "projekte/$id",
   component: () => renderPage("@/pages/projekte/liste"),
   staticData: {"breadcrumb":"Detail","module":"@/pages/projekte/liste","legacyPath":"/projekte/:id"},
 })
 
-const appRoute0679 = createRoute({
+const appRoute0681 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "projekte/liste",
   component: () => renderPage("@/pages/projekte/liste"),
   staticData: {"breadcrumb":"Liste","module":"@/pages/projekte/liste","legacyPath":"/projekte/liste"},
 })
 
-const appRoute0680 = createRoute({
+const appRoute0682 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "prospecting/LeadExplorer",
   component: () => renderPage("@/pages/prospecting/LeadExplorer"),
   staticData: {"breadcrumb":"LeadExplorer","module":"@/pages/prospecting/LeadExplorer","legacyPath":"/prospecting/LeadExplorer"},
 })
 
-const appRoute0681 = createRoute({
+const appRoute0683 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "prospecting/leads",
   component: () => renderPage("@/pages/prospecting/LeadExplorer"),
   staticData: {"breadcrumb":"Leads","module":"@/pages/prospecting/LeadExplorer","legacyPath":"/prospecting/leads"},
 })
 
-const appRoute0682 = createRoute({
+const appRoute0684 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "public/verify",
   component: () => renderPage("@/pages/public/verify"),
   staticData: {"breadcrumb":"Verify","module":"@/pages/public/verify","legacyPath":"/public/verify"},
 })
 
-const appRoute0683 = createRoute({
+const appRoute0685 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "qualitaet/ausnahme-neu",
   component: () => renderPage("@/pages/qualitaet/ausnahmen"),
   staticData: {"breadcrumb":"Ausnahme Neu","module":"@/pages/qualitaet/ausnahmen","legacyPath":"/qualitaet/ausnahme-neu"},
 })
 
-const appRoute0684 = createRoute({
+const appRoute0686 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "qualitaet/ausnahmen",
   component: () => renderPage("@/pages/qualitaet/ausnahmen"),
   staticData: {"breadcrumb":"Ausnahmen","module":"@/pages/qualitaet/ausnahmen","legacyPath":"/qualitaet/ausnahmen"},
 })
 
-const appRoute0685 = createRoute({
+const appRoute0687 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "qualitaet/labor",
   component: () => renderPage("@/pages/qualitaet/labor-liste"),
   staticData: {"breadcrumb":"Labor","module":"@/pages/qualitaet/labor-liste","legacyPath":"/qualitaet/labor"},
 })
 
-const appRoute0686 = createRoute({
+const appRoute0688 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "qualitaet/labor-auftrag",
   component: () => renderPage("@/pages/qualitaet/labor-auftrag"),
   staticData: {"breadcrumb":"Labor Auftrag","module":"@/pages/qualitaet/labor-auftrag","legacyPath":"/qualitaet/labor-auftrag"},
 })
 
-const appRoute0687 = createRoute({
+const appRoute0689 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "qualitaet/labor-detail",
   component: () => renderPage("@/pages/qualitaet/labor-detail"),
   staticData: {"breadcrumb":"Labor Detail","module":"@/pages/qualitaet/labor-detail","legacyPath":"/qualitaet/labor-detail"},
 })
 
-const appRoute0688 = createRoute({
+const appRoute0690 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "qualitaet/labor-liste",
   component: () => renderPage("@/pages/qualitaet/labor-liste"),
   staticData: {"breadcrumb":"Labor Liste","module":"@/pages/qualitaet/labor-liste","legacyPath":"/qualitaet/labor-liste"},
 })
 
-const appRoute0689 = createRoute({
+const appRoute0691 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "qualitaet/labor/$id",
   component: () => renderPage("@/pages/qualitaet/labor-detail"),
   staticData: {"breadcrumb":"Detail","module":"@/pages/qualitaet/labor-detail","legacyPath":"/qualitaet/labor/:id"},
 })
 
-const appRoute0690 = createRoute({
+const appRoute0692 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "qualitaet/reklamation-detail",
   component: () => renderPage("@/pages/qualitaet/reklamation-detail"),
   staticData: {"breadcrumb":"Reklamation Detail","module":"@/pages/qualitaet/reklamation-detail","legacyPath":"/qualitaet/reklamation-detail"},
 })
 
-const appRoute0691 = createRoute({
+const appRoute0693 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "qualitaet/reklamation/$id",
   component: () => renderPage("@/pages/qualitaet/reklamation-detail"),
   staticData: {"breadcrumb":"Detail","module":"@/pages/qualitaet/reklamation-detail","legacyPath":"/qualitaet/reklamation/:id"},
 })
 
-const appRoute0692 = createRoute({
+const appRoute0694 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "qualitaet/reklamationen",
   component: () => renderPage("@/pages/qualitaet/reklamationen"),
   staticData: {"breadcrumb":"Reklamationen","module":"@/pages/qualitaet/reklamationen","legacyPath":"/qualitaet/reklamationen"},
 })
 
-const appRoute0693 = createRoute({
+const appRoute0695 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "reports",
   component: () => renderPage("@/pages/reports"),
   staticData: {"breadcrumb":"Reports","module":"@/pages/reports","legacyPath":"/reports"},
 })
 
-const appRoute0694 = createRoute({
+const appRoute0696 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "reports/charts/customeranalyticscharts",
   component: () => renderPage("@/pages/reports/charts/customeranalyticscharts"),
   staticData: {"breadcrumb":"Customeranalyticscharts","module":"@/pages/reports/charts/customeranalyticscharts","legacyPath":"/reports/charts/customeranalyticscharts"},
 })
 
-const appRoute0695 = createRoute({
+const appRoute0697 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "reports/charts/financialanalyticscharts",
   component: () => renderPage("@/pages/reports/charts/financialanalyticscharts"),
   staticData: {"breadcrumb":"Financialanalyticscharts","module":"@/pages/reports/charts/financialanalyticscharts","legacyPath":"/reports/charts/financialanalyticscharts"},
 })
 
-const appRoute0696 = createRoute({
+const appRoute0698 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "reports/charts/productanalyticscharts",
   component: () => renderPage("@/pages/reports/charts/productanalyticscharts"),
   staticData: {"breadcrumb":"Productanalyticscharts","module":"@/pages/reports/charts/productanalyticscharts","legacyPath":"/reports/charts/productanalyticscharts"},
 })
 
-const appRoute0697 = createRoute({
+const appRoute0699 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "reports/charts/salesperformancecharts",
   component: () => renderPage("@/pages/reports/charts/salesperformancecharts"),
   staticData: {"breadcrumb":"Salesperformancecharts","module":"@/pages/reports/charts/salesperformancecharts","legacyPath":"/reports/charts/salesperformancecharts"},
 })
 
-const appRoute0698 = createRoute({
+const appRoute0700 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "reports/charts/trendanalyticscharts",
   component: () => renderPage("@/pages/reports/charts/trendanalyticscharts"),
   staticData: {"breadcrumb":"Trendanalyticscharts","module":"@/pages/reports/charts/trendanalyticscharts","legacyPath":"/reports/charts/trendanalyticscharts"},
 })
 
-const appRoute0699 = createRoute({
+const appRoute0701 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "reports/deckungsbeitrag",
   component: () => renderPage("@/pages/reports/deckungsbeitrag"),
   staticData: {"breadcrumb":"Deckungsbeitrag","module":"@/pages/reports/deckungsbeitrag","legacyPath":"/reports/deckungsbeitrag"},
 })
 
-const appRoute0700 = createRoute({
+const appRoute0702 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "reports/lagerbestand",
   component: () => renderPage("@/pages/reports/lagerbestand"),
   staticData: {"breadcrumb":"Lagerbestand","module":"@/pages/reports/lagerbestand","legacyPath":"/reports/lagerbestand"},
 })
 
-const appRoute0701 = createRoute({
+const appRoute0703 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "reports/ReportsDashboardCharts",
   component: () => renderPage("@/pages/reports/ReportsDashboardCharts"),
   staticData: {"breadcrumb":"ReportsDashboardCharts","module":"@/pages/reports/ReportsDashboardCharts","legacyPath":"/reports/ReportsDashboardCharts"},
 })
 
-const appRoute0702 = createRoute({
+const appRoute0704 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "reports/umsatz",
   component: () => renderPage("@/pages/reports/umsatz"),
   staticData: {"breadcrumb":"Umsatz","module":"@/pages/reports/umsatz","legacyPath":"/reports/umsatz"},
 })
 
-const appRoute0703 = createRoute({
+const appRoute0705 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "rezepte/editor",
   component: () => renderPage("@/pages/rezepte/editor"),
   staticData: {"breadcrumb":"Editor","module":"@/pages/rezepte/editor","legacyPath":"/rezepte/editor"},
 })
 
-const appRoute0704 = createRoute({
+const appRoute0706 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "sales",
   component: () => renderPage("@/pages/sales/auftraege-liste"),
   staticData: {"breadcrumb":"Sales","module":"@/pages/sales/auftraege-liste","legacyPath":"/sales"},
 })
 
-const appRoute0705 = createRoute({
+const appRoute0707 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "sales/angebot-erstellen",
   component: () => renderPage("@/pages/sales/angebot-erstellen"),
   staticData: {"breadcrumb":"Angebot Erstellen","module":"@/pages/sales/angebot-erstellen","legacyPath":"/sales/angebot-erstellen"},
 })
 
-const appRoute0706 = createRoute({
+const appRoute0708 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "sales/angebot/$id",
   component: () => renderPage("@/pages/sales/angebot-erstellen"),
   staticData: {"breadcrumb":"Detail","module":"@/pages/sales/angebot-erstellen","legacyPath":"/sales/angebot/:id"},
 })
 
-const appRoute0707 = createRoute({
+const appRoute0709 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "sales/angebot/neu",
   component: () => renderPage("@/pages/sales/angebot-erstellen"),
   staticData: {"breadcrumb":"Neu","module":"@/pages/sales/angebot-erstellen","legacyPath":"/sales/angebot/neu"},
 })
 
-const appRoute0708 = createRoute({
+const appRoute0710 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "sales/angebote",
   component: () => renderPage("@/pages/sales/angebot-erstellen"),
   staticData: {"breadcrumb":"Angebote","module":"@/pages/sales/angebot-erstellen","legacyPath":"/sales/angebote"},
 })
 
-const appRoute0709 = createRoute({
+const appRoute0711 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "sales/angebote-liste",
   component: () => renderPage("@/pages/sales/angebote-liste"),
   staticData: {"breadcrumb":"Angebote Liste","module":"@/pages/sales/angebote-liste","legacyPath":"/sales/angebote-liste"},
 })
 
-const appRoute0710 = createRoute({
+const appRoute0712 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "sales/angebote/neu",
   component: () => renderPage("@/pages/sales/angebot-erstellen"),
   staticData: {"breadcrumb":"Neu","module":"@/pages/sales/angebot-erstellen","legacyPath":"/sales/angebote/neu"},
 })
 
-const appRoute0711 = createRoute({
+const appRoute0713 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "sales/auftraege",
   component: () => renderPage("@/pages/sales/auftraege-liste"),
   staticData: {"breadcrumb":"Auftraege","module":"@/pages/sales/auftraege-liste","legacyPath":"/sales/auftraege"},
 })
 
-const appRoute0712 = createRoute({
+const appRoute0714 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "sales/auftraege-liste",
   beforeLoad: ({ params }) => {
@@ -5104,133 +5118,133 @@ const appRoute0712 = createRoute({
   staticData: {"breadcrumb":"Auftraege Liste","module":"@/pages/sales/auftraege-liste","legacyPath":"/sales/auftraege-liste"},
 })
 
-const appRoute0713 = createRoute({
+const appRoute0715 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "sales/auftraege/neu",
   component: () => renderPage("@/pages/sales/order-editor"),
   staticData: {"breadcrumb":"Neu","module":"@/pages/sales/order-editor","legacyPath":"/sales/auftraege/neu"},
 })
 
-const appRoute0714 = createRoute({
+const appRoute0716 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "sales/auftrag-lieferschein-abgleich",
   component: () => renderPage("@/pages/sales/auftrag-lieferschein-abgleich"),
   staticData: {"breadcrumb":"Auftrag Lieferschein Abgleich","module":"@/pages/sales/auftrag-lieferschein-abgleich","legacyPath":"/sales/auftrag-lieferschein-abgleich"},
 })
 
-const appRoute0715 = createRoute({
+const appRoute0717 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "sales/auftragskette",
   component: () => renderPage("@/pages/sales/auftragskette"),
   staticData: {"breadcrumb":"Auftragskette","module":"@/pages/sales/auftragskette","legacyPath":"/sales/auftragskette"},
 })
 
-const appRoute0716 = createRoute({
+const appRoute0718 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "sales/credit-note-editor",
   component: () => renderPage("@/pages/sales/credit-note-editor"),
   staticData: {"breadcrumb":"Credit Note Editor","module":"@/pages/sales/credit-note-editor","legacyPath":"/sales/credit-note-editor"},
 })
 
-const appRoute0717 = createRoute({
+const appRoute0719 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "sales/credit-notes",
   component: () => renderPage("@/pages/sales/credit-note-editor"),
   staticData: {"breadcrumb":"Credit Notes","module":"@/pages/sales/credit-note-editor","legacyPath":"/sales/credit-notes"},
 })
 
-const appRoute0718 = createRoute({
+const appRoute0720 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "sales/deliveries/new",
   component: () => renderPage("@/pages/verkauf/lieferschein-erfassung"),
   staticData: {"breadcrumb":"New","module":"@/pages/verkauf/lieferschein-erfassung","legacyPath":"/sales/deliveries/new"},
 })
 
-const appRoute0719 = createRoute({
+const appRoute0721 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "sales/delivery",
   component: () => renderPage("@/pages/verkauf/lieferschein-erfassung"),
   staticData: {"breadcrumb":"Delivery","module":"@/pages/verkauf/lieferschein-erfassung","legacyPath":"/sales/delivery"},
 })
 
-const appRoute0720 = createRoute({
+const appRoute0722 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "sales/delivery-editor",
   component: () => renderPage("@/pages/sales/delivery-editor"),
   staticData: {"breadcrumb":"Delivery Editor","module":"@/pages/sales/delivery-editor","legacyPath":"/sales/delivery-editor"},
 })
 
-const appRoute0721 = createRoute({
+const appRoute0723 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "sales/delivery-editor-new",
   component: () => renderPage("@/pages/sales/delivery-editor-new"),
   staticData: {"breadcrumb":"Delivery Editor New","module":"@/pages/sales/delivery-editor-new","legacyPath":"/sales/delivery-editor-new"},
 })
 
-const appRoute0722 = createRoute({
+const appRoute0724 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "sales/invoice",
   component: () => renderPage("@/pages/sales/invoice-editor"),
   staticData: {"breadcrumb":"Invoice","module":"@/pages/sales/invoice-editor","legacyPath":"/sales/invoice"},
 })
 
-const appRoute0723 = createRoute({
+const appRoute0725 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "sales/invoice-editor",
   component: () => renderPage("@/pages/sales/invoice-editor"),
   staticData: {"breadcrumb":"Invoice Editor","module":"@/pages/sales/invoice-editor","legacyPath":"/sales/invoice-editor"},
 })
 
-const appRoute0724 = createRoute({
+const appRoute0726 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "sales/invoice/$id",
   component: () => renderPage("@/pages/sales/invoice-editor"),
   staticData: {"breadcrumb":"Detail","module":"@/pages/sales/invoice-editor","legacyPath":"/sales/invoice/:id"},
 })
 
-const appRoute0725 = createRoute({
+const appRoute0727 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "sales/invoices/new",
   component: () => renderPage("@/pages/sales/invoice-editor"),
   staticData: {"breadcrumb":"New","module":"@/pages/sales/invoice-editor","legacyPath":"/sales/invoices/new"},
 })
 
-const appRoute0726 = createRoute({
+const appRoute0728 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "sales/kalkulationen/neu",
   component: () => renderPage("@/pages/preise/kalkulation"),
   staticData: {"breadcrumb":"Neu","module":"@/pages/preise/kalkulation","legacyPath":"/sales/kalkulationen/neu"},
 })
 
-const appRoute0727 = createRoute({
+const appRoute0729 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "sales/kreditlimit-pruefung",
   component: () => renderPage("@/pages/sales/kreditlimit-pruefung"),
   staticData: {"breadcrumb":"Kreditlimit Pruefung","module":"@/pages/sales/kreditlimit-pruefung","legacyPath":"/sales/kreditlimit-pruefung"},
 })
 
-const appRoute0728 = createRoute({
+const appRoute0730 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "sales/lieferung-storno",
   component: () => renderPage("@/pages/sales/lieferung-storno"),
   staticData: {"breadcrumb":"Lieferung Storno","module":"@/pages/sales/lieferung-storno","legacyPath":"/sales/lieferung-storno"},
 })
 
-const appRoute0729 = createRoute({
+const appRoute0731 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "sales/lieferungen",
   component: () => renderPage("@/pages/sales/lieferungen-liste"),
   staticData: {"breadcrumb":"Lieferungen","module":"@/pages/sales/lieferungen-liste","legacyPath":"/sales/lieferungen"},
 })
 
-const appRoute0730 = createRoute({
+const appRoute0732 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "sales/lieferungen-liste",
   component: () => renderPage("@/pages/sales/lieferungen-liste"),
   staticData: {"breadcrumb":"Lieferungen Liste","module":"@/pages/sales/lieferungen-liste","legacyPath":"/sales/lieferungen-liste"},
 })
 
-const appRoute0731 = createRoute({
+const appRoute0733 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "sales/lieferungen/neu",
   beforeLoad: ({ params }) => {
@@ -5240,504 +5254,504 @@ const appRoute0731 = createRoute({
   staticData: {"breadcrumb":"Neu","module":"@/pages/sales/lieferungen-liste","legacyPath":"/sales/lieferungen/neu"},
 })
 
-const appRoute0732 = createRoute({
+const appRoute0734 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "sales/order",
   component: () => renderPage("@/pages/sales/order-editor"),
   staticData: {"breadcrumb":"Order","module":"@/pages/sales/order-editor","legacyPath":"/sales/order"},
 })
 
-const appRoute0733 = createRoute({
+const appRoute0735 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "sales/order-editor",
   component: () => renderPage("@/pages/sales/order-editor"),
   staticData: {"breadcrumb":"Order Editor","module":"@/pages/sales/order-editor","legacyPath":"/sales/order-editor"},
 })
 
-const appRoute0734 = createRoute({
+const appRoute0736 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "sales/order-editor/$id",
   component: () => renderPage("@/pages/sales/order-editor"),
   staticData: {"breadcrumb":"Detail","module":"@/pages/sales/order-editor","legacyPath":"/sales/order-editor/:id"},
 })
 
-const appRoute0735 = createRoute({
+const appRoute0737 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "sales/orders-modern",
   component: () => renderPage("@/pages/sales/orders-modern"),
   staticData: {"breadcrumb":"Orders Modern","module":"@/pages/sales/orders-modern","legacyPath":"/sales/orders-modern"},
 })
 
-const appRoute0736 = createRoute({
+const appRoute0738 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "sales/orders/new",
   component: () => renderPage("@/pages/sales/order-editor"),
   staticData: {"breadcrumb":"New","module":"@/pages/sales/order-editor","legacyPath":"/sales/orders/new"},
 })
 
-const appRoute0737 = createRoute({
+const appRoute0739 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "sales/rechnungen",
   component: () => renderPage("@/pages/sales/rechnungen-liste"),
   staticData: {"breadcrumb":"Rechnungen","module":"@/pages/sales/rechnungen-liste","legacyPath":"/sales/rechnungen"},
 })
 
-const appRoute0738 = createRoute({
+const appRoute0740 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "sales/rechnungen-liste",
   component: () => renderPage("@/pages/sales/rechnungen-liste"),
   staticData: {"breadcrumb":"Rechnungen Liste","module":"@/pages/sales/rechnungen-liste","legacyPath":"/sales/rechnungen-liste"},
 })
 
-const appRoute0739 = createRoute({
+const appRoute0741 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "schaeden",
   component: () => renderPage("@/pages/schaeden/liste"),
   staticData: {"breadcrumb":"Schaeden","module":"@/pages/schaeden/liste","legacyPath":"/schaeden"},
 })
 
-const appRoute0740 = createRoute({
+const appRoute0742 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "schaeden/$id",
   component: () => renderPage("@/pages/schaeden/meldung"),
   staticData: {"breadcrumb":"Detail","module":"@/pages/schaeden/meldung","legacyPath":"/schaeden/:id"},
 })
 
-const appRoute0741 = createRoute({
+const appRoute0743 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "schaeden/liste",
   component: () => renderPage("@/pages/schaeden/liste"),
   staticData: {"breadcrumb":"Liste","module":"@/pages/schaeden/liste","legacyPath":"/schaeden/liste"},
 })
 
-const appRoute0742 = createRoute({
+const appRoute0744 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "schaeden/meldung",
   component: () => renderPage("@/pages/schaeden/meldung"),
   staticData: {"breadcrumb":"Meldung","module":"@/pages/schaeden/meldung","legacyPath":"/schaeden/meldung"},
 })
 
-const appRoute0743 = createRoute({
+const appRoute0745 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "schichtplan",
   component: () => renderPage("@/pages/schichtplan/liste"),
   staticData: {"breadcrumb":"Schichtplan","module":"@/pages/schichtplan/liste","legacyPath":"/schichtplan"},
 })
 
-const appRoute0744 = createRoute({
+const appRoute0746 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "schichtplan/liste",
   component: () => renderPage("@/pages/schichtplan/liste"),
   staticData: {"breadcrumb":"Liste","module":"@/pages/schichtplan/liste","legacyPath":"/schichtplan/liste"},
 })
 
-const appRoute0745 = createRoute({
+const appRoute0747 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "service/abschluss",
   component: () => renderPage("@/pages/service/abschluss"),
   staticData: {"breadcrumb":"Abschluss","module":"@/pages/service/abschluss","legacyPath":"/service/abschluss"},
 })
 
-const appRoute0746 = createRoute({
+const appRoute0748 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "service/anfrage-detail",
   component: () => renderPage("@/pages/service/anfrage-detail"),
   staticData: {"breadcrumb":"Anfrage Detail","module":"@/pages/service/anfrage-detail","legacyPath":"/service/anfrage-detail"},
 })
 
-const appRoute0747 = createRoute({
+const appRoute0749 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "service/anfrage-neu",
   component: () => renderPage("@/pages/service/anfrage-neu"),
   staticData: {"breadcrumb":"Anfrage Neu","module":"@/pages/service/anfrage-neu","legacyPath":"/service/anfrage-neu"},
 })
 
-const appRoute0748 = createRoute({
+const appRoute0750 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "service/anfrage/$id",
   component: () => renderPage("@/pages/service/anfrage-detail"),
   staticData: {"breadcrumb":"Detail","module":"@/pages/service/anfrage-detail","legacyPath":"/service/anfrage/:id"},
 })
 
-const appRoute0749 = createRoute({
+const appRoute0751 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "service/anfrage/neu",
   component: () => renderPage("@/pages/service/anfrage-neu"),
   staticData: {"breadcrumb":"Neu","module":"@/pages/service/anfrage-neu","legacyPath":"/service/anfrage/neu"},
 })
 
-const appRoute0750 = createRoute({
+const appRoute0752 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "service/anfragen",
   component: () => renderPage("@/pages/service/anfragen"),
   staticData: {"breadcrumb":"Anfragen","module":"@/pages/service/anfragen","legacyPath":"/service/anfragen"},
 })
 
-const appRoute0751 = createRoute({
+const appRoute0753 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "service/rueckmeldung",
   component: () => renderPage("@/pages/service/rueckmeldung"),
   staticData: {"breadcrumb":"Rueckmeldung","module":"@/pages/service/rueckmeldung","legacyPath":"/service/rueckmeldung"},
 })
 
-const appRoute0752 = createRoute({
+const appRoute0754 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "setup/firma",
   component: () => renderPage("@/pages/setup/firma"),
   staticData: {"breadcrumb":"Firma","module":"@/pages/setup/firma","legacyPath":"/setup/firma"},
 })
 
-const appRoute0753 = createRoute({
+const appRoute0755 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "silo",
   component: () => renderPage("@/pages/silo/kapazitaeten"),
   staticData: {"breadcrumb":"Silo","module":"@/pages/silo/kapazitaeten","legacyPath":"/silo"},
 })
 
-const appRoute0754 = createRoute({
+const appRoute0756 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "silo/kapazitaeten",
   component: () => renderPage("@/pages/silo/kapazitaeten"),
   staticData: {"breadcrumb":"Kapazitaeten","module":"@/pages/silo/kapazitaeten","legacyPath":"/silo/kapazitaeten"},
 })
 
-const appRoute0755 = createRoute({
+const appRoute0757 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "stammdaten/artikel-stoffstrom",
   component: () => renderPage("@/pages/stammdaten/artikel-stoffstrom"),
   staticData: {"breadcrumb":"Artikel Stoffstrom","module":"@/pages/stammdaten/artikel-stoffstrom","legacyPath":"/stammdaten/artikel-stoffstrom"},
 })
 
-const appRoute0756 = createRoute({
+const appRoute0758 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "stammdaten/artikelbestandteile",
   component: () => renderPage("@/pages/stammdaten/artikelbestandteile"),
   staticData: {"breadcrumb":"Artikelbestandteile","module":"@/pages/stammdaten/artikelbestandteile","legacyPath":"/stammdaten/artikelbestandteile"},
 })
 
-const appRoute0757 = createRoute({
+const appRoute0759 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "stammdaten/artikelverpackung",
   component: () => renderPage("@/pages/stammdaten/artikelverpackung"),
   staticData: {"breadcrumb":"Artikelverpackung","module":"@/pages/stammdaten/artikelverpackung","legacyPath":"/stammdaten/artikelverpackung"},
 })
 
-const appRoute0758 = createRoute({
+const appRoute0760 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "stammdaten/betriebsstaetten",
   component: () => renderPage("@/pages/stammdaten/betriebsstaetten"),
   staticData: {"breadcrumb":"Betriebsstaetten","module":"@/pages/stammdaten/betriebsstaetten","legacyPath":"/stammdaten/betriebsstaetten"},
 })
 
-const appRoute0759 = createRoute({
+const appRoute0761 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "stammdaten/hausbanken",
   component: () => renderPage("@/pages/stammdaten/hausbanken"),
   staticData: {"breadcrumb":"Hausbanken","module":"@/pages/stammdaten/hausbanken","legacyPath":"/stammdaten/hausbanken"},
 })
 
-const appRoute0760 = createRoute({
+const appRoute0762 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "stammdaten/individuelle-artikelnummern",
   component: () => renderPage("@/pages/stammdaten/individuelle-artikelnummern"),
   staticData: {"breadcrumb":"Individuelle Artikelnummern","module":"@/pages/stammdaten/individuelle-artikelnummern","legacyPath":"/stammdaten/individuelle-artikelnummern"},
 })
 
-const appRoute0761 = createRoute({
+const appRoute0763 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "stammdaten/mengeneinheiten",
   component: () => renderPage("@/pages/stammdaten/mengeneinheiten"),
   staticData: {"breadcrumb":"Mengeneinheiten","module":"@/pages/stammdaten/mengeneinheiten","legacyPath":"/stammdaten/mengeneinheiten"},
 })
 
-const appRoute0762 = createRoute({
+const appRoute0764 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "start-dashboard",
   component: () => renderPage("@/pages/start-dashboard"),
   staticData: {"breadcrumb":"Start Dashboard","module":"@/pages/start-dashboard","legacyPath":"/start-dashboard"},
 })
 
-const appRoute0763 = createRoute({
+const appRoute0765 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "statistik/bewegungen",
   component: () => renderPage("@/pages/statistik/bewegungen"),
   staticData: {"breadcrumb":"Bewegungen","module":"@/pages/statistik/bewegungen","legacyPath":"/statistik/bewegungen"},
 })
 
-const appRoute0764 = createRoute({
+const appRoute0766 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "stock-management",
   component: () => renderPage("@/pages/stock-management"),
   staticData: {"breadcrumb":"Stock Management","module":"@/pages/stock-management","legacyPath":"/stock-management"},
 })
 
-const appRoute0765 = createRoute({
+const appRoute0767 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "strecke/disposition",
   component: () => renderPage("@/pages/strecke/disposition"),
   staticData: {"breadcrumb":"Disposition","module":"@/pages/strecke/disposition","legacyPath":"/strecke/disposition"},
 })
 
-const appRoute0766 = createRoute({
+const appRoute0768 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "strecke/dokumente-drucken",
   component: () => renderPage("@/pages/strecke/dokumente-drucken"),
   staticData: {"breadcrumb":"Dokumente Drucken","module":"@/pages/strecke/dokumente-drucken","legacyPath":"/strecke/dokumente-drucken"},
 })
 
-const appRoute0767 = createRoute({
+const appRoute0769 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "strecke/menu",
   component: () => renderPage("@/pages/strecke/menu"),
   staticData: {"breadcrumb":"Menu","module":"@/pages/strecke/menu","legacyPath":"/strecke/menu"},
 })
 
-const appRoute0768 = createRoute({
+const appRoute0770 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "strecke/nawaro-ernterklaerung-drucken",
   component: () => renderPage("@/pages/strecke/nawaro-ernterklaerung-drucken"),
   staticData: {"breadcrumb":"Nawaro Ernterklaerung Drucken","module":"@/pages/strecke/nawaro-ernterklaerung-drucken","legacyPath":"/strecke/nawaro-ernterklaerung-drucken"},
 })
 
-const appRoute0769 = createRoute({
+const appRoute0771 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "strecke/nawaro-lieferungen",
   component: () => renderPage("@/pages/strecke/nawaro-lieferungen"),
   staticData: {"breadcrumb":"Nawaro Lieferungen","module":"@/pages/strecke/nawaro-lieferungen","legacyPath":"/strecke/nawaro-lieferungen"},
 })
 
-const appRoute0770 = createRoute({
+const appRoute0772 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "strecke/nawaro-uebersicht",
   component: () => renderPage("@/pages/strecke/nawaro-uebersicht"),
   staticData: {"breadcrumb":"Nawaro Uebersicht","module":"@/pages/strecke/nawaro-uebersicht","legacyPath":"/strecke/nawaro-uebersicht"},
 })
 
-const appRoute0771 = createRoute({
+const appRoute0773 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "strecke/nawaro-uebersicht-drucken",
   component: () => renderPage("@/pages/strecke/nawaro-uebersicht-drucken"),
   staticData: {"breadcrumb":"Nawaro Uebersicht Drucken","module":"@/pages/strecke/nawaro-uebersicht-drucken","legacyPath":"/strecke/nawaro-uebersicht-drucken"},
 })
 
-const appRoute0772 = createRoute({
+const appRoute0774 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "strecke/nawaro-vertraege-pruefen",
   component: () => renderPage("@/pages/strecke/nawaro-vertraege-pruefen"),
   staticData: {"breadcrumb":"Nawaro Vertraege Pruefen","module":"@/pages/strecke/nawaro-vertraege-pruefen","legacyPath":"/strecke/nawaro-vertraege-pruefen"},
 })
 
-const appRoute0773 = createRoute({
+const appRoute0775 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "strecke/qualitaets-abweichung",
   component: () => renderPage("@/pages/strecke/qualitaets-abweichung"),
   staticData: {"breadcrumb":"Qualitaets Abweichung","module":"@/pages/strecke/qualitaets-abweichung","legacyPath":"/strecke/qualitaets-abweichung"},
 })
 
-const appRoute0774 = createRoute({
+const appRoute0776 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "strecke/speditionen-fracht-preise",
   component: () => renderPage("@/pages/strecke/speditionen-fracht-preise"),
   staticData: {"breadcrumb":"Speditionen Fracht Preise","module":"@/pages/strecke/speditionen-fracht-preise","legacyPath":"/strecke/speditionen-fracht-preise"},
 })
 
-const appRoute0775 = createRoute({
+const appRoute0777 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "strecke/streckengeschaeft",
   component: () => renderPage("@/pages/strecke/streckengeschaeft"),
   staticData: {"breadcrumb":"Streckengeschaeft","module":"@/pages/strecke/streckengeschaeft","legacyPath":"/strecke/streckengeschaeft"},
 })
 
-const appRoute0776 = createRoute({
+const appRoute0778 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "strecke/vorlaeufige-streckengeschaefte",
   component: () => renderPage("@/pages/strecke/vorlaeufige-streckengeschaefte"),
   staticData: {"breadcrumb":"Vorlaeufige Streckengeschaefte","module":"@/pages/strecke/vorlaeufige-streckengeschaefte","legacyPath":"/strecke/vorlaeufige-streckengeschaefte"},
 })
 
-const appRoute0777 = createRoute({
+const appRoute0779 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "subventionen/dashboard",
   component: () => renderPage("@/pages/subventionen/dashboard"),
   staticData: {"breadcrumb":"Dashboard","module":"@/pages/subventionen/dashboard","legacyPath":"/subventionen/dashboard"},
 })
 
-const appRoute0778 = createRoute({
+const appRoute0780 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "system/live-monitor",
   component: () => renderPage("@/pages/system/live-monitor"),
   staticData: {"breadcrumb":"Live Monitor","module":"@/pages/system/live-monitor","legacyPath":"/system/live-monitor"},
 })
 
-const appRoute0779 = createRoute({
+const appRoute0781 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "tankstelle",
   component: () => renderPage("@/pages/tankstelle/zapfungen"),
   staticData: {"breadcrumb":"Tankstelle","module":"@/pages/tankstelle/zapfungen","legacyPath":"/tankstelle"},
 })
 
-const appRoute0780 = createRoute({
+const appRoute0782 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "tankstelle/zapfungen",
   component: () => renderPage("@/pages/tankstelle/zapfungen"),
   staticData: {"breadcrumb":"Zapfungen","module":"@/pages/tankstelle/zapfungen","legacyPath":"/tankstelle/zapfungen"},
 })
 
-const appRoute0781 = createRoute({
+const appRoute0783 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "termine/kalender",
   component: () => renderPage("@/pages/termine/kalender"),
   staticData: {"breadcrumb":"Kalender","module":"@/pages/termine/kalender","legacyPath":"/termine/kalender"},
 })
 
-const appRoute0782 = createRoute({
+const appRoute0784 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "transporte/fahrer",
   component: () => renderPage("@/pages/transporte/fahrer-liste"),
   staticData: {"breadcrumb":"Fahrer","module":"@/pages/transporte/fahrer-liste","legacyPath":"/transporte/fahrer"},
 })
 
-const appRoute0783 = createRoute({
+const appRoute0785 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "transporte/fahrer-liste",
   component: () => renderPage("@/pages/transporte/fahrer-liste"),
   staticData: {"breadcrumb":"Fahrer Liste","module":"@/pages/transporte/fahrer-liste","legacyPath":"/transporte/fahrer-liste"},
 })
 
-const appRoute0784 = createRoute({
+const appRoute0786 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "transporte/fahrer/$id",
   component: () => renderPage("@/pages/transporte/fahrer-liste"),
   staticData: {"breadcrumb":"Detail","module":"@/pages/transporte/fahrer-liste","legacyPath":"/transporte/fahrer/:id"},
 })
 
-const appRoute0785 = createRoute({
+const appRoute0787 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "transporte/fahrer/neu",
   component: () => renderPage("@/pages/transporte/fahrer-liste"),
   staticData: {"breadcrumb":"Neu","module":"@/pages/transporte/fahrer-liste","legacyPath":"/transporte/fahrer/neu"},
 })
 
-const appRoute0786 = createRoute({
+const appRoute0788 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "verkauf",
   component: () => renderPage("@/pages/verkauf/lieferschein-erfassung"),
   staticData: {"breadcrumb":"Verkauf","module":"@/pages/verkauf/lieferschein-erfassung","legacyPath":"/verkauf"},
 })
 
-const appRoute0787 = createRoute({
+const appRoute0789 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "verkauf/auftraege",
   component: () => renderPage("@/pages/sales/auftraege-liste"),
   staticData: {"breadcrumb":"Auftraege","module":"@/pages/sales/auftraege-liste","legacyPath":"/verkauf/auftraege"},
 })
 
-const appRoute0788 = createRoute({
+const appRoute0790 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "verkauf/auftraege/neu",
   component: () => renderPage("@/pages/sales/order-editor"),
   staticData: {"breadcrumb":"Neu","module":"@/pages/sales/order-editor","legacyPath":"/verkauf/auftraege/neu"},
 })
 
-const appRoute0789 = createRoute({
+const appRoute0791 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "verkauf/betriebs-auftraege",
   component: () => renderPage("@/pages/verkauf/betriebs-auftraege"),
   staticData: {"breadcrumb":"Betriebs Auftraege","module":"@/pages/verkauf/betriebs-auftraege","legacyPath":"/verkauf/betriebs-auftraege"},
 })
 
-const appRoute0790 = createRoute({
+const appRoute0792 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "verkauf/dauerauftraege",
   component: () => renderPage("@/pages/verkauf/dauerauftraege"),
   staticData: {"breadcrumb":"Dauerauftraege","module":"@/pages/verkauf/dauerauftraege","legacyPath":"/verkauf/dauerauftraege"},
 })
 
-const appRoute0791 = createRoute({
+const appRoute0793 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "verkauf/kommissions-auftraege",
   component: () => renderPage("@/pages/verkauf/kommissions-auftraege"),
   staticData: {"breadcrumb":"Kommissions Auftraege","module":"@/pages/verkauf/kommissions-auftraege","legacyPath":"/verkauf/kommissions-auftraege"},
 })
 
-const appRoute0792 = createRoute({
+const appRoute0794 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "verkauf/kunde-neu",
   component: () => renderPage("@/pages/verkauf/kunde-neu"),
   staticData: {"breadcrumb":"Kunde Neu","module":"@/pages/verkauf/kunde-neu","legacyPath":"/verkauf/kunde-neu"},
 })
 
-const appRoute0793 = createRoute({
+const appRoute0795 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "verkauf/kunde-neu/kundeneumaskbuilderpage",
   component: () => renderPage("@/pages/verkauf/kunde-neu/kundeneumaskbuilderpage"),
   staticData: {"breadcrumb":"Kundeneumaskbuilderpage","module":"@/pages/verkauf/kunde-neu/kundeneumaskbuilderpage","legacyPath":"/verkauf/kunde-neu/kundeneumaskbuilderpage"},
 })
 
-const appRoute0794 = createRoute({
+const appRoute0796 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "verkauf/kunde/$id",
   component: () => renderPage("@/pages/verkauf/kunden-stamm"),
   staticData: {"breadcrumb":"Detail","module":"@/pages/verkauf/kunden-stamm","legacyPath":"/verkauf/kunde/:id"},
 })
 
-const appRoute0795 = createRoute({
+const appRoute0797 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "verkauf/kunde/neu",
   component: () => renderPage("@/pages/verkauf/kunden-stamm"),
   staticData: {"breadcrumb":"Neu","module":"@/pages/verkauf/kunden-stamm","legacyPath":"/verkauf/kunde/neu"},
 })
 
-const appRoute0796 = createRoute({
+const appRoute0798 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "verkauf/kunden-liste",
   component: () => renderPage("@/pages/verkauf/kunden-liste"),
   staticData: {"breadcrumb":"Kunden Liste","module":"@/pages/verkauf/kunden-liste","legacyPath":"/verkauf/kunden-liste"},
 })
 
-const appRoute0797 = createRoute({
+const appRoute0799 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "verkauf/kunden-stamm",
   component: () => renderPage("@/pages/verkauf/kunden-stamm"),
   staticData: {"breadcrumb":"Kunden Stamm","module":"@/pages/verkauf/kunden-stamm","legacyPath":"/verkauf/kunden-stamm"},
 })
 
-const appRoute0798 = createRoute({
+const appRoute0800 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "verkauf/kunden-stamm-enhanced",
   component: () => renderPage("@/pages/verkauf/kunden-stamm-enhanced"),
   staticData: {"breadcrumb":"Kunden Stamm Enhanced","module":"@/pages/verkauf/kunden-stamm-enhanced","legacyPath":"/verkauf/kunden-stamm-enhanced"},
 })
 
-const appRoute0799 = createRoute({
+const appRoute0801 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "verkauf/kunden-stamm-enhanced/$id",
   component: () => renderPage("@/pages/verkauf/kunden-stamm-enhanced"),
   staticData: {"breadcrumb":"Detail","module":"@/pages/verkauf/kunden-stamm-enhanced","legacyPath":"/verkauf/kunden-stamm-enhanced/:id"},
 })
 
-const appRoute0800 = createRoute({
+const appRoute0802 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "verkauf/kunden-stamm/$id",
   component: () => renderPage("@/pages/verkauf/kunden-stamm"),
   staticData: {"breadcrumb":"Detail","module":"@/pages/verkauf/kunden-stamm","legacyPath":"/verkauf/kunden-stamm/:id"},
 })
 
-const appRoute0801 = createRoute({
+const appRoute0803 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "verkauf/lieferschein-erfassung",
   component: () => renderPage("@/pages/verkauf/lieferschein-erfassung"),
   staticData: {"breadcrumb":"Lieferschein Erfassung","module":"@/pages/verkauf/lieferschein-erfassung","legacyPath":"/verkauf/lieferschein-erfassung"},
 })
 
-const appRoute0802 = createRoute({
+const appRoute0804 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "verkauf/lieferschein-erfassung/$id",
   component: () => renderPage("@/pages/verkauf/lieferschein-erfassung"),
   staticData: {"breadcrumb":"Detail","module":"@/pages/verkauf/lieferschein-erfassung","legacyPath":"/verkauf/lieferschein-erfassung/:id"},
 })
 
-const appRoute0803 = createRoute({
+const appRoute0805 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "verkauf/rechnungen",
   beforeLoad: ({ params }) => {
@@ -5747,98 +5761,98 @@ const appRoute0803 = createRoute({
   staticData: {"breadcrumb":"Rechnungen","module":"@/pages/sales/rechnungen-liste","legacyPath":"/verkauf/rechnungen"},
 })
 
-const appRoute0804 = createRoute({
+const appRoute0806 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "verkauf/rechnungen/$id",
   component: () => renderPage("@/pages/sales/invoice-editor"),
   staticData: {"breadcrumb":"Detail","module":"@/pages/sales/invoice-editor","legacyPath":"/verkauf/rechnungen/:id"},
 })
 
-const appRoute0805 = createRoute({
+const appRoute0807 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "verkauf/rechnungen/neu",
   component: () => renderPage("@/pages/sales/invoice-editor"),
   staticData: {"breadcrumb":"Neu","module":"@/pages/sales/invoice-editor","legacyPath":"/verkauf/rechnungen/neu"},
 })
 
-const appRoute0806 = createRoute({
+const appRoute0808 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "verkauf/unerledigte-auftrags-positionen",
   component: () => renderPage("@/pages/verkauf/unerledigte-auftrags-positionen"),
   staticData: {"breadcrumb":"Unerledigte Auftrags Positionen","module":"@/pages/verkauf/unerledigte-auftrags-positionen","legacyPath":"/verkauf/unerledigte-auftrags-positionen"},
 })
 
-const appRoute0807 = createRoute({
+const appRoute0809 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "verladung",
   component: () => renderPage("@/pages/verladung/liste"),
   staticData: {"breadcrumb":"Verladung","module":"@/pages/verladung/liste","legacyPath":"/verladung"},
 })
 
-const appRoute0808 = createRoute({
+const appRoute0810 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "verladung/liste",
   component: () => renderPage("@/pages/verladung/liste"),
   staticData: {"breadcrumb":"Liste","module":"@/pages/verladung/liste","legacyPath":"/verladung/liste"},
 })
 
-const appRoute0809 = createRoute({
+const appRoute0811 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "verladung/lkw-beladung",
   component: () => renderPage("@/pages/verladung/lkw-beladung"),
   staticData: {"breadcrumb":"Lkw Beladung","module":"@/pages/verladung/lkw-beladung","legacyPath":"/verladung/lkw-beladung"},
 })
 
-const appRoute0810 = createRoute({
+const appRoute0812 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "versand",
   component: () => renderPage("@/pages/versand/frachtdokumente"),
   staticData: {"breadcrumb":"Versand","module":"@/pages/versand/frachtdokumente","legacyPath":"/versand"},
 })
 
-const appRoute0811 = createRoute({
+const appRoute0813 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "versand/frachtdokumente",
   component: () => renderPage("@/pages/versand/frachtdokumente"),
   staticData: {"breadcrumb":"Frachtdokumente","module":"@/pages/versand/frachtdokumente","legacyPath":"/versand/frachtdokumente"},
 })
 
-const appRoute0812 = createRoute({
+const appRoute0814 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "versand/paket-etikett",
   component: () => renderPage("@/pages/versand/paket-etikett"),
   staticData: {"breadcrumb":"Paket Etikett","module":"@/pages/versand/paket-etikett","legacyPath":"/versand/paket-etikett"},
 })
 
-const appRoute0813 = createRoute({
+const appRoute0815 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "versand/versand-avis",
   component: () => renderPage("@/pages/versand/versand-avis"),
   staticData: {"breadcrumb":"Versand Avis","module":"@/pages/versand/versand-avis","legacyPath":"/versand/versand-avis"},
 })
 
-const appRoute0814 = createRoute({
+const appRoute0816 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "versicherungen",
   component: () => renderPage("@/pages/versicherungen/liste"),
   staticData: {"breadcrumb":"Versicherungen","module":"@/pages/versicherungen/liste","legacyPath":"/versicherungen"},
 })
 
-const appRoute0815 = createRoute({
+const appRoute0817 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "versicherungen/$id",
   component: () => renderPage("@/pages/versicherungen/liste"),
   staticData: {"breadcrumb":"Detail","module":"@/pages/versicherungen/liste","legacyPath":"/versicherungen/:id"},
 })
 
-const appRoute0816 = createRoute({
+const appRoute0818 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "versicherungen/liste",
   component: () => renderPage("@/pages/versicherungen/liste"),
   staticData: {"breadcrumb":"Liste","module":"@/pages/versicherungen/liste","legacyPath":"/versicherungen/liste"},
 })
 
-const appRoute0817 = createRoute({
+const appRoute0819 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "vertrag/$id",
   beforeLoad: ({ params }) => {
@@ -5848,245 +5862,245 @@ const appRoute0817 = createRoute({
   staticData: {"breadcrumb":"Detail","module":"@/pages/kontrakte/FrmKontraktDetail","legacyPath":"/vertrag/:id"},
 })
 
-const appRoute0818 = createRoute({
+const appRoute0820 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "vertrag/neu",
   component: () => renderPage("@/pages/kontrakte/FrmKontraktDetail"),
   staticData: {"breadcrumb":"Neu","module":"@/pages/kontrakte/FrmKontraktDetail","legacyPath":"/vertrag/neu"},
 })
 
-const appRoute0819 = createRoute({
+const appRoute0821 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "vertrag/rahmenvertraege",
   component: () => renderPage("@/pages/vertrag/rahmenvertraege"),
   staticData: {"breadcrumb":"Rahmenvertraege","module":"@/pages/vertrag/rahmenvertraege","legacyPath":"/vertrag/rahmenvertraege"},
 })
 
-const appRoute0820 = createRoute({
+const appRoute0822 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "vertrieb/kundenumsatz",
   component: () => renderPage("@/pages/vertrieb/kundenumsatz"),
   staticData: {"breadcrumb":"Kundenumsatz","module":"@/pages/vertrieb/kundenumsatz","legacyPath":"/vertrieb/kundenumsatz"},
 })
 
-const appRoute0821 = createRoute({
+const appRoute0823 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "waage",
   component: () => renderPage("@/pages/waage/liste"),
   staticData: {"breadcrumb":"Waage","module":"@/pages/waage/liste","legacyPath":"/waage"},
 })
 
-const appRoute0822 = createRoute({
+const appRoute0824 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "waage/hofliste",
   component: () => renderPage("@/pages/waage/hofliste"),
   staticData: {"breadcrumb":"Hofliste","module":"@/pages/waage/hofliste","legacyPath":"/waage/hofliste"},
 })
 
-const appRoute0823 = createRoute({
+const appRoute0825 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "waage/liste",
   component: () => renderPage("@/pages/waage/liste"),
   staticData: {"breadcrumb":"Liste","module":"@/pages/waage/liste","legacyPath":"/waage/liste"},
 })
 
-const appRoute0824 = createRoute({
+const appRoute0826 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "waage/neu",
   component: () => renderPage("@/pages/waage/liste"),
   staticData: {"breadcrumb":"Neu","module":"@/pages/waage/liste","legacyPath":"/waage/neu"},
 })
 
-const appRoute0825 = createRoute({
+const appRoute0827 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "waage/vorlagen",
   component: () => renderPage("@/pages/waage/vorlagen"),
   staticData: {"breadcrumb":"Vorlagen","module":"@/pages/waage/vorlagen","legacyPath":"/waage/vorlagen"},
 })
 
-const appRoute0826 = createRoute({
+const appRoute0828 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "waage/wiegeschein-detail",
   component: () => renderPage("@/pages/waage/wiegeschein-detail"),
   staticData: {"breadcrumb":"Wiegeschein Detail","module":"@/pages/waage/wiegeschein-detail","legacyPath":"/waage/wiegeschein-detail"},
 })
 
-const appRoute0827 = createRoute({
+const appRoute0829 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "waage/wiegeschein/$id",
   component: () => renderPage("@/pages/waage/wiegeschein-detail"),
   staticData: {"breadcrumb":"Detail","module":"@/pages/waage/wiegeschein-detail","legacyPath":"/waage/wiegeschein/:id"},
 })
 
-const appRoute0828 = createRoute({
+const appRoute0830 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "waage/wiegungen",
   component: () => renderPage("@/pages/waage/wiegungen"),
   staticData: {"breadcrumb":"Wiegungen","module":"@/pages/waage/wiegungen","legacyPath":"/waage/wiegungen"},
 })
 
-const appRoute0829 = createRoute({
+const appRoute0831 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "wartung/anlage/$id",
   component: () => renderPage("@/pages/wartung/anlagen-liste"),
   staticData: {"breadcrumb":"Detail","module":"@/pages/wartung/anlagen-liste","legacyPath":"/wartung/anlage/:id"},
 })
 
-const appRoute0830 = createRoute({
+const appRoute0832 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "wartung/anlage/neu",
   component: () => renderPage("@/pages/wartung/anlagen-liste"),
   staticData: {"breadcrumb":"Neu","module":"@/pages/wartung/anlagen-liste","legacyPath":"/wartung/anlage/neu"},
 })
 
-const appRoute0831 = createRoute({
+const appRoute0833 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "wartung/anlagen",
   component: () => renderPage("@/pages/wartung/anlagen-liste"),
   staticData: {"breadcrumb":"Anlagen","module":"@/pages/wartung/anlagen-liste","legacyPath":"/wartung/anlagen"},
 })
 
-const appRoute0832 = createRoute({
+const appRoute0834 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "wartung/anlagen-liste",
   component: () => renderPage("@/pages/wartung/anlagen-liste"),
   staticData: {"breadcrumb":"Anlagen Liste","module":"@/pages/wartung/anlagen-liste","legacyPath":"/wartung/anlagen-liste"},
 })
 
-const appRoute0833 = createRoute({
+const appRoute0835 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "weighing",
   component: () => renderPage("@/pages/weighing"),
   staticData: {"breadcrumb":"Weighing","module":"@/pages/weighing","legacyPath":"/weighing"},
 })
 
-const appRoute0834 = createRoute({
+const appRoute0836 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "wissen/wissensbasis",
   component: () => renderPage("@/pages/wissen/wissensbasis"),
   staticData: {"breadcrumb":"Wissensbasis","module":"@/pages/wissen/wissensbasis","legacyPath":"/wissen/wissensbasis"},
 })
 
-const appRoute0835 = createRoute({
+const appRoute0837 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "workflow/flow-spine-complaint-to-resolution",
   component: () => renderPage("@/pages/workflow/flow-spine-complaint-to-resolution"),
   staticData: {"breadcrumb":"Flow Spine Complaint To Resolution","module":"@/pages/workflow/flow-spine-complaint-to-resolution","legacyPath":"/workflow/flow-spine-complaint-to-resolution"},
 })
 
-const appRoute0836 = createRoute({
+const appRoute0838 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "workflow/flow-spine-compliance-to-report",
   component: () => renderPage("@/pages/workflow/flow-spine-compliance-to-report"),
   staticData: {"breadcrumb":"Flow Spine Compliance To Report","module":"@/pages/workflow/flow-spine-compliance-to-report","legacyPath":"/workflow/flow-spine-compliance-to-report"},
 })
 
-const appRoute0837 = createRoute({
+const appRoute0839 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "workflow/flow-spine-contract-to-settlement",
   component: () => renderPage("@/pages/workflow/flow-spine-contract-to-settlement"),
   staticData: {"breadcrumb":"Flow Spine Contract To Settlement","module":"@/pages/workflow/flow-spine-contract-to-settlement","legacyPath":"/workflow/flow-spine-contract-to-settlement"},
 })
 
-const appRoute0838 = createRoute({
+const appRoute0840 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "workflow/flow-spine-finance-to-close",
   component: () => renderPage("@/pages/workflow/flow-spine-finance-to-close"),
   staticData: {"breadcrumb":"Flow Spine Finance To Close","module":"@/pages/workflow/flow-spine-finance-to-close","legacyPath":"/workflow/flow-spine-finance-to-close"},
 })
 
-const appRoute0839 = createRoute({
+const appRoute0841 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "workflow/flow-spine-harvest-to-settlement",
   component: () => renderPage("@/pages/workflow/flow-spine-harvest-to-settlement"),
   staticData: {"breadcrumb":"Flow Spine Harvest To Settlement","module":"@/pages/workflow/flow-spine-harvest-to-settlement","legacyPath":"/workflow/flow-spine-harvest-to-settlement"},
 })
 
-const appRoute0840 = createRoute({
+const appRoute0842 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "workflow/flow-spine-inventory-to-settlement",
   component: () => renderPage("@/pages/workflow/flow-spine-inventory-to-settlement"),
   staticData: {"breadcrumb":"Flow Spine Inventory To Settlement","module":"@/pages/workflow/flow-spine-inventory-to-settlement","legacyPath":"/workflow/flow-spine-inventory-to-settlement"},
 })
 
-const appRoute0841 = createRoute({
+const appRoute0843 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "workflow/flow-spine-order-to-cash",
   component: () => renderPage("@/pages/workflow/flow-spine-order-to-cash"),
   staticData: {"breadcrumb":"Flow Spine Order To Cash","module":"@/pages/workflow/flow-spine-order-to-cash","legacyPath":"/workflow/flow-spine-order-to-cash"},
 })
 
-const appRoute0842 = createRoute({
+const appRoute0844 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "workflow/flow-spine-procure-to-pay",
   component: () => renderPage("@/pages/workflow/flow-spine-procure-to-pay"),
   staticData: {"breadcrumb":"Flow Spine Procure To Pay","module":"@/pages/workflow/flow-spine-procure-to-pay","legacyPath":"/workflow/flow-spine-procure-to-pay"},
 })
 
-const appRoute0843 = createRoute({
+const appRoute0845 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "workflow/flow-spine-service-to-customer",
   component: () => renderPage("@/pages/workflow/flow-spine-service-to-customer"),
   staticData: {"breadcrumb":"Flow Spine Service To Customer","module":"@/pages/workflow/flow-spine-service-to-customer","legacyPath":"/workflow/flow-spine-service-to-customer"},
 })
 
-const appRoute0844 = createRoute({
+const appRoute0846 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "workflow/flow-spine-studio",
   component: () => renderPage("@/pages/workflow/flow-spine-studio"),
   staticData: {"breadcrumb":"Flow Spine Studio","module":"@/pages/workflow/flow-spine-studio","legacyPath":"/workflow/flow-spine-studio"},
 })
 
-const appRoute0845 = createRoute({
+const appRoute0847 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "workflow/process-mining-analytics",
   component: () => renderPage("@/pages/workflow/process-mining-analytics"),
   staticData: {"breadcrumb":"Process Mining Analytics","module":"@/pages/workflow/process-mining-analytics","legacyPath":"/workflow/process-mining-analytics"},
 })
 
-const appRoute0846 = createRoute({
+const appRoute0848 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "workflow/workflow-monitoring",
   component: () => renderPage("@/pages/workflow/workflow-monitoring"),
   staticData: {"breadcrumb":"Workflow Monitoring","module":"@/pages/workflow/workflow-monitoring","legacyPath":"/workflow/workflow-monitoring"},
 })
 
-const appRoute0847 = createRoute({
+const appRoute0849 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "workflow/workflow-regeln",
   component: () => renderPage("@/pages/workflow/workflow-regeln"),
   staticData: {"breadcrumb":"Workflow Regeln","module":"@/pages/workflow/workflow-regeln","legacyPath":"/workflow/workflow-regeln"},
 })
 
-const appRoute0848 = createRoute({
+const appRoute0850 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "workflow/workflow-sandbox",
   component: () => renderPage("@/pages/workflow/workflow-sandbox"),
   staticData: {"breadcrumb":"Workflow Sandbox","module":"@/pages/workflow/workflow-sandbox","legacyPath":"/workflow/workflow-sandbox"},
 })
 
-const appRoute0849 = createRoute({
+const appRoute0851 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "workflows",
   component: () => renderPage("@/pages/workflow/workflow-monitoring"),
   staticData: {"breadcrumb":"Workflows","module":"@/pages/workflow/workflow-monitoring","legacyPath":"/workflows"},
 })
 
-const appRoute0850 = createRoute({
+const appRoute0852 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "workflows/approval",
   component: () => renderPage("@/pages/workflows/approval"),
   staticData: {"breadcrumb":"Approval","module":"@/pages/workflows/approval","legacyPath":"/workflows/approval"},
 })
 
-const appRoute0851 = createRoute({
+const appRoute0853 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "workflows/approval/$workflowId",
   component: () => renderPage("@/pages/workflows/approval"),
   staticData: {"breadcrumb":"Detail","module":"@/pages/workflows/approval","legacyPath":"/workflows/approval/:workflowId"},
 })
 
-const appRoute0852 = createRoute({
+const appRoute0854 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "workflows/history",
   beforeLoad: ({ params }) => {
@@ -6096,42 +6110,42 @@ const appRoute0852 = createRoute({
   staticData: {"breadcrumb":"History","module":"@/pages/workflow/workflow-monitoring","legacyPath":"/workflows/history"},
 })
 
-const appRoute0853 = createRoute({
+const appRoute0855 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "workflows/supervisor",
   component: () => renderPage("@/pages/workflows/supervisor"),
   staticData: {"breadcrumb":"Supervisor","module":"@/pages/workflows/supervisor","legacyPath":"/workflows/supervisor"},
 })
 
-const appRoute0854 = createRoute({
+const appRoute0856 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "workflows/trigger",
   component: () => renderPage("@/pages/workflows/trigger"),
   staticData: {"breadcrumb":"Trigger","module":"@/pages/workflows/trigger","legacyPath":"/workflows/trigger"},
 })
 
-const appRoute0855 = createRoute({
+const appRoute0857 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "zertifikate",
   component: () => renderPage("@/pages/zertifikate/liste"),
   staticData: {"breadcrumb":"Zertifikate","module":"@/pages/zertifikate/liste","legacyPath":"/zertifikate"},
 })
 
-const appRoute0856 = createRoute({
+const appRoute0858 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "zertifikate/$id",
   component: () => renderPage("@/pages/zertifikate/liste"),
   staticData: {"breadcrumb":"Detail","module":"@/pages/zertifikate/liste","legacyPath":"/zertifikate/:id"},
 })
 
-const appRoute0857 = createRoute({
+const appRoute0859 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "zertifikate/liste",
   component: () => renderPage("@/pages/zertifikate/liste"),
   staticData: {"breadcrumb":"Liste","module":"@/pages/zertifikate/liste","legacyPath":"/zertifikate/liste"},
 })
 
-const appRoute0858 = createRoute({
+const appRoute0860 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "zertifikate/neu",
   component: () => renderPage("@/pages/zertifikate/liste"),
@@ -7124,7 +7138,9 @@ export const routeTree = rootRoute.addChildren([
     appRoute0855,
     appRoute0856,
     appRoute0857,
-    appRoute0858
+    appRoute0858,
+    appRoute0859,
+    appRoute0860
   ]),
   portalLayoutRoute.addChildren([
     portalRoute0000,
@@ -10125,6 +10141,11 @@ export const generatedRouteInventory = [
     "source": "auto"
   },
   {
+    "module": "@/pages/lager/bestandsbewertung",
+    "path": "lager/bestandsbewertung",
+    "source": "alias"
+  },
+  {
     "module": "@/pages/lager/bestandskorrektur",
     "path": "lager/bestandskorrektur",
     "source": "auto"
@@ -10172,6 +10193,11 @@ export const generatedRouteInventory = [
   {
     "module": "@/pages/lager/materialfluss",
     "path": "lager/materialfluss",
+    "source": "alias"
+  },
+  {
+    "module": "@/pages/lager/materialfluss-visualisierung",
+    "path": "lager/materialfluss-visualisierung",
     "source": "alias"
   },
   {
