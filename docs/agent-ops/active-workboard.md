@@ -219,6 +219,31 @@ nach vollständiger Lieferung auf Offen/In Bearbeitung, kein automatisches O2C-E
 **Abnahmekriterien:** 400 wenn Status ≠ shipped; Auftrag auf geliefert wenn vollständig; kein Update bei
 Teillieferung; kein Fehler wenn kein sales_order_id; 4 Tests grün.
 
+## AGRAR-KON-001 — Ernte-Annahme final release → AgrarContract Restmenge + Status
+
+**Von:** Claude
+**Owner:** Claude
+**Stand:** abgeschlossen 2026-06-13 — `harvest_acceptance_service.py`: Bei `release_status=final`
+und vorhandenem `contract_id` wird jetzt `AgrarContract.remaining_quantity_kg -= net_weight_kg`
+gesetzt; `status='fulfilled'` wenn Restmenge=0, sonst `'partially_allocated'`. Fail-soft. 2 Tests grün.
+**Ziel:** Belegbruch schließen: Ernte-Annahme-Freigabe aktualisierte nie den verknüpften Kontrakt →
+Kontrakt blieb auf `open` trotz vollständiger Erfüllung.
+**Dateibesitz:** `app/services/harvest_acceptance_service.py`, `tests/test_agrar_kon_001.py` (neu).
+**Abnahmekriterien:** remaining_quantity_kg reduziert; status fulfilled wenn leer; 2 Tests grün.
+
+## EINK-GR-PO-001 — Wareneingang → PO-Mengen-Fortschreibung + Bestellstatus
+
+**Von:** Claude
+**Owner:** Claude
+**Stand:** abgeschlossen 2026-06-13 — `einkauf_compat_service.py`: `_update_po_delivery_quantities()`
+schreibt `menge_geliefert += recv_qty` + `menge_offen -= recv_qty` auf `bestellung_positionen`;
+setzt `status='vollstaendig_geliefert'` wenn vollständig; UPDATE `bestellungen.status='geliefert'`
+wenn alle Positionen vollständig. 4 Unit-Tests grün.
+**Ziel:** Belegbruch schließen: GR-Erfassung aktualisierte nie PO-Positionsmengen und Bestellstatus →
+PO blieb dauerhaft auf `freigegeben` auch nach vollständiger Lieferung.
+**Dateibesitz:** `app/services/einkauf_compat_service.py`, `tests/test_eink_gr_po_001.py` (neu).
+**Abnahmekriterien:** menge_geliefert aktualisiert; status=geliefert wenn vollständig; skip ohne POI; 4 Tests grün.
+
 ## FIN-BELEG-001 — Finance Belegbrüche: Zahlungseingang → Rechnung BEZAHLT
 
 **Von:** Claude
