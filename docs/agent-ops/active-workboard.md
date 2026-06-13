@@ -206,6 +206,21 @@ Tests grün; type-check grün.
 **Abnahmekriterien:** Ø-Einstandspreis wird bei Zugang berechnet; Putaway-Suggest gibt TOP-10 zurück;
 Seite `/lager/bestandsbewertung` erreichbar; Tests + type-check grün.
 
+## EINKAUF-3WM-001 — 3-Wege-Match (PO/GR/IR) Alembic-Persistenz
+
+**Von:** Claude
+**Owner:** Claude
+**Stand:** abgeschlossen 2026-06-13 — Migration `einkauf_3wm_invoice_verification_20260613` (Single-Head von
+`feed_chain_quality_lot_20260613`): `domain_einkauf.invoice_verification` mit Index auf tenant_id+match_status
+und po_id+gr_id+invoice_id. Endpoint `purchase_invoice_verification.py`: runtime-DDL ersetzt durch
+`_ensure_schema` (503 wenn Migration nicht läuft, statt stiller CREATE TABLE). 5 Unit-Tests grün.
+**Ziel:** Belegbrüche schließen: (a) `CREATE TABLE IF NOT EXISTS` in prod-Endpunkt → instabil bei
+Migrations-Race und Multi-Tenant; (b) Tiefenplan §2 ❌ Wichtig: 3-Wege-Match persistiert jetzt
+via Alembic-Tabelle statt Runtime-DDL.
+**Dateibesitz:** `alembic/versions/einkauf_3wm_invoice_verification_20260613.py` (neu),
+`app/api/v1/endpoints/purchase_invoice_verification.py`, `tests/test_einkauf_3wm_001.py` (neu).
+**Abnahmekriterien:** 503 ohne Migration; Alembic single-head; 5 Tests grün.
+
 ## WAVE-PHYS-CHAIN-000 — (reserviert / Lead)
 
 **Von:** Cursor

@@ -52,29 +52,16 @@ class BlockRequest(BaseModel):
 # ─────────────────────────────────────────────────────────────────────────────
 
 def _ensure_schema(db: Session) -> None:
-    """Create schema and table if missing — idempotent."""
-    db.execute(text("CREATE SCHEMA IF NOT EXISTS domain_einkauf"))
-    db.execute(text("""
-        CREATE TABLE IF NOT EXISTS domain_einkauf.invoice_verification (
-            id               BIGSERIAL PRIMARY KEY,
-            po_id            TEXT NOT NULL,
-            gr_id            TEXT NOT NULL,
-            invoice_id       TEXT NOT NULL,
-            match_status     TEXT NOT NULL DEFAULT 'OFFEN',
-            po_amount        NUMERIC(18,4),
-            gr_amount        NUMERIC(18,4),
-            invoice_amount   NUMERIC(18,4),
-            variance_amount  NUMERIC(18,4),
-            variance_percent NUMERIC(10,4),
-            tolerance_percent NUMERIC(10,4) DEFAULT 2.0,
-            tenant_id        TEXT,
-            created_at       TIMESTAMPTZ DEFAULT NOW(),
-            verified_at      TIMESTAMPTZ,
-            verified_by      TEXT,
-            comment          TEXT
+    """Verify migration was applied; raise 503 if table is missing."""
+    count = db.execute(text("""
+        SELECT COUNT(*) FROM information_schema.tables
+        WHERE table_schema = 'domain_einkauf' AND table_name = 'invoice_verification'
+    """)).scalar()
+    if not count:
+        raise HTTPException(
+            status_code=503,
+            detail="3-Wege-Match-Tabelle nicht vorhanden — bitte 'alembic upgrade head' ausführen.",
         )
-    """))
-    db.commit()
 
 
 def _fetch_po_amount(db: Session, po_id: str, tenant_id: str) -> Optional[float]:
@@ -175,10 +162,7 @@ def match_invoice(
     tenant_id: str = Depends(get_tenant_id),
 ) -> dict[str, Any]:
     """3-Wege-Match durchführen und Ergebnis speichern."""
-    try:
-        _ensure_schema(db)
-    except Exception as exc:
-        raise HTTPException(status_code=503, detail=f"DB-Schema nicht verfügbar: {exc}") from exc
+    _ensure_schema(db)  # raises HTTPException(503) if migration not applied
 
     po_amount = _fetch_po_amount(db, body.po_id, tenant_id)
     gr_amount = _fetch_gr_amount(db, body.gr_id, tenant_id)
