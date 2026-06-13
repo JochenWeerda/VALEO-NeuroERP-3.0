@@ -15,6 +15,7 @@ from sqlalchemy.orm import Session
 
 from ....core.database import get_db
 from ....core.tenant import get_tenant_id
+from app.services.sales_posting_service import SalesPostingService
 
 from app.api.v1.schemas.base import BaseSchema
 from app.api.v1.schemas.collective_documents_schemas import CollectiveDocumentsOut
@@ -94,15 +95,16 @@ async def create_collective_invoice(
     db: Session = Depends(get_db),
 ):
     now = datetime.now(timezone.utc)
-    # Aggregate amounts from delivery notes
+    # Validate and aggregate — only shipped/delivered DNs may be invoiced
     total_amount = Decimal("0.00")
+    _INVOICEABLE = ("shipped", "delivered")
     for dn_id in payload.delivery_note_ids:
         try:
             row = db.execute(
                 text(
                     """
-                    SELECT total_amount FROM domain_sales.delivery_notes
-                    WHERE id = :id AND tenant_id = :tid AND status != 'STORNIERT'
+                    SELECT total_amount, status FROM domain_sales.delivery_notes
+                    WHERE id = :id AND tenant_id = :tid
                     """
                 ),
                 {"id": dn_id, "tid": tenant_id},
@@ -111,6 +113,13 @@ async def create_collective_invoice(
             raise HTTPException(status_code=503, detail="Datenbankfehler")
         if not row:
             raise HTTPException(status_code=404, detail=f"Lieferschein {dn_id} nicht gefunden")
+        if row["status"] == "BERECHNET":
+            raise HTTPException(status_code=409, detail=f"Lieferschein {dn_id} ist bereits berechnet")
+        if row["status"] not in _INVOICEABLE:
+            raise HTTPException(
+                status_code=422,
+                detail=f"Lieferschein {dn_id} hat Status '{row['status']}' — nur shipped/delivered sind abrechnungsfähig",
+            )
         total_amount += Decimal(str(row["total_amount"] or 0))
 
     invoice_id = str(uuid4())
@@ -140,10 +149,39 @@ async def create_collective_invoice(
                 "now": now,
             },
         )
+        # Mark source delivery notes as invoiced — prevents double-billing
+        for dn_id in payload.delivery_note_ids:
+            db.execute(
+                text(
+                    "UPDATE domain_sales.delivery_notes "
+                    "SET status = 'BERECHNET', invoice_id = :inv_id, updated_at = :now "
+                    "WHERE id = :dn_id AND tenant_id = :tid"
+                ),
+                {"inv_id": invoice_id, "now": now, "dn_id": dn_id, "tid": tenant_id},
+            )
         db.commit()
+    except HTTPException:
+        raise
     except Exception:
         db.rollback()
         raise HTTPException(status_code=503, detail="Datenbankfehler")
+
+    # GL-Buchung (Belegbruch Finance): AR-Posting für Sammelrechnung
+    # Treat total as gross, compute 19% USt; posting failure must not block the document.
+    try:
+        _VAT = Decimal("0.19")
+        gross = total_amount.quantize(Decimal("0.01"))
+        tax = (gross * _VAT / (1 + _VAT)).quantize(Decimal("0.01"))
+        net = (gross - tax).quantize(Decimal("0.01"))
+        SalesPostingService(db, tenant_id).book_ausgangsrechnung(
+            invoice_number=invoice_number,
+            invoice_date=payload.invoice_date,
+            net_amount=net,
+            tax_amount=tax,
+            gross_amount=gross,
+        )
+    except Exception:  # noqa: BLE001 — GL posting must not block the invoice document
+        pass
 
     return CollectiveInvoiceOut(
         id=invoice_id,
@@ -165,13 +203,15 @@ async def create_collective_delivery(
     db: Session = Depends(get_db),
 ):
     now = datetime.now(timezone.utc)
+    # Validate: only confirmed orders (status 'bestaetigt'/'in_lieferung') may be collected
+    _DELIVERABLE = ("bestaetigt", "in_lieferung", "confirmed", "approved")
     total_amount = Decimal("0.00")
     for order_id in payload.order_ids:
         try:
             row = db.execute(
                 text(
                     """
-                    SELECT total_amount FROM domain_crm.sales_orders
+                    SELECT total_amount, status FROM domain_crm.sales_orders
                     WHERE id = :id AND tenant_id = :tid AND deleted_at IS NULL
                     """
                 ),
@@ -181,6 +221,8 @@ async def create_collective_delivery(
             raise HTTPException(status_code=503, detail="Datenbankfehler")
         if not row:
             raise HTTPException(status_code=404, detail=f"Auftrag {order_id} nicht gefunden")
+        if str(row.get("status", "")).lower() == "geliefert":
+            raise HTTPException(status_code=409, detail=f"Auftrag {order_id} ist bereits geliefert")
         total_amount += Decimal(str(row["total_amount"] or 0))
 
     dn_id = str(uuid4())
@@ -196,7 +238,7 @@ async def create_collective_delivery(
                    total_amount, status, source_order_ids, created_at)
                 VALUES
                   (:id, :tid, :cid, :dn_no, :dn_date,
-                   :amount, 'OFFEN', :src_ids::jsonb, :now)
+                   :amount, 'draft', :src_ids::jsonb, :now)
                 """
             ),
             {
@@ -210,7 +252,19 @@ async def create_collective_delivery(
                 "now": now,
             },
         )
+        # Mark source orders as in delivery — prevents duplicate collective delivery
+        for order_id in payload.order_ids:
+            db.execute(
+                text(
+                    "UPDATE domain_crm.sales_orders "
+                    "SET status = 'geliefert', updated_at = :now "
+                    "WHERE id = :oid AND tenant_id = :tid"
+                ),
+                {"now": now, "oid": order_id, "tid": tenant_id},
+            )
         db.commit()
+    except HTTPException:
+        raise
     except Exception:
         db.rollback()
         raise HTTPException(status_code=503, detail="Datenbankfehler")
@@ -268,7 +322,7 @@ async def collective_eligible(
                 SELECT id, delivery_note_number, delivery_date, total_amount, status
                 FROM domain_sales.delivery_notes
                 WHERE customer_id = :cid AND tenant_id = :tid
-                  AND status NOT IN ('STORNIERT', 'BERECHNET')
+                  AND status IN ('shipped', 'delivered')
                 ORDER BY delivery_date DESC
                 """
             ),
