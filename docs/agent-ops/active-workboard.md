@@ -219,6 +219,23 @@ nach vollständiger Lieferung auf Offen/In Bearbeitung, kein automatisches O2C-E
 **Abnahmekriterien:** 400 wenn Status ≠ shipped; Auftrag auf geliefert wenn vollständig; kein Update bei
 Teillieferung; kein Fehler wenn kein sales_order_id; 4 Tests grün.
 
+## FIN-BELEG-001 — Finance Belegbrüche: Zahlungseingang → Rechnung BEZAHLT
+
+**Von:** Claude
+**Owner:** Claude
+**Stand:** abgeschlossen 2026-06-13 — (1) `finance_clearing.py`: `record_payment` setzt
+`sales_invoice.status='BEZAHLT'` nach `voll_ausgeziffert=True` via Document-Store;
+(2) `payment_runs.py`: `execute_payment_run` setzt `op_status='ausgeziffert'` + `ap_invoice.status='BEZAHLT'`
+wenn OP durch Zahlungslauf vollständig ausgeglichen; (3) `op_skonto_auszifferung.py`: `create_auszifferung`
+reduziert jetzt `offene_posten.offen` + setzt `op_status='ausgeziffert'` + `sales_invoice.status='BEZAHLT'`
+bei Vollausgleich. 3 Unit-Tests grün.
+**Ziel:** Belegbrüche schließen: 3 Zahlungspfade aktualisierten nie den Beleg-Status auf BEZAHLT →
+Rechnungen blieben dauerhaft auf GEBUCHT/VERBUCHT auch nach Vollzahlung.
+**Dateibesitz:** `app/api/v1/endpoints/finance_clearing.py`, `app/api/v1/endpoints/payment_runs.py`,
+`app/api/v1/endpoints/op_skonto_auszifferung.py`, `tests/test_fin_belegbruch_001.py` (neu).
+**Abnahmekriterien:** AR-Rechnung BEZAHLT nach voll_ausgeziffert; AP-Rechnung BEZAHLT nach Zahlungslauf;
+OP-Betrag reduziert + Rechnung BEZAHLT nach Skonto-Ausgleich; 3 Tests grün.
+
 ## EINKAUF-3WM-001 — 3-Wege-Match (PO/GR/IR) Alembic-Persistenz
 
 **Von:** Claude
