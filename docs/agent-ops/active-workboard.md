@@ -219,6 +219,26 @@ nach vollständiger Lieferung auf Offen/In Bearbeitung, kein automatisches O2C-E
 **Abnahmekriterien:** 400 wenn Status ≠ shipped; Auftrag auf geliefert wenn vollständig; kein Update bei
 Teillieferung; kein Fehler wenn kein sales_order_id; 4 Tests grün.
 
+## SALES-INV-DN-001 — SalesInvoice.sourceDelivery → delivery_notes.invoice_number
+
+**Von:** Claude
+**Owner:** Claude
+**Stand:** abgeschlossen 2026-06-13 — `finance_invoices.create_invoice`: wenn `sourceDelivery` gesetzt,
+UPDATE `domain_sales.delivery_notes SET invoice_number = :inv_nr` (nur wenn noch leer); 2 Tests grün.
+**Ziel:** Belegbruch schließen: Einzelrechnung verknüpfte nie den Lieferschein zurück →
+`delivery_notes.invoice_number` blieb NULL auch nach Rechnungserstellung.
+**Dateibesitz:** `app/api/v1/endpoints/finance_invoices.py`, `tests/test_sales_inv_dn_link_001.py` (neu).
+
+## ERS-OP-001 — ERS-Settlement → Kreditoren-OP anlegen
+
+**Von:** Claude
+**Owner:** Claude
+**Stand:** abgeschlossen 2026-06-13 — `ers_settlement.trigger_ers`: Nach ERS-Rechnungserstellung
+INSERT in `domain_erp.offene_posten` (konto_typ='kreditoren', op_status='offen'). Fail-soft.
+**Ziel:** Belegbruch schließen: ERS-Lauf erzeugte Rechnungsdatensatz aber keinen Kreditoren-OP →
+AP-Kette (Zahlungslauf/Auszifferung) wäre nie ansteuerbar gewesen.
+**Dateibesitz:** `app/api/v1/endpoints/ers_settlement.py`.
+
 ## AGRAR-KON-001 — Ernte-Annahme final release → AgrarContract Restmenge + Status
 
 **Von:** Claude
