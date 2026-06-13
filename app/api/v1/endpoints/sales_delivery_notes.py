@@ -107,6 +107,7 @@ class DeliveryNoteBase(BaseModel):
     is_printed: bool = False
     is_delivered: bool = False
     invoice_number: Optional[str] = None
+    sales_order_id: Optional[str] = None
 
 
 class DeliveryNoteCreate(DeliveryNoteBase):
@@ -250,13 +251,13 @@ async def create_delivery_note(
                 id, tenant_id, delivery_note_number, customer_id, branch_id, sales_rep_id, operator_id,
                 delivery_date, delivery_time, cost_center_id, truck_number,
                 is_credit_note, is_self_pickup, is_early_payment, reference_invoice_number,
-                status, is_printed, is_delivered, invoice_number, totals,
+                status, is_printed, is_delivered, invoice_number, totals, sales_order_id,
                 created_at, updated_at
             ) VALUES (
                 :id, :tenant_id, :delivery_note_number, :customer_id, :branch_id, :sales_rep_id, :operator_id,
                 :delivery_date, :delivery_time, :cost_center_id, :truck_number,
                 :is_credit_note, :is_self_pickup, :is_early_payment, :reference_invoice_number,
-                :status, :is_printed, :is_delivered, :invoice_number, CAST(:totals AS jsonb),
+                :status, :is_printed, :is_delivered, :invoice_number, CAST(:totals AS jsonb), :sales_order_id,
                 NOW(), NOW()
             )
         """),
@@ -598,6 +599,22 @@ async def deliver_delivery_note(
         {"id": ls_id, "tenant_id": tenant_id},
     )
     db.commit()
+
+    # O2C completion: wenn Auftrag vollständig geliefert → Auftrag auf geliefert setzen
+    order_id = row.get("sales_order_id")
+    if order_id:
+        try:
+            from app.services.sales_match_service import SalesMatchService
+            match = SalesMatchService(db, tenant_id).match(order_id)
+            if match.get("vollstaendig_geliefert"):
+                db.execute(
+                    text("UPDATE domain_crm.sales_orders SET status = 'geliefert', updated_at = NOW() WHERE id = :oid AND tenant_id = :tid"),
+                    {"oid": order_id, "tid": tenant_id},
+                )
+                db.commit()
+        except Exception:  # noqa: BLE001 — order status update is non-blocking
+            pass
+
     row = _get_delivery_note_or_404(db, ls_id, tenant_id)
     positions = _list_positions(db, ls_id)
     return DeliveryNote(**dict(row), positionen=[DeliveryNotePosition(**dict(p)) for p in positions])

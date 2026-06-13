@@ -1,0 +1,36 @@
+id: WM-AGRI-SILO-001
+title: Agrar-Siloanlagen und Materialfluss (Knoten/Kanten, Route-Validierung)
+owner: Cursor
+status: in_arbeit
+updated: 2026-06-13
+files:
+  - alembic/versions/agri_silo_material_flow_20260612.py
+  - app/services/agri_silo_material_flow_service.py
+  - app/api/v1/endpoints/agri_silo_material_flow.py
+  - app/api/v1/api.py
+  - app/infrastructure/models/wms_models.py
+  - app/infrastructure/models/__init__.py
+  - tests/test_agri_silo_material_flow.py
+  - packages/frontend-web/src/lib/api/agri-material-flow.ts
+  - packages/frontend-web/src/lib/material-flow-display.ts
+  - packages/frontend-web/src/pages/lager/materialfluss.tsx
+  - packages/frontend-web/src/pages/lager/materialfluss-visualisierung.tsx
+  - packages/frontend-web/src/app/route-aliases.json
+  - packages/frontend-web/src/__tests__/lib/material-flow-display.test.ts
+  - docs/warehouse/README.md
+  - docs/warehouse/agri-silo-material-flow-benchmark-2026-06-12.md
+  - docs/warehouse/reusable-open-source-silo-material-flow-2026-06-12.md
+  - docs/warehouse/agri-silo-vendor-interface-research-2026-06-12.md
+  - docs/warehouse/agrar-silo-materialfluss-studio-baustein.md
+  - docs/workflows/wm-agri-silo-supply-chain-integration-2026-06-13.md
+  - docs/warehouse/handbuch-c-inventar.md
+  - packages/agrar-silo-materialfluss-studio/README.md
+  - docs/agent-ops/slices/WM-AGRI-FLOW-001.yaml
+  - docs/agent-ops/active-workboard.md
+acceptance:
+  - Alembic domain_inventory Tabellen silo_systems, silo_cells, material_flow_nodes, material_flow_edges am Head
+  - API unter /api/v1/lager/wms/agri/* (Listen/Anlegen + validate-route + PATCH silo-cells + PATCH material-flow/nodes|edges)
+  - Service lehnt open-Kante zu blocked/unterbundenem QS-Ziel ab; validate_route prüft QS gesperrt und Verschleppungshinweis
+  - Unit-Tests tests/test_agri_silo_material_flow.py gruen (pytest --no-cov fuer Einzeldatei ok)
+  - Frontend Route lager/materialfluss + lager/materialfluss-visualisierung (PageToolbar, MERIDIAN-Tokens)
+  - Doku Benchmark + OSS + Hersteller-Sammelliste + UI-Baustein-Paket agrar-silo-materialfluss-studio + Prozessketten-Workflow wm-agri-silo-supply-chain-integration

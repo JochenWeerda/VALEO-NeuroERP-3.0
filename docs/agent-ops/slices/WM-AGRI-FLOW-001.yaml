@@ -1,0 +1,28 @@
+id: WM-AGRI-FLOW-001
+title: Materialflussmodell Agrar — Spezifikation & Ausbau (Roadmap-Slice)
+owner: Cursor
+status: geplant
+updated: 2026-06-12
+depends_on:
+  - WM-AGRI-SILO-001
+  - WM-STRUCT-001
+summary: |
+  Erweiterung des in WM-AGRI-SILO-001 begonnenen digitalen Modells:
+  material_flow_nodes, material_flow_edges, silo_cells, serverseitige Route-Validierung,
+  QS-/Sperrstatus, flush_required / Spülcharge, contamination_guard_enabled.
+scope:
+  - Graph-Persistenz mit Versionierung / Audit (optional)
+  - **Gerichtete Kanten** für validate_route (Speicher-Richtung from→to; kein impliziter Rückfluss)
+  - Kopplung an Artikel/Los (current_material_id / current_lot_id) aus Stammdaten
+  - UI-Editor (React Flow) gespeichert aus Backend layout_x/y
+  - Ereignisse (Material bewegt) — Outbox, noch ohne PLC
+non_goals:
+  - Echte SPS-Steuerung
+  - Hersteller-spezifische Treiber ohne PoC
+related_future_slices:
+  - WM-AGRI-MAP-001
+  - WM-AGRI-FLOW-002
+  - WM-AGRI-QS-003
+  - WM-AGRI-MOBILE-004
+  - WM-AGRI-PLC-005
+  - WM-AGRI-FLUSH-006

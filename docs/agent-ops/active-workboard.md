@@ -6,10 +6,10 @@ Stand: `2026-06-13`
 
 **Von:** Cursor
 **Owner:** Cursor
-**Stand:** in Arbeit 2026-06-12 — Migration `agri_silo_material_flow_20260612`, Service `AgriSiloMaterialFlowService`, Router `/api/v1/lager/wms/agri`, Unit-Tests `tests/test_agri_silo_material_flow.py`, Frontend-Prototyp `/lager/materialfluss` (`@xyflow/react`), Doku unter `docs/warehouse/`.
+**Stand:** in Arbeit 2026-06-13 — wie 2026-06-12, plus: Route **`/lager/materialfluss-visualisierung`** (Layout-Editor Silozellen + Materialfluss-Graph, `PATCH` `layout_x`/`layout_y` auch **Silozellen**), **`PageToolbar`**/MERIDIAN-Tokens, Referenz-Hofplan (Folkerts), Inventar **`docs/warehouse/handbuch-c-inventar.md`**, Frontend-`type-check` gruen (`useNodesState<Node>`), **Prozessketten-Doku** [`wm-agri-silo-supply-chain-integration-2026-06-13.md`](../workflows/wm-agri-silo-supply-chain-integration-2026-06-13.md) + Toolbar-Sprung **Rückverfolgbarkeit** (DOM-SUPPLY-004).
 **Ziel:** Digitales Modell Siloanlage/Silozelle/Materialfluss ohne PLC; QS-Sperre und Verschleppungs-Hinweis auf Routen; Mandanten-Trennung.
-**Dateibesitz:** genannte Alembic-/Backend-/Frontend-/Test-/Doku-Dateien, `docs/agent-ops/slices/WM-AGRI-SILO-001.yaml`, Roadmap `WM-AGRI-FLOW-001.yaml`.
-**Abnahmekriterien:** `alembic heads` einheitlich; API erreichbar; Tests `pytest tests/test_agri_silo_material_flow.py --no-cov` gruen; `npm run type-check` im Frontend nach Dependency; Navigation + Route-Generate konsistent.
+**Dateibesitz:** genannte Alembic-/Backend-/Frontend-/Test-/Doku-Dateien, `docs/warehouse/README.md`, `docs/agent-ops/slices/WM-AGRI-SILO-001.yaml`, Roadmap `WM-AGRI-FLOW-001.yaml`.
+**Abnahmekriterien:** `alembic heads` einheitlich; API erreichbar; Tests `pytest tests/test_agri_silo_material_flow.py --no-cov` gruen; `npm run type-check` im Frontend; Navigation + `npm run routes:generate` konsistent.
 
 ## WAVE-PHYS-CHAIN-001 — Task 0 Verifikation + Logistik-Audit
 

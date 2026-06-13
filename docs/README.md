@@ -34,9 +34,10 @@ Sie richtet sich an:
 
 - **Auth & Mandant (API/erp-domain):** [AUTH-AND-TENANT-CONCEPT.md](AUTH-AND-TENANT-CONCEPT.md), ADR unter `docs/architecture/`, sowie [ERP: Finanz & Mandant – Multitenancy](erp-finanz-multitenancy.md) (`finanz`-Schema, Migrationen, SQL-Runner). Schnellwege von der Repo-Wurzel: **`pnpm migrate:erp-finanz`**, **`pnpm test:erp-domain`**.
 - `docs/project-context/`: fachlicher und technischer Rahmen
-- `docs/workflows/`: Arbeitsweise fuer Workflow-Zerlegung, Prompting und Struktur (Kernel-Actions/DB: [kernel-action-execution-mutations.md](c:/Users/Jochen/VALEO-NeuroERP-3.0/docs/workflows/kernel-action-execution-mutations.md))
+- `docs/workflows/`: Arbeitsweise fuer Workflow-Zerlegung, Prompting und Struktur (Kernel-Actions/DB: [kernel-action-execution-mutations.md](c:/Users/Jochen/VALEO-NeuroERP-3.0/docs/workflows/kernel-action-execution-mutations.md)); Agrar-Materialfluss ↔ Lieferkette: [wm-agri-silo-supply-chain-integration-2026-06-13.md](c:/Users/Jochen/VALEO-NeuroERP-3.0/docs/workflows/wm-agri-silo-supply-chain-integration-2026-06-13.md)
 - `docs/cards/`: Card-Templates und Ablagelogik
 - `docs/quality-assurance/`: Browser-Use-, CRUD- und Soll-Ist-Pruefung
+- `docs/warehouse/`: Agrar-Lager / WMS-Vertiefung — Einstieg [warehouse/README.md](c:/Users/Jochen/VALEO-NeuroERP-3.0/docs/warehouse/README.md) (Materialfluss, Hofplan, externes Handbuch-Inventar)
 - `docs/agent-ops/`: restart-sichere Parallelarbeit fuer mehrere Agenten
 - `docs/adr/`: verbindliche Architektur- und Entscheidungsregeln
 - [Frontend Routing](c:/Users/Jochen/VALEO-NeuroERP-3.0/docs/architecture/frontend-routing/README.md): TanStack-Route-Tree, typisierte Deep Links und Legacy-Redirects

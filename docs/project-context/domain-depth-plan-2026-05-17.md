@@ -195,7 +195,7 @@ Fokussierte Nachweise:
 | MHD-Verwaltung mit Ampelfunktion | Teilweise | Ausbauen |
 | Pick-Liste (kommissionieren) | ❌ | Wichtig |
 | Packliste / Versandvorbereitung | ❌ | Wichtig |
-| Silo-Management (Schuettgut) | Teilweise | Vertiefen |
+| Silo-Management (Schuettgut) | Teilweise | **WM-AGRI-SILO-001** — `silo_systems` / `silo_cells` / `material_flow_nodes|edges` in `domain_inventory`, API `/lager/wms/agri`, Route-Validierung; Bird-View (**WM-AGRI-MAP-001**), PLC (**WM-AGRI-PLC-005**) folgen |
 | Gefahrstoff-Lager (TRGS 510) | ❌ | Compliance-relevant |
 | Lagerplatzbelegung / Kapazitaet | Teilweise | `capacity_kg` + Summenprüfung bei Buchung (**WM-WMS-BIN-001**); Belegungs-Visualisierung/Optimierung offen |
 | RF-/Barcode-Unterstuetzung (Schnittstelle) | ❌ | Wichtig |
@@ -213,7 +213,7 @@ Fokussierte Nachweise:
 5. **Pick-Listen** — `POST /lager/pick-lists` aus Lieferschein; Optimierung nach Lagerplatz-Sequenz
 6. **Transferauftraege** — `POST /lager/transfer-orders` (Bin-to-Bin, Zone-to-Zone)
 7. **Bestandsbewertung** — FIFO-/Durchschnitts-Kostenberechnung auf Buchungsebene; `GET /lager/stock-valuation`
-8. **Silo-Management vertiefen** — Fuellstand, Qualitaetsparameter pro Silo, Siloprotokoll-Export
+8. **Silo-Management vertiefen** — Fuellstand, Qualitaetsparameter pro Silo, Siloprotokoll-Export; Datenbasis **WM-AGRI-SILO-001** (Alembic `agri_silo_material_flow_20260612`) + UI `/lager/materialfluss`
 9. **MHD-Ampel** — Dashboard-Widget `GET /lager/mhd-alert` (rot/gelb/gruen nach Verfalldatum-Abstand)
 10. **Permanente Inventur** — rollende Inventur je Lagerbereich ohne Betriebsunterbrechung
 

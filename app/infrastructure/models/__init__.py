@@ -1310,4 +1310,8 @@ from app.infrastructure.models.wms_models import (  # noqa: E402,F401
     BinStock,
     WmsPickList,
     WmsPickListLine,
+    SiloSystem,
+    SiloCell,
+    MaterialFlowNode,
+    MaterialFlowEdge,
 )

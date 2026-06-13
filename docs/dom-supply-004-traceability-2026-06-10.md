@@ -115,6 +115,12 @@ kanon_status=storniert; erneuter Storno → 422. Seed restauriert.
 6. Tests (BE-Logik) ✅; **Browser-E2E ✅ (004.5, @smoke)**
 7. Externe/betriebliche Abnahme — UAT-Paket ✅ erstellt; Unterschrift ⏳
 
+## Anbindung Agrar-WMS-Materialfluss (WM-AGRI-SILO-001, 2026-06-13)
+
+Das **Lieferketten-Rückgrat** bleibt der **Wiegeschein** (DOM-SUPPLY-004). Das **Anlagen-/Fördergraph-Modell** (Silozellen, Knoten, Kanten, `validate-route`) ist ein **zusätzlicher** WMS-Strang je Lager — fachlich beschrieben und mit der Rückverfolgbarkeits-UI verknüpft (Toolbar-Sprung), **ohne** die Trace-Tabellen zu verändern.
+
+Details und Gap-Matrix: [wm-agri-silo-supply-chain-integration-2026-06-13.md](workflows/wm-agri-silo-supply-chain-integration-2026-06-13.md).
+
 ## Geplante Folge-Slices
 - **004.2** Einheitlicher Übergabestatus + append-only Ketten-Event-Log ✅ **fertig**
 - **004.3** Schwund/Sperrbestand/QS-Freigabe als Folgeaktionen mit Abweichungsgründen ✅ **fertig**
