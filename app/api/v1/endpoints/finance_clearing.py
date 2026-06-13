@@ -12,6 +12,7 @@ from sqlalchemy.orm import Session
 from app.core.database import get_db
 from app.core.tenant import get_tenant_id
 from app.services.finance_clearing_service import ClearingError, FinanceClearingService
+from app.documents.router_helpers import get_repository, get_from_store, save_to_store
 
 router = APIRouter(prefix="/finance", tags=["finance", "fibu", "op"])
 
@@ -47,9 +48,22 @@ def record_payment(
         except ValueError:
             raise HTTPException(status_code=422, detail="Ungültiges Datum (erwartet ISO YYYY-MM-DD).")
     try:
-        return FinanceClearingService(db, tenant_id).record_payment(
+        result = FinanceClearingService(db, tenant_id).record_payment(
             rechnungsnr=body.rechnungsnr, betrag=body.betrag, skonto_betrag=body.skontoBetrag or 0.0,
             zahlungsdatum=zd, zahlungsart=body.zahlungsart or "ueberweisung", bediener=body.bediener or "KIM",
         )
     except ClearingError as exc:
         raise HTTPException(status_code=422, detail=str(exc))
+
+    # Belegbruch schließen: Rechnung auf BEZAHLT setzen wenn vollständig ausgeziffert
+    if result.get("voll_ausgeziffert"):
+        try:
+            repo = get_repository(db)
+            inv = get_from_store("sales_invoice", body.rechnungsnr, repo)
+            if inv and inv.get("status") not in ("BEZAHLT", "STORNIERT"):
+                inv["status"] = "BEZAHLT"
+                save_to_store("sales_invoice", body.rechnungsnr, inv, repo)
+        except Exception:  # noqa: BLE001 — invoice status update is non-blocking
+            pass
+
+    return result
