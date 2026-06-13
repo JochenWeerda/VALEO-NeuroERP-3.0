@@ -7,6 +7,7 @@ from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel
+from sqlalchemy import text
 from sqlalchemy.orm import Session
 
 from ....core.config import settings
@@ -112,6 +113,24 @@ async def book_pick_list_order(
     if payload.order_id:
         obj.order_id = payload.order_id
     db.commit()
+
+    # Belegbruch schließen: Auftrag auf 'in_delivery' setzen
+    linked_order = payload.order_id or obj.order_id
+    if linked_order:
+        try:
+            db.execute(
+                text("""
+                    UPDATE domain_crm.sales_orders
+                    SET status = 'in_delivery', updated_at = NOW()
+                    WHERE id = :oid
+                      AND status NOT IN ('in_delivery', 'geliefert', 'completed', 'cancelled')
+                """),
+                {"oid": linked_order},
+            )
+            db.commit()
+        except Exception:  # noqa: BLE001 — Auftragsupdate nicht kritisch für Picklisten-Buchung
+            pass
+
     db.refresh(obj)
     return PickListOut.model_validate(obj)
 

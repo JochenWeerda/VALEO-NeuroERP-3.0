@@ -3771,3 +3771,58 @@ Archiv des vorherigen Boards:
 **Gate-Ergebnis:** E2E 1/1 ✅ · TypeScript 0 Fehler ✅
 **Erledigt:** API-Client; Seite mit Liste/Anlegen/Lookup/Löschen; Route + Navigation; E2E gemockt.
 **Offene Risiken:** Keine.
+
+## LOG-POD-DN-001 — POD ABGELIEFERT → delivery_notes.status = 'delivered'
+
+**Von:** Claude
+**Owner:** Claude
+**Stand:** abgeschlossen 2026-06-13 — `logistics_tours.save_pod`: nach `ABGELIEFERT`-Update wird `tour_stops.delivery_note_ref` gelesen und `domain_sales.delivery_notes SET status='delivered'` gesetzt (fail-soft, kein Update bei `delivered`/`BERECHNET`); 2 Unit-Tests grün.
+**Ziel:** Belegbruch schließen: Stopp-POD setzte Lieferschein-Status nie auf `delivered` → Lieferschein blieb auf `shipped` nach ePOD-Eingang.
+**Dateibesitz:** `app/api/v1/endpoints/logistics_tours.py`, `tests/test_log_pod_dn_001.py` (neu).
+**Abnahmekriterien:** delivery_notes UPDATE ausgeführt wenn delivery_note_ref gesetzt; kein Update ohne ref; 2 Tests grün.
+
+## SALES-CN-INV-001 — Gutschrift anlegen → sales_invoice.status = 'GUTGESCHRIEBEN'
+
+**Von:** Claude
+**Owner:** Claude
+**Stand:** abgeschlossen 2026-06-13 — `sales_credit_notes.create_credit_note`: wenn `invoice_reference` gesetzt, setzt `sales_invoice` im Store auf `GUTGESCHRIEBEN` (fail-soft); 2 Tests grün.
+**Ziel:** Belegbruch schließen: Gutschrift referenzierte Originalrechnung ohne Rückmeldung → Rechnung blieb auf OFFEN/GEBUCHT.
+**Dateibesitz:** `app/api/v1/endpoints/sales_credit_notes.py`, `tests/test_sales_cn_inv_001.py` (neu).
+
+## SALES-RETURN-001 — Retoure → delivery_notes.status='returned' + Invoice GUTGESCHRIEBEN
+
+**Von:** Claude
+**Owner:** Claude
+**Stand:** abgeschlossen 2026-06-13 — `sales_credit_notes.create_return`: setzt `delivery_notes.status='returned'` (fail-soft) wenn `delivery_note_reference` gesetzt; setzt `sales_invoice.status='GUTGESCHRIEBEN'` wenn `invoice_reference` gesetzt; 2 Tests grün.
+**Ziel:** Belegbruch schließen: Retoure-Anlage aktualisierte weder Lieferschein noch Rechnung.
+**Dateibesitz:** `app/api/v1/endpoints/sales_credit_notes.py`, `tests/test_sales_return_dn_001.py` (neu).
+
+## FIN-STORNO-001 — storno_invoice → sales_invoice.status = 'STORNIERT' im Store
+
+**Von:** Claude
+**Owner:** Claude
+**Stand:** abgeschlossen 2026-06-13 — `finance_invoices.storno_invoice`: nach Buchungsumkehr wird `sales_invoice` im Store auf `STORNIERT` gesetzt (fail-soft); 1 Test grün.
+**Ziel:** Belegbruch schließen: Storno-Buchung korrigierte Buchhalter-Sicht aber nicht den Dokument-Store.
+**Dateibesitz:** `app/api/v1/endpoints/finance_invoices.py`, `tests/test_fin_storno_store_001.py` (neu).
+
+## SALES-ORDERS-DN-LINK-001 — create_delivery_from_order → sales_order_id in DN
+
+**Von:** Claude
+**Owner:** Claude
+**Stand:** abgeschlossen 2026-06-13 — `sales_orders.create_delivery_from_order`: `sales_order_id` wird jetzt beim INSERT in `domain_sales.delivery_notes` gesetzt (zuvor fehlend) → SALES-O2C-001 greift auch auf auto-erstellte Lieferscheine.
+**Dateibesitz:** `app/api/v1/endpoints/sales_orders.py`.
+
+## PICK-LIST-ORDER-001 — pick_list book-order → sales_order.status = 'in_delivery'
+
+**Von:** Claude
+**Owner:** Claude
+**Stand:** abgeschlossen 2026-06-13 — `pick_lists.book_pick_list_order`: setzt `domain_crm.sales_orders.status='in_delivery'` wenn `order_id` verknüpft (fail-soft); kein Update wenn bereits in_delivery/geliefert/completed/cancelled.
+**Dateibesitz:** `app/api/v1/endpoints/pick_lists.py`.
+
+## CREDIT-MEMO-OP-001 — Credit-Memo settle → offene_posten reduzieren
+
+**Von:** Claude
+**Owner:** Claude
+**Stand:** abgeschlossen 2026-06-13 — `credit_debit_memos.settle_credit_memo`: nach Store-Update wird `domain_erp.offene_posten.offen -= per_invoice` mit auto-Auszifferung gesetzt (fail-soft).
+**Ziel:** Belegbruch schließen: Gutschrift-Verrechnung reduzierte den AP-OP-Saldo nicht.
+**Dateibesitz:** `app/api/v1/endpoints/credit_debit_memos.py`.

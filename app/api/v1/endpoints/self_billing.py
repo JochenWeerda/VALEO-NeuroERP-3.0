@@ -11,6 +11,7 @@ from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Request
 from pydantic import BaseModel, Field, ConfigDict
+from sqlalchemy import text
 from sqlalchemy.orm import Session
 
 from app.core.data_quality_enforcement import build_dq_error_detail, evaluate_self_billing_datensatz
@@ -197,7 +198,21 @@ async def create_credit_note_endpoint(
     
     repo = SelfBillingRepositoryImpl(db)
     invoice = create_credit_note(repo, create_input, taxation_type=payload.taxation_type)
-    
+
+    # Belegbruch schließen: HarvestAcceptance.invoice_id zurückverknüpfen
+    try:
+        db.execute(
+            text("""
+                UPDATE domain_agrar.harvest_acceptances
+                SET invoice_id = :inv_id, updated_at = NOW()
+                WHERE id = :ha_id AND tenant_id = :tid AND invoice_id IS NULL
+            """),
+            {"inv_id": invoice.id, "ha_id": harvest_acceptance_id, "tid": tenant_id},
+        )
+        db.commit()
+    except Exception:  # noqa: BLE001 — Rückkopplung nicht kritisch für Gutschrift-Erstellung
+        pass
+
     return _to_out(invoice)
 
 

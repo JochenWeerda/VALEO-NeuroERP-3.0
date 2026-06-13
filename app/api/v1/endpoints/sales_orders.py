@@ -499,9 +499,9 @@ async def create_delivery_from_order(
         text("""
             INSERT INTO domain_sales.delivery_notes
             (id, tenant_id, delivery_note_number, customer_id, delivery_date,
-             status, is_printed, is_delivered, totals, created_at, updated_at)
+             status, is_printed, is_delivered, totals, sales_order_id, created_at, updated_at)
             VALUES (:id, :tid, :ls, :kid, NOW()::date,
-                    'draft', FALSE, FALSE, CAST(:totals AS jsonb), NOW(), NOW())
+                    'draft', FALSE, FALSE, CAST(:totals AS jsonb), :oid, NOW(), NOW())
         """),
         {
             "id": dn_id, "tid": effective_tenant, "ls": dn_nr,
@@ -511,6 +511,7 @@ async def create_delivery_from_order(
                 "mwst": 0,
                 "brutto": float(order_row.get("total_amount") or 0),
             }),
+            "oid": order_id,
         },
     )
 

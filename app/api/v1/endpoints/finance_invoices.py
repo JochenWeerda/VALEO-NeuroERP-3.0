@@ -585,6 +585,16 @@ async def storno_invoice(
         except Exception:
             db.rollback()
 
+        # Belegbruch schließen: Rechnungsdokument im Store auf STORNIERT setzen
+        try:
+            repo = get_repository(db)
+            inv = get_from_store("sales_invoice", invoice_number, repo)
+            if inv:
+                inv["status"] = "STORNIERT"
+                save_to_store("sales_invoice", invoice_number, inv, repo)
+        except Exception:  # noqa: BLE001 — Store-Update nicht kritisch für Buchungsstorno
+            pass
+
         log_fibu_audit(
             db, tenant_id, "storno", "journal_entry", je_id,
             {"invoice_number": invoice_number, "reversal_id": str(reversal.id)},

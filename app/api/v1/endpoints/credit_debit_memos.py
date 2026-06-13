@@ -11,6 +11,7 @@ from pydantic import BaseModel, Field
 import logging
 from app.core.uuid7 import uuid7
 
+from sqlalchemy import text
 from app.core.database import get_db
 from app.documents.router_helpers import get_repository, save_to_store, get_from_store, list_from_store
 
@@ -467,6 +468,22 @@ async def settle_credit_memo(
             if invoice:
                 invoice["openAmount"] = max(0, (invoice.get("openAmount") or invoice.get("totalGross") or 0) - per_invoice)
                 save_to_store("ap_invoice", invoice_id, invoice, repo)
+                # Belegbruch schließen: offene_posten reduzieren
+                if per_invoice > 0:
+                    try:
+                        db.execute(
+                            text("""
+                                UPDATE domain_erp.offene_posten
+                                SET offen = GREATEST(offen - :amt, 0),
+                                    op_status = CASE WHEN offen - :amt <= 0 THEN 'ausgeziffert' ELSE op_status END,
+                                    updated_at = NOW()
+                                WHERE rechnungsnr = :inv_nr AND tenant_id = :tid AND konto_typ = 'kreditoren'
+                            """),
+                            {"amt": per_invoice, "inv_nr": invoice_id, "tid": invoice.get("tenantId", "system")},
+                        )
+                        db.commit()
+                    except Exception:  # noqa: BLE001 — OP-Update nicht kritisch für Gutschrift-Verrechnung
+                        pass
 
         return {
             "status": "ok",
