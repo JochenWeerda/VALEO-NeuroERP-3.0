@@ -58,8 +58,6 @@ async def create_retoure(
     retoure_id = str(uuid.uuid4())
     bon_nr = f"RET-{datetime.now(timezone.utc).strftime('%Y%m%d%H%M%S')}"
 
-    # In echtem System: Lagerbuchung Rückeinlagerung + Zahlungsrückerstattung auslösen
-    # Hier: Retoure als Datensatz erfassen (Journal-Eintrag)
     try:
         from sqlalchemy import text
         for pos in data.positionen:
@@ -80,7 +78,7 @@ async def create_retoure(
                             ORDER BY w.warehouse_code
                             LIMIT 1
                         ),
-                        'in',
+                        'RETOURE',
                         :qty,
                         COALESCE(a.unit, 'ST'),
                         :bon_nr,
@@ -106,10 +104,32 @@ async def create_retoure(
                     "artikelnr": pos.artikelnr,
                 }
             )
+            # Bestandsfortschreibung: bin_stock aktualisieren (erster passender Bin des Lagers)
+            db.execute(
+                text("""
+                    UPDATE domain_inventory.bin_stock bs
+                    SET quantity_kg = bs.quantity_kg + :qty,
+                        last_movement_at = NOW()
+                    WHERE bs.article_id = (
+                        SELECT a.id FROM domain_inventory.articles a
+                        WHERE a.article_number = :artikelnr AND a.tenant_id = :tenant_id LIMIT 1
+                    )
+                    AND bs.tenant_id = :tenant_id
+                    AND bs.bin_id = (
+                        SELECT wb.id FROM domain_inventory.warehouse_bins wb
+                        JOIN domain_inventory.warehouse_zones wz ON wz.id = wb.zone_id
+                        JOIN domain_inventory.warehouses w ON w.id = wz.warehouse_id
+                        WHERE w.tenant_id = :tenant_id AND wb.is_blocked = false
+                        ORDER BY w.warehouse_code, wb.bin_code
+                        LIMIT 1
+                    )
+                """),
+                {"qty": pos.menge, "artikelnr": pos.artikelnr, "tenant_id": tenant_id},
+            )
         db.commit()
     except Exception:
         db.rollback()
-        # Retoure trotzdem erfassen, auch wenn Lagerbuchung fehlschlägt
+        # Retoure-Buchung gescheitert; Dokument trotzdem zurückgeben (Fail-soft)
 
     return RetourResponse(
         retoure_id=retoure_id,
