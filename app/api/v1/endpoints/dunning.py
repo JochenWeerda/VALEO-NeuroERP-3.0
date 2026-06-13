@@ -829,9 +829,26 @@ async def mark_dunning_paid(
         
         if not row:
             raise HTTPException(status_code=404, detail="Dunning notice not found")
-        
+
+        op_id = str(row[1]) if row[1] else None
+
         db.commit()
-        
+
+        # Belegbruch schließen: offene_posten auf ausgeziffert setzen
+        if op_id:
+            try:
+                db.execute(
+                    text("""
+                        UPDATE domain_erp.offene_posten
+                        SET offen = 0, op_status = 'ausgeziffert', updated_at = NOW()
+                        WHERE id = :op_id AND tenant_id = :tid
+                    """),
+                    {"op_id": op_id, "tid": tenant_id},
+                )
+                db.commit()
+            except Exception:  # noqa: BLE001 — OP-Update nicht kritisch für Mahnung-Bezahlung
+                pass
+
         return DunningResponse(
             id=str(row[0]),
             op_id=str(row[1]),
@@ -851,7 +868,7 @@ async def mark_dunning_paid(
             created_at=row[15],
             updated_at=row[16]
         )
-        
+
     except HTTPException:
         raise
     except Exception as e:

@@ -793,6 +793,25 @@ def save_pod(
         ).mappings().first()
         if not row:
             raise HTTPException(status_code=404, detail=f"Stopp {stop_id} nicht gefunden")
+
+        # Belegbruch schließen: Lieferschein-Status auf 'delivered' setzen
+        dn_ref = row.get("delivery_note_ref")
+        if dn_ref and x_tenant_id:
+            try:
+                db.execute(
+                    text("""
+                        UPDATE domain_sales.delivery_notes
+                        SET status = 'delivered', updated_at = NOW()
+                        WHERE (id = :ref OR delivery_note_number = :ref)
+                          AND tenant_id = :tid
+                          AND status NOT IN ('delivered', 'BERECHNET')
+                    """),
+                    {"ref": dn_ref, "tid": x_tenant_id},
+                )
+                db.commit()
+            except Exception:  # noqa: BLE001 — Lieferschein-Update nicht kritisch für POD-Erfolg
+                pass
+
         return dict(row)
     except HTTPException:
         raise

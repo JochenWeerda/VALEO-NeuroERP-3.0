@@ -27,6 +27,7 @@ from app.core.fibu_audit import log_fibu_audit
 logger = logging.getLogger(__name__)
 
 from app.api.v1.schemas.base import BaseSchema, StatusResponse
+from app.documents.router_helpers import get_repository, get_from_store, save_to_store
 
 
 router = APIRouter(prefix="/sales", tags=["sales", "credit-notes", "returns"])
@@ -134,6 +135,18 @@ async def create_credit_note(
         )
 
     db.commit()
+
+    # Belegbruch schließen: Original-Rechnung als GUTGESCHRIEBEN markieren
+    if payload.invoice_reference:
+        try:
+            repo = get_repository(db)
+            inv = get_from_store("sales_invoice", payload.invoice_reference, repo)
+            if inv and inv.get("status") not in ("STORNIERT", "GUTGESCHRIEBEN"):
+                inv["status"] = "GUTGESCHRIEBEN"
+                save_to_store("sales_invoice", payload.invoice_reference, inv, repo)
+        except Exception:  # noqa: BLE001 — Rechnungsstatus-Update nicht kritisch
+            pass
+
     log_fibu_audit(
         db, tid, "create", "sales_credit_note", cn_id,
         {"credit_note_number": payload.credit_note_number, "total": float(total)},
@@ -318,6 +331,34 @@ async def create_return(
         },
     )
     db.commit()
+
+    # Belegbruch schließen: Lieferschein und Rechnung als retourniert markieren
+    if payload.delivery_note_reference:
+        try:
+            db.execute(
+                text("""
+                    UPDATE domain_sales.delivery_notes
+                    SET status = 'returned', updated_at = NOW()
+                    WHERE (id = :ref OR delivery_note_number = :ref)
+                      AND tenant_id = :tid
+                      AND status NOT IN ('returned', 'BERECHNET')
+                """),
+                {"ref": payload.delivery_note_reference, "tid": tid},
+            )
+            db.commit()
+        except Exception:  # noqa: BLE001 — Lieferschein-Update nicht kritisch
+            pass
+
+    if payload.invoice_reference:
+        try:
+            repo = get_repository(db)
+            inv = get_from_store("sales_invoice", payload.invoice_reference, repo)
+            if inv and inv.get("status") not in ("STORNIERT", "GUTGESCHRIEBEN"):
+                inv["status"] = "GUTGESCHRIEBEN"
+                save_to_store("sales_invoice", payload.invoice_reference, inv, repo)
+        except Exception:  # noqa: BLE001 — Rechnungsstatus-Update nicht kritisch
+            pass
+
     return ReturnOut(id=ret_id, tenant_id=tid, **payload.model_dump(exclude={"tenant_id"}))
 
 

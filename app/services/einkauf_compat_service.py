@@ -648,6 +648,35 @@ class EinkaufCompatService:
         self._write_rechnung_audit(rid, action, old_status, new_status)
         self.db.commit()
         self._invalidate()
+
+        # Belegbruch schließen: bei Verbuchung Kreditoren-OP anlegen
+        if action == "verbuchen":
+            try:
+                import uuid as _uuid
+                from datetime import date as _date
+                rech_row = self.db.execute(text(
+                    "SELECT rechnungs_nummer, brutto_betrag, rechnungs_datum FROM einkauf_rechnungseingaenge WHERE id = :id"
+                ), {"id": rid}).fetchone()
+                if rech_row and rech_row[1]:
+                    today = _date.today().isoformat()
+                    due_in_30 = (_date.today().replace(day=min(_date.today().day + 30, 28))).isoformat()
+                    self.db.execute(text("""
+                        INSERT INTO domain_erp.offene_posten
+                            (id, tenant_id, konto_typ, rechnungsnr, rechnungsdatum, datum, faelligkeit,
+                             betrag, offen, op_status)
+                        VALUES (:id, :tid, 'kreditoren', :rnr, :rdat, :dat, :faell, :betrag, :betrag, 'offen')
+                        ON CONFLICT DO NOTHING
+                    """), {
+                        "id": str(_uuid.uuid4()), "tid": self.tenant_id,
+                        "rnr": rech_row[0] or rid,
+                        "rdat": (rech_row[2].isoformat() if rech_row[2] else today),
+                        "dat": today, "faell": due_in_30,
+                        "betrag": float(rech_row[1]),
+                    })
+                    self.db.commit()
+            except Exception:  # noqa: BLE001 — OP-Anlage nicht kritisch für Buchungs-Workflow
+                pass
+
         return {"message": f"Rechnungseingang {action}t", "status": new_status}
 
     def pruefen_rechnung(self, rechnung_id: str) -> dict:
