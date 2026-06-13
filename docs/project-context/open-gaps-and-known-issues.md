@@ -57,9 +57,9 @@ Aggregierte Gesamtsicht: [PROJEKT-GESAMTSTAND-2026-05-27.md](../PROJEKT-GESAMTST
 
 - **Lagerbewegungs-Altpfade:** `INV-STOCK-MOVEMENTS-001` (2026-06-11) hat
   `articles.py` und `pos_retoure.py` auf `inventory_stock_movements` umgestellt.
-  Offen bleibt die vollständige Bestandsfortschreibung bei POS-Retoure
-  (`articles.current_stock`-Update) und tieferes Chargen-/MHD-Modell jenseits
-  von `charge`.
+  **2026-06-13:** `pos_retoure.py` schreibt jetzt auch `bin_stock`-Update (Bestandsfortschreibung
+  bei Retoure geschlossen; movement_type von `'in'` auf `'RETOURE'` korrigiert).
+  Verbleibend: tieferes Chargen-/MHD-Modell jenseits von `charge`.
 
 ### COVERAGE-001: Backend-Testabdeckung repo-weit weiter zu niedrig
 
