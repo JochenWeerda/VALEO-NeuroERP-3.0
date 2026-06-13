@@ -150,6 +150,15 @@ export const RAW_NAV_SECTIONS: RawNavItem[] = [
         mcp: { businessDomain: 'inventory', scope: 'inventory:read' },
       },
       {
+        id: 'materialfluss-visualisierung',
+        label: 'Materialfluss — Visualisierung',
+        icon: LayoutGrid,
+        module: '@/pages/lager/materialfluss-visualisierung',
+        preferredPath: 'lager/materialfluss-visualisierung',
+        keywords: ['materialfluss', 'visualisierung', 'hofplan', 'layout', 'silos', 'react-flow', 'folkerts'],
+        mcp: { businessDomain: 'inventory', scope: 'inventory:read' },
+      },
+      {
         id: 'kommissionierung',
         label: 'Kommissionierung',
         icon: ShoppingCart,
@@ -157,6 +166,15 @@ export const RAW_NAV_SECTIONS: RawNavItem[] = [
         preferredPath: 'lager/kommissionierung',
         keywords: ['kommissionierung', 'pick', 'fefo', 'warenausgang', 'lieferschein', 'pick-liste'],
         mcp: { businessDomain: 'inventory', scope: 'inventory:write' },
+      },
+      {
+        id: 'bestandsbewertung',
+        label: 'Bestandsbewertung',
+        icon: BarChart3,
+        module: '@/pages/lager/bestandsbewertung',
+        preferredPath: 'lager/bestandsbewertung',
+        keywords: ['bestandsbewertung', 'einstandspreis', 'fifo', 'durchschnittspreis', 'lagerwert', 'bewertung'],
+        mcp: { businessDomain: 'inventory', scope: 'inventory:read' },
       },
       {
         id: 'lager-terminal',

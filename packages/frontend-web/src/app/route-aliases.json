@@ -1461,8 +1461,16 @@
       "path": "lager/materialfluss"
     },
     {
+      "module": "@/pages/lager/materialfluss-visualisierung",
+      "path": "lager/materialfluss-visualisierung"
+    },
+    {
       "module": "@/pages/lager/kommissionierung",
       "path": "lager/kommissionierung"
+    },
+    {
+      "module": "@/pages/lager/bestandsbewertung",
+      "path": "lager/bestandsbewertung"
     },
     {
       "module": "@/pages/lager/terminal",

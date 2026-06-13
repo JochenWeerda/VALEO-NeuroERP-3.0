@@ -245,3 +245,33 @@ export function useConfirmPickList() {
     },
   })
 }
+
+// ── Bestandsbewertung ─────────────────────────────────────────────────────
+
+export type StockValuationRow = {
+  article_id: string
+  batch_number: string | null
+  total_quantity_kg: number
+  total_value_eur: number
+  avg_cost_per_kg: number
+}
+
+export const stockValuationKeys = {
+  all: ['lager', 'wms', 'stock-valuation'] as const,
+  byWarehouse: (warehouseId?: string) =>
+    [...stockValuationKeys.all, warehouseId ?? 'all'] as const,
+}
+
+export async function fetchStockValuation(warehouseId?: string): Promise<StockValuationRow[]> {
+  const params = warehouseId ? `?warehouse_id=${encodeURIComponent(warehouseId)}` : ''
+  const res = await apiClient.get<StockValuationRow[]>(`/lager/wms/stock-valuation${params}`)
+  return res.data
+}
+
+export function useStockValuation(warehouseId?: string) {
+  return useQuery({
+    queryKey: stockValuationKeys.byWarehouse(warehouseId),
+    queryFn: () => fetchStockValuation(warehouseId),
+    staleTime: 60_000,
+  })
+}

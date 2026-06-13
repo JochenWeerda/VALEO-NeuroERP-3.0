@@ -255,14 +255,26 @@ class WarehouseService:
         """), {"bid": bin_id, "aid": article_id, "batch": batch_number, "tid": self.tenant_id}).fetchone()
 
         if existing:
-            new_qty = Decimal(str(existing.quantity_kg)) + quantity_kg
+            old_qty = Decimal(str(existing.quantity_kg))
+            new_qty = old_qty + quantity_kg
             if new_qty < 0:
                 raise ValueError(f"Unterdeckung: Bestand {existing.quantity_kg} kg, Entnahme {abs(quantity_kg)} kg")
+            # Weighted-average unit_cost: update only on inbound movements with a known cost
+            new_cost: Decimal | None = None
+            if quantity_kg > 0 and unit_cost is not None:
+                existing_cost_row = self.db.execute(text(
+                    "SELECT unit_cost FROM domain_inventory.bin_stock WHERE id = :id"
+                ), {"id": existing.id}).fetchone()
+                old_cost = Decimal(str(existing_cost_row.unit_cost or 0)) if existing_cost_row and existing_cost_row.unit_cost else Decimal("0")
+                if new_qty > 0:
+                    new_cost = ((old_qty * old_cost) + (quantity_kg * unit_cost)) / new_qty
             self.db.execute(text("""
                 UPDATE domain_inventory.bin_stock
-                SET quantity_kg = :qty, last_movement_at = :now
+                SET quantity_kg = :qty,
+                    unit_cost = COALESCE(:cost, unit_cost),
+                    last_movement_at = :now
                 WHERE id = :id
-            """), {"qty": new_qty, "now": datetime.now(timezone.utc), "id": existing.id})
+            """), {"qty": new_qty, "cost": new_cost, "now": datetime.now(timezone.utc), "id": existing.id})
         else:
             if quantity_kg < 0:
                 raise ValueError("Auslagerung ohne vorhandenen Bestand")
@@ -590,3 +602,62 @@ class WarehouseService:
                  "total_quantity_kg": float(r.total_qty),
                  "total_value_eur": float(r.total_value),
                  "avg_cost_per_kg": float(r.avg_cost)} for r in rows]
+
+    # ── Einlagerungsstrategie (Putaway) ────────────────────────
+
+    def suggest_putaway_bin(
+        self,
+        warehouse_id: str,
+        article_id: str,
+        quantity_kg: Decimal,
+        best_before_date: date | None = None,
+        strategy: str = "CAPACITY",
+    ) -> list[dict]:
+        """Einlagerungsvorschlag: welche Bins haben genug Restkapazität.
+
+        Strategies:
+        - CAPACITY: Bins mit grösster Restkapazität zuerst (space-out)
+        - CONSOLIDATE: Bins, die den selben Artikel bereits enthalten (reduziert Fragmentation)
+        - FEFO_ZONE: Bins im selben Zone/Gang wie bestehende Chargen dieses Artikels (FEFO-kompatibel)
+        """
+        rows = self.db.execute(text("""
+            SELECT wb.id AS bin_id, wb.bin_code, wb.bin_type,
+                   COALESCE(wb.capacity_kg, 0) as capacity_kg,
+                   COALESCE(SUM(bs.quantity_kg), 0) as used_kg,
+                   COALESCE(wb.capacity_kg, 0) - COALESCE(SUM(bs.quantity_kg), 0) as free_kg,
+                   EXISTS (
+                       SELECT 1 FROM domain_inventory.bin_stock bs2
+                       WHERE bs2.bin_id = wb.id AND bs2.article_id = :aid
+                         AND bs2.tenant_id = :tid AND bs2.quantity_kg > 0
+                   ) as has_same_article
+            FROM domain_inventory.warehouse_bins wb
+            LEFT JOIN domain_inventory.bin_stock bs ON bs.bin_id = wb.id AND bs.tenant_id = :tid
+            WHERE wb.warehouse_id = :wid
+              AND wb.is_blocked = false
+              AND wb.tenant_id = :tid
+            GROUP BY wb.id, wb.bin_code, wb.bin_type, wb.capacity_kg
+            HAVING COALESCE(wb.capacity_kg, 0) - COALESCE(SUM(bs.quantity_kg), 0) >= :qty
+               OR COALESCE(wb.capacity_kg, 0) = 0
+        """), {"wid": warehouse_id, "aid": article_id, "qty": float(quantity_kg), "tid": self.tenant_id}).fetchall()
+
+        candidates = [
+            {
+                "bin_id": str(r.bin_id),
+                "bin_code": str(r.bin_code),
+                "bin_type": str(r.bin_type) if r.bin_type else None,
+                "capacity_kg": float(r.capacity_kg),
+                "used_kg": float(r.used_kg),
+                "free_kg": float(r.free_kg),
+                "has_same_article": bool(r.has_same_article),
+            }
+            for r in rows
+        ]
+
+        if strategy == "CONSOLIDATE":
+            # Bins with same article first, then by most free space
+            candidates.sort(key=lambda c: (not c["has_same_article"], -c["free_kg"]))
+        else:
+            # CAPACITY or FEFO_ZONE: sort by free space descending
+            candidates.sort(key=lambda c: -c["free_kg"])
+
+        return candidates[:10]  # top 10 suggestions

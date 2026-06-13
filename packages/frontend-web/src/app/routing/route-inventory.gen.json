@@ -2976,6 +2976,11 @@
       "source": "auto"
     },
     {
+      "module": "@/pages/lager/bestandsbewertung",
+      "path": "lager/bestandsbewertung",
+      "source": "alias"
+    },
+    {
       "module": "@/pages/lager/bestandskorrektur",
       "path": "lager/bestandskorrektur",
       "source": "auto"
@@ -3023,6 +3028,11 @@
     {
       "module": "@/pages/lager/materialfluss",
       "path": "lager/materialfluss",
+      "source": "alias"
+    },
+    {
+      "module": "@/pages/lager/materialfluss-visualisierung",
+      "path": "lager/materialfluss-visualisierung",
       "source": "alias"
     },
     {

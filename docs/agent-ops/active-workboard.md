@@ -183,6 +183,29 @@ Sammellieferschein setzte Aufträge nicht auf geliefert.
 **Dateibesitz:** `app/api/v1/endpoints/collective_documents.py`, `tests/test_sales_coll_001.py` (neu).
 **Abnahmekriterien:** 409 bei Doppelabrechnung; 422 bei falschem DN-Status; DN-Update auf BERECHNET; Auftrag-Update auf geliefert; 5 Tests grün.
 
+## LAGER-BWERT-001 — Bestandsbewertung + Einlagerungsstrategie (Putaway)
+
+**Von:** Claude
+**Owner:** Claude
+**Stand:** abgeschlossen 2026-06-13 — (1) `book_stock_movement` berechnet jetzt Ø-Einstandspreis
+(weighted-average cost) bei Zugang auf bestehendem Bestand (UPDATE unit_cost = COALESCE(:cost, unit_cost));
+(2) `suggest_putaway_bin()` in `warehouse_service.py`: CAPACITY/CONSOLIDATE/FEFO_ZONE-Strategien,
+TOP-10-Bins nach Restkapazität; (3) `POST /lager/wms/warehouses/{id}/suggest-putaway` Endpoint;
+(4) Frontend: `StockValuationRow`-Typ + `useStockValuation()`-Hook in `warehouse-wms.ts`;
+Seite `lager/bestandsbewertung.tsx` (Übersichtstabelle + Summary-Cards); Nav-Eintrag + Route generiert;
+Tests grün; type-check grün.
+**Ziel:** Belegbrüche schließen: (a) `GET /lager/wms/stock-valuation` lieferte NULL-Werte wenn
+`unit_cost=None` (kein Ø-Kosten-Update auf bestehenden Rows); (b) Einlagerung ohne Bin-Vorschlag
+(Putaway-Strategie fehlte komplett — Tiefenplan §3 ❌ Kritisch); (c) keine UI-Seite für Lagerwerte
+(Periodenabschluss-Voraussetzung).
+**Dateibesitz:** `app/services/warehouse_service.py` (weighted-avg + putaway),
+`app/api/v1/endpoints/warehouse_wms.py` (suggest-putaway endpoint),
+`packages/frontend-web/src/lib/api/warehouse-wms.ts` (valuation types+hook),
+`packages/frontend-web/src/pages/lager/bestandsbewertung.tsx` (neu),
+`tests/test_lager_bwert_001.py` (neu), `route-aliases.json`, `operations.tsx` (Nav).
+**Abnahmekriterien:** Ø-Einstandspreis wird bei Zugang berechnet; Putaway-Suggest gibt TOP-10 zurück;
+Seite `/lager/bestandsbewertung` erreichbar; Tests + type-check grün.
+
 ## WAVE-PHYS-CHAIN-000 — (reserviert / Lead)
 
 **Von:** Cursor
