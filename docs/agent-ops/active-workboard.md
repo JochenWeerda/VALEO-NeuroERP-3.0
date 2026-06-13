@@ -153,6 +153,36 @@ Lieferschein automatisch auf `shipped` wenn DELIVERY_NOTE-Pick-Liste COMPLETED;
 **Abnahmekriterien:** 409 wenn LS nicht posted/printed; 409 bei Duplicate; confirm setzt LS auf shipped;
 6 Tests grün; ESLint + type-check grün; Route `/lager/kommissionierung` erreichbar.
 
+## FEED-CHAIN-003 — quality_lot_binding DB-Persistenz + Charge-Rückkopplung
+
+**Von:** Claude
+**Owner:** Claude
+**Stand:** abgeschlossen 2026-06-13 — Migration `feed_chain_quality_lot_20260613` (Alembic Single-Head von
+`agri_silo_material_flow_20260612`): `domain_ops.quality_lot_profiles` + `domain_ops.quality_release_decisions`
+(je UNIQUE tenant_id+lot_id). Endpoint `quality_lot_binding.py` rewritten: in-memory-Dicts entfernt,
+`_ensure_tables` (503 wenn Migration nicht läuft), upsert-Insert für Lot und Decision,
+Charge-Rückkopplung: `approve → freigegeben`, `reject → gesperrt`, `hold → quarantaene` auf `ops_chargen`.
+7 Unit-Tests grün.
+**Ziel:** Belegbruch schließen: `quality_lot_binding`-Daten überlebten keinen Neustart → Persistenz in DB;
+Freigabe/Sperrung ist jetzt auf der Charge sichtbar.
+**Dateibesitz:** `app/api/v1/endpoints/quality_lot_binding.py`, `alembic/versions/feed_chain_quality_lot_20260613.py`,
+`tests/test_feed_chain_003.py` (neu).
+**Abnahmekriterien:** 503 ohne Migration; Lot upsert; Decision approve/reject schreibt Charge-Status; 7 Tests grün.
+
+## SALES-COLL-001 — Sammelrechnung/Sammellieferschein Belegbruch
+
+**Von:** Claude
+**Owner:** Claude
+**Stand:** abgeschlossen 2026-06-13 — `collective_documents.py`: (1) `create_collective_invoice` validiert
+jetzt DN-Status (nur `shipped`/`delivered` abrechnungsfähig — 422; bereits `BERECHNET` → 409) und setzt
+Quell-Lieferscheine nach Rechnungserstellung auf `BERECHNET` + `invoice_id`; (2) `create_collective_delivery`
+prüft auf Doppel-Lieferung (`geliefert` → 409) und setzt Quell-Aufträge auf `geliefert`; (3) `collective_eligible`
+filtert nur noch `shipped`/`delivered`; 5 Unit-Tests grün.
+**Ziel:** Belegbruch schließen: Sammelrechnung markierte Lieferscheine nicht als berechnet → Doppelabrechnung möglich;
+Sammellieferschein setzte Aufträge nicht auf geliefert.
+**Dateibesitz:** `app/api/v1/endpoints/collective_documents.py`, `tests/test_sales_coll_001.py` (neu).
+**Abnahmekriterien:** 409 bei Doppelabrechnung; 422 bei falschem DN-Status; DN-Update auf BERECHNET; Auftrag-Update auf geliefert; 5 Tests grün.
+
 ## WAVE-PHYS-CHAIN-000 — (reserviert / Lead)
 
 **Von:** Cursor
