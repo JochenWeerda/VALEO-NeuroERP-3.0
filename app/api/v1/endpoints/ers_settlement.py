@@ -224,6 +224,34 @@ def trigger_ers(
         db.rollback()
         raise HTTPException(status_code=503, detail=f"Datenbankfehler: {exc}") from exc
 
+    # Belegbruch schließen: Kreditoren-OP für ERS-Rechnung anlegen
+    if gr_amount and gr_amount > 0:
+        try:
+            from datetime import date as _date
+            import uuid as _uuid
+            today = _date.today().isoformat()
+            due_in_30 = (_date.today().replace(day=min(_date.today().day + 30, 28))).isoformat()
+            ers_inv_nr = f"ERS-{inv_row[0]}"
+            db.execute(text("""
+                INSERT INTO domain_erp.offene_posten
+                    (id, tenant_id, konto_typ, rechnungsnr, rechnungsdatum, datum, faelligkeit,
+                     betrag, offen, lieferant_id, op_status)
+                VALUES
+                    (:id, :tid, 'kreditoren', :rnr, :rdat, :dat, :faell,
+                     :betrag, :betrag, :sid, 'offen')
+                ON CONFLICT DO NOTHING
+            """), {
+                "id": str(_uuid.uuid4()),
+                "tid": tenant_id,
+                "rnr": ers_inv_nr,
+                "rdat": today, "dat": today, "faell": due_in_30,
+                "betrag": gr_amount,
+                "sid": body.supplier_id,
+            })
+            db.commit()
+        except Exception:  # noqa: BLE001 — OP-Anlage nicht kritisch für ERS-Erfolg
+            pass
+
     # Event: invoice_auto_created (best-effort, nicht blockierend)
     # In Produktion: NATS JetStream publish hier einfügen
 

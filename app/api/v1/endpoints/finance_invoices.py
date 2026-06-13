@@ -371,6 +371,23 @@ async def create_invoice(
                 created_by=None,
             )
 
+        # Belegbruch schließen: Lieferschein invoice_number befüllen wenn sourceDelivery gesetzt
+        if invoice.sourceDelivery:
+            try:
+                db.execute(
+                    text("""
+                        UPDATE domain_sales.delivery_notes
+                        SET invoice_number = :inv_nr, updated_at = NOW()
+                        WHERE (id = :dn_ref OR delivery_note_number = :dn_ref)
+                          AND tenant_id = :tid
+                          AND (invoice_number IS NULL OR invoice_number = '')
+                    """),
+                    {"inv_nr": invoice.number, "dn_ref": invoice.sourceDelivery, "tid": tenant_id},
+                )
+                db.flush()
+            except Exception:  # noqa: BLE001 — non-blocking
+                pass
+
         logger.info("Invoice created: %s", invoice.number)
         return {
             "ok": True,
