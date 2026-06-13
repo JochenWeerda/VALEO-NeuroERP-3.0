@@ -26,6 +26,7 @@ from app.core.uuid7 import uuid7
 
 from app.api.v1.schemas.base import BaseSchema
 from app.api.v1.schemas.op_skonto_auszifferung_schemas import OpSkontoAuszifferungOut
+from app.documents.router_helpers import get_repository, get_from_store, save_to_store
 
 
 router = APIRouter(prefix="/fibu/op-auszifferung", tags=["FIBU - OP Skonto-Auszifferung"])
@@ -175,6 +176,28 @@ def create_auszifferung(
         "zart": payload.zahlungsart, "btext": payload.buchungstext,
         "fibu_kto": payload.fibu_konto, "skonto_kto": payload.skonto_konto,
     })
+    # Belegbruch schließen: OP-Betrag reduzieren; bei Vollausgleich op_status setzen
+    try:
+        settled = db.execute(text("""
+            UPDATE domain_erp.offene_posten
+            SET offen = GREATEST(offen - :betrag, 0),
+                op_status = CASE WHEN offen - :betrag <= 0 THEN 'ausgeziffert' ELSE op_status END,
+                updated_at = NOW()
+            WHERE id = :op_id AND tenant_id = :tid
+            RETURNING rechnungsnr, op_status
+        """), {"betrag": gesamtbetrag, "op_id": payload.op_id, "tid": tenant_id}).fetchone()
+
+        if settled and settled[1] == "ausgeziffert":
+            rnr = payload.rechnungsnr or settled[0]
+            if rnr:
+                repo = get_repository(db)
+                inv = get_from_store("sales_invoice", rnr, repo)
+                if inv and inv.get("status") not in ("BEZAHLT", "STORNIERT"):
+                    inv["status"] = "BEZAHLT"
+                    save_to_store("sales_invoice", rnr, inv, repo)
+    except Exception:  # noqa: BLE001 — non-blocking
+        pass
+
     db.commit()
     row = db.execute(text("""
         SELECT * FROM domain_shared.op_auszifferungen WHERE id = :id

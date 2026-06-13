@@ -25,6 +25,7 @@ logger = logging.getLogger(__name__)
 
 from app.api.v1.schemas.base import BaseSchema
 from app.api.v1.schemas.payment_runs_schemas import PaymentRunsOut
+from app.documents.router_helpers import get_repository, get_from_store, save_to_store
 
 
 router = APIRouter(prefix="/payment-runs", tags=["finance", "ap", "sepa"])
@@ -770,17 +771,30 @@ async def execute_payment_run(
                         "amount": payment["amount"]
                     })
 
-                    # If fully settled, mark as closed
+                    # If fully settled, mark as closed and update AP invoice
                     check_query = text("""
                         UPDATE domain_erp.offene_posten
-                        SET offen = 0, updated_at = NOW()
+                        SET offen = 0, op_status = 'ausgeziffert', updated_at = NOW()
                         WHERE id = :op_id AND tenant_id = :tenant_id AND offen <= 0
+                        RETURNING rechnungsnr
                     """)
 
-                    db.execute(check_query, {
+                    settled_row = db.execute(check_query, {
                         "op_id": payment["op_id"],
                         "tenant_id": tenant_id
-                    })
+                    }).fetchone()
+
+                    # Belegbruch schließen: AP-Rechnung auf BEZAHLT setzen wenn OP vollständig ausgeziffert
+                    inv_nr = payment.get("invoice_number") or (settled_row[0] if settled_row else None)
+                    if inv_nr:
+                        try:
+                            repo = get_repository(db)
+                            inv = get_from_store("ap_invoice", inv_nr, repo)
+                            if inv and inv.get("status") not in ("BEZAHLT", "STORNIERT"):
+                                inv["status"] = "BEZAHLT"
+                                save_to_store("ap_invoice", inv_nr, inv, repo)
+                        except Exception as _e:  # noqa: BLE001 — non-blocking
+                            logger.debug("AP invoice status update skipped: %s", _e)
 
                 except Exception as e:
                     logger.warning(f"Could not settle open item {payment.get('op_id')}: {e}")
