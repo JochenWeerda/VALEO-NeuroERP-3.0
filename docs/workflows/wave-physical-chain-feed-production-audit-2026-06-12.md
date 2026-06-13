@@ -49,8 +49,11 @@
    ``initialData``+``staleTime``-Falle unterdrückte den ersten Fetch). Auftragsliste mit
    Statusübergängen (Per-Entity-Pending), Charge-Link nach ``fertig``, Trace-Panel
    („Kette geschlossen“ + Mischprotokoll). Browser-verifiziert gegen Dev-Stack.
-3. **FEED-CHAIN-003:** `quality_lot_binding` persistent (Alembic statt in-memory) und an
-   `ops_chargen.qualitaetsstatus`/Freigabe gebunden.
+3. **FEED-CHAIN-003 (erledigt 2026-06-13):** `quality_lot_binding` DB-persistent (Migration
+   `feed_chain_quality_lot_20260613`: `domain_ops.quality_lot_profiles` +
+   `domain_ops.quality_release_decisions`); Endpoint rewritten ohne in-memory-Dict;
+   release-decision (approve/reject/hold) schreibt `qualitaetsstatus` auf `ops_chargen` zurück;
+   7 Unit-Tests grün.
 4. **FEED-CHAIN-004:** Artikel-Mapping Einzelfutter ↔ `domain_inventory.articles` und
    Bewegungsbelege in `inventory_stock_movements` (Abstimmung: INV-STOCK-MOVEMENTS-001/Cursor).
 
