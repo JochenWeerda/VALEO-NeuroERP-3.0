@@ -241,6 +241,8 @@ class EinkaufCompatService:
                                      "itemCount": len(items)},
                             tenant_id=self.tenant_id)
         self._book_wareneingang(receipt_id, received_date, items)
+        # Belegbruch schließen: PO-Positionen mit gelieferter Menge fortschreiben
+        self._update_po_delivery_quantities(purchase_order_id, items)
         self._invalidate()
         return {
             "id": receipt_id,
@@ -281,6 +283,49 @@ class EinkaufCompatService:
             )
         except Exception:  # noqa: BLE001 — Cache-Invalidierung fehlgeschlagen; nächste Anfrage lädt frisch
             pass  # booking failure must not block receipt creation
+
+    def _update_po_delivery_quantities(self, purchase_order_id: str, items: list) -> None:
+        """Fortschreiben gelieferter Mengen auf Bestellposition und Bestellstatus (EINK-GR-PO-001)."""
+        from sqlalchemy import text
+        try:
+            for line in items:
+                poi = line.get("purchaseOrderItemId") or line.get("purchase_order_item_id")
+                if not poi:
+                    continue
+                recv_qty = float(line.get("acceptedQuantity") or line.get("accepted_quantity") or
+                                  line.get("receivedQuantity") or line.get("received_quantity") or 0)
+                if recv_qty <= 0:
+                    continue
+                self.db.execute(text("""
+                    UPDATE domain_einkauf.bestellung_positionen
+                    SET menge_geliefert = COALESCE(menge_geliefert, 0) + :qty,
+                        menge_offen     = GREATEST(COALESCE(menge_offen, menge) - :qty, 0),
+                        status          = CASE
+                            WHEN COALESCE(menge_geliefert, 0) + :qty >= menge THEN 'vollstaendig_geliefert'
+                            ELSE 'teilgeliefert'
+                        END,
+                        updated_at = NOW()
+                    WHERE id = :poi
+                      AND bestellung_id IN (
+                          SELECT id FROM domain_einkauf.bestellungen WHERE tenant_id = :tid
+                      )
+                """), {"qty": recv_qty, "poi": poi, "tid": self.tenant_id})
+
+            # Bestellung auf geliefert setzen wenn alle Positionen vollständig geliefert
+            self.db.execute(text("""
+                UPDATE domain_einkauf.bestellungen b
+                SET status = 'geliefert', updated_at = NOW()
+                WHERE b.id = :po_id
+                  AND b.tenant_id = :tid
+                  AND b.status NOT IN ('storniert', 'geliefert')
+                  AND NOT EXISTS (
+                      SELECT 1 FROM domain_einkauf.bestellung_positionen bp
+                      WHERE bp.bestellung_id = b.id
+                        AND COALESCE(bp.status, '') != 'vollstaendig_geliefert'
+                  )
+            """), {"po_id": purchase_order_id, "tid": self.tenant_id})
+        except Exception:  # noqa: BLE001 — non-blocking, PO-Status-Update darf GR nicht blockieren
+            pass
 
     # ── Anfragen ──────────────────────────────────────────────────────────────
 
