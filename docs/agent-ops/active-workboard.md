@@ -206,6 +206,19 @@ Tests grün; type-check grün.
 **Abnahmekriterien:** Ø-Einstandspreis wird bei Zugang berechnet; Putaway-Suggest gibt TOP-10 zurück;
 Seite `/lager/bestandsbewertung` erreichbar; Tests + type-check grün.
 
+## SALES-O2C-001 — O2C Completion: DN delivered → Auftrag geliefert
+
+**Von:** Claude
+**Owner:** Claude
+**Stand:** abgeschlossen 2026-06-13 — `sales_delivery_notes.py`: (1) `DeliveryNoteBase` + INSERT um `sales_order_id`
+erweitert; (2) `deliver_delivery_note` prüft nach shipped→delivered-Transition via `SalesMatchService.match()`,
+ob Auftrag vollständig geliefert ist, und setzt ihn dann auf `geliefert` (fail-soft); 4 Unit-Tests grün.
+**Ziel:** Belegbruch schließen: Lieferschein-Deliver aktualisierte nie den Quell-Auftrag → Auftrag blieb
+nach vollständiger Lieferung auf Offen/In Bearbeitung, kein automatisches O2C-Ende.
+**Dateibesitz:** `app/api/v1/endpoints/sales_delivery_notes.py`, `tests/test_sales_o2c_001.py` (neu).
+**Abnahmekriterien:** 400 wenn Status ≠ shipped; Auftrag auf geliefert wenn vollständig; kein Update bei
+Teillieferung; kein Fehler wenn kein sales_order_id; 4 Tests grün.
+
 ## EINKAUF-3WM-001 — 3-Wege-Match (PO/GR/IR) Alembic-Persistenz
 
 **Von:** Claude
