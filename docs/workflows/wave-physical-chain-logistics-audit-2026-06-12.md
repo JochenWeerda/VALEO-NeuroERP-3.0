@@ -63,3 +63,4 @@ HRM, POS, Webshop, Agent-Ops, Compliance/Meldewesen (extern / P3 laut Depth-Plan
 - Depth-Plan: `docs/project-context/domain-depth-plan-2026-05-17.md`
 - Playwright Auth: `docs/quality-assurance/playwright-smoke-auth.md`
 - Process-Kernel: `docs/architecture/process-kernel/STATUS.md`
+- **Agrar-Materialfluss ↔ Lieferkette (Doku-Brücke, 2026-06-13):** [wm-agri-silo-supply-chain-integration-2026-06-13.md](./wm-agri-silo-supply-chain-integration-2026-06-13.md) — schließt den **Dokumentations-Gap** zwischen SILO-001 und DOM-SUPPLY-004 / Logistik-Welle; technische Lot↔Graph-Kopplung bleibt Folge-Slice.

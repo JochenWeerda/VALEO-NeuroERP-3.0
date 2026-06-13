@@ -1,15 +1,9 @@
+echo "husky - DEPRECATED
+
+Please remove the following two lines from $0:
+
 #!/usr/bin/env sh
+. \"\$(dirname -- \"\$0\")/_/husky.sh\"
 
-if [ "${HUSKY-}" = "0" ]; then
-  exit 0
-fi
-
-hook_dir="$(dirname -- "$0")"
-repo_root="$(cd "$hook_dir/../.." && pwd)"
-
-case ":$PATH:" in
-  *":$repo_root/node_modules/.bin:"*) ;;
-  *) PATH="$repo_root/node_modules/.bin:$PATH" ;;
-esac
-
-export PATH
+They WILL FAIL in v10.0.0
+"

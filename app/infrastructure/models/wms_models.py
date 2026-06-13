@@ -1,6 +1,7 @@
 """SQLAlchemy models for WMS (Warehouse Management System).
 
-Covers warehouse zones, bins, bin-level stock, and WMS-extended pick lists.
+Covers warehouse zones, aisles, bins, bin-level stock, WMS-extended pick lists,
+and agrar-specific silo / material-flow tables (WM-AGRI-SILO-001).
 All tables live in the ``domain_inventory`` schema.
 """
 
@@ -222,3 +223,138 @@ class WmsPickListLine(Base):
     # Sequence by bin location code for efficient warehouse walk
     sort_order = Column(Integer, server_default="0")
     tenant_id = Column(String(64), nullable=True)
+
+
+# ── Agrar: Siloanlagen & Materialfluss (WM-AGRI-SILO-001) ───────────────────
+
+
+class SiloSystem(Base):
+    """Siloanlage / Silogruppe innerhalb eines Lagers."""
+
+    __tablename__ = "silo_systems"
+    __table_args__ = (
+        UniqueConstraint("warehouse_id", "system_code", name="uq_silo_sys_wh_code"),
+        Index("idx_silo_sys_wh", "warehouse_id"),
+        Index("idx_silo_sys_tenant", "tenant_id"),
+        {"schema": "domain_inventory", "extend_existing": True},
+    )
+
+    id = Column(String(36), primary_key=True, default=uuid7)
+    warehouse_id = Column(
+        String(36),
+        ForeignKey("domain_inventory.warehouses.id"),
+        nullable=False,
+    )
+    system_code = Column(String(40), nullable=False)
+    name = Column(String(200), nullable=False)
+    description = Column(Text, nullable=True)
+    tenant_id = Column(String(64), nullable=False)
+    is_active = Column(Boolean, server_default="true")
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+
+class SiloCell(Base):
+    """Silozelle / Kammer; optional an Zone, Gang, Fach angebunden."""
+
+    __tablename__ = "silo_cells"
+    __table_args__ = (
+        UniqueConstraint("silo_system_id", "cell_code", name="uq_silo_cell_sys_code"),
+        Index("idx_silo_cells_sys", "silo_system_id"),
+        Index("idx_silo_cells_wh", "warehouse_id"),
+        Index("idx_silo_cells_tenant", "tenant_id"),
+        {"schema": "domain_inventory", "extend_existing": True},
+    )
+
+    id = Column(String(36), primary_key=True, default=uuid7)
+    silo_system_id = Column(
+        String(36),
+        ForeignKey("domain_inventory.silo_systems.id"),
+        nullable=False,
+    )
+    warehouse_id = Column(
+        String(36),
+        ForeignKey("domain_inventory.warehouses.id"),
+        nullable=False,
+    )
+    zone_id = Column(String(36), ForeignKey("domain_inventory.warehouse_zones.id"), nullable=True)
+    aisle_id = Column(String(36), ForeignKey("domain_inventory.warehouse_aisles.id"), nullable=True)
+    bin_id = Column(String(36), ForeignKey("domain_inventory.warehouse_bins.id"), nullable=True)
+    cell_code = Column(String(40), nullable=False)
+    name = Column(String(200), nullable=False)
+    capacity_kg = Column(DECIMAL(14, 4), nullable=False, server_default="0")
+    current_material_id = Column(String(64), nullable=True)
+    current_lot_id = Column(String(64), nullable=True)
+    qs_status = Column(String(32), nullable=False, server_default="frei")
+    contamination_risk_class = Column(String(32), nullable=True)
+    tenant_id = Column(String(64), nullable=False)
+    is_active = Column(Boolean, server_default="true")
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+
+class MaterialFlowNode(Base):
+    """Knoten im Materialfluss (Waage, Elevator, Silozelle, Mischer, …)."""
+
+    __tablename__ = "material_flow_nodes"
+    __table_args__ = (
+        UniqueConstraint("warehouse_id", "code", name="uq_mfn_wh_code"),
+        Index("idx_mfn_wh", "warehouse_id"),
+        Index("idx_mfn_tenant", "tenant_id"),
+        {"schema": "domain_inventory", "extend_existing": True},
+    )
+
+    id = Column(String(36), primary_key=True, default=uuid7)
+    warehouse_id = Column(
+        String(36),
+        ForeignKey("domain_inventory.warehouses.id"),
+        nullable=False,
+    )
+    node_type = Column(String(40), nullable=False)
+    ref_type = Column(String(40), nullable=True)
+    ref_id = Column(String(64), nullable=True)
+    code = Column(String(64), nullable=False)
+    name = Column(String(200), nullable=False)
+    status = Column(String(32), nullable=False, server_default="active")
+    geo_lat = Column(DECIMAL(10, 7), nullable=True)
+    geo_lng = Column(DECIMAL(10, 7), nullable=True)
+    layout_x = Column(DECIMAL(12, 3), nullable=True)
+    layout_y = Column(DECIMAL(12, 3), nullable=True)
+    tenant_id = Column(String(64), nullable=False)
+    is_active = Column(Boolean, server_default="true")
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+
+class MaterialFlowEdge(Base):
+    """Gerichtete Kante zwischen Materialfluss-Knoten."""
+
+    __tablename__ = "material_flow_edges"
+    __table_args__ = (
+        Index("idx_mfe_wh", "warehouse_id"),
+        Index("idx_mfe_from", "from_node_id"),
+        Index("idx_mfe_to", "to_node_id"),
+        Index("idx_mfe_tenant", "tenant_id"),
+        {"schema": "domain_inventory", "extend_existing": True},
+    )
+
+    id = Column(String(36), primary_key=True, default=uuid7)
+    warehouse_id = Column(
+        String(36),
+        ForeignKey("domain_inventory.warehouses.id"),
+        nullable=False,
+    )
+    from_node_id = Column(
+        String(36),
+        ForeignKey("domain_inventory.material_flow_nodes.id"),
+        nullable=False,
+    )
+    to_node_id = Column(
+        String(36),
+        ForeignKey("domain_inventory.material_flow_nodes.id"),
+        nullable=False,
+    )
+    conveyor_type = Column(String(64), nullable=False, server_default="generic")
+    status = Column(String(32), nullable=False, server_default="open")
+    contamination_guard_enabled = Column(Boolean, nullable=False, server_default="true")
+    flush_required = Column(Boolean, nullable=False, server_default="false")
+    max_capacity_kg_h = Column(DECIMAL(14, 4), nullable=True)
+    tenant_id = Column(String(64), nullable=False)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
