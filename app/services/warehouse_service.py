@@ -422,8 +422,90 @@ class WarehouseService:
               completed_at = CASE WHEN :st = 'COMPLETED' THEN NOW() ELSE completed_at END
             WHERE id = :plid
         """), {"st": new_pl_status, "plid": pick_list_id})
+        # Lieferschein → versandt wenn Pick-Liste komplett (Belegkette schließen)
+        if new_pl_status == "COMPLETED":
+            pl_meta = self.db.execute(text("""
+                SELECT source_doc_ref, source_doc_type FROM domain_inventory.pick_lists
+                WHERE id = :plid
+            """), {"plid": pick_list_id}).fetchone()
+            if pl_meta and pl_meta.source_doc_type == "DELIVERY_NOTE" and pl_meta.source_doc_ref:
+                self.db.execute(text("""
+                    UPDATE domain_sales.delivery_notes
+                    SET status = 'shipped', updated_at = NOW()
+                    WHERE id = :id AND tenant_id = :tid AND status IN ('posted', 'printed')
+                """), {"id": pl_meta.source_doc_ref, "tid": self.tenant_id})
+
         self.db.commit()
         return {"pick_list_id": pick_list_id, "status": new_pl_status}
+
+    def create_pick_list_from_delivery_note(
+        self,
+        ls_id: str,
+        warehouse_id: str | None = None,
+        strategy: str = "FEFO",
+        created_by: str | None = None,
+    ) -> dict:
+        """Erstellt eine WMS-Pick-Liste aus einem gebuchten/gedruckten Lieferschein.
+
+        Schließt den Belegbruch Lieferschein → Kommissionierliste:
+        - Status muss posted/printed sein, sonst ValueError (→ 409)
+        - Positionen mit artikel_id werden als Pick-Positionen übernommen
+        - FEFO-Vorschlag je Position aus bin_stock
+        """
+        dn = self.db.execute(text("""
+            SELECT id, status, delivery_note_number
+            FROM domain_sales.delivery_notes
+            WHERE id = :id AND tenant_id = :tid
+        """), {"id": ls_id, "tid": self.tenant_id}).fetchone()
+        if not dn:
+            raise ValueError(f"Lieferschein {ls_id} nicht gefunden")
+        if dn.status not in ("posted", "printed"):
+            raise ValueError(
+                f"Lieferschein muss gebucht oder gedruckt sein (Status: {dn.status})"
+            )
+
+        # Check no open pick list exists for this delivery note
+        existing = self.db.execute(text("""
+            SELECT id FROM domain_inventory.pick_lists
+            WHERE source_doc_ref = :ref AND source_doc_type = 'DELIVERY_NOTE'
+              AND tenant_id = :tid AND status NOT IN ('COMPLETED', 'CANCELLED')
+        """), {"ref": ls_id, "tid": self.tenant_id}).fetchone()
+        if existing:
+            raise ValueError(
+                f"Für diesen Lieferschein existiert bereits eine offene Pick-Liste ({existing.id})"
+            )
+
+        positions = self.db.execute(text("""
+            SELECT artikel_id, menge, einheit
+            FROM domain_sales.delivery_note_positions
+            WHERE delivery_note_id = :id
+              AND artikel_id IS NOT NULL AND menge > 0
+            ORDER BY pos_nr
+        """), {"id": ls_id}).fetchall()
+
+        if not positions:
+            raise ValueError("Lieferschein hat keine Positionen mit Artikel-Referenz")
+
+        items = [
+            {
+                "article_id": p.artikel_id,
+                "quantity_required": float(p.menge),
+                "unit": p.einheit or "Stk",
+            }
+            for p in positions
+        ]
+
+        result = self.create_pick_list(
+            warehouse_id=warehouse_id or "",
+            items=items,
+            source_doc_ref=ls_id,
+            source_doc_type="DELIVERY_NOTE",
+            strategy=strategy,
+            created_by=created_by,
+        )
+        result["delivery_note_id"] = ls_id
+        result["delivery_note_number"] = dn.delivery_note_number
+        return result
 
     # ── MHD-Ampel ──────────────────────────────────────────────
 

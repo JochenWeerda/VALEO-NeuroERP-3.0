@@ -127,3 +127,121 @@ export function usePatchWmsBin() {
     },
   })
 }
+
+// ── Pick-Listen (WMS-PICK-LINK-001) ────────────────────────────────────────
+
+export type PickListLine = {
+  id: string
+  pick_list_id: string
+  article_id: string
+  bin_id: string | null
+  bin_code?: string | null
+  batch_number: string | null
+  best_before_date: string | null
+  quantity_required: number
+  quantity_picked: number
+  unit: string
+  status: string
+  sort_order: number
+}
+
+export type PickList = {
+  id: string
+  tenant_id?: string
+  warehouse_id: string | null
+  source_doc_ref: string | null
+  source_doc_type: string | null
+  status: string
+  strategy: string
+  created_by: string | null
+  created_at?: string | null
+  completed_at?: string | null
+  delivery_note_id?: string | null
+  delivery_note_number?: string | null
+  lines?: PickListLine[]
+}
+
+export const pickListKeys = {
+  all: ['lager', 'wms', 'pick-lists'] as const,
+  detail: (id: string) => [...pickListKeys.all, id] as const,
+  forDeliveryNote: (lsId: string) => [...pickListKeys.all, 'dn', lsId] as const,
+}
+
+export async function fetchPickList(pickListId: string): Promise<PickList> {
+  const { data } = await apiClient.get<PickList>(`/api/v1/lager/wms/pick-lists/${pickListId}`)
+  return data
+}
+
+export async function fetchPickLists(params?: { source_doc_ref?: string }): Promise<PickList[]> {
+  const { data } = await apiClient.get<PickList[]>('/api/v1/lager/wms/pick-lists', {
+    params,
+  })
+  return Array.isArray(data) ? data : []
+}
+
+export async function createPickListFromDeliveryNote(
+  lsId: string,
+  payload: { warehouse_id?: string | null; strategy?: string; created_by?: string },
+): Promise<PickList> {
+  const { data } = await apiClient.post<PickList>(
+    `/api/v1/lager/wms/pick-lists/from-delivery-note/${encodeURIComponent(lsId)}`,
+    {
+      warehouse_id: payload.warehouse_id ?? null,
+      strategy: payload.strategy ?? 'FEFO',
+      created_by: payload.created_by ?? null,
+    },
+  )
+  return data
+}
+
+export async function confirmPickList(
+  pickListId: string,
+  pickedLines: Array<{ line_id: string; quantity_picked: number }>,
+): Promise<{ pick_list_id: string; status: string }> {
+  const { data } = await apiClient.post<{ pick_list_id: string; status: string }>(
+    `/api/v1/lager/wms/pick-lists/${encodeURIComponent(pickListId)}/confirm`,
+    { picked_lines: pickedLines },
+  )
+  return data
+}
+
+export function usePickList(pickListId: string | null) {
+  return useQuery({
+    queryKey: pickListKeys.detail(pickListId ?? ''),
+    queryFn: () => fetchPickList(pickListId ?? ''),
+    enabled: Boolean(pickListId),
+    staleTime: 15_000,
+  })
+}
+
+export function useCreatePickListFromDeliveryNote() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: ({
+      lsId,
+      payload,
+    }: {
+      lsId: string
+      payload: { warehouse_id?: string | null; strategy?: string; created_by?: string }
+    }) => createPickListFromDeliveryNote(lsId, payload),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: pickListKeys.all })
+    },
+  })
+}
+
+export function useConfirmPickList() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: ({
+      pickListId,
+      pickedLines,
+    }: {
+      pickListId: string
+      pickedLines: Array<{ line_id: string; quantity_picked: number }>
+    }) => confirmPickList(pickListId, pickedLines),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: pickListKeys.all })
+    },
+  })
+}

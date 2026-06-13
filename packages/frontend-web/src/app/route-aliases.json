@@ -1457,6 +1457,14 @@
       "path": "lager/lagerplaetze"
     },
     {
+      "module": "@/pages/lager/materialfluss",
+      "path": "lager/materialfluss"
+    },
+    {
+      "module": "@/pages/lager/kommissionierung",
+      "path": "lager/kommissionierung"
+    },
+    {
       "module": "@/pages/lager/terminal",
       "path": "lager/terminal"
     },
