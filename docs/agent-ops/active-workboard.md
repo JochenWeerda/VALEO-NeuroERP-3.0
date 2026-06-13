@@ -221,6 +221,21 @@ via Alembic-Tabelle statt Runtime-DDL.
 `app/api/v1/endpoints/purchase_invoice_verification.py`, `tests/test_einkauf_3wm_001.py` (neu).
 **Abnahmekriterien:** 503 ohne Migration; Alembic single-head; 5 Tests grün.
 
+## EINK-WE-001 — Wareneingang einbuchen (Einkauf-Lieferschein → Lager)
+
+**Von:** Claude
+**Owner:** Claude
+**Stand:** abgeschlossen 2026-06-13 — `POST /einkauf/lieferscheine/{ls_id}/einbuchen` in `einkauf_lieferschein.py`:
+Verbucht alle Positionen mit `artikel_nr`+`menge>0` als EINLAGERUNG in `domain_inventory.inventory_stock_movements`
+und `bin_stock` via `WarehouseService.book_stock_movement()`; Bin-Auflösung: erst `lagerfach` der Position,
+dann `default_bin_id`, dann auto-Suggest via `suggest_putaway_bin(CAPACITY)`; setzt `erledigt=TRUE` nach
+Buchung; übersprungene Positionen (keine artikel_nr, kein Bin) werden in `detail`-Liste gemeldet; 4 Unit-Tests grün.
+**Ziel:** Belegbruch schließen: Einkauf-Lieferschein (Wareneingang vom Lieferanten) aktualisierte nie
+`bin_stock`/`inventory_stock_movements` → Lager hatte nach Wareneingang keinen aktuellen Bestand.
+**Dateibesitz:** `app/api/v1/endpoints/einkauf_lieferschein.py` (neuer Endpoint),
+`tests/test_eink_we_001.py` (neu).
+**Abnahmekriterien:** 404 wenn LS fehlt; 422 ohne Positionen; Buchung pro Position; erledigt=TRUE danach; 4 Tests grün.
+
 ## WAVE-PHYS-CHAIN-000 — (reserviert / Lead)
 
 **Von:** Cursor
