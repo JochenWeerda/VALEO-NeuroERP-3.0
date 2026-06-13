@@ -406,3 +406,115 @@ async def delete_frachtauftrag(fa_id: str, tenant_id: str = Query("system"), db:
     db.execute(text("DELETE FROM einkauf_frachtauftraege WHERE id = :id AND tenant_id = :tenant_id"), {"id": fa_id, "tenant_id": tenant_id})
     db.commit()
     return None
+
+
+# ── Wareneingang buchen (Belegbruch: Einkauf-LS → Lager) ──────────────────
+
+class EinbuchenPayload(BaseModel):
+    warehouse_id: str
+    default_bin_id: Optional[str] = None
+    unit_cost_override: Optional[Decimal] = None
+
+
+class EinbuchenResult(BaseModel):
+    lieferschein_id: str
+    movements_created: int
+    positions_skipped: int
+    detail: list[dict]
+
+
+@router.post("/lieferscheine/{ls_id}/einbuchen", response_model=EinbuchenResult, status_code=200,
+             summary="Wareneingang in Lager einbuchen (Belegbruch-Fix)")
+async def einbuchen_lieferschein(
+    ls_id: str,
+    payload: EinbuchenPayload,
+    tenant_id: str = Query("system"),
+    db: Session = Depends(get_db),
+):
+    """Bucht alle Positionen des Einkauf-Lieferscheins als Einlagerung
+    (EINLAGERUNG) in domain_inventory.inventory_stock_movements und bin_stock.
+    Voraussetzung: Lieferschein muss existieren; kann auch nicht-erledigte LSe verbuchen,
+    aber jede Position kann nur einmal verbucht werden (idempotent via movement_reference_check).
+    """
+    ls = db.execute(
+        text("SELECT id, lieferschein_nr, erledigt FROM einkauf_lieferscheine WHERE id = :id AND tenant_id = :tid"),
+        {"id": ls_id, "tid": tenant_id},
+    ).mappings().first()
+    if not ls:
+        raise HTTPException(status_code=404, detail="Lieferschein nicht gefunden")
+
+    positions = db.execute(
+        text("SELECT * FROM einkauf_lieferschein_positionen WHERE lieferschein_id = :id ORDER BY pos_nr ASC"),
+        {"id": ls_id},
+    ).mappings().all()
+
+    if not positions:
+        raise HTTPException(status_code=422, detail="Lieferschein hat keine Positionen")
+
+    from app.services.warehouse_service import WarehouseService
+    svc = WarehouseService(db, tenant_id)
+
+    movements_created = 0
+    positions_skipped = 0
+    detail = []
+    reference = f"LS-EK-{ls['lieferschein_nr']}"
+
+    for pos in positions:
+        artikel_id = pos.get("artikel_nr")
+        menge = Decimal(str(pos.get("menge") or 0))
+        if not artikel_id or menge <= 0:
+            positions_skipped += 1
+            detail.append({"pos_nr": pos.get("pos_nr"), "skipped": True, "reason": "keine artikel_nr oder menge=0"})
+            continue
+
+        # Resolve bin: prefer position's lagerfach, then payload default_bin_id
+        bin_id = pos.get("lagerfach") or payload.default_bin_id
+        if not bin_id:
+            # Auto-suggest best bin via CAPACITY strategy
+            suggestions = svc.suggest_putaway_bin(
+                warehouse_id=payload.warehouse_id,
+                article_id=artikel_id,
+                quantity_kg=menge,
+                strategy="CAPACITY",
+            )
+            if not suggestions:
+                positions_skipped += 1
+                detail.append({"pos_nr": pos.get("pos_nr"), "skipped": True, "reason": "kein Bin mit ausreichend Kapazität"})
+                continue
+            bin_id = suggestions[0]["bin_id"]
+
+        unit_cost = payload.unit_cost_override or pos.get("einzelpreis")
+        if unit_cost is not None:
+            unit_cost = Decimal(str(unit_cost))
+
+        try:
+            mv_id = svc.book_stock_movement(
+                bin_id=bin_id,
+                article_id=artikel_id,
+                batch_number=pos.get("charge"),
+                best_before_date=None,
+                quantity_kg=menge,
+                unit_cost=unit_cost,
+                movement_type="EINLAGERUNG",
+                reference=reference,
+            )
+            movements_created += 1
+            detail.append({"pos_nr": pos.get("pos_nr"), "bin_id": bin_id, "menge": float(menge), "mv_id": mv_id})
+        except ValueError as exc:
+            positions_skipped += 1
+            detail.append({"pos_nr": pos.get("pos_nr"), "skipped": True, "reason": str(exc)})
+
+    # Mark lieferschein as erledigt
+    if movements_created > 0:
+        db.execute(
+            text("UPDATE einkauf_lieferscheine SET erledigt = TRUE WHERE id = :id AND tenant_id = :tid"),
+            {"id": ls_id, "tid": tenant_id},
+        )
+        db.commit()
+
+    return EinbuchenResult(
+        lieferschein_id=ls_id,
+        movements_created=movements_created,
+        positions_skipped=positions_skipped,
+        detail=detail,
+    )
