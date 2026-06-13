@@ -561,6 +561,26 @@ class HarvestAcceptanceService:
         obj.updated_by = user_id
         obj.updated_at = _datetime.utcnow()
 
+        # Belegbruch schließen (AGRAR-KON-001): Kontrakt-Restmenge reduzieren bei final release
+        if release_status == "final" and obj.contract_id and net_weight_kg > 0:
+            try:
+                contract = self.db.query(AgrarContract).filter(
+                    AgrarContract.id == obj.contract_id,
+                    AgrarContract.tenant_id == self.tenant_id,
+                ).first()
+                if contract:
+                    from decimal import Decimal as _Dec
+                    new_remaining = max(
+                        _Dec("0"),
+                        (contract.remaining_quantity_kg or _Dec("0")) - net_weight_kg,
+                    )
+                    contract.remaining_quantity_kg = new_remaining
+                    contract.status = (
+                        "fulfilled" if new_remaining == 0 else "partially_allocated"
+                    )
+            except Exception:  # noqa: BLE001 — Kontrakt-Update nicht kritisch für Freigabe
+                pass
+
         # Erstelle Partie/Charge (wenn final und noch nicht vorhanden)
         if release_status == "final":
             existing_lines = self.db.query(HarvestAcceptanceLine).filter(
