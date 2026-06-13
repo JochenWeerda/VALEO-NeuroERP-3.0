@@ -2,6 +2,15 @@
 
 Stand: `2026-06-13`
 
+## WM-AGRI-SILO-001 — Agrar-Silo / Materialfluss (additiv WMS)
+
+**Von:** Cursor
+**Owner:** Cursor
+**Stand:** in Arbeit 2026-06-12 — Migration `agri_silo_material_flow_20260612`, Service `AgriSiloMaterialFlowService`, Router `/api/v1/lager/wms/agri`, Unit-Tests `tests/test_agri_silo_material_flow.py`, Frontend-Prototyp `/lager/materialfluss` (`@xyflow/react`), Doku unter `docs/warehouse/`.
+**Ziel:** Digitales Modell Siloanlage/Silozelle/Materialfluss ohne PLC; QS-Sperre und Verschleppungs-Hinweis auf Routen; Mandanten-Trennung.
+**Dateibesitz:** genannte Alembic-/Backend-/Frontend-/Test-/Doku-Dateien, `docs/agent-ops/slices/WM-AGRI-SILO-001.yaml`, Roadmap `WM-AGRI-FLOW-001.yaml`.
+**Abnahmekriterien:** `alembic heads` einheitlich; API erreichbar; Tests `pytest tests/test_agri_silo_material_flow.py --no-cov` gruen; `npm run type-check` im Frontend nach Dependency; Navigation + Route-Generate konsistent.
+
 ## WAVE-PHYS-CHAIN-001 — Task 0 Verifikation + Logistik-Audit
 
 **Von:** Cursor
@@ -122,6 +131,27 @@ Charge-Link nach ``fertig`` und Trace-Ansicht; Per-Entity-Pending laut Invariant
 `packages/frontend-web/src/pages/produktion/mischfutter-produktion.tsx`, Audit-Doc Futtermittel-Kette.
 **Abnahmekriterien:** Create gegen echtes Backend (201), Statusaktionen mit keyed Pending +
 Toast, fertige Aufträge zeigen Charge/Trace; ESLint + type-check grün.
+
+## WMS-PICK-LINK-001 — Lieferschein → Kommissionierliste → Warenausgang (Belegbruch)
+
+**Von:** Claude
+**Owner:** Claude
+**Stand:** abgeschlossen 2026-06-13 — `create_pick_list_from_delivery_note()` in `warehouse_service.py`
+(prüft Status posted/printed, kein Duplicate, keine leere Pos-Liste → 409); `confirm_pick_list` setzt
+Lieferschein automatisch auf `shipped` wenn DELIVERY_NOTE-Pick-Liste COMPLETED;
+`POST /lager/wms/pick-lists/from-delivery-note/{ls_id}` (409 fail-closed); `warehouse-wms.ts`
+(PickList-Typen, `createPickListFromDeliveryNote`, `confirmPickList`, Hooks); Kommissionierungs-Seite
+`lager/kommissionierung` (per-entity Pending, „Alle bestätigen", FEFO-Zeilen, Toast bei shipped);
+6 Unit-Tests grün; ESLint + type-check grün; Route + Nav-Eintrag generiert.
+**Ziel:** Belegbruch Lieferschein (posted/printed) → Kommissionierliste (WMS/FEFO) → Warenausgang
+(shipped) ohne manuelles REST-Tool.
+**Dateibesitz:** `app/services/warehouse_service.py` (Methoden-Erweiterung),
+`app/api/v1/endpoints/warehouse_wms.py` (neuer Endpoint + PickListFromDeliveryNoteIn),
+`packages/frontend-web/src/lib/api/warehouse-wms.ts` (PickList-Typen + API-Funktionen),
+`packages/frontend-web/src/pages/lager/kommissionierung.tsx` (neu),
+`tests/test_wms_pick_link.py` (neu), `route-aliases.json`, `operations.tsx` (Nav).
+**Abnahmekriterien:** 409 wenn LS nicht posted/printed; 409 bei Duplicate; confirm setzt LS auf shipped;
+6 Tests grün; ESLint + type-check grün; Route `/lager/kommissionierung` erreichbar.
 
 ## WAVE-PHYS-CHAIN-000 — (reserviert / Lead)
 

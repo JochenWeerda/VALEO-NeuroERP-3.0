@@ -3001,6 +3001,11 @@
       "source": "auto"
     },
     {
+      "module": "@/pages/lager/kommissionierung",
+      "path": "lager/kommissionierung",
+      "source": "alias"
+    },
+    {
       "module": "@/pages/lager/lagerbewegungen",
       "path": "lager/lagerbewegungen",
       "source": "auto"
@@ -3014,6 +3019,11 @@
       "module": "@/pages/lager/massebilanz",
       "path": "lager/massebilanz",
       "source": "auto"
+    },
+    {
+      "module": "@/pages/lager/materialfluss",
+      "path": "lager/materialfluss",
+      "source": "alias"
     },
     {
       "module": "@/pages/lager/partiestamm",

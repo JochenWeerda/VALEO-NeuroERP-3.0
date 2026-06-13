@@ -340,6 +340,40 @@ def get_pick_list(pick_list_id: str, svc: WarehouseService = Depends(_svc)):
     return {**dict(pl._mapping), "lines": [dict(l._mapping) for l in lines]}
 
 
+class PickListFromDeliveryNoteIn(BaseModel):
+    warehouse_id: Optional[str] = None
+    strategy: str = "FEFO"
+    created_by: Optional[str] = None
+
+
+@router.post(
+    "/pick-lists/from-delivery-note/{ls_id}",
+    status_code=status.HTTP_201_CREATED,
+    summary="Kommissionierliste aus Lieferschein (WMS-PICK-LINK-001)",
+    response_model=WarehouseWmsOut,
+)
+def create_pick_list_from_delivery_note(
+    ls_id: str,
+    payload: PickListFromDeliveryNoteIn,
+    svc: WarehouseService = Depends(_svc),
+):
+    """Erstellt eine WMS-Kommissionierliste (Pick-Liste) aus einem gebuchten Lieferschein.
+
+    Schließt den Belegbruch: Lieferschein (posted/printed) → Kommissionierliste → Warenausgang
+    (shipped). Wenn alle Positionen bestätigt werden (confirm), setzt die Pick-Liste den
+    Lieferschein-Status automatisch auf 'shipped'.
+    """
+    try:
+        return svc.create_pick_list_from_delivery_note(
+            ls_id=ls_id,
+            warehouse_id=payload.warehouse_id,
+            strategy=payload.strategy,
+            created_by=payload.created_by,
+        )
+    except ValueError as e:
+        raise HTTPException(status_code=409, detail=str(e))
+
+
 @router.post("/pick-lists/{pick_list_id}/confirm", summary="Pick list bestätigen",
     response_model=WarehouseWmsOut
 )
