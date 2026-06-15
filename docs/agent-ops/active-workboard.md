@@ -3914,3 +3914,11 @@ Archiv des vorherigen Boards:
 **Stand:** abgeschlossen 2026-06-15 — `zinsabrechnung.buche_zinsabrechnung`: nach Buchung wird Kreditoren-OP für Zins+MwSt (Zinsgutschrift an Lieferant) in `domain_erp.offene_posten` angelegt (fail-soft).
 **Ziel:** Belegbruch schließen: Zinsabrechnung-Buchung erzeugte Belegnummer aber keinen Kreditoren-OP.
 **Dateibesitz:** `app/api/v1/endpoints/zinsabrechnung.py`.
+
+## ERECHNUNG-BUCHEN-OP-001 — e-Rechnung buchen → Kreditoren-OP anlegen
+
+**Von:** Claude
+**Owner:** Claude
+**Stand:** abgeschlossen 2026-06-15 — `erechnung_import.buchen`: nach IMPORTIERT-Setzung wird Kreditoren-OP für `betrag_brutto` der e-Rechnung in `domain_erp.offene_posten` angelegt (fail-soft).
+**Ziel:** Belegbruch schließen: e-Rechnungs-Buchung setzte Status auf IMPORTIERT aber erzeugte keinen Kreditoren-OP.
+**Dateibesitz:** `app/api/v1/endpoints/erechnung_import.py`.
