@@ -24,14 +24,12 @@ concurrency:
   cancel-in-progress: true
 
 env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
   PYTHON_VERSION: "3.11"
   NODE_VERSION: "20"
   PNPM_VERSION: "9.12.0"
   PYTHONHASHSEED: "0"
   TZ: "UTC"
-
-env:
-  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
 
 jobs:
   path-guard:
