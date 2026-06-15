@@ -166,6 +166,30 @@ async def create_collective_invoice(
         db.rollback()
         raise HTTPException(status_code=503, detail="Datenbankfehler")
 
+    # COLL-INV-OP-001: Debitoren-OP für Sammelrechnung (Belegbruch schliessen)
+    try:
+        from datetime import date as _date
+        today = _date.today().isoformat()
+        due = _date.today().replace(day=min(_date.today().day + 30, 28)).isoformat()
+        db.execute(text("""
+            INSERT INTO domain_erp.offene_posten
+                (id, tenant_id, konto_typ, rechnungsnr, rechnungsdatum, datum, faelligkeit,
+                 betrag, offen, kunde_id, op_status)
+            VALUES (:id, :tid, 'debitoren', :rnr, :rdat, :dat, :faell,
+                    :betrag, :betrag, :kid, 'offen')
+            ON CONFLICT DO NOTHING
+        """), {
+            "id": str(uuid4()),
+            "tid": tenant_id,
+            "rnr": invoice_number,
+            "rdat": str(payload.invoice_date), "dat": today, "faell": due,
+            "betrag": float(total_amount),
+            "kid": payload.customer_id,
+        })
+        db.commit()
+    except Exception:  # noqa: BLE001 — OP-Anlage nicht kritisch für Sammelrechnung
+        pass
+
     # GL-Buchung (Belegbruch Finance): AR-Posting für Sammelrechnung
     # Treat total as gross, compute 19% USt; posting failure must not block the document.
     try:
