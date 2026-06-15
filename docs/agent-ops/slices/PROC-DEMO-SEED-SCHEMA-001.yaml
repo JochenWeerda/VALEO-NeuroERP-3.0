@@ -1,0 +1,25 @@
+slice_id: PROC-DEMO-SEED-SCHEMA-001
+title: Procurement Demo-Seed an kanonisches Inventory-Schema anbinden
+owner: Codex
+status: reserved
+coordination: >-
+  CI-Nachzug aus PR #7. Keine Ueberschneidung mit WM-AGRI-SILO-001.
+  Der abgeschlossene DOM-PROC-004-Slice verwendete noch Legacy-Namen im Seed;
+  nur Seed, fokussierter Vertragstest und Workboard werden geaendert.
+goal: >-
+  Procurement- und RFQ-Integrationstests muessen ihre Demo-Lagerdaten in den
+  migrierten Tabellen domain_inventory.warehouses und stock_locations anlegen,
+  statt nicht existierende public.inventory_*-Tabellen vorauszusetzen.
+file_ownership:
+  - docs/agent-ops/active-workboard.md
+  - docs/agent-ops/slices/PROC-DEMO-SEED-SCHEMA-001.yaml
+  - scripts/seed_demo_procurement.py
+  - tests/test_procurement_seed_schema_contract.py
+acceptance_criteria:
+  - Seed nutzt domain_inventory.warehouses mit warehouse_code.
+  - Seed nutzt domain_inventory.stock_locations mit location_code.
+  - Tenant- und Lagerbezug bleiben idempotent.
+  - Legacy-Namen public.inventory_warehouses und inventory_locations entfallen.
+  - Fokussierter Vertragstest und SQL-f-string-Guardrail sind fuer den Seed gruen.
+risks:
+  - Vollstaendige DB-Integration wird durch andere aktive CI-Blocker beeinflusst.

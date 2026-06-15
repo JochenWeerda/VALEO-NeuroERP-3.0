@@ -549,6 +549,16 @@ Dispo-Arbeitsraum: Tarifliste + Bestätigung + `cancelFreightTariff`; Tests in `
 **Ergebnis:** Der Gitleaks-Snapshot deaktiviert den LFS-Process nur fuer `git archive`, exportiert dadurch den versionierten Pointer und bleibt unabhaengig vom externen Binaerdownload. Der eigentliche Secret-Scan bleibt blockierend und unveraendert.
 **Checks:** Lokaler Archivtest gegen den fehlenden Hofplan-OID erfolgreich; Workflow-YAML geparst; fokussierter Vertragstest gruen.
 
+## PROC-DEMO-SEED-SCHEMA-001
+
+**Von:** Codex
+**Owner:** Codex
+**Stand:** reserviert 2026-06-15
+**Abstimmung:** CI-Nachzug aus PR #7 ohne Ueberschneidung mit dem aktiven Agrar-Silo-Slice. Besitz nur von `scripts/seed_demo_procurement.py`, fokussiertem Vertragstest und diesem Workboard-Eintrag.
+**Ziel des Slices:** Den Procurement-Demo-Seed von nicht existierenden Legacy-Tabellen `public.inventory_warehouses`/`inventory_locations` auf das migrierte `domain_inventory`-Schema umstellen.
+**Abnahmekriterien:** Kanonische Tabellen und Spalten; tenantbezogene Idempotenz; keine Legacy-Namen; fokussierter Test und SQL-Guardrail gruen.
+**Offene Risiken:** Der Gesamt-CI-Lauf besitzt weitere unabhaengige Blocker im aktiven Agrar-Slice und im Dependency-Audit.
+
 ## KIM-DEPRECATE-COCKPIT-001
 
 **Von:** Claude
