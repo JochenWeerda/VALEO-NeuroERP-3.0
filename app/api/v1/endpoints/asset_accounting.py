@@ -311,6 +311,36 @@ def dispose_asset(
             {"id": asset_id, "tid": tenant_id},
         )
         db.commit()
+
+        # ASSET-DISPOSE-JE-001: GL-Buchung für Anlagen-Abgang (Belegbruch schliessen)
+        try:
+            from app.services.finance_transaction_service import FinanceTransactionService
+            fin = FinanceTransactionService(db, tenant_id)
+            lines = [
+                {"account_id": "0800", "debit_amount": float(body.disposal_proceeds), "credit_amount": 0.0,
+                 "description": "Veräußerungserlös Anlage"},
+                {"account_id": "0200", "debit_amount": 0.0, "credit_amount": book_value,
+                 "description": f"Abgang Anlage Buchwert {asset_id[:8]}"},
+            ]
+            if gain_loss > 0:
+                lines.append({"account_id": "2650", "debit_amount": 0.0, "credit_amount": gain_loss,
+                               "description": "Gewinn Anlagenabgang"})
+            elif gain_loss < 0:
+                lines.append({"account_id": "6800", "debit_amount": abs(gain_loss), "credit_amount": 0.0,
+                               "description": "Verlust Anlagenabgang"})
+            fin.create(
+                entry_number=f"ABGANG-{asset_id[:8].upper()}-{body.disposal_date.strftime('%Y%m%d')}",
+                description=f"Anlagenabgang {body.disposal_reason or asset_id}",
+                entry_date=body.disposal_date,
+                lines=lines,
+                reference=asset_id,
+                source="asset_disposal",
+                document_type="asset_disposal",
+                period=body.disposal_date.strftime("%Y-%m"),
+            )
+        except Exception as exc:  # noqa: BLE001 — GL-Buchung nicht kritisch für Abgang
+            logger.warning("Asset disposal GL booking failed (non-blocking): %s", exc)
+
         return {
             "asset_id": asset_id,
             "disposal_date": body.disposal_date.isoformat(),
