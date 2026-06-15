@@ -537,6 +537,16 @@ Dispo-Arbeitsraum: Tarifliste + Bestätigung + `cancelFreightTariff`; Tests in `
 **Ergebnis:** Full-UAT besitzt jetzt PostgreSQL-Service, Python-Installation, Migration, optionalen Env-Fallback und aktive Backend-/Frontend-Probes. Der Erntepeak-Test akzeptiert nur ein explizites Ziel, prueft es vor k6 und weist fehlende Konfiguration als offenes externes Gate aus.
 **Checks:** Beide Workflow-YAMLs geparst; fokussierter Vertragstest 2/2 gruen; `git diff --check` gruen. Produktions-Audit bleibt mit einem High-Befund in `esbuild` blockierend.
 
+## PROD-READINESS-ACTIONS-NODE24-001
+
+**Von:** Codex
+**Owner:** Codex
+**Stand:** reserviert 2026-06-15
+**Abstimmung:** Nachzug aus GitHub E2E Smoke Run `27536228069`; Besitz nur der zentralen Release-, Quality-, Security-, DB-, Docs-, Sonar- und E2E-Workflows sowie eines fokussierten Vertragstests. Keine Produktivlogik und keine Dateien des aktiven Agrar-Silo-Slices.
+**Ziel des Slices:** Zentrale GitHub-Actions vor der fuer den 16.06.2026 angekuendigten Node-24-Standardumschaltung explizit unter Node 24 pruefen und veraltete Setup-Action-Majors aktualisieren.
+**Abnahmekriterien:** Expliziter Node-24-Opt-in; Node-24-faehige Majors fuer Checkout/Node/Python; kein `pnpm/action-setup@v2`; YAML und Vertragstest gruen; GitHub-Abnahme der zentralen Gates.
+**Offene Risiken:** Nicht zentrale Workflows bleiben fuer einen Folgeslice sichtbar; bestehende fachliche Security- und Quality-Befunde werden nicht verdeckt.
+
 ## PROD-READINESS-GITLEAKS-LFS-001
 
 **Von:** Codex
