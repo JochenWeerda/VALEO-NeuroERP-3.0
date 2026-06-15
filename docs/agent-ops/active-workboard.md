@@ -3890,3 +3890,11 @@ Archiv des vorherigen Boards:
 **Stand:** abgeschlossen 2026-06-15 — `strecke.close_streckengeschaeft`: nach Setzung `erledigt=True + rechnungsnr` wird Kreditoren-OP für `brutto`-Betrag in `domain_erp.offene_posten` angelegt (fail-soft).
 **Ziel:** Belegbruch schließen: Streckengeschäft-Abschluss verknüpfte Lieferantenrechnung aber erzeugte keinen OP.
 **Dateibesitz:** `app/api/v1/endpoints/strecke.py`.
+
+## ASSET-DISPOSE-JE-001 — Anlagen-Abgang → GL-Journal-Entry
+
+**Von:** Claude
+**Owner:** Claude
+**Stand:** abgeschlossen 2026-06-15 — `asset_accounting.dispose_asset`: nach Deaktivierung der Anlage wird GL-Buchung (Veräußerungserlös/Buchwert-Abgang/Gewinn-Verlust) via `FinanceTransactionService` gebucht (fail-soft).
+**Ziel:** Belegbruch schließen: Anlagen-Abgang berechnete Gewinn/Verlust aber erzeugte keinen FiBu-Buchungssatz.
+**Dateibesitz:** `app/api/v1/endpoints/asset_accounting.py`.
