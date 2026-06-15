@@ -214,6 +214,16 @@ def buchen(
     tenant_id: str = Depends(get_tenant_id),
 ):
     journal_entry_id = str(uuid4())
+    # Fetch import record for OP creation
+    imp_row = None
+    try:
+        imp_row = db.execute(
+            text("SELECT rechnungsnummer, lieferant_name, betrag_brutto FROM domain_finance.erechnung_imports"
+                 " WHERE id = :id AND tenant_id = :tid"),
+            {"id": import_id, "tid": tenant_id},
+        ).fetchone()
+    except Exception:
+        pass
     try:
         db.execute(
             text(
@@ -230,4 +240,28 @@ def buchen(
         db.commit()
     except Exception:
         db.rollback()
+
+    # ERECHNUNG-BUCHEN-OP-001: Kreditoren-OP für e-Rechnung (Belegbruch schliessen)
+    if imp_row and imp_row[2] and float(imp_row[2]) > 0:
+        try:
+            from datetime import date as _date
+            today = _date.today().isoformat()
+            due = _date.today().replace(day=min(_date.today().day + 30, 28)).isoformat()
+            db.execute(text("""
+                INSERT INTO domain_erp.offene_posten
+                    (id, tenant_id, konto_typ, rechnungsnr, rechnungsdatum, datum, faelligkeit,
+                     betrag, offen, lieferant_name, op_status)
+                VALUES (:id, :tid, 'kreditoren', :rnr, :rdat, :dat, :faell,
+                        :betrag, :betrag, :lname, 'offen')
+                ON CONFLICT DO NOTHING
+            """), {
+                "id": str(uuid4()), "tid": tenant_id,
+                "rnr": imp_row[0] or import_id,
+                "rdat": today, "dat": today, "faell": due,
+                "betrag": float(imp_row[2]), "lname": imp_row[1] or "",
+            })
+            db.commit()
+        except Exception:  # noqa: BLE001 — OP-Anlage nicht kritisch für e-Rechnungs-Buchung
+            pass
+
     return {"status": "gebucht", "journal_entry_id": journal_entry_id}
