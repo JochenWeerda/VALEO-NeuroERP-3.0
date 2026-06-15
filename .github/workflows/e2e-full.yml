@@ -9,11 +9,40 @@ jobs:
   full-uat:
     runs-on: ubuntu-latest
     timeout-minutes: 60
-    
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: valeo_uat
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d valeo_uat"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    env:
+      DATABASE_URL: postgresql://postgres:postgres@127.0.0.1:5432/valeo_uat
+      API_DEV_TOKEN: ci-uat-token
+      EVENT_BUS_ENABLED: "false"
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install backend dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
@@ -40,23 +69,52 @@ jobs:
       
       - name: Setup Test Environment
         run: |
-          cp .env.uat .env
+          if [ -f .env.uat ]; then
+            cp .env.uat .env
+          elif [ -f .env.example ]; then
+            cp .env.example .env
+            echo "::notice::.env.uat fehlt; verwende .env.example als CI-Basis."
+          else
+            touch .env
+            echo "::notice::Keine Env-Vorlage gefunden; erzeuge minimale CI-Konfiguration."
+          fi
           echo "VALEO_TENANT=QA-UAT-01" >> .env
           echo "VALEO_BASE_URL=http://localhost:3000" >> .env
+          echo "DATABASE_URL=$DATABASE_URL" >> .env
+          echo "API_DEV_TOKEN=$API_DEV_TOKEN" >> .env
+          echo "EVENT_BUS_ENABLED=false" >> .env
+
+      - name: Initialize database
+        run: python scripts/init_db.py
       
       - name: Build Application
         run: pnpm --filter @valero-neuroerp/frontend-web build
       
       - name: Start Backend (Background)
         run: |
-          python -m uvicorn main:app --host 0.0.0.0 --port 8000 &
-          sleep 10
+          nohup python -m uvicorn main:app --host 0.0.0.0 --port 8000 > backend.log 2>&1 &
+          for attempt in $(seq 1 30); do
+            if curl --silent --show-error --fail http://127.0.0.1:8000/healthz; then
+              exit 0
+            fi
+            sleep 2
+          done
+          cat backend.log
+          exit 1
       
       - name: Start Frontend (Background)
         run: |
           cd packages/frontend-web
-          pnpm preview --port 3000 &
-          sleep 10
+          nohup pnpm preview --host 127.0.0.1 --port 3000 > ../../frontend.log 2>&1 &
+          cd ../..
+          for attempt in $(seq 1 30); do
+            if curl --silent --show-error --fail http://127.0.0.1:3000/; then
+              exit 0
+            fi
+            sleep 2
+          done
+          cat frontend.log
+          exit 1
       
       - name: Run Full UAT Tests
         run: pnpm exec playwright test --project=full
@@ -78,6 +136,8 @@ jobs:
           path: |
             playwright-tests/artifacts/
             playwright-report/
+            backend.log
+            frontend.log
           retention-days: 30
       
       - name: Upload Coverage Matrix

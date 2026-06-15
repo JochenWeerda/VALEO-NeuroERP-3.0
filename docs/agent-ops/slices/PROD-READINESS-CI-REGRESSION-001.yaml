@@ -1,7 +1,7 @@
 slice_id: PROD-READINESS-CI-REGRESSION-001
 title: Production Readiness CI Regression Hardening
 owner: Codex
-status: reserved
+status: completed
 coordination: >-
   Eng begrenzter Nachzug zu PROD-READINESS-001. Cursor besitzt parallel
   WM-AGRI-SILO-001 und packages/agrar-silo-materialfluss-studio/**; diese
@@ -30,3 +30,11 @@ acceptance_criteria:
 risks:
   - Reale UAT- und Lasttest-Evidenz benoetigt erreichbare Zielsysteme und Secrets.
   - GHSA-gv7w-rqvm-qjhr in esbuild bleibt bis zum Upgrade im Cursor-Slice blockierend.
+result:
+  - Full-UAT stellt PostgreSQL bereit, installiert Backend-Abhaengigkeiten und migriert.
+  - Env-Fallback und aktive Backend-/Frontend-Readiness ersetzen implizite Annahmen.
+  - Erntepeak verwendet nur explizite Ziele und prueft Erreichbarkeit vor k6.
+checks:
+  - YAML-Parse fuer beide Workflows erfolgreich.
+  - pytest tests/test_ci_workflow_regressions.py --noconftest: 2 passed.
+  - pnpm audit --prod --audit-level high: blockiert erwartungsgemaess durch esbuild High.
