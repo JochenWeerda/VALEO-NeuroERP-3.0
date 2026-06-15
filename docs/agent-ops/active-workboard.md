@@ -541,13 +541,13 @@ Dispo-Arbeitsraum: Tarifliste + Bestätigung + `cancelFreightTariff`; Tests in `
 
 **Von:** Codex
 **Owner:** Codex
-**Stand:** implementiert 2026-06-15; GitHub-Abnahme ausstehend
+**Stand:** abgeschlossen 2026-06-15
 **Abstimmung:** Nachzug aus GitHub E2E Smoke Run `27536228069`; Besitz nur der zentralen Release-, Quality-, Security-, DB-, Docs-, Sonar- und E2E-Workflows sowie eines fokussierten Vertragstests. Keine Produktivlogik und keine Dateien des aktiven Agrar-Silo-Slices.
 **Ziel des Slices:** Zentrale GitHub-Actions vor der fuer den 16.06.2026 angekuendigten Node-24-Standardumschaltung explizit unter Node 24 pruefen und veraltete Setup-Action-Majors aktualisieren.
 **Abnahmekriterien:** Expliziter Node-24-Opt-in; Node-24-faehige Majors fuer Checkout/Node/Python; kein `pnpm/action-setup@v2`; YAML und Vertragstest gruen; GitHub-Abnahme der zentralen Gates.
 **Offene Risiken:** Nicht zentrale Workflows bleiben fuer einen Folgeslice sichtbar; bestehende fachliche Security- und Quality-Befunde werden nicht verdeckt.
 **Ergebnis:** Neun zentrale Workflows optieren explizit in Node 24 ein; Checkout, Node-, Python- und pnpm-Setup verwenden die aktuellen v6-Majors.
-**Checks:** Neun Workflow-YAMLs und fokussierter Node-24-Vertrag gruen; GitHub-Abnahme nach Push ausstehend.
+**Checks:** Neun Workflow-YAMLs und fokussierter Node-24-Vertrag gruen. GitHub: E2E `27537066721`, require_db `27537066806` und Docs `27537066910` gruen; Quality `27537066707` sowie Security `27537066782` bestaetigen die neuen Action-Runtimes und scheitern nur an den bereits dokumentierten fachlichen SQL-/esbuild-/Dependency-Graph-Gates.
 
 ## PROD-READINESS-GITLEAKS-LFS-001
 

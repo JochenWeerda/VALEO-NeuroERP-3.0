@@ -1,7 +1,7 @@
 slice_id: PROD-READINESS-ACTIONS-NODE24-001
 title: Zentrale GitHub Actions vor Node-24-Umschaltung haerten
 owner: Codex
-status: implemented_pending_ci
+status: completed
 coordination: >-
   Nachzug aus GitHub E2E Smoke Run 27536228069. Keine Produktivlogik und
   keine Dateien des aktiven Agrar-Silo-Slices. Besitz nur der zentralen
@@ -39,4 +39,9 @@ result:
 checks:
   - Neun Workflow-YAMLs erfolgreich geparst.
   - Fokussierter Node-24-Workflow-Vertrag gruen.
-  - GitHub-Abnahme nach Push ausstehend.
+  - GitHub E2E Smoke Run 27537066721 vollstaendig gruen.
+  - GitHub require_db Run 27537066806 und Docs Run 27537066910 gruen.
+  - Quality Run 27537066707 bestaetigt alle Action-v6-Setups; nur bekannte
+    fachliche SQL- und esbuild-Gates bleiben rot.
+  - Security Run 27537066782 bestaetigt Action-v6, ZAP, Trivy und Grype;
+    nur esbuild-Audit und extern deaktivierter Dependency Graph bleiben rot.
