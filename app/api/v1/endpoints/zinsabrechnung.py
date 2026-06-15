@@ -221,6 +221,34 @@ def buche_zinsabrechnung(
         WHERE id = :id
     """), {"id": zins_id, "beleg_nr": generated_beleg})
     db.commit()
+
+    # ZINS-BUCHUNG-JE-001: Kreditoren-OP für Zinsgutschrift (Belegbruch schliessen)
+    # Zinsgutschrift → Schuld gegenüber Lieferant (Kreditoren)
+    r = dict(row._mapping)
+    zins_brutto = float((r.get("zinsbetrag_eur") or 0)) + float((r.get("mwst_betrag_eur") or 0))
+    if zins_brutto > 0 and r.get("lieferant_nr"):
+        try:
+            import uuid as _uuid
+            from datetime import date as _date
+            today = _date.today().isoformat()
+            due = _date.today().replace(day=min(_date.today().day + 30, 28)).isoformat()
+            db.execute(text("""
+                INSERT INTO domain_erp.offene_posten
+                    (id, tenant_id, konto_typ, rechnungsnr, rechnungsdatum, datum, faelligkeit,
+                     betrag, offen, lieferant_id, lieferant_name, op_status)
+                VALUES (:id, :tid, 'kreditoren', :rnr, :rdat, :dat, :faell,
+                        :betrag, :betrag, :lid, :lname, 'offen')
+                ON CONFLICT DO NOTHING
+            """), {
+                "id": str(_uuid.uuid4()), "tid": tenant_id, "rnr": generated_beleg,
+                "rdat": today, "dat": today, "faell": due,
+                "betrag": zins_brutto,
+                "lid": r.get("lieferant_nr") or "", "lname": r.get("lieferant_name") or "",
+            })
+            db.commit()
+        except Exception:  # noqa: BLE001 — OP-Anlage nicht kritisch für Zins-Buchung
+            pass
+
     row = db.execute(text("""
         SELECT * FROM domain_shared.kontrakt_zinsabrechnungen WHERE id = :id
     """), {"id": zins_id}).fetchone()
