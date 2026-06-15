@@ -1,7 +1,7 @@
 slice_id: QA-KIM-SMOKE-ROUTING-001
 title: KIM Performance-Smoke Route-Prioritaet korrigieren
 owner: Codex
-status: implemented_pending_ci
+status: completed
 coordination: >-
   Nachzug aus E2E-Smoke in PR #7. Keine Produktivdatei und keine aktive
   KIM-Slice-Datei wird geaendert; Besitz nur der Performance-Smoke-Spec.
@@ -25,4 +25,4 @@ result:
   - Spezifische Route-Handler besitzen damit zur Laufzeit Vorrang.
 checks:
   - Fokussierter Route-Prioritaetsvertrag gruen.
-  - CRM-Smoke in GitHub Actions nach Push ausstehend.
+  - GitHub E2E Smoke Run 27536228069 vollstaendig gruen, inklusive CRM.
