@@ -589,11 +589,13 @@ Dispo-Arbeitsraum: Tarifliste + Bestätigung + `cancelFreightTariff`; Tests in `
 
 **Von:** Codex
 **Owner:** Codex
-**Stand:** reserviert 2026-06-15
+**Stand:** implementiert 2026-06-15; erneuter CRM-Smoke ausstehend
 **Abstimmung:** CRM-Smoke-Nachzug aus PR #7. Keine Produktiv- oder aktive KIM-Slice-Datei; exklusiver Besitz der `kim-performance-smoke.spec.ts` und eines fokussierten Vertragstests.
 **Ziel des Slices:** Playwright-Route-Prioritaet korrigieren, damit der KIM-Catch-all die spezifischen Kunden-/Dashboard-Mocks nicht ueberschreibt.
 **Abnahmekriterien:** PERF-Kunden sichtbar; Dashboard-Zaehler aktiv; keine Einzelstrom-Aufrufe; CRM-Smoke auf GitHub gruen.
 **Offene Risiken:** Keine.
+**Ergebnis:** Der tolerante KIM-Catch-all wird vor den spezifischen Kunden-, Dashboard- und Einzelstrom-Mocks registriert. Wegen Playwrights umgekehrter Handler-Prioritaet gewinnen damit die fachlichen Vertrage.
+**Checks:** Fokussierter Route-Prioritaetsvertrag und `git diff --check` gruen; erneuter GitHub-CRM-Smoke ausstehend.
 
 ## KIM-DEPRECATE-COCKPIT-001
 
