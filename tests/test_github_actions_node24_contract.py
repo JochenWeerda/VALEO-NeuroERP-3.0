@@ -26,9 +26,11 @@ CURRENT_ACTIONS = (
 def test_central_workflows_opt_into_node24_action_runtime():
     for name in WORKFLOWS:
         path = ROOT / ".github" / "workflows" / name
-        workflow = yaml.safe_load(path.read_text(encoding="utf-8"))
+        text = path.read_text(encoding="utf-8")
+        workflow = yaml.safe_load(text)
 
         assert workflow["env"]["FORCE_JAVASCRIPT_ACTIONS_TO_NODE24"] == "true"
+        assert text.splitlines().count("env:") == 1
 
 
 def test_central_workflows_use_current_action_majors():
