@@ -537,6 +537,16 @@ Dispo-Arbeitsraum: Tarifliste + Bestätigung + `cancelFreightTariff`; Tests in `
 **Ergebnis:** Full-UAT besitzt jetzt PostgreSQL-Service, Python-Installation, Migration, optionalen Env-Fallback und aktive Backend-/Frontend-Probes. Der Erntepeak-Test akzeptiert nur ein explizites Ziel, prueft es vor k6 und weist fehlende Konfiguration als offenes externes Gate aus.
 **Checks:** Beide Workflow-YAMLs geparst; fokussierter Vertragstest 2/2 gruen; `git diff --check` gruen. Produktions-Audit bleibt mit einem High-Befund in `esbuild` blockierend.
 
+## PROD-READINESS-GITLEAKS-LFS-001
+
+**Von:** Codex
+**Owner:** Codex
+**Stand:** reserviert 2026-06-15
+**Abstimmung:** Nachzug aus PR #7. Exklusiver Besitz des Gitleaks-Schritts in `.github/workflows/quality-gate.yml` und eines fokussierten Vertragstests. Cursor besitzt weiterhin die Hofplan-Datei; keine Aenderung am Bild oder LFS-Objekt.
+**Ziel des Slices:** Secret-Scan vom externen LFS-Download entkoppeln, ohne versionierte Inhalte vom Scan auszunehmen.
+**Abnahmekriterien:** `git archive` exportiert LFS-Pointer ohne Smudge/Download; Gitleaks scannt den Snapshot; fehlende LFS-Binaerobjekte verhindern den Security-Scan nicht; YAML und Vertragstest gruen.
+**Offene Risiken:** Das fehlende Hofplan-LFS-Objekt bleibt als separater Artefaktbefund offen und muss vom Dateieigentuemer nachgeliefert oder bewusst ersetzt werden.
+
 ## KIM-DEPRECATE-COCKPIT-001
 
 **Von:** Claude
