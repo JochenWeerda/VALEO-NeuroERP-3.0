@@ -699,6 +699,33 @@ class AgrarSettlementService:
         except Exception as exc:
             logger.warning("Settlement PDF archiving failed (non-blocking): %s", exc)
 
+        # AGRAR-SETTLE-OP-001: Kreditoren-OP für Lieferantenzahlung anlegen (Belegbruch schliessen)
+        if net and float(net) > 0:
+            try:
+                import uuid as _uuid
+                from datetime import date as _date
+                from sqlalchemy import text as _text
+                today = _date.today().isoformat()
+                due = _date.today().replace(day=min(_date.today().day + 30, 28)).isoformat()
+                self.db.execute(_text("""
+                    INSERT INTO domain_erp.offene_posten
+                        (id, tenant_id, konto_typ, rechnungsnr, rechnungsdatum, datum, faelligkeit,
+                         betrag, offen, lieferant_id, op_status)
+                    VALUES (:id, :tid, 'kreditoren', :rnr, :rdat, :dat, :faell,
+                            :betrag, :betrag, :sid, 'offen')
+                    ON CONFLICT DO NOTHING
+                """), {
+                    "id": str(_uuid.uuid4()),
+                    "tid": self.tenant_id,
+                    "rnr": settlement.settlement_number,
+                    "rdat": today, "dat": today, "faell": due,
+                    "betrag": float(net),
+                    "sid": settlement.supplier_id,
+                })
+                self.db.commit()
+            except Exception as exc:  # noqa: BLE001 — OP-Anlage nicht kritisch für FIBU-Buchung
+                logger.warning("Agrar settlement OP creation failed (non-blocking): %s", exc)
+
         return {
             "ok": True,
             "settlement_id": settlement.id,
