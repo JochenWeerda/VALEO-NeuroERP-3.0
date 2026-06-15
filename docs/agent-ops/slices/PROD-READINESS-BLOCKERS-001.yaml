@@ -1,0 +1,28 @@
+slice_id: PROD-READINESS-BLOCKERS-001
+title: Production-Readiness-Blockaden schliessen
+owner: Codex
+status: reserved
+coordination: >-
+  Nachzug zu PR #7. Konfliktfreie Verantwortung fuer GitHub Dependency
+  Graph/Vulnerability Alerts, das fehlende Hofplan-LFS-Objekt und den
+  esbuild-Security-Pin. app/services/agri_silo_material_flow_service.py
+  bleibt bis zum Handoff im aktiven Cursor-Slice WM-AGRI-SILO-001.
+goal: >-
+  Alle technisch schliessbaren roten Release-Gates beseitigen und den
+  verbleibenden SQL-Guardrail nach sauberem Dateihandoff integrieren.
+file_ownership:
+  - packages/agrar-silo-materialfluss-studio/package.json
+  - pnpm-lock.yaml
+  - docs/agent-ops/active-workboard.md
+  - docs/agent-ops/slices/PROD-READINESS-BLOCKERS-001.yaml
+  - fokussierte Security-Vertragstests
+external_ownership:
+  - GitHub Repository Vulnerability Alerts / Dependency Graph
+  - Git LFS object 68465ac75b for docs/warehouse/references/folkerts-landhandel-hofplan.png
+acceptance_criteria:
+  - pnpm audit --prod --audit-level high ist gruen.
+  - Dependency Review kann auf den Dependency Graph zugreifen.
+  - Das Hofplan-LFS-Objekt ist auf origin verfuegbar.
+  - SQL-f-string-Guardrail ist nach Cursor-Handoff gruen.
+risks:
+  - Der SQL-Fix darf aktiven Cursor-WIP nicht buendeln oder ueberschreiben.
