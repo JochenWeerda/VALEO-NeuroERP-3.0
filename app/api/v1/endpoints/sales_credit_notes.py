@@ -271,6 +271,35 @@ async def post_credit_note(
         {"id": cn_id, "tid": tenant_id},
     )
     db.commit()
+
+    # CREDIT-NOTE-POST-001: GL-Zeilen + OP-Reduktion (Belegbruch schliessen)
+    try:
+        from app.core.uuid7 import uuid7 as _uuid7
+        db.execute(text("""
+            INSERT INTO domain_erp.journal_entry_lines
+                (id, tenant_id, journal_entry_id, account_id, description, debit, credit, line_number, created_at)
+            VALUES
+                (:id1, :tid, :jeid, '1400', 'Gutschrift Forderungsminderung', 0, :total, 1, NOW()),
+                (:id2, :tid, :jeid, '8400', 'Gutschrift Erlöskorrektur', :total, 0, 2, NOW())
+            ON CONFLICT DO NOTHING
+        """), {
+            "id1": _uuid7(), "id2": _uuid7(),
+            "tid": row[1], "jeid": je_id, "total": float(total),
+        })
+        # Debitoren-OP für Gutschrift ausziffern/reduzieren
+        cn_number = str(row[2])
+        db.execute(text("""
+            UPDATE domain_erp.offene_posten
+            SET offen = GREATEST(0, offen - :betrag),
+                op_status = CASE WHEN offen - :betrag <= 0 THEN 'geschlossen' ELSE 'teilweise' END
+            WHERE tenant_id = :tid AND konto_typ = 'debitoren'
+              AND (rechnungsnr = :ref OR kunde_id = :cid)
+              AND op_status NOT IN ('geschlossen', 'ausgeziffert')
+        """), {"tid": row[1], "betrag": float(total), "ref": cn_number, "cid": str(row[3])})
+        db.commit()
+    except Exception:  # noqa: BLE001 — GL-Zeilen/OP-Reduktion nicht kritisch für Gutschrift-Buchung
+        pass
+
     log_fibu_audit(db, row[1], "post", "sales_credit_note", cn_id, {"total": float(total)}, request=request)
     return {"ok": True, "journal_entry_id": je_id}
 
