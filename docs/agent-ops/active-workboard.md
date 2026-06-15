@@ -3826,3 +3826,19 @@ Archiv des vorherigen Boards:
 **Stand:** abgeschlossen 2026-06-13 — `credit_debit_memos.settle_credit_memo`: nach Store-Update wird `domain_erp.offene_posten.offen -= per_invoice` mit auto-Auszifferung gesetzt (fail-soft).
 **Ziel:** Belegbruch schließen: Gutschrift-Verrechnung reduzierte den AP-OP-Saldo nicht.
 **Dateibesitz:** `app/api/v1/endpoints/credit_debit_memos.py`.
+
+## EINK-VERIF-AP-001 — Rechnungsprüfung approve → AP-Invoice freigeben + Kreditoren-OP
+
+**Von:** Claude
+**Owner:** Claude
+**Stand:** abgeschlossen 2026-06-13 — `purchase_invoice_verification.approve_verification`: nach GEMATCHT-Übergang werden `domain_einkauf.ap_invoices.status = 'freigegeben'` und ein Kreditoren-OP in `domain_erp.offene_posten` angelegt (fail-soft).
+**Ziel:** Belegbruch schließen: 3-Wege-Match-Freigabe aktualisierte weder AP-Invoice noch offene Posten.
+**Dateibesitz:** `app/api/v1/endpoints/purchase_invoice_verification.py`.
+
+## AGRAR-SETTLE-OP-001 — Agrar-Abrechnung FIBU-Buchung → Kreditoren-OP
+
+**Von:** Claude
+**Owner:** Claude
+**Stand:** abgeschlossen 2026-06-13 — `agrar_settlement_service.post_to_fibu_full`: nach GL-Buchung wird Kreditoren-OP für Netto-Lieferantenzahlung in `domain_erp.offene_posten` angelegt (fail-soft).
+**Ziel:** Belegbruch schließen: Agrar-Auszahlung erzeugte Journal-Entry aber keinen OP-Eintrag für Lieferantenzahlung.
+**Dateibesitz:** `app/services/agrar_settlement_service.py`.

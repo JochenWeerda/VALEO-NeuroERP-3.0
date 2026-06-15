@@ -10,7 +10,8 @@ Endpoints:
 """
 from __future__ import annotations
 
-from datetime import datetime
+import uuid as _uuid
+from datetime import date as _date, datetime
 from typing import Any, Optional
 
 from fastapi import APIRouter, Depends, HTTPException
@@ -289,6 +290,48 @@ def approve_verification(
 
     if not result:
         raise HTTPException(status_code=404, detail="Prüfvorgang nicht gefunden")
+
+    # EINK-VERIF-AP-001: Belegbruch schliessen — AP-Rechnung freigeben + Kreditoren-OP anlegen
+    inv_row = db.execute(
+        text("""
+            SELECT invoice_id, invoice_amount, supplier_id
+            FROM domain_einkauf.invoice_verification
+            WHERE id = :id AND tenant_id = :tid
+        """),
+        {"id": verification_id, "tid": tenant_id},
+    ).fetchone()
+    if inv_row and inv_row[0]:
+        try:
+            db.execute(text("""
+                UPDATE domain_einkauf.ap_invoices
+                SET status = 'freigegeben', updated_at = NOW()
+                WHERE id = :inv_id AND tenant_id = :tid
+                  AND status NOT IN ('freigegeben', 'bezahlt', 'storniert')
+            """), {"inv_id": inv_row[0], "tid": tenant_id})
+            db.commit()
+        except Exception:  # noqa: BLE001 — AP-Invoice-Update nicht kritisch
+            pass
+        try:
+            today = _date.today().isoformat()
+            due = _date.today().replace(day=min(_date.today().day + 30, 28)).isoformat()
+            db.execute(text("""
+                INSERT INTO domain_erp.offene_posten
+                    (id, tenant_id, konto_typ, rechnungsnr, rechnungsdatum, datum, faelligkeit,
+                     betrag, offen, lieferant_id, op_status)
+                VALUES (:id, :tid, 'kreditoren', :rnr, :rdat, :dat, :faell,
+                        :betrag, :betrag, :sid, 'offen')
+                ON CONFLICT DO NOTHING
+            """), {
+                "id": str(_uuid.uuid4()),
+                "tid": tenant_id,
+                "rnr": inv_row[0],
+                "rdat": today, "dat": today, "faell": due,
+                "betrag": float(inv_row[1] or 0),
+                "sid": inv_row[2],
+            })
+            db.commit()
+        except Exception:  # noqa: BLE001 — OP-Anlage nicht kritisch
+            pass
 
     return {
         "id": result[0],
