@@ -3882,3 +3882,11 @@ Archiv des vorherigen Boards:
 **Stand:** abgeschlossen 2026-06-15 — `dauerauftraege.dauerauftrag_starten`: nach Anlage der Ausführung wird aus den Positionen ein Gesamtbetrag berechnet und Debitoren-OP in `domain_erp.offene_posten` angelegt (fail-soft).
 **Ziel:** Belegbruch schließen: Dauerauftrag-Ausführung erzeugte Belegnummer aber keinen offenen Posten.
 **Dateibesitz:** `app/api/v1/endpoints/dauerauftraege.py`.
+
+## STRECKE-CLOSE-OP-001 — Streckengeschäft abschließen → Kreditoren-OP
+
+**Von:** Claude
+**Owner:** Claude
+**Stand:** abgeschlossen 2026-06-15 — `strecke.close_streckengeschaeft`: nach Setzung `erledigt=True + rechnungsnr` wird Kreditoren-OP für `brutto`-Betrag in `domain_erp.offene_posten` angelegt (fail-soft).
+**Ziel:** Belegbruch schließen: Streckengeschäft-Abschluss verknüpfte Lieferantenrechnung aber erzeugte keinen OP.
+**Dateibesitz:** `app/api/v1/endpoints/strecke.py`.

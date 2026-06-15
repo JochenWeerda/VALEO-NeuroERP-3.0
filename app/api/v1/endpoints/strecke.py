@@ -304,6 +304,31 @@ async def close_streckengeschaeft(
     row.rechnungsnr = rechnungsnr
     db.commit()
     db.refresh(row)
+
+    # STRECKE-CLOSE-OP-001: Kreditoren-OP für Lieferantenrechnung (Belegbruch schliessen)
+    if row.brutto and float(row.brutto) > 0:
+        try:
+            import uuid as _uuid
+            from datetime import date as _date
+            today = _date.today().isoformat()
+            due = _date.today().replace(day=min(_date.today().day + 30, 28)).isoformat()
+            db.execute(text("""
+                INSERT INTO domain_erp.offene_posten
+                    (id, tenant_id, konto_typ, rechnungsnr, rechnungsdatum, datum, faelligkeit,
+                     betrag, offen, lieferant_id, lieferant_name, op_status)
+                VALUES (:id, :tid, 'kreditoren', :rnr, :rdat, :dat, :faell,
+                        :betrag, :betrag, :lid, :lname, 'offen')
+                ON CONFLICT DO NOTHING
+            """), {
+                "id": str(_uuid.uuid4()), "tid": tenant_id, "rnr": rechnungsnr,
+                "rdat": today, "dat": today, "faell": due,
+                "betrag": float(row.brutto),
+                "lid": row.lieferant_nr or "", "lname": row.lieferant_name or "",
+            })
+            db.commit()
+        except Exception:  # noqa: BLE001 — OP-Anlage nicht kritisch für Strecken-Abschluss
+            pass
+
     return StreckengeschaeftOut(
         id=str(row.id),
         strecke_nr=str(row.strecke_nr),
