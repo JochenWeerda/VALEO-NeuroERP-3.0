@@ -1,7 +1,7 @@
 slice_id: QA-PLAYWRIGHT-FIXTURE-001
 title: Playwright Fixture-Signatur mit aktueller Runtime kompatibel machen
 owner: Codex
-status: reserved
+status: completed
 coordination: >-
   Nachzug aus E2E-Smoke in PR #7. WAVE-PHYS-CHAIN-001 ist abgeschlossen;
   aktuell besteht kein anderer Dateibesitz an testSetup.ts.
@@ -20,3 +20,9 @@ acceptance_criteria:
   - Vertragstest und Playwright-Testauflistung sind gruen.
 risks:
   - Fachliche Smoke-Fehler koennen nach erfolgreichem Fixture-Load separat sichtbar werden.
+result:
+  - Tenant-Fixture verwendet ein leeres Objekt-Destrukturierungsmuster.
+  - Tenant-Fallback, Header und Login-Verhalten bleiben unveraendert.
+checks:
+  - Fokussierter Fixture-Vertragstest gruen.
+  - Playwright-Testauflistung fuer Smoke-Projekt erfolgreich.

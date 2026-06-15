@@ -577,11 +577,13 @@ Dispo-Arbeitsraum: Tarifliste + Bestätigung + `cancelFreightTariff`; Tests in `
 
 **Von:** Codex
 **Owner:** Codex
-**Stand:** reserviert 2026-06-15
+**Stand:** abgeschlossen 2026-06-15; erneuter E2E-Smoke ausstehend
 **Abstimmung:** E2E-Smoke-Nachzug aus PR #7. Der fruehere Besitzer `WAVE-PHYS-CHAIN-001` ist abgeschlossen; exklusiver Besitz von `playwright-tests/fixtures/testSetup.ts` und fokussiertem Vertragstest.
 **Ziel des Slices:** Die gemeinsame Tenant-Fixture an die aktuelle Playwright-Anforderung fuer ein destrukturiertes Dependency-Argument anpassen.
 **Abnahmekriterien:** Fixture laedt ohne Parserfehler; Tenant-Verhalten unveraendert; keine gleichartige Signatur im Playwright-Baum; Vertragstest und Testauflistung gruen.
 **Offene Risiken:** Nach dem Fixture-Load koennen weitere fachliche Smoke-Befunde sichtbar werden.
+**Ergebnis:** Die Tenant-Fixture verwendet nun `async ({}, use)` und ist damit mit der aktuellen Playwright-Runtime kompatibel. Tenant-Fallback, Header und Login-Verhalten sind unveraendert.
+**Checks:** Fokussierter Fixture-Vertragstest und Playwright-Testauflistung gruen; `git diff --check` gruen.
 
 ## KIM-DEPRECATE-COCKPIT-001
 
