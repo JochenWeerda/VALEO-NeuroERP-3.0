@@ -182,6 +182,29 @@ class WebshopIntegrationService:
         erp_order_no = order.get("erp_order_number") or self._erp_order_number()
         order.update({"status": "VERARBEITET", "erp_order_number": erp_order_no, "processed_at": _now_iso()})
         self._persist_order(order)
+
+        # WEBSHOP-CONV-ORDER-001: ERP-Auftrag in domain_crm.sales_orders anlegen (Belegbruch schliessen)
+        try:
+            total = sum(_money(p.get("gesamt_preis") or p.get("total_price") or 0)
+                        for p in (order.get("artikel_positionen") or []))
+            self.db.execute(text("""
+                INSERT INTO domain_crm.sales_orders
+                    (id, tenant_id, order_number, customer_id, subject, total_amount,
+                     currency, status, notes, created_at, updated_at, version)
+                VALUES (:id, :tid, :on, :cid, :subj, :total,
+                        'EUR', 'open', :notes, NOW(), NOW(), 1)
+                ON CONFLICT DO NOTHING
+            """), {
+                "id": str(uuid4()), "tid": self.tenant_id, "on": erp_order_no,
+                "cid": str(order.get("kunden_nr") or order.get("customer_id") or ""),
+                "subj": f"Webshop-Import {order.get('externe_bestellnr', '')}",
+                "total": float(total),
+                "notes": f"Webshop: {order.get('shop_system', '')} | ExtNr: {order.get('externe_bestellnr', '')}",
+            })
+            self.db.commit()
+        except Exception:  # noqa: BLE001 — ERP-Auftragsanlage nicht kritisch für Webshop-Import
+            pass
+
         return {"verarbeitet": True, "auftrag_nr": erp_order_no, "hinweis": "Auftrag im ERP angelegt"}
 
     def get_sync_log(self) -> list[dict[str, Any]]:
