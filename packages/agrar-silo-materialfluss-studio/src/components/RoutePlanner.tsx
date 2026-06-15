@@ -5,30 +5,26 @@
 
 import React, { useEffect, useState } from 'react';
 import { MaterialFlowNode, RouteValidationRequest, RouteValidationResult } from '../types';
-import { 
-  AlertTriangle, 
-  ArrowRight, 
-  CheckCircle2, 
-  Compass, 
-  HelpCircle, 
-  Info, 
-  Pause,
+import {
+  AlertTriangle,
+  ArrowRight,
+  CheckCircle2,
+  Compass,
   Play,
   RefreshCw,
-  TrendingDown,
   XCircle,
-  Zap
+  Zap,
 } from 'lucide-react';
 
 interface RoutePlannerProps {
   nodes: MaterialFlowNode[];
   selectedSourceId: string;
   selectedTargetId: string;
-  onChangeSource: (id: string) => void;
-  onChangeTarget: (id: string) => void;
-  onSetSimulation: (active: boolean) => void;
+  onChangeSource: (_id: string) => void;
+  onChangeTarget: (_id: string) => void;
+  onSetSimulation: (_active: boolean) => void;
   isSimulating: boolean;
-  onValidationChange: (result: RouteValidationResult | null) => void;
+  onValidationChange: (_result: RouteValidationResult | null) => void;
 }
 
 export default function RoutePlanner({

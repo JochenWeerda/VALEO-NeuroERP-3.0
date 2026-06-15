@@ -1,0 +1,17 @@
+id: WM-AGRI-CHAIN-002
+title: Materialfluss — supply_chain_events + Outbox (DOM-SUPPLY-Anbindung)
+owner: Cursor
+status: erledigt
+updated: 2026-06-13
+files:
+  - app/services/supply_chain_event_service.py
+  - app/services/agri_material_flow_trace_integration.py
+  - app/services/agri_silo_material_flow_service.py
+  - tests/test_agri_silo_material_flow.py
+  - docs/workflows/wm-agri-silo-supply-chain-integration-2026-06-13.md
+  - docs/project-context/open-gaps-and-known-issues.md
+acceptance:
+  - SupplyChainEventService.record unterstützt commit=False + flush (gleiche DB-Transaktion wie Materialfluss-INSERT/UPDATE)
+  - AgriSiloMaterialFlowService optional trace_hooks_enabled (Tests default false)
+  - Bei trace_hooks_enabled=True schreiben create/patch Siloanlage-Zelle, Materialfluss-Knoten/-Kante und validate-route je ein supply_chain_event (stage=materialfluss) und Outbox inventory.material_flow.*
+  - Unit-Tests Agrar-Materialfluss gruen; neuer Test prüft Doppelaufruf append+outbox bei Kanten-Anlage

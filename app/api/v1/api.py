@@ -1297,7 +1297,7 @@ api_router.include_router(
 api_router.include_router(
     agri_silo_material_flow.router,
     prefix="/lager/wms/agri",
-    tags=["lager", "wms", "agri", "inventory"]
+    tags=["lager", "wms", "agri", "inventory", "silo", "materialfluss"],
 )
 
 api_router.include_router(

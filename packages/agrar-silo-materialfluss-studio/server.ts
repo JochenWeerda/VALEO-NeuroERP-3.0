@@ -569,7 +569,8 @@ async function run() {
 
   // API Endpoint: Plausibilitäts- & Routen-Prüfung (validate-route)
   app.post('/api/warehouse/material-flow/validate-route', (req, res) => {
-    const { fromNodeId, toNodeId, materialId, materialName, contaminationRiskClass } = req.body as RouteValidationRequest;
+    const { fromNodeId, toNodeId, materialId: _materialId, materialName: _materialName, contaminationRiskClass } =
+      req.body as RouteValidationRequest;
 
     if (!fromNodeId || !toNodeId) {
       return res.status(400).json({ error: 'fromNodeId und toNodeId sind erforderlich.' });
@@ -673,7 +674,9 @@ async function run() {
     const visited = new Set<string>();
 
     while (queue.length > 0) {
-      const currentPath = queue.shift()!;
+      const shifted = queue.shift();
+      if (!shifted) break;
+      const currentPath = shifted;
       const lastNode = currentPath[currentPath.length - 1];
 
       if (lastNode === end) {

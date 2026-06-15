@@ -46,8 +46,51 @@ export type ValidateAgriRouteBody = {
   previous_material_id?: string | null
 }
 
+export type SiloSystemCreate = {
+  system_code: string
+  name: string
+  description?: string | null
+}
+
+export type SiloCellCreate = {
+  cell_code: string
+  name: string
+  capacity_kg?: string | number | null
+  zone_id?: string | null
+  aisle_id?: string | null
+  bin_id?: string | null
+  current_material_id?: string | null
+  current_lot_id?: string | null
+  qs_status?: string
+  contamination_risk_class?: string | null
+}
+
+export type MaterialFlowNodeCreate = {
+  node_type: string
+  code: string
+  name: string
+  ref_type?: string | null
+  ref_id?: string | null
+  status?: string
+  geo_lat?: string | number | null
+  geo_lng?: string | number | null
+  layout_x?: string | number | null
+  layout_y?: string | number | null
+}
+
+export type MaterialFlowEdgeCreate = {
+  from_node_id: string
+  to_node_id: string
+  conveyor_type?: string
+  status?: string
+  contamination_guard_enabled?: boolean
+  flush_required?: boolean
+  max_capacity_kg_h?: string | number | null
+}
+
 export const agriMaterialFlowKeys = {
   all: ['lager', 'wms', 'agri'] as const,
+  siloSystems: (warehouseId: string) => [...agriMaterialFlowKeys.all, 'silo-systems', warehouseId] as const,
   siloCells: (warehouseId: string) => [...agriMaterialFlowKeys.all, 'silo-cells', warehouseId] as const,
   nodes: (warehouseId: string) => [...agriMaterialFlowKeys.all, 'nodes', warehouseId] as const,
   edges: (warehouseId: string) => [...agriMaterialFlowKeys.all, 'edges', warehouseId] as const,
@@ -76,6 +119,45 @@ export async function fetchAgriFlowEdges(warehouseId: string): Promise<AgriFlowR
     params: { warehouse_id: warehouseId },
   })
   return asList(data)
+}
+
+export async function fetchAgriSiloSystems(warehouseId: string): Promise<AgriFlowRow[]> {
+  const { data } = await apiClient.get<unknown>('/api/v1/lager/wms/agri/silo-systems', {
+    params: { warehouse_id: warehouseId },
+  })
+  return asList(data)
+}
+
+export async function createAgriSiloSystem(warehouseId: string, body: SiloSystemCreate): Promise<AgriFlowRow> {
+  const { data } = await apiClient.post<unknown>('/api/v1/lager/wms/agri/silo-systems', body, {
+    params: { warehouse_id: warehouseId },
+  })
+  return (data && typeof data === 'object' ? data : {}) as AgriFlowRow
+}
+
+export async function createAgriSiloCell(
+  siloSystemId: string,
+  warehouseId: string,
+  body: SiloCellCreate,
+): Promise<AgriFlowRow> {
+  const { data } = await apiClient.post<unknown>('/api/v1/lager/wms/agri/silo-cells', body, {
+    params: { silo_system_id: siloSystemId, warehouse_id: warehouseId },
+  })
+  return (data && typeof data === 'object' ? data : {}) as AgriFlowRow
+}
+
+export async function createAgriFlowNode(warehouseId: string, body: MaterialFlowNodeCreate): Promise<AgriFlowRow> {
+  const { data } = await apiClient.post<unknown>('/api/v1/lager/wms/agri/material-flow/nodes', body, {
+    params: { warehouse_id: warehouseId },
+  })
+  return (data && typeof data === 'object' ? data : {}) as AgriFlowRow
+}
+
+export async function createAgriFlowEdge(warehouseId: string, body: MaterialFlowEdgeCreate): Promise<AgriFlowRow> {
+  const { data } = await apiClient.post<unknown>('/api/v1/lager/wms/agri/material-flow/edges', body, {
+    params: { warehouse_id: warehouseId },
+  })
+  return (data && typeof data === 'object' ? data : {}) as AgriFlowRow
 }
 
 export async function patchAgriSiloCell(
@@ -140,6 +222,59 @@ export function useAgriFlowEdges(warehouseId: string | undefined, options?: { en
     queryKey: agriMaterialFlowKeys.edges(wid),
     queryFn: () => fetchAgriFlowEdges(wid),
     enabled: Boolean(wid) && (options?.enabled ?? true),
+  })
+}
+
+export function useAgriSiloSystems(warehouseId: string | undefined, options?: { enabled?: boolean }) {
+  const wid = warehouseId ?? ''
+  return useQuery({
+    queryKey: agriMaterialFlowKeys.siloSystems(wid),
+    queryFn: () => fetchAgriSiloSystems(wid),
+    enabled: Boolean(wid) && (options?.enabled ?? true),
+  })
+}
+
+export function useCreateAgriSiloSystem() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: async (vars: { warehouseId: string; body: SiloSystemCreate }) =>
+      createAgriSiloSystem(vars.warehouseId, vars.body),
+    onSuccess: (_data, vars) => {
+      void qc.invalidateQueries({ queryKey: agriMaterialFlowKeys.siloSystems(vars.warehouseId) })
+    },
+  })
+}
+
+export function useCreateAgriSiloCell() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: async (vars: { siloSystemId: string; warehouseId: string; body: SiloCellCreate }) =>
+      createAgriSiloCell(vars.siloSystemId, vars.warehouseId, vars.body),
+    onSuccess: (_data, vars) => {
+      void qc.invalidateQueries({ queryKey: agriMaterialFlowKeys.siloCells(vars.warehouseId) })
+    },
+  })
+}
+
+export function useCreateAgriFlowNode() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: async (vars: { warehouseId: string; body: MaterialFlowNodeCreate }) =>
+      createAgriFlowNode(vars.warehouseId, vars.body),
+    onSuccess: (_data, vars) => {
+      void qc.invalidateQueries({ queryKey: agriMaterialFlowKeys.nodes(vars.warehouseId) })
+    },
+  })
+}
+
+export function useCreateAgriFlowEdge() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: async (vars: { warehouseId: string; body: MaterialFlowEdgeCreate }) =>
+      createAgriFlowEdge(vars.warehouseId, vars.body),
+    onSuccess: (_data, vars) => {
+      void qc.invalidateQueries({ queryKey: agriMaterialFlowKeys.edges(vars.warehouseId) })
+    },
   })
 }
 

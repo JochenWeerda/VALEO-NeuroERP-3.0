@@ -9,15 +9,7 @@ import SiloFlowsheet from './components/SiloFlowsheet';
 import SiloCellList from './components/SiloCellList';
 import RoutePlanner from './components/RoutePlanner';
 import { MaterialFlowEdge, MaterialFlowNode, RouteValidationResult, SiloCell } from './types';
-import { 
-  BookOpen, 
-  CheckCircle, 
-  FlameKindling, 
-  HelpCircle, 
-  Info, 
-  Settings,
-  ShieldAlert
-} from 'lucide-react';
+import { BookOpen } from 'lucide-react';
 
 export default function App() {
   const [cells, setCells] = useState<SiloCell[]>([]);

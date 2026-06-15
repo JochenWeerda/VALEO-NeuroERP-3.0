@@ -69,6 +69,7 @@ class SupplyChainEventService:
         bediener: Optional[str] = None,
         source: str = "manual",
         occurred_at: Optional[str] = None,
+        commit: bool = True,
     ) -> dict:
         import json
 
@@ -95,7 +96,10 @@ class SupplyChainEventService:
                 "bediener": bediener, "source": source, "occurred_at": occurred_at,
             },
         )
-        self.db.commit()
+        if commit:
+            self.db.commit()
+        else:
+            self.db.flush()
         # reviewed-safe: _COLS is a module-owned constant; the event id is bound.
         r = self.db.execute(
             text(f"SELECT {_COLS} FROM domain_inventory.supply_chain_events WHERE id = :id"),

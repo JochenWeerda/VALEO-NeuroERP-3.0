@@ -29,7 +29,7 @@ def make_svc():
     from app.services.agri_silo_material_flow_service import AgriSiloMaterialFlowService
 
     db = MagicMock()
-    return AgriSiloMaterialFlowService(db, "tenant-a"), db
+    return AgriSiloMaterialFlowService(db, "tenant-a", trace_hooks_enabled=False), db
 
 
 @pytest.mark.unit
@@ -324,4 +324,45 @@ def test_patch_material_flow_edge_flush_only():
     ]
     out = svc.patch_material_flow_edge("e1", "wh-1", {"flush_required": True})
     assert out.get("flush_required") is True
+    svc.db.commit.assert_called_once()
+
+
+@pytest.mark.unit
+def test_trace_hooks_invoke_integration_on_edge_create(mocker):
+    append = mocker.patch(
+        "app.services.agri_material_flow_trace_integration.append_material_flow_supply_chain_event",
+    )
+    outbox = mocker.patch(
+        "app.services.agri_material_flow_trace_integration.store_material_flow_outbox_best_effort",
+    )
+    from app.services.agri_silo_material_flow_service import AgriSiloMaterialFlowService
+
+    db = MagicMock()
+    svc = AgriSiloMaterialFlowService(db, "tenant-x", trace_hooks_enabled=True)
+    n_from = _row(
+        id="n1",
+        warehouse_id="wh-1",
+        status="active",
+        ref_type=None,
+        ref_id=None,
+    )
+    n_to = _row(
+        id="n2",
+        warehouse_id="wh-1",
+        status="active",
+        ref_type=None,
+        ref_id=None,
+    )
+    db.execute.side_effect = [
+        _mk_result(fetchone=n_from),
+        _mk_result(fetchone=n_to),
+        _mk_result(fetchone=n_to),
+        MagicMock(),
+    ]
+    svc.create_material_flow_edge(
+        "wh-1",
+        {"from_node_id": "n1", "to_node_id": "n2", "status": "open"},
+    )
+    append.assert_called_once()
+    outbox.assert_called_once()
     svc.db.commit.assert_called_once()
