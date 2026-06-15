@@ -529,11 +529,13 @@ Dispo-Arbeitsraum: Tarifliste + Bestätigung + `cancelFreightTariff`; Tests in `
 
 **Von:** Codex
 **Owner:** Codex
-**Stand:** reserviert 2026-06-15
+**Stand:** abgeschlossen 2026-06-15 (repo-seitig); Live-Evidenz und separater Security-Handoff offen
 **Abstimmung:** Enger Nachzug zu `PROD-READINESS-001`. Exklusiver Besitz von `.github/workflows/e2e-full.yml`, `.github/workflows/load-test.yml`, fokussiertem Vertragstest und Ergebnisdoku. Cursor besitzt `WM-AGRI-SILO-001` sowie `packages/agrar-silo-materialfluss-studio/**`; dort keine Aenderung.
 **Ziel des Slices:** Full-UAT lokal vollstaendig und ohne unversionierte `.env.uat` aufsetzen; Erntepeak-Lasttest nur gegen ein explizit konfiguriertes und vorab erreichbares Ziel starten; externe Gates ehrlich ausweisen.
 **Abnahmekriterien:** Python-Abhaengigkeiten und Env-Fallback im Full-UAT; kein hart codiertes Staging-Ziel; fehlende Konfiguration wird uebersprungen und dokumentiert; unerreichbares konfiguriertes Ziel scheitert vor k6; YAML und Vertragstests gruen.
 **Offene Risiken:** Live-Evidenz erfordert Staging-Secrets und ein erreichbares System. Separater blockierender Security-Handoff an Cursor: `esbuild` GHSA-gv7w-rqvm-qjhr im aktiven Agrar-Studio-Slice auf gepatchte Version anheben und Audit erneut ausfuehren.
+**Ergebnis:** Full-UAT besitzt jetzt PostgreSQL-Service, Python-Installation, Migration, optionalen Env-Fallback und aktive Backend-/Frontend-Probes. Der Erntepeak-Test akzeptiert nur ein explizites Ziel, prueft es vor k6 und weist fehlende Konfiguration als offenes externes Gate aus.
+**Checks:** Beide Workflow-YAMLs geparst; fokussierter Vertragstest 2/2 gruen; `git diff --check` gruen. Produktions-Audit bleibt mit einem High-Befund in `esbuild` blockierend.
 
 ## KIM-DEPRECATE-COCKPIT-001
 
