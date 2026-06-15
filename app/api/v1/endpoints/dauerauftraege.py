@@ -260,6 +260,31 @@ def dauerauftrag_starten(
     """), {"naechster": naechster, "id": d["id"]})
     db.commit()
 
+    # DAUERAUFTRAG-OP-001: Debitoren-OP für ausgelöste Dauerauftrag-Rechnung
+    try:
+        positionen = _load_positionen(db, tenant_id, d["id"])
+        gesamt = sum(
+            Decimal(str(p.get("menge") or 0)) * Decimal(str(p.get("preis_eur") or 0))
+            for p in positionen
+        )
+        if gesamt > 0:
+            faell = (date.today().replace(day=min(date.today().day + 30, 28)))
+            db.execute(text("""
+                INSERT INTO domain_erp.offene_posten
+                    (id, tenant_id, konto_typ, rechnungsnr, rechnungsdatum, datum, faelligkeit,
+                     betrag, offen, kunde_id, op_status)
+                VALUES (:id, :tid, 'debitoren', :rnr, :rdat, :dat, :faell,
+                        :betrag, :betrag, :kid, 'offen')
+                ON CONFLICT DO NOTHING
+            """), {
+                "id": str(uuid7()), "tid": tenant_id, "rnr": belegnummer,
+                "rdat": str(date.today()), "dat": str(date.today()), "faell": str(faell),
+                "betrag": float(gesamt), "kid": d["kunden_nr"],
+            })
+            db.commit()
+    except Exception:  # noqa: BLE001 — OP-Anlage nicht kritisch für Dauerauftrag-Start
+        pass
+
     aus_row = db.execute(text(
         "SELECT * FROM domain_shared.dauerauftrag_ausfuehrungen WHERE id = :id"
     ), {"id": ausfuehrungs_id}).fetchone()

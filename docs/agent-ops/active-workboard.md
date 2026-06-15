@@ -3874,3 +3874,11 @@ Archiv des vorherigen Boards:
 **Stand:** abgeschlossen 2026-06-15 — `sales_delivery_notes.create_invoice_from_delivery`: nach GL-Buchung werden Debitoren-OP und `sales_invoice`-Eintrag im Document-Store angelegt (fail-soft).
 **Ziel:** Belegbruch schließen: Einzel-LS→RE-Konvertierung erzeugte JE aber keinen OP und keinen Store-Eintrag.
 **Dateibesitz:** `app/api/v1/endpoints/sales_delivery_notes.py`.
+
+## DAUERAUFTRAG-OP-001 — Dauerauftrag starten → Debitoren-OP anlegen
+
+**Von:** Claude
+**Owner:** Claude
+**Stand:** abgeschlossen 2026-06-15 — `dauerauftraege.dauerauftrag_starten`: nach Anlage der Ausführung wird aus den Positionen ein Gesamtbetrag berechnet und Debitoren-OP in `domain_erp.offene_posten` angelegt (fail-soft).
+**Ziel:** Belegbruch schließen: Dauerauftrag-Ausführung erzeugte Belegnummer aber keinen offenen Posten.
+**Dateibesitz:** `app/api/v1/endpoints/dauerauftraege.py`.
