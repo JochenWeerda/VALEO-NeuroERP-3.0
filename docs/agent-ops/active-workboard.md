@@ -573,6 +573,16 @@ Dispo-Arbeitsraum: Tarifliste + Bestätigung + `cancelFreightTariff`; Tests in `
 **Ergebnis:** Match-Service und Demo-Seed verwenden `einkauf_wareneingaenge`/`einkauf_wareneingang_positionen`. Gelieferte Mengen werden ueber `purchase_order_item_id` zur Bestellposition aufgeloest; Tenant-Isolation erfolgt ueber die Bestellung.
 **Checks:** Fokussierter Schema-Vertrag, Python-Compile und reine Procurement-Unit-Tests gruen; keine `public.inventory_goods_receipts*`-Referenz im geaenderten Spine.
 
+## QA-PLAYWRIGHT-FIXTURE-001
+
+**Von:** Codex
+**Owner:** Codex
+**Stand:** reserviert 2026-06-15
+**Abstimmung:** E2E-Smoke-Nachzug aus PR #7. Der fruehere Besitzer `WAVE-PHYS-CHAIN-001` ist abgeschlossen; exklusiver Besitz von `playwright-tests/fixtures/testSetup.ts` und fokussiertem Vertragstest.
+**Ziel des Slices:** Die gemeinsame Tenant-Fixture an die aktuelle Playwright-Anforderung fuer ein destrukturiertes Dependency-Argument anpassen.
+**Abnahmekriterien:** Fixture laedt ohne Parserfehler; Tenant-Verhalten unveraendert; keine gleichartige Signatur im Playwright-Baum; Vertragstest und Testauflistung gruen.
+**Offene Risiken:** Nach dem Fixture-Load koennen weitere fachliche Smoke-Befunde sichtbar werden.
+
 ## KIM-DEPRECATE-COCKPIT-001
 
 **Von:** Claude
