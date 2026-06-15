@@ -525,6 +525,16 @@ Dispo-Arbeitsraum: Tarifliste + Bestätigung + `cancelFreightTariff`; Tests in `
 **Abnahmekriterien:** Release-CI kann Typecheck/Lint/Tests oder High/Critical-Befunde nicht uebergehen; SBOM wird erzeugt; produktive Konfiguration scheitert bei Dev-Tokens, Default-Secrets, Debug/Reload, Wildcard-Hosts oder fehlenden Pflichtwerten; Deployments sind environment-geschuetzt und besitzen Migration-Preflight, Smoke und Rollback; externe UAT-, Steuer-, DMS-, TSE- und Hardwareabnahmen bleiben explizit blockierend; YAML-, Skript-, Doku- und fokussierte Vertragstests sind gruen.
 **Offene Risiken:** Echte Cloud-/Kubernetes-Zugangsdaten, Branch-Protection-Regeln, GitHub-Environment-Approvals und fachliche Unterschriften koennen nur als externe GitHub-/Betriebs-Gates konfiguriert, nicht im Repository erfunden werden.
 
+## PROD-READINESS-CI-REGRESSION-001
+
+**Von:** Codex
+**Owner:** Codex
+**Stand:** reserviert 2026-06-15
+**Abstimmung:** Enger Nachzug zu `PROD-READINESS-001`. Exklusiver Besitz von `.github/workflows/e2e-full.yml`, `.github/workflows/load-test.yml`, fokussiertem Vertragstest und Ergebnisdoku. Cursor besitzt `WM-AGRI-SILO-001` sowie `packages/agrar-silo-materialfluss-studio/**`; dort keine Aenderung.
+**Ziel des Slices:** Full-UAT lokal vollstaendig und ohne unversionierte `.env.uat` aufsetzen; Erntepeak-Lasttest nur gegen ein explizit konfiguriertes und vorab erreichbares Ziel starten; externe Gates ehrlich ausweisen.
+**Abnahmekriterien:** Python-Abhaengigkeiten und Env-Fallback im Full-UAT; kein hart codiertes Staging-Ziel; fehlende Konfiguration wird uebersprungen und dokumentiert; unerreichbares konfiguriertes Ziel scheitert vor k6; YAML und Vertragstests gruen.
+**Offene Risiken:** Live-Evidenz erfordert Staging-Secrets und ein erreichbares System. Separater blockierender Security-Handoff an Cursor: `esbuild` GHSA-gv7w-rqvm-qjhr im aktiven Agrar-Studio-Slice auf gepatchte Version anheben und Audit erneut ausfuehren.
+
 ## KIM-DEPRECATE-COCKPIT-001
 
 **Von:** Claude
