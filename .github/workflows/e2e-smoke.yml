@@ -42,8 +42,6 @@ jobs:
       
       - name: Setup pnpm
         uses: pnpm/action-setup@v6
-        with:
-          version: 9
 
       # `actions/setup-node`'s pnpm caching requires `pnpm` to already be on PATH.
       - name: Setup Node.js (pnpm cache)
