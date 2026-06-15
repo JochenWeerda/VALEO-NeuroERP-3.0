@@ -72,9 +72,15 @@ jobs:
         run: |
           # Use `git archive` to scan a working-tree snapshot without `.git/`.
           # This avoids false positives from temporary auth headers written by actions/checkout.
+          # Disable LFS smudging for the archive: gitleaks scans the versioned pointer,
+          # and a missing external binary must not prevent the repository secret scan.
           rm -rf /tmp/gitleaks-src
           mkdir -p /tmp/gitleaks-src
-          git archive --format=tar HEAD | tar -x -C /tmp/gitleaks-src
+          git \
+            -c filter.lfs.process= \
+            -c filter.lfs.smudge=cat \
+            -c filter.lfs.required=false \
+            archive --format=tar HEAD | tar -x -C /tmp/gitleaks-src
 
           set +e
           docker run --rm \
