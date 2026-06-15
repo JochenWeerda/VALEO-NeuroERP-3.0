@@ -50,26 +50,53 @@ def _lieferant(db) -> str:
 
 def _warehouse_location(db) -> tuple[str, str]:
     """Get-or-create ein Demo-Lager + -Lagerplatz (FK-Ziele der WE-Zeilen)."""
-    now = datetime.utcnow()
-    wh = db.execute(text("SELECT id FROM public.inventory_warehouses WHERE code = 'DEMO-WH'")).first()
+    wh = db.execute(
+        text(
+            "SELECT id FROM domain_inventory.warehouses "
+            "WHERE warehouse_code = :code AND tenant_id = :tenant"
+        ),
+        {"code": "DEMO-WH", "tenant": TENANT},
+    ).first()
     if wh:
         wh_id = str(wh[0])
     else:
         wh_id = str(uuid.uuid4())
         db.execute(
-            text("INSERT INTO public.inventory_warehouses (id, code, name, tenant_id, is_active, created_at, updated_at) "
-                 "VALUES (:id, 'DEMO-WH', 'Demo-Lager', :t, true, :ts, :ts)"),
-            {"id": wh_id, "t": TENANT, "ts": now},
+            text(
+                "INSERT INTO domain_inventory.warehouses "
+                "(id, tenant_id, warehouse_code, name, is_active) "
+                "VALUES (:id, :tenant, :code, :name, true)"
+            ),
+            {
+                "id": wh_id,
+                "tenant": TENANT,
+                "code": "DEMO-WH",
+                "name": "Demo-Lager",
+            },
         )
-    loc = db.execute(text("SELECT id FROM public.inventory_locations WHERE code = 'DEMO-LOC'")).first()
+    loc = db.execute(
+        text(
+            "SELECT id FROM domain_inventory.stock_locations "
+            "WHERE warehouse_id = :warehouse_id AND location_code = :code"
+        ),
+        {"warehouse_id": wh_id, "code": "DEMO-LOC"},
+    ).first()
     if loc:
         loc_id = str(loc[0])
     else:
         loc_id = str(uuid.uuid4())
         db.execute(
-            text("INSERT INTO public.inventory_locations (id, warehouse_id, code, location_type, created_at) "
-                 "VALUES (:id, :wh, 'DEMO-LOC', 'bulk', :ts)"),
-            {"id": loc_id, "wh": wh_id, "ts": now},
+            text(
+                "INSERT INTO domain_inventory.stock_locations "
+                "(id, warehouse_id, location_code, location_type, is_active) "
+                "VALUES (:id, :warehouse_id, :code, :location_type, true)"
+            ),
+            {
+                "id": loc_id,
+                "warehouse_id": wh_id,
+                "code": "DEMO-LOC",
+                "location_type": "bulk",
+            },
         )
     return wh_id, loc_id
 

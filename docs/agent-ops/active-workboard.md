@@ -553,11 +553,13 @@ Dispo-Arbeitsraum: Tarifliste + Bestätigung + `cancelFreightTariff`; Tests in `
 
 **Von:** Codex
 **Owner:** Codex
-**Stand:** reserviert 2026-06-15
+**Stand:** abgeschlossen 2026-06-15; erneuter DB-CI-Lauf ausstehend
 **Abstimmung:** CI-Nachzug aus PR #7 ohne Ueberschneidung mit dem aktiven Agrar-Silo-Slice. Besitz nur von `scripts/seed_demo_procurement.py`, fokussiertem Vertragstest und diesem Workboard-Eintrag.
 **Ziel des Slices:** Den Procurement-Demo-Seed von nicht existierenden Legacy-Tabellen `public.inventory_warehouses`/`inventory_locations` auf das migrierte `domain_inventory`-Schema umstellen.
 **Abnahmekriterien:** Kanonische Tabellen und Spalten; tenantbezogene Idempotenz; keine Legacy-Namen; fokussierter Test und SQL-Guardrail gruen.
 **Offene Risiken:** Der Gesamt-CI-Lauf besitzt weitere unabhaengige Blocker im aktiven Agrar-Slice und im Dependency-Audit.
+**Ergebnis:** Demo-Lager wird tenantbezogen in `domain_inventory.warehouses` ueber `warehouse_code` angelegt; der Lagerplatz lagerbezogen in `domain_inventory.stock_locations` ueber `location_code`. Die nicht migrierten `public.inventory_*`-Namen sind entfernt.
+**Checks:** Fokussierter Schema-Vertragstest gruen; keine neuen SQL-f-string-Befunde; `git diff --check` gruen.
 
 ## KIM-DEPRECATE-COCKPIT-001
 
