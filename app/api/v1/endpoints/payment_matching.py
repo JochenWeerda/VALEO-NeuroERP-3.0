@@ -19,6 +19,7 @@ from app.core.data_quality_enforcement import (
     build_dq_error_detail,
     evaluate_payment_import_datensatz,
 )
+from app.documents.router_helpers import get_repository, get_from_store, save_to_store
 
 logger = logging.getLogger(__name__)
 
@@ -395,6 +396,18 @@ async def match_payment(
             })
         except Exception as line_err:
             logger.warning(f"Update bank_statement_lines for match: {line_err}")
+
+        # PAY-MATCH-INV-001: Belegbruch schliessen — AR-Rechnung auf BEZAHLT setzen
+        if remaining_amount == 0 and op_result[1]:
+            try:
+                repo = get_repository(db)
+                inv = get_from_store("sales_invoice", str(op_result[1]), repo)
+                if inv and inv.get("status") not in ("BEZAHLT", "STORNIERT", "GUTGESCHRIEBEN"):
+                    inv["status"] = "BEZAHLT"
+                    save_to_store("sales_invoice", str(op_result[1]), inv, repo)
+            except Exception as inv_err:  # noqa: BLE001 — AR-Invoice-Update nicht kritisch
+                logger.debug("AR invoice BEZAHLT update skipped: %s", inv_err)
+
         db.commit()
         
         return MatchResult(
@@ -549,6 +562,17 @@ async def auto_match_payments(
                     }
                 )
                 
+                # PAY-MATCH-INV-001: AR-Rechnung auf BEZAHLT setzen wenn OP vollständig
+                if remaining_amount == 0 and best_op[1]:
+                    try:
+                        repo = get_repository(db)
+                        inv = get_from_store("sales_invoice", str(best_op[1]), repo)
+                        if inv and inv.get("status") not in ("BEZAHLT", "STORNIERT", "GUTGESCHRIEBEN"):
+                            inv["status"] = "BEZAHLT"
+                            save_to_store("sales_invoice", str(best_op[1]), inv, repo)
+                    except Exception:  # noqa: BLE001 — nicht kritisch
+                        pass
+
                 match_results.append(MatchResult(
                     payment_id=line_id,
                     matched_op_id=op_id,
@@ -558,7 +582,7 @@ async def auto_match_payments(
                     confidence=0.9 if invoice_match else 0.7,
                     match_reason=f"Auto-matched by {'reference' if invoice_match else 'amount+customer'}"
                 ))
-        
+
         db.commit()
         logger.info(f"Auto-matched {len(match_results)} payments")
         return match_results

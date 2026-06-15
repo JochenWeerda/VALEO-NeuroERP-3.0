@@ -3842,3 +3842,19 @@ Archiv des vorherigen Boards:
 **Stand:** abgeschlossen 2026-06-13 — `agrar_settlement_service.post_to_fibu_full`: nach GL-Buchung wird Kreditoren-OP für Netto-Lieferantenzahlung in `domain_erp.offene_posten` angelegt (fail-soft).
 **Ziel:** Belegbruch schließen: Agrar-Auszahlung erzeugte Journal-Entry aber keinen OP-Eintrag für Lieferantenzahlung.
 **Dateibesitz:** `app/services/agrar_settlement_service.py`.
+
+## BLANKET-RELEASE-CLOSE-001 — Rahmenauftrag-Abruf → auto-close bei vollständigem Abruf
+
+**Von:** Claude
+**Owner:** Claude
+**Stand:** abgeschlossen 2026-06-15 — `sales_blanket_orders.create_release`: nach Abruf-Anlage wird Restmenge geprüft; bei vollständigem Abruf wird Rahmenauftrag automatisch auf `ABGESCHLOSSEN` gesetzt (fail-soft).
+**Ziel:** Belegbruch schließen: vollständig abgerufene Rahmenaufträge blieben auf `AKTIV`.
+**Dateibesitz:** `app/api/v1/endpoints/sales_blanket_orders.py`.
+
+## PAY-MATCH-INV-001 — Zahlungseingang-Matching → AR-Rechnung BEZAHLT
+
+**Von:** Claude
+**Owner:** Claude
+**Stand:** abgeschlossen 2026-06-15 — `payment_matching.match_payment` + `auto_match_payments`: nach vollständigem OP-Abgleich wird `sales_invoice.status = BEZAHLT` im Document-Store gesetzt (fail-soft).
+**Ziel:** Belegbruch schließen: Zahlungseingang-Matching schloss den OP aber setzte die AR-Rechnung nie auf BEZAHLT.
+**Dateibesitz:** `app/api/v1/endpoints/payment_matching.py`.
