@@ -1,0 +1,35 @@
+slice_id: PROD-READINESS-ACTIONS-NODE24-001
+title: Zentrale GitHub Actions vor Node-24-Umschaltung haerten
+owner: Codex
+status: reserved
+coordination: >-
+  Nachzug aus GitHub E2E Smoke Run 27536228069. Keine Produktivlogik und
+  keine Dateien des aktiven Agrar-Silo-Slices. Besitz nur der zentralen
+  Release-, Quality-, Security-, DB-, Docs-, Sonar- und E2E-Workflows
+  sowie eines fokussierten Workflow-Vertragstests.
+goal: >-
+  Die zentrale CI-Kette vor der von GitHub fuer den 16.06.2026
+  angekuendigten Node-24-Standardumschaltung explizit auf Node 24 testen
+  und veraltete Setup-Action-Majors anheben.
+file_ownership:
+  - .github/workflows/ci.yml
+  - .github/workflows/docs-governance.yml
+  - .github/workflows/e2e-full.yml
+  - .github/workflows/e2e-smoke.yml
+  - .github/workflows/pytest-postgres-require-db.yml
+  - .github/workflows/quality-gate.yml
+  - .github/workflows/release-gates.yml
+  - .github/workflows/security-scan.yml
+  - .github/workflows/sonarcloud.yml
+  - tests/test_github_actions_node24_contract.py
+  - docs/agent-ops/active-workboard.md
+  - docs/agent-ops/slices/PROD-READINESS-ACTIONS-NODE24-001.yaml
+acceptance_criteria:
+  - Zentrale Workflows optieren explizit in den Node-24-Action-Runtime ein.
+  - checkout, setup-node und setup-python verwenden Node-24-faehige Majors.
+  - pnpm/action-setup@v2 ist aus den zentralen Workflows entfernt.
+  - YAML und fokussierter Vertragstest sind gruen.
+  - GitHub-Abnahme belegt mindestens E2E, DB, Docs, Quality und Security.
+risks:
+  - Fremde, nicht zentrale Workflows bleiben fuer einen Folgeslice sichtbar.
+  - Bestehende fachliche Security- und Quality-Befunde bleiben blockierend.
