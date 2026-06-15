@@ -1,7 +1,7 @@
 """Beschaffungs-Abgleich / 3-Wege-Match (DOM-PROC-004).
 
 Gleicht Bestellung (domain_einkauf.bestellungen/_positionen) gegen Wareneingang
-(public.inventory_goods_receipts/_lines) ab — Basis für den 3-Wege-Match; die
+(einkauf_wareneingaenge/_positionen) ab — Basis für den 3-Wege-Match; die
 Rechnungs-Stufe wird ergänzt, sobald ein PO-Bezug am Eingangsrechnungs-Modell
 vorliegt.
 
@@ -165,11 +165,15 @@ class ProcurementMatchService:
         """Summiert WE-Zeilenmengen je PO-Positionsnummer (po_line_number)."""
         rows = self.db.execute(
             text(
-                "SELECT l.po_line_number AS posnr, COALESCE(SUM(l.received_quantity),0) AS menge "
-                "FROM public.inventory_goods_receipts gr "
-                "JOIN public.inventory_goods_receipt_lines l ON l.goods_receipt_id = gr.id "
-                "WHERE gr.tenant_id = :t AND (gr.po_id::text = :pid OR gr.po_number = :pnum) "
-                "GROUP BY l.po_line_number"
+                "SELECT bp.pos_nr AS posnr, COALESCE(SUM(l.received_quantity),0) AS menge "
+                "FROM einkauf_wareneingaenge gr "
+                "JOIN domain_einkauf.bestellungen b ON b.id::text = gr.purchase_order_id "
+                "JOIN einkauf_wareneingang_positionen l ON l.wareneingang_id = gr.id "
+                "JOIN domain_einkauf.bestellung_positionen bp "
+                "  ON bp.id::text = l.purchase_order_item_id "
+                "WHERE b.tenant_id = :t "
+                "  AND (b.id::text = :pid OR b.bestellnummer = :pnum) "
+                "GROUP BY bp.pos_nr"
             ),
             {"t": self.tenant_id, "pid": str(po_id) if po_id else "", "pnum": po_number or ""},
         ).mappings().all()
@@ -178,10 +182,14 @@ class ProcurementMatchService:
     def _goods_receipts(self, po_id: Optional[str], po_number: Optional[str]) -> list[dict]:
         rows = self.db.execute(
             text(
-                "SELECT id, gr_number, receipt_date, status, delivery_note_number "
-                "FROM public.inventory_goods_receipts "
-                "WHERE tenant_id = :t AND (po_id::text = :pid OR po_number = :pnum) "
-                "ORDER BY receipt_date"
+                "SELECT gr.id, COALESCE(gr.delivery_note_number, gr.id) AS gr_number, "
+                "gr.received_date AS receipt_date, "
+                "gr.quality_inspection_status AS status, gr.delivery_note_number "
+                "FROM einkauf_wareneingaenge gr "
+                "JOIN domain_einkauf.bestellungen b ON b.id::text = gr.purchase_order_id "
+                "WHERE b.tenant_id = :t "
+                "  AND (b.id::text = :pid OR b.bestellnummer = :pnum) "
+                "ORDER BY gr.received_date"
             ),
             {"t": self.tenant_id, "pid": str(po_id) if po_id else "", "pnum": po_number or ""},
         ).mappings().all()
@@ -265,8 +273,8 @@ class ProcurementMatchService:
             text(
                 "SELECT b.id, b.bestellnummer, b.bestelldatum, b.status, b.netto_summe, "
                 "(SELECT count(*) FROM domain_einkauf.bestellung_positionen p WHERE p.bestellung_id = b.id) AS pos, "
-                "EXISTS(SELECT 1 FROM public.inventory_goods_receipts gr "
-                "       WHERE gr.tenant_id = b.tenant_id AND (gr.po_id = b.id OR gr.po_number = b.bestellnummer)) AS hat_we "
+                "EXISTS(SELECT 1 FROM einkauf_wareneingaenge gr "
+                "       WHERE gr.purchase_order_id = b.id::text) AS hat_we "
                 "FROM domain_einkauf.bestellungen b WHERE b.tenant_id = :t "
                 "ORDER BY b.bestelldatum DESC NULLS LAST, b.created_at DESC LIMIT :lim"
             ),

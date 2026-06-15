@@ -1,7 +1,7 @@
 slice_id: PROC-MATCH-GR-SCHEMA-001
 title: Procurement Match auf kanonische Wareneingangstabellen umstellen
 owner: Codex
-status: reserved
+status: completed
 coordination: >-
   Folge-Slice zu PROC-DEMO-SEED-SCHEMA-001. Keine Ueberschneidung mit
   WM-AGRI-SILO-001. Der abgeschlossene DOM-PROC-004-Match-Spine wird nur
@@ -24,3 +24,10 @@ acceptance_criteria:
   - Keine Referenz auf public.inventory_goods_receipts* verbleibt.
 risks:
   - Bestehende externe Microservice-Daten benoetigen bei realer Nutzung einen separaten Import.
+result:
+  - Match-Service liest Kopf und Positionen aus den migrierten Einkaufstabellen.
+  - Tenant-Isolation erfolgt ueber den Join zur Bestellung.
+  - Seed speichert den PO-Positionsbezug in purchase_order_item_id.
+checks:
+  - Fokussierter Schema-Vertragstest gruen.
+  - Python-Compile und bestehende reine Procurement-Unit-Tests gruen.
