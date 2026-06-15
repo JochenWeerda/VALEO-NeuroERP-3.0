@@ -549,6 +549,16 @@ Dispo-Arbeitsraum: Tarifliste + Bestätigung + `cancelFreightTariff`; Tests in `
 **Ergebnis:** Neun zentrale Workflows optieren explizit in Node 24 ein; Checkout, Node-, Python- und pnpm-Setup verwenden die aktuellen v6-Majors.
 **Checks:** Neun Workflow-YAMLs und fokussierter Node-24-Vertrag gruen. GitHub: E2E `27537066721`, require_db `27537066806` und Docs `27537066910` gruen; Quality `27537066707` sowie Security `27537066782` bestaetigen die neuen Action-Runtimes und scheitern nur an den bereits dokumentierten fachlichen SQL-/esbuild-/Dependency-Graph-Gates.
 
+## PROD-READINESS-BLOCKERS-001
+
+**Von:** Codex
+**Owner:** Codex
+**Stand:** reserviert 2026-06-15
+**Abstimmung:** Konfliktfreier Nachzug zu PR #7 fuer Dependency Graph/Vulnerability Alerts, Hofplan-LFS und esbuild. `app/services/agri_silo_material_flow_service.py` bleibt bis zum Handoff im aktiven Cursor-Slice `WM-AGRI-SILO-001`.
+**Ziel des Slices:** Alle technisch schliessbaren roten Release-Gates beseitigen und den SQL-Guardrail nach sauberem Dateihandoff integrieren.
+**Abnahmekriterien:** Produktions-Audit gruen; Dependency Review hat Zugriff; LFS-Objekt remote vorhanden; SQL-f-string-Guardrail nach Handoff gruen.
+**Offene Risiken:** Aktiver Cursor-WIP darf nicht gebuendelt oder ueberschrieben werden.
+
 ## PROD-READINESS-GITLEAKS-LFS-001
 
 **Von:** Codex
