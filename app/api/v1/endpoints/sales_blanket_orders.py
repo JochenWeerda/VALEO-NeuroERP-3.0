@@ -289,6 +289,21 @@ async def create_release(
         db.rollback()
         raise HTTPException(status_code=503, detail="Datenbankfehler")
 
+    # BLANKET-RELEASE-CLOSE-001: auto-close Rahmenauftrag wenn vollständig abgerufen
+    try:
+        new_released = _released_total(db, order_id, tenant_id)
+        if new_released >= float(row["total_quantity"]):
+            db.execute(
+                text(
+                    "UPDATE domain_sales.blanket_orders SET status = 'ABGESCHLOSSEN' "
+                    "WHERE id = :id AND tenant_id = :tid AND status = 'AKTIV'"
+                ),
+                {"id": order_id, "tid": tenant_id},
+            )
+            db.commit()
+    except Exception:  # noqa: BLE001 — Auto-Abschluss nicht kritisch für Abruf-Erfolg
+        pass
+
     rel_row = db.execute(
         text("SELECT * FROM domain_sales.blanket_order_releases WHERE id = :id AND tenant_id = :tid"),
         {"id": rid, "tid": tenant_id},
