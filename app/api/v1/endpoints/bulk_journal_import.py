@@ -295,7 +295,7 @@ async def import_journal_entries_csv(
                     "description": first_line.description,
                     "source": "bulk_import",
                     "currency": "EUR",
-                    "status": "draft",  # Imported entries start as draft
+                    "status": "posted",  # BULK-JE-POST-001: direkt buchen (Belegbruch schliessen)
                     "total_debit": total_debit,
                     "total_credit": total_credit
                 })
