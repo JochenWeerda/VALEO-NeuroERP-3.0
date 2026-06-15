@@ -18,9 +18,51 @@ _ALLOWED_EDGE_STATUS = frozenset({"open", "blocked", "maintenance", "cleaning"})
 
 
 class AgriSiloMaterialFlowService:
-    def __init__(self, db: Session, tenant_id: str):
+    def __init__(self, db: Session, tenant_id: str, *, trace_hooks_enabled: bool = True) -> None:
         self.db = db
         self.tenant_id = tenant_id
+        self._trace_hooks_enabled = trace_hooks_enabled
+
+    def _emit_material_flow_hooks(
+        self,
+        *,
+        sc_event_type: str,
+        outbox_event_type: str,
+        aggregate_id: str,
+        ref_type: str | None,
+        ref_id: str | None,
+        ref_label: str | None = None,
+        status_from: str | None = None,
+        status_to: str | None = None,
+        payload: dict,
+        ticket_id: str | None = None,
+    ) -> None:
+        if not self._trace_hooks_enabled:
+            return
+        from app.services.agri_material_flow_trace_integration import (
+            append_material_flow_supply_chain_event,
+            store_material_flow_outbox_best_effort,
+        )
+
+        append_material_flow_supply_chain_event(
+            self.db,
+            self.tenant_id,
+            event_type=sc_event_type,
+            ref_type=ref_type,
+            ref_id=ref_id,
+            ref_label=ref_label,
+            status_from=status_from,
+            status_to=status_to,
+            payload=payload,
+            ticket_id=ticket_id,
+        )
+        store_material_flow_outbox_best_effort(
+            self.db,
+            self.tenant_id,
+            event_type=outbox_event_type,
+            aggregate_id=aggregate_id,
+            payload=payload,
+        )
 
     # ── Siloanlagen ────────────────────────────────────────────
 
@@ -52,6 +94,19 @@ class AgriSiloMaterialFlowService:
                 "name": payload["name"],
                 "desc": payload.get("description"),
                 "tid": self.tenant_id,
+            },
+        )
+        self._emit_material_flow_hooks(
+            sc_event_type="silo_system_created",
+            outbox_event_type="inventory.material_flow.silo_system_created",
+            aggregate_id=warehouse_id,
+            ref_type="silo_system",
+            ref_id=sid,
+            ref_label=str(payload["system_code"]),
+            payload={
+                "warehouse_id": warehouse_id,
+                "system_code": payload["system_code"],
+                "name": payload["name"],
             },
         )
         self.db.commit()
@@ -114,6 +169,21 @@ class AgriSiloMaterialFlowService:
                 "tid": self.tenant_id,
             },
         )
+        self._emit_material_flow_hooks(
+            sc_event_type="silo_cell_created",
+            outbox_event_type="inventory.material_flow.silo_cell_created",
+            aggregate_id=warehouse_id,
+            ref_type="silo_cell",
+            ref_id=cid,
+            ref_label=str(payload["cell_code"]),
+            status_to=str(payload.get("qs_status", "frei")),
+            payload={
+                "warehouse_id": warehouse_id,
+                "silo_system_id": silo_system_id,
+                "cell_code": payload["cell_code"],
+                "name": payload["name"],
+            },
+        )
         self.db.commit()
         return {"id": cid, "silo_system_id": silo_system_id, "warehouse_id": warehouse_id, **payload}
 
@@ -154,8 +224,25 @@ class AgriSiloMaterialFlowService:
         ).fetchone()
         if not row:
             raise ValueError("Silozelle nicht gefunden")
+        d = dict(row._mapping)
+        qs_to = str(d.get("qs_status")) if "qs_status" in fields else None
+        self._emit_material_flow_hooks(
+            sc_event_type="silo_cell_updated",
+            outbox_event_type="inventory.material_flow.silo_cell_updated",
+            aggregate_id=warehouse_id,
+            ref_type="silo_cell",
+            ref_id=cell_id,
+            ref_label=str(d.get("cell_code") or cell_id),
+            status_to=qs_to,
+            payload={
+                "warehouse_id": warehouse_id,
+                "cell_id": cell_id,
+                "updated_fields": sorted(fields.keys()),
+                "qs_status": d.get("qs_status"),
+            },
+        )
         self.db.commit()
-        return dict(row._mapping)
+        return d
 
     # ── Materialfluss-Knoten ───────────────────────────────────
 
@@ -198,6 +285,21 @@ class AgriSiloMaterialFlowService:
                 "tid": self.tenant_id,
             },
         )
+        self._emit_material_flow_hooks(
+            sc_event_type="material_flow_node_created",
+            outbox_event_type="inventory.material_flow.node_created",
+            aggregate_id=warehouse_id,
+            ref_type="material_flow_node",
+            ref_id=nid,
+            ref_label=str(payload["code"]),
+            status_to=str(payload.get("status", "active")),
+            payload={
+                "warehouse_id": warehouse_id,
+                "node_type": payload["node_type"],
+                "code": payload["code"],
+                "name": payload["name"],
+            },
+        )
         self.db.commit()
         return {"id": nid, "warehouse_id": warehouse_id, **payload}
 
@@ -238,8 +340,23 @@ class AgriSiloMaterialFlowService:
         ).fetchone()
         if not row:
             raise ValueError("Knoten nicht gefunden")
+        d = dict(row._mapping)
+        self._emit_material_flow_hooks(
+            sc_event_type="material_flow_node_updated",
+            outbox_event_type="inventory.material_flow.node_updated",
+            aggregate_id=warehouse_id,
+            ref_type="material_flow_node",
+            ref_id=node_id,
+            ref_label=str(d.get("code") or node_id),
+            status_to=str(d.get("status")) if "status" in fields else None,
+            payload={
+                "warehouse_id": warehouse_id,
+                "node_id": node_id,
+                "updated_fields": sorted(fields.keys()),
+            },
+        )
         self.db.commit()
-        return dict(row._mapping)
+        return d
 
     # ── Kanten ────────────────────────────────────────────────
 
@@ -332,6 +449,23 @@ class AgriSiloMaterialFlowService:
                 "tid": self.tenant_id,
             },
         )
+        self._emit_material_flow_hooks(
+            sc_event_type="material_flow_edge_created",
+            outbox_event_type="inventory.material_flow.edge_created",
+            aggregate_id=warehouse_id,
+            ref_type="material_flow_edge",
+            ref_id=eid,
+            ref_label=f"{fn}->{tn}",
+            status_to=str(est),
+            payload={
+                "warehouse_id": warehouse_id,
+                "from_node_id": fn,
+                "to_node_id": tn,
+                "conveyor_type": payload.get("conveyor_type", "generic"),
+                "status": est,
+                "flush_required": flush_flag,
+            },
+        )
         self.db.commit()
         return {"id": eid, "warehouse_id": warehouse_id, **payload}
 
@@ -371,8 +505,23 @@ class AgriSiloMaterialFlowService:
         ).fetchone()
         if not row:
             raise ValueError("Kante nicht gefunden")
+        d = dict(row._mapping)
+        self._emit_material_flow_hooks(
+            sc_event_type="material_flow_edge_updated",
+            outbox_event_type="inventory.material_flow.edge_updated",
+            aggregate_id=warehouse_id,
+            ref_type="material_flow_edge",
+            ref_id=edge_id,
+            ref_label=f"{d.get('from_node_id')}->{d.get('to_node_id')}",
+            status_to=str(d.get("status")) if "status" in fields else None,
+            payload={
+                "warehouse_id": warehouse_id,
+                "edge_id": edge_id,
+                "updated_fields": sorted(fields.keys()),
+            },
+        )
         self.db.commit()
-        return dict(row._mapping)
+        return d
 
     # ── Routen-Validierung (BFS) ───────────────────────────────
 
@@ -388,8 +537,36 @@ class AgriSiloMaterialFlowService:
 
         Kanten status='open'; Zwischenknoten müssen status='active' sein.
         """
+
+        def _finish(result: dict) -> dict:
+            if not self._trace_hooks_enabled:
+                return result
+            ok = bool(result.get("ok"))
+            self._emit_material_flow_hooks(
+                sc_event_type="route_validated" if ok else "route_validation_failed",
+                outbox_event_type=(
+                    "inventory.material_flow.route_validated"
+                    if ok
+                    else "inventory.material_flow.route_validation_failed"
+                ),
+                aggregate_id=warehouse_id,
+                ref_type="material_flow_route_check",
+                ref_id=f"{warehouse_id}:{from_node_id}:{to_node_id}"[:180],
+                ref_label=f"{from_node_id[:8]}-{to_node_id[:8]}",
+                payload={
+                    "warehouse_id": warehouse_id,
+                    "from_node_id": from_node_id,
+                    "to_node_id": to_node_id,
+                    "material_id": material_id,
+                    "previous_material_id": previous_material_id,
+                    "result": result,
+                },
+            )
+            self.db.commit()
+            return result
+
         if from_node_id == to_node_id:
-            return {"ok": True, "path": [from_node_id], "warnings": [], "flush_required": False}
+            return _finish({"ok": True, "path": [from_node_id], "warnings": [], "flush_required": False})
 
         edges = self.db.execute(
             text("""
@@ -418,7 +595,7 @@ class AgriSiloMaterialFlowService:
                     prev[nxt] = cur
                     q.append(nxt)
         if not found:
-            return {"ok": False, "reason": "Keine offene Route zwischen den Knoten", "path": []}
+            return _finish({"ok": False, "reason": "Keine offene Route zwischen den Knoten", "path": []})
 
         path: list[str] = []
         cur: str | None = to_node_id
@@ -432,13 +609,17 @@ class AgriSiloMaterialFlowService:
         for nid in path:
             node = self._node_row(nid)
             if not node or str(node.get("warehouse_id")) != warehouse_id:
-                return {"ok": False, "reason": "Knoten ausserhalb des Lagers", "path": path}
+                return _finish({"ok": False, "reason": "Knoten ausserhalb des Lagers", "path": path})
             nst = str(node.get("status") or "")
             if nst != "active":
-                return {"ok": False, "reason": f"Knoten {node.get('code')} ist nicht aktiv ({nst})", "path": path}
+                return _finish(
+                    {"ok": False, "reason": f"Knoten {node.get('code')} ist nicht aktiv ({nst})", "path": path}
+                )
             qs = self._silo_cell_qs_for_ref(node.get("ref_type"), node.get("ref_id"))
             if qs == "gesperrt":
-                return {"ok": False, "reason": f"Silozelle gesperrt (Knoten {node.get('code')})", "path": path}
+                return _finish(
+                    {"ok": False, "reason": f"Silozelle gesperrt (Knoten {node.get('code')})", "path": path}
+                )
             if qs in ("in_pruefung", "reinigung", "reserviert"):
                 warnings.append(f"Hinweis: Silozelle qs_status={qs} bei {node.get('code')}")
 
@@ -462,9 +643,11 @@ class AgriSiloMaterialFlowService:
                     )
                     break
 
-        return {
-            "ok": True,
-            "path": path,
-            "warnings": warnings,
-            "flush_required": flush_required,
-        }
+        return _finish(
+            {
+                "ok": True,
+                "path": path,
+                "warnings": warnings,
+                "flush_required": flush_required,
+            }
+        )

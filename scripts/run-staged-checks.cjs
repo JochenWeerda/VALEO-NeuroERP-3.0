@@ -36,7 +36,8 @@ if (stagedFiles.length === 0) {
 const scriptLikeFiles = stagedFiles.filter(
   (file) =>
     /\.(ts|tsx|js|jsx)$/i.test(file) &&
-    !/\.(spec|test)\.(ts|tsx|js|jsx)$/i.test(file),
+    !/\.(spec|test)\.(ts|tsx|js|jsx)$/i.test(file) &&
+    !/\/vite\.config(?:\.performance)?\.ts$/i.test(file),
 )
 const markdownFiles = stagedFiles.filter((file) => /\.md$/i.test(file))
 

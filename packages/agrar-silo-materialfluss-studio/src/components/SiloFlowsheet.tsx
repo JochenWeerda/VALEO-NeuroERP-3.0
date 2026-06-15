@@ -5,33 +5,22 @@
 
 import React, { useEffect, useRef, useState } from 'react';
 import { ConveyorType, MaterialFlowEdge, MaterialFlowNode, NodeStatus, NodeType, QsStatus, SiloCell } from '../types';
-import { 
-  Activity, 
-  AlertTriangle, 
-  ArrowRight, 
-  Compass, 
-  CornerDownRight, 
-  Cpu, 
-  Database, 
-  Eye,
+import {
+  Activity,
+  Compass,
+  CornerDownRight,
+  Cpu,
   Grid,
-  Hammer,
-  HelpCircle,
-  Info,
   Layers,
-  Lock,
   MapPin,
-  Maximize2,
   Plus,
   RefreshCw,
   Settings,
   Sliders,
   Terminal,
   Trash2,
-  TrendingUp,
   Truck,
-  Unlock,
-  Zap
+  Zap,
 } from 'lucide-react';
 
 interface SiloFlowsheetProps {
@@ -40,11 +29,11 @@ interface SiloFlowsheetProps {
   activePath: string[];
   selectedSourceId: string;
   selectedTargetId: string;
-  onSelectNode: (id: string, role: 'source' | 'target') => void;
+  onSelectNode: (_id: string, _role: 'source' | 'target') => void;
   isSimulating: boolean;
-  onUpdateNodes: (updated: MaterialFlowNode[]) => void;
-  onUpdateEdges: (updated: MaterialFlowEdge[]) => void;
-  onUpdateCells?: (updated: SiloCell[]) => void;
+  onUpdateNodes: (_updated: MaterialFlowNode[]) => void;
+  onUpdateEdges: (_updated: MaterialFlowEdge[]) => void;
+  onUpdateCells?: (_updated: SiloCell[]) => void;
   cells: SiloCell[];
 }
 
@@ -86,9 +75,9 @@ export default function SiloFlowsheet({
   const [mmxCoords, setMmxCoords] = useState({ lat: 53.48301, lng: 8.91402, x: 350, y: 350 });
   const [mmxHeading, setMmxHeading] = useState<number>(45);
   const [mmxSpeed, setMmxSpeed] = useState<number>(12);
-  const [mmxPathIndex, setMmxPathIndex] = useState(0);
+  const [_mmxPathIndex, setMmxPathIndex] = useState(0);
   const [customPins, setCustomPins] = useState<{ id: string; name: string; lat: number; lng: number; x: number; y: number }[]>([]);
-  const [selectedMapTarget, setSelectedMapTarget] = useState<string | null>(null);
+  const [_selectedMapTarget, setSelectedMapTarget] = useState<string | null>(null);
 
   // Path coordinates loop for mobile MMX
   const mmxRoutePoints = [
@@ -114,7 +103,7 @@ export default function SiloFlowsheet({
   const [forcedRegAddress, setForcedRegAddress] = useState('DB100.DBX0.1');
   const [forcedRegValue, setForcedRegValue] = useState('1');
   const [mqttLogs, setMqttLogs] = useState<string[]>([]);
-  const [mqttIndex, setMqttIndex] = useState(0);
+  const [_mqttIndex, setMqttIndex] = useState(0);
 
   // Trigger telemetry timers
   useEffect(() => {
@@ -289,17 +278,15 @@ export default function SiloFlowsheet({
     const targetNode = nodes.find(n => forcedRegAddress.toUpperCase().includes(n.code.toUpperCase()) || n.code.toUpperCase() === matchCode.toUpperCase());
     
     if (targetNode) {
+      const tn = targetNode;
       const newStatus: NodeStatus = (forcedRegValue === '0' || forcedRegValue.toLowerCase() === 'false') ? 'blocked' : 'active';
-      onUpdateNodes(
-        nodes.map(n => n.id === targetNode!.id ? { ...n, status: newStatus } : n)
-      );
+      onUpdateNodes(nodes.map(n => (n.id === tn.id ? { ...n, status: newStatus } : n)));
 
       // Force update Silo QsStatus if node is a silo cell
-      if (targetNode.node_type === 'silo_cell' && targetNode.ref_id && onUpdateCells) {
+      if (tn.node_type === 'silo_cell' && tn.ref_id && onUpdateCells) {
         const newQs: QsStatus = (forcedRegValue === '0' || forcedRegValue.toLowerCase() === 'false') ? 'gesperrt' : 'frei';
-        onUpdateCells(
-          cells.map(c => c.id === targetNode!.ref_id ? { ...c, qs_status: newQs } : c)
-        );
+        const refId = tn.ref_id;
+        onUpdateCells(cells.map(c => (c.id === refId ? { ...c, qs_status: newQs } : c)));
       }
     }
   };

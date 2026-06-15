@@ -14,7 +14,7 @@
 | Mengen / Schwund | Trace-Service: Mengen-Konsistenz Stufe-zu-Stufe | Materialfluss: **kein** kg-RÃ¼ckgrat (bewusst); Verschleppungs-**Hinweis** Ã¼ber `previous_material_id` bei Route |
 | UI | `lager/rueckverfolgbarkeit` | `lager/materialfluss`, `lager/materialfluss-visualisierung` |
 
-**Gap (bewusst offen, nÃ¤chste Wellen):** Es gibt noch **keine** automatische VerknÃ¼pfung `silo_lots` â†” `material_flow_nodes` (z. B. `ref_type=silo_cell` + Lot-Update). Das ist **Slice-Futter** (z. B. WM-AGRI-CHAIN-002), nicht Teil von SILO-001.
+**Gap (bewusst offen, nächste Wellen):** Es gibt noch **keine** automatische Verknüpfung `silo_lots` ↔ `material_flow_nodes` (Lot-Update / Bestands-Sync). Folge-Slice z. B. **WM-AGRI-LOT-LINK** (CHAIN-002 deckt Event-Log + Outbox ab).
 
 **Repo-seitig geschlossen (2026-06-13):** Fachliche **Zuordnung** und **Operator-Sprung**: Materialfluss-Toolbar â†’ **RÃ¼ckverfolgbarkeit**; Doku-Verweise (diese Datei, `docs/warehouse/README.md`, Handbuch-Inventar).
 
@@ -28,7 +28,7 @@ Siehe [wave-physical-chain-logistics-audit-2026-06-12.md](./wave-physical-chain-
 |---------------|--------|
 | `delivery_note_ref` auf Tour-Stops, Read-Spine LS | umgesetzt (LOG-SPINE-*) |
 | Fracht simulate + Traceability-Tickets | Ketten-Test LOG-CHAIN-001 |
-| **Lager-intern: Silo-FÃ¶rderweg** vor Verladung | **Modell** in WM-AGRI-SILO-001; **kein** zusÃ¤tzlicher Kernel-Event-Typ â€” Anbindung an `supply_chain_events` optional spÃ¤ter |
+| **Lager-intern: Silo-Förderweg** vor Verladung | **Modell** WM-AGRI-SILO-001; **Ereignisse** WM-AGRI-CHAIN-002 (`supply_chain_events` + Outbox) |
 
 ---
 
@@ -48,13 +48,31 @@ Siehe [wave-physical-chain-logistics-audit-2026-06-12.md](./wave-physical-chain-
 |------------|--------|-------------------------|
 | Kein dokumentierter **Ketten-Bezug** SILO â†” SUPPLY-004 | Medienbruch in KÃ¶pfen | **Geschlossen** (diese Workflow-Datei + Warehouse-README) |
 | Kein UI-Sprung **Materialfluss â†” RÃ¼ckverfolgbarkeit** | separate Silos | **Geschlossen** (Overflow-Aktion) |
-| **Ereignis-/Trace-Kopplung** FÃ¶rderkante â†” `supply_chain_events` | fehlend | **Offen** (Slice-Vorschlag WM-AGRI-CHAIN-002 o. Ã¤.) |
+| **Ereignis-/Trace-Kopplung** Förderkante ↔ `supply_chain_events` + Outbox | fehlend | **Geschlossen** (Slice **WM-AGRI-CHAIN-002**, 2026-06-13): Mutationen + `validate-route` → `stage=materialfluss`, Outbox `inventory.material_flow.*` |
 | **Lot-Bestand** â†” Silozelle im Graph | fehlend | **Offen** (DomÃ¤nenmodellierung) |
 | Bird-View Luftbild | offen | **Offen** (WM-AGRI-MAP-001) |
 
 ---
 
-## 5. Verweise
+## 5. `current_material_id` / `current_lot_id` auf Silozellen (Zielbild)
+
+**Ist (Stammdaten):** `silo_cells` speichert optionale Fremdschlüssel `current_material_id` und `current_lot_id` (UUID-Strings), sichtbar und per PATCH über `/api/v1/lager/wms/agri/silo-cells/{id}` pflegbar. In der UI **lager/materialfluss** können diese Referenzen pro Zeile bearbeitet und mit „Material / Lot speichern“ geschrieben werden (keine automatische Synchronisation aus Wareneingang/Waage).
+
+**Soll (spätere Integration):**
+
+| Quelle / Ereignis | Erwartetes Mapping |
+|-------------------|--------------------|
+| Annahme / WE | Material und Lot der angenommenen Partie als Vorschlag für Ziel-Silozelle (Operator-Bestätigung) |
+| Waage / Wiegeschein | Verknüpfung über bestehende Trace-Spine (`weighing_tickets`, DOM-SUPPLY-004); Lot-ID aus Ticket → `current_lot_id` |
+| QS-Freigabe / Sperre | `qs_status` steuert Routen/Kanten; Lot bleibt referenziert, bis Umbuchung oder Entladung |
+| Umbuchung / Silo-Umfüllung | explizite Buchung: alte Zelle leeren, neue setzen (Audit) |
+| Mischauftrag / MMX | Verbrauchsmaterial aus Zelle → Auftrag; `current_*` nach Abschluss aktualisieren |
+
+**Bereits vorhandene Endpunkte (Lesen / Spur):** Rückverfolgbarkeit unter `lager/rueckverfolgbarkeit`, Supply-Chain-Events (CHAIN-002) für Materialfluss-Mutationen; **fehlend** ist die fachliche Regel-Engine „Ticket/Lot → Silozelle“ als eine konsistente Transaktion.
+
+---
+
+## 6. Verweise
 
 - Slice: [WM-AGRI-SILO-001](../agent-ops/slices/WM-AGRI-SILO-001.yaml)
 - DOM-SUPPLY-004: [dom-supply-004-traceability-2026-06-10.md](../dom-supply-004-traceability-2026-06-10.md)

@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { BellRing, ShieldAlert, Tractor, User, Warehouse } from 'lucide-react';
+import { BellRing, Tractor, Warehouse } from 'lucide-react';
 
 interface HeaderProps {
   hasAlerts: boolean;

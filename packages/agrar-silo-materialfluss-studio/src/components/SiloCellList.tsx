@@ -5,19 +5,15 @@
 
 import React, { useState } from 'react';
 import { QsStatus, SiloCell } from '../types';
-import { 
-  AlertOctagon, 
-  CheckCircle2, 
-  Clock, 
-  FlameKindling, 
-  Layers, 
-  Lock, 
-  Percent, 
-  Plus, 
-  Settings, 
-  Tag, 
-  Trash2, 
-  Weight
+import {
+  AlertOctagon,
+  CheckCircle2,
+  Clock,
+  Lock,
+  Plus,
+  Settings,
+  Tag,
+  Weight,
 } from 'lucide-react';
 
 interface SiloCellListProps {

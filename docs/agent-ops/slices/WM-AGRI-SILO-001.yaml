@@ -30,7 +30,15 @@ files:
 acceptance:
   - Alembic domain_inventory Tabellen silo_systems, silo_cells, material_flow_nodes, material_flow_edges am Head
   - API unter /api/v1/lager/wms/agri/* (Listen/Anlegen + validate-route + PATCH silo-cells + PATCH material-flow/nodes|edges)
+  - Router agri_silo_material_flow in app/api/v1/api.py mit prefix /lager/wms/agri (Master-router /api/v1)
   - Service lehnt open-Kante zu blocked/unterbundenem QS-Ziel ab; validate_route prüft QS gesperrt und Verschleppungshinweis
   - Unit-Tests tests/test_agri_silo_material_flow.py gruen (pytest --no-cov fuer Einzeldatei ok)
   - Frontend Route lager/materialfluss + lager/materialfluss-visualisierung (PageToolbar, MERIDIAN-Tokens)
+  - Materialfluss-Seite Live-Graph aus material_flow_nodes/edges wenn Lager gewaehlt und Daten vorhanden; Demo nur ohne Lagerwahl
+  - UI Silozellen Material/Lot Referenz speichern Knoten layout_x/y Position Kanten Verschleppungsschutz
+  - Vitest material-flow-display Mapper (Nodes Kanten Endpunkt-Filter)
   - Doku Benchmark + OSS + Hersteller-Sammelliste + UI-Baustein-Paket agrar-silo-materialfluss-studio + Prozessketten-Workflow wm-agri-silo-supply-chain-integration
+open_after_integration_pass:
+  - Bird-View WM-AGRI-MAP-001
+  - Lot-Bestand Silozelle automatisch aus WE/Waage (Slice-Idee WM-AGRI-LOT-LINK)
+  - PLC/OPC-UA Anbindung
