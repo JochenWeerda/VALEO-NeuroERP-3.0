@@ -244,6 +244,16 @@ def buchen(
     tenant_id: str = Depends(get_tenant_id),
 ) -> dict:
     buchungsnr = uuid.uuid4().hex[:8].upper()
+    # Read header before status update for OP creation
+    header_row = None
+    try:
+        header_row = db.execute(
+            text("SELECT summe_betrag_eur, bezeichnung FROM domain_agrar.sammelabrechnungen"
+                 " WHERE id=:id AND tenant_id=:tenant_id"),
+            {"id": sammelabrechnung_id, "tenant_id": tenant_id},
+        ).fetchone()
+    except Exception:
+        pass
     # Persist status (best-effort)
     try:
         db.execute(
@@ -256,6 +266,30 @@ def buchen(
         db.commit()
     except Exception:
         db.rollback()
+
+    # ROHWARE-SAMMEL-OP-001: Kreditoren-OP für Sammelabrechnung (Belegbruch schliessen)
+    if header_row and header_row[0] and float(header_row[0]) > 0:
+        try:
+            from datetime import date as _date
+            today = _date.today().isoformat()
+            due = _date.today().replace(day=min(_date.today().day + 30, 28)).isoformat()
+            db.execute(text("""
+                INSERT INTO domain_erp.offene_posten
+                    (id, tenant_id, konto_typ, rechnungsnr, rechnungsdatum, datum, faelligkeit,
+                     betrag, offen, lieferant_name, op_status)
+                VALUES (:id, :tid, 'kreditoren', :rnr, :rdat, :dat, :faell,
+                        :betrag, :betrag, :lname, 'offen')
+                ON CONFLICT DO NOTHING
+            """), {
+                "id": str(uuid.uuid4()), "tid": tenant_id, "rnr": buchungsnr,
+                "rdat": today, "dat": today, "faell": due,
+                "betrag": float(header_row[0]),
+                "lname": str(header_row[1] or "Sammelabrechnung"),
+            })
+            db.commit()
+        except Exception:  # noqa: BLE001 — OP-Anlage nicht kritisch für Sammelabrechnung-Buchung
+            pass
+
     return {"gebucht": True, "buchungsnr": buchungsnr}
 
 

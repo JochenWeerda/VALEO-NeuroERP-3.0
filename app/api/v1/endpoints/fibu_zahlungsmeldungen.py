@@ -139,12 +139,37 @@ def meldung_verarbeiten(
     if row.status != "eingegangen":
         raise HTTPException(409, f"Zahlungsmeldung hat Status '{row.status}', nicht 'eingegangen'.")
 
+    r = dict(row._mapping)
     db.execute(text("""
         UPDATE domain_shared.fibu_zahlungsmeldungen
         SET status = 'verarbeitet', verarbeitet_am = now()
         WHERE id = :id
     """), {"id": meldung_id})
     db.commit()
+
+    # ZAHLMELD-OP-001: Debitoren-OP ausziffern (Belegbruch schliessen)
+    if r.get("rechnungs_nr") and r.get("zahlungsbetrag_eur"):
+        try:
+            db.execute(text("""
+                UPDATE domain_erp.offene_posten
+                SET offen = GREATEST(0, offen - :betrag),
+                    op_status = CASE
+                        WHEN offen - :betrag <= 0 THEN 'geschlossen'
+                        ELSE 'teilweise'
+                    END
+                WHERE tenant_id = :tid
+                  AND konto_typ = 'debitoren'
+                  AND rechnungsnr = :rnr
+                  AND op_status NOT IN ('geschlossen', 'ausgeziffert')
+            """), {
+                "tid": tenant_id,
+                "rnr": r["rechnungs_nr"],
+                "betrag": float(r["zahlungsbetrag_eur"]),
+            })
+            db.commit()
+        except Exception:  # noqa: BLE001 — OP-Auszifferung nicht kritisch für Zahlungsmeldungs-Verarbeitung
+            pass
+
     updated = db.execute(text(
         "SELECT * FROM domain_shared.fibu_zahlungsmeldungen WHERE id = :id"
     ), {"id": meldung_id}).fetchone()
