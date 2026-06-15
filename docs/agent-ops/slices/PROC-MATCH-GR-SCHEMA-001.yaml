@@ -1,0 +1,26 @@
+slice_id: PROC-MATCH-GR-SCHEMA-001
+title: Procurement Match auf kanonische Wareneingangstabellen umstellen
+owner: Codex
+status: reserved
+coordination: >-
+  Folge-Slice zu PROC-DEMO-SEED-SCHEMA-001. Keine Ueberschneidung mit
+  WM-AGRI-SILO-001. Der abgeschlossene DOM-PROC-004-Match-Spine wird nur
+  hinsichtlich seiner nicht migrierten Wareneingangsquelle korrigiert.
+goal: >-
+  Procurement-Match, RFQ-Integration und Demo-Seed verwenden die migrierten
+  Tabellen einkauf_wareneingaenge und einkauf_wareneingang_positionen statt
+  nie angelegter public.inventory_goods_receipts*-Tabellen.
+file_ownership:
+  - docs/agent-ops/active-workboard.md
+  - docs/agent-ops/slices/PROC-MATCH-GR-SCHEMA-001.yaml
+  - app/services/procurement_match_service.py
+  - scripts/seed_demo_procurement.py
+  - tests/test_procurement_match_schema_contract.py
+acceptance_criteria:
+  - Gelieferte Mengen werden ueber purchase_order_id und PO-Positions-ID aufgeloest.
+  - Wareneingangslisten und hat_wareneingang nutzen die kanonischen Tabellen.
+  - Seed schreibt Kopf und Positionen in dieselben kanonischen Tabellen.
+  - Tenant-Isolation erfolgt ueber den Join zur Bestellung.
+  - Keine Referenz auf public.inventory_goods_receipts* verbleibt.
+risks:
+  - Bestehende externe Microservice-Daten benoetigen bei realer Nutzung einen separaten Import.
