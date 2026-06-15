@@ -3858,3 +3858,19 @@ Archiv des vorherigen Boards:
 **Stand:** abgeschlossen 2026-06-15 — `payment_matching.match_payment` + `auto_match_payments`: nach vollständigem OP-Abgleich wird `sales_invoice.status = BEZAHLT` im Document-Store gesetzt (fail-soft).
 **Ziel:** Belegbruch schließen: Zahlungseingang-Matching schloss den OP aber setzte die AR-Rechnung nie auf BEZAHLT.
 **Dateibesitz:** `app/api/v1/endpoints/payment_matching.py`.
+
+## COLL-INV-OP-001 — Sammelrechnung → Debitoren-OP anlegen
+
+**Von:** Claude
+**Owner:** Claude
+**Stand:** abgeschlossen 2026-06-15 — `collective_documents.create_collective_invoice`: nach Rechnungsanlage und GL-Buchung wird Debitoren-OP in `domain_erp.offene_posten` angelegt (fail-soft).
+**Ziel:** Belegbruch schließen: Sammelrechnung erzeugte keine offene Forderung (OP).
+**Dateibesitz:** `app/api/v1/endpoints/collective_documents.py`.
+
+## SALES-DN-INV-OP-001 — LS→RE create_invoice_from_delivery → OP + Document-Store
+
+**Von:** Claude
+**Owner:** Claude
+**Stand:** abgeschlossen 2026-06-15 — `sales_delivery_notes.create_invoice_from_delivery`: nach GL-Buchung werden Debitoren-OP und `sales_invoice`-Eintrag im Document-Store angelegt (fail-soft).
+**Ziel:** Belegbruch schließen: Einzel-LS→RE-Konvertierung erzeugte JE aber keinen OP und keinen Store-Eintrag.
+**Dateibesitz:** `app/api/v1/endpoints/sales_delivery_notes.py`.

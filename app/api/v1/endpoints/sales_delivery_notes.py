@@ -20,6 +20,8 @@ from app.services.customer_sales_eligibility import assert_customer_allowed_for_
 from app.services.kontrakt_movement_sync import sync_movements_for_delivery_note
 from app.services.sales_posting_service import SalesPostingService
 
+from app.documents.router_helpers import get_repository, save_to_store
+
 from app.api.v1.schemas.base import BaseSchema
 from app.api.v1.schemas.sales_delivery_notes_schemas import SalesDeliveryNotesOut
 
@@ -745,6 +747,40 @@ async def create_invoice_from_delivery(
         {"id": ls_id, "tenant_id": tenant_id},
     )
     db.commit()
+
+    # SALES-DN-INV-OP-001: Debitoren-OP + Document-Store Eintrag (Belegbruch schliessen)
+    try:
+        from datetime import date as _date
+        import uuid as _uuid
+        today = _date.today().isoformat()
+        due = _date.today().replace(day=min(_date.today().day + 30, 28)).isoformat()
+        db.execute(text("""
+            INSERT INTO domain_erp.offene_posten
+                (id, tenant_id, konto_typ, rechnungsnr, rechnungsdatum, datum, faelligkeit,
+                 betrag, offen, kunde_id, op_status)
+            VALUES (:id, :tid, 'debitoren', :rnr, :rdat, :dat, :faell,
+                    :betrag, :betrag, :kid, 'offen')
+            ON CONFLICT DO NOTHING
+        """), {
+            "id": str(_uuid.uuid4()), "tid": tenant_id, "rnr": inv_nr,
+            "rdat": today, "dat": today, "faell": due,
+            "betrag": float(total),
+            "kid": row.get("customer_id") or "",
+        })
+        db.commit()
+    except Exception:  # noqa: BLE001 — OP-Anlage nicht kritisch
+        pass
+    try:
+        repo = get_repository(db)
+        save_to_store("sales_invoice", inv_nr, {
+            "id": str(inv_id), "number": inv_nr,
+            "deliveryNoteId": ls_id, "customerId": row.get("customer_id") or "",
+            "totalGross": float(total), "status": "GEBUCHT",
+            "tenantId": tenant_id,
+        }, repo)
+    except Exception:  # noqa: BLE001 — Store-Eintrag nicht kritisch
+        pass
+
     return {
         "ok": True,
         "invoice_id": inv_id,
