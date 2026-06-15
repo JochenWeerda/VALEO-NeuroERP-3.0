@@ -565,11 +565,13 @@ Dispo-Arbeitsraum: Tarifliste + Bestätigung + `cancelFreightTariff`; Tests in `
 
 **Von:** Codex
 **Owner:** Codex
-**Stand:** reserviert 2026-06-15
+**Stand:** abgeschlossen 2026-06-15; erneuter DB-CI-Lauf ausstehend
 **Abstimmung:** Folge-Slice zu `PROC-DEMO-SEED-SCHEMA-001`, konfliktfrei zum aktiven Agrar-Silo-Slice. Besitz von Procurement-Match-Service, Procurement-Seed und fokussiertem Vertragstest.
 **Ziel des Slices:** Den 3-Wege-Match von nie migrierten `public.inventory_goods_receipts*`-Tabellen auf `einkauf_wareneingaenge` und `einkauf_wareneingang_positionen` umstellen.
 **Abnahmekriterien:** Mengenauflösung über PO-Positions-ID; tenantisolierter PO-Join; Seed und Match verwenden dieselbe kanonische Wareneingangsquelle; keine Legacy-Referenz verbleibt.
 **Offene Risiken:** Eine produktive Uebernahme vorhandener externer Inventory-Microservice-Daten ist ein separater Migrationsvorgang.
+**Ergebnis:** Match-Service und Demo-Seed verwenden `einkauf_wareneingaenge`/`einkauf_wareneingang_positionen`. Gelieferte Mengen werden ueber `purchase_order_item_id` zur Bestellposition aufgeloest; Tenant-Isolation erfolgt ueber die Bestellung.
+**Checks:** Fokussierter Schema-Vertrag, Python-Compile und reine Procurement-Unit-Tests gruen; keine `public.inventory_goods_receipts*`-Referenz im geaenderten Spine.
 
 ## KIM-DEPRECATE-COCKPIT-001
 
