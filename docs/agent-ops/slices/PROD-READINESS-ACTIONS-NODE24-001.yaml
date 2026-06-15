@@ -1,7 +1,7 @@
 slice_id: PROD-READINESS-ACTIONS-NODE24-001
 title: Zentrale GitHub Actions vor Node-24-Umschaltung haerten
 owner: Codex
-status: reserved
+status: implemented_pending_ci
 coordination: >-
   Nachzug aus GitHub E2E Smoke Run 27536228069. Keine Produktivlogik und
   keine Dateien des aktiven Agrar-Silo-Slices. Besitz nur der zentralen
@@ -33,3 +33,10 @@ acceptance_criteria:
 risks:
   - Fremde, nicht zentrale Workflows bleiben fuer einen Folgeslice sichtbar.
   - Bestehende fachliche Security- und Quality-Befunde bleiben blockierend.
+result:
+  - Neun zentrale Workflows optieren explizit in die Node-24-Action-Runtime ein.
+  - checkout, setup-node, setup-python und pnpm/action-setup verwenden v6.
+checks:
+  - Neun Workflow-YAMLs erfolgreich geparst.
+  - Fokussierter Node-24-Workflow-Vertrag gruen.
+  - GitHub-Abnahme nach Push ausstehend.
