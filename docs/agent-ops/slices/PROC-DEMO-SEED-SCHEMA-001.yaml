@@ -1,7 +1,7 @@
 slice_id: PROC-DEMO-SEED-SCHEMA-001
 title: Procurement Demo-Seed an kanonisches Inventory-Schema anbinden
 owner: Codex
-status: reserved
+status: completed
 coordination: >-
   CI-Nachzug aus PR #7. Keine Ueberschneidung mit WM-AGRI-SILO-001.
   Der abgeschlossene DOM-PROC-004-Slice verwendete noch Legacy-Namen im Seed;
@@ -23,3 +23,10 @@ acceptance_criteria:
   - Fokussierter Vertragstest und SQL-f-string-Guardrail sind fuer den Seed gruen.
 risks:
   - Vollstaendige DB-Integration wird durch andere aktive CI-Blocker beeinflusst.
+result:
+  - Demo-Lager nutzt domain_inventory.warehouses und warehouse_code.
+  - Demo-Lagerplatz nutzt domain_inventory.stock_locations und location_code.
+  - Lookups sind tenant- beziehungsweise lagerbezogen und idempotent.
+checks:
+  - Fokussierter Schema-Vertragstest gruen.
+  - scripts/check_sql_fstrings.py meldet keine Befunde im geaenderten Seed.
