@@ -1,4 +1,5 @@
 from pathlib import Path
+import re
 
 import yaml
 
@@ -49,3 +50,8 @@ def test_central_workflows_use_current_action_majors():
     assert "actions/setup-python@v5" not in combined
     assert "pnpm/action-setup@v2" not in combined
     assert "pnpm/action-setup@v4" not in combined
+    assert "PNPM_VERSION" not in combined
+    assert not re.search(
+        r"uses:\s*pnpm/action-setup@v6\s+with:\s+version:",
+        combined,
+    )
