@@ -3898,3 +3898,11 @@ Archiv des vorherigen Boards:
 **Stand:** abgeschlossen 2026-06-15 — `asset_accounting.dispose_asset`: nach Deaktivierung der Anlage wird GL-Buchung (Veräußerungserlös/Buchwert-Abgang/Gewinn-Verlust) via `FinanceTransactionService` gebucht (fail-soft).
 **Ziel:** Belegbruch schließen: Anlagen-Abgang berechnete Gewinn/Verlust aber erzeugte keinen FiBu-Buchungssatz.
 **Dateibesitz:** `app/api/v1/endpoints/asset_accounting.py`.
+
+## WEBSHOP-CONV-ORDER-001 — Webshop-Bestellimport → ERP Sales Order anlegen
+
+**Von:** Claude
+**Owner:** Claude
+**Stand:** abgeschlossen 2026-06-15 — `webshop_integration_service.process_order`: nach Markierung VERARBEITET wird `domain_crm.sales_orders`-Datensatz angelegt (fail-soft, ON CONFLICT DO NOTHING).
+**Ziel:** Belegbruch schließen: Webshop-Order-Konvertierung setzte Status auf VERARBEITET aber legte keinen ERP-Auftrag an.
+**Dateibesitz:** `app/services/webshop_integration_service.py`.
