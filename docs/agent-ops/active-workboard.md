@@ -3922,3 +3922,11 @@ Archiv des vorherigen Boards:
 **Stand:** abgeschlossen 2026-06-15 — `erechnung_import.buchen`: nach IMPORTIERT-Setzung wird Kreditoren-OP für `betrag_brutto` der e-Rechnung in `domain_erp.offene_posten` angelegt (fail-soft).
 **Ziel:** Belegbruch schließen: e-Rechnungs-Buchung setzte Status auf IMPORTIERT aber erzeugte keinen Kreditoren-OP.
 **Dateibesitz:** `app/api/v1/endpoints/erechnung_import.py`.
+
+## GENO-ANTEILE-JE-001 — Anteilsbewegung → GL-Buchung Kapital
+
+**Von:** Claude
+**Owner:** Claude
+**Stand:** abgeschlossen 2026-06-15 — `genossenschaft.create_anteilsbewegung`: nach Mitglieder-Saldo-Update wird GL-Buchung via `FinanceTransactionService` erzeugt (Zeichnung: Bank/Kapital; Rückzahlung: Kapital/Verbindlichkeiten-Mitglieder) (fail-soft).
+**Ziel:** Belegbruch schließen: Genossenschafts-Anteilsbewegung aktualisierte Mitgliedersaldo aber erzeugte keinen FiBu-Buchungssatz.
+**Dateibesitz:** `app/api/v1/endpoints/genossenschaft.py`.

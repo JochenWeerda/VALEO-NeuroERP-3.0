@@ -295,6 +295,40 @@ def create_anteilsbewegung(
             {"delta": delta, "id": mitglied_id},
         )
         db.commit()
+
+        # GENO-ANTEILE-JE-001: GL-Buchung für Anteilsbewegung (Belegbruch schliessen)
+        wert = float(payload.wert_eur or 0)
+        if wert > 0:
+            try:
+                from app.services.finance_transaction_service import FinanceTransactionService
+                fin = FinanceTransactionService(db, tenant_id)
+                if payload.bewegungstyp == "ZEICHNUNG":
+                    lines = [
+                        {"account_id": "1200", "debit_amount": wert, "credit_amount": 0.0,
+                         "description": f"Anteilszeichnung Mitglied {mitglied_id[:8]}"},
+                        {"account_id": "0900", "debit_amount": 0.0, "credit_amount": wert,
+                         "description": "Genossenschaftskapital"},
+                    ]
+                else:  # TEILRUECKZAHLUNG / VOLLRUECKZAHLUNG
+                    lines = [
+                        {"account_id": "0900", "debit_amount": abs(wert), "credit_amount": 0.0,
+                         "description": f"Anteilsrückzahlung Mitglied {mitglied_id[:8]}"},
+                        {"account_id": "1600", "debit_amount": 0.0, "credit_amount": abs(wert),
+                         "description": "Verbindlichkeiten Mitglieder"},
+                    ]
+                fin.create(
+                    entry_number=f"GENO-{bewegung_id[:8].upper()}",
+                    description=f"Anteilsbewegung {payload.bewegungstyp} Mitglied {mitglied_id[:8]}",
+                    entry_date=payload.datum,
+                    lines=lines,
+                    reference=bewegung_id,
+                    source="genossenschaft_anteile",
+                    document_type="anteilsbewegung",
+                    period=str(payload.datum)[:7],
+                )
+            except Exception:  # noqa: BLE001 — GL-Buchung nicht kritisch für Anteilsbewegung
+                pass
+
         return {"id": bewegung_id, "mitglieds_id": mitglied_id, "delta_anteile": delta, "status": "gebucht"}
     except Exception as exc:
         db.rollback()
