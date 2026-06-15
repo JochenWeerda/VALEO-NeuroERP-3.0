@@ -541,11 +541,13 @@ Dispo-Arbeitsraum: Tarifliste + Bestätigung + `cancelFreightTariff`; Tests in `
 
 **Von:** Codex
 **Owner:** Codex
-**Stand:** reserviert 2026-06-15
+**Stand:** abgeschlossen 2026-06-15; fehlendes LFS-Binaerobjekt separat offen
 **Abstimmung:** Nachzug aus PR #7. Exklusiver Besitz des Gitleaks-Schritts in `.github/workflows/quality-gate.yml` und eines fokussierten Vertragstests. Cursor besitzt weiterhin die Hofplan-Datei; keine Aenderung am Bild oder LFS-Objekt.
 **Ziel des Slices:** Secret-Scan vom externen LFS-Download entkoppeln, ohne versionierte Inhalte vom Scan auszunehmen.
 **Abnahmekriterien:** `git archive` exportiert LFS-Pointer ohne Smudge/Download; Gitleaks scannt den Snapshot; fehlende LFS-Binaerobjekte verhindern den Security-Scan nicht; YAML und Vertragstest gruen.
 **Offene Risiken:** Das fehlende Hofplan-LFS-Objekt bleibt als separater Artefaktbefund offen und muss vom Dateieigentuemer nachgeliefert oder bewusst ersetzt werden.
+**Ergebnis:** Der Gitleaks-Snapshot deaktiviert den LFS-Process nur fuer `git archive`, exportiert dadurch den versionierten Pointer und bleibt unabhaengig vom externen Binaerdownload. Der eigentliche Secret-Scan bleibt blockierend und unveraendert.
+**Checks:** Lokaler Archivtest gegen den fehlenden Hofplan-OID erfolgreich; Workflow-YAML geparst; fokussierter Vertragstest gruen.
 
 ## KIM-DEPRECATE-COCKPIT-001
 
