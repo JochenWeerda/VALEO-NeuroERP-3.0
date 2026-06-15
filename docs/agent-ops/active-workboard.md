@@ -585,6 +585,16 @@ Dispo-Arbeitsraum: Tarifliste + Bestätigung + `cancelFreightTariff`; Tests in `
 **Ergebnis:** Die Tenant-Fixture verwendet nun `async ({}, use)` und ist damit mit der aktuellen Playwright-Runtime kompatibel. Tenant-Fallback, Header und Login-Verhalten sind unveraendert.
 **Checks:** Fokussierter Fixture-Vertragstest und Playwright-Testauflistung gruen; `git diff --check` gruen.
 
+## QA-KIM-SMOKE-ROUTING-001
+
+**Von:** Codex
+**Owner:** Codex
+**Stand:** reserviert 2026-06-15
+**Abstimmung:** CRM-Smoke-Nachzug aus PR #7. Keine Produktiv- oder aktive KIM-Slice-Datei; exklusiver Besitz der `kim-performance-smoke.spec.ts` und eines fokussierten Vertragstests.
+**Ziel des Slices:** Playwright-Route-Prioritaet korrigieren, damit der KIM-Catch-all die spezifischen Kunden-/Dashboard-Mocks nicht ueberschreibt.
+**Abnahmekriterien:** PERF-Kunden sichtbar; Dashboard-Zaehler aktiv; keine Einzelstrom-Aufrufe; CRM-Smoke auf GitHub gruen.
+**Offene Risiken:** Keine.
+
 ## KIM-DEPRECATE-COCKPIT-001
 
 **Von:** Claude
