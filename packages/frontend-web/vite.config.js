@@ -9,6 +9,12 @@ export default defineConfig({
             '@': path.resolve(__dirname, './src'),
         },
     },
+    optimizeDeps: {
+        entries: ['index.html'],
+        esbuildOptions: {
+            target: 'es2022',
+        },
+    },
     server: {
         port: 3000,
         host: true,
@@ -49,6 +55,7 @@ export default defineConfig({
     },
     build: {
         outDir: 'dist',
+        target: 'es2022',
         sourcemap: true,
     },
     test: {
