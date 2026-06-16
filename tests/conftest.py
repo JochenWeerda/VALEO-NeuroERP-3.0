@@ -10,6 +10,7 @@ Zentrale Test-Fixtures für VALEO NeuroERP 3.0.
 
 import os
 import sys
+from unittest.mock import patch
 
 import pytest
 from sqlalchemy import text
@@ -116,3 +117,41 @@ def require_db():
                 "DATABASE_URL prüfen und Schema mit scripts/init_db.py migrieren."
             )
         pytest.skip("PostgreSQL nicht erreichbar — docker compose up erforderlich")
+
+@pytest.fixture
+def mocker():
+    """Small pytest-mock compatible subset used by legacy tests."""
+
+    class _PatchProxy:
+        def __init__(self, owner):
+            self._owner = owner
+
+        def __call__(self, target, *args, **kwargs):
+            patcher = patch(target, *args, **kwargs)
+            mocked = patcher.start()
+            self._owner._patches.append(patcher)
+            return mocked
+
+        def object(self, target, attribute, *args, **kwargs):
+            patcher = patch.object(target, attribute, *args, **kwargs)
+            mocked = patcher.start()
+            self._owner._patches.append(patcher)
+            return mocked
+
+    class _Mocker:
+        def __init__(self):
+            self._patches = []
+            self.patch = _PatchProxy(self)
+
+        def patch_object(self, target, attribute, *args, **kwargs):
+            return self.patch.object(target, attribute, *args, **kwargs)
+
+        def stopall(self):
+            while self._patches:
+                self._patches.pop().stop()
+
+    fixture = _Mocker()
+    try:
+        yield fixture
+    finally:
+        fixture.stopall()
