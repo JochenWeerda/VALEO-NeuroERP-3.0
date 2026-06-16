@@ -17,7 +17,7 @@ on:
       base_url:
         description: 'Backend-URL'
         required: false
-        default: 'https://staging.valeo-erp.de'
+        default: ''
   push:
     branches:
       - main
@@ -84,7 +84,40 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Zielsystem aufloesen
+        id: target
+        env:
+          REQUESTED_BASE_URL: ${{ github.event.inputs.base_url }}
+          STAGING_BASE_URL: ${{ secrets.STAGING_URL }}
+        run: |
+          BASE_URL="${REQUESTED_BASE_URL:-$STAGING_BASE_URL}"
+          BASE_URL="${BASE_URL%/}"
+          if [ -z "$BASE_URL" ]; then
+            echo "enabled=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::Erntepeak als externes Gate uebersprungen: STAGING_URL fehlt."
+          else
+            echo "enabled=true" >> "$GITHUB_OUTPUT"
+            echo "base_url=$BASE_URL" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Zielsystem vorpruefen
+        if: steps.target.outputs.enabled == 'true'
+        env:
+          BASE_URL: ${{ steps.target.outputs.base_url }}
+        run: |
+          for path in /readyz /healthz /health; do
+            if curl --silent --show-error --fail \
+              --connect-timeout 5 --max-time 15 \
+              "$BASE_URL$path" > /dev/null; then
+              echo "Lasttest-Ziel ist ueber $path erreichbar."
+              exit 0
+            fi
+          done
+          echo "::error::Konfiguriertes Lasttest-Ziel ist nicht erreichbar: $BASE_URL"
+          exit 1
+
       - name: k6 installieren
+        if: steps.target.outputs.enabled == 'true'
         run: |
           sudo gpg -k
           sudo gpg --no-default-keyring --keyring /usr/share/keyrings/k6-archive-keyring.gpg \
@@ -95,8 +128,9 @@ jobs:
           sudo apt-get install k6
 
       - name: Erntepeak-Lasttest ausführen
+        if: steps.target.outputs.enabled == 'true'
         env:
-          BASE_URL: ${{ github.event.inputs.base_url || 'https://staging.valeo-erp.de' }}
+          BASE_URL: ${{ steps.target.outputs.base_url }}
           API_DEV_TOKEN: ${{ secrets.API_DEV_TOKEN }}
           TENANT_ID: ${{ secrets.TENANT_ID || 'tenant-staging' }}
         run: |
@@ -109,7 +143,7 @@ jobs:
             tests/load/harvest-peak.js
 
       - name: Ergebnisse hochladen
-        if: always()
+        if: always() && steps.target.outputs.enabled == 'true'
         uses: actions/upload-artifact@v4
         with:
           name: lasttest-ergebnisse-${{ github.run_id }}
@@ -121,6 +155,12 @@ jobs:
         run: |
           {
             echo "## Lasttest-Ergebnis"
+            if [ "${{ steps.target.outputs.enabled }}" != "true" ]; then
+              echo ""
+              echo "Nicht ausgefuehrt: Es ist kein Staging-Ziel konfiguriert."
+              echo "Das externe Performance-Gate bleibt offen."
+              exit 0
+            fi
             echo "| Metrik | Ziel |"
             echo "|--------|------|"
             echo "| P95 Antwortzeit | < 800ms |"

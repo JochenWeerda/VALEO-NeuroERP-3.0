@@ -1,0 +1,30 @@
+slice_id: PROD-READINESS-GITLEAKS-LFS-001
+title: Gitleaks LFS-unabhaengiger Repository-Scan
+owner: Codex
+status: completed
+coordination: >-
+  Nachzug aus dem PR-Check von PROD-READINESS-CI-REGRESSION-001. Der aktive
+  Cursor-Slice besitzt die Hofplan-Datei; weder Datei noch LFS-Objekt werden
+  veraendert. Dieser Slice besitzt nur den Secret-Scan-Vertrag.
+goal: >-
+  Gitleaks muss den versionierten Repository-Inhalt auch dann scannen koennen,
+  wenn ein LFS-Binaerobjekt extern fehlt. LFS-Pointer werden als Repositorytext
+  gescannt; fehlende Binardownloads duerfen den Security-Scan nicht verhindern.
+file_ownership:
+  - docs/agent-ops/active-workboard.md
+  - docs/agent-ops/slices/PROD-READINESS-GITLEAKS-LFS-001.yaml
+  - .github/workflows/quality-gate.yml
+  - tests/test_quality_gate_lfs_contract.py
+acceptance_criteria:
+  - git archive startet beim Gitleaks-Snapshot keinen LFS-Smudge-Prozess.
+  - Der Scan umfasst weiterhin alle versionierten Textdateien und LFS-Pointer.
+  - Fehlende LFS-Binaerobjekte blockieren den Secret-Scan nicht.
+  - Workflow-YAML und fokussierter Vertragstest sind gruen.
+risks:
+  - Das fehlende LFS-Binaerobjekt bleibt ein separater Repository-Artefaktbefund.
+result:
+  - Gitleaks-Snapshot deaktiviert LFS-Process und nutzt den versionierten Pointer.
+  - Baseline, Scan-Umfang und blockierendes Gitleaks-Ergebnis bleiben unveraendert.
+checks:
+  - Lokaler git-archive-Nachweis mit fehlendem Hofplan-LFS-Objekt erfolgreich.
+  - Workflow-YAML und fokussierter Vertragstest gruen.

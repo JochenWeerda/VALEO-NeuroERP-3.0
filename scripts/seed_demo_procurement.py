@@ -50,26 +50,53 @@ def _lieferant(db) -> str:
 
 def _warehouse_location(db) -> tuple[str, str]:
     """Get-or-create ein Demo-Lager + -Lagerplatz (FK-Ziele der WE-Zeilen)."""
-    now = datetime.utcnow()
-    wh = db.execute(text("SELECT id FROM public.inventory_warehouses WHERE code = 'DEMO-WH'")).first()
+    wh = db.execute(
+        text(
+            "SELECT id FROM domain_inventory.warehouses "
+            "WHERE warehouse_code = :code AND tenant_id = :tenant"
+        ),
+        {"code": "DEMO-WH", "tenant": TENANT},
+    ).first()
     if wh:
         wh_id = str(wh[0])
     else:
         wh_id = str(uuid.uuid4())
         db.execute(
-            text("INSERT INTO public.inventory_warehouses (id, code, name, tenant_id, is_active, created_at, updated_at) "
-                 "VALUES (:id, 'DEMO-WH', 'Demo-Lager', :t, true, :ts, :ts)"),
-            {"id": wh_id, "t": TENANT, "ts": now},
+            text(
+                "INSERT INTO domain_inventory.warehouses "
+                "(id, tenant_id, warehouse_code, name, is_active) "
+                "VALUES (:id, :tenant, :code, :name, true)"
+            ),
+            {
+                "id": wh_id,
+                "tenant": TENANT,
+                "code": "DEMO-WH",
+                "name": "Demo-Lager",
+            },
         )
-    loc = db.execute(text("SELECT id FROM public.inventory_locations WHERE code = 'DEMO-LOC'")).first()
+    loc = db.execute(
+        text(
+            "SELECT id FROM domain_inventory.stock_locations "
+            "WHERE warehouse_id = :warehouse_id AND location_code = :code"
+        ),
+        {"warehouse_id": wh_id, "code": "DEMO-LOC"},
+    ).first()
     if loc:
         loc_id = str(loc[0])
     else:
         loc_id = str(uuid.uuid4())
         db.execute(
-            text("INSERT INTO public.inventory_locations (id, warehouse_id, code, location_type, created_at) "
-                 "VALUES (:id, :wh, 'DEMO-LOC', 'bulk', :ts)"),
-            {"id": loc_id, "wh": wh_id, "ts": now},
+            text(
+                "INSERT INTO domain_inventory.stock_locations "
+                "(id, warehouse_id, location_code, location_type, is_active) "
+                "VALUES (:id, :warehouse_id, :code, :location_type, true)"
+            ),
+            {
+                "id": loc_id,
+                "warehouse_id": wh_id,
+                "code": "DEMO-LOC",
+                "location_type": "bulk",
+            },
         )
     return wh_id, loc_id
 
@@ -134,22 +161,58 @@ def _gr(db, po_id: str, po_number: str, lieferant_id: str, gr_number: str, zeile
     gid = str(uuid.uuid4())
     now = datetime.utcnow()
     db.execute(
-        text("INSERT INTO public.inventory_goods_receipts "
-             "(id, tenant_id, gr_number, po_number, po_id, supplier_id, supplier_name, "
-             "receipt_date, status, notes, created_by, created_at, updated_at) "
-             "VALUES (:id, :t, :grn, :pon, :pid, :sid, :sn, :dt, 'POSTED', '', 'seed', :ts, :ts)"),
-        {"id": gid, "t": TENANT, "grn": gr_number, "pon": po_number, "pid": po_id,
-         "sid": lieferant_id, "sn": "Demo Agrar-Lieferant GmbH", "dt": now, "ts": now},
+        text(
+            "INSERT INTO einkauf_wareneingaenge "
+            "(id, purchase_order_id, delivery_note_number, received_date, received_by, "
+            "received_location, quality_inspection_status, inspection_notes, created_at, updated_at) "
+            "VALUES (:id, :po_id, :delivery_note, :received_date, :received_by, "
+            ":received_location, 'APPROVED', :notes, :created_at, :updated_at)"
+        ),
+        {
+            "id": gid,
+            "po_id": po_id,
+            "delivery_note": gr_number,
+            "received_date": now.date(),
+            "received_by": "seed",
+            "received_location": loc_id,
+            "notes": f"Demo-Wareneingang {po_number}; Lieferant {lieferant_id}; Lager {wh_id}",
+            "created_at": now,
+            "updated_at": now,
+        },
     )
     for z in zeilen:
+        po_line = db.execute(
+            text(
+                "SELECT id, artikel_nr FROM domain_einkauf.bestellung_positionen "
+                "WHERE bestellung_id = :po_id AND pos_nr = :pos"
+            ),
+            {"po_id": po_id, "pos": z["pos"]},
+        ).first()
+        if not po_line:
+            raise RuntimeError(
+                f"Bestellposition {po_number}/{z['pos']} fuer Demo-Wareneingang fehlt"
+            )
         db.execute(
-            text("INSERT INTO public.inventory_goods_receipt_lines "
-                 "(id, goods_receipt_id, po_line_number, sku, description, ordered_quantity, "
-                 "received_quantity, unit, warehouse_id, location_id, quality_status, notes, created_at) "
-                 "VALUES (:id, :gid, :pos, :sku, :desc, :ord, :rec, :unit, :wh, :loc, 'ok', '', :ts)"),
-            {"id": str(uuid.uuid4()), "gid": gid, "pos": z["pos"], "sku": z["sku"], "desc": z["bezeichnung"],
-             "ord": z["bestellt"], "rec": z["geliefert"], "unit": z["einheit"],
-             "wh": wh_id, "loc": loc_id, "ts": now},
+            text(
+                "INSERT INTO einkauf_wareneingang_positionen "
+                "(id, wareneingang_id, purchase_order_item_id, article_id, article_name, "
+                "ordered_quantity, received_quantity, accepted_quantity, rejected_quantity, "
+                "condition, created_at, updated_at) "
+                "VALUES (:id, :receipt_id, :po_line_id, :article_id, :article_name, "
+                ":ordered, :received, :accepted, 0, 'PERFECT', :created_at, :updated_at)"
+            ),
+            {
+                "id": str(uuid.uuid4()),
+                "receipt_id": gid,
+                "po_line_id": str(po_line[0]),
+                "article_id": str(po_line[1] or z["sku"]),
+                "article_name": z["bezeichnung"],
+                "ordered": z["bestellt"],
+                "received": z["geliefert"],
+                "accepted": z["geliefert"],
+                "created_at": now,
+                "updated_at": now,
+            },
         )
 
 

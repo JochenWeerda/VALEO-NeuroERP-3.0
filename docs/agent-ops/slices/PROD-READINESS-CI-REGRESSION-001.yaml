@@ -1,0 +1,40 @@
+slice_id: PROD-READINESS-CI-REGRESSION-001
+title: Production Readiness CI Regression Hardening
+owner: Codex
+status: completed
+coordination: >-
+  Eng begrenzter Nachzug zu PROD-READINESS-001. Cursor besitzt parallel
+  WM-AGRI-SILO-001 und packages/agrar-silo-materialfluss-studio/**; diese
+  Dateien bleiben unberuehrt. Der dortige esbuild-High-Befund wird als
+  blockierender Handoff dokumentiert, aber nicht in diesem Slice behoben.
+goal: >-
+  Die nach dem Production-Readiness-Sprint sichtbar gewordenen CI-Defekte
+  im Full-UAT- und Erntepeak-Workflow reproduzierbar beheben: lokale
+  Testumgebung vollstaendig aufsetzen, fehlende optionale Env-Datei
+  abfangen und externe Lasttests ohne konfiguriertes oder erreichbares
+  Ziel fail-fast behandeln.
+file_ownership:
+  - docs/agent-ops/active-workboard.md
+  - docs/agent-ops/slices/PROD-READINESS-CI-REGRESSION-001.yaml
+  - .github/workflows/e2e-full.yml
+  - .github/workflows/load-test.yml
+  - tests/test_ci_workflow_regressions.py
+  - docs/quality-assurance/production-readiness-ci-regressions-2026-06-15.md
+acceptance_criteria:
+  - Full-UAT scheitert nicht an einer unversionierten .env.uat.
+  - Full-UAT installiert die benoetigten Python-Abhaengigkeiten.
+  - Erntepeak nutzt kein fest verdrahtetes vermeintliches Staging-System.
+  - Fehlende Staging-Konfiguration wird als offenes externes Gate ausgewiesen.
+  - Ein konfiguriertes, aber nicht erreichbares Ziel scheitert vor dem Lasttest.
+  - YAML- und fokussierte Workflow-Vertragstests sind gruen.
+risks:
+  - Reale UAT- und Lasttest-Evidenz benoetigt erreichbare Zielsysteme und Secrets.
+  - GHSA-gv7w-rqvm-qjhr in esbuild bleibt bis zum Upgrade im Cursor-Slice blockierend.
+result:
+  - Full-UAT stellt PostgreSQL bereit, installiert Backend-Abhaengigkeiten und migriert.
+  - Env-Fallback und aktive Backend-/Frontend-Readiness ersetzen implizite Annahmen.
+  - Erntepeak verwendet nur explizite Ziele und prueft Erreichbarkeit vor k6.
+checks:
+  - YAML-Parse fuer beide Workflows erfolgreich.
+  - pytest tests/test_ci_workflow_regressions.py --noconftest: 2 passed.
+  - pnpm audit --prod --audit-level high: blockiert erwartungsgemaess durch esbuild High.

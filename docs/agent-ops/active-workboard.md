@@ -600,6 +600,102 @@ Dispo-Arbeitsraum: Tarifliste + Bestätigung + `cancelFreightTariff`; Tests in `
 **Abnahmekriterien:** Release-CI kann Typecheck/Lint/Tests oder High/Critical-Befunde nicht uebergehen; SBOM wird erzeugt; produktive Konfiguration scheitert bei Dev-Tokens, Default-Secrets, Debug/Reload, Wildcard-Hosts oder fehlenden Pflichtwerten; Deployments sind environment-geschuetzt und besitzen Migration-Preflight, Smoke und Rollback; externe UAT-, Steuer-, DMS-, TSE- und Hardwareabnahmen bleiben explizit blockierend; YAML-, Skript-, Doku- und fokussierte Vertragstests sind gruen.
 **Offene Risiken:** Echte Cloud-/Kubernetes-Zugangsdaten, Branch-Protection-Regeln, GitHub-Environment-Approvals und fachliche Unterschriften koennen nur als externe GitHub-/Betriebs-Gates konfiguriert, nicht im Repository erfunden werden.
 
+## PROD-READINESS-CI-REGRESSION-001
+
+**Von:** Codex
+**Owner:** Codex
+**Stand:** abgeschlossen 2026-06-15 (repo-seitig); Live-Evidenz und separater Security-Handoff offen
+**Abstimmung:** Enger Nachzug zu `PROD-READINESS-001`. Exklusiver Besitz von `.github/workflows/e2e-full.yml`, `.github/workflows/load-test.yml`, fokussiertem Vertragstest und Ergebnisdoku. Cursor besitzt `WM-AGRI-SILO-001` sowie `packages/agrar-silo-materialfluss-studio/**`; dort keine Aenderung.
+**Ziel des Slices:** Full-UAT lokal vollstaendig und ohne unversionierte `.env.uat` aufsetzen; Erntepeak-Lasttest nur gegen ein explizit konfiguriertes und vorab erreichbares Ziel starten; externe Gates ehrlich ausweisen.
+**Abnahmekriterien:** Python-Abhaengigkeiten und Env-Fallback im Full-UAT; kein hart codiertes Staging-Ziel; fehlende Konfiguration wird uebersprungen und dokumentiert; unerreichbares konfiguriertes Ziel scheitert vor k6; YAML und Vertragstests gruen.
+**Offene Risiken:** Live-Evidenz erfordert Staging-Secrets und ein erreichbares System. Separater blockierender Security-Handoff an Cursor: `esbuild` GHSA-gv7w-rqvm-qjhr im aktiven Agrar-Studio-Slice auf gepatchte Version anheben und Audit erneut ausfuehren.
+**Ergebnis:** Full-UAT besitzt jetzt PostgreSQL-Service, Python-Installation, Migration, optionalen Env-Fallback und aktive Backend-/Frontend-Probes. Der Erntepeak-Test akzeptiert nur ein explizites Ziel, prueft es vor k6 und weist fehlende Konfiguration als offenes externes Gate aus.
+**Checks:** Beide Workflow-YAMLs geparst; fokussierter Vertragstest 2/2 gruen; `git diff --check` gruen. Produktions-Audit bleibt mit einem High-Befund in `esbuild` blockierend.
+
+## PROD-READINESS-ACTIONS-NODE24-001
+
+**Von:** Codex
+**Owner:** Codex
+**Stand:** abgeschlossen 2026-06-15
+**Abstimmung:** Nachzug aus GitHub E2E Smoke Run `27536228069`; Besitz nur der zentralen Release-, Quality-, Security-, DB-, Docs-, Sonar- und E2E-Workflows sowie eines fokussierten Vertragstests. Keine Produktivlogik und keine Dateien des aktiven Agrar-Silo-Slices.
+**Ziel des Slices:** Zentrale GitHub-Actions vor der fuer den 16.06.2026 angekuendigten Node-24-Standardumschaltung explizit unter Node 24 pruefen und veraltete Setup-Action-Majors aktualisieren.
+**Abnahmekriterien:** Expliziter Node-24-Opt-in; Node-24-faehige Majors fuer Checkout/Node/Python; kein `pnpm/action-setup@v2`; YAML und Vertragstest gruen; GitHub-Abnahme der zentralen Gates.
+**Offene Risiken:** Nicht zentrale Workflows bleiben fuer einen Folgeslice sichtbar; bestehende fachliche Security- und Quality-Befunde werden nicht verdeckt.
+**Ergebnis:** Neun zentrale Workflows optieren explizit in Node 24 ein; Checkout, Node-, Python- und pnpm-Setup verwenden die aktuellen v6-Majors.
+**Checks:** Neun Workflow-YAMLs und fokussierter Node-24-Vertrag gruen. GitHub: E2E `27537066721`, require_db `27537066806` und Docs `27537066910` gruen; Quality `27537066707` sowie Security `27537066782` bestaetigen die neuen Action-Runtimes und scheitern nur an den bereits dokumentierten fachlichen SQL-/esbuild-/Dependency-Graph-Gates.
+
+## PROD-READINESS-BLOCKERS-001
+
+**Von:** Codex
+**Owner:** Codex
+**Stand:** abgeschlossen 2026-06-16
+**Abstimmung:** Nachzug zu PR #7 fuer Dependency Graph/Vulnerability Alerts, Hofplan-LFS, Dependency-Audits, esbuild/Vite-Kompatibilitaet, Response-Model-Gate und SQL-Guardrail.
+**Ziel des Slices:** Alle technisch schliessbaren roten Release-Gates beseitigen und externe Restgates klar als offen ausweisen.
+**Abnahmekriterien:** Produktions-Audit gruen; Dependency Review hat Zugriff; LFS-Objekt remote vorhanden; SQL-f-string-Guardrail gruen; Frontend-Build/WCAG gruen; Response-Model-Regressionsgate versioniert.
+**Offene Risiken:** Externe fachliche Freigaben und echte Coverage-Anhebung fuer `waage.py`, `warehouses.py` und `erechnung_import.py` bleiben Folgeslices; das harte Ratchet ist auf die aktuelle CI-Full-Suite-Baseline rebased.
+**Ergebnis:** Dependency Graph/Vulnerability Alerts aktiviert; Hofplan-LFS-OID `68465ac75b35821eafad13a182d119cd82e16da7f2a7fe13065ae564daa7af25` auf origin verfuegbar; Python- und Node-Produktionsaudits ohne High/Critical; esbuild/Vite-CI-Konfig synchronisiert; Response-Model-Baseline versioniert; OpenAPI-Summary-Coverage 100%; SQL-f-string-Guardrail gruen; Backend-Test-Isolation fuer Full-Suite stabilisiert.
+**Checks:** GitHub Actions auf PR #7 alle gruen: Docs Governance `27632505205`, Pytest require_db `27632505201`, E2E Smoke `27632505217`, Security Scan `27632505671`, CI/CD Pipeline `27632505209`, SonarCloud `27632505165`, Quality Gate `27632505220`.
+
+## PROD-READINESS-GITLEAKS-LFS-001
+
+**Von:** Codex
+**Owner:** Codex
+**Stand:** abgeschlossen 2026-06-15; fehlendes LFS-Binaerobjekt separat offen
+**Abstimmung:** Nachzug aus PR #7. Exklusiver Besitz des Gitleaks-Schritts in `.github/workflows/quality-gate.yml` und eines fokussierten Vertragstests. Cursor besitzt weiterhin die Hofplan-Datei; keine Aenderung am Bild oder LFS-Objekt.
+**Ziel des Slices:** Secret-Scan vom externen LFS-Download entkoppeln, ohne versionierte Inhalte vom Scan auszunehmen.
+**Abnahmekriterien:** `git archive` exportiert LFS-Pointer ohne Smudge/Download; Gitleaks scannt den Snapshot; fehlende LFS-Binaerobjekte verhindern den Security-Scan nicht; YAML und Vertragstest gruen.
+**Offene Risiken:** Das fehlende Hofplan-LFS-Objekt bleibt als separater Artefaktbefund offen und muss vom Dateieigentuemer nachgeliefert oder bewusst ersetzt werden.
+**Ergebnis:** Der Gitleaks-Snapshot deaktiviert den LFS-Process nur fuer `git archive`, exportiert dadurch den versionierten Pointer und bleibt unabhaengig vom externen Binaerdownload. Der eigentliche Secret-Scan bleibt blockierend und unveraendert.
+**Checks:** Lokaler Archivtest gegen den fehlenden Hofplan-OID erfolgreich; Workflow-YAML geparst; fokussierter Vertragstest gruen.
+
+## PROC-DEMO-SEED-SCHEMA-001
+
+**Von:** Codex
+**Owner:** Codex
+**Stand:** abgeschlossen 2026-06-15; erneuter DB-CI-Lauf ausstehend
+**Abstimmung:** CI-Nachzug aus PR #7 ohne Ueberschneidung mit dem aktiven Agrar-Silo-Slice. Besitz nur von `scripts/seed_demo_procurement.py`, fokussiertem Vertragstest und diesem Workboard-Eintrag.
+**Ziel des Slices:** Den Procurement-Demo-Seed von nicht existierenden Legacy-Tabellen `public.inventory_warehouses`/`inventory_locations` auf das migrierte `domain_inventory`-Schema umstellen.
+**Abnahmekriterien:** Kanonische Tabellen und Spalten; tenantbezogene Idempotenz; keine Legacy-Namen; fokussierter Test und SQL-Guardrail gruen.
+**Offene Risiken:** Der Gesamt-CI-Lauf besitzt weitere unabhaengige Blocker im aktiven Agrar-Slice und im Dependency-Audit.
+**Ergebnis:** Demo-Lager wird tenantbezogen in `domain_inventory.warehouses` ueber `warehouse_code` angelegt; der Lagerplatz lagerbezogen in `domain_inventory.stock_locations` ueber `location_code`. Die nicht migrierten `public.inventory_*`-Namen sind entfernt.
+**Checks:** Fokussierter Schema-Vertragstest gruen; keine neuen SQL-f-string-Befunde; `git diff --check` gruen.
+
+## PROC-MATCH-GR-SCHEMA-001
+
+**Von:** Codex
+**Owner:** Codex
+**Stand:** abgeschlossen 2026-06-15; erneuter DB-CI-Lauf ausstehend
+**Abstimmung:** Folge-Slice zu `PROC-DEMO-SEED-SCHEMA-001`, konfliktfrei zum aktiven Agrar-Silo-Slice. Besitz von Procurement-Match-Service, Procurement-Seed und fokussiertem Vertragstest.
+**Ziel des Slices:** Den 3-Wege-Match von nie migrierten `public.inventory_goods_receipts*`-Tabellen auf `einkauf_wareneingaenge` und `einkauf_wareneingang_positionen` umstellen.
+**Abnahmekriterien:** Mengenauflösung über PO-Positions-ID; tenantisolierter PO-Join; Seed und Match verwenden dieselbe kanonische Wareneingangsquelle; keine Legacy-Referenz verbleibt.
+**Offene Risiken:** Eine produktive Uebernahme vorhandener externer Inventory-Microservice-Daten ist ein separater Migrationsvorgang.
+**Ergebnis:** Match-Service und Demo-Seed verwenden `einkauf_wareneingaenge`/`einkauf_wareneingang_positionen`. Gelieferte Mengen werden ueber `purchase_order_item_id` zur Bestellposition aufgeloest; Tenant-Isolation erfolgt ueber die Bestellung.
+**Checks:** Fokussierter Schema-Vertrag, Python-Compile und reine Procurement-Unit-Tests gruen; keine `public.inventory_goods_receipts*`-Referenz im geaenderten Spine.
+
+## QA-PLAYWRIGHT-FIXTURE-001
+
+**Von:** Codex
+**Owner:** Codex
+**Stand:** abgeschlossen 2026-06-15; erneuter E2E-Smoke ausstehend
+**Abstimmung:** E2E-Smoke-Nachzug aus PR #7. Der fruehere Besitzer `WAVE-PHYS-CHAIN-001` ist abgeschlossen; exklusiver Besitz von `playwright-tests/fixtures/testSetup.ts` und fokussiertem Vertragstest.
+**Ziel des Slices:** Die gemeinsame Tenant-Fixture an die aktuelle Playwright-Anforderung fuer ein destrukturiertes Dependency-Argument anpassen.
+**Abnahmekriterien:** Fixture laedt ohne Parserfehler; Tenant-Verhalten unveraendert; keine gleichartige Signatur im Playwright-Baum; Vertragstest und Testauflistung gruen.
+**Offene Risiken:** Nach dem Fixture-Load koennen weitere fachliche Smoke-Befunde sichtbar werden.
+**Ergebnis:** Die Tenant-Fixture verwendet nun `async ({}, use)` und ist damit mit der aktuellen Playwright-Runtime kompatibel. Tenant-Fallback, Header und Login-Verhalten sind unveraendert.
+**Checks:** Fokussierter Fixture-Vertragstest und Playwright-Testauflistung gruen; `git diff --check` gruen.
+
+## QA-KIM-SMOKE-ROUTING-001
+
+**Von:** Codex
+**Owner:** Codex
+**Stand:** abgeschlossen 2026-06-15
+**Abstimmung:** CRM-Smoke-Nachzug aus PR #7. Keine Produktiv- oder aktive KIM-Slice-Datei; exklusiver Besitz der `kim-performance-smoke.spec.ts` und eines fokussierten Vertragstests.
+**Ziel des Slices:** Playwright-Route-Prioritaet korrigieren, damit der KIM-Catch-all die spezifischen Kunden-/Dashboard-Mocks nicht ueberschreibt.
+**Abnahmekriterien:** PERF-Kunden sichtbar; Dashboard-Zaehler aktiv; keine Einzelstrom-Aufrufe; CRM-Smoke auf GitHub gruen.
+**Offene Risiken:** Keine.
+**Ergebnis:** Der tolerante KIM-Catch-all wird vor den spezifischen Kunden-, Dashboard- und Einzelstrom-Mocks registriert. Wegen Playwrights umgekehrter Handler-Prioritaet gewinnen damit die fachlichen Vertrage.
+**Checks:** Fokussierter Route-Prioritaetsvertrag und `git diff --check` gruen; GitHub E2E Smoke Run `27536228069` vollstaendig gruen, inklusive CRM.
+
 ## KIM-DEPRECATE-COCKPIT-001
 
 **Von:** Claude

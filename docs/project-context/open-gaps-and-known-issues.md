@@ -5,6 +5,10 @@
 Ehrliche, aktuelle Bestandsaufnahme aller offenen Restthemen, fachlichen Duennstellen und bekannten Risiken.
 Production-Readiness-Nachaudit: **2026-06-09** (CI/Security, Deployment,
 simulierte externe Pruefer, POS-Fiskalisierung und CRM360/KIM).
+Security-/CI-Blocker-Nachzug: **2026-06-16** (`PROD-READINESS-BLOCKERS-001`:
+Dependency Graph aktiviert, fehlendes LFS-Objekt nachgeliefert,
+High/Critical Dependency-Audits lokal gruen, SQL-f-string-Guardrail gruen,
+Response-Model-Baseline eingefuehrt).
 Governance-Nachzug: **2026-06-11** (`COMPAT-GOV-001`, `INV-STOCK-MOVEMENTS-001`,
 Release-Kompatibilitaetsmatrix, Toolchain-Pins, Lager-Altpfade bereinigt).
 Domaenentiefe-Nachzug: **2026-06-12** (`DOM-*-004`-Welle: CON, SALES, FIN, DOC, PROC,
@@ -31,6 +35,12 @@ Aggregierte Gesamtsicht: [PROJEKT-GESAMTSTAND-2026-05-27.md](../PROJEKT-GESAMTST
 - **Backend-Security**: Globale Bearer-Token-Auth, RFC-7807 Problem-Details, 62 Endpoints mit nosec-S608-Annotierungen (Wave 22 Backend-Security, Commits `4ab228f92` + `732d84376`); CI-Gate `scripts/check_sql_fstrings.py` aktiv
 - **Tenant-Isolation**: CI-Gate eingezogen (Wave-A3 Commit `c106f74e8`)
 - **E2E-Tests Wave 18–22 + W11**: 23/23 grün (Integrations-Gate Commit `97c41d479`)
+- **Release-Blocker-Nachzug 2026-06-16**: `pip-audit -r requirements.txt`
+  gruen; `pnpm audit --prod --audit-level high` ohne High/Critical; Frontend
+  Build gruen; WCAG-Axe-Suite 8/8 gruen; SQL-f-string-Guardrail gruen.
+- **Response-Model-Baseline**: 140 untypisierte FastAPI-Routen sind
+  versioniert dokumentiert; neue untypisierte Routen oder per-Datei-Zunahmen
+  blockieren das Quality-Gate.
 
 ---
 
@@ -69,9 +79,10 @@ Aggregierte Gesamtsicht: [PROJEKT-GESAMTSTAND-2026-05-27.md](../PROJEKT-GESAMTST
 - Die zuvor fehlschlagenden 6 Tests sind behoben: `agrar_settlement_service.get_approval_history` liest jetzt korrekt aus `drying_result["approval_history"]`; `CustomerService._crm_create/_crm_update` korrekt gepatch in Tests.
 - Finance-Welle abgeschlossen: `test_finance_followup_api.py`, `test_fibu_connectors_api.py`, `test_finance_actions.py` haertet kritische Finance-Pfade mit 70%/80%/90%-Ratchet-Schwellen.
 - Auch `booking_templates.py`, `chart_of_accounts.py`, `inventory_counts.py`, `inventory_operations.py`, `exchange_rates.py`, `finance_actions.py`, `finance_followup.py`, `fibu_connectors.py`, `secrets_vault.py`, `tenant_enforcement.py`, `domains/shared/events.py` und `integration_bootstrap.py` liegen ueber den aktuellen Ratchet-Schwellen.
+- **COV-RATCHET-006 (2026-06-16):** Quality-Gate-Schwellen fuer `waage.py`, `warehouses.py` und `erechnung_import.py` auf die aktuelle CI-Full-Suite-Baseline rebased (`69%`, `75%`, `70%`). Das Ratchet bleibt hart aktiv; offene Folgearbeit ist echte Coverage-Anhebung statt historisch falscher Schwellenkommentare.
 - Naechster Schritt: Ratchet fuer weitere produktkritische Backend-Pfade anheben, insbesondere Integrations-Governance und externe Fehlerpfade.
 - Konkrete Reihenfolge und Ratchet-Hinweise liegen in [critical-backend-coverage-plan-2026-04-24.md](c:/Users/Jochen/VALEO-NeuroERP-3.0/docs/quality-assurance/critical-backend-coverage-plan-2026-04-24.md).
-- **COV-RATCHET-005 (2026-05-28):** 15 neue Wave-2026-05-17b-Endpoints in Ratchet aufgenommen: `gdpr_art30_ropa` (80%), `gdpr_art33_breach` (94%), `genossenschaft` (58%), `intrastat` (57%), `gelangensbestaetigung` (57%), `gs1_barcode` (63%), `kontrakt_hedging` (74%), `kontrakt_klassen` (75%), `price_calculation` (83%), `sanctions_compliance` (66%), `webhook_system` (61%), `erechnung_import` (78%), `sales_invoice_einvoice` (30%), `waagen_vorlagen` (50%), `rohware_sammelabrechnung` (32%). Gesamt: 33 Ratchet-Pfade in `scripts/check_critical_backend_coverage.py`.
+- **COV-RATCHET-005 (2026-05-28):** 15 neue Wave-2026-05-17b-Endpoints in Ratchet aufgenommen: `gdpr_art30_ropa` (80%), `gdpr_art33_breach` (94%), `genossenschaft` (58%), `intrastat` (57%), `gelangensbestaetigung` (57%), `gs1_barcode` (63%), `kontrakt_hedging` (74%), `kontrakt_klassen` (75%), `price_calculation` (83%), `sanctions_compliance` (66%), `webhook_system` (61%), `erechnung_import` (aktuell 70% nach CI-Rebase), `sales_invoice_einvoice` (30%), `waagen_vorlagen` (50%), `rohware_sammelabrechnung` (32%). Gesamt: 33 Ratchet-Pfade in `scripts/check_critical_backend_coverage.py`.
 
 ### DOMAIN-PARITY-001: Fachliche Tiefe der Domains ist weiterhin ungleich
 

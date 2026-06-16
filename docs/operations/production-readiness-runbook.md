@@ -1,6 +1,6 @@
 # Production Readiness Runbook
 
-Stand: 2026-06-09
+Stand: 2026-06-16
 
 ## Freigabeprinzip
 
@@ -40,6 +40,16 @@ in voneinander isolierten Jobs mit eigenen Runner-Ressourcen ausfuehren.
 
 Abhaengigkeits-, Vertrags- und Major-Upgrade-Regeln:
 [Dependency and Compatibility Maintenance](dependency-and-compatibility-maintenance.md).
+
+Security-Patches an Build-Werkzeugen gelten erst dann als vollstaendig, wenn
+Audit-Gate und kompatibler Runtime-/Build-Pfad gruen sind. Fuer `esbuild`
+bedeutet das aktuell `^0.28.1` plus explizites Vite-Target `es2022` fuer Build
+und `optimizeDeps`.
+
+FastAPI-Response-Modelle werden dateigenau gegen
+`docs/quality-assurance/response-model-baseline.json` geprueft. Der aktuelle
+Altbestand von 140 untypisierten Routen ist kein Go-live-Nachweis; er ist eine
+versionierte Schuldenlinie. Neue untypisierte Routen duerfen nicht hinzukommen.
 
 ## Pflicht-Secrets
 

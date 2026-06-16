@@ -20,7 +20,8 @@ export interface UATFixtures {
 
 export const test = base.extend<UATFixtures>({
   // Tenant-Isolation (Backend erwartet üblicherweise UUID; QA-UAT-01 bricht API-Calls)
-  tenant: async (_deps, use) => {
+  // eslint-disable-next-line no-empty-pattern -- Playwright requires destructuring here.
+  tenant: async ({}, use) => {
     const tenant =
       process.env.VALEO_TENANT ||
       process.env.X_TENANT_ID ||

@@ -1,0 +1,28 @@
+slice_id: QA-PLAYWRIGHT-FIXTURE-001
+title: Playwright Fixture-Signatur mit aktueller Runtime kompatibel machen
+owner: Codex
+status: completed
+coordination: >-
+  Nachzug aus E2E-Smoke in PR #7. WAVE-PHYS-CHAIN-001 ist abgeschlossen;
+  aktuell besteht kein anderer Dateibesitz an testSetup.ts.
+goal: >-
+  Alle Playwright-Projekte muessen die gemeinsame Tenant-Fixture mit der von
+  der aktuellen Playwright-Runtime verlangten Destrukturierungs-Signatur laden.
+file_ownership:
+  - docs/agent-ops/active-workboard.md
+  - docs/agent-ops/slices/QA-PLAYWRIGHT-FIXTURE-001.yaml
+  - playwright-tests/fixtures/testSetup.ts
+  - tests/test_playwright_fixture_contract.py
+acceptance_criteria:
+  - Fixture-Argument verwendet ein Objekt-Destrukturierungsmuster.
+  - Tenant-Fallback und Verhalten bleiben unveraendert.
+  - Keine weitere Fixture verwendet einen einfachen Identifier als Dependency-Argument.
+  - Vertragstest und Playwright-Testauflistung sind gruen.
+risks:
+  - Fachliche Smoke-Fehler koennen nach erfolgreichem Fixture-Load separat sichtbar werden.
+result:
+  - Tenant-Fixture verwendet ein leeres Objekt-Destrukturierungsmuster.
+  - Tenant-Fallback, Header und Login-Verhalten bleiben unveraendert.
+checks:
+  - Fokussierter Fixture-Vertragstest gruen.
+  - Playwright-Testauflistung fuer Smoke-Projekt erfolgreich.

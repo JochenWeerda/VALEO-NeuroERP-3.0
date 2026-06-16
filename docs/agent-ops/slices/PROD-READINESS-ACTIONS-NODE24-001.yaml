@@ -1,0 +1,47 @@
+slice_id: PROD-READINESS-ACTIONS-NODE24-001
+title: Zentrale GitHub Actions vor Node-24-Umschaltung haerten
+owner: Codex
+status: completed
+coordination: >-
+  Nachzug aus GitHub E2E Smoke Run 27536228069. Keine Produktivlogik und
+  keine Dateien des aktiven Agrar-Silo-Slices. Besitz nur der zentralen
+  Release-, Quality-, Security-, DB-, Docs-, Sonar- und E2E-Workflows
+  sowie eines fokussierten Workflow-Vertragstests.
+goal: >-
+  Die zentrale CI-Kette vor der von GitHub fuer den 16.06.2026
+  angekuendigten Node-24-Standardumschaltung explizit auf Node 24 testen
+  und veraltete Setup-Action-Majors anheben.
+file_ownership:
+  - .github/workflows/ci.yml
+  - .github/workflows/docs-governance.yml
+  - .github/workflows/e2e-full.yml
+  - .github/workflows/e2e-smoke.yml
+  - .github/workflows/pytest-postgres-require-db.yml
+  - .github/workflows/quality-gate.yml
+  - .github/workflows/release-gates.yml
+  - .github/workflows/security-scan.yml
+  - .github/workflows/sonarcloud.yml
+  - tests/test_github_actions_node24_contract.py
+  - docs/agent-ops/active-workboard.md
+  - docs/agent-ops/slices/PROD-READINESS-ACTIONS-NODE24-001.yaml
+acceptance_criteria:
+  - Zentrale Workflows optieren explizit in den Node-24-Action-Runtime ein.
+  - checkout, setup-node und setup-python verwenden Node-24-faehige Majors.
+  - pnpm/action-setup@v2 ist aus den zentralen Workflows entfernt.
+  - YAML und fokussierter Vertragstest sind gruen.
+  - GitHub-Abnahme belegt mindestens E2E, DB, Docs, Quality und Security.
+risks:
+  - Fremde, nicht zentrale Workflows bleiben fuer einen Folgeslice sichtbar.
+  - Bestehende fachliche Security- und Quality-Befunde bleiben blockierend.
+result:
+  - Neun zentrale Workflows optieren explizit in die Node-24-Action-Runtime ein.
+  - checkout, setup-node, setup-python und pnpm/action-setup verwenden v6.
+checks:
+  - Neun Workflow-YAMLs erfolgreich geparst.
+  - Fokussierter Node-24-Workflow-Vertrag gruen.
+  - GitHub E2E Smoke Run 27537066721 vollstaendig gruen.
+  - GitHub require_db Run 27537066806 und Docs Run 27537066910 gruen.
+  - Quality Run 27537066707 bestaetigt alle Action-v6-Setups; nur bekannte
+    fachliche SQL- und esbuild-Gates bleiben rot.
+  - Security Run 27537066782 bestaetigt Action-v6, ZAP, Trivy und Grype;
+    nur esbuild-Audit und extern deaktivierter Dependency Graph bleiben rot.

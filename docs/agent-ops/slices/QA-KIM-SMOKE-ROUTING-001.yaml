@@ -1,0 +1,28 @@
+slice_id: QA-KIM-SMOKE-ROUTING-001
+title: KIM Performance-Smoke Route-Prioritaet korrigieren
+owner: Codex
+status: completed
+coordination: >-
+  Nachzug aus E2E-Smoke in PR #7. Keine Produktivdatei und keine aktive
+  KIM-Slice-Datei wird geaendert; Besitz nur der Performance-Smoke-Spec.
+goal: >-
+  Spezifische Kunden- und Dashboard-Mocks muessen Vorrang vor dem toleranten
+  KIM-Catch-all haben, damit der Smoke den realen Buendelrequest prueft.
+file_ownership:
+  - docs/agent-ops/active-workboard.md
+  - docs/agent-ops/slices/QA-KIM-SMOKE-ROUTING-001.yaml
+  - playwright-tests/specs/crm/kim-performance-smoke.spec.ts
+  - tests/test_kim_smoke_route_contract.py
+acceptance_criteria:
+  - Catch-all wird vor spezifischen KIM-Routen registriert.
+  - Kundenliste rendert die gemockten PERF-Kunden.
+  - Dashboard-Aufrufe werden gezaehlt und Einzelstroeme bleiben ungenutzt.
+  - CRM-Smoke ist in GitHub Actions gruen.
+risks:
+  - Keine.
+result:
+  - KIM-Catch-all wird vor Kunden-, Dashboard- und Einzelstrom-Mocks registriert.
+  - Spezifische Route-Handler besitzen damit zur Laufzeit Vorrang.
+checks:
+  - Fokussierter Route-Prioritaetsvertrag gruen.
+  - GitHub E2E Smoke Run 27536228069 vollstaendig gruen, inklusive CRM.

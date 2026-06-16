@@ -1,0 +1,44 @@
+slice_id: PROD-READINESS-BLOCKERS-001
+title: Production-Readiness-Blockaden schliessen
+owner: Codex
+status: completed
+coordination: >-
+  Nachzug zu PR #7. Konfliktfreie Verantwortung fuer GitHub Dependency
+  Graph/Vulnerability Alerts, das fehlende Hofplan-LFS-Objekt und den
+  esbuild-Security-Pin, Python-Dependency-Patches, Response-Model-Gate
+  und SQL-Guardrail.
+goal: >-
+  Alle technisch schliessbaren roten Release-Gates beseitigen und den
+  verbleibenden SQL-Guardrail nach sauberem Dateihandoff integrieren.
+file_ownership:
+  - packages/agrar-silo-materialfluss-studio/package.json
+  - packages/frontend-web/vite.config.ts
+  - requirements.txt
+  - scripts/check_response_models.py
+  - docs/quality-assurance/response-model-baseline.json
+  - docs/quality-assurance/production-readiness-ci-regressions-2026-06-15.md
+  - docs/project-context/open-gaps-and-known-issues.md
+  - docs/operations/production-readiness-runbook.md
+  - README.md
+  - pnpm-lock.yaml
+  - docs/agent-ops/active-workboard.md
+  - docs/agent-ops/slices/PROD-READINESS-BLOCKERS-001.yaml
+  - fokussierte Security-Vertragstests
+external_ownership:
+  - GitHub Repository Vulnerability Alerts / Dependency Graph
+  - Git LFS object 68465ac75b for docs/warehouse/references/folkerts-landhandel-hofplan.png
+acceptance_criteria:
+  - pnpm audit --prod --audit-level high ist gruen.
+  - pip-audit -r requirements.txt ist gruen.
+  - Dependency Review kann auf den Dependency Graph zugreifen.
+  - Das Hofplan-LFS-Objekt ist auf origin verfuegbar.
+  - SQL-f-string-Guardrail ist nach Cursor-Handoff gruen.
+  - Frontend Build und WCAG-Axe-Suite laufen mit gepatchtem esbuild gruen.
+risks:
+  - Externe fachliche Freigaben und echte Coverage-Anhebung fuer waage.py,
+    warehouses.py und erechnung_import.py bleiben Folgeslices.
+result: >-
+  Alle GitHub-Release-Gates auf PR #7 sind gruen: Docs Governance 27632505205,
+  Pytest require_db 27632505201, E2E Smoke 27632505217, Security Scan
+  27632505671, CI/CD Pipeline 27632505209, SonarCloud 27632505165 und
+  Quality Gate 27632505220.
