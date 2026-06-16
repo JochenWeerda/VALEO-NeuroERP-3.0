@@ -1,7 +1,7 @@
 slice_id: PROD-READINESS-BLOCKERS-001
 title: Production-Readiness-Blockaden schliessen
 owner: Codex
-status: in arbeit
+status: completed
 coordination: >-
   Nachzug zu PR #7. Konfliktfreie Verantwortung fuer GitHub Dependency
   Graph/Vulnerability Alerts, das fehlende Hofplan-LFS-Objekt und den
@@ -35,4 +35,10 @@ acceptance_criteria:
   - SQL-f-string-Guardrail ist nach Cursor-Handoff gruen.
   - Frontend Build und WCAG-Axe-Suite laufen mit gepatchtem esbuild gruen.
 risks:
-  - GitHub Actions muessen die lokal gruenen Gates auf frischen Runnern bestaetigen.
+  - Externe fachliche Freigaben und echte Coverage-Anhebung fuer waage.py,
+    warehouses.py und erechnung_import.py bleiben Folgeslices.
+result: >-
+  Alle GitHub-Release-Gates auf PR #7 sind gruen: Docs Governance 27632505205,
+  Pytest require_db 27632505201, E2E Smoke 27632505217, Security Scan
+  27632505671, CI/CD Pipeline 27632505209, SonarCloud 27632505165 und
+  Quality Gate 27632505220.
