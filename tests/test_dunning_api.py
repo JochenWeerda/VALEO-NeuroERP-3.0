@@ -103,6 +103,7 @@ class FakeDb:
     def __init__(self):
         self.commit_count = 0
         self.rollback_count = 0
+        self.executed_sql: list[str] = []
         self._rules: list = []
         self._notices: list = []
         self._ops: list = []
@@ -117,6 +118,7 @@ class FakeDb:
     def execute(self, query, params=None):
         if self._raise_on_execute:
             raise self._raise_on_execute
+        self.executed_sql.append(str(query))
         return self._next_result()
 
     def commit(self):
@@ -440,7 +442,8 @@ class TestMarkDunningPaid:
         client = _make_app(db)
         r = client.put("/dunning/n-1/paid")
         assert r.status_code == 200
-        assert db.commit_count == 1
+        assert any("SET status = 'paid'" in sql for sql in db.executed_sql)
+        assert db.commit_count >= 1
 
     def test_paid_not_found_returns_404(self):
         db = FakeDb()

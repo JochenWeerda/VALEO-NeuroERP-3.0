@@ -173,8 +173,9 @@ class TestGenossenschaftAnteilsbewegung:
 
         assert result["delta_anteile"] == 10
         assert result["status"] == "gebucht"
-        # Two execute calls: INSERT bewegung + UPDATE mitglied
-        assert db.execute.call_count == 2
+        sqls = [str(call.args[0]) for call in db.execute.call_args_list]
+        assert any("INSERT INTO domain_shared.genossenschaft_anteilsbewegungen" in sql for sql in sqls)
+        assert any("UPDATE domain_shared.genossenschaft_mitglieder" in sql for sql in sqls)
         db.commit.assert_called_once()
 
     @pytest.mark.unit

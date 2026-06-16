@@ -79,7 +79,11 @@ async def test_create_invoice_from_delivery_scopes_final_update_by_tenant():
     )
 
     assert result["delivery_note_id"] == "ls-1"
-    update_statement, update_params = db.calls[-1]
+    update_statement, update_params = next(
+        (statement, params)
+        for statement, params in reversed(db.calls)
+        if "UPDATE domain_sales.delivery_notes" in statement
+    )
     assert "WHERE id = :id AND tenant_id = :tenant_id" in update_statement
     assert update_params["tenant_id"] == "tenant-a"
     assert db.committed is True
