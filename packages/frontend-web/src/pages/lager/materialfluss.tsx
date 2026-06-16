@@ -1464,7 +1464,7 @@ export default function MaterialflussPage(): JSX.Element {
             </CardDescription>
           ) : null}
         </CardHeader>
-        <CardContent className="h-[520px] min-h-[400px] rounded-md border bg-muted/20 p-0 overflow-hidden">
+        <CardContent className="h-[340px] sm:h-[460px] lg:h-[580px] rounded-md border bg-muted/20 p-0 overflow-hidden">
           <ReactFlow
             key={warehouseId || 'demo'}
             nodes={displayNodes}
