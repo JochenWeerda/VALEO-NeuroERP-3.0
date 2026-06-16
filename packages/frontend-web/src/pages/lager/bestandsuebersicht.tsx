@@ -34,7 +34,7 @@ export default function BestandsuebersichtPage(): JSX.Element {
   const workflowProcess = searchParams.get('workflowProcess')
   const workflowCase = searchParams.get('workflowCase')
 
-  const buildWorkflowQuery = (): string => {
+  const workflowQuery = useMemo(() => {
     const params = new URLSearchParams()
     if (workflowContext?.process) params.set('workflowProcess', workflowContext.process)
     if (workflowContext?.instanceId) params.set('workflowInstanceId', workflowContext.instanceId)
@@ -44,23 +44,26 @@ export default function BestandsuebersichtPage(): JSX.Element {
     if (workflowContext?.subject) params.set('subject', workflowContext.subject)
     if (workflowContext?.entryMode) params.set('entryMode', workflowContext.entryMode)
     return params.toString()
-  }
+  }, [workflowContext])
 
   const navigateWithWorkflowResume = async (targetPath: string, resumeNodeId: string): Promise<void> => {
-    const query = buildWorkflowQuery()
-    const target = `${targetPath}${query ? `?${query}` : ''}`
+    const target = `${targetPath}${workflowQuery ? `?${workflowQuery}` : ''}`
     if (workflowContext?.process && workflowContext.instanceId) {
-      await saveFlowSpineResumeCheckpoint(workflowContext.process, workflowContext.instanceId, {
-        resume_node_id: resumeNodeId,
-        resume_route: target,
-        resume_payload: {
-          screen: 'inventory-dashboard',
-          targetPath,
-          workflowCase: workflowContext.caseNumber || undefined,
-        },
-        business_status: 'lagerfall_in_bearbeitung',
-        action_label: `Inventory-Resume nach ${targetPath}`,
-      })
+      try {
+        await saveFlowSpineResumeCheckpoint(workflowContext.process, workflowContext.instanceId, {
+          resume_node_id: resumeNodeId,
+          resume_route: target,
+          resume_payload: {
+            screen: 'inventory-dashboard',
+            targetPath,
+            workflowCase: workflowContext.caseNumber || undefined,
+          },
+          business_status: 'lagerfall_in_bearbeitung',
+          action_label: `Inventory-Resume nach ${targetPath}`,
+        })
+      } catch {
+        // best-effort checkpoint — navigation proceeds regardless
+      }
     }
     navigate(target)
   }

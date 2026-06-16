@@ -101,12 +101,13 @@ export default function InventurPage(): JSX.Element {
           variant="ghost"
           size="icon"
           title="Position stornieren"
-          onClick={() => {
-            if (confirm('Diese Inventur-Position wirklich stornieren/entfernen?')) {
-              stornierenMutation.mutate(pos.id, {
-                onSuccess: () => toast({ title: 'Position storniert' }),
-                onError: () => toast({ variant: 'destructive', title: 'Stornieren fehlgeschlagen' })
-              })
+          onClick={async () => {
+            if (!confirm('Diese Inventur-Position wirklich stornieren/entfernen?')) return
+            try {
+              await stornierenMutation.mutateAsync(pos.id)
+              toast({ title: 'Position storniert' })
+            } catch {
+              toast({ variant: 'destructive', title: 'Stornieren fehlgeschlagen' })
             }
           }}
           disabled={stornierenMutation.isPending}

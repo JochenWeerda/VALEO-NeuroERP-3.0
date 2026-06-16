@@ -69,6 +69,7 @@ export default function LagerbewegungenPage(): JSX.Element {
   const [dialogOpen, setDialogOpen] = useState(false)
   const [editing, setEditing] = useState<StockMovement | null>(null)
   const [form, setForm] = useState<MovementFormState>(EMPTY_FORM)
+  const [deletingId, setDeletingId] = useState<string | null>(null)
 
   const { data: movementsData, isLoading } = useQuery({
     queryKey: ['stock-movements', { search, movementTypeFilter }],
@@ -111,6 +112,18 @@ export default function LagerbewegungenPage(): JSX.Element {
       folgepfad: korrekturen > 0 ? 'Korrekturbuchungen pruefen' : hatBewegungen ? 'Bewegungsjournal aktuell' : 'Neue Buchung erfassen',
     }
   }, [movements])
+
+  const handleDelete = async (id: string) => {
+    if (deletingId) return
+    setDeletingId(id)
+    try {
+      await deleteMutation.mutateAsync(id)
+    } catch {
+      // onError in mutation definition shows toast
+    } finally {
+      setDeletingId(null)
+    }
+  }
 
   const resetDialog = () => {
     setEditing(null)
@@ -321,8 +334,8 @@ export default function LagerbewegungenPage(): JSX.Element {
                       <Button
                         size="icon"
                         variant="outline"
-                        onClick={() => deleteMutation.mutate(movement.id)}
-                        disabled={deleteMutation.isPending}
+                        onClick={() => void handleDelete(movement.id)}
+                        disabled={deletingId === movement.id}
                       >
                         <Trash2 className="h-4 w-4" />
                       </Button>

@@ -1,9 +1,10 @@
 import { useState, useMemo } from 'react'
 import { useStockValuation } from '@/lib/api/warehouse-wms'
+import { Input } from '@/components/ui/input'
 
 export default function BestandsbewertungPage() {
   const [warehouseId, setWarehouseId] = useState('')
-  const { data: rows = [], isLoading, isError } = useStockValuation(warehouseId || undefined)
+  const { data: rows = [], isLoading, isError, error } = useStockValuation(warehouseId || undefined)
 
   const totalValue = useMemo(
     () => rows.reduce((sum, r) => sum + r.total_value_eur, 0),
@@ -20,8 +21,8 @@ export default function BestandsbewertungPage() {
         <h1 className="text-xl font-semibold">Bestandsbewertung (Ø-Einstandspreis)</h1>
         <div className="flex gap-2 items-center">
           <label className="text-sm text-gray-500">Lager-ID (optional)</label>
-          <input
-            className="border rounded px-2 py-1 text-sm w-48"
+          <Input
+            className="w-48"
             placeholder="alle Lager"
             value={warehouseId}
             onChange={(e) => setWarehouseId(e.target.value)}
@@ -31,7 +32,9 @@ export default function BestandsbewertungPage() {
 
       {isLoading && <p className="text-sm text-gray-500">Lade Bestandswerte…</p>}
       {isError && (
-        <p className="text-sm text-red-600">Fehler beim Laden der Bestandsbewertung.</p>
+        <p className="text-sm text-red-600">
+          Fehler beim Laden der Bestandsbewertung{error instanceof Error ? `: ${error.message}` : '.'}
+        </p>
       )}
 
       {!isLoading && !isError && (
