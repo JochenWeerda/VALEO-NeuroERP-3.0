@@ -1059,6 +1059,15 @@ export const RAW_NAV_SECTIONS: RawNavItem[] = [
             keywords: ['belege', 'dokumente', 'versand', 'druck'],
             mcp: { businessDomain: 'logistics', scope: 'logistics:write' },
           },
+          {
+            id: 'fuhrpark-vertiefung',
+            label: 'Vertiefung & Analyse',
+            icon: Activity,
+            module: '@/pages/fuhrpark/fahrzeug-vertiefung',
+            preferredPath: 'fuhrpark/fahrzeug-vertiefung',
+            keywords: ['statushistorie', 'schadensfälle', 'bußgeld', 'wartung', 'leasing', 'rückgabe', 'vorhersage'],
+            mcp: { businessDomain: 'logistics', scope: 'logistics:write' },
+          },
         ],
       },
       {
