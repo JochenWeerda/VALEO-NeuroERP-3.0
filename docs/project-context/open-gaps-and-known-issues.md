@@ -5,6 +5,10 @@
 Ehrliche, aktuelle Bestandsaufnahme aller offenen Restthemen, fachlichen Duennstellen und bekannten Risiken.
 Production-Readiness-Nachaudit: **2026-06-09** (CI/Security, Deployment,
 simulierte externe Pruefer, POS-Fiskalisierung und CRM360/KIM).
+Security-/CI-Blocker-Nachzug: **2026-06-16** (`PROD-READINESS-BLOCKERS-001`:
+Dependency Graph aktiviert, fehlendes LFS-Objekt nachgeliefert,
+High/Critical Dependency-Audits lokal gruen, SQL-f-string-Guardrail gruen,
+Response-Model-Baseline eingefuehrt).
 Governance-Nachzug: **2026-06-11** (`COMPAT-GOV-001`, `INV-STOCK-MOVEMENTS-001`,
 Release-Kompatibilitaetsmatrix, Toolchain-Pins, Lager-Altpfade bereinigt).
 Domaenentiefe-Nachzug: **2026-06-12** (`DOM-*-004`-Welle: CON, SALES, FIN, DOC, PROC,
@@ -31,6 +35,12 @@ Aggregierte Gesamtsicht: [PROJEKT-GESAMTSTAND-2026-05-27.md](../PROJEKT-GESAMTST
 - **Backend-Security**: Globale Bearer-Token-Auth, RFC-7807 Problem-Details, 62 Endpoints mit nosec-S608-Annotierungen (Wave 22 Backend-Security, Commits `4ab228f92` + `732d84376`); CI-Gate `scripts/check_sql_fstrings.py` aktiv
 - **Tenant-Isolation**: CI-Gate eingezogen (Wave-A3 Commit `c106f74e8`)
 - **E2E-Tests Wave 18–22 + W11**: 23/23 grün (Integrations-Gate Commit `97c41d479`)
+- **Release-Blocker-Nachzug 2026-06-16**: `pip-audit -r requirements.txt`
+  gruen; `pnpm audit --prod --audit-level high` ohne High/Critical; Frontend
+  Build gruen; WCAG-Axe-Suite 8/8 gruen; SQL-f-string-Guardrail gruen.
+- **Response-Model-Baseline**: 140 untypisierte FastAPI-Routen sind
+  versioniert dokumentiert; neue untypisierte Routen oder per-Datei-Zunahmen
+  blockieren das Quality-Gate.
 
 ---
 

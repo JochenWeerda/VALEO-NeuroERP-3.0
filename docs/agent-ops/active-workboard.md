@@ -553,11 +553,12 @@ Dispo-Arbeitsraum: Tarifliste + Bestätigung + `cancelFreightTariff`; Tests in `
 
 **Von:** Codex
 **Owner:** Codex
-**Stand:** reserviert 2026-06-15
-**Abstimmung:** Konfliktfreier Nachzug zu PR #7 fuer Dependency Graph/Vulnerability Alerts, Hofplan-LFS und esbuild. `app/services/agri_silo_material_flow_service.py` bleibt bis zum Handoff im aktiven Cursor-Slice `WM-AGRI-SILO-001`.
-**Ziel des Slices:** Alle technisch schliessbaren roten Release-Gates beseitigen und den SQL-Guardrail nach sauberem Dateihandoff integrieren.
-**Abnahmekriterien:** Produktions-Audit gruen; Dependency Review hat Zugriff; LFS-Objekt remote vorhanden; SQL-f-string-Guardrail nach Handoff gruen.
-**Offene Risiken:** Aktiver Cursor-WIP darf nicht gebuendelt oder ueberschrieben werden.
+**Stand:** in Arbeit 2026-06-16
+**Abstimmung:** Nachzug zu PR #7 fuer Dependency Graph/Vulnerability Alerts, Hofplan-LFS, Dependency-Audits, esbuild/Vite-Kompatibilitaet, Response-Model-Gate und SQL-Guardrail.
+**Ziel des Slices:** Alle technisch schliessbaren roten Release-Gates beseitigen und externe Restgates klar als offen ausweisen.
+**Abnahmekriterien:** Produktions-Audit gruen; Dependency Review hat Zugriff; LFS-Objekt remote vorhanden; SQL-f-string-Guardrail gruen; Frontend-Build/WCAG gruen; Response-Model-Regressionsgate versioniert.
+**Offene Risiken:** GitHub Actions muessen die lokal gruenen Gates auf frischen Runnern bestaetigen.
+**Zwischenstand 2026-06-16:** Dependency Graph/Vulnerability Alerts aktiviert; Hofplan-LFS-OID `68465ac75b35821eafad13a182d119cd82e16da7f2a7fe13065ae564daa7af25` auf origin verfuegbar; `pip-audit -r requirements.txt` gruen; `pnpm audit --prod --audit-level high` ohne High/Critical; Frontend-Build gruen; WCAG-Axe-Suite 8/8 gruen; `check_sql_fstrings.py` gruen; Agrar-Silo-Materialfluss-Tests 16/16 gruen.
 
 ## PROD-READINESS-GITLEAKS-LFS-001
 

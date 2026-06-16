@@ -33,8 +33,29 @@ Gates und fail-fast Readiness-Pruefungen.
 
 ## Separater Security-Blocker
 
-Der Produktions-Audit meldet `GHSA-gv7w-rqvm-qjhr` fuer `esbuild` aus
-`packages/agrar-silo-materialfluss-studio`. Das Paket liegt im aktiven
-Cursor-Slice `WM-AGRI-SILO-001`. Dieser Befund bleibt bis zum Upgrade auf eine
-gepatchte Abhaengigkeitskette und einem erneut gruenen
-`pnpm audit --prod --audit-level high` blockierend.
+Stand 2026-06-16: Der produktive Dependency-Blocker ist repo-seitig
+geschlossen.
+
+- `esbuild` ist auf die gepatchte Linie `^0.28.1` gepinnt.
+- Vite baut und prebundelt explizit fuer `es2022`, weil der gepatchte
+  `esbuild`-Pfad bei ES2020-Downleveling reproduzierbar an Destructuring
+  scheiterte.
+- `starlette`, `python-multipart` und `aiohttp` sind auf die von
+  `pip-audit` geforderten Patch-Versionen angehoben.
+- `pnpm audit --prod --audit-level high` meldet keine High/Critical-Befunde
+  mehr; `pip-audit -r requirements.txt` meldet keine bekannten
+  Schwachstellen mehr.
+
+Der Response-Model-Check nutzt jetzt eine dateigenaue Baseline
+(`docs/quality-assurance/response-model-baseline.json`). Das ist kein
+Freibrief fuer untypisierte Routen: neue untypisierte FastAPI-Routen oder
+per-Datei-Regressions schlagen fehl. Die bestehende Altlast von 140
+untypisierten Routen bleibt transparent und muss inkrementell durch konkrete
+`response_model`-Schemas abgebaut werden.
+
+Gelernte Ursache: Die Fehler entstanden nicht durch fehlende Modulversionierung
+allein, sondern durch eine Kombination aus Security-Pin ohne Build-Kompatibilitaetstest,
+extern aktivierten GitHub-Security-Funktionen, fehlendem LFS-Objekt und einem
+zu niedrig gesetzten globalen Threshold ohne versionierte Baseline. Kuenftig
+muessen Major- oder Security-Patch-Linien immer als Paket aus Audit,
+Frontend-Build, Dev-Server/WCAG und betroffenen Docker-Builds validiert werden.

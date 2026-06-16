@@ -96,6 +96,9 @@ export default defineConfig(({ mode }) => {
   },
   optimizeDeps: {
     entries: ['index.html'],
+    esbuildOptions: {
+      target: 'es2022',
+    },
     include: [
       'react', 'react-dom', 'react/jsx-runtime',
       '@tanstack/react-router',
@@ -210,6 +213,7 @@ export default defineConfig(({ mode }) => {
   },
   build: {
     outDir: 'dist',
+    target: 'es2022',
     sourcemap: mode === 'production' ? 'hidden' : true,
     chunkSizeWarningLimit: 500,
     modulePreload: { polyfill: false },

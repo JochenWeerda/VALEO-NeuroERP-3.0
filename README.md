@@ -20,7 +20,7 @@ VALEO NeuroERP 3.0 ist ein mehrdomäniges ERP-System für Agrargenossenschaften 
 
 | Kennzahl | Stand |
 |----------|-------|
-| Doku-Stand | `2026-06-12` |
+| Doku-Stand | `2026-06-16` |
 | Produktreife | aktive Entwicklung, nicht allgemein produktionsreif |
 | Frontend TypeScript | 0 Fehler |
 | Backend-Testabdeckung | 64,85 % gesamt; 18/18 kritische Ratchet-Pfade grün |
@@ -30,6 +30,7 @@ VALEO NeuroERP 3.0 ist ein mehrdomäniges ERP-System für Agrargenossenschaften 
 | Docker/Container | Erstinstallation, Keycloak-DB-Bootstrap und mehrere Healthcheck-/CRM-/Inventory-Fixes nachgezogen |
 | Production Release | Harte CI-/Security-Gates, SBOM, getrennte immutable Backend-/Frontend-Images, atomarer Helm-Rollout |
 | UAT | Abgenommen mit dokumentierten externen Gates; repo-seitige UAT-Auflagen nachgeliefert |
+| Security-Blocker | High/Critical Dependency-Audits lokal gruen; Response-Model-Altbestand versioniert gegen Regression gesperrt |
 
 Der belastbare Ist-Zustand liegt in:
 
