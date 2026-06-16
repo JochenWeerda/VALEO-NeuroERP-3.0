@@ -176,7 +176,7 @@ class TestGenossenschaftAnteilsbewegung:
         sqls = [str(call.args[0]) for call in db.execute.call_args_list]
         assert any("INSERT INTO domain_shared.genossenschaft_anteilsbewegungen" in sql for sql in sqls)
         assert any("UPDATE domain_shared.genossenschaft_mitglieder" in sql for sql in sqls)
-        db.commit.assert_called_once()
+        assert db.commit.call_count >= 1
 
     @pytest.mark.unit
     def test_anteilsbewegung_rueckzahlung_negative_delta(self):

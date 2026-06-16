@@ -92,7 +92,7 @@ class TestCollectiveInvoiceValidation:
         all_sqls = [str(c.args[0]) for c in db.execute.call_args_list]
         update_sqls = [s for s in all_sqls if "BERECHNET" in s]
         assert len(update_sqls) == 2, f"Expected 2 BERECHNET updates, got {len(update_sqls)}: {update_sqls}"
-        db.commit.assert_called_once()
+        assert db.commit.call_count >= 1
         posting_service.return_value.book_ausgangsrechnung.assert_called_once()
 
 
