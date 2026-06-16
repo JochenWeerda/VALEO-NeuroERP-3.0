@@ -25,15 +25,15 @@ class AgriSiloMaterialFlowService:
     # ── Siloanlagen ────────────────────────────────────────────
 
     def list_silo_systems(self, warehouse_id: str | None = None) -> list[dict]:
-        filters = ["tenant_id = :tid", "is_active = true"]
-        params: dict = {"tid": self.tenant_id}
-        if warehouse_id:
-            filters.append("warehouse_id = :wid")
-            params["wid"] = warehouse_id
-        where = " AND ".join(filters)
         rows = self.db.execute(
-            text(f"SELECT * FROM domain_inventory.silo_systems WHERE {where} ORDER BY system_code"),  # noqa: S608
-            params,
+            text("""
+                SELECT * FROM domain_inventory.silo_systems
+                WHERE tenant_id = :tid
+                  AND is_active = true
+                  AND (:wid IS NULL OR warehouse_id = :wid)
+                ORDER BY system_code
+            """),
+            {"tid": self.tenant_id, "wid": warehouse_id},
         ).fetchall()
         return [dict(r._mapping) for r in rows]
 
@@ -60,18 +60,16 @@ class AgriSiloMaterialFlowService:
     # ── Silozellen ─────────────────────────────────────────────
 
     def list_silo_cells(self, warehouse_id: str | None = None, silo_system_id: str | None = None) -> list[dict]:
-        filters = ["tenant_id = :tid", "is_active = true"]
-        params: dict = {"tid": self.tenant_id}
-        if warehouse_id:
-            filters.append("warehouse_id = :wid")
-            params["wid"] = warehouse_id
-        if silo_system_id:
-            filters.append("silo_system_id = :ssid")
-            params["ssid"] = silo_system_id
-        where = " AND ".join(filters)
         rows = self.db.execute(
-            text(f"SELECT * FROM domain_inventory.silo_cells WHERE {where} ORDER BY cell_code"),  # noqa: S608
-            params,
+            text("""
+                SELECT * FROM domain_inventory.silo_cells
+                WHERE tenant_id = :tid
+                  AND is_active = true
+                  AND (:wid IS NULL OR warehouse_id = :wid)
+                  AND (:ssid IS NULL OR silo_system_id = :ssid)
+                ORDER BY cell_code
+            """),
+            {"tid": self.tenant_id, "wid": warehouse_id, "ssid": silo_system_id},
         ).fetchall()
         return [dict(r._mapping) for r in rows]
 
@@ -144,12 +142,12 @@ class AgriSiloMaterialFlowService:
         set_parts = [f"{k} = :{k}" for k in fields]
         params: dict = {**fields, "cid": cell_id, "wid": warehouse_id, "tid": self.tenant_id}
         row = self.db.execute(
-            text(f"""
+            text(f"""  # nosec S608 -- SET clause is generated only from whitelisted internal field names; values stay bound.
                 UPDATE domain_inventory.silo_cells
                 SET {", ".join(set_parts)}
                 WHERE id = :cid AND warehouse_id = :wid AND tenant_id = :tid AND is_active = true
                 RETURNING *
-            """),  # noqa: S608
+            """),
             params,
         ).fetchone()
         if not row:
@@ -160,15 +158,15 @@ class AgriSiloMaterialFlowService:
     # ── Materialfluss-Knoten ───────────────────────────────────
 
     def list_material_flow_nodes(self, warehouse_id: str | None = None) -> list[dict]:
-        filters = ["tenant_id = :tid", "is_active = true"]
-        params: dict = {"tid": self.tenant_id}
-        if warehouse_id:
-            filters.append("warehouse_id = :wid")
-            params["wid"] = warehouse_id
-        where = " AND ".join(filters)
         rows = self.db.execute(
-            text(f"SELECT * FROM domain_inventory.material_flow_nodes WHERE {where} ORDER BY code"),  # noqa: S608
-            params,
+            text("""
+                SELECT * FROM domain_inventory.material_flow_nodes
+                WHERE tenant_id = :tid
+                  AND is_active = true
+                  AND (:wid IS NULL OR warehouse_id = :wid)
+                ORDER BY code
+            """),
+            {"tid": self.tenant_id, "wid": warehouse_id},
         ).fetchall()
         return [dict(r._mapping) for r in rows]
 
@@ -228,12 +226,12 @@ class AgriSiloMaterialFlowService:
         set_parts = [f"{k} = :{k}" for k in fields]
         params: dict = {**fields, "nid": node_id, "wid": warehouse_id, "tid": self.tenant_id}
         row = self.db.execute(
-            text(f"""
+            text(f"""  # nosec S608 -- SET clause is generated only from whitelisted internal field names; values stay bound.
                 UPDATE domain_inventory.material_flow_nodes
                 SET {", ".join(set_parts)}
                 WHERE id = :nid AND warehouse_id = :wid AND tenant_id = :tid AND is_active = true
                 RETURNING *
-            """),  # noqa: S608
+            """),
             params,
         ).fetchone()
         if not row:
@@ -289,15 +287,14 @@ class AgriSiloMaterialFlowService:
             raise ValueError("Route/Kante in gesperrte Silozelle nicht als 'open' zulaessig")
 
     def list_material_flow_edges(self, warehouse_id: str | None = None) -> list[dict]:
-        filters = ["tenant_id = :tid"]
-        params: dict = {"tid": self.tenant_id}
-        if warehouse_id:
-            filters.append("warehouse_id = :wid")
-            params["wid"] = warehouse_id
-        where = " AND ".join(filters)
         rows = self.db.execute(
-            text(f"SELECT * FROM domain_inventory.material_flow_edges WHERE {where} ORDER BY created_at"),  # noqa: S608
-            params,
+            text("""
+                SELECT * FROM domain_inventory.material_flow_edges
+                WHERE tenant_id = :tid
+                  AND (:wid IS NULL OR warehouse_id = :wid)
+                ORDER BY created_at
+            """),
+            {"tid": self.tenant_id, "wid": warehouse_id},
         ).fetchall()
         return [dict(r._mapping) for r in rows]
 
@@ -361,12 +358,12 @@ class AgriSiloMaterialFlowService:
         set_parts = [f"{k} = :{k}" for k in fields]
         params: dict = {**fields, "eid": edge_id, "wid": warehouse_id, "tid": self.tenant_id}
         row = self.db.execute(
-            text(f"""
+            text(f"""  # nosec S608 -- SET clause is generated only from whitelisted internal field names; values stay bound.
                 UPDATE domain_inventory.material_flow_edges
                 SET {", ".join(set_parts)}
                 WHERE id = :eid AND warehouse_id = :wid AND tenant_id = :tid
                 RETURNING *
-            """),  # noqa: S608
+            """),
             params,
         ).fetchone()
         if not row:
