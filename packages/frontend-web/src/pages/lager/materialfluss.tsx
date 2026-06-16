@@ -6,7 +6,7 @@
  * Tabellen: PATCH/CRUD über `/api/v1/lager/wms/agri/*`. Bird-View: WM-AGRI-MAP-001.
  */
 
-import { memo, useEffect, useMemo, useState } from 'react'
+import React, { memo, useEffect, useMemo, useState } from 'react'
 import {
   Background,
   Controls,
@@ -250,6 +250,42 @@ function SiloCellInventoryEditor(props: {
   )
 }
 
+function SiloCellRiskEditor(props: {
+  cellId: string
+  riskServer: string
+  disabled: boolean
+  saving: boolean
+  onSave: (cellId: string, value: string) => Promise<void>
+}): JSX.Element {
+  const [v, setV] = useState(props.riskServer)
+  useEffect(() => {
+    setV(props.riskServer)
+  }, [props.riskServer, props.cellId])
+  return (
+    <div className="flex flex-col gap-1 max-w-[140px]">
+      <Input
+        className="h-7 text-[10px] font-mono"
+        value={v}
+        onChange={(e) => setV(e.target.value)}
+        disabled={props.disabled}
+        placeholder="contamination_risk_class"
+        autoComplete="off"
+        spellCheck={false}
+      />
+      <Button
+        type="button"
+        size="sm"
+        variant="secondary"
+        className="h-7 text-xs w-full"
+        disabled={props.disabled}
+        onClick={() => void props.onSave(props.cellId, v)}
+      >
+        {props.saving ? 'Speichere…' : 'VK speichern'}
+      </Button>
+    </div>
+  )
+}
+
 function NodeLayoutEditor(props: {
   nodeId: string
   layoutXServer: string
@@ -360,6 +396,42 @@ function FlowEdgeFlushSelect(props: {
   )
 }
 
+function EdgeCapacityEditor(props: {
+  edgeId: string
+  kgHServer: string
+  disabled: boolean
+  saving: boolean
+  onSave: (edgeId: string, raw: string) => Promise<void>
+}): JSX.Element {
+  const [v, setV] = useState(props.kgHServer)
+  useEffect(() => {
+    setV(props.kgHServer)
+  }, [props.kgHServer, props.edgeId])
+  return (
+    <div className="flex flex-col gap-1 max-w-[120px]">
+      <Input
+        className="h-7 text-[10px] font-mono"
+        value={v}
+        onChange={(e) => setV(e.target.value)}
+        disabled={props.disabled}
+        placeholder="kg/h"
+        inputMode="decimal"
+        autoComplete="off"
+      />
+      <Button
+        type="button"
+        size="sm"
+        variant="secondary"
+        className="h-7 text-xs w-full"
+        disabled={props.disabled}
+        onClick={() => void props.onSave(props.edgeId, v)}
+      >
+        {props.saving ? 'Speichere…' : 'Kapazität'}
+      </Button>
+    </div>
+  )
+}
+
 function FlowEdgeStatusSelect(props: {
   edgeId: string
   warehouseId: string
@@ -400,11 +472,16 @@ export default function MaterialflussPage(): JSX.Element {
   const patchSiloCell = usePatchAgriSiloCell()
   const patchFlowNode = usePatchAgriFlowNode()
   const patchFlowEdge = usePatchAgriFlowEdge()
-  const [patchingCellId, setPatchingCellId] = useState<string | null>(null)
-  const [inventorySavingCellId, setInventorySavingCellId] = useState<string | null>(null)
-  const [siloLayoutSavingCellId, setSiloLayoutSavingCellId] = useState<string | null>(null)
-  const [patchingNodeId, setPatchingNodeId] = useState<string | null>(null)
-  const [patchingEdgeId, setPatchingEdgeId] = useState<string | null>(null)
+  const [pendingCellKeys, setPendingCellKeys] = useState<Set<string>>(new Set())
+  const [pendingNodeKeys, setPendingNodeKeys] = useState<Set<string>>(new Set())
+  const [pendingEdgeKeys, setPendingEdgeKeys] = useState<Set<string>>(new Set())
+
+  function addPendingKey(setter: React.Dispatch<React.SetStateAction<Set<string>>>, key: string): void {
+    setter(prev => { const s = new Set(prev); s.add(key); return s })
+  }
+  function removePendingKey(setter: React.Dispatch<React.SetStateAction<Set<string>>>, key: string): void {
+    setter(prev => { const s = new Set(prev); s.delete(key); return s })
+  }
   const [routeFrom, setRouteFrom] = useState('')
   const [routeTo, setRouteTo] = useState('')
   const [routeMat, setRouteMat] = useState('')
@@ -511,8 +588,7 @@ export default function MaterialflussPage(): JSX.Element {
   const displayNodes = !warehouseId ? demoNodes : hasLiveGraphData ? liveNodes : []
   const displayEdges = !warehouseId ? demoEdges : hasLiveGraphData ? liveEdges : []
 
-  const siloCellsTableBusy =
-    patchingCellId !== null || inventorySavingCellId !== null || siloLayoutSavingCellId !== null
+  const siloCellsTableBusy = pendingCellKeys.size > 0
 
   const flowCardTitle = !warehouseId
     ? 'Materialfluss (React Flow — Demo)'
@@ -526,10 +602,9 @@ export default function MaterialflussPage(): JSX.Element {
 
   async function handlePatchSiloQs(cellId: string, qs: string): Promise<void> {
     if (!warehouseId) return
-    if (patchingCellId !== null || inventorySavingCellId !== null || siloLayoutSavingCellId !== null) {
-      throw new Error('busy')
-    }
-    setPatchingCellId(cellId)
+    const key = `${cellId}:qs`
+    if (pendingCellKeys.has(key)) throw new Error('busy')
+    addPendingKey(setPendingCellKeys, key)
     try {
       await patchSiloCell.mutateAsync({ cellId, warehouseId, body: { qs_status: qs } })
       toast({ title: 'QS-Status gespeichert' })
@@ -541,21 +616,22 @@ export default function MaterialflussPage(): JSX.Element {
       })
       throw err
     } finally {
-      setPatchingCellId(null)
+      removePendingKey(setPendingCellKeys, key)
     }
   }
 
   async function handlePatchSiloInventory(cellId: string, materialId: string, lotId: string): Promise<void> {
     if (!warehouseId) return
-    if (patchingCellId !== null || inventorySavingCellId !== null || siloLayoutSavingCellId !== null) {
+    const key = `${cellId}:inventory`
+    if (pendingCellKeys.has(key)) {
       toast({
         title: 'Bitte warten',
-        description: 'Es läuft bereits ein Speichervorgang an den Silozellen.',
+        description: 'An dieser Silozelle läuft bereits ein Speichervorgang.',
         variant: 'destructive',
       })
       return
     }
-    setInventorySavingCellId(cellId)
+    addPendingKey(setPendingCellKeys, key)
     try {
       await patchSiloCell.mutateAsync({
         cellId,
@@ -573,16 +649,17 @@ export default function MaterialflussPage(): JSX.Element {
         variant: 'destructive',
       })
     } finally {
-      setInventorySavingCellId(null)
+      removePendingKey(setPendingCellKeys, key)
     }
   }
 
   async function handlePatchSiloLayout(cellId: string, layoutX: string, layoutY: string): Promise<void> {
     if (!warehouseId) return
-    if (patchingCellId !== null || inventorySavingCellId !== null || siloLayoutSavingCellId !== null) {
+    const key = `${cellId}:layout`
+    if (pendingCellKeys.has(key)) {
       toast({
         title: 'Bitte warten',
-        description: 'An Silozellen wird bereits gespeichert.',
+        description: 'An dieser Silozelle wird bereits gespeichert.',
         variant: 'destructive',
       })
       return
@@ -610,7 +687,7 @@ export default function MaterialflussPage(): JSX.Element {
       }
       body.layout_y = n
     }
-    setSiloLayoutSavingCellId(cellId)
+    addPendingKey(setPendingCellKeys, key)
     try {
       await patchSiloCell.mutateAsync({ cellId, warehouseId, body })
       toast({ title: 'Silozellen-Layout gespeichert' })
@@ -621,16 +698,46 @@ export default function MaterialflussPage(): JSX.Element {
         variant: 'destructive',
       })
     } finally {
-      setSiloLayoutSavingCellId(null)
+      removePendingKey(setPendingCellKeys, key)
+    }
+  }
+
+  async function handlePatchSiloRisk(cellId: string, raw: string): Promise<void> {
+    if (!warehouseId) return
+    const key = `${cellId}:risk`
+    if (pendingCellKeys.has(key)) {
+      toast({
+        title: 'Bitte warten',
+        description: 'An dieser Silozelle wird bereits gespeichert.',
+        variant: 'destructive',
+      })
+      return
+    }
+    addPendingKey(setPendingCellKeys, key)
+    try {
+      const val = raw.trim()
+      await patchSiloCell.mutateAsync({
+        cellId,
+        warehouseId,
+        body: { contamination_risk_class: val === '' ? null : val },
+      })
+      toast({ title: 'VK-Klasse gespeichert' })
+    } catch (err) {
+      toast({
+        title: 'Speichern fehlgeschlagen',
+        description: getAxiosErrorMessage(err),
+        variant: 'destructive',
+      })
+    } finally {
+      removePendingKey(setPendingCellKeys, key)
     }
   }
 
   async function handlePatchNodeStatus(nodeId: string, status: string): Promise<void> {
     if (!warehouseId) return
-    if (patchingNodeId !== null) {
-      throw new Error('busy')
-    }
-    setPatchingNodeId(nodeId)
+    const key = `${nodeId}:status`
+    if (pendingNodeKeys.has(key)) throw new Error('busy')
+    addPendingKey(setPendingNodeKeys, key)
     try {
       await patchFlowNode.mutateAsync({ nodeId, warehouseId, body: { status } })
       toast({ title: 'Knoten-Status gespeichert' })
@@ -642,16 +749,17 @@ export default function MaterialflussPage(): JSX.Element {
       })
       throw err
     } finally {
-      setPatchingNodeId(null)
+      removePendingKey(setPendingNodeKeys, key)
     }
   }
 
   async function handlePatchNodeLayout(nodeId: string, layoutX: string, layoutY: string): Promise<void> {
     if (!warehouseId) return
-    if (patchingNodeId !== null) {
+    const key = `${nodeId}:layout`
+    if (pendingNodeKeys.has(key)) {
       toast({
         title: 'Bitte warten',
-        description: 'An einem anderen Knoten wird bereits gespeichert.',
+        description: 'An diesem Knoten wird bereits gespeichert.',
         variant: 'destructive',
       })
       return
@@ -679,7 +787,7 @@ export default function MaterialflussPage(): JSX.Element {
       }
       body.layout_y = n
     }
-    setPatchingNodeId(nodeId)
+    addPendingKey(setPendingNodeKeys, key)
     try {
       await patchFlowNode.mutateAsync({ nodeId, warehouseId, body })
       toast({ title: 'Knoten-Position gespeichert' })
@@ -690,16 +798,15 @@ export default function MaterialflussPage(): JSX.Element {
         variant: 'destructive',
       })
     } finally {
-      setPatchingNodeId(null)
+      removePendingKey(setPendingNodeKeys, key)
     }
   }
 
   async function handlePatchEdgeStatus(edgeId: string, status: string): Promise<void> {
     if (!warehouseId) return
-    if (patchingEdgeId !== null) {
-      throw new Error('busy')
-    }
-    setPatchingEdgeId(edgeId)
+    const key = `${edgeId}:status`
+    if (pendingEdgeKeys.has(key)) throw new Error('busy')
+    addPendingKey(setPendingEdgeKeys, key)
     try {
       await patchFlowEdge.mutateAsync({ edgeId, warehouseId, body: { status } })
       toast({ title: 'Kanten-Status gespeichert' })
@@ -711,21 +818,22 @@ export default function MaterialflussPage(): JSX.Element {
       })
       throw err
     } finally {
-      setPatchingEdgeId(null)
+      removePendingKey(setPendingEdgeKeys, key)
     }
   }
 
   async function handlePatchEdgeContamination(edgeId: string, contamination_guard_enabled: boolean): Promise<void> {
     if (!warehouseId) return
-    if (patchingEdgeId !== null) {
+    const key = `${edgeId}:contamination`
+    if (pendingEdgeKeys.has(key)) {
       toast({
         title: 'Bitte warten',
-        description: 'An einer anderen Kante wird bereits gespeichert.',
+        description: 'An dieser Kante wird bereits gespeichert.',
         variant: 'destructive',
       })
       throw new Error('busy')
     }
-    setPatchingEdgeId(edgeId)
+    addPendingKey(setPendingEdgeKeys, key)
     try {
       await patchFlowEdge.mutateAsync({ edgeId, warehouseId, body: { contamination_guard_enabled } })
       toast({ title: 'Verschleppungsschutz gespeichert' })
@@ -737,21 +845,22 @@ export default function MaterialflussPage(): JSX.Element {
       })
       throw err
     } finally {
-      setPatchingEdgeId(null)
+      removePendingKey(setPendingEdgeKeys, key)
     }
   }
 
   async function handlePatchEdgeFlush(edgeId: string, flush_required: boolean): Promise<void> {
     if (!warehouseId) return
-    if (patchingEdgeId !== null) {
+    const key = `${edgeId}:flush`
+    if (pendingEdgeKeys.has(key)) {
       toast({
         title: 'Bitte warten',
-        description: 'An einer anderen Kante wird bereits gespeichert.',
+        description: 'An dieser Kante wird bereits gespeichert.',
         variant: 'destructive',
       })
       throw new Error('busy')
     }
-    setPatchingEdgeId(edgeId)
+    addPendingKey(setPendingEdgeKeys, key)
     try {
       await patchFlowEdge.mutateAsync({ edgeId, warehouseId, body: { flush_required } })
       toast({ title: 'Spülcharge-Flag gespeichert' })
@@ -763,7 +872,45 @@ export default function MaterialflussPage(): JSX.Element {
       })
       throw err
     } finally {
-      setPatchingEdgeId(null)
+      removePendingKey(setPendingEdgeKeys, key)
+    }
+  }
+
+  async function handlePatchEdgeCapacity(edgeId: string, raw: string): Promise<void> {
+    if (!warehouseId) return
+    const key = `${edgeId}:capacity`
+    if (pendingEdgeKeys.has(key)) {
+      toast({
+        title: 'Bitte warten',
+        description: 'An dieser Kante wird bereits gespeichert.',
+        variant: 'destructive',
+      })
+      return
+    }
+    const t = raw.trim()
+    let max_capacity_kg_h: number | null
+    if (t === '') {
+      max_capacity_kg_h = null
+    } else {
+      const n = Number(t)
+      if (!Number.isFinite(n) || n < 0) {
+        toast({ title: 'kg/h ungültig', variant: 'destructive' })
+        return
+      }
+      max_capacity_kg_h = n
+    }
+    addPendingKey(setPendingEdgeKeys, key)
+    try {
+      await patchFlowEdge.mutateAsync({ edgeId, warehouseId, body: { max_capacity_kg_h } })
+      toast({ title: 'Kapazität kg/h gespeichert' })
+    } catch (err) {
+      toast({
+        title: 'Speichern fehlgeschlagen',
+        description: getAxiosErrorMessage(err),
+        variant: 'destructive',
+      })
+    } finally {
+      removePendingKey(setPendingEdgeKeys, key)
     }
   }
 
@@ -1358,6 +1505,43 @@ export default function MaterialflussPage(): JSX.Element {
         <div className="grid gap-6 lg:grid-cols-1">
           <Card>
             <CardHeader>
+              <CardTitle className="text-base">Siloanlagen (Übersicht)</CardTitle>
+              <CardDescription>Stammdaten zu diesem Lager — nur Lesen.</CardDescription>
+            </CardHeader>
+            <CardContent className="overflow-x-auto">
+              {systemsQ.isError ? (
+                <p className="text-sm text-destructive">Fehler beim Laden der Siloanlagen.</p>
+              ) : systemsQ.isLoading ? (
+                <p className="text-sm text-muted-foreground">Lade …</p>
+              ) : (systemsQ.data ?? []).length === 0 ? (
+                <p className="text-sm text-muted-foreground">Keine Siloanlage — oben im Block „Stammdaten anlegen“ anlegen.</p>
+              ) : (
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b text-left text-muted-foreground">
+                      <th className="py-2 pr-2">system_code</th>
+                      <th className="py-2 pr-2">Name</th>
+                      <th className="py-2">Beschreibung</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {(systemsQ.data ?? []).map((s) => (
+                      <tr key={agriStr(s, 'id')} className="border-b border-border/60">
+                        <td className="py-2 pr-2 font-mono text-xs">{agriStr(s, 'system_code')}</td>
+                        <td className="py-2 pr-2">{agriStr(s, 'name')}</td>
+                        <td className="py-2 text-muted-foreground max-w-md truncate" title={agriStr(s, 'description')}>
+                          {agriStr(s, 'description')}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
               <CardTitle className="text-base">Silozellen (API)</CardTitle>
               {siloQ.isError ? (
                 <p className="text-sm text-destructive">Fehler beim Laden — Migration oder Endpoint prüfen.</p>
@@ -1371,6 +1555,7 @@ export default function MaterialflussPage(): JSX.Element {
                     <th className="py-2 pr-2">Name</th>
                     <th className="py-2 pr-2">QS</th>
                     <th className="py-2 pr-2">kg</th>
+                    <th className="py-2 pr-2 min-w-[120px]">VK (frei)</th>
                     <th className="py-2 pr-2 min-w-[160px]">Layout (Hof/Plan)</th>
                     <th className="py-2 pr-2 min-w-[200px]">Material / Lot (Referenz)</th>
                   </tr>
@@ -1378,13 +1563,13 @@ export default function MaterialflussPage(): JSX.Element {
                 <tbody>
                   {siloQ.isLoading ? (
                     <tr>
-                      <td colSpan={6} className="py-3 text-muted-foreground">
+                      <td colSpan={7} className="py-3 text-muted-foreground">
                         Lade…
                       </td>
                     </tr>
                   ) : (siloQ.data ?? []).length === 0 ? (
                     <tr>
-                      <td colSpan={6} className="py-3 text-muted-foreground">
+                      <td colSpan={7} className="py-3 text-muted-foreground">
                         Keine Silozellen — Stammdaten anlegen oder andere Siloanlage wählen.
                       </td>
                     </tr>
@@ -1404,12 +1589,21 @@ export default function MaterialflussPage(): JSX.Element {
                         </td>
                         <td className="py-2 tabular-nums">{agriStr(row, 'capacity_kg')}</td>
                         <td className="py-2 pr-2 align-top">
+                          <SiloCellRiskEditor
+                            cellId={agriStr(row, 'id')}
+                            riskServer={agriStr(row, 'contamination_risk_class')}
+                            disabled={siloCellsTableBusy}
+                            saving={pendingCellKeys.has(`${agriStr(row, 'id')  }:risk`)}
+                            onSave={handlePatchSiloRisk}
+                          />
+                        </td>
+                        <td className="py-2 pr-2 align-top">
                           <NodeLayoutEditor
                             nodeId={agriStr(row, 'id')}
                             layoutXServer={agriStr(row, 'layout_x')}
                             layoutYServer={agriStr(row, 'layout_y')}
                             disabled={siloCellsTableBusy}
-                            saving={siloLayoutSavingCellId === agriStr(row, 'id')}
+                            saving={pendingCellKeys.has(`${agriStr(row, 'id')  }:layout`)}
                             onSave={handlePatchSiloLayout}
                           />
                         </td>
@@ -1419,7 +1613,7 @@ export default function MaterialflussPage(): JSX.Element {
                             materialServer={agriStr(row, 'current_material_id')}
                             lotServer={agriStr(row, 'current_lot_id')}
                             disabled={siloCellsTableBusy}
-                            saving={inventorySavingCellId === agriStr(row, 'id')}
+                            saving={pendingCellKeys.has(`${agriStr(row, 'id')  }:inventory`)}
                             onSave={handlePatchSiloInventory}
                           />
                         </td>
@@ -1470,7 +1664,7 @@ export default function MaterialflussPage(): JSX.Element {
                               nodeId={agriStr(row, 'id')}
                               warehouseId={warehouseId}
                               statusValue={agriStr(row, 'status')}
-                              disabled={patchingNodeId !== null}
+                              disabled={pendingNodeKeys.has(`${agriStr(row, 'id')  }:status`)}
                               onPatch={handlePatchNodeStatus}
                             />
                           </td>
@@ -1479,8 +1673,8 @@ export default function MaterialflussPage(): JSX.Element {
                               nodeId={agriStr(row, 'id')}
                               layoutXServer={agriStr(row, 'layout_x')}
                               layoutYServer={agriStr(row, 'layout_y')}
-                              disabled={patchingNodeId !== null}
-                              saving={patchingNodeId === agriStr(row, 'id')}
+                              disabled={pendingNodeKeys.has(`${agriStr(row, 'id')  }:layout`)}
+                              saving={pendingNodeKeys.has(`${agriStr(row, 'id')  }:layout`)}
                               onSave={handlePatchNodeLayout}
                             />
                           </td>
@@ -1500,18 +1694,19 @@ export default function MaterialflussPage(): JSX.Element {
                       <th className="py-2 pr-2">Status</th>
                       <th className="py-2 pr-2">Verschleppung</th>
                       <th className="py-2 pr-2">Spülcharge</th>
+                      <th className="py-2 pr-2 min-w-[100px]">kg/h max</th>
                     </tr>
                   </thead>
                   <tbody>
                     {edgesQ.isLoading ? (
                       <tr>
-                        <td colSpan={5} className="py-2 text-muted-foreground">
+                        <td colSpan={6} className="py-2 text-muted-foreground">
                           Lade…
                         </td>
                       </tr>
                     ) : (edgesQ.data ?? []).length === 0 ? (
                       <tr>
-                        <td colSpan={5} className="py-2 text-muted-foreground">
+                        <td colSpan={6} className="py-2 text-muted-foreground">
                           Keine Kanten
                         </td>
                       </tr>
@@ -1552,7 +1747,7 @@ export default function MaterialflussPage(): JSX.Element {
                                 edgeId={agriStr(row, 'id')}
                                 warehouseId={warehouseId}
                                 statusValue={agriStr(row, 'status')}
-                                disabled={patchingEdgeId !== null}
+                                disabled={pendingEdgeKeys.has(`${agriStr(row, 'id')  }:status`)}
                                 onPatch={handlePatchEdgeStatus}
                               />
                             </td>
@@ -1560,7 +1755,7 @@ export default function MaterialflussPage(): JSX.Element {
                               <FlowEdgeContaminationSelect
                                 edgeId={agriStr(row, 'id')}
                                 guardEnabled={guardOn}
-                                disabled={patchingEdgeId !== null}
+                                disabled={pendingEdgeKeys.has(`${agriStr(row, 'id')  }:contamination`)}
                                 onPatch={handlePatchEdgeContamination}
                               />
                             </td>
@@ -1568,8 +1763,17 @@ export default function MaterialflussPage(): JSX.Element {
                               <FlowEdgeFlushSelect
                                 edgeId={agriStr(row, 'id')}
                                 flushRequired={flushOn}
-                                disabled={patchingEdgeId !== null}
+                                disabled={pendingEdgeKeys.has(`${agriStr(row, 'id')  }:flush`)}
                                 onPatch={handlePatchEdgeFlush}
+                              />
+                            </td>
+                            <td className="py-2 pr-0 align-top">
+                              <EdgeCapacityEditor
+                                edgeId={agriStr(row, 'id')}
+                                kgHServer={agriStr(row, 'max_capacity_kg_h')}
+                                disabled={pendingEdgeKeys.has(`${agriStr(row, 'id')  }:capacity`)}
+                                saving={pendingEdgeKeys.has(`${agriStr(row, 'id')  }:capacity`)}
+                                onSave={handlePatchEdgeCapacity}
                               />
                             </td>
                           </tr>
