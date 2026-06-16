@@ -13,6 +13,7 @@ preventing regressions while allowing gradual improvement.
 from __future__ import annotations
 
 import argparse
+import json
 import os
 import re
 import sys
@@ -50,6 +51,14 @@ def main() -> int:
         "--threshold", type=int, default=916,
         help="Max allowed untyped routes (baseline: 916)",
     )
+    parser.add_argument(
+        "--baseline-file",
+        help=(
+            "Optional JSON baseline with total_untyped and per-file untyped "
+            "counts. When present, per-file regressions fail even if the "
+            "global threshold is unchanged."
+        ),
+    )
     parser.add_argument("--verbose", action="store_true")
     args = parser.parse_args()
 
@@ -73,6 +82,28 @@ def main() -> int:
 
     print(f"Response model coverage: {typed}/{total_routes} routes ({pct}%)")
     print(f"Untyped routes: {total_untyped} (threshold: {args.threshold})")
+
+    if args.baseline_file:
+        with open(args.baseline_file, encoding="utf-8") as f:
+            baseline = json.load(f)
+        allowed_by_file = baseline.get("files", {})
+        file_lookup = {fname: u for fname, u, _ in files_with_gaps}
+        regressions: list[str] = []
+        for fname, current in sorted(file_lookup.items()):
+            allowed = int(allowed_by_file.get(fname, 0))
+            if current > allowed:
+                regressions.append(f"{fname}: {current} > {allowed}")
+        allowed_total = int(baseline.get("total_untyped", args.threshold))
+        if total_untyped > allowed_total:
+            regressions.append(f"total_untyped: {total_untyped} > {allowed_total}")
+        if regressions:
+            print("\nFAIL: response model baseline regressed.", file=sys.stderr)
+            for item in regressions[:20]:
+                print(f"  {item}", file=sys.stderr)
+            if len(regressions) > 20:
+                print(f"  ... {len(regressions) - 20} more", file=sys.stderr)
+            return 1
+        print(f"OK - response model baseline: {args.baseline_file}")
 
     if args.verbose:
         print("\nFiles with untyped routes (top 20):")
