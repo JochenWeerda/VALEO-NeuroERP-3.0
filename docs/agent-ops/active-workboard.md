@@ -1,6 +1,21 @@
 # Active Workboard
 
-Stand: `2026-06-13`
+Stand: `2026-06-16`
+
+## FUHRPARK-VERTIEFUNG-001 — Fuhrpark Tiefenausbau (5 Gaps)
+
+**Von:** Claude
+**Owner:** Claude
+**Stand:** abgeschlossen 2026-06-16 — alle 5 identifizierten Gaps implementiert.
+**Ziel:** Status-Lifecycle, Schadensfälle, Bußgeld, KM-basierte Wartungsvorhersage, Leasing-Rückgabe.
+**Dateibesitz:**
+- `alembic/versions/fuhrpark_vertiefung_20260616.py` — 3 neue Tabellen `ops_fahrzeug_status_historie`, `ops_fahrzeug_schaeden`, `ops_fahrzeug_bussgeld`
+- `app/api/v1/endpoints/fuhrpark.py` — 10 neue Endpunkte (Status-Wechsel, Historie, Schaeden CRUD, Bussgeld CRUD, Wartungsvorhersage, Leasing-Rückgabe)
+- `packages/frontend-web/src/lib/api/fuhrpark.ts` — 4 neue Typen + 10 neue Funktionen
+- `packages/frontend-web/src/pages/fuhrpark/fahrzeug-vertiefung.tsx` — neue 5-Tab-Seite
+- `packages/frontend-web/src/app/navigation/domains/operations.tsx` — Nav-Eintrag „Vertiefung & Analyse"
+- `tests/test_fuhrpark_vertiefung.py` — Integrationstests (integration, needs_live_db)
+**Abnahmekriterien:** `alembic upgrade head` erzeugt 3 Tabellen; 10 neue API-Endpunkte erreichbar; Frontend Lint 0 Warnings; Integrationstests grün (needs_live_db).
 
 ## WM-AGRI-SILO-001 — Agrar-Silo / Materialfluss (additiv WMS)
 
