@@ -1,6 +1,19 @@
 # Active Workboard
 
-Stand: `2026-06-16`
+Stand: `2026-06-17`
+
+## KOND-001 — Konditionssystem / Preisfindung
+
+**Von:** Claude
+**Owner:** Claude
+**Stand:** abgeschlossen 2026-06-17 — vollständige Frontend-UI für alle vorhandenen Backend-Preismodule.
+**Ziel:** Kern des Landhandels: Kundenpreislisten, Staffelpreise, Rabattgruppen/-klassen, zeitbegrenzte Konditionen, hierarchische Preisfindung.
+**Bestandsaufnahme (2026-06-17):** Backend war vollständig vorhanden (price_lists.py, pricing.py, preis_rabattgruppen.py, zu_abschlaggruppen.py, individualpreise.py, price_calculation.py); Frontend-UI komplett fehlend.
+**Dateibesitz:**
+- `packages/frontend-web/src/lib/api/konditionen.ts` — API-Client (Preislisten, Preisfindung, Rabattgruppen/klassen/sätze, Individualpreise)
+- `packages/frontend-web/src/pages/konditionen/konditionssystem.tsx` — 6-Tab-Hauptseite (Preislisten, Rabattgruppen, Rabattklassen, Rabattsätze, Individualpreise, Preisfindung-Kalkulator)
+- `packages/frontend-web/src/app/navigation/domains/commercial.tsx` — Nav-Eintrag unter „Preise & Kalkulation"
+**Abnahmekriterien:** ESLint 0 Warnings; alle 6 Tabs rendern; CRUD für Preislisten/Rabattgruppen/klassen/sätze/Individualpreise; Live-Preisfindung gegen `/api/v1/pricing/calculate`.
 
 ## FUHRPARK-VERTIEFUNG-001 — Fuhrpark Tiefenausbau (5 Gaps)
 

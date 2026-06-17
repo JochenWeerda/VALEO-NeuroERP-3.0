@@ -331,6 +331,15 @@ export const RAW_NAV_SECTIONS: RawNavItem[] = [
         keywords: ['individualpreis', 'pri', 'prie', 'kundenpreis', 'lieferantenpreis', 'staffelpreis'],
         mcp: { businessDomain: 'agrar', scope: 'agrar:read' },
       },
+      {
+        id: 'konditionssystem',
+        label: 'Konditionssystem KOND-001',
+        icon: Calculator,
+        module: '@/pages/konditionen/konditionssystem',
+        preferredPath: 'konditionen/konditionssystem',
+        keywords: ['konditionssystem', 'preisliste', 'staffelpreis', 'rabattgruppe', 'rabattklasse', 'rabattsatz', 'individualpreis', 'preisfindung', 'kond'],
+        mcp: { businessDomain: 'agrar', scope: 'agrar:write' },
+      },
     ],
   },
   {
