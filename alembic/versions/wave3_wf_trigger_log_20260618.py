@@ -81,9 +81,13 @@ def upgrade() -> None:
     op.execute("CREATE SCHEMA IF NOT EXISTS domain_agrar")
     # Quittiert-Spalten zu weighing_tickets hinzufügen (falls nicht vorhanden)
     op.execute("""
-        ALTER TABLE domain_agrar.weighing_tickets
+        ALTER TABLE IF EXISTS domain_inventory.weighing_tickets
         ADD COLUMN IF NOT EXISTS quittiert BOOLEAN DEFAULT false,
         ADD COLUMN IF NOT EXISTS quittiert_am TIMESTAMPTZ
+    """)
+    op.execute("""
+        CREATE OR REPLACE VIEW domain_agrar.weighing_tickets AS
+        SELECT * FROM domain_inventory.weighing_tickets
     """)
 
     op.create_table(
@@ -107,8 +111,9 @@ def upgrade() -> None:
 
 def downgrade() -> None:
     op.drop_table("waagen_quittungen", schema="domain_agrar")
+    op.execute("DROP VIEW IF EXISTS domain_agrar.weighing_tickets")
     op.execute("""
-        ALTER TABLE domain_agrar.weighing_tickets
+        ALTER TABLE IF EXISTS domain_inventory.weighing_tickets
         DROP COLUMN IF EXISTS quittiert,
         DROP COLUMN IF EXISTS quittiert_am
     """)
