@@ -10,6 +10,7 @@ Zentrale Test-Fixtures für VALEO NeuroERP 3.0.
 
 import os
 import sys
+from types import SimpleNamespace
 
 import pytest
 from sqlalchemy import text
@@ -31,6 +32,26 @@ def pytest_collection_modifyitems(config: pytest.Config, items: list) -> None:
             continue
         if "require_db" in fns:
             item.add_marker(pytest.mark.needs_live_db)
+
+
+@pytest.fixture
+def mocker(monkeypatch):
+    """Small pytest-mock compatible subset used by legacy unit tests."""
+
+    def _patch(target: str, **kwargs):
+        from unittest.mock import MagicMock
+
+        parts = target.split(".")
+        if len(parts) < 2:
+            raise ValueError("target must contain a module and attribute")
+        module_name = ".".join(parts[:-1])
+        attr_name = parts[-1]
+        module = __import__(module_name, fromlist=[attr_name])
+        replacement = kwargs.pop("new", MagicMock(**kwargs))
+        monkeypatch.setattr(module, attr_name, replacement)
+        return replacement
+
+    return SimpleNamespace(patch=_patch)
 
 
 @pytest.fixture(autouse=True)
