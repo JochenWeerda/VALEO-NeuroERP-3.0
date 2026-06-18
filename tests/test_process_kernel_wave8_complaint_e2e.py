@@ -148,7 +148,7 @@ def test_reklamation_transition_records_audit_and_overdue_state(client: TestClie
 
     transition_1 = client.post(
         f"/reklamationen/{reklamation_id}/transition",
-        params={"neuer_status": "abgelehnt", "aktor_id": "reviewer-1", "kommentar": "Teilweise unklar"},
+        json={"neuer_status": "abgelehnt", "aktor_id": "reviewer-1", "kommentar": "Teilweise unklar"},
         headers=_headers("TENANT-REK-2"),
     )
     assert transition_1.status_code == 200
@@ -156,7 +156,7 @@ def test_reklamation_transition_records_audit_and_overdue_state(client: TestClie
 
     transition_2 = client.post(
         f"/reklamationen/{reklamation_id}/transition",
-        params={"neuer_status": "geschlossen", "aktor_id": "reviewer-2"},
+        json={"neuer_status": "geschlossen", "aktor_id": "reviewer-2"},
         headers=_headers("TENANT-REK-2"),
     )
     assert transition_2.status_code == 200
