@@ -36,6 +36,10 @@ test.describe('CRM/KIM - Performance @smoke', () => {
     const individualStreamCalls: string[] = [];
     let dashboardCalls = 0;
 
+    // Restliche KIM-Aufrufe tolerant leer. Spezifische Routes werden danach registriert
+    // und haben bei Playwright Vorrang vor diesem Catch-all.
+    await adminPage.route('**/api/v1/crm/kim/**', (route) =>
+      route.fulfill({ status: 200, contentType: 'application/json', body: '[]' }));
     await adminPage.route('**/api/v1/crm/kim/customers?**', (route) =>
       route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(CUSTOMERS) }));
     await adminPage.route('**/api/v1/crm/kim/customers/*/dashboard', (route) => {
@@ -50,9 +54,6 @@ test.describe('CRM/KIM - Performance @smoke', () => {
         route.fulfill({ status: 200, contentType: 'application/json', body: '[]' });
       });
     }
-    // Restliche KIM-Aufrufe (neuro-summary, notifications, …) tolerant leer.
-    await adminPage.route('**/api/v1/crm/kim/**', (route) =>
-      route.fulfill({ status: 200, contentType: 'application/json', body: '[]' }));
 
     // 1) Öffnen unter Budget
     const tOpen = Date.now();
