@@ -50,6 +50,71 @@ def upgrade() -> None:
         ON domain_finance.kostenstellen_umlagen (tenant_id, periode)
     """)
 
+    # ── PROC-3WM-001: Public inventory compatibility tables used by match seed/service ──
+    op.execute("""
+        CREATE TABLE IF NOT EXISTS public.inventory_warehouses (
+            id          TEXT PRIMARY KEY,
+            code        TEXT NOT NULL UNIQUE,
+            name        TEXT NOT NULL,
+            tenant_id   TEXT NOT NULL,
+            is_active   BOOLEAN NOT NULL DEFAULT TRUE,
+            created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+            updated_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
+        )
+    """)
+    op.execute("""
+        CREATE TABLE IF NOT EXISTS public.inventory_locations (
+            id             TEXT PRIMARY KEY,
+            warehouse_id   TEXT NOT NULL,
+            code           TEXT NOT NULL UNIQUE,
+            location_type  TEXT,
+            created_at     TIMESTAMPTZ NOT NULL DEFAULT NOW()
+        )
+    """)
+    op.execute("""
+        CREATE TABLE IF NOT EXISTS public.inventory_goods_receipts (
+            id                    TEXT PRIMARY KEY,
+            tenant_id             TEXT NOT NULL,
+            gr_number             TEXT NOT NULL,
+            po_number             TEXT,
+            po_id                 TEXT,
+            supplier_id           TEXT,
+            supplier_name         TEXT,
+            receipt_date          TIMESTAMPTZ,
+            status                TEXT,
+            delivery_note_number  TEXT,
+            notes                 TEXT,
+            created_by            TEXT,
+            created_at            TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+            updated_at            TIMESTAMPTZ NOT NULL DEFAULT NOW()
+        )
+    """)
+    op.execute("""
+        CREATE TABLE IF NOT EXISTS public.inventory_goods_receipt_lines (
+            id                 TEXT PRIMARY KEY,
+            goods_receipt_id   TEXT NOT NULL,
+            po_line_number     TEXT,
+            sku                TEXT,
+            description        TEXT,
+            ordered_quantity   NUMERIC(16,3),
+            received_quantity  NUMERIC(16,3),
+            unit               TEXT,
+            warehouse_id       TEXT,
+            location_id        TEXT,
+            quality_status     TEXT,
+            notes              TEXT,
+            created_at         TIMESTAMPTZ NOT NULL DEFAULT NOW()
+        )
+    """)
+    op.execute("""
+        CREATE INDEX IF NOT EXISTS ix_inventory_gr_tenant_po
+        ON public.inventory_goods_receipts (tenant_id, po_number, po_id)
+    """)
+    op.execute("""
+        CREATE INDEX IF NOT EXISTS ix_inventory_gr_lines_receipt
+        ON public.inventory_goods_receipt_lines (goods_receipt_id, po_line_number)
+    """)
+
     # ── QS-CHARGE-001: quality_protocol_id FK in harvest_acceptances ─────
     op.execute("""
         ALTER TABLE IF EXISTS domain_agrar.harvest_acceptances

@@ -14,6 +14,10 @@ from app.api.v1.endpoints import reklamation_api
 _TEST_TENANTS = {"TENANT-REK-1", "TENANT-REK-2", "TENANT-REK-3"}
 
 
+def _headers(tenant_id: str) -> dict[str, str]:
+    return {"X-Tenant-ID": tenant_id}
+
+
 def _db_reachable() -> bool:
     try:
         db = SessionLocal()
@@ -101,7 +105,7 @@ def test_create_reklamation_surfaces_crm_dms_and_sla_state(client: TestClient):
         "aktor_id": "crm-user",
     }
 
-    response = client.post("/reklamationen", json=payload)
+    response = client.post("/reklamationen", json=payload, headers=_headers("TENANT-REK-1"))
 
     assert response.status_code == 201
     body = response.json()
@@ -134,16 +138,18 @@ def test_reklamation_transition_records_audit_and_overdue_state(client: TestClie
             "frist_datum": (date.today() - timedelta(days=1)).isoformat(),
             "aktor_id": "service-user",
         },
+        headers=_headers("TENANT-REK-2"),
     )
     reklamation_id = create.json()["reklamation_id"]
 
-    overdue = client.get("/reklamationen/ueberfaellige/TENANT-REK-2")
+    overdue = client.get("/reklamationen/ueberfaellige/TENANT-REK-2", headers=_headers("TENANT-REK-2"))
     assert overdue.status_code == 200
     assert any(item["reklamation_id"] == reklamation_id for item in overdue.json())
 
     transition_1 = client.post(
         f"/reklamationen/{reklamation_id}/transition",
         params={"neuer_status": "abgelehnt", "aktor_id": "reviewer-1", "kommentar": "Teilweise unklar"},
+        headers=_headers("TENANT-REK-2"),
     )
     assert transition_1.status_code == 200
     assert transition_1.json()["status"] == "abgelehnt"
@@ -151,13 +157,14 @@ def test_reklamation_transition_records_audit_and_overdue_state(client: TestClie
     transition_2 = client.post(
         f"/reklamationen/{reklamation_id}/transition",
         params={"neuer_status": "geschlossen", "aktor_id": "reviewer-2"},
+        headers=_headers("TENANT-REK-2"),
     )
     assert transition_2.status_code == 200
     assert transition_2.json()["status"] == "geschlossen"
     assert transition_2.json()["sla_status"] == "erledigt"
     assert transition_2.json()["ist_ueberfaellig"] is False
 
-    audit = client.get(f"/reklamationen/{reklamation_id}/audit")
+    audit = client.get(f"/reklamationen/{reklamation_id}/audit", headers=_headers("TENANT-REK-2"))
     assert audit.status_code == 200
     audit_body = audit.json()
     assert audit_body["count"] == 3
@@ -184,6 +191,7 @@ def test_crm_and_dms_reference_endpoints_update_existing_complaint(client: TestC
             "zustaendiger": "Klara Rolle",
             "frist_datum": (date.today() + timedelta(days=5)).isoformat(),
         },
+        headers=_headers("TENANT-REK-3"),
     )
     reklamation_id = create.json()["reklamation_id"]
 
@@ -198,6 +206,7 @@ def test_crm_and_dms_reference_endpoints_update_existing_complaint(client: TestC
                 "crm_url": "https://crm.example/cases/CRM-CASE-2002",
             },
         },
+        headers=_headers("TENANT-REK-3"),
     )
     assert crm_update.status_code == 200
     assert crm_update.json()["crm_referenz"]["crm_case_id"] == "CRM-CASE-2002"
@@ -215,12 +224,13 @@ def test_crm_and_dms_reference_endpoints_update_existing_complaint(client: TestC
                 }
             ],
         },
+        headers=_headers("TENANT-REK-3"),
     )
     assert dms_update.status_code == 200
     assert dms_update.json()["gobd_beleg_id"] == "DMS-REK-2002"
     assert dms_update.json()["audit_eintrag_anzahl"] >= 3
 
-    crm_lookup = client.get("/reklamationen/crm/CRM-CASE-2002")
+    crm_lookup = client.get("/reklamationen/crm/CRM-CASE-2002", headers=_headers("TENANT-REK-3"))
     assert crm_lookup.status_code == 200
     assert len(crm_lookup.json()) == 1
     assert crm_lookup.json()[0]["reklamation_id"] == reklamation_id
