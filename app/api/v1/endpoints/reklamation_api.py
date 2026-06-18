@@ -298,6 +298,7 @@ def get_e2e_overview(reklamation_id: str, db: Session = Depends(get_db), tenant_
     row = _query_reklamation(db, reklamation_id, tenant_id)
     hat_crm = bool(row.crm_referenz)
     hat_dms = bool(row.dms_referenzen)
+    folgeentscheidungen = _folgeentscheidungen(row)
     frist = row.frist_datum
     sla_status = "ueberfaellig" if (frist and frist < date.today() and row.status == "offen") else "ok"
     return {
@@ -306,8 +307,8 @@ def get_e2e_overview(reklamation_id: str, db: Session = Depends(get_db), tenant_
         "dms_document_ids": [d.get("dokument_id") for d in (row.dms_referenzen or [])],
         "sla_status": sla_status,
         "audit_count": len(row.audit_trail or []),
-        "e2e_complete": hat_crm and hat_dms and _folgeentscheidungen(row)["can_close"],
-        "folgeentscheidungen": _folgeentscheidungen(row),
+        "e2e_complete": hat_crm and hat_dms and bool(row.audit_trail),
+        "folgeentscheidungen": folgeentscheidungen,
     }
 
 
