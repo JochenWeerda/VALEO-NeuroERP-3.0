@@ -46,6 +46,17 @@ export type ValidateAgriRouteBody = {
   previous_material_id?: string | null
 }
 
+export type MaterialTransferBody = {
+  warehouse_id: string
+  from_cell_id: string
+  to_cell_id: string
+  quantity_kg: string | number
+  article_id: string
+  lot_id?: string | null
+  booked_by?: string | null
+  reference?: string | null
+}
+
 export type SiloSystemCreate = {
   system_code: string
   name: string
@@ -198,6 +209,11 @@ export async function validateAgriMaterialRoute(body: ValidateAgriRouteBody): Pr
   return (data && typeof data === 'object' ? data : {}) as AgriFlowRow
 }
 
+export async function bookAgriMaterialTransfer(body: MaterialTransferBody): Promise<AgriFlowRow> {
+  const { data } = await apiClient.post<unknown>('/api/v1/lager/wms/agri/material-flow/transfer', body)
+  return (data && typeof data === 'object' ? data : {}) as AgriFlowRow
+}
+
 export function useAgriSiloCells(warehouseId: string | undefined, options?: { enabled?: boolean }) {
   const wid = warehouseId ?? ''
   return useQuery({
@@ -307,6 +323,16 @@ export function usePatchAgriFlowEdge() {
       patchAgriFlowEdge(vars.edgeId, vars.warehouseId, vars.body),
     onSuccess: (_data, vars) => {
       void qc.invalidateQueries({ queryKey: agriMaterialFlowKeys.edges(vars.warehouseId) })
+    },
+  })
+}
+
+export function useBookAgriMaterialTransfer() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: bookAgriMaterialTransfer,
+    onSuccess: (_data, vars) => {
+      void qc.invalidateQueries({ queryKey: agriMaterialFlowKeys.siloCells(vars.warehouse_id) })
     },
   })
 }

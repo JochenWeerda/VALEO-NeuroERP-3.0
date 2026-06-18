@@ -212,6 +212,7 @@ class AgriSiloMaterialFlowService:
         if not fields:
             raise ValueError("Keine Felder zum Aktualisieren")
         set_parts = [f"{k} = :{k}" for k in fields]
+        set_parts.append("updated_at = NOW()")
         params: dict = {**fields, "cid": cell_id, "wid": warehouse_id, "tid": self.tenant_id}
         row = self.db.execute(
             # nosec S608 -- reviewed-safe: set_parts are built only from explicit allowlisted payload keys.
@@ -811,8 +812,6 @@ class AgriSiloMaterialFlowService:
                 "id": to_cell_id, "tid": self.tenant_id,
             },
         )
-        self.db.commit()
-
         self._emit_material_flow_hooks(
             sc_event_type="material_transfer_booked",
             outbox_event_type="inventory.material_flow.transfer_booked",
@@ -832,6 +831,7 @@ class AgriSiloMaterialFlowService:
                 "move_in_id": move_in_id,
             },
         )
+        self.db.commit()
 
         return {
             "ok": True,

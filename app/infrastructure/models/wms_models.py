@@ -284,11 +284,15 @@ class SiloCell(Base):
     capacity_kg = Column(DECIMAL(14, 4), nullable=False, server_default="0")
     current_material_id = Column(String(64), nullable=True)
     current_lot_id = Column(String(64), nullable=True)
+    current_stock_kg = Column(DECIMAL(16, 3), nullable=False, server_default="0")
     qs_status = Column(String(32), nullable=False, server_default="frei")
     contamination_risk_class = Column(String(32), nullable=True)
+    layout_x = Column(DECIMAL(12, 3), nullable=True)
+    layout_y = Column(DECIMAL(12, 3), nullable=True)
     tenant_id = Column(String(64), nullable=False)
     is_active = Column(Boolean, server_default="true")
     created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
 
 
 class MaterialFlowNode(Base):

@@ -28,21 +28,24 @@
 - **Feed-Mill / Batching:** Typisch Chargenprotokoll, Rohwarenfreigabe, Formelversionen; technisch oft Ã¼ber MES/PLC oder InsellÃ¶sungen â€” VALEO priorisiert zuerst **digitales Modell + API + UI-Skizze**.
 - **WMS mit Layout:** Yard-/Warehouse-Maps sind oft Custom (GIS + Overlay oder Canvas-Editor); wiederverwendbar sind **Karten-Engines** und **Graph-Editoren** (siehe `reusable-open-source-silo-material-flow-2026-06-12.md`).
 
-## Empfehlung fÃ¼r VALEO
+## Empfehlung für VALEO
 
 1. **Datenmodell** Siloanlage / Silozelle / Materialfluss-Knoten/-Kanten in `domain_inventory` (umgesetzt in WM-AGRI-SILO-001).
 2. **Route-Validierung** rein digital (BFS, QS-Sperre, Verschleppungs-Hinweis).
-3. **UI:** React Flow fÃ¼r Editor/Visualisierung; MapLibre spÃ¤ter fÃ¼r Bird-View.
+3. **UI:** React Flow für Editor/Visualisierung; MapLibre später für Bird-View.
+4. **kg-Buchung** Silo-Umfüllung (umgesetzt in **WMS-FLOW-001**, 2026-06-19): `book_material_transfer` → `inventory_stock_movements` + `current_stock_kg`.
 
 ## Folge-Slices (Roadmap)
 
-| ID | Inhalt |
-|----|--------|
-| WM-AGRI-MAP-001 | Bird-View Hof/Lagerhaus mit Luftbild/MapLibre, zeichnbare Silos |
-| WM-AGRI-FLOW-002 | Simulation / Live-ZustÃ¤nde auf dem Graph |
-| WM-AGRI-QS-003 | Rohwarenfreigabe, LaborÃ¼bergabe, Freigabe MMX |
-| WM-AGRI-MOBILE-004 | Mobile Anlagen, Standort, Mischprotokoll Tablet |
-| WM-AGRI-PLC-005 | OPC-UA / MQTT / CSV-Import Hersteller |
-| WM-AGRI-FLUSH-006 | SpÃ¼lchargen, Verschleppungsmatrix, QS-Nachweis |
+| ID | Inhalt | Status (2026-06-19) |
+|----|--------|------------------------|
+| WMS-FLOW-001 | Materialtransfer Silozelle ↔ Lagerbewegung + UI | **Erledigt** |
+| WM-AGRI-LOT-LINK | Auto-Sync `silo_lots` ↔ Silozellen-Graph | Offen |
+| WM-AGRI-MAP-001 | Bird-View Hof/Lagerhaus mit Luftbild/MapLibre, zeichnbare Silos | Offen |
+| WM-AGRI-FLOW-002 | Simulation / Live-Zustände auf dem Graph | Offen |
+| WM-AGRI-QS-003 | Rohwarenfreigabe, Laborübergabe, Freigabe MMX | Offen |
+| WM-AGRI-MOBILE-004 | Mobile Anlagen, Standort, Mischprotokoll Tablet | Teilweise (Mobile-Sync Transfer) |
+| WM-AGRI-PLC-005 | OPC-UA / MQTT / CSV-Import Hersteller | Offen |
+| WM-AGRI-FLUSH-006 | Spülchargen, Verschleppungsmatrix, QS-Nachweis | Offen |
 
-Siehe auch `WM-AGRI-FLOW-001.yaml`.
+Siehe auch `WM-AGRI-FLOW-001.yaml`, `WMS-FLOW-001.yaml`.
