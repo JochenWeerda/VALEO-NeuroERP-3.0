@@ -126,19 +126,22 @@ def _build_xrechnung_xml(inv: dict, lines: list[dict]) -> str:
     return '<?xml version="1.0" encoding="UTF-8"?>\n' + ET.tostring(root, encoding="unicode")
 
 
-def _load_invoice(db: Session, invoice_id: str, tenant_id: str) -> tuple[dict, list[dict]]:
-    """Lädt Rechnungskopf + Positionen aus der DB."""
-    inv_row = db.execute(text("""
-        SELECT si.id, si.invoice_number, si.invoice_date, si.due_date,
-               si.customer_id, si.net_amount, si.tax_amount, si.total_amount,
-               si.currency, bp.name AS customer_name
-          FROM domain_erp.sales_invoices si
-          LEFT JOIN domain_erp.business_partners bp ON bp.id = si.customer_id
-         WHERE si.id = :id AND si.tenant_id = :tid
-    """), {"id": invoice_id, "tid": tenant_id}).fetchone()
+def _load_invoice(db: Session, invoice_id: str, tenant_id: str) -> tuple[dict, list[dict]] | None:
+    """Lädt Rechnungskopf + Positionen aus der DB. Gibt None zurück wenn nicht gefunden."""
+    try:
+        inv_row = db.execute(text("""
+            SELECT si.id, si.invoice_number, si.invoice_date, si.due_date,
+                   si.customer_id, si.net_amount, si.tax_amount, si.total_amount,
+                   si.currency, bp.name AS customer_name
+              FROM domain_erp.sales_invoices si
+              LEFT JOIN domain_erp.business_partners bp ON bp.id = si.customer_id
+             WHERE si.id = :id AND si.tenant_id = :tid
+        """), {"id": invoice_id, "tid": tenant_id}).fetchone()
+    except Exception as exc:
+        raise HTTPException(status_code=503, detail=f"DB-Fehler: {exc}") from exc
 
     if not inv_row:
-        raise HTTPException(status_code=404, detail="Rechnung nicht gefunden")
+        return None
 
     inv = {
         "invoice_number": inv_row[1],
@@ -186,7 +189,10 @@ def export_xrechnung(
     db: Session = Depends(get_db),
 ) -> Response:
     """Exportiert eine Rechnung als XRechnung 3.0 / UBL 2.1 XML."""
-    inv, lines = _load_invoice(db, invoice_id, tenant_id)
+    result = _load_invoice(db, invoice_id, tenant_id)
+    if result is None:
+        raise HTTPException(status_code=404, detail="Rechnung nicht gefunden")
+    inv, lines = result
     xml = _build_xrechnung_xml(inv, lines)
     filename = f"XRechnung_{inv['invoice_number']}.xml"
     return Response(
@@ -203,7 +209,10 @@ def validate_xrechnung(
     db: Session = Depends(get_db),
 ) -> dict:
     """Prüft ob Pflichtfelder für XRechnung vorhanden sind (kein vollständiger Schematron-Check)."""
-    inv, lines = _load_invoice(db, invoice_id, tenant_id)
+    result = _load_invoice(db, invoice_id, tenant_id)
+    if result is None:
+        raise HTTPException(status_code=404, detail="Rechnung nicht gefunden")
+    inv, lines = result
     errors: list[str] = []
     if not inv.get("invoice_number"):
         errors.append("Rechnungsnummer fehlt (BT-1)")
@@ -254,7 +263,10 @@ def export_xrechnung_batch(
     with zipfile.ZipFile(buf, "w", zipfile.ZIP_DEFLATED) as zf:
         for (inv_id,) in rows:
             try:
-                inv, lines = _load_invoice(db, str(inv_id), tenant_id)
+                result = _load_invoice(db, str(inv_id), tenant_id)
+                if result is None:
+                    continue
+                inv, lines = result
                 xml = _build_xrechnung_xml(inv, lines)
                 filename = f"XRechnung_{inv['invoice_number']}.xml"
                 zf.writestr(filename, xml.encode("utf-8"))
