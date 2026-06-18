@@ -1,0 +1,28 @@
+slice_id: QM-REK-LAB-001
+title: Reklamation/Labor fachlich schliessen
+owner: Codex
+status: reserved
+coordination: >-
+  Abgegrenzt von KOSTEN-001 (Kostenrechnung) und WM-AGRI-SILO-001
+  (Silo/Materialfluss). Dieser Slice bearbeitet nur Reklamation/Labor/QS-
+  Folgeentscheidungen.
+goal: >-
+  Technische und fachliche Luecken in Complaint-to-Resolution schliessen:
+  Tenant-Scope, valide Statusmaschine, Laborbefund, QS-Entscheidung,
+  Folgeaktionen fuer Sperre/Freigabe/Retoure/Gutschrift/CAPA.
+files:
+  - app/api/v1/endpoints/reklamation_api.py
+  - app/api/v1/endpoints/labor.py
+  - app/core/reklamation.py
+  - tests/test_reklamation_api.py
+  - tests/test_labor_api.py
+  - docs/cards/qualitaet/REK-001-complaint-to-resolution.md
+acceptance:
+  - Reklamation nutzt Tenant aus Request-Kontext, nicht aus Body.
+  - Statuswechsel akzeptiert Body-Modell und erzwingt erlaubte Uebergaenge.
+  - Laborauftrag kann Befund/Entscheidung speichern und liefert Folgeaktion.
+  - Reklamation E2E zeigt fehlende und verfuegbare Folgeentscheidungen.
+  - Focused pytest fuer Reklamation und Labor ist gruen.
+risks:
+  - Bestehende Kompatibilitaetstests erwarten teilweise breite Response-Schemas.
+  - Keine Alembic-Aenderung in diesem Slice; Zusatzdaten werden additiv in JSON-Feldern gehalten.

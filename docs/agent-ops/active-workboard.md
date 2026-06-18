@@ -2,6 +2,15 @@
 
 Stand: `2026-06-17`
 
+## QM-REK-LAB-001 - Reklamation/Labor fachlich schliessen
+
+**Von:** Codex
+**Owner:** Codex
+**Stand:** reserviert 2026-06-18 - Claim committed, Umsetzung startet danach.
+**Ziel:** Complaint-to-Resolution technisch und fachlich haerten: Tenant-Scope, serverseitige Statusmaschine, Laborbefund, QS-Entscheidung, Folgeaktionen fuer Sperre/Freigabe/Retoure/Gutschrift/CAPA.
+**Dateibesitz:** `app/api/v1/endpoints/reklamation_api.py`, `app/api/v1/endpoints/labor.py`, `app/core/reklamation.py`, `tests/test_reklamation_api.py`, `tests/test_labor_api.py`, `docs/cards/qualitaet/REK-001-complaint-to-resolution.md`.
+**Abnahmekriterien:** Body-basierter Statuswechsel; kein Cross-Tenant-Read; Laborbefund mit Folgeentscheidung; E2E-Risiken sichtbar; fokussierte Tests gruen.
+
 ## KOND-001 — Konditionssystem / Preisfindung
 
 **Von:** Claude
