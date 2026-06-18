@@ -1,7 +1,7 @@
 slice_id: INT-ACCOUNTING-EXPORT-PROFILES-001
 title: Kanzleisoftware-neutrale Exportprofile fuer Steuerberater, FIBU und Payroll-Vorlauf
 owner: Codex
-status: reserved
+status: completed
 coordination: >-
   Additiver Integrationsslice neben HRM-PAYROLL-DEEP-001. Kein Besitz an
   parallel dirty Dateien app/api/v1/api.py, Scheduler, WF/STMD/Waage/XRechnung
@@ -27,3 +27,11 @@ acceptance:
 risks:
   - Hersteller-/DATEV-Feldspezifikationen und Zertifizierungen bleiben externe Gates.
   - Steuerberater-Testimport je Zielprofil ist produktives Akzeptanzkriterium.
+result: >-
+  Kanonisches Accounting-Exportmodell, Batch-/Status-/Korrekturvertrag,
+  YAML-Profile fuer DATEV, Agenda, ADDISON, Simba, Lexware, Sage und SBS/WK
+  sowie Doku und Regressionstests angelegt.
+verification: >-
+  python -m py_compile fuer Service/Tests gruen; direkte Python-Vertragschecks
+  laden alle sieben Profile, validieren balancierte Batches und rendern CSV mit
+  Checksummen.

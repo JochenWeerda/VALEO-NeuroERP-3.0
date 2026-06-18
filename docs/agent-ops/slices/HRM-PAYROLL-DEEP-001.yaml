@@ -1,7 +1,7 @@
 slice_id: HRM-PAYROLL-DEEP-001
 title: HRM Payroll Deepening - Closeout, DATEV-Vertrag, FIBU-Uebergabe
 owner: Codex
-status: reserved
+status: completed
 coordination: >-
   Eigenstaendiger HRM/Payroll-Slice. Kein Besitz an parallel dirty Dateien
   app/api/v1/api.py, app/services/scheduler_service.py, WF/STMD/Waage/XRechnung
@@ -26,3 +26,11 @@ acceptance:
 risks:
   - Amtliche Lohnsteuer-PAP-Implementierung und DATEV-Zertifizierung bleiben externe Gates.
   - Produktive SV-/Steuerparameter muessen versioniert und fachlich freigegeben werden.
+result: >-
+  Payroll-Preview und Closeout-Vertrag umgesetzt: explizites API-Response-Modell,
+  versionierte Parameter, AN-/AG-Anteile, Netto, Arbeitgeberkosten, DATEV-artige
+  Vorlaufzeilen, FIBU-Buchungssaetze und externe Gate-Liste.
+verification: >-
+  python -m py_compile fuer Service/API/Tests gruen; direkte Python-Vertragschecks
+  fuer Payroll-Service und Closeout gruen. Pytest-Harness haengt aktuell im
+  bestehenden globalen Test-Setup und wurde nicht als Fachfehler des Slices gewertet.

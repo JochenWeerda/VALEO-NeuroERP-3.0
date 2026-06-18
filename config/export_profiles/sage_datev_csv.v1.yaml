@@ -1,0 +1,22 @@
+id: sage_datev_csv
+version: 1
+status: not_certified
+strategy: datev_compatible_with_sage_subprofiles
+requires_tax_advisor_test_import: true
+subprofiles: [sage_50_datev_csv, sage_100_datev_csv, sage_hr_payroll_pre_export]
+format: {type: csv, encoding: utf-8, delimiter: ";", decimal_separator: ",", date_format: DDMMYYYY, header_included: true}
+fields:
+  - {target: Sachkonto, source: account_no, required: true}
+  - {target: Gegenkonto, source: contra_account_no, required: true}
+  - {target: DebitorKreditor, source: customer_vendor_no, required: false}
+  - {target: Belegnummer, source: document_no, required: true}
+  - {target: Belegdatum, source: document_date, required: true}
+  - {target: Buchungsdatum, source: booking_date, required: true}
+  - {target: Betrag, source: amount_gross, fallback: amount_net, required: true}
+  - {target: Steuercode, source: tax_key, required: false}
+  - {target: Buchungstext, source: booking_text, required: true}
+  - {target: Kostenstelle, source: cost_center_1, required: false}
+  - {target: Kostentraeger, source: cost_center_2, required: false}
+  - {target: Segment, source: profit_center, required: false}
+  - {target: Beleglink, source: document_link, required: false}
+validation: {require_non_zero_amount: true, require_open_period: true, require_balanced_batch: true}
