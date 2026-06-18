@@ -33,7 +33,7 @@ class UebernehmenBody(BaseModel):
     kandidaten: list[LeadKandidatIn]
 
 
-@router.get("/preview", summary="Lead-Kandidaten-Vorschau (GAP/LKV, region-universal)")
+@router.get("/preview", response_model=dict[str, Any], summary="Lead-Kandidaten-Vorschau (GAP/LKV, region-universal)")
 def lead_preview(
     quelle: str = Query("gap", description="gap | lkv | beide"),
     plz_min: Optional[str] = Query(None, description="PLZ von (z. B. 26500)"),
@@ -47,7 +47,7 @@ def lead_preview(
     )
 
 
-@router.get("/leads", summary="Übernommene CRM-Leads auflisten")
+@router.get("/leads", response_model=dict[str, Any], summary="Übernommene CRM-Leads auflisten")
 def list_leads(
     search: Optional[str] = Query(None),
     db: Session = Depends(get_db),
@@ -56,7 +56,7 @@ def list_leads(
     return CrmLeadGenService(db, tenant_id).list_leads(search)
 
 
-@router.get("/leads/{lead_id}", summary="Übernommenen CRM-Lead abrufen")
+@router.get("/leads/{lead_id}", response_model=dict[str, Any], summary="Übernommenen CRM-Lead abrufen")
 def get_lead(
     lead_id: str,
     db: Session = Depends(get_db),
@@ -68,12 +68,12 @@ def get_lead(
     return lead
 
 
-@router.get("/leads-count", summary="Anzahl übernommener CRM-Leads")
+@router.get("/leads-count", response_model=dict[str, Any], summary="Anzahl übernommener CRM-Leads")
 def leads_count(db: Session = Depends(get_db), tenant_id: str = Depends(get_tenant_id)) -> dict[str, Any]:
     return {"count": CrmLeadGenService(db, tenant_id).leads_count()}
 
 
-@router.post("/uebernehmen", summary="Kandidaten als CRM-Leads übernehmen")
+@router.post("/uebernehmen", response_model=dict[str, Any], summary="Kandidaten als CRM-Leads übernehmen")
 def uebernehmen(
     body: UebernehmenBody,
     db: Session = Depends(get_db),
@@ -82,7 +82,7 @@ def uebernehmen(
     return CrmLeadGenService(db, tenant_id).create_leads([k.model_dump() for k in body.kandidaten])
 
 
-@router.post("/leads/{lead_id}/convert", summary="Lead in Kunden konvertieren")
+@router.post("/leads/{lead_id}/convert", response_model=dict[str, Any], summary="Lead in Kunden konvertieren")
 def convert_lead(
     lead_id: str,
     db: Session = Depends(get_db),

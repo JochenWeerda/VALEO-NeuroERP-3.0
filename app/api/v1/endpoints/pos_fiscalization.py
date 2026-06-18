@@ -40,7 +40,7 @@ def _provider_error(exc: Exception) -> HTTPException:
     return HTTPException(status_code=503, detail=str(exc))
 
 
-@router.get("/config", summary="Fiskalisierungsprovider abrufen")
+@router.get("/config", response_model=dict[str, Any], summary="Fiskalisierungsprovider abrufen")
 async def get_config(
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
@@ -48,7 +48,7 @@ async def get_config(
     return _service(db, tenant_id).get_config()
 
 
-@router.put("/config", summary="Fiskalisierungsprovider konfigurieren")
+@router.put("/config", response_model=dict[str, Any], summary="Fiskalisierungsprovider konfigurieren")
 async def put_config(
     payload: FiscalProviderConfigIn,
     tenant_id: str = Depends(get_tenant_id),
@@ -60,7 +60,7 @@ async def put_config(
         raise HTTPException(status_code=422, detail=str(exc)) from exc
 
 
-@router.get("/readiness", summary="Provider-Readiness pruefen")
+@router.get("/readiness", response_model=dict[str, Any], summary="Provider-Readiness pruefen")
 async def readiness(
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
@@ -68,7 +68,7 @@ async def readiness(
     return _service(db, tenant_id).readiness()
 
 
-@router.post("/transactions/start", summary="Fiskaltransaktion idempotent starten")
+@router.post("/transactions/start", response_model=dict[str, Any], summary="Fiskaltransaktion idempotent starten")
 async def start_transaction(
     payload: StartTransactionCommand,
     tenant_id: str = Depends(get_tenant_id),
@@ -80,7 +80,7 @@ async def start_transaction(
         raise _provider_error(exc) from exc
 
 
-@router.post("/transactions/finish", summary="Fiskaltransaktion idempotent abschliessen")
+@router.post("/transactions/finish", response_model=dict[str, Any], summary="Fiskaltransaktion idempotent abschliessen")
 async def finish_transaction(
     payload: FinishTransactionCommand,
     tenant_id: str = Depends(get_tenant_id),
@@ -92,7 +92,7 @@ async def finish_transaction(
         raise _provider_error(exc) from exc
 
 
-@router.get("/daily-summary", summary="Signierte Tageswerte abrufen")
+@router.get("/daily-summary", response_model=dict[str, Any], summary="Signierte Tageswerte abrufen")
 async def daily_summary(
     business_date: date = Query(...),
     terminal_id: str | None = Query(default=None),
@@ -102,7 +102,7 @@ async def daily_summary(
     return _service(db, tenant_id).daily_summary(business_date, terminal_id)
 
 
-@router.post("/cash-point-closings", summary="DSFinV-K Cash Point Closing uebertragen")
+@router.post("/cash-point-closings", response_model=dict[str, Any], summary="DSFinV-K Cash Point Closing uebertragen")
 async def close_cash_point(
     payload: CashPointClosingCommand,
     tenant_id: str = Depends(get_tenant_id),
@@ -114,7 +114,7 @@ async def close_cash_point(
         raise _provider_error(exc) from exc
 
 
-@router.post("/exports", summary="TSE- oder DSFinV-K-Export anfordern")
+@router.post("/exports", response_model=dict[str, Any], summary="TSE- oder DSFinV-K-Export anfordern")
 async def request_export(
     payload: ExportCommand,
     tenant_id: str = Depends(get_tenant_id),
@@ -126,7 +126,7 @@ async def request_export(
         raise _provider_error(exc) from exc
 
 
-@router.post("/exports/{export_type}", summary="Export mit generierter ID anfordern")
+@router.post("/exports/{export_type}", response_model=dict[str, Any], summary="Export mit generierter ID anfordern")
 async def request_generated_export(
     export_type: Literal["tse", "dsfinvk"],
     cash_register_id: str,
