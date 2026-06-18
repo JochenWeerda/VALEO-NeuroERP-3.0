@@ -2023,3 +2023,7 @@ api_router.include_router(
 
 # Kostenrechnung — KOSTEN-001
 api_router.include_router(kostenrechnung.router)
+
+# Mobile Offline-Sync — MOB-SYNC-001
+from app.api.v1.endpoints import mobile_sync  # noqa: E402
+api_router.include_router(mobile_sync.router)
