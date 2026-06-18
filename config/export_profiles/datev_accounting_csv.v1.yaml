@@ -1,0 +1,22 @@
+id: datev_accounting_csv
+version: 1
+status: datev_compatible_contract
+strategy: datev_gold_standard
+requires_tax_advisor_test_import: true
+format: {type: csv, encoding: windows-1252, delimiter: ";", decimal_separator: ",", date_format: DDMMYYYY, header_included: true}
+fields:
+  - {target: Umsatz, source: amount_gross, fallback: amount_net, required: true}
+  - {target: SollHaben, source: debit_credit, required: true}
+  - {target: Konto, source: account_no, required: true}
+  - {target: Gegenkonto, source: contra_account_no, required: true}
+  - {target: BU-Schluessel, source: tax_key, required: false}
+  - {target: Belegfeld1, source: document_no, required: true}
+  - {target: Belegdatum, source: document_date, required: true}
+  - {target: Buchungsdatum, source: booking_date, required: true}
+  - {target: Buchungstext, source: booking_text, required: true}
+  - {target: KOST1, source: cost_center_1, required: false}
+  - {target: KOST2, source: cost_center_2, required: false}
+  - {target: WKZ, source: currency, required: true}
+  - {target: Faelligkeit, source: due_date, required: false}
+  - {target: Belegreferenz, source: archive_id, fallback: document_link, required: false}
+validation: {require_non_zero_amount: true, require_open_period: true, require_balanced_batch: true, require_kost1_for_payroll: true}

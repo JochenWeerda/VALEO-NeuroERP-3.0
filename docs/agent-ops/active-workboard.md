@@ -4,19 +4,21 @@
 
 **Von:** Codex
 **Owner:** Codex
-**Stand:** reserviert 2026-06-18 — Claim-Slice fuer Lohnbuchhaltung-Tiefenentwicklung; parallel dirty Dateien (`app/api/v1/api.py`, Scheduler, WF/STMD/Waage/XRechnung, WM-AGRI-SILO-001) bleiben unberuehrt.
+**Stand:** abgeschlossen 2026-06-18 — Payroll-Preview und Closeout-Vertrag umgesetzt; parallel dirty Dateien (`app/api/v1/api.py`, Scheduler, WF/STMD/Waage/XRechnung, WM-AGRI-SILO-001) bleiben unberuehrt.
 **Ziel:** Lohnbuchhaltung von Payroll-Readiness zu einem pruefbaren Closeout-Vertrag vertiefen: Brutto-Netto-Kontext, Arbeitgeberanteile, Lohnarten, DATEV-ASCII-Uebergabedaten, FIBU-Buchungssaetze, externe Gates und Regressionstests.
 **Dateibesitz:** `app/services/lohn_service.py`, `app/api/v1/endpoints/personal.py`, `tests/test_personal_payroll_deep.py`, `docs/project-context/hrm-payroll-deepening-2026-06-18.md`, `docs/project-context/open-gaps-and-known-issues.md`, `docs/agent-ops/slices/HRM-PAYROLL-DEEP-001.yaml`.
 **Abnahmekriterien:** Explizites Payroll-Response-Modell, Monats-Closeout mit AN-/AG-Anteilen, DATEV-/FIBU-Uebergabevertrag, fail-closed externe Gates, Regressionstests.
+**Verifikation:** `python -m py_compile` gruen; direkte Python-Vertragschecks fuer Payroll-Service und Closeout gruen. Voller Pytest-Harness haengt aktuell im bestehenden globalen Test-Setup.
 
 ## INT-ACCOUNTING-EXPORT-PROFILES-001 — Steuerberater-/Accounting-Exportprofile
 
 **Von:** Codex
 **Owner:** Codex
-**Stand:** reserviert 2026-06-18 — additiver Integrationsslice neben HRM-PAYROLL-DEEP-001; parallel dirty Dateien (`app/api/v1/api.py`, Scheduler, WF/STMD/Waage/XRechnung, WM-AGRI-SILO-001) bleiben unberuehrt.
+**Stand:** abgeschlossen 2026-06-18 — kanonisches Exportmodell, sieben YAML-Profile, Validierung, CSV-Rendering, Checksummen, Korrekturvertrag, Doku und Tests angelegt.
 **Ziel:** Kanzleisoftware-neutrales kanonisches Exportmodell mit versionierten Profilen fuer DATEV, Agenda, ADDISON, Simba, Lexware, Sage und SBS/Wolters Kluwer; keine Zertifizierung behaupten, Steuerberater-Testimport bleibt externes Gate.
 **Dateibesitz:** `app/services/accounting_export_profiles.py`, `config/export_profiles/*.yaml`, `tests/test_accounting_export_profiles.py`, `docs/integrations/tax-advisor-export-profiles.md`, `docs/agent-ops/slices/INT-ACCOUNTING-EXPORT-PROFILES-001.yaml`.
 **Abnahmekriterien:** Pflichtfeldvalidierung, KOST1/KOST2-Mapping, CSV-Rendering, Checksummen, Batch-Status, Korrekturexport-Versionierung und not_certified/requires_tax_advisor_test_import fuer nicht abgenommene Profile.
+**Verifikation:** `python -m py_compile` gruen; direkte Python-Vertragschecks laden alle sieben Profile, validieren balancierte Batches und rendern CSV mit Checksummen.
 
 Stand: `2026-06-18`
 

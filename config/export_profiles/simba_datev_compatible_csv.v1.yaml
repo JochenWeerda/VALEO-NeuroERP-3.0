@@ -1,0 +1,21 @@
+id: simba_datev_compatible_csv
+version: 1
+status: not_certified
+strategy: datev_compatible_first
+requires_tax_advisor_test_import: true
+format: {type: csv, encoding: windows-1252, delimiter: ";", decimal_separator: ",", date_format: DDMMYYYY, header_included: true}
+fields:
+  - {target: Buchungsdatum, source: booking_date, required: true}
+  - {target: Belegdatum, source: document_date, required: true}
+  - {target: Belegnummer, source: document_no, required: true}
+  - {target: Sachkonto, source: account_no, required: true}
+  - {target: Gegenkonto, source: contra_account_no, required: true}
+  - {target: DebitorKreditor, source: customer_vendor_no, required: false}
+  - {target: Buchungsbetrag, source: amount_gross, fallback: amount_net, required: true}
+  - {target: Steuerschluessel, source: tax_key, required: false}
+  - {target: Buchungstext, source: booking_text, required: true}
+  - {target: Kostenstelle, source: cost_center_1, required: false}
+  - {target: Kostentraeger, source: cost_center_2, required: false}
+  - {target: Segment, source: profit_center, required: false}
+  - {target: Archivref, source: archive_id, required: false}
+validation: {require_non_zero_amount: true, require_open_period: true, require_balanced_batch: true}

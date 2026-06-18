@@ -1,0 +1,21 @@
+id: lexware_datev_csv
+version: 1
+status: not_certified
+strategy: datev_or_simple_csv
+requires_tax_advisor_test_import: true
+format: {type: csv, encoding: windows-1252, delimiter: ";", decimal_separator: ",", date_format: DD.MM.YYYY, header_included: true}
+fields:
+  - {target: Belegnummer, source: document_no, required: true}
+  - {target: Belegdatum, source: document_date, required: true}
+  - {target: Buchungsdatum, source: booking_date, required: true}
+  - {target: Konto, source: account_no, required: true}
+  - {target: Gegenkonto, source: contra_account_no, required: true}
+  - {target: Bruttobetrag, source: amount_gross, fallback: amount_net, required: true}
+  - {target: Nettobetrag, source: amount_net, required: true}
+  - {target: Steuer, source: tax_amount, required: false}
+  - {target: Steuerkennzeichen, source: tax_key, required: false}
+  - {target: KundeLieferant, source: customer_vendor_no, required: false}
+  - {target: Buchungstext, source: booking_text, required: true}
+  - {target: Kostenstelle, source: cost_center_1, required: false}
+  - {target: Kostentraeger, source: cost_center_2, required: false}
+validation: {require_non_zero_amount: true, require_open_period: true, require_balanced_batch: true}

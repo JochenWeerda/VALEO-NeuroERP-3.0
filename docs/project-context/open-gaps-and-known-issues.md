@@ -110,6 +110,11 @@ Aggregierte Gesamtsicht: [PROJEKT-GESAMTSTAND-2026-05-27.md](../PROJEKT-GESAMTST
 
 ## P4 - Externe Abhaengigkeiten (nicht repo-seitig loesbar)
 
+### HRM/Payroll-Exportprofile - Stand 2026-06-18
+
+- Repo-seitig vertieft: `HRM-PAYROLL-DEEP-001` und `INT-ACCOUNTING-EXPORT-PROFILES-001` liefern Payroll-Vorlaufdaten, Monats-Closeout-Preview, AN-/AG-Anteile, FIBU-/KORE-Buchungssaetze, DATEV-kompatible und kanzleisoftware-neutrale Exportprofile mit Pruefsummen-, Audit- und Korrekturvertrag.
+- Nicht repo-seitig schliessbar bleiben: amtlicher BMF-PAP, ELStAM, DEUEV, SV-Meldewesen, DATEV-/Herstellerfreigabe, Steuerberater-Testimport je Profil, produktive Lohnarten-/Sachkonten-/KOST1-/KOST2-Freigabe und reale Periodensperre im Betriebsprozess.
+
 ### EXT-001: Live-Credentials und Zielsystem-URLs
 
 - Superglue-Connectors, L3-Import, Erstinstallation und Finance-Export brauchen produktive Tenant-Secrets, Zielsystem-URLs und Ops-Alerting-Werte, die ausserhalb des Repos gepflegt werden.
