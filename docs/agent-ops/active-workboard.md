@@ -26,10 +26,11 @@ Stand: `2026-06-18`
 
 **Von:** Codex
 **Owner:** Codex
-**Stand:** reserviert 2026-06-18 — Claim; umgesetzt wird ein revisionsfaehiger QS-Workflow fuer Labor -> Lager -> Produktion ohne Eingriff in Cursor-LOT-LINK-Dateien.
+**Stand:** abgeschlossen 2026-06-18 — QS-Workflow-Service, API, Lot-/Silozellen-Rueckkopplung, Audit-Event, Tests und Doku umgesetzt.
 **Ziel:** QS-/Compliance-Tiefe fuer Silo-Lots erhoehen: Statuswechsel mit Pflichtgrund, Bediener, Proben-/Analyse-/Dokumentenbezug, GMP+/VLOG-Nachweisen, Silozellen-Rueckkopplung und append-only Supply-Chain-Audit.
 **Dateibesitz:** `app/services/agri_qs_workflow_service.py`, `app/api/v1/endpoints/agri_qs_workflow.py`, `app/api/v1/api.py`, `tests/test_agri_qs_workflow.py`, `docs/agent-ops/slices/WM-AGRI-QS-003.yaml`, `docs/project-context/open-gaps-and-known-issues.md`, `docs/workflows/wm-agri-silo-supply-chain-integration-2026-06-13.md`.
 **Abnahmekriterien:** Tenant-Scope, erlaubte QS-Transitionen, Pflichtgrund, Audit-Payload mit Labor-/Dokumentenbezug, Update `silo_lots.status`, Update verknuepfter `silo_cells.qs_status`, Trace-Event, Regressionstest.
+**Verifikation:** `python -m py_compile app/services/agri_qs_workflow_service.py app/api/v1/endpoints/agri_qs_workflow.py app/api/v1/api.py tests/test_agri_qs_workflow.py`; `python -m pytest -q -o addopts= tests/test_agri_qs_workflow.py` (4 passed).
 
 ## WM-AGRI-LOT-LINK-001 — Lot-/Bestands-Sync Waage/WE -> Silozelle
 

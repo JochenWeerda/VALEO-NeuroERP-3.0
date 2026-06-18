@@ -38,6 +38,7 @@ from app.api.v1.endpoints import (
     warehouses,
     warehouse_wms,
     agri_lot_link_booking,
+    agri_qs_workflow,
     agri_silo_material_flow,
     policies,
     gap,
@@ -952,6 +953,10 @@ from app.api.v1.endpoints import supply_chain  # noqa: E402
 api_router.include_router(
     supply_chain.router,
     tags=["supply-chain", "agrar", "lager"]
+)
+
+api_router.include_router(
+    agri_qs_workflow.router,
 )
 
 from app.api.v1.endpoints import procurement_match  # noqa: E402

@@ -1,8 +1,9 @@
 slice_id: WM-AGRI-QS-003
 title: QS-Freigabe und Audit fuer Silo-Lots
 owner: Codex
-status: reserved
+status: completed
 reserved_at: 2026-06-18
+completed_at: 2026-06-18
 coordination: >-
   Additiver QS-/Compliance-Slice neben WM-AGRI-LOT-LINK. Keine Aenderung an
   Cursor-Dateien fuer Legacy-Silo-Sync, Materialfluss-UI oder LOT-LINK-Migration.
@@ -31,3 +32,6 @@ acceptance_criteria:
   - Event-Payload enthaelt Labor-/Analyse-/Dokument-/GMP+/VLOG-Kontext.
   - Verknuepfte Silozellen erhalten den passenden qs_status.
   - Tests und Doku sind nachgezogen.
+verification:
+  - python -m py_compile app/services/agri_qs_workflow_service.py app/api/v1/endpoints/agri_qs_workflow.py app/api/v1/api.py tests/test_agri_qs_workflow.py
+  - python -m pytest -q -o addopts= tests/test_agri_qs_workflow.py
