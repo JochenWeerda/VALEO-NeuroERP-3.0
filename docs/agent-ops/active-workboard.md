@@ -6,7 +6,7 @@ Stand: `2026-06-18`
 
 **Von:** Claude
 **Owner:** Claude
-**Stand:** in Bearbeitung 2026-06-18 — alle 5 Slices implementiert, Commit ausstehend
+**Stand:** in Bearbeitung 2026-06-18 — Basiscommit `61d623677`, Codex-Hardening fuer P0 Punkt 4/5 `2bf40505c` gepusht; CI laeuft.
 **Ziel:** Schließt kritische Prozesskettenlücken aus ERP-Tiefenanalyse:
   - WMS-FLOW-001: `book_material_transfer()` in AgriSiloMaterialFlowService + Endpoint POST /material-flow/transfer — Silozell→StockMovement-Kopplung mit Kontaminationsschutz
   - KORE-BAB-001: BAB-Engine (GET /kostenrechnung/bab) + Kostenumlage (POST /kostenrechnung/umlagen) + BAB-Tab im Frontend
@@ -15,6 +15,7 @@ Stand: `2026-06-18`
   - QS-CHARGE-001: QsChargeService (Feuchte/Unreinheiten/HL-Gewicht/Mykotoxin-Abschläge) + GET /harvest-acceptances/{id}/qs-abschlag
   - Alembic: wms_material_flow_stock_link_20260619 (silo_cells.current_stock_kg + kostenstellen_umlagen + harvest_acceptances.quality_protocol_id + procurement_match_results)
 **Dateibesitz:** app/services/agri_silo_material_flow_service.py, app/services/qs_charge_service.py (neu), app/api/v1/endpoints/agri_silo_material_flow.py, app/api/v1/endpoints/kostenrechnung.py, app/api/v1/endpoints/crm_360.py, app/api/v1/endpoints/procurement_match.py, app/api/v1/endpoints/harvest_acceptance.py, packages/frontend-web/src/lib/api/kostenrechnung.ts, packages/frontend-web/src/pages/fibu/kostenstellenrechnung.tsx, alembic/versions/wms_material_flow_stock_link_20260619.py
+**Codex-Review 2026-06-18:** KORE-BAB-001 und PROC-3WM-001 gehaertet: valide Monatsgrenzen statt `YYYY-MM-31`, aktive Quell-/Ziel-KST-Validierung, monatliche Budget-Normalisierung, String-ID-kompatible Migration, fehlendes `domain_procurement`-Schema, toleranzbasierte 3-Way-Match-Klassifikation mit persistierten Mengen-/Wertkennzahlen.
 
 ## QM-REK-LAB-001 - Reklamation/Labor fachlich schliessen
 
