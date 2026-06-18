@@ -44,7 +44,7 @@ def _row(r) -> dict:
     return d
 
 
-@router.get("/katalog", summary="Käufergruppen-Katalog (Label/Zielanteil/Ansatz)")
+@router.get("/katalog", response_model=dict[str, Any], summary="Käufergruppen-Katalog (Label/Zielanteil/Ansatz)")
 def katalog() -> list[dict[str, Any]]:
     return [
         {"group": g.value, "label": p.label, "ziel_anteil_min": p.ziel_anteil_min,
@@ -54,7 +54,7 @@ def katalog() -> list[dict[str, Any]]:
     ]
 
 
-@router.get("/{kunden_nr}", summary="Käufergruppen-Profil eines Betriebs")
+@router.get("/{kunden_nr}", response_model=dict[str, Any], summary="Käufergruppen-Profil eines Betriebs")
 def get_profil(kunden_nr: str, db: Session = Depends(get_db), tenant_id: str = Depends(get_tenant_id)) -> dict[str, Any]:
     r = db.execute(
         text("SELECT * FROM public.kunden_kaeufer_profil WHERE kunden_nr = :k AND tenant_id = :t"),
@@ -95,17 +95,17 @@ def _reklassifiziere(db: Session, tenant_id: str, kunden_nr: str, prefer_ai: boo
     return get_profil(kunden_nr, db, tenant_id)
 
 
-@router.post("/{kunden_nr}/neu-klassifizieren", summary="Regelbasiert neu klassifizieren (aus echten Belegsignalen)")
+@router.post("/{kunden_nr}/neu-klassifizieren", response_model=dict[str, Any], summary="Regelbasiert neu klassifizieren (aus echten Belegsignalen)")
 def neu_klassifizieren(kunden_nr: str, db: Session = Depends(get_db), tenant_id: str = Depends(get_tenant_id)) -> dict[str, Any]:
     return _reklassifiziere(db, tenant_id, kunden_nr, prefer_ai=False)
 
 
-@router.post("/{kunden_nr}/ki-klassifizieren", summary="KI-gestützt einschätzen (Claude, Fallback regelbasiert)")
+@router.post("/{kunden_nr}/ki-klassifizieren", response_model=dict[str, Any], summary="KI-gestützt einschätzen (Claude, Fallback regelbasiert)")
 def ki_klassifizieren(kunden_nr: str, db: Session = Depends(get_db), tenant_id: str = Depends(get_tenant_id)) -> dict[str, Any]:
     return _reklassifiziere(db, tenant_id, kunden_nr, prefer_ai=True)
 
 
-@router.post("/{kunden_nr}/produktgruppen-klassifizieren", summary="Käufergruppe je Produktgruppe ableiten")
+@router.post("/{kunden_nr}/produktgruppen-klassifizieren", response_model=dict[str, Any], summary="Käufergruppe je Produktgruppe ableiten")
 def produktgruppen_klassifizieren(kunden_nr: str, db: Session = Depends(get_db), tenant_id: str = Depends(get_tenant_id)) -> dict[str, Any]:
     """Leitet je Produktgruppe eine eigene Käufergruppe aus deren Deckung/Bezug ab
     (ein Betrieb kann je Gruppe unterschiedlich ticken)."""
@@ -131,7 +131,7 @@ def produktgruppen_klassifizieren(kunden_nr: str, db: Session = Depends(get_db),
     return {"kunden_nr": kunden_nr, "klassifiziert": n}
 
 
-@router.post("/{kunden_nr}/setzen", summary="Käufergruppe bestätigen/überschreiben (mit Audit)")
+@router.post("/{kunden_nr}/setzen", response_model=dict[str, Any], summary="Käufergruppe bestätigen/überschreiben (mit Audit)")
 def setzen(kunden_nr: str, body: SetGroupIn, db: Session = Depends(get_db), tenant_id: str = Depends(get_tenant_id)) -> dict[str, Any]:
     if body.group not in {g.value for g in BuyingGroup}:
         raise HTTPException(status_code=422, detail="Unbekannte Käufergruppe")

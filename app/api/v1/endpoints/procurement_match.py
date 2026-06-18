@@ -34,7 +34,7 @@ class ErsCreditIn(BaseModel):
     created_by: Optional[str] = None
 
 
-@router.get("/match/orders", summary="Bestellungen mit Match-Übersicht (Picker)")
+@router.get("/match/orders", response_model=dict[str, Any], summary="Bestellungen mit Match-Übersicht (Picker)")
 def list_orders(
     limit: int = Query(50, ge=1, le=500),
     db: Session = Depends(get_db),
@@ -43,7 +43,7 @@ def list_orders(
     return {"items": ProcurementMatchService(db, tenant_id).list_orders(limit=limit)}
 
 
-@router.get("/match", summary="3-Wege-Match je Bestellung (Bestellung ↔ Wareneingang)")
+@router.get("/match", response_model=dict[str, Any], summary="3-Wege-Match je Bestellung (Bestellung ↔ Wareneingang)")
 def match(
     bestellung: str = Query(..., description="Bestellnummer oder -ID"),
     db: Session = Depends(get_db),
@@ -52,7 +52,7 @@ def match(
     return ProcurementMatchService(db, tenant_id).match(bestellung)
 
 
-@router.get("/match/three-way", summary="3-Wege-Match inkl. Eingangsrechnung")
+@router.get("/match/three-way", response_model=dict[str, Any], summary="3-Wege-Match inkl. Eingangsrechnung")
 def match_three_way(
     bestellung: str = Query(..., description="Bestellnummer oder -ID"),
     db: Session = Depends(get_db),
@@ -61,7 +61,7 @@ def match_three_way(
     return ProcurementMatchService(db, tenant_id).match_three_way(bestellung)
 
 
-@router.get("/match/follow-up", summary="Folgeaktionen je Bestellung (append-only)")
+@router.get("/match/follow-up", response_model=dict[str, Any], summary="Folgeaktionen je Bestellung (append-only)")
 def list_follow_ups(
     bestellung: str = Query(..., description="Bestellnummer"),
     db: Session = Depends(get_db),
@@ -72,7 +72,7 @@ def list_follow_ups(
     }
 
 
-@router.post("/match/follow-up", summary="Folgeaktion erfassen (append-only)", status_code=201)
+@router.post("/match/follow-up", response_model=dict[str, Any], summary="Folgeaktion erfassen (append-only)", status_code=201)
 def create_follow_up(
     body: FollowUpIn,
     db: Session = Depends(get_db),
@@ -94,7 +94,7 @@ def create_follow_up(
         raise HTTPException(status_code=503, detail=f"Folgeaktion konnte nicht gespeichert werden: {exc}") from exc
 
 
-@router.get("/match/ers/preview", summary="ERS-Gutschrift-Vorschau je Bestellung")
+@router.get("/match/ers/preview", response_model=dict[str, Any], summary="ERS-Gutschrift-Vorschau je Bestellung")
 def preview_ers(
     bestellung: str = Query(..., description="Bestellnummer"),
     db: Session = Depends(get_db),
@@ -103,7 +103,7 @@ def preview_ers(
     return ProcurementMatchService(db, tenant_id).preview_ers(bestellung)
 
 
-@router.get("/match/ers", summary="Erfasste ERS-Gutschriften je Bestellung")
+@router.get("/match/ers", response_model=dict[str, Any], summary="Erfasste ERS-Gutschriften je Bestellung")
 def list_ers_credits(
     bestellung: str = Query(..., description="Bestellnummer"),
     db: Session = Depends(get_db),
@@ -139,7 +139,7 @@ def _max_abs_position_delta_pct(positionen: list[dict[str, Any]]) -> Decimal:
     return max(deltas, default=Decimal("0"))
 
 
-@router.post("/match/auto", summary="PROC-3WM-001: 3-Wege-Match ausführen und Ergebnis persistieren", status_code=201)
+@router.post("/match/auto", response_model=dict[str, Any], summary="PROC-3WM-001: 3-Wege-Match ausführen und Ergebnis persistieren", status_code=201)
 def auto_match_and_persist(
     body: AutoMatchIn,
     db: Session = Depends(get_db),
@@ -241,7 +241,7 @@ def auto_match_and_persist(
     }
 
 
-@router.get("/match/results", summary="Gespeicherte Match-Ergebnisse abrufen")
+@router.get("/match/results", response_model=dict[str, Any], summary="Gespeicherte Match-Ergebnisse abrufen")
 def list_match_results(
     po_id: Optional[str] = Query(None),
     match_status: Optional[str] = Query(None),
@@ -266,7 +266,7 @@ def list_match_results(
     return {"items": [dict(r) for r in rows]}
 
 
-@router.post("/match/ers", summary="ERS-Gutschrift aus Match-Abweichung erzeugen", status_code=201)
+@router.post("/match/ers", response_model=dict[str, Any], summary="ERS-Gutschrift aus Match-Abweichung erzeugen", status_code=201)
 def create_ers_credit(
     body: ErsCreditIn,
     db: Session = Depends(get_db),

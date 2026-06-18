@@ -525,7 +525,7 @@ class BABReport(BaseModel):
     gesamt_kosten_eur: Decimal
 
 
-@router.post("/umlagen", summary="Kostenumlage anlegen für Periode")
+@router.post("/umlagen", response_model=UmlageOut, summary="Kostenumlage anlegen für Periode")
 def create_umlage(
     periode: str = Query(..., example="2026-06"),
     payload: UmlageCreate = ...,
@@ -591,10 +591,19 @@ def create_umlage(
             raise HTTPException(409, "Umlage für diesen KST-Schlüssel und Periode bereits vorhanden")
         raise HTTPException(500, str(exc))
 
-    return {"id": uid, "umlagebetrag_eur": float(umlagebetrag), "ok": True}
+    return {
+        "id": uid,
+        "periode": periode,
+        "von_kostenstelle_id": payload.von_kostenstelle_id,
+        "nach_kostenstelle_id": payload.nach_kostenstelle_id,
+        "umlage_art": payload.umlage_art,
+        "umlage_wert": payload.umlage_wert,
+        "umlage_basis": payload.umlage_basis,
+        "umlagebetrag_eur": umlagebetrag,
+    }
 
 
-@router.get("/bab", summary="Betriebsabrechnungsbogen (BAB) für eine Periode")
+@router.get("/bab", response_model=BABReport, summary="Betriebsabrechnungsbogen (BAB) für eine Periode")
 def get_bab(
     periode: str = Query(..., example="2026-06"),
     tenant_id: str = Depends(get_tenant_id),

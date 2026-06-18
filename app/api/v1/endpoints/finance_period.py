@@ -15,7 +15,7 @@ from app.services.finance_period_service import FinancePeriodService, PeriodErro
 router = APIRouter(prefix="/finance", tags=["finance", "fibu", "abschluss"])
 
 
-@router.get("/perioden", summary="Buchungsperioden mit Abschlussreife")
+@router.get("/perioden", response_model=dict[str, Any], summary="Buchungsperioden mit Abschlussreife")
 def list_periods(
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
@@ -23,7 +23,7 @@ def list_periods(
     return {"items": FinancePeriodService(db, tenant_id).list_periods()}
 
 
-@router.get("/perioden/{period}/readiness", summary="Abschlussreife einer Periode")
+@router.get("/perioden/{period}/readiness", response_model=dict[str, Any], summary="Abschlussreife einer Periode")
 def readiness(
     period: str,
     db: Session = Depends(get_db),
@@ -37,7 +37,7 @@ class CloseIn(BaseModel):
     bediener: Optional[str] = None
 
 
-@router.post("/perioden/{period}/close", summary="Periode abschließen (sperren)")
+@router.post("/perioden/{period}/close", response_model=dict[str, Any], summary="Periode abschließen (sperren)")
 def close_period(
     period: str,
     body: CloseIn,
@@ -55,7 +55,7 @@ class ReopenIn(BaseModel):
     bediener: Optional[str] = None
 
 
-@router.post("/perioden/{period}/reopen", summary="Periode wieder öffnen")
+@router.post("/perioden/{period}/reopen", response_model=dict[str, Any], summary="Periode wieder öffnen")
 def reopen_period(
     period: str,
     body: ReopenIn,

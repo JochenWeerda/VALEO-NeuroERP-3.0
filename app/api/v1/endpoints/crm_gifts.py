@@ -36,7 +36,7 @@ class StatusOut(BaseModel):
     status: str = "success"
 
 
-@router.get("/customers/{kunden_nr}/gifts", summary="Kunden-Präsente (Liste)")
+@router.get("/customers/{kunden_nr}/gifts", response_model=dict[str, Any], summary="Kunden-Präsente (Liste)")
 def list_gifts(
     kunden_nr: str,
     year: Optional[int] = None,
@@ -47,7 +47,7 @@ def list_gifts(
     return CrmGiftService(db, tenant_id).list(kunden_nr, year=year, contact_id=contactId)
 
 
-@router.post("/customers/{kunden_nr}/gifts", summary="Präsent anlegen")
+@router.post("/customers/{kunden_nr}/gifts", response_model=dict[str, Any], summary="Präsent anlegen")
 def create_gift(
     kunden_nr: str,
     body: GiftIn,
@@ -57,7 +57,7 @@ def create_gift(
     return CrmGiftService(db, tenant_id).create(kunden_nr, body.model_dump())
 
 
-@router.put("/gifts/{gift_id}", summary="Präsent bearbeiten")
+@router.put("/gifts/{gift_id}", response_model=dict[str, Any], summary="Präsent bearbeiten")
 def update_gift(
     gift_id: str,
     body: GiftIn,
@@ -67,7 +67,7 @@ def update_gift(
     return CrmGiftService(db, tenant_id).update(gift_id, body.model_dump())
 
 
-@router.delete("/gifts/{gift_id}", summary="Präsent löschen")
+@router.delete("/gifts/{gift_id}", response_model=dict[str, Any], summary="Präsent löschen")
 def delete_gift(
     gift_id: str,
     db: Session = Depends(get_db),

@@ -29,7 +29,7 @@ class DismissIn(BaseModel):
     resolvedBy: Optional[str] = None
 
 
-@router.get("/capture-inbox", summary="Klärfälle (nicht zugeordnete Auto-Captures) listen")
+@router.get("/capture-inbox", response_model=dict[str, Any], summary="Klärfälle (nicht zugeordnete Auto-Captures) listen")
 def list_inbox(
     status: str = Query("offen", description="offen | zugeordnet | verworfen | alle"),
     limit: int = Query(200, ge=1, le=1000),
@@ -40,7 +40,7 @@ def list_inbox(
     return {"items": svc.list(status=status, limit=limit), "open": svc.count_open()}
 
 
-@router.post("/capture-inbox/{inbox_id}/assign", summary="Klärfall einem Kunden zuordnen")
+@router.post("/capture-inbox/{inbox_id}/assign", response_model=dict[str, Any], summary="Klärfall einem Kunden zuordnen")
 def assign_inbox(
     inbox_id: str,
     body: AssignIn,
@@ -52,7 +52,7 @@ def assign_inbox(
     )
 
 
-@router.post("/capture-inbox/{inbox_id}/dismiss", summary="Klärfall verwerfen")
+@router.post("/capture-inbox/{inbox_id}/dismiss", response_model=dict[str, Any], summary="Klärfall verwerfen")
 def dismiss_inbox(
     inbox_id: str,
     body: DismissIn,

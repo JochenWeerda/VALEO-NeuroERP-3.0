@@ -20,7 +20,7 @@ from app.services.crm_merge_service import CrmMergeService, MergeError
 router = APIRouter(prefix="/crm", tags=["crm", "dubletten"])
 
 
-@router.get("/duplicates", summary="Kunden-Dubletten-Cluster erkennen")
+@router.get("/duplicates", response_model=dict[str, Any], summary="Kunden-Dubletten-Cluster erkennen")
 def duplicates(
     limit: int = Query(100, ge=1, le=500),
     db: Session = Depends(get_db),
@@ -35,7 +35,7 @@ class MergeIn(BaseModel):
     bediener: str | None = None
 
 
-@router.post("/duplicates/merge-preview", summary="Zusammenführung vorschauen (read-only)")
+@router.post("/duplicates/merge-preview", response_model=dict[str, Any], summary="Zusammenführung vorschauen (read-only)")
 def merge_preview(
     body: MergeIn,
     db: Session = Depends(get_db),
@@ -47,7 +47,7 @@ def merge_preview(
         raise HTTPException(status_code=422, detail=str(exc))
 
 
-@router.post("/duplicates/merge", summary="Dublette in Master zusammenführen")
+@router.post("/duplicates/merge", response_model=dict[str, Any], summary="Dublette in Master zusammenführen")
 def merge(
     body: MergeIn,
     db: Session = Depends(get_db),

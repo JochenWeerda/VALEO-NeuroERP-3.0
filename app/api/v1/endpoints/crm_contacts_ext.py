@@ -29,7 +29,7 @@ class StatusOut(BaseModel):
     status: str = "success"
 
 
-@router.get("/contacts/{contact_id}/marketing-prefs", summary="Werbe-/Marketingpräferenzen")
+@router.get("/contacts/{contact_id}/marketing-prefs", response_model=dict[str, Any], summary="Werbe-/Marketingpräferenzen")
 def list_marketing(
     contact_id: str,
     db: Session = Depends(get_db),
@@ -38,7 +38,7 @@ def list_marketing(
     return CrmContactExtService(db, tenant_id).list_marketing(contact_id)
 
 
-@router.put("/contacts/{contact_id}/marketing-prefs", summary="Werbepräferenz setzen")
+@router.put("/contacts/{contact_id}/marketing-prefs", response_model=dict[str, Any], summary="Werbepräferenz setzen")
 def set_marketing(
     contact_id: str,
     body: MarketingPrefIn,
@@ -51,7 +51,7 @@ def set_marketing(
     )
 
 
-@router.post("/contacts/{contact_id}/pseudonymize", summary="Ansprechpartner DSGVO-pseudonymisieren")
+@router.post("/contacts/{contact_id}/pseudonymize", response_model=dict[str, Any], summary="Ansprechpartner DSGVO-pseudonymisieren")
 def pseudonymize(
     contact_id: str,
     db: Session = Depends(get_db),

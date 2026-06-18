@@ -70,7 +70,7 @@ def _row(r) -> dict:
     return d
 
 
-@router.post("/incoming", summary="Eingehenden Anruf melden (TAPI-Bridge)")
+@router.post("/incoming", response_model=dict[str, Any], summary="Eingehenden Anruf melden (TAPI-Bridge)")
 def incoming(body: IncomingIn, db: Session = Depends(get_db), tenant_id: str = Depends(get_tenant_id)) -> dict[str, Any]:
     kunde = _resolve_kunde(db, body.caller)
     new_id = str(uuid.uuid4())
@@ -90,7 +90,7 @@ def incoming(body: IncomingIn, db: Session = Depends(get_db), tenant_id: str = D
     return _row(r)
 
 
-@router.get("/pending", summary="Offene (nicht quittierte) Anrufe")
+@router.get("/pending", response_model=dict[str, Any], summary="Offene (nicht quittierte) Anrufe")
 def pending(db: Session = Depends(get_db), tenant_id: str = Depends(get_tenant_id)) -> list[dict[str, Any]]:
     # reviewed-safe: _COLS is a module-owned constant; tenant data is bound.
     rows = db.execute(
@@ -100,7 +100,7 @@ def pending(db: Session = Depends(get_db), tenant_id: str = Depends(get_tenant_i
     return [_row(r) for r in rows]
 
 
-@router.post("/{call_id}/ack", summary="Anruf quittieren")
+@router.post("/{call_id}/ack", response_model=dict[str, Any], summary="Anruf quittieren")
 def ack(call_id: str, db: Session = Depends(get_db), tenant_id: str = Depends(get_tenant_id)) -> dict[str, Any]:
     db.execute(
         text("UPDATE public.tapi_calls SET acked = TRUE, status = 'erledigt', updated_at = now() WHERE id = :id AND tenant_id = :t"),
@@ -120,7 +120,7 @@ class DialIn(BaseModel):
     caller: Optional[str] = None
 
 
-@router.post("/dial", summary="Ausgehende Wahl anfordern (Click-to-Dial)")
+@router.post("/dial", response_model=dict[str, Any], summary="Ausgehende Wahl anfordern (Click-to-Dial)")
 def dial(body: DialIn, db: Session = Depends(get_db), tenant_id: str = Depends(get_tenant_id)) -> dict[str, Any]:
     if len(_norm_phone(body.called)) < 3:
         raise HTTPException(status_code=422, detail="Ungueltige Zielrufnummer")
@@ -150,7 +150,7 @@ def dial(body: DialIn, db: Session = Depends(get_db), tenant_id: str = Depends(g
     return _row(r)
 
 
-@router.get("/dial/pending", summary="Offene Wahl-Anforderungen (lokale Bridge)")
+@router.get("/dial/pending", response_model=dict[str, Any], summary="Offene Wahl-Anforderungen (lokale Bridge)")
 def dial_pending(db: Session = Depends(get_db), tenant_id: str = Depends(get_tenant_id)) -> list[dict[str, Any]]:
     rows = db.execute(
         text(
@@ -163,7 +163,7 @@ def dial_pending(db: Session = Depends(get_db), tenant_id: str = Depends(get_ten
     return [_row(r) for r in rows]
 
 
-@router.post("/dial/{call_id}/done", summary="Wahl ausgefuehrt quittieren")
+@router.post("/dial/{call_id}/done", response_model=dict[str, Any], summary="Wahl ausgefuehrt quittieren")
 def dial_done(call_id: str, status: str = "dialed", db: Session = Depends(get_db), tenant_id: str = Depends(get_tenant_id)) -> dict[str, Any]:
     db.execute(
         text("UPDATE public.tapi_calls SET status = :s, acked = TRUE, updated_at = now() WHERE id = :id AND tenant_id = :t"),

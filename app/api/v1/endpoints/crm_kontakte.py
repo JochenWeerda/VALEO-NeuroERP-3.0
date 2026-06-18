@@ -27,7 +27,7 @@ class KontaktIn(BaseModel):
     verweis: Optional[str] = None
 
 
-@router.get("/wiedervorlagen", summary="Offene Wiedervorlagen")
+@router.get("/wiedervorlagen", response_model=dict[str, Any], summary="Offene Wiedervorlagen")
 def wiedervorlagen(
     tage: int = Query(14, ge=0, le=365),
     db: Session = Depends(get_db),
@@ -36,7 +36,7 @@ def wiedervorlagen(
     return CrmKontaktService(db, tenant_id).wiedervorlagen_offen(tage)
 
 
-@router.get("/{kunden_nr}", summary="Kontakthistorie eines Kunden")
+@router.get("/{kunden_nr}", response_model=dict[str, Any], summary="Kontakthistorie eines Kunden")
 def list_kontakte(
     kunden_nr: str,
     db: Session = Depends(get_db),
@@ -45,7 +45,7 @@ def list_kontakte(
     return CrmKontaktService(db, tenant_id).list_by_kunde(kunden_nr)
 
 
-@router.post("", summary="Kontakt anlegen")
+@router.post("", response_model=dict[str, Any], summary="Kontakt anlegen")
 def create_kontakt(
     body: KontaktIn,
     db: Session = Depends(get_db),
@@ -58,7 +58,7 @@ class ErledigtIn(BaseModel):
     ergebnis: Optional[str] = None  # Serviceabschluss-Ergebnis (optional)
 
 
-@router.post("/{kontakt_id}/erledigt", summary="Wiedervorlage erledigen (mit optionalem Ergebnis)")
+@router.post("/{kontakt_id}/erledigt", response_model=dict[str, Any], summary="Wiedervorlage erledigen (mit optionalem Ergebnis)")
 def erledigt(
     kontakt_id: str,
     body: ErledigtIn | None = None,

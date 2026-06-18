@@ -19,7 +19,7 @@ from app.services.contract_engagement_service import ContractEngagementService, 
 router = APIRouter(prefix="/contracts", tags=["contracts", "kontrakte", "agrar"])
 
 
-@router.get("/engagement", summary="Engagement: offene Menge je Artikel (Netto) und je Partei")
+@router.get("/engagement", response_model=dict[str, Any], summary="Engagement: offene Menge je Artikel (Netto) und je Partei")
 def engagement(
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
@@ -27,7 +27,7 @@ def engagement(
     return ContractEngagementService(db, tenant_id).engagement()
 
 
-@router.get("/dunning/candidates", summary="Mahnkandidaten: überfällige, untererfüllte Kontrakte")
+@router.get("/dunning/candidates", response_model=dict[str, Any], summary="Mahnkandidaten: überfällige, untererfüllte Kontrakte")
 def dunning_candidates(
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
@@ -35,7 +35,7 @@ def dunning_candidates(
     return {"items": ContractEngagementService(db, tenant_id).dunning_candidates()}
 
 
-@router.get("/dunning/list", summary="Mahnungen eines Kontrakts")
+@router.get("/dunning/list", response_model=dict[str, Any], summary="Mahnungen eines Kontrakts")
 def list_reminders(
     kontrakt: str = Query(..., description="Kontraktnummer oder -ID"),
     db: Session = Depends(get_db),
@@ -51,7 +51,7 @@ class ReminderIn(BaseModel):
     bediener: Optional[str] = None
 
 
-@router.post("/dunning", summary="Kontraktmahnung erfassen (append-only)")
+@router.post("/dunning", response_model=dict[str, Any], summary="Kontraktmahnung erfassen (append-only)")
 def create_reminder(
     body: ReminderIn,
     db: Session = Depends(get_db),
