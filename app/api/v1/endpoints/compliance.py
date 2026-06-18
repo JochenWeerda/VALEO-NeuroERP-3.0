@@ -906,7 +906,7 @@ async def list_artikel_sperren(
         params["sperrgrund"] = sperrgrund
 
     try:
-        rows = db.execute(text(f"""  # nosec S608 — reviewed-safe: where fragments are code-controlled, values parameterized
+        rows = db.execute(text(f"""  -- nosec S608 reviewed-safe: dynamic fragments are code-controlled and values parameterized
             SELECT id, artikel_id, sperrgrund, gesperrt_bis, bemerkung, gesperrt_am
               FROM domain_shared.artikel_sperren
              WHERE {where}
