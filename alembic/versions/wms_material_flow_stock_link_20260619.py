@@ -17,6 +17,8 @@ depends_on = None
 
 
 def upgrade() -> None:
+    op.execute("CREATE SCHEMA IF NOT EXISTS domain_procurement")
+
     # ── WMS-FLOW-001: Ist-Bestand je Silozelle ────────────────────────────
     op.execute("""
         ALTER TABLE domain_inventory.silo_cells
@@ -26,12 +28,12 @@ def upgrade() -> None:
     # ── KORE-BAB-001: Kostenumlagen-Tabelle ──────────────────────────────
     op.execute("""
         CREATE TABLE IF NOT EXISTS domain_finance.kostenstellen_umlagen (
-            id                  UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-            tenant_id           UUID NOT NULL,
+            id                  TEXT PRIMARY KEY DEFAULT gen_random_uuid()::text,
+            tenant_id           VARCHAR(36) NOT NULL,
             periode             TEXT NOT NULL,            -- YYYY-MM
-            von_kostenstelle_id UUID NOT NULL
+            von_kostenstelle_id VARCHAR(36) NOT NULL
                 REFERENCES domain_finance.kostenstellen(id),
-            nach_kostenstelle_id UUID NOT NULL
+            nach_kostenstelle_id VARCHAR(36) NOT NULL
                 REFERENCES domain_finance.kostenstellen(id),
             umlage_art          TEXT NOT NULL
                 CHECK (umlage_art IN ('PROZENT','BETRAG','MENGE')),
@@ -58,11 +60,11 @@ def upgrade() -> None:
     # ── PROC-3WM-001: Matching-Ergebnis-Tabelle ──────────────────────────
     op.execute("""
         CREATE TABLE IF NOT EXISTS domain_procurement.procurement_match_results (
-            id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-            tenant_id       UUID NOT NULL,
-            po_id           UUID,
-            gr_id           UUID,
-            ap_invoice_id   UUID,
+            id              TEXT PRIMARY KEY DEFAULT gen_random_uuid()::text,
+            tenant_id       TEXT NOT NULL,
+            po_id           TEXT,
+            gr_id           TEXT,
+            ap_invoice_id   TEXT,
             match_status    TEXT NOT NULL
                 CHECK (match_status IN ('MATCH_OK','MISMATCH','PENDING','CANCELLED')),
             qty_po          NUMERIC(16,3),
