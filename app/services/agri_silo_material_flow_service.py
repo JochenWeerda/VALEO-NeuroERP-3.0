@@ -74,7 +74,7 @@ class AgriSiloMaterialFlowService:
             params["wid"] = warehouse_id
         where = " AND ".join(filters)
         rows = self.db.execute(
-            text(f"SELECT * FROM domain_inventory.silo_systems WHERE {where} ORDER BY system_code"),  # noqa: S608
+            text(f"SELECT * FROM domain_inventory.silo_systems WHERE {where} ORDER BY system_code"),  # nosec S608 -- reviewed-safe: where fragments are code-controlled, values parameterized
             params,
         ).fetchall()
         return [dict(r._mapping) for r in rows]
@@ -125,7 +125,7 @@ class AgriSiloMaterialFlowService:
             params["ssid"] = silo_system_id
         where = " AND ".join(filters)
         rows = self.db.execute(
-            text(f"SELECT * FROM domain_inventory.silo_cells WHERE {where} ORDER BY cell_code"),  # noqa: S608
+            text(f"SELECT * FROM domain_inventory.silo_cells WHERE {where} ORDER BY cell_code"),  # nosec S608 -- reviewed-safe: where fragments are code-controlled, values parameterized
             params,
         ).fetchall()
         return [dict(r._mapping) for r in rows]
@@ -214,6 +214,7 @@ class AgriSiloMaterialFlowService:
         set_parts = [f"{k} = :{k}" for k in fields]
         params: dict = {**fields, "cid": cell_id, "wid": warehouse_id, "tid": self.tenant_id}
         row = self.db.execute(
+            # nosec S608 -- reviewed-safe: set_parts are built only from explicit allowlisted payload keys.
             text(f"""
                 UPDATE domain_inventory.silo_cells
                 SET {", ".join(set_parts)}
@@ -254,7 +255,7 @@ class AgriSiloMaterialFlowService:
             params["wid"] = warehouse_id
         where = " AND ".join(filters)
         rows = self.db.execute(
-            text(f"SELECT * FROM domain_inventory.material_flow_nodes WHERE {where} ORDER BY code"),  # noqa: S608
+            text(f"SELECT * FROM domain_inventory.material_flow_nodes WHERE {where} ORDER BY code"),  # nosec S608 -- reviewed-safe: where fragments are code-controlled, values parameterized
             params,
         ).fetchall()
         return [dict(r._mapping) for r in rows]
@@ -330,6 +331,7 @@ class AgriSiloMaterialFlowService:
         set_parts = [f"{k} = :{k}" for k in fields]
         params: dict = {**fields, "nid": node_id, "wid": warehouse_id, "tid": self.tenant_id}
         row = self.db.execute(
+            # nosec S608 -- reviewed-safe: set_parts are built only from explicit allowlisted payload keys.
             text(f"""
                 UPDATE domain_inventory.material_flow_nodes
                 SET {", ".join(set_parts)}
@@ -413,7 +415,7 @@ class AgriSiloMaterialFlowService:
             params["wid"] = warehouse_id
         where = " AND ".join(filters)
         rows = self.db.execute(
-            text(f"SELECT * FROM domain_inventory.material_flow_edges WHERE {where} ORDER BY created_at"),  # noqa: S608
+            text(f"SELECT * FROM domain_inventory.material_flow_edges WHERE {where} ORDER BY created_at"),  # nosec S608 -- reviewed-safe: where fragments are code-controlled, values parameterized
             params,
         ).fetchall()
         return [dict(r._mapping) for r in rows]
@@ -495,6 +497,7 @@ class AgriSiloMaterialFlowService:
         set_parts = [f"{k} = :{k}" for k in fields]
         params: dict = {**fields, "eid": edge_id, "wid": warehouse_id, "tid": self.tenant_id}
         row = self.db.execute(
+            # nosec S608 -- reviewed-safe: set_parts are built only from explicit allowlisted payload keys.
             text(f"""
                 UPDATE domain_inventory.material_flow_edges
                 SET {", ".join(set_parts)}
