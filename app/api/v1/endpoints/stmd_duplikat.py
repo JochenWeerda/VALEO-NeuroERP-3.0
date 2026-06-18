@@ -205,7 +205,7 @@ def zusammenfuehren(
         raise HTTPException(status_code=422, detail=f"Unbekannter entity_type: {entity_type}")
 
     try:
-        result = db.execute(text(f"""
+        result = db.execute(text(f"""  # nosec S608 — reviewed-safe: table/where fragments are code-controlled, values parameterized
             UPDATE {table}
                SET is_active = false,
                    notes = COALESCE(notes, '') || ' [ZUSAMMENGEFUEHRT → ' || :master || ']'

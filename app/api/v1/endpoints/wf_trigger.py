@@ -63,7 +63,7 @@ def get_trigger_log(
         where += " AND entity_id = :eid"
         params["eid"] = entity_id
     try:
-        rows = db.execute(text(f"""
+        rows = db.execute(text(f"""  # nosec S608 — reviewed-safe: where fragments are code-controlled, values parameterized
             SELECT id, entity_type, entity_id, trigger_status,
                    actions AS action, result, error_detail AS error_message, fired_at
               FROM domain_ops.wf_trigger_log

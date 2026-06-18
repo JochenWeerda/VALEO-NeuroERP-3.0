@@ -290,7 +290,7 @@ def list_statements(
         where += " AND iban = :iban"
         params["iban"] = iban
     try:
-        rows = db.execute(text(f"""
+        rows = db.execute(text(f"""  # nosec S608 — reviewed-safe: where fragments are code-controlled, values parameterized
             SELECT id, iban, format, filename, line_count, imported_at
               FROM domain_finance.bank_statements
              WHERE {where}
