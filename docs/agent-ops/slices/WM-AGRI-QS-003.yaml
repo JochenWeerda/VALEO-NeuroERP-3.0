@@ -1,0 +1,33 @@
+slice_id: WM-AGRI-QS-003
+title: QS-Freigabe und Audit fuer Silo-Lots
+owner: Codex
+status: reserved
+reserved_at: 2026-06-18
+coordination: >-
+  Additiver QS-/Compliance-Slice neben WM-AGRI-LOT-LINK. Keine Aenderung an
+  Cursor-Dateien fuer Legacy-Silo-Sync, Materialfluss-UI oder LOT-LINK-Migration.
+goal: >-
+  QS-Wechsel fuer Silo-Lots revisionsfaehig machen und Lager-/Materialflussstatus
+  konsistent rueckkoppeln.
+scope:
+  - Separater QS-Workflow-Service fuer Silo-Lots
+  - API-Kontrakt fuer Labor-/Lager-/Produktionsentscheidungen
+  - Pflichtgrund, Bediener, Proben-/Analyse-/Dokumentenbezug
+  - GMP+/VLOG-Nachweise im Audit-Payload
+  - Update von silo_lots.status und verknuepften silo_cells.qs_status
+  - Supply-Chain-Event als append-only Audit
+file_ownership:
+  - app/services/agri_qs_workflow_service.py
+  - app/api/v1/endpoints/agri_qs_workflow.py
+  - app/api/v1/api.py
+  - tests/test_agri_qs_workflow.py
+  - docs/agent-ops/slices/WM-AGRI-QS-003.yaml
+  - docs/project-context/open-gaps-and-known-issues.md
+  - docs/workflows/wm-agri-silo-supply-chain-integration-2026-06-13.md
+acceptance_criteria:
+  - Tenant-Scope verhindert Cross-Tenant-QS-Wechsel.
+  - Nur erlaubte Zielstatus werden akzeptiert.
+  - Grund und Bediener sind Pflichtfelder.
+  - Event-Payload enthaelt Labor-/Analyse-/Dokument-/GMP+/VLOG-Kontext.
+  - Verknuepfte Silozellen erhalten den passenden qs_status.
+  - Tests und Doku sind nachgezogen.
