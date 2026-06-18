@@ -651,3 +651,191 @@ class AgriSiloMaterialFlowService:
                 "flush_required": flush_required,
             }
         )
+
+    # ── WMS-FLOW-001: Materialtransfer mit Lagerbuchung ──────────────────
+
+    def book_material_transfer(
+        self,
+        *,
+        warehouse_id: str,
+        from_cell_id: str,
+        to_cell_id: str,
+        quantity_kg: Decimal,
+        article_id: str,
+        lot_id: str | None = None,
+        booked_by: str = "system",
+        reference: str | None = None,
+    ) -> dict:
+        """Bucht einen Materialtransfer zwischen zwei Silozellen.
+
+        - Validiert die Route (validate_route)
+        - Prüft ausreichend Bestand in der Quellzelle
+        - Schreibt je eine 'out'- und 'in'-Bewegung in inventory_stock_movements
+        - Aktualisiert current_stock_kg und current_material_id beider Zellen
+        - Alles in einer Transaktion (kein partial-commit)
+        """
+        if quantity_kg <= Decimal("0"):
+            raise ValueError("quantity_kg muss positiv sein")
+
+        # 1. Zellen laden
+        from_cell = self.db.execute(
+            text("SELECT * FROM domain_inventory.silo_cells WHERE id = :id AND tenant_id = :tid"),
+            {"id": from_cell_id, "tid": self.tenant_id},
+        ).fetchone()
+        to_cell = self.db.execute(
+            text("SELECT * FROM domain_inventory.silo_cells WHERE id = :id AND tenant_id = :tid"),
+            {"id": to_cell_id, "tid": self.tenant_id},
+        ).fetchone()
+        if not from_cell or not to_cell:
+            raise ValueError("Quell- oder Zielzelle nicht gefunden")
+
+        from_cell_d = dict(from_cell._mapping)
+        to_cell_d = dict(to_cell._mapping)
+
+        # 2. Bestand prüfen
+        from_stock = Decimal(str(from_cell_d.get("current_stock_kg") or "0"))
+        if from_stock < quantity_kg:
+            raise ValueError(
+                f"Unzureichender Bestand in {from_cell_d.get('cell_code')}: "
+                f"{from_stock} kg vorhanden, {quantity_kg} kg angefordert"
+            )
+
+        # 3. Route validieren (Kontaminationsschutz)
+        from_node = self.db.execute(
+            text("""
+                SELECT id FROM domain_inventory.material_flow_nodes
+                WHERE ref_type = 'silo_cell' AND ref_id = :cid AND tenant_id = :tid
+            """),
+            {"cid": from_cell_id, "tid": self.tenant_id},
+        ).fetchone()
+        to_node = self.db.execute(
+            text("""
+                SELECT id FROM domain_inventory.material_flow_nodes
+                WHERE ref_type = 'silo_cell' AND ref_id = :cid AND tenant_id = :tid
+            """),
+            {"cid": to_cell_id, "tid": self.tenant_id},
+        ).fetchone()
+
+        if from_node and to_node:
+            route = self.validate_route(
+                warehouse_id=warehouse_id,
+                from_node_id=str(from_node.id),
+                to_node_id=str(to_node.id),
+                material_id=article_id,
+                previous_material_id=str(to_cell_d.get("current_material_id") or ""),
+            )
+            if not route["ok"]:
+                raise ValueError(f"Route ungültig: {route.get('reason', 'unbekannt')}")
+            warnings = route.get("warnings", [])
+        else:
+            warnings = []
+
+        # 4. Lagerbewegungen schreiben (out + in)
+        from app.core.uuid7 import uuid7
+        from datetime import date
+        today = date.today()
+        ref = reference or f"TRANSF-{from_cell_d['cell_code']}-{to_cell_d['cell_code']}"
+
+        move_out_id = str(uuid7())
+        move_in_id = str(uuid7())
+
+        self.db.execute(
+            text("""
+                INSERT INTO domain_inventory.inventory_stock_movements
+                    (id, article_id, warehouse_id, movement_type, quantity, unit, charge,
+                     warehouse_location, reference_number, movement_date, movement_time,
+                     notes, booking_user, auto_created, ownership_type, tenant_id, created_at)
+                VALUES (:id, :art, :wid, 'out', :qty, 'kg', :lot,
+                        :loc, :ref, :dt, NOW()::time,
+                        :notes, :user, false, 'owned', :tid, NOW())
+            """),
+            {
+                "id": move_out_id, "art": article_id, "wid": warehouse_id,
+                "qty": float(quantity_kg), "lot": lot_id,
+                "loc": str(from_cell_d.get("cell_code")),
+                "ref": ref, "dt": today,
+                "notes": f"Transfer aus {from_cell_d.get('cell_code')} nach {to_cell_d.get('cell_code')}",
+                "user": booked_by, "tid": self.tenant_id,
+            },
+        )
+        self.db.execute(
+            text("""
+                INSERT INTO domain_inventory.inventory_stock_movements
+                    (id, article_id, warehouse_id, movement_type, quantity, unit, charge,
+                     warehouse_location, reference_number, movement_date, movement_time,
+                     notes, booking_user, auto_created, ownership_type, tenant_id, created_at)
+                VALUES (:id, :art, :wid, 'in', :qty, 'kg', :lot,
+                        :loc, :ref, :dt, NOW()::time,
+                        :notes, :user, false, 'owned', :tid, NOW())
+            """),
+            {
+                "id": move_in_id, "art": article_id, "wid": warehouse_id,
+                "qty": float(quantity_kg), "lot": lot_id,
+                "loc": str(to_cell_d.get("cell_code")),
+                "ref": ref, "dt": today,
+                "notes": f"Transfer aus {from_cell_d.get('cell_code')} nach {to_cell_d.get('cell_code')}",
+                "user": booked_by, "tid": self.tenant_id,
+            },
+        )
+
+        # 5. Silozell-Bestände aktualisieren
+        new_from_stock = from_stock - quantity_kg
+        to_stock = Decimal(str(to_cell_d.get("current_stock_kg") or "0"))
+        new_to_stock = to_stock + quantity_kg
+
+        self.db.execute(
+            text("""
+                UPDATE domain_inventory.silo_cells
+                SET current_stock_kg = :qty,
+                    current_material_id = CASE WHEN :qty = 0 THEN NULL ELSE current_material_id END,
+                    current_lot_id = CASE WHEN :qty = 0 THEN NULL ELSE current_lot_id END,
+                    updated_at = NOW()
+                WHERE id = :id AND tenant_id = :tid
+            """),
+            {"qty": float(new_from_stock), "id": from_cell_id, "tid": self.tenant_id},
+        )
+        self.db.execute(
+            text("""
+                UPDATE domain_inventory.silo_cells
+                SET current_stock_kg = :qty,
+                    current_material_id = :mat,
+                    current_lot_id = :lot,
+                    updated_at = NOW()
+                WHERE id = :id AND tenant_id = :tid
+            """),
+            {
+                "qty": float(new_to_stock), "mat": article_id, "lot": lot_id,
+                "id": to_cell_id, "tid": self.tenant_id,
+            },
+        )
+        self.db.commit()
+
+        self._emit_material_flow_hooks(
+            sc_event_type="material_transfer_booked",
+            outbox_event_type="inventory.material_flow.transfer_booked",
+            aggregate_id=warehouse_id,
+            ref_type="silo_transfer",
+            ref_id=move_out_id,
+            ref_label=ref,
+            status_from=str(from_cell_d.get("cell_code")),
+            status_to=str(to_cell_d.get("cell_code")),
+            payload={
+                "from_cell_id": from_cell_id,
+                "to_cell_id": to_cell_id,
+                "quantity_kg": float(quantity_kg),
+                "article_id": article_id,
+                "lot_id": lot_id,
+                "move_out_id": move_out_id,
+                "move_in_id": move_in_id,
+            },
+        )
+
+        return {
+            "ok": True,
+            "move_out_id": move_out_id,
+            "move_in_id": move_in_id,
+            "from_cell_stock_kg": float(new_from_stock),
+            "to_cell_stock_kg": float(new_to_stock),
+            "warnings": warnings,
+            "reference": ref,
+        }

@@ -148,3 +148,44 @@ export async function deleteBuchung(id: string): Promise<void> {
 export async function getKostenstellenReport(von: string, bis: string): Promise<KostenstellenReport> {
   return (await apiClient.get<KostenstellenReport>(`/api/v1/kostenrechnung/report?von=${von}&bis=${bis}`)).data
 }
+
+// ── KORE-BAB-001: Betriebsabrechnungsbogen ────────────────────────────────────
+
+export type UmlageArt = 'PROZENT' | 'BETRAG' | 'MENGE'
+
+export type UmlageCreate = {
+  von_kostenstelle_id: string
+  nach_kostenstelle_id: string
+  umlage_art: UmlageArt
+  umlage_wert: number
+  umlage_basis?: string
+}
+
+export type BABZeile = {
+  kostenstelle_id: string
+  nummer: string
+  bezeichnung: string
+  primaerkosten_eur: number
+  umlage_eingang_eur: number
+  umlage_ausgang_eur: number
+  gesamtkosten_eur: number
+  budget_eur: number
+  abweichung_eur: number
+  abweichung_pct: number
+}
+
+export type BABReport = {
+  periode: string
+  zeilen: BABZeile[]
+  gesamt_primaer_eur: number
+  gesamt_umlage_eur: number
+  gesamt_kosten_eur: number
+}
+
+export async function getBAB(periode: string): Promise<BABReport> {
+  return (await apiClient.get<BABReport>(`/api/v1/kostenrechnung/bab?periode=${periode}`)).data
+}
+
+export async function createUmlage(periode: string, payload: UmlageCreate): Promise<{ id: string; umlagebetrag_eur: number }> {
+  return (await apiClient.post<{ id: string; umlagebetrag_eur: number }>(`/api/v1/kostenrechnung/umlagen?periode=${periode}`, payload)).data
+}

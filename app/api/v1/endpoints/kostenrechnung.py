@@ -458,3 +458,198 @@ def get_report(
         gesamt_offen=gesamt_budget - gesamt_verbraucht,
         auswertungen=auswertungen,
     )
+
+
+# ── KORE-BAB-001: Betriebsabrechnungsbogen + Kostenumlagen ───────────────────
+
+class UmlageCreate(BaseModel):
+    von_kostenstelle_id: str
+    nach_kostenstelle_id: str
+    umlage_art: str = Field(..., pattern="^(PROZENT|BETRAG|MENGE)$")
+    umlage_wert: Decimal = Field(..., gt=0)
+    umlage_basis: Optional[str] = None
+
+
+class UmlageOut(BaseModel):
+    id: str
+    periode: str
+    von_kostenstelle_id: str
+    nach_kostenstelle_id: str
+    umlage_art: str
+    umlage_wert: Decimal
+    umlage_basis: Optional[str]
+    umlagebetrag_eur: Optional[Decimal]
+
+
+class BABZeile(BaseModel):
+    kostenstelle_id: str
+    nummer: str
+    bezeichnung: str
+    primaerkosten_eur: Decimal          # direkte Buchungen
+    umlage_eingang_eur: Decimal         # empfangene Umlagen
+    umlage_ausgang_eur: Decimal         # weitergegebene Umlagen
+    gesamtkosten_eur: Decimal           # primär + eingang - ausgang
+    budget_eur: Decimal
+    abweichung_eur: Decimal             # budget - gesamt
+    abweichung_pct: float
+
+
+class BABReport(BaseModel):
+    periode: str
+    zeilen: list[BABZeile]
+    gesamt_primaer_eur: Decimal
+    gesamt_umlage_eur: Decimal
+    gesamt_kosten_eur: Decimal
+
+
+@router.post("/umlagen", summary="Kostenumlage anlegen für Periode")
+def create_umlage(
+    periode: str = Query(..., example="2026-06"),
+    payload: UmlageCreate = ...,
+    tenant_id: str = Depends(get_tenant_id),
+    db=Depends(get_db),
+):
+    """Legt eine Kostenumlage von einer Kostenstelle zu einer anderen für eine Periode an."""
+    # Bestimme Umlagebetrag je nach Art
+    if payload.umlage_art == "BETRAG":
+        umlagebetrag = payload.umlage_wert
+    elif payload.umlage_art == "PROZENT":
+        # Primärkosten der Quell-KST berechnen
+        period_start = f"{periode}-01"
+        period_end = f"{periode}-31"
+        row = db.execute(
+            text("""
+                SELECT COALESCE(SUM(betrag_eur), 0) AS summe
+                FROM domain_finance.kostenstellen_buchungen
+                WHERE tenant_id = :tid AND kostenstelle_id = :kst
+                  AND buchungsdatum BETWEEN :von AND :bis
+            """),
+            {"tid": tenant_id, "kst": payload.von_kostenstelle_id,
+             "von": period_start, "bis": period_end},
+        ).fetchone()
+        umlagebetrag = Decimal(str(row[0])) * payload.umlage_wert / Decimal("100")
+    else:  # MENGE — Wert ist Kostensatz × Menge; Menge = umlage_wert
+        umlagebetrag = payload.umlage_wert  # caller liefert Betrag direkt
+
+    uid = str(uuid7())
+    try:
+        db.execute(
+            text("""
+                INSERT INTO domain_finance.kostenstellen_umlagen
+                    (id, tenant_id, periode, von_kostenstelle_id, nach_kostenstelle_id,
+                     umlage_art, umlage_wert, umlage_basis, umlagebetrag_eur)
+                VALUES (:id, :tid, :per, :von, :nach, :art, :wert, :basis, :betrag)
+            """),
+            {
+                "id": uid, "tid": tenant_id, "per": periode,
+                "von": payload.von_kostenstelle_id,
+                "nach": payload.nach_kostenstelle_id,
+                "art": payload.umlage_art, "wert": float(payload.umlage_wert),
+                "basis": payload.umlage_basis, "betrag": float(umlagebetrag),
+            },
+        )
+        db.commit()
+    except Exception as exc:
+        db.rollback()
+        if "uq_kostenstellen_umlage" in str(exc):
+            raise HTTPException(409, "Umlage für diesen KST-Schlüssel und Periode bereits vorhanden")
+        raise HTTPException(500, str(exc))
+
+    return {"id": uid, "umlagebetrag_eur": float(umlagebetrag), "ok": True}
+
+
+@router.get("/bab", summary="Betriebsabrechnungsbogen (BAB) für eine Periode")
+def get_bab(
+    periode: str = Query(..., example="2026-06"),
+    tenant_id: str = Depends(get_tenant_id),
+    db=Depends(get_db),
+) -> BABReport:
+    """Berechnet den BAB für eine Periode.
+
+    Logik:
+      Primärkosten = Summe Kostenstellen-Buchungen im Monat der Periode
+      Umlage-Eingang = Summe umlagebetrag_eur wo diese KST = nach_kostenstelle_id
+      Umlage-Ausgang = Summe umlagebetrag_eur wo diese KST = von_kostenstelle_id
+      Gesamtkosten = Primär + Eingang - Ausgang
+    """
+    period_start = f"{periode}-01"
+    period_end = f"{periode}-31"
+
+    kostenstellen = db.execute(
+        text("""
+            SELECT id, nummer, bezeichnung, budget, budget_periode
+            FROM domain_finance.kostenstellen
+            WHERE tenant_id = :tid AND aktiv = true
+            ORDER BY nummer
+        """),
+        {"tid": tenant_id},
+    ).mappings().all()
+
+    # Primärkosten
+    pk_rows = db.execute(
+        text("""
+            SELECT kostenstelle_id, SUM(betrag_eur) AS summe
+            FROM domain_finance.kostenstellen_buchungen
+            WHERE tenant_id = :tid AND buchungsdatum BETWEEN :von AND :bis
+            GROUP BY kostenstelle_id
+        """),
+        {"tid": tenant_id, "von": period_start, "bis": period_end},
+    ).mappings().all()
+    pk_map = {r["kostenstelle_id"]: Decimal(str(r["summe"])) for r in pk_rows}
+
+    # Umlagen
+    umlage_rows = db.execute(
+        text("""
+            SELECT von_kostenstelle_id, nach_kostenstelle_id, COALESCE(umlagebetrag_eur, 0) AS betrag
+            FROM domain_finance.kostenstellen_umlagen
+            WHERE tenant_id = :tid AND periode = :per
+        """),
+        {"tid": tenant_id, "per": periode},
+    ).mappings().all()
+
+    umlage_ein: dict[str, Decimal] = {}
+    umlage_aus: dict[str, Decimal] = {}
+    for u in umlage_rows:
+        betrag = Decimal(str(u["betrag"]))
+        umlage_ein[u["nach_kostenstelle_id"]] = umlage_ein.get(u["nach_kostenstelle_id"], Decimal("0")) + betrag
+        umlage_aus[u["von_kostenstelle_id"]] = umlage_aus.get(u["von_kostenstelle_id"], Decimal("0")) + betrag
+
+    zeilen: list[BABZeile] = []
+    gesamt_prim = Decimal("0")
+    gesamt_uml = Decimal("0")
+    gesamt_ges = Decimal("0")
+
+    for k in kostenstellen:
+        kid = str(k["id"])
+        prim = pk_map.get(kid, Decimal("0"))
+        ein = umlage_ein.get(kid, Decimal("0"))
+        aus = umlage_aus.get(kid, Decimal("0"))
+        ges = prim + ein - aus
+        budget = Decimal(str(k["budget"] or 0))
+        abw = budget - ges
+        abw_pct = float(abw / budget * 100) if budget > 0 else 0.0
+
+        gesamt_prim += prim
+        gesamt_uml += ein
+        gesamt_ges += ges
+
+        zeilen.append(BABZeile(
+            kostenstelle_id=kid,
+            nummer=str(k["nummer"]),
+            bezeichnung=str(k["bezeichnung"]),
+            primaerkosten_eur=prim,
+            umlage_eingang_eur=ein,
+            umlage_ausgang_eur=aus,
+            gesamtkosten_eur=ges,
+            budget_eur=budget,
+            abweichung_eur=abw,
+            abweichung_pct=round(abw_pct, 1),
+        ))
+
+    return BABReport(
+        periode=periode,
+        zeilen=zeilen,
+        gesamt_primaer_eur=gesamt_prim,
+        gesamt_umlage_eur=gesamt_uml,
+        gesamt_kosten_eur=gesamt_ges,
+    )
