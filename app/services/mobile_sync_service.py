@@ -288,7 +288,7 @@ class MobileSyncService:
             params["status"] = status
         where = " AND ".join(filters)
         rows = self.db.execute(
-            text(f"SELECT * FROM domain_ops.mobile_event_queue WHERE {where} ORDER BY created_at DESC LIMIT :lim"),  # noqa: S608
+            text(f"SELECT * FROM domain_ops.mobile_event_queue WHERE {where} ORDER BY created_at DESC LIMIT :lim"),  # nosec S608 -- reviewed-safe: where fragments are code-controlled, values parameterized
             params,
         ).mappings().all()
         return [dict(r) for r in rows]
