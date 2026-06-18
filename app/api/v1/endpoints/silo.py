@@ -5,6 +5,7 @@ Silo capacity and virtual lot endpoints (AGRAR-SILO-01).
 from __future__ import annotations
 
 import json
+import logging
 from datetime import datetime, timezone
 from decimal import Decimal
 from typing import Optional
@@ -29,6 +30,17 @@ class SiloOut(BaseSchema):
 
 
 router = APIRouter()
+logger = logging.getLogger(__name__)
+
+
+def _sync_material_flow_cells(db: Session, tenant_id: str, silo_id: str, *, commit: bool = False) -> None:
+    """WM-AGRI-LOT-LINK: Best-effort Sync zu verknüpften Silozellen (Materialfluss-Graph)."""
+    try:
+        from app.services.agri_silo_lot_link_service import AgriSiloLotLinkService
+
+        AgriSiloLotLinkService(db, tenant_id).sync_cells_for_legacy_silo(silo_id, commit=commit)
+    except Exception as exc:
+        logger.warning("WM-AGRI-LOT-LINK sync failed for silo %s: %s", silo_id, exc)
 
 
 def _to_float(value: Decimal | float | int | None) -> float:
@@ -414,6 +426,7 @@ async def create_silo_lot(
         )
     )
     snapshot = _create_snapshot(db, str(silo.id), tenant_id)
+    _sync_material_flow_cells(db, tenant_id, str(silo.id), commit=False)
     db.commit()
     db.refresh(lot)
     db.refresh(snapshot)
@@ -459,6 +472,7 @@ async def update_silo_lot(
         if val is not None:
             setattr(lot, field, val)
     snapshot = _create_snapshot(db, silo_id, tenant_id)
+    _sync_material_flow_cells(db, tenant_id, silo_id, commit=False)
     db.commit()
     db.refresh(lot)
     db.refresh(snapshot)
@@ -482,6 +496,7 @@ async def delete_silo_lot(
         raise HTTPException(status_code=400, detail="Lot hat Restmenge — zuerst ausbuchen")
     lot.status = "closed"
     _create_snapshot(db, silo_id, tenant_id)
+    _sync_material_flow_cells(db, tenant_id, silo_id, commit=False)
     db.commit()
 
 
@@ -524,6 +539,7 @@ async def create_silo_lot_movement(
     )
     db.add(movement)
     snapshot = _create_snapshot(db, silo_id, tenant_id)
+    _sync_material_flow_cells(db, tenant_id, silo_id, commit=False)
     db.commit()
     db.refresh(movement)
     db.refresh(snapshot)

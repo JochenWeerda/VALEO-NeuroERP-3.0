@@ -285,6 +285,7 @@ class SiloCell(Base):
     current_material_id = Column(String(64), nullable=True)
     current_lot_id = Column(String(64), nullable=True)
     current_stock_kg = Column(DECIMAL(16, 3), nullable=False, server_default="0")
+    legacy_silo_id = Column(String(64), nullable=True)
     qs_status = Column(String(32), nullable=False, server_default="frei")
     contamination_risk_class = Column(String(32), nullable=True)
     layout_x = Column(DECIMAL(12, 3), nullable=True)

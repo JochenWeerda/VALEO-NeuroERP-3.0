@@ -209,6 +209,8 @@ class AgriSiloMaterialFlowService:
             fields["layout_x"] = payload.get("layout_x")
         if "layout_y" in payload:
             fields["layout_y"] = payload.get("layout_y")
+        if "legacy_silo_id" in payload:
+            fields["legacy_silo_id"] = payload.get("legacy_silo_id")
         if not fields:
             raise ValueError("Keine Felder zum Aktualisieren")
         set_parts = [f"{k} = :{k}" for k in fields]

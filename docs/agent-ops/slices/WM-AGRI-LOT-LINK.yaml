@@ -1,0 +1,29 @@
+id: WM-AGRI-LOT-LINK
+title: silo_lots (DOM-SUPPLY) ↔ silo_cells (Materialfluss) Bestands-Sync
+owner: Cursor
+status: in_arbeit
+updated: 2026-06-19
+files:
+  - alembic/versions/agri_silo_lot_link_20260619.py
+  - app/services/agri_silo_lot_link_service.py
+  - app/services/agri_silo_material_flow_service.py
+  - app/api/v1/endpoints/agri_silo_material_flow.py
+  - app/api/v1/endpoints/silo.py
+  - app/infrastructure/models/wms_models.py
+  - tests/test_agri_silo_lot_link.py
+  - packages/frontend-web/src/lib/api/agri-material-flow.ts
+  - packages/frontend-web/src/pages/lager/materialfluss.tsx
+  - docs/workflows/wm-agri-silo-supply-chain-integration-2026-06-13.md
+  - docs/agent-ops/active-workboard.md
+acceptance:
+  - silo_cells.legacy_silo_id per Alembic (Mapping zu domain_inventory.silos)
+  - PATCH silo-cells legacy_silo_id + POST silo-cells/{id}/sync-from-lots
+  - Sync aggregiert aktive silo_lots (Summe kg, primaeres Lot) auf current_stock_kg/current_lot_id/current_material_id
+  - Auto-Sync nach create/update/delete/movement auf silo_lots wenn Mapping existiert (silo.py)
+  - Supply-Chain-Event silo_lot_synced + Outbox inventory.material_flow.silo_lot_synced
+  - UI Spalte LOT-LINK auf lager/materialfluss (Mapping speichern + manueller Sync)
+  - Unit-Tests tests/test_agri_silo_lot_link.py gruen
+open_after_lot_link:
+  - Annahme/Waage → Ziel-Silozelle ohne manuelles Mapping (Regel-Engine)
+  - Bidirektionaler Sync Materialtransfer (WMS-FLOW-001) → silo_lots
+  - QS-Status aus Lot-Folgeaktionen auf Silozelle

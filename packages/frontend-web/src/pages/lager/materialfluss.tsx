@@ -40,6 +40,7 @@ import {
   useAgriSiloSystems,
   useCreateAgriFlowEdge,
   useBookAgriMaterialTransfer,
+  useSyncAgriSiloCellFromLots,
   useCreateAgriFlowNode,
   useCreateAgriSiloCell,
   useCreateAgriSiloSystem,
@@ -246,6 +247,54 @@ function SiloCellInventoryEditor(props: {
         onClick={() => void props.onSave(props.cellId, mat, lot)}
       >
         {props.saving ? 'Speichere…' : 'Material / Lot speichern'}
+      </Button>
+    </div>
+  )
+}
+
+function SiloCellLotLinkEditor(props: {
+  cellId: string
+  legacySiloServer: string
+  disabled: boolean
+  savingLegacy: boolean
+  syncing: boolean
+  onSaveLegacy: (cellId: string, legacySiloId: string) => Promise<void>
+  onSync: (cellId: string) => Promise<void>
+}): JSX.Element {
+  const [legacySilo, setLegacySilo] = useState(props.legacySiloServer)
+  useEffect(() => {
+    setLegacySilo(props.legacySiloServer)
+  }, [props.legacySiloServer, props.cellId])
+  return (
+    <div className="flex flex-col gap-1 max-w-[200px]">
+      <Input
+        className="h-7 text-[10px] font-mono"
+        value={legacySilo}
+        onChange={(e) => setLegacySilo(e.target.value)}
+        disabled={props.disabled}
+        placeholder="legacy_silo_id"
+        autoComplete="off"
+        spellCheck={false}
+      />
+      <Button
+        type="button"
+        size="sm"
+        variant="secondary"
+        className="h-7 text-xs w-full"
+        disabled={props.disabled}
+        onClick={() => void props.onSaveLegacy(props.cellId, legacySilo)}
+      >
+        {props.savingLegacy ? 'Speichere…' : 'Legacy-Silo speichern'}
+      </Button>
+      <Button
+        type="button"
+        size="sm"
+        variant="outline"
+        className="h-7 text-xs w-full"
+        disabled={props.disabled || props.syncing}
+        onClick={() => void props.onSync(props.cellId)}
+      >
+        {props.syncing ? 'Sync…' : 'Aus silo_lots sync'}
       </Button>
     </div>
   )
@@ -503,6 +552,7 @@ export default function MaterialflussPage(): JSX.Element {
   const createFlowNode = useCreateAgriFlowNode()
   const createFlowEdge = useCreateAgriFlowEdge()
   const bookTransfer = useBookAgriMaterialTransfer()
+  const syncSiloCellFromLots = useSyncAgriSiloCellFromLots()
 
   const [newSysCode, setNewSysCode] = useState('')
   const [newSysName, setNewSysName] = useState('')
@@ -662,6 +712,53 @@ export default function MaterialflussPage(): JSX.Element {
     } catch (err) {
       toast({
         title: 'Speichern fehlgeschlagen',
+        description: getAxiosErrorMessage(err),
+        variant: 'destructive',
+      })
+    } finally {
+      removePendingKey(setPendingCellKeys, key)
+    }
+  }
+
+  async function handlePatchLegacySilo(cellId: string, legacySiloId: string): Promise<void> {
+    if (!warehouseId) return
+    const key = `${cellId}:legacy`
+    if (pendingCellKeys.has(key)) return
+    addPendingKey(setPendingCellKeys, key)
+    try {
+      await patchSiloCell.mutateAsync({
+        cellId,
+        warehouseId,
+        body: {
+          legacy_silo_id: legacySiloId.trim() === '' ? null : legacySiloId.trim(),
+        },
+      })
+      toast({ title: 'Legacy-Silo-Verknüpfung gespeichert' })
+    } catch (err) {
+      toast({
+        title: 'Speichern fehlgeschlagen',
+        description: getAxiosErrorMessage(err),
+        variant: 'destructive',
+      })
+    } finally {
+      removePendingKey(setPendingCellKeys, key)
+    }
+  }
+
+  async function handleSyncCellFromLots(cellId: string): Promise<void> {
+    if (!warehouseId) return
+    const key = `${cellId}:sync-lots`
+    if (pendingCellKeys.has(key)) return
+    addPendingKey(setPendingCellKeys, key)
+    try {
+      const result = await syncSiloCellFromLots.mutateAsync({ cellId, warehouseId })
+      toast({
+        title: 'silo_lots synchronisiert',
+        description: `Ist kg: ${agriStr(result, 'current_stock_kg')} (${agriStr(result, 'active_lot_count')} Lot(s))`,
+      })
+    } catch (err) {
+      toast({
+        title: 'Sync fehlgeschlagen',
         description: getAxiosErrorMessage(err),
         variant: 'destructive',
       })
@@ -1625,18 +1722,19 @@ export default function MaterialflussPage(): JSX.Element {
                     <th className="py-2 pr-2 min-w-[120px]">VK (frei)</th>
                     <th className="py-2 pr-2 min-w-[160px]">Layout (Hof/Plan)</th>
                     <th className="py-2 pr-2 min-w-[200px]">Material / Lot (Referenz)</th>
+                    <th className="py-2 pr-2 min-w-[180px]">LOT-LINK (legacy silo)</th>
                   </tr>
                 </thead>
                 <tbody>
                   {siloQ.isLoading ? (
                     <tr>
-                      <td colSpan={8} className="py-3 text-muted-foreground">
+                      <td colSpan={9} className="py-3 text-muted-foreground">
                         Lade…
                       </td>
                     </tr>
                   ) : (siloQ.data ?? []).length === 0 ? (
                     <tr>
-                      <td colSpan={8} className="py-3 text-muted-foreground">
+                      <td colSpan={9} className="py-3 text-muted-foreground">
                         Keine Silozellen — Stammdaten anlegen oder andere Siloanlage wählen.
                       </td>
                     </tr>
@@ -1683,6 +1781,17 @@ export default function MaterialflussPage(): JSX.Element {
                             disabled={siloCellsTableBusy}
                             saving={pendingCellKeys.has(`${agriStr(row, 'id')  }:inventory`)}
                             onSave={handlePatchSiloInventory}
+                          />
+                        </td>
+                        <td className="py-2 pr-0 align-top">
+                          <SiloCellLotLinkEditor
+                            cellId={agriStr(row, 'id')}
+                            legacySiloServer={agriStr(row, 'legacy_silo_id')}
+                            disabled={siloCellsTableBusy}
+                            savingLegacy={pendingCellKeys.has(`${agriStr(row, 'id')}:legacy`)}
+                            syncing={pendingCellKeys.has(`${agriStr(row, 'id')}:sync-lots`)}
+                            onSaveLegacy={handlePatchLegacySilo}
+                            onSync={handleSyncCellFromLots}
                           />
                         </td>
                       </tr>
