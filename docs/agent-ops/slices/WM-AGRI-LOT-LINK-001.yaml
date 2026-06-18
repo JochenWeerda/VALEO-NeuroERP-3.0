@@ -1,0 +1,34 @@
+slice_id: WM-AGRI-LOT-LINK-001
+title: Lot-/Bestands-Sync Waage/WE -> Silozelle
+owner: Codex
+status: reserved
+reserved_at: 2026-06-18
+coordination: >-
+  Folgeslice zu WM-AGRI-SILO-001. Bearbeitet die Lot-/Bestandskopplung additiv
+  und greift nicht in die abgeschlossene WM-AGRI-SILO-001-Slice-YAML ein.
+goal: >-
+  Den Medienbruch Annahme -> Waage -> Lot -> Silozelle -> kg-Bestand -> Trace
+  schließen, indem Silo-Lots transaktional an Materialfluss-Zellen gebucht
+  werden.
+scope:
+  - Backend-Service fuer Lot-zu-Silozelle-Link mit Tenant-Scope
+  - Endpoint-Vertrag fuer Waage/WE- und manuelle Link-Buchung
+  - Aktualisierung von current_lot_id/current_material_id/current_stock_kg
+  - Bestandsbewegung und Trace-/Supply-Chain-Event
+  - Regressionstests und Doku
+file_ownership:
+  - app/services/agri_lot_link_service.py
+  - app/api/v1/endpoints/agri_silo_material_flow.py
+  - tests/test_agri_lot_link.py
+  - docs/workflows/wm-agri-silo-supply-chain-integration-2026-06-13.md
+  - docs/project-context/open-gaps-and-known-issues.md
+acceptance_criteria:
+  - Tenant-Scope verhindert Cross-Tenant-Lot- oder Zielzellenbuchungen.
+  - Zielzelle und Lot werden fail-closed validiert.
+  - Kapazitaet, Materialkonflikte und Lotkonflikte werden serverseitig geprueft.
+  - Buchung aktualisiert current_* der Zielzelle und erzeugt einen Bewegungsbeleg.
+  - Trace-/Supply-Chain-Event macht die Kopplung auditierbar.
+  - Tests und Doku sind nachgezogen.
+risks:
+  - Produktiv-DB-Schemata koennen je Umgebung abweichen; SQL bleibt schema-qualifiziert
+    und Tests pruefen den Vertragskern ohne Live-DB.
