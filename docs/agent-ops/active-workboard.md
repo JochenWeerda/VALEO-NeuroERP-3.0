@@ -9,6 +9,15 @@
 **Dateibesitz:** `app/services/lohn_service.py`, `app/api/v1/endpoints/personal.py`, `tests/test_personal_payroll_deep.py`, `docs/project-context/hrm-payroll-deepening-2026-06-18.md`, `docs/project-context/open-gaps-and-known-issues.md`, `docs/agent-ops/slices/HRM-PAYROLL-DEEP-001.yaml`.
 **Abnahmekriterien:** Explizites Payroll-Response-Modell, Monats-Closeout mit AN-/AG-Anteilen, DATEV-/FIBU-Uebergabevertrag, fail-closed externe Gates, Regressionstests.
 
+## INT-ACCOUNTING-EXPORT-PROFILES-001 — Steuerberater-/Accounting-Exportprofile
+
+**Von:** Codex
+**Owner:** Codex
+**Stand:** reserviert 2026-06-18 — additiver Integrationsslice neben HRM-PAYROLL-DEEP-001; parallel dirty Dateien (`app/api/v1/api.py`, Scheduler, WF/STMD/Waage/XRechnung, WM-AGRI-SILO-001) bleiben unberuehrt.
+**Ziel:** Kanzleisoftware-neutrales kanonisches Exportmodell mit versionierten Profilen fuer DATEV, Agenda, ADDISON, Simba, Lexware, Sage und SBS/Wolters Kluwer; keine Zertifizierung behaupten, Steuerberater-Testimport bleibt externes Gate.
+**Dateibesitz:** `app/services/accounting_export_profiles.py`, `config/export_profiles/*.yaml`, `tests/test_accounting_export_profiles.py`, `docs/integrations/tax-advisor-export-profiles.md`, `docs/agent-ops/slices/INT-ACCOUNTING-EXPORT-PROFILES-001.yaml`.
+**Abnahmekriterien:** Pflichtfeldvalidierung, KOST1/KOST2-Mapping, CSV-Rendering, Checksummen, Batch-Status, Korrekturexport-Versionierung und not_certified/requires_tax_advisor_test_import fuer nicht abgenommene Profile.
+
 Stand: `2026-06-18`
 
 ## P0-INTEGRATION-SLICES-001 — Fachliche Integrationslücken (5 Slices)

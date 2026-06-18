@@ -1,0 +1,29 @@
+slice_id: INT-ACCOUNTING-EXPORT-PROFILES-001
+title: Kanzleisoftware-neutrale Exportprofile fuer Steuerberater, FIBU und Payroll-Vorlauf
+owner: Codex
+status: reserved
+coordination: >-
+  Additiver Integrationsslice neben HRM-PAYROLL-DEEP-001. Kein Besitz an
+  parallel dirty Dateien app/api/v1/api.py, Scheduler, WF/STMD/Waage/XRechnung
+  oder WM-AGRI-SILO-001.
+goal: >-
+  Kanonisches Accounting-Exportmodell mit versionierten Profilen fuer DATEV,
+  Agenda, ADDISON, Simba, Lexware, Sage und SBS/Wolters Kluwer bereitstellen.
+  Keine Zertifizierung behaupten; alle Nicht-DATEV-Profile bleiben
+  DATEV-kompatibel/CSV-ASCII vorbereitet und per Steuerberater-Testimport zu
+  validieren.
+file_ownership:
+  - app/services/accounting_export_profiles.py
+  - config/export_profiles/*.yaml
+  - tests/test_accounting_export_profiles.py
+  - docs/integrations/tax-advisor-export-profiles.md
+  - docs/agent-ops/active-workboard.md
+acceptance:
+  - Kanonisches AccountingExportLine-Modell mit Pflichtfeldvalidierung.
+  - Versionierte YAML-Profile fuer DATEV, Agenda, ADDISON, Simba, Lexware, Sage, SBS/WK.
+  - Mapping, CSV-Rendering, Checksummen und Batch-Status sind testbar.
+  - Nicht zertifizierte Profile erzwingen requires_tax_advisor_test_import.
+  - Korrekturexporte ueberschreiben alte Exporte nicht.
+risks:
+  - Hersteller-/DATEV-Feldspezifikationen und Zertifizierungen bleiben externe Gates.
+  - Steuerberater-Testimport je Zielprofil ist produktives Akzeptanzkriterium.
