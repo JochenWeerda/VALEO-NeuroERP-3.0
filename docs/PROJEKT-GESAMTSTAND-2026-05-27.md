@@ -3,7 +3,7 @@
 > Aggregierte Lieferstands-Sicht über alle Slices, Waves und Compliance-Bereiche.
 > Source of Truth bleiben die referenzierten Detaildokumente.
 
-**Branch:** `develop` | **HEAD:** `389a411a1` | **Stand:** 2026-05-27
+**Branch:** `perf/crm-kim-dashboard` | **HEAD:** `eb8e62237` | **Stand:** 2026-06-18
 
 ---
 
@@ -15,7 +15,11 @@ VALEO NeuroERP 3.0 ist ein mandantenfähiges, agrarhandels-spezifisches ERP mit 
 - **Fachliche Vertiefung** Waves 1–22 mit Frontend-Masken für 17+ Stammdatenbereiche.
 - **Backend-Security** Wave 22 (globale Auth, RFC-7807, nosec SQL) und Wave-A3 (Tenant-Isolation-CI-Gate).
 - **OpenAPI-Coverage** 100% (2663 Routen mit `summary=`, Wave-D2).
-- **Compliance** GoBD, DSGVO Art. 15/17/20, E-Rechnung Import vollständig; **E-Rechnung Export für B2B-Verkaufsrechnungen** ist die einzige verbliebene gesetzliche Lücke (Slice-006 in Vorbereitung).
+- **Compliance** GoBD, DSGVO Art. 15/17/20/30/33, E-Rechnung Import **und Export** vollständig implementiert.
+- **DOM-*-004-Tiefenwelle** abgeschlossen (2026-06-12): CON/SALES/FIN/DOC/PROC/SUPPLY auf voller operativer Tiefe.
+- **Logistik-Kette** (2026-06-12/13): Tourenplanung, Fracht/Tarif/Storno, Read-Spine LS↔Tour, Ketten-Lifecycle-Test.
+- **Wave-3 Produktions-Readiness** (2026-06-18): WF-Trigger-Log, Stammdaten-Duplikat-Erkennung, XRechnung-Export/Batch, Bank-Import MT940/CAMT053, Waage Mobile Sync, Mahnwesen-Scheduler.
+- **HRM-PAYROLL-DEEP-001** (2026-06-18): Payroll-Closeout-Preview, AN-/AG-Anteile, DATEV-/kanzleisoftware-neutrale Exportprofile.
 
 ---
 
@@ -23,14 +27,14 @@ VALEO NeuroERP 3.0 ist ein mandantenfähiges, agrarhandels-spezifisches ERP mit 
 
 | Kennzahl | Wert | Quelle |
 |---|---|---|
-| Backend-API-Endpoints | 311 Endpoint-Module | `app/api/v1/endpoints/*.py` |
+| Backend-API-Endpoints | 316+ Endpoint-Module | `app/api/v1/endpoints/*.py` (+5 Wave-3) |
 | OpenAPI-Routen mit `summary=` | 2663 (100%) | Commit `554625ae7` |
-| Backend-Tests (pytest) | 9228 passed, 0 failed | Commit `271bc5e12` (2026-05-26) |
-| Backend-Testabdeckung | 64,85% | Ratchet ≥60% gruen, 18 kritische Pfade |
+| Backend-Tests (pytest) | 9527+ gesammelt (2026-06-11); letzter Voll-Lauf 9228 passed | Commit `271bc5e12` (2026-05-26) |
+| Backend-Testabdeckung | 64,85%+ | Ratchet ≥60% grün, 33 kritische Pfade (COV-RATCHET-005) |
 | Frontend-TypeCheck | 0 Fehler | Wave-22-Gate (2026-05-27) |
 | Frontend-Pages (Fachliche Vertiefung) | 17+ neue Masken | Waves 10–22 |
 | E2E-Tests (Playwright Wave 11/20–22) | 23/23 grün | Integrations-Gate `97c41d479` |
-| Alembic-Heads | 1 | nach `merge_heads_20260522` |
+| Alembic-Heads | 1 | `wave3_wf_trigger_log_20260618` (aktueller Head) |
 
 ---
 
@@ -58,7 +62,49 @@ Migrations `fachliche_vertiefung_wave1..13_20260521`. Siehe [FACHLICHE-VERTIEFUN
 
 Waves 18/19 waren bereits vorbefüllt und wurden im Sweep gestoppt.
 
-### 3.4 Backend-Hardening — abgeschlossen
+### 3.4 DOM-*-004 Tiefenwelle — abgeschlossen (2026-06-12)
+
+| Domain | Lieferung | Services |
+|---|---|---|
+| CON-004 | Fixierung/MATIF-Marktwert, Engagement-Sicht, Kontraktmahnung, Settlement-Übergabe/Storno | `contract_{fixing,engagement,settlement}_service.py` |
+| SALES-004 | Positions-Match O2C, Kreditlimit-Prüfung, Storno/Gutschrift | `sales_{match,credit,storno}_service.py` |
+| FIN-004 | Mahnlauf/Eskalation, OP-Auszifferung, Periodenabschluss/Storno, DATEV-Export | `finance_{dunning,clearing,period,datev}_service.py` |
+| DOC-004 | Artefakt-Upload/Versionierung/Freigabe, Bescheid/Wiedervorlage, GoBD-Exportpaket | `docflow_{artifact,followup,gobd}_service.py` |
+| PROC-004 | 3-Wege-Match, Folgeaktionen/Reklamation, ERS, RFQ→PO | `procurement_match_service.py`, `rfq_service.py` |
+| SUPPLY-004 | Rückverfolgbarkeit, Ketten-Event-Log, Lot-Folgeaktionen, Ketten-Storno | `supply_chain_traceability_service.py` |
+
+### 3.5 Logistik-Kette — abgeschlossen (2026-06-12/13)
+
+| Slice | Lieferung |
+|---|---|
+| LOG-PROD-001 | Alembic `log_logistics_core_20260612`, Lazy-DDL entfernt |
+| LOG-SPINE-RAND-001 | Read-API `GET /logistik/sales-delivery-note-by-ref`, `delivery_note_ref`-Auflösung |
+| LOG-SPINE-001 | Frontend Tourenplanung + Tour-Hints + PATCH `delivery_note_ref`, Seed |
+| LOG-CHAIN-001 | Ketten-Lifecycle-Test LS→Tour→Fracht→Traceability |
+| LOG-LIFE-001 | Storno-Endpunkte fail-closed + Frontend Status STORNIERT |
+| LOG-FREIGHT-STORNO-001 | Fracht-Tarif Soft-Storno + Alembic `log_freight_tariff_storno_20260613` |
+
+### 3.6 Wave-3 Produktions-Readiness — abgeschlossen (2026-06-18)
+
+| Slice | Lieferung | Endpoint / Modul |
+|---|---|---|
+| WF-TRIGGER-001 | WF-Trigger-Map + Log | `wf_trigger.py`, `wf_trigger_service.py`, `domain_ops.wf_trigger_log` |
+| STMD-DUP-001 | Stammdaten Duplikat-Erkennung (UST-ID, IBAN, PLZ+Name, EAN) | `stmd_duplikat.py` |
+| INT-XRECHNUNG-001 | XRechnung 3.0 UBL-Export + Batch-ZIP | `xrechnung.py` |
+| INT-BANK-001 | Bank-Import MT940 + CAMT.053 + OP-Matching | `bank_import.py` |
+| WGE-MOB-001 | Waage Mobile Sync (Idempotenz-Key, Batch-Sync, Offline-Queue) | `waage_mobile.py` |
+| MAHNWESEN-AUTO | Scheduler: Dunning-Auto tägl. 07:00, WF-Trigger-Pending 15min | `scheduler_service.py` |
+
+### 3.7 Wave-2 Integration Slices — abgeschlossen (2026-06-18)
+
+| Slice | Lieferung |
+|---|---|
+| PROD-FIBU-001 | Produktions-FIBU-Journal-Referenz |
+| LOG-FRACHT-001 | Frachtbriefe/Carrier Invoices |
+| BI-DRILL-001 | BI-Drill-Down Reporting |
+| COMP-SPERR-001 | Artikel-Sperren Cross-Domain |
+
+### 3.8 Backend-Hardening — abgeschlossen
 
 | Wave | Lieferung | Commit |
 |---|---|---|
@@ -90,9 +136,9 @@ Waves 18/19 waren bereits vorbefüllt und wurden im Sweep gestoppt.
 | Art. 15 | Auskunftsrecht | ✅ | `/api/v1/gdpr/data-export` |
 | Art. 17 | Löschung | ✅ | `/api/v1/gdpr/requests` Lifecycle PENDING→VERIFIED→COMPLETED |
 | Art. 20 | Datenportabilität | ✅ | `/api/v1/gdpr/data-export` |
-| Art. 30 | Verarbeitungsverzeichnis | ⚠️ teilweise (extern via Audit-Logs) | `audit.py` |
+| Art. 30 | Verarbeitungsverzeichnis | ✅ | `gdpr_art30_ropa.py` (83% Coverage, Slice-008) |
 | Art. 32 | Sicherheit der Verarbeitung | ✅ | OIDC, Tenant-Isolation, RFC-7807-Fehlermaskierung |
-| Art. 33 | Meldepflicht bei Datenpanne | ⚠️ Prozess offen | — |
+| Art. 33 | Meldepflicht bei Datenpanne | ✅ | `gdpr_art33_breach.py` (97% Coverage, Slice-009) |
 
 ### 4.3 E-Rechnung (Wachstumschancengesetz, B2B-Pflicht ab 2025/2027/2028)
 
@@ -160,7 +206,7 @@ Voice-Provider: Whisper / Azure / OpenAI TTS konfigurierbar, Browser-Fallback.
 
 ---
 
-## 7. Offene Punkte (Stand 2026-05-28)
+## 7. Offene Punkte (Stand 2026-06-18)
 
 | Slice | Beschreibung | Priorität | Status |
 |---|---|---|---|

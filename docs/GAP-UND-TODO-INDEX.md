@@ -2,10 +2,10 @@
 
 **Zweck:** Einheitlicher Einstieg für alle Gap-, Todo- und Plan-Dokumente. Vermeidung von Dopplungen; klare Zuordnung, was aktuell und was archiviert ist.
 
-**Zuletzt geprüft:** 2026-05-27 (Integrations-Gate Wave 18–22, OpenAPI-Coverage, Backend-Security).
-**Aggregierter Gesamtstand:** [PROJEKT-GESAMTSTAND-2026-05-27.md](PROJEKT-GESAMTSTAND-2026-05-27.md).
-**Geschlossen (Implementierung):** Button-UX-Audit F1–F19, E2, E4, W10, W14, W15, M1–M21, M23. TSE/Offline: Konzept in `docs/AUTH-AND-TENANT-CONCEPT.md` (M22). **Phase 1–6** abgeschlossen, siehe Phase-Completion-Reports.
-**Neu seit März 2026:** Fachliche Vertiefung Waves 10–22 (UI), Backend-Security-Hardening, OpenAPI 100% Summary-Coverage, Tenant-Isolation-CI-Gate. **Verbliebene gesetzliche Lücke:** E-Rechnung B2B-Export (Slice-006, in Vorbereitung).
+**Zuletzt geprüft:** 2026-06-18 (Wave-3 Produktions-Readiness, Logistik-Kette, DOM-*-004-Tiefenwelle, HRM-Payroll-Deep).
+**Aggregierter Gesamtstand:** [PROJEKT-GESAMTSTAND-2026-05-27.md](PROJEKT-GESAMTSTAND-2026-05-27.md) (aktualisiert 2026-06-18).
+**Geschlossen (Implementierung):** Button-UX-Audit F1–F19, E2, E4, W10, W14, W15, M1–M21, M23. TSE/Offline: Konzept in `docs/AUTH-AND-TENANT-CONCEPT.md` (M22). **Phase 1–6** abgeschlossen, siehe Phase-Completion-Reports. **Slices 006–011** abgeschlossen (XRechnung-Export, Command Palette, DSGVO Art. 30/33, Voice-Intents, Meridian-Hardcolors). **DOM-*-004-Tiefenwelle** abgeschlossen (2026-06-12). **Logistik-Kette** abgeschlossen (2026-06-12/13). **Wave-3 Produktions-Readiness** abgeschlossen (2026-06-18).
+**Neu seit Mai 2026:** DOM-*-004-Welle, Logistik-Kette, Wave-2+3 Integration/Readiness-Slices, HRM-Payroll-Deep, DSGVO Art. 30/33. **Keine verbliebenen gesetzlichen Lücken** im Repo; externe Gates (ATLAS, ERiC, UAT-Unterschriften) bleiben offen.
 
 ---
 
