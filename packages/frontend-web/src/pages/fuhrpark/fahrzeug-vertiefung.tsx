@@ -116,6 +116,10 @@ export default function FahrzeugVertiefungPage(): JSX.Element {
         beschreibung: schadenBeschr,
         schadenhoehe_eur: schadenHoehe ? Number(schadenHoehe) : null,
         versicherung_gemeldet: schadenVersGem,
+        versicherungs_nr: null,
+        gegner_kennzeichen: null,
+        polizei_aktenzeichen: null,
+        erstellt_von: null,
         status: 'offen',
       })
       toast({ title: 'Schadensfall angelegt' })
@@ -139,7 +143,6 @@ export default function FahrzeugVertiefungPage(): JSX.Element {
     try {
       await updateFahrzeugSchaden(fahrzeugId, schaden.id, {
         status: 'abgeschlossen',
-        abgeschlossen_am: new Date().toISOString(),
       })
       toast({ title: 'Schadensfall abgeschlossen' })
       invalidate()
