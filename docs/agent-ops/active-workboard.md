@@ -1,5 +1,14 @@
 # Active Workboard
 
+## HRM-PAYROLL-DEEP-001 — HRM Payroll Deepening
+
+**Von:** Codex
+**Owner:** Codex
+**Stand:** reserviert 2026-06-18 — Claim-Slice fuer Lohnbuchhaltung-Tiefenentwicklung; parallel dirty Dateien (`app/api/v1/api.py`, Scheduler, WF/STMD/Waage/XRechnung, WM-AGRI-SILO-001) bleiben unberuehrt.
+**Ziel:** Lohnbuchhaltung von Payroll-Readiness zu einem pruefbaren Closeout-Vertrag vertiefen: Brutto-Netto-Kontext, Arbeitgeberanteile, Lohnarten, DATEV-ASCII-Uebergabedaten, FIBU-Buchungssaetze, externe Gates und Regressionstests.
+**Dateibesitz:** `app/services/lohn_service.py`, `app/api/v1/endpoints/personal.py`, `tests/test_personal_payroll_deep.py`, `docs/project-context/hrm-payroll-deepening-2026-06-18.md`, `docs/project-context/open-gaps-and-known-issues.md`, `docs/agent-ops/slices/HRM-PAYROLL-DEEP-001.yaml`.
+**Abnahmekriterien:** Explizites Payroll-Response-Modell, Monats-Closeout mit AN-/AG-Anteilen, DATEV-/FIBU-Uebergabevertrag, fail-closed externe Gates, Regressionstests.
+
 Stand: `2026-06-18`
 
 ## P0-INTEGRATION-SLICES-001 — Fachliche Integrationslücken (5 Slices)

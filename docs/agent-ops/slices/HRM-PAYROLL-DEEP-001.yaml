@@ -1,0 +1,28 @@
+slice_id: HRM-PAYROLL-DEEP-001
+title: HRM Payroll Deepening - Closeout, DATEV-Vertrag, FIBU-Uebergabe
+owner: Codex
+status: reserved
+coordination: >-
+  Eigenstaendiger HRM/Payroll-Slice. Kein Besitz an parallel dirty Dateien
+  app/api/v1/api.py, app/services/scheduler_service.py, WF/STMD/Waage/XRechnung
+  oder WM-AGRI-SILO-001.
+goal: >-
+  Lohnbuchhaltung von Payroll-Readiness zu einem pruefbaren Closeout-Vertrag
+  vertiefen: Brutto-Netto-Kontext, Arbeitgeberanteile, Lohnarten, DATEV-ASCII-
+  Uebergabedaten, FIBU-Buchungssaetze, externe Gates und Regressionstests.
+file_ownership:
+  - app/services/lohn_service.py
+  - app/api/v1/endpoints/personal.py
+  - tests/test_personal_payroll_deep.py
+  - docs/project-context/hrm-payroll-deepening-2026-06-18.md
+  - docs/project-context/open-gaps-and-known-issues.md
+  - docs/agent-ops/active-workboard.md
+acceptance:
+  - Payroll-Berechnung liefert explizites Response-Modell statt falschem PersonalOut.
+  - Monats-Closeout erzeugt Arbeitnehmer-/Arbeitgeberanteile und Netto.
+  - DATEV-ASCII-Vertrag und FIBU-Uebergabe werden maschinenlesbar bereitgestellt.
+  - Externe DATEV-/Steuerberater-/amtliche PAP-Gates bleiben sichtbar fail-closed.
+  - Unit-Tests sichern Rechenvertrag, Exportvertrag und Gateway-Status.
+risks:
+  - Amtliche Lohnsteuer-PAP-Implementierung und DATEV-Zertifizierung bleiben externe Gates.
+  - Produktive SV-/Steuerparameter muessen versioniert und fachlich freigegeben werden.
