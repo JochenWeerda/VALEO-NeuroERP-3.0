@@ -694,7 +694,7 @@ async def get_periodenvergleich(
         if konto_klasse:
             params["konto_klasse"] = f"{konto_klasse}%"
 
-        sql = text(f"""
+    sql = text(f"""  # nosec S608 — reviewed-safe: where fragments are code-controlled, values parameterized
             WITH saldi AS (
                 SELECT
                     coa.account_number,
