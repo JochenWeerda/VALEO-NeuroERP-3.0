@@ -52,7 +52,7 @@ def upgrade() -> None:
 
     # ── QS-CHARGE-001: quality_protocol_id FK in harvest_acceptances ─────
     op.execute("""
-        ALTER TABLE domain_agrar.harvest_acceptances
+        ALTER TABLE IF EXISTS domain_agrar.harvest_acceptances
         ADD COLUMN IF NOT EXISTS quality_protocol_id UUID
     """)
     # quality_protocols already exists (domain_agrar schema); no FK to avoid cross-migration deps
