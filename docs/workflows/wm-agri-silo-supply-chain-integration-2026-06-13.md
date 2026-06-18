@@ -19,6 +19,7 @@
 | Supply-Chain-Events bei Mutationen | **Implementiert** (Slice **WM-AGRI-CHAIN-002**) | `supply_chain_events` + Outbox `inventory.material_flow.*` |
 | Transfer-Hooks in einer Transaktion | **Implementiert** | `commit()` nach `_emit_material_flow_hooks`; Test `test_transfer_commits_after_trace_hooks` |
 | Lot-/Bestands-Sync `silo_lots` ↔ Graph | **Backend-Kontrakt implementiert** (Slice **WM-AGRI-LOT-LINK-001**, 2026-06-18) | `legacy_silo_id`-Mapping, `sync-from-lots`, `POST /material-flow/lot-link` mit Bewegungsbeleg, `current_*` und Trace-Event; UI-/Regelvorschlag bleibt Folgeslice |
+| QS-Freigabe/Audit Labor → Lager → Produktion | **Backend-Kontrakt implementiert** (Slice **WM-AGRI-QS-003**, 2026-06-18) | `POST /supply-chain/lots/{lot_id}/qs-transition`, Pflichtgrund/Bediener, Probe/Analyse/Dokument, GMP+/VLOG-Payload, `silo_lots.status`, `silo_cells.qs_status`, `supply_chain_events` |
 | Bird-View / Hofplan MapLibre | **Offen** | **WM-AGRI-MAP-001** |
 | PLC / OPC-UA Live-Anlagen | **Offen** | **WM-AGRI-PLC-005** (Architektur only) |
 
@@ -40,6 +41,8 @@
 **Repo-seitig geschlossen (2026-06-19):** **Materialtransfer** inkl. Lagerbuchung und UI (Slice **WMS-FLOW-001**).
 
 **Repo-seitig geschlossen (2026-06-18):** **Lot-Link-Buchung** Annahme/Waage → Silozelle als Backend-Vertrag (Slice **WM-AGRI-LOT-LINK-001**).
+
+**Repo-seitig geschlossen (2026-06-18):** **QS-Workflow** fuer Silo-Lots mit Labor-/Analyse-/Dokumentenbezug, GMP+/VLOG-Payload, Lot-/Silozellen-Rueckkopplung und append-only Event-Audit (Slice **WM-AGRI-QS-003**).
 
 ---
 
@@ -74,6 +77,7 @@ Siehe [wave-physical-chain-logistics-audit-2026-06-12.md](./wave-physical-chain-
 | **Ereignis-/Trace-Kopplung** Förderkante ↔ `supply_chain_events` + Outbox | fehlend | **Geschlossen** (Slice **WM-AGRI-CHAIN-002**, 2026-06-13) |
 | **kg-Transfer** Silozelle ↔ `inventory_stock_movements` | fehlend | **Geschlossen** (Slice **WMS-FLOW-001**, 2026-06-19): Backend + UI + Mobile-Sync |
 | **Lot-Bestand** ↔ Silozelle im Graph (automatisch) | fehlend | **Backend-Kontrakt geschlossen** (WM-AGRI-LOT-LINK-001): Mapping + Sync-API + konkrete Lot-Link-Buchung; UI-/WE/Waage-Regelvorschlag offen |
+| **QS-Freigabe/Audit** Labor ↔ Lager ↔ Produktion | Status-Dropdowns / Folgeaktion | **Backend-Kontrakt geschlossen** (WM-AGRI-QS-003): QS-Transition mit Pflichtgrund, Bediener, Probe/Analyse/Dokument, GMP+/VLOG, `silo_lots` + `silo_cells` + `supply_chain_events`; Leitstands-UI offen |
 | Bird-View Luftbild | offen | **Offen** (WM-AGRI-MAP-001) |
 | PLC / Live-Anlagen | offen | **Offen** (WM-AGRI-PLC-005) |
 
@@ -105,6 +109,7 @@ Siehe [wave-physical-chain-logistics-audit-2026-06-12.md](./wave-physical-chain-
 - Slice Stammdaten/Graph: [WM-AGRI-SILO-001](../agent-ops/slices/WM-AGRI-SILO-001.yaml)
 - Slice Transfer/Buchung: [WMS-FLOW-001](../agent-ops/slices/WMS-FLOW-001.yaml)
 - Slice Lot-Link: [WM-AGRI-LOT-LINK-001](../agent-ops/slices/WM-AGRI-LOT-LINK-001.yaml)
+- Slice QS-Workflow: [WM-AGRI-QS-003](../agent-ops/slices/WM-AGRI-QS-003.yaml)
 - Slice Events/Outbox: [WM-AGRI-CHAIN-002](../agent-ops/slices/WM-AGRI-CHAIN-002.yaml)
 - DOM-SUPPLY-004: [dom-supply-004-traceability-2026-06-10.md](../dom-supply-004-traceability-2026-06-10.md)
 - Logistik-Audit: [wave-physical-chain-logistics-audit-2026-06-12.md](./wave-physical-chain-logistics-audit-2026-06-12.md)
