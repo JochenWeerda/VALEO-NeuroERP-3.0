@@ -2027,3 +2027,24 @@ api_router.include_router(kostenrechnung.router)
 # Mobile Offline-Sync — MOB-SYNC-001
 from app.api.v1.endpoints import mobile_sync  # noqa: E402
 api_router.include_router(mobile_sync.router)
+
+# ── Wave 3 — Vollständige Prozess-Integration ──────────────────
+# WF-TRIGGER-001: Status-Trigger → Follow-up-Automation
+from app.api.v1.endpoints import wf_trigger  # noqa: E402
+api_router.include_router(wf_trigger.router, tags=["workflow", "automation"])
+
+# STMD-DUP-001: Cross-Domain-Dublettenprüfung
+from app.api.v1.endpoints import stmd_duplikat  # noqa: E402
+api_router.include_router(stmd_duplikat.router, tags=["stammdaten", "qualitaet"])
+
+# INT-XRECHNUNG-001: XRechnung 3.0 / UBL 2.1 E-Rechnung Export
+from app.api.v1.endpoints import xrechnung  # noqa: E402
+api_router.include_router(xrechnung.router, tags=["schnittstellen", "e-rechnung"])
+
+# INT-BANK-001: Bank-API / SEPA-Import (MT940 + CAMT.053)
+from app.api.v1.endpoints import bank_import  # noqa: E402
+api_router.include_router(bank_import.router, tags=["schnittstellen", "bank"])
+
+# WGE-MOB-001: Mobile-Sync für Waagenbelege
+from app.api.v1.endpoints import waage_mobile  # noqa: E402
+api_router.include_router(waage_mobile.router, tags=["waage", "mobile", "logistik"])

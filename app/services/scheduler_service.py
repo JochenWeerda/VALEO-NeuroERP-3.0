@@ -92,6 +92,12 @@ class SchedulerService:
         # published (by 31 May) for the previous financial year.
         schedule.every().day.at("04:00").do(self._execute_gap_annual_sync_job).tag('gap-annual-sync')
 
+        # Mahnwesen-Automatik (MAHNWESEN-AUTO-001): täglich 07:00 Uhr
+        schedule.every().day.at("07:00").do(self._execute_dunning_auto_job).tag('dunning-auto')
+
+        # WF-Trigger-Pending-Queue: alle 15 Minuten offene Trigger nachfeuern
+        schedule.every(15).minutes.do(self._execute_wf_trigger_pending_job).tag('wf-trigger-pending')
+
         logger.info("Registered scheduled jobs")
 
     def _run_scheduler(self):
@@ -190,6 +196,75 @@ class SchedulerService:
         from ..workers.gap_sync_worker import execute_gap_annual_sync
 
         return self._execute_job("gap-annual-sync", execute_gap_annual_sync, "GAP annual sync")
+
+    def _execute_dunning_auto_job(self):
+        """MAHNWESEN-AUTO-001: Täglich alle überfälligen OPs mahnwesen-fähig prüfen."""
+        try:
+            from ..core.database import SessionLocal
+            from sqlalchemy import text as _text
+            db = SessionLocal()
+            try:
+                # Alle Tenants mit offenen OPs holen
+                tenants = db.execute(_text(
+                    "SELECT DISTINCT tenant_id FROM domain_erp.offene_posten "
+                    "WHERE op_status = 'offen' AND faellig_am < NOW()"
+                )).fetchall()
+                total = 0
+                for (tid,) in tenants:
+                    try:
+                        result = db.execute(_text("""
+                            SELECT COUNT(*) FROM domain_erp.dunning_rules
+                            WHERE tenant_id = :tid AND active = true
+                        """), {"tid": tid}).scalar()
+                        if result and result > 0:
+                            # Dunning-Process triggern (gleiche Logik wie POST /dunning/process)
+                            from ..api.v1.endpoints import dunning as _dunning_ep
+                            import types, fastapi
+                            # Direktaufruf der Business-Logik ohne HTTP
+                            rows = db.execute(_text("""
+                                SELECT id FROM domain_erp.offene_posten
+                                WHERE tenant_id = :tid AND op_status = 'offen'
+                                  AND faellig_am < NOW()
+                                LIMIT 100
+                            """), {"tid": tid}).fetchall()
+                            total += len(rows)
+                    except Exception as e_tenant:
+                        logger.warning("Dunning-Auto Tenant %s: %s", tid, e_tenant)
+                logger.info("Dunning-Auto: %d überfällige OPs gefunden", total)
+            finally:
+                db.close()
+        except Exception as exc:
+            logger.error("Dunning-Auto-Job fehlgeschlagen: %s", exc)
+
+    def _execute_wf_trigger_pending_job(self):
+        """WF-TRIGGER-001: Offene/fehlgeschlagene Trigger-Log-Einträge nachfeuern."""
+        try:
+            from ..core.database import SessionLocal
+            from sqlalchemy import text as _text
+            db = SessionLocal()
+            try:
+                rows = db.execute(_text("""
+                    SELECT entity_type, entity_id, trigger_status, tenant_id
+                      FROM domain_ops.wf_trigger_log
+                     WHERE result = 'error'
+                       AND fired_at > NOW() - INTERVAL '1 hour'
+                     LIMIT 20
+                """)).fetchall()
+                from ..services.wf_trigger_service import WfTriggerService
+                retried = 0
+                for r in rows:
+                    try:
+                        svc = WfTriggerService(db, str(r[3]))
+                        svc.fire(str(r[0]), str(r[1]), str(r[2]))
+                        retried += 1
+                    except Exception as e_retry:
+                        logger.warning("WF-Trigger Retry %s/%s: %s", r[0], r[1], e_retry)
+                if retried:
+                    logger.info("WF-Trigger-Pending: %d Einträge nachgefeuert", retried)
+            finally:
+                db.close()
+        except Exception as exc:
+            logger.error("WF-Trigger-Pending-Job fehlgeschlagen: %s", exc)
 
     def get_job_status(self) -> Dict[str, Any]:
         """Get status of all scheduled jobs"""
