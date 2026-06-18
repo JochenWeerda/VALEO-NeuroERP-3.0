@@ -236,6 +236,80 @@ def test_erechnung_rechnungsnummer_extracted_zugferd():
     assert result.steuer_betrag == pytest.approx(190.0)
 
 
+@pytest.mark.unit
+def test_erechnung_xrechnung_supplier_and_amounts_extracted():
+    from app.api.v1.endpoints.erechnung_import import import_erechnung
+
+    content = b"""<ubl:Invoice>
+  <cbc:ID>XR-2026-100</cbc:ID>
+  <cac:AccountingSupplierParty><cbc:Name>Lieferant GmbH</cbc:Name></cac:AccountingSupplierParty>
+  <cbc:TaxExclusiveAmount>200.00</cbc:TaxExclusiveAmount>
+  <cbc:TaxAmount>38.00</cbc:TaxAmount>
+  <cbc:PayableAmount>238.00</cbc:PayableAmount>
+</ubl:Invoice>"""
+    file = _make_upload_file("xrechnung.xml", content)
+    result = asyncio.run(import_erechnung(file=file, db=_raising_db(), tenant_id=TENANT))
+    assert result.lieferant_name == "Lieferant GmbH"
+    assert result.betrag_brutto == pytest.approx(238.0)
+
+
+@pytest.mark.unit
+def test_erechnung_import_persists_when_db_available():
+    from app.api.v1.endpoints.erechnung_import import import_erechnung
+
+    db = MagicMock()
+    file = _make_upload_file("rechnung.txt", b"plain")
+    result = asyncio.run(import_erechnung(file=file, db=db, tenant_id=TENANT))
+    assert result.status == "ERKANNT"
+    assert db.execute.called
+    db.commit.assert_called_once()
+
+
+@pytest.mark.unit
+def test_erechnung_list_imports_and_fallback():
+    from app.api.v1.endpoints.erechnung_import import list_imports
+
+    db = MagicMock()
+    db.execute.return_value.mappings.return_value.all.return_value = [
+        {
+            "import_id": "IMP-1",
+            "format": "XRECHNUNG_3_0",
+            "status": "ERKANNT",
+            "rechnungsnummer": "XR-1",
+            "lieferant_name": "L",
+            "betrag_netto": 1.0,
+            "betrag_brutto": 1.19,
+            "steuer_betrag": 0.19,
+            "fehler_details": None,
+        }
+    ]
+    assert list_imports(db=db, tenant_id=TENANT)[0]["import_id"] == "IMP-1"
+    assert list_imports(db=_raising_db(), tenant_id=TENANT) == []
+
+
+@pytest.mark.unit
+def test_erechnung_buchen_updates_import_and_creates_op():
+    from app.api.v1.endpoints.erechnung_import import buchen
+
+    db = MagicMock()
+    first = MagicMock()
+    first.fetchone.return_value = ("RE-1", "Lieferant", 119.0)
+    db.execute.side_effect = [first, MagicMock(), MagicMock()]
+
+    result = buchen("IMP-1", db=db, tenant_id=TENANT)
+    assert result["status"] == "gebucht"
+    assert result["journal_entry_id"]
+    assert db.commit.call_count == 2
+
+
+@pytest.mark.unit
+def test_erechnung_buchen_tolerates_missing_import_table():
+    from app.api.v1.endpoints.erechnung_import import buchen
+
+    result = buchen("IMP-404", db=_raising_db(), tenant_id=TENANT)
+    assert result["status"] == "gebucht"
+
+
 # ---------------------------------------------------------------------------
 # price_calculation — sorte_klasse + kalkulationsweg
 # ---------------------------------------------------------------------------
