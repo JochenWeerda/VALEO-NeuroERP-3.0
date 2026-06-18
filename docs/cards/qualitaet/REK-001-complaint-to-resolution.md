@@ -42,10 +42,17 @@ und des Backend-Reklamations-API auf CRUD-Vollständigkeit, API-Korrektheit und 
 - `ausnahmen.tsx` nutzt `@/lib/api-client` mit korrekter `.data`-Extraktion
 - `reklamation-detail.tsx` nutzt `@/lib/api-client`; Flow-Spine: `readWorkflowEntryContext`, best-effort Transition nach Statuswechsel
 
-## 5. Offene Punkte
+## 5. Geschlossene Gap-Risiken 2026-06-18
 
-Keine aus dieser Card — siehe `docs/workflows/rek-001-complaint-to-resolution.md` fuer Historie.
+Slice `QM-REK-LAB-001` schliesst die vorher sichtbaren Randrisiken:
 
+- Reklamations-Reads und Folgeendpunkte sind tenant-gescoped; `tenant_id` aus dem Payload darf den Request-Tenant nicht uebersteuern.
+- Statuswechsel laufen ueber Body-Modell und serverseitige Zustandsmaschine.
+- Laborauftraege koennen einen Befund mit Entscheidung `freigeben`, `sperren` oder `nachpruefung` erfassen.
+- Laborbefund erzeugt eine explizite Folgeaktion: `qs_freigeben`, `charge_sperren` oder `nachpruefung_anlegen`.
+- Reklamations-E2E zeigt `folgeentscheidungen`, `abschluss_blocker` und `abschlussfaehig`.
+
+Offen bleiben nur externe organisatorische Gates: reale QS-Freigabe, reale DMS-Akte und fachliche Entscheidung zu Retoure/Gutschrift/CAPA.
 ## 6. Tests (manuell)
 
 1. Reklamationen → Liste laden

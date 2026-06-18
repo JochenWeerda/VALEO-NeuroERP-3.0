@@ -5,24 +5,50 @@
 
 import { useMemo } from 'react'
 import { useNavigate, useParams } from '@/app/routing/typed-router'
-import { useQuery } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { apiClient } from '@/lib/api-client'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
+import { useToast } from '@/hooks/use-toast'
 import { ArrowLeft, Beaker } from 'lucide-react'
 import type { LaborAuftrag } from '@/lib/api/betrieb'
 
 export default function LaborDetailPage(): JSX.Element {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
+  const queryClient = useQueryClient()
+  const { toast } = useToast()
 
   const { data: auftrag, isLoading, isError } = useQuery({
     queryKey: ['qualitaet', 'labor', id],
     queryFn: async () =>
       (await apiClient.get<LaborAuftrag>(`/api/v1/qualitaet/labor-auftraege/${id}`)).data,
     enabled: !!id,
+  })
+
+  const befundMutation = useMutation({
+    mutationFn: async (entscheidung: 'freigeben' | 'sperren' | 'nachpruefung') =>
+      (
+        await apiClient.post<LaborAuftrag>(`/api/v1/qualitaet/labor-auftraege/${id}/befund`, {
+          entscheidung,
+          analysewerte: {},
+          grenzwerte: {},
+          bemerkung: `QS-Entscheidung ${entscheidung}`,
+        })
+      ).data,
+    onSuccess: (updated) => {
+      void queryClient.invalidateQueries({ queryKey: ['qualitaet', 'labor', id] })
+      void queryClient.invalidateQueries({ queryKey: ['qualitaet', 'labor'] })
+      toast({
+        title: 'Laborbefund gespeichert',
+        description: `Folgeaktion: ${updated.folgeaktion ?? 'befund_erfassen'}`,
+      })
+    },
+    onError: () => {
+      toast({ title: 'Befund konnte nicht gespeichert werden', variant: 'destructive' })
+    },
   })
 
   const fallkopf = useMemo(() => {
@@ -40,9 +66,17 @@ export default function LaborDetailPage(): JSX.Element {
     return {
       status: istOffen ? 'Auftrag offen' : inBearbeitung ? 'Analyse laeuft' : 'Abgeschlossen',
       statusColor: istOffen ? 'text-amber-700 bg-amber-50 border-amber-300' : inBearbeitung ? 'text-blue-700 bg-blue-50 border-blue-300' : 'text-green-700 bg-green-50 border-green-300',
-      befundlage: `Charge ${auftrag.chargenId} · ${auftrag.analysen} Analyse(n)`,
-      blocker: istOffen ? 'Laborergebnis steht aus' : 'Kein Blocker',
-      naechsteAktion: istOffen ? 'Probe an Labor uebergeben' : inBearbeitung ? 'Ergebnis abwarten / nachfragen' : 'Ergebnis in Freigabe uebernehmen',
+      befundlage: auftrag.qs_entscheidung
+        ? `Charge ${auftrag.chargenId} - Entscheidung: ${auftrag.qs_entscheidung}`
+        : `Charge ${auftrag.chargenId} - ${auftrag.analysen} Analyse(n)`,
+      blocker: auftrag.qs_entscheidung ? 'Kein Blocker' : 'Laborergebnis steht aus',
+      naechsteAktion: auftrag.folgeaktion === 'charge_sperren'
+        ? 'Charge sperren und Reklamation entscheiden'
+        : auftrag.folgeaktion === 'qs_freigeben'
+          ? 'QS-Freigabe dokumentieren'
+          : auftrag.folgeaktion === 'nachpruefung_anlegen'
+            ? 'Nachpruefung anlegen'
+            : istOffen ? 'Probe an Labor uebergeben' : inBearbeitung ? 'Ergebnis abwarten / nachfragen' : 'Ergebnis in Freigabe uebernehmen',
     }
   }, [auftrag])
 
@@ -110,6 +144,29 @@ export default function LaborDetailPage(): JSX.Element {
               : 'Abgeschlossen'}
         </Badge>
       </div>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>QS-Entscheidung</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-3 text-sm">
+          <div className="grid gap-2 sm:grid-cols-3">
+            <Button variant="outline" disabled={befundMutation.isPending} onClick={() => befundMutation.mutate('freigeben')}>
+              QS freigeben
+            </Button>
+            <Button variant="outline" disabled={befundMutation.isPending} onClick={() => befundMutation.mutate('sperren')}>
+              Charge sperren
+            </Button>
+            <Button variant="outline" disabled={befundMutation.isPending} onClick={() => befundMutation.mutate('nachpruefung')}>
+              Nachpruefung
+            </Button>
+          </div>
+          <div className="rounded-md border bg-muted/30 p-3">
+            <div>Aktuelle Entscheidung: <span className="font-medium">{auftrag.qs_entscheidung ?? 'offen'}</span></div>
+            <div>Folgeaktion: <span className="font-medium">{auftrag.folgeaktion ?? 'befund_erfassen'}</span></div>
+          </div>
+        </CardContent>
+      </Card>
 
       <div className="grid gap-4 md:grid-cols-2">
         <Card>

@@ -23,16 +23,16 @@ _client = TestClient(app, raise_server_exceptions=False)
 # ReklamationCreateRequest validation
 # ---------------------------------------------------------------------------
 
-def test_create_request_requires_tenant_id():
-    with pytest.raises(Exception):
-        ReklamationCreateRequest(
-            lieferant_id="LF-001",
-            typ="qualitaet",
-            positionen=[],
-            zustaendiger="max",
-            frist_datum="2026-06-01",
-            aktor_id="system",
-        )
+def test_create_request_tenant_id_is_optional_for_header_scope():
+    req = ReklamationCreateRequest(
+        lieferant_id="LF-001",
+        typ="qualitaet",
+        positionen=[],
+        zustaendiger="max",
+        frist_datum="2026-06-01",
+        aktor_id="system",
+    )
+    assert req.tenant_id is None
 
 
 def test_create_request_valid():
@@ -48,7 +48,7 @@ def test_create_request_valid():
 
 
 def test_transition_request_defaults():
-    req = ReklamationTransitionRequest(neuer_status="in_bearbeitung")
+    req = ReklamationTransitionRequest(neuer_status="in_pruefung")
     assert req.aktor_id == "system"
     assert req.kommentar is None
 
@@ -110,4 +110,4 @@ def test_create_reklamation_valid_payload():
     }
     resp = _client.post("/api/v1/reklamationen", json=payload, headers=_HEADERS)
     skip_if_db_unavailable(resp)
-    assert resp.status_code in (200, 201, 422)
+    assert resp.status_code in (200, 201)

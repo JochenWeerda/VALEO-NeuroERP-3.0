@@ -57,6 +57,35 @@ def test_labor_auftrag_create_201():
     assert body["analysen"] == 2
 
 
+def test_labor_auftrag_befund_creates_qs_followup():
+    created = client.post(
+        "/api/v1/qualitaet/labor-auftraege",
+        json={
+            "chargenId": "TEST-CHARGE-SPERRE-001",
+            "labor": "Test-Labor",
+            "analysen": ["Feuchte"],
+            "prioritaet": "express",
+        },
+    )
+    assert created.status_code == 201
+    auftrag_id = created.json()["id"]
+
+    r = client.post(
+        f"/api/v1/qualitaet/labor-auftraege/{auftrag_id}/befund",
+        json={
+            "entscheidung": "sperren",
+            "analysewerte": {"feuchte": 18.1},
+            "grenzwerte": {"feuchte_max": 14.5},
+            "bemerkung": "Grenzwert ueberschritten",
+        },
+    )
+    assert r.status_code == 200
+    body = r.json()
+    assert body["qs_entscheidung"] == "sperren"
+    assert body["folgeaktion"] == "charge_sperren"
+    assert body["status"] == "abgeschlossen"
+
+
 def test_labor_auftrag_detail_404():
     r = client.get("/api/v1/qualitaet/labor-auftraege/does-not-exist-99999")
     assert r.status_code == 404
