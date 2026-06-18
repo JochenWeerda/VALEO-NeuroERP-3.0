@@ -64,8 +64,8 @@ def get_trigger_log(
         params["eid"] = entity_id
     try:
         rows = db.execute(text(f"""
-            SELECT id, entity_type, entity_id, trigger_status, action,
-                   result, error_message, fired_at
+            SELECT id, entity_type, entity_id, trigger_status,
+                   actions AS action, result, error_detail AS error_message, fired_at
               FROM domain_ops.wf_trigger_log
              WHERE {where}
              ORDER BY fired_at DESC
