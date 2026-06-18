@@ -20,7 +20,7 @@ export interface UATFixtures {
 
 export const test = base.extend<UATFixtures>({
   // Tenant-Isolation (Backend erwartet üblicherweise UUID; QA-UAT-01 bricht API-Calls)
-  tenant: async (_deps, use) => {
+  tenant: async ({ request: _request }, use) => {
     const tenant =
       process.env.VALEO_TENANT ||
       process.env.X_TENANT_ID ||
