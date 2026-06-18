@@ -25,8 +25,8 @@ def datev_export(
 
 @router.get("/datev-journal", summary="INT-DATEV-001: Journal-Einträge als DATEV-CSV mit KOST1/KOST2")
 def datev_journal_export(
-    periode_von: str = Query(..., example="2026-01", description="Von-Periode YYYY-MM"),
-    periode_bis: str = Query(..., example="2026-06", description="Bis-Periode YYYY-MM"),
+    periode_von: str = Query(..., examples=["2026-01"], description="Von-Periode YYYY-MM"),
+    periode_bis: str = Query(..., examples=["2026-06"], description="Bis-Periode YYYY-MM"),
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
 ) -> dict[str, Any]:

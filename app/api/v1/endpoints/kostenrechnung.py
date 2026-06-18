@@ -527,7 +527,7 @@ class BABReport(BaseModel):
 
 @router.post("/umlagen", response_model=UmlageOut, summary="Kostenumlage anlegen für Periode")
 def create_umlage(
-    periode: str = Query(..., example="2026-06"),
+    periode: str = Query(..., examples=["2026-06"]),
     payload: UmlageCreate = ...,
     tenant_id: str = Depends(get_tenant_id),
     db=Depends(get_db),
@@ -605,7 +605,7 @@ def create_umlage(
 
 @router.get("/bab", response_model=BABReport, summary="Betriebsabrechnungsbogen (BAB) für eine Periode")
 def get_bab(
-    periode: str = Query(..., example="2026-06"),
+    periode: str = Query(..., examples=["2026-06"]),
     tenant_id: str = Depends(get_tenant_id),
     db=Depends(get_db),
 ) -> BABReport:
