@@ -8,9 +8,10 @@ Unit-Tests (kein DB) für Helper + alle Endpoint-Pfade via Repo-Mocks.
 
 from __future__ import annotations
 
+import asyncio
 from datetime import datetime, timezone
 from decimal import Decimal
-from unittest.mock import MagicMock
+from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 from fastapi import FastAPI
@@ -383,3 +384,114 @@ class TestWiegungenUnit:
     def test_delete_found(self):
         with _client_ctx(wiegungen=[_fwg("WG-1")]) as (c, _):
             assert c.delete("/waage/wiegungen/WG-1").status_code == 204
+
+
+class TestWaageLiveUnit:
+    def test_partiepflicht_config_and_check_fallbacks(self):
+        from app.api.v1.endpoints.waage import (
+            PartiepflichtCheckRequest,
+            check_partiepflicht,
+            get_partiepflicht_config,
+        )
+
+        db = MagicMock()
+        db.execute.side_effect = Exception("no metadata")
+        cfg = asyncio.run(get_partiepflicht_config(db=db))
+        assert cfg["config_source"] == "default"
+
+        invalid = asyncio.run(
+            check_partiepflicht(
+                payload=PartiepflichtCheckRequest(artikel_id="A1", wiegetyp="ROHWARE"),
+                db=db,
+            )
+        )
+        assert invalid["valid"] is False
+        valid = asyncio.run(
+            check_partiepflicht(
+                payload=PartiepflichtCheckRequest(artikel_id="A1", wiegetyp="SONST", partie_id="P1"),
+                db=db,
+            )
+        )
+        assert valid["valid"] is True
+
+    def test_parse_ascii_lines_and_import_error_queue(self):
+        import asyncio
+        from app.api.v1.endpoints import waage
+
+        waage._fehlerqueue.clear()
+        w = waage._parse_w_line(
+            "W;WG1;2026-01-01;08:00;1000;400;600;HB1;L1;A1;S1;P1;SILO;14.5;78;1.2;X".split(";")
+        )
+        assert w["netto_kg"] == pytest.approx(600)
+        q = waage._parse_q_line("Q;WG1;Feuchte;14.5;%".split(";"))
+        assert q["parameter"] == "Feuchte"
+
+        db = MagicMock()
+        db.execute.side_effect = Exception("relation missing")
+        file = MagicMock()
+        file.read = AsyncMock(return_value=b"W;WG1;2026-01-01;08:00;1000;400;600;HB1;L1;A1;S1;P1;SILO;14.5;78;1.2;X\nBAD\n")
+        result = asyncio.run(waage.import_ascii(file=file, waage_id="WA-1", fehler_toleranz=True, db=db))
+        assert result["imported"] == 0
+        assert result["skipped"] == 2
+        assert len(waage._fehlerqueue) == 1
+
+    def test_fehlerqueue_retry_delete_and_404(self):
+        import asyncio
+        from fastapi import HTTPException
+        from app.api.v1.endpoints import waage
+
+        waage._fehlerqueue[:] = [{"id": "E1", "retry_count": 0}]
+        retry = asyncio.run(waage.retry_fehlerqueue_entry("E1"))
+        assert retry["entry"]["retry_count"] == 1
+        assert asyncio.run(waage.list_fehlerqueue())[0]["id"] == "E1"
+        asyncio.run(waage.delete_fehlerqueue_entry("E1"))
+        with pytest.raises(HTTPException):
+            asyncio.run(waage.retry_fehlerqueue_entry("missing"))
+
+    def test_kalibrierung_status_get_update_paths(self):
+        import asyncio
+        from fastapi import HTTPException
+        from app.api.v1.endpoints import waage
+
+        assert waage._kalibrierung_status(None) == "faellig"
+        assert waage._kalibrierung_status("bad") == "unbekannt"
+
+        row = ({"letztes_eichdatum": "2026-01-01", "naechste_eichfaelligkeit": "2999-01-01"},)
+        db = MagicMock()
+        db.execute.return_value.fetchone.return_value = row
+        got = asyncio.run(waage.get_kalibrierung("WA-1", db=db))
+        assert got["kalibrierungsstatus"] == "ok"
+        upd = asyncio.run(waage.update_kalibrierung("WA-1", {"eichamt": "Amt"}, db=db))
+        assert upd["eichamt"] == "Amt"
+
+        db_missing = MagicMock()
+        db_missing.execute.return_value.fetchone.return_value = None
+        with pytest.raises(HTTPException):
+            asyncio.run(waage.get_kalibrierung("missing", db=db_missing))
+
+    def test_dual_wiegung_create_fallback_and_extended_read(self):
+        import asyncio
+        from datetime import datetime
+        from app.api.v1.endpoints.waage import (
+            WiegungErweitert,
+            WiegescheinMitDoppelwiegung,
+            create_dual_wiegung,
+            get_wiegung_extended,
+        )
+
+        db = MagicMock()
+        db.execute.side_effect = [Exception("column does not exist"), MagicMock()]
+        payload = WiegescheinMitDoppelwiegung(
+            waage_id="WA-1",
+            wiegung_erweitert=WiegungErweitert(waage_id="WA-1", wiegung1=1000, wiegung2=400, gosse=2),
+            kfz_kennzeichen="HB-1",
+        )
+        created = asyncio.run(create_dual_wiegung(payload=payload, db=db))
+        assert created["netto"] == pytest.approx(600)
+        assert created["gosse"] == 2
+
+        row = ("WG-1", "WA-1", 600.0, 2, "EL", "HB-1", {"x": 1}, datetime(2026, 1, 1))
+        db_read = MagicMock()
+        db_read.execute.return_value.fetchone.return_value = row
+        got = asyncio.run(get_wiegung_extended("WG-1", db=db_read))
+        assert got["extended_data"] == {"x": 1}
