@@ -17,6 +17,7 @@ export type SiloCellPatch = {
   contamination_risk_class?: string | null
   layout_x?: string | number | null
   layout_y?: string | number | null
+  legacy_silo_id?: string | null
 }
 
 export type MaterialFlowNodePatch = {
@@ -214,6 +215,15 @@ export async function bookAgriMaterialTransfer(body: MaterialTransferBody): Prom
   return (data && typeof data === 'object' ? data : {}) as AgriFlowRow
 }
 
+export async function syncAgriSiloCellFromLots(cellId: string, warehouseId: string): Promise<AgriFlowRow> {
+  const { data } = await apiClient.post<unknown>(
+    `/api/v1/lager/wms/agri/silo-cells/${cellId}/sync-from-lots`,
+    null,
+    { params: { warehouse_id: warehouseId } },
+  )
+  return (data && typeof data === 'object' ? data : {}) as AgriFlowRow
+}
+
 export function useAgriSiloCells(warehouseId: string | undefined, options?: { enabled?: boolean }) {
   const wid = warehouseId ?? ''
   return useQuery({
@@ -333,6 +343,17 @@ export function useBookAgriMaterialTransfer() {
     mutationFn: bookAgriMaterialTransfer,
     onSuccess: (_data, vars) => {
       void qc.invalidateQueries({ queryKey: agriMaterialFlowKeys.siloCells(vars.warehouse_id) })
+    },
+  })
+}
+
+export function useSyncAgriSiloCellFromLots() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: async (vars: { cellId: string; warehouseId: string }) =>
+      syncAgriSiloCellFromLots(vars.cellId, vars.warehouseId),
+    onSuccess: (_data, vars) => {
+      void qc.invalidateQueries({ queryKey: agriMaterialFlowKeys.siloCells(vars.warehouseId) })
     },
   })
 }

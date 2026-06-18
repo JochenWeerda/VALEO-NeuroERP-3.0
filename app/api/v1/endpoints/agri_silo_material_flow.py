@@ -57,6 +57,7 @@ class SiloCellPatch(BaseModel):
     contamination_risk_class: Optional[str] = None
     layout_x: Optional[Decimal] = None
     layout_y: Optional[Decimal] = None
+    legacy_silo_id: Optional[str] = None
 
 
 class MaterialFlowNodeIn(BaseModel):
@@ -284,5 +285,26 @@ def book_material_transfer(
             booked_by=payload.booked_by or "system",
             reference=payload.reference,
         )
+    except ValueError as e:
+        raise HTTPException(status_code=422, detail=str(e))
+
+
+@router.post(
+    "/silo-cells/{cell_id}/sync-from-lots",
+    response_model=AgriJsonOut,
+    status_code=200,
+    summary="POST /silo-cells/{cell_id}/sync-from-lots",
+)
+def sync_silo_cell_from_lots(
+    cell_id: str,
+    warehouse_id: str = Query(...),
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+) -> Any:
+    """WM-AGRI-LOT-LINK: Aggregiert aktive silo_lots des verknüpften Legacy-Silos auf die Silozelle."""
+    from app.services.agri_silo_lot_link_service import AgriSiloLotLinkService
+
+    try:
+        return AgriSiloLotLinkService(db, tenant_id).sync_cell_from_lots(cell_id, warehouse_id)
     except ValueError as e:
         raise HTTPException(status_code=422, detail=str(e))
