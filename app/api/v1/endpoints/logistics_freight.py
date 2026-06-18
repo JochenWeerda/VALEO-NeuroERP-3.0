@@ -474,7 +474,7 @@ def list_carrier_invoices(
         params["carrier_id"] = carrier_id
 
     try:
-        rows = db.execute(text(f"""  # nosec S608 — reviewed-safe: where fragments are code-controlled, values parameterized
+        rows = db.execute(text(f"""  -- nosec S608 reviewed-safe: dynamic fragments are code-controlled and values parameterized
             SELECT id, tour_id, carrier_id, invoice_number, invoice_date,
                    net_amount_eur, tax_amount_eur, gross_amount_eur,
                    fibu_journal_ref, status, created_at
