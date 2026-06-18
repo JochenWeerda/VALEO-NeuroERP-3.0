@@ -6,7 +6,7 @@ Stand: `2026-06-18`
 
 **Von:** Claude
 **Owner:** Claude
-**Stand:** in Bearbeitung 2026-06-18 — Basiscommit `61d623677`, Codex-Hardening fuer P0 Punkt 4/5 `2bf40505c` gepusht; CI laeuft.
+**Stand:** abgeschlossen 2026-06-18 — alle 7 Slices (5 neu, 2 bereits vorhanden) implementiert und gepusht. HEAD: `b25d10e5b` + nachgezogener CI-Fix fuer Procurement-Inventory-Kompatibilitaet und Tenant-Testvertrag.
 **Ziel:** Schließt kritische Prozesskettenlücken aus ERP-Tiefenanalyse:
   - WMS-FLOW-001: `book_material_transfer()` in AgriSiloMaterialFlowService + Endpoint POST /material-flow/transfer — Silozell→StockMovement-Kopplung mit Kontaminationsschutz
   - KORE-BAB-001: BAB-Engine (GET /kostenrechnung/bab) + Kostenumlage (POST /kostenrechnung/umlagen) + BAB-Tab im Frontend
