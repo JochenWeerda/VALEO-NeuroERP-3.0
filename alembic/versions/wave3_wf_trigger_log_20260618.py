@@ -79,15 +79,22 @@ def upgrade() -> None:
 
     # ── domain_agrar.waagen_quittungen ────────────────────────────
     op.execute("CREATE SCHEMA IF NOT EXISTS domain_agrar")
-    # Quittiert-Spalten zu weighing_tickets hinzufügen (falls nicht vorhanden)
+    # Kompatibilitaetstabelle fuer WGE-MOB-001. Die kanonische Waage-Tabelle
+    # liegt historisch unter domain_inventory; die Mobile-Wave nutzt deutsche
+    # Feldnamen im domain_agrar-Kontext und braucht einen eigenen Vertrag.
     op.execute("""
-        ALTER TABLE IF EXISTS domain_inventory.weighing_tickets
-        ADD COLUMN IF NOT EXISTS quittiert BOOLEAN DEFAULT false,
-        ADD COLUMN IF NOT EXISTS quittiert_am TIMESTAMPTZ
-    """)
-    op.execute("""
-        CREATE OR REPLACE VIEW domain_agrar.weighing_tickets AS
-        SELECT * FROM domain_inventory.weighing_tickets
+        CREATE TABLE IF NOT EXISTS domain_agrar.weighing_tickets (
+            id VARCHAR PRIMARY KEY,
+            tenant_id VARCHAR NOT NULL,
+            ticket_number VARCHAR(50) NOT NULL,
+            netto_gewicht_kg NUMERIC(12, 3),
+            brutto_gewicht_kg NUMERIC(12, 3),
+            tara_gewicht_kg NUMERIC(12, 3),
+            status VARCHAR(20) DEFAULT 'open',
+            quittiert BOOLEAN DEFAULT false,
+            quittiert_am TIMESTAMPTZ,
+            created_at TIMESTAMPTZ DEFAULT NOW()
+        )
     """)
 
     op.create_table(
@@ -111,12 +118,7 @@ def upgrade() -> None:
 
 def downgrade() -> None:
     op.drop_table("waagen_quittungen", schema="domain_agrar")
-    op.execute("DROP VIEW IF EXISTS domain_agrar.weighing_tickets")
-    op.execute("""
-        ALTER TABLE IF EXISTS domain_inventory.weighing_tickets
-        DROP COLUMN IF EXISTS quittiert,
-        DROP COLUMN IF EXISTS quittiert_am
-    """)
+    op.execute("DROP TABLE IF EXISTS domain_agrar.weighing_tickets")
     op.drop_table("bank_statement_lines", schema="domain_finance")
     op.drop_table("bank_statements", schema="domain_finance")
     op.drop_index("ix_wf_trigger_log_entity", "wf_trigger_log", schema="domain_ops")

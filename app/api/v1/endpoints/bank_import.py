@@ -129,10 +129,7 @@ def _match_transactions(db: Session, tenant_id: str,
              WHERE tenant_id = :tid
                AND konto_typ = 'debitoren'
                AND op_status = 'offen'
-               AND (
-                 :purpose ILIKE '%' || referenz_id || '%'
-                 OR :purpose ILIKE '%' || COALESCE(invoice_number, '') || '%'
-               )
+               AND :purpose ILIKE '%' || referenz_id || '%'
              LIMIT 1
         """), {"tid": tenant_id, "purpose": purpose}).fetchone()
 
@@ -159,12 +156,17 @@ def _match_transactions(db: Session, tenant_id: str,
             """), {"amt": amount, "op_id": str(op[0]), "tid": tenant_id})
             # Bank-Statement-Zeile als gebucht markieren
             db.execute(text("""
+                WITH candidate AS (
+                    SELECT id
+                      FROM domain_finance.bank_statement_lines
+                     WHERE statement_id = :sid AND booking_date = :bdate
+                       AND ABS(amount - :amt) <= 0.01
+                       AND match_status = 'offen'
+                     LIMIT 1
+                )
                 UPDATE domain_finance.bank_statement_lines
                    SET match_status = 'gematcht', matched_op_id = :op_id
-                 WHERE statement_id = :sid AND booking_date = :bdate
-                   AND ABS(amount - :amt) <= 0.01
-                   AND match_status = 'offen'
-                 LIMIT 1
+                 WHERE id IN (SELECT id FROM candidate)
             """), {"op_id": str(op[0]), "sid": statement_id,
                    "bdate": tx["booking_date"], "amt": amount})
             matched += 1
