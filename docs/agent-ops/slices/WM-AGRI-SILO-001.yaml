@@ -35,7 +35,9 @@ acceptance:
   - Unit-Tests tests/test_agri_silo_material_flow.py gruen (pytest --no-cov fuer Einzeldatei ok)
   - Frontend Route lager/materialfluss + lager/materialfluss-visualisierung (PageToolbar, MERIDIAN-Tokens)
   - Materialfluss-Seite Live-Graph aus material_flow_nodes/edges wenn Lager gewaehlt und Daten vorhanden; Demo nur ohne Lagerwahl
-  - UI Silozellen Material/Lot Referenz speichern Silozelle layout_x/y Knoten layout_x/y Position Kanten Verschleppungsschutz Spuelcharge-Flag lesbare Kanten-Codes
+  - Mindest-UI Stammdaten anlegen Siloanlage Silozelle Knoten Kante (kein Delete Pflichtstatus)
+  - UI Silozellen Material/Lot Referenz Silozelle layout_x/y VK-Klasse Knoten layout Kanten Verschleppung Spuelcharge lesbare Codes max kg/h
+  - Siloanlagen-Uebersicht lesen (nur Anzeige)
   - Vitest material-flow-display Mapper (Nodes Kanten Endpunkt-Filter)
   - Doku Benchmark + OSS + Hersteller-Sammelliste + UI-Baustein-Paket agrar-silo-materialfluss-studio + Prozessketten-Workflow wm-agri-silo-supply-chain-integration
 open_after_integration_pass:
