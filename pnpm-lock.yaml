@@ -5,7 +5,9 @@ settings:
   excludeLinksFromLockfile: false
 
 overrides:
-  multer: ^2.1.1
+  multer: ^2.2.0
+  ws: ^8.21.0
+  form-data: ^4.0.6
   rollup: npm:@rollup/wasm-node@^4.29.0
   baseline-browser-mapping: 2.10.0
   browserslist: 4.28.1
@@ -1391,7 +1393,7 @@ importers:
         version: 3.3.0
       openai:
         specifier: ^6.3.0
-        version: 6.3.0(ws@8.18.3)(zod@3.25.76)
+        version: 6.3.0(ws@8.21.0)(zod@3.25.76)
       qrcode.react:
         specifier: ^4.2.0
         version: 4.2.0(react@18.3.1)
@@ -2512,8 +2514,8 @@ importers:
         specifier: ^2.30.1
         version: 2.30.1
       multer:
-        specifier: ^2.1.1
-        version: 2.1.1
+        specifier: ^2.2.0
+        version: 2.2.0
       nats:
         specifier: ^2.15.0
         version: 2.29.3
@@ -9744,9 +9746,6 @@ packages:
     resolution: {integrity: sha512-hsU18Ae8CDTR6Kgu9DYf0EbCr/a5iGL0rytQDobUcdpYOKokk8LEjVphnXkDkgpi0wYVsqrXuP0bZxJaTqdgoA==}
     engines: {node: '>= 0.4'}
 
-  async-limiter@1.0.1:
-    resolution: {integrity: sha512-csOlWGAcRFJaI6m+F2WKdnMKr4HhdhFVBk0H/QbJFMCr+uO2kwohwXQPxw/9OCxp05r5ghVBFSyioixx3gfkNQ==}
-
   async-lock@1.4.1:
     resolution: {integrity: sha512-Az2ZTpuytrtqENulXwO3GGv1Bztugx6TT37NIo7imr/Qo0gsYiGtSdBa2B6fsXhTpVZDNfu1Qn3pk531e3q+nQ==}
 
@@ -12201,16 +12200,8 @@ packages:
     resolution: {integrity: sha512-gIXjKqtFuWEgzFRJA9WCQeSJLZDjgJUOMCMzxtvFq/37KojM1BFGufqsCy0r4qSQmYLsZYMeyRqzIWOMup03sw==}
     engines: {node: '>=14'}
 
-  form-data@3.0.4:
-    resolution: {integrity: sha512-f0cRzm6dkyVYV3nPoooP8XlccPQukegwhAnpoLcXy+X+A8KfpGOoXwDr9FLZd3wzgLaBGQBE3lY93Zm/i1JvIQ==}
-    engines: {node: '>= 6'}
-
-  form-data@4.0.4:
-    resolution: {integrity: sha512-KrGhL9Q4zjj0kiUt5OO4Mr/A/jlI2jDYs5eHBpYHPcBEVSiipAvn2Ko2HnPe20rmcuuvMHNdZFp+4IlGTMF0Ow==}
-    engines: {node: '>= 6'}
-
-  form-data@4.0.5:
-    resolution: {integrity: sha512-8RipRLol37bNs2bhoV67fiTEvdTrbMUYcFTiy3+wuuOnUog2QBHCZWXDRijWQfAkhBj2Uf5UnVaiWwA5vdd82w==}
+  form-data@4.0.6:
+    resolution: {integrity: sha512-vKatAh4SlVfgbv+YtmhiRjhEMJsYpsG1Y2rMQtR+SVSbytsSD1YGzDIcrAJmdFec88u/+VoGmxnl+80gL1tRCQ==}
     engines: {node: '>= 6'}
 
   formdata-polyfill@4.0.10:
@@ -12551,6 +12542,10 @@ packages:
 
   hasown@2.0.2:
     resolution: {integrity: sha512-0hJU9SCPvmMzIBdZFqNPXWa6dqh7WdH0cII9y+CyS8rG3nL48Bclra9HmKhVVUHyPWNH5Y7xDwAB7bfgSjkUMQ==}
+    engines: {node: '>= 0.4'}
+
+  hasown@2.0.4:
+    resolution: {integrity: sha512-T2UbfbBEF32wiepXIsMlTW9+dDYC6wMh/t/vYA4tuOMKqWz/n3vr1NFSxQiyP+zk2mXsoMA/i/7qV6LKut1t1A==}
     engines: {node: '>= 0.4'}
 
   hast-util-to-html@9.0.5:
@@ -14310,8 +14305,8 @@ packages:
   ms@2.1.3:
     resolution: {integrity: sha512-6FlzubTLZG3J2a/NVCAleEhjzq5oxgHyaCU9yYXvcLsvoVaHJq/s5xXI6/XXP6tz7R9xAOtHnSO/tXtF3WRTlA==}
 
-  multer@2.1.1:
-    resolution: {integrity: sha512-mo+QTzKlx8R7E5ylSXxWzGoXoZbOsRMpyitcht8By2KHvMbf3tjwosZ/Mu/XYU6UuJ3VZnODIrak5ZrPiPyB6A==}
+  multer@2.2.0:
+    resolution: {integrity: sha512-6rdyFg2kLrMh9Jee7/BMPuV9lEAd7lLW2YUpF9/YxR7njyoUwwQ0ZPh3TaIY50Sw6vlyD2HW3wGOkTS4P79xrQ==}
     engines: {node: '>= 10.16.0'}
 
   multi-sort-stream@1.0.4:
@@ -14661,7 +14656,7 @@ packages:
     resolution: {integrity: sha512-E6vOGtZvdcb4yXQ5jXvDlUG599OhIkb/GjBLZXS+qk0HF+PJReIldEc9hM8Ft81vn+N6dRdFRb7BZNK8bbvXrw==}
     hasBin: true
     peerDependencies:
-      ws: ^8.18.0
+      ws: ^8.21.0
       zod: ^3.25 || ^4.0
     peerDependenciesMeta:
       ws:
@@ -17728,43 +17723,8 @@ packages:
     resolution: {integrity: sha512-+QU2zd6OTD8XWIJCbffaiQeH9U73qIqafo1x6V1snCWYGJf6cVE0cDR4D8xRzcEnfI21IFrUPzPGtcPf8AC+Rw==}
     engines: {node: ^14.17.0 || ^16.13.0 || >=18.0.0}
 
-  ws@6.2.3:
-    resolution: {integrity: sha512-jmTjYU0j60B+vHey6TfR3Z7RD61z/hmxBS3VMSGIrroOWXQEneK1zNuotOUrGyBHQj0yrpsLHPWtigEFd13ndA==}
-    peerDependencies:
-      bufferutil: ^4.0.1
-      utf-8-validate: ^5.0.2
-    peerDependenciesMeta:
-      bufferutil:
-        optional: true
-      utf-8-validate:
-        optional: true
-
-  ws@7.5.10:
-    resolution: {integrity: sha512-+dbF1tHwZpXcbOJdVOkzLDxZP1ailvSxM6ZweXTegylPny803bFhA+vqBYw4s31NSAk4S2Qz+AKXK9a4wkdjcQ==}
-    engines: {node: '>=8.3.0'}
-    peerDependencies:
-      bufferutil: ^4.0.1
-      utf-8-validate: ^5.0.2
-    peerDependenciesMeta:
-      bufferutil:
-        optional: true
-      utf-8-validate:
-        optional: true
-
-  ws@8.17.1:
-    resolution: {integrity: sha512-6XQFvXTkbfUOZOKKILFG1PDK2NDQs4azKQl26T0YS5CxqWLgXajbPZ+h4gZekJyRqFU8pvnbAbbs/3TgRPy+GQ==}
-    engines: {node: '>=10.0.0'}
-    peerDependencies:
-      bufferutil: ^4.0.1
-      utf-8-validate: '>=5.0.2'
-    peerDependenciesMeta:
-      bufferutil:
-        optional: true
-      utf-8-validate:
-        optional: true
-
-  ws@8.18.3:
-    resolution: {integrity: sha512-PEIGCY5tSlUt50cqyMXfCzX+oOPqN0vuGqWzbcJ2xvnkzkq46oOpz7dQaTDBdfICb4N14+GARUDw2XV2N4tvzg==}
+  ws@8.21.0:
+    resolution: {integrity: sha512-Vsp28b7DRcimFQvrqu2Wek3z1iYxDCWqHYB8Qsnk/S4RfaCQzPGPyBNuVjJV3cd6UiKtUtp6sNM77gWvzcCH+g==}
     engines: {node: '>=10.0.0'}
     peerDependencies:
       bufferutil: ^4.0.1
@@ -17976,7 +17936,7 @@ snapshots:
     dependencies:
       async: 2.6.4
       cheerio: 1.1.2
-      debug: 4.4.3(supports-color@8.1.1)
+      debug: 4.4.3(supports-color@5.5.0)
       deep-for-each: 3.0.0
       espree: 9.6.1
       jsonpath-plus: 10.3.0
@@ -17996,7 +17956,7 @@ snapshots:
       cheerio: 1.1.2
       cookie-parser: 1.4.7
       csv-parse: 4.16.3
-      debug: 4.4.3(supports-color@8.1.1)
+      debug: 4.4.3(supports-color@5.5.0)
       decompress-response: 6.0.0
       deep-for-each: 3.0.0
       driftless: 2.0.3
@@ -18004,7 +17964,7 @@ snapshots:
       eventemitter3: 4.0.7
       fast-deep-equal: 3.1.3
       filtrex: 0.5.4
-      form-data: 3.0.4
+      form-data: 4.0.6
       got: 11.8.6
       hpagent: 0.1.2
       https-proxy-agent: 5.0.1
@@ -18015,7 +17975,7 @@ snapshots:
       socketio-wildcard: 2.0.0
       tough-cookie: 5.1.2
       uuid: 8.3.2
-      ws: 7.5.10
+      ws: 8.21.0
     transitivePeerDependencies:
       - bufferutil
       - supports-color
@@ -19298,7 +19258,7 @@ snapshots:
       '@babel/types': 7.28.4
       '@jridgewell/remapping': 2.3.5
       convert-source-map: 2.0.0
-      debug: 4.4.3(supports-color@8.1.1)
+      debug: 4.4.3(supports-color@5.5.0)
       gensync: 1.0.0-beta.2
       json5: 2.2.3
       semver: 7.8.3
@@ -19318,7 +19278,7 @@ snapshots:
       '@babel/types': 7.29.7
       '@jridgewell/remapping': 2.3.5
       convert-source-map: 2.0.0
-      debug: 4.4.3(supports-color@8.1.1)
+      debug: 4.4.3(supports-color@5.5.0)
       gensync: 1.0.0-beta.2
       json5: 2.2.3
       semver: 7.8.3
@@ -19414,7 +19374,7 @@ snapshots:
       '@babel/core': 7.28.4
       '@babel/helper-compilation-targets': 7.28.6
       '@babel/helper-plugin-utils': 7.29.7
-      debug: 4.4.3(supports-color@8.1.1)
+      debug: 4.4.3(supports-color@5.5.0)
       lodash.debounce: 4.0.8
       resolve: 1.22.10
     transitivePeerDependencies:
@@ -19425,7 +19385,7 @@ snapshots:
       '@babel/core': 7.29.0
       '@babel/helper-compilation-targets': 7.28.6
       '@babel/helper-plugin-utils': 7.29.7
-      debug: 4.4.3(supports-color@8.1.1)
+      debug: 4.4.3(supports-color@5.5.0)
       lodash.debounce: 4.0.8
       resolve: 1.22.10
     transitivePeerDependencies:
@@ -20692,7 +20652,7 @@ snapshots:
       '@babel/parser': 7.28.4
       '@babel/template': 7.28.6
       '@babel/types': 7.29.0
-      debug: 4.4.3(supports-color@8.1.1)
+      debug: 4.4.3(supports-color@5.5.0)
     transitivePeerDependencies:
       - supports-color
 
@@ -20704,7 +20664,7 @@ snapshots:
       '@babel/parser': 7.29.0
       '@babel/template': 7.28.6
       '@babel/types': 7.29.0
-      debug: 4.4.3(supports-color@8.1.1)
+      debug: 4.4.3(supports-color@5.5.0)
     transitivePeerDependencies:
       - supports-color
 
@@ -20716,7 +20676,7 @@ snapshots:
       '@babel/parser': 7.29.7
       '@babel/template': 7.29.7
       '@babel/types': 7.29.7
-      debug: 4.4.3(supports-color@8.1.1)
+      debug: 4.4.3(supports-color@5.5.0)
     transitivePeerDependencies:
       - supports-color
 
@@ -21176,7 +21136,7 @@ snapshots:
   '@eslint/eslintrc@2.1.4':
     dependencies:
       ajv: 6.12.6
-      debug: 4.4.3(supports-color@8.1.1)
+      debug: 4.4.3(supports-color@5.5.0)
       espree: 9.6.1
       globals: 13.24.0
       ignore: 5.3.2
@@ -21190,7 +21150,7 @@ snapshots:
   '@eslint/eslintrc@3.3.1':
     dependencies:
       ajv: 6.12.6
-      debug: 4.4.3(supports-color@8.1.1)
+      debug: 4.4.3(supports-color@5.5.0)
       espree: 10.4.0
       globals: 14.0.0
       ignore: 5.3.2
@@ -21240,9 +21200,9 @@ snapshots:
       cacache: 15.3.0
       chalk: 4.1.2
       ci-info: 3.9.0
-      debug: 4.4.3(supports-color@8.1.1)
+      debug: 4.4.3(supports-color@5.5.0)
       env-editor: 0.4.2
-      form-data: 3.0.4
+      form-data: 4.0.6
       freeport-async: 2.0.0
       fs-extra: 8.1.0
       getenv: 1.0.0
@@ -21276,7 +21236,7 @@ snapshots:
       text-table: 0.2.0
       url-join: 4.0.0
       wrap-ansi: 7.0.0
-      ws: 8.18.3
+      ws: 8.21.0
     transitivePeerDependencies:
       - bluebird
       - bufferutil
@@ -21298,7 +21258,7 @@ snapshots:
       '@expo/sdk-runtime-versions': 1.0.0
       '@react-native/normalize-color': 2.1.0
       chalk: 4.1.2
-      debug: 4.4.3(supports-color@8.1.1)
+      debug: 4.4.3(supports-color@5.5.0)
       find-up: 5.0.0
       getenv: 1.0.0
       glob: 10.5.0
@@ -21417,7 +21377,7 @@ snapshots:
     dependencies:
       '@expo/config': 8.0.5
       chalk: 4.1.2
-      debug: 4.4.3(supports-color@8.1.1)
+      debug: 4.4.3(supports-color@5.5.0)
       find-yarn-workspace-root: 2.0.0
       getenv: 1.0.0
       resolve-from: 5.0.0
@@ -21462,7 +21422,7 @@ snapshots:
       '@expo/config-types': 48.0.0
       '@expo/image-utils': 0.3.22
       '@expo/json-file': 8.3.3
-      debug: 4.4.3(supports-color@8.1.1)
+      debug: 4.4.3(supports-color@5.5.0)
       expo-modules-autolinking: 1.2.0
       fs-extra: 9.1.0
       resolve-from: 5.0.0
@@ -21666,7 +21626,7 @@ snapshots:
       google-auth-library: 10.7.0
       p-retry: 4.6.2
       protobufjs: 7.6.2
-      ws: 8.18.3
+      ws: 8.21.0
     transitivePeerDependencies:
       - bufferutil
       - supports-color
@@ -21714,7 +21674,7 @@ snapshots:
   '@humanwhocodes/config-array@0.13.0':
     dependencies:
       '@humanwhocodes/object-schema': 2.0.3
-      debug: 4.4.3(supports-color@8.1.1)
+      debug: 4.4.3(supports-color@5.5.0)
       minimatch: 9.0.9
     transitivePeerDependencies:
       - supports-color
@@ -24360,7 +24320,7 @@ snapshots:
       nocache: 3.0.4
       pretty-format: 26.6.2
       serve-static: 1.16.2
-      ws: 7.5.10
+      ws: 8.21.0
     transitivePeerDependencies:
       - bufferutil
       - encoding
@@ -25127,7 +25087,7 @@ snapshots:
       recast: 0.23.11
       semver: 7.8.3
       util: 0.12.5
-      ws: 8.18.3
+      ws: 8.21.0
     optionalDependencies:
       prettier: 3.6.2
     transitivePeerDependencies:
@@ -25835,7 +25795,7 @@ snapshots:
       '@types/cookiejar': 2.1.5
       '@types/methods': 1.1.4
       '@types/node': 20.19.37
-      form-data: 4.0.4
+      form-data: 4.0.6
 
   '@types/supercluster@7.1.3':
     dependencies:
@@ -25902,7 +25862,7 @@ snapshots:
       '@typescript-eslint/scope-manager': 5.62.0
       '@typescript-eslint/type-utils': 5.62.0(eslint@8.57.1)(typescript@4.9.5)
       '@typescript-eslint/utils': 5.62.0(eslint@8.57.1)(typescript@4.9.5)
-      debug: 4.4.3(supports-color@8.1.1)
+      debug: 4.4.3(supports-color@5.5.0)
       eslint: 8.57.1
       graphemer: 1.4.0
       ignore: 5.3.2
@@ -25922,7 +25882,7 @@ snapshots:
       '@typescript-eslint/type-utils': 6.21.0(eslint@8.57.1)(typescript@5.6.3)
       '@typescript-eslint/utils': 6.21.0(eslint@8.57.1)(typescript@5.6.3)
       '@typescript-eslint/visitor-keys': 6.21.0
-      debug: 4.4.3(supports-color@8.1.1)
+      debug: 4.4.3(supports-color@5.5.0)
       eslint: 8.57.1
       graphemer: 1.4.0
       ignore: 5.3.2
@@ -25942,7 +25902,7 @@ snapshots:
       '@typescript-eslint/type-utils': 6.21.0(eslint@8.57.1)(typescript@5.9.2)
       '@typescript-eslint/utils': 6.21.0(eslint@8.57.1)(typescript@5.9.2)
       '@typescript-eslint/visitor-keys': 6.21.0
-      debug: 4.4.3(supports-color@8.1.1)
+      debug: 4.4.3(supports-color@5.5.0)
       eslint: 8.57.1
       graphemer: 1.4.0
       ignore: 5.3.2
@@ -25977,7 +25937,7 @@ snapshots:
       '@typescript-eslint/scope-manager': 5.62.0
       '@typescript-eslint/types': 5.62.0
       '@typescript-eslint/typescript-estree': 5.62.0(typescript@4.9.5)
-      debug: 4.4.3(supports-color@8.1.1)
+      debug: 4.4.3(supports-color@5.5.0)
       eslint: 8.57.1
     optionalDependencies:
       typescript: 4.9.5
@@ -25990,7 +25950,7 @@ snapshots:
       '@typescript-eslint/types': 6.21.0
       '@typescript-eslint/typescript-estree': 6.21.0(typescript@5.6.3)
       '@typescript-eslint/visitor-keys': 6.21.0
-      debug: 4.4.3(supports-color@8.1.1)
+      debug: 4.4.3(supports-color@5.5.0)
       eslint: 8.57.1
     optionalDependencies:
       typescript: 5.6.3
@@ -26003,7 +25963,7 @@ snapshots:
       '@typescript-eslint/types': 6.21.0
       '@typescript-eslint/typescript-estree': 6.21.0(typescript@5.9.2)
       '@typescript-eslint/visitor-keys': 6.21.0
-      debug: 4.4.3(supports-color@8.1.1)
+      debug: 4.4.3(supports-color@5.5.0)
       eslint: 8.57.1
     optionalDependencies:
       typescript: 5.9.2
@@ -26016,7 +25976,7 @@ snapshots:
       '@typescript-eslint/types': 7.18.0
       '@typescript-eslint/typescript-estree': 7.18.0(typescript@5.9.2)
       '@typescript-eslint/visitor-keys': 7.18.0
-      debug: 4.4.3(supports-color@8.1.1)
+      debug: 4.4.3(supports-color@5.5.0)
       eslint: 8.57.1
     optionalDependencies:
       typescript: 5.9.2
@@ -26027,7 +25987,7 @@ snapshots:
     dependencies:
       '@typescript-eslint/tsconfig-utils': 8.46.0(typescript@5.9.2)
       '@typescript-eslint/types': 8.46.0
-      debug: 4.4.3(supports-color@8.1.1)
+      debug: 4.4.3(supports-color@5.5.0)
       typescript: 5.9.2
     transitivePeerDependencies:
       - supports-color
@@ -26060,7 +26020,7 @@ snapshots:
     dependencies:
       '@typescript-eslint/typescript-estree': 5.62.0(typescript@4.9.5)
       '@typescript-eslint/utils': 5.62.0(eslint@8.57.1)(typescript@4.9.5)
-      debug: 4.4.3(supports-color@8.1.1)
+      debug: 4.4.3(supports-color@5.5.0)
       eslint: 8.57.1
       tsutils: 3.21.0(typescript@4.9.5)
     optionalDependencies:
@@ -26072,7 +26032,7 @@ snapshots:
     dependencies:
       '@typescript-eslint/typescript-estree': 6.21.0(typescript@5.6.3)
       '@typescript-eslint/utils': 6.21.0(eslint@8.57.1)(typescript@5.6.3)
-      debug: 4.4.3(supports-color@8.1.1)
+      debug: 4.4.3(supports-color@5.5.0)
       eslint: 8.57.1
       ts-api-utils: 1.4.3(typescript@5.6.3)
     optionalDependencies:
@@ -26084,7 +26044,7 @@ snapshots:
     dependencies:
       '@typescript-eslint/typescript-estree': 6.21.0(typescript@5.9.2)
       '@typescript-eslint/utils': 6.21.0(eslint@8.57.1)(typescript@5.9.2)
-      debug: 4.4.3(supports-color@8.1.1)
+      debug: 4.4.3(supports-color@5.5.0)
       eslint: 8.57.1
       ts-api-utils: 1.4.3(typescript@5.9.2)
     optionalDependencies:
@@ -26096,7 +26056,7 @@ snapshots:
     dependencies:
       '@typescript-eslint/typescript-estree': 7.18.0(typescript@5.9.2)
       '@typescript-eslint/utils': 7.18.0(eslint@8.57.1)(typescript@5.9.2)
-      debug: 4.4.3(supports-color@8.1.1)
+      debug: 4.4.3(supports-color@5.5.0)
       eslint: 8.57.1
       ts-api-utils: 1.4.3(typescript@5.9.2)
     optionalDependencies:
@@ -26116,7 +26076,7 @@ snapshots:
     dependencies:
       '@typescript-eslint/types': 5.62.0
       '@typescript-eslint/visitor-keys': 5.62.0
-      debug: 4.4.3(supports-color@8.1.1)
+      debug: 4.4.3(supports-color@5.5.0)
       globby: 11.1.0
       is-glob: 4.0.3
       semver: 7.8.3
@@ -26130,7 +26090,7 @@ snapshots:
     dependencies:
       '@typescript-eslint/types': 6.21.0
       '@typescript-eslint/visitor-keys': 6.21.0
-      debug: 4.4.3(supports-color@8.1.1)
+      debug: 4.4.3(supports-color@5.5.0)
       globby: 11.1.0
       is-glob: 4.0.3
       minimatch: 9.0.9
@@ -26145,7 +26105,7 @@ snapshots:
     dependencies:
       '@typescript-eslint/types': 6.21.0
       '@typescript-eslint/visitor-keys': 6.21.0
-      debug: 4.4.3(supports-color@8.1.1)
+      debug: 4.4.3(supports-color@5.5.0)
       globby: 11.1.0
       is-glob: 4.0.3
       minimatch: 9.0.9
@@ -26160,7 +26120,7 @@ snapshots:
     dependencies:
       '@typescript-eslint/types': 7.18.0
       '@typescript-eslint/visitor-keys': 7.18.0
-      debug: 4.4.3(supports-color@8.1.1)
+      debug: 4.4.3(supports-color@5.5.0)
       globby: 11.1.0
       is-glob: 4.0.3
       minimatch: 9.0.9
@@ -26175,7 +26135,7 @@ snapshots:
     dependencies:
       '@typescript-eslint/types': 7.18.0
       '@typescript-eslint/visitor-keys': 7.18.0
-      debug: 4.4.3(supports-color@8.1.1)
+      debug: 4.4.3(supports-color@5.5.0)
       globby: 11.1.0
       is-glob: 4.0.3
       minimatch: 9.0.9
@@ -26192,7 +26152,7 @@ snapshots:
       '@typescript-eslint/tsconfig-utils': 8.46.0(typescript@5.9.2)
       '@typescript-eslint/types': 8.46.0
       '@typescript-eslint/visitor-keys': 8.46.0
-      debug: 4.4.3(supports-color@8.1.1)
+      debug: 4.4.3(supports-color@5.5.0)
       fast-glob: 3.3.3
       is-glob: 4.0.3
       minimatch: 9.0.9
@@ -26468,7 +26428,7 @@ snapshots:
     dependencies:
       '@ampproject/remapping': 2.3.0
       '@bcoe/v8-coverage': 0.2.3
-      debug: 4.4.3(supports-color@8.1.1)
+      debug: 4.4.3(supports-color@5.5.0)
       istanbul-lib-coverage: 3.2.2
       istanbul-lib-report: 3.0.1
       istanbul-lib-source-maps: 5.0.6
@@ -26569,7 +26529,7 @@ snapshots:
       pathe: 1.1.2
       picocolors: 1.1.1
       sirv: 2.0.4
-      vitest: 1.6.1(@types/node@20.19.17)(@vitest/ui@1.6.1)(jsdom@24.1.3)(lightningcss@1.32.0)(terser@5.44.1)
+      vitest: 1.6.1(@types/node@24.6.1)(@vitest/ui@1.6.1)(jsdom@24.1.3)(lightningcss@1.32.0)(terser@5.44.1)
     optional: true
 
   '@vitest/ui@3.2.6(vitest@3.2.6)':
@@ -26729,7 +26689,7 @@ snapshots:
 
   agent-base@6.0.2:
     dependencies:
-      debug: 4.4.3(supports-color@8.1.1)
+      debug: 4.4.3(supports-color@5.5.0)
     transitivePeerDependencies:
       - supports-color
 
@@ -26974,7 +26934,7 @@ snapshots:
 
   arrivals@2.1.2:
     dependencies:
-      debug: 4.4.3(supports-color@8.1.1)
+      debug: 4.4.3(supports-color@5.5.0)
       nanotimer: 0.3.14
     transitivePeerDependencies:
       - supports-color
@@ -26983,7 +26943,7 @@ snapshots:
     dependencies:
       '@playwright/browser-chromium': 1.55.0
       '@playwright/test': 1.55.0
-      debug: 4.4.3(supports-color@8.1.1)
+      debug: 4.4.3(supports-color@5.5.0)
       playwright: 1.55.0
     transitivePeerDependencies:
       - supports-color
@@ -26993,7 +26953,7 @@ snapshots:
   artillery-plugin-ensure@1.20.0:
     dependencies:
       chalk: 2.4.2
-      debug: 4.4.3(supports-color@8.1.1)
+      debug: 4.4.3(supports-color@5.5.0)
       filtrex: 2.2.3
     transitivePeerDependencies:
       - supports-color
@@ -27001,7 +26961,7 @@ snapshots:
   artillery-plugin-expect@2.20.0:
     dependencies:
       chalk: 4.1.2
-      debug: 4.4.3(supports-color@8.1.1)
+      debug: 4.4.3(supports-color@5.5.0)
       jmespath: 0.16.0
       lodash: 4.18.1
     transitivePeerDependencies:
@@ -27013,7 +26973,7 @@ snapshots:
 
   artillery-plugin-metrics-by-endpoint@1.20.0:
     dependencies:
-      debug: 4.4.3(supports-color@8.1.1)
+      debug: 4.4.3(supports-color@5.5.0)
     transitivePeerDependencies:
       - supports-color
 
@@ -27035,7 +26995,7 @@ snapshots:
       '@opentelemetry/semantic-conventions': 1.37.0
       async: 2.6.4
       datadog-metrics: 0.9.3
-      debug: 4.4.3(supports-color@8.1.1)
+      debug: 4.4.3(supports-color@5.5.0)
       dogapi: 2.8.4
       hot-shots: 6.8.7
       mixpanel: 0.13.0
@@ -27049,7 +27009,7 @@ snapshots:
 
   artillery-plugin-slack@1.15.0:
     dependencies:
-      debug: 4.4.3(supports-color@8.1.1)
+      debug: 4.4.3(supports-color@5.5.0)
       got: 11.8.6
     transitivePeerDependencies:
       - supports-color
@@ -27092,7 +27052,7 @@ snapshots:
       cli-table3: 0.6.5
       cross-spawn: 7.0.6
       csv-parse: 4.16.3
-      debug: 4.4.3(supports-color@8.1.1)
+      debug: 4.4.3(supports-color@5.5.0)
       dependency-tree: 11.2.0
       detective-es6: 4.0.1
       dotenv: 16.6.1
@@ -27159,8 +27119,6 @@ snapshots:
 
   async-function@1.0.0: {}
 
-  async-limiter@1.0.1: {}
-
   async-lock@1.4.1: {}
 
   async@2.6.4:
@@ -27201,7 +27159,7 @@ snapshots:
   axios@1.17.0:
     dependencies:
       follow-redirects: 1.16.0
-      form-data: 4.0.5
+      form-data: 4.0.6
       https-proxy-agent: 5.0.1
       proxy-from-env: 2.1.0
     transitivePeerDependencies:
@@ -27613,7 +27571,7 @@ snapshots:
     dependencies:
       bytes: 3.1.2
       content-type: 1.0.5
-      debug: 4.4.3(supports-color@8.1.1)
+      debug: 4.4.3(supports-color@5.5.0)
       http-errors: 2.0.0
       iconv-lite: 0.6.3
       on-finished: 2.4.1
@@ -28809,7 +28767,7 @@ snapshots:
       tmp: 0.2.7
       trace-event-lib: 1.4.1
       which: 1.3.1
-      ws: 7.5.10
+      ws: 8.21.0
       yargs: 17.7.2
       yargs-parser: 21.1.1
       yargs-unparser: 2.0.0
@@ -28860,7 +28818,7 @@ snapshots:
 
   docker-modem@5.0.6:
     dependencies:
-      debug: 4.4.3(supports-color@8.1.1)
+      debug: 4.4.3(supports-color@5.5.0)
       readable-stream: 3.6.2
       split-ca: 1.0.1
       ssh2: 1.17.0
@@ -29068,7 +29026,7 @@ snapshots:
       '@socket.io/component-emitter': 3.1.2
       debug: 4.3.7
       engine.io-parser: 5.2.3
-      ws: 8.17.1
+      ws: 8.21.0
       xmlhttprequest-ssl: 2.1.2
     transitivePeerDependencies:
       - bufferutil
@@ -29087,7 +29045,7 @@ snapshots:
       cors: 2.8.5
       debug: 4.3.7
       engine.io-parser: 5.2.3
-      ws: 8.17.1
+      ws: 8.21.0
     transitivePeerDependencies:
       - bufferutil
       - supports-color
@@ -29238,7 +29196,7 @@ snapshots:
       es-errors: 1.3.0
       get-intrinsic: 1.3.0
       has-tostringtag: 1.0.2
-      hasown: 2.0.2
+      hasown: 2.0.4
 
   es-shim-unscopables@1.1.0:
     dependencies:
@@ -29279,14 +29237,14 @@ snapshots:
 
   esbuild-register@3.6.0(esbuild@0.19.12):
     dependencies:
-      debug: 4.4.3(supports-color@8.1.1)
+      debug: 4.4.3(supports-color@5.5.0)
       esbuild: 0.19.12
     transitivePeerDependencies:
       - supports-color
 
   esbuild-register@3.6.0(esbuild@0.25.10):
     dependencies:
-      debug: 4.4.3(supports-color@8.1.1)
+      debug: 4.4.3(supports-color@5.5.0)
       esbuild: 0.25.10
     transitivePeerDependencies:
       - supports-color
@@ -29558,7 +29516,7 @@ snapshots:
       ajv: 6.12.6
       chalk: 4.1.2
       cross-spawn: 7.0.6
-      debug: 4.4.3(supports-color@8.1.1)
+      debug: 4.4.3(supports-color@5.5.0)
       doctrine: 3.0.0
       escape-string-regexp: 4.0.0
       eslint-scope: 7.2.2
@@ -30011,7 +29969,7 @@ snapshots:
       content-type: 1.0.5
       cookie: 0.7.2
       cookie-signature: 1.2.2
-      debug: 4.4.3(supports-color@8.1.1)
+      debug: 4.4.3(supports-color@5.5.0)
       encodeurl: 2.0.0
       escape-html: 1.0.3
       etag: 1.8.1
@@ -30241,7 +30199,7 @@ snapshots:
 
   finalhandler@2.1.0:
     dependencies:
-      debug: 4.4.3(supports-color@8.1.1)
+      debug: 4.4.3(supports-color@5.5.0)
       encodeurl: 2.0.0
       escape-html: 1.0.3
       on-finished: 2.4.1
@@ -30332,28 +30290,12 @@ snapshots:
       cross-spawn: 7.0.6
       signal-exit: 4.1.0
 
-  form-data@3.0.4:
+  form-data@4.0.6:
     dependencies:
       asynckit: 0.4.0
       combined-stream: 1.0.8
       es-set-tostringtag: 2.1.0
-      hasown: 2.0.2
-      mime-types: 2.1.35
-
-  form-data@4.0.4:
-    dependencies:
-      asynckit: 0.4.0
-      combined-stream: 1.0.8
-      es-set-tostringtag: 2.1.0
-      hasown: 2.0.2
-      mime-types: 2.1.35
-
-  form-data@4.0.5:
-    dependencies:
-      asynckit: 0.4.0
-      combined-stream: 1.0.8
-      es-set-tostringtag: 2.1.0
-      hasown: 2.0.2
+      hasown: 2.0.4
       mime-types: 2.1.35
 
   formdata-polyfill@4.0.10:
@@ -30729,6 +30671,10 @@ snapshots:
     dependencies:
       function-bind: 1.1.2
 
+  hasown@2.0.4:
+    dependencies:
+      function-bind: 1.1.2
+
   hast-util-to-html@9.0.5:
     dependencies:
       '@types/hast': 3.0.4
@@ -30831,14 +30777,14 @@ snapshots:
     dependencies:
       '@tootallnate/once': 2.0.0
       agent-base: 6.0.2
-      debug: 4.4.3(supports-color@8.1.1)
+      debug: 4.4.3(supports-color@5.5.0)
     transitivePeerDependencies:
       - supports-color
 
   http-proxy-agent@7.0.2:
     dependencies:
       agent-base: 7.1.4
-      debug: 4.4.3(supports-color@8.1.1)
+      debug: 4.4.3(supports-color@5.5.0)
     transitivePeerDependencies:
       - supports-color
 
@@ -30877,21 +30823,21 @@ snapshots:
   https-proxy-agent@5.0.0:
     dependencies:
       agent-base: 6.0.2
-      debug: 4.4.3(supports-color@8.1.1)
+      debug: 4.4.3(supports-color@5.5.0)
     transitivePeerDependencies:
       - supports-color
 
   https-proxy-agent@5.0.1:
     dependencies:
       agent-base: 6.0.2
-      debug: 4.4.3(supports-color@8.1.1)
+      debug: 4.4.3(supports-color@5.5.0)
     transitivePeerDependencies:
       - supports-color
 
   https-proxy-agent@7.0.6:
     dependencies:
       agent-base: 7.1.4
-      debug: 4.4.3(supports-color@8.1.1)
+      debug: 4.4.3(supports-color@5.5.0)
     transitivePeerDependencies:
       - supports-color
 
@@ -31046,7 +30992,7 @@ snapshots:
     dependencies:
       '@ioredis/commands': 1.4.0
       cluster-key-slot: 1.1.2
-      debug: 4.4.3(supports-color@8.1.1)
+      debug: 4.4.3(supports-color@5.5.0)
       denque: 2.1.0
       lodash.defaults: 4.2.0
       lodash.isarguments: 3.1.0
@@ -31318,7 +31264,7 @@ snapshots:
 
   istanbul-lib-source-maps@4.0.1:
     dependencies:
-      debug: 4.4.3(supports-color@8.1.1)
+      debug: 4.4.3(supports-color@5.5.0)
       istanbul-lib-coverage: 3.2.2
       source-map: 0.6.1
     transitivePeerDependencies:
@@ -31327,7 +31273,7 @@ snapshots:
   istanbul-lib-source-maps@5.0.6:
     dependencies:
       '@jridgewell/trace-mapping': 0.3.31
-      debug: 4.4.3(supports-color@8.1.1)
+      debug: 4.4.3(supports-color@5.5.0)
       istanbul-lib-coverage: 3.2.2
     transitivePeerDependencies:
       - supports-color
@@ -32029,7 +31975,7 @@ snapshots:
       decimal.js: 10.6.0
       domexception: 4.0.0
       escodegen: 2.1.0
-      form-data: 4.0.5
+      form-data: 4.0.6
       html-encoding-sniffer: 3.0.0
       http-proxy-agent: 5.0.0
       https-proxy-agent: 5.0.1
@@ -32044,7 +31990,7 @@ snapshots:
       whatwg-encoding: 2.0.0
       whatwg-mimetype: 3.0.0
       whatwg-url: 11.0.0
-      ws: 8.18.3
+      ws: 8.21.0
       xml-name-validator: 4.0.0
     transitivePeerDependencies:
       - bufferutil
@@ -32056,7 +32002,7 @@ snapshots:
       cssstyle: 4.6.0
       data-urls: 5.0.0
       decimal.js: 10.6.0
-      form-data: 4.0.4
+      form-data: 4.0.6
       html-encoding-sniffer: 4.0.0
       http-proxy-agent: 7.0.2
       https-proxy-agent: 7.0.6
@@ -32072,7 +32018,7 @@ snapshots:
       whatwg-encoding: 3.1.1
       whatwg-mimetype: 4.0.0
       whatwg-url: 14.2.0
-      ws: 8.18.3
+      ws: 8.21.0
       xml-name-validator: 5.0.0
     transitivePeerDependencies:
       - bufferutil
@@ -32120,7 +32066,7 @@ snapshots:
 
   json-schema-resolver@2.0.0:
     dependencies:
-      debug: 4.4.3(supports-color@8.1.1)
+      debug: 4.4.3(supports-color@5.5.0)
       rfdc: 1.4.1
       uri-js: 4.4.1
     transitivePeerDependencies:
@@ -32708,7 +32654,7 @@ snapshots:
     dependencies:
       connect: 3.7.0
       debug: 2.6.9
-      ws: 7.5.10
+      ws: 8.21.0
       yargs: 17.7.2
     transitivePeerDependencies:
       - bufferutil
@@ -33020,7 +32966,7 @@ snapshots:
       strip-ansi: 6.0.1
       temp: 0.8.3
       throat: 5.0.0
-      ws: 7.5.10
+      ws: 8.21.0
       yargs: 17.7.2
     transitivePeerDependencies:
       - bufferutil
@@ -33199,7 +33145,7 @@ snapshots:
 
   ms@2.1.3: {}
 
-  multer@2.1.1:
+  multer@2.2.0:
     dependencies:
       append-field: 1.0.0
       busboy: 1.6.0
@@ -33280,7 +33226,7 @@ snapshots:
 
   nock@13.5.6:
     dependencies:
-      debug: 4.4.3(supports-color@8.1.1)
+      debug: 4.4.3(supports-color@5.5.0)
       json-stringify-safe: 5.0.1
       propagate: 2.0.1
     transitivePeerDependencies:
@@ -33544,9 +33490,9 @@ snapshots:
       is-docker: 2.2.1
       is-wsl: 2.2.0
 
-  openai@6.3.0(ws@8.18.3)(zod@3.25.76):
+  openai@6.3.0(ws@8.21.0)(zod@3.25.76):
     optionalDependencies:
-      ws: 8.18.3
+      ws: 8.21.0
       zod: 3.25.76
 
   openapi-types@12.1.3: {}
@@ -33940,7 +33886,7 @@ snapshots:
   portfinder@1.0.38:
     dependencies:
       async: 3.2.6
-      debug: 4.4.3(supports-color@8.1.1)
+      debug: 4.4.3(supports-color@5.5.0)
     transitivePeerDependencies:
       - supports-color
 
@@ -34290,7 +34236,7 @@ snapshots:
   react-devtools-core@4.28.5:
     dependencies:
       shell-quote: 1.8.4
-      ws: 7.5.10
+      ws: 8.21.0
     transitivePeerDependencies:
       - bufferutil
       - utf-8-validate
@@ -34477,7 +34423,7 @@ snapshots:
       stacktrace-parser: 0.1.11
       use-sync-external-store: 1.6.0(react@18.2.0)
       whatwg-fetch: 3.6.20
-      ws: 6.2.3
+      ws: 8.21.0
     transitivePeerDependencies:
       - '@babel/core'
       - '@babel/preset-env'
@@ -34773,7 +34719,7 @@ snapshots:
 
   require-in-the-middle@5.2.0:
     dependencies:
-      debug: 4.4.3(supports-color@8.1.1)
+      debug: 4.4.3(supports-color@5.5.0)
       module-details-from-path: 1.0.4
       resolve: 1.22.10
     transitivePeerDependencies:
@@ -34781,7 +34727,7 @@ snapshots:
 
   require-in-the-middle@7.5.2:
     dependencies:
-      debug: 4.4.3(supports-color@8.1.1)
+      debug: 4.4.3(supports-color@5.5.0)
       module-details-from-path: 1.0.4
       resolve: 1.22.10
     transitivePeerDependencies:
@@ -34789,7 +34735,7 @@ snapshots:
 
   require-in-the-middle@8.0.1:
     dependencies:
-      debug: 4.4.3(supports-color@8.1.1)
+      debug: 4.4.3(supports-color@5.5.0)
       module-details-from-path: 1.0.4
     transitivePeerDependencies:
       - supports-color
@@ -34926,7 +34872,7 @@ snapshots:
 
   router@2.2.0:
     dependencies:
-      debug: 4.4.3(supports-color@8.1.1)
+      debug: 4.4.3(supports-color@5.5.0)
       depd: 2.0.0
       is-promise: 4.0.0
       parseurl: 1.3.3
@@ -35069,7 +35015,7 @@ snapshots:
 
   send@1.2.0:
     dependencies:
-      debug: 4.4.3(supports-color@8.1.1)
+      debug: 4.4.3(supports-color@5.5.0)
       encodeurl: 2.0.0
       escape-html: 1.0.3
       etag: 1.8.1
@@ -35306,7 +35252,7 @@ snapshots:
   socket.io-adapter@2.5.5:
     dependencies:
       debug: 4.3.7
-      ws: 8.17.1
+      ws: 8.21.0
     transitivePeerDependencies:
       - bufferutil
       - supports-color
@@ -35326,7 +35272,7 @@ snapshots:
   socket.io-parser@4.2.6:
     dependencies:
       '@socket.io/component-emitter': 3.1.2
-      debug: 4.4.3(supports-color@8.1.1)
+      debug: 4.4.3(supports-color@5.5.0)
     transitivePeerDependencies:
       - supports-color
 
@@ -35422,7 +35368,7 @@ snapshots:
   sqs-consumer@6.0.2(@aws-sdk/client-sqs@3.901.0):
     dependencies:
       '@aws-sdk/client-sqs': 3.901.0
-      debug: 4.4.3(supports-color@8.1.1)
+      debug: 4.4.3(supports-color@5.5.0)
     transitivePeerDependencies:
       - supports-color
 
@@ -35680,9 +35626,9 @@ snapshots:
     dependencies:
       component-emitter: 1.3.1
       cookiejar: 2.1.4
-      debug: 4.4.3(supports-color@8.1.1)
+      debug: 4.4.3(supports-color@5.5.0)
       fast-safe-stringify: 2.1.1
-      form-data: 4.0.4
+      form-data: 4.0.6
       formidable: 3.5.4
       methods: 1.1.2
       mime: 2.6.0
@@ -35694,9 +35640,9 @@ snapshots:
     dependencies:
       component-emitter: 1.3.1
       cookiejar: 2.1.4
-      debug: 4.4.3(supports-color@8.1.1)
+      debug: 4.4.3(supports-color@5.5.0)
       fast-safe-stringify: 2.1.1
-      form-data: 4.0.5
+      form-data: 4.0.6
       formidable: 2.1.5
       methods: 1.1.2
       mime: 2.6.0
@@ -35912,7 +35858,7 @@ snapshots:
       archiver: 7.0.1
       async-lock: 1.4.1
       byline: 5.0.0
-      debug: 4.4.3(supports-color@8.1.1)
+      debug: 4.4.3(supports-color@5.5.0)
       docker-compose: 0.24.8
       dockerode: 4.0.8
       get-port: 7.1.0
@@ -36210,7 +36156,7 @@ snapshots:
       bundle-require: 4.2.1(esbuild@0.19.12)
       cac: 6.7.14
       chokidar: 3.6.0
-      debug: 4.4.3(supports-color@8.1.1)
+      debug: 4.4.3(supports-color@5.5.0)
       esbuild: 0.19.12
       execa: 5.1.1
       globby: 11.1.0
@@ -36234,7 +36180,7 @@ snapshots:
       cac: 6.7.14
       chokidar: 4.0.3
       consola: 3.4.2
-      debug: 4.4.3(supports-color@8.1.1)
+      debug: 4.4.3(supports-color@5.5.0)
       esbuild: 0.25.10
       fix-dts-default-cjs-exports: 1.0.1
       joycon: 3.1.1
@@ -36681,7 +36627,7 @@ snapshots:
   vite-node@1.6.1(@types/node@20.19.17)(lightningcss@1.32.0)(terser@5.44.1):
     dependencies:
       cac: 6.7.14
-      debug: 4.4.3(supports-color@8.1.1)
+      debug: 4.4.3(supports-color@5.5.0)
       pathe: 1.1.2
       picocolors: 1.1.1
       vite: 5.4.20(@types/node@20.19.17)(lightningcss@1.32.0)(terser@5.44.1)
@@ -36699,7 +36645,7 @@ snapshots:
   vite-node@1.6.1(@types/node@24.6.1)(lightningcss@1.32.0)(terser@5.44.1):
     dependencies:
       cac: 6.7.14
-      debug: 4.4.3(supports-color@8.1.1)
+      debug: 4.4.3(supports-color@5.5.0)
       pathe: 1.1.2
       picocolors: 1.1.1
       vite: 5.4.20(@types/node@24.6.1)(lightningcss@1.32.0)(terser@5.44.1)
@@ -36717,7 +36663,7 @@ snapshots:
   vite-node@3.2.4(@types/node@20.19.17)(jiti@1.21.7)(lightningcss@1.32.0)(terser@5.44.1)(tsx@4.22.4)(yaml@2.9.0):
     dependencies:
       cac: 6.7.14
-      debug: 4.4.3(supports-color@8.1.1)
+      debug: 4.4.3(supports-color@5.5.0)
       es-module-lexer: 1.7.0
       pathe: 2.0.3
       vite: 6.4.3(@types/node@20.19.17)(jiti@1.21.7)(lightningcss@1.32.0)(terser@5.44.1)(tsx@4.22.4)(yaml@2.9.0)
@@ -36738,7 +36684,7 @@ snapshots:
   vite-plugin-compression@0.5.1(vite@6.4.3(@types/node@20.19.17)(jiti@1.21.7)(lightningcss@1.32.0)(terser@5.44.1)(tsx@4.22.4)(yaml@2.9.0)):
     dependencies:
       chalk: 4.1.2
-      debug: 4.4.3(supports-color@8.1.1)
+      debug: 4.4.3(supports-color@5.5.0)
       fs-extra: 10.1.0
       vite: 6.4.3(@types/node@20.19.17)(jiti@1.21.7)(lightningcss@1.32.0)(terser@5.44.1)(tsx@4.22.4)(yaml@2.9.0)
     transitivePeerDependencies:
@@ -36809,7 +36755,7 @@ snapshots:
       '@vitest/utils': 1.6.1
       acorn-walk: 8.3.4
       chai: 4.5.0
-      debug: 4.4.3(supports-color@8.1.1)
+      debug: 4.4.3(supports-color@5.5.0)
       execa: 8.0.1
       local-pkg: 0.5.1
       magic-string: 0.30.19
@@ -36845,7 +36791,7 @@ snapshots:
       '@vitest/utils': 1.6.1
       acorn-walk: 8.3.4
       chai: 4.5.0
-      debug: 4.4.3(supports-color@8.1.1)
+      debug: 4.4.3(supports-color@5.5.0)
       execa: 8.0.1
       local-pkg: 0.5.1
       magic-string: 0.30.19
@@ -36883,7 +36829,7 @@ snapshots:
       '@vitest/spy': 3.2.6
       '@vitest/utils': 3.2.6
       chai: 5.3.3
-      debug: 4.4.3(supports-color@8.1.1)
+      debug: 4.4.3(supports-color@5.5.0)
       expect-type: 1.3.0
       magic-string: 0.30.21
       pathe: 2.0.3
@@ -37122,15 +37068,7 @@ snapshots:
       signal-exit: 4.1.0
     optional: true
 
-  ws@6.2.3:
-    dependencies:
-      async-limiter: 1.0.1
-
-  ws@7.5.10: {}
-
-  ws@8.17.1: {}
-
-  ws@8.18.3: {}
+  ws@8.21.0: {}
 
   wsl-utils@0.1.0:
     dependencies:
