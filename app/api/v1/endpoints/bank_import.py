@@ -122,29 +122,34 @@ def _match_transactions(db: Session, tenant_id: str,
         amount = tx["amount"]
         purpose = (tx.get("purpose") or "") + " " + (tx.get("reference") or "")
 
-        # 1. Referenz-Match
-        op = db.execute(text("""
-            SELECT id, betrag, offen, referenz_id, referenz_typ
-              FROM domain_erp.offene_posten
-             WHERE tenant_id = :tid
-               AND konto_typ = 'debitoren'
-               AND op_status = 'offen'
-               AND :purpose ILIKE '%' || referenz_id || '%'
-             LIMIT 1
-        """), {"tid": tenant_id, "purpose": purpose}).fetchone()
-
-        # 2. Betrag-Match (Fallback)
-        if not op:
+        try:
+            # 1. Referenz-Match
             op = db.execute(text("""
                 SELECT id, betrag, offen, referenz_id, referenz_typ
                   FROM domain_erp.offene_posten
                  WHERE tenant_id = :tid
                    AND konto_typ = 'debitoren'
                    AND op_status = 'offen'
-                   AND ABS(offen - :amt) <= 0.01
-                 ORDER BY faellig_am ASC
+                   AND :purpose ILIKE '%' || referenz_id || '%'
                  LIMIT 1
-            """), {"tid": tenant_id, "amt": amount}).fetchone()
+            """), {"tid": tenant_id, "purpose": purpose}).fetchone()
+
+            # 2. Betrag-Match (Fallback)
+            if not op:
+                op = db.execute(text("""
+                    SELECT id, betrag, offen, referenz_id, referenz_typ
+                      FROM domain_erp.offene_posten
+                     WHERE tenant_id = :tid
+                       AND konto_typ = 'debitoren'
+                       AND op_status = 'offen'
+                       AND ABS(offen - :amt) <= 0.01
+                     ORDER BY faellig_am ASC
+                     LIMIT 1
+                """), {"tid": tenant_id, "amt": amount}).fetchone()
+        except Exception:
+            db.rollback()
+            unmatched += 1
+            continue
 
         if op:
             db.execute(text("""
