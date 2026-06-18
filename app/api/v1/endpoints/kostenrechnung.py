@@ -156,7 +156,7 @@ class KostenstellenReport(BaseModel):
 
 # ── Kostenstellen CRUD ────────────────────────────────────────────────────────
 
-@router.get("/kostenstellen", response_model=list[KostenstelleOut])
+@router.get("/kostenstellen", response_model=list[KostenstelleOut], summary="GET /kostenstellen")
 def list_kostenstellen(
     art: Optional[str] = Query(None),
     aktiv: Optional[bool] = Query(True),
@@ -176,7 +176,7 @@ def list_kostenstellen(
     return [dict(r) for r in rows]
 
 
-@router.get("/kostenstellen/{kst_id}", response_model=KostenstelleOut)
+@router.get("/kostenstellen/{kst_id}", response_model=KostenstelleOut, summary="GET /kostenstellen/{kst_id}")
 def get_kostenstelle(kst_id: str, db=Depends(get_db), tenant_id: str = Depends(get_tenant_id)):
     row = db.execute(
         text("SELECT * FROM domain_finance.kostenstellen WHERE id = :id AND tenant_id = :tid"),
@@ -187,7 +187,7 @@ def get_kostenstelle(kst_id: str, db=Depends(get_db), tenant_id: str = Depends(g
     return dict(row)
 
 
-@router.post("/kostenstellen", response_model=KostenstelleOut, status_code=201)
+@router.post("/kostenstellen", response_model=KostenstelleOut, status_code=201, summary="POST /kostenstellen")
 def create_kostenstelle(payload: KostenstelleCreate, db=Depends(get_db), tenant_id: str = Depends(get_tenant_id)):
     # Duplikat-Check
     existing = db.execute(
@@ -229,7 +229,7 @@ def create_kostenstelle(payload: KostenstelleCreate, db=Depends(get_db), tenant_
     return dict(row)
 
 
-@router.patch("/kostenstellen/{kst_id}", response_model=KostenstelleOut)
+@router.patch("/kostenstellen/{kst_id}", response_model=KostenstelleOut, summary="PATCH /kostenstellen/{kst_id}")
 def update_kostenstelle(
     kst_id: str,
     payload: KostenstelleCreate,
@@ -277,7 +277,7 @@ def update_kostenstelle(
     return dict(row)
 
 
-@router.delete("/kostenstellen/{kst_id}", response_class=Response, status_code=204)
+@router.delete("/kostenstellen/{kst_id}", response_class=Response, status_code=204, summary="DELETE /kostenstellen/{kst_id}")
 def delete_kostenstelle(kst_id: str, db=Depends(get_db), tenant_id: str = Depends(get_tenant_id)):
     existing = db.execute(
         text("SELECT id FROM domain_finance.kostenstellen WHERE id = :id AND tenant_id = :tid"),
@@ -301,7 +301,7 @@ def delete_kostenstelle(kst_id: str, db=Depends(get_db), tenant_id: str = Depend
 
 # ── Kostenarten CRUD ──────────────────────────────────────────────────────────
 
-@router.get("/kostenarten", response_model=list[KostenartOut])
+@router.get("/kostenarten", response_model=list[KostenartOut], summary="GET /kostenarten")
 def list_kostenarten(
     aktiv: Optional[bool] = Query(True),
     gruppe: Optional[str] = Query(None),
@@ -320,7 +320,7 @@ def list_kostenarten(
     return [dict(r) for r in db.execute(text(sql), params).mappings().all()]
 
 
-@router.post("/kostenarten", response_model=KostenartOut, status_code=201)
+@router.post("/kostenarten", response_model=KostenartOut, status_code=201, summary="POST /kostenarten")
 def create_kostenart(payload: KostenartCreate, db=Depends(get_db), tenant_id: str = Depends(get_tenant_id)):
     existing = db.execute(
         text("SELECT id FROM domain_finance.kostenarten WHERE tenant_id = :tid AND nummer = :nr"),
@@ -347,7 +347,7 @@ def create_kostenart(payload: KostenartCreate, db=Depends(get_db), tenant_id: st
     return dict(row)
 
 
-@router.delete("/kostenarten/{koa_id}", response_class=Response, status_code=204)
+@router.delete("/kostenarten/{koa_id}", response_class=Response, status_code=204, summary="DELETE /kostenarten/{koa_id}")
 def delete_kostenart(koa_id: str, db=Depends(get_db), tenant_id: str = Depends(get_tenant_id)):
     db.execute(
         text("DELETE FROM domain_finance.kostenarten WHERE id = :id AND tenant_id = :tid"),
@@ -359,7 +359,7 @@ def delete_kostenart(koa_id: str, db=Depends(get_db), tenant_id: str = Depends(g
 
 # ── Kostenbuchungen ───────────────────────────────────────────────────────────
 
-@router.get("/buchungen", response_model=list[BuchungOut])
+@router.get("/buchungen", response_model=list[BuchungOut], summary="GET /buchungen")
 def list_buchungen(
     kostenstelle_id: Optional[str] = Query(None),
     periode: Optional[str] = Query(None, description="Format: YYYY-MM"),
@@ -378,7 +378,7 @@ def list_buchungen(
     return [dict(r) for r in db.execute(text(sql), params).mappings().all()]
 
 
-@router.post("/buchungen", response_model=BuchungOut, status_code=201)
+@router.post("/buchungen", response_model=BuchungOut, status_code=201, summary="POST /buchungen")
 def create_buchung(payload: BuchungCreate, db=Depends(get_db), tenant_id: str = Depends(get_tenant_id)):
     kst = db.execute(
         text("SELECT id FROM domain_finance.kostenstellen WHERE id = :id AND tenant_id = :tid"),
@@ -411,7 +411,7 @@ def create_buchung(payload: BuchungCreate, db=Depends(get_db), tenant_id: str = 
     return dict(row)
 
 
-@router.delete("/buchungen/{buchung_id}", response_class=Response, status_code=204)
+@router.delete("/buchungen/{buchung_id}", response_class=Response, status_code=204, summary="DELETE /buchungen/{buchung_id}")
 def delete_buchung(buchung_id: str, db=Depends(get_db), tenant_id: str = Depends(get_tenant_id)):
     db.execute(
         text("DELETE FROM domain_finance.kostenstellen_buchungen WHERE id = :id AND tenant_id = :tid"),
@@ -423,7 +423,7 @@ def delete_buchung(buchung_id: str, db=Depends(get_db), tenant_id: str = Depends
 
 # ── Auswertung ────────────────────────────────────────────────────────────────
 
-@router.get("/report", response_model=KostenstellenReport)
+@router.get("/report", response_model=KostenstellenReport, summary="GET /report")
 def get_report(
     von: date = Query(..., description="Periode von (YYYY-MM-DD)"),
     bis: date = Query(..., description="Periode bis (YYYY-MM-DD)"),

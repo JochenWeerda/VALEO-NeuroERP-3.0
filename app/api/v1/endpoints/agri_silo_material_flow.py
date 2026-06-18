@@ -112,7 +112,7 @@ class ValidateRouteIn(BaseModel):
 # ── Siloanlagen ────────────────────────────────────────────────────────────
 
 
-@router.get("/silo-systems")
+@router.get("/silo-systems", summary="GET /silo-systems")
 def list_silo_systems(
     warehouse_id: Optional[str] = Query(None),
     svc: AgriSiloMaterialFlowService = Depends(_svc),
@@ -120,7 +120,7 @@ def list_silo_systems(
     return svc.list_silo_systems(warehouse_id)
 
 
-@router.post("/silo-systems", status_code=status.HTTP_201_CREATED, response_model=AgriJsonOut)
+@router.post("/silo-systems", status_code=status.HTTP_201_CREATED, response_model=AgriJsonOut, summary="POST /silo-systems")
 def create_silo_system(
     warehouse_id: str = Query(...),
     payload: SiloSystemIn = ...,
@@ -135,7 +135,7 @@ def create_silo_system(
 # ── Silozellen ──────────────────────────────────────────────────────────────
 
 
-@router.get("/silo-cells")
+@router.get("/silo-cells", summary="GET /silo-cells")
 def list_silo_cells(
     warehouse_id: Optional[str] = Query(None),
     silo_system_id: Optional[str] = Query(None),
@@ -144,7 +144,7 @@ def list_silo_cells(
     return svc.list_silo_cells(warehouse_id, silo_system_id)
 
 
-@router.post("/silo-cells", status_code=status.HTTP_201_CREATED, response_model=AgriJsonOut)
+@router.post("/silo-cells", status_code=status.HTTP_201_CREATED, response_model=AgriJsonOut, summary="POST /silo-cells")
 def create_silo_cell(
     silo_system_id: str = Query(...),
     warehouse_id: str = Query(...),
@@ -157,7 +157,7 @@ def create_silo_cell(
         raise HTTPException(status_code=422, detail=str(e))
 
 
-@router.patch("/silo-cells/{cell_id}", response_model=AgriJsonOut)
+@router.patch("/silo-cells/{cell_id}", response_model=AgriJsonOut, summary="PATCH /silo-cells/{cell_id}")
 def patch_silo_cell(
     cell_id: str,
     warehouse_id: str = Query(...),
@@ -174,7 +174,7 @@ def patch_silo_cell(
 # ── Materialfluss ───────────────────────────────────────────────────────────
 
 
-@router.get("/material-flow/nodes")
+@router.get("/material-flow/nodes", summary="GET /material-flow/nodes")
 def list_flow_nodes(
     warehouse_id: Optional[str] = Query(None),
     svc: AgriSiloMaterialFlowService = Depends(_svc),
@@ -182,7 +182,7 @@ def list_flow_nodes(
     return svc.list_material_flow_nodes(warehouse_id)
 
 
-@router.post("/material-flow/nodes", status_code=status.HTTP_201_CREATED, response_model=AgriJsonOut)
+@router.post("/material-flow/nodes", status_code=status.HTTP_201_CREATED, response_model=AgriJsonOut, summary="POST /material-flow/nodes")
 def create_flow_node(
     warehouse_id: str = Query(...),
     payload: MaterialFlowNodeIn = ...,
@@ -194,7 +194,7 @@ def create_flow_node(
         raise HTTPException(status_code=422, detail=str(e))
 
 
-@router.patch("/material-flow/nodes/{node_id}", response_model=AgriJsonOut)
+@router.patch("/material-flow/nodes/{node_id}", response_model=AgriJsonOut, summary="PATCH /material-flow/nodes/{node_id}")
 def patch_flow_node(
     node_id: str,
     warehouse_id: str = Query(...),
@@ -208,7 +208,7 @@ def patch_flow_node(
         raise HTTPException(status_code=422, detail=str(e))
 
 
-@router.get("/material-flow/edges")
+@router.get("/material-flow/edges", summary="GET /material-flow/edges")
 def list_flow_edges(
     warehouse_id: Optional[str] = Query(None),
     svc: AgriSiloMaterialFlowService = Depends(_svc),
@@ -216,7 +216,7 @@ def list_flow_edges(
     return svc.list_material_flow_edges(warehouse_id)
 
 
-@router.post("/material-flow/edges", status_code=status.HTTP_201_CREATED, response_model=AgriJsonOut)
+@router.post("/material-flow/edges", status_code=status.HTTP_201_CREATED, response_model=AgriJsonOut, summary="POST /material-flow/edges")
 def create_flow_edge(
     warehouse_id: str = Query(...),
     payload: MaterialFlowEdgeIn = ...,
@@ -228,7 +228,7 @@ def create_flow_edge(
         raise HTTPException(status_code=422, detail=str(e))
 
 
-@router.patch("/material-flow/edges/{edge_id}", response_model=AgriJsonOut)
+@router.patch("/material-flow/edges/{edge_id}", response_model=AgriJsonOut, summary="PATCH /material-flow/edges/{edge_id}")
 def patch_flow_edge(
     edge_id: str,
     warehouse_id: str = Query(...),
@@ -242,7 +242,7 @@ def patch_flow_edge(
         raise HTTPException(status_code=422, detail=str(e))
 
 
-@router.post("/material-flow/validate-route", response_model=AgriJsonOut)
+@router.post("/material-flow/validate-route", response_model=AgriJsonOut, summary="POST /material-flow/validate-route")
 def validate_route(
     payload: ValidateRouteIn = ...,
     svc: AgriSiloMaterialFlowService = Depends(_svc),
@@ -267,7 +267,7 @@ class MaterialTransferIn(BaseModel):
     reference: Optional[str] = None
 
 
-@router.post("/material-flow/transfer", response_model=AgriJsonOut, status_code=200)
+@router.post("/material-flow/transfer", response_model=AgriJsonOut, status_code=200, summary="POST /material-flow/transfer")
 def book_material_transfer(
     payload: MaterialTransferIn,
     svc: AgriSiloMaterialFlowService = Depends(_svc),
