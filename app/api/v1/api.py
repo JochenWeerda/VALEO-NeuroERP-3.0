@@ -37,6 +37,7 @@ from app.api.v1.endpoints import (
     docflow,
     warehouses,
     warehouse_wms,
+    agri_lot_link_booking,
     agri_silo_material_flow,
     policies,
     gap,
@@ -1301,6 +1302,12 @@ api_router.include_router(
     agri_silo_material_flow.router,
     prefix="/lager/wms/agri",
     tags=["lager", "wms", "agri", "inventory", "silo", "materialfluss"],
+)
+
+api_router.include_router(
+    agri_lot_link_booking.router,
+    prefix="/lager/wms/agri",
+    tags=["lager", "wms", "agri", "inventory", "silo", "lot-link"],
 )
 
 api_router.include_router(
