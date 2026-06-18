@@ -9,25 +9,30 @@ import {
   createBuchung,
   createKostenart,
   createKostenstelle,
+  createUmlage,
   deleteBuchung,
   deleteKostenart,
   deleteKostenstelle,
+  getBAB,
   getKostenstellenReport,
   listBuchungen,
   listKostenarten,
   listKostenstellen,
   updateKostenstelle,
+  type BABZeile,
   type KostenstelleArt,
   type Kostenstelle,
   type Kostenart,
   type Kostenbuchung,
   type KostenstelleAuswertung,
+  type UmlageCreate,
 } from '@/lib/api/kostenrechnung'
 import {
   BarChart3,
   BookOpen,
   Building2,
   Euro,
+  GitMerge,
   Plus,
   Tag,
   Trash2,
@@ -35,7 +40,7 @@ import {
   TrendingUp,
 } from 'lucide-react'
 
-const TABS = ['Auswertung', 'Kostenstellen', 'Kostenarten', 'Buchungen'] as const
+const TABS = ['Auswertung', 'BAB', 'Kostenstellen', 'Kostenarten', 'Buchungen'] as const
 type Tab = (typeof TABS)[number]
 
 const KST_ARTEN: KostenstelleArt[] = ['KOSTENSTELLE', 'KOSTENTRAEGER', 'PROJEKT', 'ABTEILUNG']
@@ -686,6 +691,192 @@ function BuchungenTab() {
   )
 }
 
+// ── BAB-Tab (KORE-BAB-001) ────────────────────────────────────────────────────
+
+function BABTab(): JSX.Element {
+  const [periode, setPeriode] = useState(() => new Date().toISOString().slice(0, 7))
+  const { toast } = useToast()
+  const qc = useQueryClient()
+
+  const { data: bab, isLoading } = useQuery({
+    queryKey: ['kore-bab', periode],
+    queryFn: () => getBAB(periode),
+    enabled: !!periode,
+  })
+
+  const { data: kostenstellen = [] } = useQuery({
+    queryKey: ['kostenstellen'],
+    queryFn: () => listKostenstellen({ aktiv: true }),
+  })
+
+  const [umlageForm, setUmlageForm] = useState<Partial<UmlageCreate>>({ umlage_art: 'PROZENT' })
+  const [savingUmlage, setSavingUmlage] = useState(false)
+
+  const handleUmlage = async () => {
+    if (!umlageForm.von_kostenstelle_id || !umlageForm.nach_kostenstelle_id || !umlageForm.umlage_wert) {
+      toast({ title: 'Pflichtfelder fehlen', variant: 'destructive' })
+      return
+    }
+    setSavingUmlage(true)
+    try {
+      const res = await createUmlage(periode, umlageForm as UmlageCreate)
+      toast({ title: `Umlage gespeichert (${res.umlagebetrag_eur.toFixed(2)} €)` })
+      qc.invalidateQueries({ queryKey: ['kore-bab'] })
+      setUmlageForm({ umlage_art: 'PROZENT' })
+    } catch {
+      toast({ title: 'Fehler beim Speichern', variant: 'destructive' })
+    } finally {
+      setSavingUmlage(false)
+    }
+  }
+
+  const abwColor = (pct: number) =>
+    pct >= 0 ? 'text-green-600' : Math.abs(pct) < 10 ? 'text-amber-600' : 'text-red-600'
+
+  return (
+    <div className="space-y-4">
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <GitMerge className="h-5 w-5" />
+            Betriebsabrechnungsbogen (BAB)
+          </CardTitle>
+          <CardDescription>Primärkosten + Umlagen = Gesamtkosten je KST, Plan/Ist-Vergleich</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="flex gap-3 items-center">
+            <label className="text-sm font-medium">Periode</label>
+            <Input type="month" value={periode} onChange={e => setPeriode(e.target.value)} className="w-40" />
+          </div>
+
+          {isLoading && <p className="text-sm text-muted-foreground">Lade BAB…</p>}
+          {bab && (
+            <>
+              <div className="grid grid-cols-3 gap-3">
+                <div className="rounded border p-3">
+                  <p className="text-xs text-muted-foreground">Primärkosten</p>
+                  <p className="text-lg font-semibold">{bab.gesamt_primaer_eur.toFixed(2)} €</p>
+                </div>
+                <div className="rounded border p-3">
+                  <p className="text-xs text-muted-foreground">Umlagen (Eingang)</p>
+                  <p className="text-lg font-semibold">{bab.gesamt_umlage_eur.toFixed(2)} €</p>
+                </div>
+                <div className="rounded border p-3">
+                  <p className="text-xs text-muted-foreground">Gesamtkosten</p>
+                  <p className="text-lg font-bold">{bab.gesamt_kosten_eur.toFixed(2)} €</p>
+                </div>
+              </div>
+
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead className="bg-muted/50">
+                    <tr>
+                      <th className="text-left p-2">Nr.</th>
+                      <th className="text-left p-2">Bezeichnung</th>
+                      <th className="text-right p-2">Primär €</th>
+                      <th className="text-right p-2">Uml. Ein</th>
+                      <th className="text-right p-2">Uml. Aus</th>
+                      <th className="text-right p-2">Gesamt €</th>
+                      <th className="text-right p-2">Budget €</th>
+                      <th className="text-right p-2">Abw. %</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {bab.zeilen.map((z: BABZeile) => (
+                      <tr key={z.kostenstelle_id} className="border-b hover:bg-muted/20">
+                        <td className="p-2 font-mono text-xs">{z.nummer}</td>
+                        <td className="p-2">{z.bezeichnung}</td>
+                        <td className="p-2 text-right">{z.primaerkosten_eur.toFixed(2)}</td>
+                        <td className="p-2 text-right text-green-700">{z.umlage_eingang_eur > 0 ? `+${z.umlage_eingang_eur.toFixed(2)}` : '—'}</td>
+                        <td className="p-2 text-right text-red-600">{z.umlage_ausgang_eur > 0 ? `-${z.umlage_ausgang_eur.toFixed(2)}` : '—'}</td>
+                        <td className="p-2 text-right font-semibold">{z.gesamtkosten_eur.toFixed(2)}</td>
+                        <td className="p-2 text-right">{z.budget_eur.toFixed(2)}</td>
+                        <td className={`p-2 text-right font-medium ${abwColor(z.abweichung_pct)}`}>
+                          {z.abweichung_pct > 0 ? '+' : ''}{z.abweichung_pct.toFixed(1)}%
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </>
+          )}
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">Kostenumlage erfassen</CardTitle>
+          <CardDescription>Gemeinkosten von einer KST auf eine andere verteilen</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-2 gap-3 md:grid-cols-3">
+            <div>
+              <label className="text-xs text-muted-foreground">Von KST</label>
+              <select
+                className="w-full border rounded px-2 py-1 text-sm mt-1"
+                value={umlageForm.von_kostenstelle_id || ''}
+                onChange={e => setUmlageForm(f => ({ ...f, von_kostenstelle_id: e.target.value }))}
+              >
+                <option value="">— wählen —</option>
+                {kostenstellen.map(k => <option key={k.id} value={k.id}>{k.nummer} {k.bezeichnung}</option>)}
+              </select>
+            </div>
+            <div>
+              <label className="text-xs text-muted-foreground">Nach KST</label>
+              <select
+                className="w-full border rounded px-2 py-1 text-sm mt-1"
+                value={umlageForm.nach_kostenstelle_id || ''}
+                onChange={e => setUmlageForm(f => ({ ...f, nach_kostenstelle_id: e.target.value }))}
+              >
+                <option value="">— wählen —</option>
+                {kostenstellen.map(k => <option key={k.id} value={k.id}>{k.nummer} {k.bezeichnung}</option>)}
+              </select>
+            </div>
+            <div>
+              <label className="text-xs text-muted-foreground">Art</label>
+              <select
+                className="w-full border rounded px-2 py-1 text-sm mt-1"
+                value={umlageForm.umlage_art || 'PROZENT'}
+                onChange={e => setUmlageForm(f => ({ ...f, umlage_art: e.target.value as 'PROZENT' | 'BETRAG' | 'MENGE' }))}
+              >
+                <option value="PROZENT">Prozent</option>
+                <option value="BETRAG">Fixer Betrag</option>
+                <option value="MENGE">Menge × Satz</option>
+              </select>
+            </div>
+            <div>
+              <label className="text-xs text-muted-foreground">
+                {umlageForm.umlage_art === 'PROZENT' ? 'Prozentsatz' : 'Betrag €'}
+              </label>
+              <Input
+                type="number" step="0.01" min="0"
+                value={umlageForm.umlage_wert || ''}
+                onChange={e => setUmlageForm(f => ({ ...f, umlage_wert: parseFloat(e.target.value) }))}
+                className="mt-1"
+              />
+            </div>
+            <div>
+              <label className="text-xs text-muted-foreground">Basis (optional)</label>
+              <Input
+                value={umlageForm.umlage_basis || ''}
+                onChange={e => setUmlageForm(f => ({ ...f, umlage_basis: e.target.value }))}
+                placeholder="z.B. Maschinenst."
+                className="mt-1"
+              />
+            </div>
+            <div className="flex items-end">
+              <Button onClick={handleUmlage} disabled={savingUmlage} className="w-full">
+                {savingUmlage ? 'Speichern…' : 'Umlage speichern'}
+              </Button>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  )
+}
+
 // ── Hauptseite ────────────────────────────────────────────────────────────────
 
 export default function KostenstellenrechnungPage(): JSX.Element {
@@ -696,13 +887,14 @@ export default function KostenstellenrechnungPage(): JSX.Element {
       <div>
         <h1 className="text-2xl font-bold">Kostenstellenrechnung</h1>
         <p className="text-sm text-muted-foreground mt-1">
-          Kostenstellen [KST] · Kostenarten [KOA] · Buchungen · Budget-Auswertung
+          Kostenstellen [KST] · Kostenarten [KOA] · Buchungen · BAB · Budget-Auswertung
         </p>
       </div>
 
       <TabBar active={activeTab} onChange={setActiveTab} />
 
       {activeTab === 'Auswertung' && <AuswertungTab />}
+      {activeTab === 'BAB' && <BABTab />}
       {activeTab === 'Kostenstellen' && <KostenstellenTab />}
       {activeTab === 'Kostenarten' && <KostenartenTab />}
       {activeTab === 'Buchungen' && <BuchungenTab />}

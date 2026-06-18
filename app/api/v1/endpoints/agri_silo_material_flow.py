@@ -254,3 +254,35 @@ def validate_route(
         payload.material_id,
         payload.previous_material_id,
     )
+
+
+class MaterialTransferIn(BaseModel):
+    warehouse_id: str
+    from_cell_id: str
+    to_cell_id: str
+    quantity_kg: Decimal
+    article_id: str
+    lot_id: Optional[str] = None
+    booked_by: Optional[str] = None
+    reference: Optional[str] = None
+
+
+@router.post("/material-flow/transfer", response_model=AgriJsonOut, status_code=200)
+def book_material_transfer(
+    payload: MaterialTransferIn,
+    svc: AgriSiloMaterialFlowService = Depends(_svc),
+) -> Any:
+    """WMS-FLOW-001: Materialtransfer zwischen Silozellen mit Lagerbuchung."""
+    try:
+        return svc.book_material_transfer(
+            warehouse_id=payload.warehouse_id,
+            from_cell_id=payload.from_cell_id,
+            to_cell_id=payload.to_cell_id,
+            quantity_kg=payload.quantity_kg,
+            article_id=payload.article_id,
+            lot_id=payload.lot_id,
+            booked_by=payload.booked_by or "system",
+            reference=payload.reference,
+        )
+    except ValueError as e:
+        raise HTTPException(status_code=422, detail=str(e))

@@ -1,6 +1,20 @@
 # Active Workboard
 
-Stand: `2026-06-17`
+Stand: `2026-06-18`
+
+## P0-INTEGRATION-SLICES-001 — Fachliche Integrationslücken (5 Slices)
+
+**Von:** Claude
+**Owner:** Claude
+**Stand:** in Bearbeitung 2026-06-18 — alle 5 Slices implementiert, Commit ausstehend
+**Ziel:** Schließt kritische Prozesskettenlücken aus ERP-Tiefenanalyse:
+  - WMS-FLOW-001: `book_material_transfer()` in AgriSiloMaterialFlowService + Endpoint POST /material-flow/transfer — Silozell→StockMovement-Kopplung mit Kontaminationsschutz
+  - KORE-BAB-001: BAB-Engine (GET /kostenrechnung/bab) + Kostenumlage (POST /kostenrechnung/umlagen) + BAB-Tab im Frontend
+  - CRM-360-REAL: crm_360.py komplett neu mit schema-qualifizierten Tabellennamen, 404 bei fehlendem Kunde, echte OP-Summe
+  - PROC-3WM-001: POST /procurement/match/auto + GET /procurement/match/results — Match-Persistierung in domain_procurement.procurement_match_results
+  - QS-CHARGE-001: QsChargeService (Feuchte/Unreinheiten/HL-Gewicht/Mykotoxin-Abschläge) + GET /harvest-acceptances/{id}/qs-abschlag
+  - Alembic: wms_material_flow_stock_link_20260619 (silo_cells.current_stock_kg + kostenstellen_umlagen + harvest_acceptances.quality_protocol_id + procurement_match_results)
+**Dateibesitz:** app/services/agri_silo_material_flow_service.py, app/services/qs_charge_service.py (neu), app/api/v1/endpoints/agri_silo_material_flow.py, app/api/v1/endpoints/kostenrechnung.py, app/api/v1/endpoints/crm_360.py, app/api/v1/endpoints/procurement_match.py, app/api/v1/endpoints/harvest_acceptance.py, packages/frontend-web/src/lib/api/kostenrechnung.ts, packages/frontend-web/src/pages/fibu/kostenstellenrechnung.tsx, alembic/versions/wms_material_flow_stock_link_20260619.py
 
 ## QM-REK-LAB-001 - Reklamation/Labor fachlich schliessen
 

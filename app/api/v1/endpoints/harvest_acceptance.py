@@ -547,3 +547,44 @@ async def get_frachtkosten(
     except EntityNotFoundError as exc:
         raise HTTPException(status_code=404, detail=exc.detail)
 
+
+# ── QS-CHARGE-001: QS-Abschlag-Kalkulator ────────────────────────────────────
+
+@router.get("/{acceptance_id}/qs-abschlag", summary="QS-CHARGE-001: QS-Abschläge berechnen")
+async def get_qs_abschlag(
+    acceptance_id: str,
+    net_weight_kg: float = Query(..., description="Nettomenge in kg"),
+    unit_price_eur_per_t: float = Query(..., description="Preis EUR/t"),
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+) -> dict:
+    """Berechnet QS-basierte Preisabschläge aus dem zugehörigen Qualitätsprotokoll.
+
+    Berücksichtigt Feuchte, Unreinheiten, HL-Gewicht und Mykotoxine.
+    """
+    from decimal import Decimal
+    from app.services.qs_charge_service import QsChargeService
+
+    svc = QsChargeService(db, tenant_id)
+    return svc.calculate_deductions(
+        acceptance_id=acceptance_id,
+        net_weight_kg=Decimal(str(net_weight_kg)),
+        unit_price_eur_per_t=Decimal(str(unit_price_eur_per_t)),
+    )
+
+
+@router.post("/{acceptance_id}/qs-protokoll-link", summary="QS-Protokoll mit Annahme verknüpfen")
+async def link_qs_protokoll(
+    acceptance_id: str,
+    quality_protocol_id: str = Query(...),
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+) -> dict:
+    """Setzt die quality_protocol_id auf der Ernte-Annahme (QS-CHARGE-001)."""
+    from app.services.qs_charge_service import QsChargeService
+
+    QsChargeService(db, tenant_id).link_quality_protocol_to_acceptance(
+        acceptance_id, quality_protocol_id
+    )
+    return {"ok": True, "acceptance_id": acceptance_id, "quality_protocol_id": quality_protocol_id}
+
