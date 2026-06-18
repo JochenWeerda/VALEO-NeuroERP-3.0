@@ -746,3 +746,185 @@ async def get_bvl_umsaetze(
         return [{"wirkstoff": r[0], "menge": float(r[1]), "einheit": r[2]} for r in rows]
     except Exception:
         return []
+
+
+# ── COMP-SPERR-001: Artikel-Sperr-Engine ─────────────────────────────────────
+
+from pydantic import BaseModel as _BaseModel
+
+
+class ArtikelSperreIn(_BaseModel):
+    artikel_id: str
+    sperrgrund: str   # NACHBAUPFLICHT | FUTTERMITTELRECHT | ZULASSUNG_ABGELAUFEN | MYKOTOXIN | MANUELL
+    gesperrt_bis: Optional[str] = None   # YYYY-MM-DD, None = unbegrenzt
+    bemerkung: Optional[str] = None
+
+
+class ArtikelFreigabeIn(_BaseModel):
+    bemerkung: Optional[str] = None
+
+
+_VALID_SPERRGRUENDE = {
+    "NACHBAUPFLICHT", "FUTTERMITTELRECHT", "ZULASSUNG_ABGELAUFEN",
+    "MYKOTOXIN", "QUALITAET", "MANUELL",
+}
+
+
+@router.post("/artikel-sperre", status_code=201, summary="Artikel sperren (COMP-SPERR-001)")
+async def sperre_artikel(
+    body: ArtikelSperreIn,
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+) -> dict:
+    """Setzt Artikel auf gesperrt mit Sperrgrund und optionalem Ablaufdatum.
+
+    Gesperrte Artikel dürfen nicht in Auftragserfassung, Produktion oder Settlement verwendet werden.
+    Prüfung erfolgt über GET /compliance/artikel-sperre/{artikel_id}.
+    """
+    from sqlalchemy import text
+
+    if body.sperrgrund not in _VALID_SPERRGRUENDE:
+        raise HTTPException(
+            status_code=422,
+            detail=f"Ungültiger Sperrgrund. Erlaubt: {sorted(_VALID_SPERRGRUENDE)}",
+        )
+
+    sperre_id = str(uuid4())
+    try:
+        db.execute(text("""
+            INSERT INTO domain_shared.artikel_sperren
+              (id, tenant_id, artikel_id, sperrgrund, gesperrt_bis, bemerkung,
+               gesperrt_am, status)
+            VALUES
+              (:id, :tenant_id, :artikel_id, :sperrgrund, :gesperrt_bis, :bemerkung,
+               NOW(), 'AKTIV')
+            ON CONFLICT (tenant_id, artikel_id)
+            DO UPDATE SET
+              sperrgrund = EXCLUDED.sperrgrund,
+              gesperrt_bis = EXCLUDED.gesperrt_bis,
+              bemerkung = EXCLUDED.bemerkung,
+              gesperrt_am = NOW(),
+              status = 'AKTIV'
+        """), {
+            "id": sperre_id,
+            "tenant_id": tenant_id,
+            "artikel_id": body.artikel_id,
+            "sperrgrund": body.sperrgrund,
+            "gesperrt_bis": body.gesperrt_bis,
+            "bemerkung": body.bemerkung,
+        })
+        db.commit()
+    except Exception as exc:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=f"Sperre konnte nicht gesetzt werden: {exc}") from exc
+
+    return {
+        "id": sperre_id,
+        "artikel_id": body.artikel_id,
+        "sperrgrund": body.sperrgrund,
+        "gesperrt_bis": body.gesperrt_bis,
+        "status": "AKTIV",
+        "gesperrt_am": datetime.utcnow().isoformat(),
+    }
+
+
+@router.get("/artikel-sperre/{artikel_id}", summary="Artikel-Sperrstatus prüfen")
+async def get_artikel_sperre(
+    artikel_id: str,
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+) -> dict:
+    """Gibt Sperrstatus zurück. Wird von Auftragserfassung, Settlement und Produktion aufgerufen."""
+    from sqlalchemy import text
+
+    try:
+        row = db.execute(text("""
+            SELECT id, sperrgrund, gesperrt_bis, bemerkung, gesperrt_am, status
+              FROM domain_shared.artikel_sperren
+             WHERE tenant_id = :tenant_id AND artikel_id = :artikel_id
+               AND status = 'AKTIV'
+               AND (gesperrt_bis IS NULL OR gesperrt_bis >= CURRENT_DATE)
+        """), {"tenant_id": tenant_id, "artikel_id": artikel_id}).fetchone()
+    except Exception:
+        return {"artikel_id": artikel_id, "gesperrt": False, "sperrgrund": None}
+
+    if not row:
+        return {"artikel_id": artikel_id, "gesperrt": False, "sperrgrund": None}
+
+    return {
+        "artikel_id": artikel_id,
+        "gesperrt": True,
+        "sperrgrund": row[1],
+        "gesperrt_bis": str(row[2]) if row[2] else None,
+        "bemerkung": row[3],
+        "gesperrt_am": row[4].isoformat() if row[4] else None,
+    }
+
+
+@router.delete("/artikel-sperre/{artikel_id}", summary="Artikel freigeben")
+async def freigabe_artikel(
+    artikel_id: str,
+    body: ArtikelFreigabeIn,
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+) -> dict:
+    """Hebt Artikelsperre auf (Status → AUFGEHOBEN)."""
+    from sqlalchemy import text
+
+    try:
+        result = db.execute(text("""
+            UPDATE domain_shared.artikel_sperren
+               SET status = 'AUFGEHOBEN',
+                   bemerkung = COALESCE(:bemerkung, bemerkung)
+             WHERE tenant_id = :tenant_id AND artikel_id = :artikel_id AND status = 'AKTIV'
+        """), {"tenant_id": tenant_id, "artikel_id": artikel_id, "bemerkung": body.bemerkung})
+        db.commit()
+        if result.rowcount == 0:
+            raise HTTPException(status_code=404, detail="Keine aktive Sperre für diesen Artikel gefunden")
+    except HTTPException:
+        raise
+    except Exception as exc:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=str(exc)) from exc
+
+    return {"artikel_id": artikel_id, "status": "AUFGEHOBEN"}
+
+
+@router.get("/artikel-sperren", summary="Alle aktiven Artikel-Sperren auflisten")
+async def list_artikel_sperren(
+    sperrgrund: Optional[str] = Query(None),
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+) -> dict:
+    """Listet alle aktiven Sperren (inkl. abgelaufene werden automatisch ignoriert)."""
+    from sqlalchemy import text
+
+    where = "tenant_id = :tenant_id AND status = 'AKTIV' AND (gesperrt_bis IS NULL OR gesperrt_bis >= CURRENT_DATE)"
+    params: dict = {"tenant_id": tenant_id}
+    if sperrgrund:
+        where += " AND sperrgrund = :sperrgrund"
+        params["sperrgrund"] = sperrgrund
+
+    try:
+        rows = db.execute(text(f"""
+            SELECT id, artikel_id, sperrgrund, gesperrt_bis, bemerkung, gesperrt_am
+              FROM domain_shared.artikel_sperren
+             WHERE {where}
+             ORDER BY gesperrt_am DESC
+        """), params).fetchall()
+        return {
+            "items": [
+                {
+                    "id": str(r[0]),
+                    "artikel_id": str(r[1]),
+                    "sperrgrund": r[2],
+                    "gesperrt_bis": str(r[3]) if r[3] else None,
+                    "bemerkung": r[4],
+                    "gesperrt_am": r[5].isoformat() if r[5] else None,
+                }
+                for r in rows
+            ],
+            "count": len(rows),
+        }
+    except Exception as exc:
+        raise HTTPException(status_code=503, detail=str(exc)) from exc

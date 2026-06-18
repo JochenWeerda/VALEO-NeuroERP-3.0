@@ -267,6 +267,8 @@ class ProduktionsAuftrag(Base):
     freigegeben_von = Column(String(255), nullable=True)
     freigegeben_am = Column(DateTime(timezone=True), nullable=True)
     fertig_am = Column(DateTime(timezone=True), nullable=True)
+    fibu_journal_ref = Column(String(128), nullable=True,
+                              comment="JournalEntry-Referenz nach Produktionsabschluss (PROD-FIBU-001)")
     bemerkung = Column(Text, nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
