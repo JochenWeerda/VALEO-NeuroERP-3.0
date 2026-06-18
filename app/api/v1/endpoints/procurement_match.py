@@ -6,6 +6,7 @@ Wertabweichung und Lücken je Bestellung sichtbar machen.
 
 from __future__ import annotations
 
+from decimal import Decimal
 from typing import Any, Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query
@@ -123,6 +124,21 @@ class AutoMatchIn(BaseModel):
     matched_by: Optional[str] = None
 
 
+def _decimal_from(value: Any) -> Decimal:
+    if value is None:
+        return Decimal("0")
+    return Decimal(str(value))
+
+
+def _sum_position_value(positionen: list[dict[str, Any]], field: str) -> Decimal:
+    return sum((_decimal_from(pos.get(field)) for pos in positionen), Decimal("0"))
+
+
+def _max_abs_position_delta_pct(positionen: list[dict[str, Any]]) -> Decimal:
+    deltas = [_decimal_from(pos.get("abweichung_pct")).copy_abs() for pos in positionen]
+    return max(deltas, default=Decimal("0"))
+
+
 @router.post("/match/auto", summary="PROC-3WM-001: 3-Wege-Match ausführen und Ergebnis persistieren", status_code=201)
 def auto_match_and_persist(
     body: AutoMatchIn,
@@ -131,25 +147,47 @@ def auto_match_and_persist(
 ) -> dict[str, Any]:
     """Führt den 3-Wege-Match aus und speichert das Ergebnis in procurement_match_results."""
     from sqlalchemy import text
-    from datetime import datetime, timezone
 
     service = ProcurementMatchService(db, tenant_id)
     result = service.match_three_way(body.bestellnummer)
+    if not result.get("found", False):
+        raise HTTPException(status_code=404, detail=result.get("detail") or "Bestellung nicht gefunden")
+
     three_way = result.get("three_way", {})
+    positionen = result.get("positionen") or []
+    invoices = result.get("rechnungen") or []
+    goods_receipts = result.get("wareneingaenge") or []
+    qty_delta_pct = _max_abs_position_delta_pct(positionen)
+    value_delta_pct = _decimal_from(three_way.get("abweichung_pct")).copy_abs()
+    qty_tolerance_pct = _decimal_from(body.qty_tolerance_pct)
+    price_tolerance_pct = _decimal_from(body.price_tolerance_pct)
 
-    match_ok = three_way.get("drei_wege_abgeglichen", False)
-    has_exception = result.get("summary", {}).get("hat_ausnahme", False)
-    if match_ok:
-        match_status = "MATCH_OK"
-    elif has_exception:
-        match_status = "MISMATCH"
-    else:
+    missing_context: list[str] = []
+    if not goods_receipts:
+        missing_context.append("Wareneingang")
+    if not invoices:
+        missing_context.append("Eingangsrechnung")
+
+    qty_ok = qty_delta_pct <= qty_tolerance_pct
+    value_ok = value_delta_pct <= price_tolerance_pct
+    if missing_context:
         match_status = "PENDING"
+    elif qty_ok and value_ok:
+        match_status = "MATCH_OK"
+    else:
+        match_status = "MISMATCH"
 
-    discrepancy = None
+    discrepancy_parts: list[str] = []
+    if missing_context:
+        discrepancy_parts.append(f"Offen: {', '.join(missing_context)} fehlt")
+    if not qty_ok:
+        discrepancy_parts.append(f"Mengenabweichung {qty_delta_pct}% > Toleranz {qty_tolerance_pct}%")
+    if not value_ok:
+        discrepancy_parts.append(f"Wertabweichung {value_delta_pct}% > Toleranz {price_tolerance_pct}%")
     ausnahmen = result.get("ausnahmen") or []
     if ausnahmen:
-        discrepancy = "; ".join(a.get("text", "") for a in ausnahmen[:3])
+        discrepancy_parts.extend(a.get("text", "") for a in ausnahmen[:3] if a.get("text"))
+    discrepancy = "; ".join(discrepancy_parts) or None
 
     try:
         from app.core.uuid7 import uuid7
@@ -170,10 +208,11 @@ def auto_match_and_persist(
                 "id": match_id, "tid": tenant_id,
                 "po_id": body.po_id, "gr_id": body.gr_id, "ap_id": body.ap_invoice_id,
                 "status": match_status,
-                "qty_po": three_way.get("bestellt_wert"),
-                "qty_gr": three_way.get("geliefert_wert"),
-                "qty_ap": three_way.get("fakturiert_netto"),
-                "price_po": None, "price_ap": None,
+                "qty_po": _sum_position_value(positionen, "bestellt"),
+                "qty_gr": _sum_position_value(positionen, "geliefert"),
+                "qty_ap": None,
+                "price_po": three_way.get("bestellt_wert"),
+                "price_ap": three_way.get("fakturiert_netto"),
                 "qty_tol": body.qty_tolerance_pct,
                 "price_tol": body.price_tolerance_pct,
                 "discr": discrepancy, "by": body.matched_by,
@@ -187,8 +226,17 @@ def auto_match_and_persist(
     return {
         "match_id": match_id,
         "match_status": match_status,
-        "drei_wege_abgeglichen": match_ok,
+        "drei_wege_abgeglichen": match_status == "MATCH_OK",
         "discrepancy_reason": discrepancy,
+        "tolerance_check": {
+            "qty_delta_pct": float(qty_delta_pct),
+            "qty_tolerance_pct": body.qty_tolerance_pct,
+            "qty_ok": qty_ok,
+            "value_delta_pct": float(value_delta_pct),
+            "price_tolerance_pct": body.price_tolerance_pct,
+            "value_ok": value_ok,
+            "missing_context": missing_context,
+        },
         "detail": result,
     }
 

@@ -9,6 +9,7 @@ Fachlicher Hintergrund (Referenz-ERP Domain 09 Kostenrechnung):
 
 from __future__ import annotations
 
+from calendar import monthrange
 from datetime import date, datetime, timezone
 from decimal import Decimal
 from typing import Optional
@@ -27,6 +28,28 @@ router = APIRouter(prefix="/kostenrechnung", tags=["Kostenrechnung"])
 GUELTIGE_ARTEN = {"KOSTENSTELLE", "KOSTENTRAEGER", "PROJEKT", "ABTEILUNG"}
 GUELTIGE_BUDGET_PERIODEN = {"MONAT", "QUARTAL", "JAHR"}
 GUELTIGE_KOSTENART_GRUPPEN = {"PERSONAL", "MATERIAL", "ABSCHREIBUNG", "FREMDLEISTUNG", "ENERGIE", "SONSTIGE"}
+
+
+def _period_bounds(periode: str) -> tuple[date, date]:
+    try:
+        year_s, month_s = periode.split("-", 1)
+        year = int(year_s)
+        month = int(month_s)
+        if month < 1 or month > 12:
+            raise ValueError
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail="periode muss im Format YYYY-MM vorliegen") from exc
+    return date(year, month, 1), date(year, month, monthrange(year, month)[1])
+
+
+def _monthly_budget(raw_budget: Decimal, budget_periode: Optional[str]) -> Decimal:
+    if raw_budget <= 0:
+        return Decimal("0")
+    if budget_periode == "JAHR":
+        return raw_budget / Decimal("12")
+    if budget_periode == "QUARTAL":
+        return raw_budget / Decimal("3")
+    return raw_budget
 
 
 # ── Schemas ───────────────────────────────────────────────────────────────────
@@ -510,13 +533,26 @@ def create_umlage(
     db=Depends(get_db),
 ):
     """Legt eine Kostenumlage von einer Kostenstelle zu einer anderen für eine Periode an."""
+    period_start, period_end = _period_bounds(periode)
+    if payload.von_kostenstelle_id == payload.nach_kostenstelle_id:
+        raise HTTPException(status_code=422, detail="Quell- und Ziel-Kostenstelle muessen unterschiedlich sein")
+
+    existing_count = db.execute(
+        text("""
+            SELECT COUNT(*) AS c
+            FROM domain_finance.kostenstellen
+            WHERE tenant_id = :tid AND aktiv = true AND id IN (:von, :nach)
+        """),
+        {"tid": tenant_id, "von": payload.von_kostenstelle_id, "nach": payload.nach_kostenstelle_id},
+    ).scalar()
+    if int(existing_count or 0) != 2:
+        raise HTTPException(status_code=404, detail="Quell- oder Ziel-Kostenstelle nicht gefunden")
+
     # Bestimme Umlagebetrag je nach Art
     if payload.umlage_art == "BETRAG":
         umlagebetrag = payload.umlage_wert
     elif payload.umlage_art == "PROZENT":
         # Primärkosten der Quell-KST berechnen
-        period_start = f"{periode}-01"
-        period_end = f"{periode}-31"
         row = db.execute(
             text("""
                 SELECT COALESCE(SUM(betrag_eur), 0) AS summe
@@ -572,8 +608,7 @@ def get_bab(
       Umlage-Ausgang = Summe umlagebetrag_eur wo diese KST = von_kostenstelle_id
       Gesamtkosten = Primär + Eingang - Ausgang
     """
-    period_start = f"{periode}-01"
-    period_end = f"{periode}-31"
+    period_start, period_end = _period_bounds(periode)
 
     kostenstellen = db.execute(
         text("""
@@ -625,7 +660,7 @@ def get_bab(
         ein = umlage_ein.get(kid, Decimal("0"))
         aus = umlage_aus.get(kid, Decimal("0"))
         ges = prim + ein - aus
-        budget = Decimal(str(k["budget"] or 0))
+        budget = _monthly_budget(Decimal(str(k["budget"] or 0)), k["budget_periode"])
         abw = budget - ges
         abw_pct = float(abw / budget * 100) if budget > 0 else 0.0
 
