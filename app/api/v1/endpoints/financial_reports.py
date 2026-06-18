@@ -664,3 +664,160 @@ async def export_report(
         raise HTTPException(status_code=500, detail=f"Failed to export report: {str(e)}")
 
 
+# ── BI-DRILL-001: Periodenvergleich + Beleg-Drilldown ────────────────────────
+
+@router.get(
+    "/periodenvergleich",
+    summary="Konten-Saldenliste mit Periodenvergleich (BI-DRILL-001)",
+)
+async def get_periodenvergleich(
+    periode_aktuell: str = Query(..., description="Aktuelle Periode YYYY-MM"),
+    periode_vergleich: str = Query(..., description="Vergleichsperiode YYYY-MM (Vormonat/Vorjahr)"),
+    konto_klasse: str = Query(None, description="Kontoklasse-Präfix (z.B. '4' für Erlöse)"),
+    tenant_id: str = Query("system", description="Tenant ID"),
+    limit: int = Query(200, ge=1, le=1000),
+    db: Session = Depends(get_db),
+) -> dict:
+    """Saldenliste zwei Perioden nebeneinander mit Abweichung absolut + %.
+
+    Ergebnis pro Konto: Saldo aktuell, Saldo Vergleich, Δ EUR, Δ %.
+    Ermöglicht Monats- und Jahresvergleich (Plan/Ist wenn Vergleichsperiode = Planperiode).
+    """
+    try:
+        where_kl = "AND coa.account_number LIKE :konto_klasse" if konto_klasse else ""
+        params: dict = {
+            "tenant_id": tenant_id,
+            "p_akt": periode_aktuell,
+            "p_vgl": periode_vergleich,
+            "lim": limit,
+        }
+        if konto_klasse:
+            params["konto_klasse"] = f"{konto_klasse}%"
+
+        sql = text(f"""
+            WITH saldi AS (
+                SELECT
+                    coa.account_number,
+                    coa.account_name,
+                    coa.account_type,
+                    TO_CHAR(je.entry_date, 'YYYY-MM') AS periode,
+                    SUM(jel.debit)  AS total_debit,
+                    SUM(jel.credit) AS total_credit,
+                    SUM(jel.debit - jel.credit) AS saldo
+                FROM domain_erp.chart_of_accounts coa
+                JOIN domain_erp.journal_entry_lines jel ON jel.account_id = coa.id
+                JOIN domain_erp.journal_entries je       ON je.id = jel.journal_entry_id
+                WHERE coa.tenant_id = :tenant_id
+                  AND je.tenant_id  = :tenant_id
+                  AND je.status = 'posted'
+                  AND TO_CHAR(je.entry_date, 'YYYY-MM') IN (:p_akt, :p_vgl)
+                  {where_kl}
+                GROUP BY coa.account_number, coa.account_name, coa.account_type,
+                         TO_CHAR(je.entry_date, 'YYYY-MM')
+            )
+            SELECT
+                account_number,
+                account_name,
+                account_type,
+                MAX(CASE WHEN periode = :p_akt THEN saldo ELSE 0 END) AS saldo_aktuell,
+                MAX(CASE WHEN periode = :p_vgl THEN saldo ELSE 0 END) AS saldo_vergleich
+            FROM saldi
+            GROUP BY account_number, account_name, account_type
+            ORDER BY account_number
+            LIMIT :lim
+        """)
+        rows = db.execute(sql, params).fetchall()
+        result = []
+        for r in rows:
+            s_akt = float(r[3] or 0)
+            s_vgl = float(r[4] or 0)
+            delta = s_akt - s_vgl
+            delta_pct = (delta / s_vgl * 100) if s_vgl != 0 else None
+            result.append({
+                "account_number": r[0],
+                "account_name": r[1],
+                "account_type": r[2],
+                "saldo_aktuell": round(s_akt, 2),
+                "saldo_vergleich": round(s_vgl, 2),
+                "delta_eur": round(delta, 2),
+                "delta_pct": round(delta_pct, 1) if delta_pct is not None else None,
+            })
+        return {
+            "periode_aktuell": periode_aktuell,
+            "periode_vergleich": periode_vergleich,
+            "konto_klasse": konto_klasse,
+            "zeilen": result,
+            "count": len(result),
+        }
+    except (OperationalError, ProgrammingError) as exc:
+        logger.warning("Periodenvergleich query failed: %s", exc)
+        return {"periode_aktuell": periode_aktuell, "periode_vergleich": periode_vergleich,
+                "zeilen": [], "count": 0}
+
+
+@router.get(
+    "/beleg-drilldown/{journal_entry_id}",
+    summary="Beleg-Drilldown: JournalEntry → Quelldokument + Zeilen",
+)
+async def get_beleg_drilldown(
+    journal_entry_id: str,
+    tenant_id: str = Query("system"),
+    db: Session = Depends(get_db),
+) -> dict:
+    """Vollständiger Drilldown eines JournalEntry: Header + Zeilen + Quelldokument-Link.
+
+    Gibt source/document_type zurück, damit das Frontend direkt zum Quelldokument
+    (Settlement, SalesInvoice, ProdAuftrag, …) verlinken kann.
+    """
+    try:
+        header = db.execute(text("""
+            SELECT id, entry_number, entry_date, description, status,
+                   total_debit, total_credit, source, document_type, reference, period
+              FROM domain_erp.journal_entries
+             WHERE id = :id AND tenant_id = :tenant_id
+        """), {"id": journal_entry_id, "tenant_id": tenant_id}).fetchone()
+
+        if not header:
+            raise HTTPException(status_code=404, detail="JournalEntry nicht gefunden")
+
+        lines_rows = db.execute(text("""
+            SELECT jel.id, coa.account_number, coa.account_name,
+                   jel.debit, jel.credit, jel.description, jel.reference
+              FROM domain_erp.journal_entry_lines jel
+              LEFT JOIN domain_erp.chart_of_accounts coa ON coa.id = jel.account_id
+             WHERE jel.journal_entry_id = :id
+             ORDER BY jel.id
+        """), {"id": journal_entry_id}).fetchall()
+
+        return {
+            "id": str(header[0]),
+            "entry_number": header[1],
+            "entry_date": header[2].isoformat() if header[2] else None,
+            "description": header[3],
+            "status": header[4],
+            "total_debit": float(header[5] or 0),
+            "total_credit": float(header[6] or 0),
+            "source": header[7],
+            "document_type": header[8],
+            "reference": header[9],
+            "period": header[10],
+            "lines": [
+                {
+                    "id": str(ln[0]),
+                    "account_number": ln[1],
+                    "account_name": ln[2],
+                    "debit": float(ln[3] or 0),
+                    "credit": float(ln[4] or 0),
+                    "description": ln[5],
+                    "reference": ln[6],
+                }
+                for ln in lines_rows
+            ],
+        }
+    except HTTPException:
+        raise
+    except (OperationalError, ProgrammingError) as exc:
+        logger.warning("Beleg-Drilldown failed: %s", exc)
+        raise HTTPException(status_code=503, detail="DB-Fehler beim Beleg-Drilldown") from exc
+
+

@@ -320,3 +320,174 @@ def simulate_freight(
         raise
     except Exception as exc:
         raise HTTPException(status_code=503, detail=str(exc)) from exc
+
+
+# ---------------------------------------------------------------------------
+# LOG-FRACHT-001: Spediteur-Rechnung → Tour-Link + FiBu-Buchung
+# ---------------------------------------------------------------------------
+
+class CarrierInvoiceIn(BaseModel):
+    tour_id: str
+    carrier_id: str
+    invoice_number: str
+    invoice_date: str  # YYYY-MM-DD
+    net_amount_eur: float
+    tax_amount_eur: float = 0.0
+    currency: str = "EUR"
+    debit_account: str = "4820"       # Frachtkosten (SKR03)
+    credit_account: str = "1600"      # Verbindlichkeiten Spediteur
+    tax_account: str = "1576"         # Vorsteuer 19%
+    bemerkung: Optional[str] = None
+
+
+@router.post(
+    "/freight-cost/carrier-invoice",
+    status_code=201,
+    summary="Spediteur-Eingangsrechnung erfassen + FiBu-Buchung (LOG-FRACHT-001)",
+)
+def create_carrier_invoice(
+    body: CarrierInvoiceIn,
+    x_tenant_id: Optional[str] = Header(None),
+    db: Session = Depends(get_db),
+) -> dict:
+    """Erfasst Spediteur-Eingangsrechnung, verknüpft sie mit der Tour und bucht ins Hauptbuch."""
+    if not x_tenant_id:
+        raise HTTPException(status_code=422, detail="X-Tenant-ID erforderlich.")
+
+    invoice_id = str(uuid.uuid4())
+    gross = body.net_amount_eur + body.tax_amount_eur
+    journal_ref: Optional[str] = None
+
+    # 1) Spediteur-Rechnung persistieren (Tabelle muss via Migration existieren)
+    try:
+        db.execute(text("""
+            INSERT INTO domain_logistics.carrier_invoices
+              (id, tenant_id, tour_id, carrier_id, invoice_number, invoice_date,
+               net_amount_eur, tax_amount_eur, gross_amount_eur, currency, bemerkung,
+               status, created_at)
+            VALUES
+              (:id, :tenant_id, :tour_id, :carrier_id, :invoice_number, :invoice_date,
+               :net, :tax, :gross, :currency, :bemerkung,
+               'offen', NOW())
+            ON CONFLICT (tenant_id, invoice_number) DO NOTHING
+        """), {
+            "id": invoice_id,
+            "tenant_id": x_tenant_id,
+            "tour_id": body.tour_id,
+            "carrier_id": body.carrier_id,
+            "invoice_number": body.invoice_number,
+            "invoice_date": body.invoice_date,
+            "net": body.net_amount_eur,
+            "tax": body.tax_amount_eur,
+            "gross": gross,
+            "currency": body.currency,
+            "bemerkung": body.bemerkung,
+        })
+    except Exception as exc:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=f"DB-Fehler Carrier-Invoice: {exc}") from exc
+
+    # 2) FiBu: Dr. Frachtkosten / Cr. AP Spediteur (+ Vorsteuer wenn > 0)
+    try:
+        from app.services.finance_transaction_service import FinanceTransactionService
+        from datetime import date as _date
+
+        inv_date = _date.fromisoformat(body.invoice_date)
+        lines = [
+            {"account_id": body.debit_account, "debit_amount": body.net_amount_eur,
+             "credit_amount": 0.0,
+             "description": f"Frachtkosten Tour {body.tour_id} ({body.carrier_id})"},
+            {"account_id": body.credit_account, "debit_amount": 0.0,
+             "credit_amount": gross,
+             "description": f"AP Spediteur {body.carrier_id} {body.invoice_number}"},
+        ]
+        if body.tax_amount_eur > 0:
+            lines.append({
+                "account_id": body.tax_account,
+                "debit_amount": body.tax_amount_eur,
+                "credit_amount": 0.0,
+                "description": f"Vorsteuer 19% Fracht {body.invoice_number}",
+            })
+
+        fin = FinanceTransactionService(db, x_tenant_id)
+        je = fin.create(
+            entry_number=f"JE-FRACHT-{body.invoice_number}",
+            description=f"Spediteur-Rechnung {body.invoice_number} Tour {body.tour_id}",
+            entry_date=inv_date,
+            lines=lines,
+            reference=body.invoice_number,
+            source="logistics_freight",
+            document_type="carrier_invoice",
+            period=body.invoice_date[:7],
+        )
+        journal_ref = str(je.entry_number)
+
+        db.execute(text("""
+            UPDATE domain_logistics.carrier_invoices
+               SET fibu_journal_ref = :ref, status = 'gebucht'
+             WHERE id = :id AND tenant_id = :tenant_id
+        """), {"ref": journal_ref, "id": invoice_id, "tenant_id": x_tenant_id})
+
+    except Exception:
+        # FiBu-Fehler → Invoice gespeichert, Status bleibt 'offen', manuell nachbuchen
+        pass
+
+    db.commit()
+
+    return {
+        "id": invoice_id,
+        "tour_id": body.tour_id,
+        "carrier_id": body.carrier_id,
+        "invoice_number": body.invoice_number,
+        "invoice_date": body.invoice_date,
+        "net_amount_eur": body.net_amount_eur,
+        "tax_amount_eur": body.tax_amount_eur,
+        "gross_amount_eur": gross,
+        "fibu_journal_ref": journal_ref,
+        "status": "gebucht" if journal_ref else "offen",
+        "created_at": datetime.now(timezone.utc).isoformat(),
+    }
+
+
+@router.get(
+    "/freight-cost/carrier-invoices",
+    summary="Spediteur-Rechnungen auflisten",
+)
+def list_carrier_invoices(
+    tour_id: Optional[str] = Query(None),
+    carrier_id: Optional[str] = Query(None),
+    limit: int = Query(50, ge=1, le=200),
+    x_tenant_id: Optional[str] = Header(None),
+    db: Session = Depends(get_db),
+) -> dict:
+    """Spediteur-Rechnungen mit optionalem Filter auf Tour/Spediteur."""
+    if not x_tenant_id:
+        raise HTTPException(status_code=422, detail="X-Tenant-ID erforderlich.")
+
+    where = "tenant_id = :tenant_id"
+    params: dict = {"tenant_id": x_tenant_id, "limit": limit}
+    if tour_id:
+        where += " AND tour_id = :tour_id"
+        params["tour_id"] = tour_id
+    if carrier_id:
+        where += " AND carrier_id = :carrier_id"
+        params["carrier_id"] = carrier_id
+
+    try:
+        rows = db.execute(text(f"""
+            SELECT id, tour_id, carrier_id, invoice_number, invoice_date,
+                   net_amount_eur, tax_amount_eur, gross_amount_eur,
+                   fibu_journal_ref, status, created_at
+              FROM domain_logistics.carrier_invoices
+             WHERE {where}
+             ORDER BY created_at DESC
+             LIMIT :limit
+        """), params).mappings().all()
+        items = [dict(r) for r in rows]
+        for item in items:
+            for k, v in item.items():
+                if hasattr(v, "isoformat"):
+                    item[k] = v.isoformat()
+        return {"items": items, "count": len(items)}
+    except Exception as exc:
+        raise HTTPException(status_code=503, detail=str(exc)) from exc
