@@ -28,7 +28,7 @@ Stand: `2026-06-18`
 **Owner:** Claude
 **Stand:** abgeschlossen 2026-06-18 — alle 7 Slices (5 neu, 2 bereits vorhanden) implementiert und gepusht. HEAD: `b25d10e5b` + nachgezogener CI-Fix fuer Procurement-Inventory-Kompatibilitaet und Tenant-Testvertrag.
 **Ziel:** Schließt kritische Prozesskettenlücken aus ERP-Tiefenanalyse:
-  - WMS-FLOW-001: `book_material_transfer()` in AgriSiloMaterialFlowService + Endpoint POST /material-flow/transfer — Silozell→StockMovement-Kopplung mit Kontaminationsschutz
+  - WMS-FLOW-001: `book_material_transfer()` in AgriSiloMaterialFlowService + Endpoint POST /material-flow/transfer — Silozell→StockMovement-Kopplung mit Kontaminationsschutz; UI Transfer-Card auf `lager/materialfluss` (2026-06-19)
   - KORE-BAB-001: BAB-Engine (GET /kostenrechnung/bab) + Kostenumlage (POST /kostenrechnung/umlagen) + BAB-Tab im Frontend
   - CRM-360-REAL: crm_360.py komplett neu mit schema-qualifizierten Tabellennamen, 404 bei fehlendem Kunde, echte OP-Summe
   - PROC-3WM-001: POST /procurement/match/auto + GET /procurement/match/results — Match-Persistierung in domain_procurement.procurement_match_results
@@ -78,10 +78,11 @@ Stand: `2026-06-18`
 
 **Von:** Cursor
 **Owner:** Cursor
-**Stand:** in Arbeit 2026-06-13 — wie 2026-06-12, plus: Route **`/lager/materialfluss-visualisierung`** (Layout-Editor Silozellen + Materialfluss-Graph, `PATCH` `layout_x`/`layout_y` auch **Silozellen**), **`PageToolbar`**/MERIDIAN-Tokens, Referenz-Hofplan (Folkerts), Inventar **`docs/warehouse/handbuch-c-inventar.md`**, Frontend-`type-check` gruen (`useNodesState<Node>`), **Prozessketten-Doku** [`wm-agri-silo-supply-chain-integration-2026-06-13.md`](../workflows/wm-agri-silo-supply-chain-integration-2026-06-13.md) + Toolbar-Sprung **Rückverfolgbarkeit** (DOM-SUPPLY-004).
+**Stand:** abgeschlossen 2026-06-19 — Stammdaten, Live-Graph, Route-Validierung, Silozellen-PATCH inkl. Layout, Supply-Chain-Anbindung (CHAIN-002), Materialtransfer (WMS-FLOW-001) Backend+UI; Alembic-Head `agri_silo_cells_layout_20260619`; 18 Unit-Tests grün.
 **Ziel:** Digitales Modell Siloanlage/Silozelle/Materialfluss ohne PLC; QS-Sperre und Verschleppungs-Hinweis auf Routen; Mandanten-Trennung.
-**Dateibesitz:** genannte Alembic-/Backend-/Frontend-/Test-/Doku-Dateien, `docs/warehouse/README.md`, `docs/agent-ops/slices/WM-AGRI-SILO-001.yaml`, Roadmap `WM-AGRI-FLOW-001.yaml`.
-**Abnahmekriterien:** `alembic heads` einheitlich; API erreichbar; Tests `pytest tests/test_agri_silo_material_flow.py --no-cov` gruen; `npm run type-check` im Frontend; Navigation + `npm run routes:generate` konsistent.
+**Dateibesitz:** genannte Alembic-/Backend-/Frontend-/Test-/Doku-Dateien, `docs/warehouse/README.md`, `docs/agent-ops/slices/WM-AGRI-SILO-001.yaml`, `docs/agent-ops/slices/WMS-FLOW-001.yaml`, Roadmap `WM-AGRI-FLOW-001.yaml`.
+**Abnahmekriterien:** `alembic heads` einheitlich; API erreichbar; Tests `pytest tests/test_agri_silo_material_flow.py --no-cov` grün; Transfer-UI auf `lager/materialfluss`; Navigation + `npm run routes:generate` konsistent.
+**Offen (Folge-Slices):** WM-AGRI-LOT-LINK, WM-AGRI-MAP-001, WM-AGRI-PLC-005 — siehe [wm-agri-silo-supply-chain-integration-2026-06-13.md](../workflows/wm-agri-silo-supply-chain-integration-2026-06-13.md) Abschnitt 0.
 
 ## WAVE-PHYS-CHAIN-001 — Task 0 Verifikation + Logistik-Audit
 

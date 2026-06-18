@@ -366,3 +366,62 @@ def test_trace_hooks_invoke_integration_on_edge_create(mocker):
     append.assert_called_once()
     outbox.assert_called_once()
     svc.db.commit.assert_called_once()
+
+
+@pytest.mark.unit
+def test_transfer_commits_after_trace_hooks(mocker):
+    """WMS-FLOW-001: Supply-Chain-Hooks müssen vor commit in derselben Transaktion landen."""
+    append = mocker.patch(
+        "app.services.agri_material_flow_trace_integration.append_material_flow_supply_chain_event",
+    )
+    mocker.patch(
+        "app.services.agri_material_flow_trace_integration.store_material_flow_outbox_best_effort",
+    )
+    from app.services.agri_silo_material_flow_service import AgriSiloMaterialFlowService
+
+    db = MagicMock()
+    call_order: list[str] = []
+
+    def _commit() -> None:
+        call_order.append("commit")
+
+    db.commit = _commit
+
+    from_cell = _row(
+        id="cell-a",
+        cell_code="A1",
+        current_stock_kg=500,
+        current_material_id="art-1",
+        current_lot_id="lot-1",
+    )
+    to_cell = _row(
+        id="cell-b",
+        cell_code="B1",
+        current_stock_kg=0,
+        current_material_id=None,
+        current_lot_id=None,
+    )
+    db.execute.side_effect = [
+        _mk_result(fetchone=from_cell),
+        _mk_result(fetchone=to_cell),
+        _mk_result(fetchone=None),
+        _mk_result(fetchone=None),
+        MagicMock(),
+        MagicMock(),
+        MagicMock(),
+        MagicMock(),
+    ]
+
+    svc = AgriSiloMaterialFlowService(db, "tenant-x", trace_hooks_enabled=True)
+    svc.validate_route = MagicMock(return_value={"ok": True, "warnings": [], "path": []})
+    out = svc.book_material_transfer(
+        warehouse_id="wh-1",
+        from_cell_id="cell-a",
+        to_cell_id="cell-b",
+        quantity_kg=Decimal("100"),
+        article_id="art-1",
+        lot_id="lot-1",
+    )
+    assert out["ok"] is True
+    append.assert_called_once()
+    assert call_order == ["commit"]

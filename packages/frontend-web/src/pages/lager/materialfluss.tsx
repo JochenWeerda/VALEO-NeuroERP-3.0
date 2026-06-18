@@ -39,6 +39,7 @@ import {
   useAgriSiloCells,
   useAgriSiloSystems,
   useCreateAgriFlowEdge,
+  useBookAgriMaterialTransfer,
   useCreateAgriFlowNode,
   useCreateAgriSiloCell,
   useCreateAgriSiloSystem,
@@ -56,7 +57,7 @@ import {
   qsStatusGermanLabel,
   type AgriFlowLike,
 } from '@/lib/material-flow-display'
-import { AlertTriangle, GitBranch, LayoutGrid, MapPin, Route } from 'lucide-react'
+import { AlertTriangle, ArrowRightLeft, GitBranch, LayoutGrid, MapPin, Route } from 'lucide-react'
 
 const QS_SELECT_VALUES = ['frei', 'gesperrt', 'in_pruefung', 'reinigung', 'reserviert'] as const
 const NODE_STATUS_VALUES = ['active', 'blocked', 'maintenance', 'cleaning'] as const
@@ -501,6 +502,7 @@ export default function MaterialflussPage(): JSX.Element {
   const createSiloCell = useCreateAgriSiloCell()
   const createFlowNode = useCreateAgriFlowNode()
   const createFlowEdge = useCreateAgriFlowEdge()
+  const bookTransfer = useBookAgriMaterialTransfer()
 
   const [newSysCode, setNewSysCode] = useState('')
   const [newSysName, setNewSysName] = useState('')
@@ -519,6 +521,14 @@ export default function MaterialflussPage(): JSX.Element {
   const [edgeFromId, setEdgeFromId] = useState('')
   const [edgeToId, setEdgeToId] = useState('')
   const [edgeSubmitting, setEdgeSubmitting] = useState(false)
+  const [transferFromCellId, setTransferFromCellId] = useState('')
+  const [transferToCellId, setTransferToCellId] = useState('')
+  const [transferQty, setTransferQty] = useState('')
+  const [transferArticleId, setTransferArticleId] = useState('')
+  const [transferLotId, setTransferLotId] = useState('')
+  const [transferRef, setTransferRef] = useState('')
+  const [transferPending, setTransferPending] = useState(false)
+  const [transferResult, setTransferResult] = useState<Record<string, unknown> | null>(null)
 
   useEffect(() => {
     setCellSiloSystemId('')
@@ -533,6 +543,13 @@ export default function MaterialflussPage(): JSX.Element {
     setNewNodeLayoutY('')
     setEdgeFromId('')
     setEdgeToId('')
+    setTransferFromCellId('')
+    setTransferToCellId('')
+    setTransferQty('')
+    setTransferArticleId('')
+    setTransferLotId('')
+    setTransferRef('')
+    setTransferResult(null)
     setRouteFrom('')
     setRouteTo('')
     setRouteMat('')
@@ -956,6 +973,55 @@ export default function MaterialflussPage(): JSX.Element {
       toast({ title: 'API-Fehler', description: getAxiosErrorMessage(err), variant: 'destructive' })
     } finally {
       setRoutePending(false)
+    }
+  }
+
+  async function handleBookMaterialTransfer(): Promise<void> {
+    if (!warehouseId || transferPending) return
+    if (!transferFromCellId || !transferToCellId) {
+      toast({
+        title: 'Zellen fehlen',
+        description: 'Bitte Quell- und Ziel-Silozelle wählen.',
+        variant: 'destructive',
+      })
+      return
+    }
+    if (transferFromCellId === transferToCellId) {
+      toast({ title: 'Ungültiger Transfer', description: 'Quelle und Ziel müssen verschieden sein.', variant: 'destructive' })
+      return
+    }
+    const qtyRaw = transferQty.trim()
+    const qty = Number(qtyRaw)
+    if (!Number.isFinite(qty) || qty <= 0) {
+      toast({ title: 'Menge ungültig', description: 'quantity_kg muss > 0 sein.', variant: 'destructive' })
+      return
+    }
+    const articleId = transferArticleId.trim()
+    if (!articleId) {
+      toast({ title: 'Artikel fehlt', description: 'article_id ist Pflicht.', variant: 'destructive' })
+      return
+    }
+    setTransferPending(true)
+    setTransferResult(null)
+    try {
+      const res = await bookTransfer.mutateAsync({
+        warehouse_id: warehouseId,
+        from_cell_id: transferFromCellId,
+        to_cell_id: transferToCellId,
+        quantity_kg: qty,
+        article_id: articleId,
+        lot_id: transferLotId.trim() || undefined,
+        reference: transferRef.trim() || undefined,
+      })
+      setTransferResult(res)
+      toast({
+        title: 'Transfer gebucht',
+        description: `Referenz ${String(res.reference ?? '—')}`,
+      })
+    } catch (err) {
+      toast({ title: 'Transfer fehlgeschlagen', description: getAxiosErrorMessage(err), variant: 'destructive' })
+    } finally {
+      setTransferPending(false)
     }
   }
 
@@ -1554,7 +1620,8 @@ export default function MaterialflussPage(): JSX.Element {
                     <th className="py-2 pr-2">Code</th>
                     <th className="py-2 pr-2">Name</th>
                     <th className="py-2 pr-2">QS</th>
-                    <th className="py-2 pr-2">kg</th>
+                    <th className="py-2 pr-2 tabular-nums">Ist kg</th>
+                    <th className="py-2 pr-2 tabular-nums">Kap. kg</th>
                     <th className="py-2 pr-2 min-w-[120px]">VK (frei)</th>
                     <th className="py-2 pr-2 min-w-[160px]">Layout (Hof/Plan)</th>
                     <th className="py-2 pr-2 min-w-[200px]">Material / Lot (Referenz)</th>
@@ -1563,13 +1630,13 @@ export default function MaterialflussPage(): JSX.Element {
                 <tbody>
                   {siloQ.isLoading ? (
                     <tr>
-                      <td colSpan={7} className="py-3 text-muted-foreground">
+                      <td colSpan={8} className="py-3 text-muted-foreground">
                         Lade…
                       </td>
                     </tr>
                   ) : (siloQ.data ?? []).length === 0 ? (
                     <tr>
-                      <td colSpan={7} className="py-3 text-muted-foreground">
+                      <td colSpan={8} className="py-3 text-muted-foreground">
                         Keine Silozellen — Stammdaten anlegen oder andere Siloanlage wählen.
                       </td>
                     </tr>
@@ -1587,7 +1654,8 @@ export default function MaterialflussPage(): JSX.Element {
                             onPatch={handlePatchSiloQs}
                           />
                         </td>
-                        <td className="py-2 tabular-nums">{agriStr(row, 'capacity_kg')}</td>
+                        <td className="py-2 pr-2 tabular-nums">{agriStr(row, 'current_stock_kg')}</td>
+                        <td className="py-2 pr-2 tabular-nums">{agriStr(row, 'capacity_kg')}</td>
                         <td className="py-2 pr-2 align-top">
                           <SiloCellRiskEditor
                             cellId={agriStr(row, 'id')}
@@ -1783,6 +1851,128 @@ export default function MaterialflussPage(): JSX.Element {
                   </tbody>
                 </table>
               </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-base flex items-center gap-2">
+                <ArrowRightLeft className="h-4 w-4" />
+                Materialtransfer (WMS-FLOW-001)
+              </CardTitle>
+              <CardDescription>
+                Bucht kg zwischen Silozellen inkl. <code className="text-xs">inventory_stock_movements</code> und
+                Routenprüfung (wenn Knoten mit <code className="text-xs">ref_type=silo_cell</code> verknüpft).
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid gap-3 sm:grid-cols-2">
+                <div className="space-y-1">
+                  <label className="text-xs font-medium" htmlFor="xfer-from">
+                    Von-Silozelle
+                  </label>
+                  <NativeSelect
+                    id="xfer-from"
+                    value={transferFromCellId}
+                    disabled={transferPending || siloQ.isLoading}
+                    onChange={(e) => {
+                      const id = e.target.value
+                      setTransferFromCellId(id)
+                      const row = (siloQ.data ?? []).find((r) => agriStr(r, 'id') === id)
+                      if (row) {
+                        setTransferArticleId(agriStr(row, 'current_material_id'))
+                        setTransferLotId(agriStr(row, 'current_lot_id'))
+                      }
+                    }}
+                  >
+                    <option value="">— wählen —</option>
+                    {(siloQ.data ?? []).map((c) => (
+                      <option key={`xf-${agriStr(c, 'id')}`} value={agriStr(c, 'id')}>
+                        {agriStr(c, 'cell_code')} ({agriStr(c, 'current_stock_kg')} kg)
+                      </option>
+                    ))}
+                  </NativeSelect>
+                </div>
+                <div className="space-y-1">
+                  <label className="text-xs font-medium" htmlFor="xfer-to">
+                    Nach-Silozelle
+                  </label>
+                  <NativeSelect
+                    id="xfer-to"
+                    value={transferToCellId}
+                    disabled={transferPending || siloQ.isLoading}
+                    onChange={(e) => setTransferToCellId(e.target.value)}
+                  >
+                    <option value="">— wählen —</option>
+                    {(siloQ.data ?? []).map((c) => (
+                      <option key={`xt-${agriStr(c, 'id')}`} value={agriStr(c, 'id')}>
+                        {agriStr(c, 'cell_code')}
+                      </option>
+                    ))}
+                  </NativeSelect>
+                </div>
+              </div>
+              <div className="grid gap-3 sm:grid-cols-2">
+                <div className="space-y-1">
+                  <label className="text-xs font-medium" htmlFor="xfer-qty">
+                    quantity_kg
+                  </label>
+                  <Input
+                    id="xfer-qty"
+                    value={transferQty}
+                    onChange={(e) => setTransferQty(e.target.value)}
+                    disabled={transferPending}
+                    inputMode="decimal"
+                    autoComplete="off"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-xs font-medium" htmlFor="xfer-art">
+                    article_id
+                  </label>
+                  <Input
+                    id="xfer-art"
+                    value={transferArticleId}
+                    onChange={(e) => setTransferArticleId(e.target.value)}
+                    disabled={transferPending}
+                    autoComplete="off"
+                  />
+                </div>
+              </div>
+              <div className="grid gap-3 sm:grid-cols-2">
+                <div className="space-y-1">
+                  <label className="text-xs font-medium" htmlFor="xfer-lot">
+                    lot_id (optional)
+                  </label>
+                  <Input
+                    id="xfer-lot"
+                    value={transferLotId}
+                    onChange={(e) => setTransferLotId(e.target.value)}
+                    disabled={transferPending}
+                    autoComplete="off"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-xs font-medium" htmlFor="xfer-ref">
+                    reference (optional)
+                  </label>
+                  <Input
+                    id="xfer-ref"
+                    value={transferRef}
+                    onChange={(e) => setTransferRef(e.target.value)}
+                    disabled={transferPending}
+                    autoComplete="off"
+                  />
+                </div>
+              </div>
+              <Button type="button" disabled={transferPending} onClick={() => void handleBookMaterialTransfer()}>
+                {transferPending ? 'Buche…' : 'Transfer buchen'}
+              </Button>
+              {transferResult ? (
+                <pre className="text-xs bg-muted p-3 rounded-md overflow-x-auto max-h-48 whitespace-pre-wrap">
+                  {JSON.stringify(transferResult, null, 2)}
+                </pre>
+              ) : null}
             </CardContent>
           </Card>
 
