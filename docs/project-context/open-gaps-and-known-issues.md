@@ -15,7 +15,7 @@ Aggregierte Gesamtsicht: [PROJEKT-GESAMTSTAND-2026-05-27.md](../PROJEKT-GESAMTST
 
 ---
 
-## Build-Health (Stand 2026-06-11)
+## Build-Health (Stand 2026-06-18)
 
 - **TypeScript**: 0 Fehler (`tsc --noEmit`) — Wave-22-Gate (letzter Nachweis 2026-05-27)
 - **Backend-Tests**: 9527 collected (2026-06-11, `pytest --collect-only`); letzter Voll-Lauf mit Pass-Count: 9228 passed (2026-05-26, Commit `271bc5e12`) — massgeblich naechster gruener `quality-gate`-Lauf
@@ -24,7 +24,7 @@ Aggregierte Gesamtsicht: [PROJEKT-GESAMTSTAND-2026-05-27.md](../PROJEKT-GESAMTST
 - **Release-Matrix**: Generator + CI-Upload in `quality-gate.yml` / `release-gates.yml`
 - **OpenAPI-Routen mit `summary=`**: 2663 (100%, Wave-D2 Commit `554625ae7`)
 - **Frontend-Imports**: 0 gebrochene Importe (letzter Nachweis 2026-05-27)
-- **Alembic**: 1 Head (`merge_doc_proc_20260612`, 2026-06-12) — DOC-Branch (`doc_followup_20260611`) und PROC-Branch (`proc_rfq_20260611`) der DOM-*-004-Welle zusammengefuehrt; `init_db.py upgrade head` per Backend-Neustart verifiziert
+- **Alembic**: 1 Head (`wave3_wf_trigger_log_20260618`) — Wave-3 Migration erstellt `domain_ops.wf_trigger_log`, `domain_finance.bank_statements/bank_statement_lines`, `domain_agrar.waagen_quittungen`, ergänzt `domain_inventory.weighing_tickets` um quittiert-Spalten
 - **DOM-*-004-Tiefenwelle (2026-06-11/12)**: ~90 neue reine Logik-Unit-Tests gruen; 5 Live-UAT-Skripte (`scripts/uat/{con_contract,sales_o2c,fin_op,doc_nachweisraum,proc_match}_lifecycle_uat.py`, `--execute` mit DB-Restore); Frontend `tsc 0` + ESLint clean je Slice
 - **Docker-Erstinstallation**: Alembic-Bootstrap und Mehr-Domaenen-Struktur auf leerer DB abgesichert
 - **Service-Layer**: Hauptwellen refaktoriert; Legacy-Endpunkte `harvest_acceptance.py`, `agrar_settlements.py` und `docflow.py` repo-seitig mit dedizierten Services nachgezogen (Stand 2026-05-21)
@@ -154,6 +154,28 @@ Aggregierte Gesamtsicht: [PROJEKT-GESAMTSTAND-2026-05-27.md](../PROJEKT-GESAMTST
 - ~~Service-Layer-Refaktorierung~~ -> Alle 6 Haupt-Endpunkt-Dateien auf thin-router + Service-Klassen umgestellt: `business_partners.py`, `customers.py`, `personal.py` (Zeiteintraege + Abwesenheiten), `controlling.py`, `agrar_contracts.py`, `einkauf_bestellvorschlag.py`.
 - ~~Service-Layer-Legacy-Endpunkte~~ -> `harvest_acceptance.py`, `agrar_settlements.py` und `docflow.py` haben dedizierte Services; verbliebene Router sind auf Schema-/Dependency-Wiring und HTTP-Fehler-Mapping reduziert.
 - ~~HR-TIME-001 (Pilot-Slice)~~ -> `domain_hr.driver_time_events`-Tabelle, CRUD-Endpoints und Abwesenheitskollisions-Check repo-seitig implementiert.
+
+## Zuletzt geschlossene Punkte (2026-06-12 bis 2026-06-18)
+
+- ~~**Logistik-Kette LOG-PROD-001 bis LOG-FREIGHT-STORNO-001** (2026-06-12/13)~~ → Tourenplanung mit Alembic (`log_logistics_core_20260612`), Read-Spine LS↔Tour (`GET /logistik/sales-delivery-note-by-ref`), Frontend Tourenplanung mit Tour-Hints und PATCH, Ketten-Lifecycle-Test, Storno fail-closed, Fracht-Tarif Soft-Storno (`log_freight_tariff_storno_20260613`), Tour-Fracht-Dispo-Arbeitsraum.
+- ~~**DOM-*-004-Tiefenwelle** (2026-06-12)~~ → CON/SALES/FIN/DOC/PROC/SUPPLY je auf voller operativer Tiefe `.2`–`.5` (Fixierung/MATIF, O2C-Match/Kreditlimit, Mahnlauf/OP-Clearing/DATEV-Export, Artefakt-Upload/GoBD-Paket, 3-Wege-Match/RFQ, Rückverfolgbarkeit/Lot-Aktionen). Detail: [dom-004-spine-buildout-2026-06-12.md](../dom-004-spine-buildout-2026-06-12.md).
+- ~~**WM-AGRI-SUPPLY-LINK-001 + WM-AGRI-CHAIN-002** (2026-06-13)~~ → Materialfluss-UI-Brücke zu DOM-SUPPLY-004, `supply_chain_events` bei Agrar-API-Mutationen, Outbox-Event `inventory.material_flow.*`.
+- ~~**Wave-2 Integration Slices** (2026-06-18)~~ → PROD-FIBU-001 (Produktions-FIBU-Ref), LOG-FRACHT-001 (Carrier Invoices), BI-DRILL-001 (BI-Drilldown), COMP-SPERR-001 (Artikel-Sperren), jeweils mit Alembic-Migration und Tests.
+- ~~**Wave-3 Produktions-Readiness** (2026-06-18)~~ → alle 6 Slices implementiert (`wave3_wf_trigger_log_20260618`):
+  - **WF-TRIGGER-001**: WF-Trigger-Map + Log (`domain_ops.wf_trigger_log`), TRIGGER_MAP 6 Domains, manuelles Feuern + Log-Endpoint.
+  - **STMD-DUP-001**: Cross-domain Duplikat-Erkennung — UST-ID/IBAN-Duplikate, PLZ+Name-Fuzzy, EAN-Duplikate + Soft-Merge.
+  - **INT-XRECHNUNG-001**: XRechnung 3.0 UBL-XML-Builder + Batch-ZIP-Export; 404-Fix (keine 500 mehr durch DB-Generator-Cleanup-Bug).
+  - **INT-BANK-001**: MT940 + CAMT.053 Parser, OP-Matching (Referenz + Betrag), `domain_finance.bank_statements/bank_statement_lines`.
+  - **WGE-MOB-001**: Waage Mobile Sync — Idempotenz-Key, Batch-Offline-Sync, Pending-Queue, `domain_agrar.waagen_quittungen`.
+  - **MAHNWESEN-AUTO**: Scheduler-Jobs — Dunning-Auto tägl. 07:00, WF-Trigger-Pending alle 15min.
+- ~~**HRM-PAYROLL-DEEP-001 + INT-ACCOUNTING-EXPORT-PROFILES-001** (2026-06-18)~~ → Payroll-Closeout-Preview, Monatsabschluss, AN-/AG-Anteile, DATEV-kompatible + kanzleisoftware-neutrale Exportprofile mit Prüfsummen-/Audit-/Korrekturvertrag.
+- ~~**DSGVO Art. 30 (Slice-008)**~~ → `gdpr_art30_ropa.py`, 83% Coverage.
+- ~~**DSGVO Art. 33 (Slice-009)**~~ → `gdpr_art33_breach.py`, 97% Coverage.
+- ~~**Slice-007 Command Palette**~~ → `CommandPalette.tsx` + Ctrl+K via `useFeature('commandPalette')`.
+- ~~**Slice-010 Voice-Intent**~~ → Lager/Einkauf/HR-Intents in `ActionDispatchContext.tsx`.
+- ~~**Slice-011 Meridian Hardcolors**~~ → DESIGN-MERIDIAN-HARDCOLORS-011 bis 014.
+
+---
 
 ## Agrar-Spezialsoftware/Externe-Plattform Paritaets-Gaps (2026-05-17, aktualisiert)
 
