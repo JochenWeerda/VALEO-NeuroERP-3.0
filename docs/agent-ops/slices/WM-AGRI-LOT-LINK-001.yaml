@@ -1,8 +1,9 @@
 slice_id: WM-AGRI-LOT-LINK-001
 title: Lot-/Bestands-Sync Waage/WE -> Silozelle
 owner: Codex
-status: reserved
+status: completed
 reserved_at: 2026-06-18
+completed_at: 2026-06-18
 coordination: >-
   Folgeslice zu WM-AGRI-SILO-001. Bearbeitet die Lot-/Bestandskopplung additiv
   und greift nicht in die abgeschlossene WM-AGRI-SILO-001-Slice-YAML ein.
@@ -17,8 +18,9 @@ scope:
   - Bestandsbewegung und Trace-/Supply-Chain-Event
   - Regressionstests und Doku
 file_ownership:
-  - app/services/agri_lot_link_service.py
-  - app/api/v1/endpoints/agri_silo_material_flow.py
+  - app/services/agri_lot_link_booking_service.py
+  - app/api/v1/endpoints/agri_lot_link_booking.py
+  - app/api/v1/api.py
   - tests/test_agri_lot_link.py
   - docs/workflows/wm-agri-silo-supply-chain-integration-2026-06-13.md
   - docs/project-context/open-gaps-and-known-issues.md
@@ -32,3 +34,7 @@ acceptance_criteria:
 risks:
   - Produktiv-DB-Schemata koennen je Umgebung abweichen; SQL bleibt schema-qualifiziert
     und Tests pruefen den Vertragskern ohne Live-DB.
+verification:
+  - python -m py_compile app/services/agri_lot_link_booking_service.py app/api/v1/endpoints/agri_lot_link_booking.py app/api/v1/api.py tests/test_agri_lot_link.py
+  - python -m pytest -q -o addopts= tests/test_agri_lot_link.py
+  - direct Python service contract check

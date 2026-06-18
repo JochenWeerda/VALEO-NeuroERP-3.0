@@ -18,7 +18,7 @@
 | Materialtransfer kg-Buchung | **Implementiert** (Slice **WMS-FLOW-001**) | `book_material_transfer`, `POST …/material-flow/transfer`, Transfer-Card UI |
 | Supply-Chain-Events bei Mutationen | **Implementiert** (Slice **WM-AGRI-CHAIN-002**) | `supply_chain_events` + Outbox `inventory.material_flow.*` |
 | Transfer-Hooks in einer Transaktion | **Implementiert** | `commit()` nach `_emit_material_flow_hooks`; Test `test_transfer_commits_after_trace_hooks` |
-| Lot-/Bestands-Sync `silo_lots` ↔ Graph | **Offen** | Folge-Slice **WM-AGRI-LOT-LINK** |
+| Lot-/Bestands-Sync `silo_lots` ↔ Graph | **Backend-Kontrakt implementiert** (Slice **WM-AGRI-LOT-LINK-001**, 2026-06-18) | `legacy_silo_id`-Mapping, `sync-from-lots`, `POST /material-flow/lot-link` mit Bewegungsbeleg, `current_*` und Trace-Event; UI-/Regelvorschlag bleibt Folgeslice |
 | Bird-View / Hofplan MapLibre | **Offen** | **WM-AGRI-MAP-001** |
 | PLC / OPC-UA Live-Anlagen | **Offen** | **WM-AGRI-PLC-005** (Architektur only) |
 
@@ -30,14 +30,16 @@
 |--------|----------------|------------------|
 | Rückgrat | Wiegeschein `weighing_tickets` → Annahme → `silo_lots` → Settlement | **Parallel:** digitales **Anlagen-/Fördermodell** (`material_flow_nodes`/`edges`, `silo_cells`) je **Warehouse** + **Tenant** |
 | QS / Sperre | Lot-Folgeaktionen, Event-Log (`supply_chain_events`) | `qs_status` auf **Silozelle**, Knoten-`status`, Kanten-`status`; **validate-route** prüft u. a. QS-Sperre am Ziel |
-| Mengen / Schwund | Trace-Service: Mengen-Konsistenz Stufe-zu-Stufe | **WMS-FLOW-001:** kg-Transfer zwischen Silozellen → `inventory_stock_movements` + `current_stock_kg`; kein automatischer Abgleich mit `silo_lots` |
+| Mengen / Schwund | Trace-Service: Mengen-Konsistenz Stufe-zu-Stufe | **WMS-FLOW-001:** kg-Transfer zwischen Silozellen → `inventory_stock_movements` + `current_stock_kg`; **WM-AGRI-LOT-LINK-001:** aktives `silo_lots`-Lot → Silozelle mit Bewegungsbeleg und Trace-Event |
 | UI | `lager/rueckverfolgbarkeit` | `lager/materialfluss`, `lager/materialfluss-visualisierung` |
 
-**Gap (bewusst offen, nächste Wellen):** Es gibt noch **keine** automatische Verknüpfung `silo_lots` ↔ `material_flow_nodes` (Lot-Update / Bestands-Sync). Folge-Slice **WM-AGRI-LOT-LINK** (CHAIN-002 deckt Event-Log + Outbox ab).
+**Backend-Gap geschlossen (2026-06-18):** `POST /material-flow/lot-link` verbindet ein aktives `silo_lots`-Lot fail-closed mit einer Silozelle, schreibt `inventory_stock_movements`, aktualisiert `current_lot_id`/`current_material_id`/`current_stock_kg` und erzeugt ein Trace-/Outbox-Ereignis. Offen bleibt die UI-/Regel-Engine, die aus Annahme/Waage automatisch die fachlich passende Zielzelle vorschlägt.
 
 **Repo-seitig geschlossen (2026-06-13):** Fachliche **Zuordnung** und **Operator-Sprung**: Materialfluss-Toolbar → **Rückverfolgbarkeit**; Doku-Verweise (diese Datei, `docs/warehouse/README.md`, Handbuch-Inventar).
 
 **Repo-seitig geschlossen (2026-06-19):** **Materialtransfer** inkl. Lagerbuchung und UI (Slice **WMS-FLOW-001**).
+
+**Repo-seitig geschlossen (2026-06-18):** **Lot-Link-Buchung** Annahme/Waage → Silozelle als Backend-Vertrag (Slice **WM-AGRI-LOT-LINK-001**).
 
 ---
 
@@ -71,7 +73,7 @@ Siehe [wave-physical-chain-logistics-audit-2026-06-12.md](./wave-physical-chain-
 | Kein UI-Sprung **Materialfluss ↔ Rückverfolgbarkeit** | separate Silos | **Geschlossen** (Overflow-Aktion) |
 | **Ereignis-/Trace-Kopplung** Förderkante ↔ `supply_chain_events` + Outbox | fehlend | **Geschlossen** (Slice **WM-AGRI-CHAIN-002**, 2026-06-13) |
 | **kg-Transfer** Silozelle ↔ `inventory_stock_movements` | fehlend | **Geschlossen** (Slice **WMS-FLOW-001**, 2026-06-19): Backend + UI + Mobile-Sync |
-| **Lot-Bestand** ↔ Silozelle im Graph (automatisch) | fehlend | **Offen** (WM-AGRI-LOT-LINK) |
+| **Lot-Bestand** ↔ Silozelle im Graph (automatisch) | fehlend | **Backend-Kontrakt geschlossen** (WM-AGRI-LOT-LINK-001): Mapping + Sync-API + konkrete Lot-Link-Buchung; UI-/WE/Waage-Regelvorschlag offen |
 | Bird-View Luftbild | offen | **Offen** (WM-AGRI-MAP-001) |
 | PLC / Live-Anlagen | offen | **Offen** (WM-AGRI-PLC-005) |
 
@@ -81,7 +83,7 @@ Siehe [wave-physical-chain-logistics-audit-2026-06-12.md](./wave-physical-chain-
 
 **Ist (Stammdaten + Buchung):**
 
-- `current_material_id`, `current_lot_id`: optional, per PATCH und UI pflegbar (keine Auto-Sync aus WE/Waage).
+- `current_material_id`, `current_lot_id`: optional per PATCH/UI pflegbar und per `POST /material-flow/lot-link` aus aktivem `silo_lots`-Lot buchbar.
 - `current_stock_kg`: wird bei **WMS-FLOW-001**-Transfer aktualisiert; in UI als **Ist kg** sichtbar (neben **Kap. kg** = `capacity_kg`).
 - Umbuchung / Silo-Umfüllung: über Transfer-Card auf `lager/materialfluss` (Operator-gesteuert, auditierbar via Bewegungen + CHAIN-002-Events).
 
@@ -94,7 +96,7 @@ Siehe [wave-physical-chain-logistics-audit-2026-06-12.md](./wave-physical-chain-
 | QS-Freigabe / Sperre | `qs_status` steuert Routen/Kanten; Lot bleibt referenziert, bis Umbuchung oder Entladung |
 | Mischauftrag / MMX | Verbrauchsmaterial aus Zelle → Auftrag; `current_*` nach Abschluss aktualisieren |
 
-**Bereits vorhanden:** Rückverfolgbarkeit `lager/rueckverfolgbarkeit`, Supply-Chain-Events (CHAIN-002), Transfer-API (WMS-FLOW-001). **Fehlend:** Regel-Engine „Ticket/Lot → Silozelle“ als konsistente Transaktion ohne manuelle Eingabe.
+**Bereits vorhanden:** Rückverfolgbarkeit `lager/rueckverfolgbarkeit`, Supply-Chain-Events (CHAIN-002), Transfer-API (WMS-FLOW-001), Lot-Link-API (WM-AGRI-LOT-LINK-001). **Fehlend:** UI-/Regel-Engine „Ticket/Lot → Silozelle“ als Vorschlag ohne manuelle Zielzellenwahl.
 
 ---
 
@@ -102,6 +104,7 @@ Siehe [wave-physical-chain-logistics-audit-2026-06-12.md](./wave-physical-chain-
 
 - Slice Stammdaten/Graph: [WM-AGRI-SILO-001](../agent-ops/slices/WM-AGRI-SILO-001.yaml)
 - Slice Transfer/Buchung: [WMS-FLOW-001](../agent-ops/slices/WMS-FLOW-001.yaml)
+- Slice Lot-Link: [WM-AGRI-LOT-LINK-001](../agent-ops/slices/WM-AGRI-LOT-LINK-001.yaml)
 - Slice Events/Outbox: [WM-AGRI-CHAIN-002](../agent-ops/slices/WM-AGRI-CHAIN-002.yaml)
 - DOM-SUPPLY-004: [dom-supply-004-traceability-2026-06-10.md](../dom-supply-004-traceability-2026-06-10.md)
 - Logistik-Audit: [wave-physical-chain-logistics-audit-2026-06-12.md](./wave-physical-chain-logistics-audit-2026-06-12.md)

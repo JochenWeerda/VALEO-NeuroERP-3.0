@@ -26,10 +26,11 @@ Stand: `2026-06-18`
 
 **Von:** Codex
 **Owner:** Codex
-**Stand:** reserviert 2026-06-18 — Claim; umgesetzt wird die transaktionale Kopplung von Annahme/Waage/Silo-Lot an Materialfluss-Zellen.
+**Stand:** abgeschlossen 2026-06-18 — Backend-Kontrakt `POST /material-flow/lot-link`, Service-Härtung, Regressionstests und Doku umgesetzt; UI-/Leitstand-Folgen bleiben eigene Slices.
 **Ziel:** Medienbruch Annahme -> Waage -> Lot -> Silozelle -> kg-Bestand -> Trace schließen: Silo-Lots werden fail-closed mit `silo_cells.current_lot_id`, `current_material_id`, `current_stock_kg`, Bestandsbewegung und Trace-Event verbunden.
-**Dateibesitz:** `app/services/agri_lot_link_service.py`, `app/api/v1/endpoints/agri_silo_material_flow.py`, `tests/test_agri_lot_link.py`, `docs/workflows/wm-agri-silo-supply-chain-integration-2026-06-13.md`, `docs/project-context/open-gaps-and-known-issues.md`, `docs/agent-ops/slices/WM-AGRI-LOT-LINK-001.yaml`.
+**Dateibesitz:** `app/services/agri_lot_link_booking_service.py`, `app/api/v1/endpoints/agri_lot_link_booking.py`, `app/api/v1/api.py`, `tests/test_agri_lot_link.py`, `docs/workflows/wm-agri-silo-supply-chain-integration-2026-06-13.md`, `docs/project-context/open-gaps-and-known-issues.md`, `docs/agent-ops/slices/WM-AGRI-LOT-LINK-001.yaml`.
 **Abnahmekriterien:** Tenant-Scope, Zielzellen-/Kapazitätsprüfung, Lot-/Material-Konfliktschutz, idempotenter Bewegungsbeleg, Aktualisierung von `current_*`, Trace-Event, Regressionstest und aktualisierte Doku.
+**Verifikation:** `python -m py_compile app/services/agri_lot_link_booking_service.py app/api/v1/endpoints/agri_lot_link_booking.py app/api/v1/api.py tests/test_agri_lot_link.py`; `python -m pytest -q -o addopts= tests/test_agri_lot_link.py` (4 passed im ersten Lauf; spätere Wiederholung hing im bestehenden globalen Harness ohne Testausgabe, Direktvertrag grün).
 
 ## P0-INTEGRATION-SLICES-001 — Fachliche Integrationslücken (5 Slices)
 
