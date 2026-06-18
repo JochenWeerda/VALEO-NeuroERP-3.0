@@ -120,8 +120,8 @@ class TestXrechnungDB:
             "/api/v1/xrechnung/00000000-0000-0000-0000-000000000099",
             headers=HEADERS,
         )
-        if resp.status_code in (500, 503):
-            pytest.skip(f"Tabelle/Schema nicht verfügbar: {resp.text[:200]}")
+        if resp.status_code == 503:
+            pytest.skip(f"DB nicht verfügbar: {resp.text[:200]}")
         assert resp.status_code == 404
 
     def test_validate_404_for_nonexistent(self, require_db):
@@ -129,8 +129,8 @@ class TestXrechnungDB:
             "/api/v1/xrechnung/00000000-0000-0000-0000-000000000099/validate",
             headers=HEADERS,
         )
-        if resp.status_code in (500, 503):
-            pytest.skip(f"Tabelle/Schema nicht verfügbar: {resp.text[:200]}")
+        if resp.status_code == 503:
+            pytest.skip(f"DB nicht verfügbar: {resp.text[:200]}")
         assert resp.status_code == 404
 
     def test_batch_export_empty_periode_returns_zip(self, require_db):
