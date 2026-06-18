@@ -495,3 +495,75 @@ class TestWaageLiveUnit:
         db_read.execute.return_value.fetchone.return_value = row
         got = asyncio.run(get_wiegung_extended("WG-1", db=db_read))
         assert got["extended_data"] == {"x": 1}
+
+    def test_import_ascii_success_quality_and_strict_parse_error(self):
+        from app.api.v1.endpoints import waage
+
+        db = MagicMock()
+        file_ok = MagicMock()
+        file_ok.read = AsyncMock(return_value=(
+            b"W;WG1;2026-01-01;08:00;1000;400;600;HB1;L1;A1;S1;P1;SILO;14.5;78;1.2;X\n"
+            b"Q;WG1;Feuchte;14.5;%\n"
+            b"Q;OTHER;Feuchte;15;%\n"
+        ))
+        result = asyncio.run(waage.import_ascii(file=file_ok, waage_id="WA-1", fehler_toleranz=True, db=db))
+        assert result["imported"] == 1
+        assert result["skipped"] == 1
+        assert db.commit.call_count >= 2
+
+        file_bad = MagicMock()
+        file_bad.read = AsyncMock(return_value=b"W;too;short\n")
+        strict = asyncio.run(waage.import_ascii(file=file_bad, waage_id="WA-1", fehler_toleranz=False, db=MagicMock()))
+        assert strict["errors"]
+
+    def test_kalibrierung_update_db_error_and_extended_errors(self):
+        import asyncio
+        from fastapi import HTTPException
+        from app.api.v1.endpoints import waage
+
+        db_update_error = MagicMock()
+        db_update_error.execute.side_effect = [MagicMock(fetchone=MagicMock(return_value=({},))), Exception("boom")]
+        with pytest.raises(HTTPException) as exc:
+            asyncio.run(waage.update_kalibrierung("WA-1", {"eichamt": "Amt"}, db=db_update_error))
+        assert exc.value.status_code == 503
+
+        db_extended_missing = MagicMock()
+        db_extended_missing.execute.return_value.fetchone.return_value = None
+        with pytest.raises(HTTPException) as missing:
+            asyncio.run(waage.get_wiegung_extended("missing", db=db_extended_missing))
+        assert missing.value.status_code == 404
+
+        db_extended_error = MagicMock()
+        db_extended_error.execute.side_effect = Exception("relation missing")
+        with pytest.raises(HTTPException) as db_exc:
+            asyncio.run(waage.get_wiegung_extended("WG-1", db=db_extended_error))
+        assert db_exc.value.status_code == 503
+
+    def test_dual_wiegung_db_error_paths_and_explicit_netto(self):
+        import asyncio
+        from fastapi import HTTPException
+        from app.api.v1.endpoints.waage import (
+            WiegungErweitert,
+            WiegescheinMitDoppelwiegung,
+            create_dual_wiegung,
+        )
+
+        db = MagicMock()
+        payload = WiegescheinMitDoppelwiegung(
+            wiegung_erweitert=WiegungErweitert(waage_id="WA-1", netto=123.0, zielschein_typ="VL"),
+        )
+        created = asyncio.run(create_dual_wiegung(payload=payload, db=db))
+        assert created["netto"] == pytest.approx(123.0)
+        assert created["zielschein_typ"] == "VL"
+
+        db_bad = MagicMock()
+        db_bad.execute.side_effect = Exception("permission denied")
+        with pytest.raises(HTTPException) as exc:
+            asyncio.run(create_dual_wiegung(payload=payload, db=db_bad))
+        assert exc.value.status_code == 503
+
+        db_fallback_bad = MagicMock()
+        db_fallback_bad.execute.side_effect = [Exception("column missing"), Exception("fallback failed")]
+        with pytest.raises(HTTPException) as fallback_exc:
+            asyncio.run(create_dual_wiegung(payload=payload, db=db_fallback_bad))
+        assert fallback_exc.value.status_code == 503
