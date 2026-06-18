@@ -320,6 +320,9 @@ from app.api.v1.endpoints import (
     websocket,
 )
 
+# Kostenrechnung — KOSTEN-001
+from app.api.v1.endpoints import kostenrechnung
+
 # Import domain routers
 from app.domains.agrar.api import psm, psm_proplanta
 from app.domains.inventory.api import router as inventory_domain_router
@@ -2017,3 +2020,6 @@ api_router.include_router(
     prefix="/agribusiness",
     tags=["agribusiness", "farmers"],
 )
+
+# Kostenrechnung — KOSTEN-001
+api_router.include_router(kostenrechnung.router)
