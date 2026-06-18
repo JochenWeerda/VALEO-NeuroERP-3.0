@@ -832,9 +832,7 @@ async def mark_dunning_paid(
 
         op_id = str(row[1]) if row[1] else None
 
-        db.commit()
-
-        # Belegbruch schließen: offene_posten auf ausgeziffert setzen
+        # Belegbruch schließen: offene_posten auf ausgeziffert setzen (gleiche Transaktion)
         if op_id:
             try:
                 db.execute(
@@ -845,9 +843,10 @@ async def mark_dunning_paid(
                     """),
                     {"op_id": op_id, "tid": tenant_id},
                 )
-                db.commit()
             except Exception:  # noqa: BLE001 — OP-Update nicht kritisch für Mahnung-Bezahlung
                 pass
+
+        db.commit()
 
         return DunningResponse(
             id=str(row[0]),
