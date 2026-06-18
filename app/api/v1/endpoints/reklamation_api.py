@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import uuid
 from datetime import date, datetime
-from typing import Optional
+from typing import Any, Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from fastapi.responses import Response
@@ -10,7 +10,8 @@ from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
-from app.core.reklamation import Reklamation, ReklamationsStatus, ReklamationsTyp
+from app.core.reklamation import Reklamation, ReklamationsStatus, ReklamationsTyp, ReklamationZustandsmaschine
+from app.core.tenant import get_tenant_id
 from app.domains.operations.models import ReklamationDB
 
 from app.api.v1.schemas.base import BaseSchema
@@ -51,7 +52,7 @@ class ReklamationsDMSReferenzRequest(BaseModel):
 
 
 class ReklamationCreateRequest(BaseModel):
-    tenant_id: str
+    tenant_id: Optional[str] = None
     lieferant_id: str
     typ: str
     positionen: list[dict]
@@ -76,6 +77,16 @@ class ReklamationReferenzUpdateRequest(BaseModel):
     dms_referenzen: list[ReklamationsDMSReferenzRequest] = Field(default_factory=list)
 
 
+class ReklamationLaborBefundRequest(BaseModel):
+    labor_auftrag_id: str
+    chargen_id: str
+    entscheidung: str = Field(..., pattern="^(freigeben|sperren|nachpruefung)$")
+    analysewerte: dict[str, Any] = Field(default_factory=dict)
+    grenzwerte: dict[str, Any] = Field(default_factory=dict)
+    bemerkung: Optional[str] = None
+    aktor_id: str = "system"
+
+
 def _sla_status(row: ReklamationDB) -> str:
     if row.status in ("geschlossen", "abgelehnt"):
         return "erledigt"
@@ -84,9 +95,88 @@ def _sla_status(row: ReklamationDB) -> str:
     return "in_frist"
 
 
+def _require_payload_tenant_matches_request(payload_tenant: Optional[str], request_tenant: str) -> None:
+    if payload_tenant and payload_tenant != request_tenant:
+        raise HTTPException(status_code=403, detail="tenant_id im Payload passt nicht zum Request-Tenant")
+
+
+def _query_reklamation(db: Session, reklamation_id: str, tenant_id: str) -> ReklamationDB:
+    row = db.query(ReklamationDB).filter(
+        ReklamationDB.reklamation_id == reklamation_id,
+        ReklamationDB.tenant_id == tenant_id,
+    ).first()
+    if not row:
+        raise HTTPException(404, "Reklamation nicht gefunden")
+    return row
+
+
+def _labor_befunde(row: ReklamationDB) -> list[dict[str, Any]]:
+    return [
+        entry.get("metadaten", {})
+        for entry in (row.audit_trail or [])
+        if entry.get("aktion") == "labor_befund_uebernommen" and isinstance(entry.get("metadaten"), dict)
+    ]
+
+
+def _folgeentscheidungen(row: ReklamationDB) -> dict[str, Any]:
+    hat_crm = bool(row.crm_referenz)
+    hat_dms = bool(row.dms_referenzen)
+    labor_befunde = _labor_befunde(row)
+    positionen = row.positionen or []
+    has_charge = any(bool(p.get("charge_id") or p.get("chargen_id") or p.get("charge")) for p in positionen if isinstance(p, dict))
+    anerkannt = row.status in ("anerkannt", "teilweise_anerkannt")
+    in_pruefung = row.status in ("offen", "in_pruefung")
+
+    actions: list[dict[str, Any]] = []
+    actions.append({
+        "id": "crm_case",
+        "label": "CRM-Fall verknuepfen",
+        "status": "ok" if hat_crm else "offen",
+        "required_for_close": True,
+    })
+    actions.append({
+        "id": "dms_evidence",
+        "label": "Nachweisdokumente anhängen",
+        "status": "ok" if hat_dms else "offen",
+        "required_for_close": True,
+    })
+    if row.typ == ReklamationsTyp.QUALITAET.value:
+        actions.append({
+            "id": "labor_finding",
+            "label": "Laborbefund uebernehmen",
+            "status": "ok" if labor_befunde else "offen",
+            "required_for_close": in_pruefung,
+        })
+    if has_charge or labor_befunde:
+        gesperrt = any(b.get("entscheidung") == "sperren" for b in labor_befunde)
+        freigegeben = any(b.get("entscheidung") == "freigeben" for b in labor_befunde)
+        actions.append({
+            "id": "lot_release_or_block",
+            "label": "Charge sperren oder QS-freigeben",
+            "status": "sperre" if gesperrt else "freigabe" if freigegeben else "offen",
+            "required_for_close": row.typ == ReklamationsTyp.QUALITAET.value,
+        })
+    if anerkannt:
+        actions.extend([
+            {"id": "return_order", "label": "Retoure anlegen", "status": "bereit", "required_for_close": False},
+            {"id": "credit_note", "label": "Gutschrift oder Belastung erstellen", "status": "bereit", "required_for_close": False},
+            {"id": "replacement_delivery", "label": "Ersatzlieferung pruefen", "status": "bereit", "required_for_close": False},
+            {"id": "capa", "label": "CAPA / Lieferantenmassnahme starten", "status": "bereit", "required_for_close": False},
+        ])
+
+    blocker = [a for a in actions if a.get("required_for_close") and a.get("status") == "offen"]
+    return {
+        "actions": actions,
+        "blocker": blocker,
+        "can_close": not blocker and row.status in ("anerkannt", "teilweise_anerkannt", "abgelehnt"),
+        "labor_befunde": labor_befunde,
+    }
+
+
 def _to_dict(row: ReklamationDB) -> dict:
     trail = row.audit_trail or []
     sla = _sla_status(row)
+    folge = _folgeentscheidungen(row)
     return {
         "reklamation_id": row.reklamation_id,
         "tenant_id": row.tenant_id,
@@ -109,17 +199,27 @@ def _to_dict(row: ReklamationDB) -> dict:
         "ist_ueberfaellig": sla == "ueberfaellig",
         "audit_eintrag_anzahl": len(trail),
         "audit_integritaet_ok": True,
+        "folgeentscheidungen": folge,
+        "abschluss_blocker": folge["blocker"],
+        "abschlussfaehig": folge["can_close"],
         "schema_version": 1,
     }
 
 
-def _add_audit(row: ReklamationDB, aktion: str, aktor_id: str, kommentar: Optional[str] = None) -> None:
+def _add_audit(
+    row: ReklamationDB,
+    aktion: str,
+    aktor_id: str,
+    kommentar: Optional[str] = None,
+    metadaten: Optional[dict[str, Any]] = None,
+) -> None:
     trail = list(row.audit_trail or [])
     trail.append({
         "aktion": aktion,
         "aktor_id": aktor_id,
         "zeitpunkt": datetime.utcnow().isoformat(),
         "kommentar": kommentar,
+        "metadaten": metadaten or {},
     })
     row.audit_trail = trail
 
@@ -127,13 +227,18 @@ def _add_audit(row: ReklamationDB, aktion: str, aktor_id: str, kommentar: Option
 @router.post("", status_code=201, summary="Reklamation anlegen",
     response_model=ReklamationOut
 )
-def create_reklamation(req: ReklamationCreateRequest, db: Session = Depends(get_db)):
+def create_reklamation(
+    req: ReklamationCreateRequest,
+    db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
+):
+    _require_payload_tenant_matches_request(req.tenant_id, tenant_id)
     ReklamationsTyp(req.typ)  # validate
     dms = [d.model_dump() for d in req.dms_referenzen]
     gobd = req.gobd_beleg_id or (dms[0]["dokument_id"] if dms else None)
     row = ReklamationDB(
         reklamation_id=str(uuid.uuid4()),
-        tenant_id=req.tenant_id,
+        tenant_id=tenant_id,
         lieferant_id=req.lieferant_id,
         typ=req.typ,
         positionen=req.positionen,
@@ -160,20 +265,16 @@ def create_reklamation(req: ReklamationCreateRequest, db: Session = Depends(get_
 @router.get("/{reklamation_id}", summary="Reklamation abrufen",
     response_model=ReklamationOut
 )
-def get_reklamation(reklamation_id: str, db: Session = Depends(get_db)):
-    row = db.query(ReklamationDB).filter(ReklamationDB.reklamation_id == reklamation_id).first()
-    if not row:
-        raise HTTPException(404, "Reklamation nicht gefunden")
+def get_reklamation(reklamation_id: str, db: Session = Depends(get_db), tenant_id: str = Depends(get_tenant_id)):
+    row = _query_reklamation(db, reklamation_id, tenant_id)
     return _to_dict(row)
 
 
 @router.get("/{reklamation_id}/audit", summary="Audit trail abrufen",
     response_model=ReklamationOut
 )
-def get_audit_trail(reklamation_id: str, db: Session = Depends(get_db)):
-    row = db.query(ReklamationDB).filter(ReklamationDB.reklamation_id == reklamation_id).first()
-    if not row:
-        raise HTTPException(404, "Reklamation nicht gefunden")
+def get_audit_trail(reklamation_id: str, db: Session = Depends(get_db), tenant_id: str = Depends(get_tenant_id)):
+    row = _query_reklamation(db, reklamation_id, tenant_id)
     trail = row.audit_trail or []
     return {
         "reklamation_id": reklamation_id,
@@ -186,10 +287,8 @@ def get_audit_trail(reklamation_id: str, db: Session = Depends(get_db)):
 @router.get("/{reklamation_id}/e2e", summary="E2e overview abrufen",
     response_model=ReklamationOut
 )
-def get_e2e_overview(reklamation_id: str, db: Session = Depends(get_db)):
-    row = db.query(ReklamationDB).filter(ReklamationDB.reklamation_id == reklamation_id).first()
-    if not row:
-        raise HTTPException(404, "Reklamation nicht gefunden")
+def get_e2e_overview(reklamation_id: str, db: Session = Depends(get_db), tenant_id: str = Depends(get_tenant_id)):
+    row = _query_reklamation(db, reklamation_id, tenant_id)
     hat_crm = bool(row.crm_referenz)
     hat_dms = bool(row.dms_referenzen)
     frist = row.frist_datum
@@ -200,7 +299,8 @@ def get_e2e_overview(reklamation_id: str, db: Session = Depends(get_db)):
         "dms_document_ids": [d.get("dokument_id") for d in (row.dms_referenzen or [])],
         "sla_status": sla_status,
         "audit_count": len(row.audit_trail or []),
-        "e2e_complete": hat_crm and hat_dms,
+        "e2e_complete": hat_crm and hat_dms and _folgeentscheidungen(row)["can_close"],
+        "folgeentscheidungen": _folgeentscheidungen(row),
     }
 
 
@@ -209,20 +309,25 @@ def get_e2e_overview(reklamation_id: str, db: Session = Depends(get_db)):
 )
 def transition_status(
     reklamation_id: str,
-    neuer_status: str,
-    aktor_id: str = "system",
-    kommentar: Optional[str] = None,
+    req: ReklamationTransitionRequest,
     db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
 ):
-    row = db.query(ReklamationDB).filter(ReklamationDB.reklamation_id == reklamation_id).first()
-    if not row:
-        raise HTTPException(404, "Reklamation nicht gefunden")
+    row = _query_reklamation(db, reklamation_id, tenant_id)
     try:
-        ReklamationsStatus(neuer_status)
+        aktueller_status = ReklamationsStatus(row.status)
+        neuer_status = ReklamationsStatus(req.neuer_status)
+        ReklamationZustandsmaschine.pruefe_statuswechsel(aktueller_status, neuer_status)
     except ValueError as e:
         raise HTTPException(422, str(e))
-    _add_audit(row, "status_geaendert", aktor_id, kommentar)
-    row.status = neuer_status
+    _add_audit(
+        row,
+        "status_geaendert",
+        req.aktor_id,
+        req.kommentar,
+        {"vor_status": row.status, "nach_status": neuer_status.value},
+    )
+    row.status = neuer_status.value
     db.commit()
     db.refresh(row)
     return _to_dict(row)
@@ -231,10 +336,13 @@ def transition_status(
 @router.post("/{reklamation_id}/crm-reference", summary="Crm reference aktualisieren",
     response_model=ReklamationOut
 )
-def update_crm_reference(reklamation_id: str, req: ReklamationReferenzUpdateRequest, db: Session = Depends(get_db)):
-    row = db.query(ReklamationDB).filter(ReklamationDB.reklamation_id == reklamation_id).first()
-    if not row:
-        raise HTTPException(404, "Reklamation nicht gefunden")
+def update_crm_reference(
+    reklamation_id: str,
+    req: ReklamationReferenzUpdateRequest,
+    db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
+):
+    row = _query_reklamation(db, reklamation_id, tenant_id)
     if req.crm_referenz is None:
         raise HTTPException(422, "crm_referenz ist erforderlich")
     row.crm_referenz = req.crm_referenz.model_dump()
@@ -247,10 +355,13 @@ def update_crm_reference(reklamation_id: str, req: ReklamationReferenzUpdateRequ
 @router.post("/{reklamation_id}/dms-referenzen", summary="Dms referenzen hinzufügen",
     response_model=ReklamationOut
 )
-def add_dms_referenzen(reklamation_id: str, req: ReklamationReferenzUpdateRequest, db: Session = Depends(get_db)):
-    row = db.query(ReklamationDB).filter(ReklamationDB.reklamation_id == reklamation_id).first()
-    if not row:
-        raise HTTPException(404, "Reklamation nicht gefunden")
+def add_dms_referenzen(
+    reklamation_id: str,
+    req: ReklamationReferenzUpdateRequest,
+    db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
+):
+    row = _query_reklamation(db, reklamation_id, tenant_id)
     if not req.dms_referenzen:
         raise HTTPException(422, "dms_referenzen ist erforderlich")
     existing = list(row.dms_referenzen or [])
@@ -268,11 +379,42 @@ def add_dms_referenzen(reklamation_id: str, req: ReklamationReferenzUpdateReques
     return _to_dict(row)
 
 
+@router.post("/{reklamation_id}/labor-befund", summary="Laborbefund uebernehmen",
+    response_model=ReklamationOut
+)
+def uebernehme_labor_befund(
+    reklamation_id: str,
+    req: ReklamationLaborBefundRequest,
+    db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
+):
+    row = _query_reklamation(db, reklamation_id, tenant_id)
+    metadaten = {
+        "labor_auftrag_id": req.labor_auftrag_id,
+        "chargen_id": req.chargen_id,
+        "entscheidung": req.entscheidung,
+        "analysewerte": req.analysewerte,
+        "grenzwerte": req.grenzwerte,
+        "folgeaktion": "charge_sperren" if req.entscheidung == "sperren" else "qs_freigeben" if req.entscheidung == "freigeben" else "nachpruefung_anlegen",
+    }
+    _add_audit(row, "labor_befund_uebernommen", req.aktor_id, req.bemerkung, metadaten)
+    if row.status == ReklamationsStatus.OFFEN.value:
+        row.status = ReklamationsStatus.IN_PRUEFUNG.value
+        _add_audit(row, "status_geaendert", req.aktor_id, "Laborbefund uebernommen", {
+            "vor_status": ReklamationsStatus.OFFEN.value,
+            "nach_status": ReklamationsStatus.IN_PRUEFUNG.value,
+        })
+    db.commit()
+    db.refresh(row)
+    return _to_dict(row)
+
+
 @router.get("/crm/{crm_case_id}", summary="By crm case abrufen",
     response_model=list[ReklamationOut]
 )
-def get_by_crm_case(crm_case_id: str, db: Session = Depends(get_db)):
+def get_by_crm_case(crm_case_id: str, db: Session = Depends(get_db), tenant_id: str = Depends(get_tenant_id)):
     rows = db.query(ReklamationDB).filter(
+        ReklamationDB.tenant_id == tenant_id,
         ReklamationDB.crm_referenz["crm_case_id"].astext == crm_case_id
     ).all()
     return [_to_dict(r) for r in rows]
@@ -281,7 +423,9 @@ def get_by_crm_case(crm_case_id: str, db: Session = Depends(get_db)):
 @router.get("/offene/{tenant_id}", summary="Offene abrufen",
     response_model=list[ReklamationOut]
 )
-def get_offene(tenant_id: str, db: Session = Depends(get_db)):
+def get_offene(tenant_id: str, db: Session = Depends(get_db), request_tenant_id: str = Depends(get_tenant_id)):
+    if tenant_id != request_tenant_id:
+        raise HTTPException(status_code=403, detail="tenant_id passt nicht zum Request-Tenant")
     rows = db.query(ReklamationDB).filter(
         ReklamationDB.tenant_id == tenant_id,
         ReklamationDB.status == "offen",
@@ -292,7 +436,9 @@ def get_offene(tenant_id: str, db: Session = Depends(get_db)):
 @router.get("/ueberfaellige/{tenant_id}", summary="Ueberfaellige abrufen",
     response_model=list[ReklamationOut]
 )
-def get_ueberfaellige(tenant_id: str, db: Session = Depends(get_db)):
+def get_ueberfaellige(tenant_id: str, db: Session = Depends(get_db), request_tenant_id: str = Depends(get_tenant_id)):
+    if tenant_id != request_tenant_id:
+        raise HTTPException(status_code=403, detail="tenant_id passt nicht zum Request-Tenant")
     rows = db.query(ReklamationDB).filter(
         ReklamationDB.tenant_id == tenant_id,
         ReklamationDB.status == "offen",

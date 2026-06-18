@@ -29,7 +29,23 @@ export type Antrag = { id: string; nummer: string; programm: string; antragsdatu
 export type Probe = { id: string; probennummer: string; typ: string; artikel: string; datum: string; labor: string; status: 'ausstehend' | 'in-bearbeitung' | 'abgeschlossen' }
 export type Kampagne = { id: string; name: string; typ: string; zielgruppe: string; startdatum: string; enddatum: string; budget: number; status: 'geplant' | 'aktiv' | 'beendet' }
 export type Projekt = { id: string; name: string; kunde: string; startdatum: string; enddatum: string; fortschritt: number; budget: number; status: 'aktiv' | 'pausiert' | 'abgeschlossen' }
-export type LaborAuftrag = { id: string; chargenId: string; labor: string; analysen: number; auftragsdatum: string; status: 'offen' | 'in-bearbeitung' | 'abgeschlossen' }
+export type LaborAuftrag = {
+  id: string
+  chargenId: string
+  labor: string
+  analysen: number
+  auftragsdatum: string
+  status: 'offen' | 'in-bearbeitung' | 'abgeschlossen'
+  befund?: {
+    id: string
+    probennummer: string
+    entscheidung: 'freigeben' | 'sperren' | 'nachpruefung' | null
+    datum?: string | null
+    labor: string
+  } | null
+  qs_entscheidung?: 'freigeben' | 'sperren' | 'nachpruefung' | null
+  folgeaktion?: 'qs_freigeben' | 'charge_sperren' | 'nachpruefung_anlegen' | 'befund_erfassen'
+}
 export type ServiceAnfrage = { id: string; nummer: string; kunde: string; betreff: string; datum: string; prioritaet: 'hoch' | 'normal' | 'niedrig'; status: 'neu' | 'in-bearbeitung' | 'erledigt' }
 export type Schaden = { id: string; nummer: string; art: string; datum: string; ort: string; schadenhoehe: number; status: 'gemeldet' | 'in-pruefung' | 'reguliert' | 'abgelehnt' }
 export type Zapfung = { id: string; kennzeichen: string; artikel: string; menge: number; zeitstempel: string; fahrer: string }

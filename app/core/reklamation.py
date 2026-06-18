@@ -217,6 +217,19 @@ class Reklamation(BaseModel):
 
 class ReklamationZustandsmaschine:
     @staticmethod
+    def erlaubte_statuswechsel(status: ReklamationsStatus) -> list[ReklamationsStatus]:
+        return list(_GUELTIGE_UEBERGAENGE.get(status, []))
+
+    @staticmethod
+    def pruefe_statuswechsel(aktueller_status: ReklamationsStatus, neuer_status: ReklamationsStatus) -> None:
+        erlaubt = _GUELTIGE_UEBERGAENGE.get(aktueller_status, [])
+        if neuer_status not in erlaubt:
+            raise ValueError(
+                f"Ungueltiger Uebergang: {aktueller_status.value} -> {neuer_status.value}. "
+                f"Erlaubt: {[s.value for s in erlaubt]}"
+            )
+
+    @staticmethod
     def transition(reklamation: Reklamation, neuer_status: ReklamationsStatus) -> Reklamation:
         erlaubt = _GUELTIGE_UEBERGAENGE.get(reklamation.status, [])
         if neuer_status not in erlaubt:

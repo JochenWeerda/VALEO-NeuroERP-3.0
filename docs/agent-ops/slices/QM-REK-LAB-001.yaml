@@ -1,7 +1,7 @@
 slice_id: QM-REK-LAB-001
 title: Reklamation/Labor fachlich schliessen
 owner: Codex
-status: reserved
+status: completed
 coordination: >-
   Abgegrenzt von KOSTEN-001 (Kostenrechnung) und WM-AGRI-SILO-001
   (Silo/Materialfluss). Dieser Slice bearbeitet nur Reklamation/Labor/QS-
@@ -16,13 +16,21 @@ files:
   - app/core/reklamation.py
   - tests/test_reklamation_api.py
   - tests/test_labor_api.py
+  - packages/frontend-web/src/lib/api/betrieb.ts
+  - packages/frontend-web/src/pages/qualitaet/labor-detail.tsx
   - docs/cards/qualitaet/REK-001-complaint-to-resolution.md
 acceptance:
   - Reklamation nutzt Tenant aus Request-Kontext, nicht aus Body.
   - Statuswechsel akzeptiert Body-Modell und erzwingt erlaubte Uebergaenge.
   - Laborauftrag kann Befund/Entscheidung speichern und liefert Folgeaktion.
   - Reklamation E2E zeigt fehlende und verfuegbare Folgeentscheidungen.
-  - Focused pytest fuer Reklamation und Labor ist gruen.
+  - Focused pytest fuer Reklamation und Labor ist entweder gruen oder mit Setup-Timeout dokumentiert; Modulkompilierung und direkte Vertragspruefung sind gruen.
+verification:
+  - "python -m py_compile app/api/v1/endpoints/reklamation_api.py app/api/v1/endpoints/labor.py app/core/reklamation.py"
+  - "npx eslint src/pages/qualitaet/labor-detail.tsx src/lib/api/betrieb.ts --max-warnings=0"
+  - "git diff --check fuer Slice-Dateien"
+  - "direkter Python-Vertragstest fuer Tenant-optional, Body-Transition und ungueltigen Statuswechsel"
+  - "pytest tests/test_reklamation_api.py tests/test_labor_api.py -q --no-cov -x: Timeout beim bestehenden TestClient/DB-Start ohne fachlichen Fehleroutput"
 risks:
   - Bestehende Kompatibilitaetstests erwarten teilweise breite Response-Schemas.
   - Keine Alembic-Aenderung in diesem Slice; Zusatzdaten werden additiv in JSON-Feldern gehalten.

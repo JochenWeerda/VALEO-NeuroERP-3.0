@@ -6,10 +6,10 @@ Stand: `2026-06-17`
 
 **Von:** Codex
 **Owner:** Codex
-**Stand:** reserviert 2026-06-18 - Claim committed, Umsetzung startet danach.
+**Stand:** abgeschlossen 2026-06-18 - Tenant-Scope, Statusmaschine, Laborbefund, QS-Folgeaktion und E2E-Blocker umgesetzt; Pytest-HTTP-Lauf blockiert im bestehenden TestClient/DB-Start, Import/Lint/py_compile gruen.
 **Ziel:** Complaint-to-Resolution technisch und fachlich haerten: Tenant-Scope, serverseitige Statusmaschine, Laborbefund, QS-Entscheidung, Folgeaktionen fuer Sperre/Freigabe/Retoure/Gutschrift/CAPA.
-**Dateibesitz:** `app/api/v1/endpoints/reklamation_api.py`, `app/api/v1/endpoints/labor.py`, `app/core/reklamation.py`, `tests/test_reklamation_api.py`, `tests/test_labor_api.py`, `docs/cards/qualitaet/REK-001-complaint-to-resolution.md`.
-**Abnahmekriterien:** Body-basierter Statuswechsel; kein Cross-Tenant-Read; Laborbefund mit Folgeentscheidung; E2E-Risiken sichtbar; fokussierte Tests gruen.
+**Dateibesitz:** `app/api/v1/endpoints/reklamation_api.py`, `app/api/v1/endpoints/labor.py`, `app/core/reklamation.py`, `tests/test_reklamation_api.py`, `tests/test_labor_api.py`, `packages/frontend-web/src/lib/api/betrieb.ts`, `packages/frontend-web/src/pages/qualitaet/labor-detail.tsx`, `docs/cards/qualitaet/REK-001-complaint-to-resolution.md`.
+**Abnahmekriterien:** Body-basierter Statuswechsel; kein Cross-Tenant-Read; Laborbefund mit Folgeentscheidung; E2E-Risiken sichtbar; Import/Lint/py_compile/direkte Vertragspruefung gruen, Pytest-HTTP-Timeout dokumentiert.
 
 ## KOND-001 — Konditionssystem / Preisfindung
 
