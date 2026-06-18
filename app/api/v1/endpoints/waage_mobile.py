@@ -48,7 +48,7 @@ class WaagenQuittungBatch(BaseModel):
              summary="Fahrer-Quittung für Wiegeticket erfassen (WGE-MOB-001)")
 def create_quittung(
     body: WaagenQuittungIn,
-    response: Response,
+    response: Response = None,
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ) -> dict:
@@ -59,7 +59,8 @@ def create_quittung(
          WHERE idempotency_key = :key AND tenant_id = :tid
     """), {"key": body.idempotency_key, "tid": tenant_id}).fetchone()
     if existing:
-        response.status_code = 200
+        if response is not None:
+            response.status_code = 200
         return {"id": str(existing[0]), "status": str(existing[1]),
                 "idempotent": True, "idempotency_key": body.idempotency_key}
 
