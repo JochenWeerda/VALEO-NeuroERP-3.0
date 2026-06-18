@@ -40,6 +40,11 @@ def _query_one(db: Session, sql: str, params: dict) -> dict | None:
         return None
 
 
+def _safe_query(db: Session, sql: str, params: dict) -> dict | None:
+    """Backward-compatible single-row safe query used by older CRM 360 tests."""
+    return _query_one(db, sql, params)
+
+
 @router.get("/{customer_id}/360", response_model=Crm360Out, tags=["crm", "customers"], summary="Customer 360 abrufen")
 async def get_customer_360(
     customer_id: str,

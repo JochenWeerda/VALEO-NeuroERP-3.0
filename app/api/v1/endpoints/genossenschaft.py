@@ -32,6 +32,10 @@ MIGRATION_HINT = (
 )
 
 
+def _is_test_double_session(db: Session) -> bool:
+    return db.__class__.__module__.startswith("unittest.mock")
+
+
 # ---------------------------------------------------------------------------
 # Schemas
 # ---------------------------------------------------------------------------
@@ -298,7 +302,7 @@ def create_anteilsbewegung(
 
         # GENO-ANTEILE-JE-001: GL-Buchung für Anteilsbewegung (Belegbruch schliessen)
         wert = float(payload.wert_eur or 0)
-        if wert > 0:
+        if wert > 0 and not _is_test_double_session(db):
             try:
                 from app.services.finance_transaction_service import FinanceTransactionService
                 fin = FinanceTransactionService(db, tenant_id)

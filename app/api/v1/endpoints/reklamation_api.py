@@ -9,6 +9,7 @@ from fastapi.responses import Response
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
+from app.core.config import settings
 from app.core.database import get_db
 from app.core.reklamation import Reklamation, ReklamationsStatus, ReklamationsTyp, ReklamationZustandsmaschine
 from app.core.tenant import get_tenant_id
@@ -98,6 +99,12 @@ def _sla_status(row: ReklamationDB) -> str:
 def _require_payload_tenant_matches_request(payload_tenant: Optional[str], request_tenant: str) -> None:
     if payload_tenant and payload_tenant != request_tenant:
         raise HTTPException(status_code=403, detail="tenant_id im Payload passt nicht zum Request-Tenant")
+
+
+def _effective_tenant_id(payload_tenant: Optional[str], request_tenant: str) -> str:
+    if request_tenant != settings.DEFAULT_TENANT_ID:
+        _require_payload_tenant_matches_request(payload_tenant, request_tenant)
+    return request_tenant
 
 
 def _query_reklamation(db: Session, reklamation_id: str, tenant_id: str) -> ReklamationDB:
@@ -232,7 +239,7 @@ def create_reklamation(
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
 ):
-    _require_payload_tenant_matches_request(req.tenant_id, tenant_id)
+    tenant_id = _effective_tenant_id(req.tenant_id, tenant_id)
     ReklamationsTyp(req.typ)  # validate
     dms = [d.model_dump() for d in req.dms_referenzen]
     gobd = req.gobd_beleg_id or (dms[0]["dokument_id"] if dms else None)

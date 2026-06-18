@@ -297,7 +297,7 @@ class TestAlembicMigrationChain:
     def test_wave3_migration_has_correct_down_revision(self):
         """Stellt sicher dass Wave-3 Migration an comp_artikel_sperren angehängt ist."""
         import importlib.util, pathlib
-        mig_path = pathlib.Path("C:/Users/Jochen/VALEO-NeuroERP-3.0/alembic/versions/wave3_wf_trigger_log_20260618.py")
+        mig_path = pathlib.Path("alembic/versions/wave3_wf_trigger_log_20260618.py")
         spec = importlib.util.spec_from_file_location("wave3_mig", mig_path)
         mod = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(mod)
