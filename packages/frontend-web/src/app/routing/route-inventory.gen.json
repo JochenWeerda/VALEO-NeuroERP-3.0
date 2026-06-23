@@ -3046,6 +3046,11 @@
       "source": "auto"
     },
     {
+      "module": "@/pages/lager/qs-leitstand",
+      "path": "lager/qs-leitstand",
+      "source": "alias"
+    },
+    {
       "module": "@/pages/lager/rueckverfolgbarkeit",
       "path": "lager/rueckverfolgbarkeit",
       "source": "alias"

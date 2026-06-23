@@ -79,7 +79,7 @@ Siehe [wave-physical-chain-logistics-audit-2026-06-12.md](./wave-physical-chain-
 | **Ereignis-/Trace-Kopplung** Förderkante ↔ `supply_chain_events` + Outbox | fehlend | **Geschlossen** (Slice **WM-AGRI-CHAIN-002**, 2026-06-13) |
 | **kg-Transfer** Silozelle ↔ `inventory_stock_movements` | fehlend | **Geschlossen** (Slice **WMS-FLOW-001**, 2026-06-19): Backend + UI + Mobile-Sync |
 | **Lot-Bestand** ↔ Silozelle im Graph (automatisch) | fehlend | **Backend-Kontrakt geschlossen** (WM-AGRI-LOT-LINK-001): Mapping + Sync-API + konkrete Lot-Link-Buchung; UI-/WE/Waage-Regelvorschlag offen |
-| **QS-Freigabe/Audit** Labor ↔ Lager ↔ Produktion | Status-Dropdowns / Folgeaktion | **Backend-Kontrakt geschlossen** (WM-AGRI-QS-003): QS-Transition mit Pflichtgrund, Bediener, Probe/Analyse/Dokument, GMP+/VLOG, `silo_lots` + `silo_cells` + `supply_chain_events`; Leitstands-UI offen |
+| **QS-Freigabe/Audit** Labor ↔ Lager ↔ Produktion | Status-Dropdowns / Folgeaktion | **Backend** WM-AGRI-QS-003 + **Leitstand-UI** WM-AGRI-QS-004 (`lager/qs-leitstand`) |
 | Bird-View Luftbild | offen | **Offen** (WM-AGRI-MAP-001) |
 | PLC / Live-Anlagen | offen | **Offen** (WM-AGRI-PLC-005) |
 

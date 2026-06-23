@@ -13,7 +13,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { NativeSelect } from '@/components/ui/native-select'
 import { useWarehouses } from '@/lib/api/inventory'
 import { agriStr, useAgriSiloCells } from '@/lib/api/agri-material-flow'
-import { ArrowLeftRight, LayoutGrid, RefreshCw, Share2 } from 'lucide-react'
+import { ArrowLeftRight, LayoutGrid, RefreshCw, Share2, ShieldCheck } from 'lucide-react'
 
 // ── Hilfsfunktionen ──────────────────────────────────────────────────────────
 
@@ -244,6 +244,14 @@ export default function SiloUebersichtPage(): JSX.Element {
             variant: 'outline',
             onClick: () => navigate('/lager/materialfluss-visualisierung'),
             mcp: { intent: 'open-agri-flow-visualisation' },
+          },
+          {
+            id: 'goto-qs-leitstand',
+            label: 'QS-Leitstand',
+            icon: <ShieldCheck className="h-4 w-4" aria-hidden />,
+            variant: 'outline',
+            onClick: () => navigate('/lager/qs-leitstand'),
+            mcp: { intent: 'open-agri-qs-leitstand' },
           },
         ]}
         rightSlot={

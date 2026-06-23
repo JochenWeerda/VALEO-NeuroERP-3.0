@@ -1473,6 +1473,10 @@
       "path": "lager/silo-mobil"
     },
     {
+      "module": "@/pages/lager/qs-leitstand",
+      "path": "lager/qs-leitstand"
+    },
+    {
       "module": "@/pages/lager/kommissionierung",
       "path": "lager/kommissionierung"
     },

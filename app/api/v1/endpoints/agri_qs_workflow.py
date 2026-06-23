@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import Any, Optional
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel, ConfigDict
 from sqlalchemy.orm import Session
 
@@ -56,5 +56,24 @@ def change_lot_qs_status(
             vlog_evidence_id=body.vlogEvidenceId,
             production_release_ref=body.productionReleaseRef,
         )
+    except AgriQsWorkflowError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+
+
+@router.get("/qs-worklist", response_model=AgriQsOut, summary="QS-Leitstand Worklist (Lots und Zellen)")
+def qs_worklist(
+    limit: int = Query(100, ge=1, le=500),
+    svc: AgriQsWorkflowService = Depends(_svc),
+) -> Any:
+    return svc.list_worklist(limit=limit)
+
+
+@router.get("/lots/{lot_id}/qs-release-suggest", response_model=AgriQsOut, summary="QS-Freigabe-Vorschlag inkl. Produktionsfreigabe")
+def qs_release_suggest(
+    lot_id: str,
+    svc: AgriQsWorkflowService = Depends(_svc),
+) -> Any:
+    try:
+        return svc.suggest_release(lot_id)
     except AgriQsWorkflowError as exc:
         raise HTTPException(status_code=422, detail=str(exc)) from exc
