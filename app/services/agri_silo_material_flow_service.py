@@ -833,6 +833,21 @@ class AgriSiloMaterialFlowService:
                 "move_in_id": move_in_id,
             },
         )
+
+        # WMS-FLOW-001 → silo_lots Rücksync (best-effort, innerhalb derselben Transaktion)
+        try:
+            from app.services.agri_silo_lot_link_service import AgriSiloLotLinkService
+            AgriSiloLotLinkService(self.db, self.tenant_id, trace_hooks_enabled=False).sync_lots_from_transfer(
+                from_cell_id=from_cell_id,
+                to_cell_id=to_cell_id,
+                quantity_kg=quantity_kg,
+                lot_id=lot_id,
+                article_id=article_id,
+            )
+        except Exception as _exc:
+            import logging as _logging
+            _logging.getLogger(__name__).warning("WMS-FLOW silo_lots Rücksync fehlgeschlagen: %s", _exc)
+
         self.db.commit()
 
         return {
