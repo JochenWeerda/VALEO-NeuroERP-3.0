@@ -189,6 +189,118 @@ def test_book_lot_to_cell_is_idempotent_for_existing_reference():
 
 
 @pytest.mark.unit
+def test_auto_book_lot_link_books_legacy_match_cell():
+    """auto_book_lot_link_by_lot_id wählt Zelle mit legacy_silo_id-Match und bucht transaktional."""
+    lot = _row(
+        id="lot-auto",
+        silo_id="silo-auto",
+        virtual_lot_number="VL-AUTO",
+        source_ticket_id="ticket-auto",
+        article_id="art-auto",
+        quantity_tons=Decimal("5"),
+        status="active",
+        silo_number="SA",
+    )
+    # Zelle mit passendem legacy_silo_id
+    cell_match = _row(
+        id="cell-match",
+        warehouse_id="wh-auto",
+        cell_code="M1",
+        legacy_silo_id="silo-auto",
+        capacity_kg=Decimal("20000"),
+        current_stock_kg=Decimal("0"),
+        current_material_id=None,
+        current_lot_id=None,
+        qs_status="frei",
+    )
+    # Wiederverwendung der book_lot_to_cell-Mocks (lot, cell, existing=None, insert, update)
+    lot2 = _row(
+        id="lot-auto",
+        silo_id="silo-auto",
+        virtual_lot_number="VL-AUTO",
+        source_ticket_id="ticket-auto",
+        article_id="art-auto",
+        quantity_tons=Decimal("5"),
+        status="active",
+        silo_number="SA",
+    )
+    cell2 = _row(
+        id="cell-match",
+        warehouse_id="wh-auto",
+        cell_code="M1",
+        capacity_kg=Decimal("20000"),
+        current_stock_kg=Decimal("0"),
+        current_material_id=None,
+        current_lot_id=None,
+        qs_status="frei",
+        legacy_silo_id="silo-auto",
+    )
+    db = MagicMock()
+    cells_result = MagicMock()
+    cells_result.fetchall.return_value = [cell_match]
+    # Reihenfolge: lot-resolve, cells-fetchall, dann book_lot_to_cell: lot, cell, existing=None, insert, update
+    db.execute.side_effect = [
+        _result(lot),
+        cells_result,
+        _result(lot2),
+        _result(cell2),
+        _result(None),  # existing movement = None → frische Buchung
+        MagicMock(),   # INSERT
+        MagicMock(),   # UPDATE cell
+    ]
+
+    svc = AgriLotLinkBookingService(db, "tenant-a", trace_hooks_enabled=False)
+    out = svc.auto_book_lot_link_by_lot_id(lot_id="lot-auto")
+
+    assert out["ok"] is True
+    assert out["auto_booked"] is True
+    assert out["cell_id"] == "cell-match"
+    assert out["warehouse_id"] == "wh-auto"
+    assert out["quantity_kg"] == 5000.0
+    db.commit.assert_called_once()
+
+
+@pytest.mark.unit
+def test_auto_book_lot_link_returns_ok_false_when_no_cell_mapping():
+    """auto_book_lot_link_by_lot_id gibt ok=False wenn kein legacy_silo_id-Mapping existiert."""
+    lot = _row(
+        id="lot-x",
+        silo_id="silo-x",
+        virtual_lot_number="VL-X",
+        source_ticket_id=None,
+        article_id="art-x",
+        quantity_tons=Decimal("3"),
+        status="active",
+        silo_number="SX",
+    )
+    db = MagicMock()
+    cells_result = MagicMock()
+    cells_result.fetchall.return_value = []
+    db.execute.side_effect = [_result(lot), cells_result]
+
+    svc = AgriLotLinkBookingService(db, "tenant-a", trace_hooks_enabled=False)
+    out = svc.auto_book_lot_link_by_lot_id(lot_id="lot-x")
+
+    assert out["ok"] is False
+    assert "reason" in out
+    db.commit.assert_not_called()
+
+
+@pytest.mark.unit
+def test_auto_book_lot_link_returns_ok_false_for_missing_lot():
+    """auto_book_lot_link_by_lot_id gibt ok=False für unbekanntes/inaktives Lot."""
+    db = MagicMock()
+    db.execute.return_value = _result(None)
+
+    svc = AgriLotLinkBookingService(db, "tenant-a", trace_hooks_enabled=False)
+    out = svc.auto_book_lot_link_by_lot_id(lot_id="lot-missing")
+
+    assert out["ok"] is False
+    assert "reason" in out
+    db.commit.assert_not_called()
+
+
+@pytest.mark.unit
 def test_suggest_lot_link_prefers_legacy_silo_match():
     lot = _row(
         id="lot-1",

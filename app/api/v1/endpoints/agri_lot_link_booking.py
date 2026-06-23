@@ -28,6 +28,12 @@ class LotCellLinkIn(BaseModel):
     reference: Optional[str] = None
 
 
+class AutoBookIn(BaseModel):
+    lot_id: str
+    warehouse_id: Optional[str] = None
+    booked_by: Optional[str] = None
+
+
 router = APIRouter()
 
 
@@ -54,6 +60,27 @@ def book_lot_to_cell(
             quantity_kg=payload.quantity_kg,
             booked_by=payload.booked_by or "system",
             reference=payload.reference,
+        )
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+
+
+@router.post(
+    "/material-flow/lot-link/auto-book",
+    response_model=AgriLotLinkOut,
+    status_code=status.HTTP_200_OK,
+    summary="POST /material-flow/lot-link/auto-book",
+)
+def auto_book_lot_link(
+    payload: AutoBookIn,
+    svc: AgriLotLinkBookingService = Depends(_svc),
+) -> Any:
+    """Vollautomatische LOT-LINK-Buchung: Lot → beste Silozelle via legacy_silo_id ohne manuelle Zell-Auswahl."""
+    try:
+        return svc.auto_book_lot_link_by_lot_id(
+            lot_id=payload.lot_id,
+            warehouse_id=payload.warehouse_id,
+            booked_by=payload.booked_by or "system",
         )
     except ValueError as exc:
         raise HTTPException(status_code=422, detail=str(exc)) from exc

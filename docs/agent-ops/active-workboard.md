@@ -1,5 +1,15 @@
 # Active Workboard
 
+## WM-AGRI-AUTO-LINK-001 — Vollautomatische LOT-LINK-Buchung (Annahme/Waage → Silozelle)
+
+**Von:** Claude Sonnet 4.6
+**Owner:** Claude Sonnet 4.6
+**Stand:** abgeschlossen 2026-06-23 — `auto_book_lot_link_by_lot_id` in `AgriLotLinkBookingService`; Auto-Hook `_auto_book_lot_link` in `silo.py` `create_silo_lot`; neuer Endpoint `POST /material-flow/lot-link/auto-book`; 3 neue Unit-Tests (8/8 grün).
+**Ziel:** Medienbruch Annahme/Waage → Silozelle schließen: nach Silo-Lot-Anlage wird automatisch via `legacy_silo_id`-Mapping die beste Zielzelle ermittelt und `book_lot_to_cell` transaktional ausgeführt — kein manueller Operator-Schritt nötig. Fail-soft wenn kein Mapping vorhanden (ok=False + reason statt Exception).
+**Dateibesitz:** `app/services/agri_lot_link_booking_service.py`, `app/api/v1/endpoints/agri_lot_link_booking.py`, `app/api/v1/endpoints/silo.py`, `tests/test_agri_lot_link.py`.
+**Abnahmekriterien:** `auto_book_lot_link_by_lot_id` findet beste Zelle via `legacy_silo_id`-Score; bucht transaktional mit Stock-Movement + Trace-Event; gibt ok=False fail-soft wenn kein Mapping/inaktives Lot/alle Zellen gesperrt; Auto-Hook nach `create_silo_lot`; Endpoint `/material-flow/lot-link/auto-book` für Retry; 8/8 Unit-Tests grün.
+**Verifikation:** `python -m py_compile` grün; `pytest -q -o addopts= tests/test_agri_lot_link.py` → 8 passed.
+
 ## HRM-PAYROLL-DEEP-001 — HRM Payroll Deepening
 
 **Von:** Codex
