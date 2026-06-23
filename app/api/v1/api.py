@@ -153,6 +153,12 @@ from app.api.v1.endpoints import (
     job_runner,
     controlling,
     controlling_actions,
+    kontrakt_actions,
+    feed_produktion_actions,
+    pos_tagesabschluss_actions,
+    doc_nachweisraum_actions,
+    hrm_lifecycle_actions,
+    meldewesen_lifecycle_actions,
     training,
     personal,
     compliance_dsgvo,
@@ -1600,6 +1606,36 @@ api_router.include_router(
 api_router.include_router(
     controlling_actions.router,
     tags=["controlling"]
+)
+
+api_router.include_router(
+    kontrakt_actions.router,
+    tags=["kontrakte-lifecycle"]
+)
+
+api_router.include_router(
+    feed_produktion_actions.router,
+    tags=["feed-produktion"]
+)
+
+api_router.include_router(
+    pos_tagesabschluss_actions.router,
+    tags=["pos-tagesabschluss"]
+)
+
+api_router.include_router(
+    doc_nachweisraum_actions.router,
+    tags=["nachweisraum"]
+)
+
+api_router.include_router(
+    hrm_lifecycle_actions.router,
+    tags=["hrm-lifecycle"]
+)
+
+api_router.include_router(
+    meldewesen_lifecycle_actions.router,
+    tags=["meldewesen-lifecycle"]
 )
 
 api_router.include_router(

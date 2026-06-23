@@ -1,0 +1,27 @@
+slice_id: SEMANTIC-E2E-MATRIX-001
+title: "Semantische E2E Action-Matrix — Kritische ERP-UI-Flows (O2C/P2P/WMS/FIBU/CRM/POS/Compliance/HRM)"
+owner: Claude Sonnet 4.6
+status: completed
+goal: >-
+  Playwright-Spec-Datei, die nicht nur 404-freie Navigation prüft, sondern semantisch
+  verifiziert, dass kritische Seiten korrekt laden (main-Element, Statusfilter, KPI-Bar).
+  Basis-Action-Matrix für alle 9 Domains.
+file_ownership:
+  - docs/agent-ops/slices/SEMANTIC-E2E-MATRIX-001.yaml
+  - playwright-tests/specs/e2e-matrix/semantic-action-matrix.spec.ts
+acceptance_criteria:
+  - Playwright-Spec mit @smoke-Tags für O2C, P2P, WMS, FIBU, CRM, Kontrakt, POS, Compliance, HRM
+  - Semantische Checks (nicht nur URL, auch Element-Sichtbarkeit)
+  - Externe Gates (TSE, ELSTER, DATEV) explizit skipped
+ai_harness:
+  fachlicher_vertrag: >-
+    Jede Domain-Seite prüft: kein 404 + main/role=main sichtbar.
+    Kritische Seiten prüfen zusätzlich spezifische UI-Elemente.
+  architektur_vertrag: Playwright-Spec unter playwright-tests/specs/e2e-matrix/.
+  daten_vertrag: Keine DB-Schreiboperationen; nur GET-Aufrufe.
+  test_vertrag: @smoke-Tag für alle Tests; PLAYWRIGHT_BASE_URL konfigurierbar.
+  security_vertrag: dev-token für lokale Tests; produktiv nur Staging-Umgebung.
+  betriebs_vertrag: Tests laufen gegen gestarteten Frontend-Server (npm run dev).
+  dokumentations_vertrag: Workboard-Eintrag + Slice-YAML
+external_gates:
+  - Frontend-Server muss laufen (npm run dev)

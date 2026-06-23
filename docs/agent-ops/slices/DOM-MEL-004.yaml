@@ -1,0 +1,38 @@
+slice_id: DOM-MEL-004
+title: "Meldewesen-Domäne — Vollständige Vertiefung: Intrastat/ELSTER/ATLAS Lifecycle (.2–.5)"
+owner: Claude Sonnet 4.6
+status: completed
+goal: >-
+  Meldewesen auf volle 004-Tiefe: ENTWURF→IN_PRUEFUNG→FREIGEGEBEN→UEBERMITTELT→BESTAETIGT.
+  ABGELEHNT→IN_PRUEFUNG (Korrektionsschleife). Simulierte Übermittlung für Tests.
+  Echte Behörden-Übermittlung bleibt externes Gate.
+file_ownership:
+  - docs/agent-ops/slices/DOM-MEL-004.yaml
+  - app/services/meldewesen_lifecycle_service.py
+  - alembic/versions/meldewesen_lifecycle_20260623.py
+  - app/api/v1/endpoints/meldewesen_lifecycle_actions.py
+  - tests/test_dom_mel_004.py
+not_owned:
+  - app/api/v1/endpoints/intrastat.py
+  - app/api/v1/endpoints/atlas_zollausfuhr.py
+  - app/api/v1/endpoints/ebilanz_elster.py
+acceptance_criteria:
+  - Lifecycle inkl. ABGELEHNT→IN_PRUEFUNG Korrektionsschleife
+  - Hinweis bei UEBERMITTELT (externe Bestätigung offen)
+  - Simulierte Übermittlung deterministisch
+  - 9 Unit-Tests grün
+ai_harness:
+  fachlicher_vertrag: >-
+    UEBERMITTELT bedeutet: Meldung raus, Bestätigung steht aus.
+    BESTAETIGT: Behörde hat angenommen. ABGELEHNT: Korrektionsschleife möglich.
+    Echte Übermittlung extern gegated.
+  architektur_vertrag: Schema domain_meldewesen. text()-SQL only.
+  daten_vertrag: meldungen (typ, periode, betrag, status), meldung_log (append-only).
+  test_vertrag: Lifecycle + Hinweis + Simulation-Determinismus.
+  security_vertrag: X-Tenant-ID; Log append-only.
+  betriebs_vertrag: Simulation als eigener Endpunkt, kein Commit in Behörden-System.
+  dokumentations_vertrag: Workboard-Eintrag + Slice-YAML
+external_gates:
+  - ELSTER/ERiC echte Übermittlung
+  - ATLAS Zollanmeldung echte Übertragung
+  - Intrastat Statistisches Bundesamt
