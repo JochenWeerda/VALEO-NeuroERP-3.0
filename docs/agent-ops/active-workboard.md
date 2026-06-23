@@ -1,5 +1,14 @@
 # Active Workboard
 
+## DOM-FINANCE-004 — Finance-Domäne Vollständige Vertiefung (.2–.5)
+
+**Von:** Claude Code
+**Owner:** Claude Code
+**Stand:** reserviert 2026-06-23 — Claim vor Implementierung (AI-Harness-Protokoll)
+**Ziel:** Finance-Kern-Prozesse auf volle 004-Tiefe heben: SEPA-Zahlungsträger (.2), Ratenzahlungsplan-Lifecycle (.3), Mahnwesen-Eskalation-Trail (.4), Playwright @smoke + UAT (.5).
+**Dateibesitz:** `app/services/finance_sepa_service.py`, `app/services/finance_ratenzahlung_service.py`, `app/services/finance_mahnstufe_service.py`, `alembic/versions/finance_sepa_ratenzahlung_20260623.py`, `app/api/v1/endpoints/finance_actions.py`, `playwright-tests/specs/finance/finance-lifecycle-smoke.spec.ts`, `scripts/uat/finance_lifecycle_uat.py`, `docs/workflows/dom-finance-004-finance-deepening-2026-06-23.md`, `docs/agent-ops/slices/DOM-FINANCE-004.yaml`, `tests/test_dom_finance_004.py`
+**Koordination:** Keine aktiven Cursor-Finance-Slices. Fremde Dateien bleiben unangetastet.
+
 ## DOM-COMPLIANCE-004 — Compliance-Domäne Vollständige Vertiefung (.2–.5)
 
 **Von:** Claude Code
