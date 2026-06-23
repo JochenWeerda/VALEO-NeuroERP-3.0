@@ -264,3 +264,28 @@ Nach SonarCloud-Einf√ºhrung schrittweise die bestehenden advisory-only Checks h√
 - [Continue.dev Docs](https://docs.continue.dev/)
 - [Continue.dev Anthropic-Setup](https://docs.continue.dev/customize/model-providers/top-level/anthropic)
 - [ADR-007 Agent-Tool-Contract-Governance](../adr/adr-007-agent-tool-contract-governance.md)
+
+## 11. AI-Harness-Governance
+
+VALEO nutzt AI-Agenten nur innerhalb eines pruefbaren Harness:
+
+- Slice-YAML mit fachlichem Vertrag, Architekturvertrag, Datenvertrag,
+  Testvertrag, Security-Vertrag, Betriebsvertrag und Dokumentationsvertrag.
+- Workboard-Dateibesitz vor Umsetzung.
+- Doku-/Code-Sync fuer kritische Pfade.
+- AI-Slice-Readiness-Check fuer neue oder geaenderte Slices.
+- Nightly Documentation Drift Report ohne automatische Doku-Mutation.
+
+Technische Artefakte:
+
+| Artefakt | Zweck |
+|----------|-------|
+| `scripts/ai-slice-readiness-check.cjs` | Validiert Slice-YAML, Workboard-Bezug und AI-Harness |
+| `scripts/docs-code-sync-check.cjs` | Erkennt kritische Codeaenderungen ohne passende Doku oder Ausnahme |
+| `scripts/docs-drift-report.cjs` | Erzeugt Nightly-Report zu potenzieller Doku-Drift |
+| `config/docs-code-sync-map.yaml` | Mapping von Codepfaden zu erwarteten Doku-Bereichen |
+| `.github/workflows/ai-doc-sync.yml` | Nightly Drift Report als CI-Artefakt |
+| `artifacts/ai-tool-compatibility-matrix.json` | Modell-/Tool-Fallbacks, Restriktionen und Datenklassen |
+
+Diese Checks ersetzen kein Review. Sie verhindern, dass AI-Geschwindigkeit
+neue nicht dokumentierte Architektur- oder Compliance-Schulden erzeugt.

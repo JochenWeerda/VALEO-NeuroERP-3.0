@@ -119,6 +119,46 @@ Security-Updates sofort oeffnen. Major-Upgrades werden mindestens monatlich in
 einem Testzweig geprobt, damit der erste Kontakt nicht erst bei einer
 kritischen Sicherheitsluecke erfolgt.
 
+## AI-gestuetzte Major-Update-Arbeit
+
+AI-Agenten duerfen Major Updates vorbereiten und implementieren, aber nicht
+ohne reproduzierbaren Kompatibilitaetsnachweis abschliessen.
+
+Pflicht fuer jeden AI-gestuetzten Security- oder Major-Update-Slice:
+
+- Slice-YAML mit AI-Harness und `external_gates`.
+- Advisory-Klassifikation: `fixable_minor`, `forced_major`,
+  `accepted_temporary_risk`.
+- Betroffene direkte und transitive Module.
+- Liste der Contract-, Integration-, Migration-, Browser- und Negativtests.
+- Canary-/Feature-Flag- oder Rollback-/Forward-Fix-Plan.
+- Ablaufdatum und Owner fuer jede befristete Risikoakzeptanz.
+- Aktualisierte Release-Kompatibilitaetsmatrix.
+
+AI darf Changelogs, Migrationsleitfaeden und betroffene APIs zusammenfassen.
+Die technische Entscheidung bleibt beim Owner des Security-Upgrade-Slices.
+Bei POS, FiBu, Payroll, HR, DMS, QS, TSE, DATEV oder Datenschutz muss ein
+externes oder simuliertes Pruefer-Gate im QA-Report stehen.
+
+## Modell- und Tool-Kompatibilitaet
+
+Die AI-Tool-Kompatibilitaetsmatrix liegt unter
+`artifacts/ai-tool-compatibility-matrix.json`. Sie dokumentiert erlaubte
+Werkzeuge, Datenklassen, Fallbacks und Restriktionen.
+
+Verbindliche Regeln:
+
+- Chat-only-Entscheidungen sind nicht releasefaehig; Vertraege, Prompts,
+  Akzeptanzkriterien und Tests muessen ins Repo.
+- Sensible Daten, Payroll, HR, personenbezogene Daten und Secrets duerfen nicht
+  in externe Modelle gelangen. Es werden synthetische, anonymisierte oder lokale
+  Kontexte genutzt.
+- Ein Anbieter- oder Modellwechsel darf keine Architekturentscheidung loeschen;
+  Slices muessen anhand von Workboard, Slice-YAML, Tests und Doku fortsetzbar
+  sein.
+- Lokale Modelle duerfen niedrigere Kosten oder bessere Datenresidenz liefern,
+  aber keine niedrigeren Qualitaetsgates.
+
 ## Prueferevidenz
 
 Fuer jede Freigabe werden Audit-Ausgaben, SBOM, Image-Digests,

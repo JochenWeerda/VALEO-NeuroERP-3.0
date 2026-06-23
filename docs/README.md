@@ -41,6 +41,8 @@ Sie richtet sich an:
 - `docs/agent-ops/`: restart-sichere Parallelarbeit fuer mehrere Agenten
 - `docs/adr/`: verbindliche Architektur- und Entscheidungsregeln
 - [Frontend Routing](c:/Users/Jochen/VALEO-NeuroERP-3.0/docs/architecture/frontend-routing/README.md): TanStack-Route-Tree, typisierte Deep Links und Legacy-Redirects
+- [AI-assisted Enterprise Development Standard](c:/Users/Jochen/VALEO-NeuroERP-3.0/docs/architecture/ai-assisted-enterprise-development-standard.md): verbindlicher Harness fuer KI-gestuetzte Enterprise-Entwicklung, Agentenarbeit, QA, Doku-Sync, Security und externe Gates
+- [AI-assisted Development Implementation Plan](c:/Users/Jochen/VALEO-NeuroERP-3.0/docs/project-context/ai-assisted-development-implementation-plan-2026-06-23.md): operative Einfuehrung des Harness mit Slice-Governance, Doku-/Code-Sync, QA-Templates und Nightly-Drift-Report
 - [Production Readiness Runbook](c:/Users/Jochen/VALEO-NeuroERP-3.0/docs/operations/production-readiness-runbook.md): harte Release-Gates, Auditor-Simulation, Deployment und externe Freigaben
 - [Dependency and Compatibility Maintenance](c:/Users/Jochen/VALEO-NeuroERP-3.0/docs/operations/dependency-and-compatibility-maintenance.md): Vertragsversionierung, Schema-Kompatibilitaet, Security-Patches, Major-Upgrades und Release-Kompatibilitaetsmatrix (`artifacts/release-compatibility-matrix.json`)
 

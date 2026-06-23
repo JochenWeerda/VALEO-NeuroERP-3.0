@@ -4,12 +4,13 @@
 
 **Von:** Codex
 **Owner:** Codex
-**Stand:** reserviert 2026-06-23 - Claim fuer Umsetzung des AI-assisted Enterprise Development Standards.
+**Stand:** abgeschlossen 2026-06-23 - AI-Harness-Governance, Doku-/Code-Sync, AI-Slice-Readiness, semantische QA-Templates, Nightly-Drift-Report, AI-Tool-Kompatibilitaetsmatrix und Security-/Major-Update-Ergaenzungen umgesetzt.
 **Info an Claude Code:** Codex bearbeitet ausschliesslich AI-/Docs-Governance, Agent-Ops-Harness, QA-Templates und zugehoerige CI-/Script-Dateien. Keine Aenderung an aktuellen WMS-/Silo-/Materialfluss-Dateien oder generierten Frontend-Routen aus parallelem WIP; fremde gestagte/dirty fachliche Dateien werden nicht gebuendelt.
 **Ziel:** Slice-Harness, Doku-/Code-Sync, AI-Definition-of-Done, semantische QA-Templates, Nightly-Drift-Report, Vendor-Unabhaengigkeit und Security-/Major-Update-Prozess operativ einfuehren.
 **Dateibesitz:** `docs/agent-ops/*` nur AI-Harness-relevante Dateien, `docs/architecture/ai-assisted-enterprise-development-standard.md`, `docs/project-context/ai-assisted-development-implementation-plan-2026-06-23.md`, neue QA-Templates, `config/docs-code-sync-map.yaml`, `artifacts/ai-tool-compatibility-matrix.json`, `scripts/docs-*.cjs`, `scripts/ai-slice-readiness-check.cjs`, `.github/workflows/docs-governance.yml`, `.github/workflows/quality-gate.yml`, `.github/workflows/ai-doc-sync.yml`.
 **Abnahmekriterien:** Neue/geaenderte Slice-YAMLs werden auf AI-Harness-Felder validiert; kritische Codepfade benoetigen Doku/Gaps oder explizite Ausnahme; AI-Slice-Readiness ist pruefbar; semantische QA-Templates und Drift-Report existieren; Security-/Major-Update-Prozess ist dokumentiert.
 **Risiken:** Legacy-Slices duerfen nicht sofort repo-weit blockiert werden; Checks gelten initial fuer neue/geaenderte Artefakte und kritische Diff-Pfade.
+**Verifikation:** `node --check` fuer neue/geaenderte Governance-Scripts gruen; `node scripts/docs-governance-check.cjs docs/agent-ops/slices/AI-HARNESS-GOV-001.yaml` gruen; `node scripts/ai-slice-readiness-check.cjs --slice AI-HARNESS-GOV-001` gruen; `node scripts/docs-code-sync-check.cjs --base HEAD --head WORKTREE` gruen; `pnpm.cmd run docs:check` gruen.
 
 ## WM-AGRI-MAP-001 — Silo Bird-View / Kapazitäts-Dashboard
 

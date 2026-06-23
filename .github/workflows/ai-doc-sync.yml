@@ -1,0 +1,39 @@
+name: AI Documentation Drift Report
+
+on:
+  schedule:
+    - cron: "20 2 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  docs-drift-report:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Generate documentation drift report
+        run: |
+          BASE="$(git rev-list --max-parents=0 HEAD | tail -n 1)"
+          node scripts/docs-drift-report.cjs \
+            --base "$BASE" \
+            --head HEAD \
+            --output artifacts/docs-drift-report.json
+
+      - name: Upload documentation drift report
+        uses: actions/upload-artifact@v4
+        with:
+          name: docs-drift-report
+          path: artifacts/docs-drift-report.json
+          retention-days: 30

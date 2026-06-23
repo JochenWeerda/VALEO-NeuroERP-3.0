@@ -57,6 +57,13 @@ Jeder Slice muss mindestens enthalten:
 - noetige Tests
 - noetige Doku-Updates
 
+Neue AI- oder Agenten-Slices muessen ausserdem den AI-Harness aus
+`task-slice-template.md` enthalten. Der Harness macht fachlichen Vertrag,
+Architekturvertrag, Datenvertrag, Testvertrag, Security-Vertrag,
+Betriebsvertrag, Dokumentationsvertrag und externe Gates explizit. Ein Slice
+ohne diesen Harness darf nicht von `offen` oder `reserviert` auf `in arbeit`
+gesetzt werden, ausser er ist als Legacy-Slice dokumentiert.
+
 ## Ueberschneidungsregel
 
 Wenn zwei Agenten dieselbe Datei brauchen:
