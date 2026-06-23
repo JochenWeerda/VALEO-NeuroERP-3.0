@@ -104,14 +104,12 @@ Stand: `2026-06-18`
 **Abnahmekriterien:** `alembic heads` einheitlich; API erreichbar; Tests `pytest tests/test_agri_silo_material_flow.py --no-cov` grün; Transfer-UI auf `lager/materialfluss`; Navigation + `npm run routes:generate` konsistent.
 **Offen (Folge-Slices):** WM-AGRI-LOT-LINK Phase 2 (WE/Waage-Regeln), WM-AGRI-MAP-001, WM-AGRI-PLC-005 — siehe [wm-agri-silo-supply-chain-integration-2026-06-13.md](../workflows/wm-agri-silo-supply-chain-integration-2026-06-13.md) Abschnitt 0.
 
-## WM-AGRI-LOT-LINK — silo_lots ↔ silo_cells (Phase 1)
+## WM-AGRI-LOT-LINK — silo_lots ↔ silo_cells
 
 **Von:** Cursor
 **Owner:** Cursor
-**Stand:** in Arbeit 2026-06-19 — `legacy_silo_id`-Mapping, Sync-Service, API `POST …/sync-from-lots`, Auto-Hook in `silo.py`, UI-Spalte LOT-LINK; 3 Unit-Tests grün.
-**Ziel:** Bestand aus DOM-SUPPLY `silo_lots` auf Materialfluss-`silo_cells` spiegeln ohne manuelle kg-Eingabe.
-**Dateibesitz:** siehe [WM-AGRI-LOT-LINK.yaml](../agent-ops/slices/WM-AGRI-LOT-LINK.yaml).
-**Abnahmekriterien:** Alembic-Head `agri_silo_lot_link_20260619`; pytest `tests/test_agri_silo_lot_link.py` grün; UI Sync auf `lager/materialfluss`.
+**Stand:** abgeschlossen 2026-06-19 — Sync, Lot-Link-Buchung, **Vorschlag-API** (`GET …/lot-link/suggest`) + UI auf `lager/materialfluss`; Tests grün (5).
+**Offen:** Vollautomatische Buchung bei Annahme/Waage; Rücksync WMS-FLOW-001 → `silo_lots`.
 
 ## WAVE-PHYS-CHAIN-001 — Task 0 Verifikation + Logistik-Audit
 

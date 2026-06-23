@@ -58,6 +58,15 @@ export type MaterialTransferBody = {
   reference?: string | null
 }
 
+export type LotCellLinkBody = {
+  warehouse_id: string
+  lot_id: string
+  target_cell_id: string
+  quantity_kg?: string | number | null
+  booked_by?: string | null
+  reference?: string | null
+}
+
 export type SiloSystemCreate = {
   system_code: string
   name: string
@@ -215,6 +224,25 @@ export async function bookAgriMaterialTransfer(body: MaterialTransferBody): Prom
   return (data && typeof data === 'object' ? data : {}) as AgriFlowRow
 }
 
+export async function bookAgriLotToCell(body: LotCellLinkBody): Promise<AgriFlowRow> {
+  const { data } = await apiClient.post<unknown>('/api/v1/lager/wms/agri/material-flow/lot-link', body)
+  return (data && typeof data === 'object' ? data : {}) as AgriFlowRow
+}
+
+export type LotLinkSuggestParams = {
+  warehouse_id: string
+  lot_id?: string
+  ticket_id?: string
+  acceptance_id?: string
+}
+
+export async function suggestAgriLotLink(params: LotLinkSuggestParams): Promise<AgriFlowRow> {
+  const { data } = await apiClient.get<unknown>('/api/v1/lager/wms/agri/material-flow/lot-link/suggest', {
+    params,
+  })
+  return (data && typeof data === 'object' ? data : {}) as AgriFlowRow
+}
+
 export async function syncAgriSiloCellFromLots(cellId: string, warehouseId: string): Promise<AgriFlowRow> {
   const { data } = await apiClient.post<unknown>(
     `/api/v1/lager/wms/agri/silo-cells/${cellId}/sync-from-lots`,
@@ -341,6 +369,16 @@ export function useBookAgriMaterialTransfer() {
   const qc = useQueryClient()
   return useMutation({
     mutationFn: bookAgriMaterialTransfer,
+    onSuccess: (_data, vars) => {
+      void qc.invalidateQueries({ queryKey: agriMaterialFlowKeys.siloCells(vars.warehouse_id) })
+    },
+  })
+}
+
+export function useBookAgriLotToCell() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: bookAgriLotToCell,
     onSuccess: (_data, vars) => {
       void qc.invalidateQueries({ queryKey: agriMaterialFlowKeys.siloCells(vars.warehouse_id) })
     },
