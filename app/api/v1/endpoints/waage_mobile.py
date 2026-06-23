@@ -13,7 +13,7 @@ Endpoints:
 from __future__ import annotations
 
 from datetime import datetime, timezone
-from typing import Optional
+from typing import Any, Optional
 from uuid import uuid4
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Response
@@ -181,7 +181,7 @@ def batch_sync(
             "synced": synced, "results": results}
 
 
-@router.get("/pending", summary="Ausstehende Quittungen eines Geräts")
+@router.get("/pending", response_model=dict[str, Any], summary="Ausstehende Quittungen eines Geräts")
 def get_pending(
     device_id: str = Query(...),
     limit: int = Query(50, ge=1, le=200),
@@ -215,7 +215,7 @@ def get_pending(
         raise HTTPException(status_code=503, detail=str(exc)) from exc
 
 
-@router.get("/tickets/{ticket_id}", summary="Wiegeticket + Quittungsstatus")
+@router.get("/tickets/{ticket_id}", response_model=dict[str, Any], summary="Wiegeticket + Quittungsstatus")
 def get_ticket_with_quittung(
     ticket_id: str,
     tenant_id: str = Depends(get_tenant_id),

@@ -1,7 +1,7 @@
 slice_id: VALEO-WF-COCKPIT-001
 title: "Workflow- und Prozessleitstand fuer VALEO Process Kernel"
 owner: Codex
-status: reserved
+status: completed
 coordination: >-
   Entsteht aus valeo_neuroerp_youtube_gap_analyse_2026-06-23.md P0.1.
   Kein Ueberlapp mit WM-AGRI-/Route-Generator-WIP oder DOM-CONTROLLING-004.
@@ -29,6 +29,14 @@ acceptance_criteria:
   - Externe Blocker werden getrennt von technischen Fehlern gefuehrt.
   - Replay/Retry ist nur ueber explizite Berechtigungsentscheidung moeglich.
   - Unit-Tests decken Statusuebergaenge, Tenant-Isolation, Blocker und Replay-Guards ab.
+acceptance:
+  - Tenantisolierte Prozessliste und Detailansicht.
+  - Statusmodell inklusive blocked_external_gate.
+  - Chronologische Event-Kette und externe Blocker.
+  - Replay-Anforderung fail-closed ohne workflow:replay.
+tests:
+  - python -m py_compile app/services/workflow_cockpit_service.py app/api/v1/endpoints/workflow_cockpit.py
+  - pytest -q -o addopts= tests/test_workflow_cockpit_service.py
 ai_harness:
   fachlicher_vertrag: >-
     Operatoren muessen erkennen koennen, welcher ERP-Prozess warum steht:
@@ -61,3 +69,6 @@ risks:
     kapselt deshalb Statusmodell und Cockpit-Snapshot service-seitig.
   - Produktives Replay bleibt Folgeslice und darf nicht ohne RBAC/Audit
     erweitert werden.
+verification:
+  - python -m py_compile app/services/workflow_cockpit_service.py app/api/v1/endpoints/workflow_cockpit.py
+  - pytest -q -o addopts= tests/test_workflow_cockpit_service.py
