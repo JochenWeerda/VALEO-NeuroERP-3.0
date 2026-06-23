@@ -1,5 +1,14 @@
 # Active Workboard
 
+## DOM-SALES-004 — Sales-Domäne Vollständige Vertiefung (.2–.5)
+
+**Von:** Claude Code
+**Owner:** Claude Code
+**Stand:** reserviert 2026-06-23 — Claim vor Implementierung (AI-Harness-Protokoll)
+**Ziel:** Sales-Kern-Prozesse auf volle 004-Tiefe heben: Auftragsbestätigung-Lifecycle (.2), Lieferschein-Closing-Flow (.3), Preisabweichungs-Eskalation (.4), Playwright @smoke + UAT (.5).
+**Dateibesitz:** `app/services/sales_ab_lifecycle_service.py`, `app/services/sales_lieferschein_close_service.py`, `app/services/sales_preisabweichung_service.py`, `alembic/versions/sales_ab_preisabweichung_20260623.py`, `app/api/v1/endpoints/sales_orders.py`, `playwright-tests/specs/sales/sales-lifecycle-smoke.spec.ts`, `scripts/uat/sales_lifecycle_uat.py`, `docs/workflows/dom-sales-004-sales-deepening-2026-06-23.md`, `docs/agent-ops/slices/DOM-SALES-004.yaml`, `tests/test_dom_sales_004.py`
+**Koordination:** Keine aktiven Cursor-Sales-Slices. Fremde Dateien bleiben unangetastet.
+
 ## DOM-FINANCE-004 — Finance-Domäne Vollständige Vertiefung (.2–.5)
 
 **Von:** Claude Code
