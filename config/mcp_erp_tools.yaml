@@ -1,0 +1,300 @@
+schema_version: "1.0"
+registry_id: MCP-ERP-TOOLS-001
+description: "VALEO NeuroERP MCP-Toolkatalog — rollenbasierte, auditierte ERP-Tools fuer Agent-Zugriff"
+
+tools:
+
+  # ── CRM ────────────────────────────────────────────────────────────────────
+  - tool_id: crm.customer.search
+    domain: crm
+    name: "Kunden suchen"
+    description: "Sucht Kunden anhand von Name, Kundennummer oder PLZ. Gibt eine Liste von Kunden zurueck."
+    scope: crm:read
+    idempotent: true
+    risk_class: low
+    input_schema:
+      type: object
+      properties:
+        query: { type: string, description: "Suchbegriff (Name, Nr., PLZ)" }
+        limit: { type: integer, default: 20 }
+      required: [query]
+    output_schema:
+      type: array
+      items:
+        type: object
+        properties:
+          kunden_nr: { type: string }
+          name: { type: string }
+          ort: { type: string }
+          segment: { type: string }
+    audit: read
+    endpoint: "GET /api/v1/kunden?search={query}&limit={limit}"
+
+  - tool_id: crm.customer.summary360
+    domain: crm
+    name: "Kunden-360-Zusammenfassung"
+    description: "Liefert 360-Grad-Zusammenfassung: offene Auftraege, letzte Kontakte, OP-Saldo, Segmentierung."
+    scope: crm:read
+    idempotent: true
+    risk_class: low
+    input_schema:
+      type: object
+      properties:
+        kunden_nr: { type: string }
+      required: [kunden_nr]
+    output_schema:
+      type: object
+      properties:
+        kunden_nr: { type: string }
+        name: { type: string }
+        offene_auftraege: { type: integer }
+        op_saldo_eur: { type: number }
+        letzte_kontakte: { type: array }
+        segment: { type: string }
+    audit: read
+    endpoint: "GET /api/v1/crm/kunden/{kunden_nr}/360"
+
+  - tool_id: crm.contact.log
+    domain: crm
+    name: "Kontaktprotokoll erfassen"
+    description: "Erfasst einen Kundenkontakt (Anruf, E-Mail, Besuch) mit Ergebnis und Wiedervorlage."
+    scope: crm:write
+    idempotent: false
+    risk_class: medium
+    input_schema:
+      type: object
+      properties:
+        kunden_nr: { type: string }
+        kanal: { type: string, enum: [telefon, email, besuch, post] }
+        ergebnis: { type: string }
+        wiedervorlage_datum: { type: string, format: date, nullable: true }
+      required: [kunden_nr, kanal, ergebnis]
+    output_schema:
+      type: object
+      properties:
+        kontakt_id: { type: string }
+        erfasst_am: { type: string }
+    audit: write
+    endpoint: "POST /api/v1/crm/kontakte"
+    human_approval_required: false
+
+  # ── Sales / O2C ────────────────────────────────────────────────────────────
+  - tool_id: sales.order.status
+    domain: sales
+    name: "Auftragsstatus pruefen"
+    description: "Gibt Lifecycle-Status, offene Positionen und naechsten Schritt eines Auftrags zurueck."
+    scope: sales:read
+    idempotent: true
+    risk_class: low
+    input_schema:
+      type: object
+      properties:
+        auftrag_nr: { type: string }
+      required: [auftrag_nr]
+    output_schema:
+      type: object
+      properties:
+        auftrag_nr: { type: string }
+        status: { type: string }
+        offene_positionen: { type: integer }
+        naechster_schritt: { type: string }
+    audit: read
+    endpoint: "GET /api/v1/sales-orders/{auftrag_nr}/status"
+
+  - tool_id: sales.invoice.propose
+    domain: sales
+    name: "Rechnungsvorschlag aus Lieferschein"
+    description: "Erzeugt einen Rechnungs-Entwurf aus einem abgeschlossenen Lieferschein. Erfordert Human Approval."
+    scope: sales:write
+    idempotent: false
+    risk_class: high
+    input_schema:
+      type: object
+      properties:
+        lieferschein_nr: { type: string }
+        rechnungsdatum: { type: string, format: date }
+      required: [lieferschein_nr, rechnungsdatum]
+    output_schema:
+      type: object
+      properties:
+        entwurf_id: { type: string }
+        betrag_netto: { type: number }
+        mwst: { type: number }
+        positionen: { type: integer }
+    audit: write
+    endpoint: "POST /api/v1/sales-invoices/propose"
+    human_approval_required: true
+
+  # ── FIBU ───────────────────────────────────────────────────────────────────
+  - tool_id: fibu.open_items.list
+    domain: finance
+    name: "Offene Posten auflisten"
+    description: "Listet offene Forderungen oder Verbindlichkeiten nach Faelligkeit."
+    scope: finance:read
+    idempotent: true
+    risk_class: low
+    input_schema:
+      type: object
+      properties:
+        typ: { type: string, enum: [forderung, verbindlichkeit] }
+        faellig_bis: { type: string, format: date, nullable: true }
+        limit: { type: integer, default: 50 }
+      required: [typ]
+    output_schema:
+      type: array
+      items:
+        type: object
+        properties:
+          beleg_nr: { type: string }
+          kunden_nr: { type: string }
+          betrag_eur: { type: number }
+          faellig_am: { type: string }
+          mahnstatus: { type: string }
+    audit: read
+    endpoint: "GET /api/v1/open-items?typ={typ}&faellig_bis={faellig_bis}&limit={limit}"
+
+  - tool_id: fibu.dunning.status
+    domain: finance
+    name: "Mahnstatus abfragen"
+    description: "Gibt Mahnstatus und letzte Mahnaktionen fuer einen Kunden zurueck."
+    scope: finance:read
+    idempotent: true
+    risk_class: low
+    input_schema:
+      type: object
+      properties:
+        kunden_nr: { type: string }
+      required: [kunden_nr]
+    output_schema:
+      type: object
+      properties:
+        kunden_nr: { type: string }
+        mahnstufe: { type: integer }
+        letzte_mahnung: { type: string, nullable: true }
+        gesamt_offen_eur: { type: number }
+    audit: read
+    endpoint: "GET /api/v1/dunning/status/{kunden_nr}"
+
+  # ── WMS / QS ───────────────────────────────────────────────────────────────
+  - tool_id: wms.lot.trace
+    domain: inventory
+    name: "Lot verfolgen"
+    description: "Gibt Herkunft, Silozelle, QS-Status und Bewegungshistorie eines Lots zurueck."
+    scope: inventory:read
+    idempotent: true
+    risk_class: low
+    input_schema:
+      type: object
+      properties:
+        lot_id: { type: string }
+      required: [lot_id]
+    output_schema:
+      type: object
+      properties:
+        lot_id: { type: string }
+        artikel_id: { type: string }
+        menge_kg: { type: number }
+        status: { type: string }
+        qs_status: { type: string }
+        silozelle: { type: string, nullable: true }
+        bewegungen: { type: array }
+    audit: read
+    endpoint: "GET /api/v1/inventory/lots/{lot_id}/trace"
+
+  - tool_id: wms.cell.status
+    domain: inventory
+    name: "Silozellen-Status"
+    description: "Gibt Fuellstand, Artikel, QS-Status und Sperren einer Silozelle zurueck."
+    scope: inventory:read
+    idempotent: true
+    risk_class: low
+    input_schema:
+      type: object
+      properties:
+        cell_code: { type: string }
+      required: [cell_code]
+    output_schema:
+      type: object
+      properties:
+        cell_code: { type: string }
+        current_stock_kg: { type: number }
+        qs_status: { type: string }
+        current_material: { type: string, nullable: true }
+        flush_required: { type: boolean }
+    audit: read
+    endpoint: "GET /api/v1/silo/cells/{cell_code}/status"
+
+  # ── DMS / Nachweisraum ─────────────────────────────────────────────────────
+  - tool_id: dms.document.search
+    domain: nachweisraum
+    name: "Dokument suchen"
+    description: "Sucht Dokumente im Nachweisraum nach Typ, Zeitraum oder Beleg-Referenz."
+    scope: nachweisraum:read
+    idempotent: true
+    risk_class: low
+    input_schema:
+      type: object
+      properties:
+        beleg_ref: { type: string, nullable: true }
+        dokument_typ: { type: string, nullable: true }
+        von: { type: string, format: date, nullable: true }
+        bis: { type: string, format: date, nullable: true }
+        limit: { type: integer, default: 20 }
+    output_schema:
+      type: array
+      items:
+        type: object
+        properties:
+          dokument_id: { type: string }
+          titel: { type: string }
+          status: { type: string }
+          erstellt_am: { type: string }
+    audit: read
+    endpoint: "GET /api/v1/nachweisraum/dokumente"
+
+  - tool_id: dms.gobd.export_status
+    domain: nachweisraum
+    name: "GoBD-Export-Status"
+    description: "Gibt Status und Pruefprotokoll eines GoBD-Exports zurueck."
+    scope: nachweisraum:read
+    idempotent: true
+    risk_class: low
+    input_schema:
+      type: object
+      properties:
+        export_id: { type: string }
+      required: [export_id]
+    output_schema:
+      type: object
+      properties:
+        export_id: { type: string }
+        status: { type: string }
+        dokument_anzahl: { type: integer }
+        pruefprotokoll: { type: string, nullable: true }
+    audit: read
+    endpoint: "GET /api/v1/nachweisraum/gobd-exporte/{export_id}"
+
+  # ── Compliance ─────────────────────────────────────────────────────────────
+  - tool_id: compliance.gate.status
+    domain: compliance
+    name: "Externe Gate-Status abfragen"
+    description: "Gibt Status ausstehender externer Abnahmen (ELSTER, DATEV, TSE, Auditor) zurueck."
+    scope: compliance:read
+    idempotent: true
+    risk_class: low
+    input_schema:
+      type: object
+      properties:
+        gate_typ: { type: string, nullable: true, enum: [elster, datev, tse, auditor, all] }
+      required: []
+    output_schema:
+      type: array
+      items:
+        type: object
+        properties:
+          gate_id: { type: string }
+          gate_typ: { type: string }
+          status: { type: string }
+          faellig_am: { type: string, nullable: true }
+    audit: read
+    endpoint: "GET /api/v1/compliance/external-gates"
