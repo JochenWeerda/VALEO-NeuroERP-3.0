@@ -159,6 +159,15 @@ export const RAW_NAV_SECTIONS: RawNavItem[] = [
         mcp: { businessDomain: 'inventory', scope: 'inventory:read' },
       },
       {
+        id: 'silo-uebersicht',
+        label: 'Silo-Übersicht (Bird-View)',
+        icon: LayoutGrid,
+        module: '@/pages/lager/silo-uebersicht',
+        preferredPath: 'lager/silo-uebersicht',
+        keywords: ['silo', 'übersicht', 'bird-view', 'kapazität', 'qs-status', 'bestand', 'map', 'karte'],
+        mcp: { businessDomain: 'inventory', scope: 'inventory:read' },
+      },
+      {
         id: 'kommissionierung',
         label: 'Kommissionierung',
         icon: ShoppingCart,
