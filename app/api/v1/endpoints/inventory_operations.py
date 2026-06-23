@@ -1,6 +1,7 @@
 """
 Inventory Operations — Bestandskorrektur, Schwund, MHD-Abschreibung
 Wave 1+2: Core inventory correction endpoints with automatic GL posting.
+DOM-INV-004: Lot-Trace (.2), Inventur-Differenzbeleg (.3), Korrektur-Storno (.4).
 """
 
 from datetime import date
@@ -525,3 +526,178 @@ async def get_korrektur(
         "bemerkung": row["notes"],
         "created_at": str(row["created_at"]),
     }
+
+
+# ---------------------------------------------------------------------------
+# DOM-INV-004.2 — Lot/Charge-Traceability (FEFO)
+# ---------------------------------------------------------------------------
+
+from pydantic import Field as _Field
+from typing import List as _List
+
+
+class LotCreateIn(BaseModel):
+    article_id: str
+    warehouse_id: str
+    lot_number: str
+    initial_qty: float = _Field(..., gt=0)
+    unit: str = "kg"
+    mhd: Optional[date] = None
+
+
+class LotConsumeIn(BaseModel):
+    quantity: float = _Field(..., gt=0)
+    reference_id: Optional[str] = None
+    reference_type: Optional[str] = None
+
+
+@router.post(
+    "/lots",
+    status_code=201,
+    tags=["lager", "inventory", "lots"],
+    summary="Inventory-Lot anlegen (DOM-INV-004.2)",
+)
+async def create_inventory_lot(
+    body: LotCreateIn,
+    x_tenant_id: Optional[str] = None,
+    db: Session = Depends(get_db),
+) -> dict:
+    """Neuen Chargen-/MHD-Eintrag anlegen."""
+    tenant_id = x_tenant_id or DEFAULT_TENANT
+    from app.services.inventory_lot_trace_service import create_lot, LotTraceError
+    try:
+        return create_lot(
+            db=db,
+            tenant_id=tenant_id,
+            article_id=body.article_id,
+            warehouse_id=body.warehouse_id,
+            lot_number=body.lot_number,
+            initial_qty=body.initial_qty,
+            unit=body.unit,
+            mhd=body.mhd,
+        )
+    except LotTraceError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+    except Exception as exc:
+        raise HTTPException(status_code=503, detail=str(exc)) from exc
+
+
+@router.get(
+    "/lots",
+    tags=["lager", "inventory", "lots"],
+    summary="Inventory-Lots (FEFO) auflisten (DOM-INV-004.2)",
+)
+async def list_inventory_lots(
+    article_id: Optional[str] = None,
+    warehouse_id: Optional[str] = None,
+    include_exhausted: bool = False,
+    x_tenant_id: Optional[str] = None,
+    db: Session = Depends(get_db),
+) -> list:
+    """FEFO-sortierte Lot-Liste (frühestes MHD zuerst)."""
+    tenant_id = x_tenant_id or DEFAULT_TENANT
+    from app.services.inventory_lot_trace_service import list_lots_fefo
+    try:
+        return list_lots_fefo(
+            db=db,
+            tenant_id=tenant_id,
+            article_id=article_id,
+            warehouse_id=warehouse_id,
+            include_exhausted=include_exhausted,
+        )
+    except Exception as exc:
+        raise HTTPException(status_code=503, detail=str(exc)) from exc
+
+
+@router.post(
+    "/lots/{lot_id}/consume",
+    tags=["lager", "inventory", "lots"],
+    summary="Lot-Verbrauch (FEFO, fail-closed) (DOM-INV-004.2)",
+)
+async def consume_inventory_lot(
+    lot_id: str,
+    body: LotConsumeIn,
+    x_tenant_id: Optional[str] = None,
+    db: Session = Depends(get_db),
+) -> dict:
+    """Menge aus einem Lot verbrauchen (fail-closed bei MHD-Ablauf oder Unterdeckung)."""
+    tenant_id = x_tenant_id or DEFAULT_TENANT
+    from app.services.inventory_lot_trace_service import consume_lot, LotTraceError
+    try:
+        return consume_lot(
+            db=db,
+            lot_id=lot_id,
+            tenant_id=tenant_id,
+            quantity=body.quantity,
+            reference_id=body.reference_id,
+            reference_type=body.reference_type,
+        )
+    except LotTraceError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+    except Exception as exc:
+        raise HTTPException(status_code=503, detail=str(exc)) from exc
+
+
+# ---------------------------------------------------------------------------
+# DOM-INV-004.3 — Inventur-Differenzbeleg
+# ---------------------------------------------------------------------------
+
+@router.post(
+    "/inventur/{count_id}/differenz-buchen",
+    status_code=201,
+    tags=["lager", "inventory", "inventur"],
+    summary="Inventur-Differenzbeleg automatisch erzeugen (DOM-INV-004.3)",
+)
+async def inventur_differenz_buchen(
+    count_id: str,
+    x_tenant_id: Optional[str] = None,
+    db: Session = Depends(get_db),
+) -> dict:
+    """Für jede Zähldifferenz (gezählt vs. Buchbestand) automatisch Bestandskorrektur anlegen.
+
+    Nur für Inventuren mit status='posted'. Idempotent.
+    """
+    tenant_id = x_tenant_id or DEFAULT_TENANT
+    from app.services.inventory_count_close_service import differenz_buchen, CountCloseError
+    try:
+        return differenz_buchen(db=db, count_id=count_id, tenant_id=tenant_id)
+    except CountCloseError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+    except Exception as exc:
+        raise HTTPException(status_code=503, detail=str(exc)) from exc
+
+
+# ---------------------------------------------------------------------------
+# DOM-INV-004.4 — Bestandskorrektur-Storno
+# ---------------------------------------------------------------------------
+
+class StornoIn(BaseModel):
+    bemerkung: Optional[str] = None
+
+
+@router.post(
+    "/korrekturen/{korrektur_id}/storno",
+    status_code=201,
+    tags=["lager", "inventory", "korrekturen"],
+    summary="Bestandskorrektur stornieren (idempotent) (DOM-INV-004.4)",
+)
+async def storno_bestandskorrektur(
+    korrektur_id: str,
+    body: StornoIn,
+    x_tenant_id: Optional[str] = None,
+    db: Session = Depends(get_db),
+) -> dict:
+    """Storno-Gegenbuchung zur Bestandskorrektur (idempotent via storno_ref)."""
+    tenant_id = x_tenant_id or DEFAULT_TENANT
+    from app.services.inventory_correction_service import storno_korrektur, CorrectionError
+    try:
+        return storno_korrektur(
+            db=db,
+            korrektur_id=korrektur_id,
+            tenant_id=tenant_id,
+            bemerkung=body.bemerkung,
+        )
+    except CorrectionError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+    except Exception as exc:
+        raise HTTPException(status_code=503, detail=str(exc)) from exc

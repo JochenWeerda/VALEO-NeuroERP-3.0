@@ -1,0 +1,78 @@
+slice_id: DOM-INV-004
+title: "INV Domäne — Vollständige fachliche Vertiefung (Chargen-MHD .2 / Inventur-Abschluss .3 / Korrektur-Storno .4 / E2E .5)"
+owner: Claude Code
+status: completed
+coordination: >-
+  Ergänzt INV-STOCK-MOVEMENTS-001 und inventory_charge_lineage_20260215.
+  Kein Überlapp mit WM-AGRI-QS-004 (Cursor) oder DOM-LOG-004 (abgeschlossen).
+  Besitzt nur INV-Domain-Dateien.
+goal: >-
+  Inventory-Domäne auf volle 004-Tiefe heben: Chargen-/MHD-Traceability (.2),
+  Inventur-Abschluss mit Differenzbeleg (.3), Bestandskorrektur-Storno (.4),
+  End-to-End-UAT (.5). Schließt DOMAIN-PARITY-001 "tieferes Chargen-/MHD-Modell".
+file_ownership:
+  - docs/agent-ops/active-workboard.md
+  - docs/agent-ops/slices/DOM-INV-004.yaml
+  - docs/workflows/dom-inv-004-inventory-deepening-2026-06-23.md
+  - app/services/inventory_lot_trace_service.py
+  - app/services/inventory_count_close_service.py
+  - app/services/inventory_correction_service.py
+  - alembic/versions/inv_lot_trace_20260623.py
+  - app/api/v1/endpoints/inventory_operations.py
+  - playwright-tests/specs/inventory/inv-lifecycle-smoke.spec.ts
+  - scripts/uat/inv_lifecycle_uat.py
+  - tests/test_dom_inv_004.py
+not_owned:
+  - alembic/versions/inventory_charge_lineage_20260215.py
+  - app/api/v1/endpoints/inventory_counts.py
+  - app/services/inventory_compat_service.py
+  - app/services/warehouse_service.py
+acceptance_criteria:
+  - POST /lager/lots legt einen neuen Chargen-/MHD-Eintrag an
+  - GET /lager/lots?article_id=X&warehouse_id=Y gibt FEFO-sortierte Lots zurück
+  - POST /lager/lots/{id}/consume reduziert Lot-Bestand (fail-closed bei Unterdeckung)
+  - POST /lager/inventur/{count_id}/differenz-buchen erzeugt automatische Korrekturen
+  - POST /lager/korrekturen/{id}/storno erzeugt Gegenbuchung idempotent
+  - 9+ Unit-Tests grün
+  - Playwright @smoke (3 Pfade) + UAT-Script lauffähig
+ai_harness:
+  fachlicher_vertrag: >-
+    Chargen-/MHD-Modell: Ein Lot hat lot_number, article_id, warehouse_id, mhd
+    (Mindesthaltbarkeitsdatum), initial_qty, current_qty, status (AKTIV/ERSCHÖPFT/ABGELAUFEN).
+    FEFO: Bei Verbrauch wird das Lot mit dem frühesten MHD zuerst belastet.
+    Inventur-Differenzbeleg: Nach POST /{count_id}/differenz-buchen wird für
+    jede Zähldifferenz (gezählt vs. Buchbestand) automatisch eine Bestandskorrektur
+    mit Grund 'messdifferenz' angelegt. Nur für Inventuren im Status 'posted'.
+    Korrektur-Storno: Gegenbuchung mit negierter Menge, referenziert Original via
+    storno_ref. Idempotent: zweiter Storno-Aufruf gibt existierenden Storno zurück.
+  architektur_vertrag: >-
+    Services in app/services/, Thin-Router-Erweiterungen in inventory_operations.py.
+    Neue Tabellen via Alembic (inv_lot_trace_20260623). Kein ORM-Modell — nur text()-SQL.
+    Services zustandslos.
+  daten_vertrag: >-
+    inventory_lots: id, tenant_id, article_id, warehouse_id, lot_number, mhd,
+    initial_qty, current_qty, unit, status, created_at.
+    inventory_lot_movements: id, lot_id, movement_type (IN/OUT/ADJUST),
+    quantity, reference_id, reference_type, created_at, tenant_id.
+    Neue Spalte an inventory_stock_movements: storno_ref VARCHAR(36) (Storno-Verknüpfung).
+  test_vertrag: >-
+    Unit: lot_trace (FEFO-Reihenfolge, Unterdeckung, MHD-Abgelaufen-Guard).
+    Unit: count_close (Differenzbeleg-Erzeugung, nur-posted-Guard).
+    Unit: correction_storno (Idempotenz, Gegenbuchung-Betrag).
+    Playwright @smoke: Lot anlegen, Verbrauchen, Differenzbeleg.
+    UAT: sequentiell alle neuen Endpunkte.
+  security_vertrag: >-
+    X-Tenant-ID Pflicht bei allen Mutations.
+    Lot-Consume nur für eigenen Tenant.
+    MHD-Ablauf-Check: abgelaufene Lots dürfen nicht verbraucht werden
+    (fail-closed, nicht nur Warning).
+  betriebs_vertrag: >-
+    Alle Service-Fehler mit logger.warning. Idempotenz-Guards verhindern
+    Doppelbuchungen. Consume ist transaktional.
+  dokumentations_vertrag: >-
+    docs/workflows/dom-inv-004-inventory-deepening-2026-06-23.md beschreibt
+    alle drei Subprozesse. Playwright-Spec mit @smoke-Tag.
+external_gates: []
+risks:
+  - FEFO setzt voraus dass MHD befüllt ist; Lots ohne MHD werden ans Ende sortiert
+  - Inventur-Differenzbeleg setzt domain_inventory.inventory_counts.status='posted' voraus
