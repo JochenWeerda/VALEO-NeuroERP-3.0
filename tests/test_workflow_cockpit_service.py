@@ -92,7 +92,7 @@ def test_replay_requires_explicit_role():
     service.upsert_process(
         tenant_id="tenant-a",
         process_instance_id="wf-failed",
-        process_key="p2p.invoice-match",
+        process_key="match",
         status="failed",
         correlation_id="corr-failed",
     )
@@ -116,7 +116,7 @@ def test_replay_request_is_audited_for_replayable_process():
     service.upsert_process(
         tenant_id="tenant-a",
         process_instance_id="wf-failed",
-        process_key="p2p.invoice-match",
+        process_key="match",
         status="failed",
         correlation_id="corr-failed",
     )
