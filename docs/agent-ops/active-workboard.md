@@ -11,6 +11,7 @@
 **Abnahmekriterien:** Neue/geaenderte Slice-YAMLs werden auf AI-Harness-Felder validiert; kritische Codepfade benoetigen Doku/Gaps oder explizite Ausnahme; AI-Slice-Readiness ist pruefbar; semantische QA-Templates und Drift-Report existieren; Security-/Major-Update-Prozess ist dokumentiert.
 **Risiken:** Legacy-Slices duerfen nicht sofort repo-weit blockiert werden; Checks gelten initial fuer neue/geaenderte Artefakte und kritische Diff-Pfade.
 **Verifikation:** `node --check` fuer neue/geaenderte Governance-Scripts gruen; `node scripts/docs-governance-check.cjs docs/agent-ops/slices/AI-HARNESS-GOV-001.yaml` gruen; `node scripts/ai-slice-readiness-check.cjs --slice AI-HARNESS-GOV-001` gruen; `node scripts/docs-code-sync-check.cjs --base HEAD --head WORKTREE` gruen; `pnpm.cmd run docs:check` gruen.
+**CI-Nachzug 2026-06-23:** Quality-Gate-Folgefix auf `main`: `agri_plc_stub.py` bekam `response_model=dict[str, Any]` fuer die vier neuen PLC-Stub-Routen, damit die Response-Model-Coverage wieder unter dem erlaubten untyped-Routen-Schwellwert liegt. Der neue Docs/code-sync-Check hat den reinen Code-Fix korrekt als dokumentationspflichtig markiert; diese Workboard-Zeile ist der zugehoerige Nachweis.
 
 ## WM-AGRI-MAP-001 — Silo Bird-View / Kapazitäts-Dashboard
 
