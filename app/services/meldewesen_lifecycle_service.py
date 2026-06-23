@@ -110,6 +110,7 @@ def transition_meldung(
         params["ext_ref"] = externe_referenz
 
     db.execute(
+        # nosec S608 — extra is assembled only from fixed code-controlled fragments; values are parameterized.
         text(f"""
             UPDATE domain_meldewesen.meldungen
             SET status = :new_status, fehler_grund = :fehler_grund{extra}, updated_at = NOW()
