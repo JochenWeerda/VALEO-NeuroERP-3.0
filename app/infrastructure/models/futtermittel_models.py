@@ -50,6 +50,7 @@ class Einzelfuttermittel(Base):
     gmp_plus = Column(Boolean, default=False, comment="GMP+ zertifiziert")
     bio_zertifiziert = Column(Boolean, default=False)
     verfuegbar_t = Column(DECIMAL(12, 2), default=0, comment="Verfügbarer Bestand in Tonnen")
+    inventory_article_id = Column(String(64), nullable=True, comment="FEED-CHAIN-004: Link zu domain_inventory.articles")
     einheit = Column(String(10), default="t")
     min_bestand_t = Column(DECIMAL(12, 2), nullable=True, comment="Mindestbestand in Tonnen")
     preis_pro_t = Column(DECIMAL(12, 2), nullable=True, comment="Preis pro Tonne EUR")

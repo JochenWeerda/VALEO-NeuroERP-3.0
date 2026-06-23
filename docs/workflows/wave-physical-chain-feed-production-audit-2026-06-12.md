@@ -54,8 +54,10 @@
    `domain_ops.quality_release_decisions`); Endpoint rewritten ohne in-memory-Dict;
    release-decision (approve/reject/hold) schreibt `qualitaetsstatus` auf `ops_chargen` zurück;
    7 Unit-Tests grün.
-4. **FEED-CHAIN-004:** Artikel-Mapping Einzelfutter ↔ `domain_inventory.articles` und
-   Bewegungsbelege in `inventory_stock_movements` (Abstimmung: INV-STOCK-MOVEMENTS-001/Cursor).
+4. **FEED-CHAIN-004 (erledigt 2026-06-23):** Artikel-Mapping Einzelfutter ↔ `domain_inventory.articles`
+   (`inventory_article_id` auf `futtermittel_einzelfutter`, Migration `feed_chain_article_map_20260623`);
+   bei Produktionsfreigabe/Storno kanonische Bewegungen in `inventory_stock_movements`
+   (`source_document_type=feed_production`); API `GET/POST …/inventory-links`.
 
 ## 4. Bewusst nicht in diesem Zweig
 

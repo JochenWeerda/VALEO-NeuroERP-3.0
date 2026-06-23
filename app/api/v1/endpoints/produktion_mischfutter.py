@@ -23,6 +23,7 @@ from app.infrastructure.models.futtermittel_models import (
     FuttermittelRezept,
     ProduktionsAuftrag,
 )
+from app.services.feed_inventory_link_service import FeedInventoryLinkError, FeedInventoryLinkService
 from app.services.feed_production_chain_service import (
     FeedChainError,
     FeedProductionChainService,
@@ -282,6 +283,13 @@ async def update_auftrag_status(
                     detail={"message": "Unzureichende Komponentenbestände bei Freigabe", "fehlend": fehlend},
                 )
             chain.apply_verbrauch(snapshot, richtung=-1)
+            inv_link = FeedInventoryLinkService(db, tenant_id)
+            inv_link.book_snapshot_movements(
+                snapshot=snapshot,
+                direction=-1,
+                production_order_id=auftrag.id,
+                booked_by=payload.freigegeben_von or "system",
+            )
             auftrag.verbrauch = snapshot
             auftrag.bestands_abzug_erfolgt = True
         auftrag.freigegeben_von = payload.freigegeben_von
@@ -289,7 +297,14 @@ async def update_auftrag_status(
 
     # Return inventory on 'storniert' — exakt den Freigabe-Snapshot restaurieren
     if payload.status == "storniert" and auftrag.bestands_abzug_erfolgt:
-        chain.apply_verbrauch(chain.snapshot_or_recipe(auftrag), richtung=+1)
+        storno_snapshot = chain.snapshot_or_recipe(auftrag)
+        chain.apply_verbrauch(storno_snapshot, richtung=+1)
+        FeedInventoryLinkService(db, tenant_id).book_snapshot_movements(
+            snapshot=storno_snapshot,
+            direction=+1,
+            production_order_id=auftrag.id,
+            booked_by=payload.freigegeben_von or "system",
+        )
         auftrag.bestands_abzug_erfolgt = False
 
     # 'fertig' schließt die Belegkette: Fertigwaren-Charge entsteht + FiBu-Buchung (PROD-FIBU-001)
@@ -412,3 +427,30 @@ async def trace_auftrag(
     if result is None:
         raise HTTPException(status_code=404, detail=f"Auftrag '{ref}' nicht gefunden")
     return result
+
+
+@router.get("/inventory-links", summary="Einzelfutter ↔ Lagerartikel-Mapping (FEED-CHAIN-004)")
+async def list_inventory_links(
+    limit: int = Query(100, ge=1, le=500),
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+) -> dict:
+    return FeedInventoryLinkService(db, tenant_id).list_links(limit=limit)
+
+
+@router.post(
+    "/inventory-links/{einzelfutter_id}/ensure",
+    summary="Lagerartikel für Einzelfuttermittel anlegen oder verknüpfen",
+)
+async def ensure_inventory_link(
+    einzelfutter_id: str,
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+) -> dict:
+    try:
+        result = FeedInventoryLinkService(db, tenant_id).ensure_article_link(einzelfutter_id)
+        db.commit()
+        return result
+    except FeedInventoryLinkError as exc:
+        db.rollback()
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
