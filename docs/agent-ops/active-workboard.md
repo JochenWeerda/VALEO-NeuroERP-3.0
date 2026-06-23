@@ -14,9 +14,14 @@
 **Von:** Cursor
 **Owner:** Cursor
 **Stand:** abgeschlossen 2026-06-23 — Worklist-API, Freigabe-Vorschlag, Leitstand-UI `lager/qs-leitstand`, Nav/Route, 7 Unit-Tests grün, TS 0.
-**Ziel:** Operative QS-Worklist und Freigabe/Sperre-UI auf Basis WM-AGRI-QS-003; Produktionsfreigabe-Regeln als deterministischer Vorschlag.
-**Dateibesitz:** `app/services/agri_qs_workflow_service.py`, `app/api/v1/endpoints/agri_qs_workflow.py`, `tests/test_agri_qs_workflow.py`, `packages/frontend-web/src/pages/lager/qs-leitstand.tsx`, `packages/frontend-web/src/lib/api/agri-qs-workflow.ts`, Nav/Route, Doku, `docs/agent-ops/slices/WM-AGRI-QS-004.yaml`.
-**Koordination:** Kein Ueberlapp mit DOM-LOG-004 (Claude Code).
+
+## DOM-CRM-004.5 — CRM Kundenstamm E2E + UAT (DOM-CRM-004 abgeschlossen)
+
+**Von:** Cursor
+**Owner:** Cursor
+**Stand:** abgeschlossen 2026-06-23 — Playwright `crm-stammdaten-smoke.spec.ts` (bestehend), Live-UAT `scripts/uat/crm_stammdaten_lifecycle_uat.py`, Nachweisdoku aktualisiert.
+**Ziel:** DOM-CRM-004 formal abschliessen analog CON/SALES 004.5.
+**Dateibesitz:** `scripts/uat/crm_stammdaten_lifecycle_uat.py`, `tests/test_crm_stammdaten_uat.py`, `docs/dom-crm-004-uat-2026-06-10.md`, `docs/agent-ops/slices/DOM-CRM-004.5.yaml`.
 
 ## DOM-LOG-004 — Logistik-Domäne vollständige Vertiefung (.2–.5)
 

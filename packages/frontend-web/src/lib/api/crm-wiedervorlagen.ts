@@ -24,8 +24,13 @@ export function useWiedervorlagen(tage = 365) {
   return useQuery({
     queryKey: ['crm-wiedervorlagen', tage],
     queryFn: async () => {
-      const res = await apiClient.get<Wiedervorlage[]>('/api/v1/crm/kunden-kontakte/wiedervorlagen', { params: { tage } })
-      return Array.isArray(res.data) ? res.data : []
+      const res = await apiClient.get<{ items?: Wiedervorlage[] } | Wiedervorlage[]>(
+        '/api/v1/crm/kunden-kontakte/wiedervorlagen',
+        { params: { tage } },
+      )
+      const data = res.data
+      if (Array.isArray(data)) return data
+      return data?.items ?? []
     },
   })
 }
