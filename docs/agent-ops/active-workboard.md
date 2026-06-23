@@ -4,7 +4,7 @@
 
 **Von:** Claude Code
 **Owner:** Claude Code
-**Stand:** reserviert 2026-06-23 — Claim vor Implementierung (AI-Harness-Protokoll)
+**Stand:** abgeschlossen 2026-06-23 — AB-Lifecycle (.2), Lieferschein-Close (.3), Preisabweichungs-Eskalation (.4), Playwright @smoke + UAT-Script (.5), Alembic-Migration sales_ab_preisabweichung_20260623, 14 Unit-Tests grün, Slice-YAML + Workflow-Doku
 **Ziel:** Sales-Kern-Prozesse auf volle 004-Tiefe heben: Auftragsbestätigung-Lifecycle (.2), Lieferschein-Closing-Flow (.3), Preisabweichungs-Eskalation (.4), Playwright @smoke + UAT (.5).
 **Dateibesitz:** `app/services/sales_ab_lifecycle_service.py`, `app/services/sales_lieferschein_close_service.py`, `app/services/sales_preisabweichung_service.py`, `alembic/versions/sales_ab_preisabweichung_20260623.py`, `app/api/v1/endpoints/sales_orders.py`, `playwright-tests/specs/sales/sales-lifecycle-smoke.spec.ts`, `scripts/uat/sales_lifecycle_uat.py`, `docs/workflows/dom-sales-004-sales-deepening-2026-06-23.md`, `docs/agent-ops/slices/DOM-SALES-004.yaml`, `tests/test_dom_sales_004.py`
 **Koordination:** Keine aktiven Cursor-Sales-Slices. Fremde Dateien bleiben unangetastet.
@@ -422,6 +422,17 @@ Hooks in `produktion_mischfutter` nach `apply_verbrauch`; API `GET/POST …/inve
 **Ziel:** Belegbruch schließen: Verbrauch nur in `futtermittel_einzelfutter.verfuegbar_t` ohne Lagerbewegungs-Audit.
 **Dateibesitz:** `feed_inventory_link_service.py`, `produktion_mischfutter.py`, Migration, `test_feed_chain_004.py`.
 **Abnahmekriterien:** Freigabe → 2× out-Bewegungen; Storno → 2× in-Bewegungen; ensure idempotent; Tests grün.
+
+## FEED-CHAIN-004.5 — Lagerartikel-Verknüpfung UI (Mischfutter)
+
+**Von:** Cursor
+**Owner:** Cursor
+**Stand:** abgeschlossen 2026-06-23 — `useFeedInventoryLinks` + `useEnsureFeedInventoryLink` in `produktion.ts`;
+Verknüpfungs-Card auf `mischfutter-produktion.tsx` (Lager-Rolle oder bei offenen Mappings sichtbar);
+per-row Pending + Toast; Typecheck grün.
+**Ziel:** Operator kann Einzelfutter ↔ Lagerartikel vor Freigabe verknüpfen (Ergänzung FEED-CHAIN-004 Backend).
+**Dateibesitz:** `produktion.ts`, `mischfutter-produktion.tsx`, `FEED-CHAIN-004.5.yaml`.
+**Abnahmekriterien:** Unmapped-Liste + Ensure-Button; Mutation-Guards; tsc 0.
 
 ## SALES-COLL-001 — Sammelrechnung/Sammellieferschein Belegbruch
 

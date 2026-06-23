@@ -8,7 +8,7 @@ import json
 from typing import Optional
 from uuid import uuid4
 
-from fastapi import APIRouter, Depends, HTTPException, Query, Response, status
+from fastapi import APIRouter, Depends, Header, HTTPException, Query, Response, status
 from pydantic import BaseModel, Field
 from sqlalchemy import text
 from sqlalchemy.orm import Session
@@ -636,3 +636,101 @@ async def cancel_sales_order(
     )
     db.commit()
     return _row_to_order(_get_sales_order_row(db, order_id, tenant_id))
+
+
+# ---------------------------------------------------------------------------
+# DOM-SALES-004: AB-Lifecycle / Lieferschein-Close / Preisabweichung
+# ---------------------------------------------------------------------------
+
+from pydantic import BaseModel as _BM
+from typing import Optional as _Opt
+
+
+class ABTransitionIn(_BM):
+    new_status: str
+    operator: _Opt[str] = "system"
+    reason: _Opt[str] = None
+
+
+class LSAdvanceIn(_BM):
+    new_status: str
+    operator: _Opt[str] = "system"
+    quittiert_von: _Opt[str] = None
+
+
+class PreisabweichungIn(_BM):
+    artikel_id: str
+    angebots_preis: float
+    rechnungs_preis: float
+    schwelle_pct: _Opt[float] = 2.0
+
+
+class PreisabweichungFreigabeIn(_BM):
+    entscheidung: str
+    operator: str
+    grund: _Opt[str] = None
+
+
+@router.post("/orders/{auftrag_id}/ab-transition", summary="Auftragsbestätigung Status wechseln")
+def ab_transition_endpoint(
+    auftrag_id: str,
+    body: ABTransitionIn,
+    x_tenant_id: _Opt[str] = Header(None),
+    db: Session = Depends(get_db),
+) -> dict:
+    from app.services.sales_ab_lifecycle_service import transition_ab_status, ABLifecycleError
+    tenant_id = x_tenant_id or "default"
+    try:
+        return transition_ab_status(db, auftrag_id, tenant_id, body.new_status,
+                                     body.operator or "system", body.reason)
+    except ABLifecycleError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+
+
+@router.post("/delivery-notes/{ls_id}/advance", summary="Lieferschein-Status vorwärts")
+def ls_advance_endpoint(
+    ls_id: str,
+    body: LSAdvanceIn,
+    x_tenant_id: _Opt[str] = Header(None),
+    db: Session = Depends(get_db),
+) -> dict:
+    from app.services.sales_lieferschein_close_service import advance_lieferschein, LSCloseError
+    tenant_id = x_tenant_id or "default"
+    try:
+        return advance_lieferschein(db, ls_id, tenant_id, body.new_status,
+                                     body.operator or "system", body.quittiert_von)
+    except LSCloseError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+
+
+@router.post("/orders/{auftrag_id}/preisabweichung", status_code=201, summary="Preisabweichung prüfen")
+def pruefe_preisabweichung_endpoint(
+    auftrag_id: str,
+    body: PreisabweichungIn,
+    x_tenant_id: _Opt[str] = Header(None),
+    db: Session = Depends(get_db),
+) -> dict:
+    from app.services.sales_preisabweichung_service import pruefe_preisabweichung, PreisabweichungError
+    tenant_id = x_tenant_id or "default"
+    try:
+        return pruefe_preisabweichung(db, auftrag_id, tenant_id, body.artikel_id,
+                                       body.angebots_preis, body.rechnungs_preis,
+                                       body.schwelle_pct or 2.0)
+    except PreisabweichungError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+
+
+@router.post("/preisabweichungen/{abweichung_id}/freigabe", summary="Preisabweichung freigeben/ablehnen")
+def freigabe_preisabweichung_endpoint(
+    abweichung_id: str,
+    body: PreisabweichungFreigabeIn,
+    x_tenant_id: _Opt[str] = Header(None),
+    db: Session = Depends(get_db),
+) -> dict:
+    from app.services.sales_preisabweichung_service import freigabe_preisabweichung, PreisabweichungError
+    tenant_id = x_tenant_id or "default"
+    try:
+        return freigabe_preisabweichung(db, abweichung_id, tenant_id, body.entscheidung,
+                                         body.operator, body.grund)
+    except PreisabweichungError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
