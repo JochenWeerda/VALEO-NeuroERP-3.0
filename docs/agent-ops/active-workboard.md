@@ -1,5 +1,23 @@
 # Active Workboard
 
+## DOM-INV-004 — Inventory/Lager Domänen-Vertiefung (.2–.5)
+
+**Von:** Claude Code
+**Owner:** Claude Code
+**Stand:** reserviert 2026-06-23 — Claim vor Implementierung (AI-Harness-Protokoll)
+**Ziel:** Inventory-Domäne auf volle 004-Tiefe heben: Chargen-/MHD-Traceability (.2), Inventur-Abschluss + Lagerbewegungs-Abstimmung (.3), Bestandskorrektur-Lifecycle (.4), E2E-UAT (.5). Schließt das DOMAIN-PARITY-001-Gap "tieferes Chargen-/MHD-Modell".
+**Dateibesitz:** `app/services/inventory_lot_trace_service.py`, `app/services/inventory_count_close_service.py`, `app/services/inventory_correction_service.py`, `alembic/versions/inv_lot_trace_20260623.py`, `app/api/v1/endpoints/inventory_operations.py`, `playwright-tests/specs/inventory/inv-lifecycle-smoke.spec.ts`, `scripts/uat/inv_lifecycle_uat.py`, `docs/workflows/dom-inv-004-inventory-deepening-2026-06-23.md`, `docs/agent-ops/slices/DOM-INV-004.yaml`
+**Koordination:** Kein Überlapp mit WM-AGRI-QS-004 (Cursor). Fremde Dateien bleiben unangetastet.
+
+## WM-AGRI-QS-004 — QS-Leitstand-UI (Silo-Lots / Silozellen)
+
+**Von:** Cursor
+**Owner:** Cursor
+**Stand:** in arbeit 2026-06-23 — Claim + Umsetzung Leitstand-UI, Worklist-API, Freigabe-Vorschlag, Navigation.
+**Ziel:** Operative QS-Worklist und Freigabe/Sperre-UI auf Basis WM-AGRI-QS-003; Produktionsfreigabe-Regeln als deterministischer Vorschlag.
+**Dateibesitz:** `app/services/agri_qs_workflow_service.py`, `app/api/v1/endpoints/agri_qs_workflow.py`, `tests/test_agri_qs_workflow.py`, `packages/frontend-web/src/pages/lager/qs-leitstand.tsx`, `packages/frontend-web/src/lib/api/agri-qs-workflow.ts`, Nav/Route, Doku, `docs/agent-ops/slices/WM-AGRI-QS-004.yaml`.
+**Koordination:** Kein Ueberlapp mit DOM-LOG-004 (Claude Code).
+
 ## DOM-LOG-004 — Logistik-Domäne vollständige Vertiefung (.2–.5)
 
 **Von:** Claude Code
