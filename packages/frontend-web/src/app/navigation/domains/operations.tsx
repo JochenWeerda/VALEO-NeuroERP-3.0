@@ -31,6 +31,7 @@ import {
   Truck,
   Upload,
   UserCog,
+  Smartphone,
   Users,
   Waypoints,
   Wheat,
@@ -166,6 +167,15 @@ export const RAW_NAV_SECTIONS: RawNavItem[] = [
         preferredPath: 'lager/silo-uebersicht',
         keywords: ['silo', 'übersicht', 'bird-view', 'kapazität', 'qs-status', 'bestand', 'map', 'karte'],
         mcp: { businessDomain: 'inventory', scope: 'inventory:read' },
+      },
+      {
+        id: 'silo-mobil',
+        label: 'Silo-Terminal (Mobil)',
+        icon: Smartphone,
+        module: '@/pages/lager/silo-mobil',
+        preferredPath: 'lager/silo-mobil',
+        keywords: ['silo', 'mobil', 'terminal', 'waage', 'hallenterminal', 'lot-link', 'transfer', 'spülcharge'],
+        mcp: { businessDomain: 'inventory', scope: 'inventory:write' },
       },
       {
         id: 'kommissionierung',

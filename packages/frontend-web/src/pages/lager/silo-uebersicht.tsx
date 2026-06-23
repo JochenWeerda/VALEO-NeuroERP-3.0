@@ -205,7 +205,6 @@ export default function SiloUebersichtPage(): JSX.Element {
 
   const cellsQ = useAgriSiloCells(warehouseId || undefined, {
     enabled: Boolean(warehouseId),
-    refetchInterval: 30_000,
   })
 
   const cells = cellsQ.data ?? []

@@ -1469,6 +1469,10 @@
       "path": "lager/silo-uebersicht"
     },
     {
+      "module": "@/pages/lager/silo-mobil",
+      "path": "lager/silo-mobil"
+    },
+    {
       "module": "@/pages/lager/kommissionierung",
       "path": "lager/kommissionierung"
     },

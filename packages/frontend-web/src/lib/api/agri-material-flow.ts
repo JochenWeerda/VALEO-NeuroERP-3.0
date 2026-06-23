@@ -252,12 +252,13 @@ export async function syncAgriSiloCellFromLots(cellId: string, warehouseId: stri
   return (data && typeof data === 'object' ? data : {}) as AgriFlowRow
 }
 
-export function useAgriSiloCells(warehouseId: string | undefined, options?: { enabled?: boolean }) {
+export function useAgriSiloCells(warehouseId: string | undefined, options?: { enabled?: boolean; refetchInterval?: number }) {
   const wid = warehouseId ?? ''
   return useQuery({
     queryKey: agriMaterialFlowKeys.siloCells(wid),
     queryFn: () => fetchAgriSiloCells(wid),
     enabled: Boolean(wid) && (options?.enabled ?? true),
+    refetchInterval: options?.refetchInterval,
   })
 }
 
