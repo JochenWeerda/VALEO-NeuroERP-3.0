@@ -1,7 +1,7 @@
 slice_id: KIM-L3-QUICK-001
 title: KIM L3 Frontend Quick Wins
-owner: Codex
-status: in_progress
+owner: Claude Code
+status: completed
 coordination: >-
   Komplementaer zu KIM-L3-BACKEND-001 (Claude). Dieser Slice besitzt nur
   KIM-Frontend, CRM-Playwright und den eigenen QA-Nachweis. Keine Aenderung
