@@ -140,6 +140,7 @@ def transition_pcn_status(
         set_clauses += ", abgeschlossen_am = NOW()"
 
     db.execute(
+        # nosec S608 — set_clauses is assembled only from fixed code-controlled fragments; values are parameterized.
         text(f"UPDATE domain_compliance.compliance_pcn_meldungen SET {set_clauses} WHERE id = :id"),
         params,
     )

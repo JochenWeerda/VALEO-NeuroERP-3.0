@@ -105,6 +105,7 @@ def transition_dokument(
         params["wv"] = wiedervorlage_datum
 
     db.execute(
+        # nosec S608 — extra is assembled only from fixed code-controlled fragments; values are parameterized.
         text(f"""
             UPDATE domain_nachweisraum.nachweisraum_dokumente
             SET status = :new_status{extra}, updated_at = NOW()
@@ -203,6 +204,7 @@ def transition_gobd_export(
         params["fehler"] = fehler
 
     db.execute(
+        # nosec S608 — extra is assembled only from fixed code-controlled fragments; values are parameterized.
         text(f"""
             UPDATE domain_nachweisraum.gobd_exporte
             SET status = :new_status{extra}, updated_at = NOW()

@@ -109,6 +109,7 @@ def transition_produktionsauftrag(
         params["qs_befund"] = qs_befund
 
     db.execute(
+        # nosec S608 — update_fields is assembled only from fixed code-controlled fragments; values are parameterized.
         text(f"""
             UPDATE domain_futtermittel.feed_produktionsauftraege
             SET {update_fields}

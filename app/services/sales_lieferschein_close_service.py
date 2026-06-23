@@ -91,6 +91,7 @@ def advance_lieferschein(
             params["quittiert_von"] = quittiert_von
 
     db.execute(
+        # nosec S608 — set_clauses is assembled only from fixed code-controlled fragments; values are parameterized.
         text(f"UPDATE domain_sales.sales_delivery_notes SET {set_clauses} WHERE id = :id"),
         params,
     )
