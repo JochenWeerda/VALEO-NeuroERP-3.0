@@ -57,3 +57,28 @@ def book_lot_to_cell(
         )
     except ValueError as exc:
         raise HTTPException(status_code=422, detail=str(exc)) from exc
+
+
+@router.get(
+    "/material-flow/lot-link/suggest",
+    response_model=AgriLotLinkOut,
+    status_code=status.HTTP_200_OK,
+    summary="GET /material-flow/lot-link/suggest",
+)
+def suggest_lot_link(
+    warehouse_id: str,
+    lot_id: str | None = None,
+    ticket_id: str | None = None,
+    acceptance_id: str | None = None,
+    svc: AgriLotLinkBookingService = Depends(_svc),
+) -> Any:
+    """Schlägt Lot + Ziel-Silozelle aus Waage/WE/Annahme vor (legacy_silo_id-Regel)."""
+    try:
+        return svc.suggest_lot_link(
+            warehouse_id=warehouse_id,
+            lot_id=lot_id,
+            ticket_id=ticket_id,
+            acceptance_id=acceptance_id,
+        )
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc

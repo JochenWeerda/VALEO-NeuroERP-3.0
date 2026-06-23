@@ -24,6 +24,12 @@ def _result(row=None):
     return result
 
 
+def _result_all(rows=None):
+    result = MagicMock()
+    result.fetchall.return_value = rows or []
+    return result
+
+
 def _svc_with_rows(*rows):
     db = MagicMock()
     db.execute.side_effect = [_result(row) for row in rows]
@@ -180,3 +186,50 @@ def test_book_lot_to_cell_is_idempotent_for_existing_reference():
     assert out["movement_id"] == "mov-1"
     assert db.execute.call_count == 3
     db.commit.assert_not_called()
+
+
+@pytest.mark.unit
+def test_suggest_lot_link_prefers_legacy_silo_match():
+    lot = _row(
+        id="lot-1",
+        silo_id="silo-1",
+        virtual_lot_number="VL-1",
+        source_ticket_id="ticket-1",
+        article_id="art-1",
+        quantity_tons=Decimal("10"),
+        status="active",
+        silo_number="S1",
+    )
+    cell_legacy = _row(
+        id="cell-a",
+        cell_code="A1",
+        legacy_silo_id="silo-1",
+        capacity_kg=Decimal("50000"),
+        current_stock_kg=Decimal("0"),
+        current_material_id=None,
+        current_lot_id=None,
+        qs_status="frei",
+    )
+    cell_other = _row(
+        id="cell-b",
+        cell_code="B1",
+        legacy_silo_id=None,
+        capacity_kg=Decimal("50000"),
+        current_stock_kg=Decimal("0"),
+        current_material_id=None,
+        current_lot_id=None,
+        qs_status="frei",
+    )
+    db = MagicMock()
+    cells_result = MagicMock()
+    cells_result.fetchall.return_value = [cell_other, cell_legacy]
+    db.execute.side_effect = [_result(lot), cells_result]
+
+    svc = AgriLotLinkBookingService(db, "tenant-a", trace_hooks_enabled=False)
+    out = svc.suggest_lot_link(warehouse_id="wh-1", lot_id="lot-1")
+
+    assert out["ok"] is True
+    assert out["suggested_cell_id"] == "cell-a"
+    assert out["quantity_kg_available"] == 10000.0
+    assert out["candidate_cells"][0]["cell_id"] == "cell-a"
+    assert out["candidate_cells"][0]["legacy_match"] is True

@@ -212,3 +212,167 @@ class AgriLotLinkBookingService:
             )
         self.db.commit()
         return result
+
+    def suggest_lot_link(
+        self,
+        *,
+        warehouse_id: str,
+        lot_id: str | None = None,
+        ticket_id: str | None = None,
+        acceptance_id: str | None = None,
+    ) -> dict:
+        """Schlägt Ziel-Silozelle + Lot für Waage/WE vor (legacy_silo_id-Matching)."""
+        lot_d = self._resolve_active_lot(
+            lot_id=lot_id,
+            ticket_ref=ticket_id,
+            acceptance_ref=acceptance_id,
+        )
+        silo_id = str(lot_d["silo_id"])
+        lot_kg = Decimal(str(lot_d.get("quantity_tons") or "0")) * Decimal("1000")
+
+        rows = self.db.execute(
+            text("""
+                SELECT id, cell_code, legacy_silo_id, capacity_kg, current_stock_kg,
+                       current_material_id, current_lot_id, qs_status
+                FROM domain_inventory.silo_cells
+                WHERE warehouse_id = :wid AND tenant_id = :tid AND is_active = true
+                ORDER BY cell_code
+            """),
+            {"wid": warehouse_id, "tid": self.tenant_id},
+        ).fetchall()
+
+        candidates: list[dict] = []
+        for row in rows:
+            cell_d = dict(row._mapping)
+            score = self._score_cell_for_lot(cell_d, lot_d, silo_id, lot_kg)
+            if score is None:
+                continue
+            candidates.append(
+                {
+                    "cell_id": str(cell_d["id"]),
+                    "cell_code": str(cell_d.get("cell_code") or ""),
+                    "legacy_silo_id": cell_d.get("legacy_silo_id"),
+                    "qs_status": cell_d.get("qs_status"),
+                    "current_stock_kg": float(cell_d.get("current_stock_kg") or 0),
+                    "capacity_kg": float(cell_d.get("capacity_kg") or 0),
+                    "score": score,
+                    "legacy_match": str(cell_d.get("legacy_silo_id") or "") == silo_id,
+                }
+            )
+
+        candidates.sort(key=lambda c: (-c["score"], c["cell_code"]))
+        best = candidates[0] if candidates else None
+
+        return {
+            "ok": True,
+            "warehouse_id": warehouse_id,
+            "lot_id": str(lot_d["id"]),
+            "silo_id": silo_id,
+            "virtual_lot_number": lot_d.get("virtual_lot_number"),
+            "article_id": lot_d.get("article_id"),
+            "source_ticket_id": lot_d.get("source_ticket_id"),
+            "quantity_kg_available": float(lot_kg),
+            "suggested_cell_id": best["cell_id"] if best else None,
+            "suggested_cell_code": best["cell_code"] if best else None,
+            "suggested_quantity_kg": float(lot_kg) if best else None,
+            "candidate_cells": candidates,
+        }
+
+    def _resolve_active_lot(
+        self,
+        *,
+        lot_id: str | None,
+        ticket_ref: str | None,
+        acceptance_ref: str | None,
+    ) -> dict:
+        if not any([lot_id, ticket_ref, acceptance_ref]):
+            raise ValueError("lot_id, ticket_id oder acceptance_id erforderlich")
+
+        ticket_uuid: str | None = None
+        if acceptance_ref and not ticket_ref:
+            acc = self.db.execute(
+                text("""
+                    SELECT weighing_ticket_id
+                    FROM domain_inventory.harvest_acceptances
+                    WHERE tenant_id = :tid
+                      AND (id::text = :v OR acceptance_number = :v)
+                    LIMIT 1
+                """),
+                {"tid": self.tenant_id, "v": acceptance_ref},
+            ).fetchone()
+            if acc and acc.weighing_ticket_id:
+                ticket_uuid = str(acc.weighing_ticket_id)
+
+        if ticket_ref:
+            ticket = self.db.execute(
+                text("""
+                    SELECT id FROM domain_inventory.weighing_tickets
+                    WHERE tenant_id = :tid
+                      AND (id::text = :v OR ticket_number = :v)
+                    LIMIT 1
+                """),
+                {"tid": self.tenant_id, "v": ticket_ref},
+            ).fetchone()
+            if ticket:
+                ticket_uuid = str(ticket.id)
+
+        lot_row = None
+        if lot_id:
+            lot_row = self.db.execute(
+                text("""
+                    SELECT l.id, l.silo_id, l.virtual_lot_number, l.source_ticket_id,
+                           l.article_id, l.quantity_tons, l.status, s.silo_number
+                    FROM domain_inventory.silo_lots l
+                    JOIN domain_inventory.silos s
+                      ON s.id = l.silo_id AND s.tenant_id = l.tenant_id
+                    WHERE l.tenant_id = :tid AND l.status = 'active'
+                      AND (l.id::text = :v OR l.virtual_lot_number = :v)
+                    LIMIT 1
+                """),
+                {"tid": self.tenant_id, "v": lot_id},
+            ).fetchone()
+        elif ticket_uuid:
+            lot_row = self.db.execute(
+                text("""
+                    SELECT l.id, l.silo_id, l.virtual_lot_number, l.source_ticket_id,
+                           l.article_id, l.quantity_tons, l.status, s.silo_number
+                    FROM domain_inventory.silo_lots l
+                    JOIN domain_inventory.silos s
+                      ON s.id = l.silo_id AND s.tenant_id = l.tenant_id
+                    WHERE l.tenant_id = :tid AND l.status = 'active'
+                      AND l.source_ticket_id::text = :ticket
+                    ORDER BY l.created_at DESC
+                    LIMIT 1
+                """),
+                {"tid": self.tenant_id, "ticket": ticket_uuid},
+            ).fetchone()
+
+        if not lot_row:
+            raise ValueError("Kein aktives Silo-Lot für die Eingabe gefunden")
+        return dict(lot_row._mapping)
+
+    @staticmethod
+    def _score_cell_for_lot(
+        cell_d: dict,
+        lot_d: dict,
+        silo_id: str,
+        lot_kg: Decimal,
+    ) -> int | None:
+        if str(cell_d.get("qs_status") or "") == "gesperrt":
+            return None
+        article_id = lot_d.get("article_id")
+        current_mat = cell_d.get("current_material_id")
+        if current_mat and article_id and str(current_mat) != str(article_id):
+            return None
+        current_lot = cell_d.get("current_lot_id")
+        if current_lot and str(current_lot) != str(lot_d["id"]):
+            return None
+        stock = Decimal(str(cell_d.get("current_stock_kg") or "0"))
+        capacity = Decimal(str(cell_d.get("capacity_kg") or "0"))
+        if capacity > Decimal("0") and stock + lot_kg > capacity:
+            return None
+        score = 0
+        if str(cell_d.get("legacy_silo_id") or "") == silo_id:
+            score += 100
+        score += max(0, 50 - int(stock / Decimal("1000")))
+        return score

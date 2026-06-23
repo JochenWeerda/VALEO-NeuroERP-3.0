@@ -18,7 +18,7 @@
 | Materialtransfer kg-Buchung | **Implementiert** (Slice **WMS-FLOW-001**) | `book_material_transfer`, `POST …/material-flow/transfer`, Transfer-Card UI |
 | Supply-Chain-Events bei Mutationen | **Implementiert** (Slice **WM-AGRI-CHAIN-002**) | `supply_chain_events` + Outbox `inventory.material_flow.*` |
 | Transfer-Hooks in einer Transaktion | **Implementiert** | `commit()` nach `_emit_material_flow_hooks`; Test `test_transfer_commits_after_trace_hooks` |
-| Lot-/Bestands-Sync `silo_lots` ↔ Graph | **Backend-Kontrakt implementiert** (Slice **WM-AGRI-LOT-LINK-001**, 2026-06-18) | `legacy_silo_id`-Mapping, `sync-from-lots`, `POST /material-flow/lot-link` mit Bewegungsbeleg, `current_*` und Trace-Event; UI-/Regelvorschlag bleibt Folgeslice |
+| Lot-/Bestands-Sync `silo_lots` ↔ Graph | **Implementiert** | WM-AGRI-LOT-LINK-001 `lot-link` + WM-AGRI-LOT-LINK Sync; UI auf `lager/materialfluss` |
 | QS-Freigabe/Audit Labor → Lager → Produktion | **Backend-Kontrakt implementiert** (Slice **WM-AGRI-QS-003**, 2026-06-18) | `POST /supply-chain/lots/{lot_id}/qs-transition`, Pflichtgrund/Bediener, Probe/Analyse/Dokument, GMP+/VLOG-Payload, `silo_lots.status`, `silo_cells.qs_status`, `supply_chain_events` |
 | Bird-View / Hofplan MapLibre | **Offen** | **WM-AGRI-MAP-001** |
 | PLC / OPC-UA Live-Anlagen | **Offen** | **WM-AGRI-PLC-005** (Architektur only) |
@@ -34,7 +34,9 @@
 | Mengen / Schwund | Trace-Service: Mengen-Konsistenz Stufe-zu-Stufe | **WMS-FLOW-001:** kg-Transfer zwischen Silozellen → `inventory_stock_movements` + `current_stock_kg`; **WM-AGRI-LOT-LINK-001:** aktives `silo_lots`-Lot → Silozelle mit Bewegungsbeleg und Trace-Event |
 | UI | `lager/rueckverfolgbarkeit` | `lager/materialfluss`, `lager/materialfluss-visualisierung` |
 
-**Backend-Gap geschlossen (2026-06-18):** `POST /material-flow/lot-link` verbindet ein aktives `silo_lots`-Lot fail-closed mit einer Silozelle, schreibt `inventory_stock_movements`, aktualisiert `current_lot_id`/`current_material_id`/`current_stock_kg` und erzeugt ein Trace-/Outbox-Ereignis. Offen bleibt die UI-/Regel-Engine, die aus Annahme/Waage automatisch die fachlich passende Zielzelle vorschlägt.
+**Backend-Gap geschlossen (2026-06-18):** `POST /material-flow/lot-link` verbindet ein aktives `silo_lots`-Lot fail-closed mit einer Silozelle.
+
+**UI geschlossen (2026-06-19):** Lot-Link-Card und LOT-LINK-Spalte auf `lager/materialfluss` (Sync + Buchung + **Vorschlag aus Ticket/Annahme** via `GET …/lot-link/suggest`). Offen: vollautomatische Buchung ohne Operator-Schritt.
 
 **Repo-seitig geschlossen (2026-06-13):** Fachliche **Zuordnung** und **Operator-Sprung**: Materialfluss-Toolbar → **Rückverfolgbarkeit**; Doku-Verweise (diese Datei, `docs/warehouse/README.md`, Handbuch-Inventar).
 

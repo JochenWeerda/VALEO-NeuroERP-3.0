@@ -40,6 +40,8 @@ import {
   useAgriSiloSystems,
   useCreateAgriFlowEdge,
   useBookAgriMaterialTransfer,
+  useBookAgriLotToCell,
+  suggestAgriLotLink,
   useSyncAgriSiloCellFromLots,
   useCreateAgriFlowNode,
   useCreateAgriSiloCell,
@@ -58,7 +60,7 @@ import {
   qsStatusGermanLabel,
   type AgriFlowLike,
 } from '@/lib/material-flow-display'
-import { AlertTriangle, ArrowRightLeft, GitBranch, LayoutGrid, MapPin, Route } from 'lucide-react'
+import { AlertTriangle, ArrowRightLeft, GitBranch, LayoutGrid, Link2, MapPin, Route } from 'lucide-react'
 
 const QS_SELECT_VALUES = ['frei', 'gesperrt', 'in_pruefung', 'reinigung', 'reserviert'] as const
 const NODE_STATUS_VALUES = ['active', 'blocked', 'maintenance', 'cleaning'] as const
@@ -552,6 +554,7 @@ export default function MaterialflussPage(): JSX.Element {
   const createFlowNode = useCreateAgriFlowNode()
   const createFlowEdge = useCreateAgriFlowEdge()
   const bookTransfer = useBookAgriMaterialTransfer()
+  const bookLotToCell = useBookAgriLotToCell()
   const syncSiloCellFromLots = useSyncAgriSiloCellFromLots()
 
   const [newSysCode, setNewSysCode] = useState('')
@@ -579,6 +582,16 @@ export default function MaterialflussPage(): JSX.Element {
   const [transferRef, setTransferRef] = useState('')
   const [transferPending, setTransferPending] = useState(false)
   const [transferResult, setTransferResult] = useState<Record<string, unknown> | null>(null)
+  const [lotLinkTicketId, setLotLinkTicketId] = useState('')
+  const [lotLinkAcceptanceId, setLotLinkAcceptanceId] = useState('')
+  const [lotLinkLotId, setLotLinkLotId] = useState('')
+  const [lotLinkCellId, setLotLinkCellId] = useState('')
+  const [lotLinkQty, setLotLinkQty] = useState('')
+  const [lotLinkRef, setLotLinkRef] = useState('')
+  const [lotLinkSuggestPending, setLotLinkSuggestPending] = useState(false)
+  const [lotLinkPending, setLotLinkPending] = useState(false)
+  const [lotLinkResult, setLotLinkResult] = useState<Record<string, unknown> | null>(null)
+  const lotLinkBusy = lotLinkPending || lotLinkSuggestPending
 
   useEffect(() => {
     setCellSiloSystemId('')
@@ -1119,6 +1132,96 @@ export default function MaterialflussPage(): JSX.Element {
       toast({ title: 'Transfer fehlgeschlagen', description: getAxiosErrorMessage(err), variant: 'destructive' })
     } finally {
       setTransferPending(false)
+    }
+  }
+
+  async function handleSuggestLotLink(): Promise<void> {
+    if (!warehouseId || lotLinkBusy) return
+    const ticketId = lotLinkTicketId.trim()
+    const acceptanceId = lotLinkAcceptanceId.trim()
+    const lotId = lotLinkLotId.trim()
+    if (!ticketId && !acceptanceId && !lotId) {
+      toast({
+        title: 'Eingabe fehlt',
+        description: 'ticket_id, acceptance_id oder lot_id für den Vorschlag angeben.',
+        variant: 'destructive',
+      })
+      return
+    }
+    setLotLinkSuggestPending(true)
+    setLotLinkResult(null)
+    try {
+      const res = await suggestAgriLotLink({
+        warehouse_id: warehouseId,
+        ...(ticketId ? { ticket_id: ticketId } : {}),
+        ...(acceptanceId ? { acceptance_id: acceptanceId } : {}),
+        ...(lotId ? { lot_id: lotId } : {}),
+      })
+      setLotLinkResult(res)
+      if (res.lot_id) setLotLinkLotId(String(res.lot_id))
+      if (res.suggested_cell_id) setLotLinkCellId(String(res.suggested_cell_id))
+      if (res.suggested_quantity_kg != null) setLotLinkQty(String(res.suggested_quantity_kg))
+      if (res.suggested_cell_id) {
+        toast({
+          title: 'Vorschlag geladen',
+          description: `Ziel: ${String(res.suggested_cell_code ?? res.suggested_cell_id)}`,
+        })
+      } else {
+        toast({
+          title: 'Keine passende Silozelle',
+          description: 'Prüfen Sie legacy_silo_id-Mapping oder Kapazität/QS.',
+          variant: 'destructive',
+        })
+      }
+    } catch (err) {
+      toast({ title: 'Vorschlag fehlgeschlagen', description: getAxiosErrorMessage(err), variant: 'destructive' })
+    } finally {
+      setLotLinkSuggestPending(false)
+    }
+  }
+
+  async function handleBookLotToCell(): Promise<void> {
+    if (!warehouseId || lotLinkBusy) return
+    const lotId = lotLinkLotId.trim()
+    const cellId = lotLinkCellId.trim()
+    if (!lotId || !cellId) {
+      toast({
+        title: 'Angaben fehlen',
+        description: 'lot_id und Ziel-Silozelle sind Pflicht.',
+        variant: 'destructive',
+      })
+      return
+    }
+    const qtyRaw = lotLinkQty.trim()
+    let quantityKg: number | undefined
+    if (qtyRaw !== '') {
+      const qty = Number(qtyRaw)
+      if (!Number.isFinite(qty) || qty <= 0) {
+        toast({ title: 'Menge ungültig', description: 'quantity_kg muss > 0 sein.', variant: 'destructive' })
+        return
+      }
+      quantityKg = qty
+    }
+    setLotLinkPending(true)
+    setLotLinkResult(null)
+    try {
+      const res = await bookLotToCell.mutateAsync({
+        warehouse_id: warehouseId,
+        lot_id: lotId,
+        target_cell_id: cellId,
+        quantity_kg: quantityKg,
+        reference: lotLinkRef.trim() || undefined,
+      })
+      setLotLinkResult(res)
+      const idempotent = res.idempotent === true
+      toast({
+        title: idempotent ? 'Lot-Link bereits gebucht' : 'Lot in Silozelle gebucht',
+        description: `Referenz ${String(res.reference ?? '—')}`,
+      })
+    } catch (err) {
+      toast({ title: 'Lot-Link fehlgeschlagen', description: getAxiosErrorMessage(err), variant: 'destructive' })
+    } finally {
+      setLotLinkPending(false)
     }
   }
 
@@ -2080,6 +2183,136 @@ export default function MaterialflussPage(): JSX.Element {
               {transferResult ? (
                 <pre className="text-xs bg-muted p-3 rounded-md overflow-x-auto max-h-48 whitespace-pre-wrap">
                   {JSON.stringify(transferResult, null, 2)}
+                </pre>
+              ) : null}
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-base flex items-center gap-2">
+                <Link2 className="h-4 w-4" />
+                Lot-Link (WM-AGRI-LOT-LINK-001)
+              </CardTitle>
+              <CardDescription>
+                Bucht ein aktives <code className="text-xs">silo_lots</code>-Lot (Waage/WE) transaktional in eine
+                Silozelle — inkl. Bewegungsbeleg, <code className="text-xs">current_*</code> und Trace-Event. Setzt
+                bei Bedarf <code className="text-xs">legacy_silo_id</code> automatisch.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid gap-3 sm:grid-cols-2">
+                <div className="space-y-1">
+                  <label className="text-xs font-medium" htmlFor="lot-link-ticket">
+                    ticket_id / Wiegeschein-Nr.
+                  </label>
+                  <Input
+                    id="lot-link-ticket"
+                    value={lotLinkTicketId}
+                    onChange={(e) => setLotLinkTicketId(e.target.value)}
+                    disabled={lotLinkBusy}
+                    placeholder="UUID oder Ticket-Nummer"
+                    autoComplete="off"
+                    spellCheck={false}
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-xs font-medium" htmlFor="lot-link-acc">
+                    acceptance_id (optional)
+                  </label>
+                  <Input
+                    id="lot-link-acc"
+                    value={lotLinkAcceptanceId}
+                    onChange={(e) => setLotLinkAcceptanceId(e.target.value)}
+                    disabled={lotLinkBusy}
+                    placeholder="Annahme-ID oder -Nummer"
+                    autoComplete="off"
+                    spellCheck={false}
+                  />
+                </div>
+              </div>
+              <div className="grid gap-3 sm:grid-cols-2">
+                <div className="space-y-1">
+                  <label className="text-xs font-medium" htmlFor="lot-link-id">
+                    lot_id (silo_lots)
+                  </label>
+                  <Input
+                    id="lot-link-id"
+                    value={lotLinkLotId}
+                    onChange={(e) => setLotLinkLotId(e.target.value)}
+                    disabled={lotLinkBusy}
+                    placeholder="UUID des aktiven Silo-Lots"
+                    autoComplete="off"
+                    spellCheck={false}
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-xs font-medium" htmlFor="lot-link-cell">
+                    Ziel-Silozelle
+                  </label>
+                  <NativeSelect
+                    id="lot-link-cell"
+                    value={lotLinkCellId}
+                    disabled={lotLinkBusy || siloQ.isLoading}
+                    onChange={(e) => setLotLinkCellId(e.target.value)}
+                  >
+                    <option value="">— wählen —</option>
+                    {(siloQ.data ?? []).map((c) => {
+                      const legacy = agriStr(c, 'legacy_silo_id')
+                      const suffix = legacy ? ` · legacy ${legacy.slice(0, 8)}…` : ''
+                      return (
+                        <option key={`ll-${agriStr(c, 'id')}`} value={agriStr(c, 'id')}>
+                          {agriStr(c, 'cell_code')}
+                          {suffix}
+                        </option>
+                      )
+                    })}
+                  </NativeSelect>
+                </div>
+              </div>
+              <div className="grid gap-3 sm:grid-cols-2">
+                <div className="space-y-1">
+                  <label className="text-xs font-medium" htmlFor="lot-link-qty">
+                    quantity_kg (optional, sonst Lot-Rest)
+                  </label>
+                  <Input
+                    id="lot-link-qty"
+                    value={lotLinkQty}
+                    onChange={(e) => setLotLinkQty(e.target.value)}
+                    disabled={lotLinkBusy}
+                    inputMode="decimal"
+                    autoComplete="off"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-xs font-medium" htmlFor="lot-link-ref">
+                    reference (optional)
+                  </label>
+                  <Input
+                    id="lot-link-ref"
+                    value={lotLinkRef}
+                    onChange={(e) => setLotLinkRef(e.target.value)}
+                    disabled={lotLinkBusy}
+                    autoComplete="off"
+                  />
+                </div>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                <Button
+                  type="button"
+                  variant="secondary"
+                  disabled={lotLinkBusy}
+                  onClick={() => void handleSuggestLotLink()}
+                >
+                  {lotLinkSuggestPending ? 'Lade Vorschlag…' : 'Vorschlag aus Ticket/Annahme'}
+                </Button>
+                <Button type="button" disabled={lotLinkBusy} onClick={() => void handleBookLotToCell()}>
+                  {lotLinkPending ? 'Buche…' : 'Lot in Silozelle buchen'}
+                </Button>
+              </div>
+              {lotLinkResult ? (
+                <pre className="text-xs bg-muted p-3 rounded-md overflow-x-auto max-h-48 whitespace-pre-wrap">
+                  {JSON.stringify(lotLinkResult, null, 2)}
                 </pre>
               ) : null}
             </CardContent>
