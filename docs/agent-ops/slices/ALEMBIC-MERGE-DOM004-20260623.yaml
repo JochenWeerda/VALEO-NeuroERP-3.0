@@ -1,0 +1,42 @@
+slice_id: ALEMBIC-MERGE-DOM004-20260623
+title: Alembic-Head-Merge DOM-004-Welle + FEED-CHAIN-004
+owner: Cursor
+status: completed
+created_at: 2026-06-23
+coordination: >-
+  Keine Schema-Aenderungen — nur Merge-Revision. Parallele DOM-AGRAR/FINANCE/COMPLIANCE/SALES
+  und FEED-CHAIN-004 Migrations auf einem Head vereinen.
+goal: >-
+  ``alembic upgrade head`` und init_db wieder mit genau einem Head; Crash-Loop-Risiko
+  wie 2026-06-10 vermeiden.
+file_ownership:
+  - alembic/versions/merge_dom004_feed_chain_20260623.py
+  - tests/test_alembic_single_head.py
+  - docs/agent-ops/active-workboard.md
+  - docs/agent-ops/slices/ALEMBIC-MERGE-DOM004-20260623.yaml
+  - docs/project-context/open-gaps-and-known-issues.md
+acceptance:
+  - alembic heads zeigt genau einen Head merge_dom004_feed_chain_20260623
+  - test_alembic_single_head gruen
+tests:
+  - python -m pytest -q -o addopts= tests/test_alembic_single_head.py
+  - python -m alembic heads
+risks:
+  - Weitere parallele Migrationen ohne Merge reproduzieren das Problem
+ai_harness:
+  fachlicher_vertrag: >-
+    Kein fachlicher Prozess — rein technische Kompatibilitaetsschicht.
+  architektur_vertrag: >-
+    Leere Merge-Revision; down_revision ist Tupel beider Heads.
+  daten_vertrag: >-
+    upgrade/downgrade no-op.
+  test_vertrag: >-
+    Unit-Test subprocess alembic heads.
+  security_vertrag: >-
+    not_applicable
+  betriebs_vertrag: >-
+    Pflicht vor Docker-Erstinstallation und quality-gate-Migrationsjob.
+  dokumentations_vertrag: >-
+    Build-Health Open-Gaps aktualisiert.
+external_gates:
+  - not_applicable

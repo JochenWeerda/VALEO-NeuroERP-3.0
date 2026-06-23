@@ -90,6 +90,19 @@
 **Verifikation:** `node --check` fuer neue/geaenderte Governance-Scripts gruen; `node scripts/docs-governance-check.cjs docs/agent-ops/slices/AI-HARNESS-GOV-001.yaml` gruen; `node scripts/ai-slice-readiness-check.cjs --slice AI-HARNESS-GOV-001` gruen; `node scripts/docs-code-sync-check.cjs --base HEAD --head WORKTREE` gruen; `pnpm.cmd run docs:check` gruen.
 **CI-Nachzug 2026-06-23:** Quality-Gate-Folgefix auf `main`: `agri_plc_stub.py` bekam `response_model=dict[str, Any]` fuer die vier neuen PLC-Stub-Routen, damit die Response-Model-Coverage wieder unter dem erlaubten untyped-Routen-Schwellwert liegt. Der neue Docs/code-sync-Check hat den reinen Code-Fix korrekt als dokumentationspflichtig markiert; diese Workboard-Zeile ist der zugehoerige Nachweis.
 
+## ALEMBIC-MERGE-DOM004-20260623 — Ein Head nach paralleler 004-Welle
+
+**Von:** Cursor
+**Owner:** Cursor
+**Stand:** abgeschlossen 2026-06-23 — Merge-Revision `merge_dom004_feed_chain_20260623` vereint
+`feed_chain_article_map_20260623` (FEED-CHAIN-004) und `sales_ab_preisabweichung_20260623`
+(DOM-SALES-004-Kette); `test_alembic_single_head.py`; wieder genau 1 Alembic-Head.
+**Ziel:** `alembic upgrade head` / init_db / Container-Bootstrap nicht durch Multiple-Heads blockieren.
+**Dateibesitz:** `merge_dom004_feed_chain_20260623.py`, `test_alembic_single_head.py`, Open-Gaps Build-Health.
+**Abnahmekriterien:** `alembic heads` → 1 Zeile; Governance-Test grün.
+**Hinweis DOM-PROC-004:** Parallele Migration `proc_bestellung_wareneingang_20260623` muss
+`down_revision = merge_dom004_feed_chain_20260623` (nicht `sales_ab_*`) — lokal bereits angepasst.
+
 ## WM-AGRI-MAP-001 — Silo Bird-View / Kapazitäts-Dashboard
 
 **Von:** Claude Sonnet 4.6

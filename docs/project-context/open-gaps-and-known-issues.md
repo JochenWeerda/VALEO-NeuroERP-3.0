@@ -24,7 +24,7 @@ Aggregierte Gesamtsicht: [PROJEKT-GESAMTSTAND-2026-05-27.md](../PROJEKT-GESAMTST
 - **Release-Matrix**: Generator + CI-Upload in `quality-gate.yml` / `release-gates.yml`
 - **OpenAPI-Routen mit `summary=`**: 2663 (100%, Wave-D2 Commit `554625ae7`)
 - **Frontend-Imports**: 0 gebrochene Importe (letzter Nachweis 2026-05-27)
-- **Alembic**: 1 Head (`wave3_wf_trigger_log_20260618`) — Wave-3 Migration erstellt `domain_ops.wf_trigger_log`, `domain_finance.bank_statements/bank_statement_lines`, `domain_agrar.waagen_quittungen`, ergänzt `domain_inventory.weighing_tickets` um quittiert-Spalten
+- **Alembic**: 1 Head (`merge_dom004_feed_chain_20260623`) — Merge 2026-06-23 nach paralleler DOM-*-004/FEED-CHAIN-004-Welle (vorher 2 Heads)
 - **DOM-*-004-Tiefenwelle (2026-06-11/12)**: ~90 neue reine Logik-Unit-Tests gruen; 5 Live-UAT-Skripte (`scripts/uat/{con_contract,sales_o2c,fin_op,doc_nachweisraum,proc_match}_lifecycle_uat.py`, `--execute` mit DB-Restore); Frontend `tsc 0` + ESLint clean je Slice
 - **Docker-Erstinstallation**: Alembic-Bootstrap und Mehr-Domaenen-Struktur auf leerer DB abgesichert
 - **Service-Layer**: Hauptwellen refaktoriert; Legacy-Endpunkte `harvest_acceptance.py`, `agrar_settlements.py` und `docflow.py` repo-seitig mit dedizierten Services nachgezogen (Stand 2026-05-21)
