@@ -39,6 +39,7 @@ import {
   Search,
   Microscope,
   GitBranch,
+  Monitor,
 } from 'lucide-react'
 import type { RawNavItem } from '@/app/navigation/types'
 
@@ -1417,6 +1418,23 @@ export const RAW_NAV_SECTIONS: RawNavItem[] = [
         preferredPath: 'personal/bewerbungen',
         keywords: ['bewerbung', 'rekrutierung', 'stelle', 'kandidat'],
         mcp: { businessDomain: 'hr', scope: 'hr:read' },
+      },
+    ],
+  },
+  {
+    id: 'system',
+    label: 'System & Betrieb',
+    icon: Monitor,
+    mcp: { businessDomain: 'system', scope: 'system:read' },
+    children: [
+      {
+        id: 'workflow-leitstand',
+        label: 'Workflow-Prozessleitstand',
+        icon: Monitor,
+        module: '@/pages/workflow/leitstand',
+        preferredPath: 'workflow/leitstand',
+        keywords: ['workflow', 'prozess', 'leitstand', 'event', 'replay', 'blocker', 'gate'],
+        mcp: { businessDomain: 'system', scope: 'system:read' },
       },
     ],
   },

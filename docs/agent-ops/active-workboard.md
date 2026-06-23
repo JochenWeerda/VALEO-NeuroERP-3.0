@@ -4,32 +4,32 @@
 
 **Von:** Claude Code
 **Owner:** Claude Code
-**Stand:** in Arbeit 2026-06-23
-**Ziel:** Frontend-UI für den Workflow-Prozessleitstand: ListReport mit Status-Filter/Auto-Refresh, Detail-Drawer mit chronologischer Event-Kette und Blocker-Liste, Replay-Button (role-guarded, nur mit workflow:replay), KPI-Kacheln (total/blockiert/replay-fähig). Backend `VALEO-WF-COCKPIT-001` ist abgeschlossen.
-**Dateibesitz:** `packages/frontend-web/src/pages/workflow/leitstand.tsx`, `packages/frontend-web/src/app/navigation/domains/operations.tsx` (nav entry), `docs/agent-ops/slices/WF-COCKPIT-UI-001.yaml`
+**Stand:** abgeschlossen 2026-06-23 — `pages/workflow/leitstand.tsx` (KPI-Kacheln, Status-Filter, Detail-Dialog, Replay-Button); `lib/api/workflow-cockpit.ts`; Nav-Eintrag unter System & Betrieb; Route `workflow/leitstand`; 883 Routen; TS 0 Fehler.
+**Ziel:** Frontend-UI für den Workflow-Prozessleitstand: ListReport mit Status-Filter/Auto-Refresh, Detail-Drawer mit Event-Kette, Replay-Button (role-guarded).
+**Dateibesitz:** `packages/frontend-web/src/pages/workflow/leitstand.tsx`, `packages/frontend-web/src/lib/api/workflow-cockpit.ts`, `packages/frontend-web/src/app/navigation/domains/operations.tsx`, `packages/frontend-web/src/app/routing/navigation-routes.json`, `docs/agent-ops/slices/WF-COCKPIT-UI-001.yaml`
 
 ## MCP-ERP-TOOLS-001 — ERP MCP Tool-Katalog
 
 **Von:** Claude Code
 **Owner:** Claude Code
-**Stand:** in Arbeit 2026-06-23
-**Ziel:** Produktiver rollenbasierter ERP-MCP-Toolkatalog: `config/mcp_erp_tools.yaml` mit Tool-Registry je Domain (CRM/Sales/FIBU/WMS/DMS/Compliance), Service-Layer mit Schema/Scope/Idempotenz-Validierung, API `/mcp/tools` für Agent-Toollist, Tests.
+**Stand:** abgeschlossen 2026-06-23 — `config/mcp_erp_tools.yaml` (13 Tools: CRM/Sales/FIBU/WMS/DMS/Compliance); Service+API; 9 Unit-Tests grün; validate_all() 0 Fehler.
+**Ziel:** Produktiver rollenbasierter ERP-MCP-Toolkatalog mit Schema/Scope/Idempotenz/Risiko-Validierung.
 **Dateibesitz:** `config/mcp_erp_tools.yaml`, `app/services/mcp_tool_registry_service.py`, `app/api/v1/endpoints/mcp_tool_registry.py`, `tests/test_mcp_tool_registry.py`, `docs/agent-ops/slices/MCP-ERP-TOOLS-001.yaml`
 
 ## EXTERNAL-MOCK-HARNESS-001 — Mock-Schicht für externe Systeme
 
 **Von:** Claude Code
 **Owner:** Claude Code
-**Stand:** in Arbeit 2026-06-23
-**Ziel:** Reproduzierbare Mock-Stubs für DATEV, TSE/DSFinV-K, ELSTER/ERiC, DMS/Paperless, Bank/CAMT — kein externes System nötig für Tests. Service mit simulierten Responses, Dev-Only API `/dev/external-mocks`, Alembic-Migration, Tests.
+**Stand:** abgeschlossen 2026-06-23 — `external_mock_harness_service.py` (DATEV/TSE/DSFinV-K/ELSTER/DMS/CAMT, deterministisch, simulated=true); Dev-API `/dev/external-mocks/*`; Alembic `external_mock_sessions_20260623`; 14 Unit-Tests grün.
+**Ziel:** Reproduzierbare Mock-Stubs für externe Systeme ohne echten Systemkontakt.
 **Dateibesitz:** `app/services/external_mock_harness_service.py`, `app/api/v1/endpoints/external_mock_harness.py`, `alembic/versions/external_mock_sessions_20260623.py`, `tests/test_external_mock_harness.py`, `docs/agent-ops/slices/EXTERNAL-MOCK-HARNESS-001.yaml`
 
 ## AI-DOC-DRIFT-DASHBOARD-001 — Doku-Drift-Report
 
 **Von:** Claude Code
 **Owner:** Claude Code
-**Stand:** in Arbeit 2026-06-23
-**Ziel:** Script `scripts/doc_drift_report.py` prüft neue Routen ohne API-Doku, neue Migrationen ohne Runbook/Gaps-Eintrag, neue Services ohne Fachprozessbeleg — erzeugt maschinenlesbaren Drift-Report (JSON + Markdown-Summary). Tests.
+**Stand:** abgeschlossen 2026-06-23 — `scripts/doc_drift_report.py` (Endpoints/Migrationen/Services/Pages vs. Docs, JSON+Markdown); 4 Unit-Tests grün.
+**Ziel:** Heuristischer Drift-Report für Code-Objekte ohne Doku-Entsprechung.
 **Dateibesitz:** `scripts/doc_drift_report.py`, `tests/test_doc_drift_report.py`, `docs/agent-ops/slices/AI-DOC-DRIFT-DASHBOARD-001.yaml`
 
 ## VALEO-WF-COCKPIT-001 - Workflow- und Prozessleitstand fuer VALEO Process Kernel

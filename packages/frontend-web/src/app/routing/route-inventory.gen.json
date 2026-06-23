@@ -4341,6 +4341,11 @@
       "source": "auto"
     },
     {
+      "module": "@/pages/workflow/leitstand",
+      "path": "workflow/leitstand",
+      "source": "navigation"
+    },
+    {
       "module": "@/pages/workflow/process-mining-analytics",
       "path": "workflow/process-mining-analytics",
       "source": "auto"
