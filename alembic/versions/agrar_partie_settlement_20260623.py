@@ -107,6 +107,16 @@ def upgrade() -> None:
         schema="domain_agrar",
     )
 
+    # Empty CI databases may not have the legacy settlement table yet. Keep the
+    # migration idempotent and additive; domain-specific columns are added by
+    # their owning migrations/services when present.
+    op.execute("""
+        CREATE TABLE IF NOT EXISTS domain_agrar.agrar_selbstabrechnungen (
+            id VARCHAR(36) PRIMARY KEY,
+            tenant_id VARCHAR(36)
+        )
+    """)
+
     # add status column to existing agrar_selbstabrechnungen if not present
     op.execute("""
         ALTER TABLE domain_agrar.agrar_selbstabrechnungen
