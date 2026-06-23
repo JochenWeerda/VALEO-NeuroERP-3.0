@@ -1,5 +1,14 @@
 # Active Workboard
 
+## DOM-COMPLIANCE-004 — Compliance-Domäne Vollständige Vertiefung (.2–.5)
+
+**Von:** Claude Code
+**Owner:** Claude Code
+**Stand:** reserviert 2026-06-23 — Claim vor Implementierung (AI-Harness-Protokoll)
+**Ziel:** Compliance-Kern-Prozesse auf volle 004-Tiefe heben: PCN-Meldung-Lifecycle (.2), VVVO-Prüfung + Sachkunde-Ablauf (.3), Artikel-Sperre-Audit-Trail (.4), Playwright @smoke + UAT (.5). Schließt Lücke bei strukturiertem Service-Layer für behördliche Meldepflichten.
+**Dateibesitz:** `app/services/compliance_pcn_lifecycle_service.py`, `app/services/compliance_vvvo_sachkunde_service.py`, `app/services/compliance_sperre_audit_service.py`, `alembic/versions/compliance_pcn_audit_20260623.py`, `app/api/v1/endpoints/compliance.py`, `playwright-tests/specs/compliance/compliance-lifecycle-smoke.spec.ts`, `scripts/uat/compliance_lifecycle_uat.py`, `docs/workflows/dom-compliance-004-compliance-deepening-2026-06-23.md`, `docs/agent-ops/slices/DOM-COMPLIANCE-004.yaml`, `tests/test_dom_compliance_004.py`
+**Koordination:** Cursor besitzt keine aktiven Compliance-Slices. Fremde Dateien bleiben unangetastet.
+
 ## DOM-AGRAR-004 — Agrar-Domäne Vollständige Vertiefung (.2–.5)
 
 **Von:** Claude Code
