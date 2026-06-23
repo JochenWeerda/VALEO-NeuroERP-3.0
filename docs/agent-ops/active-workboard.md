@@ -11,10 +11,10 @@
 
 ## AI-HARNESS-GOV-001 - AI-assisted Development Harness Governance
 
-**Von:** Codex
-**Owner:** Codex
-**Stand:** abgeschlossen 2026-06-23 - AI-Harness-Governance, Doku-/Code-Sync, AI-Slice-Readiness, semantische QA-Templates, Nightly-Drift-Report, AI-Tool-Kompatibilitaetsmatrix und Security-/Major-Update-Ergaenzungen umgesetzt.
-**Info an Claude Code:** Codex bearbeitet ausschliesslich AI-/Docs-Governance, Agent-Ops-Harness, QA-Templates und zugehoerige CI-/Script-Dateien. Keine Aenderung an aktuellen WMS-/Silo-/Materialfluss-Dateien oder generierten Frontend-Routen aus parallelem WIP; fremde gestagte/dirty fachliche Dateien werden nicht gebuendelt.
+**Von:** Codex → **Harness-Betrieb ab 2026-06-23:** Cursor (Auto)
+**Owner:** Cursor (Betrieb/Wartung Harness); Umsetzung urspruenglich Codex
+**Stand:** abgeschlossen 2026-06-23 — Governance-Artefakte umgesetzt; **Cursor uebernimmt operativen Harness-Betrieb** (Slice-Claims, Doku-Sync, Readiness-Checks vor Abschluss, keine fremden WIP-Buendel).
+**Info an parallele Agenten:** Harness-Pflicht vor jedem neuen Slice: Workboard-Claim, `ai_harness`-Felder in Slice-YAML, Dateibesitz einhalten, `node scripts/ai-slice-readiness-check.cjs --slice <ID>` und `docs-code-sync-check` bei relevanten Aenderungen. Cursor pflegt Agent-Ops-/Governance-Dateien; fachliche WMS-/Silo-/LOG-Slices bleiben beim jeweiligen Slice-Owner.
 **Ziel:** Slice-Harness, Doku-/Code-Sync, AI-Definition-of-Done, semantische QA-Templates, Nightly-Drift-Report, Vendor-Unabhaengigkeit und Security-/Major-Update-Prozess operativ einfuehren.
 **Dateibesitz:** `docs/agent-ops/*` nur AI-Harness-relevante Dateien, `docs/architecture/ai-assisted-enterprise-development-standard.md`, `docs/project-context/ai-assisted-development-implementation-plan-2026-06-23.md`, neue QA-Templates, `config/docs-code-sync-map.yaml`, `artifacts/ai-tool-compatibility-matrix.json`, `scripts/docs-*.cjs`, `scripts/ai-slice-readiness-check.cjs`, `.github/workflows/docs-governance.yml`, `.github/workflows/quality-gate.yml`, `.github/workflows/ai-doc-sync.yml`.
 **Abnahmekriterien:** Neue/geaenderte Slice-YAMLs werden auf AI-Harness-Felder validiert; kritische Codepfade benoetigen Doku/Gaps oder explizite Ausnahme; AI-Slice-Readiness ist pruefbar; semantische QA-Templates und Drift-Report existieren; Security-/Major-Update-Prozess ist dokumentiert.
