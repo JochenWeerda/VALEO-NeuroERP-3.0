@@ -4,7 +4,7 @@
 
 **Von:** Claude Code
 **Owner:** Claude Code
-**Stand:** reserviert 2026-06-23 — Claim vor Implementierung (AI-Harness-Protokoll)
+**Stand:** abgeschlossen 2026-06-23 — Disposition-Check (.2), ePOD-Settlement (.3), Playwright @smoke (.5), UAT-Script (.5), Alembic-Migration log_disposition_20260623, Unit-Tests (9 Fälle), Slice-YAML + Workflow-Doku
 **Ziel:** Logistik-Domäne auf volle 004-Tiefe heben analog CON/SALES/FIN/DOC/PROC: Tour-Disposition (Kapazitäts-/Zeitfenster-Optimierung), ePOD-Lifecycle (Lieferschein→Ablieferungsbeleg→Settlement), Frachtkostenabrechnung (Tarif→Abrechnung→Storno), Supply-Chain-Traceability (Tour→Freight→LS-Kette), Playwright-E2E + Live-UAT.
 **Dateibesitz:** `app/api/v1/endpoints/logistics_*.py`, `app/services/logistics_*.py`, `alembic/versions/log_*`, `packages/frontend-web/src/pages/logistik/**`, `tests/test_logistics_*.py`, `scripts/uat/log_*.py`, `playwright-tests/specs/logistik/`, `docs/dom-log-004-*.md`, `docs/agent-ops/slices/DOM-LOG-004.yaml`
 **Koordination:** Keine parallelen LOG-Dateien durch Cursor bekannt (alle LOG-*-Slices abgeschlossen). Fremde Dateien bleiben unangetastet.
