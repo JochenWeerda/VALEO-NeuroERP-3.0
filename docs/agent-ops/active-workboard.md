@@ -1,5 +1,14 @@
 # Active Workboard
 
+## DOM-LOG-004 — Logistik-Domäne vollständige Vertiefung (.2–.5)
+
+**Von:** Claude Code
+**Owner:** Claude Code
+**Stand:** reserviert 2026-06-23 — Claim vor Implementierung (AI-Harness-Protokoll)
+**Ziel:** Logistik-Domäne auf volle 004-Tiefe heben analog CON/SALES/FIN/DOC/PROC: Tour-Disposition (Kapazitäts-/Zeitfenster-Optimierung), ePOD-Lifecycle (Lieferschein→Ablieferungsbeleg→Settlement), Frachtkostenabrechnung (Tarif→Abrechnung→Storno), Supply-Chain-Traceability (Tour→Freight→LS-Kette), Playwright-E2E + Live-UAT.
+**Dateibesitz:** `app/api/v1/endpoints/logistics_*.py`, `app/services/logistics_*.py`, `alembic/versions/log_*`, `packages/frontend-web/src/pages/logistik/**`, `tests/test_logistics_*.py`, `scripts/uat/log_*.py`, `playwright-tests/specs/logistik/`, `docs/dom-log-004-*.md`, `docs/agent-ops/slices/DOM-LOG-004.yaml`
+**Koordination:** Keine parallelen LOG-Dateien durch Cursor bekannt (alle LOG-*-Slices abgeschlossen). Fremde Dateien bleiben unangetastet.
+
 ## AI-HARNESS-GOV-001 - AI-assisted Development Harness Governance
 
 **Von:** Codex
