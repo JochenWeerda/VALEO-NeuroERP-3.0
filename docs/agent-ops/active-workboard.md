@@ -1,5 +1,14 @@
 # Active Workboard
 
+## DOM-CONTROLLING-004 — Controlling-Domäne Vollständige Vertiefung (.2–.5)
+
+**Von:** Claude Code
+**Owner:** Claude Code
+**Stand:** reserviert 2026-06-23 — Claim vor Implementierung (AI-Harness-Protokoll)
+**Ziel:** Controlling-Kern-Prozesse auf volle 004-Tiefe heben: Budget-Lifecycle (.2), Plan/Ist-Abweichungsanalyse (.3), Kostenstellen-Abschluss-Flow (.4), Playwright @smoke + UAT (.5).
+**Dateibesitz:** `app/services/controlling_budget_lifecycle_service.py`, `app/services/controlling_abweichung_service.py`, `app/services/controlling_kostenstellen_abschluss_service.py`, `alembic/versions/controlling_budget_abschluss_20260623.py`, `app/api/v1/endpoints/controlling_actions.py`, `playwright-tests/specs/controlling/controlling-lifecycle-smoke.spec.ts`, `scripts/uat/controlling_lifecycle_uat.py`, `docs/workflows/dom-controlling-004-controlling-deepening-2026-06-23.md`, `docs/agent-ops/slices/DOM-CONTROLLING-004.yaml`, `tests/test_dom_controlling_004.py`
+**Koordination:** Keine aktiven Cursor-Controlling-Slices. `controlling_service.py` bleibt unangetastet.
+
 ## DOM-PROC-004 — Procurement-Domäne Vollständige Vertiefung (.2–.5)
 
 **Von:** Claude Code
