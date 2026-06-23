@@ -529,6 +529,57 @@ class AgriSiloMaterialFlowService:
         self.db.commit()
         return d
 
+    def delete_material_flow_node(self, node_id: str, warehouse_id: str) -> None:
+        """Löscht einen Materialfluss-Knoten; lehnt ab wenn noch aktive Kanten hängen."""
+        existing = self.db.execute(
+            text("""
+                SELECT id FROM domain_inventory.material_flow_nodes
+                WHERE id = :nid AND warehouse_id = :wid AND tenant_id = :tid
+            """),
+            {"nid": node_id, "wid": warehouse_id, "tid": self.tenant_id},
+        ).fetchone()
+        if not existing:
+            raise ValueError("Knoten nicht gefunden")
+        edge_count = self.db.execute(
+            text("""
+                SELECT COUNT(*) FROM domain_inventory.material_flow_edges
+                WHERE (from_node_id = :nid OR to_node_id = :nid)
+                  AND warehouse_id = :wid AND tenant_id = :tid
+                  AND status = 'open'
+            """),
+            {"nid": node_id, "wid": warehouse_id, "tid": self.tenant_id},
+        ).scalar()
+        if edge_count and edge_count > 0:
+            raise ValueError(f"Knoten hat {edge_count} aktive Kante(n) — zuerst Kanten entfernen oder schließen")
+        self.db.execute(
+            text("""
+                DELETE FROM domain_inventory.material_flow_nodes
+                WHERE id = :nid AND warehouse_id = :wid AND tenant_id = :tid
+            """),
+            {"nid": node_id, "wid": warehouse_id, "tid": self.tenant_id},
+        )
+        self.db.commit()
+
+    def delete_material_flow_edge(self, edge_id: str, warehouse_id: str) -> None:
+        """Löscht eine Materialfluss-Kante."""
+        existing = self.db.execute(
+            text("""
+                SELECT id FROM domain_inventory.material_flow_edges
+                WHERE id = :eid AND warehouse_id = :wid AND tenant_id = :tid
+            """),
+            {"eid": edge_id, "wid": warehouse_id, "tid": self.tenant_id},
+        ).fetchone()
+        if not existing:
+            raise ValueError("Kante nicht gefunden")
+        self.db.execute(
+            text("""
+                DELETE FROM domain_inventory.material_flow_edges
+                WHERE id = :eid AND warehouse_id = :wid AND tenant_id = :tid
+            """),
+            {"eid": edge_id, "wid": warehouse_id, "tid": self.tenant_id},
+        )
+        self.db.commit()
+
     # ── Routen-Validierung (BFS) ───────────────────────────────
 
     def validate_route(
