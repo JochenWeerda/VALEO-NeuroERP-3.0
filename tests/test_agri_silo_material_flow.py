@@ -369,6 +369,52 @@ def test_trace_hooks_invoke_integration_on_edge_create(mocker):
 
 
 @pytest.mark.unit
+def test_book_flush_charge_writes_movements_and_resets_flush_flag(mocker):
+    """WM-AGRI-FLUSH-006: Spülcharge schreibt out+in Bewegungen und setzt flush_required zurueck."""
+    mocker.patch("app.services.agri_material_flow_trace_integration.append_material_flow_supply_chain_event")
+    mocker.patch("app.services.agri_material_flow_trace_integration.store_material_flow_outbox_best_effort")
+    from app.services.agri_silo_material_flow_service import AgriSiloMaterialFlowService
+
+    from_cell = _row(id="cell-a", cell_code="A1", current_stock_kg=0, current_material_id=None, current_lot_id=None)
+    to_cell = _row(id="cell-b", cell_code="B1", current_stock_kg=0, current_material_id=None, current_lot_id=None)
+
+    _no_node = MagicMock()
+    _no_node.fetchone.return_value = None
+
+    db = MagicMock()
+    db.execute.side_effect = [
+        _mk_result(fetchone=from_cell),   # from_cell
+        _mk_result(fetchone=to_cell),     # to_cell
+        _no_node,                         # from_node → None (kein Graph-Knoten)
+        _no_node,                         # to_node → None
+        MagicMock(),                      # INSERT out movement
+        MagicMock(),                      # INSERT in movement
+    ]
+    db.commit = MagicMock()
+
+    svc = AgriSiloMaterialFlowService(db, "tenant-x", trace_hooks_enabled=False)
+    svc.validate_route = MagicMock(return_value={"ok": True, "warnings": [], "flush_required": False})
+
+    result = svc.book_flush_charge(
+        warehouse_id="wh-1",
+        from_cell_id="cell-a",
+        to_cell_id="cell-b",
+        flush_material_id="art-flush",
+        flush_quantity_kg=Decimal("200"),
+        booked_by="operator",
+    )
+
+    assert result["ok"] is True
+    assert result["flush_material_id"] == "art-flush"
+    assert result["flush_quantity_kg"] == 200.0
+    assert "move_out_id" in result
+    assert "move_in_id" in result
+    db.commit.assert_called_once()
+    # 4 SELECT + 2 INSERT = mindestens 6 execute-Aufrufe
+    assert db.execute.call_count >= 6
+
+
+@pytest.mark.unit
 def test_sync_lots_from_transfer_reduces_source_and_increases_dest():
     """sync_lots_from_transfer reduziert Quell-Lot und erhöht Ziel-Lot."""
     from app.services.agri_silo_lot_link_service import AgriSiloLotLinkService

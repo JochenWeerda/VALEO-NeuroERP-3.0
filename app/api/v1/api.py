@@ -40,6 +40,7 @@ from app.api.v1.endpoints import (
     agri_lot_link_booking,
     agri_qs_workflow,
     agri_silo_material_flow,
+    agri_plc_stub,
     policies,
     gap,
     geo,
@@ -1313,6 +1314,12 @@ api_router.include_router(
     agri_lot_link_booking.router,
     prefix="/lager/wms/agri",
     tags=["lager", "wms", "agri", "inventory", "silo", "lot-link"],
+)
+
+api_router.include_router(
+    agri_plc_stub.router,
+    prefix="/lager/wms/agri",
+    tags=["lager", "wms", "agri", "plc", "opc-ua", "iot"],
 )
 
 api_router.include_router(

@@ -709,6 +709,146 @@ class AgriSiloMaterialFlowService:
             }
         )
 
+    # ── WM-AGRI-FLUSH-006: Spülcharge-Workflow ───────────────────────────
+
+    def book_flush_charge(
+        self,
+        *,
+        warehouse_id: str,
+        from_cell_id: str,
+        to_cell_id: str,
+        flush_material_id: str,
+        flush_quantity_kg: Decimal,
+        booked_by: str = "system",
+        reference: str | None = None,
+    ) -> dict:
+        """Bucht eine Spülcharge auf der Route from→to (WM-AGRI-FLUSH-006).
+
+        Eine Spülcharge ist ein Leerreinigungslauf: Spül-/Restmaterial wird durch die Route
+        geschickt, bevor das neue Hauptmaterial folgt. Dabei wird:
+        1. validate_route geprüft (QS, Route OK)
+        2. flush_required auf der Route gesetzt (Warnung wenn bereits klar)
+        3. Stock-Movements für Spülmaterial geschrieben (out Quellzelle → in Zielzelle)
+        4. Trace-Event + Outbox
+        """
+        if flush_quantity_kg <= Decimal("0"):
+            raise ValueError("flush_quantity_kg muss positiv sein")
+
+        from_cell = self.db.execute(
+            text("SELECT * FROM domain_inventory.silo_cells WHERE id = :id AND tenant_id = :tid"),
+            {"id": from_cell_id, "tid": self.tenant_id},
+        ).fetchone()
+        to_cell = self.db.execute(
+            text("SELECT * FROM domain_inventory.silo_cells WHERE id = :id AND tenant_id = :tid"),
+            {"id": to_cell_id, "tid": self.tenant_id},
+        ).fetchone()
+        if not from_cell or not to_cell:
+            raise ValueError("Quell- oder Zielzelle nicht gefunden")
+
+        from_cell_d = dict(from_cell._mapping)
+        to_cell_d = dict(to_cell._mapping)
+
+        # Route validieren
+        from_node = self.db.execute(
+            text("""
+                SELECT id FROM domain_inventory.material_flow_nodes
+                WHERE ref_type = 'silo_cell' AND ref_id = :cid AND tenant_id = :tid
+            """),
+            {"cid": from_cell_id, "tid": self.tenant_id},
+        ).fetchone()
+        to_node = self.db.execute(
+            text("""
+                SELECT id FROM domain_inventory.material_flow_nodes
+                WHERE ref_type = 'silo_cell' AND ref_id = :cid AND tenant_id = :tid
+            """),
+            {"cid": to_cell_id, "tid": self.tenant_id},
+        ).fetchone()
+
+        if from_node and to_node:
+            route = self.validate_route(
+                warehouse_id=warehouse_id,
+                from_node_id=str(from_node.id),
+                to_node_id=str(to_node.id),
+                material_id=flush_material_id,
+                previous_material_id=None,
+            )
+            if not route["ok"]:
+                raise ValueError(f"Route für Spülcharge ungültig: {route.get('reason', 'unbekannt')}")
+        else:
+            route = {"ok": True, "warnings": [], "flush_required": False}
+
+        from app.core.uuid7 import uuid7
+        from datetime import date
+        today = date.today()
+        ref = reference or f"FLUSH-{from_cell_d['cell_code']}-{to_cell_d['cell_code']}"
+
+        move_out_id = str(uuid7())
+        move_in_id = str(uuid7())
+
+        for mv_type, loc, mv_id in [
+            ("out", str(from_cell_d.get("cell_code")), move_out_id),
+            ("in", str(to_cell_d.get("cell_code")), move_in_id),
+        ]:
+            self.db.execute(
+                text("""
+                    INSERT INTO domain_inventory.inventory_stock_movements
+                        (id, article_id, warehouse_id, movement_type, quantity, unit, charge,
+                         warehouse_location, reference_number, movement_date, movement_time,
+                         notes, booking_user, auto_created, ownership_type, tenant_id, created_at)
+                    VALUES (:id, :art, :wid, :mv, :qty, 'kg', NULL,
+                            :loc, :ref, :dt, NOW()::time,
+                            :notes, :user, true, 'flush', :tid, NOW())
+                """),
+                {
+                    "id": mv_id, "art": flush_material_id, "wid": warehouse_id,
+                    "mv": mv_type, "qty": float(flush_quantity_kg),
+                    "loc": loc, "ref": ref, "dt": today,
+                    "notes": f"Spülcharge {from_cell_d.get('cell_code')} -> {to_cell_d.get('cell_code')}",
+                    "user": booked_by, "tid": self.tenant_id,
+                },
+            )
+
+        # flush_required auf betroffenen Kanten zurücksetzen
+        if from_node and to_node:
+            self.db.execute(
+                text("""
+                    UPDATE domain_inventory.material_flow_edges
+                    SET flush_required = false
+                    WHERE (from_node_id = :fn OR to_node_id = :tn)
+                      AND warehouse_id = :wid AND tenant_id = :tid
+                      AND flush_required = true
+                """),
+                {
+                    "fn": str(from_node.id), "tn": str(to_node.id),
+                    "wid": warehouse_id, "tid": self.tenant_id,
+                },
+            )
+
+        result = {
+            "ok": True,
+            "flush_reference": ref,
+            "from_cell_id": from_cell_id,
+            "to_cell_id": to_cell_id,
+            "flush_material_id": flush_material_id,
+            "flush_quantity_kg": float(flush_quantity_kg),
+            "move_out_id": move_out_id,
+            "move_in_id": move_in_id,
+            "route_warnings": route.get("warnings", []),
+        }
+        self._emit_material_flow_hooks(
+            sc_event_type="flush_charge_booked",
+            outbox_event_type="inventory.material_flow.flush_charge_booked",
+            aggregate_id=warehouse_id,
+            ref_type="silo_flush",
+            ref_id=move_out_id,
+            ref_label=ref,
+            status_from=str(from_cell_d.get("cell_code")),
+            status_to=str(to_cell_d.get("cell_code")),
+            payload=result,
+        )
+        self.db.commit()
+        return result
+
     # ── WMS-FLOW-001: Materialtransfer mit Lagerbuchung ──────────────────
 
     def book_material_transfer(

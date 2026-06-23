@@ -304,6 +304,41 @@ class MaterialTransferIn(BaseModel):
     reference: Optional[str] = None
 
 
+class FlushChargeIn(BaseModel):
+    warehouse_id: str
+    from_cell_id: str
+    to_cell_id: str
+    flush_material_id: str
+    flush_quantity_kg: Decimal
+    booked_by: Optional[str] = None
+    reference: Optional[str] = None
+
+
+@router.post(
+    "/material-flow/flush-charge",
+    response_model=AgriJsonOut,
+    status_code=200,
+    summary="POST /material-flow/flush-charge",
+)
+def book_flush_charge(
+    payload: FlushChargeIn,
+    svc: AgriSiloMaterialFlowService = Depends(_svc),
+) -> Any:
+    """WM-AGRI-FLUSH-006: Spülcharge buchen — Reinigungslauf vor Materialwechsel."""
+    try:
+        return svc.book_flush_charge(
+            warehouse_id=payload.warehouse_id,
+            from_cell_id=payload.from_cell_id,
+            to_cell_id=payload.to_cell_id,
+            flush_material_id=payload.flush_material_id,
+            flush_quantity_kg=payload.flush_quantity_kg,
+            booked_by=payload.booked_by or "system",
+            reference=payload.reference,
+        )
+    except ValueError as e:
+        raise HTTPException(status_code=422, detail=str(e))
+
+
 @router.post("/material-flow/transfer", response_model=AgriJsonOut, status_code=200, summary="POST /material-flow/transfer")
 def book_material_transfer(
     payload: MaterialTransferIn,

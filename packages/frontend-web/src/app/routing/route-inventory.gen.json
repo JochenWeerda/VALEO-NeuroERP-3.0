@@ -3051,6 +3051,16 @@
       "source": "alias"
     },
     {
+      "module": "@/pages/lager/silo-mobil",
+      "path": "lager/silo-mobil",
+      "source": "alias"
+    },
+    {
+      "module": "@/pages/lager/silo-uebersicht",
+      "path": "lager/silo-uebersicht",
+      "source": "alias"
+    },
+    {
       "module": "@/pages/lager/terminal",
       "path": "lager/terminal",
       "source": "auto"

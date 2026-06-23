@@ -389,6 +389,8 @@ class AgriLotLinkBookingService:
             wid_clause = " AND warehouse_id = :wid"
             cell_filter["wid"] = warehouse_id
 
+        # nosec S608 - wid_clause is code-controlled and only adds a static
+        # parameterized warehouse predicate; all values remain bound params.
         rows = self.db.execute(
             text(f"""
                 SELECT id, warehouse_id, cell_code, legacy_silo_id,

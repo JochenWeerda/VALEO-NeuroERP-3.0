@@ -142,7 +142,39 @@ Stand: `2026-06-18`
 **Ziel:** Digitales Modell Siloanlage/Silozelle/Materialfluss ohne PLC; QS-Sperre und Verschleppungs-Hinweis auf Routen; Mandanten-Trennung.
 **Dateibesitz:** genannte Alembic-/Backend-/Frontend-/Test-/Doku-Dateien, `docs/warehouse/README.md`, `docs/agent-ops/slices/WM-AGRI-SILO-001.yaml`, `docs/agent-ops/slices/WMS-FLOW-001.yaml`, Roadmap `WM-AGRI-FLOW-001.yaml`.
 **Abnahmekriterien:** `alembic heads` einheitlich; API erreichbar; Tests `pytest tests/test_agri_silo_material_flow.py --no-cov` grün; Transfer-UI auf `lager/materialfluss`; Navigation + `npm run routes:generate` konsistent.
-**Offen (Folge-Slices):** WM-AGRI-LOT-LINK Phase 2 (WE/Waage-Regeln), WM-AGRI-MAP-001, WM-AGRI-PLC-005 — siehe [wm-agri-silo-supply-chain-integration-2026-06-13.md](../workflows/wm-agri-silo-supply-chain-integration-2026-06-13.md) Abschnitt 0.
+**Folge-Slices umgesetzt:** WM-AGRI-AUTO-LINK-001, WM-AGRI-BIDIR-SYNC-001, WM-AGRI-MAP-001, WM-AGRI-FLOW-002, WM-AGRI-FLUSH-006, WM-AGRI-MOBILE-004, WM-AGRI-PLC-005 — alle abgeschlossen 2026-06-23.
+
+## WM-AGRI-FLOW-002 — Graph-Editor Create/Delete (Knoten & Kanten)
+
+**Von:** Claude Sonnet 4.6
+**Owner:** Claude Sonnet 4.6
+**Stand:** abgeschlossen 2026-06-23 — `CreateNodeDialog`, `CreateEdgeDialog` in `materialfluss-visualisierung.tsx`; `DELETE /material-flow/nodes/{id}` + `DELETE /material-flow/edges/{id}` Backend-Endpoints; `useDeleteAgriFlowNode/Edge` React-Query-Hooks; Selection-State + Trash-Buttons.
+**Ziel:** Operatoren können im Graph-Editor neue Knoten/Kanten anlegen und bestehende löschen.
+**Dateibesitz:** `packages/frontend-web/src/pages/lager/materialfluss-visualisierung.tsx`, `packages/frontend-web/src/lib/api/agri-material-flow.ts`, `app/services/agri_silo_material_flow_service.py`, `app/api/v1/endpoints/agri_silo_material_flow.py`.
+
+## WM-AGRI-FLUSH-006 — Spülcharge-Workflow
+
+**Von:** Claude Sonnet 4.6
+**Owner:** Claude Sonnet 4.6
+**Stand:** abgeschlossen 2026-06-23 — `AgriSiloMaterialFlowService.book_flush_charge`; `POST /material-flow/flush-charge`; `flush_required` Reset auf betroffenen Kanten; Supply-Chain-Event + Outbox; 4 neue Tests (22/22 grün).
+**Ziel:** Reinigungslauf vor Materialwechsel: Spülcharge bucht Out/In mit `ownership_type='flush'`, setzt `flush_required=false` auf Route, emittiert Trace-Event.
+**Dateibesitz:** `app/services/agri_silo_material_flow_service.py`, `app/api/v1/endpoints/agri_silo_material_flow.py`, `tests/test_agri_silo_material_flow.py`.
+
+## WM-AGRI-MOBILE-004 — Mobil-UI Waage/Hallenterminal
+
+**Von:** Claude Sonnet 4.6
+**Owner:** Claude Sonnet 4.6
+**Stand:** abgeschlossen 2026-06-23 — `pages/lager/silo-mobil.tsx`; Route `lager/silo-mobil`; Nav-Eintrag „Silo-Terminal (Mobil)"; Panels: Auto-Lot-Link, Schnelltransfer, Spülcharge, Zellen-Schnellübersicht.
+**Ziel:** Touch-optimierte Seite (max-w-2xl) für Tablet-Operatoren an Waage und Hallenterminal. Alle zentralen Silo-Aktionen (Lot-Link, Transfer, Flush) ohne Desktop-Navigation erreichbar.
+**Dateibesitz:** `packages/frontend-web/src/pages/lager/silo-mobil.tsx`, `packages/frontend-web/src/app/route-aliases.json`, `packages/frontend-web/src/app/navigation/domains/operations.tsx`, `packages/frontend-web/src/lib/api/agri-material-flow.ts`.
+
+## WM-AGRI-PLC-005 — PLC/OPC-UA Anbindung Stub
+
+**Von:** Claude Sonnet 4.6
+**Owner:** Claude Sonnet 4.6
+**Stand:** abgeschlossen 2026-06-23 — `AgriPlcService` + 3 Endpoints (`POST /plc/ingest`, `POST /plc/silo-level`, `POST /plc/device-status`, `GET /plc/info`); Router in `api.py` unter Prefix `/lager/wms/agri`; 5 Unit-Tests grün.
+**Ziel:** Stub-Endpoint für SPS/OPC-UA-Sensordaten: IoT-Gateway liefert Füllstand-/Temperatur-/Statusmeldungen per REST; `silo_level`-Endpoint schreibt `current_stock_kg` auf Silozelle. Produktionserweiterung: asyncua-Polling + plc_tag_mappings-Tabelle.
+**Dateibesitz:** `app/api/v1/endpoints/agri_plc_stub.py`, `app/api/v1/api.py`, `tests/test_agri_plc_stub.py`.
 
 ## WM-AGRI-LOT-LINK — silo_lots ↔ silo_cells
 
