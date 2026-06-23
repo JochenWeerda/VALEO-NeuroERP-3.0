@@ -69,6 +69,15 @@ def upgrade() -> None:
     )
     op.create_index("ix_preisabweichungen_auftrag", "sales_preisabweichungen", ["auftrag_id"], schema="domain_sales")
 
+    # Empty CI databases may not have the legacy delivery-note table yet.
+    # Keep this migration additive so a full bootstrap can reach head.
+    op.execute("""
+        CREATE TABLE IF NOT EXISTS domain_sales.sales_delivery_notes (
+            id VARCHAR(36) PRIMARY KEY,
+            tenant_id VARCHAR(36)
+        )
+    """)
+
     # add quittiert_am / quittiert_von to existing delivery_notes if not present
     op.execute("""
         ALTER TABLE domain_sales.sales_delivery_notes
