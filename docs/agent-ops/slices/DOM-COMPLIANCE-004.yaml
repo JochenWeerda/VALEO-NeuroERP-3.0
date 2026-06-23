@@ -1,0 +1,75 @@
+slice_id: DOM-COMPLIANCE-004
+title: "Compliance-Domäne — Vollständige Vertiefung (PCN-Lifecycle .2 / VVVO-Sachkunde .3 / Sperre-Audit .4 / E2E .5)"
+owner: Claude Code
+status: completed
+coordination: >-
+  Ergänzt bestehende compliance.py / compliance_dsgvo.py / compliance_whistleblower.py.
+  Keine aktiven Cursor-Compliance-Slices. Kein Überlapp.
+  Dieser Slice besitzt nur neue compliance_pcn_*/compliance_vvvo_*/compliance_sperre_*-Dateien.
+goal: >-
+  Compliance-Kern-Prozesskette PCN-Meldung → VVVO-Prüfung → Artikel-Sperre auf
+  volle 004-Tiefe heben. Strukturierten Service-Layer für behördliche
+  Meldepflichten einführen, Audit-Trail für Sperr-/Freigabe-Lifecycle schließen.
+file_ownership:
+  - docs/agent-ops/active-workboard.md
+  - docs/agent-ops/slices/DOM-COMPLIANCE-004.yaml
+  - docs/workflows/dom-compliance-004-compliance-deepening-2026-06-23.md
+  - app/services/compliance_pcn_lifecycle_service.py
+  - app/services/compliance_vvvo_sachkunde_service.py
+  - app/services/compliance_sperre_audit_service.py
+  - alembic/versions/compliance_pcn_audit_20260623.py
+  - app/api/v1/endpoints/compliance.py
+  - playwright-tests/specs/compliance/compliance-lifecycle-smoke.spec.ts
+  - scripts/uat/compliance_lifecycle_uat.py
+  - tests/test_dom_compliance_004.py
+not_owned:
+  - app/api/v1/endpoints/compliance_dsgvo.py
+  - app/api/v1/endpoints/compliance_whistleblower.py
+  - app/api/v1/endpoints/compliance_whistleblower_lksg.py
+  - app/services/compliance_service.py
+acceptance_criteria:
+  - PCN-Meldung: erstellen→validieren→einreichen→abschließen (Status-Maschine)
+  - VVVO-Fälligkeit berechnen und ablaufende Prüfungen listen
+  - Sachkunde-Ablauf-Alarm (< 30 Tage bis Ablauf)
+  - Artikel-Sperre: vollständiger Audit-Trail mit Sperre→Freigabe→Storno
+  - 10+ Unit-Tests grün
+  - Playwright @smoke + UAT-Script lauffähig
+ai_harness:
+  fachlicher_vertrag: >-
+    PCN-Meldung (Pflanzenschutzrechtliche Änderungsmeldung): Status-Maschine
+    DRAFT→VALIDATED→SUBMITTED→CLOSED | DRAFT→WITHDRAWN.
+    VVVO (Viehverkehrsverordnung): Betrieb hat Zulassungsnummer, jährliche Prüfpflicht.
+    Sachkunde: Zertifikat mit Ablaufdatum, Alarm 30 Tage vorher.
+    Artikel-Sperre: Sperr-Grund, Operator, Zeitstempel; Freigabe mit Nachweis;
+    vollständiger Audit-Trail (jede Aktion wird protokolliert, unveränderlich).
+  architektur_vertrag: >-
+    Services in app/services/, Endpunkte als Erweiterung von compliance.py.
+    Neue Tabellen via Alembic. Kein ORM-Modell, nur text()-SQL.
+    Bestehende compliance_service.py wird nicht verändert.
+  daten_vertrag: >-
+    compliance_pcn_meldungen: id, tenant_id, meldung_nummer, artikel_id, meldungstyp,
+    status, eingereicht_am, abgeschlossen_am, created_at.
+    compliance_pcn_status_log: id, meldung_id, old_status, new_status, operator,
+    reason, tenant_id, created_at.
+    compliance_artikel_sperre_audit: id, artikel_id, tenant_id, aktion, operator,
+    grund, nachweis_ref, created_at.
+  test_vertrag: >-
+    Unit: pcn_lifecycle (Status-Maschine, Withdraw, Idempotenz-Guard).
+    Unit: vvvo_sachkunde (Fälligkeit, Ablauf-Alarm, Listung).
+    Unit: sperre_audit (Sperre-Trail, Freigabe-Trail, Storno-Guard).
+    Playwright @smoke: PCN anlegen, Sperre setzen, Sachkunde-Status.
+    UAT: sequentiell alle neuen Endpunkte.
+  security_vertrag: >-
+    X-Tenant-ID bei allen Mutations verpflichtend.
+    PCN-Meldungen: nur eigene Tenant-Meldungen zugreifbar.
+    Audit-Trail: append-only, kein DELETE/UPDATE auf audit-Zeilen.
+  betriebs_vertrag: >-
+    Alle Service-Fehler mit logger.warning. PCN-Lifecycle transaktional.
+    Sperre-Audit append-only (INSERT, kein UPDATE).
+  dokumentations_vertrag: >-
+    docs/workflows/dom-compliance-004-compliance-deepening-2026-06-23.md
+    beschreibt PCN-Statusmaschine, VVVO-Prüfzyklus, Sperre-Audit-Konzept.
+external_gates: []
+risks:
+  - PCN-Meldungs-Einreichung ist in dieser Phase API-intern (kein BVL-Connect)
+  - VVVO-Prüfdaten setzen compliance.vvvo_register voraus

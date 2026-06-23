@@ -4,7 +4,7 @@
 
 **Von:** Claude Code
 **Owner:** Claude Code
-**Stand:** reserviert 2026-06-23 — Claim vor Implementierung (AI-Harness-Protokoll)
+**Stand:** abgeschlossen 2026-06-23 — PCN-Lifecycle (.2), VVVO-Sachkunde (.3), Sperre-Audit-Trail (.4), Playwright @smoke + UAT-Script (.5), Alembic-Migration compliance_pcn_audit_20260623, 17 Unit-Tests grün, Slice-YAML + Workflow-Doku
 **Ziel:** Compliance-Kern-Prozesse auf volle 004-Tiefe heben: PCN-Meldung-Lifecycle (.2), VVVO-Prüfung + Sachkunde-Ablauf (.3), Artikel-Sperre-Audit-Trail (.4), Playwright @smoke + UAT (.5). Schließt Lücke bei strukturiertem Service-Layer für behördliche Meldepflichten.
 **Dateibesitz:** `app/services/compliance_pcn_lifecycle_service.py`, `app/services/compliance_vvvo_sachkunde_service.py`, `app/services/compliance_sperre_audit_service.py`, `alembic/versions/compliance_pcn_audit_20260623.py`, `app/api/v1/endpoints/compliance.py`, `playwright-tests/specs/compliance/compliance-lifecycle-smoke.spec.ts`, `scripts/uat/compliance_lifecycle_uat.py`, `docs/workflows/dom-compliance-004-compliance-deepening-2026-06-23.md`, `docs/agent-ops/slices/DOM-COMPLIANCE-004.yaml`, `tests/test_dom_compliance_004.py`
 **Koordination:** Cursor besitzt keine aktiven Compliance-Slices. Fremde Dateien bleiben unangetastet.
