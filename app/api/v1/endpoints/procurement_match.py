@@ -327,7 +327,7 @@ class RechnungsFreigabeIn(_BM):
     grund: _Opt[str] = None
 
 
-@router.post("/bestellungen/{bestellung_id}/transition", summary="Bestellungs-Status wechseln")
+@router.post("/bestellungen/{bestellung_id}/transition", response_model=dict[str, Any], summary="Bestellungs-Status wechseln")
 def bestellung_transition_endpoint(
     bestellung_id: str,
     body: BestellungTransitionIn,
@@ -343,7 +343,7 @@ def bestellung_transition_endpoint(
         raise HTTPException(status_code=422, detail=str(exc)) from exc
 
 
-@router.post("/bestellungen/{bestellung_id}/wareneingang", status_code=201, summary="Wareneingang buchen")
+@router.post("/bestellungen/{bestellung_id}/wareneingang", response_model=dict[str, Any], status_code=201, summary="Wareneingang buchen")
 def buche_wareneingang_endpoint(
     bestellung_id: str,
     body: WareneingangIn,
@@ -360,7 +360,7 @@ def buche_wareneingang_endpoint(
         raise HTTPException(status_code=422, detail=str(exc)) from exc
 
 
-@router.post("/wareneingaenge/{we_id}/qs", summary="QS-Status eines Wareneingangs aktualisieren")
+@router.post("/wareneingaenge/{we_id}/qs", response_model=dict[str, Any], summary="QS-Status eines Wareneingangs aktualisieren")
 def update_we_qs_endpoint(
     we_id: str,
     body: QSUpdateIn,
@@ -375,7 +375,7 @@ def update_we_qs_endpoint(
         raise HTTPException(status_code=422, detail=str(exc)) from exc
 
 
-@router.post("/bestellungen/{bestellung_id}/rechnungspruefung", status_code=201, summary="Rechnungsprüfung (3-Way-Match)")
+@router.post("/bestellungen/{bestellung_id}/rechnungspruefung", response_model=dict[str, Any], status_code=201, summary="Rechnungsprüfung (response_model=dict[str, Any], 3-Way-Match)")
 def rechnungspruefung_endpoint(
     bestellung_id: str,
     body: RechnungspruefungIn,
@@ -392,7 +392,7 @@ def rechnungspruefung_endpoint(
         raise HTTPException(status_code=422, detail=str(exc)) from exc
 
 
-@router.post("/rechnungspruefungen/{pruefung_id}/freigabe", summary="Rechnungsprüfung manuell freigeben")
+@router.post("/rechnungspruefungen/{pruefung_id}/freigabe", response_model=dict[str, Any], summary="Rechnungsprüfung manuell freigeben")
 def rechnungsfreigabe_endpoint(
     pruefung_id: str,
     body: RechnungsFreigabeIn,

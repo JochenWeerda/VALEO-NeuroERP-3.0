@@ -19,7 +19,7 @@ from app.services.docflow_artifact_service import ArtifactError, DocflowArtifact
 router = APIRouter(prefix="/docflow/evidence", tags=["docflow", "dms", "gobd"])
 
 
-@router.get("/artifacts", summary="Artefakte eines Dokuments (Version + Freigabe)")
+@router.get("/artifacts", response_model=dict[str, Any], summary="Artefakte eines Dokuments (Version + Freigabe)")
 def list_artifacts(
     doc: str = Query(..., description="Dokumentnummer oder -ID"),
     db: Session = Depends(get_db),
@@ -37,7 +37,7 @@ class UploadIn(BaseModel):
     bediener: Optional[str] = None
 
 
-@router.post("/artifacts", summary="Artefakt hochladen (neue Version, SHA-256)")
+@router.post("/artifacts", response_model=dict[str, Any], summary="Artefakt hochladen (neue Version, SHA-256)")
 def upload_artifact(
     body: UploadIn,
     db: Session = Depends(get_db),
@@ -58,7 +58,7 @@ class FreigabeIn(BaseModel):
     bediener: Optional[str] = None
 
 
-@router.post("/artifacts/{artifact_id}/freigabe", summary="Freigabe-Status setzen (Transition)")
+@router.post("/artifacts/{artifact_id}/freigabe", response_model=dict[str, Any], summary="Freigabe-Status setzen (Transition)")
 def set_freigabe(
     artifact_id: str,
     body: FreigabeIn,

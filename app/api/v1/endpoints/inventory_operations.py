@@ -6,7 +6,7 @@ DOM-INV-004: Lot-Trace (.2), Inventur-Differenzbeleg (.3), Korrektur-Storno (.4)
 
 from datetime import date
 from decimal import Decimal
-from typing import Optional
+from typing import Any, Optional
 from uuid import uuid4
 
 from fastapi import APIRouter, Depends, HTTPException, Query

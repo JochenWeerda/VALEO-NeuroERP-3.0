@@ -36,6 +36,19 @@ Aggregierte Gesamtsicht: [PROJEKT-GESAMTSTAND-2026-05-27.md](../PROJEKT-GESAMTST
 
 ## P1 - Verbleibende offene Punkte
 
+### VALEO-WF-COCKPIT-001: Workflow-Leitstand MVP umgesetzt, UI/Persistenz offen
+
+- **2026-06-23:** P0.1 aus `valeo_neuroerp_youtube_gap_analyse_2026-06-23.md`
+  als Backend-/API-MVP umgesetzt: `WorkflowCockpitService`,
+  `/workflow/cockpit/*`, Statusmodell, externe Gate-Blocker,
+  chronologische Event-Kette, Tenant-Isolation und Replay-Guard mit
+  `workflow:replay`.
+- Bewusst nicht als n8n-Kernersatz gebaut: Source of Truth bleiben Process
+  Kernel, Domain-Services, Outbox/NATS und Audit.
+- Offen fuer Folgeslices: persistente Cockpit-Tabellen, Outbox-/NATS-Projektor,
+  UI-Leitstand/Meridian ListReport, Dead-Letter-Sicht und kontrollierter
+  Retry mit Kompensationspfad.
+
 ### PROD-READINESS-001: Repo-seitige P0-Haertung abgeschlossen, Live-Gates offen
 
 - Kanonische Release-Gates tolerieren keine Fehler bei TypeScript, ESLint,

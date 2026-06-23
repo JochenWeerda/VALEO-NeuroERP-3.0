@@ -1709,6 +1709,7 @@ from app.api.v1.endpoints import (
     tenant_governance,
     tenant_limits,
     terminology,
+    workflow_cockpit,
     workflow_runtime,
     workflow_simulation,
     workflow_template_marketplace,
@@ -1738,6 +1739,7 @@ api_router.include_router(sla_escalation_api.router)
 api_router.include_router(tenant_governance.router)
 api_router.include_router(tenant_limits.router)
 api_router.include_router(terminology.router)
+api_router.include_router(workflow_cockpit.router)
 api_router.include_router(workflow_runtime.router)
 api_router.include_router(workflow_simulation.router)
 api_router.include_router(workflow_template_marketplace.router)

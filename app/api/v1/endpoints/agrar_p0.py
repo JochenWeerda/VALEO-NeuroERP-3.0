@@ -120,9 +120,10 @@ class StornoIn(BaseModel):
 
 @router.post(
     "/partien",
+    response_model=AgrarP0Out,
     status_code=201,
     summary="Partie aus Ernteannahmen aggregieren (DOM-AGRAR-004.2)",
-    response_model=AgrarP0Out,
+
 )
 def create_partie(
     body: PartieCreateIn,
@@ -143,8 +144,9 @@ def create_partie(
 
 @router.get(
     "/partien/{partie_id}",
-    summary="Partie abrufen (DOM-AGRAR-004.2)",
     response_model=AgrarP0Out,
+    summary="Partie abrufen (DOM-AGRAR-004.2)",
+
 )
 def get_partie(
     partie_id: str,
@@ -168,9 +170,10 @@ def get_partie(
 
 @router.post(
     "/partien/{partie_id}/trocknung",
+    response_model=AgrarP0Out,
     status_code=201,
     summary="Trocknungsabrechnung berechnen (DOM-AGRAR-004.3)",
-    response_model=AgrarP0Out,
+
 )
 def berechne_trocknung(
     partie_id: str,
@@ -198,8 +201,9 @@ def berechne_trocknung(
 
 @router.post(
     "/selbstabrechnung/{rechnung_id}/issue",
-    summary="Selbstabrechnung auf ISSUED setzen (DOM-AGRAR-004.4)",
     response_model=AgrarP0Out,
+    summary="Selbstabrechnung auf ISSUED setzen (DOM-AGRAR-004.4)",
+
 )
 def issue_selbstabrechnung(
     rechnung_id: str,
@@ -220,8 +224,9 @@ def issue_selbstabrechnung(
 
 @router.post(
     "/selbstabrechnung/{rechnung_id}/status",
-    summary="Selbstabrechnung-Status wechseln (DOM-AGRAR-004.4)",
     response_model=AgrarP0Out,
+    summary="Selbstabrechnung-Status wechseln (DOM-AGRAR-004.4)",
+
 )
 def set_selbstabrechnung_status(
     rechnung_id: str,
@@ -245,9 +250,10 @@ def set_selbstabrechnung_status(
 
 @router.post(
     "/selbstabrechnung/{rechnung_id}/storno",
+    response_model=AgrarP0Out,
     status_code=201,
     summary="Selbstabrechnung stornieren (idempotent) (DOM-AGRAR-004.4)",
-    response_model=AgrarP0Out,
+
 )
 def storno_selbstabrechnung(
     rechnung_id: str,
