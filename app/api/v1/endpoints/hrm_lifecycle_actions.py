@@ -45,7 +45,7 @@ class AbwesenheitTransitionRequest(BaseModel):
     ablehnungs_grund: str = ""
 
 
-@router.post("/zeitbuchungen", response_model=Dict[str, Any])
+@router.post("/zeitbuchungen", response_model=Dict[str, Any], summary="Zeitbuchung anlegen")
 def create_zeitbuchung(
     req: ZeitbuchungCreateRequest,
     x_tenant_id: str = Header(...),
@@ -71,7 +71,11 @@ def create_zeitbuchung(
         raise HTTPException(status_code=400, detail=str(e))
 
 
-@router.post("/zeitbuchungen/{buchung_id}/transition", response_model=Dict[str, Any])
+@router.post(
+    "/zeitbuchungen/{buchung_id}/transition",
+    response_model=Dict[str, Any],
+    summary="Zeitbuchungsstatus wechseln",
+)
 def transition_zeitbuchung(
     buchung_id: str,
     req: ZeitbuchungTransitionRequest,
@@ -95,7 +99,11 @@ def transition_zeitbuchung(
         raise HTTPException(status_code=400, detail=str(e))
 
 
-@router.get("/arbeitszeitkonto/{mitarbeiter_id}", response_model=Dict[str, Any])
+@router.get(
+    "/arbeitszeitkonto/{mitarbeiter_id}",
+    response_model=Dict[str, Any],
+    summary="Arbeitszeitkonto abrufen",
+)
 def get_arbeitszeitkonto(
     mitarbeiter_id: str,
     monat: str,
@@ -106,7 +114,7 @@ def get_arbeitszeitkonto(
     return svc(db=db, mitarbeiter_id=mitarbeiter_id, tenant_id=x_tenant_id, monat=monat)
 
 
-@router.post("/abwesenheiten", response_model=Dict[str, Any])
+@router.post("/abwesenheiten", response_model=Dict[str, Any], summary="Abwesenheitsantrag anlegen")
 def create_abwesenheit(
     req: AbwesenheitCreateRequest,
     x_tenant_id: str = Header(...),
@@ -132,7 +140,11 @@ def create_abwesenheit(
         raise HTTPException(status_code=400, detail=str(e))
 
 
-@router.post("/abwesenheiten/{abwesenheit_id}/transition", response_model=Dict[str, Any])
+@router.post(
+    "/abwesenheiten/{abwesenheit_id}/transition",
+    response_model=Dict[str, Any],
+    summary="Abwesenheitsstatus wechseln",
+)
 def transition_abwesenheit(
     abwesenheit_id: str,
     req: AbwesenheitTransitionRequest,

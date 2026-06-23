@@ -48,7 +48,7 @@ class KSTAbschlussRequest(BaseModel):
 # Endpoints
 # ---------------------------------------------------------------------------
 
-@router.post("/budgets", response_model=dict[str, Any], status_code=201)
+@router.post("/budgets", response_model=dict[str, Any], status_code=201, summary="Controlling-Budget anlegen")
 def create_budget(
     body: BudgetCreateRequest,
     x_tenant_id: Optional[str] = Header(None),
@@ -62,7 +62,11 @@ def create_budget(
         raise HTTPException(status_code=422, detail=str(e))
 
 
-@router.post("/budgets/{budget_id}/transition", response_model=dict[str, Any])
+@router.post(
+    "/budgets/{budget_id}/transition",
+    response_model=dict[str, Any],
+    summary="Controlling-Budgetstatus wechseln",
+)
 def transition_budget(
     budget_id: str,
     body: BudgetTransitionRequest,
@@ -77,7 +81,7 @@ def transition_budget(
         raise HTTPException(status_code=422, detail=str(e))
 
 
-@router.get("/abweichung", response_model=dict[str, Any])
+@router.get("/abweichung", response_model=dict[str, Any], summary="Plan-Ist-Abweichung abrufen")
 def get_abweichung(
     kostenstelle_id: str,
     periode: str,
@@ -89,7 +93,7 @@ def get_abweichung(
     return svc(db, tenant_id, kostenstelle_id, periode)
 
 
-@router.post("/ist-werte", response_model=dict[str, Any], status_code=201)
+@router.post("/ist-werte", response_model=dict[str, Any], status_code=201, summary="Ist-Wert buchen")
 def buche_ist_wert(
     body: IstWertRequest,
     x_tenant_id: Optional[str] = Header(None),
@@ -103,7 +107,11 @@ def buche_ist_wert(
         raise HTTPException(status_code=422, detail=str(e))
 
 
-@router.get("/abweichung/drill-down", response_model=dict[str, Any])
+@router.get(
+    "/abweichung/drill-down",
+    response_model=dict[str, Any],
+    summary="Plan-Ist-Abweichungs-Drilldown abrufen",
+)
 def drill_down(
     periode: str,
     x_tenant_id: Optional[str] = Header(None),
@@ -114,7 +122,11 @@ def drill_down(
     return list_abweichungen_drill_down(db, tenant_id, periode)
 
 
-@router.post("/kostenstellen/{kostenstelle_id}/abschluss", response_model=dict[str, Any])
+@router.post(
+    "/kostenstellen/{kostenstelle_id}/abschluss",
+    response_model=dict[str, Any],
+    summary="Kostenstellenabschluss fortschreiben",
+)
 def advance_abschluss(
     kostenstelle_id: str,
     body: KSTAbschlussRequest,

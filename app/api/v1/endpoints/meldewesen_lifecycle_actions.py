@@ -29,7 +29,7 @@ class MeldungTransitionRequest(BaseModel):
     externe_referenz: str = ""
 
 
-@router.post("", response_model=Dict[str, Any])
+@router.post("", response_model=Dict[str, Any], summary="Meldewesen-Meldung anlegen")
 def create_meldung(
     req: MeldungCreateRequest,
     x_tenant_id: str = Header(...),
@@ -51,7 +51,11 @@ def create_meldung(
         raise HTTPException(status_code=400, detail=str(e))
 
 
-@router.post("/{meldung_id}/transition", response_model=Dict[str, Any])
+@router.post(
+    "/{meldung_id}/transition",
+    response_model=Dict[str, Any],
+    summary="Meldewesen-Meldungsstatus wechseln",
+)
 def transition_meldung(
     meldung_id: str,
     req: MeldungTransitionRequest,
@@ -76,7 +80,11 @@ def transition_meldung(
         raise HTTPException(status_code=400, detail=str(e))
 
 
-@router.post("/simulate-uebermittlung", response_model=Dict[str, Any])
+@router.post(
+    "/simulate-uebermittlung",
+    response_model=Dict[str, Any],
+    summary="Meldewesen-Uebermittlung simulieren",
+)
 def simulate_uebermittlung(
     meldung_typ: str,
     periode: str,

@@ -29,7 +29,7 @@ class TagesabschlussTransitionRequest(BaseModel):
     fehler_grund: Optional[str] = None
 
 
-@router.post("", response_model=Dict[str, Any])
+@router.post("", response_model=Dict[str, Any], summary="POS-Tagesabschluss anlegen")
 def create_tagesabschluss(
     req: TagesabschlussCreateRequest,
     x_tenant_id: str = Header(...),
@@ -51,7 +51,11 @@ def create_tagesabschluss(
         raise HTTPException(status_code=400, detail=str(e))
 
 
-@router.post("/{abschluss_id}/transition", response_model=Dict[str, Any])
+@router.post(
+    "/{abschluss_id}/transition",
+    response_model=Dict[str, Any],
+    summary="POS-Tagesabschlussstatus wechseln",
+)
 def transition_tagesabschluss(
     abschluss_id: str,
     req: TagesabschlussTransitionRequest,
@@ -86,7 +90,7 @@ def transition_tagesabschluss(
         raise HTTPException(status_code=400, detail=str(e))
 
 
-@router.post("/tse/simulate", response_model=Dict[str, Any])
+@router.post("/tse/simulate", response_model=Dict[str, Any], summary="POS-TSE-Signatur simulieren")
 def simulate_tse(
     kasse_id: str,
     z_bon_nr: str,

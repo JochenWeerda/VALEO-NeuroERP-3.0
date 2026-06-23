@@ -35,9 +35,20 @@ def _generate_partie_number(db: Session, tenant_id: str) -> str:
 def _fetch_acceptance(db: Session, acceptance_id: str, tenant_id: str) -> Optional[Dict[str, Any]]:
     row = db.execute(
         text(
-            "SELECT id, tenant_id, gross_weight_kg, net_weight_kg, "
-            "moisture_content_pct, impurity_pct, article_id "
-            "FROM domain_agrar.harvest_acceptances WHERE id = :id"
+            """
+            SELECT
+                ha.id,
+                ha.tenant_id,
+                COALESCE(wt.gross_weight, wt.net_weight, wt.billing_weight, 0) AS gross_weight_kg,
+                COALESCE(wt.billing_weight, wt.net_weight, 0) AS net_weight_kg,
+                COALESCE(wt.moisture_pct, 0) AS moisture_content_pct,
+                COALESCE(wt.impurities_pct, 0) AS impurity_pct,
+                COALESCE(ha.article_id, wt.article_id) AS article_id
+            FROM domain_inventory.harvest_acceptances ha
+            LEFT JOIN domain_inventory.weighing_tickets wt
+                ON wt.id = ha.weighing_ticket_id
+            WHERE ha.id = :id
+            """
         ),
         {"id": acceptance_id},
     ).mappings().first()
