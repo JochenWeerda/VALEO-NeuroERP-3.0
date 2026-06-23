@@ -32,8 +32,8 @@ def wiedervorlagen(
     tage: int = Query(14, ge=0, le=365),
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
-) -> list[dict[str, Any]]:
-    return CrmKontaktService(db, tenant_id).wiedervorlagen_offen(tage)
+) -> dict[str, Any]:
+    return {"items": CrmKontaktService(db, tenant_id).wiedervorlagen_offen(tage)}
 
 
 @router.get("/{kunden_nr}", response_model=dict[str, Any], summary="Kontakthistorie eines Kunden")
