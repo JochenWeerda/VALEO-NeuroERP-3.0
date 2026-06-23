@@ -75,7 +75,7 @@ jobs:
         run: |
           cd ${{ github.workspace }}
           python -m uvicorn main:app --host 0.0.0.0 --port 8000 &
-          sleep 5
+          timeout 30 bash -c 'until curl -fsS http://127.0.0.1:8000/healthz; do sleep 2; done'
       
       - name: Start Frontend (Background)
         run: |
@@ -86,6 +86,7 @@ jobs:
       - name: Run Smoke Tests - ${{ matrix.domain }}
         run: pnpm exec playwright test --grep "@smoke" --project=smoke specs/${{ matrix.domain }}/
         env:
+          PLAYWRIGHT_BASE_URL: http://127.0.0.1:8000
           PLAYWRIGHT_RUN_ID: ${{ github.run_id }}-${{ matrix.domain }}
           BUILD_ID: ${{ github.sha }}
       

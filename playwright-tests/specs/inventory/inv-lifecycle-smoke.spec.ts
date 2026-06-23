@@ -5,7 +5,7 @@
  */
 import { test, expect, request } from '@playwright/test'
 
-const BASE = process.env.PLAYWRIGHT_BASE_URL ?? 'http://localhost:8000'
+const BASE = process.env.PLAYWRIGHT_BASE_URL ?? 'http://127.0.0.1:8000'
 const TENANT = 'test-tenant-inv-001'
 const HEADERS = { 'X-Tenant-ID': TENANT, 'Content-Type': 'application/json' }
 
