@@ -1,5 +1,14 @@
 # Active Workboard
 
+## DOM-AGRAR-004 — Agrar-Domäne Vollständige Vertiefung (.2–.5)
+
+**Von:** Claude Code
+**Owner:** Claude Code
+**Stand:** reserviert 2026-06-23 — Claim vor Implementierung (AI-Harness-Protokoll)
+**Ziel:** Agrar-Kern-Prozess auf volle 004-Tiefe heben: Ernteannahme→Partie (.2), Trocknungsabrechnung→Settlement (.3), Selbstabrechnung-Lifecycle (.4), E2E-UAT (.5). Kein Überlapp mit WM-AGRI-QS-004 (Cursor, QS-Leitstand).
+**Dateibesitz:** `app/services/agrar_partie_service.py`, `app/services/agrar_trocknung_abrechnung_service.py`, `app/services/agrar_selbstabrechnung_lifecycle_service.py`, `alembic/versions/agrar_partie_settlement_20260623.py`, `app/api/v1/endpoints/agrar_p0.py`, `playwright-tests/specs/agrar/agrar-lifecycle-smoke.spec.ts`, `scripts/uat/agrar_lifecycle_uat.py`, `docs/workflows/dom-agrar-004-agrar-deepening-2026-06-23.md`, `docs/agent-ops/slices/DOM-AGRAR-004.yaml`
+**Koordination:** WM-AGRI-QS-004 (Cursor) besitzt `agri_qs_workflow*.py` — kein Überlapp. Fremde Dateien bleiben unangetastet.
+
 ## DOM-INV-004 — Inventory/Lager Domänen-Vertiefung (.2–.5)
 
 **Von:** Claude Code
