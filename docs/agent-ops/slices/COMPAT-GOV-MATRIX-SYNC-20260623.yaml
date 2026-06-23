@@ -6,8 +6,8 @@ created_at: 2026-06-23
 coordination: >-
   Harness-Betrieb (AI-HARNESS-GOV-001). Kein Eingriff in DOM-CONTROLLING-004 (reserviert).
 goal: >-
-  database_revision in Release-Matrix und Doku auf proc_bestellung_wareneingang_20260623
-  nach DOM-PROC-004 und Merge-Kette.
+  database_revision in Release-Matrix und Doku auf meldewesen_lifecycle_20260623
+  nach DOM-CON/FEED-PROD/POS/DOC/HRM/MEL-004-Welle (2026-06-23).
 file_ownership:
   - docs/project-context/open-gaps-and-known-issues.md
   - docs/architecture/process-kernel/STATUS.md
