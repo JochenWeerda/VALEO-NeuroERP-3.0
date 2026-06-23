@@ -11,6 +11,27 @@ jobs:
   smoke-tests:
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    env:
+      DATABASE_URL: postgresql://valeo_dev:valeo_dev_2024@localhost:5432/valeo_neuro_erp
+      API_DEV_TOKEN: dev-token
+      EVENT_BUS_ENABLED: "false"
+      EVENT_BUS_PROVIDER: memory
+      OUTBOX_WORKER_ENABLED: "false"
+
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_DB: valeo_neuro_erp
+          POSTGRES_USER: valeo_dev
+          POSTGRES_PASSWORD: valeo_dev_2024
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U valeo_dev -d valeo_neuro_erp"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 10
     
     strategy:
       fail-fast: false
@@ -67,15 +88,14 @@ jobs:
           fi
           echo "VALEO_TENANT=QA-UAT-01" >> .env
           echo "VALEO_BASE_URL=http://localhost:3000" >> .env
+
+      - name: Migrate Test Database
+        run: python scripts/init_db.py
       
       - name: Build Application
         run: pnpm --filter @valero-neuroerp/frontend-web build
       
       - name: Start Backend (Background)
-        env:
-          EVENT_BUS_ENABLED: "false"
-          EVENT_BUS_PROVIDER: memory
-          OUTBOX_WORKER_ENABLED: "false"
         run: |
           cd ${{ github.workspace }}
           python -m uvicorn main:app --host 0.0.0.0 --port 8000 &
