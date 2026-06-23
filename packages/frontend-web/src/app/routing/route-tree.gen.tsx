@@ -6074,54 +6074,61 @@ const appRoute0849 = createRoute({
 
 const appRoute0850 = createRoute({
   getParentRoute: () => appLayoutRoute,
+  path: "workflow/leitstand",
+  component: () => renderPage("@/pages/workflow/leitstand"),
+  staticData: {"breadcrumb":"Leitstand","module":"@/pages/workflow/leitstand","legacyPath":"/workflow/leitstand"},
+})
+
+const appRoute0851 = createRoute({
+  getParentRoute: () => appLayoutRoute,
   path: "workflow/process-mining-analytics",
   component: () => renderPage("@/pages/workflow/process-mining-analytics"),
   staticData: {"breadcrumb":"Process Mining Analytics","module":"@/pages/workflow/process-mining-analytics","legacyPath":"/workflow/process-mining-analytics"},
 })
 
-const appRoute0851 = createRoute({
+const appRoute0852 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "workflow/workflow-monitoring",
   component: () => renderPage("@/pages/workflow/workflow-monitoring"),
   staticData: {"breadcrumb":"Workflow Monitoring","module":"@/pages/workflow/workflow-monitoring","legacyPath":"/workflow/workflow-monitoring"},
 })
 
-const appRoute0852 = createRoute({
+const appRoute0853 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "workflow/workflow-regeln",
   component: () => renderPage("@/pages/workflow/workflow-regeln"),
   staticData: {"breadcrumb":"Workflow Regeln","module":"@/pages/workflow/workflow-regeln","legacyPath":"/workflow/workflow-regeln"},
 })
 
-const appRoute0853 = createRoute({
+const appRoute0854 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "workflow/workflow-sandbox",
   component: () => renderPage("@/pages/workflow/workflow-sandbox"),
   staticData: {"breadcrumb":"Workflow Sandbox","module":"@/pages/workflow/workflow-sandbox","legacyPath":"/workflow/workflow-sandbox"},
 })
 
-const appRoute0854 = createRoute({
+const appRoute0855 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "workflows",
   component: () => renderPage("@/pages/workflow/workflow-monitoring"),
   staticData: {"breadcrumb":"Workflows","module":"@/pages/workflow/workflow-monitoring","legacyPath":"/workflows"},
 })
 
-const appRoute0855 = createRoute({
+const appRoute0856 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "workflows/approval",
   component: () => renderPage("@/pages/workflows/approval"),
   staticData: {"breadcrumb":"Approval","module":"@/pages/workflows/approval","legacyPath":"/workflows/approval"},
 })
 
-const appRoute0856 = createRoute({
+const appRoute0857 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "workflows/approval/$workflowId",
   component: () => renderPage("@/pages/workflows/approval"),
   staticData: {"breadcrumb":"Detail","module":"@/pages/workflows/approval","legacyPath":"/workflows/approval/:workflowId"},
 })
 
-const appRoute0857 = createRoute({
+const appRoute0858 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "workflows/history",
   beforeLoad: ({ params }) => {
@@ -6131,42 +6138,42 @@ const appRoute0857 = createRoute({
   staticData: {"breadcrumb":"History","module":"@/pages/workflow/workflow-monitoring","legacyPath":"/workflows/history"},
 })
 
-const appRoute0858 = createRoute({
+const appRoute0859 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "workflows/supervisor",
   component: () => renderPage("@/pages/workflows/supervisor"),
   staticData: {"breadcrumb":"Supervisor","module":"@/pages/workflows/supervisor","legacyPath":"/workflows/supervisor"},
 })
 
-const appRoute0859 = createRoute({
+const appRoute0860 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "workflows/trigger",
   component: () => renderPage("@/pages/workflows/trigger"),
   staticData: {"breadcrumb":"Trigger","module":"@/pages/workflows/trigger","legacyPath":"/workflows/trigger"},
 })
 
-const appRoute0860 = createRoute({
+const appRoute0861 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "zertifikate",
   component: () => renderPage("@/pages/zertifikate/liste"),
   staticData: {"breadcrumb":"Zertifikate","module":"@/pages/zertifikate/liste","legacyPath":"/zertifikate"},
 })
 
-const appRoute0861 = createRoute({
+const appRoute0862 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "zertifikate/$id",
   component: () => renderPage("@/pages/zertifikate/liste"),
   staticData: {"breadcrumb":"Detail","module":"@/pages/zertifikate/liste","legacyPath":"/zertifikate/:id"},
 })
 
-const appRoute0862 = createRoute({
+const appRoute0863 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "zertifikate/liste",
   component: () => renderPage("@/pages/zertifikate/liste"),
   staticData: {"breadcrumb":"Liste","module":"@/pages/zertifikate/liste","legacyPath":"/zertifikate/liste"},
 })
 
-const appRoute0863 = createRoute({
+const appRoute0864 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "zertifikate/neu",
   component: () => renderPage("@/pages/zertifikate/liste"),
@@ -7164,7 +7171,8 @@ export const routeTree = rootRoute.addChildren([
     appRoute0860,
     appRoute0861,
     appRoute0862,
-    appRoute0863
+    appRoute0863,
+    appRoute0864
   ]),
   portalLayoutRoute.addChildren([
     portalRoute0000,
@@ -11528,6 +11536,11 @@ export const generatedRouteInventory = [
     "module": "@/pages/workflow/flow-spine-studio",
     "path": "workflow/flow-spine-studio",
     "source": "auto"
+  },
+  {
+    "module": "@/pages/workflow/leitstand",
+    "path": "workflow/leitstand",
+    "source": "navigation"
   },
   {
     "module": "@/pages/workflow/process-mining-analytics",

@@ -93,4 +93,5 @@
   ,{ "path": "versicherungen/:id", "module": "@/pages/versicherungen/liste" }
   ,{ "path": "wartung/anlage/:id", "module": "@/pages/wartung/anlagen-liste" }
   ,{ "path": "zertifikate/:id", "module": "@/pages/zertifikate/liste" }
+  ,{ "path": "workflow/leitstand", "module": "@/pages/workflow/leitstand" }
 ]
