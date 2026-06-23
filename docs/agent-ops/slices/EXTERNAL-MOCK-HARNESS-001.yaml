@@ -1,0 +1,48 @@
+slice_id: EXTERNAL-MOCK-HARNESS-001
+title: "Mock-Schicht fuer externe Systeme (DATEV/TSE/ELSTER/DMS/Bank)"
+owner: Claude Code
+status: completed
+created_at: "2026-06-23"
+goal: >-
+  Reproduzierbare, deterministisch-simulierte Responses fuer DATEV, TSE/DSFinV-K,
+  ELSTER/ERiC, DMS/Paperless, Bank/CAMT. Dev-Only API /dev/external-mocks/*.
+  Alle Responses tragen simulated=true und Hinweis-Feld. Kein externer Kontakt.
+file_ownership:
+  - app/services/external_mock_harness_service.py
+  - app/api/v1/endpoints/external_mock_harness.py
+  - alembic/versions/external_mock_sessions_20260623.py
+  - tests/test_external_mock_harness.py
+  - docs/agent-ops/slices/EXTERNAL-MOCK-HARNESS-001.yaml
+tests:
+  - python -m py_compile app/services/external_mock_harness_service.py app/api/v1/endpoints/external_mock_harness.py alembic/versions/external_mock_sessions_20260623.py
+  - pytest -q -o addopts= tests/test_external_mock_harness.py
+risks:
+  - /dev/external-mocks-Routen duerfen nie in Produktion aktiv sein; TODO: Env-Guard.
+  - Deterministische Signaturen sind SHA256-basiert — kein Ersatz fuer echte TSE-Zertifizierung.
+external_gates:
+  - Keine externe Zertifizierung (BSI, DATEV, ELSTER) fuer Mock-Stubs erforderlich.
+  - Echte Zertifizierungen bleiben separate Gates in der Domain-Doku.
+ai_harness:
+  fachlicher_vertrag: >-
+    Tests koennen DATEV-Export, TSE-Signatur, ELSTER-Uebermittlung, DMS-Upload
+    und CAMT-Import ohne externe Systeme durchlaufen. Alle Responses sind
+    deterministisch und tragen simulated=true.
+  architektur_vertrag: >-
+    Service bleibt vollstaendig in-memory; keine DB-Schreiboperationen im Service.
+    Alembic-Migration legt optionale Log-Tabelle an (domain_dev_mock.mock_sessions).
+    Router-Prefix /dev/ signalisiert Dev-Only-Kontext.
+  daten_vertrag: >-
+    Alle Responses: simulated, system, action, hinweis (Pflichtfelder).
+    Determinismus: gleiche Inputs => gleicher job_id/signatur/dokument_id.
+  test_vertrag: >-
+    14 Tests: alle Systeme, Determinismus fuer DATEV und TSE, Hinweis-Feld-Guard,
+    systems_overview vollstaendig.
+  security_vertrag: >-
+    /dev/external-mocks-Routen koennen per Middleware auf nicht-produktive
+    Environments eingeschraenkt werden. Kein echter Credential-Zugriff.
+  betriebs_vertrag: >-
+    Alembic-Migration ist idempotent (IF NOT EXISTS). Dev-Schicht unabhaengig
+    von echter Infrastruktur startbar.
+  dokumentations_vertrag: >-
+    Workboard-Abschnitt EXTERNAL-MOCK-HARNESS-001; hinweis-Feld in jeder
+    Response als eingebettete Doku.

@@ -2111,3 +2111,12 @@ api_router.include_router(bank_import.router, tags=["schnittstellen", "bank"])
 # WGE-MOB-001: Mobile-Sync für Waagenbelege
 from app.api.v1.endpoints import waage_mobile  # noqa: E402
 api_router.include_router(waage_mobile.router, tags=["waage", "mobile", "logistik"])
+
+
+# MCP-ERP-TOOLS-001: Rollenbasierter ERP-Tool-Katalog
+from app.api.v1.endpoints import mcp_tool_registry  # noqa: E402
+api_router.include_router(mcp_tool_registry.router, tags=["mcp", "tools"])
+
+# EXTERNAL-MOCK-HARNESS-001: Mock-Stubs fuer externe Systeme (Dev-Only)
+from app.api.v1.endpoints import external_mock_harness  # noqa: E402
+api_router.include_router(external_mock_harness.router, tags=["dev", "mock"])
