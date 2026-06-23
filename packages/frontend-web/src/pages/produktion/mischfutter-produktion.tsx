@@ -7,15 +7,18 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { CheckCircle, Link2, Loader2 } from 'lucide-react'
+import { CheckCircle, Link2, Loader2, Package } from 'lucide-react'
 import {
   fetchProduktionsTrace,
   updateProduktionsauftragStatus,
   useCreateProduktionsauftrag,
+  useEnsureFeedInventoryLink,
+  useFeedInventoryLinks,
   useMischfutterRezepte,
   useMischfutterVerfuegbarkeit,
   useProduktionsauftraege,
   type FeedChainTrace,
+  type FeedInventoryLinkRow,
   type Produktionsauftrag,
   type ProduktionsauftragStatus,
 } from '@/lib/api/produktion'
@@ -81,6 +84,8 @@ export default function MischfutterProduktionPage(): JSX.Element {
   const { data: verfuegbarkeit, isLoading: loadingV } = useMischfutterVerfuegbarkeit()
   const { data: rezepte, isLoading: loadingR } = useMischfutterRezepte()
   const { data: auftraege } = useProduktionsauftraege()
+  const { data: inventoryLinks, isLoading: loadingLinks } = useFeedInventoryLinks()
+  const ensureInventoryLink = useEnsureFeedInventoryLink()
   const createAuftrag = useCreateProduktionsauftrag()
 
   const [rezeptId, setRezeptId] = useState('')
@@ -139,6 +144,27 @@ export default function MischfutterProduktionPage(): JSX.Element {
         }
       }),
     [toast, withPending],
+  )
+
+  const handleEnsureLink = useCallback(
+    (row: FeedInventoryLinkRow) =>
+      withPending(`link:${row.id}`, async () => {
+        try {
+          const result = await ensureInventoryLink.mutateAsync(row.id)
+          toast({
+            title: result.created ? 'Lagerartikel angelegt' : 'Verknüpfung hergestellt',
+            description: `${row.name} → Artikel ${result.article_id.slice(0, 8)}…`,
+          })
+        } catch (e) {
+          toast({ title: 'Verknüpfung fehlgeschlagen', description: getAxiosErrorMessage(e), variant: 'destructive' })
+        }
+      }),
+    [ensureInventoryLink, toast, withPending],
+  )
+
+  const unmappedLinks = useMemo(
+    () => (inventoryLinks?.items ?? []).filter((r) => !r.inventory_article_id),
+    [inventoryLinks],
   )
 
   // Build a map of component name -> available tons from the API
@@ -384,6 +410,56 @@ export default function MischfutterProduktionPage(): JSX.Element {
         onFinish={handleFinish}
         onCancel={() => navigate('/futter/misch/liste')}
       />
+
+      {(roleFocus === 'lager' || unmappedLinks.length > 0) ? (
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="flex items-center gap-2 text-base">
+              <Package className="h-4 w-4" />
+              Lagerartikel-Verknüpfung
+            </CardTitle>
+            {inventoryLinks ? (
+              <Badge variant={inventoryLinks.unmapped_count > 0 ? 'destructive' : 'outline'}>
+                {inventoryLinks.mapped_count}/{inventoryLinks.total} verknüpft
+              </Badge>
+            ) : null}
+          </CardHeader>
+          <CardContent className="space-y-2 text-sm">
+            <p className="text-muted-foreground">
+              Bei Freigabe schreibt das System kanonische Lagerbewegungen — nur für verknüpfte Einzelfuttermittel
+              (FEED-CHAIN-004).
+            </p>
+            {loadingLinks ? (
+              <p className="flex items-center gap-2 text-muted-foreground">
+                <Loader2 className="h-4 w-4 animate-spin" />
+                Verknüpfungen laden…
+              </p>
+            ) : unmappedLinks.length === 0 ? (
+              <p className="text-green-700">Alle aktiven Einzelfuttermittel sind mit Lagerartikeln verknüpft.</p>
+            ) : (
+              <ul className="space-y-2">
+                {unmappedLinks.map((row) => (
+                  <li key={row.id} className="flex flex-wrap items-center justify-between gap-2 rounded border px-3 py-2">
+                    <div>
+                      <span className="font-medium">{row.name}</span>
+                      <span className="ml-2 font-mono text-xs text-muted-foreground">{row.artikel_nummer}</span>
+                    </div>
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="outline"
+                      disabled={pendingActions.has(`link:${row.id}`)}
+                      onClick={() => void handleEnsureLink(row)}
+                    >
+                      {pendingActions.has(`link:${row.id}`) ? 'Wird verknüpft…' : 'Lagerartikel verknüpfen'}
+                    </Button>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </CardContent>
+        </Card>
+      ) : null}
 
       <Card>
         <CardHeader className="pb-2">

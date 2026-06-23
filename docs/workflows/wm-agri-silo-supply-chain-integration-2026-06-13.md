@@ -102,7 +102,7 @@ Siehe [wave-physical-chain-logistics-audit-2026-06-12.md](./wave-physical-chain-
 | QS-Freigabe / Sperre | `qs_status` steuert Routen/Kanten; Lot bleibt referenziert, bis Umbuchung oder Entladung |
 | Mischauftrag / MMX | Verbrauchsmaterial aus Zelle → Auftrag; `current_*` nach Abschluss aktualisieren |
 
-**Bereits vorhanden:** Rückverfolgbarkeit `lager/rueckverfolgbarkeit`, Supply-Chain-Events (CHAIN-002), Transfer-API (WMS-FLOW-001), Lot-Link-API (WM-AGRI-LOT-LINK-001). **Fehlend:** UI-/Regel-Engine „Ticket/Lot → Silozelle“ als Vorschlag ohne manuelle Zielzellenwahl.
+**Bereits vorhanden:** Rückverfolgbarkeit `lager/rueckverfolgbarkeit`, Supply-Chain-Events (CHAIN-002), Transfer-API (WMS-FLOW-001), Lot-Link-API (WM-AGRI-LOT-LINK-001), Zielzellen-Vorschlag + Auto-Book (WM-AGRI-AUTO-LINK-001, `suggest_target_cell`). **Fehlend:** keine — Medienbruch Annahme→Silozelle repo-seitig geschlossen (Stand 2026-06-23).
 
 ---
 

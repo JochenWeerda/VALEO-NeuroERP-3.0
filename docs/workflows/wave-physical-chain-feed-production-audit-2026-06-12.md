@@ -58,6 +58,8 @@
    (`inventory_article_id` auf `futtermittel_einzelfutter`, Migration `feed_chain_article_map_20260623`);
    bei Produktionsfreigabe/Storno kanonische Bewegungen in `inventory_stock_movements`
    (`source_document_type=feed_production`); API `GET/POST …/inventory-links`.
+   **FEED-CHAIN-004.5 (2026-06-23):** UI auf `produktion/mischfutter-produktion` — Mapping-Status,
+   Ensure-Button für unverknüpfte Einzelfutter (Lager-Rolle).
 
 ## 4. Bewusst nicht in diesem Zweig
 
