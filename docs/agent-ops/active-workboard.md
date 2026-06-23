@@ -109,8 +109,18 @@
 **Ziel:** `alembic upgrade head` / init_db / Container-Bootstrap nicht durch Multiple-Heads blockieren.
 **Dateibesitz:** `merge_dom004_feed_chain_20260623.py`, `test_alembic_single_head.py`, Open-Gaps Build-Health.
 **Abnahmekriterien:** `alembic heads` → 1 Zeile; Governance-Test grün.
-**Hinweis DOM-PROC-004:** Parallele Migration `proc_bestellung_wareneingang_20260623` muss
-`down_revision = merge_dom004_feed_chain_20260623` (nicht `sales_ab_*`) — lokal bereits angepasst.
+**Hinweis DOM-PROC-004:** Migration `proc_bestellung_wareneingang_20260623` hängt an
+`merge_dom004_feed_chain_20260623` — aktueller Head (Stand nach DOM-PROC-004 Abschluss).
+
+## COMPAT-GOV-MATRIX-SYNC-20260623 — Release-Matrix Alembic-Head
+
+**Von:** Cursor
+**Owner:** Cursor
+**Stand:** abgeschlossen 2026-06-23 — `generate_release_compatibility_matrix.py` lokal ausgeführt;
+`database_revision=proc_bestellung_wareneingang_20260623`; Open-Gaps + Process-Kernel STATUS
+aktualisiert; Governance-Tests grün.
+**Ziel:** Kompatibilitätsmatrix und Doku auf aktuellen DB-Head nach DOM-PROC-004 bringen.
+**Abnahmekriterien:** `build_matrix()` liefert einen Head; `test_alembic_single_head` grün.
 
 ## COV-RATCHET-FEED-001 — Coverage FeedInventoryLinkService
 

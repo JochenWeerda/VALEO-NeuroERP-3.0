@@ -1,0 +1,38 @@
+slice_id: COMPAT-GOV-MATRIX-SYNC-20260623
+title: Release-Kompatibilitaetsmatrix DB-Head Sync
+owner: Cursor
+status: completed
+created_at: 2026-06-23
+coordination: >-
+  Harness-Betrieb (AI-HARNESS-GOV-001). Kein Eingriff in DOM-CONTROLLING-004 (reserviert).
+goal: >-
+  database_revision in Release-Matrix und Doku auf proc_bestellung_wareneingang_20260623
+  nach DOM-PROC-004 und Merge-Kette.
+file_ownership:
+  - docs/project-context/open-gaps-and-known-issues.md
+  - docs/architecture/process-kernel/STATUS.md
+  - docs/agent-ops/active-workboard.md
+  - docs/agent-ops/slices/COMPAT-GOV-MATRIX-SYNC-20260623.yaml
+acceptance:
+  - generate_release_compatibility_matrix.py erfolgreich mit 1 Head
+  - test_release_compatibility_governance + test_alembic_single_head gruen
+tests:
+  - python scripts/generate_release_compatibility_matrix.py
+  - python -m pytest -q -o addopts= tests/test_release_compatibility_governance.py tests/test_alembic_single_head.py
+risks:
+  - artifacts/* ist gitignored; CI generiert Matrix im Pipeline-Lauf
+ai_harness:
+  fachlicher_vertrag: not_applicable
+  architektur_vertrag: >-
+    Matrix bindet git_sha, app_version, database_revision, API /api/v1, Toolchain-Pins.
+  daten_vertrag: >-
+    Alembic-Head aus ScriptDirectory.get_heads() — fail bei != 1.
+  test_vertrag: >-
+    test_release_compatibility_governance build_matrix; test_alembic_single_head subprocess.
+  security_vertrag: not_applicable
+  betriebs_vertrag: >-
+    Nach parallelen Migrationen Matrix + Doku nachziehen.
+  dokumentations_vertrag: >-
+    Open-Gaps Build-Health + Process-Kernel STATUS.
+external_gates:
+  - not_applicable
