@@ -1,5 +1,14 @@
 # Active Workboard
 
+## VALEO-WF-COCKPIT-001 - Workflow- und Prozessleitstand fuer VALEO Process Kernel
+
+**Von:** Codex
+**Owner:** Codex
+**Stand:** reserviert 2026-06-23 - Claim aus `valeo_neuroerp_youtube_gap_analyse_2026-06-23.md` P0.1; Umsetzung ohne Ueberlapp mit WM-AGRI-/Route-Generator-WIP oder DOM-CONTROLLING-004.
+**Ziel:** Operativen Workflow-Leitstand fuer Prozessinstanzen, Events, externe Gate-Blocker, Fehler, Retry/Replay und Audit-Kontext schaffen. Deterministische Fachlogik bleibt in Process Kernel, Domain-Services, Outbox/NATS und Audit; kein n8n-Kernersatz.
+**Dateibesitz:** `app/services/workflow_cockpit_service.py`, `app/api/v1/endpoints/workflow_cockpit.py`, `tests/test_workflow_cockpit_service.py`, `docs/workflows/valeo-wf-cockpit-001-workflow-leitstand-2026-06-23.md`, `docs/agent-ops/slices/VALEO-WF-COCKPIT-001.yaml`, dieser Workboard-Abschnitt.
+**Abnahmekriterien:** Tenantisolierte Prozessliste; Statusmodell `pending/running/blocked_external_gate/failed/completed/compensated`; chronologische Event-Kette; externe Blocker getrennt von `failed`; Replay/Retry nur mit expliziter Rolle; Unit-Tests und Doku gruen.
+
 ## DOM-CONTROLLING-004 — Controlling-Domäne Vollständige Vertiefung (.2–.5)
 
 **Von:** Claude Code
