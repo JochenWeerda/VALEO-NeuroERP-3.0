@@ -7,7 +7,8 @@ import { test, expect, request } from '@playwright/test'
 
 const BASE = process.env.PLAYWRIGHT_BASE_URL ?? 'http://127.0.0.1:8000'
 const TENANT = 'test-tenant-agrar-001'
-const HEADERS = { 'X-Tenant-ID': TENANT, 'Content-Type': 'application/json' }
+const TOKEN = process.env.API_DEV_TOKEN ?? process.env.VALEO_API_DEV_TOKEN ?? process.env.VITE_API_DEV_TOKEN ?? 'dev-token'
+const HEADERS = { Authorization: `Bearer ${TOKEN}`, 'X-Tenant-ID': TENANT, 'Content-Type': 'application/json' }
 
 let partieId: string
 
