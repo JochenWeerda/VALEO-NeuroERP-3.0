@@ -351,6 +351,95 @@ class AgriLotLinkBookingService:
             raise ValueError("Kein aktives Silo-Lot für die Eingabe gefunden")
         return dict(lot_row._mapping)
 
+    def auto_book_lot_link_by_lot_id(
+        self,
+        *,
+        lot_id: str,
+        warehouse_id: str | None = None,
+        booked_by: str = "system",
+    ) -> dict:
+        """Vollautomatische LOT-LINK-Buchung: löst Lot → beste Silozelle ohne Operator-Schritt.
+
+        Schlägt fehl-soft: wenn kein eindeutiger legacy_silo_id-Match gefunden wird,
+        wird kein Fehler geworfen — stattdessen ok=False + reason.
+        """
+        lot_row = self.db.execute(
+            text("""
+                SELECT l.id, l.silo_id, l.virtual_lot_number, l.source_ticket_id,
+                       l.article_id, l.quantity_tons, l.status, s.silo_number
+                FROM domain_inventory.silo_lots l
+                JOIN domain_inventory.silos s
+                  ON s.id = l.silo_id AND s.tenant_id = l.tenant_id
+                WHERE l.tenant_id = :tid AND l.status = 'active'
+                  AND (l.id::text = :v OR l.virtual_lot_number = :v)
+                LIMIT 1
+            """),
+            {"tid": self.tenant_id, "v": lot_id},
+        ).fetchone()
+        if not lot_row:
+            return {"ok": False, "lot_id": lot_id, "reason": "Kein aktives Silo-Lot gefunden"}
+
+        lot_d = dict(lot_row._mapping)
+        silo_id = str(lot_d["silo_id"])
+        lot_kg = Decimal(str(lot_d.get("quantity_tons") or "0")) * Decimal("1000")
+
+        cell_filter = {"sid": silo_id, "tid": self.tenant_id}
+        wid_clause = ""
+        if warehouse_id:
+            wid_clause = " AND warehouse_id = :wid"
+            cell_filter["wid"] = warehouse_id
+
+        rows = self.db.execute(
+            text(f"""
+                SELECT id, warehouse_id, cell_code, legacy_silo_id,
+                       capacity_kg, current_stock_kg, current_material_id,
+                       current_lot_id, qs_status
+                FROM domain_inventory.silo_cells
+                WHERE legacy_silo_id = :sid
+                  AND tenant_id = :tid
+                  AND is_active = true
+                  {wid_clause}
+                ORDER BY cell_code
+            """),  # noqa: S608 — column names code-controlled
+            cell_filter,
+        ).fetchall()
+
+        if not rows:
+            return {
+                "ok": False,
+                "lot_id": lot_id,
+                "silo_id": silo_id,
+                "reason": "Kein legacy_silo_id-Mapping für Zielzelle gefunden",
+            }
+
+        best_cell: dict | None = None
+        best_score = -1
+        for row in rows:
+            cell_d = dict(row._mapping)
+            score = self._score_cell_for_lot(cell_d, lot_d, silo_id, lot_kg)
+            if score is not None and score > best_score:
+                best_score = score
+                best_cell = cell_d
+
+        if best_cell is None:
+            return {
+                "ok": False,
+                "lot_id": lot_id,
+                "silo_id": silo_id,
+                "reason": "Alle Kandidaten-Silozellen gesperrt oder Kapazität/Materialkonflikt",
+            }
+
+        result = self.book_lot_to_cell(
+            lot_id=lot_id,
+            target_cell_id=str(best_cell["id"]),
+            warehouse_id=str(best_cell["warehouse_id"]),
+            quantity_kg=lot_kg,
+            booked_by=booked_by,
+        )
+        result["auto_booked"] = True
+        result["auto_score"] = best_score
+        return result
+
     @staticmethod
     def _score_cell_for_lot(
         cell_d: dict,

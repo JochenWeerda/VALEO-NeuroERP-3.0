@@ -43,6 +43,25 @@ def _sync_material_flow_cells(db: Session, tenant_id: str, silo_id: str, *, comm
         logger.warning("WM-AGRI-LOT-LINK sync failed for silo %s: %s", silo_id, exc)
 
 
+def _auto_book_lot_link(db: Session, tenant_id: str, lot_id: str) -> None:
+    """WM-AGRI-LOT-LINK: Best-effort vollautomatische LOT-LINK-Buchung nach Lot-Anlage."""
+    try:
+        from app.services.agri_lot_link_booking_service import AgriLotLinkBookingService
+
+        result = AgriLotLinkBookingService(db, tenant_id).auto_book_lot_link_by_lot_id(
+            lot_id=lot_id,
+            booked_by="system:auto",
+        )
+        if not result.get("ok"):
+            logger.info(
+                "WM-AGRI-LOT-LINK auto-book skipped for lot %s: %s",
+                lot_id,
+                result.get("reason"),
+            )
+    except Exception as exc:
+        logger.warning("WM-AGRI-LOT-LINK auto-book failed for lot %s: %s", lot_id, exc)
+
+
 def _to_float(value: Decimal | float | int | None) -> float:
     if value is None:
         return 0.0
@@ -430,6 +449,8 @@ async def create_silo_lot(
     db.commit()
     db.refresh(lot)
     db.refresh(snapshot)
+
+    _auto_book_lot_link(db, tenant_id, str(lot.id))
 
     return {
         "lot": {
