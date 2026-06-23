@@ -1,104 +1,94 @@
-id: WM-AGRI-SILO-001
-
-title: Agrar-Siloanlagen und Materialfluss (Knoten/Kanten, Route-Validierung)
-
+slice_id: WM-AGRI-SILO-001
+title: "Agrar-Siloanlagen und Materialfluss (Knoten/Kanten, Route-Validierung)"
 owner: Cursor
-
-status: erledigt
-
+status: completed
 updated: 2026-06-19
-
-files:
-
+coordination: >-
+  Bestehender Integrationsslice fuer Siloanlagen, Silozellen, Materialfluss-
+  Knoten/-Kanten, Route-Validierung und Visualisierung. Folgeslices fuer
+  Lot-Bestand, Bird-View und PLC bleiben getrennt.
+goal: >-
+  Agrar-/WMS-Materialfluss so bereitstellen, dass Silozellen, Knoten, Kanten,
+  Route-Validierung, QS-Sperren, Verschleppungshinweise, Live-Graph und
+  Stammdaten-Minimum fachlich nachvollziehbar und technisch pruefbar sind.
+file_ownership:
   - alembic/versions/agri_silo_material_flow_20260612.py
-
   - alembic/versions/wms_material_flow_stock_link_20260619.py
-
   - alembic/versions/agri_silo_cells_layout_20260619.py
-
   - app/services/agri_silo_material_flow_service.py
-
   - app/api/v1/endpoints/agri_silo_material_flow.py
-
   - app/api/v1/api.py
-
   - app/infrastructure/models/wms_models.py
-
   - app/infrastructure/models/__init__.py
-
   - tests/test_agri_silo_material_flow.py
-
   - packages/frontend-web/src/lib/api/agri-material-flow.ts
-
   - packages/frontend-web/src/lib/material-flow-display.ts
-
   - packages/frontend-web/src/pages/lager/materialfluss.tsx
-
   - packages/frontend-web/src/pages/lager/materialfluss-visualisierung.tsx
-
   - packages/frontend-web/src/app/route-aliases.json
-
   - packages/frontend-web/src/__tests__/lib/material-flow-display.test.ts
-
   - docs/warehouse/README.md
-
   - docs/warehouse/agri-silo-material-flow-benchmark-2026-06-12.md
-
   - docs/warehouse/reusable-open-source-silo-material-flow-2026-06-12.md
-
   - docs/warehouse/agri-silo-vendor-interface-research-2026-06-12.md
-
   - docs/warehouse/agrar-silo-materialfluss-studio-baustein.md
-
   - docs/workflows/wm-agri-silo-supply-chain-integration-2026-06-13.md
-
   - docs/warehouse/handbuch-c-inventar.md
-
   - packages/agrar-silo-materialfluss-studio/README.md
-
+  - docs/agent-ops/slices/WM-AGRI-SILO-001.yaml
   - docs/agent-ops/slices/WM-AGRI-FLOW-001.yaml
-
   - docs/agent-ops/slices/WMS-FLOW-001.yaml
-
   - docs/agent-ops/slices/WM-AGRI-CHAIN-002.yaml
-
   - docs/agent-ops/active-workboard.md
-
 acceptance:
-
-  - Alembic domain_inventory Tabellen silo_systems, silo_cells, material_flow_nodes, material_flow_edges am Head
-
-  - API unter /api/v1/lager/wms/agri/* (Listen/Anlegen + validate-route + PATCH silo-cells + PATCH material-flow/nodes|edges)
-
-  - Router agri_silo_material_flow in app/api/v1/api.py mit prefix /lager/wms/agri (Master-router /api/v1)
-
-  - Service lehnt open-Kante zu blocked/unterbundenem QS-Ziel ab; validate_route prüft QS gesperrt und Verschleppungshinweis
-
-  - Unit-Tests tests/test_agri_silo_material_flow.py gruen (18 Tests, pytest --no-cov)
-
-  - Frontend Route lager/materialfluss + lager/materialfluss-visualisierung (PageToolbar, MERIDIAN-Tokens)
-
-  - Materialfluss-Seite Live-Graph aus material_flow_nodes/edges wenn Lager gewaehlt und Daten vorhanden; Demo nur ohne Lagerwahl
-
-  - Mindest-UI Stammdaten anlegen Siloanlage Silozelle Knoten Kante (kein Delete Pflichtstatus)
-
-  - UI Silozellen Material/Lot Referenz Silozelle layout_x/y VK-Klasse Knoten layout Kanten Verschleppung Spuelcharge lesbare Codes max kg/h
-
-  - Silozellen-Tabelle Spalten Ist kg (current_stock_kg) und Kap. kg (capacity_kg)
-
-  - Siloanlagen-Uebersicht lesen (nur Anzeige)
-
-  - Vitest material-flow-display Mapper (Nodes Kanten Endpunkt-Filter)
-
-  - Doku Benchmark + OSS + Hersteller-Sammelliste + UI-Baustein-Paket agrar-silo-materialfluss-studio + Prozessketten-Workflow wm-agri-silo-supply-chain-integration
-
-  - Materialtransfer (WMS-FLOW-001) Backend+UI siehe Slice WMS-FLOW-001.yaml
-
-open_after_integration_pass:
-
-  - Bird-View WM-AGRI-MAP-001
-
-  - Lot-Bestand Silozelle automatisch aus WE/Waage (Slice-Idee WM-AGRI-LOT-LINK)
-
-  - PLC/OPC-UA Anbindung (WM-AGRI-PLC-005)
-
+  - Alembic-Tabellen fuer silo_systems, silo_cells, material_flow_nodes und material_flow_edges liegen in domain_inventory am Head.
+  - API ist unter /api/v1/lager/wms/agri/* fuer Listen, Anlegen, Route-Validierung sowie PATCH fuer Silo Cells, Nodes und Edges verdrahtet.
+  - Router agri_silo_material_flow ist in app/api/v1/api.py mit Prefix /lager/wms/agri registriert.
+  - Service lehnt offene Kanten zu blocked- oder QS-gesperrten Zielen ab und liefert Verschleppungshinweise.
+  - Unit-Tests tests/test_agri_silo_material_flow.py sind fachlich gruen.
+  - Frontend-Routen lager/materialfluss und lager/materialfluss-visualisierung verwenden PageToolbar und MERIDIAN-Tokens.
+  - Materialfluss-Seite zeigt Live-Graph aus material_flow_nodes/edges bei Lagerwahl; Demo bleibt Fallback ohne Lagerwahl.
+  - Mindest-UI erlaubt Stammdatenanlage fuer Siloanlage, Silozelle, Knoten und Kante.
+  - Silozellen-UI zeigt Material/Lot-Referenz, current_stock_kg, capacity_kg, Layout, VK-Klasse, Kanten, Spuelcharge und max kg/h.
+  - Doku, Benchmark, OSS-/Herstellerliste, UI-Baustein-Paket und Prozessketten-Workflow sind nachgezogen.
+  - Materialtransfer wird ueber WMS-FLOW-001 getrennt nachverfolgt.
+tests:
+  - pytest -q -o addopts= tests/test_agri_silo_material_flow.py
+  - pnpm --dir packages/frontend-web exec vitest run src/__tests__/lib/material-flow-display.test.ts
+  - pnpm --dir packages/frontend-web exec tsc --noEmit --pretty false
+  - node scripts/ai-slice-readiness-check.cjs --slice WM-AGRI-SILO-001
+risks:
+  - Bird-View WM-AGRI-MAP-001 ist Folgeslice.
+  - Lot-Bestand Silozelle automatisch aus WE/Waage bleibt Folgeslice WM-AGRI-LOT-LINK.
+  - PLC/OPC-UA-Anbindung bleibt Folgeslice WM-AGRI-PLC-005.
+  - Delete-Verhalten in der Mindest-UI ist kein Pflichtstatus dieses Slices.
+ai_harness:
+  fachlicher_vertrag: >-
+    Operatoren muessen sehen und pruefen koennen, welche Silozelle, welcher
+    Materialfluss-Knoten und welche Kante fuer einen Lager-/Foerderweg fachlich
+    zulaessig sind.
+  architektur_vertrag: >-
+    Backend-Service, API, ORM/Migration und Frontend-Visualisierung bilden die
+    Integrationsschicht. Produktionsnahe PLC-, Bird-View- und Lot-Waage-Syncs
+    bleiben getrennte Folgeslices.
+  daten_vertrag: >-
+    Siloanlage, Silozelle, Materialfluss-Knoten, Materialfluss-Kante,
+    current_stock_kg, capacity_kg, QS-Status, Lot-/Materialreferenz,
+    layout_x/y, Durchsatz und Spuelcharge sind die zentralen Vertragsdaten.
+  test_vertrag: >-
+    Route-Validierung, QS-Sperren, Mapper-Logik und Typecheck muessen
+    reproduzierbar laufen; Folgeslices brauchen eigene UAT-/E2E-Gates.
+  security_vertrag: >-
+    Keine direkte Anlagensteuerung ohne gesondertes PLC-/MES-Gate. UI/API
+    duerfen Stammdaten und Simulation pruefen, aber keine Hardware-Bewegung
+    ausloesen.
+  betriebs_vertrag: >-
+    Live-Graph faellt bei fehlender Lagerwahl auf Demo/Leerzustand zurueck;
+    echte Mengen- und Chargenbuchungen werden in WMS-FLOW/LOT-LINK vertieft.
+  dokumentations_vertrag: >-
+    Warehouse-Doku, Benchmark, OSS-/Herstellerbewertung, Handbuchbezug und
+    Workflow-Doku halten Scope, offene Risiken und Folgeslices fest.
+external_gates:
+  - Anlagen-/PLC-Abnahme vor produktiver Steuerung.
+  - Fachliche QS-/Chargenfreigabe fuer automatische Lot-Bestandskopplung.
+  - UAT mit realem Warenfluss Annahme, Waage, Lot, Silozelle, kg-Bestand und Trace.
