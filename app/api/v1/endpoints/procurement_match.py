@@ -9,7 +9,7 @@ from __future__ import annotations
 from decimal import Decimal
 from typing import Any, Optional
 
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, Header, HTTPException, Query
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
@@ -284,3 +284,125 @@ def create_ers_credit(
     except Exception as exc:
         db.rollback()
         raise HTTPException(status_code=503, detail=f"ERS-Gutschrift konnte nicht erzeugt werden: {exc}") from exc
+
+
+# ---------------------------------------------------------------------------
+# DOM-PROC-004: Bestellung-Lifecycle / Wareneingang / Rechnungsprüfung
+# ---------------------------------------------------------------------------
+
+from pydantic import BaseModel as _BM
+from typing import Optional as _Opt
+
+
+class BestellungTransitionIn(_BM):
+    new_status: str
+    operator: _Opt[str] = "system"
+    reason: _Opt[str] = None
+
+
+class WareneingangIn(_BM):
+    menge_erhalten: float
+    einheit: str
+    lager_id: str
+    operator: _Opt[str] = "system"
+    qs_status: _Opt[str] = "AUSSTEHEND"
+
+
+class QSUpdateIn(_BM):
+    qs_status: str
+    operator: _Opt[str] = "system"
+
+
+class RechnungspruefungIn(_BM):
+    rechnungs_nr: str
+    rechnungs_betrag_eur: float
+    bestell_preis_eur: float
+    we_menge: float
+    schwelle_pct: _Opt[float] = 3.0
+
+
+class RechnungsFreigabeIn(_BM):
+    entscheidung: str
+    operator: str
+    grund: _Opt[str] = None
+
+
+@router.post("/bestellungen/{bestellung_id}/transition", summary="Bestellungs-Status wechseln")
+def bestellung_transition_endpoint(
+    bestellung_id: str,
+    body: BestellungTransitionIn,
+    x_tenant_id: _Opt[str] = Header(None),
+    db: Session = Depends(get_db),
+) -> dict:
+    from app.services.proc_bestellung_lifecycle_service import transition_bestellung_status, BestellungLifecycleError
+    tenant_id = x_tenant_id or "default"
+    try:
+        return transition_bestellung_status(db, bestellung_id, tenant_id, body.new_status,
+                                             body.operator or "system", body.reason)
+    except BestellungLifecycleError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+
+
+@router.post("/bestellungen/{bestellung_id}/wareneingang", status_code=201, summary="Wareneingang buchen")
+def buche_wareneingang_endpoint(
+    bestellung_id: str,
+    body: WareneingangIn,
+    x_tenant_id: _Opt[str] = Header(None),
+    db: Session = Depends(get_db),
+) -> dict:
+    from app.services.proc_wareneingang_service import buche_wareneingang, WareneingangError
+    tenant_id = x_tenant_id or "default"
+    try:
+        return buche_wareneingang(db, bestellung_id, tenant_id, body.menge_erhalten,
+                                   body.einheit, body.lager_id, body.operator or "system",
+                                   body.qs_status or "AUSSTEHEND")
+    except WareneingangError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+
+
+@router.post("/wareneingaenge/{we_id}/qs", summary="QS-Status eines Wareneingangs aktualisieren")
+def update_we_qs_endpoint(
+    we_id: str,
+    body: QSUpdateIn,
+    x_tenant_id: _Opt[str] = Header(None),
+    db: Session = Depends(get_db),
+) -> dict:
+    from app.services.proc_wareneingang_service import update_qs_status, WareneingangError
+    tenant_id = x_tenant_id or "default"
+    try:
+        return update_qs_status(db, we_id, tenant_id, body.qs_status, body.operator or "system")
+    except WareneingangError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+
+
+@router.post("/bestellungen/{bestellung_id}/rechnungspruefung", status_code=201, summary="Rechnungsprüfung (3-Way-Match)")
+def rechnungspruefung_endpoint(
+    bestellung_id: str,
+    body: RechnungspruefungIn,
+    x_tenant_id: _Opt[str] = Header(None),
+    db: Session = Depends(get_db),
+) -> dict:
+    from app.services.proc_rechnungspruefung_service import pruefe_rechnung, RechnungspruefungError
+    tenant_id = x_tenant_id or "default"
+    try:
+        return pruefe_rechnung(db, bestellung_id, tenant_id, body.rechnungs_nr,
+                                body.rechnungs_betrag_eur, body.bestell_preis_eur,
+                                body.we_menge, body.schwelle_pct or 3.0)
+    except RechnungspruefungError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+
+
+@router.post("/rechnungspruefungen/{pruefung_id}/freigabe", summary="Rechnungsprüfung manuell freigeben")
+def rechnungsfreigabe_endpoint(
+    pruefung_id: str,
+    body: RechnungsFreigabeIn,
+    x_tenant_id: _Opt[str] = Header(None),
+    db: Session = Depends(get_db),
+) -> dict:
+    from app.services.proc_rechnungspruefung_service import freigabe_rechnungspruefung, RechnungspruefungError
+    tenant_id = x_tenant_id or "default"
+    try:
+        return freigabe_rechnungspruefung(db, pruefung_id, tenant_id, body.entscheidung,
+                                           body.operator, body.grund)
+    except RechnungspruefungError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
