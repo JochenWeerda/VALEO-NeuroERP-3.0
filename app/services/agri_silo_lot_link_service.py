@@ -1,4 +1,4 @@
-"""WM-AGRI-LOT-LINK — Sync silo_lots (DOM-SUPPLY) → silo_cells (Materialfluss-Graph)."""
+"""WM-AGRI-LOT-LINK — Sync silo_lots (DOM-SUPPLY) ↔ silo_cells (Materialfluss-Graph)."""
 
 from __future__ import annotations
 
@@ -7,6 +7,7 @@ from decimal import Decimal
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
+from app.core.uuid7 import uuid7
 from app.services.agri_material_flow_trace_integration import (
     append_material_flow_supply_chain_event,
     store_material_flow_outbox_best_effort,
@@ -158,3 +159,140 @@ class AgriSiloLotLinkService:
         if commit:
             self.db.commit()
         return result
+
+    def sync_lots_from_transfer(
+        self,
+        *,
+        from_cell_id: str,
+        to_cell_id: str,
+        quantity_kg: Decimal,
+        lot_id: str | None,
+        article_id: str,
+    ) -> dict:
+        """Rücksync WMS-FLOW-001 → silo_lots: Materialtransfer aktualisiert Lot-Mengen.
+
+        Fail-soft: gibt ok=False + reason zurück statt Exception wenn kein Mapping vorhanden.
+        Kein eigenes commit — Caller (book_material_transfer) commitet die gesamte Transaktion.
+        """
+        qty_tons = quantity_kg / Decimal("1000")
+        updated: list[str] = []
+
+        # legacy_silo_id für Quell- und Zielzelle ermitteln
+        from_row = self.db.execute(
+            text("SELECT legacy_silo_id FROM domain_inventory.silo_cells WHERE id = :cid AND tenant_id = :tid"),
+            {"cid": from_cell_id, "tid": self.tenant_id},
+        ).fetchone()
+        to_row = self.db.execute(
+            text("SELECT legacy_silo_id FROM domain_inventory.silo_cells WHERE id = :cid AND tenant_id = :tid"),
+            {"cid": to_cell_id, "tid": self.tenant_id},
+        ).fetchone()
+
+        from_silo_id = str(from_row.legacy_silo_id) if from_row and from_row.legacy_silo_id else None
+        to_silo_id = str(to_row.legacy_silo_id) if to_row and to_row.legacy_silo_id else None
+
+        if not from_silo_id and not to_silo_id:
+            return {"ok": False, "reason": "Keine legacy_silo_id-Mappings auf Quell-/Zielzelle"}
+
+        # ── Quell-Lot: Menge reduzieren ─────────────────────────────────────
+        src_lot = None
+        if lot_id:
+            src_lot = self.db.execute(
+                text("""
+                    SELECT id, quantity_tons FROM domain_inventory.silo_lots
+                    WHERE id::text = :lid AND tenant_id = :tid AND status = 'active'
+                    LIMIT 1
+                """),
+                {"lid": lot_id, "tid": self.tenant_id},
+            ).fetchone()
+        elif from_silo_id:
+            src_lot = self.db.execute(
+                text("""
+                    SELECT id, quantity_tons FROM domain_inventory.silo_lots
+                    WHERE silo_id = :sid AND tenant_id = :tid AND status = 'active'
+                      AND article_id = :art AND quantity_tons > 0
+                    ORDER BY quantity_tons DESC, created_at DESC
+                    LIMIT 1
+                """),
+                {"sid": from_silo_id, "art": article_id, "tid": self.tenant_id},
+            ).fetchone()
+
+        if src_lot:
+            src_new_qty = max(Decimal("0"), Decimal(str(src_lot.quantity_tons)) - qty_tons)
+            src_status = "closed" if src_new_qty == Decimal("0") else "active"
+            self.db.execute(
+                text("""
+                    UPDATE domain_inventory.silo_lots
+                    SET quantity_tons = :qty, status = :st, updated_at = NOW()
+                    WHERE id = :id
+                """),
+                {"qty": float(src_new_qty), "st": src_status, "id": str(src_lot.id)},
+            )
+            self.db.execute(
+                text("""
+                    INSERT INTO domain_inventory.silo_lot_movements
+                        (id, silo_lot_id, movement_type, quantity_tons, note, tenant_id, created_at)
+                    VALUES (:id, :lid, 'out', :qty, :note, :tid, NOW())
+                """),
+                {
+                    "id": str(uuid7()),
+                    "lid": str(src_lot.id),
+                    "qty": float(qty_tons),
+                    "note": f"WMS-Transfer → Zielzelle {to_cell_id}",
+                    "tid": self.tenant_id,
+                },
+            )
+            updated.append(f"src:{src_lot.id}:out:{float(qty_tons)}t")
+
+        # ── Ziel-Lot: Menge erhöhen (falls aktives Lot mit passendem Artikel im Ziel-Silo) ──
+        if to_silo_id:
+            dest_lot = None
+            if lot_id:
+                # Bevorzuge gleiches Lot wenn es bereits im Ziel-Silo ist
+                dest_lot = self.db.execute(
+                    text("""
+                        SELECT id, quantity_tons FROM domain_inventory.silo_lots
+                        WHERE id::text = :lid AND silo_id = :sid AND tenant_id = :tid AND status = 'active'
+                        LIMIT 1
+                    """),
+                    {"lid": lot_id, "sid": to_silo_id, "tid": self.tenant_id},
+                ).fetchone()
+            if not dest_lot:
+                # Aktivstes Lot mit passendem Artikel im Ziel-Silo
+                dest_lot = self.db.execute(
+                    text("""
+                        SELECT id, quantity_tons FROM domain_inventory.silo_lots
+                        WHERE silo_id = :sid AND tenant_id = :tid AND status = 'active'
+                          AND article_id = :art
+                        ORDER BY quantity_tons DESC, created_at DESC
+                        LIMIT 1
+                    """),
+                    {"sid": to_silo_id, "art": article_id, "tid": self.tenant_id},
+                ).fetchone()
+
+            if dest_lot:
+                dest_new_qty = Decimal(str(dest_lot.quantity_tons)) + qty_tons
+                self.db.execute(
+                    text("""
+                        UPDATE domain_inventory.silo_lots
+                        SET quantity_tons = :qty, updated_at = NOW()
+                        WHERE id = :id
+                    """),
+                    {"qty": float(dest_new_qty), "id": str(dest_lot.id)},
+                )
+                self.db.execute(
+                    text("""
+                        INSERT INTO domain_inventory.silo_lot_movements
+                            (id, silo_lot_id, movement_type, quantity_tons, note, tenant_id, created_at)
+                        VALUES (:id, :lid, 'in', :qty, :note, :tid, NOW())
+                    """),
+                    {
+                        "id": str(uuid7()),
+                        "lid": str(dest_lot.id),
+                        "qty": float(qty_tons),
+                        "note": f"WMS-Transfer ← Quellzelle {from_cell_id}",
+                        "tid": self.tenant_id,
+                    },
+                )
+                updated.append(f"dest:{dest_lot.id}:in:{float(qty_tons)}t")
+
+        return {"ok": True, "updated": updated}

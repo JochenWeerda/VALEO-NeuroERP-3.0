@@ -1,5 +1,14 @@
 # Active Workboard
 
+## WM-AGRI-BIDIR-SYNC-001 — Bidirektionaler Sync WMS-FLOW-001 → silo_lots
+
+**Von:** Claude Sonnet 4.6
+**Owner:** Claude Sonnet 4.6
+**Stand:** abgeschlossen 2026-06-23 — `AgriSiloLotLinkService.sync_lots_from_transfer` implementiert; best-effort Hook in `AgriSiloMaterialFlowService.book_material_transfer` vor commit; 3 neue Unit-Tests (29/29 gesamt grün).
+**Ziel:** Materialtransfers im WMS-Graph (WMS-FLOW-001) spiegeln sich jetzt in `domain_inventory.silo_lots` zurück — Quell-Lot wird um `quantity_kg/1000 t` reduziert (ggf. auf `closed` gesetzt), Ziel-Lot erhöht (wenn aktives Lot mit passendem Artikel im legacy_silo existiert). Je eine `SiloLotMovement`-Zeile ('out'/'in') wird geschrieben. Fail-soft wenn kein `legacy_silo_id`-Mapping vorhanden.
+**Dateibesitz:** `app/services/agri_silo_lot_link_service.py`, `app/services/agri_silo_material_flow_service.py`, `tests/test_agri_silo_material_flow.py`.
+**Abnahmekriterien:** Quell-Lot reduziert; status='closed' bei Restmenge=0; Ziel-Lot erhöht wenn Kandidat vorhanden; ok=False fail-soft ohne Mapping; kein eigener commit; 29/29 Unit-Tests grün.
+
 ## WM-AGRI-AUTO-LINK-001 — Vollautomatische LOT-LINK-Buchung (Annahme/Waage → Silozelle)
 
 **Von:** Claude Sonnet 4.6

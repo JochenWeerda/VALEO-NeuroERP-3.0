@@ -369,6 +369,111 @@ def test_trace_hooks_invoke_integration_on_edge_create(mocker):
 
 
 @pytest.mark.unit
+def test_sync_lots_from_transfer_reduces_source_and_increases_dest():
+    """sync_lots_from_transfer reduziert Quell-Lot und erhöht Ziel-Lot."""
+    from app.services.agri_silo_lot_link_service import AgriSiloLotLinkService
+
+    from_cell = _row(legacy_silo_id="silo-a")
+    to_cell = _row(legacy_silo_id="silo-b")
+    src_lot = _row(id="lot-src", quantity_tons=Decimal("10"))
+    dest_lot = _row(id="lot-dest", quantity_tons=Decimal("5"))
+
+    _no_row = MagicMock()
+    _no_row.fetchone.return_value = None
+
+    db = MagicMock()
+    db.execute.side_effect = [
+        _mk_result(fetchone=from_cell),   # from_cell legacy_silo_id
+        _mk_result(fetchone=to_cell),     # to_cell legacy_silo_id
+        _mk_result(fetchone=src_lot),     # src lot by lot_id
+        MagicMock(),                      # UPDATE src lot
+        MagicMock(),                      # INSERT src movement 'out'
+        _no_row,                          # dest lot by same lot_id → not found
+        _mk_result(fetchone=dest_lot),    # dest lot by article_id
+        MagicMock(),                      # UPDATE dest lot
+        MagicMock(),                      # INSERT dest movement 'in'
+    ]
+
+    svc = AgriSiloLotLinkService(db, "tenant-x", trace_hooks_enabled=False)
+    result = svc.sync_lots_from_transfer(
+        from_cell_id="cell-a",
+        to_cell_id="cell-b",
+        quantity_kg=Decimal("2000"),  # 2 t
+        lot_id="lot-src",
+        article_id="art-1",
+    )
+
+    assert result["ok"] is True
+    assert len(result["updated"]) == 2
+    # Quell-UPDATE: neue Menge = 10 - 2 = 8 t
+    src_update_params = db.execute.call_args_list[3][0][1]
+    assert src_update_params["qty"] == pytest.approx(8.0)
+    assert src_update_params["st"] == "active"
+    # Ziel-UPDATE: neue Menge = 5 + 2 = 7 t
+    dest_update_params = db.execute.call_args_list[7][0][1]
+    assert dest_update_params["qty"] == pytest.approx(7.0)
+    db.commit.assert_not_called()
+
+
+@pytest.mark.unit
+def test_sync_lots_from_transfer_closes_source_lot_when_empty():
+    """sync_lots_from_transfer setzt status='closed' wenn Quell-Lot auf 0 fällt."""
+    from app.services.agri_silo_lot_link_service import AgriSiloLotLinkService
+
+    from_cell = _row(legacy_silo_id="silo-a")
+    to_cell = _row(legacy_silo_id=None)
+    src_lot = _row(id="lot-src", quantity_tons=Decimal("2"))
+
+    db = MagicMock()
+    db.execute.side_effect = [
+        _mk_result(fetchone=from_cell),
+        _mk_result(fetchone=to_cell),
+        _mk_result(fetchone=src_lot),
+        MagicMock(),  # UPDATE
+        MagicMock(),  # INSERT movement
+    ]
+
+    svc = AgriSiloLotLinkService(db, "tenant-x", trace_hooks_enabled=False)
+    result = svc.sync_lots_from_transfer(
+        from_cell_id="cell-a",
+        to_cell_id="cell-b",
+        quantity_kg=Decimal("2000"),
+        lot_id="lot-src",
+        article_id="art-1",
+    )
+
+    assert result["ok"] is True
+    update_params = db.execute.call_args_list[3][0][1]
+    assert update_params["qty"] == pytest.approx(0.0)
+    assert update_params["st"] == "closed"
+
+
+@pytest.mark.unit
+def test_sync_lots_from_transfer_ok_false_without_silo_mapping():
+    """sync_lots_from_transfer gibt ok=False wenn keine legacy_silo_id auf beiden Zellen."""
+    from app.services.agri_silo_lot_link_service import AgriSiloLotLinkService
+
+    db = MagicMock()
+    db.execute.side_effect = [
+        _mk_result(fetchone=_row(legacy_silo_id=None)),
+        _mk_result(fetchone=_row(legacy_silo_id=None)),
+    ]
+
+    svc = AgriSiloLotLinkService(db, "tenant-x", trace_hooks_enabled=False)
+    result = svc.sync_lots_from_transfer(
+        from_cell_id="cell-a",
+        to_cell_id="cell-b",
+        quantity_kg=Decimal("500"),
+        lot_id=None,
+        article_id="art-1",
+    )
+
+    assert result["ok"] is False
+    assert "reason" in result
+    db.commit.assert_not_called()
+
+
+@pytest.mark.unit
 def test_transfer_commits_after_trace_hooks(mocker):
     """WMS-FLOW-001: Supply-Chain-Hooks müssen vor commit in derselben Transaktion landen."""
     append = mocker.patch(
