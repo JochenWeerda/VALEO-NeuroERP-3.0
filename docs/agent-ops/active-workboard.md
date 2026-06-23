@@ -1,5 +1,37 @@
 # Active Workboard
 
+## WF-COCKPIT-UI-001 — Workflow-Leitstand Frontend-UI
+
+**Von:** Claude Code
+**Owner:** Claude Code
+**Stand:** in Arbeit 2026-06-23
+**Ziel:** Frontend-UI für den Workflow-Prozessleitstand: ListReport mit Status-Filter/Auto-Refresh, Detail-Drawer mit chronologischer Event-Kette und Blocker-Liste, Replay-Button (role-guarded, nur mit workflow:replay), KPI-Kacheln (total/blockiert/replay-fähig). Backend `VALEO-WF-COCKPIT-001` ist abgeschlossen.
+**Dateibesitz:** `packages/frontend-web/src/pages/workflow/leitstand.tsx`, `packages/frontend-web/src/app/navigation/domains/operations.tsx` (nav entry), `docs/agent-ops/slices/WF-COCKPIT-UI-001.yaml`
+
+## MCP-ERP-TOOLS-001 — ERP MCP Tool-Katalog
+
+**Von:** Claude Code
+**Owner:** Claude Code
+**Stand:** in Arbeit 2026-06-23
+**Ziel:** Produktiver rollenbasierter ERP-MCP-Toolkatalog: `config/mcp_erp_tools.yaml` mit Tool-Registry je Domain (CRM/Sales/FIBU/WMS/DMS/Compliance), Service-Layer mit Schema/Scope/Idempotenz-Validierung, API `/mcp/tools` für Agent-Toollist, Tests.
+**Dateibesitz:** `config/mcp_erp_tools.yaml`, `app/services/mcp_tool_registry_service.py`, `app/api/v1/endpoints/mcp_tool_registry.py`, `tests/test_mcp_tool_registry.py`, `docs/agent-ops/slices/MCP-ERP-TOOLS-001.yaml`
+
+## EXTERNAL-MOCK-HARNESS-001 — Mock-Schicht für externe Systeme
+
+**Von:** Claude Code
+**Owner:** Claude Code
+**Stand:** in Arbeit 2026-06-23
+**Ziel:** Reproduzierbare Mock-Stubs für DATEV, TSE/DSFinV-K, ELSTER/ERiC, DMS/Paperless, Bank/CAMT — kein externes System nötig für Tests. Service mit simulierten Responses, Dev-Only API `/dev/external-mocks`, Alembic-Migration, Tests.
+**Dateibesitz:** `app/services/external_mock_harness_service.py`, `app/api/v1/endpoints/external_mock_harness.py`, `alembic/versions/external_mock_sessions_20260623.py`, `tests/test_external_mock_harness.py`, `docs/agent-ops/slices/EXTERNAL-MOCK-HARNESS-001.yaml`
+
+## AI-DOC-DRIFT-DASHBOARD-001 — Doku-Drift-Report
+
+**Von:** Claude Code
+**Owner:** Claude Code
+**Stand:** in Arbeit 2026-06-23
+**Ziel:** Script `scripts/doc_drift_report.py` prüft neue Routen ohne API-Doku, neue Migrationen ohne Runbook/Gaps-Eintrag, neue Services ohne Fachprozessbeleg — erzeugt maschinenlesbaren Drift-Report (JSON + Markdown-Summary). Tests.
+**Dateibesitz:** `scripts/doc_drift_report.py`, `tests/test_doc_drift_report.py`, `docs/agent-ops/slices/AI-DOC-DRIFT-DASHBOARD-001.yaml`
+
 ## VALEO-WF-COCKPIT-001 - Workflow- und Prozessleitstand fuer VALEO Process Kernel
 
 **Von:** Codex
@@ -9,6 +41,7 @@
 **CI-Nachzug 2026-06-23:** E2E-Smoke-Folgefix auf `main`: API-only Smoke-Specs fuer Finance, Sales, Agrar und Inventory nutzen in CI explizit `http://127.0.0.1:8000` statt `localhost`, weil GitHub-Runner `localhost` fuer Playwright auf `::1` aufloesen koennen, waehrend uvicorn im Workflow nur IPv4 sicher bereitsteht. Der E2E-Workflow prueft den Backend-Start jetzt vor Testbeginn per `/healthz`; NATS/Eventbus und Outbox-Worker werden im Smoke-Workflow explizit deaktiviert, weil `.env.example` NATS fuer Dev-Compose aktiviert, der E2E-Runner aber keinen Broker startet.
 **CI-Nachzug 2026-06-23:** API-only Smoke-Specs fuer Finance, Sales, Agrar und Inventory senden jetzt den Dev-Bearer-Token (`API_DEV_TOKEN`/`VALEO_API_DEV_TOKEN`/`VITE_API_DEV_TOKEN`, Fallback `dev-token`) mit. Ursache der roten E2E-Runs war kein fachlicher Endpoint-Fehler, sondern 401 auf geschuetzten Routen durch fehlenden Auth-Kontext im direkten Playwright-API-Client.
 **CI-Nachzug 2026-06-23:** E2E-Smoke-Workflow startet jetzt einen dedizierten Postgres-Service und fuehrt `python scripts/init_db.py` vor dem Backend-Start aus. Die roten Finance/Agrar/Inventory-Smokes nach dem Auth-Fix waren neue DOM-004-Tabellen auf einer nicht migrierten CI-Smoke-DB; Sales-Preisabweichung nutzt den tatsaechlichen Routerpfad unter `/sales/orders/orders/...`.
+**CI-Nachzug 2026-06-23:** Quality-Gate-Folgefix: neun neue SQL-f-string-Funde aus parallelen DOM-004/POS/Feed/Meldewesen-Slices wurden review-markiert (`# nosec S608`), weil die dynamischen SQL-Teile ausschliesslich aus festen, codekontrollierten SET-Fragmenten bestehen und alle Werte weiterhin parametrisiert gebunden werden.
 **Ziel:** Operativen Workflow-Leitstand fuer Prozessinstanzen, Events, externe Gate-Blocker, Fehler, Retry/Replay und Audit-Kontext schaffen. Deterministische Fachlogik bleibt in Process Kernel, Domain-Services, Outbox/NATS und Audit; kein n8n-Kernersatz.
 **Dateibesitz:** `app/services/workflow_cockpit_service.py`, `app/api/v1/endpoints/workflow_cockpit.py`, `tests/test_workflow_cockpit_service.py`, `docs/workflows/valeo-wf-cockpit-001-workflow-leitstand-2026-06-23.md`, `docs/agent-ops/slices/VALEO-WF-COCKPIT-001.yaml`, dieser Workboard-Abschnitt.
 **Abnahmekriterien:** Tenantisolierte Prozessliste; Statusmodell `pending/running/blocked_external_gate/failed/completed/compensated`; chronologische Event-Kette; externe Blocker getrennt von `failed`; Replay/Retry nur mit expliziter Rolle; Unit-Tests und Doku gruen.
