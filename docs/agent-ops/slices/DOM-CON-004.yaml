@@ -1,0 +1,54 @@
+slice_id: DOM-CON-004
+title: "Kontrakt-Domäne — Vollständige Vertiefung (Lifecycle .2 / Fixing .3 / Settlement .4 / E2E .5)"
+owner: Claude Sonnet 4.6
+status: completed
+coordination: >-
+  Ergänzt bestehende kontrakte.py, kontrakt_fixing_service.py (alt), kontrakt_settlement_service.py (alt).
+  Neue Dateien mit eigenen Tabellen via domain_kontrakte Schema.
+  Fremde Dateien bleiben unangetastet.
+goal: >-
+  Kontrakt-Prozesskette ENTWURF→FREIGEGEBEN→AKTIV→TEIL_ERFUELLT/ERFUELLT
+  auf volle 004-Tiefe heben: Lifecycle-Statusmaschine, MATIF/Kassa-Fixing,
+  Settlement-Abrechnung mit Erfüllungsgrad-Automatik.
+file_ownership:
+  - docs/agent-ops/active-workboard.md
+  - docs/agent-ops/slices/DOM-CON-004.yaml
+  - app/services/kontrakt_lifecycle_service.py
+  - app/services/kontrakt_fixing_service.py
+  - app/services/kontrakt_settlement_service.py
+  - alembic/versions/kontrakt_lifecycle_fixing_20260623.py
+  - app/api/v1/endpoints/kontrakt_actions.py
+  - tests/test_dom_con_004.py
+not_owned:
+  - app/api/v1/endpoints/kontrakte.py
+  - app/services/kontrakte_service.py
+acceptance_criteria:
+  - Kontrakt: ENTWURF→FREIGEGEBEN→AKTIV→TEIL_ERFUELLT→ERFUELLT
+  - Fixing: MATIF/KASSA, Mengencheck gegen Kontraktmenge, Durchschnittspreis
+  - Settlement: OFFEN→IN_ABRECHNUNG→ABGERECHNET, Erfüllungsgrad-Automatik
+  - 11 Unit-Tests grün
+  - py_compile grün
+ai_harness:
+  fachlicher_vertrag: >-
+    Kontrakt: ENTWURF→FREIGEGEBEN→AKTIV→TEIL_ERFUELLT/ERFUELLT/STORNIERT.
+    Fixing: Summe gefixter Mengen ≤ Kontraktmenge; Durchschnittspreis gewichtet.
+    Settlement: OFFEN→IN_ABRECHNUNG→ABGERECHNET; netto_eur = menge * preis.
+    Erfüllungsgrad-Automatik: Kontrakt → TEIL_ERFUELLT wenn teilweise, ERFUELLT wenn voll.
+  architektur_vertrag: >-
+    Services in app/services/, Endpunkte in kontrakt_actions.py.
+    Schema domain_kontrakte via Alembic. Kein ORM, nur text()-SQL.
+  daten_vertrag: >-
+    kontrakt_lifecycle: kontrakt_id UNIQUE, status, periode, menge_t, preis_eur_t.
+    kontrakt_status_log: append-only, old/new status, operator, grund.
+    kontrakt_fixings: fixing_datum, markt, referenz.
+    kontrakt_settlements: netto_eur, status, storno_grund.
+  test_vertrag: >-
+    Unit: lifecycle (Übergänge, not_found, invalid).
+    Unit: fixing (avg_preis gewichtet, vollständig, empty).
+    Unit: settlement (Übergänge, not_found, invalid).
+  security_vertrag: X-Tenant-ID verpflichtend; Status-Log append-only.
+  betriebs_vertrag: create_kontrakt_lifecycle idempotent via kontrakt_id UNIQUE.
+  dokumentations_vertrag: Workboard-Eintrag + Slice-YAML
+external_gates: []
+risks:
+  - Echter Kontrakt-Datensatz in kontrakte.py bleibt separate Datenquelle

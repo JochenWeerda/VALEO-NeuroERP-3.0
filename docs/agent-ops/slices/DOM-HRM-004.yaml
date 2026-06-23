@@ -1,0 +1,37 @@
+slice_id: DOM-HRM-004
+title: "HRM-Domäne — Vollständige Vertiefung: Zeiterfassung (.2), Abwesenheit (.3), Arbeitszeitkonto (.4), E2E (.5)"
+owner: Claude Sonnet 4.6
+status: completed
+goal: >-
+  HRM-Gesamtkette auf volle 004-Tiefe: Zeitbuchung OFFEN→GEBUCHT→KORRIGIERT,
+  Abwesenheitsantrag BEANTRAGT→GENEHMIGT→VERBRAUCHT,
+  Arbeitszeitkonto mit Soll/Ist + Ampel.
+file_ownership:
+  - docs/agent-ops/slices/DOM-HRM-004.yaml
+  - app/services/hrm_zeiterfassung_service.py
+  - app/services/hrm_abwesenheit_service.py
+  - alembic/versions/hrm_zeiterfassung_abwesenheit_20260623.py
+  - app/api/v1/endpoints/hrm_lifecycle_actions.py
+  - tests/test_dom_hrm_004.py
+not_owned:
+  - app/api/v1/endpoints/personal.py
+  - app/services/lohn_service.py
+acceptance_criteria:
+  - Zeitbuchung: OFFEN→GEBUCHT→KORRIGIERT/STORNIERT
+  - Abwesenheit: BEANTRAGT→GENEHMIGT/ABGELEHNT/ZURUECKGEZOGEN→VERBRAUCHT
+  - Arbeitszeitkonto: Soll/Ist, Differenz, Ampel grün/gelb/rot
+  - Stunden-Berechnung HH:MM
+  - 13 Unit-Tests grün
+ai_harness:
+  fachlicher_vertrag: >-
+    Stunden = (bis - von) in Dezimalstunden. Abwesenheits-Typ aus Whitelist.
+    Arbeitstage > 0. Ampel: ≤8h Diff=grün, ≤20h=gelb, >20h=rot.
+  architektur_vertrag: Schema domain_hrm. text()-SQL only.
+  daten_vertrag: hrm_zeitbuchungen, hrm_mitarbeiter_konten, hrm_abwesenheiten.
+  test_vertrag: Stunden-Berechnung + Übergänge + Validierung + Ampel.
+  security_vertrag: X-Tenant-ID verpflichtend.
+  betriebs_vertrag: Konto-Berechnung read-only (kein commit).
+  dokumentations_vertrag: Workboard-Eintrag + Slice-YAML
+external_gates:
+  - eAU-Integration (externe Krankenkassen-Schnittstelle)
+  - Tarifvertrag-Prüfung (externe Rechtsberatung)
