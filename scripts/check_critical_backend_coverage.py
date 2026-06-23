@@ -40,6 +40,34 @@ CRITICAL_THRESHOLDS: dict[str, float] = {
     "services/feed_inventory_link_service.py": 0.55,
     "api/v1/endpoints/produktion_mischfutter.py": 0.35,
 
+    # ── DOM-CON-004: Kontrakt Lifecycle / Fixing / Settlement ─────────────────
+    "services/kontrakt_lifecycle_service.py": 0.80,   #  83% measured
+    "services/kontrakt_fixing_service.py": 0.58,      #  61% measured
+    "services/kontrakt_settlement_service.py": 0.60,  #  63% measured
+    "api/v1/endpoints/kontrakt_actions.py": 0.58,     #  62% measured
+
+    # ── DOM-FEED-PROD-004: Mischfutter-Produktion ─────────────────────────────
+    "services/feed_produktion_lifecycle_service.py": 0.73, #  76% measured
+    "services/feed_rezeptur_service.py": 0.50,             #  53% measured
+    "api/v1/endpoints/feed_produktion_actions.py": 0.62,   #  66% measured
+
+    # ── DOM-POS-004: Tagesabschluss + TSE-Simulation ─────────────────────────
+    "services/pos_tagesabschluss_service.py": 0.76,        #  79% measured
+    "api/v1/endpoints/pos_tagesabschluss_actions.py": 0.50, #  53% measured
+
+    # ── DOM-DOC-004: Nachweisraum + GoBD-Export ───────────────────────────────
+    "services/doc_nachweisraum_lifecycle_service.py": 0.73, #  76% measured
+    "api/v1/endpoints/doc_nachweisraum_actions.py": 0.62,   #  65% measured
+
+    # ── DOM-HRM-004: Zeiterfassung + Abwesenheit ──────────────────────────────
+    "services/hrm_zeiterfassung_service.py": 0.74,    #  77% measured
+    "services/hrm_abwesenheit_service.py": 0.78,      #  81% measured
+    "api/v1/endpoints/hrm_lifecycle_actions.py": 0.63, #  66% measured
+
+    # ── DOM-MEL-004: Meldewesen (Intrastat/ELSTER/ATLAS) ─────────────────────
+    "services/meldewesen_lifecycle_service.py": 0.87,  #  90% measured
+    "api/v1/endpoints/meldewesen_lifecycle_actions.py": 0.65, #  68% measured
+
     # ── Landhandel-Kern (COV-RATCHET-004 angehoben) ───────────────────────────
     "api/v1/endpoints/kontrakte.py": 0.27,          #  28.5% measured  (+5pp)
     "api/v1/endpoints/harvest_acceptance.py": 0.24, #  25.3% measured  (+4pp)
