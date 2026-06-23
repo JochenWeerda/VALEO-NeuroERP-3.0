@@ -1,0 +1,63 @@
+slice_id: VALEO-WF-COCKPIT-001
+title: "Workflow- und Prozessleitstand fuer VALEO Process Kernel"
+owner: Codex
+status: reserved
+coordination: >-
+  Entsteht aus valeo_neuroerp_youtube_gap_analyse_2026-06-23.md P0.1.
+  Kein Ueberlapp mit WM-AGRI-/Route-Generator-WIP oder DOM-CONTROLLING-004.
+  Deterministische Fachlogik bleibt in Process Kernel, Domain-Services,
+  Outbox/NATS und Audit-Logs; kein n8n-Kernersatz.
+goal: >-
+  Operativen Workflow-Leitstand schaffen, der Prozessinstanzen, Events,
+  externe Gates, Fehler, Retry-/Replay-Faelle und Audit-Kontext tenantfaehig
+  sichtbar und pruefbar macht.
+file_ownership:
+  - docs/agent-ops/active-workboard.md
+  - docs/agent-ops/slices/VALEO-WF-COCKPIT-001.yaml
+  - docs/workflows/valeo-wf-cockpit-001-workflow-leitstand-2026-06-23.md
+  - app/services/workflow_cockpit_service.py
+  - app/api/v1/endpoints/workflow_cockpit.py
+  - tests/test_workflow_cockpit_service.py
+not_owned:
+  - packages/frontend-web/src/app/routing/route-tree.gen.tsx
+  - packages/frontend-web/src/app/routing/route-inventory.gen.json
+  - packages/frontend-web/src/pages/lager/**
+  - docs/agent-ops/slices/WM-AGRI-SILO-001.yaml
+acceptance_criteria:
+  - Prozessinstanzen sind tenantisoliert mit Status pending/running/blocked_external_gate/failed/completed/compensated sichtbar.
+  - Event-Kette je Prozessinstanz ist chronologisch auswertbar.
+  - Externe Blocker werden getrennt von technischen Fehlern gefuehrt.
+  - Replay/Retry ist nur ueber explizite Berechtigungsentscheidung moeglich.
+  - Unit-Tests decken Statusuebergaenge, Tenant-Isolation, Blocker und Replay-Guards ab.
+ai_harness:
+  fachlicher_vertrag: >-
+    Operatoren muessen erkennen koennen, welcher ERP-Prozess warum steht:
+    Fachprozess, Status, letzte Aktion, externer Gate-Blocker, Retry-Faehigkeit,
+    Replay-Risiko und Audit-Bezug.
+  architektur_vertrag: >-
+    MVP als read-heavy Service/API ohne Uebernahme der Kernlogik. Source of
+    Truth bleiben Process Kernel, Domain-Services, Outbox/NATS und Audit.
+    Mutierende Aktionen duerfen nur Replay-/Retry-Anforderungen markieren.
+  daten_vertrag: >-
+    Tenant-ID, process_instance_id, process_key, correlation_id,
+    idempotency_key, status, business_object_ref, events, blockers, audit.
+  test_vertrag: >-
+    Unit-Tests fuer Statusberechnung, Eventsortierung, externe Blocker,
+    Tenant-Isolation und Replay-Authorization-Guard. API-Vertrag mit
+    response_model fuer alle neuen Routen.
+  security_vertrag: >-
+    Kein tenantuebergreifender Zugriff. Replay/Retry ohne Rolle
+    workflow:replay wird blockiert. Audit-Event fuer jede Replay-Anforderung.
+  betriebs_vertrag: >-
+    Fail-closed fuer Replay, fail-readable fuer Cockpit-Listen. Keine
+    externen Systeme fuer MVP erforderlich.
+  dokumentations_vertrag: >-
+    Workflow-Doku mit Scope, Statusmodell, externen Gates, Grenzen gegen n8n
+    und UAT-Szenario.
+external_gates:
+  - Keine externe Abnahme fuer MVP; externe Gate-Typen werden nur modelliert.
+risks:
+  - Bestehende Process-Kernel-Tabellen koennen je Umgebung variieren; MVP
+    kapselt deshalb Statusmodell und Cockpit-Snapshot service-seitig.
+  - Produktives Replay bleibt Folgeslice und darf nicht ohne RBAC/Audit
+    erweitert werden.
