@@ -85,6 +85,23 @@ export type FeedChainTrace = {
   kette_geschlossen: boolean
 }
 
+/** FEED-CHAIN-004: Einzelfutter ↔ domain_inventory.articles */
+export type FeedInventoryLinkRow = {
+  id: string
+  artikel_nummer: string
+  name: string
+  inventory_article_id?: string | null
+  verfuegbar_t: number
+  inv_article_number?: string | null
+}
+
+export type FeedInventoryLinksResponse = {
+  items: FeedInventoryLinkRow[]
+  total: number
+  mapped_count: number
+  unmapped_count: number
+}
+
 // ── Hooks ──────────────────────────────────────────────────────────────────
 
 // Achtung: kein ``initialData: []`` — das zählt als frischer Fetch und unterdrückt
@@ -162,4 +179,29 @@ export async function fetchProduktionsTrace(ref: string): Promise<FeedChainTrace
     `/api/v1/produktion/mischfutter/auftraege/${encodeURIComponent(ref)}/trace`,
   )
   return res.data
+}
+
+export function useFeedInventoryLinks() {
+  return useQuery({
+    queryKey: ['produktion', 'mischfutter', 'inventory-links'],
+    queryFn: async () =>
+      (await apiClient.get<FeedInventoryLinksResponse>('/api/v1/produktion/mischfutter/inventory-links')).data,
+    staleTime: 30 * 1000,
+  })
+}
+
+/** Legt fehlenden Lagerartikel an oder verknüpft per artikel_nummer (idempotent). */
+export function useEnsureFeedInventoryLink() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async (einzelfutterId: string) =>
+      (
+        await apiClient.post<{ ok: boolean; article_id: string; created?: boolean }>(
+          `/api/v1/produktion/mischfutter/inventory-links/${encodeURIComponent(einzelfutterId)}/ensure`,
+        )
+      ).data,
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ['produktion', 'mischfutter', 'inventory-links'] })
+    },
+  })
 }
