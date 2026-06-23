@@ -1,6 +1,9 @@
 # Security scan reports (generated locally)
 security-reports/
 
+# Local Alembic helper scripts (not part of codebase)
+scripts/fix_alembic_drift.py
+
 # Sync .project/sourceTexts/ folder (source text files)
 
 # Don't sync user-specific SQLite databases
