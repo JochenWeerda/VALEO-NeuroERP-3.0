@@ -31,7 +31,7 @@ test.describe('@smoke Sales Lifecycle', () => {
 
   test('3 — Preisabweichung prüfen', async () => {
     const ctx = await request.newContext({ baseURL: BASE })
-    const res = await ctx.post('/api/v1/sales/orders/smoke-auftrag-001/preisabweichung', {
+    const res = await ctx.post('/api/v1/sales/orders/orders/smoke-auftrag-001/preisabweichung', {
       headers: HEADERS,
       data: { artikel_id: 'art-001', angebots_preis: 100.0, rechnungs_preis: 105.0 },
     })
