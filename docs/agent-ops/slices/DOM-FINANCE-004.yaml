@@ -1,0 +1,82 @@
+slice_id: DOM-FINANCE-004
+title: "Finance-Domäne — Vollständige Vertiefung (SEPA .2 / Ratenzahlung .3 / Mahnstufe .4 / E2E .5)"
+owner: Claude Code
+status: completed
+coordination: >-
+  Ergänzt bestehende finance_clearing_service / finance_dunning_service / finance_op_service.
+  Keine aktiven Cursor-Finance-Slices. Kein Überlapp.
+  Dieser Slice besitzt nur neue finance_sepa_*/finance_ratenzahlung_*/finance_mahnstufe_*-Dateien.
+goal: >-
+  Finance-Kern-Prozesskette SEPA-Lastschrift → Ratenzahlung → Mahnwesen-Eskalation
+  auf volle 004-Tiefe heben. Zahlungsträger-Export, Ratenzahlungsplan-Lifecycle
+  und vollständige Mahnstufen-Protokollierung einführen.
+file_ownership:
+  - docs/agent-ops/active-workboard.md
+  - docs/agent-ops/slices/DOM-FINANCE-004.yaml
+  - docs/workflows/dom-finance-004-finance-deepening-2026-06-23.md
+  - app/services/finance_sepa_service.py
+  - app/services/finance_ratenzahlung_service.py
+  - app/services/finance_mahnstufe_service.py
+  - alembic/versions/finance_sepa_ratenzahlung_20260623.py
+  - app/api/v1/endpoints/finance_actions.py
+  - playwright-tests/specs/finance/finance-lifecycle-smoke.spec.ts
+  - scripts/uat/finance_lifecycle_uat.py
+  - tests/test_dom_finance_004.py
+not_owned:
+  - app/services/finance_clearing_service.py
+  - app/services/finance_dunning_service.py
+  - app/services/finance_op_service.py
+  - app/services/finance_period_service.py
+  - app/services/finance_transaction_service.py
+  - app/api/v1/endpoints/finance_clearing.py
+  - app/api/v1/endpoints/finance_dunning.py
+acceptance_criteria:
+  - SEPA-Mandat anlegen + Lastschrift-Batch exportieren (XML-Struktur)
+  - Ratenzahlungsplan: erstellen → Raten buchen → Plan abschließen
+  - Mahnstufen-Eskalation: 1→2→3→INKASSO mit Audit-Trail
+  - 10+ Unit-Tests grün
+  - Playwright @smoke + UAT-Script lauffähig
+ai_harness:
+  fachlicher_vertrag: >-
+    SEPA-Mandat: Gläubiger-ID, IBAN, BIC, Mandatsreferenz, Typ (CORE/B2B).
+    Status: AKTIV / WIDERRUFEN / ABGELAUFEN.
+    Lastschrift-Batch: XML-Export (PAIN.008 vereinfacht) pro Fälligkeitstag.
+    Ratenzahlungsplan: Gesamtbetrag aufgeteilt in N Raten mit Fälligkeitstagen.
+    Status: AKTIV / ABGESCHLOSSEN / STORNIERT.
+    Rate-Buchung: Reduziert Restbetrag, setzt ABGESCHLOSSEN wenn Restbetrag=0.
+    Mahnstufe: 1=Zahlungserinnerung, 2=Mahnung, 3=letzte Mahnung, INKASSO=Übergabe.
+    Jede Eskalation schreibt Audit-Zeile (append-only).
+  architektur_vertrag: >-
+    Services in app/services/, Endpunkte als Erweiterung von finance_actions.py.
+    Neue Tabellen via Alembic. Kein ORM-Modell, nur text()-SQL.
+    Bestehende finance_*_service.py werden nicht verändert.
+  daten_vertrag: >-
+    finance_sepa_mandate: id, tenant_id, mandat_ref, glaeubiger_id, iban, bic,
+    typ, status, erteilung_am, widerruf_am, created_at.
+    finance_sepa_batches: id, tenant_id, faellig_am, gesamt_eur, status, xml_payload, created_at.
+    finance_ratenzahlungsplaene: id, tenant_id, op_id, gesamt_eur, anzahl_raten,
+    restbetrag_eur, status, created_at.
+    finance_ratenzahlungsraten: id, plan_id, tenant_id, rate_nr, betrag_eur,
+    faellig_am, bezahlt_am, status.
+    finance_mahnstufen_audit: id, tenant_id, rechnungsnr, stufe, operator,
+    bearbeitungsgebuehr_eur, created_at.
+  test_vertrag: >-
+    Unit: sepa (Mandat anlegen, Widerruf, Batch-Export).
+    Unit: ratenzahlung (Plan anlegen, Rate buchen, Abschluss bei Restbetrag=0).
+    Unit: mahnstufe (Eskalation, Doppel-Eskalation-Guard, Inkasso).
+    Playwright @smoke: SEPA anlegen, Ratenzahlung, Mahnstufe.
+    UAT: sequentiell alle neuen Endpunkte.
+  security_vertrag: >-
+    X-Tenant-ID bei allen Mutations verpflichtend.
+    SEPA-Mandate: nur eigene Tenant-Mandate zugreifbar.
+    Mahnstufen-Audit append-only (INSERT, kein UPDATE).
+  betriebs_vertrag: >-
+    Alle Service-Fehler mit logger.warning. SEPA-Batch-Export transaktional.
+    Ratenzahlungsplan idempotent via op_id unique.
+  dokumentations_vertrag: >-
+    docs/workflows/dom-finance-004-finance-deepening-2026-06-23.md
+    beschreibt SEPA-Flow, Ratenzahlungs-Lifecycle, Mahnstufen-Eskalation.
+external_gates: []
+risks:
+  - SEPA XML-Export ist vereinfacht (kein vollständiger PAIN.008-Standard)
+  - Ratenzahlungsplan setzt finance_op_service (OP-Lookup) voraus

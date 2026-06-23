@@ -6,7 +6,7 @@ Minimal action endpoints that execute a short logic or stub and return { success
 import io
 from datetime import date, datetime, timezone
 from typing import List, Optional
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, Header, HTTPException, Query
 from fastapi.responses import StreamingResponse
 from sqlalchemy.orm import Session
 from sqlalchemy import text
@@ -666,3 +666,146 @@ async def get_close_readiness(
         ],
         "last_updated": datetime.now(timezone.utc).isoformat(),
     }
+
+
+# ---------------------------------------------------------------------------
+# DOM-FINANCE-004: SEPA / Ratenzahlung / Mahnstufe
+# ---------------------------------------------------------------------------
+
+from pydantic import BaseModel as _BM
+from typing import List as _List, Optional as _Opt
+
+
+class SEPAMandatIn(_BM):
+    glaeubiger_id: str
+    iban: str
+    bic: _Opt[str] = None
+    typ: _Opt[str] = "CORE"
+    erteilung_am: _Opt[str] = None
+
+
+class SEPABatchEintragIn(_BM):
+    mandat_ref: str
+    iban: str
+    betrag_eur: float
+
+
+class SEPABatchIn(_BM):
+    faellig_am: str
+    eintraege: _List[SEPABatchEintragIn]
+
+
+class RatenzahlungPlanIn(_BM):
+    op_id: str
+    gesamt_eur: float
+    anzahl_raten: int
+    erste_faelligkeit: str
+
+
+class RateBuchenIn(_BM):
+    bezahlt_am: _Opt[str] = None
+
+
+class MahnstufeIn(_BM):
+    operator: _Opt[str] = "system"
+
+
+@router.post("/sepa/mandate", status_code=201, summary="SEPA-Mandat anlegen")
+def create_sepa_mandat_endpoint(
+    body: SEPAMandatIn,
+    x_tenant_id: _Opt[str] = Header(None),
+    db: Session = Depends(get_db),
+) -> dict:
+    from app.services.finance_sepa_service import create_sepa_mandat, SEPAError
+    tenant_id = x_tenant_id or "default"
+    try:
+        return create_sepa_mandat(db, tenant_id, body.glaeubiger_id, body.iban,
+                                   body.bic or "", body.typ or "CORE", body.erteilung_am)
+    except SEPAError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+
+
+@router.post("/sepa/mandate/{mandat_id}/widerruf", summary="SEPA-Mandat widerrufen")
+def widerruf_sepa_mandat_endpoint(
+    mandat_id: str,
+    x_tenant_id: _Opt[str] = Header(None),
+    db: Session = Depends(get_db),
+) -> dict:
+    from app.services.finance_sepa_service import widerruf_sepa_mandat, SEPAError
+    tenant_id = x_tenant_id or "default"
+    try:
+        return widerruf_sepa_mandat(db, mandat_id, tenant_id)
+    except SEPAError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+
+
+@router.post("/sepa/batches", status_code=201, summary="SEPA-Lastschrift-Batch erstellen")
+def create_sepa_batch_endpoint(
+    body: SEPABatchIn,
+    x_tenant_id: _Opt[str] = Header(None),
+    db: Session = Depends(get_db),
+) -> dict:
+    from app.services.finance_sepa_service import create_sepa_batch, SEPAError
+    tenant_id = x_tenant_id or "default"
+    try:
+        return create_sepa_batch(db, tenant_id, body.faellig_am,
+                                  [e.model_dump() for e in body.eintraege])
+    except SEPAError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+
+
+@router.post("/ratenzahlung/plaene", status_code=201, summary="Ratenzahlungsplan anlegen")
+def create_ratenzahlungsplan_endpoint(
+    body: RatenzahlungPlanIn,
+    x_tenant_id: _Opt[str] = Header(None),
+    db: Session = Depends(get_db),
+) -> dict:
+    from app.services.finance_ratenzahlung_service import create_ratenzahlungsplan, RatenzahlungError
+    tenant_id = x_tenant_id or "default"
+    try:
+        return create_ratenzahlungsplan(db, tenant_id, body.op_id, body.gesamt_eur,
+                                        body.anzahl_raten, body.erste_faelligkeit)
+    except RatenzahlungError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+
+
+@router.post("/ratenzahlung/raten/{rate_id}/buchen", summary="Rate als bezahlt buchen")
+def buche_rate_endpoint(
+    rate_id: str,
+    body: RateBuchenIn,
+    x_tenant_id: _Opt[str] = Header(None),
+    db: Session = Depends(get_db),
+) -> dict:
+    from app.services.finance_ratenzahlung_service import buche_rate, RatenzahlungError
+    tenant_id = x_tenant_id or "default"
+    try:
+        return buche_rate(db, rate_id, tenant_id, body.bezahlt_am)
+    except RatenzahlungError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+
+
+@router.post("/mahnstufe/{rechnungsnr}/eskalieren", status_code=201, summary="Mahnstufe eskalieren")
+def eskaliere_mahnstufe_endpoint(
+    rechnungsnr: str,
+    body: MahnstufeIn,
+    x_tenant_id: _Opt[str] = Header(None),
+    db: Session = Depends(get_db),
+) -> dict:
+    from app.services.finance_mahnstufe_service import eskaliere_mahnstufe, MahnstufeError
+    tenant_id = x_tenant_id or "default"
+    try:
+        return eskaliere_mahnstufe(db, rechnungsnr, tenant_id, body.operator or "system")
+    except MahnstufeError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+
+
+@router.get("/mahnstufe/{rechnungsnr}/trail", summary="Mahnstufen-Trail abrufen")
+def get_mahnstufe_trail_endpoint(
+    rechnungsnr: str,
+    x_tenant_id: _Opt[str] = Header(None),
+    db: Session = Depends(get_db),
+) -> dict:
+    from app.services.finance_mahnstufe_service import get_mahnstufen_trail
+    tenant_id = x_tenant_id or "default"
+    trail = get_mahnstufen_trail(db, rechnungsnr, tenant_id)
+    return {"rechnungsnr": rechnungsnr, "trail": trail, "count": len(trail)}
