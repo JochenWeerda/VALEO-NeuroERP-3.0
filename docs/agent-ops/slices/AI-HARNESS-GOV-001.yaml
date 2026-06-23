@@ -1,14 +1,13 @@
 slice_id: AI-HARNESS-GOV-001
 title: AI-assisted Development Harness Governance
-owner: Codex
+owner: Cursor
 status: completed
 created_at: 2026-06-23
 coordination: >-
-  Info an Claude Code: Codex bearbeitet ausschliesslich AI-/Docs-Governance,
-  Agent-Ops-Harness, QA-Templates und zugehoerige CI-/Script-Dateien. Keine
-  Aenderung an aktuellen WMS-/Silo-/Materialfluss-Dateien oder generierten
-  Frontend-Routen aus parallelem WIP. Bestehende fachliche WIP-Dateien bleiben
-  unangetastet und werden nicht gebuendelt.
+  Harness-Betrieb ab 2026-06-23: Cursor (Auto) uebernimmt operativen AI-Harness
+  (Claims, Readiness-/Sync-Checks, Doku-Nachzug). Parallele fachliche Slices
+  behalten eigenen Dateibesitz; keine Buendelung fremden WIP. Governance-
+  Aenderungen nur in file_ownership dieses Slices.
 goal: >-
   Den AI-assisted Enterprise Development Standard operativ einfuehren: Slice-
   Harness, Doku-/Code-Sync, AI-Definition-of-Done, semantische QA-Templates,
