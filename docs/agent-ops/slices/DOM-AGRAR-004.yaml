@@ -1,0 +1,81 @@
+slice_id: DOM-AGRAR-004
+title: "AGRAR-Domäne — Vollständige Vertiefung (Partie .2 / Trocknungsabrechnung .3 / Selbstabrechnung .4 / E2E .5)"
+owner: Claude Code
+status: completed
+coordination: >-
+  Ergänzt bestehende agrar_settlements.py / agrar_contracts.py / agrar_drying_rules.py.
+  WM-AGRI-QS-004 (Cursor) besitzt agri_qs_workflow_*.py — kein Überlapp.
+  Dieser Slice besitzt nur neue agrar_partie_*/agrar_trocknung_*/agrar_selbstabrechnung_*-Dateien.
+goal: >-
+  Agrar-Kern-Prozesskette Ernteannahme → Partie → Trocknungsabrechnung →
+  Selbstabrechnung auf volle 004-Tiefe heben. Medienbruch zwischen
+  Einzelannahmen, Partie-Aggregation und Abrechnungsbeleg schließen.
+file_ownership:
+  - docs/agent-ops/active-workboard.md
+  - docs/agent-ops/slices/DOM-AGRAR-004.yaml
+  - docs/workflows/dom-agrar-004-agrar-deepening-2026-06-23.md
+  - app/services/agrar_partie_aggregate_service.py
+  - app/services/agrar_trocknung_abrechnung_service.py
+  - app/services/agrar_selbstabrechnung_lifecycle_service.py
+  - alembic/versions/agrar_partie_settlement_20260623.py
+  - app/api/v1/endpoints/agrar_p0.py
+  - playwright-tests/specs/agrar/agrar-lifecycle-smoke.spec.ts
+  - scripts/uat/agrar_lifecycle_uat.py
+  - tests/test_dom_agrar_004.py
+not_owned:
+  - app/api/v1/endpoints/agrar_settlements.py
+  - app/api/v1/endpoints/agrar_contracts.py
+  - app/api/v1/endpoints/agrar_drying_rules.py
+  - modules/agrar/services/partie_service.py
+  - modules/agrar/services/self_billing_service.py
+  - app/api/v1/endpoints/agri_qs_workflow.py
+acceptance_criteria:
+  - POST /agrar/partien legt Partie aus mehreren Annahmen an
+  - GET /agrar/partien/{id} gibt Partie mit verknüpften Annahmen zurück
+  - POST /agrar/partien/{id}/trocknung berechnet Trocknungskosten und persistiert Abrechnung
+  - POST /agrar/selbstabrechnung/{id}/issue setzt Status auf ISSUED (fail-closed)
+  - POST /agrar/selbstabrechnung/{id}/storno erzeugt Gegenbuchung idempotent
+  - 10+ Unit-Tests grün
+  - Playwright @smoke + UAT-Script lauffähig
+ai_harness:
+  fachlicher_vertrag: >-
+    Partie: Aggregiert N Ernteannahmen zu einer Handelspartie.
+    Felder: partie_number (auto), article_id, tenant_id, total_net_kg,
+    avg_moisture_pct, avg_impurity_pct, status (OFFEN/ABGERECHNET/STORNIERT).
+    Partie-Links: (partie_id, acceptance_id) eindeutig.
+    Trocknungsabrechnung: moisture_in - moisture_out = Trocknungsgrad.
+    Trocknungskosten = (brutto_kg * trocknung_pct / 100) * cost_eur_per_pct_ton.
+    Selbstabrechnung-Status: DRAFT→ISSUED→PAID | DRAFT→CANCELLED | ISSUED→DISPUTED→RESOLVED.
+    Storno nur aus DRAFT oder ISSUED möglich.
+  architektur_vertrag: >-
+    Services in app/services/, Endpunkte als Erweiterung von agrar_p0.py.
+    Neue Tabellen via Alembic. Kein ORM-Modell, nur text()-SQL.
+    Bestehende modules/agrar/services/* werden als reine Kalkulatoren aufgerufen.
+  daten_vertrag: >-
+    agrar_partien: id, tenant_id, partie_number, article_id, campaign_id,
+    total_gross_kg, total_net_kg, avg_moisture_pct, avg_impurity_pct, status, created_at.
+    agrar_partie_links: id, partie_id, acceptance_id, gross_kg, net_kg, tenant_id.
+    agrar_trocknung_abrechnungen: id, partie_id, tenant_id, moisture_in_pct,
+    moisture_out_pct, brutto_kg, trocknungsabzug_kg, trocknungskosten_eur, created_at.
+    agrar_selbstabrechnung_status_log: id, rechnung_id, old_status, new_status,
+    operator, reason, created_at, tenant_id.
+  test_vertrag: >-
+    Unit: partie_aggregate (Gewichts-Aggregation, Feuchte-Mittelwert, Duplikat-Guard).
+    Unit: trocknung_abrechnung (Trocknungsgrad, Kosten-Berechnung, Fail-Closed).
+    Unit: selbstabrechnung_lifecycle (Status-Maschine, Storno-Idempotenz).
+    Playwright @smoke: Partie anlegen, Trocknung buchen, Status-Wechsel.
+    UAT: sequentiell alle neuen Endpunkte.
+  security_vertrag: >-
+    X-Tenant-ID bei allen Mutations verpflichtend.
+    Partie-Links: Annahmen müssen zum selben Tenant gehören (cross-tenant-Guard).
+    Storno nur aus erlaubten Status (fail-closed).
+  betriebs_vertrag: >-
+    Alle Service-Fehler mit logger.warning. Partie-Anlage transaktional.
+    Trocknungsabrechnung idempotent via (partie_id) unique constraint.
+  dokumentations_vertrag: >-
+    docs/workflows/dom-agrar-004-agrar-deepening-2026-06-23.md
+    beschreibt alle drei Subprozesse mit Statusmaschinen.
+external_gates: []
+risks:
+  - acceptance_id-Verknüpfung setzt domain_agrar.harvest_acceptances voraus
+  - Trocknungsparameter (cost_eur_per_pct_ton) aus Config-Default wenn keine Regel vorhanden

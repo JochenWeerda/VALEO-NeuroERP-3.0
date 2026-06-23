@@ -4,7 +4,7 @@
 
 **Von:** Claude Code
 **Owner:** Claude Code
-**Stand:** reserviert 2026-06-23 — Claim vor Implementierung (AI-Harness-Protokoll)
+**Stand:** abgeschlossen 2026-06-23 — Partie-Aggregation (.2), Trocknungsabrechnung (.3), Selbstabrechnung-Lifecycle (.4), Playwright @smoke + UAT-Script (.5), Alembic-Migration agrar_partie_settlement_20260623, 13 Unit-Tests grün, Slice-YAML + Workflow-Doku
 **Ziel:** Agrar-Kern-Prozess auf volle 004-Tiefe heben: Ernteannahme→Partie (.2), Trocknungsabrechnung→Settlement (.3), Selbstabrechnung-Lifecycle (.4), E2E-UAT (.5). Kein Überlapp mit WM-AGRI-QS-004 (Cursor, QS-Leitstand).
 **Dateibesitz:** `app/services/agrar_partie_service.py`, `app/services/agrar_trocknung_abrechnung_service.py`, `app/services/agrar_selbstabrechnung_lifecycle_service.py`, `alembic/versions/agrar_partie_settlement_20260623.py`, `app/api/v1/endpoints/agrar_p0.py`, `playwright-tests/specs/agrar/agrar-lifecycle-smoke.spec.ts`, `scripts/uat/agrar_lifecycle_uat.py`, `docs/workflows/dom-agrar-004-agrar-deepening-2026-06-23.md`, `docs/agent-ops/slices/DOM-AGRAR-004.yaml`
 **Koordination:** WM-AGRI-QS-004 (Cursor) besitzt `agri_qs_workflow*.py` — kein Überlapp. Fremde Dateien bleiben unangetastet.
@@ -382,6 +382,19 @@ Freigabe/Sperrung ist jetzt auf der Charge sichtbar.
 **Dateibesitz:** `app/api/v1/endpoints/quality_lot_binding.py`, `alembic/versions/feed_chain_quality_lot_20260613.py`,
 `tests/test_feed_chain_003.py` (neu).
 **Abnahmekriterien:** 503 ohne Migration; Lot upsert; Decision approve/reject schreibt Charge-Status; 7 Tests grün.
+
+## FEED-CHAIN-004 — Einzelfutter ↔ inventory.articles + Bewegungsbelege
+
+**Von:** Cursor
+**Owner:** Cursor
+**Stand:** abgeschlossen 2026-06-23 — Migration `feed_chain_article_map_20260623` (`inventory_article_id` auf
+`futtermittel_einzelfutter`); `FeedInventoryLinkService` verknüpft Einzelfutter per `artikel_nummer` mit
+`domain_inventory.articles` und schreibt bei Produktionsfreigabe/Storno kanonische Bewegungen in
+`inventory_stock_movements` (`source_document_type=feed_production`, idempotent per `reference_number`);
+Hooks in `produktion_mischfutter` nach `apply_verbrauch`; API `GET/POST …/inventory-links`; 4 Integrationstests.
+**Ziel:** Belegbruch schließen: Verbrauch nur in `futtermittel_einzelfutter.verfuegbar_t` ohne Lagerbewegungs-Audit.
+**Dateibesitz:** `feed_inventory_link_service.py`, `produktion_mischfutter.py`, Migration, `test_feed_chain_004.py`.
+**Abnahmekriterien:** Freigabe → 2× out-Bewegungen; Storno → 2× in-Bewegungen; ensure idempotent; Tests grün.
 
 ## SALES-COLL-001 — Sammelrechnung/Sammellieferschein Belegbruch
 
