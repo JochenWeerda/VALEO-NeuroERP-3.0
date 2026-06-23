@@ -4,7 +4,7 @@
 
 **Von:** Claude Code
 **Owner:** Claude Code
-**Stand:** reserviert 2026-06-23 — Claim vor Implementierung (AI-Harness-Protokoll)
+**Stand:** abgeschlossen 2026-06-23 — LotTrace/FEFO (.2), Inventur-Differenzbeleg (.3), Korrektur-Storno (.4), Playwright @smoke (.5), UAT-Script (.5), Alembic-Migration inv_lot_trace_20260623, 12 Unit-Tests, Slice-YAML + Workflow-Doku
 **Ziel:** Inventory-Domäne auf volle 004-Tiefe heben: Chargen-/MHD-Traceability (.2), Inventur-Abschluss + Lagerbewegungs-Abstimmung (.3), Bestandskorrektur-Lifecycle (.4), E2E-UAT (.5). Schließt das DOMAIN-PARITY-001-Gap "tieferes Chargen-/MHD-Modell".
 **Dateibesitz:** `app/services/inventory_lot_trace_service.py`, `app/services/inventory_count_close_service.py`, `app/services/inventory_correction_service.py`, `alembic/versions/inv_lot_trace_20260623.py`, `app/api/v1/endpoints/inventory_operations.py`, `playwright-tests/specs/inventory/inv-lifecycle-smoke.spec.ts`, `scripts/uat/inv_lifecycle_uat.py`, `docs/workflows/dom-inv-004-inventory-deepening-2026-06-23.md`, `docs/agent-ops/slices/DOM-INV-004.yaml`
 **Koordination:** Kein Überlapp mit WM-AGRI-QS-004 (Cursor). Fremde Dateien bleiben unangetastet.
