@@ -46,7 +46,7 @@ class RezepturTransitionRequest(BaseModel):
     operator: str = "system"
 
 
-@router.post("/auftraege", response_model=Dict[str, Any])
+@router.post("/auftraege", response_model=Dict[str, Any], summary="Futtermittel-Produktionsauftrag anlegen")
 def create_produktionsauftrag(
     req: ProduktionsauftragCreateRequest,
     x_tenant_id: str = Header(...),
@@ -70,7 +70,11 @@ def create_produktionsauftrag(
         raise HTTPException(status_code=400, detail=str(e))
 
 
-@router.post("/auftraege/{auftrag_id}/transition", response_model=Dict[str, Any])
+@router.post(
+    "/auftraege/{auftrag_id}/transition",
+    response_model=Dict[str, Any],
+    summary="Futtermittel-Produktionsauftragstatus wechseln",
+)
 def transition_auftrag(
     auftrag_id: str,
     req: ProduktionsTransitionRequest,
@@ -95,7 +99,7 @@ def transition_auftrag(
         raise HTTPException(status_code=400, detail=str(e))
 
 
-@router.post("/rezepturen", response_model=Dict[str, Any])
+@router.post("/rezepturen", response_model=Dict[str, Any], summary="Futtermittel-Rezeptur anlegen")
 def create_rezeptur(
     req: RezepturCreateRequest,
     x_tenant_id: str = Header(...),
@@ -116,7 +120,11 @@ def create_rezeptur(
         raise HTTPException(status_code=400, detail=str(e))
 
 
-@router.post("/rezepturen/{rezeptur_id}/transition", response_model=Dict[str, Any])
+@router.post(
+    "/rezepturen/{rezeptur_id}/transition",
+    response_model=Dict[str, Any],
+    summary="Futtermittel-Rezepturstatus wechseln",
+)
 def transition_rezeptur(
     rezeptur_id: str,
     req: RezepturTransitionRequest,

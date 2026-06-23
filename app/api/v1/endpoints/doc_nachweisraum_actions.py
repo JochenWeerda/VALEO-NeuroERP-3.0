@@ -42,7 +42,7 @@ class GoBDExportTransitionRequest(BaseModel):
     fehler: Optional[str] = None
 
 
-@router.post("/dokumente", response_model=Dict[str, Any])
+@router.post("/dokumente", response_model=Dict[str, Any], summary="Nachweisraum-Dokument anlegen")
 def create_dokument(
     req: DokumentCreateRequest,
     x_tenant_id: str = Header(...),
@@ -67,7 +67,11 @@ def create_dokument(
         raise HTTPException(status_code=400, detail=str(e))
 
 
-@router.post("/dokumente/{dokument_id}/transition", response_model=Dict[str, Any])
+@router.post(
+    "/dokumente/{dokument_id}/transition",
+    response_model=Dict[str, Any],
+    summary="Nachweisraum-Dokumentstatus wechseln",
+)
 def transition_dokument(
     dokument_id: str,
     req: DokumentTransitionRequest,
@@ -92,7 +96,7 @@ def transition_dokument(
         raise HTTPException(status_code=400, detail=str(e))
 
 
-@router.post("/gobd-exporte", response_model=Dict[str, Any])
+@router.post("/gobd-exporte", response_model=Dict[str, Any], summary="GoBD-Export anlegen")
 def create_gobd_export(
     req: GoBDExportCreateRequest,
     x_tenant_id: str = Header(...),
@@ -114,7 +118,11 @@ def create_gobd_export(
         raise HTTPException(status_code=400, detail=str(e))
 
 
-@router.post("/gobd-exporte/{export_id}/transition", response_model=Dict[str, Any])
+@router.post(
+    "/gobd-exporte/{export_id}/transition",
+    response_model=Dict[str, Any],
+    summary="GoBD-Exportstatus wechseln",
+)
 def transition_gobd_export(
     export_id: str,
     req: GoBDExportTransitionRequest,
