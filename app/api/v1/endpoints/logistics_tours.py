@@ -1,5 +1,6 @@
 """
 Logistik – Tourenplanung-Engine (Feature 1 + Track & Trace / ePOD Feature 3)
+DOM-LOG-004: Disposition-Check (.2) + ePOD-Settlement (.3) added 2026-06-23.
 Thin-router pattern: sqlalchemy.text() SQL, domain_logistics schema.
 Schema/Tabellen: Alembic-Revision ``log_logistics_core_20260612`` (kein Runtime-DDL).
 """
@@ -932,6 +933,102 @@ def get_statistics(
             "avg_stops_per_tour": round(total_stops / total_tours, 2) if total_tours > 0 else None,
             "problem_rate": round(problems / total_stops, 4) if total_stops > 0 else None,
         }
+    except HTTPException:
+        raise
+    except Exception as exc:
+        raise HTTPException(status_code=503, detail=str(exc)) from exc
+
+
+# ---------------------------------------------------------------------------
+# DOM-LOG-004.2 — Tour-Disposition-Check
+# ---------------------------------------------------------------------------
+
+class DispositionCheckIn(BaseModel):
+    capacity_kg: Optional[float] = None
+
+
+@router.post(
+    "/tours/{tour_id}/disposition-check",
+    status_code=200,
+    summary="Kapazitäts- und Zeitfenster-Check (DOM-LOG-004.2)",
+    response_model=LogisticsTourOut,
+)
+def disposition_check(
+    tour_id: str,
+    body: DispositionCheckIn,
+    x_tenant_id: Optional[str] = Header(None),
+    db: Session = Depends(get_db),
+) -> Dict[str, Any]:
+    """Disposition-Check: Kapazitätsauslastung + Zeitfenster-Konsistenz.
+
+    Persistiert ein Check-Record in tour_disposition_checks.
+    422 bei Überbuchung oder Zeitfenster-Verletzung.
+    """
+    if not x_tenant_id:
+        raise HTTPException(status_code=422, detail="X-Tenant-ID erforderlich.")
+    from app.services.logistics_disposition_service import (
+        DispositionError,
+        check_tour_disposition,
+    )
+    try:
+        result = check_tour_disposition(
+            db=db,
+            tour_id=tour_id,
+            tenant_id=x_tenant_id,
+            capacity_kg=body.capacity_kg,
+        )
+        return result
+    except DispositionError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+    except HTTPException:
+        raise
+    except Exception as exc:
+        raise HTTPException(status_code=503, detail=str(exc)) from exc
+
+
+# ---------------------------------------------------------------------------
+# DOM-LOG-004.3 — ePOD-Settlement
+# ---------------------------------------------------------------------------
+
+class EpodSettleIn(BaseModel):
+    recipient_name: Optional[str] = None
+    delivered_at: Optional[str] = None
+    notes: Optional[str] = None
+
+
+@router.post(
+    "/tours/{tour_id}/stops/{stop_id}/settle",
+    status_code=201,
+    summary="ePOD-Settlement (DOM-LOG-004.3)",
+    response_model=LogisticsTourOut,
+)
+def settle_epod_stop(
+    tour_id: str,
+    stop_id: str,
+    body: EpodSettleIn,
+    x_tenant_id: Optional[str] = Header(None),
+    db: Session = Depends(get_db),
+) -> Dict[str, Any]:
+    """Ablieferungsbeleg abschließen (fail-closed: erfordert GELIEFERT/SIGNED-Status).
+
+    Idempotent: wiederholter Aufruf gibt vorhandenen Settlement-Record zurück.
+    """
+    if not x_tenant_id:
+        raise HTTPException(status_code=422, detail="X-Tenant-ID erforderlich.")
+    from app.services.logistics_epod_service import EpodError, settle_epod
+    try:
+        result = settle_epod(
+            db=db,
+            tour_id=tour_id,
+            stop_id=stop_id,
+            tenant_id=x_tenant_id,
+            recipient_name=body.recipient_name,
+            delivered_at_iso=body.delivered_at,
+            notes=body.notes,
+        )
+        return result
+    except EpodError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
     except HTTPException:
         raise
     except Exception as exc:
