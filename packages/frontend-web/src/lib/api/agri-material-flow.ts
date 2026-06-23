@@ -365,6 +365,41 @@ export function usePatchAgriFlowEdge() {
   })
 }
 
+export async function deleteAgriFlowNode(nodeId: string, warehouseId: string): Promise<void> {
+  await apiClient.delete(`/api/v1/lager/wms/agri/material-flow/nodes/${nodeId}`, {
+    params: { warehouse_id: warehouseId },
+  })
+}
+
+export async function deleteAgriFlowEdge(edgeId: string, warehouseId: string): Promise<void> {
+  await apiClient.delete(`/api/v1/lager/wms/agri/material-flow/edges/${edgeId}`, {
+    params: { warehouse_id: warehouseId },
+  })
+}
+
+export function useDeleteAgriFlowNode() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: async (vars: { nodeId: string; warehouseId: string }) =>
+      deleteAgriFlowNode(vars.nodeId, vars.warehouseId),
+    onSuccess: (_data, vars) => {
+      void qc.invalidateQueries({ queryKey: agriMaterialFlowKeys.nodes(vars.warehouseId) })
+      void qc.invalidateQueries({ queryKey: agriMaterialFlowKeys.edges(vars.warehouseId) })
+    },
+  })
+}
+
+export function useDeleteAgriFlowEdge() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: async (vars: { edgeId: string; warehouseId: string }) =>
+      deleteAgriFlowEdge(vars.edgeId, vars.warehouseId),
+    onSuccess: (_data, vars) => {
+      void qc.invalidateQueries({ queryKey: agriMaterialFlowKeys.edges(vars.warehouseId) })
+    },
+  })
+}
+
 export function useBookAgriMaterialTransfer() {
   const qc = useQueryClient()
   return useMutation({

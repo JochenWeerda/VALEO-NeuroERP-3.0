@@ -5,7 +5,7 @@ from __future__ import annotations
 from decimal import Decimal
 from typing import Any, Optional
 
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import APIRouter, Depends, HTTPException, Query, Response, status
 from pydantic import BaseModel, ConfigDict
 from sqlalchemy.orm import Session
 
@@ -239,6 +239,42 @@ def patch_flow_edge(
     body = payload.model_dump(exclude_unset=True)
     try:
         return svc.patch_material_flow_edge(edge_id, warehouse_id, body)
+    except ValueError as e:
+        raise HTTPException(status_code=422, detail=str(e))
+
+
+@router.delete(
+    "/material-flow/nodes/{node_id}",
+    response_class=Response,
+    status_code=204,
+    summary="DELETE /material-flow/nodes/{node_id}",
+)
+def delete_flow_node(
+    node_id: str,
+    warehouse_id: str = Query(...),
+    svc: AgriSiloMaterialFlowService = Depends(_svc),
+) -> Response:
+    try:
+        svc.delete_material_flow_node(node_id, warehouse_id)
+        return Response(status_code=204)
+    except ValueError as e:
+        raise HTTPException(status_code=422, detail=str(e))
+
+
+@router.delete(
+    "/material-flow/edges/{edge_id}",
+    response_class=Response,
+    status_code=204,
+    summary="DELETE /material-flow/edges/{edge_id}",
+)
+def delete_flow_edge(
+    edge_id: str,
+    warehouse_id: str = Query(...),
+    svc: AgriSiloMaterialFlowService = Depends(_svc),
+) -> Response:
+    try:
+        svc.delete_material_flow_edge(edge_id, warehouse_id)
+        return Response(status_code=204)
     except ValueError as e:
         raise HTTPException(status_code=422, detail=str(e))
 
