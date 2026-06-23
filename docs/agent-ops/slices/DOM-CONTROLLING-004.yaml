@@ -1,0 +1,70 @@
+slice_id: DOM-CONTROLLING-004
+title: "Controlling-Domäne — Vollständige Vertiefung (Budget-Lifecycle .2 / Abweichung .3 / Kostenstellen-Abschluss .4 / E2E .5)"
+owner: Claude Code
+status: completed
+coordination: >-
+  Ergänzt bestehende controlling_service.py (KPI/Dashboard-CRUD).
+  Keine aktiven Cursor-Controlling-Slices. Kein Überlapp.
+  controlling_service.py bleibt unangetastet.
+goal: >-
+  Controlling-Kern-Prozesskette Budget-Planung → Plan/Ist-Abweichung →
+  Kostenstellen-Abschluss auf volle 004-Tiefe heben.
+file_ownership:
+  - docs/agent-ops/active-workboard.md
+  - docs/agent-ops/slices/DOM-CONTROLLING-004.yaml
+  - docs/workflows/dom-controlling-004-controlling-deepening-2026-06-23.md
+  - app/services/controlling_budget_lifecycle_service.py
+  - app/services/controlling_abweichung_service.py
+  - app/services/controlling_kostenstellen_abschluss_service.py
+  - alembic/versions/controlling_budget_abschluss_20260623.py
+  - app/api/v1/endpoints/controlling_actions.py
+  - playwright-tests/specs/controlling/controlling-lifecycle-smoke.spec.ts
+  - scripts/uat/controlling_lifecycle_uat.py
+  - tests/test_dom_controlling_004.py
+not_owned:
+  - app/services/controlling_service.py
+  - app/api/v1/endpoints/controlling.py
+acceptance_criteria:
+  - Budget: ENTWURF→FREIGEGEBEN→AKTIV→ABGESCHLOSSEN
+  - Abweichungsanalyse: Plan vs. Ist, Ampel-Status, Drill-Down per KST
+  - Kostenstellen-Abschluss: OFFEN→IN_BEARBEITUNG→ABGESCHLOSSEN mit Sperr-Guard
+  - 10+ Unit-Tests grün
+  - Playwright @smoke + UAT-Script lauffähig
+ai_harness:
+  fachlicher_vertrag: >-
+    Budget: Planwert je Kostenstelle + Periode. Status ENTWURF→FREIGEGEBEN→AKTIV→ABGESCHLOSSEN.
+    Abweichung: (ist_eur - plan_eur) / plan_eur * 100.
+    Ampel: grün ≤ 5%, gelb ≤ 15%, rot > 15%.
+    Kostenstellen-Abschluss: OFFEN→IN_BEARBEITUNG→ABGESCHLOSSEN.
+    Abgeschlossene Perioden sind gegen neue Ist-Buchungen gesperrt.
+  architektur_vertrag: >-
+    Services in app/services/, Endpunkte in neuem controlling_actions.py.
+    Neue Tabellen via Alembic. Kein ORM-Modell, nur text()-SQL.
+    controlling_service.py bleibt unangetastet.
+  daten_vertrag: >-
+    controlling_budgets: id, tenant_id, kostenstelle_id, periode, plan_eur,
+    bezeichnung, status, freigabe_operator, created_at.
+    controlling_budget_status_log: id, budget_id, tenant_id, old_status,
+    new_status, operator, created_at.
+    controlling_ist_werte: id, tenant_id, kostenstelle_id, periode,
+    ist_eur, buchungsref, created_at.
+    controlling_kst_abschluss: id, tenant_id, kostenstelle_id, periode,
+    status, operator, abgeschlossen_am, created_at.
+  test_vertrag: >-
+    Unit: budget_lifecycle (Statusübergänge, Freigabe-Guard, idempotente Aktivierung).
+    Unit: abweichung (Ampel-Berechnung, Drill-Down, kein Plan → Sonderfall).
+    Unit: kostenstellen_abschluss (Flow, Sperr-Guard, Idempotenz).
+    Playwright @smoke + UAT-Script.
+  security_vertrag: >-
+    X-Tenant-ID bei allen Mutations verpflichtend.
+    Abgeschlossene Kostenstellen-Perioden: keine neuen Ist-Buchungen.
+    Budget-Status-Log append-only.
+  betriebs_vertrag: >-
+    Budget-Lifecycle transaktional. Abweichung read-only (kein Commit).
+    Kostenstellen-Abschluss idempotent via (kostenstelle_id, periode).
+  dokumentations_vertrag: >-
+    docs/workflows/dom-controlling-004-controlling-deepening-2026-06-23.md
+external_gates: []
+risks:
+  - Ist-Werte kommen aus externen Buchungs-Services (hier: eigene controlling_ist_werte Tabelle)
+  - Periodenformat: YYYY-MM (string)

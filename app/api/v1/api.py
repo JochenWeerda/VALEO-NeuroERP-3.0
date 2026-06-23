@@ -152,6 +152,7 @@ from app.api.v1.endpoints import (
     config_service,
     job_runner,
     controlling,
+    controlling_actions,
     training,
     personal,
     compliance_dsgvo,
@@ -1594,6 +1595,11 @@ api_router.include_router(
 api_router.include_router(
     controlling.router,
     tags=["controlling", "kpi", "dashboard"]
+)
+
+api_router.include_router(
+    controlling_actions.router,
+    tags=["controlling"]
 )
 
 api_router.include_router(
