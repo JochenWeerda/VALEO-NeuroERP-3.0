@@ -83,6 +83,15 @@ def upgrade() -> None:
         schema="domain_procurement",
     )
 
+    # Empty CI databases may not have the legacy purchase-order table yet.
+    # Keep the migration additive so a full bootstrap can reach head.
+    op.execute("""
+        CREATE TABLE IF NOT EXISTS domain_procurement.proc_purchase_orders (
+            id VARCHAR(36) PRIMARY KEY,
+            tenant_id VARCHAR(36)
+        )
+    """)
+
     # add status column to existing purchase orders if not present
     op.execute("""
         ALTER TABLE domain_procurement.proc_purchase_orders
