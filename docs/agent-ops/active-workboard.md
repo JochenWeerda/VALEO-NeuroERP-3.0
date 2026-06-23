@@ -1,5 +1,14 @@
 # Active Workboard
 
+## DOM-PROC-004 — Procurement-Domäne Vollständige Vertiefung (.2–.5)
+
+**Von:** Claude Code
+**Owner:** Claude Code
+**Stand:** reserviert 2026-06-23 — Claim vor Implementierung (AI-Harness-Protokoll)
+**Ziel:** Procurement-Kern-Prozesse auf volle 004-Tiefe heben: Bestellung-Lifecycle (.2), Wareneingangs-Buchung + QS (.3), Rechnungsprüfung + ERS-Abschluss (.4), Playwright @smoke + UAT (.5).
+**Dateibesitz:** `app/services/proc_bestellung_lifecycle_service.py`, `app/services/proc_wareneingang_service.py`, `app/services/proc_rechnungspruefung_service.py`, `alembic/versions/proc_bestellung_wareneingang_20260623.py`, `app/api/v1/endpoints/procurement_match.py`, `playwright-tests/specs/procurement/proc-lifecycle-smoke.spec.ts`, `scripts/uat/proc_lifecycle_uat.py`, `docs/workflows/dom-proc-004-procurement-deepening-2026-06-23.md`, `docs/agent-ops/slices/DOM-PROC-004.yaml`, `tests/test_dom_proc_004.py`
+**Koordination:** Keine aktiven Cursor-Procurement-Slices. Fremde Dateien bleiben unangetastet.
+
 ## DOM-SALES-004 — Sales-Domäne Vollständige Vertiefung (.2–.5)
 
 **Von:** Claude Code
