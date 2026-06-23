@@ -197,6 +197,7 @@ def _svc(db: Session = Depends(get_db), tenant_id: str = Depends(get_tenant_id))
 @router.post(
     "/plc/ingest",
     status_code=200,
+    response_model=dict[str, Any],
     summary="POST /plc/ingest — PLC/OPC-UA Batch-Datenpunkte einlesen (WM-AGRI-PLC-005)",
 )
 def plc_ingest(payload: PlcIngestIn, svc: AgriPlcService = Depends(_svc)) -> Any:
@@ -210,6 +211,7 @@ def plc_ingest(payload: PlcIngestIn, svc: AgriPlcService = Depends(_svc)) -> Any
 @router.post(
     "/plc/silo-level",
     status_code=200,
+    response_model=dict[str, Any],
     summary="POST /plc/silo-level — Fuellstand-Update von PLC/Sensor (WM-AGRI-PLC-005)",
 )
 def plc_silo_level(payload: PlcSiloLevelIn, svc: AgriPlcService = Depends(_svc)) -> Any:
@@ -223,6 +225,7 @@ def plc_silo_level(payload: PlcSiloLevelIn, svc: AgriPlcService = Depends(_svc))
 @router.post(
     "/plc/device-status",
     status_code=200,
+    response_model=dict[str, Any],
     summary="POST /plc/device-status — Heartbeat/Statusmeldung vom PLC-Feldgeraet",
 )
 def plc_device_status(payload: PlcDeviceStatusIn, svc: AgriPlcService = Depends(_svc)) -> Any:
@@ -233,6 +236,7 @@ def plc_device_status(payload: PlcDeviceStatusIn, svc: AgriPlcService = Depends(
 @router.get(
     "/plc/info",
     status_code=200,
+    response_model=dict[str, Any],
     summary="GET /plc/info — PLC-Stub-Informationen und Integrations-Anleitung",
 )
 def plc_info() -> Any:
