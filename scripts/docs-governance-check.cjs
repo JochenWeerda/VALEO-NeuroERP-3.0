@@ -41,6 +41,10 @@ function isMarkdownFile(filePath) {
   return normalizeSlashes(filePath).toLowerCase().endsWith(".md");
 }
 
+function isYamlFile(filePath) {
+  return /\.ya?ml$/i.test(normalizeSlashes(filePath));
+}
+
 function shouldIgnore(filePath) {
   const normalized = normalizeSlashes(filePath);
   return normalized.startsWith("docs/archive/");
@@ -128,6 +132,51 @@ function collectMarkdownFiles(rootDir) {
 
 function fileContent(filePath) {
   return fs.readFileSync(path.join(repoRoot, filePath), "utf8");
+}
+
+function ensureAiHarnessSliceRules(filePath, content, errors) {
+  const normalized = normalizeSlashes(filePath);
+  if (!/^docs\/agent-ops\/slices\/.+\.ya?ml$/i.test(normalized)) {
+    return;
+  }
+
+  const requiredTopLevel = [
+    "slice_id",
+    "title",
+    "owner",
+    "status",
+    "goal",
+    "file_ownership",
+    "acceptance",
+    "tests",
+    "risks",
+    "ai_harness",
+    "external_gates",
+  ];
+  const requiredHarness = [
+    "fachlicher_vertrag",
+    "architektur_vertrag",
+    "daten_vertrag",
+    "test_vertrag",
+    "security_vertrag",
+    "betriebs_vertrag",
+    "dokumentations_vertrag",
+  ];
+
+  for (const key of requiredTopLevel) {
+    if (!new RegExp(`(^|\\n)${key}:`, "m").test(content)) {
+      errors.push(`${filePath}: missing required AI harness field '${key}'`);
+    }
+  }
+
+  const harnessBlock = content.match(/(^|\n)ai_harness:\s*\n([\s\S]*?)(\n[^ \n#][^\n]*:|\s*$)/);
+  if (harnessBlock) {
+    for (const key of requiredHarness) {
+      if (!new RegExp(`(^|\\n)\\s+${key}:`, "m").test(harnessBlock[2])) {
+        errors.push(`${filePath}: ai_harness missing '${key}'`);
+      }
+    }
+  }
 }
 
 function ensureH1(filePath, content, errors) {
@@ -339,6 +388,12 @@ function ensureAdrRules(filePath, content, errors) {
 
 function checkFile(filePath, errors) {
   const content = fileContent(filePath);
+
+  if (isYamlFile(filePath)) {
+    ensureAiHarnessSliceRules(filePath, content, errors);
+    return;
+  }
+
   ensureH1(filePath, content, errors);
   ensureDateFormat(filePath, content, errors);
 
@@ -376,14 +431,14 @@ function checkFile(filePath, errors) {
 }
 
 function resolveTargetsFromArgs(args) {
-  const markdownArgs = args
+  const explicitArgs = args
     .map((value) => normalizeSlashes(path.relative(repoRoot, path.resolve(value))))
     .filter((value) => !value.startsWith(".."))
-    .filter((value) => isMarkdownFile(value))
+    .filter((value) => isMarkdownFile(value) || isYamlFile(value))
     .filter((value) => !shouldIgnore(value));
 
-  if (markdownArgs.length > 0) {
-    return markdownArgs;
+  if (explicitArgs.length > 0) {
+    return explicitArgs;
   }
 
   const packageStatusFiles = collectMarkdownFiles(repoRoot).filter((filePath) =>

@@ -1,7 +1,7 @@
 slice_id: AI-HARNESS-GOV-001
 title: AI-assisted Development Harness Governance
 owner: Codex
-status: reserved
+status: completed
 created_at: 2026-06-23
 coordination: >-
   Info an Claude Code: Codex bearbeitet ausschliesslich AI-/Docs-Governance,
@@ -49,7 +49,36 @@ tests:
   - node scripts/ai-slice-readiness-check.cjs --slice AI-HARNESS-GOV-001
   - node scripts/docs-drift-report.cjs --base HEAD --head WORKTREE --output artifacts/docs-drift-report.local.json
   - pnpm run docs:check
+verification:
+  - node --check scripts/ai-slice-readiness-check.cjs scripts/docs-code-sync-check.cjs scripts/docs-drift-report.cjs scripts/docs-governance-check.cjs
+  - node scripts/docs-governance-check.cjs docs/agent-ops/slices/AI-HARNESS-GOV-001.yaml
+  - node scripts/ai-slice-readiness-check.cjs --slice AI-HARNESS-GOV-001
+  - node scripts/docs-code-sync-check.cjs --base HEAD --head WORKTREE
+  - pnpm.cmd run docs:check
 risks:
   - Zu harte Gates koennen Legacy-Slices oder parallele fachliche WIP blockieren.
   - Deshalb werden neue Checks zuerst auf neue/geaenderte Slice-Dateien und kritische Pfad-Diffs begrenzt.
   - Bestehende Altlasten werden sichtbar gemacht, aber nicht repo-weit sofort blockierend gemacht.
+ai_harness:
+  fachlicher_vertrag: >-
+    Neue AI-Slices muessen Ziel, Scope, Akzeptanz, Risiken und externe Gates
+    explizit machen.
+  architektur_vertrag: >-
+    Umsetzung bleibt in Agent-Ops, Docs-Governance, QA-Templates und CI; keine
+    fachlichen Runtime-Module werden beruehrt.
+  daten_vertrag: >-
+    Keine produktiven Datenbank- oder API-Schemaaenderungen; nur Repo-
+    Governance-Artefakte und JSON/YAML-Konfigurationsdateien.
+  test_vertrag: >-
+    Node-basierte Governance-, Sync-, Readiness- und Drift-Checks plus
+    docs:check.
+  security_vertrag: >-
+    Security- und Compliance-Gates werden dokumentiert und fuer Major Updates
+    mit Owner, Ablaufdatum und externen Gates verknuepft.
+  betriebs_vertrag: >-
+    Nightly Drift Workflow erzeugt Artefakte ohne automatische Doku-Mutation.
+  dokumentations_vertrag: >-
+    Agent-Ops, Architekturstandard, Umsetzungsplan, QA-Templates, Tooling- und
+    Dependency-Doku werden aktualisiert.
+external_gates:
+  - not_applicable

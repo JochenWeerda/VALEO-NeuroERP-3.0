@@ -25,6 +25,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -36,3 +38,24 @@ jobs:
 
       - name: Governance check
         run: node scripts/docs-governance-check.cjs
+
+      - name: Determine diff range
+        id: range
+        shell: bash
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            echo "base=${{ github.event.pull_request.base.sha }}" >> "$GITHUB_OUTPUT"
+          else
+            BEFORE="${{ github.event.before }}"
+            if [ -z "$BEFORE" ] || [ "$BEFORE" = "0000000000000000000000000000000000000000" ]; then
+              BEFORE="$(git rev-list --max-parents=0 HEAD | tail -n 1)"
+            fi
+            echo "base=$BEFORE" >> "$GITHUB_OUTPUT"
+          fi
+          echo "head=${{ github.sha }}" >> "$GITHUB_OUTPUT"
+
+      - name: AI slice harness check
+        run: node scripts/ai-slice-readiness-check.cjs --changed-only --base "${{ steps.range.outputs.base }}" --head "${{ steps.range.outputs.head }}"
+
+      - name: Docs/code sync check
+        run: node scripts/docs-code-sync-check.cjs --base "${{ steps.range.outputs.base }}" --head "${{ steps.range.outputs.head }}"

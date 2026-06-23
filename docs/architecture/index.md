@@ -123,12 +123,14 @@ Diese Datei ist eine `abgeleitete Sicht` auf die Architektur. Der operative Deli
 ### Agent & Integration
 - [ADR-007 Agent-/Tool-Contract-Governance](../adr/adr-007-agent-tool-contract-governance.md)
 - [ADR-014 Integrationsgrenzen API / EDI / MCP / Partneradapter](../adr/adr-014-integrationsgrenzen-api-edi-mcp-partneradapter.md)
+- [AI-assisted Enterprise Development Standard](ai-assisted-enterprise-development-standard.md)
 - [KI Usability Microservices](KI-USABILITY-MICROSERVICES.md)
 - [Agrar Event Hook Contracts](agrar-event-hook-contracts.md)
 - [DMS Paperless Integration](dms-paperless-integration.md)
 
 ### Foundations
 - [Fundamental Architecture Principles](fundamental-architecture-principles.md)
+- [AI-assisted Enterprise Development Standard](ai-assisted-enterprise-development-standard.md)
 - [Context Architecture Revolution](context-architecture-revolution.md)
 - [Business Logic Architecture](business-logic-architecture.md)
 - [Module Resolution Architecture](module-resolution-architecture.md)

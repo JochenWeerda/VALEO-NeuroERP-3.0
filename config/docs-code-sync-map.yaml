@@ -1,0 +1,56 @@
+# Doku-/Code-Sync-Mapping fuer AI-assisted Development Gates.
+#
+# Der Check bewertet nur geaenderte Pfade im Diff. Legacy-Bestand wird nicht
+# repo-weit blockiert.
+
+critical_paths:
+  - path: app/api/v1/endpoints/
+    docs:
+      - docs/workflows/
+      - docs/quality-assurance/
+      - docs/project-context/
+      - docs/operations/
+      - docs/architecture/
+  - path: app/services/
+    docs:
+      - docs/workflows/
+      - docs/project-context/
+      - docs/quality-assurance/
+      - docs/architecture/
+  - path: packages/frontend-web/src/pages/
+    docs:
+      - docs/quality-assurance/
+      - docs/project-context/
+      - docs/architecture/frontend-routing/
+      - docs/workflows/
+  - path: packages/frontend-web/src/app/routing/
+    docs:
+      - docs/architecture/frontend-routing/
+      - docs/quality-assurance/
+  - path: alembic/versions/
+    docs:
+      - docs/operations/
+      - docs/project-context/
+      - docs/workflows/
+  - path: migrations/sql/
+    docs:
+      - docs/operations/
+      - docs/project-context/
+  - path: .github/workflows/
+    docs:
+      - docs/operations/
+      - docs/quality-assurance/
+      - docs/architecture/
+  - path: scripts/
+    docs:
+      - docs/operations/
+      - docs/architecture/
+      - docs/agent-ops/
+
+global_docs:
+  - docs/project-context/open-gaps-and-known-issues.md
+  - docs/agent-ops/active-workboard.md
+
+exception_markers:
+  - docs_sync_exception: true
+  - docs-sync-exception
