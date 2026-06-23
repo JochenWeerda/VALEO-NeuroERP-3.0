@@ -112,6 +112,16 @@
 **Hinweis DOM-PROC-004:** Parallele Migration `proc_bestellung_wareneingang_20260623` muss
 `down_revision = merge_dom004_feed_chain_20260623` (nicht `sales_ab_*`) — lokal bereits angepasst.
 
+## COV-RATCHET-FEED-001 — Coverage FeedInventoryLinkService
+
+**Von:** Cursor
+**Owner:** Cursor
+**Stand:** abgeschlossen 2026-06-23 — `test_feed_inventory_link_unit.py` (11 Unit-Tests);
+Ratchet-Einträge `feed_inventory_link_service.py` + `produktion_mischfutter.py` in
+`check_critical_backend_coverage.py`.
+**Ziel:** FEED-CHAIN-004 Service-Pfad im kritischen Coverage-Ratchet absichern.
+**Abnahmekriterien:** 11 Unit-Tests grün; Ratchet-Pfade registriert.
+
 ## WM-AGRI-MAP-001 — Silo Bird-View / Kapazitäts-Dashboard
 
 **Von:** Claude Sonnet 4.6

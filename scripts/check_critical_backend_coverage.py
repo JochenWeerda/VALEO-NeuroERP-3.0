@@ -36,6 +36,10 @@ CRITICAL_THRESHOLDS: dict[str, float] = {
     "api/v1/endpoints/inventory_counts.py": 0.57,   #  59.9% measured  (+7pp)
     "api/v1/endpoints/inventory_operations.py": 0.54, #  55.7% measured  (+4pp)
 
+    # ── Feed production chain (FEED-CHAIN-004 / COV-RATCHET-FEED-001) ─────────
+    "services/feed_inventory_link_service.py": 0.55,
+    "api/v1/endpoints/produktion_mischfutter.py": 0.35,
+
     # ── Landhandel-Kern (COV-RATCHET-004 angehoben) ───────────────────────────
     "api/v1/endpoints/kontrakte.py": 0.27,          #  28.5% measured  (+5pp)
     "api/v1/endpoints/harvest_acceptance.py": 0.24, #  25.3% measured  (+4pp)
