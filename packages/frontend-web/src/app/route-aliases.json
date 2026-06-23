@@ -1465,6 +1465,10 @@
       "path": "lager/materialfluss-visualisierung"
     },
     {
+      "module": "@/pages/lager/silo-uebersicht",
+      "path": "lager/silo-uebersicht"
+    },
+    {
       "module": "@/pages/lager/kommissionierung",
       "path": "lager/kommissionierung"
     },

@@ -1,5 +1,14 @@
 # Active Workboard
 
+## WM-AGRI-MAP-001 — Silo Bird-View / Kapazitäts-Dashboard
+
+**Von:** Claude Sonnet 4.6
+**Owner:** Claude Sonnet 4.6
+**Stand:** abgeschlossen 2026-06-23 — `pages/lager/silo-uebersicht.tsx`; Route `lager/silo-uebersicht`; Nav-Eintrag „Silo-Übersicht (Bird-View)"; routes:generate 880 Routen; ESLint 0 Warnings; TS 0 Fehler.
+**Ziel:** Operatives Bird-View-Dashboard aller Silozellen eines Lagers: Kapazitäts-Füllstand als Balken, QS-Ampel (grün/gelb/rot), Material/Lot-Info, Zusammenfassungs-KPIs (Gesamt-t, Auslastung %, gesperrte Zellen), QS-Filter, Auto-Refresh alle 30 s, Transfer-Button → lager/materialfluss.
+**Dateibesitz:** `packages/frontend-web/src/pages/lager/silo-uebersicht.tsx`, `packages/frontend-web/src/app/route-aliases.json`, `packages/frontend-web/src/app/navigation/domains/operations.tsx`, `packages/frontend-web/src/app/routing/route-tree.gen.tsx`.
+**Abnahmekriterien:** Route lager/silo-uebersicht; SummaryBar mit Gesamt-t/Auslastung/gesperrt; Kachel-Grid mit Füllbalken/QS-Badge/Lot-Info/Transfer-Button; QS-Filter; refetchInterval 30 s; ESLint 0 / TS 0.
+
 ## WM-AGRI-BIDIR-SYNC-001 — Bidirektionaler Sync WMS-FLOW-001 → silo_lots
 
 **Von:** Claude Sonnet 4.6
