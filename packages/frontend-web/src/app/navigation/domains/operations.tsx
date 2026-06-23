@@ -178,6 +178,15 @@ export const RAW_NAV_SECTIONS: RawNavItem[] = [
         mcp: { businessDomain: 'inventory', scope: 'inventory:write' },
       },
       {
+        id: 'qs-leitstand',
+        label: 'QS-Leitstand (Silo)',
+        icon: ShieldCheck,
+        module: '@/pages/lager/qs-leitstand',
+        preferredPath: 'lager/qs-leitstand',
+        keywords: ['qs', 'freigabe', 'sperre', 'leitstand', 'labor', 'silo-lot', 'gmp', 'vlog'],
+        mcp: { businessDomain: 'inventory', scope: 'inventory:write' },
+      },
+      {
         id: 'kommissionierung',
         label: 'Kommissionierung',
         icon: ShoppingCart,

@@ -13,7 +13,7 @@
 
 **Von:** Cursor
 **Owner:** Cursor
-**Stand:** in arbeit 2026-06-23 — Claim + Umsetzung Leitstand-UI, Worklist-API, Freigabe-Vorschlag, Navigation.
+**Stand:** abgeschlossen 2026-06-23 — Worklist-API, Freigabe-Vorschlag, Leitstand-UI `lager/qs-leitstand`, Nav/Route, 7 Unit-Tests grün, TS 0.
 **Ziel:** Operative QS-Worklist und Freigabe/Sperre-UI auf Basis WM-AGRI-QS-003; Produktionsfreigabe-Regeln als deterministischer Vorschlag.
 **Dateibesitz:** `app/services/agri_qs_workflow_service.py`, `app/api/v1/endpoints/agri_qs_workflow.py`, `tests/test_agri_qs_workflow.py`, `packages/frontend-web/src/pages/lager/qs-leitstand.tsx`, `packages/frontend-web/src/lib/api/agri-qs-workflow.ts`, Nav/Route, Doku, `docs/agent-ops/slices/WM-AGRI-QS-004.yaml`.
 **Koordination:** Kein Ueberlapp mit DOM-LOG-004 (Claude Code).

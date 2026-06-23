@@ -17,6 +17,8 @@ class AgriQsWorkflowError(ValueError):
 
 
 _ALLOWED_QS_STATUS = frozenset({"in_pruefung", "frei", "gesperrt", "reserviert", "reinigung"})
+_LOT_STATUS_ATTENTION = frozenset({"in_pruefung", "gesperrt", "reserviert", "reinigung"})
+_CELL_QS_ATTENTION = frozenset({"in_pruefung", "gesperrt", "reserviert", "reinigung"})
 _LOT_STATUS_BY_QS = {
     "in_pruefung": "in_pruefung",
     "frei": "active",
@@ -162,4 +164,152 @@ class AgriQsWorkflowService:
             "linked_cell_count": len(payload["linked_cells"]),
             "linked_cells": payload["linked_cells"],
             "event": event,
+        }
+
+    def list_worklist(self, *, limit: int = 100) -> dict[str, Any]:
+        """Lots und Silozellen mit handlungsbeduerftigem QS-Status."""
+        safe_limit = max(1, min(limit, 500))
+        lot_rows = self.db.execute(
+            text("""
+                SELECT sl.id, sl.virtual_lot_number, sl.article_id, sl.quantity_tons,
+                       sl.status, sl.source_ticket_id, sl.updated_at,
+                       COUNT(sc.id) FILTER (WHERE sc.is_active = true) AS linked_cell_count
+                FROM domain_inventory.silo_lots sl
+                LEFT JOIN domain_inventory.silo_cells sc
+                  ON sc.current_lot_id = sl.id::text
+                 AND sc.tenant_id = sl.tenant_id
+                WHERE sl.tenant_id = :tenant_id
+                  AND sl.status = ANY(:attention_statuses)
+                GROUP BY sl.id, sl.virtual_lot_number, sl.article_id, sl.quantity_tons,
+                         sl.status, sl.source_ticket_id, sl.updated_at
+                ORDER BY sl.updated_at DESC NULLS LAST
+                LIMIT :limit
+            """),
+            {
+                "tenant_id": self.tenant_id,
+                "attention_statuses": list(_LOT_STATUS_ATTENTION),
+                "limit": safe_limit,
+            },
+        ).mappings().all()
+        cell_rows = self.db.execute(
+            text("""
+                SELECT sc.id, sc.cell_code, sc.name, sc.warehouse_id, sc.qs_status,
+                       sc.current_lot_id, sc.current_material_id, sc.current_stock_kg,
+                       sc.updated_at, sl.virtual_lot_number
+                FROM domain_inventory.silo_cells sc
+                LEFT JOIN domain_inventory.silo_lots sl
+                  ON sl.id::text = sc.current_lot_id
+                 AND sl.tenant_id = sc.tenant_id
+                WHERE sc.tenant_id = :tenant_id
+                  AND sc.is_active = true
+                  AND sc.qs_status = ANY(:attention_qs)
+                ORDER BY sc.updated_at DESC NULLS LAST
+                LIMIT :limit
+            """),
+            {
+                "tenant_id": self.tenant_id,
+                "attention_qs": list(_CELL_QS_ATTENTION),
+                "limit": safe_limit,
+            },
+        ).mappings().all()
+        lots = []
+        for row in lot_rows:
+            item = dict(row)
+            qty = Decimal(str(item.get("quantity_tons") or "0"))
+            item["quantity_kg"] = float(qty * Decimal("1000"))
+            item["kind"] = "lot"
+            item["qs_status"] = str(item.get("status") or "")
+            lots.append(item)
+        cells = []
+        for row in cell_rows:
+            item = dict(row)
+            item["kind"] = "cell"
+            cells.append(item)
+        return {
+            "lots": lots,
+            "cells": cells,
+            "summary": {
+                "lot_count": len(lots),
+                "cell_count": len(cells),
+                "blocked_cells": sum(1 for c in cells if c.get("qs_status") == "gesperrt"),
+                "in_review": sum(
+                    1 for x in [*lots, *cells]
+                    if str(x.get("qs_status") or x.get("status") or "") == "in_pruefung"
+                ),
+            },
+        }
+
+    def suggest_release(self, lot_id: str) -> dict[str, Any]:
+        """Deterministischer Freigabe-Vorschlag inkl. Produktionsfreigabe-Regeln."""
+        lot = self.db.execute(
+            text("""
+                SELECT id, virtual_lot_number, source_ticket_id, article_id,
+                       quantity_tons, status, moisture_pct, impurities_pct, protein_pct
+                FROM domain_inventory.silo_lots
+                WHERE (id::text = :lot_id OR virtual_lot_number = :lot_id)
+                  AND tenant_id = :tenant_id
+                LIMIT 1
+            """),
+            {"lot_id": lot_id, "tenant_id": self.tenant_id},
+        ).mappings().first()
+        if not lot:
+            raise AgriQsWorkflowError("Silo-Lot nicht gefunden")
+        lot_d = dict(lot)
+        current_status = str(lot_d.get("status") or "")
+        blockers: list[str] = []
+        if current_status == "active":
+            blockers.append("Lot ist bereits freigegeben (active).")
+        if current_status not in {"in_pruefung", "gesperrt", "reserviert", "reinigung"}:
+            blockers.append(f"Lot-Status '{current_status}' erlaubt keine QS-Freigabe.")
+
+        sample_id = str(lot_d["source_ticket_id"]) if lot_d.get("source_ticket_id") else None
+        analysis_id = f"lot-{lot_d['id']}-inline-qs"
+        lab_document_id = None
+        has_inline_lab = any(
+            lot_d.get(k) is not None for k in ("moisture_pct", "impurities_pct", "protein_pct")
+        )
+        if not sample_id and not has_inline_lab:
+            blockers.append("Kein Wiegeschein und keine Inline-Laborwerte am Lot.")
+        elif not sample_id and has_inline_lab:
+            sample_id = analysis_id
+
+        blocked_cells = self.db.execute(
+            text("""
+                SELECT cell_code, qs_status
+                FROM domain_inventory.silo_cells
+                WHERE current_lot_id = :lot_id
+                  AND tenant_id = :tenant_id
+                  AND is_active = true
+                  AND qs_status = 'gesperrt'
+            """),
+            {"lot_id": str(lot_d["id"]), "tenant_id": self.tenant_id},
+        ).mappings().all()
+        if blocked_cells:
+            codes = ", ".join(str(r["cell_code"]) for r in blocked_cells)
+            blockers.append(f"Verknuepfte Zellen gesperrt: {codes}")
+
+        production_release_allowed = not blockers and bool(sample_id or analysis_id or lab_document_id)
+        return {
+            "ok": True,
+            "lot_id": str(lot_d["id"]),
+            "virtual_lot_number": lot_d.get("virtual_lot_number"),
+            "current_lot_status": current_status,
+            "target_qs_status": "frei",
+            "production_release_allowed": production_release_allowed,
+            "blockers": blockers,
+            "suggested": {
+                "sampleId": sample_id,
+                "analysisId": analysis_id if has_inline_lab or sample_id else None,
+                "labDocumentId": lab_document_id,
+                "productionReleaseRef": (
+                    f"PROD-RELEASE-{lot_d.get('virtual_lot_number') or lot_d['id']}"
+                    if production_release_allowed
+                    else None
+                ),
+                "reason": (
+                    "Laborwerte/Wiegeschein vorhanden — Freigabe gemaess QS-Regelwerk"
+                    if production_release_allowed
+                    else "Manuelle Freigabe mit Laborbezug erforderlich"
+                ),
+            },
         }
