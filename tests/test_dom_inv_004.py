@@ -137,7 +137,19 @@ class TestCorrectionStornoService:
             "movement_type": "ABGANG", "quantity": 100.0, "unit": "kg",
             "reference_type": "KORREKTUR",
         }
-        db = _mock_db({"inventory_stock_movements": orig})
+        # differentiate SELECT by id vs SELECT by storno_ref
+        db = MagicMock()
+        def side_effect(stmt, params=None):
+            sql = str(stmt)
+            m = MagicMock()
+            if "storno_ref" in sql and "SELECT" in sql:
+                m.mappings.return_value.first.return_value = None  # no existing storno
+            elif "inventory_stock_movements" in sql and "SELECT" in sql:
+                m.mappings.return_value.first.return_value = orig
+            else:
+                m.mappings.return_value.first.return_value = None
+            return m
+        db.execute.side_effect = side_effect
         result = storno_korrektur(db, "corr-1", "t1")
         assert result["movement_type"] == "ZUGANG"
         assert result["quantity"] == 100.0
