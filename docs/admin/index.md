@@ -15,15 +15,15 @@ System-/Betriebsführung (technisch).
 
 ## Mandanten-Admin
 
-- Module & Feature-Flags (`INSTALLED_MODULES`, `TENANT_MODULE_FLAGS`).
-- RBAC, Rollen, Berechtigungen.
-- Nummernkreise, Stammdaten, Belegvorlagen, Übersetzungen.
+- [Mandanten-Administration](mandanten-administration.md) — Überblick & Aufgaben.
+- [Module & Feature-Flags](module-und-feature-flags.md) — `INSTALLED_MODULES`, `TENANT_MODULE_FLAGS`.
+- [RBAC & Rollen](rbac-und-rollen.md) — Authentifizierung, Scopes, Least Privilege.
 
 ## Betrieb / System-Admin
 
-- Deployment (Docker Compose), Secrets-Handling.
-- Backup & Restore, Alembic-Migrationen (Single-Head).
-- Monitoring (Prometheus/SLO), Incident-Response.
-- Skalierung (Worker, vgl. PERF-MULTIUSER-001), Production-Readiness-Gates.
-
-> Inhalte folgen in `DOC-ADMIN-OPS-001`.
+- [Deployment](deployment.md) — Docker Compose, Env-Variablen, Secrets.
+- [Backup & Restore](backup-restore.md) — Datensicherung, Restore-Tests.
+- [Datenbank-Migrationen](datenbank-migrationen.md) — Alembic, Single-Head.
+- [Monitoring & SLO](monitoring-und-slo.md) — Prometheus, Health-Checks, Logging.
+- [Incident-Response](incident-response.md) — Störungen, Eskalation, Post-Mortem.
+- [Skalierung & Performance](skalierung-performance.md) — Worker, ASGI, Lasttests.
