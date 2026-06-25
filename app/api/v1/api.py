@@ -2124,3 +2124,15 @@ api_router.include_router(external_mock_harness.router, tags=["dev", "mock"])
 # OPERATOR-AGENT-001: Read-Only/Proposal-Modus fuer ERP-Operator-Agent
 from app.api.v1.endpoints import operator_agent  # noqa: E402
 api_router.include_router(operator_agent.router, tags=["agent", "operator"])
+
+# P2.1: Workflow-Prozesskarte
+from app.api.v1.endpoints import process_map  # noqa: E402
+api_router.include_router(process_map.router, tags=["process-map", "workflow"])
+
+# P2.2: AI-Engineering-Metriken
+from app.api.v1.endpoints import ai_engineering_metrics  # noqa: E402
+api_router.include_router(ai_engineering_metrics.router, tags=["ai-engineering", "metrics"])
+
+# P2.3: KI-Datenklassen
+from app.api.v1.endpoints import ai_data_classification  # noqa: E402
+api_router.include_router(ai_data_classification.router, tags=["ai-data-classification", "compliance"])

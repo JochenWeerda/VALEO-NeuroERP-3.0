@@ -32,21 +32,36 @@
 **Ziel:** Governance-Doku auf Head `external_mock_sessions_20260623` bringen; Coverage-Ratchet um neue Services erweitern.
 **Dateibesitz:** `docs/project-context/open-gaps-and-known-issues.md`, `docs/architecture/process-kernel/STATUS.md`, `scripts/check_critical_backend_coverage.py`
 
-## OPERATOR-AGENT-001 — ERP Operator-Agent (Read-Only/Proposal-Modus)
+## PROCESS-MAP-001 — P2.1 Workflow-Prozesskarte
 
 **Von:** Claude Code
 **Owner:** Claude Code
-**Stand:** in Arbeit 2026-06-25
-**Ziel:** Operator-Agent-Service: liest Kontext (OP-Liste, Mahnstatus, offene UAT-Gates), schlägt Handlung vor (Mahnvorschlag, Rechnungsvorschlag, QS-Sperrliste), verlangt Human Approval, schreibt nichts selbst. API `/agent/operator/*`, Tests.
-**Dateibesitz:** `app/services/operator_agent_service.py`, `app/api/v1/endpoints/operator_agent.py`, `tests/test_operator_agent.py`, `docs/agent-ops/slices/OPERATOR-AGENT-001.yaml`
+**Stand:** abgeschlossen 2026-06-25 — 5 Prozesskarten (O2C/WMS/P2P/FIBU/POS); API /process-map/*; externe Gates + Human-Approval-Steps strukturiert; 11 Unit-Tests grün.
+**Ziel:** Strukturierte Prozesskarten mit Steps, Gates, Policies, SLA, Verantwortlichkeiten.
+**Dateibesitz:** `app/services/process_map_service.py`, `app/api/v1/endpoints/process_map.py`, `tests/test_process_map_service.py`, `docs/agent-ops/slices/PROCESS-MAP-001.yaml`
 
-## DEV-HARNESS-CLI-001 — Valeo-Slice CLI
+## AI-METRICS-001 — P2.2 Produktivitaetsmetriken AI-Engineering
 
 **Von:** Claude Code
 **Owner:** Claude Code
-**Stand:** in Arbeit 2026-06-25
-**Ziel:** `scripts/valeo_slice.py` — CLI für Slice-Claim, Plan, Verify und Close: `valeo-slice claim <ID>`, `valeo-slice verify <ID>`, `valeo-slice close <ID>`. Liest Workboard + Slice-YAML, führt Harness-Checks aus, gibt strukturierten Report.
-**Dateibesitz:** `scripts/valeo_slice.py`, `tests/test_valeo_slice_cli.py`, `docs/agent-ops/slices/DEV-HARNESS-CLI-001.yaml`
+**Stand:** abgeschlossen 2026-06-25 — Cycle Time aus Slice-YAMLs, Coverage aus coverage.xml, Rework-Indikator, Gate-Blocker, Owner-Verteilung; API /ai-engineering/metrics/*; 9 Unit-Tests grün.
+**Ziel:** Mess- und steuerbare AI-Engineering-Metriken fuer den VALEO-Entwicklungsbetrieb.
+**Dateibesitz:** `app/services/ai_engineering_metrics_service.py`, `app/api/v1/endpoints/ai_engineering_metrics.py`, `tests/test_ai_engineering_metrics.py`, `docs/agent-ops/slices/AI-METRICS-001.yaml`
+
+## AI-DATA-CLASSES-001 — P2.3 Lokale KI-Datenklassen
+
+**Von:** Claude Code
+**Owner:** Claude Code
+**Stand:** abgeschlossen 2026-06-25 — 12 Datenkategorien C0-C5; TSE/ELSTER/Bankkonto/Passwort=C5; Personal/Kunden/Kontrakte=C3; check-model-Pruefung; API /ai-data-classes/*; 15 Unit-Tests grün.
+**Ziel:** Verbindliche KI-Zugriffsklassen fuer alle VALEO-Datenkategorien (DSGVO/GoBD/Steuergeheimnis).
+**Dateibesitz:** `app/services/ai_data_classification_service.py`, `app/api/v1/endpoints/ai_data_classification.py`, `tests/test_ai_data_classification.py`, `docs/agent-ops/slices/AI-DATA-CLASSES-001.yaml`
+
+## SEMANTIC-E2E-MATRIX-001-CHAIN — O2C + WMS/Silo Semantische Ketten
+
+**Von:** Claude Code
+**Owner:** Claude Code
+**Stand:** abgeschlossen 2026-06-25 — O2C (10 Schritte: Kunde→Angebot→Auftrag→LS→RE→Zahlung→Mahnung→DATEV-Mock) + WMS/Silo (11 Schritte: Annahme→Waage→Lot→Silo→QS-Probe→Freigabe/Sperre→Traceability→Abgang) als API-semantische Playwright-Specs. Fail-safe (akzeptiert 404/422/503).
+**Dateibesitz:** `playwright-tests/specs/e2e-matrix/o2c-semantic-chain.spec.ts`, `playwright-tests/specs/e2e-matrix/wms-silo-semantic-chain.spec.ts`
 
 ## WF-COCKPIT-UI-001 — Workflow-Leitstand Frontend-UI
 

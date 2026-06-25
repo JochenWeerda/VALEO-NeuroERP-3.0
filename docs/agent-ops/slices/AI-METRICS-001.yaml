@@ -1,0 +1,46 @@
+slice_id: AI-METRICS-001
+title: "P2.2 — Produktivitaetsmetriken fuer AI-Engineering"
+owner: ai
+status: completed
+created_at: "2026-06-25"
+goal: >-
+  Service fuer AI-Engineering-Metriken: Slice Cycle Time, Rework-Quote,
+  Coverage-Zusammenfassung, Gate-Blocker, Owner-Verteilung.
+  API /ai-engineering/metrics/* mit Dashboard-Endpunkt.
+file_ownership:
+  - app/services/ai_engineering_metrics_service.py
+  - app/api/v1/endpoints/ai_engineering_metrics.py
+  - tests/test_ai_engineering_metrics.py
+  - docs/agent-ops/slices/AI-METRICS-001.yaml
+acceptance:
+  - Cycle-Time-Summary liest Slice-YAMLs aus docs/agent-ops/slices/.
+  - Coverage-Summary liest coverage.xml (robust wenn nicht vorhanden).
+  - Rework-Indikator erkennt Slices ohne Tests oder unvollstaendiges Harness.
+  - Full-Dashboard liefert alle Sektionen in einem Request.
+tests:
+  - python -m py_compile app/services/ai_engineering_metrics_service.py app/api/v1/endpoints/ai_engineering_metrics.py
+  - pytest -q -o addopts= tests/test_ai_engineering_metrics.py
+risks: >-
+  Closed-At heuristisch aus Status abgeleitet (kein explizites Feld in YAML) —
+  Cycle Time ist Naeherung. coverage.xml muss manuell erzeugt werden.
+external_gates:
+  - not_applicable
+ai_harness:
+  fachlicher_vertrag: >-
+    Metriken erlauben Steuerung des AI-Engineering-Betriebs:
+    Cycle Time, Rework-Rate, Coverage, Gate-Blocker, Owner-Verteilung.
+  architektur_vertrag: >-
+    Liest Slice-YAMLs und coverage.xml. Kein DB-Zugriff. Kein Schreibzugriff.
+    Singleton ai_engineering_metrics_service.
+  daten_vertrag: >-
+    Eingabe: docs/agent-ops/slices/*.yaml + coverage.xml.
+    Ausgabe: SliceMetric-Dicts mit cycle_time_days, has_tests, has_all_harness_fields.
+  test_vertrag: >-
+    Tests decken ab: list-Struktur, Cycle-Time-Summary, Coverage-Summary (robust ohne XML),
+    Gate-Blocker, Rework-Indikator, Owner-Verteilung, Dashboard, bekannte Slices erkannt.
+  security_vertrag: >-
+    Nur lesend. Keine personenbezogenen Daten in Slice-YAMLs.
+  betriebs_vertrag: >-
+    Nightly als CI-Artefakt aufrufbar. Dashboard-Endpunkt fuer Ops-Dashboard.
+  dokumentations_vertrag: >-
+    Slice-YAML als einzige Doku. Inline-Kommentare im Service.
