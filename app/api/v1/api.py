@@ -2120,3 +2120,7 @@ api_router.include_router(mcp_tool_registry.router, tags=["mcp", "tools"])
 # EXTERNAL-MOCK-HARNESS-001: Mock-Stubs fuer externe Systeme (Dev-Only)
 from app.api.v1.endpoints import external_mock_harness  # noqa: E402
 api_router.include_router(external_mock_harness.router, tags=["dev", "mock"])
+
+# OPERATOR-AGENT-001: Read-Only/Proposal-Modus fuer ERP-Operator-Agent
+from app.api.v1.endpoints import operator_agent  # noqa: E402
+api_router.include_router(operator_agent.router, tags=["agent", "operator"])

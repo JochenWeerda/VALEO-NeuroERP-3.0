@@ -1,11 +1,27 @@
 # Active Workboard
 
+## OPERATOR-AGENT-001 — ERP Operator-Agent (Read-Only/Proposal-Modus)
+
+**Von:** Claude Code
+**Owner:** Claude Code
+**Stand:** abgeschlossen 2026-06-25 — `operator_agent_service.py` (Proposal-Lifecycle, RBAC: agent:read/propose/approve, Human-Approval HIGH-risk, Audit-Events); API `/agent/operator/*` (7 Endpoints); 13 Unit-Tests grün; Slice-YAML; Router in api.py registriert; Coverage-Ratchet +2 Eintraege.
+**Ziel:** Operator-Agent-Service: liest Kontext, schlägt Handlungen vor, verlangt Human Approval, schreibt nie autonom.
+**Dateibesitz:** `app/services/operator_agent_service.py`, `app/api/v1/endpoints/operator_agent.py`, `tests/test_operator_agent.py`, `docs/agent-ops/slices/OPERATOR-AGENT-001.yaml`
+
+## DEV-HARNESS-CLI-001 — Valeo-Slice CLI
+
+**Von:** Claude Code
+**Owner:** Claude Code
+**Stand:** abgeschlossen 2026-06-25 — `scripts/valeo_slice.py` (claim/verify/close/status/list); 11 Unit-Tests grün; Slice-YAML; py_compile OK.
+**Ziel:** CLI-Tool fuer Slice-Lifecycle-Management mit YAML-Schema-Validation und Governance-Checks.
+**Dateibesitz:** `scripts/valeo_slice.py`, `tests/test_valeo_slice_cli.py`, `docs/agent-ops/slices/DEV-HARNESS-CLI-001.yaml`
+
 ## COMPAT-GOV-MATRIX-SYNC-20260625 — Alembic-Head + Coverage-Ratchet Nachzug
 
 **Von:** Claude Code
 **Owner:** Claude Code
-**Stand:** in Arbeit 2026-06-25
-**Ziel:** Governance-Doku auf Head `external_mock_sessions_20260623` bringen; Coverage-Ratchet um neue Services (mcp_tool_registry, external_mock_harness) erweitern.
+**Stand:** abgeschlossen 2026-06-25 — Alembic-Head in open-gaps + STATUS.md auf `external_mock_sessions_20260623` aktualisiert; Coverage-Ratchet um mcp_tool_registry, external_mock_harness, operator_agent erweitert.
+**Ziel:** Governance-Doku auf Head `external_mock_sessions_20260623` bringen; Coverage-Ratchet um neue Services erweitern.
 **Dateibesitz:** `docs/project-context/open-gaps-and-known-issues.md`, `docs/architecture/process-kernel/STATUS.md`, `scripts/check_critical_backend_coverage.py`
 
 ## OPERATOR-AGENT-001 — ERP Operator-Agent (Read-Only/Proposal-Modus)
