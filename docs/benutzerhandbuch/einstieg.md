@@ -23,6 +23,8 @@ der Oberfläche navigieren.
 **Ergebnis:** Sie sind angemeldet und sehen die für Ihre Rolle freigeschalteten
 Bereiche.
 
+![Dashboard nach der Anmeldung mit Kennzahlen und Flow-Spine-Prozessen](img/einstieg-dashboard.png)
+
 ## Mandant wählen
 
 Wenn Sie Zugriff auf mehrere Mandanten haben:

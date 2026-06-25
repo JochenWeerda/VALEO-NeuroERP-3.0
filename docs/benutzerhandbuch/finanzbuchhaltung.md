@@ -13,6 +13,8 @@ version: 3.0.0
 Behalten Sie Forderungen und Verbindlichkeiten im Blick, mahnen Sie überfällige
 Posten an und verbuchen Sie Zahlungen.
 
+![Hauptbuch mit Journalverlauf, Objektkontext und Wirtschaftslage](img/finanzbuchhaltung-hauptbuch.png)
+
 ## Offene Posten prüfen
 
 1. Bereich *Finanzen* → *Offene Posten*.

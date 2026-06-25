@@ -21,6 +21,8 @@ sofort zurechtfinden.
 
 ## 1. Auftrag anlegen
 
+![Auftrags-Erfassung mit Rollenfokus, Belegfähigkeits-Prüfung und Erfassungsplan](img/verkauf-auftraege.png)
+
 1. Bereich *Verkauf* → *Aufträge* → *Neu*.
 2. Kunde wählen (Kundenauswahl), Lieferbedingungen prüfen.
 3. Positionen erfassen (Artikel, Menge, Preis).
