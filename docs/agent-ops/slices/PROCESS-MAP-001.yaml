@@ -1,5 +1,5 @@
 slice_id: PROCESS-MAP-001
-title: "P2.1 — Workflow-Designer / Prozesskarte fuer ERP-Prozessketten"
+title: "P2.1 â€” Workflow-Designer / Prozesskarte fuer ERP-Prozessketten"
 owner: ai
 status: completed
 created_at: "2026-06-25"
@@ -20,9 +20,9 @@ acceptance:
 tests:
   - python -m py_compile app/services/process_map_service.py app/api/v1/endpoints/process_map.py
   - pytest -q -o addopts= tests/test_process_map_service.py
-risks: >-
-  Prozesskarten sind statisch definiert — kein automatischer Abgleich mit implementierten
-  API-Endpunkten. Muss periodisch gepflegt werden.
+risks:
+  - Prozesskarten sind statisch definiert und werden nicht automatisch mit implementierten API-Endpunkten abgeglichen.
+  - Prozesskarten muessen periodisch gepflegt werden, wenn Fachprozesse oder externe Gates geaendert werden.
 external_gates:
   - not_applicable
 ai_harness:

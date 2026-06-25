@@ -1,5 +1,5 @@
 slice_id: AI-METRICS-001
-title: "P2.2 — Produktivitaetsmetriken fuer AI-Engineering"
+title: "P2.2 â€” Produktivitaetsmetriken fuer AI-Engineering"
 owner: ai
 status: completed
 created_at: "2026-06-25"
@@ -20,9 +20,9 @@ acceptance:
 tests:
   - python -m py_compile app/services/ai_engineering_metrics_service.py app/api/v1/endpoints/ai_engineering_metrics.py
   - pytest -q -o addopts= tests/test_ai_engineering_metrics.py
-risks: >-
-  Closed-At heuristisch aus Status abgeleitet (kein explizites Feld in YAML) —
-  Cycle Time ist Naeherung. coverage.xml muss manuell erzeugt werden.
+risks:
+  - Closed-At wird heuristisch aus Status abgeleitet; Cycle Time ist eine Naeherung.
+  - coverage.xml muss fuer belastbare Coverage-Auswertungen manuell oder per CI erzeugt werden.
 external_gates:
   - not_applicable
 ai_harness:
