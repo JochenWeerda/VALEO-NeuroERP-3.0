@@ -89,8 +89,13 @@ nicht eingecheckt). Begleitend Browser-Sweep über UI-Routen.
 output-templates, report-permissions}`, `/api/v1/admin/mobile/*`
 (connectors, connector-events[/quarantine], mobile-devices, routing-rules,
 scan-profiles, station-devices, stations), `/api/v1/einkauf/lieferscheine[/last]`,
-`/api/v1/inventory/{charge-lineage/, storage-fees/runs}`, `/api/v1/jobs`,
+`/api/v1/inventory/{charge-lineage/, storage-fees/runs}`,
 `/api/v1/crm/opportunities/pipeline` (+ `/api/crm-sales/opportunities/pipeline`).
+Nachzug 2026-06-25e: `/api/v1/jobs` ist repo-seitig geschlossen:
+Repair-Migration `job_runner_tables_repair_20260625` legt
+`domain_shared.jobs` und `domain_shared.job_artifacts` idempotent am aktuellen
+Alembic-Head an; `GET /api/v1/jobs` degradiert bis zum produktiven
+Migrationslauf auf eine leere Liste statt 500.
 
 **B. Bewusste 503 (graceful degradation, kein Bug — by design)** mit
 Migrations-/Config-Hinweis: `/api/v1/analytics`, `/api/v1/contracts`,
