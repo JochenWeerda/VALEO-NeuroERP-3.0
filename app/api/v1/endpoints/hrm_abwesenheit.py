@@ -49,7 +49,12 @@ class ZurueckziehenBody(BaseModel):
     mitarbeiter_nr: str
 
 
-@router.post("/antraege", response_model=dict[str, Any], status_code=201)
+@router.post(
+    "/antraege",
+    response_model=dict[str, Any],
+    status_code=201,
+    summary="Abwesenheitsantrag stellen",
+)
 def antrag_stellen(body: AntragCreate, x_tenant_id: Annotated[str | None, Header()] = None) -> dict[str, Any]:
     tid = _tenant(x_tenant_id)
     svc = get_abwesenheit_service(tid)
@@ -70,7 +75,11 @@ def antrag_stellen(body: AntragCreate, x_tenant_id: Annotated[str | None, Header
     return antrag.to_dict()
 
 
-@router.get("/antraege", response_model=dict[str, Any])
+@router.get(
+    "/antraege",
+    response_model=dict[str, Any],
+    summary="Abwesenheitsantraege listen",
+)
 def list_antraege(
     mitarbeiter_nr: str | None = Query(None),
     status: str | None = Query(None),
@@ -89,7 +98,11 @@ def list_antraege(
     return {"items": [a.to_dict() for a in items], "count": len(items)}
 
 
-@router.get("/antraege/{antrag_id}", response_model=dict[str, Any])
+@router.get(
+    "/antraege/{antrag_id}",
+    response_model=dict[str, Any],
+    summary="Abwesenheitsantrag abrufen",
+)
 def get_antrag(antrag_id: str, x_tenant_id: Annotated[str | None, Header()] = None) -> dict[str, Any]:
     tid = _tenant(x_tenant_id)
     svc = get_abwesenheit_service(tid)
@@ -99,7 +112,11 @@ def get_antrag(antrag_id: str, x_tenant_id: Annotated[str | None, Header()] = No
         raise HTTPException(status_code=404, detail=str(e)) from e
 
 
-@router.post("/antraege/{antrag_id}/genehmigen", response_model=dict[str, Any])
+@router.post(
+    "/antraege/{antrag_id}/genehmigen",
+    response_model=dict[str, Any],
+    summary="Abwesenheitsantrag genehmigen",
+)
 def genehmigen(
     antrag_id: str, body: GenehmigenBody, x_tenant_id: Annotated[str | None, Header()] = None
 ) -> dict[str, Any]:
@@ -113,7 +130,11 @@ def genehmigen(
         raise HTTPException(status_code=409, detail=str(e)) from e
 
 
-@router.post("/antraege/{antrag_id}/ablehnen", response_model=dict[str, Any])
+@router.post(
+    "/antraege/{antrag_id}/ablehnen",
+    response_model=dict[str, Any],
+    summary="Abwesenheitsantrag ablehnen",
+)
 def ablehnen(
     antrag_id: str, body: AblehnenBody, x_tenant_id: Annotated[str | None, Header()] = None
 ) -> dict[str, Any]:
@@ -127,7 +148,11 @@ def ablehnen(
         raise HTTPException(status_code=409, detail=str(e)) from e
 
 
-@router.post("/antraege/{antrag_id}/zurueckziehen", response_model=dict[str, Any])
+@router.post(
+    "/antraege/{antrag_id}/zurueckziehen",
+    response_model=dict[str, Any],
+    summary="Abwesenheitsantrag zurueckziehen",
+)
 def zurueckziehen(
     antrag_id: str, body: ZurueckziehenBody, x_tenant_id: Annotated[str | None, Header()] = None
 ) -> dict[str, Any]:
@@ -141,7 +166,11 @@ def zurueckziehen(
         raise HTTPException(status_code=409, detail=str(e)) from e
 
 
-@router.get("/urlaubskonto/{mitarbeiter_nr}", response_model=dict[str, Any])
+@router.get(
+    "/urlaubskonto/{mitarbeiter_nr}",
+    response_model=dict[str, Any],
+    summary="Urlaubskonto abrufen",
+)
 def urlaubskonto(
     mitarbeiter_nr: str,
     jahr: int = Query(..., ge=2020, le=2050),

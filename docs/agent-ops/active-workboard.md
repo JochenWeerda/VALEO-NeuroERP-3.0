@@ -4392,5 +4392,5 @@ Archiv des vorherigen Boards:
 ## HRM-ABWESENHEIT-ANTRAG-001 — HRM Abwesenheitsantrag-Workflow
 
 **Owner:** claude-sonnet-4-6
-**Stand:** abgeschlossen 2026-06-25 — Antragserstellung, Liste, Detail, Genehmigung, Ablehnung, Rueckzug, Urlaubskonto, Ueberschneidungspruefung, eAU-Pflicht und Tenant-Isolation umgesetzt; Legacy-DOM-HRM-004-Funktionsvertrag (`VALID_ABWESENHEIT_TRANSITIONS`, `create_abwesenheitsantrag`, `transition_abwesenheit`) bleibt kompatibel.
+**Stand:** abgeschlossen 2026-06-25 — Antragserstellung, Liste, Detail, Genehmigung, Ablehnung, Rueckzug, Urlaubskonto, Ueberschneidungspruefung, eAU-Pflicht und Tenant-Isolation umgesetzt; Legacy-DOM-HRM-004-Funktionsvertrag (`VALID_ABWESENHEIT_TRANSITIONS`, `create_abwesenheitsantrag`, `transition_abwesenheit`) bleibt kompatibel; alle 7 HRM-Abwesenheitsrouten tragen OpenAPI-`summary=`.
 **Dateibesitz:** `app/services/hrm_abwesenheit_service.py`, `app/api/v1/endpoints/hrm_abwesenheit.py`, `tests/test_hrm_abwesenheit.py`, `app/api/v1/api.py`, `scripts/check_critical_backend_coverage.py`, `docs/agent-ops/slices/HRM-ABWESENHEIT-ANTRAG-001.yaml`.
