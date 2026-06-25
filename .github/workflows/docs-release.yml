@@ -1,0 +1,56 @@
+name: Docs Release (mike)
+
+# Versionierte Doku je Release-Tag mit mike auf den gh-pages-Branch deployen.
+# Voraussetzung: GitHub Pages ist auf den Branch "gh-pages" konfiguriert.
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Doku-Version (z. B. 3.0.0)"
+        required: true
+
+permissions:
+  contents: write
+
+jobs:
+  deploy:
+    name: mike deploy
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: requirements-docs.txt
+
+      - name: Install docs toolchain
+        run: pip install -r requirements-docs.txt
+
+      - name: Configure git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Resolve version
+        id: ver
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "version=${{ github.event.inputs.version }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "version=${GITHUB_REF_NAME#v}" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Deploy versioned docs
+        run: |
+          mike deploy --push --update-aliases "${{ steps.ver.outputs.version }}" latest
+          mike set-default --push latest

@@ -30,7 +30,7 @@
 
 ## DOC-GOVERNANCE-001 — Doku-Governance: CODEOWNERS, Link-/Staleness-Check, Changelog, Release-Versionierung
 
-**Von:** Cursor · **Owner:** Cursor · **Stand:** in Arbeit 2026-06-25 — CODEOWNERS, Staleness-Check (last_reviewed), striktes Build-Gate, CHANGELOG (Keep a Changelog), mike-Release-Workflow.
+**Von:** Cursor · **Owner:** Cursor · **Stand:** abgeschlossen 2026-06-25 — `.github/CODEOWNERS`, `scripts/docs-staleness-check.cjs` (+ nicht-blockierender CI-Step), `.github/workflows/docs-release.yml` (mike), `CHANGELOG.md` (Keep a Changelog), `docs/dokumentation/governance.md`; `mkdocs build` grün. Offenes externes Gate: GitHub-Pages-Aktivierung (gh-pages) für produktiven mike-Deploy.
 **Dateibesitz:** `.github/CODEOWNERS`, `.github/workflows/docs.yml`, `.github/workflows/docs-release.yml`, `scripts/docs-staleness-check.cjs`, `CHANGELOG.md`, `docs/dokumentation/governance.md`, `docs/agent-ops/slices/DOC-GOVERNANCE-001.yaml`
 
 ## DOC-MIGRATION-001 — Doku-Migration: Altbestaende archivieren und einordnen

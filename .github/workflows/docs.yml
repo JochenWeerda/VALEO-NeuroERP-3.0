@@ -39,3 +39,7 @@ jobs:
 
       - name: Build documentation site
         run: python -m mkdocs build --site-dir site
+
+      - name: Staleness report (non-blocking)
+        continue-on-error: true
+        run: node scripts/docs-staleness-check.cjs --max-age-days 365
