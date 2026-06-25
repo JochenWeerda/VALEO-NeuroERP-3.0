@@ -56,6 +56,8 @@ werden.
 - **Doku-Version = App-Version** (kein eigener Doku-Strang).
 - Je Release-Tag erzeugt `docs-release.yml` mit **mike** einen
   unveränderlichen, datierten Doku-Snapshot (revisionssicher, auditrelevant).
+- **Live-Site:** <https://jochenweerda.github.io/VALEO-NeuroERP-3.0/>
+  (GitHub Pages, Branch `gh-pages`, via `mike` versioniert).
 - Nutzerlesbare Änderungen stehen im [CHANGELOG](https://keepachangelog.com/de/1.1.0/)
   (`CHANGELOG.md`).
 

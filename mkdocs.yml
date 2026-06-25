@@ -2,6 +2,7 @@ site_name: VALEO NeuroERP 3.0 – Dokumentation
 site_description: >-
   Dokumentation für VALEO NeuroERP 3.0 – Multi-Mandanten-ERP für Agrar,
   Landhandel und Handel.
+site_url: https://jochenweerda.github.io/VALEO-NeuroERP-3.0/
 docs_dir: docs
 site_dir: site
 
@@ -153,3 +154,4 @@ nav:
       - Dokumentationskonzept: dokumentation/dokumentationskonzept.md
       - Frontmatter-Standard: dokumentation/frontmatter-standard.md
       - Doku-Governance: dokumentation/governance.md
+      - Migrationsplan: dokumentation/migrationsplan.md
