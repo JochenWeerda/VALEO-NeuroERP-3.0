@@ -4424,3 +4424,10 @@ Archiv des vorherigen Boards:
 **Owner:** claude-sonnet-4-6
 **Stand:** abgeschlossen 2026-06-25 — Antragserstellung, Liste, Detail, Genehmigung, Ablehnung, Rueckzug, Urlaubskonto, Ueberschneidungspruefung, eAU-Pflicht und Tenant-Isolation umgesetzt; Legacy-DOM-HRM-004-Funktionsvertrag (`VALID_ABWESENHEIT_TRANSITIONS`, `create_abwesenheitsantrag`, `transition_abwesenheit`) bleibt kompatibel; alle 7 HRM-Abwesenheitsrouten tragen OpenAPI-`summary=`.
 **Dateibesitz:** `app/services/hrm_abwesenheit_service.py`, `app/api/v1/endpoints/hrm_abwesenheit.py`, `tests/test_hrm_abwesenheit.py`, `app/api/v1/api.py`, `scripts/check_critical_backend_coverage.py`, `docs/agent-ops/slices/HRM-ABWESENHEIT-ANTRAG-001.yaml`.
+## COVERAGE-RATCHET-ERP-CORE-001 — Coverage kritischer Landhandel-Kern-Pfade anheben
+
+**Von:** Claude Sonnet 4.6
+**Owner:** Claude Sonnet 4.6
+**Stand:** abgeschlossen 2026-06-25 — 54 Unit-Tests grün; DI-Override-Pattern etabliert; harvest_acceptance/articles/kontrakte/sales_orders-HTTP-Pfade + Service-Fehlerbehandlung abgedeckt.
+**Ziel:** Gesamt-Coverage 64,85 % → 70 %; neue Unit-Tests fuer die vier schwächsten kritischen Endpoint-Dateien (harvest_acceptance 24 %, articles 23 %, kontrakte 27 %, sales_orders 38 %); Ratchet-Schwellen angehoben.
+**Dateibesitz:** `tests/test_coverage_ratchet_erp_core_001.py`, `docs/agent-ops/slices/COVERAGE-RATCHET-ERP-CORE-001.yaml`, `scripts/check_critical_backend_coverage.py`

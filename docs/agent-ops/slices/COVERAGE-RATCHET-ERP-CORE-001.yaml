@@ -1,0 +1,46 @@
+slice_id: COVERAGE-RATCHET-ERP-CORE-001
+title: "Coverage-Ratchet kritische Landhandel-Kern-Pfade anheben"
+owner: Claude Sonnet 4.6
+status: completed
+created_at: "2026-06-25"
+goal: >-
+  Gesamt-Backend-Coverage von ~65 % in Richtung 70 % treiben durch gezielte
+  Unit-Tests fuer die vier schwächsten kritischen Endpoint-Dateien:
+  harvest_acceptance.py (24 %), articles.py (23 %), kontrakte.py (27 %),
+  sales_orders.py (38 %). Ratchet-Schwellen in check_critical_backend_coverage.py
+  nach Messung angehoben.
+file_ownership:
+  - tests/test_coverage_ratchet_erp_core_001.py
+  - docs/agent-ops/slices/COVERAGE-RATCHET-ERP-CORE-001.yaml
+  - scripts/check_critical_backend_coverage.py
+acceptance_criteria:
+  - 50+ Unit-Tests in test_coverage_ratchet_erp_core_001.py grueen
+  - sales_orders.py Ratchet >= 45 %
+  - articles.py Ratchet >= 32 %
+  - harvest_acceptance.py Ratchet >= 30 %
+  - kontrakte.py Ratchet >= 33 %
+checks:
+  - pytest tests/test_coverage_ratchet_erp_core_001.py -q --no-cov
+ai_harness:
+  fachlicher_vertrag: >-
+    Alle 4 Landhandel-Kern-Endpunkte haben messbaren Ratchet-Anstieg.
+    Tests decken: list, get, create (success + error paths), delete, status-transitions.
+  architektur_vertrag: >-
+    FastAPI TestClient + Mock-Injection (patch get_db, patch Service-Klassen).
+    Keine echte DB. Alle Tests pytest.mark.unit-kompatibel.
+  daten_vertrag: >-
+    Synthetische Mock-Objekte. Kein Produktionsdatenzugriff.
+  test_vertrag: >-
+    accept: [200, 201, 404, 409, 422, 503] als valide HTTP-Antworten.
+    Error-Pfade (EntityNotFoundError, ConflictError, ValidationFailedError) gezielt getestet.
+  security_vertrag: >-
+    dev-token + test-cov-001 Tenant. Keine Cross-Tenant-Zugriffe.
+  betriebs_vertrag: >-
+    pytest tests/test_coverage_ratchet_erp_core_001.py --no-cov
+  dokumentations_vertrag: >-
+    Slice-YAML + Workboard-Eintrag.
+external_gates:
+  - not_applicable
+risks: >-
+  Mock-Injection kann bestehende DI-Overrides ueberschreiben. patch()-Targets
+  muessen exakt zum Import-Pfad im Endpoint-Modul passen.
