@@ -1,6 +1,11 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+if [[ -z "${SUPERGLUE_CI_BASE_URL:-}" && -n "${GITHUB_ACTIONS:-}" ]]; then
+  echo "SUPERGLUE_CI_BASE_URL not configured; skipping external Superglue CI smoke."
+  exit 0
+fi
+
 BASE_URL="${SUPERGLUE_CI_BASE_URL:-${SUPERGLUE_BASE_URL:-http://localhost:3011}}"
 TENANT_ID="${SUPERGLUE_CI_TENANT_ID:-ci-tenant}"
 
