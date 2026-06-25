@@ -1,0 +1,54 @@
+slice_id: DEV-HARNESS-CLI-001
+title: "Valeo-Slice CLI fuer Slice-Lifecycle-Management"
+owner: ai
+status: completed
+created_at: "2026-06-25"
+coordination: >-
+  Entsteht aus valeo_neuroerp_youtube_gap_analyse_2026-06-23.md P1.
+  Erleichtert Claim/Verify/Close-Workflow fuer alle kuenftigen Slices.
+  Liest nur YAML-Dateien und Workboard — schreibt nicht in Fachcode.
+goal: >-
+  CLI-Tool (scripts/valeo_slice.py) fuer den Slice-Lifecycle: claim, verify,
+  close, status, list. verify prueft YAML-Schema (11 Pflicht-Felder,
+  7 ai_harness-Felder), fuehrt Governance-Checks aus und laesst Test-Kommandos
+  aus der YAML laufen.
+file_ownership:
+  owned:
+    - scripts/valeo_slice.py
+    - tests/test_valeo_slice_cli.py
+    - docs/agent-ops/slices/DEV-HARNESS-CLI-001.yaml
+  reads:
+    - docs/agent-ops/active-workboard.md
+    - docs/agent-ops/slices/*.yaml
+tests:
+  - python -m py_compile scripts/valeo_slice.py
+  - pytest -q -o addopts= tests/test_valeo_slice_cli.py
+risks: >-
+  CLI laeuft sync; bei sehr vielen Slice-YAMLs (100+) wird glob langsam.
+  Governance-Checks setzen Node.js voraus — SKIP wenn nicht vorhanden.
+external_gates: []
+ai_harness:
+  fachlicher_vertrag: >-
+    Jeder neue Slice soll mit `valeo_slice.py verify` pruefbar sein, bevor
+    er als abgeschlossen gilt. claim gibt Hinweise zum manuellen Workboard-Eintrag.
+    close verweigert, wenn verify rot ist.
+  architektur_vertrag: >-
+    Reine Python-3.11-Stdlib + PyYAML. Kein FastAPI-Import. Laeuft als
+    `python scripts/valeo_slice.py <cmd>` oder via pnpm-Script. Kein eigener
+    Daemon.
+  daten_vertrag: >-
+    Liest YAML-Dateien aus docs/agent-ops/slices/. Schreibt nichts.
+    REQUIRED_SLICE_FIELDS = 11, REQUIRED_AI_HARNESS_FIELDS = 7.
+  test_vertrag: >-
+    Unit-Tests decken ab: validate_yaml (gut/schlecht), load_yaml, find_slice_yaml
+    (vorhanden/nicht-vorhanden), cmd_list (RC=0), cmd_status (nicht-gefunden RC=1),
+    Konstantenpruefung der Pflichtfelder.
+  security_vertrag: >-
+    Kein Netzwerkzugriff. subprocess nur fuer node-Scripts und pytest.
+    Keine sensitiven Daten in YAML-Dateien erwartet.
+  betriebs_vertrag: >-
+    Wird als Pre-Close-Gate in AI-Slice-Workflow eingesetzt. Kann in CI als
+    `python scripts/valeo_slice.py verify <ID>` aufgerufen werden.
+  dokumentations_vertrag: >-
+    Nutzung im Docstring von valeo_slice.py vollstaendig dokumentiert.
+    Slice-YAML als einzige externe Doku.
