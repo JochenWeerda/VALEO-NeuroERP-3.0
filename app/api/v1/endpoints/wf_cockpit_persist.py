@@ -21,7 +21,7 @@ def _svc(
     return WorkflowCockpitPersistService(db=db, tenant_id=x_tenant_id)
 
 
-@router.get("/instances", summary="Cockpit-Instanzen (DB)")
+@router.get("/instances", response_model=dict[str, Any], summary="Cockpit-Instanzen (DB)")
 def list_instances(
     status: str | None = Query(None),
     process_key: str | None = Query(None),
@@ -35,7 +35,7 @@ def list_instances(
     return {"items": items, "count": len(items)}
 
 
-@router.get("/instances/{process_instance_id}", summary="Cockpit-Instanz-Detail")
+@router.get("/instances/{process_instance_id}", response_model=dict[str, Any], summary="Cockpit-Instanz-Detail")
 def get_instance(
     process_instance_id: str,
     svc: WorkflowCockpitPersistService = Depends(_svc),
@@ -46,7 +46,7 @@ def get_instance(
     return detail
 
 
-@router.get("/dead-letter", summary="Dead-Letter-Sicht: FAILED / BLOCKED_EXTERNAL_GATE")
+@router.get("/dead-letter", response_model=dict[str, Any], summary="Dead-Letter-Sicht: FAILED / BLOCKED_EXTERNAL_GATE")
 def dead_letter(
     limit: int = Query(100, ge=1, le=500),
     svc: WorkflowCockpitPersistService = Depends(_svc),
@@ -54,7 +54,7 @@ def dead_letter(
     return svc.dead_letter_view(limit=limit)
 
 
-@router.post("/instances", summary="Cockpit-Instanz manuell anlegen/aktualisieren")
+@router.post("/instances", response_model=dict[str, Any], summary="Cockpit-Instanz manuell anlegen/aktualisieren")
 def upsert_instance(
     body: dict[str, Any],
     svc: WorkflowCockpitPersistService = Depends(_svc),
@@ -74,8 +74,11 @@ def upsert_instance(
     return {"process_instance_id": process_instance_id, "ok": True}
 
 
-@router.post("/instances/{process_instance_id}/blockers/{blocker_id}/resolve",
-             summary="Blocker als resolved markieren")
+@router.post(
+    "/instances/{process_instance_id}/blockers/{blocker_id}/resolve",
+    response_model=dict[str, Any],
+    summary="Blocker als resolved markieren",
+)
 def resolve_blocker(
     process_instance_id: str,
     blocker_id: str,
