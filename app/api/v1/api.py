@@ -2170,3 +2170,7 @@ api_router.include_router(portal_interessent.router, tags=["portal", "interessen
 # PORTAL-INNENDIENST-001: Innendienst Kunden-Schlagkartei + Potentialanalyse
 from app.api.v1.endpoints import portal_innendienst  # noqa: E402
 api_router.include_router(portal_innendienst.router, tags=["innendienst", "portal"])
+
+# WA-AGENT-001: WhatsApp Bestellkanal + Dev-Simulator
+from app.api.v1.endpoints import whatsapp_webhook  # noqa: E402
+api_router.include_router(whatsapp_webhook.router, prefix="/whatsapp", tags=["WhatsApp"])

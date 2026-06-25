@@ -4438,3 +4438,11 @@ Archiv des vorherigen Boards:
 **Stand:** abgeschlossen 2026-06-25 - `job_runner_tables_repair_20260625` legt `domain_shared.jobs` und `domain_shared.job_artifacts` idempotent am aktuellen Alembic-Head an; `GET /api/v1/jobs` degradiert bei fehlender Tabelle auf `[]` statt 500; fokussierte Runtime-Sweep-Tests 10/10 gruen; Alembic single-head `job_runner_tables_repair_20260625`.
 **Ziel:** `domain_shared.jobs` und `domain_shared.job_artifacts` per idempotenter Repair-Migration am aktuellen Alembic-Head absichern; Job-Listenpfad bei fehlender Migration kontrolliert leer degradieren.
 **Dateibesitz:** `alembic/versions/job_runner_tables_repair_20260625.py`, `app/api/v1/endpoints/job_runner.py`, `tests/test_runtime_sweep_category_a_jobs.py`, `docs/project-context/open-gaps-and-known-issues.md`, `docs/agent-ops/slices/RUNTIME-A-JOBS-001.yaml`.
+
+## WA-AGENT-001 — WhatsApp Bestellkanal mit Test-Webhook-Simulator
+
+**Owner:** Claude Sonnet 4.6
+**Stand:** abgeschlossen 2026-06-25 — Eingehende WhatsApp-Textnachrichten werden per LLM (claude-haiku, Fallback: Regex) zu Bestelldetails extrahiert und als Sales Order angelegt (👍-Bestätigung). Dev-Simulator ohne Meta-Auth unter `/api/v1/whatsapp/dev/simulate` + Chat-UI unter `/portal/whatsapp-simulator`. 25/25 Unit-Tests grün.
+**Ziel:** WhatsApp-Textnachricht → Kundenzuordnung → Bestellextraktion → Auftragsanlage ODER Rückfrage (max. 1 Round). Start mit In-Memory-Simulator, Meta-Produktions-Webhook vorbereitet.
+**Dateibesitz:** `app/services/whatsapp_agent_service.py`, `app/api/v1/endpoints/whatsapp_webhook.py`, `packages/frontend-web/src/pages/portal/whatsapp-simulator.tsx`, `tests/test_whatsapp_agent.py`, `docs/agent-ops/slices/WA-AGENT-001.yaml`.
+**Folge-Slices:** WA-NOTIFY-001 (Lieferankündigung Push), PORTAL-SHOP-001 (Betriebsmittel-Shop).
