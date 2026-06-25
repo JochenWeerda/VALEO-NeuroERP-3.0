@@ -104,6 +104,18 @@ CRITICAL_THRESHOLDS: dict[str, float] = {
     "api/v1/endpoints/sales_invoice_einvoice.py": 0.30,  #  33% measured — XRechnung/ZUGFeRD Export
     "api/v1/endpoints/waagen_vorlagen.py": 0.50,    #  53% measured — Waagenvorlagen
     "api/v1/endpoints/rohware_sammelabrechnung.py": 0.32,  #  35% measured — Sammelabrechnung
+
+    # ── MCP-ERP-TOOLS-001 (2026-06-25) ────────────────────────────────────────
+    "services/mcp_tool_registry_service.py": 0.85,        #  88% measured
+    "api/v1/endpoints/mcp_tool_registry.py": 0.50,        #  53% estimated
+
+    # ── EXTERNAL-MOCK-HARNESS-001 (2026-06-25) ────────────────────────────────
+    "services/external_mock_harness_service.py": 0.88,    #  91% measured
+    "api/v1/endpoints/external_mock_harness.py": 0.50,    #  53% estimated
+
+    # ── OPERATOR-AGENT-001 (2026-06-25) ───────────────────────────────────────
+    "services/operator_agent_service.py": 0.85,           #  88% measured
+    "api/v1/endpoints/operator_agent.py": 0.50,           #  53% estimated
 }
 
 

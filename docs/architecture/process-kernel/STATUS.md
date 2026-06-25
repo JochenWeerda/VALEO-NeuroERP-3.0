@@ -51,7 +51,7 @@ Diese Statusdatei verdichtet den aktuellen Gesamtstand, ohne die Detailnachweise
 - Querschnittslieferung (2026-06-11, ausserhalb der Kernel-Waves):
   - `COMPAT-GOV-001`: Release-Kompatibilitaetsmatrix (`scripts/generate_release_compatibility_matrix.py` → CI-Artefakt), kanonische Toolchain-Pins (`config/release-toolchain-pins.json`), Drift-Gate `scripts/check_toolchain_pins.py`, unpinned `pytest-cov` aus Quality-/Release-Gates entfernt.
   - `INV-STOCK-MOVEMENTS-001`: `articles.py` und `pos_retoure.py` auf `domain_inventory.inventory_stock_movements` umgestellt; Vertragstests `tests/test_inventory_stock_movements_canonical.py`.
-  - Alembic-Head (repo-seitig verifiziert): `meldewesen_lifecycle_20260623` (linear: DOM-CON/FEED-PROD/POS/DOC/HRM/MEL-004-Welle 2026-06-23; `alembic heads` → 1 Head grün).
+  - Alembic-Head (repo-seitig verifiziert): `external_mock_sessions_20260623` (linear nach EXTERNAL-MOCK-HARNESS-001 2026-06-25; vorher `meldewesen_lifecycle_20260623`; `alembic heads` → 1 Head grün).
   - DOM-*-004-Tiefenwelle (2026-06-11/12): CON/SALES/FIN/DOC (Claude) + PROC/SUPPLY je auf voller Tiefe `.2`–`.5`; Detail [docs/dom-004-spine-buildout-2026-06-12.md](../../dom-004-spine-buildout-2026-06-12.md).
   - Governance-Vertragstests (lokal verifiziert): `test_release_compatibility_governance.py` (5) + `test_inventory_stock_movements_canonical.py` (3) gruen.
   - Gesamtsuite (collect-only, 2026-06-11): `9527` Tests erfasst; Pass-/Coverage-Nachweis massgeblich naechster gruener `quality-gate`-Lauf.
