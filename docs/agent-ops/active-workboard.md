@@ -1,5 +1,13 @@
 # Active Workboard
 
+## DOC-FOUNDATION-001 — Dokumentations-Fundament: MkDocs-Material + Versionierung + Taxonomie
+
+**Von:** Cursor
+**Owner:** Cursor
+**Stand:** in Arbeit 2026-06-25 — Docs-as-Code-Fundament: MkDocs+Material, mike-Versionierung, Diataxis-Taxonomie mit Einstiegsseiten, Frontmatter-Standard, CI-Build-Gate. Inhalt/Migration folgen in DOC-INTERFACES/USER-MANUAL/ADMIN-OPS/AGENT-CATALOG/GOVERNANCE/MIGRATION-Slices.
+**Ziel:** Wartbares, versioniertes, agententaugliches Doku-System schaffen, ohne bestehende Inhalte zu verschieben.
+**Dateibesitz:** `mkdocs.yml`, `requirements-docs.txt`, `.github/workflows/docs.yml`, `docs/index.md`, `docs/dokumentation/dokumentationskonzept.md`, `docs/dokumentation/frontmatter-standard.md`, `docs/{benutzerhandbuch,admin,entwickler,schnittstellen,agent-docs,compliance,referenz}/index.md`, `docs/agent-ops/slices/DOC-FOUNDATION-001.yaml`
+
 ## PERF-MULTIUSER-001 — Multi-User-Performance: Middleware auf pure ASGI + Logging entschlacken
 
 **Von:** Cursor

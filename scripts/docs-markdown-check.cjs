@@ -99,12 +99,34 @@ function checkFile(filePath, errors) {
   const content = fs.readFileSync(absolutePath, "utf8");
   const lines = content.split(/\r?\n/);
 
-  const firstNonEmptyIndex = lines.findIndex((line) => line.trim().length > 0);
-  if (firstNonEmptyIndex === -1) {
+  // Optionaler YAML-Frontmatter-Block am Dateianfang (Docs-as-Code-Standard):
+  // '---' ... '---' vor der H1 ist erlaubt. Ohne Frontmatter bleibt H1-first Pflicht.
+  let bodyStartIndex = 0;
+  const frontmatterStart = lines.findIndex((line) => line.trim().length > 0);
+  if (frontmatterStart !== -1 && lines[frontmatterStart].trim() === "---") {
+    let frontmatterEnd = -1;
+    for (let index = frontmatterStart + 1; index < lines.length; index += 1) {
+      if (lines[index].trim() === "---") {
+        frontmatterEnd = index;
+        break;
+      }
+    }
+    if (frontmatterEnd === -1) {
+      errors.push(`${filePath}: unclosed YAML frontmatter block`);
+      return;
+    }
+    bodyStartIndex = frontmatterEnd + 1;
+  }
+
+  const relativeFirstNonEmpty = lines
+    .slice(bodyStartIndex)
+    .findIndex((line) => line.trim().length > 0);
+  if (relativeFirstNonEmpty === -1) {
     errors.push(`${filePath}: file is empty`);
     return;
   }
 
+  const firstNonEmptyIndex = bodyStartIndex + relativeFirstNonEmpty;
   if (!lines[firstNonEmptyIndex].startsWith("# ")) {
     errors.push(`${filePath}: first non-empty line must start with '# '`);
   }
