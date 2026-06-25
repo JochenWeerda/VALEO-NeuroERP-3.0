@@ -16,11 +16,10 @@ sind Leser **und** Autoren der Doku.
 ## Bestandteile
 
 - **AGENTS.md** (Repo-Root) — Einstieg, Pflichtreihenfolge.
-- **Capability-Katalog** — Fähigkeiten je Agent-Rolle.
-- **Tool-Katalog** — MCP-Tools mit Schema, Scope, Idempotenz, Risiko.
-- **Guardrails** — Human-Approval bei HIGH-Risk, fail-closed, RBAC.
-- **Contracts** — `ai_harness`-Verträge je Slice (7 Pflichtverträge).
-- **Runbooks** — Operator-Agent-Proposal-Lifecycle.
+- [**Capability-Katalog**](capability-catalog.md) — Fähigkeiten je Agent-Rolle.
+- [**Tool-Katalog**](tool-catalog.md) — MCP-Tools (Schema, Scope, Idempotenz, Risiko).
+- [**Guardrails**](guardrails.md) — Human-Approval bei HIGH-Risk, fail-closed, RBAC.
+- [**Contracts**](contracts.md) — `ai_harness`-Verträge je Slice (7 Pflichtverträge).
 
 ## Zwei Rollen
 

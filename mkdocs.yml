@@ -140,7 +140,12 @@ nav:
       - REST-API: schnittstellen/rest-api.md
       - MCP-Tools: schnittstellen/mcp-tools.md
       - Event-Katalog: schnittstellen/events.md
-  - Agent-Dokumentation: agent-docs/index.md
+  - Agent-Dokumentation:
+      - Überblick: agent-docs/index.md
+      - Capability-Katalog: agent-docs/capability-catalog.md
+      - Tool-Katalog: agent-docs/tool-catalog.md
+      - Guardrails: agent-docs/guardrails.md
+      - ai_harness-Verträge: agent-docs/contracts.md
   - Compliance: compliance/index.md
   - Referenz: referenz/index.md
   - Grundlagen:

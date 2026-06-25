@@ -25,7 +25,7 @@
 
 ## DOC-AGENT-CATALOG-001 — Agent-Dokumentation: Capability- + Tool-Katalog + Guardrails
 
-**Von:** Cursor · **Owner:** Cursor · **Stand:** in Arbeit 2026-06-25 — Capability-Katalog, MCP-Tool-Katalog (Agent-Sicht), Guardrails (Human-Approval/fail-closed/RBAC), ai_harness-Vertragsmodell.
+**Von:** Cursor · **Owner:** Cursor · **Stand:** abgeschlossen 2026-06-25 — Capability-Katalog, Tool-Katalog (Agent-Sicht, verweist auf generierte MCP-Referenz), Guardrails (Human-Approval/fail-closed/RBAC/Idempotenz), ai_harness-Vertragsmodell; Index + Nav; `mkdocs build` grün.
 **Dateibesitz:** `docs/agent-docs/*.md`, `mkdocs.yml`, `docs/agent-ops/slices/DOC-AGENT-CATALOG-001.yaml`
 
 ## DOC-GOVERNANCE-001 — Doku-Governance: CODEOWNERS, Link-/Staleness-Check, Changelog, Release-Versionierung
