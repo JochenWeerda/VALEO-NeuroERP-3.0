@@ -1,0 +1,8 @@
+# Dokumentations-Toolchain (Docs-as-Code) – siehe docs/dokumentation/dokumentationskonzept.md
+# Installation: pip install -r requirements-docs.txt
+# Build:        python -m mkdocs build
+# Lokal:        python -m mkdocs serve
+# Versionierung (Releases): mike deploy --update-aliases <version> latest
+
+mkdocs-material==9.5.49
+mike==2.1.3
