@@ -10,13 +10,13 @@
       
       
       
-        <link rel="canonical" href="https://jochenweerda.github.io/VALEO-NeuroERP-3.0/3.0.0/benutzerhandbuch/lager/">
+        <link rel="canonical" href="https://jochenweerda.github.io/VALEO-NeuroERP-3.0/3.0.0/benutzerhandbuch/einkauf/">
       
       
-        <link rel="prev" href="../einkauf/">
+        <link rel="prev" href="../verkauf/">
       
       
-        <link rel="next" href="../finanzbuchhaltung/">
+        <link rel="next" href="../lager/">
       
       
       <link rel="icon" href="../../assets/images/favicon.png">
@@ -24,7 +24,7 @@
     
     
       
-        <title>Lager – Bestand, Umlagerung, Inventur - VALEO NeuroERP 3.0 – Dokumentation</title>
+        <title>Einkauf – Bestellung, Wareneingang, Rechnungsabgleich - VALEO NeuroERP 3.0 – Dokumentation</title>
       
     
     
@@ -76,7 +76,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#lager-bestand-umlagerung-inventur" class="md-skip">
+        <a href="#einkauf-bestellung-wareneingang-rechnungsabgleich" class="md-skip">
           Zum Inhalt
         </a>
       
@@ -112,7 +112,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Lager – Bestand, Umlagerung, Inventur
+              Einkauf – Bestellung, Wareneingang, Rechnungsabgleich
             
           </span>
         </div>
@@ -424,34 +424,6 @@
                 
   
   
-  
-  
-    <li class="md-nav__item">
-      <a href="../einkauf/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    Einkauf
-  </span>
-  
-    
-  
-  
-    <span class="md-status md-status--aktiv"></span>
-  
-
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
     
   
   
@@ -468,7 +440,7 @@
           
   
   <span class="md-ellipsis">
-    Lager
+    Einkauf
   </span>
   
     
@@ -486,7 +458,7 @@
         
   
   <span class="md-ellipsis">
-    Lager
+    Einkauf
   </span>
   
     
@@ -515,27 +487,45 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#bestand-einsehen" class="md-nav__link">
+  <a href="#voraussetzungen" class="md-nav__link">
     <span class="md-ellipsis">
-      Bestand einsehen
+      Voraussetzungen
     </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#umlagerung-buchen" class="md-nav__link">
+  <a href="#1-bestellvorschlag-prufen" class="md-nav__link">
     <span class="md-ellipsis">
-      Umlagerung buchen
+      1. Bestellvorschlag prüfen
     </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#inventur-durchfuhren" class="md-nav__link">
+  <a href="#2-bestellung-anlegen" class="md-nav__link">
     <span class="md-ellipsis">
-      Inventur durchführen
+      2. Bestellung anlegen
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-wareneingang-buchen" class="md-nav__link">
+    <span class="md-ellipsis">
+      3. Wareneingang buchen
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-rechnungseingang-3-wege-match" class="md-nav__link">
+    <span class="md-ellipsis">
+      4. Rechnungseingang &amp; 3-Wege-Match
     </span>
   </a>
   
@@ -554,6 +544,34 @@
   
 </nav>
       
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../lager/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Lager
+  </span>
+  
+    
+  
+  
+    <span class="md-status md-status--aktiv"></span>
+  
+
+  
+
+      </a>
     </li>
   
 
@@ -1645,27 +1663,45 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#bestand-einsehen" class="md-nav__link">
+  <a href="#voraussetzungen" class="md-nav__link">
     <span class="md-ellipsis">
-      Bestand einsehen
+      Voraussetzungen
     </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#umlagerung-buchen" class="md-nav__link">
+  <a href="#1-bestellvorschlag-prufen" class="md-nav__link">
     <span class="md-ellipsis">
-      Umlagerung buchen
+      1. Bestellvorschlag prüfen
     </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#inventur-durchfuhren" class="md-nav__link">
+  <a href="#2-bestellung-anlegen" class="md-nav__link">
     <span class="md-ellipsis">
-      Inventur durchführen
+      2. Bestellung anlegen
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-wareneingang-buchen" class="md-nav__link">
+    <span class="md-ellipsis">
+      3. Wareneingang buchen
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-rechnungseingang-3-wege-match" class="md-nav__link">
+    <span class="md-ellipsis">
+      4. Rechnungseingang &amp; 3-Wege-Match
     </span>
   </a>
   
@@ -1695,38 +1731,47 @@
                   
 
 
-<h1 id="lager-bestand-umlagerung-inventur">Lager – Bestand, Umlagerung, Inventur<a class="headerlink" href="#lager-bestand-umlagerung-inventur" title="Permanent link">&para;</a></h1>
-<p>Verwalten Sie Bestände, Umlagerungen zwischen Silozellen/Lagerorten und führen
-Sie Inventuren durch.</p>
-<h2 id="bestand-einsehen">Bestand einsehen<a class="headerlink" href="#bestand-einsehen" title="Permanent link">&para;</a></h2>
-<p><img alt="Bestandsübersicht mit Kennzahlen zu Artikeln, Wert, Reichweite und Unterbestand" src="../img/lager-bestandsuebersicht.webp" /></p>
+<h1 id="einkauf-bestellung-wareneingang-rechnungsabgleich">Einkauf – Bestellung, Wareneingang, Rechnungsabgleich<a class="headerlink" href="#einkauf-bestellung-wareneingang-rechnungsabgleich" title="Permanent link">&para;</a></h1>
+<p>Der Beschaffungsprozess folgt der Belegkette <strong>Bestellvorschlag → Bestellung →
+Wareneingang → Rechnungsabgleich (3-Wege-Match)</strong>. Die Masken sind rollenfokus-
+geführt und zeigen jederzeit die nächste nötige Aktion.</p>
+<p><img alt="Bestellübersicht mit Rollenfokus, Belegfähigkeits-Prüfung und Bestell-Follow-up-Plan" src="../img/einkauf-bestellungen.webp" /></p>
+<h2 id="voraussetzungen">Voraussetzungen<a class="headerlink" href="#voraussetzungen" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Modul <strong>Einkauf</strong> ist für den Mandanten freigeschaltet.</li>
+<li>Lieferant und Artikel sind als Stammdaten vorhanden.</li>
+</ul>
+<h2 id="1-bestellvorschlag-prufen">1. Bestellvorschlag prüfen<a class="headerlink" href="#1-bestellvorschlag-prufen" title="Permanent link">&para;</a></h2>
 <ol>
-<li>Bereich <em>Lager</em> → <em>Bestände</em>.</li>
-<li>Nach Artikel, Lagerort oder Silozelle filtern.</li>
-<li>Detailzeile öffnen für Lots, Mengen und QS-Status.</li>
+<li>Bereich <em>Einkauf</em> → <em>Bestellvorschläge</em> (Lager, Verkauf oder Rohware).</li>
+<li>Vorschlagsmengen prüfen (Bedarf, Mindestbestand, offene Aufträge).</li>
+<li>Vorschläge übernehmen oder anpassen.</li>
 </ol>
-<h2 id="umlagerung-buchen">Umlagerung buchen<a class="headerlink" href="#umlagerung-buchen" title="Permanent link">&para;</a></h2>
+<h2 id="2-bestellung-anlegen">2. Bestellung anlegen<a class="headerlink" href="#2-bestellung-anlegen" title="Permanent link">&para;</a></h2>
 <ol>
-<li><em>Lager</em> → <em>Umlagerung</em> → <em>Neu</em>.</li>
-<li>Quelle (Silozelle/Lagerort) und Ziel wählen.</li>
-<li>Menge erfassen; bei Materialwechsel ggf. <strong>Spülcharge</strong> berücksichtigen.</li>
-<li><strong>Buchen</strong>. Der Bestand wird umgebucht und als Bewegung protokolliert.</li>
+<li><em>Einkauf</em> → <em>Bestellungen</em> → <em>Neue Bestellung</em>.</li>
+<li>Lieferant wählen, Positionen erfassen (Artikel, Menge, Preis, Liefertermin).</li>
+<li><strong>Speichern</strong> und anschließend <strong>Freigeben</strong>.</li>
 </ol>
-<h2 id="inventur-durchfuhren">Inventur durchführen<a class="headerlink" href="#inventur-durchfuhren" title="Permanent link">&para;</a></h2>
+<h2 id="3-wareneingang-buchen">3. Wareneingang buchen<a class="headerlink" href="#3-wareneingang-buchen" title="Permanent link">&para;</a></h2>
 <ol>
-<li><em>Lager</em> → <em>Inventur</em> → <em>Neue Inventur</em>.</li>
-<li>Zählbereich (Lagerorte/Zellen) festlegen.</li>
-<li>Zählmengen erfassen.</li>
-<li>Differenzen prüfen und <strong>Inventur abschließen</strong> (Buchung der Differenzen).</li>
+<li>Wareneingang zur Bestellung öffnen.</li>
+<li>Gelieferte Mengen erfassen (Teil- oder Komplettlieferung).</li>
+<li><strong>Buchen</strong>. Der Bestand wird erhöht und die Bestellposition aktualisiert.</li>
 </ol>
-<p><strong>Ergebnis:</strong> Bestände sind aktuell, Bewegungen und Differenzen sind
-nachvollziehbar dokumentiert.</p>
+<h2 id="4-rechnungseingang-3-wege-match">4. Rechnungseingang &amp; 3-Wege-Match<a class="headerlink" href="#4-rechnungseingang-3-wege-match" title="Permanent link">&para;</a></h2>
+<ol>
+<li><em>Einkauf</em> → <em>Rechnungseingang</em> → Rechnung erfassen.</li>
+<li>Abgleich <strong>Bestellung ↔ Wareneingang ↔ Rechnung</strong> (Menge, Preis).</li>
+<li>Bei Übereinstimmung freigeben; Abweichungen klären (Gutschrift/Belastung).</li>
+</ol>
+<p><strong>Ergebnis:</strong> Eine durchgängige, prüfbare Beschaffungskette mit korrekter
+Bestandsführung und freigegebener Eingangsrechnung.</p>
 <h2 id="haufige-fehler">Häufige Fehler<a class="headerlink" href="#haufige-fehler" title="Permanent link">&para;</a></h2>
 <ul>
-<li><strong>QS-Sperre verhindert Buchung:</strong> QS-Status der Zelle prüfen/freigeben lassen.</li>
-<li><strong>Spülpflicht ignoriert:</strong> bei Materialwechsel Spülcharge buchen, sonst
-  Kontaminationsrisiko.</li>
-<li><strong>Inventurdifferenz unerwartet:</strong> offene Bewegungen vor der Zählung abschließen.</li>
+<li><strong>Wareneingang ohne Bestellbezug:</strong> zuerst Bestellung freigeben.</li>
+<li><strong>Rechnung blockiert:</strong> Mengen-/Preisabweichung im 3-Wege-Match prüfen.</li>
+<li><strong>Bestellvorschlag leer:</strong> Mindestbestände/Bedarfe an den Artikeln prüfen.</li>
 </ul>
 
 
@@ -1766,7 +1811,7 @@ nachvollziehbar dokumentiert.</p>
       <nav class="md-footer__inner md-grid" aria-label="Fußzeile" >
         
           
-          <a href="../einkauf/" class="md-footer__link md-footer__link--prev" aria-label="Zurück: Einkauf">
+          <a href="../verkauf/" class="md-footer__link md-footer__link--prev" aria-label="Zurück: Verkauf (Auftrag → Rechnung)">
             <div class="md-footer__button md-icon">
               
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
@@ -1776,20 +1821,20 @@ nachvollziehbar dokumentiert.</p>
                 Zurück
               </span>
               <div class="md-ellipsis">
-                Einkauf
+                Verkauf (Auftrag → Rechnung)
               </div>
             </div>
           </a>
         
         
           
-          <a href="../finanzbuchhaltung/" class="md-footer__link md-footer__link--next" aria-label="Weiter: Finanzbuchhaltung">
+          <a href="../lager/" class="md-footer__link md-footer__link--next" aria-label="Weiter: Lager">
             <div class="md-footer__title">
               <span class="md-footer__direction">
                 Weiter
               </span>
               <div class="md-ellipsis">
-                Finanzbuchhaltung
+                Lager
               </div>
             </div>
             <div class="md-footer__button md-icon">

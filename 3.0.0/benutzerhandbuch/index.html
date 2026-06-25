@@ -282,6 +282,10 @@
       
         
       
+        
+      
+        
+      
     
     
       
@@ -423,6 +427,34 @@
   
   
     <li class="md-nav__item">
+      <a href="einkauf/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Einkauf
+  </span>
+  
+    
+  
+  
+    <span class="md-status md-status--aktiv"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="lager/" class="md-nav__link">
         
   
@@ -456,6 +488,34 @@
   
   <span class="md-ellipsis">
     Finanzbuchhaltung
+  </span>
+  
+    
+  
+  
+    <span class="md-status md-status--aktiv"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="crm/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    CRM
   </span>
   
     
@@ -1543,32 +1603,38 @@ Voraussetzungen → Schritte → Ergebnis → häufige Fehler.</p>
 <li><a href="einstieg/"><strong>Einstieg</strong></a> — Anmeldung, Mandantenwahl, Navigation, Tastatur.</li>
 <li><a href="annahme/"><strong>Annahme</strong></a> — LKW-Registrierung, Waage, Qualität, Ernteannahme.</li>
 <li><a href="verkauf/"><strong>Verkauf</strong></a> — Auftrag → Lieferschein → Rechnung.</li>
+<li><a href="einkauf/"><strong>Einkauf</strong></a> — Bestellung, Wareneingang, 3-Wege-Match.</li>
 <li><a href="lager/"><strong>Lager</strong></a> — Bestand, Umlagerung, Inventur, Silo.</li>
 <li><a href="finanzbuchhaltung/"><strong>Finanzbuchhaltung</strong></a> — Offene Posten, Mahnwesen, Zahlungen.</li>
+<li><a href="crm/"><strong>CRM</strong></a> — Kontakte, Leads, Aktivitäten.</li>
 <li><a href="glossar/"><strong>Glossar</strong></a> — Fachbegriffe Landhandel/Agrar.</li>
 <li><a href="in-app-hilfe/"><strong>In-App-Hilfe</strong></a> — kontextsensitive Deep-Links.</li>
 </ul>
-<blockquote>
-<p>Einkauf und CRM folgen als weitere How-tos.</p>
-</blockquote>
 <h2 id="screenshots">Screenshots<a class="headerlink" href="#screenshots" title="Permanent link">&para;</a></h2>
-<p>Screenshots liegen unter <code>benutzerhandbuch/img/</code> und werden so eingebunden:</p>
+<p>Screenshots liegen als <strong>WebP</strong> unter <code>benutzerhandbuch/img/</code> und werden so
+eingebunden:</p>
 <p><code>markdown
-![Anmeldemaske](img/einstieg-login.png)</code></p>
-<p><strong>Aufnahme-Verfahren</strong> (erfordert eine laufende, <strong>angemeldete</strong> Oberfläche):</p>
+![Dashboard](img/einstieg-dashboard.webp)</code></p>
+<p><strong>Aufnahme-Verfahren</strong> (lokale Dev-/Docker-Umgebung):</p>
 <ol>
-<li>Frontend starten/öffnen (Docker: <code>valeo-neuro-erp-frontend</code>, Port 3000) und
-   mit gültigen Zugangsdaten anmelden.</li>
-<li>Zielmaske öffnen und Screenshot erstellen (Browser/UI-Explorer).</li>
-<li>Bild als <code>img/&lt;bereich&gt;-&lt;maske&gt;.png</code> ablegen und in der jeweiligen How-to
-   einbinden.</li>
+<li>Frontend öffnen (Docker: <code>valeo-neuro-erp-frontend</code>, Port 3000).</li>
+<li>Dev-Session aktivieren: Im Browser <code>localStorage.setItem('access_token','dev-token')</code>
+   setzen und neu laden. Der <code>AuthService</code> erzeugt damit einen Mock-Admin und
+   umgeht den OIDC-Login (siehe <code>src/lib/auth.ts</code>); das Backend akzeptiert den
+   Wert aus <code>API_DEV_TOKEN</code>.</li>
+<li>Zielmaske öffnen, <strong>dem ersten Aufruf genügend Zeit geben</strong> (Vite kompiliert
+   Lazy-Chunks on-demand — bis ~20 s), dann Screenshot erstellen.</li>
+<li>Rohbild (PNG) als <code>img/&lt;bereich&gt;-&lt;maske&gt;.png</code> ablegen und mit
+   <code>python scripts/compress_screenshots.py</code> zu WebP komprimieren
+   (ersetzt die PNG, ~60–80 % kleiner, Text bleibt scharf).</li>
+<li>WebP-Bild in der jeweiligen How-to einbinden.</li>
 </ol>
 <div class="admonition note">
-<p class="admonition-title">Status</p>
-<p>Automatisierte Screenshot-Aufnahme ist vorbereitet, aber noch offen: Die
-Oberfläche benötigt eine authentifizierte Session (OIDC). Sobald
-Test-Zugangsdaten (<code>NEUROERP_USER</code> / <code>NEUROERP_PASS</code>) bereitstehen, können
-die Bilder per Browser-Automation erzeugt und hier abgelegt werden.</p>
+<p class="admonition-title">Aktueller Stand</p>
+<p>Die Kern-Masken sind als komprimierte WebP-Screenshots hinterlegt: Dashboard,
+Rohware-Annahme, Auftrags-Erfassung, Einkauf-Bestellungen, Bestandsübersicht,
+Hauptbuch und CRM-Kontakte. Die Aufnahme erfolgte über die Dev-Token-Session
+ohne externen OIDC-Provider.</p>
 </div>
 
 
