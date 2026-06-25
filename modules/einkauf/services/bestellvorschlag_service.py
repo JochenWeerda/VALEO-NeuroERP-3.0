@@ -444,6 +444,7 @@ def engine_rohware(
                                   "stichtag": stichtag}).scalar() or 0
             ))
         except Exception:
+            db.rollback()
             pass
 
         # Fallback: Tagesverbrauch × Wiederbeschaffungszeit

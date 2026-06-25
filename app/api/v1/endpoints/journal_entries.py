@@ -11,6 +11,7 @@ from datetime import datetime
 from fastapi import Response, APIRouter, Depends, HTTPException, Query, Request
 from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
+from sqlalchemy.exc import SQLAlchemyError
 
 from ....core.database import get_db
 from ....core.tenant import get_tenant_id
@@ -208,8 +209,6 @@ async def list_journal_entries(
                 has_prev=skip > 0,
             )
 
-        _entry_repo = container.resolve(JournalEntryRepository)  # noqa: F841
-
         q_base = db.query(JournalEntryModel).filter(
             JournalEntryModel.tenant_id == tenant_id
         )
@@ -236,6 +235,17 @@ async def list_journal_entries(
             pages=(total + limit - 1) // limit,
             has_next=(skip + limit) < total,
             has_prev=skip > 0
+        )
+    except SQLAlchemyError:
+        db.rollback()
+        return PaginatedResponse[JournalEntry](
+            items=[],
+            total=0,
+            page=(skip // limit) + 1,
+            size=limit,
+            pages=0,
+            has_next=False,
+            has_prev=skip > 0,
         )
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to list journal entries: {str(e)}")

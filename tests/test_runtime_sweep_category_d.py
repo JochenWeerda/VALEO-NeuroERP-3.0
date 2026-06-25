@@ -2,8 +2,9 @@ import json
 
 import httpx
 import pytest
+from sqlalchemy.exc import SQLAlchemyError
 
-from app.api.v1.endpoints import activities, cases, opportunities
+from app.api.v1.endpoints import activities, cases, einkauf_bestellvorschlag, journal_entries, opportunities
 from app.domains.inventory.application.services.replenishment_service import ReplenishmentService
 from app.finance.gobd import BelegnummernLuecke, _count_missing_belegnummern
 from app.infrastructure.models import NawaroPrintNotification
@@ -26,6 +27,20 @@ class _Db:
 
     def query(self, *_args, **_kwargs):
         return _Query(self._rows)
+
+
+class _FailingDb:
+    rolled_back = False
+
+    def query(self, *_args, **_kwargs):
+        raise SQLAlchemyError("table missing")
+
+    def rollback(self):
+        self.rolled_back = True
+
+
+class _Request:
+    query_params: dict[str, str] = {}
 
 
 def test_belegnummern_luecken_count_missing_range():
@@ -100,3 +115,38 @@ async def test_crm_opportunity_list_degrades_when_downstream_unreachable(monkeyp
 
     assert response.total == 0
     assert response.items == []
+
+
+@pytest.mark.asyncio
+async def test_journal_entry_list_degrades_on_sqlalchemy_error():
+    db = _FailingDb()
+
+    response = await journal_entries.list_journal_entries(
+        request=_Request(),
+        tenant_id="tenant-1",
+        skip=0,
+        limit=50,
+        db=db,
+    )
+
+    assert db.rolled_back is True
+    assert response.total == 0
+    assert response.items == []
+
+
+@pytest.mark.asyncio
+async def test_rohware_vorschlag_degrades_on_sqlalchemy_error(monkeypatch):
+    class _Service:
+        def compute_vorschlag_rohware(self, *_args, **_kwargs):
+            raise SQLAlchemyError("transaction failed")
+
+    db = _FailingDb()
+    monkeypatch.setattr(einkauf_bestellvorschlag, "_svc", lambda *_args, **_kwargs: _Service())
+
+    response = await einkauf_bestellvorschlag.vorschlag_rohware(
+        db=db,
+        tenant_id="tenant-1",
+    )
+
+    assert db.rolled_back is True
+    assert response == []
