@@ -795,7 +795,7 @@ async def list_intercompany_buchungen(
     if status:
         query = query.where(IntercompanyBuchung.status == status)
     
-    query = query.order_by(IntercompanyBuchung.buchungsdatum.desc())
+    query = query.order_by(IntercompanyBuchung.datum.desc(), IntercompanyBuchung.created_at.desc())
     
     result = db.execute(query).scalars().all()
     return result

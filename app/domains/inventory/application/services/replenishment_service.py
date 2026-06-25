@@ -4,8 +4,9 @@ Handles automated replenishment logic and purchase order suggestions
 """
 
 from typing import List, Dict, Any, Optional
-from decimal import Decimal
 from datetime import datetime, timedelta
+from decimal import Decimal
+from math import isfinite
 from sqlalchemy.orm import Session
 
 from app.infrastructure.models import Article as ArticleModel
@@ -175,16 +176,22 @@ class ReplenishmentService:
         # Calculate turnover ratio (simplified)
         if total_inventory_value > 0:
             turnover_ratio = total_cost_of_goods_sold / total_inventory_value
-            turnover_days = period_days / float(turnover_ratio) if turnover_ratio > 0 else float('inf')
+            turnover_days = period_days / float(turnover_ratio) if turnover_ratio > 0 else None
         else:
             turnover_ratio = 0
-            turnover_days = float('inf')
+            turnover_days = None
+
+        turnover_ratio_value = float(turnover_ratio)
+        if not isfinite(turnover_ratio_value):
+            turnover_ratio_value = 0.0
+        if turnover_days is not None and not isfinite(turnover_days):
+            turnover_days = None
 
         return {
             "period_days": period_days,
             "total_inventory_value": float(total_inventory_value),
             "total_cogs": float(total_cost_of_goods_sold),
-            "turnover_ratio": float(turnover_ratio),
+            "turnover_ratio": turnover_ratio_value,
             "turnover_days": turnover_days,
             "analysis_date": datetime.utcnow().isoformat()
         }
