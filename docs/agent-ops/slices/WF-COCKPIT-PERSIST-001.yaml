@@ -1,0 +1,46 @@
+id: WF-COCKPIT-PERSIST-001
+title: "Workflow-Cockpit DB-Persistenz + NATS-Projector"
+domain: workflow
+status: closed
+owner: dev
+created_at: "2026-06-25"
+closed_at: "2026-06-25"
+description: >
+  Persistente DB-Tabellen fuer das Workflow-Cockpit (Schema domain_workflow).
+  Alembic-Migration erstellt wf_cockpit_instances, wf_cockpit_events, wf_cockpit_blockers.
+  WorkflowCockpitPersistService schreibt Snapshots via SQLAlchemy-Core.
+  WfCockpitNatsProjector abonniert workflow.> und domain.> fuer Live-Projektion.
+  Dead-Letter-Sicht zeigt FAILED/BLOCKED_EXTERNAL_GATE mit offenen Blockern.
+
+file_ownership:
+  - alembic/versions/wf_cockpit_persist_20260625.py
+  - app/services/wf_cockpit_persist_service.py
+  - app/services/wf_cockpit_nats_projector.py
+  - app/api/v1/endpoints/wf_cockpit_persist.py
+  - tests/test_wf_cockpit_persist.py
+
+acceptance:
+  - Alembic-Migration up/down ohne Fehler
+  - GET /workflow/cockpit-db/instances liefert Instanzliste (tenant-isoliert)
+  - GET /workflow/cockpit-db/dead-letter zeigt FAILED + BLOCKED mit Blocker-Anzahl
+  - GET /workflow/cockpit-db/instances/{id} zeigt Events + Blocker
+  - POST /workflow/cockpit-db/instances/{id}/blockers/{bid}/resolve markiert Blocker
+  - NATS-Projector subscribed workflow.> und domain.>
+  - NATS-Abwesenheit wird mit Warning geloggt (kein crash)
+  - 18/18 Unit-Tests gruen
+
+risks:
+  - NATS muss fuer Live-Projektion laufen (graceful-skip wenn unavailable)
+  - wf_cockpit_persist_service nutzt asyncio.run_in_executor fuer NATS-Async-Kompatibilitaet
+
+ai_harness:
+  slice_type: backend_service
+  test_count: 18
+  coverage_target: 0.78
+  has_migration: true
+  nats_subjects:
+    - workflow.>
+    - domain.>
+  external_gates: []
+  rollback_plan: >
+    alembic downgrade -1 entfernt alle drei Tabellen und das Schema domain_workflow.

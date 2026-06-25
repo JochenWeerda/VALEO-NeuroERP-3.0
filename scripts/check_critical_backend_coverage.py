@@ -128,6 +128,15 @@ CRITICAL_THRESHOLDS: dict[str, float] = {
     # ── P2.3 AI-DATA-CLASSES-001 (2026-06-25) ────────────────────────────────
     "services/ai_data_classification_service.py": 0.85,   #  88% measured
     "api/v1/endpoints/ai_data_classification.py": 0.50,   #  53% estimated
+
+    # ── WM-SILO-RULE-ENGINE-001 (2026-06-25) ─────────────────────────────────
+    "services/silo_rule_engine_service.py": 0.80,          #  ~82% estimated
+    "api/v1/endpoints/silo_target_cell.py": 0.50,          #  ~55% estimated
+
+    # ── WF-COCKPIT-PERSIST-001 (2026-06-25) ──────────────────────────────────
+    "services/wf_cockpit_persist_service.py": 0.75,        #  ~78% estimated
+    "services/wf_cockpit_nats_projector.py": 0.60,         #  ~62% estimated
+    "api/v1/endpoints/wf_cockpit_persist.py": 0.50,        #  ~55% estimated
 }
 
 

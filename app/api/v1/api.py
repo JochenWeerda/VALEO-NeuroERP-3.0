@@ -2136,3 +2136,12 @@ api_router.include_router(ai_engineering_metrics.router, tags=["ai-engineering",
 # P2.3: KI-Datenklassen
 from app.api.v1.endpoints import ai_data_classification  # noqa: E402
 api_router.include_router(ai_data_classification.router, tags=["ai-data-classification", "compliance"])
+
+
+# WM-SILO-RULE-ENGINE-001: Zielzellen-Vorschlag fuer Agrar-Einlagerung
+from app.api.v1.endpoints import silo_target_cell  # noqa: E402
+api_router.include_router(silo_target_cell.router, tags=["silo", "rule-engine"])
+
+# WF-COCKPIT-PERSIST-001: DB-backed Workflow-Cockpit (Dead-Letter-Sicht)
+from app.api.v1.endpoints import wf_cockpit_persist  # noqa: E402
+api_router.include_router(wf_cockpit_persist.router, tags=["workflow", "cockpit"])
