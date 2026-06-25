@@ -161,7 +161,7 @@ def create_aisle(
 # ── Bins ───────────────────────────────────────────────────────────────────
 
 @router.get("/bins", summary="Bins auflisten",
-    response_model=WarehouseWmsOut
+    response_model=list[WarehouseWmsOut]
 )
 def list_bins(
     warehouse_id: Optional[str] = Query(None),
@@ -426,7 +426,7 @@ def mhd_alert(
 # ── Stock Valuation ────────────────────────────────────────────────────────
 
 @router.get("/stock-valuation", summary="Valuation stock",
-    response_model=WarehouseWmsOut
+    response_model=list[WarehouseWmsOut]
 )
 def stock_valuation(
     warehouse_id: Optional[str] = Query(None),

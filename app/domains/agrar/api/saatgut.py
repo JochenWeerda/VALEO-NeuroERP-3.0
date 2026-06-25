@@ -7,7 +7,7 @@ from typing import Optional
 from fastapi import APIRouter, Depends, HTTPException, Query
 from datetime import datetime
 from sqlalchemy.orm import Session
-from sqlalchemy import or_, desc
+from sqlalchemy import or_, desc, func, case
 
 from ....core.config import settings
 from ....core.database import get_db
@@ -274,7 +274,7 @@ async def get_saatgut_stats(
 
     # Count by type
     type_stats = {}
-    types = db.query(SaatgutModel.art, db.func.count(SaatgutModel.id)).filter(
+    types = db.query(SaatgutModel.art, func.count(SaatgutModel.id)).filter(
         SaatgutModel.tenant_id == effective_tenant,
         SaatgutModel.ist_aktiv == True
     ).group_by(SaatgutModel.art).all()
@@ -285,11 +285,11 @@ async def get_saatgut_stats(
     # Approval stats
     approval_stats = {}
     approvals = db.query(
-        db.func.concat(
-            db.case((SaatgutModel.bsa_zulassung == True, "BSA"), else_=""),
-            db.case((SaatgutModel.eu_zulassung == True, "+EU"), else_="")
+        func.concat(
+            case((SaatgutModel.bsa_zulassung == True, "BSA"), else_=""),
+            case((SaatgutModel.eu_zulassung == True, "+EU"), else_="")
         ),
-        db.func.count(SaatgutModel.id)
+        func.count(SaatgutModel.id)
     ).filter(
         SaatgutModel.tenant_id == effective_tenant,
         SaatgutModel.ist_aktiv == True
@@ -303,9 +303,9 @@ async def get_saatgut_stats(
 
     # Stock stats
     stock_stats = db.query(
-        db.func.sum(SaatgutModel.lagerbestand),
-        db.func.sum(SaatgutModel.verfuegbar),
-        db.func.avg(SaatgutModel.vk_preis)
+        func.sum(SaatgutModel.lagerbestand),
+        func.sum(SaatgutModel.verfuegbar),
+        func.avg(SaatgutModel.vk_preis)
     ).filter(
         SaatgutModel.tenant_id == effective_tenant,
         SaatgutModel.ist_aktiv == True

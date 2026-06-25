@@ -3,7 +3,6 @@ Authentication Router
 Demo-Login-Endpoint für lokale Tests (NICHT für Production!)
 """
 
-from __future__ import annotations
 from fastapi import APIRouter, HTTPException, Request
 from pydantic import BaseModel
 from .jwt import create_access_token

@@ -7,7 +7,7 @@ from typing import Optional
 from fastapi import APIRouter, Depends, HTTPException, Query
 from datetime import datetime
 from sqlalchemy.orm import Session
-from sqlalchemy import or_, desc
+from sqlalchemy import or_, desc, func, case
 
 from ....core.config import settings
 from ....core.database import get_db
@@ -291,7 +291,7 @@ async def get_duenger_stats(
 
     # Count by type
     type_stats = {}
-    types = db.query(DuengerModel.typ, db.func.count(DuengerModel.id)).filter(
+    types = db.query(DuengerModel.typ, func.count(DuengerModel.id)).filter(
         DuengerModel.tenant_id == effective_tenant,
         DuengerModel.ist_aktiv == True
     ).group_by(DuengerModel.typ).all()
@@ -302,11 +302,11 @@ async def get_duenger_stats(
     # Safety stats
     safety_stats = {}
     safety = db.query(
-        db.func.concat(
-            db.case((DuengerModel.wassergefaehrdend == True, "WG"), else_=""),
-            db.case((DuengerModel.gefahrstoff_klasse.isnot(None), "+GHS"), else_="")
+        func.concat(
+            case((DuengerModel.wassergefaehrdend == True, "WG"), else_=""),
+            case((DuengerModel.gefahrstoff_klasse.isnot(None), "+GHS"), else_="")
         ),
-        db.func.count(DuengerModel.id)
+        func.count(DuengerModel.id)
     ).filter(
         DuengerModel.tenant_id == effective_tenant,
         DuengerModel.ist_aktiv == True
@@ -320,8 +320,8 @@ async def get_duenger_stats(
 
     # Stock stats
     stock_stats = db.query(
-        db.func.sum(DuengerModel.lagerbestand),
-        db.func.avg(DuengerModel.vk_preis)
+        func.sum(DuengerModel.lagerbestand),
+        func.avg(DuengerModel.vk_preis)
     ).filter(
         DuengerModel.tenant_id == effective_tenant,
         DuengerModel.ist_aktiv == True
