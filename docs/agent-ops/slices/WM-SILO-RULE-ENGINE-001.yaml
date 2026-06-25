@@ -1,40 +1,49 @@
-id: WM-SILO-RULE-ENGINE-001
+slice_id: WM-SILO-RULE-ENGINE-001
 title: "Silo Zielzellen-Regelengine"
-domain: agrar-wms
-status: closed
 owner: dev
+status: completed
 created_at: "2026-06-25"
 closed_at: "2026-06-25"
-description: >
+goal: >-
   Regelbasierte API zur automatischen Empfehlung von Zielzellen fuer
-  Agrar-Einlagerungsvorgaenge. Liest silo_cells und silo_lots aus domain_inventory.
-  Priorisierung: gleicher Artikel + Erntejahr > leere Zelle > gleicher Artikel > generisch.
-
+  Agrar-Einlagerungsvorgaenge bereitstellen. Priorisierung: gleicher Artikel
+  und Erntejahr, leere Zelle, gleicher Artikel, generische Kapazitaet.
 file_ownership:
   - app/services/silo_rule_engine_service.py
   - app/api/v1/endpoints/silo_target_cell.py
   - tests/test_silo_rule_engine.py
-
+  - docs/agent-ops/slices/WM-SILO-RULE-ENGINE-001.yaml
 acceptance:
-  - GET /silo/zielzellen-vorschlag?artikel_id=WEIZEN&menge_kg=10000 liefert gerankte Liste
-  - GET /silo/zielzellen-vorschlag/lot/{lot_id} ableitet Artikel aus Lot
-  - Rang 1 = gleicher Artikel + Erntejahr + QS freigegeben
-  - Rang 2 = leere Zelle
-  - Rang 3 = gleicher Artikel beliebiges Erntejahr
-  - Rang 4 = generisch Kapazitaet
-  - Gesperrte Zellen werden nicht vorgeschlagen
-  - 15/15 Unit-Tests gruen
-
+  - Vorschlags-Endpoint liefert gerankte Zielzellen fuer Artikel und Menge.
+  - Lot-Endpoint leitet Artikel-/Kontextdaten aus dem Lot ab.
+  - Gesperrte oder fachlich unpassende Zellen werden nicht vorgeschlagen.
+tests:
+  - python -m py_compile app/services/silo_rule_engine_service.py app/api/v1/endpoints/silo_target_cell.py
+  - pytest -q -o addopts= tests/test_silo_rule_engine.py
 risks:
-  - silo_lots.ernte_jahr Spalte muss existieren (Migration-Check vor Deployment)
-  - silo_lots.qualitaetsklasse ebenfalls optional
-
+  - silo_lots.ernte_jahr und optionale QS-Felder muessen vor Deployment schema-seitig verfuegbar sein.
+  - Ranking ist fachlich regelbasiert und muss bei neuen Silo-/QS-Policies gepflegt werden.
+external_gates:
+  - not_applicable
 ai_harness:
-  slice_type: backend_service
-  test_count: 15
-  coverage_target: 0.82
-  has_migration: false
-  nats_subjects: []
-  external_gates: []
-  rollback_plan: >
-    Endpoint deaktivieren via Router-Auskommentierung; kein Schema-Rollback noetig.
+  fachlicher_vertrag: >-
+    Einlagerungsoperatoren erhalten nachvollziehbare Zielzellen-Vorschlaege
+    mit Rangfolge, Begruendung und Ausschluss gesperrter Zellen.
+  architektur_vertrag: >-
+    Read-only Service ueber domain_inventory.silo_cells und silo_lots; keine
+    Bestandsbuchung und kein Schema-Rollback erforderlich.
+  daten_vertrag: >-
+    Eingaben: artikel_id, menge_kg oder lot_id. Ausgabe: gerankte Zellliste
+    mit Score, Kapazitaet, Artikel-/Erntejahr-Match und Begruendung.
+  test_vertrag: >-
+    Unit-Tests decken Artikel-/Lot-Flow, Rangfolge, Kapazitaet, QS-Freigabe
+    und Ausschluss gesperrter Zellen ab.
+  security_vertrag: >-
+    Nur lesender Vorschlagsdienst; keine automatischen Umbuchungen und keine
+    Cross-Tenant-Datenfreigabe.
+  betriebs_vertrag: >-
+    Service ist ohne externe Anlage lauffaehig; fachliche Policies muessen bei
+    geaenderten Silo-Regeln versioniert angepasst werden.
+  dokumentations_vertrag: >-
+    Slice-YAML und Workboard nennen Dateibesitz, Tests, Risiken und fachliche
+    Priorisierungslogik.
