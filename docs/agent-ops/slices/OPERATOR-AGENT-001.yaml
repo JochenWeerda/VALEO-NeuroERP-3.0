@@ -6,27 +6,30 @@ created_at: "2026-06-25"
 coordination: >-
   Entsteht aus valeo_neuroerp_youtube_gap_analyse_2026-06-23.md P1.
   Kein Konflikt mit DOM-CONTROLLING-004 oder COMPAT-GOV-MATRIX-SYNC.
-  Agent schreibt nie autonom in Domaenobjekte — nur Proposals mit Audit-Trail.
+  Agent schreibt nie autonom in Domaenobjekte; nur Proposals mit Audit-Trail.
 goal: >-
   Sicheren, RBAC-bewachten Operator-Agent-Modus bereitstellen: Kontext lesen,
   Handlungen vorschlagen (Mahnung, Rechnung, QS-Freigabe, Nachfassung, DMS-Paket),
   Human-Approval-Flow protokollieren und auditieren. Kein autonomes Schreiben.
 file_ownership:
-  owned:
-    - app/services/operator_agent_service.py
-    - app/api/v1/endpoints/operator_agent.py
-    - tests/test_operator_agent.py
-    - docs/agent-ops/slices/OPERATOR-AGENT-001.yaml
-  reads:
-    - app/api/v1/api.py
-    - docs/agent-ops/active-workboard.md
+  - app/services/operator_agent_service.py
+  - app/api/v1/endpoints/operator_agent.py
+  - tests/test_operator_agent.py
+  - docs/agent-ops/slices/OPERATOR-AGENT-001.yaml
+  - app/api/v1/api.py
+  - docs/agent-ops/active-workboard.md
+acceptance:
+  - Operator-Agent liest Kontext tenantisoliert und erzeugt nur Proposals statt Fachobjekte direkt zu veraendern.
+  - High-Risk-Aktionen verlangen Human Approval und werden im Audit-Trail protokolliert.
+  - Rollenpruefungen fuer read, propose und approve schlagen fail-closed fehl.
 tests:
   - python -m py_compile app/services/operator_agent_service.py app/api/v1/endpoints/operator_agent.py
   - pytest -q -o addopts= tests/test_operator_agent.py
-risks: >-
-  In-Memory-Store: kein Restart-Persistenz (bewusst fuer MVP — productiv via DB).
-  Roles via Header: Muss in Prod durch OIDC-Claims ersetzt werden.
-external_gates: []
+risks:
+  - In-Memory-Store hat keine Restart-Persistenz und muss fuer Produktion durch DB-Persistenz ersetzt werden.
+  - Rollen via Header muessen in Produktion durch OIDC-Claims ersetzt werden.
+external_gates:
+  - not_applicable
 ai_harness:
   fachlicher_vertrag: >-
     Agent darf Kontext lesen (OP-Liste, Mahnstatus, QS-Gates) und Handlungen
