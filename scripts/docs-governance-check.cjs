@@ -180,8 +180,24 @@ function ensureAiHarnessSliceRules(filePath, content, errors) {
 }
 
 function ensureH1(filePath, content, errors) {
-  const firstNonEmpty = content
-    .split(/\r?\n/)
+  const lines = content.split(/\r?\n/);
+
+  // Optionaler YAML-Frontmatter-Block ('---' ... '---') vor der H1 ist erlaubt.
+  let startIndex = 0;
+  const frontmatterStart = lines.findIndex((line) => line.trim().length > 0);
+  if (frontmatterStart !== -1 && lines[frontmatterStart].trim() === "---") {
+    const frontmatterEnd = lines.findIndex(
+      (line, index) => index > frontmatterStart && line.trim() === "---",
+    );
+    if (frontmatterEnd === -1) {
+      errors.push(`${filePath}: unclosed YAML frontmatter block`);
+      return;
+    }
+    startIndex = frontmatterEnd + 1;
+  }
+
+  const firstNonEmpty = lines
+    .slice(startIndex)
     .find((line) => line.trim().length > 0);
 
   if (!firstNonEmpty || !firstNonEmpty.startsWith("# ")) {
