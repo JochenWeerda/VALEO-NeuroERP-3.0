@@ -1,0 +1,1859 @@
+
+<!doctype html>
+<html lang="de" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Dokumentation für VALEO NeuroERP 3.0 – Multi-Mandanten-ERP für Agrar, Landhandel und Handel.">
+      
+      
+      
+      
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.5.49">
+    
+    
+      
+        <title>GoBD Schritt 3 – Konzept & umgesetzte Maßnahmen - VALEO NeuroERP 3.0 – Dokumentation</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.6f8fc17f.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.06af60db.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="green" data-md-color-accent="light-green">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#gobd-schritt-3-konzept-umgesetzte-manahmen" class="md-skip">
+          Zum Inhalt
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Kopfzeile">
+    <a href="../.." title="VALEO NeuroERP 3.0 – Dokumentation" class="md-header__button md-logo" aria-label="VALEO NeuroERP 3.0 – Dokumentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            VALEO NeuroERP 3.0 – Dokumentation
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              GoBD Schritt 3 – Konzept &amp; umgesetzte Maßnahmen
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="green" data-md-color-accent="light-green"  aria-label="Dunkles Design"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Dunkles Design" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m17.75 4.09-2.53 1.94.91 3.06-2.63-1.81-2.63 1.81.91-3.06-2.53-1.94L12.44 4l1.06-3 1.06 3zm3.5 6.91-1.64 1.25.59 1.98-1.7-1.17-1.7 1.17.59-1.98L15.75 11l2.06-.05L18.5 9l.69 1.95zm-2.28 4.95c.83-.08 1.72 1.1 1.19 1.85-.32.45-.66.87-1.08 1.27C15.17 23 8.84 23 4.94 19.07c-3.91-3.9-3.91-10.24 0-14.14.4-.4.82-.76 1.27-1.08.75-.53 1.93.36 1.85 1.19-.27 2.86.69 5.83 2.89 8.02a9.96 9.96 0 0 0 8.02 2.89m-1.64 2.02a12.08 12.08 0 0 1-7.8-3.47c-2.17-2.19-3.33-5-3.49-7.82-2.81 3.14-2.7 7.96.31 10.98 3.02 3.01 7.84 3.12 10.98.31"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="green" data-md-color-accent="light-green"  aria-label="Helles Design"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Helles Design" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 7a5 5 0 0 1 5 5 5 5 0 0 1-5 5 5 5 0 0 1-5-5 5 5 0 0 1 5-5m0 2a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3m0-7 2.39 3.42C13.65 5.15 12.84 5 12 5s-1.65.15-2.39.42zM3.34 7l4.16-.35A7.2 7.2 0 0 0 5.94 8.5c-.44.74-.69 1.5-.83 2.29zm.02 10 1.76-3.77a7.131 7.131 0 0 0 2.38 4.14zM20.65 7l-1.77 3.79a7.02 7.02 0 0 0-2.38-4.15zm-.01 10-4.14.36c.59-.51 1.12-1.14 1.54-1.86.42-.73.69-1.5.83-2.29zM12 22l-2.41-3.44c.74.27 1.55.44 2.41.44.82 0 1.63-.17 2.37-.44z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Suche" placeholder="Suche" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Suche">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Zurücksetzen" aria-label="Zurücksetzen" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Suche wird initialisiert
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="VALEO NeuroERP 3.0 – Dokumentation" class="md-nav__button md-logo" aria-label="VALEO NeuroERP 3.0 – Dokumentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    VALEO NeuroERP 3.0 – Dokumentation
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Start
+  </span>
+  
+    
+  
+  
+    <span class="md-status md-status--aktiv"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../../benutzerhandbuch/" class="md-nav__link ">
+              
+  
+  <span class="md-ellipsis">
+    Benutzerhandbuch
+  </span>
+  
+    
+  
+  
+    <span class="md-status md-status--entwurf"></span>
+  
+
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_2" id="__nav_2_label" tabindex="">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            Benutzerhandbuch
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../benutzerhandbuch/einstieg/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Einstieg
+  </span>
+  
+    
+  
+  
+    <span class="md-status md-status--aktiv"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../benutzerhandbuch/annahme/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Ernteannahme
+  </span>
+  
+    
+  
+  
+    <span class="md-status md-status--aktiv"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../benutzerhandbuch/verkauf/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Verkauf (Auftrag → Rechnung)
+  </span>
+  
+    
+  
+  
+    <span class="md-status md-status--aktiv"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../benutzerhandbuch/lager/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Lager
+  </span>
+  
+    
+  
+  
+    <span class="md-status md-status--aktiv"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../benutzerhandbuch/finanzbuchhaltung/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Finanzbuchhaltung
+  </span>
+  
+    
+  
+  
+    <span class="md-status md-status--aktiv"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../benutzerhandbuch/glossar/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Glossar
+  </span>
+  
+    
+  
+  
+    <span class="md-status md-status--aktiv"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../benutzerhandbuch/in-app-hilfe/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    In-App-Hilfe
+  </span>
+  
+    
+  
+  
+    <span class="md-status md-status--aktiv"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../../admin/" class="md-nav__link ">
+              
+  
+  <span class="md-ellipsis">
+    Administration & Betrieb
+  </span>
+  
+    
+  
+  
+    <span class="md-status md-status--entwurf"></span>
+  
+
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_3" id="__nav_3_label" tabindex="">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            Administration & Betrieb
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../admin/mandanten-administration/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Mandanten-Administration
+  </span>
+  
+    
+  
+  
+    <span class="md-status md-status--aktiv"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../admin/module-und-feature-flags/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Module & Feature-Flags
+  </span>
+  
+    
+  
+  
+    <span class="md-status md-status--aktiv"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../admin/rbac-und-rollen/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    RBAC & Rollen
+  </span>
+  
+    
+  
+  
+    <span class="md-status md-status--aktiv"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../admin/deployment/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Deployment
+  </span>
+  
+    
+  
+  
+    <span class="md-status md-status--aktiv"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../admin/backup-restore/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Backup & Restore
+  </span>
+  
+    
+  
+  
+    <span class="md-status md-status--aktiv"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../admin/datenbank-migrationen/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Datenbank-Migrationen
+  </span>
+  
+    
+  
+  
+    <span class="md-status md-status--aktiv"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../admin/monitoring-und-slo/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Monitoring & SLO
+  </span>
+  
+    
+  
+  
+    <span class="md-status md-status--aktiv"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../admin/incident-response/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Incident-Response
+  </span>
+  
+    
+  
+  
+    <span class="md-status md-status--aktiv"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../admin/skalierung-performance/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Skalierung & Performance
+  </span>
+  
+    
+  
+  
+    <span class="md-status md-status--aktiv"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../entwickler/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Entwickler
+  </span>
+  
+    
+  
+  
+    <span class="md-status md-status--entwurf"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../../schnittstellen/" class="md-nav__link ">
+              
+  
+  <span class="md-ellipsis">
+    Schnittstellen
+  </span>
+  
+    
+  
+  
+    <span class="md-status md-status--entwurf"></span>
+  
+
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_5" id="__nav_5_label" tabindex="">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            Schnittstellen
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../schnittstellen/rest-api/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    REST-API
+  </span>
+  
+    
+  
+  
+    <span class="md-status md-status--aktiv"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../schnittstellen/mcp-tools/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    MCP-Tools
+  </span>
+  
+    
+  
+  
+    <span class="md-status md-status--aktiv"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../schnittstellen/events/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Event-Katalog
+  </span>
+  
+    
+  
+  
+    <span class="md-status md-status--aktiv"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        
+          
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../../agent-docs/" class="md-nav__link ">
+              
+  
+  <span class="md-ellipsis">
+    Agent-Dokumentation
+  </span>
+  
+    
+  
+  
+    <span class="md-status md-status--entwurf"></span>
+  
+
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_6" id="__nav_6_label" tabindex="">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            Agent-Dokumentation
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../agent-docs/capability-catalog/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Capability-Katalog
+  </span>
+  
+    
+  
+  
+    <span class="md-status md-status--aktiv"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../agent-docs/tool-catalog/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Tool-Katalog
+  </span>
+  
+    
+  
+  
+    <span class="md-status md-status--aktiv"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../agent-docs/guardrails/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Guardrails
+  </span>
+  
+    
+  
+  
+    <span class="md-status md-status--aktiv"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../agent-docs/contracts/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    ai_harness-Verträge
+  </span>
+  
+    
+  
+  
+    <span class="md-status md-status--aktiv"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Compliance
+  </span>
+  
+    
+  
+  
+    <span class="md-status md-status--entwurf"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../referenz/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Referenz
+  </span>
+  
+    
+  
+  
+    <span class="md-status md-status--entwurf"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_9" >
+        
+          
+          <label class="md-nav__link" for="__nav_9" id="__nav_9_label" tabindex="">
+            
+  
+  <span class="md-ellipsis">
+    Grundlagen
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_9_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_9">
+            <span class="md-nav__icon md-icon"></span>
+            Grundlagen
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../dokumentation/dokumentationskonzept/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Dokumentationskonzept
+  </span>
+  
+    
+  
+  
+    <span class="md-status md-status--aktiv"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../dokumentation/frontmatter-standard/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Frontmatter-Standard
+  </span>
+  
+    
+  
+  
+    <span class="md-status md-status--aktiv"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../dokumentation/governance/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Doku-Governance
+  </span>
+  
+    
+  
+  
+    <span class="md-status md-status--aktiv"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Inhaltsverzeichnis">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Inhaltsverzeichnis
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#1-umgesetzt-schritt-3" class="md-nav__link">
+    <span class="md-ellipsis">
+      1. Umgesetzt (Schritt 3)
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="1. Umgesetzt (Schritt 3)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#11-doppelbelege-save-macht-post" class="md-nav__link">
+    <span class="md-ellipsis">
+      1.1 Doppelbelege &amp; „Save macht POST“
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#12-replace-items-nur-im-draft" class="md-nav__link">
+    <span class="md-ellipsis">
+      1.2 Replace Items nur im DRAFT
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#13-statusmodell-printed-exported-als-ereignis" class="md-nav__link">
+    <span class="md-ellipsis">
+      1.3 Statusmodell: „Printed“ / „Exported“ als Ereignis
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#14-docflow-drift-konzept-teils-vorbereitet" class="md-nav__link">
+    <span class="md-ellipsis">
+      1.4 Docflow-Drift (Konzept, teils vorbereitet)
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-nummernkreise-konzept" class="md-nav__link">
+    <span class="md-ellipsis">
+      2. Nummernkreise (Konzept)
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-unveranderbare-aufbewahrung-archivdms" class="md-nav__link">
+    <span class="md-ellipsis">
+      3. Unveränderbare Aufbewahrung (Archiv/DMS)
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-betriebsprufung-z1z2z3-datenuberlassung" class="md-nav__link">
+    <span class="md-ellipsis">
+      4. Betriebsprüfung: Z1/Z2/Z3 / Datenüberlassung
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5-e-rechnung-ab-01012025" class="md-nav__link">
+    <span class="md-ellipsis">
+      5. E-Rechnung ab 01.01.2025
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#6-architektur-entscheidungen-ki-erp" class="md-nav__link">
+    <span class="md-ellipsis">
+      6. Architektur-Entscheidungen („KI-ERP“)
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#7-migrationsubersicht-schritt-3" class="md-nav__link">
+    <span class="md-ellipsis">
+      7. Migrationsübersicht (Schritt 3)
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#8-release-neuinstallation-db-setup" class="md-nav__link">
+    <span class="md-ellipsis">
+      8. Release / Neuinstallation (DB-Setup)
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="8. Release / Neuinstallation (DB-Setup)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#tabellen-manuell-anlegen-bei-inkonsistentem-zustand" class="md-nav__link">
+    <span class="md-ellipsis">
+      Tabellen manuell anlegen (bei inkonsistentem Zustand)
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#9-nachste-schritte-optional" class="md-nav__link">
+    <span class="md-ellipsis">
+      9. Nächste Schritte (optional)
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+<h1 id="gobd-schritt-3-konzept-umgesetzte-manahmen">GoBD Schritt 3 – Konzept &amp; umgesetzte Maßnahmen<a class="headerlink" href="#gobd-schritt-3-konzept-umgesetzte-manahmen" title="Permanent link">&para;</a></h1>
+<p><strong>Bezug:</strong> GoBD-VORGEHENSPLAN.md, Docflow (domain_docflow), E-Rechnung ab 01.01.2025.</p>
+<p>Dieses Dokument beschreibt die <strong>umgesetzten</strong> Punkte von Schritt 3 sowie die <strong>Konzept-Grundlagen</strong> für Nummernkreise, Archiv, Betriebsprüfung und E-Rechnung (spätere Implementierung).</p>
+<hr />
+<h2 id="1-umgesetzt-schritt-3">1. Umgesetzt (Schritt 3)<a class="headerlink" href="#1-umgesetzt-schritt-3" title="Permanent link">&para;</a></h2>
+<h3 id="11-doppelbelege-save-macht-post">1.1 Doppelbelege &amp; „Save macht POST“<a class="headerlink" href="#11-doppelbelege-save-macht-post" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Idempotency bei Create (POST):</strong> Tabelle <code>domain_docflow.create_request_idempotency</code> (tenant_id, idempotency_key → doc_id). Optionaler Request-Parameter <code>idempotency_key</code> (8–120 Zeichen); bei Wiederholung wird das bestehende Dokument zurückgegeben.</li>
+<li><strong>Docflow-Link UNIQUE:</strong> Tabelle <code>domain_docflow.document_header_links</code> mit UNIQUE(tenant_id, from_header_id, relation_type). Verhindert mehrere Ziele pro Quelle und Relation (z. B. nur ein Lieferschein pro Auftrag).</li>
+<li><strong>Frontend:</strong> Bei bestehendem <code>id</code> wird PUT verwendet, bei neuem Beleg nur POST; beim POST (Rechnung erstellen) wird optional <code>idempotency_key</code> (z. B. <code>crypto.randomUUID()</code>) mitgesendet.</li>
+</ul>
+<h3 id="12-replace-items-nur-im-draft">1.2 Replace Items nur im DRAFT<a class="headerlink" href="#12-replace-items-nur-im-draft" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Positionen ersetzen (DELETE + INSERT)</strong> ist nur erlaubt, wenn <code>status = draft</code>. Bei freigegebenen/verbuchten Belegen: 409 mit Hinweis auf Storno/Berichtigung.</li>
+<li><strong>Storno:</strong> Bereits über <code>DocflowReverseRequest.reason</code> und Endpoint reverse abgedeckt (Begründung + Referenz).</li>
+</ul>
+<h3 id="13-statusmodell-printed-exported-als-ereignis">1.3 Statusmodell: „Printed“ / „Exported“ als Ereignis<a class="headerlink" href="#13-statusmodell-printed-exported-als-ereignis" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>document_headers:</strong> Felder <code>printed_at</code>, <code>printed_by</code>, <code>print_count</code>; <code>exported_at</code>, <code>exported_by</code> (Migration <code>docflow_print_event_20260301</code>).</li>
+<li><strong>Endpoints:</strong></li>
+<li><code>POST /api/v1/docflow/{doc_id}/record-print</code> mit optionalem <code>printed_by</code>: setzt <code>printed_at = NOW()</code>, erhöht <code>print_count</code>.</li>
+<li><code>POST /api/v1/docflow/{doc_id}/record-export</code> mit optionalem <code>exported_by</code>: setzt <code>exported_at = NOW()</code>.</li>
+<li>Kein Status „printed“/„exported“ als Sperre; Druck/Export sind reine Event-Logs. <strong>Frontend:</strong> Nach tatsächlichem Druck/Export eines Docflow-Dokuments sollte der jeweilige Endpoint aufgerufen werden (z. B. nach PDF-Download oder Druckdialog).</li>
+</ul>
+<h3 id="14-docflow-drift-konzept-teils-vorbereitet">1.4 Docflow-Drift (Konzept, teils vorbereitet)<a class="headerlink" href="#14-docflow-drift-konzept-teils-vorbereitet" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Event-getriebene Projektion:</strong> Outbox/Events bereits bei Convert; Snapshot/Hash bei released/posted ist für spätere Phasen vorgesehen (siehe Abschnitt 5).</li>
+</ul>
+<hr />
+<h2 id="2-nummernkreise-konzept">2. Nummernkreise (Konzept)<a class="headerlink" href="#2-nummernkreise-konzept" title="Permanent link">&para;</a></h2>
+<ul>
+<li><strong>Nummer erst bei „released“ vergeben;</strong> im Entwurf nur UUID. Minimiert Lücken und Missbrauch.</li>
+<li>Falls Nummer bereits im Draft vergeben wird: <strong>kein DELETE</strong>, sondern <code>voided</code> + Grund + Zeitstempel.</li>
+<li>Technisch: <code>domain_docflow.number_series</code> (tenant_id, doc_type, year, counter) wird bei Convert/Freigabe genutzt; konsequente Nutzung nur bei released ist Ziel.</li>
+</ul>
+<hr />
+<h2 id="3-unveranderbare-aufbewahrung-archivdms">3. Unveränderbare Aufbewahrung (Archiv/DMS)<a class="headerlink" href="#3-unveranderbare-aufbewahrung-archivdms" title="Permanent link">&para;</a></h2>
+<p><strong>Umgesetzt</strong> (Migration <code>gobd_archiv_erechnung_20260301</code>, Endpoint-Modul <code>gobd_archiv.py</code>):</p>
+<ul>
+<li>Tabelle <code>domain_docflow.document_artifacts</code>: speichert Belegartefakte (PDF/XML/HTML) mit <code>content_hash_sha256</code> (SHA-256), <code>storage_key</code> (externer DMS-Pfad), <code>artifact_type</code>, <code>created_at</code>, <code>created_by</code>.</li>
+<li><strong>Endpoints:</strong></li>
+<li><code>POST /api/v1/gobd/artifacts</code> — Artefakt registrieren (Hash + Storage-Key)</li>
+<li><code>GET /api/v1/gobd/artifacts?header_id=…</code> — Artefakte eines Belegs auflisten</li>
+<li><code>GET /api/v1/gobd/artifacts/{id}/verify?provided_hash=…</code> — Integritätsprüfung: gespeicherter Hash vs. übergebenem Hash; Status <code>verified</code> | <code>mismatch</code> | <code>unchecked</code></li>
+<li><code>GET /api/v1/gobd/artifacts/{id}/veri4</code> — Hash-Metadaten für Veri4-konforme Signaturprüfung</li>
+<li><strong>Hinweis:</strong> Write-Once / Object-Lock muss auf Storage-Ebene (S3/MinIO-Bucket-Policy) konfiguriert werden; die DB speichert nur den unveränderlichen Hash-Record.</li>
+<li><strong>Referenz:</strong> GoBD Aufbewahrung, Anhang 33.</li>
+</ul>
+<hr />
+<h2 id="4-betriebsprufung-z1z2z3-datenuberlassung">4. Betriebsprüfung: Z1/Z2/Z3 / Datenüberlassung<a class="headerlink" href="#4-betriebsprufung-z1z2z3-datenuberlassung" title="Permanent link">&para;</a></h2>
+<p><strong>Umgesetzt</strong> (Endpoint <code>GET /api/v1/gobd/audit-package</code>):</p>
+<p>ZIP-Download mit standardisierter Z1/Z2/Z3-Struktur für die Betriebsprüfung (§ 147 AO / GoBD Rz. 156–164):</p>
+<table>
+<thead>
+<tr>
+<th>Ordner</th>
+<th>Inhalt</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>Z1/data_dictionary.txt</code></td>
+<td>Export-Metadaten, Zeitraum, Tenant</td>
+</tr>
+<tr>
+<td><code>Z1/docflow_headers.csv</code></td>
+<td>Belegköpfe (Stammdaten, Nummern, Status)</td>
+</tr>
+<tr>
+<td><code>Z2/audit_logs.csv</code></td>
+<td>Audit-Log mit <code>old_values</code> / <code>new_values</code></td>
+</tr>
+<tr>
+<td><code>Z2/journal_entries.csv</code></td>
+<td>Buchungssätze aus <code>domain_erp.finance_journal_entries</code></td>
+</tr>
+<tr>
+<td><code>Z2/docflow_items.csv</code></td>
+<td>Belegpositionen (Artikel, Mengen, Preise)</td>
+</tr>
+<tr>
+<td><code>Z3/artifact_hashes.csv</code></td>
+<td>SHA-256-Hashes aller Belegartefakte</td>
+</tr>
+<tr>
+<td><code>integrity_manifest.csv</code></td>
+<td>SHA-256 pro ZIP-Datei zur Manipulation­serkennung</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>Query-Parameter: <code>from_date</code>, <code>to_date</code>, <code>tenant_id</code></li>
+<li>Alle CSV-Exporte greifen ausschließlich auf unveränderliche GoBD-relevante Tabellen zu; bei DB-Fehler (fehlende Spalten/Schema) werden leere Header-Zeilen geschrieben (graceful degradation).</li>
+<li><strong>Referenz:</strong> GoBD Datenzugriff, maschinelle Auswertbarkeit, BMF-Schreiben 2014 Rz. 155–164.</li>
+</ul>
+<hr />
+<h2 id="5-e-rechnung-ab-01012025">5. E-Rechnung ab 01.01.2025<a class="headerlink" href="#5-e-rechnung-ab-01012025" title="Permanent link">&para;</a></h2>
+<p><strong>Umgesetzt</strong> (Migration <code>gobd_archiv_erechnung_20260301</code>, Endpoint-Modul <code>gobd_archiv.py</code>):</p>
+<ul>
+<li>Tabelle <code>domain_docflow.invoice_xml_store</code>: speichert das führende XML-Original (XRechnung/ZUGFeRD) mit <code>content_hash_sha256</code>, <code>format_type</code>, <code>validation_status</code> (<code>pending</code> | <code>valid</code> | <code>invalid</code>), <code>validation_errors</code> (JSONB).</li>
+<li><strong>UNIQUE-Constraint</strong> <code>uq_invoice_xml_header (tenant_id, header_id)</code>: pro Beleg nur ein führendes XML. Upsert-Logik: neues XML ersetzt altes und setzt <code>validation_status = pending</code>.</li>
+<li><strong>Endpoints:</strong></li>
+<li><code>POST /api/v1/gobd/e-invoice-xml</code> — XML als führendes Original speichern (XRechnung/ZUGFeRD)</li>
+<li><code>GET /api/v1/gobd/e-invoice-xml/{header_id}</code> — XML-Metadaten + Validierungsstatus abrufen</li>
+<li><code>PATCH /api/v1/gobd/e-invoice-xml/{header_id}/validate</code> — Validierungsergebnis setzen (<code>valid</code>|<code>invalid</code>|<code>pending</code> + optionale XSD-Fehlerdetails)</li>
+<li><strong>ZUGFeRD-Generierung:</strong> <code>modules/agrar/services/self_billing_service.py</code> → <code>generate_einvoice_zugferd()</code> bettet XRechnung-XML via <code>factur-x</code> in PDF/A-3 ein.</li>
+<li><strong>Referenz:</strong> GoBD 2. Änderung 2025, § 14 UStG, EN16931.</li>
+</ul>
+<hr />
+<h2 id="6-architektur-entscheidungen-ki-erp">6. Architektur-Entscheidungen („KI-ERP“)<a class="headerlink" href="#6-architektur-entscheidungen-ki-erp" title="Permanent link">&para;</a></h2>
+<ul>
+<li><strong>Event-Log + Projektion (Outbox/CDC):</strong> Konsistente Daten, Auditspur, KI kann Ereignisse erklären.</li>
+<li><strong>Explainable Audit:</strong> Jeder Statuswechsel/Convert mit menschenlesbarer Begründung im Auditlog.</li>
+<li><strong>Strikte State-Machine + DB-Constraints:</strong> GoBD-Konformität technisch erzwungen (z. B. UNIQUE Docflow-Links, Replace nur DRAFT).</li>
+</ul>
+<hr />
+<h2 id="7-migrationsubersicht-schritt-3">7. Migrationsübersicht (Schritt 3)<a class="headerlink" href="#7-migrationsubersicht-schritt-3" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Revision</th>
+<th>Inhalt</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>docflow_create_idemp_20260301</code></td>
+<td>create_request_idempotency, document_header_links (UNIQUE)</td>
+</tr>
+<tr>
+<td><code>docflow_print_event_20260301</code></td>
+<td>document_headers: printed_at, printed_by, print_count, exported_at, exported_by</td>
+</tr>
+<tr>
+<td><code>merge_heads_20260301</code></td>
+<td>Merge aller Branch-Heads (Agrar, Einkauf RE-Workflow, Docflow) → ein gemeinsamer Head</td>
+</tr>
+<tr>
+<td><code>gobd_archiv_erechnung_20260301</code></td>
+<td>domain_docflow.document_artifacts + invoice_xml_store (führendes XML, UNIQUE per Header)</td>
+</tr>
+<tr>
+<td><code>gobd_aufbewahrungsfristen_20260301</code></td>
+<td>domain_finance.aufbewahrungsfristen + 5 Seed-Datensätze (§147 AO / §257 HGB)</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Hinweis:</strong> Die Docflow-Migrationen hängen von <code>docflow_core_20260215</code> ab (Schema <code>domain_docflow</code>, Tabellen <code>document_headers</code> usw.).</p>
+<hr />
+<h2 id="8-release-neuinstallation-db-setup">8. Release / Neuinstallation (DB-Setup)<a class="headerlink" href="#8-release-neuinstallation-db-setup" title="Permanent link">&para;</a></h2>
+<ul>
+<li><strong>Alle Migrationen durchführen:</strong> <code>alembic upgrade head</code> (führt bis zum einzigen Head <code>merge_heads_20260301</code> aus).</li>
+<li><strong>Init-Routine:</strong> <code>scripts/init_db.py</code> führt <code>command.upgrade(alembic_cfg, "head")</code> aus (mit Retry bei Verbindungsfehlern). Für CI/Release wird das so aufgerufen.</li>
+<li><strong>Entrypoint (Backend-Container):</strong> <code>entrypoint.sh</code> führt vor dem Start des Servers <code>alembic upgrade head</code> aus; bei Fehler wird der Container mit Exit-Code 1 beendet, damit Release/Neuinstallation nicht mit halb angewendeten Migrationen starten.</li>
+<li><strong>Voraussetzung:</strong> Die Datenbank ist entweder leer (dann werden alle Migrationen in korrekter Reihenfolge angewendet) oder alle Vorgänger-Revisionen sind bereits angewendet. Ist die Tabelle <code>alembic_version</code> inkonsistent (z. B. Revision eingetragen, aber zugehörige Tabellen fehlen), muss der Zustand zuerst bereinigt werden (z. B. fehlende Tabellen anlegen oder Revision zurücksetzen).</li>
+</ul>
+<h3 id="tabellen-manuell-anlegen-bei-inkonsistentem-zustand">Tabellen manuell anlegen (bei inkonsistentem Zustand)<a class="headerlink" href="#tabellen-manuell-anlegen-bei-inkonsistentem-zustand" title="Permanent link">&para;</a></h3>
+<p>Wenn <code>alembic_version</code> bereits eine Docflow-Revision enthält (z. B. <code>docflow_core_20260215</code>), die Tabellen in <code>domain_docflow</code> aber fehlen:</p>
+<ol>
+<li><strong>Tabellen anlegen</strong> (Schema + alle Docflow-Tabellen bis inkl. docflow_pos_admin_dsfinvk, idempotent):</li>
+<li><strong>Mit Python (empfohlen, nutzt DATABASE_URL aus .env):</strong>
+     <code>bash
+     python scripts/run_docflow_manual_tables.py</code></li>
+<li><strong>Oder mit psql:</strong>
+     <code>bash
+     psql "$DATABASE_URL" -f scripts/sql/docflow_manual_create_tables.sql</code>
+     bzw. mit expliziter Verbindung:
+     <code>bash
+     psql -h localhost -p 5432 -U valeo_dev -d valeo_neuro_erp -f scripts/sql/docflow_manual_create_tables.sql</code></li>
+<li><strong>Anschließend:</strong> <code>alembic upgrade head</code> ausführen (wendet die restlichen Migrationen an: create_request_idempotency, document_header_links, printed_at/print_count, Merge).</li>
+</ol>
+<hr />
+<h2 id="9-nachste-schritte-optional">9. Nächste Schritte (optional)<a class="headerlink" href="#9-nachste-schritte-optional" title="Permanent link">&para;</a></h2>
+<ul>
+<li><strong>Frontend:</strong> In allen Masken, die Docflow-Dokumente drucken oder exportieren (z. B. Rechnungs-Editor, Belegfluss), nach erfolgreichem Druck/Export <code>POST /api/v1/docflow/{doc_id}/record-print</code> bzw. <code>record-export</code> mit optionalem <code>printed_by</code>/<code>exported_by</code> (z. B. aus User-Kontext) aufrufen, damit die Event-Felder gesetzt werden.</li>
+<li><strong>Nummernkreise:</strong> Perspektivisch <code>doc_number</code> erst bei Übergang in „released” vergeben (heute kann das Frontend beim Create eine Nummer mitschicken); dann Draft nur mit interner UUID führen.</li>
+<li><strong>Storage / Object-Lock:</strong> Bucket-Policy für <code>document_artifacts</code>-Storage auf Write-Once setzen (S3/MinIO Retention Mode). Integrity-Check-Job (Cronjob) einplanen: Hash aus Storage neu berechnen, mit <code>content_hash_sha256</code> aus DB vergleichen, Alarm bei Abweichung.</li>
+<li><strong>Prüfer-Zugang Z1 (UI):</strong> Read-Only-Rolle für Betriebsprüfer mit Zugriff auf die GoBD-Endpoints (Artifacts, Audit-Package). Kein Schreibzugriff; separate RBAC-Rolle <code>auditor</code>.</li>
+</ul>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Zurück zum Seitenanfang
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+    
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    <script id="__config" type="application/json">{"base": "../..", "features": ["navigation.sections", "navigation.top", "navigation.indexes", "navigation.footer", "search.suggest", "search.highlight", "content.code.copy", "toc.follow"], "search": "../../assets/javascripts/workers/search.6ce7567c.min.js", "translations": {"clipboard.copied": "In Zwischenablage kopiert", "clipboard.copy": "In Zwischenablage kopieren", "search.result.more.one": "1 weiteres Suchergebnis auf dieser Seite", "search.result.more.other": "# weitere Suchergebnisse auf dieser Seite", "search.result.none": "Keine Suchergebnisse", "search.result.one": "1 Suchergebnis", "search.result.other": "# Suchergebnisse", "search.result.placeholder": "Suchbegriff eingeben", "search.result.term.missing": "Es fehlt", "select.version": "Version ausw\u00e4hlen"}}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.88dd0f4e.min.js"></script>
+      
+    
+  </body>
+</html>

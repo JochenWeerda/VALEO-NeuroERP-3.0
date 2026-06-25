@@ -1,0 +1,2772 @@
+
+<!doctype html>
+<html lang="de" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Dokumentation für VALEO NeuroERP 3.0 – Multi-Mandanten-ERP für Agrar, Landhandel und Handel.">
+      
+      
+      
+      
+        <link rel="prev" href="../rest-api/">
+      
+      
+        <link rel="next" href="../events/">
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.5.49">
+    
+    
+      
+        <title>MCP-Tool-Referenz - VALEO NeuroERP 3.0 – Dokumentation</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.6f8fc17f.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.06af60db.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="green" data-md-color-accent="light-green">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#mcp-tool-referenz" class="md-skip">
+          Zum Inhalt
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Kopfzeile">
+    <a href="../.." title="VALEO NeuroERP 3.0 – Dokumentation" class="md-header__button md-logo" aria-label="VALEO NeuroERP 3.0 – Dokumentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            VALEO NeuroERP 3.0 – Dokumentation
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              MCP-Tool-Referenz
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="green" data-md-color-accent="light-green"  aria-label="Dunkles Design"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Dunkles Design" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m17.75 4.09-2.53 1.94.91 3.06-2.63-1.81-2.63 1.81.91-3.06-2.53-1.94L12.44 4l1.06-3 1.06 3zm3.5 6.91-1.64 1.25.59 1.98-1.7-1.17-1.7 1.17.59-1.98L15.75 11l2.06-.05L18.5 9l.69 1.95zm-2.28 4.95c.83-.08 1.72 1.1 1.19 1.85-.32.45-.66.87-1.08 1.27C15.17 23 8.84 23 4.94 19.07c-3.91-3.9-3.91-10.24 0-14.14.4-.4.82-.76 1.27-1.08.75-.53 1.93.36 1.85 1.19-.27 2.86.69 5.83 2.89 8.02a9.96 9.96 0 0 0 8.02 2.89m-1.64 2.02a12.08 12.08 0 0 1-7.8-3.47c-2.17-2.19-3.33-5-3.49-7.82-2.81 3.14-2.7 7.96.31 10.98 3.02 3.01 7.84 3.12 10.98.31"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="green" data-md-color-accent="light-green"  aria-label="Helles Design"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Helles Design" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 7a5 5 0 0 1 5 5 5 5 0 0 1-5 5 5 5 0 0 1-5-5 5 5 0 0 1 5-5m0 2a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3m0-7 2.39 3.42C13.65 5.15 12.84 5 12 5s-1.65.15-2.39.42zM3.34 7l4.16-.35A7.2 7.2 0 0 0 5.94 8.5c-.44.74-.69 1.5-.83 2.29zm.02 10 1.76-3.77a7.131 7.131 0 0 0 2.38 4.14zM20.65 7l-1.77 3.79a7.02 7.02 0 0 0-2.38-4.15zm-.01 10-4.14.36c.59-.51 1.12-1.14 1.54-1.86.42-.73.69-1.5.83-2.29zM12 22l-2.41-3.44c.74.27 1.55.44 2.41.44.82 0 1.63-.17 2.37-.44z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Suche" placeholder="Suche" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Suche">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Zurücksetzen" aria-label="Zurücksetzen" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Suche wird initialisiert
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="VALEO NeuroERP 3.0 – Dokumentation" class="md-nav__button md-logo" aria-label="VALEO NeuroERP 3.0 – Dokumentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    VALEO NeuroERP 3.0 – Dokumentation
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Start
+  </span>
+  
+    
+  
+  
+    <span class="md-status md-status--aktiv"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../../benutzerhandbuch/" class="md-nav__link ">
+              
+  
+  <span class="md-ellipsis">
+    Benutzerhandbuch
+  </span>
+  
+    
+  
+  
+    <span class="md-status md-status--entwurf"></span>
+  
+
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_2" id="__nav_2_label" tabindex="">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            Benutzerhandbuch
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../benutzerhandbuch/einstieg/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Einstieg
+  </span>
+  
+    
+  
+  
+    <span class="md-status md-status--aktiv"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../benutzerhandbuch/annahme/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Ernteannahme
+  </span>
+  
+    
+  
+  
+    <span class="md-status md-status--aktiv"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../benutzerhandbuch/verkauf/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Verkauf (Auftrag → Rechnung)
+  </span>
+  
+    
+  
+  
+    <span class="md-status md-status--aktiv"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../benutzerhandbuch/lager/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Lager
+  </span>
+  
+    
+  
+  
+    <span class="md-status md-status--aktiv"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../benutzerhandbuch/finanzbuchhaltung/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Finanzbuchhaltung
+  </span>
+  
+    
+  
+  
+    <span class="md-status md-status--aktiv"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../benutzerhandbuch/glossar/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Glossar
+  </span>
+  
+    
+  
+  
+    <span class="md-status md-status--aktiv"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../benutzerhandbuch/in-app-hilfe/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    In-App-Hilfe
+  </span>
+  
+    
+  
+  
+    <span class="md-status md-status--aktiv"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../../admin/" class="md-nav__link ">
+              
+  
+  <span class="md-ellipsis">
+    Administration & Betrieb
+  </span>
+  
+    
+  
+  
+    <span class="md-status md-status--entwurf"></span>
+  
+
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_3" id="__nav_3_label" tabindex="">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            Administration & Betrieb
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../admin/mandanten-administration/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Mandanten-Administration
+  </span>
+  
+    
+  
+  
+    <span class="md-status md-status--aktiv"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../admin/module-und-feature-flags/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Module & Feature-Flags
+  </span>
+  
+    
+  
+  
+    <span class="md-status md-status--aktiv"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../admin/rbac-und-rollen/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    RBAC & Rollen
+  </span>
+  
+    
+  
+  
+    <span class="md-status md-status--aktiv"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../admin/deployment/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Deployment
+  </span>
+  
+    
+  
+  
+    <span class="md-status md-status--aktiv"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../admin/backup-restore/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Backup & Restore
+  </span>
+  
+    
+  
+  
+    <span class="md-status md-status--aktiv"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../admin/datenbank-migrationen/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Datenbank-Migrationen
+  </span>
+  
+    
+  
+  
+    <span class="md-status md-status--aktiv"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../admin/monitoring-und-slo/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Monitoring & SLO
+  </span>
+  
+    
+  
+  
+    <span class="md-status md-status--aktiv"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../admin/incident-response/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Incident-Response
+  </span>
+  
+    
+  
+  
+    <span class="md-status md-status--aktiv"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../admin/skalierung-performance/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Skalierung & Performance
+  </span>
+  
+    
+  
+  
+    <span class="md-status md-status--aktiv"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../entwickler/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Entwickler
+  </span>
+  
+    
+  
+  
+    <span class="md-status md-status--entwurf"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" checked>
+        
+          
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../" class="md-nav__link ">
+              
+  
+  <span class="md-ellipsis">
+    Schnittstellen
+  </span>
+  
+    
+  
+  
+    <span class="md-status md-status--entwurf"></span>
+  
+
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_5" id="__nav_5_label" tabindex="">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            Schnittstellen
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../rest-api/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    REST-API
+  </span>
+  
+    
+  
+  
+    <span class="md-status md-status--aktiv"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  <span class="md-ellipsis">
+    MCP-Tools
+  </span>
+  
+    
+  
+  
+    <span class="md-status md-status--aktiv"></span>
+  
+
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  <span class="md-ellipsis">
+    MCP-Tools
+  </span>
+  
+    
+  
+  
+    <span class="md-status md-status--aktiv"></span>
+  
+
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Inhaltsverzeichnis">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Inhaltsverzeichnis
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#uebersicht" class="md-nav__link">
+    <span class="md-ellipsis">
+      Uebersicht
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#domaene-compliance" class="md-nav__link">
+    <span class="md-ellipsis">
+      Domaene: compliance
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Domaene: compliance">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#compliancegatestatus-externe-gate-status-abfragen" class="md-nav__link">
+    <span class="md-ellipsis">
+      compliance.gate.status — Externe Gate-Status abfragen
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#domaene-crm" class="md-nav__link">
+    <span class="md-ellipsis">
+      Domaene: crm
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Domaene: crm">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#crmcontactlog-kontaktprotokoll-erfassen" class="md-nav__link">
+    <span class="md-ellipsis">
+      crm.contact.log — Kontaktprotokoll erfassen
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#crmcustomersearch-kunden-suchen" class="md-nav__link">
+    <span class="md-ellipsis">
+      crm.customer.search — Kunden suchen
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#crmcustomersummary360-kunden-360-zusammenfassung" class="md-nav__link">
+    <span class="md-ellipsis">
+      crm.customer.summary360 — Kunden-360-Zusammenfassung
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#domaene-finance" class="md-nav__link">
+    <span class="md-ellipsis">
+      Domaene: finance
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Domaene: finance">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#fibudunningstatus-mahnstatus-abfragen" class="md-nav__link">
+    <span class="md-ellipsis">
+      fibu.dunning.status — Mahnstatus abfragen
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#fibuopen_itemslist-offene-posten-auflisten" class="md-nav__link">
+    <span class="md-ellipsis">
+      fibu.open_items.list — Offene Posten auflisten
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#domaene-inventory" class="md-nav__link">
+    <span class="md-ellipsis">
+      Domaene: inventory
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Domaene: inventory">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#wmscellstatus-silozellen-status" class="md-nav__link">
+    <span class="md-ellipsis">
+      wms.cell.status — Silozellen-Status
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#wmslottrace-lot-verfolgen" class="md-nav__link">
+    <span class="md-ellipsis">
+      wms.lot.trace — Lot verfolgen
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#domaene-nachweisraum" class="md-nav__link">
+    <span class="md-ellipsis">
+      Domaene: nachweisraum
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Domaene: nachweisraum">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#dmsdocumentsearch-dokument-suchen" class="md-nav__link">
+    <span class="md-ellipsis">
+      dms.document.search — Dokument suchen
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#dmsgobdexport_status-gobd-export-status" class="md-nav__link">
+    <span class="md-ellipsis">
+      dms.gobd.export_status — GoBD-Export-Status
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#domaene-sales" class="md-nav__link">
+    <span class="md-ellipsis">
+      Domaene: sales
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Domaene: sales">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#salesinvoicepropose-rechnungsvorschlag-aus-lieferschein" class="md-nav__link">
+    <span class="md-ellipsis">
+      sales.invoice.propose — Rechnungsvorschlag aus Lieferschein
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#salesorderstatus-auftragsstatus-pruefen" class="md-nav__link">
+    <span class="md-ellipsis">
+      sales.order.status — Auftragsstatus pruefen
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../events/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Event-Katalog
+  </span>
+  
+    
+  
+  
+    <span class="md-status md-status--aktiv"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        
+          
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../../agent-docs/" class="md-nav__link ">
+              
+  
+  <span class="md-ellipsis">
+    Agent-Dokumentation
+  </span>
+  
+    
+  
+  
+    <span class="md-status md-status--entwurf"></span>
+  
+
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_6" id="__nav_6_label" tabindex="">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            Agent-Dokumentation
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../agent-docs/capability-catalog/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Capability-Katalog
+  </span>
+  
+    
+  
+  
+    <span class="md-status md-status--aktiv"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../agent-docs/tool-catalog/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Tool-Katalog
+  </span>
+  
+    
+  
+  
+    <span class="md-status md-status--aktiv"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../agent-docs/guardrails/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Guardrails
+  </span>
+  
+    
+  
+  
+    <span class="md-status md-status--aktiv"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../agent-docs/contracts/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    ai_harness-Verträge
+  </span>
+  
+    
+  
+  
+    <span class="md-status md-status--aktiv"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../compliance/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Compliance
+  </span>
+  
+    
+  
+  
+    <span class="md-status md-status--entwurf"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../referenz/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Referenz
+  </span>
+  
+    
+  
+  
+    <span class="md-status md-status--entwurf"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_9" >
+        
+          
+          <label class="md-nav__link" for="__nav_9" id="__nav_9_label" tabindex="">
+            
+  
+  <span class="md-ellipsis">
+    Grundlagen
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_9_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_9">
+            <span class="md-nav__icon md-icon"></span>
+            Grundlagen
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../dokumentation/dokumentationskonzept/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Dokumentationskonzept
+  </span>
+  
+    
+  
+  
+    <span class="md-status md-status--aktiv"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../dokumentation/frontmatter-standard/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Frontmatter-Standard
+  </span>
+  
+    
+  
+  
+    <span class="md-status md-status--aktiv"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../dokumentation/governance/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Doku-Governance
+  </span>
+  
+    
+  
+  
+    <span class="md-status md-status--aktiv"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Inhaltsverzeichnis">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Inhaltsverzeichnis
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#uebersicht" class="md-nav__link">
+    <span class="md-ellipsis">
+      Uebersicht
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#domaene-compliance" class="md-nav__link">
+    <span class="md-ellipsis">
+      Domaene: compliance
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Domaene: compliance">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#compliancegatestatus-externe-gate-status-abfragen" class="md-nav__link">
+    <span class="md-ellipsis">
+      compliance.gate.status — Externe Gate-Status abfragen
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#domaene-crm" class="md-nav__link">
+    <span class="md-ellipsis">
+      Domaene: crm
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Domaene: crm">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#crmcontactlog-kontaktprotokoll-erfassen" class="md-nav__link">
+    <span class="md-ellipsis">
+      crm.contact.log — Kontaktprotokoll erfassen
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#crmcustomersearch-kunden-suchen" class="md-nav__link">
+    <span class="md-ellipsis">
+      crm.customer.search — Kunden suchen
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#crmcustomersummary360-kunden-360-zusammenfassung" class="md-nav__link">
+    <span class="md-ellipsis">
+      crm.customer.summary360 — Kunden-360-Zusammenfassung
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#domaene-finance" class="md-nav__link">
+    <span class="md-ellipsis">
+      Domaene: finance
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Domaene: finance">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#fibudunningstatus-mahnstatus-abfragen" class="md-nav__link">
+    <span class="md-ellipsis">
+      fibu.dunning.status — Mahnstatus abfragen
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#fibuopen_itemslist-offene-posten-auflisten" class="md-nav__link">
+    <span class="md-ellipsis">
+      fibu.open_items.list — Offene Posten auflisten
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#domaene-inventory" class="md-nav__link">
+    <span class="md-ellipsis">
+      Domaene: inventory
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Domaene: inventory">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#wmscellstatus-silozellen-status" class="md-nav__link">
+    <span class="md-ellipsis">
+      wms.cell.status — Silozellen-Status
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#wmslottrace-lot-verfolgen" class="md-nav__link">
+    <span class="md-ellipsis">
+      wms.lot.trace — Lot verfolgen
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#domaene-nachweisraum" class="md-nav__link">
+    <span class="md-ellipsis">
+      Domaene: nachweisraum
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Domaene: nachweisraum">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#dmsdocumentsearch-dokument-suchen" class="md-nav__link">
+    <span class="md-ellipsis">
+      dms.document.search — Dokument suchen
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#dmsgobdexport_status-gobd-export-status" class="md-nav__link">
+    <span class="md-ellipsis">
+      dms.gobd.export_status — GoBD-Export-Status
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#domaene-sales" class="md-nav__link">
+    <span class="md-ellipsis">
+      Domaene: sales
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Domaene: sales">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#salesinvoicepropose-rechnungsvorschlag-aus-lieferschein" class="md-nav__link">
+    <span class="md-ellipsis">
+      sales.invoice.propose — Rechnungsvorschlag aus Lieferschein
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#salesorderstatus-auftragsstatus-pruefen" class="md-nav__link">
+    <span class="md-ellipsis">
+      sales.order.status — Auftragsstatus pruefen
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+<h1 id="mcp-tool-referenz">MCP-Tool-Referenz<a class="headerlink" href="#mcp-tool-referenz" title="Permanent link">&para;</a></h1>
+<blockquote>
+<p>Automatisch generiert aus <code>config/mcp_erp_tools.yaml</code> via <code>python scripts/generate_mcp_tool_reference.py</code>. <strong>Nicht manuell bearbeiten.</strong></p>
+</blockquote>
+<p>Registry <code>MCP-ERP-TOOLS-001</code> (Schema 1.0) — 12 Tools in 6 Domaenen.</p>
+<h2 id="uebersicht">Uebersicht<a class="headerlink" href="#uebersicht" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Tool</th>
+<th>Domaene</th>
+<th>Scope</th>
+<th>Idempotent</th>
+<th>Risiko</th>
+<th>Human-Approval</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>compliance.gate.status</code></td>
+<td>compliance</td>
+<td><code>compliance:read</code></td>
+<td>ja</td>
+<td>niedrig</td>
+<td>nein</td>
+</tr>
+<tr>
+<td><code>crm.contact.log</code></td>
+<td>crm</td>
+<td><code>crm:write</code></td>
+<td>nein</td>
+<td>mittel</td>
+<td>nein</td>
+</tr>
+<tr>
+<td><code>crm.customer.search</code></td>
+<td>crm</td>
+<td><code>crm:read</code></td>
+<td>ja</td>
+<td>niedrig</td>
+<td>nein</td>
+</tr>
+<tr>
+<td><code>crm.customer.summary360</code></td>
+<td>crm</td>
+<td><code>crm:read</code></td>
+<td>ja</td>
+<td>niedrig</td>
+<td>nein</td>
+</tr>
+<tr>
+<td><code>dms.document.search</code></td>
+<td>nachweisraum</td>
+<td><code>nachweisraum:read</code></td>
+<td>ja</td>
+<td>niedrig</td>
+<td>nein</td>
+</tr>
+<tr>
+<td><code>dms.gobd.export_status</code></td>
+<td>nachweisraum</td>
+<td><code>nachweisraum:read</code></td>
+<td>ja</td>
+<td>niedrig</td>
+<td>nein</td>
+</tr>
+<tr>
+<td><code>fibu.dunning.status</code></td>
+<td>finance</td>
+<td><code>finance:read</code></td>
+<td>ja</td>
+<td>niedrig</td>
+<td>nein</td>
+</tr>
+<tr>
+<td><code>fibu.open_items.list</code></td>
+<td>finance</td>
+<td><code>finance:read</code></td>
+<td>ja</td>
+<td>niedrig</td>
+<td>nein</td>
+</tr>
+<tr>
+<td><code>sales.invoice.propose</code></td>
+<td>sales</td>
+<td><code>sales:write</code></td>
+<td>nein</td>
+<td>hoch</td>
+<td>ja</td>
+</tr>
+<tr>
+<td><code>sales.order.status</code></td>
+<td>sales</td>
+<td><code>sales:read</code></td>
+<td>ja</td>
+<td>niedrig</td>
+<td>nein</td>
+</tr>
+<tr>
+<td><code>wms.cell.status</code></td>
+<td>inventory</td>
+<td><code>inventory:read</code></td>
+<td>ja</td>
+<td>niedrig</td>
+<td>nein</td>
+</tr>
+<tr>
+<td><code>wms.lot.trace</code></td>
+<td>inventory</td>
+<td><code>inventory:read</code></td>
+<td>ja</td>
+<td>niedrig</td>
+<td>nein</td>
+</tr>
+</tbody>
+</table>
+<h2 id="domaene-compliance">Domaene: compliance<a class="headerlink" href="#domaene-compliance" title="Permanent link">&para;</a></h2>
+<h3 id="compliancegatestatus-externe-gate-status-abfragen"><code>compliance.gate.status</code> — Externe Gate-Status abfragen<a class="headerlink" href="#compliancegatestatus-externe-gate-status-abfragen" title="Permanent link">&para;</a></h3>
+<p>Gibt Status ausstehender externer Abnahmen (ELSTER, DATEV, TSE, Auditor) zurueck.</p>
+<ul>
+<li><strong>Scope:</strong> <code>compliance:read</code></li>
+<li><strong>Idempotent:</strong> ja</li>
+<li><strong>Risikoklasse:</strong> niedrig</li>
+<li><strong>Audit:</strong> read</li>
+<li><strong>Human-Approval erforderlich:</strong> nein</li>
+<li><strong>Endpoint:</strong> <code>GET /api/v1/compliance/external-gates</code></li>
+</ul>
+<p><strong>Eingabe-Schema:</strong></p>
+<p><code>json
+{
+  "type": "object",
+  "properties": {
+    "gate_typ": {
+      "type": "string",
+      "nullable": true,
+      "enum": [
+        "elster",
+        "datev",
+        "tse",
+        "auditor",
+        "all"
+      ]
+    }
+  },
+  "required": []
+}</code></p>
+<p><strong>Ausgabe-Schema:</strong></p>
+<p><code>json
+{
+  "type": "array",
+  "items": {
+    "type": "object",
+    "properties": {
+      "gate_id": {
+        "type": "string"
+      },
+      "gate_typ": {
+        "type": "string"
+      },
+      "status": {
+        "type": "string"
+      },
+      "faellig_am": {
+        "type": "string",
+        "nullable": true
+      }
+    }
+  }
+}</code></p>
+<h2 id="domaene-crm">Domaene: crm<a class="headerlink" href="#domaene-crm" title="Permanent link">&para;</a></h2>
+<h3 id="crmcontactlog-kontaktprotokoll-erfassen"><code>crm.contact.log</code> — Kontaktprotokoll erfassen<a class="headerlink" href="#crmcontactlog-kontaktprotokoll-erfassen" title="Permanent link">&para;</a></h3>
+<p>Erfasst einen Kundenkontakt (Anruf, E-Mail, Besuch) mit Ergebnis und Wiedervorlage.</p>
+<ul>
+<li><strong>Scope:</strong> <code>crm:write</code></li>
+<li><strong>Idempotent:</strong> nein</li>
+<li><strong>Risikoklasse:</strong> mittel</li>
+<li><strong>Audit:</strong> write</li>
+<li><strong>Human-Approval erforderlich:</strong> nein</li>
+<li><strong>Endpoint:</strong> <code>POST /api/v1/crm/kontakte</code></li>
+</ul>
+<p><strong>Eingabe-Schema:</strong></p>
+<p><code>json
+{
+  "type": "object",
+  "properties": {
+    "kunden_nr": {
+      "type": "string"
+    },
+    "kanal": {
+      "type": "string",
+      "enum": [
+        "telefon",
+        "email",
+        "besuch",
+        "post"
+      ]
+    },
+    "ergebnis": {
+      "type": "string"
+    },
+    "wiedervorlage_datum": {
+      "type": "string",
+      "format": "date",
+      "nullable": true
+    }
+  },
+  "required": [
+    "kunden_nr",
+    "kanal",
+    "ergebnis"
+  ]
+}</code></p>
+<p><strong>Ausgabe-Schema:</strong></p>
+<p><code>json
+{
+  "type": "object",
+  "properties": {
+    "kontakt_id": {
+      "type": "string"
+    },
+    "erfasst_am": {
+      "type": "string"
+    }
+  }
+}</code></p>
+<h3 id="crmcustomersearch-kunden-suchen"><code>crm.customer.search</code> — Kunden suchen<a class="headerlink" href="#crmcustomersearch-kunden-suchen" title="Permanent link">&para;</a></h3>
+<p>Sucht Kunden anhand von Name, Kundennummer oder PLZ. Gibt eine Liste von Kunden zurueck.</p>
+<ul>
+<li><strong>Scope:</strong> <code>crm:read</code></li>
+<li><strong>Idempotent:</strong> ja</li>
+<li><strong>Risikoklasse:</strong> niedrig</li>
+<li><strong>Audit:</strong> read</li>
+<li><strong>Human-Approval erforderlich:</strong> nein</li>
+<li><strong>Endpoint:</strong> <code>GET /api/v1/kunden?search={query}&amp;limit={limit}</code></li>
+</ul>
+<p><strong>Eingabe-Schema:</strong></p>
+<p><code>json
+{
+  "type": "object",
+  "properties": {
+    "query": {
+      "type": "string",
+      "description": "Suchbegriff (Name, Nr., PLZ)"
+    },
+    "limit": {
+      "type": "integer",
+      "default": 20
+    }
+  },
+  "required": [
+    "query"
+  ]
+}</code></p>
+<p><strong>Ausgabe-Schema:</strong></p>
+<p><code>json
+{
+  "type": "array",
+  "items": {
+    "type": "object",
+    "properties": {
+      "kunden_nr": {
+        "type": "string"
+      },
+      "name": {
+        "type": "string"
+      },
+      "ort": {
+        "type": "string"
+      },
+      "segment": {
+        "type": "string"
+      }
+    }
+  }
+}</code></p>
+<h3 id="crmcustomersummary360-kunden-360-zusammenfassung"><code>crm.customer.summary360</code> — Kunden-360-Zusammenfassung<a class="headerlink" href="#crmcustomersummary360-kunden-360-zusammenfassung" title="Permanent link">&para;</a></h3>
+<p>Liefert 360-Grad-Zusammenfassung: offene Auftraege, letzte Kontakte, OP-Saldo, Segmentierung.</p>
+<ul>
+<li><strong>Scope:</strong> <code>crm:read</code></li>
+<li><strong>Idempotent:</strong> ja</li>
+<li><strong>Risikoklasse:</strong> niedrig</li>
+<li><strong>Audit:</strong> read</li>
+<li><strong>Human-Approval erforderlich:</strong> nein</li>
+<li><strong>Endpoint:</strong> <code>GET /api/v1/crm/kunden/{kunden_nr}/360</code></li>
+</ul>
+<p><strong>Eingabe-Schema:</strong></p>
+<p><code>json
+{
+  "type": "object",
+  "properties": {
+    "kunden_nr": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "kunden_nr"
+  ]
+}</code></p>
+<p><strong>Ausgabe-Schema:</strong></p>
+<p><code>json
+{
+  "type": "object",
+  "properties": {
+    "kunden_nr": {
+      "type": "string"
+    },
+    "name": {
+      "type": "string"
+    },
+    "offene_auftraege": {
+      "type": "integer"
+    },
+    "op_saldo_eur": {
+      "type": "number"
+    },
+    "letzte_kontakte": {
+      "type": "array"
+    },
+    "segment": {
+      "type": "string"
+    }
+  }
+}</code></p>
+<h2 id="domaene-finance">Domaene: finance<a class="headerlink" href="#domaene-finance" title="Permanent link">&para;</a></h2>
+<h3 id="fibudunningstatus-mahnstatus-abfragen"><code>fibu.dunning.status</code> — Mahnstatus abfragen<a class="headerlink" href="#fibudunningstatus-mahnstatus-abfragen" title="Permanent link">&para;</a></h3>
+<p>Gibt Mahnstatus und letzte Mahnaktionen fuer einen Kunden zurueck.</p>
+<ul>
+<li><strong>Scope:</strong> <code>finance:read</code></li>
+<li><strong>Idempotent:</strong> ja</li>
+<li><strong>Risikoklasse:</strong> niedrig</li>
+<li><strong>Audit:</strong> read</li>
+<li><strong>Human-Approval erforderlich:</strong> nein</li>
+<li><strong>Endpoint:</strong> <code>GET /api/v1/dunning/status/{kunden_nr}</code></li>
+</ul>
+<p><strong>Eingabe-Schema:</strong></p>
+<p><code>json
+{
+  "type": "object",
+  "properties": {
+    "kunden_nr": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "kunden_nr"
+  ]
+}</code></p>
+<p><strong>Ausgabe-Schema:</strong></p>
+<p><code>json
+{
+  "type": "object",
+  "properties": {
+    "kunden_nr": {
+      "type": "string"
+    },
+    "mahnstufe": {
+      "type": "integer"
+    },
+    "letzte_mahnung": {
+      "type": "string",
+      "nullable": true
+    },
+    "gesamt_offen_eur": {
+      "type": "number"
+    }
+  }
+}</code></p>
+<h3 id="fibuopen_itemslist-offene-posten-auflisten"><code>fibu.open_items.list</code> — Offene Posten auflisten<a class="headerlink" href="#fibuopen_itemslist-offene-posten-auflisten" title="Permanent link">&para;</a></h3>
+<p>Listet offene Forderungen oder Verbindlichkeiten nach Faelligkeit.</p>
+<ul>
+<li><strong>Scope:</strong> <code>finance:read</code></li>
+<li><strong>Idempotent:</strong> ja</li>
+<li><strong>Risikoklasse:</strong> niedrig</li>
+<li><strong>Audit:</strong> read</li>
+<li><strong>Human-Approval erforderlich:</strong> nein</li>
+<li><strong>Endpoint:</strong> <code>GET /api/v1/open-items?typ={typ}&amp;faellig_bis={faellig_bis}&amp;limit={limit}</code></li>
+</ul>
+<p><strong>Eingabe-Schema:</strong></p>
+<p><code>json
+{
+  "type": "object",
+  "properties": {
+    "typ": {
+      "type": "string",
+      "enum": [
+        "forderung",
+        "verbindlichkeit"
+      ]
+    },
+    "faellig_bis": {
+      "type": "string",
+      "format": "date",
+      "nullable": true
+    },
+    "limit": {
+      "type": "integer",
+      "default": 50
+    }
+  },
+  "required": [
+    "typ"
+  ]
+}</code></p>
+<p><strong>Ausgabe-Schema:</strong></p>
+<p><code>json
+{
+  "type": "array",
+  "items": {
+    "type": "object",
+    "properties": {
+      "beleg_nr": {
+        "type": "string"
+      },
+      "kunden_nr": {
+        "type": "string"
+      },
+      "betrag_eur": {
+        "type": "number"
+      },
+      "faellig_am": {
+        "type": "string"
+      },
+      "mahnstatus": {
+        "type": "string"
+      }
+    }
+  }
+}</code></p>
+<h2 id="domaene-inventory">Domaene: inventory<a class="headerlink" href="#domaene-inventory" title="Permanent link">&para;</a></h2>
+<h3 id="wmscellstatus-silozellen-status"><code>wms.cell.status</code> — Silozellen-Status<a class="headerlink" href="#wmscellstatus-silozellen-status" title="Permanent link">&para;</a></h3>
+<p>Gibt Fuellstand, Artikel, QS-Status und Sperren einer Silozelle zurueck.</p>
+<ul>
+<li><strong>Scope:</strong> <code>inventory:read</code></li>
+<li><strong>Idempotent:</strong> ja</li>
+<li><strong>Risikoklasse:</strong> niedrig</li>
+<li><strong>Audit:</strong> read</li>
+<li><strong>Human-Approval erforderlich:</strong> nein</li>
+<li><strong>Endpoint:</strong> <code>GET /api/v1/silo/cells/{cell_code}/status</code></li>
+</ul>
+<p><strong>Eingabe-Schema:</strong></p>
+<p><code>json
+{
+  "type": "object",
+  "properties": {
+    "cell_code": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "cell_code"
+  ]
+}</code></p>
+<p><strong>Ausgabe-Schema:</strong></p>
+<p><code>json
+{
+  "type": "object",
+  "properties": {
+    "cell_code": {
+      "type": "string"
+    },
+    "current_stock_kg": {
+      "type": "number"
+    },
+    "qs_status": {
+      "type": "string"
+    },
+    "current_material": {
+      "type": "string",
+      "nullable": true
+    },
+    "flush_required": {
+      "type": "boolean"
+    }
+  }
+}</code></p>
+<h3 id="wmslottrace-lot-verfolgen"><code>wms.lot.trace</code> — Lot verfolgen<a class="headerlink" href="#wmslottrace-lot-verfolgen" title="Permanent link">&para;</a></h3>
+<p>Gibt Herkunft, Silozelle, QS-Status und Bewegungshistorie eines Lots zurueck.</p>
+<ul>
+<li><strong>Scope:</strong> <code>inventory:read</code></li>
+<li><strong>Idempotent:</strong> ja</li>
+<li><strong>Risikoklasse:</strong> niedrig</li>
+<li><strong>Audit:</strong> read</li>
+<li><strong>Human-Approval erforderlich:</strong> nein</li>
+<li><strong>Endpoint:</strong> <code>GET /api/v1/inventory/lots/{lot_id}/trace</code></li>
+</ul>
+<p><strong>Eingabe-Schema:</strong></p>
+<p><code>json
+{
+  "type": "object",
+  "properties": {
+    "lot_id": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "lot_id"
+  ]
+}</code></p>
+<p><strong>Ausgabe-Schema:</strong></p>
+<p><code>json
+{
+  "type": "object",
+  "properties": {
+    "lot_id": {
+      "type": "string"
+    },
+    "artikel_id": {
+      "type": "string"
+    },
+    "menge_kg": {
+      "type": "number"
+    },
+    "status": {
+      "type": "string"
+    },
+    "qs_status": {
+      "type": "string"
+    },
+    "silozelle": {
+      "type": "string",
+      "nullable": true
+    },
+    "bewegungen": {
+      "type": "array"
+    }
+  }
+}</code></p>
+<h2 id="domaene-nachweisraum">Domaene: nachweisraum<a class="headerlink" href="#domaene-nachweisraum" title="Permanent link">&para;</a></h2>
+<h3 id="dmsdocumentsearch-dokument-suchen"><code>dms.document.search</code> — Dokument suchen<a class="headerlink" href="#dmsdocumentsearch-dokument-suchen" title="Permanent link">&para;</a></h3>
+<p>Sucht Dokumente im Nachweisraum nach Typ, Zeitraum oder Beleg-Referenz.</p>
+<ul>
+<li><strong>Scope:</strong> <code>nachweisraum:read</code></li>
+<li><strong>Idempotent:</strong> ja</li>
+<li><strong>Risikoklasse:</strong> niedrig</li>
+<li><strong>Audit:</strong> read</li>
+<li><strong>Human-Approval erforderlich:</strong> nein</li>
+<li><strong>Endpoint:</strong> <code>GET /api/v1/nachweisraum/dokumente</code></li>
+</ul>
+<p><strong>Eingabe-Schema:</strong></p>
+<p><code>json
+{
+  "type": "object",
+  "properties": {
+    "beleg_ref": {
+      "type": "string",
+      "nullable": true
+    },
+    "dokument_typ": {
+      "type": "string",
+      "nullable": true
+    },
+    "von": {
+      "type": "string",
+      "format": "date",
+      "nullable": true
+    },
+    "bis": {
+      "type": "string",
+      "format": "date",
+      "nullable": true
+    },
+    "limit": {
+      "type": "integer",
+      "default": 20
+    }
+  }
+}</code></p>
+<p><strong>Ausgabe-Schema:</strong></p>
+<p><code>json
+{
+  "type": "array",
+  "items": {
+    "type": "object",
+    "properties": {
+      "dokument_id": {
+        "type": "string"
+      },
+      "titel": {
+        "type": "string"
+      },
+      "status": {
+        "type": "string"
+      },
+      "erstellt_am": {
+        "type": "string"
+      }
+    }
+  }
+}</code></p>
+<h3 id="dmsgobdexport_status-gobd-export-status"><code>dms.gobd.export_status</code> — GoBD-Export-Status<a class="headerlink" href="#dmsgobdexport_status-gobd-export-status" title="Permanent link">&para;</a></h3>
+<p>Gibt Status und Pruefprotokoll eines GoBD-Exports zurueck.</p>
+<ul>
+<li><strong>Scope:</strong> <code>nachweisraum:read</code></li>
+<li><strong>Idempotent:</strong> ja</li>
+<li><strong>Risikoklasse:</strong> niedrig</li>
+<li><strong>Audit:</strong> read</li>
+<li><strong>Human-Approval erforderlich:</strong> nein</li>
+<li><strong>Endpoint:</strong> <code>GET /api/v1/nachweisraum/gobd-exporte/{export_id}</code></li>
+</ul>
+<p><strong>Eingabe-Schema:</strong></p>
+<p><code>json
+{
+  "type": "object",
+  "properties": {
+    "export_id": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "export_id"
+  ]
+}</code></p>
+<p><strong>Ausgabe-Schema:</strong></p>
+<p><code>json
+{
+  "type": "object",
+  "properties": {
+    "export_id": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string"
+    },
+    "dokument_anzahl": {
+      "type": "integer"
+    },
+    "pruefprotokoll": {
+      "type": "string",
+      "nullable": true
+    }
+  }
+}</code></p>
+<h2 id="domaene-sales">Domaene: sales<a class="headerlink" href="#domaene-sales" title="Permanent link">&para;</a></h2>
+<h3 id="salesinvoicepropose-rechnungsvorschlag-aus-lieferschein"><code>sales.invoice.propose</code> — Rechnungsvorschlag aus Lieferschein<a class="headerlink" href="#salesinvoicepropose-rechnungsvorschlag-aus-lieferschein" title="Permanent link">&para;</a></h3>
+<p>Erzeugt einen Rechnungs-Entwurf aus einem abgeschlossenen Lieferschein. Erfordert Human Approval.</p>
+<ul>
+<li><strong>Scope:</strong> <code>sales:write</code></li>
+<li><strong>Idempotent:</strong> nein</li>
+<li><strong>Risikoklasse:</strong> hoch</li>
+<li><strong>Audit:</strong> write</li>
+<li><strong>Human-Approval erforderlich:</strong> ja</li>
+<li><strong>Endpoint:</strong> <code>POST /api/v1/sales-invoices/propose</code></li>
+</ul>
+<p><strong>Eingabe-Schema:</strong></p>
+<p><code>json
+{
+  "type": "object",
+  "properties": {
+    "lieferschein_nr": {
+      "type": "string"
+    },
+    "rechnungsdatum": {
+      "type": "string",
+      "format": "date"
+    }
+  },
+  "required": [
+    "lieferschein_nr",
+    "rechnungsdatum"
+  ]
+}</code></p>
+<p><strong>Ausgabe-Schema:</strong></p>
+<p><code>json
+{
+  "type": "object",
+  "properties": {
+    "entwurf_id": {
+      "type": "string"
+    },
+    "betrag_netto": {
+      "type": "number"
+    },
+    "mwst": {
+      "type": "number"
+    },
+    "positionen": {
+      "type": "integer"
+    }
+  }
+}</code></p>
+<h3 id="salesorderstatus-auftragsstatus-pruefen"><code>sales.order.status</code> — Auftragsstatus pruefen<a class="headerlink" href="#salesorderstatus-auftragsstatus-pruefen" title="Permanent link">&para;</a></h3>
+<p>Gibt Lifecycle-Status, offene Positionen und naechsten Schritt eines Auftrags zurueck.</p>
+<ul>
+<li><strong>Scope:</strong> <code>sales:read</code></li>
+<li><strong>Idempotent:</strong> ja</li>
+<li><strong>Risikoklasse:</strong> niedrig</li>
+<li><strong>Audit:</strong> read</li>
+<li><strong>Human-Approval erforderlich:</strong> nein</li>
+<li><strong>Endpoint:</strong> <code>GET /api/v1/sales-orders/{auftrag_nr}/status</code></li>
+</ul>
+<p><strong>Eingabe-Schema:</strong></p>
+<p><code>json
+{
+  "type": "object",
+  "properties": {
+    "auftrag_nr": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "auftrag_nr"
+  ]
+}</code></p>
+<p><strong>Ausgabe-Schema:</strong></p>
+<p><code>json
+{
+  "type": "object",
+  "properties": {
+    "auftrag_nr": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string"
+    },
+    "offene_positionen": {
+      "type": "integer"
+    },
+    "naechster_schritt": {
+      "type": "string"
+    }
+  }
+}</code></p>
+
+
+
+
+
+
+
+  
+  
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Zurück zum Seitenanfang
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+    
+      
+      <nav class="md-footer__inner md-grid" aria-label="Fußzeile" >
+        
+          
+          <a href="../rest-api/" class="md-footer__link md-footer__link--prev" aria-label="Zurück: REST-API">
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+            </div>
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Zurück
+              </span>
+              <div class="md-ellipsis">
+                REST-API
+              </div>
+            </div>
+          </a>
+        
+        
+          
+          <a href="../events/" class="md-footer__link md-footer__link--next" aria-label="Weiter: Event-Katalog">
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Weiter
+              </span>
+              <div class="md-ellipsis">
+                Event-Katalog
+              </div>
+            </div>
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11z"/></svg>
+            </div>
+          </a>
+        
+      </nav>
+    
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    <script id="__config" type="application/json">{"base": "../..", "features": ["navigation.sections", "navigation.top", "navigation.indexes", "navigation.footer", "search.suggest", "search.highlight", "content.code.copy", "toc.follow"], "search": "../../assets/javascripts/workers/search.6ce7567c.min.js", "translations": {"clipboard.copied": "In Zwischenablage kopiert", "clipboard.copy": "In Zwischenablage kopieren", "search.result.more.one": "1 weiteres Suchergebnis auf dieser Seite", "search.result.more.other": "# weitere Suchergebnisse auf dieser Seite", "search.result.none": "Keine Suchergebnisse", "search.result.one": "1 Suchergebnis", "search.result.other": "# Suchergebnisse", "search.result.placeholder": "Suchbegriff eingeben", "search.result.term.missing": "Es fehlt", "select.version": "Version ausw\u00e4hlen"}}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.88dd0f4e.min.js"></script>
+      
+    
+  </body>
+</html>
