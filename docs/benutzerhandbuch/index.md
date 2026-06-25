@@ -16,13 +16,13 @@ Voraussetzungen → Schritte → Ergebnis → häufige Fehler.
 
 ## Bereiche
 
-- **Einstieg** — Login, Mandantenwahl, Navigation, Tastatur.
-- **Annahme** — LKW-Registrierung, Waage, Qualität, Ernteannahme.
-- **Verkauf** — Auftrag → Lieferschein → Rechnung.
-- **Einkauf** — Bestellung → Wareneingang → Prüfung.
-- **Lager** — Bestand, Umlagerung, Inventur, Silo.
-- **Finanzbuchhaltung** — Debitoren, Mahnwesen, Zahlungen.
-- **CRM** — Kontakte, Leads, Hofprofile.
-- **Glossar** — Fachbegriffe Landhandel/Agrar.
+- [**Einstieg**](einstieg.md) — Anmeldung, Mandantenwahl, Navigation, Tastatur.
+- [**Annahme**](annahme.md) — LKW-Registrierung, Waage, Qualität, Ernteannahme.
+- [**Verkauf**](verkauf.md) — Auftrag → Lieferschein → Rechnung.
+- [**Lager**](lager.md) — Bestand, Umlagerung, Inventur, Silo.
+- [**Finanzbuchhaltung**](finanzbuchhaltung.md) — Offene Posten, Mahnwesen, Zahlungen.
+- [**Glossar**](glossar.md) — Fachbegriffe Landhandel/Agrar.
+- [**In-App-Hilfe**](in-app-hilfe.md) — kontextsensitive Deep-Links.
 
-> Inhalte folgen in `DOC-USER-MANUAL-001`.
+> Einkauf und CRM folgen als weitere How-tos. Screenshots werden über den
+> UI-Explorer ergänzt.
