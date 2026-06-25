@@ -1,8 +1,9 @@
 slice_id: DOC-GOVERNANCE-001
 title: "Doku-Governance: CODEOWNERS, Link-/Staleness-Check, Changelog, Release-Versionierung"
 owner: Cursor
-status: in arbeit
+status: abgeschlossen
 created_at: 2026-06-25
+completed_at: 2026-06-25
 goal: >-
   Die Doku-Pflege absichern: CODEOWNERS je Doku-Bereich, Staleness-Check
   (last_reviewed-Frontmatter), striktes Doku-Build-Gate inkl. Link-Pruefung,
