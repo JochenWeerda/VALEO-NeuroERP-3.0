@@ -31,16 +31,26 @@ abgebildet:
 
 ## Umsetzungsweg (Frontend)
 
-1. Hilfe-Symbol in der Kopf- oder Fußzeile jeder Maske.
-2. Das Symbol verlinkt anhand der aktuellen Routen-ID auf die zugeordnete
-   Doku-URL (Mapping-Tabelle, gepflegt analog zu `route-aliases.json`).
-3. Fällt keine spezifische Zuordnung an, wird die Bereichs-Startseite geöffnet.
+1. Hilfe-Symbol (`HelpCircle`) in der Kopfzeile (`TopBar`) – auf jeder Maske sichtbar.
+2. Das Symbol verlinkt anhand des aktuellen Routen-Pfads auf die zugeordnete
+   Doku-URL (Mapping in `src/lib/docs-help.ts`, gepflegt analog zu
+   `route-aliases.json`).
+3. Fällt keine spezifische Zuordnung an, wird das Benutzerhandbuch
+   (Bereichs-Startseite) geöffnet.
+4. Zusätzlich öffnet der Eintrag **„Dokumentation"** im User-Menü die Doku-Site.
+
+## Implementierungsstand
+
+- **Stufe 1 (umgesetzt):** Hilfe-Button + User-Menü-Eintrag öffnen die Doku-Site
+  in einem neuen Tab. Basis-URL über `VITE_DOCS_URL` konfigurierbar (Fallback:
+  veröffentlichte GitHub-Pages-Site, vgl. `mkdocs.yml#site_url`).
+- **Stufe 2 (umgesetzt):** Kontextsensitives Mapping `Routen-Pfad → Handbuch-Seite`
+  in `src/lib/docs-help.ts` (`resolveHelpUrl`), inkl. Längster-Prefix-Auflösung
+  und Fallback. Abgedeckt durch `src/__tests__/lib/docs-help.test.ts`.
 
 ## Pflege
 
-- Das Mapping wird gemeinsam mit neuen Masken erweitert.
+- Das Mapping (`ROUTE_DOC_MAP` in `src/lib/docs-help.ts`) wird gemeinsam mit neuen
+  Masken erweitert.
 - Diese Seite ist die fachliche Referenz für die Zuordnung; die technische
-  Umsetzung erfolgt im Frontend.
-
-> Die konkrete Frontend-Integration (Hilfe-Button + Mapping) ist als Folgearbeit
-> vorgesehen; dieses Dokument legt das verbindliche Konzept fest.
+  Umsetzung liegt im Frontend (`docs-help.ts` + `TopBar.tsx`).
