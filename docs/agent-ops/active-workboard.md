@@ -15,7 +15,7 @@
 
 ## DOC-USER-MANUAL-001 — Benutzerhandbuch: Inhalte, Glossar, In-App-Deep-Links
 
-**Von:** Cursor · **Owner:** Cursor · **Stand:** in Arbeit 2026-06-25 — aufgabenorientierte How-tos je Domaene (Einstieg, Annahme, Verkauf, Lager, FiBu), Glossar, In-App-Hilfe-Konzept.
+**Von:** Cursor · **Owner:** Cursor · **Stand:** abgeschlossen 2026-06-25 — How-tos: Einstieg, Annahme, Verkauf, Lager, FiBu; Glossar; In-App-Hilfe-Konzept (Routen-ID → Doku); Index + Nav verlinkt; `mkdocs build` grün.
 **Dateibesitz:** `docs/benutzerhandbuch/*.md`, `mkdocs.yml`, `docs/agent-ops/slices/DOC-USER-MANUAL-001.yaml`
 
 ## DOC-ADMIN-OPS-001 — Administration & Betrieb: Mandanten-Admin- + Betriebshandbuch

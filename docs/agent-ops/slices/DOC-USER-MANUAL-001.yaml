@@ -1,8 +1,9 @@
 slice_id: DOC-USER-MANUAL-001
 title: "Benutzerhandbuch: Inhalte, Glossar, In-App-Deep-Links"
 owner: Cursor
-status: in arbeit
+status: abgeschlossen
 created_at: 2026-06-25
+completed_at: 2026-06-25
 goal: >-
   Das Benutzerhandbuch mit aufgabenorientierten Inhalten je Fachdomaene fuellen
   (Einstieg, Annahme, Verkauf, Lager, FiBu), ein Glossar der
