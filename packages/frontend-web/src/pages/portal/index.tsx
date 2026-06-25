@@ -11,6 +11,8 @@ import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
 import { usePortalDashboard, type PortalDashboard as PortalDashboardApi } from '@/lib/api/portal'
 import { ErrorState } from '@/components/ErrorState'
+import { useQuery } from '@tanstack/react-query'
+import apiClient from '@/lib/api-client'
 import {
   ShoppingCart,
   Package,
@@ -24,7 +26,15 @@ import {
   CheckCircle2,
   Truck,
   Calculator,
+  Wheat,
+  Sparkles,
+  Tractor,
 } from 'lucide-react'
+
+// Demo-Kunden-Nr; produktiv aus Auth-Context
+const DEMO_KUNDEN_NR = 'K-10001'
+// Demo Artikel-IDs basierend auf Schlagkartei-Kulturen
+const DEMO_ARTIKEL_IDS = 'WEI-001,GER-001,RAP-001'
 
 
 type PortalDashboardView = {
@@ -103,6 +113,157 @@ function mapPortalDashboard(data: PortalDashboardApi): PortalDashboardView {
   }
 }
 
+// ─── Preisspiegel-Widget ──────────────────────────────────────────────────────
+
+type PreisVariante = { gesamtpreis_eur_dt: number; ernte_jahr: number }
+type ArtikelPreis = {
+  artikel_id: string
+  artikel_name: string
+  frucht_gruppe: string
+  varianten: Record<string, PreisVariante>
+}
+type PreisspiegalData = { preisspiegel: ArtikelPreis[]; stand: string }
+
+function PreisspiegalWidget() {
+  const { data, isLoading } = useQuery<PreisspiegalData>({
+    queryKey: ['portal-preisspiegel-widget', DEMO_ARTIKEL_IDS],
+    queryFn: async () => {
+      const res = await apiClient.get<PreisspiegalData>(
+        `/portal/preisspiegel/kunde?artikel_ids=${DEMO_ARTIKEL_IDS}`,
+      )
+      return res.data
+    },
+    staleTime: 5 * 60 * 1000,
+  })
+
+  const VARIANTE_LABELS: Record<string, string> = {
+    altware_ab_hof: 'Altware ab Hof',
+    altware_frei_lager: 'Altware frei Lager',
+    neue_ernte_frei_lager: 'Neue Ernte frei Lager',
+    neue_ernte_ab_hof: 'Neue Ernte ab Hof',
+  }
+
+  return (
+    <Card>
+      <CardHeader className="flex flex-row items-center justify-between pb-3">
+        <div>
+          <CardTitle className="text-lg flex items-center gap-2">
+            <TrendingUp className="h-5 w-5 text-green-600" />
+            Aktuelle Getreidekurse
+          </CardTitle>
+          <CardDescription>
+            Ankaufspreise für Ihre Ernte{data ? ` — Stand ${data.stand}` : ''}
+          </CardDescription>
+        </div>
+        <Link to="/portal/preisspiegel">
+          <Button variant="ghost" size="sm" className="gap-1 text-green-700">
+            Alle Varianten <ChevronRight className="h-4 w-4" />
+          </Button>
+        </Link>
+      </CardHeader>
+      <CardContent>
+        {isLoading && (
+          <div className="space-y-2">
+            {[1, 2, 3].map((i) => <Skeleton key={i} className="h-10 w-full" />)}
+          </div>
+        )}
+        {data && (
+          <div className="space-y-1">
+            {/* Tabellenkopf */}
+            <div className="grid grid-cols-5 gap-2 text-xs font-medium text-gray-500 px-2 pb-1 border-b">
+              <span className="col-span-1">Frucht</span>
+              {Object.values(VARIANTE_LABELS).map((l) => (
+                <span key={l} className="text-right leading-tight">{l}</span>
+              ))}
+            </div>
+            {/* Preiszeilen */}
+            {data.preisspiegel.map((a) => (
+              <div
+                key={a.artikel_id}
+                className="grid grid-cols-5 gap-2 items-center rounded-lg px-2 py-2 hover:bg-gray-50"
+              >
+                <div className="col-span-1">
+                  <div className="font-medium text-sm text-gray-900">{a.artikel_name}</div>
+                  <div className="text-xs text-gray-400">{a.frucht_gruppe}</div>
+                </div>
+                {Object.keys(VARIANTE_LABELS).map((v) => {
+                  const p = a.varianten[v]
+                  return (
+                    <div key={v} className="text-right">
+                      {p ? (
+                        <span className="text-sm font-semibold text-gray-800">
+                          {p.gesamtpreis_eur_dt.toFixed(2)}{' '}
+                          <span className="text-xs font-normal text-gray-400">€/dt</span>
+                        </span>
+                      ) : (
+                        <span className="text-xs text-gray-300">—</span>
+                      )}
+                    </div>
+                  )
+                })}
+              </div>
+            ))}
+            {data.preisspiegel.length === 0 && (
+              <p className="text-sm text-gray-500 text-center py-4">
+                Keine Preise für Ihre Früchte hinterlegt.
+              </p>
+            )}
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  )
+}
+
+// ─── Empfehlungs-Banner ───────────────────────────────────────────────────────
+
+type EmpfehlungZusammenfassung = { ungesehen: number; gesamt: number; nach_typ: Record<string, number> }
+
+function EmpfehlungsBanner() {
+  const { data } = useQuery<EmpfehlungZusammenfassung>({
+    queryKey: ['portal-empfehlungen-badge', DEMO_KUNDEN_NR],
+    queryFn: async () => {
+      const res = await apiClient.get<EmpfehlungZusammenfassung>(
+        `/portal/empfehlungen/${DEMO_KUNDEN_NR}/zusammenfassung`,
+      )
+      return res.data
+    },
+    staleTime: 2 * 60 * 1000,
+  })
+
+  if (!data || data.ungesehen === 0) return null
+
+  const ankauf = data.nach_typ['ankauf_kontrakt'] ?? 0
+  const lohn = data.nach_typ['lohndienst'] ?? 0
+  const rohware = data.nach_typ['rohware_angebot'] ?? 0
+
+  return (
+    <Link to="/portal/empfehlungen">
+      <div className="rounded-xl border border-amber-200 bg-amber-50 px-5 py-4 flex items-center justify-between gap-4 hover:bg-amber-100 transition-colors cursor-pointer">
+        <div className="flex items-center gap-3">
+          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-amber-400">
+            <Sparkles className="h-5 w-5 text-white" />
+          </div>
+          <div>
+            <div className="font-semibold text-amber-900 flex items-center gap-2">
+              {data.ungesehen} neue Empfehlung{data.ungesehen !== 1 ? 'en' : ''} für Sie
+              <Badge className="bg-amber-500 text-white text-xs">{data.ungesehen} neu</Badge>
+            </div>
+            <div className="text-sm text-amber-700 flex gap-3 mt-0.5">
+              {ankauf > 0 && <span>{ankauf} Ankaufsangebot{ankauf !== 1 ? 'e' : ''}</span>}
+              {lohn > 0 && <span>{lohn} Lohndienstleistung{lohn !== 1 ? 'en' : ''}</span>}
+              {rohware > 0 && <span>{rohware} Rohwaren-Angebot{rohware !== 1 ? 'e' : ''}</span>}
+            </div>
+          </div>
+        </div>
+        <ChevronRight className="h-5 w-5 text-amber-600 flex-shrink-0" />
+      </div>
+    </Link>
+  )
+}
+
+// ─── Dashboard ────────────────────────────────────────────────────────────────
+
 export default function PortalDashboard() {
   const { data: portalData, isLoading, isError, error, refetch } = usePortalDashboard()
 
@@ -142,8 +303,23 @@ export default function PortalDashboard() {
               Anfrage stellen
             </Button>
           </Link>
+          <Link to="/portal/preisspiegel">
+            <Button variant="outline" className="gap-2 border-white/30 bg-white/10 text-white hover:bg-white/20">
+              <TrendingUp className="h-4 w-4" />
+              Getreidekurse
+            </Button>
+          </Link>
+          <Link to="/portal/lohndienste">
+            <Button variant="outline" className="gap-2 border-white/30 bg-white/10 text-white hover:bg-white/20">
+              <Tractor className="h-4 w-4" />
+              Lohndienste buchen
+            </Button>
+          </Link>
         </div>
       </div>
+
+      {/* Empfehlungs-Banner (nur wenn neue Empfehlungen vorhanden) */}
+      <EmpfehlungsBanner />
 
       {/* KPI Cards */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -177,6 +353,9 @@ export default function PortalDashboard() {
           color="purple"
         />
       </div>
+
+      {/* Preisspiegel-Widget (volle Breite) */}
+      <PreisspiegalWidget />
 
       {/* Main Content Grid */}
       <div className="grid gap-6 lg:grid-cols-2">
@@ -268,43 +447,74 @@ export default function PortalDashboard() {
           <CardTitle className="text-lg">Schnellzugriff</CardTitle>
           <CardDescription>Häufig verwendete Funktionen</CardDescription>
         </CardHeader>
-        <CardContent>
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
-            <QuickAccessCard
-              title="Ackerschlagkartei"
-              description="Feldbuch einsehen"
-              icon={<Leaf className="h-6 w-6" />}
-              link="/portal/feldbuch"
-              color="emerald"
-            />
-            <QuickAccessCard
-              title="Nährstoffbilanzen"
-              description="Jahresübersichten"
-              icon={<TrendingUp className="h-6 w-6" />}
-              link="/portal/naehrstoffbilanzen"
-              color="blue"
-            />
-            <QuickAccessCard
-              title="Rationsberechnung"
-              description="Kostenoptimale Ration berechnen"
-              icon={<Calculator className="h-6 w-6" />}
-              link="/portal/rationsoptimierung"
-              color="emerald"
-            />
-            <QuickAccessCard
-              title="Zertifikate"
-              description="GMP, VLOG, QS..."
-              icon={<FileText className="h-6 w-6" />}
-              link="/portal/zertifikate"
-              color="amber"
-            />
-            <QuickAccessCard
-              title="CSV Export"
-              description="Daten exportieren"
-              icon={<Download className="h-6 w-6" />}
-              link="/portal/feldbuch?tab=export"
-              color="purple"
-            />
+        <CardContent className="space-y-4">
+          {/* Neue Agrar-Dienste */}
+          <div>
+            <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">Markt & Dienste</p>
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+              <QuickAccessCard
+                title="Getreidekurse"
+                description="4 Preisvarianten je Frucht"
+                icon={<TrendingUp className="h-6 w-6" />}
+                link="/portal/preisspiegel"
+                color="emerald"
+              />
+              <QuickAccessCard
+                title="Empfehlungen"
+                description="Angebote & Kontrakte für Sie"
+                icon={<Sparkles className="h-6 w-6" />}
+                link="/portal/empfehlungen"
+                color="amber"
+              />
+              <QuickAccessCard
+                title="Lohndienste buchen"
+                description="Spritz, Mahl+Misch, TMR"
+                icon={<Tractor className="h-6 w-6" />}
+                link="/portal/lohndienste"
+                color="blue"
+              />
+              <QuickAccessCard
+                title="Rationsberechnung"
+                description="Kostenoptimale Ration"
+                icon={<Calculator className="h-6 w-6" />}
+                link="/portal/rationsoptimierung"
+                color="emerald"
+              />
+            </div>
+          </div>
+          {/* Feldbuch & Dokumente */}
+          <div>
+            <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">Flächen & Dokumente</p>
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+              <QuickAccessCard
+                title="Ackerschlagkartei"
+                description="Feldbuch & Maßnahmen"
+                icon={<Leaf className="h-6 w-6" />}
+                link="/portal/feldbuch"
+                color="emerald"
+              />
+              <QuickAccessCard
+                title="Nährstoffbilanzen"
+                description="Jahresübersichten"
+                icon={<Wheat className="h-6 w-6" />}
+                link="/portal/naehrstoffbilanzen"
+                color="blue"
+              />
+              <QuickAccessCard
+                title="Zertifikate"
+                description="GMP, VLOG, QS..."
+                icon={<FileText className="h-6 w-6" />}
+                link="/portal/zertifikate"
+                color="amber"
+              />
+              <QuickAccessCard
+                title="CSV Export"
+                description="Daten exportieren"
+                icon={<Download className="h-6 w-6" />}
+                link="/portal/feldbuch?tab=export"
+                color="purple"
+              />
+            </div>
           </div>
         </CardContent>
       </Card>
