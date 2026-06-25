@@ -1,7 +1,9 @@
 # ISO 27001 Quarterly Access Review – Prozess
 
-**Steuerung:** A.9.2 User Access Management – Access-Review  
-**Frequenz:** Vierteljährlich (geplant: Q1, Q2, Q3, Q4)  
+**Steuerung:** A.9.2 User Access Management – Access-Review
+
+**Frequenz:** Vierteljährlich (geplant: Q1, Q2, Q3, Q4)
+
 **Status:** Implementiert (Prozess)
 
 ---
@@ -37,4 +39,4 @@ Regelmäßige Prüfung, ob Berechtigungen noch den Anforderungen entsprechen (Le
 ## 4. Verweise
 
 - [ISO 27001 Gap Analysis](iso27001-gap-analysis.md) – A.9.2
-- [SECURITY-FOUNDATION-AUDIT.md](../../SECURITY-FOUNDATION-AUDIT.md) – Audit-Logging
+- `SECURITY-FOUNDATION-AUDIT.md` (Repo-Root) – Audit-Logging
