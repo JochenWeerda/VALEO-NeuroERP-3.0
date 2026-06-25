@@ -1,8 +1,9 @@
 slice_id: DOC-AGENT-CATALOG-001
 title: "Agent-Dokumentation: Capability- + Tool-Katalog + Guardrails"
 owner: Cursor
-status: in arbeit
+status: abgeschlossen
 created_at: 2026-06-25
+completed_at: 2026-06-25
 goal: >-
   Die maschinenlesbare Agent-Doku-Schicht fuellen: Capability-Katalog (Hermes/
   Operator-/Coding-Agents), Tool-Katalog (MCP, generiert aus der Registry),
