@@ -41,12 +41,18 @@ abgebildet:
 
 ## Implementierungsstand
 
-- **Stufe 1 (umgesetzt):** Hilfe-Button + User-Menü-Eintrag öffnen die Doku-Site
-  in einem neuen Tab. Basis-URL über `VITE_DOCS_URL` konfigurierbar (Fallback:
-  veröffentlichte GitHub-Pages-Site, vgl. `mkdocs.yml#site_url`).
+- **Stufe 1 (umgesetzt):** Hilfe-Button (`TopBar`) und User-Menü-Eintrag
+  „Dokumentation" öffnen die Hilfe. Basis-URL über `VITE_DOCS_URL` konfigurierbar
+  (Fallback: veröffentlichte GitHub-Pages-Site, vgl. `mkdocs.yml#site_url`).
 - **Stufe 2 (umgesetzt):** Kontextsensitives Mapping `Routen-Pfad → Handbuch-Seite`
-  in `src/lib/docs-help.ts` (`resolveHelpUrl`), inkl. Längster-Prefix-Auflösung
-  und Fallback. Abgedeckt durch `src/__tests__/lib/docs-help.test.ts`.
+  in `src/lib/docs-help.ts` (`resolveHelpUrl`), inkl. Längster-Prefix-Auflösung,
+  Admin-Deep-Links und Fallback. Abgedeckt durch
+  `src/__tests__/lib/docs-help.test.ts`.
+- **Eingebettete Ansicht (umgesetzt):** Die App-Route `/hilfe`
+  (`src/pages/hilfe.tsx`) bettet die Doku per iframe ein und lädt über den
+  `ctx`-Query-Parameter die zur aktuellen Maske passende Seite. Der Hilfe-Button
+  navigiert auf `/hilfe?ctx=<aktueller-pfad>`; ein „In neuem Tab öffnen"-Fallback
+  ist vorhanden, falls eine Umgebung das Framing unterbindet.
 
 ## Pflege
 

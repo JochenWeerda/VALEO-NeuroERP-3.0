@@ -1,6 +1,10 @@
 {
   "aliases": [
     {
+      "module": "@/pages/hilfe",
+      "path": "hilfe"
+    },
+    {
       "module": "@/pages/stammdaten/artikel-stoffstrom",
       "path": "stammdaten/artikel-stoffstrom"
     },

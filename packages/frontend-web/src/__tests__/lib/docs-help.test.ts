@@ -1,5 +1,11 @@
 import { describe, expect, it } from 'vitest'
-import { DOCS_BASE_URL, DOCS_USER_MANUAL_URL, resolveHelpUrl } from '@/lib/docs-help'
+import {
+  DOCS_BASE_URL,
+  DOCS_USER_MANUAL_URL,
+  getEmbeddedHelpHref,
+  HELP_ROUTE,
+  resolveHelpUrl,
+} from '@/lib/docs-help'
 
 describe('docs-help', () => {
   it('liefert eine Basis-URL mit abschließendem Slash', () => {
@@ -22,8 +28,16 @@ describe('docs-help', () => {
     expect(resolveHelpUrl('/agrar/annahme/erfassung')).toBe(`${DOCS_BASE_URL}benutzerhandbuch/annahme/`)
   })
 
-  it('mappt Admin- und Schnittstellen-Routen auf ihre Doku-Sektionen', () => {
-    expect(resolveHelpUrl('/admin/mandanten')).toBe(`${DOCS_BASE_URL}admin/`)
+  it('mappt erweiterte Fachrouten (POS, WMS, Mahnwesen) korrekt', () => {
+    expect(resolveHelpUrl('/pos/terminal')).toBe(`${DOCS_BASE_URL}benutzerhandbuch/verkauf/`)
+    expect(resolveHelpUrl('/lager/wms')).toBe(`${DOCS_BASE_URL}benutzerhandbuch/lager/`)
+    expect(resolveHelpUrl('/mahnwesen/laeufe')).toBe(`${DOCS_BASE_URL}benutzerhandbuch/finanzbuchhaltung/`)
+  })
+
+  it('löst spezifische Admin-Deep-Links vor der Admin-Sektion auf', () => {
+    expect(resolveHelpUrl('/admin/mandanten')).toBe(`${DOCS_BASE_URL}admin/mandanten-administration/`)
+    expect(resolveHelpUrl('/admin/deployment')).toBe(`${DOCS_BASE_URL}admin/deployment/`)
+    expect(resolveHelpUrl('/admin/control-center')).toBe(`${DOCS_BASE_URL}admin/`)
     expect(resolveHelpUrl('/schnittstellen/rest')).toBe(`${DOCS_BASE_URL}schnittstellen/`)
   })
 
@@ -31,5 +45,12 @@ describe('docs-help', () => {
     expect(resolveHelpUrl('/unbekannte-maske')).toBe(DOCS_USER_MANUAL_URL)
     expect(resolveHelpUrl('/')).toBe(DOCS_USER_MANUAL_URL)
     expect(resolveHelpUrl('')).toBe(DOCS_USER_MANUAL_URL)
+  })
+
+  it('baut den eingebetteten Hilfe-Link mit ctx-Parameter', () => {
+    expect(getEmbeddedHelpHref('/verkauf/auftraege')).toBe(
+      `${HELP_ROUTE}?ctx=${encodeURIComponent('/verkauf/auftraege')}`,
+    )
+    expect(getEmbeddedHelpHref('')).toBe(HELP_ROUTE)
   })
 })

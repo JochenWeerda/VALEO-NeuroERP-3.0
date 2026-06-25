@@ -45,6 +45,7 @@ const GROUP_BY_PREFIX: Record<string, PageModuleGroupName> = {
   foerderung: 'operations',
   fuhrpark: 'operations',
   genossenschaft: 'commercial',
+  hilfe: 'core',
   futter: 'operations',
   futtermittel: 'operations',
   inbox: 'operations',
