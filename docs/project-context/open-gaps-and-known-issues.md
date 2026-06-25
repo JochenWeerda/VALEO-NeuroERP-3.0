@@ -112,8 +112,9 @@ sortiert nach `IntercompanyBuchung.datum` statt nicht existierendem
 `buchungsdatum`; `/api/gobd/belegnummern` zaehlt Nummernkreisluecken ohne
 falschen Zugriff auf `BelegnummernLuecke.luecken`; `/api/v1/inventory/reports/turnover-analysis`
 liefert bei Null-Umschlag JSON-konformes `turnover_days: null` statt `Infinity`.
-Weiter offen: `/api/v1/agrar/nawaro/print-notifications`
-(`NawaroPrintNotification.tenant_id`), `/api/v1/crm/{activities/, cases/, opportunities/}`,
+Nachzug 2026-06-25b: `NawaroPrintNotification`-ORM-Modell um die vom Router
+genutzten Tenant-/Druckparameter-/Zeitstempel-Felder ergaenzt. Weiter offen:
+`/api/v1/crm/{activities/, cases/, opportunities/}`,
 `/api/v1/journal-entries/`, `/api/v1/einkauf/bestellvorschlaege/rohware`
 (InFailedSqlTransaction-Folgefehler).
 
