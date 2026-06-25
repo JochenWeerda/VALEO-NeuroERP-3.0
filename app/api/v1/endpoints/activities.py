@@ -111,6 +111,8 @@ async def list_activities(
             skip=skip,
             limit=limit,
         )
+    except (httpx.RequestError, RuntimeError):
+        activities, total = [], 0
     except Exception as exc:
         raise HTTPException(status_code=500, detail=f"Failed to list activities: {exc}") from exc
 
