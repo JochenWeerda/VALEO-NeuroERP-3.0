@@ -17,9 +17,8 @@ from __future__ import annotations
 
 import logging
 import time
-from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.requests import Request
-from starlette.responses import Response
+from starlette.types import ASGIApp, Message, Receive, Scope, Send
 
 logger = logging.getLogger("audit")
 
@@ -34,16 +33,17 @@ _SKIP_PATHS = frozenset({
 })
 
 
-class AuditMiddleware(BaseHTTPMiddleware):
+class AuditMiddleware:
     """
-    Middleware die schreibende API-Aufrufe automatisch als Audit-Events loggt.
+    Pure ASGI-Middleware die schreibende API-Aufrufe als Audit-Events loggt
+    (PERF-MULTIUSER-001 — ersetzt die frühere BaseHTTPMiddleware).
 
     Schreibt einen strukturierten Log-Eintrag mit:
     - action: HTTP-Methode + Pfad
     - entity_type: zweites Path-Segment (z.B. 'kontrakte', 'zahlungen')
     - user_id: aus request.state.token_claims['sub']
     - tenant_id: aus request.state.tenant_id
-    - status_code: der HTTP-Response-Code
+    - status_code: der HTTP-Response-Code (aus http.response.start)
     - duration_ms: Verarbeitungszeit
     - correlation_id: aus request.state oder Header
 
@@ -51,46 +51,68 @@ class AuditMiddleware(BaseHTTPMiddleware):
     Die Audit-API /api/v1/audit/log bleibt für explizite Einträge bestehen.
     """
 
-    async def dispatch(self, request: Request, call_next) -> Response:
+    def __init__(self, app: ASGIApp) -> None:
+        self.app = app
+
+    async def __call__(self, scope: Scope, receive: Receive, send: Send) -> None:
+        if scope["type"] != "http":
+            await self.app(scope, receive, send)
+            return
+
+        method = scope["method"]
+        path = scope["path"]
+
         # Nur schreibende Methoden auf API-Pfaden auditieren
         if (
-            request.method not in _AUDIT_METHODS
-            or not request.url.path.startswith(_AUDIT_PREFIX)
-            or request.url.path in _SKIP_PATHS
+            method not in _AUDIT_METHODS
+            or not path.startswith(_AUDIT_PREFIX)
+            or path in _SKIP_PATHS
         ):
-            return await call_next(request)
+            await self.app(scope, receive, send)
+            return
 
         start = time.perf_counter()
-        response = await call_next(request)
+        status_code = 500
+
+        async def send_wrapper(message: Message) -> None:
+            nonlocal status_code
+            if message["type"] == "http.response.start":
+                status_code = message["status"]
+            await send(message)
+
+        # Bei Exception propagiert der Fehler vor dem Logging (wie zuvor).
+        await self.app(scope, receive, send_wrapper)
+
         duration_ms = round((time.perf_counter() - start) * 1000, 1)
 
-        # Metadaten aus Request-State extrahieren
+        # Metadaten aus Request-State/Scope extrahieren (state von Bearer-Schicht gesetzt)
+        request = Request(scope)
+        headers = request.headers
         claims = getattr(request.state, "token_claims", {}) or {}
-        user_id = claims.get("sub") or request.headers.get("X-User-ID", "anonymous")
+        user_id = claims.get("sub") or headers.get("X-User-ID", "anonymous")
         tenant_id = getattr(request.state, "tenant_id", "unknown")
         correlation_id = (
             getattr(request.state, "correlation_id", None)
-            or request.headers.get("X-Correlation-ID", "")
+            or headers.get("X-Correlation-ID", "")
         )
 
         # Entity-Type aus Pfad ableiten (z.B. /api/v1/kontrakte/123 → "kontrakte")
-        path_parts = request.url.path.removeprefix(_AUDIT_PREFIX).split("/")
+        path_parts = path.removeprefix(_AUDIT_PREFIX).split("/")
         entity_type = path_parts[0] if path_parts else "unknown"
 
+        client = scope.get("client")
         logger.info(
             "AUDIT",
             extra={
                 "audit": True,
-                "action": f"{request.method} {request.url.path}",
+                "action": f"{method} {path}",
                 "entity_type": entity_type,
                 "user_id": user_id,
                 "tenant_id": tenant_id,
-                "status_code": response.status_code,
+                "status_code": status_code,
                 "duration_ms": duration_ms,
                 "correlation_id": correlation_id,
-                "ip_address": request.client.host if request.client else "unknown",
-                "user_agent": request.headers.get("user-agent", ""),
+                "ip_address": client[0] if client else "unknown",
+                "user_agent": headers.get("user-agent", ""),
             },
         )
-
-        return response

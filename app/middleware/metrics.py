@@ -3,13 +3,27 @@ Prometheus Metrics Middleware
 Tracks HTTP requests, latency, and errors
 """
 
+import re
 import time
 import logging
-from starlette.middleware.base import BaseHTTPMiddleware
-from starlette.requests import Request
+from starlette.types import ASGIApp, Message, Receive, Scope, Send
 from prometheus_client import Counter, Histogram, Gauge
 
 logger = logging.getLogger(__name__)
+
+# Precompiled once at import (was compiled per-request in the old implementation)
+_UUID_RE = re.compile(
+    r'[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}',
+    flags=re.IGNORECASE,
+)
+_NUMERIC_ID_RE = re.compile(r'/\d+(/|$)')
+
+
+def _simplify_path(path: str) -> str:
+    """Replace UUIDs and numeric IDs with placeholders for metric aggregation."""
+    path = _UUID_RE.sub('{id}', path)
+    path = _NUMERIC_ID_RE.sub('/{id}\\1', path)
+    return path
 
 # Metrics
 http_requests_total = Counter(
@@ -48,47 +62,42 @@ http_slo_error_violations_total = Counter(
 )
 
 
-class PrometheusMiddleware(BaseHTTPMiddleware):
-    """Middleware to track Prometheus metrics for all HTTP requests."""
-    
-    async def dispatch(self, request: Request, call_next):
-        # Skip metrics endpoint itself
-        if request.url.path == "/metrics":
-            return await call_next(request)
-        
-        method = request.method
-        path = request.url.path
-        
-        # Simplify path (remove IDs for better aggregation)
-        endpoint = self._simplify_path(path)
-        
-        # Track in-progress requests
+class PrometheusMiddleware:
+    """Pure ASGI middleware to track Prometheus metrics (PERF-MULTIUSER-001).
+
+    Ersetzt die frühere BaseHTTPMiddleware: liest Methode/Pfad aus dem Scope,
+    erfasst den Status-Code aus der ``http.response.start``-Nachricht und
+    vermeidet den anyio-Stream-Overhead pro Request.
+    """
+
+    def __init__(self, app: ASGIApp) -> None:
+        self.app = app
+
+    async def __call__(self, scope: Scope, receive: Receive, send: Send) -> None:
+        if scope["type"] != "http" or scope["path"] == "/metrics":
+            await self.app(scope, receive, send)
+            return
+
+        method = scope["method"]
+        endpoint = _simplify_path(scope["path"])
+
         http_requests_in_progress.labels(method=method, endpoint=endpoint).inc()
-        
         start_time = time.time()
-        
+        status_code = 500
+
+        async def send_wrapper(message: Message) -> None:
+            nonlocal status_code
+            if message["type"] == "http.response.start":
+                status_code = message["status"]
+            await send(message)
+
         try:
-            response = await call_next(request)
-            status = response.status_code
-            
-            # Track request
-            http_requests_total.labels(
-                method=method,
-                endpoint=endpoint,
-                status=status
-            ).inc()
-            
-            return response
-            
+            await self.app(scope, receive, send_wrapper)
         except Exception:
-            # Track errors
-            http_requests_total.labels(
-                method=method,
-                endpoint=endpoint,
-                status=500
-            ).inc()
+            http_requests_total.labels(method=method, endpoint=endpoint, status=500).inc()
             raise
-            
+        else:
+            http_requests_total.labels(method=method, endpoint=endpoint, status=status_code).inc()
         finally:
             duration = time.time() - start_time
             http_request_duration_seconds.labels(
@@ -102,25 +111,8 @@ class PrometheusMiddleware(BaseHTTPMiddleware):
                 http_slo_latency_violations_total.labels(
                     method=method, endpoint=endpoint
                 ).inc()
-            if "status" in locals() and status >= 500:
+            if status_code >= 500:
                 http_slo_error_violations_total.labels(
                     method=method, endpoint=endpoint
                 ).inc()
-    
-    def _simplify_path(self, path: str) -> str:
-        """Simplify path by replacing UUIDs and IDs with placeholders."""
-        import re
-        
-        # Replace UUIDs
-        path = re.sub(
-            r'[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}',
-            '{id}',
-            path,
-            flags=re.IGNORECASE
-        )
-        
-        # Replace numeric IDs
-        path = re.sub(r'/\d+(/|$)', '/{id}\\1', path)
-        
-        return path
 

@@ -14,9 +14,8 @@ Deckung:
 """
 from __future__ import annotations
 
-from starlette.middleware.base import BaseHTTPMiddleware
-from starlette.requests import Request
-from starlette.responses import Response
+from starlette.datastructures import MutableHeaders
+from starlette.types import ASGIApp, Message, Receive, Scope, Send
 
 from app.core.config import settings
 
@@ -77,38 +76,50 @@ _CSP_DEVELOPMENT = (
 )
 
 
-class SecurityHeadersMiddleware(BaseHTTPMiddleware):
+class SecurityHeadersMiddleware:
     """
-    Starlette-Middleware für HTTP Security Headers.
+    Reine ASGI-Middleware für HTTP Security Headers (PERF-MULTIUSER-001).
 
-    Wird in main.py zwischen GZipMiddleware und PrometheusMiddleware eingebunden.
-    Überschreibt keine vom Endpunkt gesetzten Security-Header (sofern vorhanden).
+    Ersetzt die frühere BaseHTTPMiddleware: injiziert Security-Header direkt
+    in die ``http.response.start``-Nachricht und vermeidet so den anyio-
+    Stream-Overhead pro Request. Überschreibt keine vom Endpunkt bereits
+    gesetzten Security-Header.
     """
 
-    async def dispatch(self, request: Request, call_next) -> Response:
-        response = await call_next(request)
+    def __init__(self, app: ASGIApp) -> None:
+        self.app = app
 
-        # Statische Header immer setzen (sofern nicht schon vorhanden)
-        for header, value in _STATIC_HEADERS.items():
-            if header not in response.headers:
-                response.headers[header] = value
+    async def __call__(self, scope: Scope, receive: Receive, send: Send) -> None:
+        if scope["type"] != "http":
+            await self.app(scope, receive, send)
+            return
 
-        # HSTS: nur in Produktion (HTTPS erzwingen)
-        if not settings.DEBUG:
-            if "Strict-Transport-Security" not in response.headers:
-                response.headers["Strict-Transport-Security"] = _HSTS_HEADER
+        async def send_wrapper(message: Message) -> None:
+            if message["type"] == "http.response.start":
+                headers = MutableHeaders(scope=message)
 
-        # CSP: immer setzen (aber mit unterschiedlichem Inhalt)
-        if "Content-Security-Policy" not in response.headers:
-            response.headers["Content-Security-Policy"] = (
-                _CSP_DEVELOPMENT if settings.DEBUG else _CSP_PRODUCTION
-            )
+                # Statische Header immer setzen (sofern nicht schon vorhanden)
+                for header, value in _STATIC_HEADERS.items():
+                    if header not in headers:
+                        headers[header] = value
 
-        # Server-Header entfernen (Fingerprinting-Schutz) — nur in Produktion
-        if not settings.DEBUG and "server" in response.headers:
-            del response.headers["server"]
+                # HSTS: nur in Produktion (HTTPS erzwingen)
+                if not settings.DEBUG and "Strict-Transport-Security" not in headers:
+                    headers["Strict-Transport-Security"] = _HSTS_HEADER
 
-        return response
+                # CSP: immer setzen (aber mit unterschiedlichem Inhalt)
+                if "Content-Security-Policy" not in headers:
+                    headers["Content-Security-Policy"] = (
+                        _CSP_DEVELOPMENT if settings.DEBUG else _CSP_PRODUCTION
+                    )
+
+                # Server-Header entfernen (Fingerprinting-Schutz) — nur in Produktion
+                if not settings.DEBUG and "server" in headers:
+                    del headers["server"]
+
+            await send(message)
+
+        await self.app(scope, receive, send_wrapper)
 
 
 # ---------------------------------------------------------------------------
