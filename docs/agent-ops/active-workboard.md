@@ -10,7 +10,7 @@
 
 ## DOC-INTERFACES-001 — Schnittstellenhandbuch: OpenAPI + MCP-Tools + Event-Katalog
 
-**Von:** Cursor · **Owner:** Cursor · **Stand:** in Arbeit 2026-06-25 — OpenAPI aus FastAPI generieren (Docs-CI-entkoppelt), MCP-Tool-Referenz aus `config/mcp_erp_tools.yaml` rendern, Event-Katalog kuratieren, Swagger-UI-Einbettung.
+**Von:** Cursor · **Owner:** Cursor · **Stand:** abgeschlossen 2026-06-25 — `scripts/generate_openapi.py` erzeugt `docs/schnittstellen/openapi.json` (2451 Pfade, 8,2 MB, vom Docs-CI entkoppelt); `scripts/generate_mcp_tool_reference.py` rendert `mcp-tools.md` (12 Tools); `rest-api.md` bettet Swagger-UI ein; `events.md` Event-Katalog; Nav erweitert; `mkdocs build` grün.
 **Dateibesitz:** `docs/schnittstellen/{rest-api,mcp-tools,events}.md`, `docs/schnittstellen/openapi.json`, `scripts/generate_openapi.py`, `scripts/generate_mcp_tool_reference.py`, `mkdocs.yml`, `requirements-docs.txt`, `docs/agent-ops/slices/DOC-INTERFACES-001.yaml`
 
 ## DOC-USER-MANUAL-001 — Benutzerhandbuch: Inhalte, Glossar, In-App-Deep-Links

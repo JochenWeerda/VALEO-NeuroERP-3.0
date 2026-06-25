@@ -36,6 +36,7 @@ theme:
 plugins:
   - search:
       lang: de
+  - swagger-ui-tag
 
 markdown_extensions:
   - admonition
@@ -116,7 +117,11 @@ nav:
   - Benutzerhandbuch: benutzerhandbuch/index.md
   - Administration & Betrieb: admin/index.md
   - Entwickler: entwickler/index.md
-  - Schnittstellen: schnittstellen/index.md
+  - Schnittstellen:
+      - Überblick: schnittstellen/index.md
+      - REST-API: schnittstellen/rest-api.md
+      - MCP-Tools: schnittstellen/mcp-tools.md
+      - Event-Katalog: schnittstellen/events.md
   - Agent-Dokumentation: agent-docs/index.md
   - Compliance: compliance/index.md
   - Referenz: referenz/index.md
