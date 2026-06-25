@@ -48,3 +48,30 @@ def test_unvollstaendige_zeile_ist_none():
 def test_called_leer_wird_none():
     evt = parse("17.06.26 09:15:03;RING;5;049417360;;SIP0;")
     assert evt["called"] is None
+
+
+# ── API-Vertrag: /pending-Endpoints liefern Listen ───────────────────────────
+# Regression: response_model war faelschlich dict[str, Any], obwohl die Handler
+# eine Liste zurueckgeben -> FastAPI ResponseValidationError (HTTP 500) bei jeder
+# Antwort (auch der leeren Liste). Der Poller im Frontend feuert auf jeder Seite,
+# daher trat der 500er global auf.
+def _list_routes():
+    from typing import get_args, get_origin
+
+    from app.api.v1.endpoints import tapi as tapi_endpoints
+
+    return tapi_endpoints.router.routes, get_origin, get_args
+
+
+def test_pending_endpoint_response_model_is_list():
+    routes, get_origin, _ = _list_routes()
+    pending = [r for r in routes if getattr(r, "path", "").endswith("/tapi/pending")]
+    assert pending, "pending-Route nicht gefunden"
+    assert get_origin(pending[0].response_model) is list
+
+
+def test_dial_pending_endpoint_response_model_is_list():
+    routes, get_origin, _ = _list_routes()
+    dial = [r for r in routes if getattr(r, "path", "").endswith("/tapi/dial/pending")]
+    assert dial, "dial/pending-Route nicht gefunden"
+    assert get_origin(dial[0].response_model) is list
