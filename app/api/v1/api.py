@@ -2150,3 +2150,23 @@ api_router.include_router(wf_cockpit_persist.router, tags=["workflow", "cockpit"
 # HRM-ABWESENHEIT-ANTRAG-001: Abwesenheitsantrag-Workflow
 from app.api.v1.endpoints import hrm_abwesenheit  # noqa: E402
 api_router.include_router(hrm_abwesenheit.router, tags=["hrm", "abwesenheit"])
+
+# PORTAL-PREISSPIEGEL-001: Getreidekurs-Anzeige
+from app.api.v1.endpoints import portal_preisspiegel  # noqa: E402
+api_router.include_router(portal_preisspiegel.router, tags=["portal", "preisspiegel"])
+
+# PORTAL-INTELLIGENCE-001: Cross-Sell-Empfehlungsengine
+from app.api.v1.endpoints import portal_intelligence  # noqa: E402
+api_router.include_router(portal_intelligence.router, tags=["portal", "intelligence"])
+
+# PORTAL-LOHNDIENST-001: Lohndienstleistungs-Auftraege
+from app.api.v1.endpoints import portal_lohndienst  # noqa: E402
+api_router.include_router(portal_lohndienst.router, tags=["portal", "lohndienste"])
+
+# PORTAL-INTERESSENT-001: Interessenten-Onboarding
+from app.api.v1.endpoints import portal_interessent  # noqa: E402
+api_router.include_router(portal_interessent.router, tags=["portal", "interessent"])
+
+# PORTAL-INNENDIENST-001: Innendienst Kunden-Schlagkartei + Potentialanalyse
+from app.api.v1.endpoints import portal_innendienst  # noqa: E402
+api_router.include_router(portal_innendienst.router, tags=["innendienst", "portal"])

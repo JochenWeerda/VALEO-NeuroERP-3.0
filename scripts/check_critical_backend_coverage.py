@@ -145,6 +145,25 @@ CRITICAL_THRESHOLDS: dict[str, float] = {
     # current CI coverage artifact does not include it, so adding it here would
     # create a non-actionable phantom gate instead of a measured baseline.
     "api/v1/endpoints/wf_cockpit_persist.py": 0.48,        #  48.6% measured in CI 2026-06-25
+
+    # ── PORTAL-PREISSPIEGEL-001 (2026-06-25) ─────────────────────────────────
+    "services/portal_preisspiegel_service.py": 0.70,
+    "api/v1/endpoints/portal_preisspiegel.py": 0.52,
+
+    # ── PORTAL-INTELLIGENCE-001 (2026-06-25) ─────────────────────────────────
+    "services/portal_intelligence_service.py": 0.72,
+    "api/v1/endpoints/portal_intelligence.py": 0.50,
+
+    # ── PORTAL-LOHNDIENST-001 (2026-06-25) ───────────────────────────────────
+    "services/portal_lohndienst_service.py": 0.75,
+    "api/v1/endpoints/portal_lohndienst.py": 0.50,
+
+    # ── PORTAL-INTERESSENT-001 (2026-06-25) ──────────────────────────────────
+    "services/portal_interessent_service.py": 0.78,
+    "api/v1/endpoints/portal_interessent.py": 0.50,
+
+    # ── PORTAL-INNENDIENST-001 (2026-06-25) ──────────────────────────────────
+    "api/v1/endpoints/portal_innendienst.py": 0.43,
 }
 
 
