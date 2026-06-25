@@ -96,6 +96,7 @@
   ,{ "path": "workflow/leitstand", "module": "@/pages/workflow/leitstand" }
   ,{ "path": "portal/preisspiegel", "module": "@/pages/portal/preisspiegel" }
   ,{ "path": "portal/empfehlungen", "module": "@/pages/portal/empfehlungen" }
+  ,{ "path": "portal/whatsapp-simulator", "module": "@/pages/portal/whatsapp-simulator" }
   ,{ "path": "portal/lohndienste", "module": "@/pages/portal/lohndienste" }
   ,{ "path": "portal/lohndienste/neu", "module": "@/pages/portal/lohndienste" }
   ,{ "path": "portal/onboarding", "module": "@/pages/portal/onboarding" }

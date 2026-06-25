@@ -1,0 +1,63 @@
+slice_id: WA-AGENT-001
+title: "WhatsApp Bestellkanal mit Test-Webhook-Simulator"
+owner: Claude Sonnet 4.6
+status: completed
+created_at: "2026-06-25"
+goal: >-
+  Eingehende WhatsApp-Textnachrichten von Landwirten werden per LLM zu
+  Bestelldetails verarbeitet und automatisch als Sales Order im ERP angelegt.
+  Bestätigung (👍 + Auftragsnummer) geht zurück. Bei unklaren Details max.
+  1 Rückfrage. Produktions-Webhook (Meta Cloud API) und Dev-Simulator
+  (ohne Meta-Auth) sind getrennte Endpunkte.
+
+file_ownership:
+  - app/services/whatsapp_agent_service.py
+  - app/api/v1/endpoints/whatsapp_webhook.py
+  - packages/frontend-web/src/pages/portal/whatsapp-simulator.tsx
+  - docs/agent-ops/slices/WA-AGENT-001.yaml
+
+acceptance_criteria:
+  - POST /api/v1/whatsapp/dev/simulate verarbeitet Textnachricht und gibt reply zurück
+  - Bekannte Demo-Telefonnummer wird zu Kundennummer aufgelöst
+  - Vollständige Bestellung (Artikel + Menge) löst Auftragsanlage aus (👍-Bestätigung)
+  - Unvollständige Bestellung löst Rückfrage aus
+  - LLM-Fallback auf regex-Extraktion wenn ANTHROPIC_API_KEY nicht gesetzt
+  - GET /api/v1/whatsapp/webhook (Hub-Verifikation) antwortet mit hub.challenge
+  - Dev-Simulator UI erreichbar unter /portal/whatsapp-simulator
+
+checks:
+  - pytest tests/test_whatsapp_agent.py -q --no-cov
+
+ai_harness:
+  fachlicher_vertrag: >-
+    WhatsApp-Nachricht → Kundenzuordnung → Bestellextraktion → Auftragsanlage ODER Rückfrage.
+    Prozesskette endet mit Auftragsbestätigung (ID sichtbar). Kein Loop über 1 Rückfrage hinaus.
+  architektur_vertrag: >-
+    Tenant-isolierter In-Memory-Kontext (_CONV_STORE). Kein Datenbankschema geändert.
+    LLM via direktem anthropic-Client (ANTHROPIC_API_KEY). Regex-Fallback wenn kein API-Key.
+    FastAPI-Router in app/api/v1/api.py registriert (prefix=/whatsapp).
+  daten_vertrag: >-
+    Gesprächskontext nur im RAM (kein Log personenbezogener Nachrichten).
+    Demo-Telefon-Mapping hardcoded für Simulator. Prod: DB-Lookup.
+  test_vertrag: >-
+    Unit-Tests ohne LLM (ANTHROPIC_API_KEY nicht gesetzt → Regex-Fallback).
+    Tests prüfen Extraktion, Merge-Logik, Bestätigung, Rückfrage, Unbekannte-Nummer-Pfad.
+  security_vertrag: >-
+    Produktions-Webhook validiert X-Hub-Signature-256 (HMAC-SHA256, WHATSAPP_APP_SECRET).
+    Dev-Simulator /dev/* ohne Auth (nur für lokale Entwicklung).
+    Hub-Verify-Token konfigurierbar via WHATSAPP_VERIFY_TOKEN.
+  betriebs_vertrag: >-
+    Env-Vars: ANTHROPIC_API_KEY, WHATSAPP_AGENT_MODEL (default claude-haiku-4-5-20251001),
+    WHATSAPP_APP_SECRET, WHATSAPP_VERIFY_TOKEN.
+    In-Memory-Store: kein Persistenz-Restart-Verlust-Risiko in Produktion unkritisch
+    (Konversation max. 2 Turns).
+  dokumentations_vertrag: >-
+    Slice-YAML + Workboard-Eintrag.
+
+follow_up_slices:
+  - WA-NOTIFY-001: Ausgehende Push-Nachrichten (Lieferankündigung 1h vor Ankunft, Dokument-Ready)
+  - PORTAL-SHOP-001: Online-Shop Betriebsmittel (Saatgut, Dünger, PSM)
+
+risks: >-
+  In-Memory-Kontext geht bei App-Restart verloren — bei >1 Worker (Gunicorn) nicht shared.
+  Lösung für Produktion: Redis-Backend für _CONV_STORE (WA-NOTIFY-001 Scope).

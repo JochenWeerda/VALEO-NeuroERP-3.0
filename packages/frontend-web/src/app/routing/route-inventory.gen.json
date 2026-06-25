@@ -441,6 +441,16 @@
       "source": "navigation"
     },
     {
+      "module": "@/pages/agrar/kunden-schlagkartei",
+      "path": "agrar/kunden-schlagkartei",
+      "source": "navigation"
+    },
+    {
+      "module": "@/pages/agrar/kunden-schlagkartei",
+      "path": "agrar/kunden-schlagkartei/:kunden_nr",
+      "source": "navigation"
+    },
+    {
       "module": "@/pages/agrar/maschinenauslastung",
       "path": "agrar/maschinenauslastung",
       "source": "auto"
@@ -1449,6 +1459,11 @@
       "module": "@/pages/crm/opportunity-detail",
       "path": "crm/opportunity/new",
       "source": "alias"
+    },
+    {
+      "module": "@/pages/crm/potential-analyse",
+      "path": "crm/potential-analyse",
+      "source": "navigation"
     },
     {
       "module": "@/pages/crm/segment-detail",
@@ -2816,6 +2831,11 @@
       "source": "auto"
     },
     {
+      "module": "@/pages/hilfe",
+      "path": "hilfe",
+      "source": "alias"
+    },
+    {
       "module": "@/pages/inbox/index",
       "path": "inbox",
       "source": "auto"
@@ -3311,9 +3331,24 @@
       "source": "auto"
     },
     {
+      "module": "@/pages/portal/empfehlungen",
+      "path": "portal/empfehlungen",
+      "source": "navigation"
+    },
+    {
       "module": "@/pages/portal/feldbuch",
       "path": "portal/feldbuch",
       "source": "auto"
+    },
+    {
+      "module": "@/pages/portal/lohndienste",
+      "path": "portal/lohndienste",
+      "source": "navigation"
+    },
+    {
+      "module": "@/pages/portal/lohndienste",
+      "path": "portal/lohndienste/neu",
+      "source": "navigation"
     },
     {
       "module": "@/pages/portal/naehrstoffbilanzen",
@@ -3321,9 +3356,19 @@
       "source": "auto"
     },
     {
+      "module": "@/pages/portal/onboarding",
+      "path": "portal/onboarding",
+      "source": "navigation"
+    },
+    {
       "module": "@/pages/portal/index",
       "path": "portal/portal",
       "source": "alias"
+    },
+    {
+      "module": "@/pages/portal/preisspiegel",
+      "path": "portal/preisspiegel",
+      "source": "navigation"
     },
     {
       "module": "@/pages/portal/index",
@@ -3349,6 +3394,11 @@
       "module": "@/pages/portal/vertraege",
       "path": "portal/vertraege",
       "source": "auto"
+    },
+    {
+      "module": "@/pages/portal/whatsapp-simulator",
+      "path": "portal/whatsapp-simulator",
+      "source": "navigation"
     },
     {
       "module": "@/pages/portal/zertifikate",
@@ -4487,6 +4537,7 @@
     "hash",
     "id",
     "invoiceId",
+    "kunden_nr",
     "number",
     "poId",
     "rfqId",
