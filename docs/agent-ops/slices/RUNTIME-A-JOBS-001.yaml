@@ -1,0 +1,24 @@
+slice_id: RUNTIME-A-JOBS-001
+title: Runtime Sweep Kategorie A - domain_shared jobs Tabellen absichern
+owner: Codex
+status: reserved
+coordination: >-
+  Eng begrenzter Shared-Platform-Slice. Keine Aenderungen an Inventory-,
+  Admin-Mobile- oder Frontend-Dateien; dadurch kollisionsarm zu parallelen
+  Inventory/Admin-Agenten.
+goal: >-
+  /api/v1/jobs gegen UndefinedTable absichern: idempotente Repair-Migration fuer
+  domain_shared.jobs und domain_shared.job_artifacts am aktuellen Alembic-Head,
+  plus Runtime-Degradation/Tests fuer Listenpfade.
+file_ownership:
+  - alembic/versions/job_runner_tables_repair_20260625.py
+  - app/api/v1/endpoints/job_runner.py
+  - tests/test_runtime_sweep_category_a_jobs.py
+  - docs/project-context/open-gaps-and-known-issues.md
+acceptance_criteria:
+  - alembic heads bleibt single-head
+  - Repair-Migration ist idempotent und legt keine Runtime-DDL in Endpoints an
+  - GET /api/v1/jobs degradiert bei fehlender Tabelle auf leere Liste statt 500
+  - pytest fuer fokussierte Runtime-/Migrationsvertraege gruen
+risks:
+  - Produktive Datenbank muss Migration tatsaechlich ausrollen; bis dahin bleiben Schreibpfade fail-closed.

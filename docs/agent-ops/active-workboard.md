@@ -4431,3 +4431,10 @@ Archiv des vorherigen Boards:
 **Stand:** abgeschlossen 2026-06-25 — 54 Unit-Tests grün; DI-Override-Pattern etabliert; harvest_acceptance/articles/kontrakte/sales_orders-HTTP-Pfade + Service-Fehlerbehandlung abgedeckt.
 **Ziel:** Gesamt-Coverage 64,85 % → 70 %; neue Unit-Tests fuer die vier schwächsten kritischen Endpoint-Dateien (harvest_acceptance 24 %, articles 23 %, kontrakte 27 %, sales_orders 38 %); Ratchet-Schwellen angehoben.
 **Dateibesitz:** `tests/test_coverage_ratchet_erp_core_001.py`, `docs/agent-ops/slices/COVERAGE-RATCHET-ERP-CORE-001.yaml`, `scripts/check_critical_backend_coverage.py`
+
+## RUNTIME-A-JOBS-001 - Runtime Sweep Kategorie A: Job-Runner-Tabellen
+
+**Owner:** Codex
+**Stand:** reserviert 2026-06-25 - schliesst den Category-A-UndefinedTable-Pfad `/api/v1/jobs` ohne Inventory-/Admin-Dateibesitz.
+**Ziel:** `domain_shared.jobs` und `domain_shared.job_artifacts` per idempotenter Repair-Migration am aktuellen Alembic-Head absichern; Job-Listenpfad bei fehlender Migration kontrolliert leer degradieren.
+**Dateibesitz:** `alembic/versions/job_runner_tables_repair_20260625.py`, `app/api/v1/endpoints/job_runner.py`, `tests/test_runtime_sweep_category_a_jobs.py`, `docs/project-context/open-gaps-and-known-issues.md`, `docs/agent-ops/slices/RUNTIME-A-JOBS-001.yaml`.
