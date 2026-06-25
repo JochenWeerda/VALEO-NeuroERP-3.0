@@ -21,7 +21,7 @@ def _svc(
     return SiloRuleEngineService(db=db, tenant_id=x_tenant_id)
 
 
-@router.get("/zielzellen-vorschlag", summary="Zielzellen-Vorschlag fuer Einlagerung")
+@router.get("/zielzellen-vorschlag", response_model=dict[str, Any], summary="Zielzellen-Vorschlag fuer Einlagerung")
 def zielzellen_vorschlag(
     artikel_id: str = Query(..., description="Artikel-ID / Material-Nr"),
     menge_kg: float = Query(..., gt=0, description="Einzulagernde Menge in kg"),
@@ -49,7 +49,11 @@ def zielzellen_vorschlag(
     }
 
 
-@router.get("/zielzellen-vorschlag/lot/{lot_id}", summary="Zielzellen-Vorschlag direkt aus Lot")
+@router.get(
+    "/zielzellen-vorschlag/lot/{lot_id}",
+    response_model=dict[str, Any],
+    summary="Zielzellen-Vorschlag direkt aus Lot",
+)
 def zielzellen_vorschlag_lot(
     lot_id: str,
     menge_kg: float | None = Query(None, gt=0),
