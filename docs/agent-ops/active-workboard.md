@@ -30,7 +30,7 @@
 
 ## DOC-GOVERNANCE-001 — Doku-Governance: CODEOWNERS, Link-/Staleness-Check, Changelog, Release-Versionierung
 
-**Von:** Cursor · **Owner:** Cursor · **Stand:** abgeschlossen 2026-06-25 — `.github/CODEOWNERS`, `scripts/docs-staleness-check.cjs` (+ nicht-blockierender CI-Step), `.github/workflows/docs-release.yml` (mike), `CHANGELOG.md` (Keep a Changelog), `docs/dokumentation/governance.md`; `mkdocs build` grün. Offenes externes Gate: GitHub-Pages-Aktivierung (gh-pages) für produktiven mike-Deploy.
+**Von:** Cursor · **Owner:** Cursor · **Stand:** abgeschlossen 2026-06-25 — `.github/CODEOWNERS` (auf realen Owner @JochenWeerda), `scripts/docs-staleness-check.cjs` (+ nicht-blockierender CI-Step), `.github/workflows/docs-release.yml` (mike), `CHANGELOG.md`, `docs/dokumentation/governance.md`; `mkdocs build` grün. **Externes Gate erledigt:** mike-Deploy auf `gh-pages` gepusht, GitHub Pages aktiv → Live-Site https://jochenweerda.github.io/VALEO-NeuroERP-3.0/ (Build „built", HTTP 200). Begleitend: `WMS-FLOW-001.yaml` (Fremd-Slice) auf Pflichtschema gebracht; Screenshot-Infrastruktur (`benutzerhandbuch/img/`) + Verfahren angelegt (Live-Aufnahme blockiert durch fehlende OIDC-Test-Credentials).
 **Dateibesitz:** `.github/CODEOWNERS`, `.github/workflows/docs.yml`, `.github/workflows/docs-release.yml`, `scripts/docs-staleness-check.cjs`, `CHANGELOG.md`, `docs/dokumentation/governance.md`, `docs/agent-ops/slices/DOC-GOVERNANCE-001.yaml`
 
 ## DOC-MIGRATION-001 — Doku-Migration: Altbestaende archivieren und einordnen
