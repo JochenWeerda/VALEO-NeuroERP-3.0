@@ -50,6 +50,11 @@ acceptance_criteria:
   - requirements-docs.txt pinnt mkdocs-material + mike.
   - CI-Workflow baut die Doku bei PRs (mkdocs build).
   - Lokaler Build (mkdocs build) laeuft ohne Fehler durch.
+acceptance:
+  - mkdocs.yml mit Material-Theme (de), kuratierter Navigation und lenienter Validierung vorhanden.
+  - Diataxis-Taxonomie als Verzeichnisse mit Einstiegsseiten angelegt.
+  - Frontmatter-Standard dokumentiert und CI-Build fuer die kuratierte Site vorhanden.
+  - Lokaler Build (mkdocs build) laeuft ohne Fehler durch.
 tests:
   - python -m mkdocs build --site-dir site_check
   - node scripts/docs-governance-check.cjs docs/agent-ops/slices/DOC-FOUNDATION-001.yaml
