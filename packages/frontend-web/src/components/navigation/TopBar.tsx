@@ -3,7 +3,8 @@ import { clsx } from 'clsx'
 import { Link } from '@/app/routing/typed-router'
 import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/button'
-import { Command as CommandIcon, Check, HelpCircle, Home, Keyboard, LogOut, Menu, Moon, PanelLeft, Search, Settings, Sparkles, Sun, User } from 'lucide-react'
+import { BookOpen, Command as CommandIcon, Check, HelpCircle, Home, Keyboard, LogOut, Menu, Moon, PanelLeft, Search, Settings, Sparkles, Sun, User } from 'lucide-react'
+import { openDocs, openHelp } from '@/lib/docs-help'
 import { useFeature } from '@/hooks/useFeature'
 import { useTheme } from '@/hooks/useTheme'
 import { availableLanguages, loadLanguage } from '@/i18n/config'
@@ -282,7 +283,14 @@ export function TopBar({
         {isDark ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
       </Button>
 
-      <Button variant="ghost" size="icon" title="Hilfe" className="hidden lg:inline-flex">
+      <Button
+        variant="ghost"
+        size="icon"
+        title="Hilfe & Handbuch (kontextbezogen)"
+        aria-label="Hilfe öffnen"
+        className="hidden lg:inline-flex"
+        onClick={() => openHelp()}
+      >
         <HelpCircle className="h-5 w-5" />
         <span className="sr-only">Hilfe</span>
       </Button>
@@ -311,6 +319,18 @@ export function TopBar({
             <button type="button" className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-sm hover:bg-accent">
               <Settings className="h-4 w-4" />
               <span>Einstellungen</span>
+            </button>
+            <div className="my-1 h-px bg-border" />
+            <button
+              type="button"
+              className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-sm hover:bg-accent"
+              onClick={() => {
+                setUserMenuOpen(false)
+                openDocs()
+              }}
+            >
+              <BookOpen className="h-4 w-4" />
+              <span>Dokumentation</span>
             </button>
             <div className="my-1 h-px bg-border" />
             <button type="button" className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-sm text-destructive hover:bg-accent">
