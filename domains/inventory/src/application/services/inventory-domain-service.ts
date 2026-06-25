@@ -354,7 +354,7 @@ export class InventoryDomainService {
                 if (k) return k;
         }
         if (partOfName) {
-            const rgx = new RegExp(partOfName, 'igg'); // r//--ignore-case ( play along )-
+            const rgx = new RegExp(partOfName, 'ig'); // r//--ignore-case ( play along )-
             const k = arrayOfP.find(p=>rgx.test(p.name));
             if (k) return k;
         }
