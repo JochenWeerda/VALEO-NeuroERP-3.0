@@ -1,10 +1,10 @@
 import { Suspense, lazy, useEffect, useState, useCallback, useRef } from 'react'
 import { clsx } from 'clsx'
-import { Link } from '@/app/routing/typed-router'
+import { Link, useNavigate } from '@/app/routing/typed-router'
 import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/button'
 import { BookOpen, Command as CommandIcon, Check, HelpCircle, Home, Keyboard, LogOut, Menu, Moon, PanelLeft, Search, Settings, Sparkles, Sun, User } from 'lucide-react'
-import { openDocs, openHelp } from '@/lib/docs-help'
+import { HELP_ROUTE, getEmbeddedHelpHref } from '@/lib/docs-help'
 import { useFeature } from '@/hooks/useFeature'
 import { useTheme } from '@/hooks/useTheme'
 import { availableLanguages, loadLanguage } from '@/i18n/config'
@@ -153,6 +153,7 @@ export function TopBar({
   onShortcutsToggle,
 }: TopBarProps): JSX.Element {
   const { isDark, toggleTheme } = useTheme()
+  const navigate = useNavigate()
   const voiceControlEnabled = useFeature('voiceControl')
   const [userMenuOpen, setUserMenuOpen] = useState(false)
   const userMenuRef = useRef<HTMLDivElement>(null)
@@ -289,7 +290,7 @@ export function TopBar({
         title="Hilfe & Handbuch (kontextbezogen)"
         aria-label="Hilfe öffnen"
         className="hidden lg:inline-flex"
-        onClick={() => openHelp()}
+        onClick={() => navigate(getEmbeddedHelpHref(window.location.pathname))}
       >
         <HelpCircle className="h-5 w-5" />
         <span className="sr-only">Hilfe</span>
@@ -326,7 +327,7 @@ export function TopBar({
               className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-sm hover:bg-accent"
               onClick={() => {
                 setUserMenuOpen(false)
-                openDocs()
+                navigate(HELP_ROUTE)
               }}
             >
               <BookOpen className="h-4 w-4" />
