@@ -4362,3 +4362,15 @@ Archiv des vorherigen Boards:
 **Stand:** abgeschlossen 2026-06-15 — `genossenschaft.create_anteilsbewegung`: nach Mitglieder-Saldo-Update wird GL-Buchung via `FinanceTransactionService` erzeugt (Zeichnung: Bank/Kapital; Rückzahlung: Kapital/Verbindlichkeiten-Mitglieder) (fail-soft).
 **Ziel:** Belegbruch schließen: Genossenschafts-Anteilsbewegung aktualisierte Mitgliedersaldo aber erzeugte keinen FiBu-Buchungssatz.
 **Dateibesitz:** `app/api/v1/endpoints/genossenschaft.py`.
+
+## WF-COCKPIT-PERSIST-001 — Workflow-Cockpit Persistenz
+
+**Owner:** dev
+**Stand:** abgeschlossen 2026-06-25 — DB-Persistenz fuer Workflow-Cockpit-Instanzen, Events und Blocker plus NATS-Projector.
+**Dateibesitz:** `app/services/wf_cockpit_persist_service.py`, `app/services/wf_cockpit_nats_projector.py`, `app/api/v1/endpoints/wf_cockpit_persist.py`.
+
+## WM-SILO-RULE-ENGINE-001 — Silo Zielzellen-Regelengine
+
+**Owner:** dev
+**Stand:** abgeschlossen 2026-06-25 — regelbasierte Zielzellen-Vorschlaege fuer Artikel-/Lot-basierte Agrar-Einlagerung.
+**Dateibesitz:** `app/services/silo_rule_engine_service.py`, `app/api/v1/endpoints/silo_target_cell.py`.
