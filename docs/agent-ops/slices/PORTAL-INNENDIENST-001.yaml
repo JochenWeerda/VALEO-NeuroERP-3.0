@@ -1,0 +1,39 @@
+﻿slice_id: PORTAL-INNENDIENST-001
+title: "Innendienst Kunden-Schlagkartei und Potentialanalyse"
+domain: portal
+status: done
+claimed_by: claude-sonnet-4-6
+owner: claude-sonnet-4-6
+claimed_at: "2026-06-25"
+closed_at: "2026-06-25"
+goal: >-
+  Innendienst liest Kundenschlaege fuer Auftragsvororbereitung; Aussendienst sieht Cross-Sell-Luecken
+file_ownership:
+      - app/api/v1/endpoints/portal_innendienst.py
+      - packages/frontend-web/src/pages/agrar/kunden-schlagkartei.tsx
+      - packages/frontend-web/src/pages/crm/potential-analyse.tsx
+      - app/api/v1/api.py
+      - scripts/check_critical_backend_coverage.py
+      - tests/test_portal_services.py
+acceptance:
+  - API-Endpunkte liefern korrekte Antworten mit Tenant-Isolation.
+  - Service-Logik durch Unit-Tests abgedeckt.
+  - Frontend-Seite zeigt echte API-Daten.
+tests:
+  - pytest -q -o addopts= tests/test_portal_services.py
+ai_harness:
+  fachlicher_vertrag: >-
+    Landwirtschaftliches Kundenportal erhaelt vollstaendige Marktpreis-,
+    Cross-Sell-, Lohndienst- und Onboarding-Funktionalitaet.
+  architektur_vertrag: >-
+    Thin-Router plus Service-Layer; Routen in navigation-routes.json registriert.
+  daten_vertrag: >-
+    Tenant-isolierte In-Memory-Stores; Produktiv-Migration zu domain_portal-Tabellen geplant.
+  test_vertrag: >-
+    Unit-Tests decken Lifecycle, Validierungen und Tenant-Isolation ab.
+  security_vertrag: >-
+    Kein Cross-Tenant-Datenzugriff; X-Tenant-ID Header Pflicht.
+  betriebs_vertrag: >-
+    Laeuft ohne externe Datenfeeds; Preise manuell gepflegt bis Boersenschnittstelle integriert.
+  dokumentations_vertrag: >-
+    Slice-YAML und Workboard dokumentieren Dateibesitz, Tests und Roadmap.

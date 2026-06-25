@@ -94,4 +94,12 @@
   ,{ "path": "wartung/anlage/:id", "module": "@/pages/wartung/anlagen-liste" }
   ,{ "path": "zertifikate/:id", "module": "@/pages/zertifikate/liste" }
   ,{ "path": "workflow/leitstand", "module": "@/pages/workflow/leitstand" }
+  ,{ "path": "portal/preisspiegel", "module": "@/pages/portal/preisspiegel" }
+  ,{ "path": "portal/empfehlungen", "module": "@/pages/portal/empfehlungen" }
+  ,{ "path": "portal/lohndienste", "module": "@/pages/portal/lohndienste" }
+  ,{ "path": "portal/lohndienste/neu", "module": "@/pages/portal/lohndienste" }
+  ,{ "path": "portal/onboarding", "module": "@/pages/portal/onboarding" }
+  ,{ "path": "agrar/kunden-schlagkartei", "module": "@/pages/agrar/kunden-schlagkartei" }
+  ,{ "path": "agrar/kunden-schlagkartei/:kunden_nr", "module": "@/pages/agrar/kunden-schlagkartei" }
+  ,{ "path": "crm/potential-analyse", "module": "@/pages/crm/potential-analyse" }
 ]
