@@ -4,7 +4,7 @@
 
 **Von:** Cursor
 **Owner:** Cursor
-**Stand:** in Arbeit 2026-06-25 — Hotpath-Analyse abgeschlossen (6× BaseHTTPMiddleware + 2× Funktions-Middleware identifiziert); Umbau Prometheus/Correlation/SecurityHeaders/Audit auf reine ASGI-Middleware + Per-Request-Logging auf Slow/Fehler reduzieren; Micro-Benchmark vorher/nachher.
+**Stand:** abgeschlossen 2026-06-25 — alle 6 Middleware (Prometheus, Correlation, SecurityHeaders, Audit, Bearer-Auth, Request-Logging) von BaseHTTPMiddleware auf reine ASGI umgestellt; Per-Request-Logging auf Slow-Requests (>1s) + Fehler reduziert; Micro-Benchmark: Stack-Overhead von ~82 ms/Req auf <0,3 ms/Req (RPS GET 334→795); Tests grün (test_middleware_asgi 6/6, Auth/Tenant/Security 75/75). DB-Pool bewusst unveraendert (bereits passend dimensioniert).
 **Ziel:** Latenz/CPU pro Request unter Multi-User-Last senken, ohne Auth-, Tenant-, Audit- oder Security-Header-Semantik zu aendern.
 **Dateibesitz:** `app/middleware/metrics.py`, `app/middleware/correlation.py`, `app/middleware/security_headers.py`, `app/middleware/audit_middleware.py`, `main.py`, `scripts/benchmark_middleware_stack.py`, `tests/test_middleware_asgi.py`, `docs/agent-ops/slices/PERF-MULTIUSER-001.yaml`, `docs/workflows/perf-multiuser-001-middleware-asgi-2026-06-25.md`
 

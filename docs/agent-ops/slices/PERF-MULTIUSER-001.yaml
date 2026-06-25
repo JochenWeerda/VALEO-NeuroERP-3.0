@@ -1,7 +1,7 @@
 slice_id: PERF-MULTIUSER-001
 title: "Multi-User-Performance: Middleware-Stack auf pure ASGI + Request-Logging entschlacken"
 owner: Cursor
-status: in arbeit
+status: completed
 created_at: 2026-06-25
 coordination: >-
   Optimiert ausschliesslich den HTTP-Request-Hotpath (Middleware + Logging) in

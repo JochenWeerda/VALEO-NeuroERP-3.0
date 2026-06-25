@@ -261,83 +261,120 @@ app.add_middleware(SecurityHeadersMiddleware)
 from app.middleware.audit_middleware import AuditMiddleware
 app.add_middleware(AuditMiddleware)
 
-# Authentication middleware
-@app.middleware("http")
-async def enforce_bearer_token(request: Request, call_next):
+# ── PERF-MULTIUSER-001 ────────────────────────────────────────────────────
+# Authentication + Request-Logging als reine ASGI-Middleware (vorher
+# BaseHTTPMiddleware via @app.middleware("http")). BaseHTTPMiddleware verursacht
+# unter Multi-User-Last erheblichen anyio-Stream-Overhead (~80ms/Request bei 32
+# parallelen Requests gemessen); pure ASGI-Middleware vermeidet das.
+from starlette.datastructures import MutableHeaders
+
+
+def _apply_cors_headers(response: JSONResponse, request: Request) -> None:
+    """CORS-Header auf eine früh erzeugte Fehler-/Preflight-Antwort setzen."""
+    origin = request.headers.get("origin")
+    allow_all = settings.DEBUG or not settings.BACKEND_CORS_ORIGINS
+    if origin and (allow_all or origin in [str(o) for o in settings.BACKEND_CORS_ORIGINS]):
+        response.headers["Access-Control-Allow-Origin"] = origin
+        response.headers["Access-Control-Allow-Credentials"] = "true"
+        response.headers["Access-Control-Allow-Methods"] = "*"
+        response.headers["Access-Control-Allow-Headers"] = "*"
+
+
+class BearerAuthMiddleware:
+    """Erzwingt Bearer-Token-Auth und setzt den Tenant-Kontext (pure ASGI)."""
+
+    def __init__(self, app):
+        self.app = app
+
+    async def __call__(self, scope, receive, send):
+        if scope["type"] != "http":
+            await self.app(scope, receive, send)
+            return
+
+        request = Request(scope, receive)
+
+        # OPTIONS (CORS-Preflight) ohne Auth beantworten
+        if request.method == "OPTIONS":
+            response = JSONResponse(status_code=200, content={})
+            _apply_cors_headers(response, request)
+            await response(scope, receive, send)
+            return
+
+        try:
+            await require_bearer_token(request)
+        except HTTPException as exc:
+            response = JSONResponse(status_code=exc.status_code, content={"detail": exc.detail})
+            _apply_cors_headers(response, request)
+            await response(scope, receive, send)
+            return
+
+        header_tenant = (request.headers.get("X-Tenant-ID") or "").strip()
+        claims = getattr(request.state, "token_claims", {}) or {}
+        token_tenant = str(claims.get("tenant_id") or claims.get("tid") or "").strip()
+        resolved_tenant = header_tenant or token_tenant or settings.DEFAULT_TENANT_ID
+
+        token = set_current_tenant_id(resolved_tenant)
+        request.state.tenant_id = resolved_tenant
+
+        async def send_wrapper(message):
+            if message["type"] == "http.response.start":
+                MutableHeaders(scope=message)["X-Tenant-ID"] = resolved_tenant
+            await send(message)
+
+        try:
+            await self.app(scope, receive, send_wrapper)
+        finally:
+            reset_current_tenant_id(token)
+
+
+class RequestLoggingMiddleware:
+    """Loggt nur langsame Requests (> Schwelle) und Fehler (pure ASGI).
+
+    Pro-Request-Volllogging entfällt — Prometheus erfasst Durchsatz/Latenz
+    bereits. Das vermeidet unter Multi-User-Last Log-Flut + PII-Redaction-CPU.
     """
-    Enforce bearer-token authentication for protected API routes.
-    """
-    # Handle OPTIONS requests (CORS preflight) - skip auth and add CORS headers
-    if request.method == "OPTIONS":
-        response = JSONResponse(status_code=200, content={})
-        origin = request.headers.get("origin")
-        allow_all = settings.DEBUG or not settings.BACKEND_CORS_ORIGINS
-        if origin and (allow_all or origin in [str(o) for o in settings.BACKEND_CORS_ORIGINS]):
-            response.headers["Access-Control-Allow-Origin"] = origin
-            response.headers["Access-Control-Allow-Credentials"] = "true"
-            response.headers["Access-Control-Allow-Methods"] = "*"
-            response.headers["Access-Control-Allow-Headers"] = "*"
-        return response
 
-    try:
-        await require_bearer_token(request)
-    except HTTPException as exc:
-        # Return error response with CORS headers
-        response = JSONResponse(status_code=exc.status_code, content={"detail": exc.detail})
-        origin = request.headers.get("origin")
-        allow_all = settings.DEBUG or not settings.BACKEND_CORS_ORIGINS
-        if origin and (allow_all or origin in [str(o) for o in settings.BACKEND_CORS_ORIGINS]):
-            response.headers["Access-Control-Allow-Origin"] = origin
-            response.headers["Access-Control-Allow-Credentials"] = "true"
-            response.headers["Access-Control-Allow-Methods"] = "*"
-            response.headers["Access-Control-Allow-Headers"] = "*"
-        return response
-    header_tenant = (request.headers.get("X-Tenant-ID") or "").strip()
-    claims = getattr(request.state, "token_claims", {}) or {}
-    token_tenant = str(claims.get("tenant_id") or claims.get("tid") or "").strip()
-    resolved_tenant = header_tenant or token_tenant or settings.DEFAULT_TENANT_ID
+    def __init__(self, app, slow_threshold_s: float = 1.0):
+        self.app = app
+        self.slow_threshold_s = slow_threshold_s
 
-    token = set_current_tenant_id(resolved_tenant)
-    request.state.tenant_id = resolved_tenant
-    try:
-        response = await call_next(request)
-    finally:
-        reset_current_tenant_id(token)
+    async def __call__(self, scope, receive, send):
+        if scope["type"] != "http":
+            await self.app(scope, receive, send)
+            return
 
-    response.headers["X-Tenant-ID"] = resolved_tenant
-    return response
+        start_time = time.time()
+        method = scope["method"]
+        path = scope["path"]
+        status_code = 500
 
-# Request logging middleware
-@app.middleware("http")
-async def log_requests(request: Request, call_next):
-    """Log all HTTP requests"""
-    start_time = time.time()
+        async def send_wrapper(message):
+            nonlocal status_code
+            if message["type"] == "http.response.start":
+                status_code = message["status"]
+            await send(message)
 
-    # Log request
-    logger.info(f"{request.method} {request.url} - {request.client.host if request.client else 'unknown'}")
+        try:
+            await self.app(scope, receive, send_wrapper)
+        except Exception as exc:
+            process_time = time.time() - start_time
+            logger.error("%s %s failed in %.2fs: %s", method, path, process_time, exc)
+            raise
 
-    try:
-        response = await call_next(request)
         process_time = time.time() - start_time
-        logger.info(
-            "%s %s completed in %.2fs with status %s",
-            request.method,
-            request.url.path,
-            process_time,
-            response.status_code,
-        )
-        return response
+        if process_time >= self.slow_threshold_s or status_code >= 500:
+            logger.warning(
+                "%s %s -> %s in %.2fs",
+                method,
+                path,
+                status_code,
+                process_time,
+            )
 
-    except Exception as e:
-        process_time = time.time() - start_time
-        logger.error(
-            "%s %s failed in %.2fs: %s",
-            request.method,
-            request.url.path,
-            process_time,
-            e,
-        )
-        raise
+
+# Reihenfolge wie zuvor: Bearer-Auth innen, Request-Logging außen
+app.add_middleware(BearerAuthMiddleware)
+app.add_middleware(RequestLoggingMiddleware)
 
 # Catch-all for truly unhandled exceptions — RFC 7807 format.
 # Specific handlers (HTTPException, RequestValidationError, DomainError) are
