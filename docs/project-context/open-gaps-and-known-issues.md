@@ -24,13 +24,13 @@ Aggregierte Gesamtsicht: [PROJEKT-GESAMTSTAND-2026-05-27.md](../PROJEKT-GESAMTST
 - **Release-Matrix**: Generator + CI-Upload in `quality-gate.yml` / `release-gates.yml`
 - **OpenAPI-Routen mit `summary=`**: 3041/3041 (100%, Nachzug 2026-06-23; DOM-004/POS/Feed/Meldewesen-Action-Routen mit Summary-Metadaten nachannotiert)
 - **Frontend-Imports**: 0 gebrochene Importe (letzter Nachweis 2026-05-27)
-- **Alembic**: 1 Head (`meldewesen_lifecycle_20260623`) — linear nach DOM-CON/FEED-PROD/POS/DOC/HRM/MEL-004-Welle (2026-06-23)
+- **Alembic**: 1 Head (`external_mock_sessions_20260623`) — linear nach EXTERNAL-MOCK-HARNESS-001 (2026-06-25; vorher `meldewesen_lifecycle_20260623`)
 - **DOM-*-004-Tiefenwelle (2026-06-11/12)**: ~90 neue reine Logik-Unit-Tests gruen; 5 Live-UAT-Skripte (`scripts/uat/{con_contract,sales_o2c,fin_op,doc_nachweisraum,proc_match}_lifecycle_uat.py`, `--execute` mit DB-Restore); Frontend `tsc 0` + ESLint clean je Slice
 - **Docker-Erstinstallation**: Alembic-Bootstrap und Mehr-Domaenen-Struktur auf leerer DB abgesichert
 - **Service-Layer**: Hauptwellen refaktoriert; Legacy-Endpunkte `harvest_acceptance.py`, `agrar_settlements.py` und `docflow.py` repo-seitig mit dedizierten Services nachgezogen (Stand 2026-05-21)
 - **Backend-Security**: Globale Bearer-Token-Auth, RFC-7807 Problem-Details, 62 Endpoints mit nosec-S608-Annotierungen (Wave 22 Backend-Security, Commits `4ab228f92` + `732d84376`); CI-Gate `scripts/check_sql_fstrings.py` aktiv. Nachzug 2026-06-23: neun neue SQL-f-string-Funde aus DOM-004/POS/Feed/Meldewesen-Slices wurden review-markiert, weil die dynamischen SQL-Fragmente ausschliesslich aus festen Feldlisten stammen und Werte parametrisiert bleiben.
 - **Agrar-Partie-Erstinstallation**: Nachzug 2026-06-23: DOM-AGRAR-004 Partie-Aggregation liest Ernteannahmen jetzt aus der kanonischen Tabelle `domain_inventory.harvest_acceptances` und leitet Brutto-/Netto-/QS-Werte ueber `domain_inventory.weighing_tickets` ab. Der vorherige Zugriff auf `domain_agrar.harvest_acceptances` fuehrte in frischen CI-Smoke-Datenbanken zu 503 statt fachlichem 422 bei Dummy-Annahmen.
-- **Tenant-Isolation**: CI-Gate eingezogen (Wave-A3 Commit `c106f74e8`)
+- **Tenant-Isolation**: CI-Gate eingezogen (Wave-A3 Commit `c106f74e8`); Nachzug 2026-06-25: Dev-only External-Mock-Harness und read-only MCP-Toolkatalog explizit als systemische Endpunkte ohne Tenant-DB-Daten klassifiziert.
 - **E2E-Tests Wave 18–22 + W11**: 23/23 grün (Integrations-Gate Commit `97c41d479`)
 
 ---
