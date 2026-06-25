@@ -122,6 +122,8 @@ async def list_cases(
         )
     except httpx.HTTPStatusError as exc:
         raise HTTPException(status_code=exc.response.status_code, detail=exc.response.text) from exc
+    except (httpx.RequestError, RuntimeError):
+        cases, total = [], 0
     except Exception as exc:
         raise HTTPException(status_code=500, detail=f"Failed to list cases: {exc}") from exc
 

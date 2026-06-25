@@ -113,8 +113,10 @@ sortiert nach `IntercompanyBuchung.datum` statt nicht existierendem
 falschen Zugriff auf `BelegnummernLuecke.luecken`; `/api/v1/inventory/reports/turnover-analysis`
 liefert bei Null-Umschlag JSON-konformes `turnover_days: null` statt `Infinity`.
 Nachzug 2026-06-25b: `NawaroPrintNotification`-ORM-Modell um die vom Router
-genutzten Tenant-/Druckparameter-/Zeitstempel-Felder ergaenzt. Weiter offen:
-`/api/v1/crm/{activities/, cases/, opportunities/}`,
+genutzten Tenant-/Druckparameter-/Zeitstempel-Felder ergaenzt. Nachzug
+2026-06-25c: CRM-Listenendpunkte `/api/v1/crm/{activities/, cases/, opportunities/}`
+degradieren bei nicht erreichbaren Downstream-CRM-Services auf leere
+PaginatedResponses statt 500. Weiter offen:
 `/api/v1/journal-entries/`, `/api/v1/einkauf/bestellvorschlaege/rohware`
 (InFailedSqlTransaction-Folgefehler).
 

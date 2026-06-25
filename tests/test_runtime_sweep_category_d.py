@@ -1,5 +1,9 @@
 import json
 
+import httpx
+import pytest
+
+from app.api.v1.endpoints import activities, cases, opportunities
 from app.domains.inventory.application.services.replenishment_service import ReplenishmentService
 from app.finance.gobd import BelegnummernLuecke, _count_missing_belegnummern
 from app.infrastructure.models import NawaroPrintNotification
@@ -57,3 +61,42 @@ def test_nawaro_print_notification_model_matches_router_contract():
         "updated_at",
     ]:
         assert hasattr(NawaroPrintNotification, column_name)
+
+
+@pytest.mark.asyncio
+async def test_crm_activity_list_degrades_when_downstream_unreachable(monkeypatch):
+    async def _raise_downstream(**_kwargs):
+        raise httpx.ConnectError("crm-core unavailable")
+
+    monkeypatch.setattr(activities.crm_core_client, "list_activities", _raise_downstream)
+
+    response = await activities.list_activities(skip=0, limit=50)
+
+    assert response.total == 0
+    assert response.items == []
+
+
+@pytest.mark.asyncio
+async def test_crm_case_list_degrades_when_downstream_unreachable(monkeypatch):
+    async def _raise_downstream(**_kwargs):
+        raise httpx.ConnectError("crm-service unavailable")
+
+    monkeypatch.setattr(cases, "crm_list_cases", _raise_downstream)
+
+    response = await cases.list_cases(skip=0, limit=50)
+
+    assert response.total == 0
+    assert response.items == []
+
+
+@pytest.mark.asyncio
+async def test_crm_opportunity_list_degrades_when_downstream_unreachable(monkeypatch):
+    async def _raise_downstream(**_kwargs):
+        raise httpx.ConnectError("crm-sales unavailable")
+
+    monkeypatch.setattr(opportunities, "crm_list_opportunities", _raise_downstream)
+
+    response = await opportunities.list_opportunities(skip=0, limit=50)
+
+    assert response.total == 0
+    assert response.items == []
