@@ -21,7 +21,8 @@ function shouldIgnore(filePath) {
     normalized.startsWith("dist/") ||
     normalized.startsWith("coverage/") ||
     normalized.startsWith("htmlcov/") ||
-    normalized.startsWith("docs/archive/")
+    normalized.startsWith("docs/archive/") ||
+    normalized.startsWith("docs/_internal/")
   );
 }
 

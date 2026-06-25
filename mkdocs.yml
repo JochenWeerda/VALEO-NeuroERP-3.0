@@ -76,6 +76,7 @@ validation:
 exclude_docs: |
   /*.md
   !/index.md
+  /_internal/
   /analysis/
   /api/
   /agent-ops/

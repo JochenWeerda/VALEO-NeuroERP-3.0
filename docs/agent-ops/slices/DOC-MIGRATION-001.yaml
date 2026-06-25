@@ -1,8 +1,9 @@
 slice_id: DOC-MIGRATION-001
 title: "Doku-Migration: Altbestaende archivieren und einordnen"
 owner: Cursor
-status: in arbeit
+status: abgeschlossen
 created_at: 2026-06-25
+completed_at: 2026-06-25
 goal: >-
   Die organisch gewachsenen Altbestaende ordnen: einen internen, nicht
   veroeffentlichten Bereich (docs/_internal/) etablieren, klar historische
@@ -12,7 +13,10 @@ goal: >-
 file_ownership:
   - docs/_internal/README.md
   - docs/_internal/archive/README.md
+  - docs/_internal/archive/**
   - docs/dokumentation/migrationsplan.md
+  - scripts/docs-markdown-check.cjs
+  - scripts/docs-governance-check.cjs
   - mkdocs.yml
   - docs/agent-ops/slices/DOC-MIGRATION-001.yaml
   - docs/agent-ops/active-workboard.md

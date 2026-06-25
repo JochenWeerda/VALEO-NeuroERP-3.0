@@ -35,7 +35,7 @@
 
 ## DOC-MIGRATION-001 — Doku-Migration: Altbestaende archivieren und einordnen
 
-**Von:** Cursor · **Owner:** Cursor · **Stand:** in Arbeit 2026-06-25 — `docs/_internal/` etablieren, klar historische Root-Artefakte nach `docs/_internal/archive/` (git mv), Migrations-Inventar.
+**Von:** Cursor · **Owner:** Cursor · **Stand:** abgeschlossen 2026-06-25 — `docs/_internal/` etabliert (Build- + Check-ausgeschlossen), 34 historische Root-Artefakte per `git mv` nach `docs/_internal/archive/` (Historie erhalten), Migrationsplan mit Kategorien→Bucket; `mkdocs build` grün.
 **Dateibesitz:** `docs/_internal/**`, `docs/dokumentation/migrationsplan.md`, `mkdocs.yml`, `docs/agent-ops/slices/DOC-MIGRATION-001.yaml`
 
 ## PERF-MULTIUSER-001 — Multi-User-Performance: Middleware auf pure ASGI + Logging entschlacken
