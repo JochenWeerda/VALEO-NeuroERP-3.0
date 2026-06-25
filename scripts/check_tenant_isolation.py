@@ -81,6 +81,8 @@ SYSTEM_ENDPOINTS: set[str] = {
     "pos_dsfinvk.py",          # DSFinV-K export; mock/static data
     "sales_shipping_ext.py",   # thin shipping extension; no DB queries
     "prospecting.py",          # AI prospecting; no persistent tenant data
+    "external_mock_harness.py",  # dev-only deterministic external-system mocks; no tenant DB data
+    "mcp_tool_registry.py",    # read-only ERP tool catalog from versioned YAML; no tenant DB data
 }
 
 # Known gaps: model HAS tenant_id but endpoint doesn't filter yet.
