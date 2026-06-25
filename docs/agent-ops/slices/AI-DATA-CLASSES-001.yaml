@@ -1,0 +1,51 @@
+slice_id: AI-DATA-CLASSES-001
+title: "P2.3 — Lokale KI-Datenklassen fuer VALEO NeuroERP"
+owner: ai
+status: completed
+created_at: "2026-06-25"
+goal: >-
+  Verbindliche Klassifizierung aller VALEO-Datenkategorien nach KI-Zugriffsklassen:
+  C0 (oeffentlich) bis C5 (niemals Modellkontext). Service + API fuer
+  Kategorieabfrage und Modell-Erlaubnispruefung.
+file_ownership:
+  - app/services/ai_data_classification_service.py
+  - app/api/v1/endpoints/ai_data_classification.py
+  - tests/test_ai_data_classification.py
+  - docs/agent-ops/slices/AI-DATA-CLASSES-001.yaml
+acceptance:
+  - 12+ Datenkategorien mit Klasse C0-C5 definiert.
+  - TSE, ELSTER, Bankkonto, Passwort sind C5 (niemals Modellkontext).
+  - Personalstamm, Kundenstamm, Kontrakte sind C3 (nur lokal).
+  - check-model gibt fuer C5 immer allowed=false zurueck.
+  - check-model gibt fuer C3 nur bei lokalem Modell allowed=true zurueck.
+tests:
+  - python -m py_compile app/services/ai_data_classification_service.py app/api/v1/endpoints/ai_data_classification.py
+  - pytest -q -o addopts= tests/test_ai_data_classification.py
+risks: >-
+  Klassifizierung muss bei neuen Datenfeldern aktiv gepflegt werden.
+  Rechtsgrundlagen-Texte sind keine Rechtsberatung — juristisches Review empfohlen.
+external_gates:
+  - Juristische Pruefung Datenschutz/Steuergeheimnis (empfohlen, nicht blockierend)
+ai_harness:
+  fachlicher_vertrag: >-
+    Jede VALEO-Datenkategorie ist klassifiziert. Agenten und Entwickler koennen
+    pruefen, ob ein KI-Modell fuer eine Datenkategorie erlaubt ist.
+    C5 wird niemals in Modellkontext gegeben.
+  architektur_vertrag: >-
+    Statische Klassifizierungsregeln als Python-Dataclasses. Kein DB-Zugriff.
+    Singleton ai_data_classification_service. API /ai-data-classes/*.
+  daten_vertrag: >-
+    DataCategoryRule enthaelt: category_id, name, data_class (C0-C5),
+    beispiele, rechtsgrundlage, erlaubte_ki_modelle, verbotene_aktionen,
+    anonymisierung_ausreichend.
+  test_vertrag: >-
+    Tests: list_categories, filter by class, get einzelne Kategorie,
+    check-model fuer C5/C3/C1/C0, summary, data_class_label vorhanden.
+  security_vertrag: >-
+    C5-Regeln sind fail-closed (allowed=false immer). Kein Schreibzugriff.
+    Rechtsgrundlagen sind dokumentiert.
+  betriebs_vertrag: >-
+    API fuer Agenten-Middleware nutzbar. Kann als Pre-Tool-Gate fuer MCP-Tools
+    eingesetzt werden (Datenklasse pruefen vor Tool-Aufruf).
+  dokumentations_vertrag: >-
+    Slice-YAML + Inline-Kommentare mit Rechtsgrundlagen.

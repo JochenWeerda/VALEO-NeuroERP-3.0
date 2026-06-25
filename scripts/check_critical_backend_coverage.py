@@ -116,6 +116,18 @@ CRITICAL_THRESHOLDS: dict[str, float] = {
     # ── OPERATOR-AGENT-001 (2026-06-25) ───────────────────────────────────────
     "services/operator_agent_service.py": 0.85,           #  88% measured
     "api/v1/endpoints/operator_agent.py": 0.50,           #  53% estimated
+
+    # ── P2.1 PROCESS-MAP-001 (2026-06-25) ────────────────────────────────────
+    "services/process_map_service.py": 0.82,              #  85% measured
+    "api/v1/endpoints/process_map.py": 0.50,              #  53% estimated
+
+    # ── P2.2 AI-METRICS-001 (2026-06-25) ─────────────────────────────────────
+    "services/ai_engineering_metrics_service.py": 0.78,   #  81% measured
+    "api/v1/endpoints/ai_engineering_metrics.py": 0.50,   #  53% estimated
+
+    # ── P2.3 AI-DATA-CLASSES-001 (2026-06-25) ────────────────────────────────
+    "services/ai_data_classification_service.py": 0.85,   #  88% measured
+    "api/v1/endpoints/ai_data_classification.py": 0.50,   #  53% estimated
 }
 
 
