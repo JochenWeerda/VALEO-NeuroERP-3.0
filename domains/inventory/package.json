@@ -6,6 +6,7 @@
   "types": "dist/bootstrap.d.ts",
   "scripts": {
     "build": "tsc",
+    "build:ci": "tsc -p tsconfig.ci.json",
     "build:watch": "tsc --watch",
     "start": "node dist/bootstrap.js",
     "dev": "nodemon --exec ts-node src/bootstrap.ts",

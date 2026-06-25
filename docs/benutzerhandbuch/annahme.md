@@ -13,7 +13,7 @@ version: 3.0.0
 So nehmen Sie eine Anlieferung (z. B. Getreide) vollständig an – von der
 LKW-Registrierung bis zur abgeschlossenen Annahme mit Qualitätsdaten.
 
-![Leitstand Rohware-Annahme mit Vorgangslage, Kontext und nächster Aktion](img/annahme-rohware.png)
+![Leitstand Rohware-Annahme mit Vorgangslage, Kontext und nächster Aktion](img/annahme-rohware.webp)
 
 ## Voraussetzungen
 

@@ -57,7 +57,7 @@ jobs:
       - name: Run TypeScript compilation
         run: |
           cd domains/inventory
-          npm run build
+          npm run build:ci
 
       - name: Run unit tests
         run: |
@@ -300,7 +300,7 @@ jobs:
       - name: Build application
         run: |
           cd domains/inventory
-          npm run build
+          npm run build:ci
 
       - name: Build Docker image
         uses: docker/build-push-action@v5

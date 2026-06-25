@@ -4,8 +4,8 @@
  * Warehouse management and inventory operations
  */
 
-import { DIContainer } from '@valeo-neuroerp-3.0/packages/utilities/src/di-container';
-import { Brand } from '@valeo-neuroerp-3.0/packages/data-models/src/branded-types';
+import { DIContainer } from '../../types/di-container';
+import type { Brand } from '../../types/branded-types';
 
 // ===== BRANDED TYPES =====
 export type ProductId = Brand<string, 'ProductId'>;
@@ -269,8 +269,8 @@ export class InventoryDomainService {
                 {
                     id: 'STK-ERP-PACK-01' as StockId,
                     productId: 'EPP_HARDWARE_PACK' as ProductId,
-                    warehouseId: 'WHS-' + Date.now(),
-                    locationId: 'LOC_A_ARYA-423',
+                    warehouseId: ('WHS-' + Date.now()) as WarehouseId,
+                    locationId: 'LOC_A_ARYA-423' as LocationId,
                     quantity: 3,
                     reservedQuantity: 1,
                     availableQuantity: 3,
