@@ -31,19 +31,22 @@ Voraussetzungen → Schritte → Ergebnis → häufige Fehler.
 Screenshots liegen unter `benutzerhandbuch/img/` und werden so eingebunden:
 
 ```markdown
-![Anmeldemaske](img/einstieg-login.png)
+![Dashboard](img/einstieg-dashboard.png)
 ```
 
-**Aufnahme-Verfahren** (erfordert eine laufende, **angemeldete** Oberfläche):
+**Aufnahme-Verfahren** (lokale Dev-/Docker-Umgebung):
 
-1. Frontend starten/öffnen (Docker: `valeo-neuro-erp-frontend`, Port 3000) und
-   mit gültigen Zugangsdaten anmelden.
-2. Zielmaske öffnen und Screenshot erstellen (Browser/UI-Explorer).
-3. Bild als `img/<bereich>-<maske>.png` ablegen und in der jeweiligen How-to
+1. Frontend öffnen (Docker: `valeo-neuro-erp-frontend`, Port 3000).
+2. Dev-Session aktivieren: Im Browser `localStorage.setItem('access_token','dev-token')`
+   setzen und neu laden. Der `AuthService` erzeugt damit einen Mock-Admin und
+   umgeht den OIDC-Login (siehe `src/lib/auth.ts`); das Backend akzeptiert den
+   Wert aus `API_DEV_TOKEN`.
+3. Zielmaske öffnen, **dem ersten Aufruf genügend Zeit geben** (Vite kompiliert
+   Lazy-Chunks on-demand — bis ~20 s), dann Screenshot erstellen.
+4. Bild als `img/<bereich>-<maske>.png` ablegen und in der jeweiligen How-to
    einbinden.
 
-!!! note "Status"
-    Automatisierte Screenshot-Aufnahme ist vorbereitet, aber noch offen: Die
-    Oberfläche benötigt eine authentifizierte Session (OIDC). Sobald
-    Test-Zugangsdaten (`NEUROERP_USER` / `NEUROERP_PASS`) bereitstehen, können
-    die Bilder per Browser-Automation erzeugt und hier abgelegt werden.
+!!! note "Aktueller Stand"
+    Die Kern-Masken sind als Screenshots hinterlegt: Dashboard, Rohware-Annahme,
+    Auftrags-Erfassung, Bestandsübersicht und Hauptbuch. Die Aufnahme erfolgte
+    über die Dev-Token-Session ohne externen OIDC-Provider.

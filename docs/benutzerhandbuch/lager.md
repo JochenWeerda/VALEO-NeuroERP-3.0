@@ -15,6 +15,8 @@ Sie Inventuren durch.
 
 ## Bestand einsehen
 
+![Bestandsübersicht mit Kennzahlen zu Artikeln, Wert, Reichweite und Unterbestand](img/lager-bestandsuebersicht.png)
+
 1. Bereich *Lager* → *Bestände*.
 2. Nach Artikel, Lagerort oder Silozelle filtern.
 3. Detailzeile öffnen für Lots, Mengen und QS-Status.
