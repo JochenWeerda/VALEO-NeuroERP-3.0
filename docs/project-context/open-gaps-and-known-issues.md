@@ -106,11 +106,14 @@ Migrations-/Config-Hinweis: `/api/v1/analytics`, `/api/v1/contracts`,
 fremdwaren-einlagerung}`, `/api/v1/ebilanz/taxonomie-felder`,
 `/api/v1/inventory/warehouses/` (PaginatedResponse).
 
-**D. Code-Bugs (Attribut/Daten):** `/api/v1/finance/intercompany`
-(`IntercompanyBuchung.buchungsdatum` existiert nicht), `/api/gobd/belegnummern`
-(`BelegnummernLuecke.luecken`), `/api/v1/agrar/nawaro/print-notifications`
-(`NawaroPrintNotification.tenant_id`), `/api/v1/inventory/reports/turnover-analysis`
-(NaN/Inf nicht JSON-konform), `/api/v1/crm/{activities/, cases/, opportunities/}`,
+**D. Code-Bugs (Attribut/Daten):** Nachzug 2026-06-25: drei Runtime-5xx
+geschlossen und per Regressionstest abgesichert: `/api/v1/finance/intercompany`
+sortiert nach `IntercompanyBuchung.datum` statt nicht existierendem
+`buchungsdatum`; `/api/gobd/belegnummern` zaehlt Nummernkreisluecken ohne
+falschen Zugriff auf `BelegnummernLuecke.luecken`; `/api/v1/inventory/reports/turnover-analysis`
+liefert bei Null-Umschlag JSON-konformes `turnover_days: null` statt `Infinity`.
+Weiter offen: `/api/v1/agrar/nawaro/print-notifications`
+(`NawaroPrintNotification.tenant_id`), `/api/v1/crm/{activities/, cases/, opportunities/}`,
 `/api/v1/journal-entries/`, `/api/v1/einkauf/bestellvorschlaege/rohware`
 (InFailedSqlTransaction-Folgefehler).
 

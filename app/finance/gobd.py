@@ -402,6 +402,16 @@ class BelegnummernKontrolleResponse(BaseModel):
     status: str
 
 
+def _count_missing_belegnummern(luecken: List[BelegnummernLuecke]) -> int:
+    fehlende_nummern = 0
+    for line_item in luecken:
+        try:
+            fehlende_nummern += int(line_item.bis_nummer) - int(line_item.von_nummer) + 1
+        except (TypeError, ValueError):
+            fehlende_nummern += 1
+    return fehlende_nummern
+
+
 @router.get("/belegnummern")
 async def get_belegnummern_kontrolle(
     belegart: Optional[str] = None,
@@ -457,7 +467,8 @@ async def get_belegnummern_kontrolle(
                 pass
     
     gesamt_belege = len(result)
-    fortlaufend = gesamt_belege - sum(len(line_item.luecken) for line_item in luecken) if luecken else gesamt_belege
+    fehlende_nummern = _count_missing_belegnummern(luecken)
+    fortlaufend = max(0, gesamt_belege - fehlende_nummern) if luecken else gesamt_belege
     status = "ORDNUNGSGEMAESS" if not luecken else "LUCKEN_VORHANDEN"
     
     return BelegnummernKontrolleResponse(
