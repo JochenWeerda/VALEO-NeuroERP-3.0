@@ -123,7 +123,17 @@ nav:
       - Finanzbuchhaltung: benutzerhandbuch/finanzbuchhaltung.md
       - Glossar: benutzerhandbuch/glossar.md
       - In-App-Hilfe: benutzerhandbuch/in-app-hilfe.md
-  - Administration & Betrieb: admin/index.md
+  - Administration & Betrieb:
+      - Überblick: admin/index.md
+      - Mandanten-Administration: admin/mandanten-administration.md
+      - Module & Feature-Flags: admin/module-und-feature-flags.md
+      - RBAC & Rollen: admin/rbac-und-rollen.md
+      - Deployment: admin/deployment.md
+      - Backup & Restore: admin/backup-restore.md
+      - Datenbank-Migrationen: admin/datenbank-migrationen.md
+      - Monitoring & SLO: admin/monitoring-und-slo.md
+      - Incident-Response: admin/incident-response.md
+      - Skalierung & Performance: admin/skalierung-performance.md
   - Entwickler: entwickler/index.md
   - Schnittstellen:
       - Überblick: schnittstellen/index.md

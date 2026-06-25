@@ -1,8 +1,9 @@
 slice_id: DOC-ADMIN-OPS-001
 title: "Administration & Betrieb: Mandanten-Admin- + Betriebshandbuch"
 owner: Cursor
-status: in arbeit
+status: abgeschlossen
 created_at: 2026-06-25
+completed_at: 2026-06-25
 goal: >-
   Das Admin- und Betriebshandbuch fuellen: Mandanten-Administration (Module/
   Feature-Flags, RBAC, Nummernkreise, Stammdaten) und System-/Betriebsfuehrung

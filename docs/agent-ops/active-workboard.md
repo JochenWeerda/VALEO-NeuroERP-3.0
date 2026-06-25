@@ -20,7 +20,7 @@
 
 ## DOC-ADMIN-OPS-001 — Administration & Betrieb: Mandanten-Admin- + Betriebshandbuch
 
-**Von:** Cursor · **Owner:** Cursor · **Stand:** in Arbeit 2026-06-25 — Mandanten-Admin (Module/Flags, RBAC, Nummernkreise) + Betrieb (Deployment, Backup/Restore, Migrationen, Monitoring/SLO, Incident, Skalierung).
+**Von:** Cursor · **Owner:** Cursor · **Stand:** abgeschlossen 2026-06-25 — 9 Seiten: Mandanten-Admin, Module/Flags, RBAC; Deployment, Backup/Restore, DB-Migrationen, Monitoring/SLO, Incident-Response, Skalierung (verweist auf PERF-MULTIUSER-001); Index + Nav; `mkdocs build` grün.
 **Dateibesitz:** `docs/admin/*.md`, `mkdocs.yml`, `docs/agent-ops/slices/DOC-ADMIN-OPS-001.yaml`
 
 ## DOC-AGENT-CATALOG-001 — Agent-Dokumentation: Capability- + Tool-Katalog + Guardrails
