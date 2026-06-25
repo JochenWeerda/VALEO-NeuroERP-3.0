@@ -1,30 +1,31 @@
 # CODEOWNERS — Review-Verantwortung je Bereich.
-# Reihenfolge: spaetere Regeln gewinnen. Platzhalter-Teams bitte an die reale
-# Team-Struktur anpassen (z. B. @valeo-neuroerp/<team>).
+# Reihenfolge: spaetere Regeln gewinnen.
+# Repo-Owner ist aktuell ein Einzel-Account; sobald GitHub-Teams existieren,
+# koennen die Eintraege auf @JochenWeerda/<team> umgestellt werden.
 
 # --- Dokumentation (Docs-as-Code) ------------------------------------------
-/docs/                                   @valeo-neuroerp/docs
-/mkdocs.yml                              @valeo-neuroerp/docs
-/requirements-docs.txt                  @valeo-neuroerp/docs
-/.github/workflows/docs.yml             @valeo-neuroerp/docs
-/.github/workflows/docs-release.yml     @valeo-neuroerp/docs
+/docs/                                   @JochenWeerda
+/mkdocs.yml                              @JochenWeerda
+/requirements-docs.txt                  @JochenWeerda
+/.github/workflows/docs.yml             @JochenWeerda
+/.github/workflows/docs-release.yml     @JochenWeerda
 
 # Fachbereiche der Doku
-/docs/benutzerhandbuch/                 @valeo-neuroerp/product
-/docs/admin/                            @valeo-neuroerp/ops
-/docs/schnittstellen/                   @valeo-neuroerp/backend
-/docs/entwickler/                       @valeo-neuroerp/backend
-/docs/agent-docs/                       @valeo-neuroerp/ai-platform
-/docs/compliance/                       @valeo-neuroerp/compliance
+/docs/benutzerhandbuch/                 @JochenWeerda
+/docs/admin/                            @JochenWeerda
+/docs/schnittstellen/                   @JochenWeerda
+/docs/entwickler/                       @JochenWeerda
+/docs/agent-docs/                        @JochenWeerda
+/docs/compliance/                       @JochenWeerda
 
 # Agent-Ops / Governance
-/docs/agent-ops/                        @valeo-neuroerp/ai-platform
-/AGENTS.md                              @valeo-neuroerp/ai-platform
-/CLAUDE.md                              @valeo-neuroerp/ai-platform
+/docs/agent-ops/                        @JochenWeerda
+/AGENTS.md                              @JochenWeerda
+/CLAUDE.md                              @JochenWeerda
 
 # --- Doku-Toolchain / Generatoren ------------------------------------------
-/scripts/docs-markdown-check.cjs        @valeo-neuroerp/docs
-/scripts/docs-governance-check.cjs      @valeo-neuroerp/docs
-/scripts/docs-staleness-check.cjs       @valeo-neuroerp/docs
-/scripts/generate_openapi.py            @valeo-neuroerp/backend
-/scripts/generate_mcp_tool_reference.py @valeo-neuroerp/ai-platform
+/scripts/docs-markdown-check.cjs        @JochenWeerda
+/scripts/docs-governance-check.cjs      @JochenWeerda
+/scripts/docs-staleness-check.cjs       @JochenWeerda
+/scripts/generate_openapi.py            @JochenWeerda
+/scripts/generate_mcp_tool_reference.py @JochenWeerda
