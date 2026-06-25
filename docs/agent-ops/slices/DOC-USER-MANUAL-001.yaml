@@ -1,0 +1,58 @@
+slice_id: DOC-USER-MANUAL-001
+title: "Benutzerhandbuch: Inhalte, Glossar, In-App-Deep-Links"
+owner: Cursor
+status: in arbeit
+created_at: 2026-06-25
+goal: >-
+  Das Benutzerhandbuch mit aufgabenorientierten Inhalten je Fachdomaene fuellen
+  (Einstieg, Annahme, Verkauf, Lager, FiBu), ein Glossar der
+  Landhandel/Agrar-Fachbegriffe anlegen und das Konzept fuer kontextsensitive
+  In-App-Deep-Links (Routen-IDs -> Doku) festschreiben.
+file_ownership:
+  - docs/benutzerhandbuch/einstieg.md
+  - docs/benutzerhandbuch/annahme.md
+  - docs/benutzerhandbuch/verkauf.md
+  - docs/benutzerhandbuch/lager.md
+  - docs/benutzerhandbuch/finanzbuchhaltung.md
+  - docs/benutzerhandbuch/glossar.md
+  - docs/benutzerhandbuch/in-app-hilfe.md
+  - docs/benutzerhandbuch/index.md
+  - mkdocs.yml
+  - docs/agent-ops/slices/DOC-USER-MANUAL-001.yaml
+  - docs/agent-ops/active-workboard.md
+acceptance:
+  - Einstieg, Annahme, Verkauf, Lager und FiBu sind als aufgabenorientierte How-tos vorhanden.
+  - Glossar mit Landhandel/Agrar-Fachbegriffen ist angelegt.
+  - In-App-Hilfe-Konzept (Deep-Links via Routen-IDs) ist dokumentiert.
+  - Alle Seiten tragen den Frontmatter-Standard und sind in der Navigation verlinkt.
+  - mkdocs build laeuft fehlerfrei.
+tests:
+  - python -m mkdocs build --site-dir site_check
+  - node scripts/docs-markdown-check.cjs docs/benutzerhandbuch/einstieg.md
+  - node scripts/ai-slice-readiness-check.cjs --slice DOC-USER-MANUAL-001
+risks:
+  - "Screenshots fehlen noch; Platzhalter mit klarer Kennzeichnung, Nachpflege ueber UI-Explorer."
+  - "Fachliche Detailtiefe pro Domaene wird iterativ vertieft."
+ai_harness:
+  fachlicher_vertrag: >-
+    Sachbearbeiter:innen finden fuer die haeufigsten Aufgaben eine klare
+    Schritt-fuer-Schritt-Anleitung in deutscher Sprache.
+  architektur_vertrag: >-
+    Diataxis-konform (How-to/Tutorial), gegliedert nach Fachdomaene, verknuepft
+    mit Glossar und (perspektivisch) In-App-Deep-Links.
+  daten_vertrag: >-
+    Keine persistenten Daten. Verweise auf Routen-IDs/Masken als Deep-Link-Anker.
+  test_vertrag: >-
+    Markdown-/Governance-Checks und mkdocs build im CI; Slice-Readiness gruen.
+  security_vertrag: >-
+    Keine echten Mandanten-/Personendaten in Beispielen; nur fiktive Stammdaten.
+  betriebs_vertrag: >-
+    Review je Release; Aktualitaet ueber last_reviewed-Frontmatter steuerbar.
+  dokumentations_vertrag: >-
+    Benutzerhandbuch-Inhalte sind in die Navigation eingebunden und im Workboard
+    referenziert.
+external_gates:
+  - Keine externe Abnahme.
+verification:
+  - python -m mkdocs build --site-dir site_check
+  - node scripts/ai-slice-readiness-check.cjs --slice DOC-USER-MANUAL-001

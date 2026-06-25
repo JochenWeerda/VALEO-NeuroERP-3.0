@@ -8,6 +8,36 @@
 **Ziel:** Wartbares, versioniertes, agententaugliches Doku-System schaffen, ohne bestehende Inhalte zu verschieben.
 **Dateibesitz:** `mkdocs.yml`, `requirements-docs.txt`, `.github/workflows/docs.yml`, `docs/index.md`, `docs/dokumentation/dokumentationskonzept.md`, `docs/dokumentation/frontmatter-standard.md`, `docs/{benutzerhandbuch,admin,entwickler,schnittstellen,agent-docs,compliance,referenz}/index.md`, `docs/agent-ops/slices/DOC-FOUNDATION-001.yaml`
 
+## DOC-INTERFACES-001 — Schnittstellenhandbuch: OpenAPI + MCP-Tools + Event-Katalog
+
+**Von:** Cursor · **Owner:** Cursor · **Stand:** in Arbeit 2026-06-25 — OpenAPI aus FastAPI generieren (Docs-CI-entkoppelt), MCP-Tool-Referenz aus `config/mcp_erp_tools.yaml` rendern, Event-Katalog kuratieren, Swagger-UI-Einbettung.
+**Dateibesitz:** `docs/schnittstellen/{rest-api,mcp-tools,events}.md`, `docs/schnittstellen/openapi.json`, `scripts/generate_openapi.py`, `scripts/generate_mcp_tool_reference.py`, `mkdocs.yml`, `requirements-docs.txt`, `docs/agent-ops/slices/DOC-INTERFACES-001.yaml`
+
+## DOC-USER-MANUAL-001 — Benutzerhandbuch: Inhalte, Glossar, In-App-Deep-Links
+
+**Von:** Cursor · **Owner:** Cursor · **Stand:** in Arbeit 2026-06-25 — aufgabenorientierte How-tos je Domaene (Einstieg, Annahme, Verkauf, Lager, FiBu), Glossar, In-App-Hilfe-Konzept.
+**Dateibesitz:** `docs/benutzerhandbuch/*.md`, `mkdocs.yml`, `docs/agent-ops/slices/DOC-USER-MANUAL-001.yaml`
+
+## DOC-ADMIN-OPS-001 — Administration & Betrieb: Mandanten-Admin- + Betriebshandbuch
+
+**Von:** Cursor · **Owner:** Cursor · **Stand:** in Arbeit 2026-06-25 — Mandanten-Admin (Module/Flags, RBAC, Nummernkreise) + Betrieb (Deployment, Backup/Restore, Migrationen, Monitoring/SLO, Incident, Skalierung).
+**Dateibesitz:** `docs/admin/*.md`, `mkdocs.yml`, `docs/agent-ops/slices/DOC-ADMIN-OPS-001.yaml`
+
+## DOC-AGENT-CATALOG-001 — Agent-Dokumentation: Capability- + Tool-Katalog + Guardrails
+
+**Von:** Cursor · **Owner:** Cursor · **Stand:** in Arbeit 2026-06-25 — Capability-Katalog, MCP-Tool-Katalog (Agent-Sicht), Guardrails (Human-Approval/fail-closed/RBAC), ai_harness-Vertragsmodell.
+**Dateibesitz:** `docs/agent-docs/*.md`, `mkdocs.yml`, `docs/agent-ops/slices/DOC-AGENT-CATALOG-001.yaml`
+
+## DOC-GOVERNANCE-001 — Doku-Governance: CODEOWNERS, Link-/Staleness-Check, Changelog, Release-Versionierung
+
+**Von:** Cursor · **Owner:** Cursor · **Stand:** in Arbeit 2026-06-25 — CODEOWNERS, Staleness-Check (last_reviewed), striktes Build-Gate, CHANGELOG (Keep a Changelog), mike-Release-Workflow.
+**Dateibesitz:** `.github/CODEOWNERS`, `.github/workflows/docs.yml`, `.github/workflows/docs-release.yml`, `scripts/docs-staleness-check.cjs`, `CHANGELOG.md`, `docs/dokumentation/governance.md`, `docs/agent-ops/slices/DOC-GOVERNANCE-001.yaml`
+
+## DOC-MIGRATION-001 — Doku-Migration: Altbestaende archivieren und einordnen
+
+**Von:** Cursor · **Owner:** Cursor · **Stand:** in Arbeit 2026-06-25 — `docs/_internal/` etablieren, klar historische Root-Artefakte nach `docs/_internal/archive/` (git mv), Migrations-Inventar.
+**Dateibesitz:** `docs/_internal/**`, `docs/dokumentation/migrationsplan.md`, `mkdocs.yml`, `docs/agent-ops/slices/DOC-MIGRATION-001.yaml`
+
 ## PERF-MULTIUSER-001 — Multi-User-Performance: Middleware auf pure ASGI + Logging entschlacken
 
 **Von:** Cursor

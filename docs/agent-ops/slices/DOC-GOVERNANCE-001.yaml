@@ -1,0 +1,59 @@
+slice_id: DOC-GOVERNANCE-001
+title: "Doku-Governance: CODEOWNERS, Link-/Staleness-Check, Changelog, Release-Versionierung"
+owner: Cursor
+status: in arbeit
+created_at: 2026-06-25
+goal: >-
+  Die Doku-Pflege absichern: CODEOWNERS je Doku-Bereich, Staleness-Check
+  (last_reviewed-Frontmatter), striktes Doku-Build-Gate inkl. Link-Pruefung,
+  ein nutzerlesbares CHANGELOG (Keep a Changelog) und die Release-Versionierung
+  der Doku-Site mit mike.
+file_ownership:
+  - .github/CODEOWNERS
+  - .github/workflows/docs.yml
+  - .github/workflows/docs-release.yml
+  - scripts/docs-staleness-check.cjs
+  - CHANGELOG.md
+  - docs/dokumentation/governance.md
+  - docs/agent-ops/slices/DOC-GOVERNANCE-001.yaml
+  - docs/agent-ops/active-workboard.md
+acceptance:
+  - CODEOWNERS weist Doku-Bereiche Verantwortlichen zu.
+  - scripts/docs-staleness-check.cjs meldet abgelaufene last_reviewed-Daten.
+  - docs.yml fuehrt zusaetzlich den Staleness-Check aus (nicht-blockierend).
+  - docs-release.yml deployt versionierte Doku mit mike bei Tags.
+  - CHANGELOG.md nach Keep-a-Changelog ist angelegt.
+  - Governance-Seite beschreibt Verantwortlichkeiten, Reviewfrequenz und Release-Snapshots.
+tests:
+  - node scripts/docs-staleness-check.cjs --max-age-days 3650
+  - python -m mkdocs build --site-dir site_check
+  - node scripts/ai-slice-readiness-check.cjs --slice DOC-GOVERNANCE-001
+risks:
+  - "mike-Deploy benoetigt gh-pages/Hosting-Rechte; Workflow ist vorbereitet, Aktivierung erfordert Repo-Settings."
+  - "Staleness-Check startet bewusst nicht-blockierend, um Altbestaende nicht sofort rot zu faerben."
+ai_harness:
+  fachlicher_vertrag: >-
+    Doku bleibt dauerhaft aktuell, verantwortet und auditierbar; Nutzer sehen
+    Aenderungen je Release im Changelog.
+  architektur_vertrag: >-
+    Docs-as-Code-Governance: CODEOWNERS-Review, CI-Gates (Build, Link,
+    Staleness), mike-Versionierung je Release-Tag.
+  daten_vertrag: >-
+    Keine persistenten Daten. Metadaten: last_reviewed je Seite, Versions-Alias
+    je Release.
+  test_vertrag: >-
+    Staleness-Check und mkdocs build im CI; Slice-Readiness gruen.
+  security_vertrag: >-
+    docs-release.yml nutzt nur die fuer Pages noetigen Rechte; keine Secrets im
+    Repo. CODEOWNERS erzwingt Vier-Augen-Prinzip fuer sensible Bereiche.
+  betriebs_vertrag: >-
+    Release-Snapshot je Tag (mike) als revisionssicherer, datierter Doku-Stand;
+    Reviewfrequenz dokumentiert.
+  dokumentations_vertrag: >-
+    Governance-Seite ist Teil der Site und im Workboard referenziert.
+external_gates:
+  - "GitHub Pages/Hosting-Aktivierung (Repo-Settings) fuer produktiven mike-Deploy."
+verification:
+  - node scripts/docs-staleness-check.cjs --max-age-days 3650
+  - python -m mkdocs build --site-dir site_check
+  - node scripts/ai-slice-readiness-check.cjs --slice DOC-GOVERNANCE-001
