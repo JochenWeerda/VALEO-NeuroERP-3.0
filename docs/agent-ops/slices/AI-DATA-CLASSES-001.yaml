@@ -1,5 +1,5 @@
 slice_id: AI-DATA-CLASSES-001
-title: "P2.3 — Lokale KI-Datenklassen fuer VALEO NeuroERP"
+title: "P2.3 â€” Lokale KI-Datenklassen fuer VALEO NeuroERP"
 owner: ai
 status: completed
 created_at: "2026-06-25"
@@ -21,9 +21,9 @@ acceptance:
 tests:
   - python -m py_compile app/services/ai_data_classification_service.py app/api/v1/endpoints/ai_data_classification.py
   - pytest -q -o addopts= tests/test_ai_data_classification.py
-risks: >-
-  Klassifizierung muss bei neuen Datenfeldern aktiv gepflegt werden.
-  Rechtsgrundlagen-Texte sind keine Rechtsberatung — juristisches Review empfohlen.
+risks:
+  - Klassifizierung muss bei neuen Datenfeldern aktiv gepflegt werden.
+  - Rechtsgrundlagen-Texte sind keine Rechtsberatung; juristisches Review empfohlen.
 external_gates:
   - Juristische Pruefung Datenschutz/Steuergeheimnis (empfohlen, nicht blockierend)
 ai_harness:
