@@ -36,6 +36,10 @@ acceptance_criteria:
   - Per-Request-Logging schreibt im Normalfall kein INFO-Doppel-Log mehr; nur Slow-Requests (> Schwelle) und Fehler werden geloggt.
   - Micro-Benchmark belegt geringere Stack-Overhead-Latenz nach dem Umbau (Report im Workflow-Doc).
   - Bestehende Middleware-Tests (Security-Header, Correlation, Tenant-Enforcement, Audit) bleiben gruen.
+acceptance:
+  - ASGI-Middleware ersetzt BaseHTTPMiddleware fuer Prometheus, Correlation, SecurityHeaders und Audit ohne Verhaltensverlust.
+  - Security-Header, Correlation-ID, Prometheus-Metriken und Audit-Logging bleiben fachlich identisch.
+  - Benchmark und Middleware-Tests belegen geringere Hotpath-Latenz und unveraenderte Schutzwirkung.
 tests:
   - python -m py_compile main.py app/middleware/metrics.py app/middleware/correlation.py app/middleware/security_headers.py app/middleware/audit_middleware.py
   - pytest -q -o addopts= tests/test_middleware_asgi.py
