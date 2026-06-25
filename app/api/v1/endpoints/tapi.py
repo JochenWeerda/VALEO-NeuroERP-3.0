@@ -90,7 +90,7 @@ def incoming(body: IncomingIn, db: Session = Depends(get_db), tenant_id: str = D
     return _row(r)
 
 
-@router.get("/pending", response_model=dict[str, Any], summary="Offene (nicht quittierte) Anrufe")
+@router.get("/pending", response_model=list[dict[str, Any]], summary="Offene (nicht quittierte) Anrufe")
 def pending(db: Session = Depends(get_db), tenant_id: str = Depends(get_tenant_id)) -> list[dict[str, Any]]:
     # reviewed-safe: _COLS is a module-owned constant; tenant data is bound.
     rows = db.execute(
@@ -150,7 +150,7 @@ def dial(body: DialIn, db: Session = Depends(get_db), tenant_id: str = Depends(g
     return _row(r)
 
 
-@router.get("/dial/pending", response_model=dict[str, Any], summary="Offene Wahl-Anforderungen (lokale Bridge)")
+@router.get("/dial/pending", response_model=list[dict[str, Any]], summary="Offene Wahl-Anforderungen (lokale Bridge)")
 def dial_pending(db: Session = Depends(get_db), tenant_id: str = Depends(get_tenant_id)) -> list[dict[str, Any]]:
     rows = db.execute(
         text(
