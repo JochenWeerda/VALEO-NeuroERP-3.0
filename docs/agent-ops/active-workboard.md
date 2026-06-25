@@ -1,5 +1,13 @@
 # Active Workboard
 
+## PERF-MULTIUSER-001 — Multi-User-Performance: Middleware auf pure ASGI + Logging entschlacken
+
+**Von:** Cursor
+**Owner:** Cursor
+**Stand:** in Arbeit 2026-06-25 — Hotpath-Analyse abgeschlossen (6× BaseHTTPMiddleware + 2× Funktions-Middleware identifiziert); Umbau Prometheus/Correlation/SecurityHeaders/Audit auf reine ASGI-Middleware + Per-Request-Logging auf Slow/Fehler reduzieren; Micro-Benchmark vorher/nachher.
+**Ziel:** Latenz/CPU pro Request unter Multi-User-Last senken, ohne Auth-, Tenant-, Audit- oder Security-Header-Semantik zu aendern.
+**Dateibesitz:** `app/middleware/metrics.py`, `app/middleware/correlation.py`, `app/middleware/security_headers.py`, `app/middleware/audit_middleware.py`, `main.py`, `scripts/benchmark_middleware_stack.py`, `tests/test_middleware_asgi.py`, `docs/agent-ops/slices/PERF-MULTIUSER-001.yaml`, `docs/workflows/perf-multiuser-001-middleware-asgi-2026-06-25.md`
+
 ## OPERATOR-AGENT-001 — ERP Operator-Agent (Read-Only/Proposal-Modus)
 
 **Von:** Claude Code
