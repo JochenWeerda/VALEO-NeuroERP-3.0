@@ -924,6 +924,10 @@ class PersonalService:
                 {"tenant_id": tid},
             ).mappings().all()
         except Exception:
+            # Optionale Anreicherung (preferences kann fehlen). Rollback ist
+            # zwingend: ohne ihn bleibt die DB-Session im Status "aborted" und
+            # alle Folge-Queries dieses Requests scheitern mit InFailedSqlTransaction.
+            self.db.rollback()
             user_rows = []
 
         absence_rows = self.db.execute(

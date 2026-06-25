@@ -8,7 +8,7 @@ from typing import Optional, List, Literal
 from fastapi import APIRouter, Depends, HTTPException, Query
 from datetime import datetime, timedelta
 from sqlalchemy.orm import Session
-from sqlalchemy import or_, desc
+from sqlalchemy import or_, desc, func, case
 import logging
 import time
 import math
@@ -573,7 +573,7 @@ async def get_psm_stats(
 
     # Count by type
     type_stats = {}
-    types = db.query(PSMModel.mittel_typ, db.func.count(PSMModel.id)).filter(
+    types = db.query(PSMModel.mittel_typ, func.count(PSMModel.id)).filter(
         PSMModel.tenant_id == effective_tenant,
         PSMModel.ist_aktiv == True
     ).group_by(PSMModel.mittel_typ).all()
@@ -584,11 +584,11 @@ async def get_psm_stats(
     # Safety stats
     safety_stats = {}
     safety = db.query(
-        db.func.concat(
-            db.case((PSMModel.bienenschutz == True, "B"), else_=""),
-            db.case((PSMModel.wasserschutz_gebiet == True, "W"), else_="")
+        func.concat(
+            case((PSMModel.bienenschutz == True, "B"), else_=""),
+            case((PSMModel.wasserschutz_gebiet == True, "W"), else_="")
         ),
-        db.func.count(PSMModel.id)
+        func.count(PSMModel.id)
     ).filter(
         PSMModel.tenant_id == effective_tenant,
         PSMModel.ist_aktiv == True
@@ -618,8 +618,8 @@ async def get_psm_stats(
 
     # Stock stats
     stock_stats = db.query(
-        db.func.sum(PSMModel.lagerbestand),
-        db.func.avg(PSMModel.vk_preis)
+        func.sum(PSMModel.lagerbestand),
+        func.avg(PSMModel.vk_preis)
     ).filter(
         PSMModel.tenant_id == effective_tenant,
         PSMModel.ist_aktiv == True
@@ -629,7 +629,7 @@ async def get_psm_stats(
     erklaerung_stats = {}
     erklaerung = db.query(
         PSMModel.erklaerung_landwirt_status,
-        db.func.count(PSMModel.id)
+        func.count(PSMModel.id)
     ).filter(
         PSMModel.tenant_id == effective_tenant,
         PSMModel.ist_aktiv == True,

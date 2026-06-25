@@ -3,7 +3,6 @@ Policy API Router
 FastAPI-Router mit CRUD, Test, Backup/Restore und WebSocket
 """
 
-from __future__ import annotations
 import os
 import shutil
 from pathlib import Path

@@ -41,6 +41,90 @@ Aggregierte Gesamtsicht: [PROJEKT-GESAMTSTAND-2026-05-27.md](../PROJEKT-GESAMTST
 
 ---
 
+## RUNTIME-API-SWEEP-001: Live-Laufzeit-Fehlersweep aller GET-Endpoints (2026-06-25)
+
+**Methode:** Gegen den laufenden Backend-Container (`dev-token`, Tenant
+`00000000-…-001`) wurden alle **1059 parameterlosen GET-Endpoints** aus der
+OpenAPI-Spec live aufgerufen und auf `5xx` geprüft (`tmp_endpoint_sweep.py`,
+nicht eingecheckt). Begleitend Browser-Sweep über UI-Routen.
+
+### Behoben + verifiziert (HTTP 200 nachgewiesen)
+
+- **OpenAPI-/Swagger-Generierung war global defekt (500):** `cached_read_model`
+  (Redis-Cache-Decorator) erbte über `functools.wraps` die `__globals__` des
+  Decorator-Moduls; bei Endpoint-Dateien mit `from __future__ import annotations`
+  konnte FastAPI String-Annotationen (`Optional[bool]` etc.) nicht auflösen →
+  pydantic „TypeAdapter not fully defined" → **gesamte** `/api/v1/openapi.json`,
+  Swagger-UI und Docs-OpenAPI-Seite lieferten 500. Fix: aufgelöste
+  `__signature__` am Wrapper (`app/core/read_model_cache.py`); zusätzlich
+  `from __future__ import annotations` aus `app/auth/router.py` und
+  `app/policy/router.py` entfernt (slowapi-`@limiter.limit`-Wrapper +
+  Body-Modell `LoginBody`). Ergebnis: `openapi.json` 200, **2663 Pfade**.
+- **HR-Planungstabellen fehlten (500 `UndefinedTable`):** Migration
+  `hr_planning_tables_20260625` legt `domain_hr.{employee_time_profiles,
+  calendar_events, payroll_exports, campaign_capacity_plans, field_service_plans,
+  driver_timesheets}` an. Betraf `/api/v1/personal/{calendar-events,
+  payroll-exports, campaign-capacity, field-service-plan, work-plan,
+  stundenzettel}` sowie die Logistik-Seiten Tourenplanung/Frachtbriefe.
+- **Vergiftete DB-Transaktion (500 `InFailedSqlTransaction`):** In
+  `personal_service.get_work_plan_data` schluckte ein `except` einen Fehler der
+  optionalen `domain_shared.users.preferences`-Query ohne `rollback`; alle
+  Folge-Queries scheiterten. Fix: `self.db.rollback()` im `except`.
+- **Agrar-Statistik (500 `'Session' object has no attribute 'func'`):**
+  `db.func.*`/`db.case(...)` statt `func`/`case` aus `sqlalchemy` in
+  `agrar/api/{saatgut,psm,duenger}.py` (+ `psm_proplanta.py`). Betraf
+  `/api/v1/agrar/{saatgut,psm,duenger}/stats/overview`.
+- **WMS response_model dict↔list (500 ResponseValidation):**
+  `agri_silo_material_flow.py` (`silo-systems`, `silo-cells`,
+  `material-flow/nodes`, `material-flow/edges`) und `warehouse_wms.py`
+  (`bins`, `stock-valuation`) gaben Listen zurück, deklarierten aber ein
+  Einzelobjekt; auf `list[...]` korrigiert (gleiche Klasse wie der
+  frühere `tapi`-Bug).
+
+### Verbleibende 5xx (60 Stand 2026-06-25) — kategorisiert, offen
+
+**A. Fehlende DB-Tabellen (500 `UndefinedTable`)** — brauchen Migration
+(teils Inventory-/Admin-Domäne, Eigentümerschaft klären):
+`/api/v1/admin/{api-keys, device-mappings, devices, output-profiles,
+output-templates, report-permissions}`, `/api/v1/admin/mobile/*`
+(connectors, connector-events[/quarantine], mobile-devices, routing-rules,
+scan-profiles, station-devices, stations), `/api/v1/einkauf/lieferscheine[/last]`,
+`/api/v1/inventory/{charge-lineage/, storage-fees/runs}`, `/api/v1/jobs`,
+`/api/v1/crm/opportunities/pipeline` (+ `/api/crm-sales/opportunities/pipeline`).
+
+**B. Bewusste 503 (graceful degradation, kein Bug — by design)** mit
+Migrations-/Config-Hinweis: `/api/v1/analytics`, `/api/v1/contracts`,
+`/api/v1/compliance/{dsgvo/erasure-requests, lksg/*, whistleblower/reports}`,
+`/api/v1/finance/{asset-accounting/*, budgets[/summary]}`,
+`/api/v1/personal/applications`, `/api/v1/channels/whatsapp/webhook`.
+
+**C. Custom Response-Envelope-Validierung (500, Format „N validation errors:")**
+— globaler Middleware-Vertrag (kein blinder Eingriff): `/api/v1/health/health/live`,
+`/api/v1/mcp/policy/list` (+ `/api/mcp/policy/list`), `/api/v1/messages/health`,
+`/api/v1/crm/{bestell-inbox, kaeufergruppe/katalog}`,
+`/api/v1/einkauf/{lieferanten, kontrakte, lager-konten, artikel-lager-parameter,
+fremdwaren-einlagerung}`, `/api/v1/ebilanz/taxonomie-felder`,
+`/api/v1/inventory/warehouses/` (PaginatedResponse).
+
+**D. Code-Bugs (Attribut/Daten):** `/api/v1/finance/intercompany`
+(`IntercompanyBuchung.buchungsdatum` existiert nicht), `/api/gobd/belegnummern`
+(`BelegnummernLuecke.luecken`), `/api/v1/agrar/nawaro/print-notifications`
+(`NawaroPrintNotification.tenant_id`), `/api/v1/inventory/reports/turnover-analysis`
+(NaN/Inf nicht JSON-konform), `/api/v1/crm/{activities/, cases/, opportunities/}`,
+`/api/v1/journal-entries/`, `/api/v1/einkauf/bestellvorschlaege/rohware`
+(InFailedSqlTransaction-Folgefehler).
+
+**E. Fehlende Konfiguration/Datei (500 statt 503):** `/api/v1/mcp/tools[/summary]`
+(`/app/config/mcp_erp_tools.yaml` fehlt — vgl. Slice `MCP-ERP-TOOLS-001`),
+`/api/v1/agrar/psm/proplanta/{list, stats/overview}` (Proplanta nicht konfiguriert).
+
+**F. Feature-Lücke (404, vom Frontend mit `initialData:[]` abgefangen):**
+`GET /api/v1/logistik/frachtbriefe` hat keinen Backend-Endpoint
+(`useFrachtbriefe` in `lib/api/misc-modules.ts`); `/logistik/tours` und
+`/logistik/freight-tariffs` existieren. Kein Crash, nur leere Liste.
+
+---
+
 ## P1 - Verbleibende offene Punkte
 
 ### VALEO-WF-COCKPIT-001: Workflow-Leitstand MVP umgesetzt, UI/Persistenz offen

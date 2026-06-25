@@ -5,6 +5,7 @@ API endpoints for Proplanta PSM data synchronization and queries
 
 from typing import Optional, List, Dict, Any
 from fastapi import APIRouter, Depends, HTTPException, Query, BackgroundTasks
+from sqlalchemy import func
 from sqlalchemy.orm import Session
 import logging
 
@@ -292,7 +293,7 @@ def _perform_psm_import(tenant_id: str, update_existing: bool, db: Session):
                         existing.gefahrenklasse = psm_data.hazard_class
                         existing.kulturen = psm_data.application_areas
                         existing.ist_aktiv = psm_data.status == "approved" and not psm_data.is_expired()
-                        existing.updated_at = db.func.now()
+                        existing.updated_at = func.now()
 
                         updated_count += 1
                         logger.debug(f"Updated PSM: {psm_data.approval_number}")

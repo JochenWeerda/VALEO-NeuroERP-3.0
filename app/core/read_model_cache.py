@@ -49,6 +49,42 @@ def _cache_key(prefix: str, tenant_id: str, **kwargs) -> str:
     return f"rm:{prefix}:{tenant_id}:{suffix}" if suffix else f"rm:{prefix}:{tenant_id}"
 
 
+def _expose_resolved_signature(fn: Callable, wrapper: Callable) -> None:
+    """Give the wrapper an explicit ``__signature__`` with fully resolved type
+    annotations.
+
+    ``functools.wraps`` copies ``fn.__annotations__`` (which are *strings* when
+    the endpoint module uses ``from __future__ import annotations``) but the
+    wrapper keeps *this* module's ``__globals__``. FastAPI resolves those string
+    annotations against ``wrapper.__globals__`` — where names like ``Optional``
+    are not defined — and pydantic then fails with "TypeAdapter ... is not fully
+    defined", breaking OpenAPI schema generation for the whole app.
+
+    Resolving the hints against the original function's globals and exposing them
+    via an explicit ``__signature__`` makes FastAPI read real type objects
+    directly, so no forward-ref evaluation against the wrong globals happens.
+    """
+    import inspect
+    import typing
+
+    try:
+        sig = inspect.signature(fn)
+        hints = typing.get_type_hints(fn, include_extras=True)
+    except Exception as exc:  # pragma: no cover — fall back to default behaviour
+        logger.debug("Signatur-Auflösung für %s fehlgeschlagen: %s", getattr(fn, "__name__", fn), exc)
+        return
+    if not hints:
+        return
+    params = [
+        p.replace(annotation=hints.get(name, p.annotation))
+        for name, p in sig.parameters.items()
+    ]
+    wrapper.__signature__ = sig.replace(
+        parameters=params,
+        return_annotation=hints.get("return", sig.return_annotation),
+    )
+
+
 def cached_read_model(prefix: str, ttl: int = 30):
     """
     Dekorator für synchrone und asynchrone GET-Handler. Cached das Ergebnis in Redis.
@@ -94,6 +130,7 @@ def cached_read_model(prefix: str, ttl: int = 30):
                     except Exception as exc:
                         logger.debug("Cache-write fehlgeschlagen: %s", exc)
                 return result
+            _expose_resolved_signature(fn, async_wrapper)
             return async_wrapper
 
         @wraps(fn)
@@ -116,6 +153,7 @@ def cached_read_model(prefix: str, ttl: int = 30):
                 except Exception as exc:
                     logger.debug("Cache-write fehlgeschlagen: %s", exc)
             return result
+        _expose_resolved_signature(fn, wrapper)
         return wrapper
     return decorator
 
