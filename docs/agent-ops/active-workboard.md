@@ -4382,3 +4382,15 @@ Archiv des vorherigen Boards:
 **Owner:** dev
 **Stand:** abgeschlossen 2026-06-25 — regelbasierte Zielzellen-Vorschlaege fuer Artikel-/Lot-basierte Agrar-Einlagerung.
 **Dateibesitz:** `app/services/silo_rule_engine_service.py`, `app/api/v1/endpoints/silo_target_cell.py`.
+
+## WM-SILO-RULE-UPGRADE-001 — Regelengine-Fallback in Auto-Einlagerung
+
+**Owner:** claude-sonnet-4-6
+**Stand:** abgeschlossen 2026-06-25 — Auto-Einlagerung nutzt die Silo-Zielzellen-Regelengine als Fallback, wenn Legacy-Mapping keine fachlich passende freie Zelle liefert oder QS-Sperren alle Kandidaten ausschliessen.
+**Dateibesitz:** `app/services/agri_lot_link_booking_service.py`, `scripts/check_critical_backend_coverage.py`, `docs/agent-ops/slices/WM-SILO-RULE-UPGRADE-001.yaml`.
+
+## HRM-ABWESENHEIT-ANTRAG-001 — HRM Abwesenheitsantrag-Workflow
+
+**Owner:** claude-sonnet-4-6
+**Stand:** abgeschlossen 2026-06-25 — Antragserstellung, Liste, Detail, Genehmigung, Ablehnung, Rueckzug, Urlaubskonto, Ueberschneidungspruefung, eAU-Pflicht und Tenant-Isolation umgesetzt.
+**Dateibesitz:** `app/services/hrm_abwesenheit_service.py`, `app/api/v1/endpoints/hrm_abwesenheit.py`, `tests/test_hrm_abwesenheit.py`, `app/api/v1/api.py`, `scripts/check_critical_backend_coverage.py`, `docs/agent-ops/slices/HRM-ABWESENHEIT-ANTRAG-001.yaml`.
