@@ -13,6 +13,10 @@ file_ownership:
   - alembic/versions/external_mock_sessions_20260623.py
   - tests/test_external_mock_harness.py
   - docs/agent-ops/slices/EXTERNAL-MOCK-HARNESS-001.yaml
+acceptance:
+  - DATEV-, TSE-, ELSTER-, DMS- und CAMT-Mocks liefern deterministische simulierte Responses.
+  - Jede Mock-Response enthaelt simulated=true und ein Hinweis-Feld gegen Verwechslung mit Echtintegration.
+  - Tests decken alle Mock-Systeme, Determinismus und Pflichtfelder ab.
 tests:
   - python -m py_compile app/services/external_mock_harness_service.py app/api/v1/endpoints/external_mock_harness.py alembic/versions/external_mock_sessions_20260623.py
   - pytest -q -o addopts= tests/test_external_mock_harness.py

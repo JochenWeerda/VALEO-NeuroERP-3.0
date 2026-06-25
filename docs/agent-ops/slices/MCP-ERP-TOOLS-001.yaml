@@ -13,6 +13,10 @@ file_ownership:
   - app/api/v1/endpoints/mcp_tool_registry.py
   - tests/test_mcp_tool_registry.py
   - docs/agent-ops/slices/MCP-ERP-TOOLS-001.yaml
+acceptance:
+  - MCP-Toolkatalog ist aus YAML ladbar und ueber read-only API abrufbar.
+  - Filter nach Domain, Scope und Risiko sowie Detailabruf einzelner Tools funktionieren.
+  - Validierung sichert Pflichtfelder, Schema, Idempotenz und Human-Approval-Regeln.
 tests:
   - python -m py_compile app/services/mcp_tool_registry_service.py app/api/v1/endpoints/mcp_tool_registry.py
   - pytest -q -o addopts= tests/test_mcp_tool_registry.py
