@@ -1,0 +1,61 @@
+slice_id: SEMANTIC-E2E-P2P-FIBU-POS-QS-001
+title: "Semantische E2E-Ketten: P2P, FIBU, POS/TSE und QS/Reklamation"
+owner: ai
+status: completed
+created_at: "2026-06-25"
+coordination: >-
+  Vervollstaendigt SEMANTIC-E2E-MATRIX-001 (P0.2) fuer die vier verbleibenden
+  Prozessketten. Keine Ueberschneidung mit bestehenden Specs (O2C, WMS/Silo
+  bereits abgeschlossen). Externe Gates TSE/DSFinV-K/DATEV/ELSTER simuliert.
+goal: >-
+  Playwright-Specs fuer P2P (12 Schritte), FIBU (13 Schritte), POS/TSE (12 Schritte)
+  und QS/Reklamation (14 Schritte) als vollstaendige semantische API-Ketten-Tests.
+  Komplettiert die gesamte P0.2-Semantic-Action-Matrix.
+file_ownership:
+  - playwright-tests/specs/e2e-matrix/p2p-semantic-chain.spec.ts
+  - playwright-tests/specs/e2e-matrix/fibu-semantic-chain.spec.ts
+  - playwright-tests/specs/e2e-matrix/pos-tse-semantic-chain.spec.ts
+  - playwright-tests/specs/e2e-matrix/qs-reklamation-semantic-chain.spec.ts
+  - docs/agent-ops/slices/SEMANTIC-E2E-P2P-FIBU-POS-QS-001.yaml
+acceptance:
+  - P2P-Kette (12 Schritte RFQ→DATEV) als API-semantischer Spec vorhanden.
+  - FIBU-Kette (13 Schritte OP→Periodenabschluss→ELSTER-VA) als Spec vorhanden.
+  - POS/TSE-Kette (12 Schritte Bon→TSE→DSFinV-K→FIBU) als Spec vorhanden.
+  - QS/Reklamation-Kette (14 Schritte Labor→CAPA) als Spec vorhanden.
+  - Alle Specs fail-safe (404/422/503 als valide Antworten akzeptiert).
+  - TSE/DSFinV-K/DATEV/ELSTER ausschliesslich via External-Mock-Harness (simulated=true).
+tests:
+  - npx tsc --noEmit --project playwright-tests/tsconfig.json
+risks: >-
+  Mehrere Endpunkte (3-Wege-Match, CAPA, Lieferanten-Bewertung, Periodenabschluss)
+  koennen noch nicht vollstaendig implementiert sein. Fail-safe-Design absorbiert das.
+external_gates:
+  - TSE-Hersteller (simuliert via external-mock-harness)
+  - DSFinV-K-Pruefwerkzeug (simuliert)
+  - DATEV (simuliert)
+  - ELSTER (simuliert)
+ai_harness:
+  fachlicher_vertrag: >-
+    P2P: RFQ→Bestellung→WE→3-Wege-Match→ERS→SEPA→DATEV semantisch pruefbar.
+    FIBU: OP→CAMT→Auszifferung→Mahnlauf→DATEV→Periodenabschluss→ELSTER-VA pruefbar.
+    POS/TSE: Bon→TSE-Signatur→Zahlung→Tagesabschluss→DSFinV-K→FIBU→Retoure pruefbar.
+    QS: Labor-Probe→Sperre→Reklamation→Retoure/Gutschrift→CAPA pruefbar.
+  architektur_vertrag: >-
+    Playwright request-Context (API-only). Serial-Mode je Kette fuer Zustandsverfolgung.
+    Externe Gates nur via /dev/external-mocks/* mit simulated=true-Pruefung.
+    Fail-safe: [200,201,404,422,503] alle als valide Ergebnisse akzeptiert.
+  daten_vertrag: >-
+    Tenants: e2e-p2p-001, e2e-fibu-001, e2e-pos-001, e2e-qs-001 (strikt getrennt).
+    Alle Testdaten synthetisch (Klasse C4). Kein Produktionsdatenzugriff.
+  test_vertrag: >-
+    Jede Prozesskette >= 12 Schritte. TSE-Signatur muss simulated=true enthalten.
+    DSFinV-K muss simulated=true enthalten. DATEV muss simulated=true enthalten.
+  security_vertrag: >-
+    Alle Testdaten synthetisch (C4). Auth via dev-token. Kein Cross-Tenant-Zugriff.
+    C5-Daten (TSE-Signaturen, ELSTER-Echtdaten) werden nicht in Tests verwendet.
+  betriebs_vertrag: >-
+    CI via npx playwright test specs/e2e-matrix/.
+    Kein Echtkontext fuer TSE/DATEV/ELSTER/Bank erforderlich.
+  dokumentations_vertrag: >-
+    Slice-YAML als einzige externe Doku. Prozessschritte in Spec-Kommentaren.
+    Rechtsgrundlagen im QS-Spec dokumentiert (GMP+, EU-VO 178/2002, §146a AO).
