@@ -40,7 +40,13 @@ jobs:
       
       - name: Setup Test Environment
         run: |
-          cp .env.uat .env
+          if [ -f .env.uat ]; then
+            cp .env.uat .env
+          elif [ -f .env.example ]; then
+            cp .env.example .env
+          else
+            touch .env
+          fi
           echo "VALEO_TENANT=QA-UAT-01" >> .env
           echo "VALEO_BASE_URL=http://localhost:3000" >> .env
       
