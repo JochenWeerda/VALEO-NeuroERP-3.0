@@ -121,8 +121,10 @@ nav:
       - Einstieg: benutzerhandbuch/einstieg.md
       - Ernteannahme: benutzerhandbuch/annahme.md
       - Verkauf (Auftrag → Rechnung): benutzerhandbuch/verkauf.md
+      - Einkauf: benutzerhandbuch/einkauf.md
       - Lager: benutzerhandbuch/lager.md
       - Finanzbuchhaltung: benutzerhandbuch/finanzbuchhaltung.md
+      - CRM: benutzerhandbuch/crm.md
       - Glossar: benutzerhandbuch/glossar.md
       - In-App-Hilfe: benutzerhandbuch/in-app-hilfe.md
   - Administration & Betrieb:

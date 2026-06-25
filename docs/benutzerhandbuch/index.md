@@ -19,12 +19,12 @@ Voraussetzungen → Schritte → Ergebnis → häufige Fehler.
 - [**Einstieg**](einstieg.md) — Anmeldung, Mandantenwahl, Navigation, Tastatur.
 - [**Annahme**](annahme.md) — LKW-Registrierung, Waage, Qualität, Ernteannahme.
 - [**Verkauf**](verkauf.md) — Auftrag → Lieferschein → Rechnung.
+- [**Einkauf**](einkauf.md) — Bestellung, Wareneingang, 3-Wege-Match.
 - [**Lager**](lager.md) — Bestand, Umlagerung, Inventur, Silo.
 - [**Finanzbuchhaltung**](finanzbuchhaltung.md) — Offene Posten, Mahnwesen, Zahlungen.
+- [**CRM**](crm.md) — Kontakte, Leads, Aktivitäten.
 - [**Glossar**](glossar.md) — Fachbegriffe Landhandel/Agrar.
 - [**In-App-Hilfe**](in-app-hilfe.md) — kontextsensitive Deep-Links.
-
-> Einkauf und CRM folgen als weitere How-tos.
 
 ## Screenshots
 
@@ -51,5 +51,6 @@ eingebunden:
 
 !!! note "Aktueller Stand"
     Die Kern-Masken sind als komprimierte WebP-Screenshots hinterlegt: Dashboard,
-    Rohware-Annahme, Auftrags-Erfassung, Bestandsübersicht und Hauptbuch. Die
-    Aufnahme erfolgte über die Dev-Token-Session ohne externen OIDC-Provider.
+    Rohware-Annahme, Auftrags-Erfassung, Einkauf-Bestellungen, Bestandsübersicht,
+    Hauptbuch und CRM-Kontakte. Die Aufnahme erfolgte über die Dev-Token-Session
+    ohne externen OIDC-Provider.
