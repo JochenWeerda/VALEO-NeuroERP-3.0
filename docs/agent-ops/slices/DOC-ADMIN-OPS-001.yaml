@@ -1,0 +1,63 @@
+slice_id: DOC-ADMIN-OPS-001
+title: "Administration & Betrieb: Mandanten-Admin- + Betriebshandbuch"
+owner: Cursor
+status: in arbeit
+created_at: 2026-06-25
+goal: >-
+  Das Admin- und Betriebshandbuch fuellen: Mandanten-Administration (Module/
+  Feature-Flags, RBAC, Nummernkreise, Stammdaten) und System-/Betriebsfuehrung
+  (Deployment, Backup/Restore, Migrationen, Monitoring/SLO, Incident-Response,
+  Skalierung, Production-Readiness).
+file_ownership:
+  - docs/admin/mandanten-administration.md
+  - docs/admin/module-und-feature-flags.md
+  - docs/admin/rbac-und-rollen.md
+  - docs/admin/deployment.md
+  - docs/admin/backup-restore.md
+  - docs/admin/datenbank-migrationen.md
+  - docs/admin/monitoring-und-slo.md
+  - docs/admin/incident-response.md
+  - docs/admin/skalierung-performance.md
+  - docs/admin/index.md
+  - mkdocs.yml
+  - docs/agent-ops/slices/DOC-ADMIN-OPS-001.yaml
+  - docs/agent-ops/active-workboard.md
+acceptance:
+  - Mandanten-Admin-Themen (Module/Feature-Flags, RBAC, Nummernkreise/Stammdaten) sind dokumentiert.
+  - Betriebsthemen (Deployment, Backup/Restore, Migrationen, Monitoring/SLO, Incident, Skalierung) sind dokumentiert.
+  - Skalierung verweist auf PERF-MULTIUSER-001 (Worker, ASGI-Middleware).
+  - Alle Seiten tragen den Frontmatter-Standard und sind navigierbar.
+  - mkdocs build laeuft fehlerfrei.
+tests:
+  - python -m mkdocs build --site-dir site_check
+  - node scripts/docs-governance-check.cjs docs/admin/deployment.md
+  - node scripts/ai-slice-readiness-check.cjs --slice DOC-ADMIN-OPS-001
+risks:
+  - "Konkrete Deployment-/Secret-Werte werden bewusst nicht dokumentiert (nur Platzhalter/Env-Variablen)."
+  - "Runbooks verweisen teils auf bestehende docs/runbooks und docs/operations (Migration spaeter)."
+ai_harness:
+  fachlicher_vertrag: >-
+    Mandanten-Admins und Betrieb finden klare Anleitungen fuer Konfiguration und
+    sicheren Betrieb des Systems.
+  architektur_vertrag: >-
+    Zweiteilung fachliche Mandanten-Admin vs. technische Betriebsfuehrung;
+    konsistent mit Modul-Registry, RBAC und Middleware-/Monitoring-Stack.
+  daten_vertrag: >-
+    Keine persistenten Daten. Verweise auf Env-Variablen und Konfig-Schluessel
+    (INSTALLED_MODULES, TENANT_MODULE_FLAGS) ohne reale Secrets.
+  test_vertrag: >-
+    Markdown-/Governance-Checks und mkdocs build im CI; Slice-Readiness gruen.
+  security_vertrag: >-
+    Keine Secrets/Zugangsdaten in der Doku; Secret-Handling nur als Verfahren
+    beschrieben. RBAC- und Mandantentrennung als Sicherheitskontrolle erlaeutert.
+  betriebs_vertrag: >-
+    Runbooks fuer Backup/Restore, Migration, Incident und Skalierung sind
+    nachvollziehbar; Review quartalsweise bzw. je Release.
+  dokumentations_vertrag: >-
+    Admin-/Betriebsinhalte sind in die Navigation eingebunden und im Workboard
+    referenziert.
+external_gates:
+  - Keine externe Abnahme.
+verification:
+  - python -m mkdocs build --site-dir site_check
+  - node scripts/ai-slice-readiness-check.cjs --slice DOC-ADMIN-OPS-001
