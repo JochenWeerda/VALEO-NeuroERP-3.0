@@ -2145,3 +2145,8 @@ api_router.include_router(silo_target_cell.router, tags=["silo", "rule-engine"])
 # WF-COCKPIT-PERSIST-001: DB-backed Workflow-Cockpit (Dead-Letter-Sicht)
 from app.api.v1.endpoints import wf_cockpit_persist  # noqa: E402
 api_router.include_router(wf_cockpit_persist.router, tags=["workflow", "cockpit"])
+
+
+# HRM-ABWESENHEIT-ANTRAG-001: Abwesenheitsantrag-Workflow
+from app.api.v1.endpoints import hrm_abwesenheit  # noqa: E402
+api_router.include_router(hrm_abwesenheit.router, tags=["hrm", "abwesenheit"])

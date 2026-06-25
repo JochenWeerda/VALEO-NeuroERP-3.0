@@ -406,12 +406,38 @@ class AgriLotLinkBookingService:
             cell_filter,
         ).fetchall()
 
+        used_rule_engine = False
         if not rows:
+            # Fallback: Regelengine-Vorschlag wenn kein legacy_silo_id-Match vorhanden
+            artikel_id = str(lot_d.get("article_id") or "")
+            if artikel_id:
+                from app.services.silo_rule_engine_service import SiloRuleEngineService  # noqa: PLC0415
+                rule_svc = SiloRuleEngineService(db=self.db, tenant_id=self.tenant_id)
+                vorschlaege = rule_svc.vorschlag(
+                    artikel_id=artikel_id,
+                    menge_kg=float(lot_kg),
+                    warehouse_id=warehouse_id,
+                    max_vorschlaege=1,
+                )
+                if vorschlaege:
+                    best_v = vorschlaege[0]
+                    result = self.book_lot_to_cell(
+                        lot_id=lot_id,
+                        target_cell_id=best_v["cell_id"],
+                        warehouse_id=best_v["warehouse_id"],
+                        quantity_kg=lot_kg,
+                        booked_by=booked_by,
+                    )
+                    result["auto_booked"] = True
+                    result["auto_score"] = 0
+                    result["rule_engine_used"] = True
+                    result["rule_engine_grund"] = best_v.get("grund")
+                    return result
             return {
                 "ok": False,
                 "lot_id": lot_id,
                 "silo_id": silo_id,
-                "reason": "Kein legacy_silo_id-Mapping für Zielzelle gefunden",
+                "reason": "Kein legacy_silo_id-Mapping und keine freie Zelle via Regelengine",
             }
 
         best_cell: dict | None = None
@@ -424,6 +450,31 @@ class AgriLotLinkBookingService:
                 best_cell = cell_d
 
         if best_cell is None:
+            # Zweiter Fallback: Regelengine wenn alle legacy-Kandidaten blockiert
+            artikel_id = str(lot_d.get("article_id") or "")
+            if artikel_id:
+                from app.services.silo_rule_engine_service import SiloRuleEngineService  # noqa: PLC0415
+                rule_svc = SiloRuleEngineService(db=self.db, tenant_id=self.tenant_id)
+                vorschlaege = rule_svc.vorschlag(
+                    artikel_id=artikel_id,
+                    menge_kg=float(lot_kg),
+                    warehouse_id=warehouse_id,
+                    max_vorschlaege=1,
+                )
+                if vorschlaege:
+                    best_v = vorschlaege[0]
+                    result = self.book_lot_to_cell(
+                        lot_id=lot_id,
+                        target_cell_id=best_v["cell_id"],
+                        warehouse_id=best_v["warehouse_id"],
+                        quantity_kg=lot_kg,
+                        booked_by=booked_by,
+                    )
+                    result["auto_booked"] = True
+                    result["auto_score"] = 0
+                    result["rule_engine_used"] = True
+                    result["rule_engine_grund"] = best_v.get("grund")
+                    return result
             return {
                 "ok": False,
                 "lot_id": lot_id,
@@ -440,6 +491,7 @@ class AgriLotLinkBookingService:
         )
         result["auto_booked"] = True
         result["auto_score"] = best_score
+        result["rule_engine_used"] = False
         return result
 
     @staticmethod

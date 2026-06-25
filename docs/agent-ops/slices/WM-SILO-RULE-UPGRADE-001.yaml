@@ -1,0 +1,33 @@
+slice_id: WM-SILO-RULE-UPGRADE-001
+title: "WMS Regelengine-Integration in Auto-Einlagerung"
+domain: wms
+status: done
+claimed_by: claude-sonnet-4-6
+claimed_at: "2026-06-25"
+closed_at: "2026-06-25"
+
+description: |
+  Upgrade des Auto-Buchungsservice (agri_lot_link_booking_service.py):
+  SiloRuleEngineService wird als Fallback eingesetzt, wenn das
+  legacy_silo_id-Mapping keine Zelle liefert (leere rows) oder
+  alle kandidaten QS-gesperrt sind (best_cell=None).
+  Ergebnis enthält rule_engine_used=True/False und grund-Feld.
+
+depends_on:
+  - WM-SILO-RULE-ENGINE-001   # SiloRuleEngineService
+
+contracts:
+  backend:
+    modified_files:
+      - app/services/agri_lot_link_booking_service.py
+      - scripts/check_critical_backend_coverage.py
+    behavior:
+      - "Wenn rows leer: SiloRuleEngineService.vorschlag() mit artikel_id + menge_kg"
+      - "Wenn best_cell None: gleicher Fallback auf Regelengine"
+      - "Erfolg-Pfad: result['rule_engine_used'] = False"
+      - "Regelengine-Pfad: result['rule_engine_used'] = True, rule_engine_grund=grund"
+      - "Kein Match in beiden Systemen: {ok: False, reason: 'Kein ... freie Zelle'}"
+
+coverage_ratchet:
+  - path: services/agri_lot_link_booking_service.py
+    threshold: 0.50

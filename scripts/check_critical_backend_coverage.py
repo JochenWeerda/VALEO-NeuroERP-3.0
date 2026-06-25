@@ -133,6 +133,12 @@ CRITICAL_THRESHOLDS: dict[str, float] = {
     "services/silo_rule_engine_service.py": 0.80,          #  ~82% estimated
     "api/v1/endpoints/silo_target_cell.py": 0.50,          #  ~55% estimated
 
+    # ── WM-SILO-RULE-UPGRADE-001 (2026-06-25) ────────────────────────────────
+    "services/agri_lot_link_booking_service.py": 0.50,     #  ~52% estimated (Regelengine-Fallback)
+
+    # ── HRM-ABWESENHEIT-ANTRAG-001 (2026-06-25) ──────────────────────────────
+    "api/v1/endpoints/hrm_abwesenheit.py": 0.65,           #  ~68% estimated
+
     # ── WF-COCKPIT-PERSIST-001 (2026-06-25) ──────────────────────────────────
     "services/wf_cockpit_persist_service.py": 0.75,        #  ~78% estimated
     "services/wf_cockpit_nats_projector.py": 0.60,         #  ~62% estimated
