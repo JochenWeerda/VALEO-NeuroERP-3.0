@@ -1,0 +1,51 @@
+slice_id: HRM-ABWESENHEIT-ANTRAG-001
+title: "HRM Abwesenheitsantrag-Workflow (Urlaub, Krank, Sonderurlaub)"
+domain: hrm
+status: done
+claimed_by: claude-sonnet-4-6
+claimed_at: "2026-06-25"
+closed_at: "2026-06-25"
+
+description: |
+  Vollständiger Abwesenheitsantrag-Lifecycle für Mitarbeiter:
+  BEANTRAGT → GENEHMIGT | ABGELEHNT | ZURUECKGEZOGEN.
+  Enthält Werktage-Berechnung (Mo–Fr), Überschneidungs-Prüfung,
+  eAU-Pflicht für KRANK-Typ, 30-Tage-Urlaubsanspruch-Default,
+  Urlaubskonto-View und vollständige Tenant-Isolation.
+
+contracts:
+  backend:
+    new_files:
+      - app/services/hrm_abwesenheit_service.py
+      - app/api/v1/endpoints/hrm_abwesenheit.py
+      - tests/test_hrm_abwesenheit.py
+    modified_files:
+      - app/api/v1/api.py
+      - scripts/check_critical_backend_coverage.py
+    endpoints:
+      - "POST   /personal/abwesenheit/antraege           → 201 AntragCreate"
+      - "GET    /personal/abwesenheit/antraege           → {items, count}"
+      - "GET    /personal/abwesenheit/antraege/{id}     → AbwesenheitAntrag"
+      - "POST   /personal/abwesenheit/antraege/{id}/genehmigen"
+      - "POST   /personal/abwesenheit/antraege/{id}/ablehnen"
+      - "POST   /personal/abwesenheit/antraege/{id}/zurueckziehen"
+      - "GET    /personal/abwesenheit/urlaubskonto/{nr}?jahr="
+    status_machine:
+      BEANTRAGT:
+        - GENEHMIGT
+        - ABGELEHNT
+        - ZURUECKGEZOGEN
+      GENEHMIGT: []
+      ABGELEHNT: []
+      ZURUECKGEZOGEN: []
+
+test_coverage:
+  count: 25
+  all_passing: true
+  markers: [unit]
+
+coverage_ratchet:
+  - path: services/hrm_abwesenheit_service.py
+    threshold: 0.78
+  - path: api/v1/endpoints/hrm_abwesenheit.py
+    threshold: 0.65
