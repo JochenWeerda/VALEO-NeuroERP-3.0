@@ -10,6 +10,7 @@ from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel, Field, ConfigDict
+from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
@@ -24,6 +25,13 @@ from app.api.v1.schemas.base import BaseSchema
 
 
 router = APIRouter()
+
+
+def _rollback_safely(db: Session) -> None:
+    try:
+        db.rollback()
+    except Exception:
+        pass
 
 
 # ── Pydantic Models ─────────────────────────────────────────────────────────────
@@ -166,22 +174,26 @@ async def list_jobs(
 ):
     """List jobs (optional status filter)."""
     from sqlalchemy import text
-    if status:
-        rows = db.execute(
-            text(
-                "SELECT id, tenant_id, schedule_id, job_type, status, triggered_at, completed_at, error_message, dry_run, created_at "
-                "FROM domain_shared.jobs WHERE tenant_id = :tid AND status = :s ORDER BY triggered_at DESC LIMIT :lim"
-            ),
-            {"tid": tenant_id, "s": status, "lim": limit}
-        ).fetchall()
-    else:
-        rows = db.execute(
-            text(
-                "SELECT id, tenant_id, schedule_id, job_type, status, triggered_at, completed_at, error_message, dry_run, created_at "
-                "FROM domain_shared.jobs WHERE tenant_id = :tid ORDER BY triggered_at DESC LIMIT :lim"
-            ),
-            {"tid": tenant_id, "lim": limit}
-        ).fetchall()
+    try:
+        if status:
+            rows = db.execute(
+                text(
+                    "SELECT id, tenant_id, schedule_id, job_type, status, triggered_at, completed_at, error_message, dry_run, created_at "
+                    "FROM domain_shared.jobs WHERE tenant_id = :tid AND status = :s ORDER BY triggered_at DESC LIMIT :lim"
+                ),
+                {"tid": tenant_id, "s": status, "lim": limit}
+            ).fetchall()
+        else:
+            rows = db.execute(
+                text(
+                    "SELECT id, tenant_id, schedule_id, job_type, status, triggered_at, completed_at, error_message, dry_run, created_at "
+                    "FROM domain_shared.jobs WHERE tenant_id = :tid ORDER BY triggered_at DESC LIMIT :lim"
+                ),
+                {"tid": tenant_id, "lim": limit}
+            ).fetchall()
+    except SQLAlchemyError:
+        _rollback_safely(db)
+        return []
     return [
         JobOut(
             id=str(r[0]),

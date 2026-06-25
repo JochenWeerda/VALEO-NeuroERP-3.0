@@ -4435,6 +4435,6 @@ Archiv des vorherigen Boards:
 ## RUNTIME-A-JOBS-001 - Runtime Sweep Kategorie A: Job-Runner-Tabellen
 
 **Owner:** Codex
-**Stand:** reserviert 2026-06-25 - schliesst den Category-A-UndefinedTable-Pfad `/api/v1/jobs` ohne Inventory-/Admin-Dateibesitz.
+**Stand:** abgeschlossen 2026-06-25 - `job_runner_tables_repair_20260625` legt `domain_shared.jobs` und `domain_shared.job_artifacts` idempotent am aktuellen Alembic-Head an; `GET /api/v1/jobs` degradiert bei fehlender Tabelle auf `[]` statt 500; fokussierte Runtime-Sweep-Tests 10/10 gruen; Alembic single-head `job_runner_tables_repair_20260625`.
 **Ziel:** `domain_shared.jobs` und `domain_shared.job_artifacts` per idempotenter Repair-Migration am aktuellen Alembic-Head absichern; Job-Listenpfad bei fehlender Migration kontrolliert leer degradieren.
 **Dateibesitz:** `alembic/versions/job_runner_tables_repair_20260625.py`, `app/api/v1/endpoints/job_runner.py`, `tests/test_runtime_sweep_category_a_jobs.py`, `docs/project-context/open-gaps-and-known-issues.md`, `docs/agent-ops/slices/RUNTIME-A-JOBS-001.yaml`.

@@ -1,7 +1,7 @@
 slice_id: RUNTIME-A-JOBS-001
 title: Runtime Sweep Kategorie A - domain_shared jobs Tabellen absichern
 owner: Codex
-status: reserved
+status: completed
 coordination: >-
   Eng begrenzter Shared-Platform-Slice. Keine Aenderungen an Inventory-,
   Admin-Mobile- oder Frontend-Dateien; dadurch kollisionsarm zu parallelen
@@ -22,3 +22,7 @@ acceptance_criteria:
   - pytest fuer fokussierte Runtime-/Migrationsvertraege gruen
 risks:
   - Produktive Datenbank muss Migration tatsaechlich ausrollen; bis dahin bleiben Schreibpfade fail-closed.
+checks:
+  - pytest -q -o addopts= tests/test_runtime_sweep_category_a_jobs.py tests/test_runtime_sweep_category_d.py
+  - python -m py_compile app/api/v1/endpoints/job_runner.py alembic/versions/job_runner_tables_repair_20260625.py
+  - alembic heads
