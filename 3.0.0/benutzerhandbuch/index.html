@@ -10,6 +10,8 @@
       
       
       
+        <link rel="canonical" href="https://jochenweerda.github.io/VALEO-NeuroERP-3.0/3.0.0/benutzerhandbuch/">
+      
       
         <link rel="prev" href="..">
       
@@ -1319,6 +1321,8 @@
       
         
       
+        
+      
     
     
       
@@ -1436,6 +1440,34 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../dokumentation/migrationsplan/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Migrationsplan
+  </span>
+  
+    
+  
+  
+    <span class="md-status md-status--aktiv"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -1478,6 +1510,15 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#screenshots" class="md-nav__link">
+    <span class="md-ellipsis">
+      Screenshots
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -1508,9 +1549,27 @@ Voraussetzungen → Schritte → Ergebnis → häufige Fehler.</p>
 <li><a href="in-app-hilfe/"><strong>In-App-Hilfe</strong></a> — kontextsensitive Deep-Links.</li>
 </ul>
 <blockquote>
-<p>Einkauf und CRM folgen als weitere How-tos. Screenshots werden über den
-UI-Explorer ergänzt.</p>
+<p>Einkauf und CRM folgen als weitere How-tos.</p>
 </blockquote>
+<h2 id="screenshots">Screenshots<a class="headerlink" href="#screenshots" title="Permanent link">&para;</a></h2>
+<p>Screenshots liegen unter <code>benutzerhandbuch/img/</code> und werden so eingebunden:</p>
+<p><code>markdown
+![Anmeldemaske](img/einstieg-login.png)</code></p>
+<p><strong>Aufnahme-Verfahren</strong> (erfordert eine laufende, <strong>angemeldete</strong> Oberfläche):</p>
+<ol>
+<li>Frontend starten/öffnen (Docker: <code>valeo-neuro-erp-frontend</code>, Port 3000) und
+   mit gültigen Zugangsdaten anmelden.</li>
+<li>Zielmaske öffnen und Screenshot erstellen (Browser/UI-Explorer).</li>
+<li>Bild als <code>img/&lt;bereich&gt;-&lt;maske&gt;.png</code> ablegen und in der jeweiligen How-to
+   einbinden.</li>
+</ol>
+<div class="admonition note">
+<p class="admonition-title">Status</p>
+<p>Automatisierte Screenshot-Aufnahme ist vorbereitet, aber noch offen: Die
+Oberfläche benötigt eine authentifizierte Session (OIDC). Sobald
+Test-Zugangsdaten (<code>NEUROERP_USER</code> / <code>NEUROERP_PASS</code>) bereitstehen, können
+die Bilder per Browser-Automation erzeugt und hier abgelegt werden.</p>
+</div>
 
 
 
