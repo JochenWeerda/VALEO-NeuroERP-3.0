@@ -47,7 +47,10 @@ function isYamlFile(filePath) {
 
 function shouldIgnore(filePath) {
   const normalized = normalizeSlashes(filePath);
-  return normalized.startsWith("docs/archive/");
+  return (
+    normalized.startsWith("docs/archive/") ||
+    normalized.startsWith("docs/_internal/")
+  );
 }
 
 function isGovernedStatusFile(filePath) {
