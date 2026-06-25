@@ -1,8 +1,9 @@
 slice_id: DOC-FOUNDATION-001
 title: "Dokumentations-Fundament: MkDocs-Material + Versionierung + Taxonomie"
 owner: Cursor
-status: in arbeit
+status: abgeschlossen
 created_at: 2026-06-25
+completed_at: 2026-06-25
 coordination: >-
   Legt das Doku-System (Generator, Versionierung, Taxonomie, Frontmatter,
   CI-Build) an, ohne bestehende Inhalte zu verschieben. Inhaltliche Befuellung
@@ -33,6 +34,7 @@ file_ownership:
   - .github/workflows/docs.yml
   - scripts/docs-markdown-check.cjs
   - scripts/docs-governance-check.cjs
+  - .gitignore
 not_owned:
   - app/**
   - alembic/**

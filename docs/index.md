@@ -1,0 +1,42 @@
+---
+title: VALEO NeuroERP 3.0 – Dokumentation
+type: explanation
+audience: [endnutzer, tenant-admin, betrieb, entwickler, integrator, ki-agent]
+owner: Cursor
+status: aktiv
+last_reviewed: 2026-06-25
+version: 3.0.0
+---
+
+# VALEO NeuroERP 3.0 – Dokumentation
+
+Willkommen in der zentralen Dokumentation für VALEO NeuroERP 3.0 — das
+Multi-Mandanten-ERP für Agrar-, Landhandels- und Handelsunternehmen.
+
+Diese Site ist nach dem [Diátaxis](https://diataxis.fr/)-Prinzip aufgebaut:
+Lernen (Tutorials), Aufgaben (How-to), Nachschlagen (Reference) und Verstehen
+(Explanation). Grundlage ist das
+[Dokumentationskonzept](dokumentation/dokumentationskonzept.md).
+
+## Wohin möchten Sie?
+
+| Sie sind … | Starten Sie hier |
+|---|---|
+| Sachbearbeiter:in (Annahme, Verkauf, Lager, FiBu) | [Benutzerhandbuch](benutzerhandbuch/index.md) |
+| Mandanten- oder System-Admin | [Administration & Betrieb](admin/index.md) |
+| Entwickler:in | [Entwicklerdokumentation](entwickler/index.md) |
+| Integrator:in / Partner | [Schnittstellen](schnittstellen/index.md) |
+| KI-Agent (Hermes & Co.) | [Agent-Dokumentation](agent-docs/index.md) |
+| Compliance / Audit | [Compliance](compliance/index.md) |
+| Nachschlagen (Masken, Datenmodell, Glossar) | [Referenz](referenz/index.md) |
+
+## Grundlagen
+
+- [Dokumentationskonzept](dokumentation/dokumentationskonzept.md) — Ziele,
+  Beteiligte, Versionierung, Governance.
+- [Frontmatter-Standard](dokumentation/frontmatter-standard.md) — verbindliche
+  Metadaten je Seite.
+
+!!! note "Aufbauphase"
+    Diese Site ist das Fundament (`DOC-FOUNDATION-001`). Die einzelnen Bereiche
+    werden in Folge-Slices inhaltlich befüllt und die Altbestände migriert.

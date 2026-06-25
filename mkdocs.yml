@@ -1,0 +1,125 @@
+site_name: VALEO NeuroERP 3.0 – Dokumentation
+site_description: >-
+  Dokumentation für VALEO NeuroERP 3.0 – Multi-Mandanten-ERP für Agrar,
+  Landhandel und Handel.
+docs_dir: docs
+site_dir: site
+
+theme:
+  name: material
+  language: de
+  features:
+    - navigation.sections
+    - navigation.top
+    - navigation.indexes
+    - navigation.footer
+    - search.suggest
+    - search.highlight
+    - content.code.copy
+    - toc.follow
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: green
+      accent: light green
+      toggle:
+        icon: material/weather-night
+        name: Dunkles Design
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: green
+      accent: light green
+      toggle:
+        icon: material/weather-sunny
+        name: Helles Design
+
+plugins:
+  - search:
+      lang: de
+
+markdown_extensions:
+  - admonition
+  - attr_list
+  - md_in_html
+  - tables
+  - toc:
+      permalink: true
+  - pymdownx.details
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+
+# Validierung bewusst lenient: Altbestaende erzeugen Warnungen, keine Build-Fehler.
+# Striktes Gate folgt nach der Migration (DOC-MIGRATION-001 / DOC-GOVERNANCE-001).
+validation:
+  omitted_files: info
+  absolute_links: ignore
+  unrecognized_links: ignore
+  nav:
+    omitted_files: info
+    not_found: warn
+  links:
+    not_found: warn
+    absolute_links: ignore
+    unrecognized_links: ignore
+
+# Nur die kuratierte Struktur bauen; Altbestaende vom Build ausschliessen.
+# Sie bleiben im Repo erhalten und werden in DOC-MIGRATION-001 schrittweise
+# eingeordnet.
+exclude_docs: |
+  /*.md
+  !/index.md
+  /analysis/
+  /api/
+  /agent-ops/
+  /archive/
+  /cards/
+  /config/
+  /data/
+  /db/
+  /deployment/
+  /design/
+  /hrm-go-live-templates/
+  /integrations/
+  /migration/
+  /operations/
+  /perf/
+  /policies/
+  /project-context/
+  /quality/
+  /quality-assurance/
+  /roadmap/
+  /runbooks/
+  /schemas/
+  /screenshots/
+  /setup/
+  /specs/
+  /standards/
+  /testing/
+  /uat/
+  /user/
+  /valeo-reference/
+  /warehouse/
+  /wiki/
+  /workflows/
+  /architecture/
+  /adr/
+
+nav:
+  - Start: index.md
+  - Benutzerhandbuch: benutzerhandbuch/index.md
+  - Administration & Betrieb: admin/index.md
+  - Entwickler: entwickler/index.md
+  - Schnittstellen: schnittstellen/index.md
+  - Agent-Dokumentation: agent-docs/index.md
+  - Compliance: compliance/index.md
+  - Referenz: referenz/index.md
+  - Grundlagen:
+      - Dokumentationskonzept: dokumentation/dokumentationskonzept.md
+      - Frontmatter-Standard: dokumentation/frontmatter-standard.md
