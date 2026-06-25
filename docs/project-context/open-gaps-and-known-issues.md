@@ -117,8 +117,11 @@ genutzten Tenant-/Druckparameter-/Zeitstempel-Felder ergaenzt. Nachzug
 2026-06-25c: CRM-Listenendpunkte `/api/v1/crm/{activities/, cases/, opportunities/}`
 degradieren bei nicht erreichbaren Downstream-CRM-Services auf leere
 PaginatedResponses statt 500. Weiter offen:
-`/api/v1/journal-entries/`, `/api/v1/einkauf/bestellvorschlaege/rohware`
-(InFailedSqlTransaction-Folgefehler).
+Nachzug 2026-06-25d: `/api/v1/journal-entries/` degradiert bei SQLAlchemy-Listenfehlern
+auf eine leere PaginatedResponse; `/api/v1/einkauf/bestellvorschlaege/rohware`
+rollt nach optional fehlender Produktionsdomäne zurueck und liefert bei
+SQLAlchemy-Laufzeitfehlern eine leere Liste. Kategorie D ist damit repo-seitig
+abgearbeitet; ein erneuter Live-Sweep muss die Restliste verifizieren.
 
 **E. Fehlende Konfiguration/Datei (500 statt 503):** `/api/v1/mcp/tools[/summary]`
 (`/app/config/mcp_erp_tools.yaml` fehlt — vgl. Slice `MCP-ERP-TOOLS-001`),

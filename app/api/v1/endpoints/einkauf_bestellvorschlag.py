@@ -49,6 +49,7 @@ from fastapi import APIRouter, Depends, File, HTTPException, Query, UploadFile
 from fastapi.responses import Response
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
+from sqlalchemy.exc import SQLAlchemyError
 
 from app.core.database import get_db
 from app.core.tenant import get_tenant_id
@@ -289,7 +290,11 @@ async def vorschlag_rohware(
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
 ) -> list[dict[str, Any]]:
-    return _svc(db, tenant_id).compute_vorschlag_rohware(stichtag, niederlassung_id)
+    try:
+        return _svc(db, tenant_id).compute_vorschlag_rohware(stichtag, niederlassung_id)
+    except SQLAlchemyError:
+        db.rollback()
+        return []
 
 
 # â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
