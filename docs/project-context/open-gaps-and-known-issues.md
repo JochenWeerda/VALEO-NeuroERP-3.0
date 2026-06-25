@@ -23,6 +23,7 @@ Aggregierte Gesamtsicht: [PROJEKT-GESAMTSTAND-2026-05-27.md](../PROJEKT-GESAMTST
 - **Toolchain-Pins**: `scripts/check_toolchain_pins.py` gruen (pytest-cov/coverage repo-weit fixiert)
 - **Release-Matrix**: Generator + CI-Upload in `quality-gate.yml` / `release-gates.yml`
 - **OpenAPI-Routen mit `summary=`**: 3041/3041 (100%, Nachzug 2026-06-23; DOM-004/POS/Feed/Meldewesen-Action-Routen mit Summary-Metadaten nachannotiert)
+- **Response-Model-Coverage**: Nachzug 2026-06-25: External-Mock-Harness-Routen tragen `response_model` gate-kompatibel vor Summary-Texten mit Klammern; verhindert False-Negative im Regex-basierten CI-Check.
 - **Frontend-Imports**: 0 gebrochene Importe (letzter Nachweis 2026-05-27)
 - **Alembic**: 1 Head (`external_mock_sessions_20260623`) — linear nach EXTERNAL-MOCK-HARNESS-001 (2026-06-25; vorher `meldewesen_lifecycle_20260623`)
 - **DOM-*-004-Tiefenwelle (2026-06-11/12)**: ~90 neue reine Logik-Unit-Tests gruen; 5 Live-UAT-Skripte (`scripts/uat/{con_contract,sales_o2c,fin_op,doc_nachweisraum,proc_match}_lifecycle_uat.py`, `--execute` mit DB-Restore); Frontend `tsc 0` + ESLint clean je Slice
