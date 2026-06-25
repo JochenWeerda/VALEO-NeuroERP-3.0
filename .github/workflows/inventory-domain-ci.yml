@@ -42,12 +42,12 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
-          cache-dependency-path: domains/inventory/package-lock.json
+          cache-dependency-path: domains/inventory/package.json
 
       - name: Install dependencies
         run: |
           cd domains/inventory
-          npm ci
+          if [ -f package-lock.json ]; then npm ci; else npm install; fi
 
       - name: Run linting
         run: |
@@ -142,7 +142,7 @@ jobs:
       - name: Install dependencies
         run: |
           cd domains/inventory
-          npm ci
+          if [ -f package-lock.json ]; then npm ci; else npm install; fi
 
       - name: Run npm audit
         run: |
@@ -279,12 +279,12 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
-          cache-dependency-path: domains/inventory/package-lock.json
+          cache-dependency-path: domains/inventory/package.json
 
       - name: Install dependencies
         run: |
           cd domains/inventory
-          npm ci
+          if [ -f package-lock.json ]; then npm ci; else npm install; fi
 
       - name: Run full test suite
         run: |
