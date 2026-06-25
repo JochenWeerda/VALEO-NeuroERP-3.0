@@ -1,5 +1,29 @@
 # Active Workboard
 
+## COMPAT-GOV-MATRIX-SYNC-20260625 — Alembic-Head + Coverage-Ratchet Nachzug
+
+**Von:** Claude Code
+**Owner:** Claude Code
+**Stand:** in Arbeit 2026-06-25
+**Ziel:** Governance-Doku auf Head `external_mock_sessions_20260623` bringen; Coverage-Ratchet um neue Services (mcp_tool_registry, external_mock_harness) erweitern.
+**Dateibesitz:** `docs/project-context/open-gaps-and-known-issues.md`, `docs/architecture/process-kernel/STATUS.md`, `scripts/check_critical_backend_coverage.py`
+
+## OPERATOR-AGENT-001 — ERP Operator-Agent (Read-Only/Proposal-Modus)
+
+**Von:** Claude Code
+**Owner:** Claude Code
+**Stand:** in Arbeit 2026-06-25
+**Ziel:** Operator-Agent-Service: liest Kontext (OP-Liste, Mahnstatus, offene UAT-Gates), schlägt Handlung vor (Mahnvorschlag, Rechnungsvorschlag, QS-Sperrliste), verlangt Human Approval, schreibt nichts selbst. API `/agent/operator/*`, Tests.
+**Dateibesitz:** `app/services/operator_agent_service.py`, `app/api/v1/endpoints/operator_agent.py`, `tests/test_operator_agent.py`, `docs/agent-ops/slices/OPERATOR-AGENT-001.yaml`
+
+## DEV-HARNESS-CLI-001 — Valeo-Slice CLI
+
+**Von:** Claude Code
+**Owner:** Claude Code
+**Stand:** in Arbeit 2026-06-25
+**Ziel:** `scripts/valeo_slice.py` — CLI für Slice-Claim, Plan, Verify und Close: `valeo-slice claim <ID>`, `valeo-slice verify <ID>`, `valeo-slice close <ID>`. Liest Workboard + Slice-YAML, führt Harness-Checks aus, gibt strukturierten Report.
+**Dateibesitz:** `scripts/valeo_slice.py`, `tests/test_valeo_slice_cli.py`, `docs/agent-ops/slices/DEV-HARNESS-CLI-001.yaml`
+
 ## WF-COCKPIT-UI-001 — Workflow-Leitstand Frontend-UI
 
 **Von:** Claude Code
