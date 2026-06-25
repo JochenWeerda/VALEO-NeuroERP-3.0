@@ -1,8 +1,9 @@
 slice_id: DOC-INTERFACES-001
 title: "Schnittstellenhandbuch: OpenAPI + MCP-Tools + Event-Katalog"
 owner: Cursor
-status: in arbeit
+status: abgeschlossen
 created_at: 2026-06-25
+completed_at: 2026-06-25
 goal: >-
   Die technischen Schnittstellen (REST-API, MCP-Tools, Event-Bus) aus der Single
   Source of Truth (Code/Config) generieren bzw. dokumentieren und als
