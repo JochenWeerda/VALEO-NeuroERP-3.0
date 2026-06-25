@@ -56,6 +56,13 @@
 **Ziel:** Verbindliche KI-Zugriffsklassen fuer alle VALEO-Datenkategorien (DSGVO/GoBD/Steuergeheimnis).
 **Dateibesitz:** `app/services/ai_data_classification_service.py`, `app/api/v1/endpoints/ai_data_classification.py`, `tests/test_ai_data_classification.py`, `docs/agent-ops/slices/AI-DATA-CLASSES-001.yaml`
 
+## SEMANTIC-E2E-P2P-FIBU-POS-QS-001 — P2P + FIBU + POS/TSE + QS/Reklamation Semantische Ketten
+
+**Von:** Claude Code
+**Owner:** Claude Code
+**Stand:** abgeschlossen 2026-06-25 — P2P (12 Schritte: RFQ→Bestellung→WE→3-Wege-Match→ERS→SEPA→DATEV) + FIBU (13 Schritte: OP→CAMT→Auszifferung→Mahnlauf→DATEV→Periodenabschluss→ELSTER-VA) + POS/TSE (12 Schritte: Bon→TSE-Signatur→Zahlung→Tagesabschluss→DSFinV-K→FIBU→Retoure) + QS/Reklamation (14 Schritte: Labor→Sperre→Reklamation→Retoure/Gutschrift→CAPA→Lieferant-Sperre). Alle Specs fail-safe. Externe Gates simuliert (simulated=true). P0.2 vollstaendig.
+**Dateibesitz:** `playwright-tests/specs/e2e-matrix/p2p-semantic-chain.spec.ts`, `fibu-semantic-chain.spec.ts`, `pos-tse-semantic-chain.spec.ts`, `qs-reklamation-semantic-chain.spec.ts`, `docs/agent-ops/slices/SEMANTIC-E2E-P2P-FIBU-POS-QS-001.yaml`
+
 ## SEMANTIC-E2E-MATRIX-001-CHAIN — O2C + WMS/Silo Semantische Ketten
 
 **Von:** Claude Code
