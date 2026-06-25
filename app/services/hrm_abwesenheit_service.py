@@ -10,6 +10,8 @@ from enum import Enum
 from typing import Any
 from uuid import uuid4
 
+from sqlalchemy import text
+
 
 class AbwesenheitTyp(str, Enum):
     URLAUB = "urlaub"
@@ -35,6 +37,24 @@ TERMINAL_STATUSES = {
 }
 EAU_REQUIRED_TYPES = {AbwesenheitTyp.KRANK}
 DEFAULT_URLAUBSANSPRUCH_TAGE = 30
+ABWESENHEIT_TYPEN = {
+    "URLAUB",
+    "KRANKHEIT",
+    "SONDERURLAUB",
+    "ELTERNZEIT",
+    "FORTBILDUNG",
+    "KURZARBEIT",
+    "GLEITZEITAUSGLEICH",
+}
+VALID_ABWESENHEIT_TRANSITIONS = {
+    ("BEANTRAGT", "GENEHMIGT"),
+    ("BEANTRAGT", "ABGELEHNT"),
+    ("BEANTRAGT", "ZURUECKGEZOGEN"),
+}
+
+
+class AbwesenheitError(Exception):
+    pass
 
 
 def _now() -> datetime:
@@ -258,3 +278,89 @@ def get_abwesenheit_service(tenant_id: str) -> HrmAbwesenheitService:
     if tenant_id not in _svc_cache:
         _svc_cache[tenant_id] = HrmAbwesenheitService(tenant_id=tenant_id)
     return _svc_cache[tenant_id]
+
+
+def create_abwesenheitsantrag(
+    db: Any,
+    tenant_id: str,
+    mitarbeiter_id: str,
+    typ: str,
+    von_datum: str,
+    bis_datum: str,
+    tage: int,
+    operator: str = "system",
+) -> dict[str, Any]:
+    """Legacy DOM-HRM-004 DB helper kept for existing workflow tests."""
+    if typ not in ABWESENHEIT_TYPEN:
+        raise AbwesenheitError(f"Unbekannter Abwesenheitstyp: {typ}")
+    if tage <= 0:
+        raise AbwesenheitError("Tage muessen > 0 sein")
+
+    antrag_id = _uid()
+    db.execute(
+        text("""
+            INSERT INTO domain_hrm.hrm_abwesenheiten
+                (id, tenant_id, mitarbeiter_id, typ, von_datum, bis_datum,
+                 tage, status, operator, created_at)
+            VALUES (:id, :tenant_id, :mitarbeiter_id, :typ, :von_datum,
+                    :bis_datum, :tage, 'BEANTRAGT', :operator, NOW())
+        """),
+        {
+            "id": antrag_id,
+            "tenant_id": tenant_id,
+            "mitarbeiter_id": mitarbeiter_id,
+            "typ": typ,
+            "von_datum": von_datum,
+            "bis_datum": bis_datum,
+            "tage": tage,
+            "operator": operator,
+        },
+    )
+    db.commit()
+    row = db.execute(
+        text("SELECT * FROM domain_hrm.hrm_abwesenheiten WHERE id = :id"),
+        {"id": antrag_id},
+    ).mappings().first()
+    return dict(row) if row else {"id": antrag_id, "status": "BEANTRAGT", "typ": typ}
+
+
+def transition_abwesenheit(
+    db: Any,
+    antrag_id: str,
+    new_status: str,
+    tenant_id: str,
+    operator: str,
+) -> dict[str, Any]:
+    rec = db.execute(
+        text("""
+            SELECT * FROM domain_hrm.hrm_abwesenheiten
+            WHERE id = :id AND tenant_id = :tid
+        """),
+        {"id": antrag_id, "tid": tenant_id},
+    ).mappings().first()
+    if not rec:
+        raise AbwesenheitError(f"Abwesenheitsantrag {antrag_id} nicht gefunden")
+
+    old_status = rec["status"]
+    if (old_status, new_status) not in VALID_ABWESENHEIT_TRANSITIONS:
+        raise AbwesenheitError(f"Ungueltiger Uebergang {old_status} -> {new_status}")
+
+    db.execute(
+        text("""
+            UPDATE domain_hrm.hrm_abwesenheiten
+            SET status = :new_status, operator = :operator, updated_at = NOW()
+            WHERE id = :id AND tenant_id = :tid
+        """),
+        {
+            "new_status": new_status,
+            "operator": operator,
+            "id": antrag_id,
+            "tid": tenant_id,
+        },
+    )
+    db.commit()
+    updated = db.execute(
+        text("SELECT * FROM domain_hrm.hrm_abwesenheiten WHERE id = :id"),
+        {"id": antrag_id},
+    ).mappings().first()
+    return dict(updated)
