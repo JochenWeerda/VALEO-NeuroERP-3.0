@@ -2,6 +2,7 @@ import json
 
 from app.domains.inventory.application.services.replenishment_service import ReplenishmentService
 from app.finance.gobd import BelegnummernLuecke, _count_missing_belegnummern
+from app.infrastructure.models import NawaroPrintNotification
 
 
 class _Query:
@@ -41,3 +42,18 @@ def test_inventory_turnover_report_is_strict_json_when_no_cogs():
     assert report["turnover_ratio"] == 0.0
     assert report["turnover_days"] is None
     json.dumps(report, allow_nan=False)
+
+
+def test_nawaro_print_notification_model_matches_router_contract():
+    for column_name in [
+        "tenant_id",
+        "debtor_from",
+        "debtor_to",
+        "delivery_option",
+        "form_code",
+        "copies",
+        "printer_name",
+        "created_at",
+        "updated_at",
+    ]:
+        assert hasattr(NawaroPrintNotification, column_name)

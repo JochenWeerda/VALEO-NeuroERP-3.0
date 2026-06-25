@@ -543,9 +543,18 @@ class NawaroPrintNotification(Base):
     __table_args__ = {"schema": "domain_inventory", "extend_existing": True}
 
     id = Column(String, primary_key=True, default=uuid7)
+    tenant_id = Column(String, ForeignKey("domain_shared.tenants.id"), nullable=False, index=True)
     document_name = Column(String(255), nullable=False)
     harvest_year = Column(Integer, nullable=False)
     article_number = Column(String(80), nullable=True)
+    debtor_from = Column(String(80), nullable=True)
+    debtor_to = Column(String(80), nullable=True)
+    delivery_option = Column(String(40), nullable=False, server_default="vollstaendige_ablieferung")
+    form_code = Column(String(40), nullable=False, server_default="W12151")
+    copies = Column(Integer, nullable=False, server_default="1")
+    printer_name = Column(String(255), nullable=True)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
 
 
 # ── Quality Protocols ─────────────────────────────────────────────────────────────
