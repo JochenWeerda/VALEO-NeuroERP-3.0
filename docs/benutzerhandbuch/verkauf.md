@@ -21,7 +21,7 @@ sofort zurechtfinden.
 
 ## 1. Auftrag anlegen
 
-![Auftrags-Erfassung mit Rollenfokus, Belegfähigkeits-Prüfung und Erfassungsplan](img/verkauf-auftraege.png)
+![Auftrags-Erfassung mit Rollenfokus, Belegfähigkeits-Prüfung und Erfassungsplan](img/verkauf-auftraege.webp)
 
 1. Bereich *Verkauf* → *Aufträge* → *Neu*.
 2. Kunde wählen (Kundenauswahl), Lieferbedingungen prüfen.

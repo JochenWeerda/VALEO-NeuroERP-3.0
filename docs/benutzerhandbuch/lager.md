@@ -15,7 +15,7 @@ Sie Inventuren durch.
 
 ## Bestand einsehen
 
-![Bestandsübersicht mit Kennzahlen zu Artikeln, Wert, Reichweite und Unterbestand](img/lager-bestandsuebersicht.png)
+![Bestandsübersicht mit Kennzahlen zu Artikeln, Wert, Reichweite und Unterbestand](img/lager-bestandsuebersicht.webp)
 
 1. Bereich *Lager* → *Bestände*.
 2. Nach Artikel, Lagerort oder Silozelle filtern.

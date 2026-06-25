@@ -28,10 +28,11 @@ Voraussetzungen → Schritte → Ergebnis → häufige Fehler.
 
 ## Screenshots
 
-Screenshots liegen unter `benutzerhandbuch/img/` und werden so eingebunden:
+Screenshots liegen als **WebP** unter `benutzerhandbuch/img/` und werden so
+eingebunden:
 
 ```markdown
-![Dashboard](img/einstieg-dashboard.png)
+![Dashboard](img/einstieg-dashboard.webp)
 ```
 
 **Aufnahme-Verfahren** (lokale Dev-/Docker-Umgebung):
@@ -43,10 +44,12 @@ Screenshots liegen unter `benutzerhandbuch/img/` und werden so eingebunden:
    Wert aus `API_DEV_TOKEN`.
 3. Zielmaske öffnen, **dem ersten Aufruf genügend Zeit geben** (Vite kompiliert
    Lazy-Chunks on-demand — bis ~20 s), dann Screenshot erstellen.
-4. Bild als `img/<bereich>-<maske>.png` ablegen und in der jeweiligen How-to
-   einbinden.
+4. Rohbild (PNG) als `img/<bereich>-<maske>.png` ablegen und mit
+   `python scripts/compress_screenshots.py` zu WebP komprimieren
+   (ersetzt die PNG, ~60–80 % kleiner, Text bleibt scharf).
+5. WebP-Bild in der jeweiligen How-to einbinden.
 
 !!! note "Aktueller Stand"
-    Die Kern-Masken sind als Screenshots hinterlegt: Dashboard, Rohware-Annahme,
-    Auftrags-Erfassung, Bestandsübersicht und Hauptbuch. Die Aufnahme erfolgte
-    über die Dev-Token-Session ohne externen OIDC-Provider.
+    Die Kern-Masken sind als komprimierte WebP-Screenshots hinterlegt: Dashboard,
+    Rohware-Annahme, Auftrags-Erfassung, Bestandsübersicht und Hauptbuch. Die
+    Aufnahme erfolgte über die Dev-Token-Session ohne externen OIDC-Provider.
