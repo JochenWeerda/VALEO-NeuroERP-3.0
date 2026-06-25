@@ -28,6 +28,8 @@ jobs:
     runs-on: ubuntu-latest
     env:
       SONAR_TOKEN_PRESENT: ${{ secrets.SONAR_TOKEN != '' }}
+      SONAR_HOST_URL_CONFIGURED: ${{ vars.SONAR_HOST_URL != '' }}
+      SONAR_HOST_URL: ${{ vars.SONAR_HOST_URL }}
     outputs:
       quality-score: ${{ steps.sonarqube.outputs.quality-gate-status }}
       coverage: ${{ steps.coverage.outputs.coverage }}
@@ -85,7 +87,7 @@ jobs:
 
       - name: Run SonarQube analysis
         id: sonarqube
-        if: env.SONAR_TOKEN_PRESENT == 'true'
+        if: env.SONAR_TOKEN_PRESENT == 'true' && env.SONAR_HOST_URL_CONFIGURED == 'true'
         uses: sonarsource/sonarqube-scan-action@v2
         with:
           projectBaseDir: domains/inventory
@@ -99,11 +101,12 @@ jobs:
             -Dsonar.testExecutionReportPaths=test-results/test-report.xml
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: ${{ vars.SONAR_HOST_URL }}
 
       - name: Quality gate check
         run: |
-          if [[ "${SONAR_TOKEN_PRESENT}" != "true" ]]; then
-            echo "SonarQube token not configured; treating Sonar as external gate for this repository."
+          if [[ "${SONAR_TOKEN_PRESENT}" != "true" || "${SONAR_HOST_URL_CONFIGURED}" != "true" ]]; then
+            echo "SonarQube token or host URL not configured; treating Sonar as external gate for this repository."
             exit 0
           fi
           if [[ "${{ steps.sonarqube.outputs.quality-gate-status }}" != "PASSED" ]]; then
