@@ -11,6 +11,10 @@ file_ownership:
   - scripts/doc_drift_report.py
   - tests/test_doc_drift_report.py
   - docs/agent-ops/slices/AI-DOC-DRIFT-DASHBOARD-001.yaml
+acceptance:
+  - Drift-Report erzeugt JSON mit Summary und Issue-Liste fuer Endpoints, Migrationen, Services und Frontend-Seiten.
+  - Markdown-Ausgabe ist fuer CI-Logs lesbar und nennt offene Drift-Items mit Dateipfad.
+  - Unit-Tests sichern Report-Struktur, JSON-Serialisierung, Markdown-Ausgabe und Artefakt-Schreiben.
 tests:
   - python -m py_compile scripts/doc_drift_report.py
   - pytest -q -o addopts= tests/test_doc_drift_report.py
