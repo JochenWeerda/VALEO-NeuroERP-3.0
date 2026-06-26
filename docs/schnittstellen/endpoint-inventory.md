@@ -1,5 +1,6 @@
 ---
 title: API-Endpoint-Inventar
+last_reviewed: 2026-06-26
 description: Vollständiges Inventar aller FastAPI-Endpoint-Module mit Kurzbeschreibung. Beschreibungen sind aus den Modul-Docstrings extrahiert.
 ---
 
