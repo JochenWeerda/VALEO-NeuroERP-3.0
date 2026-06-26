@@ -1156,11 +1156,18 @@ Dispo-Arbeitsraum: Tarifliste + Bestätigung + `cancelFreightTariff`; Tests in `
 **Abnahmekriterien:** Jede neue Aktion besitzt eine stabile semantische Action-ID; Neukunde oeffnet eine leere kanonische Kundenmaske; Print erzeugt eine druckbare Cockpit-Sicht; Ansprechpartner sind selektier- und filterbar und Oeffnen/E-Mail/Praesente arbeiten im gewaehlten Kontext; unterstuetzte Verkaufsbelege oeffnen die richtige Detail- beziehungsweise Neuanlagemaske mit Kunden-/Belegkontext; unbekannte oder noch nicht kanonisch routbare Belegarten behaupten keinen erfolgreichen Fachprozess; Typecheck, Build, Playwright und Governance sind gruen.
 **Offene Risiken:** TAPI-Wahl, CC/Benachrichtigung und neue Kontaktlog-Persistenz sind explizit nicht Teil dieses Slices. Kaufangebote, Kaufabrechnungen und Fremdbestaende duerfen nur verdrahtet werden, wenn eine kanonische Zielroute eindeutig nachweisbar ist.
 
+## KIM-L3-FRONTEND-001
+
+**Von:** Claude Code
+**Owner:** Claude Code
+**Stand:** abgeschlossen 2026-06-26 — Belegtabs (INVOICES/DUNNING/CONTRACTS/DROP_SHIPMENTS) rufen jetzt `fetchContactDocs` statt lokal zu filtern. Neuer Postfach-Tab in KIM zeigt interne CRM-Benachrichtigungen mit markRead-Funktion und unread-Badge im Tab-Label.
+**Dateibesitz:** `packages/frontend-web/src/pages/crm/kim/components/ContactHistoryTable.tsx`, `packages/frontend-web/src/pages/crm/kim/index.tsx`, `docs/agent-ops/slices/KIM-L3-FRONTEND-001.yaml`
+
 ## KIM-L3-BACKEND-001
 
 **Von:** Claude
 **Owner:** Claude
-**Stand:** Backend umgesetzt 2026-06-09
+**Stand:** abgeschlossen 2026-06-26 (Backend 2026-06-09, Frontend-Verdrahtung via KIM-L3-FRONTEND-001)
 **Ergebnis (Backend):** (A1) Kontaktlog persistiert Art/Betreff/Kommentar/CC (`crm_kim.py` LogCreateIn/create_log/_log_from_row/ContactLog; Tabelle `kunden_kontakte` unterstuetzte die Spalten bereits, keine Migration). (B) TAPI Click-to-Dial: `POST /crm/tapi/dial` + `GET /crm/tapi/dial/pending` + `POST /crm/tapi/dial/{id}/done` (reuse `tapi_calls`, richtung='aus', status='dial_req', acked=TRUE, caller-Default 'KIM'; graceful ohne Bridge). (C) `GET /crm/kim/customers/{nr}/contact-docs?kind=invoices|dunning|contracts|drop_shipments` (Rechnungen/Mahnungen aus kanonischer `domain_shared.open_items`, Kontrakte/Strecken tolerant leer). (D) Internes Benachrichtigungssystem: Migration `crm_notifications_kim_l3_backend_20260609` (idempotent angewandt), `crm_notification_service.py` (intern persistent + extern Mail best-effort), Endpoints `POST/GET /crm/kim/notifications` + `/{id}/read`, CC-Auto-Dispatch in `create_log`. Verifiziert: 6 Unit-Tests gruen, alle Endpoints per curl 200 (Dial/Inbox/contact-docs), Migration idempotent. **Offen (Folge-Slice, Frontend):** Verdrahtung im KIM-Cockpit (Art-Dropdown/Betreff/Kommentar/CC-Feld, Tel→Dial, Kontakte-Belegtabs, Postfach-Anzeige) — nach KIM-L3-QUICK-001.
 **Abstimmung:** Komplementaer zu `KIM-L3-QUICK-001` (Codex/Claude Code). Claude Code macht die rein frontend-/routenseitigen Bedienluecken (`packages/frontend-web/src/pages/crm/kim/**` + CRM-Playwright-Vertraege). Ich (Claude) baue die von KIM-L3-QUICK-001 **ausdruecklich ausgeklammerten** Backend-Fundamente: Kontaktlog-Persistenz (Art/Betreff/Kommentar/CC), TAPI-Wahl-Trigger, internes Benachrichtigungssystem sowie kanonische Kontakte-Belegquellen. **Ich fasse KEINE Datei unter `packages/frontend-web/src/pages/crm/kim/**` und KEINE `playwright-tests/specs/crm/**` an** — Frontend-Verdrahtung dieser Backends erfolgt als Folge-Slice, nachdem KIM-L3-QUICK-001 gelandet ist.
 **Ziel des Slices:** Backend-Vertraege bereitstellen, damit die L3-Funktionen Kontaktdokumentation (Art/Betreff/Kommentar/CC), TAPI-Wahl, interne/externe Benachrichtigung und kontaktbezogene Belegtabs (Rechnungen/Mahnungen/Kontrakte/Strecken) im KIM-Cockpit fachlich hinterlegt sind.
@@ -2349,33 +2356,6 @@ Dispo-Arbeitsraum: Tarifliste + Bestätigung + `cancelFreightTariff`; Tests in `
 **Checks:** `pnpm --filter @valero-neuroerp/frontend-web type-check`; `python scripts/agent_workboard_supervisor.py validate`; `node scripts/docs-governance-check.cjs`; `node scripts/docs-markdown-check.cjs docs/project-context/ux-excellence-operating-standard-2026-05-13.md docs/agent-ops/active-workboard.md docs/agent-ops/slices/UX-FUHRPARK-001.yaml`; `git diff --check`
 **Offene Risiken:** Fuhrpark-Menues und Detailstammdaten bleiben Folgeslices; dieser Slice fokussiert Status-/Fristen- und Dokumentsteuerung.
 
-## TODO-SPRINT-001
-
-**Von:** Cursor<br>
-**Owner:** (Team)<br>
-**Stand:** dokumentiert 2026-04-24<br>
-**Ziel des Slices:** Die abgestimmte **TODO-Umsetzungs-Roadmap** (Meilensteine **M-01–M-12**) und die **Sprint-Zuordnung S1–S5** im Repo und hier im Workboard als **einzige Sprint-/Issue-Referenz** festhalten; Abgleich mit automatisch erzeugten TODO-Reports möglich.
-
-**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/agent-ops/slices/TODO-SPRINT-001.yaml`, Ergänzungen in `scripts/update_todos.py` (Slice-Ausgaben `docs/TODO-next-slices.md`, `docs/todo-report.json` → `next_slices`).
-
-**Kurzreferenz Meilensteine**
-
-| Sprint | Meilensteine |
-|--------|----------------|
-| S1 | M-01 (Auth-/Tenant-**Vertrag**), M-02 (Pagination Contract erp-domain) |
-| S2 | M-03 (Pagination Rollout), M-04 (ERP Actor), M-05 (**E2E-Auth früh**) |
-| S3 | M-06 (CRM Auth), M-07 (CRM E-Mail/Queue) |
-| S4 | M-08 (GDPR Export), M-09 (GDPR Löschung inkl. Retention), M-10 (FiBu Perioden/Saldo) |
-| S5 | M-11 (Strecke DB + Migration/Rollback), M-12 (Einkauf OCR, Teilprojekt) |
-
-**Abnahmekriterien (Doku-Slice):** Workboard enthält Slice-ID und Tabelle; kanonisches Dokument existiert und ist vom Board aus erreichbar; Tracking-Hinweis für `python scripts/update_todos.py --repo-only` / `docs/TODO-next-slices.md` genannt.
-
-**Erledigt:** Sprint-Matrix M-01–M-12 / S1–S5 im Workboard verankert; Legacy-Datei `docs/roadmap/TODO-UMSETZUNG-SPRINT-PLAN-S1-S5.md` entfernt (DOC-MIGRATION-005).
-
-**Checks (optional):** `python scripts/update_todos.py --repo-only`; Doku-Link im Browser öffnen.
-
-**Offene Risiken:** Die Meilensteine **M-01–M-12** sind Umsetzungsarbeit — dieser Slice ist **Planungs-/Referenz-Ebene**. Konkrete Implementierungs-Slices sollten eigene IDs im Workboard erhalten und auf **M-xx** im Titel oder Body verweisen.
-
 ## HR-TIME-001
 
 **Von:** Codex
@@ -2827,15 +2807,6 @@ Archiv des vorherigen Boards:
   2. Workboard committen
   3. erst dann implementieren
 
-## Kurzstand
-
-- Das gemeinsame operative Arbeitsmodell ist bereits in den priorisierten Kernmasken ausgerollt.
-- Der Rollout-Scope ist dokumentiert in:
-  - [operational-rollout-scope-2026-04-09.md](C:/Users/Jochen/VALEO-NeuroERP-3.0/docs/project-context/operational-rollout-scope-2026-04-09.md)
-- Der naechste Block betrifft Sammel- und Follow-up-Masken mit echtem operativem Mehrwert.
-- Fuer den Flow-Spine-Kern liegt jetzt eine gemeinsame Lifecycle-Zieldoku vor:
-  - [flow-spine-instance-lifecycle-overview.md](C:/Users/Jochen/VALEO-NeuroERP-3.0/docs/workflows/flow-spine-instance-lifecycle-overview.md)
-
 ## FEEDING-SYSTEM-ARCHITECTURE Slices 1-3 (abgeschlossen 2026-04-23)
 
 **Von:** Cursor
@@ -3133,7 +3104,7 @@ Archiv des vorherigen Boards:
 ## DOM-FIN-003
 
 **Von:** Codex
-**Stand:** erledigt
+**Stand:** abgeschlossen 2026-06-23
 **Ziel des Slices:** FIBU-Operatorpfade fuer Abschluss, Reorganisator, Zinswesen und Revisionssicht semantisch verdichten.
 **Abnahmekriterien:** Abschluss- und FIBU-Operatorraeume tragen denselben klaren Status-, Fristen-, Revisions- und Folgeaktionsrahmen.
 **Ergebnis:** Alle 4 FIBU-Masken (abschluss-cockpit, schnittstellen-center, mahnwesen, zahlungslaeufe) tragen OperationalCaseHeader mit Status/Blocker/Folgeaktion.
@@ -3141,7 +3112,7 @@ Archiv des vorherigen Boards:
 ## DOM-SUPPLY-003
 
 **Von:** Codex
-**Stand:** erledigt
+**Stand:** abgeschlossen 2026-06-23
 **Ziel des Slices:** Die physische Kette `Partie -> Annahme -> Wiegung -> Charge -> Fracht -> Abrechnung` fachlich und statusseitig durchgaengig harmonisieren.
 **Abnahmekriterien:** Jeder Uebergabepunkt zeigt Objektbezug, Abweichung, naechste Aktion und Folgeobjekt konsistent.
 **Ergebnis:** Alle 6 Supply-Masken (waage/liste, tourenplanung, wareneingang, wiegeschein-detail, rohware, frachtbriefe) tragen OperationalCaseHeader.
@@ -3149,7 +3120,7 @@ Archiv des vorherigen Boards:
 ## DOM-PROC-003
 
 **Von:** Codex
-**Stand:** erledigt
+**Stand:** abgeschlossen 2026-06-23
 **Ziel des Slices:** Einkaufsausnahmen, Matching, Nachforderung und Lieferantenkommunikation auf echte Folgefaelle heben.
 **Abnahmekriterien:** Beschaffungsfaelle bilden Matching-Ausnahmen, Nachforderung und Folgekommunikation als echte Arbeitsobjekte ab.
 **Ergebnis:** Alle 5 Einkauf-Masken (rechnung-abgleich, rechnungseingang, lieferanten-dokumente, anlieferavis, auftragsbestaetigung) tragen OperationalCaseHeader.
@@ -3157,7 +3128,7 @@ Archiv des vorherigen Boards:
 ## DOM-CON-003
 
 **Von:** Codex
-**Stand:** erledigt
+**Stand:** abgeschlossen 2026-06-23
 **Ziel des Slices:** Kontraktfixierung, Marktbewertung, Mahnung und Engagement als vollwertige Operatorraeume ausbauen.
 **Abnahmekriterien:** Fixierungs-, Markt- und Mahnlogik ist nicht nur sichtbar, sondern als klarer Operatorpfad bedienbar.
 **Ergebnis:** Alle 4 Kontrakt-Masken (contracts-v2, KontraktPositionsmonitor, FrmKontraktDetail, KontraktAlarmDashboard) tragen OperationalCaseHeader.
@@ -3165,7 +3136,7 @@ Archiv des vorherigen Boards:
 ## DOM-CRM-003
 
 **Von:** Codex
-**Stand:** erledigt
+**Stand:** abgeschlossen 2026-06-23
 **Ziel des Slices:** CRM-/Servicefaelle mit Ownership, Folgeobjekten, Dubletten- und Abschlusslogik angleichen.
 **Abnahmekriterien:** CRM und Service tragen denselben Fallbezug, Ownership-Rahmen und Abschlusspfad.
 **Ergebnis:** Alle 4 CRM-/Service-Masken (LegacyKundenStammModern, anfrage-detail, opportunity-detail, kontakt-management) tragen OperationalCaseHeader.
@@ -3173,7 +3144,7 @@ Archiv des vorherigen Boards:
 ## DOM-DOC-003
 
 **Von:** Codex
-**Stand:** erledigt
+**Stand:** abgeschlossen 2026-06-23
 **Ziel des Slices:** Nachweis-, Bescheid-, Artefakt- und Rueckmeldungskette ueber Dokumente, Meldungen und Vorgangskontext vereinheitlichen.
 **Abnahmekriterien:** Dokumente und Meldungen zeigen revisionsrelevanten Nachweisstatus, Rueckmeldungspfad und Wiedervorlage konsistent.
 **Ergebnis:** Alle 3 Dokumenten-/Compliance-Masken (ablage, meldewesen-konsole, atlas) tragen OperationalCaseHeader.
@@ -3181,7 +3152,7 @@ Archiv des vorherigen Boards:
 ## COV-FIN-002
 
 **Von:** Codex
-**Stand:** erledigt
+**Stand:** abgeschlossen 2026-06-23
 **Ziel des Slices:** Coverage-Tiefe fuer FIBU-Kernpfade aufbauen: Journal, Zahlungslaeufe, DATEV/ELSTER-nahe Follow-up-Logik und Abschlusskontext.
 **Dateibesitz:** `docs/agent-ops/active-workboard.md`, `tests/**`, relevante Finance-/FIBU-Services und Endpunkte
 **Abnahmekriterien:** Kritische FIBU-Kernpfade besitzen gezielte Tests statt nur allgemeiner Gesamtquote; Ratchet kann fuer Finance spaeter angehoben werden.
@@ -4607,8 +4578,8 @@ Parallele Fix-Slices aus Cards-Inventar-Audit (`CARD-AUDIT-001`). Claim-Protokol
 
 ## CI-WA-PORTAL-GATE-20260626 - WhatsApp/Portal CI-Gate-Nachzug
 
-**Owner:** Codex
-**Stand:** reserviert 2026-06-26 - Nachzug fuer rote Gates nach WA-AGENT-001 / WA-NOTIFY-001 / PORTAL-SHOP-001: Backend-Response-Model-Coverage, Frontend-Typecheck und E2E-Smoke-Build.
+**Owner:** Claude Code
+**Stand:** abgeschlossen 2026-06-26 — Response-Model-Coverage 97,4 % (Threshold 80 % ✅). Build-Blocker behoben: 5 fehlende Exports in `docs-help.ts` (`HELP_ROUTE`, `DOCS_USER_MANUAL_URL`, `getEmbeddedHelpHref`, `resolveHelpUrl`, `openDocs`) ergänzt. Frontend-Build ✅, TSC ✅.
 **Ziel:** CI wieder gruenschalten, ohne neue WhatsApp-/Portal-Fachlogik einzufuehren oder fremde Parallel-Agent-Aenderungen zu buendeln.
 **Dateibesitz:** `app/api/v1/endpoints/whatsapp_notify.py`, `app/api/v1/endpoints/whatsapp_webhook.py`, `packages/frontend-web/src/pages/portal/whatsapp-simulator.tsx`, optional `packages/frontend-web/src/components/ui/use-toast.ts`, `docs/project-context/open-gaps-and-known-issues.md`, `docs/agent-ops/slices/CI-WA-PORTAL-GATE-20260626.yaml`, dieser Workboard-Abschnitt.
 **Abnahmekriterien:** `python scripts/check_response_models.py --threshold 80`, `pnpm --dir packages/frontend-web typecheck`, `pnpm --dir packages/frontend-web build` lokal gruen; GitHub Actions Quality Gate/E2E-Smoke nach Push pruefen.
@@ -4713,7 +4684,7 @@ Parallele Fix-Slices aus Cards-Inventar-Audit (`CARD-AUDIT-001`). Claim-Protokol
 ## SEMANTIC-E2E-STRICT-001 — Playwright @critical Tags
 
 **Von:** Claude Code · **Owner:** Claude Code
-**Stand:** abgeschlossen 2026-06-26 — `@critical` in O2C + WMS/Silo Specs; CI-Workflow `e2e-critical.yml` (blockierend auf main/develop).
+**Stand:** abgeschlossen 2026-06-26 — `@critical` in O2C + WMS/Silo Specs; CI-Workflow `e2e-critical.yml` (blockierend auf main/develop); Playwright vom Repo-Root (Fix „No tests found“).
 **Dateibesitz:** `.github/workflows/e2e-critical.yml`, `playwright-tests/specs/e2e-matrix/o2c-semantic-chain.spec.ts`, `wms-silo-semantic-chain.spec.ts`.
 
 ## TRACEABILITY-MATRIX-001 — Slice↔Test↔Doku
@@ -4725,22 +4696,14 @@ Parallele Fix-Slices aus Cards-Inventar-Audit (`CARD-AUDIT-001`). Claim-Protokol
 ## OPERATOR-AGENT-002 — Agent DB-Persistenz
 
 **Von:** Claude Code · **Owner:** Claude Code
-**Stand:** in Arbeit 2026-06-26 — Schema `agent_proposals`, Repository, Alembic + Merge-Head; **Service-Wiring offen** (In-Memory MVP bleibt bis OPERATOR-AGENT-002b).
-**Dateibesitz:** `alembic/versions/agent_proposals_persist_20260626.py`, `app/infrastructure/models/agent_proposal_model.py`, `app/repositories/agent_proposal_repository.py`.
+**Stand:** abgeschlossen 2026-06-26 — Schema `agent_proposals`, Repository mit Mapper, Alembic + Merge-Head; **OPERATOR-AGENT-002b:** Service verdrahtet via `Depends(get_db)`, Idempotency-Key, Persistenz-Tests (`test_operator_agent_persist.py`).
+**Dateibesitz:** `alembic/versions/agent_proposals_persist_20260626.py`, `app/infrastructure/models/agent_proposal_model.py`, `app/repositories/agent_proposal_repository.py`, `app/services/operator_agent_service.py`, `app/api/v1/endpoints/operator_agent.py`, `tests/test_operator_agent_persist.py`.
 
 ## MCP-ERP-TOOLS-002 — MCP-Tools Erweiterung
 
 **Von:** Claude Code · **Owner:** Claude Code
 **Stand:** abgeschlossen 2026-06-26 — `mcp_erp_tools.yaml` um Domain-Tools erweitert (+158 Zeilen); Contract-Tests + Classification-Enforcement folgen in 002b.
 **Dateibesitz:** `config/mcp_erp_tools.yaml`.
-
-## COVERAGE-RATCHET-002 — Coverage-Härtung (Claim)
-
-**Von:** Claude Code / **Stand:** offen
-
-## DOC-USER-MANUAL-002 — Benutzerhandbuch Vertiefung (Claim)
-
-**Von:** Claude Code / **Stand:** offen
 
 ## DOC-RELEASE-NOTES-001 — Release-Notes-Generator
 
@@ -4756,7 +4719,7 @@ Parallele Fix-Slices aus Cards-Inventar-Audit (`CARD-AUDIT-001`). Claim-Protokol
 
 ## EXTERNAL-MOCK-WORKFLOW-001 — Playwright Mock-Verträge (Claim)
 
-**Von:** Claude Code / **Stand:** offen
+**Von:** Claude Code / **Stand:** abgeschlossen 2026-06-26
 
 ---
 

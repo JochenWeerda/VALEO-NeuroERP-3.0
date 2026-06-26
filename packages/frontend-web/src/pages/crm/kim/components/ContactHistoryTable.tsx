@@ -3,15 +3,17 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { ContactLog, Customer } from '../types';
+import * as kimApi from '../kim-api';
+import type { ContactDoc, ContactDocKind } from '../kim-api';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { NativeSelect } from '@/components/ui/native-select';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { Paperclip, Mail, Check, Clock, Plus, X } from 'lucide-react';
+import { Paperclip, Mail, Check, Clock, Plus, X, Loader2 } from 'lucide-react';
 
 interface ContactHistoryTableProps {
   logs: ContactLog[];
@@ -21,9 +23,38 @@ interface ContactHistoryTableProps {
 
 type L3HistorySubtab = 'OVERVIEW' | 'HISTORY' | 'INVOICES' | 'DUNNING' | 'CONTRACTS' | 'DROP_SHIPMENT';
 
+const KIND_MAP: Partial<Record<L3HistorySubtab, ContactDocKind>> = {
+  INVOICES: 'invoices',
+  DUNNING: 'dunning',
+  CONTRACTS: 'contracts',
+  DROP_SHIPMENT: 'drop_shipments',
+};
+
 export default function ContactHistoryTable({ logs, customer, onAddLog }: ContactHistoryTableProps) {
   const [activeTab, setActiveTab] = useState<L3HistorySubtab>('OVERVIEW');
   const [showAddLog, setShowAddLog] = useState(false);
+
+  // Belegtabs — echte Backend-Daten
+  const [contactDocs, setContactDocs] = useState<ContactDoc[]>([]);
+  const [docsLoading, setDocsLoading] = useState(false);
+
+  const loadContactDocs = useCallback(async (tab: L3HistorySubtab) => {
+    const kind = KIND_MAP[tab];
+    if (!kind) return;
+    setDocsLoading(true);
+    try {
+      setContactDocs(await kimApi.fetchContactDocs(customer.id, kind));
+    } catch {
+      setContactDocs([]);
+    } finally {
+      setDocsLoading(false);
+    }
+  }, [customer.id]);
+
+  const handleTabChange = (tab: L3HistorySubtab) => {
+    setActiveTab(tab);
+    void loadContactDocs(tab);
+  };
 
   const [logDirection, setLogDirection] = useState<'INCOMING' | 'OUTGOING'>('INCOMING');
   const [logArt, setLogArt] = useState<'persoenlich' | 'telefon' | 'email' | 'whatsapp'>('telefon');
@@ -41,21 +72,9 @@ export default function ContactHistoryTable({ logs, customer, onAddLog }: Contac
   const [saveError, setSaveError] = useState('');
 
   const filteredLogs = logs.filter(log => {
-    switch (activeTab) {
-      case 'HISTORY':
-        return log.referenceType === 'NONE' || !log.referenceType;
-      case 'INVOICES':
-        return log.referenceType === 'INVOICE' || log.artKurzinfo.toLowerCase().includes('re-') || log.artKurzinfo.toLowerCase().includes('rechnung');
-      case 'DUNNING':
-        return log.artKurzinfo.toLowerCase().includes('mahnung') || log.artKurzinfo.toLowerCase().includes('zahlungsverzug') || log.artKurzinfo.toLowerCase().includes('op');
-      case 'CONTRACTS':
-        return log.referenceType === 'CONTRACT' || log.artKurzinfo.toLowerCase().includes('kontrakt') || log.artKurzinfo.toLowerCase().includes('abnahme');
-      case 'DROP_SHIPMENT':
-        return log.artKurzinfo.toLowerCase().includes('strecke') || log.artKurzinfo.toLowerCase().includes('direkt');
-      case 'OVERVIEW':
-      default:
-        return true;
-    }
+    if (activeTab === 'HISTORY') return log.referenceType === 'NONE' || !log.referenceType;
+    if (activeTab === 'OVERVIEW') return true;
+    return false; // INVOICES/DUNNING/CONTRACTS/DROP_SHIPMENT use contactDocs
   });
 
   const handleSubmitLog = async (e: React.FormEvent) => {
@@ -110,7 +129,7 @@ export default function ContactHistoryTable({ logs, customer, onAddLog }: Contac
           {tabs.map(tab => (
             <button
               key={tab.key}
-              onClick={() => setActiveTab(tab.key)}
+              onClick={() => handleTabChange(tab.key)}
               className={`whitespace-nowrap px-3 py-1.5 text-xs font-medium transition rounded-t-md border-t border-x ${
                 activeTab === tab.key
                   ? 'bg-card border-border text-primary font-semibold'
@@ -229,8 +248,54 @@ export default function ContactHistoryTable({ logs, customer, onAddLog }: Contac
         </form>
       )}
 
-      {/* Listing */}
-      <div className="overflow-x-auto">
+      {/* Belegtabs — echte Backend-Daten */}
+      {KIND_MAP[activeTab] && (
+        <div className="overflow-x-auto">
+          {docsLoading ? (
+            <div className="flex items-center justify-center gap-2 p-8 text-muted-foreground text-sm">
+              <Loader2 className="h-4 w-4 animate-spin" /> Lade Belege…
+            </div>
+          ) : contactDocs.length === 0 ? (
+            <p className="p-6 text-center text-muted-foreground italic text-sm">Keine Belege vorhanden.</p>
+          ) : (
+            <table className="w-full text-left text-sm border-collapse">
+              <thead>
+                <tr className="bg-muted/60 border-b border-border text-muted-foreground text-xs">
+                  <th className="p-2">Beleg-Nr.</th>
+                  <th className="p-2">Datum</th>
+                  <th className="p-2">Fälligkeit</th>
+                  <th className="p-2 text-right">Betrag</th>
+                  <th className="p-2">Status</th>
+                  <th className="p-2">Info</th>
+                </tr>
+              </thead>
+              <tbody>
+                {contactDocs.map(doc => (
+                  <tr key={doc.id} className="border-b border-border hover:bg-muted/40 transition">
+                    <td className="p-2 font-mono text-xs">{doc.docNo}</td>
+                    <td className="p-2 text-muted-foreground whitespace-nowrap">{new Date(doc.date).toLocaleDateString('de-DE')}</td>
+                    <td className="p-2 text-muted-foreground whitespace-nowrap">
+                      {doc.dueDate ? new Date(doc.dueDate).toLocaleDateString('de-DE') : '—'}
+                    </td>
+                    <td className="p-2 text-right tabular-nums">
+                      {doc.amount.toLocaleString('de-DE', { style: 'currency', currency: 'EUR' })}
+                    </td>
+                    <td className="p-2">
+                      <Badge variant={doc.status === 'offen' ? 'info' : doc.status === 'bezahlt' ? 'success' : 'secondary'}>
+                        {doc.status}
+                      </Badge>
+                    </td>
+                    <td className="p-2 text-muted-foreground text-xs truncate max-w-[200px]">{doc.info ?? '—'}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+        </div>
+      )}
+
+      {/* Log-Tabelle — nur für OVERVIEW und HISTORY */}
+      {!KIND_MAP[activeTab] && <div className="overflow-x-auto">
         <table className="w-full text-left text-sm border-collapse">
           <thead className="sticky top-0">
             <tr className="bg-muted/60 border-b border-border text-muted-foreground text-xs">
@@ -302,8 +367,7 @@ export default function ContactHistoryTable({ logs, customer, onAddLog }: Contac
             )}
           </tbody>
         </table>
-      </div>
-      </div>
+      </div>}</div>
 
     </div>
   );

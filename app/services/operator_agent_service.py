@@ -18,8 +18,11 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from enum import Enum
-from typing import Any
+from typing import TYPE_CHECKING, Any
 from uuid import uuid4
+
+if TYPE_CHECKING:
+    from app.repositories.agent_proposal_repository import AgentProposalRepository
 
 
 class AgentActionType(str, Enum):
@@ -99,6 +102,9 @@ class AgentProposal:
     approved_at: datetime | None = None
     rejection_reason: str | None = None
     audit_events: list[dict[str, Any]] = field(default_factory=list)
+    idempotency_key: str | None = None
+    expires_at: datetime | None = None
+    execution_result: dict[str, Any] | None = None
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -130,8 +136,31 @@ class ProposalNotFoundError(LookupError):
 class OperatorAgentService:
     """Read-Only/Proposal-Modus fuer den ERP-Operator-Agent."""
 
-    def __init__(self) -> None:
+    def __init__(self, repo: AgentProposalRepository | None = None) -> None:
+        self._repo = repo
         self._proposals: dict[tuple[str, str], AgentProposal] = {}
+
+    def _cache(self, proposal: AgentProposal) -> None:
+        self._proposals[(proposal.tenant_id, proposal.proposal_id)] = proposal
+
+    def _persist(self, tenant_id: str, proposal: AgentProposal) -> None:
+        self._cache(proposal)
+        if self._repo is not None:
+            self._repo.save(tenant_id, proposal)
+
+    def _resolve_proposal(self, *, tenant_id: str, proposal_id: str) -> AgentProposal:
+        cached = self._proposals.get((tenant_id, proposal_id))
+        if cached is not None:
+            return cached
+        if self._repo is not None:
+            from app.repositories.agent_proposal_repository import record_to_proposal
+
+            rec = self._repo.get(tenant_id, proposal_id)
+            if rec is not None:
+                proposal = record_to_proposal(rec)
+                self._cache(proposal)
+                return proposal
+        raise ProposalNotFoundError(proposal_id)
 
     def _require_role(self, roles: set[str], required: str) -> None:
         if required not in roles:
@@ -206,8 +235,17 @@ class OperatorAgentService:
         context_summary: str,
         proposed_action: str,
         rationale: str,
+        idempotency_key: str | None = None,
     ) -> AgentProposal:
         self._require_role(roles, "agent:propose")
+        if self._repo is not None and idempotency_key:
+            from app.repositories.agent_proposal_repository import record_to_proposal
+
+            existing = self._repo.get_by_idempotency_key(tenant_id, idempotency_key)
+            if existing is not None:
+                proposal = record_to_proposal(existing)
+                self._cache(proposal)
+                return proposal
         risk = _RISK_BY_ACTION[action_type]
         proposal = AgentProposal(
             proposal_id=str(uuid4()),
@@ -218,21 +256,24 @@ class OperatorAgentService:
             context_summary=context_summary,
             proposed_action=proposed_action,
             rationale=rationale,
+            idempotency_key=idempotency_key,
         )
         proposal.audit_events.append({
             "event": "proposal_created",
             "occurred_at": _utcnow().isoformat(),
         })
-        self._proposals[(tenant_id, proposal.proposal_id)] = proposal
+        self._persist(tenant_id, proposal)
         return proposal
 
     def get_proposal(self, *, tenant_id: str, proposal_id: str) -> AgentProposal:
-        proposal = self._proposals.get((tenant_id, proposal_id))
-        if proposal is None:
-            raise ProposalNotFoundError(proposal_id)
-        return proposal
+        return self._resolve_proposal(tenant_id=tenant_id, proposal_id=proposal_id)
 
     def list_proposals(self, *, tenant_id: str, status: ApprovalStatus | None = None) -> list[AgentProposal]:
+        if self._repo is not None:
+            from app.repositories.agent_proposal_repository import record_to_proposal
+
+            records = self._repo.list(tenant_id, status=status)
+            return [record_to_proposal(rec) for rec in records]
         results = [p for (t, _), p in self._proposals.items() if t == tenant_id]
         if status is not None:
             results = [p for p in results if p.approval_status == status]
@@ -258,6 +299,7 @@ class OperatorAgentService:
             "approved_by": approved_by,
             "occurred_at": proposal.approved_at.isoformat(),
         })
+        self._persist(tenant_id, proposal)
         return proposal
 
     def reject_proposal(
@@ -281,6 +323,7 @@ class OperatorAgentService:
             "reason": reason,
             "occurred_at": _utcnow().isoformat(),
         })
+        self._persist(tenant_id, proposal)
         return proposal
 
     def execute_approved_action(
@@ -314,12 +357,14 @@ class OperatorAgentService:
             )
 
         result = self._execute_low_risk(proposal)
+        proposal.execution_result = result
         proposal.audit_events.append({
             "event": "action_executed",
             "executed_by": executed_by,
             "result_summary": result.get("summary", ""),
             "occurred_at": _utcnow().isoformat(),
         })
+        self._persist(tenant_id, proposal)
         return {
             "proposal_id": proposal_id,
             "action_type": proposal.action_type.value,
