@@ -1,5 +1,6 @@
 ---
 title: Service-Inventar
+last_reviewed: 2026-06-26
 description: Vollständiges Inventar aller Backend-Service-Module mit Kurzbeschreibung. Beschreibungen sind aus den Modul-Docstrings extrahiert.
 ---
 

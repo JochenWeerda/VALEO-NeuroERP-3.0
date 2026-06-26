@@ -1,5 +1,6 @@
 ---
 title: Datenbank-Migrations-Inventar
+last_reviewed: 2026-06-26
 description: Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Beschreibungen sind aus den Datei-Docstrings extrahiert.
 ---
 
