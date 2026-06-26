@@ -99,6 +99,12 @@ jobs:
             --backend-image-digest "${{ steps.images.outputs.backend_digest }}" \
             --frontend-image-digest "${{ steps.images.outputs.frontend_digest }}"
 
+      - name: Release Evidence Report (RELEASE-EVIDENCE-GATE-001)
+        run: |
+          python scripts/release_evidence_report.py \
+            --fail-on-red \
+            --sha "${{ inputs.release_sha || github.sha }}"
+
       - uses: actions/upload-artifact@v4
         with:
           name: release-gate-evidence
@@ -106,4 +112,6 @@ jobs:
             artifacts/production-readiness-assessment.*
             artifacts/release-compatibility-matrix.json
             artifacts/release-compatibility-matrix.md
+            artifacts/release_evidence.json
+            artifacts/release_evidence.md
           retention-days: 90
