@@ -4,9 +4,10 @@
 
 **Von:** Codex
 **Owner:** Codex
-**Stand:** reserviert 2026-06-26 - Erweiterung des Benutzerhandbuchs um operative Randdomaenen mit Quellen-/Reverse-Pflege.
+**Stand:** abgeschlossen 2026-06-26 - Benutzerhandbuch um POS/Kasse, Logistik/Touren, Compliance/Meldewesen, Personal/Zeit/Lohn, Controlling/Kostenrechnung und Futtermittel/Produktion erweitert.
 **Ziel:** POS/Kasse, Logistik, Compliance/Meldewesen, Personal/Lohn, Controlling/Kostenrechnung und Futtermittel/Produktion als Endnutzer-How-tos in `docs/benutzerhandbuch/` ergaenzen.
 **Dateibesitz:** `docs/benutzerhandbuch/**`, `mkdocs.yml`, `docs/agent-ops/slices/DOC-USER-MANUAL-002.yaml`, dieser Workboard-Abschnitt.
+**Abnahme:** Docs-Governance gruen; Staleness gruen; `mkdocs build` gruen. `mkdocs build --strict` bleibt durch bestehende Warnungen ausserhalb dieses Slice blockiert (ADR-/Architecture-Links und nicht navigierte Agent-Docs-Runbook-Seite), keine neuen Handbuch-Warnungen.
 
 ## ALEMBIC-MERGE-001 — Admin-Mobile + Charge-Lineage Alembic Repair-Migration
 

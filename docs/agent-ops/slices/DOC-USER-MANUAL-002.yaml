@@ -1,7 +1,7 @@
 slice_id: DOC-USER-MANUAL-002
 title: Benutzerhandbuch vervollstaendigen - operative Randdomaenen
 owner: Codex
-status: reserved
+status: completed
 created_at: 2026-06-26
 coordination: >-
   Reiner Doku-Slice fuer docs/benutzerhandbuch und mkdocs.yml. Keine Code-,
@@ -30,6 +30,28 @@ risks:
   - Screenshots fuer neue Seiten koennen fehlen; Text-How-tos muessen trotzdem nutzbar sein.
 external_gates:
   - Fachliche UAT je Domaene.
+completed_at: 2026-06-26
+result: >-
+  Benutzerhandbuch um sechs operative Randdomaenen erweitert: POS/Kasse,
+  Logistik/Touren, Compliance/Meldewesen, Personal/Zeit/Lohn,
+  Controlling/Kostenrechnung und Futtermittel/Produktion. Index und MkDocs-
+  Navigation verlinken alle neuen Seiten. Jede Seite nennt Quellen und
+  Reverse-Pflege-Regeln.
+completion_evidence:
+  - docs/benutzerhandbuch/pos-kasse.md
+  - docs/benutzerhandbuch/logistik.md
+  - docs/benutzerhandbuch/compliance-meldewesen.md
+  - docs/benutzerhandbuch/personal-lohn.md
+  - docs/benutzerhandbuch/controlling-kostenrechnung.md
+  - docs/benutzerhandbuch/futtermittel-produktion.md
+  - node scripts/docs-governance-check.cjs ... passed
+  - node scripts/docs-staleness-check.cjs --max-age-days 365 passed
+  - mkdocs build passed
+  - >-
+    mkdocs build --strict blockiert durch bestehende Warnungen ausserhalb dieses
+    Slices: ADR-Links zu AGENT-INTEGRATION.md, Prozesskernel-Wave-Link,
+    architecture/process-map Test-Link und nicht navigierte
+    agent-docs/runbooks/external-mock-vertraege.md.
 ai_harness:
   fachlicher_vertrag: >-
     Endnutzer erhalten aufgabenorientierte Anleitungen fuer taegliche ERP-Arbeit
