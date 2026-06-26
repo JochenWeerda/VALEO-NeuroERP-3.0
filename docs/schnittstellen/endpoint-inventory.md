@@ -232,6 +232,7 @@ Vollständiges Inventar aller FastAPI-Endpoint-Module mit Kurzbeschreibung. Besc
 | `liquidity_planning` | Liquiditätsplanung — 13-Wochen-Rolling-Forecast, thin-router pattern |
 | `logistics_freight` | Logistik – Frachtkostenberechnung (Feature 2) |
 | `logistics_tours` | Logistik – Tourenplanung-Engine (Feature 1 + Track & Trace / ePOD Feature 3) |
+| `logistik_frachtbriefe` | LOG-FRACHTBRIEF-001 — GET/POST /api/v1/logistik/frachtbriefe. |
 | `logistik_frachttabellen` | Frachttabellen — Frachtkosten-Stammdaten und Zuordnungen. |
 | `lohn_connector` | Lohn-Connector API – Lohn-Import-Läufe (LEXWARE / externe Lohnbuchhaltung). |
 | `marketing` | Marketing API - DB-backed endpoints. |
