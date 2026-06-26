@@ -1,3 +1,13 @@
+---
+title: Nummernkreise
+type: reference
+audience: [tenant-admin, betrieb]
+owner: Cursor
+status: aktiv
+last_reviewed: 2026-06-25
+version: 3.0.0
+---
+
 # Nummernkreise konfigurieren
 
 ## Überblick
@@ -139,9 +149,9 @@ curl -X POST https://erp.valeo.example.com/api/numbering/init-year \
 
 **Verifikation:**
 ```sql
-SELECT domain, tenant_id, year, COUNT(*) 
-FROM documents_header 
-GROUP BY domain, tenant_id, year, number 
+SELECT domain, tenant_id, year, COUNT(*)
+FROM documents_header
+GROUP BY domain, tenant_id, year, number
 HAVING COUNT(*) > 1;
 ```
 
@@ -193,8 +203,8 @@ max_order = old_cur.fetchone()[0]
 new_conn = psycopg2.connect("postgresql://valeo_erp")
 new_cur = new_conn.cursor()
 new_cur.execute("""
-  UPDATE number_series 
-  SET counter = %s 
+  UPDATE number_series
+  SET counter = %s
   WHERE domain = 'sales' AND tenant_id = 'default';
 """, (max_order,))
 new_conn.commit()

@@ -16,8 +16,8 @@ version: 1.0.0
 
 | Metrik | Wert |
 |--------|------|
-| Markdown-Dateien gesamt | 647 |
-| Kuratiert (behalten) | 628 |
+| Markdown-Dateien gesamt | 648 |
+| Kuratiert (behalten) | 629 |
 | Archiv-Kandidaten | 0 |
 | Doppelte Dateinamen | 140 |
 

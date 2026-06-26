@@ -1,8 +1,18 @@
+---
+title: ISO 27001 Gap-Analyse
+type: reference
+audience: [security, tenant-admin, betrieb]
+owner: Cursor
+status: aktiv
+last_reviewed: 2026-06-25
+version: 3.0.0
+---
+
 # ISO 27001 Gap Analysis - VALEO NeuroERP 3.0
 
-**Standard:** ISO/IEC 27001:2022  
-**Status:** 🟡 In Progress (58% Complete)  
-**Target:** ✅ Certification-Ready  
+**Standard:** ISO/IEC 27001:2022
+**Status:** 🟡 In Progress (58% Complete)
+**Target:** ✅ Certification-Ready
 **Review-Date:** 2025-10-12
 
 ---
@@ -15,12 +25,12 @@
 - [x] **Security-Policy** dokumentiert
   - Datei: `SECURITY.md`
   - Incident-Response-Plan ✅
-  
+
 - [ ] **Acceptable-Use-Policy**
   - Für Mitarbeiter
   - Für externe Nutzer
 
-**Gap:** Acceptable-Use-Policy fehlt  
+**Gap:** Acceptable-Use-Policy fehlt
 **Aufwand:** 1 Tag
 
 ---
@@ -30,7 +40,7 @@
 - [x] **On-Call-Rotation** dokumentiert
 - [ ] **Security-Champions** in jedem Team
 
-**Gap:** Security-Champions-Programm  
+**Gap:** Security-Champions-Programm
 **Aufwand:** Organisatorisch
 
 ---
@@ -47,7 +57,7 @@
   - Public, Internal, Confidential, Restricted
   - Labels in Code/Docs
 
-**Gap:** Formal Asset-Register  
+**Gap:** Formal Asset-Register
 **Aufwand:** 2 Tage
 
 ---
@@ -58,11 +68,11 @@
 - [x] **RBAC** implementiert
   - 6 Rollen definiert
   - 12 Permissions
-  
+
 - [x] **OIDC-Authentication**
   - Multi-Provider (Keycloak, Azure AD)
   - MFA-ready
-  
+
 - [x] **Least-Privilege-Principle**
   - Default: user (minimal permissions)
   - Admin nur für System-Admins
@@ -75,7 +85,7 @@
 - [x] **User-Provisioning/Deprovisioning**
   - Via Keycloak
   - Auto-Deactivation bei Austritt
-  
+
 - [x] **Access-Review**
   - Quarterly (Prozess: [iso27001-quarterly-review-process.md](iso27001-quarterly-review-process.md))
   - Audit-Log für Zugriffe
@@ -84,7 +94,7 @@
   - Jump-Host für Production-Access
   - Session-Recording
 
-**Gap:** PAM fehlt  
+**Gap:** PAM fehlt
 **Aufwand:** 1-2 Wochen
 
 ---
@@ -95,17 +105,17 @@
 - [x] **Encryption-in-Transit**
   - TLS 1.3 ✅
   - mTLS in Service-Mesh (Istio) ✅
-  
+
 - [ ] **Encryption-at-Rest**
   - PostgreSQL: Transparent-Data-Encryption (TDE)
   - Redis: Encryption-Module
   - Backups: GPG-Encrypted
-  
+
 - [x] **Key-Management**
   - Secrets in Kubernetes-Secrets
   - Rotation: monthly ✅
 
-**Gap:** Encryption-at-Rest  
+**Gap:** Encryption-at-Rest
 **Aufwand:** 3-5 Tage
 
 ---
@@ -116,11 +126,11 @@
 - [x] **Change-Management**
   - Git-Workflow (PR-Reviews)
   - CI/CD-Pipeline ✅
-  
+
 - [x] **Capacity-Management**
   - Kubernetes HPA ✅
   - Resource-Limits ✅
-  
+
 - [x] **Separation of Environments**
   - Dev, Staging, Production
   - Separate Databases
@@ -133,16 +143,16 @@
 - [x] **Container-Scanning**
   - Trivy ✅
   - Grype ✅
-  
+
 - [x] **Dependency-Scanning**
   - Safety (Python) ✅
   - npm audit (Node.js) ✅
-  
+
 - [ ] **Runtime-Protection**
   - Falco (Kubernetes)
   - SIEM-Integration
 
-**Gap:** Runtime-Protection  
+**Gap:** Runtime-Protection
 **Aufwand:** 1 Woche
 
 ---
@@ -153,7 +163,7 @@
 - [ ] **Backup-Testing** (monthly)
 - [ ] **Disaster-Recovery-Plan**
 
-**Gap:** Off-Site + DR-Plan  
+**Gap:** Off-Site + DR-Plan
 **Aufwand:** 1 Woche
 
 ---
@@ -164,14 +174,14 @@
 - [x] **Network-Segmentation**
   - Kubernetes-Namespaces ✅
   - Network-Policies ⏳
-  
+
 - [x] **mTLS** (Service-Mesh)
   - Istio PeerAuthentication ✅
-  
+
 - [ ] **WAF** (Web-Application-Firewall)
   - ModSecurity oder CloudFlare
 
-**Gap:** WAF fehlt  
+**Gap:** WAF fehlt
 **Aufwand:** 3-5 Tage
 
 ---
@@ -182,11 +192,11 @@
 - [x] **Secure-Coding-Guidelines**
   - ESLint Security-Rules ✅
   - Bandit (Python) ✅
-  
+
 - [x] **Code-Reviews**
   - Required für PR-Merge
   - 2-Reviewer-Prinzip (empfohlen)
-  
+
 - [x] **Security-Testing**
   - OWASP ZAP ✅
   - ASVS Level 2 ✅
@@ -199,12 +209,12 @@
 - [x] **Patch-Management**
   - Dependabot ✅
   - Monthly-Updates
-  
+
 - [ ] **Vulnerability-Management**
   - CVE-Tracking
   - Remediation-SLA (Critical: 7 days)
 
-**Gap:** Formal Vulnerability-Management  
+**Gap:** Formal Vulnerability-Management
 **Aufwand:** 1 Woche
 
 ---
@@ -215,16 +225,16 @@
 - [x] **Incident-Response-Plan**
   - Datei: `SECURITY.md` ✅
   - Runbooks: `docs/operations/on-call-schedule.md` ✅
-  
+
 - [x] **On-Call-Rotation**
   - 24/7-Coverage ✅
   - Escalation-Policy ✅
-  
+
 - [ ] **Incident-Tracking-System**
   - Jira/GitHub-Issues
   - Post-Incident-Reviews
 
-**Gap:** Formal Incident-Tracking  
+**Gap:** Formal Incident-Tracking
 **Aufwand:** Organisatorisch
 
 ---
@@ -235,16 +245,16 @@
 - [ ] **Business-Impact-Analysis** (BIA)
   - Kritische Prozesse identifizieren
   - RTO/RPO definieren
-  
+
 - [ ] **Disaster-Recovery-Plan**
   - Failover-Szenarien
   - Recovery-Procedures
-  
+
 - [ ] **BC-Tests** (jährlich)
   - Simulated-Disaster
   - Recovery-Drill
 
-**Gap:** BC-Plan komplett fehlt  
+**Gap:** BC-Plan komplett fehlt
 **Aufwand:** 2-3 Wochen
 
 ---

@@ -1,0 +1,25 @@
+slice_id: DOC-MIGRATION-006
+title: "Doku-Migration Phase J: Frontmatter Compliance + Operations-Archiv"
+owner: Cursor
+status: abgeschlossen
+updated: 2026-06-25
+completed_at: 2026-06-25
+goal: >-
+  Frontmatter (last_reviewed) auf alle MkDocs-Compliance- und Admin-Seiten ohne
+  Metadaten; docs/operations/ nach _internal/archive/ verschieben (Phase-D-Vorbereitung).
+file_ownership:
+  - docs/compliance/*.md
+  - docs/admin/BRANDING.md
+  - docs/admin/NUMBERING.md
+  - docs/_internal/archive/operations/**
+  - scripts/docs-legacy-migrate.py
+  - docs/dokumentation/migrationsplan.md
+  - docs/agent-ops/slices/DOC-MIGRATION-006.yaml
+acceptance:
+  - node scripts/docs-staleness-check.cjs meldet 0 fehlende last_reviewed in Compliance/Admin.
+  - docs/operations/ ist leer oder entfernt.
+  - python -m mkdocs build --site-dir site_check Exit 0.
+tests:
+  - node scripts/docs-staleness-check.cjs --max-age-days 180
+  - python scripts/docs-legacy-migrate.py --apply
+  - python -m mkdocs build --site-dir site_check
