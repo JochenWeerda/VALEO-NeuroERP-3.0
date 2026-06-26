@@ -40,7 +40,7 @@ Dieser Plan ist **historischer Soll-Katalog**; der aktuelle Lieferstand steht in
 | Futtermittel | HACCP-Grundstruktur, VLOG-Meldung, QS-Leitfaden vollständig |
 | CRM | RAG-/Intent-Panel im Kunden-Stamm, Legacy-API-Pfade `/api/crm/` |
 | Finance | Finanz-Abschluss-Stubs (calculate/lock/run); ELSTER vollständig (ERiC extern) |
-| Logistik | CMR-Frachtbrief-Druck vollständig; `/api/v1/logistik/frachtbriefe` fehlt als Backend-Endpoint |
+| Logistik | CMR-Frachtbrief-Druck vollständig; `/api/v1/logistik/frachtbriefe` **geschlossen 2026-06-26** (LOG-FRACHTBRIEF-001: `domain_logistics.frachtbriefe` Alembic + GET/POST/PATCH + Tests); Track & Trace / ePOD noch offen |
 | WF-Cockpit | Persistente Cockpit-Tabellen, Outbox-/NATS-Projektor, UI-Leitstand, Dead-Letter-Sicht |
 | Agrar/Silo | Zielzellen-Regelengine (automatischer Vorschlag aus WE/Waage) |
 
