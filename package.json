@@ -72,6 +72,7 @@
     "test:e2e:smoke": "playwright test --grep @smoke --project=smoke",
     "test:e2e:full": "playwright test --grep @full --project=full",
     "test:e2e:fallback": "playwright test --grep @fallback --project=fallback-verification",
+    "test:e2e:critical": "playwright test --config playwright.config.critical.ts",
     "test:e2e:report": "playwright show-report"
   },
   "devDependencies": {
