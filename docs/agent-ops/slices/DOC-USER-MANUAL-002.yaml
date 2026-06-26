@@ -1,0 +1,52 @@
+slice_id: DOC-USER-MANUAL-002
+title: Benutzerhandbuch vervollstaendigen - operative Randdomaenen
+owner: Codex
+status: reserved
+created_at: 2026-06-26
+coordination: >-
+  Reiner Doku-Slice fuer docs/benutzerhandbuch und mkdocs.yml. Keine Code-,
+  API- oder Testdateien. Quellen muessen je Seite in Reverse-Pflege-Hinweisen
+  notiert werden.
+goal: >-
+  Das Benutzerhandbuch von Kernseiten auf die wichtigsten operativen
+  Fachbereiche erweitern: POS/Kasse, Logistik, Compliance/Meldewesen,
+  Personal/Lohn, Controlling/Kostenrechnung sowie Futtermittel/Produktion.
+file_ownership:
+  - docs/benutzerhandbuch/**
+  - mkdocs.yml
+  - docs/agent-ops/active-workboard.md
+  - docs/agent-ops/slices/DOC-USER-MANUAL-002.yaml
+acceptance:
+  - Neue Seiten folgen dem Benutzerhandbuch-Muster Ziel/Voraussetzungen/Schritte/Ergebnis/Fehler.
+  - Jede neue Seite nennt Quellen und Reverse-Pflege.
+  - Index und MkDocs-Navigation verlinken alle neuen Seiten.
+  - Docs-Governance, Staleness und mkdocs build sind gruen oder Blocker dokumentiert.
+tests:
+  - node scripts/docs-governance-check.cjs
+  - node scripts/docs-staleness-check.cjs --max-age-days 365
+  - mkdocs build --strict
+risks:
+  - Benutzerhandbuch darf keine externen Freigaben als erledigt darstellen.
+  - Screenshots fuer neue Seiten koennen fehlen; Text-How-tos muessen trotzdem nutzbar sein.
+external_gates:
+  - Fachliche UAT je Domaene.
+ai_harness:
+  fachlicher_vertrag: >-
+    Endnutzer erhalten aufgabenorientierte Anleitungen fuer taegliche ERP-Arbeit
+    in den wichtigsten noch fehlenden Domaenen.
+  architektur_vertrag: >-
+    Nur MkDocs-/Markdown-Doku; keine Aenderung an Runtime, API, Tests oder
+    Navigation im Produkt.
+  daten_vertrag: >-
+    Quellen sind Workboard, Process-Kernel-Status, Open-Gaps, Workflow-/Card-
+    Doku und vorhandene Handbuchseiten. Jede Seite nennt Reverse-Pflege.
+  test_vertrag: >-
+    Doku-Governance, Staleness und MkDocs-Build muessen die neue Struktur pruefen.
+  security_vertrag: >-
+    Keine produktiven Secrets, keine echten Personen-/Kassen-/Steuerdaten.
+  betriebs_vertrag: >-
+    Externe Gates wie DATEV, TSE, ELSTER, Payroll-Provider und UAT werden klar
+    als Freigabe-/Betriebsgrenzen markiert.
+  dokumentations_vertrag: >-
+    Index, Navigation, Quellen- und Reverse-Pflege-Hinweise werden gemeinsam
+    aktualisiert.
