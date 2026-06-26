@@ -27,7 +27,7 @@ def _tid(x_tenant_id: Annotated[str | None, Header()] = None) -> str:
     return x_tenant_id
 
 
-@router.get("/kunden/{kunden_nr}/schlaege", response_model=dict[str, Any])
+@router.get("/kunden/{kunden_nr}/schlaege", response_model=dict[str, Any], summary="Kundenschlaege fuer Innendienst abrufen")
 def kunden_schlaege(
     kunden_nr: str,
     db: Session = Depends(get_db),
@@ -71,7 +71,7 @@ def kunden_schlaege(
     }
 
 
-@router.get("/kunden/{kunden_nr}/massnahmen", response_model=dict[str, Any])
+@router.get("/kunden/{kunden_nr}/massnahmen", response_model=dict[str, Any], summary="Kundenmassnahmen fuer Innendienst abrufen")
 def kunden_massnahmen(
     kunden_nr: str,
     schlag_id: str | None = Query(None),
@@ -120,7 +120,7 @@ def kunden_massnahmen(
     }
 
 
-@router.get("/potential", response_model=dict[str, Any])
+@router.get("/potential", response_model=dict[str, Any], summary="Innendienst-Potentialanalyse abrufen")
 def potential_analyse(
     db: Session = Depends(get_db),
     x_tenant_id: Annotated[str | None, Header()] = None,
