@@ -423,11 +423,11 @@ gegen Code, Tests und Workboard verifiziert.
 
 | Thema | Quelle | Priorität | Workboard-Slice |
 |-------|--------|-----------|-----------------|
-| Finanz-Abschluss-Stubs (calculate/lock/run) | FIN-001 | P1 | `FIN-ABSCHLUSS-STUBS-001` |
+| ~~Finanz-Abschluss-Stubs (calculate/lock/run)~~ | FIN-001 | P1 | **erledigt 2026-06-26** - `finance_closing_service.py`, `finance_actions.py`, `tests/test_finance_closing_service.py` |
 | OTC-010 Positionen Auftrag->LS | OTC-010-P1/P2/P3 | P2 | ~~`OTC-010-POS-HANDOVER-001`~~ **erledigt 2026-06-26** |
 | CMP ustva `.data`-Bug | CMP-001-P1/P2 | P2 | `CMP-UStVA-API-CLIENT-001` |
 | CRM Legacy-Pfade `/api/crm/` | CRM-001 | P2 | `CRM-LEGACY-API-MIGRATE-001` |
-| Compliance CamelCase Register | COM-001 | P2 | `COM-REGISTER-CAMELCASE-001` |
+| ~~Compliance CamelCase Register~~ | COM-001 | P2 | **erledigt 2026-06-26** - `compliance.py`, `betrieb.ts`, Register-Seiten |
 | P2P-010 Overview-Card fehlt | workflow-chains | P3 | ~~`P2P-010-OVERVIEW-001`~~ **erledigt** 2026-06-26 |
 | Ketten-Registry + Inventar-Audit | CARD-AUDIT | Doku | ~~`DOC-CARD-CHAIN-001`~~ **erledigt** 2026-06-26 |
 | Card-Frontmatter Rollout | CARD-AUDIT | Doku | ~~`DOC-CARD-FRONTMATTER-001`~~ **erledigt** (Registry-Cards) |
