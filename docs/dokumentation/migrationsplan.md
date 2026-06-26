@@ -50,9 +50,8 @@ Diátaxis-Struktur — schrittweise, nachvollziehbar, ohne Informationsverlust.
    Frontmatter auf alle Registry-Prozess-Cards migriert
    (`scripts/migrate-cards-frontmatter.py`); P2P-010 Overview angelegt.
    Cards bleiben intern; Ergebnisse fließen in Workflows/Open-Gaps.
-4. **Phase D:** Staleness-Gate verschärfen (blockierend), sobald die kuratierte
-   Basis vollständig Frontmatter trägt — **Fortschritt 2026-06-25:** Compliance
-   + Admin BRANDING/NUMBERING haben `last_reviewed`; CI weiterhin warnend.
+4. **Phase D (2026-06-25):** Staleness-Vorbereitung (Frontmatter Compliance/Admin,
+   `DOC-MIGRATION-006`) und blockierendes CI-Gate 365 Tage (`DOC-MIGRATION-007`).
 5. **Phase E (2026-06-26):** Bulk-Archivierung ~390 Alt-Dokumente nach
    `docs/_internal/archive/` (`scripts/docs-legacy-migrate.py`); Doppel-Archiv
    `docs/archive/` aufgelöst; Root von 107 auf 2 kuratierte Dateien reduziert
@@ -70,8 +69,9 @@ Diátaxis-Struktur — schrittweise, nachvollziehbar, ohne Informationsverlust.
    `python scripts/docs-legacy-migrate.py --purge-roadmap --apply`
    (`DOC-MIGRATION-005`).
 10. **Phase J (2026-06-25):** Frontmatter auf Compliance-/Admin-Seiten;
-    `docs/operations/` archiviert; Staleness-Check ohne Lücken in MkDocs-Nav
-    (`DOC-MIGRATION-006`, Vorbereitung Phase D).
+    `docs/operations/` archiviert (`DOC-MIGRATION-006`).
+
+## Sicherheitsnetz
 
 - Vor jeder Verschiebung Working-Tree-Status prüfen (keine fremden, offenen
   Änderungen an Zieldateien).

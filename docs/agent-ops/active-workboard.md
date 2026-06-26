@@ -4485,6 +4485,12 @@ Archiv des vorherigen Boards:
 **Stand:** abgeschlossen 2026-06-25 — Frontmatter auf 10 Compliance-/Admin-Seiten; `docs/operations/` nach `_internal/archive/operations/`.
 **Dateibesitz:** `docs/compliance/**`, `docs/admin/BRANDING.md`, `docs/admin/NUMBERING.md`, `scripts/docs-legacy-migrate.py`, `docs/agent-ops/slices/DOC-MIGRATION-006.yaml`.
 
+## DOC-MIGRATION-007 — Staleness-Gate blockierend (Phase D)
+
+**Owner:** Cursor
+**Stand:** abgeschlossen 2026-06-25 — CI blockiert bei fehlendem/veraltetem `last_reviewed` (365 Tage, kuratierte MkDocs-Seiten).
+**Dateibesitz:** `.github/workflows/docs.yml`, `.github/workflows/docs-governance.yml`, `scripts/docs-staleness-check.cjs`, `docs/dokumentation/governance.md`, `docs/agent-ops/slices/DOC-MIGRATION-007.yaml`.
+
 ---
 
 ## CARD-AUDIT-Follow-up (2026-06-26)

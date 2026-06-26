@@ -1,0 +1,23 @@
+slice_id: DOC-MIGRATION-007
+title: "Doku-Migration Phase D/K: Staleness-Gate blockierend"
+owner: Cursor
+status: abgeschlossen
+updated: 2026-06-25
+completed_at: 2026-06-25
+goal: >-
+  Staleness-Check in CI blockierend schalten (365 Tage, kuratierte MkDocs-Seiten);
+  fehlendes last_reviewed fail-fast; Governance-Doku aktualisieren.
+file_ownership:
+  - .github/workflows/docs.yml
+  - .github/workflows/docs-governance.yml
+  - scripts/docs-staleness-check.cjs
+  - docs/dokumentation/governance.md
+  - docs/dokumentation/migrationsplan.md
+  - docs/agent-ops/slices/DOC-MIGRATION-007.yaml
+acceptance:
+  - docs.yml und docs-governance.yml führen Staleness ohne continue-on-error aus.
+  - node scripts/docs-staleness-check.cjs --max-age-days 365 Exit 0 auf main.
+  - Fehlendes last_reviewed setzt Exit-Code 1 (ohne --warn-missing).
+tests:
+  - node scripts/docs-staleness-check.cjs --max-age-days 365
+  - python -m mkdocs build --site-dir site_check

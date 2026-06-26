@@ -26,7 +26,7 @@ erfordern Review der jeweils Verantwortlichen.
 | `mkdocs build` | Baut die kuratierte Site; Fehler blockieren. |
 | `docs-markdown-check.cjs` | Markdown-Hygiene (H1, Whitespace, Fences). |
 | `docs-governance-check.cjs` | Struktur-/Frontmatter-Regeln. |
-| `docs-staleness-check.cjs` | Meldet veraltete Seiten (zunächst nicht-blockierend). |
+| `docs-staleness-check.cjs` | Blockiert PRs bei fehlendem oder veraltetem `last_reviewed` (365 Tage, kuratierte MkDocs-Seiten). |
 | `ai-slice-readiness-check.cjs` | Pflichtschema der Slice-YAMLs. |
 
 ## Aktualität (Staleness)
@@ -38,9 +38,9 @@ Jede kuratierte Seite trägt `last_reviewed`. Der Staleness-Check meldet Seiten
 node scripts/docs-staleness-check.cjs --max-age-days 365
 ```
 
-Im CI läuft er zunächst **nicht-blockierend** (`continue-on-error`), um
-Altbestände nicht sofort rot zu färben. Nach der Migration kann er verschärft
-werden.
+Im CI läuft der Check **blockierend** in `docs.yml` und `docs-governance.yml`
+(Schwellwert 365 Tage, Scope: kuratierte MkDocs-Bereiche). ADR-/Wave-Architektur
+bleibt repo-only und ist nicht im Scope.
 
 ## Review-Frequenz
 

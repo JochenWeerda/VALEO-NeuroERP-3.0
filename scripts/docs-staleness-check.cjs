@@ -10,6 +10,7 @@
  *   node scripts/docs-staleness-check.cjs                 # Default 180 Tage
  *   node scripts/docs-staleness-check.cjs --max-age-days 365
  *   node scripts/docs-staleness-check.cjs --max-age-days 3650   # praktisch nicht-blockierend
+ *   node scripts/docs-staleness-check.cjs --warn-missing      # fehlendes last_reviewed nur melden
  */
 
 const fs = require("fs");
@@ -32,9 +33,10 @@ const CURATED = [
 
 function parseArgs() {
   const args = process.argv.slice(2);
-  const result = { maxAgeDays: 180, paths: [] };
+  const result = { maxAgeDays: 180, paths: [], warnMissing: false };
   for (let i = 0; i < args.length; i += 1) {
     if (args[i] === "--max-age-days") result.maxAgeDays = Number(args[++i]);
+    else if (args[i] === "--warn-missing") result.warnMissing = true;
     else result.paths.push(args[i]);
   }
   return result;
@@ -93,6 +95,7 @@ function main() {
   if (missing.length > 0) {
     console.log(`\nOhne last_reviewed (${missing.length}):`);
     for (const filePath of missing) console.log(`  - ${filePath}`);
+    if (!args.warnMissing) process.exitCode = 1;
   }
   if (stale.length > 0) {
     console.log(`\nVeraltet (${stale.length}):`);
@@ -102,6 +105,7 @@ function main() {
     process.exitCode = 1;
     return;
   }
+  if (process.exitCode === 1) return;
   console.log("\nKeine veralteten Seiten.");
 }
 
