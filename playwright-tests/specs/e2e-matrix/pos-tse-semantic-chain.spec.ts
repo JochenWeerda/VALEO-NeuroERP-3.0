@@ -253,8 +253,12 @@ test.describe('POS @critical Kern-Pfad', () => {
 
   test('POS @critical — Tagesabschluss-Endpunkt antwortet (Health)', async () => {
     const ctx = await request.newContext({ baseURL: BASE_CRIT })
-    const res = await ctx.get('/api/v1/pos/tagesabschluss', { headers: HEADERS_CRIT })
-    expect([200, 404, 422]).toContain(res.status())
+    // POST-only route — leerer Body liefert 422 (Validierung), kein 405 wie bei GET
+    const res = await ctx.post('/api/v1/pos/tagesabschluss', {
+      headers: HEADERS_CRIT,
+      data: {},
+    })
+    expect([200, 201, 404, 422]).toContain(res.status())
     await ctx.dispose()
   })
 })
