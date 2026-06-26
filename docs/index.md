@@ -37,6 +37,8 @@ Lernen (Tutorials), Aufgaben (How-to), Nachschlagen (Reference) und Verstehen
 - [Frontmatter-Standard](dokumentation/frontmatter-standard.md) — verbindliche
   Metadaten je Seite.
 
-!!! note "Aufbauphase"
-    Diese Site ist das Fundament (`DOC-FOUNDATION-001`). Die einzelnen Bereiche
-    werden in Folge-Slices inhaltlich befüllt und die Altbestände migriert.
+!!! note "Migrationsstand"
+    Bulk-Migration abgeschlossen (`DOC-MIGRATION-001…008`, Stand 2026-06-26).
+    Altbestände liegen unter `docs/_internal/archive/`; Lieferstand siehe
+    [Process Kernel STATUS](architecture/process-kernel/STATUS.md) und
+    [Migrationsplan](dokumentation/migrationsplan.md).

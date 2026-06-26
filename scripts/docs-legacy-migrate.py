@@ -173,6 +173,37 @@ def collect_md_files() -> list[Path]:
     return sorted(files)
 
 
+def classify_duplicate_group(name: str, paths: list[str]) -> str:
+    """Klassifiziert gleichnamige Dateien: strukturell harmlos vs. inhaltlich prüfbar."""
+    lower = name.lower()
+    if lower == "status.md" and all(
+        p.startswith("docs/architecture/process-kernel/") for p in paths
+    ):
+        return "benign"
+    if lower in ("index.md", "readme.md"):
+        return "benign"
+    cards = [p for p in paths if "/cards/" in p]
+    workflows = [p for p in paths if "/workflows/" in p]
+    if cards and workflows and len(cards) + len(workflows) == len(paths):
+        return "benign"
+    if lower == "governance.md" and len(paths) == 2:
+        return "benign"
+    if lower == "crm.md" and len({p.split("/")[1] for p in paths if p.startswith("docs/")}) >= 2:
+        return "benign"
+    return "actionable"
+
+
+def split_duplicates(by_name: dict[str, list[str]]) -> tuple[dict[str, list[str]], dict[str, list[str]]]:
+    benign: dict[str, list[str]] = {}
+    actionable: dict[str, list[str]] = {}
+    for name, paths in by_name.items():
+        if len(paths) <= 1:
+            continue
+        bucket = classify_duplicate_group(name, paths)
+        (benign if bucket == "benign" else actionable)[name] = paths
+    return benign, actionable
+
+
 def build_inventory(files: list[Path]) -> dict:
     by_name: dict[str, list[str]] = defaultdict(list)
     to_archive: list[dict] = []
@@ -203,12 +234,15 @@ def build_inventory(files: list[Path]) -> dict:
             to_archive.append({"from": r, "bucket": classify(p), "reason": "pattern"})
 
     duplicates = {k: v for k, v in by_name.items() if len(v) > 1}
+    benign_duplicates, actionable_duplicates = split_duplicates(duplicates)
     return {
         "generated": date.today().isoformat(),
         "total_md": len(seen_resolved),
         "keep_count": len(kept),
         "archive_candidates": to_archive,
         "duplicate_basenames": duplicates,
+        "benign_duplicate_basenames": benign_duplicates,
+        "actionable_duplicate_basenames": actionable_duplicates,
         "card_duplicates_resolved": list(CARD_DUPLICATE_CANONICAL.keys()),
     }
 
@@ -236,7 +270,9 @@ def write_inventory(data: dict) -> None:
         f"| Markdown-Dateien gesamt | {data['total_md']} |",
         f"| Kuratiert (behalten) | {data['keep_count']} |",
         f"| Archiv-Kandidaten | {len(data['archive_candidates'])} |",
-        f"| Doppelte Dateinamen | {len(data['duplicate_basenames'])} |",
+        f"| Doppelte Dateinamen (gesamt) | {len(data['duplicate_basenames'])} |",
+        f"| — strukturell harmlos | {len(data['benign_duplicate_basenames'])} |",
+        f"| — inhaltlich prüfbar | {len(data['actionable_duplicate_basenames'])} |",
         "",
         "## Archiv-Buckets (Kandidaten)",
         "",
@@ -249,9 +285,35 @@ def write_inventory(data: dict) -> None:
     for b, c in sorted(buckets.items(), key=lambda x: (-x[1], x[0])):
         lines.append(f"| `{b}` | {c} |")
 
-    lines.extend(["", "## Doppelte Dateinamen (Top 30)", "", "| Dateiname | Vorkommen |", "|-----------|-----------|"])
-    dup_items = sorted(data["duplicate_basenames"].items(), key=lambda x: -len(x[1]))[:30]
-    for name, paths in dup_items:
+    lines.extend(
+        [
+            "",
+            "## Strukturell harmlose Duplikate",
+            "",
+            "Gleicher Dateiname, unterschiedlicher Zweck — **kein Merge nötig** "
+            "(Wave-`STATUS.md`, Cards↔Workflows, Bereichs-`index.md`/`README.md`).",
+            "",
+            "| Dateiname | Vorkommen |",
+            "|-----------|-----------|",
+        ]
+    )
+    benign_items = sorted(data["benign_duplicate_basenames"].items(), key=lambda x: -len(x[1]))[:15]
+    for name, paths in benign_items:
+        lines.append(f"| `{name}` | {len(paths)} |")
+
+    lines.extend(
+        [
+            "",
+            "## Inhaltlich prüfbare Duplikate",
+            "",
+            "| Dateiname | Vorkommen |",
+            "|-----------|-----------|",
+        ]
+    )
+    action_items = sorted(data["actionable_duplicate_basenames"].items(), key=lambda x: -len(x[1]))[:30]
+    if not action_items:
+        lines.append("| *(keine offenen Fälle)* | 0 |")
+    for name, paths in action_items:
         lines.append(f"| `{name}` | {len(paths)} |")
 
     lines.extend(
@@ -274,7 +336,6 @@ def write_inventory(data: dict) -> None:
             "- Migration: `python scripts/docs-legacy-migrate.py --apply`",
             "- Dry-run: `python scripts/docs-legacy-migrate.py --dry-run`",
             "- Card-Dedupe: `python scripts/docs-legacy-migrate.py --dedupe-cards`",
-            "- Roadmap-Status: `python scripts/docs-legacy-migrate.py --archive-roadmap-status --apply`",
             "- Roadmap-Purge: `python scripts/docs-legacy-migrate.py --purge-roadmap --apply`",
             "- Ziel: `docs/_internal/archive/` (einheitlich)",
             "",
