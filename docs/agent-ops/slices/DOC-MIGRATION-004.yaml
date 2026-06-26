@@ -1,0 +1,27 @@
+slice_id: DOC-MIGRATION-004
+title: "Doku-Migration Phase H: Compliance-Nav + Roadmap-Status archivieren"
+owner: Cursor
+status: abgeschlossen
+updated: 2026-06-25
+completed_at: 2026-06-25
+goal: >-
+  Compliance-Seiten in MkDocs-Navigation einbinden; historische roadmap/status-
+  Snapshots nach _internal/archive/ verschieben; Duplikat-Inventar von Archiv-
+  und Stub-Pfaden bereinigen.
+file_ownership:
+  - mkdocs.yml
+  - docs/compliance/index.md
+  - docs/roadmap/README.md
+  - docs/_internal/archive/roadmap-status/**
+  - scripts/docs-legacy-migrate.py
+  - docs/dokumentation/migrationsplan.md
+  - docs/agent-ops/slices/DOC-MIGRATION-004.yaml
+acceptance:
+  - Compliance-Unterseiten in mkdocs nav; compliance/index verlinkt alle Seiten.
+  - docs/roadmap/status/ leer; Inhalt in _internal/archive/roadmap-status/.
+  - legacy-docs-inventory zählt Archiv-Kopien nicht als Duplikate.
+  - python -m mkdocs build --site-dir site_check Exit 0.
+tests:
+  - python scripts/docs-legacy-migrate.py --archive-roadmap-status --apply
+  - python scripts/docs-legacy-migrate.py --inventory-only
+  - python -m mkdocs build --site-dir site_check

@@ -430,7 +430,5 @@ Wenn in Code, Tests oder UI ein Widerspruch zwischen Doku, Implementierung, Fach
 
 Formale Projekt- und Lieferstaende liegen weiterhin in:
 
-- [Process Kernel Status](c:/Users/Jochen/VALEO-NeuroERP-3.0/docs/architecture/process-kernel/STATUS.md)
-- `docs/roadmap/status/*.md`
+- [Process Kernel Status](../architecture/process-kernel/STATUS.md)
 - `docs/project-context/operational-rollout-scope-2026-04-09.md`
-- `docs/roadmap/status/2026-04-03-security-hardening-phase-2.md`

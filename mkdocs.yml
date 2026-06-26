@@ -142,6 +142,8 @@ nav:
       - Monitoring & SLO: admin/monitoring-und-slo.md
       - Incident-Response: admin/incident-response.md
       - Skalierung & Performance: admin/skalierung-performance.md
+      - PDF-Branding: admin/BRANDING.md
+      - Nummernkreise: admin/NUMBERING.md
   - Entwickler:
       - Überblick: entwickler/index.md
       - Architektur:
@@ -161,7 +163,16 @@ nav:
       - Tool-Katalog: agent-docs/tool-catalog.md
       - Guardrails: agent-docs/guardrails.md
       - ai_harness-Verträge: agent-docs/contracts.md
-  - Compliance: compliance/index.md
+  - Compliance:
+      - Überblick: compliance/index.md
+      - GoBD-Checkliste: compliance/gobd-checklist.md
+      - GoBD Belegnummer: compliance/GOBD-BELEGNUMMER-ABBRUCH.md
+      - GoBD Schritt 3: compliance/GOBD-SCHRITT3-KONZEPT.md
+      - Buchungen Audit-Pfad: compliance/BUCHUNGEN-AUDIT-PFAD.md
+      - DSGVO-Checkliste: compliance/gdpr-checklist.md
+      - ISO 27001 Gap-Analyse: compliance/iso27001-gap-analysis.md
+      - ISO 27001 Review: compliance/iso27001-quarterly-review-process.md
+      - A1 Compliance-Roadmap: compliance/a-eins-compliance-roadmap.md
   - Referenz: referenz/index.md
   - Grundlagen:
       - Dokumentationskonzept: dokumentation/dokumentationskonzept.md

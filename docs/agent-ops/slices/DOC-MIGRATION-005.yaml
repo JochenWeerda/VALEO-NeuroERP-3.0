@@ -1,0 +1,23 @@
+slice_id: DOC-MIGRATION-005
+title: "Doku-Migration Phase I: Abgearbeitete Roadmaps löschen"
+owner: Cursor
+status: abgeschlossen
+updated: 2026-06-25
+completed_at: 2026-06-25
+goal: >-
+  Historische Roadmap-Snapshots und Legacy-Planungsdocs entfernen (abgearbeitet);
+  Verweise in STATUS, ADRs, Cards und Open-Gaps auf aktive Quellen umstellen.
+file_ownership:
+  - docs/roadmap/README.md
+  - scripts/docs-legacy-migrate.py
+  - docs/architecture/process-kernel/STATUS.md
+  - docs/architecture/process-kernel/DELIVERY-MAP.md
+  - docs/project-context/open-gaps-and-known-issues.md
+  - docs/agent-ops/slices/DOC-MIGRATION-005.yaml
+acceptance:
+  - docs/roadmap/ enthält nur README.md (Redirect auf Lieferstand).
+  - Keine aktiven Verweise auf gelöschte roadmap/status- oder Planungsdateien.
+  - python -m mkdocs build --site-dir site_check Exit 0.
+tests:
+  - python scripts/docs-legacy-migrate.py --purge-roadmap --apply
+  - python -m mkdocs build --site-dir site_check

@@ -3,7 +3,7 @@
 ## Status
 
 - **Stand:** abgeschlossen (verifiziert 2026-06-25, Cards-Migration-Audit)
-- **Evidenz:** tests/test_process_kernel_wave6_supplier.py, docs/roadmap/status/2026-04-01-security-hardening-phase-1.md
+- **Evidenz:** tests/test_process_kernel_wave6_supplier.py
 
 ## Ziel
 

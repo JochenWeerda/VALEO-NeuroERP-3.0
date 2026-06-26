@@ -3,7 +3,7 @@
 ## Status
 
 - **Stand:** abgeschlossen (verifiziert 2026-06-25, Cards-Migration-Audit)
-- **Evidenz:** tests/test_security_admin_monitoring.py, docs/roadmap/status/2026-04-01-security-hardening-phase-1.md
+- **Evidenz:** tests/test_security_admin_monitoring.py
 
 - Bereich: Security Dashboard / Alerting
 - Risiko: Security-Events existieren, sind aber ohne Dashboard-/Alerting-Anbindung operativ schwer nutzbar

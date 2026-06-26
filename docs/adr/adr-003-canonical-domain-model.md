@@ -44,4 +44,4 @@ Negativ:
 - Bestehende Schattenmodelle muessen schrittweise abgebaut werden
 ## References
 - [Target State Landhandel ERP](../architecture/target-state-landhandel-erp.md)
-- [Top-50 Gap Backlog Landhandel](../roadmap/status/2026-03-06-top-50-gap-backlog-landhandel.md)
+- [Top-50 Gap Backlog Landhandel](../project-context/open-gaps-and-known-issues.md)

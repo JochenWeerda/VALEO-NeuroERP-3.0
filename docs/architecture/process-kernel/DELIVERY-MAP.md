@@ -179,5 +179,5 @@ Prioritaet fuer die naechste Liefersequenz:
 
 - Detaillieferungen: `wave-*/STATUS.md`
 - Globaler Status: `STATUS.md`
-- Gap-Backlog: `docs/roadmap/status/2026-03-06-top-50-gap-backlog-landhandel.md`
+- Gap-Backlog: `docs/project-context/open-gaps-and-known-issues.md`
 - ADR-Index: `docs/architecture/index.md`

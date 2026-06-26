@@ -1,7 +1,7 @@
 {
   "generated": "2026-06-26",
-  "total_md": 667,
-  "keep_count": 648,
+  "total_md": 647,
+  "keep_count": 628,
   "archive_candidates": [],
   "duplicate_basenames": {
     "readme.md": [
@@ -10,6 +10,7 @@
       "docs/agent-ops/README.md",
       "docs/architecture/frontend-routing/README.md",
       "docs/cards/README.md",
+      "docs/roadmap/README.md",
       "docs/warehouse/README.md",
       "docs/workflows/README.md"
     ],
@@ -245,11 +246,6 @@
       "docs/cards/inventory/DOM-SUPPLY-003-physische-kette.md",
       "docs/workflows/dom-supply-003-physische-kette.md"
     ],
-    "inv-001-inventory-to-settlement.md": [
-      "docs/cards/inventory/INV-001-inventory-to-settlement.md",
-      "docs/cards/lager/INV-001-inventory-to-settlement.md",
-      "docs/workflows/inv-001-inventory-to-settlement.md"
-    ],
     "cts-001-contract-to-settlement.md": [
       "docs/cards/kontrakte/CTS-001-contract-to-settlement.md",
       "docs/workflows/cts-001-contract-to-settlement.md"
@@ -261,6 +257,10 @@
     "dom-con-003-fixierung-markt-mahnung.md": [
       "docs/cards/kontrakte/DOM-CON-003-fixierung-markt-mahnung.md",
       "docs/workflows/dom-con-003-fixierung-markt-mahnung.md"
+    ],
+    "inv-001-inventory-to-settlement.md": [
+      "docs/cards/lager/INV-001-inventory-to-settlement.md",
+      "docs/workflows/inv-001-inventory-to-settlement.md"
     ],
     "int-sg-021-superglue-compose-stack.md": [
       "docs/cards/neuro-core/INT-SG-021-superglue-compose-stack.md",

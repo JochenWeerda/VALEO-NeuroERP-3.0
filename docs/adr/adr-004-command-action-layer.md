@@ -29,4 +29,4 @@ Negativ:
 - Teams muessen Business-Aktionen sauber von UI-Interaktionen trennen
 ## References
 - [Target State Landhandel ERP](../architecture/target-state-landhandel-erp.md)
-- [Konsolidierte Strategie](../roadmap/status/2026-03-06-valeo-spitzenposition-konsolidiert.md)
+- [Konsolidierte Strategie](../project-context/open-gaps-and-known-issues.md)

@@ -6,7 +6,7 @@
 | **Abnahme erforderlich durch** | Architektur, Legal, Datenschutz, ERP-Fachbereich |
 | **Gültigkeit** | **Nicht produktionsfreigebend** ohne formale vierseitige Abnahme dieser Vorgaben (bzw. des nach Revision „akzeptiert“ markierten ADR mit identischem Kern). |
 | **Datum** | 2026-05-06 |
-| **Meilenstein-Bezug** | [M3.0–M3.4](../roadmap/TODO-UMSETZUNG-SPRINT-PLAN-S1-S5.md); Ergänzung zu M-08/M-09 (GDPR Export / Löschung) |
+| **Meilenstein-Bezug** | [TODO-SPRINT-001](../agent-ops/slices/TODO-SPRINT-001.yaml) (M3.0–M3.4); Ergänzung zu M-08/M-09 (GDPR Export / Löschung) |
 
 ## Einordnung (verbindlich für diesen Entwurf)
 
@@ -379,6 +379,6 @@ Dieser Entwurf **ist**:
 
 ## Links
 
-- [TODO-UMSETZUNG-SPRINT-PLAN-S1-S5.md](../roadmap/TODO-UMSETZUNG-SPRINT-PLAN-S1-S5.md) (M3.0–M3.4)
+- [TODO-SPRINT-001](../agent-ops/slices/TODO-SPRINT-001.yaml) (M3.0–M3.4)
 - **[Policy-Rahmen: Erasure, Retention & Audit](../policies/erasure-retention-audit-policy.md)** (Datenklassen, Retention-Defaults, Matrix, API-/Audit-Vorgaben)
 - [ADR: Auth- und Tenant-Kontext](adr-2026-04-24-auth-tenant-context.md)

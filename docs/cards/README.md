@@ -10,8 +10,8 @@ Endnutzer-Doku (MkDocs schließt `docs/cards/` per `exclude_docs` aus).
 
 - **Inventar:** [`docs/_internal/cards-inventory.md`](../_internal/cards-inventory.md)
   (maschinell via `scripts/cards-inventory-audit.py`)
-- **Security-Hardening:** abgeschlossene SEC-Slices siehe
-  [`docs/roadmap/status/2026-04-01-security-hardening-phase-1.md`](../roadmap/status/2026-04-01-security-hardening-phase-1.md)
+- **Security-Hardening:** abgeschlossene SEC-Slices (SEC-001–SEC-034) — siehe
+  [`docs/project-context/open-gaps-and-known-issues.md`](../project-context/open-gaps-and-known-issues.md)
 - **Migration:** Cards werden nicht 1:1 in MkDocs übernommen; verifizierte
   Ergebnisse fließen in `docs/workflows/`, Benutzerhandbuch oder
   `docs/project-context/open-gaps-and-known-issues.md`.
