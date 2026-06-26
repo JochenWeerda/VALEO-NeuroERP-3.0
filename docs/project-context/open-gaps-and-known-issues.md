@@ -88,14 +88,13 @@ nicht eingecheckt). Begleitend Browser-Sweep über UI-Routen.
 
 ### Verbleibende 5xx (60 Stand 2026-06-25) — kategorisiert, offen
 
-**A. Fehlende DB-Tabellen (500 `UndefinedTable`)** — brauchen Migration
-(teils Inventory-/Admin-Domäne, Eigentümerschaft klären):
-`/api/v1/admin/{api-keys, device-mappings, devices, output-profiles,
-output-templates, report-permissions}`, `/api/v1/admin/mobile/*`
-(connectors, connector-events[/quarantine], mobile-devices, routing-rules,
-scan-profiles, station-devices, stations), `/api/v1/einkauf/lieferscheine[/last]`,
-`/api/v1/inventory/{charge-lineage/, storage-fees/runs}`,
-`/api/v1/crm/opportunities/pipeline` (+ `/api/crm-sales/opportunities/pipeline`).
+**A. Fehlende DB-Tabellen (500 `UndefinedTable`)** — geschlossen Wave 8–10:
+~~`/api/v1/admin/{api-keys, device-mappings, devices, output-profiles, output-templates, report-permissions}`~~ (ALEMBIC-MERGE-001 Wave 8),
+~~`/api/v1/admin/mobile/*` (connectors, connector-events, mobile-devices, routing-rules, scan-profiles, station-devices, stations)~~ (ALEMBIC-MERGE-001 Wave 8),
+~~`/api/v1/einkauf/lieferscheine[/last]`~~ (EINKAUF-LS-REPAIR-001 Wave 9),
+~~`/api/v1/inventory/{charge-lineage/, storage-fees/runs}`~~ (ALEMBIC-MERGE-001 Wave 8),
+~~`/api/v1/crm/opportunities/pipeline`~~ (EINKAUF-LS-REPAIR-001 Wave 9).
+Alle Kat-A-Items repo-seitig geschlossen; naechster Live-Sweep verifiziert produktiven Migrationslauf.
 Nachzug 2026-06-25e: `/api/v1/jobs` ist repo-seitig geschlossen:
 Repair-Migration `job_runner_tables_repair_20260625` legt
 `domain_shared.jobs` und `domain_shared.job_artifacts` idempotent am aktuellen
@@ -108,15 +107,15 @@ Migrations-/Config-Hinweis: `/api/v1/analytics`, `/api/v1/contracts`,
 `/api/v1/finance/{asset-accounting/*, budgets[/summary]}`,
 `/api/v1/personal/applications`, `/api/v1/channels/whatsapp/webhook`.
 
-**C. Custom Response-Envelope-Validierung (500, Format „N validation errors:")**
-— globaler Middleware-Vertrag (kein blinder Eingriff):
-~~`/api/v1/health/health/live`~~ (RUNTIME-KAT-C-001 2026-06-26 geschlossen: `return StatusResponse(success=True, message="alive")`),
-`/api/v1/mcp/policy/list` (+ `/api/mcp/policy/list`), `/api/v1/messages/health`,
-`/api/v1/crm/{bestell-inbox, kaeufergruppe/katalog}`,
-`/api/v1/einkauf/{lieferanten, kontrakte, lager-konten, artikel-lager-parameter,
-fremdwaren-einlagerung}`,
-~~`/api/v1/ebilanz/taxonomie-felder`~~ (RUNTIME-KAT-C-001 2026-06-26 geschlossen: `response_model=list[EbilanzElsterOut]`),
-`/api/v1/inventory/warehouses/` (PaginatedResponse).
+**C. Custom Response-Envelope-Validierung (500)** — alle repo-seitig geschlossen:
+~~`/api/v1/health/health/live`~~ (RUNTIME-KAT-C-001),
+~~`/api/v1/mcp/policy/list`~~ (RUNTIME-KAT-C-002 Wave 6: `success`-Key-Fix),
+~~`/api/v1/messages/health`~~ (RUNTIME-KAT-C-002 Wave 6: `response_model=dict[str,str]`),
+~~`/api/v1/crm/{bestell-inbox, kaeufergruppe/katalog}`~~ (RUNTIME-KAT-C-002 Wave 6),
+~~`/api/v1/einkauf/{lieferanten, kontrakte, lager-konten, artikel-lager-parameter, fremdwaren-einlagerung}`~~ (RUNTIME-KAT-C-002 Wave 6: Einzelobjekt→list[]),
+~~`/api/v1/ebilanz/taxonomie-felder`~~ (RUNTIME-KAT-C-001: `response_model=list[EbilanzElsterOut]`),
+~~`/api/v1/inventory/warehouses/`~~ (WAREHOUSE-REPAIR-001 Wave 10: `field_validator("address")` + Repair-Migration).
+Alle Kat-C-Items geschlossen.
 
 **D. Code-Bugs (Attribut/Daten):** Nachzug 2026-06-25: drei Runtime-5xx
 geschlossen und per Regressionstest abgesichert: `/api/v1/finance/intercompany`
