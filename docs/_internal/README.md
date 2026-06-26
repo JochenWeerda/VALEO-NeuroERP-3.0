@@ -25,6 +25,10 @@ Bulk-Archivierung via `python scripts/docs-legacy-migrate.py --apply`:
 - **Kuratiert belassen:** `index.md`, `MASKEN.md`, Diataxis-Bereiche, `workflows/`,
   `architecture/`, `agent-ops/`, `project-context/`, `cards/`, `warehouse/` (aktiv)
 
+**Abschluss (`DOC-MIGRATION-008`):** 0 Archiv-Kandidaten; 140 gleichnamige Dateien —
+alle strukturell harmlos (Process-Kernel-`STATUS.md`, Cards↔Workflows, Bereichs-Indexe),
+0 offene inhaltliche Duplikate. Siehe `legacy-docs-inventory.md`.
+
 ## Regeln
 
 - Inhalte hier sind **historisch** und werden nicht aktiv gepflegt.

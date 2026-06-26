@@ -422,6 +422,24 @@ Cards bleiben **intern** (nicht in MkDocs-Nav); Ergebnisse fließen in Workflows
 
 ---
 
+## DOC-MIGRATION-001…008 — Altbestands-Migration abgeschlossen (2026-06-26)
+
+Bulk-Migration der organisch gewachsenen Doku in Diátaxis + internes Archiv.
+
+**Ergebnis:**
+
+- ~390 Alt-`.md` nach `docs/_internal/archive/` (`git mv`, Historie erhalten)
+- Root-Docs: 107 → 2 (`index.md`, `MASKEN.md`)
+- MkDocs: Compliance, Architektur, alle ADRs in Navigation; Wave-STATUS repo-only
+- Staleness-Gate blockierend (365 Tage, kuratierte Seiten)
+- ~23 abgearbeitete Roadmap-Snapshots gelöscht; Verweise auf Process-Kernel/Open-Gaps
+- INV-001 Card-Duplikat kanonisch auf `docs/cards/lager/`
+
+**Fortlaufend:** Inventar `python scripts/docs-legacy-migrate.py --inventory-only`;
+Details: [`migrationsplan.md`](../dokumentation/migrationsplan.md).
+
+---
+
 ## Analysepflicht
 
 Wenn in Code, Tests oder UI ein Widerspruch zwischen Doku, Implementierung, Fachlogik oder Benutzerfuehrung auftaucht, ist das hier oder in der passenden Workflow-Datei zu dokumentieren.

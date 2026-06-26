@@ -4491,6 +4491,12 @@ Archiv des vorherigen Boards:
 **Stand:** abgeschlossen 2026-06-25 — CI blockiert bei fehlendem/veraltetem `last_reviewed` (365 Tage, kuratierte MkDocs-Seiten).
 **Dateibesitz:** `.github/workflows/docs.yml`, `.github/workflows/docs-governance.yml`, `scripts/docs-staleness-check.cjs`, `docs/dokumentation/governance.md`, `docs/agent-ops/slices/DOC-MIGRATION-007.yaml`.
 
+## DOC-MIGRATION-008 — Migrationsprogramm abgeschlossen (Phase C/K)
+
+**Owner:** Cursor
+**Stand:** abgeschlossen 2026-06-26 — Phase C (CRM/i18n/GAP in Archiv) dokumentiert; Duplikat-Inventar klassifiziert (140 harmlos / 0 offen); `docs/index.md` + Open-Gaps + Migrationsplan-Abschluss; 0 Archiv-Kandidaten.
+**Dateibesitz:** `scripts/docs-legacy-migrate.py`, `docs/_internal/legacy-docs-inventory.md`, `docs/dokumentation/migrationsplan.md`, `docs/index.md`, `docs/project-context/open-gaps-and-known-issues.md`, `docs/agent-ops/slices/DOC-MIGRATION-008.yaml`.
+
 ---
 
 ## CARD-AUDIT-Follow-up (2026-06-26)
@@ -4580,3 +4586,13 @@ Parallele Fix-Slices aus Cards-Inventar-Audit (`CARD-AUDIT-001`). Claim-Protokol
 **Dateibesitz:** `scripts/ai_engineering_metrics.py`, `tests/test_ai_engineering_metrics.py`, `docs/agent-ops/slices/AI-ENGINEERING-METRICS-001.yaml`.
 **Abnahmekriterien:** 29 Unit-Tests grün; `python scripts/ai_engineering_metrics.py --since 2026-06-01` gibt Report aus; `--json`/`--csv` funktionieren.
 **Folge:** AI-ENGINEERING-METRICS-002 (CI-Nightly-Cron + MkDocs-Dashboard).
+
+## AI-ENGINEERING-METRICS-002 — Nightly CI-Cron + MkDocs Dashboard (P2.2 Ausbau)
+
+**Von:** Claude Sonnet 4.6
+**Owner:** Claude Sonnet 4.6
+**Stand:** abgeschlossen 2026-06-26 — GitHub Actions Nightly Cron (`0 4 * * *`) + `scripts/generate_metrics_page.py` (Markdown aus JSON); `docs/agent-ops/engineering-metrics.md` initial generiert; MkDocs-Nav-Eintrag gesetzt. 15 Unit-Tests grün.
+**Ziel:** AI Engineering Metrics täglich automatisch berechnen, als JSON-Artefakt (90 Tage Retention) sichern und als MkDocs-Dashboard-Seite publizieren.
+**Dateibesitz:** `.github/workflows/ai-engineering-metrics.yml`, `scripts/generate_metrics_page.py`, `docs/agent-ops/engineering-metrics.md`, `tests/test_generate_metrics_page.py`, `mkdocs.yml`.
+**Abnahmekriterien:** 15 Unit-Tests grün; Workflow syntaktisch korrekt; Seite hat Frontmatter; MkDocs-Nav enthält Eintrag.
+**Externes Gate:** Erster erfolgreicher Nightly-Lauf auf GitHub Actions.
