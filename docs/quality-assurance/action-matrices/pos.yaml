@@ -1,0 +1,30 @@
+chain_id: pos
+chain_name: "POS / Kasse"
+description: "Kassenvorgang → TSE-Signatur → DSFinV-K → Tagesabschluss"
+priority: medium
+
+actions:
+  - action_id: pos-001
+    label: "Kassenbon erstellen"
+    route_prefix: "pos"
+    api_method: "POST /pos/belege"
+    e2e_tag: "@smoke"
+    status: gap
+
+  - action_id: pos-002
+    label: "TSE-Signatur prüfen"
+    route_prefix: "pos"
+    api_method: "GET /pos/belege/{id}/tse"
+    e2e_tag: "@smoke"
+    status: gap
+
+  - action_id: pos-003
+    label: "Tagesabschluss (Z-Bericht)"
+    route_prefix: "pos"
+    api_method: "POST /pos/tagesabschluss"
+    e2e_tag: "@smoke"
+    status: gap
+
+open_gaps:
+  - "pos-001/002/003: POS-Kette ohne E2E (TSE-Simulation erforderlich)"
+  - "TSE-Simulation via /dev/external-mocks/tse"

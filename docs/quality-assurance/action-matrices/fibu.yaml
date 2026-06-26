@@ -1,0 +1,36 @@
+chain_id: fibu
+chain_name: "Finanzbuchhaltung (FiBu)"
+description: "Buchung → OP-Verwaltung → Periodenabschluss → DATEV-Export"
+priority: high
+
+actions:
+  - action_id: fibu-001
+    label: "Buchungssatz erfassen"
+    route_prefix: "fibu/buchungen"
+    api_method: "POST /fibu/buchungen"
+    e2e_tag: "@smoke"
+    status: gap
+
+  - action_id: fibu-002
+    label: "Offene Posten anzeigen / ausziffern"
+    route_prefix: "fibu/offene-posten"
+    api_method: "GET /fibu/offene-posten"
+    e2e_tag: "@smoke"
+    status: gap
+
+  - action_id: fibu-003
+    label: "Periodenabschluss durchführen"
+    route_prefix: "fibu/periodenabschluss"
+    api_method: "POST /fibu/perioden/{id}/abschluss"
+    e2e_tag: "@smoke"
+    status: gap
+
+  - action_id: fibu-004
+    label: "DATEV-Export erstellen"
+    route_prefix: "fibu/datev"
+    api_method: "POST /fibu/datev/export"
+    e2e_tag: "@smoke"
+    status: gap
+
+open_gaps:
+  - "fibu-001/002/003/004: Alle FiBu-Aktionen noch ohne E2E (externe Assessoren für DATEV)"

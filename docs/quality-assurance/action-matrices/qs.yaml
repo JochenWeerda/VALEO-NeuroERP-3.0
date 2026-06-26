@@ -1,0 +1,36 @@
+chain_id: qs
+chain_name: "Qualitätssicherung (QS)"
+description: "Labor-Probe → Analyse → Freigabe/Sperrung → Reklamation"
+priority: high
+
+actions:
+  - action_id: qs-001
+    label: "QS-Probe anlegen"
+    route_prefix: "lager/qs-leitstand"
+    api_method: "POST /qs/proben"
+    e2e_tag: "@smoke"
+    status: gap
+
+  - action_id: qs-002
+    label: "Laborergebnis erfassen"
+    route_prefix: "lager/qs-leitstand"
+    api_method: "PATCH /qs/proben/{id}/ergebnis"
+    e2e_tag: "@smoke"
+    status: gap
+
+  - action_id: qs-003
+    label: "Charge freigeben / sperren"
+    route_prefix: "lager/qs-leitstand"
+    api_method: "PATCH /qs/chargen/{id}/status"
+    e2e_tag: "@smoke"
+    status: gap
+
+  - action_id: qs-004
+    label: "Reklamation anlegen"
+    route_prefix: "lager/qs-leitstand"
+    api_method: "POST /qs/reklamationen"
+    e2e_tag: "@smoke"
+    status: gap
+
+open_gaps:
+  - "qs-001/002/003/004: QS-Kette komplett ohne E2E"
