@@ -1,0 +1,15 @@
+chain_id: admin
+chain_name: "Administration & Betrieb"
+description: "Mandanten-Admin, RBAC, Monitoring, Integrationen — Top-50-In-App-Routen"
+priority: medium
+
+actions:
+  - action_id: admin-001
+    label: "Administration (Stammdaten, Setup, Monitoring)"
+    route_prefix: "admin"
+    api_method: "GET /admin/*"
+    e2e_tag: "-"
+    status: gap
+
+open_gaps:
+  - "Admin-Routen: bewusst Admin-Handbuch statt Endnutzer-E2E; Matrix-Eintrag fuer Top-50-Coverage"

@@ -1,0 +1,15 @@
+chain_id: agrar
+chain_name: "Agrar-Stammdaten & Feldarbeit"
+description: "Aussaat, Dünger, Bodenproben, Biostimulanzien — Ergänzung zur Ernteannahme-Kette"
+priority: high
+
+actions:
+  - action_id: agrar-001
+    label: "Agrar-Stammdaten und Feldarbeit"
+    route_prefix: "agrar"
+    api_method: "GET /agrar/*"
+    e2e_tag: "@smoke"
+    status: gap
+
+open_gaps:
+  - "agrar-001: Dedizierte E2E fuer Aussaat/Dünger/Bodenproben noch offen (Annahme-Kette separat in WMS/O2C)"

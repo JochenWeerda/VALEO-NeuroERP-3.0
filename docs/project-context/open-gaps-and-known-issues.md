@@ -136,7 +136,7 @@ abgearbeitet; ein erneuter Live-Sweep muss die Restliste verifizieren.
 
 **E. Fehlende Konfiguration/Datei (500 statt 503):**
 ~~`/api/v1/mcp/tools[/summary]`~~ (MCP-ERP-TOOLS-001 2026-06-26 geschlossen: `app/config/mcp_erp_tools.yaml` mit 21 Tools angelegt),
-`/api/v1/agrar/psm/proplanta/{list, stats/overview}` (Proplanta nicht konfiguriert).
+~~`/api/v1/agrar/psm/proplanta/{list, stats/overview}`~~ (RUNTIME-KAT-E-002 Wave 13 2026-06-26: 400→503 bei fehlendem Proplanta-Config). Keine weiteren offenen Kat-E-Items.
 
 **F. Feature-Lücke (404, vom Frontend mit `initialData:[]` abgefangen):**
 ~~`GET /api/v1/logistik/frachtbriefe`~~ (LOG-FRACHTBRIEF-001 2026-06-26 geschlossen: Alembic `domain_logistics.frachtbriefe` + GET/POST/PATCH Endpoint).
@@ -483,11 +483,11 @@ Kompakte Übersicht echter Lücken (repo-seitig lösbar, nicht extern blockiert)
 
 | Thema | Slice / Tracker | Prio | Quelle (zum Rückschreiben) |
 |---|---|---|---|
-| WF-Cockpit: Dead-Letter-Sicht, NATS-Projektor-Anbindung | VALEO-WF-COCKPIT-002 | P2 | `open-gaps-and-known-issues.md` § P1 VALEO-WF-COCKPIT-001 |
-| Runtime 5xx Kat. A: fehlende DB-Tabellen (Admin-Mobile: devices, scan_profiles, stations, mobile-routing) | RUNTIME-KAT-A-001 | P1 | `open-gaps-and-known-issues.md` § RUNTIME-API-SWEEP-001 Kat. A |
+| ~~WF-Cockpit: Dead-Letter-Sicht, NATS-Projektor-Anbindung~~ | WF-COCKPIT-002 **abgeschlossen Wave 13 2026-06-26**: WfCockpitNatsProjector in startup_event_consumer() verdrahtet; domain_workflow.wf_cockpit_* idempotent gesichert | ~~P2~~ | — |
+| ~~Runtime 5xx Kat. A: fehlende DB-Tabellen (Admin-Mobile)~~ | RUNTIME-KAT-A-001 **geschlossen Wave 8 (ALEMBIC-MERGE-001)** | ~~P1~~ | — |
 | ~~Runtime 5xx Kat. C Restliste~~: `mcp/policy/list`, `einkauf/lieferanten+kontrakte+artikel-lager-parameter`, `kaeufergruppe/katalog`, `messages/health`, `crm/bestell-inbox` | RUNTIME-KAT-C-002 **abgeschlossen 2026-06-26** | P1 | `open-gaps-and-known-issues.md` § RUNTIME-API-SWEEP-001 Kat. C |
-| Runtime 5xx Kat. C: `inventory/warehouses/` PaginatedResponse (pruefen ob noch offen) | RUNTIME-KAT-A-002 | P2 | `open-gaps-and-known-issues.md` § RUNTIME-API-SWEEP-001 Kat. C |
-| Futtermittel: HACCP, VLOG-Meldung, QS-Leitfaden vollständig | FEED-QS-001 | P3 | `domain-depth-plan-2026-05-17.md` § 10 Futtermittel · `open-gaps-and-known-issues.md` § Enterprise-Domain-Gap-Closure |
+| ~~Runtime 5xx Kat. C: `inventory/warehouses/` PaginatedResponse~~ | RUNTIME-KAT-A-002 **geschlossen Wave 10 (WAREHOUSE-REPAIR-001)**: field_validator("address") Pydantic-Fix | ~~P2~~ | — |
+| ~~Futtermittel: HACCP, VLOG-Meldung, QS-Leitfaden vollständig~~ | FEED-QS-001 **abgeschlossen Wave 13 2026-06-26**: /futtermittel/qs Router + 3 domain_shared-Tabellen | ~~P3~~ | — |
 | ~~CRM RAG-/Intent-Panel~~ | TAIL-CRM-001 **retroaktiv abgeschlossen 2026-06-26** | P3 | `professional-tail-gap-plan-2026-04-09.md` § 2 |
 | ~~NaWaRo Druck/Vorschau/Serienbrief~~ | TAIL-NAWARO-001 **retroaktiv abgeschlossen 2026-06-26** | P3 | `professional-tail-gap-plan-2026-04-09.md` § 1 |
 | ~~Agrar PSM-Beratung + Saatgut-Edit~~ | TAIL-AGRI-001 **retroaktiv abgeschlossen 2026-06-26** | P3 | `professional-tail-gap-plan-2026-04-09.md` § 3 |

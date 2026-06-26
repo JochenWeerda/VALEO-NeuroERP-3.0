@@ -11,24 +11,43 @@ version: 3.0.0
 
 # Action-Matrix-Report
 
-**Konsolidierungsstatus 2026-06-26:** Diese Datei ist ein generierter
-QA-Heuristikreport. `GAP` bedeutet fehlende oder nicht erkannte E2E-Verknuepfung,
-nicht automatisch fehlende Implementierung. Fuer echten Restbacklog gelten
-Open-Gaps und der Konsolidierungsbericht.
-Reverse-Pflege: Bei neu generierten Matrixwerten offene Punkte gegen
-Open-Gaps und das Quellenregister im Konsolidierungsbericht validieren.
-
-> Generiert via `scripts/generate_action_matrix_report.py` · 2026-06-26 09:37:16 UTC
+> Generiert via `scripts/generate_action_matrix_report.py` · 2026-06-26 20:45:54 UTC
 
 ## Übersicht
 
 | Metrik | Wert |
 |---|---|
-| Prozessketten | 6 |
-| Aktionen gesamt | 24 |
+| Prozessketten | 8 |
+| Aktionen gesamt | 26 |
 | Green (E2E @critical/@smoke grün) | 2 |
 | Partial (E2E vorhanden, nicht @critical) | 4 |
-| Gap (keine E2E) | 18 |
+| Gap (keine E2E) | 20 |
+
+## Administration & Betrieb (`admin`)
+
+> Mandanten-Admin, RBAC, Monitoring, Integrationen — Top-50-In-App-Routen
+> Priorität: **MEDIUM**
+
+| ID | Aktion | Route | Status | E2E-Tag |
+|---|---|---|---|---|
+| `admin-001` | Administration (Stammdaten, Setup, Monitoring) | `admin` | GAP | `-` |
+
+**Offene Gaps:**
+
+- Admin-Routen: bewusst Admin-Handbuch statt Endnutzer-E2E; Matrix-Eintrag fuer Top-50-Coverage
+
+## Agrar-Stammdaten & Feldarbeit (`agrar`)
+
+> Aussaat, Dünger, Bodenproben, Biostimulanzien — Ergänzung zur Ernteannahme-Kette
+> Priorität: **HIGH**
+
+| ID | Aktion | Route | Status | E2E-Tag |
+|---|---|---|---|---|
+| `agrar-001` | Agrar-Stammdaten und Feldarbeit | `agrar` | GAP | `@smoke` |
+
+**Offene Gaps:**
+
+- agrar-001: Dedizierte E2E fuer Aussaat/Dünger/Bodenproben noch offen (Annahme-Kette separat in WMS/O2C)
 
 ## Finanzbuchhaltung (FiBu) (`fibu`)
 
@@ -128,49 +147,4 @@ Open-Gaps und das Quellenregister im Konsolidierungsbericht validieren.
 
 - wms-003/004/005: QS-Freigabe und Auslagerung ohne E2E
 
-## Top-50-Routen ohne Matrix-Eintrag
-
-- `admin/agenten-integration`
-- `admin/ai-approvals`
-- `admin/externe-gates`
-- `admin/audit-log`
-- `admin/benutzer`
-- `admin/benutzer-liste`
-- `admin/benutzer/neu`
-- `admin/command-monitor`
-- `admin/compliance`
-- `admin/compliance-dashboard`
-- `admin/control-center`
-- `admin/control-center/agent-ops`
-- `admin/control-center/superglue`
-- `admin/data-quality`
-- `admin/gap-pipeline`
-- `admin/integrationen-quarantaene`
-- `admin/monitoring/alerts`
-- `admin/monitoring/regeln`
-- `admin/nummernkreise`
-- `admin/report-berechtigungen`
-- `admin/rolle/neu`
-- `admin/rollen-verwaltung`
-- `admin/setup`
-- `admin/setup/dms-integration`
-- `admin/terminologie`
-- `admin/voice-channel`
-- `admin/webhooks`
-- `admin/webshop`
-- `agrar/aussaat`
-- `agrar/aussaat/liste`
-- `agrar/aussaat/neu`
-- `agrar/biostimulanzien`
-- `agrar/biostimulanzien-liste`
-- `agrar/biostimulanzien-stamm`
-- `agrar/bodenprobe/neu`
-- `agrar/bodenproben`
-- `agrar/bodenproben/liste`
-- `agrar/duenger`
-- `agrar/duenger-liste`
-- `agrar/duenger-stamm`
-- `agrar/duenger/bedarfsrechner`
-- `agrar/duenger/liste`
-
-*Stand: 2026-06-26 09:37:16 UTC · 24 Aktionen · Slice: SEMANTIC-ACTION-MATRIX-002*
+*Stand: 2026-06-26 20:45:54 UTC · 26 Aktionen · Slice: SEMANTIC-ACTION-MATRIX-002*

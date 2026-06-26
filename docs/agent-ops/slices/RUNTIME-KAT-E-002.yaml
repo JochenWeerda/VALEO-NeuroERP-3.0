@@ -1,0 +1,21 @@
+slice_id: RUNTIME-KAT-E-002
+title: "Proplanta PSM: 400 → 503 bei fehlender Konfiguration"
+status: abgeschlossen
+priority: P2
+wave: 13
+created: "2026-06-26"
+closed: "2026-06-26"
+
+problem: |
+  app/domains/agrar/api/psm_proplanta.py lieferte HTTP 400 wenn Proplanta
+  nicht konfiguriert ist (data/config/proplanta_psm.json fehlt oder
+  is_configured() False). 400 = Client-Fehler (falsche Anfrage) ist
+  semantisch falsch; korrekt ist 503 = Service nicht verfuegbar.
+
+solution: |
+  Alle 6 HTTPException(status_code=400, detail="...not configured")-Stellen
+  in psm_proplanta.py durch status_code=503 ersetzt (replace_all).
+
+files_changed:
+  - app/domains/agrar/api/psm_proplanta.py  # 6x 400 → 503
+  - docs/agent-ops/slices/RUNTIME-KAT-E-002.yaml
