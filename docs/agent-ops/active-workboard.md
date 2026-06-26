@@ -4681,3 +4681,17 @@ Parallele Fix-Slices aus Cards-Inventar-Audit (`CARD-AUDIT-001`). Claim-Protokol
 **Stand:** abgeschlossen 2026-06-26 — `--fail-over 0`-Step in `quality-gate.yml` eingetragen; Baseline 0 Drift-Items; lokal verifiziert (Exit 0). Bei Drift > 0 schlägt CI mit Hinweis fehl.
 **Ziel:** Doku-Drift von Endpoints/Migrationen/Services/Pages dauerhaft auf 0 halten durch blockierendes CI-Gate.
 **Dateibesitz:** `.github/workflows/quality-gate.yml`, `docs/agent-ops/slices/DOC-DRIFT-GATE-002.yaml`.
+
+## DOCS-CODE-SYNC-002 — Mapping-Härtung (Claim)
+
+**Von:** Claude Code
+**Owner:** Claude Code
+**Stand:** in Arbeit — Lane A, Welle 1
+**Ziel:** docs-code-sync-map.yaml auf generierte Inventar-Artefakte erweitern; generierte .json/.yaml als gültige Doku-Mappings zählen lassen.
+
+## DOC-DRIFT-DASHBOARD-002 — MkDocs-Sichtbarkeit (Claim)
+
+**Von:** Claude Code
+**Owner:** Claude Code
+**Stand:** in Arbeit — Lane B, Welle 1
+**Ziel:** generate_drift_dashboard_page.py erzeugt docs/entwickler/drift-dashboard.md aus doc_drift_report.json; in MkDocs-Nav einbinden.
