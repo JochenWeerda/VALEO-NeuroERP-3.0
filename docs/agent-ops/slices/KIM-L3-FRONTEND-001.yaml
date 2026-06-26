@@ -1,0 +1,30 @@
+slice_id: KIM-L3-FRONTEND-001
+title: "KIM L3 Frontend-Verdrahtung: Belegtabs + Postfach"
+priority: P1
+owner: Claude Code
+status: in_arbeit
+created: "2026-06-26"
+
+goal: >
+  Verdrahtet die zwei offenen Frontend-Lücken aus KIM-L3-BACKEND-001 (abgeschlossen 2026-06-09):
+  (1) Belegtabs INVOICES/DUNNING/CONTRACTS/DROP_SHIPMENTS rufen fetchContactDocs statt lokal zu filtern.
+  (2) Neuer Postfach-Tab in KIM zeigt interne CRM-Benachrichtigungen (fetchNotifications/markRead).
+
+ai_harness:
+  fachlicher_vertrag:
+    - Belegtabs zeigen echte Daten aus /crm/kim/customers/{nr}/contact-docs?kind=...
+    - Postfach zeigt Benachrichtigungen des aktuellen Operators (default JW), markierbar als gelesen.
+    - Kein Umbau bestehender Funktionen (Kontaktlog-Formular, Dial, OVERVIEW, HISTORY bleiben unverändert).
+  architekturvertrag:
+    - Nur ContactHistoryTable.tsx und index.tsx werden geändert.
+    - Keine neuen API-Funktionen — fetchContactDocs und fetchNotifications existieren bereits in kim-api.ts.
+    - Pending-State je Aktion (docsLoading, notifLoading, markingRead).
+  akzeptanzkriterien:
+    - Sub-Tab INVOICES/DUNNING/CONTRACTS/DROP_SHIPMENTS lädt Daten vom Backend (nicht lokal gefiltert).
+    - Postfach-Tab zeigt Notifications-Liste; "Gelesen"-Button markiert einzelne Einträge.
+    - tsc --noEmit 0 Fehler.
+
+dateibesitz:
+  - packages/frontend-web/src/pages/crm/kim/components/ContactHistoryTable.tsx
+  - packages/frontend-web/src/pages/crm/kim/index.tsx
+  - docs/agent-ops/slices/KIM-L3-FRONTEND-001.yaml

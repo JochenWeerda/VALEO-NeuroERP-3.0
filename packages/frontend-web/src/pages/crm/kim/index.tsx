@@ -58,7 +58,7 @@ import {
   Phone,
 } from 'lucide-react';
 
-type KimTab = 'allgemein' | 'belege' | 'kontrakte' | 'finanzen' | 'audit' | 'tasks' | 'chef' | 'leads' | 'geo' | 'information' | 'praesente';
+type KimTab = 'allgemein' | 'belege' | 'kontrakte' | 'finanzen' | 'audit' | 'tasks' | 'chef' | 'leads' | 'geo' | 'information' | 'praesente' | 'postfach';
 
 export default function KimCockpitPage() {
   const navigate = useNavigate();
@@ -101,6 +101,12 @@ export default function KimCockpitPage() {
   const [callContact, setCallContact] = useState<ContactPerson | null>(null);
   const [dialing, setDialing] = useState(false);
   const [workspaceResetKey, setWorkspaceResetKey] = useState(0);
+
+  // Postfach (interne CRM-Benachrichtigungen)
+  const [currentOperator] = useState('JW');
+  const [notifications, setNotifications] = useState<kimApi.CrmNotification[]>([]);
+  const [notifLoading, setNotifLoading] = useState(false);
+  const [markingReadId, setMarkingReadId] = useState<string | null>(null);
 
   // In-Edit master data fields state
   const [editStreet, setEditStreet] = useState('');
@@ -508,6 +514,31 @@ export default function KimCockpitPage() {
     }
   };
 
+  const loadNotifications = async () => {
+    setNotifLoading(true);
+    try {
+      setNotifications(await kimApi.fetchNotifications(currentOperator));
+    } catch {
+      setNotifications([]);
+    } finally {
+      setNotifLoading(false);
+    }
+  };
+
+  const handleMarkRead = async (id: string) => {
+    if (markingReadId) return;
+    setMarkingReadId(id);
+    try {
+      await kimApi.markNotificationRead(id);
+      setNotifications(prev => prev.map(n => n.id === id ? { ...n, status: 'read' } : n));
+    } catch {
+      toast({ title: 'Fehler beim Markieren', variant: 'destructive' });
+    } finally {
+      setMarkingReadId(null);
+    }
+  };
+
+  const unreadCount = notifications.filter(n => n.status !== 'read').length;
   const openTasksCount = logs.filter(l => l.reSubmissionDate && !l.completed).length;
   const tabs: { key: KimTab; label: string }[] = [
     { key: 'allgemein', label: 'Allgemein / Ansprechpartner' },
@@ -518,6 +549,7 @@ export default function KimCockpitPage() {
     { key: 'finanzen', label: 'Finanzwesen (Offene Posten)' },
     { key: 'audit', label: 'Unterlagen (Dateien)' },
     { key: 'tasks', label: `Wiedervorlage (${openTasksCount})` },
+    { key: 'postfach', label: unreadCount > 0 ? `Postfach (${unreadCount})` : 'Postfach' },
     { key: 'chef', label: 'Chef-Anweisungen' },
     { key: 'leads', label: 'Lead-Management' },
     { key: 'geo', label: 'CRM-Geo / Karte' },
@@ -652,6 +684,43 @@ export default function KimCockpitPage() {
                     customer={activeCustomer}
                     onResolveTask={handleResolveTask}
                   />
+                )}
+
+                {activeTab === 'postfach' && (
+                  <div className="p-4 space-y-3" id="postfach-workspace">
+                    <div className="flex items-center justify-between">
+                      <h3 className="font-semibold text-sm text-foreground">
+                        Internes Postfach – {currentOperator}
+                        {unreadCount > 0 && <Badge variant="info" className="ml-2">{unreadCount} ungelesen</Badge>}
+                      </h3>
+                      <Button variant="outline" size="sm" onClick={() => void loadNotifications()} disabled={notifLoading} id="btn-postfach-refresh">
+                        {notifLoading ? <Loader2 className="h-3 w-3 animate-spin" /> : 'Aktualisieren'}
+                      </Button>
+                    </div>
+                    {notifLoading && <p className="text-sm text-muted-foreground">Lade Nachrichten…</p>}
+                    {!notifLoading && notifications.length === 0 && (
+                      <p className="text-sm text-muted-foreground italic">Keine Nachrichten vorhanden.</p>
+                    )}
+                    {!notifLoading && notifications.map(n => (
+                      <div key={n.id} className={`rounded-md border p-3 text-sm space-y-1 ${n.status === 'read' ? 'opacity-50' : 'bg-card'}`} id={`notif-${n.id}`}>
+                        <div className="flex items-center justify-between gap-2">
+                          <span className="font-medium text-foreground">{n.betreff ?? '(kein Betreff)'}</span>
+                          {n.status !== 'read' && (
+                            <Button variant="ghost" size="sm" className="text-xs h-6 px-2" disabled={markingReadId === n.id}
+                              onClick={() => void handleMarkRead(n.id)} id={`btn-mark-read-${n.id}`}>
+                              {markingReadId === n.id ? <Loader2 className="h-3 w-3 animate-spin" /> : 'Gelesen'}
+                            </Button>
+                          )}
+                        </div>
+                        {n.kommentar && <p className="text-muted-foreground text-xs">{n.kommentar}</p>}
+                        <div className="flex gap-3 text-xs text-muted-foreground">
+                          {n.sender && <span>Von: {n.sender}</span>}
+                          {n.kunden_nr && <span>Kunde: {n.kunden_nr}</span>}
+                          {n.created_at && <span>{new Date(n.created_at).toLocaleString('de-DE')}</span>}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 )}
 
                 {activeTab === 'chef' && (
