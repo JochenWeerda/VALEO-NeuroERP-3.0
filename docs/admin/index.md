@@ -3,9 +3,9 @@ title: Administration & Betrieb
 type: explanation
 audience: [tenant-admin, betrieb]
 owner: Cursor
-status: entwurf
-last_reviewed: 2026-06-25
-version: 3.0.0
+status: aktiv
+last_reviewed: 2026-06-26
+version: 3.1.0
 ---
 
 # Administration & Betrieb
@@ -24,6 +24,7 @@ System-/Betriebsführung (technisch).
 - [Deployment](deployment.md) — Docker Compose, Env-Variablen, Secrets.
 - [Backup & Restore](backup-restore.md) — Datensicherung, Restore-Tests.
 - [Datenbank-Migrationen](datenbank-migrationen.md) — Alembic, Single-Head.
+- [Migrations-Inventar](migration-inventory.md) — Alembic-Skripte (generiert).
 - [Monitoring & SLO](monitoring-und-slo.md) — Prometheus, Health-Checks, Logging.
 - [Incident-Response](incident-response.md) — Störungen, Eskalation, Post-Mortem.
 - [Skalierung & Performance](skalierung-performance.md) — Worker, ASGI, Lasttests.

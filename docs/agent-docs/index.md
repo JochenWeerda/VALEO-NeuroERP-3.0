@@ -3,9 +3,9 @@ title: Agent-Dokumentation
 type: explanation
 audience: [ki-agent, entwickler]
 owner: Cursor
-status: entwurf
-last_reviewed: 2026-06-25
-version: 3.0.0
+status: aktiv
+last_reviewed: 2026-06-26
+version: 3.1.0
 ---
 
 # Agent-Dokumentation
@@ -15,7 +15,7 @@ sind Leser **und** Autoren der Doku.
 
 ## Bestandteile
 
-- **AGENTS.md** (Repo-Root) — Einstieg, Pflichtreihenfolge.
+- **AGENTS.md** (Repo-Root) — Einstieg, Pflichtreihenfolge, Parallel-Protokoll.
 - [**Capability-Katalog**](capability-catalog.md) — Fähigkeiten je Agent-Rolle.
 - [**Tool-Katalog**](tool-catalog.md) — MCP-Tools (Schema, Scope, Idempotenz, Risiko).
 - [**Guardrails**](guardrails.md) — Human-Approval bei HIGH-Risk, fail-closed, RBAC.
@@ -24,8 +24,11 @@ sind Leser **und** Autoren der Doku.
 ## Zwei Rollen
 
 - **Agent als Leser:** strukturierte Verträge (`ai_harness`, MCP-JSON-Schema,
-  OpenAPI).
+  OpenAPI, generierte Inventare).
 - **Agent als Autor:** jeder Slice erzeugt Pflichtdoku; Doku-Update = Definition
-  of Done; Drift wird nachts gemessen (AI-DOC-DRIFT-DASHBOARD).
+  of Done; Drift wird wöchentlich gemessen (siehe [Doku-Governance](../dokumentation/governance.md)).
 
-> Katalog & Guardrails folgen in `DOC-AGENT-CATALOG-001`.
+## Verwandte Metriken
+
+- [AI Engineering Metrics](../entwickler/engineering-metrics.md) — Slice-Cycle-Time,
+  Rework-Rate (generiert, MkDocs-Nav).

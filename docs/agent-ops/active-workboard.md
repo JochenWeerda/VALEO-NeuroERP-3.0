@@ -4527,6 +4527,12 @@ Archiv des vorherigen Boards:
 **Stand:** abgeschlossen 2026-06-26 — `generate_code_inventories.py` für Endpoint/Service/Migration; CI-Drift-Check in `docs.yml`; Drift-Report 0; 4 Unit-Tests grün.
 **Dateibesitz:** `scripts/generate_code_inventories.py`, `tests/test_generate_code_inventories.py`, `docs/{schnittstellen/endpoint-inventory,entwickler/service-inventory,admin/migration-inventory}.md`, `docs/agent-ops/slices/DOC-INVENTORY-001.yaml`.
 
+## DOC-INDEX-POLISH-001 — Diataxis-Einstiegsseiten (Status aktiv)
+
+**Owner:** Cursor
+**Stand:** abgeschlossen 2026-06-26 — `benutzerhandbuch/`, `admin/`, `agent-docs/` Index auf `aktiv`; Migrationsplan-Abschluss erweitert (009–INVENTORY); Staleness grün.
+**Dateibesitz:** `docs/{benutzerhandbuch,admin,agent-docs}/index.md`, `docs/dokumentation/migrationsplan.md`, `docs/agent-ops/slices/DOC-INDEX-POLISH-001.yaml`.
+
 ---
 
 ## CARD-AUDIT-Follow-up (2026-06-26)
