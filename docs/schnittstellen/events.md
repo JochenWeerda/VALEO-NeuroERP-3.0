@@ -166,4 +166,18 @@ info:
 # ... (vollständige Spec in asyncapi.yaml)
 ```
 
+## Externe Mock-Endpunkte (E2E / Integration)
+
+Für Playwright-Semantiktests und lokale Integration ohne echte DATEV/TSE/ELSTER-Anbindung
+stehen Dev-/Test-Stubs unter `/api/v1/dev/external-mocks/*` bereit. Alle Antworten enthalten
+`simulated: true`.
+
+| Endpunkt | Verwendung in Specs |
+|---|---|
+| `/dev/external-mocks/datev/export` | `fibu-semantic-chain`, `o2c-semantic-chain`, `p2p-semantic-chain` |
+| `/dev/external-mocks/tse/sign` | `pos-tse-semantic-chain` |
+| `/dev/external-mocks/bank/camt-import` | `fibu-semantic-chain`, `p2p-semantic-chain` |
+
+Vertragsdokumentation: [`docs/agent-docs/runbooks/external-mock-vertraege.md`](../agent-docs/runbooks/external-mock-vertraege.md) (Slice: EXTERNAL-MOCK-WORKFLOW-001).
+
 *Stand: 2026-06-26 · 51 Events · Slice: DOC-ASYNCAPI-001*
