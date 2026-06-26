@@ -3133,7 +3133,7 @@ Archiv des vorherigen Boards:
 ## DOM-FIN-003
 
 **Von:** Codex
-**Stand:** erledigt
+**Stand:** abgeschlossen 2026-06-23
 **Ziel des Slices:** FIBU-Operatorpfade fuer Abschluss, Reorganisator, Zinswesen und Revisionssicht semantisch verdichten.
 **Abnahmekriterien:** Abschluss- und FIBU-Operatorraeume tragen denselben klaren Status-, Fristen-, Revisions- und Folgeaktionsrahmen.
 **Ergebnis:** Alle 4 FIBU-Masken (abschluss-cockpit, schnittstellen-center, mahnwesen, zahlungslaeufe) tragen OperationalCaseHeader mit Status/Blocker/Folgeaktion.
@@ -3141,7 +3141,7 @@ Archiv des vorherigen Boards:
 ## DOM-SUPPLY-003
 
 **Von:** Codex
-**Stand:** erledigt
+**Stand:** abgeschlossen 2026-06-23
 **Ziel des Slices:** Die physische Kette `Partie -> Annahme -> Wiegung -> Charge -> Fracht -> Abrechnung` fachlich und statusseitig durchgaengig harmonisieren.
 **Abnahmekriterien:** Jeder Uebergabepunkt zeigt Objektbezug, Abweichung, naechste Aktion und Folgeobjekt konsistent.
 **Ergebnis:** Alle 6 Supply-Masken (waage/liste, tourenplanung, wareneingang, wiegeschein-detail, rohware, frachtbriefe) tragen OperationalCaseHeader.
@@ -3149,7 +3149,7 @@ Archiv des vorherigen Boards:
 ## DOM-PROC-003
 
 **Von:** Codex
-**Stand:** erledigt
+**Stand:** abgeschlossen 2026-06-23
 **Ziel des Slices:** Einkaufsausnahmen, Matching, Nachforderung und Lieferantenkommunikation auf echte Folgefaelle heben.
 **Abnahmekriterien:** Beschaffungsfaelle bilden Matching-Ausnahmen, Nachforderung und Folgekommunikation als echte Arbeitsobjekte ab.
 **Ergebnis:** Alle 5 Einkauf-Masken (rechnung-abgleich, rechnungseingang, lieferanten-dokumente, anlieferavis, auftragsbestaetigung) tragen OperationalCaseHeader.
@@ -3157,7 +3157,7 @@ Archiv des vorherigen Boards:
 ## DOM-CON-003
 
 **Von:** Codex
-**Stand:** erledigt
+**Stand:** abgeschlossen 2026-06-23
 **Ziel des Slices:** Kontraktfixierung, Marktbewertung, Mahnung und Engagement als vollwertige Operatorraeume ausbauen.
 **Abnahmekriterien:** Fixierungs-, Markt- und Mahnlogik ist nicht nur sichtbar, sondern als klarer Operatorpfad bedienbar.
 **Ergebnis:** Alle 4 Kontrakt-Masken (contracts-v2, KontraktPositionsmonitor, FrmKontraktDetail, KontraktAlarmDashboard) tragen OperationalCaseHeader.
@@ -3165,7 +3165,7 @@ Archiv des vorherigen Boards:
 ## DOM-CRM-003
 
 **Von:** Codex
-**Stand:** erledigt
+**Stand:** abgeschlossen 2026-06-23
 **Ziel des Slices:** CRM-/Servicefaelle mit Ownership, Folgeobjekten, Dubletten- und Abschlusslogik angleichen.
 **Abnahmekriterien:** CRM und Service tragen denselben Fallbezug, Ownership-Rahmen und Abschlusspfad.
 **Ergebnis:** Alle 4 CRM-/Service-Masken (LegacyKundenStammModern, anfrage-detail, opportunity-detail, kontakt-management) tragen OperationalCaseHeader.
@@ -3173,7 +3173,7 @@ Archiv des vorherigen Boards:
 ## DOM-DOC-003
 
 **Von:** Codex
-**Stand:** erledigt
+**Stand:** abgeschlossen 2026-06-23
 **Ziel des Slices:** Nachweis-, Bescheid-, Artefakt- und Rueckmeldungskette ueber Dokumente, Meldungen und Vorgangskontext vereinheitlichen.
 **Abnahmekriterien:** Dokumente und Meldungen zeigen revisionsrelevanten Nachweisstatus, Rueckmeldungspfad und Wiedervorlage konsistent.
 **Ergebnis:** Alle 3 Dokumenten-/Compliance-Masken (ablage, meldewesen-konsole, atlas) tragen OperationalCaseHeader.
@@ -3181,7 +3181,7 @@ Archiv des vorherigen Boards:
 ## COV-FIN-002
 
 **Von:** Codex
-**Stand:** erledigt
+**Stand:** abgeschlossen 2026-06-23
 **Ziel des Slices:** Coverage-Tiefe fuer FIBU-Kernpfade aufbauen: Journal, Zahlungslaeufe, DATEV/ELSTER-nahe Follow-up-Logik und Abschlusskontext.
 **Dateibesitz:** `docs/agent-ops/active-workboard.md`, `tests/**`, relevante Finance-/FIBU-Services und Endpunkte
 **Abnahmekriterien:** Kritische FIBU-Kernpfade besitzen gezielte Tests statt nur allgemeiner Gesamtquote; Ratchet kann fuer Finance spaeter angehoben werden.
@@ -4713,7 +4713,7 @@ Parallele Fix-Slices aus Cards-Inventar-Audit (`CARD-AUDIT-001`). Claim-Protokol
 ## SEMANTIC-E2E-STRICT-001 — Playwright @critical Tags
 
 **Von:** Claude Code · **Owner:** Claude Code
-**Stand:** abgeschlossen 2026-06-26 — `@critical` in O2C + WMS/Silo Specs; CI-Workflow `e2e-critical.yml` (blockierend auf main/develop).
+**Stand:** abgeschlossen 2026-06-26 — `@critical` in O2C + WMS/Silo Specs; CI-Workflow `e2e-critical.yml` (blockierend auf main/develop); Playwright vom Repo-Root (Fix „No tests found“).
 **Dateibesitz:** `.github/workflows/e2e-critical.yml`, `playwright-tests/specs/e2e-matrix/o2c-semantic-chain.spec.ts`, `wms-silo-semantic-chain.spec.ts`.
 
 ## TRACEABILITY-MATRIX-001 — Slice↔Test↔Doku
@@ -4725,8 +4725,8 @@ Parallele Fix-Slices aus Cards-Inventar-Audit (`CARD-AUDIT-001`). Claim-Protokol
 ## OPERATOR-AGENT-002 — Agent DB-Persistenz
 
 **Von:** Claude Code · **Owner:** Claude Code
-**Stand:** in Arbeit 2026-06-26 — Schema `agent_proposals`, Repository, Alembic + Merge-Head; **Service-Wiring offen** (In-Memory MVP bleibt bis OPERATOR-AGENT-002b).
-**Dateibesitz:** `alembic/versions/agent_proposals_persist_20260626.py`, `app/infrastructure/models/agent_proposal_model.py`, `app/repositories/agent_proposal_repository.py`.
+**Stand:** abgeschlossen 2026-06-26 — Schema `agent_proposals`, Repository mit Mapper, Alembic + Merge-Head; **OPERATOR-AGENT-002b:** Service verdrahtet via `Depends(get_db)`, Idempotency-Key, Persistenz-Tests (`test_operator_agent_persist.py`).
+**Dateibesitz:** `alembic/versions/agent_proposals_persist_20260626.py`, `app/infrastructure/models/agent_proposal_model.py`, `app/repositories/agent_proposal_repository.py`, `app/services/operator_agent_service.py`, `app/api/v1/endpoints/operator_agent.py`, `tests/test_operator_agent_persist.py`.
 
 ## MCP-ERP-TOOLS-002 — MCP-Tools Erweiterung
 
@@ -4756,7 +4756,7 @@ Parallele Fix-Slices aus Cards-Inventar-Audit (`CARD-AUDIT-001`). Claim-Protokol
 
 ## EXTERNAL-MOCK-WORKFLOW-001 — Playwright Mock-Verträge (Claim)
 
-**Von:** Claude Code / **Stand:** offen
+**Von:** Claude Code / **Stand:** abgeschlossen 2026-06-26
 
 ---
 
