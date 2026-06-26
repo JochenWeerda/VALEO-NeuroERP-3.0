@@ -1,5 +1,13 @@
 # Active Workboard
 
+## DOC-CONSOLIDATION-010 - Doku-Konsolidierung: erledigte Zukunftsplaene, Dubletten, echter Restbacklog
+
+**Von:** Codex
+**Owner:** Codex
+**Stand:** reserviert 2026-06-26 - Repo-weite Doku-Konsolidierung fuer aktive `docs/**` ohne Archive: erledigte "folgt/offen/geplant"-Aussagen gegen Code/Slices pruefen, Dubletten/Altbefunde konsolidieren, offene Punkte in eine belastbare Restliste ueberfuehren.
+**Ziel:** Aktive Dokumentation wieder als verlaessliche Produkt- und Entwicklungsquelle nutzbar machen.
+**Dateibesitz:** `docs/project-context/open-gaps-and-known-issues.md`, `docs/project-context/documentation-consolidation-2026-06-26.md`, ausgewaehlte aktive `docs/**/*.md` mit belegbarer Statuskorrektur, `docs/agent-ops/slices/DOC-CONSOLIDATION-010.yaml`. Keine Edits an `docs/_internal/archive/**`.
+
 ## DOC-FOUNDATION-001 — Dokumentations-Fundament: MkDocs-Material + Versionierung + Taxonomie
 
 **Von:** Cursor
