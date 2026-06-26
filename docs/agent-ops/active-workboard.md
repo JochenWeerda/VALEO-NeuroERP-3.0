@@ -9,6 +9,13 @@
 **Dateibesitz:** `docs/benutzerhandbuch/**`, `mkdocs.yml`, `docs/agent-ops/slices/DOC-USER-MANUAL-002.yaml`, dieser Workboard-Abschnitt.
 **Abnahme:** Docs-Governance gruen; Staleness gruen; `mkdocs build` gruen. `mkdocs build --strict` bleibt durch bestehende Warnungen ausserhalb dieses Slice blockiert (ADR-/Architecture-Links und nicht navigierte Agent-Docs-Runbook-Seite), keine neuen Handbuch-Warnungen.
 
+## EINKAUF-LS-REPAIR-001 — Einkauf-Lieferschein + Opportunities Repair-Migration
+
+**Von:** Claude Code · **Owner:** Claude Code · **Stand:** abgeschlossen 2026-06-26
+P1-Gap (Welle 9) geschlossen: `einkauf_lieferscheine`, `einkauf_lieferschein_positionen`, `einkauf_frachtauftraege` + `opportunities` (public schema) lagen in Parallel-Branches → 500 UndefinedTable fuer `/einkauf/lieferscheine[/last]`, `/crm/opportunities/pipeline`. Repair-Migration `einkauf_ls_opportunities_repair_20260626` idempotent angehaengt.
+**Dateibesitz:** `alembic/versions/einkauf_ls_opportunities_repair_20260626.py`, `docs/agent-ops/slices/EINKAUF-LS-REPAIR-001.yaml`
+**Neuer Alembic-Head:** `einkauf_ls_opportunities_repair_20260626`
+
 ## ALEMBIC-MERGE-001 — Admin-Mobile + Charge-Lineage Alembic Repair-Migration
 
 **Von:** Claude Code · **Owner:** Claude Code · **Stand:** abgeschlossen 2026-06-26
