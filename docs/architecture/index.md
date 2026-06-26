@@ -4,7 +4,7 @@
 
 ## Einordnung
 
-Diese Datei ist eine `abgeleitete Sicht` auf die Architektur. Der operative Delivery-Stand liegt in [STATUS.md](c:/Users/Jochen/VALEO-NeuroERP-3.0/docs/architecture/process-kernel/STATUS.md) und den jeweiligen `wave-*/STATUS.md`.
+Diese Datei ist eine `abgeleitete Sicht` auf die Architektur. Der operative Delivery-Stand liegt in [STATUS.md](process-kernel/STATUS.md) und den jeweiligen `wave-*/STATUS.md` (Wave-Ordner nur im Repo, nicht in der MkDocs-Site).
 
 ## Zielbild
 - [Target State Landhandel ERP](target-state-landhandel-erp.md)

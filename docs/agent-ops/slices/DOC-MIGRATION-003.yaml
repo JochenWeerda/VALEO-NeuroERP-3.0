@@ -1,0 +1,32 @@
+slice_id: DOC-MIGRATION-003
+title: "Doku-Migration Phase F: Card-Duplikate + Architektur-Nav"
+owner: Cursor
+status: abgeschlossen
+updated: 2026-06-25
+completed_at: 2026-06-25
+goal: >-
+  Inhaltliches Card-Duplikat INV-001 (inventory vs lager) auflösen; Architektur-
+  und ADR-Bereiche in MkDocs-Navigation einbinden; Duplikat-Zählung im Inventar
+  auf resolve()-Pfade korrigieren.
+file_ownership:
+  - docs/cards/inventory/INV-001-inventory-to-settlement.md
+  - docs/cards/lager/INV-001-inventory-to-settlement.md
+  - docs/_internal/archive/cards-duplicates/**
+  - docs/entwickler/index.md
+  - docs/architecture/index.md
+  - mkdocs.yml
+  - scripts/docs-legacy-migrate.py
+  - docs/dokumentation/migrationsplan.md
+  - docs/_internal/README.md
+  - docs/agent-ops/slices/DOC-MIGRATION-003.yaml
+acceptance:
+  - Kanonische INV-001 liegt unter docs/cards/lager/; inventory/-Stub verweist darauf.
+  - mkdocs nav enthält Architektur-Index, Process-Kernel-STATUS, ADR-Index.
+  - Wave-Ordner weiterhin vom MkDocs-Build ausgeschlossen.
+  - python -m mkdocs build --site-dir site_check Exit 0.
+tests:
+  - python scripts/docs-legacy-migrate.py --inventory-only
+  - python -m mkdocs build --site-dir site_check
+risks:
+  - architecture/index.md enthielt absolute Pfade; auf relative Links umgestellt.
+  - Viele STATUS.md in process-kernel/wave-* sind kein Inhaltsduplikat — unverändert.
