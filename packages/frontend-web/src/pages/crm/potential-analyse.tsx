@@ -15,7 +15,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Skeleton } from '@/components/ui/skeleton'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { useQuery } from '@tanstack/react-query'
-import apiClient from '@/lib/api-client'
+import { apiClient } from '@/lib/api-client'
 import {
   TrendingUp,
   Users,

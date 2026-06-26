@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Badge } from '@/components/ui/badge'
-import { useToast } from '@/components/ui/use-toast'
+import { useToast } from '@/hooks/use-toast'
 
 const API = '/api/v1/whatsapp'
 
@@ -111,7 +111,7 @@ export default function WhatsAppSimulator() {
     }
   }
 
-  const order = lastResponse?.partial_order ?? lastResponse?.conversation?.partial_order
+  const order = lastResponse?.conversation?.partial_order ?? null
   const completedOrders = lastResponse?.orders ?? []
 
   return (

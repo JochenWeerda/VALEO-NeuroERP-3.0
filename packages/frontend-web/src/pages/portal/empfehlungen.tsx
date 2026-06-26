@@ -18,7 +18,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import apiClient from '@/lib/api-client'
+import { apiClient } from '@/lib/api-client'
 import { useToast } from '@/hooks/use-toast'
 import {
   Sparkles,
@@ -26,7 +26,7 @@ import {
   Tractor,
   ShoppingCart,
   Bell,
-  Seedling,
+  Sprout,
   CheckCircle2,
   ChevronRight,
   Filter,
@@ -52,7 +52,7 @@ const TYP_CONFIG: Record<string, { icon: React.ReactNode; farbe: string; badge: 
   ankauf_kontrakt: { icon: <TrendingUp className="h-5 w-5" />, farbe: 'border-green-300 bg-green-50', badge: 'Ankauf' },
   rohware_angebot: { icon: <ShoppingCart className="h-5 w-5" />, farbe: 'border-blue-300 bg-blue-50', badge: 'Rohwaren' },
   lohndienst: { icon: <Tractor className="h-5 w-5" />, farbe: 'border-amber-300 bg-amber-50', badge: 'Lohndienst' },
-  saatgut_folge: { icon: <Seedling className="h-5 w-5" />, farbe: 'border-lime-300 bg-lime-50', badge: 'Saatgut' },
+  saatgut_folge: { icon: <Sprout className="h-5 w-5" />, farbe: 'border-lime-300 bg-lime-50', badge: 'Saatgut' },
   vertrag_erinnerung: { icon: <Bell className="h-5 w-5" />, farbe: 'border-red-300 bg-red-50', badge: 'Erinnerung' },
 }
 
