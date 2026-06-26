@@ -1,136 +1,88 @@
-/**
- * In-App-Hilfe: Verknüpfung der laufenden Anwendung mit der MkDocs-Dokumentation.
- *
- * Stufe 1: Hilfe-/Dokumentations-Einstieg (externe Doku-Site, neuer Tab).
- * Stufe 2: kontextsensitives Mapping `Routen-Pfad → Handbuch-Seite`
- *          (fachliche Referenz: `docs/benutzerhandbuch/in-app-hilfe.md`).
- *
- * Die Basis-URL ist über `VITE_DOCS_URL` konfigurierbar (siehe `.env.example`);
- * Fallback ist die veröffentlichte GitHub-Pages-Site (vgl. `mkdocs.yml#site_url`).
- */
+// DOC-INAPP-HELP-002 — Route → Dokumentation Mapping
+// Generiert via scripts/generate_inapp_help_map.py
+// Stand: 2026-06-26
+// Nicht manuell bearbeiten — aus route-inventory.gen.json + HELP_MAP generiert.
 
-const DEFAULT_DOCS_BASE = 'https://jochenweerda.github.io/VALEO-NeuroERP-3.0/'
-
-/** Basis-URL der Doku-Site, garantiert mit abschließendem Slash. */
-export const DOCS_BASE_URL: string = (
-  (import.meta.env.VITE_DOCS_URL as string | undefined) || DEFAULT_DOCS_BASE
-).replace(/\/?$/, '/')
-
-/** Startseite des Benutzerhandbuchs. */
-export const DOCS_USER_MANUAL_URL = `${DOCS_BASE_URL}benutzerhandbuch/`
-
-/** In-App-Route der eingebetteten Hilfe (siehe `src/pages/hilfe.tsx`). */
-export const HELP_ROUTE = '/hilfe'
-
-/**
- * Mapping: Routen-Pfad-Fragment → Doku-Seite (relativ zur Basis).
- * Aufgelöst per Längster-Prefix-Match, daher reicht das jeweils kürzeste
- * eindeutige Fragment. Erweiterung erfolgt gemeinsam mit neuen Masken.
- *
- * Wichtig: Ziele müssen existierende Doku-Seiten sein (siehe `mkdocs.yml`),
- * sonst läuft der Deep-Link ins Leere.
- */
-const ROUTE_DOC_MAP: Record<string, string> = {
-  // --- Ernteannahme / Waage ---
-  'agrar/annahme': 'benutzerhandbuch/annahme/',
-  'agrar/ernte': 'benutzerhandbuch/annahme/',
-  annahme: 'benutzerhandbuch/annahme/',
-  waage: 'benutzerhandbuch/annahme/',
-  weighing: 'benutzerhandbuch/annahme/',
-  ernte: 'benutzerhandbuch/annahme/',
-  // --- Verkauf / Vertrieb / POS ---
-  verkauf: 'benutzerhandbuch/verkauf/',
-  sales: 'benutzerhandbuch/verkauf/',
-  vertrieb: 'benutzerhandbuch/verkauf/',
-  auftrag: 'benutzerhandbuch/verkauf/',
-  angebot: 'benutzerhandbuch/verkauf/',
-  rechnung: 'benutzerhandbuch/verkauf/',
-  lieferschein: 'benutzerhandbuch/verkauf/',
-  pos: 'benutzerhandbuch/verkauf/',
-  kasse: 'benutzerhandbuch/verkauf/',
-  // --- Einkauf / Beschaffung ---
-  einkauf: 'benutzerhandbuch/einkauf/',
-  beschaffung: 'benutzerhandbuch/einkauf/',
-  bestellung: 'benutzerhandbuch/einkauf/',
-  lieferanten: 'benutzerhandbuch/einkauf/',
-  // --- Lager / Bestand / Inventur ---
-  lager: 'benutzerhandbuch/lager/',
-  wms: 'benutzerhandbuch/lager/',
-  bestand: 'benutzerhandbuch/lager/',
-  inventur: 'benutzerhandbuch/lager/',
-  inventory: 'benutzerhandbuch/lager/',
-  'stock-management': 'benutzerhandbuch/lager/',
-  silo: 'benutzerhandbuch/lager/',
-  // --- CRM / Marketing ---
-  crm: 'benutzerhandbuch/crm/',
-  kontakte: 'benutzerhandbuch/crm/',
-  leads: 'benutzerhandbuch/crm/',
-  marketing: 'benutzerhandbuch/crm/',
-  prospecting: 'benutzerhandbuch/crm/',
-  // --- Finanzbuchhaltung ---
-  fibu: 'benutzerhandbuch/finanzbuchhaltung/',
-  finanz: 'benutzerhandbuch/finanzbuchhaltung/',
-  finanzen: 'benutzerhandbuch/finanzbuchhaltung/',
-  finance: 'benutzerhandbuch/finanzbuchhaltung/',
-  finanzplanung: 'benutzerhandbuch/finanzbuchhaltung/',
-  mahnwesen: 'benutzerhandbuch/finanzbuchhaltung/',
-  banken: 'benutzerhandbuch/finanzbuchhaltung/',
-  controlling: 'benutzerhandbuch/finanzbuchhaltung/',
-  // --- Administration & Betrieb (spezifisch vor allgemein) ---
-  'admin/mandanten': 'admin/mandanten-administration/',
-  'admin/module': 'admin/module-und-feature-flags/',
-  'admin/rbac': 'admin/rbac-und-rollen/',
-  'admin/deployment': 'admin/deployment/',
-  'admin/backup': 'admin/backup-restore/',
-  'admin/datenbank': 'admin/datenbank-migrationen/',
-  'admin/migrationen': 'admin/datenbank-migrationen/',
-  'admin/monitoring': 'admin/monitoring-und-slo/',
-  'admin/incident': 'admin/incident-response/',
-  'admin/skalierung': 'admin/skalierung-performance/',
-  admin: 'admin/',
-  'admin-suite': 'admin/',
-  // --- Schnittstellen / Integrationen ---
-  schnittstellen: 'schnittstellen/',
-  integrationen: 'schnittstellen/',
-  // --- Agenten / KI-Automatisierung ---
-  agent: 'agent-docs/',
-  agenten: 'agent-docs/',
+export interface HelpEntry {
+  docPath: string;
+  label: string;
+  url: string;
 }
 
+/** Vollständige Docs-Basis-URL */
+export const DOCS_BASE_URL = "https://jochenweerda.github.io/VALEO-NeuroERP-3.0";
+
 /**
- * Ermittelt die passende Handbuch-URL für einen App-Pfad.
- * Fällt ohne spezifische Zuordnung auf die Benutzerhandbuch-Startseite zurück.
+ * Mapping von Route-Pfad-Präfix → Hilfe-Seite.
+ * Wird von useInAppHelp() verwendet um die passende Doku zur aktuellen Route zu finden.
  */
-export function resolveHelpUrl(pathname: string): string {
-  const clean = (pathname || '').replace(/^\/+/, '').toLowerCase()
-  const keys = Object.keys(ROUTE_DOC_MAP).sort((a, b) => b.length - a.length)
-  for (const key of keys) {
-    if (clean === key || clean.startsWith(`${key}/`)) {
-      return `${DOCS_BASE_URL}${ROUTE_DOC_MAP[key]}`
+export const ROUTE_HELP_MAP: Record<string, HelpEntry> = {
+  "admin/agenten-integration": { docPath: "admin/index", label: "Administration", url: "https://jochenweerda.github.io/VALEO-NeuroERP-3.0/admin/index/" },
+  "admin/ai-approvals": { docPath: "agent-docs/guardrails", label: "AI-Freigaben", url: "https://jochenweerda.github.io/VALEO-NeuroERP-3.0/agent-docs/guardrails/" },
+  "admin/externe-gates": { docPath: "admin/monitoring-und-slo", label: "Externe Gate-Dashboards", url: "https://jochenweerda.github.io/VALEO-NeuroERP-3.0/admin/monitoring-und-slo/" },
+  "admin/audit-log": { docPath: "admin/index", label: "Administration", url: "https://jochenweerda.github.io/VALEO-NeuroERP-3.0/admin/index/" },
+  "admin/benutzer": { docPath: "admin/rbac-und-rollen", label: "Benutzer & Rollen", url: "https://jochenweerda.github.io/VALEO-NeuroERP-3.0/admin/rbac-und-rollen/" },
+  "admin/benutzer-liste": { docPath: "admin/index", label: "Administration", url: "https://jochenweerda.github.io/VALEO-NeuroERP-3.0/admin/index/" },
+  "admin/benutzer/:id": { docPath: "admin/rbac-und-rollen", label: "Benutzer & Rollen", url: "https://jochenweerda.github.io/VALEO-NeuroERP-3.0/admin/rbac-und-rollen/" },
+  "admin/benutzer/neu": { docPath: "admin/rbac-und-rollen", label: "Benutzer & Rollen", url: "https://jochenweerda.github.io/VALEO-NeuroERP-3.0/admin/rbac-und-rollen/" },
+  "admin/command-monitor": { docPath: "admin/index", label: "Administration", url: "https://jochenweerda.github.io/VALEO-NeuroERP-3.0/admin/index/" },
+  "admin/compliance": { docPath: "admin/index", label: "Administration", url: "https://jochenweerda.github.io/VALEO-NeuroERP-3.0/admin/index/" },
+  "admin/compliance-dashboard": { docPath: "admin/index", label: "Administration", url: "https://jochenweerda.github.io/VALEO-NeuroERP-3.0/admin/index/" },
+  "admin/control-center": { docPath: "admin/index", label: "Administration", url: "https://jochenweerda.github.io/VALEO-NeuroERP-3.0/admin/index/" },
+  "admin/control-center/agent-ops": { docPath: "admin/index", label: "Administration", url: "https://jochenweerda.github.io/VALEO-NeuroERP-3.0/admin/index/" },
+  "admin/control-center/superglue": { docPath: "admin/index", label: "Administration", url: "https://jochenweerda.github.io/VALEO-NeuroERP-3.0/admin/index/" },
+  "admin/data-quality": { docPath: "admin/index", label: "Administration", url: "https://jochenweerda.github.io/VALEO-NeuroERP-3.0/admin/index/" },
+  "admin/gap-pipeline": { docPath: "admin/index", label: "Administration", url: "https://jochenweerda.github.io/VALEO-NeuroERP-3.0/admin/index/" },
+  "admin/GapPipelineConsole": { docPath: "admin/index", label: "Administration", url: "https://jochenweerda.github.io/VALEO-NeuroERP-3.0/admin/index/" },
+  "admin/integrationen-quarantaene": { docPath: "admin/index", label: "Administration", url: "https://jochenweerda.github.io/VALEO-NeuroERP-3.0/admin/index/" },
+  "admin/monitoring/alerts": { docPath: "admin/index", label: "Administration", url: "https://jochenweerda.github.io/VALEO-NeuroERP-3.0/admin/index/" },
+  "admin/monitoring/regeln": { docPath: "admin/index", label: "Administration", url: "https://jochenweerda.github.io/VALEO-NeuroERP-3.0/admin/index/" },
+  "admin/nummernkreise": { docPath: "admin/index", label: "Administration", url: "https://jochenweerda.github.io/VALEO-NeuroERP-3.0/admin/index/" },
+  "admin/report-berechtigungen": { docPath: "admin/index", label: "Administration", url: "https://jochenweerda.github.io/VALEO-NeuroERP-3.0/admin/index/" },
+  "admin/rolle/:id": { docPath: "admin/index", label: "Administration", url: "https://jochenweerda.github.io/VALEO-NeuroERP-3.0/admin/index/" },
+  "admin/rolle/neu": { docPath: "admin/index", label: "Administration", url: "https://jochenweerda.github.io/VALEO-NeuroERP-3.0/admin/index/" },
+  "admin/rollen-verwaltung": { docPath: "admin/index", label: "Administration", url: "https://jochenweerda.github.io/VALEO-NeuroERP-3.0/admin/index/" },
+  "admin/setup": { docPath: "admin/index", label: "Administration", url: "https://jochenweerda.github.io/VALEO-NeuroERP-3.0/admin/index/" },
+  "admin/setup/dms-integration": { docPath: "admin/index", label: "Administration", url: "https://jochenweerda.github.io/VALEO-NeuroERP-3.0/admin/index/" },
+  "admin/terminologie": { docPath: "admin/index", label: "Administration", url: "https://jochenweerda.github.io/VALEO-NeuroERP-3.0/admin/index/" },
+  "admin/voice-channel": { docPath: "admin/index", label: "Administration", url: "https://jochenweerda.github.io/VALEO-NeuroERP-3.0/admin/index/" },
+  "admin/webhooks": { docPath: "admin/index", label: "Administration", url: "https://jochenweerda.github.io/VALEO-NeuroERP-3.0/admin/index/" },
+  "admin/webshop": { docPath: "admin/index", label: "Administration", url: "https://jochenweerda.github.io/VALEO-NeuroERP-3.0/admin/index/" },
+  "agrar": { docPath: "benutzerhandbuch/annahme", label: "Agrar-Modul", url: "https://jochenweerda.github.io/VALEO-NeuroERP-3.0/benutzerhandbuch/annahme/" },
+  "agrar/aussaat": { docPath: "benutzerhandbuch/annahme", label: "Agrar-Modul", url: "https://jochenweerda.github.io/VALEO-NeuroERP-3.0/benutzerhandbuch/annahme/" },
+  "agrar/aussaat/:id": { docPath: "benutzerhandbuch/annahme", label: "Agrar-Modul", url: "https://jochenweerda.github.io/VALEO-NeuroERP-3.0/benutzerhandbuch/annahme/" },
+  "agrar/aussaat/liste": { docPath: "benutzerhandbuch/annahme", label: "Agrar-Modul", url: "https://jochenweerda.github.io/VALEO-NeuroERP-3.0/benutzerhandbuch/annahme/" },
+  "agrar/aussaat/neu": { docPath: "benutzerhandbuch/annahme", label: "Agrar-Modul", url: "https://jochenweerda.github.io/VALEO-NeuroERP-3.0/benutzerhandbuch/annahme/" },
+  "agrar/biostimulanzien": { docPath: "benutzerhandbuch/annahme", label: "Agrar-Modul", url: "https://jochenweerda.github.io/VALEO-NeuroERP-3.0/benutzerhandbuch/annahme/" },
+  "agrar/biostimulanzien-liste": { docPath: "benutzerhandbuch/annahme", label: "Agrar-Modul", url: "https://jochenweerda.github.io/VALEO-NeuroERP-3.0/benutzerhandbuch/annahme/" },
+  "agrar/biostimulanzien-stamm": { docPath: "benutzerhandbuch/annahme", label: "Agrar-Modul", url: "https://jochenweerda.github.io/VALEO-NeuroERP-3.0/benutzerhandbuch/annahme/" },
+  "agrar/biostimulanzien-stamm/:id": { docPath: "benutzerhandbuch/annahme", label: "Agrar-Modul", url: "https://jochenweerda.github.io/VALEO-NeuroERP-3.0/benutzerhandbuch/annahme/" },
+  "agrar/bodenprobe/:id": { docPath: "benutzerhandbuch/annahme", label: "Agrar-Modul", url: "https://jochenweerda.github.io/VALEO-NeuroERP-3.0/benutzerhandbuch/annahme/" },
+  "agrar/bodenprobe/neu": { docPath: "benutzerhandbuch/annahme", label: "Agrar-Modul", url: "https://jochenweerda.github.io/VALEO-NeuroERP-3.0/benutzerhandbuch/annahme/" },
+  "agrar/bodenproben": { docPath: "benutzerhandbuch/annahme", label: "Agrar-Modul", url: "https://jochenweerda.github.io/VALEO-NeuroERP-3.0/benutzerhandbuch/annahme/" },
+  "agrar/bodenproben/liste": { docPath: "benutzerhandbuch/annahme", label: "Agrar-Modul", url: "https://jochenweerda.github.io/VALEO-NeuroERP-3.0/benutzerhandbuch/annahme/" },
+  "agrar/duenger": { docPath: "benutzerhandbuch/annahme", label: "Agrar-Modul", url: "https://jochenweerda.github.io/VALEO-NeuroERP-3.0/benutzerhandbuch/annahme/" },
+  "agrar/duenger-liste": { docPath: "benutzerhandbuch/annahme", label: "Agrar-Modul", url: "https://jochenweerda.github.io/VALEO-NeuroERP-3.0/benutzerhandbuch/annahme/" },
+  "agrar/duenger-stamm": { docPath: "benutzerhandbuch/annahme", label: "Agrar-Modul", url: "https://jochenweerda.github.io/VALEO-NeuroERP-3.0/benutzerhandbuch/annahme/" },
+  "agrar/duenger-stamm/:id": { docPath: "benutzerhandbuch/annahme", label: "Agrar-Modul", url: "https://jochenweerda.github.io/VALEO-NeuroERP-3.0/benutzerhandbuch/annahme/" },
+  "agrar/duenger/bedarfsrechner": { docPath: "benutzerhandbuch/annahme", label: "Agrar-Modul", url: "https://jochenweerda.github.io/VALEO-NeuroERP-3.0/benutzerhandbuch/annahme/" },
+  "agrar/duenger/liste": { docPath: "benutzerhandbuch/annahme", label: "Agrar-Modul", url: "https://jochenweerda.github.io/VALEO-NeuroERP-3.0/benutzerhandbuch/annahme/" },
+};
+
+/**
+ * Findet den passenden Hilfe-Eintrag für einen gegebenen Pfad.
+ * Längster Präfix gewinnt.
+ */
+export function findHelpEntry(currentPath: string): HelpEntry | null {
+  const normalised = currentPath.replace(/^\//, "").replace(/\/$/, "");
+  // Längsten Präfix zuerst prüfen
+  const entries = Object.entries(ROUTE_HELP_MAP).sort(
+    ([a], [b]) => b.length - a.length
+  );
+  for (const [prefix, entry] of entries) {
+    if (normalised === prefix || normalised.startsWith(prefix + "/")) {
+      return entry;
     }
   }
-  return DOCS_USER_MANUAL_URL
-}
-
-/** Öffnet die kontextsensitive Hilfe in einem neuen Tab. */
-export function openHelp(pathname?: string): void {
-  if (typeof window === 'undefined') return
-  const path = pathname ?? window.location.pathname
-  window.open(resolveHelpUrl(path), '_blank', 'noopener,noreferrer')
-}
-
-/** Öffnet eine feste Doku-URL (z. B. Handbuch-Startseite) in einem neuen Tab. */
-export function openDocs(url: string = DOCS_USER_MANUAL_URL): void {
-  if (typeof window === 'undefined') return
-  window.open(url, '_blank', 'noopener,noreferrer')
-}
-
-/**
- * Liefert den In-App-Link zur eingebetteten Hilfe (`/hilfe`).
- * Der ursprüngliche App-Pfad wird als `ctx` übergeben, damit die Hilfe-Seite
- * die passende Handbuch-Seite einbettet (Stufe 2).
- */
-export function getEmbeddedHelpHref(pathname?: string): string {
-  const ctx = (pathname ?? (typeof window !== 'undefined' ? window.location.pathname : '')) || ''
-  return ctx ? `${HELP_ROUTE}?ctx=${encodeURIComponent(ctx)}` : HELP_ROUTE
+  return null;
 }

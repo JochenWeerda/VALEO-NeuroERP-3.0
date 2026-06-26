@@ -4657,3 +4657,19 @@ Parallele Fix-Slices aus Cards-Inventar-Audit (`CARD-AUDIT-001`). Claim-Protokol
 **Stand:** abgeschlossen 2026-06-26 — `--check`-Step in quality-gate.yml (blockiert PRs bei Drift); `openapi-drift.yml` (Auto-Commit auf main bei API-Änderungen).
 **Ziel:** `generate_openapi.py --check` als blockierendes CI-Gate; bei Drift auto-commit durch CI statt manuellem Schritt.
 **Dateibesitz:** `.github/workflows/openapi-drift.yml`, `docs/agent-ops/slices/DOC-OPENAPI-CI-001.yaml`
+
+## DOC-ASYNCAPI-001 — AsyncAPI 2.6 Event-Katalog
+
+**Von:** Claude Code
+**Owner:** Claude Code
+**Stand:** abgeschlossen 2026-06-26 — 51 NATS/Outbox-Events aus Codebase extrahiert; `docs/schnittstellen/asyncapi.yaml` (AsyncAPI 2.6, 51 Channels); `docs/schnittstellen/events.md` (MkDocs-Seite nach Domäne); `scripts/extract_events.py` + `scripts/generate_asyncapi.py` (portable, kein Hardcoded-Pfad).
+**Ziel:** Maschinenlesbare Event-Spec für Integratoren; Events nach Domäne dokumentiert.
+**Dateibesitz:** `docs/schnittstellen/asyncapi.yaml`, `docs/schnittstellen/events.md`, `scripts/extract_events.py`, `scripts/generate_asyncapi.py`.
+
+## DOC-INAPP-HELP-002 — In-App-Hilfe Route → Dokumentation Mapping
+
+**Von:** Claude Code
+**Owner:** Claude Code
+**Stand:** abgeschlossen 2026-06-26 — 50 Routen gemappt auf MkDocs-Seiten; `src/lib/docs-help.ts` mit `ROUTE_HELP_MAP` + `findHelpEntry()` (längster-Präfix-Match); `docs/benutzerhandbuch/in-app-hilfe.md` mit Konzept + Mapping-Tabelle; `scripts/generate_inapp_help_map.py` (portable Generator).
+**Ziel:** Kontextsensitive In-App-Hilfe: aktuelle Route → passende Doku-Seite, sofort per useInAppHelp()-Hook nutzbar.
+**Dateibesitz:** `packages/frontend-web/src/lib/docs-help.ts`, `docs/benutzerhandbuch/in-app-hilfe.md`, `scripts/generate_inapp_help_map.py`.
