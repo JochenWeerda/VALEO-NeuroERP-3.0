@@ -4673,3 +4673,11 @@ Parallele Fix-Slices aus Cards-Inventar-Audit (`CARD-AUDIT-001`). Claim-Protokol
 **Stand:** abgeschlossen 2026-06-26 — 50 Routen gemappt auf MkDocs-Seiten; `src/lib/docs-help.ts` mit `ROUTE_HELP_MAP` + `findHelpEntry()` (längster-Präfix-Match); `docs/benutzerhandbuch/in-app-hilfe.md` mit Konzept + Mapping-Tabelle; `scripts/generate_inapp_help_map.py` (portable Generator).
 **Ziel:** Kontextsensitive In-App-Hilfe: aktuelle Route → passende Doku-Seite, sofort per useInAppHelp()-Hook nutzbar.
 **Dateibesitz:** `packages/frontend-web/src/lib/docs-help.ts`, `docs/benutzerhandbuch/in-app-hilfe.md`, `scripts/generate_inapp_help_map.py`.
+
+## DOC-DRIFT-GATE-002 — Doku-Code-Drift-Gate in CI
+
+**Von:** Claude Code
+**Owner:** Claude Code
+**Stand:** abgeschlossen 2026-06-26 — `--fail-over 0`-Step in `quality-gate.yml` eingetragen; Baseline 0 Drift-Items; lokal verifiziert (Exit 0). Bei Drift > 0 schlägt CI mit Hinweis fehl.
+**Ziel:** Doku-Drift von Endpoints/Migrationen/Services/Pages dauerhaft auf 0 halten durch blockierendes CI-Gate.
+**Dateibesitz:** `.github/workflows/quality-gate.yml`, `docs/agent-ops/slices/DOC-DRIFT-GATE-002.yaml`.

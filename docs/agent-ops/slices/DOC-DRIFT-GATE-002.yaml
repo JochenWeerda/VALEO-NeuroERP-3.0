@@ -1,0 +1,32 @@
+slice_id: DOC-DRIFT-GATE-002
+title: "Doku-Code-Drift-Gate in CI"
+priority: P2
+owner: Claude Code
+status: abgeschlossen
+created: "2026-06-26"
+
+goal: >
+  doc_drift_report.py --fail-over 0 als blockierenden CI-Step in quality-gate.yml einführen.
+  Drift-Schwellwert 0: jeder neue Endpoint/Migration/Service/Page ohne Doku bricht den Build.
+  Baseline: 0 Drift-Items (erreicht durch Inventar-Dokumente und Drift-Script-Filter).
+
+ai_harness:
+  fachlicher_vertrag:
+    - Jeder neue API-Endpoint muss in docs/ erwähnt sein (stem-in-docs-text Prüfung).
+    - Jede neue Alembic-Migration muss in docs/ erwähnt sein.
+    - Jeder neue Service muss in docs/ erwähnt sein.
+    - Jede neue Frontend-Seite muss in route-inventory.gen.json oder nav vorhanden sein.
+    - Bei Drift > 0 schlägt CI mit klarer Fehlermeldung fehl.
+  architekturvertrag:
+    - scripts/doc_drift_report.py --fail-over 0 ist der Gate-Befehl (kein separates Script).
+    - Inventar-Dokumente in docs/schnittstellen/ und docs/entwickler/ dienen als Doku-Nachweis.
+    - Ausnahmen (Charts, Dialoge, Legacy-Komponenten) sind im Script per SKIP_* konfiguriert.
+    - Schwellwert 0 ist verbindlich — kein Erhöhen ohne expliziten Slice + Begründung.
+  akzeptanzkriterien:
+    - quality-gate.yml enthält Step "Doc-Drift-Gate (DOC-DRIFT-GATE-002)".
+    - python scripts/doc_drift_report.py --fail-over 0 läuft lokal mit Exit 0.
+    - Bei simuliertem Drift (Dummy-Endpoint ohne Doku) schlägt CI mit Exit 1 fehl.
+
+dateibesitz:
+  - .github/workflows/quality-gate.yml
+  - docs/agent-ops/slices/DOC-DRIFT-GATE-002.yaml
