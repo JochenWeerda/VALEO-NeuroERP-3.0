@@ -237,3 +237,4 @@ nav:
       - Doku-Governance: dokumentation/governance.md
       - Migrationsplan: dokumentation/migrationsplan.md
   - AI Engineering Metrics: entwickler/engineering-metrics.md
+  - Doku-Drift-Dashboard: entwickler/drift-dashboard.md

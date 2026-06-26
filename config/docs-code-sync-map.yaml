@@ -2,6 +2,9 @@
 #
 # Der Check bewertet nur geaenderte Pfade im Diff. Legacy-Bestand wird nicht
 # repo-weit blockiert.
+#
+# DOCS-CODE-SYNC-002: Generierte Inventar-Artefakte gelten als gueltige Doku.
+# Pfade mit generated_artifacts werden zusaetzlich zu .md-Docs akzeptiert.
 
 critical_paths:
   - path: app/api/v1/endpoints/
@@ -11,45 +14,93 @@ critical_paths:
       - docs/project-context/
       - docs/operations/
       - docs/architecture/
+      - docs/schnittstellen/
+    generated_artifacts:
+      - docs/schnittstellen/openapi.json
+      - docs/schnittstellen/endpoint-inventory.md
+
   - path: app/services/
     docs:
       - docs/workflows/
       - docs/project-context/
       - docs/quality-assurance/
       - docs/architecture/
+      - docs/entwickler/
+    generated_artifacts:
+      - docs/entwickler/service-inventory.md
+
   - path: packages/frontend-web/src/pages/
     docs:
       - docs/quality-assurance/
       - docs/project-context/
       - docs/architecture/frontend-routing/
       - docs/workflows/
+      - docs/benutzerhandbuch/
+    generated_artifacts:
+      - packages/frontend-web/src/app/routing/route-inventory.gen.json
+      - packages/frontend-web/src/lib/docs-help.ts
+
   - path: packages/frontend-web/src/app/routing/
     docs:
       - docs/architecture/frontend-routing/
       - docs/quality-assurance/
+    generated_artifacts:
+      - packages/frontend-web/src/app/routing/route-inventory.gen.json
+
   - path: alembic/versions/
     docs:
       - docs/operations/
       - docs/project-context/
       - docs/workflows/
+      - docs/admin/
+    generated_artifacts:
+      - docs/admin/migration-inventory.md
+
   - path: migrations/sql/
     docs:
       - docs/operations/
       - docs/project-context/
+    generated_artifacts:
+      - docs/admin/migration-inventory.md
+
   - path: .github/workflows/
     docs:
       - docs/operations/
       - docs/quality-assurance/
       - docs/architecture/
+      - docs/agent-ops/
+
   - path: scripts/
     docs:
       - docs/operations/
       - docs/architecture/
       - docs/agent-ops/
+      - docs/entwickler/
+
+  # Events/Outbox-Dateien → AsyncAPI-Doku als Nachweis
+  - path: app/
+    event_pattern: outbox_event_type|event_type
+    docs:
+      - docs/schnittstellen/
+    generated_artifacts:
+      - docs/schnittstellen/asyncapi.yaml
+      - docs/schnittstellen/events.md
 
 global_docs:
   - docs/project-context/open-gaps-and-known-issues.md
   - docs/agent-ops/active-workboard.md
+
+# Generierte Artefakte: Aenderungen an diesen Dateien zaehlen als Doku-Update.
+# Der Check akzeptiert generated_artifacts als Aequivalent zu .md-Doku-Aenderungen.
+generated_doc_paths:
+  - docs/schnittstellen/openapi.json
+  - docs/schnittstellen/asyncapi.yaml
+  - docs/schnittstellen/endpoint-inventory.md
+  - docs/schnittstellen/events.md
+  - docs/admin/migration-inventory.md
+  - docs/entwickler/service-inventory.md
+  - packages/frontend-web/src/app/routing/route-inventory.gen.json
+  - packages/frontend-web/src/lib/docs-help.ts
 
 exception_markers:
   - docs_sync_exception: true

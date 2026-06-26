@@ -57,14 +57,19 @@ function parseListBlock(lines, startIndex, indent) {
 function parseMap(filePath) {
   const fullPath = path.join(repoRoot, filePath);
   const lines = fs.readFileSync(fullPath, "utf8").split(/\r?\n/);
-  const config = { critical_paths: [], global_docs: [], exception_markers: [] };
+  const config = {
+    critical_paths: [],
+    global_docs: [],
+    exception_markers: [],
+    generated_doc_paths: [],
+  };
 
   let current = null;
   for (let index = 0; index < lines.length; index += 1) {
     const line = lines[index];
     const pathMatch = line.match(/^\s*-\s+path:\s+(.+?)\s*$/);
     if (pathMatch) {
-      current = { path: normalize(pathMatch[1].trim()), docs: [] };
+      current = { path: normalize(pathMatch[1].trim()), docs: [], generated_artifacts: [] };
       config.critical_paths.push(current);
       continue;
     }
@@ -74,8 +79,18 @@ function parseMap(filePath) {
       continue;
     }
 
+    if (current && /^\s+generated_artifacts:\s*$/.test(line)) {
+      current.generated_artifacts = parseListBlock(lines, index + 1, 6).map(normalize);
+      continue;
+    }
+
     if (/^global_docs:\s*$/.test(line)) {
       config.global_docs = parseListBlock(lines, index + 1, 2).map(normalize);
+      continue;
+    }
+
+    if (/^generated_doc_paths:\s*$/.test(line)) {
+      config.generated_doc_paths = parseListBlock(lines, index + 1, 2).map(normalize);
       continue;
     }
 
@@ -100,6 +115,10 @@ function main() {
   const changed = changedFiles(args.base, args.head);
   const config = parseMap(args.map);
   const changedDocs = changed.filter((filePath) => filePath.endsWith(".md"));
+  // DOCS-CODE-SYNC-002: generierte Artefakte (.json, .yaml, .ts) zaehlen als Doku-Nachweis
+  const changedGenerated = changed.filter((filePath) =>
+    config.generated_doc_paths.some((gp) => filePath === gp || filePath.startsWith(gp))
+  );
   const changedGlobalDocs = changed.filter((filePath) => config.global_docs.includes(filePath));
   const exception = hasException(changed, config.exception_markers);
   const errors = [];
@@ -111,11 +130,16 @@ function main() {
     const hasMappedDoc = changedDocs.some((filePath) =>
       rule.docs.some((docPath) => filePath === docPath || filePath.startsWith(docPath))
     );
+    const hasMappedGenerated = changedGenerated.some((filePath) =>
+      (rule.generated_artifacts || []).some(
+        (gp) => filePath === gp || filePath.startsWith(gp)
+      )
+    );
     const hasGlobalDoc = changedGlobalDocs.length > 0;
 
-    if (!hasMappedDoc && !hasGlobalDoc && !exception) {
+    if (!hasMappedDoc && !hasMappedGenerated && !hasGlobalDoc && !exception) {
       errors.push(
-        `${rule.path}: ${affected.length} code file(s) changed without mapped docs, open-gaps/workboard update or docs_sync_exception`
+        `${rule.path}: ${affected.length} code file(s) changed without mapped docs, generated inventory, open-gaps/workboard update or docs_sync_exception`
       );
     }
   }
