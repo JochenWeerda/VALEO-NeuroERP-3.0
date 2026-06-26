@@ -32,7 +32,7 @@ import {
 } from '@/components/ui/dialog'
 import { Textarea } from '@/components/ui/textarea'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import apiClient from '@/lib/api-client'
+import { apiClient } from '@/lib/api-client'
 import { useToast } from '@/hooks/use-toast'
 import { Tractor, Plus, Clock, CheckCircle2, XCircle, Calendar, Wheat, Droplets } from 'lucide-react'
 
@@ -84,7 +84,7 @@ function AuftragKarte({ a }: { a: LohnAuftrag }) {
           <div className="flex-1">
             <div className="flex items-center gap-2 mb-2">
               <span className="font-semibold text-gray-900">{a.typ_bezeichnung}</span>
-              <Badge className={sc.farbe + ' flex items-center gap-1'}>
+              <Badge className={`${sc.farbe  } flex items-center gap-1`}>
                 {sc.icon}{sc.label}
               </Badge>
             </div>
