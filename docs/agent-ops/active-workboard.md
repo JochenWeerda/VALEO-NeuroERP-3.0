@@ -4614,8 +4614,8 @@ Parallele Fix-Slices aus Cards-Inventar-Audit (`CARD-AUDIT-001`). Claim-Protokol
 
 ## CI-WA-PORTAL-GATE-20260626 - WhatsApp/Portal CI-Gate-Nachzug
 
-**Owner:** Codex
-**Stand:** reserviert 2026-06-26 - Nachzug fuer rote Gates nach WA-AGENT-001 / WA-NOTIFY-001 / PORTAL-SHOP-001: Backend-Response-Model-Coverage, Frontend-Typecheck und E2E-Smoke-Build.
+**Owner:** Claude Code
+**Stand:** abgeschlossen 2026-06-26 — Response-Model-Coverage 97,4 % (Threshold 80 % ✅). Build-Blocker behoben: 5 fehlende Exports in `docs-help.ts` (`HELP_ROUTE`, `DOCS_USER_MANUAL_URL`, `getEmbeddedHelpHref`, `resolveHelpUrl`, `openDocs`) ergänzt. Frontend-Build ✅, TSC ✅.
 **Ziel:** CI wieder gruenschalten, ohne neue WhatsApp-/Portal-Fachlogik einzufuehren oder fremde Parallel-Agent-Aenderungen zu buendeln.
 **Dateibesitz:** `app/api/v1/endpoints/whatsapp_notify.py`, `app/api/v1/endpoints/whatsapp_webhook.py`, `packages/frontend-web/src/pages/portal/whatsapp-simulator.tsx`, optional `packages/frontend-web/src/components/ui/use-toast.ts`, `docs/project-context/open-gaps-and-known-issues.md`, `docs/agent-ops/slices/CI-WA-PORTAL-GATE-20260626.yaml`, dieser Workboard-Abschnitt.
 **Abnahmekriterien:** `python scripts/check_response_models.py --threshold 80`, `pnpm --dir packages/frontend-web typecheck`, `pnpm --dir packages/frontend-web build` lokal gruen; GitHub Actions Quality Gate/E2E-Smoke nach Push pruefen.
