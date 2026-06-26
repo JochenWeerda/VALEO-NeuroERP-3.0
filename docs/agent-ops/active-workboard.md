@@ -4455,6 +4455,12 @@ Archiv des vorherigen Boards:
 **Dateibesitz:** `app/services/whatsapp_notify_service.py`, `app/api/v1/endpoints/whatsapp_notify.py`, `tests/test_whatsapp_notify.py`, `docs/agent-ops/slices/WA-NOTIFY-001.yaml`.
 **Integration:** Logistik → `/dev/notify/lieferankuendigung`, Docflow → `/dev/notify/dokument-ready`.
 
+## DOC-MIGRATION-002 — Alt-Dokumente konsolidiert (Phase E)
+
+**Owner:** Cursor
+**Stand:** abgeschlossen 2026-06-26 — ~390 Markdown-Dateien nach `docs/_internal/archive/` migriert; `docs/archive/` aufgelöst; Root-Docs von 107→2 (`index.md`, `MASKEN.md`); Inventar + Duplikat-Report; `mkdocs build` grün.
+**Dateibesitz:** `scripts/docs-legacy-migrate.py`, `docs/_internal/archive/**`, `docs/_internal/legacy-docs-inventory.md`, `docs/agent-ops/slices/DOC-MIGRATION-002.yaml`.
+
 ---
 
 ## CARD-AUDIT-Follow-up (2026-06-26)
@@ -4464,7 +4470,7 @@ Parallele Fix-Slices aus Cards-Inventar-Audit (`CARD-AUDIT-001`). Claim-Protokol
 | Slice | Priorität | Owner | Stand |
 |-------|-----------|-------|-------|
 | FIN-ABSCHLUSS-STUBS-001 | P1 | — | offen |
-| OTC-010-POS-HANDOVER-001 | P2 | — | offen |
+| OTC-010-POS-HANDOVER-001 | P2 | Codex | reserviert 2026-06-26 |
 | CMP-UStVA-API-CLIENT-001 | P2 | — | offen |
 | CRM-LEGACY-API-MIGRATE-001 | P2 | — | offen |
 | COM-REGISTER-CAMELCASE-001 | P2 | — | offen |
@@ -4481,8 +4487,8 @@ Parallele Fix-Slices aus Cards-Inventar-Audit (`CARD-AUDIT-001`). Claim-Protokol
 
 ## OTC-010-POS-HANDOVER-001 — Positionen Auftrag→Lieferschein
 
-**Owner:** —
-**Stand:** offen — OTC-010-P1/P2/P3 dokumentiert; Kunden-Prefill behoben, Positionen und `source_order_id` offen.
+**Owner:** Codex
+**Stand:** reserviert 2026-06-26 — OTC-010-P1/P2/P3 dokumentiert; Kunden-Prefill behoben, Positionen und `source_order_id` offen.
 **Ziel:** Belegkette Auftrag→LS→RE vervollständigen.
 **Dateibesitz:** `packages/frontend-web/src/pages/verkauf/lieferschein-erfassung.tsx`, `packages/frontend-web/src/pages/sales/order-editor.tsx`, `docs/agent-ops/slices/OTC-010-POS-HANDOVER-001.yaml`.
 

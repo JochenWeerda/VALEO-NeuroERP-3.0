@@ -1,7 +1,7 @@
 slice_id: OTC-010-POS-HANDOVER-001
 title: "OTC-010 Positionen Auftrag→Lieferschein + Belegkette"
-owner: —
-status: offen
+owner: Codex
+status: reserviert
 updated: 2026-06-26
 coordination: >-
   Folge aus CARD-AUDIT-001 / OTC-010 Card. Kein Eingriff in OTC-011
