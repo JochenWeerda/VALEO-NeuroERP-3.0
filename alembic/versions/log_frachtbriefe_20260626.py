@@ -1,7 +1,7 @@
 """LOG-FRACHTBRIEF-001: Frachtbrief-Tabelle fuer /api/v1/logistik/frachtbriefe.
 
 Revision ID: log_frachtbriefe_20260626
-Revises: external_mock_sessions_20260623
+Revises: wf_cockpit_persist_20260625
 Create Date: 2026-06-26
 """
 
@@ -11,7 +11,7 @@ import sqlalchemy as sa
 from alembic import op
 
 revision = "log_frachtbriefe_20260626"
-down_revision = "external_mock_sessions_20260623"
+down_revision = "wf_cockpit_persist_20260625"
 branch_labels = None
 depends_on = None
 

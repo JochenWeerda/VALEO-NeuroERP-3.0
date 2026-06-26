@@ -1,5 +1,17 @@
 # Active Workboard
 
+## WM-AGRI-MAP-001 — Zielzellen-Regelengine (retroaktiv dokumentiert)
+
+**Von:** Claude Code · **Owner:** Claude Code · **Stand:** abgeschlossen 2026-06-26
+Gap-Verifikation ergab: `silo_target_cell.py` + `silo_rule_engine_service.py` + `agri_lot_link_booking.py` bereits vollständig implementiert. GET /silo/zielzellen-vorschlag, GET /zielzellen-vorschlag/lot/{lot_id}, POST /material-flow/lot-link/auto-book vorhanden.
+**Dateibesitz:** `app/api/v1/endpoints/silo_target_cell.py`, `app/services/silo_rule_engine_service.py`, `docs/agent-ops/slices/WM-AGRI-MAP-001.yaml`
+
+## LOG-TRACK-001 — Logistik Track & Trace / ePOD (retroaktiv dokumentiert)
+
+**Von:** Claude Code · **Owner:** Claude Code · **Stand:** abgeschlossen 2026-06-26
+Gap-Verifikation ergab: `logistics_tours.py` + `logistics_epod_service.py` + Alembic `domain_logistics.tour_events` bereits vollständig. POST /tours/{id}/events, GET /gps-track, ePOD-Settlement (DOM-LOG-004.3) vorhanden.
+**Dateibesitz:** `app/api/v1/endpoints/logistics_tours.py`, `app/services/logistics_epod_service.py`, `docs/agent-ops/slices/LOG-TRACK-001.yaml`
+
 ## LOG-FRACHTBRIEF-001 — Logistik Frachtbrief-Endpoint
 
 **Von:** Claude Code · **Owner:** Claude Code · **Stand:** abgeschlossen 2026-06-26
