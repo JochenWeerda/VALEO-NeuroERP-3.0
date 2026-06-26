@@ -231,6 +231,7 @@ Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Be
 | `log_logistics_core_20260612` | Logistik Kern-Tabellen (domain_logistics) — Alembic statt Runtime-DDL. |
 | `log_touren_initial` | Verladung Domain Models Migration |
 | `meldewesen_lifecycle_20260623` | DOM-MEL-004 — Meldewesen Lifecycle Tabellen (Intrastat/ELSTER/ATLAS) |
+| `merge_agent_job_runner_20260626` | Merge Alembic heads: agent_proposals + job_runner_tables_repair. |
 | `merge_crm_capture_pos_fiscal_20260609` | Merge CRM capture inbox and POS fiscal provider branches. |
 | `merge_crm_ownership_prod_20260610` | Merge CRM ownership and production-readiness migration branches. |
 | `merge_doc_proc_20260612` | Merge DOC- und PROC-Branch zu einem Alembic-Head. |
@@ -295,5 +296,3 @@ Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Be
 | `whatsapp_bestell_inbox_20260603` | WhatsApp Bestell-Inbox — eingehende Freitext-Bestellungen + AI-Extraktion. |
 | `wms_material_flow_stock_link_20260619` | WMS-FLOW-001: silo_cells current_stock_kg + BAB-Umlagen-Tabelle |
 | `wms_warehouse_aisles_20260612` | WMS: Lager-Gang (warehouse_aisles) + optionale Zuordnung auf warehouse_bins. |
-| `agent_proposals_persist_20260626` | OPERATOR-AGENT-002: Tabelle agent_proposals für persistente Agent-Proposals (tenant_id, action_type, approval_status, idempotency_key). |
-| `merge_agent_job_runner_20260626` | Alembic-Merge-Migration: agent_proposals_persist + job_runner_tables_repair. |
