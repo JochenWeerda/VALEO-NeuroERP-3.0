@@ -24,6 +24,25 @@ acceptance:
   - "mkdocs.yml enthält Eintrag 'AI Engineering Metrics'."
 tests:
   - pytest -m unit tests/test_generate_metrics_page.py -v -p no:cov -o addopts=
+risks:
+  - Nightly-Metriken koennen bei fehlendem Git-Verlauf, shallow checkout oder parallelen Force-/Merge-Aenderungen unvollstaendig sein.
+  - Dashboard-Seiten koennen veralten, wenn der Cron ausfaellt oder MkDocs-Deploy neue Artefakte nicht uebernimmt.
+ai_harness:
+  fachlicher_vertrag: >-
+    AI-Engineering-Metriken werden regelmaessig als Transparenz- und Steuerungsartefakt erzeugt,
+    nicht als isolierte Leistungsbewertung einzelner Personen.
+  architektur_vertrag: >-
+    GitHub Actions Cron ruft ein Generator-Skript auf und publiziert Markdown/JSON-Artefakte ohne Backend-Laufzeitabhaengigkeit.
+  daten_vertrag: >-
+    Datenquelle sind Repository-Metadaten, Slice-YAMLs und generierte Reports; keine Mandanten- oder Kundendaten.
+  test_vertrag: >-
+    Unit-Tests sichern Markdown-Generierung, Frontmatter, Tabellen und fehlertolerante Eingaben.
+  security_vertrag: >-
+    Workflow darf keine Secrets ausgeben; Reports enthalten nur technische Repository-Metadaten.
+  betriebs_vertrag: >-
+    Erster erfolgreicher Nightly-Cron bleibt externes Gate; manuelle Ausfuehrung muss als Fallback moeglich bleiben.
+  dokumentations_vertrag: >-
+    MkDocs-Navigation, Dashboard-Seite und Slice-YAML bleiben synchron.
 completion_evidence:
   - "2026-06-26: 15 Tests grün."
   - "2026-06-26: Seite docs/agent-ops/engineering-metrics.md generiert."
