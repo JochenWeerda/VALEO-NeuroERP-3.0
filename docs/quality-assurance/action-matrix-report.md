@@ -15,6 +15,8 @@ version: 3.0.0
 QA-Heuristikreport. `GAP` bedeutet fehlende oder nicht erkannte E2E-Verknuepfung,
 nicht automatisch fehlende Implementierung. Fuer echten Restbacklog gelten
 Open-Gaps und der Konsolidierungsbericht.
+Reverse-Pflege: Bei neu generierten Matrixwerten offene Punkte gegen
+Open-Gaps und das Quellenregister im Konsolidierungsbericht validieren.
 
 > Generiert via `scripts/generate_action_matrix_report.py` · 2026-06-26 09:37:16 UTC
 

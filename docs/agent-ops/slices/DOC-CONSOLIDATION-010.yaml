@@ -1,7 +1,7 @@
 slice_id: DOC-CONSOLIDATION-010
 title: Doku-Konsolidierung erledigter Zukunftsplaene, Dubletten und echter Restbacklog
 owner: Codex
-status: reserved
+status: completed
 created_at: 2026-06-26
 coordination: >-
   Eigenstaendiger Doku-Slice. Keine Aenderungen an parallelem OPERATOR-AGENT-002
@@ -48,3 +48,10 @@ ai_harness:
     Ergebnis ist eine wartbare Restbacklog-Liste fuer weitere Slices und externe Gates.
   dokumentations_vertrag: >-
     Jede Statuskorrektur nennt Evidenz oder bleibt als offener Punkt markiert.
+completion_evidence:
+  - docs/project-context/documentation-consolidation-2026-06-26.md mit Quellen- und Reverse-Update-Register erstellt.
+  - docs/project-context/open-gaps-and-known-issues.md verweist auf den konsolidierten Doku-Stand.
+  - Historische Benchmark-/Roadmap-/Heuristikdateien mit Konsolidierungsstatus und Reverse-Pflege-Hinweis markiert.
+  - node scripts/docs-governance-check.cjs fuer die geaenderten Dateien gruen.
+  - node scripts/docs-staleness-check.cjs --max-age-days 365 gruen.
+  - python scripts/doc_drift_report.py meldet 0 Drift-Items.
