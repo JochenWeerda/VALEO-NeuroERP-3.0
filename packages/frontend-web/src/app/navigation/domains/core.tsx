@@ -380,6 +380,15 @@ export const RAW_NAV_SECTIONS: RawNavItem[] = [
         mcp: { businessDomain: 'admin', scope: 'admin:read' },
       },
       {
+        id: 'qualitaets-cockpit',
+        label: 'Qualitäts-Cockpit',
+        icon: Activity,
+        module: '@/pages/admin/qualitaets-cockpit',
+        preferredPath: 'admin/qualitaets-cockpit',
+        keywords: ['qualitaet', 'evidence', 'release', 'drift', 'coverage', 'gate', 'cockpit'],
+        mcp: { businessDomain: 'admin', scope: 'admin:read' },
+      },
+      {
         id: 'voice-channel',
         label: 'Voice-Kanal',
         icon: Mic,

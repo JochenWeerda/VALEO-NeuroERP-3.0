@@ -161,6 +161,7 @@ Vollständiges Inventar aller FastAPI-Endpoint-Module mit Kurzbeschreibung. Besc
 | `exchange_rates` | Exchange Rates API |
 | `export_service` | Central Export Mikroservice |
 | `external_agent_integrations` | — |
+| `external_gates` | Externes Gate-Dashboard — Produktiv-API für den Integrationsstatus externer Systeme. |
 | `external_mock_harness` | EXTERNAL-MOCK-HARNESS-001 — Dev-Only API fuer simulierte externe Systeme. |
 | `farm_profiles` | CRM Farm Profile endpoints proxied through crm-core. |
 | `feed_produktion_actions` | DOM-FEED-PROD-004 — Mischfutter Produktion: Rezeptur, Auftrag, QS-Freigabe. |
@@ -268,7 +269,7 @@ Vollständiges Inventar aller FastAPI-Endpoint-Module mit Kurzbeschreibung. Besc
 | `op_skonto_auszifferung` | OP Skonto-Auszifferung — Offene Posten mit Skontoaufteilung ausgleichen. |
 | `open_items` | Open Items (OP) management endpoints |
 | `operational_governance` | Operational Governance API — Wave 4 AP4 |
-| `operator_agent` | OPERATOR-AGENT-001 — API fuer den ERP-Operator-Agent (Read-Only/Proposal-Modus). |
+| `operator_agent` | OPERATOR-AGENT-001 — API fuer den ERP-Operator-Agent (Proposal + LOW-Risiko-Execute). |
 | `opportunities` | CRM Sales Opportunities API endpoints proxied through crm-sales. |
 | `partiestamm` | Partiestamm [PAR] & Partiegruppen [PGR] — Lot-/Charge-Verwaltung. |
 | `payment_matching` | Payment Matching API |
@@ -312,6 +313,7 @@ Vollständiges Inventar aller FastAPI-Endpoint-Module mit Kurzbeschreibung. Besc
 | `prospecting` | Prospecting API Endpoints |
 | `purchase_invoice_verification` | Einkauf — 3-Wege-Match (Purchase Order / Goods Receipt / Invoice Receipt) |
 | `quadriga_connector` | Quadriga-Connector API – Konfiguration und Sync für Quadriga-Anbindung. |
+| `quality_evidence` | INTEGRATION-EVIDENCE-BOARD-001 — GET /admin/quality-evidence/ aggregiert Qualitätsnachweise. |
 | `quality_lot_binding` | Quality Lot Binding Endpoints — FEED-CHAIN-003. |
 | `quality_protocols` | Quality Protocol API endpoints. |
 | `rag` | RAG API Endpoints |

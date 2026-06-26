@@ -76,11 +76,6 @@
       "source": "auto"
     },
     {
-      "module": "@/pages/admin/externe-gates",
-      "path": "admin/externe-gates",
-      "source": "auto"
-    },
-    {
       "module": "@/pages/admin/audit-log",
       "path": "admin/audit-log",
       "source": "auto"
@@ -141,6 +136,11 @@
       "source": "auto"
     },
     {
+      "module": "@/pages/admin/externe-gates",
+      "path": "admin/externe-gates",
+      "source": "alias"
+    },
+    {
       "module": "@/pages/admin/GapPipelineConsole",
       "path": "admin/gap-pipeline",
       "source": "alias"
@@ -169,6 +169,11 @@
       "module": "@/pages/admin/nummernkreise",
       "path": "admin/nummernkreise",
       "source": "auto"
+    },
+    {
+      "module": "@/pages/admin/qualitaets-cockpit",
+      "path": "admin/qualitaets-cockpit",
+      "source": "alias"
     },
     {
       "module": "@/pages/admin/report-berechtigungen",
