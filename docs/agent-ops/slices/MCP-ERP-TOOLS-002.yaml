@@ -23,7 +23,9 @@ ai_harness:
     - schema_version bleibt 1.0 — keine Breaking Changes.
   akzeptanzkriterien:
     - 18 tool_id-Einträge in mcp_erp_tools.yaml.
-    - Alle neuen Tools haben scope, risk_class, data_classification, audit, endpoint.
+    - Alle Tools haben scope, risk_class, data_classification, audit, endpoint.
+    - data_classification-Werte aus ai_data_classification.yaml (5 Stufen).
+    - McpToolRegistryService.validate_all() lehnt fehlende/ungültige data_classification ab.
     - YAML ist syntaktisch valide (python -c "import yaml; yaml.safe_load(open('config/mcp_erp_tools.yaml'))").
 
 dateibesitz:

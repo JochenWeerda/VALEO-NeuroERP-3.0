@@ -80,6 +80,10 @@ jobs:
           pnpm exec playwright test \
             playwright-tests/specs/e2e-matrix/o2c-semantic-chain.spec.ts \
             playwright-tests/specs/e2e-matrix/wms-silo-semantic-chain.spec.ts \
+            playwright-tests/specs/e2e-matrix/p2p-semantic-chain.spec.ts \
+            playwright-tests/specs/e2e-matrix/fibu-semantic-chain.spec.ts \
+            playwright-tests/specs/e2e-matrix/pos-tse-semantic-chain.spec.ts \
+            playwright-tests/specs/e2e-matrix/qs-reklamation-semantic-chain.spec.ts \
             --grep "@critical" \
             --reporter=list
 

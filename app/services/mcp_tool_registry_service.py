@@ -11,6 +11,13 @@ _REGISTRY_PATH = Path(__file__).resolve().parents[2] / "config" / "mcp_erp_tools
 
 _RISK_CLASSES = {"low", "medium", "high", "critical"}
 _AUDIT_TYPES = {"read", "write", "none"}
+_DATA_CLASSIFICATION_LEVELS = {
+    "PUBLIC",
+    "EU_ONLY",
+    "LOCAL_ONLY",
+    "SYNTHETIC_ALLOWED",
+    "NEVER",
+}
 
 
 class McpToolValidationError(ValueError):
@@ -36,6 +43,15 @@ def _validate_tool(tool: dict[str, Any]) -> None:
     if tool["audit"] not in _AUDIT_TYPES:
         raise McpToolValidationError(
             f"Tool {tool['tool_id']}: invalid audit type '{tool['audit']}'"
+        )
+    dc = tool.get("data_classification")
+    if not dc:
+        raise McpToolValidationError(
+            f"Tool {tool['tool_id']}: missing data_classification"
+        )
+    if dc not in _DATA_CLASSIFICATION_LEVELS:
+        raise McpToolValidationError(
+            f"Tool {tool['tool_id']}: invalid data_classification '{dc}'"
         )
 
 
