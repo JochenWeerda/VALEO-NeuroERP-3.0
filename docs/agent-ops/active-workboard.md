@@ -4616,3 +4616,12 @@ Parallele Fix-Slices aus Cards-Inventar-Audit (`CARD-AUDIT-001`). Claim-Protokol
 **Stand:** abgeschlossen 2026-06-26 — `docs/architecture/process-map.md` mit 6 Mermaid-Flussdiagrammen (O2C, P2P, FiBu, WMS/Agrar, POS/TSE, QS/Reklamation); Belege, NATS-Events, externe Gates und kritische Invarianten je Kette; MkDocs-Nav-Eintrag + Whitelist gesetzt.
 **Ziel:** P2.1 aus YouTube-Gap-Analyse: operativ nutzbare visuelle Prozesskarte ohne n8n-Abhängigkeit — direkt aus der ERP-Fachlogik abgeleitet.
 **Dateibesitz:** `docs/architecture/process-map.md`, `mkdocs.yml`, `docs/agent-ops/slices/WORKFLOW-PROCESS-MAP-001.yaml`.
+
+## DATA-CLASSIFICATION-001 — KI-Datenklassen-Policy (P2.3)
+
+**Von:** Claude Sonnet 4.6
+**Owner:** Claude Sonnet 4.6
+**Stand:** abgeschlossen 2026-06-26 — `config/ai_data_classification.yaml` (5 Stufen, 19 Kategorien); `scripts/validate_data_classification.py` (Validator, 0 Fehler); `docs/architecture/ai-data-classification.md` (MkDocs mit Tabellen + Rechtsgrundlagen); 27 Unit-Tests grün. NEVER: Credentials, Audit-Log, Zahlung, Mitarbeiter, Gehalt, Prompt-History. LOCAL_ONLY: Agrar-Kontrakte, GoBD-Journal, DATEV, Mandanten-Config.
+**Ziel:** P2.3: Verbindliche maschinenlesbare Policy welche Datenkategorien externen KI-Modellen zugänglich sind.
+**Dateibesitz:** `config/ai_data_classification.yaml`, `scripts/validate_data_classification.py`, `tests/test_data_classification.py`, `docs/architecture/ai-data-classification.md`, `mkdocs.yml`.
+**Externe Gates:** DSGVO-Review durch Datenschutzbeauftragten; juristisches Review Agrar-Kontrakte.

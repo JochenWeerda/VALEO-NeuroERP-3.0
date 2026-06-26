@@ -1,0 +1,173 @@
+# AI-Datenklassen-Policy — VALEO NeuroERP 3.0
+# Definiert welche Datenkategorien externen KI-Modellen zugänglich sind.
+# Maschinenlesbar — validiert via scripts/validate_data_classification.py
+
+version: "1.0"
+updated: "2026-06-26"
+owner: "Claude Sonnet 4.6"
+
+# ── Klassifizierungsstufen ────────────────────────────────────────────────────
+levels:
+  - id: PUBLIC
+    label: "Öffentlich"
+    description: "Darf jedem externem Modell und API ohne Einschränkung übergeben werden."
+    external_model_allowed: true
+    eu_api_only: false
+    local_only: false
+    never_in_context: false
+
+  - id: EU_ONLY
+    label: "Nur EU/EWR-APIs"
+    description: "Darf nur an Modelle/APIs mit Sitz im EU/EWR-Rechtsraum übergeben werden (DSGVO Art. 46)."
+    external_model_allowed: true
+    eu_api_only: true
+    local_only: false
+    never_in_context: false
+
+  - id: LOCAL_ONLY
+    label: "Nur lokal"
+    description: "Darf ausschließlich an lokal betriebene Modelle (on-premise / self-hosted) übergeben werden."
+    external_model_allowed: false
+    eu_api_only: false
+    local_only: true
+    never_in_context: false
+
+  - id: SYNTHETIC_ALLOWED
+    label: "Synthetisch/anonymisiert erlaubt"
+    description: "Original-Daten dürfen nicht weitergegeben werden; synthetisierte oder vollständig anonymisierte Varianten sind erlaubt."
+    external_model_allowed: false
+    eu_api_only: false
+    local_only: false
+    never_in_context: false
+    synthetic_ok: true
+
+  - id: NEVER
+    label: "Niemals in Modell-Kontext"
+    description: "Darf unter keinen Umständen an ein KI-Modell übergeben werden — weder direkt noch indirekt."
+    external_model_allowed: false
+    eu_api_only: false
+    local_only: false
+    never_in_context: true
+
+# ── Datenkategorien mit Klassifizierung ──────────────────────────────────────
+categories:
+
+  # --- Stammdaten ---
+  - id: master_article
+    label: "Artikel-Stammdaten"
+    examples: ["Artikelnummer", "Bezeichnung", "Warengruppe", "Einheit"]
+    level: PUBLIC
+    rationale: "Keine personenbezogenen Daten; handelsübliche Katalogdaten."
+
+  - id: master_supplier_public
+    label: "Lieferanten-Stammdaten (öffentlich)"
+    examples: ["Firmenname", "USt-ID", "Branche", "Postleitzahl"]
+    level: EU_ONLY
+    rationale: "Unternehmensdaten unterliegen DSGVO wenn natürliche Personen betroffen sein können."
+
+  - id: master_customer_identity
+    label: "Kunden-Identitätsdaten"
+    examples: ["Name", "Adresse", "E-Mail", "Kundennummer"]
+    level: EU_ONLY
+    rationale: "Personenbezogene Daten gem. DSGVO Art. 4 — nur EU-Modelle."
+
+  - id: master_employee
+    label: "Mitarbeiterstamm"
+    examples: ["Name", "Personalnummer", "Gehalt", "Krankheitstage", "Bankverbindung"]
+    level: NEVER
+    rationale: "Hochsensible Beschäftigtendaten gem. DSGVO Art. 9 und BetrVG."
+
+  # --- Transaktionsdaten ---
+  - id: transaction_order
+    label: "Auftrags-/Bestelldaten"
+    examples: ["Auftragsnummer", "Positionen", "Preise", "Lieferdatum"]
+    level: EU_ONLY
+    rationale: "Enthält Preiskonditionsgeheimnisse und ggf. Kundenbezug."
+
+  - id: transaction_invoice
+    label: "Rechnungsdaten"
+    examples: ["Rechnungsnummer", "Betrag", "Steuerbetrag", "Zahlungsziel"]
+    level: EU_ONLY
+    rationale: "Finanztransaktionen mit Personenbezug und GoBD-Relevanz."
+
+  - id: transaction_payment
+    label: "Zahlungsdaten / Bankdaten"
+    examples: ["IBAN", "Kontonummer", "Zahlungsbetrag", "Valutadatum"]
+    level: NEVER
+    rationale: "Zahlungsverkehrsdaten — kritische Finanzdaten, niemals externem Modell zugänglich."
+
+  - id: transaction_salary
+    label: "Lohn- und Gehaltsabrechnungen"
+    examples: ["Bruttogehalt", "Nettobetrag", "Steuerklasse", "Sozialversicherung"]
+    level: NEVER
+    rationale: "Steuerrelevante Lohndaten mit höchster Schutzstufe."
+
+  # --- Agrardaten ---
+  - id: agrar_lot_public
+    label: "Chargendaten (anonymisiert)"
+    examples: ["Lot-Nummer", "Sorte", "Qualitätsklasse", "Erntejahr"]
+    level: PUBLIC
+    rationale: "Anonymisierte Chargen ohne Erzeuger-Zuordnung sind öffentliche Handelsdaten."
+
+  - id: agrar_lot_producer
+    label: "Chargendaten mit Erzeuger-Zuordnung"
+    examples: ["Erzeuger-Name", "Betriebsnummer", "Flächenbezug"]
+    level: EU_ONLY
+    rationale: "Erzeugerangaben können natürliche Personen identifizieren."
+
+  - id: agrar_contract
+    label: "Agrar-Kontrakte / Preisfixierungen"
+    examples: ["Kontraktpreis", "MATIF-Fixierung", "Menge", "Lieferbedingung"]
+    level: LOCAL_ONLY
+    rationale: "Handelsgeheimnisse und marktrelevante Preisinformationen — nur lokal."
+
+  # --- Compliance & Audit ---
+  - id: compliance_gobd_journal
+    label: "GoBD Journal-Einträge"
+    examples: ["Buchungstext", "Konto", "Betrag", "Steuerschlüssel"]
+    level: LOCAL_ONLY
+    rationale: "Steuerrelevante Buchführungsdaten — Weitergabe nur an lokale Modelle erlaubt."
+
+  - id: compliance_audit_log
+    label: "Audit-Logs / Zugriffsprotokolle"
+    examples: ["User-ID", "Aktion", "Timestamp", "IP-Adresse"]
+    level: NEVER
+    rationale: "Audit-Logs enthalten Nutzungsprofile — niemals externem Modell zugänglich."
+
+  - id: compliance_tax_return
+    label: "Steuerliche Meldedaten (UStVA, DATEV)"
+    examples: ["Steuervoranmeldung", "DATEV-Export", "Steuernummer"]
+    level: LOCAL_ONLY
+    rationale: "Steuerliche Daten unterliegen Steuergeheimnis — ausschließlich lokale Verarbeitung."
+
+  # --- Systemdaten ---
+  - id: system_config_public
+    label: "Systemkonfiguration (nicht-sensibel)"
+    examples: ["Feature-Flags", "Mandanten-Name", "Modulliste"]
+    level: PUBLIC
+    rationale: "Nicht-sensible Konfigurationsdaten für Agent-Kontext nutzbar."
+
+  - id: system_credentials
+    label: "Credentials / Secrets"
+    examples: ["Passwörter", "API-Keys", "Zertifikate", "Tokens"]
+    level: NEVER
+    rationale: "Zugangsdaten dürfen niemals in Modell-Kontext gelangen."
+
+  - id: system_tenant_config
+    label: "Mandanten-Konfiguration (sensibel)"
+    examples: ["Datenbankverbindung", "OIDC-Config", "Webhook-URLs"]
+    level: LOCAL_ONLY
+    rationale: "Infrastrukturdetails — nur lokale Agenten dürfen darauf zugreifen."
+
+  # --- KI-Training ---
+  - id: ai_training_synthetic
+    label: "Synthetische Trainingsdaten"
+    examples: ["Generierte Beispiel-Aufträge", "Anonymisierte Testdaten"]
+    level: SYNTHETIC_ALLOWED
+    rationale: "Synthetische Daten ohne Personenbezug können für Modell-Training genutzt werden."
+
+  - id: ai_prompt_history
+    label: "Prompt-History / Konversationsverläufe"
+    examples: ["Nutzer-Prompts", "Modell-Antworten", "Session-Kontext"]
+    level: NEVER
+    rationale: "Konversationsdaten können sensible Geschäftsinformationen enthalten."

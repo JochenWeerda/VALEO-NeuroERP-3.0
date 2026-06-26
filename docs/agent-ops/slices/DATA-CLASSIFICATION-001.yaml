@@ -1,0 +1,42 @@
+slice_id: DATA-CLASSIFICATION-001
+title: "P2.3 — KI-Datenklassen-Policy (maschinenlesbar + validiert)"
+owner: Claude Sonnet 4.6
+status: completed
+updated: 2026-06-26
+coordination: >-
+  P2.3 aus YouTube-Gap-Analyse 2026-06-23. Rein konfigurativ/dokumentarisch.
+  Kein Backend-Code, kein Codex/Cursor-Konflikt.
+goal: >-
+  Verbindliche, maschinenlesbare KI-Datenklassen-Policy: definiert welche
+  Datenkategorien externen Modellen, nur EU-APIs, nur lokal oder niemals
+  übergeben werden dürfen. 5 Stufen (PUBLIC/EU_ONLY/LOCAL_ONLY/SYNTHETIC_ALLOWED/NEVER),
+  19 Kategorien, Validator-Script, MkDocs-Seite mit Rechtsgrundlagen.
+file_ownership:
+  - config/ai_data_classification.yaml
+  - scripts/validate_data_classification.py
+  - tests/test_data_classification.py
+  - docs/architecture/ai-data-classification.md
+  - docs/agent-ops/slices/DATA-CLASSIFICATION-001.yaml
+  - mkdocs.yml
+acceptance:
+  - "pytest -m unit tests/test_data_classification.py → 27 Tests grün."
+  - "python scripts/validate_data_classification.py → 0 Fehler."
+  - "NEVER-Kategorien: Credentials, Audit-Log, Zahlungsdaten, Mitarbeiter, Gehaltsabrechnung, Prompt-History."
+  - "LOCAL_ONLY: Agrar-Kontrakte, GoBD-Journal, DATEV, Mandanten-Config."
+tests:
+  - pytest -m unit tests/test_data_classification.py -v -p no:cov -o addopts=
+  - python scripts/validate_data_classification.py
+completion_evidence:
+  - "2026-06-26: 27 Unit-Tests grün."
+  - "2026-06-26: Validator: 19 Kategorien, 0 Fehler."
+  - "2026-06-26: MkDocs-Seite docs/architecture/ai-data-classification.md."
+classification_summary:
+  total_categories: 19
+  PUBLIC: 3
+  EU_ONLY: 5
+  LOCAL_ONLY: 4
+  SYNTHETIC_ALLOWED: 1
+  NEVER: 6
+external_gates:
+  - Abstimmung mit Datenschutzbeauftragtem (DSGVO-Konformität der EU_ONLY-Grenze).
+  - Juristisches Review Agrar-Kontrakte LOCAL_ONLY vs. NEVER.
