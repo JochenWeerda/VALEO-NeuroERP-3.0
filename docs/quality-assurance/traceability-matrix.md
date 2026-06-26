@@ -15,6 +15,8 @@ version: 3.0.0
 Slice-Test-Doku-Verknuepfungen. Viele `GAP`-Zeilen sind Traceability-Metadaten-
 Luecken, nicht zwingend fachlich offene Implementierungen. Keine manuelle
 Planung direkt aus dieser Tabelle ableiten.
+Reverse-Pflege: Bei neuen Generatorwerten zuerst Traceability-Metadaten und
+Konsolidierungsbericht aktualisieren, nicht historische Planungsdocs.
 
 > Generiert via `scripts/generate_traceability_matrix.py` · 2026-06-26 09:49 UTC
 

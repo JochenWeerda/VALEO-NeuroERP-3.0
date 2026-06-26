@@ -4,6 +4,8 @@
 aktueller Umsetzungsplan. Neue Slices duerfen nur aus dieser Datei abgeleitet
 werden, wenn der Befund gegen aktuellen Code, Workboard und Open-Gaps erneut
 validiert wurde.
+Reverse-Pflege: Neue Referenzbefunde muessen im Konsolidierungsbericht als
+Quelle oder verworfene Quelle dokumentiert werden.
 
 Stand: `2026-04-12`
 
