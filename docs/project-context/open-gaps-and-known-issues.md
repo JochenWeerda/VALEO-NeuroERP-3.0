@@ -474,15 +474,15 @@ Kompakte Übersicht echter Lücken (repo-seitig lösbar, nicht extern blockiert)
 ~~Runtime Kat. A: crm/pipeline~~ → `opportunities.py` Endpoint + Migration ·
 ~~Runtime Kat. C: health/live + ebilanz/taxonomie-felder~~ → RUNTIME-KAT-C-001 (Welle 5) ·
 ~~Runtime Kat. E: mcp/tools + mcp/tools/summary~~ → MCP-ERP-TOOLS-001 (Welle 5) ·
-~~Runtime Kat. F: logistik/frachtbriefe~~ → LOG-FRACHTBRIEF-001 (Welle 5)
+~~Runtime Kat. F: logistik/frachtbriefe~~ → LOG-FRACHTBRIEF-001 (Welle 5) ·
+~~Zielzellen-Regelengine~~ → WM-AGRI-MAP-001 (retroaktiv 2026-06-26): `silo_target_cell.py` + `silo_rule_engine_service.py` bereits vorhanden ·
+~~Track & Trace / ePOD~~ → LOG-TRACK-001 (retroaktiv 2026-06-26): `logistics_tours.py` + `logistics_epod_service.py` + `tour_events`-Migration bereits vorhanden
 
 | Thema | Slice / Tracker | Prio | Quelle (zum Rückschreiben) |
 |---|---|---|---|
 | WF-Cockpit: Dead-Letter-Sicht, NATS-Projektor-Anbindung | VALEO-WF-COCKPIT-002 | P2 | `open-gaps-and-known-issues.md` § P1 VALEO-WF-COCKPIT-001 |
 | Runtime 5xx Kat. A: fehlende DB-Tabellen (Admin-Mobile: devices, scan_profiles, stations, mobile-routing) | RUNTIME-KAT-A-001 | P1 | `open-gaps-and-known-issues.md` § RUNTIME-API-SWEEP-001 Kat. A |
 | Runtime 5xx Kat. C Restliste: Custom-Envelope-Validierung (`mcp/policy/list`, `einkauf/lieferanten`, `crm/bestell-inbox`, `inventory/warehouses`) | RUNTIME-KAT-C-002 | P1 | `open-gaps-and-known-issues.md` § RUNTIME-API-SWEEP-001 Kat. C |
-| Agrar Silo: Zielzellen-Regelengine (WE/Waage → Silozelle automatisch) | WM-AGRI-MAP-001 | P2 | `open-gaps-and-known-issues.md` § DOMAIN-PARITY-001 WM-AGRI-SUPPLY-LINK-001 |
-| Logistik: Track & Trace, ePOD, `tour_events` | LOG-TRACK-001 | P2 | `domain-depth-plan-2026-05-17.md` § 7 Logistik · `open-gaps-and-known-issues.md` § DOMAIN-PARITY-001 |
 | Futtermittel: HACCP, VLOG-Meldung, QS-Leitfaden vollständig | FEED-QS-001 | P3 | `domain-depth-plan-2026-05-17.md` § 10 Futtermittel · `open-gaps-and-known-issues.md` § Enterprise-Domain-Gap-Closure |
 | CRM: RAG-Panel + Intent-Bar in `LegacyKundenStammModern.tsx` | TAIL-CRM-001 | P3 | `professional-tail-gap-plan-2026-04-09.md` § 2 CRM Modernisierung · TAIL-CRM-001 |
 | NaWaRo: Druck-/Vorschau-/Serienbrief-Pfad vollständig | TAIL-NAWARO-001 | P3 | `professional-tail-gap-plan-2026-04-09.md` § 1 NaWaRo-Kommunikation · TAIL-NAWARO-001 |
