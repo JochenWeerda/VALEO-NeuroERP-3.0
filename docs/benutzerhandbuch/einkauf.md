@@ -53,3 +53,12 @@ Bestandsführung und freigegebener Eingangsrechnung.
 - **Wareneingang ohne Bestellbezug:** zuerst Bestellung freigeben.
 - **Rechnung blockiert:** Mengen-/Preisabweichung im 3-Wege-Match prüfen.
 - **Bestellvorschlag leer:** Mindestbestände/Bedarfe an den Artikeln prüfen.
+
+## Quellen und Reverse-Pflege
+
+- `packages/frontend-web/src/app/navigation/domains/commercial.tsx`: Einkauf-Menü.
+- `docs/benutzerhandbuch/lager.md`: Wareneingang → Bestandsbuchung.
+- `docs/agent-ops/slices/DOM-PROC-004.yaml`: P2P-Vertiefung und 3-Wege-Match.
+
+Reverse-Pflege: Bei Match-Regeln, Bestellstatus oder WE-Buchungslogik diese Seite
+und die Einkauf-Workflow-Doku aktualisieren.

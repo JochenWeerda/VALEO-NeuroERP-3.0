@@ -129,6 +129,7 @@ nav:
       - Überblick: benutzerhandbuch/index.md
       - Einstieg: benutzerhandbuch/einstieg.md
       - Ernteannahme: benutzerhandbuch/annahme.md
+      - Agrar-Kontrakte: benutzerhandbuch/agrar-kontrakte.md
       - Verkauf (Auftrag → Rechnung): benutzerhandbuch/verkauf.md
       - Einkauf: benutzerhandbuch/einkauf.md
       - Lager: benutzerhandbuch/lager.md
@@ -141,6 +142,9 @@ nav:
       - CRM: benutzerhandbuch/crm.md
       - Qualitätssicherung: benutzerhandbuch/qualitaetssicherung.md
       - Compliance und Meldewesen: benutzerhandbuch/compliance-meldewesen.md
+      - NaWaRo: benutzerhandbuch/nawaro.md
+      - Genossenschaft: benutzerhandbuch/genossenschaft.md
+      - Dokumente und Belegarchiv: benutzerhandbuch/dokumente-belegarchiv.md
       - Release Notes: benutzerhandbuch/release-notes.md
       - Glossar: benutzerhandbuch/glossar.md
       - In-App-Hilfe: benutzerhandbuch/in-app-hilfe.md

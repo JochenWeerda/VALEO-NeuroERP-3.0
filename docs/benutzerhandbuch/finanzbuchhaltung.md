@@ -46,3 +46,12 @@ GoBD-konform dokumentiert.
 - **Zahlung nicht zuordenbar:** Verwendungszweck/Belegnummer prüfen.
 - **Mahnung trotz Zahlung:** Zahlungseingang war zum Stichtag noch nicht gebucht.
 - **Falsche Mahnstufe:** Mahnhistorie des Kunden prüfen.
+
+## Quellen und Reverse-Pflege
+
+- `packages/frontend-web/src/app/navigation/domains/finance.tsx`: FiBu-Menü.
+- `docs/benutzerhandbuch/pos-kasse.md`: Tagesabschluss → FIBU-Übernahme.
+- `docs/agent-ops/slices/DOM-FIN-004.yaml`: Mahnlauf, Zahlungseingang, Periodenabschluss.
+
+Reverse-Pflege: Bei OP-Status, Mahnstufen oder Zahlungs-Mapping diese Seite und
+FiBu-Runbooks aktualisieren.

@@ -19,7 +19,6 @@ export const DOCS_BASE_URL = "https://jochenweerda.github.io/VALEO-NeuroERP-3.0"
 export const ROUTE_HELP_MAP: Record<string, HelpEntry> = {
   "admin/agenten-integration": { docPath: "admin/index", label: "Administration", url: "https://jochenweerda.github.io/VALEO-NeuroERP-3.0/admin/index/" },
   "admin/ai-approvals": { docPath: "agent-docs/guardrails", label: "AI-Freigaben", url: "https://jochenweerda.github.io/VALEO-NeuroERP-3.0/agent-docs/guardrails/" },
-  "admin/externe-gates": { docPath: "admin/monitoring-und-slo", label: "Externe Gate-Dashboards", url: "https://jochenweerda.github.io/VALEO-NeuroERP-3.0/admin/monitoring-und-slo/" },
   "admin/audit-log": { docPath: "admin/index", label: "Administration", url: "https://jochenweerda.github.io/VALEO-NeuroERP-3.0/admin/index/" },
   "admin/benutzer": { docPath: "admin/rbac-und-rollen", label: "Benutzer & Rollen", url: "https://jochenweerda.github.io/VALEO-NeuroERP-3.0/admin/rbac-und-rollen/" },
   "admin/benutzer-liste": { docPath: "admin/index", label: "Administration", url: "https://jochenweerda.github.io/VALEO-NeuroERP-3.0/admin/index/" },
@@ -32,12 +31,14 @@ export const ROUTE_HELP_MAP: Record<string, HelpEntry> = {
   "admin/control-center/agent-ops": { docPath: "admin/index", label: "Administration", url: "https://jochenweerda.github.io/VALEO-NeuroERP-3.0/admin/index/" },
   "admin/control-center/superglue": { docPath: "admin/index", label: "Administration", url: "https://jochenweerda.github.io/VALEO-NeuroERP-3.0/admin/index/" },
   "admin/data-quality": { docPath: "admin/index", label: "Administration", url: "https://jochenweerda.github.io/VALEO-NeuroERP-3.0/admin/index/" },
+  "admin/externe-gates": { docPath: "admin/monitoring-und-slo", label: "Externe Gate-Dashboards", url: "https://jochenweerda.github.io/VALEO-NeuroERP-3.0/admin/monitoring-und-slo/" },
   "admin/gap-pipeline": { docPath: "admin/index", label: "Administration", url: "https://jochenweerda.github.io/VALEO-NeuroERP-3.0/admin/index/" },
   "admin/GapPipelineConsole": { docPath: "admin/index", label: "Administration", url: "https://jochenweerda.github.io/VALEO-NeuroERP-3.0/admin/index/" },
   "admin/integrationen-quarantaene": { docPath: "admin/index", label: "Administration", url: "https://jochenweerda.github.io/VALEO-NeuroERP-3.0/admin/index/" },
   "admin/monitoring/alerts": { docPath: "admin/index", label: "Administration", url: "https://jochenweerda.github.io/VALEO-NeuroERP-3.0/admin/index/" },
   "admin/monitoring/regeln": { docPath: "admin/index", label: "Administration", url: "https://jochenweerda.github.io/VALEO-NeuroERP-3.0/admin/index/" },
   "admin/nummernkreise": { docPath: "admin/index", label: "Administration", url: "https://jochenweerda.github.io/VALEO-NeuroERP-3.0/admin/index/" },
+  "admin/qualitaets-cockpit": { docPath: "admin/index", label: "Administration", url: "https://jochenweerda.github.io/VALEO-NeuroERP-3.0/admin/index/" },
   "admin/report-berechtigungen": { docPath: "admin/index", label: "Administration", url: "https://jochenweerda.github.io/VALEO-NeuroERP-3.0/admin/index/" },
   "admin/rolle/:id": { docPath: "admin/index", label: "Administration", url: "https://jochenweerda.github.io/VALEO-NeuroERP-3.0/admin/index/" },
   "admin/rolle/neu": { docPath: "admin/index", label: "Administration", url: "https://jochenweerda.github.io/VALEO-NeuroERP-3.0/admin/index/" },
@@ -66,7 +67,6 @@ export const ROUTE_HELP_MAP: Record<string, HelpEntry> = {
   "agrar/duenger-stamm": { docPath: "benutzerhandbuch/annahme", label: "Agrar-Modul", url: "https://jochenweerda.github.io/VALEO-NeuroERP-3.0/benutzerhandbuch/annahme/" },
   "agrar/duenger-stamm/:id": { docPath: "benutzerhandbuch/annahme", label: "Agrar-Modul", url: "https://jochenweerda.github.io/VALEO-NeuroERP-3.0/benutzerhandbuch/annahme/" },
   "agrar/duenger/bedarfsrechner": { docPath: "benutzerhandbuch/annahme", label: "Agrar-Modul", url: "https://jochenweerda.github.io/VALEO-NeuroERP-3.0/benutzerhandbuch/annahme/" },
-  "agrar/duenger/liste": { docPath: "benutzerhandbuch/annahme", label: "Agrar-Modul", url: "https://jochenweerda.github.io/VALEO-NeuroERP-3.0/benutzerhandbuch/annahme/" },
 };
 
 /**
