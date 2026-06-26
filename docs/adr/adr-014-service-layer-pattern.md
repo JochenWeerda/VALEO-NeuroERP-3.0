@@ -14,7 +14,7 @@ Die Codebasis enthielt über 30 Endpoint-Dateien mit >1.000 LOC, in denen Routin
 
 Alle Mutation-Pfade und komplexe Abfragen werden in dedizierten **Service-Klassen** und **Repository-Klassen** extrahiert. Die Schichtung ist:
 
-```
+```text
 Router (FastAPI)  →  DomainService  →  BaseRepository  →  SQLAlchemy / DB
 ```
 

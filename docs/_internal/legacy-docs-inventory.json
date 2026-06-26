@@ -694,5 +694,8 @@
       "docs/cards/verkauf/OTC-010-order-to-cash.md",
       "docs/workflows/otc-010-order-to-cash.md"
     ]
-  }
+  },
+  "card_duplicates_resolved": [
+    "docs/cards/inventory/INV-001-inventory-to-settlement.md"
+  ]
 }
