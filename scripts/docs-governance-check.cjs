@@ -137,6 +137,17 @@ function fileContent(filePath) {
   return fs.readFileSync(path.join(repoRoot, filePath), "utf8");
 }
 
+function filterExistingTargets(targets) {
+  const seen = new Set();
+  return targets.filter((filePath) => {
+    if (seen.has(filePath)) {
+      return false;
+    }
+    seen.add(filePath);
+    return fs.existsSync(path.join(repoRoot, filePath));
+  });
+}
+
 function ensureAiHarnessSliceRules(filePath, content, errors) {
   const normalized = normalizeSlashes(filePath);
   if (!/^docs\/agent-ops\/slices\/.+\.ya?ml$/i.test(normalized)) {
@@ -483,7 +494,7 @@ function resolveTargetsFromArgs(args) {
 }
 
 function main() {
-  const targets = resolveTargetsFromArgs(process.argv.slice(2));
+  const targets = filterExistingTargets(resolveTargetsFromArgs(process.argv.slice(2)));
   const errors = [];
 
   for (const filePath of targets) {
