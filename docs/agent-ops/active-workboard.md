@@ -4476,8 +4476,14 @@ Archiv des vorherigen Boards:
 ## DOC-MIGRATION-005 — Abgearbeitete Roadmaps entfernt (Phase I)
 
 **Owner:** Cursor
-**Stand:** abgeschlossen 2026-06-25 — 23 Legacy-Roadmap-Dateien gelöscht (status-Snapshots, Finance-Suite, TODO-Sprint, a-eins); Verweise auf Process-Kernel/Open-Gaps umgestellt; `docs/roadmap/README.md` als Redirect-Stub.
+**Stand:** abgeschlossen 2026-06-25 — 23 Legacy-Roadmap-Dateien gelöscht; Verweise auf Process-Kernel/Open-Gaps umgestellt.
 **Dateibesitz:** `scripts/docs-legacy-migrate.py`, `docs/roadmap/README.md`, `docs/agent-ops/slices/DOC-MIGRATION-005.yaml`.
+
+## DOC-MIGRATION-006 — Frontmatter Compliance + Operations-Archiv (Phase J)
+
+**Owner:** Cursor
+**Stand:** abgeschlossen 2026-06-25 — Frontmatter auf 10 Compliance-/Admin-Seiten; `docs/operations/` nach `_internal/archive/operations/`.
+**Dateibesitz:** `docs/compliance/**`, `docs/admin/BRANDING.md`, `docs/admin/NUMBERING.md`, `scripts/docs-legacy-migrate.py`, `docs/agent-ops/slices/DOC-MIGRATION-006.yaml`.
 
 ---
 

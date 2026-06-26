@@ -1,3 +1,13 @@
+---
+title: GoBD Schritt 3 — Konzept
+type: reference
+audience: [security, tenant-admin, betrieb]
+owner: Cursor
+status: aktiv
+last_reviewed: 2026-06-25
+version: 3.0.0
+---
+
 # GoBD Schritt 3 – Konzept & umgesetzte Maßnahmen
 
 **Bezug:** GoBD-VORGEHENSPLAN.md, Docflow (domain_docflow), E-Rechnung ab 01.01.2025.

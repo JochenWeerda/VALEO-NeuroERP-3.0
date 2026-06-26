@@ -1,7 +1,17 @@
+---
+title: GDPR-Compliance-Checkliste
+type: reference
+audience: [security, tenant-admin, betrieb]
+owner: Cursor
+status: aktiv
+last_reviewed: 2026-06-25
+version: 3.0.0
+---
+
 # GDPR Compliance Checklist - VALEO NeuroERP 3.0
 
-**Status:** 🟡 In Progress  
-**Target:** ✅ Full GDPR Compliance  
+**Status:** 🟡 In Progress
+**Target:** ✅ Full GDPR Compliance
 **Last-Review:** 2025-10-12
 
 ---
@@ -13,11 +23,11 @@
 - [x] **Privacy-Policy** dokumentiert
   - Datei: `docs/legal/privacy-policy.md`
   - Öffentlich zugänglich
-  
+
 - [ ] **Cookie-Consent** (wenn applicable)
   - Banner bei erstem Besuch
   - Opt-in für nicht-essenzielle Cookies
-  
+
 - [x] **Data-Processing-Agreement** (DPA)
   - Datei: `docs/legal/dpa-template.md`
   - Mit allen Kunden abgeschlossen
@@ -31,11 +41,11 @@
 - [ ] **API-Endpoint:** `/api/v1/gdpr/data-export/{user_id}`
   - Exportiert alle User-Daten als JSON/PDF
   - Includes: Personal-Data, Transactions, Audit-Logs
-  
+
 - [ ] **Frontend-Maske:** GDPR Data-Export
   - User kann eigene Daten anfordern
   - Download als ZIP-Archiv
-  
+
 - [ ] **Response-Time:** < 30 Tage
   - Automatische Email bei Request
   - Status-Tracking
@@ -53,11 +63,11 @@
 - [ ] **API-Endpoint:** `/api/v1/gdpr/delete-user/{user_id}`
   - Löscht alle persönlichen Daten
   - Cascade-Logic für abhängige Datensätze
-  
+
 - [ ] **Anonymisierung** statt Löschung
   - Bei Transaktionen: Anonymize (GoBD-Konformität)
   - Bei Logs: Pseudonymisierung
-  
+
 - [ ] **Audit-Trail** für Löschungen
   - Logged wer wann was gelöscht hat
   - Compliance-Officer-Benachrichtigung
@@ -77,10 +87,10 @@
 
 - [ ] **Export-Format:** JSON, CSV, XML
   - Strukturierte, maschinenlesbare Daten
-  
+
 - [ ] **API-Endpoint:** `/api/v1/gdpr/export-portable/{user_id}`
   - Standard-Format (z.B. vCard, iCal)
-  
+
 - [ ] **Bulk-Export**
   - Alle Kunden-Daten auf einmal
   - ZIP-Archiv mit Struktur
@@ -97,14 +107,14 @@
 
 - [x] **Encryption-in-Transit:** TLS 1.3
   - Alle API-Calls verschlüsselt
-  
+
 - [ ] **Encryption-at-Rest:**
   - PostgreSQL: Transparent-Data-Encryption (TDE)
   - Backups: Encrypted
-  
+
 - [x] **Pseudonymisierung:**
   - Audit-Logs verwenden correlation_id
-  
+
 - [x] **Access-Control:**
   - RBAC mit 6 Rollen
   - OIDC-Authentication
@@ -142,16 +152,16 @@
 
 - [x] **Pseudonymisierung & Verschlüsselung**
   - TLS ✅, At-Rest ⏳
-  
+
 - [x] **Verfügbarkeit & Belastbarkeit**
   - Kubernetes-HA ✅
   - Auto-Scaling ✅
   - Backup ⏳
-  
+
 - [x] **Wiederherstellbarkeit**
   - PostgreSQL-Backups (daily)
   - Point-in-Time-Recovery ⏳
-  
+
 - [x] **Regelmäßige Überprüfung**
   - Security-Scans ✅ (6 Tools)
   - Penetration-Tests ⏳
@@ -170,11 +180,11 @@
   - Datei: `SECURITY.md` erweitern
   - 72-Stunden-Meldepflicht an Behörde
   - Benachrichtigung betroffener Personen
-  
+
 - [ ] **Breach-Detection**
   - Security-Monitoring ✅
   - Auto-Alerts bei Anomalien
-  
+
 - [ ] **Documentation-Template**
   - Incident-Report mit allen relevanten Infos
 
@@ -192,7 +202,7 @@
   - Datei: `docs/compliance/dpia.md`
   - Risiko-Bewertung
   - Maßnahmen-Katalog
-  
+
 - [ ] **Review** alle 12 Monate
   - Bei System-Änderungen
   - Bei neuen Features

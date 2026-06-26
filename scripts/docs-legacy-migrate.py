@@ -108,6 +108,7 @@ BULK_ARCHIVE_DIRS = (
     "docs/standards",
     "docs/integrations",
     "docs/operations",
+    "docs/operations",
     "docs/api",
 )
 

@@ -1,3 +1,13 @@
+---
+title: ISO 27001 Quarterly Review
+type: reference
+audience: [security, tenant-admin, betrieb]
+owner: Cursor
+status: aktiv
+last_reviewed: 2026-06-25
+version: 3.0.0
+---
+
 # ISO 27001 Quarterly Access Review – Prozess
 
 **Steuerung:** A.9.2 User Access Management – Access-Review

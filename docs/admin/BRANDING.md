@@ -1,3 +1,13 @@
+---
+title: PDF-Templates und Branding
+type: reference
+audience: [tenant-admin, betrieb]
+owner: Cursor
+status: aktiv
+last_reviewed: 2026-06-25
+version: 3.0.0
+---
+
 # PDF-Templates & Branding
 
 ## Überblick

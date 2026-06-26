@@ -1,3 +1,13 @@
+---
+title: A1 Compliance-Roadmap
+type: reference
+audience: [security, tenant-admin, betrieb]
+owner: Cursor
+status: aktiv
+last_reviewed: 2026-06-25
+version: 3.0.0
+---
+
 # Compliance-Roadmap für a.eins-Parität
 
 ## Verpflichtende Themen

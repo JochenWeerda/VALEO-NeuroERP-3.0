@@ -1,3 +1,13 @@
+---
+title: Buchungen Audit-Pfad (GoBD)
+type: reference
+audience: [security, tenant-admin, betrieb]
+owner: Cursor
+status: aktiv
+last_reviewed: 2026-06-25
+version: 3.0.0
+---
+
 # Zentraler Audit-Pfad für Buchungen (GoBD-Nachvollziehbarkeit)
 
 ## Übersicht

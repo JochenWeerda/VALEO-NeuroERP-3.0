@@ -1,3 +1,13 @@
+---
+title: GoBD Belegnummer bei Abbruch
+type: reference
+audience: [security, tenant-admin, betrieb]
+owner: Cursor
+status: aktiv
+last_reviewed: 2026-06-25
+version: 3.0.0
+---
+
 # GoBD: Belegnummer bei abgebrochener Beleg-Eingabe
 
 ## Fragestellung
