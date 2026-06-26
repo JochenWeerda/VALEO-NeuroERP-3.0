@@ -1,0 +1,23 @@
+slice_id: TAIL-SALES-001
+title: "Sales orders-modern.tsx Export/Import/Archiv echte Pfade (retroaktiv)"
+priority: P3
+owner: Claude Code
+status: abgeschlossen
+created: "2026-06-26"
+
+goal: >
+  Gap-Verifikation 2026-06-26: TAIL-SALES-001 bereits abgeschlossen (Codex).
+orders-modern.tsx ist an reale Sales-Order-Liste angebunden, exportiert CSV,
+toggelt echte Statusfilter und fuehrt Import/Archiv ueber kanonische Auftragsliste.
+
+ai_harness:
+  fachlicher_vertrag:
+    - orders-modern.tsx enthaelt keine reinen Toast-Hinweise fuer Export/Import/Archiv mehr.
+  architekturvertrag:
+    - Keine Architekturanpassung erforderlich; Code bereits vorhanden.
+  akzeptanzkriterien:
+    - orders-modern.tsx enthaelt keine reinen Toast-Hinweise fuer Export/Import/Archiv mehr.
+
+dateibesitz:
+  - packages/frontend-web/src/pages/sales/orders-modern.tsx
+  - docs/agent-ops/slices/TAIL-SALES-001.yaml

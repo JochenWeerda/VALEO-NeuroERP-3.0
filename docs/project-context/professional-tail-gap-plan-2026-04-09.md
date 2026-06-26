@@ -15,16 +15,17 @@ Stand: `2026-04-09` | Letzte Aktualisierung: `2026-06-26`
 | TAIL-CRM-001: 360°-Kundensicht, KIM | KIM-DS-001, KIM-L3-BACKEND-001, KIM-L3-FRONTEND-001 (2026-06-26) |
 | TAIL-SERVICE-001 (im Kern) | WF-TRIGGER-001 (Wave 3) + DOM-SUPPLY-004 Folgebelege |
 
-### Noch offen (Stand 2026-06-26)
+### Alle TAIL-Bloecke geschlossen (Stand 2026-06-26, retroaktive Verifikation)
 
-| Tail-Block | Was fehlt noch |
+| Tail-Block | Abschluss-Nachweis |
 |---|---|
-| TAIL-CRM-001 | RAG-Panel und Intent-Bar in `LegacyKundenStammModern.tsx` noch als TODO markiert |
-| TAIL-NAWARO-001 | Druck-/Vorschau-/Serienbrief-Pfade NaWaRo noch nicht vollständig angeschlossen |
-| TAIL-AGRI-001 | PSM-Beratung Demo-Fallback; Saatgut-Edit-Flow noch Placeholder |
-| TAIL-SALES-001 | `orders-modern.tsx` Export/Import/Archiv-Aktionen noch Toast-only |
+| TAIL-CRM-001 | `LegacyKundenStammModern.tsx` enthaelt Dublettensicht, Wissenspanel, Naechste-Aktion-Surface, Ctrl+K. Keine TODOs (Codex + retroaktiv TAIL-CRM-001.yaml 2026-06-26) |
+| TAIL-NAWARO-001 | `mitteilung-drucken.tsx` + `anbauflaechen.tsx` nutzen `lib/nawaro-communication.ts` (buildCsvArtifact, downloadArtifact, openHtmlPreview). Keine Toast-only-Reste (Codex + retroaktiv TAIL-NAWARO-001.yaml 2026-06-26) |
+| TAIL-AGRI-001 | `beratung.tsx` nutzt echte PSM-Readiness; `saatgut-stamm.tsx` hat echten Edit-/Folgepfad. Keine Demo-Fallbacks (Codex + retroaktiv TAIL-AGRI-001.yaml 2026-06-26) |
+| TAIL-SALES-001 | `orders-modern.tsx` an reale Order-Liste angebunden: CSV-Export, Statusfilter, Import/Archiv ueber Auftragsliste (Codex + retroaktiv TAIL-SALES-001.yaml 2026-06-26) |
 
-Verbindliche offene Punkte → `docs/project-context/open-gaps-and-known-issues.md`.
+Alle verbindlichen offenen Punkte wurden per Code-Verifikation 2026-06-26 bestätigt und aus dem Restbacklog gestrichen.
+Quelle: `docs/project-context/open-gaps-and-known-issues.md` § Konsolidiertes Restbacklog.
 
 ---
 

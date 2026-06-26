@@ -105,6 +105,13 @@ CRITICAL_THRESHOLDS: dict[str, float] = {
     "api/v1/endpoints/waagen_vorlagen.py": 0.50,    #  53% measured — Waagenvorlagen
     "api/v1/endpoints/rohware_sammelabrechnung.py": 0.32,  #  35% measured — Sammelabrechnung
 
+    # ── COV-RATCHET-007 (2026-06-26): Welle-5/6-Endpoints ───────────────────
+    "api/v1/endpoints/logistik_frachtbriefe.py": 0.60,  # LOG-FRACHTBRIEF-001: GET/POST/PATCH + Enum-Check
+    "api/v1/endpoints/silo_target_cell.py": 0.50,       # WM-AGRI-MAP-001: Zielzellen-Vorschlag
+    "api/v1/endpoints/policies.py": 0.40,               # RUNTIME-KAT-C-002: policy/list (success-Key-Fix)
+    "api/v1/endpoints/kaeufergruppe.py": 0.45,          # RUNTIME-KAT-C-002: katalog list[dict]-Fix
+    "api/v1/endpoints/messages.py": 0.35,               # RUNTIME-KAT-C-002: health dict[str,str]-Fix
+
     # ── MCP-ERP-TOOLS-001 (2026-06-25) ────────────────────────────────────────
     "services/mcp_tool_registry_service.py": 0.85,        #  88% measured
     "api/v1/endpoints/mcp_tool_registry.py": 0.50,        #  53% estimated
