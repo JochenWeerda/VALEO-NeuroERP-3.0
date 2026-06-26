@@ -392,6 +392,36 @@ Nicht repo-seitig schliessbar bleiben echte externe Abnahmen und Zugangsdaten: S
 
 ---
 
+## CARD-AUDIT-001 — Workflow-Cards konsolidiert (2026-06-26)
+
+148 Cards unter `docs/cards/` inventarisiert (`docs/_internal/cards-inventory.md`,
+Generator: `scripts/cards-inventory-audit.py`). Veraltete offene/kritische Meldungen
+gegen Code, Tests und Workboard verifiziert.
+
+**Aktualisiert / geschlossen (Auszug):**
+
+- VK-010, P2P-020, NC-F: Status auf abgeschlossen/umgesetzt (Handover, Wizard, Copilot F5)
+- SEC-003–SEC-034: Status + Evidenz ergänzt (Regressionstests, Security-Roadmap)
+- CRM-001, COM-001, FIN-001: Gaps tabellarisch; `/stages`, `/forecast`, `audit_evidence`,
+  `reporting_api`, PCN-Route als **behoben** markiert
+
+**Verbleibend (echte Lücken aus Cards, nicht blockierend für MkDocs):**
+
+| Thema | Quelle | Priorität | Workboard-Slice |
+|-------|--------|-----------|-----------------|
+| Finanz-Abschluss-Stubs (calculate/lock/run) | FIN-001 | P1 | `FIN-ABSCHLUSS-STUBS-001` |
+| OTC-010 Positionen Auftrag→LS | OTC-010-P1/P2/P3 | P2 | `OTC-010-POS-HANDOVER-001` |
+| CMP ustva `.data`-Bug | CMP-001-P1/P2 | P2 | `CMP-UStVA-API-CLIENT-001` |
+| CRM Legacy-Pfade `/api/crm/` | CRM-001 | P2 | `CRM-LEGACY-API-MIGRATE-001` |
+| Compliance CamelCase Register | COM-001 | P2 | `COM-REGISTER-CAMELCASE-001` |
+| P2P-010 Overview-Card fehlt | workflow-chains | P3 | `P2P-010-OVERVIEW-001` |
+| Ketten-Registry + Inventar-Audit | CARD-AUDIT | Doku | `DOC-CARD-CHAIN-001` |
+| Card-Frontmatter Rollout | CARD-AUDIT | Doku | `DOC-CARD-FRONTMATTER-001` |
+
+Cards bleiben **intern** (nicht in MkDocs-Nav); Ergebnisse fließen in Workflows und diese Datei.
+
+---
+
 ## Analysepflicht
 
 Wenn in Code, Tests oder UI ein Widerspruch zwischen Doku, Implementierung, Fachlogik oder Benutzerfuehrung auftaucht, ist das hier oder in der passenden Workflow-Datei zu dokumentieren.

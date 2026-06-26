@@ -1,5 +1,10 @@
 # SEC-022
 
+## Status
+
+- **Stand:** abgeschlossen (verifiziert 2026-06-25, Cards-Migration-Audit)
+- **Evidenz:** tests/test_security_vat_return_export.py, docs/roadmap/status/2026-04-01-security-hardening-phase-1.md
+
 ## Titel
 
 Tenant-Isolation fuer VAT Return Export

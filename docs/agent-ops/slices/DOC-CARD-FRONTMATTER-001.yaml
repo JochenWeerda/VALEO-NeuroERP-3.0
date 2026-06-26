@@ -1,0 +1,28 @@
+slice_id: DOC-CARD-FRONTMATTER-001
+title: "Card-Frontmatter schrittweise auf Prozess-Cards"
+owner: —
+status: offen
+updated: 2026-06-26
+coordination: >-
+  Ergaenzung zu DOC-CARD-CHAIN-001. Nur docs/cards/** aendern. Pro Slice
+  max. 10–15 Cards; mehrere Agenten koennen nach Ketten aufteilen (harvest,
+  otc, p2p, fin).
+goal: >-
+  YAML-Frontmatter (chain, chain_step, card_type) auf alle Overview- und
+  process-step-Cards rollieren; CHAIN_REGISTRY im Script schrittweise
+  reduzieren zugunsten parse_frontmatter.
+file_ownership:
+  - docs/cards/**/*.md
+  - scripts/cards-inventory-audit.py
+  - docs/_internal/cards-inventory.md
+  - docs/agent-ops/slices/DOC-CARD-FRONTMATTER-001.yaml
+acceptance:
+  - Mindestens alle Overview-Cards (OTC-010, FIN-001, INV-001, …) haben Frontmatter.
+  - cards-inventory Metrik „Prozess-Cards ohne YAML-Frontmatter" sinkt messbar.
+  - Audit-Script bevorzugt Frontmatter vor CHAIN_REGISTRY-Fallback.
+tests:
+  - python scripts/cards-inventory-audit.py
+risks:
+  - Massen-Edit an 147 Cards; inkrementell nach Kette claimen.
+external_gates:
+  - Keine externe Abnahme.

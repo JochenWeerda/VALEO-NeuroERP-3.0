@@ -39,19 +39,42 @@ class DokumentReadyRequest(BaseModel):
     portal_url: Optional[str] = None
 
 
+class NotifyResponse(BaseModel):
+    msg_id: str
+    status: str
+    text: str
+
+
+class OutboxMessageResponse(BaseModel):
+    msg_id: str
+    phone: str
+    kunden_nr: Optional[str] = None
+    notify_type: str
+    text: str
+    meta_msg_id: Optional[str] = None
+    status: str
+    created_at: str
+
+
+class OutboxLogResponse(BaseModel):
+    tenant_id: str
+    messages: list[OutboxMessageResponse]
+
+
 # ─── Endpunkte ───────────────────────────────────────────────────────────────
 
 @router.post(
     "/dev/notify/lieferankuendigung",
+    response_model=NotifyResponse,
     tags=["WhatsApp Dev-Simulator"],
     summary="Simuliert Lieferankündigung (Push an Kunde)",
 )
-async def simulate_lieferankuendigung(body: LieferankuendigungRequest) -> dict:
+async def simulate_lieferankuendigung(body: LieferankuendigungRequest) -> NotifyResponse:
     """
     Triggerbar aus Disposition/Logistik: LKW ~eta_min Minuten entfernt.
     Im Simulator: Nachricht in Outbox-Log. Mit WHATSAPP_ACCESS_TOKEN: echter Meta-Aufruf.
     """
-    return send_lieferankuendigung(
+    return NotifyResponse(**send_lieferankuendigung(
         tenant_id=body.tenant_id,
         phone=body.phone,
         kunden_nr=body.kunden_nr,
@@ -61,19 +84,20 @@ async def simulate_lieferankuendigung(body: LieferankuendigungRequest) -> dict:
         einheit=body.einheit,
         eta_min=body.eta_min,
         fahrer=body.fahrer,
-    )
+    ))
 
 
 @router.post(
     "/dev/notify/dokument-ready",
+    response_model=NotifyResponse,
     tags=["WhatsApp Dev-Simulator"],
     summary="Simuliert Dokument-Bereitstellungs-Benachrichtigung",
 )
-async def simulate_dokument_ready(body: DokumentReadyRequest) -> dict:
+async def simulate_dokument_ready(body: DokumentReadyRequest) -> NotifyResponse:
     """
     Triggerbar aus Docflow nach Lieferschein-/Rechnungs-Erstellung.
     """
-    return send_dokument_ready(
+    return NotifyResponse(**send_dokument_ready(
         tenant_id=body.tenant_id,
         phone=body.phone,
         kunden_nr=body.kunden_nr,
@@ -81,13 +105,14 @@ async def simulate_dokument_ready(body: DokumentReadyRequest) -> dict:
         doc_typ=body.doc_typ,
         doc_nr=body.doc_nr,
         portal_url=body.portal_url,
-    )
+    ))
 
 
 @router.get(
     "/dev/outbox",
+    response_model=OutboxLogResponse,
     tags=["WhatsApp Dev-Simulator"],
     summary="Alle ausgehenden WhatsApp-Nachrichten (Outbox-Log)",
 )
-async def get_outbox_log(tenant_id: str = "dev-tenant") -> dict:
-    return {"tenant_id": tenant_id, "messages": get_outbox(tenant_id)}
+async def get_outbox_log(tenant_id: str = "dev-tenant") -> OutboxLogResponse:
+    return OutboxLogResponse(tenant_id=tenant_id, messages=get_outbox(tenant_id))

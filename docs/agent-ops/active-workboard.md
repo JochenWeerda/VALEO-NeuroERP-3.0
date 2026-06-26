@@ -4455,6 +4455,79 @@ Archiv des vorherigen Boards:
 **Dateibesitz:** `app/services/whatsapp_notify_service.py`, `app/api/v1/endpoints/whatsapp_notify.py`, `tests/test_whatsapp_notify.py`, `docs/agent-ops/slices/WA-NOTIFY-001.yaml`.
 **Integration:** Logistik → `/dev/notify/lieferankuendigung`, Docflow → `/dev/notify/dokument-ready`.
 
+---
+
+## CARD-AUDIT-Follow-up (2026-06-26)
+
+Parallele Fix-Slices aus Cards-Inventar-Audit (`CARD-AUDIT-001`). Claim-Protokoll: `docs/agent-ops/parallel-work-protocol.md`.
+
+| Slice | Priorität | Owner | Stand |
+|-------|-----------|-------|-------|
+| FIN-ABSCHLUSS-STUBS-001 | P1 | — | offen |
+| OTC-010-POS-HANDOVER-001 | P2 | — | offen |
+| CMP-UStVA-API-CLIENT-001 | P2 | — | offen |
+| CRM-LEGACY-API-MIGRATE-001 | P2 | — | offen |
+| COM-REGISTER-CAMELCASE-001 | P2 | — | offen |
+| P2P-010-OVERVIEW-001 | P3 | — | offen |
+| DOC-CARD-CHAIN-001 | Doku | — | offen (Registry/Script/Template angelegt) |
+| DOC-CARD-FRONTMATTER-001 | Doku | — | offen (2 Beispiel-Cards: VK-011, OTC-010) |
+
+## FIN-ABSCHLUSS-STUBS-001 — Finanz-Abschluss calculate/lock/run
+
+**Owner:** —
+**Stand:** offen — Backend-Stubs in `finance_actions.py`; echte Periodenlogik und Tests ausstehend (CARD-AUDIT P1).
+**Ziel:** GoBD-taugliche Abschlussaktionen statt fail-soft-Platzhalter; Frontend `abschluss.tsx` zeigt echte Salden.
+**Dateibesitz:** `app/api/v1/endpoints/finance_actions.py`, `app/services/finance_closing_service.py`, `packages/frontend-web/src/pages/finance/abschluss.tsx`, `docs/agent-ops/slices/FIN-ABSCHLUSS-STUBS-001.yaml`.
+
+## OTC-010-POS-HANDOVER-001 — Positionen Auftrag→Lieferschein
+
+**Owner:** —
+**Stand:** offen — OTC-010-P1/P2/P3 dokumentiert; Kunden-Prefill behoben, Positionen und `source_order_id` offen.
+**Ziel:** Belegkette Auftrag→LS→RE vervollständigen.
+**Dateibesitz:** `packages/frontend-web/src/pages/verkauf/lieferschein-erfassung.tsx`, `packages/frontend-web/src/pages/sales/order-editor.tsx`, `docs/agent-ops/slices/OTC-010-POS-HANDOVER-001.yaml`.
+
+## CMP-UStVA-API-CLIENT-001 — UStVA Response-Normalisierung
+
+**Owner:** —
+**Stand:** offen — Import bereits `@/lib/api-client`; inkonsistente `.data`-Zugriffe in Ladepfaden (CMP-001-P1/P2).
+**Ziel:** Einheitliches apiClient-Response-Pattern in `ustva.tsx`.
+**Dateibesitz:** `packages/frontend-web/src/pages/finance/ustva.tsx`, `docs/agent-ops/slices/CMP-UStVA-API-CLIENT-001.yaml`.
+
+## CRM-LEGACY-API-MIGRATE-001 — CRM axios → /api/v1/crm/
+
+**Owner:** —
+**Stand:** offen — `crm.ts` bereits v1; drei Masken noch auf `@/lib/axios` (kontakt-management, kunden-liste, lieferanten-liste).
+**Ziel:** Vollständige v1-Migration CRM-Frontend.
+**Dateibesitz:** `packages/frontend-web/src/pages/crm/kontakt-management.tsx`, `kunden-liste.tsx`, `lieferanten-liste.tsx`, `docs/agent-ops/slices/CRM-LEGACY-API-MIGRATE-001.yaml`.
+
+## COM-REGISTER-CAMELCASE-001 — Compliance-Register CamelCase
+
+**Owner:** —
+**Stand:** offen — COM-003: qs-checkliste, zulassungen/vvvo/sachkunde-register UI/API-Mismatch.
+**Ziel:** Register laden und speichern ohne Feld-Mapping-Fehler.
+**Dateibesitz:** `packages/frontend-web/src/pages/compliance/*-register.tsx`, `docs/agent-ops/slices/COM-REGISTER-CAMELCASE-001.yaml`.
+
+## P2P-010-OVERVIEW-001 — P2P Overview-Card
+
+**Owner:** —
+**Stand:** offen — Step 0 in `workflow-chains.md` fehlt; P2P-020+ existieren.
+**Ziel:** Overview-Card P2P-010 anlegen und Registry ergänzen.
+**Dateibesitz:** `docs/cards/einkauf/P2P-010-procure-to-pay.md`, `docs/agent-ops/slices/P2P-010-OVERVIEW-001.yaml`.
+
+## DOC-CARD-CHAIN-001 — Workflow-Ketten-Registry + Inventar-Audit
+
+**Owner:** —
+**Stand:** offen — `workflow-chains.md`, `cards-inventory-audit.py`, `card-template.md`, Inventar v3 regeneriert; Abnahme + Doku-Sync ausstehend.
+**Ziel:** Interne Source of Truth für Card-Ketten maschinenlesbar pflegen.
+**Dateibesitz:** `docs/_internal/workflow-chains.md`, `scripts/cards-inventory-audit.py`, `docs/agent-ops/slices/DOC-CARD-CHAIN-001.yaml`.
+
+## DOC-CARD-FRONTMATTER-001 — Card-Frontmatter Rollout
+
+**Owner:** —
+**Stand:** offen — Vorlage in `card-template.md`; Beispiele VK-011, OTC-010; Restliche Prozess-Cards ausstehend.
+**Ziel:** Frontmatter auf alle Overview/process-step-Cards; CHAIN_REGISTRY schrittweise ablösen.
+**Dateibesitz:** `docs/cards/**/*.md`, `docs/agent-ops/slices/DOC-CARD-FRONTMATTER-001.yaml`.
+
 ## PORTAL-SHOP-001 — Betriebsmittel-Online-Shop (Governance-Erfassung)
 
 **Owner:** Cursor (Backend + Frontend) / Claude Sonnet 4.6 (Governance-Doku)

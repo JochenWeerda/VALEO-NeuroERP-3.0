@@ -1,5 +1,10 @@
 # SEC-023
 
+## Status
+
+- **Stand:** abgeschlossen (verifiziert 2026-06-25, Cards-Migration-Audit)
+- **Evidenz:** tests/test_security_sales_credit_notes.py, docs/roadmap/status/2026-04-01-security-hardening-phase-1.md
+
 ## Titel
 
 Tenant-Isolation fuer Sales Credit Notes / Returns

@@ -1,5 +1,10 @@
 # INT-SG-021 - Superglue Compose Stack
 
+## Status
+
+- **Stand:** abgeschlossen (verifiziert 2026-06-25, Cards-Migration-Audit)
+- **Evidenz:** `docker-compose.integration.yml`, `docs/workflows/int-sg-021-superglue-compose-stack.md`
+
 ## Kontext
 
 `INT-SG-005` hatte den Deploymentpfad nur vorbereitet. Fuer eine praktikable lokale und Staging-nahe Inbetriebnahme fehlten Persistenz, Objektablage und ein sauberer Init-/Health-Pfad.

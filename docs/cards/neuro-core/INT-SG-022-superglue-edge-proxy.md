@@ -1,5 +1,10 @@
 # INT-SG-022 - Superglue Edge / Proxy Overlay
 
+## Status
+
+- **Stand:** abgeschlossen (verifiziert 2026-06-25, Cards-Migration-Audit)
+- **Evidenz:** `docker-compose.integration.edge.yml`, `docs/workflows/int-sg-022-superglue-edge-proxy.md`
+
 ## Kontext
 
 `INT-SG-021` liefert den internen Compose-Stack. Fuer Staging und produktionsnahe Setups fehlte noch ein externer Ingress-Pfad mit TLS und sauber geschlossenen Service-Ports.

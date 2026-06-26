@@ -6,7 +6,7 @@
 - Teilprozess: Direktbestellung
 - Rolle(n): Einkauf, Disposition, operativer Sachbearbeiter
 - Prioritaet: hoch
-- Status: in arbeit
+- Status: abgeschlossen (Kernpfad; Follow-up: Inline-Fehler pro Wizard-Schritt)
 
 ## 2. Fachlicher Zweck
 - Ziel des Schrittes: Einen Flow-Spine-Beschaffungsvorgang in eine belastbare Bestellung ueberfuehren.
