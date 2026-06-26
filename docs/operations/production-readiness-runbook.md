@@ -130,3 +130,35 @@ damit kein gueltiger Produktionsrelease.
   https://www.bsi.bund.de/DE/Themen/Unternehmen-und-Organisationen/Standards-und-Zertifizierung/IT-Grundschutz/it-grundschutz_node.html
 - DSGVO:
   https://eur-lex.europa.eu/eli/reg/2016/679/oj
+
+## Release-Evidence-Gate (RELEASE-EVIDENCE-GATE-001)
+
+### Überblick
+
+Vor jedem Staging- oder Produktions-Release aggregiert `scripts/release_evidence_report.py`
+alle Qualitätsdimensionen in einem maschinenlesbaren Report.
+
+### Dimensionen
+
+| Dimension | Tool | Blockierend |
+|---|---|---|
+| drift | `doc_drift_report.py --fail-over 0` | ja (fail) |
+| openapi | `generate_openapi.py --check` | ja (fail) |
+| inventories | Datei-Existenz-Check | ja (fail) |
+| coverage | `check_critical_backend_coverage.py` | nein (warn) |
+| slice_harness | `valeo_slice.py list` | nein (warn) |
+| external | `artifacts/production-readiness-assessment.json` | nein (warn) |
+
+### Lokal ausführen
+
+```bash
+python scripts/release_evidence_report.py --fail-on-red
+# → artifacts/release_evidence.json
+# → artifacts/release_evidence.md
+```
+
+### CI-Integration
+
+Läuft als letzter Step in `.github/workflows/release-gates.yml`.
+`--fail-on-red`: Exit 1 wenn mindestens eine Dimension `fail` hat.
+WARN-Dimensionen blockieren nicht, erscheinen aber im Report.
