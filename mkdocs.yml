@@ -132,9 +132,15 @@ nav:
       - Verkauf (Auftrag → Rechnung): benutzerhandbuch/verkauf.md
       - Einkauf: benutzerhandbuch/einkauf.md
       - Lager: benutzerhandbuch/lager.md
+      - Logistik und Touren: benutzerhandbuch/logistik.md
+      - Futtermittel und Produktion: benutzerhandbuch/futtermittel-produktion.md
       - Finanzbuchhaltung: benutzerhandbuch/finanzbuchhaltung.md
+      - Controlling und Kostenrechnung: benutzerhandbuch/controlling-kostenrechnung.md
+      - POS und Kasse: benutzerhandbuch/pos-kasse.md
+      - Personal, Zeit und Lohn: benutzerhandbuch/personal-lohn.md
       - CRM: benutzerhandbuch/crm.md
       - Qualitätssicherung: benutzerhandbuch/qualitaetssicherung.md
+      - Compliance und Meldewesen: benutzerhandbuch/compliance-meldewesen.md
       - Release Notes: benutzerhandbuch/release-notes.md
       - Glossar: benutzerhandbuch/glossar.md
       - In-App-Hilfe: benutzerhandbuch/in-app-hilfe.md
