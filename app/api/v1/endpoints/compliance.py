@@ -101,7 +101,7 @@ async def list_qs_checkliste(db: Session = Depends(get_db)) -> dict:
             "erfuellt": bool(i.erfuellt),
             "bemerkung": i.bemerkung,
             "geprueft_am": _dt(i.geprueft_am),
-            "geprrueftAm": _dt(i.geprueft_am),
+            "geprueftAm": _dt(i.geprueft_am),
         }
         for i in items
     ]
@@ -163,6 +163,7 @@ async def list_sachkunde(status: Optional[str] = Query(None), db: Session = Depe
                 "gueltig_bis": _dt(i.gueltig_bis),
                 "gueltigBis": _dt(i.gueltig_bis),
                 "ausstellende_stelle": i.ausstellende_stelle,
+                "ausstellendeStelle": i.ausstellende_stelle,
                 "status": i.status,
             }
             for i in items
