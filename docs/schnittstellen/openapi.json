@@ -4851,7 +4851,10 @@
           "qs_freigabe_vorschlag",
           "offene_gates_abfrage",
           "angebotsnachfassung",
-          "dms_paket_vorschlag"
+          "dms_paket_vorschlag",
+          "angebot_nachfassen_execute",
+          "dms_paket_senden_execute",
+          "gate_status_aktualisieren_execute"
         ],
         "title": "AgentActionType",
         "type": "string"
@@ -11315,6 +11318,134 @@
           "titel"
         ],
         "title": "AufgabePayload",
+        "type": "object"
+      },
+      "AuftragCreateBody": {
+        "properties": {
+          "anmerkung": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Anmerkung"
+          },
+          "flaeche_ha": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Flaeche Ha"
+          },
+          "getreide_art": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Getreide Art"
+          },
+          "kultur": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Kultur"
+          },
+          "kunden_nr": {
+            "title": "Kunden Nr",
+            "type": "string"
+          },
+          "menge_dt": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Menge Dt"
+          },
+          "psm_mittel": {
+            "default": [],
+            "items": {
+              "type": "string"
+            },
+            "title": "Psm Mittel",
+            "type": "array"
+          },
+          "schlag_beschreibung": {
+            "default": "",
+            "title": "Schlag Beschreibung",
+            "type": "string"
+          },
+          "schlag_ids": {
+            "default": [],
+            "items": {
+              "type": "string"
+            },
+            "title": "Schlag Ids",
+            "type": "array"
+          },
+          "tierart": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tierart"
+          },
+          "tiere_anzahl": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tiere Anzahl"
+          },
+          "typ": {
+            "title": "Typ",
+            "type": "string"
+          },
+          "wunsch_datum": {
+            "anyOf": [
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Wunsch Datum"
+          }
+        },
+        "required": [
+          "kunden_nr",
+          "typ"
+        ],
+        "title": "AuftragCreateBody",
         "type": "object"
       },
       "AusfuehrungOut": {
@@ -32820,6 +32951,17 @@
             ],
             "title": "Reference Invoice Number"
           },
+          "sales_order_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sales Order Id"
+          },
           "sales_rep_id": {
             "anyOf": [
               {
@@ -33210,6 +33352,29 @@
           "description"
         ],
         "title": "DifferenceItem",
+        "type": "object"
+      },
+      "DimensionResult": {
+        "properties": {
+          "detail": {
+            "title": "Detail",
+            "type": "string"
+          },
+          "dimension": {
+            "title": "Dimension",
+            "type": "string"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "dimension",
+          "status",
+          "detail"
+        ],
+        "title": "DimensionResult",
         "type": "object"
       },
       "DirectDebitItemCreate": {
@@ -35786,6 +35951,67 @@
           "datei_pfad"
         ],
         "title": "DokumentCreateRequest",
+        "type": "object"
+      },
+      "DokumentReadyRequest": {
+        "properties": {
+          "doc_nr": {
+            "title": "Doc Nr",
+            "type": "string"
+          },
+          "doc_typ": {
+            "title": "Doc Typ",
+            "type": "string"
+          },
+          "kunden_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Kunden Name"
+          },
+          "kunden_nr": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Kunden Nr"
+          },
+          "phone": {
+            "title": "Phone",
+            "type": "string"
+          },
+          "portal_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Portal Url"
+          },
+          "tenant_id": {
+            "default": "dev-tenant",
+            "title": "Tenant Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "phone",
+          "doc_typ",
+          "doc_nr"
+        ],
+        "title": "DokumentReadyRequest",
         "type": "object"
       },
       "DokumentTransitionRequest": {
@@ -41583,6 +41809,19 @@
           "executed_by"
         ],
         "title": "ExecutePaymentRunRequest",
+        "type": "object"
+      },
+      "ExecuteRequest": {
+        "properties": {
+          "executed_by": {
+            "title": "Executed By",
+            "type": "string"
+          }
+        },
+        "required": [
+          "executed_by"
+        ],
+        "title": "ExecuteRequest",
         "type": "object"
       },
       "ExplainabilityDetail": {
@@ -50678,6 +50917,37 @@
           "id"
         ],
         "title": "HedgeOut",
+        "type": "object"
+      },
+      "HistoryResponse": {
+        "properties": {
+          "conversation": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Conversation"
+          },
+          "phone": {
+            "title": "Phone",
+            "type": "string"
+          },
+          "tenant_id": {
+            "title": "Tenant Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "phone",
+          "tenant_id",
+          "conversation"
+        ],
+        "title": "HistoryResponse",
         "type": "object"
       },
       "HoflisteCreate": {
@@ -62509,6 +62779,77 @@
         "title": "LegacyCustomerFields",
         "type": "object"
       },
+      "LieferankuendigungRequest": {
+        "properties": {
+          "artikel": {
+            "title": "Artikel",
+            "type": "string"
+          },
+          "einheit": {
+            "default": "t",
+            "title": "Einheit",
+            "type": "string"
+          },
+          "eta_min": {
+            "default": 60,
+            "title": "Eta Min",
+            "type": "integer"
+          },
+          "fahrer": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Fahrer"
+          },
+          "kunden_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Kunden Name"
+          },
+          "kunden_nr": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Kunden Nr"
+          },
+          "menge": {
+            "title": "Menge",
+            "type": "number"
+          },
+          "phone": {
+            "title": "Phone",
+            "type": "string"
+          },
+          "tenant_id": {
+            "default": "dev-tenant",
+            "title": "Tenant Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "phone",
+          "artikel",
+          "menge"
+        ],
+        "title": "LieferankuendigungRequest",
+        "type": "object"
+      },
       "LieferantCreate": {
         "properties": {
           "ansprechpartner": {
@@ -71673,6 +72014,29 @@
         "title": "NotifyIn",
         "type": "object"
       },
+      "NotifyResponse": {
+        "properties": {
+          "msg_id": {
+            "title": "Msg Id",
+            "type": "string"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          },
+          "text": {
+            "title": "Text",
+            "type": "string"
+          }
+        },
+        "required": [
+          "msg_id",
+          "status",
+          "text"
+        ],
+        "title": "NotifyResponse",
+        "type": "object"
+      },
       "NumberRangeConfigRequest": {
         "properties": {
           "digit_count": {
@@ -73617,6 +73981,28 @@
         "title": "OrderStatus",
         "type": "string"
       },
+      "OrdersResponse": {
+        "properties": {
+          "orders": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Orders",
+            "type": "array"
+          },
+          "tenant_id": {
+            "title": "Tenant Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "tenant_id",
+          "orders"
+        ],
+        "title": "OrdersResponse",
+        "type": "object"
+      },
       "OrgUnitIn": {
         "properties": {
           "cost_center_id": {
@@ -73724,6 +74110,87 @@
           }
         },
         "title": "OrgUnitPatch",
+        "type": "object"
+      },
+      "OutboxLogResponse": {
+        "properties": {
+          "messages": {
+            "items": {
+              "$ref": "#/components/schemas/OutboxMessageResponse"
+            },
+            "title": "Messages",
+            "type": "array"
+          },
+          "tenant_id": {
+            "title": "Tenant Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "tenant_id",
+          "messages"
+        ],
+        "title": "OutboxLogResponse",
+        "type": "object"
+      },
+      "OutboxMessageResponse": {
+        "properties": {
+          "created_at": {
+            "title": "Created At",
+            "type": "string"
+          },
+          "kunden_nr": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Kunden Nr"
+          },
+          "meta_msg_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Meta Msg Id"
+          },
+          "msg_id": {
+            "title": "Msg Id",
+            "type": "string"
+          },
+          "notify_type": {
+            "title": "Notify Type",
+            "type": "string"
+          },
+          "phone": {
+            "title": "Phone",
+            "type": "string"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          },
+          "text": {
+            "title": "Text",
+            "type": "string"
+          }
+        },
+        "required": [
+          "msg_id",
+          "phone",
+          "notify_type",
+          "text",
+          "status",
+          "created_at"
+        ],
+        "title": "OutboxMessageResponse",
         "type": "object"
       },
       "OverrideApproveIn": {
@@ -81796,6 +82263,93 @@
         "title": "PreisLookupResult",
         "type": "object"
       },
+      "PreisSetzenBody": {
+        "properties": {
+          "artikel_id": {
+            "title": "Artikel Id",
+            "type": "string"
+          },
+          "artikel_name": {
+            "title": "Artikel Name",
+            "type": "string"
+          },
+          "aufschlag_eur_dt": {
+            "default": 0.0,
+            "title": "Aufschlag Eur Dt",
+            "type": "number"
+          },
+          "basis_qualitaet": {
+            "title": "Basis Qualitaet",
+            "type": "string"
+          },
+          "ernte_jahr": {
+            "title": "Ernte Jahr",
+            "type": "integer"
+          },
+          "frucht_gruppe": {
+            "title": "Frucht Gruppe",
+            "type": "string"
+          },
+          "gueltig_bis": {
+            "anyOf": [
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Gueltig Bis"
+          },
+          "hinweis": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Hinweis"
+          },
+          "liefermonat": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Liefermonat"
+          },
+          "preis_eur_dt": {
+            "title": "Preis Eur Dt",
+            "type": "number"
+          },
+          "quelle": {
+            "default": "manuell",
+            "title": "Quelle",
+            "type": "string"
+          },
+          "variante": {
+            "title": "Variante",
+            "type": "string"
+          }
+        },
+        "required": [
+          "artikel_id",
+          "artikel_name",
+          "frucht_gruppe",
+          "variante",
+          "preis_eur_dt",
+          "basis_qualitaet",
+          "ernte_jahr"
+        ],
+        "title": "PreisSetzenBody",
+        "type": "object"
+      },
       "PreisabweichungFreigabeIn": {
         "properties": {
           "entscheidung": {
@@ -87010,6 +87564,45 @@
         "title": "QualifyRequest",
         "type": "object"
       },
+      "QualityEvidenceSummary": {
+        "properties": {
+          "dimensions": {
+            "items": {
+              "$ref": "#/components/schemas/DimensionResult"
+            },
+            "title": "Dimensions",
+            "type": "array"
+          },
+          "generated_at": {
+            "title": "Generated At",
+            "type": "string"
+          },
+          "overall_status": {
+            "title": "Overall Status",
+            "type": "string"
+          },
+          "source": {
+            "title": "Source",
+            "type": "string"
+          },
+          "summary": {
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "title": "Summary",
+            "type": "object"
+          }
+        },
+        "required": [
+          "generated_at",
+          "overall_status",
+          "dimensions",
+          "summary",
+          "source"
+        ],
+        "title": "QualityEvidenceSummary",
+        "type": "object"
+      },
       "QualityProtocolCreateIn": {
         "description": "Input-Model für Protokoll-Erstellung.",
         "properties": {
@@ -88341,6 +88934,37 @@
         "title": "RatenzahlungPlanIn",
         "type": "object"
       },
+      "RationContext": {
+        "properties": {
+          "benoetigt_rohwaren": {
+            "default": [],
+            "items": {
+              "type": "string"
+            },
+            "title": "Benoetigt Rohwaren",
+            "type": "array"
+          },
+          "kunden_nr": {
+            "title": "Kunden Nr",
+            "type": "string"
+          },
+          "tier_kategorie": {
+            "title": "Tier Kategorie",
+            "type": "string"
+          },
+          "tiere_anzahl": {
+            "title": "Tiere Anzahl",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "kunden_nr",
+          "tiere_anzahl",
+          "tier_kategorie"
+        ],
+        "title": "RationContext",
+        "type": "object"
+      },
       "RationsOptimizationOut": {
         "additionalProperties": true,
         "description": "Typed response schema for RationsOptimizationOut endpoints (extra fields forwarded).",
@@ -88973,6 +89597,144 @@
           "output_schema"
         ],
         "title": "RegisterPromptPackRequest",
+        "type": "object"
+      },
+      "RegistrierenBody": {
+        "properties": {
+          "anmerkung": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Anmerkung"
+          },
+          "betrieb_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Betrieb Name"
+          },
+          "betrieb_typ": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Betrieb Typ"
+          },
+          "email": {
+            "title": "Email",
+            "type": "string"
+          },
+          "flaeche_ha": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Flaeche Ha"
+          },
+          "hauptkulturen": {
+            "default": [],
+            "items": {
+              "type": "string"
+            },
+            "title": "Hauptkulturen",
+            "type": "array"
+          },
+          "interesse_themen": {
+            "default": [],
+            "items": {
+              "type": "string"
+            },
+            "title": "Interesse Themen",
+            "type": "array"
+          },
+          "nachname": {
+            "title": "Nachname",
+            "type": "string"
+          },
+          "ort": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ort"
+          },
+          "plz": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Plz"
+          },
+          "telefon": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Telefon"
+          },
+          "tierart": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tierart"
+          },
+          "tiere_anzahl": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tiere Anzahl"
+          },
+          "vorname": {
+            "title": "Vorname",
+            "type": "string"
+          }
+        },
+        "required": [
+          "vorname",
+          "nachname",
+          "email"
+        ],
+        "title": "RegistrierenBody",
         "type": "object"
       },
       "RejectRequest": {
@@ -95180,6 +95942,37 @@
         "title": "SchedulerJobOut",
         "type": "object"
       },
+      "SchlagContext": {
+        "properties": {
+          "ernte_jahr": {
+            "title": "Ernte Jahr",
+            "type": "integer"
+          },
+          "flaeche_ha": {
+            "title": "Flaeche Ha",
+            "type": "number"
+          },
+          "kulturen": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Kulturen",
+            "type": "array"
+          },
+          "kunden_nr": {
+            "title": "Kunden Nr",
+            "type": "string"
+          }
+        },
+        "required": [
+          "kunden_nr",
+          "kulturen",
+          "flaeche_ha",
+          "ernte_jahr"
+        ],
+        "title": "SchlagContext",
+        "type": "object"
+      },
       "SchlagCreate": {
         "properties": {
           "ackerzahl": {
@@ -98510,6 +99303,64 @@
           "reason"
         ],
         "title": "SimulationStepResult",
+        "type": "object"
+      },
+      "SimulatorRequest": {
+        "properties": {
+          "message": {
+            "title": "Message",
+            "type": "string"
+          },
+          "phone": {
+            "title": "Phone",
+            "type": "string"
+          },
+          "tenant_id": {
+            "default": "dev-tenant",
+            "title": "Tenant Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "phone",
+          "message"
+        ],
+        "title": "SimulatorRequest",
+        "type": "object"
+      },
+      "SimulatorResponse": {
+        "properties": {
+          "conversation": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Conversation"
+          },
+          "orders": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Orders",
+            "type": "array"
+          },
+          "reply": {
+            "title": "Reply",
+            "type": "string"
+          }
+        },
+        "required": [
+          "reply",
+          "conversation",
+          "orders"
+        ],
+        "title": "SimulatorResponse",
         "type": "object"
       },
       "SkontoAuszifferungCreate": {
@@ -110804,6 +111655,19 @@
         "title": "WartungOut",
         "type": "object"
       },
+      "WebhookReceiveResponse": {
+        "properties": {
+          "status": {
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "status"
+        ],
+        "title": "WebhookReceiveResponse",
+        "type": "object"
+      },
       "WebshopBestellung": {
         "properties": {
           "artikel_positionen": {
@@ -119115,6 +119979,88 @@
           "ende"
         ],
         "title": "TourIn",
+        "type": "object"
+      },
+      "app__api__v1__endpoints__portal_interessent__StatusWechselBody": {
+        "properties": {
+          "kunden_nr": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Kunden Nr"
+          },
+          "neuer_status": {
+            "title": "Neuer Status",
+            "type": "string"
+          },
+          "zugewiesen_an": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Zugewiesen An"
+          }
+        },
+        "required": [
+          "neuer_status"
+        ],
+        "title": "StatusWechselBody",
+        "type": "object"
+      },
+      "app__api__v1__endpoints__portal_lohndienst__StatusWechselBody": {
+        "properties": {
+          "geplant_datum": {
+            "anyOf": [
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Geplant Datum"
+          },
+          "innendienst_notiz": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Innendienst Notiz"
+          },
+          "neuer_status": {
+            "title": "Neuer Status",
+            "type": "string"
+          },
+          "preis_indikativ_eur": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Preis Indikativ Eur"
+          }
+        },
+        "required": [
+          "neuer_status"
+        ],
+        "title": "StatusWechselBody",
         "type": "object"
       },
       "app__api__v1__endpoints__pos_payments__PaymentLine": {
@@ -129664,6 +130610,122 @@
         ]
       }
     },
+    "/api/v1/admin/quality-evidence/": {
+      "get": {
+        "description": "Aggregiert verfügbare Qualitätsnachweise aus CI-Artefakten.\n\nPhase 1: Statische Artefakte (release_evidence.json, doc_drift_report.json).\nErfordert: agent:read oder admin-Rolle.",
+        "operationId": "get_quality_evidence_api_v1_admin_quality_evidence__get",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QualityEvidenceSummary"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Get Quality Evidence",
+        "tags": [
+          "quality-evidence",
+          "admin",
+          "quality"
+        ]
+      }
+    },
+    "/api/v1/admin/quality-evidence/drift": {
+      "get": {
+        "description": "Gibt den aktuellen Doku-Code-Drift-Status zurück.",
+        "operationId": "get_drift_status_api_v1_admin_quality_evidence_drift_get",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Get Drift Status Api V1 Admin Quality Evidence Drift Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Get Drift Status",
+        "tags": [
+          "quality-evidence",
+          "admin",
+          "quality"
+        ]
+      }
+    },
     "/api/v1/admin/report-permissions": {
       "get": {
         "operationId": "list_report_permissions_api_v1_admin_report_permissions_get",
@@ -132679,6 +133741,100 @@
           }
         ],
         "summary": "Agent-Proposal freigeben (Human Approval)",
+        "tags": [
+          "agent",
+          "operator",
+          "agent",
+          "operator"
+        ]
+      }
+    },
+    "/api/v1/agent/operator/proposals/{proposal_id}/execute": {
+      "post": {
+        "operationId": "execute_proposal_api_v1_agent_operator_proposals__proposal_id__execute_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "proposal_id",
+            "required": true,
+            "schema": {
+              "title": "Proposal Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-VALEO-Roles",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Valeo-Roles"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ExecuteRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Execute Proposal Api V1 Agent Operator Proposals  Proposal Id  Execute Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Genehmigte LOW-Risiko-Aktion direkt ausfuehren",
         "tags": [
           "agent",
           "operator",
@@ -186432,9 +187588,12 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
+                  "items": {
+                    "additionalProperties": true,
+                    "type": "object"
+                  },
                   "title": "Response Dial Pending Api V1 Crm Tapi Dial Pending Get",
-                  "type": "object"
+                  "type": "array"
                 }
               }
             },
@@ -186638,9 +187797,12 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
+                  "items": {
+                    "additionalProperties": true,
+                    "type": "object"
+                  },
                   "title": "Response Pending Api V1 Crm Tapi Pending Get",
-                  "type": "object"
+                  "type": "array"
                 }
               }
             },
@@ -201244,6 +202406,129 @@
         ]
       }
     },
+    "/api/v1/external-gates/": {
+      "get": {
+        "operationId": "get_all_gates_api_v1_external_gates__get",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Get All Gates Api V1 External Gates  Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Alle externen Gate-Status abrufen",
+        "tags": [
+          "external-gates",
+          "external-gates"
+        ]
+      }
+    },
+    "/api/v1/external-gates/{system_id}": {
+      "get": {
+        "operationId": "get_gate_api_v1_external_gates__system_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "system_id",
+            "required": true,
+            "schema": {
+              "title": "System Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Get Gate Api V1 External Gates  System Id  Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Gate-Status eines externen Systems abrufen",
+        "tags": [
+          "external-gates",
+          "external-gates"
+        ]
+      }
+    },
     "/api/v1/fibu/erloeskennziffern": {
       "get": {
         "operationId": "list_erloeskennziffern_api_v1_fibu_erloeskennziffern_get",
@@ -210281,7 +211566,7 @@
     },
     "/api/v1/finance/closing/calculate": {
       "post": {
-        "description": "Abschluss-Berechnung: Summen und Salden fuer die Periode ermitteln.",
+        "description": "Abschluss-Berechnung: echte Summen und Salden aus gebuchten journal_entries.",
         "operationId": "calculate_closing_api_v1_finance_closing_calculate_post",
         "parameters": [
           {
@@ -210349,7 +211634,7 @@
     },
     "/api/v1/finance/closing/lock": {
       "post": {
-        "description": "Periode sperren — verhindert weitere Buchungen in der Periode.",
+        "description": "Periode atomar sperren — lehnt Doppel-Sperre und nicht-abschlussreife Perioden ab.",
         "operationId": "lock_closing_api_v1_finance_closing_lock_post",
         "parameters": [
           {
@@ -210417,7 +211702,7 @@
     },
     "/api/v1/finance/closing/run": {
       "post": {
-        "description": "Periodenabschluss durchfuehren: berechnen, sperren, Abschluss-Buchungen erzeugen.",
+        "description": "Vollständiger Periodenabschluss: Salden berechnen, Abschluss-Buchung anlegen, Periode sperren.",
         "operationId": "run_closing_api_v1_finance_closing_run_post",
         "parameters": [
           {
@@ -233181,6 +234466,236 @@
         ]
       }
     },
+    "/api/v1/innendienst/kunden/{kunden_nr}/massnahmen": {
+      "get": {
+        "description": "Maßnahmen-Spritztagebuch eines Kunden — für Innendienst.",
+        "operationId": "kunden_massnahmen_api_v1_innendienst_kunden__kunden_nr__massnahmen_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "kunden_nr",
+            "required": true,
+            "schema": {
+              "title": "Kunden Nr",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "schlag_id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Schlag Id"
+            }
+          },
+          {
+            "in": "query",
+            "name": "massnahme_typ",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Massnahme Typ"
+            }
+          },
+          {
+            "in": "header",
+            "name": "x-tenant-id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Kunden Massnahmen Api V1 Innendienst Kunden  Kunden Nr  Massnahmen Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Kundenmassnahmen fuer Innendienst abrufen",
+        "tags": [
+          "innendienst",
+          "portal",
+          "innendienst",
+          "portal"
+        ]
+      }
+    },
+    "/api/v1/innendienst/kunden/{kunden_nr}/schlaege": {
+      "get": {
+        "description": "Schlagkartei eines Kunden — für Innendienst-Auftragsvoorbereitung (Lohnspritz etc.).",
+        "operationId": "kunden_schlaege_api_v1_innendienst_kunden__kunden_nr__schlaege_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "kunden_nr",
+            "required": true,
+            "schema": {
+              "title": "Kunden Nr",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "x-tenant-id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Kunden Schlaege Api V1 Innendienst Kunden  Kunden Nr  Schlaege Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Kundenschlaege fuer Innendienst abrufen",
+        "tags": [
+          "innendienst",
+          "portal",
+          "innendienst",
+          "portal"
+        ]
+      }
+    },
+    "/api/v1/innendienst/potential": {
+      "get": {
+        "description": "Cross-Sell-Gap-Analyse fuer Aussendienstler.\n\nZeigt: Welche Kunden bauen Kulturen an, haben aber keinen aktiven Ankaufskontrakt?\nWelche haben Viehbestand, nutzen keinen Rationierungsservice?",
+        "operationId": "potential_analyse_api_v1_innendienst_potential_get",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "x-tenant-id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Potential Analyse Api V1 Innendienst Potential Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Innendienst-Potentialanalyse abrufen",
+        "tags": [
+          "innendienst",
+          "portal",
+          "innendienst",
+          "portal"
+        ]
+      }
+    },
     "/api/v1/intrastat/meldungen": {
       "get": {
         "operationId": "list_meldungen_api_v1_intrastat_meldungen_get",
@@ -246763,9 +248278,12 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
+                  "items": {
+                    "additionalProperties": true,
+                    "type": "object"
+                  },
                   "title": "Response List Flow Edges Api V1 Lager Wms Agri Material Flow Edges Get",
-                  "type": "object"
+                  "type": "array"
                 }
               }
             },
@@ -247398,9 +248916,12 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
+                  "items": {
+                    "additionalProperties": true,
+                    "type": "object"
+                  },
                   "title": "Response List Flow Nodes Api V1 Lager Wms Agri Material Flow Nodes Get",
-                  "type": "object"
+                  "type": "array"
                 }
               }
             },
@@ -248111,9 +249632,12 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
+                  "items": {
+                    "additionalProperties": true,
+                    "type": "object"
+                  },
                   "title": "Response List Silo Cells Api V1 Lager Wms Agri Silo Cells Get",
-                  "type": "object"
+                  "type": "array"
                 }
               }
             },
@@ -248438,9 +249962,12 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
+                  "items": {
+                    "additionalProperties": true,
+                    "type": "object"
+                  },
                   "title": "Response List Silo Systems Api V1 Lager Wms Agri Silo Systems Get",
-                  "type": "object"
+                  "type": "array"
                 }
               }
             },
@@ -248837,7 +250364,11 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/WarehouseWmsOut"
+                  "items": {
+                    "$ref": "#/components/schemas/WarehouseWmsOut"
+                  },
+                  "title": "Response List Bins Api V1 Lager Wms Bins Get",
+                  "type": "array"
                 }
               }
             },
@@ -249867,7 +251398,11 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/WarehouseWmsOut"
+                  "items": {
+                    "$ref": "#/components/schemas/WarehouseWmsOut"
+                  },
+                  "title": "Response Stock Valuation Api V1 Lager Wms Stock Valuation Get",
+                  "type": "array"
                 }
               }
             },
@@ -268512,6 +270047,367 @@
         ]
       }
     },
+    "/api/v1/portal/empfehlungen/generieren/ration": {
+      "post": {
+        "operationId": "generiere_aus_ration_api_v1_portal_empfehlungen_generieren_ration_post",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "x-tenant-id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RationContext"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Generiere Aus Ration Api V1 Portal Empfehlungen Generieren Ration Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Empfehlungen aus Rationskontext generieren",
+        "tags": [
+          "portal",
+          "intelligence",
+          "portal",
+          "intelligence"
+        ]
+      }
+    },
+    "/api/v1/portal/empfehlungen/generieren/schlagkartei": {
+      "post": {
+        "operationId": "generiere_aus_schlagkartei_api_v1_portal_empfehlungen_generieren_schlagkartei_post",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "x-tenant-id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SchlagContext"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Generiere Aus Schlagkartei Api V1 Portal Empfehlungen Generieren Schlagkartei Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Empfehlungen aus Schlagkartei-Kontext generieren",
+        "tags": [
+          "portal",
+          "intelligence",
+          "portal",
+          "intelligence"
+        ]
+      }
+    },
+    "/api/v1/portal/empfehlungen/{kunden_nr}": {
+      "get": {
+        "operationId": "empfehlungen_fuer_kunden_api_v1_portal_empfehlungen__kunden_nr__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "kunden_nr",
+            "required": true,
+            "schema": {
+              "title": "Kunden Nr",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "nur_ungesehen",
+            "required": false,
+            "schema": {
+              "default": false,
+              "title": "Nur Ungesehen",
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "header",
+            "name": "x-tenant-id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Empfehlungen Fuer Kunden Api V1 Portal Empfehlungen  Kunden Nr  Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Cross-Sell-Empfehlungen fuer Kunden abrufen",
+        "tags": [
+          "portal",
+          "intelligence",
+          "portal",
+          "intelligence"
+        ]
+      }
+    },
+    "/api/v1/portal/empfehlungen/{kunden_nr}/gesehen/{empfehlung_id}": {
+      "post": {
+        "operationId": "als_gesehen_api_v1_portal_empfehlungen__kunden_nr__gesehen__empfehlung_id__post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "kunden_nr",
+            "required": true,
+            "schema": {
+              "title": "Kunden Nr",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "empfehlung_id",
+            "required": true,
+            "schema": {
+              "title": "Empfehlung Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "x-tenant-id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Als Gesehen Api V1 Portal Empfehlungen  Kunden Nr  Gesehen  Empfehlung Id  Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Empfehlung als gesehen markieren",
+        "tags": [
+          "portal",
+          "intelligence",
+          "portal",
+          "intelligence"
+        ]
+      }
+    },
+    "/api/v1/portal/empfehlungen/{kunden_nr}/zusammenfassung": {
+      "get": {
+        "operationId": "zusammenfassung_api_v1_portal_empfehlungen__kunden_nr__zusammenfassung_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "kunden_nr",
+            "required": true,
+            "schema": {
+              "title": "Kunden Nr",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "x-tenant-id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Zusammenfassung Api V1 Portal Empfehlungen  Kunden Nr  Zusammenfassung Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Empfehlungs-Zusammenfassung fuer Kunden abrufen",
+        "tags": [
+          "portal",
+          "intelligence",
+          "portal",
+          "intelligence"
+        ]
+      }
+    },
     "/api/v1/portal/feldbuch": {
       "get": {
         "operationId": "portal_feldbuch_api_v1_portal_feldbuch_get",
@@ -269486,6 +271382,646 @@
         ]
       }
     },
+    "/api/v1/portal/interessenten": {
+      "get": {
+        "operationId": "list_interessenten_api_v1_portal_interessenten_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Status"
+            }
+          },
+          {
+            "in": "query",
+            "name": "betrieb_typ",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Betrieb Typ"
+            }
+          },
+          {
+            "in": "query",
+            "name": "zugewiesen_an",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Zugewiesen An"
+            }
+          },
+          {
+            "in": "header",
+            "name": "x-tenant-id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response List Interessenten Api V1 Portal Interessenten Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Interessenten-Liste (Innendienst)",
+        "tags": [
+          "portal",
+          "interessent",
+          "portal",
+          "interessent"
+        ]
+      },
+      "post": {
+        "operationId": "registrieren_api_v1_portal_interessenten_post",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "x-tenant-id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegistrierenBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Registrieren Api V1 Portal Interessenten Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Interessent selbst registrieren (public)",
+        "tags": [
+          "portal",
+          "interessent",
+          "portal",
+          "interessent"
+        ]
+      }
+    },
+    "/api/v1/portal/interessenten/{interessent_id}": {
+      "get": {
+        "operationId": "get_interessent_api_v1_portal_interessenten__interessent_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "interessent_id",
+            "required": true,
+            "schema": {
+              "title": "Interessent Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "x-tenant-id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Get Interessent Api V1 Portal Interessenten  Interessent Id  Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Interessent abrufen",
+        "tags": [
+          "portal",
+          "interessent",
+          "portal",
+          "interessent"
+        ]
+      }
+    },
+    "/api/v1/portal/interessenten/{interessent_id}/status": {
+      "post": {
+        "operationId": "status_wechsel_api_v1_portal_interessenten__interessent_id__status_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "interessent_id",
+            "required": true,
+            "schema": {
+              "title": "Interessent Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "x-tenant-id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/app__api__v1__endpoints__portal_interessent__StatusWechselBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Status Wechsel Api V1 Portal Interessenten  Interessent Id  Status Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Interessentenstatus wechseln",
+        "tags": [
+          "portal",
+          "interessent",
+          "portal",
+          "interessent"
+        ]
+      }
+    },
+    "/api/v1/portal/lohndienste": {
+      "get": {
+        "operationId": "list_auftraege_api_v1_portal_lohndienste_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "kunden_nr",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Kunden Nr"
+            }
+          },
+          {
+            "in": "query",
+            "name": "typ",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Typ"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Status"
+            }
+          },
+          {
+            "in": "header",
+            "name": "x-tenant-id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response List Auftraege Api V1 Portal Lohndienste Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Lohndienst-Auftraege auflisten",
+        "tags": [
+          "portal",
+          "lohndienste",
+          "portal",
+          "lohndienste"
+        ]
+      },
+      "post": {
+        "operationId": "auftrag_anlegen_api_v1_portal_lohndienste_post",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "x-tenant-id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AuftragCreateBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Auftrag Anlegen Api V1 Portal Lohndienste Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Lohndienst-Auftrag anlegen",
+        "tags": [
+          "portal",
+          "lohndienste",
+          "portal",
+          "lohndienste"
+        ]
+      }
+    },
+    "/api/v1/portal/lohndienste/{auftrag_id}": {
+      "get": {
+        "operationId": "get_auftrag_api_v1_portal_lohndienste__auftrag_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "auftrag_id",
+            "required": true,
+            "schema": {
+              "title": "Auftrag Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "x-tenant-id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Get Auftrag Api V1 Portal Lohndienste  Auftrag Id  Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Lohndienst-Auftrag abrufen",
+        "tags": [
+          "portal",
+          "lohndienste",
+          "portal",
+          "lohndienste"
+        ]
+      }
+    },
+    "/api/v1/portal/lohndienste/{auftrag_id}/status": {
+      "post": {
+        "operationId": "status_wechsel_api_v1_portal_lohndienste__auftrag_id__status_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "auftrag_id",
+            "required": true,
+            "schema": {
+              "title": "Auftrag Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "x-tenant-id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/app__api__v1__endpoints__portal_lohndienst__StatusWechselBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Status Wechsel Api V1 Portal Lohndienste  Auftrag Id  Status Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Lohndienst-Auftragsstatus wechseln",
+        "tags": [
+          "portal",
+          "lohndienste",
+          "portal",
+          "lohndienste"
+        ]
+      }
+    },
     "/api/v1/portal/naehrstoffbilanzen": {
       "get": {
         "operationId": "portal_naehrstoffbilanzen_api_v1_portal_naehrstoffbilanzen_get",
@@ -270025,6 +272561,250 @@
         "summary": "Pre purchases portal",
         "tags": [
           "compat"
+        ]
+      }
+    },
+    "/api/v1/portal/preisspiegel": {
+      "get": {
+        "operationId": "preise_alle_api_v1_portal_preisspiegel_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "frucht_gruppe",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Frucht Gruppe"
+            }
+          },
+          {
+            "in": "query",
+            "name": "variante",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Variante"
+            }
+          },
+          {
+            "in": "query",
+            "name": "ernte_jahr",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Ernte Jahr"
+            }
+          },
+          {
+            "in": "header",
+            "name": "x-tenant-id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Preise Alle Api V1 Portal Preisspiegel Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Alle aktuellen Preise",
+        "tags": [
+          "portal",
+          "preisspiegel",
+          "portal",
+          "preisspiegel"
+        ]
+      },
+      "post": {
+        "operationId": "preis_setzen_api_v1_portal_preisspiegel_post",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "x-tenant-id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PreisSetzenBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Preis Setzen Api V1 Portal Preisspiegel Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Preis pflegen (Innendienst)",
+        "tags": [
+          "portal",
+          "preisspiegel",
+          "portal",
+          "preisspiegel"
+        ]
+      }
+    },
+    "/api/v1/portal/preisspiegel/kunde": {
+      "get": {
+        "operationId": "preisspiegel_kunde_api_v1_portal_preisspiegel_kunde_get",
+        "parameters": [
+          {
+            "description": "Kommagetrennte Artikel-IDs",
+            "in": "query",
+            "name": "artikel_ids",
+            "required": true,
+            "schema": {
+              "description": "Kommagetrennte Artikel-IDs",
+              "title": "Artikel Ids",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "x-tenant-id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Preisspiegel Kunde Api V1 Portal Preisspiegel Kunde Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Preisspiegel gefiltert nach Kundenfrüchten",
+        "tags": [
+          "portal",
+          "preisspiegel",
+          "portal",
+          "preisspiegel"
         ]
       }
     },
@@ -322180,6 +324960,469 @@
           "automation",
           "workflow",
           "automation"
+        ]
+      }
+    },
+    "/api/v1/whatsapp/dev/history/{phone}": {
+      "delete": {
+        "operationId": "reset_conversation_api_v1_whatsapp_dev_history__phone__delete",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "phone",
+            "required": true,
+            "schema": {
+              "title": "Phone",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "tenant_id",
+            "required": false,
+            "schema": {
+              "default": "dev-tenant",
+              "title": "Tenant Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Gesprächsverlauf zurücksetzen",
+        "tags": [
+          "WhatsApp",
+          "WhatsApp Dev-Simulator"
+        ]
+      },
+      "get": {
+        "operationId": "get_history_api_v1_whatsapp_dev_history__phone__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "phone",
+            "required": true,
+            "schema": {
+              "title": "Phone",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "tenant_id",
+            "required": false,
+            "schema": {
+              "default": "dev-tenant",
+              "title": "Tenant Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HistoryResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Gesprächsverlauf für eine Telefonnummer",
+        "tags": [
+          "WhatsApp",
+          "WhatsApp Dev-Simulator"
+        ]
+      }
+    },
+    "/api/v1/whatsapp/dev/notify/dokument-ready": {
+      "post": {
+        "description": "Triggerbar aus Docflow nach Lieferschein-/Rechnungs-Erstellung.",
+        "operationId": "simulate_dokument_ready_api_v1_whatsapp_dev_notify_dokument_ready_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DokumentReadyRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotifyResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Simuliert Dokument-Bereitstellungs-Benachrichtigung",
+        "tags": [
+          "WhatsApp",
+          "WhatsApp Dev-Simulator"
+        ]
+      }
+    },
+    "/api/v1/whatsapp/dev/notify/lieferankuendigung": {
+      "post": {
+        "description": "Triggerbar aus Disposition/Logistik: LKW ~eta_min Minuten entfernt.\nIm Simulator: Nachricht in Outbox-Log. Mit WHATSAPP_ACCESS_TOKEN: echter Meta-Aufruf.",
+        "operationId": "simulate_lieferankuendigung_api_v1_whatsapp_dev_notify_lieferankuendigung_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LieferankuendigungRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotifyResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Simuliert Lieferankündigung (Push an Kunde)",
+        "tags": [
+          "WhatsApp",
+          "WhatsApp Dev-Simulator"
+        ]
+      }
+    },
+    "/api/v1/whatsapp/dev/orders": {
+      "get": {
+        "operationId": "get_orders_api_v1_whatsapp_dev_orders_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "tenant_id",
+            "required": false,
+            "schema": {
+              "default": "dev-tenant",
+              "title": "Tenant Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrdersResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Alle WhatsApp-Aufträge (In-Memory-Log)",
+        "tags": [
+          "WhatsApp",
+          "WhatsApp Dev-Simulator"
+        ]
+      }
+    },
+    "/api/v1/whatsapp/dev/outbox": {
+      "get": {
+        "operationId": "get_outbox_log_api_v1_whatsapp_dev_outbox_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "tenant_id",
+            "required": false,
+            "schema": {
+              "default": "dev-tenant",
+              "title": "Tenant Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OutboxLogResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Alle ausgehenden WhatsApp-Nachrichten (Outbox-Log)",
+        "tags": [
+          "WhatsApp",
+          "WhatsApp Dev-Simulator"
+        ]
+      }
+    },
+    "/api/v1/whatsapp/dev/simulate": {
+      "post": {
+        "description": "Test-Endpunkt ohne Meta-Authentifizierung.\nVerarbeitet eine Nachricht und gibt Antwort + Gesprächszustand zurück.",
+        "operationId": "simulate_message_api_v1_whatsapp_dev_simulate_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SimulatorRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SimulatorResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Simuliert eine eingehende WhatsApp-Nachricht",
+        "tags": [
+          "WhatsApp",
+          "WhatsApp Dev-Simulator"
+        ]
+      }
+    },
+    "/api/v1/whatsapp/webhook": {
+      "get": {
+        "description": "Meta Webhook-Verifikation (GET). Wird bei Produktion einmalig aufgerufen.",
+        "operationId": "webhook_verify_api_v1_whatsapp_webhook_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "hub.mode",
+            "required": false,
+            "schema": {
+              "title": "Hub.Mode",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "hub.verify_token",
+            "required": false,
+            "schema": {
+              "title": "Hub.Verify Token",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "hub.challenge",
+            "required": false,
+            "schema": {
+              "title": "Hub.Challenge",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "WhatsApp Webhook-Verifikation ausfuehren",
+        "tags": [
+          "WhatsApp",
+          "WhatsApp"
+        ]
+      },
+      "post": {
+        "description": "Produktions-Webhook: empfängt Nachrichten von der Meta-Cloud-API.\nValidiert X-Hub-Signature-256 gegen WHATSAPP_APP_SECRET.",
+        "operationId": "webhook_receive_api_v1_whatsapp_webhook_post",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "x-hub-signature-256",
+            "required": false,
+            "schema": {
+              "title": "X-Hub-Signature-256",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WebhookReceiveResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "WhatsApp Webhook-Nachricht empfangen",
+        "tags": [
+          "WhatsApp",
+          "WhatsApp"
         ]
       }
     },
