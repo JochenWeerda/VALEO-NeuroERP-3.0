@@ -1,3 +1,11 @@
+---
+card_id: VK-017
+chain: harvest-to-settlement
+chain_step: 4
+card_type: process-step
+flow_spine: flow-spine-harvest-to-settlement
+workflow_doc: docs/workflows/vk-017-queue-article-id.md
+---
 # Card: VK-017 - Queue-Contract mit echter article_id
 
 ## 1. Einordnung

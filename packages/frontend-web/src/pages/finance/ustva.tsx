@@ -6,7 +6,7 @@ import { useMaskData, useMaskActions } from '@/components/mask-builder/hooks'
 import { MaskConfig } from '@/components/mask-builder/types'
 import { getFieldsFromMaskConfig, validateFields } from '@/components/mask-builder/validation'
 import { toast } from '@/hooks/use-toast'
-import { apiClient } from '@/lib/api-client'
+import { apiClient, getAxiosErrorMessage } from '@/lib/api-client'
 import { getEntityTypeLabel } from '@/features/crud/utils/i18n-helpers'
 import { buildDecisionView } from '@/policy/decision-view'
 import { ProcessStatusPanel } from '@/components/workflow/ProcessStatusPanel'
@@ -411,6 +411,31 @@ function AbweichungenTable({ data: _data, onChange }: { data: any[], onChange: (
   )
 }
 
+function mapVatReturnPayload(payload: Record<string, unknown> | null | undefined): Record<string, unknown> | null | undefined {
+  if (!payload || typeof payload !== 'object') {
+    return payload
+  }
+  return {
+    ...payload,
+    periode: payload.period,
+    voranmeldungszeitraum: payload.return_type === 'quarterly' ? 'quartalsweise' : 'monatlich',
+    steuerpflichtiger: payload.taxpayer_name,
+    ustId: payload.vat_id,
+    gesamtUmsatz: payload.total_sales_net,
+    gesamtVorsteuer: payload.total_input_tax,
+    gesamtUst: payload.vat_payable,
+    status: payload.status,
+    freigegebenAm: payload.approved_at,
+    freigegebenDurch: payload.approved_by,
+    abgegebenAm: payload.submitted_at,
+    elsterReferenz: payload.elster_reference,
+    approval_status: payload.approval_status,
+    approval_can_submit: payload.approval_can_submit,
+    approval_override_resolution: payload.approval_override_resolution,
+    approval_explainability: payload.approval_explainability,
+  }
+}
+
 export default function UStVAPage(): JSX.Element {
   const { t } = useTranslation()
   const navigate = useNavigate()
@@ -430,30 +455,7 @@ export default function UStVAPage(): JSX.Element {
   const { data, loading } = useMaskData({
     apiUrl: ustvaConfig.api.baseUrl,
     id: 'new',
-    transformResponse: (response: any) => {
-      if (response?.data) {
-        return {
-          ...response.data,
-          periode: response.data.period,
-          voranmeldungszeitraum: response.data.return_type === 'quarterly' ? 'quartalsweise' : 'monatlich',
-          steuerpflichtiger: response.data.taxpayer_name,
-          ustId: response.data.vat_id,
-          gesamtUmsatz: response.data.total_sales_net,
-          gesamtVorsteuer: response.data.total_input_tax,
-          gesamtUst: response.data.vat_payable,
-          status: response.data.status,
-          freigegebenAm: response.data.approved_at,
-          freigegebenDurch: response.data.approved_by,
-          abgegebenAm: response.data.submitted_at,
-          elsterReferenz: response.data.elster_reference,
-          approval_status: response.data.approval_status,
-          approval_can_submit: response.data.approval_can_submit,
-          approval_override_resolution: response.data.approval_override_resolution,
-          approval_explainability: response.data.approval_explainability,
-        }
-      }
-      return response
-    }
+    transformResponse: (payload: Record<string, unknown>) => mapVatReturnPayload(payload) ?? payload,
   })
 
   const validate = (formData: any) => validateFields(getFieldsFromMaskConfig(ustvaConfig), formData ?? {})
@@ -461,43 +463,27 @@ export default function UStVAPage(): JSX.Element {
     toast({ variant: 'destructive', title: t('crud.messages.validationError'), description: `${Object.keys(errors).length} Feld(er) muessen korrigiert werden.` })
   }
 
-  const applyVATReturnResponse = (response: any) => {
-    const payload = response?.data ?? response
-    if (!payload) {
+  const applyVATReturnResponse = (response: unknown) => {
+    const raw = response && typeof response === 'object' && 'data' in (response as object)
+      ? (response as { data?: Record<string, unknown> }).data
+      : (response as Record<string, unknown> | undefined)
+    const mapped = mapVatReturnPayload(raw)
+    if (!mapped) {
       return
     }
-    setWorkspaceData({
-      ...payload,
-      periode: payload.period,
-      voranmeldungszeitraum: payload.return_type === 'quarterly' ? 'quartalsweise' : 'monatlich',
-      steuerpflichtiger: payload.taxpayer_name,
-      ustId: payload.vat_id,
-      gesamtUmsatz: payload.total_sales_net,
-      gesamtVorsteuer: payload.total_input_tax,
-      gesamtUst: payload.vat_payable,
-      status: payload.status,
-      freigegebenAm: payload.approved_at,
-      freigegebenDurch: payload.approved_by,
-      abgegebenAm: payload.submitted_at,
-      elsterReferenz: payload.elster_reference,
-      approval_status: payload.approval_status,
-      approval_can_submit: payload.approval_can_submit,
-      approval_override_resolution: payload.approval_override_resolution,
-      approval_explainability: payload.approval_explainability,
-    })
+    setWorkspaceData(mapped)
   }
 
   const { handleAction, loadingActionKey } = useMaskActions(async (action: string, formData: any) => {
     if (action === 'calculate') {
       try {
-        const result = (await apiClient.post<Record<string, unknown>>('/api/v1/finance/vat-return/calculate', {
+        const result = await apiClient.post<Record<string, unknown>>('/api/v1/finance/vat-return/calculate', {
           period: formData?.periode,
-        })).data
+        })
         toast({ title: t('crud.messages.calculationCompleted'), description: t('crud.messages.ustvaAmountsRecalculated') })
-        applyVATReturnResponse(result)
-      } catch (error: any) {
-        const msg = error.response?.data?.detail ?? error.message
-        toast({ variant: 'destructive', title: t('common.error'), description: msg })
+        applyVATReturnResponse(result.data)
+      } catch (error: unknown) {
+        toast({ variant: 'destructive', title: t('common.error'), description: getAxiosErrorMessage(error) })
       }
       return
     }
@@ -523,19 +509,19 @@ export default function UStVAPage(): JSX.Element {
       }
 
       try {
-        const response = (await apiClient.post(`/api/v1/finance/vat-return/${formData.id}/approve`, {
+        const response = await apiClient.post(`/api/v1/finance/vat-return/${formData.id}/approve`, {
           approved_by: currentActor,
-        })).data
-        applyVATReturnResponse(response)
+        })
+        applyVATReturnResponse(response.data)
         toast({
           title: t('crud.messages.approvalSuccess'),
           description: t('crud.messages.ustvaApproved'),
         })
-      } catch (error: any) {
+      } catch (error: unknown) {
         toast({
           variant: 'destructive',
           title: t('crud.messages.networkError'),
-          description: error.response?.data?.detail ?? t('crud.messages.networkErrorDesc'),
+          description: getAxiosErrorMessage(error),
         })
       }
     } else if (action === 'submit') {
@@ -562,10 +548,10 @@ export default function UStVAPage(): JSX.Element {
       }
 
       try {
-        const response = (await apiClient.post(`/api/v1/finance/vat-return/${formData.id}/submit`, {
+        const response = await apiClient.post(`/api/v1/finance/vat-return/${formData.id}/submit`, {
           submitted_by: currentActor,
-        })).data
-        applyVATReturnResponse(response)
+        })
+        applyVATReturnResponse(response.data)
         setIsDirty(false)
         if (workflowInstanceId && workflowProcess) {
           try {
@@ -590,12 +576,15 @@ export default function UStVAPage(): JSX.Element {
         return
       }
       try {
-        const res = (await apiClient.post<{ url?: string }>('/api/v1/export/list', { entity: 'vat_return', format: 'xml', id: formData.id })).data
-        if (res?.url) window.open(res.url, '_blank')
+        const res = await apiClient.post<{ url?: string }>('/api/v1/export/list', {
+          entity: 'vat_return',
+          format: 'xml',
+          id: formData.id,
+        })
+        if (res.data?.url) window.open(res.data.url, '_blank')
         toast({ title: t('crud.actions.xmlExport'), description: t('crud.messages.exportCreated', { defaultValue: 'Export erstellt' }) })
-      } catch (error: any) {
-        const msg = error.response?.data?.detail ?? error.message
-        toast({ variant: 'destructive', title: t('common.error'), description: msg })
+      } catch (error: unknown) {
+        toast({ variant: 'destructive', title: t('common.error'), description: getAxiosErrorMessage(error) })
       }
     }
   })

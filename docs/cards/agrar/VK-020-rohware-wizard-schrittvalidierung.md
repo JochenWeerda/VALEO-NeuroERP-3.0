@@ -1,3 +1,11 @@
+---
+card_id: VK-020
+chain: harvest-to-settlement
+chain_step: 11
+card_type: process-step
+flow_spine: flow-spine-harvest-to-settlement
+workflow_doc: docs/workflows/vk-020-rohware-wizard-schrittvalidierung.md
+---
 # VK-020 — Rohware-Wizard Schrittvalidierung
 
 **Slice:** VK-020 | **Datum:** 2026-03-27

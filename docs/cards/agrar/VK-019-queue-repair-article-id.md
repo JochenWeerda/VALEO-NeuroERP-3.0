@@ -1,3 +1,11 @@
+---
+card_id: VK-019
+chain: harvest-to-settlement
+chain_step: 5
+card_type: process-step
+flow_spine: flow-spine-harvest-to-settlement
+workflow_doc: docs/workflows/vk-019-queue-repair-article-id.md
+---
 # Card: VK-019 - Queue-Repair historische `article_id`
 
 ## 1. Einordnung

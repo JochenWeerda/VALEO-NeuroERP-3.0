@@ -1,3 +1,11 @@
+---
+card_id: CTS-001
+chain: contract-to-settlement
+chain_step: 0
+card_type: overview
+flow_spine: flow-spine-contract-to-settlement
+workflow_doc: docs/workflows/cts-001-contract-to-settlement.md
+---
 # Card: CTS-001 — Contract-to-Settlement
 
 | Feld | Wert |

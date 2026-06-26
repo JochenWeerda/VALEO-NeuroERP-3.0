@@ -1,8 +1,9 @@
 slice_id: DOC-CARD-CHAIN-001
 title: "Workflow-Ketten-Registry + Cards-Inventar-Audit"
 owner: —
-status: offen
+status: abgeschlossen
 updated: 2026-06-26
+completed_at: 2026-06-26
 coordination: >-
   Doku-only Slice aus CARD-AUDIT-001. Kein Code, kein Frontend. Parallele
   Fix-Slices (OTC-010, CRM, COM, FIN, CMP) bleiben unberührt. Nach Abschluss

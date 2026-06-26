@@ -315,41 +315,24 @@ async def calculate_closing(
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
-    """Abschluss-Berechnung: Summen und Salden fuer die Periode ermitteln."""
+    """Abschluss-Berechnung: echte Summen und Salden aus gebuchten journal_entries."""
+    from app.services.finance_closing_service import FinanceClosingService, ClosingError
     try:
-        row = db.execute(
-            text("""
-                SELECT
-                    COUNT(*) AS entry_count,
-                    COALESCE(SUM(CASE WHEN jl.debit > 0 THEN jl.debit ELSE 0 END), 0) AS total_debit,
-                    COALESCE(SUM(CASE WHEN jl.credit > 0 THEN jl.credit ELSE 0 END), 0) AS total_credit
-                FROM domain_erp.journal_entries je
-                JOIN domain_erp.journal_entry_lines jl ON jl.journal_entry_id = je.id
-                WHERE je.tenant_id = :tid
-                  AND je.period = :period
-                  AND je.status = 'posted'
-            """),
-            {"tid": tenant_id, "period": body.period},
-        ).first()
+        svc = FinanceClosingService(db, tenant_id)
+        result = svc.calculate(body.period, body.closing_type)
         return {
-            "period": body.period,
-            "closing_type": body.closing_type,
-            "entry_count": row[0] if row else 0,
-            "total_debit": float(row[1]) if row else 0,
-            "total_credit": float(row[2]) if row else 0,
-            "balance": float((row[1] or 0) - (row[2] or 0)) if row else 0,
-            "status": "calculated",
+            "period": result.period,
+            "closing_type": result.closing_type,
+            "entry_count": result.entry_count,
+            "total_debit": result.total_debit,
+            "total_credit": result.total_credit,
+            "balance": result.balance,
+            "status": result.status,
         }
-    except Exception:
-        return {
-            "period": body.period,
-            "closing_type": body.closing_type,
-            "entry_count": 0,
-            "total_debit": 0,
-            "total_credit": 0,
-            "balance": 0,
-            "status": "calculated",
-        }
+    except ClosingError as exc:
+        raise HTTPException(status_code=422, detail=str(exc))
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=f"Berechnung fehlgeschlagen: {exc}")
 
 
 @router.post("/closing/lock", response_model=ActionResponse, summary="Closing sperren")
@@ -358,20 +341,17 @@ async def lock_closing(
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
-    """Periode sperren — verhindert weitere Buchungen in der Periode."""
+    """Periode atomar sperren — lehnt Doppel-Sperre und nicht-abschlussreife Perioden ab."""
+    from app.services.finance_closing_service import FinanceClosingService, ClosingError
+    actor = getattr(body, "actor", None) or "system"
     try:
-        db.execute(
-            text("""
-                UPDATE domain_erp.accounting_periods
-                SET status = 'closed', closed_at = NOW()
-                WHERE tenant_id = :tid AND period_key = :period AND status != 'closed'
-            """),
-            {"tid": tenant_id, "period": body.period},
-        )
-        db.commit()
-        return ActionResponse(success=True, message=f"Periode {body.period} gesperrt.")
-    except Exception:
-        return ActionResponse(success=True, message=f"Periode {body.period} Sperrung vorgemerkt.")
+        svc = FinanceClosingService(db, tenant_id)
+        result = svc.lock(body.period, actor=actor)
+        return ActionResponse(success=True, message=result.message)
+    except ClosingError as exc:
+        raise HTTPException(status_code=422, detail=str(exc))
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=f"Sperre fehlgeschlagen: {exc}")
 
 
 @router.post("/closing/run", response_model=ActionResponse, summary="Closing ausführen")
@@ -380,21 +360,19 @@ async def run_closing(
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
-    """Periodenabschluss durchfuehren: berechnen, sperren, Abschluss-Buchungen erzeugen."""
+    """Vollständiger Periodenabschluss: Salden berechnen, Abschluss-Buchung anlegen, Periode sperren."""
+    from app.services.finance_closing_service import FinanceClosingService, ClosingError
     period = body.period if body else datetime.now(timezone.utc).strftime("%Y-%m")
+    closing_type = body.closing_type if body else "monthly"
+    actor = (getattr(body, "actor", None) or "system") if body else "system"
     try:
-        db.execute(
-            text("""
-                UPDATE domain_erp.accounting_periods
-                SET status = 'closed', closed_at = NOW()
-                WHERE tenant_id = :tid AND period_key = :period AND status != 'closed'
-            """),
-            {"tid": tenant_id, "period": period},
-        )
-        db.commit()
-        return ActionResponse(success=True, message=f"Abschluss fuer {period} durchgefuehrt.")
-    except Exception:
-        return ActionResponse(success=True, message="Abschluss angestossen.")
+        svc = FinanceClosingService(db, tenant_id)
+        result = svc.run(period, closing_type=closing_type, actor=actor)
+        return ActionResponse(success=True, message=result.message)
+    except ClosingError as exc:
+        raise HTTPException(status_code=422, detail=str(exc))
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=f"Abschluss fehlgeschlagen: {exc}")
 
 
 @router.post("/closing/approve", response_model=ClosingApproveOut, summary="Closing genehmigen")

@@ -1,3 +1,12 @@
+---
+card_id: OTC-011
+chain: order-to-cash
+chain_step: 1
+card_type: process-step
+parent_card: OTC-010
+flow_spine: flow-spine-order-to-cash
+workflow_doc: docs/workflows/otc-011-zahlungseingang-und-abstimmung.md
+---
 # OTC-011 — Zahlungseingang und Abstimmung (Card)
 
 **Slice:** OTC-011 | **Lane:** Order-to-Cash (Folge) | **Status:** abgeschlossen

@@ -1,3 +1,12 @@
+---
+card_id: VK-010
+chain: harvest-to-settlement
+chain_step: 1
+card_type: process-step
+parent_card: VK-010
+flow_spine: flow-spine-harvest-to-settlement
+workflow_doc: docs/workflows/vk-010-ernte-annahme.md
+---
 # Card: VK-010 - Ernte-Annahme aus Harvest-to-Settlement oeffnen
 
 ## 1. Einordnung

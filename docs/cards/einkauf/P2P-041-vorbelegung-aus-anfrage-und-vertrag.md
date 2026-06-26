@@ -1,3 +1,11 @@
+---
+card_id: P2P-041
+chain: procure-to-pay
+chain_step: 3
+card_type: process-step
+flow_spine: flow-spine-procure-to-pay
+workflow_doc: docs/workflows/p2p-001-procure-to-pay-direktbestellung.md
+---
 # Card: P2P-041 - Vorbelegung aus Anfrage, RFQ und Vertrag
 
 ## 1. Einordnung

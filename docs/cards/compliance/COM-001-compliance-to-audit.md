@@ -1,3 +1,11 @@
+---
+card_id: COM-001
+chain: compliance-to-report
+chain_step: 0
+card_type: overview
+flow_spine: flow-spine-compliance-to-report
+workflow_doc: docs/workflows/com-001-compliance-to-audit.md
+---
 # Card: COM-001 — Compliance-to-Audit
 
 | Feld | Wert |

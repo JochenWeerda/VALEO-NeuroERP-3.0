@@ -6,9 +6,8 @@ import { ListReport } from '@/components/mask-builder'
 import { formatCurrency, formatNumber } from '@/components/mask-builder/utils/formatting'
 import { Badge } from '@/components/ui/badge'
 import { ListConfig } from '@/components/mask-builder/types'
-import { apiClient } from '@/lib/api-client'
+import { apiClient, getAxiosErrorMessage } from '@/lib/api-client'
 import { resolveBusinessPartnerIdForCrmCustomer } from '@/lib/crm/fetch-customer-chef-hints'
-import { api } from '@/lib/axios'
 import { toast } from '@/hooks/use-toast'
 import { getEntityTypeLabel } from '@/features/crud/utils/i18n-helpers'
 
@@ -275,20 +274,36 @@ export default function KundenListePage(): JSX.Element {
         return
       }
       try {
-        await api.post('/api/v1/crm/kommunikation/newsletter', { empfaenger: emails, typ: 'kunden', betreff: 'Information von VALEO' })
+        await apiClient.post('/api/v1/crm/kommunikation/newsletter', {
+          empfaenger: emails,
+          typ: 'kunden',
+          betreff: 'Information von VALEO',
+        })
         toast({ title: 'Newsletter versendet', description: `Versand an ${emails.length} Empfänger initiiert.` })
-      } catch (e: any) {
-        toast({ title: 'Versand fehlgeschlagen', description: e.response?.data?.detail ?? e.message, variant: 'destructive' })
+      } catch (e: unknown) {
+        toast({
+          title: 'Versand fehlgeschlagen',
+          description: getAxiosErrorMessage(e),
+          variant: 'destructive',
+        })
       }
     }
     const onBlock = async (items: any[]) => {
       if (items.length === 0) { toast({ title: t('crud.list.noSelection', { defaultValue: 'Keine Auswahl' }) }); return }
       try {
-        await Promise.all(items.map((k: any) => api.patch(`/api/v1/crm/kunden/${k.id}`, { status: 'gesperrt' })))
+        await Promise.all(
+          items.map((k: { id: string }) =>
+            apiClient.put(`/api/v1/crm/customers/${k.id}`, { is_active: false }),
+          ),
+        )
         toast({ title: 'Gesperrt', description: `${items.length} Kunde(n) gesperrt.`, variant: 'destructive' })
         invalidate()
-      } catch (e: any) {
-        toast({ title: 'Fehler beim Sperren', description: e.response?.data?.detail ?? e.message, variant: 'destructive' })
+      } catch (e: unknown) {
+        toast({
+          title: 'Fehler beim Sperren',
+          description: getAxiosErrorMessage(e),
+          variant: 'destructive',
+        })
       }
     }
     return {
@@ -307,12 +322,20 @@ export default function KundenListePage(): JSX.Element {
     const form = new FormData()
     form.append('file', file)
     try {
-      const res = await api.post('/api/v1/crm/import/kunden', form, { headers: { 'Content-Type': 'multipart/form-data' } })
-      const { created, updated, errors } = res.data as { created: number; updated: number; errors: string[] }
+      const res = await apiClient.post<{ created?: number; updated?: number; errors?: string[] }>(
+        '/api/v1/crm/import/kunden',
+        form,
+        { headers: { 'Content-Type': 'multipart/form-data' } },
+      )
+      const { created = 0, updated = 0, errors = [] } = res.data ?? {}
       toast({ title: 'Import abgeschlossen', description: `${created} neu, ${updated} aktualisiert${errors.length ? `, ${errors.length} Fehler` : ''}.` })
       invalidate()
-    } catch (e: any) {
-      toast({ title: 'Import fehlgeschlagen', description: e.response?.data?.detail ?? e.message, variant: 'destructive' })
+    } catch (e: unknown) {
+      toast({
+        title: 'Import fehlgeschlagen',
+        description: getAxiosErrorMessage(e),
+        variant: 'destructive',
+      })
     }
     e.target.value = ''
   }

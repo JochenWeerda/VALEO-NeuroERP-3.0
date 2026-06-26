@@ -1,3 +1,11 @@
+---
+card_id: INV-001
+chain: inventory-to-settlement
+chain_step: 0
+card_type: overview
+flow_spine: flow-spine-inventory-to-settlement
+workflow_doc: docs/workflows/inv-001-inventory-to-settlement.md
+---
 # Card: INV-001 — Inventory-to-Settlement
 
 | Feld | Wert |

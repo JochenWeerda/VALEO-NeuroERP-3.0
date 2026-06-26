@@ -88,8 +88,8 @@ overlaps: [SEC-029]
 
 | Step | Card | Rolle | Vor | Nach |
 |------|------|-------|-----|------|
-| 0 | *(fehlt: P2P-010 Overview)* | — | — | P2P-020 |
-| 1 | P2P-020-direktbestellung-standardmaske | Direktbestellung | Flow-Spine | P2P-040 |
+| 0 | P2P-010-procure-to-pay | Overview / Gesamtkette | — | P2P-020 |
+| 1 | P2P-020-direktbestellung-standardmaske | Direktbestellung | P2P-010 | P2P-040 |
 | 2 | P2P-040-vorbelegung-standardmaske | Vorbelegung Standard | P2P-020 | P2P-041 |
 | 3 | P2P-041-vorbelegung-aus-anfrage-und-vertrag | Vorbelegung Anfrage/Vertrag | P2P-040 | — |
 | — | P2P-050-wizard-schrittvalidierung | Querschnitt Wizard | alle P2P | — |
@@ -97,7 +97,7 @@ overlaps: [SEC-029]
 - **Workflow:** [p2p-001-procure-to-pay-direktbestellung.md](../workflows/p2p-001-procure-to-pay-direktbestellung.md)
 - **Flow-Spine:** `flow-spine-procure-to-pay`
 - **Querschnitt:** SEC-008, INT-SG-057
-- **Offen (Workboard):** P2P-010 Overview-Card anlegen; Inline-Fehler Wizard (P2P-020 Follow-up)
+- **Offen (Workboard):** Inline-Fehler Wizard (P2P-020 Follow-up, P3)
 
 ---
 

@@ -1,3 +1,11 @@
+---
+card_id: CTS-009
+chain: contract-to-settlement
+chain_step: 1
+card_type: process-step
+flow_spine: flow-spine-contract-to-settlement
+workflow_doc: docs/workflows/cts-009-rohwaren-positionsmonitor.md
+---
 # Card: CTS-009 — Rohwaren-Positionsmonitor (Long/Short)
 
 | Feld | Wert |

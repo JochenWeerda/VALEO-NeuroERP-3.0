@@ -4468,9 +4468,9 @@ Parallele Fix-Slices aus Cards-Inventar-Audit (`CARD-AUDIT-001`). Claim-Protokol
 | CMP-UStVA-API-CLIENT-001 | P2 | — | offen |
 | CRM-LEGACY-API-MIGRATE-001 | P2 | — | offen |
 | COM-REGISTER-CAMELCASE-001 | P2 | — | offen |
-| P2P-010-OVERVIEW-001 | P3 | — | offen |
-| DOC-CARD-CHAIN-001 | Doku | — | offen (Registry/Script/Template angelegt) |
-| DOC-CARD-FRONTMATTER-001 | Doku | — | offen (2 Beispiel-Cards: VK-011, OTC-010) |
+| P2P-010-OVERVIEW-001 | P3 | Cursor | abgeschlossen 2026-06-26 |
+| DOC-CARD-CHAIN-001 | Doku | Cursor | abgeschlossen 2026-06-26 |
+| DOC-CARD-FRONTMATTER-001 | Doku | Cursor | abgeschlossen 2026-06-26 (Registry-Cards) |
 
 ## FIN-ABSCHLUSS-STUBS-001 — Finanz-Abschluss calculate/lock/run
 
@@ -4509,24 +4509,21 @@ Parallele Fix-Slices aus Cards-Inventar-Audit (`CARD-AUDIT-001`). Claim-Protokol
 
 ## P2P-010-OVERVIEW-001 — P2P Overview-Card
 
-**Owner:** —
-**Stand:** offen — Step 0 in `workflow-chains.md` fehlt; P2P-020+ existieren.
-**Ziel:** Overview-Card P2P-010 anlegen und Registry ergänzen.
+**Owner:** Cursor
+**Stand:** abgeschlossen 2026-06-26 — `docs/cards/einkauf/P2P-010-procure-to-pay.md` angelegt; `workflow-chains.md` Step 0 aktualisiert; CHAIN_REGISTRY ergänzt.
 **Dateibesitz:** `docs/cards/einkauf/P2P-010-procure-to-pay.md`, `docs/agent-ops/slices/P2P-010-OVERVIEW-001.yaml`.
 
 ## DOC-CARD-CHAIN-001 — Workflow-Ketten-Registry + Inventar-Audit
 
-**Owner:** —
-**Stand:** offen — `workflow-chains.md`, `cards-inventory-audit.py`, `card-template.md`, Inventar v3 regeneriert; Abnahme + Doku-Sync ausstehend.
-**Ziel:** Interne Source of Truth für Card-Ketten maschinenlesbar pflegen.
+**Owner:** Cursor
+**Stand:** abgeschlossen 2026-06-26 — `workflow-chains.md`, `cards-inventory-audit.py`, `card-template.md`, Inventar v3; 148 Cards, 0 ohne Ketten-Zuordnung.
 **Dateibesitz:** `docs/_internal/workflow-chains.md`, `scripts/cards-inventory-audit.py`, `docs/agent-ops/slices/DOC-CARD-CHAIN-001.yaml`.
 
 ## DOC-CARD-FRONTMATTER-001 — Card-Frontmatter Rollout
 
-**Owner:** —
-**Stand:** offen — Vorlage in `card-template.md`; Beispiele VK-011, OTC-010; Restliche Prozess-Cards ausstehend.
-**Ziel:** Frontmatter auf alle Overview/process-step-Cards; CHAIN_REGISTRY schrittweise ablösen.
-**Dateibesitz:** `docs/cards/**/*.md`, `docs/agent-ops/slices/DOC-CARD-FRONTMATTER-001.yaml`.
+**Owner:** Cursor
+**Stand:** abgeschlossen 2026-06-26 — `scripts/migrate-cards-frontmatter.py` migriert 32 Registry-Cards + P2P-010; Metrik „ohne Frontmatter“ = 0 für Prozess-Cards.
+**Dateibesitz:** `docs/cards/**/*.md`, `scripts/migrate-cards-frontmatter.py`, `docs/agent-ops/slices/DOC-CARD-FRONTMATTER-001.yaml`.
 
 ## PORTAL-SHOP-001 — Betriebsmittel-Online-Shop (Governance-Erfassung)
 

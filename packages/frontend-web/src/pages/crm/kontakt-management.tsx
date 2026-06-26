@@ -5,9 +5,9 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { ListReport } from '@/components/mask-builder'
 import { useMaskActions } from '@/components/mask-builder/hooks'
 import { ListConfig } from '@/components/mask-builder/types'
-import { apiClient } from '@/lib/api-client'
+import { apiClient, getAxiosErrorMessage } from '@/lib/api-client'
+import { unwrapCrmListPage, type CrmListEnvelope } from '@/lib/api/crm-list-response'
 import { toast } from '@/hooks/use-toast'
-import { api } from '@/lib/axios'
 import { OperationalCaseHeader } from '@/components/workflow/OperationalCaseHeader'
 import { OperationalContextPanel } from '@/components/workflow/OperationalContextPanel'
 import { OperationalTimeline } from '@/components/workflow/OperationalTimeline'
@@ -236,11 +236,16 @@ export default function KontaktManagementPage(): JSX.Element {
   const loadData = async () => {
     setLoading(true)
     try {
-      const response = await apiClient.get('/api/v1/crm/contacts')
-      setData((response.data as any).data || (response.data as any).items || [])
-      setTotal((response.data as any).total || 0)
-    } catch (error: any) {
-      toast({ variant: 'destructive', title: 'Fehler beim Laden der Kontakte', description: error?.message })
+      const response = await apiClient.get<CrmListEnvelope<Record<string, unknown>>>('/api/v1/crm/contacts')
+      const { items, total: totalCount } = unwrapCrmListPage(response.data)
+      setData(items)
+      setTotal(totalCount)
+    } catch (error: unknown) {
+      toast({
+        variant: 'destructive',
+        title: 'Fehler beim Laden der Kontakte',
+        description: getAxiosErrorMessage(error),
+      })
     } finally {
       setLoading(false)
     }
@@ -333,17 +338,23 @@ export default function KontaktManagementPage(): JSX.Element {
     const formData = new FormData()
     formData.append('file', file)
     try {
-      const res = await api.post('/api/v1/crm/import/kunden', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' },
-      })
-      const { created = 0, updated = 0, errors = [] } = (res.data as any) ?? {}
+      const res = await apiClient.post<{ created?: number; updated?: number; errors?: string[] }>(
+        '/api/v1/crm/import/kunden',
+        formData,
+        { headers: { 'Content-Type': 'multipart/form-data' } },
+      )
+      const { created = 0, updated = 0, errors = [] } = res.data ?? {}
       toast({
         title: 'Import abgeschlossen',
         description: `${created} neu, ${updated} aktualisiert${errors.length ? `, ${errors.length} Fehler` : ''}.`,
       })
       await loadData()
-    } catch (err: any) {
-      toast({ title: 'Import fehlgeschlagen', description: err.response?.data?.detail ?? err.message, variant: 'destructive' })
+    } catch (err: unknown) {
+      toast({
+        title: 'Import fehlgeschlagen',
+        description: getAxiosErrorMessage(err),
+        variant: 'destructive',
+      })
     }
     e.target.value = ''
   }

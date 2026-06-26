@@ -1,3 +1,11 @@
+---
+card_id: VK-013
+chain: harvest-to-settlement
+chain_step: 8
+card_type: process-step
+flow_spine: flow-spine-harvest-to-settlement
+workflow_doc: docs/workflows/vk-013-kampagnenabschluss.md
+---
 # Card: VK-013 - Ernte-Kampagnenabschluss ueber bestehende Standardmasken
 
 ## 1. Einordnung

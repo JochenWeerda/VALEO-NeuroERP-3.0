@@ -1,3 +1,11 @@
+---
+card_id: SVC-001
+chain: service-to-customer
+chain_step: 0
+card_type: overview
+flow_spine: flow-spine-service-to-customer
+workflow_doc: docs/workflows/svc-001-service-to-customer.md
+---
 # SVC-001 — Service-to-Customer (Card)
 
 **Slice:** SVC-001 | **Lane:** Service-to-Customer | **Status:** umgesetzt (Kernpfad + Field-Service P4/P5)

@@ -1,3 +1,11 @@
+---
+card_id: VK-015
+chain: harvest-to-settlement
+chain_step: 10
+card_type: process-step
+flow_spine: flow-spine-harvest-to-settlement
+workflow_doc: docs/workflows/vk-015-settlement-kampagnen-backfill.md
+---
 # Card: VK-015 - Legacy-Settlements kampagnenbezogen nachziehen
 
 ## 1. Einordnung

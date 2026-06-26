@@ -1,3 +1,11 @@
+---
+card_id: REK-001
+chain: complaint-to-resolution
+chain_step: 0
+card_type: overview
+flow_spine: flow-spine-complaint-to-resolution
+workflow_doc: docs/workflows/rek-001-complaint-to-resolution.md
+---
 # REK-001 — Complaint-to-Resolution (Card)
 
 **Slice:** REK-001 | **Lane:** Complaint-to-Resolution | **Status:** umgesetzt (Detail + Kern-Flow)

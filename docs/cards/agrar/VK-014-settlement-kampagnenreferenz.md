@@ -1,3 +1,11 @@
+---
+card_id: VK-014
+chain: harvest-to-settlement
+chain_step: 9
+card_type: process-step
+flow_spine: flow-spine-harvest-to-settlement
+workflow_doc: docs/workflows/vk-014-settlement-kampagnenreferenz.md
+---
 # Card: VK-014 - Settlement-Kampagnenreferenz statt Zeitfenster-Proxy
 
 ## 1. Einordnung

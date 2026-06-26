@@ -1,3 +1,11 @@
+---
+card_id: VK-010
+chain: harvest-to-settlement
+chain_step: 0
+card_type: overview
+flow_spine: flow-spine-harvest-to-settlement
+workflow_doc: docs/workflows/vk-010-ernte-annahme.md
+---
 # Card: VK-010 - Ernte-Annahme (Landhandel-Kernprozess)
 
 ## 1. Einordnung

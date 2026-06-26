@@ -414,9 +414,9 @@ gegen Code, Tests und Workboard verifiziert.
 | CMP ustva `.data`-Bug | CMP-001-P1/P2 | P2 | `CMP-UStVA-API-CLIENT-001` |
 | CRM Legacy-Pfade `/api/crm/` | CRM-001 | P2 | `CRM-LEGACY-API-MIGRATE-001` |
 | Compliance CamelCase Register | COM-001 | P2 | `COM-REGISTER-CAMELCASE-001` |
-| P2P-010 Overview-Card fehlt | workflow-chains | P3 | `P2P-010-OVERVIEW-001` |
-| Ketten-Registry + Inventar-Audit | CARD-AUDIT | Doku | `DOC-CARD-CHAIN-001` |
-| Card-Frontmatter Rollout | CARD-AUDIT | Doku | `DOC-CARD-FRONTMATTER-001` |
+| P2P-010 Overview-Card fehlt | workflow-chains | P3 | ~~`P2P-010-OVERVIEW-001`~~ **erledigt** 2026-06-26 |
+| Ketten-Registry + Inventar-Audit | CARD-AUDIT | Doku | ~~`DOC-CARD-CHAIN-001`~~ **erledigt** 2026-06-26 |
+| Card-Frontmatter Rollout | CARD-AUDIT | Doku | ~~`DOC-CARD-FRONTMATTER-001`~~ **erledigt** (Registry-Cards) |
 
 Cards bleiben **intern** (nicht in MkDocs-Nav); Ergebnisse fließen in Workflows und diese Datei.
 
