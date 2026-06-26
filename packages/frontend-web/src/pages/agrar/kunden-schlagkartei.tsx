@@ -29,7 +29,7 @@ import {
 } from '@/components/ui/dialog'
 import { Textarea } from '@/components/ui/textarea'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import apiClient from '@/lib/api-client'
+import { apiClient } from '@/lib/api-client'
 import { useToast } from '@/hooks/use-toast'
 import {
   Map,

@@ -12,7 +12,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { usePortalDashboard, type PortalDashboard as PortalDashboardApi } from '@/lib/api/portal'
 import { ErrorState } from '@/components/ErrorState'
 import { useQuery } from '@tanstack/react-query'
-import apiClient from '@/lib/api-client'
+import { apiClient } from '@/lib/api-client'
 import {
   ShoppingCart,
   Package,

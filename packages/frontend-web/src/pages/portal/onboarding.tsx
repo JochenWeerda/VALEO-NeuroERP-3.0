@@ -17,7 +17,7 @@ import { NativeSelect } from '@/components/ui/native-select'
 import { Textarea } from '@/components/ui/textarea'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Checkbox } from '@/components/ui/checkbox'
-import apiClient, { getAxiosErrorMessage } from '@/lib/api-client'
+import { apiClient, getAxiosErrorMessage } from '@/lib/api-client'
 import { useToast } from '@/hooks/use-toast'
 import { CheckCircle2, Wheat, Tractor, TrendingUp, Users, Leaf } from 'lucide-react'
 
