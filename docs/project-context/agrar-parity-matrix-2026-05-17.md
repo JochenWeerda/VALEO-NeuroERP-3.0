@@ -1,5 +1,11 @@
 # Agrar-Spezialsoftware Paritaetsmatrix
 
+**Konsolidierungsstatus 2026-06-26:** Historischer Benchmark. Nicht als aktuelle
+Restliste verwenden. Aktuelle repo-seitig offene Punkte stehen in
+[`open-gaps-and-known-issues.md`](open-gaps-and-known-issues.md) und im
+Konsolidierungsbericht
+[`documentation-consolidation-2026-06-26.md`](documentation-consolidation-2026-06-26.md).
+
 Stand: `2026-05-17`
 Methodik: Direktvergleich Branchenspezifische-Agrarsoftware-Kernfunktionen gegen VALEO-IST-Routes und vorhandene Tests. Luecken werden als Gap-IDs gefuehrt und in `open-gaps-and-known-issues.md` nachgezogen. Prioritaeten P0–P2: P0 = Go-live-blockierend, P1 = Produktionsqualitaet erforderlich, P2 = UX-/Komfortlevel.
 

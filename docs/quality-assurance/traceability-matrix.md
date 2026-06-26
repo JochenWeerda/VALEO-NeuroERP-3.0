@@ -11,6 +11,11 @@ version: 3.0.0
 
 # Traceability-Matrix
 
+**Konsolidierungsstatus 2026-06-26:** Diese Matrix misst maschinenlesbare
+Slice-Test-Doku-Verknuepfungen. Viele `GAP`-Zeilen sind Traceability-Metadaten-
+Luecken, nicht zwingend fachlich offene Implementierungen. Keine manuelle
+Planung direkt aus dieser Tabelle ableiten.
+
 > Generiert via `scripts/generate_traceability_matrix.py` · 2026-06-26 09:49 UTC
 
 ## Zusammenfassung

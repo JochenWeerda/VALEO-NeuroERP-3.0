@@ -11,6 +11,11 @@ version: 3.0.0
 
 # Action-Matrix-Report
 
+**Konsolidierungsstatus 2026-06-26:** Diese Datei ist ein generierter
+QA-Heuristikreport. `GAP` bedeutet fehlende oder nicht erkannte E2E-Verknuepfung,
+nicht automatisch fehlende Implementierung. Fuer echten Restbacklog gelten
+Open-Gaps und der Konsolidierungsbericht.
+
 > Generiert via `scripts/generate_action_matrix_report.py` · 2026-06-26 09:37:16 UTC
 
 ## Übersicht

@@ -29,7 +29,27 @@ Fokussierter Teststand: 70 Tests gruen fuer CRM, Einkauf, Finance, Logistik, Rou
 
 ---
 
-## Aktualisierung 2026-06-12: Welle „Physische Kette“ — Task 0 + Logistik-Audit
+## Aktualisierung 2026-06-26: Konsolidierungsstand
+
+Verbindliche offene Punkte liegen in `docs/project-context/open-gaps-and-known-issues.md`.
+Dieser Plan ist **historischer Soll-Katalog**; der aktuelle Lieferstand steht in den Aktualisierungsblöcken.
+
+| Domain | Repo-Resttiefe (echte Lücken, nicht extern blockiert) |
+|---|---|
+| Lager/WMS | FEFO-Pick-Listen, Bestandsbewertung FIFO/Durchschnitt, Permanente Inventur, Multi-Lager-Konsolidierung |
+| Futtermittel | HACCP-Grundstruktur, VLOG-Meldung, QS-Leitfaden vollständig |
+| CRM | RAG-/Intent-Panel im Kunden-Stamm, Legacy-API-Pfade `/api/crm/` |
+| Finance | Finanz-Abschluss-Stubs (calculate/lock/run); ELSTER vollständig (ERiC extern) |
+| Logistik | CMR-Frachtbrief-Druck vollständig; `/api/v1/logistik/frachtbriefe` fehlt als Backend-Endpoint |
+| WF-Cockpit | Persistente Cockpit-Tabellen, Outbox-/NATS-Projektor, UI-Leitstand, Dead-Letter-Sicht |
+| Agrar/Silo | Zielzellen-Regelengine (automatischer Vorschlag aus WE/Waage) |
+
+Extern blockiert (nicht repo-seitig schliessbar): DATEV-Steuerberater-Cutover, DMS-Live-Probe,
+TSE-/DSFinV-K-Pruefwerkzeug, ATLAS-Zertifikat, ERiC-Zertifikat, UAT-Unterschriften.
+
+---
+
+## Aktualisierung 2026-06-12: Welle „Physische Kette” — Task 0 + Logistik-Audit
 
 - **Playwright @smoke / Dev:** SSO-only-Login ersetzt durch Dev-`localStorage`-Session und
   `X-Tenant-ID`-Default auf Dev-Tenant-UUID (`playwright-tests/helpers/api.ts`,
