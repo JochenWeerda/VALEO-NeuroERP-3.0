@@ -1156,11 +1156,18 @@ Dispo-Arbeitsraum: Tarifliste + Bestätigung + `cancelFreightTariff`; Tests in `
 **Abnahmekriterien:** Jede neue Aktion besitzt eine stabile semantische Action-ID; Neukunde oeffnet eine leere kanonische Kundenmaske; Print erzeugt eine druckbare Cockpit-Sicht; Ansprechpartner sind selektier- und filterbar und Oeffnen/E-Mail/Praesente arbeiten im gewaehlten Kontext; unterstuetzte Verkaufsbelege oeffnen die richtige Detail- beziehungsweise Neuanlagemaske mit Kunden-/Belegkontext; unbekannte oder noch nicht kanonisch routbare Belegarten behaupten keinen erfolgreichen Fachprozess; Typecheck, Build, Playwright und Governance sind gruen.
 **Offene Risiken:** TAPI-Wahl, CC/Benachrichtigung und neue Kontaktlog-Persistenz sind explizit nicht Teil dieses Slices. Kaufangebote, Kaufabrechnungen und Fremdbestaende duerfen nur verdrahtet werden, wenn eine kanonische Zielroute eindeutig nachweisbar ist.
 
+## KIM-L3-FRONTEND-001
+
+**Von:** Claude Code
+**Owner:** Claude Code
+**Stand:** abgeschlossen 2026-06-26 — Belegtabs (INVOICES/DUNNING/CONTRACTS/DROP_SHIPMENTS) rufen jetzt `fetchContactDocs` statt lokal zu filtern. Neuer Postfach-Tab in KIM zeigt interne CRM-Benachrichtigungen mit markRead-Funktion und unread-Badge im Tab-Label.
+**Dateibesitz:** `packages/frontend-web/src/pages/crm/kim/components/ContactHistoryTable.tsx`, `packages/frontend-web/src/pages/crm/kim/index.tsx`, `docs/agent-ops/slices/KIM-L3-FRONTEND-001.yaml`
+
 ## KIM-L3-BACKEND-001
 
 **Von:** Claude
 **Owner:** Claude
-**Stand:** Backend umgesetzt 2026-06-09
+**Stand:** abgeschlossen 2026-06-26 (Backend 2026-06-09, Frontend-Verdrahtung via KIM-L3-FRONTEND-001)
 **Ergebnis (Backend):** (A1) Kontaktlog persistiert Art/Betreff/Kommentar/CC (`crm_kim.py` LogCreateIn/create_log/_log_from_row/ContactLog; Tabelle `kunden_kontakte` unterstuetzte die Spalten bereits, keine Migration). (B) TAPI Click-to-Dial: `POST /crm/tapi/dial` + `GET /crm/tapi/dial/pending` + `POST /crm/tapi/dial/{id}/done` (reuse `tapi_calls`, richtung='aus', status='dial_req', acked=TRUE, caller-Default 'KIM'; graceful ohne Bridge). (C) `GET /crm/kim/customers/{nr}/contact-docs?kind=invoices|dunning|contracts|drop_shipments` (Rechnungen/Mahnungen aus kanonischer `domain_shared.open_items`, Kontrakte/Strecken tolerant leer). (D) Internes Benachrichtigungssystem: Migration `crm_notifications_kim_l3_backend_20260609` (idempotent angewandt), `crm_notification_service.py` (intern persistent + extern Mail best-effort), Endpoints `POST/GET /crm/kim/notifications` + `/{id}/read`, CC-Auto-Dispatch in `create_log`. Verifiziert: 6 Unit-Tests gruen, alle Endpoints per curl 200 (Dial/Inbox/contact-docs), Migration idempotent. **Offen (Folge-Slice, Frontend):** Verdrahtung im KIM-Cockpit (Art-Dropdown/Betreff/Kommentar/CC-Feld, Tel→Dial, Kontakte-Belegtabs, Postfach-Anzeige) — nach KIM-L3-QUICK-001.
 **Abstimmung:** Komplementaer zu `KIM-L3-QUICK-001` (Codex/Claude Code). Claude Code macht die rein frontend-/routenseitigen Bedienluecken (`packages/frontend-web/src/pages/crm/kim/**` + CRM-Playwright-Vertraege). Ich (Claude) baue die von KIM-L3-QUICK-001 **ausdruecklich ausgeklammerten** Backend-Fundamente: Kontaktlog-Persistenz (Art/Betreff/Kommentar/CC), TAPI-Wahl-Trigger, internes Benachrichtigungssystem sowie kanonische Kontakte-Belegquellen. **Ich fasse KEINE Datei unter `packages/frontend-web/src/pages/crm/kim/**` und KEINE `playwright-tests/specs/crm/**` an** — Frontend-Verdrahtung dieser Backends erfolgt als Folge-Slice, nachdem KIM-L3-QUICK-001 gelandet ist.
 **Ziel des Slices:** Backend-Vertraege bereitstellen, damit die L3-Funktionen Kontaktdokumentation (Art/Betreff/Kommentar/CC), TAPI-Wahl, interne/externe Benachrichtigung und kontaktbezogene Belegtabs (Rechnungen/Mahnungen/Kontrakte/Strecken) im KIM-Cockpit fachlich hinterlegt sind.
