@@ -118,6 +118,7 @@ exclude_docs: |
   !/architecture/process-kernel/STATUS.md
   !/architecture/process-kernel/DELIVERY-MAP.md
   !/architecture/process-map.md
+  !/architecture/ai-data-classification.md
 
 nav:
   - Start: index.md
@@ -153,6 +154,7 @@ nav:
           - Process Kernel (Lieferstand): architecture/process-kernel/STATUS.md
           - Lieferkarte: architecture/process-kernel/DELIVERY-MAP.md
           - ERP Prozesskarte: architecture/process-map.md
+          - KI-Datenklassen-Policy: architecture/ai-data-classification.md
       # adr-nav:begin (generated — scripts/generate_adr_nav.py; do not edit manually)
       - ADRs:
           - Index: adr/README.md
