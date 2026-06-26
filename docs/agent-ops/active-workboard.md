@@ -4461,3 +4461,11 @@ Archiv des vorherigen Boards:
 **Stand:** abgeschlossen 2026-06-26 — Backend (`portal_shop.py`) + Frontend (`shop.tsx`) waren bereits vollständig durch Cursor implementiert. Slice-YAML zur Governance-Compliance nacherfasst.
 **Ziel:** Saatgut/Dünger/PSM-Shop im Kundenportal mit Kontrakt-/Vorkauf-Preisen, Idempotenz, Status-Maschine und Reconciliation.
 **Dateibesitz:** `docs/agent-ops/slices/PORTAL-SHOP-001.yaml`.
+
+## CI-WA-PORTAL-GATE-20260626 - WhatsApp/Portal CI-Gate-Nachzug
+
+**Owner:** Codex
+**Stand:** reserviert 2026-06-26 - Nachzug fuer rote Gates nach WA-AGENT-001 / WA-NOTIFY-001 / PORTAL-SHOP-001: Backend-Response-Model-Coverage, Frontend-Typecheck und E2E-Smoke-Build.
+**Ziel:** CI wieder gruenschalten, ohne neue WhatsApp-/Portal-Fachlogik einzufuehren oder fremde Parallel-Agent-Aenderungen zu buendeln.
+**Dateibesitz:** `app/api/v1/endpoints/whatsapp_notify.py`, `app/api/v1/endpoints/whatsapp_webhook.py`, `packages/frontend-web/src/pages/portal/whatsapp-simulator.tsx`, optional `packages/frontend-web/src/components/ui/use-toast.ts`, `docs/project-context/open-gaps-and-known-issues.md`, `docs/agent-ops/slices/CI-WA-PORTAL-GATE-20260626.yaml`, dieser Workboard-Abschnitt.
+**Abnahmekriterien:** `python scripts/check_response_models.py --threshold 80`, `pnpm --dir packages/frontend-web typecheck`, `pnpm --dir packages/frontend-web build` lokal gruen; GitHub Actions Quality Gate/E2E-Smoke nach Push pruefen.
