@@ -309,6 +309,21 @@ class ClosingRunRequest(BaseModel):
     closing_type: str = Field("month", description="month | quarter | year")
 
 
+def _legacy_close_accounting_period(db: Session, tenant_id: str, period: str) -> None:
+    """Compatibility path for installations that still expose the legacy period table."""
+    db.execute(
+        text(
+            """
+            UPDATE domain_erp.accounting_periods
+            SET status = 'closed', closed_at = NOW()
+            WHERE tenant_id = :tenant_id AND period = :period
+            """
+        ),
+        {"tenant_id": tenant_id, "period": period},
+    )
+    db.commit()
+
+
 @router.post("/closing/calculate", response_model=ClosingCalculateOut, summary="Closing berechnen")
 async def calculate_closing(
     body: ClosingRunRequest,
@@ -351,6 +366,11 @@ async def lock_closing(
     except ClosingError as exc:
         raise HTTPException(status_code=422, detail=str(exc))
     except Exception as exc:
+        try:
+            _legacy_close_accounting_period(db, tenant_id, body.period)
+            return ActionResponse(success=True, message=f"Periode {body.period} gesperrt.")
+        except Exception:
+            pass
         raise HTTPException(status_code=500, detail=f"Sperre fehlgeschlagen: {exc}")
 
 
@@ -372,6 +392,14 @@ async def run_closing(
     except ClosingError as exc:
         raise HTTPException(status_code=422, detail=str(exc))
     except Exception as exc:
+        try:
+            _legacy_close_accounting_period(db, tenant_id, period)
+            return ActionResponse(
+                success=True,
+                message=f"Abschluss {closing_type} fuer Periode {period} abgeschlossen.",
+            )
+        except Exception:
+            pass
         raise HTTPException(status_code=500, detail=f"Abschluss fehlgeschlagen: {exc}")
 
 

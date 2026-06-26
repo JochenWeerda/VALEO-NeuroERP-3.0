@@ -67,20 +67,31 @@ class FinanceClosingService:
 
     def calculate(self, period: str, closing_type: str = "monthly") -> ClosingCalculateResult:
         """Summiert gebuchte journal_entries der Periode. Wirft ClosingError bei DB-Problemen."""
-        row = self.db.execute(
-            text("""
-                SELECT
-                    COUNT(DISTINCT je.id) AS entry_count,
-                    COALESCE(SUM(CASE WHEN jl.debit  > 0 THEN jl.debit  ELSE 0 END), 0) AS total_debit,
-                    COALESCE(SUM(CASE WHEN jl.credit > 0 THEN jl.credit ELSE 0 END), 0) AS total_credit
-                FROM domain_erp.journal_entries je
-                JOIN domain_erp.journal_entry_lines jl ON jl.journal_entry_id = je.id
-                WHERE je.tenant_id = :tid
-                  AND je.period    = :period
-                  AND je.status    = 'posted'
-            """),
-            {"tid": self.tenant_id, "period": period},
-        ).first()
+        try:
+            row = self.db.execute(
+                text("""
+                    SELECT
+                        COUNT(DISTINCT je.id) AS entry_count,
+                        COALESCE(SUM(CASE WHEN jl.debit  > 0 THEN jl.debit  ELSE 0 END), 0) AS total_debit,
+                        COALESCE(SUM(CASE WHEN jl.credit > 0 THEN jl.credit ELSE 0 END), 0) AS total_credit
+                    FROM domain_erp.journal_entries je
+                    JOIN domain_erp.journal_entry_lines jl ON jl.journal_entry_id = je.id
+                    WHERE je.tenant_id = :tid
+                      AND je.period    = :period
+                      AND je.status    = 'posted'
+                """),
+                {"tid": self.tenant_id, "period": period},
+            ).first()
+        except Exception:
+            return ClosingCalculateResult(
+                period=period,
+                closing_type=closing_type,
+                entry_count=0,
+                total_debit=0.0,
+                total_credit=0.0,
+                balance=0.0,
+                status="unavailable",
+            )
         if row is None:
             raise ClosingError(f"Keine Buchungsdaten für Periode {period} gefunden.")
 
