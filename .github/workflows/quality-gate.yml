@@ -194,6 +194,17 @@ jobs:
       - name: OpenAPI docs coverage (summary= on all routes)
         run: python scripts/check_openapi_docs.py --threshold 0
 
+      - name: Doc-Drift-Gate (DOC-DRIFT-GATE-002)
+        run: |
+          python scripts/doc_drift_report.py --fail-over 0 || {
+            echo ""
+            echo "──────────────────────────────────────────────────────────"
+            echo "FEHLER: Doku-Code-Drift erkannt (Schwellwert: 0)."
+            echo "Bitte Doku-Inventar aktualisieren oder doc_drift_report.py prüfen."
+            echo "──────────────────────────────────────────────────────────"
+            exit 1
+          }
+
       - name: OpenAPI spec drift check (DOC-OPENAPI-CI-001)
         run: |
           python scripts/generate_openapi.py --check || {
