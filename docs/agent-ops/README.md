@@ -55,3 +55,12 @@ Damit werden fachlicher Vertrag, Architekturvertrag, Datenvertrag, Testvertrag,
 Security-Vertrag, Betriebsvertrag, Dokumentationsvertrag und externe Gates
 vor der Umsetzung sichtbar. Die Governance-Scripts pruefen neue oder
 geaenderte Slice-YAMLs auf diese Mindestfelder.
+
+## Doku-Governance bei Archivierungen
+
+`scripts/docs-governance-check.cjs` prueft eine kuratierte Default-Liste plus
+ADR-, Roadmap- und Package-Statusdateien. Wenn Legacy-Dokumente nach
+`docs/_internal/archive/` verschoben werden, duerfen alte Default-Ziele nicht
+mehr hart als fehlende Dateien scheitern. Der Check filtert deshalb nicht mehr
+existierende Default-Targets vor der Inhaltspruefung; vorhandene Dateien und
+explizit uebergebene Ziele bleiben weiterhin strikt geprueft.
