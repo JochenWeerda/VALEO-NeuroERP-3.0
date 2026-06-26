@@ -18,6 +18,12 @@
 **Dateibesitz:** `docs/benutzerhandbuch/**`, `mkdocs.yml`, `docs/agent-ops/slices/DOC-USER-MANUAL-002.yaml`, dieser Workboard-Abschnitt.
 **Abnahme:** Docs-Governance gruen; Staleness gruen; `mkdocs build` gruen. `mkdocs build --strict` bleibt durch bestehende Warnungen ausserhalb dieses Slice blockiert (ADR-/Architecture-Links und nicht navigierte Agent-Docs-Runbook-Seite), keine neuen Handbuch-Warnungen.
 
+## Wave 15 — WF-COCKPIT-RETRY-001: Retry + Kompensationspfad
+
+**Von:** Claude Code · **Owner:** Claude Code · **Stand:** abgeschlossen 2026-06-26
+
+`retry_instance()` + `compensate_instance()` in `WorkflowCockpitPersistService` implementiert. Neue Endpoints `POST /workflow/cockpit-db/instances/{id}/retry` (FAILED/blocked → retry_pending) und `POST /workflow/cockpit-db/instances/{id}/compensate` (→ compensated). Schliesst letztes offenes Sub-Item aus VALEO-WF-COCKPIT-001.
+
 ## Wave 14 — COV-RATCHET-009 + CRM-LEGACY-Abschluss + Stale-Gap-Cleanup
 
 **Von:** Claude Code · **Owner:** Claude Code · **Stand:** abgeschlossen 2026-06-26

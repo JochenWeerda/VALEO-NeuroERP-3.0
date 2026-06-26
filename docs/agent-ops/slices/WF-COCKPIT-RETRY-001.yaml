@@ -1,0 +1,36 @@
+slice_id: WF-COCKPIT-RETRY-001
+title: "WF-Cockpit: Kontrollierter Retry + Kompensationspfad"
+status: abgeschlossen
+priority: P2
+wave: 15
+created: "2026-06-26"
+closed: "2026-06-26"
+
+problem: |
+  VALEO-WF-COCKPIT-001 nannte als offene Folgeslices:
+  "kontrollierter Retry mit Kompensationspfad".
+  Es gab keine API-Endpoints um FAILED/blocked Prozessinstanzen
+  neu zu starten oder als kompensiert (Storno) zu markieren.
+
+solution: |
+  Neue Service-Methoden in WorkflowCockpitPersistService:
+  - retry_instance(): setzt FAILED/blocked → retry_pending, legt retry_requested-Event an
+  - compensate_instance(): markiert beliebige Instanz als compensated + Event
+
+  Neue Endpoints in /workflow/cockpit-db:
+  - POST /instances/{id}/retry   → 200 {status: "retry_pending"} oder 404
+  - POST /instances/{id}/compensate → 200 {status: "compensated"} oder 404
+
+  VALEO-WF-COCKPIT-001 alle Sub-Items jetzt abgeschlossen:
+  persistente Tabellen (W13) + NATS-Projektor (W13) + UI-Leitstand (vorhanden)
+  + Dead-Letter (vorhanden) + Retry/Kompensation (W15).
+
+endpoints_created:
+  - "POST /api/v1/workflow/cockpit-db/instances/{id}/retry"
+  - "POST /api/v1/workflow/cockpit-db/instances/{id}/compensate"
+
+files_changed:
+  - app/services/wf_cockpit_persist_service.py  # retry_instance + compensate_instance
+  - app/api/v1/endpoints/wf_cockpit_persist.py  # retry + compensate endpoints
+  - docs/agent-ops/slices/WF-COCKPIT-RETRY-001.yaml
+  - docs/project-context/open-gaps-and-known-issues.md  # WF-COCKPIT-001 Sub-Items closed
