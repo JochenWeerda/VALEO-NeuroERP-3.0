@@ -4697,3 +4697,47 @@ Parallele Fix-Slices aus Cards-Inventar-Audit (`CARD-AUDIT-001`). Claim-Protokol
 **Stand:** abgeschlossen 2026-06-26 — `scripts/generate_drift_dashboard_page.py` generiert `docs/entwickler/drift-dashboard.md` mit Status (GRUEN/GELB/ROT), Dimensionen, offenen Punkten und Gate-Dokumentation; in MkDocs-Nav eingebunden; `doc-drift-report.yml` committet Dashboard nach jedem Nightly-Report automatisch.
 **Ziel:** Drift-Status für Entwickler direkt in MkDocs sichtbar; Auto-aktualisiert durch Nightly-Workflow.
 **Dateibesitz:** `scripts/generate_drift_dashboard_page.py`, `docs/entwickler/drift-dashboard.md`, `.github/workflows/doc-drift-report.yml`, `mkdocs.yml`.
+
+## RELEASE-EVIDENCE-GATE-001 — Freigabe-Aggregator (Claim)
+
+**Von:** Claude Code / **Stand:** in Arbeit
+
+## SEMANTIC-ACTION-MATRIX-002 — Action-Matrices YAML (Claim)
+
+**Von:** Claude Code / **Stand:** in Arbeit
+
+## SEMANTIC-E2E-STRICT-001 — Playwright @critical Tags (Claim)
+
+**Von:** Claude Code / **Stand:** in Arbeit
+
+## TRACEABILITY-MATRIX-001 — Slice↔Test↔Doku (Claim)
+
+**Von:** Claude Code / **Stand:** in Arbeit
+
+## OPERATOR-AGENT-002 — Agent DB-Persistenz (Claim)
+
+**Von:** Claude Code / **Stand:** in Arbeit
+
+## MCP-ERP-TOOLS-002 — MCP-Tools Erweiterung (Claim)
+
+**Von:** Claude Code / **Stand:** in Arbeit
+
+## COVERAGE-RATCHET-002 — Coverage-Härtung (Claim)
+
+**Von:** Claude Code / **Stand:** in Arbeit
+
+## DOC-USER-MANUAL-002 — Benutzerhandbuch Vertiefung (Claim)
+
+**Von:** Claude Code / **Stand:** in Arbeit
+
+## DOC-RELEASE-NOTES-001 — Release-Notes-Generator (Claim)
+
+**Von:** Claude Code / **Stand:** in Arbeit
+
+## INTEGRATION-EVIDENCE-BOARD-001 — Qualitäts-Cockpit (Claim)
+
+**Von:** Claude Code / **Stand:** in Arbeit
+
+## EXTERNAL-MOCK-WORKFLOW-001 — Playwright Mock-Verträge (Claim)
+
+**Von:** Claude Code / **Stand:** in Arbeit
