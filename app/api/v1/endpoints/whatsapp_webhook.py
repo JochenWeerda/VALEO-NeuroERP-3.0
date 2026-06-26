@@ -23,7 +23,13 @@ router = APIRouter()
 
 # ─── Meta-Produktions-Webhook ─────────────────────────────────────────────────
 
-@router.get("/webhook", response_model=str, response_class=PlainTextResponse, tags=["WhatsApp"])
+@router.get(
+    "/webhook",
+    response_model=str,
+    response_class=PlainTextResponse,
+    tags=["WhatsApp"],
+    summary="WhatsApp Webhook-Verifikation ausfuehren",
+)
 async def webhook_verify(
     hub_mode: str = Query(None, alias="hub.mode"),
     hub_verify_token: str = Query(None, alias="hub.verify_token"),
@@ -40,7 +46,13 @@ class WebhookReceiveResponse(BaseModel):
     status: str
 
 
-@router.post("/webhook", response_model=WebhookReceiveResponse, status_code=200, tags=["WhatsApp"])
+@router.post(
+    "/webhook",
+    response_model=WebhookReceiveResponse,
+    status_code=200,
+    tags=["WhatsApp"],
+    summary="WhatsApp Webhook-Nachricht empfangen",
+)
 async def webhook_receive(
     request: Request,
     x_hub_signature_256: str = Header(None),

@@ -89,7 +89,7 @@ def list_interessenten(
     return {"items": items, "count": len(items)}
 
 
-@router.get("/{interessent_id}", response_model=dict[str, Any])
+@router.get("/{interessent_id}", response_model=dict[str, Any], summary="Interessent abrufen")
 def get_interessent(interessent_id: str, x_tenant_id: Annotated[str | None, Header()] = None) -> dict[str, Any]:
     try:
         return get_interessent_service(_tid(x_tenant_id)).get(interessent_id)
@@ -97,7 +97,7 @@ def get_interessent(interessent_id: str, x_tenant_id: Annotated[str | None, Head
         raise HTTPException(status_code=404, detail=str(e)) from e
 
 
-@router.post("/{interessent_id}/status", response_model=dict[str, Any])
+@router.post("/{interessent_id}/status", response_model=dict[str, Any], summary="Interessentenstatus wechseln")
 def status_wechsel(
     interessent_id: str,
     body: StatusWechselBody,
