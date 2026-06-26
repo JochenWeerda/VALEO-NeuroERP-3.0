@@ -217,6 +217,9 @@ jobs:
             exit 1
           }
 
+      - name: Doc generator meta-check
+        run: bash scripts/check_all_doc_generators.sh --check
+
       - name: Check core contamination guardrail
         run: python scripts/check_no_core_contamination.py
 
