@@ -9,6 +9,13 @@
 **Dateibesitz:** `docs/benutzerhandbuch/**`, `mkdocs.yml`, `docs/agent-ops/slices/DOC-USER-MANUAL-002.yaml`, dieser Workboard-Abschnitt.
 **Abnahme:** Docs-Governance gruen; Staleness gruen; `mkdocs build` gruen. `mkdocs build --strict` bleibt durch bestehende Warnungen ausserhalb dieses Slice blockiert (ADR-/Architecture-Links und nicht navigierte Agent-Docs-Runbook-Seite), keine neuen Handbuch-Warnungen.
 
+## FINANCE-HR-EINKAUF-REPAIR-001 — Finance + HR + Einkauf Batch-Repair-Migration Wave 12
+
+**Von:** Claude Code · **Owner:** Claude Code · **Stand:** abgeschlossen 2026-06-26
+P1-Batch (Wave 12): 24 domain_erp-Tabellen (ap_approval_rules/requests/approvals, matching_rules, bank_matches, booking_templates, closing_checklist_templates, closing_checklists, tax_keys, vat_returns, offene_posten, open_items, business_partners, collaterals, debitors, debtors, pos_transactions, pos_transaction_lines, delivery_notes/erp, cash_movements, serial_numbers, gift_cards, bank_statements, bank_statement_lines) + ADD COLUMN journal_entries/lines + rfq_requests/quotes (domain_einkauf) + shifts (domain_hr) + zahlungsformulare/zinsgruppen/leergutarten (domain_shared) — alle aus Parallel-Branches, idempotent in Hauptkette. Finaler Single-Head-Merge `final_single_head_merge_20260626` schliesst alle offenen Branches.
+**Dateibesitz:** `alembic/versions/finance_hr_einkauf_repair_20260626.py`, `alembic/versions/final_single_head_merge_20260626.py`, `docs/agent-ops/slices/FINANCE-HR-EINKAUF-REPAIR-001.yaml`
+**Neuer Alembic-Head:** `final_single_head_merge_20260626` (SINGLE HEAD — alle 55+ Parallel-Branches geschlossen)
+
 ## BULK-REPAIR-001 — Finance + Agrar + Sales Batch-Repair-Migration Wave 11
 
 **Von:** Claude Code · **Owner:** Claude Code · **Stand:** abgeschlossen 2026-06-26
