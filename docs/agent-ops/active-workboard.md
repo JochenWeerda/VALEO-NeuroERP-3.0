@@ -4446,3 +4446,18 @@ Archiv des vorherigen Boards:
 **Ziel:** WhatsApp-Textnachricht → Kundenzuordnung → Bestellextraktion → Auftragsanlage ODER Rückfrage (max. 1 Round). Start mit In-Memory-Simulator, Meta-Produktions-Webhook vorbereitet.
 **Dateibesitz:** `app/services/whatsapp_agent_service.py`, `app/api/v1/endpoints/whatsapp_webhook.py`, `packages/frontend-web/src/pages/portal/whatsapp-simulator.tsx`, `tests/test_whatsapp_agent.py`, `docs/agent-ops/slices/WA-AGENT-001.yaml`.
 **Folge-Slices:** WA-NOTIFY-001 (Lieferankündigung Push), PORTAL-SHOP-001 (Betriebsmittel-Shop).
+
+## WA-NOTIFY-001 — WhatsApp Ausgehende Push-Benachrichtigungen
+
+**Owner:** Claude Sonnet 4.6
+**Stand:** abgeschlossen 2026-06-26 — Lieferankündigung (🚛 LKW ~ETA-Min entfernt) + Dokument-Ready (📄 Lieferschein/Rechnung im Portal verfügbar). Meta Cloud API-ready (HMAC, httpx); Fallback: simulierter Outbox-Log. Simulator-UI um Tabs "Ausgehend (Push)" + "Outbox" erweitert. 13/13 Tests grün.
+**Ziel:** Vollständige WhatsApp-Prozesskette: Bestellung eingehend (WA-AGENT-001) → Lieferankündigung 1h vor Ankunft → Dokument-Benachrichtigung nach Erstellung.
+**Dateibesitz:** `app/services/whatsapp_notify_service.py`, `app/api/v1/endpoints/whatsapp_notify.py`, `tests/test_whatsapp_notify.py`, `docs/agent-ops/slices/WA-NOTIFY-001.yaml`.
+**Integration:** Logistik → `/dev/notify/lieferankuendigung`, Docflow → `/dev/notify/dokument-ready`.
+
+## PORTAL-SHOP-001 — Betriebsmittel-Online-Shop (Governance-Erfassung)
+
+**Owner:** Cursor (Backend + Frontend) / Claude Sonnet 4.6 (Governance-Doku)
+**Stand:** abgeschlossen 2026-06-26 — Backend (`portal_shop.py`) + Frontend (`shop.tsx`) waren bereits vollständig durch Cursor implementiert. Slice-YAML zur Governance-Compliance nacherfasst.
+**Ziel:** Saatgut/Dünger/PSM-Shop im Kundenportal mit Kontrakt-/Vorkauf-Preisen, Idempotenz, Status-Maschine und Reconciliation.
+**Dateibesitz:** `docs/agent-ops/slices/PORTAL-SHOP-001.yaml`.
