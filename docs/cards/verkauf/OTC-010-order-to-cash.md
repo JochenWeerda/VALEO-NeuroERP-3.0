@@ -9,28 +9,27 @@ workflow_doc: docs/workflows/otc-010-order-to-cash.md
 overlaps: [SEC-031, SEC-032]
 ---
 
-# OTC-010 — Order-to-Cash (Card)
+# OTC-010 - Order-to-Cash (Card)
 
-**Slice:** OTC-010 | **Lane:** Order-to-Cash | **Owner:** Claude Sonnet 4.6 | **Datum:** 2026-03-27
+**Slice:** OTC-010 | **Lane:** Order-to-Cash | **Owner:** Codex | **Datum:** 2026-06-26
 **Status:** abgeschlossen
-
----
 
 ## 1. Zweck
 
-End-to-End Analyse und QA-Härtung der Order-to-Cash Lane: Angebot → Verkaufsauftrag → Lieferschein → Rechnung → Zahlung.
+End-to-End Analyse und QA-Haertung der Order-to-Cash Lane:
+Angebot -> Verkaufsauftrag -> Lieferschein -> Rechnung -> Zahlung.
 
 ## 2. Betroffene Dateien
 
-- `packages/frontend-web/src/pages/sales/invoice-editor.tsx` — `.data`-Bug behoben
-- `packages/frontend-web/src/pages/verkauf/lieferschein-erfassung.tsx` — Handover-Gap behoben
-- `packages/frontend-web/src/pages/workflow/flow-spine-order-to-cash.tsx` — analysiert (kein Bug)
-- `packages/frontend-web/src/pages/sales/order-editor.tsx` — analysiert (kein Bug)
-- `docs/workflows/otc-010-order-to-cash.md` — Workflow-Analyse
+- `packages/frontend-web/src/pages/sales/invoice-editor.tsx` - Edit-Mode und Deep-Link per Path-ID.
+- `packages/frontend-web/src/pages/verkauf/lieferschein-erfassung.tsx` - Handover aus Auftrag inklusive Positionen und `sales_order_id`.
+- `packages/frontend-web/src/pages/sales/order-editor.tsx` - Sofort-Rechnung mit vollstaendigem Sales-Handover-Kontext.
+- `app/api/v1/endpoints/sales_delivery_notes.py` - `sales_order_id` auch im Update-Payload.
+- `docs/workflows/otc-010-order-to-cash.md` - Workflow-Analyse und Nachweis.
 
 ## 3. Fachlicher Kontext
 
-Der Verkauf von Agrarprodukten (Saatgut, Dünger, PSM) und Handelsware folgt dem OTC-Prozess. Landhandel-spezifisch: Kontrakt-Referenz in Positionen, Frühabnahme-Kennzeichen, Gefahrgutpunkte. Die Belegkette Auftrag → LS → Rechnung muss lückenlos nachverfolgbar sein (GoBD-Anforderung).
+Der Verkauf von Agrarprodukten und Handelsware folgt dem OTC-Prozess. Landhandel-spezifisch relevant sind Kontrakt-Referenz in Positionen, Fruehabnahme-Kennzeichen, Gefahrgutpunkte und eine lueckenlose Belegkette Auftrag -> Lieferschein -> Rechnung.
 
 ## 4. API-Endpoints
 
@@ -38,74 +37,50 @@ Der Verkauf von Agrarprodukten (Saatgut, Dünger, PSM) und Handelsware folgt dem
 |---|---|---|
 | `/api/v1/sales/orders` | GET/POST | Auftrags-CRUD |
 | `/api/v1/sales/orders/{id}` | GET/PUT/DELETE | Einzel-Auftrag |
-| `/api/v1/sales/orders/{id}/print` | POST | Druckprotokoll |
-| `/api/v1/sales/orders/{id}/post` | POST | Auftrag buchen |
 | `/api/v1/sales/delivery-notes` | GET/POST | LS-CRUD |
 | `/api/v1/sales/delivery-notes/{id}` | GET/PUT/DELETE | Einzel-LS |
-| `/api/v1/docflow/{id}/convert` | POST | LS/Auftrag → Rechnung |
+| `/api/v1/docflow/{id}/convert` | POST | LS/Auftrag -> Rechnung |
 | `/api/v1/docflow` | GET/POST | Rechnung CRUD via Docflow |
 | `/api/v1/docflow/{id}` | GET/PUT | Rechnung Einzel |
-| `/api/v1/docflow/{id}/record-print` | POST | Druck protokollieren |
-| `/api/v1/crm/customers/{id}` | GET | Kundendaten für Prefill |
+| `/api/v1/crm/customers/{id}` | GET | Kundendaten fuer Prefill |
 
-## 5. Client-Warnung
+## 5. Handover-Architektur
 
-**Wichtig:** `invoice-editor.tsx` importiert `apiClient` von `@/lib/api-client` (gibt `AxiosResponse<T>` zurück). Alle anderen Masken nutzen `apiClient` von `@/lib/axios` (gibt `T` direkt zurück). Mischung führt zu `.data`-Bugs wenn nicht aufgepasst.
+```text
+order-editor.tsx
+  -> buildSalesHandoverPath('/verkauf/lieferschein-erfassung', { sourceOrderId })
+
+lieferschein-erfassung.tsx
+  -> parseSalesHandover() liest ?auftrag=<id>
+  -> GET /api/v1/sales/orders/{id}
+  -> prefill Kunde + Positionen
+  -> POST/PUT /api/v1/sales/delivery-notes mit sales_order_id
+
+order-editor.tsx / lieferschein-erfassung.tsx
+  -> POST /api/v1/docflow/{id}/convert
+  -> /verkauf/rechnungen/<targetId>?rechnungId=<targetId>&...
+
+invoice-editor.tsx
+  -> editId = ?rechnungId || ?id || path id
+  -> GET /api/v1/docflow/{editId}
+```
 
 ## 6. Behobene Bugs
 
-### Bug OTC-010-B1: invoice-editor.tsx — Edit-Mode lädt nichts
-- **Symptom:** Bestehende Rechnung öffnen → alle Felder leer
-- **Ursache:** `const doc = await apiClient.get(...) as any` → `doc` ist `AxiosResponse`, nicht Daten. `doc.id`, `doc.doc_number` etc. sind `undefined`.
-- **Fix:** `const { data: doc } = await apiClient.get(...) as any`
-
-### Bug OTC-010-B2: invoice-editor.tsx — Create setzt docId auf "undefined"
-- **Symptom:** Neue Rechnung speichern → `docId = "undefined"` → Folgeaktionen schlagen fehl
-- **Ursache:** `(created as { id?: string }).id` auf `AxiosResponse`-Objekt — `.id` ist undefined
-- **Fix:** `const { data: created } = await apiClient.post(...) as any`
-
-### Bug OTC-010-B3: lieferschein-erfassung.tsx — `?auftrag=` ignoriert
-- **Symptom:** Aus Auftragsmaske "Lieferschein erstellen" → leerer Lieferschein, kein Kunde prefilled
-- **Ursache:** Kein `useSearchParams`, `?auftrag=<id>` wird nie gelesen
-- **Fix:** `useSearchParams` + `useEffect([sourceOrderId])` → lädt Auftrag → prefilled Kunden + Toast
-
-## 7. Handover-Architektur (nach Fix)
-
-```
-order-editor.tsx
-  → navigate('/verkauf/lieferschein-erfassung?auftrag=<id>')
-
-lieferschein-erfassung.tsx
-  → useSearchParams() → sourceOrderId = '...'
-  → GET /api/v1/sales/orders/<id> → order
-  → GET /api/v1/crm/customers/<order.customer_id> → customer
-  → setState({ customer, vertreter })
-  → push('Lieferschein aus Auftrag XY eröffnet')
-```
-
-## 8. Offene Punkte
-
-| ID | Beschreibung | Priorität |
+| ID | Beschreibung | Status |
 |---|---|---|
-| OTC-010-P1 | Positionen aus Auftrag in Lieferschein übernehmen | Mittel |
-| OTC-010-P2 | `source_order_id` Backend-Feld im Lieferschein | Mittel |
-| OTC-010-P3 | Route `/verkauf/rechnungen/<id>` prüfen → Weiterleitung zu invoice-editor | Mittel |
-| ~~OTC-011~~ | Zahlungseingangs-Flow | **abgeschlossen** (Card OTC-011) |
+| OTC-010-B1 | `invoice-editor.tsx` Edit-Mode laedt Daten per `.data` korrekt | behoben |
+| OTC-010-B2 | Rechnung-Create setzt keine `"undefined"`-ID mehr | behoben |
+| OTC-010-B3 | `?auftrag=` wurde ignoriert | behoben |
+| OTC-010-P1 | Auftragpositionen werden in den Lieferschein uebernommen | behoben 2026-06-26 |
+| OTC-010-P2 | Lieferschein persistiert Belegkette ueber `sales_order_id` | behoben 2026-06-26 |
+| OTC-010-P3 | `/verkauf/rechnungen/<id>` oeffnet den invoice-editor korrekt | behoben 2026-06-26 |
 
-## 9. Tests (manuell)
+## 7. Tests
 
-1. Neuer Auftrag → Kunde auswählen → Positionen → "In Lieferschein wandeln"
-2. Lieferschein öffnet sich mit Kundendaten prefilled + Toast
-3. Lieferschein drucken → Sofort-Rechnung
-4. Rechnung öffnen (Edit-Mode) → alle Felder geladen (kein Bug mehr)
-5. Rechnung speichern (Create) → `docId` != `"undefined"`
+- `pnpm.cmd --dir packages/frontend-web exec tsc --noEmit --pretty false` - gruen.
+- `pytest -q -o addopts= tests/test_sales_o2c_001.py tests/test_sales_orders_api.py tests/test_sales_delivery_notes_api.py tests/test_docflow_conversion_order.py --maxfail=3` - 30 passed.
 
-## 10. Handoff
+## 8. Externe Abnahme
 
-**Nächste Slices:**
-- OTC-011: Zahlungseingang und Abstimmung
-- OTC-012: Belegkette-Visualisierung im Flow-Spine Cockpit
-
----
-
-*Erstellt von Claude Sonnet 4.6 — Slice OTC-010 — 2026-03-27*
+Die technische Belegkette ist repo-seitig geschlossen. Fachlich offen bleibt nur die UAT-Abnahme durch Vertrieb/FiBu fuer reale Belegnummern, Drucklayout und Prozessfreigabe.
