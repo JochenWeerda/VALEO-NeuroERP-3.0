@@ -117,8 +117,12 @@ async def shutdown_event_publisher() -> None:
         await disconnect()
 
 
+_cockpit_projector: Any = None  # WfCockpitNatsProjector | None
+
+
 async def startup_event_consumer() -> None:
-    """Initialize NATS consumer and register core handlers if enabled."""
+    """Initialize NATS consumer, core handlers, and cockpit projector if enabled."""
+    global _cockpit_projector
     from app.infrastructure.eventbus.nats_consumer import nats_consumer
     from app.services.nats_event_handlers import register_core_event_handlers
 
@@ -128,14 +132,37 @@ async def startup_event_consumer() -> None:
         logger.info("Event consumer disabled (provider=%s, enabled=%s)", provider, enabled)
         return
 
+    nats_url = getattr(settings, "EVENT_BUS_NATS_URL", "nats://localhost:4222")
+
     nats_consumer.enabled = True
-    nats_consumer.nats_url = getattr(settings, "EVENT_BUS_NATS_URL", nats_consumer.nats_url)
+    nats_consumer.nats_url = nats_url
     register_core_event_handlers(nats_consumer)
     await nats_consumer.start()
 
+    try:
+        from app.core.database import SessionLocal
+        from app.services.wf_cockpit_persist_service import WorkflowCockpitPersistService
+        from app.services.wf_cockpit_nats_projector import WfCockpitNatsProjector
+
+        db = SessionLocal()
+        persist_svc = WorkflowCockpitPersistService(db=db, tenant_id="__projector__")
+        _cockpit_projector = WfCockpitNatsProjector(persist_service=persist_svc)
+        await _cockpit_projector.start(nats_url=nats_url)
+        logger.info("WfCockpitNatsProjector gestartet (WF-COCKPIT-002)")
+    except Exception:
+        logger.exception("WfCockpitNatsProjector-Start fehlgeschlagen — Cockpit laeuft ohne NATS-Projektor")
+
 
 async def shutdown_event_consumer() -> None:
-    """Stop the NATS consumer if running."""
+    """Stop the NATS consumer and cockpit projector if running."""
+    global _cockpit_projector
     from app.infrastructure.eventbus.nats_consumer import nats_consumer
+
+    if _cockpit_projector is not None:
+        try:
+            await _cockpit_projector.stop()
+        except Exception:
+            logger.warning("WfCockpitNatsProjector-Stop fehlgeschlagen", exc_info=True)
+        _cockpit_projector = None
 
     await nats_consumer.stop()

@@ -185,6 +185,7 @@ from app.api.v1.endpoints import (
     central_contracts,
     futtermittel_rohwaren,
     futtermittel_rezepte,
+    futtermittel_qs,
     gs1_barcode,
     webhook_system,
     ruestliste,
@@ -1857,6 +1858,10 @@ api_router.include_router(
 api_router.include_router(
     futtermittel_rezepte.router,
     tags=["futtermittel", "rezepte"],
+)
+
+api_router.include_router(
+    futtermittel_qs.router,
 )
 
 api_router.include_router(
