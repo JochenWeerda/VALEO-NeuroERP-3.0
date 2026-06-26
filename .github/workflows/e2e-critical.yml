@@ -38,7 +38,9 @@ jobs:
     env:
       DATABASE_URL: postgresql://postgres:postgres@localhost:5432/valeo_test
       API_DEV_TOKEN: e2e-critical-token
-      PLAYWRIGHT_BASE_URL: http://localhost:8000
+      PLAYWRIGHT_BASE_URL: http://127.0.0.1:8000
+      EVENT_BUS_ENABLED: "false"
+      OUTBOX_WORKER_ENABLED: "false"
 
     steps:
       - uses: actions/checkout@v4
@@ -53,28 +55,28 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Start backend
-        run: |
-          python scripts/init_db.py
-          uvicorn app.main:app --host 0.0.0.0 --port 8000 &
-          sleep 5
-          curl -sf http://localhost:8000/api/v1/health || echo "Backend health check optional"
-
       - uses: actions/setup-node@v4
         with:
           node-version: "20"
 
       - uses: pnpm/action-setup@v4
 
-      - name: Install Playwright + browsers
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Install Playwright browsers
+        run: pnpm exec playwright install chromium --with-deps
+
+      - name: Migrate test database
+        run: python scripts/init_db.py
+
+      - name: Start backend
         run: |
-          cd packages/frontend-web
-          pnpm install
-          pnpm exec playwright install chromium --with-deps
+          python -m uvicorn app.main:app --host 0.0.0.0 --port 8000 &
+          timeout 75 bash -c 'until curl -fsS http://127.0.0.1:8000/api/v1/health; do sleep 2; done'
 
       - name: Run @critical E2E tests
         run: |
-          cd packages/frontend-web
           pnpm exec playwright test \
             playwright-tests/specs/e2e-matrix/o2c-semantic-chain.spec.ts \
             playwright-tests/specs/e2e-matrix/wms-silo-semantic-chain.spec.ts \
@@ -86,5 +88,5 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: e2e-critical-results
-          path: packages/frontend-web/playwright-report/
+          path: playwright-tests/artifacts/
           retention-days: 14
