@@ -20,8 +20,8 @@ Diátaxis-Struktur — schrittweise, nachvollziehbar, ohne Informationsverlust.
 - **Kuratiert vor vollständig.** Aktiv gepflegte Inhalte wandern in die
   Fachbereiche; Reste bleiben archiviert, bis sie kuratiert werden.
 - **Build bleibt grün.** Altbestände sind per `exclude_docs` vom Build
-  ausgenommen; Verschiebungen erzeugen höchstens Warnungen in ebenfalls
-  ausgeschlossenen Dateien.
+  ausgenommen; Architektur/ADR nur kuratierte Whitelist-Seiten in der Site
+  (Einzel-ADRs und Wave-STATUS bleiben repo-only bis Folgeslice).
 
 ## Kategorien → Zielbucket
 

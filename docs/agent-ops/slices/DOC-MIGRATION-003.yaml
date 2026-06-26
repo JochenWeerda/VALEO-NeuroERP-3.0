@@ -22,7 +22,7 @@ file_ownership:
 acceptance:
   - Kanonische INV-001 liegt unter docs/cards/lager/; inventory/-Stub verweist darauf.
   - mkdocs nav enthält Architektur-Index, Process-Kernel-STATUS, ADR-Index.
-  - Wave-Ordner weiterhin vom MkDocs-Build ausgeschlossen.
+  - Kuratierte Architektur-/ADR-Seiten im Build; Wave-Ordner und übrige ADRs repo-only.
   - python -m mkdocs build --site-dir site_check Exit 0.
 tests:
   - python scripts/docs-legacy-migrate.py --inventory-only

@@ -61,9 +61,16 @@ version: 1.0.0
 | `dom-supply-003-physische-kette.md` | 2 |
 | `cts-001-contract-to-settlement.md` | 2 |
 
+## Card-Duplikate (kanonisch aufgelöst)
+
+| Duplikat (archiviert) | Kanonisch |
+|-----------------------|-----------|
+| `docs/cards/inventory/INV-001-inventory-to-settlement.md` | `docs/cards/lager/INV-001-inventory-to-settlement.md` |
+
 ## Pflege
 
 - Migration: `python scripts/docs-legacy-migrate.py --apply`
 - Dry-run: `python scripts/docs-legacy-migrate.py --dry-run`
+- Card-Dedupe: `python scripts/docs-legacy-migrate.py --dedupe-cards`
 - Ziel: `docs/_internal/archive/` (einheitlich)
 

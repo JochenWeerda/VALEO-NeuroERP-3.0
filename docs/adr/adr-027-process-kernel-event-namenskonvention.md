@@ -21,7 +21,7 @@ Ohne Konvention entstehen:
 
 Alle produktiven Kernprozess-Events verwenden folgendes NATS-Subject-Format:
 
-```
+```text
 {tenant_id}.{domain}.{aggregate}.{verb}
 ```
 

@@ -111,8 +111,12 @@ exclude_docs: |
   /warehouse/
   /wiki/
   /workflows/
-  /architecture/
-  /adr/
+  /architecture/process-kernel/wave-*/
+  /architecture/*
+  !/architecture/index.md
+  !/architecture/fundamental-architecture-principles.md
+  !/architecture/process-kernel/STATUS.md
+  !/architecture/process-kernel/DELIVERY-MAP.md
 
 nav:
   - Start: index.md
@@ -138,7 +142,14 @@ nav:
       - Monitoring & SLO: admin/monitoring-und-slo.md
       - Incident-Response: admin/incident-response.md
       - Skalierung & Performance: admin/skalierung-performance.md
-  - Entwickler: entwickler/index.md
+  - Entwickler:
+      - Überblick: entwickler/index.md
+      - Architektur:
+          - Index: architecture/index.md
+          - Architekturprinzipien: architecture/fundamental-architecture-principles.md
+          - Process Kernel (Lieferstand): architecture/process-kernel/STATUS.md
+          - Lieferkarte: architecture/process-kernel/DELIVERY-MAP.md
+      - ADRs: adr/README.md
   - Schnittstellen:
       - Überblick: schnittstellen/index.md
       - REST-API: schnittstellen/rest-api.md
