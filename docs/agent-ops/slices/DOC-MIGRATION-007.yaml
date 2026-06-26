@@ -21,3 +21,23 @@ acceptance:
 tests:
   - node scripts/docs-staleness-check.cjs --max-age-days 365
   - python -m mkdocs build --site-dir site_check
+risks:
+  - Ein blockierendes Staleness-Gate kann produktive CI stoppen, wenn kuratierte Seiten ohne last_reviewed in die MkDocs-Navigation kommen.
+  - Parallele Doku-Migrationen muessen Frontmatter- und Nav-Aenderungen koordinieren, damit keine falschen Negativbefunde entstehen.
+ai_harness:
+  fachlicher_vertrag: >-
+    Kuratierte produktrelevante Dokumentation hat nachvollziehbare Review-Daten; veraltete Seiten werden sichtbar und blockierend behandelt.
+  architektur_vertrag: >-
+    Keine Produktcode-Aenderung; betroffen sind CI-Workflows, Staleness-Skript und Doku-Governance.
+  daten_vertrag: >-
+    Keine produktiven Daten. Frontmatter-Metadaten muessen maschinenlesbar und stabil bleiben.
+  test_vertrag: >-
+    Staleness-Check und MkDocs-Build muessen lokal und in CI gruen laufen.
+  security_vertrag: >-
+    Keine Secrets in Frontmatter oder Doku-Beispielen; Compliance-Doku bleibt reviewfaehig.
+  betriebs_vertrag: >-
+    CI-Blocker sind bewusst hart; Fehlalarme muessen ueber Doku-Fix statt continue-on-error geloest werden.
+  dokumentations_vertrag: >-
+    Governance-Doku, Migrationsplan und Slice-YAML dokumentieren die neue Staleness-Pflicht.
+external_gates:
+  - Keine externen Gates; Staleness ist ein internes Doku-Qualitaetsgate.
