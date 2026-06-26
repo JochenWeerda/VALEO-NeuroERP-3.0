@@ -1,0 +1,40 @@
+slice_id: DOC-REFERENZ-001
+title: "Referenzbereich — MASKEN, Glossar, Skripte in MkDocs"
+owner: Cursor
+status: abgeschlossen
+updated: 2026-06-26
+completed_at: 2026-06-26
+goal: >-
+  Referenz-Navigation befuellen: MASKEN.md in Site aufnehmen, Glossar verlinken,
+  Skripte-Uebersicht anlegen, referenz/index.md aktivieren.
+file_ownership:
+  - docs/referenz/index.md
+  - docs/referenz/skripte-uebersicht.md
+  - mkdocs.yml
+  - docs/agent-ops/slices/DOC-REFERENZ-001.yaml
+acceptance:
+  - MkDocs-Nav Referenz mit MASKEN, Glossar, Skripte.
+  - exclude_docs erlaubt MASKEN.md im Build.
+  - mkdocs build und Staleness gruen.
+tests:
+  - python -m mkdocs build --site-dir site_check
+  - node scripts/docs-staleness-check.cjs --max-age-days 365
+risks:
+  - MASKEN.md ohne Frontmatter — nicht im Staleness-Scope (docs/referenz only).
+ai_harness:
+  fachlicher_vertrag: >-
+    Nachschlagewerke sind aus der Site erreichbar ohne Root-Loseblatt-Navigation.
+  architektur_vertrag: >-
+    Keine Produktcode-Aenderung.
+  daten_vertrag: >-
+    Keine produktiven Daten.
+  test_vertrag: >-
+    MkDocs-Build und Staleness gruen.
+  security_vertrag: >-
+    Skript-Doku ohne Secrets.
+  betriebs_vertrag: >-
+    Keine Runtime-Aenderung.
+  dokumentations_vertrag: >-
+    Slice-YAML und Workboard.
+external_gates:
+  - Keine externen Gates.

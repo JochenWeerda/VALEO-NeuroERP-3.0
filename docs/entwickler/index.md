@@ -5,12 +5,21 @@ audience: [entwickler, qa]
 owner: Cursor
 status: aktiv
 last_reviewed: 2026-06-26
-version: 3.2.0
+version: 3.3.0
 ---
 
 # Entwicklerdokumentation
 
 Einstieg für Entwickler:innen in Architektur, Setup und Konventionen.
+
+## Erste Schritte
+
+| Thema | Seite |
+|-------|-------|
+| Lokales Setup (Backend, Frontend, DB) | [Lokales Setup](lokales-setup.md) |
+| Multi-Tenancy & Schemas | [Datenmodell & Tenancy](datenmodell-tenancy.md) |
+| Error-Handling & Mutation-Invarianten | [Konventionen](konventionen.md) |
+| pytest, Vitest, Playwright | [Test-Strategie](test-strategie.md) |
 
 ## Architektur & Entscheidungen
 
@@ -24,14 +33,6 @@ Einstieg für Entwickler:innen in Architektur, Setup und Konventionen.
 ## Weitere Quellen
 
 - `CLAUDE.md` / `AGENTS.md` (Repo-Root) — Konventionen, Invarianten, Agent-Operating-Guide.
+- [Schnittstellen](../schnittstellen/index.md) — REST, MCP, Events.
 - `docs/workflows/` — Prozessketten (intern, Ergebnisse in Open-Gaps).
-- `docs/project-context/open-gaps-and-known-issues.md` — bekannter Lieferstand.
-
-## Geplante Inhalte
-
-- Lokales Setup (Backend, Frontend, Datenbank).
-- Datenmodell & Multi-Schema-Tenancy.
-- Coding-Konventionen, Error-Handling-/Mutation-Invarianten.
-- Test-Strategie (pytest, Vitest, Playwright).
-
-> Setup- und Konventionsseiten folgen in Folge-Slices.
+- `docs/project-context/open-gaps-and-known-issues.md` — bekannter Lieferstand (repo-only).
