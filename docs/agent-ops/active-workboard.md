@@ -18,6 +18,16 @@
 **Dateibesitz:** `docs/benutzerhandbuch/**`, `mkdocs.yml`, `docs/agent-ops/slices/DOC-USER-MANUAL-002.yaml`, dieser Workboard-Abschnitt.
 **Abnahme:** Docs-Governance gruen; Staleness gruen; `mkdocs build` gruen. `mkdocs build --strict` bleibt durch bestehende Warnungen ausserhalb dieses Slice blockiert (ADR-/Architecture-Links und nicht navigierte Agent-Docs-Runbook-Seite), keine neuen Handbuch-Warnungen.
 
+## Wave 14 — COV-RATCHET-009 + CRM-LEGACY-Abschluss + Stale-Gap-Cleanup
+
+**Von:** Claude Code · **Owner:** Claude Code · **Stand:** abgeschlossen 2026-06-26
+
+**COV-RATCHET-009**: `futtermittel_qs.py` und `psm_proplanta.py` in Coverage-Ratchet aufgenommen (Wave-13-Endpoints, 40%-Baseline). Test `test_futtermittel_qs.py` mit 8 Unit-/Endpoint-Tests fuer HACCP/VLOG/QS-Pruefpunkte geschrieben.
+
+**CRM-LEGACY-API-MIGRATE-001 abgeschlossen**: Verifikation Wave 14 — CRM-Seiten (`kontakt-management.tsx`, `kunden-liste.tsx`, `lieferanten-liste.tsx`) haben keine `@/lib/axios`-Imports; `/api/v1/crm/`-Pfade durchgaengig.
+
+**Stale open-gaps bereinigt**: CMP-UStVA-Bug geschlossen (Code-Nachweis), WM-AGRI Zielzellen-Vorschlag als abgeschlossen markiert (retroaktiv WM-AGRI-MAP-001).
+
 ## Wave 13 — WF-COCKPIT-002 + FEED-QS-001 + RUNTIME-KAT-E-002
 
 **Von:** Claude Code · **Owner:** Claude Code · **Stand:** abgeschlossen 2026-06-26
