@@ -482,7 +482,8 @@ Kompakte Übersicht echter Lücken (repo-seitig lösbar, nicht extern blockiert)
 |---|---|---|---|
 | WF-Cockpit: Dead-Letter-Sicht, NATS-Projektor-Anbindung | VALEO-WF-COCKPIT-002 | P2 | `open-gaps-and-known-issues.md` § P1 VALEO-WF-COCKPIT-001 |
 | Runtime 5xx Kat. A: fehlende DB-Tabellen (Admin-Mobile: devices, scan_profiles, stations, mobile-routing) | RUNTIME-KAT-A-001 | P1 | `open-gaps-and-known-issues.md` § RUNTIME-API-SWEEP-001 Kat. A |
-| Runtime 5xx Kat. C Restliste: Custom-Envelope-Validierung (`mcp/policy/list`, `einkauf/lieferanten`, `crm/bestell-inbox`, `inventory/warehouses`) | RUNTIME-KAT-C-002 | P1 | `open-gaps-and-known-issues.md` § RUNTIME-API-SWEEP-001 Kat. C |
+| ~~Runtime 5xx Kat. C Restliste~~: `mcp/policy/list`, `einkauf/lieferanten+kontrakte+artikel-lager-parameter`, `kaeufergruppe/katalog`, `messages/health`, `crm/bestell-inbox` | RUNTIME-KAT-C-002 **abgeschlossen 2026-06-26** | P1 | `open-gaps-and-known-issues.md` § RUNTIME-API-SWEEP-001 Kat. C |
+| Runtime 5xx Kat. C: `inventory/warehouses/` PaginatedResponse (pruefen ob noch offen) | RUNTIME-KAT-A-002 | P2 | `open-gaps-and-known-issues.md` § RUNTIME-API-SWEEP-001 Kat. C |
 | Futtermittel: HACCP, VLOG-Meldung, QS-Leitfaden vollständig | FEED-QS-001 | P3 | `domain-depth-plan-2026-05-17.md` § 10 Futtermittel · `open-gaps-and-known-issues.md` § Enterprise-Domain-Gap-Closure |
 | CRM: RAG-Panel + Intent-Bar in `LegacyKundenStammModern.tsx` | TAIL-CRM-001 | P3 | `professional-tail-gap-plan-2026-04-09.md` § 2 CRM Modernisierung · TAIL-CRM-001 |
 | NaWaRo: Druck-/Vorschau-/Serienbrief-Pfad vollständig | TAIL-NAWARO-001 | P3 | `professional-tail-gap-plan-2026-04-09.md` § 1 NaWaRo-Kommunikation · TAIL-NAWARO-001 |

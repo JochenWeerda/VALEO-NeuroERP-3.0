@@ -1,5 +1,11 @@
 # Active Workboard
 
+## RUNTIME-KAT-C-002 — Response-Model-Mismatches Kat. C Restliste (7 Endpoints)
+
+**Von:** Claude Code · **Owner:** Claude Code · **Stand:** abgeschlossen 2026-06-26
+7 Endpoints: `policies/policy/list` ok→success, `einkauf/lieferanten+kontrakte+artikel-lager-parameter` Einzelobjekt→list[], `kaeufergruppe/katalog` dict→list[dict], `messages/health` MessageOut→dict[str,str], `crm/bestell-inbox` GET dict→list[dict].
+**Dateibesitz:** `policies.py`, `einkauf_bestellvorschlag.py`, `kaeufergruppe.py`, `messages.py`, `whatsapp_intake.py`, `docs/agent-ops/slices/RUNTIME-KAT-C-002.yaml`
+
 ## WM-AGRI-MAP-001 — Zielzellen-Regelengine (retroaktiv dokumentiert)
 
 **Von:** Claude Code · **Owner:** Claude Code · **Stand:** abgeschlossen 2026-06-26

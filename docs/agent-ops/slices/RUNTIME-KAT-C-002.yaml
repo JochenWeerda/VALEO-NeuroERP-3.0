@@ -1,0 +1,35 @@
+slice_id: RUNTIME-KAT-C-002
+title: "Runtime 5xx Kat. C Restliste: response_model-Mismatches (6 Endpoints)"
+priority: P1
+owner: Claude Code
+status: abgeschlossen
+created: "2026-06-26"
+
+goal: >
+  Sechs weitere Kat-C-Endpoints lieferten 500 ResponseValidationError wegen
+  response_model/Return-Typ-Mismatch. Behoben:
+  1. policies.py /policy/list: Rueckgabe-Key war "ok", erwartet "success" (StatusResponse).
+  2. einkauf_bestellvorschlag.py /lieferanten: response_model=EinkaufBestellvorschlagOut → list[BestellvorschlagOut].
+  3. einkauf_bestellvorschlag.py /kontrakte: response_model=BestellvorschlagOut → list[].
+  4. einkauf_bestellvorschlag.py /artikel-lager-parameter: dto.
+  5. kaeufergruppe.py /katalog: response_model=dict → list[dict].
+  6. messages.py /health: response_model=MessageOut → dict[str,str].
+  7. whatsapp_intake.py GET /crm/bestell-inbox: response_model=dict → list[dict].
+
+ai_harness:
+  fachlicher_vertrag:
+    - Alle 7 Endpoints liefern 200 ohne ValidationError.
+    - Keine fachliche Verhaltensaenderung; nur response_model/return-Wert ausgerichtet.
+  architekturvertrag:
+    - Minimaler Eingriff je Endpoint.
+    - BestellvorschlagOut extra="allow" bleibt erhalten.
+  akzeptanzkriterien:
+    - Kein ResponseValidationError 500 bei parameterlosen GET-Aufrufen.
+
+dateibesitz:
+  - app/api/v1/endpoints/policies.py
+  - app/api/v1/endpoints/einkauf_bestellvorschlag.py
+  - app/api/v1/endpoints/kaeufergruppe.py
+  - app/api/v1/endpoints/messages.py
+  - app/api/v1/endpoints/whatsapp_intake.py
+  - docs/agent-ops/slices/RUNTIME-KAT-C-002.yaml

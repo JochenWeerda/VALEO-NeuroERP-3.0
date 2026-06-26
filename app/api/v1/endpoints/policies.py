@@ -89,11 +89,11 @@ async def list_policies() -> Dict[str, Any]:
     Listet alle Policies auf
 
     Returns:
-        Dict mit ok=True und data=List[Rule]
+        Dict mit success=True und data=List[Rule]
     """
     try:
         rules = policy_store.list()
-        return {"ok": True, "data": [r.dict() for r in rules]}
+        return {"success": True, "data": [r.dict() for r in rules]}
     except Exception as e:
         logger.error(f"Failed to list policies: {e}")
         raise HTTPException(status_code=500, detail=str(e))
