@@ -1,0 +1,50 @@
+slice_id: DOC-CONSOLIDATION-010
+title: Doku-Konsolidierung erledigter Zukunftsplaene, Dubletten und echter Restbacklog
+owner: Codex
+status: reserved
+created_at: 2026-06-26
+coordination: >-
+  Eigenstaendiger Doku-Slice. Keine Aenderungen an parallelem OPERATOR-AGENT-002
+  und keine Edits unter docs/_internal/archive/**.
+goal: >-
+  Aktive Dokumentation repo-weit konsolidieren: alte offen/geplant/folgt-Aussagen
+  gegen Code, Slices und aktuelle Statusdokumente validieren, Dubletten reduzieren
+  und eine belastbare Liste tatsaechlich verbleibender Aufgaben und sinnvoller
+  fachlicher Vertiefungen erstellen.
+file_ownership:
+  - docs/project-context/open-gaps-and-known-issues.md
+  - docs/project-context/documentation-consolidation-2026-06-26.md
+  - ausgewaehlte aktive docs/**/*.md mit belegbarer Statuskorrektur
+  - docs/agent-ops/slices/DOC-CONSOLIDATION-010.yaml
+tests:
+  - node scripts/docs-governance-check.cjs docs/agent-ops/slices/DOC-CONSOLIDATION-010.yaml
+  - node scripts/docs-staleness-check.cjs --max-age-days 365
+  - python scripts/doc_drift_report.py --output-json artifacts/doc-drift.local.json --output-markdown artifacts/doc-drift.local.md
+acceptance:
+  - Konsolidierungsbericht benennt gepruefte Doku-Cluster, entfernte oder korrigierte Altbefunde und Evidenzquellen.
+  - Open-Gaps enthaelt nur belastbare offene Punkte oder klar markierte externe Gates.
+  - Mindestens eine priorisierte Restbacklog-Liste mit fachlich sinnvollen Vertiefungen liegt vor.
+  - Docs-Governance und Staleness-Check laufen gruen.
+risks:
+  - Breite Doku-Aenderungen koennen parallele Agentenarbeit beruehren; deshalb werden Aenderungen auf aktive, belegbare Konsolidierungsziele begrenzt.
+  - Historische Analyse-Dateien duerfen nicht als aktueller Backlog missverstanden werden; Archiv bleibt unveraendert.
+external_gates:
+  - not_applicable
+ai_harness:
+  fachlicher_vertrag: >-
+    Offene Punkte bleiben nur dann offen, wenn Code, Tests, Slices oder externe Gates
+    keinen Abschluss belegen.
+  architektur_vertrag: >-
+    Source of Truth bleibt Process-Kernel-STATUS plus Workboard/Slice-YAML; alte
+    Analyse-Dokumente werden konsolidiert statt als zweite Wahrheit gepflegt.
+  daten_vertrag: >-
+    Es werden nur Repository-Metadaten, Dokumente und Codepfade ausgewertet; keine
+    Mandanten- oder Kundendaten.
+  test_vertrag: >-
+    Docs-Governance, Staleness-Check und Drift-Report validieren die Aenderungen.
+  security_vertrag: >-
+    Keine Secrets, keine externen Produktivsysteme, keine sensiblen Daten.
+  betriebs_vertrag: >-
+    Ergebnis ist eine wartbare Restbacklog-Liste fuer weitere Slices und externe Gates.
+  dokumentations_vertrag: >-
+    Jede Statuskorrektur nennt Evidenz oder bleibt als offener Punkt markiert.
