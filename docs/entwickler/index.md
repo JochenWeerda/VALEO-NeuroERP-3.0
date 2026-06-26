@@ -4,8 +4,8 @@ type: explanation
 audience: [entwickler, qa]
 owner: Cursor
 status: aktiv
-last_reviewed: 2026-06-25
-version: 3.1.0
+last_reviewed: 2026-06-26
+version: 3.2.0
 ---
 
 # Entwicklerdokumentation
@@ -18,7 +18,7 @@ Einstieg für Entwickler:innen in Architektur, Setup und Konventionen.
 |---------|------|-------------|
 | Architektur-Index | `docs/architecture/index.md` | Navigation → Architektur |
 | Process-Kernel (Lieferstand) | `docs/architecture/process-kernel/STATUS.md` | Navigation → Process Kernel |
-| ADR-Index | `docs/adr/README.md` | Navigation → ADRs |
+| ADR-Index | `docs/adr/README.md` | Navigation → ADRs → Index (+ 38 Einzel-ADRs via Generator) |
 | Wave-STATUS (historisch) | `docs/architecture/process-kernel/wave-*/` | Repo only (vom Build ausgeschlossen) |
 
 ## Weitere Quellen

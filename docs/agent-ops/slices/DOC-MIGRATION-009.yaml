@@ -1,0 +1,47 @@
+slice_id: DOC-MIGRATION-009
+title: "ADR-Navigation — MkDocs-Sidebar per Generator"
+owner: Cursor
+status: abgeschlossen
+updated: 2026-06-26
+completed_at: 2026-06-26
+goal: >-
+  Alle ADRs in der MkDocs-Sidebar unter Entwickler → ADRs auffindbar machen;
+  Nav-Block aus docs/adr/ generieren; CI-Drift-Check wie bei MCP-Referenz.
+file_ownership:
+  - scripts/generate_adr_nav.py
+  - tests/test_generate_adr_nav.py
+  - mkdocs.yml
+  - .github/workflows/docs.yml
+  - docs/entwickler/index.md
+  - docs/adr/README.md
+  - docs/dokumentation/migrationsplan.md
+  - docs/agent-ops/slices/DOC-MIGRATION-009.yaml
+acceptance:
+  - mkdocs.yml enthaelt 38 ADR-Eintraege zwischen adr-nav-Markern.
+  - python scripts/generate_adr_nav.py --check Exit 0.
+  - pytest -m unit tests/test_generate_adr_nav.py gruen.
+  - python -m mkdocs build Exit 0.
+tests:
+  - python scripts/generate_adr_nav.py --check
+  - pytest -m unit tests/test_generate_adr_nav.py -v -p no:cov -o addopts=
+  - python -m mkdocs build --site-dir site_check
+risks:
+  - Neue ADR ohne Generator-Lauf bricht docs-CI-Drift-Check.
+  - Sehr lange ADR-Titel koennen Sidebar unuebersichtlich machen.
+ai_harness:
+  fachlicher_vertrag: >-
+    Architekturentscheidungen sind in der veroeffentlichten Doku direkt navigierbar.
+  architektur_vertrag: >-
+    Keine Produktcode-Aenderung; Generator patcht nur mkdocs.yml Nav-Block.
+  daten_vertrag: >-
+    Keine produktiven Daten.
+  test_vertrag: >-
+    Unit-Tests, Drift-Check und MkDocs-Build gruen.
+  security_vertrag: >-
+    Keine Secrets.
+  betriebs_vertrag: >-
+    CI fuehrt ADR-Nav-Drift-Check vor mkdocs build aus.
+  dokumentations_vertrag: >-
+    entwickler/index, adr/README und Migrationsplan dokumentieren Generator-Workflow.
+external_gates:
+  - Keine externen Gates.

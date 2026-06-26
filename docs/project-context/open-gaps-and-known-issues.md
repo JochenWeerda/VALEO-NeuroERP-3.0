@@ -437,6 +437,7 @@ Bulk-Migration der organisch gewachsenen Doku in Diátaxis + internes Archiv.
 
 **Fortlaufend:** Inventar `python scripts/docs-legacy-migrate.py --inventory-only`;
 Details: [`migrationsplan.md`](../dokumentation/migrationsplan.md).
+ADR-Nav: `python scripts/generate_adr_nav.py` nach neuer ADR-Datei (`DOC-MIGRATION-009`).
 
 ---
 

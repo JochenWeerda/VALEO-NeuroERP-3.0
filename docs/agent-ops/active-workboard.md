@@ -4497,6 +4497,12 @@ Archiv des vorherigen Boards:
 **Stand:** abgeschlossen 2026-06-26 — Phase C (CRM/i18n/GAP in Archiv) dokumentiert; Duplikat-Inventar klassifiziert (140 harmlos / 0 offen); `docs/index.md` + Open-Gaps + Migrationsplan-Abschluss; 0 Archiv-Kandidaten.
 **Dateibesitz:** `scripts/docs-legacy-migrate.py`, `docs/_internal/legacy-docs-inventory.md`, `docs/dokumentation/migrationsplan.md`, `docs/index.md`, `docs/project-context/open-gaps-and-known-issues.md`, `docs/agent-ops/slices/DOC-MIGRATION-008.yaml`.
 
+## DOC-MIGRATION-009 — ADR-Navigation in MkDocs (Generator)
+
+**Owner:** Cursor
+**Stand:** abgeschlossen 2026-06-26 — `scripts/generate_adr_nav.py` patcht 38 ADRs in `mkdocs.yml`; CI-Drift-Check in `docs.yml`; 4 Unit-Tests grün; `mkdocs build` grün.
+**Dateibesitz:** `scripts/generate_adr_nav.py`, `tests/test_generate_adr_nav.py`, `mkdocs.yml`, `.github/workflows/docs.yml`, `docs/agent-ops/slices/DOC-MIGRATION-009.yaml`.
+
 ---
 
 ## CARD-AUDIT-Follow-up (2026-06-26)
