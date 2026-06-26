@@ -1,4 +1,4 @@
-"""OPERATOR-AGENT-001 — API fuer den ERP-Operator-Agent (Read-Only/Proposal-Modus)."""
+"""OPERATOR-AGENT-001 — API fuer den ERP-Operator-Agent (Proposal + LOW-Risiko-Execute)."""
 
 from __future__ import annotations
 
@@ -45,6 +45,10 @@ class ApproveRequest(BaseModel):
 class RejectRequest(BaseModel):
     rejected_by: str
     reason: str
+
+
+class ExecuteRequest(BaseModel):
+    executed_by: str
 
 
 @router.post("/context", summary="Kontext fuer Agent-Aktion lesen", response_model=dict[str, Any])
@@ -174,4 +178,30 @@ async def reject_proposal(
     except ProposalNotFoundError as exc:
         raise HTTPException(status_code=404, detail=str(exc)) from exc
     except ValueError as exc:
+        raise HTTPException(status_code=409, detail=str(exc)) from exc
+
+
+@router.post(
+    "/proposals/{proposal_id}/execute",
+    summary="Genehmigte LOW-Risiko-Aktion direkt ausfuehren",
+    response_model=dict[str, Any],
+)
+async def execute_proposal(
+    proposal_id: str,
+    req: ExecuteRequest,
+    tenant_id: str = Depends(get_tenant_id),
+    roles: set[str] = Depends(_roles),
+) -> dict[str, Any]:
+    try:
+        return operator_agent_service.execute_approved_action(
+            tenant_id=tenant_id,
+            proposal_id=proposal_id,
+            executed_by=req.executed_by,
+            roles=roles,
+        )
+    except OperatorAgentPermissionError as exc:
+        raise HTTPException(status_code=403, detail=str(exc)) from exc
+    except ProposalNotFoundError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+    except (ValueError, PermissionError) as exc:
         raise HTTPException(status_code=409, detail=str(exc)) from exc

@@ -76,6 +76,11 @@
       "source": "auto"
     },
     {
+      "module": "@/pages/admin/externe-gates",
+      "path": "admin/externe-gates",
+      "source": "auto"
+    },
+    {
       "module": "@/pages/admin/audit-log",
       "path": "admin/audit-log",
       "source": "auto"

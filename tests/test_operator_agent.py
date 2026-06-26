@@ -1,4 +1,4 @@
-"""Tests fuer OPERATOR-AGENT-001 Read-Only/Proposal-Modus."""
+"""Tests fuer OPERATOR-AGENT-001 Proposal + LOW-Risiko-Execute."""
 
 import pytest
 from app.services.operator_agent_service import (
@@ -14,6 +14,7 @@ TENANT = "tenant-agent-test"
 READ_ROLES = {"agent:read"}
 PROPOSE_ROLES = {"agent:read", "agent:propose"}
 APPROVE_ROLES = {"agent:read", "agent:propose", "agent:approve"}
+EXECUTE_ROLES = {"agent:read", "agent:propose", "agent:approve", "agent:execute"}
 
 
 @pytest.fixture()
@@ -164,3 +165,82 @@ def test_list_proposals_filter_by_status(svc: OperatorAgentService) -> None:
     assert all(p.approval_status == ApprovalStatus.PENDING for p in pending)
     approved = svc.list_proposals(tenant_id=TENANT, status=ApprovalStatus.APPROVED)
     assert all(p.approval_status == ApprovalStatus.APPROVED for p in approved)
+
+
+# ── Execute LOW-Risiko-Aktionen ────────────────────────────────────────────────
+
+def _approved_low_risk_proposal(svc: OperatorAgentService, action: AgentActionType):
+    p = svc.create_proposal(
+        tenant_id=TENANT, action_type=action, roles=PROPOSE_ROLES,
+        context_summary="test", proposed_action="ausfuehren", rationale="low risk",
+    )
+    svc.approve_proposal(tenant_id=TENANT, proposal_id=p.proposal_id,
+                         approved_by="manager", roles=APPROVE_ROLES)
+    return p
+
+
+def test_execute_requires_agent_execute_role(svc: OperatorAgentService) -> None:
+    p = _approved_low_risk_proposal(svc, AgentActionType.ANGEBOT_NACHFASSEN_EXECUTE)
+    with pytest.raises(OperatorAgentPermissionError):
+        svc.execute_approved_action(tenant_id=TENANT, proposal_id=p.proposal_id,
+                                    executed_by="bot", roles=APPROVE_ROLES)
+
+
+def test_execute_angebot_nachfassen(svc: OperatorAgentService) -> None:
+    p = _approved_low_risk_proposal(svc, AgentActionType.ANGEBOT_NACHFASSEN_EXECUTE)
+    result = svc.execute_approved_action(tenant_id=TENANT, proposal_id=p.proposal_id,
+                                         executed_by="bot", roles=EXECUTE_ROLES)
+    assert result["action_type"] == AgentActionType.ANGEBOT_NACHFASSEN_EXECUTE.value
+    assert "crm.angebot.nachgefasst" in result["result"]["outbox_event"]
+    assert result["result"]["simulated"] is True
+
+
+def test_execute_dms_paket_senden(svc: OperatorAgentService) -> None:
+    p = _approved_low_risk_proposal(svc, AgentActionType.DMS_PAKET_SENDEN_EXECUTE)
+    result = svc.execute_approved_action(tenant_id=TENANT, proposal_id=p.proposal_id,
+                                         executed_by="bot", roles=EXECUTE_ROLES)
+    assert "dms.paket.gesendet" in result["result"]["outbox_event"]
+
+
+def test_execute_gate_status_aktualisieren(svc: OperatorAgentService) -> None:
+    p = _approved_low_risk_proposal(svc, AgentActionType.GATE_STATUS_AKTUALISIEREN_EXECUTE)
+    result = svc.execute_approved_action(tenant_id=TENANT, proposal_id=p.proposal_id,
+                                         executed_by="bot", roles=EXECUTE_ROLES)
+    assert "gate.status.aktualisiert" in result["result"]["outbox_event"]
+
+
+def test_execute_fails_for_non_approved_proposal(svc: OperatorAgentService) -> None:
+    p = svc.create_proposal(
+        tenant_id=TENANT, action_type=AgentActionType.ANGEBOT_NACHFASSEN_EXECUTE,
+        roles=PROPOSE_ROLES, context_summary="x", proposed_action="y", rationale="z",
+    )
+    with pytest.raises(ValueError, match="APPROVED"):
+        svc.execute_approved_action(tenant_id=TENANT, proposal_id=p.proposal_id,
+                                    executed_by="bot", roles=EXECUTE_ROLES)
+
+
+def test_execute_fails_for_high_risk_action(svc: OperatorAgentService) -> None:
+    p = svc.create_proposal(
+        tenant_id=TENANT, action_type=AgentActionType.MAHNUNG_VORSCHLAG,
+        roles=PROPOSE_ROLES, context_summary="x", proposed_action="y", rationale="z",
+    )
+    svc.approve_proposal(tenant_id=TENANT, proposal_id=p.proposal_id,
+                         approved_by="manager", roles=APPROVE_ROLES)
+    with pytest.raises(PermissionError):
+        svc.execute_approved_action(tenant_id=TENANT, proposal_id=p.proposal_id,
+                                    executed_by="bot", roles=EXECUTE_ROLES)
+
+
+def test_execute_writes_audit_event(svc: OperatorAgentService) -> None:
+    p = _approved_low_risk_proposal(svc, AgentActionType.ANGEBOT_NACHFASSEN_EXECUTE)
+    svc.execute_approved_action(tenant_id=TENANT, proposal_id=p.proposal_id,
+                                executed_by="bot", roles=EXECUTE_ROLES)
+    events = [e["event"] for e in p.audit_events]
+    assert "action_executed" in events
+
+
+def test_new_low_risk_action_types_have_correct_risk() -> None:
+    from app.services.operator_agent_service import _RISK_BY_ACTION, AgentRiskLevel
+    assert _RISK_BY_ACTION[AgentActionType.ANGEBOT_NACHFASSEN_EXECUTE] == AgentRiskLevel.LOW
+    assert _RISK_BY_ACTION[AgentActionType.DMS_PAKET_SENDEN_EXECUTE] == AgentRiskLevel.LOW
+    assert _RISK_BY_ACTION[AgentActionType.GATE_STATUS_AKTUALISIEREN_EXECUTE] == AgentRiskLevel.LOW

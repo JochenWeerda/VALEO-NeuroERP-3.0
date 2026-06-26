@@ -371,6 +371,15 @@ export const RAW_NAV_SECTIONS: RawNavItem[] = [
         mcp: { businessDomain: 'admin', scope: 'admin:write' },
       },
       {
+        id: 'externe-gates',
+        label: 'Externe Gates',
+        icon: Zap,
+        module: '@/pages/admin/externe-gates',
+        preferredPath: 'admin/externe-gates',
+        keywords: ['datev', 'elster', 'tse', 'dms', 'bank', 'sepa', 'integration', 'gate', 'extern'],
+        mcp: { businessDomain: 'admin', scope: 'admin:read' },
+      },
+      {
         id: 'voice-channel',
         label: 'Voice-Kanal',
         icon: Mic,
