@@ -1,0 +1,63 @@
+slice_id: WA-NOTIFY-001
+title: "WhatsApp Ausgehende Push-Benachrichtigungen"
+owner: Claude Sonnet 4.6
+status: completed
+created_at: "2026-06-26"
+goal: >-
+  Ausgehende WhatsApp-Nachrichten als Push-Kanal zum Kunden:
+  1. Lieferankündigung wenn LKW ~1h entfernt (Logistik-Trigger)
+  2. Dokument-Bereitstellung wenn Lieferschein/Rechnung erstellt (Docflow-Trigger)
+  Simulator mit Outbox-Log; Produktions-Anbindung via Meta Cloud API
+  (WHATSAPP_ACCESS_TOKEN + WHATSAPP_PHONE_NUMBER_ID).
+
+file_ownership:
+  - app/services/whatsapp_notify_service.py
+  - app/api/v1/endpoints/whatsapp_notify.py
+  - packages/frontend-web/src/pages/portal/whatsapp-simulator.tsx  # erweitert
+  - tests/test_whatsapp_notify.py
+  - docs/agent-ops/slices/WA-NOTIFY-001.yaml
+
+acceptance_criteria:
+  - POST /api/v1/whatsapp/dev/notify/lieferankuendigung gibt msg_id + status zurück
+  - POST /api/v1/whatsapp/dev/notify/dokument-ready gibt msg_id + text zurück
+  - GET /api/v1/whatsapp/dev/outbox zeigt alle gesendeten Nachrichten
+  - Simulator-UI Tab "Ausgehend (Push)" und "Outbox" funktionieren
+  - Tenant-Isolation: Outbox pro Mandant isoliert
+  - Mit WHATSAPP_ACCESS_TOKEN: echter Meta-API-Aufruf (HMAC-gesichert)
+
+checks:
+  - pytest tests/test_whatsapp_notify.py -q --no-cov
+
+ai_harness:
+  fachlicher_vertrag: >-
+    Lieferankündigung-Trigger: Logistik/Disposition → POST /notify/lieferankuendigung.
+    Dokument-Trigger: Docflow nach Erstellung → POST /notify/dokument-ready.
+    Text enthält: Kunden-Name, Artikel, Menge, ETA bzw. Dokumenten-Nr. + Portal-Link.
+  architektur_vertrag: >-
+    Tenant-isolierter In-Memory-Outbox (_OUTBOX). Meta-API-Aufruf über httpx wenn
+    WHATSAPP_ACCESS_TOKEN gesetzt. Fallback: status='simulated'.
+    Router unter /api/v1/whatsapp/* (gleicher Prefix wie WA-AGENT-001).
+  daten_vertrag: >-
+    Outbox-Einträge: msg_id, phone, notify_type, text, status, created_at.
+    Kein personenbezogener Log in Produktionsmodus.
+  test_vertrag: >-
+    Unit-Tests ohne echten Meta-Aufruf (kein WHATSAPP_ACCESS_TOKEN gesetzt → simulated).
+    Tenant-Isolation, Eindeutigkeit msg_id, Outbox-Chronologie geprüft.
+  security_vertrag: >-
+    Produktions-Meta-Aufruf nur mit gesetztem WHATSAPP_ACCESS_TOKEN.
+    Dev-Endpoints /dev/* nur für lokale Entwicklung.
+  betriebs_vertrag: >-
+    Env-Vars: WHATSAPP_ACCESS_TOKEN, WHATSAPP_PHONE_NUMBER_ID, PORTAL_BASE_URL.
+    httpx muss installiert sein (bereits in requirements).
+  dokumentations_vertrag: >-
+    Slice-YAML + Workboard-Eintrag.
+
+integration_points:
+  - Logistik-/Dispositions-Service → POST /api/v1/whatsapp/dev/notify/lieferankuendigung
+  - Docflow-Service → POST /api/v1/whatsapp/dev/notify/dokument-ready
+  - WA-AGENT-001 (Eingehend, gleicher Router-Prefix)
+
+risks: >-
+  httpx muss installiert sein. Meta-API-Aufruf ist synchron (blocking) — in Produktion
+  sollte ein Background-Task (FastAPI BackgroundTasks) verwendet werden. In-Memory-Outbox
+  geht bei Restart verloren — Redis-Persistenz als WA-INFRA-001 Scope.

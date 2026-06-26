@@ -1,0 +1,42 @@
+slice_id: PORTAL-SHOP-001
+title: "Betriebsmittel-Online-Shop im Kundenportal"
+owner: Claude Sonnet 4.6 + Cursor (Backend)
+status: completed
+created_at: "2026-06-26"
+goal: >-
+  Landwirte können über das Kundenportal Betriebsmittel (Saatgut, Düngemittel, PSM)
+  mit Kontrakt-/Vorkauf-Preisen bestellen. Bestellungen landen im ERP als
+  CustomerOrder mit vollständigem Status-Lifecycle.
+
+file_ownership:
+  - app/api/v1/endpoints/portal_shop.py          # vollständig (Cursor)
+  - packages/frontend-web/src/pages/portal/shop.tsx  # vollständig (Cursor)
+  - app/infrastructure/models/portal_models.py   # Datenmodell (Cursor)
+  - app/api/v1/schemas/portal.py                 # Schemata (Cursor)
+  - docs/agent-ops/slices/PORTAL-SHOP-001.yaml   # Doku (Claude)
+
+acceptance_criteria:
+  - GET /portal/products liefert Artikel mit Kontrakt-/Vorkauf-Status
+  - POST /portal/orders legt Bestellung an mit Idempotenz-Key
+  - GET /portal/orders listet Bestellungen des Kunden
+  - PATCH /portal/orders/{id}/status validiert Zustandsübergänge
+  - GET /portal/orders/reconciliation findet inkonsistente Bestellungen
+  - Frontend /portal/shop zeigt Produktkatalog + Warenkorb + Checkout
+
+ai_harness:
+  fachlicher_vertrag: >-
+    Produktkatalog mit Kategorie-Filter + Suche. Vorkauf-Guthaben wird zuerst verbraucht.
+    Kontrakt-Preise als Fallback. Listenpreise wenn kein Kontrakt/Vorkauf.
+    Idempotenz via X-Idempotency-Key. Status-Maschine:
+    DRAFT → SUBMITTED → CONFIRMED → IN_PROGRESS → SHIPPED → DELIVERED.
+  architektur_vertrag: >-
+    DB-backed (CustomerOrder, CustomerOrderItem, CustomerContract, CustomerPrePurchase).
+    Multi-Tenant (tenant_id Query-Param). Auth via JWT/X-User-ID.
+    Idempotenz-Key in DB gespeichert. Reconciliation-Endpoint für Ops.
+  integration_points:
+    - WA-AGENT-001: WhatsApp-Bestellungen ergänzen Shop-Bestellungen
+    - WA-NOTIFY-001: Dokument-Ready Benachrichtigung nach Lieferung
+
+note: >-
+  Backend und Frontend waren bereits vollständig durch Cursor implementiert.
+  Slice-YAML dient der Dokumentation und Governance-Compliance.

@@ -2174,3 +2174,7 @@ api_router.include_router(portal_innendienst.router, tags=["innendienst", "porta
 # WA-AGENT-001: WhatsApp Bestellkanal + Dev-Simulator
 from app.api.v1.endpoints import whatsapp_webhook  # noqa: E402
 api_router.include_router(whatsapp_webhook.router, prefix="/whatsapp", tags=["WhatsApp"])
+
+# WA-NOTIFY-001: Ausgehende WhatsApp Push-Benachrichtigungen
+from app.api.v1.endpoints import whatsapp_notify  # noqa: E402
+api_router.include_router(whatsapp_notify.router, prefix="/whatsapp", tags=["WhatsApp"])
