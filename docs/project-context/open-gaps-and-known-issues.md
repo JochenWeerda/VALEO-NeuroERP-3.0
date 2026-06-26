@@ -450,25 +450,25 @@ ADR-Nav: `python scripts/generate_adr_nav.py` nach neuer ADR-Datei (`DOC-MIGRATI
 
 Kompakte Übersicht echter Lücken (repo-seitig lösbar, nicht extern blockiert):
 
-| Thema | Slice / Tracker | Prio |
-|---|---|---|
-| WF-Cockpit: Persistenz, NATS-Projektor, UI-Leitstand, Dead-Letter, Retry | VALEO-WF-COCKPIT-001 (offen) | P1 |
-| Lager/WMS: FEFO-Pick-Listen, Bestandsbewertung FIFO/Ø, Permanente Inventur | WMS-FEFO-001 ff. (nicht gestartet) | P1 |
-| Runtime 5xx Kat. A: fehlende DB-Tabellen (Admin-Mobile, einkauf/lieferscheine, crm/pipeline) | neue Migrations-Slices | P1 |
-| Runtime 5xx Kat. C: Custom-Envelope-Validierung (18 Endpoints) | globaler Middleware-Fix | P1 |
-| Runtime 5xx Kat. E: MCP-Tools-YAML fehlt | MCP-ERP-TOOLS-001 | P2 |
-| Runtime 5xx Kat. F: `/api/v1/logistik/frachtbriefe` kein Backend-Endpoint | LOG-FRACHTBRIEF-001 | P2 |
-| Finanz-Abschluss-Stubs (calculate/lock/run) | FIN-ABSCHLUSS-STUBS-001 | P1 |
-| CMP UStVA `.data`-Bug im API-Client | CMP-UStVA-API-CLIENT-001 | P2 |
-| CRM Legacy-Pfade `/api/crm/` → `/api/v1/crm/` | CRM-LEGACY-API-MIGRATE-001 | P2 |
-| Compliance CamelCase Register | COM-REGISTER-CAMELCASE-001 | P2 |
-| Agrar Silo: Zielzellen-Regelengine (WE/Waage → Silozelle automatisch) | WM-AGRI-MAP-001 (Folge-Slice) | P2 |
-| Futtermittel: HACCP, VLOG-Meldung, QS-Leitfaden vollständig | FEED-QS-001 (nicht gestartet) | P3 |
-| CRM: RAG-Panel + Intent-Bar in `LegacyKundenStammModern.tsx` | TAIL-CRM-001 (restl. Teil) | P3 |
-| NaWaRo: Druck-/Vorschau-/Serienbrief-Pfad vollständig | TAIL-NAWARO-001 | P3 |
-| Agrar PSM-Beratung Demo-Fallback; Saatgut-Edit-Flow Placeholder | TAIL-AGRI-001 | P3 |
-| Sales `orders-modern.tsx` Export/Import/Archiv (Toast → echter Pfad) | TAIL-SALES-001 | P3 |
-| Coverage: Ratchet für weitere kritische Pfade anheben (aktuell 64,85 %) | COVERAGE-001 (laufend) | P2 |
+| Thema | Slice / Tracker | Prio | Quelle (zum Rückschreiben) |
+|---|---|---|---|
+| WF-Cockpit: Persistenz, NATS-Projektor, UI-Leitstand, Dead-Letter, Retry | VALEO-WF-COCKPIT-001 (offen) | P1 | `open-gaps-and-known-issues.md` § P1 VALEO-WF-COCKPIT-001 |
+| Lager/WMS: FEFO-Pick-Listen, Bestandsbewertung FIFO/Ø, Permanente Inventur | WMS-FEFO-001 ff. (nicht gestartet) | P1 | `domain-depth-plan-2026-05-17.md` § 3 Lager/WMS · `open-gaps-and-known-issues.md` § DOMAIN-PARITY-001 |
+| Runtime 5xx Kat. A: fehlende DB-Tabellen (Admin-Mobile, einkauf/lieferscheine, crm/pipeline) | neue Migrations-Slices | P1 | `open-gaps-and-known-issues.md` § RUNTIME-API-SWEEP-001 Kat. A |
+| Runtime 5xx Kat. C: Custom-Envelope-Validierung (18 Endpoints) | globaler Middleware-Fix | P1 | `open-gaps-and-known-issues.md` § RUNTIME-API-SWEEP-001 Kat. C |
+| Runtime 5xx Kat. E: MCP-Tools-YAML fehlt | MCP-ERP-TOOLS-001 | P2 | `open-gaps-and-known-issues.md` § RUNTIME-API-SWEEP-001 Kat. E |
+| Runtime 5xx Kat. F: `/api/v1/logistik/frachtbriefe` kein Backend-Endpoint | LOG-FRACHTBRIEF-001 | P2 | `open-gaps-and-known-issues.md` § RUNTIME-API-SWEEP-001 Kat. F |
+| Finanz-Abschluss-Stubs (calculate/lock/run) | FIN-ABSCHLUSS-STUBS-001 | P1 | `open-gaps-and-known-issues.md` § CARD-AUDIT-001 · `docs/cards/fibu/FIN-001*.md` |
+| CMP UStVA `.data`-Bug im API-Client | CMP-UStVA-API-CLIENT-001 | P2 | `open-gaps-and-known-issues.md` § CARD-AUDIT-001 · `docs/cards/compliance/CMP-001*.md` |
+| CRM Legacy-Pfade `/api/crm/` → `/api/v1/crm/` | CRM-LEGACY-API-MIGRATE-001 | P2 | `open-gaps-and-known-issues.md` § CARD-AUDIT-001 · `docs/cards/crm/CRM-001*.md` |
+| Compliance CamelCase Register | COM-REGISTER-CAMELCASE-001 | P2 | `open-gaps-and-known-issues.md` § CARD-AUDIT-001 · `docs/cards/compliance/COM-001*.md` |
+| Agrar Silo: Zielzellen-Regelengine (WE/Waage → Silozelle automatisch) | WM-AGRI-MAP-001 (Folge-Slice) | P2 | `open-gaps-and-known-issues.md` § DOMAIN-PARITY-001 WM-AGRI-SUPPLY-LINK-001 |
+| Futtermittel: HACCP, VLOG-Meldung, QS-Leitfaden vollständig | FEED-QS-001 (nicht gestartet) | P3 | `domain-depth-plan-2026-05-17.md` § 10 Futtermittel · `open-gaps-and-known-issues.md` § Enterprise-Domain-Gap-Closure |
+| CRM: RAG-Panel + Intent-Bar in `LegacyKundenStammModern.tsx` | TAIL-CRM-001 (restl. Teil) | P3 | `professional-tail-gap-plan-2026-04-09.md` § 2 CRM Modernisierung · TAIL-CRM-001 |
+| NaWaRo: Druck-/Vorschau-/Serienbrief-Pfad vollständig | TAIL-NAWARO-001 | P3 | `professional-tail-gap-plan-2026-04-09.md` § 1 NaWaRo-Kommunikation · TAIL-NAWARO-001 |
+| Agrar PSM-Beratung Demo-Fallback; Saatgut-Edit-Flow Placeholder | TAIL-AGRI-001 | P3 | `professional-tail-gap-plan-2026-04-09.md` § 3 Agrar Beratung · TAIL-AGRI-001 |
+| Sales `orders-modern.tsx` Export/Import/Archiv (Toast → echter Pfad) | TAIL-SALES-001 | P3 | `professional-tail-gap-plan-2026-04-09.md` § 4 Sales Modern Surface · TAIL-SALES-001 |
+| Coverage: Ratchet für weitere kritische Pfade anheben (aktuell 64,85 %) | COVERAGE-001 (laufend) | P2 | `open-gaps-and-known-issues.md` § COVERAGE-001 · `docs/quality-assurance/critical-backend-coverage-plan-2026-04-24.md` |
 
 **Extern blockiert** (kein Repo-Fortschritt möglich): DATEV-Steuerberater-Cutover,
 DMS-Live-Probe (`PAPERLESS_URL`), reale TSE-/DSFinV-K-Prüfwerkzeug-Abnahme,
