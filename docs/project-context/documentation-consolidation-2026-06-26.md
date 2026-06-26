@@ -77,8 +77,12 @@ erneut geprueft und bei Bedarf aktualisiert werden.
 4. **Runtime-Sweep-Restliste erneut live verifizieren.**
    `open-gaps-and-known-issues.md` fuehrt noch Restkategorien aus dem
    Live-Sweep: fehlende Tabellen/Migrationen, Response-Envelope-Validierung,
-   fehlende Konfiguration und einzelne Feature-Luecken. Ein neuer Sweep muss
-   trennen, was durch Folgeslices bereits geschlossen ist.
+   fehlende Konfiguration und einzelne Feature-Luecken.
+   **Welle-5-Nachzug (2026-06-26):** Kat. C (`health/live`, `ebilanz/taxonomie-felder`),
+   Kat. E (`mcp/tools`), Kat. F (`logistik/frachtbriefe`) sind in `open-gaps-and-known-issues.md`
+   als geschlossen markiert. Verbleibend: Kat. A (fehlende DB-Tabellen), restliche Kat. C
+   (`mcp/policy/list`, `einkauf/*`, `inventory/warehouses`), Kat. E (Proplanta).
+   Ein neuer Live-Sweep muss die aktuelle Lage der A/C-Restkandidaten verifiizieren.
    *Quellen:* `open-gaps-and-known-issues.md` § RUNTIME-API-SWEEP-001 (Kat. A–F)
    *Rueckschreiben bei Schliessung:* jeweilige Kategorie in § RUNTIME-API-SWEEP-001 als behoben kennzeichnen + § Konsolidiertes Restbacklog.
 

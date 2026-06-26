@@ -31,7 +31,7 @@ Aggregierte Gesamtsicht: [PROJEKT-GESAMTSTAND-2026-05-27.md](../PROJEKT-GESAMTST
 - **Response-Model-Coverage**: Nachzug 2026-06-25: External-Mock-Harness-Routen tragen `response_model` gate-kompatibel vor Summary-Texten mit Klammern; verhindert False-Negative im Regex-basierten CI-Check.
 - **Response-Model-Coverage**: Nachzug 2026-06-25b: Workflow-Cockpit-Persistenz und Silo-Zielzellen-Regelengine mit expliziten `response_model`-Metadaten versehen; Gate wieder bei 80 untypisierten Legacy-Routen.
 - **Frontend-Imports**: 0 gebrochene Importe (letzter Nachweis 2026-05-27). Nachzug 2026-06-26: Portal-/CRM-Buildbruch aus dem E2E-Smoke geschlossen (`potential-analyse`, `empfehlungen`, `whatsapp-simulator`): falsche Default-API-Imports auf named `apiClient`, Toast-Hook auf kanonischen `@/hooks/use-toast`, fehlende JSX-Funktionsklammer in `empfehlungen`; lokaler Nachweis `pnpm --dir packages/frontend-web build` gruen.
-- **Alembic**: 1 Head (`external_mock_sessions_20260623`) — linear nach EXTERNAL-MOCK-HARNESS-001 (2026-06-25; vorher `meldewesen_lifecycle_20260623`)
+- **Alembic**: 1 Head (`log_frachtbriefe_20260626`) — linear nach LOG-FRACHTBRIEF-001 (2026-06-26; vorher `external_mock_sessions_20260623`)
 - **DOM-*-004-Tiefenwelle (2026-06-11/12)**: ~90 neue reine Logik-Unit-Tests gruen; 5 Live-UAT-Skripte (`scripts/uat/{con_contract,sales_o2c,fin_op,doc_nachweisraum,proc_match}_lifecycle_uat.py`, `--execute` mit DB-Restore); Frontend `tsc 0` + ESLint clean je Slice
 - **Docker-Erstinstallation**: Alembic-Bootstrap und Mehr-Domaenen-Struktur auf leerer DB abgesichert
 - **Service-Layer**: Hauptwellen refaktoriert; Legacy-Endpunkte `harvest_acceptance.py`, `agrar_settlements.py` und `docflow.py` repo-seitig mit dedizierten Services nachgezogen (Stand 2026-05-21)
@@ -109,11 +109,13 @@ Migrations-/Config-Hinweis: `/api/v1/analytics`, `/api/v1/contracts`,
 `/api/v1/personal/applications`, `/api/v1/channels/whatsapp/webhook`.
 
 **C. Custom Response-Envelope-Validierung (500, Format „N validation errors:")**
-— globaler Middleware-Vertrag (kein blinder Eingriff): `/api/v1/health/health/live`,
+— globaler Middleware-Vertrag (kein blinder Eingriff):
+~~`/api/v1/health/health/live`~~ (RUNTIME-KAT-C-001 2026-06-26 geschlossen: `return StatusResponse(success=True, message="alive")`),
 `/api/v1/mcp/policy/list` (+ `/api/mcp/policy/list`), `/api/v1/messages/health`,
 `/api/v1/crm/{bestell-inbox, kaeufergruppe/katalog}`,
 `/api/v1/einkauf/{lieferanten, kontrakte, lager-konten, artikel-lager-parameter,
-fremdwaren-einlagerung}`, `/api/v1/ebilanz/taxonomie-felder`,
+fremdwaren-einlagerung}`,
+~~`/api/v1/ebilanz/taxonomie-felder`~~ (RUNTIME-KAT-C-001 2026-06-26 geschlossen: `response_model=list[EbilanzElsterOut]`),
 `/api/v1/inventory/warehouses/` (PaginatedResponse).
 
 **D. Code-Bugs (Attribut/Daten):** Nachzug 2026-06-25: drei Runtime-5xx
@@ -133,14 +135,13 @@ rollt nach optional fehlender Produktionsdomäne zurueck und liefert bei
 SQLAlchemy-Laufzeitfehlern eine leere Liste. Kategorie D ist damit repo-seitig
 abgearbeitet; ein erneuter Live-Sweep muss die Restliste verifizieren.
 
-**E. Fehlende Konfiguration/Datei (500 statt 503):** `/api/v1/mcp/tools[/summary]`
-(`/app/config/mcp_erp_tools.yaml` fehlt — vgl. Slice `MCP-ERP-TOOLS-001`),
+**E. Fehlende Konfiguration/Datei (500 statt 503):**
+~~`/api/v1/mcp/tools[/summary]`~~ (MCP-ERP-TOOLS-001 2026-06-26 geschlossen: `app/config/mcp_erp_tools.yaml` mit 21 Tools angelegt),
 `/api/v1/agrar/psm/proplanta/{list, stats/overview}` (Proplanta nicht konfiguriert).
 
 **F. Feature-Lücke (404, vom Frontend mit `initialData:[]` abgefangen):**
-`GET /api/v1/logistik/frachtbriefe` hat keinen Backend-Endpoint
-(`useFrachtbriefe` in `lib/api/misc-modules.ts`); `/logistik/tours` und
-`/logistik/freight-tariffs` existieren. Kein Crash, nur leere Liste.
+~~`GET /api/v1/logistik/frachtbriefe`~~ (LOG-FRACHTBRIEF-001 2026-06-26 geschlossen: Alembic `domain_logistics.frachtbriefe` + GET/POST/PATCH Endpoint).
+Keine weiteren bekannten F-Lücken nach Wave 5.
 
 ---
 
@@ -306,6 +307,14 @@ abgearbeitet; ein erneuter Live-Sweep muss die Restliste verifizieren.
 
 ---
 
+## Zuletzt geschlossene Punkte (Welle 5, 2026-06-26)
+
+- ~~**RUNTIME-KAT-C-001**~~ → `health/live` liefert jetzt `StatusResponse(success=True, message="alive")` statt rohem Dict; `ebilanz/taxonomie-felder` deklariert `response_model=list[EbilanzElsterOut]` korrekt. Beide 500er aus der Sweep-Kat.-C-Liste behoben.
+- ~~**MCP-ERP-TOOLS-001**~~ → `app/config/mcp_erp_tools.yaml` mit 21 Tool-Definitionen angelegt; `GET /api/v1/mcp/tools` und `/summary` liefern 200 statt 500/FileNotFoundError.
+- ~~**LOG-FRACHTBRIEF-001**~~ → Alembic-Migration `domain_logistics.frachtbriefe` + Thin-Router `GET/POST /logistik/frachtbriefe` + `PATCH .../status`; Sweep-Kat.-F-Lücke und Frontend-404 behoben.
+
+---
+
 ## Agrar-Spezialsoftware/Externe-Plattform Paritaets-Gaps (2026-05-17, aktualisiert)
 
 Analysen:
@@ -462,15 +471,16 @@ Kompakte Übersicht echter Lücken (repo-seitig lösbar, nicht extern blockiert)
 ~~Bestandsbewertung~~ → `stock_valuation` Endpoint ·
 ~~CMP UStVA .data-Bug~~ → `ustva.ts` nutzt `response.data` korrekt ·
 ~~Runtime Kat. A: einkauf/lieferscheine~~ → `einkauf_lieferschein.py` + Migration ·
-~~Runtime Kat. A: crm/pipeline~~ → `opportunities.py` Endpoint + Migration
+~~Runtime Kat. A: crm/pipeline~~ → `opportunities.py` Endpoint + Migration ·
+~~Runtime Kat. C: health/live + ebilanz/taxonomie-felder~~ → RUNTIME-KAT-C-001 (Welle 5) ·
+~~Runtime Kat. E: mcp/tools + mcp/tools/summary~~ → MCP-ERP-TOOLS-001 (Welle 5) ·
+~~Runtime Kat. F: logistik/frachtbriefe~~ → LOG-FRACHTBRIEF-001 (Welle 5)
 
 | Thema | Slice / Tracker | Prio | Quelle (zum Rückschreiben) |
 |---|---|---|---|
 | WF-Cockpit: Dead-Letter-Sicht, NATS-Projektor-Anbindung | VALEO-WF-COCKPIT-002 | P2 | `open-gaps-and-known-issues.md` § P1 VALEO-WF-COCKPIT-001 |
 | Runtime 5xx Kat. A: fehlende DB-Tabellen (Admin-Mobile: devices, scan_profiles, stations, mobile-routing) | RUNTIME-KAT-A-001 | P1 | `open-gaps-and-known-issues.md` § RUNTIME-API-SWEEP-001 Kat. A |
-| Runtime 5xx Kat. C: Custom-Envelope-Validierung (einkauf_lieferanten, ebilanz, crm_bestell_inbox, inventory/warehouses u.a.) | RUNTIME-KAT-C-001 | P1 | `open-gaps-and-known-issues.md` § RUNTIME-API-SWEEP-001 Kat. C |
-| Runtime 5xx Kat. E: MCP-Tools-YAML fehlt (`app/config/mcp_erp_tools.yaml`) | MCP-ERP-TOOLS-001 | P2 | `open-gaps-and-known-issues.md` § RUNTIME-API-SWEEP-001 Kat. E |
-| Runtime 5xx Kat. F: `/api/v1/logistik/frachtbriefe` kein Backend-Endpoint | LOG-FRACHTBRIEF-001 | P2 | `open-gaps-and-known-issues.md` § RUNTIME-API-SWEEP-001 Kat. F |
+| Runtime 5xx Kat. C Restliste: Custom-Envelope-Validierung (`mcp/policy/list`, `einkauf/lieferanten`, `crm/bestell-inbox`, `inventory/warehouses`) | RUNTIME-KAT-C-002 | P1 | `open-gaps-and-known-issues.md` § RUNTIME-API-SWEEP-001 Kat. C |
 | Agrar Silo: Zielzellen-Regelengine (WE/Waage → Silozelle automatisch) | WM-AGRI-MAP-001 | P2 | `open-gaps-and-known-issues.md` § DOMAIN-PARITY-001 WM-AGRI-SUPPLY-LINK-001 |
 | Logistik: Track & Trace, ePOD, `tour_events` | LOG-TRACK-001 | P2 | `domain-depth-plan-2026-05-17.md` § 7 Logistik · `open-gaps-and-known-issues.md` § DOMAIN-PARITY-001 |
 | Futtermittel: HACCP, VLOG-Meldung, QS-Leitfaden vollständig | FEED-QS-001 | P3 | `domain-depth-plan-2026-05-17.md` § 10 Futtermittel · `open-gaps-and-known-issues.md` § Enterprise-Domain-Gap-Closure |
