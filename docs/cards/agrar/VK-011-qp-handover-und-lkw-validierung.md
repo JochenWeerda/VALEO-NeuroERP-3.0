@@ -1,3 +1,15 @@
+---
+card_id: VK-011
+chain: harvest-to-settlement
+chain_step: 2
+card_type: process-step
+parent_card: VK-010
+related_cards: [VK-018, VK-012]
+flow_spine: flow-spine-harvest-to-settlement
+workflow_doc: docs/workflows/vk-011-qp-handover-und-lkw-validierung.md
+overlaps: [SEC-029]
+---
+
 # Card: VK-011 - Qualitaets-Check Handover und LKW-Wizard-Validierung
 
 ## 1. Einordnung

@@ -1,3 +1,14 @@
+---
+card_id: OTC-010
+chain: order-to-cash
+chain_step: 0
+card_type: overview
+related_cards: [OTC-011]
+flow_spine: flow-spine-order-to-cash
+workflow_doc: docs/workflows/otc-010-order-to-cash.md
+overlaps: [SEC-031, SEC-032]
+---
+
 # OTC-010 — Order-to-Cash (Card)
 
 **Slice:** OTC-010 | **Lane:** Order-to-Cash | **Owner:** Claude Sonnet 4.6 | **Datum:** 2026-03-27
@@ -79,7 +90,7 @@ lieferschein-erfassung.tsx
 | OTC-010-P1 | Positionen aus Auftrag in Lieferschein übernehmen | Mittel |
 | OTC-010-P2 | `source_order_id` Backend-Feld im Lieferschein | Mittel |
 | OTC-010-P3 | Route `/verkauf/rechnungen/<id>` prüfen → Weiterleitung zu invoice-editor | Mittel |
-| OTC-011 | Zahlungseingangs-Flow (`/finance/payment-runs`) | Niedrig |
+| ~~OTC-011~~ | Zahlungseingangs-Flow | **abgeschlossen** (Card OTC-011) |
 
 ## 9. Tests (manuell)
 

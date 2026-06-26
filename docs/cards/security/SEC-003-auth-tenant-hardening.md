@@ -1,5 +1,10 @@
 # SEC-003 - Metrics und Copilot-WebSocket haerten
 
+## Status
+
+- **Stand:** abgeschlossen (verifiziert 2026-06-25, Cards-Migration-Audit)
+- **Evidenz:** tests/test_security_metrics_and_copilot_ws.py, docs/roadmap/status/2026-04-01-security-hardening-phase-1.md
+
 ## Ziel
 
 Bestaetigte Security-Funde fuer Copilot-WebSocket und Metrics-Surface mit kleinem Dateibesitz schliessen.

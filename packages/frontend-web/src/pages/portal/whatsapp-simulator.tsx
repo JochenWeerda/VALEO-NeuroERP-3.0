@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Badge } from '@/components/ui/badge'
-import { useToast } from '@/components/ui/use-toast'
+import { useToast } from '@/hooks/use-toast'
 
 const API = '/api/v1/whatsapp'
 
@@ -26,12 +26,47 @@ const EXAMPLE_MESSAGES = [
 
 type Tab = 'chat' | 'notify' | 'outbox'
 
+interface SimResponse {
+  reply: string
+  conversation?: {
+    history: { role: string; content: string }[]
+    partial_order?: {
+      artikel: string | null
+      menge: number | null
+      einheit: string | null
+      lieferdatum: string | null
+      konfidenz: number
+      fehlende_felder: string[]
+    }
+  }
+  orders?: SimOrder[]
+}
+
+interface SimOrder {
+  id: string
+  kunden_name: string
+  artikel: string
+  menge: number
+  einheit: string
+  lieferdatum: string | null
+  status: string
+}
+
+interface OutboxMsg {
+  msg_id: string
+  phone: string
+  notify_type: string
+  text: string
+  status: string
+  created_at: string
+}
+
 export default function WhatsAppSimulator() {
   const [phone, setPhone] = useState(DEMO_PHONES[0].value)
   const [message, setMessage] = useState('')
   const [tenantId] = useState('dev-tenant')
   const [chatHistory, setChatHistory] = useState<{ role: string; content: string }[]>([])
-  const [lastResponse, setLastResponse] = useState<any>(null)
+  const [lastResponse, setLastResponse] = useState<SimResponse | null>(null)
   const [activeTab, setActiveTab] = useState<Tab>('chat')
   const chatEndRef = useRef<HTMLDivElement>(null)
   const { toast } = useToast()
@@ -52,7 +87,7 @@ export default function WhatsAppSimulator() {
       const res = await axios.post(`${API}/dev/simulate`, vars)
       return res.data
     },
-    onSuccess: (data: any) => { setChatHistory(data.conversation?.history ?? []); setLastResponse(data); setMessage('') },
+    onSuccess: (data: SimResponse) => { setChatHistory(data.conversation?.history ?? []); setLastResponse(data); setMessage('') },
     onError: (err: unknown) => {
       const msg = axios.isAxiosError(err) ? err.response?.data?.detail : 'Netzwerkfehler'
       toast({ title: 'Fehler', description: String(msg), variant: 'destructive' })
@@ -98,7 +133,7 @@ export default function WhatsAppSimulator() {
   const { data: outboxData, refetch: outboxRefetch } = useQuery({
     queryKey: ['wa-outbox', tenantId],
     queryFn: async () => {
-      const res = await axios.get<{ messages: any[] }>(`${API}/dev/outbox`, { params: { tenant_id: tenantId } })
+      const res = await axios.get<{ messages: OutboxMsg[] }>(`${API}/dev/outbox`, { params: { tenant_id: tenantId } })
       return res.data.messages
     },
     enabled: activeTab === 'outbox',
@@ -112,7 +147,7 @@ export default function WhatsAppSimulator() {
   }
 
   const partialOrder = lastResponse?.conversation?.partial_order
-  const completedOrders: any[] = lastResponse?.orders ?? []
+  const completedOrders: SimOrder[] = lastResponse?.orders ?? []
 
   return (
     <div className="p-4 max-w-5xl mx-auto space-y-4">
@@ -194,7 +229,7 @@ export default function WhatsAppSimulator() {
             {completedOrders.length > 0 && (
               <div className="border rounded-lg p-3 space-y-2 bg-card">
                 <h2 className="text-sm font-medium">📋 Angelegte Aufträge</h2>
-                {completedOrders.map((o: any) => (
+                {completedOrders.map((o) => (
                   <div key={o.id} className="border rounded p-2 text-xs">
                     <div className="flex justify-between font-medium"><span className="font-mono text-primary">{o.id}</span><Badge variant="outline" className="text-xs">{o.status}</Badge></div>
                     <div className="text-muted-foreground">{o.kunden_name} · {o.menge} {o.einheit} {o.artikel}{o.lieferdatum ? ` · ${o.lieferdatum}` : ''}</div>
@@ -265,7 +300,7 @@ export default function WhatsAppSimulator() {
             <p className="text-sm text-muted-foreground text-center py-8">Noch keine ausgehenden Nachrichten.</p>
           ) : (
             <div className="space-y-2">
-              {outboxData.map((msg: any) => (
+              {outboxData.map((msg) => (
                 <div key={msg.msg_id} className="border rounded-lg p-3 text-sm space-y-2 bg-card">
                   <div className="flex items-start justify-between gap-2">
                     <div className="flex items-center gap-2">

@@ -8,7 +8,7 @@ import os
 from typing import Any
 
 from fastapi import APIRouter, Header, HTTPException, Request, Query
-from fastapi.responses import PlainTextResponse
+from fastapi.responses import PlainTextResponse, Response
 from pydantic import BaseModel
 
 from app.services.whatsapp_agent_service import (
@@ -23,7 +23,7 @@ router = APIRouter()
 
 # ─── Meta-Produktions-Webhook ─────────────────────────────────────────────────
 
-@router.get("/webhook", response_class=PlainTextResponse, tags=["WhatsApp"])
+@router.get("/webhook", response_model=str, response_class=PlainTextResponse, tags=["WhatsApp"])
 async def webhook_verify(
     hub_mode: str = Query(None, alias="hub.mode"),
     hub_verify_token: str = Query(None, alias="hub.verify_token"),
@@ -36,8 +36,15 @@ async def webhook_verify(
     raise HTTPException(status_code=403, detail="Ungültiger Verify-Token")
 
 
-@router.post("/webhook", status_code=200, tags=["WhatsApp"])
-async def webhook_receive(request: Request, x_hub_signature_256: str = Header(None)):
+class WebhookReceiveResponse(BaseModel):
+    status: str
+
+
+@router.post("/webhook", response_model=WebhookReceiveResponse, status_code=200, tags=["WhatsApp"])
+async def webhook_receive(
+    request: Request,
+    x_hub_signature_256: str = Header(None),
+) -> WebhookReceiveResponse:
     """
     Produktions-Webhook: empfängt Nachrichten von der Meta-Cloud-API.
     Validiert X-Hub-Signature-256 gegen WHATSAPP_APP_SECRET.
@@ -59,7 +66,7 @@ async def webhook_receive(request: Request, x_hub_signature_256: str = Header(No
 
     tenant_id = request.headers.get("X-Tenant-ID", "default")
     _process_meta_payload(payload, tenant_id)
-    return {"status": "ok"}
+    return WebhookReceiveResponse(status="ok")
 
 
 def _process_meta_payload(payload: dict, tenant_id: str) -> None:
@@ -88,8 +95,19 @@ class SimulatorRequest(BaseModel):
 
 class SimulatorResponse(BaseModel):
     reply: str
-    conversation: dict | None
-    orders: list[dict]
+    conversation: dict[str, Any] | None
+    orders: list[dict[str, Any]]
+
+
+class HistoryResponse(BaseModel):
+    phone: str
+    tenant_id: str
+    conversation: dict[str, Any] | None
+
+
+class OrdersResponse(BaseModel):
+    tenant_id: str
+    orders: list[dict[str, Any]]
 
 
 @router.post(
@@ -111,29 +129,34 @@ async def simulate_message(body: SimulatorRequest) -> SimulatorResponse:
 
 @router.get(
     "/dev/history/{phone}",
+    response_model=HistoryResponse,
     tags=["WhatsApp Dev-Simulator"],
     summary="Gesprächsverlauf für eine Telefonnummer",
 )
-async def get_history(phone: str, tenant_id: str = "dev-tenant") -> dict:
+async def get_history(phone: str, tenant_id: str = "dev-tenant") -> HistoryResponse:
     conv = get_conversation_state(tenant_id, phone)
-    return {"phone": phone, "tenant_id": tenant_id, "conversation": conv}
+    return HistoryResponse(phone=phone, tenant_id=tenant_id, conversation=conv)
 
 
 @router.get(
     "/dev/orders",
+    response_model=OrdersResponse,
     tags=["WhatsApp Dev-Simulator"],
     summary="Alle WhatsApp-Aufträge (In-Memory-Log)",
 )
-async def get_orders(tenant_id: str = "dev-tenant") -> dict:
-    return {"tenant_id": tenant_id, "orders": get_order_log(tenant_id)}
+async def get_orders(tenant_id: str = "dev-tenant") -> OrdersResponse:
+    return OrdersResponse(tenant_id=tenant_id, orders=get_order_log(tenant_id))
 
 
 @router.delete(
     "/dev/history/{phone}",
     status_code=204,
+    response_class=Response,
+    response_model=None,
     tags=["WhatsApp Dev-Simulator"],
     summary="Gesprächsverlauf zurücksetzen",
 )
-async def reset_conversation(phone: str, tenant_id: str = "dev-tenant"):
+async def reset_conversation(phone: str, tenant_id: str = "dev-tenant") -> Response:
     from app.services.whatsapp_agent_service import _reset_conv
     _reset_conv(tenant_id, phone)
+    return Response(status_code=204)

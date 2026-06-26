@@ -1,5 +1,10 @@
 # SEC-006 - Accounting Periods haerten
 
+## Status
+
+- **Stand:** abgeschlossen (verifiziert 2026-06-25, Cards-Migration-Audit)
+- **Evidenz:** tests/test_security_accounting_periods.py, docs/roadmap/status/2026-04-01-security-hardening-phase-1.md
+
 ## Ziel
 
 Tenant-Isolation im Perioden-Router durchziehen, ohne den kompletten Finance-Stack anzufassen.

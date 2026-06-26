@@ -1,0 +1,35 @@
+slice_id: COM-REGISTER-CAMELCASE-001
+title: "Compliance-Register UI/API CamelCase-Angleichung"
+owner: —
+status: offen
+updated: 2026-06-26
+coordination: >-
+  Aus COM-001 Card (COM-003). Backend-Routen und Frontend-Feldnamen auf
+  konsistentes snake_case (API) / camelCase (UI via Mapper) bringen. Kein
+  Eingriff in PCN/BVL bereits behobene Pfade.
+goal: >-
+  CamelCase-Mismatch in Compliance-Registern (qs-checkliste, zulassungen-register,
+  vvvo-register, sachkunde-register, ggf. weitere) beheben: API-Pfade und
+  Response-Mapping so dass Listen/CRUD ohne leere Felder laden.
+file_ownership:
+  - packages/frontend-web/src/pages/compliance/qs-checkliste.tsx
+  - packages/frontend-web/src/pages/compliance/zulassungen-register.tsx
+  - packages/frontend-web/src/pages/compliance/vvvo-register.tsx
+  - packages/frontend-web/src/pages/compliance/sachkunde-register.tsx
+  - app/api/v1/endpoints/compliance_registers.py
+  - app/api/v1/api.py
+  - docs/cards/compliance/COM-001-compliance-to-audit.md
+  - docs/workflows/com-001-compliance-to-audit.md
+  - docs/project-context/open-gaps-and-known-issues.md
+  - docs/agent-ops/slices/COM-REGISTER-CAMELCASE-001.yaml
+acceptance:
+  - Alle 4+ Register laden Daten ohne Feld-Mapping-Fehler (manuell oder Test).
+  - OpenAPI-Pfade und Frontend-Calls stimmen ueberein.
+  - COM-001 CamelCase-Gap in Card als behoben markiert.
+tests:
+  - pnpm --dir packages/frontend-web exec tsc --noEmit --pretty false
+  - pytest -q -o addopts= -k "compliance" --maxfail=5
+risks:
+  - Backend-Endpoint-Namen evtl. historisch gemischt; ggf. Alias-Routen noetig.
+external_gates:
+  - Fachliche Compliance-Abnahme Melderegister.

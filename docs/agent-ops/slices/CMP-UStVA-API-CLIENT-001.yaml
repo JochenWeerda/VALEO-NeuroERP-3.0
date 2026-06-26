@@ -1,0 +1,28 @@
+slice_id: CMP-UStVA-API-CLIENT-001
+title: "UStVA-Maske api-client Response-Normalisierung"
+owner: —
+status: offen
+updated: 2026-06-26
+coordination: >-
+  Aus CMP-001 Card (CARD-AUDIT-001). Import ist bereits auf @/lib/api-client;
+  Rest-Gap ist inkonsistente .data/.response-Nutzung. Kein Eingriff in
+  ELSTER-Produktions-Gate.
+goal: >-
+  ustva.tsx auf einheitliches apiClient-Response-Pattern umstellen (kein
+  doppeltes .data, keine AxiosResponse-Leaks); Ladefehler mit toast() sichtbar.
+file_ownership:
+  - packages/frontend-web/src/pages/finance/ustva.tsx
+  - docs/cards/compliance/CMP-001-compliance-to-report.md
+  - docs/project-context/open-gaps-and-known-issues.md
+  - docs/agent-ops/slices/CMP-UStVA-API-CLIENT-001.yaml
+acceptance:
+  - Kein Import von @/lib/axios in ustva.tsx.
+  - GET/POST UStVA-Pfade nutzen durchgaengig apiClient ohne response?.data Doppelzugriff.
+  - Mutation Lifecycle Invariant (loading/disabled/toast) eingehalten.
+  - CMP-001-P1/P2 in Card als behoben markiert.
+tests:
+  - pnpm --dir packages/frontend-web exec tsc --noEmit --pretty false
+risks:
+  - Approval/ELSTER-Flow hat viele Action-Handler; Regression nur manuell oder E2E abdeckbar.
+external_gates:
+  - ELSTER-Testzugang fuer echte Abgabe-Validierung.

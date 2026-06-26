@@ -5,7 +5,7 @@
 | **Card-ID** | COM-001 |
 | **Name** | Compliance-to-Audit (Meldewesen bis Pruefung) |
 | **Flow-Spine** | `flow-spine-compliance-to-report` |
-| **Status** | P1-Fixes umgesetzt |
+| **Status** | P1-Fixes umgesetzt; Gap-Audit 2026-06-25 |
 | **Erstellt** | 2026-03-28 |
 
 ## Fixes
@@ -16,10 +16,12 @@
 
 ## Offene Gaps
 
-- CamelCase-Mismatch in 5 Compliance-Registern
-- audit_evidence.py nicht in api.py registriert
-- PCN-Navigation zu /compliance/pcn-liste ohne Route
-- Flow-Spine Name: compliance-to-report vs. compliance-to-audit
+| Gap | Stand 2026-06-25 |
+|-----|------------------|
+| CamelCase-Mismatch in 5 Compliance-Registern | **offen** — UI/API-Namensangleichung ausstehend |
+| ~~audit_evidence.py nicht in api.py registriert~~ | **behoben** — Router in `app/api/v1/api.py` |
+| ~~PCN-Navigation zu /compliance/pcn-liste ohne Route~~ | **behoben** — Route + Seite vorhanden |
+| Flow-Spine Name: compliance-to-report vs. compliance-to-audit | **Doku** — Benennung in Workflow-Doku harmonisieren |
 
 ## Workflow-Dokumentation
 

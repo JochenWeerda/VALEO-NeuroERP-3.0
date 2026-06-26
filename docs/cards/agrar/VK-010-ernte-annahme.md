@@ -6,7 +6,7 @@
 - Teilprozess: Vollstaendige Annahmekette (LKW-Registrierung → QP → Erfassung → Abrechnung)
 - Rolle(n): Tor-Mitarbeiter, Qualitaetspruefer, Sachbearbeiter Annahme, Disponentin
 - Prioritaet: kritisch
-- Status: in arbeit (Bugs behoben, Handover-Bruecke und Schrittvalidierung offen)
+- Status: abgeschlossen (Kernkette VK-011/VK-018/VK-010-standardmaske; Rest siehe Abschnitt 13)
 
 ## 2. Fachlicher Zweck
 - Ziel des Schrittes: Vollstaendige Abwicklung der Ernte-Annahme von der LKW-Anmeldung bis zur Abrechnungsgutschrift.
@@ -51,7 +51,7 @@
 - Status vor Ausfuehrung: LKW nicht registriert / wartend / in Bearbeitung / Entwurf.
 - Status nach Ausfuehrung: Abgeschlossen / Freigegeben / Verbucht.
 - Sichtbare Felder: Alle Grunddaten-Tabs, Positionstabelle, Laborwerte, Preisfindung.
-- Fehlende Felder / Aktionen: Button `Ernte-Annahme anlegen` in Warteschlange; Handover-Link nach Qualitaets-Check; Schrittvalidierung in LKW-Wizard.
+- Fehlende Felder / Aktionen: Barcode-Scanner weiterhin Platzhalter; tiefergehende Feldvalidierung Ernte-Annahme (VK-010-standardmaske).
 
 ## 7. Aktion
 - Benutzeraktion (LKW-Wizard): Kennzeichen, Lieferant, Artikel eingeben und `Abschliessen`.
@@ -109,19 +109,19 @@
 
 ## 13. Soll-Ist-Bewertung
 - Soll-Prozess: Lueckenlose Kette von LKW-Anmeldung bis Gutschrift ohne Medienbrueche.
-- Ist-Umsetzung: Alle Masken vorhanden und mit Backend verbunden; Kettennavigation zwischen Masken fehlt.
-- Abweichung: Drei Medienbruecke (Queue→QP→Ernte-Annahme); Edit-Mode-Bug; fehlende Schrittvalidierung.
-- Fehlende Umsetzung: Handover-Bruecke, Button in Queue, Schrittvalidierung (Klaerungsprozess gesperrte Ware ist in VK-018 abgedeckt).
+- Ist-Umsetzung: Alle Masken vorhanden; Handover QP→Ernte-Annahme (VK-011), Queue-CTA und LKW-Schrittvalidierung umgesetzt; Klaerung gesperrt (VK-018).
+- Abweichung: Barcode-Scanner Platzhalter; optionale Vertiefung der Erfassungsvalidierung.
+- Fehlende Umsetzung: Barcode-Scanner-Produktivlogik; erweiterte Speicher-/Freigabevalidierung in der Erfassungsmaske (Follow-up VK-010-standardmaske).
 - Unklare Umsetzung: Kalkulations- und Freigabe-Button in Ernte-Annahme-Maske (nicht gelesen).
-- Workaround aktuell noetig: Manuelle Navigation und Dateneingabe nach Qualitaets-Check.
+- Workaround aktuell noetig: keiner fuer die Standardkette; Scanner manuell ersetzen.
 
 ## 14. Risiko
 - Risiko-Level:
-  - [x] kritisch (Edit-Mode-Bug)
-  - [x] hoch (Medienbrueche, fehlende Schrittvalidierung)
-  - [ ] mittel
+  - [ ] kritisch
+  - [ ] hoch
+  - [x] mittel (Barcode-Platzhalter, Validierungstiefe)
   - [ ] niedrig
-- Risiko-Beschreibung: Edit-Mode zeigt leere Felder; Sachbearbeiter muss nach QP alle Daten manuell neu eingeben.
+- Risiko-Beschreibung: Edit-Mode-Bug und Medienbrueche behoben; verbleibend mittleres Risiko durch Scanner-Platzhalter.
 - Auswirkung im Tagesgeschaeft: Fehlbedienungen, doppelte Dateneingabe, Produktivitaetsverlust im Hochbetrieb (Ernte).
 - Betroffene Rollen: Tor-Mitarbeiter, Qualitaetspruefer, Sachbearbeiter Annahme.
 - Betroffene Folgeprozesse: Settlement, FIBU-Verbuchung, Lagerbestand.

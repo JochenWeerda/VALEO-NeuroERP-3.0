@@ -1,0 +1,30 @@
+slice_id: P2P-010-OVERVIEW-001
+title: "P2P-010 Procure-to-Pay Overview-Card"
+owner: —
+status: offen
+updated: 2026-06-26
+coordination: >-
+  Doku-Slice aus workflow-chains.md (fehlender Step 0). Keine Code-Aenderung
+  ausser optional Nav/Workflow-Verlinkung. Parallele P2P-020-Wizard-Fixes
+  separat.
+goal: >-
+  Overview-Card P2P-010 analog OTC-010/FIN-001 anlegen: Gesamtkette RFQ→Bestellung→WE→
+  Match→Zahlung, Verweis auf P2P-020/040/041/050, Frontmatter chain=procure-to-pay
+  chain_step=0.
+file_ownership:
+  - docs/cards/einkauf/P2P-010-procure-to-pay.md
+  - docs/_internal/workflow-chains.md
+  - scripts/cards-inventory-audit.py
+  - docs/workflows/p2p-001-procure-to-pay-direktbestellung.md
+  - docs/agent-ops/slices/P2P-010-OVERVIEW-001.yaml
+acceptance:
+  - P2P-010 Card existiert mit Overview-Struktur und Status-Feld.
+  - workflow-chains.md Step 0 verweist auf P2P-010 (nicht mehr „fehlt").
+  - CHAIN_REGISTRY im Audit-Script enthaelt P2P-010.
+  - python scripts/cards-inventory-audit.py aktualisiert Inventar.
+tests:
+  - python scripts/cards-inventory-audit.py
+risks:
+  - Card-Inhalt muss mit bestehendem p2p-001-Workflow konsistent sein.
+external_gates:
+  - Keine externe Abnahme.

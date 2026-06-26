@@ -1,0 +1,34 @@
+slice_id: FIN-ABSCHLUSS-STUBS-001
+title: "Finanz-Abschluss calculate/lock/run — echte Fachlogik"
+owner: —
+status: offen
+updated: 2026-06-26
+coordination: >-
+  Aus FIN-001 / FIN-001-finance-to-reporting Card (P1). Endpoints existieren in
+  finance_actions.py mit fail-soft-Stubs; Ziel ist GoBD-taugliche Periodenlogik.
+  Koordination mit FIN-004 falls bereits referenziert.
+goal: >-
+  POST /api/v1/finance/closing/{calculate,lock,run} mit echter Periodenbuchungs-
+  und Sperrlogik (accounting_periods, journal_entries); Frontend abschluss.tsx
+  zeigt berechnete Salden und Fehler transparent.
+file_ownership:
+  - app/api/v1/endpoints/finance_actions.py
+  - app/services/finance_closing_service.py
+  - packages/frontend-web/src/pages/finance/abschluss.tsx
+  - docs/cards/finance/FIN-001-finance-to-reporting.md
+  - docs/workflows/fin-001-finance-to-close.md
+  - docs/project-context/open-gaps-and-known-issues.md
+  - docs/agent-ops/slices/FIN-ABSCHLUSS-STUBS-001.yaml
+acceptance:
+  - calculate liefert echte Summen aus posted journal_entries (nicht nur fail-soft 0).
+  - lock setzt accounting_periods.status atomar und lehnt Doppel-Sperre ab.
+  - run fuehrt Abschlussbuchungen oder dokumentierten Teilschritt aus.
+  - Unit-Tests fuer Closing-Service gruen.
+  - FIN-001 Reporting-Gap Abschluss-Stubs geschlossen.
+tests:
+  - pytest -q -o addopts= -k "closing or finance_actions" --maxfail=5
+  - pnpm --dir packages/frontend-web exec tsc --noEmit --pretty false
+risks:
+  - GoBD/FiBu-Fachlogik komplex; ggf. iterativ calculate vor lock/run.
+external_gates:
+  - Steuerberater-/FiBu-Abnahme Periodenabschluss.

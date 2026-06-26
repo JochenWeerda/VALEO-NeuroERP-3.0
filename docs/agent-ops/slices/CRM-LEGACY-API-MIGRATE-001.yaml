@@ -1,0 +1,34 @@
+slice_id: CRM-LEGACY-API-MIGRATE-001
+title: "CRM Legacy axios → /api/v1/crm/"
+owner: —
+status: offen
+updated: 2026-06-26
+coordination: >-
+  Aus CRM-001 Card. @/lib/api/crm.ts nutzt bereits /api/v1/crm/; verbleibende
+  Masken mit @/lib/axios schrittweise migrieren. Kein Proxy-Entfernen in
+  vite.config ohne alle Call-Sites umgestellt.
+goal: >-
+  Alle CRM-Frontend-Seiten von Legacy @/lib/axios auf @/lib/api-client bzw.
+  bestehende TanStack-Hooks in @/lib/api/crm* umstellen; Pfade einheitlich
+  /api/v1/crm/.
+file_ownership:
+  - packages/frontend-web/src/pages/crm/kontakt-management.tsx
+  - packages/frontend-web/src/pages/crm/kunden-liste.tsx
+  - packages/frontend-web/src/pages/crm/lieferanten-liste.tsx
+  - packages/frontend-web/src/lib/api/crm.ts
+  - docs/cards/crm/CRM-001-crm-to-revenue.md
+  - docs/workflows/crm-001-crm-to-revenue.md
+  - docs/project-context/open-gaps-and-known-issues.md
+  - docs/agent-ops/slices/CRM-LEGACY-API-MIGRATE-001.yaml
+acceptance:
+  - Keine @/lib/axios-Imports mehr in den drei genannten CRM-Listen/Masken.
+  - API-Calls gehen auf /api/v1/crm/* (nicht /api/crm/*).
+  - Fehlerfeedback via toast() bei User-Mutationen.
+  - CRM-001 Legacy-Gap in Card geschlossen oder auf explizite Restliste reduziert.
+tests:
+  - pnpm --dir packages/frontend-web exec tsc --noEmit --pretty false
+  - rg "@/lib/axios" packages/frontend-web/src/pages/crm --glob "*.tsx" (0 Treffer in migrierten Dateien)
+risks:
+  - vite.config Proxy /api/crm bleibt bis alle Call-Sites umgestellt sind.
+external_gates:
+  - Keine externe Abnahme; interne API-Konsistenz.

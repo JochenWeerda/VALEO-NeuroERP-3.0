@@ -9,6 +9,8 @@ Doku-Hygiene-Checks (`docs-markdown-check`, `docs-governance-check`) ausgenommen
 - **archive/** — revisionssicher aufbewahrte, historische Artefakte
   (Completion-Reports, Debugging-Notizen, Summaries, alte Testprotokolle).
   Nichts wird gelöscht; die Git-Historie bleibt erhalten.
+- **cards-inventory.md** / **cards-inventory.json** — konsolidierter Stand der
+  Workflow-Cards (`docs/cards/`); generiert durch `scripts/cards-inventory-audit.py`.
 
 ## Regeln
 

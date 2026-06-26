@@ -1,0 +1,38 @@
+slice_id: DOC-CARD-CHAIN-001
+title: "Workflow-Ketten-Registry + Cards-Inventar-Audit"
+owner: —
+status: offen
+updated: 2026-06-26
+coordination: >-
+  Doku-only Slice aus CARD-AUDIT-001. Kein Code, kein Frontend. Parallele
+  Fix-Slices (OTC-010, CRM, COM, FIN, CMP) bleiben unberührt. Nach Abschluss
+  CARD-AUDIT-001 in open-gaps auf „Workboard-Slices angelegt“ setzen.
+goal: >-
+  Kanonische Ketten-Registry (`workflow-chains.md`), maschinenlesbares
+  Cards-Inventar (`cards-inventory-audit.py` inkl. CHAIN_REGISTRY) und
+  Frontmatter-Vorlage in `card-template.md` als interne Source of Truth
+  etablieren; Inventar-Report regenerierbar und Review-Queue sichtbar.
+file_ownership:
+  - docs/_internal/workflow-chains.md
+  - docs/_internal/cards-inventory.md
+  - docs/_internal/cards-inventory.json
+  - scripts/cards-inventory-audit.py
+  - docs/cards/card-template.md
+  - docs/cards/README.md
+  - docs/dokumentation/migrationsplan.md
+  - docs/project-context/open-gaps-and-known-issues.md
+  - docs/agent-ops/active-workboard.md
+  - docs/agent-ops/slices/DOC-CARD-CHAIN-001.yaml
+acceptance:
+  - workflow-chains.md listet alle 10 Prozessketten mit Step→Card-Tabellen.
+  - cards-inventory-audit.py schreibt MD+JSON inkl. Ketten-Metriken und Review-Queue.
+  - card-template.md dokumentiert YAML-Frontmatter-Standard.
+  - python scripts/cards-inventory-audit.py laeuft ohne Fehler.
+  - mkdocs build bleibt gruen (Cards weiterhin exclude_docs).
+tests:
+  - python scripts/cards-inventory-audit.py
+  - python -m mkdocs build --site-dir site_check
+risks:
+  - CHAIN_REGISTRY im Script muss bei neuen Prozess-Cards manuell nachgezogen werden bis Frontmatter-Rollout (DOC-CARD-FRONTMATTER-001) breiter ist.
+external_gates:
+  - Keine externe Abnahme; interne Doku-Governance.

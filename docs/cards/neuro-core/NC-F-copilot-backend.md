@@ -2,7 +2,7 @@
 
 **Lane:** Neuro-Core (Lane F)
 **Prioritaet:** P2
-**Status:** teilweise (F1-F4 umgesetzt, F5 wartet auf Lane A)
+**Status:** umgesetzt (F1–F5; NC-F5 Copilot-Pipeline abgeschlossen)
 
 ## Kontext
 Der VALEO Copilot braucht Echtzeit-Streaming statt Request/Response.

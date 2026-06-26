@@ -5,7 +5,7 @@
 | **Card-ID** | FIN-001 |
 | **Name** | Finance-to-Reporting (Finanzbuchhaltung bis Abschluss) |
 | **Flow-Spine** | `flow-spine-finance-to-close` |
-| **Status** | P1-Fixes umgesetzt |
+| **Status** | P1-Fixes umgesetzt; Gap-Audit 2026-06-25 |
 | **Erstellt** | 2026-03-28 |
 
 ## Fixes
@@ -17,9 +17,12 @@
 
 ## Offene Gaps
 
-- Abschluss-Aktionen (calculate/lock/run) sind Backend-Stubs
-- Journal-Pfad-Abweichung in reports.tsx
-- reporting_api.py nicht registriert
+| Gap | Stand 2026-06-25 |
+|-----|------------------|
+| Abschluss-Aktionen (calculate/lock/run) sind Backend-Stubs | **offen** — Fachlogik Folge-Slice |
+| Journal-Pfad-Abweichung in reports.tsx | **offen** — Pfad vereinheitlichen |
+| ~~reporting_api.py nicht registriert~~ | **behoben** — `api_router.include_router(reporting_api.router)` |
+| ~~Finance-Followup Router~~ | **behoben** — `finance_followup` registriert (FIN-003) |
 
 ## Workflow-Dokumentation
 

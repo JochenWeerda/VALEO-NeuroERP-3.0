@@ -1,5 +1,27 @@
 # Card Template
 
+## YAML-Frontmatter (empfohlen für Prozess-Cards)
+
+Interne Cards (`docs/cards/`) sind vom MkDocs-Build ausgeschlossen. Frontmatter
+macht Ketten-Zuordnung maschinenlesbar (`scripts/cards-inventory-audit.py`).
+
+```yaml
+---
+card_id: VK-011
+chain: harvest-to-settlement       # null bei Querschnitt
+chain_step: 2                        # null bei cross-cutting
+card_type: process-step              # overview | process-step | cross-cutting | hardening
+parent_card: VK-010                  # optional
+related_cards: [VK-018, VK-012]      # optional
+flow_spine: flow-spine-harvest-to-settlement
+workflow_doc: docs/workflows/vk-011-qp-handover-und-lkw-validierung.md
+overlaps: [SEC-029]                  # Querschnitt-Schnittmenge
+related_chain: order-to-cash         # nur wenn kein eigener Spine (z. B. CRM-001)
+---
+```
+
+Registry-Referenz: [`docs/_internal/workflow-chains.md`](../_internal/workflow-chains.md)
+
 ## Vollversion
 
 ```markdown
