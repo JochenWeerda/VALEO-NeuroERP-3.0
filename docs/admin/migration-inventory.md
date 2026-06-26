@@ -79,6 +79,7 @@ Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Be
 | `add_workflow_version_20260307` | Gap 011: workflow_version in workflow_status (versionierte Workflow Engine) |
 | `admin_api_keys_20260215` | admin api key management |
 | `admin_devices_output_profiles_20260215` | admin devices and output profile settings |
+| `admin_mobile_repair_20260626` | ALEMBIC-MERGE-001: Admin-Mobile + Charge-Lineage Repair-Migration. |
 | `admin_mobile_routing_connectors_20260215` | admin stations, routing, mobile scan and connectors |
 | `admin_report_permissions_20260215` | admin self-service report permissions |
 | `agent_proposals_persist_20260626` | OPERATOR-AGENT-002: Tabelle agent_proposals fuer persistente Agent-Proposals. |
@@ -151,6 +152,7 @@ Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Be
 | `einkauf_bestellungen_dedupe_unique_20260407` | einkauf_bestellungen: Duplikate bereinigen + Unique-Index |
 | `einkauf_domain_tables_20260227` | einkauf domain tables — Lieferanten, Kontrakte, Bestellungen, Bestellvorschlaege, ArtikelLagerParameter, LagerKonten, PalettenKonto, PfandKonto, FremdwarenEinlagerung |
 | `einkauf_lieferschein_frachtauftrag_20260214` | Add procurement delivery note and freight order tables. |
+| `einkauf_ls_opportunities_repair_20260626` | EINKAUF-LS-REPAIR-001: Einkauf-Lieferschein + Opportunities Repair-Migration. |
 | `einkauf_missing_tables_20260305` | Einkauf: missing tables for RFQ, delivery advices, order confirmations, article groups, payment runs |
 | `einkauf_rechnungseingang_workflow_audit_20260301` | Add workflow audit columns to einkauf_rechnungseingaenge (Prüfen/Freigeben/Verbuchen) |
 | `ensure_chart_of_accounts_and_journal_entry_lines_20260303` | chart_of_accounts und journal_entry_lines anlegen (Nachlauf zu journal_entries) |
@@ -238,6 +240,7 @@ Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Be
 | `merge_doc_proc_20260612` | Merge DOC- und PROC-Branch zu einem Alembic-Head. |
 | `merge_dom004_feed_chain_20260623` | Merge parallel 2026-06-23 branches (DOM-*-004 wave + FEED-CHAIN-004). |
 | `merge_driver_time_hrm_gates_20260517` | merge driver_time and hrm_gates heads |
+| `merge_einkauf_log_agent_20260626` | Merge Alembic heads: einkauf_ls_opportunities_repair + merge_log_agent. |
 | `merge_heads_20260522` | Merge: agrar_ernte_planung_20260520 + fachliche_vertiefung_wave13_20260522 |
 | `merge_heads_docflow_agrar_einkauf_20260301` | Merge heads: Agrar, Einkauf RE-Workflow, Docflow GoBD Schritt 3 |
 | `merge_heads_ops_and_erp_20260304` | merge heads: domain_ops (missing_ops) and domain_erp (finance tables) |
