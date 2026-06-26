@@ -9,6 +9,13 @@
 **Dateibesitz:** `docs/benutzerhandbuch/**`, `mkdocs.yml`, `docs/agent-ops/slices/DOC-USER-MANUAL-002.yaml`, dieser Workboard-Abschnitt.
 **Abnahme:** Docs-Governance gruen; Staleness gruen; `mkdocs build` gruen. `mkdocs build --strict` bleibt durch bestehende Warnungen ausserhalb dieses Slice blockiert (ADR-/Architecture-Links und nicht navigierte Agent-Docs-Runbook-Seite), keine neuen Handbuch-Warnungen.
 
+## WAREHOUSE-REPAIR-001 — domain_inventory.warehouses Schema-Repair + Kat-C-Fix
+
+**Von:** Claude Code · **Owner:** Claude Code · **Stand:** abgeschlossen 2026-06-26
+Kat-C-500 `/api/v1/inventory/warehouses/` geschlossen: `001_initial_schema.py` hatte `address` als JSONB angelegt, Pydantic-Schema erwartete `Optional[str]` → `model_validate` fehlgeschlagen. Fix: `field_validator("address", mode="before")` in `WarehouseBase` konvertiert JSONB-dict → str. Repair-Migration `warehouse_schema_repair_20260626` ergaenzt fehlende Spalten + legt `inventory_counts` und `inventory_stock_movements` idempotent an.
+**Dateibesitz:** `alembic/versions/warehouse_schema_repair_20260626.py`, `app/api/v1/schemas/inventory.py`, `docs/agent-ops/slices/WAREHOUSE-REPAIR-001.yaml`
+**Neuer Alembic-Head:** `warehouse_schema_repair_20260626`
+
 ## EINKAUF-LS-REPAIR-001 — Einkauf-Lieferschein + Opportunities Repair-Migration
 
 **Von:** Claude Code · **Owner:** Claude Code · **Stand:** abgeschlossen 2026-06-26
