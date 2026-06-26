@@ -4509,6 +4509,18 @@ Archiv des vorherigen Boards:
 **Stand:** abgeschlossen 2026-06-26 — `doc_drift_report.py` nutzt alle Nav-Domain-Dateien + `route-inventory.gen.json`; Workflow `doc-drift-report.yml` (Montag, Artifact); 6 Unit-Tests grün; `.gitignore` für `site_check_*/`.
 **Dateibesitz:** `scripts/doc_drift_report.py`, `tests/test_doc_drift_report.py`, `.github/workflows/doc-drift-report.yml`, `docs/dokumentation/governance.md`, `docs/agent-ops/slices/AI-DOC-DRIFT-CI-001.yaml`.
 
+## DOC-DEV-GUIDE-001 — Entwicklerhandbuch (Setup, Tenancy, Konventionen, Tests)
+
+**Owner:** Cursor
+**Stand:** abgeschlossen 2026-06-26 — 4 Seiten unter `docs/entwickler/`; MkDocs-Nav erweitert; `entwickler/index.md` aktualisiert; `mkdocs build` + Staleness grün.
+**Dateibesitz:** `docs/entwickler/{lokales-setup,datenmodell-tenancy,konventionen,test-strategie}.md`, `mkdocs.yml`, `docs/agent-ops/slices/DOC-DEV-GUIDE-001.yaml`.
+
+## DOC-REFERENZ-001 — Referenzbereich (MASKEN, Glossar, Skripte)
+
+**Owner:** Cursor
+**Stand:** abgeschlossen 2026-06-26 — `MASKEN.md` in MkDocs-Build; Referenz-Nav mit Glossar + Skripte-Übersicht; `referenz/index.md` aktiv.
+**Dateibesitz:** `docs/referenz/**`, `mkdocs.yml`, `docs/agent-ops/slices/DOC-REFERENZ-001.yaml`.
+
 ---
 
 ## CARD-AUDIT-Follow-up (2026-06-26)
