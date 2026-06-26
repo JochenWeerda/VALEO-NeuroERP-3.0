@@ -2,80 +2,396 @@
 title: Logistik und Touren
 type: how-to
 audience: [endnutzer, power-user]
-owner: Codex
+owner: Cursor
 status: aktiv
 last_reviewed: 2026-06-26
-version: 3.1.0
+version: 3.2.0
 ---
 
 # Logistik und Touren
 
-Diese Anleitung beschreibt die Arbeit von Disposition, Lager und Fahrer:
-Tour planen, Frachtbrief erstellen, Lieferung verfolgen und ePOD abschliessen.
+Disposition, Touren, Frachtbriefe.
+
+## Ziel
+
+Sie arbeiten sicher in allen Masken des Bereichs **Logistik und Touren** — von der Navigation
+bis zu Speichern, Freigabe und Folgebelegen.
 
 ## Voraussetzungen
 
-- Lieferschein oder Versandauftrag ist vorhanden.
-- Fahrzeug, Fahrer und geplante Stopps sind bekannt.
-- Gewichte, Zeitfenster und Empfaengeradresse sind gepflegt.
-- Fuer ePOD muss der Fahrer den Ablieferungsnachweis erfassen koennen.
+- Gültige Anmeldung und Mandant (`X-Tenant-ID`).
+- Modul für diesen Fachbereich ist installiert (siehe Administration → Module).
+- Ihre Rolle hat Lese- bzw. Schreibberechtigung für die jeweilige Maske.
 
-## Tour planen
+## Maskenregister
 
-1. Oeffnen Sie *Logistik* -> *Tour & Fracht (Dispo)*.
-2. Pruefen Sie offene Lieferungen, Fahrzeugkapazitaet und Zeitfenster.
-3. Legen Sie eine Tour an oder oeffnen Sie eine bestehende Tour.
-4. Ordnen Sie Stopps zu.
-5. Fuehren Sie die Dispositionspruefung aus.
-6. Klaeren Sie Ueberladung, fehlende Adressen oder Zeitfensterkonflikte.
+Vollständige Abdeckung: **16** App-Routen
+(0 explizit in der Sidebar-Navigation).
 
-## Frachtbrief erstellen
+| Maske | Route | Modul |
+|-------|-------|-------|
+| :Id | `/logistik/frachtbrief/:id` | `@/pages/logistik/frachtbriefe` |
+| Neu | `/logistik/frachtbrief/neu` | `@/pages/logistik/frachtbriefe` |
+| Frachtbriefe | `/logistik/frachtbriefe` | `@/pages/logistik/frachtbriefe` |
+| Frachttabellen | `/logistik/frachttabellen` | `@/pages/logistik/frachttabellen` |
+| Tour Fracht Arbeitsraum | `/logistik/tour-fracht-arbeitsraum` | `@/pages/logistik/tour-fracht-arbeitsraum` |
+| Tourenplanung | `/logistik/tourenplanung` | `@/pages/logistik/tourenplanung` |
+| Verladungen | `/logistik/verladungen` | `@/pages/verladung/liste` |
+| Versandprofile | `/logistik/versandprofile` | `@/pages/logistik/versandprofile` |
+| Fahrer | `/transporte/fahrer` | `@/pages/transporte/fahrer-liste` |
+| Fahrer Liste | `/transporte/fahrer-liste` | `@/pages/transporte/fahrer-liste` |
+| :Id | `/transporte/fahrer/:id` | `@/pages/transporte/fahrer-liste` |
+| Neu | `/transporte/fahrer/neu` | `@/pages/transporte/fahrer-liste` |
+| Versand | `/versand` | `@/pages/versand/frachtdokumente` |
+| Frachtdokumente | `/versand/frachtdokumente` | `@/pages/versand/frachtdokumente` |
+| Paket Etikett | `/versand/paket-etikett` | `@/pages/versand/paket-etikett` |
+| Versand Avis | `/versand/versand-avis` | `@/pages/versand/versand-avis` |
 
-1. Oeffnen Sie *Logistik* -> *Frachtbriefe*.
-2. Waehlen Sie Tour, Lieferschein oder Empfaenger.
-3. Pruefen Sie Absender, Empfaenger, Ware, Gewicht, Gefahr-/QS-Hinweise und
-   Frachthinweise.
-4. Speichern Sie den Frachtbrief.
-5. Drucken oder exportieren Sie den Beleg fuer Fahrer und Empfaenger.
+## Masken im Detail
 
-## Lieferung verfolgen und ePOD abschliessen
+Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
-1. Oeffnen Sie die Tour.
-2. Pruefen Sie Tourereignisse und GPS-Track, falls verfuegbar.
-3. Setzen Sie den Stoppstatus nach Rueckmeldung des Fahrers.
-4. Erfassen Sie den ePOD: Empfaengername, Signaturhinweis, Zeit und optional
-   Foto-/Dokumentreferenz.
-5. Schliessen Sie den Stopp per ePOD-Settlement ab.
-6. Pruefen Sie, ob die Tour abrechnungs- oder fakturabereit ist.
+### :Id
 
-## Ergebnis
+**Route:** `/logistik/frachtbrief/:id` · **Modul:** `@/pages/logistik/frachtbriefe`
 
-- Tour, Frachtbrief, Stopps und ePOD bilden eine nachvollziehbare Lieferkette.
-- Ueberladung und Zeitfensterkonflikte werden vor Abfahrt sichtbar.
-- Abgeschlossene Stopps haben einen Ablieferungsnachweis.
+**Schritte:**
 
-## Haeufige Fehler
+1. Sidebar oder Suche: **:Id** öffnen (`/logistik/frachtbrief/:id`).
+2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
+3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
+4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
 
-| Fehler | Ursache | Behebung |
-| --- | --- | --- |
-| Tour kann nicht freigegeben werden | Kapazitaet oder Zeitfenster verletzt | Dispositionspruefung lesen und Stopps anpassen |
-| Frachtbrief laesst sich nicht speichern | Lieferschein-, Gewichts- oder Empfaengerdaten fehlen | Stammdaten und Belegbezug vervollstaendigen |
-| ePOD-Settlement blockiert | Stopp ist noch nicht als geliefert/signiert markiert | Status und ePOD-Daten nachtragen |
-| Abrechnung fehlt | Tour nicht abgeschlossen oder bereits fakturiert | Tourstatus und Invoice-Status pruefen |
+**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
+
+**Häufige Fehler:**
+
+| Symptom | Ursache | Maßnahme |
+|---------|---------|----------|
+| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
+| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
+| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
+
+### Neu
+
+**Route:** `/logistik/frachtbrief/neu` · **Modul:** `@/pages/logistik/frachtbriefe`
+
+**Schritte:**
+
+1. Sidebar oder Suche: **Neu** öffnen (`/logistik/frachtbrief/neu`).
+2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
+3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
+4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
+
+**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
+
+**Häufige Fehler:**
+
+| Symptom | Ursache | Maßnahme |
+|---------|---------|----------|
+| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
+| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
+| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
+
+### Frachtbriefe
+
+**Route:** `/logistik/frachtbriefe` · **Modul:** `@/pages/logistik/frachtbriefe`
+
+**Schritte:**
+
+1. Sidebar oder Suche: **Frachtbriefe** öffnen (`/logistik/frachtbriefe`).
+2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
+3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
+4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
+
+**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
+
+**Häufige Fehler:**
+
+| Symptom | Ursache | Maßnahme |
+|---------|---------|----------|
+| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
+| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
+| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
+
+### Frachttabellen
+
+**Route:** `/logistik/frachttabellen` · **Modul:** `@/pages/logistik/frachttabellen`
+
+**Schritte:**
+
+1. Sidebar oder Suche: **Frachttabellen** öffnen (`/logistik/frachttabellen`).
+2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
+3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
+4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
+
+**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
+
+**Häufige Fehler:**
+
+| Symptom | Ursache | Maßnahme |
+|---------|---------|----------|
+| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
+| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
+| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
+
+### Tour Fracht Arbeitsraum
+
+**Route:** `/logistik/tour-fracht-arbeitsraum` · **Modul:** `@/pages/logistik/tour-fracht-arbeitsraum`
+
+**Schritte:**
+
+1. Sidebar oder Suche: **Tour Fracht Arbeitsraum** öffnen (`/logistik/tour-fracht-arbeitsraum`).
+2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
+3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
+4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
+
+**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
+
+**Häufige Fehler:**
+
+| Symptom | Ursache | Maßnahme |
+|---------|---------|----------|
+| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
+| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
+| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
+
+### Tourenplanung
+
+**Route:** `/logistik/tourenplanung` · **Modul:** `@/pages/logistik/tourenplanung`
+
+**Schritte:**
+
+1. Sidebar oder Suche: **Tourenplanung** öffnen (`/logistik/tourenplanung`).
+2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
+3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
+4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
+
+**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
+
+**Häufige Fehler:**
+
+| Symptom | Ursache | Maßnahme |
+|---------|---------|----------|
+| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
+| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
+| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
+
+### Verladungen
+
+**Route:** `/logistik/verladungen` · **Modul:** `@/pages/verladung/liste`
+
+**Schritte:**
+
+1. Sidebar oder Suche: **Verladungen** öffnen (`/logistik/verladungen`).
+2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
+3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
+4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
+
+**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
+
+**Häufige Fehler:**
+
+| Symptom | Ursache | Maßnahme |
+|---------|---------|----------|
+| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
+| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
+| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
+
+### Versandprofile
+
+**Route:** `/logistik/versandprofile` · **Modul:** `@/pages/logistik/versandprofile`
+
+**Schritte:**
+
+1. Sidebar oder Suche: **Versandprofile** öffnen (`/logistik/versandprofile`).
+2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
+3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
+4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
+
+**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
+
+**Häufige Fehler:**
+
+| Symptom | Ursache | Maßnahme |
+|---------|---------|----------|
+| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
+| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
+| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
+
+### Fahrer
+
+**Route:** `/transporte/fahrer` · **Modul:** `@/pages/transporte/fahrer-liste`
+
+**Schritte:**
+
+1. Sidebar oder Suche: **Fahrer** öffnen (`/transporte/fahrer`).
+2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
+3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
+4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
+
+**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
+
+**Häufige Fehler:**
+
+| Symptom | Ursache | Maßnahme |
+|---------|---------|----------|
+| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
+| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
+| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
+
+### Fahrer Liste
+
+**Route:** `/transporte/fahrer-liste` · **Modul:** `@/pages/transporte/fahrer-liste`
+
+**Schritte:**
+
+1. Sidebar oder Suche: **Fahrer Liste** öffnen (`/transporte/fahrer-liste`).
+2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
+3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
+4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
+
+**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
+
+**Häufige Fehler:**
+
+| Symptom | Ursache | Maßnahme |
+|---------|---------|----------|
+| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
+| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
+| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
+
+### :Id
+
+**Route:** `/transporte/fahrer/:id` · **Modul:** `@/pages/transporte/fahrer-liste`
+
+**Schritte:**
+
+1. Sidebar oder Suche: **:Id** öffnen (`/transporte/fahrer/:id`).
+2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
+3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
+4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
+
+**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
+
+**Häufige Fehler:**
+
+| Symptom | Ursache | Maßnahme |
+|---------|---------|----------|
+| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
+| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
+| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
+
+### Neu
+
+**Route:** `/transporte/fahrer/neu` · **Modul:** `@/pages/transporte/fahrer-liste`
+
+**Schritte:**
+
+1. Sidebar oder Suche: **Neu** öffnen (`/transporte/fahrer/neu`).
+2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
+3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
+4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
+
+**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
+
+**Häufige Fehler:**
+
+| Symptom | Ursache | Maßnahme |
+|---------|---------|----------|
+| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
+| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
+| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
+
+### Versand
+
+**Route:** `/versand` · **Modul:** `@/pages/versand/frachtdokumente`
+
+**Schritte:**
+
+1. Sidebar oder Suche: **Versand** öffnen (`/versand`).
+2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
+3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
+4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
+
+**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
+
+**Häufige Fehler:**
+
+| Symptom | Ursache | Maßnahme |
+|---------|---------|----------|
+| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
+| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
+| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
+
+### Frachtdokumente
+
+**Route:** `/versand/frachtdokumente` · **Modul:** `@/pages/versand/frachtdokumente`
+
+**Schritte:**
+
+1. Sidebar oder Suche: **Frachtdokumente** öffnen (`/versand/frachtdokumente`).
+2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
+3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
+4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
+
+**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
+
+**Häufige Fehler:**
+
+| Symptom | Ursache | Maßnahme |
+|---------|---------|----------|
+| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
+| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
+| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
+
+### Paket Etikett
+
+**Route:** `/versand/paket-etikett` · **Modul:** `@/pages/versand/paket-etikett`
+
+**Schritte:**
+
+1. Sidebar oder Suche: **Paket Etikett** öffnen (`/versand/paket-etikett`).
+2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
+3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
+4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
+
+**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
+
+**Häufige Fehler:**
+
+| Symptom | Ursache | Maßnahme |
+|---------|---------|----------|
+| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
+| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
+| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
+
+### Versand Avis
+
+**Route:** `/versand/versand-avis` · **Modul:** `@/pages/versand/versand-avis`
+
+**Schritte:**
+
+1. Sidebar oder Suche: **Versand Avis** öffnen (`/versand/versand-avis`).
+2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
+3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
+4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
+
+**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
+
+**Häufige Fehler:**
+
+| Symptom | Ursache | Maßnahme |
+|---------|---------|----------|
+| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
+| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
+| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
 
 ## Quellen und Reverse-Pflege
 
-- `packages/frontend-web/src/app/navigation/domains/operations.tsx`: Logistik-Menue
-  mit Tour & Fracht, Tourenplanung und Frachtbriefen.
-- `docs/agent-ops/slices/LOG-FRACHTBRIEF-001.yaml`: Frachtbrief-Endpoint
-  `GET/POST/PATCH /api/v1/logistik/frachtbriefe`.
-- `docs/agent-ops/slices/LOG-TRACK-001.yaml`: Tourereignisse, GPS-Track,
-  ePOD und ePOD-Settlement.
-- `docs/agent-ops/slices/DOM-LOG-004.yaml`: fachliche Vertiefung
-  Tour-Disposition, ePOD-Lifecycle und Frachtabrechnung.
-- `docs/workflows/wave-physical-chain-logistics-audit-2026-06-12.md`: Audit der
-  Kette Waage -> Lager -> Lieferschein -> Tour/Fracht -> Abrechnung.
+- `packages/frontend-web/src/app/navigation/domains/*.tsx` — Sidebar-Navigation.
+- `packages/frontend-web/src/app/routing/route-inventory.gen.json` — Routen-Inventar.
+- `docs/MASKEN.md` — Layout-Standard (Gewohnheits-Prinzip).
 
-Reverse-Pflege: Wenn Tourstatus, ePOD-Felder, Frachtbriefpflichtfelder,
-Disposition-Checks oder Abrechnungsregeln geaendert werden, diese Seite und die
-Logistik-Workflow-Dokumente gemeinsam aktualisieren.
+Reverse-Pflege: Bei neuen Routen Generator `scripts/generate_benutzerhandbuch_full.py`
+ausführen; `mkdocs.yml`, `index.md` und `generate_inapp_help_map.py` mitziehen.

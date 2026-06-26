@@ -1,5 +1,5 @@
 ---
-title: Personal, Zeit und Lohn
+title: Fuhrpark
 type: how-to
 audience: [endnutzer, power-user]
 owner: Cursor
@@ -8,13 +8,13 @@ last_reviewed: 2026-06-26
 version: 3.2.0
 ---
 
-# Personal, Zeit und Lohn
+# Fuhrpark
 
-Zeiterfassung, Abwesenheit, Lohnabrechnung.
+Fahrzeuge, Wartung, Kosten, Rechnungen.
 
 ## Ziel
 
-Sie arbeiten sicher in allen Masken des Bereichs **Personal, Zeit und Lohn** — von der Navigation
+Sie arbeiten sicher in allen Masken des Bereichs **Fuhrpark** — von der Navigation
 bis zu Speichern, Freigabe und Folgebelegen.
 
 ## Voraussetzungen
@@ -25,41 +25,37 @@ bis zu Speichern, Freigabe und Folgebelegen.
 
 ## Maskenregister
 
-Vollständige Abdeckung: **18** App-Routen
+Vollständige Abdeckung: **14** App-Routen
 (0 explizit in der Sidebar-Navigation).
 
 | Maske | Route | Modul |
 |-------|-------|-------|
-| Bewerbungen | `/personal/bewerbungen` | `@/pages/personal/bewerbungen` |
-| Hrm Operations Gates | `/personal/hrm-operations-gates` | `@/pages/personal/hrm-operations-gates` |
-| Mitarbeiter | `/personal/mitarbeiter` | `@/pages/personal/mitarbeiter-liste` |
-| Mitarbeiter Liste | `/personal/mitarbeiter-liste` | `@/pages/personal/mitarbeiter-liste` |
-| Mitarbeiter Stamm | `/personal/mitarbeiter-stamm` | `@/pages/personal/mitarbeiter-stamm` |
-| :Id | `/personal/mitarbeiter/:id` | `@/pages/personal/mitarbeiter-stamm` |
-| Neu | `/personal/mitarbeiter/neu` | `@/pages/personal/mitarbeiter-stamm` |
-| Onboarding | `/personal/onboarding` | `@/pages/personal/onboarding` |
-| Organigramm | `/personal/organigramm` | `@/pages/personal/organigramm` |
-| Qualifikationen | `/personal/qualifikationen` | `@/pages/personal/qualifikationen` |
-| Schulung Neu | `/personal/schulung-neu` | `@/pages/personal/schulung-neu` |
-| Schulungen | `/personal/schulungen` | `@/pages/personal/schulungen` |
-| Stundenzettel | `/personal/stundenzettel` | `@/pages/personal/stundenzettel` |
-| Stundenzettel Liste | `/personal/stundenzettel-liste` | `@/pages/personal/stundenzettel-liste` |
-| :Id | `/personal/stundenzettel/:id` | `@/pages/personal/stundenzettel` |
-| Zeiterfassung | `/personal/zeiterfassung` | `@/pages/personal/zeiterfassung` |
-| Schichtplan | `/schichtplan` | `@/pages/schichtplan/liste` |
-| Liste | `/schichtplan/liste` | `@/pages/schichtplan/liste` |
+| Ausgehende Belege Dokumente | `/fuhrpark/ausgehende-belege-dokumente` | `@/pages/fuhrpark/ausgehende-belege-dokumente` |
+| Fahrzeug Stamm | `/fuhrpark/fahrzeug-stamm` | `@/pages/fuhrpark/fahrzeug-stamm` |
+| :Id | `/fuhrpark/fahrzeug/:id` | `@/pages/fuhrpark/fahrzeug-stamm` |
+| Neu | `/fuhrpark/fahrzeug/neu` | `@/pages/fuhrpark/fahrzeug-stamm` |
+| Fahrzeuge | `/fuhrpark/fahrzeuge` | `@/pages/fuhrpark/fahrzeuge` |
+| Fuhrpark Auswertung Kosten Pro Fahrzeug | `/fuhrpark/fuhrpark-auswertung-kosten-pro-fahrzeug` | `@/pages/fuhrpark/fuhrpark-auswertung-kosten-pro-fahrzeug` |
+| Fuhrpark Auswertungen Menu | `/fuhrpark/fuhrpark-auswertungen-menu` | `@/pages/fuhrpark/fuhrpark-auswertungen-menu` |
+| Fuhrpark Klassisch | `/fuhrpark/fuhrpark-klassisch` | `@/pages/fuhrpark/fuhrpark-klassisch` |
+| Fuhrpark Menue | `/fuhrpark/fuhrpark-menue` | `@/pages/fuhrpark/fuhrpark-menue` |
+| Fuhrpark Rechnungen | `/fuhrpark/fuhrpark-rechnungen` | `@/pages/fuhrpark/fuhrpark-rechnungen` |
+| Fuhrpark Stammdaten | `/fuhrpark/fuhrpark-stammdaten` | `@/pages/fuhrpark/fuhrpark-stammdaten` |
+| Uebersicht | `/fuhrpark/uebersicht` | `@/pages/fuhrpark/uebersicht` |
+| Tankstelle | `/tankstelle` | `@/pages/tankstelle/zapfungen` |
+| Zapfungen | `/tankstelle/zapfungen` | `@/pages/tankstelle/zapfungen` |
 
 ## Masken im Detail
 
 Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
-### Bewerbungen
+### Ausgehende Belege Dokumente
 
-**Route:** `/personal/bewerbungen` · **Modul:** `@/pages/personal/bewerbungen`
+**Route:** `/fuhrpark/ausgehende-belege-dokumente` · **Modul:** `@/pages/fuhrpark/ausgehende-belege-dokumente`
 
 **Schritte:**
 
-1. Sidebar oder Suche: **Bewerbungen** öffnen (`/personal/bewerbungen`).
+1. Sidebar oder Suche: **Ausgehende Belege Dokumente** öffnen (`/fuhrpark/ausgehende-belege-dokumente`).
 2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
 3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
 4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
@@ -74,76 +70,13 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 | Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
 | Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
 
-### Hrm Operations Gates
+### Fahrzeug Stamm
 
-**Route:** `/personal/hrm-operations-gates` · **Modul:** `@/pages/personal/hrm-operations-gates`
-
-**Schritte:**
-
-1. Sidebar oder Suche: **Hrm Operations Gates** öffnen (`/personal/hrm-operations-gates`).
-2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
-3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
-4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
-
-**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
-
-**Häufige Fehler:**
-
-| Symptom | Ursache | Maßnahme |
-|---------|---------|----------|
-| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
-| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
-| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
-
-### Mitarbeiter
-
-**Route:** `/personal/mitarbeiter` · **Modul:** `@/pages/personal/mitarbeiter-liste`
+**Route:** `/fuhrpark/fahrzeug-stamm` · **Modul:** `@/pages/fuhrpark/fahrzeug-stamm`
 
 **Schritte:**
 
-1. Sidebar oder Suche: **Mitarbeiter** öffnen (`/personal/mitarbeiter`).
-2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
-3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
-4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
-
-**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
-
-**Häufige Fehler:**
-
-| Symptom | Ursache | Maßnahme |
-|---------|---------|----------|
-| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
-| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
-| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
-
-### Mitarbeiter Liste
-
-**Route:** `/personal/mitarbeiter-liste` · **Modul:** `@/pages/personal/mitarbeiter-liste`
-
-**Schritte:**
-
-1. Sidebar oder Suche: **Mitarbeiter Liste** öffnen (`/personal/mitarbeiter-liste`).
-2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
-3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
-4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
-
-**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
-
-**Häufige Fehler:**
-
-| Symptom | Ursache | Maßnahme |
-|---------|---------|----------|
-| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
-| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
-| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
-
-### Mitarbeiter Stamm
-
-**Route:** `/personal/mitarbeiter-stamm` · **Modul:** `@/pages/personal/mitarbeiter-stamm`
-
-**Schritte:**
-
-1. Sidebar oder Suche: **Mitarbeiter Stamm** öffnen (`/personal/mitarbeiter-stamm`).
+1. Sidebar oder Suche: **Fahrzeug Stamm** öffnen (`/fuhrpark/fahrzeug-stamm`).
 2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
 3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
 4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
@@ -160,11 +93,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 ### :Id
 
-**Route:** `/personal/mitarbeiter/:id` · **Modul:** `@/pages/personal/mitarbeiter-stamm`
+**Route:** `/fuhrpark/fahrzeug/:id` · **Modul:** `@/pages/fuhrpark/fahrzeug-stamm`
 
 **Schritte:**
 
-1. Sidebar oder Suche: **:Id** öffnen (`/personal/mitarbeiter/:id`).
+1. Sidebar oder Suche: **:Id** öffnen (`/fuhrpark/fahrzeug/:id`).
 2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
 3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
 4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
@@ -181,11 +114,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 ### Neu
 
-**Route:** `/personal/mitarbeiter/neu` · **Modul:** `@/pages/personal/mitarbeiter-stamm`
+**Route:** `/fuhrpark/fahrzeug/neu` · **Modul:** `@/pages/fuhrpark/fahrzeug-stamm`
 
 **Schritte:**
 
-1. Sidebar oder Suche: **Neu** öffnen (`/personal/mitarbeiter/neu`).
+1. Sidebar oder Suche: **Neu** öffnen (`/fuhrpark/fahrzeug/neu`).
 2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
 3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
 4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
@@ -200,13 +133,13 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 | Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
 | Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
 
-### Onboarding
+### Fahrzeuge
 
-**Route:** `/personal/onboarding` · **Modul:** `@/pages/personal/onboarding`
+**Route:** `/fuhrpark/fahrzeuge` · **Modul:** `@/pages/fuhrpark/fahrzeuge`
 
 **Schritte:**
 
-1. Sidebar oder Suche: **Onboarding** öffnen (`/personal/onboarding`).
+1. Sidebar oder Suche: **Fahrzeuge** öffnen (`/fuhrpark/fahrzeuge`).
 2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
 3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
 4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
@@ -221,13 +154,13 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 | Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
 | Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
 
-### Organigramm
+### Fuhrpark Auswertung Kosten Pro Fahrzeug
 
-**Route:** `/personal/organigramm` · **Modul:** `@/pages/personal/organigramm`
+**Route:** `/fuhrpark/fuhrpark-auswertung-kosten-pro-fahrzeug` · **Modul:** `@/pages/fuhrpark/fuhrpark-auswertung-kosten-pro-fahrzeug`
 
 **Schritte:**
 
-1. Sidebar oder Suche: **Organigramm** öffnen (`/personal/organigramm`).
+1. Sidebar oder Suche: **Fuhrpark Auswertung Kosten Pro Fahrzeug** öffnen (`/fuhrpark/fuhrpark-auswertung-kosten-pro-fahrzeug`).
 2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
 3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
 4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
@@ -242,13 +175,13 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 | Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
 | Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
 
-### Qualifikationen
+### Fuhrpark Auswertungen Menu
 
-**Route:** `/personal/qualifikationen` · **Modul:** `@/pages/personal/qualifikationen`
+**Route:** `/fuhrpark/fuhrpark-auswertungen-menu` · **Modul:** `@/pages/fuhrpark/fuhrpark-auswertungen-menu`
 
 **Schritte:**
 
-1. Sidebar oder Suche: **Qualifikationen** öffnen (`/personal/qualifikationen`).
+1. Sidebar oder Suche: **Fuhrpark Auswertungen Menu** öffnen (`/fuhrpark/fuhrpark-auswertungen-menu`).
 2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
 3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
 4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
@@ -263,13 +196,13 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 | Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
 | Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
 
-### Schulung Neu
+### Fuhrpark Klassisch
 
-**Route:** `/personal/schulung-neu` · **Modul:** `@/pages/personal/schulung-neu`
+**Route:** `/fuhrpark/fuhrpark-klassisch` · **Modul:** `@/pages/fuhrpark/fuhrpark-klassisch`
 
 **Schritte:**
 
-1. Sidebar oder Suche: **Schulung Neu** öffnen (`/personal/schulung-neu`).
+1. Sidebar oder Suche: **Fuhrpark Klassisch** öffnen (`/fuhrpark/fuhrpark-klassisch`).
 2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
 3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
 4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
@@ -284,13 +217,13 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 | Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
 | Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
 
-### Schulungen
+### Fuhrpark Menue
 
-**Route:** `/personal/schulungen` · **Modul:** `@/pages/personal/schulungen`
+**Route:** `/fuhrpark/fuhrpark-menue` · **Modul:** `@/pages/fuhrpark/fuhrpark-menue`
 
 **Schritte:**
 
-1. Sidebar oder Suche: **Schulungen** öffnen (`/personal/schulungen`).
+1. Sidebar oder Suche: **Fuhrpark Menue** öffnen (`/fuhrpark/fuhrpark-menue`).
 2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
 3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
 4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
@@ -305,13 +238,13 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 | Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
 | Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
 
-### Stundenzettel
+### Fuhrpark Rechnungen
 
-**Route:** `/personal/stundenzettel` · **Modul:** `@/pages/personal/stundenzettel`
+**Route:** `/fuhrpark/fuhrpark-rechnungen` · **Modul:** `@/pages/fuhrpark/fuhrpark-rechnungen`
 
 **Schritte:**
 
-1. Sidebar oder Suche: **Stundenzettel** öffnen (`/personal/stundenzettel`).
+1. Sidebar oder Suche: **Fuhrpark Rechnungen** öffnen (`/fuhrpark/fuhrpark-rechnungen`).
 2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
 3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
 4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
@@ -326,13 +259,13 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 | Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
 | Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
 
-### Stundenzettel Liste
+### Fuhrpark Stammdaten
 
-**Route:** `/personal/stundenzettel-liste` · **Modul:** `@/pages/personal/stundenzettel-liste`
+**Route:** `/fuhrpark/fuhrpark-stammdaten` · **Modul:** `@/pages/fuhrpark/fuhrpark-stammdaten`
 
 **Schritte:**
 
-1. Sidebar oder Suche: **Stundenzettel Liste** öffnen (`/personal/stundenzettel-liste`).
+1. Sidebar oder Suche: **Fuhrpark Stammdaten** öffnen (`/fuhrpark/fuhrpark-stammdaten`).
 2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
 3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
 4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
@@ -347,13 +280,13 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 | Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
 | Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
 
-### :Id
+### Uebersicht
 
-**Route:** `/personal/stundenzettel/:id` · **Modul:** `@/pages/personal/stundenzettel`
+**Route:** `/fuhrpark/uebersicht` · **Modul:** `@/pages/fuhrpark/uebersicht`
 
 **Schritte:**
 
-1. Sidebar oder Suche: **:Id** öffnen (`/personal/stundenzettel/:id`).
+1. Sidebar oder Suche: **Uebersicht** öffnen (`/fuhrpark/uebersicht`).
 2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
 3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
 4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
@@ -368,13 +301,13 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 | Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
 | Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
 
-### Zeiterfassung
+### Tankstelle
 
-**Route:** `/personal/zeiterfassung` · **Modul:** `@/pages/personal/zeiterfassung`
+**Route:** `/tankstelle` · **Modul:** `@/pages/tankstelle/zapfungen`
 
 **Schritte:**
 
-1. Sidebar oder Suche: **Zeiterfassung** öffnen (`/personal/zeiterfassung`).
+1. Sidebar oder Suche: **Tankstelle** öffnen (`/tankstelle`).
 2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
 3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
 4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
@@ -389,34 +322,13 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 | Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
 | Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
 
-### Schichtplan
+### Zapfungen
 
-**Route:** `/schichtplan` · **Modul:** `@/pages/schichtplan/liste`
-
-**Schritte:**
-
-1. Sidebar oder Suche: **Schichtplan** öffnen (`/schichtplan`).
-2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
-3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
-4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
-
-**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
-
-**Häufige Fehler:**
-
-| Symptom | Ursache | Maßnahme |
-|---------|---------|----------|
-| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
-| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
-| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
-
-### Liste
-
-**Route:** `/schichtplan/liste` · **Modul:** `@/pages/schichtplan/liste`
+**Route:** `/tankstelle/zapfungen` · **Modul:** `@/pages/tankstelle/zapfungen`
 
 **Schritte:**
 
-1. Sidebar oder Suche: **Liste** öffnen (`/schichtplan/liste`).
+1. Sidebar oder Suche: **Zapfungen** öffnen (`/tankstelle/zapfungen`).
 2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
 3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
 4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.

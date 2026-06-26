@@ -128,23 +128,33 @@ nav:
   - Benutzerhandbuch:
       - Überblick: benutzerhandbuch/index.md
       - Einstieg: benutzerhandbuch/einstieg.md
+      - Dashboard und Workflows: benutzerhandbuch/dashboard-workflows.md
+      - Wissensbasis und Kundenportal: benutzerhandbuch/wissensbasis-kundenportal.md
       - Ernteannahme: benutzerhandbuch/annahme.md
       - Agrar-Kontrakte: benutzerhandbuch/agrar-kontrakte.md
+      - Agrar-Warenwirtschaft: benutzerhandbuch/agrar-warenwirtschaft.md
       - Verkauf (Auftrag → Rechnung): benutzerhandbuch/verkauf.md
       - Einkauf: benutzerhandbuch/einkauf.md
+      - Vertreter und Provisionen: benutzerhandbuch/vertreter-provisionen.md
+      - CRM und Marketing: benutzerhandbuch/crm.md
+      - Preise und Kalkulation: benutzerhandbuch/preise-kalkulation.md
+      - Artikel und Stammdaten: benutzerhandbuch/artikel-stammdaten.md
       - Lager: benutzerhandbuch/lager.md
-      - Logistik und Touren: benutzerhandbuch/logistik.md
       - Futtermittel und Produktion: benutzerhandbuch/futtermittel-produktion.md
+      - Qualitätssicherung: benutzerhandbuch/qualitaetssicherung.md
+      - Compliance und Meldewesen: benutzerhandbuch/compliance-meldewesen.md
+      - NaWaRo: benutzerhandbuch/nawaro.md
+      - Streckengeschäft: benutzerhandbuch/strecke-handelsgeschaeft.md
+      - Logistik und Touren: benutzerhandbuch/logistik.md
+      - Fuhrpark: benutzerhandbuch/fuhrpark.md
       - Finanzbuchhaltung: benutzerhandbuch/finanzbuchhaltung.md
       - Controlling und Kostenrechnung: benutzerhandbuch/controlling-kostenrechnung.md
       - POS und Kasse: benutzerhandbuch/pos-kasse.md
       - Personal, Zeit und Lohn: benutzerhandbuch/personal-lohn.md
-      - CRM: benutzerhandbuch/crm.md
-      - Qualitätssicherung: benutzerhandbuch/qualitaetssicherung.md
-      - Compliance und Meldewesen: benutzerhandbuch/compliance-meldewesen.md
-      - NaWaRo: benutzerhandbuch/nawaro.md
       - Genossenschaft: benutzerhandbuch/genossenschaft.md
       - Dokumente und Belegarchiv: benutzerhandbuch/dokumente-belegarchiv.md
+      - Reports und Analytics: benutzerhandbuch/reports-analytics.md
+      - Service und Support: benutzerhandbuch/service-support.md
       - Release Notes: benutzerhandbuch/release-notes.md
       - Glossar: benutzerhandbuch/glossar.md
       - In-App-Hilfe: benutzerhandbuch/in-app-hilfe.md

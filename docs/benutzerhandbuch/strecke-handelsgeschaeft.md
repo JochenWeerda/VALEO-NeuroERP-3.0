@@ -1,5 +1,5 @@
 ---
-title: Personal, Zeit und Lohn
+title: Streckengeschäft
 type: how-to
 audience: [endnutzer, power-user]
 owner: Cursor
@@ -8,13 +8,13 @@ last_reviewed: 2026-06-26
 version: 3.2.0
 ---
 
-# Personal, Zeit und Lohn
+# Streckengeschäft
 
-Zeiterfassung, Abwesenheit, Lohnabrechnung.
+Streckenhandel, Dokumente, Abrechnung.
 
 ## Ziel
 
-Sie arbeiten sicher in allen Masken des Bereichs **Personal, Zeit und Lohn** — von der Navigation
+Sie arbeiten sicher in allen Masken des Bereichs **Streckengeschäft** — von der Navigation
 bis zu Speichern, Freigabe und Folgebelegen.
 
 ## Voraussetzungen
@@ -25,41 +25,35 @@ bis zu Speichern, Freigabe und Folgebelegen.
 
 ## Maskenregister
 
-Vollständige Abdeckung: **18** App-Routen
+Vollständige Abdeckung: **12** App-Routen
 (0 explizit in der Sidebar-Navigation).
 
 | Maske | Route | Modul |
 |-------|-------|-------|
-| Bewerbungen | `/personal/bewerbungen` | `@/pages/personal/bewerbungen` |
-| Hrm Operations Gates | `/personal/hrm-operations-gates` | `@/pages/personal/hrm-operations-gates` |
-| Mitarbeiter | `/personal/mitarbeiter` | `@/pages/personal/mitarbeiter-liste` |
-| Mitarbeiter Liste | `/personal/mitarbeiter-liste` | `@/pages/personal/mitarbeiter-liste` |
-| Mitarbeiter Stamm | `/personal/mitarbeiter-stamm` | `@/pages/personal/mitarbeiter-stamm` |
-| :Id | `/personal/mitarbeiter/:id` | `@/pages/personal/mitarbeiter-stamm` |
-| Neu | `/personal/mitarbeiter/neu` | `@/pages/personal/mitarbeiter-stamm` |
-| Onboarding | `/personal/onboarding` | `@/pages/personal/onboarding` |
-| Organigramm | `/personal/organigramm` | `@/pages/personal/organigramm` |
-| Qualifikationen | `/personal/qualifikationen` | `@/pages/personal/qualifikationen` |
-| Schulung Neu | `/personal/schulung-neu` | `@/pages/personal/schulung-neu` |
-| Schulungen | `/personal/schulungen` | `@/pages/personal/schulungen` |
-| Stundenzettel | `/personal/stundenzettel` | `@/pages/personal/stundenzettel` |
-| Stundenzettel Liste | `/personal/stundenzettel-liste` | `@/pages/personal/stundenzettel-liste` |
-| :Id | `/personal/stundenzettel/:id` | `@/pages/personal/stundenzettel` |
-| Zeiterfassung | `/personal/zeiterfassung` | `@/pages/personal/zeiterfassung` |
-| Schichtplan | `/schichtplan` | `@/pages/schichtplan/liste` |
-| Liste | `/schichtplan/liste` | `@/pages/schichtplan/liste` |
+| Disposition | `/strecke/disposition` | `@/pages/strecke/disposition` |
+| Dokumente Drucken | `/strecke/dokumente-drucken` | `@/pages/strecke/dokumente-drucken` |
+| Menu | `/strecke/menu` | `@/pages/strecke/menu` |
+| Nawaro Ernterklaerung Drucken | `/strecke/nawaro-ernterklaerung-drucken` | `@/pages/strecke/nawaro-ernterklaerung-drucken` |
+| Nawaro Lieferungen | `/strecke/nawaro-lieferungen` | `@/pages/strecke/nawaro-lieferungen` |
+| Nawaro Uebersicht | `/strecke/nawaro-uebersicht` | `@/pages/strecke/nawaro-uebersicht` |
+| Nawaro Uebersicht Drucken | `/strecke/nawaro-uebersicht-drucken` | `@/pages/strecke/nawaro-uebersicht-drucken` |
+| Nawaro Vertraege Pruefen | `/strecke/nawaro-vertraege-pruefen` | `@/pages/strecke/nawaro-vertraege-pruefen` |
+| Qualitaets Abweichung | `/strecke/qualitaets-abweichung` | `@/pages/strecke/qualitaets-abweichung` |
+| Speditionen Fracht Preise | `/strecke/speditionen-fracht-preise` | `@/pages/strecke/speditionen-fracht-preise` |
+| Streckengeschaeft | `/strecke/streckengeschaeft` | `@/pages/strecke/streckengeschaeft` |
+| Vorlaeufige Streckengeschaefte | `/strecke/vorlaeufige-streckengeschaefte` | `@/pages/strecke/vorlaeufige-streckengeschaefte` |
 
 ## Masken im Detail
 
 Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
-### Bewerbungen
+### Disposition
 
-**Route:** `/personal/bewerbungen` · **Modul:** `@/pages/personal/bewerbungen`
+**Route:** `/strecke/disposition` · **Modul:** `@/pages/strecke/disposition`
 
 **Schritte:**
 
-1. Sidebar oder Suche: **Bewerbungen** öffnen (`/personal/bewerbungen`).
+1. Sidebar oder Suche: **Disposition** öffnen (`/strecke/disposition`).
 2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
 3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
 4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
@@ -74,13 +68,13 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 | Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
 | Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
 
-### Hrm Operations Gates
+### Dokumente Drucken
 
-**Route:** `/personal/hrm-operations-gates` · **Modul:** `@/pages/personal/hrm-operations-gates`
+**Route:** `/strecke/dokumente-drucken` · **Modul:** `@/pages/strecke/dokumente-drucken`
 
 **Schritte:**
 
-1. Sidebar oder Suche: **Hrm Operations Gates** öffnen (`/personal/hrm-operations-gates`).
+1. Sidebar oder Suche: **Dokumente Drucken** öffnen (`/strecke/dokumente-drucken`).
 2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
 3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
 4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
@@ -95,13 +89,13 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 | Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
 | Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
 
-### Mitarbeiter
+### Menu
 
-**Route:** `/personal/mitarbeiter` · **Modul:** `@/pages/personal/mitarbeiter-liste`
+**Route:** `/strecke/menu` · **Modul:** `@/pages/strecke/menu`
 
 **Schritte:**
 
-1. Sidebar oder Suche: **Mitarbeiter** öffnen (`/personal/mitarbeiter`).
+1. Sidebar oder Suche: **Menu** öffnen (`/strecke/menu`).
 2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
 3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
 4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
@@ -116,13 +110,13 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 | Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
 | Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
 
-### Mitarbeiter Liste
+### Nawaro Ernterklaerung Drucken
 
-**Route:** `/personal/mitarbeiter-liste` · **Modul:** `@/pages/personal/mitarbeiter-liste`
+**Route:** `/strecke/nawaro-ernterklaerung-drucken` · **Modul:** `@/pages/strecke/nawaro-ernterklaerung-drucken`
 
 **Schritte:**
 
-1. Sidebar oder Suche: **Mitarbeiter Liste** öffnen (`/personal/mitarbeiter-liste`).
+1. Sidebar oder Suche: **Nawaro Ernterklaerung Drucken** öffnen (`/strecke/nawaro-ernterklaerung-drucken`).
 2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
 3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
 4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
@@ -137,13 +131,13 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 | Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
 | Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
 
-### Mitarbeiter Stamm
+### Nawaro Lieferungen
 
-**Route:** `/personal/mitarbeiter-stamm` · **Modul:** `@/pages/personal/mitarbeiter-stamm`
+**Route:** `/strecke/nawaro-lieferungen` · **Modul:** `@/pages/strecke/nawaro-lieferungen`
 
 **Schritte:**
 
-1. Sidebar oder Suche: **Mitarbeiter Stamm** öffnen (`/personal/mitarbeiter-stamm`).
+1. Sidebar oder Suche: **Nawaro Lieferungen** öffnen (`/strecke/nawaro-lieferungen`).
 2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
 3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
 4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
@@ -158,13 +152,13 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 | Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
 | Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
 
-### :Id
+### Nawaro Uebersicht
 
-**Route:** `/personal/mitarbeiter/:id` · **Modul:** `@/pages/personal/mitarbeiter-stamm`
+**Route:** `/strecke/nawaro-uebersicht` · **Modul:** `@/pages/strecke/nawaro-uebersicht`
 
 **Schritte:**
 
-1. Sidebar oder Suche: **:Id** öffnen (`/personal/mitarbeiter/:id`).
+1. Sidebar oder Suche: **Nawaro Uebersicht** öffnen (`/strecke/nawaro-uebersicht`).
 2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
 3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
 4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
@@ -179,13 +173,13 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 | Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
 | Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
 
-### Neu
+### Nawaro Uebersicht Drucken
 
-**Route:** `/personal/mitarbeiter/neu` · **Modul:** `@/pages/personal/mitarbeiter-stamm`
+**Route:** `/strecke/nawaro-uebersicht-drucken` · **Modul:** `@/pages/strecke/nawaro-uebersicht-drucken`
 
 **Schritte:**
 
-1. Sidebar oder Suche: **Neu** öffnen (`/personal/mitarbeiter/neu`).
+1. Sidebar oder Suche: **Nawaro Uebersicht Drucken** öffnen (`/strecke/nawaro-uebersicht-drucken`).
 2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
 3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
 4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
@@ -200,13 +194,13 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 | Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
 | Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
 
-### Onboarding
+### Nawaro Vertraege Pruefen
 
-**Route:** `/personal/onboarding` · **Modul:** `@/pages/personal/onboarding`
+**Route:** `/strecke/nawaro-vertraege-pruefen` · **Modul:** `@/pages/strecke/nawaro-vertraege-pruefen`
 
 **Schritte:**
 
-1. Sidebar oder Suche: **Onboarding** öffnen (`/personal/onboarding`).
+1. Sidebar oder Suche: **Nawaro Vertraege Pruefen** öffnen (`/strecke/nawaro-vertraege-pruefen`).
 2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
 3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
 4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
@@ -221,13 +215,13 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 | Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
 | Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
 
-### Organigramm
+### Qualitaets Abweichung
 
-**Route:** `/personal/organigramm` · **Modul:** `@/pages/personal/organigramm`
+**Route:** `/strecke/qualitaets-abweichung` · **Modul:** `@/pages/strecke/qualitaets-abweichung`
 
 **Schritte:**
 
-1. Sidebar oder Suche: **Organigramm** öffnen (`/personal/organigramm`).
+1. Sidebar oder Suche: **Qualitaets Abweichung** öffnen (`/strecke/qualitaets-abweichung`).
 2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
 3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
 4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
@@ -242,13 +236,13 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 | Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
 | Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
 
-### Qualifikationen
+### Speditionen Fracht Preise
 
-**Route:** `/personal/qualifikationen` · **Modul:** `@/pages/personal/qualifikationen`
+**Route:** `/strecke/speditionen-fracht-preise` · **Modul:** `@/pages/strecke/speditionen-fracht-preise`
 
 **Schritte:**
 
-1. Sidebar oder Suche: **Qualifikationen** öffnen (`/personal/qualifikationen`).
+1. Sidebar oder Suche: **Speditionen Fracht Preise** öffnen (`/strecke/speditionen-fracht-preise`).
 2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
 3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
 4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
@@ -263,13 +257,13 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 | Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
 | Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
 
-### Schulung Neu
+### Streckengeschaeft
 
-**Route:** `/personal/schulung-neu` · **Modul:** `@/pages/personal/schulung-neu`
+**Route:** `/strecke/streckengeschaeft` · **Modul:** `@/pages/strecke/streckengeschaeft`
 
 **Schritte:**
 
-1. Sidebar oder Suche: **Schulung Neu** öffnen (`/personal/schulung-neu`).
+1. Sidebar oder Suche: **Streckengeschaeft** öffnen (`/strecke/streckengeschaeft`).
 2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
 3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
 4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
@@ -284,139 +278,13 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 | Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
 | Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
 
-### Schulungen
+### Vorlaeufige Streckengeschaefte
 
-**Route:** `/personal/schulungen` · **Modul:** `@/pages/personal/schulungen`
-
-**Schritte:**
-
-1. Sidebar oder Suche: **Schulungen** öffnen (`/personal/schulungen`).
-2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
-3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
-4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
-
-**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
-
-**Häufige Fehler:**
-
-| Symptom | Ursache | Maßnahme |
-|---------|---------|----------|
-| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
-| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
-| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
-
-### Stundenzettel
-
-**Route:** `/personal/stundenzettel` · **Modul:** `@/pages/personal/stundenzettel`
+**Route:** `/strecke/vorlaeufige-streckengeschaefte` · **Modul:** `@/pages/strecke/vorlaeufige-streckengeschaefte`
 
 **Schritte:**
 
-1. Sidebar oder Suche: **Stundenzettel** öffnen (`/personal/stundenzettel`).
-2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
-3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
-4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
-
-**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
-
-**Häufige Fehler:**
-
-| Symptom | Ursache | Maßnahme |
-|---------|---------|----------|
-| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
-| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
-| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
-
-### Stundenzettel Liste
-
-**Route:** `/personal/stundenzettel-liste` · **Modul:** `@/pages/personal/stundenzettel-liste`
-
-**Schritte:**
-
-1. Sidebar oder Suche: **Stundenzettel Liste** öffnen (`/personal/stundenzettel-liste`).
-2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
-3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
-4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
-
-**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
-
-**Häufige Fehler:**
-
-| Symptom | Ursache | Maßnahme |
-|---------|---------|----------|
-| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
-| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
-| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
-
-### :Id
-
-**Route:** `/personal/stundenzettel/:id` · **Modul:** `@/pages/personal/stundenzettel`
-
-**Schritte:**
-
-1. Sidebar oder Suche: **:Id** öffnen (`/personal/stundenzettel/:id`).
-2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
-3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
-4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
-
-**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
-
-**Häufige Fehler:**
-
-| Symptom | Ursache | Maßnahme |
-|---------|---------|----------|
-| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
-| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
-| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
-
-### Zeiterfassung
-
-**Route:** `/personal/zeiterfassung` · **Modul:** `@/pages/personal/zeiterfassung`
-
-**Schritte:**
-
-1. Sidebar oder Suche: **Zeiterfassung** öffnen (`/personal/zeiterfassung`).
-2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
-3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
-4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
-
-**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
-
-**Häufige Fehler:**
-
-| Symptom | Ursache | Maßnahme |
-|---------|---------|----------|
-| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
-| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
-| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
-
-### Schichtplan
-
-**Route:** `/schichtplan` · **Modul:** `@/pages/schichtplan/liste`
-
-**Schritte:**
-
-1. Sidebar oder Suche: **Schichtplan** öffnen (`/schichtplan`).
-2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
-3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
-4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
-
-**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
-
-**Häufige Fehler:**
-
-| Symptom | Ursache | Maßnahme |
-|---------|---------|----------|
-| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
-| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
-| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
-
-### Liste
-
-**Route:** `/schichtplan/liste` · **Modul:** `@/pages/schichtplan/liste`
-
-**Schritte:**
-
-1. Sidebar oder Suche: **Liste** öffnen (`/schichtplan/liste`).
+1. Sidebar oder Suche: **Vorlaeufige Streckengeschaefte** öffnen (`/strecke/vorlaeufige-streckengeschaefte`).
 2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
 3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
 4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.

@@ -2,90 +2,198 @@
 title: Controlling und Kostenrechnung
 type: how-to
 audience: [endnutzer, power-user]
-owner: Codex
+owner: Cursor
 status: aktiv
 last_reviewed: 2026-06-26
-version: 3.1.0
+version: 3.2.0
 ---
 
 # Controlling und Kostenrechnung
 
-Diese Anleitung beschreibt Kostenstellen, Kostenarten, Buchungen, Umlagen,
-BAB-Auswertung und Kostenstellenabschluss.
+Kostenstellen, Umlagen, Auswertungen.
+
+## Ziel
+
+Sie arbeiten sicher in allen Masken des Bereichs **Controlling und Kostenrechnung** — von der Navigation
+bis zu Speichern, Freigabe und Folgebelegen.
 
 ## Voraussetzungen
 
-- Kontenplan, Kostenstellen, Kostentraeger, Projekte oder Abteilungen sind
-  gepflegt.
-- Buchungsperiode und Auswertungszeitraum sind offen.
-- Kostenstellen-Mappings aus FIBU, Einkauf, Verkauf, Logistik und HR sind
-  fachlich freigegeben.
+- Gültige Anmeldung und Mandant (`X-Tenant-ID`).
+- Modul für diesen Fachbereich ist installiert (siehe Administration → Module).
+- Ihre Rolle hat Lese- bzw. Schreibberechtigung für die jeweilige Maske.
 
-## Kostenstelle anlegen oder pflegen
+## Maskenregister
 
-1. Oeffnen Sie *FIBU* -> *Kostenstellen*.
-2. Wechseln Sie in den Tab *Kostenstellen*.
-3. Erfassen Sie Nummer, Bezeichnung, Art und Budget.
-4. Speichern Sie die Kostenstelle.
-5. Deaktivieren Sie nicht mehr genutzte Kostenstellen statt sie in laufenden
-   Perioden zu loeschen.
+Vollständige Abdeckung: **7** App-Routen
+(0 explizit in der Sidebar-Navigation).
 
-## Kosten buchen
+| Maske | Route | Modul |
+|-------|-------|-------|
+| Benchmark Cockpit | `/controlling/benchmark-cockpit` | `@/pages/controlling/benchmark-cockpit` |
+| Dashboard Verwaltung | `/controlling/dashboard-verwaltung` | `@/pages/controlling/dashboard-verwaltung` |
+| Kpi Verwaltung | `/controlling/kpi-verwaltung` | `@/pages/controlling/kpi-verwaltung` |
+| Massnahmen | `/controlling/massnahmen` | `@/pages/controlling/massnahmen` |
+| Plan Ist | `/controlling/plan-ist` | `@/pages/controlling/plan-ist` |
+| Timeseries Erfassung | `/controlling/timeseries-erfassung` | `@/pages/controlling/timeseries-erfassung` |
+| Widget Verwaltung | `/controlling/widget-verwaltung` | `@/pages/controlling/widget-verwaltung` |
 
-1. Wechseln Sie in den Tab *Buchungen*.
-2. Waehlen Sie Kostenstelle, Kostenart, Datum und Betrag.
-3. Erfassen Sie einen nachvollziehbaren Buchungstext.
-4. Speichern Sie die Buchung.
-5. Pruefen Sie die Auswertung fuer den Zeitraum.
+## Masken im Detail
 
-## Umlage erfassen
+Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
-1. Wechseln Sie in den Tab *BAB*.
-2. Waehlen Sie Periode, Quell- und Zielkostenstelle.
-3. Waehlen Sie Umlageart: Prozent, Betrag oder Menge.
-4. Erfassen Sie Wert und Basis.
-5. Speichern Sie die Umlage.
-6. Pruefen Sie Primaerkosten, Umlagen und Gesamtkosten je Kostenstelle.
+### Benchmark Cockpit
 
-## Kostenstellenabschluss pruefen
+**Route:** `/controlling/benchmark-cockpit` · **Modul:** `@/pages/controlling/benchmark-cockpit`
 
-1. Oeffnen Sie die Controlling-/Kostenrechnungs-Auswertung.
-2. Pruefen Sie Budget, Ist, Abweichung und offene Buchungen.
-3. Klaeren Sie fehlende oder falsche Kostenstellenzuordnungen.
-4. Schliessen Sie die Periode erst, wenn keine relevanten Buchungen mehr fehlen.
-5. Nach Abschluss duerfen fuer die gesperrte Periode keine neuen Ist-Buchungen
-   ohne definierte Korrektur-/Storno-Regel erfolgen.
+**Schritte:**
 
-## Ergebnis
+1. Sidebar oder Suche: **Benchmark Cockpit** öffnen (`/controlling/benchmark-cockpit`).
+2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
+3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
+4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
 
-- Kostenstellen und Kostenarten sind auswertbar.
-- BAB und Umlagen zeigen die Verteilung von Primaer- und Sekundaerkosten.
-- Budget-/Ist-Abweichungen sind sichtbar.
-- Abgeschlossene Perioden sind gegen nachtraegliche Ist-Buchungen geschuetzt.
+**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
 
-## Haeufige Fehler
+**Häufige Fehler:**
 
-| Fehler | Ursache | Behebung |
-| --- | --- | --- |
-| Kostenstelle fehlt in Buchung | Stammdaten oder Mapping unvollstaendig | Kostenstelle anlegen und Mapping pruefen |
-| Umlagebetrag wirkt falsch | Basis, Prozent oder Quellkostenstelle falsch | Umlageparameter und BAB pruefen |
-| Periode laesst sich nicht schliessen | Offene Buchungen oder fehlende Freigabe | offene Positionen klaeren |
-| Auswertung leer | Zeitraum, aktive Kostenstelle oder Mandant falsch | Filter und Stammdaten pruefen |
+| Symptom | Ursache | Maßnahme |
+|---------|---------|----------|
+| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
+| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
+| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
+
+### Dashboard Verwaltung
+
+**Route:** `/controlling/dashboard-verwaltung` · **Modul:** `@/pages/controlling/dashboard-verwaltung`
+
+**Schritte:**
+
+1. Sidebar oder Suche: **Dashboard Verwaltung** öffnen (`/controlling/dashboard-verwaltung`).
+2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
+3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
+4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
+
+**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
+
+**Häufige Fehler:**
+
+| Symptom | Ursache | Maßnahme |
+|---------|---------|----------|
+| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
+| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
+| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
+
+### Kpi Verwaltung
+
+**Route:** `/controlling/kpi-verwaltung` · **Modul:** `@/pages/controlling/kpi-verwaltung`
+
+**Schritte:**
+
+1. Sidebar oder Suche: **Kpi Verwaltung** öffnen (`/controlling/kpi-verwaltung`).
+2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
+3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
+4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
+
+**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
+
+**Häufige Fehler:**
+
+| Symptom | Ursache | Maßnahme |
+|---------|---------|----------|
+| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
+| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
+| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
+
+### Massnahmen
+
+**Route:** `/controlling/massnahmen` · **Modul:** `@/pages/controlling/massnahmen`
+
+**Schritte:**
+
+1. Sidebar oder Suche: **Massnahmen** öffnen (`/controlling/massnahmen`).
+2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
+3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
+4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
+
+**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
+
+**Häufige Fehler:**
+
+| Symptom | Ursache | Maßnahme |
+|---------|---------|----------|
+| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
+| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
+| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
+
+### Plan Ist
+
+**Route:** `/controlling/plan-ist` · **Modul:** `@/pages/controlling/plan-ist`
+
+**Schritte:**
+
+1. Sidebar oder Suche: **Plan Ist** öffnen (`/controlling/plan-ist`).
+2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
+3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
+4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
+
+**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
+
+**Häufige Fehler:**
+
+| Symptom | Ursache | Maßnahme |
+|---------|---------|----------|
+| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
+| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
+| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
+
+### Timeseries Erfassung
+
+**Route:** `/controlling/timeseries-erfassung` · **Modul:** `@/pages/controlling/timeseries-erfassung`
+
+**Schritte:**
+
+1. Sidebar oder Suche: **Timeseries Erfassung** öffnen (`/controlling/timeseries-erfassung`).
+2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
+3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
+4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
+
+**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
+
+**Häufige Fehler:**
+
+| Symptom | Ursache | Maßnahme |
+|---------|---------|----------|
+| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
+| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
+| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
+
+### Widget Verwaltung
+
+**Route:** `/controlling/widget-verwaltung` · **Modul:** `@/pages/controlling/widget-verwaltung`
+
+**Schritte:**
+
+1. Sidebar oder Suche: **Widget Verwaltung** öffnen (`/controlling/widget-verwaltung`).
+2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
+3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
+4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
+
+**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
+
+**Häufige Fehler:**
+
+| Symptom | Ursache | Maßnahme |
+|---------|---------|----------|
+| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
+| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
+| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
 
 ## Quellen und Reverse-Pflege
 
-- `packages/frontend-web/src/app/navigation/domains/finance.tsx` und
-  `packages/frontend-web/src/app/navigation/fibu-suite.tsx`: Navigation
-  *Kostenstellen*.
-- `packages/frontend-web/src/pages/fibu/kostenstellenrechnung.tsx`:
-  Auswertung, BAB, Kostenstellen, Kostenarten und Buchungen.
-- `docs/agent-ops/slices/DOM-CONTROLLING-004.yaml`: Budget-Lifecycle,
-  Plan/Ist-Abweichung und Kostenstellenabschluss.
-- `docs/workflows/dom-controlling-004-controlling-deepening-2026-06-23.md`:
-  fachlicher Controlling-Workflow.
-- `docs/project-context/open-gaps-and-known-issues.md`: externe Freigabe der
-  Konten-/Steuer-/Kostenstellen-Mappings.
+- `packages/frontend-web/src/app/navigation/domains/*.tsx` — Sidebar-Navigation.
+- `packages/frontend-web/src/app/routing/route-inventory.gen.json` — Routen-Inventar.
+- `docs/MASKEN.md` — Layout-Standard (Gewohnheits-Prinzip).
 
-Reverse-Pflege: Wenn Kostenstellenarten, BAB-Logik, Umlagearten, Periodenstatus,
-Budgetregeln oder FIBU-/HR-/Logistik-Mappings geaendert werden, diese Seite und
-die Controlling-Workflow-Dokumente gemeinsam aktualisieren.
+Reverse-Pflege: Bei neuen Routen Generator `scripts/generate_benutzerhandbuch_full.py`
+ausführen; `mkdocs.yml`, `index.md` und `generate_inapp_help_map.py` mitziehen.

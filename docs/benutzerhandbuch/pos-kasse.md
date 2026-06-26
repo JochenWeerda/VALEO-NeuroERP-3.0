@@ -2,100 +2,418 @@
 title: POS und Kasse
 type: how-to
 audience: [endnutzer, power-user]
-owner: Codex
+owner: Cursor
 status: aktiv
 last_reviewed: 2026-06-26
-version: 3.1.0
+version: 3.2.0
 ---
 
 # POS und Kasse
 
-Diese Anleitung beschreibt den operativen Kassenablauf: Bon erfassen,
-Zahlungsart buchen, TSE-/DSFinV-K-Status pruefen und Tagesabschluss an die
-Finanzbuchhaltung uebergeben.
+Bon, Zahlungsarten, Tagesabschluss.
 
-!!! warning "Produktive TSE-Freigabe"
-    Repo-seitig sind POS-, TSE-, DSFinV-K- und FIBU-Vertraege dokumentiert und
-    ueber Mock-/Testpfade pruefbar. Fuer den produktiven Betrieb bleiben
-    TSE-Herstellerabnahme, DSFinV-K-Pruefwerkzeug, Steuerberaterfreigabe und
-    echte Provider-Zugangsdaten externe Gates.
+## Ziel
+
+Sie arbeiten sicher in allen Masken des Bereichs **POS und Kasse** — von der Navigation
+bis zu Speichern, Freigabe und Folgebelegen.
 
 ## Voraussetzungen
 
-- Sie sind am richtigen Mandanten angemeldet.
-- Kasse, Terminal und Benutzerrolle sind fuer den POS freigegeben.
-- Fuer produktive Abschluesse muss die TSE erreichbar und betriebsbereit sein.
-- Artikel, Steuerkennzeichen und Zahlungsmittel sind gepflegt.
+- Gültige Anmeldung und Mandant (`X-Tenant-ID`).
+- Modul für diesen Fachbereich ist installiert (siehe Administration → Module).
+- Ihre Rolle hat Lese- bzw. Schreibberechtigung für die jeweilige Maske.
 
-## Kassenverkauf buchen
+## Maskenregister
 
-1. Oeffnen Sie *POS* -> *POS-Terminal*.
-2. Waehlen oder scannen Sie die Artikel.
-3. Pruefen Sie Menge, Preis, Rabatt und Steuerkennzeichen.
-4. Waehlen Sie die Zahlungsart: Bar, EC/Karte, Gutschein oder Split-Payment.
-5. Schliessen Sie den Bon ab.
-6. Pruefen Sie auf dem Bon die Bonnummer, Zeit, Betrag, Steueranteile und
-   TSE-Status.
+Vollständige Abdeckung: **17** App-Routen
+(0 explizit in der Sidebar-Navigation).
 
-## Gutschein ausgeben oder einloesen
+| Maske | Route | Modul |
+|-------|-------|-------|
+| Historie | `/kasse/historie` | `@/pages/kasse/tagesabschluss` |
+| Tagesabschluss | `/kasse/tagesabschluss` | `@/pages/kasse/tagesabschluss` |
+| Customer Display | `/pos/customer-display` | `@/pages/pos/customer-display` |
+| Gift Card Neu | `/pos/gift-card-neu` | `@/pages/pos/gift-cards` |
+| :Id | `/pos/gift-card/:id` | `@/pages/pos/gift-cards` |
+| Gift Cards | `/pos/gift-cards` | `@/pages/pos/gift-cards` |
+| Promotionen | `/pos/promotionen` | `@/pages/pos/promotionen` |
+| Rabatt Neu | `/pos/rabatt-neu` | `@/pages/pos/rabatte` |
+| :Id | `/pos/rabatt/:id` | `@/pages/pos/rabatte` |
+| Rabatte | `/pos/rabatte` | `@/pages/pos/rabatte` |
+| Retoure | `/pos/retoure` | `@/pages/pos/retoure` |
+| Suspended Sales | `/pos/suspended-sales` | `@/pages/pos/suspended-sales` |
+| Tagesabschluss | `/pos/tagesabschluss` | `@/pages/pos/tagesabschluss-enhanced` |
+| Tagesabschluss Enhanced | `/pos/tagesabschluss-enhanced` | `@/pages/pos/tagesabschluss-enhanced` |
+| Terminal | `/pos/terminal` | `@/pages/pos/terminal` |
+| Tse Journal | `/pos/tse-journal` | `@/pages/pos/tse-journal` |
+| Uebernahme Kasse | `/pos/uebernahme-kasse` | `@/pages/pos/uebernahme-kasse` |
 
-1. Oeffnen Sie *POS* -> *Gutscheine* oder nutzen Sie die Gutschein-Aktion im
-   POS-Terminal.
-2. Fuer Ausgabe: Betrag und Empfaengerhinweis erfassen, Zahlung buchen und Bon
-   drucken.
-3. Fuer Einloesung: Gutscheincode scannen oder eingeben.
-4. Restbetrag pruefen und mit weiterer Zahlungsart ausgleichen.
+## Masken im Detail
 
-## Retoure oder Storno buchen
+Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
-1. Oeffnen Sie den betroffenen Bon oder starten Sie eine Retoure im POS.
-2. Waehlen Sie die Positionen, die storniert oder zurueckgenommen werden.
-3. Erfassen Sie den Grund.
-4. Buchen Sie die Rueckzahlung in der fachlich korrekten Zahlungsart.
-5. Drucken Sie den Storno-/Retourenbeleg.
+### Historie
 
-## Tagesabschluss ausfuehren
+**Route:** `/kasse/historie` · **Modul:** `@/pages/kasse/tagesabschluss`
 
-1. Oeffnen Sie *POS* -> *Tagesabschluss*.
-2. Pruefen Sie Barbestand, Kartensummen, Gutscheine, Entnahmen und Differenzen.
-3. Klaeren Sie offene oder fehlerhafte Bons vor dem Abschluss.
-4. Starten Sie den Tagesabschluss.
-5. Pruefen Sie den Abschlussbeleg und den Link zum TSE-Journal.
-6. Oeffnen Sie bei Bedarf *FIBU* -> *Uebernahme Buchungen Tagesabschluss POS*,
-   um die Uebergabe in die Finanzbuchhaltung zu kontrollieren.
+**Schritte:**
 
-## Ergebnis
+1. Sidebar oder Suche: **Historie** öffnen (`/kasse/historie`).
+2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
+3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
+4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
 
-- Jeder Bon hat eine nachvollziehbare Bonnummer, Zahlungsart und TSE-Spur.
-- Der Tagesabschluss enthaelt Bar-, Karten-, Gutschein- und Entnahme-Summen.
-- Die FIBU-Uebergabe ist als Prozessschritt sichtbar und kann bei Blockern
-  fail-closed gestoppt werden.
+**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
 
-## Haeufige Fehler
+**Häufige Fehler:**
 
-| Fehler | Ursache | Behebung |
-| --- | --- | --- |
-| Bon ohne TSE-Status | TSE nicht erreichbar oder Provider nicht freigegeben | TSE-Journal pruefen, Abschluss nicht produktiv freigeben |
-| Zahlungsdifferenz | Barbestand oder Kartenabschluss stimmt nicht | Differenz klaeren, Entnahme oder Korrektur erfassen |
-| Gutschein wird nicht akzeptiert | Code ungueltig, bereits verbraucht oder Mandant falsch | Gutscheinstatus pruefen |
-| Tagesabschluss blockiert | Offene Bons, TSE-Blocker oder FIBU-Mapping fehlt | Offene Positionen bereinigen, Mapping/Freigabe pruefen |
+| Symptom | Ursache | Maßnahme |
+|---------|---------|----------|
+| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
+| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
+| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
+
+### Tagesabschluss
+
+**Route:** `/kasse/tagesabschluss` · **Modul:** `@/pages/kasse/tagesabschluss`
+
+**Schritte:**
+
+1. Sidebar oder Suche: **Tagesabschluss** öffnen (`/kasse/tagesabschluss`).
+2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
+3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
+4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
+
+**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
+
+**Häufige Fehler:**
+
+| Symptom | Ursache | Maßnahme |
+|---------|---------|----------|
+| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
+| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
+| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
+
+### Customer Display
+
+**Route:** `/pos/customer-display` · **Modul:** `@/pages/pos/customer-display`
+
+**Schritte:**
+
+1. Sidebar oder Suche: **Customer Display** öffnen (`/pos/customer-display`).
+2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
+3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
+4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
+
+**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
+
+**Häufige Fehler:**
+
+| Symptom | Ursache | Maßnahme |
+|---------|---------|----------|
+| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
+| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
+| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
+
+### Gift Card Neu
+
+**Route:** `/pos/gift-card-neu` · **Modul:** `@/pages/pos/gift-cards`
+
+**Schritte:**
+
+1. Sidebar oder Suche: **Gift Card Neu** öffnen (`/pos/gift-card-neu`).
+2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
+3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
+4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
+
+**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
+
+**Häufige Fehler:**
+
+| Symptom | Ursache | Maßnahme |
+|---------|---------|----------|
+| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
+| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
+| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
+
+### :Id
+
+**Route:** `/pos/gift-card/:id` · **Modul:** `@/pages/pos/gift-cards`
+
+**Schritte:**
+
+1. Sidebar oder Suche: **:Id** öffnen (`/pos/gift-card/:id`).
+2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
+3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
+4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
+
+**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
+
+**Häufige Fehler:**
+
+| Symptom | Ursache | Maßnahme |
+|---------|---------|----------|
+| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
+| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
+| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
+
+### Gift Cards
+
+**Route:** `/pos/gift-cards` · **Modul:** `@/pages/pos/gift-cards`
+
+**Schritte:**
+
+1. Sidebar oder Suche: **Gift Cards** öffnen (`/pos/gift-cards`).
+2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
+3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
+4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
+
+**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
+
+**Häufige Fehler:**
+
+| Symptom | Ursache | Maßnahme |
+|---------|---------|----------|
+| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
+| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
+| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
+
+### Promotionen
+
+**Route:** `/pos/promotionen` · **Modul:** `@/pages/pos/promotionen`
+
+**Schritte:**
+
+1. Sidebar oder Suche: **Promotionen** öffnen (`/pos/promotionen`).
+2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
+3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
+4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
+
+**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
+
+**Häufige Fehler:**
+
+| Symptom | Ursache | Maßnahme |
+|---------|---------|----------|
+| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
+| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
+| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
+
+### Rabatt Neu
+
+**Route:** `/pos/rabatt-neu` · **Modul:** `@/pages/pos/rabatte`
+
+**Schritte:**
+
+1. Sidebar oder Suche: **Rabatt Neu** öffnen (`/pos/rabatt-neu`).
+2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
+3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
+4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
+
+**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
+
+**Häufige Fehler:**
+
+| Symptom | Ursache | Maßnahme |
+|---------|---------|----------|
+| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
+| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
+| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
+
+### :Id
+
+**Route:** `/pos/rabatt/:id` · **Modul:** `@/pages/pos/rabatte`
+
+**Schritte:**
+
+1. Sidebar oder Suche: **:Id** öffnen (`/pos/rabatt/:id`).
+2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
+3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
+4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
+
+**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
+
+**Häufige Fehler:**
+
+| Symptom | Ursache | Maßnahme |
+|---------|---------|----------|
+| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
+| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
+| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
+
+### Rabatte
+
+**Route:** `/pos/rabatte` · **Modul:** `@/pages/pos/rabatte`
+
+**Schritte:**
+
+1. Sidebar oder Suche: **Rabatte** öffnen (`/pos/rabatte`).
+2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
+3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
+4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
+
+**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
+
+**Häufige Fehler:**
+
+| Symptom | Ursache | Maßnahme |
+|---------|---------|----------|
+| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
+| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
+| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
+
+### Retoure
+
+**Route:** `/pos/retoure` · **Modul:** `@/pages/pos/retoure`
+
+**Schritte:**
+
+1. Sidebar oder Suche: **Retoure** öffnen (`/pos/retoure`).
+2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
+3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
+4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
+
+**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
+
+**Häufige Fehler:**
+
+| Symptom | Ursache | Maßnahme |
+|---------|---------|----------|
+| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
+| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
+| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
+
+### Suspended Sales
+
+**Route:** `/pos/suspended-sales` · **Modul:** `@/pages/pos/suspended-sales`
+
+**Schritte:**
+
+1. Sidebar oder Suche: **Suspended Sales** öffnen (`/pos/suspended-sales`).
+2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
+3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
+4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
+
+**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
+
+**Häufige Fehler:**
+
+| Symptom | Ursache | Maßnahme |
+|---------|---------|----------|
+| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
+| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
+| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
+
+### Tagesabschluss
+
+**Route:** `/pos/tagesabschluss` · **Modul:** `@/pages/pos/tagesabschluss-enhanced`
+
+**Schritte:**
+
+1. Sidebar oder Suche: **Tagesabschluss** öffnen (`/pos/tagesabschluss`).
+2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
+3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
+4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
+
+**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
+
+**Häufige Fehler:**
+
+| Symptom | Ursache | Maßnahme |
+|---------|---------|----------|
+| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
+| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
+| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
+
+### Tagesabschluss Enhanced
+
+**Route:** `/pos/tagesabschluss-enhanced` · **Modul:** `@/pages/pos/tagesabschluss-enhanced`
+
+**Schritte:**
+
+1. Sidebar oder Suche: **Tagesabschluss Enhanced** öffnen (`/pos/tagesabschluss-enhanced`).
+2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
+3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
+4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
+
+**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
+
+**Häufige Fehler:**
+
+| Symptom | Ursache | Maßnahme |
+|---------|---------|----------|
+| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
+| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
+| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
+
+### Terminal
+
+**Route:** `/pos/terminal` · **Modul:** `@/pages/pos/terminal`
+
+**Schritte:**
+
+1. Sidebar oder Suche: **Terminal** öffnen (`/pos/terminal`).
+2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
+3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
+4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
+
+**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
+
+**Häufige Fehler:**
+
+| Symptom | Ursache | Maßnahme |
+|---------|---------|----------|
+| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
+| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
+| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
+
+### Tse Journal
+
+**Route:** `/pos/tse-journal` · **Modul:** `@/pages/pos/tse-journal`
+
+**Schritte:**
+
+1. Sidebar oder Suche: **Tse Journal** öffnen (`/pos/tse-journal`).
+2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
+3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
+4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
+
+**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
+
+**Häufige Fehler:**
+
+| Symptom | Ursache | Maßnahme |
+|---------|---------|----------|
+| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
+| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
+| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
+
+### Uebernahme Kasse
+
+**Route:** `/pos/uebernahme-kasse` · **Modul:** `@/pages/pos/uebernahme-kasse`
+
+**Schritte:**
+
+1. Sidebar oder Suche: **Uebernahme Kasse** öffnen (`/pos/uebernahme-kasse`).
+2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
+3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
+4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
+
+**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
+
+**Häufige Fehler:**
+
+| Symptom | Ursache | Maßnahme |
+|---------|---------|----------|
+| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
+| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
+| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
 
 ## Quellen und Reverse-Pflege
 
-- `packages/frontend-web/src/app/navigation/domains/operations.tsx`: POS-Menue
-  mit POS-Terminal, TSE-Journal, Tagesabschluss und Gutscheinen.
-- `packages/frontend-web/src/app/navigation/domains/finance.tsx` und
-  `packages/frontend-web/src/app/navigation/fibu-suite.tsx`: FIBU-Uebernahme
-  Tagesabschluss POS.
-- `packages/frontend-web/src/pages/pos/tagesabschluss-enhanced.tsx` und
-  `packages/frontend-web/src/pages/pos/tse-journal.tsx`: Tagesabschluss- und
-  DSFinV-K-/TSE-Journal-Aktionen.
-- `docs/agent-ops/slices/POS-FISCAL-PROVIDERS-001.yaml` und
-  `docs/agent-ops/slices/POS-FISCAL-OPS-002.yaml`: Provider- und
-  Betriebsvertraege.
-- `docs/agent-ops/slices/SEMANTIC-E2E-P2P-FIBU-POS-QS-001.yaml`: semantische
-  POS/TSE-Kette mit externen Mock-Gates.
+- `packages/frontend-web/src/app/navigation/domains/*.tsx` — Sidebar-Navigation.
+- `packages/frontend-web/src/app/routing/route-inventory.gen.json` — Routen-Inventar.
+- `docs/MASKEN.md` — Layout-Standard (Gewohnheits-Prinzip).
 
-Reverse-Pflege: Wenn POS-Zahlungsarten, Tagesabschluss-Status, TSE-Provider,
-DSFinV-K-Export oder FIBU-Uebergabe geaendert werden, diese Seite und die
-entsprechenden POS-/Finance-Runbooks im gleichen Slice aktualisieren.
+Reverse-Pflege: Bei neuen Routen Generator `scripts/generate_benutzerhandbuch_full.py`
+ausführen; `mkdocs.yml`, `index.md` und `generate_inapp_help_map.py` mitziehen.

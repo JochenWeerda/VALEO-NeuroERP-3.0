@@ -1,5 +1,5 @@
 ---
-title: Compliance und Meldewesen
+title: Service und Support
 type: how-to
 audience: [endnutzer, power-user]
 owner: Cursor
@@ -8,13 +8,13 @@ last_reviewed: 2026-06-26
 version: 3.2.0
 ---
 
-# Compliance und Meldewesen
+# Service und Support
 
-Register, Meldungen, GoBD, PCN/UFI.
+Servicefälle, Wartung, Support.
 
 ## Ziel
 
-Sie arbeiten sicher in allen Masken des Bereichs **Compliance und Meldewesen** — von der Navigation
+Sie arbeiten sicher in allen Masken des Bereichs **Service und Support** — von der Navigation
 bis zu Speichern, Freigabe und Folgebelegen.
 
 ## Voraussetzungen
@@ -25,58 +25,47 @@ bis zu Speichern, Freigabe und Folgebelegen.
 
 ## Maskenregister
 
-Vollständige Abdeckung: **35** App-Routen
+Vollständige Abdeckung: **24** App-Routen
 (0 explizit in der Sidebar-Navigation).
 
 | Maske | Route | Modul |
 |-------|-------|-------|
-| Bvl Meldungen | `/compliance/bvl-meldungen` | `@/pages/compliance/bvl-umsatzmeldung` |
-| Bvl Umsatzmeldung | `/compliance/bvl-umsatzmeldung` | `@/pages/compliance/bvl-umsatzmeldung` |
-| Cross Compliance | `/compliance/cross-compliance` | `@/pages/compliance/cross-compliance` |
-| Datenpannen | `/compliance/datenpannen` | `@/pages/compliance/datenpannen` |
-| Enni Meldungen | `/compliance/enni-meldungen` | `@/pages/compliance/enni-meldungen` |
-| Enni Neu | `/compliance/enni-neu` | `@/pages/compliance/enni-meldungen` |
-| Export Pruefprotokoll | `/compliance/export-pruefprotokoll` | `@/pages/compliance/export-pruefprotokoll` |
-| Gelangensbestaetigung | `/compliance/gelangensbestaetigung` | `@/pages/compliance/gelangensbestaetigung` |
-| Intrastat | `/compliance/intrastat` | `@/pages/compliance/intrastat` |
-| Lksg | `/compliance/lksg` | `@/pages/compliance/lksg` |
-| Meldewesen Konsole | `/compliance/meldewesen-konsole` | `@/pages/compliance/meldewesen-konsole` |
-| Pcn Liste | `/compliance/pcn-liste` | `@/pages/compliance/pcn-liste` |
-| Pcn Ufi | `/compliance/pcn-ufi` | `@/pages/compliance/pcn-ufi` |
-| Qs Checkliste | `/compliance/qs-checkliste` | `@/pages/compliance/qs-checkliste` |
-| Saatgut Nachbau | `/compliance/saatgut-nachbau` | `@/pages/compliance/saatgut-nachbau` |
-| Saatgut Nachbau Neu | `/compliance/saatgut-nachbau-neu` | `@/pages/compliance/saatgut-nachbau` |
-| Sachkunde Neu | `/compliance/sachkunde-neu` | `@/pages/compliance/sachkunde-register` |
-| Sachkunde Register | `/compliance/sachkunde-register` | `@/pages/compliance/sachkunde-register` |
-| Sanktionspruefung | `/compliance/sanktionspruefung` | `@/pages/compliance/sanktionspruefung` |
-| Verarbeitungsverzeichnis | `/compliance/verarbeitungsverzeichnis` | `@/pages/compliance/verarbeitungsverzeichnis` |
-| Vvvo Register | `/compliance/vvvo-register` | `@/pages/compliance/vvvo-register` |
-| Zulassungen Register | `/compliance/zulassungen-register` | `@/pages/compliance/zulassungen-register` |
-| Foerderung | `/foerderung` | `@/pages/foerderung/liste` |
-| Antrag | `/foerderung/antrag` | `@/pages/foerderung/antrag` |
-| :Id | `/foerderung/antrag/:id` | `@/pages/foerderung/antrag` |
-| Liste | `/foerderung/liste` | `@/pages/foerderung/liste` |
-| Biodiversitaet | `/nachhaltigkeit/biodiversitaet` | `@/pages/nachhaltigkeit/biodiversitaet` |
-| Co2 Bilanz | `/nachhaltigkeit/co2-bilanz` | `@/pages/nachhaltigkeit/co2-bilanz` |
-| Esg Report | `/nachhaltigkeit/esg-report` | `@/pages/nachhaltigkeit/esg-report` |
-| Eudr Compliance | `/nachhaltigkeit/eudr-compliance` | `@/pages/nachhaltigkeit/eudr-compliance` |
-| Dashboard | `/subventionen/dashboard` | `@/pages/subventionen/dashboard` |
-| Zertifikate | `/zertifikate` | `@/pages/zertifikate/liste` |
-| :Id | `/zertifikate/:id` | `@/pages/zertifikate/liste` |
-| Liste | `/zertifikate/liste` | `@/pages/zertifikate/liste` |
-| Neu | `/zertifikate/neu` | `@/pages/zertifikate/liste` |
+| Energie | `/energie` | `@/pages/energie/verbrauch` |
+| Verbrauch | `/energie/verbrauch` | `@/pages/energie/verbrauch` |
+| Scanner | `/mobile/scanner` | `@/pages/mobile/scanner` |
+| Projekte | `/projekte` | `@/pages/projekte/liste` |
+| :Id | `/projekte/:id` | `@/pages/projekte/liste` |
+| Liste | `/projekte/liste` | `@/pages/projekte/liste` |
+| Schaeden | `/schaeden` | `@/pages/schaeden/liste` |
+| :Id | `/schaeden/:id` | `@/pages/schaeden/meldung` |
+| Liste | `/schaeden/liste` | `@/pages/schaeden/liste` |
+| Meldung | `/schaeden/meldung` | `@/pages/schaeden/meldung` |
+| Abschluss | `/service/abschluss` | `@/pages/service/abschluss` |
+| Anfrage Detail | `/service/anfrage-detail` | `@/pages/service/anfrage-detail` |
+| Anfrage Neu | `/service/anfrage-neu` | `@/pages/service/anfrage-neu` |
+| :Id | `/service/anfrage/:id` | `@/pages/service/anfrage-detail` |
+| Neu | `/service/anfrage/neu` | `@/pages/service/anfrage-neu` |
+| Anfragen | `/service/anfragen` | `@/pages/service/anfragen` |
+| Rueckmeldung | `/service/rueckmeldung` | `@/pages/service/rueckmeldung` |
+| Versicherungen | `/versicherungen` | `@/pages/versicherungen/liste` |
+| :Id | `/versicherungen/:id` | `@/pages/versicherungen/liste` |
+| Liste | `/versicherungen/liste` | `@/pages/versicherungen/liste` |
+| :Id | `/wartung/anlage/:id` | `@/pages/wartung/anlagen-liste` |
+| Neu | `/wartung/anlage/neu` | `@/pages/wartung/anlagen-liste` |
+| Anlagen | `/wartung/anlagen` | `@/pages/wartung/anlagen-liste` |
+| Anlagen Liste | `/wartung/anlagen-liste` | `@/pages/wartung/anlagen-liste` |
 
 ## Masken im Detail
 
 Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
-### Bvl Meldungen
+### Energie
 
-**Route:** `/compliance/bvl-meldungen` · **Modul:** `@/pages/compliance/bvl-umsatzmeldung`
+**Route:** `/energie` · **Modul:** `@/pages/energie/verbrauch`
 
 **Schritte:**
 
-1. Sidebar oder Suche: **Bvl Meldungen** öffnen (`/compliance/bvl-meldungen`).
+1. Sidebar oder Suche: **Energie** öffnen (`/energie`).
 2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
 3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
 4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
@@ -91,13 +80,13 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 | Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
 | Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
 
-### Bvl Umsatzmeldung
+### Verbrauch
 
-**Route:** `/compliance/bvl-umsatzmeldung` · **Modul:** `@/pages/compliance/bvl-umsatzmeldung`
+**Route:** `/energie/verbrauch` · **Modul:** `@/pages/energie/verbrauch`
 
 **Schritte:**
 
-1. Sidebar oder Suche: **Bvl Umsatzmeldung** öffnen (`/compliance/bvl-umsatzmeldung`).
+1. Sidebar oder Suche: **Verbrauch** öffnen (`/energie/verbrauch`).
 2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
 3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
 4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
@@ -112,13 +101,13 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 | Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
 | Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
 
-### Cross Compliance
+### Scanner
 
-**Route:** `/compliance/cross-compliance` · **Modul:** `@/pages/compliance/cross-compliance`
+**Route:** `/mobile/scanner` · **Modul:** `@/pages/mobile/scanner`
 
 **Schritte:**
 
-1. Sidebar oder Suche: **Cross Compliance** öffnen (`/compliance/cross-compliance`).
+1. Sidebar oder Suche: **Scanner** öffnen (`/mobile/scanner`).
 2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
 3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
 4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
@@ -133,433 +122,13 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 | Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
 | Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
 
-### Datenpannen
+### Projekte
 
-**Route:** `/compliance/datenpannen` · **Modul:** `@/pages/compliance/datenpannen`
-
-**Schritte:**
-
-1. Sidebar oder Suche: **Datenpannen** öffnen (`/compliance/datenpannen`).
-2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
-3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
-4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
-
-**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
-
-**Häufige Fehler:**
-
-| Symptom | Ursache | Maßnahme |
-|---------|---------|----------|
-| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
-| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
-| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
-
-### Enni Meldungen
-
-**Route:** `/compliance/enni-meldungen` · **Modul:** `@/pages/compliance/enni-meldungen`
+**Route:** `/projekte` · **Modul:** `@/pages/projekte/liste`
 
 **Schritte:**
 
-1. Sidebar oder Suche: **Enni Meldungen** öffnen (`/compliance/enni-meldungen`).
-2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
-3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
-4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
-
-**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
-
-**Häufige Fehler:**
-
-| Symptom | Ursache | Maßnahme |
-|---------|---------|----------|
-| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
-| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
-| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
-
-### Enni Neu
-
-**Route:** `/compliance/enni-neu` · **Modul:** `@/pages/compliance/enni-meldungen`
-
-**Schritte:**
-
-1. Sidebar oder Suche: **Enni Neu** öffnen (`/compliance/enni-neu`).
-2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
-3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
-4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
-
-**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
-
-**Häufige Fehler:**
-
-| Symptom | Ursache | Maßnahme |
-|---------|---------|----------|
-| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
-| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
-| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
-
-### Export Pruefprotokoll
-
-**Route:** `/compliance/export-pruefprotokoll` · **Modul:** `@/pages/compliance/export-pruefprotokoll`
-
-**Schritte:**
-
-1. Sidebar oder Suche: **Export Pruefprotokoll** öffnen (`/compliance/export-pruefprotokoll`).
-2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
-3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
-4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
-
-**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
-
-**Häufige Fehler:**
-
-| Symptom | Ursache | Maßnahme |
-|---------|---------|----------|
-| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
-| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
-| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
-
-### Gelangensbestaetigung
-
-**Route:** `/compliance/gelangensbestaetigung` · **Modul:** `@/pages/compliance/gelangensbestaetigung`
-
-**Schritte:**
-
-1. Sidebar oder Suche: **Gelangensbestaetigung** öffnen (`/compliance/gelangensbestaetigung`).
-2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
-3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
-4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
-
-**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
-
-**Häufige Fehler:**
-
-| Symptom | Ursache | Maßnahme |
-|---------|---------|----------|
-| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
-| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
-| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
-
-### Intrastat
-
-**Route:** `/compliance/intrastat` · **Modul:** `@/pages/compliance/intrastat`
-
-**Schritte:**
-
-1. Sidebar oder Suche: **Intrastat** öffnen (`/compliance/intrastat`).
-2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
-3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
-4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
-
-**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
-
-**Häufige Fehler:**
-
-| Symptom | Ursache | Maßnahme |
-|---------|---------|----------|
-| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
-| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
-| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
-
-### Lksg
-
-**Route:** `/compliance/lksg` · **Modul:** `@/pages/compliance/lksg`
-
-**Schritte:**
-
-1. Sidebar oder Suche: **Lksg** öffnen (`/compliance/lksg`).
-2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
-3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
-4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
-
-**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
-
-**Häufige Fehler:**
-
-| Symptom | Ursache | Maßnahme |
-|---------|---------|----------|
-| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
-| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
-| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
-
-### Meldewesen Konsole
-
-**Route:** `/compliance/meldewesen-konsole` · **Modul:** `@/pages/compliance/meldewesen-konsole`
-
-**Schritte:**
-
-1. Sidebar oder Suche: **Meldewesen Konsole** öffnen (`/compliance/meldewesen-konsole`).
-2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
-3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
-4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
-
-**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
-
-**Häufige Fehler:**
-
-| Symptom | Ursache | Maßnahme |
-|---------|---------|----------|
-| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
-| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
-| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
-
-### Pcn Liste
-
-**Route:** `/compliance/pcn-liste` · **Modul:** `@/pages/compliance/pcn-liste`
-
-**Schritte:**
-
-1. Sidebar oder Suche: **Pcn Liste** öffnen (`/compliance/pcn-liste`).
-2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
-3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
-4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
-
-**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
-
-**Häufige Fehler:**
-
-| Symptom | Ursache | Maßnahme |
-|---------|---------|----------|
-| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
-| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
-| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
-
-### Pcn Ufi
-
-**Route:** `/compliance/pcn-ufi` · **Modul:** `@/pages/compliance/pcn-ufi`
-
-**Schritte:**
-
-1. Sidebar oder Suche: **Pcn Ufi** öffnen (`/compliance/pcn-ufi`).
-2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
-3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
-4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
-
-**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
-
-**Häufige Fehler:**
-
-| Symptom | Ursache | Maßnahme |
-|---------|---------|----------|
-| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
-| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
-| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
-
-### Qs Checkliste
-
-**Route:** `/compliance/qs-checkliste` · **Modul:** `@/pages/compliance/qs-checkliste`
-
-**Schritte:**
-
-1. Sidebar oder Suche: **Qs Checkliste** öffnen (`/compliance/qs-checkliste`).
-2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
-3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
-4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
-
-**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
-
-**Häufige Fehler:**
-
-| Symptom | Ursache | Maßnahme |
-|---------|---------|----------|
-| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
-| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
-| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
-
-### Saatgut Nachbau
-
-**Route:** `/compliance/saatgut-nachbau` · **Modul:** `@/pages/compliance/saatgut-nachbau`
-
-**Schritte:**
-
-1. Sidebar oder Suche: **Saatgut Nachbau** öffnen (`/compliance/saatgut-nachbau`).
-2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
-3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
-4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
-
-**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
-
-**Häufige Fehler:**
-
-| Symptom | Ursache | Maßnahme |
-|---------|---------|----------|
-| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
-| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
-| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
-
-### Saatgut Nachbau Neu
-
-**Route:** `/compliance/saatgut-nachbau-neu` · **Modul:** `@/pages/compliance/saatgut-nachbau`
-
-**Schritte:**
-
-1. Sidebar oder Suche: **Saatgut Nachbau Neu** öffnen (`/compliance/saatgut-nachbau-neu`).
-2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
-3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
-4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
-
-**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
-
-**Häufige Fehler:**
-
-| Symptom | Ursache | Maßnahme |
-|---------|---------|----------|
-| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
-| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
-| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
-
-### Sachkunde Neu
-
-**Route:** `/compliance/sachkunde-neu` · **Modul:** `@/pages/compliance/sachkunde-register`
-
-**Schritte:**
-
-1. Sidebar oder Suche: **Sachkunde Neu** öffnen (`/compliance/sachkunde-neu`).
-2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
-3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
-4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
-
-**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
-
-**Häufige Fehler:**
-
-| Symptom | Ursache | Maßnahme |
-|---------|---------|----------|
-| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
-| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
-| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
-
-### Sachkunde Register
-
-**Route:** `/compliance/sachkunde-register` · **Modul:** `@/pages/compliance/sachkunde-register`
-
-**Schritte:**
-
-1. Sidebar oder Suche: **Sachkunde Register** öffnen (`/compliance/sachkunde-register`).
-2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
-3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
-4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
-
-**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
-
-**Häufige Fehler:**
-
-| Symptom | Ursache | Maßnahme |
-|---------|---------|----------|
-| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
-| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
-| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
-
-### Sanktionspruefung
-
-**Route:** `/compliance/sanktionspruefung` · **Modul:** `@/pages/compliance/sanktionspruefung`
-
-**Schritte:**
-
-1. Sidebar oder Suche: **Sanktionspruefung** öffnen (`/compliance/sanktionspruefung`).
-2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
-3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
-4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
-
-**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
-
-**Häufige Fehler:**
-
-| Symptom | Ursache | Maßnahme |
-|---------|---------|----------|
-| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
-| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
-| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
-
-### Verarbeitungsverzeichnis
-
-**Route:** `/compliance/verarbeitungsverzeichnis` · **Modul:** `@/pages/compliance/verarbeitungsverzeichnis`
-
-**Schritte:**
-
-1. Sidebar oder Suche: **Verarbeitungsverzeichnis** öffnen (`/compliance/verarbeitungsverzeichnis`).
-2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
-3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
-4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
-
-**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
-
-**Häufige Fehler:**
-
-| Symptom | Ursache | Maßnahme |
-|---------|---------|----------|
-| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
-| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
-| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
-
-### Vvvo Register
-
-**Route:** `/compliance/vvvo-register` · **Modul:** `@/pages/compliance/vvvo-register`
-
-**Schritte:**
-
-1. Sidebar oder Suche: **Vvvo Register** öffnen (`/compliance/vvvo-register`).
-2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
-3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
-4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
-
-**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
-
-**Häufige Fehler:**
-
-| Symptom | Ursache | Maßnahme |
-|---------|---------|----------|
-| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
-| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
-| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
-
-### Zulassungen Register
-
-**Route:** `/compliance/zulassungen-register` · **Modul:** `@/pages/compliance/zulassungen-register`
-
-**Schritte:**
-
-1. Sidebar oder Suche: **Zulassungen Register** öffnen (`/compliance/zulassungen-register`).
-2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
-3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
-4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
-
-**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
-
-**Häufige Fehler:**
-
-| Symptom | Ursache | Maßnahme |
-|---------|---------|----------|
-| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
-| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
-| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
-
-### Foerderung
-
-**Route:** `/foerderung` · **Modul:** `@/pages/foerderung/liste`
-
-**Schritte:**
-
-1. Sidebar oder Suche: **Foerderung** öffnen (`/foerderung`).
-2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
-3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
-4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
-
-**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
-
-**Häufige Fehler:**
-
-| Symptom | Ursache | Maßnahme |
-|---------|---------|----------|
-| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
-| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
-| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
-
-### Antrag
-
-**Route:** `/foerderung/antrag` · **Modul:** `@/pages/foerderung/antrag`
-
-**Schritte:**
-
-1. Sidebar oder Suche: **Antrag** öffnen (`/foerderung/antrag`).
+1. Sidebar oder Suche: **Projekte** öffnen (`/projekte`).
 2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
 3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
 4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
@@ -576,11 +145,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 ### :Id
 
-**Route:** `/foerderung/antrag/:id` · **Modul:** `@/pages/foerderung/antrag`
+**Route:** `/projekte/:id` · **Modul:** `@/pages/projekte/liste`
 
 **Schritte:**
 
-1. Sidebar oder Suche: **:Id** öffnen (`/foerderung/antrag/:id`).
+1. Sidebar oder Suche: **:Id** öffnen (`/projekte/:id`).
 2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
 3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
 4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
@@ -597,11 +166,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 ### Liste
 
-**Route:** `/foerderung/liste` · **Modul:** `@/pages/foerderung/liste`
+**Route:** `/projekte/liste` · **Modul:** `@/pages/projekte/liste`
 
 **Schritte:**
 
-1. Sidebar oder Suche: **Liste** öffnen (`/foerderung/liste`).
+1. Sidebar oder Suche: **Liste** öffnen (`/projekte/liste`).
 2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
 3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
 4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
@@ -616,118 +185,13 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 | Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
 | Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
 
-### Biodiversitaet
+### Schaeden
 
-**Route:** `/nachhaltigkeit/biodiversitaet` · **Modul:** `@/pages/nachhaltigkeit/biodiversitaet`
-
-**Schritte:**
-
-1. Sidebar oder Suche: **Biodiversitaet** öffnen (`/nachhaltigkeit/biodiversitaet`).
-2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
-3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
-4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
-
-**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
-
-**Häufige Fehler:**
-
-| Symptom | Ursache | Maßnahme |
-|---------|---------|----------|
-| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
-| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
-| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
-
-### Co2 Bilanz
-
-**Route:** `/nachhaltigkeit/co2-bilanz` · **Modul:** `@/pages/nachhaltigkeit/co2-bilanz`
+**Route:** `/schaeden` · **Modul:** `@/pages/schaeden/liste`
 
 **Schritte:**
 
-1. Sidebar oder Suche: **Co2 Bilanz** öffnen (`/nachhaltigkeit/co2-bilanz`).
-2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
-3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
-4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
-
-**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
-
-**Häufige Fehler:**
-
-| Symptom | Ursache | Maßnahme |
-|---------|---------|----------|
-| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
-| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
-| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
-
-### Esg Report
-
-**Route:** `/nachhaltigkeit/esg-report` · **Modul:** `@/pages/nachhaltigkeit/esg-report`
-
-**Schritte:**
-
-1. Sidebar oder Suche: **Esg Report** öffnen (`/nachhaltigkeit/esg-report`).
-2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
-3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
-4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
-
-**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
-
-**Häufige Fehler:**
-
-| Symptom | Ursache | Maßnahme |
-|---------|---------|----------|
-| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
-| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
-| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
-
-### Eudr Compliance
-
-**Route:** `/nachhaltigkeit/eudr-compliance` · **Modul:** `@/pages/nachhaltigkeit/eudr-compliance`
-
-**Schritte:**
-
-1. Sidebar oder Suche: **Eudr Compliance** öffnen (`/nachhaltigkeit/eudr-compliance`).
-2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
-3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
-4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
-
-**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
-
-**Häufige Fehler:**
-
-| Symptom | Ursache | Maßnahme |
-|---------|---------|----------|
-| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
-| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
-| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
-
-### Dashboard
-
-**Route:** `/subventionen/dashboard` · **Modul:** `@/pages/subventionen/dashboard`
-
-**Schritte:**
-
-1. Sidebar oder Suche: **Dashboard** öffnen (`/subventionen/dashboard`).
-2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
-3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
-4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
-
-**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
-
-**Häufige Fehler:**
-
-| Symptom | Ursache | Maßnahme |
-|---------|---------|----------|
-| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
-| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
-| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
-
-### Zertifikate
-
-**Route:** `/zertifikate` · **Modul:** `@/pages/zertifikate/liste`
-
-**Schritte:**
-
-1. Sidebar oder Suche: **Zertifikate** öffnen (`/zertifikate`).
+1. Sidebar oder Suche: **Schaeden** öffnen (`/schaeden`).
 2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
 3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
 4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
@@ -744,11 +208,11 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 ### :Id
 
-**Route:** `/zertifikate/:id` · **Modul:** `@/pages/zertifikate/liste`
+**Route:** `/schaeden/:id` · **Modul:** `@/pages/schaeden/meldung`
 
 **Schritte:**
 
-1. Sidebar oder Suche: **:Id** öffnen (`/zertifikate/:id`).
+1. Sidebar oder Suche: **:Id** öffnen (`/schaeden/:id`).
 2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
 3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
 4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
@@ -765,11 +229,116 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 ### Liste
 
-**Route:** `/zertifikate/liste` · **Modul:** `@/pages/zertifikate/liste`
+**Route:** `/schaeden/liste` · **Modul:** `@/pages/schaeden/liste`
 
 **Schritte:**
 
-1. Sidebar oder Suche: **Liste** öffnen (`/zertifikate/liste`).
+1. Sidebar oder Suche: **Liste** öffnen (`/schaeden/liste`).
+2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
+3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
+4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
+
+**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
+
+**Häufige Fehler:**
+
+| Symptom | Ursache | Maßnahme |
+|---------|---------|----------|
+| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
+| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
+| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
+
+### Meldung
+
+**Route:** `/schaeden/meldung` · **Modul:** `@/pages/schaeden/meldung`
+
+**Schritte:**
+
+1. Sidebar oder Suche: **Meldung** öffnen (`/schaeden/meldung`).
+2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
+3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
+4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
+
+**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
+
+**Häufige Fehler:**
+
+| Symptom | Ursache | Maßnahme |
+|---------|---------|----------|
+| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
+| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
+| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
+
+### Abschluss
+
+**Route:** `/service/abschluss` · **Modul:** `@/pages/service/abschluss`
+
+**Schritte:**
+
+1. Sidebar oder Suche: **Abschluss** öffnen (`/service/abschluss`).
+2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
+3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
+4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
+
+**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
+
+**Häufige Fehler:**
+
+| Symptom | Ursache | Maßnahme |
+|---------|---------|----------|
+| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
+| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
+| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
+
+### Anfrage Detail
+
+**Route:** `/service/anfrage-detail` · **Modul:** `@/pages/service/anfrage-detail`
+
+**Schritte:**
+
+1. Sidebar oder Suche: **Anfrage Detail** öffnen (`/service/anfrage-detail`).
+2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
+3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
+4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
+
+**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
+
+**Häufige Fehler:**
+
+| Symptom | Ursache | Maßnahme |
+|---------|---------|----------|
+| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
+| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
+| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
+
+### Anfrage Neu
+
+**Route:** `/service/anfrage-neu` · **Modul:** `@/pages/service/anfrage-neu`
+
+**Schritte:**
+
+1. Sidebar oder Suche: **Anfrage Neu** öffnen (`/service/anfrage-neu`).
+2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
+3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
+4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
+
+**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
+
+**Häufige Fehler:**
+
+| Symptom | Ursache | Maßnahme |
+|---------|---------|----------|
+| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
+| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
+| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
+
+### :Id
+
+**Route:** `/service/anfrage/:id` · **Modul:** `@/pages/service/anfrage-detail`
+
+**Schritte:**
+
+1. Sidebar oder Suche: **:Id** öffnen (`/service/anfrage/:id`).
 2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
 3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
 4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
@@ -786,11 +355,200 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 ### Neu
 
-**Route:** `/zertifikate/neu` · **Modul:** `@/pages/zertifikate/liste`
+**Route:** `/service/anfrage/neu` · **Modul:** `@/pages/service/anfrage-neu`
 
 **Schritte:**
 
-1. Sidebar oder Suche: **Neu** öffnen (`/zertifikate/neu`).
+1. Sidebar oder Suche: **Neu** öffnen (`/service/anfrage/neu`).
+2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
+3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
+4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
+
+**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
+
+**Häufige Fehler:**
+
+| Symptom | Ursache | Maßnahme |
+|---------|---------|----------|
+| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
+| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
+| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
+
+### Anfragen
+
+**Route:** `/service/anfragen` · **Modul:** `@/pages/service/anfragen`
+
+**Schritte:**
+
+1. Sidebar oder Suche: **Anfragen** öffnen (`/service/anfragen`).
+2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
+3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
+4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
+
+**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
+
+**Häufige Fehler:**
+
+| Symptom | Ursache | Maßnahme |
+|---------|---------|----------|
+| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
+| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
+| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
+
+### Rueckmeldung
+
+**Route:** `/service/rueckmeldung` · **Modul:** `@/pages/service/rueckmeldung`
+
+**Schritte:**
+
+1. Sidebar oder Suche: **Rueckmeldung** öffnen (`/service/rueckmeldung`).
+2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
+3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
+4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
+
+**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
+
+**Häufige Fehler:**
+
+| Symptom | Ursache | Maßnahme |
+|---------|---------|----------|
+| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
+| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
+| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
+
+### Versicherungen
+
+**Route:** `/versicherungen` · **Modul:** `@/pages/versicherungen/liste`
+
+**Schritte:**
+
+1. Sidebar oder Suche: **Versicherungen** öffnen (`/versicherungen`).
+2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
+3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
+4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
+
+**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
+
+**Häufige Fehler:**
+
+| Symptom | Ursache | Maßnahme |
+|---------|---------|----------|
+| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
+| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
+| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
+
+### :Id
+
+**Route:** `/versicherungen/:id` · **Modul:** `@/pages/versicherungen/liste`
+
+**Schritte:**
+
+1. Sidebar oder Suche: **:Id** öffnen (`/versicherungen/:id`).
+2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
+3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
+4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
+
+**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
+
+**Häufige Fehler:**
+
+| Symptom | Ursache | Maßnahme |
+|---------|---------|----------|
+| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
+| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
+| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
+
+### Liste
+
+**Route:** `/versicherungen/liste` · **Modul:** `@/pages/versicherungen/liste`
+
+**Schritte:**
+
+1. Sidebar oder Suche: **Liste** öffnen (`/versicherungen/liste`).
+2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
+3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
+4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
+
+**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
+
+**Häufige Fehler:**
+
+| Symptom | Ursache | Maßnahme |
+|---------|---------|----------|
+| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
+| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
+| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
+
+### :Id
+
+**Route:** `/wartung/anlage/:id` · **Modul:** `@/pages/wartung/anlagen-liste`
+
+**Schritte:**
+
+1. Sidebar oder Suche: **:Id** öffnen (`/wartung/anlage/:id`).
+2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
+3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
+4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
+
+**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
+
+**Häufige Fehler:**
+
+| Symptom | Ursache | Maßnahme |
+|---------|---------|----------|
+| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
+| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
+| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
+
+### Neu
+
+**Route:** `/wartung/anlage/neu` · **Modul:** `@/pages/wartung/anlagen-liste`
+
+**Schritte:**
+
+1. Sidebar oder Suche: **Neu** öffnen (`/wartung/anlage/neu`).
+2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
+3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
+4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
+
+**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
+
+**Häufige Fehler:**
+
+| Symptom | Ursache | Maßnahme |
+|---------|---------|----------|
+| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
+| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
+| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
+
+### Anlagen
+
+**Route:** `/wartung/anlagen` · **Modul:** `@/pages/wartung/anlagen-liste`
+
+**Schritte:**
+
+1. Sidebar oder Suche: **Anlagen** öffnen (`/wartung/anlagen`).
+2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
+3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
+4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
+
+**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
+
+**Häufige Fehler:**
+
+| Symptom | Ursache | Maßnahme |
+|---------|---------|----------|
+| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
+| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
+| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
+
+### Anlagen Liste
+
+**Route:** `/wartung/anlagen-liste` · **Modul:** `@/pages/wartung/anlagen-liste`
+
+**Schritte:**
+
+1. Sidebar oder Suche: **Anlagen Liste** öffnen (`/wartung/anlagen-liste`).
 2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
 3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
 4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
