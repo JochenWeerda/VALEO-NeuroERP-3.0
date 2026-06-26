@@ -5,7 +5,7 @@ audience: [entwickler, product, qa, admin]
 owner: Cursor
 status: aktiv
 last_reviewed: 2026-06-26
-version: 3.1.0
+version: 3.2.0
 ---
 
 # Doku-Governance
@@ -29,6 +29,7 @@ erfordern Review der jeweils Verantwortlichen.
 | `docs-staleness-check.cjs` | Blockiert PRs bei fehlendem oder veraltetem `last_reviewed` (365 Tage, kuratierte MkDocs-Seiten). |
 | `ai-slice-readiness-check.cjs` | Pflichtschema der Slice-YAMLs. |
 | `doc-drift-report.yml` (woechentlich) | Informativer Drift-Snapshot Code↔Doku; Artifact `doc_drift_report.json`. |
+| `generate_code_inventories.py --check` | Endpoint-/Service-/Migrations-Inventare synchron zu Code (docs.yml). |
 
 ## Doku-Code-Drift (informativ)
 

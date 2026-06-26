@@ -236,4 +236,4 @@ nav:
       - Frontmatter-Standard: dokumentation/frontmatter-standard.md
       - Doku-Governance: dokumentation/governance.md
       - Migrationsplan: dokumentation/migrationsplan.md
-  - AI Engineering Metrics: agent-ops/engineering-metrics.md
+  - AI Engineering Metrics: entwickler/engineering-metrics.md

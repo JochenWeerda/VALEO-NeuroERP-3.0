@@ -20,6 +20,7 @@ Einstieg für Entwickler:innen in Architektur, Setup und Konventionen.
 | Multi-Tenancy & Schemas | [Datenmodell & Tenancy](datenmodell-tenancy.md) |
 | Error-Handling & Mutation-Invarianten | [Konventionen](konventionen.md) |
 | pytest, Vitest, Playwright | [Test-Strategie](test-strategie.md) |
+| Backend-Service-Module (Inventar) | [Service-Inventar](service-inventory.md) |
 
 ## Architektur & Entscheidungen
 

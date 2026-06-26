@@ -4,8 +4,8 @@ type: explanation
 audience: [endnutzer, tenant-admin, betrieb, entwickler, integrator, ki-agent]
 owner: Cursor
 status: aktiv
-last_reviewed: 2026-06-25
-version: 3.0.0
+last_reviewed: 2026-06-26
+version: 3.1.0
 ---
 
 # VALEO NeuroERP 3.0 – Dokumentation
@@ -38,7 +38,8 @@ Lernen (Tutorials), Aufgaben (How-to), Nachschlagen (Reference) und Verstehen
   Metadaten je Seite.
 
 !!! note "Migrationsstand"
-    Bulk-Migration abgeschlossen (`DOC-MIGRATION-001…008`, Stand 2026-06-26).
+    Bulk-Migration abgeschlossen (`DOC-MIGRATION-001…009`, Stand 2026-06-26).
+    Code-Inventare (Endpoints, Services, Migrationen) werden per Generator gepflegt.
     Altbestände liegen unter `docs/_internal/archive/`; Lieferstand siehe
     [Process Kernel STATUS](architecture/process-kernel/STATUS.md) und
     [Migrationsplan](dokumentation/migrationsplan.md).

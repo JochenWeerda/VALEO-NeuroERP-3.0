@@ -1,10 +1,17 @@
 ---
 title: Service-Inventar
+type: reference
+audience: [entwickler, qa]
+owner: Cursor
+status: aktiv
 last_reviewed: 2026-06-26
+version: 3.0.0
 description: Vollständiges Inventar aller Backend-Service-Module mit Kurzbeschreibung. Beschreibungen sind aus den Modul-Docstrings extrahiert.
 ---
 
 # Service-Inventar
+
+> Automatisch generiert via `python scripts/generate_code_inventories.py`. **Nicht manuell bearbeiten.**
 
 Vollständiges Inventar aller Backend-Service-Module mit Kurzbeschreibung. Beschreibungen sind aus den Modul-Docstrings extrahiert.
 
@@ -108,16 +115,16 @@ Vollständiges Inventar aller Backend-Service-Module mit Kurzbeschreibung. Besch
 | `geo_pipeline` | Geo-Pipeline – Betriebsadressen → Koordinaten für den Außendienst-Viewer. |
 | `guardrails` | Guardrails Service — NC-C3 |
 | `harvest_acceptance_service` | Service layer for Harvest Acceptance (Ernte-Annahme) CRUD operations. |
-| `hrm_abwesenheit_service` | Hrm abwesenheit service |
+| `hrm_abwesenheit_service` | — |
 | `hrm_zeiterfassung_service` | DOM-HRM-004.2 — HRM Zeiterfassung Lifecycle (Einstempeln/Ausstempeln/Korrektur). |
-| `integration_bootstrap` | Integration bootstrap |
+| `integration_bootstrap` | — |
 | `interaction_state_manager` | Interaction State Manager — NC-002 |
 | `inventory_compat_service` | Service layer for compat inventory (lager) and futter domain routes. |
 | `inventory_correction_service` | DOM-INV-004.4 — Bestandskorrektur-Storno-Service. |
 | `inventory_count_close_service` | DOM-INV-004.3 — Inventur-Differenzbeleg-Service. |
 | `inventory_lot_trace_service` | DOM-INV-004.2 — Chargen-/MHD-Traceability Service (FEFO). |
 | `ist_aggregation_service` | Echte Ist-Belegaggregation für das Bedarfsdeckungs-Cockpit. |
-| `kaeufer_klassifikator` | Austauschbare Käufergruppen-Klassifikatoren (regelbasiert &#124; KI). |
+| `kaeufer_klassifikator` | Austauschbare Käufergruppen-Klassifikatoren (regelbasiert / KI). |
 | `kaeufer_signal_service` | Aggregiert echte Verhaltenssignale je Betrieb (und je Produktgruppe) aus den |
 | `kaeufergruppe` | Käufergruppen-Modell + realistisch gewinnbare Bedarfslücke (Durchdringungs-CRM). |
 | `knowledge_store` | Knowledge Store — NC-06 |
@@ -126,8 +133,8 @@ Vollständiges Inventar aller Backend-Service-Module mit Kurzbeschreibung. Besch
 | `kontrakt_movement_sync` | Automatic Kontrakt-Movement synchronization. |
 | `kontrakt_position_service` | Rohwaren-Positionsmonitor: Long/Short-Berechnung pro Artikel. |
 | `kontrakt_settlement_service` | DOM-CON-004.4 — Kontrakt Settlement Service (Abrechnung + Storno). |
-| `kontrakte_adapters` | Kontrakte adapters |
-| `kontrakte_service` | row-level lock avoids duplicate numbers under parallel requests |
+| `kontrakte_adapters` | — |
+| `kontrakte_service` | — |
 | `kunden_backfill` | Phase 2D Schritt 3: Backfill public.kunden -> Domänensatelliten. |
 | `kunden_geocode_service` | Befüllt public.kunden_geo mit präzisen Koordinaten je Kunde. |
 | `kunden_merge` | Kunden/Business-Partner-Merge — Dry-Run / Reconciliation (Phase 2A). |
@@ -153,7 +160,7 @@ Vollständiges Inventar aller Backend-Service-Module mit Kurzbeschreibung. Besch
 | `numbering_service` | Numbering Service |
 | `numbering_service_pg` | Numbering Service (PostgreSQL) |
 | `o2c_chain_service` | Order-to-Cash-Kette (DOM-SALES-004) — Angebot → Auftrag → Lieferschein → Rechnung. |
-| `operator_agent_service` | OPERATOR-AGENT-001 — Read-Only/Proposal-Modus fuer ERP-Operator-Agent. |
+| `operator_agent_service` | OPERATOR-AGENT-001 — ERP-Operator-Agent: Proposal + kontrollierte LOW-Schreibaktionen. |
 | `pdf_service` | PDF Service |
 | `pdf_template_service` | PDF Template Service |
 | `personal_service` | Service layer for HR/Personal domain queries (Mitarbeiter, Zeiterfassung, Abwesenheiten). |
@@ -161,13 +168,13 @@ Vollständiges Inventar aller Backend-Service-Module mit Kurzbeschreibung. Besch
 | `policy_registry` | Policy Registry — NC-G4 |
 | `policy_service` | Policy Service - Policy-Framework für Alert-Actions |
 | `portal_compat_service` | Service layer for compat portal domain routes (supplier/customer portal). |
-| `portal_intelligence_service` | In-memory store per tenant |
-| `portal_interessent_service` | Kontaktdaten |
-| `portal_lohndienst_service` | Fachliche Felder |
-| `portal_preisspiegel_service` | In-memory store (tenant-isoliert); Produktiv: DB-Tabelle domain_portal.preisspiegel |
-| `pos_accounting_service` | Pos accounting service |
+| `portal_intelligence_service` | — |
+| `portal_interessent_service` | — |
+| `portal_lohndienst_service` | — |
+| `portal_preisspiegel_service` | — |
+| `pos_accounting_service` | — |
 | `pos_compat_service` | Service layer for compat POS domain routes. |
-| `pos_fiscal_document_service` | Pos fiscal document service |
+| `pos_fiscal_document_service` | — |
 | `pos_tagesabschluss_service` | DOM-POS-004.2 — POS Tagesabschluss Lifecycle (Z-Bon, TSE-Signatur, DSFinV-K-Export). |
 | `position_guard_service` | No-Speculation Guard Service for Commodity Positions. |
 | `position_service` | Commodity Position Calculation Service. |
@@ -206,7 +213,7 @@ Vollständiges Inventar aller Backend-Service-Module mit Kurzbeschreibung. Besch
 | `tse_fiskaly_service` | Compatibility facade for the canonical fiscalization provider layer. |
 | `vies_service` | VIES Service |
 | `voice_adapter` | Voice Adapter Layer — NC-003 |
-| `warehouse_service` | ── Zonen ────────────────────────────────────────────────── |
+| `warehouse_service` | — |
 | `webshop_integration_service` | Service layer for B2B webshop order imports. |
 | `wf_cockpit_nats_projector` | WF-COCKPIT-PERSIST-001 — NATS-JetStream-Projector fuer Workflow-Cockpit. |
 | `wf_cockpit_persist_service` | WF-COCKPIT-PERSIST-001 — DB-backed Workflow-Cockpit-Service. |

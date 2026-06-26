@@ -1,10 +1,17 @@
 ---
 title: API-Endpoint-Inventar
+type: reference
+audience: [entwickler, integrator]
+owner: Cursor
+status: aktiv
 last_reviewed: 2026-06-26
+version: 3.0.0
 description: Vollständiges Inventar aller FastAPI-Endpoint-Module mit Kurzbeschreibung. Beschreibungen sind aus den Modul-Docstrings extrahiert.
 ---
 
 # API-Endpoint-Inventar
+
+> Automatisch generiert via `python scripts/generate_code_inventories.py`. **Nicht manuell bearbeiten.**
 
 Vollständiges Inventar aller FastAPI-Endpoint-Module mit Kurzbeschreibung. Beschreibungen sind aus den Modul-Docstrings extrahiert.
 
@@ -24,14 +31,14 @@ Vollständiges Inventar aller FastAPI-Endpoint-Module mit Kurzbeschreibung. Besc
 | `admin_pos` | Admin POS/TSE settings and DSFinV-K exports. |
 | `admin_reporting` | Admin CRUD for self-service report permissions. |
 | `admin_suite` | Read-only Admin Suite production-readiness aggregation. |
-| `agent_context_api` | Agent context api |
+| `agent_context_api` | — |
 | `agent_tool_contracts` | External agent tool contracts. |
 | `agents` | AI Agents API |
 | `agrar_contracts` | Agrar contract endpoints — thin handlers, all logic in AgrarContractService. |
 | `agrar_drying_rules` | Agrar Drying Rule Sets, Lookup Rows, and Factor Ranges — CRUD endpoints. |
 | `agrar_feldbuch` | Agrar Feldbuch — ERP-interne Endpoints (Landhandel-Mitarbeiter) |
 | `agrar_maschinen` | Agrar Maschinen — CRUD für Maschinenpark (Landhandel + Lohnunternehmer) |
-| `agrar_p0` | --------------------------------------------------------------------------- |
+| `agrar_p0` | — |
 | `agrar_settlements` | Agrar self-billing settlements with deduction and posting workflow (AGRAR-SET-01). |
 | `agrar_varieties` | Agrar Sorten/Varieties API fuer Ernte-Annahme. |
 | `agrar_wetter` | Agrar Wetter — Wetter-Proxy für BrightSky (DWD) + Open-Meteo (ICON-D2) |
@@ -66,10 +73,10 @@ Vollständiges Inventar aller FastAPI-Endpoint-Module mit Kurzbeschreibung. Besc
 | `banken` | Bank Accounts API - Bankkonto Management (SQLAlchemy) |
 | `batch` | OData-style $batch endpoint for bundling multiple read requests. |
 | `bedarfsdeckung` | Bedarfsdeckungs-Cockpit (Durchdringungs-CRM) — Lücke je Betrieb × Produktgruppe. |
-| `benchmark_api` | Benchmark api |
-| `benchmark_cockpit` | Benchmark cockpit |
+| `benchmark_api` | — |
+| `benchmark_cockpit` | — |
 | `betriebsstaetten` | Betriebsstätten/Filialen — Filialsystem-Stammdaten. |
-| `blockchain_runtime` | Blockchain runtime |
+| `blockchain_runtime` | — |
 | `booking_templates` | Booking Templates API |
 | `branches` | Branches (Niederlassungen) CRUD endpoints. |
 | `budget_planning` | Budgetierung / Forecast — thin-router pattern with sqlalchemy.text() |
@@ -78,7 +85,7 @@ Vollständiges Inventar aller FastAPI-Endpoint-Module mit Kurzbeschreibung. Besc
 | `case_management_api` | Case Management REST API — NC-08. |
 | `cases` | CRM Service Cases API endpoints proxied through crm-service. |
 | `central_contracts` | Zentrale Kontrakte-Engine — thin-router, sqlalchemy.text(). |
-| `channel_work_surfaces` | Channel work surfaces |
+| `channel_work_surfaces` | — |
 | `channels` | Channel Endpoints — NC-H1/H2/H4: WhatsApp Webhook, Email Ingress, Channel Router. |
 | `charges` | Charges API - Lot/Batch Management (SQLAlchemy) |
 | `chart_of_accounts` | Chart of Accounts management endpoints |
@@ -89,14 +96,14 @@ Vollständiges Inventar aller FastAPI-Endpoint-Module mit Kurzbeschreibung. Besc
 | `compat` | Compatibility endpoints for frontend path alignment and missing modules. |
 | `compliance` | Compliance API - DB-backed endpoints. |
 | `compliance_dsgvo` | DSGVO Löschkonzept — Erasure request management (Art. 17 DSGVO). |
-| `compliance_whistleblower` | Compliance whistleblower |
+| `compliance_whistleblower` | — |
 | `compliance_whistleblower_lksg` | Whistleblower and LkSG operating contracts for compliance. |
 | `config_service` | Config Service API. |
 | `contacts` | CRM Contact management endpoints proxied via crm-core |
 | `contract_engagement` | Kontrakt-Engagement & Kontraktmahnung (DOM-CON-004.3). |
 | `contract_fixing` | Kontrakt-Fixierung & MATIF-Bewertung (DOM-CON-004.2). |
 | `contract_fulfillment` | Kontrakt-Erfüllungsstand (DOM-CON-004) — read-only. |
-| `contract_pricing_api` | Contract pricing api |
+| `contract_pricing_api` | — |
 | `contract_settlement` | Kontrakt-Settlement-Übergabe & Storno (DOM-CON-004.4). |
 | `controlling` | Controlling module CRUD endpoints. |
 | `controlling_actions` | DOM-CONTROLLING-004 — Budget-Lifecycle, Abweichungsanalyse, KST-Abschluss. |
@@ -108,7 +115,7 @@ Vollständiges Inventar aller FastAPI-Endpoint-Module mit Kurzbeschreibung. Besc
 | `crm_account_hierarchy` | CRM Account-Hierarchien — Parent/Child-Beziehungen zwischen Business-Partnern. |
 | `crm_auto_capture` | KIM-AUTOCAPTURE — automatische Kontakt-Erfassung (Telefon/E-Mail/WhatsApp). |
 | `crm_call_transcript` | KIM Telefon-Transkript-Connector — Anrufe automatisch als Kontakt erfassen. |
-| `crm_campaigns` | â”€â”€â”€ Pydantic Schemas â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ |
+| `crm_campaigns` | — |
 | `crm_capture_inbox` | KIM Klärfall-Inbox — nicht zuordenbare Auto-Captures sichten und zuordnen. |
 | `crm_contacts_ext` | KIM-S4 — Ansprechpartner-Erweiterung: Werbe-Präferenzen + Pseudonymisierung. |
 | `crm_duplicates` | Kunden-Dubletten (DOM-CRM-004) — Erkennung wahrscheinlicher Doppelanlagen. |
@@ -139,21 +146,21 @@ Vollständiges Inventar aller FastAPI-Endpoint-Module mit Kurzbeschreibung. Besc
 | `docflow_gobd` | GoBD-Exportpaket & DMS-/Paperless-Liveprobe (DOM-DOC-004.4). |
 | `dokumente` | Dokumente API - Dokumentenverwaltung (SQLAlchemy Version) |
 | `dunning` | Dunning System API |
-| `e2e_chain` | Nicht gefunden → neu anlegen (Upsert-Semantik beibehalten) |
+| `e2e_chain` | — |
 | `ebilanz_elster` | eBilanz / ELSTER export and ERiC submission endpoint. |
-| `edi_api` | Edi api |
+| `edi_api` | — |
 | `einkauf_bestellvorschlag` | Einkauf â€” Bestell-Vorschlag Endpoints |
 | `einkauf_kpis` | Einkauf — KPIs |
 | `einkauf_lieferschein` | Einkauf Lieferschein + Frachtauftrag CRUD endpoints. |
 | `erechnung_import` | E-Rechnung Import — ZUGFeRD / XRechnung stub. |
 | `erloeskennziffern` | Erlöskennziffern [EKZS/EKZZ] — WaWi→FIBU Kontozuordnung. |
-| `ernte_kampagne_api` | Ernte kampagne api |
+| `ernte_kampagne_api` | — |
 | `ernte_planung` | Ernte-Planungsübersicht — CRUD für Ernteplanung (Schlag, Kultur, Menge, Status). |
 | `ers_settlement` | Einkauf — ERS (Evaluated Receipt Settlement) |
 | `etiketten` | Etiketten (Label Printing) API |
 | `exchange_rates` | Exchange Rates API |
 | `export_service` | Central Export Mikroservice |
-| `external_agent_integrations` | External agent integrations |
+| `external_agent_integrations` | — |
 | `external_mock_harness` | EXTERNAL-MOCK-HARNESS-001 — Dev-Only API fuer simulierte externe Systeme. |
 | `farm_profiles` | CRM Farm Profile endpoints proxied through crm-core. |
 | `feed_produktion_actions` | DOM-FEED-PROD-004 — Mischfutter Produktion: Rezeptur, Auftrag, QS-Freigabe. |
@@ -171,7 +178,7 @@ Vollständiges Inventar aller FastAPI-Endpoint-Module mit Kurzbeschreibung. Besc
 | `finance_period` | Periodenabschluss & Storno-Konsistenz (DOM-FIN-004.4). |
 | `finance_read_models` | Finance Read-Models — Wave 2 AP2 |
 | `financial_reports` | Financial Reports API |
-| `flow_spines` | ── Pydantic schemas ───────────────────────────────────────────────────────── |
+| `flow_spines` | — |
 | `foerderung` | Foerderung API - DB-backed endpoints. |
 | `forderungsgruppen` | Forderungsgruppen [FORG] — Kundensegmentierung für Bestandskontenzuordnung. |
 | `fuhrpark` | Fuhrpark API Endpoints - zvoove style master data mask. |
@@ -196,7 +203,7 @@ Vollständiges Inventar aller FastAPI-Endpoint-Module mit Kurzbeschreibung. Besc
 | `hrm_abwesenheit` | HRM-ABWESENHEIT-ANTRAG-001 — Abwesenheitsantrag API. |
 | `hrm_lifecycle_actions` | DOM-HRM-004 — HRM Lifecycle: Zeiterfassung, Abwesenheit, Arbeitszeitkonto. |
 | `iban_lookup` | IBAN Lookup Service |
-| `idempotency_monitoring` | Idempotency monitoring |
+| `idempotency_monitoring` | — |
 | `import_pipeline` | Import Pipeline Endpoints — Wave 3 AP6 |
 | `individualpreise` | Individualpreise [PRI/PRIE] — Kunden-/Lieferanten-spezifische Preise. |
 | `individuelle_artikelnummern` | Individuelle Artikelnummern [INDIVART] — Kunden-/Lieferanten-spezifische Artikelnummern. |
@@ -271,15 +278,15 @@ Vollständiges Inventar aller FastAPI-Endpoint-Module mit Kurzbeschreibung. Besc
 | `pick_lists` | Pick-list endpoints (l3c-pickliste) |
 | `policies` | Policy Manager API Endpoints |
 | `portal_feldbuch` | Portal Feldbuch — Endpoints für den Landwirt im Kundenportal |
-| `portal_innendienst` | Gap 1: Kunden mit Schlaegen ohne Ankaufskontrakt (simuliert) |
-| `portal_intelligence` | Portal intelligence |
-| `portal_interessent` | Portal interessent |
-| `portal_lohndienst` | Portal lohndienst |
-| `portal_preisspiegel` | Portal preisspiegel |
+| `portal_innendienst` | — |
+| `portal_intelligence` | — |
+| `portal_interessent` | — |
+| `portal_lohndienst` | — |
+| `portal_preisspiegel` | — |
 | `portal_shop` | Kundenportal Shop API Endpunkte |
 | `pos_dsfinvk` | Compatibility endpoints for provider-backed DSFinV-K exports. |
-| `pos_fiscalization` | Pos fiscalization |
-| `pos_payments` | ── Schemas ──────────────────────────────────────────────────────────────── |
+| `pos_fiscalization` | — |
+| `pos_payments` | — |
 | `pos_payments_promotions` | POS payment split and promotions preview endpoints. |
 | `pos_retoure` | POS Retoure (Return) Endpoint |
 | `pos_tagesabschluss_actions` | DOM-POS-004 — POS Tagesabschluss: Z-Bon, TSE-Simulation, DSFinV-K. |
@@ -288,14 +295,14 @@ Vollständiges Inventar aller FastAPI-Endpoint-Module mit Kurzbeschreibung. Besc
 | `preis_rabattgruppen` | Rabattgruppen und Rabattklassen — Stammdaten für die Rabattpflege. |
 | `preparation_lists` | Preparation list endpoints (l3c-lager Rüstlisten) |
 | `price_calculation` | Preis-Kalkulations-Engine (dynamisch). |
-| `price_hedge_api` | Price hedge api |
+| `price_hedge_api` | — |
 | `price_lists` | Price List management endpoints. |
 | `pricing` | Pricing calculation endpoints with hierarchical cascade logic. |
 | `pricing_governance` | Pricing Governance Endpoints — Wave 3 AP4 |
 | `process_kernel_api` | Process Kernel API â€” Wave 11 |
 | `process_map` | P2.1 — Workflow-Prozesskarte API. |
-| `process_mining_api` | Process mining api |
-| `process_mining_observation` | Process mining observation |
+| `process_mining_api` | — |
+| `process_mining_observation` | — |
 | `process_sla` | Process SLA API — Wave 4 AP3 |
 | `procurement_match` | Beschaffungs-Abgleich / 3-Wege-Match (DOM-PROC-004). |
 | `produktion_mischfutter` | Produktion – Mischfutter: Verfuegbarkeit, Rezepte & Produktionsauftraege |
@@ -310,13 +317,13 @@ Vollständiges Inventar aller FastAPI-Endpoint-Module mit Kurzbeschreibung. Besc
 | `rag` | RAG API Endpoints |
 | `rations_optimization` | Rationsoptimierung API  (GfE 2023 / DLG-Futterwerttabellen Stand Juli 2025) |
 | `rations_zugang` | Rationsoptimierung – DSGVO-Zugangsverwaltung |
-| `read_model_snapshots` | Read model snapshots |
-| `reklamation_api` | Kept for test-fixture compatibility (wave8 e2e tests call _store.clear()). |
+| `read_model_snapshots` | — |
+| `reklamation_api` | — |
 | `report_print` | Report and print endpoints for traceability, weighing PDFs and labels. |
-| `reporting_api` | Reporting api |
+| `reporting_api` | — |
 | `rfq` | Einkauf — RFQ (Request for Quotation) — Anfrageprozess |
 | `rohware_sammelabrechnung` | Rohware-Sammelabrechnung — gebündelte Abrechnung mehrerer Belege (Agrar-Spezialsoftware Feature). |
-| `rohware_schema` | --------------------------------------------------------------------------- |
+| `rohware_schema` | — |
 | `rohwarengruppen` | Rohwarengruppen [RWG] — Stammdaten für Rohwarenabrechnung. |
 | `ruestliste` | Rüstliste (Kommissioniervorbereitung) |
 | `runtime_operations` | Runtime Operations API — Wave 4 AP6 |
@@ -338,7 +345,7 @@ Vollständiges Inventar aller FastAPI-Endpoint-Module mit Kurzbeschreibung. Besc
 | `self_billing` | Self-Billing API endpoints. |
 | `service_anfragen` | Service-Anfragen API — CRUD for service requests, feedback, and case closure. |
 | `silo` | Silo capacity and virtual lot endpoints (AGRAR-SILO-01). |
-| `silo_operations_api` | Silo operations api |
+| `silo_operations_api` | — |
 | `silo_target_cell` | WM-SILO-RULE-ENGINE-001 — Zielzellen-Vorschlag API. |
 | `sla_escalation_api` | SLA-Eskalation API — Wave 12 |
 | `stmd_duplikat` | STMD-DUP-001: Cross-Domain-Dublettenprüfung für Stammdaten. |
@@ -346,9 +353,9 @@ Vollständiges Inventar aller FastAPI-Endpoint-Module mit Kurzbeschreibung. Besc
 | `strecke_speditionen` | Strecke – Speditionen / Frachttarife nach PLZ |
 | `stuecklisten` | Stücklisten / Rezepturen [ARTSTLI] — Artikelkomponenten-Stammdaten. |
 | `subsidiary_ledger_reconciliation` | Subsidiary Ledger Reconciliation API |
-| `supplier_portal` | --- Schemas --- |
+| `supplier_portal` | — |
 | `supply_chain` | Supply-Chain-Traceability (DOM-SUPPLY-004). |
-| `supply_chain_blockchain` | Supply chain blockchain |
+| `supply_chain_blockchain` | — |
 | `sustainability` | Sustainability API endpoints. |
 | `system_metrics` | System Metrics API for AI Agents |
 | `tankstelle` | Tankstelle — Zapfungen und Tankbestand, vollständiges CRUD. |
@@ -359,7 +366,7 @@ Vollständiges Inventar aller FastAPI-Endpoint-Module mit Kurzbeschreibung. Besc
 | `tenants` | Tenant API endpoints |
 | `terminology` | Terminology API for the Landhandel bilingual terminology registry. |
 | `tours` | Tours API - Verladung/Tour Management |
-| `training` | Training |
+| `training` | — |
 | `transporte` | Transporte — Fahrerverwaltung, vollständiges CRUD. |
 | `users` | User API endpoints |
 | `vat_codes` | VAT Tax Codes Admin API |
@@ -371,11 +378,11 @@ Vollständiges Inventar aller FastAPI-Endpoint-Module mit Kurzbeschreibung. Besc
 | `vertraege` | Verträge API - Rahmenverträge (SQLAlchemy) |
 | `vertreterprovisionen` | Vertreterprovisionsgruppen und -staffeln — Provisionsabrechnung Außendienst. |
 | `vertreterstamm` | Vertreterstamm — Außendienstmitarbeiter und Vertretergruppen. |
-| `waage` | ============================================================ |
+| `waage` | — |
 | `waage_mobile` | WGE-MOB-001: Mobile-Sync für Waagenbelege. |
 | `waagen_vorlagen` | Waagenvorlagen / Wiederholfall-Anlieferungen (Agrar-Spezialsoftware Feature). |
 | `warehouse_transfers` | Warehouse transfer & stock correction endpoints (l3c-lager) |
-| `warehouse_wms` | ── Schemas ──────────────────────────────────────────────────────────────── |
+| `warehouse_wms` | — |
 | `warehouses` | Warehouse management endpoints |
 | `warengruppen` | Warengruppen 3-stufig — Hauptwarengruppe / Oberwarengruppe / Warengruppe. |
 | `wartung` | Wartung / Anlagenverwaltung — vollständiges CRUD. |
@@ -391,11 +398,11 @@ Vollständiges Inventar aller FastAPI-Endpoint-Module mit Kurzbeschreibung. Besc
 | `whatsapp_webhook` | WA-AGENT-001/WA-NOTIFY-001 — WhatsApp Webhook + Dev-Simulator Endpoints |
 | `workflow_cockpit` | Workflow cockpit API. |
 | `workflow_runtime` | Workflow Runtime API — Wave 4 AP1 |
-| `workflow_simulation` | Workflow simulation |
-| `workflow_template_marketplace` | Workflow template marketplace |
+| `workflow_simulation` | — |
+| `workflow_template_marketplace` | — |
 | `xrechnung` | INT-XRECHNUNG-001: XRechnung / ZUGFeRD E-Rechnung Export. |
 | `zahlungsbedingungen` | Zahlungsbedingungen [ZABD] — Zahlungsziel, Skonto, Zahlungsart. |
 | `zertifikate` | Zertifikate API - DB-backed endpoints. |
-| `zertifikate_api` | Zertifikate api |
+| `zertifikate_api` | — |
 | `zinsabrechnung` | Zinsabrechnung — Zinsen auf Rohware-Einlagerungskontrakte. |
 | `zu_abschlaggruppen` | Zu-/Abschlaggruppen [ZAGR] und Zu-/Abschlagklassen [ZAKL] — Konditionsstammdaten. |
