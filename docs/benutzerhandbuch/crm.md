@@ -49,3 +49,12 @@ Vertriebssteuerung und Kampagnen.
 - **Dublette angelegt:** vor dem Anlegen über die Suche prüfen.
 - **Kontakt nicht auffindbar:** Filter/Typ (Kunde/Lieferant) prüfen.
 - **Aktivität ohne Bezug:** Aktivität immer am Kontakt oder Lead erfassen.
+
+## Quellen und Reverse-Pflege
+
+- `packages/frontend-web/src/app/navigation/domains/commercial.tsx`: CRM & Marketing.
+- `docs/agent-ops/slices/CRM360-MBT-001.yaml`: CRM360 Action-Matrix und Revenue-Handover.
+- `docs/benutzerhandbuch/verkauf.md`: Übergang qualifizierter Lead → Auftrag.
+
+Reverse-Pflege: Bei CRM360-Tabs, KIM-Funktionen oder TAPI-Integration diese Seite
+und CRM-Slice-Doku aktualisieren.

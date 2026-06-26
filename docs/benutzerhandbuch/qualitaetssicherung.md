@@ -58,3 +58,12 @@ für Qualitätsparameter wie Feuchte, Protein, Hektolitergewicht).
 - **Freigabe-Button grau:** Laborergebnis noch nicht vollständig erfasst.
 - **Charge trotz Freigabe nicht disponierbar:** Bestandsbuchung prüfen (Einlagerung?).
 - **Reklamation ohne Lieferantenbezug:** Lieferanten-Stammdaten prüfen.
+
+## Quellen und Reverse-Pflege
+
+- `docs/benutzerhandbuch/annahme.md`: Probe an Wiegeschein, Qualitätsabschläge.
+- `docs/benutzerhandbuch/lager.md`: Chargenfreigabe und Bestandsbuchung.
+- `docs/agent-ops/slices/DOM-QS-004.yaml`: QS-Vertiefung Reklamation/Labor.
+
+Reverse-Pflege: Bei Grenzwerten, Freigabestatus oder Reklamationsworkflow diese
+Seite und QS-Workflow-Doku aktualisieren.

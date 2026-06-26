@@ -47,3 +47,13 @@ ausgewiesen.
   freigeben lassen.
 - **Qualitätswert fehlt:** Pflichtfelder vor dem Abschluss vollständig erfassen.
 - **Waage liefert keinen Wert:** Gewicht manuell erfassen und Grund dokumentieren.
+
+## Quellen und Reverse-Pflege
+
+- `packages/frontend-web/src/app/navigation/domains/operations.tsx`: Annahme & Waage.
+- `docs/benutzerhandbuch/agrar-kontrakte.md`: Kontrakt-Erfüllung nach Annahme.
+- `docs/benutzerhandbuch/qualitaetssicherung.md`: Probe und Qualitätsabschläge.
+- `docs/agent-ops/slices/WM-AGRI-SILO-001.yaml`: Zielzellen/Silo-Zuordnung.
+
+Reverse-Pflege: Bei Trocknungsregeln, Waagen-Integration oder Zielzellenlogik
+diese Seite und Agrar-Workflow-Doku aktualisieren.

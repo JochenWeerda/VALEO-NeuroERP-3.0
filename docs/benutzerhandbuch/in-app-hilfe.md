@@ -33,7 +33,6 @@ const entry = findHelpEntry('verkauf/auftrag/123');
 |---|---|---|
 | `admin/agenten-integration` | [Administration](https://jochenweerda.github.io/VALEO-NeuroERP-3.0/admin/index/) | Administration |
 | `admin/ai-approvals` | [AI-Freigaben](https://jochenweerda.github.io/VALEO-NeuroERP-3.0/agent-docs/guardrails/) | AI-Freigaben |
-| `admin/externe-gates` | [Externe Gate-Dashboards](https://jochenweerda.github.io/VALEO-NeuroERP-3.0/admin/monitoring-und-slo/) | Externe Gate-Dashboards |
 | `admin/audit-log` | [Administration](https://jochenweerda.github.io/VALEO-NeuroERP-3.0/admin/index/) | Administration |
 | `admin/benutzer` | [Benutzer & Rollen](https://jochenweerda.github.io/VALEO-NeuroERP-3.0/admin/rbac-und-rollen/) | Benutzer & Rollen |
 | `admin/benutzer-liste` | [Administration](https://jochenweerda.github.io/VALEO-NeuroERP-3.0/admin/index/) | Administration |
@@ -46,12 +45,14 @@ const entry = findHelpEntry('verkauf/auftrag/123');
 | `admin/control-center/agent-ops` | [Administration](https://jochenweerda.github.io/VALEO-NeuroERP-3.0/admin/index/) | Administration |
 | `admin/control-center/superglue` | [Administration](https://jochenweerda.github.io/VALEO-NeuroERP-3.0/admin/index/) | Administration |
 | `admin/data-quality` | [Administration](https://jochenweerda.github.io/VALEO-NeuroERP-3.0/admin/index/) | Administration |
+| `admin/externe-gates` | [Externe Gate-Dashboards](https://jochenweerda.github.io/VALEO-NeuroERP-3.0/admin/monitoring-und-slo/) | Externe Gate-Dashboards |
 | `admin/gap-pipeline` | [Administration](https://jochenweerda.github.io/VALEO-NeuroERP-3.0/admin/index/) | Administration |
 | `admin/GapPipelineConsole` | [Administration](https://jochenweerda.github.io/VALEO-NeuroERP-3.0/admin/index/) | Administration |
 | `admin/integrationen-quarantaene` | [Administration](https://jochenweerda.github.io/VALEO-NeuroERP-3.0/admin/index/) | Administration |
 | `admin/monitoring/alerts` | [Administration](https://jochenweerda.github.io/VALEO-NeuroERP-3.0/admin/index/) | Administration |
 | `admin/monitoring/regeln` | [Administration](https://jochenweerda.github.io/VALEO-NeuroERP-3.0/admin/index/) | Administration |
 | `admin/nummernkreise` | [Administration](https://jochenweerda.github.io/VALEO-NeuroERP-3.0/admin/index/) | Administration |
+| `admin/qualitaets-cockpit` | [Administration](https://jochenweerda.github.io/VALEO-NeuroERP-3.0/admin/index/) | Administration |
 | `admin/report-berechtigungen` | [Administration](https://jochenweerda.github.io/VALEO-NeuroERP-3.0/admin/index/) | Administration |
 | `admin/rolle/:id` | [Administration](https://jochenweerda.github.io/VALEO-NeuroERP-3.0/admin/index/) | Administration |
 | `admin/rolle/neu` | [Administration](https://jochenweerda.github.io/VALEO-NeuroERP-3.0/admin/index/) | Administration |
@@ -80,7 +81,6 @@ const entry = findHelpEntry('verkauf/auftrag/123');
 | `agrar/duenger-stamm` | [Agrar-Modul](https://jochenweerda.github.io/VALEO-NeuroERP-3.0/benutzerhandbuch/annahme/) | Agrar-Modul |
 | `agrar/duenger-stamm/:id` | [Agrar-Modul](https://jochenweerda.github.io/VALEO-NeuroERP-3.0/benutzerhandbuch/annahme/) | Agrar-Modul |
 | `agrar/duenger/bedarfsrechner` | [Agrar-Modul](https://jochenweerda.github.io/VALEO-NeuroERP-3.0/benutzerhandbuch/annahme/) | Agrar-Modul |
-| `agrar/duenger/liste` | [Agrar-Modul](https://jochenweerda.github.io/VALEO-NeuroERP-3.0/benutzerhandbuch/annahme/) | Agrar-Modul |
 
 ## Erweiterung
 

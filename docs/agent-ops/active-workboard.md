@@ -1,5 +1,14 @@
 # Active Workboard
 
+## DOC-USER-MANUAL-003 - Benutzerhandbuch Kern- und Spezialdomaenen
+
+**Von:** Cursor
+**Owner:** Cursor
+**Stand:** abgeschlossen 2026-06-26 — Vier neue How-tos (Agrar-Kontrakte, NaWaRo, Genossenschaft, Belegarchiv); sieben Legacy-Kapitel mit Quellen/Reverse-Pflege; In-App-Hilfe-Mapping auf korrekte Handbuchseiten (Logistik, Controlling, POS, Personal, Kontrakte).
+**Ziel:** Benutzerhandbuch fachlich vollstaendiger machen und In-App-Deep-Links konsistent halten.
+**Dateibesitz:** `docs/benutzerhandbuch/**`, `mkdocs.yml`, `scripts/generate_inapp_help_map.py`, `packages/frontend-web/src/lib/docs-help.ts`, Slice-YAML, Workboard.
+**Abnahme:** `docs-governance-check` gruen; `mkdocs build` gruen. Screenshots fuer neue Domänen optional nachziehbar.
+
 ## DOC-USER-MANUAL-002 - Benutzerhandbuch vervollstaendigen
 
 **Von:** Codex
