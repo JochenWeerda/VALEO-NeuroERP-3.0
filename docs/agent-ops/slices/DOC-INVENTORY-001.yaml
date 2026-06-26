@@ -1,0 +1,47 @@
+slice_id: DOC-INVENTORY-001
+title: "Code-Inventare — Generator + CI-Drift-Check"
+owner: Cursor
+status: abgeschlossen
+updated: 2026-06-26
+completed_at: 2026-06-26
+goal: >-
+  Endpoint-, Service- und Migrations-Inventare per Generator aus Docstrings pflegen;
+  Staleness-taugliches Frontmatter; CI-Drift-Check in docs.yml; Drift-Report bleibt 0.
+file_ownership:
+  - scripts/generate_code_inventories.py
+  - tests/test_generate_code_inventories.py
+  - docs/schnittstellen/endpoint-inventory.md
+  - docs/entwickler/service-inventory.md
+  - docs/admin/migration-inventory.md
+  - .github/workflows/docs.yml
+  - docs/dokumentation/governance.md
+  - docs/agent-ops/slices/DOC-INVENTORY-001.yaml
+acceptance:
+  - python scripts/generate_code_inventories.py --check Exit 0.
+  - python scripts/doc_drift_report.py meldet 0 Drift-Items fuer Endpoints/Services/Migrationen.
+  - pytest -m unit tests/test_generate_code_inventories.py gruen.
+  - Staleness-Check fuer kuratierte Seiten gruen.
+tests:
+  - python scripts/generate_code_inventories.py --check
+  - python scripts/doc_drift_report.py
+  - pytest -m unit tests/test_generate_code_inventories.py -v -p no:cov -o addopts=
+  - node scripts/docs-staleness-check.cjs --max-age-days 365
+risks:
+  - Docstring-Aenderungen erfordern Generator-Lauf vor Merge.
+ai_harness:
+  fachlicher_vertrag: >-
+    Jedes Endpoint-/Service-/Migrations-Modul ist in der Doku referenziert.
+  architektur_vertrag: >-
+    Generator liest nur Repo-Dateien; keine Runtime-Aenderung.
+  daten_vertrag: >-
+    Inventar-Tabellen aus Modul-Metadaten.
+  test_vertrag: >-
+    Unit-Tests + Drift-Checks gruen.
+  security_vertrag: >-
+    Keine Secrets in Inventar-Ausgabe.
+  betriebs_vertrag: >-
+    docs.yml blockiert bei Inventar-Drift.
+  dokumentations_vertrag: >-
+    governance.md und Skripte-Uebersicht dokumentieren Generator.
+external_gates:
+  - Keine externen Gates.

@@ -72,6 +72,12 @@ def generate(metrics: dict) -> str:
 
     return f"""---
 title: AI Engineering Metrics
+type: reference
+audience: [entwickler, ki-agent, product]
+owner: Cursor
+status: aktiv
+last_reviewed: {gen}
+version: 3.0.0
 generated: {gen}
 ---
 

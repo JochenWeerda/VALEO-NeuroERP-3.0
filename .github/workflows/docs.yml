@@ -8,6 +8,10 @@ on:
       - "requirements-docs.txt"
       - "scripts/docs-staleness-check.cjs"
       - "scripts/generate_adr_nav.py"
+      - "scripts/generate_code_inventories.py"
+      - "app/api/v1/endpoints/**"
+      - "app/services/**"
+      - "alembic/versions/**"
       - ".github/workflows/docs.yml"
   push:
     branches:
@@ -18,6 +22,10 @@ on:
       - "requirements-docs.txt"
       - "scripts/docs-staleness-check.cjs"
       - "scripts/generate_adr_nav.py"
+      - "scripts/generate_code_inventories.py"
+      - "app/api/v1/endpoints/**"
+      - "app/services/**"
+      - "alembic/versions/**"
       - ".github/workflows/docs.yml"
 
 permissions:
@@ -48,6 +56,9 @@ jobs:
 
       - name: ADR navigation drift check
         run: python scripts/generate_adr_nav.py --check
+
+      - name: Code inventory drift check
+        run: python scripts/generate_code_inventories.py --check
 
       - name: Build documentation site
         run: python -m mkdocs build --site-dir site

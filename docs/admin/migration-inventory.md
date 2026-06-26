@@ -1,10 +1,17 @@
 ---
 title: Datenbank-Migrations-Inventar
+type: reference
+audience: [entwickler, betrieb]
+owner: Cursor
+status: aktiv
 last_reviewed: 2026-06-26
+version: 3.0.0
 description: Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Beschreibungen sind aus den Datei-Docstrings extrahiert.
 ---
 
 # Datenbank-Migrations-Inventar
+
+> Automatisch generiert via `python scripts/generate_code_inventories.py`. **Nicht manuell bearbeiten.**
 
 Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Beschreibungen sind aus den Datei-Docstrings extrahiert.
 
@@ -21,7 +28,7 @@ Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Be
 | `34a9ed912cd7_add_crm_tables_contacts_leads_` | Add CRM tables - contacts, leads, activities, betriebsprofile |
 | `4601a09c0fc1_add_farmer_declaration_fields_to_psm` | Add farmer declaration fields to PSM |
 | `4b6600ac3926_merge_heads` | merge heads |
-| `4e8447ad429a_merge_gdpr_base` | merge_gdpr_base |
+| `4e8447ad429a_merge_gdpr_base` | — |
 | `519e0d90cd66_add_sales_orders_table` | add_sales_orders_table |
 | `59b4fa8420f2_add_crm_subservices_seed` | Add CRM sub-service seed tables with demo data. |
 | `5ebb49807644_merge_heads` | merge_heads |
@@ -58,8 +65,8 @@ Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Be
 | `add_kontrakte_module_tables_20260303` | add_kontrakte_module_tables_20260303 |
 | `add_l3_connect_gap_closure_tables` | Add L3-Connect gap closure tables |
 | `add_lkw_annahme_queue_20260306` | add lkw_annahme_queue table (Gap 002) |
-| `add_missing_bank_accounts_table_20260304` | ensure bank_accounts table exists for finance bank modules |
-| `add_missing_domain_erp_finance_tables_20260304` | add missing domain_erp finance tables and compatibility columns |
+| `add_missing_bank_accounts_table_20260304` | — |
+| `add_missing_domain_erp_finance_tables_20260304` | — |
 | `add_missing_domain_ops_tables_20260304` | add missing domain_ops tables (compliance, enni, qs, zulassungen, sachkunde, saatgut, vvvo, disposition, foerderantraege, labor, marketing, zertifikate) |
 | `add_number_ranges_table_20260417` | Add number_ranges table for configurable Debitor/Kreditor account numbering. |
 | `add_nutrient_compositions_20260219` | Add nutrient compositions table and article linkage |
@@ -101,7 +108,7 @@ Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Be
 | `business_partner_item_constraints_20260214` | Add constraints and indexes for business partner discount/price items. |
 | `business_partner_tab_23_24_25_20260214` | Add normalized Tab 23/24/25 structures for business partners. |
 | `business_partners_customer_master_fields_20260214` | Add extended customer master fields to business_partners. |
-| `c137c1d3ba3a_gdpr_requests_table` | gdpr_requests_table |
+| `c137c1d3ba3a_gdpr_requests_table` | — |
 | `c4d5e6f7a8b9_add_harvest_acceptance_extensions_20260217` | add_harvest_acceptance_extensions_20260217 |
 | `c68442f4d6dd_kontrakt_klasse_variante_enum` | kontrakt_klasse_variante_enum |
 | `comp_artikel_sperren_20260618` | COMP-SPERR-001: Artikel-Sperr-Engine (artikel_sperren) |

@@ -4521,6 +4521,12 @@ Archiv des vorherigen Boards:
 **Stand:** abgeschlossen 2026-06-26 — `MASKEN.md` in MkDocs-Build; Referenz-Nav mit Glossar + Skripte-Übersicht; `referenz/index.md` aktiv.
 **Dateibesitz:** `docs/referenz/**`, `mkdocs.yml`, `docs/agent-ops/slices/DOC-REFERENZ-001.yaml`.
 
+## DOC-INVENTORY-001 — Code-Inventare (Generator + CI)
+
+**Owner:** Cursor
+**Stand:** abgeschlossen 2026-06-26 — `generate_code_inventories.py` für Endpoint/Service/Migration; CI-Drift-Check in `docs.yml`; Drift-Report 0; 4 Unit-Tests grün.
+**Dateibesitz:** `scripts/generate_code_inventories.py`, `tests/test_generate_code_inventories.py`, `docs/{schnittstellen/endpoint-inventory,entwickler/service-inventory,admin/migration-inventory}.md`, `docs/agent-ops/slices/DOC-INVENTORY-001.yaml`.
+
 ---
 
 ## CARD-AUDIT-Follow-up (2026-06-26)

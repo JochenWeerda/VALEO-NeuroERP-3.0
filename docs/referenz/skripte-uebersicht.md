@@ -5,7 +5,7 @@ audience: [entwickler, betrieb, qa]
 owner: Cursor
 status: aktiv
 last_reviewed: 2026-06-26
-version: 3.0.0
+version: 3.1.0
 ---
 
 # Skripte & Generatoren
@@ -19,6 +19,7 @@ version: 3.0.0
 | `scripts/generate_openapi.py` | OpenAPI-Spec → `docs/schnittstellen/openapi.json` |
 | `scripts/generate_mcp_tool_reference.py` | MCP-Tool-Referenz aus `config/mcp_erp_tools.yaml` |
 | `scripts/generate_adr_nav.py` | MkDocs ADR-Navigation patchen |
+| `scripts/generate_code_inventories.py` | Endpoint-/Service-/Migrations-Inventare |
 | `scripts/doc_drift_report.py` | Code↔Doku-Drift-Report → `artifacts/` |
 | `scripts/docs-legacy-migrate.py` | Alt-Doku inventarisieren/archivieren |
 | `scripts/docs-staleness-check.cjs` | `last_reviewed`-Gate (Node) |
