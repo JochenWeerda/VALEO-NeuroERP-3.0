@@ -23,3 +23,24 @@ tests:
   - node scripts/docs-staleness-check.cjs --max-age-days 180
   - python scripts/docs-legacy-migrate.py --apply
   - python -m mkdocs build --site-dir site_check
+risks:
+  - Aktive Operations-Runbooks duerfen nicht nur archiviert bleiben, wenn CI- oder Pruefer-Gates sie als Evidenz nutzen.
+  - Frontmatter-Massenupdates koennen bei parallelen Agents leicht mit MkDocs-Nav- oder Governance-Aenderungen kollidieren.
+ai_harness:
+  fachlicher_vertrag: >-
+    Compliance-/Admin-Dokumente erhalten aktuelle Metadaten; archivierte Operations-Dokumente
+    bleiben auffindbar, aktive Gate-Evidenz muss separat in kuratierten Pfaden erhalten bleiben.
+  architektur_vertrag: >-
+    Keine Codepfade; nur Dokumentationsstruktur, MkDocs-Navigation und Governance-Skripte.
+  daten_vertrag: >-
+    Keine produktiven Daten. Dokument-Moves muessen Git-Historie und Links nachvollziehbar halten.
+  test_vertrag: >-
+    Staleness-Check, MkDocs-Build und Docs-Governance muessen gruen laufen.
+  security_vertrag: >-
+    Keine Secrets oder produktiven Kundendaten in archivierten oder neuen Doku-Dateien.
+  betriebs_vertrag: >-
+    Betriebsrelevante Runbooks duerfen nicht ohne aktuellen Ersatz aus der kuratierten Doku verschwinden.
+  dokumentations_vertrag: >-
+    Slice-YAML, Migrationsplan und betroffene Indexseiten bleiben synchron.
+external_gates:
+  - Keine externen Gates; Doku-Governance-CI ist internes Release-Gate.
