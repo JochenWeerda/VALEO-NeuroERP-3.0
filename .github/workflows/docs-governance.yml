@@ -39,6 +39,9 @@ jobs:
       - name: Governance check
         run: node scripts/docs-governance-check.cjs
 
+      - name: Staleness gate (curated MkDocs pages)
+        run: node scripts/docs-staleness-check.cjs --max-age-days 365
+
       - name: Determine diff range
         id: range
         shell: bash
