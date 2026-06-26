@@ -1,0 +1,28 @@
+slice_id: DOC-RELEASE-NOTES-001
+title: "Release-Notes-Generator aus CHANGELOG + Slices"
+priority: P3
+owner: Claude Code
+status: abgeschlossen
+created: "2026-06-26"
+
+goal: >
+  scripts/generate_release_notes.py erzeugt docs/benutzerhandbuch/release-notes.md
+  aus CHANGELOG.md-Sections + abgeschlossenen Slice-YAMLs.
+
+ai_harness:
+  fachlicher_vertrag:
+    - release-notes.md enthält alle CHANGELOG-Sections + Top-50-Slice-Tabelle (2026).
+    - Generator läuft ohne Git-Tag-Fehler (Fallback auf 3.0.0-dev).
+    - Seite dient als erste Anlaufstelle für neue Nutzer ("Was ist neu?").
+  architekturvertrag:
+    - CHANGELOG.md bleibt die fachliche Quelle (manuell gepflegt).
+    - Slice-YAMLs sind maschinelle Ergänzung (automatisch ausgelesen).
+    - docs-release.yml (mike) kann den Generator als Pre-Deploy-Step nutzen.
+  akzeptanzkriterien:
+    - generate_release_notes.py läuft durch (102 Slices, keine Ausnahme).
+    - docs/benutzerhandbuch/release-notes.md existiert mit korrektem Frontmatter.
+
+dateibesitz:
+  - scripts/generate_release_notes.py
+  - docs/benutzerhandbuch/release-notes.md
+  - docs/agent-ops/slices/DOC-RELEASE-NOTES-001.yaml

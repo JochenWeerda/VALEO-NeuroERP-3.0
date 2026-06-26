@@ -2185,3 +2185,7 @@ api_router.include_router(whatsapp_webhook.router, prefix="/whatsapp", tags=["Wh
 # WA-NOTIFY-001: Ausgehende WhatsApp Push-Benachrichtigungen
 from app.api.v1.endpoints import whatsapp_notify  # noqa: E402
 api_router.include_router(whatsapp_notify.router, prefix="/whatsapp", tags=["WhatsApp"])
+
+# INTEGRATION-EVIDENCE-BOARD-001: Quality Evidence API
+from app.api.v1.endpoints import quality_evidence  # noqa: E402
+api_router.include_router(quality_evidence.router, tags=["quality-evidence"])

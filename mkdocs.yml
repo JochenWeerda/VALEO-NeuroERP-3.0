@@ -98,6 +98,8 @@ exclude_docs: |
   /project-context/
   /quality/
   /quality-assurance/
+  !/quality-assurance/action-matrix-report.md
+  !/quality-assurance/traceability-matrix.md
   /roadmap/
   /runbooks/
   /schemas/
@@ -132,6 +134,8 @@ nav:
       - Lager: benutzerhandbuch/lager.md
       - Finanzbuchhaltung: benutzerhandbuch/finanzbuchhaltung.md
       - CRM: benutzerhandbuch/crm.md
+      - Qualitätssicherung: benutzerhandbuch/qualitaetssicherung.md
+      - Release Notes: benutzerhandbuch/release-notes.md
       - Glossar: benutzerhandbuch/glossar.md
       - In-App-Hilfe: benutzerhandbuch/in-app-hilfe.md
   - Administration & Betrieb:
@@ -155,6 +159,8 @@ nav:
       - Konventionen: entwickler/konventionen.md
       - Test-Strategie: entwickler/test-strategie.md
       - Service-Inventar: entwickler/service-inventory.md
+      - Action-Matrix-Report: quality-assurance/action-matrix-report.md
+      - Traceability-Matrix: quality-assurance/traceability-matrix.md
       - Architektur:
           - Index: architecture/index.md
           - Architekturprinzipien: architecture/fundamental-architecture-principles.md

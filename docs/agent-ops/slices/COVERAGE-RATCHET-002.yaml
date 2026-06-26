@@ -1,0 +1,28 @@
+slice_id: COVERAGE-RATCHET-002
+title: "Coverage-Ratchet Schwellwert-Erhöhung"
+priority: P3
+owner: Claude Code
+status: abgeschlossen
+created: "2026-06-26"
+
+goal: >
+  4 schwächste Services/Endpoints um je 4-6pp anheben:
+  journal_entries (+6pp→25%), financial_reports (+5pp→30%),
+  harvest_acceptance (+4pp→28%), strecke (+4pp→22%).
+
+ai_harness:
+  fachlicher_vertrag:
+    - Schwellwerte erhöht ohne bestehende Tests zu entfernen.
+    - Quartalsweise Raten: Ziel Gesamt-Coverage >75%, kritische Pfade >85%.
+    - 4 Dateien angehoben (COV-RATCHET-002 Kommentar in CRITICAL_THRESHOLDS).
+  architekturvertrag:
+    - check_critical_backend_coverage.py ist Single Source of Truth.
+    - Kommentare im Script dokumentieren aktuellen Messwert und Slice-Referenz.
+    - Kein Anheben über gemessenen Wert + 2pp Puffer (Stabilitätspuffer).
+  akzeptanzkriterien:
+    - 4 Zeilen in CRITICAL_THRESHOLDS mit COV-RATCHET-002-Kommentar.
+    - Script läuft weiterhin durch (kein Syntax-Fehler).
+
+dateibesitz:
+  - scripts/check_critical_backend_coverage.py
+  - docs/agent-ops/slices/COVERAGE-RATCHET-002.yaml

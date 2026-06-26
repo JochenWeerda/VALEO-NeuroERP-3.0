@@ -1,0 +1,31 @@
+slice_id: MCP-ERP-TOOLS-002
+title: "MCP-Tools Erweiterung: Agrar, Lager, Einkauf, Agent"
+priority: P2
+owner: Claude Code
+status: abgeschlossen
+created: "2026-06-26"
+
+goal: >
+  mcp_erp_tools.yaml um 6 neue Tools erweitern: agrar.contract.get,
+  agrar.weighing_ticket.list, lager.bestand.get, lager.inventur.status,
+  einkauf.bestellung.list, agent.proposal.list.
+  Felder data_classification für Classification-Check.
+
+ai_harness:
+  fachlicher_vertrag:
+    - 6 neue Tools ergänzt (war 12, jetzt 18 gesamt).
+    - Agrar-Tools mit data_classification: LOCAL_ONLY (keine externen KI-APIs).
+    - agent.proposal.list erfordert agent:read Scope.
+    - Alle neuen Tools mit audit: read und idempotent: true.
+  architekturvertrag:
+    - config/mcp_erp_tools.yaml ist Single Source of Truth.
+    - data_classification-Feld folgt ai_data_classification.yaml (5 Stufen).
+    - schema_version bleibt 1.0 — keine Breaking Changes.
+  akzeptanzkriterien:
+    - 18 tool_id-Einträge in mcp_erp_tools.yaml.
+    - Alle neuen Tools haben scope, risk_class, data_classification, audit, endpoint.
+    - YAML ist syntaktisch valide (python -c "import yaml; yaml.safe_load(open('config/mcp_erp_tools.yaml'))").
+
+dateibesitz:
+  - config/mcp_erp_tools.yaml
+  - docs/agent-ops/slices/MCP-ERP-TOOLS-002.yaml

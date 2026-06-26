@@ -1,0 +1,36 @@
+slice_id: SEMANTIC-ACTION-MATRIX-002
+title: "Semantische Action-Matrices YAML + Report"
+priority: P2
+owner: Claude Code
+status: abgeschlossen
+created: "2026-06-26"
+
+goal: >
+  YAML-Action-Matrices für 6 Prozessketten (O2C, WMS, P2P, FiBu, POS, QS) anlegen.
+  Generator vergleicht Matrices mit route-inventory und erzeugt MkDocs-Report.
+  Top-50-Routen aus INAPP-Help als Pflichtliste für Matrix-Coverage.
+
+ai_harness:
+  fachlicher_vertrag:
+    - docs/quality-assurance/action-matrices/{o2c,wms,p2p,fibu,pos,qs}.yaml definieren je Kette: action_id, route_prefix, api_method, e2e_tag, status.
+    - docs/quality-assurance/action-matrix-report.md zeigt Status je Aktion (GREEN/PARTIAL/GAP).
+    - Alle Top-50-INAPP-Routen haben einen Matrix-Eintrag oder sind als Gap dokumentiert.
+  architekturvertrag:
+    - scripts/generate_action_matrix_report.py ist Single Source of Truth für den Report.
+    - Matrix-YAMLs sind fachliche Spezifikation, kein Code.
+    - Status-Werte: green (E2E grün), partial (E2E vorhanden, nicht @critical), gap (keine E2E).
+  akzeptanzkriterien:
+    - 6 Matrix-YAMLs existieren in docs/quality-assurance/action-matrices/.
+    - generate_action_matrix_report.py läuft ohne Fehler.
+    - action-matrix-report.md zeigt 24 Aktionen.
+
+dateibesitz:
+  - docs/quality-assurance/action-matrices/o2c.yaml
+  - docs/quality-assurance/action-matrices/wms.yaml
+  - docs/quality-assurance/action-matrices/p2p.yaml
+  - docs/quality-assurance/action-matrices/fibu.yaml
+  - docs/quality-assurance/action-matrices/pos.yaml
+  - docs/quality-assurance/action-matrices/qs.yaml
+  - docs/quality-assurance/action-matrix-report.md
+  - scripts/generate_action_matrix_report.py
+  - docs/agent-ops/slices/SEMANTIC-ACTION-MATRIX-002.yaml

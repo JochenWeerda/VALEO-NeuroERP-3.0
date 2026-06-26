@@ -298,3 +298,161 @@ tools:
           faellig_am: { type: string, nullable: true }
     audit: read
     endpoint: "GET /api/v1/compliance/external-gates"
+
+  # ── Agrar / Ernte (MCP-ERP-TOOLS-002) ────────────────────────────────────
+  - tool_id: agrar.contract.get
+    domain: agrar
+    name: "Agrar-Kontrakt abrufen"
+    description: "Gibt Details zu einem Agrar-Kontrakt zurück (Menge, Preis, Status)."
+    scope: agrar:read
+    idempotent: true
+    risk_class: low
+    data_classification: LOCAL_ONLY
+    input_schema:
+      type: object
+      properties:
+        kontrakt_id: { type: string }
+        tenant_id: { type: string }
+      required: [kontrakt_id]
+    output_schema:
+      type: object
+      properties:
+        kontrakt_id: { type: string }
+        ware: { type: string }
+        menge_t: { type: number }
+        preis_eur: { type: number }
+        status: { type: string }
+    audit: read
+    endpoint: "GET /api/v1/agrar/contracts/{kontrakt_id}"
+
+  - tool_id: agrar.weighing_ticket.list
+    domain: agrar
+    name: "Wiegescheine auflisten"
+    description: "Listet Wiegescheine für eine Partie oder einen Zeitraum."
+    scope: agrar:read
+    idempotent: true
+    risk_class: low
+    data_classification: LOCAL_ONLY
+    input_schema:
+      type: object
+      properties:
+        partie_id: { type: string, nullable: true }
+        von: { type: string, format: date, nullable: true }
+        bis: { type: string, format: date, nullable: true }
+        limit: { type: integer, default: 50 }
+      required: []
+    output_schema:
+      type: array
+      items:
+        type: object
+        properties:
+          ticket_id: { type: string }
+          partie_id: { type: string }
+          brutto_kg: { type: number }
+          netto_kg: { type: number }
+          erstellt_am: { type: string }
+    audit: read
+    endpoint: "GET /api/v1/agrar/weighing-tickets"
+
+  # ── Inventory / Lager (MCP-ERP-TOOLS-002) ────────────────────────────────
+  - tool_id: lager.bestand.get
+    domain: lager
+    name: "Lagerbestand abfragen"
+    description: "Gibt aktuellen Lagerbestand für ein Produkt / Lager zurück."
+    scope: lager:read
+    idempotent: true
+    risk_class: low
+    data_classification: INTERNAL
+    input_schema:
+      type: object
+      properties:
+        artikel_id: { type: string }
+        lager_id: { type: string, nullable: true }
+      required: [artikel_id]
+    output_schema:
+      type: object
+      properties:
+        artikel_id: { type: string }
+        menge: { type: number }
+        einheit: { type: string }
+        reserviert: { type: number }
+        verfuegbar: { type: number }
+    audit: read
+    endpoint: "GET /api/v1/lager/bestand"
+
+  - tool_id: lager.inventur.status
+    domain: lager
+    name: "Inventurstatus abfragen"
+    description: "Gibt offene Inventur-Aufträge und Zähldifferenzen zurück."
+    scope: lager:read
+    idempotent: true
+    risk_class: low
+    data_classification: INTERNAL
+    input_schema:
+      type: object
+      properties:
+        lager_id: { type: string, nullable: true }
+      required: []
+    output_schema:
+      type: object
+      properties:
+        offene_inventuren: { type: integer }
+        differenzen_eur: { type: number }
+        letzter_abschluss: { type: string, nullable: true }
+    audit: read
+    endpoint: "GET /api/v1/lager/inventuren/status"
+
+  # ── Einkauf (MCP-ERP-TOOLS-002) ──────────────────────────────────────────
+  - tool_id: einkauf.bestellung.list
+    domain: einkauf
+    name: "Offene Bestellungen auflisten"
+    description: "Listet offene Bestellungen mit Status und Liefertermin."
+    scope: einkauf:read
+    idempotent: true
+    risk_class: low
+    data_classification: INTERNAL
+    input_schema:
+      type: object
+      properties:
+        status: { type: string, nullable: true, enum: [offen, teilgeliefert, abgeschlossen] }
+        limit: { type: integer, default: 50 }
+      required: []
+    output_schema:
+      type: array
+      items:
+        type: object
+        properties:
+          bestellung_id: { type: string }
+          lieferant: { type: string }
+          status: { type: string }
+          liefertermin: { type: string }
+          wert_eur: { type: number }
+    audit: read
+    endpoint: "GET /api/v1/einkauf/bestellungen"
+
+  # ── Agent-Proposal-Verwaltung (MCP-ERP-TOOLS-002 + OPERATOR-AGENT-002) ───
+  - tool_id: agent.proposal.list
+    domain: agent
+    name: "Agent-Proposals auflisten"
+    description: "Gibt ausstehende und abgeschlossene Agent-Proposals zurück. Nur für Supervisor-Rolle."
+    scope: agent:read
+    idempotent: true
+    risk_class: low
+    data_classification: INTERNAL
+    input_schema:
+      type: object
+      properties:
+        status: { type: string, nullable: true, enum: [pending, approved, rejected, expired] }
+        limit: { type: integer, default: 20 }
+      required: []
+    output_schema:
+      type: array
+      items:
+        type: object
+        properties:
+          proposal_id: { type: string }
+          action_type: { type: string }
+          approval_status: { type: string }
+          created_at: { type: string }
+    audit: read
+    endpoint: "GET /api/v1/agent/proposals"

@@ -1,0 +1,32 @@
+slice_id: SEMANTIC-E2E-STRICT-001
+title: "Playwright @critical Tags für Kern-Pfade"
+priority: P2
+owner: Claude Code
+status: abgeschlossen
+created: "2026-06-26"
+
+goal: >
+  @critical Describe-Blöcke in O2C und WMS Playwright-Specs ergänzen.
+  Separater CI-Job e2e-critical.yml läuft @critical-Tests bei jedem PR.
+  Stricter als @smoke: kein 503-Fallback als Erfolg.
+
+ai_harness:
+  fachlicher_vertrag:
+    - o2c-semantic-chain.spec.ts + wms-silo-semantic-chain.spec.ts haben je einen @critical Block.
+    - @critical prüft Health der kritischen Endpunkte (200/404/422 erwartet, 503 = fail).
+    - e2e-critical.yml blockiert bei @critical-Fehlern.
+    - @smoke bleibt fail-safe (503 als Erfolg weiterhin akzeptiert).
+  architekturvertrag:
+    - @critical und @smoke als getrennte describe-Blöcke — kein Umbau bestehender Tests.
+    - Nur 2 Ketten initial (@critical): O2C und WMS. Weitere Ketten in Folge-Slices.
+    - Playwright grep: --grep "@critical" für den separaten CI-Job.
+  akzeptanzkriterien:
+    - .github/workflows/e2e-critical.yml existiert.
+    - O2C @critical Block: 2 Tests (Auftrag-Health, Lieferschein-Health).
+    - WMS @critical Block: 2 Tests (Einlagerung-Health, Wareneingang-Health).
+
+dateibesitz:
+  - playwright-tests/specs/e2e-matrix/o2c-semantic-chain.spec.ts
+  - playwright-tests/specs/e2e-matrix/wms-silo-semantic-chain.spec.ts
+  - .github/workflows/e2e-critical.yml
+  - docs/agent-ops/slices/SEMANTIC-E2E-STRICT-001.yaml
