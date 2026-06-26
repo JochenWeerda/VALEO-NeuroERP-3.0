@@ -5,7 +5,7 @@ audience: [entwickler, product, docs]
 owner: Cursor
 status: aktiv
 last_reviewed: 2026-06-26
-version: 3.3.0
+version: 3.4.0
 ---
 
 # Doku-Migrationsplan
@@ -80,21 +80,24 @@ Diátaxis-Struktur — schrittweise, nachvollziehbar, ohne Informationsverlust.
 
 ## Abschluss (2026-06-26)
 
-Das Bulk-Migrationsprogramm **DOC-MIGRATION-001…008** ist abgeschlossen:
+Das Doku-Programm **DOC-MIGRATION-001…009**, **DOC-DEV-GUIDE-001**,
+**DOC-REFERENZ-001** und **DOC-INVENTORY-001** ist abgeschlossen:
 
 | Ergebnis | Stand |
 |----------|-------|
 | Root-`.md` | 2 kuratierte Dateien (`index.md`, `MASKEN.md`) |
 | Archiv | ~430 Dateien unter `docs/_internal/archive/` |
-| MkDocs-Nav | Diátaxis-Bereiche, Compliance, Architektur, alle ADRs |
-| CI-Gates | Staleness blockierend (365 Tage, 47 kuratierte Seiten) |
+| MkDocs-Nav | Diátaxis, Compliance, Architektur, 38 ADRs, Referenz/MASKEN |
+| CI-Gates | Staleness blockierend; ADR-Nav + Code-Inventar Drift-Check |
+| Drift-Report | Wöchentlich informativ; Endpoints/Services/Migrationen = 0 |
+| Kuratierte Seiten | ~56 (inkl. Entwicklerhandbuch, Inventare) |
 | Roadmaps | Abgearbeitete Snapshots gelöscht; Redirect über `docs/roadmap/README.md` |
 | Lieferstand | [Process Kernel STATUS](../architecture/process-kernel/STATUS.md), [Open Gaps](../project-context/open-gaps-and-known-issues.md) |
 
 **Fortlaufende Pflege:** Neue Doku direkt in Diátaxis-Bereichen anlegen; Altbestände
 nur über `scripts/docs-legacy-migrate.py` archivieren; Cards intern halten.
-Neue ADRs: Datei unter `docs/adr/` anlegen, dann `python scripts/generate_adr_nav.py`
-(MkDocs-Nav, CI-Drift-Check).
+Neue ADRs: `docs/adr/` + `python scripts/generate_adr_nav.py`.
+Neue Endpoint-/Service-/Migration-Module: `python scripts/generate_code_inventories.py`.
 
 ## Sicherheitsnetz
 
