@@ -186,6 +186,7 @@ Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Be
 | `ff7b1a7899b4_add_customer_inquiries_table` | add_customer_inquiries_table |
 | `fibu_connector_asset_ledger_rename_20260301` | FIBU Connector: QUADRIGA → ASSET_LEDGER (geschützter Name entfernt) |
 | `fibu_connector_framework_20260301` | FIBU Connector Framework: Profile, Runs, Run-Items (domain_erp) |
+| `finance_agrar_sales_repair_20260626` | BULK-REPAIR-001: Finance + Agrar + Sales Batch-Repair-Migration Wave 11. |
 | `finance_followup_exports_einkauf_uq_20260406` | finance_followup_exports + optional unique (tenant_id, bestellnummer) |
 | `finance_sepa_ratenzahlung_20260623` | DOM-FINANCE-004: finance_sepa_mandate, sepa_batches, ratenzahlungsplaene, ratenzahlungsraten, mahnstufen_audit |
 | `flow_spine_instances_20260326` | Flow Spine Instance persistence table |
@@ -241,6 +242,7 @@ Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Be
 | `merge_dom004_feed_chain_20260623` | Merge parallel 2026-06-23 branches (DOM-*-004 wave + FEED-CHAIN-004). |
 | `merge_driver_time_hrm_gates_20260517` | merge driver_time and hrm_gates heads |
 | `merge_einkauf_log_agent_20260626` | Merge Alembic heads: einkauf_ls_opportunities_repair + merge_log_agent. |
+| `merge_finance_warehouse_20260626` | Merge Alembic heads: finance_agrar_sales_repair + merge_warehouse_einkauf. |
 | `merge_heads_20260522` | Merge: agrar_ernte_planung_20260520 + fachliche_vertiefung_wave13_20260522 |
 | `merge_heads_docflow_agrar_einkauf_20260301` | Merge heads: Agrar, Einkauf RE-Workflow, Docflow GoBD Schritt 3 |
 | `merge_heads_ops_and_erp_20260304` | merge heads: domain_ops (missing_ops) and domain_erp (finance tables) |
