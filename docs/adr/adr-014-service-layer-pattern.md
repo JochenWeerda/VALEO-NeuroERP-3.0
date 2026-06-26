@@ -20,30 +20,12 @@ Router (FastAPI)  →  DomainService  →  BaseRepository  →  SQLAlchemy / DB
 
 ### BaseRepository (Generisch)
 
-```python
-# app/core/repository.py
+```python linenums="0"
+# app/core/repository.py — vereinfachtes Muster
 class BaseRepository(Generic[T]):
-    def __init__(self, db: Session, model: type[T], tenant_id: str):
-        self.db = db
-        self.model = model
-        self.tenant_id = tenant_id
-
-    def get(self, id: str) -> T | None:
-        return self.db.query(self.model).filter(
-            self.model.id == id,
-            self.model.tenant_id == self.tenant_id,
-        ).first()
-
-    def list(self, skip: int = 0, limit: int = 50) -> tuple[list[T], int]:
-        q = self.db.query(self.model).filter(self.model.tenant_id == self.tenant_id)
-        total = q.count()
-        return q.offset(skip).limit(limit).all(), total
-
-    def save(self, entity: T) -> T:
-        self.db.add(entity)
-        self.db.commit()
-        self.db.refresh(entity)
-        return entity
+    def get(self, id: str) -> T | None: ...
+    def list(self, skip: int = 0, limit: int = 50) -> tuple[list[T], int]: ...
+    def save(self, entity: T) -> T: ...
 ```
 
 ### DomainService-Konvention
