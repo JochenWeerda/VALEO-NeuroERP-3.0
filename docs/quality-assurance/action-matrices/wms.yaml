@@ -1,0 +1,43 @@
+chain_id: wms
+chain_name: "Warehouse Management / Agrar-Materialfluss"
+description: "Wareneingang → Einlagerung → QS-Prüfung → Auslagerung"
+priority: critical
+
+actions:
+  - action_id: wms-001
+    label: "Wareneingang erfassen"
+    route_prefix: "lager/einlagerung"
+    api_method: "POST /lager/wareneingaenge"
+    e2e_tag: "@smoke"
+    status: partial
+
+  - action_id: wms-002
+    label: "Einlagerung durchführen"
+    route_prefix: "lager/einlagerung"
+    api_method: "POST /lager/einlagerungen"
+    e2e_tag: "@smoke"
+    status: partial
+
+  - action_id: wms-003
+    label: "QS-Probe anlegen / Labor"
+    route_prefix: "lager/qs-leitstand"
+    api_method: "POST /qs/proben"
+    e2e_tag: "@smoke"
+    status: gap
+
+  - action_id: wms-004
+    label: "Freigabe / Sperrung nach QS"
+    route_prefix: "lager/qs-leitstand"
+    api_method: "PATCH /qs/proben/{id}/freigabe"
+    e2e_tag: "@smoke"
+    status: gap
+
+  - action_id: wms-005
+    label: "Auslagerung / Kommissionierung"
+    route_prefix: "lager/auslagerung"
+    api_method: "POST /lager/auslagerungen"
+    e2e_tag: "@smoke"
+    status: gap
+
+open_gaps:
+  - "wms-003/004/005: QS-Freigabe und Auslagerung ohne E2E"

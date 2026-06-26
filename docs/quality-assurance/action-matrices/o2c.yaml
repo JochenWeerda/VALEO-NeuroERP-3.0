@@ -1,0 +1,37 @@
+chain_id: o2c
+chain_name: "Order-to-Cash (O2C)"
+description: "Verkaufsauftrag → Lieferschein → Ausgangsrechnung → Zahlung"
+priority: critical
+
+actions:
+  - action_id: o2c-001
+    label: "Verkaufsauftrag anlegen"
+    route_prefix: "verkauf/auftrag"
+    api_method: "POST /verkauf/auftraege"
+    e2e_tag: "@critical"
+    status: green
+
+  - action_id: o2c-002
+    label: "Lieferschein aus Auftrag generieren"
+    route_prefix: "verkauf/lieferschein"
+    api_method: "POST /verkauf/lieferscheine"
+    e2e_tag: "@critical"
+    status: green
+
+  - action_id: o2c-003
+    label: "Ausgangsrechnung stellen"
+    route_prefix: "verkauf/rechnung"
+    api_method: "POST /verkauf/rechnungen"
+    e2e_tag: "@smoke"
+    status: partial
+
+  - action_id: o2c-004
+    label: "Zahlung buchen / OP ausziffern"
+    route_prefix: "fibu/offene-posten"
+    api_method: "POST /fibu/zahlungen"
+    e2e_tag: "@smoke"
+    status: gap
+
+open_gaps:
+  - "o2c-003: Rechnungs-PDF-Generierung noch ohne @critical"
+  - "o2c-004: Zahlungseingang-Buchung noch ohne E2E"

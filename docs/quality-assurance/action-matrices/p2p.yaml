@@ -1,0 +1,36 @@
+chain_id: p2p
+chain_name: "Procure-to-Pay (P2P)"
+description: "Bestellanforderung → Bestellung → Wareneingang → Eingangsrechnung → Zahlung"
+priority: high
+
+actions:
+  - action_id: p2p-001
+    label: "Bestellung anlegen"
+    route_prefix: "einkauf/bestellung"
+    api_method: "POST /einkauf/bestellungen"
+    e2e_tag: "@smoke"
+    status: partial
+
+  - action_id: p2p-002
+    label: "Wareneingang buchen"
+    route_prefix: "einkauf/wareneingang"
+    api_method: "POST /einkauf/wareneingaenge"
+    e2e_tag: "@smoke"
+    status: gap
+
+  - action_id: p2p-003
+    label: "Eingangsrechnung prüfen / freigeben"
+    route_prefix: "einkauf/rechnung"
+    api_method: "POST /einkauf/rechnungen"
+    e2e_tag: "@smoke"
+    status: gap
+
+  - action_id: p2p-004
+    label: "Zahlungslauf ausführen (SEPA)"
+    route_prefix: "fibu/zahlungslaeufe"
+    api_method: "POST /fibu/zahlungslaeufe"
+    e2e_tag: "@smoke"
+    status: gap
+
+open_gaps:
+  - "p2p-002/003/004: WE-Buchung, Rechnungsprüfung, SEPA-Lauf ohne E2E"
