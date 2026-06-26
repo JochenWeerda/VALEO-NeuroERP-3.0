@@ -88,3 +88,47 @@ def resolve_blocker(
     if not resolved:
         raise HTTPException(status_code=404, detail="Blocker nicht gefunden oder bereits resolved")
     return {"blocker_id": blocker_id, "resolved": True}
+
+
+@router.post(
+    "/instances/{process_instance_id}/retry",
+    response_model=dict[str, Any],
+    summary="FAILED/blocked Instanz kontrolliert neu starten (WF-COCKPIT-RETRY-001)",
+)
+def retry_instance(
+    process_instance_id: str,
+    body: dict[str, Any],
+    svc: WorkflowCockpitPersistService = Depends(_svc),
+) -> dict[str, Any]:
+    ok = svc.retry_instance(
+        process_instance_id=process_instance_id,
+        retried_by=body.get("retried_by"),
+        reason=body.get("reason", ""),
+    )
+    if not ok:
+        raise HTTPException(
+            status_code=404,
+            detail="Instanz nicht gefunden oder nicht in retryable Status (failed/blocked_external_gate)",
+        )
+    return {"process_instance_id": process_instance_id, "status": "retry_pending"}
+
+
+@router.post(
+    "/instances/{process_instance_id}/compensate",
+    response_model=dict[str, Any],
+    summary="Instanz als kompensiert/storniert markieren (Kompensationspfad)",
+)
+def compensate_instance(
+    process_instance_id: str,
+    body: dict[str, Any],
+    svc: WorkflowCockpitPersistService = Depends(_svc),
+) -> dict[str, Any]:
+    ok = svc.compensate_instance(
+        process_instance_id=process_instance_id,
+        compensated_by=body.get("compensated_by"),
+        compensation_action=body.get("compensation_action", ""),
+        notes=body.get("notes", ""),
+    )
+    if not ok:
+        raise HTTPException(status_code=404, detail="Instanz nicht gefunden")
+    return {"process_instance_id": process_instance_id, "status": "compensated"}

@@ -340,3 +340,93 @@ class WorkflowCockpitPersistService:
         result["events"] = [_ser_row(e) for e in events]
         result["blockers"] = [_ser_row(b) for b in blockers]
         return result
+
+    # ------------------------------------------------------------------
+    # Kontrollierter Retry / Kompensationspfad (WF-COCKPIT-RETRY-001)
+    # ------------------------------------------------------------------
+
+    def retry_instance(
+        self,
+        *,
+        process_instance_id: str,
+        retried_by: str | None = None,
+        reason: str = "",
+    ) -> bool:
+        """Setzt eine FAILED/blocked Instanz auf 'retry_pending' und legt ein Retry-Event an.
+
+        Gibt True zurueck wenn die Instanz gefunden und zurueckgesetzt wurde,
+        False wenn sie nicht existiert oder nicht retrybar ist.
+        """
+        row = self.db.execute(
+            text("""
+                SELECT id, status, replayable
+                FROM domain_workflow.wf_cockpit_instances
+                WHERE id = :id AND tenant_id = :tid
+            """),
+            {"id": process_instance_id, "tid": self.tenant_id},
+        ).fetchone()
+        if not row:
+            return False
+        if row.status not in ("failed", "blocked_external_gate"):
+            return False
+
+        self.db.execute(
+            text("""
+                UPDATE domain_workflow.wf_cockpit_instances
+                SET status = 'retry_pending',
+                    updated_at = :now
+                WHERE id = :id AND tenant_id = :tid
+            """),
+            {"id": process_instance_id, "tid": self.tenant_id, "now": _now()},
+        )
+        self.append_event(
+            process_instance_id=process_instance_id,
+            kind="retry_requested",
+            message=f"Retry angefordert von {retried_by or 'unbekannt'}: {reason}",
+            payload={"retried_by": retried_by, "reason": reason},
+            tenant_id=self.tenant_id,
+        )
+        self.db.commit()
+        return True
+
+    def compensate_instance(
+        self,
+        *,
+        process_instance_id: str,
+        compensated_by: str | None = None,
+        compensation_action: str = "",
+        notes: str = "",
+    ) -> bool:
+        """Markiert eine Instanz als kompensiert (Rollback/Storno abgeschlossen)."""
+        row = self.db.execute(
+            text("""
+                SELECT id, status FROM domain_workflow.wf_cockpit_instances
+                WHERE id = :id AND tenant_id = :tid
+            """),
+            {"id": process_instance_id, "tid": self.tenant_id},
+        ).fetchone()
+        if not row:
+            return False
+
+        self.db.execute(
+            text("""
+                UPDATE domain_workflow.wf_cockpit_instances
+                SET status = 'compensated',
+                    updated_at = :now
+                WHERE id = :id AND tenant_id = :tid
+            """),
+            {"id": process_instance_id, "tid": self.tenant_id, "now": _now()},
+        )
+        self.append_event(
+            process_instance_id=process_instance_id,
+            kind="compensated",
+            message=f"Kompensiert von {compensated_by or 'unbekannt'} via {compensation_action}: {notes}",
+            payload={
+                "compensated_by": compensated_by,
+                "compensation_action": compensation_action,
+                "notes": notes,
+            },
+            tenant_id=self.tenant_id,
+        )
+        self.db.commit()
+        return True

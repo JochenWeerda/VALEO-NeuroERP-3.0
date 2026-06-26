@@ -155,9 +155,12 @@ Keine weiteren bekannten F-Lücken nach Wave 5.
   `workflow:replay`.
 - Bewusst nicht als n8n-Kernersatz gebaut: Source of Truth bleiben Process
   Kernel, Domain-Services, Outbox/NATS und Audit.
-- Offen fuer Folgeslices: persistente Cockpit-Tabellen, Outbox-/NATS-Projektor,
+- ~~Offen fuer Folgeslices: persistente Cockpit-Tabellen, Outbox-/NATS-Projektor,
   UI-Leitstand/Meridian ListReport, Dead-Letter-Sicht und kontrollierter
-  Retry mit Kompensationspfad.
+  Retry mit Kompensationspfad~~ — **alle Wave 13–15 2026-06-26 geschlossen**:
+  domain_workflow.wf_cockpit_* Tabellen (W13), WfCockpitNatsProjector (W13, WF-COCKPIT-002),
+  `leitstand.tsx` (vorhanden), `/dead-letter`-Sicht (vorhanden),
+  `POST /instances/{id}/retry` + `POST /instances/{id}/compensate` (W15, WF-COCKPIT-RETRY-001).
 
 ### PROD-READINESS-001: Repo-seitige P0-Haertung abgeschlossen, Live-Gates offen
 
