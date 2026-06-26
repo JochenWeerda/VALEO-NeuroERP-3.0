@@ -208,8 +208,8 @@ nav:
           - ADR-032 — Auth-Enforcement über Router-Level Global Dependency: adr/adr-032-auth-enforcement-router-global-dependency.md
           - "ADR-033 — Rollback-Strategie: Zentral in get_db()": adr/adr-033-rollback-strategie-get-db.md
           - ADR-034 — Tenant-Isolation-Klassifizierungssystem: adr/adr-034-tenant-isolation-klassifizierungssystem.md
+          - "ADR-035: Kein interaktiver Workflow-Designer (P2.1 gestrichen)": adr/adr-035-kein-workflow-designer.md
           - ADR-CRM-001 – CRM as Independent AI-First Bounded Context: adr/ADR-CRM-001.md
-          - "ADR-035: Kein interaktiver Workflow-Designer": adr/adr-035-kein-workflow-designer.md
       # adr-nav:end
   - Schnittstellen:
       - Überblick: schnittstellen/index.md
