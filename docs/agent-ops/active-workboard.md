@@ -2356,33 +2356,6 @@ Dispo-Arbeitsraum: Tarifliste + Bestätigung + `cancelFreightTariff`; Tests in `
 **Checks:** `pnpm --filter @valero-neuroerp/frontend-web type-check`; `python scripts/agent_workboard_supervisor.py validate`; `node scripts/docs-governance-check.cjs`; `node scripts/docs-markdown-check.cjs docs/project-context/ux-excellence-operating-standard-2026-05-13.md docs/agent-ops/active-workboard.md docs/agent-ops/slices/UX-FUHRPARK-001.yaml`; `git diff --check`
 **Offene Risiken:** Fuhrpark-Menues und Detailstammdaten bleiben Folgeslices; dieser Slice fokussiert Status-/Fristen- und Dokumentsteuerung.
 
-## TODO-SPRINT-001
-
-**Von:** Cursor<br>
-**Owner:** (Team)<br>
-**Stand:** dokumentiert 2026-04-24<br>
-**Ziel des Slices:** Die abgestimmte **TODO-Umsetzungs-Roadmap** (Meilensteine **M-01–M-12**) und die **Sprint-Zuordnung S1–S5** im Repo und hier im Workboard als **einzige Sprint-/Issue-Referenz** festhalten; Abgleich mit automatisch erzeugten TODO-Reports möglich.
-
-**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/agent-ops/slices/TODO-SPRINT-001.yaml`, Ergänzungen in `scripts/update_todos.py` (Slice-Ausgaben `docs/TODO-next-slices.md`, `docs/todo-report.json` → `next_slices`).
-
-**Kurzreferenz Meilensteine**
-
-| Sprint | Meilensteine |
-|--------|----------------|
-| S1 | M-01 (Auth-/Tenant-**Vertrag**), M-02 (Pagination Contract erp-domain) |
-| S2 | M-03 (Pagination Rollout), M-04 (ERP Actor), M-05 (**E2E-Auth früh**) |
-| S3 | M-06 (CRM Auth), M-07 (CRM E-Mail/Queue) |
-| S4 | M-08 (GDPR Export), M-09 (GDPR Löschung inkl. Retention), M-10 (FiBu Perioden/Saldo) |
-| S5 | M-11 (Strecke DB + Migration/Rollback), M-12 (Einkauf OCR, Teilprojekt) |
-
-**Abnahmekriterien (Doku-Slice):** Workboard enthält Slice-ID und Tabelle; kanonisches Dokument existiert und ist vom Board aus erreichbar; Tracking-Hinweis für `python scripts/update_todos.py --repo-only` / `docs/TODO-next-slices.md` genannt.
-
-**Erledigt:** Sprint-Matrix M-01–M-12 / S1–S5 im Workboard verankert; Legacy-Datei `docs/roadmap/TODO-UMSETZUNG-SPRINT-PLAN-S1-S5.md` entfernt (DOC-MIGRATION-005).
-
-**Checks (optional):** `python scripts/update_todos.py --repo-only`; Doku-Link im Browser öffnen.
-
-**Offene Risiken:** Die Meilensteine **M-01–M-12** sind Umsetzungsarbeit — dieser Slice ist **Planungs-/Referenz-Ebene**. Konkrete Implementierungs-Slices sollten eigene IDs im Workboard erhalten und auf **M-xx** im Titel oder Body verweisen.
-
 ## HR-TIME-001
 
 **Von:** Codex
@@ -2833,15 +2806,6 @@ Archiv des vorherigen Boards:
   1. Slice auf `reserviert`
   2. Workboard committen
   3. erst dann implementieren
-
-## Kurzstand
-
-- Das gemeinsame operative Arbeitsmodell ist bereits in den priorisierten Kernmasken ausgerollt.
-- Der Rollout-Scope ist dokumentiert in:
-  - [operational-rollout-scope-2026-04-09.md](C:/Users/Jochen/VALEO-NeuroERP-3.0/docs/project-context/operational-rollout-scope-2026-04-09.md)
-- Der naechste Block betrifft Sammel- und Follow-up-Masken mit echtem operativem Mehrwert.
-- Fuer den Flow-Spine-Kern liegt jetzt eine gemeinsame Lifecycle-Zieldoku vor:
-  - [flow-spine-instance-lifecycle-overview.md](C:/Users/Jochen/VALEO-NeuroERP-3.0/docs/workflows/flow-spine-instance-lifecycle-overview.md)
 
 ## FEEDING-SYSTEM-ARCHITECTURE Slices 1-3 (abgeschlossen 2026-04-23)
 
@@ -4740,14 +4704,6 @@ Parallele Fix-Slices aus Cards-Inventar-Audit (`CARD-AUDIT-001`). Claim-Protokol
 **Von:** Claude Code · **Owner:** Claude Code
 **Stand:** abgeschlossen 2026-06-26 — `mcp_erp_tools.yaml` um Domain-Tools erweitert (+158 Zeilen); Contract-Tests + Classification-Enforcement folgen in 002b.
 **Dateibesitz:** `config/mcp_erp_tools.yaml`.
-
-## COVERAGE-RATCHET-002 — Coverage-Härtung (Claim)
-
-**Von:** Claude Code / **Stand:** offen
-
-## DOC-USER-MANUAL-002 — Benutzerhandbuch Vertiefung (Claim)
-
-**Von:** Claude Code / **Stand:** offen
 
 ## DOC-RELEASE-NOTES-001 — Release-Notes-Generator
 
