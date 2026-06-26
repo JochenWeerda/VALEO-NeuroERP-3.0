@@ -323,7 +323,26 @@ async def create_delivery_note(
     db.commit()
     row = _get_delivery_note_or_404(db, ls_id, tenant_id)
     positions = _list_positions(db, ls_id)
-    
+
+    # WA-NOTIFY-001: Kunden per WhatsApp benachrichtigen (best-effort)
+    if payload.customer_id:
+        try:
+            from app.services.whatsapp_notify_service import send_dokument_ready
+            # Telefonnummer aus CRM-Kontext — Demo: Umgebungsvariable oder Lookup
+            _phone = getattr(payload, "customer_phone", None)
+            if _phone:
+                send_dokument_ready(
+                    tenant_id=tenant_id,
+                    phone=_phone,
+                    kunden_nr=payload.customer_id,
+                    kunden_name=None,
+                    doc_typ="Lieferschein",
+                    doc_nr=delivery_note_number,
+                )
+        except Exception:
+            import logging
+            logging.getLogger(__name__).debug("WA-Notify Lieferschein fehlgeschlagen (non-critical)", exc_info=True)
+
     return DeliveryNote(
         **dict(row),
         positionen=[DeliveryNotePosition(**dict(p)) for p in positions]
@@ -780,6 +799,18 @@ async def create_invoice_from_delivery(
         }, repo)
     except Exception:  # noqa: BLE001 — Store-Eintrag nicht kritisch
         pass
+
+    # WA-NOTIFY-001: Kunden per WhatsApp benachrichtigen (best-effort)
+    try:
+        from app.services.whatsapp_notify_service import send_dokument_ready
+        _customer_id = row.get("customer_id")
+        if _customer_id:
+            # In Produktion: Telefonnummer aus CRM-Lookup. Hier als placeholder gesetzt.
+            # Echte Integration: Customer-Query nach phone_number aus domain_crm.customers
+            pass
+    except Exception:
+        import logging
+        logging.getLogger(__name__).debug("WA-Notify Rechnung fehlgeschlagen (non-critical)", exc_info=True)
 
     return {
         "ok": True,
