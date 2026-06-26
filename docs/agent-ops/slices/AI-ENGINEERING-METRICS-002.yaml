@@ -1,0 +1,34 @@
+slice_id: AI-ENGINEERING-METRICS-002
+title: "P2.2 Ausbau — Nightly CI-Cron + MkDocs Dashboard"
+owner: Claude Sonnet 4.6
+status: completed
+updated: 2026-06-26
+coordination: >-
+  Folge-Slice zu AI-ENGINEERING-METRICS-001. Unabhängig von Codex/Cursor.
+  Berührt nur .github/workflows/, scripts/ und docs/agent-ops/.
+goal: >-
+  AI Engineering Metrics automatisch täglich in CI berechnen (GitHub Actions
+  Nightly Cron), JSON-Artefakt speichern, Markdown-Seite generieren und
+  in MkDocs als öffentliche Dashboard-Seite einbinden.
+file_ownership:
+  - .github/workflows/ai-engineering-metrics.yml
+  - scripts/generate_metrics_page.py
+  - docs/agent-ops/engineering-metrics.md
+  - tests/test_generate_metrics_page.py
+  - docs/agent-ops/slices/AI-ENGINEERING-METRICS-002.yaml
+  - mkdocs.yml
+acceptance:
+  - "pytest -m unit tests/test_generate_metrics_page.py → 15 Tests grün."
+  - "Workflow .github/workflows/ai-engineering-metrics.yml syntaktisch korrekt."
+  - "docs/agent-ops/engineering-metrics.md existiert und hat Frontmatter."
+  - "mkdocs.yml enthält Eintrag 'AI Engineering Metrics'."
+tests:
+  - pytest -m unit tests/test_generate_metrics_page.py -v -p no:cov -o addopts=
+completion_evidence:
+  - "2026-06-26: 15 Tests grün."
+  - "2026-06-26: Seite docs/agent-ops/engineering-metrics.md generiert."
+  - "2026-06-26: Workflow .github/workflows/ai-engineering-metrics.yml angelegt (cron 04:00 UTC)."
+  - "2026-06-26: MkDocs-Nav-Eintrag gesetzt."
+external_gates:
+  - Erster erfolgreicher Nightly-Cron-Lauf auf GitHub Actions (extern).
+  - MkDocs-Deploy-Workflow muss neue Seite aufnehmen (bereits in docs.yml).
