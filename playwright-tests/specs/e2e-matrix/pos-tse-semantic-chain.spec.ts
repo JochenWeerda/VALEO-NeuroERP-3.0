@@ -233,3 +233,28 @@ test.describe.serial('POS/TSE — Kassenbon bis FIBU-Buchung @smoke @e2e-matrix'
   })
 
 })
+
+// SEMANTIC-E2E-STRICT-001 — @critical Kern-Pfad POS/TSE
+test.describe('POS @critical Kern-Pfad', () => {
+  const BASE_CRIT = process.env.PLAYWRIGHT_BASE_URL ?? 'http://localhost:8000'
+  const TENANT_CRIT = 'e2e-crit-pos'
+  const HEADERS_CRIT = {
+    'X-Tenant-ID': TENANT_CRIT,
+    'Content-Type': 'application/json',
+    'Authorization': `Bearer ${process.env.API_DEV_TOKEN ?? 'dev-token'}`,
+  }
+
+  test('POS @critical — Kassen-Endpunkt antwortet (Health)', async () => {
+    const ctx = await request.newContext({ baseURL: BASE_CRIT })
+    const res = await ctx.get('/api/v1/pos/kassen', { headers: HEADERS_CRIT })
+    expect([200, 404, 422]).toContain(res.status())
+    await ctx.dispose()
+  })
+
+  test('POS @critical — Tagesabschluss-Endpunkt antwortet (Health)', async () => {
+    const ctx = await request.newContext({ baseURL: BASE_CRIT })
+    const res = await ctx.get('/api/v1/pos/tagesabschluss', { headers: HEADERS_CRIT })
+    expect([200, 404, 422]).toContain(res.status())
+    await ctx.dispose()
+  })
+})

@@ -57,6 +57,17 @@ def test_summary_structure(svc: McpToolRegistryService) -> None:
     assert summary["validation_errors"] == []
 
 
+def test_registry_has_18_tools(svc: McpToolRegistryService) -> None:
+    assert len(svc.list_tools()) == 18
+
+
+def test_all_tools_have_data_classification(svc: McpToolRegistryService) -> None:
+    valid = {"PUBLIC", "EU_ONLY", "LOCAL_ONLY", "SYNTHETIC_ALLOWED", "NEVER"}
+    for tool in svc.list_tools():
+        dc = tool.get("data_classification")
+        assert dc in valid, f"{tool['tool_id']}: invalid data_classification {dc!r}"
+
+
 def test_human_approval_tools_are_high_risk(svc: McpToolRegistryService) -> None:
     for tool in svc.list_tools():
         if tool.get("human_approval_required"):

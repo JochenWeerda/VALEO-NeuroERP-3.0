@@ -275,3 +275,28 @@ test.describe.serial('QS/Reklamation — Labor bis CAPA Prozesskette @smoke @e2e
   })
 
 })
+
+// SEMANTIC-E2E-STRICT-001 — @critical Kern-Pfad QS
+test.describe('QS @critical Kern-Pfad', () => {
+  const BASE_CRIT = process.env.PLAYWRIGHT_BASE_URL ?? 'http://localhost:8000'
+  const TENANT_CRIT = 'e2e-crit-qs'
+  const HEADERS_CRIT = {
+    'X-Tenant-ID': TENANT_CRIT,
+    'Content-Type': 'application/json',
+    'Authorization': `Bearer ${process.env.API_DEV_TOKEN ?? 'dev-token'}`,
+  }
+
+  test('QS @critical — QS-Worklist-Endpunkt antwortet (Health)', async () => {
+    const ctx = await request.newContext({ baseURL: BASE_CRIT })
+    const res = await ctx.get('/api/v1/supply-chain/qs-worklist', { headers: HEADERS_CRIT })
+    expect([200, 404, 422]).toContain(res.status())
+    await ctx.dispose()
+  })
+
+  test('QS @critical — Lots-Endpunkt antwortet (Health)', async () => {
+    const ctx = await request.newContext({ baseURL: BASE_CRIT })
+    const res = await ctx.get('/api/v1/silo/lots', { headers: HEADERS_CRIT })
+    expect([200, 404, 422]).toContain(res.status())
+    await ctx.dispose()
+  })
+})

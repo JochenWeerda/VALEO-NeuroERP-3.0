@@ -12,24 +12,218 @@ version: 3.0.0
 
 > Automatisch generiert aus `config/mcp_erp_tools.yaml` via `python scripts/generate_mcp_tool_reference.py`. **Nicht manuell bearbeiten.**
 
-Registry `MCP-ERP-TOOLS-001` (Schema 1.0) — 12 Tools in 6 Domaenen.
+Registry `MCP-ERP-TOOLS-001` (Schema 1.0) — 18 Tools in 10 Domaenen.
 
 ## Uebersicht
 
 | Tool | Domaene | Scope | Idempotent | Risiko | Human-Approval |
 |---|---|---|---|---|---|
+| `agent.proposal.list` | agent | `agent:read` | ja | niedrig | nein |
+| `agrar.contract.get` | agrar | `agrar:read` | ja | niedrig | nein |
+| `agrar.weighing_ticket.list` | agrar | `agrar:read` | ja | niedrig | nein |
 | `compliance.gate.status` | compliance | `compliance:read` | ja | niedrig | nein |
 | `crm.contact.log` | crm | `crm:write` | nein | mittel | nein |
 | `crm.customer.search` | crm | `crm:read` | ja | niedrig | nein |
 | `crm.customer.summary360` | crm | `crm:read` | ja | niedrig | nein |
 | `dms.document.search` | nachweisraum | `nachweisraum:read` | ja | niedrig | nein |
 | `dms.gobd.export_status` | nachweisraum | `nachweisraum:read` | ja | niedrig | nein |
+| `einkauf.bestellung.list` | einkauf | `einkauf:read` | ja | niedrig | nein |
 | `fibu.dunning.status` | finance | `finance:read` | ja | niedrig | nein |
 | `fibu.open_items.list` | finance | `finance:read` | ja | niedrig | nein |
+| `lager.bestand.get` | lager | `lager:read` | ja | niedrig | nein |
+| `lager.inventur.status` | lager | `lager:read` | ja | niedrig | nein |
 | `sales.invoice.propose` | sales | `sales:write` | nein | hoch | ja |
 | `sales.order.status` | sales | `sales:read` | ja | niedrig | nein |
 | `wms.cell.status` | inventory | `inventory:read` | ja | niedrig | nein |
 | `wms.lot.trace` | inventory | `inventory:read` | ja | niedrig | nein |
+
+## Domaene: agent
+
+### `agent.proposal.list` — Agent-Proposals auflisten
+
+Gibt ausstehende und abgeschlossene Agent-Proposals zurück. Nur für Supervisor-Rolle.
+
+- **Scope:** `agent:read`
+- **Idempotent:** ja
+- **Risikoklasse:** niedrig
+- **Audit:** read
+- **Human-Approval erforderlich:** nein
+- **Endpoint:** `GET /api/v1/agent/proposals`
+
+**Eingabe-Schema:**
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "status": {
+      "type": "string",
+      "nullable": true,
+      "enum": [
+        "pending",
+        "approved",
+        "rejected",
+        "expired"
+      ]
+    },
+    "limit": {
+      "type": "integer",
+      "default": 20
+    }
+  },
+  "required": []
+}
+```
+
+**Ausgabe-Schema:**
+
+```json
+{
+  "type": "array",
+  "items": {
+    "type": "object",
+    "properties": {
+      "proposal_id": {
+        "type": "string"
+      },
+      "action_type": {
+        "type": "string"
+      },
+      "approval_status": {
+        "type": "string"
+      },
+      "created_at": {
+        "type": "string"
+      }
+    }
+  }
+}
+```
+
+## Domaene: agrar
+
+### `agrar.contract.get` — Agrar-Kontrakt abrufen
+
+Gibt Details zu einem Agrar-Kontrakt zurück (Menge, Preis, Status).
+
+- **Scope:** `agrar:read`
+- **Idempotent:** ja
+- **Risikoklasse:** niedrig
+- **Audit:** read
+- **Human-Approval erforderlich:** nein
+- **Endpoint:** `GET /api/v1/agrar/contracts/{kontrakt_id}`
+
+**Eingabe-Schema:**
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "kontrakt_id": {
+      "type": "string"
+    },
+    "tenant_id": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "kontrakt_id"
+  ]
+}
+```
+
+**Ausgabe-Schema:**
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "kontrakt_id": {
+      "type": "string"
+    },
+    "ware": {
+      "type": "string"
+    },
+    "menge_t": {
+      "type": "number"
+    },
+    "preis_eur": {
+      "type": "number"
+    },
+    "status": {
+      "type": "string"
+    }
+  }
+}
+```
+
+### `agrar.weighing_ticket.list` — Wiegescheine auflisten
+
+Listet Wiegescheine für eine Partie oder einen Zeitraum.
+
+- **Scope:** `agrar:read`
+- **Idempotent:** ja
+- **Risikoklasse:** niedrig
+- **Audit:** read
+- **Human-Approval erforderlich:** nein
+- **Endpoint:** `GET /api/v1/agrar/weighing-tickets`
+
+**Eingabe-Schema:**
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "partie_id": {
+      "type": "string",
+      "nullable": true
+    },
+    "von": {
+      "type": "string",
+      "format": "date",
+      "nullable": true
+    },
+    "bis": {
+      "type": "string",
+      "format": "date",
+      "nullable": true
+    },
+    "limit": {
+      "type": "integer",
+      "default": 50
+    }
+  },
+  "required": []
+}
+```
+
+**Ausgabe-Schema:**
+
+```json
+{
+  "type": "array",
+  "items": {
+    "type": "object",
+    "properties": {
+      "ticket_id": {
+        "type": "string"
+      },
+      "partie_id": {
+        "type": "string"
+      },
+      "brutto_kg": {
+        "type": "number"
+      },
+      "netto_kg": {
+        "type": "number"
+      },
+      "erstellt_am": {
+        "type": "string"
+      }
+    }
+  }
+}
+```
 
 ## Domaene: compliance
 
@@ -268,6 +462,71 @@ Liefert 360-Grad-Zusammenfassung: offene Auftraege, letzte Kontakte, OP-Saldo, S
 }
 ```
 
+## Domaene: einkauf
+
+### `einkauf.bestellung.list` — Offene Bestellungen auflisten
+
+Listet offene Bestellungen mit Status und Liefertermin.
+
+- **Scope:** `einkauf:read`
+- **Idempotent:** ja
+- **Risikoklasse:** niedrig
+- **Audit:** read
+- **Human-Approval erforderlich:** nein
+- **Endpoint:** `GET /api/v1/einkauf/bestellungen`
+
+**Eingabe-Schema:**
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "status": {
+      "type": "string",
+      "nullable": true,
+      "enum": [
+        "offen",
+        "teilgeliefert",
+        "abgeschlossen"
+      ]
+    },
+    "limit": {
+      "type": "integer",
+      "default": 50
+    }
+  },
+  "required": []
+}
+```
+
+**Ausgabe-Schema:**
+
+```json
+{
+  "type": "array",
+  "items": {
+    "type": "object",
+    "properties": {
+      "bestellung_id": {
+        "type": "string"
+      },
+      "lieferant": {
+        "type": "string"
+      },
+      "status": {
+        "type": "string"
+      },
+      "liefertermin": {
+        "type": "string"
+      },
+      "wert_eur": {
+        "type": "number"
+      }
+    }
+  }
+}
+```
+
 ## Domaene: finance
 
 ### `fibu.dunning.status` — Mahnstatus abfragen
@@ -497,6 +756,110 @@ Gibt Herkunft, Silozelle, QS-Status und Bewegungshistorie eines Lots zurueck.
     },
     "bewegungen": {
       "type": "array"
+    }
+  }
+}
+```
+
+## Domaene: lager
+
+### `lager.bestand.get` — Lagerbestand abfragen
+
+Gibt aktuellen Lagerbestand für ein Produkt / Lager zurück.
+
+- **Scope:** `lager:read`
+- **Idempotent:** ja
+- **Risikoklasse:** niedrig
+- **Audit:** read
+- **Human-Approval erforderlich:** nein
+- **Endpoint:** `GET /api/v1/lager/bestand`
+
+**Eingabe-Schema:**
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "artikel_id": {
+      "type": "string"
+    },
+    "lager_id": {
+      "type": "string",
+      "nullable": true
+    }
+  },
+  "required": [
+    "artikel_id"
+  ]
+}
+```
+
+**Ausgabe-Schema:**
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "artikel_id": {
+      "type": "string"
+    },
+    "menge": {
+      "type": "number"
+    },
+    "einheit": {
+      "type": "string"
+    },
+    "reserviert": {
+      "type": "number"
+    },
+    "verfuegbar": {
+      "type": "number"
+    }
+  }
+}
+```
+
+### `lager.inventur.status` — Inventurstatus abfragen
+
+Gibt offene Inventur-Aufträge und Zähldifferenzen zurück.
+
+- **Scope:** `lager:read`
+- **Idempotent:** ja
+- **Risikoklasse:** niedrig
+- **Audit:** read
+- **Human-Approval erforderlich:** nein
+- **Endpoint:** `GET /api/v1/lager/inventuren/status`
+
+**Eingabe-Schema:**
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "lager_id": {
+      "type": "string",
+      "nullable": true
+    }
+  },
+  "required": []
+}
+```
+
+**Ausgabe-Schema:**
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "offene_inventuren": {
+      "type": "integer"
+    },
+    "differenzen_eur": {
+      "type": "number"
+    },
+    "letzter_abschluss": {
+      "type": "string",
+      "nullable": true
     }
   }
 }

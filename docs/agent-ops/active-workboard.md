@@ -4,7 +4,7 @@
 
 **Von:** Codex
 **Owner:** Codex
-**Stand:** reserviert 2026-06-26 - Repo-weite Doku-Konsolidierung fuer aktive `docs/**` ohne Archive: erledigte "folgt/offen/geplant"-Aussagen gegen Code/Slices pruefen, Dubletten/Altbefunde konsolidieren, offene Punkte in eine belastbare Restliste ueberfuehren.
+**Stand:** abgeschlossen 2026-06-26 - Konsolidierungsbericht erstellt, Open-Gaps mit aktuellem Doku-Status versehen, wichtigste historische Gap-/Roadmap-/Heuristikdateien markiert. `doc_drift_report.py`: 0 Drift-Items; Docs-Governance und Staleness gruen.
 **Ziel:** Aktive Dokumentation wieder als verlaessliche Produkt- und Entwicklungsquelle nutzbar machen.
 **Dateibesitz:** `docs/project-context/open-gaps-and-known-issues.md`, `docs/project-context/documentation-consolidation-2026-06-26.md`, ausgewaehlte aktive `docs/**/*.md` mit belegbarer Statuskorrektur, `docs/agent-ops/slices/DOC-CONSOLIDATION-010.yaml`. Keine Edits an `docs/_internal/archive/**`.
 
@@ -4692,8 +4692,8 @@ Parallele Fix-Slices aus Cards-Inventar-Audit (`CARD-AUDIT-001`). Claim-Protokol
 ## SEMANTIC-E2E-STRICT-001 — Playwright @critical Tags
 
 **Von:** Claude Code · **Owner:** Claude Code
-**Stand:** abgeschlossen 2026-06-26 — `@critical` in O2C + WMS/Silo Specs; CI-Workflow `e2e-critical.yml` (blockierend auf main/develop); Playwright vom Repo-Root (Fix „No tests found“).
-**Dateibesitz:** `.github/workflows/e2e-critical.yml`, `playwright-tests/specs/e2e-matrix/o2c-semantic-chain.spec.ts`, `wms-silo-semantic-chain.spec.ts`.
+**Stand:** abgeschlossen 2026-06-26 — `@critical` in allen 6 E2E-Ketten (O2C, WMS, P2P, FIBU, POS, QS); CI-Workflow `e2e-critical.yml` (12 Health-Tests, Repo-Root).
+**Dateibesitz:** `.github/workflows/e2e-critical.yml`, `playwright-tests/specs/e2e-matrix/*-semantic-chain.spec.ts`.
 
 ## TRACEABILITY-MATRIX-001 — Slice↔Test↔Doku
 
@@ -4710,8 +4710,8 @@ Parallele Fix-Slices aus Cards-Inventar-Audit (`CARD-AUDIT-001`). Claim-Protokol
 ## MCP-ERP-TOOLS-002 — MCP-Tools Erweiterung
 
 **Von:** Claude Code · **Owner:** Claude Code
-**Stand:** abgeschlossen 2026-06-26 — `mcp_erp_tools.yaml` um Domain-Tools erweitert (+158 Zeilen); Contract-Tests + Classification-Enforcement folgen in 002b.
-**Dateibesitz:** `config/mcp_erp_tools.yaml`.
+**Stand:** abgeschlossen 2026-06-26 — 18 Tools mit `data_classification: LOCAL_ONLY`; Registry-Validation erzwingt Policy-Stufen; 11 Contract-Tests grün; `check_all_doc_generators.sh` bindet MCP-Check ein.
+**Dateibesitz:** `config/mcp_erp_tools.yaml`, `app/services/mcp_tool_registry_service.py`, `tests/test_mcp_tool_registry.py`, `scripts/check_all_doc_generators.sh`.
 
 ## DOC-RELEASE-NOTES-001 — Release-Notes-Generator
 

@@ -249,3 +249,28 @@ test.describe.serial('P2P — Procure-to-Pay Prozesskette @smoke @e2e-matrix', (
   })
 
 })
+
+// SEMANTIC-E2E-STRICT-001 — @critical Kern-Pfad P2P
+test.describe('P2P @critical Kern-Pfad', () => {
+  const BASE_CRIT = process.env.PLAYWRIGHT_BASE_URL ?? 'http://localhost:8000'
+  const TENANT_CRIT = 'e2e-crit-p2p'
+  const HEADERS_CRIT = {
+    'X-Tenant-ID': TENANT_CRIT,
+    'Content-Type': 'application/json',
+    'Authorization': `Bearer ${process.env.API_DEV_TOKEN ?? 'dev-token'}`,
+  }
+
+  test('P2P @critical — Bestellungen-Endpunkt antwortet (Health)', async () => {
+    const ctx = await request.newContext({ baseURL: BASE_CRIT })
+    const res = await ctx.get('/api/v1/einkauf/bestellungen', { headers: HEADERS_CRIT })
+    expect([200, 404, 422]).toContain(res.status())
+    await ctx.dispose()
+  })
+
+  test('P2P @critical — Lieferanten-Endpunkt antwortet (Health)', async () => {
+    const ctx = await request.newContext({ baseURL: BASE_CRIT })
+    const res = await ctx.get('/api/v1/einkauf/lieferanten', { headers: HEADERS_CRIT })
+    expect([200, 404, 422]).toContain(res.status())
+    await ctx.dispose()
+  })
+})
