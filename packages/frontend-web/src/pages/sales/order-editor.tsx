@@ -1162,7 +1162,16 @@ export default function SalesOrderEditorPage(): JSX.Element {
         push(`Rechnung ${docNumber} erstellt`)
         const targetId = res.target_doc_id
         if (targetId && typeof navigate === 'function') {
-          navigate(`/verkauf/rechnungen/${targetId}`, { replace: false })
+          navigate(buildSalesHandoverPath(`/verkauf/rechnungen/${targetId}`, {
+            customerId: state.customer?.id,
+            customerNumber: state.customer?.customerNumber || state.customer?.debitorAccount,
+            customerName: state.customer?.name,
+            entryMode: salesHandover.entryMode ?? 'order-invoice-conversion',
+            sourceOfferId: salesHandover.sourceOfferId,
+            sourceOrderId: orderId,
+            invoiceId: targetId,
+            invoiceNumber: docNumber,
+          }), { replace: false })
         }
       } else {
         push('Rechnung erstellt')

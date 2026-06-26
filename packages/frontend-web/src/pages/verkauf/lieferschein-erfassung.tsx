@@ -80,6 +80,7 @@ type DeliveryNoteResponse = {
   is_printed: boolean
   is_delivered: boolean
   invoice_number: string | null
+  sales_order_id: string | null
   totals: { netto: number; mwst: number; brutto: number } | null
   created_at: string
   updated_at: string
@@ -491,23 +492,34 @@ export default function LieferscheinErfassungPage(): JSX.Element {
           id: string
           order_number: string
           customer_id: string | null
-          items: Array<{ article_number: string; description: string; quantity: number; unit_price: number; discount_percent: number }>
+          items: Array<{
+            article_number: string
+            description: string | null
+            quantity: number
+            unit_price: number
+            discount_percent: number
+            line_total?: number
+          }>
         }>(`/api/v1/sales/orders/${sourceOrderId}`)
         const positionen: Position[] = order.items.map((item, index) => {
-          const nettoPreis = item.unit_price * (1 - item.discount_percent / 100)
+          const unitPrice = Number(item.unit_price ?? 0)
+          const discountPercent = Number(item.discount_percent ?? 0)
+          const quantity = Number(item.quantity ?? 0)
+          const nettoPreis = unitPrice * (1 - discountPercent / 100)
+          const nettoBetrag = Number(item.line_total ?? nettoPreis * quantity)
           return {
             posNr: (index + 1) * 10,
-            artikelNr: item.article_number,
+            artikelNr: item.article_number || '',
             artikelId: null,
-            bezeichnung: item.description,
+            bezeichnung: item.description || item.article_number || '',
             bezeichnung2: '',
-            menge: item.quantity,
+            menge: quantity,
             einheit: 'Stk',
-            listenpreis: item.unit_price,
-            rabatt: item.discount_percent,
+            listenpreis: unitPrice,
+            rabatt: discountPercent,
             art: '',
             nettoPreis,
-            nettoBetrag: nettoPreis * item.quantity,
+            nettoBetrag,
             niederlassung: '',
             lagerhalle: '',
             lagerfach: '',
@@ -1029,6 +1041,7 @@ export default function LieferscheinErfassungPage(): JSX.Element {
         is_self_pickup: state.selbstabholung,
         is_early_payment: state.fruehbezugRechnung,
         reference_invoice_number: state.reNrBezug || null,
+        sales_order_id: sourceOrderId || null,
         status: 'draft',
         is_printed: state.statusGedruckt,
         is_delivered: state.statusAusgeliefert,

@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
-import { useNavigate, useSearchParams } from '@/app/routing/typed-router'
+import { useNavigate, useParams, useSearchParams } from '@/app/routing/typed-router'
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { useToast } from "@/components/ui/toast-provider"
@@ -87,9 +87,10 @@ export default function SalesInvoiceEditorPage(): JSX.Element {
   const { t } = useTranslation()
   const { push } = useToast()
   const navigate = useNavigate()
+  const { id: pathInvoiceId } = useParams<{ id?: string }>()
   const [searchParams] = useSearchParams()
   const salesHandover = useMemo(() => parseSalesHandover(searchParams), [searchParams])
-  const editId = salesHandover.invoiceId
+  const editId = salesHandover.invoiceId ?? pathInvoiceId
   const entityType = 'invoice'
   const entityTypeLabel = getEntityTypeLabel(t, entityType, 'Rechnung')
   const [docId, setDocId] = useState<string | null>(editId ?? null)

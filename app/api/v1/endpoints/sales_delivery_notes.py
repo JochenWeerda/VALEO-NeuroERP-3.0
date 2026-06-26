@@ -132,6 +132,7 @@ class DeliveryNoteUpdate(BaseModel):
     is_printed: Optional[bool] = None
     is_delivered: Optional[bool] = None
     invoice_number: Optional[str] = None
+    sales_order_id: Optional[str] = None
     positionen: Optional[list[DeliveryNotePositionCreate]] = None
 
 
