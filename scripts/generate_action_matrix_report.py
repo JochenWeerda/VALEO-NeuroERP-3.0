@@ -132,7 +132,7 @@ def build_markdown(report: dict) -> str:
         lines += [
             f"## {m['chain_name']} (`{m['chain_id']}`)",
             "",
-            f"> {m.get('description', '')}  ",
+            f"> {m.get('description', '')}",
             f"> Priorität: **{m.get('priority', '?').upper()}**",
             "",
             "| ID | Aktion | Route | Status | E2E-Tag |",
