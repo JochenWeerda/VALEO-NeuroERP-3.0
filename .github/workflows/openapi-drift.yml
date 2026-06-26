@@ -1,0 +1,101 @@
+name: OpenAPI Drift — Auto-Update (DOC-OPENAPI-CI-001)
+
+# Läuft nach jedem Push auf main/develop wenn App-Code geändert wurde.
+# Generiert openapi.json neu und committet bei Drift automatisch.
+# PRs werden durch den --check-Step in quality-gate.yml geblockt.
+
+on:
+  push:
+    branches: [main, develop]
+    paths:
+      - "app/**"
+      - "requirements.txt"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: openapi-drift-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  PYTHON_VERSION: "3.11"
+
+jobs:
+  openapi-refresh:
+    name: OpenAPI Spec aktualisieren
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_DB: valeo_test
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d valeo_test"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 10
+
+    env:
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/valeo_test
+      API_DEV_TOKEN: ci-token
+      VALEO_API_VERSION: "3.0.0"
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # Fetch mit Token damit der Auto-Commit gepusht werden kann
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
+
+      - name: Backend-Dependencies installieren
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: DB-Schema migrieren
+        run: python scripts/init_db.py
+
+      - name: OpenAPI-Spec prüfen
+        id: check
+        run: |
+          if python scripts/generate_openapi.py --check; then
+            echo "drift=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "drift=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: OpenAPI-Spec neu generieren (bei Drift)
+        if: steps.check.outputs.drift == 'true'
+        run: python scripts/generate_openapi.py
+
+      - name: Drift-Diff anzeigen
+        if: steps.check.outputs.drift == 'true'
+        run: |
+          git diff --stat docs/schnittstellen/openapi.json || true
+
+      - name: Auto-Commit aktualisierte Spec
+        if: steps.check.outputs.drift == 'true'
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add docs/schnittstellen/openapi.json
+          git commit -m "chore(docs): OpenAPI-Spec automatisch aktualisiert [DOC-OPENAPI-CI-001]
+
+          Ausgelöst durch API-Änderung in ${{ github.sha }}.
+          Generiert via scripts/generate_openapi.py."
+          git push
+
+      - name: Kein Drift — Spec ist aktuell
+        if: steps.check.outputs.drift == 'false'
+        run: echo "openapi.json ist aktuell — kein Commit nötig."

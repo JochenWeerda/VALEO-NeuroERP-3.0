@@ -4649,3 +4649,11 @@ Parallele Fix-Slices aus Cards-Inventar-Audit (`CARD-AUDIT-001`). Claim-Protokol
 **Ziel:** P2.3: Verbindliche maschinenlesbare Policy welche Datenkategorien externen KI-Modellen zugänglich sind.
 **Dateibesitz:** `config/ai_data_classification.yaml`, `scripts/validate_data_classification.py`, `tests/test_data_classification.py`, `docs/architecture/ai-data-classification.md`, `mkdocs.yml`.
 **Externe Gates:** DSGVO-Review durch Datenschutzbeauftragten; juristisches Review Agrar-Kontrakte.
+
+## DOC-OPENAPI-CI-001 — OpenAPI-Drift-Gate in CI
+
+**Von:** Claude Code
+**Owner:** Claude Code
+**Stand:** abgeschlossen 2026-06-26 — `--check`-Step in quality-gate.yml (blockiert PRs bei Drift); `openapi-drift.yml` (Auto-Commit auf main bei API-Änderungen).
+**Ziel:** `generate_openapi.py --check` als blockierendes CI-Gate; bei Drift auto-commit durch CI statt manuellem Schritt.
+**Dateibesitz:** `.github/workflows/openapi-drift.yml`, `docs/agent-ops/slices/DOC-OPENAPI-CI-001.yaml`
