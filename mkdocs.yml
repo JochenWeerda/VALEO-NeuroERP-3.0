@@ -117,6 +117,7 @@ exclude_docs: |
   !/architecture/fundamental-architecture-principles.md
   !/architecture/process-kernel/STATUS.md
   !/architecture/process-kernel/DELIVERY-MAP.md
+  !/architecture/process-map.md
 
 nav:
   - Start: index.md
@@ -151,6 +152,7 @@ nav:
           - Architekturprinzipien: architecture/fundamental-architecture-principles.md
           - Process Kernel (Lieferstand): architecture/process-kernel/STATUS.md
           - Lieferkarte: architecture/process-kernel/DELIVERY-MAP.md
+          - ERP Prozesskarte: architecture/process-map.md
       # adr-nav:begin (generated — scripts/generate_adr_nav.py; do not edit manually)
       - ADRs:
           - Index: adr/README.md
