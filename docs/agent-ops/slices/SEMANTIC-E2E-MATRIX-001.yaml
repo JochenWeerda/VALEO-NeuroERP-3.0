@@ -1,27 +1,55 @@
 slice_id: SEMANTIC-E2E-MATRIX-001
-title: "Semantische E2E Action-Matrix — Kritische ERP-UI-Flows (O2C/P2P/WMS/FIBU/CRM/POS/Compliance/HRM)"
+title: "Semantische Prozessketten-Tests (O2C, P2P, FiBu, WMS/Agrar) — Business-Outcome-Validierung"
 owner: Claude Sonnet 4.6
 status: completed
+updated: 2026-06-26
+coordination: >-
+  P0.2 aus YouTube-Gap-Analyse 2026-06-23. Unabhängig von laufenden Cursor/Codex-Arbeiten.
+  Keine DB-Session erforderlich; rein unit-basiert.
 goal: >-
-  Playwright-Spec-Datei, die nicht nur 404-freie Navigation prüft, sondern semantisch
-  verifiziert, dass kritische Seiten korrekt laden (main-Element, Statusfilter, KPI-Bar).
-  Basis-Action-Matrix für alle 9 Domains.
+  Semantische Tests für 4 kritische Prozessketten die Business-Outcomes (Belegketten-
+  verknüpfung, Salden-Invarianten, Status-Übergänge, GoBD-Felder) ohne reale DB prüfen.
+  Differenz zu bestehenden API-Tests: KORREKTHEIT der Prozesskette (richtiger Beleg
+  verknüpft? OP auf 0 ausgeziffert? 3-Wege-Match-Toleranz eingehalten?).
 file_ownership:
+  - app/services/semantic_e2e_chain_service.py
+  - tests/test_semantic_e2e_matrix_001.py
   - docs/agent-ops/slices/SEMANTIC-E2E-MATRIX-001.yaml
-  - playwright-tests/specs/e2e-matrix/semantic-action-matrix.spec.ts
-acceptance_criteria:
-  - Playwright-Spec mit @smoke-Tags für O2C, P2P, WMS, FIBU, CRM, Kontrakt, POS, Compliance, HRM
-  - Semantische Checks (nicht nur URL, auch Element-Sichtbarkeit)
-  - Externe Gates (TSE, ELSTER, DATEV) explizit skipped
-ai_harness:
-  fachlicher_vertrag: >-
-    Jede Domain-Seite prüft: kein 404 + main/role=main sichtbar.
-    Kritische Seiten prüfen zusätzlich spezifische UI-Elemente.
-  architektur_vertrag: Playwright-Spec unter playwright-tests/specs/e2e-matrix/.
-  daten_vertrag: Keine DB-Schreiboperationen; nur GET-Aufrufe.
-  test_vertrag: @smoke-Tag für alle Tests; PLAYWRIGHT_BASE_URL konfigurierbar.
-  security_vertrag: dev-token für lokale Tests; produktiv nur Staging-Umgebung.
-  betriebs_vertrag: Tests laufen gegen gestarteten Frontend-Server (npm run dev).
-  dokumentations_vertrag: Workboard-Eintrag + Slice-YAML
+acceptance:
+  - "pytest -m unit tests/test_semantic_e2e_matrix_001.py → alle 41 Tests grün."
+  - "O2CChain: 10 Tests (happy path + Negativ-Szenarien)."
+  - "P2PChain: 8 Tests inkl. Preisabweichungs-Toleranz (2 %-Grenze)."
+  - "FiBuChain: 11 Tests inkl. optionalem Periodenabschluss-Schritt."
+  - "WMSAgrChain: 9 Tests inkl. Silo-Überfüllungs-Check und QS-Status-Whitelist."
+  - "InvariantViolationsReport: 3 Cross-Chain-Tests."
+tests:
+  - pytest -m unit tests/test_semantic_e2e_matrix_001.py -v
+completion_evidence:
+  - 2026-06-26 app/services/semantic_e2e_chain_service.py erstellt (4 Chain-Klassen)
+  - 2026-06-26 tests/test_semantic_e2e_matrix_001.py erstellt (41 Tests in 5 Klassen)
+covered_chains:
+  - id: o2c-crm360
+    steps: [kunde, angebot, auftrag, lieferschein, rechnung, zahlungseingang]
+    key_invariants:
+      - sales_order_id auf LS muss mit Auftrag-ID übereinstimmen
+      - GoBD-Rechnungsnummer darf nicht None sein
+      - OP muss auf "ausgeziffert" enden
+  - id: p2p-procure-to-pay
+    steps: [lieferant, bestellung, wareneingang, drei_wege_match, eingangsrechnung]
+    key_invariants:
+      - Preisabweichung im 3-Wege-Match max. 2 %
+      - Kreditoren-OP muss bei Eingangsrechnung existieren
+  - id: fibu-op-to-datev
+    steps: [offener_posten, zahlung, auszifferung, (periodenabschluss), datev_export]
+    key_invariants:
+      - Ausgezifferter OP-Saldo exakt 0
+      - DATEV-Export entry_count > 0 und file_path gesetzt
+  - id: wms-agr-annahme-trace
+    steps: [annahme, waage, lot, silozelle, qs_freigabe, traceability]
+    key_invariants:
+      - Silozelle darf capacity_kg nicht überschreiten
+      - QS-Status muss in [freigegeben, gesperrt, bedingt]
+      - Trace-Record verknüpft Lot mit Annahme und Silozelle
 external_gates:
-  - Frontend-Server muss laufen (npm run dev)
+  - Fachliche Abnahme der Invarianzen durch Leiter Rechnungswesen (DATEV/GoBD-Teil).
+  - WMS-QS-Status-Whitelist mit Qualitätssicherung abstimmen.
