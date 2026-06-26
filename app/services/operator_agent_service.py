@@ -1,12 +1,16 @@
-"""OPERATOR-AGENT-001 — Read-Only/Proposal-Modus fuer ERP-Operator-Agent.
+"""OPERATOR-AGENT-001 — ERP-Operator-Agent: Proposal + kontrollierte LOW-Schreibaktionen.
 
-Kein autonomes Schreiben. Agenten-Aktionen:
+Agenten-Aktionen:
 - Kontext lesen (OP-Liste, Mahnstatus, QS-Sperren, Gate-Status)
 - Handlung vorschlagen (Mahnvorschlag, Rechnungsvorschlag, QS-Freigabevorschlag)
 - Human-Approval-Request erzeugen und protokollieren
+- Genehmigte LOW-Risiko-Aktionen direkt ausfuehren (execute_approved_action)
 - Audit-Event schreiben
 
-Jede Aktion hat einen definierten Risiko-Level und einen Human-Approval-Schwellwert.
+Risiko-Logik:
+  LOW   → nach Approval direkt ausfuehrbar (kein zweiter Human-Step noetig)
+  MEDIUM → Approval + manueller Ausfuehrungs-Trigger
+  HIGH  → Approval zwingend, Ausfuehrung nur durch menschliche Hand
 """
 
 from __future__ import annotations
@@ -25,6 +29,10 @@ class AgentActionType(str, Enum):
     OFFENE_GATES_ABFRAGE = "offene_gates_abfrage"
     ANGEBOTSNACHFASSUNG = "angebotsnachfassung"
     DMS_PAKET_VORSCHLAG = "dms_paket_vorschlag"
+    # LOW-Risiko-Schreibaktionen (nach Approval direkt ausfuehrbar):
+    ANGEBOT_NACHFASSEN_EXECUTE = "angebot_nachfassen_execute"
+    DMS_PAKET_SENDEN_EXECUTE = "dms_paket_senden_execute"
+    GATE_STATUS_AKTUALISIEREN_EXECUTE = "gate_status_aktualisieren_execute"
 
 
 class AgentRiskLevel(str, Enum):
@@ -47,12 +55,27 @@ _RISK_BY_ACTION: dict[AgentActionType, AgentRiskLevel] = {
     AgentActionType.OFFENE_GATES_ABFRAGE: AgentRiskLevel.LOW,
     AgentActionType.ANGEBOTSNACHFASSUNG: AgentRiskLevel.MEDIUM,
     AgentActionType.DMS_PAKET_VORSCHLAG: AgentRiskLevel.MEDIUM,
+    AgentActionType.ANGEBOT_NACHFASSEN_EXECUTE: AgentRiskLevel.LOW,
+    AgentActionType.DMS_PAKET_SENDEN_EXECUTE: AgentRiskLevel.LOW,
+    AgentActionType.GATE_STATUS_AKTUALISIEREN_EXECUTE: AgentRiskLevel.LOW,
 }
 
 _HUMAN_APPROVAL_REQUIRED: set[AgentActionType] = {
     AgentActionType.MAHNUNG_VORSCHLAG,
     AgentActionType.RECHNUNG_VORSCHLAG,
     AgentActionType.QS_FREIGABE_VORSCHLAG,
+    AgentActionType.ANGEBOTSNACHFASSUNG,
+    AgentActionType.DMS_PAKET_VORSCHLAG,
+    AgentActionType.ANGEBOT_NACHFASSEN_EXECUTE,
+    AgentActionType.DMS_PAKET_SENDEN_EXECUTE,
+    AgentActionType.GATE_STATUS_AKTUALISIEREN_EXECUTE,
+}
+
+# LOW-Risiko-Aktionen duerfen nach Approval direkt ausgefuehrt werden.
+_DIRECTLY_EXECUTABLE: set[AgentActionType] = {
+    AgentActionType.ANGEBOT_NACHFASSEN_EXECUTE,
+    AgentActionType.DMS_PAKET_SENDEN_EXECUTE,
+    AgentActionType.GATE_STATUS_AKTUALISIEREN_EXECUTE,
 }
 
 
@@ -259,6 +282,76 @@ class OperatorAgentService:
             "occurred_at": _utcnow().isoformat(),
         })
         return proposal
+
+    def execute_approved_action(
+        self,
+        *,
+        tenant_id: str,
+        proposal_id: str,
+        executed_by: str,
+        roles: set[str],
+    ) -> dict[str, Any]:
+        """Fuehrt eine genehmigte LOW-Risiko-Aktion direkt aus.
+
+        Nur erlaubt wenn:
+        - Proposal-Status == APPROVED
+        - action_type in _DIRECTLY_EXECUTABLE (LOW-Risiko)
+        - Rolle agent:execute vorhanden
+
+        Gibt Ausfuehrungs-Protokoll zurueck; schreibt Audit-Event.
+        """
+        self._require_role(roles, "agent:execute")
+        proposal = self.get_proposal(tenant_id=tenant_id, proposal_id=proposal_id)
+
+        if proposal.approval_status != ApprovalStatus.APPROVED:
+            raise ValueError(
+                f"Proposal muss APPROVED sein, ist aber {proposal.approval_status.value}"
+            )
+        if proposal.action_type not in _DIRECTLY_EXECUTABLE:
+            raise PermissionError(
+                f"Aktion '{proposal.action_type.value}' darf nicht direkt ausgefuehrt werden "
+                f"(Risiko: {proposal.risk_level.value}). Nur LOW-Risiko-Aktionen sind erlaubt."
+            )
+
+        result = self._execute_low_risk(proposal)
+        proposal.audit_events.append({
+            "event": "action_executed",
+            "executed_by": executed_by,
+            "result_summary": result.get("summary", ""),
+            "occurred_at": _utcnow().isoformat(),
+        })
+        return {
+            "proposal_id": proposal_id,
+            "action_type": proposal.action_type.value,
+            "executed_by": executed_by,
+            "executed_at": _utcnow().isoformat(),
+            "result": result,
+        }
+
+    def _execute_low_risk(self, proposal: AgentProposal) -> dict[str, Any]:
+        """Simulierte Ausfuehrung der LOW-Risiko-Aktionen."""
+        if proposal.action_type == AgentActionType.ANGEBOT_NACHFASSEN_EXECUTE:
+            return {
+                "summary": "Angebots-Nachfassmail in Ausgangsqueue eingestellt.",
+                "simulated": True,
+                "outbox_event": "crm.angebot.nachgefasst",
+                "proposal_id": proposal.proposal_id,
+            }
+        if proposal.action_type == AgentActionType.DMS_PAKET_SENDEN_EXECUTE:
+            return {
+                "summary": "DMS-Paket an Paperless-ngx uebermittelt (simuliert).",
+                "simulated": True,
+                "outbox_event": "dms.paket.gesendet",
+                "proposal_id": proposal.proposal_id,
+            }
+        if proposal.action_type == AgentActionType.GATE_STATUS_AKTUALISIEREN_EXECUTE:
+            return {
+                "summary": "Externer Gate-Status als 'abgenommen' markiert.",
+                "simulated": True,
+                "outbox_event": "gate.status.aktualisiert",
+                "proposal_id": proposal.proposal_id,
+            }
+        return {"summary": "Unbekannte Aktion.", "simulated": True}
 
     def summary(self, *, tenant_id: str) -> dict[str, Any]:
         proposals = self.list_proposals(tenant_id=tenant_id)

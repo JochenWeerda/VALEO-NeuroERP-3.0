@@ -164,6 +164,9 @@ CRITICAL_THRESHOLDS: dict[str, float] = {
 
     # ── PORTAL-INNENDIENST-001 (2026-06-25) ──────────────────────────────────
     "api/v1/endpoints/portal_innendienst.py": 0.43,
+
+    # ── OPERATOR-AGENT Execute-Erweiterung + Externe Gates (2026-06-26) ───────
+    "api/v1/endpoints/external_gates.py": 0.70,           # Gate-Dashboard Produktiv-API
 }
 
 

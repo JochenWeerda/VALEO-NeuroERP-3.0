@@ -2125,6 +2125,9 @@ api_router.include_router(external_mock_harness.router, tags=["dev", "mock"])
 from app.api.v1.endpoints import operator_agent  # noqa: E402
 api_router.include_router(operator_agent.router, tags=["agent", "operator"])
 
+from app.api.v1.endpoints import external_gates  # noqa: E402
+api_router.include_router(external_gates.router, tags=["external-gates"])
+
 # P2.1: Workflow-Prozesskarte
 from app.api.v1.endpoints import process_map  # noqa: E402
 api_router.include_router(process_map.router, tags=["process-map", "workflow"])
