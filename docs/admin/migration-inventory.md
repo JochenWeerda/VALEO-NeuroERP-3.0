@@ -249,6 +249,7 @@ Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Be
 | `merge_log_agri_heads_20260623` | Merge log_disposition and agri_silo_lot_link heads (DOM-INV-004 pre-step). |
 | `merge_sales_orders_and_consignment_20260215` | merge heads sales_orders_items_shipping and consignment_storage_fee_engine |
 | `merge_supply_production_readiness_20260610` | Merge supply-chain and production-readiness migration branches. |
+| `merge_warehouse_einkauf_20260626` | Merge Alembic heads: warehouse_schema_repair + merge_einkauf_log_agent. |
 | `merge_wave104_20260326` | Merge Wave 104 migrations with main head |
 | `mobile_event_queue_20260619` | MOB-SYNC-001: Mobile Offline-Sync Event-Queue |
 | `neuro_step_audit_einkauf_tenant_20260405` | neuro_step_audit_trace + einkauf_bestellungen.tenant_id |
@@ -295,6 +296,7 @@ Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Be
 | `supply_chain_events_20260610` | supply_chain_events — append-only Ketten-Ereignis-Log (DOM-SUPPLY-004.2) |
 | `tapi_calls_20260603` | TAPI/Telefonie — eingehende Anrufe für Click-to-Customer-Popup. |
 | `ustva_voranmeldungen_20260527` | UStVA Voranmeldungen Tabelle (§ 18 UStG ELSTER-Übertragung). |
+| `warehouse_schema_repair_20260626` | WAREHOUSE-REPAIR-001: domain_inventory.warehouses fehlende Spalten nachziehen. |
 | `warehouse_wms_structure_20260517` | WMS warehouse zones, bins, bin_stock, pick_lists and pick_list_lines |
 | `wave3_wf_trigger_log_20260618` | wave3: wf_trigger_log + bank_statements + bank_statement_lines + waagen_quittungen |
 | `wf_cockpit_persist_20260625` | WF-COCKPIT-PERSIST-001: Persistente Workflow-Cockpit-Tabellen. |

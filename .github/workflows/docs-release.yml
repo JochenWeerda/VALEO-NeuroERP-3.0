@@ -50,6 +50,9 @@ jobs:
             echo "version=${GITHUB_REF_NAME#v}" >> "$GITHUB_OUTPUT"
           fi
 
+      - name: Generate release notes (DOC-RELEASE-NOTES-001)
+        run: python scripts/generate_release_notes.py --version "${{ steps.ver.outputs.version }}"
+
       - name: Deploy versioned docs
         run: |
           mike deploy --push --update-aliases "${{ steps.ver.outputs.version }}" latest
