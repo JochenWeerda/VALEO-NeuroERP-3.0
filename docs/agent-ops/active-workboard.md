@@ -4503,6 +4503,12 @@ Archiv des vorherigen Boards:
 **Stand:** abgeschlossen 2026-06-26 — `scripts/generate_adr_nav.py` patcht 38 ADRs in `mkdocs.yml`; CI-Drift-Check in `docs.yml`; 4 Unit-Tests grün; `mkdocs build` grün.
 **Dateibesitz:** `scripts/generate_adr_nav.py`, `tests/test_generate_adr_nav.py`, `mkdocs.yml`, `.github/workflows/docs.yml`, `docs/agent-ops/slices/DOC-MIGRATION-009.yaml`.
 
+## AI-DOC-DRIFT-CI-001 — Drift-Report woechentlich in CI
+
+**Owner:** Cursor
+**Stand:** abgeschlossen 2026-06-26 — `doc_drift_report.py` nutzt alle Nav-Domain-Dateien + `route-inventory.gen.json`; Workflow `doc-drift-report.yml` (Montag, Artifact); 6 Unit-Tests grün; `.gitignore` für `site_check_*/`.
+**Dateibesitz:** `scripts/doc_drift_report.py`, `tests/test_doc_drift_report.py`, `.github/workflows/doc-drift-report.yml`, `docs/dokumentation/governance.md`, `docs/agent-ops/slices/AI-DOC-DRIFT-CI-001.yaml`.
+
 ---
 
 ## CARD-AUDIT-Follow-up (2026-06-26)
@@ -4602,3 +4608,11 @@ Parallele Fix-Slices aus Cards-Inventar-Audit (`CARD-AUDIT-001`). Claim-Protokol
 **Dateibesitz:** `.github/workflows/ai-engineering-metrics.yml`, `scripts/generate_metrics_page.py`, `docs/agent-ops/engineering-metrics.md`, `tests/test_generate_metrics_page.py`, `mkdocs.yml`.
 **Abnahmekriterien:** 15 Unit-Tests grün; Workflow syntaktisch korrekt; Seite hat Frontmatter; MkDocs-Nav enthält Eintrag.
 **Externes Gate:** Erster erfolgreicher Nightly-Lauf auf GitHub Actions.
+
+## WORKFLOW-PROCESS-MAP-001 — Visuelle ERP Prozesskarte (P2.1)
+
+**Von:** Claude Sonnet 4.6
+**Owner:** Claude Sonnet 4.6
+**Stand:** abgeschlossen 2026-06-26 — `docs/architecture/process-map.md` mit 6 Mermaid-Flussdiagrammen (O2C, P2P, FiBu, WMS/Agrar, POS/TSE, QS/Reklamation); Belege, NATS-Events, externe Gates und kritische Invarianten je Kette; MkDocs-Nav-Eintrag + Whitelist gesetzt.
+**Ziel:** P2.1 aus YouTube-Gap-Analyse: operativ nutzbare visuelle Prozesskarte ohne n8n-Abhängigkeit — direkt aus der ERP-Fachlogik abgeleitet.
+**Dateibesitz:** `docs/architecture/process-map.md`, `mkdocs.yml`, `docs/agent-ops/slices/WORKFLOW-PROCESS-MAP-001.yaml`.
