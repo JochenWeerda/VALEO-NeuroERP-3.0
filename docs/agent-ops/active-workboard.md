@@ -9,6 +9,13 @@
 **Dateibesitz:** `docs/benutzerhandbuch/**`, `mkdocs.yml`, `docs/agent-ops/slices/DOC-USER-MANUAL-002.yaml`, dieser Workboard-Abschnitt.
 **Abnahme:** Docs-Governance gruen; Staleness gruen; `mkdocs build` gruen. `mkdocs build --strict` bleibt durch bestehende Warnungen ausserhalb dieses Slice blockiert (ADR-/Architecture-Links und nicht navigierte Agent-Docs-Runbook-Seite), keine neuen Handbuch-Warnungen.
 
+## BULK-REPAIR-001 — Finance + Agrar + Sales Batch-Repair-Migration Wave 11
+
+**Von:** Claude Code · **Owner:** Claude Code · **Stand:** abgeschlossen 2026-06-26
+P1-Batch (Wave 11): Finance-Tabellen `dunning_rules`, `dunning_notices`, `payment_runs`, `payment_run_items`, `payment_returns`, `exchange_rates` (domain_erp) + `ernte_planung`, `agrar_maschinen` (domain_agrar) + `branches` (domain_shared) + `delivery_notes` (domain_sales) + `sales_order_items` + `shipping_method` (domain_crm) — alle aus Parallel-Branches, idempotent in Hauptkette gebracht.
+**Dateibesitz:** `alembic/versions/finance_agrar_sales_repair_20260626.py`, `docs/agent-ops/slices/BULK-REPAIR-001.yaml`
+**Neuer Alembic-Head:** `finance_agrar_sales_repair_20260626`
+
 ## WAREHOUSE-REPAIR-001 — domain_inventory.warehouses Schema-Repair + Kat-C-Fix
 
 **Von:** Claude Code · **Owner:** Claude Code · **Stand:** abgeschlossen 2026-06-26
