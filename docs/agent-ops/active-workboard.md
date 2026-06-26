@@ -4570,3 +4570,13 @@ Parallele Fix-Slices aus Cards-Inventar-Audit (`CARD-AUDIT-001`). Claim-Protokol
 **Ziel:** CI wieder gruenschalten, ohne neue WhatsApp-/Portal-Fachlogik einzufuehren oder fremde Parallel-Agent-Aenderungen zu buendeln.
 **Dateibesitz:** `app/api/v1/endpoints/whatsapp_notify.py`, `app/api/v1/endpoints/whatsapp_webhook.py`, `packages/frontend-web/src/pages/portal/whatsapp-simulator.tsx`, optional `packages/frontend-web/src/components/ui/use-toast.ts`, `docs/project-context/open-gaps-and-known-issues.md`, `docs/agent-ops/slices/CI-WA-PORTAL-GATE-20260626.yaml`, dieser Workboard-Abschnitt.
 **Abnahmekriterien:** `python scripts/check_response_models.py --threshold 80`, `pnpm --dir packages/frontend-web typecheck`, `pnpm --dir packages/frontend-web build` lokal gruen; GitHub Actions Quality Gate/E2E-Smoke nach Push pruefen.
+
+## AI-ENGINEERING-METRICS-001 — Produktivitätsmetriken für das AI-Engineering (P2.2)
+
+**Von:** Claude Sonnet 4.6
+**Owner:** Claude Sonnet 4.6
+**Stand:** abgeschlossen 2026-06-26 — `scripts/ai_engineering_metrics.py` (CLI: summary/JSON/CSV); liest Git-Log + 249 Slice-YAMLs; berechnet Cycle-Time, Rework-Quote, Doku-Drift, Agent-Verteilung, Langläufer. Live-Sample: 96 Slices, 84 abgeschlossen, Median-Cycle-Time 0.1 h, P90 0.3 h, Rework-Rate 59 %, Top-Langläufer DOM-CONTROLLING-004 (0.8 h). 29 Unit-Tests grün.
+**Ziel:** P2.2 aus YouTube-Gap-Analyse: messbare AI-Engineering-Produktivitätskennzahlen ohne subjektive Einschätzung, automatisch aus Git + YAML-Slices.
+**Dateibesitz:** `scripts/ai_engineering_metrics.py`, `tests/test_ai_engineering_metrics.py`, `docs/agent-ops/slices/AI-ENGINEERING-METRICS-001.yaml`.
+**Abnahmekriterien:** 29 Unit-Tests grün; `python scripts/ai_engineering_metrics.py --since 2026-06-01` gibt Report aus; `--json`/`--csv` funktionieren.
+**Folge:** AI-ENGINEERING-METRICS-002 (CI-Nightly-Cron + MkDocs-Dashboard).
