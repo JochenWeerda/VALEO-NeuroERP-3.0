@@ -1,42 +1,69 @@
 slice_id: PORTAL-SHOP-001
-title: "Betriebsmittel-Online-Shop im Kundenportal"
-owner: Claude Sonnet 4.6 + Cursor (Backend)
+title: Betriebsmittel-Online-Shop im Kundenportal
+owner: Claude Sonnet 4.6 + Cursor Backend
 status: completed
 created_at: "2026-06-26"
 goal: >-
-  Landwirte können über das Kundenportal Betriebsmittel (Saatgut, Düngemittel, PSM)
-  mit Kontrakt-/Vorkauf-Preisen bestellen. Bestellungen landen im ERP als
-  CustomerOrder mit vollständigem Status-Lifecycle.
-
+  Landwirte koennen ueber das Kundenportal Betriebsmittel wie Saatgut,
+  Duengemittel und PSM mit Kontrakt- oder Vorkauf-Preisen bestellen.
+  Bestellungen landen im ERP als CustomerOrder mit vollstaendigem
+  Status-Lifecycle.
 file_ownership:
-  - app/api/v1/endpoints/portal_shop.py          # vollständig (Cursor)
-  - packages/frontend-web/src/pages/portal/shop.tsx  # vollständig (Cursor)
-  - app/infrastructure/models/portal_models.py   # Datenmodell (Cursor)
-  - app/api/v1/schemas/portal.py                 # Schemata (Cursor)
-  - docs/agent-ops/slices/PORTAL-SHOP-001.yaml   # Doku (Claude)
-
+  - app/api/v1/endpoints/portal_shop.py
+  - packages/frontend-web/src/pages/portal/shop.tsx
+  - app/infrastructure/models/portal_models.py
+  - app/api/v1/schemas/portal.py
+  - docs/agent-ops/slices/PORTAL-SHOP-001.yaml
 acceptance_criteria:
   - GET /portal/products liefert Artikel mit Kontrakt-/Vorkauf-Status
-  - POST /portal/orders legt Bestellung an mit Idempotenz-Key
+  - POST /portal/orders legt Bestellung mit Idempotenz-Key an
   - GET /portal/orders listet Bestellungen des Kunden
-  - PATCH /portal/orders/{id}/status validiert Zustandsübergänge
+  - PATCH /portal/orders/{id}/status validiert Zustandsuebergaenge
   - GET /portal/orders/reconciliation findet inkonsistente Bestellungen
-  - Frontend /portal/shop zeigt Produktkatalog + Warenkorb + Checkout
-
+  - Frontend /portal/shop zeigt Produktkatalog, Warenkorb und Checkout
+acceptance:
+  - GET /portal/products liefert Artikel mit Kontrakt-/Vorkauf-Status
+  - POST /portal/orders legt Bestellung mit Idempotenz-Key an
+  - GET /portal/orders listet Bestellungen des Kunden
+  - PATCH /portal/orders/{id}/status validiert Zustandsuebergaenge
+  - GET /portal/orders/reconciliation findet inkonsistente Bestellungen
+  - Frontend /portal/shop zeigt Produktkatalog, Warenkorb und Checkout
+tests:
+  - Backend-/Frontend-Implementierung wurde im Cursor-Slice geliefert; Governance-Slice dokumentiert die Uebernahme.
+  - pnpm --dir packages/frontend-web build
+risks:
+  - Backend-/Frontend-Implementierung liegt ausserhalb dieses Governance-Slice und muss bei Folgeaenderungen separat getestet werden.
+  - Meta-/WhatsApp-Benachrichtigung ist ein separates externes Gate.
+external_gates:
+  - Meta-/WhatsApp-Produktivfreigabe fuer Benachrichtigungsintegration
 ai_harness:
   fachlicher_vertrag: >-
-    Produktkatalog mit Kategorie-Filter + Suche. Vorkauf-Guthaben wird zuerst verbraucht.
-    Kontrakt-Preise als Fallback. Listenpreise wenn kein Kontrakt/Vorkauf.
-    Idempotenz via X-Idempotency-Key. Status-Maschine:
-    DRAFT → SUBMITTED → CONFIRMED → IN_PROGRESS → SHIPPED → DELIVERED.
+    Produktkatalog mit Kategorie-Filter und Suche. Vorkauf-Guthaben wird zuerst
+    verbraucht, danach Kontraktpreise, danach Listenpreise. Idempotenz via
+    X-Idempotency-Key. Status-Maschine: DRAFT -> SUBMITTED -> CONFIRMED ->
+    IN_PROGRESS -> SHIPPED -> DELIVERED.
   architektur_vertrag: >-
-    DB-backed (CustomerOrder, CustomerOrderItem, CustomerContract, CustomerPrePurchase).
-    Multi-Tenant (tenant_id Query-Param). Auth via JWT/X-User-ID.
-    Idempotenz-Key in DB gespeichert. Reconciliation-Endpoint für Ops.
-  integration_points:
-    - WA-AGENT-001: WhatsApp-Bestellungen ergänzen Shop-Bestellungen
-    - WA-NOTIFY-001: Dokument-Ready Benachrichtigung nach Lieferung
-
+    DB-backed CustomerOrder, CustomerOrderItem, CustomerContract und
+    CustomerPrePurchase. Multi-Tenant ueber tenant_id und Auth via JWT/X-User-ID.
+    Reconciliation-Endpoint fuer Ops.
+  daten_vertrag: >-
+    Shop-Auftraege, Positionen, Kontraktpreise und Vorkauf-Guthaben bleiben
+    tenant-isoliert; Bestell-Idempotenz verhindert Doppelanlage.
+  test_vertrag: >-
+    Build- und API-Vertraege muessen in den liefernden Code-Slices nachgewiesen
+    werden; dieser Slice ist Governance-Dokumentation.
+  security_vertrag: >-
+    Kundenportalzugriffe laufen ueber JWT/X-User-ID und duerfen keine fremden
+    Kunden-/Mandantendaten offenlegen.
+  betriebs_vertrag: >-
+    Reconciliation-Endpoint bleibt das operative Kontrollinstrument fuer
+    inkonsistente Shop-Bestellungen.
+  dokumentations_vertrag: >-
+    Slice-YAML und Workboard verweisen auf PORTAL-SHOP-001; Folgerisiken bleiben
+    in Open-Gaps/Runbooks nachzuziehen.
+integration_points:
+  - WA-AGENT-001: WhatsApp-Bestellungen ergaenzen Shop-Bestellungen
+  - WA-NOTIFY-001: Dokument-Ready Benachrichtigung nach Lieferung
 note: >-
-  Backend und Frontend waren bereits vollständig durch Cursor implementiert.
+  Backend und Frontend waren bereits vollstaendig durch Cursor implementiert.
   Slice-YAML dient der Dokumentation und Governance-Compliance.
