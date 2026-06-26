@@ -44,3 +44,12 @@ nachvollziehbar dokumentiert.
 - **Spülpflicht ignoriert:** bei Materialwechsel Spülcharge buchen, sonst
   Kontaminationsrisiko.
 - **Inventurdifferenz unerwartet:** offene Bewegungen vor der Zählung abschließen.
+
+## Quellen und Reverse-Pflege
+
+- `packages/frontend-web/src/app/navigation/domains/operations.tsx`: Lager/WMS-Menü.
+- `docs/benutzerhandbuch/qualitaetssicherung.md`: QS-Sperre und Chargenfreigabe.
+- `docs/agent-ops/slices/WM-AGRI-SILO-001.yaml`: Silo/Materialfluss.
+
+Reverse-Pflege: Bei Inventur-, Umlagerungs- oder Silo-Regeln diese Seite und
+Lager-Workflow-Doku gemeinsam pflegen.

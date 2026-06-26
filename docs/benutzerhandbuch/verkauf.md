@@ -49,3 +49,12 @@ Rechnung.
 - **Aktion „Folgebeleg" fehlt:** Vorbeleg ist nicht im passenden Status
   (z. B. Auftrag nicht freigegeben).
 - **Preis weicht ab:** Konditionen/Preisliste am Kunden prüfen.
+
+## Quellen und Reverse-Pflege
+
+- `packages/frontend-web/src/app/navigation/domains/commercial.tsx`: Verkauf O2C-Menü.
+- `docs/benutzerhandbuch/finanzbuchhaltung.md`: Übergang Rechnung → Offene Posten.
+- `docs/agent-ops/slices/DOM-SALES-004.yaml`: O2C-Vertiefung (Match, Kreditlimit).
+
+Reverse-Pflege: Bei neuen O2C-Status, Folgebeleg-Aktionen oder Layout-Änderungen
+diese Seite und `docs/MASKEN.md` gemeinsam aktualisieren.

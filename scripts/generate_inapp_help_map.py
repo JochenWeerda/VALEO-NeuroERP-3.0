@@ -16,9 +16,17 @@ HELP_MAP = [
     # Agrar / Ernteannahme
     ("agrar/annahme",           "benutzerhandbuch/annahme",          "Ernteannahme"),
     ("agrar/partie",            "benutzerhandbuch/annahme",          "Partie-Verwaltung"),
-    ("agrar/kontrakte",         "benutzerhandbuch/einkauf",          "Agrar-Kontrakte"),
+    ("agrar/kontrakt",          "benutzerhandbuch/agrar-kontrakte",  "Agrar-Kontrakte"),
+    ("agrar/kontrakte",         "benutzerhandbuch/agrar-kontrakte",  "Agrar-Kontrakte"),
     ("agrar/wetter",            "benutzerhandbuch/annahme",          "Wetter & Prognose"),
     ("agrar",                   "benutzerhandbuch/annahme",          "Agrar-Modul"),
+
+    # NaWaRo
+    ("nawaro",                  "benutzerhandbuch/nawaro",           "NaWaRo-Meldungen"),
+    ("strecke/nawaro",          "benutzerhandbuch/nawaro",           "NaWaRo Streckengeschäft"),
+
+    # Genossenschaft
+    ("genossenschaft",          "benutzerhandbuch/genossenschaft",   "Genossenschaft"),
 
     # Verkauf / O2C
     ("verkauf/auftrag",         "benutzerhandbuch/verkauf",          "Verkaufsauftrag"),
@@ -37,17 +45,27 @@ HELP_MAP = [
     ("lager/einlagerung",       "benutzerhandbuch/lager",            "Einlagerung"),
     ("lager/auslagerung",       "benutzerhandbuch/lager",            "Auslagerung"),
     ("lager/inventur",          "benutzerhandbuch/lager",            "Inventur"),
-    ("lager/qs-leitstand",      "benutzerhandbuch/lager",            "QS-Leitstand"),
+    ("lager/qs-leitstand",      "benutzerhandbuch/qualitaetssicherung","QS-Leitstand"),
     ("lager",                   "benutzerhandbuch/lager",            "Lager"),
 
-    # Finanzbuchhaltung
+    # Finanzbuchhaltung / Controlling
     ("fibu/buchungen",          "benutzerhandbuch/finanzbuchhaltung","Buchungsjournal"),
     ("fibu/offene-posten",      "benutzerhandbuch/finanzbuchhaltung","Offene Posten"),
     ("fibu/zahlungslaeufe",     "benutzerhandbuch/finanzbuchhaltung","Zahlungsläufe"),
     ("fibu/periodenabschluss",  "benutzerhandbuch/finanzbuchhaltung","Periodenabschluss"),
     ("fibu/datev",              "benutzerhandbuch/finanzbuchhaltung","DATEV-Export"),
     ("fibu",                    "benutzerhandbuch/finanzbuchhaltung","Finanzbuchhaltung"),
-    ("controlling",             "benutzerhandbuch/finanzbuchhaltung","Controlling"),
+    ("controlling",             "benutzerhandbuch/controlling-kostenrechnung","Controlling"),
+
+    # POS / Personal
+    ("pos",                     "benutzerhandbuch/pos-kasse",        "POS und Kasse"),
+    ("kasse",                   "benutzerhandbuch/pos-kasse",        "Kasse"),
+    ("personal",                "benutzerhandbuch/personal-lohn",  "Personal und Lohn"),
+    ("hr",                      "benutzerhandbuch/personal-lohn",  "Personal und Lohn"),
+
+    # Produktion
+    ("produktion",              "benutzerhandbuch/futtermittel-produktion","Futtermittel/Produktion"),
+    ("mischfutter",             "benutzerhandbuch/futtermittel-produktion","Futtermittel/Produktion"),
 
     # CRM
     ("crm/kunden",              "benutzerhandbuch/crm",              "Kundenstamm"),
@@ -64,19 +82,27 @@ HELP_MAP = [
     ("admin/ai-approvals",      "agent-docs/guardrails",             "AI-Freigaben"),
     ("admin",                   "admin/index",                       "Administration"),
 
-    # Compliance
+    # Compliance (Endnutzer-Meldewesen)
+    ("compliance/meldewesen",   "benutzerhandbuch/compliance-meldewesen","Compliance/Meldewesen"),
+    ("meldewesen",              "benutzerhandbuch/compliance-meldewesen","Meldewesen"),
     ("compliance/gobd",         "compliance/gobd-checklist",         "GoBD-Prüfung"),
     ("compliance/datenschutz",  "compliance/gdpr-checklist",         "Datenschutz (DSGVO)"),
-    ("compliance",              "compliance/index",                  "Compliance"),
+    ("compliance",              "benutzerhandbuch/compliance-meldewesen","Compliance"),
 
-    # Kontrakte
-    ("kontrakte/preisfixierung","benutzerhandbuch/verkauf",          "Preisfixierung"),
-    ("kontrakte",               "benutzerhandbuch/einkauf",          "Kontrakte"),
+    # Kontrakte (Navigation root)
+    ("kontrakte/preisfixierung","benutzerhandbuch/agrar-kontrakte",  "Preisfixierung"),
+    ("kontrakte",               "benutzerhandbuch/agrar-kontrakte",  "Kontrakte"),
 
     # Logistik
-    ("logistik/disposition",    "benutzerhandbuch/lager",            "Disposition"),
-    ("logistik/touren",         "benutzerhandbuch/lager",            "Tourenplanung"),
-    ("logistik",                "benutzerhandbuch/lager",            "Logistik"),
+    ("logistik/disposition",    "benutzerhandbuch/logistik",         "Disposition"),
+    ("logistik/touren",         "benutzerhandbuch/logistik",         "Tourenplanung"),
+    ("logistik/frachtbriefe",   "benutzerhandbuch/logistik",         "Frachtbriefe"),
+    ("logistik",                "benutzerhandbuch/logistik",         "Logistik"),
+
+    # Dokumente / DMS
+    ("dokumente",               "benutzerhandbuch/dokumente-belegarchiv","Dokumente"),
+    ("fuhrpark/ausgehende",     "benutzerhandbuch/dokumente-belegarchiv","Ausgehende Belege"),
+    ("strecke/dokumente",       "benutzerhandbuch/dokumente-belegarchiv","Strecken-Dokumente"),
 
     # Workflow / Betrieb
     ("workflow/leitstand",      "schnittstellen/events",             "Workflow-Leitstand"),
@@ -165,6 +191,28 @@ export function findHelpEntry(currentPath: string): HelpEntry | null {{
   }}
   return null;
 }}
+
+/** Route der eingebetteten Hilfeseite */
+export const HELP_ROUTE = '/hilfe';
+
+/** URL des Benutzerhandbuchs */
+export const DOCS_USER_MANUAL_URL = `${{DOCS_BASE_URL}}/benutzerhandbuch/`;
+
+/** Gibt die Hilfe-URL für einen gegebenen App-Pfad zurück. */
+export function getEmbeddedHelpHref(currentPath: string): string {{
+  const entry = findHelpEntry(currentPath);
+  return entry ? `${{HELP_ROUTE}}?ctx=${{encodeURIComponent(entry.docPath)}}` : HELP_ROUTE;
+}}
+
+/** Löst einen doc-Pfad oder -Schlüssel zur vollständigen Hilfe-URL auf. */
+export function resolveHelpUrl(docPath: string): string {{
+  return docPath.startsWith('http') ? docPath : `${{DOCS_BASE_URL}}/${{docPath}}`;
+}}
+
+/** Öffnet eine Docs-URL im neuen Tab. */
+export function openDocs(url: string): void {{
+  window.open(url, '_blank', 'noopener,noreferrer');
+}}
 """
 
 ts_path = REPO / "packages/frontend-web/src/lib/docs-help.ts"
@@ -186,7 +234,7 @@ md_lines = [
     "",
     "# In-App-Hilfe — Route → Dokumentation",
     "",
-    "> Slice: **DOC-INAPP-HELP-002**  ",
+    "> Slice: **DOC-INAPP-HELP-002**",
     "> Mapping: [`src/lib/docs-help.ts`](https://github.com/JochenWeerda/VALEO-NeuroERP-3.0/blob/main/packages/frontend-web/src/lib/docs-help.ts)",
     "",
     "## Konzept",
